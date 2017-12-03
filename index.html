@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv='content-type' content='text/html' charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=Edge, chrome=1'>
+    <meta name='author' content='ckcz123'>
+    <meta name='viewport'
+          content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=yes'>
+    <!-- 做出塔后需要在这里改成塔本身的名字 -->
+    <title>魔塔样板 - HTML5魔塔</title>
+    <meta name="apple-mobile-web-app-title" content="魔塔样板">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <meta name="screen-orientation" content="portrait">
+    <meta name="full-screen" content="yes">
+    <meta name="browsermode" content="application">
+    <meta name="x5-orientation" content="portrait">
+    <meta name="x5-fullscreen" content="true">
+    <meta name="x5-page-mode" content="app">
+    <link type='text/css' href='styles.css' rel='stylesheet'>
+</head>
+<body>
+<div id='gameGroup'>
+    <p id='mainTips'>请稍后...</p>
+    <div id='startPanel'>
+        <div id='startTop'>
+            <div id='startTopProgressBar'>
+                <div id='startTopProgress'></div>
+            </div>
+            <p id='startTopLoadTips'>资源即将开始加载</p>
+        </div>
+        <img id='startBackground' src='images/bg.png'>
+        <!-- 标题界面；可以改style的color使标题改变颜色 -->
+        <p id='startLogo' style="color: black">魔塔样板</p>
+        <div id='startButtonGroup'>
+            <div id='startButtons'>
+                <span class='startButton' id='playGame'>开始游戏</span>
+                <span class='startButton' id='loadGame'>载入游戏</span>
+                <span class='startButton' id='aboutGame'>关于本塔</span>
+            </div>
+            <div id='levelChooseButtons'>
+                <!-- 如果不需要三个难度，直接像这样注释掉即可 -->
+                <span class='startButton' id='easyLevel'>简单</span>
+                <span class='startButton' id='normalLevel'>普通</span>
+                <span class='startButton' id='hardLevel'>困难</span>
+            </div>
+        </div>
+    </div>
+    <div id='floorMsgGroup'>
+        <p id='logoLabel'></p>
+        <p id='versionLabel'></p>
+        <p id='floorNameLabel'></p>
+    </div>
+    <div id='statusBar'>
+        <img src='images/floor.png' id="img-floor">
+        <p class='statusLabel' id='floor'></p>
+        <img src='images/hp.png' id="img-hp">
+        <p class='statusLabel' id='hp'></p>
+        <img src='images/atk.png' id="img-atk">
+        <p class='statusLabel' id='atk'></p>
+        <img src='images/def.png' id="img-def">
+        <p class='statusLabel' id='def'></p>
+        <img src='images/mdef.png' id="img-mdef">
+        <p class='statusLabel' id='mdef'></p>
+        <img src='images/money.png' id="img-money">
+        <p class='statusLabel' id='money'></p>
+        <img src='images/experience.png' id="img-experience">
+        <p class='statusLabel' id='experience'></p>
+        <p class='statusLabel' id='yellowKey' style="color:#FFCCAA"></p>
+        <p class='statusLabel' id='blueKey' style="color:#AAAADD"></p>
+        <p class='statusLabel' id='redKey' style="color:#FF8888"></p>
+        <p class='statusLabel' id='poison' style="color: #AFFCA8;"></p>
+        <p class='statusLabel' id='weak' style="color: #FECCD0;"></p>
+        <p class='statusLabel' id='curse' style="color: #59ACFF;"></p>
+        <img src="images/book.png" id='img-book'>
+        <img src="images/fly.png" id='img-fly'>
+        <img src="images/toolbox.png" id='img-toolbox'>
+        <img src="images/shop.png" id='img-shop'>
+        <img src="images/save.png" id='img-save'>
+        <img src="images/load.png" id=img-load>
+        <img src="images/settings.png" id='img-settings'>
+        <p class=statusLabel id="hard"></p>
+    </div>
+    <div id="toolBar"></div>
+    <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas>
+    <canvas class='gameCanvas' id='event' width='416' height='416'></canvas>
+    <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
+    <canvas class='gameCanvas' id='hero' width='416' height='416'></canvas>
+    <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
+    <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
+</div>
+<script id='mainScript' src='main.js'></script>
+</body>
+</html>

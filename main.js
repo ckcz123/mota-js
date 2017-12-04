@@ -1,4 +1,5 @@
 function main() {
+    this.version = "0.0.1";
     this.dom = {
         'body': document.body,
         'gameGroup': document.getElementById('gameGroup'),
@@ -76,7 +77,7 @@ function main() {
         'hard': document.getElementById("hard")
     }
     this.floorIds = [
-        "MT1"
+        "sample0"
     ]
     this.floors = {}
     this.instance = {};
@@ -87,7 +88,7 @@ main.prototype.init = function () {
     for (var i = 0; i < main.dom.gameCanvas.length; i++) {
         main.canvas[main.dom.gameCanvas[i].id] = main.dom.gameCanvas[i].getContext('2d');
     }
-    main.loader(function () {
+    main.loaderJs(function () {
         var coreData = {};
         for (i = 0; i < main.loadList.length; i++) {
             var name = main.loadList[i];
@@ -100,13 +101,24 @@ main.prototype.init = function () {
             main[name].init(main.dom);
             coreData[name] = main[name];
         }
-        main.core.init(main.dom, main.statusBar, main.canvas, main.images, main.sounds, coreData);
-        main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
+        main.loaderFloors(function() {
+            // 处理.min
+            for (var i=0;i<main.floorIds.length;i++) {
+                if (name.indexOf(".min")==name.length-4) {
+                    name = name.substring(0, name.length - 4);
+                    main.floorIds[i] = name.substring(0, name.length - 4);
+                }
+            }
+            main.core.init(main.dom, main.statusBar, main.canvas, main.images, main.sounds, main.floorIds, main.floors, coreData);
+            main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
+        })
     });
 }
 
-main.prototype.loader = function (callback) {
+main.prototype.loaderJs = function (callback) {
     var instanceNum = 0;
+    // 加载js
+    main.setMainTipsText('正在加载核心js文件...')
     for (var i = 0; i < main.loadList.length; i++) {
         main.loadMod(main.loadList[i], function (modName) {
             instanceNum = 0;
@@ -116,6 +128,20 @@ main.prototype.loader = function (callback) {
             }
             if (instanceNum === main.loadList.length) {
                 delete main.instance;
+                // main.dom.mainTips.style.display = 'none';
+                callback();
+            }
+        });
+    }
+}
+
+main.prototype.loaderFloors = function (callback) {
+    // 加载js
+    main.setMainTipsText('正在加载楼层文件...')
+    for (var i = 0; i < main.floorIds.length; i++) {
+        main.loadFloor(main.floorIds[i], function (modName) {
+            main.setMainTipsText("楼层 " + modName + '.js 加载完毕');
+            if (Object.keys(main.floors).length === main.floorIds.length) {
                 main.dom.mainTips.style.display = 'none';
                 callback();
             }
@@ -129,11 +155,20 @@ main.prototype.loadMod = function (modName, callback) {
     // end with ".min"
     if (name.indexOf(".min")==name.length-4)
         name=name.substring(0, name.length-4);
-    script.src = 'libs/' + modName + '.js';
+    script.src = 'libs/' + modName + '.js?' + this.version;
     main.dom.body.appendChild(script);
     script.onload = function () {
         main[name] = main.instance[name];
         callback(name);
+    }
+}
+
+main.prototype.loadFloor = function(floorId, callback) {
+    var script = document.createElement('script');
+    script.src = 'libs/floors/' + floorId +'.js?' + this.version;
+    main.dom.body.appendChild(script);
+    script.onload = function () {
+        callback(floorId);
     }
 }
 
@@ -152,13 +187,13 @@ window.onresize = function () {
 
 main.dom.body.onkeydown = function(e) {
     if (main.core.isPlaying())
-    	main.core.keyDown(e);
+    	main.core.onkeyDown(e);
 }
 
 main.dom.body.onkeyup = function(e) {
     try {
         if (main.core.isPlaying())
-            main.core.keyUp(e);
+            main.core.onkeyUp(e);
     } catch (e) {}
 }
 

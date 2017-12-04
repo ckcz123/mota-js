@@ -18,7 +18,7 @@ main.instance.ui = new ui();
  */
 ui.prototype.closePanel = function (clearData) {
     core.status.boxAnimateObjs = [];
-    core.setBoxAnimate(core.firstData.animateSpeed);
+    core.setBoxAnimate();
     core.clearMap('ui', 0, 0, 416, 416);
     core.setAlpha('ui', 1.0);
     if (core.isset(clearData) && clearData)
@@ -34,12 +34,43 @@ ui.prototype.closePanel = function (clearData) {
  * @param content
  * @param id
  */
-ui.prototype.drawTextBox = function(content, id) {
+ui.prototype.drawTextBox = function(content) {
 
-    core.lockControl();
-
-    if (core.status.event.id == null)
-        core.status.event.id = 'text';
+    // 获得name, image, icon
+    var id=null, name=null, image=null, icon=null;
+    if (content.indexOf("\t[")==0) {
+        var index = content.indexOf("]");
+        if (index>=0) {
+            var str=content.substring(2, index);
+            content=content.substring(index+1);
+            var ss=str.split(",");
+            if (ss.length==1) {
+                // id
+                id=ss[0];
+                // monster
+                if (id!='hero') {
+                    var enemys = core.material.enemys[id];
+                    if (core.isset(enemys)) {
+                        name = core.material.enemys[id].name;
+                        image = core.material.images.enemys;
+                        icon = core.material.icons.enemys[id];
+                    }
+                    else {
+                        name=id;
+                        id='npc';
+                        image=null;
+                        icon=null;
+                    }
+                }
+            }
+            else {
+                id='npc';
+                name=ss[0];
+                image=core.material.images.npcs;
+                icon=core.material.icons.npcs[ss[1]];
+            }
+        }
+    }
 
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
     var contents = content.split('\n');
@@ -54,6 +85,8 @@ ui.prototype.drawTextBox = function(content, id) {
     core.fillRect('ui', left, top, right, bottom, '#000000');
     core.setAlpha('ui', 1);
     core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+    core.status.boxAnimateObjs = [];
+    core.setBoxAnimate();
 
     // 名称
     core.canvas.ui.textAlign = "left";
@@ -61,42 +94,30 @@ ui.prototype.drawTextBox = function(content, id) {
     var content_left = left + 25, content_top = top + 35;
     if (core.isset(id)) {
 
-        content_left = left+63;
         content_top = top+57;
 
-        var name, image, cls;
         // 动画
-        core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, 34, '#FFD700', 2);
+        if (id=='hero' || core.isset(icon)) {
+            core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, 34, '#FFD700', 2);
+            content_left = left+63;
+        }
 
         if (id == 'hero') {
-            core.fillText('ui', core.status.hero.name, left + 63, top + 30, '#FFD700', 'bold 22px Verdana');
-            core.status.boxAnimateObjs = [];
-            core.setBoxAnimate(core.firstData.animateSpeed);
+            core.fillText('ui', core.status.hero.name, content_left, top + 30, '#FFD700', 'bold 22px Verdana');
             core.clearMap('ui', left + 15, top + 40, 32, 32);
             core.fillRect('ui', left + 15, top + 40, 32, 32, background);
             var heroIcon = core.material.icons.heros[core.status.hero.id]['down'];
-            core.canvas.ui.drawImage(core.material.images.heros, heroIcon.loc['stop'] * heroIcon.size, heroIcon.loc.iconLoc * heroIcon.size, heroIcon.size, heroIcon.size, left+15, top+40, 32, 32);
+            core.canvas.ui.drawImage(core.material.images.heros, heroIcon.stop * 32, heroIcon.loc *32, 32, 32, left+15, top+40, 32, 32);
         }
         else {
-            var name = null, image = null, icon = null;
-            if (core.material.npcs.hasOwnProperty(id)) {
-                name = core.material.npcs[id].name;
-                image = core.material.images.npcs;
-                icon = core.material.icons.npcs[core.material.npcs[id].icon];
-            }
-            else if (core.material.enemys.hasOwnProperty(id)) {
-                name = core.material.enemys[id].name;
-                image = core.material.images.enemys;
-                icon = core.material.icons.enemys[id];
-            }
-            if (name != null) {
-                core.fillText('ui', name, left + 63, top + 30, '#FFD700', 'bold 22px Verdana');
+            core.fillText('ui', name, content_left, top + 30, '#FFD700', 'bold 22px Verdana');
+            if (core.isset(icon)) {
                 core.status.boxAnimateObjs = [];
                 core.status.boxAnimateObjs.push({
                     'bgx': left + 15, 'bgy': top + 40, 'bgsize': 32,
                     'image': image, 'x': left + 15, 'y': top + 40, 'icon': icon
                 });
-                core.setBoxAnimate(core.firstData.animateSpeed);
+                core.setBoxAnimate();
             }
         }
     }
@@ -254,7 +275,7 @@ ui.prototype.drawShop = function (id) {
         'image': core.material.images.npcs,
         'x': left + 15, 'y': top + 30, 'icon': core.material.icons.npcs[shop.icon]
     });
-    core.setBoxAnimate(core.firstData.animateSpeed);
+    core.setBoxAnimate();
 
     // 对话
     core.canvas.ui.textAlign = "left";
@@ -451,7 +472,7 @@ ui.prototype.drawEnemyBook = function (page) {
         core.fillText('ui', enemy.defDamage, 365, 62 * i + 68, '#DDDDDD', 'bold 13px Verdana');
 
     }
-    core.setBoxAnimate(core.firstData.animateSpeed);
+    core.setBoxAnimate();
     this.drawPagination(page, totalPage);
 }
 
@@ -547,16 +568,18 @@ ui.prototype.drawToolbox = function(selectId) {
         var tool=tools[i];
         var icon=core.material.icons.items[tool];
         if (i<6) {
-            core.canvas.ui.drawImage(images, 0, icon.loc*icon.size, icon.size, icon.size, 16*(4*i+1)+5, 144+5, icon.size, icon.size)
+            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*i+1)+5, 144+5, 32, 32)
             // 个数
             core.fillText('ui', core.itemCount(tool), 16*(4*i+1)+40, 144+38, '#FFFFFF', "bold 14px Verdana");
             if (selectId == tool)
-                core.strokeRect('ui', 16*(4*i+1)+1, 144+1, icon.size+8, icon.size+8, '#FFD700');
+                core.strokeRect('ui', 16*(4*i+1)+1, 144+1, 40, 40, '#FFD700');
         }
         else {
-            core.canvas.ui.drawImage(images, 0, icon.loc*icon.size, icon.size, icon.size, 16*(4*(i-6)+1)+5, 144+64+5, icon.size, icon.size)
+            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*(i-6)+1)+5, 144+64+5, 32, 32)
+            // 个数
+            core.fillText('ui', core.itemCount(tool), 16*(4*(i-6)+1)+40, 144+64+38, '#FFFFFF', "bold 14px Verdana");
             if (selectId == tool)
-                core.strokeRect('ui', 16*(4*(i-6)+1)+1, 144+64+1, icon.size+8, icon.size+8, '#FFD700');
+                core.strokeRect('ui', 16*(4*(i-6)+1)+1, 144+64+1, 40, 40, '#FFD700');
 
         }
     }
@@ -567,15 +590,15 @@ ui.prototype.drawToolbox = function(selectId) {
         var constant=constants[i];
         var icon=core.material.icons.items[constant];
         if (i<6) {
-            core.canvas.ui.drawImage(images, 0, icon.loc*icon.size, icon.size, icon.size, 16*(4*i+1)+5, 304+5, icon.size, icon.size)
+            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*i+1)+5, 304+5, 32, 32)
             // core.fillText('ui', core.itemCount(constant), 16*(4*i+1)+40, 304+38, '#FFFFFF', "bold 16px Verdana")
             if (selectId == constant)
-                core.strokeRect('ui', 16*(4*i+1)+1, 304+1, icon.size+8, icon.size+8, '#FFD700');
+                core.strokeRect('ui', 16*(4*i+1)+1, 304+1, 40, 40, '#FFD700');
         }
         else {
-            core.canvas.ui.drawImage(images, 0, icon.loc*icon.size, icon.size, icon.size, 16*(4*(i-6)+1)+5, 304+64+5, icon.size, icon.size)
+            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*(i-6)+1)+5, 304+64+5, 32, 32)
             if (selectId == constant)
-                core.strokeRect('ui', 16*(4*(i-6)+1)+1, 304+64+1, icon.size+8, icon.size+8, '#FFD700');
+                core.strokeRect('ui', 16*(4*(i-6)+1)+1, 304+64+1, 40, 40, '#FFD700');
         }
     }
 
@@ -654,7 +677,7 @@ ui.prototype.drawThumbnail = function(canvas, blocks, x, y, size, heroLoc, heroI
         for (var j=0;j<13;j++) {
             var blockIcon = core.material.icons.terrains.ground;
             var blockImage = core.material.images.terrains;
-            core.canvas[canvas].drawImage(blockImage, 0, blockIcon.loc * blockIcon.size, blockIcon.size, blockIcon.size, x + i * persize, y + j * persize, persize, persize);
+            core.canvas[canvas].drawImage(blockImage, 0, blockIcon * 32, 32, 32, x + i * persize, y + j * persize, persize, persize);
         }
     }
     for (var b in blocks) {
@@ -664,13 +687,13 @@ ui.prototype.drawThumbnail = function(canvas, blocks, x, y, size, heroLoc, heroI
             var blockIcon = core.material.icons[block.event.cls][block.event.id];
             var blockImage = core.material.images[block.event.cls];
             //core.canvas[canvas].clearRect(x + i * persize, y + j * persize, persize, persize);
-            core.canvas[canvas].drawImage(blockImage, 0, blockIcon.loc * blockIcon.size, blockIcon.size, blockIcon.size, x + i * persize, y + j * persize, persize, persize);
+            core.canvas[canvas].drawImage(blockImage, 0, blockIcon * 32, 32, 32, x + i * persize, y + j * persize, persize, persize);
         }
     }
     if (core.isset(heroLoc)) {
         var id = core.isset(heroId)?heroId:core.status.hero.id;
         var heroIcon = core.material.icons.heros[id][heroLoc.direction];
-        core.canvas[canvas].drawImage(core.material.images.heros, heroIcon.loc['stop'] * heroIcon.size, heroIcon.loc.iconLoc * heroIcon.size, heroIcon.size, heroIcon.size, x+persize*heroLoc.x, y+persize*heroLoc.y, persize, persize);
+        core.canvas[canvas].drawImage(core.material.images.heros, heroIcon.stop * 32, heroIcon.loc * 32, 32, 32, x+persize*heroLoc.x, y+persize*heroLoc.y, persize, persize);
     }
 }
 

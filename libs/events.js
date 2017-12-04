@@ -5,8 +5,6 @@ function events() {
 events.prototype.init = function () {
     this.events = {
         'battle': function (data, core, callback) {
-            //core.playSound('floor', 'mp3');
-            //core.rmBlock('event', data.x, data.y);
             core.battle(data.event.id, data.x, data.y);
             if (core.isset(callback))
                 callback();
@@ -41,13 +39,17 @@ events.prototype.init = function () {
             if (core.isset(callback))
                 callback();
         },
-        'blockEvent': function (data, core, callback) {
-            core.events.blockEvent(data);
+        "checkBlock": function (data, core, callback) {
+            core.events.checkBlock(data.x, data.y);
+        },
+        'action': function (data, core, callback) {
+            core.events.doEvents(data.event.data, data.x, data.y);
             if (core.isset(callback)) callback();
         }
     }
 }
 
+// 初始化
 events.prototype.getEvents = function (eventName) {
     if (eventName == undefined) {
         return this.events;
@@ -57,10 +59,9 @@ events.prototype.getEvents = function (eventName) {
 
 main.instance.events = new events();
 
-/**
- * 游戏开始事件
- * @param hard 难度
- */
+
+
+////// 游戏开始事件 //////
 events.prototype.startGame = function (hard) {
 
     core.hideStartAnimate(function() {
@@ -72,103 +73,120 @@ events.prototype.startGame = function (hard) {
 
 ////// 走到某位置时触发事件 //////
 events.prototype.blockEvent = function (data) {
-
-    if (core.status.floorId=='MT16' && data.x==6 && data.y==2) {
-        core.waitHeroToStop(function (){
-            // 和魔王对话
-            core.drawText([
-                {'content': '冥灵魔王？你不是已经被我杀了吗？\n为什么会出现在这里？？', 'id': 'hero'},
-                {'content': '因为...这里位于魔塔的另一个位面。\n大多数情况下，塔内死亡的生物都会回归这里。', 'id': 'vampire'},
-                {'content': '你的意思是说，我现在已经死了？', 'id': 'hero'},
-                {'content': '是的，能到达这里的，\n除了可以掌控位面的高智慧生物以外，只有\n亡灵。', 'id': 'vampire'},
-                {'content': '呵，既然，我的生命已经不复存在。\n我已经没有什么好怕的了。\n大魔头，我们冤家路窄，居然又见面了，\n决斗吧！', 'id': 'hero'},
-                {'content': '你似乎还没明白。。。', 'id': 'vampire'},
-                {'content': '明白什么？', 'id': 'hero'},
-                {'content': '诶，算了，决一死战吧。', 'id': 'vampire'},
-            ], function() {
-                core.removeBlock('data', data.x, data.y);
-            })
-        });
-        return;
-    }
 }
 
+////// 检查领域、夹击事件 //////
+events.prototype.checkBlock = function (x,y) {
+    var damage = 0;
+    // 获得四个方向的怪物
+    var directions = [[0,-1],[-1,0],[0,1],[1,0]]; // 上，左，下，右
+    var enemys = [null,null,null,null];
+    for (var i in directions) {
+        var block = core.getBlock(x+directions[i][0], y+directions[i][1]);
+        if (block==null) continue;
+        // 是怪物
+        if (block.block.event.cls=='enemys')
+            enemys[i]=core.material.enemys[block.block.event.id];
+    }
 
+    // 领域
+    for (var i in enemys) {
+        if (enemys[i]!=null && enemys[i].special==15) {
+            damage+=enemys[i].value;
+        }
+    }
+    if (damage>0)
+        core.drawTip('受到领域伤害'+damage+'点');
+    core.status.hero.hp-=damage;
+    if (core.status.hero.hp<=0) {
+        core.status.hero.hp=0;
+        core.updateStatusBar();
+        core.events.lose('zone');
+        return;
+    }
 
-
-
-
-
-
-
-
-
-
-
-/////////////////// onclick事件处理 ///////////////////
+    // 夹击
+    var has=false;
+    if (enemys[0]!=null && enemys[2]!=null && enemys[0].id==enemys[2].id && enemys[0].special==16)
+        has=true;
+    if (enemys[1]!=null && enemys[3]!=null && enemys[1].id==enemys[3].id && enemys[1].special==16)
+        has=true;
+    if (has && core.status.hero.hp>1) { // 1血夹击不死
+        core.status.hero.hp = parseInt(core.status.hero.hp/2);
+        core.drawTip('受到夹击，生命变成一半');
+    }
+    core.updateStatusBar();
+}
 
 ////// 转换楼层结束的事件 //////
 events.prototype.afterChangeFloor = function (floorId) {
-
-    core.status.hero.flags.passLava = false;
-
-    // 首次到达某层
-    if (!core.isset(core.status.hero.flags.visitFloors[floorId])) {
-        core.status.hero.flags.visitFloors[floorId]=true;
-        if (floorId=='MT1') {
-            core.drawText([
-                {'content': '这里...是哪里？', 'id': 'hero'},
-                {'content': '难道？我还活着？', 'id': 'hero'},
-                {'content': '一股似曾相识的感觉，\n但我又不知道在哪里见过。', 'id': 'hero'},
-                {'content': '魔塔已经被大火烧成了灰烬，\n这里为什么安然无恙？这到底是什么地方？', 'id': 'hero'},
-                {'content': '这里，我感觉到不像是我生活的地方。\n难道我已经到了异世界吗？', 'id': 'hero'},
-                {'content': '算了，不管这么多了。\n只要我还活着，一切都好。', 'id': 'hero'},
-                {'content': '我先四处看看要怎么出去吧。', 'id': 'hero'},
-                {'content': '（系统提示）本塔快捷键如下：\n\n[↑][↓][←][→]    移动\n[X]    怪物手册\n[G]    楼层传送器\n[T]    工具栏\n[K]    快捷商店\n[S/L]    存/读档\n[ESC]    菜单栏\n同时也可以点击状态栏中的图标进行操作。'},
-                {'content': '（系统提示）\n在菜单栏里可以同步存档，这样可以很方便的让你\n在多设备（例如手机/电脑）之间接档游戏。'}
-            ]);
-        }
-        if (floorId=='MT2') {
-            core.drawText([
-                {'content': '奇怪，我明明杀死了血影。\n为什么这里又出现了一个。', 'id': 'hero'},
-                {'content': '不过我的力量似乎都被冻结了。\n目前肯定是无法杀死血影，\n等我变强以后再回来吧。', 'id': 'hero'},
-            ]);
-        }
-        if (floorId=='MT11') {
-            core.drawText([
-                {'content': '诶，奇怪，我明明只是上了一层楼而已。\n为什么，这里变得如此的寒冷...', 'id': 'hero'},
-                {'content': '诶，毕竟我已经不在我生活的世界了。\n很多事情都是预料不到的。', 'id': 'hero'},
-                {'content': '不管怎么说，我要继续上去看个究竟。', 'id': 'hero'}
-            ])
-        }
-        if (floorId=='MT20') {
-            core.drawText([
-                {'content': '这...这里就是塔顶了吗。\n仙子，你怎么也在这里。\n魔塔倒塌了，你也死掉了所以到达这里了吗？', 'id': 'hero'},
-                {'content': '呵，怎么可能。我怎么会这么容易死。\n这里就是位面的交界处了，\n我就是这个位面的操纵者。', 'id': 'fairy'},
-                {'content': '你居然有这样强大的能力！\n跟我第一次遇见你差距太大了吧！', 'id': 'hero'},
-                {'content': '是的，一开始，我弱不禁风。\n但是你帮我集齐了十字架和三个灵杖，\n让我的能力得到了巨幅度的提高。', 'id': 'fairy'},
-                {'content': '估计你自己也想不到这些东西有这么大的威力。\n不过还要感谢你的无私奉献成就了我的现在。', 'id': 'fairy'},
-                {'content': '......', 'id': 'hero'},
-                {'content': '其实，魔塔倒塌是我一手策划的，\n就是为了把所有的生物都驱逐进这个亡灵位面。', 'id': 'fairy'},
-                {'content': '我一直策划着等我有一天变强了，\n我要一人统治世界，消灭掉所有的其他生物。\n如今我的目标达成了。', 'id': 'fairy'},
-                {'content': '消灭其他所有生物？也就是说也包括我？', 'id': 'hero'},
-                {'content': '没错。愚蠢的人类终于觉悟了。', 'id': 'fairy'},
-                {'content': '呵呵，想当初，我就应该一刀把你杀了。\n真没想到我会轻信你的鬼话。', 'id': 'hero'},
-                {'content': '现在说这些还有什么用呢，\n你和我的力量根本就不是一个级别的。\n劝你放弃抵抗吧。', 'id': 'fairy'},
-                {'content': '（仙子有来源于高维度的力量支持，\n所以目前强大无比。我是不可能战胜的。）', 'id': 'hero'},
-                {'content': '（不过，这个位面力量非常不稳定，\n如果我能成功的封印她，切断外界的支持，\n也许还能有机会求胜。）', 'id': 'hero'},
-                {'content': '（仙子目前的位置正好被八个小怪包围，\n如果按照当年封印Zeno的方法去封印她，\n能否成功呢？这是我唯一的希望。）', 'id': 'hero'},
-                {'content': '系统提示：（专门给没玩过TSW的玩家看的）\n击杀仙子周围的四个怪，保留四个角的怪。\n如果还看不懂的，看一眼你的小键盘，\n仙子在5的位置，击杀2468。'},
-            ]);
-        }
+    if (!core.hasFlag("visited_"+floorId)) {
+        this.doEvents(core.status.thisMap.firstArrive);
+        core.setFlag("visited_"+floorId, true);
     }
 }
 
+////// 实际事件的处理 //////
+events.prototype.doEvents = function (list, x, y, callback) {
+    // 停止勇士
+    core.waitHeroToStop(function() {
+        if (!core.isset(list)) return;
+        if (!(list instanceof Array)) {
+            list = [list];
+        }
+        core.lockControl();
+        core.status.event = {'id': 'action', 'data': {
+            'list': list, 'x': x, 'y': y, 'callback': callback
+        }}
+        core.events.doAction();
+    });
+}
 
+events.prototype.doAction = function() {
+    // 事件处理完毕
+    if (core.status.event.data.list.length==0) {
+        if (core.isset(core.status.event.data.callback))
+            core.status.event.data.callback();
+        core.ui.closePanel(false);
+        return;
+    }
+    var data = core.status.event.data.list.shift();
+    core.status.event.data.current = data;
 
-////// 选中菜单栏 //////
+    var x=core.status.event.data.x, y=core.status.event.data.y;
 
+    // 不同种类的事件
 
+    // 如果是文字：显示
+    if (typeof data == "string") {
+        core.status.event.data.type='text';
+        core.ui.drawTextBox(data);
+        return;
+    }
+    core.status.event.data.type=data.type;
+    switch (data.type) {
+        case "text": // 文字/对话
+            core.ui.drawTextBox(data.data);
+            break;
+        case "disappear": // 消失
+            core.removeBlock('event', x, y);
+            this.doAction();
+            break;
+        case "sleep": // 等待多少毫秒
+            setTimeout(function () {
+                core.events.doAction();
+            }, data.data);
+            break;
+        case "exit": // 立刻结束事件
+            core.status.event.data.list = [];
+            core.events.doAction();
+            break;
+        default:
+            core.status.event.data.type='text';
+            core.ui.drawTextBox("\t[警告,]出错啦！\n"+data.type+" 事件不被支持...");
+    }
+    return;
+}
 
 ////// 降低难度 //////
 events.prototype.decreaseHard = function() {
@@ -194,13 +212,11 @@ events.prototype.decreaseHard = function() {
 ////// 能否使用快捷商店 //////
 events.prototype.canUseQuickShop = function(index) {
     if (core.status.floorId == 'MT20') return '当前不能使用快捷商店。';
-    if (core.status.hero.flags.passLava) return '由于你刚刚经过岩浆，此时不得使用快捷商店。\n切换楼层后恢复。';
     return null;
 }
 
 ////// 尝试使用道具 //////
 events.prototype.useItem = function(itemId) {
-    console.log("使用道具："+core.material.items[itemId].name);
     core.ui.closePanel(false);
 
     if (itemId=='book') {
@@ -212,73 +228,158 @@ events.prototype.useItem = function(itemId) {
         return;
     }
 
-    // TODO add other items
     if (core.canUseItem(itemId)) core.useItem(itemId);
     else core.drawTip("当前无法使用"+core.material.items[itemId].name);
 }
 
 /****** 打完怪物 ******/
-events.prototype.afterBattle = function(enemyId) {
-    if (core.status.floorId == 'MT14' && !core.enemyExists(5,9) && !core.enemyExists(7,9)) {
-        core.openDoor("specialDoor", 6, 8, false);
+events.prototype.afterBattle = function(enemyId,x,y,callback) {
+
+    // 毒衰咒的处理
+    var special = core.material.enemys[enemyId].special;
+    // 中毒
+    if (special==12 && !core.hasFlag('poison')) {
+        core.setFlag('poison', true);
+        core.updateStatusBar();
     }
-    if (core.status.floorId == 'MT20') {
-        // 检查封印
-        if (!core.status.hero.flags.seal20F) {
-            // 四个角都存在，四边都不存在
-            if (core.enemyExists(5,5) && core.enemyExists(5,7) && core.enemyExists(7,7) && core.enemyExists(7,5)
-                && !core.enemyExists(5,6) && !core.enemyExists(7,6) && !core.enemyExists(6,5) && !core.enemyExists(6,7)) {
-                // 触发封印
-                core.status.hero.flags.seal20F = true;
-                core.material.enemys.fairy.hp /= 10;
-                core.material.enemys.fairy.atk /= 10;
-                core.material.enemys.fairy.def /= 10;
-                core.updateFg();
-                core.drawText([
-                    {'content': '啊，我怎么被封印了！\n能量只剩下一成了！', 'id': 'fairy'}
-                ]);
-                // core.drawTip("触发仙子封印");
-                core.clearContinueAutomaticRoute();
-                return;
-            }
-        }
-        // 打败仙子
-        if (enemyId == 'fairy') {
-            core.events.win();
-            core.clearContinueAutomaticRoute();
-            return;
-        }
+    // 衰弱
+    if (special==13 && !core.hasFlag('weak')) {
+        core.setFlag('weak', true);
+        core.status.hero.atk-=core.flags.weakValue;
+        core.status.hero.def-=core.flags.weakValue;
+        core.updateStatusBar();
+    }
+    // 诅咒
+    if (special==14 && !core.hasFlag('curse')) {
+        core.setFlag('curse', true);
+        core.updateStatusBar();
     }
 
-
+    // 检查处理后的事件。
+    var event = core.floors[core.status.floorId].afterBattle[x+","+y];
+    if (core.isset(event)) {
+        core.events.doEvents(event, x, y, callback);
+    }
     //继续行走
-    core.continueAutomaticRoute();
+    else {
+        core.continueAutomaticRoute();
+        if (core.isset(callback)) callback();
+    }
 }
 
 /****** 开完门 ******/
-events.prototype.afterOpenDoor = function(doorId) {
-
+events.prototype.afterOpenDoor = function(doorId,x,y,callback) {
+    // 检查处理后的事件。
+    var event = core.floors[core.status.floorId].afterOpenDoor[x+","+y];
+    if (core.isset(event)) {
+        core.events.doEvents(event, x, y, callback);
+    }
     //继续行走
-    core.continueAutomaticRoute();
+    else {
+        core.continueAutomaticRoute();
+        if (core.isset(callback)) callback();
+    }
 }
 
 /****** 经过路障 ******/
 events.prototype.passNet = function (data) {
+    // 有鞋子
+    if (core.hasItem('shoes')) return;
     if (data.event.id=='lavaNet') {
-        core.status.hero.hp -= 100;
+        core.status.hero.hp -= core.flags.lavaDamage;
         if (core.status.hero.hp<=0) {
             core.status.hero.hp=0;
             core.updateStatusBar();
-            core.events.lose();
+            core.events.lose('lava');
             return;
         }
-        core.status.hero.flags.passLava = true;
         core.updateStatusBar();
-        core.drawTip('经过熔岩，生命-100');
+        core.drawTip('经过血网，生命-'+core.flags.lavaDamage);
+    }
+    if (data.event.id=='poisonNet') {
+        if (core.hasFlag('poison')) return;
+        core.setFlag('poison', true);
+        core.updateStatusBar();
+    }
+    if (data.event.id=='weakNet') {
+        if (core.hasFlag('weak')) return;
+        core.setFlag('weak', true);
+        core.status.hero.atk-=core.flags.weakValue;
+        core.status.hero.def-=core.flags.weakValue;
+        core.updateStatusBar();
+    }
+    if (data.event.id=='curseNet') {
+        if (core.hasFlag('curse')) return;
+        core.setFlag('curse', true);
+        core.updateStatusBar();
     }
 }
 
+// NPC自定义操作
+events.prototype.npcCustomAction = function (npcData) {
+
+}
+
+// 当点击(x,y)位置后自定义操作
+events.prototype.npcCustomActionOnClick = function (npcData, x, y) {
+
+}
+
+// NPC自定义事件处理
+events.prototype.npcCustomEffect = function (effect, npc) {
+
+}
+
+// 存档事件前一刻的处理
+events.prototype.beforeSaveData = function(data) {
+
+}
+
+// 读档事件后，载入事件前，对数据的处理
+events.prototype.afterLoadData = function(data) {
+
+}
+
+events.prototype.win = function(reason) {
+    // 获胜
+    core.waitHeroToStop(function() {
+        core.clearMap('all');
+        core.rmGlobalAnimate(0,0,true);
+        core.drawText([
+            "\t[结局3]恭喜通关！"
+        ], function () {
+            core.restart();
+        })
+    });
+}
+
+events.prototype.lose = function(reason) {
+    // 失败
+    core.waitHeroToStop(function() {
+        core.drawText('\t[结局1]你死了。', function () {
+            core.restart();
+        });
+    })
+}
+
+
+
+
+
+/******************************************/
 /*********** 界面上的点击事件 ***************/
+/******************************************/
+
+// 正在处理事件时的点击操作...
+events.prototype.clickAction = function (x,y) {
+
+    if (core.status.event.data.type=='text') {
+        // 文字
+        this.doAction();
+        return;
+    }
+
+}
 
 // 怪物手册
 events.prototype.clickBook = function(x,y) {
@@ -359,6 +460,7 @@ events.prototype.clickShop = function(x,y) {
     }
 }
 
+// 快捷商店
 events.prototype.clickSelectShop = function(x,y) {
     if (x >= 5 && x <= 7) {
         var shopList = core.status.shops, keys = Object.keys(shopList);
@@ -394,7 +496,6 @@ events.prototype.clickToolbox = function(x,y) {
         return;
     }
 
-    var itemId = null;
     var items = null;
 
     if (y>=4 && y<=7 && x!=12)
@@ -547,60 +648,3 @@ events.prototype.clickNPC = function(x,y) {
 }
 
 /*********** 点击事件 END ***************/
-
-
-// NPC自定义操作
-events.prototype.npcCustomAction = function (npcData) {
-
-}
-
-// 当点击(x,y)位置后自定义操作
-events.prototype.npcCustomActionOnClick = function (npcData, x, y) {
-
-}
-
-// NPC自定义事件处理
-events.prototype.npcCustomEffect = function (effect, npc) {
-
-}
-
-// 存档事件前一刻的处理
-events.prototype.beforeSaveData = function(data) {
-
-}
-
-// 读档事件后，载入事件前，对数据的处理
-events.prototype.afterLoadData = function(data) {
-    // 重新封印仙子
-    if (core.status.hero.flags.seal20F) {
-        var fairy = core.material.enemys.fairy;
-        fairy.hp/=10;
-        fairy.atk/=10;
-        fairy.def/=10;
-    }
-}
-
-events.prototype.win = function() {
-    // 获胜
-
-    core.waitHeroToStop(function() {
-        core.clearMap('all');
-        core.rmGlobalAnimate(0,0,true);
-        core.drawText([
-            {'content': '终于，我逃脱了这个可怕的异空间。', 'id': 'hero'},
-            {'content': '接下来，我要何去何从。', 'id': 'hero'},
-            {'content': '顺着这条漆黑的甬道走下去，\n我能回到我的现实世界吗？', 'id': 'hero'},
-            {'content': '恭喜通关难度' + core.status.hard + '！你的分数是：' + core.status.hero.hp + '\n欢迎截图到发布帖下进行炫耀！\n\n再次感谢对本塔的支持！'}
-        ], function () {
-            core.restart();
-        })
-    });
-}
-
-events.prototype.lose = function() {
-    // 失败
-    core.drawText('很不好意思，但是你死了。', function () {
-        core.restart();
-    });
-}
-

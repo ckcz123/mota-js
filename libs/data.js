@@ -7,14 +7,13 @@ data.prototype.init = function() {
         'title': '魔塔样板',
         'name': 'template',
         'version': 'Ver 1.0.0 (Beta)',
-        'floorId': 'MT1',
-        'enableExperience': true,
+        'floorId': 'sample0',
         'hero': {
             'id': 'hero1',
             'name': '勇士',
             'hp': 1000,
-            'atk': 10,
-            'def': 10,
+            'atk': 100,
+            'def': 100,
             'mdef': 0,
             'money': 0,
             'experience': 0,
@@ -28,22 +27,15 @@ data.prototype.init = function() {
                 'tools': {}
             },
             'flyRange': [],
-            'loc': {'direction': 'up', 'x': 6, 'y': 11},
-            'steps': 0,
-            'time': {
-                'starttime': new Date(),
-                'playtime': 0,
-                'totaltime': 0,
-                'lasttime': new Date()
-            },
+            'loc': {'direction': 'up', 'x': 6, 'y': 10},
             'flags': {
-                'visitFloors': {},
-                'passLava': false, // 经过岩浆则禁用商店
-                'hasShield5': false, // 有神圣盾
-                'seal20F': false, // 20F封印
-                'poison': true,
             }
         },
+        'startText': [
+            "Hi，欢迎来到 HTML5 魔塔样板！\n\n本样板由艾之葵制作，可以让你在不会写任何代码\n的情况下也能做出属于自己的H5魔塔！",
+            "这里游戏开始时的剧情。\n定义在data.js的startText处。\n\n你可以在这里写上自己的内容。",
+            "赶快来试一试吧！"
+        ],
         'shops': {
             'shop1': {
                 'id': 'shop1', 'title': '贪婪之神', 'name': '3楼金币商店', 'icon': 'blueShop',
@@ -93,9 +85,6 @@ data.prototype.init = function() {
         },
         'npcs': {},
         'animateSpeed': 500,
-        'startText': [
-            "测试"
-        ]
     }
     // 系统FLAG，在游戏运行中中请不要修改它。
     this.flags = {
@@ -103,15 +92,18 @@ data.prototype.init = function() {
         /****** 角色状态相关 ******/
         "HPMAX": 999999, // HP上限；-1则无上限
         "enableMDef": true, // 是否涉及勇士的魔防值；如果此项为false，则状态栏不会显示勇士的魔防值
-        "enableExperience": true, // 是否涉及经验值；如果此项为false，则状态栏和怪物手册均将不会显示经验值
+        "enableExperience": false, // 是否涉及经验值；如果此项为false，则状态栏和怪物手册均将不会显示经验值
         // 重要说明：如果enableMDef和enableExperience均为true，则在状态栏不会显示当前楼层！！！！ //
+        "lavaDamage": 100, // 经过血网受到的伤害
+        "poisonDamage": 10, // 经过毒网受到的伤害
+        "weakValue": 20, // 衰弱状态下攻防减少的数值
 
 
         /****** 道具相关 ******/
         "flyNearStair": false, // 是否需要在楼梯边使用传送器
         "bombTrigger": true, // 使用炸弹后是否触发怪物事件（如开门）
         "pickaxeFourDirections": true, // 使用破墙镐是否四个方向都破坏；如果false则只破坏面前的墙壁
-        "bigKeyIsBox": true, // 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙
+        "bigKeyIsBox": false, // 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙
 
 
         /****** 系统相关 ******/

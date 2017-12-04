@@ -2,9 +2,9 @@ function MT0() {}
 
 MT0.prototype.init = function() {
     this.data = {
-        'id': 'MT0', // 楼层唯一标识符
-        'title': "样板层", // 楼层中文名
-        'name': 0, // 显示在status bar中的名称
+        'floorId': 'MT0', // 楼层唯一标识符
+        'title': "样板层", // 楼层中文名；转换楼层时显示
+        'name': 0, // 显示在状态栏中的楼层名称
         "canFlyTo": true, // 该楼能否被飞行器飞到（不能的话在该楼也不允许使用）
         "map": [ // 地图数据，需要是13x13，建议使用地图生成器来生成
 

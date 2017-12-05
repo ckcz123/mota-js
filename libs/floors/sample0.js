@@ -80,10 +80,8 @@ main.floors.sample0 = {
         /****** 领域、夹击检查事件 ******/
         "1,0": {"trigger": "checkBlock"},
         "0,1": {"trigger": "checkBlock"},
-        "1,1": {"trigger": "checkBlock"},
         "1,2": {"trigger": "checkBlock"},
         "2,1": {"trigger": "checkBlock"},
-        "1,0": {"trigger": "checkBlock"},
         "3,0": {"trigger": "checkBlock"},
         "3,2": {"trigger": "checkBlock"},
         "4,1": {"trigger": "checkBlock"},

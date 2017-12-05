@@ -660,16 +660,6 @@ ui.prototype.drawSLPanel = function(page) {
 
 }
 
-/**
- * 绘制缩略图
- * @param canvas
- * @param blocks
- * @param x
- * @param y
- * @param size
- * @param heroLoc
- * @param heroId
- */
 ui.prototype.drawThumbnail = function(canvas, blocks, x, y, size, heroLoc, heroId) {
     core.clearMap(canvas, x, y, size, size);
     var persize = size/13;

@@ -212,7 +212,7 @@ items.prototype.canUseItem = function (itemId) {
         var ids = [];
         for (var i in core.status.thisMap.blocks) {
             var block = core.status.thisMap.blocks[i];
-            if (core.isset(block.event) &&
+            if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) &&
                 (block.event.id == 'yellowWall' || block.event.id=='whiteWall' || block.event.id=='blueWall')) // 能破哪些墙
             {
                 // 四个方向
@@ -238,7 +238,7 @@ items.prototype.canUseItem = function (itemId) {
         // 破冰镐
         for (var i in core.status.thisMap.blocks) {
             var block = core.status.thisMap.blocks[i];
-            if (core.isset(block.event) && block.x==core.nextX() && block.y==core.nextY() && block.event.id=='ice') {
+            if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.x==core.nextX() && block.y==core.nextY() && block.event.id=='ice') {
                 core.status.event.data = [i];
                 return true;
             }
@@ -250,7 +250,7 @@ items.prototype.canUseItem = function (itemId) {
         var ids = [];
         for (var i in core.status.thisMap.blocks) {
             var block = core.status.thisMap.blocks[i];
-            if (core.isset(block.event) && block.event.cls == 'enemys' && Math.abs(block.x-core.status.hero.loc.x)+Math.abs(block.y-core.status.hero.loc.y)<=1) {
+            if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls == 'enemys' && Math.abs(block.x-core.status.hero.loc.x)+Math.abs(block.y-core.status.hero.loc.y)<=1) {
                 var enemy = core.material.enemys[block.event.id];
                 if (core.isset(enemy.bomb) && !enemy.bomb) continue;
                 ids.push(i);
@@ -266,7 +266,7 @@ items.prototype.canUseItem = function (itemId) {
         // 圣锤
         for (var i in core.status.thisMap.blocks) {
             var block = core.status.thisMap.blocks[i];
-            if (core.isset(block.event) && block.event.cls == 'enemys' && block.x==core.nextX() && block.y==core.nextY()) {
+            if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls == 'enemys' && block.x==core.nextX() && block.y==core.nextY()) {
                 var enemy = core.material.enemys[block.event.id];
                 if (core.isset(enemy.bomb) && !enemy.bomb) continue;
                 core.status.event.data = [i];
@@ -279,7 +279,7 @@ items.prototype.canUseItem = function (itemId) {
         var ids = []
         for (var i in core.status.thisMap.blocks) {
             var block = core.status.thisMap.blocks[i];
-            if (core.isset(block.event) && (block.event.id == 'yellowWall' || block.event.id == 'blueWall' || block.event.id == 'whiteWall'))
+            if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && (block.event.id == 'yellowWall' || block.event.id == 'blueWall' || block.event.id == 'whiteWall'))
                 ids.push(i);
         }
         if (ids.length>0) {
@@ -291,14 +291,12 @@ items.prototype.canUseItem = function (itemId) {
     if (itemId == 'centerFly') {
         // 中心对称
         var toX = 12 - core.getHeroLoc('x'), toY = 12-core.getHeroLoc('y');
-        var blocks = core.status.thisMap.blocks;
-        for (var s = 0; s < blocks.length; s++) {
-            if (blocks[s].x == toX && blocks[s].y == toY) {
-                return false;
-            }
+        var block = core.getBlock(toX, toY);
+        if (block==null) {
+            core.status.event.data = {'x': toX, 'y': toY};
+            return true;
         }
-        core.status.event.data = {'x': toX, 'y': toY};
-        return true;
+        return false;
     }
     if (itemId == 'upFly') {
         // 上楼器
@@ -306,19 +304,14 @@ items.prototype.canUseItem = function (itemId) {
         var index = core.floorIds.indexOf(floorId);
         if (index==core.floorIds.length-1) return false;
         var toId = core.floorIds[index+1];
-
-        // 检查是否存在block（不是空地）
         var toX = core.getHeroLoc('x'), toY = core.getHeroLoc('y');
-        var blocks = core.status.maps[toId].blocks;
-        for (var s = 0; s < blocks.length; s++) {
-            if (blocks[s].x == toX && blocks[s].y == toY) {
-                return false;
-            }
-        }
 
-        // 可以上楼，记录下位置信息，返回true
-        core.status.event.data = {'id': toId, 'x': toX, 'y': toY};
-        return true;
+        var block = core.getBlock(toX, toY, toId);
+        if (block==null) {
+            core.status.event.data = {'id': toId, 'x': toX, 'y': toY};
+            return true;
+        }
+        return false;
     }
     if (itemId == 'downFly') {
         // 下楼器
@@ -326,26 +319,21 @@ items.prototype.canUseItem = function (itemId) {
         var index = core.floorIds.indexOf(floorId);
         if (index==0) return false;
         var toId = core.floorIds[index-1];
-
-        // 检查是否存在block（不是空地）
         var toX = core.getHeroLoc('x'), toY = core.getHeroLoc('y');
-        var blocks = core.status.maps[toId].blocks;
-        for (var s = 0; s < blocks.length; s++) {
-            if (blocks[s].x == toX && blocks[s].y == toY) {
-                return false;
-            }
-        }
 
-        // 可以上楼，记录下位置信息，返回true
-        core.status.event.data = {'id': toId, 'x': toX, 'y': toY};
-        return true;
+        var block = core.getBlock(toX, toY, toId);
+        if (block==null) {
+            core.status.event.data = {'id': toId, 'x': toX, 'y': toY};
+            return true;
+        }
+        return false;
     }
     if (itemId=='snow') {
         // 冰冻徽章
         var ids = [];
         for (var i in core.status.thisMap.blocks) {
             var block = core.status.thisMap.blocks[i];
-            if (core.isset(block.event) && block.event.id == 'lava' && Math.abs(block.x-core.status.hero.loc.x)+Math.abs(block.y-core.status.hero.loc.y)<=1) {
+            if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.id == 'lava' && Math.abs(block.x-core.status.hero.loc.x)+Math.abs(block.y-core.status.hero.loc.y)<=1) {
                 ids.push(i);
             }
         }
@@ -360,7 +348,7 @@ items.prototype.canUseItem = function (itemId) {
         var ids = [];
         for (var i in core.status.thisMap.blocks) {
             var block = core.status.thisMap.blocks[i];
-            if (core.isset(block.event) && block.event.id == 'yellowDoor') {
+            if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.id == 'yellowDoor') {
                 ids.push(i);
             }
         }

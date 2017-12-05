@@ -1,7 +1,7 @@
 function maps() {}
 maps.prototype.init = function() {}
 
-maps.prototype.loadFloor = function (floorId, map, enables) {
+maps.prototype.loadFloor = function (floorId, map) {
     var floor = core.floors[floorId];
     var content = {};
     content['floorId'] = floor.floorId;

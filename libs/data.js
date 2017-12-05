@@ -29,6 +29,7 @@ data.prototype.init = function() {
             'flyRange': [],
             'loc': {'direction': 'up', 'x': 6, 'y': 10},
             'flags': {
+                // 游戏过程中的flag变量
             }
         },
         'startText': [
@@ -94,6 +95,7 @@ data.prototype.init = function() {
         "poisonDamage": 10, // 经过毒网受到的伤害
         "weakValue": 20, // 衰弱状态下攻防减少的数值
         /****** 道具相关 ******/
+        "cannotUseQuickShop": ["MT0"], // 不能使用快捷商店的楼层列表
         "redJewel": 3, // 红宝石加攻击的数值
         "blueJewel": 3, // 蓝宝石加防御的数值
         "greenJewel": 5, // 绿宝石加魔防的数值

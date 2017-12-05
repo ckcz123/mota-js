@@ -75,10 +75,6 @@ events.prototype.startGame = function (hard) {
     })
 }
 
-////// 走到某位置时触发事件 //////
-events.prototype.blockEvent = function (data) {
-}
-
 ////// 检查领域、夹击事件 //////
 events.prototype.checkBlock = function (x,y) {
     var damage = 0;
@@ -172,8 +168,8 @@ events.prototype.doAction = function() {
         case "text": // 文字/对话
             core.ui.drawTextBox(data.data);
             break;
-        case "disappear": // 消失
-            core.removeBlock('event', x, y);
+        case "hide": // 消失
+            core.removeBlock(x, y);
             this.doAction();
             break;
         case "sleep": // 等待多少毫秒
@@ -214,8 +210,9 @@ events.prototype.decreaseHard = function() {
 }
 
 ////// 能否使用快捷商店 //////
-events.prototype.canUseQuickShop = function(index) {
-    if (core.status.floorId == 'MT20') return '当前不能使用快捷商店。';
+events.prototype.canUseQuickShop = function(shopIndex) {
+    if (core.isset(core.values.cannotUseQuickShop) && core.values.cannotUseQuickShop.indexOf(core.status.floorId)>=0)
+        return '当前不能使用快捷商店。';
     return null;
 }
 

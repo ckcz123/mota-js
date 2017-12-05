@@ -1262,7 +1262,6 @@ core.prototype.moveHero = function (direction) {
 }
 
 core.prototype.moveOneStep = function() {
-    core.status.hero.steps++;
     // 中毒状态
     if (core.hasFlag('poison')) {
         core.status.hero.hp -= core.values.poisonDamage;

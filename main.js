@@ -344,5 +344,5 @@ main.dom.normalLevel.onclick = function () {
 }
 
 main.dom.hardLevel.onclick = function () {
-    core.events.startGame('Gard');
+    core.events.startGame('Hard');
 }

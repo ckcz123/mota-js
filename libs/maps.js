@@ -14,6 +14,27 @@ maps.prototype.loadFloor = function (floorId, map, enables) {
     for (var i = 0; i < 13; i++) {
         for (var j = 0; j < 13; j++) {
             var block = this.getBlock(j, i, map[i][j]);
+            if (block.event != undefined) {
+                if (block.event.cls == 'enemys' && block.event.trigger==undefined) {
+                    block.event.trigger = 'battle';
+                }
+                if (block.event.cls == 'items' && block.event.trigger==undefined) {
+                    block.event.trigger = 'getItem';
+                }
+                if (block.event.noPass == undefined) {
+                    if (block.event.cls=='enemys' || block.event.cls=='terrains' || block.event.cls=='npcs') {
+                        block.event.noPass = true;
+                    }
+                }
+                if (block.event.animate == undefined) {
+                    if (block.event.cls=='enemys' || block.event.cls=='npcs') {
+                        block.event.animate = 2;
+                    }
+                    if (block.event.cls == 'animates') {
+                        block.event.animate = 4;
+                    }
+                }
+            }
             this.addEvent(block,j,i,floor.events[j+","+i])
             if (core.isset(block.event)) blocks.push(block);
         }
@@ -235,39 +256,6 @@ maps.prototype.initMaps = function (floorIds) {
         var floorId = floorIds[i];
         maps[floorId] = this.loadFloor(floorId);
     }
-    return this.fill(maps);
-}
-
-maps.prototype.fill = function (maps) {
-    if (maps.floorId == undefined) {
-        for (var floorId in maps) {
-            this.fill(maps[floorId]);
-        }
-        return maps;
-    }
-    var blocks = maps['blocks'];
-    blocks.forEach(function (t) {
-        if (t.event == undefined) return;
-        if (t.event.cls == 'enemys' && t.event.trigger==undefined) {
-            t.event.trigger = 'battle';
-        }
-        if (t.event.cls == 'items' && t.event.trigger==undefined) {
-            t.event.trigger = 'getItem';
-        }
-        if (t.event.noPass == undefined) {
-            if (t.event.cls=='enemys' || t.event.cls=='terrains' || t.event.cls=='npcs') {
-                t.event.noPass = true;
-            }
-        }
-        if (t.event.animate == undefined) {
-            if (t.event.cls=='enemys' || t.event.cls=='npcs') {
-                t.event.animate = 2;
-            }
-            if (t.event.cls == 'animates') {
-                t.event.animate = 4;
-            }
-        }
-    });
     return maps;
 }
 

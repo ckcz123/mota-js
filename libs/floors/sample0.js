@@ -49,7 +49,7 @@ main.floors.sample0 = {
             {"type": "disappear"}
         ],
         "2,8": [ // 守着第一批怪物的老人
-            "\t[老人,magician]这些都是各种各样的怪物。\n所有怪物的属性都在enemys.js中设置。\n\n每个怪物最多只能有一个属性。",
+            "\t[老人,magician]这些都是各种各样的怪物。\n所有怪物的数据都在enemys.js中设置。\n\n每个怪物最多只能有一个特殊属性。",
             "\t[老人,magician]这批怪物分别为：普通、先攻、魔攻、坚固、\n2连击、3连击、4连击、破甲、反击、净化。",
             "\t[老人,magician]打败怪物后可触发 afterBattle 事件。\n\n有关事件的各种信息在下一层会有更为详细的\n说明。",
             {"type": "disappear"}
@@ -62,6 +62,7 @@ main.floors.sample0 = {
             "\t[老人,magician]领域、夹击。\n请注意领域怪需要设置value为伤害数值，\n可参见样板中初级巫师的写法。",
             "\t[老人,magician]出于游戏性能的考虑，我们不可能每走一步都\n对领域和夹击进行检查。\n因此我们需要在本楼层的 events 中指明哪些\n点可能会触发领域和夹击事件，在这些点才会\n对领域和夹击进行检查和处理。\n\n具体可参见本层样板中events的做法。",
             "\t[老人,magician]夹击和领域同时发生时先计算领域，再夹击。\n\n另：本塔不支持阻击怪。",
+            "\t[老人,magician]自动寻路会尽量绕过你设置的这些点。",
             {"type": "disappear"}
         ],
 
@@ -80,6 +81,7 @@ main.floors.sample0 = {
         /****** 领域、夹击检查事件 ******/
         "1,0": {"trigger": "checkBlock"},
         "0,1": {"trigger": "checkBlock"},
+        "1,1": {"trigger": "checkBlock"},
         "1,2": {"trigger": "checkBlock"},
         "2,1": {"trigger": "checkBlock"},
         "3,0": {"trigger": "checkBlock"},

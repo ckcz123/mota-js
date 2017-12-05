@@ -1031,9 +1031,16 @@ core.prototype.automaticRoute = function (destX, destY) {
             if (core.noPassExists(nx, ny))
                 continue;
             var deepAdd=1;
-            if (core.idEndWith(nx,ny,'Net')) deepAdd=100;
-            // 自动绕过血瓶
-            if (!core.flags.potionWhileRouting && core.idEndWith(nx,ny,'Potion')) deepAdd=20;
+            var block = core.getBlock(nx,ny);
+            if (block!=null) {
+                var id = block.block.event.id;
+                // 绕过路障
+                if (id.substring(id.length-3)=="Net") deepAdd=100;
+                // 绕过血瓶
+                if (!core.flags.potionWhileRouting && id.substring(id.length-6)=="Potion") deepAdd=20;
+                // 绕过可能的夹击点
+                if (block.block.event.trigger == 'checkBlock') deepAdd=200;
+            }
             route[nid] = direction;
             queue.push(169*(nowDeep+deepAdd)+nid);
         }
@@ -1697,13 +1704,6 @@ core.prototype.enemyExists = function (x, y, id) {
         }
     }
     return false;
-}
-
-core.prototype.idEndWith = function (x, y, idStr) {
-    var block = core.getBlock(x,y);
-    if (block==null) return false;
-    var id = block.block.event.id;
-    return id.substring(id.length-idStr.length)==idStr;
 }
 
 core.prototype.getBlock = function (x, y, floorId, needEnable) {
@@ -2774,7 +2774,7 @@ core.prototype.hide = function (obj, speed, callback) {
 ////// 状态栏相关 //////
 
 core.prototype.clearStatusBar = function() {
-    var statusList = ['floor', 'hp', 'atk', 'def', /*'mdef',*/ 'money', 'experience', 'yellowKey', 'blueKey', 'redKey', 'hard'];
+    var statusList = ['floor', 'hp', 'atk', 'def', 'mdef', 'money', 'experience', 'yellowKey', 'blueKey', 'redKey', 'poison', 'weak', 'curse', 'hard'];
     statusList.forEach(function (e) {
         core.statusBar[e].innerHTML = "";
     });

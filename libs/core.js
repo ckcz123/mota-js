@@ -1407,6 +1407,7 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, callback) {
     core.lockControl();
     core.stopHero();
     core.stopAutomaticRoute();
+    core.clearContinueAutomaticRoute();
     core.dom.floorNameLabel.innerHTML = core.status.maps[floorId].title;
     if (core.isset(stair)) {
         // find heroLoc
@@ -1438,7 +1439,8 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, callback) {
                     core.events.afterChangeFloor(floorId);
                     if (core.isset(callback)) callback();
                 });
-                core.setHeroLoc('direction', heroLoc.direction);
+                if (core.isset(heroLoc.direction))
+                    core.setHeroLoc('direction', heroLoc.direction);
                 core.setHeroLoc('x', heroLoc.x);
                 core.setHeroLoc('y', heroLoc.y);
                 core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
@@ -1591,7 +1593,7 @@ core.prototype.drawMap = function (mapName, callback) {
     var blockIcon, blockImage;
     core.clearMap('all');
     core.rmGlobalAnimate(null, null, true);
-    core.enabledAllTrigger();
+    // core.enabledAllTrigger();
     for (var x = 0; x < 13; x++) {
         for (var y = 0; y < 13; y++) {
             blockIcon = core.material.icons.terrains.ground;
@@ -1766,28 +1768,23 @@ core.prototype.trigger = function (x, y) {
             if (noPass) {
                 core.clearAutomaticRouteNode(x, y);
             }
-            /*
-            if(core.isset(mapBlocks[b].fg) && core.isset(mapBlocks[b].fg.trigger) && (core.isset(mapBlocks[b].fg.disabledTrigger) ? mapBlocks[b].fg.disabledTrigger == false : true)) {
-                core.material.events[mapBlocks[b].fg.trigger](mapBlocks[b], core, function(data) {
-
-                });
-            }
-            */
-            if (core.isset(mapBlocks[b].event) && core.isset(mapBlocks[b].event.trigger) && (core.isset(mapBlocks[b].event.disabledTrigger) ? mapBlocks[b].event.disabledTrigger == false : true)
-                    && !(core.isset(mapBlocks[b].event.noTriggerCross) && mapBlocks[b].event.noTriggerCross && (core.status.autoHeroMove || core.status.autoStep<core.status.autoStepRoutes.length))) {
-                core.material.events[mapBlocks[b].event.trigger](mapBlocks[b], core, function (data) {
-
-                });
-            }
-            else if (core.isset(mapBlocks[b].bg) && core.isset(mapBlocks[b].bg.trigger) && (core.isset(mapBlocks[b].bg.disabledTrigger) ? mapBlocks[b].bg.disabledTrigger == false : true)) {
-                core.material.events[mapBlocks[b].bg.trigger](mapBlocks[b], core, function (data) {
+            if (core.isset(mapBlocks[b].event) && core.isset(mapBlocks[b].event.trigger)) {
+                var trigger = mapBlocks[b].event.trigger;
+                // 转换楼层能否穿透
+                if (trigger=='changeFloor' && (core.status.autoHeroMove || core.status.autoStep<core.status.autoStepRoutes.length)) {
+                    var canCross = core.flags.portalWithoutTrigger;
+                    if (core.isset(mapBlocks[b].event.portalWithoutTrigger))
+                        canCross=mapBlocks[b].event.portalWithoutTrigger;
+                    if (canCross) continue;
+                }
+                core.material.events[trigger](mapBlocks[b], core, function (data) {
 
                 });
             }
         }
     }
 }
-
+/*
 core.prototype.setTrigger = function (x, y, map, triggerName) {
     var mapBlocks = core.status.thisMap.blocks;
     for (var b = 0; b < mapBlocks.length; b++) {
@@ -1834,7 +1831,7 @@ core.prototype.rmTrigger = function (x, y, map) {
         }
     }
 }
-
+*/
 core.prototype.addGlobalAnimate = function (animateMore, x, y, loc, image) {
     if (animateMore == 2) {
         core.status.twoAnimateObjs.push({

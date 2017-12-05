@@ -221,8 +221,12 @@ maps.prototype.addEvent = function (block, x, y, event) {
         if (core.isset(event.trigger)) block.event.trigger=event.trigger;
         else block.event.trigger='action';
     }
-    // 覆盖data
-    block.event.data = event.data;
+    // 覆盖其他属性
+    for (var key in event) {
+        if (key!="enable" && key!="trigger") {
+            block.event[key]=core.clone(event[key]);
+        }
+    }
 }
 
 maps.prototype.initMaps = function (floorIds) {

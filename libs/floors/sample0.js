@@ -20,7 +20,7 @@ main.floors.sample0 = {
         [88,   89,   90,   91,   92,   93,   94,   2,    81,   82,   83,   84,   86],
     ],
     "firstArrive": [ // 第一次到该楼层触发的事件
-        "\t[样板提示,]首次到达某层可以触发 firstArrive 事件，\n该事件可类似于RMXP中的“自动执行脚本”。",
+        "\t[样板提示]首次到达某层可以触发 firstArrive 事件，\n该事件可类似于RMXP中的“自动执行脚本”。",
         "本事件支持一切的事件类型，常常用来触发对话，\n例如：",
         "\t[hero]我是谁？\n我从哪来？\n我又要到哪去？",
         "\t[仙子,fairy]你问我...？我也不知道啊...",
@@ -29,22 +29,23 @@ main.floors.sample0 = {
     "events": { // 该楼的所有可能事件列表；NPC事件和楼层转换事件也需要包括在内
 
         /****** NPC事件 ******/
-        "10,9": [ // (10,9)位置：守着道具的老人
+        "10,9": [ // 守着道具的老人
             "\t[老人,man]这些是本样板支持的所有的道具。\n\n道具分为三类：items, constants, tools。\nitems 为即捡即用类道具，例如宝石、血瓶、\n剑盾等。\nconstants 为永久道具，例如怪物手册、楼层\n传送器、幸运金币等。\ntools 为消耗类道具，例如破墙镐、炸弹、中\n心对称飞行器等。\n\n后两类道具在工具栏中可以看到并使用。",
             "\t[老人,man]有关道具效果，定义在items.js中。\n目前大多数道具已有默认行为，如有自定义\n的需求则需在items.js中修改代码。",
             "\t[老人,man]constants 和 tools 各最多只允许12种，\n多了会导致图标溢出。",
             "\t[老人,man]拾取道具结束后可触发 afterGetItem 事件。\n\n有关事件的各种信息在下一层会有更为详细的\n说明。",
             {"type": "disappear"} // 消失
         ],
-        "10,11": [ // (10,11)位置，守着门的老人
+        "10,11": [ // 守着门的老人
             "\t[老人,woman]这些是门，需要对应的钥匙打开。\n机关门必须使用特殊的开法。",
             "\t[老人,woman]开门后可触发 afterOpenDoor 事件。\n\n有关事件的各种信息在下一层会有更为详细的\n说明。",
             {'type': 'disappear'}
         ],
-        "2,10": [ // (2,10)位置，守着楼梯、传送门、路障的老人
-            "\t[老人,womanMagician]这些是楼梯、路障、传送门。",
-            "\t[老人,womanMagician]楼梯和传送门需要在events中定义目标楼层\n和位置，可参见样板里已有的的写法。",
+        "2,10": [ // 守着楼梯、传送门、路障的老人
+            "\t[老人,womanMagician]这些是路障、楼梯、传送门。",
             "\t[老人,womanMagician]血网的伤害数值、中毒后每步伤害数值、衰弱\n时攻防下降的数值，都在 data.js 内定义。\n\n路障同样会尽量被自动寻路绕过。",
+            "\t[老人,womanMagician]楼梯和传送门需要在events中定义目标楼层\n和位置，可参见样板里已有的的写法。",
+            "\t[老人,womanMagician]楼梯和传送门是否可“穿透”，由data.js中的\n全局变量所决定，你也可以单独设置。\n穿透的意思是，自动寻路得到的路径中间经\n过了楼梯，行走时是否触发楼层转换事件。\n例如，下面的“下箭头”就是不能穿透的。",
             {"type": "disappear"}
         ],
         "2,8": [ // 守着第一批怪物的老人
@@ -65,8 +66,15 @@ main.floors.sample0 = {
         ],
 
         /****** 楼层转换事件 ******/
-
-
+        "6,0": {"trigger": "changeFloor", "data": {"floorId": "sample0", "stair": "downFloor"}},
+        "0,11": {"trigger": "changeFloor", "data": {"floorId": "sample0", "loc": [0,12]}},
+        "0,12": {"trigger": "changeFloor", "data": {"floorId": "sample0", "stair": "upFloor"}}, // 注意，目标层有多个楼梯的话，写stair可能会导致到达位置不确定。这时候推荐写loc指明目标点位置。
+        "1,12": {"trigger": "changeFloor", "data": {"floorId": "sample0", "loc": [1,12]}},
+        "2,12": {"trigger": "changeFloor", "data": {"floorId": "sample0", "loc": [2,12]}},
+        "3,12": {"trigger": "changeFloor", "data": {"floorId": "sample0", "loc": [6,1]}},
+        "4,12": {"trigger": "changeFloor", "data": {"floorId": "sample0", "loc": [0,9]}},
+        "5,12": {"trigger": "changeFloor", "data": {"floorId": "sample0", "loc": [6,10]}, "portalWithoutTrigger": false}, // 不能穿透
+        "6,12": {"trigger": "changeFloor", "data": {"floorId": "sample0", "loc": [10,10]}},
 
 
         /****** 领域、夹击检查事件 ******/

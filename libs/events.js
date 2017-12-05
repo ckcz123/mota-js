@@ -11,8 +11,12 @@ events.prototype.init = function () {
         },
         'changeFloor': function (data, core, callback) {
             // core.changeFloor(data.event.data.floorId, data.event.data.heroLoc);
+            var heroLoc = null;
+            if (core.isset(data.event.data.loc)) {
+                heroLoc = {'x': data.event.data.loc[0], 'y': data.event.data.loc[1]};
+            }
             core.changeFloor(data.event.data.floorId, data.event.data.stair,
-                data.event.data.heroLoc, callback);
+                heroLoc, callback);
         },
         'getItem': function (data, core, callback) {
             core.getItem(data.event.id, 1, data.x, data.y);

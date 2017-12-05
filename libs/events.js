@@ -249,8 +249,8 @@ events.prototype.afterBattle = function(enemyId,x,y,callback) {
     // 衰弱
     if (special==13 && !core.hasFlag('weak')) {
         core.setFlag('weak', true);
-        core.status.hero.atk-=core.flags.weakValue;
-        core.status.hero.def-=core.flags.weakValue;
+        core.status.hero.atk-=core.values.weakValue;
+        core.status.hero.def-=core.values.weakValue;
         core.updateStatusBar();
     }
     // 诅咒
@@ -290,7 +290,7 @@ events.prototype.passNet = function (data) {
     // 有鞋子
     if (core.hasItem('shoes')) return;
     if (data.event.id=='lavaNet') {
-        core.status.hero.hp -= core.flags.lavaDamage;
+        core.status.hero.hp -= core.values.lavaDamage;
         if (core.status.hero.hp<=0) {
             core.status.hero.hp=0;
             core.updateStatusBar();
@@ -298,7 +298,7 @@ events.prototype.passNet = function (data) {
             return;
         }
         core.updateStatusBar();
-        core.drawTip('经过血网，生命-'+core.flags.lavaDamage);
+        core.drawTip('经过血网，生命-'+core.values.lavaDamage);
     }
     if (data.event.id=='poisonNet') {
         if (core.hasFlag('poison')) return;
@@ -308,8 +308,8 @@ events.prototype.passNet = function (data) {
     if (data.event.id=='weakNet') {
         if (core.hasFlag('weak')) return;
         core.setFlag('weak', true);
-        core.status.hero.atk-=core.flags.weakValue;
-        core.status.hero.def-=core.flags.weakValue;
+        core.status.hero.atk-=core.values.weakValue;
+        core.status.hero.def-=core.values.weakValue;
         core.updateStatusBar();
     }
     if (data.event.id=='curseNet') {

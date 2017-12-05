@@ -113,6 +113,7 @@ core.prototype.init = function (dom, statusBar, canvas, images, sounds, floorIds
         core[key] = coreData[key];
     }
     core.flags = core.data.flags;
+    core.values = core.clone(core.data.values);
     core.firstData = core.data.getFirstData();
     core.initStatus.shops = core.firstData.shops;
     core.initStatus.npcs = core.firstData.npcs;
@@ -1290,7 +1291,7 @@ core.prototype.moveOneStep = function() {
     core.status.hero.steps++;
     // 中毒状态
     if (core.hasFlag('poison')) {
-        core.status.hero.hp -= core.flags.poisonDamage;
+        core.status.hero.hp -= core.values.poisonDamage;
         if (core.status.hero.hp<=0) {
             core.status.hero.hp=0;
             core.updateStatusBar();
@@ -2788,8 +2789,8 @@ core.prototype.clearStatusBar = function() {
 core.prototype.updateStatusBar = function () {
 
     // 上限999999
-    if (core.flags.HPMAX>0) {
-        core.setStatus('hp', Math.min(core.flags.HPMAX, core.getStatus('hp')));
+    if (core.values.HPMAX>0) {
+        core.setStatus('hp', Math.min(core.values.HPMAX, core.getStatus('hp')));
     }
 
     // core.statusBar.floor.innerHTML = core.maps.maps[core.status.floorId].name;

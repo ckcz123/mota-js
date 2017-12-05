@@ -67,8 +67,8 @@ main.floors.sample0 = {
         ],
 
         /****** 楼层转换事件 ******/
-        "6,0": {"trigger": "changeFloor", "data": {"floorId": "sample0", "stair": "downFloor"}},
-        "0,11": {"trigger": "changeFloor", "data": {"floorId": "sample0", "loc": [0,12]}},
+        "6,0": {"trigger": "changeFloor", "data": {"floorId": "sample0", "stair": "downFloor"}}, // 目标点：sample0层的下楼梯位置
+        "0,11": {"trigger": "changeFloor", "data": {"floorId": "sample0", "loc": [0,12]}}, // 目标点：sample0层的x=0,y=12位置
         "0,12": {"trigger": "changeFloor", "data": {"floorId": "sample0", "stair": "upFloor"}}, // 注意，目标层有多个楼梯的话，写stair可能会导致到达位置不确定。这时候推荐写loc指明目标点位置。
         "1,12": {"trigger": "changeFloor", "data": {"floorId": "sample0", "loc": [1,12]}},
         "2,12": {"trigger": "changeFloor", "data": {"floorId": "sample0", "loc": [2,12]}},
@@ -79,14 +79,16 @@ main.floors.sample0 = {
 
 
         /****** 领域、夹击检查事件 ******/
+        // 所有可能的的领域、夹击点均需要加上 {"trigger": "ckeckBlock"}，否则将不会触发检查事件
+        // 另外，如果该点已经存在events事件（上面有相同点位置定义），则会覆盖
+        // 所以 |****** 强烈要求可能的夹击、领域点不要存在事件！！ ******|
         "1,0": {"trigger": "checkBlock"},
-        "0,1": {"trigger": "checkBlock"},
-        "1,1": {"trigger": "checkBlock"},
-        "1,2": {"trigger": "checkBlock"},
-        "2,1": {"trigger": "checkBlock"},
         "3,0": {"trigger": "checkBlock"},
-        "3,2": {"trigger": "checkBlock"},
+        "0,1": {"trigger": "checkBlock"},
+        "2,1": {"trigger": "checkBlock"},
         "4,1": {"trigger": "checkBlock"},
+        "1,2": {"trigger": "checkBlock"},
+        "3,2": {"trigger": "checkBlock"},
 
     },
     "afterOpenDoor": { // 开完门后可能触发的事件列表
@@ -98,7 +100,7 @@ main.floors.sample0 = {
     "afterGetItem": { // 获得道具后可能触发的事件列表
         "11,8": "由于状态栏放不下，绿钥匙和铁门钥匙均视为tools，\n放入工具栏中。\n碰到绿门和铁门仍然会自动使用开门。",
         "8,6": "由于吸血和夹击等的存在，血瓶默认自动被绕路。\n你可以修改data.js中的系统Flag来设置这一项。",
-        "8,7": "如需修改消耗品的效果，请前往items.js，修改\ngetItemEffect 和 getItemEffectTip 两个函数\n的具体数值即可。",
+        "8,7": "如需修改消耗品的效果，请前往 data.js ，找到\n并修改values内对应的具体数值即可。\n\n如果有更高级的需求（如每个区域宝石数值变化）\n，详见doc文档内的做法说明。",
         "9,5": [
             "每层楼的 canFlyTo 决定了该楼层能否被飞到。\n\n不能被飞到的楼层也无法使用楼层传送器。",
             "飞行的楼层顺序由 main.js 中 floorIds 加载顺序\n所决定。\n\n是否必须在楼梯边使用楼传器由 data.js 中的系统\nFlag所决定。"

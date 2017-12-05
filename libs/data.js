@@ -86,19 +86,13 @@ data.prototype.init = function() {
         'npcs': {},
         'animateSpeed': 500,
     }
-    // 系统FLAG，在游戏运行中中请不要修改它。
-    this.flags = {
-
-        /****** 角色状态相关 ******/
+    // 各种数值；一些数值可以在这里设置
+    this.values = {
+        /****** 角色相关 ******/
         "HPMAX": 999999, // HP上限；-1则无上限
-        "enableMDef": true, // 是否涉及勇士的魔防值；如果此项为false，则状态栏不会显示勇士的魔防值
-        "enableExperience": false, // 是否涉及经验值；如果此项为false，则状态栏和怪物手册均将不会显示经验值
-        // 重要说明：如果enableMDef和enableExperience均为true，则在状态栏不会显示当前楼层！！！！ //
         "lavaDamage": 100, // 经过血网受到的伤害
         "poisonDamage": 10, // 经过毒网受到的伤害
         "weakValue": 20, // 衰弱状态下攻防减少的数值
-
-
         /****** 道具相关 ******/
         "redJewel": 3, // 红宝石加攻击的数值
         "blueJewel": 3, // 蓝宝石加防御的数值
@@ -118,7 +112,18 @@ data.prototype.init = function() {
         "sword5": 160, // 神圣剑加攻数值
         "shield5": 160, // 神圣盾加防数值
         "moneyPocket": 500, // 金钱袋加金币的数值
+    }
+    // 系统FLAG，在游戏运行中中请不要修改它。
+    this.flags = {
 
+        /****** 角色状态相关 ******/
+        "enableMDef": true, // 是否涉及勇士的魔防值；如果此项为false，则状态栏不会显示勇士的魔防值
+        "enableExperience": false, // 是否涉及经验值；如果此项为false，则状态栏和怪物手册均将不会显示经验值
+        // 重要说明：如果enableMDef和enableExperience均为true，则在状态栏不会显示当前楼层！！！！ //
+
+
+
+        /****** 道具相关 ******/
         "flyNearStair": false, // 是否需要在楼梯边使用传送器
         "bombTrigger": true, // 使用炸弹后是否触发怪物事件（如开门）
         "pickaxeFourDirections": true, // 使用破墙镐是否四个方向都破坏；如果false则只破坏面前的墙壁

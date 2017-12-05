@@ -77,36 +77,36 @@ items.prototype.getItemEffect = function(itemId, itemNum) {
     var itemCls = core.material.items[itemId].cls;
     // 消耗品
     if (itemCls === 'items') {
-        if (itemId === 'redJewel') core.status.hero.atk += core.flags.redJewel;
-        if (itemId === 'blueJewel') core.status.hero.def += core.flags.blueJewel;
-        if (itemId === 'greenJewel') core.status.hero.mdef += core.flags.greenJewel;
+        if (itemId === 'redJewel') core.status.hero.atk += core.values.redJewel;
+        if (itemId === 'blueJewel') core.status.hero.def += core.values.blueJewel;
+        if (itemId === 'greenJewel') core.status.hero.mdef += core.values.greenJewel;
         if (itemId == 'yellowJewel') { // 黄宝石属性：需自己定义
             core.status.hero.hp+=1000;
             core.status.hero.atk+=6;
             core.status.hero.def+=6;
             core.status.hero.mdef+=10;
         }
-        if (itemId === 'redPotion') core.status.hero.hp += core.flags.redPotion;
-        if (itemId === 'bluePotion') core.status.hero.hp += core.flags.bluePotion;
-        if (itemId === 'yellowPotion') core.status.hero.hp += core.flags.yellowPotion;
-        if (itemId === 'greenPotion') core.status.hero.hp += core.flags.greenPotion;
-        if (itemId === 'sword1') core.status.hero.atk += core.flags.sword1;
-        if (itemId === 'sword2') core.status.hero.atk += core.flags.sword2;
-        if (itemId == 'sword3') core.status.hero.atk += core.flags.sword3;
-        if (itemId == 'sword4') core.status.hero.atk += core.flags.sword4;
-        if (itemId === 'sword5') core.status.hero.atk += core.flags.sword5;
-        if (itemId === 'shield1') core.status.hero.def += core.flags.shield1;
-        if (itemId === 'shield2') core.status.hero.def += core.flags.shield2;
-        if (itemId === 'shield3') core.status.hero.def += core.flags.shield3;
-        if (itemId === 'shield4') core.status.hero.def += core.flags.shield4;
-        if (itemId === 'shield5') core.status.hero.def += core.flags.shield5;
+        if (itemId === 'redPotion') core.status.hero.hp += core.values.redPotion;
+        if (itemId === 'bluePotion') core.status.hero.hp += core.values.bluePotion;
+        if (itemId === 'yellowPotion') core.status.hero.hp += core.values.yellowPotion;
+        if (itemId === 'greenPotion') core.status.hero.hp += core.values.greenPotion;
+        if (itemId === 'sword1') core.status.hero.atk += core.values.sword1;
+        if (itemId === 'sword2') core.status.hero.atk += core.values.sword2;
+        if (itemId == 'sword3') core.status.hero.atk += core.values.sword3;
+        if (itemId == 'sword4') core.status.hero.atk += core.values.sword4;
+        if (itemId === 'sword5') core.status.hero.atk += core.values.sword5;
+        if (itemId === 'shield1') core.status.hero.def += core.values.shield1;
+        if (itemId === 'shield2') core.status.hero.def += core.values.shield2;
+        if (itemId === 'shield3') core.status.hero.def += core.values.shield3;
+        if (itemId === 'shield4') core.status.hero.def += core.values.shield4;
+        if (itemId === 'shield5') core.status.hero.def += core.values.shield5;
         if (itemId === 'bigKey') { // 只有是钥匙盒才会执行这一步
             core.status.hero.items.keys.yellowKey++;
             core.status.hero.items.keys.blueKey++;
             core.status.hero.items.keys.redKey++;
         }
         if (itemId == 'superPotion') core.status.hero.hp *= 2;
-        if (itemId == 'moneyPocket') core.status.hero.money += core.flags.moneyPocket;
+        if (itemId == 'moneyPocket') core.status.hero.money += core.values.moneyPocket;
     }
     else {
         core.addItem(itemId, itemNum);
@@ -114,27 +114,27 @@ items.prototype.getItemEffect = function(itemId, itemNum) {
 }
 
 items.prototype.getItemEffectTip = function(itemId) {
-    if (itemId === 'redJewel') return "，攻击+"+core.flags.redJewel;
-    if (itemId === 'blueJewel') return "，防御+"+core.flags.blueJewel;
-    if (itemId === 'greenJewel') return "，魔防+"+core.flags.greenJewel;
+    if (itemId === 'redJewel') return "，攻击+"+core.values.redJewel;
+    if (itemId === 'blueJewel') return "，防御+"+core.values.blueJewel;
+    if (itemId === 'greenJewel') return "，魔防+"+core.values.greenJewel;
     if (itemId == 'yellowJewel') return "，全属性提升";
-    if (itemId === 'redPotion') return "，生命+"+core.flags.redPotion;
-    if (itemId === 'bluePotion') return "，生命+"+core.flags.bluePotion;
-    if (itemId === 'yellowPotion') return "，生命+"+core.flags.yellowPotion;
-    if (itemId === 'greenPotion') return "，生命+"+core.flags.greenPotion;
-    if (itemId === 'sword1') return "，攻击+"+core.flags.sword1;
-    if (itemId === 'sword2') return "，攻击+"+core.flags.sword2;
-    if (itemId === 'sword3') return "，攻击+"+core.flags.sword3;
-    if (itemId === 'sword4') return "，攻击+"+core.flags.sword4;
-    if (itemId === 'sword5') return "，攻击+"+core.flags.sword5;
-    if (itemId === 'shield1') return "，防御+"+core.flags.shield1;
-    if (itemId === 'shield2') return "，防御+"+core.flags.shield2;
-    if (itemId === 'shield3') return "，防御+"+core.flags.shield3;
-    if (itemId === 'shield4') return "，防御+"+core.flags.shield4;
-    if (itemId === 'shield5') return "，防御+"+core.flags.shield5;
+    if (itemId === 'redPotion') return "，生命+"+core.values.redPotion;
+    if (itemId === 'bluePotion') return "，生命+"+core.values.bluePotion;
+    if (itemId === 'yellowPotion') return "，生命+"+core.values.yellowPotion;
+    if (itemId === 'greenPotion') return "，生命+"+core.values.greenPotion;
+    if (itemId === 'sword1') return "，攻击+"+core.values.sword1;
+    if (itemId === 'sword2') return "，攻击+"+core.values.sword2;
+    if (itemId === 'sword3') return "，攻击+"+core.values.sword3;
+    if (itemId === 'sword4') return "，攻击+"+core.values.sword4;
+    if (itemId === 'sword5') return "，攻击+"+core.values.sword5;
+    if (itemId === 'shield1') return "，防御+"+core.values.shield1;
+    if (itemId === 'shield2') return "，防御+"+core.values.shield2;
+    if (itemId === 'shield3') return "，防御+"+core.values.shield3;
+    if (itemId === 'shield4') return "，防御+"+core.values.shield4;
+    if (itemId === 'shield5') return "，防御+"+core.values.shield5;
     if (itemId === 'bigKey') return "，全钥匙+1";
     if (itemId === 'superPotion') return "，生命值翻倍";
-    if (itemId == 'moneyPocket') return "，金币+"+core.flags.moneyPocket;
+    if (itemId == 'moneyPocket') return "，金币+"+core.values.moneyPocket;
     return "";
 }
 
@@ -180,15 +180,15 @@ items.prototype.useItem = function (itemId) {
     if (itemId == 'poisonWine') core.setFlag('poison', false);
     if (itemId == 'weakWine') {
         core.setFlag('weak', false);
-        core.status.hero.atk += core.flags.weakValue;
-        core.status.hero.def += core.flags.weakValue;
+        core.status.hero.atk += core.values.weakValue;
+        core.status.hero.def += core.values.weakValue;
     }
     if (itemId == 'curseWine') core.setFlag('curse', false);
     if (itemId == 'superWine') {
         core.setFlag('poison', false);
         core.setFlag('weak', false);
-        core.status.hero.atk += core.flags.weakValue;
-        core.status.hero.def += core.flags.weakValue;
+        core.status.hero.atk += core.values.weakValue;
+        core.status.hero.def += core.values.weakValue;
         core.setFlag('curse', false);
     }
     core.updateStatusBar();

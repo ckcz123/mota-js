@@ -100,6 +100,25 @@ data.prototype.init = function() {
 
 
         /****** 道具相关 ******/
+        "redJewel": 3, // 红宝石加攻击的数值
+        "blueJewel": 3, // 蓝宝石加防御的数值
+        "greenJewel": 5, // 绿宝石加魔防的数值
+        "redPotion": 100, // 红血瓶加血数值
+        "bluePotion": 250, // 蓝血瓶加血数值
+        "yellowPotion": 500, // 黄血瓶加血数值
+        "greenPotion": 800, // 绿血瓶加血数值
+        "sword1": 10, // 铁剑加攻数值
+        "shield1": 10, // 铁盾加防数值
+        "sword2": 20, // 银剑加攻数值
+        "shield2": 20, // 银盾加防数值
+        "sword3": 40, // 骑士剑加攻数值
+        "shield3": 40, // 骑士盾加防数值
+        "sword4": 80, // 圣剑加攻数值
+        "shield4": 80, // 圣盾加防数值
+        "sword5": 160, // 神圣剑加攻数值
+        "shield5": 160, // 神圣盾加防数值
+        "moneyPocket": 500, // 金钱袋加金币的数值
+
         "flyNearStair": false, // 是否需要在楼梯边使用传送器
         "bombTrigger": true, // 使用炸弹后是否触发怪物事件（如开门）
         "pickaxeFourDirections": true, // 使用破墙镐是否四个方向都破坏；如果false则只破坏面前的墙壁

@@ -33,8 +33,7 @@ function main() {
     // console.log('加载游戏容器和开始界面dom对象完成 如下');
     // console.log(this.dom);
     this.loadList = [
-        'items', 'icons', 'maps', 'enemys', 'events',
-        'npcs', 'data', 'ui', 'core'
+        'items', 'icons', 'maps', 'enemys', 'events', 'data', 'ui', 'core'
     ];
     // console.log('加载js文件列表加载完成' + this.loadList);
     this.images = [
@@ -76,8 +75,10 @@ function main() {
         'curse': document.getElementById('curse'),
         'hard': document.getElementById("hard")
     }
-    this.floorIds = [
-        "sample0"
+    this.useCompress = false; // 是否使用压缩文件；发布前推荐使用“JS压缩工具”将所有js文件进行压缩，它会将此项改成true。
+    // 只有useCompress是false时才会读取floors目录下的文件。如果要进行剧本的修改请务必将其改成false
+    this.floorIds = [ // 在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序
+        "sample0", "sample1"
     ]
     this.floors = {}
     this.instance = {};
@@ -92,23 +93,11 @@ main.prototype.init = function () {
         var coreData = {};
         for (i = 0; i < main.loadList.length; i++) {
             var name = main.loadList[i];
-            // end with ".min"
-            if (name.indexOf(".min")==name.length-4)
-                name=name.substring(0, name.length-4);
-            if (name === 'core') {
-                continue;
-            }
+            if (name === 'core') continue;
             main[name].init(main.dom);
             coreData[name] = main[name];
         }
         main.loaderFloors(function() {
-            // 处理.min
-            for (var i=0;i<main.floorIds.length;i++) {
-                if (name.indexOf(".min")==name.length-4) {
-                    name = name.substring(0, name.length - 4);
-                    main.floorIds[i] = name.substring(0, name.length - 4);
-                }
-            }
             main.core.init(main.dom, main.statusBar, main.canvas, main.images, main.sounds, main.floorIds, main.floors, coreData);
             main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
         })
@@ -152,9 +141,6 @@ main.prototype.loaderFloors = function (callback) {
 main.prototype.loadMod = function (modName, callback) {
     var script = document.createElement('script');
     var name = modName;
-    // end with ".min"
-    if (name.indexOf(".min")==name.length-4)
-        name=name.substring(0, name.length-4);
     script.src = 'libs/' + modName + '.js?' + this.version;
     main.dom.body.appendChild(script);
     script.onload = function () {
@@ -186,15 +172,17 @@ window.onresize = function () {
 }
 
 main.dom.body.onkeydown = function(e) {
-    if (main.core.isPlaying())
-    	main.core.onkeyDown(e);
+    try {
+        if (main.core.isPlaying())
+            main.core.onkeyDown(e);
+    } catch (ee) {}
 }
 
 main.dom.body.onkeyup = function(e) {
     try {
         if (main.core.isPlaying())
             main.core.onkeyUp(e);
-    } catch (e) {}
+    } catch (ee) {}
 }
 
 main.dom.body.onselectstart = function () {
@@ -220,7 +208,7 @@ main.dom.data.onmousedown = function (e) {
         if (loc == null) return;
         var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
         main.core.ondown(x, y);
-    } catch (e) {}
+    } catch (ee) {}
 }
 
 main.dom.data.onmousemove = function (e) {
@@ -230,7 +218,7 @@ main.dom.data.onmousemove = function (e) {
         if (loc == null) return;
         var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
         main.core.onmove(x, y);
-    }catch (e) {}
+    }catch (ee) {}
 }
 
 main.dom.data.onmouseup = function () {
@@ -256,7 +244,7 @@ main.dom.data.ontouchstart = function (e) {
         var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
         //main.core.onclick(x, y, []);
         main.core.ondown(x, y);
-    }catch (e) {}
+    }catch (ee) {}
 }
 
 main.dom.data.ontouchmove = function (e) {
@@ -266,7 +254,7 @@ main.dom.data.ontouchmove = function (e) {
         if (loc == null) return;
         var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
         main.core.onmove(x, y);
-    }catch (e) {}
+    }catch (ee) {}
 }
 
 main.dom.data.ontouchend = function () {
@@ -281,32 +269,32 @@ main.statusBar.image.book.onclick = function () {
         main.core.openBook(true);
 }
 
-main.statusBar.image.fly.onclick = function (e) {
+main.statusBar.image.fly.onclick = function () {
     if (main.core.isPlaying())
         main.core.useFly(true);
 }
 
-main.statusBar.image.toolbox.onclick = function (e) {
+main.statusBar.image.toolbox.onclick = function () {
     if (main.core.isPlaying())
         main.core.openToolbox(true);
 }
 
 main.statusBar.image.shop.onclick = function () {
     if (main.core.isPlaying())
-        main.core.ui.drawSelectShop(true);
+        main.core.ui.drawQuickShop(true);
 }
 
-main.statusBar.image.save.onclick = function (e) {
+main.statusBar.image.save.onclick = function () {
     if (main.core.isPlaying())
         main.core.save(true);
 }
 
-main.statusBar.image.load.onclick = function (e) {
+main.statusBar.image.load.onclick = function () {
     if (main.core.isPlaying())
         main.core.load(true);
 }
 
-main.statusBar.image.settings.onclick = function (e) {
+main.statusBar.image.settings.onclick = function () {
     if (main.core.isPlaying())
         main.core.ui.drawSettings(true);
 }

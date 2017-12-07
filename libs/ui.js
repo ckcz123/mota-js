@@ -72,6 +72,8 @@ ui.prototype.drawTextBox = function(content) {
         }
     }
 
+    content = core.replaceText(content);
+
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
     var contents = content.split('\n');
 
@@ -128,6 +130,127 @@ ui.prototype.drawTextBox = function(content) {
     }
 
     core.fillText('ui', '<点击任意位置继续>', 270, top+height-13, '#CCCCCC', '13px Verdana');
+}
+
+// 绘制选项事件
+ui.prototype.drawChoices = function(content, choices) {
+
+    var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
+
+    core.clearMap('ui', 0, 0, 416, 416);
+    core.setAlpha('ui', 1);
+    core.setFillStyle('ui', background);
+
+    // Step 1: 计算长宽高
+    var length = choices.length;
+    var left=85, width = 416-2*left; // 宽度
+    // 高度
+    var height = 32*(length+2), bottom = 208+height/2;
+    if (length%2==0) bottom+=16;
+    var choice_top = bottom-height+56;
+
+    var id=null, name=null, image=null, icon=null;
+    if (core.isset(content)) {
+        // 获得name, image, icon
+        if (content.indexOf("\t[")==0) {
+            var index = content.indexOf("]");
+            if (index>=0) {
+                var str=content.substring(2, index);
+                content=content.substring(index+1);
+                var ss=str.split(",");
+                if (ss.length==1) {
+                    // id
+                    id=ss[0];
+                    // monster
+                    if (id!='hero') {
+                        var enemys = core.material.enemys[id];
+                        if (core.isset(enemys)) {
+                            name = core.material.enemys[id].name;
+                            image = core.material.images.enemys;
+                            icon = core.material.icons.enemys[id];
+                        }
+                        else {
+                            name=id;
+                            id='npc';
+                            image=null;
+                            icon=null;
+                        }
+                    }
+                }
+                else {
+                    id='npc';
+                    name=ss[0];
+                    image=core.material.images.npcs;
+                    icon=core.material.icons.npcs[ss[1]];
+                }
+            }
+        }
+        content = core.replaceText(content);
+
+        // content部分高度
+        var cheight=0;
+        // 如果含有标题，标题高度
+        if (name!=null) cheight+=25;
+        cheight += content.split('\n').length*20;
+        height+=cheight;
+    }
+    var top = bottom-height;
+
+    core.fillRect('ui', left, top, width, height, background);
+    core.strokeRect('ui', left - 1, top - 1, width + 1, height + 1, '#FFFFFF', 2);
+
+    // 如果有内容
+    if (core.isset(content)) {
+
+        var content_left = left + 15, content_top = top + 35;
+
+        if (core.isset(id)) {
+            core.canvas.ui.textAlign = "center";
+
+            content_top = top+55;
+            var title_offset = left+width/2;
+            // 动画
+            if (id=='hero' || core.isset(icon)) {
+                core.strokeRect('ui', left + 15 - 1, top + 30 - 1, 34, 34, '#DDDDDD', 2);
+                content_left = left+60;
+                title_offset += 22;
+            }
+
+            if (id == 'hero') {
+                core.fillText('ui', core.status.hero.name, title_offset, top + 27, '#FFD700', 'bold 19px Verdana');
+                core.clearMap('ui', left + 15, top + 30, 32, 32);
+                core.fillRect('ui', left + 15, top + 30, 32, 32, background);
+                var heroIcon = core.material.icons.heros[core.status.hero.id]['down'];
+                core.canvas.ui.drawImage(core.material.images.heros, heroIcon.stop * 32, heroIcon.loc *32, 32, 32, left+15, top+30, 32, 32);
+            }
+            else {
+                core.fillText('ui', name, title_offset, top + 27, '#FFD700', 'bold 19px Verdana');
+                if (core.isset(icon)) {
+                    core.status.boxAnimateObjs = [];
+                    core.status.boxAnimateObjs.push({
+                        'bgx': left + 15, 'bgy': top + 30, 'bgsize': 32,
+                        'image': image, 'x': left + 15, 'y': top + 30, 'icon': icon
+                    });
+                    core.setBoxAnimate();
+                }
+            }
+        }
+
+        core.canvas.ui.textAlign = "left";
+        var contents=content.split("\n");
+        for (var i=0;i<contents.length;i++) {
+            core.fillText('ui', contents[i], content_left, content_top, '#FFFFFF', 'bold 15px Verdana');
+            content_top+=20;
+        }
+    }
+
+    // 选项
+    core.canvas.ui.textAlign = "center";
+    for (var i = 0; i < choices.length; i++) {
+        core.fillText('ui', core.replaceText(choices[i].text), 208, choice_top + 32 * i, "#FFFFFF", "bold 17px Verdana");
+    }
+    return;
+
 }
 
 /**
@@ -187,8 +310,9 @@ ui.prototype.drawSettings = function (need) {
     core.canvas.ui.textAlign = "center";
     core.fillText('ui', "音乐： " + (core.musicStatus.soundStatus ? "[ON]" : "[OFF]"), 208, top + 56, "#FFFFFF", "bold 17px Verdana");
     core.fillText('ui', "快捷商店", 208, top + 88, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "降低难度", 208, top + 120, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "同步存档", 208, top + 152, "#FFFFFF", "bold 17px Verdana");
+    //core.fillText('ui', "降低难度", 208, top + 120, "#FFFFFF", "bold 17px Verdana");
+    core.fillText('ui', "同步存档", 208, top + 120, "#FFFFFF", "bold 17px Verdana");
+    core.fillText('ui', "清空存档", 208, top + 152, "#FFFFFF", "bold 17px Verdana");
     core.fillText('ui', "重新开始", 208, top + 184, "#FFFFFF", "bold 17px Verdana");
     core.fillText('ui', "关于本塔", 208, top + 216, "#FFFFFF", "bold 17px Verdana");
     core.fillText('ui', "返回游戏", 208, top + 248, "#FFFFFF", "bold 17px Verdana");
@@ -199,7 +323,7 @@ ui.prototype.drawSettings = function (need) {
  * 绘制“选择商店”窗口
  * @param need
  */
-ui.prototype.drawSelectShop = function (need) {
+ui.prototype.drawQuickShop = function (need) {
 
     if (core.isset(need) && !core.checkStatus('selectShop', need))
         return;
@@ -220,7 +344,7 @@ ui.prototype.drawSelectShop = function (need) {
 
     core.canvas.ui.textAlign = "center";
     for (var i = 0; i < keys.length; i++) {
-        core.fillText('ui', shopList[keys[i]].name, 208, top + 56 + 32 * i, "#FFFFFF", "bold 17px Verdana");
+        core.fillText('ui', shopList[keys[i]].textInList, 208, top + 56 + 32 * i, "#FFFFFF", "bold 17px Verdana");
     }
 
     core.fillText('ui', "返回游戏", 208, top + bottom - 40);
@@ -672,7 +796,7 @@ ui.prototype.drawThumbnail = function(canvas, blocks, x, y, size, heroLoc, heroI
     }
     for (var b in blocks) {
         var block = blocks[b];
-        if (core.isset(block.event)) {
+        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
             var i = block.x, j = block.y;
             var blockIcon = core.material.icons[block.event.cls][block.event.id];
             var blockImage = core.material.images[block.event.cls];

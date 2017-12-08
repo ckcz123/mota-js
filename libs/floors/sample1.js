@@ -63,7 +63,7 @@ main.floors.sample1 = {
             // 备注：这里也可以下面的这种写法：
             // {"type": "changePos", "loc": [1,11]}
             // 使用这种写法将不会有“楼层切换动画”，而是直接让勇士到达本层的loc位置。
-            {"type": "trigger", "floodId": "sample1", "loc": [2,11]} // 立刻直接触发另一个事件（也就是下面的小偷事件）；当前事件会被立刻结束
+            {"type": "trigger", "loc": [2,11]} // 立刻直接触发另一个事件（也就是下面的小偷事件）；当前事件会被立刻结束
         ],
         "2,11": [ // 小偷事件
             "\t[杰克,thief]喂！醒醒！快醒醒！",
@@ -268,7 +268,8 @@ main.floors.sample1 = {
         ]
     },
     "changeFloor": { // 楼层转换事件；该事件不能和上面的events有冲突（同位置点），否则会被覆盖
-        "4,12": {"floorId": "sample0", "loc": [6,0]} // 由于楼下有多个上楼梯，所以需指定位置而不是简单地写"stair": "upFloor"
+        "4,12": {"floorId": "sample0", "loc": [6,0]}, // 由于楼下有多个上楼梯，所以需指定位置而不是简单地写"stair": "upFloor"
+        "5,5": {"floorId": "sample2", "stair": "downFloor"}
     },
     "afterBattle": { // 战斗后可能触发的事件列表
         "9,6": [ // 初级卫兵1

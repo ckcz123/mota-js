@@ -23,9 +23,11 @@ events.prototype.init = function () {
             var heroLoc = null;
             if (core.isset(data.event.data.loc)) {
                 heroLoc = {'x': data.event.data.loc[0], 'y': data.event.data.loc[1]};
+                if (core.isset(data.event.data.direction))
+                    heroLoc.direction = data.event.data.direction;
             }
             core.changeFloor(data.event.data.floorId, data.event.data.stair,
-                heroLoc, callback);
+                heroLoc, data.event.data.time, callback);
         },
         'openShop': function (data, core, callback) {
             core.ui.drawShop(data.event.shopid);
@@ -233,7 +235,9 @@ events.prototype.doAction = function() {
             })
             break;
         case "changeFloor": // 楼层转换
-            core.changeFloor(data.floorId||core.status.floorId, null, {"x": data.loc[0], "y": data.loc[1]}, function() {
+            var heroLoc = {"x": data.loc[0], "y": data.loc[1]};
+            if (core.isset(data.direction)) heroLoc.direction=data.direction;
+            core.changeFloor(data.floorId||core.status.floorId, null, heroLoc, data.time, function() {
                 core.lockControl();
                 core.events.doAction();
             });
@@ -270,8 +274,8 @@ events.prototype.doAction = function() {
             })
             break;
         case "trigger": // 触发另一个事件；当前事件会被立刻结束。需要另一个地点的事件是有效的
-            var toX=data.loc[0], toY=data.loc[1], toId=data.floorId;
-            var block=core.getBlock(toX, toY, toId);
+            var toX=data.loc[0], toY=data.loc[1];
+            var block=core.getBlock(toX, toY);
             if (block!=null) {
                 block = block.block;
                 if (core.isset(block.event) && block.event.trigger=='action') {

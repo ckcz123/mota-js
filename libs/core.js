@@ -324,7 +324,7 @@ core.prototype.startGame = function (hard, callback) {
 
     core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, core.initStatus.maps);
 
-    core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, function() {
+    core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
         core.setHeroMoveTriggerInterval();
         if (core.isset(callback)) callback();
     });
@@ -1396,7 +1396,8 @@ core.prototype.battle = function (id, x, y, force, callback) {
 }
 
 // 楼层切换
-core.prototype.changeFloor = function (floorId, stair, heroLoc, callback) {
+core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) {
+    time = time || 50;
     core.lockControl();
     core.stopHero();
     core.stopAutomaticRoute();
@@ -1423,35 +1424,37 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, callback) {
     window.setTimeout(function () {
         // console.log('地图切换到' + floorId);
         core.playSound('floor', 'mp3');
-        core.mapChangeAnimate('show', function () {
+        core.mapChangeAnimate('show', time/2, function () {
             core.statusBar.floor.innerHTML = core.status.maps[floorId].name;
             core.updateStatusBar();
             core.drawMap(floorId, function () {
-                core.hide(core.dom.floorMsgGroup, 10, function () {
-                    core.unLockControl();
-                    core.events.afterChangeFloor(floorId);
-                    if (core.isset(callback)) callback();
-                });
-                if (core.isset(heroLoc.direction))
-                    core.setHeroLoc('direction', heroLoc.direction);
-                core.setHeroLoc('x', heroLoc.x);
-                core.setHeroLoc('y', heroLoc.y);
-                core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
-                core.updateFg();
+                setTimeout(function() {
+                    core.mapChangeAnimate('hide', time/4, function () {
+                        core.unLockControl();
+                        core.events.afterChangeFloor(floorId);
+                        if (core.isset(callback)) callback();
+                    });
+                    if (core.isset(heroLoc.direction))
+                        core.setHeroLoc('direction', heroLoc.direction);
+                    core.setHeroLoc('x', heroLoc.x);
+                    core.setHeroLoc('y', heroLoc.y);
+                    core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+                    core.updateFg();
+                }, 15)
             });
         });
     }, 50);
 }
 
 // 地图切换
-core.prototype.mapChangeAnimate = function (mode, callback) {
+core.prototype.mapChangeAnimate = function (mode, time, callback) {
     if (mode == 'show') {
-        core.show(core.dom.floorMsgGroup, 15, function () {
+        core.show(core.dom.floorMsgGroup, time, function () {
             callback();
         });
     }
     else {
-        core.hide(core.dom.floorMsgGroup, 20, function () {
+        core.hide(core.dom.floorMsgGroup, time, function () {
             callback();
         });
     }
@@ -2016,8 +2019,8 @@ core.prototype.updateFg = function () {
     var hero_hp = core.status.hero.hp;
     for (var b = 0; b < mapBlocks.length; b++) {
         var x = mapBlocks[b].x, y = mapBlocks[b].y;
-        if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls == 'enemys'
-                && !(core.isset(mapBlocks[b].enable && !mapBlocks[b].enable))) {
+        if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls == 'enemys' && mapBlocks[b].event.trigger=='battle'
+                && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable)) {
             var id = mapBlocks[b].event.id;
 
             var damage = core.enemys.getDamage(id);
@@ -2050,6 +2053,7 @@ core.prototype.updateFg = function () {
 core.prototype.itemCount = function (itemId) {
     if (!core.isset(itemId) || !core.isset(core.material.items[itemId])) return 0;
     var itemCls = core.material.items[itemId].cls;
+    if (itemCls=="items") return 0;
     return core.isset(core.status.hero.items[itemCls][itemId]) ? core.status.hero.items[itemCls][itemId] : 0;
 }
 
@@ -2485,7 +2489,7 @@ core.prototype.loadData = function (data, callback) {
 
     core.events.afterLoadData(data);
 
-    core.changeFloor(data.floorId, null, data.hero.loc, function() {
+    core.changeFloor(data.floorId, null, data.hero.loc, null, function() {
         core.setHeroMoveTriggerInterval();
         if (core.isset(callback)) callback();
     });

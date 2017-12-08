@@ -173,7 +173,7 @@ items.prototype.useItem = function (itemId) {
     }
     if (itemId == 'upFly' || itemId == 'downFly') {
         // 上楼器/下楼器
-        core.changeFloor(core.status.event.data.id, null, {'direction': core.status.hero.loc.direction, 'x': core.status.event.data.x, 'y': core.status.event.data.y}, function (){
+        core.changeFloor(core.status.event.data.id, null, {'direction': core.status.hero.loc.direction, 'x': core.status.event.data.x, 'y': core.status.event.data.y}, null, function (){
             core.drawTip(core.material.items[itemId].name + "使用成功");
         });
     }

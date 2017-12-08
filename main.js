@@ -78,7 +78,7 @@ function main() {
     this.useCompress = false; // 是否使用压缩文件；发布前推荐使用“JS压缩工具”将所有js文件进行压缩，它会将此项改成true。
     // 只有useCompress是false时才会读取floors目录下的文件。如果要进行剧本的修改请务必将其改成false
     this.floorIds = [ // 在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序
-        "sample0", "sample1"
+        "sample0", "sample1", "sample2"
     ]
     this.floors = {}
     this.instance = {};

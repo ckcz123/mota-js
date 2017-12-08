@@ -247,6 +247,9 @@ maps.prototype.addEvent = function (block, x, y, event) {
         if (core.isset(event.trigger)) block.event.trigger=event.trigger;
         else block.event.trigger='action';
     }
+    else if (core.isset(event.trigger) && event.trigger!='checkBlock') {
+        block.event.trigger=event.trigger;
+    }
     // 覆盖其他属性
     for (var key in event) {
         if (key!="enable" && key!="trigger") {

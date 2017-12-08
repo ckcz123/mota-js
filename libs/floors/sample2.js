@@ -322,7 +322,6 @@ main.floors.sample2 = {
         },
         "6,5": { // 黄宝石
             "enable": false
-            // 获得后将触发afterGetItem事件
         }
 
     },

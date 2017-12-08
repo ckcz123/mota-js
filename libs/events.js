@@ -320,9 +320,9 @@ events.prototype.doAction = function() {
             break;
         case "if": // 条件判断
             if (core.calValue(data.condition))
-                core.events.insertAction(data.true)
+                core.events.insertAction(data["true"])
             else
-                core.events.insertAction(data.false)
+                core.events.insertAction(data["false"])
             this.doAction();
             break;
         case "choices": // 提供选项
@@ -335,8 +335,8 @@ events.prototype.doAction = function() {
             core.events.lose(data.reason);
             break;
         case "function":
-            if (core.isset(data.function))
-                data.function();
+            if (core.isset(data["function"]))
+                data["function"]();
             this.doAction();
             break;
         case "update":

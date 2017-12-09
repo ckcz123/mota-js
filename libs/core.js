@@ -377,13 +377,13 @@ core.prototype.pressKey = function (keyCode) {
 }
 
 core.prototype.keyDown = function(keyCode) {
-	if(!core.status.played) {
-		return;
-	}
-	if(core.status.automaticRouting || core.status.automaticRouted) {
-		core.stopAutomaticRoute();
-	}
-	if (core.status.lockControl) {
+    if(!core.status.played) {
+        return;
+    }
+    if(core.status.automaticRouting || core.status.automaticRouted) {
+        core.stopAutomaticRoute();
+    }
+    if (core.status.lockControl) {
         if (core.status.event.id == 'book') {
             if (keyCode==37) core.ui.drawEnemyBook(core.status.event.data - 1);
             else if (keyCode==39) core.ui.drawEnemyBook(core.status.event.data + 1);
@@ -399,68 +399,68 @@ core.prototype.keyDown = function(keyCode) {
             else if (keyCode==39) core.ui.drawSLPanel(core.status.event.data+1);
             return;
         }
-	    return;
+        return;
     }
-	switch(keyCode) {
-		case 37:
-			core.moveHero('left');
-		break;
-		case 38:
-			core.moveHero('up');
-		break;
-		case 39:
-			core.moveHero('right');
-		break;
-		case 40:
-			core.moveHero('down');
-		break;
-	}
+    switch(keyCode) {
+        case 37:
+            core.moveHero('left');
+        break;
+        case 38:
+            core.moveHero('up');
+        break;
+        case 39:
+            core.moveHero('right');
+        break;
+        case 40:
+            core.moveHero('down');
+        break;
+    }
 }
 
 core.prototype.keyUp = function(keyCode) {
-	if(!core.status.played) {
-		return;
-	}
+    if(!core.status.played) {
+    return;
+}
 
-	if (core.status.lockControl) {
-        if (core.status.event.id == 'book' && (keyCode==27 || keyCode==88))
-            core.ui.closePanel(true);
-	    if (core.status.event.id == 'fly' && (keyCode==71 || keyCode==27))
-	        core.ui.closePanel();
-	    if (core.status.event.id == 'fly' && keyCode==13) {
-            var index=core.status.hero.flyRange.indexOf(core.status.floorId);
-            var stair=core.status.event.data<index?"upFloor":"downFloor";
-            var floorId=core.status.event.data;
-            core.ui.closePanel();
-            core.changeFloor(core.status.hero.flyRange[floorId], stair);
-        }
-	    if (core.status.event.id == 'save' && (keyCode==83 || keyCode==27))
-	        core.ui.closePanel();
-        if (core.status.event.id == 'load' && (keyCode==76 || keyCode==27))
-            core.ui.closePanel();
-	    if ((core.status.event.id == 'settings' || core.status.event.id == 'selectShop') && keyCode==27)
-	        core.ui.closePanel();
-	    if (core.status.event.id == 'selectShop' && keyCode==75)
-	        core.ui.closePanel();
-	    if (core.status.event.id == 'shop' && keyCode==27) {
-            core.status.boxAnimateObjs = [];
-            core.setBoxAnimate();
-            if (core.status.event.data.fromList)
-                core.ui.drawQuickShop();
-            else core.ui.closePanel();
-        }
-        if (core.status.event.id == 'toolbox' && (keyCode==84 || keyCode==27))
-            core.ui.closePanel();
-        if (core.status.event.id == 'about' && (keyCode==13 || keyCode==32))
-            core.ui.closePanel();
-        if (core.status.event.id == 'text' && (keyCode==13 || keyCode==32))
-            core.drawText();
-        if (core.status.event.id == 'action' && core.isset(core.status.event.data.current)
-            && core.status.event.data.type=='text'  && (keyCode==13 || keyCode==32))
-            core.events.doAction();
-
-	    return;
+if (core.status.lockControl) {
+    if (core.status.event.id == 'book' && (keyCode==27 || keyCode==88))
+        core.ui.closePanel(true);
+    if (core.status.event.id == 'fly' && (keyCode==71 || keyCode==27))
+        core.ui.closePanel();
+    if (core.status.event.id == 'fly' && keyCode==13) {
+        var index=core.status.hero.flyRange.indexOf(core.status.floorId);
+        var stair=core.status.event.data<index?"upFloor":"downFloor";
+        var floorId=core.status.event.data;
+        core.ui.closePanel();
+        core.changeFloor(core.status.hero.flyRange[floorId], stair);
     }
+    if (core.status.event.id == 'save' && (keyCode==83 || keyCode==27))
+        core.ui.closePanel();
+    if (core.status.event.id == 'load' && (keyCode==76 || keyCode==27))
+        core.ui.closePanel();
+    if ((core.status.event.id == 'settings' || core.status.event.id == 'selectShop') && keyCode==27)
+        core.ui.closePanel();
+    if (core.status.event.id == 'selectShop' && keyCode==75)
+        core.ui.closePanel();
+    if (core.status.event.id == 'shop' && keyCode==27) {
+        core.status.boxAnimateObjs = [];
+        core.setBoxAnimate();
+        if (core.status.event.data.fromList)
+            core.ui.drawQuickShop();
+        else core.ui.closePanel();
+    }
+    if (core.status.event.id == 'toolbox' && (keyCode==84 || keyCode==27))
+        core.ui.closePanel();
+    if (core.status.event.id == 'about' && (keyCode==13 || keyCode==32))
+        core.ui.closePanel();
+    if (core.status.event.id == 'text' && (keyCode==13 || keyCode==32))
+        core.drawText();
+    if (core.status.event.id == 'action' && core.isset(core.status.event.data.current)
+        && core.status.event.data.type=='text'  && (keyCode==13 || keyCode==32))
+        core.events.doAction();
+
+    return;
+}
 
     switch (keyCode) {
         case 27: // ESC

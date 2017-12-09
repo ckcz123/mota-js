@@ -351,76 +351,6 @@ ui.prototype.drawQuickShop = function (need) {
 
 }
 
-/**
- * 绘制商店
- * @param id
- */
-ui.prototype.drawShop = function (id) {
-    var shop = core.status.shops[id];
-    // 正在移动中...
-
-    if (!core.status.heroStop) {
-        setTimeout(function () {
-            core.ui.drawShop(id);
-        }, 30);
-        return;
-    }
-
-    core.status.event.data = shop;
-    core.status.event.id = 'shop';
-    core.lockControl();
-    shop.visited = true;
-
-    var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
-
-    var times = shop.times, need = eval(shop.need);
-
-    clearInterval(core.interval.tipAnimate);
-    core.clearMap('data', 0, 0, 416, 416);
-    core.setOpacity('data', 1);
-
-    core.clearMap('ui', 0, 0, 416, 416);
-    core.setAlpha('ui', 1);
-    core.setFillStyle('ui', background);
-
-    var left = 97, top = 64, right = 416 - 2 * left, bottom = 416 - 2 * top;
-    core.fillRect('ui', left, top, right, bottom, background);
-    core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
-
-    // 名称
-    core.canvas.ui.textAlign = "center";
-    core.fillText('ui', shop.title, left + 135, top + 34, '#FFFFFF', 'bold 19px Verdana');
-
-    // 动画
-    core.strokeRect('ui', left + 15 - 1, top + 30 - 1, 34, 34, '#DDDDDD', 2);
-    core.status.boxAnimateObjs = [];
-    core.status.boxAnimateObjs.push({
-        'bgx': left + 15, 'bgy': top + 30, 'bgsize': 32,
-        'image': core.material.images.npcs,
-        'x': left + 15, 'y': top + 30, 'icon': core.material.icons.npcs[shop.icon]
-    });
-    core.setBoxAnimate();
-
-    // 对话
-    core.canvas.ui.textAlign = "left";
-    if (need<0) need="若干";
-    var use = shop.use=='experience'?"经验":"金币";
-    core.fillText('ui', "勇敢的武士啊，给我" + need, left + 60, top + 65, '#FFFFFF', 'bold 14px Verdana');
-    core.fillText('ui', use + "你就可以：", left + 60, top + 83);
-
-    // 选项
-    core.canvas.ui.textAlign = "center";
-    for (var i = 0; i < shop.choices.length; i++) {
-        var choice = shop.choices[i];
-        var text = choice.text;
-        if (core.isset(choice.need))
-            text += "（"+eval(choice.need)+use+"）"
-        core.fillText('ui', text, 208, top + 120 + 32 * i, "#FFFFFF", "bold 17px Verdana");
-    }
-    core.fillText('ui', "退出商店", 208, top + 248);
-
-}
-
 
 /**
  * 绘制“请等候...”
@@ -835,9 +765,11 @@ ui.prototype.drawAbout = function() {
 
     // 名称
     core.canvas.ui.textAlign = "left";
-    core.fillText('ui', "异空间", text_start, top+35, "#FFD700", "bold 22px Verdana");
-    core.fillText('ui', "HTML5复刻版", text_start+75, top+37, "#DDDDDD", "bold 15px Verdana");
+    core.fillText('ui', "HTML5 魔塔样板", text_start, top+35, "#FFD700", "bold 22px Verdana");
     core.fillText('ui', "作者： 艾之葵", text_start, top + 80, "#FFFFFF", "bold 17px Verdana");
+    core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112);
+    // TODO: 写自己的“关于”页面
+    /*
     core.fillText('ui', "原作： ss433_2", text_start, top + 112, "#FFFFFF", "bold 17px Verdana");
     core.fillText('ui', "制作工具： WebStorm", text_start, top + 144, "#FFFFFF", "bold 17px Verdana");
     core.fillText('ui', "测试平台： Chrome/微信/iOS", text_start, top + 176, "#FFFFFF", "bold 17px Verdana");
@@ -846,4 +778,5 @@ ui.prototype.drawAbout = function() {
     core.fillText('ui', 'iEcho', text_start+len, top+240);
     core.fillText('ui', '打Dota的喵', text_start+len, top+272);
     core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+304);
+    */
 }

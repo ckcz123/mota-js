@@ -630,7 +630,7 @@ core.prototype.onclick = function (x, y, stepPostfix) {
 
     // 快捷商店
     if (core.status.event.id == 'selectShop') {
-        core.events.clickSelectShop(x,y);
+        core.events.clickQuickShop(x,y);
         return;
     }
 
@@ -679,124 +679,10 @@ core.prototype.onclick = function (x, y, stepPostfix) {
     if (core.status.event.id == 'syncSave') {
         if (x>=4 && x<=8) {
             if (y==5) {
-                core.ui.drawConfirmBox("你确定要将本地存档同步到服务器吗？", function(){
-                    // console.log("同步存档...");
-                    core.ui.drawWaiting("正在同步，请稍后...");
-
-                    var formData = new FormData();
-                    formData.append('type', 'save');
-                    formData.append('name', core.firstData.name);
-                    var saves = [];
-                    for (var i=1;i<=180;i++) {
-                        var data = core.getLocalStorage("save"+i, null);
-                        if (core.isset(data)) {
-                            saves.push(data);
-                        }
-                    }
-                    var save_text = JSON.stringify(saves);
-                    formData.append('data', save_text);
-
-                    // send
-                    var xhr = new XMLHttpRequest();
-                    xhr.open("POST", "../sync.php");
-                    xhr.timeout = 1000;
-                    xhr.onload = function(e) {
-                        if (xhr.status==200) {
-                            // console.log("同步成功。");
-                            var response = JSON.parse(xhr.response);
-                            if (response.code<0) {
-                                core.drawText("出错啦！\n无法同步存档到服务器。");
-                            }
-                            else {
-                                core.drawText("同步成功！\n\n您的存档编号： "+response.code+"\n您的存档密码： "+response.msg+"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。")
-                            }
-                        }
-                        else {
-                            core.drawText("出错啦！\n无法同步存档到服务器。");
-                        }
-                    };
-                    xhr.ontimeout = function(e) {
-                        console.log(e);
-                        core.drawText("出错啦！\n无法同步存档到服务器。");
-                    }
-                    xhr.onerror = function(e) {
-                        console.log(e);
-                        core.drawText("出错啦！\n无法同步存档到服务器。");
-                    }
-                    xhr.send(formData);
-                }, function() {
-                    core.ui.drawSyncSave();
-                })
+                core.syncSave("save");
             }
             if (y==6) {
-                core.ui.drawConfirmBox("你确定要从服务器加载存档吗？\n该操作将覆盖所有本地存档且不可逆！", function(){
-                    var id = prompt("请输入存档编号：");
-                    if (id==null || id=="") {
-                        core.ui.drawSyncSave(); return;
-                    }
-                    var password = prompt("请输入存档密码：");
-                    if (password==null || password=="") {
-                        core.ui.drawSyncSave(); return;
-                    }
-                    core.ui.drawWaiting("正在同步，请稍后...");
-
-                    var formData = new FormData();
-                    formData.append('type', 'load');
-                    formData.append('name', core.firstData.name);
-                    formData.append('id', id);
-                    formData.append('password', password);
-
-                    // send
-                    var xhr = new XMLHttpRequest();
-                    xhr.open("POST", "../sync.php");
-                    xhr.timeout = 1000;
-                    xhr.onload = function(e) {
-                        if (xhr.status==200) {
-                            // console.log("同步成功。");
-                            var response = JSON.parse(xhr.response);
-                            switch (response.code) {
-                                case 0:
-                                    // 成功
-                                    var data=JSON.parse(response.msg);
-                                    // console.log(data);
-                                    for (var i=1;i<=180;i++) {
-                                        if (i<=data.length) {
-                                            core.setLocalStorage("save"+i, data[i-1]);
-                                        }
-                                        else {
-                                            core.removeLocalStorage("save"+i);
-                                        }
-                                    }
-                                    core.drawText("同步成功！\n你的本地所有存档均已被覆盖。");
-                                    break;
-                                case -1:
-                                    core.drawText("出错啦！\n存档编号"+id+"不存在！");
-                                    break;
-                                case -2:
-                                    core.drawText("出错啦！\n存档密码错误！");
-                                    break;
-                                default:
-                                    core.drawText("出错啦！\n无法从服务器同步存档。");
-                                    break;
-                            }
-
-                        }
-                        else {
-                            core.drawText("出错啦！\n无法从服务器同步存档。");
-                        }
-                    };
-                    xhr.ontimeout = function(e) {
-                        console.log(e);
-                        core.drawText("出错啦！\n无法从服务器同步存档。");
-                    }
-                    xhr.onerror = function(e) {
-                        console.log(e);
-                        core.drawText("出错啦！\n无法从服务器同步存档。");
-                    }
-                    xhr.send(formData);
-                }, function() {
-                    core.ui.drawSyncSave();
-                })
+                core.syncSave("load");
             }
         }
         if (x>=5 && x<=7 && y==7) {
@@ -1318,7 +1204,7 @@ core.prototype.openDoor = function (id, x, y, needKey, callback) {
     var speed=30;
     if (needKey) {
         var key = id.replace("Door", "Key");
-        if (!core.rmItem(key)) {
+        if (!core.removeItem(key)) {
             if (key != "specialKey")
                 core.drawTip("你没有" + core.material.items[key].name);
             else core.drawTip("无法开启此门");
@@ -1395,9 +1281,36 @@ core.prototype.battle = function (id, x, y, force, callback) {
     core.events.afterBattle(id,x,y,callback);
 }
 
+core.prototype.trigger = function (x, y) {
+    var mapBlocks = core.status.thisMap.blocks;
+    var noPass;
+    for (var b = 0; b < mapBlocks.length; b++) {
+        if (mapBlocks[b].x == x && mapBlocks[b].y == y && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable)) { // 启用事件
+            noPass = mapBlocks[b].event && mapBlocks[b].event.noPass;
+            if (noPass) {
+                core.clearAutomaticRouteNode(x, y);
+            }
+            if (core.isset(mapBlocks[b].event) && core.isset(mapBlocks[b].event.trigger)) {
+                var trigger = mapBlocks[b].event.trigger;
+                // 转换楼层能否穿透
+                if (trigger=='changeFloor' && (core.status.autoHeroMove || core.status.autoStep<core.status.autoStepRoutes.length)) {
+                    var canCross = core.flags.portalWithoutTrigger;
+                    if (core.isset(mapBlocks[b].event.data) && core.isset(mapBlocks[b].event.data.portalWithoutTrigger))
+                        canCross=mapBlocks[b].event.data.portalWithoutTrigger;
+                    if (canCross) continue;
+                }
+                core.material.events[trigger](mapBlocks[b], core, function (data) {
+
+                });
+            }
+        }
+    }
+}
+
 // 楼层切换
 core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) {
-    time = time || 50;
+    time = time || 800;
+    time /= 20;
     core.lockControl();
     core.stopHero();
     core.stopAutomaticRoute();
@@ -1519,15 +1432,6 @@ core.prototype.loadCanvas = function (map) {
     core.canvas[map].restore();
 }
 
-core.prototype.setAlpha = function (map, alpha) {
-    if (map == 'all') {
-        for (var m in core.canvas) {
-            core.canvas[m].globalAlpha = alpha;
-        }
-    }
-    core.canvas[map].globalAlpha = alpha;
-}
-
 core.prototype.setStrokeStyle = function (map, style) {
     if (map == 'all') {
         for (var m in core.canvas) {
@@ -1580,7 +1484,7 @@ core.prototype.drawMap = function (mapName, callback) {
     core.status.thisMap = mapData;
     var blockIcon, blockImage;
     core.clearMap('all');
-    core.rmGlobalAnimate(null, null, true);
+    core.removeGlobalAnimate(null, null, true);
     for (var x = 0; x < 13; x++) {
         for (var y = 0; y < 13; y++) {
             blockIcon = core.material.icons.terrains.ground;
@@ -1606,6 +1510,10 @@ core.prototype.noPassExists = function (x, y, floorId) {
     var block = core.getBlock(x,y,floorId);
     if (block==null) return false;
     return core.isset(block.block.event.noPass) && block.block.event.noPass;
+}
+
+core.prototype.noPass = function (x, y) {
+    return x<0 || x>12 || y<0 || y>12 || core.noPassExists(x,y);
 }
 
 core.prototype.npcExists = function (x, y, floorId) {
@@ -1650,32 +1558,7 @@ core.prototype.getBlock = function (x, y, floorId, needEnable) {
     return null;
 }
 
-core.prototype.removeBlockById = function (index, floorId) {
-
-    var blocks = core.status.maps[floorId].blocks;
-    var x=blocks[index].x, y=blocks[index].y;
-
-    // 检查该点是否是checkBlock
-    if (core.floors[floorId].checkBlock.indexOf(x+","+y)>=0) {
-        blocks[index] = {'x': x, 'y': y, 'event': {'cls': 'terrains', 'id': 'ground', 'noPass': false, 'trigger': 'checkBlock'}};
-        return;
-    }
-
-    // 检查该点是否存在事件
-    var event = core.floors[floorId].events[x+","+y];
-    if (!core.isset(event))
-        event = core.floors[floorId].changeFloor[x+","+y];
-
-    // 不存在事件，直接删除
-    if (!core.isset(event)) {
-        blocks.splice(index,1);
-        return;
-    }
-
-    blocks[index].enable = false;
-}
-
-core.prototype.moveBlock = function(x,y,steps,time,disappear,callback) {
+core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
     time = time || 500;
 
     clearInterval(core.interval.tipAnimate);
@@ -1732,7 +1615,7 @@ core.prototype.moveBlock = function(x,y,steps,time,disappear,callback) {
     var animate=window.setInterval(function() {
         // 已经移动完毕，消失
         if (moveSteps.length==0) {
-            if (disappear) opacityVal=0;
+            if (immediateHide) opacityVal=0;
             else opacityVal -= 0.06;
             core.setOpacity('data', opacityVal);
             core.clearMap('data', nowX, nowY, 32, 32);
@@ -1834,7 +1717,7 @@ core.prototype.removeBlock = function (x, y, floorId) {
 
     // 删除动画，清除地图
     if (floorId==core.status.floorId) {
-        core.rmGlobalAnimate(x, y);
+        core.removeGlobalAnimate(x, y);
         core.canvas.event.clearRect(x * 32, y * 32, 32, 32);
     }
 
@@ -1843,40 +1726,36 @@ core.prototype.removeBlock = function (x, y, floorId) {
     core.updateFg();
 }
 
+
+core.prototype.removeBlockById = function (index, floorId) {
+
+    var blocks = core.status.maps[floorId].blocks;
+    var x=blocks[index].x, y=blocks[index].y;
+
+    // 检查该点是否是checkBlock
+    if (core.floors[floorId].checkBlock.indexOf(x+","+y)>=0) {
+        blocks[index] = {'x': x, 'y': y, 'event': {'cls': 'terrains', 'id': 'ground', 'noPass': false, 'trigger': 'checkBlock'}};
+        return;
+    }
+
+    // 检查该点是否存在事件
+    var event = core.floors[floorId].events[x+","+y];
+    if (!core.isset(event))
+        event = core.floors[floorId].changeFloor[x+","+y];
+
+    // 不存在事件，直接删除
+    if (!core.isset(event)) {
+        blocks.splice(index,1);
+        return;
+    }
+
+    blocks[index].enable = false;
+}
+
 core.prototype.removeBlockByIds = function (floorId, ids) {
     ids.sort(function (a,b) {return b-a}).forEach(function (id) {
         core.removeBlockById(id, floorId);
     });
-}
-
-core.prototype.noPass = function (x, y) {
-    return x<0 || x>12 || y<0 || y>12 || core.noPassExists(x,y);
-}
-
-core.prototype.trigger = function (x, y) {
-    var mapBlocks = core.status.thisMap.blocks;
-    var noPass;
-    for (var b = 0; b < mapBlocks.length; b++) {
-        if (mapBlocks[b].x == x && mapBlocks[b].y == y && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable)) { // 启用事件
-            noPass = mapBlocks[b].event && mapBlocks[b].event.noPass;
-            if (noPass) {
-                core.clearAutomaticRouteNode(x, y);
-            }
-            if (core.isset(mapBlocks[b].event) && core.isset(mapBlocks[b].event.trigger)) {
-                var trigger = mapBlocks[b].event.trigger;
-                // 转换楼层能否穿透
-                if (trigger=='changeFloor' && (core.status.autoHeroMove || core.status.autoStep<core.status.autoStepRoutes.length)) {
-                    var canCross = core.flags.portalWithoutTrigger;
-                    if (core.isset(mapBlocks[b].event.data) && core.isset(mapBlocks[b].event.data.portalWithoutTrigger))
-                        canCross=mapBlocks[b].event.data.portalWithoutTrigger;
-                    if (canCross) continue;
-                }
-                core.material.events[trigger](mapBlocks[b], core, function (data) {
-
-                });
-            }
-        }
-    }
 }
 
 core.prototype.addGlobalAnimate = function (animateMore, x, y, loc, image) {
@@ -1900,7 +1779,7 @@ core.prototype.addGlobalAnimate = function (animateMore, x, y, loc, image) {
     }
 }
 
-core.prototype.rmGlobalAnimate = function (x, y, all) {
+core.prototype.removeGlobalAnimate = function (x, y, all) {
     if (all == true) {
         core.status.twoAnimateObjs = [];
         core.status.fourAnimateObjs = [];
@@ -1982,6 +1861,7 @@ core.prototype.setHeroLoc = function (itemName, itemVal) {
 }
 
 core.prototype.getHeroLoc = function (itemName) {
+    if (!core.isset(itemName)) return core.status.hero.loc;
     return core.status.hero.loc[itemName];
 }
 
@@ -2070,7 +1950,7 @@ core.prototype.setItem = function (itemId, itemNum) {
     core.status.hero.items[itemCls][itemId] = itemNum;
 }
 
-core.prototype.rmItem = function (itemId) {
+core.prototype.removeItem = function (itemId) {
     if (!core.hasItem(itemId)) return false;
     var itemCls = core.material.items[itemId].cls;
     core.status.hero.items[itemCls][itemId]--;
@@ -2315,15 +2195,12 @@ core.prototype.setTwoDigits = function (x) {
     return parseInt(x)<10?"0"+x:x;
 }
 
-core.prototype.lose = function() {
-    core.stopAutomaticRoute();
-    if (!core.status.heroStop) {
-        setTimeout(function() {
-            core.lose();
-        }, 30);
-        return;
-    }
-    core.events.lose();
+core.prototype.win = function(reason) {
+    core.events.win(reason);
+}
+
+core.prototype.lose = function(reason) {
+    core.events.lose(reason);
 }
 
 // 作弊
@@ -2455,6 +2332,131 @@ core.prototype.doSL = function (id, type) {
     }
 }
 
+core.prototype.syncSave = function(type) {
+    if (type=='save') {
+        core.ui.drawConfirmBox("你确定要将本地存档同步到服务器吗？", function(){
+            // console.log("同步存档...");
+            core.ui.drawWaiting("正在同步，请稍后...");
+
+            var formData = new FormData();
+            formData.append('type', 'save');
+            formData.append('name', core.firstData.name);
+            var saves = [];
+            for (var i=1;i<=180;i++) {
+                var data = core.getLocalStorage("save"+i, null);
+                if (core.isset(data)) {
+                    saves.push(data);
+                }
+            }
+            var save_text = JSON.stringify(saves);
+            formData.append('data', save_text);
+
+            // send
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "../sync.php");
+            xhr.timeout = 1000;
+            xhr.onload = function(e) {
+                if (xhr.status==200) {
+                    // console.log("同步成功。");
+                    var response = JSON.parse(xhr.response);
+                    if (response.code<0) {
+                        core.drawText("出错啦！\n无法同步存档到服务器。");
+                    }
+                    else {
+                        core.drawText("同步成功！\n\n您的存档编号： "+response.code+"\n您的存档密码： "+response.msg+"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。")
+                    }
+                }
+                else {
+                    core.drawText("出错啦！\n无法同步存档到服务器。");
+                }
+            };
+            xhr.ontimeout = function(e) {
+                console.log(e);
+                core.drawText("出错啦！\n无法同步存档到服务器。");
+            }
+            xhr.onerror = function(e) {
+                console.log(e);
+                core.drawText("出错啦！\n无法同步存档到服务器。");
+            }
+            xhr.send(formData);
+        }, function() {
+            core.ui.drawSyncSave();
+        })
+    }
+    else if (type=='load') {
+
+        core.ui.drawConfirmBox("你确定要从服务器加载存档吗？\n该操作将覆盖所有本地存档且不可逆！", function(){
+            var id = prompt("请输入存档编号：");
+            if (id==null || id=="") {
+                core.ui.drawSyncSave(); return;
+            }
+            var password = prompt("请输入存档密码：");
+            if (password==null || password=="") {
+                core.ui.drawSyncSave(); return;
+            }
+            core.ui.drawWaiting("正在同步，请稍后...");
+
+            var formData = new FormData();
+            formData.append('type', 'load');
+            formData.append('name', core.firstData.name);
+            formData.append('id', id);
+            formData.append('password', password);
+
+            // send
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "../sync.php");
+            xhr.timeout = 1000;
+            xhr.onload = function(e) {
+                if (xhr.status==200) {
+                    // console.log("同步成功。");
+                    var response = JSON.parse(xhr.response);
+                    switch (response.code) {
+                        case 0:
+                            // 成功
+                            var data=JSON.parse(response.msg);
+                            // console.log(data);
+                            for (var i=1;i<=180;i++) {
+                                if (i<=data.length) {
+                                    core.setLocalStorage("save"+i, data[i-1]);
+                                }
+                                else {
+                                    core.removeLocalStorage("save"+i);
+                                }
+                            }
+                            core.drawText("同步成功！\n你的本地所有存档均已被覆盖。");
+                            break;
+                        case -1:
+                            core.drawText("出错啦！\n存档编号"+id+"不存在！");
+                            break;
+                        case -2:
+                            core.drawText("出错啦！\n存档密码错误！");
+                            break;
+                        default:
+                            core.drawText("出错啦！\n无法从服务器同步存档。");
+                            break;
+                    }
+
+                }
+                else {
+                    core.drawText("出错啦！\n无法从服务器同步存档。");
+                }
+            };
+            xhr.ontimeout = function(e) {
+                console.log(e);
+                core.drawText("出错啦！\n无法从服务器同步存档。");
+            }
+            xhr.onerror = function(e) {
+                console.log(e);
+                core.drawText("出错啦！\n无法从服务器同步存档。");
+            }
+            xhr.send(formData);
+        }, function() {
+            core.ui.drawSyncSave();
+        })
+    }
+
+}
+
 core.prototype.saveData = function(dataId) {
     var data = {
         'floorId': core.status.floorId,
@@ -2519,6 +2521,10 @@ core.prototype.getFlag = function(flag, defaultValue) {
 core.prototype.hasFlag = function(flag) {
     if (core.getFlag(flag)) return true;
     return false;
+}
+
+core.prototype.insertAction = function (list) {
+    core.events.insertAction(list);
 }
 
 core.prototype.lockControl = function () {

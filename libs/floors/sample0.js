@@ -2,9 +2,9 @@
 // 楼层唯一标识符仅能由字母、数字、下划线组成，且不能由数字开头
 // 推荐用法：第20层就用MT20，第38层就用MT38，地下6层就用MT_6（用下划线代替负号），隐藏3层用MT3h（h表示隐藏），等等
 main.floors.sample0 = {
-    'floorId': 'sample0', // 楼层唯一标识符，需要和名字完全一致
-    'title': "样板 0 层", // 楼层中文名
-    'name': 0, // 显示在状态栏中的名称
+    "floorId": "sample0", // 楼层唯一标识符，需要和名字完全一致
+    "title": "样板 0 层", // 楼层中文名
+    "name": 0, // 显示在状态栏中的层数
     "canFlyTo": true, // 该楼能否被楼传器飞到（不能的话在该楼也不允许使用楼传器）
     "map": [ // 地图数据，需要是13x13，建议使用地图生成器来生成
         [0,    0,    220,  0,    0,    6,    87,   3,    65,   64,   44,   43,   42],
@@ -79,10 +79,10 @@ main.floors.sample0 = {
         "0,12": {"floorId": "sample0", "stair": "upFloor"}, // 注意，目标层有多个楼梯的话，写stair可能会导致到达位置不确定。这时候推荐写loc指明目标点位置。
         "1,12": {"floorId": "sample0", "loc": [1,12]},
         "2,12": {"floorId": "sample0", "loc": [2,12]},
-        "3,12": {"floorId": "sample0", "loc": [6,1]},
-        "4,12": {"floorId": "sample0", "loc": [0,9]},
+        "3,12": {"floorId": "sample0", "loc": [6,1], "direction": "up"}, // 切换楼层后勇士面对上方
+        "4,12": {"floorId": "sample0", "loc": [0,9], "direction": "left", "time": 1000}, // 切换楼层后勇士面对左边，切换动画1000ms
         "5,12": {"floorId": "sample0", "loc": [6,10], "portalWithoutTrigger": false}, // 不能穿透
-        "6,12": {"floorId": "sample0", "loc": [10,10]},
+        "6,12": {"floorId": "sample0", "loc": [10,10], "direction": "left", "time": 1000, "portalWithoutTrigger": false},
     },
     "afterBattle": { // 战斗后可能触发的事件列表
         "2,6": ["\t[ghostSkeleton]不可能，你怎么可能打败我！\n（一个打败怪物触发的事件）"]

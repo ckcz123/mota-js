@@ -2,9 +2,9 @@
 // 楼层唯一标识符仅能由字母、数字、下划线组成，且不能由数字开头
 // 推荐用法：第20层就用MT20，第38层就用MT38，地下6层就用MT_6（用下划线代替负号），隐藏3层用MT3h（h表示隐藏），等等
 main.floors.sample2 = {
-    'floorId': 'sample2', // 楼层唯一标识符，需要和名字完全一致
-    'title': "主塔 40 层", // 楼层中文名
-    'name': 40, // 显示在状态栏中的名称
+    "floorId": "sample2", // 楼层唯一标识符，需要和名字完全一致
+    "title": "主塔 40 层", // 楼层中文名
+    "name": 40, // 显示在状态栏中的层数
     "canFlyTo": false, // 该楼能否被楼传器飞到（不能的话在该楼也不允许使用楼传器）
     "map": [ // 地图数据，需要是13x13，建议使用地图生成器来生成
         [5,    5,    5,    5,    5,    5,    87,   5,    5,    5,    5,    5,    5],
@@ -296,7 +296,7 @@ main.floors.sample2 = {
                 {"type": "hide", "loc": [4,6]},
                 {"type": "hide", "loc": [8,6]},
                 {"type": "hide", "loc": [8,3]},
-                {"type": "changeFloor", "floorId": "sample2", "loc": [6,6], "direction": "up", "time": 100}, // 更换勇士地点，合计120毫秒
+                {"type": "changeFloor", "floorId": "sample2", "loc": [6,6], "direction": "up", "time": 1000}, // 更换勇士地点，合计1秒
                 {"type": "show", "loc": [6,5]}, // 显示黄宝石
                 {"type": "sleep", "time": 200}, // 等待200毫秒
                 {"type": "playSound", "name": "item.ogg"},

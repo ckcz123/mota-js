@@ -29,11 +29,6 @@ events.prototype.init = function () {
             core.changeFloor(data.event.data.floorId, data.event.data.stair,
                 heroLoc, data.event.data.time, callback);
         },
-        'openShop': function (data, core, callback) {
-            core.ui.drawShop(data.event.shopid);
-            if (core.isset(callback))
-                callback();
-        },
         'passNet': function (data, core, callback) {
             core.events.passNet(data);
             if (core.isset(callback))
@@ -72,10 +67,17 @@ events.prototype.startGame = function (hard) {
     core.hideStartAnimate(function() {
         core.drawText(core.clone(core.firstData.startText), function() {
             core.startGame(hard);
-            // 可以在这里设置一些难度分歧
-            // 例如，简单难度下改变初始生命可以调用：
-            // if (hard=='Easy') core.setStatus("hp", 10000);
-            // 具体的各种API参见doc文档
+            if (hard=='Easy') { // 简单难度
+                core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
+                // 可以在此设置一些初始福利，比如设置初始生命值可以调用：
+                // core.setStatus("hp", 10000);
+            }
+            if (hard=='Normal') { // 普通难度
+                core.setFlag('hard', 2); // 可以用flag:hard来获得当前难度
+            }
+            if (hard=='Hard') { // 困难难度
+                core.setFlag('hard', 3); // 可以用flag:hard来获得当前难度
+            }
         });
     })
 }
@@ -84,7 +86,7 @@ events.prototype.startGame = function (hard) {
 events.prototype.win = function(reason) {
     // 获胜
     core.waitHeroToStop(function() {
-        core.rmGlobalAnimate(0,0,true);
+        core.removeGlobalAnimate(0,0,true);
         core.clearMap('all'); // 清空全地图
         core.drawText([
             "\t[结局2]恭喜通关！你的分数是${status:hp}。"
@@ -97,7 +99,9 @@ events.prototype.win = function(reason) {
 events.prototype.lose = function(reason) {
     // 失败
     core.waitHeroToStop(function() {
-        core.drawText('\t[结局1]你死了。', function () {
+        core.drawText([
+            "\t[结局1]你死了。\n如题。"
+        ], function () {
             core.restart();
         });
     })
@@ -230,7 +234,7 @@ events.prototype.doAction = function() {
             else this.doAction();
             break;
         case "move": // 移动事件
-            core.moveBlock(x,y,data.steps,data.time,data.disappear,function() {
+            core.moveBlock(x,y,data.steps,data.time,data.immediateHide,function() {
                 core.events.doAction();
             })
             break;
@@ -246,6 +250,7 @@ events.prototype.doAction = function() {
             core.clearMap('hero', 0, 0, 416, 416);
             core.setHeroLoc('x', data.loc[0]);
             core.setHeroLoc('y', data.loc[1]);
+            if (core.isset(data.direction)) core.setHeroLoc('direction', data.direction);
             core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
             this.doAction();
             break;
@@ -675,7 +680,7 @@ events.prototype.clickShop = function(x,y) {
 }
 
 // 快捷商店
-events.prototype.clickSelectShop = function(x,y) {
+events.prototype.clickQuickShop = function(x, y) {
     if (x >= 5 && x <= 7) {
         var shopList = core.status.shops, keys = Object.keys(shopList);
         var topIndex = 6 - parseInt((keys.length + 1) / 2);

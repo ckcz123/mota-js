@@ -85,10 +85,9 @@ data.prototype.init = function() {
         /****** 角色相关 ******/
         "HPMAX": 999999, // HP上限；-1则无上限
         "lavaDamage": 100, // 经过血网受到的伤害
-        "poisonDamage": 10, // 经过毒网受到的伤害
+        "poisonDamage": 10, // 中毒后每步受到的伤害
         "weakValue": 20, // 衰弱状态下攻防减少的数值
         /****** 道具相关 ******/
-        "cannotUseQuickShop": ["MT0"], // 不能使用快捷商店的楼层列表
         "redJewel": 3, // 红宝石加攻击的数值
         "blueJewel": 3, // 蓝宝石加防御的数值
         "greenJewel": 5, // 绿宝石加魔防的数值
@@ -108,7 +107,8 @@ data.prototype.init = function() {
         "shield5": 160, // 神圣盾加防数值
         "moneyPocket": 500, // 金钱袋加金币的数值
 
-        /****** 道具相关 ******/
+        /****** 系统相关 ******/
+        "cannotUseQuickShop": ["MT0"], // 不能使用快捷商店的楼层列表
         'animateSpeed': 500,
     }
     // 系统FLAG，在游戏运行中中请不要修改它。

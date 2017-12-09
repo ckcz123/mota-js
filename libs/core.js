@@ -41,15 +41,10 @@ function core() {
         'playedSound': null,
         'playedBgm': null,
     }
-    // 各元素位置、大小信息
-    this.position = {
-        'gameGroup': {},
-        'canvas': {},
-        'statusBar': {},
-        'toolBar': {},
-        'items': {},
-        'scale': 1.0,
-        'screenMode': 'bigScreen',
+    // 样式
+    this.domStyle = {
+        styles: [],
+        scale: 1.0,
     }
     this.initStatus = {
         'played': false,
@@ -382,13 +377,13 @@ core.prototype.pressKey = function (keyCode) {
 }
 
 core.prototype.keyDown = function(keyCode) {
-	if(!core.status.played) {
-		return;
-	}
-	if(core.status.automaticRouting || core.status.automaticRouted) {
-		core.stopAutomaticRoute();
-	}
-	if (core.status.lockControl) {
+    if(!core.status.played) {
+        return;
+    }
+    if(core.status.automaticRouting || core.status.automaticRouted) {
+        core.stopAutomaticRoute();
+    }
+    if (core.status.lockControl) {
         if (core.status.event.id == 'book') {
             if (keyCode==37) core.ui.drawEnemyBook(core.status.event.data - 1);
             else if (keyCode==39) core.ui.drawEnemyBook(core.status.event.data + 1);
@@ -404,68 +399,68 @@ core.prototype.keyDown = function(keyCode) {
             else if (keyCode==39) core.ui.drawSLPanel(core.status.event.data+1);
             return;
         }
-	    return;
+        return;
     }
-	switch(keyCode) {
-		case 37:
-			core.moveHero('left');
-		break;
-		case 38:
-			core.moveHero('up');
-		break;
-		case 39:
-			core.moveHero('right');
-		break;
-		case 40:
-			core.moveHero('down');
-		break;
-	}
+    switch(keyCode) {
+        case 37:
+            core.moveHero('left');
+        break;
+        case 38:
+            core.moveHero('up');
+        break;
+        case 39:
+            core.moveHero('right');
+        break;
+        case 40:
+            core.moveHero('down');
+        break;
+    }
 }
 
 core.prototype.keyUp = function(keyCode) {
-	if(!core.status.played) {
-		return;
-	}
+    if(!core.status.played) {
+    return;
+}
 
-	if (core.status.lockControl) {
-        if (core.status.event.id == 'book' && (keyCode==27 || keyCode==88))
-            core.ui.closePanel(true);
-	    if (core.status.event.id == 'fly' && (keyCode==71 || keyCode==27))
-	        core.ui.closePanel();
-	    if (core.status.event.id == 'fly' && keyCode==13) {
-            var index=core.status.hero.flyRange.indexOf(core.status.floorId);
-            var stair=core.status.event.data<index?"upFloor":"downFloor";
-            var floorId=core.status.event.data;
-            core.ui.closePanel();
-            core.changeFloor(core.status.hero.flyRange[floorId], stair);
-        }
-	    if (core.status.event.id == 'save' && (keyCode==83 || keyCode==27))
-	        core.ui.closePanel();
-        if (core.status.event.id == 'load' && (keyCode==76 || keyCode==27))
-            core.ui.closePanel();
-	    if ((core.status.event.id == 'settings' || core.status.event.id == 'selectShop') && keyCode==27)
-	        core.ui.closePanel();
-	    if (core.status.event.id == 'selectShop' && keyCode==75)
-	        core.ui.closePanel();
-	    if (core.status.event.id == 'shop' && keyCode==27) {
-            core.status.boxAnimateObjs = [];
-            core.setBoxAnimate();
-            if (core.status.event.data.fromList)
-                core.ui.drawQuickShop();
-            else core.ui.closePanel();
-        }
-        if (core.status.event.id == 'toolbox' && (keyCode==84 || keyCode==27))
-            core.ui.closePanel();
-        if (core.status.event.id == 'about' && (keyCode==13 || keyCode==32))
-            core.ui.closePanel();
-        if (core.status.event.id == 'text' && (keyCode==13 || keyCode==32))
-            core.drawText();
-        if (core.status.event.id == 'action' && core.isset(core.status.event.data.current)
-            && core.status.event.data.type=='text'  && (keyCode==13 || keyCode==32))
-            core.events.doAction();
-
-	    return;
+if (core.status.lockControl) {
+    if (core.status.event.id == 'book' && (keyCode==27 || keyCode==88))
+        core.ui.closePanel(true);
+    if (core.status.event.id == 'fly' && (keyCode==71 || keyCode==27))
+        core.ui.closePanel();
+    if (core.status.event.id == 'fly' && keyCode==13) {
+        var index=core.status.hero.flyRange.indexOf(core.status.floorId);
+        var stair=core.status.event.data<index?"upFloor":"downFloor";
+        var floorId=core.status.event.data;
+        core.ui.closePanel();
+        core.changeFloor(core.status.hero.flyRange[floorId], stair);
     }
+    if (core.status.event.id == 'save' && (keyCode==83 || keyCode==27))
+        core.ui.closePanel();
+    if (core.status.event.id == 'load' && (keyCode==76 || keyCode==27))
+        core.ui.closePanel();
+    if ((core.status.event.id == 'settings' || core.status.event.id == 'selectShop') && keyCode==27)
+        core.ui.closePanel();
+    if (core.status.event.id == 'selectShop' && keyCode==75)
+        core.ui.closePanel();
+    if (core.status.event.id == 'shop' && keyCode==27) {
+        core.status.boxAnimateObjs = [];
+        core.setBoxAnimate();
+        if (core.status.event.data.fromList)
+            core.ui.drawQuickShop();
+        else core.ui.closePanel();
+    }
+    if (core.status.event.id == 'toolbox' && (keyCode==84 || keyCode==27))
+        core.ui.closePanel();
+    if (core.status.event.id == 'about' && (keyCode==13 || keyCode==32))
+        core.ui.closePanel();
+    if (core.status.event.id == 'text' && (keyCode==13 || keyCode==32))
+        core.drawText();
+    if (core.status.event.id == 'action' && core.isset(core.status.event.data.current)
+        && core.status.event.data.type=='text'  && (keyCode==13 || keyCode==32))
+        core.events.doAction();
+
+    return;
+}
 
     switch (keyCode) {
         case 27: // ESC
@@ -564,28 +559,23 @@ core.prototype.onup = function () {
 }
 
 core.prototype.getClickLoc = function (x, y) {
-
-    if (!core.isset(core.position.canvas.top)) return null;
-
+    
     var statusBar = {'x': 0, 'y': 0};
     var size = 32;
-    size = size * core.position.scale;
+    size = size * core.domStyle.scale;
 
-    switch (core.position.screenMode) {// 这里的3是指statusBar和游戏画布之间的白线宽度
+    switch (core.domStyle.screenMode) {// 这里的3是指statusBar和游戏画布之间的白线宽度
         case 'vertical':
             statusBar.x = 0;
-            statusBar.y = core.position.statusBar.height + 3;
+            statusBar.y = core.dom.statusBar.offsetHeight + 3;
             break;
         case 'horizontal':
-            statusBar.x = core.position.statusBar.width + 3;
-            console.log(core.position.statusBar.width)
-            statusBar.y = 0;
-            break;
         case 'bigScreen':
-            statusBar.x = core.position.statusBar.width + 3;
+            statusBar.x = core.dom.statusBar.offsetWidth + 3;
             statusBar.y = 0;
             break;
     }
+    
     var left = core.dom.gameGroup.offsetLeft + statusBar.x;
     var top = core.dom.gameGroup.offsetTop + statusBar.y;
     var loc={'x': x - left, 'y': y - top, 'size': size};
@@ -2652,9 +2642,13 @@ core.prototype.updateStatusBar = function () {
     keys.forEach(function (key) {
         core.statusBar[key].innerHTML = core.setTwoDigits(core.status.hero.items.keys[key]);
     })
-    core.statusBar.poison.innerHTML = core.hasFlag('poison')?"毒":"";
-    core.statusBar.weak.innerHTML = core.hasFlag('weak')?"衰":"";
-    core.statusBar.curse.innerHTML = core.hasFlag('curse')?"咒":"";
+    if(core.flags.enableDebuff){
+        core.statusBar.poison.innerHTML = core.hasFlag('poison')?"毒":"";
+        core.statusBar.weak.innerHTML = core.hasFlag('weak')?"衰":"";
+        core.statusBar.curse.innerHTML = core.hasFlag('curse')?"咒":"";
+    }
+    
+
     core.statusBar.hard.innerHTML = core.status.hard;
     if (core.hasItem('book')) {
         core.statusBar.image.book.style.opacity = 1;
@@ -2670,344 +2664,257 @@ core.prototype.updateStatusBar = function () {
 }
 
 core.prototype.resize = function(clientWidth, clientHeight) {
-
-    // 画布大小
-    var canvasWidth = 416;
-    // 竖屏状态下，默认StatusBar高度（不计算边框）
-    var statusBarHeight = 83;
-    // 竖屏状态下，底端默认ToolBar高度（不计算边框）
-    var toolBarHeight = 49;
-
-    // 横屏状态下，默认StatusBar宽度（不计算边框）
-    var statusBarWidth = 132;
-	
-    //适配宽度阈值， 6为两倍的边框宽度
-    var ADAPT_WIDTH = canvasWidth + 6;
-
+    
+    // 默认画布大小
+    var DEFAULT_CANVAS_WIDTH = 422;
+    // 默认边栏宽度
+    var DEFAULT_BAR_WIDTH = 132;
+    
+    var BASE_LINEHEIGHT = 32;
+    var SPACE = 3;
+    var DEFAULT_FONT_SIZE = 16;
+    //适配宽度阈值
+    var ADAPT_WIDTH = DEFAULT_CANVAS_WIDTH;
+    //判断横竖屏
     var width = clientWidth;
     var isHorizontal = false;
-    if(clientWidth > clientHeight && clientHeight < 422){
+    if(clientWidth > clientHeight && clientHeight < ADAPT_WIDTH){
         isHorizontal = true;
         width = clientHeight;
     }
+    // 各元素大小的变量声明
+    var gameGroupWidth, gameGroupHeight, 
+        canvasWidth, canvasTop, canvasLeft,
+        statusBarWidth, statusBarHeight, statusBarBorder,
+        statusWidth, statusHeigth, statusMaxWidth,statusLabelsLH,
+        toolBarWidth, toolBarHeight, toolBarTop, toolBarBorder,
+        toolsWidth, toolsHeight,toolsMargin,toolsPMaxwidth,
+        fontSize, margin;
 
+    var shopDisplay, mdefDispaly, expDispaly;
+    mdefDispaly = core.flags.enableMDef ? 'block' : 'none';
+    expDispaly = core.flags.enableExperience ? 'block' : 'none';
+
+    statusBarBorder = '3px #fff solid';
+    toolBarBorder = '3px #fff solid';
     // 移动端
     if (width < ADAPT_WIDTH) {
         var zoom = (ADAPT_WIDTH - width) / 4.22;
         var scale = 1 - zoom / 100;
 
-        core.position.scale = scale;
-        canvasWidth = width - 6;
+        core.domStyle.scale = scale;
+
+        canvasWidth = width;
+        fontSize = DEFAULT_FONT_SIZE * scale;
 
         if(!isHorizontal){ //竖屏
-            core.position.screenMode = 'vertical';
+            core.domStyle.screenMode = 'vertical';
+            //显示快捷商店图标
+            shopDisplay = 'block';
+            //判断应该显示几行
+            var col = core.flags.enableMDef || core.flags.enableExperience || core.flags.enableDebuff ? 3 : 2;
+
+            var tempTopBarH = scale * (BASE_LINEHEIGHT * col + SPACE * 2) + 6;
+            var tempBotBarH = scale * (BASE_LINEHEIGHT + SPACE * 4) + 6;
+
+            gameGroupHeight = width + tempTopBarH + tempBotBarH;
             
-            statusBarHeight *= scale;
-            toolBarHeight *= scale;
-    
-            core.position.gameGroup = {
-                'width': canvasWidth,
-                'height': width+statusBarHeight+toolBarHeight,
-                'top': (clientHeight-width-statusBarHeight-toolBarHeight)/2, 
-                'left': 3
-            }
-    
-            // 这几项都是相对gameGroup的位置
-            core.position.statusBar = {
-                'width': canvasWidth, 
-                'height': statusBarHeight,
-                'top': 0,
-                'left': 0,
-                'fontSize': 16 * scale
-            }
-            core.position.canvas = {
-                'width': canvasWidth,
-                'height': canvasWidth,
-                'top': statusBarHeight, // 3px计算在内边框
-                'left': 0,
-                'borderLeft': '',
-                'borderTop': '3px #fff solid', 
-                'borderBottom': '3px #fff solid'
-            }
-            core.position.toolBar = {
-                'display': 'block', 
-                'width': canvasWidth, 'height': toolBarHeight,
-                'top': statusBarHeight + 3 + canvasWidth,
-            }
-    
-            var icon_firstline = 8 * scale, icon_secondline = 44 * scale;
-            var icon_toolline = core.position.toolBar.top + 13 * scale;
-            var icon_toolline_per = 46 * scale;
-    
-            var text_firstline = 14 * scale, text_secondline = 50 * scale, text_thirdline = 75 * scale;
-            var text_toolline = core.position.toolBar.top + 18 * scale;
+            gameGroupWidth = width
+            canvasTop = tempTopBarH;
+            canvasLeft = 0;
+            toolBarWidth = statusBarWidth = width;
+            statusBarHeigth = tempTopBarH; //一共有3行加上两个padding空隙
+            statusBarBorder = '3px #fff solid';
 
-            // 如果同时启用mdef和experience，则不显示当前层数
-            if (core.flags.enableMDef && core.flags.enableExperience) {
-                core.position.items = {
-                    'image': {
-                        'size': 32*scale,
-                        'floor': {'top': 0, 'left': 0, 'display': 'none'},
-                        'hp': {'top': icon_firstline, 'left': 8 * scale},
-                        'atk': {'top': icon_firstline, 'left': 126 * scale},
-                        'def': {'top': icon_firstline, 'left': 226 * scale},
-                        'mdef': {'top': icon_secondline, 'left': 8 * scale, 'display': 'block'},
-                        'money': {'top': icon_secondline, 'left': 108 * scale},
-                        'experience': {'top': icon_secondline, 'left': 208 * scale, 'display': 'block'},
-                        'book': {'top': icon_toolline, 'left': 8 * scale},
-                        'fly': {'top': icon_toolline, 'left': 8 * scale + icon_toolline_per},
-                        'toolbox': {'top': icon_toolline, 'left': 8 * scale + icon_toolline_per * 2},
-                        'shop': {'top': icon_toolline, 'left': 8*scale+icon_toolline_per*3, 'display': 'block'},
-                        'save': {'top': icon_toolline, 'left': 8 * scale + icon_toolline_per * 4},
-                        'load': {'top': icon_toolline, 'left': 8 * scale + icon_toolline_per * 5},
-                        'settings': {'top': icon_toolline, 'left': 8 * scale + icon_toolline_per * 6}
-                    },
-                    'floor': {'top': 0, 'left': 0, 'display': 'none'},
-                    'hp': {'top': text_firstline, 'left': 42 * scale},
-                    'atk': {'top': text_firstline, 'left': 160 * scale},
-                    'def': {'top': text_firstline, 'left': 260 * scale},
-                    'mdef': {'top': text_secondline, 'left': 42 * scale, 'display': 'block'},
-                    'money': {'top': text_secondline, 'left': 144 * scale},
-                    'experience': {'top': text_secondline, 'left': 242 * scale, 'display': 'block'},
-                    'yellowKey': {'top': text_secondline, 'left': 308 * scale},
-                    'blueKey': {'top': text_secondline, 'left': 342 * scale},
-                    'redKey': {'top': text_secondline, 'left': 376 * scale},
-                    'poison': {'top': text_firstline, 'left': 330* scale},
-                    'weak': {'top': text_firstline, 'left': 355* scale},
-                    'curse': {'top': text_firstline, 'left': 380*scale},
-                    'hard': {'top': text_toolline, 'left': 320*scale}
-                }
-            }
+            statusHeigth = scale*BASE_LINEHEIGHT * .8;
+            statusLabelsLH = .8 * BASE_LINEHEIGHT *scale;
+            statusMaxWidth = scale * DEFAULT_BAR_WIDTH * .95;
+            toolBarHeight = tempBotBarH;
 
-            // 否则显示层数
-            else {
-                core.position.items = {
-                    'image': {
-                        'size': 32*scale,
-                        'floor': {'top': icon_firstline, 'left': 8 * scale, 'display': 'block'},
-                        'hp': {'top': icon_firstline, 'left': 90 * scale},
-                        'atk': {'top': icon_firstline, 'left': 208 * scale},
-                        'def': {'top': icon_firstline, 'left': 308 * scale},
-                        'mdef': {'top': icon_secondline, 'left': 8 * scale, 'display': core.flags.enableMDef?'block':'none'},
-                        'money': {'top': icon_secondline, 'left': (core.flags.enableMDef?108:8) * scale},
-                        'experience': {'top': icon_secondline, 'left': 108 * scale, 'display': core.flags.enableExperience?'block':'none'},
-                        'book': {'top': icon_toolline, 'left': 8 * scale},
-                        'fly': {'top': icon_toolline, 'left': 8 * scale + icon_toolline_per},
-                        'toolbox': {'top': icon_toolline, 'left': 8 * scale + icon_toolline_per * 2},
-                        'shop': {'top': icon_toolline, 'left': 8*scale+icon_toolline_per*3, 'display': 'block'},
-                        'save': {'top': icon_toolline, 'left': 8 * scale + icon_toolline_per * 4},
-                        'load': {'top': icon_toolline, 'left': 8 * scale + icon_toolline_per * 5},
-                        'settings': {'top': icon_toolline, 'left': 8 * scale + icon_toolline_per * 6}
-                    },
-                    'floor': {'top': text_firstline, 'left': 44 * scale},
-                    'hp': {'top': text_firstline, 'left': 124 * scale},
-                    'atk': {'top': text_firstline, 'left': 242 * scale},
-                    'def': {'top': text_firstline, 'left': 342 * scale},
-                    'mdef': {'top': text_secondline, 'left': 44*scale, 'display': core.flags.enableMDef?'block':'none'},
-                    'money': {'top': text_secondline, 'left': (core.flags.enableMDef?144:44) * scale},
-                    'experience': {'top': text_secondline, 'left': 142 * scale, 'display': core.flags.enableExperience?'block':'none'},
-                    'yellowKey': {'top': text_secondline, 'left': 216 * scale},
-                    'blueKey': {'top': text_secondline, 'left': 250 * scale},
-                    'redKey': {'top': text_secondline, 'left': 284 * scale},
-                    'poison': {'top': text_secondline, 'left': 330* scale},
-                    'weak': {'top': text_secondline, 'left': 355* scale},
-                    'curse': {'top': text_secondline, 'left': 380*scale},
-                    'hard': {'top': text_toolline, 'left': 320*scale}
-                }
-            }
+            toolBarTop = statusBarHeigth + width;
+            toolBarBorder = '3px #fff solid';
+            toolsHeight = scale * BASE_LINEHEIGHT;
+            toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH * .4;
+            borderRight = '3px #fff solid';
+            
+            margin = scale * SPACE * 2;
+            toolsMargin = scale * SPACE * 4;
         }else { //横屏
-            core.position.screenMode = 'horizontal';
-            statusBarWidth *= scale
+            core.domStyle.screenMode = 'horizontal';
+            shopDisplay = 'none';
+            gameGroupWidth = width + DEFAULT_BAR_WIDTH * scale;
+            gameGroupHeight = width;
+            canvasTop = 0;
+            canvasLeft = DEFAULT_BAR_WIDTH * scale;
+            toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH * scale;
+            statusBarHeigth = scale * BASE_LINEHEIGHT * 9 + SPACE * 2; //一共有9行加上两个padding空隙
+            statusBarBorder = '3px #fff solid';
 
-            core.position.gameGroup = {
-                'width': statusBarWidth + canvasWidth + 3, 
-                'height': canvasWidth,
-                'top': 3, 
-                'left': (clientWidth - width - statusBarWidth)/2,
-            }
-    
-            // 这几项都是相对gameGroup的位置
-            core.position.statusBar = {
-                'top': 0, 'left': 0,
-                'width': statusBarWidth,
-                'height': canvasWidth,
-                'fontSize': 16 * scale
-            }
-            core.position.canvas = {
-                'borderTop': '', 
-                'borderLeft': '3px #fff solid',
-                'borderBottom': '',
-                'top': 0, 
-                'left': statusBarWidth, 
-                'width': canvasWidth, 
-                'height': canvasWidth
-            }
-            core.position.toolBar = {
-                'display': 'none', 'top': 0, 'left': 0, 'width': 0, 'height': 0
-            }
-            core.resizeIconHorizontal(scale);
+            statusHeigth = scale*BASE_LINEHEIGHT * .8;
+            statusLabelsLH = .8 * BASE_LINEHEIGHT *scale;
+            toolBarHeight = width - statusBarHeigth;
+            toolBarTop = scale*BASE_LINEHEIGHT * 9 + SPACE * 2;
+            toolBarBorder = '3px #fff solid';
+            toolsHeight = scale * BASE_LINEHEIGHT;
+            borderRight = '';
+            statusMaxWidth = scale * DEFAULT_BAR_WIDTH;
+            toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH;
+
+            margin = scale * SPACE * 2;
+            toolsMargin = 2 * SPACE * scale;
         }
         
     }else { //大屏设备 pc端
-        core.position.scale = 1;
-        core.position.screenMode = 'bigScreen';
+        core.domStyle.scale = 1;
+        core.domStyle.screenMode = 'bigScreen';
+        shopDisplay = 'none';
+        
+        gameGroupWidth = DEFAULT_CANVAS_WIDTH + DEFAULT_BAR_WIDTH;
+        gameGroupHeight = DEFAULT_CANVAS_WIDTH;
+        canvasWidth = DEFAULT_CANVAS_WIDTH;
+        canvasTop = 0;
+        canvasLeft = DEFAULT_BAR_WIDTH;
 
-        var totalWidth = statusBarWidth + 3 + canvasWidth;
-
-        core.position.gameGroup = {
-            'top': (clientHeight-canvasWidth)/2,
-            'left': (width-totalWidth)/2,
-            'width': totalWidth, 'height': canvasWidth
-        }
-
-        // 这几项都是相对gameGroup的位置
-        core.position.statusBar = {
-            'top': 0, 'left': 0,
-            'width': statusBarWidth, 'height': canvasWidth,
-            'fontSize': 16
-        }
-        core.position.canvas = {
-            'borderTop': '', 'borderBottom': '', 'borderLeft': '3px #fff solid',
-            'top': 0, 'left': statusBarWidth, 'width': canvasWidth, 'height': canvasWidth
-        }
-        core.position.toolBar = {
-            'display': 'none', 'top': 0, 'left': 0, 'width': 0, 'height': 0
-        }
-        core.resizeIconHorizontal(1);
+        toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH;
+        statusBarHeigth = BASE_LINEHEIGHT * 9 + SPACE * 2; //一共有9行
+        
+        statusHeigth = BASE_LINEHEIGHT * .8;
+        statusLabelsLH = .8 * BASE_LINEHEIGHT;
+        toolBarHeight = DEFAULT_CANVAS_WIDTH - statusBarHeigth;
+        toolBarTop = BASE_LINEHEIGHT * 9 + SPACE * 2;
+        
+        toolsHeight = BASE_LINEHEIGHT;
+        borderRight = '';
+        fontSize = DEFAULT_FONT_SIZE;
+        statusMaxWidth = DEFAULT_BAR_WIDTH;
+        toolsPMaxwidth = DEFAULT_BAR_WIDTH * .9;
+        margin = SPACE * 2;
+        toolsMargin = 2 * SPACE;
     }
-    core.resetSize();
+
+    var unit = 'px'
+    core.domStyle.styles = [
+        {   id: 'gameGroup',
+            rules:{
+                width: gameGroupWidth + unit,
+                height: gameGroupHeight + unit,
+                top: (clientHeight-gameGroupHeight)/2 + unit,
+                left: (clientWidth-gameGroupWidth)/2 + unit,
+            }
+        },
+        {   className: 'gameCanvas',
+            rules:{
+                width: canvasWidth + unit, 
+                height: canvasWidth + unit,
+                top: canvasTop + unit,
+                left: canvasLeft + unit, 
+
+                border: '3px #fff solid',
+            }
+        },
+        {   id: 'statusBar',
+            rules:{
+                width: statusBarWidth + unit,
+                height: statusBarHeigth + unit,
+                top: 0,
+                left: 0,
+                padding: SPACE + unit,
+
+                borderTop: statusBarBorder,
+                borderLeft: statusBarBorder,
+                borderRight: borderRight,
+                fontSize: fontSize + unit
+            }
+        },
+        {   className: 'status',
+            rules:{
+                width: '100%',
+                maxWidth: statusMaxWidth + unit,
+                height: statusHeigth + unit,
+                margin: margin/2 + unit
+            }
+        },
+        {
+            className: 'statusLabels',
+            rules:{
+                marginLeft: margin + unit,
+                lineHeight: statusLabelsLH + unit,
+            }
+        },
+        {   id: 'toolBar',
+            rules:{
+                width: toolBarWidth + unit,
+                height: toolBarHeight + unit,
+                top: toolBarTop +unit,
+                left: 0,
+                padding: SPACE + unit,
+                borderBottom: toolBarBorder,
+                borderLeft: toolBarBorder,
+                borderRight: borderRight,
+                fontSize: fontSize + unit
+            }
+        },
+        {   className: 'tools',
+            rules:{
+                height: toolsHeight + unit,
+                maxWidth: toolsPMaxwidth + unit,
+                marginLeft: toolsMargin + unit,
+                marginTop: margin + unit,
+            }
+        },
+        {
+            imgId: 'shop',
+            rules:{
+                display: shopDisplay
+            }
+        },
+        {
+            id: 'expCol',
+            rules: {
+                display: expDispaly
+            }
+        },
+        {
+            id: 'mdefCol',
+            rules: {
+                display: mdefDispaly
+            }
+        },
+    ]
+    core.domRenderer();
 }
 
-core.prototype.resizeIconHorizontal = function(scale) {
-    var first_col = 8 * scale, second_col = 50 * scale, third_col = 92 * scale;
-    var first_icon_row = 20 * scale, first_text_row = 28 * scale, first_tool_row = 303 * scale;
-    var per_row = 36 * scale, tool_per_row = 40*scale;
+core.prototype.domRenderer = function(){
+    var styles = core.domStyle.styles;
 
-    // 如果同时启用mdef和experience，则不显示当前层数
-    if (core.flags.enableMDef && core.flags.enableExperience) {
-        core.position.items = {
-            'image': {
-                'size': 32*scale,
-                'floor': {'top': 0, 'left': 0, 'display': 'none'},
-                'hp': {'top': first_icon_row , 'left': first_col},
-                'atk': {'top': first_icon_row + per_row, 'left': first_col},
-                'def': {'top': first_icon_row + per_row * 2, 'left': first_col},
-                'mdef': {'top': first_icon_row + per_row * 3, 'left': first_col, 'display': 'block'},
-                'money': {'top': first_icon_row + per_row * 4, 'left': first_col},
-                'experience': {'top': first_icon_row + per_row * 5, 'left': first_col, 'display': 'block'},
-                'book': {'top': first_tool_row, 'left': first_col},
-                'fly': {'top': first_tool_row, 'left': second_col},
-                'toolbox': {'top': first_tool_row, 'left': third_col},
-                'shop': {'top': 0, 'left': 0, 'display': 'none'},
-                'save': {'top': first_tool_row + tool_per_row, 'left': first_col},
-                'load': {'top': first_tool_row + tool_per_row, 'left': second_col},
-                'settings': {'top': first_tool_row + tool_per_row, 'left': third_col}
-            },
-            'floor': {'top': 0, 'left': 0, 'display': 'none'},
-            'hp': {'top': first_text_row, 'left': second_col},
-            'atk': {'top': first_text_row + per_row, 'left': second_col},
-            'def': {'top': first_text_row + per_row * 2, 'left': second_col},
-            'mdef': {'top': first_text_row + per_row * 3, 'left': second_col, 'display': 'block'},
-            'money': {'top': first_text_row + per_row * 4, 'left': second_col},
-            'experience': {'top': first_text_row + per_row * 5, 'left': second_col, 'display': 'block'},
-            'yellowKey': {'top': first_text_row + per_row * 6, 'left': first_col},
-            'blueKey':{'top': first_text_row + per_row * 6, 'left': second_col},
-            'redKey': {'top': first_text_row + per_row * 6, 'left': third_col},
-            'poison': {'top': first_text_row + per_row * 6.75, 'left': first_col+10 * scale},
-            'weak': {'top': first_text_row + per_row * 6.75, 'left': first_col + 35 * scale},
-            'curse': {'top': first_text_row + per_row * 6.75, 'left': first_col + 60 * scale},
-            'hard': {'top': 383*scale, 'left': 0}
+    for(var i=0; i<styles.length; i++){
+        if(styles[i].hasOwnProperty('rules')){
+            var rules = styles[i].rules;
+            var rulesProp = Object.keys(rules);
+
+            if(styles[i].hasOwnProperty('className')){
+                var className = styles[i].className
+                for(var j=0; j<core.dom[className].length; j++)
+                    for(var k=0; k<rulesProp.length; k++)
+                        core.dom[className][j].style[rulesProp[k]] = rules[rulesProp[k]];
+            }
+            if(styles[i].hasOwnProperty('id')){
+                var id = styles[i].id;
+
+                for(var j=0; j<rulesProp.length; j++)
+                    core.dom[id].style[rulesProp[j]] = rules[rulesProp[j]];
+            }
+            if(styles[i].hasOwnProperty('imgId')){
+                var imgId = styles[i].imgId;
+
+                for(var j=0; j<rulesProp.length; j++)
+                core.statusBar.image[imgId].style[rulesProp[j]] = rules[rulesProp[j]];
+            }
         }
-    }
-    // 否则显示层数
-    else {
-        core.position.items = {
-            'image': {
-                'size': 32*scale,
-                'floor': {'top': first_icon_row, 'left': first_col, 'display': 'block'},
-                'hp': {'top': first_icon_row + per_row, 'left': first_col},
-                'atk': {'top': first_icon_row + per_row * 2, 'left': first_col},
-                'def': {'top': first_icon_row + per_row * 3, 'left': first_col},
-                'mdef': {'top': first_icon_row + per_row * 4, 'left': first_col, 'display': core.flags.enableMDef?'block':'none'},
-                'money': {'top': first_icon_row + per_row * (core.flags.enableMDef?5:4), 'left': first_col},
-                'experience': {'top': first_icon_row + per_row * 5, 'left': first_col, 'display': core.flags.enableExperience?'block':'none'},
-                'book': {'top': first_tool_row, 'left': first_col},
-                'fly': {'top': first_tool_row, 'left': second_col},
-                'toolbox': {'top': first_tool_row, 'left': third_col},
-                'shop': {'top': 0, 'left': 0, 'display': 'none'},
-                'save': {'top': first_tool_row + tool_per_row, 'left': first_col},
-                'load': {'top': first_tool_row + tool_per_row, 'left': second_col},
-                'settings': {'top': first_tool_row + tool_per_row, 'left': third_col}
-            },
-            'floor': {'top': first_text_row, 'left': second_col, 'display': 'block'},
-            'hp': {'top': first_text_row + per_row, 'left': second_col},
-            'atk': {'top': first_text_row + per_row * 2, 'left': second_col},
-            'def': {'top': first_text_row + per_row * 3, 'left': second_col},
-            'mdef': {'top': first_text_row + per_row * 4, 'left': second_col, 'display': core.flags.enableMDef?'block':'none'},
-            'money': {'top': first_text_row + per_row * (core.flags.enableMDef?5:4), 'left': second_col},
-            'experience': {'top': first_text_row + per_row * 5, 'left': second_col, 'display': core.flags.enableExperience?'block':'none'},
-            'yellowKey': {'top': first_text_row + per_row * 6, 'left': first_col},
-            'blueKey':{'top': first_text_row + per_row * 6, 'left': second_col},
-            'redKey': {'top': first_text_row + per_row * 6, 'left': third_col},
-            'poison': {'top': first_text_row + per_row * 6.75, 'left': first_col+10 * scale},
-            'weak': {'top': first_text_row + per_row * 6.75, 'left': first_col + 35 * scale},
-            'curse': {'top': first_text_row + per_row * 6.75, 'left': first_col + 60 * scale},
-            'hard': {'top': 383*scale, 'left': 0}
-        }
+        
     }
 }
-
-core.prototype.resetSize = function () {
-
-    core.dom.gameGroup.style.left = core.position.gameGroup.left + "px";
-    core.dom.gameGroup.style.top = core.position.gameGroup.top + "px";
-    core.dom.gameGroup.style.width = core.position.gameGroup.width + "px";
-    core.dom.gameGroup.style.height = core.position.gameGroup.height + "px";
-
-    core.dom.statusBar.style.width = core.position.statusBar.width + "px";
-    core.dom.statusBar.style.height = core.position.statusBar.height + "px";
-    core.dom.statusBar.style.fontSize = core.position.statusBar.fontSize + "px";
-
-    core.dom.toolBar.style.top = core.position.toolBar.top + "px";
-    core.dom.toolBar.style.width = core.position.toolBar.width + "px";
-    core.dom.toolBar.style.height = core.position.toolBar.height + "px";
-    core.dom.toolBar.style.display = core.position.toolBar.display;
-
-    core.dom.floorMsgGroup.style.width = core.position.canvas.width + "px";
-
-    for (var i = 0; i < core.dom.gameCanvas.length; i++) {
-        core.dom.gameCanvas[i].style.borderTop = core.position.canvas.borderTop;
-        core.dom.gameCanvas[i].style.borderLeft = core.position.canvas.borderLeft;
-        core.dom.gameCanvas[i].style.top = core.position.canvas.top + "px";
-        core.dom.gameCanvas[i].style.left = core.position.canvas.left + "px";
-        core.dom.gameCanvas[i].style.width = core.position.canvas.width + "px";
-        core.dom.gameCanvas[i].style.height = core.position.canvas.height + "px";
-    }
-
-    // images
-    for (var item in core.statusBar.image) {
-        if (core.isset(core.position.items.image[item].display))
-            core.statusBar.image[item].style.display = core.position.items.image[item].display;
-        else
-            core.statusBar.image[item].style.display = 'block';
-        core.statusBar.image[item].style.width = core.position.items.image.size + "px";
-        core.statusBar.image[item].style.height = core.position.items.image.size + "px";
-        core.statusBar.image[item].style.top = core.position.items.image[item].top + "px";
-        core.statusBar.image[item].style.left = core.position.items.image[item].left + "px";
-    }
-
-    // texts
-    for (var item in core.statusBar) {
-        if (item == 'image') continue;
-        if (core.isset(core.position.items[item].display))
-            core.statusBar[item].style.display = core.position.items[item].display;
-        else
-            core.statusBar[item].style.display = 'block';
-        core.statusBar[item].style.top = core.position.items[item].top + "px";
-        core.statusBar[item].style.left = core.position.items[item].left + "px";
-    }
-
-}
+    
 
 /**
  * 系统机制 end

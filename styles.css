@@ -7,9 +7,16 @@ html, body {
     overflow: hidden;
 }
 
+@font-face {
+    font-family: number;
+    src: url("fonts/number.ttf");
+}
+
 #gameGroup {
     position: absolute;
-    outline: 3px #fff solid;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
     background-color: #000;
 }
 
@@ -131,7 +138,7 @@ html, body {
 }
 
 #floorMsgGroup {
-    width: 416px;
+    width: 100%;
     height: 100%;
     position: absolute;
     top: 0;
@@ -164,45 +171,68 @@ html, body {
 
 #statusBar {
     position: absolute;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
     background: url(images/ground.png) round;
     z-index: 6;
 }
-
+#statusBar .status{
+    position: relative;
+    display: block;
+    float: left;
+}
+.status img{
+    vertical-align: middle;
+    width: 1.6em;
+    height: 1.6em;
+}
+#statusBar span{
+    color: white;
+    font: bold italic 1.1em Verdana;
+}
+#statusBar p {
+    display: inline-block;
+    vertical-align: middle;
+    width: 60%;
+    margin: 0;
+    color: white;
+    font: bold italic 1.1em Verdana;
+}
 #toolBar {
     position: absolute;
     background: url(images/ground.png) round;
     z-index: 5;
-    display: none;
-    left: 0px;
-    border-top: 3px #fff solid;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+#toolBar .tools{
+    position: relative;
+    display: block;
+    float: left;
 }
 
-#statusBar img {
-    position: absolute;
-    display: none;
-}
-
-#statusBar p {
-    position: absolute;
-    color: white;
-    font: bold italic 1.1em Verdana;
-    margin: 0;
-}
-
-#statusBar p#hard {
+p#hard {
+    width: 6em;
+    vertical-align: middle;
+    display: inline-block;
     color: red;
     font: bold normal 1.1em "Arial Black";
     text-align: center;
-    right: 0;
+    margin: 0 6px 6px 0;
 }
 
-p#poison, p#weak, p#curse {
+span#poison, span#weak, span#curse {
     font-style: normal;
     font-size: 1em;
 }
 
 .gameCanvas {
     position: absolute;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
 }
 
 #bg {
@@ -227,4 +257,12 @@ p#poison, p#weak, p#curse {
 
 #data {
     z-index: 6;
+}
+
+.clearfix:before,
+.clearfix:after {
+   content: ".";
+   display: block;
+   height: 0;
+   visibility: hidden;
 }

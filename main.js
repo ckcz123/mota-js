@@ -17,7 +17,9 @@ function main() {
         'versionLabel': document.getElementById('versionLabel'),
         'floorNameLabel': document.getElementById('floorNameLabel'),
         'statusBar': document.getElementById('statusBar'),
+        'status': document.getElementsByClassName('status'),
         'toolBar': document.getElementById('toolBar'),
+        'tools': document.getElementsByClassName('tools'),
         'gameCanvas': document.getElementsByClassName('gameCanvas'),
         'startButtons': document.getElementById('startButtons'),
         'playGame': document.getElementById('playGame'),
@@ -28,7 +30,9 @@ function main() {
         'normalLevel': document.getElementById('normalLevel'),
         'hardLevel': document.getElementById('hardLevel'),
         'data': document.getElementById('data'),
-        'statusLabels': document.getElementsByClassName('statusLabel')
+        'statusLabels': document.getElementsByClassName('statusLabel'),
+        'mdefCol': document.getElementById('mdefCol'),
+        'expCol': document.getElementById('expCol'),
     };
     // console.log('加载游戏容器和开始界面dom对象完成 如下');
     // console.log(this.dom);
@@ -246,7 +250,7 @@ main.dom.data.onmousewheel = function(e) {
     try {
         if (e.wheelDelta)
             main.core.onmousewheel(Math.sign(e.wheelDelta))
-        else if (e.detal)
+        else if (e.detail)
             main.core.onmousewheel(Math.sign(e.detail));
     } catch (ee) {}
 }

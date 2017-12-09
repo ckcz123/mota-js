@@ -117,10 +117,7 @@ data.prototype.init = function() {
         /****** 角色状态相关 ******/
         "enableMDef": false, // 是否涉及勇士的魔防值；如果此项为false，则状态栏不会显示勇士的魔防值
         "enableExperience": true, // 是否涉及经验值；如果此项为false，则状态栏和怪物手册均将不会显示经验值
-        // 重要说明：如果enableMDef和enableExperience均为true，则在状态栏不会显示当前楼层！！！！ //
-
-
-
+        "enableDebuff": true, // 是否涉及debuff，支持三项"poison" 毒"weak": 衰"curse": 咒
         /****** 道具相关 ******/
         "flyNearStair": true, // 是否需要在楼梯边使用传送器
         "bombTrigger": true, // 使用炸弹后是否触发怪物事件（如开门）

@@ -9,15 +9,6 @@ events.prototype.init = function () {
             if (core.isset(callback))
                 callback();
         },
-        'changeFloor': function (data, core, callback) {
-            // core.changeFloor(data.event.data.floorId, data.event.data.heroLoc);
-            var heroLoc = null;
-            if (core.isset(data.event.data.loc)) {
-                heroLoc = {'x': data.event.data.loc[0], 'y': data.event.data.loc[1]};
-            }
-            core.changeFloor(data.event.data.floorId, data.event.data.stair,
-                heroLoc, callback);
-        },
         'getItem': function (data, core, callback) {
             core.getItem(data.event.id, 1, data.x, data.y);
             if (core.isset(callback))
@@ -28,15 +19,15 @@ events.prototype.init = function () {
             if (core.isset(callback))
                 callback();
         },
-        'visitNpc': function (data, core, callback) {
-            core.visitNpc(data.event.npcid, data.x, data.y);
-            if (core.isset(callback))
-                callback();
-        },
-        'openShop': function (data, core, callback) {
-            core.ui.drawShop(data.event.shopid);
-            if (core.isset(callback))
-                callback();
+        'changeFloor': function (data, core, callback) {
+            var heroLoc = null;
+            if (core.isset(data.event.data.loc)) {
+                heroLoc = {'x': data.event.data.loc[0], 'y': data.event.data.loc[1]};
+                if (core.isset(data.event.data.direction))
+                    heroLoc.direction = data.event.data.direction;
+            }
+            core.changeFloor(data.event.data.floorId, data.event.data.stair,
+                heroLoc, data.event.data.time, callback);
         },
         'passNet': function (data, core, callback) {
             core.events.passNet(data);
@@ -45,6 +36,8 @@ events.prototype.init = function () {
         },
         "checkBlock": function (data, core, callback) {
             core.events.checkBlock(data.x, data.y);
+            if (core.isset(callback))
+                callback();
         },
         'action': function (data, core, callback) {
             core.events.doEvents(data.event.data, data.x, data.y);
@@ -68,16 +61,52 @@ main.instance.events = new events();
 ////// 游戏开始事件 //////
 events.prototype.startGame = function (hard) {
 
+    if (core.status.isStarting) return;
+    core.status.isStarting = true;
+
     core.hideStartAnimate(function() {
-        core.drawText(core.firstData.startText, function() {
+        core.drawText(core.clone(core.firstData.startText), function() {
             core.startGame(hard);
+            if (hard=='Easy') { // 简单难度
+                core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
+                // 可以在此设置一些初始福利，比如设置初始生命值可以调用：
+                // core.setStatus("hp", 10000);
+            }
+            if (hard=='Normal') { // 普通难度
+                core.setFlag('hard', 2); // 可以用flag:hard来获得当前难度
+            }
+            if (hard=='Hard') { // 困难难度
+                core.setFlag('hard', 3); // 可以用flag:hard来获得当前难度
+            }
         });
     })
 }
 
-////// 走到某位置时触发事件 //////
-events.prototype.blockEvent = function (data) {
+////// 游戏结束事件 //////
+events.prototype.win = function(reason) {
+    // 获胜
+    core.waitHeroToStop(function() {
+        core.removeGlobalAnimate(0,0,true);
+        core.clearMap('all'); // 清空全地图
+        core.drawText([
+            "\t[结局2]恭喜通关！你的分数是${status:hp}。"
+        ], function () {
+            core.restart();
+        })
+    });
 }
+
+events.prototype.lose = function(reason) {
+    // 失败
+    core.waitHeroToStop(function() {
+        core.drawText([
+            "\t[结局1]你死了。\n如题。"
+        ], function () {
+            core.restart();
+        });
+    })
+}
+
 
 ////// 检查领域、夹击事件 //////
 events.prototype.checkBlock = function (x,y) {
@@ -125,7 +154,7 @@ events.prototype.checkBlock = function (x,y) {
 ////// 转换楼层结束的事件 //////
 events.prototype.afterChangeFloor = function (floorId) {
     if (!core.hasFlag("visited_"+floorId)) {
-        this.doEvents(core.status.thisMap.firstArrive);
+        this.doEvents(core.floors[floorId].firstArrive);
         core.setFlag("visited_"+floorId, true);
     }
 }
@@ -140,13 +169,18 @@ events.prototype.doEvents = function (list, x, y, callback) {
         }
         core.lockControl();
         core.status.event = {'id': 'action', 'data': {
-            'list': list, 'x': x, 'y': y, 'callback': callback
+            'list': core.clone(list), 'x': x, 'y': y, 'callback': callback
         }}
         core.events.doAction();
     });
 }
 
 events.prototype.doAction = function() {
+    // 清空boxAnimate和UI层
+    clearInterval(core.interval.boxAnimate);
+    core.clearMap('ui', 0, 0, 416, 416);
+    core.setAlpha('ui', 1.0);
+
     // 事件处理完毕
     if (core.status.event.data.list.length==0) {
         if (core.isset(core.status.event.data.callback))
@@ -154,6 +188,7 @@ events.prototype.doAction = function() {
         core.ui.closePanel(false);
         return;
     }
+
     var data = core.status.event.data.list.shift();
     core.status.event.data.current = data;
 
@@ -172,14 +207,161 @@ events.prototype.doAction = function() {
         case "text": // 文字/对话
             core.ui.drawTextBox(data.data);
             break;
-        case "disappear": // 消失
-            core.removeBlock('event', x, y);
+        case "show": // 显示
+            if (core.isset(data.time) && data.time>0 && (!core.isset(data.floorId) || data.floorId==core.status.floorId)) {
+                core.animateBlock(data.loc[0],data.loc[1],'show', data.time, function () {
+                    core.addBlock(data.loc[0],data.loc[1],data.floorId);
+                    core.events.doAction();
+                });
+            }
+            else {
+                core.addBlock(data.loc[0],data.loc[1],data.floorId)
+                this.doAction();
+            }
+            break;
+        case "hide": // 消失
+            var toX=x, toY=y, toId=core.status.floorId;
+            if (core.isset(data.loc)) {
+                toX=data.loc[0]; toY=data.loc[1];
+            }
+            if (core.isset(data.floorId)) toId=data.floorId;
+            core.removeBlock(toX,toY,toId)
+            if (core.isset(data.time) && data.time>0 && toId==core.status.floorId) {
+                core.animateBlock(toX,toY,'hide',data.time, function () {
+                    core.events.doAction();
+                });
+            }
+            else this.doAction();
+            break;
+        case "move": // 移动事件
+            core.moveBlock(x,y,data.steps,data.time,data.immediateHide,function() {
+                core.events.doAction();
+            })
+            break;
+        case "changeFloor": // 楼层转换
+            var heroLoc = {"x": data.loc[0], "y": data.loc[1]};
+            if (core.isset(data.direction)) heroLoc.direction=data.direction;
+            core.changeFloor(data.floorId||core.status.floorId, null, heroLoc, data.time, function() {
+                core.lockControl();
+                core.events.doAction();
+            });
+            break;
+        case "changePos": // 直接更换勇士位置，不切换楼层
+            core.clearMap('hero', 0, 0, 416, 416);
+            core.setHeroLoc('x', data.loc[0]);
+            core.setHeroLoc('y', data.loc[1]);
+            if (core.isset(data.direction)) core.setHeroLoc('direction', data.direction);
+            core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+            this.doAction();
+            break;
+        case "openDoor": // 开一个门，包括暗墙
+            var floorId=data.floorId || core.status.floorId;
+            var block=core.getBlock(data.loc[0], data.loc[1], floorId);
+            if (block!=null) {
+                if (floorId==core.status.floorId)
+                    core.openDoor(block.block.event.id, block.block.x, block.block.y, false, function() {
+                        core.events.doAction();
+                    })
+                else {
+                    core.removeBlock(block.block.x,block.block.y,floorId);
+                    this.doAction();
+                }
+                break;
+            }
+            this.doAction();
+            break;
+        case "openShop": // 打开一个全局商店
+            core.events.openShop(data.id);
+            break;
+        case "battle": // 强制战斗
+            core.battle(data.id,null,null,true,function() {
+                core.events.doAction();
+            })
+            break;
+        case "trigger": // 触发另一个事件；当前事件会被立刻结束。需要另一个地点的事件是有效的
+            var toX=data.loc[0], toY=data.loc[1];
+            var block=core.getBlock(toX, toY);
+            if (block!=null) {
+                block = block.block;
+                if (core.isset(block.event) && block.event.trigger=='action') {
+                    // 触发
+                    core.status.event = {'id': 'action', 'data': {
+                        'list': core.clone(block.event.data), 'x': block.x, 'y': block.y, 'callback': core.status.event.data.callback
+                    }}
+                }
+            }
+            this.doAction();
+            break;
+        case "playSound":
+            var name=data.name.split(".");
+            if (name.length==2)
+                core.playSound(name[0],name[1]);
+            this.doAction();
+            break;
+        case "setValue":
+            try {
+                var value=core.calValue(data.value);
+                // 属性
+                if (data.name.indexOf("status:")==0) {
+                    value=parseInt(value);
+                    core.setStatus(data.name.substring(7), value);
+                }
+                // 道具
+                if (data.name.indexOf("item:")==0) {
+                    value=parseInt(value);
+                    var itemId=data.name.substring(5);
+                    if (value>core.itemCount(itemId)) // 效果
+                        core.getItem(itemId,value-core.itemCount(itemId));
+                    else core.setItem(itemId, value);
+                }
+                // flag
+                if (data.name.indexOf("flag:")==0) {
+                    core.setFlag(data.name.substring(5), value);
+                }
+            }
+            catch (e) {console.log(e)}
+            core.updateStatusBar();
+            this.doAction();
+            break;
+        case "if": // 条件判断
+            if (core.calValue(data.condition))
+                core.events.insertAction(data["true"])
+            else
+                core.events.insertAction(data["false"])
+            this.doAction();
+            break;
+        case "choices": // 提供选项
+            core.ui.drawChoices(data.text, data.choices);
+            break;
+        case "win":
+            core.events.win(data.reason);
+            break;
+        case "lose":
+            core.events.lose(data.reason);
+            break;
+        case "function":
+            if (core.isset(data["function"]))
+                data["function"]();
+            this.doAction();
+            break;
+        case "update":
+            core.updateStatusBar();
             this.doAction();
             break;
         case "sleep": // 等待多少毫秒
             setTimeout(function () {
                 core.events.doAction();
-            }, data.data);
+            }, data.time);
+            break;
+        case "revisit": // 立刻重新执行该事件
+            var block=core.getBlock(x,y); // 重新获得事件
+            if (block!=null) {
+                block = block.block;
+                if (core.isset(block.event) && block.event.trigger=='action') {
+                    core.status.event.data.list = core.clone(block.event.data);
+                }
+            }
+            this.doAction();
             break;
         case "exit": // 立刻结束事件
             core.status.event.data.list = [];
@@ -192,7 +374,51 @@ events.prototype.doAction = function() {
     return;
 }
 
+////// 往当前事件列表之前添加一个或多个事件 //////
+events.prototype.insertAction = function (action) {
+    core.unshift(core.status.event.data.list, action)
+}
+
+////// 打开商店 //////
+events.prototype.openShop = function(shopId, needVisited) {
+    var shop = core.status.shops[shopId];
+    shop.times = shop.times || 0;
+    shop.visited = shop.visited || false;
+    if (needVisited && !shop.visited) {
+        if (shop.times==0) core.drawTip("该商店尚未开启");
+        else core.drawTip("该商店已失效");
+        return;
+    }
+    shop.visited = true;
+
+    core.ui.closePanel();
+    core.lockControl();
+    core.status.event = {'id': 'shop', 'data': {'id': shopId, 'shop': shop}};
+    // 拼词
+    var content = "\t["+shop.name+","+shop.icon+"]";
+    var times = shop.times, need=eval(shop.need);
+    if (need<0) need="若干";
+    var use=shop.use=="experience"?"经验":"金币";
+    content = content+"勇敢的武士啊，给我"+need+"\n"+use+"，你就可以："
+    var choices = [];
+    for (var i=0;i<shop.choices.length;i++) {
+        var choice = shop.choices[i];
+        var text = choice.text;
+        if (core.isset(choice.need))
+            text += "（"+eval(choice.need)+use+"）"
+        choices.push({"text": text});
+    }
+    choices.push({"text": "离开"});
+    core.ui.drawChoices(content, choices);
+}
+
+events.prototype.disableQuickShop = function (shopId) {
+    core.status.shops[shopId].visited = false;
+
+}
+
 ////// 降低难度 //////
+/*
 events.prototype.decreaseHard = function() {
     if (core.status.hard == 0) {
         core.drawTip("当前已是难度0，不能再降低难度了");
@@ -212,10 +438,12 @@ events.prototype.decreaseHard = function() {
         core.ui.drawSettings(false);
     });
 }
+*/
 
 ////// 能否使用快捷商店 //////
-events.prototype.canUseQuickShop = function(index) {
-    if (core.status.floorId == 'MT20') return '当前不能使用快捷商店。';
+events.prototype.canUseQuickShop = function(shopIndex) {
+    if (core.isset(core.values.cannotUseQuickShop) && core.values.cannotUseQuickShop.indexOf(core.status.floorId)>=0)
+        return '当前不能使用快捷商店。';
     return null;
 }
 
@@ -249,14 +477,20 @@ events.prototype.afterBattle = function(enemyId,x,y,callback) {
     // 衰弱
     if (special==13 && !core.hasFlag('weak')) {
         core.setFlag('weak', true);
-        core.status.hero.atk-=core.flags.weakValue;
-        core.status.hero.def-=core.flags.weakValue;
+        core.status.hero.atk-=core.values.weakValue;
+        core.status.hero.def-=core.values.weakValue;
         core.updateStatusBar();
     }
     // 诅咒
     if (special==14 && !core.hasFlag('curse')) {
         core.setFlag('curse', true);
         core.updateStatusBar();
+    }
+
+    // 如果已有事件正在处理中
+    if (core.status.lockControl) {
+        if (core.isset(callback)) callback();
+        return;
     }
 
     // 检查处理后的事件。
@@ -273,6 +507,13 @@ events.prototype.afterBattle = function(enemyId,x,y,callback) {
 
 /****** 开完门 ******/
 events.prototype.afterOpenDoor = function(doorId,x,y,callback) {
+
+    // 如果已有事件正在处理中
+    if (core.status.lockControl) {
+        if (core.isset(callback)) callback();
+        return;
+    }
+
     // 检查处理后的事件。
     var event = core.floors[core.status.floorId].afterOpenDoor[x+","+y];
     if (core.isset(event)) {
@@ -289,49 +530,31 @@ events.prototype.afterOpenDoor = function(doorId,x,y,callback) {
 events.prototype.passNet = function (data) {
     // 有鞋子
     if (core.hasItem('shoes')) return;
-    if (data.event.id=='lavaNet') {
-        core.status.hero.hp -= core.flags.lavaDamage;
+    if (data.event.id=='lavaNet') { // 血网
+        core.status.hero.hp -= core.values.lavaDamage;
         if (core.status.hero.hp<=0) {
             core.status.hero.hp=0;
             core.updateStatusBar();
             core.events.lose('lava');
             return;
         }
-        core.updateStatusBar();
-        core.drawTip('经过血网，生命-'+core.flags.lavaDamage);
+        core.drawTip('经过血网，生命-'+core.values.lavaDamage);
     }
-    if (data.event.id=='poisonNet') {
+    if (data.event.id=='poisonNet') { // 毒网
         if (core.hasFlag('poison')) return;
         core.setFlag('poison', true);
-        core.updateStatusBar();
     }
-    if (data.event.id=='weakNet') {
+    if (data.event.id=='weakNet') { // 衰网
         if (core.hasFlag('weak')) return;
         core.setFlag('weak', true);
-        core.status.hero.atk-=core.flags.weakValue;
-        core.status.hero.def-=core.flags.weakValue;
-        core.updateStatusBar();
+        core.status.hero.atk-=core.values.weakValue;
+        core.status.hero.def-=core.values.weakValue;
     }
-    if (data.event.id=='curseNet') {
+    if (data.event.id=='curseNet') { // 咒网
         if (core.hasFlag('curse')) return;
         core.setFlag('curse', true);
-        core.updateStatusBar();
     }
-}
-
-// NPC自定义操作
-events.prototype.npcCustomAction = function (npcData) {
-
-}
-
-// 当点击(x,y)位置后自定义操作
-events.prototype.npcCustomActionOnClick = function (npcData, x, y) {
-
-}
-
-// NPC自定义事件处理
-events.prototype.npcCustomEffect = function (effect, npc) {
-
+    core.updateStatusBar();
 }
 
 // 存档事件前一刻的处理
@@ -343,31 +566,6 @@ events.prototype.beforeSaveData = function(data) {
 events.prototype.afterLoadData = function(data) {
 
 }
-
-events.prototype.win = function(reason) {
-    // 获胜
-    core.waitHeroToStop(function() {
-        core.clearMap('all');
-        core.rmGlobalAnimate(0,0,true);
-        core.drawText([
-            "\t[结局3]恭喜通关！"
-        ], function () {
-            core.restart();
-        })
-    });
-}
-
-events.prototype.lose = function(reason) {
-    // 失败
-    core.waitHeroToStop(function() {
-        core.drawText('\t[结局1]你死了。', function () {
-            core.restart();
-        });
-    })
-}
-
-
-
 
 
 /******************************************/
@@ -382,7 +580,19 @@ events.prototype.clickAction = function (x,y) {
         this.doAction();
         return;
     }
-
+    if (core.status.event.data.type=='choices') {
+        // 选项
+        var data = core.status.event.data.current;
+        var choices = data.choices;
+        if (choices.length==0) return;
+        if (x >= 5 && x <= 7) {
+            var topIndex = 6 - parseInt((choices.length - 1) / 2);
+            if (y>=topIndex && y<topIndex+choices.length) {
+                this.insertAction(choices[y-topIndex].action);
+                this.doAction();
+            }
+        }
+    }
 }
 
 // 怪物手册
@@ -419,22 +629,19 @@ events.prototype.clickFly = function(x,y) {
 
 // 商店
 events.prototype.clickShop = function(x,y) {
-    if (core.status.event.data == null) {
-        console.log("发生错误，商店不存在？");
-        return;
-    }
+    var shop = core.status.event.data.shop;
+    var choices = shop.choices;
     if (x >= 5 && x <= 7) {
-        if (y >= 5 && y <= 8) {
-            if (y >= 5 + core.status.event.data.choices.length) return;
-
+        var topIndex = 6 - parseInt(choices.length / 2);
+        if (y>=topIndex && y<topIndex+choices.length) {
+            //this.insertAction(choices[y-topIndex].action);
+            //this.doAction();
             var money = core.getStatus('money'), experience = core.getStatus('experience');
-
-            var shop = core.status.event.data;
             var times = shop.times, need = eval(shop.need);
             var use = shop.use;
             var use_text = use=='money'?"金币":"经验";
 
-            var choice = shop.choices[y-5];
+            var choice = choices[y-topIndex];
             if (core.isset(choice.need))
                 need = eval(choice.need);
 
@@ -444,28 +651,36 @@ events.prototype.clickShop = function(x,y) {
             }
 
             eval(use+'-='+need);
+
             core.setStatus('money', money);
             core.setStatus('experience', experience);
+
+            // 更新属性
+            choice.effect.split(";").forEach(function (t) {
+                if (t.indexOf("status:")==0) {
+                    eval(t.replace("status:", "core.status.hero."));
+                }
+                else if (t.indexOf("item:")==0) {
+                    eval(t.replace("item:", "core.getItem('").replace("+=", "', ")+")");
+                }
+            });
             core.updateStatusBar();
-
-            core.npcEffect(choice.effect);
-
-            core.status.event.data.times++;
-            core.ui.openShop(core.status.event.data.id);
-            return;
+            shop.times++;
+            this.openShop(core.status.event.data.id);
         }
-
-        // 退出商店
-        if (y == 9) {
-            core.status.event.data = null;
-            core.ui.closePanel();
-            return;
+        // 离开
+        else if (y==topIndex+choices.length) {
+            core.status.boxAnimateObjs = [];
+            core.setBoxAnimate();
+            if (core.status.event.data.fromList)
+                core.ui.drawQuickShop();
+            else core.ui.closePanel();
         }
     }
 }
 
 // 快捷商店
-events.prototype.clickSelectShop = function(x,y) {
+events.prototype.clickQuickShop = function(x, y) {
     if (x >= 5 && x <= 7) {
         var shopList = core.status.shops, keys = Object.keys(shopList);
         var topIndex = 6 - parseInt((keys.length + 1) / 2);
@@ -477,13 +692,9 @@ events.prototype.clickSelectShop = function(x,y) {
                 core.drawText(reason);
                 return;
             }
-            var shop=shopList[keys[y - topIndex]];
-            if (!shop.visited) {
-                if (shop.times==0) core.drawTip('该商店尚未开启');
-                else core.drawTip('该商店已失效');
-                return;
-            }
-            core.ui.drawShop(keys[y - topIndex]);
+            this.openShop(keys[y - topIndex], true);
+            if (core.status.event.id=='shop')
+                core.status.event.data.fromList = true;
         }
         if (y == exitIndex) {
             core.ui.closePanel();
@@ -567,10 +778,18 @@ events.prototype.clickSettings = function (x,y) {
         core.changeSoundStatus();
         core.ui.drawSettings(false);
     }
-    if (y == 4) core.ui.drawSelectShop();
-    if (y == 5) this.decreaseHard();
-    if (y == 6) {
+    if (y == 4) core.ui.drawQuickShop();
+    // if (y == 5) this.decreaseHard();
+    if (y == 5) {
         core.ui.drawSyncSave();
+    }
+    if (y == 6) {
+        core.ui.drawConfirmBox("你确定要清空所有本地存档吗？", function() {
+            localStorage.clear();
+            core.drawText("\t[操作成功]你的本地所有存档已被清空。");
+        }, function() {
+            core.ui.drawSettings(false);
+        })
     }
     if (y == 7) {
         core.ui.drawConfirmBox("你确定要重新开始吗？", function () {
@@ -586,69 +805,6 @@ events.prototype.clickSettings = function (x,y) {
     }
     if (y == 9) core.ui.closePanel();
     return;
-}
-
-events.prototype.clickNPC = function(x,y) {
-
-    var data = core.status.event.data.current;
-    if (core.isset(data)) {
-
-        // 对话，任意位置继续
-        if (data.action == 'text') {
-            core.npcAction();
-            return;
-        }
-        if (data.action == 'choices') {
-            if (x >= 5 && x <= 7) {
-                if (y >= 5 && y <= 8) {
-                    if (y >= 5 + data.choices.length) return;
-
-                    var choice = data.choices[y - 5];
-                    if (core.isset(choice.need)) {
-                        var able = true;
-                        choice.need.split(';').forEach(function (e) {
-                            var ones = e.split(',');
-                            var type = ones[0], key = ones[1], value = ones[2];
-                            if (type == 'status') {
-                                if (core.getStatus(key)<parseInt(value)) able=false;
-                            }
-                            else if (type == 'item') {
-                                if (core.itemCount(key)<parseInt(value)) able=false;
-                            }
-                        });
-                        if (!able) {
-                            core.drawTip("无法选择此项");
-                            return;
-                        }
-                        choice.need.split(';').forEach(function (e) {
-                            var ones = e.split(',');
-                            var type = ones[0], key = ones[1], value = ones[2];
-                            if (type == 'status') {
-                                core.setStatus(key, core.getStatus(key)-parseInt(value));
-                            }
-                            else if (type == 'item') {
-                                core.setItem(key, core.itemCount(key)-parseInt(value));
-                            }
-                        });
-                    }
-                    core.npcEffect(choice.effect);
-                    core.npcAction();
-                    return;
-                }
-
-                // 退出商店
-                if (y == 9 && !(core.isset(data.cancel) && !data.cancel)) {
-                    core.status.event.data = null;
-                    core.ui.closePanel();
-                    return;
-                }
-            }
-        }
-        if (data.action == 'custom') {
-            core.events.npcCustomActionOnClick(data, x, y);
-            return;
-        }
-    }
 }
 
 /*********** 点击事件 END ***************/

@@ -1,14 +1,13 @@
 function maps() {}
 maps.prototype.init = function() {}
 
-maps.prototype.loadFloor = function (floorId, map, enables) {
+maps.prototype.loadFloor = function (floorId, map) {
     var floor = core.floors[floorId];
     var content = {};
     content['floorId'] = floor.floorId;
     content['name'] = floor.name;
     content['title'] = floor.title;
     content['canFlyTo'] = floor.canFlyTo;
-    content['firstArrive'] = floor.firstArrive;
     if (!core.isset(map)) map=floor.map;
     var blocks = [];
     for (var i = 0; i < 13; i++) {
@@ -36,6 +35,9 @@ maps.prototype.loadFloor = function (floorId, map, enables) {
                 }
             }
             this.addEvent(block,j,i,floor.events[j+","+i])
+            this.addChangeFloor(block,j,i,floor.changeFloor[j+","+i]);
+            if (floor.checkBlock.indexOf(j+","+i)>=0)
+                this.addEvent(block,j,i,{"trigger":"checkBlock"});
             if (core.isset(block.event)) blocks.push(block);
         }
     }
@@ -57,6 +59,7 @@ maps.prototype.getBlock = function (x, y, id) {
             enable = true;
         }
     }
+    id=parseInt(id);
     var tmp = {'x': x, 'y': y, 'id': id};
     if (enable!=null) tmp.enable = enable;
 
@@ -232,9 +235,11 @@ maps.prototype.addEvent = function (block, x, y, event) {
     else if (event instanceof Array) {
         event = {"data": event};
     }
+    if (!core.isset(event.data))
+        event.data = [];
 
     // 覆盖enable
-    if (!core.isset(block.event.enable) && core.isset(event.enable)) {
+    if (!core.isset(block.enable) && core.isset(event.enable)) {
         block.enable=event.enable;
     }
     // 覆盖trigger
@@ -242,12 +247,20 @@ maps.prototype.addEvent = function (block, x, y, event) {
         if (core.isset(event.trigger)) block.event.trigger=event.trigger;
         else block.event.trigger='action';
     }
+    else if (core.isset(event.trigger) && event.trigger!='checkBlock') {
+        block.event.trigger=event.trigger;
+    }
     // 覆盖其他属性
     for (var key in event) {
         if (key!="enable" && key!="trigger") {
             block.event[key]=core.clone(event[key]);
         }
     }
+}
+
+maps.prototype.addChangeFloor = function (block, x, y, event) {
+    if (!core.isset(event)) return;
+    this.addEvent(block, x, y, {"trigger": "changeFloor", "data": event});
 }
 
 maps.prototype.initMaps = function (floorIds) {
@@ -260,20 +273,16 @@ maps.prototype.initMaps = function (floorIds) {
 }
 
 maps.prototype.save = function(maps, floorId) {
-    if (floorId==undefined || floorId==null) {
-        var map = [];
+    if (!core.isset(floorId)) {
+        var map = {};
         for (var id in maps) {
-            // map[id] = this.save(maps, id);
-            map.push(this.save(maps, id));
+            map[id] = this.save(maps, id);
+            // map.push(this.save(maps, id));
         }
         return map;
     }
+
     var thisFloor = maps[floorId];
-    var floor = {};
-    floor.floorId = thisFloor.floorId;
-    floor.name = thisFloor.name;
-    floor.title = thisFloor.title;
-    floor.canFlyTo = thisFloor.canFlyTo;
 
     var blocks = [];
     for (var x=0;x<13;x++) {
@@ -283,44 +292,24 @@ maps.prototype.save = function(maps, floorId) {
         }
     }
     thisFloor.blocks.forEach(function (block) {
-        blocks[block.x][block.y] = block.id;
+        if (core.isset(block.enable)) {
+            if (block.enable) blocks[block.y][block.x] = block.id+":t";
+            else blocks[block.y][block.x] = block.id+":f";
+        }
+        else blocks[block.y][block.x] = block.id;
     });
-    floor.blocks = blocks;
-    return floor;
+    return blocks;
 }
 
 maps.prototype.load = function (data, floorId) {
     if (floorId == undefined) {
-        var map = [];
+        var map = {};
         for (var id in data) {
-            map[data[id].floorId] = this.load(data, data[id].floorId);
+            map[id] = this.load(data, id);
         }
         return map;
     }
-    var x = null;
-    for (var id in data) {
-        if (data[id].floorId == floorId) {
-            x = data[id];
-            break;
-        }
-    }
-    if (x==null) return {};
-
-    var content = {};
-    content['floorId'] = x.floorId;
-    content['name'] = x.name;
-    content['title'] = x.title;
-    content['canFlyTo'] = x.canFlyTo;
-    var blocks = [];
-    for (var i = 0; i < 13; i++) {
-        for (var j = 0; j < 13; j++) {
-            var id = x.blocks[i][j];
-            var block = this.getBlock(x.floorId, x.name, i, j, id);
-            if (block!=null) blocks.push(block);
-        }
-    }
-    content['blocks'] = blocks;
-    return this.updateNoPass(content);
+    return this.loadFloor(floorId, data[floorId]);
 }
 
 main.instance.maps = new maps();

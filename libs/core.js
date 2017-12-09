@@ -18,8 +18,7 @@ function core() {
         'items': {},
         'enemys': {},
         'icons': {},
-        'events': {},
-        'npcs': {}
+        'events': {}
     }
     this.timeout = {
         'getItemTipTimeout': null
@@ -83,7 +82,6 @@ function core() {
         // event事件
         'savePage': null,
         'shops': {},
-        'npcs': {},
         'event': {
             'id': null,
             'data': null
@@ -113,9 +111,9 @@ core.prototype.init = function (dom, statusBar, canvas, images, sounds, floorIds
         core[key] = coreData[key];
     }
     core.flags = core.data.flags;
+    core.values = core.clone(core.data.values);
     core.firstData = core.data.getFirstData();
     core.initStatus.shops = core.firstData.shops;
-    core.initStatus.npcs = core.firstData.npcs;
     core.dom.versionLabel.innerHTML = core.firstData.version;
     core.dom.logoLabel.innerHTML = core.firstData.title;
     core.material.items = core.items.getItems();
@@ -123,7 +121,6 @@ core.prototype.init = function (dom, statusBar, canvas, images, sounds, floorIds
     core.material.enemys = core.clone(core.enemys.getEnemys());
     core.material.icons = core.icons.getIcons();
     core.material.events = core.events.getEvents();
-    core.material.npcs = core.npcs.getNpcs();
 
     // test if iOS
     core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
@@ -140,8 +137,7 @@ core.prototype.init = function (dom, statusBar, canvas, images, sounds, floorIds
 
     core.loader(function () {
         console.log(core.material);
-        // core.playGame();
-        core.showStartAnimate(function() {});
+        core.showStartAnimate();
     });
 }
 
@@ -178,7 +174,7 @@ core.prototype.hideStartAnimate = function (callback) {
         if (opacityVal < 0) {
             clearInterval(startAnimate);
             core.dom.startPanel.style.display = 'none';
-            callback();
+            if (core.isset(callback)) callback();
         }
         core.dom.startPanel.style.opacity = opacityVal;
     }, 20);
@@ -193,41 +189,41 @@ core.prototype.setStartLoadTipText = function (text) {
 }
 
 core.prototype.loader = function (callback) {
-    var loadedImageNum = 0, allImageNum = 0, loadSoundNum = 0, allSoundNum = 0;
+    var loadedImageNum = 0, allImageNum = 0, allSoundNum = 0;
     allImageNum = core.images.length;
     for (var key in core.sounds) {
         allSoundNum += core.sounds[key].length;
     }
-        for (var i = 0; i < core.images.length; i++) {
-            core.loadImage(core.images[i], function (imgName, image) {
-                core.setStartLoadTipText('正在加载图片 ' + imgName + "...");
-                imgName = imgName.split('-');
-                imgName = imgName[0];
-                core.material.images[imgName] = image;
-                loadedImageNum++;
-                core.setStartLoadTipText(imgName + ' 加载完毕...');
-                core.setStartProgressVal(loadedImageNum * (100 / allImageNum));
-                if (loadedImageNum == allImageNum) {
-                    // 加载音频
-                    for (var key in core.sounds) {
-                        for (var i = 0; i < core.sounds[key].length; i++) {
-                            var soundName=core.sounds[key][i];
-                            soundName = soundName.split('-');
-                            var sound = new Audio();
-                            sound.preload = 'none';
-                            sound.src = 'sounds/' + soundName[0] + '.' + key;
-                            if (soundName[1] == 'loop') {
-                                sound.loop = 'loop';
-                            }
-
-                            if (!core.isset(core.material.sounds[key]))
-                                core.material.sounds[key] = {};
-                            core.material.sounds[key][soundName[0]] = sound;
+    for (var i = 0; i < core.images.length; i++) {
+        core.loadImage(core.images[i], function (imgName, image) {
+            core.setStartLoadTipText('正在加载图片 ' + imgName + "...");
+            imgName = imgName.split('-');
+            imgName = imgName[0];
+            core.material.images[imgName] = image;
+            loadedImageNum++;
+            core.setStartLoadTipText(imgName + ' 加载完毕...');
+            core.setStartProgressVal(loadedImageNum * (100 / allImageNum));
+            if (loadedImageNum == allImageNum) {
+                // 加载音频
+                for (var key in core.sounds) {
+                    for (var i = 0; i < core.sounds[key].length; i++) {
+                        var soundName=core.sounds[key][i];
+                        soundName = soundName.split('-');
+                        var sound = new Audio();
+                        sound.preload = 'none';
+                        sound.src = 'sounds/' + soundName[0] + '.' + key;
+                        if (soundName[1] == 'loop') {
+                            sound.loop = 'loop';
                         }
+
+                        if (!core.isset(core.material.sounds[key]))
+                            core.material.sounds[key] = {};
+                        core.material.sounds[key][soundName[0]] = sound;
                     }
-                    callback();
                 }
-            });
+                callback();
+            }
+        });
     }
 }
 
@@ -268,7 +264,6 @@ core.prototype.loadSound = function() {
 
 core.prototype.loadSoundItem = function (toLoadList) {
     if (toLoadList.length==0) {
-        // if (core.musicStatus.bgmStatus==0) core.musicStatus.bgmStatus=-1;
         if (core.musicStatus.bgmStatus>0) return;
         core.musicStatus.bgmStatus=1;
         if (core.musicStatus.soundStatus)
@@ -327,10 +322,9 @@ core.prototype.resetStatus = function(hero, hard, floorId, maps) {
 core.prototype.startGame = function (hard, callback) {
     console.log('开始游戏');
 
-    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId,
-        core.initStatus.maps);
+    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, core.initStatus.maps);
 
-    core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, function() {
+    core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
         core.setHeroMoveTriggerInterval();
         if (core.isset(callback)) callback();
     });
@@ -338,17 +332,6 @@ core.prototype.startGame = function (hard, callback) {
 
 
 core.prototype.restart = function() {
-
-    /*
-    core.resetStatus(core.firstData.hero, core.firstData.hard, core.firstData.floorId,
-        core.initStatus.maps);
-
-    core.changeFloor(core.firstData.floorId, null, core.firstData.hero.loc, function() {
-        core.drawTip('重新开始游戏');
-        core.setHeroMoveTriggerInterval();
-    });
-
-    */
     core.showStartAnimate();
 }
 
@@ -397,9 +380,6 @@ core.prototype.pressKey = function (keyCode) {
         window.setTimeout(function(){core.pressKey(keyCode);},30);
     }
 }
-
-
-
 
 core.prototype.keyDown = function(keyCode) {
 	if(!core.status.played) {
@@ -463,11 +443,17 @@ core.prototype.keyUp = function(keyCode) {
 	        core.ui.closePanel();
         if (core.status.event.id == 'load' && (keyCode==76 || keyCode==27))
             core.ui.closePanel();
-	    if ((core.status.event.id == 'shop' || core.status.event.id == 'settings'
-            || core.status.event.id == 'selectShop') && keyCode==27)
+	    if ((core.status.event.id == 'settings' || core.status.event.id == 'selectShop') && keyCode==27)
 	        core.ui.closePanel();
 	    if (core.status.event.id == 'selectShop' && keyCode==75)
 	        core.ui.closePanel();
+	    if (core.status.event.id == 'shop' && keyCode==27) {
+            core.status.boxAnimateObjs = [];
+            core.setBoxAnimate();
+            if (core.status.event.data.fromList)
+                core.ui.drawQuickShop();
+            else core.ui.closePanel();
+        }
         if (core.status.event.id == 'toolbox' && (keyCode==84 || keyCode==27))
             core.ui.closePanel();
         if (core.status.event.id == 'about' && (keyCode==13 || keyCode==32))
@@ -504,7 +490,7 @@ core.prototype.keyUp = function(keyCode) {
             core.turnHero();
             break;
         case 75: // K
-            core.ui.drawSelectShop(true);
+            core.ui.drawQuickShop(true);
             break;
         case 37: // UP
             break;
@@ -644,7 +630,7 @@ core.prototype.onclick = function (x, y, stepPostfix) {
 
     // 快捷商店
     if (core.status.event.id == 'selectShop') {
-        core.events.clickSelectShop(x,y);
+        core.events.clickQuickShop(x,y);
         return;
     }
 
@@ -689,132 +675,14 @@ core.prototype.onclick = function (x, y, stepPostfix) {
         return;
     }
 
-    // NPC
-    if (core.status.event.id == 'npc') {
-        core.events.clickNPC(x,y);
-        return;
-    }
-
     // 同步存档
     if (core.status.event.id == 'syncSave') {
         if (x>=4 && x<=8) {
             if (y==5) {
-                core.ui.drawConfirmBox("你确定要将本地存档同步到服务器吗？", function(){
-                    // console.log("同步存档...");
-                    core.ui.drawWaiting("正在同步，请稍后...");
-
-                    var formData = new FormData();
-                    formData.append('type', 'save');
-                    var saves = [];
-                    for (var i=1;i<=180;i++) {
-                        var data = core.getLocalStorage("save"+i, null);
-                        if (core.isset(data)) {
-                            saves.push(data);
-                        }
-                    }
-                    var save_text = JSON.stringify(saves);
-                    formData.append('data', save_text);
-
-                    // send
-                    var xhr = new XMLHttpRequest();
-                    xhr.open("POST", "../sync.php");
-                    xhr.timeout = 1000;
-                    xhr.onload = function(e) {
-                        if (xhr.status==200) {
-                            // console.log("同步成功。");
-                            var response = JSON.parse(xhr.response);
-                            if (response.code<0) {
-                                core.drawText("出错啦！\n无法同步存档到服务器。");
-                            }
-                            else {
-                                core.drawText("同步成功！\n\n您的存档编号： "+response.code+"\n您的存档密码： "+response.msg+"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。")
-                            }
-                        }
-                        else {
-                            core.drawText("出错啦！\n无法同步存档到服务器。");
-                        }
-                    };
-                    xhr.ontimeout = function(e) {
-                        console.log(e);
-                        core.drawText("出错啦！\n无法同步存档到服务器。");
-                    }
-                    xhr.onerror = function(e) {
-                        console.log(e);
-                        core.drawText("出错啦！\n无法同步存档到服务器。");
-                    }
-                    xhr.send(formData);
-                }, function() {
-                    core.ui.drawSyncSave();
-                })
+                core.syncSave("save");
             }
             if (y==6) {
-                core.ui.drawConfirmBox("你确定要从服务器加载存档吗？\n该操作将覆盖所有本地存档且不可逆！", function(){
-                    var id = prompt("请输入存档编号：");
-                    if (id==null || id=="") {
-                        core.ui.drawSyncSave(); return;
-                    }
-                    var password = prompt("请输入存档密码：");
-                    if (password==null || password=="") {
-                        core.ui.drawSyncSave(); return;
-                    }
-                    core.ui.drawWaiting("正在同步，请稍后...");
-
-                    var formData = new FormData();
-                    formData.append('type', 'load');
-                    formData.append('id', id);
-                    formData.append('password', password);
-
-                    // send
-                    var xhr = new XMLHttpRequest();
-                    xhr.open("POST", "../sync.php");
-                    xhr.timeout = 1000;
-                    xhr.onload = function(e) {
-                        if (xhr.status==200) {
-                            // console.log("同步成功。");
-                            var response = JSON.parse(xhr.response);
-                            switch (response.code) {
-                                case 0:
-                                    // 成功
-                                    var data=JSON.parse(response.msg);
-                                    // console.log(data);
-                                    for (var i=1;i<=180;i++) {
-                                        if (i<=data.length) {
-                                            core.setLocalStorage("save"+i, data[i-1]);
-                                        }
-                                        else {
-                                            core.removeLocalStorage("save"+i);
-                                        }
-                                    }
-                                    core.drawText("同步成功！\n你的本地所有存档均已被覆盖。");
-                                    break;
-                                case -1:
-                                    core.drawText("出错啦！\n存档编号"+id+"不存在！");
-                                    break;
-                                case -2:
-                                    core.drawText("出错啦！\n存档密码错误！");
-                                    break;
-                                default:
-                                    core.drawText("出错啦！\n无法从服务器同步存档。");
-                                    break;
-                            }
-
-                        }
-                        else {
-                            core.drawText("出错啦！\n无法从服务器同步存档。");
-                        }
-                    };
-                    xhr.ontimeout = function(e) {
-                        console.log(e);
-                        core.drawText("出错啦！\n无法从服务器同步存档。");
-                    }
-                    xhr.onerror = function(e) {
-                        console.log(e);
-                        core.drawText("出错啦！\n无法从服务器同步存档。");
-                    }
-                    xhr.send(formData);
-                }, function() {
-                    core.ui.drawSyncSave();
-                })
+                core.syncSave("load");
             }
         }
         if (x>=5 && x<=7 && y==7) {
@@ -858,7 +726,7 @@ core.prototype.stopAutomaticRoute = function () {
 }
 
 core.prototype.continueAutomaticRoute = function () {
-    //此函数只应由events.afterOpenDoor和events.afterBattle调用
+    // 此函数只应由events.afterOpenDoor和events.afterBattle调用
     var moveStep = core.status.moveStepBeforeStop;
     core.status.moveStepBeforeStop = [];
     if(moveStep.length===0)return;
@@ -884,15 +752,6 @@ core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
         core.turnHero();
         return;
     }
-    // 直接移动
-    /*
-    if(core.status.automaticRoutingTemp.moveStep.length != 0 && core.status.automaticRoutingTemp.destX == destX && core.status.automaticRoutingTemp.destY == destY) {
-        core.status.automaticRouting = true;
-        core.setAutoHeroMove(core.status.automaticRoutingTemp.moveStep);
-        core.status.automaticRoutingTemp = {'destX': 0, 'destY': 0, 'moveStep': []};
-        return;
-    }
-    */
     var step = 0;
     var tempStep = null;
     var moveStep;
@@ -902,7 +761,7 @@ core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
             moveStep=[];
         } else {
             core.canvas.ui.clearRect(0, 0, 416, 416);
-            return false;
+            return;
         }
     }
     moveStep=moveStep.concat(stepPostfix);
@@ -988,9 +847,6 @@ core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
 core.prototype.automaticRoute = function (destX, destY) {
     var startX = core.getHeroLoc('x');
     var startY = core.getHeroLoc('y');
-    var nowX = startX;
-    var nowY = startY;
-    var scanItem = {'x': 0, 'y': 0};
     var scan = {
         'up': {'x': 0, 'y': -1},
         'left': {'x': -1, 'y': 0},
@@ -1236,7 +1092,6 @@ core.prototype.setHeroMoveTriggerInterval = function () {
                         core.status.autoHeroMove = false;
                         core.status.destStep = 0;
                         core.status.movedStep = 0;
-                        // core.stopHero();
                         core.status.moveStepBeforeStop=[];
                         core.stopAutomaticRoute();
                     }
@@ -1287,10 +1142,9 @@ core.prototype.moveHero = function (direction) {
 }
 
 core.prototype.moveOneStep = function() {
-    core.status.hero.steps++;
     // 中毒状态
     if (core.hasFlag('poison')) {
-        core.status.hero.hp -= core.flags.poisonDamage;
+        core.status.hero.hp -= core.values.poisonDamage;
         if (core.status.hero.hp<=0) {
             core.status.hero.hp=0;
             core.updateStatusBar();
@@ -1337,44 +1191,53 @@ core.prototype.drawHero = function (direction, x, y, status, offsetX, offsetY) {
 // 开门
 core.prototype.openDoor = function (id, x, y, needKey, callback) {
     // 是否存在门
-    if (!core.terrainExists(x, y, id)) return;
-    // core.lockControl();
+    if (!core.terrainExists(x, y, id)) {
+        if (core.isset(callback)) callback();
+        return;
+    }
     if (core.status.moveStepBeforeStop.length==0) {
         core.status.moveStepBeforeStop=core.status.autoStepRoutes.slice(core.status.autoStep-1,core.status.autoStepRoutes.length);
         if (core.status.moveStepBeforeStop.length>=1)core.status.moveStepBeforeStop[0].step-=core.status.movedStep;
     }
     core.stopHero();
     core.stopAutomaticRoute();
+    var speed=30;
     if (needKey) {
         var key = id.replace("Door", "Key");
-        if (!core.rmItem(key)) {
+        if (!core.removeItem(key)) {
             if (key != "specialKey")
-                core.drawTip("你没有" + core.material.items[key].name + "！");
+                core.drawTip("你没有" + core.material.items[key].name);
             else core.drawTip("无法开启此门");
             core.clearContinueAutomaticRoute();
+            if (core.isset(callback)) callback();
             return;
         }
     }
     // open
     core.playSound("door", "ogg");
     var state = 0;
-    var door = core.material.icons.animates[id];
+    var doorId = id;
+    if (!(doorId.substring(doorId.length-4)=="Door")) {
+        doorId=doorId+"Door";
+        speed=100;
+    }
+    var door = core.material.icons.animates[doorId];
     core.interval.openDoorAnimate = window.setInterval(function () {
         state++;
         if (state == 4) {
             clearInterval(core.interval.openDoorAnimate);
-            core.removeBlock('event', x, y);
+            core.removeBlock(x, y);
             core.events.afterOpenDoor(id,x,y,callback);
             return;
         }
         core.canvas.event.clearRect(32 * x, 32 * y, 32, 32);
         core.canvas.event.drawImage(core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
-    }, 30)
+    }, speed)
 }
 
 // 战斗
-core.prototype.battle = function (id, x, y, callback) {
-    if (typeof(core.status.moveStepBeforeStop)=="undefined" || core.status.moveStepBeforeStop.length==0) {
+core.prototype.battle = function (id, x, y, force, callback) {
+    if (core.status.moveStepBeforeStop.length==0) {
         core.status.moveStepBeforeStop=core.status.autoStepRoutes.slice(core.status.autoStep-1,core.status.autoStepRoutes.length);
         if (core.status.moveStepBeforeStop.length>=1)core.status.moveStepBeforeStop[0].step-=core.status.movedStep;
     }
@@ -1382,13 +1245,20 @@ core.prototype.battle = function (id, x, y, callback) {
     core.stopAutomaticRoute();
 
     var damage = core.enemys.getDamage(id);
-    if (damage >= core.status.hero.hp) {
+    // 非强制战斗
+    if (damage >= core.status.hero.hp && !force) {
         core.drawTip("你打不过此怪物！");
         core.clearContinueAutomaticRoute();
         return;
     }
     core.playSound('attack', 'ogg');
     core.status.hero.hp -= damage;
+    if (core.status.hero.hp<=0) {
+        core.status.hero.hp=0;
+        core.updateStatusBar();
+        core.events.lose('battle');
+        return;
+    }
     var money = core.material.enemys[id].money;
     if (core.hasItem('coin')) money *= 2;
     if (core.hasFlag('curse')) money=0;
@@ -1397,8 +1267,10 @@ core.prototype.battle = function (id, x, y, callback) {
     if (core.hasFlag('curse')) experience=0;
     core.status.hero.experience += experience;
     core.updateStatusBar();
-    core.removeBlock('event', x, y);
-    core.canvas.event.clearRect(32 * x, 32 * y, 32, 32);
+    if (core.isset(x) && core.isset(y)) {
+        core.removeBlock(x, y);
+        core.canvas.event.clearRect(32 * x, 32 * y, 32, 32);
+    }
     core.updateFg();
     var hint = "打败 " + core.material.enemys[id].name + "，金币+" + money;
     if (core.flags.enableExperience)
@@ -1409,8 +1281,36 @@ core.prototype.battle = function (id, x, y, callback) {
     core.events.afterBattle(id,x,y,callback);
 }
 
+core.prototype.trigger = function (x, y) {
+    var mapBlocks = core.status.thisMap.blocks;
+    var noPass;
+    for (var b = 0; b < mapBlocks.length; b++) {
+        if (mapBlocks[b].x == x && mapBlocks[b].y == y && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable)) { // 启用事件
+            noPass = mapBlocks[b].event && mapBlocks[b].event.noPass;
+            if (noPass) {
+                core.clearAutomaticRouteNode(x, y);
+            }
+            if (core.isset(mapBlocks[b].event) && core.isset(mapBlocks[b].event.trigger)) {
+                var trigger = mapBlocks[b].event.trigger;
+                // 转换楼层能否穿透
+                if (trigger=='changeFloor' && (core.status.autoHeroMove || core.status.autoStep<core.status.autoStepRoutes.length)) {
+                    var canCross = core.flags.portalWithoutTrigger;
+                    if (core.isset(mapBlocks[b].event.data) && core.isset(mapBlocks[b].event.data.portalWithoutTrigger))
+                        canCross=mapBlocks[b].event.data.portalWithoutTrigger;
+                    if (canCross) continue;
+                }
+                core.material.events[trigger](mapBlocks[b], core, function (data) {
+
+                });
+            }
+        }
+    }
+}
+
 // 楼层切换
-core.prototype.changeFloor = function (floorId, stair, heroLoc, callback) {
+core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) {
+    time = time || 800;
+    time /= 20;
     core.lockControl();
     core.stopHero();
     core.stopAutomaticRoute();
@@ -1421,7 +1321,7 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, callback) {
         heroLoc = core.status.hero.loc;
         var blocks = core.status.maps[floorId].blocks;
         for (var i in blocks) {
-            if (core.isset(blocks[i].event) && blocks[i].event.id === stair) {
+            if (core.isset(blocks[i].event) && !(core.isset(blocks[i].enable) && !blocks[i].enable) && blocks[i].event.id === stair) {
                 heroLoc.x = blocks[i].x;
                 heroLoc.y = blocks[i].y;
             }
@@ -1437,35 +1337,37 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, callback) {
     window.setTimeout(function () {
         // console.log('地图切换到' + floorId);
         core.playSound('floor', 'mp3');
-        core.mapChangeAnimate('show', function () {
+        core.mapChangeAnimate('show', time/2, function () {
             core.statusBar.floor.innerHTML = core.status.maps[floorId].name;
             core.updateStatusBar();
             core.drawMap(floorId, function () {
-                core.hide(core.dom.floorMsgGroup, 10, function () {
-                    core.unLockControl();
-                    core.events.afterChangeFloor(floorId);
-                    if (core.isset(callback)) callback();
-                });
-                if (core.isset(heroLoc.direction))
-                    core.setHeroLoc('direction', heroLoc.direction);
-                core.setHeroLoc('x', heroLoc.x);
-                core.setHeroLoc('y', heroLoc.y);
-                core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
-                core.updateFg();
+                setTimeout(function() {
+                    core.mapChangeAnimate('hide', time/4, function () {
+                        core.unLockControl();
+                        core.events.afterChangeFloor(floorId);
+                        if (core.isset(callback)) callback();
+                    });
+                    if (core.isset(heroLoc.direction))
+                        core.setHeroLoc('direction', heroLoc.direction);
+                    core.setHeroLoc('x', heroLoc.x);
+                    core.setHeroLoc('y', heroLoc.y);
+                    core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+                    core.updateFg();
+                }, 15)
             });
         });
     }, 50);
 }
 
 // 地图切换
-core.prototype.mapChangeAnimate = function (mode, callback) {
+core.prototype.mapChangeAnimate = function (mode, time, callback) {
     if (mode == 'show') {
-        core.show(core.dom.floorMsgGroup, 15, function () {
+        core.show(core.dom.floorMsgGroup, time, function () {
             callback();
         });
     }
     else {
-        core.hide(core.dom.floorMsgGroup, 20, function () {
+        core.hide(core.dom.floorMsgGroup, time, function () {
             callback();
         });
     }
@@ -1509,14 +1411,6 @@ core.prototype.strokeRect = function (map, x, y, width, height, style, lineWidth
     core.canvas[map].strokeRect(x, y, width, height);
 }
 
-core.prototype.drawBlock = function (map, image, cutX, cutY, x, y, size, zoom, clear) {
-    zoom = zoom || 1;
-    if (core.isset(clear) && clear == true) {
-        core.canvas[map].clearRect(x * size, y * size, size, size);
-    }
-    core.canvas[map].drawImage(core.material.images[image], cutX * size, cutY * size, size, size, x * size, y * size, size * zoom, size * zoom);
-}
-
 core.prototype.setFont = function (map, font) {
     core.canvas[map].font = font;
 }
@@ -1536,15 +1430,6 @@ core.prototype.saveCanvas = function (map) {
 
 core.prototype.loadCanvas = function (map) {
     core.canvas[map].restore();
-}
-
-core.prototype.setOpacity = function (map, opacity) {
-    if (map == 'all') {
-        for (var m in core.canvas) {
-            core.canvas[m].globalAlpha = opacity;
-        }
-    }
-    core.canvas[map].globalAlpha = opacity;
 }
 
 core.prototype.setStrokeStyle = function (map, style) {
@@ -1599,8 +1484,7 @@ core.prototype.drawMap = function (mapName, callback) {
     core.status.thisMap = mapData;
     var blockIcon, blockImage;
     core.clearMap('all');
-    core.rmGlobalAnimate(null, null, true);
-    // core.enabledAllTrigger();
+    core.removeGlobalAnimate(null, null, true);
     for (var x = 0; x < 13; x++) {
         for (var y = 0; y < 13; y++) {
             blockIcon = core.material.icons.terrains.ground;
@@ -1609,106 +1493,61 @@ core.prototype.drawMap = function (mapName, callback) {
         }
     }
     for (var b = 0; b < mapBlocks.length; b++) {
-        if (core.isset(mapBlocks[b].event)) {
+        // 事件启用
+        if (core.isset(mapBlocks[b].event) && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable)) {
             blockIcon = core.material.icons[mapBlocks[b].event.cls][mapBlocks[b].event.id];
             blockImage = core.material.images[mapBlocks[b].event.cls];
             core.canvas.event.drawImage(core.material.images[mapBlocks[b].event.cls], 0, blockIcon * 32, 32, 32, mapBlocks[b].x * 32, mapBlocks[b].y * 32, 32, 32);
             core.addGlobalAnimate(mapBlocks[b].event.animate, mapBlocks[b].x * 32, mapBlocks[b].y * 32, blockIcon, blockImage);
         }
     }
-    core.setGlobalAnimate(core.firstData.animateSpeed);
+    core.setGlobalAnimate(core.values.animateSpeed);
     if (core.isset(callback))
         callback();
 }
 
-/**
- * 是否存在不可通行节点
- * @param x
- * @param y
- * @returns {boolean}
- */
-core.prototype.noPassExists = function (x, y) {
-    var blocks = core.status.thisMap.blocks;
-    for (var n = 0; n < blocks.length; n++) {
-        if (blocks[n].x == x && blocks[n].y == y && core.isset(blocks[n].event) && core.isset(blocks[n].event.noPass) && blocks[n].event.noPass) {
-            return true;
-        }
-    }
-    return false;
+core.prototype.noPassExists = function (x, y, floorId) {
+    var block = core.getBlock(x,y,floorId);
+    if (block==null) return false;
+    return core.isset(block.block.event.noPass) && block.block.event.noPass;
 }
 
-/**
- * 是否存在NPC节点
- * @param x
- * @param y
- * @returns {boolean}
- */
-core.prototype.npcExists = function (x, y) {
-    var blocks = core.status.thisMap.blocks;
-    for (var n = 0; n < blocks.length; n++) {
-        if (blocks[n].x == x && blocks[n].y == y && core.isset(blocks[n].event) && blocks[n].event.cls == 'npcs') {
-            return true;
-        }
-    }
-    return false;
+core.prototype.noPass = function (x, y) {
+    return x<0 || x>12 || y<0 || y>12 || core.noPassExists(x,y);
 }
 
-/**
- * 是否存在地形
- * @param x
- * @param y
- * @param id
- * @returns {boolean}
- */
-core.prototype.terrainExists = function (x, y, id) {
-    if (x > 12 || y > 12 || x < 0 || y < 0) {
-        return true;
-    }
-    if (core.stairExists(x, y)) {
-        return false;
-    }
-    var blocks = core.status.thisMap.blocks;
-    for (var t = 0; t < blocks.length; t++) {
-        if (blocks[t].x == x && blocks[t].y == y) {
-            for (var map in core.canvas) {
-                if (core.isset(blocks[t][map]) && (blocks[t][map].cls == 'terrains' || (blocks[t][map].cls == 'animates' && core.isset(blocks[t][map].noPass) && blocks[t][map].noPass == true)) && ((core.isset(id) && core.isset(blocks[t][map].id)) ? blocks[t][map].id == id : true)) {
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
+core.prototype.npcExists = function (x, y, floorId) {
+    var block = core.getBlock(x,y,floorId);
+    if (block==null) return false;
+    return block.block.event.cls == 'npcs';
 }
 
-/**
- * 是否存在楼梯
- * @param x
- * @param y
- * @returns {boolean}
- */
-core.prototype.stairExists = function (x, y) {
-    var blocks = core.status.thisMap.blocks;
-    for (var s = 0; s < blocks.length; s++) {
-        if (blocks[s].x == x && blocks[s].y == y && core.isset(blocks[s].event) && blocks[s].event.cls == 'terrains' && core.isset(blocks[s].event.id) && (blocks[s].event.id == 'upFloor' || blocks[s].event.id == 'downFloor')) {
-            return true;
-        }
-    }
-    return false;
+core.prototype.terrainExists = function (x, y, id, floorId) {
+    var block = core.getBlock(x,y,floorId);
+    if (block==null) return false;
+    return block.block.event.cls=='terrains' && block.block.event.id==id;
 }
 
-core.prototype.enemyExists = function (x, y, id) {
-    var blocks = core.status.thisMap.blocks;
-    for (var e = 0; e < blocks.length; e++) {
-        if (blocks[e].x == x && blocks[e].y == y && core.isset(blocks[e].event) && blocks[e].event.cls == 'enemys' && ((core.isset(id) && core.isset(blocks[e].event.id)) ? blocks[e].event.id == id : true)) {
-            return true;
-        }
-    }
-    return false;
+core.prototype.stairExists = function (x, y, floorId) {
+    var block = core.getBlock(x,y,floorId);
+    if (block==null) return false;
+    return block.block.event.cls=='terrains' && (block.block.event.id=='upFloor' || block.block.event.id=='downFloor');
+}
+
+core.prototype.nearStair = function() {
+    var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
+    return core.stairExists(x,y) || core.stairExists(x-1,y) || core.stairExists(x,y-1) || core.stairExists(x+1,y) || core.stairExists(x,y+1);
+}
+
+core.prototype.enemyExists = function (x, y, id,floorId) {
+    var block = core.getBlock(x,y,floorId);
+    if (block==null) return false;
+    return block.block.event.cls=='enemys' && block.block.event.id==id;
 }
 
 core.prototype.getBlock = function (x, y, floorId, needEnable) {
-    floorId = floorId || core.status.floorId;
-    needEnable = needEnable || true;
+    if (!core.isset(floorId)) floorId=core.status.floorId;
+    if (!core.isset(needEnable)) needEnable=true;
     var blocks = core.status.maps[floorId].blocks;
     for (var n=0;n<blocks.length;n++) {
         if (blocks[n].x==x && blocks[n].y==y && core.isset(blocks[n].event)) {
@@ -1719,119 +1558,206 @@ core.prototype.getBlock = function (x, y, floorId, needEnable) {
     return null;
 }
 
-core.prototype.removeBlock = function (map, x, y) {
-    var map = map.split(',');
-    var mapBlocks = core.status.thisMap.blocks;
-    var blockIcon;
-    for (var b = 0; b < mapBlocks.length; b++) {
-        if (mapBlocks[b].x == x && mapBlocks[b].y == y) {
-            core.rmGlobalAnimate(x, y);
-            for (var m = 0; m < map.length; m++) {
-                if (!core.isset(mapBlocks[b][map[m]])) {
-                    continue;
-                }
-                blockIcon = core.material.icons[mapBlocks[b][map[m]].cls][mapBlocks[b][map[m]].id];
-                core.canvas[map[m]].clearRect(x * 32, y * 32, 32, 32);
-                // delete core.status.thisMap.blocks[b][map[m]];
+core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
+    time = time || 500;
+
+    clearInterval(core.interval.tipAnimate);
+    core.saveCanvas('data');
+    core.clearMap('data', 0, 0, 416, 416);
+
+    var block = core.getBlock(x,y,core.status.floorId,false);
+    if (block==null) {// 不存在
+        if (core.isset(callback)) callback();
+        return;
+    }
+
+    // 需要删除该块
+    core.removeBlock(x,y);
+
+    core.clearMap('ui', 0, 0, 416, 416);
+    core.setAlpha('ui', 1.0);
+
+    block=block.block;
+    blockIcon = core.material.icons[block.event.cls][block.event.id];
+    blockImage = core.material.images[block.event.cls];
+
+    // 绘制data层
+    var opacityVal = 1;
+    core.setOpacity('data', opacityVal);
+    core.canvas.data.drawImage(blockImage, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+
+    // 要运行的轨迹：将steps展开
+    var moveSteps=[];
+    steps.forEach(function (e) {
+        if (typeof e=="string") {
+            moveSteps.push(e);
+        }
+        else {
+            if (!core.isset(e.value)) {
+                moveSteps.push(e.direction)
             }
-            core.status.thisMap.blocks.splice(b, 1);
-            break;
+            else {
+                for (var i=0;i<e.value;i++) {
+                    moveSteps.push(e.direction);
+                }
+            }
+        }
+    });
+
+    var nowX=32*x, nowY=32*y, step=0;
+    var scan = {
+        'up': {'x': 0, 'y': -1},
+        'left': {'x': -1, 'y': 0},
+        'down': {'x': 0, 'y': 1},
+        'right': {'x': 1, 'y': 0}
+    };
+
+    var animate=window.setInterval(function() {
+        // 已经移动完毕，消失
+        if (moveSteps.length==0) {
+            if (immediateHide) opacityVal=0;
+            else opacityVal -= 0.06;
+            core.setOpacity('data', opacityVal);
+            core.clearMap('data', nowX, nowY, 32, 32);
+            core.canvas.data.drawImage(blockImage, 0, blockIcon * 32, 32, 32, nowX, nowY, 32, 32);
+            if (opacityVal<=0) {
+                clearInterval(animate);
+                core.loadCanvas('data');
+                core.clearMap('data', 0, 0, 416, 416);
+                core.setOpacity('data', 1);
+                if (core.isset(callback)) callback();
+            }
+        }
+        else {
+            // 移动中
+            step++;
+            nowX+=scan[moveSteps[0]].x*2;
+            nowY+=scan[moveSteps[0]].y*2;
+            core.clearMap('data', nowX-32, nowY-32, 96, 96);
+            // 绘制
+            core.canvas.data.drawImage(blockImage, 0, blockIcon * 32, 32, 32, nowX, nowY, 32, 32);
+            if (step==16) {
+                // 该移动完毕，继续
+                step=0;
+                moveSteps.shift();
+            }
+        }
+    }, time/16);
+}
+
+core.prototype.animateBlock = function (x,y,type,time,callback) {
+    if (type!='hide') type='show';
+
+    clearInterval(core.interval.tipAnimate);
+    core.saveCanvas('data');
+    core.clearMap('data', 0, 0, 416, 416);
+
+    var block = core.getBlock(x,y,core.status.floorId,false);
+    if (block==null) {// 不存在
+        if (core.isset(callback)) callback();
+        return;
+    }
+    // 清空UI
+    core.clearMap('ui', 0, 0, 416, 416);
+    core.setAlpha('ui', 1.0);
+
+    block=block.block;
+    blockIcon = core.material.icons[block.event.cls][block.event.id];
+    blockImage = core.material.images[block.event.cls];
+
+    var opacityVal = 0;
+    if (type=='hide') opacityVal=1;
+
+    core.setOpacity('data', opacityVal);
+    core.canvas.data.drawImage(blockImage, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+
+    var animate = window.setInterval(function () {
+        if (type=='show') opacityVal += 0.1;
+        else opacityVal -= 0.1;
+        core.setOpacity('data', opacityVal);
+        core.clearMap('data',block.x * 32, block.y * 32, 32, 32);
+        core.canvas.data.drawImage(blockImage, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+        if (opacityVal >=1 || opacityVal<=0) {
+            clearInterval(animate);
+            core.loadCanvas('data');
+            core.clearMap('data', 0, 0, 416, 416);
+            core.setOpacity('data', 1);
+            if (core.isset(callback)) callback();
+        }
+    }, time/10);
+}
+
+// 显示一个事件
+core.prototype.addBlock = function(x,y,floodId) {
+    floodId = floodId || core.status.floorId;
+    var block = core.getBlock(x,y,floodId,false);
+    if (block==null) return; // 不存在
+    block=block.block;
+    // 本身是禁用事件，启用之
+    if (core.isset(block.enable) && !block.enable) {
+        block.enable = true;
+        // 在本层，添加动画
+        if (floodId == core.status.floorId && core.isset(block.event)) {
+            blockIcon = core.material.icons[block.event.cls][block.event.id];
+            blockImage = core.material.images[block.event.cls];
+            core.canvas.event.drawImage(core.material.images[block.event.cls], 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+            core.addGlobalAnimate(block.event.animate, block.x * 32, block.y * 32, blockIcon, blockImage);
+            core.setGlobalAnimate(core.values.animateSpeed);
         }
     }
+}
+
+core.prototype.removeBlock = function (x, y, floorId) {
+    floorId = floorId || core.status.floorId;
+
+    var block = core.getBlock(x,y,floorId,false);
+    if (block==null) return; // 不存在
+
+    var index=block.index;
+
+    // 删除动画，清除地图
+    if (floorId==core.status.floorId) {
+        core.removeGlobalAnimate(x, y);
+        core.canvas.event.clearRect(x * 32, y * 32, 32, 32);
+    }
+
+    // 删除Index
+    core.removeBlockById(index, floorId);
+    core.updateFg();
+}
+
+
+core.prototype.removeBlockById = function (index, floorId) {
+
+    var blocks = core.status.maps[floorId].blocks;
+    var x=blocks[index].x, y=blocks[index].y;
+
+    // 检查该点是否是checkBlock
+    if (core.floors[floorId].checkBlock.indexOf(x+","+y)>=0) {
+        blocks[index] = {'x': x, 'y': y, 'event': {'cls': 'terrains', 'id': 'ground', 'noPass': false, 'trigger': 'checkBlock'}};
+        return;
+    }
+
+    // 检查该点是否存在事件
+    var event = core.floors[floorId].events[x+","+y];
+    if (!core.isset(event))
+        event = core.floors[floorId].changeFloor[x+","+y];
+
+    // 不存在事件，直接删除
+    if (!core.isset(event)) {
+        blocks.splice(index,1);
+        return;
+    }
+
+    blocks[index].enable = false;
 }
 
 core.prototype.removeBlockByIds = function (floorId, ids) {
     ids.sort(function (a,b) {return b-a}).forEach(function (id) {
-        core.status.maps[floorId].blocks.splice(id, 1);
+        core.removeBlockById(id, floorId);
     });
 }
 
-core.prototype.noPass = function (x, y) {
-    if (x > 12 || y > 12 || x < 0 || y < 0) {
-        return true;
-    }
-    var mapBlocks = core.status.thisMap.blocks;
-    var noPass;
-    for (var b = 0; b < mapBlocks.length; b++) {
-        if (mapBlocks[b].x == x && mapBlocks[b].y == y) {
-            return noPass = (mapBlocks[b].event && mapBlocks[b].event.noPass) || (mapBlocks[b].bg && mapBlocks[b].bg.noPass);
-        }
-    }
-}
-
-core.prototype.trigger = function (x, y) {
-    var mapBlocks = core.status.thisMap.blocks;
-    var noPass;
-    for (var b = 0; b < mapBlocks.length; b++) {
-        if (mapBlocks[b].x == x && mapBlocks[b].y == y) {
-            noPass = (mapBlocks[b].event && mapBlocks[b].event.noPass) || (mapBlocks[b].bg && mapBlocks[b].bg.noPass);
-            if (noPass) {
-                core.clearAutomaticRouteNode(x, y);
-            }
-            if (core.isset(mapBlocks[b].event) && core.isset(mapBlocks[b].event.trigger)) {
-                var trigger = mapBlocks[b].event.trigger;
-                // 转换楼层能否穿透
-                if (trigger=='changeFloor' && (core.status.autoHeroMove || core.status.autoStep<core.status.autoStepRoutes.length)) {
-                    var canCross = core.flags.portalWithoutTrigger;
-                    if (core.isset(mapBlocks[b].event.portalWithoutTrigger))
-                        canCross=mapBlocks[b].event.portalWithoutTrigger;
-                    if (canCross) continue;
-                }
-                core.material.events[trigger](mapBlocks[b], core, function (data) {
-
-                });
-            }
-        }
-    }
-}
-/*
-core.prototype.setTrigger = function (x, y, map, triggerName) {
-    var mapBlocks = core.status.thisMap.blocks;
-    for (var b = 0; b < mapBlocks.length; b++) {
-        if (mapBlocks[b].x == x && mapBlocks[b].y == y && core.isset(mapBlocks[b][map])) {
-            mapBlocks[b][map].trigger = triggerName;
-        }
-    }
-}
-
-core.prototype.enabledTrigger = function (x, y, map) {
-    var mapBlocks = core.status.thisMap.blocks;
-    for (var b = 0; b < mapBlocks.length; b++) {
-        if (mapBlocks[b].x == x && mapBlocks[b].y == y && core.isset(mapBlocks[b][map]) && core.isset(mapBlocks[b][map].trigger)) {
-            mapBlocks[b][map].disabledTrigger = false;
-        }
-    }
-}
-
-core.prototype.enabledAllTrigger = function () {
-    var mapBlocks = core.status.thisMap.blocks;
-    for (var b = 0; b < mapBlocks.length; b++) {
-        for (var map in core.canvas) {
-            if (core.isset(mapBlocks[b][map]) && core.isset(mapBlocks[b][map].trigger)) {
-                mapBlocks[b][map].disabledTrigger = false;
-            }
-        }
-    }
-}
-
-core.prototype.disabledTrigger = function (x, y, map) {
-    var mapBlocks = core.status.thisMap.blocks;
-    for (var b = 0; b < mapBlocks.length; b++) {
-        if (mapBlocks[b].x == x && mapBlocks[b].y == y && core.isset(mapBlocks[b][map]) && core.isset(mapBlocks[b][map].trigger)) {
-            mapBlocks[b][map].disabledTrigger = true;
-        }
-    }
-}
-
-core.prototype.rmTrigger = function (x, y, map) {
-    var mapBlocks = core.status.thisMap.blocks;
-    for (var b = 0; b < mapBlocks.length; b++) {
-        if (mapBlocks[b].x == x && mapBlocks[b].y == y && core.isset(mapBlocks[b][map]) && core.isset(mapBlocks[b][map].trigger)) {
-            delete mapBlocks[b][map].trigger;
-        }
-    }
-}
-*/
 core.prototype.addGlobalAnimate = function (animateMore, x, y, loc, image) {
     if (animateMore == 2) {
         core.status.twoAnimateObjs.push({
@@ -1853,7 +1779,7 @@ core.prototype.addGlobalAnimate = function (animateMore, x, y, loc, image) {
     }
 }
 
-core.prototype.rmGlobalAnimate = function (x, y, all) {
+core.prototype.removeGlobalAnimate = function (x, y, all) {
     if (all == true) {
         core.status.twoAnimateObjs = [];
         core.status.fourAnimateObjs = [];
@@ -1881,13 +1807,6 @@ core.prototype.setGlobalAnimate = function (speed) {
             var obj = core.status.twoAnimateObjs[a];
             obj.status = (obj.status+1)%2;
             core.canvas.event.clearRect(obj.x, obj.y, 32, 32);
-            /*
-            for (var b = 0; b < core.status.thisMap.blocks.length; b++) {
-                if (core.status.thisMap.blocks[b].x * 32 == core.status.twoAnimateObjs[a].x && core.status.thisMap.blocks[b].y * 32 == core.status.twoAnimateObjs[a].y && (!core.isset(core.status.thisMap.blocks[b][core.status.twoAnimateObjs[a].map]) || core.status.thisMap.blocks[b][core.status.twoAnimateObjs[a].map].animate == 0)) {
-                    animateClose = true;
-                }
-            }
-            */
             if (!animateClose) {
                 core.canvas.event.drawImage(obj.image, obj.status * 32, obj.loc * 32, 32, 32, obj.x, obj.y, 32, 32);
             }
@@ -1899,13 +1818,6 @@ core.prototype.setGlobalAnimate = function (speed) {
             var obj=core.status.fourAnimateObjs[a];
             obj.status = (obj.status+1)%4;
             core.canvas.event.clearRect(obj.x, obj.y, 32, 32);
-            /*
-            for (var b = 0; b < core.status.thisMap.blocks.length; b++) {
-                if (core.status.thisMap.blocks[b].x * 32 == core.status.fourAnimateObjs[a].x && core.status.thisMap.blocks[b].y * 32 == core.status.fourAnimateObjs[a].y && (!core.isset(core.status.thisMap.blocks[b][core.status.fourAnimateObjs[a].map]) || core.status.thisMap.blocks[b][core.status.fourAnimateObjs[a].map].animate == 0)) {
-                    animateClose = true;
-                }
-            }
-            */
             if (!animateClose) {
                 core.canvas.event.drawImage(obj.image, obj.status * 32, obj.loc * 32, 32, 32, obj.x, obj.y, 32, 32);
             }
@@ -1921,7 +1833,7 @@ core.prototype.setBoxAnimate = function () {
         core.drawBoxAnimate(background);
         core.interval.boxAnimate = setInterval(function () {
             core.drawBoxAnimate(background);
-        }, core.firstData.animateSpeed);
+        }, core.values.animateSpeed);
     }
 }
 
@@ -1949,6 +1861,7 @@ core.prototype.setHeroLoc = function (itemName, itemVal) {
 }
 
 core.prototype.getHeroLoc = function (itemName) {
+    if (!core.isset(itemName)) return core.status.hero.loc;
     return core.status.hero.loc[itemName];
 }
 
@@ -1986,7 +1899,8 @@ core.prototype.updateFg = function () {
     var hero_hp = core.status.hero.hp;
     for (var b = 0; b < mapBlocks.length; b++) {
         var x = mapBlocks[b].x, y = mapBlocks[b].y;
-        if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls == 'enemys') {
+        if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls == 'enemys' && mapBlocks[b].event.trigger=='battle'
+                && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable)) {
             var id = mapBlocks[b].event.id;
 
             var damage = core.enemys.getDamage(id);
@@ -2013,14 +1927,13 @@ core.prototype.updateFg = function () {
     }
 }
 
-
-
 /**
  * 物品处理 start
  */
 core.prototype.itemCount = function (itemId) {
     if (!core.isset(itemId) || !core.isset(core.material.items[itemId])) return 0;
     var itemCls = core.material.items[itemId].cls;
+    if (itemCls=="items") return 0;
     return core.isset(core.status.hero.items[itemCls][itemId]) ? core.status.hero.items[itemCls][itemId] : 0;
 }
 
@@ -2030,14 +1943,14 @@ core.prototype.hasItem = function (itemId) {
 
 core.prototype.setItem = function (itemId, itemNum) {
     var itemCls = core.material.items[itemId].cls;
-    if (itemCls == 'item') return;
+    if (itemCls == 'items') return;
     if (!core.isset(core.status.hero.items[itemCls])) {
         core.status.hero.items[itemCls] = {};
     }
     core.status.hero.items[itemCls][itemId] = itemNum;
 }
 
-core.prototype.rmItem = function (itemId) {
+core.prototype.removeItem = function (itemId) {
     if (!core.hasItem(itemId)) return false;
     var itemCls = core.material.items[itemId].cls;
     core.status.hero.items[itemCls][itemId]--;
@@ -2060,7 +1973,7 @@ core.prototype.canUseItem = function (itemId) {
 core.prototype.addItem = function (itemId, itemNum) {
     var itemData = core.material.items[itemId];
     var itemCls = itemData.cls;
-    if (itemCls == 'item') return;
+    if (itemCls == 'items') return;
     if (!core.isset(core.status.hero.items[itemCls])) {
         core.status.hero.items[itemCls] = {};
         core.status.hero.items[itemCls][itemId] = 0;
@@ -2076,7 +1989,7 @@ core.prototype.getItem = function (itemId, itemNum, itemX, itemY, callback) {
     core.playSound('item', 'ogg');
     var itemCls = core.material.items[itemId].cls;
     core.items.getItemEffect(itemId, itemNum);
-    core.removeBlock('event', itemX, itemY);
+    core.removeBlock(itemX, itemY);
     var text = '获得 ' + core.material.items[itemId].name;
     if (itemNum > 1) text += "x" + itemNum;
     if (itemCls === 'items') text += core.items.getItemEffectTip(itemId);
@@ -2137,7 +2050,7 @@ core.prototype.drawTip = function (text, itemIcon) {
                     core.timeout.getItemTipTimeout = window.setTimeout(function () {
                         hide = true;
                         core.timeout.getItemTipTimeout = null;
-                    }, 1000);
+                    }, 750);
                 }
                 opacityVal = 0.6;
                 core.setOpacity('data', opacityVal);
@@ -2188,156 +2101,35 @@ core.prototype.drawText = function (contents, callback) {
 
 /////////// 地图相关 END ///////////
 
-/*
- * NPC事件
- */
-core.prototype.visitNpc = function (npcId, x, y, callback) {
-
-    // 正在移动中...
-    if (!core.status.heroStop) {
-        setTimeout(function () {
-            core.visitNpc(npcId, x, y, callback);
-        }, 30);
-        return;
-    }
-
-    if (!core.isset(core.status.npcs[npcId]))
-        core.status.npcs[npcId] = 0;
-    var times=core.status.npcs[npcId];
-
-    var list = core.npcs.getEffect(npcId, times);
-    if (list.length==0) return;
-
-    core.status.event.data = {'x': x, 'y': y, 'id': npcId, 'list': list, 'callback': callback};
-    core.status.event.id = 'npc';
-    core.lockControl();
-
-    core.npcAction();
-}
-
-core.prototype.npcAction = function() {
-
-    if (core.status.event.data.list.length==0) {
-        if (core.isset(core.status.event.data.callback))
-            core.status.event.data.callback();
-        core.ui.closePanel(false);
-        return;
-    }
-
-    var data = core.status.event.data.list.shift();
-    core.status.event.data.current = data;
-
-    var id=core.status.event.data.id, x=core.status.event.data.x, y=core.status.event.data.y;
-
-    // 对话
-    if (data.action=='text') {
-        core.ui.drawTextBox(data.content, core.isset(data.isHero)&&data.isHero?'hero':data.id);
-        return;
-    }
-    // 显示选项
-    if (data.action=='choices') {
-        var npc = core.material.npcs[data.id];
-
-        var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
-
-        clearInterval(core.interval.tipAnimate);
-        core.clearMap('data', 0, 0, 416, 416);
-        core.setOpacity('data', 1);
-
-        core.clearMap('ui', 0, 0, 416, 416);
-        core.setAlpha('ui', 1);
-        core.setFillStyle('ui', background);
-
-        var left = 97, top = 64, right = 416 - 2 * left, bottom = 416 - 2 * top;
-        core.fillRect('ui', left, top, right, bottom, background);
-        core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
-
-        // 名称
-        core.canvas.ui.textAlign = "center";
-        core.fillText('ui', npc.name, left + 135, top + 34, '#FFFFFF', 'bold 19px Verdana');
-
-        // 动画
-        core.strokeRect('ui', left + 15 - 1, top + 30 - 1, 34, 34, '#DDDDDD', 2);
-        core.status.boxAnimateObjs = [];
-        core.status.boxAnimateObjs.push({
-            'bgx': left + 15, 'bgy': top + 30, 'bgsize': 32,
-            'image': core.material.images.npcs,
-            'x': left + 15, 'y': top + 30, 'icon': core.material.icons.npcs[npc.icon]
-        });
-        core.setBoxAnimate();
-
-        // 对话
-        core.canvas.ui.textAlign = "left";
-        var contents = data.hint.split('\n');
-        for (var i=0;i<contents.length;i++) {
-            core.fillText('ui', contents[i], left+60, top+65+18*i, '#FFFFFF', 'bold 14px Verdana');
-        }
-
-        // 选项
-        core.canvas.ui.textAlign = "center";
-        for (var i = 0; i < data.choices.length; i++) {
-            core.fillText('ui', data.choices[i].text, 208, top + 120 + 32 * i, "#FFFFFF", "bold 17px Verdana");
-        }
-        if (!(core.isset(data.cancel) && !data.cancel))
-            core.fillText('ui', "返回", 208, top + 248);
-        return;
-    }
-    // 添加访问次数
-    if (data.action == 'addtimes') {
-        core.status.npcs[id]++;
-        core.npcAction();
-        return;
-    }
-    // 设置访问次数
-    if (data.action == 'settimes') {
-        core.status.npcs[id]=data.times;
-        core.npcAction();
-        return;
-    }
-    // 消失
-    if (data.action == 'disappear') {
-        core.removeBlock('event', x, y);
-        core.npcAction();
-        return;
-    }
-    // 立刻再次访问
-    if (data.action == 'revisit') {
-        core.ui.closePanel(false);
-        core.visitNpc(id, x, y)
-        return;
-    }
-    // 自定义事件
-    if (data.action == 'custom') {
-        core.events.npcCustomAction(data);
-        return;
-    }
-    return;
-}
-
-core.prototype.npcEffect = function (effect, npc) {
-    // 自定义事件
-    if (effect.indexOf('custom:')==0) {
-        core.events.npcCustomEffect(effect.substr(7), npc);
-        return;
-    }
-    effects = effect.split(';');
-    effects.forEach(function (e) {
-        var ones = e.split(',');
-        var type = ones[0], key = ones[1], value = ones[2];
-        if (type == 'status') {
-            core.setStatus(key, core.getStatus(key)+parseInt(value));
-        }
-        else if (type == 'item') {
-            core.setItem(key, core.itemCount(key)+parseInt(value));
-        }
-    });
-    core.updateStatusBar();
-}
-
-
 /**
  * 系统机制 start
  */
+
+// 替换文本中的数为实际值
+core.prototype.replaceText = function (text) {
+    return text.replace(/\${([^}]+)}/g, function (word, value) {
+        return core.calValue(value);
+    });
+}
+
+
+core.prototype.calValue = function (value) {
+    value=value.replace(/status:([\w\d_]+)/g, "core.getStatus('$1')");
+    value=value.replace(/item:([\w\d_]+)/g, "core.itemCount('$1')");
+    value=value.replace(/flag:([\w\d_]+)/g, "core.getFlag('$1', false)");
+    return eval(value);
+}
+
+core.prototype.unshift = function (a,b) {
+    if (!(a instanceof Array) || !core.isset(b)) return;
+    if (b instanceof Array) {
+        core.clone(b).reverse().forEach(function (e) {
+            a.unshift(e);
+        });
+    }
+    else a.unshift(b);
+    return a;
+}
 
 core.prototype.setLocalStorage = function(key, value) {
     try {
@@ -2377,6 +2169,10 @@ core.prototype.clone = function (data) {
         }
         return copy;
     }
+    // 函数
+    if (data instanceof Function) {
+        return data;
+    }
     // object
     if (data instanceof Object) {
         var copy={};
@@ -2396,65 +2192,15 @@ core.prototype.formatDate = function(date) {
 }
 
 core.prototype.setTwoDigits = function (x) {
-    return x<10?"0"+x:x;
+    return parseInt(x)<10?"0"+x:x;
 }
 
-core.prototype.lose = function() {
-    core.stopAutomaticRoute();
-    if (!core.status.heroStop) {
-        setTimeout(function() {
-            core.lose();
-        }, 30);
-        return;
-    }
-    core.events.lose();
+core.prototype.win = function(reason) {
+    core.events.win(reason);
 }
 
-core.prototype.win = function() {
-
-    // 正在移动中...
-    if (!core.status.heroStop) {
-        setTimeout(function () {
-            core.win();
-        }, 30);
-        return;
-    }
-    core.events.win();
-}
-
-core.prototype.updateTime = function() {
-    var currentTime = new Date();
-    core.status.hero.time.playtime += (currentTime.getTime()-core.status.hero.time.lasttime.getTime())/1000;
-    core.status.hero.time.totaltime += (currentTime.getTime()-core.status.hero.time.lasttime.getTime())/1000;
-    core.status.hero.time.lasttime = currentTime;
-}
-
-core.prototype.upload = function (delay) {
-    /*
-    try {
-
-        if (core.isset(delay) && delay>0) {
-            setTimeout(function() {core.upload();}, delay);
-            return;
-        }
-
-        core.updateTime();
-
-        var xmlHttp = new XMLHttpRequest();
-        var parameters = "action=upload";
-        parameters+="&starttime="+core.status.hero.time.starttime.getTime()/1000;
-        parameters+="&hard="+core.status.hard;
-        parameters+="&floor="+core.status.maps[core.status.floorId].name;
-        parameters+="&hp="+core.status.hero.hp+"&atk="+core.status.hero.atk+"&def="+core.status.hero.def+"&mdef="+core.status.hero.mdef+"&money="+core.status.hero.money;
-        parameters+="&yellow="+core.status.hero.items.keys.yellowKey+"&blue="+core.status.hero.items.keys.blueKey;
-        parameters+="&playtime="+core.status.hero.time.playtime+"&totaltime="+core.status.hero.time.totaltime+"&step="+core.status.hero.steps+"&ending="+(core.status.event.id=='win'?1:0);
-
-        //xmlHttp.open("GET", "/service/mota/mota4.php?"+parameters, true);
-        //xmlHttp.send();
-    }
-    catch (e) {
-    }
-    */
+core.prototype.lose = function(reason) {
+    core.events.lose(reason);
 }
 
 // 作弊
@@ -2476,7 +2222,6 @@ core.prototype.debug = function() {
     core.updateStatusBar();
     core.drawTip("作弊成功");
 }
-
 
 core.prototype.checkStatus = function (name, need, item, clearData) {
     if (need && core.status.event.id == name) {
@@ -2509,6 +2254,13 @@ core.prototype.openBook = function (need) {
 core.prototype.useFly = function (need) {
     if (!core.checkStatus('fly', need, true))
         return;
+    if (core.flags.flyNearStair && !core.nearStair()) {
+        core.drawTip("只有在楼梯边才能使用传送器");
+        core.unLockControl();
+        core.status.event.data = null;
+        core.status.event.id = null;
+        return;
+    }
     if (!core.canUseItem('fly')) {
         core.drawTip("楼层传送器好像失效了");
         core.unLockControl();
@@ -2523,7 +2275,6 @@ core.prototype.useFly = function (need) {
 core.prototype.openToolbox = function (need) {
     if (!core.checkStatus('toolbox', need))
         return;
-    // core.drawTip("工具箱还未完成");
     core.ui.drawToolbox();
 }
 
@@ -2568,6 +2319,10 @@ core.prototype.doSL = function (id, type) {
             core.drawTip("无效的存档");
             return;
         }
+        if (data.version != core.firstData.version) {
+            core.drawTip("存档版本不匹配");
+            return;
+        }
         core.ui.closePanel();
         core.loadData(data, function() {
             core.setLocalStorage('savePage', core.status.savePage);
@@ -2577,46 +2332,156 @@ core.prototype.doSL = function (id, type) {
     }
 }
 
+core.prototype.syncSave = function(type) {
+    if (type=='save') {
+        core.ui.drawConfirmBox("你确定要将本地存档同步到服务器吗？", function(){
+            // console.log("同步存档...");
+            core.ui.drawWaiting("正在同步，请稍后...");
+
+            var formData = new FormData();
+            formData.append('type', 'save');
+            formData.append('name', core.firstData.name);
+            var saves = [];
+            for (var i=1;i<=180;i++) {
+                var data = core.getLocalStorage("save"+i, null);
+                if (core.isset(data)) {
+                    saves.push(data);
+                }
+            }
+            var save_text = JSON.stringify(saves);
+            formData.append('data', save_text);
+
+            // send
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "../sync.php");
+            xhr.timeout = 1000;
+            xhr.onload = function(e) {
+                if (xhr.status==200) {
+                    // console.log("同步成功。");
+                    var response = JSON.parse(xhr.response);
+                    if (response.code<0) {
+                        core.drawText("出错啦！\n无法同步存档到服务器。");
+                    }
+                    else {
+                        core.drawText("同步成功！\n\n您的存档编号： "+response.code+"\n您的存档密码： "+response.msg+"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。")
+                    }
+                }
+                else {
+                    core.drawText("出错啦！\n无法同步存档到服务器。");
+                }
+            };
+            xhr.ontimeout = function(e) {
+                console.log(e);
+                core.drawText("出错啦！\n无法同步存档到服务器。");
+            }
+            xhr.onerror = function(e) {
+                console.log(e);
+                core.drawText("出错啦！\n无法同步存档到服务器。");
+            }
+            xhr.send(formData);
+        }, function() {
+            core.ui.drawSyncSave();
+        })
+    }
+    else if (type=='load') {
+
+        core.ui.drawConfirmBox("你确定要从服务器加载存档吗？\n该操作将覆盖所有本地存档且不可逆！", function(){
+            var id = prompt("请输入存档编号：");
+            if (id==null || id=="") {
+                core.ui.drawSyncSave(); return;
+            }
+            var password = prompt("请输入存档密码：");
+            if (password==null || password=="") {
+                core.ui.drawSyncSave(); return;
+            }
+            core.ui.drawWaiting("正在同步，请稍后...");
+
+            var formData = new FormData();
+            formData.append('type', 'load');
+            formData.append('name', core.firstData.name);
+            formData.append('id', id);
+            formData.append('password', password);
+
+            // send
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "../sync.php");
+            xhr.timeout = 1000;
+            xhr.onload = function(e) {
+                if (xhr.status==200) {
+                    // console.log("同步成功。");
+                    var response = JSON.parse(xhr.response);
+                    switch (response.code) {
+                        case 0:
+                            // 成功
+                            var data=JSON.parse(response.msg);
+                            // console.log(data);
+                            for (var i=1;i<=180;i++) {
+                                if (i<=data.length) {
+                                    core.setLocalStorage("save"+i, data[i-1]);
+                                }
+                                else {
+                                    core.removeLocalStorage("save"+i);
+                                }
+                            }
+                            core.drawText("同步成功！\n你的本地所有存档均已被覆盖。");
+                            break;
+                        case -1:
+                            core.drawText("出错啦！\n存档编号"+id+"不存在！");
+                            break;
+                        case -2:
+                            core.drawText("出错啦！\n存档密码错误！");
+                            break;
+                        default:
+                            core.drawText("出错啦！\n无法从服务器同步存档。");
+                            break;
+                    }
+
+                }
+                else {
+                    core.drawText("出错啦！\n无法从服务器同步存档。");
+                }
+            };
+            xhr.ontimeout = function(e) {
+                console.log(e);
+                core.drawText("出错啦！\n无法从服务器同步存档。");
+            }
+            xhr.onerror = function(e) {
+                console.log(e);
+                core.drawText("出错啦！\n无法从服务器同步存档。");
+            }
+            xhr.send(formData);
+        }, function() {
+            core.ui.drawSyncSave();
+        })
+    }
+
+}
+
 core.prototype.saveData = function(dataId) {
-    core.updateTime();
     var data = {
         'floorId': core.status.floorId,
         'hero': core.clone(core.status.hero),
         'hard': core.status.hard,
         'maps': core.maps.save(core.status.maps),
-        'npcs': {},
         'shops': {},
         'version': core.firstData.version,
-        'time': new Date().getTime()
+        "time": new Date().getTime()
     };
-    data.hero.time.starttime=core.status.hero.time.starttime.getTime();
     // set shop times
     for (var shop in core.status.shops) {
         data.shops[shop]={
-            'times': core.status.shops[shop].times,
-            'visited': core.status.shops[shop].visited
+            'times': core.status.shops[shop].times || 0,
+            'visited': core.status.shops[shop].visited || false
         }
     }
-    // core.upload();
     core.events.beforeSaveData(data);
 
     return core.setLocalStorage(dataId, data);
-    // console.log(core.getLocalStorage(dataId));
 }
 
 core.prototype.loadData = function (data, callback) {
-    core.upload();
 
-    var totaltime=null, lasttime = null;
-
-    if (core.isPlaying()) {
-        core.updateTime();
-        var totaltime = core.status.hero.time.totaltime;
-        var lasttime = core.clone(core.status.hero.time.lasttime);
-    }
-
-    core.resetStatus(data.hero, data.hard, data.floorId,
-        core.maps.load(data.maps));
+    core.resetStatus(data.hero, data.hard, data.floorId, core.maps.load(data.maps));
 
     // load shop times
     for (var shop in core.status.shops) {
@@ -2624,33 +2489,20 @@ core.prototype.loadData = function (data, callback) {
         core.status.shops[shop].visited = data.shops[shop].visited;
     }
 
-    core.status.hero.time.starttime = new Date(core.status.hero.time.starttime);
-    if (core.isset(totaltime) && totaltime>core.status.hero.time.totaltime)
-        core.status.hero.time.totaltime=totaltime;
-    if (core.isset(lasttime))
-        core.status.hero.time.lasttime = lasttime;
-    else core.status.hero.time.lasttime = new Date();
-
     core.events.afterLoadData(data);
 
-    core.changeFloor(data.floorId, null, data.hero.loc, function() {
+    core.changeFloor(data.floorId, null, data.hero.loc, null, function() {
         core.setHeroMoveTriggerInterval();
         if (core.isset(callback)) callback();
     });
-
-    core.upload(1500);
 }
 
 core.prototype.setStatus = function (statusName, statusVal) {
-    if (core.isset(core.status.hero[statusName])) {
-        core.status.hero[statusName] = statusVal;
-    }
+    core.status.hero[statusName] = statusVal;
 }
 
 core.prototype.getStatus = function (statusName) {
-    if (core.isset(core.status.hero[statusName])) {
-        return core.status.hero[statusName];
-    }
+    return core.status.hero[statusName];
 }
 
 core.prototype.setFlag = function(flag, value) {
@@ -2669,6 +2521,10 @@ core.prototype.getFlag = function(flag, defaultValue) {
 core.prototype.hasFlag = function(flag) {
     if (core.getFlag(flag)) return true;
     return false;
+}
+
+core.prototype.insertAction = function (list) {
+    core.events.insertAction(list);
 }
 
 core.prototype.lockControl = function () {
@@ -2690,11 +2546,7 @@ core.prototype.playSound = function (soundName, soundType) {
     if (!core.musicStatus.soundStatus || !core.musicStatus.loaded) {
         return;
     }
-    /*
-    if (core.isset(core.musicStatus.playedSound)) {
-        // core.musicStatus.playedSound.pause();
-    }
-    */
+    if (!core.isset(core.material.sounds[soundType][soundName])) return;
     core.musicStatus.playedSound = core.material.sounds[soundType][soundName];
     core.musicStatus.playedSound.play();
 }
@@ -2719,7 +2571,6 @@ core.prototype.changeSoundStatus = function () {
 }
 
 core.prototype.enabledSound = function () {
-    // core.musicStatus.playedBgm.play();
     core.musicStatus.soundStatus = true;
     core.playBgm('bgm', 'mp3');
     core.setLocalStorage('soundStatus', true);
@@ -2788,8 +2639,8 @@ core.prototype.clearStatusBar = function() {
 core.prototype.updateStatusBar = function () {
 
     // 上限999999
-    if (core.flags.HPMAX>0) {
-        core.setStatus('hp', Math.min(core.flags.HPMAX, core.getStatus('hp')));
+    if (core.values.HPMAX>0) {
+        core.setStatus('hp', Math.min(core.values.HPMAX, core.getStatus('hp')));
     }
 
     // core.statusBar.floor.innerHTML = core.maps.maps[core.status.floorId].name;

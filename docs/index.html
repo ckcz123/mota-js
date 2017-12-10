@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <link rel="shortcut icon" type="image/png" href="./img/logo.png">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description" content="Description">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <link rel="stylesheet" href="//unpkg.com/docsify/lib/themes/vue.css">
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    window.$docsify = {
+      loadSidebar: true,
+      name: 'H5魔塔样板',
+      repo: 'https://github.com/ckcz123/mota-js',
+      // Search Support
+      // search: {
+      //   maxAge: 43200000, // 过期时间，单位毫秒，默认一天
+      //   paths: 'auto',
+      //   placeholder: {
+      //     '/en/': 'Search',
+      //     '/': '搜索',
+      //   },
+      //   noData: {
+      //     '/en/': 'No Results',
+      //     '/': '找不到结果',
+      //   },
+      // },
+
+       // load sidebar from _sidebar.md
+      loadSidebar: '_sidebar.md',
+      subMaxLevel: 2,
+      autoHeader: true,
+    }
+    // 离线模式
+    // if (typeof navigator.serviceWorker !== 'undefined') {
+    //    navigator.serviceWorker.register('serviceWorker.js')
+    // }
+  </script>
+  <script src="//unpkg.com/docsify/lib/docsify.min.js"></script>
+</body>
+</html>

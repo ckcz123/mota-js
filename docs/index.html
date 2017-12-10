@@ -35,10 +35,10 @@
       subMaxLevel: 2,
       autoHeader: true,
     }
-    // 离线模式
-    // if (typeof navigator.serviceWorker !== 'undefined') {
-    //    navigator.serviceWorker.register('serviceWorker.js')
-    // }
+    //离线模式
+    if (typeof navigator.serviceWorker !== 'undefined') {
+       navigator.serviceWorker.register('serviceWorker.js')
+    }
   </script>
   <script src="//unpkg.com/docsify/lib/docsify.min.js"></script>
 </body>

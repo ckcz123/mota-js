@@ -254,4 +254,4 @@ enemys.prototype.calDamage = function (hero_atk, hero_def, hero_mdef, mon_hp, mo
 
 ==========================================================================================
 
-[继续阅读附录：所有API列表](./api)
+[继续阅读附录：所有API列表](api)

@@ -2932,10 +2932,10 @@ core.prototype.resize = function(clientWidth, clientHeight) {
         {
             id: 'floorMsgGroup',
             rules:{
-                width: canvasWidth + unit,
-                height: canvasWidth + unit,
-                top: 0,
-                right: 0,
+                width: (canvasWidth - SPACE*2) + unit,
+                height:(canvasWidth - SPACE*2) + unit,
+                top: SPACE + unit,
+                right: SPACE + unit,
             }
         },
         {

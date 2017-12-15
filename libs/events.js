@@ -282,6 +282,7 @@ events.prototype.doAction = function() {
             break;
         case "disableShop": // 禁用一个全局商店
             core.events.disableQuickShop(data.id);
+            this.doAction();
             break;
         case "battle": // 强制战斗
             core.battle(data.id,null,null,true,function() {
@@ -796,11 +797,17 @@ events.prototype.clickSettings = function (x,y) {
         core.changeSoundStatus();
         core.ui.drawSettings(false);
     }
-    if (y == 4) core.ui.drawQuickShop();
+    if (y==4) {
+        core.flags.battleAnimate=!core.flags.battleAnimate;
+        core.setLocalStorage('battleAnimate', core.flags.battleAnimate);
+        core.ui.drawSettings(false);
+    }
+    if (y == 5) core.ui.drawQuickShop();
     // if (y == 5) this.decreaseHard();
-    if (y == 5) {
+    if (y == 6) {
         core.ui.drawSyncSave();
     }
+    /*
     if (y == 6) {
         core.ui.drawConfirmBox("你确定要清空所有本地存档吗？", function() {
             localStorage.clear();
@@ -809,6 +816,7 @@ events.prototype.clickSettings = function (x,y) {
             core.ui.drawSettings(false);
         })
     }
+    */
     if (y == 7) {
         core.ui.drawConfirmBox("你确定要重新开始吗？", function () {
             core.ui.closePanel();

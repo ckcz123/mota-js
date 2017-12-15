@@ -29,8 +29,8 @@ main.floors.sample1 = {
         "4,10": [ // 走到中间时的提示
             "\t[样板提示]本层楼将会对各类事件进行介绍。",
             "左边是一个仿50层的陷阱做法，上方是商店、快捷商店的使用方法，右上是一个典型的杀怪开门的例子，右下是各类可能的NPC事件。",
-            "本样板目前支持的事件列表大致有：\ntext: 显示一段文字（比如你现在正在看到的）\nshow: 使一个事件有效（可见、可被交互）\nhide: 使一个事件失效（不可见、不可被交互）\ntrigger: 触发另一个地点的事件\nbattle: 强制和某怪物战斗\nopenDoor: 无需钥匙开门（例如机关门、暗墙）\nopenShop: 打开一个全局商店\nchangeFloor: 传送勇士到某层某位置\nchangePos: 传送勇士到当层某位置\nwin: 获得胜利（游戏通关）\nlose: 游戏失败",
-            "move: 移动事件效果\nplaySound: 播放某个音频\nif: 条件判断\nchoices: 提供选项\nsetValue: 设置勇士属性道具，或某个变量/flag\nupdate: 更新状态栏和地图显伤\nsleep: 等待多少毫秒\nexit: 立刻结束当前事件\nrevisit: 立刻结束事件并重新触发\nfunction: 自定义JS脚本\n\n更多支持的事件还在编写中，欢迎您宝贵的意见。",
+            "本样板目前支持的事件列表大致有：\ntext: 显示一段文字（比如你现在正在看到的）\nshow: 使一个事件有效（可见、可被交互）\nhide: 使一个事件失效（不可见、不可被交互）\ntrigger: 触发另一个地点的事件\nbattle: 强制和某怪物战斗\nopenDoor: 无需钥匙开门（例如机关门、暗墙）\nopenShop: 打开一个全局商店\ndisableShop: 禁用一个全局商店\nchangeFloor: 传送勇士到某层某位置\nchangePos: 传送勇士到当层某位置；转向\nsetFg: 更改画面色调",
+            "move: 移动事件效果\nplaySound: 播放某个音频\nif: 条件判断\nchoices: 提供选项\nsetValue: 设置勇士属性道具，或某个变量/flag\nupdate: 更新状态栏和地图显伤\nwin: 获得胜利（游戏通关）\nlose: 游戏失败\nsleep: 等待多少毫秒\nexit: 立刻结束当前事件\nrevisit: 立刻结束事件并重新触发\nfunction: 自定义JS脚本\n更多支持的事件还在编写中，欢迎您宝贵的意见。",
             "有关各事件的样例，可参见本层一些NPC的写法。\n所有事件样例本层都有介绍。\n\n一个自定义事件处理完后，需要调用{\"type\": \"hide\"}该事件才不会再次出现。",
             {"type": "hide"}
         ],
@@ -59,7 +59,7 @@ main.floors.sample1 = {
             {"type": "hide", "loc": [1,8]},
             {"type": "hide", "loc": [1,5], "time": 500}, // 隐藏红衣魔王，动画500ms
             {"type": "hide"}, // 隐藏本事件
-            {"type": "setFg", "color": [255,255,255], 'time': 1250}, // 渐变为黑色
+            {"type": "setFg", "color": [0,0,0], 'time': 1250}, // 渐变为白色
             {"type": "sleep", "time": 700},
             {"type": "changeFloor", "floorId": "sample1", "loc": [1,11], 'direction': 'right', 'time': 1000}, // 楼层切换。changeFloor必须指定floorId和loc。
             // 备注：这里也可以下面的这种写法：

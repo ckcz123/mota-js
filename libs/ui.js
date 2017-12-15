@@ -320,10 +320,10 @@ ui.prototype.drawSettings = function (need) {
 
     core.canvas.ui.textAlign = "center";
     core.fillText('ui', "音乐： " + (core.musicStatus.soundStatus ? "[ON]" : "[OFF]"), 208, top + 56, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "快捷商店", 208, top + 88, "#FFFFFF", "bold 17px Verdana");
-    //core.fillText('ui', "降低难度", 208, top + 120, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "同步存档", 208, top + 120, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "清空存档", 208, top + 152, "#FFFFFF", "bold 17px Verdana");
+    core.fillText('ui', '战斗过程： ' +(core.flags.battleAnimate?'[ON]':'[OFF]'), 208, top + 88, "#FFFFFF", "bold 17px Verdana")
+    core.fillText('ui', "快捷商店", 208, top + 120, "#FFFFFF", "bold 17px Verdana");
+    core.fillText('ui', "同步存档", 208, top + 152, "#FFFFFF", "bold 17px Verdana");
+    // core.fillText('ui', "清空存档", 208, top + 152, "#FFFFFF", "bold 17px Verdana");
     core.fillText('ui', "重新开始", 208, top + 184, "#FFFFFF", "bold 17px Verdana");
     core.fillText('ui', "关于本塔", 208, top + 216, "#FFFFFF", "bold 17px Verdana");
     core.fillText('ui', "返回游戏", 208, top + 248, "#FFFFFF", "bold 17px Verdana");
@@ -362,6 +362,13 @@ ui.prototype.drawQuickShop = function (need) {
 
 }
 
+ui.prototype.drawBattleAnimate = function() {
+
+
+
+
+
+}
 
 /**
  * 绘制“请等候...”
@@ -397,13 +404,14 @@ ui.prototype.drawSyncSave = function () {
     core.setAlpha('ui', 1);
     core.setFillStyle('ui', background);
 
-    var left = 97, top = 208 - 32 - 16 * 3, right = 416 - 2 * left, bottom = 416 - 2 * top;
+    var left = 97, top = 208 - 32 - 16 * 3, right = 416 - 2 * left, bottom = 416 - 2 * top + 32;
     core.fillRect('ui', left, top, right, bottom, background);
     core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
 
     core.canvas.ui.textAlign = "center";
     core.fillText('ui', "同步存档到服务器", 208, top + 56, "#FFFFFF", "bold 17px Verdana");
     core.fillText('ui', "从服务器加载存档", 208, top + 56 + 32, "#FFFFFF", "bold 17px Verdana");
+    core.fillText('ui', "清空本地存档", 208, top + 56 + 64, "#FFFFFF", "bold 17px Verdana");
     core.fillText('ui', "返回游戏", 208, top + bottom - 40);
 }
 

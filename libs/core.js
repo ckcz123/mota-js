@@ -105,7 +105,8 @@ core.prototype.init = function (dom, statusBar, canvas, images, sounds, floorIds
     for (var key in coreData) {
         core[key] = coreData[key];
     }
-    core.flags = core.data.flags;
+    core.flags = core.clone(core.data.flags);
+    core.flags.battleAnimate = core.getLocalStorage('battleAnimate', core.flags.battleAnimate);
     core.values = core.clone(core.data.values);
     core.firstData = core.data.getFirstData();
     core.initStatus.shops = core.firstData.shops;
@@ -681,8 +682,17 @@ core.prototype.onclick = function (x, y, stepPostfix) {
                 core.syncSave("load");
             }
         }
-        if (x>=5 && x<=7 && y==7) {
-            core.ui.drawSettings(false);
+        if (x>=5 && x<=7) {
+            if (y==7) {
+                core.ui.drawConfirmBox("你确定要清空所有本地存档吗？", function() {
+                    localStorage.clear();
+                    core.drawText("\t[操作成功]你的本地所有存档已被清空。");
+                }, function() {
+                    core.ui.drawSettings(false);
+                })
+            }
+            if (y==8)
+                core.ui.drawSettings(false);
         }
     }
 
@@ -2795,9 +2805,9 @@ core.prototype.resize = function(clientWidth, clientHeight) {
 
     var statusLineHeight = BASE_LINEHEIGHT * 9/count;
 
-    var shopDisplay, mdefDispaly, expDispaly;
-    mdefDispaly = core.flags.enableMDef ? 'block' : 'none';
-    expDispaly = core.flags.enableExperience ? 'block' : 'none';
+    var shopDisplay, mdefDisplay, expDisplay;
+    mdefDisplay = core.flags.enableMDef ? 'block' : 'none';
+    expDisplay = core.flags.enableExperience ? 'block' : 'none';
 
     statusBarBorder = '3px #fff solid';
     toolBarBorder = '3px #fff solid';
@@ -2898,7 +2908,8 @@ core.prototype.resize = function(clientWidth, clientHeight) {
 
     var unit = 'px'
     core.domStyle.styles = [
-        {   id: 'gameGroup',
+        {
+            id: 'gameGroup',
             rules:{
                 width: gameGroupWidth + unit,
                 height: gameGroupHeight + unit,
@@ -2906,7 +2917,8 @@ core.prototype.resize = function(clientWidth, clientHeight) {
                 left: (clientWidth-gameGroupWidth)/2 + unit,
             }
         },
-        {   className: 'gameCanvas',
+        {
+            className: 'gameCanvas',
             rules:{
                 width: canvasWidth + unit, 
                 height: canvasWidth + unit,
@@ -2916,7 +2928,8 @@ core.prototype.resize = function(clientWidth, clientHeight) {
                 border: '3px #fff solid',
             }
         },
-        {   id: 'statusBar',
+        {
+            id: 'statusBar',
             rules:{
                 width: statusBarWidth + unit,
                 height: statusBarHeight + unit,
@@ -2930,7 +2943,8 @@ core.prototype.resize = function(clientWidth, clientHeight) {
                 fontSize: fontSize + unit
             }
         },
-        {   className: 'status',
+        {
+            className: 'status',
             rules:{
                 width: '100%',
                 maxWidth: statusMaxWidth + unit,
@@ -2945,7 +2959,8 @@ core.prototype.resize = function(clientWidth, clientHeight) {
                 lineHeight: statusLabelsLH + unit,
             }
         },
-        {   id: 'toolBar',
+        {
+            id: 'toolBar',
             rules:{
                 width: toolBarWidth + unit,
                 height: toolBarHeight + unit,
@@ -2958,7 +2973,8 @@ core.prototype.resize = function(clientWidth, clientHeight) {
                 fontSize: fontSize + unit
             }
         },
-        {   className: 'tools',
+        {
+            className: 'tools',
             rules:{
                 height: toolsHeight + unit,
                 maxWidth: toolsPMaxwidth + unit,
@@ -2975,13 +2991,13 @@ core.prototype.resize = function(clientWidth, clientHeight) {
         {
             id: 'expCol',
             rules: {
-                display: expDispaly
+                display: expDisplay
             }
         },
         {
             id: 'mdefCol',
             rules: {
-                display: mdefDispaly
+                display: mdefDisplay
             }
         },
     ]

@@ -7,7 +7,7 @@ HTML5 canvas制作的魔塔样板，支持全平台；即使不会编程的用�
 ## 文档
 
 * [Demo](http://ckcz123.com/games/template/)
-* [Docs](ckcz123.github.io/mota-js)
+* [Docs](http://ckcz123.github.io/mota-js)
 
 ## 更新说明
 

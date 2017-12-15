@@ -2791,7 +2791,7 @@ core.prototype.resize = function(clientWidth, clientHeight) {
     }
     // 各元素大小的变量声明
     var gameGroupWidth, gameGroupHeight, borderRight,
-        canvasWidth, canvasTop, canvasLeft,
+        canvasWidth, canvasTop, // canvasLeft,
         statusBarWidth, statusBarHeight, statusBarBorder,
         statusWidth, statusHeight, statusMaxWidth,statusLabelsLH,
         toolBarWidth, toolBarHeight, toolBarTop, toolBarBorder,
@@ -2835,7 +2835,7 @@ core.prototype.resize = function(clientWidth, clientHeight) {
             
             gameGroupWidth = width
             canvasTop = tempTopBarH;
-            canvasLeft = 0;
+            // canvasLeft = 0;
             toolBarWidth = statusBarWidth = width;
             statusBarHeight = tempTopBarH; //一共有3行加上两个padding空隙
             statusBarBorder = '3px #fff solid';
@@ -2859,7 +2859,7 @@ core.prototype.resize = function(clientWidth, clientHeight) {
             gameGroupWidth = width + DEFAULT_BAR_WIDTH * scale;
             gameGroupHeight = width;
             canvasTop = 0;
-            canvasLeft = DEFAULT_BAR_WIDTH * scale;
+            // canvasLeft = DEFAULT_BAR_WIDTH * scale;
             toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH * scale;
             statusBarHeight = scale * statusLineHeight * count + SPACE * 2; //一共有9行加上两个padding空隙
             statusBarBorder = '3px #fff solid';
@@ -2887,7 +2887,7 @@ core.prototype.resize = function(clientWidth, clientHeight) {
         gameGroupHeight = DEFAULT_CANVAS_WIDTH;
         canvasWidth = DEFAULT_CANVAS_WIDTH;
         canvasTop = 0;
-        canvasLeft = DEFAULT_BAR_WIDTH;
+        // canvasLeft = DEFAULT_BAR_WIDTH;
 
         toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH;
         statusBarHeight = statusLineHeight * count + SPACE * 2; //一共有9行
@@ -2923,9 +2923,19 @@ core.prototype.resize = function(clientWidth, clientHeight) {
                 width: canvasWidth + unit, 
                 height: canvasWidth + unit,
                 top: canvasTop + unit,
-                left: canvasLeft + unit, 
+                right: 0,
+                // left: canvasLeft + unit, 
 
                 border: '3px #fff solid',
+            }
+        },
+        {
+            id: 'floorMsgGroup',
+            rules:{
+                width: canvasWidth + unit,
+                height: canvasWidth + unit,
+                top: 0,
+                right: 0,
             }
         },
         {

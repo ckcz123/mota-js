@@ -138,11 +138,11 @@ html, body {
 }
 
 #floorMsgGroup {
-    width: 100%;
-    height: 100%;
+    /* width: 100%;
+    height: 100%; */
+    /* top: 0;
+    right: 0; */
     position: absolute;
-    top: 0;
-    right: 0;
     text-align: center;
     display: none;
     color: #fff;

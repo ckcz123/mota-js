@@ -1,5 +1,5 @@
 function main() {
-    this.version = "0.0.1";
+    this.version = "0.1";
     this.dom = {
         'body': document.body,
         'gameGroup': document.getElementById('gameGroup'),
@@ -41,7 +41,7 @@ function main() {
     ];
     // console.log('加载js文件列表加载完成' + this.loadList);
     this.images = [
-        'animates', 'enemys', 'heros', 'items', 'npcs', 'terrains'
+        'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains'
     ];
     this.sounds = {
         'mp3': ['bgm-loop', 'floor'],

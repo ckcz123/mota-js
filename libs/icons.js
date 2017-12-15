@@ -4,13 +4,11 @@ function icons() {
 
 icons.prototype.init = function () {
     this.icons = {
-        'heros': {
-            'hero1': {
-                'down': {'loc': 0, 'stop': 0, 'leftFoot': 1, 'rightFoot': 2},
-                'left': {'loc': 1, 'stop': 0, 'leftFoot': 1, 'rightFoot': 2},
-                'right': {'loc': 2, 'stop': 0, 'leftFoot': 1, 'rightFoot': 2},
-                'up': {'loc': 3, 'stop': 0, 'leftFoot': 1, 'rightFoot': 2}
-            }
+        'hero': {
+            'down': {'loc': 0, 'stop': 0, 'leftFoot': 1, 'rightFoot': 3},
+            'left': {'loc': 1, 'stop': 0, 'leftFoot': 1, 'rightFoot': 3},
+            'right': {'loc': 2, 'stop': 0, 'leftFoot': 1, 'rightFoot': 3},
+            'up': {'loc': 3, 'stop': 0, 'leftFoot': 1, 'rightFoot': 3}
         },
         'terrains': {
             'ground': 0,
@@ -192,11 +190,8 @@ icons.prototype.init = function () {
     }
 }
 
-icons.prototype.getIcons = function (iconName) {
-    if (iconName == undefined) {
-        return this.icons;
-    }
-    return this.icons[iconName];
+icons.prototype.getIcons = function () {
+    return this.icons;
 }
 
 main.instance.icons = new icons();

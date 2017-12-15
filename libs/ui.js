@@ -75,12 +75,18 @@ ui.prototype.drawTextBox = function(content) {
     content = core.replaceText(content);
 
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
-    var contents = content.split('\n');
-
     core.clearMap('ui', 0, 0, 416, 416);
+    // var contents = content.split('\n');
+    // var contents = core.splitLines('ui', content, );
+    var left=10, right=416-2*left;
+    var content_left = left + 25;
+    if (id=='hero' || core.isset(icon)) content_left=left+63;
+
+    var validWidth = right-(content_left-left)-13;
+    var contents = core.splitLines("ui", content, validWidth, '16px Verdana');
 
     var height = 416 - 10 - Math.min(416-24*(contents.length+1)-65, 250);
-    var left=10, top = (416-height)/2, right = 416 - 2*left, bottom = height;
+    var top = (416-height)/2, bottom = height;
 
     // var left = 97, top = 64, right = 416 - 2 * left, bottom = 416 - 2 * top;
     core.setAlpha('ui', 0.85);
@@ -93,27 +99,24 @@ ui.prototype.drawTextBox = function(content) {
     // 名称
     core.canvas.ui.textAlign = "left";
 
-    var content_left = left + 25, content_top = top + 35;
+    var content_top = top + 35;
     if (core.isset(id)) {
 
         content_top = top+57;
 
-        // 动画
-        if (id=='hero' || core.isset(icon)) {
-            core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, 34, '#FFD700', 2);
-            content_left = left+63;
-        }
-
         if (id == 'hero') {
+            var heroHeight=core.material.icons.hero.height;
+            core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, heroHeight+2, '#FFD700', 2);
             core.fillText('ui', core.status.hero.name, content_left, top + 30, '#FFD700', 'bold 22px Verdana');
-            core.clearMap('ui', left + 15, top + 40, 32, 32);
-            core.fillRect('ui', left + 15, top + 40, 32, 32, background);
-            var heroIcon = core.material.icons.heros[core.status.hero.id]['down'];
-            core.canvas.ui.drawImage(core.material.images.heros, heroIcon.stop * 32, heroIcon.loc *32, 32, 32, left+15, top+40, 32, 32);
+            core.clearMap('ui', left + 15, top + 40, 32, heroHeight);
+            core.fillRect('ui', left + 15, top + 40, 32, heroHeight, background);
+            var heroIcon = core.material.icons.hero['down'];
+            core.canvas.ui.drawImage(core.material.images.hero, heroIcon.stop * 32, heroIcon.loc * heroHeight, 32, heroHeight, left+15, top+40, 32, heroHeight);
         }
         else {
             core.fillText('ui', name, content_left, top + 30, '#FFD700', 'bold 22px Verdana');
             if (core.isset(icon)) {
+                core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, 34, '#FFD700', 2);
                 core.status.boxAnimateObjs = [];
                 core.status.boxAnimateObjs.push({
                     'bgx': left + 15, 'bgy': top + 40, 'bgsize': 32,
@@ -150,6 +153,10 @@ ui.prototype.drawChoices = function(content, choices) {
     var choice_top = bottom-height+56;
 
     var id=null, name=null, image=null, icon=null;
+
+    var contents = null;
+    var content_left = left + 15;
+
     if (core.isset(content)) {
         // 获得name, image, icon
         if (content.indexOf("\t[")==0) {
@@ -187,11 +194,16 @@ ui.prototype.drawChoices = function(content, choices) {
         }
         content = core.replaceText(content);
 
+        if (id=='hero' || core.isset(icon))
+            content_left = left+60;
+
+        contents = core.splitLines('ui', content, width-(content_left-left)-10, 'bold 15px Verdana');
+
         // content部分高度
         var cheight=0;
         // 如果含有标题，标题高度
         if (name!=null) cheight+=25;
-        cheight += content.split('\n').length*20;
+        cheight += contents.length*20;
         height+=cheight;
     }
     var top = bottom-height;
@@ -200,9 +212,9 @@ ui.prototype.drawChoices = function(content, choices) {
     core.strokeRect('ui', left - 1, top - 1, width + 1, height + 1, '#FFFFFF', 2);
 
     // 如果有内容
-    if (core.isset(content)) {
+    if (core.isset(contents)) {
 
-        var content_left = left + 15, content_top = top + 35;
+        var content_top = top + 35;
 
         if (core.isset(id)) {
             core.canvas.ui.textAlign = "center";
@@ -210,22 +222,22 @@ ui.prototype.drawChoices = function(content, choices) {
             content_top = top+55;
             var title_offset = left+width/2;
             // 动画
-            if (id=='hero' || core.isset(icon)) {
-                core.strokeRect('ui', left + 15 - 1, top + 30 - 1, 34, 34, '#DDDDDD', 2);
-                content_left = left+60;
+            if (id=='hero' || core.isset(icon))
                 title_offset += 22;
-            }
 
             if (id == 'hero') {
+                var heroHeight = core.material.icons.hero.height;
+                core.strokeRect('ui', left + 15 - 1, top + 30 - 1, 34, heroHeight+2, '#DDDDDD', 2);
                 core.fillText('ui', core.status.hero.name, title_offset, top + 27, '#FFD700', 'bold 19px Verdana');
-                core.clearMap('ui', left + 15, top + 30, 32, 32);
-                core.fillRect('ui', left + 15, top + 30, 32, 32, background);
-                var heroIcon = core.material.icons.heros[core.status.hero.id]['down'];
-                core.canvas.ui.drawImage(core.material.images.heros, heroIcon.stop * 32, heroIcon.loc *32, 32, 32, left+15, top+30, 32, 32);
+                core.clearMap('ui', left + 15, top + 30, 32, heroHeight);
+                core.fillRect('ui', left + 15, top + 30, 32, heroHeight, background);
+                var heroIcon = core.material.icons.hero['down'];
+                core.canvas.ui.drawImage(core.material.images.hero, heroIcon.stop * 32, heroIcon.loc *heroHeight, 32, heroHeight, left+15, top+30, 32, heroHeight);
             }
             else {
                 core.fillText('ui', name, title_offset, top + 27, '#FFD700', 'bold 19px Verdana');
                 if (core.isset(icon)) {
+                    core.strokeRect('ui', left + 15 - 1, top + 30 - 1, 34, 34, '#DDDDDD', 2);
                     core.status.boxAnimateObjs = [];
                     core.status.boxAnimateObjs.push({
                         'bgx': left + 15, 'bgy': top + 30, 'bgsize': 32,
@@ -237,7 +249,6 @@ ui.prototype.drawChoices = function(content, choices) {
         }
 
         core.canvas.ui.textAlign = "left";
-        var contents=content.split("\n");
         for (var i=0;i<contents.length;i++) {
             core.fillText('ui', contents[i], content_left, content_top, '#FFFFFF', 'bold 15px Verdana');
             content_top+=20;
@@ -689,7 +700,7 @@ ui.prototype.drawSLPanel = function(page) {
             core.fillText('ui', name+id, (2*i+1)*u, 35, '#FFFFFF', "bold 17px Verdana");
             core.strokeRect('ui', (2*i+1)*u-size/2, 50, size, size, '#FFFFFF', 2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                this.drawThumbnail('ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc, data.hero.id);
+                this.drawThumbnail('ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc);
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 65+size, '#FFFFFF', '10px Verdana');
             }
             else {
@@ -701,7 +712,7 @@ ui.prototype.drawSLPanel = function(page) {
             core.fillText('ui', name+id, (2*i-5)*u, 230, '#FFFFFF', "bold 17px Verdana");
             core.strokeRect('ui', (2*i-5)*u-size/2, 245, size, size, '#FFFFFF', 2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                this.drawThumbnail('ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc, data.hero.id);
+                this.drawThumbnail('ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc);
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 260+size, '#FFFFFF', '10px Verdana');
             }
             else {
@@ -714,7 +725,7 @@ ui.prototype.drawSLPanel = function(page) {
 
 }
 
-ui.prototype.drawThumbnail = function(canvas, blocks, x, y, size, heroLoc, heroId) {
+ui.prototype.drawThumbnail = function(canvas, blocks, x, y, size, heroLoc) {
     core.clearMap(canvas, x, y, size, size);
     var persize = size/13;
     for (var i=0;i<13;i++) {
@@ -735,9 +746,10 @@ ui.prototype.drawThumbnail = function(canvas, blocks, x, y, size, heroLoc, heroI
         }
     }
     if (core.isset(heroLoc)) {
-        var id = core.isset(heroId)?heroId:core.status.hero.id;
-        var heroIcon = core.material.icons.heros[id][heroLoc.direction];
-        core.canvas[canvas].drawImage(core.material.images.heros, heroIcon.stop * 32, heroIcon.loc * 32, 32, 32, x+persize*heroLoc.x, y+persize*heroLoc.y, persize, persize);
+        var heroIcon = core.material.icons.hero[heroLoc.direction];
+        var height = core.material.icons.hero.height;
+        var realHeight = persize*height/32;
+        core.canvas[canvas].drawImage(core.material.images.hero, heroIcon.stop * 32, heroIcon.loc * height, 32, height, x+persize*heroLoc.x, y+persize*heroLoc.y+persize-realHeight, persize, realHeight);
     }
 }
 

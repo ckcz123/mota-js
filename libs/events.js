@@ -248,11 +248,18 @@ events.prototype.doAction = function() {
             break;
         case "changePos": // 直接更换勇士位置，不切换楼层
             core.clearMap('hero', 0, 0, 416, 416);
-            core.setHeroLoc('x', data.loc[0]);
-            core.setHeroLoc('y', data.loc[1]);
+            if (core.isset(data.loc)) {
+                core.setHeroLoc('x', data.loc[0]);
+                core.setHeroLoc('y', data.loc[1]);
+            }
             if (core.isset(data.direction)) core.setHeroLoc('direction', data.direction);
             core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
             this.doAction();
+            break;
+        case "setFg": // 颜色渐变
+            core.setFg(data.color, data.time, function() {
+                core.events.doAction();
+            });
             break;
         case "openDoor": // 开一个门，包括暗墙
             var floorId=data.floorId || core.status.floorId;
@@ -273,6 +280,10 @@ events.prototype.doAction = function() {
         case "openShop": // 打开一个全局商店
             core.events.openShop(data.id);
             break;
+        case "disableShop": // 禁用一个全局商店
+            core.events.disableQuickShop(data.id);
+            this.doAction();
+            break;
         case "battle": // 强制战斗
             core.battle(data.id,null,null,true,function() {
                 core.events.doAction();
@@ -285,9 +296,14 @@ events.prototype.doAction = function() {
                 block = block.block;
                 if (core.isset(block.event) && block.event.trigger=='action') {
                     // 触发
+                    /*
                     core.status.event = {'id': 'action', 'data': {
                         'list': core.clone(block.event.data), 'x': block.x, 'y': block.y, 'callback': core.status.event.data.callback
                     }}
+                    */
+                    core.status.event.data.list = core.clone(block.event.data);
+                    core.status.event.data.x=block.x;
+                    core.status.event.data.y=block.y;
                 }
             }
             this.doAction();
@@ -397,9 +413,13 @@ events.prototype.openShop = function(shopId, needVisited) {
     // 拼词
     var content = "\t["+shop.name+","+shop.icon+"]";
     var times = shop.times, need=eval(shop.need);
-    if (need<0) need="若干";
-    var use=shop.use=="experience"?"经验":"金币";
-    content = content+"勇敢的武士啊，给我"+need+"\n"+use+"，你就可以："
+
+    content = content + shop.text.replace(/\${([^}]+)}/g, function (word, value) {
+        return eval(value);
+    });
+
+    var use = shop.use=='experience'?'经验':'金币';
+
     var choices = [];
     for (var i=0;i<shop.choices.length;i++) {
         var choice = shop.choices[i];
@@ -414,7 +434,6 @@ events.prototype.openShop = function(shopId, needVisited) {
 
 events.prototype.disableQuickShop = function (shopId) {
     core.status.shops[shopId].visited = false;
-
 }
 
 ////// 降低难度 //////
@@ -778,11 +797,17 @@ events.prototype.clickSettings = function (x,y) {
         core.changeSoundStatus();
         core.ui.drawSettings(false);
     }
-    if (y == 4) core.ui.drawQuickShop();
+    if (y==4) {
+        core.flags.battleAnimate=!core.flags.battleAnimate;
+        core.setLocalStorage('battleAnimate', core.flags.battleAnimate);
+        core.ui.drawSettings(false);
+    }
+    if (y == 5) core.ui.drawQuickShop();
     // if (y == 5) this.decreaseHard();
-    if (y == 5) {
+    if (y == 6) {
         core.ui.drawSyncSave();
     }
+    /*
     if (y == 6) {
         core.ui.drawConfirmBox("你确定要清空所有本地存档吗？", function() {
             localStorage.clear();
@@ -791,6 +816,7 @@ events.prototype.clickSettings = function (x,y) {
             core.ui.drawSettings(false);
         })
     }
+    */
     if (y == 7) {
         core.ui.drawConfirmBox("你确定要重新开始吗？", function () {
             core.ui.closePanel();

@@ -155,12 +155,6 @@ items.prototype.useItem = function (itemId) {
             core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
             core.updateFg();
             core.drawTip(core.material.items[itemId].name + "使用成功");
-            if (itemId == 'bomb' && core.flags.bombTrigger) {
-                core.events.afterBattle();
-            }
-            else if (itemId=='hammer' && core.flags.bombTrigger) {
-                core.events.afterBattle(core.status.event.data[0]);
-            }
         });
     }
     if (itemId == 'centerFly') {

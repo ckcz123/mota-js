@@ -1,5 +1,4 @@
 function main() {
-    this.version = "0.0.1";
     this.dom = {
         'body': document.body,
         'gameGroup': document.getElementById('gameGroup'),
@@ -41,7 +40,7 @@ function main() {
     ];
     // console.log('加载js文件列表加载完成' + this.loadList);
     this.images = [
-        'animates', 'enemys', 'heros', 'items', 'npcs', 'terrains'
+        'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains'
     ];
     this.sounds = {
         'mp3': ['bgm-loop', 'floor'],
@@ -79,6 +78,8 @@ function main() {
         'curse': document.getElementById('curse'),
         'hard': document.getElementById("hard")
     }
+    this.version = "0.1"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+
     this.useCompress = false; // 是否使用压缩文件
     // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
     // 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。
@@ -321,13 +322,8 @@ main.statusBar.image.settings.onclick = function () {
 main.dom.playGame.onclick = function () {
     main.dom.startButtons.style.display='none';
 
-    /**
-     * 如果点击“开始游戏”直接开始游戏而不是进入难度选择页面，则将下面这个改成true
-     */
-    var startGameNow = false;
-
-    if (startGameNow) {
-        core.events.startGame();
+    if (main.core.isset(main.core.flags.startDirectly) && main.core.flags.startDirectly) {
+        core.events.startGame("");
     }
     else {
         main.dom.levelChooseButtons.style.display='block';

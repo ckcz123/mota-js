@@ -28,14 +28,12 @@ main.floors.sample1 = {
 
         "4,10": [ // 走到中间时的提示
             "\t[样板提示]本层楼将会对各类事件进行介绍。",
-            "左边是一个仿50层的陷阱做法，上方是商店、快捷\n商店的使用方法，右上是一个典型的杀怪开门的例\n子，右下是各类可能的NPC事件。",
-            "本样板目前支持的事件列表大致有：\ntext: 显示一段文字（比如你现在正在看到的）\nshow: 使一个事件有效（可见、可被交互）\nhide: 使一个事件失效（不可见、不可被交互）\ntrigger: 触发另一个地点的事件\nbattle: 强制和某怪物战斗\nopenDoor: 无需钥匙开门（例如机关门、暗墙）\nopenShop: 打开一个全局商店\nchangeFloor: 传送勇士到某层某位置\nchangePos: 传送勇士到当层某位置\nwin: 获得胜利（游戏通关）\nlose: 游戏失败",
-            "move: 移动事件效果\nplaySound: 播放某个音频\nif: 条件判断\nchoices: 提供选项\nsetValue: 设置勇士属性、道具，或某个变量/flag\nupdate: 更新状态栏和地图显伤\nsleep: 等待多少毫秒\nexit: 立刻结束当前事件\nrevisit: 立刻结束事件并重新触发\nfunction: 自定义JS脚本\n\n更多支持的事件还在编写中，欢迎您宝贵的意见。",
-            "有关各类事件的样例，可参见本层一些NPC的写法。\n所有事件样例本层都有介绍。\n\n一个自定义事件处理完后，需要调用\n{\"type\": \"hide\"}\n该事件才不会再次出现。",
+            "左边是一个仿50层的陷阱做法，上方是商店、快捷商店的使用方法，右上是一个典型的杀怪开门的例子，右下是各类可能的NPC事件。",
+            "本样板目前支持的事件列表大致有：\ntext: 显示一段文字（比如你现在正在看到的）\nshow: 使一个事件有效（可见、可被交互）\nhide: 使一个事件失效（不可见、不可被交互）\ntrigger: 触发另一个地点的事件\nbattle: 强制和某怪物战斗\nopenDoor: 无需钥匙开门（例如机关门、暗墙）\nopenShop: 打开一个全局商店\ndisableShop: 禁用一个全局商店\nchangeFloor: 传送勇士到某层某位置\nchangePos: 传送勇士到当层某位置；转向\nsetFg: 更改画面色调",
+            "move: 移动事件效果\nplaySound: 播放某个音频\nif: 条件判断\nchoices: 提供选项\nsetValue: 设置勇士属性道具，或某个变量/flag\nupdate: 更新状态栏和地图显伤\nwin: 获得胜利（游戏通关）\nlose: 游戏失败\nsleep: 等待多少毫秒\nexit: 立刻结束当前事件\nrevisit: 立刻结束事件并重新触发\nfunction: 自定义JS脚本\n更多支持的事件还在编写中，欢迎您宝贵的意见。",
+            "有关各事件的样例，可参见本层一些NPC的写法。\n所有事件样例本层都有介绍。\n\n一个自定义事件处理完后，需要调用{\"type\": \"hide\"}该事件才不会再次出现。",
             {"type": "hide"}
         ],
-
-
 
         /****** 左边仿50F陷阱事件 ******/
         "1,5": {"enable": false}, // 这几个是白衣武士等怪物，起始时需要隐藏起来
@@ -46,7 +44,7 @@ main.floors.sample1 = {
         "1,7": [ // 走到白衣武士中间，触发陷阱事件
             {"type": "show", "loc": [1,5], "time": 1500}, // 显示红衣魔王，动画效果1500ms
             {"type": "sleep", "time": 500}, // 等待500ms
-            "\t[redKing]欢迎来到魔塔，你是第一百位挑战者。\n若你能打败我所有的手下，我就与你一对一\n的决斗。\n现在你必须接受我的安排。",
+            "\t[redKing]欢迎来到魔塔，你是第一百位挑战者。\n若你能打败我所有的手下，我就与你一对一的决斗。\n现在你必须接受我的安排。",
             {"type": "show", "loc": [1,6], "time": 500}, // 显示四个白衣武士，每个动画效果500ms
             {"type": "show", "loc": [0,7], "time": 500},
             {"type": "show", "loc": [1,8], "time": 500},
@@ -61,7 +59,9 @@ main.floors.sample1 = {
             {"type": "hide", "loc": [1,8]},
             {"type": "hide", "loc": [1,5], "time": 500}, // 隐藏红衣魔王，动画500ms
             {"type": "hide"}, // 隐藏本事件
-            {"type": "changeFloor", "floorId": "sample1", "loc": [1,11]}, // 楼层切换。changeFloor必须指定floorId和loc。
+            {"type": "setFg", "color": [0,0,0], 'time': 1250}, // 渐变为白色
+            {"type": "sleep", "time": 700},
+            {"type": "changeFloor", "floorId": "sample1", "loc": [1,11], 'direction': 'right', 'time': 1000}, // 楼层切换。changeFloor必须指定floorId和loc。
             // 备注：这里也可以下面的这种写法：
             // {"type": "changePos", "loc": [1,11]}
             // 使用这种写法将不会有“楼层切换动画”，而是直接让勇士到达本层的loc位置。
@@ -69,8 +69,9 @@ main.floors.sample1 = {
         ],
         "2,11": [ // 小偷事件
             "\t[杰克,thief]喂！醒醒！快醒醒！",
+            {"type": "setFg", "time": 1500}, // 渐变回来
             "\t[hero]额，我这是在什么地方？",
-            "\t[杰克,thief]你被魔王抓了起来扔进了监狱，和我关在了一\n起，但是幸运的是我在昨天刚刚挖好一条越狱\n的暗道！",
+            "\t[杰克,thief]你被魔王抓了起来扔进了监狱，和我关在了一起，但是幸运的是我在昨天刚刚挖好一条越狱的暗道！",
             {"type": "openDoor", "loc": [3,11]}, // 开门或墙必须指定门/墙的名称，否则不会执行
             {"type": "sleep", "time": 300}, // 等待300ms
             "\t[杰克,thief]我先走了，祝你好运！",
@@ -83,14 +84,13 @@ main.floors.sample1 = {
             "\t[hero]怎么跑的这么快..."
         ],
 
-
-
         /****** 上方商店事件相关 ******/
         "4,2": [ // 商店门前的老人
-            "\t[老人,man]本塔的商店有两类，全局商店和非全局商店。\n\n所谓非全局商店，就类似于右下角那个卖钥匙\n的老人一样，一定要碰到才能触发事件。\n\n而全局商店，则能在快捷商店中直接使用。",
-            "\t[老人,man]要注册一个全局商店，你需要在 data.js 中，\n找到 shops，并在内添加你的商店信息。",
-            "\t[老人,man]商店信息添加后，可以在需要的事件处调用\n{\"type\": \"openShop\"}\n来打开你添加的全局商店。",
-            "\t[老人,man]在上面的例子里，左边是一个仿50层的金币\n商店，右边是一个仿24层的经验商店。\n\n商店被访问后即可在快捷商店中进行使用。",
+            "\t[老人,man]本塔的商店有两类，全局商店和非全局商店。\n\n所谓非全局商店，就类似于右下角那个卖钥匙的老人一样，一定要碰到才能触发事件。\n\n而全局商店，则能在快捷商店中直接使用。",
+            "\t[老人,man]要注册一个全局商店，你需要在 data.js 中，找到 shops，并在内添加你的商店信息。",
+            "\t[老人,man]商店信息添加后，可以在需要的事件处调用{\"type\": \"openShop\"}来打开你添加的全局商店。",
+            "\t[老人,man]在上面的例子里，左边是一个仿50层的金币商店，右边是一个仿24层的经验商店。\n\n商店被访问后即可在快捷商店中进行使用。",
+            "\t[老人,man]如果你需要在某层暂时禁用快捷商店，可以在data.js中设置cannotUseQuickShop。\n如果需要永久禁用商店，请使用{\"type\":\"disableShop\"}",
             {"type": "hide", "time": 500}
         ],
         "1,0": [ // 金币商店
@@ -143,23 +143,23 @@ main.floors.sample1 = {
         /****** 右下各种NPC事件相关 ******/
         "6,12": {"enable":false}, // 仙子下面的铁门，初始时是禁用的
         "6,11": [ // 仙子事件
-            "\t[仙子,fairy]通过调用 {\"type\": \"show\"} 可以使隐藏的\n事件显示出来。\n比如我下面这个机关门。",
+            "\t[仙子,fairy]通过调用 {\"type\": \"show\"} 可以使隐藏的事件显示出来。\n比如我下面这个机关门。",
             {"type": "show", "loc": [6,12]}, // 使隐藏的铁门显示出来
-            "\t[仙子,fairy]通过调用 {\"type\": \"openDoor\"} 可以无需\n钥匙打开一扇门或暗墙。",
+            "\t[仙子,fairy]通过调用 {\"type\": \"openDoor\"} 可以无需钥匙打开一扇门或暗墙。",
             {"type": "openDoor", "loc": [6,12]}, // 开门
-            "\t[仙子,fairy]同时，也可以对其它层进行操作，比如楼下\n的机关门，现在已经为你打开了。",
+            "\t[仙子,fairy]同时，也可以对其它层进行操作，比如楼下的机关门，现在已经为你打开了。",
             {"type": "openDoor", "loc": [11,10], "floorId": "sample0"}, // 打开其它层的门，需要指定floorId
-            "\t[仙子,fairy]如果 show 或 hide 指定了 time 参数，则\n以动画效果显示，指定的参数作为消失时间\n（毫秒）来计算。",
+            "\t[仙子,fairy]如果 show 或 hide 指定了 time 参数，则以动画效果显示，指定的参数作为消失时间（毫秒）来计算。",
             "\t[仙子,fairy]现在到楼下来找我吧~",
             {"type": "show", "loc": [12,10], "floorId": "sample0"}, // 显示其它层的事件，需要指定其floorId
             {"type": "hide", "time": 500}
         ],
         "8,11": [ // 老人事件，勇士状态的显示与变化
             {"type": "setValue", "name": "flag:man_times", "value": "flag:man_times+1"}, // 设置这个老人的访问次数
-            "\t[老人,man]在文字中使用${' ${ '}和 } 可以计算并显示一个\n表达式的结果。\n",
+            "\t[老人,man]在文字中使用${' ${ '}和 } 可以计算并显示一个表达式的结果。\n",
             "\t[老人,man]例如：\n你的当前攻击力是${status:atk}，防御力是${status:def}。\n攻防和的十倍是${10*(status:atk+status:def)}，攻防之积是${status:atk*status:def}。\n你有${item:yellowKey}把黄钥匙，${item:blueKey}把蓝钥匙，${item:redKey}把红钥匙。\n你有${item:pickaxe}个破，${item:bomb}个炸，${item:centerFly}个飞。\n这是你第${flag:man_times}次和我对话。",
-            "\t[老人,man]同时，你也可以通过\n{\"type\": \"setValue\"}\n来设置一个勇士的属性、道具，或某个Flag。",
-            "\t[老人,man]例如：\n现在我将让你的攻防提升50%，再将攻防和\n的十倍加到生命值上。",
+            "\t[老人,man]同时，你也可以通过{\"type\": \"setValue\"}来设置一个勇士的属性、道具，或某个Flag。",
+            "\t[老人,man]例如：\n现在我将让你的攻防提升50%，再将攻防和的十倍加到生命值上。",
             {"type": "setValue", "name": "status:atk", "value": "status:atk*1.5"}, // 攻击提升50%；注意不要加${}
             {"type": "setValue", "name": "status:def", "value": "status:def*1.5"}, // 防御提升50%；注意不要加${}
             {"type": "setValue", "name": "status:hp", "value": "status:hp+10*(status:atk+status:def)"}, //生命提升攻防和的十倍
@@ -169,24 +169,24 @@ main.floors.sample1 = {
             {"type": "setValue", "name": "item:pickaxe", "value": "item:pickaxe+1"}, // 1破
             {"type": "setValue", "name": "item:bomb", "value": "item:bomb+2"}, // 2炸
             {"type": "setValue", "name": "item:centerFly", "value": "item:centerFly+3"}, // 3飞
-            "\t[老人,man]status:xxx 代表勇士的某个属性。\n其中xxx可取hp, atk, def, mdef, money,\nexperience这几项。\n\nitem:xxx 代表勇士的某个道具的个数。\nxxx为道具ID，具体可参见items.js中的定义。\n\nflag:xxx 代表某个自定义Flag或变量。\nxxx为Flag/变量名，可以自行定义，由字母、\n数字和下划线组成。\n未定义过而直接取用的Flag默认值为false。",
+            "\t[老人,man]status:xxx 代表勇士的某个属性。\n其中xxx可取hp, atk, def, mdef, money,experience这几项。\n\nitem:xxx 代表勇士的某个道具的个数。\nxxx为道具ID，具体可参见items.js中的定义。\n\nflag:xxx 代表某个自定义Flag或变量。\nxxx为Flag/变量名，可以自行定义，由字母、数字和下划线组成。\n未定义过而直接取用的Flag默认值为false。",
             // 如果老人不消失，则不要调用 {"type": "hide"}
-            "\t[老人,man]你现在可以重新和我进行对话，进一步看到\n属性值的改变。"
+            "\t[老人,man]你现在可以重新和我进行对话，进一步看到属性值的改变。"
         ],
         "10,11": [ // 商人事件，if语句和choices语句的写法
             // 这部分逻辑相对比较长，细心看，很容易看懂的。
             {"type": "if", "condition": "flag:woman_times==0", // 条件判断：是否从未访问过此商人。
                 "true": [ // 如果从未访问过该商人，显示一段文字
-                    "\t[老人,woman]这是个很复杂的例子，它将教会你如何使用\nif 语句进行条件判断，以及 choices 提供\n选项来供用户进行选择。",
-                    "\t[老人,woman]第一次访问我将显示这段文字；从第二次开始\n将会向你出售钥匙。\n钥匙价格将随着访问次数递增。\n当合计出售了七把钥匙后，将送你一把大黄门\n钥匙，并消失不再出现。",
-                    "\t[老人,woman]这部分的逻辑比较长，请细心看样板的写法，\n是很容易看懂并理解的。"
+                    "\t[老人,woman]这是个很复杂的例子，它将教会你如何使用if 语句进行条件判断，以及 choices 提供选项来供用户进行选择。",
+                    "\t[老人,woman]第一次访问我将显示这段文字；从第二次开始将会向你出售钥匙。\n钥匙价格将随着访问次数递增。\n当合计出售了七把钥匙后，将送你一把大黄门钥匙，并消失不再出现。",
+                    "\t[老人,woman]这部分的逻辑比较长，请细心看样板的写法，是很容易看懂并理解的。"
                     // 第一次访问结束
                 ],
                 "false": [ // 如果已经访问过该商人
                     {"type": "if", "condition": "flag:woman_times==8", // 条件判断：是否已经出售七把钥匙
                         "true": [ // 如果已经出售过七把钥匙，则直接结束
-                            "\t[老人,woman]你购买的钥匙已经够多了，再继续卖给你的话\n我会有危险的。",
-                            "\t[老人,woman]看在你贡献给我这么多钱的份上，送你一把大\n黄门钥匙吧，希望你能好好用它。",
+                            "\t[老人,woman]你购买的钥匙已经够多了，再继续卖给你的话我会有危险的。",
+                            "\t[老人,woman]看在你贡献给我这么多钱的份上，送你一把大黄门钥匙吧，希望你能好好用它。",
                             {"type": "setValue", "name": "item:bigKey", "value": "item:bigKey+1"}, // 获得一把大黄门钥匙
                             "\t[老人,woman]我先走了，拜拜~",
                             {"type":"hide", "time": 500}, // 消失
@@ -249,8 +249,8 @@ main.floors.sample1 = {
             {"type": "revisit"} // 立即重新开始这个事件
         ],
         "12,11": [ // 自定义事件的老人
-            "\t[老人,womanMagician]使用 {\"type\":\"function\"} 可以写自定义的\nJS脚本。\n本塔支持的所有主要API会在doc文档内给出。",
-            "\t[老人,womanMagician]例如这个例子：即将弹出一个输入窗口，然后\n会将你的输入结果直接加到你的攻击力上。",
+            "\t[老人,womanMagician]使用 {\"type\":\"function\"} 可以写自定义的JS脚本。\n本塔支持的所有主要API会在doc文档内给出。",
+            "\t[老人,womanMagician]例如这个例子：即将弹出一个输入窗口，然后会将你的输入结果直接加到你的攻击力上。",
             {"type": "function", "function": function() { // 自己写JS脚本并执行
                 var value = prompt("请输入你要加攻击力的数值："); // 弹出一个输入框让用户输入数据
                 if (value!=null) {

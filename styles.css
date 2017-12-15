@@ -6,12 +6,12 @@ html, body {
     background-color: #000;
     overflow: hidden;
 }
-
+/*
 @font-face {
     font-family: number;
     src: url("fonts/number.ttf");
 }
-
+*/
 #gameGroup {
     position: absolute;
     box-sizing: border-box;
@@ -176,6 +176,7 @@ html, body {
     -webkit-box-sizing: border-box;
     background: url(images/ground.png) round;
     z-index: 6;
+    display: none;
 }
 #statusBar .status{
     position: relative;
@@ -206,6 +207,7 @@ html, body {
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
+    display: none;
 }
 #toolBar .tools{
     position: relative;
@@ -243,11 +245,11 @@ span#poison, span#weak, span#curse {
     z-index: 2;
 }
 
-#fg {
+#hero {
     z-index: 3;
 }
 
-#hero {
+#fg {
     z-index: 4;
 }
 

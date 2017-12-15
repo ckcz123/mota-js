@@ -105,12 +105,15 @@ core.prototype.init = function (dom, statusBar, canvas, images, sounds, floorIds
     for (var key in coreData) {
         core[key] = coreData[key];
     }
-    core.flags = core.data.flags;
+    core.flags = core.clone(core.data.flags);
+    core.flags.battleAnimate = core.getLocalStorage('battleAnimate', core.flags.battleAnimate);
     core.values = core.clone(core.data.values);
     core.firstData = core.data.getFirstData();
     core.initStatus.shops = core.firstData.shops;
     core.dom.versionLabel.innerHTML = core.firstData.version;
     core.dom.logoLabel.innerHTML = core.firstData.title;
+    document.title = core.firstData.title + " - HTML5魔塔";
+    document.getElementById("startLogo").innerHTML = core.firstData.title;
     core.material.items = core.items.getItems();
     core.initStatus.maps = core.maps.initMaps(floorIds);
     core.material.enemys = core.clone(core.enemys.getEnemys());
@@ -132,6 +135,10 @@ core.prototype.init = function (dom, statusBar, canvas, images, sounds, floorIds
 
     core.loader(function () {
         console.log(core.material);
+
+        // 设置勇士高度
+        core.material.icons.hero.height = core.material.images.hero.height/4;
+
         core.showStartAnimate();
     });
 }
@@ -675,8 +682,17 @@ core.prototype.onclick = function (x, y, stepPostfix) {
                 core.syncSave("load");
             }
         }
-        if (x>=5 && x<=7 && y==7) {
-            core.ui.drawSettings(false);
+        if (x>=5 && x<=7) {
+            if (y==7) {
+                core.ui.drawConfirmBox("你确定要清空所有本地存档吗？", function() {
+                    localStorage.clear();
+                    core.drawText("\t[操作成功]你的本地所有存档已被清空。");
+                }, function() {
+                    core.ui.drawSettings(false);
+                })
+            }
+            if (y==8)
+                core.ui.drawSettings(false);
         }
     }
 
@@ -1165,11 +1181,12 @@ core.prototype.drawHero = function (direction, x, y, status, offsetX, offsetY) {
     offsetX = offsetX || 0;
     offsetY = offsetY || 0;
     core.clearAutomaticRouteNode(x, y);
-    var heroIcon = core.material.icons.heros[core.status.hero.id][direction];
+    var heroIcon = core.material.icons.hero[direction];
     x = x * 32;
     y = y * 32;
     core.canvas.hero.clearRect(x - 32, y - 32, 96, 96);
-    core.canvas.hero.drawImage(core.material.images.heros, heroIcon[status] * 32, heroIcon.loc * 32, 32, 32, x + offsetX, y + offsetY, 32, 32);
+    var height=core.material.icons.hero.height;
+    core.canvas.hero.drawImage(core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height, x + offsetX, y + offsetY + 32-height, 32, height);
 }
 
 /////////// 自动行走 & 行走控制 END ///////////
@@ -1180,6 +1197,9 @@ core.prototype.drawHero = function (direction, x, y, status, offsetX, offsetY) {
 
 // 开门
 core.prototype.openDoor = function (id, x, y, needKey, callback) {
+
+    if (core.interval.openDoorAnimate!=null) return;
+
     // 是否存在门
     if (!core.terrainExists(x, y, id)) {
         if (core.isset(callback)) callback();
@@ -1216,6 +1236,7 @@ core.prototype.openDoor = function (id, x, y, needKey, callback) {
         state++;
         if (state == 4) {
             clearInterval(core.interval.openDoorAnimate);
+            core.interval.openDoorAnimate=null;
             core.removeBlock(x, y);
             core.events.afterOpenDoor(id,x,y,callback);
             return;
@@ -1492,6 +1513,7 @@ core.prototype.drawMap = function (mapName, callback) {
         }
     }
     core.setGlobalAnimate(core.values.animateSpeed);
+
     if (core.isset(callback))
         callback();
 }
@@ -1838,6 +1860,59 @@ core.prototype.drawBoxAnimate = function (background) {
     }
 }
 
+core.prototype.setFg = function(color, time, callback) {
+    time = time || 750;
+    core.setOpacity('fg', 1);
+
+    var fromAlpha = 0;
+    if (core.isset(core.status.event.data.currentColor)) {
+        fromAlpha = 1;
+    }
+    else {
+        core.status.event.data.currentColor = [0,0,0];
+    }
+
+    var fromColor = core.status.event.data.currentColor;
+
+    var toAlpha = 1;
+    if (!core.isset(color)) {
+        color = [0,0,0];
+        toAlpha=0;
+    }
+
+    var step=0;
+    var changeAnimate = setInterval(function() {
+        step++;
+        core.clearMap('fg', 0, 0, 416, 416);
+
+        var nowAlpha = fromAlpha+(toAlpha-fromAlpha)*step/25;
+        var nowR = parseInt(fromColor[0]+(color[0]-fromColor[0])*step/25);
+        var nowG = parseInt(fromColor[1]+(color[1]-fromColor[1])*step/25);
+        var nowB = parseInt(fromColor[2]+(color[2]-fromColor[2])*step/25);
+        if (nowR<0) nowR=0; if (nowR>255) nowR=255;
+        if (nowG<0) nowG=0; if (nowG>255) nowG=255;
+        if (nowB<0) nowB=0; if (nowB>255) nowB=255;
+
+        core.setAlpha('fg', nowAlpha);
+        var toRGB = "#"+nowR.toString(16)+nowG.toString(16)+nowB.toString(16);
+        core.fillRect('fg', 0, 0, 416, 416, toRGB);
+
+        if (step>=25) {
+            clearInterval(changeAnimate);
+            if (toAlpha==0) {
+                core.clearMap('fg', 0, 0, 416, 416);
+                delete core.status.event.data.currentColor;
+                core.setAlpha('fg', 1);
+                core.updateFg();
+            }
+            else core.status.event.data.currentColor = color;
+            if (core.isset(callback)) callback();
+        }
+    }, time/25);
+
+}
+
+
 core.prototype.setHeroLoc = function (itemName, itemVal) {
     if (itemVal == '++') {
         core.status.hero.loc[itemName]++;
@@ -1879,6 +1954,14 @@ core.prototype.nextY = function () {
  * 更新显伤
  */
 core.prototype.updateFg = function () {
+
+    // 如果存在颜色
+    if (core.isset(core.status.event.data) && core.isset(core.status.event.data.currentColor)) {
+        var color=core.status.event.data.currentColor;
+        core.fillRect("fg",0,0,416,416,"#"+color[0].toString(16)+color[1].toString(16)+color[2].toString(16));
+        return;
+    }
+
     if (!core.isset(core.status.thisMap) || !core.isset(core.status.thisMap.blocks)) return;
     // 更新显伤
     var mapBlocks = core.status.thisMap.blocks;
@@ -2108,6 +2191,30 @@ core.prototype.calValue = function (value) {
     value=value.replace(/item:([\w\d_]+)/g, "core.itemCount('$1')");
     value=value.replace(/flag:([\w\d_]+)/g, "core.getFlag('$1', false)");
     return eval(value);
+}
+
+core.prototype.splitLines = function(canvas, text, maxLength, font) {
+    if (core.isset(font)) core.setFont(canvas, font);
+
+    var contents = [];
+    var last = 0;
+    for (var i=0;i<text.length;i++) {
+
+        if (text.charAt(i)=='\n') {
+            contents.push(text.substring(last, i));
+            last=i+1;
+        }
+        else {
+            var toAdd = text.substring(last, i+1);
+            var width = core.canvas[canvas].measureText(toAdd).width;
+            if (width>maxLength) {
+                contents.push(text.substring(last, i));
+                last=i;
+            }
+        }
+    }
+    contents.push(text.substring(last));
+    return contents;
 }
 
 core.prototype.unshift = function (a,b) {
@@ -2683,17 +2790,24 @@ core.prototype.resize = function(clientWidth, clientHeight) {
         width = clientHeight;
     }
     // 各元素大小的变量声明
-    var gameGroupWidth, gameGroupHeight, 
+    var gameGroupWidth, gameGroupHeight, borderRight,
         canvasWidth, canvasTop, canvasLeft,
         statusBarWidth, statusBarHeight, statusBarBorder,
-        statusWidth, statusHeigth, statusMaxWidth,statusLabelsLH,
+        statusWidth, statusHeight, statusMaxWidth,statusLabelsLH,
         toolBarWidth, toolBarHeight, toolBarTop, toolBarBorder,
         toolsWidth, toolsHeight,toolsMargin,toolsPMaxwidth,
         fontSize, margin;
 
-    var shopDisplay, mdefDispaly, expDispaly;
-    mdefDispaly = core.flags.enableMDef ? 'block' : 'none';
-    expDispaly = core.flags.enableExperience ? 'block' : 'none';
+    var count = 9;
+    if (!core.flags.enableMDef) count--;
+    if (!core.flags.enableExperience) count--;
+    if (!core.flags.enableDebuff) count--;
+
+    var statusLineHeight = BASE_LINEHEIGHT * 9/count;
+
+    var shopDisplay, mdefDisplay, expDisplay;
+    mdefDisplay = core.flags.enableMDef ? 'block' : 'none';
+    expDisplay = core.flags.enableExperience ? 'block' : 'none';
 
     statusBarBorder = '3px #fff solid';
     toolBarBorder = '3px #fff solid';
@@ -2723,15 +2837,15 @@ core.prototype.resize = function(clientWidth, clientHeight) {
             canvasTop = tempTopBarH;
             canvasLeft = 0;
             toolBarWidth = statusBarWidth = width;
-            statusBarHeigth = tempTopBarH; //一共有3行加上两个padding空隙
+            statusBarHeight = tempTopBarH; //一共有3行加上两个padding空隙
             statusBarBorder = '3px #fff solid';
 
-            statusHeigth = scale*BASE_LINEHEIGHT * .8;
+            statusHeight = scale*BASE_LINEHEIGHT * .8;
             statusLabelsLH = .8 * BASE_LINEHEIGHT *scale;
             statusMaxWidth = scale * DEFAULT_BAR_WIDTH * .95;
             toolBarHeight = tempBotBarH;
 
-            toolBarTop = statusBarHeigth + width;
+            toolBarTop = statusBarHeight + width;
             toolBarBorder = '3px #fff solid';
             toolsHeight = scale * BASE_LINEHEIGHT;
             toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH * .4;
@@ -2747,13 +2861,13 @@ core.prototype.resize = function(clientWidth, clientHeight) {
             canvasTop = 0;
             canvasLeft = DEFAULT_BAR_WIDTH * scale;
             toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH * scale;
-            statusBarHeigth = scale * BASE_LINEHEIGHT * 9 + SPACE * 2; //一共有9行加上两个padding空隙
+            statusBarHeight = scale * statusLineHeight * count + SPACE * 2; //一共有9行加上两个padding空隙
             statusBarBorder = '3px #fff solid';
 
-            statusHeigth = scale*BASE_LINEHEIGHT * .8;
-            statusLabelsLH = .8 * BASE_LINEHEIGHT *scale;
-            toolBarHeight = width - statusBarHeigth;
-            toolBarTop = scale*BASE_LINEHEIGHT * 9 + SPACE * 2;
+            statusHeight = scale*statusLineHeight * .8;
+            statusLabelsLH = .8 * statusLineHeight *scale;
+            toolBarHeight = width - statusBarHeight;
+            toolBarTop = scale*statusLineHeight * count + SPACE * 2;
             toolBarBorder = '3px #fff solid';
             toolsHeight = scale * BASE_LINEHEIGHT;
             borderRight = '';
@@ -2768,7 +2882,7 @@ core.prototype.resize = function(clientWidth, clientHeight) {
         core.domStyle.scale = 1;
         core.domStyle.screenMode = 'bigScreen';
         shopDisplay = 'none';
-        
+
         gameGroupWidth = DEFAULT_CANVAS_WIDTH + DEFAULT_BAR_WIDTH;
         gameGroupHeight = DEFAULT_CANVAS_WIDTH;
         canvasWidth = DEFAULT_CANVAS_WIDTH;
@@ -2776,12 +2890,12 @@ core.prototype.resize = function(clientWidth, clientHeight) {
         canvasLeft = DEFAULT_BAR_WIDTH;
 
         toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH;
-        statusBarHeigth = BASE_LINEHEIGHT * 9 + SPACE * 2; //一共有9行
-        
-        statusHeigth = BASE_LINEHEIGHT * .8;
-        statusLabelsLH = .8 * BASE_LINEHEIGHT;
-        toolBarHeight = DEFAULT_CANVAS_WIDTH - statusBarHeigth;
-        toolBarTop = BASE_LINEHEIGHT * 9 + SPACE * 2;
+        statusBarHeight = statusLineHeight * count + SPACE * 2; //一共有9行
+
+        statusHeight = statusLineHeight * .8;
+        statusLabelsLH = .8 * statusLineHeight;
+        toolBarHeight = DEFAULT_CANVAS_WIDTH - statusBarHeight;
+        toolBarTop = statusLineHeight * count + SPACE * 2;
         
         toolsHeight = BASE_LINEHEIGHT;
         borderRight = '';
@@ -2794,7 +2908,8 @@ core.prototype.resize = function(clientWidth, clientHeight) {
 
     var unit = 'px'
     core.domStyle.styles = [
-        {   id: 'gameGroup',
+        {
+            id: 'gameGroup',
             rules:{
                 width: gameGroupWidth + unit,
                 height: gameGroupHeight + unit,
@@ -2802,7 +2917,8 @@ core.prototype.resize = function(clientWidth, clientHeight) {
                 left: (clientWidth-gameGroupWidth)/2 + unit,
             }
         },
-        {   className: 'gameCanvas',
+        {
+            className: 'gameCanvas',
             rules:{
                 width: canvasWidth + unit, 
                 height: canvasWidth + unit,
@@ -2812,10 +2928,11 @@ core.prototype.resize = function(clientWidth, clientHeight) {
                 border: '3px #fff solid',
             }
         },
-        {   id: 'statusBar',
+        {
+            id: 'statusBar',
             rules:{
                 width: statusBarWidth + unit,
-                height: statusBarHeigth + unit,
+                height: statusBarHeight + unit,
                 top: 0,
                 left: 0,
                 padding: SPACE + unit,
@@ -2826,11 +2943,12 @@ core.prototype.resize = function(clientWidth, clientHeight) {
                 fontSize: fontSize + unit
             }
         },
-        {   className: 'status',
+        {
+            className: 'status',
             rules:{
                 width: '100%',
                 maxWidth: statusMaxWidth + unit,
-                height: statusHeigth + unit,
+                height: statusHeight + unit,
                 margin: margin/2 + unit
             }
         },
@@ -2841,7 +2959,8 @@ core.prototype.resize = function(clientWidth, clientHeight) {
                 lineHeight: statusLabelsLH + unit,
             }
         },
-        {   id: 'toolBar',
+        {
+            id: 'toolBar',
             rules:{
                 width: toolBarWidth + unit,
                 height: toolBarHeight + unit,
@@ -2854,7 +2973,8 @@ core.prototype.resize = function(clientWidth, clientHeight) {
                 fontSize: fontSize + unit
             }
         },
-        {   className: 'tools',
+        {
+            className: 'tools',
             rules:{
                 height: toolsHeight + unit,
                 maxWidth: toolsPMaxwidth + unit,
@@ -2871,13 +2991,13 @@ core.prototype.resize = function(clientWidth, clientHeight) {
         {
             id: 'expCol',
             rules: {
-                display: expDispaly
+                display: expDisplay
             }
         },
         {
             id: 'mdefCol',
             rules: {
-                display: mdefDispaly
+                display: mdefDisplay
             }
         },
     ]
@@ -2885,6 +3005,10 @@ core.prototype.resize = function(clientWidth, clientHeight) {
 }
 
 core.prototype.domRenderer = function(){
+
+    core.dom.statusBar.style.display = 'block';
+    core.dom.toolBar.style.display = 'block';
+
     var styles = core.domStyle.styles;
 
     for(var i=0; i<styles.length; i++){

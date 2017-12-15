@@ -103,14 +103,17 @@ enemys.prototype.getDamage = function (monsterId) {
     var mon_hp = monster.hp, mon_atk = monster.atk, mon_def = monster.def, mon_special = monster.special;
     var damage = this.calDamage(hero_atk, hero_def, hero_mdef, mon_hp, mon_atk, mon_def, mon_special);
     if (damage == 999999999) return damage;
+    return damage + this.getExtraDamage(monster);
+}
 
+enemys.prototype.getExtraDamage = function (monster) {
     var extra_damage = 0;
     if (monster.special == 11) { // 吸血
         // 吸血的比例
         extra_damage = core.status.hero.hp * monster.value;
         extra_damage = parseInt(extra_damage);
     }
-    return damage + extra_damage;
+    return extra_damage;
 }
 
 // 临界值计算

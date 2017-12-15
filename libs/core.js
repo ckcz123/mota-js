@@ -1262,8 +1262,21 @@ core.prototype.battle = function (id, x, y, force, callback) {
         core.clearContinueAutomaticRoute();
         return;
     }
-    core.playSound('attack', 'ogg');
-    core.status.hero.hp -= damage;
+    if (core.flags.battleAnimate) {
+        core.waitHeroToStop(function() {
+            core.ui.drawBattleAnimate(id, function() {
+                core.afterBattle(id, x, y, callback);
+            });
+        });
+    }
+    else {
+        core.playSound('attack', 'ogg');
+        core.afterBattle(id, x, y, callback);
+    }
+}
+
+core.prototype.afterBattle = function(id, x, y, callback) {
+    core.status.hero.hp -= core.enemys.getDamage(id);
     if (core.status.hero.hp<=0) {
         core.status.hero.hp=0;
         core.updateStatusBar();
@@ -1290,6 +1303,7 @@ core.prototype.battle = function (id, x, y, force, callback) {
 
     // 打完怪物，触发事件
     core.events.afterBattle(id,x,y,callback);
+
 }
 
 core.prototype.trigger = function (x, y) {
@@ -1420,6 +1434,19 @@ core.prototype.strokeRect = function (map, x, y, width, height, style, lineWidth
         core.setLineWidth(map, lineWidth);
     }
     core.canvas[map].strokeRect(x, y, width, height);
+}
+
+core.prototype.drawLine = function (map, x1, y1, x2, y2, style, lineWidth) {
+    if (core.isset(style)) {
+        core.setStrokeStyle(map, style);
+    }
+    if (core.isset(lineWidth)) {
+        core.setLineWidth(map, lineWidth);
+    }
+    core.canvas[map].beginPath();
+    core.canvas[map].moveTo(x1, y1);
+    core.canvas[map].lineTo(x2, y2);
+    core.canvas[map].stroke();
 }
 
 core.prototype.setFont = function (map, font) {

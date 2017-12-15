@@ -109,7 +109,6 @@ data.prototype.init = function() {
         "moneyPocket": 500, // 金钱袋加金币的数值
 
         /****** 系统相关 ******/
-        "cannotUseQuickShop": ["MT0"], // 不能使用快捷商店的楼层列表
         'animateSpeed': 500,
     }
     // 系统FLAG，在游戏运行中中请不要修改它。
@@ -125,7 +124,7 @@ data.prototype.init = function() {
         "bigKeyIsBox": false, // 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙
 
         /****** 系统相关 ******/
-        "startDirectly": true, // 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面
+        "startDirectly": false, // 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面
         "battleAnimate": true, // 是否默认显示战斗动画；用户可以手动在菜单栏中关闭
         "portalWithoutTrigger": true, // 经过楼梯、传送门时是否能“穿透”。穿透的意思是，自动寻路得到的的路径中间经过了楼梯，行走时是否触发楼层转换事件
         "potionWhileRouting": false, // 寻路算法是否经过血瓶；如果该项为false，则寻路算法会自动尽量绕过血瓶

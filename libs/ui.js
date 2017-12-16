@@ -362,12 +362,255 @@ ui.prototype.drawQuickShop = function (need) {
 
 }
 
-ui.prototype.drawBattleAnimate = function() {
+ui.prototype.drawBattleAnimate = function(monsterId, callback) {
+
+    // UI层
+    core.lockControl();
+    if (!core.isset(core.status.event.id)) {
+        core.status.event = {'id': 'battle'};
+    }
+
+    var hero_hp = core.getStatus('hp'), hero_atk = core.getStatus('atk'), hero_def = core.getStatus('def'),
+        hero_mdef = core.getStatus('mdef');
+    var monster = core.material.enemys[monsterId];
+    var mon_hp = monster.hp, mon_atk = monster.atk, mon_def = monster.def, mon_money=monster.money, mon_exp = monster.experience, mon_special=monster.special;
+
+    hero_hp -= core.enemys.getExtraDamage(monster);
+
+    if (mon_special==2) hero_def=0; // 魔攻
+    if (mon_special==3 && mon_def<hero_atk) mon_def=hero_atk-1; // 坚固
+    if (mon_special==10) { // 模仿
+        mon_atk=hero_atk;
+        mon_def=hero_def;
+    }
+    var turns = 2;
+    if (mon_special==4) turns=3;
+    if (mon_special==5) turns=4;
+    if (mon_special==6) turns=5;
+
+    // 初始伤害（破甲、净化）
+    var initDamage = 0;
+    if (mon_special==7) initDamage=parseInt(0.9 * hero_def);
+    if (mon_special==9) initDamage=parseInt(3*hero_mdef);
+    hero_mdef-=initDamage;
+    if (hero_mdef<0) {
+        hero_hp+=hero_mdef;
+        hero_mdef=0;
+    }
 
 
+    var specialText = core.enemys.getSpecialText(monsterId);
+
+    var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
+
+    core.clearMap('ui', 0, 0, 416, 416);
+    var left=10, right=416-2*left;
 
 
+    var lines = core.flags.enableExperience?5:4;
 
+    var lineHeight = 60;
+    var height = lineHeight * lines + 50;
+
+    var top = (416-height)/2, bottom = height;
+
+    // var left = 97, top = 64, right = 416 - 2 * left, bottom = 416 - 2 * top;
+    core.setAlpha('ui', 0.85);
+    core.fillRect('ui', left, top, right, bottom, '#000000');
+    core.setAlpha('ui', 1);
+    core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+    core.status.boxAnimateObjs = [];
+    core.setBoxAnimate();
+
+    var margin = 35;
+    var boxWidth = 40;
+
+    // 方块
+    var heroHeight = core.material.icons.hero.height;
+    core.strokeRect('ui', left + margin - 1, top + margin - 1, boxWidth+2, heroHeight+boxWidth-32+2, '#FFD700', 2);
+    core.strokeRect('ui', left + right - margin - boxWidth - 1 , top+margin-1, boxWidth+2, boxWidth+2);
+
+    // 名称
+    core.canvas.ui.textAlign='center';
+    core.fillText('ui', core.status.hero.name, left+margin+boxWidth/2, top+margin+heroHeight+40, '#FFD700', 'bold 22px Verdana');
+    core.fillText('ui', "怪物", left+right-margin-boxWidth/2, top+margin+32+40);
+    core.fillText('ui', specialText, left+right-margin-boxWidth/2, top+margin+32+40+24, '#FF6A6A', '15px Verdana');
+
+    // 图标
+    core.clearMap('ui', left + margin, top + margin, boxWidth, heroHeight+boxWidth-32);
+    core.fillRect('ui', left + margin, top + margin, boxWidth, heroHeight+boxWidth-32, background);
+    var heroIcon = core.material.icons.hero['down'];
+    core.canvas.ui.drawImage(core.material.images.hero, heroIcon.stop * 32, heroIcon.loc *heroHeight, 32, heroHeight, left+margin+(boxWidth-32)/2, top+margin+(boxWidth-32)/2, 32, heroHeight);
+    // 怪物的
+    core.status.boxAnimateObjs = [];
+    core.status.boxAnimateObjs.push({
+        'bgx': left + right - margin - 40, 'bgy': top+margin, 'bgsize': boxWidth,
+        'image': core.material.images.enemys, 'x': left + right - margin - 40 + (boxWidth-32)/2, 'y': top + margin + (boxWidth-32)/2, 'icon': core.material.icons.enemys[monsterId]
+    });
+    core.setBoxAnimate();
+
+    var lineWidth = 80;
+
+    var left_start = left + margin + boxWidth + 10;
+    var left_end = left_start+lineWidth;
+
+    var right_end = left+right-margin-boxWidth-10;
+    var right_start = right_end-lineWidth;
+
+    // 勇士的线
+    core.canvas.ui.textAlign='left';
+    var textTop = top+margin+10;
+    core.fillText('ui', "生命值", left_start, textTop, '#DDDDDD', '16px Verdana');
+    core.drawLine('ui', left_start, textTop+8, left_end, textTop+8, '#FFFFFF', 2);
+    core.canvas.data.textAlign='right';
+    core.fillText('data', hero_hp, left_end, textTop+26, '#DDDDDD', 'bold 16px Verdana');
+
+    textTop+=lineHeight;
+    core.canvas.ui.textAlign='left';
+    core.fillText('ui', "攻击", left_start, textTop, '#DDDDDD', '16px Verdana');
+    core.drawLine('ui', left_start, textTop+8, left_end, textTop+8, '#FFFFFF', 2);
+    core.canvas.ui.textAlign='right';
+    core.fillText('ui', hero_atk, left_end, textTop+26, '#DDDDDD', 'bold 16px Verdana');
+
+    textTop+=lineHeight;
+    core.canvas.ui.textAlign='left';
+    core.fillText('ui', "防御", left_start, textTop, '#DDDDDD', '16px Verdana');
+    core.drawLine('ui', left_start, textTop+8, left_end, textTop+8, '#FFFFFF', 2);
+    core.canvas.ui.textAlign='right';
+    core.fillText('ui', hero_def, left_end, textTop+26, '#DDDDDD', 'bold 16px Verdana');
+
+    if (core.flags.enableMDef) {
+        textTop += lineHeight;
+        core.canvas.ui.textAlign='left';
+        core.fillText('ui', "魔防", left_start, textTop, '#DDDDDD', '16px Verdana');
+        core.drawLine('ui', left_start, textTop + 8, left_end, textTop + 8, '#FFFFFF', 2);
+        core.canvas.data.textAlign='right';
+        core.fillText('data', hero_mdef, left_end, textTop+26, '#DDDDDD', 'bold 16px Verdana');
+    }
+
+    // 怪物的线
+    core.canvas.ui.textAlign='right';
+    var textTop = top+margin+10;
+    core.fillText('ui', "生命值", right_end, textTop, '#DDDDDD', '16px Verdana');
+    core.drawLine('ui', right_start, textTop+8, right_end, textTop+8, '#FFFFFF', 2);
+    core.canvas.data.textAlign='left';
+    core.fillText('data', mon_hp, right_start, textTop+26, '#DDDDDD', 'bold 16px Verdana');
+
+    textTop+=lineHeight;
+    core.canvas.ui.textAlign='right';
+    core.fillText('ui', "攻击", right_end, textTop, '#DDDDDD', '16px Verdana');
+    core.drawLine('ui', right_start, textTop+8, right_end, textTop+8, '#FFFFFF', 2);
+    core.canvas.ui.textAlign='left';
+    core.fillText('ui', mon_atk, right_start, textTop+26, '#DDDDDD', 'bold 16px Verdana');
+
+    textTop+=lineHeight;
+    core.canvas.ui.textAlign='right';
+    core.fillText('ui', "防御", right_end, textTop, '#DDDDDD', '16px Verdana');
+    core.drawLine('ui', right_start, textTop+8, right_end, textTop+8, '#FFFFFF', 2);
+    core.canvas.ui.textAlign='left';
+    core.fillText('ui', mon_def, right_start, textTop+26, '#DDDDDD', 'bold 16px Verdana');
+
+    textTop += lineHeight;
+    core.canvas.ui.textAlign='right';
+    core.fillText('ui', "金币", right_end, textTop, '#DDDDDD', '16px Verdana');
+    core.drawLine('ui', right_start, textTop + 8, right_end, textTop + 8, '#FFFFFF', 2);
+    core.canvas.ui.textAlign='left';
+    core.fillText('ui', mon_money, right_start, textTop+26, '#DDDDDD', 'bold 16px Verdana');
+
+    if (core.flags.enableExperience) {
+        textTop += lineHeight;
+        core.canvas.ui.textAlign='right';
+        core.fillText('ui', "经验", right_end, textTop, '#DDDDDD', '16px Verdana');
+        core.drawLine('ui', right_start, textTop + 8, right_end, textTop + 8, '#FFFFFF', 2);
+        core.canvas.ui.textAlign='left';
+        core.fillText('ui', mon_exp, right_start, textTop+26, '#DDDDDD', 'bold 16px Verdana');
+    }
+
+    core.canvas.ui.textAlign='left';
+    core.fillText("ui", "V", left_end+8, 208-15, "#FFFFFF", "italic bold 40px Verdana");
+
+    core.canvas.ui.textAlign='right';
+    core.fillText("ui", "S", right_start-8, 208+15, "#FFFFFF", "italic bold 40px Verdana");
+/*
+    core.drawLine('data', left + right - margin - boxWidth + 6, top+margin+boxWidth-6,
+        left+right-margin-6, top+margin+6, '#FF0000', 4);
+    core.drawLine('data', left + margin + 6, top+margin+heroHeight+(boxWidth-32)-6,
+        left+margin+boxWidth-6, top+margin+6, '#FF0000', 4);
+*/
+
+    // 实际操作
+    var turn = 0; // 0为勇士攻击
+    if (mon_special==1) turn=1;
+    var battleInterval = setInterval(function() {
+        core.playSound("attack", "ogg");
+
+        if (turn==0) {
+            // 勇士攻击
+            core.drawLine('data', left + right - margin - boxWidth + 6, top+margin+boxWidth-6,
+                left+right-margin-6, top+margin+6, '#FF0000', 4);
+            setTimeout(function() {
+                core.clearMap('data', left + right - margin - boxWidth, top+margin,
+                    boxWidth, boxWidth);
+            }, 250);
+
+            if (hero_atk-mon_def>0)
+                mon_hp-=hero_atk-mon_def;
+            if (mon_hp<0) mon_hp=0;
+
+            // 更新怪物伤害
+            core.clearMap('data', right_start, top+margin+10, lineWidth, 40);
+            core.canvas.data.textAlign='left';
+            core.fillText('data', mon_hp, right_start, top+margin+10+26, '#DDDDDD', 'bold 16px Verdana');
+
+        }
+        else {
+            // 怪物攻击
+            core.drawLine('data', left + margin + 6, top+margin+heroHeight+(boxWidth-32)-6,
+                left+margin+boxWidth-6, top+margin+6, '#FF0000', 4);
+            setTimeout(function() {
+                core.clearMap('data', left + margin, top+margin, boxWidth, heroHeight+boxWidth-32);
+            }, 250);
+
+            var per_damage = mon_atk-hero_def;
+            if (mon_special == 8) per_damage += parseInt(0.1 * hero_atk); // 反击
+
+            hero_mdef-=per_damage;
+            if (hero_mdef<0) {
+                hero_hp+=hero_mdef;
+                hero_mdef=0;
+            }
+            // 更新勇士数据
+            core.clearMap('data', left_start, top+margin+10, lineWidth, 40);
+            core.canvas.data.textAlign='right';
+            core.fillText('data', hero_hp, left_end, top+margin+10+26, '#DDDDDD', 'bold 16px Verdana');
+
+            if (core.flags.enableMDef) {
+                core.clearMap('data', left_start, top+margin+10+3*lineHeight, lineWidth, 40);
+                core.fillText('data', hero_mdef, left_end, top+margin+10+26+3*lineHeight);
+            }
+
+        }
+        turn++;
+        if (turn>=turns) turn=0;
+
+        if (hero_hp<=0 || mon_hp<=0) {
+            // 战斗结束
+            clearInterval(battleInterval);
+            core.status.boxAnimateObjs = [];
+            core.setBoxAnimate();
+            core.clearMap('ui', 0, 0, 416, 416);
+            core.setAlpha('ui', 1.0);
+            core.clearMap('data', 0, 0, 416, 416);
+            if (core.status.event.id=='battle') {
+                core.unLockControl();
+                core.status.event.id=null;
+            }
+            if (core.isset(callback))
+                callback();
+            return;
+        }
+
+    }, 500);
 }
 
 /**

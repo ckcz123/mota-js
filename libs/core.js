@@ -904,33 +904,54 @@ core.prototype.automaticRoute = function (destX, destY) {
         if (deep!==nowDeep) {queue.push(f);continue;}
         f=f%169;
         var nowX = parseInt(f / 13), nowY = f % 13;
-    
+        var nowIsArrow = false, nowId, nowBlock = core.getBlock(nowX,nowY);
+        if (nowBlock!=null){
+            nowId = nowBlock.block.event.id;
+            nowIsArrow = nowId.slice(0, 5).toLowerCase() == 'arrow';
+        }
         for (var direction in scan) {
-        
+            if(nowIsArrow){
+                var nowArrow = nowId.slice(5).toLowerCase();
+                if (direction != nowArrow) continue;
+            }
+            
             var nx = nowX + scan[direction].x;
             var ny = nowY + scan[direction].y;
+
             if (nx<0 || nx>12 || ny<0 || ny>12) continue;
+
             var nid = 13 * nx + ny;
     
             if (core.isset(route[nid])) continue;
-    
+
+            var deepAdd=1;
+
+            var nextId, nextBlock = core.getBlock(nx,ny);
+            if (nextBlock!=null){
+                nextId = nextBlock.block.event.id;console.log(nextId);
+                // 遇到单向箭头处理
+                var isArrow = nextId.slice(0, 5).toLowerCase() == 'arrow';
+                if(isArrow){
+                    var nextArrow = nextId.slice(5).toLowerCase();
+                    if ( (scan[direction].x + scan[nextArrow].x) == 0 && (scan[direction].y + scan[nextArrow].y) == 0 ) continue;
+                }
+                // 绕过亮灯（因为只有一次通行机会很宝贵）
+                if(nextId == "light") deepAdd=50;
+                // 绕过路障
+                if (nextId.substring(nextId.length-3)=="Net") deepAdd=100;
+                // 绕过血瓶
+                if (!core.flags.potionWhileRouting && nextId.substring(nextId.length-6)=="Potion") deepAdd=20;
+                // 绕过可能的夹击点
+                if (nextBlock.block.event.trigger == 'checkBlock') deepAdd=200;
+            }
+
             if (nx == destX && ny == destY) {
                 route[nid] = direction;
                 break;
             }
             if (core.noPassExists(nx, ny))
                 continue;
-            var deepAdd=1;
-            var block = core.getBlock(nx,ny);
-            if (block!=null) {
-                var id = block.block.event.id;
-                // 绕过路障
-                if (id.substring(id.length-3)=="Net") deepAdd=100;
-                // 绕过血瓶
-                if (!core.flags.potionWhileRouting && id.substring(id.length-6)=="Potion") deepAdd=20;
-                // 绕过可能的夹击点
-                if (block.block.event.trigger == 'checkBlock') deepAdd=200;
-            }
+            
             route[nid] = direction;
             queue.push(169*(nowDeep+deepAdd)+nid);
         }

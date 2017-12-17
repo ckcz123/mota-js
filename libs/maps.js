@@ -78,6 +78,7 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 12) tmp.event = {'cls': 'animates', 'id': 'poisonNet', 'noPass': false, 'trigger': 'passNet'}; // 毒网
     if (id == 13) tmp.event = {'cls': 'animates', 'id': 'weakNet', 'noPass': false, 'trigger': 'passNet'}; // 衰网
     if (id == 14) tmp.event = {'cls': 'animates', 'id': 'curseNet', 'noPass': false, 'trigger': 'passNet'}; // 咒网
+
     if (id == 15) tmp.event = {'cls': 'animates', 'id': 'water', 'noPass': true}; // 水
 
     // autotile: 20
@@ -162,10 +163,10 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 132) tmp.event = {'cls': 'npcs', 'id': 'princess'};
 
     // 161-200 其他（单向箭头、灯、箱子等等）
-    if (id == 161) tmp.event = {'cls': 'terrains', 'id': 'up'}; // 单向上箭头
-    if (id == 162) tmp.event = {'cls': 'terrains', 'id': 'down'}; // 单向下箭头
-    if (id == 163) tmp.event = {'cls': 'terrains', 'id': 'left'}; // 单向左箭头
-    if (id == 164) tmp.event = {'cls': 'terrains', 'id': 'right'}; // 单向右箭头
+    if (id == 161) tmp.event = {'cls': 'terrains', 'id': 'arrowUp', 'noPass': false}; // 单向上箭头
+    if (id == 162) tmp.event = {'cls': 'terrains', 'id': 'arrowDown', 'noPass': false}; // 单向下箭头
+    if (id == 163) tmp.event = {'cls': 'terrains', 'id': 'arrowLeft', 'noPass': false}; // 单向左箭头
+    if (id == 164) tmp.event = {'cls': 'terrains', 'id': 'arrowRight', 'noPass': false}; // 单向右箭头
     if (id == 165) tmp.event = {'cls': 'terrains', 'id': 'light', 'trigger': 'changeLight', 'noPass': false}; // 灯
     if (id == 166) tmp.event = {'cls': 'terrains', 'id': 'darkLight', 'noPass': true}; // 暗灯
 

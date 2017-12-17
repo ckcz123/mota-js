@@ -182,8 +182,10 @@ enemys.prototype.calDamage = function (hero_atk, hero_def, hero_mdef, mon_hp, mo
     if (this.hasSpecial(mon_special, 4)) per_damage *= 2;
     if (this.hasSpecial(mon_special, 5)) per_damage *= 3;
     if (this.hasSpecial(mon_special, 6)) per_damage *= 4;
+
+    var counterDamage = 0;
     // 反击
-    if (this.hasSpecial(mon_special, 8)) per_damage += parseInt(core.values.counterAttack * hero_atk);
+    if (this.hasSpecial(mon_special, 8)) counterDamage += parseInt(core.values.counterAttack * hero_atk);
 
     // 先攻
     var damage = mon_special == 1 ? per_damage : 0;
@@ -193,7 +195,7 @@ enemys.prototype.calDamage = function (hero_atk, hero_def, hero_mdef, mon_hp, mo
     if (this.hasSpecial(mon_special, 9)) damage = core.values.purify * hero_mdef;
 
     var turn = parseInt((mon_hp - 1) / (hero_atk - mon_def));
-    var ans = damage + turn * per_damage;
+    var ans = damage + turn * per_damage + (turn + 1) * counterDamage;
     ans -= hero_mdef;
 
     // 魔防回血

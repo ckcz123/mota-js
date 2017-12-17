@@ -570,6 +570,27 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
             core.canvas.data.textAlign='left';
             core.fillText('data', mon_hp, right_start, top+margin+10+26, '#DDDDDD', 'bold 16px Verdana');
 
+            // 反击
+            if (core.enemys.hasSpecial(mon_special, 8)) {
+                var counterDamage = parseInt(core.values.counterAttack * hero_atk);
+                hero_mdef -= counterDamage;
+
+                if (hero_mdef<0) {
+                    hero_hp+=hero_mdef;
+                    hero_mdef=0;
+                }
+                // 更新勇士数据
+                core.clearMap('data', left_start, top+margin+10, lineWidth, 40);
+                core.canvas.data.textAlign='right';
+                core.fillText('data', hero_hp, left_end, top+margin+10+26, '#DDDDDD', 'bold 16px Verdana');
+
+                if (core.flags.enableMDef) {
+                    core.clearMap('data', left_start, top+margin+10+3*lineHeight, lineWidth, 40);
+                    core.fillText('data', hero_mdef, left_end, top+margin+10+26+3*lineHeight);
+                }
+
+            }
+
         }
         else {
             // 怪物攻击
@@ -580,7 +601,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
             }, 250);
 
             var per_damage = mon_atk-hero_def;
-            if (core.enemys.hasSpecial(mon_special, 8)) per_damage += parseInt(core.values.counterAttack * hero_atk); // 反击
+            if (per_damage < 0) per_damage = 0;
 
             hero_mdef-=per_damage;
             if (hero_mdef<0) {
@@ -992,16 +1013,24 @@ ui.prototype.drawThumbnail = function(canvas, blocks, x, y, size, heroLoc) {
             core.canvas[canvas].drawImage(blockImage, 0, blockIcon * 32, 32, 32, x + i * persize, y + j * persize, persize, persize);
         }
     }
+    var autotileMaps = [];
     for (var b in blocks) {
         var block = blocks[b];
         if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
-            var i = block.x, j = block.y;
-            var blockIcon = core.material.icons[block.event.cls][block.event.id];
-            var blockImage = core.material.images[block.event.cls];
-            //core.canvas[canvas].clearRect(x + i * persize, y + j * persize, persize, persize);
-            core.canvas[canvas].drawImage(blockImage, 0, blockIcon * 32, 32, 32, x + i * persize, y + j * persize, persize, persize);
+            if (block.event.cls == 'autotile') {
+                // core.drawAutotile();
+                autotileMaps[13*block.x + block.y] = true;
+                continue;
+            }
+            else {
+                var blockIcon = core.material.icons[block.event.cls][block.event.id];
+                var blockImage = core.material.images[block.event.cls];
+                core.canvas[canvas].drawImage(blockImage, 0, blockIcon * 32, 32, 32, x + block.x * persize, y + block.y * persize, persize, persize);
+            }
         }
     }
+    core.drawAutotile('ui', autotileMaps, x, y, persize);
+
     if (core.isset(heroLoc)) {
         var heroIcon = core.material.icons.hero[heroLoc.direction];
         var height = core.material.icons.hero.height;

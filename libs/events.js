@@ -39,6 +39,11 @@ events.prototype.init = function () {
             if (core.isset(callback))
                 callback();
         },
+        "changeLight": function (data, core, callback) {
+            core.events.changeLight(data.x, data.y);
+            if (core.isset(callback))
+                callback();
+        },
         'action': function (data, core, callback) {
             core.events.doEvents(data.event.data, data.x, data.y);
             if (core.isset(callback)) callback();
@@ -575,6 +580,27 @@ events.prototype.passNet = function (data) {
         core.setFlag('curse', true);
     }
     core.updateStatusBar();
+}
+
+events.prototype.changeLight = function(x, y) {
+    var block = core.getBlock(x, y);
+    if (block==null) return;
+    var index = block.index;
+    block = block.block;
+    if (block.event.id != 'light') return;
+    // 改变为dark
+    block.id = 166;
+    block.event = {'cls': 'terrains', 'id': 'darkLight', 'noPass': true};
+    // 更新地图
+    core.canvas.event.clearRect(x * 32, y * 32, 32, 32);
+    var blockIcon = core.material.icons[block.event.cls][block.event.id];
+    core.canvas.event.drawImage(core.material.images[block.event.cls], 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+    this.afterChangeLight();
+}
+
+// 改变灯后的事件
+events.prototype.afterChangeLight = function() {
+
 }
 
 // 存档事件前一刻的处理

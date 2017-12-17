@@ -63,7 +63,7 @@ maps.prototype.getBlock = function (x, y, id) {
     var tmp = {'x': x, 'y': y, 'id': id};
     if (enable!=null) tmp.enable = enable;
 
-    // 0-9 地形
+    // 0-20 地形
     if (id == 1) tmp.event = {'cls': 'terrains', 'id': 'yellowWall'}; // 黄墙
     if (id == 2) tmp.event = {'cls': 'terrains', 'id': 'whiteWall'}; // 白墙
     if (id == 3) tmp.event = {'cls': 'terrains', 'id': 'blueWall'}; // 白墙
@@ -78,6 +78,8 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 12) tmp.event = {'cls': 'animates', 'id': 'poisonNet', 'noPass': false, 'trigger': 'passNet'}; // 毒网
     if (id == 13) tmp.event = {'cls': 'animates', 'id': 'weakNet', 'noPass': false, 'trigger': 'passNet'}; // 衰网
     if (id == 14) tmp.event = {'cls': 'animates', 'id': 'curseNet', 'noPass': false, 'trigger': 'passNet'}; // 咒网
+
+    if (id == 20) tmp.event = {'cls': 'autotile', 'id': 'autotile', 'noPass': true};
 
     // 21-80 物品
     if (id == 21) tmp.event = {'cls': 'items', 'id': 'yellowKey'}; // 黄钥匙
@@ -157,6 +159,13 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 131) tmp.event = {'cls': 'npcs', 'id': 'blueShop'};
     if (id == 132) tmp.event = {'cls': 'npcs', 'id': 'princess'};
 
+    // 161-200 其他（单向箭头、灯、箱子等等）
+    if (id == 161) tmp.event = {'cls': 'terrains', 'id': 'up'}; // 单向上箭头
+    if (id == 162) tmp.event = {'cls': 'terrains', 'id': 'down'}; // 单向下箭头
+    if (id == 163) tmp.event = {'cls': 'terrains', 'id': 'left'}; // 单向左箭头
+    if (id == 164) tmp.event = {'cls': 'terrains', 'id': 'right'}; // 单向右箭头
+    if (id == 165) tmp.event = {'cls': 'terrains', 'id': 'light', 'trigger': 'changeLight', 'noPass': false}; // 灯
+    if (id == 166) tmp.event = {'cls': 'terrains', 'id': 'darkLight', 'noPass': true}; // 暗灯
 
     // 201-300 怪物
     if (id == 201) tmp.event = {'cls': 'enemys', 'id': 'greenSlime'};

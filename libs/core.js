@@ -1719,6 +1719,12 @@ core.prototype.drawAutotileBlock = function (map, x, y, size, autotile, index) {
     }
 }
 
+core.prototype.autotileExists = function (x, y, floorId) {
+    var block = core.getBlock(x,y,floorId);
+    if (block==null) return false;
+    return block.block.event.cls == 'autotile';
+}
+
 core.prototype.noPassExists = function (x, y, floorId) {
     var block = core.getBlock(x,y,floorId);
     if (block==null) return false;

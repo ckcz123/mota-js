@@ -40,7 +40,7 @@ function main() {
     ];
     // console.log('加载js文件列表加载完成' + this.loadList);
     this.images = [
-        'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains'
+        'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains', "autotile"
     ];
     this.sounds = {
         'mp3': ['bgm-loop', 'floor'],

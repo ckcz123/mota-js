@@ -425,49 +425,48 @@ core.prototype.keyDown = function(keyCode) {
 }
 
 core.prototype.keyUp = function(keyCode) {
-    if(!core.status.played) {
-    return;
-}
+    if(!core.status.played)
+        return;
 
-if (core.status.lockControl) {
-    if (core.status.event.id == 'book' && (keyCode==27 || keyCode==88))
-        core.ui.closePanel(true);
-    if (core.status.event.id == 'fly' && (keyCode==71 || keyCode==27))
-        core.ui.closePanel();
-    if (core.status.event.id == 'fly' && keyCode==13) {
-        var index=core.status.hero.flyRange.indexOf(core.status.floorId);
-        var stair=core.status.event.data<index?"upFloor":"downFloor";
-        var floorId=core.status.event.data;
-        core.ui.closePanel();
-        core.changeFloor(core.status.hero.flyRange[floorId], stair);
-    }
-    if (core.status.event.id == 'save' && (keyCode==83 || keyCode==27))
-        core.ui.closePanel();
-    if (core.status.event.id == 'load' && (keyCode==76 || keyCode==27))
-        core.ui.closePanel();
-    if ((core.status.event.id == 'settings' || core.status.event.id == 'selectShop') && keyCode==27)
-        core.ui.closePanel();
-    if (core.status.event.id == 'selectShop' && keyCode==75)
-        core.ui.closePanel();
-    if (core.status.event.id == 'shop' && keyCode==27) {
-        core.status.boxAnimateObjs = [];
-        core.setBoxAnimate();
-        if (core.status.event.data.fromList)
-            core.ui.drawQuickShop();
-        else core.ui.closePanel();
-    }
-    if (core.status.event.id == 'toolbox' && (keyCode==84 || keyCode==27))
-        core.ui.closePanel();
-    if (core.status.event.id == 'about' && (keyCode==13 || keyCode==32))
-        core.ui.closePanel();
-    if (core.status.event.id == 'text' && (keyCode==13 || keyCode==32))
-        core.drawText();
-    if (core.status.event.id == 'action' && core.isset(core.status.event.data.current)
-        && core.status.event.data.type=='text'  && (keyCode==13 || keyCode==32))
-        core.events.doAction();
+    if (core.status.lockControl) {
+        if (core.status.event.id == 'book' && (keyCode==27 || keyCode==88))
+            core.ui.closePanel(true);
+        if (core.status.event.id == 'fly' && (keyCode==71 || keyCode==27))
+            core.ui.closePanel();
+        if (core.status.event.id == 'fly' && keyCode==13) {
+            var index=core.status.hero.flyRange.indexOf(core.status.floorId);
+            var stair=core.status.event.data<index?"upFloor":"downFloor";
+            var floorId=core.status.event.data;
+            core.ui.closePanel();
+            core.changeFloor(core.status.hero.flyRange[floorId], stair);
+        }
+        if (core.status.event.id == 'save' && (keyCode==83 || keyCode==27))
+            core.ui.closePanel();
+        if (core.status.event.id == 'load' && (keyCode==68 || keyCode==27))
+            core.ui.closePanel();
+        if ((core.status.event.id == 'settings' || core.status.event.id == 'selectShop') && keyCode==27)
+            core.ui.closePanel();
+        if (core.status.event.id == 'selectShop' && keyCode==75)
+            core.ui.closePanel();
+        if (core.status.event.id == 'shop' && keyCode==27) {
+            core.status.boxAnimateObjs = [];
+            core.setBoxAnimate();
+            if (core.status.event.data.fromList)
+                core.ui.drawQuickShop();
+            else core.ui.closePanel();
+        }
+        if (core.status.event.id == 'toolbox' && (keyCode==84 || keyCode==27))
+            core.ui.closePanel();
+        if (core.status.event.id == 'about' && (keyCode==13 || keyCode==32))
+            core.ui.closePanel();
+        if (core.status.event.id == 'text' && (keyCode==13 || keyCode==32))
+            core.drawText();
+        if (core.status.event.id == 'action' && core.isset(core.status.event.data.current)
+            && core.status.event.data.type=='text'  && (keyCode==13 || keyCode==32))
+            core.events.doAction();
 
-    return;
-}
+        return;
+    }
 
     switch (keyCode) {
         case 27: // ESC
@@ -482,7 +481,7 @@ if (core.status.lockControl) {
         case 83: // S
             core.save(true);
             break;
-        case 76: // L
+        case 68: // D
             core.load(true);
             break;
         case 84: // T
@@ -502,9 +501,38 @@ if (core.status.lockControl) {
             break;
         case 40: // DOWN
             break;
+        case 49: // 快捷键1：破
+            if (core.status.heroStop && core.hasItem('pickaxe')) {
+                if (core.canUseItem('pickaxe')) {
+                    core.useItem('pickaxe');
+                }
+                else {
+                    core.drawTip('当前不能使用破墙镐');
+                }
+            }
+            break;
+        case 50: // 快捷键2：炸
+            if (core.status.heroStop && core.hasItem('bomb')) {
+                if (core.canUseItem('bomb')) {
+                    core.useItem('bomb');
+                }
+                else {
+                    core.drawTip('当前不能使用炸弹');
+                }
+            }
+            break;
+        case 51: // 快捷键3：飞
+            if (core.status.heroStop && core.hasItem('centerFly')) {
+                if (core.canUseItem('centerFly')) {
+                    core.useItem('centerFly');
+                }
+                else {
+                    core.drawTip('当前不能使用中心对称飞行器');
+                }
+            }
+            break;
     }
     core.stopHero();
-
 }
 
 core.prototype.ondown = function (x ,y) {
@@ -1547,19 +1575,144 @@ core.prototype.drawMap = function (mapName, callback) {
             core.canvas.bg.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
         }
     }
+    var autotileMaps = [];
     for (var b = 0; b < mapBlocks.length; b++) {
         // 事件启用
-        if (core.isset(mapBlocks[b].event) && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable)) {
-            blockIcon = core.material.icons[mapBlocks[b].event.cls][mapBlocks[b].event.id];
-            blockImage = core.material.images[mapBlocks[b].event.cls];
-            core.canvas.event.drawImage(core.material.images[mapBlocks[b].event.cls], 0, blockIcon * 32, 32, 32, mapBlocks[b].x * 32, mapBlocks[b].y * 32, 32, 32);
-            core.addGlobalAnimate(mapBlocks[b].event.animate, mapBlocks[b].x * 32, mapBlocks[b].y * 32, blockIcon, blockImage);
+        var block = mapBlocks[b];
+        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
+            if (block.event.cls == 'autotile') {
+                // core.drawAutotile();
+                autotileMaps[13*block.x + block.y] = true;
+                continue;
+            }
+            else {
+                blockIcon = core.material.icons[block.event.cls][block.event.id];
+                blockImage = core.material.images[block.event.cls];
+                core.canvas.event.drawImage(core.material.images[block.event.cls], 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+                core.addGlobalAnimate(block.event.animate, block.x * 32, block.y * 32, blockIcon, blockImage);
+            }
         }
     }
+    core.drawAutotile('event', autotileMaps, 0, 0, 32);
     core.setGlobalAnimate(core.values.animateSpeed);
 
     if (core.isset(callback))
         callback();
+}
+
+core.prototype.drawAutotile = function (canvas, autotileMaps, left, top, size) {
+    var isAutotile = function(x, y) {
+        if (x<0 || x>12 || y<0 || y>12) return 0;
+        return autotileMaps[13*x+y]?1:0;
+    }
+    for (var xx=0;xx<13;xx++) {
+        for (var yy=0;yy<13;yy++) {
+            if (isAutotile(xx, yy)) {
+                // 绘制autotile
+                var id=isAutotile(xx, yy - 1) + 2 * isAutotile(xx - 1, yy) + 4 * isAutotile(xx, yy + 1) + 8 * isAutotile(xx + 1, yy);
+                core.drawAutotileBlock(canvas, left + xx * size, top + yy * size, size, core.material.images.autotile, id);
+            }
+        }
+    }
+    for (var xx=0;xx<13;xx++) {
+        for (var yy=0;yy<13;yy++) {
+            if (isAutotile(xx, yy) + isAutotile(xx + 1, yy) + isAutotile(xx + 1, yy + 1) + isAutotile(xx, yy + 1) != 3) continue;
+            if (!isAutotile(xx, yy)) {
+                core.drawAutotileBlock(canvas, left + xx * size + size, top + yy * size + size, size, core.material.images.autotile, 16);
+            }
+            if (!isAutotile(xx + 1, yy)) {
+                core.drawAutotileBlock(canvas, left + xx * size + size / 2, top + yy * size + size, size, core.material.images.autotile, 17);
+            }
+            if (!isAutotile(xx + 1, yy + 1)) {
+                core.drawAutotileBlock(canvas, left + xx * size + size / 2, top + yy * size + size / 2, size, core.material.images.autotile, 18);
+            }
+            if (!isAutotile(xx, yy + 1)) {
+                core.drawAutotileBlock(canvas, left + xx * size + size, top + yy * size + size / 2, size, core.material.images.autotile, 19);
+            }
+        }
+    }
+}
+
+core.prototype.drawAutotileBlock = function (map, x, y, size, autotile, index) {
+    var canvas = core.canvas[map];
+    var blockIcon = core.material.icons.terrains.ground;
+    var blockImage = core.material.images.terrains;
+    switch (index) {
+        case 0:
+            canvas.drawImage(autotile, 0, 0, 32, 32, x, y, size, size);
+            break;
+        case 1:
+            canvas.drawImage(autotile, 0, 3 * 32, 16, 32, x, y, size / 2, size);
+            canvas.drawImage(autotile, 2 * 32 + 16, 3 * 32, 16, 32, x + size / 2, y, size / 2, size);
+            break;
+        case 2:
+            canvas.drawImage(autotile, 2 * 32, 32, 32, 16, x, y, size, size / 2);
+            canvas.drawImage(autotile, 2 * 32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2);
+            break;
+        case 3:
+            canvas.drawImage(autotile, 2 * 32, 3 * 32, 32, 32, x, y, size, size);
+            break;
+        case 4:
+            canvas.drawImage(autotile, 0, 1 * 32, 16, 32, x, y, size / 2, size);
+            canvas.drawImage(autotile, 2 * 32 + 16, 1 * 32, 16, 32, x + size / 2, y, size / 2, size);
+            break;
+        case 5:
+            canvas.drawImage(autotile, 0, 2 * 32, 16, 32, x, y, size / 2, size);
+            canvas.drawImage(autotile, 2 * 32 + 16, 2 * 32, 16, 32, x + size / 2, y, size / 2, size);
+            break;
+        case 6:
+            canvas.drawImage(autotile, 2 * 32, 1 * 32, 32, 32, x, y, size, size);
+            break;
+        case 7:
+            canvas.drawImage(autotile, 2 * 32, 2 * 32, 32, 32, x, y, size, size);
+            break;
+        case 8:
+            canvas.drawImage(autotile, 0, 32, 32, 16, x, y, size, size / 2);
+            canvas.drawImage(autotile, 0, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2);
+            break;
+        case 9:
+            canvas.drawImage(autotile, 0, 3 * 32, 32, 32, x, y, size, size);
+            break;
+        case 10:
+            canvas.drawImage(autotile, 32, 32, 32, 16, x, y, size, size / 2);
+            canvas.drawImage(autotile, 32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2);
+            break;
+        case 11:
+            canvas.drawImage(autotile, 32, 3 * 32, 32, 32, x, y, size, size);
+            break;
+        case 12:
+            canvas.drawImage(autotile, 0, 32, 32, 32, x, y, size, size);
+            break;
+        case 13:
+            canvas.drawImage(autotile, 0, 2 * 32, 32, 32, x, y, size, size);
+            break;
+        case 14:
+            canvas.drawImage(autotile, 32, 32, 32, 32, x, y, size, size);
+            break;
+        case 15:
+            canvas.drawImage(autotile, 32, 2 * 32, 32, 32, x, y, size, size);
+            break;
+        case 16:
+            canvas.clearRect(x, y, size / 2, size / 2);
+            canvas.drawImage(blockImage, 0, blockIcon * 32, 16, 16, x, y, size / 2, size / 2);
+            canvas.drawImage(autotile, 2 * 32, 0, 16, 16, x, y, size / 2, size / 2);
+            break;
+        case 17:
+            canvas.clearRect(x, y, size / 2, size / 2);
+            canvas.drawImage(blockImage, 0, blockIcon * 32, 16, 16, x, y, size / 2, size / 2);
+            canvas.drawImage(autotile, 2 * 32 + 16, 0, 16, 16, x, y, size / 2, size / 2);
+            break;
+        case 18:
+            canvas.clearRect(x, y, size / 2, size / 2);
+            canvas.drawImage(blockImage, 0, blockIcon * 32, 16, 16, x, y, size / 2, size / 2);
+            canvas.drawImage(autotile, 2 * 32 + 16, 16, 16, 16, x, y, size / 2, size / 2);
+            break;
+        case 19:
+            canvas.clearRect(x, y, size / 2, size / 2);
+            canvas.drawImage(blockImage, 0, blockIcon * 32, 16, 16, x, y, size / 2, size / 2);
+            canvas.drawImage(autotile, 2 * 32, 16, 16, 16, x, y, size / 2, size / 2);
+            break;
+    }
 }
 
 core.prototype.noPassExists = function (x, y, floorId) {

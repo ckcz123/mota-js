@@ -63,7 +63,7 @@ maps.prototype.getBlock = function (x, y, id) {
     var tmp = {'x': x, 'y': y, 'id': id};
     if (enable!=null) tmp.enable = enable;
 
-    // 0-9 地形
+    // 0-20 地形
     if (id == 1) tmp.event = {'cls': 'terrains', 'id': 'yellowWall'}; // 黄墙
     if (id == 2) tmp.event = {'cls': 'terrains', 'id': 'whiteWall'}; // 白墙
     if (id == 3) tmp.event = {'cls': 'terrains', 'id': 'blueWall'}; // 白墙
@@ -78,7 +78,13 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 12) tmp.event = {'cls': 'animates', 'id': 'poisonNet', 'noPass': false, 'trigger': 'passNet'}; // 毒网
     if (id == 13) tmp.event = {'cls': 'animates', 'id': 'weakNet', 'noPass': false, 'trigger': 'passNet'}; // 衰网
     if (id == 14) tmp.event = {'cls': 'animates', 'id': 'curseNet', 'noPass': false, 'trigger': 'passNet'}; // 咒网
+<<<<<<< HEAD
     
+=======
+
+    if (id == 20) tmp.event = {'cls': 'autotile', 'id': 'autotile', 'noPass': true};
+
+>>>>>>> 0de35b6258ac07977783fbb03f6a2d491faf4cf1
     // 21-80 物品
     if (id == 21) tmp.event = {'cls': 'items', 'id': 'yellowKey'}; // 黄钥匙
     if (id == 22) tmp.event = {'cls': 'items', 'id': 'blueKey'}; // 蓝钥匙

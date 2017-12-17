@@ -39,6 +39,11 @@ events.prototype.init = function () {
             if (core.isset(callback))
                 callback();
         },
+        "changeLight": function (data, core, callback) {
+            core.events.changeLight(data.x, data.y);
+            if (core.isset(callback))
+                callback();
+        },
         'action': function (data, core, callback) {
             core.events.doEvents(data.event.data, data.x, data.y);
             if (core.isset(callback)) callback();
@@ -124,7 +129,7 @@ events.prototype.checkBlock = function (x,y) {
 
     // 领域
     for (var i in enemys) {
-        if (enemys[i]!=null && enemys[i].special==15) {
+        if (enemys[i]!=null && core.enemys.hasSpecial(enemys[i].special, 15)) {
             damage+=enemys[i].value;
         }
     }
@@ -140,9 +145,9 @@ events.prototype.checkBlock = function (x,y) {
 
     // 夹击
     var has=false;
-    if (enemys[0]!=null && enemys[2]!=null && enemys[0].id==enemys[2].id && enemys[0].special==16)
+    if (enemys[0]!=null && enemys[2]!=null && enemys[0].id==enemys[2].id && core.enemys.hasSpecial(enemys[0].special, 16))
         has=true;
-    if (enemys[1]!=null && enemys[3]!=null && enemys[1].id==enemys[3].id && enemys[1].special==16)
+    if (enemys[1]!=null && enemys[3]!=null && enemys[1].id==enemys[3].id && core.enemys.hasSpecial(enemys[1].special, 16))
         has=true;
     if (has && core.status.hero.hp>1) { // 1血夹击不死
         core.status.hero.hp = parseInt(core.status.hero.hp/2);
@@ -490,19 +495,19 @@ events.prototype.afterBattle = function(enemyId,x,y,callback) {
     // 毒衰咒的处理
     var special = core.material.enemys[enemyId].special;
     // 中毒
-    if (special==12 && !core.hasFlag('poison')) {
+    if (core.enemys.hasSpecial(special, 12) && !core.hasFlag('poison')) {
         core.setFlag('poison', true);
         core.updateStatusBar();
     }
     // 衰弱
-    if (special==13 && !core.hasFlag('weak')) {
+    if (core.enemys.hasSpecial(special, 13) && !core.hasFlag('weak')) {
         core.setFlag('weak', true);
         core.status.hero.atk-=core.values.weakValue;
         core.status.hero.def-=core.values.weakValue;
         core.updateStatusBar();
     }
     // 诅咒
-    if (special==14 && !core.hasFlag('curse')) {
+    if (core.enemys.hasSpecial(special, 14) && !core.hasFlag('curse')) {
         core.setFlag('curse', true);
         core.updateStatusBar();
     }
@@ -575,6 +580,27 @@ events.prototype.passNet = function (data) {
         core.setFlag('curse', true);
     }
     core.updateStatusBar();
+}
+
+events.prototype.changeLight = function(x, y) {
+    var block = core.getBlock(x, y);
+    if (block==null) return;
+    var index = block.index;
+    block = block.block;
+    if (block.event.id != 'light') return;
+    // 改变为dark
+    block.id = 166;
+    block.event = {'cls': 'terrains', 'id': 'darkLight', 'noPass': true};
+    // 更新地图
+    core.canvas.event.clearRect(x * 32, y * 32, 32, 32);
+    var blockIcon = core.material.icons[block.event.cls][block.event.id];
+    core.canvas.event.drawImage(core.material.images[block.event.cls], 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+    this.afterChangeLight();
+}
+
+// 改变灯后的事件
+events.prototype.afterChangeLight = function() {
+
 }
 
 // 存档事件前一刻的处理

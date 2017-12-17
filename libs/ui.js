@@ -377,27 +377,33 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
     hero_hp -= core.enemys.getExtraDamage(monster);
 
-    if (mon_special==2) hero_def=0; // 魔攻
-    if (mon_special==3 && mon_def<hero_atk) mon_def=hero_atk-1; // 坚固
-    if (mon_special==10) { // 模仿
+    if (core.enemys.hasSpecial(mon_special, 2)) hero_def=0; // 魔攻
+    if (core.enemys.hasSpecial(mon_special, 3) && mon_def<hero_atk) mon_def=hero_atk-1; // 坚固
+    if (core.enemys.hasSpecial(mon_special, 10)) { // 模仿
         mon_atk=hero_atk;
         mon_def=hero_def;
     }
+
+    // 实际操作
+    var turn = 0; // 0为勇士攻击
+    if (core.enemys.hasSpecial(mon_special, 1)) turn=1;
+
+    // 回合
     var turns = 2;
-    if (mon_special==4) turns=3;
-    if (mon_special==5) turns=4;
-    if (mon_special==6) turns=5;
+    if (core.enemys.hasSpecial(mon_special, 4)) turns=3;
+    if (core.enemys.hasSpecial(mon_special, 5)) turns=4;
+    if (core.enemys.hasSpecial(mon_special, 6)) turns=5;
+
 
     // 初始伤害（破甲、净化）
     var initDamage = 0;
-    if (mon_special==7) initDamage=parseInt(0.9 * hero_def);
-    if (mon_special==9) initDamage=parseInt(3*hero_mdef);
+    if (core.enemys.hasSpecial(mon_special, 7)) initDamage+=parseInt(core.values.breakArmor * hero_def);
+    if (core.enemys.hasSpecial(mon_special, 9)) initDamage=parseInt(core.values.purify * hero_mdef);
     hero_mdef-=initDamage;
     if (hero_mdef<0) {
         hero_hp+=hero_mdef;
         hero_mdef=0;
     }
-
 
     var specialText = core.enemys.getSpecialText(monsterId);
 
@@ -434,7 +440,12 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     core.canvas.ui.textAlign='center';
     core.fillText('ui', core.status.hero.name, left+margin+boxWidth/2, top+margin+heroHeight+40, '#FFD700', 'bold 22px Verdana');
     core.fillText('ui', "怪物", left+right-margin-boxWidth/2, top+margin+32+40);
-    core.fillText('ui', specialText, left+right-margin-boxWidth/2, top+margin+32+40+24, '#FF6A6A', '15px Verdana');
+    var specialTexts = specialText.split(" ");
+    for (var i=0, j=0; i<specialTexts.length;i++) {
+        if (specialTexts[i]!='') {
+            core.fillText('ui', specialTexts[i], left+right-margin-boxWidth/2, top+margin+32+44+20*(++j), '#FF6A6A', '15px Verdana');
+        }
+    }
 
     // 图标
     core.clearMap('ui', left + margin, top + margin, boxWidth, heroHeight+boxWidth-32);
@@ -538,9 +549,6 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
         left+margin+boxWidth-6, top+margin+6, '#FF0000', 4);
 */
 
-    // 实际操作
-    var turn = 0; // 0为勇士攻击
-    if (mon_special==1) turn=1;
     var battleInterval = setInterval(function() {
         core.playSound("attack", "ogg");
 
@@ -562,6 +570,27 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
             core.canvas.data.textAlign='left';
             core.fillText('data', mon_hp, right_start, top+margin+10+26, '#DDDDDD', 'bold 16px Verdana');
 
+            // 反击
+            if (core.enemys.hasSpecial(mon_special, 8)) {
+                var counterDamage = parseInt(core.values.counterAttack * hero_atk);
+                hero_mdef -= counterDamage;
+
+                if (hero_mdef<0) {
+                    hero_hp+=hero_mdef;
+                    hero_mdef=0;
+                }
+                // 更新勇士数据
+                core.clearMap('data', left_start, top+margin+10, lineWidth, 40);
+                core.canvas.data.textAlign='right';
+                core.fillText('data', hero_hp, left_end, top+margin+10+26, '#DDDDDD', 'bold 16px Verdana');
+
+                if (core.flags.enableMDef) {
+                    core.clearMap('data', left_start, top+margin+10+3*lineHeight, lineWidth, 40);
+                    core.fillText('data', hero_mdef, left_end, top+margin+10+26+3*lineHeight);
+                }
+
+            }
+
         }
         else {
             // 怪物攻击
@@ -572,7 +601,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
             }, 250);
 
             var per_damage = mon_atk-hero_def;
-            if (mon_special == 8) per_damage += parseInt(0.1 * hero_atk); // 反击
+            if (per_damage < 0) per_damage = 0;
 
             hero_mdef-=per_damage;
             if (hero_mdef<0) {
@@ -741,7 +770,14 @@ ui.prototype.drawEnemyBook = function (page) {
 
         // 数据
         core.canvas.ui.textAlign = "center";
-        core.fillText('ui', enemy.name, 115, 62 * i + 47, '#DDDDDD', 'bold 17px Verdana');
+
+        if (enemy.special=='') {
+            core.fillText('ui', enemy.name, 115, 62 * i + 47, '#DDDDDD', 'bold 17px Verdana');
+        }
+        else {
+            core.fillText('ui', enemy.name, 115, 62 * i + 40, '#DDDDDD', 'bold 17px Verdana');
+            core.fillText('ui', enemy.special, 115, 62 * i + 62, '#FF6A6A', 'bold 15px Verdana');
+        }
         core.canvas.ui.textAlign = "left";
         core.fillText('ui', '生命', 165, 62 * i + 32, '#DDDDDD', '13px Verdana');
         core.fillText('ui', enemy.hp, 195, 62 * i + 32, '#DDDDDD', 'bold 13px Verdana');
@@ -770,15 +806,6 @@ ui.prototype.drawEnemyBook = function (page) {
         core.fillText('ui', damage, damage_offset, 62 * i + 50, color, 'bold 13px Verdana');
 
         core.canvas.ui.textAlign = "left";
-        // 属性
-        if (enemy.special != '') {
-            core.setFont('data', 'bold 12px Verdana');
-            var length = core.canvas.data.measureText(enemy.special).width;
-            core.setAlpha('data', '0.4');
-            core.fillRect('data', 64 - 4 - length, 62 * i + 46, length + 4, 17, '#000000');
-            core.setAlpha('data', '1');
-            core.fillText('data', enemy.special, 64 - 2 - length, 62 * i + 59, '#FF6A6A', 'bold 12px Verdana')
-        }
 
         core.fillText('ui', '临界', 165, 62 * i + 68, '#DDDDDD', '13px Verdana');
         core.fillText('ui', enemy.critical, 195, 62 * i + 68, '#DDDDDD', 'bold 13px Verdana');
@@ -986,16 +1013,24 @@ ui.prototype.drawThumbnail = function(canvas, blocks, x, y, size, heroLoc) {
             core.canvas[canvas].drawImage(blockImage, 0, blockIcon * 32, 32, 32, x + i * persize, y + j * persize, persize, persize);
         }
     }
+    var autotileMaps = [];
     for (var b in blocks) {
         var block = blocks[b];
         if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
-            var i = block.x, j = block.y;
-            var blockIcon = core.material.icons[block.event.cls][block.event.id];
-            var blockImage = core.material.images[block.event.cls];
-            //core.canvas[canvas].clearRect(x + i * persize, y + j * persize, persize, persize);
-            core.canvas[canvas].drawImage(blockImage, 0, blockIcon * 32, 32, 32, x + i * persize, y + j * persize, persize, persize);
+            if (block.event.cls == 'autotile') {
+                // core.drawAutotile();
+                autotileMaps[13*block.x + block.y] = true;
+                continue;
+            }
+            else {
+                var blockIcon = core.material.icons[block.event.cls][block.event.id];
+                var blockImage = core.material.images[block.event.cls];
+                core.canvas[canvas].drawImage(blockImage, 0, blockIcon * 32, 32, 32, x + block.x * persize, y + block.y * persize, persize, persize);
+            }
         }
     }
+    core.drawAutotile('ui', autotileMaps, x, y, persize);
+
     if (core.isset(heroLoc)) {
         var heroIcon = core.material.icons.hero[heroLoc.direction];
         var height = core.material.icons.hero.height;

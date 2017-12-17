@@ -22,7 +22,9 @@
 12,animates,24  # 毒网（经过中毒）
 13,animates,25  # 衰网（经过衰弱）
 14,animates,26  # 咒网（经过诅咒）
+15,animates,31 # 水
 # 可自行往后添加
+20,autotile,0 # Autotile
 
 ### 21-80 物品 ###
 # 消耗品

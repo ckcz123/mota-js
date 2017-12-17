@@ -29,7 +29,13 @@ icons.prototype.init = function () {
             'blueShop-left': 15,
             'blueShop-right': 16,
             'pinkShop-left': 17,
-            'pinkShop-right': 18
+            'pinkShop-right': 18,
+            'up': 19,
+            'down': 20,
+            'left': 21,
+            'right': 22,
+            'light': 23,
+            'darkLight': 24
         },
         'animates': {
             'star': 0,

@@ -50,7 +50,7 @@ enemys.prototype.init = function () {
         'demonPriest': {'name': '魔神法师', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
         'goldHornSlime': {'name': '金角怪', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
         'redKing': {'name': '红衣魔王', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
-        'whiteKing': {'name': '白衣武士', 'hp': 100, 'atk': 120, 'def': 0, 'money': 17, 'experience': 0, 'special': 16},
+        'whiteKing': {'name': '白衣武士', 'hp': 100, 'atk': 120, 'def': 0, 'money': 17, 'experience': 0, 'special': 15016},
         'blackMagician': {'name': '黑暗大法师', 'hp': 100, 'atk': 120, 'def': 0, 'money': 12, 'experience': 0, 'special': 11, 'value': 1/3, 'bomb': false}, // 吸血怪需要在后面添加value代表吸血比例
         'silverSlime': {'name': '银头怪', 'hp': 100, 'atk': 120, 'def': 0, 'money': 15, 'experience': 0, 'special': 14},
         'swordEmperor': {'name': '剑圣', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
@@ -75,26 +75,31 @@ enemys.prototype.getEnemys = function (enemyId) {
     return this.enemys[enemyId];
 }
 
+enemys.prototype.hasSpecial = function (special, test) {
+    return parseInt(special/1000) == test || special % 1000 == test;
+}
+
 enemys.prototype.getSpecialText = function (enemyId) {
     if (enemyId == undefined) return "";
     var special = this.enemys[enemyId].special;
-    if (special == 1) return "先攻";
-    if (special == 2) return "魔攻";
-    if (special == 3) return "坚固";
-    if (special == 4) return "2连击";
-    if (special == 5) return "3连击";
-    if (special == 6) return "4连击";
-    if (special == 7) return "破甲";
-    if (special == 8) return "反击";
-    if (special == 9) return "净化";
-    if (special == 10) return "模仿";
-    if (special == 11) return "吸血";
-    if (special == 12) return "中毒";
-    if (special == 13) return "衰弱";
-    if (special == 14) return "诅咒";
-    if (special == 15) return "领域";
-    if (special == 16) return "夹击";
-    return "";
+    var text = [];
+    if (this.hasSpecial(special, 1)) text.push("先攻");
+    if (this.hasSpecial(special, 2)) text.push("魔攻");
+    if (this.hasSpecial(special, 3)) text.push("坚固");
+    if (this.hasSpecial(special, 4)) text.push("2连击");
+    if (this.hasSpecial(special, 5)) text.push("3连击");
+    if (this.hasSpecial(special, 6)) text.push("4连击");
+    if (this.hasSpecial(special, 7)) text.push("破甲");
+    if (this.hasSpecial(special, 8)) text.push("反击");
+    if (this.hasSpecial(special, 9)) text.push("净化");
+    if (this.hasSpecial(special, 10)) text.push("模仿");
+    if (this.hasSpecial(special, 11)) text.push("吸血");
+    if (this.hasSpecial(special, 12)) text.push("中毒");
+    if (this.hasSpecial(special, 13)) text.push("衰弱");
+    if (this.hasSpecial(special, 14)) text.push("诅咒");
+    if (this.hasSpecial(special, 15)) text.push("领域");
+    if (this.hasSpecial(special, 16)) text.push("夹击");
+    return text.join("  ");
 }
 
 enemys.prototype.getDamage = function (monsterId) {
@@ -108,7 +113,7 @@ enemys.prototype.getDamage = function (monsterId) {
 
 enemys.prototype.getExtraDamage = function (monster) {
     var extra_damage = 0;
-    if (monster.special == 11) { // 吸血
+    if (this.hasSpecial(monster.special, 11)) { // 吸血
         // 吸血的比例
         extra_damage = core.status.hero.hp * monster.value;
         extra_damage = parseInt(extra_damage);
@@ -119,7 +124,7 @@ enemys.prototype.getExtraDamage = function (monster) {
 // 临界值计算
 enemys.prototype.getCritical = function (monsterId) {
     var monster = core.material.enemys[monsterId];
-    if (monster.special == 3 || monster.special == 10) return "???";
+    if (this.hasSpecial(monster.special, 3) || this.hasSpecial(monster.special, 10)) return "???";
     var last = this.calDamage(core.status.hero.atk, core.status.hero.def, core.status.hero.mdef,
         monster.hp, monster.atk, monster.def, monster.special);
     if (last == 0) return 0;
@@ -160,11 +165,11 @@ enemys.prototype.getDefDamage = function (monsterId) {
 
 enemys.prototype.calDamage = function (hero_atk, hero_def, hero_mdef, mon_hp, mon_atk, mon_def, mon_special) {
     // 魔攻
-    if (mon_special == 2) hero_def = 0;
+    if (this.hasSpecial(mon_special,2)) hero_def = 0;
     // 坚固
-    if (mon_special == 3 && mon_def < hero_atk - 1) mon_def = hero_atk - 1;
+    if (this.hasSpecial(mon_special,3) && mon_def < hero_atk - 1) mon_def = hero_atk - 1;
     // 模仿
-    if (mon_special == 10) {
+    if (this.hasSpecial(mon_special,10)) {
         mon_atk = hero_atk;
         mon_def = hero_def;
     }
@@ -174,21 +179,23 @@ enemys.prototype.calDamage = function (hero_atk, hero_def, hero_mdef, mon_hp, mo
     if (per_damage < 0) per_damage = 0;
     // 2连击 & 3连击
 
-    if (mon_special == 4) per_damage *= 2;
-    if (mon_special == 5) per_damage *= 3;
-    if (mon_special == 6) per_damage *= 4;
+    if (this.hasSpecial(mon_special, 4)) per_damage *= 2;
+    if (this.hasSpecial(mon_special, 5)) per_damage *= 3;
+    if (this.hasSpecial(mon_special, 6)) per_damage *= 4;
+
+    var counterDamage = 0;
     // 反击
-    if (mon_special == 8) per_damage += parseInt(0.1 * hero_atk);
+    if (this.hasSpecial(mon_special, 8)) counterDamage += parseInt(core.values.counterAttack * hero_atk);
 
     // 先攻
     var damage = mon_special == 1 ? per_damage : 0;
     // 破甲
-    if (mon_special == 7) damage = parseInt(0.9 * hero_def);
+    if (this.hasSpecial(mon_special, 7)) damage += parseInt(core.values.breakArmor * hero_def);
     // 净化
-    if (mon_special == 9) damage = 3 * hero_mdef;
+    if (this.hasSpecial(mon_special, 9)) damage = core.values.purify * hero_mdef;
 
     var turn = parseInt((mon_hp - 1) / (hero_atk - mon_def));
-    var ans = damage + turn * per_damage;
+    var ans = damage + turn * per_damage + (turn + 1) * counterDamage;
     ans -= hero_mdef;
 
     // 魔防回血
@@ -211,9 +218,9 @@ enemys.prototype.getCurrentEnemys = function () {
             var monster = core.material.enemys[monsterId];
             var mon_atk = monster.atk, mon_def = monster.def;
             // 坚固
-            if (monster.special == 3 && mon_def < core.status.hero.atk - 1)
+            if (this.hasSpecial(monster.special, 3) && mon_def < core.status.hero.atk - 1)
                 mon_def = core.status.hero.atk - 1;
-            if (monster.special==10) {
+            if (this.hasSpecial(monster.special, 10)) {
                 mon_atk=core.status.hero.atk;
                 mon_def=core.status.hero.def;
             }

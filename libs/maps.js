@@ -79,10 +79,15 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 13) tmp.event = {'cls': 'animates', 'id': 'weakNet', 'noPass': false, 'trigger': 'passNet'}; // 衰网
     if (id == 14) tmp.event = {'cls': 'animates', 'id': 'curseNet', 'noPass': false, 'trigger': 'passNet'}; // 咒网
 <<<<<<< HEAD
+<<<<<<< HEAD
     
 =======
+=======
+    if (id == 15) tmp.event = {'cls': 'animates', 'id': 'water', 'noPass': true}; // 水
+>>>>>>> a6b50c17abdc856681917e5d3216f29aa9d8f9e1
 
-    if (id == 20) tmp.event = {'cls': 'autotile', 'id': 'autotile', 'noPass': true};
+    // autotile: 20
+    if (id == 20) tmp.event = {'cls': 'autotile', 'id': 'autotile', 'noPass': true}; // autotile
 
 >>>>>>> 0de35b6258ac07977783fbb03f6a2d491faf4cf1
     // 21-80 物品

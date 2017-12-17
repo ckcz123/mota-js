@@ -40,7 +40,7 @@ icons.prototype.init = function () {
         'animates': {
             'star': 0,
             'lava': 1,
-            'water': 2,
+            'waterWall': 2,
             'yellowDoor': 3,
             'blueDoor': 4,
             'redDoor': 5,
@@ -68,7 +68,8 @@ icons.prototype.init = function () {
             'downPortal': 27,
             'leftPortal': 28,
             'rightPortal': 29,
-            'upPortal': 30
+            'upPortal': 30,
+            'water': 31,
         },
         'npcs': {
             'man': 0,

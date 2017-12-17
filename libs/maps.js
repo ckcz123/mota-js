@@ -78,7 +78,7 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 12) tmp.event = {'cls': 'animates', 'id': 'poisonNet', 'noPass': false, 'trigger': 'passNet'}; // 毒网
     if (id == 13) tmp.event = {'cls': 'animates', 'id': 'weakNet', 'noPass': false, 'trigger': 'passNet'}; // 衰网
     if (id == 14) tmp.event = {'cls': 'animates', 'id': 'curseNet', 'noPass': false, 'trigger': 'passNet'}; // 咒网
-    // 单向箭头
+    // 单向行走箭头
     if (id == 15) tmp.event = {'cls': 'terrains', 'id': 'arrowUp','noPass': false}; // 上行箭头
     if (id == 16) tmp.event = {'cls': 'terrains', 'id': 'arrowLeft','noPass': false}; // 左行箭头
     if (id == 17) tmp.event = {'cls': 'terrains', 'id': 'arrowDown','noPass': false}; // 下行箭头

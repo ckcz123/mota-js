@@ -882,7 +882,8 @@ core.prototype.automaticRoute = function (destX, destY) {
             if (nowBlock!=null){
                 nowId = nowBlock.block.event.id;
                 nowArrow = nowId.slice(5).toLowerCase();
-                if (direction != nowArrow) continue;
+                var isArrow = nowId.slice(0, 5).toLowerCase() == 'arrow';
+                if (isArrow && direction != nowArrow) continue;
             }
             
             var nx = nowX + scan[direction].x;
@@ -894,7 +895,8 @@ core.prototype.automaticRoute = function (destX, destY) {
             if (nextBlock!=null){
                 nextId = nextBlock.block.event.id;
                 nextArrow = nextId.slice(5).toLowerCase();
-                if ( (scan[direction].x + scan[nextArrow].x) == 0 && (scan[direction].y + scan[nextArrow].y) == 0 ) continue;
+                var isArrow = nextId.slice(0, 5).toLowerCase() == 'arrow';
+                if (isArrow && (scan[direction].x + scan[nextArrow].x) == 0 && (scan[direction].y + scan[nextArrow].y) == 0 ) continue;
             }
 
             var nid = 13 * nx + ny;

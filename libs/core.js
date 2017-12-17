@@ -470,28 +470,36 @@ core.prototype.keyUp = function(keyCode) {
 
     switch (keyCode) {
         case 27: // ESC
-            core.ui.drawSettings(true);
+            if (core.status.heroStop)
+                core.ui.drawSettings(true);
             break;
         case 71: // G
-            core.useFly(true);
+            if (core.status.heroStop)
+                core.useFly(true);
             break;
         case 88: // X
-            core.openBook(true);
+            if (core.status.heroStop)
+                core.openBook(true);
             break;
         case 83: // S
-            core.save(true);
+            if (core.status.heroStop)
+                core.save(true);
             break;
         case 68: // D
-            core.load(true);
+            if (core.status.heroStop)
+                core.load(true);
             break;
         case 84: // T
-            core.openToolbox(true);
+            if (core.status.heroStop)
+                core.openToolbox(true);
             break;
         case 90: // Z
-            core.turnHero();
+            if (core.status.heroStop)
+                core.turnHero();
             break;
         case 75: // K
-            core.ui.drawQuickShop(true);
+            if (core.status.heroStop)
+                core.ui.drawQuickShop(true);
             break;
         case 37: // UP
             break;
@@ -1136,10 +1144,10 @@ core.prototype.setHeroMoveTriggerInterval = function () {
             direction = core.getHeroLoc('direction');
             x = core.getHeroLoc('x');
             y = core.getHeroLoc('y');
-            var noPass;
-            noPass = core.noPass(x + scan[direction].x, y + scan[direction].y);
-            if (noPass) {
-                core.trigger(x + scan[direction].x, y + scan[direction].y);
+            var noPass = core.noPass(x + scan[direction].x, y + scan[direction].y), canMove = core.canMove();
+            if (noPass || !canMove) {
+                if (canMove) // 非箭头：触发
+                    core.trigger(x + scan[direction].x, y + scan[direction].y);
                 core.drawHero(direction, x, y, 'stop');
                 if (core.status.autoHeroMove) {
                     core.status.movedStep++;
@@ -1191,32 +1199,28 @@ core.prototype.turnHero = function(direction) {
     core.canvas.ui.clearRect(0, 0, 416, 416);
 }
 
-core.prototype.moveHero = function (direction) {
-    core.setHeroLoc('direction', direction);
-    core.status.heroStop = false;
-    var nowX = core.getHeroLoc('x');
-    var nowY = core.getHeroLoc('y');
-    var nowId, nowBlock = core.getBlock(nowX,nowY);
+core.prototype.canMove = function() {
+    var direction = core.getHeroLoc('direction');
+    var nowBlock = core.getBlock(core.getHeroLoc('x'),core.getHeroLoc('y'));
     if (nowBlock!=null){
         nowId = nowBlock.block.event.id;
         var nowIsArrow = nowId.slice(0, 5).toLowerCase() == 'arrow';
         if(nowIsArrow){
             var nowArrow = nowId.slice(5).toLowerCase();
             if (direction != nowArrow) {
-                core.status.heroStop = true;
-                core.turnHero(direction);
+                // core.status.heroStop = true;
+                // core.turnHero(direction);
+                return false;
             }
         }
-    }console.log(direction,nowX,nowY, nowBlock, '1111')
+    }
     var scan = {
         'up': {'x': 0, 'y': -1},
         'left': {'x': -1, 'y': 0},
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
-    var nextX = nowX + scan[direction].x;
-    var nextY = nowY + scan[direction].y;
-    var nextId, nextBlock = core.getBlock(nextX,nextY);
+    var nextBlock = core.getBlock(core.nextX(),core.nextY());
     if (nextBlock!=null){
         nextId = nextBlock.block.event.id;
         // 遇到单向箭头处理
@@ -1224,11 +1228,18 @@ core.prototype.moveHero = function (direction) {
         if(isArrow){
             var nextArrow = nextId.slice(5).toLowerCase();
             if ( (scan[direction].x + scan[nextArrow].x) == 0 && (scan[direction].y + scan[nextArrow].y) == 0 ) {
-                core.status.heroStop = true;
-                core.turnHero(direction);
+                // core.status.heroStop = true;
+                // core.turnHero(direction);
+                return false;
             }
         }
-    }console.log(direction,nextX,nextY, nextBlock, '2222')
+    }
+    return true;
+}
+
+core.prototype.moveHero = function (direction) {
+    core.setHeroLoc('direction', direction);
+    core.status.heroStop = false;
 }
 
 core.prototype.moveOneStep = function() {

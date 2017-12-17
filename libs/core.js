@@ -425,49 +425,48 @@ core.prototype.keyDown = function(keyCode) {
 }
 
 core.prototype.keyUp = function(keyCode) {
-    if(!core.status.played) {
-    return;
-}
+    if(!core.status.played)
+        return;
 
-if (core.status.lockControl) {
-    if (core.status.event.id == 'book' && (keyCode==27 || keyCode==88))
-        core.ui.closePanel(true);
-    if (core.status.event.id == 'fly' && (keyCode==71 || keyCode==27))
-        core.ui.closePanel();
-    if (core.status.event.id == 'fly' && keyCode==13) {
-        var index=core.status.hero.flyRange.indexOf(core.status.floorId);
-        var stair=core.status.event.data<index?"upFloor":"downFloor";
-        var floorId=core.status.event.data;
-        core.ui.closePanel();
-        core.changeFloor(core.status.hero.flyRange[floorId], stair);
-    }
-    if (core.status.event.id == 'save' && (keyCode==83 || keyCode==27))
-        core.ui.closePanel();
-    if (core.status.event.id == 'load' && (keyCode==76 || keyCode==27))
-        core.ui.closePanel();
-    if ((core.status.event.id == 'settings' || core.status.event.id == 'selectShop') && keyCode==27)
-        core.ui.closePanel();
-    if (core.status.event.id == 'selectShop' && keyCode==75)
-        core.ui.closePanel();
-    if (core.status.event.id == 'shop' && keyCode==27) {
-        core.status.boxAnimateObjs = [];
-        core.setBoxAnimate();
-        if (core.status.event.data.fromList)
-            core.ui.drawQuickShop();
-        else core.ui.closePanel();
-    }
-    if (core.status.event.id == 'toolbox' && (keyCode==84 || keyCode==27))
-        core.ui.closePanel();
-    if (core.status.event.id == 'about' && (keyCode==13 || keyCode==32))
-        core.ui.closePanel();
-    if (core.status.event.id == 'text' && (keyCode==13 || keyCode==32))
-        core.drawText();
-    if (core.status.event.id == 'action' && core.isset(core.status.event.data.current)
-        && core.status.event.data.type=='text'  && (keyCode==13 || keyCode==32))
-        core.events.doAction();
+    if (core.status.lockControl) {
+        if (core.status.event.id == 'book' && (keyCode==27 || keyCode==88))
+            core.ui.closePanel(true);
+        if (core.status.event.id == 'fly' && (keyCode==71 || keyCode==27))
+            core.ui.closePanel();
+        if (core.status.event.id == 'fly' && keyCode==13) {
+            var index=core.status.hero.flyRange.indexOf(core.status.floorId);
+            var stair=core.status.event.data<index?"upFloor":"downFloor";
+            var floorId=core.status.event.data;
+            core.ui.closePanel();
+            core.changeFloor(core.status.hero.flyRange[floorId], stair);
+        }
+        if (core.status.event.id == 'save' && (keyCode==83 || keyCode==27))
+            core.ui.closePanel();
+        if (core.status.event.id == 'load' && (keyCode==68 || keyCode==27))
+            core.ui.closePanel();
+        if ((core.status.event.id == 'settings' || core.status.event.id == 'selectShop') && keyCode==27)
+            core.ui.closePanel();
+        if (core.status.event.id == 'selectShop' && keyCode==75)
+            core.ui.closePanel();
+        if (core.status.event.id == 'shop' && keyCode==27) {
+            core.status.boxAnimateObjs = [];
+            core.setBoxAnimate();
+            if (core.status.event.data.fromList)
+                core.ui.drawQuickShop();
+            else core.ui.closePanel();
+        }
+        if (core.status.event.id == 'toolbox' && (keyCode==84 || keyCode==27))
+            core.ui.closePanel();
+        if (core.status.event.id == 'about' && (keyCode==13 || keyCode==32))
+            core.ui.closePanel();
+        if (core.status.event.id == 'text' && (keyCode==13 || keyCode==32))
+            core.drawText();
+        if (core.status.event.id == 'action' && core.isset(core.status.event.data.current)
+            && core.status.event.data.type=='text'  && (keyCode==13 || keyCode==32))
+            core.events.doAction();
 
-    return;
-}
+        return;
+    }
 
     switch (keyCode) {
         case 27: // ESC
@@ -482,7 +481,7 @@ if (core.status.lockControl) {
         case 83: // S
             core.save(true);
             break;
-        case 76: // L
+        case 68: // D
             core.load(true);
             break;
         case 84: // T
@@ -502,9 +501,38 @@ if (core.status.lockControl) {
             break;
         case 40: // DOWN
             break;
+        case 49: // 快捷键1：破
+            if (core.status.heroStop && core.hasItem('pickaxe')) {
+                if (core.canUseItem('pickaxe')) {
+                    core.useItem('pickaxe');
+                }
+                else {
+                    core.drawTip('当前不能使用破墙镐');
+                }
+            }
+            break;
+        case 50: // 快捷键2：炸
+            if (core.status.heroStop && core.hasItem('bomb')) {
+                if (core.canUseItem('bomb')) {
+                    core.useItem('bomb');
+                }
+                else {
+                    core.drawTip('当前不能使用炸弹');
+                }
+            }
+            break;
+        case 51: // 快捷键3：飞
+            if (core.status.heroStop && core.hasItem('centerFly')) {
+                if (core.canUseItem('centerFly')) {
+                    core.useItem('centerFly');
+                }
+                else {
+                    core.drawTip('当前不能使用中心对称飞行器');
+                }
+            }
+            break;
     }
     core.stopHero();
-
 }
 
 core.prototype.ondown = function (x ,y) {

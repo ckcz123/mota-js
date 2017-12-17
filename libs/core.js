@@ -878,10 +878,25 @@ core.prototype.automaticRoute = function (destX, destY) {
         var nowX = parseInt(f / 13), nowY = f % 13;
     
         for (var direction in scan) {
-        
+            var nowArrow, nowId, nowBlock = core.getBlock(nowX,nowX);
+            if (nowBlock!=null){
+                nowId = nowBlock.block.event.id;
+                nowArrow = nowId.slice(5).toLowerCase();
+                if (direction != nowArrow) continue;
+            }
+            
             var nx = nowX + scan[direction].x;
             var ny = nowY + scan[direction].y;
+
             if (nx<0 || nx>12 || ny<0 || ny>12) continue;
+
+            var nextId, nextArrow, nextBlock = core.getBlock(nx,ny);
+            if (nextBlock!=null){
+                nextId = nextBlock.block.event.id;
+                nextArrow = nextId.slice(5).toLowerCase();
+                if ( (scan[direction].x + scan[nextArrow].x) == 0 && (scan[direction].y + scan[nextArrow].y) == 0 ) continue;
+            }
+
             var nid = 13 * nx + ny;
     
             if (core.isset(route[nid])) continue;

@@ -78,7 +78,11 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 12) tmp.event = {'cls': 'animates', 'id': 'poisonNet', 'noPass': false, 'trigger': 'passNet'}; // 毒网
     if (id == 13) tmp.event = {'cls': 'animates', 'id': 'weakNet', 'noPass': false, 'trigger': 'passNet'}; // 衰网
     if (id == 14) tmp.event = {'cls': 'animates', 'id': 'curseNet', 'noPass': false, 'trigger': 'passNet'}; // 咒网
-
+    // 单向箭头
+    if (id == 15) tmp.event = {'cls': 'terrains', 'id': 'arrowUp','noPass': false}; // 上行箭头
+    if (id == 16) tmp.event = {'cls': 'terrains', 'id': 'arrowLeft','noPass': false}; // 左行箭头
+    if (id == 17) tmp.event = {'cls': 'terrains', 'id': 'arrowDown','noPass': false}; // 下行箭头
+    if (id == 18) tmp.event = {'cls': 'terrains', 'id': 'arrowRight','noPass': false}; // 右行箭头
     // 21-80 物品
     if (id == 21) tmp.event = {'cls': 'items', 'id': 'yellowKey'}; // 黄钥匙
     if (id == 22) tmp.event = {'cls': 'items', 'id': 'blueKey'}; // 蓝钥匙

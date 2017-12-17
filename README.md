@@ -33,4 +33,4 @@ HTML5 canvas制作的魔塔样板，支持全平台游戏！
 
 HTML5魔塔交流群群号： `539113091`
 
-如有其它意见或建议，也可以通过发issues、或邮件至[ckcz123.com](mailto:ckcz123.com)联系我。
+如有其它意见或建议，也可以通过发[issues](https://github.com/ckcz123/mota-js/issues)、或邮件至[ckcz123.com](mailto:ckcz123.com)联系我。

@@ -928,7 +928,7 @@ core.prototype.automaticRoute = function (destX, destY) {
 
             var nextId, nextBlock = core.getBlock(nx,ny);
             if (nextBlock!=null){
-                nextId = nextBlock.block.event.id;console.log(nextId);
+                nextId = nextBlock.block.event.id;
                 // 遇到单向箭头处理
                 var isArrow = nextId.slice(0, 5).toLowerCase() == 'arrow';
                 if(isArrow){
@@ -1194,6 +1194,41 @@ core.prototype.turnHero = function(direction) {
 core.prototype.moveHero = function (direction) {
     core.setHeroLoc('direction', direction);
     core.status.heroStop = false;
+    var nowX = core.getHeroLoc('x');
+    var nowY = core.getHeroLoc('y');
+    var nowId, nowBlock = core.getBlock(nowX,nowY);
+    if (nowBlock!=null){
+        nowId = nowBlock.block.event.id;
+        var nowIsArrow = nowId.slice(0, 5).toLowerCase() == 'arrow';
+        if(nowIsArrow){
+            var nowArrow = nowId.slice(5).toLowerCase();
+            if (direction != nowArrow) {
+                core.status.heroStop = true;
+                core.turnHero(direction);
+            }
+        }
+    }console.log(direction,nowX,nowY, nowBlock, '1111')
+    var scan = {
+        'up': {'x': 0, 'y': -1},
+        'left': {'x': -1, 'y': 0},
+        'down': {'x': 0, 'y': 1},
+        'right': {'x': 1, 'y': 0}
+    };
+    var nextX = nowX + scan[direction].x;
+    var nextY = nowY + scan[direction].y;
+    var nextId, nextBlock = core.getBlock(nextX,nextY);
+    if (nextBlock!=null){
+        nextId = nextBlock.block.event.id;
+        // 遇到单向箭头处理
+        var isArrow = nextId.slice(0, 5).toLowerCase() == 'arrow';
+        if(isArrow){
+            var nextArrow = nextId.slice(5).toLowerCase();
+            if ( (scan[direction].x + scan[nextArrow].x) == 0 && (scan[direction].y + scan[nextArrow].y) == 0 ) {
+                core.status.heroStop = true;
+                core.turnHero(direction);
+            }
+        }
+    }console.log(direction,nextX,nextY, nextBlock, '2222')
 }
 
 core.prototype.moveOneStep = function() {

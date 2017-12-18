@@ -24,7 +24,6 @@ body,div,img{margin:0;padding:0;}
 }
 </style>
 </head><body>
-<canvas class='auxiliary' id='grasspic' width='96' height='128' style='z-index:3;top:500px;left:12px'></canvas>
 <canvas class='auxiliary' id='grass_pic' width='530' height='64' style='z-index:3;top:500px;left:12px'></canvas>
 
 <canvas class='gameCanvas' id='eventLayer' width='416' height='416' style='z-index:2'></canvas>
@@ -34,8 +33,43 @@ body,div,img{margin:0;padding:0;}
 <p class='auxiliary' id='pout' style='top:660px;left:12px' >可以在console中通过printf(str)来改变这里的值</p>
 <div id='dataSelection' style="top:0px;left:768px;"></div>
 
+<input class='gameCanvas' type="button" value="exportMap" onclick="exportMap()" style="top:600px;left:50px"/>
 <input class='gameCanvas' type="button" value="read" onclick="readUTF8file(pin.value)" style="top:600px;left:150px"/>
 <input class='gameCanvas' type="button" value="write" onclick="writeUTF8file(pin.value,pout.innerText)" style="top:600px;left:200px"/>
+
+<script>main={'instance':{}}</script>
+<script src='libs/icons.js'></script>
+<script src='libs/maps.js'></script>
+<script>
+main.instance.icons.init();//不知道为什么,需要手动init,明明maps是正常的
+icons=main.instance.icons.getIcons();
+ids=[];
+for(var ii=0;ii<=400;ii++)ids[ii]=main.instance.maps.getBlock(0,0,ii);
+
+
+for(var ii=0;ii<=400;ii++){
+	if('event' in ids[ii]){
+		var id =ids[ii].event.id;
+		var cls =ids[ii].event.cls;
+		if(id=='autotile'){ids[ii]={'idnum':ii,'id':'autotile','images':'autotile','y':0};continue;}
+		if (id in icons[cls])ids[ii]={'idnum':ii,'id':id,'images':cls,'y':icons[cls][id]};
+		
+	}
+	else ids[ii]=null;
+}
+ids[0]={'idnum':0,'id':'ground','images':'terrains','y':0}
+
+console.log(icons);
+console.log(ids);
+
+// ids
+// {'idnum':20,'id':'autotile','images':'autotile','y':0}
+// {'idnum':21,'id':'yellowKey','images':'items','y':0}
+// {'idnum':22,'id':'blueKey','images':'items','y':1}
+
+//var cxt = eventLayer.getContext("2d");
+//cxt.drawImage(core.material.images['spriter_name'], sx*32, sy*32, 32, 32, xx*32, yy*32, 32, 32);
+</script>
 
 
 <script>
@@ -67,7 +101,7 @@ for (var i = 0; i < core.images.length; i++) {
 		imgName = imgName[0];
 		core.material.images[imgName] = image;
 		loadedImageNum++;
-		if (loadedImageNum == core.images.length) {drawInitData();}
+		if (loadedImageNum == core.images.length) {importGrass();}
 	});
 }
 })();
@@ -76,14 +110,14 @@ for (var i = 0; i < core.images.length; i++) {
 
 <script type="text/javascript">
 //预处理草的源图片
-(function(){
+importGrass=function(){
 autotile = new Image();
 
 autotile.src = "images/autotile.png"
 
 autotile.onload = function () {
 	console.log("loaded")
-	grasspic.getContext("2d").drawImage(autotile, 0, 0);
+	drawInitData();
 };
 
 function drawAutotile(canvas, x, y, size, autotile, index) {
@@ -175,8 +209,10 @@ grass = function (ii, x, y) {
 fullX = 12;
 fullY = 12;
 
-map = [];//-2表示边界,,其他对应实体
+map = [];//-2表示边界,0表示空地,其他对象对应实体
 map[fullX + 1 + fullY * (fullX + 1)] = -2;
+for(var ii=0;ii<fullX + 1 + fullY * (fullX + 1);ii++)map[ii]=0;
+
 m = function (x, y) {
 	if (x < 0 || x > fullX || y < 0 || y > fullY) return fullX + 1 + fullY * (fullX + 1);
 	return x + y * (fullX + 1);
@@ -185,7 +221,7 @@ m = function (x, y) {
 isGrass = function (xx, yy) { 
 	var mapxy=map[m(xx,yy)];
 	if (typeof(mapxy) == typeof(-1) || typeof(mapxy) == typeof([][0]))return 0;
-	if (mapxy.name=='autotile')return 1;
+	if (mapxy.images=='autotile')return 1;
 	return 0;
 }
 
@@ -234,12 +270,12 @@ updateMap = function () {
 			if (typeof(mapxy) == typeof(-1) || typeof(mapxy) == typeof([][0]))continue;
 			//context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height)
 			cxt.clearRect(xx*32, yy*32, 32, 32);
-			cxt.drawImage(core.material.images[mapxy.name], 0, mapxy.y*32, 32, 32, xx*32, yy*32, 32, 32);
+			cxt.drawImage(core.material.images[mapxy.images], 0, mapxy.y*32, 32, 32, xx*32, yy*32, 32, 32);
 		}
 	}
 }
 
-})();
+}
 </script>
 
 <script>
@@ -380,7 +416,7 @@ ui.onmouseup = function (e) {
 	}
 }
 
-info={'y': 0, 'name': "autotile"};
+info=ids[20];//autotile
 data.onmousedown = function (e) {
 	e.stopPropagation();
 	var loc = eToLoc(e);
@@ -389,14 +425,19 @@ data.onmousedown = function (e) {
 	for (var spriter in widthsX){
 		if(pos.x>=widthsX[spriter][1] && pos.x<widthsX[spriter][2]){
 			pos.x=widthsX[spriter][1];
-			pos.name=widthsX[spriter][0];
-			if(pos.name=='autotile'){
+			pos.images=widthsX[spriter][0];
+			if(pos.images=='autotile'){
 			pos.y=0;
-			}else if((pos.y+1)*32>core.material.images[pos.name].height)pos.y=~~(core.material.images[pos.name].height/32)-1;
+			}else if((pos.y+1)*32>core.material.images[pos.images].height)pos.y=~~(core.material.images[pos.images].height/32)-1;
 			
 			dataSelection.style.left=pos.x*32+'px';
 			dataSelection.style.top=pos.y*32+'px';
-			info={'y':pos.y,'name':pos.name};
+			info={'images':pos.images,'y':pos.y};
+			for (var ii=0;ii<ids.length;ii++){
+				if(ids[ii]==null)continue;
+				if(pos.images==ids[ii].images && pos.y==ids[ii].y)info=ids[ii];
+			}
+			printf(JSON.stringify(info))
 		}
 	}
 }
@@ -406,10 +447,10 @@ data.onmousedown = function (e) {
 
 <script type="text/javascript">
 
-var timecheck=0;
+//var timecheck=0;
 postsomething = function (data,callback) {
-	if(timecheck!==0)return;
-	timecheck=1;
+	//if(timecheck!==0)return;
+	//timecheck=1;
 	setTimeout(function(){timecheck=0},5000);
 	var xhr = function(){
 		if (window.XMLHttpRequest) {
@@ -435,11 +476,11 @@ postsomething = function (data,callback) {
 		case 4 : 
 			if ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304) {
 				printf(xhr.responseText);
-				if (callback)callback(xhr.responseText);
+				if (Boolean(callback))callback(xhr.responseText);
 			}else{
 				printf('error:' + xhr.status+'<br>'+(xhr.responseText||''),'weak');
 			}
-			timecheck=0;
+			//timecheck=0;
 			break;
 	}
 }
@@ -465,13 +506,26 @@ function writeUTF8file(filename,filestr,callback){
 	postsomething(JSON.stringify(data),callback);
 }
 
-function check(callback){
-	data={};
-	data.name='check';
-	data.func='getmap';
-	data.args=[];
-	postsomething(JSON.stringify(data),callback);
-}	
+function exportMap(callback){
+	var filestr='';
+	for (var yy = 0; yy < 13; yy++){
+		filestr+='['
+		for (var xx = 0; xx < 13; xx++) {
+			var mapxy=map[m(xx,yy)];
+			if(typeof(mapxy)==typeof({})){
+				if ('idnum' in mapxy)mapxy=mapxy.idnum;
+				else mapxy='!!?';
+			}
+			mapxy=String(mapxy);
+			mapxy=Array(Math.max(5-mapxy.length,0)).join(' ')+mapxy;
+			filestr+=mapxy+','
+		}
+		filestr+='],\n'
+	}
+	printf('<pre>'+filestr+'\n</pre><p>已复制到剪贴板</p>'+'<textarea cols="1" rows="1" id=poutTmp>'+filestr+'\n</textarea><br><br><br>');
+	poutTmp.select();
+	document.execCommand("Copy");
+}
 </script>
 
 </html>

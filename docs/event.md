@@ -745,10 +745,10 @@ core.insertAction(list) //往当前事件列表中插入一系列事件。使用
             {"text": "攻击+4", "effect": "status:atk+=4"},
             {"text": "防御+4", "effect": "status:def+=4"},
             {"text": "魔防+10", "effect": "status:mdef+=10"}
-            // effect只能对status和items进行操作，不能修改flag值。且其中间只能用+=符号（也就是只能增加某个属性或道具）
+            // effect只能对status和item进行操作，不能修改flag值。且其中间只能用+=符号（也就是只能增加某个属性或道具）
             // 其他effect样例：
-            // "items:yellowKey+=1" 黄钥匙+1
-            // "items:pickaxe+=3" 破墙镐+3
+            // "item:yellowKey+=1" 黄钥匙+1
+            // "item:pickaxe+=3" 破墙镐+3
         ]
     },
     "expShop1": { // 商店唯一ID

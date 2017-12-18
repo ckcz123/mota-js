@@ -3033,8 +3033,9 @@ core.prototype.resize = function(clientWidth, clientHeight) {
     var BASE_LINEHEIGHT = 32;
     var SPACE = 3;
     var DEFAULT_FONT_SIZE = 16;
-    //适配宽度阈值
+    //适配宽度 422
     var ADAPT_WIDTH = DEFAULT_CANVAS_WIDTH;
+    var CHANGE_WIDTH = DEFAULT_CANVAS_WIDTH+DEFAULT_BAR_WIDTH;
     //判断横竖屏
     var width = clientWidth;
     var isHorizontal = false;
@@ -3057,23 +3058,30 @@ core.prototype.resize = function(clientWidth, clientHeight) {
     if (!core.flags.enableDebuff) count--;
 
     var statusLineHeight = BASE_LINEHEIGHT * 9/count;
-
+    
     var shopDisplay, mdefDisplay, expDisplay;
     mdefDisplay = core.flags.enableMDef ? 'block' : 'none';
     expDisplay = core.flags.enableExperience ? 'block' : 'none';
 
     statusBarBorder = '3px #fff solid';
     toolBarBorder = '3px #fff solid';
+    var zoom = (ADAPT_WIDTH - width) / 4.22;
+    var aScale = 1 - zoom / 100;
+
     // 移动端
-    if (width < ADAPT_WIDTH) {
-        var zoom = (ADAPT_WIDTH - width) / 4.22;
-        var scale = 1 - zoom / 100;
-
-        core.domStyle.scale = scale;
-
-        canvasWidth = width;
+    if (width < CHANGE_WIDTH) {
+        if(width < ADAPT_WIDTH){
+            
+            core.domStyle.scale = aScale;
+            canvasWidth = width;
+        }else{
+            canvasWidth = DEFAULT_CANVAS_WIDTH;
+            core.domStyle.scale = 1;
+        }
+        
+        var scale = core.domStyle.scale
+        var tempWidth = DEFAULT_CANVAS_WIDTH * scale;
         fontSize = DEFAULT_FONT_SIZE * scale;
-
         if(!isHorizontal){ //竖屏
             core.domStyle.screenMode = 'vertical';
             //显示快捷商店图标
@@ -3083,14 +3091,14 @@ core.prototype.resize = function(clientWidth, clientHeight) {
 
             var tempTopBarH = scale * (BASE_LINEHEIGHT * col + SPACE * 2) + 6;
             var tempBotBarH = scale * (BASE_LINEHEIGHT + SPACE * 4) + 6;
-
-            gameGroupHeight = width + tempTopBarH + tempBotBarH;
             
-            gameGroupWidth = width
+            gameGroupHeight = tempWidth + tempTopBarH + tempBotBarH;
+            
+            gameGroupWidth = tempWidth
             canvasTop = tempTopBarH;
             // canvasLeft = 0;
-            toolBarWidth = statusBarWidth = width;
-            statusBarHeight = tempTopBarH; //一共有3行加上两个padding空隙
+            toolBarWidth = statusBarWidth = canvasWidth;
+            statusBarHeight = tempTopBarH; 
             statusBarBorder = '3px #fff solid';
 
             statusHeight = scale*BASE_LINEHEIGHT * .8;
@@ -3098,7 +3106,7 @@ core.prototype.resize = function(clientWidth, clientHeight) {
             statusMaxWidth = scale * DEFAULT_BAR_WIDTH * .95;
             toolBarHeight = tempBotBarH;
 
-            toolBarTop = statusBarHeight + width;
+            toolBarTop = statusBarHeight + canvasWidth;
             toolBarBorder = '3px #fff solid';
             toolsHeight = scale * BASE_LINEHEIGHT;
             toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH * .4;
@@ -3109,8 +3117,8 @@ core.prototype.resize = function(clientWidth, clientHeight) {
         }else { //横屏
             core.domStyle.screenMode = 'horizontal';
             shopDisplay = 'none';
-            gameGroupWidth = width + DEFAULT_BAR_WIDTH * scale;
-            gameGroupHeight = width;
+            gameGroupWidth = tempWidth + DEFAULT_BAR_WIDTH * scale;
+            gameGroupHeight = tempWidth;
             canvasTop = 0;
             // canvasLeft = DEFAULT_BAR_WIDTH * scale;
             toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH * scale;
@@ -3119,7 +3127,7 @@ core.prototype.resize = function(clientWidth, clientHeight) {
 
             statusHeight = scale*statusLineHeight * .8;
             statusLabelsLH = .8 * statusLineHeight *scale;
-            toolBarHeight = width - statusBarHeight;
+            toolBarHeight = canvasWidth - statusBarHeight;
             toolBarTop = scale*statusLineHeight * count + SPACE * 2;
             toolBarBorder = '3px #fff solid';
             toolsHeight = scale * BASE_LINEHEIGHT;

@@ -425,6 +425,8 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     core.fillRect('ui', left, top, right, bottom, '#000000');
     core.setAlpha('ui', 1);
     core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+    core.setAlpha('data', 1);
+    core.setOpacity('data', 1);
     core.status.boxAnimateObjs = [];
     core.setBoxAnimate();
 

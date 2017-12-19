@@ -239,9 +239,18 @@ events.prototype.doAction = function() {
             else this.doAction();
             break;
         case "move": // 移动事件
+            if (core.isset(data.loc)) {
+                x=data.loc[0];
+                y=data.loc[1];
+            }
             core.moveBlock(x,y,data.steps,data.time,data.immediateHide,function() {
                 core.events.doAction();
             })
+            break;
+        case "moveHero":
+            core.eventMoveHero(data.steps,data.time,function() {
+                core.events.doAction();
+            });
             break;
         case "changeFloor": // 楼层转换
             var heroLoc = {"x": data.loc[0], "y": data.loc[1]};

@@ -109,7 +109,7 @@ events.prototype.lose = function(reason) {
 
 ////// 转换楼层结束的事件 //////
 events.prototype.afterChangeFloor = function (floorId) {
-    if (!core.hasFlag("visited_"+floorId)) {
+    if (!core.isset(core.status.event.id) && !core.hasFlag("visited_"+floorId)) {
         this.doEvents(core.floors[floorId].firstArrive);
         core.setFlag("visited_"+floorId, true);
     }

@@ -34,11 +34,6 @@ events.prototype.init = function () {
             if (core.isset(callback))
                 callback();
         },
-        "checkBlock": function (data, core, callback) {
-            core.events.checkBlock(data.x, data.y);
-            if (core.isset(callback))
-                callback();
-        },
         "changeLight": function (data, core, callback) {
             core.events.changeLight(data.x, data.y);
             if (core.isset(callback))
@@ -110,50 +105,6 @@ events.prototype.lose = function(reason) {
             core.restart();
         });
     })
-}
-
-
-////// 检查领域、夹击事件 //////
-events.prototype.checkBlock = function (x,y) {
-    var damage = 0;
-    // 获得四个方向的怪物
-    var directions = [[0,-1],[-1,0],[0,1],[1,0]]; // 上，左，下，右
-    var enemys = [null,null,null,null];
-    for (var i in directions) {
-        var block = core.getBlock(x+directions[i][0], y+directions[i][1]);
-        if (block==null) continue;
-        // 是怪物
-        if (block.block.event.cls=='enemys')
-            enemys[i]=core.material.enemys[block.block.event.id];
-    }
-
-    // 领域
-    for (var i in enemys) {
-        if (enemys[i]!=null && core.enemys.hasSpecial(enemys[i].special, 15)) {
-            damage+=enemys[i].value;
-        }
-    }
-    if (damage>0)
-        core.drawTip('受到领域伤害'+damage+'点');
-    core.status.hero.hp-=damage;
-    if (core.status.hero.hp<=0) {
-        core.status.hero.hp=0;
-        core.updateStatusBar();
-        core.events.lose('zone');
-        return;
-    }
-
-    // 夹击
-    var has=false;
-    if (enemys[0]!=null && enemys[2]!=null && enemys[0].id==enemys[2].id && core.enemys.hasSpecial(enemys[0].special, 16))
-        has=true;
-    if (enemys[1]!=null && enemys[3]!=null && enemys[1].id==enemys[3].id && core.enemys.hasSpecial(enemys[1].special, 16))
-        has=true;
-    if (has && core.status.hero.hp>1) { // 1血夹击不死
-        core.status.hero.hp = parseInt(core.status.hero.hp/2);
-        core.drawTip('受到夹击，生命变成一半');
-    }
-    core.updateStatusBar();
 }
 
 ////// 转换楼层结束的事件 //////
@@ -451,8 +402,10 @@ events.prototype.disableQuickShop = function (shopId) {
 }
 
 ////// 降低难度 //////
-/*
+
 events.prototype.decreaseHard = function() {
+    core.drawTip("本塔不支持降低难度！");
+    /*
     if (core.status.hard == 0) {
         core.drawTip("当前已是难度0，不能再降低难度了");
         return;
@@ -470,8 +423,8 @@ events.prototype.decreaseHard = function() {
     }, function () {
         core.ui.drawSettings(false);
     });
+    */
 }
-*/
 
 ////// 能否使用快捷商店 //////
 events.prototype.canUseQuickShop = function(shopIndex) {
@@ -506,20 +459,24 @@ events.prototype.afterBattle = function(enemyId,x,y,callback) {
     // 中毒
     if (core.enemys.hasSpecial(special, 12) && !core.hasFlag('poison')) {
         core.setFlag('poison', true);
-        core.updateStatusBar();
     }
     // 衰弱
     if (core.enemys.hasSpecial(special, 13) && !core.hasFlag('weak')) {
         core.setFlag('weak', true);
         core.status.hero.atk-=core.values.weakValue;
         core.status.hero.def-=core.values.weakValue;
-        core.updateStatusBar();
     }
     // 诅咒
     if (core.enemys.hasSpecial(special, 14) && !core.hasFlag('curse')) {
         core.setFlag('curse', true);
-        core.updateStatusBar();
     }
+    // 仇恨属性：减半
+    if (core.enemys.hasSpecial(special, 17)) {
+        core.setFlag('hatred', parseInt(core.getFlag('hatred', 0)/2));
+    }
+    // 增加仇恨值
+    core.setFlag('hatred', core.getFlag('hatred',0)+core.values.hatred);
+    core.updateStatusBar();
 
     // 如果已有事件正在处理中
     if (core.status.lockControl) {
@@ -604,11 +561,11 @@ events.prototype.changeLight = function(x, y) {
     core.canvas.event.clearRect(x * 32, y * 32, 32, 32);
     var blockIcon = core.material.icons[block.event.cls][block.event.id];
     core.canvas.event.drawImage(core.material.images[block.event.cls], 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
-    this.afterChangeLight();
+    this.afterChangeLight(x,y);
 }
 
 // 改变灯后的事件
-events.prototype.afterChangeLight = function() {
+events.prototype.afterChangeLight = function(x,y) {
 
 }
 
@@ -822,21 +779,48 @@ events.prototype.clickSL = function(x,y) {
     }
 }
 
-// 菜单栏
-events.prototype.clickSettings = function (x,y) {
+events.prototype.clickSwitchs = function (x,y) {
     if (x<5 || x>7) return;
-    if (y == 3) {
+    if (y==4) {
         if (core.musicStatus.isIOS) {
             core.drawTip("iOS设备不支持播放音乐");
             return;
         }
         core.changeSoundStatus();
+        core.ui.drawSwitchs();
+    }
+    if (y==5) {
+        core.flags.battleAnimate=!core.flags.battleAnimate;
+        core.ui.drawSwitchs();
+    }
+    if (y==6) {
+        core.flags.displayEnemyDamage=!core.flags.displayEnemyDamage;
+        core.updateFg();
+        core.ui.drawSwitchs();
+    }
+    if (y==7) {
+        core.flags.displayExtraDamage=!core.flags.displayExtraDamage;
+        core.updateFg();
+        core.ui.drawSwitchs();
+    }
+    if (y==8) {
         core.ui.drawSettings(false);
     }
+}
+
+// 菜单栏
+events.prototype.clickSettings = function (x,y) {
+    if (x<5 || x>7) return;
+    if (y == 3) {
+        core.ui.drawSwitchs();
+    }
     if (y==4) {
+        /*
         core.flags.battleAnimate=!core.flags.battleAnimate;
         core.setLocalStorage('battleAnimate', core.flags.battleAnimate);
         core.ui.drawSettings(false);
+        */
+        this.decreaseHard();
     }
     if (y == 5) core.ui.drawQuickShop();
     // if (y == 5) this.decreaseHard();

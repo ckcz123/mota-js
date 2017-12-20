@@ -99,6 +99,7 @@ enemys.prototype.getSpecialText = function (enemyId) {
     if (this.hasSpecial(special, 14)) text.push("诅咒");
     if (this.hasSpecial(special, 15)) text.push("领域");
     if (this.hasSpecial(special, 16)) text.push("夹击");
+    if (this.hasSpecial(special, 17)) text.push("仇恨");
     return text.join("  ");
 }
 
@@ -117,6 +118,9 @@ enemys.prototype.getExtraDamage = function (monster) {
         // 吸血的比例
         extra_damage = core.status.hero.hp * monster.value;
         extra_damage = parseInt(extra_damage);
+    }
+    if (this.hasSpecial(monster.special, 17)) { // 仇恨
+        extra_damage += core.getFlag('hatred', 0);
     }
     return extra_damage;
 }

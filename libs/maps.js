@@ -36,8 +36,6 @@ maps.prototype.loadFloor = function (floorId, map) {
             }
             this.addEvent(block,j,i,floor.events[j+","+i])
             this.addChangeFloor(block,j,i,floor.changeFloor[j+","+i]);
-            if (floor.checkBlock.indexOf(j+","+i)>=0)
-                this.addEvent(block,j,i,{"trigger":"checkBlock"});
             if (core.isset(block.event)) blocks.push(block);
         }
     }

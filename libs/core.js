@@ -2319,7 +2319,7 @@ core.prototype.setFg = function(color, time, callback) {
         if (nowB<0) nowB=0; if (nowB>255) nowB=255;
 
         core.setAlpha('fg', nowAlpha);
-        var toRGB = "#"+nowR.toString(16)+nowG.toString(16)+nowB.toString(16);
+        var toRGB = "#"+((1<<24)+(nowR<<16)+(nowG<<8)+nowB).toString(16).slice(1)
         core.fillRect('fg', 0, 0, 416, 416, toRGB);
 
         if (step>=25) {
@@ -2383,7 +2383,7 @@ core.prototype.updateFg = function () {
     // 如果存在颜色
     if (core.isset(core.status.event.data) && core.isset(core.status.event.data.currentColor)) {
         var color=core.status.event.data.currentColor;
-        core.fillRect("fg",0,0,416,416,"#"+color[0].toString(16)+color[1].toString(16)+color[2].toString(16));
+        core.fillRect("fg",0,0,416,416,"#"+((1<<24)+(color[0]<<16)+(color[1]<<8)+color[2]).toString(16).slice(1));
         return;
     }
 

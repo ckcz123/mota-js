@@ -597,7 +597,7 @@ core.prototype.onup = function () {
         core.canvas.ui.clearRect(0, 0, 416,416);
         core.canvas.ui.restore();
         core.onclick(posx,posy,stepPostfix);
-        //posx,posy是之前寻路的目标点,stepPostfix是后续的移动
+        //posx,posy是寻路的目标点,stepPostfix是后续的移动
     }
 }
 
@@ -626,7 +626,7 @@ core.prototype.getClickLoc = function (x, y) {
 }
 
 core.prototype.onclick = function (x, y, stepPostfix) {
-    // console.log("Click: (" + x + "," + y + ")");
+    console.log("Click: (" + x + "," + y + ")");
 
     // 非游戏屏幕内
     if (x<0 || y<0 || x>12 || y>12) return;
@@ -735,10 +735,26 @@ core.prototype.onclick = function (x, y, stepPostfix) {
 }
 
 core.prototype.onmousewheel = function (direct) {
+    // 向下滚动是 -1 ,向上是 1
+
     // 楼层飞行器
     if (core.status.lockControl && core.status.event.id == 'fly') {
-        if (direct==-1) core.ui.drawFly(core.status.event.data-1);
         if (direct==1) core.ui.drawFly(core.status.event.data+1);
+        if (direct==-1) core.ui.drawFly(core.status.event.data-1);
+        return;
+    }
+
+    // 怪物手册
+    if (core.status.event.id == 'book') {
+        if (direct==1) core.ui.drawEnemyBook(core.status.event.data - 1);
+        if (direct==-1) core.ui.drawEnemyBook(core.status.event.data + 1);
+        return;
+    }
+
+    // 存读档
+    if (core.status.event.id == 'save' || core.status.event.id == 'load') {
+        if (direct==1) core.ui.drawSLPanel(core.status.event.data - 1);
+        if (direct==-1) core.ui.drawSLPanel(core.status.event.data + 1);
         return;
     }
 }

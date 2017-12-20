@@ -608,7 +608,7 @@
       }
       filestr+='],\n'
     }
-    printf('<pre>'+filestr+'\n</pre><p>已复制到剪贴板</p>'+'<textarea cols="1" rows="1" id="poutTmp" style="display: none;">'+filestr+'\n</textarea><br><br><br>');
+    printf('<pre>'+filestr+'\n</pre><p>已复制到剪贴板</p>'+'<textarea cols="1" rows="1" id="poutTmp" style="opacity: 0;">'+filestr+'\n</textarea><br><br><br>');
     poutTmp.select();
     document.execCommand("Copy");
   }

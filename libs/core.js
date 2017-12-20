@@ -597,7 +597,7 @@ core.prototype.onup = function () {
         core.canvas.ui.clearRect(0, 0, 416,416);
         core.canvas.ui.restore();
         core.onclick(posx,posy,stepPostfix);
-        //posx,posy是之前寻路的目标点,stepPostfix是后续的移动
+        //posx,posy是寻路的目标点,stepPostfix是后续的移动
     }
 }
 
@@ -626,7 +626,7 @@ core.prototype.getClickLoc = function (x, y) {
 }
 
 core.prototype.onclick = function (x, y, stepPostfix) {
-    // console.log("Click: (" + x + "," + y + ")");
+    console.log("Click: (" + x + "," + y + ")");
 
     // 非游戏屏幕内
     if (x<0 || y<0 || x>12 || y>12) return;
@@ -735,10 +735,26 @@ core.prototype.onclick = function (x, y, stepPostfix) {
 }
 
 core.prototype.onmousewheel = function (direct) {
+    // 向下滚动是 -1 ,向上是 1
+
     // 楼层飞行器
     if (core.status.lockControl && core.status.event.id == 'fly') {
-        if (direct==-1) core.ui.drawFly(core.status.event.data-1);
         if (direct==1) core.ui.drawFly(core.status.event.data+1);
+        if (direct==-1) core.ui.drawFly(core.status.event.data-1);
+        return;
+    }
+
+    // 怪物手册
+    if (core.status.event.id == 'book') {
+        if (direct==1) core.ui.drawEnemyBook(core.status.event.data - 1);
+        if (direct==-1) core.ui.drawEnemyBook(core.status.event.data + 1);
+        return;
+    }
+
+    // 存读档
+    if (core.status.event.id == 'save' || core.status.event.id == 'load') {
+        if (direct==1) core.ui.drawSLPanel(core.status.event.data - 1);
+        if (direct==-1) core.ui.drawSLPanel(core.status.event.data + 1);
         return;
     }
 }
@@ -1049,86 +1065,29 @@ core.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
     }
     core.status.heroMoving = true;
     var moveStep = 0;
+    var scan = {
+        'up': {'x': 0, 'y': -1},
+        'left': {'x': -1, 'y': 0},
+        'down': {'x': 0, 'y': 1},
+        'right': {'x': 1, 'y': 0}
+    };
     core.interval.heroMoveInterval = window.setInterval(function () {
-        switch (direction) {
-            case 'up':
-                moveStep -= 4;
-                if (moveStep == -4 || moveStep == -8 || moveStep == -12 || moveStep == -16) {
-                    core.drawHero(direction, x, y, 'leftFoot', 0, moveStep);
-                }
-                else if (moveStep == -20 || moveStep == -24 || moveStep == -28 || moveStep == -32) {
-                    core.drawHero(direction, x, y, 'rightFoot', 0, moveStep);
-                }
-                if (moveStep == -32) {
-                    core.setHeroLoc('y', '--');
-                    core.moveOneStep();
-                    if (core.status.heroStop) {
-                        core.drawHero(direction, x, y - 1, 'stop');
-                    }
-                    if (core.isset(callback)) {
-                        callback();
-                    }
-                }
-                break;
-            case 'left':
-                moveStep -= 4;
-                if (moveStep == -4 || moveStep == -8 || moveStep == -12 || moveStep == -16) {
-                    core.drawHero(direction, x, y, 'leftFoot', moveStep);
-                }
-                else if (moveStep == -20 || moveStep == -24 || moveStep == -28 || moveStep == -32) {
-                    core.drawHero(direction, x, y, 'rightFoot', moveStep);
-                }
-                if (moveStep == -32) {
-                    core.setHeroLoc('x', '--');
-                    core.moveOneStep();
-                    if (core.status.heroStop) {
-                        core.drawHero(direction, x - 1, y, 'stop');
-                    }
-                    if (core.isset(callback)) {
-                        callback();
-                    }
-                }
-                break;
-            case 'down':
-                moveStep+=4;
-                if(moveStep == 4 || moveStep == 8 || moveStep == 12 || moveStep == 16) {
-                    core.drawHero(direction, x, y, 'leftFoot', 0, moveStep);
-                }
-                else if(moveStep == 20 || moveStep == 24 ||moveStep == 28 || moveStep == 32) {
-                    core.drawHero(direction, x, y, 'rightFoot', 0, moveStep);
-                }
-                if (moveStep == 32) {
-                    core.setHeroLoc('y', '++');
-                    core.moveOneStep();
-                    if (core.status.heroStop) {
-                        core.drawHero(direction, x, y + 1, 'stop');
-                    }
-                    if (core.isset(callback)) {
-                        callback();
-                    }
-                }
-                break;
-            case 'right':
-                moveStep+=4;
-                if(moveStep == 4 || moveStep == 8 || moveStep == 12 || moveStep == 16) {
-                    core.drawHero(direction, x, y, 'leftFoot', moveStep);
-                }
-                else if(moveStep == 20 || moveStep == 24 ||moveStep == 28 || moveStep == 32) {
-                    core.drawHero(direction, x, y, 'rightFoot', moveStep);
-                }
-                if (moveStep == 32) {
-                    core.setHeroLoc('x', '++');
-                    core.moveOneStep();
-                    if (core.status.heroStop) {
-                        core.drawHero(direction, x + 1, y, 'stop');
-                    }
-                    if (core.isset(callback)) {
-                        callback();
-                    }
-                }
-                break;
+        moveStep++;
+        if (moveStep<=4) {
+            core.drawHero(direction, x, y, 'leftFoot', 4*moveStep*scan[direction].x, 4*moveStep*scan[direction].y);
         }
-    }, 10);
+        else if (moveStep<=8) {
+            core.drawHero(direction, x, y, 'rightFoot', 4*moveStep*scan[direction].x, 4*moveStep*scan[direction].y);
+        }
+        if (moveStep==8) {
+            core.setHeroLoc('x', x+scan[direction].x);
+            core.setHeroLoc('y', y+scan[direction].y);
+            core.moveOneStep();
+            if (core.status.heroStop)
+                core.drawHero(direction, core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+            if (core.isset(callback)) callback();
+        }
+    }, 12.5);
 }
 
 core.prototype.setHeroMoveTriggerInterval = function () {
@@ -1240,6 +1199,66 @@ core.prototype.canMove = function() {
 core.prototype.moveHero = function (direction) {
     core.setHeroLoc('direction', direction);
     core.status.heroStop = false;
+}
+
+core.prototype.eventMoveHero = function(steps, time, callback) {
+
+    time = time || 100;
+
+    core.clearMap('ui', 0, 0, 416, 416);
+    core.setAlpha('ui', 1.0);
+
+    // 要运行的轨迹：将steps展开
+    var moveSteps=[];
+    steps.forEach(function (e) {
+        if (typeof e=="string") {
+            moveSteps.push(e);
+        }
+        else {
+            if (!core.isset(e.value)) {
+                moveSteps.push(e.direction)
+            }
+            else {
+                for (var i=0;i<e.value;i++) {
+                    moveSteps.push(e.direction);
+                }
+            }
+        }
+    });
+
+    var step=0;
+    var scan = {
+        'up': {'x': 0, 'y': -1},
+        'left': {'x': -1, 'y': 0},
+        'down': {'x': 0, 'y': 1},
+        'right': {'x': 1, 'y': 0}
+    };
+
+    var animate=window.setInterval(function() {
+        var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
+        if (moveSteps.length==0) {
+            clearInterval(animate);
+            core.drawHero(core.getHeroLoc('direction'), x, y, 'stop');
+            if (core.isset(callback)) callback();
+        }
+        else {
+            var direction = moveSteps[0];
+            core.setHeroLoc('direction', direction);
+            step++;
+            if (step <= 4) {
+                core.drawHero(direction, x, y, 'leftFoot', 4 * step * scan[direction].x, 4 * step * scan[direction].y);
+            }
+            else if (step <= 8) {
+                core.drawHero(direction, x, y, 'rightFoot', 4 * step * scan[direction].x, 4 * step * scan[direction].y);
+            }
+            if (step == 8) {
+                step = 0;
+                core.setHeroLoc('x', x + scan[direction].x);
+                core.setHeroLoc('y', y + scan[direction].y);
+                moveSteps.shift();
+            }
+        }
+    }, time/8);
 }
 
 core.prototype.moveOneStep = function() {
@@ -1877,14 +1896,26 @@ core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
         'right': {'x': 1, 'y': 0}
     };
 
+    var animateValue = block.event.animate || 1;
+    var animateCurrent = 0;
+    var animateTime = 0;
+
     var animate=window.setInterval(function() {
+
+        animateTime += time / 16;
+        if (animateTime >= core.values.animateSpeed * 2 / animateValue) {
+            animateCurrent++;
+            animateTime = 0;
+            if (animateCurrent>=animateValue) animateCurrent=0;
+        }
+
         // 已经移动完毕，消失
         if (moveSteps.length==0) {
             if (immediateHide) opacityVal=0;
             else opacityVal -= 0.06;
             core.setOpacity('data', opacityVal);
             core.clearMap('data', nowX, nowY, 32, 32);
-            core.canvas.data.drawImage(blockImage, 0, blockIcon * 32, 32, 32, nowX, nowY, 32, 32);
+            core.canvas.data.drawImage(blockImage, animateCurrent * 32, blockIcon * 32, 32, 32, nowX, nowY, 32, 32);
             if (opacityVal<=0) {
                 clearInterval(animate);
                 core.loadCanvas('data');
@@ -1900,7 +1931,7 @@ core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
             nowY+=scan[moveSteps[0]].y*2;
             core.clearMap('data', nowX-32, nowY-32, 96, 96);
             // 绘制
-            core.canvas.data.drawImage(blockImage, 0, blockIcon * 32, 32, 32, nowX, nowY, 32, 32);
+            core.canvas.data.drawImage(blockImage, animateCurrent * 32, blockIcon * 32, 32, 32, nowX, nowY, 32, 32);
             if (step==16) {
                 // 该移动完毕，继续
                 step=0;

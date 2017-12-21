@@ -144,7 +144,7 @@ icons.prototype.init = function () {
             'poisonZombie': 55,
             'magicDragon': 56,
             'octopus': 57,
-            'fairy': 58,
+            'darkFairy': 58,
             'greenKnight': 59,
         },
         'items': {

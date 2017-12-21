@@ -226,7 +226,7 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 256) tmp.event = {'cls': 'enemys', 'id': 'poisonZombie'};
     if (id == 257) tmp.event = {'cls': 'enemys', 'id': 'magicDragon'};
     if (id == 258) tmp.event = {'cls': 'enemys', 'id': 'octopus'};
-    if (id == 259) tmp.event = {'cls': 'enemys', 'id': 'fairy'};
+    if (id == 259) tmp.event = {'cls': 'enemys', 'id': 'darkFairy'};
     if (id == 260) tmp.event = {'cls': 'enemys', 'id': 'greenKnight'};
 
     return tmp;

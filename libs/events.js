@@ -163,6 +163,9 @@ events.prototype.doAction = function() {
         case "text": // 文字/对话
             core.ui.drawTextBox(data.data);
             break;
+        case "tip":
+            core.drawTip(core.replaceText(data.text));
+            core.events.doAction();
         case "show": // 显示
             if (core.isset(data.time) && data.time>0 && (!core.isset(data.floorId) || data.floorId==core.status.floorId)) {
                 core.animateBlock(data.loc[0],data.loc[1],'show', data.time, function () {
@@ -301,8 +304,16 @@ events.prototype.doAction = function() {
                 }
             }
             catch (e) {console.log(e)}
-            core.updateStatusBar();
-            this.doAction();
+            if (core.status.hero.hp<=0) {
+                core.status.hero.hp=0;
+                core.updateStatusBar();
+                core.events.lose('damage');
+
+            }
+            else {
+                core.updateStatusBar();
+                this.doAction();
+            }
             break;
         case "if": // 条件判断
             if (core.calValue(data.condition))

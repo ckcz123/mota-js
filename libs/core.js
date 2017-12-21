@@ -527,12 +527,23 @@ core.prototype.keyUp = function(keyCode) {
             }
             break;
         case 50: // 快捷键2：炸
-            if (core.status.heroStop && core.hasItem('bomb')) {
-                if (core.canUseItem('bomb')) {
-                    core.useItem('bomb');
+            if (core.status.heroStop) {
+                if (core.hasItem('bomb')) {
+                    if (core.canUseItem('bomb')) {
+                        core.useItem('bomb');
+                    }
+                    else {
+                        core.drawTip('当前不能使用炸弹');
+                    }
                 }
-                else {
-                    core.drawTip('当前不能使用炸弹');
+                else if (core.hasItem('hammer')) {
+                    if (core.canUseItem('hammer')) {
+                        core.useItem('hammer');
+                    }
+                    else {
+                        core.drawTip('当前不能使用圣锤');
+                    }
+
                 }
             }
             break;
@@ -1164,6 +1175,7 @@ core.prototype.setHeroMoveTriggerInterval = function () {
                     core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
                 }
                 core.trigger(core.getHeroLoc('x'), core.getHeroLoc('y'));
+                core.checkBlock();
                 clearInterval(core.interval.heroMoveInterval);
                 core.status.heroMoving = false;
             });
@@ -1295,24 +1307,6 @@ core.prototype.moveOneStep = function() {
             core.status.hero.hp=0;
             core.updateStatusBar();
             core.events.lose('poison');
-            return;
-        }
-        core.updateStatusBar();
-    }
-    // 检查领域、夹击事件
-    var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
-    if (core.status.checkBlock[13*x+y]>0) {
-        core.status.hero.hp -= core.status.checkBlock[13*x+y];
-        if (core.hasBetweenAttack(x,y)) {
-            core.drawTip('受到夹击，生命变成一半');
-        }
-        else if (core.hasZone(x,y)) {
-            core.drawTip('受到领域伤害'+core.status.checkBlock[13*x+y]+'点');
-        }
-        if (core.status.hero.hp<=0) {
-            core.status.hero.hp=0;
-            core.updateStatusBar();
-            core.events.lose('zone');
             return;
         }
         core.updateStatusBar();
@@ -2233,24 +2227,49 @@ core.prototype.updateCheckBlock = function() {
                 })
 
                 var leftValue = core.status.hero.hp - damage;
-                if (leftValue>=0) {
+                if (leftValue>1) {
+                    var has = false;
                     // 夹击
                     if (x>0 && x<12) {
                         var id1=parseInt(core.status.checkBlockMap[13*(x-1)+y]/1000000),
                             id2=parseInt(core.status.checkBlockMap[13*(x+1)+y]/1000000);
                         if (id1>0 && id1==id2)
-                            damage += parseInt(leftValue/2);
+                            has = true;
                     }
-                    else if (y>0 && y<12) {
+                    if (y>0 && y<12) {
                         var id1=parseInt(core.status.checkBlockMap[13*x+y-1]/1000000),
                             id2=parseInt(core.status.checkBlockMap[13*x+y+1]/1000000);
                         if (id1>0 && id1==id2)
-                            damage += parseInt(leftValue/2);
+                            has = true;
+                    }
+                    if (has) {
+                        damage += parseInt((leftValue+1) / 2);
                     }
                 }
             }
             core.status.checkBlock[13*x+y] = damage;
         }
+    }
+}
+
+core.prototype.checkBlock = function () {
+    // 检查领域、夹击事件
+    var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
+    if (core.status.checkBlock[13*x+y]>0) {
+        core.status.hero.hp -= core.status.checkBlock[13*x+y];
+        if (core.hasBetweenAttack(x,y)) {
+            core.drawTip('受到夹击，生命变成一半');
+        }
+        else if (core.hasZone(x,y)) {
+            core.drawTip('受到领域伤害'+core.status.checkBlock[13*x+y]+'点');
+        }
+        if (core.status.hero.hp<=0) {
+            core.status.hero.hp=0;
+            core.updateStatusBar();
+            core.events.lose('zone');
+            return;
+        }
+        core.updateStatusBar();
     }
 }
 
@@ -2289,28 +2308,30 @@ core.prototype.setFg = function(color, time, callback) {
     time = time || 750;
     core.setOpacity('fg', 1);
 
-    var fromAlpha = 0;
-    if (core.isset(core.status.event.data.currentColor)) {
-        fromAlpha = 1;
-    }
-    else {
-        core.status.event.data.currentColor = [0,0,0];
+    var reset = false;
+
+    if (!core.isset(core.status.event.data.currentColor)) {
+        core.status.event.data.currentColor = [0,0,0,0];
     }
 
     var fromColor = core.status.event.data.currentColor;
 
-    var toAlpha = 1;
     if (!core.isset(color)) {
-        color = [0,0,0];
-        toAlpha=0;
+        color = [0,0,0,0];
+        reset = true;
     }
+    if (color.length==3) {
+        color.push(1);
+    }
+    if (color[3]<0) color[3]=0;
+    if (color[3]>1) color[3]=1;
 
     var step=0;
     var changeAnimate = setInterval(function() {
         step++;
         core.clearMap('fg', 0, 0, 416, 416);
 
-        var nowAlpha = fromAlpha+(toAlpha-fromAlpha)*step/25;
+        var nowAlpha = fromColor[3]+(color[3]-fromColor[3])*step/25;
         var nowR = parseInt(fromColor[0]+(color[0]-fromColor[0])*step/25);
         var nowG = parseInt(fromColor[1]+(color[1]-fromColor[1])*step/25);
         var nowB = parseInt(fromColor[2]+(color[2]-fromColor[2])*step/25);
@@ -2324,7 +2345,7 @@ core.prototype.setFg = function(color, time, callback) {
 
         if (step>=25) {
             clearInterval(changeAnimate);
-            if (toAlpha==0) {
+            if (reset) {
                 core.clearMap('fg', 0, 0, 416, 416);
                 delete core.status.event.data.currentColor;
                 core.setAlpha('fg', 1);
@@ -2383,6 +2404,7 @@ core.prototype.updateFg = function () {
     // 如果存在颜色
     if (core.isset(core.status.event.data) && core.isset(core.status.event.data.currentColor)) {
         var color=core.status.event.data.currentColor;
+        core.setAlpha('fg', color[3]);
         core.fillRect("fg",0,0,416,416,"#"+((1<<24)+(color[0]<<16)+(color[1]<<8)+color[2]).toString(16).slice(1));
         return;
     }

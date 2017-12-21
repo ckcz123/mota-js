@@ -382,7 +382,7 @@ ui.prototype.drawQuickShop = function (need) {
         core.fillText('ui', shopList[keys[i]].textInList, 208, top + 56 + 32 * i, "#FFFFFF", "bold 17px Verdana");
     }
 
-    core.fillText('ui', "返回游戏", 208, top + bottom - 40);
+    core.fillText('ui', "返回游戏", 208, top + bottom - 40, "#FFFFFF", "bold 17px Verdana");
 }
 
 ui.prototype.drawBattleAnimate = function(monsterId, callback) {

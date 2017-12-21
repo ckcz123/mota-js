@@ -124,6 +124,7 @@ data.prototype.init = function() {
         /****** 道具相关 ******/
         "flyNearStair": true, // 是否需要在楼梯边使用传送器
         "pickaxeFourDirections": true, // 使用破墙镐是否四个方向都破坏；如果false则只破坏面前的墙壁
+        "bombFourDirections": true, // 使用炸弹是否四个方向都会炸；如果false则只炸面前的怪物（即和圣锤等价）
         "bigKeyIsBox": false, // 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙
         /****** 系统相关 ******/
         "startDirectly": false, // 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面

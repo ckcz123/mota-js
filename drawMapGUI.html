@@ -22,29 +22,10 @@
         position: absolute;
         left: 5px;
         top: 10px;
-        width: 430px;
+        width: 435px;
         height: 400px;
-        /* border: 1px solid rgb(238, 13, 13); */
       }
-      
-      #left span{
-        display: block;
-        position: absolute;
-        color: red;
-      }
-      #left .col{
-        top: 2px;
-        left: 20px;
-        font-size: 13px;
-        color: blue;
-      }
-      #left .row{
-        width: 10px;
-        left: 0px;
-        top: 25px;
-        font-size: 13px;
-        text-align: right;
-      }
+
       #editArea{
         position: absolute;
         width: 100%;
@@ -56,44 +37,54 @@
       }
       #pout{
         display: block;
-        width: 408px;
+        width: 410px;
         height: 100%;
         box-sizing: border-box;
-        margin-left: 15px;
-        margin-top: 20px;
+        margin-left: 22px;
+        margin-top: 21px;
+        line-height: 20px;
       }
       #editTip{
         position: absolute;
-        width: 50%;
+        width: 100%;
         height: 80px;
         bottom:10px;
-        right: 10px;
+        left: 10px;
       }
-      #editTip p{
-        margin: 10px 0;
-        /* display: block; */
-        line-height: 30px;
-        text-align: right;
+      #editArea p{
+        margin: 10px;
+        display: block;
+        width: 70%;
+        line-height: 20px;
+        text-align: left;
         font-size: 14px;
       }
       #editTip .btn{
-        margin-left: 60%;
-        margin-top: 0;
+        float: right;
+        margin-right: 20px;
+        margin-top: 5px;
       }
+
       #mid{
         position: absolute;
         left: 448px;
-        top: 0;
+        top: 10px;
+        width: 440px;
+        height: 630px;
+      }
+      .map {
+        position: absolute;
+        left: 20px;
+        top: 21px;
         width: 416px;
-        height: 620px;
-        /* border: 1px solid rgb(238, 13, 13); */
+        height: 416px;
       }
       #mid .tools{
         position: absolute;
-        width: 400px;
-        height: 195px;
+        width: 425px;
+        height: 180px;
         left: 0;
-        top: 425px;
+        bottom: 0;
         border-top: 1px solid #ccc;
         padding: 10px 5px;
         margin-left: 8px;;
@@ -103,8 +94,8 @@
         float: right;
         width: 50%;
         height: 95%;
-        padding: 10px;
-        margin-right: 5px;
+        padding: 5px 10px 10px 10px;
+        margin-right: 0;
         box-sizing: border-box;
         border: 1px solid #ccc;
         border-radius: 2px;
@@ -143,9 +134,9 @@
         padding: 0 5px;
         display: inline-block;
 
-        font-size: 11px;
+        font-size: 14px;
         font-weight: 400;
-        text-transform: uppercase;
+        /* text-transform: uppercase; */
         letter-spacing: 0;
         overflow: hidden;
         cursor: pointer;
@@ -164,11 +155,18 @@
       }
       #right{
         position: absolute;
-        left: 896px;
-        top: 0;
-        width: 450px;
-        height: 620px;
+        left: 900px;
+        top: 10px;
+        width: 440px;
+        height: 630px;
         /* border: 1px solid rgb(238, 13, 13); */
+      }
+      #iconLib{
+        position: absolute;
+        width: 435px;
+        height: 620px;
+        left: 5px;
+        top: 5px;
         overflow:auto;
       }
       .gameCanvas {
@@ -176,8 +174,8 @@
       }
       #dataSelection{
         position: absolute;
-        top:0;
-        left:320px;
+        /* top:0;
+        left:320px; */
         z-index:75;
         width:32px;height:32px;
 
@@ -192,6 +190,7 @@
       .warnText{
         color: #D50000;
         font-weight: 700;
+        font-size: 14px;
       }
       .infoText{
         color: #2196F3;
@@ -199,7 +198,66 @@
       .successText{
         color: #00897B
       }
-
+      
+      table, td {
+          border: 1px solid #fff;
+          color: #fff;
+      }
+      table.col{
+        position: relative;
+        
+        text-align: center;
+        border-collapse: collapse;
+      }
+      table.col td{
+        background-color: #4DB6AC;
+      }
+      #arrColMark td{
+        width: 16px;
+      }
+      #arrColMark {
+        top: 2px;
+        left: 36px;
+        width: 385px;
+        height: 16px;
+        font-size: 13px;
+      }
+      #mapColMark {
+        top: 2px;
+        left: 19px;
+        width: 418px;
+        height: 16px;
+        font-size: 13px;
+      }
+      #mapColMark td{
+        width: 29px;
+      }
+      table.row{
+        position: relative;
+        text-align: right;
+        vertical-align:middle;
+        border-collapse: collapse;
+      }
+      table.row td{
+        background-color: #795548;
+      }
+      #arrRowMark{
+        top: 5px;
+        left: 2px;
+        width: 16px;
+        height: 262px;
+        font-size: 12px;
+      }
+      #mapRowMark{
+        top: 1px;
+        left: 2px;
+        width: 16px;
+        height: 416px;
+        font-size: 12px;
+      }
+      #mapRowMark td{
+        height: 29px;
+      }
       /* for vue dom */
       [v-cloak] {
         display: none !important;
@@ -209,25 +267,24 @@
 <body>
   <div class="main">
     <div id="left">
-      <div id="editArea">
-        <span class="col" id='numMark'></span>
-        <span class="row">0 1 2 3 4 5 6 7 8 9 10 11 12</span>
+      <table class="col" id='arrColMark'></table>
+      <table class="row" id='arrRowMark'></table>
+      <div id="editArea" v-cloak>
         <textarea cols="10" rows="10" id="pout" v-model="mapArr"></textarea>
-        <p class="warnText" v-cloak>{{ errormsg }}</p>
+        <p class="warnText" v-if="error">{{ errors[error-1] }}</p>
       </div>
       <div id="editTip" v-cloak>
-        <input class='btn' type="button" value="copyMap" v-on:click="copyMap"/>
-        <!-- <p v-bind:class="[ hasError ? 'warnText' : 'infoText']" v-show="isShow">{{ message }}</p> -->
-        
+        <input class='btn' type="button" value="复制地图" v-on:click="copyMap"/>
       </div>
       
     </div>
     <div id="mid">
-      <div class="map">
+      <table class="col" id='mapColMark'></table>
+      <table class="row" id='mapRowMark'></table>
+      <div class="map" id="mapEdit">
         <canvas class='gameCanvas' id='bg' width='416' height='416' style='z-index:1'></canvas>
         <canvas class='gameCanvas' id='eventLayer' width='416' height='416' style='z-index:2'></canvas>
         <canvas class='gameCanvas' id='ui' width='416' height='416' style='z-index:100'></canvas>
-        
       </div>
       <div class="tools">
         <div id="tip" v-cloak >
@@ -242,8 +299,8 @@
             <p v-if="whichShow" v-bind:class="[ (whichShow%2) ? 'warnText' : 'successText']" >{{ mapMsg }}</p>
           </div>
         </div>
-        <input class='btn' id='clear' type="button" value="clearMap" v-on:click="clearMap"/>
-        <input class='btn' type="button" value="exportMap" id="exportM" v-on:click="exportMap"/>
+        <input class='btn' id='clear' type="button" value="清除地图" v-on:click="clearMap"/>
+        <input class='btn' type="button" value="导出地图" id="exportM" v-on:click="exportMap"/>
         
         <div class="files">
           <input class='btn' type="button" value="read" onclick="readUTF8file(pin.value)" />
@@ -255,7 +312,9 @@
       </div>
     </div>
     <div id="right">
-      <canvas class='gameCanvas' id='data' width='416' height='416' style='z-index:0'></canvas>
+      <div id="iconLib">
+        <canvas class='gameCanvas' id='data' width='416' height='416' style='z-index:0'></canvas>
+      </div>
       <div id="selectBox">
         <div id='dataSelection' v-show="isSelected"></div>
       </div>
@@ -267,8 +326,8 @@
 <script>main={'instance':{}}</script>
 <script src='libs/icons.js'></script>
 <script src='libs/maps.js'></script>
-<!-- <script src='ibs/vendor/vue.min.js'></script> -->
-<script src="https://unpkg.com/vue"></script>
+<script src='_server/vendor/vue.min.js'></script>
+<!-- <script src="https://unpkg.com/vue"></script> -->
 <script>
   main.instance.icons.init();//不知道为什么,需要手动init,明明maps是正常的
   icons=main.instance.icons.getIcons();
@@ -301,14 +360,21 @@
     }
   }
 
-  // 生成数组定位编号
-  var str = ' ';
+  // 生成定位编号
+  var colNum = ' ';
   for(var i=0; i<13; i++){
-    var strNum = String(i);
-    str += Array(8-strNum.length).join('&nbsp;') + strNum;
+    var tpl = '<td>'+i+'</td>';
+    colNum += tpl;
   }
-  numMark.innerHTML = str;
-  
+  arrColMark.innerHTML = '<tr>'+colNum+'</tr>';
+  mapColMark.innerHTML = '<tr>'+colNum+'</tr>';
+  var rowNum = ' ';
+  for(var i=0; i<13; i++){
+    var tpl = '<tr><td>'+i+'</td></tr>';
+    rowNum += tpl;
+  }
+  arrRowMark.innerHTML = rowNum;
+  mapRowMark.innerHTML = rowNum;
 </script>
 
 
@@ -506,7 +572,10 @@
       for (var yy = 0; yy <= fullY; yy++) {
         if (isGrass(xx, yy)) continue;
         var mapxy=map[m(xx,yy)];
-        if (typeof(mapxy) == typeof(-1))continue;
+        if (typeof(mapxy) == typeof(-1)){
+          if(mapxy == 0) cxt.clearRect(xx*32, yy*32, 32, 32);
+          continue;
+        }
         else if(typeof(mapxy) == typeof([][0])) {//未定义块画红块
           cxt.fillStyle = 'red';
           cxt.fillRect(xx*32, yy*32, 32, 32);
@@ -587,14 +656,15 @@
 
   function eToLoc(e) { 
     var loc = { 
-      'x': document.documentElement.scrollLeft+e.clientX - mid.offsetLeft, 
-      'y': document.documentElement.scrollTop+e.clientY - mid.offsetTop, 
+      'x': document.documentElement.scrollLeft+e.clientX - mid.offsetLeft-mapEdit.offsetLeft, 
+      'y': document.documentElement.scrollTop+e.clientY - mid.offsetTop-mapEdit.offsetTop, 
       'size': 32 
     };
     return loc; }//返回可用的组件内坐标
 
   function locToPos(loc) {
     pos = { 'x': ~~(loc.x / loc.size), 'y': ~~(loc.y / loc.size) }
+    console.log(pos)
     return pos;
   }
 
@@ -669,6 +739,10 @@
     e.stopPropagation();
     var loc = eToLoc(e);
     if (stepPostfix.length) {
+      preMapData = JSON.parse(JSON.stringify(map));
+      currDrawData.pos = JSON.parse(JSON.stringify(stepPostfix));
+      currDrawData.info = JSON.parse(JSON.stringify(info));
+      reDo = null;
       // console.log(stepPostfix);
       for (var ii = 0; ii < stepPostfix.length; ii++)
         map[m(stepPostfix[ii].x, stepPostfix[ii].y)] = info;
@@ -680,17 +754,47 @@
       uc.clearRect(0, 0, 416, 416);
     }
   }
+  
+  var preMapData = {};
+  var currDrawData = {
+    pos: [],
+    info: {}
+  };
+  var reDo = null;
+  document.body.onkeydown = function(e) {
+    // 禁止快捷键的默认行为
+    if( e.ctrlKey && ( e.keyCode == 90 || e.keyCode == 89 ) )
+      e.preventDefault();
+    //Ctrl+z 撤销上一步undo
+    if(e.keyCode == 90 && e.ctrlKey && preMapData && currDrawData.pos.length){
+      map = JSON.parse(JSON.stringify(preMapData));
+      updateMap();
+      reDo = JSON.parse(JSON.stringify(currDrawData));
+      currDrawData = {pos: [],info: {}};
+      preMapData = null;
+    }
+    //Ctrl+y 重做一步redo
+    if(e.keyCode == 89 && e.ctrlKey && reDo && reDo.pos.length){
+      preMapData = JSON.parse(JSON.stringify(map));
+      for(var j=0; j<reDo.pos.length;j++)
+        map[m(reDo.pos[j].x, reDo.pos[j].y)] = JSON.parse(JSON.stringify(reDo.info));
 
+      map[fullX + 1 + fullY * (fullX + 1)] = -2;
+      updateMap();
+      currDrawData = JSON.parse(JSON.stringify(reDo));
+      reDo = null;
+    }
+  }
+  
   // info=ids[indexs[20][0]];//autotile
   data.onmousedown = function (e) {
     e.stopPropagation();
     var loc = { 
-      'x': document.documentElement.scrollLeft + e.clientX - right.offsetLeft, 
-      'y': document.documentElement.scrollTop + right.scrollTop+e.clientY - right.offsetTop, 
+      'x': document.documentElement.scrollLeft + e.clientX - right.offsetLeft-iconLib.offsetLeft, 
+      'y': document.documentElement.scrollTop + e.clientY + iconLib.scrollTop - right.offsetTop-iconLib.offsetTop, 
       'size': 32 
     };
     pos = locToPos(loc);
-    // console.log(pos);
     for (var spriter in widthsX){
       if(pos.x>=widthsX[spriter][1] && pos.x<widthsX[spriter][2]){
           pos.x=widthsX[spriter][1];
@@ -702,14 +806,14 @@
         
         selectBox.isSelected = true;
         // console.log(pos,core.material.images[pos.images].height)
-        dataSelection.style.left=pos.x*32+'px';
-        dataSelection.style.top=pos.y*32+'px';
+        dataSelection.style.left = (iconLib.offsetLeft+pos.x*32) +'px';
+        dataSelection.style.top = (iconLib.offsetTop + pos.y*32) +'px';
         info={'images':pos.images,'y':pos.y};
         for (var ii=0;ii<ids.length;ii++){
           if(pos.images==ids[ii].images && pos.y==ids[ii].y)
-            info = JSON.parse(JSON.stringify(ids[ii]));
+            info = ids[ii];
         }
-        tip.infos = info;
+        tip.infos = JSON.parse(JSON.stringify(info));
       }
     }
   }
@@ -791,7 +895,10 @@
 
     methods: {
       exportMap: function(){
-
+        if(editArea.error) {
+          tip.whichShow = 3;
+          return;
+        } 
         var filestr='';
         for (var yy = 0; yy < 13; yy++){
           filestr+='['
@@ -813,7 +920,7 @@
             filestr+=mapxy+(xx==12?'':',')
           }
           
-          filestr+=(']'+(yy==12?'':',')+'\n')
+          filestr += ']'+(yy==12?'':',\n');
         }
         pout.value = filestr;
 
@@ -825,115 +932,106 @@
     el: '#editArea',
     data: {
       mapArr: '',
-      errormsg: '',
       errors: [ // 编号1,2,3,4
-        "格式错误，请使用正确格式",
-        "当前ID未定义（在地图区域显示红块），请修改ID或者到icons.js和maps.js中进行定义",
-        "编号错误，当前编辑器暂时支持编号小于400，请修改编号！"
+        "格式错误！请使用正确格式(13*13数组，如不清楚，可先点击生成地图查看正确格式)",
+        "当前有未定义ID（在地图区域显示红块），请修改ID或者到icons.js和maps.js中进行定义！",
+        "ID越界（在地图区域显示红块），当前编辑器暂时支持编号小于400，请修改编号！",
+        // "发生错误！",
       ],
       error: 0,
-      timer: null,
+      formatTimer: null,
     },
     watch: {
       mapArr: function () {
-        var self = this;
-        setTimeout(function(){
-          self.drawMap();
-          tip.whichShow = 8
-        }, 1000);
+        var that = this;
+        if(that.formatArr()){
+          that.error = 0;
+          clearTimeout(that.formatTimer);
+          setTimeout(function(){
+            that.drawMap();
+            tip.whichShow = 8
+          }, 1000);
+          that.formatTimer = setTimeout(function(){
+            pout.value = that.formatArr();
+          }, 5000); //5s后再格式化，不然光标跳到最后很烦
+        }else{
+          that.error = 1;
+        }
+        
       },
       error: function(){
-        var that = this;
-        that.errormsg = '';
-        if(that.error)
-          that.errormsg = that.errors[that.error-1];
         
-        clearTimeout(that.timer);
-        that.timer = setTimeout(function() {
-          tip.error = 0;
-        }, 5000); //5秒后自动清除
       }
     },
     methods: {
       drawMap: function(){
         var that = this;
-        if(that.formatArr){
-          var mapArray;
-          var arr = that.mapArr.replace(/\s/g, '');
-          var mapJson = '{"mapArr":['+arr+']}';
-          try{
-            mapArray = JSON.parse(mapJson).mapArr;
-          }catch (e) {
-            that.errors[3] = '发生错误！'+e;
-            that.error = 4;
-            return;
-          }
-          for(var y=0; y<mapArray.length; y++)
-            for(var x=0; x<mapArray[y].length; x++){
-              var num = mapArray[y][x];
-              if(num == 0 ) 
-                map[m(x, y)] = 0;
-              else if(num >= 400){
-                that.error = 3;
-                map[m(x, y)] = 'undefined';
-              }else if(indexs[num][0] == ''){
-                that.error = 2;
-                map[m(x, y)] = 'undefined';
-              }else map[m(x, y)] = ids[[indexs[num][0]]];
-            }
 
-          updateMap();
-        }else{
-          that.error = 1;
+        var mapArray = that.mapArr.split(/\D+/).join(' ').trim().split(' ')
+        for(var i=0; i<mapArray.length; i++){
+          var num = parseInt(mapArray[i]);
+          if(num == 0 ) 
+            map[i] = 0;
+          else if(num >= 400){
+            that.error = 3;
+            map[i] = undefined;
+          }else if(indexs[num][0] == undefined){
+            that.error = 2;
+            map[i] = undefined;
+          }else map[i] = ids[[indexs[num][0]]];
         }
+
+        updateMap();
+        
       },
       formatArr: function(){
-        var formatArr = '';
-        var arr = this.mapArr.replace(/\s/g, '').split('],[');
+        var formatArrStr = '';
 
-        if(arr.length != 13) return false;
-        else {
-          for(var i =0; i<13; i++){
-            var a = [];
-            formatArr +='[';
-            if(i==0||i==12) a = arr[i].split(/\D/).join(' ').trim().split(' ');
-            else a = arr[i].split(/\D/);
-            if(a.length != 13){
-              formatArr = '';
-              return false;
-            } 
-            else {
-              for(var k=0; k<13; k++){
-                formatArr = Array(Math.max(4-mapxy.length,0)).join(' ')+a[k];
-                filestr+=a[k]+(k==12?'':',')
-              }
-            }
-            formatArr += (']'+(i==12?'':',')+'\n');
+        if(this.mapArr.split(/\D+/).join(' ').trim().split(' ').length != 169) return false;
+        var arr = this.mapArr.replace(/\s+/g, '').split('],[');
+        
+        if(arr.length != 13) return ;
+        for(var i =0; i<13; i++){
+          var a = [];
+          formatArrStr +='[';
+          if(i==0||i==12) a = arr[i].split(/\D+/).join(' ').trim().split(' ');
+          else a = arr[i].split(/\D+/);
+          if(a.length != 13){
+            formatArrStr = '';
+            return ;
+          } 
+
+          for(var k=0; k<13; k++){
+            formatArrStr += Array(Math.max(4-a[k].length,0)).join(' ')+parseInt(a[k])+(k==12?'':',');
           }
-          
-          this.mapArr = formatArr;
-          return true;
+          formatArrStr += ']'+(i==12?'':',\n');
         }
+        
+        return formatArrStr;
       }
     }
   });
   var editTip = new Vue({
     el: '#editTip',
     data: {
-      
-      // message: ''
+      err: ''
     },
     methods: {
       copyMap: function(){
-        this.message = '';
+
         tip.whichShow = 0;
         if(pout.value.trim() != ''){
+          if(editArea.error) {
+            this.err = editArea.errors[editArea.error-1];
+            tip.whichShow = 5
+            return;
+          }
           try{
             pout.select();
             document.execCommand("Copy");
             tip.whichShow = 6;
           }catch(e){
-            this.error= e;
+            this.err= e;
             tip.whichShow = 5;
           }
         }else{
@@ -953,6 +1051,7 @@
         ec.clearRect(0, 0, 416, 416);
         pout.value = '';
         tip.whichShow = 4;
+        editArea.error = 0;
       }
     }
   })
@@ -964,12 +1063,12 @@
       isSelectedBlock: false,
       geneMapSuccess: false,
       timer: null,
-      msgs: [ //分别编号1,2,3,4,5,6；奇数警告，偶数成功
+      msgs: [ //分别编号1,2,3,4,5,6,7,8；奇数警告，偶数成功
         "当前未选择任何图块，请先在右边选择要画的图块!",
         "生成地图成功！可点击复制按钮复制地图数组到剪切板",
         "生成失败! 地图中有未定义的图块，建议先用其他有效图块覆盖或点击清除地图！",
         "地图清除成功!",
-        "复制失败！"+editTip.error,
+        "复制失败！",
         "复制成功！可直接粘贴到楼层文件的地图数组中。",
         "复制失败！当前还没有数据",
         "修改成功！可点击复制按钮复制地图数组到剪切板"
@@ -995,6 +1094,7 @@
       whichShow: function(){
         var that = this;
         that.mapMsg = '';
+        that.msgs[4] = "复制失败！"+editTip.err;
         if(that.whichShow)
           that.mapMsg = that.msgs[that.whichShow-1];
         

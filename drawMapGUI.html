@@ -24,7 +24,6 @@
         top: 10px;
         width: 435px;
         height: 400px;
-        /* border: 1px solid rgb(238, 13, 13); */
       }
 
       #editArea{
@@ -65,20 +64,27 @@
         margin-right: 20px;
         margin-top: 5px;
       }
+
       #mid{
         position: absolute;
         left: 448px;
-        top: 0;
+        top: 10px;
+        width: 440px;
+        height: 630px;
+      }
+      .map {
+        position: absolute;
+        left: 20px;
+        top: 21px;
         width: 416px;
-        height: 620px;
-        /* border: 1px solid rgb(238, 13, 13); */
+        height: 416px;
       }
       #mid .tools{
         position: absolute;
-        width: 400px;
-        height: 195px;
+        width: 425px;
+        height: 180px;
         left: 0;
-        top: 425px;
+        bottom: 0;
         border-top: 1px solid #ccc;
         padding: 10px 5px;
         margin-left: 8px;;
@@ -88,8 +94,8 @@
         float: right;
         width: 50%;
         height: 95%;
-        padding: 10px;
-        margin-right: 5px;
+        padding: 5px 10px 10px 10px;
+        margin-right: 0;
         box-sizing: border-box;
         border: 1px solid #ccc;
         border-radius: 2px;
@@ -149,11 +155,18 @@
       }
       #right{
         position: absolute;
-        left: 896px;
-        top: 0;
-        width: 450px;
-        height: 620px;
+        left: 900px;
+        top: 10px;
+        width: 440px;
+        height: 630px;
         /* border: 1px solid rgb(238, 13, 13); */
+      }
+      #iconLib{
+        position: absolute;
+        width: 435px;
+        height: 620px;
+        left: 5px;
+        top: 5px;
         overflow:auto;
       }
       .gameCanvas {
@@ -161,8 +174,8 @@
       }
       #dataSelection{
         position: absolute;
-        top:0;
-        left:320px;
+        /* top:0;
+        left:320px; */
         z-index:75;
         width:32px;height:32px;
 
@@ -191,27 +204,36 @@
           color: #fff;
       }
       table.col{
-        position: absolute;
+        position: relative;
+        
+        text-align: center;
+        border-collapse: collapse;
+      }
+      table.col td{
+        background-color: #4DB6AC;
+      }
+      #arrColMark td{
+        width: 16px;
+      }
+      #arrColMark {
         top: 2px;
         left: 36px;
         width: 385px;
         height: 16px;
         font-size: 13px;
-        text-align: center;
-        border-collapse: collapse;
       }
-      table.col td{
-        width: 16px;
-        background-color: #4DB6AC;
+      #mapColMark {
+        top: 2px;
+        left: 19px;
+        width: 418px;
+        height: 16px;
+        font-size: 13px;
       }
-
+      #mapColMark td{
+        width: 29px;
+      }
       table.row{
-        position: absolute;
-        top: 25px;
-        left: 2px;
-        width: 16px;
-        height: 262px;
-        font-size: 12px;
+        position: relative;
         text-align: right;
         vertical-align:middle;
         border-collapse: collapse;
@@ -219,7 +241,23 @@
       table.row td{
         background-color: #795548;
       }
-      
+      #arrRowMark{
+        top: 5px;
+        left: 2px;
+        width: 16px;
+        height: 262px;
+        font-size: 12px;
+      }
+      #mapRowMark{
+        top: 1px;
+        left: 2px;
+        width: 16px;
+        height: 416px;
+        font-size: 12px;
+      }
+      #mapRowMark td{
+        height: 29px;
+      }
       /* for vue dom */
       [v-cloak] {
         display: none !important;
@@ -229,9 +267,9 @@
 <body>
   <div class="main">
     <div id="left">
+      <table class="col" id='arrColMark'></table>
+      <table class="row" id='arrRowMark'></table>
       <div id="editArea" v-cloak>
-        <table class="col" id='arrColMark'></table>
-        <table class="row" id='arrRowMark'></table>
         <textarea cols="10" rows="10" id="pout" v-model="mapArr"></textarea>
         <p class="warnText" v-if="error">{{ errors[error-1] }}</p>
       </div>
@@ -241,11 +279,12 @@
       
     </div>
     <div id="mid">
-      <div class="map">
+      <table class="col" id='mapColMark'></table>
+      <table class="row" id='mapRowMark'></table>
+      <div class="map" id="mapEdit">
         <canvas class='gameCanvas' id='bg' width='416' height='416' style='z-index:1'></canvas>
         <canvas class='gameCanvas' id='eventLayer' width='416' height='416' style='z-index:2'></canvas>
         <canvas class='gameCanvas' id='ui' width='416' height='416' style='z-index:100'></canvas>
-        
       </div>
       <div class="tools">
         <div id="tip" v-cloak >
@@ -273,7 +312,9 @@
       </div>
     </div>
     <div id="right">
-      <canvas class='gameCanvas' id='data' width='416' height='416' style='z-index:0'></canvas>
+      <div id="iconLib">
+        <canvas class='gameCanvas' id='data' width='416' height='416' style='z-index:0'></canvas>
+      </div>
       <div id="selectBox">
         <div id='dataSelection' v-show="isSelected"></div>
       </div>
@@ -285,8 +326,8 @@
 <script>main={'instance':{}}</script>
 <script src='libs/icons.js'></script>
 <script src='libs/maps.js'></script>
-<!-- <script src='_server/vendor/vue.min.js'></script> -->
-<script src="https://unpkg.com/vue"></script>
+<script src='_server/vendor/vue.min.js'></script>
+<!-- <script src="https://unpkg.com/vue"></script> -->
 <script>
   main.instance.icons.init();//不知道为什么,需要手动init,明明maps是正常的
   icons=main.instance.icons.getIcons();
@@ -326,13 +367,14 @@
     colNum += tpl;
   }
   arrColMark.innerHTML = '<tr>'+colNum+'</tr>';
-  
+  mapColMark.innerHTML = '<tr>'+colNum+'</tr>';
   var rowNum = ' ';
   for(var i=0; i<13; i++){
     var tpl = '<tr><td>'+i+'</td></tr>';
     rowNum += tpl;
   }
   arrRowMark.innerHTML = rowNum;
+  mapRowMark.innerHTML = rowNum;
 </script>
 
 
@@ -614,14 +656,15 @@
 
   function eToLoc(e) { 
     var loc = { 
-      'x': document.documentElement.scrollLeft+e.clientX - mid.offsetLeft, 
-      'y': document.documentElement.scrollTop+e.clientY - mid.offsetTop, 
+      'x': document.documentElement.scrollLeft+e.clientX - mid.offsetLeft-mapEdit.offsetLeft, 
+      'y': document.documentElement.scrollTop+e.clientY - mid.offsetTop-mapEdit.offsetTop, 
       'size': 32 
     };
     return loc; }//返回可用的组件内坐标
 
   function locToPos(loc) {
     pos = { 'x': ~~(loc.x / loc.size), 'y': ~~(loc.y / loc.size) }
+    console.log(pos)
     return pos;
   }
 
@@ -747,12 +790,12 @@
   data.onmousedown = function (e) {
     e.stopPropagation();
     var loc = { 
-      'x': document.documentElement.scrollLeft + e.clientX - right.offsetLeft, 
-      'y': document.documentElement.scrollTop + right.scrollTop+e.clientY - right.offsetTop, 
+      'x': document.documentElement.scrollLeft + e.clientX - right.offsetLeft-iconLib.offsetLeft, 
+      'y': document.documentElement.scrollTop + e.clientY + iconLib.scrollTop - right.offsetTop-iconLib.offsetTop, 
       'size': 32 
     };
     pos = locToPos(loc);
-    // console.log(pos);
+
     for (var spriter in widthsX){
       if(pos.x>=widthsX[spriter][1] && pos.x<widthsX[spriter][2]){
           pos.x=widthsX[spriter][1];
@@ -764,8 +807,8 @@
         
         selectBox.isSelected = true;
         // console.log(pos,core.material.images[pos.images].height)
-        dataSelection.style.left=pos.x*32+'px';
-        dataSelection.style.top=pos.y*32+'px';
+        dataSelection.style.left = (iconLib.offsetLeft+pos.x*32) +'px';
+        dataSelection.style.top = (iconLib.offsetTop + pos.y*32) +'px';
         info={'images':pos.images,'y':pos.y};
         for (var ii=0;ii<ids.length;ii++){
           if(pos.images==ids[ii].images && pos.y==ids[ii].y)

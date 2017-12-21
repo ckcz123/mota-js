@@ -28,16 +28,16 @@ HTML5 canvas制作的魔塔样板，支持全平台游戏！
 │ ├─ maps.js         # 记录了地图信息，负责将数字与元件的ID一一对应起来。
 │ └─ ui.js           # UI绘制信息，主要负责绘制各个UI窗口。
 ├── /sounds/         # 音效目录
-├── /常用工具/        # 一些常用工具，可以辅助造塔
-│ ├─ JS代码压缩工具.exe    # 能对Javascript代码进行压缩和整合，从而减少IO请求量
-│ ├─ 便捷PS工具.exe        # 能只用复制和粘贴来快速对素材进行PS操作
-│ ├─ 地图生成器.exe        # 能从一张截图识别出来具体的数字数组，方便复刻已有的塔
-│ └─ 伤害和临界值计算器.exe       # 一个能帮助计算怪物的伤害和临界值的小工具
+├── /常用工具/        # 一些常用工具，可以辅助造塔  
+│ ├─ JS代码压缩工具.exe    # 能对Javascript代码进行压缩和整合，从而减少IO请求量。 http://github.com/ckcz123/JSCompressor/
+│ ├─ 便捷PS工具.exe        # 能只用复制和粘贴来快速对素材进行PS操作。  http://github.com/ckcz123/ps/
+│ ├─ 地图生成器.exe        # 能从一张截图识别出来具体的数字数组，方便复刻已有的塔。 http://github.com/ckcz123/map_generator/
+│ └─ 伤害和临界值计算器.exe       # 一个能帮助计算怪物的伤害和临界值的小工具。 http://github.com/ckcz123/magic-tower-calculator/
 ├── drawMapGUI.html  # 可视化地图编辑工具，能简单地在界面上绘制地图
 ├── index.html       # 主程序，游戏的入口
 ├── main.js          # JS程序的入口，将动态对所需JS进行加载
 ├── style.css        # 游戏所需要用到的样式表
-└── 启动服务.exe      # 一个本地的HTTP服务器，也能支撑前端的一些POST请求从而能拓展JS的IO功能。
+└── 启动服务.exe      # 一个本地的HTTP服务器，也能支撑前端的一些POST请求从而能拓展JS的IO功能。 http://github.com/ckcz123/mota-js-server/
 ```
 
 ## 更新说明

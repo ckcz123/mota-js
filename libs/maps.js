@@ -36,8 +36,6 @@ maps.prototype.loadFloor = function (floorId, map) {
             }
             this.addEvent(block,j,i,floor.events[j+","+i])
             this.addChangeFloor(block,j,i,floor.changeFloor[j+","+i]);
-            if (floor.checkBlock.indexOf(j+","+i)>=0)
-                this.addEvent(block,j,i,{"trigger":"checkBlock"});
             if (core.isset(block.event)) blocks.push(block);
         }
     }
@@ -78,7 +76,6 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 12) tmp.event = {'cls': 'animates', 'id': 'poisonNet', 'noPass': false, 'trigger': 'passNet'}; // 毒网
     if (id == 13) tmp.event = {'cls': 'animates', 'id': 'weakNet', 'noPass': false, 'trigger': 'passNet'}; // 衰网
     if (id == 14) tmp.event = {'cls': 'animates', 'id': 'curseNet', 'noPass': false, 'trigger': 'passNet'}; // 咒网
-
     if (id == 15) tmp.event = {'cls': 'animates', 'id': 'water', 'noPass': true}; // 水
 
     // autotile: 20
@@ -229,7 +226,7 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 256) tmp.event = {'cls': 'enemys', 'id': 'poisonZombie'};
     if (id == 257) tmp.event = {'cls': 'enemys', 'id': 'magicDragon'};
     if (id == 258) tmp.event = {'cls': 'enemys', 'id': 'octopus'};
-    if (id == 259) tmp.event = {'cls': 'enemys', 'id': 'fairy'};
+    if (id == 259) tmp.event = {'cls': 'enemys', 'id': 'darkFairy'};
     if (id == 260) tmp.event = {'cls': 'enemys', 'id': 'greenKnight'};
 
     return tmp;

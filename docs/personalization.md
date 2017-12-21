@@ -6,99 +6,100 @@
 
 所有素材的图片都在`images`目录下。
 - `animates.png` 为所有动画效果。主要是星空熔岩，开门，毒网，传送门之类的效果。为四帧。
-- `enemys.png` 为所有怪物的图片。地图生成器中对应的数字，从上至下依次是会从201开始计算（即，绿色史莱姆为201，小蝙蝠为205，依次类推）。请注意，动画效果为两帧，一般是原始四帧中的1和3。（四帧中12相同，34相同，因此只取1和3即可）
-- `heros.png`为勇士行走图。
+- `autotile.png` 为Autotile块。全塔只支持一种Autotile，其ID为20。
+- `enemys.png` 为所有怪物的图片。其对应的数字，从上至下依次是会从201开始计算（即，绿色史莱姆为201，小蝙蝠为205，依次类推）。请注意，动画效果为两帧，一般是原始四帧中的1和3。（四帧中12相同，34相同，因此只取1和3即可）
+- `heros.png` 为勇士行走图。
 - `items.png` 为所有道具的图标。
 - `npcs.png` 为所有NPC的图标，也是两帧。
 - `terrains.png` 为所有地形的图标。
 
 系统会读取`icon.js`文件，并获取每个ID对应的图标所在的位置。
 
-### 地图生成器使用自定义素材
+### 使用预定义的素材
 
-地图生成器可以将数字和图标一一对应，从数字生成图标或从图标生成数字。
+在images目录的“默认素材”下给定了若干预定义的自定义素材。包括野外（草地），星空，木板等等都已经被预先给定。
 
-在使用自定义素材后，我们可以使用地图生成器来识别新的素材。打开同目录下的`meaning.txt`，按照已有的方式来增加或编辑内容即可。
+如果你需要某个素材已经存在，则可以直接将其覆盖images目录下的同名文件，就能看到效果。
 
-第一列是地图生成器中的数字，第二列是它所在的文件名，第三列是坐标。
+### 使用便捷PS工具生成素材
 
-![地图含义](./img/mapmean.png)
+如果我们有更多的素材要求，我们可以使用“便捷PS工具”进行处理。
 
-### 使用自定义地形（路面、墙壁等）
+![便捷PS工具](img/ps.png)
 
-你需要自行P一张图，里面是你需要的地形素材。然后将其覆盖`terrains.png`文件，请注意所有元件的位置需要完全相同对应。
+我们可以打开有需求改变的素材，和我们需要被替换的素材，然后简单的Ctrl+C和Ctrl+V操作即可。
 
-岩浆、星空、传送门、箭头、门的开启动画、暗墙的开启动画在`animates.png`中，可能也需要对应进行修改。
+用这种方式，我们能极快地替换或素材，包括需要新增的怪物。
 
-请打开`items.js`中，对比素材的位置。
+### 添加素材到游戏
 
-另外需要注意的一点是，本样板不支持`Autotile`，换句话说野外地图（草地等）这种自然风可能不会太适合。
+在使用地图编辑器编辑的过程中，我们有可能会出现“该数字和ID未被定义”的错误提示。
 
-### 使用自定义道具图标
+这是因为，该素材没有被定义，无法被游戏所识别。
 
-如果你觉得已有的道具图标不够，想自己添加图标也是可以的。
+#### 新添加自定义地形（路面、墙壁等）
 
-如果`items.png`中不存在你需要的图标，则可以自己P一张图，将你需要的图标覆盖到某个用不到的图标上。或者也可以接着后面向下拉伸。
+如果你在terrains.png中新增了一行：
 
-所有道具必须是`32x32`像素。
+1. 指定一个唯一的英文ID，不能和terrains中现有的重复。
+2. 进入icons.js，在terrains分类下进行添加（对应图标在图片上的位置，即index）
+3. 指定一个数字，在maps.js的getBlock下类似进行添加。
+``` js
+if (id == 13) tmp.event = {'cls': 'animates', 'id': 'weakNet', 'noPass': false, 'trigger': 'passNet'}; // 衰网
+if (id == 14) tmp.event = {'cls': 'animates', 'id': 'curseNet', 'noPass': false, 'trigger': 'passNet'}; // 咒网
+if (id == 15) tmp.event = {'cls': 'animates', 'id': 'water', 'noPass': true}; // 水
+// 可以在此处类似添加数字-ID对应关系，但不能和任何已有的数字重复
+// autotile: 20
+if (id == 20) tmp.event = {'cls': 'autotile', 'id': 'autotile', 'noPass': true}; // autotile
+``` 
 
-P图完毕后，可以在地图生成器中加入对应的数字和图标的对应关系。
+#### 新添加道具
 
-要在系统中启用你的图标，你需要自己指定一个道具的ID（不能和任何已有的重名），然后进行如下操作：
-1. 在`items.js`中道具的定义列表中编辑，修改你的自定义道具的名称，类型，说明文字等。
-  - 即捡即用类道具的cls为items，消耗类道具的cls为tools，永久类道具的cls为constants。
-2. 在`icon.js`中，找到items一栏，往里面添加你的图标位置。
-3. 在`maps.js`中，找到对应位置，往里面添加自己的数字和道具的一一对应关系。（该数字可任意指定，不能和已有的冲突）,类似下面这样
+如果你需要新增一个未被定义的道具：
+
+1. 指定一个唯一的英文ID，不能和items中现有的重复。
+2. 进入icons.js，在items分类下进行添加（对应图标在图片上的位置，即index）
+3. 指定一个数字，在maps.js的getBlock下类似进行添加。
+4. 在items.js中仿照其他道具，来添加道具的信息。
 
 ``` js
 if (id == 63) tmp.event = {'cls': 'items', 'id': 'moneyPocket'} // 金钱袋
 if (id == 64) tmp.event = {'cls': 'items', 'id': 'shoes'} // 绿鞋
 if (id == 65) tmp.event = {'cls': 'items', 'id': 'hammer'} // 圣锤
-// 可以在这里添加自己的数字-道具对应关系
-```
+// 可以在这里添加自己的数字-ID对应关系，但不能和任何已有的数字重复
+``` 
 
 有关如何自行实现一个道具的效果，参见[自定义道具效果](#自定义道具效果)。
 
-### 使用自定义怪物图标
+#### 新添加怪物
 
-如果你觉得已有的怪物图标不够，也可以自行向后添加你需要的怪物。
+如果我们需要新添加怪物，请在enemys.png中新增一行，然后复制粘贴上四帧怪物图的**1和3帧**。
 
-在`enemys.js`中，直接向后P图，并将你需要的怪物的两帧动画放到正确的位置（注意：普通四帧动画的1和3帧）。
+然后执行如下操作：
 
-P图完毕后，可以在地图生成器中加入对应的数字和图标的对应关系。
+1. 指定一个唯一的英文ID，不能和enemys中现有的重复。
+2. 进入icons.js，在enemys分类下进行添加（对应图标在图片上的位置，即index）
+3. 在maps.js的getBlock下继续进行添加。请注意其ID为200开始的顺序，即如果新增一行为261，依次类推
+4. 在items.js中仿照其他道具，来添加道具的信息。
 
-要在系统中启用你的图标，你需要自己指定一个怪物的ID（不能和任何已有的重名），然后进行如下操作：
-
-1. 在`enemys.js`中，向怪物的定义列表中，添加一个怪物。
-2. 在`icon.js`中，找到enemys一栏，往里面添加你的图标位置。
-3. 在`maps.js`中，找到对应位置，往里面添加自己的数字和怪物的一一对应关系。一般对于怪物而言，对应的数字就是`200+`位置。
+``` js
+if (id == 258) tmp.event = {'cls': 'enemys', 'id': 'octopus'};
+if (id == 259) tmp.event = {'cls': 'enemys', 'id': 'fairy'};
+if (id == 260) tmp.event = {'cls': 'enemys', 'id': 'greenKnight'};
+// 在此依次添加，数字要求是递增的
+```
 
 有关如何自行实现一个怪物的特殊属性或伤害计算公式，参见[怪物的特殊属性](#怪物的特殊属性)。
 
-### 使用自定义NPC图标
+#### 新添加NPC
 
-同上，你也可以自定义NPC图标。只需要将你NPC的两帧动画接到`npcs.js`中即可。
+类似同上，给NPC指定ID，在icons.js中指定ID-index关系，在maps.js中指定ID-数字的关系，即可。
 
-P图完毕后，可以在地图生成器中加入对应的数字和图标的对应关系。
+### 地图生成器使用自定义素材
 
-要在系统中启用你的图标，你需要自己指定一个NPC的ID（不能和任何已有的重名），然后进行如下操作：
+地图生成器是直接从js文件中读取数字-图标对应关系的。
 
-1. 在`icon.js`中，找到npcs一栏，往里面添加你的图标位置。
-2. 在`maps.js`中，找到对应位置，往里面添加自己的数字和NPC的一一对应关系。
-
-### 使用自定义勇士图标
-
-我们同样可以使用自定义的勇士图标，比如小可绒之类。
-
-直接拿一个勇士的行走图覆盖`hero.png`即可。
-
-**支持任何行走大图，如`32x32`, `48x32`, `64x32`等等。**
-
-&nbsp;
-
-通过上述这几种方式，我们可以修改素材图片（使用自定义素材），指定数字并放入地图生成器中，然后在系统中进行启用。
-
-!> **请注意：除了勇士行走图外，其他所有素材强制要求必须是`32x32`的，不然可能会造成不可预料的后果。**
+因此，在你修改了icons.js和maps.js两个文件，也就是将素材添加到游戏后，地图生成器的对应关系也将同步更新。
 
 ## 自定义道具效果
 
@@ -167,24 +168,26 @@ if (itemId === 'shield5') {
 ``` js
 enemys.prototype.getExtraDamage = function (monster) {
     var extra_damage = 0;
-    if (monster.special == 11) { // 吸血
+    if (this.hasSpecial(monster.special, 11)) { // 吸血
         // 吸血的比例
         extra_damage = core.status.hero.hp * monster.value;
         if (core.hasFlag("shield5")) extra_damage = 0; // 如果存在神圣盾，则免疫吸血
         extra_damage = parseInt(extra_damage);
     }
-    return extra_damage;
-}
+// ... 下略
 ```
-3. 免疫领域、夹击效果：在`events.js`中，找到checkBlock函数，并编辑成如果有神圣盾标记，则直接返回。
+3. 免疫领域、夹击效果：在`core.js`中，找到updateCheckBlock函数，并编辑成如果有神圣盾标记，则直接返回。
 ``` js
-////// 检查领域、夹击事件 //////
-events.prototype.checkBlock = function (x,y) {
-    if (core.hasFlag("shield5")) return; // 如果拥有神圣盾立刻返回，免疫领域和夹击
-    var damage = 0;
-    // 获得四个方向的怪物
-    var directions = [[0,-1],[-1,0],[0,1],[1,0]]; // 上，左，下，右
-    var enemys = [null,null,null,null];
+// 更新领域、显伤点
+core.prototype.updateCheckBlock = function() {
+    if (!core.isset(core.status.thisMap)) return;
+    if (!core.isset(core.status.checkBlockMap)) core.updateCheckBlockMap();
+    core.status.checkBlock = [];
+    if (core.hasItem('shield5')) return; // 如拥有神圣盾则直接返回
+    for (var x=0;x<13;x++) {
+        for (var y=0;y<13;y++) {
+            // 计算(x,y)点伤害
+            var damage = 0;
 // ... 下略
 ```
 4. 如果有更高的需求，例如想让吸血效果变成一半（如异空间），则还是在上面这些地方进行对应的修改即可。
@@ -199,15 +202,28 @@ events.prototype.checkBlock = function (x,y) {
 
 因此无敌属性可以这样设置：
 
-``` js
-// 我们需要对无敌属性指定一个数字，比如18
+先给无敌属性指定一个数字，例如18，在getSpecialText中定义
 
+``` js
+// ... 上略
+    if (this.hasSpecial(special, 15)) text.push("领域");
+    if (this.hasSpecial(special, 16)) text.push("夹击");
+    if (this.hasSpecial(special, 17)) text.push("仇恨");
+    if (this.hasSpecial(special, 18)) text.push("无敌"); // 添加无敌的显示
+    return text.join("  ");
+}
+
+```
+
+然后修改calDamage，如果无敌属性且勇士没有拥有十字架，则立刻返回无穷大。
+
+``` js
 enemys.prototype.calDamage = function (hero_atk, hero_def, hero_mdef, mon_hp, mon_atk, mon_def, mon_special) {
-    if (mon_special==18 && !core.hasItem("cross")) // 如果是无敌属性，且勇士未持有十字架
+    if (this.hasSpecial(mon_special, 18) && !core.hasItem("cross")) // 如果是无敌属性，且勇士未持有十字架
         return 999999999; // 返回无限大
 
     // 魔攻
-    if (mon_special == 2) hero_def = 0;
+    if (this.hasSpecial(mon_special, 2)) hero_def = 0;
 // ... 下略
 ```
 

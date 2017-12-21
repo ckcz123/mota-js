@@ -18,6 +18,8 @@
 
 如需修改某个道具的效果，在不同区域宝石数据发生变化等问题，请参见[自定义道具效果](personalization#自定义道具效果)的说明。
 
+**有关轻按，在data.js的系统变量中有定义。如果`enableGentleClick`为true，则鼠标（触摸屏）通过双击勇士，键盘通过空格可达到轻按效果，即不向前移动而获得前方物品。**
+
 ## 门
 
 本塔支持6种门，黄蓝红绿铁花。前五种门需要有对应的钥匙打开，花门只能通过调用`openDoor`事件进行打开。
@@ -31,9 +33,41 @@
 本塔支持的怪物列表参见`enemys.js`。其与images目录下的`enemys.png`素材按顺序一一对应。如不知道怪物素材长啥样的请打开`enemys.png`对比查看。  
 如有自己的怪物素材需求请参见[自定义素材](personalization#自定义素材)的内容。
 
-怪物可以由特殊属性，每个怪物最多只能有一个特殊属性。怪物的特殊属性所对应的数字（special）在下面的`getSpecialText`中定义，请勿对已有的属性进行修改。
+怪物可以有特殊属性，每个怪物可以有多个自定义属性。
 
-![怪物属性](./img/getspecialtext.png)
+怪物的特殊属性所对应的数字（special）在下面的`getSpecialText`中定义，请勿对已有的属性进行修改。
+
+``` js
+enemys.prototype.getSpecialText = function (enemyId) {
+    if (enemyId == undefined) return "";
+    var special = this.enemys[enemyId].special;
+    var text = [];
+    if (this.hasSpecial(special, 1)) text.push("先攻");
+    if (this.hasSpecial(special, 2)) text.push("魔攻");
+    if (this.hasSpecial(special, 3)) text.push("坚固");
+    if (this.hasSpecial(special, 4)) text.push("2连击");
+    if (this.hasSpecial(special, 5)) text.push("3连击");
+    if (this.hasSpecial(special, 6)) text.push("4连击");
+    if (this.hasSpecial(special, 7)) text.push("破甲");
+    if (this.hasSpecial(special, 8)) text.push("反击");
+    if (this.hasSpecial(special, 9)) text.push("净化");
+    if (this.hasSpecial(special, 10)) text.push("模仿");
+    if (this.hasSpecial(special, 11)) text.push("吸血");
+    if (this.hasSpecial(special, 12)) text.push("中毒");
+    if (this.hasSpecial(special, 13)) text.push("衰弱");
+    if (this.hasSpecial(special, 14)) text.push("诅咒");
+    if (this.hasSpecial(special, 15)) text.push("领域");
+    if (this.hasSpecial(special, 16)) text.push("夹击");
+    if (this.hasSpecial(special, 17)) text.push("仇恨");
+    return text.join("  ");
+}
+```
+
+如果需要双属性，则采用100x+y的写法。例如 103 则视为同时拥有1和3的属性，即先攻且坚固。同理1314为衰弱诅咒双属性。
+
+如果需要三属性，则采用10000x+100y+z的写法。例如71116视为同时拥有7,11和16的属性，即破甲、吸血、夹击。
+
+四个乃至更多的属性以此类推。
 
 怪物的伤害计算在下面的`calDamage`函数中，如有自己需求的伤害计算公式请修改该函数的代码。
 
@@ -46,6 +80,7 @@
 ![怪物吸血](./img/blood.png)
 
 中毒怪让勇士中毒后，每步扣减的生命值由`data.js`中的values定义。
+
 衰弱怪让勇士衰弱后，攻防会暂时下降一定的数值（直到衰弱状态解除恢复）；这个下降的数值同在`data.js`中的values定义。
 
 ![debuff](./img/debuff.png)
@@ -54,17 +89,11 @@
 
 领域怪需要在怪物后添加value，代表领域伤害的数值。如果勇士生命值扣减到0，则直接死亡触发lose事件。
 
-![怪物属性](./img/domainenemy.png)
+![怪物领域](./img/domainenemy.png)
 
-出于游戏性能的考虑，我们不可能每走一步都对领域和夹击进行检查。因此我们需要在本楼层的 checkBlock 中指明哪些点可能会触发领域和夹击事件，在这些点才会对领域和夹击进行检查和处理。
+请注意如果吸血和领域同时存在，则value会冲突。**因此请勿将吸血和领域放置在同一个怪物身上。**
 
-![检查夹击和领域](./img/checkblock.png)
-
-!> **请注意这里的`"x,y"`代表该点的横坐标为x，纵坐标为y；即从左到右第x列，从上到下的第y行（从0开始计算）。**
-
-本塔不支持阻击、激光、仇恨、自爆、退化等属性。
-
-（这些属性基本都太恶心了，恶心到都不想加上去）
+本塔暂不支持阻击、激光、自爆、退化等属性。
 
 如有额外需求，可参见[自定义怪物属性](personalization#自定义自定义怪物属性)，里面讲了如何设置一个新的怪物属性。
 

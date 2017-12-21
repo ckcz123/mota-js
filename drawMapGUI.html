@@ -134,9 +134,9 @@
         padding: 0 5px;
         display: inline-block;
 
-        font-size: 11px;
+        font-size: 14px;
         font-weight: 400;
-        text-transform: uppercase;
+        /* text-transform: uppercase; */
         letter-spacing: 0;
         overflow: hidden;
         cursor: pointer;
@@ -274,7 +274,7 @@
         <p class="warnText" v-if="error">{{ errors[error-1] }}</p>
       </div>
       <div id="editTip" v-cloak>
-        <input class='btn' type="button" value="copyMap" v-on:click="copyMap"/>
+        <input class='btn' type="button" value="复制地图" v-on:click="copyMap"/>
       </div>
       
     </div>
@@ -299,8 +299,8 @@
             <p v-if="whichShow" v-bind:class="[ (whichShow%2) ? 'warnText' : 'successText']" >{{ mapMsg }}</p>
           </div>
         </div>
-        <input class='btn' id='clear' type="button" value="clearMap" v-on:click="clearMap"/>
-        <input class='btn' type="button" value="exportMap" id="exportM" v-on:click="exportMap"/>
+        <input class='btn' id='clear' type="button" value="清除地图" v-on:click="clearMap"/>
+        <input class='btn' type="button" value="导出地图" id="exportM" v-on:click="exportMap"/>
         
         <div class="files">
           <input class='btn' type="button" value="read" onclick="readUTF8file(pin.value)" />
@@ -795,7 +795,6 @@
       'size': 32 
     };
     pos = locToPos(loc);
-
     for (var spriter in widthsX){
       if(pos.x>=widthsX[spriter][1] && pos.x<widthsX[spriter][2]){
           pos.x=widthsX[spriter][1];

@@ -302,6 +302,30 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     core.fillText('ui', "取消", 208 + 38, top + bottom - 35);
 }
 
+////// 绘制开关界面 //////
+ui.prototype.drawSwitchs = function() {
+    // 背景音乐、背景音效、战斗动画、怪物显伤、领域显伤、返回
+
+    core.status.event.id = 'switchs';
+
+    var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
+    core.clearMap('ui', 0, 0, 416, 416);
+    core.setAlpha('ui', 1);
+    core.setFillStyle('ui', background);
+    var left = 97, top = 64 + 32, right = 416 - 2 * left, bottom = 416 - 2 * top;
+    core.fillRect('ui', left, top, right, bottom, background);
+    core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+
+    core.canvas.ui.textAlign = "center";
+    core.fillText('ui', "背景音乐： " + (core.musicStatus.soundStatus ? "[ON]" : "[OFF]"), 208, top + 56, "#FFFFFF", "bold 17px Verdana");
+    // core.fillText('ui', "背景音效" + (core.musicStatus.soundStatus ? "[ON]" : "[OFF]"), 208, top + 88, "#FFFFFF", "bold 17px Verdana")
+    core.fillText('ui', "战斗动画： " + (core.flags.battleAnimate ? "[ON]" : "[OFF]"), 208, top + 88, "#FFFFFF", "bold 17px Verdana")
+    core.fillText('ui', "怪物显伤： " + (core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"), 208, top + 120, "#FFFFFF", "bold 17px Verdana")
+    core.fillText('ui', "领域显伤： " + (core.flags.displayExtraDamage ? "[ON]" : "[OFF]"), 208, top + 152, "#FFFFFF", "bold 17px Verdana")
+
+    core.fillText('ui', "返回上级菜单", 208, top + 184, "#FFFFFF", "bold 17px Verdana");
+}
+
 /**
  * 绘制菜单栏
  * @param need
@@ -319,8 +343,8 @@ ui.prototype.drawSettings = function (need) {
     core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
 
     core.canvas.ui.textAlign = "center";
-    core.fillText('ui', "音乐： " + (core.musicStatus.soundStatus ? "[ON]" : "[OFF]"), 208, top + 56, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', '战斗过程： ' +(core.flags.battleAnimate?'[ON]':'[OFF]'), 208, top + 88, "#FFFFFF", "bold 17px Verdana")
+    core.fillText('ui', "系统设置", 208, top + 56, "#FFFFFF", "bold 17px Verdana");
+    core.fillText('ui', "降低难度", 208, top + 88, "#FFFFFF", "bold 17px Verdana")
     core.fillText('ui', "快捷商店", 208, top + 120, "#FFFFFF", "bold 17px Verdana");
     core.fillText('ui', "同步存档", 208, top + 152, "#FFFFFF", "bold 17px Verdana");
     // core.fillText('ui', "清空存档", 208, top + 152, "#FFFFFF", "bold 17px Verdana");
@@ -358,8 +382,7 @@ ui.prototype.drawQuickShop = function (need) {
         core.fillText('ui', shopList[keys[i]].textInList, 208, top + 56 + 32 * i, "#FFFFFF", "bold 17px Verdana");
     }
 
-    core.fillText('ui', "返回游戏", 208, top + bottom - 40);
-
+    core.fillText('ui', "返回游戏", 208, top + bottom - 40, "#FFFFFF", "bold 17px Verdana");
 }
 
 ui.prototype.drawBattleAnimate = function(monsterId, callback) {
@@ -395,10 +418,15 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     if (core.enemys.hasSpecial(mon_special, 6)) turns=5;
 
 
-    // 初始伤害（破甲、净化）
+    // 初始伤害
     var initDamage = 0;
     if (core.enemys.hasSpecial(mon_special, 7)) initDamage+=parseInt(core.values.breakArmor * hero_def);
-    if (core.enemys.hasSpecial(mon_special, 9)) initDamage=parseInt(core.values.purify * hero_mdef);
+    if (core.enemys.hasSpecial(mon_special, 9)) initDamage+=parseInt(core.values.purify * hero_mdef);
+    if (core.enemys.hasSpecial(mon_special, 11)) { // 吸血
+        var extraDamage = monster.value * hero_hp;
+        initDamage+=parseInt(extraDamage);
+    }
+    if (core.enemys.hasSpecial(mon_special, 17)) initDamage+=core.getFlag('hatred', 0);
     hero_mdef-=initDamage;
     if (hero_mdef<0) {
         hero_hp+=hero_mdef;
@@ -425,6 +453,9 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     core.fillRect('ui', left, top, right, bottom, '#000000');
     core.setAlpha('ui', 1);
     core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+    core.clearMap('data',0,0,416,416);
+    core.setAlpha('data', 1);
+    core.setOpacity('data', 1);
     core.status.boxAnimateObjs = [];
     core.setBoxAnimate();
 

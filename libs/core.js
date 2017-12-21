@@ -21,7 +21,8 @@ function core() {
         'events': {}
     }
     this.timeout = {
-        'getItemTipTimeout': null
+        'getItemTipTimeout': null,
+        'turnHeroTimeout': null,
     }
     this.interval = {
         'twoAnimate': null,
@@ -56,6 +57,7 @@ function core() {
         'floorId': null,
         'thisMap': null,
         'maps': null,
+        'checkBlock': [], // 显伤伤害
 
         // 勇士状态；自动寻路相关
         'heroMoving': false,
@@ -106,7 +108,6 @@ core.prototype.init = function (dom, statusBar, canvas, images, sounds, floorIds
         core[key] = coreData[key];
     }
     core.flags = core.clone(core.data.flags);
-    core.flags.battleAnimate = core.getLocalStorage('battleAnimate', core.flags.battleAnimate);
     core.values = core.clone(core.data.values);
     core.firstData = core.data.getFirstData();
     core.initStatus.shops = core.firstData.shops;
@@ -296,7 +297,7 @@ core.prototype.clearStatus = function() {
     core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
 }
 
-core.prototype.resetStatus = function(hero, hard, floorId, maps) {
+core.prototype.resetStatus = function(hero, hard, floorId, flags, maps) {
 
     // 停止各个Timeout和Interval
     for (var i in core.interval) {
@@ -314,6 +315,8 @@ core.prototype.resetStatus = function(hero, hard, floorId, maps) {
     // 初始化人物属性
     core.status.hero = core.clone(hero);
     core.status.hard = hard;
+    if (core.isset(flags))
+        core.flags = core.clone(flags);
     // 保存页面
     core.status.savePage = core.getLocalStorage('savePage', 0);
 
@@ -324,7 +327,7 @@ core.prototype.resetStatus = function(hero, hard, floorId, maps) {
 core.prototype.startGame = function (hard, callback) {
     console.log('开始游戏');
 
-    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, core.initStatus.maps);
+    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, core.flags, core.initStatus.maps);
 
     core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
         core.setHeroMoveTriggerInterval();
@@ -501,6 +504,10 @@ core.prototype.keyUp = function(keyCode) {
             if (core.status.heroStop)
                 core.ui.drawQuickShop(true);
             break;
+        case 32: // SPACE
+            if (!core.status.lockControl && core.status.heroStop)
+                core.getNextItem();
+            break;
         case 37: // UP
             break;
         case 38: // DOWN
@@ -520,12 +527,23 @@ core.prototype.keyUp = function(keyCode) {
             }
             break;
         case 50: // 快捷键2：炸
-            if (core.status.heroStop && core.hasItem('bomb')) {
-                if (core.canUseItem('bomb')) {
-                    core.useItem('bomb');
+            if (core.status.heroStop) {
+                if (core.hasItem('bomb')) {
+                    if (core.canUseItem('bomb')) {
+                        core.useItem('bomb');
+                    }
+                    else {
+                        core.drawTip('当前不能使用炸弹');
+                    }
                 }
-                else {
-                    core.drawTip('当前不能使用炸弹');
+                else if (core.hasItem('hammer')) {
+                    if (core.canUseItem('hammer')) {
+                        core.useItem('hammer');
+                    }
+                    else {
+                        core.drawTip('当前不能使用圣锤');
+                    }
+
                 }
             }
             break;
@@ -597,7 +615,7 @@ core.prototype.onup = function () {
         core.canvas.ui.clearRect(0, 0, 416,416);
         core.canvas.ui.restore();
         core.onclick(posx,posy,stepPostfix);
-        //posx,posy是之前寻路的目标点,stepPostfix是后续的移动
+        //posx,posy是寻路的目标点,stepPostfix是后续的移动
     }
 }
 
@@ -646,6 +664,12 @@ core.prototype.onclick = function (x, y, stepPostfix) {
     // 楼层飞行器
     if (core.status.event.id == 'fly') {
         core.events.clickFly(x,y);
+        return;
+    }
+
+    // 开关
+    if (core.status.event.id == 'switchs') {
+        core.events.clickSwitchs(x,y);
         return;
     }
 
@@ -735,10 +759,26 @@ core.prototype.onclick = function (x, y, stepPostfix) {
 }
 
 core.prototype.onmousewheel = function (direct) {
+    // 向下滚动是 -1 ,向上是 1
+
     // 楼层飞行器
     if (core.status.lockControl && core.status.event.id == 'fly') {
-        if (direct==-1) core.ui.drawFly(core.status.event.data-1);
         if (direct==1) core.ui.drawFly(core.status.event.data+1);
+        if (direct==-1) core.ui.drawFly(core.status.event.data-1);
+        return;
+    }
+
+    // 怪物手册
+    if (core.status.lockControl && core.status.event.id == 'book') {
+        if (direct==1) core.ui.drawEnemyBook(core.status.event.data - 1);
+        if (direct==-1) core.ui.drawEnemyBook(core.status.event.data + 1);
+        return;
+    }
+
+    // 存读档
+    if (core.status.lockControl && (core.status.event.id == 'save' || core.status.event.id == 'load')) {
+        if (direct==1) core.ui.drawSLPanel(core.status.event.data - 1);
+        if (direct==-1) core.ui.drawSLPanel(core.status.event.data + 1);
         return;
     }
 }
@@ -791,7 +831,18 @@ core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
         return;
     }
     if (destX == core.status.hero.loc.x && destY == core.status.hero.loc.y && stepPostfix.length==0) {
-        core.turnHero();
+        if (core.timeout.turnHeroTimeout==null) {
+            core.timeout.turnHeroTimeout = setTimeout(function() {
+                core.turnHero();
+                clearTimeout(core.timeout.turnHeroTimeout);
+                core.timeout.turnHeroTimeout = null;
+            }, 250);
+        }
+        else {
+            clearTimeout(core.timeout.turnHeroTimeout);
+            core.timeout.turnHeroTimeout = null;
+            core.getNextItem();
+        }
         return;
     }
     var step = 0;
@@ -944,14 +995,16 @@ core.prototype.automaticRoute = function (destX, destY) {
                     if ( (scan[direction].x + scan[nextArrow].x) == 0 && (scan[direction].y + scan[nextArrow].y) == 0 ) continue;
                 }
                 // 绕过亮灯（因为只有一次通行机会很宝贵）
-                if(nextId == "light") deepAdd=50;
+                if(nextId == "light") deepAdd=100;
                 // 绕过路障
-                if (nextId.substring(nextId.length-3)=="Net") deepAdd=100;
+                if (nextId.substring(nextId.length-3)=="Net") deepAdd=core.values.lavaDamage;
                 // 绕过血瓶
                 if (!core.flags.potionWhileRouting && nextId.substring(nextId.length-6)=="Potion") deepAdd=20;
                 // 绕过可能的夹击点
-                if (nextBlock.block.event.trigger == 'checkBlock') deepAdd=200;
+                // if (nextBlock.block.event.trigger == 'checkBlock') deepAdd=200;
             }
+            if (core.status.checkBlock[nid]>0)
+                deepAdd = core.status.checkBlock[nid];
 
             if (nx == destX && ny == destY) {
                 route[nid] = direction;
@@ -1049,86 +1102,29 @@ core.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
     }
     core.status.heroMoving = true;
     var moveStep = 0;
+    var scan = {
+        'up': {'x': 0, 'y': -1},
+        'left': {'x': -1, 'y': 0},
+        'down': {'x': 0, 'y': 1},
+        'right': {'x': 1, 'y': 0}
+    };
     core.interval.heroMoveInterval = window.setInterval(function () {
-        switch (direction) {
-            case 'up':
-                moveStep -= 4;
-                if (moveStep == -4 || moveStep == -8 || moveStep == -12 || moveStep == -16) {
-                    core.drawHero(direction, x, y, 'leftFoot', 0, moveStep);
-                }
-                else if (moveStep == -20 || moveStep == -24 || moveStep == -28 || moveStep == -32) {
-                    core.drawHero(direction, x, y, 'rightFoot', 0, moveStep);
-                }
-                if (moveStep == -32) {
-                    core.setHeroLoc('y', '--');
-                    core.moveOneStep();
-                    if (core.status.heroStop) {
-                        core.drawHero(direction, x, y - 1, 'stop');
-                    }
-                    if (core.isset(callback)) {
-                        callback();
-                    }
-                }
-                break;
-            case 'left':
-                moveStep -= 4;
-                if (moveStep == -4 || moveStep == -8 || moveStep == -12 || moveStep == -16) {
-                    core.drawHero(direction, x, y, 'leftFoot', moveStep);
-                }
-                else if (moveStep == -20 || moveStep == -24 || moveStep == -28 || moveStep == -32) {
-                    core.drawHero(direction, x, y, 'rightFoot', moveStep);
-                }
-                if (moveStep == -32) {
-                    core.setHeroLoc('x', '--');
-                    core.moveOneStep();
-                    if (core.status.heroStop) {
-                        core.drawHero(direction, x - 1, y, 'stop');
-                    }
-                    if (core.isset(callback)) {
-                        callback();
-                    }
-                }
-                break;
-            case 'down':
-                moveStep+=4;
-                if(moveStep == 4 || moveStep == 8 || moveStep == 12 || moveStep == 16) {
-                    core.drawHero(direction, x, y, 'leftFoot', 0, moveStep);
-                }
-                else if(moveStep == 20 || moveStep == 24 ||moveStep == 28 || moveStep == 32) {
-                    core.drawHero(direction, x, y, 'rightFoot', 0, moveStep);
-                }
-                if (moveStep == 32) {
-                    core.setHeroLoc('y', '++');
-                    core.moveOneStep();
-                    if (core.status.heroStop) {
-                        core.drawHero(direction, x, y + 1, 'stop');
-                    }
-                    if (core.isset(callback)) {
-                        callback();
-                    }
-                }
-                break;
-            case 'right':
-                moveStep+=4;
-                if(moveStep == 4 || moveStep == 8 || moveStep == 12 || moveStep == 16) {
-                    core.drawHero(direction, x, y, 'leftFoot', moveStep);
-                }
-                else if(moveStep == 20 || moveStep == 24 ||moveStep == 28 || moveStep == 32) {
-                    core.drawHero(direction, x, y, 'rightFoot', moveStep);
-                }
-                if (moveStep == 32) {
-                    core.setHeroLoc('x', '++');
-                    core.moveOneStep();
-                    if (core.status.heroStop) {
-                        core.drawHero(direction, x + 1, y, 'stop');
-                    }
-                    if (core.isset(callback)) {
-                        callback();
-                    }
-                }
-                break;
+        moveStep++;
+        if (moveStep<=4) {
+            core.drawHero(direction, x, y, 'leftFoot', 4*moveStep*scan[direction].x, 4*moveStep*scan[direction].y);
         }
-    }, 10);
+        else if (moveStep<=8) {
+            core.drawHero(direction, x, y, 'rightFoot', 4*moveStep*scan[direction].x, 4*moveStep*scan[direction].y);
+        }
+        if (moveStep==8) {
+            core.setHeroLoc('x', x+scan[direction].x);
+            core.setHeroLoc('y', y+scan[direction].y);
+            core.moveOneStep();
+            if (core.status.heroStop)
+                core.drawHero(direction, core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+            if (core.isset(callback)) callback();
+        }
+    }, 12.5);
 }
 
 core.prototype.setHeroMoveTriggerInterval = function () {
@@ -1179,6 +1175,7 @@ core.prototype.setHeroMoveTriggerInterval = function () {
                     core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
                 }
                 core.trigger(core.getHeroLoc('x'), core.getHeroLoc('y'));
+                core.checkBlock();
                 clearInterval(core.interval.heroMoveInterval);
                 core.status.heroMoving = false;
             });
@@ -1240,6 +1237,66 @@ core.prototype.canMove = function() {
 core.prototype.moveHero = function (direction) {
     core.setHeroLoc('direction', direction);
     core.status.heroStop = false;
+}
+
+core.prototype.eventMoveHero = function(steps, time, callback) {
+
+    time = time || 100;
+
+    core.clearMap('ui', 0, 0, 416, 416);
+    core.setAlpha('ui', 1.0);
+
+    // 要运行的轨迹：将steps展开
+    var moveSteps=[];
+    steps.forEach(function (e) {
+        if (typeof e=="string") {
+            moveSteps.push(e);
+        }
+        else {
+            if (!core.isset(e.value)) {
+                moveSteps.push(e.direction)
+            }
+            else {
+                for (var i=0;i<e.value;i++) {
+                    moveSteps.push(e.direction);
+                }
+            }
+        }
+    });
+
+    var step=0;
+    var scan = {
+        'up': {'x': 0, 'y': -1},
+        'left': {'x': -1, 'y': 0},
+        'down': {'x': 0, 'y': 1},
+        'right': {'x': 1, 'y': 0}
+    };
+
+    var animate=window.setInterval(function() {
+        var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
+        if (moveSteps.length==0) {
+            clearInterval(animate);
+            core.drawHero(core.getHeroLoc('direction'), x, y, 'stop');
+            if (core.isset(callback)) callback();
+        }
+        else {
+            var direction = moveSteps[0];
+            core.setHeroLoc('direction', direction);
+            step++;
+            if (step <= 4) {
+                core.drawHero(direction, x, y, 'leftFoot', 4 * step * scan[direction].x, 4 * step * scan[direction].y);
+            }
+            else if (step <= 8) {
+                core.drawHero(direction, x, y, 'rightFoot', 4 * step * scan[direction].x, 4 * step * scan[direction].y);
+            }
+            if (step == 8) {
+                step = 0;
+                core.setHeroLoc('x', x + scan[direction].x);
+                core.setHeroLoc('y', y + scan[direction].y);
+                moveSteps.shift();
+            }
+        }
+    }, time/8);
 }
 
 core.prototype.moveOneStep = function() {
@@ -1396,6 +1453,7 @@ core.prototype.afterBattle = function(id, x, y, callback) {
         hint += "，经验+" + core.material.enemys[id].experience;
     core.drawTip(hint);
 
+    core.updateCheckBlockMap();
     // 打完怪物，触发事件
     core.events.afterBattle(id,x,y,callback);
 
@@ -1472,6 +1530,8 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
                     core.setHeroLoc('x', heroLoc.x);
                     core.setHeroLoc('y', heroLoc.y);
                     core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+                    core.updateCheckBlockMap();
+                    core.updateCheckBlock();
                     core.updateFg();
                 }, 15)
             });
@@ -1877,14 +1937,26 @@ core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
         'right': {'x': 1, 'y': 0}
     };
 
+    var animateValue = block.event.animate || 1;
+    var animateCurrent = 0;
+    var animateTime = 0;
+
     var animate=window.setInterval(function() {
+
+        animateTime += time / 16;
+        if (animateTime >= core.values.animateSpeed * 2 / animateValue) {
+            animateCurrent++;
+            animateTime = 0;
+            if (animateCurrent>=animateValue) animateCurrent=0;
+        }
+
         // 已经移动完毕，消失
         if (moveSteps.length==0) {
             if (immediateHide) opacityVal=0;
             else opacityVal -= 0.06;
             core.setOpacity('data', opacityVal);
             core.clearMap('data', nowX, nowY, 32, 32);
-            core.canvas.data.drawImage(blockImage, 0, blockIcon * 32, 32, 32, nowX, nowY, 32, 32);
+            core.canvas.data.drawImage(blockImage, animateCurrent * 32, blockIcon * 32, 32, 32, nowX, nowY, 32, 32);
             if (opacityVal<=0) {
                 clearInterval(animate);
                 core.loadCanvas('data');
@@ -1900,7 +1972,7 @@ core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
             nowY+=scan[moveSteps[0]].y*2;
             core.clearMap('data', nowX-32, nowY-32, 96, 96);
             // 绘制
-            core.canvas.data.drawImage(blockImage, 0, blockIcon * 32, 32, 32, nowX, nowY, 32, 32);
+            core.canvas.data.drawImage(blockImage, animateCurrent * 32, blockIcon * 32, 32, 32, nowX, nowY, 32, 32);
             if (step==16) {
                 // 该移动完毕，继续
                 step=0;
@@ -1961,6 +2033,7 @@ core.prototype.addBlock = function(x,y,floodId) {
     // 本身是禁用事件，启用之
     if (core.isset(block.enable) && !block.enable) {
         block.enable = true;
+        core.updateCheckBlockMap();
         // 在本层，添加动画
         if (floodId == core.status.floorId && core.isset(block.event)) {
             blockIcon = core.material.icons[block.event.cls][block.event.id];
@@ -1997,24 +2070,22 @@ core.prototype.removeBlockById = function (index, floorId) {
     var blocks = core.status.maps[floorId].blocks;
     var x=blocks[index].x, y=blocks[index].y;
 
-    // 检查该点是否是checkBlock
-    if (core.floors[floorId].checkBlock.indexOf(x+","+y)>=0) {
-        blocks[index] = {'x': x, 'y': y, 'event': {'cls': 'terrains', 'id': 'ground', 'noPass': false, 'trigger': 'checkBlock'}};
-        return;
-    }
-
     // 检查该点是否存在事件
     var event = core.floors[floorId].events[x+","+y];
     if (!core.isset(event))
         event = core.floors[floorId].changeFloor[x+","+y];
 
+    var shouldUpdateBlockMap = blocks[index].event.cls == 'enemys';
     // 不存在事件，直接删除
     if (!core.isset(event)) {
         blocks.splice(index,1);
+        if (shouldUpdateBlockMap)
+            core.updateCheckBlockMap();
         return;
     }
-
     blocks[index].enable = false;
+    if (shouldUpdateBlockMap)
+        core.updateCheckBlockMap();
 }
 
 core.prototype.removeBlockByIds = function (floorId, ids) {
@@ -2113,32 +2184,154 @@ core.prototype.drawBoxAnimate = function (background) {
     }
 }
 
+core.prototype.updateCheckBlockMap = function() {
+    // 更新领域、夹击地图
+    core.status.checkBlockMap = [];
+    var blocks = core.status.thisMap.blocks;
+    for (var n=0;n<blocks.length;n++) {
+        var block = blocks[n];
+        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
+            if (block.event.cls=='enemys') {
+                var enemy = core.enemys.getEnemys(block.event.id);
+                if (core.isset(enemy)) {
+                    var value=0;
+                    if (core.enemys.hasSpecial(enemy.special, 15)) // 领域
+                        value += enemy.value;
+                    if (core.enemys.hasSpecial(enemy.special, 16)) // 夹击
+                        value += 1000000 * block.id;
+                    core.status.checkBlockMap[13*block.x+block.y] = value;
+                }
+            }
+        }
+    }
+}
+
+// 更新领域、显伤点
+core.prototype.updateCheckBlock = function() {
+    if (!core.isset(core.status.thisMap)) return;
+    if (!core.isset(core.status.checkBlockMap)) core.updateCheckBlockMap();
+    core.status.checkBlock = [];
+    for (var x=0;x<13;x++) {
+        for (var y=0;y<13;y++) {
+            // 计算(x,y)点伤害
+            var damage = 0;
+            if (!core.enemyExists(x,y)) { // 如果该点本身不存在怪物（打死怪物会调用更新）
+
+                // 领域
+                [[-1,0],[0,-1],[1,0],[0,1]].forEach(function (dir) {
+                    var nx = x+dir[0], ny = y+dir[1];
+                    if (nx<0 || nx>12 || ny<0 || ny>12) return;
+                    if (core.status.checkBlockMap[13*nx+ny]%1000000>0) {
+                        damage += core.status.checkBlockMap[13*nx+ny] % 1000000;
+                    }
+                })
+
+                var leftValue = core.status.hero.hp - damage;
+                if (leftValue>1) {
+                    var has = false;
+                    // 夹击
+                    if (x>0 && x<12) {
+                        var id1=parseInt(core.status.checkBlockMap[13*(x-1)+y]/1000000),
+                            id2=parseInt(core.status.checkBlockMap[13*(x+1)+y]/1000000);
+                        if (id1>0 && id1==id2)
+                            has = true;
+                    }
+                    if (y>0 && y<12) {
+                        var id1=parseInt(core.status.checkBlockMap[13*x+y-1]/1000000),
+                            id2=parseInt(core.status.checkBlockMap[13*x+y+1]/1000000);
+                        if (id1>0 && id1==id2)
+                            has = true;
+                    }
+                    if (has) {
+                        damage += parseInt((leftValue+1) / 2);
+                    }
+                }
+            }
+            core.status.checkBlock[13*x+y] = damage;
+        }
+    }
+}
+
+core.prototype.checkBlock = function () {
+    // 检查领域、夹击事件
+    var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
+    if (core.status.checkBlock[13*x+y]>0) {
+        core.status.hero.hp -= core.status.checkBlock[13*x+y];
+        if (core.hasBetweenAttack(x,y)) {
+            core.drawTip('受到夹击，生命变成一半');
+        }
+        else if (core.hasZone(x,y)) {
+            core.drawTip('受到领域伤害'+core.status.checkBlock[13*x+y]+'点');
+        }
+        if (core.status.hero.hp<=0) {
+            core.status.hero.hp=0;
+            core.updateStatusBar();
+            core.events.lose('zone');
+            return;
+        }
+        core.updateStatusBar();
+    }
+}
+
+core.prototype.hasZone = function (x,y) {
+    if (!core.isset(core.status.checkBlockMap)) core.updateCheckBlockMap();
+    var isZone = false;
+    // 领域
+    [[-1,0],[0,-1],[1,0],[0,1]].forEach(function (dir) {
+        var nx = x+dir[0], ny = y+dir[1];
+        if (nx<0 || nx>12 || ny<0 || ny>12) return;
+        if (core.status.checkBlockMap[13*nx+ny]%1000000>0) {
+            isZone = true;
+        }
+    })
+    return isZone;
+}
+
+core.prototype.hasBetweenAttack = function(x,y) {
+    if (!core.isset(core.status.checkBlockMap)) core.updateCheckBlockMap();
+    // 夹击
+    if (x>0 && x<12) {
+        var id1=parseInt(core.status.checkBlockMap[13*(x-1)+y]/1000000),
+            id2=parseInt(core.status.checkBlockMap[13*(x+1)+y]/1000000);
+        if (id1>0 && id1==id2)
+            return true;
+    }
+    if (y>0 && y<12) {
+        var id1=parseInt(core.status.checkBlockMap[13*x+y-1]/1000000),
+            id2=parseInt(core.status.checkBlockMap[13*x+y+1]/1000000);
+        if (id1>0 && id1==id2)
+            return true;
+    }
+}
+
 core.prototype.setFg = function(color, time, callback) {
     time = time || 750;
     core.setOpacity('fg', 1);
 
-    var fromAlpha = 0;
-    if (core.isset(core.status.event.data.currentColor)) {
-        fromAlpha = 1;
-    }
-    else {
-        core.status.event.data.currentColor = [0,0,0];
+    var reset = false;
+
+    if (!core.isset(core.status.event.data.currentColor)) {
+        core.status.event.data.currentColor = [0,0,0,0];
     }
 
     var fromColor = core.status.event.data.currentColor;
 
-    var toAlpha = 1;
     if (!core.isset(color)) {
-        color = [0,0,0];
-        toAlpha=0;
+        color = [0,0,0,0];
+        reset = true;
     }
+    if (color.length==3) {
+        color.push(1);
+    }
+    if (color[3]<0) color[3]=0;
+    if (color[3]>1) color[3]=1;
 
     var step=0;
     var changeAnimate = setInterval(function() {
         step++;
         core.clearMap('fg', 0, 0, 416, 416);
 
-        var nowAlpha = fromAlpha+(toAlpha-fromAlpha)*step/25;
+        var nowAlpha = fromColor[3]+(color[3]-fromColor[3])*step/25;
         var nowR = parseInt(fromColor[0]+(color[0]-fromColor[0])*step/25);
         var nowG = parseInt(fromColor[1]+(color[1]-fromColor[1])*step/25);
         var nowB = parseInt(fromColor[2]+(color[2]-fromColor[2])*step/25);
@@ -2147,12 +2340,12 @@ core.prototype.setFg = function(color, time, callback) {
         if (nowB<0) nowB=0; if (nowB>255) nowB=255;
 
         core.setAlpha('fg', nowAlpha);
-        var toRGB = "#"+nowR.toString(16)+nowG.toString(16)+nowB.toString(16);
+        var toRGB = "#"+((1<<24)+(nowR<<16)+(nowG<<8)+nowB).toString(16).slice(1)
         core.fillRect('fg', 0, 0, 416, 416, toRGB);
 
         if (step>=25) {
             clearInterval(changeAnimate);
-            if (toAlpha==0) {
+            if (reset) {
                 core.clearMap('fg', 0, 0, 416, 416);
                 delete core.status.event.data.currentColor;
                 core.setAlpha('fg', 1);
@@ -2211,7 +2404,8 @@ core.prototype.updateFg = function () {
     // 如果存在颜色
     if (core.isset(core.status.event.data) && core.isset(core.status.event.data.currentColor)) {
         var color=core.status.event.data.currentColor;
-        core.fillRect("fg",0,0,416,416,"#"+color[0].toString(16)+color[1].toString(16)+color[2].toString(16));
+        core.setAlpha('fg', color[3]);
+        core.fillRect("fg",0,0,416,416,"#"+((1<<24)+(color[0]<<16)+(color[1]<<8)+color[2]).toString(16).slice(1));
         return;
     }
 
@@ -2223,32 +2417,54 @@ core.prototype.updateFg = function () {
     if (!core.hasItem('book')) return;
     core.setFont('fg', "bold 11px Arial");
     var hero_hp = core.status.hero.hp;
-    for (var b = 0; b < mapBlocks.length; b++) {
-        var x = mapBlocks[b].x, y = mapBlocks[b].y;
-        if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls == 'enemys' && mapBlocks[b].event.trigger=='battle'
+    if (core.flags.displayEnemyDamage) {
+        core.canvas.fg.textAlign = 'left';
+        for (var b = 0; b < mapBlocks.length; b++) {
+            var x = mapBlocks[b].x, y = mapBlocks[b].y;
+            if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls == 'enemys' && mapBlocks[b].event.trigger == 'battle'
                 && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable)) {
-            var id = mapBlocks[b].event.id;
+                var id = mapBlocks[b].event.id;
 
-            var damage = core.enemys.getDamage(id);
-            var color = "#000000";
-            if (damage <= 0) color = '#00FF00';
-            else if (damage < hero_hp / 3) color = '#FFFFFF';
-            else if (damage < hero_hp * 2 / 3) color = '#FFFF00';
-            else if (damage < hero_hp) color = '#FF7F00';
-            else color = '#FF0000';
+                var damage = core.enemys.getDamage(id);
+                var color = "#000000";
+                if (damage <= 0) color = '#00FF00';
+                else if (damage < hero_hp / 3) color = '#FFFFFF';
+                else if (damage < hero_hp * 2 / 3) color = '#FFFF00';
+                else if (damage < hero_hp) color = '#FF7F00';
+                else color = '#FF0000';
 
-            if (damage >= 999999999) damage = "???";
-            else if (damage > 100000) damage = (damage / 10000).toFixed(1) + "w";
+                if (damage >= 999999999) damage = "???";
+                else if (damage > 100000) damage = (damage / 10000).toFixed(1) + "w";
 
-            core.setFillStyle('fg', '#000000');
-            core.canvas.fg.fillText(damage, 32 * x + 2, 32 * (y + 1) - 2);
-            core.canvas.fg.fillText(damage, 32 * x, 32 * (y + 1) - 2);
-            core.canvas.fg.fillText(damage, 32 * x + 2, 32 * (y + 1));
-            core.canvas.fg.fillText(damage, 32 * x, 32 * (y + 1));
+                core.setFillStyle('fg', '#000000');
+                core.canvas.fg.fillText(damage, 32 * x + 2, 32 * (y + 1) - 2);
+                core.canvas.fg.fillText(damage, 32 * x, 32 * (y + 1) - 2);
+                core.canvas.fg.fillText(damage, 32 * x + 2, 32 * (y + 1));
+                core.canvas.fg.fillText(damage, 32 * x, 32 * (y + 1));
 
-            core.setFillStyle('fg', color);
-            core.canvas.fg.fillText(damage, 32 * x + 1, 32 * (y + 1) - 1);
+                core.setFillStyle('fg', color);
+                core.canvas.fg.fillText(damage, 32 * x + 1, 32 * (y + 1) - 1);
 
+            }
+        }
+    }
+    // 如果是领域&夹击
+    if (core.flags.displayExtraDamage) {
+        core.canvas.fg.textAlign = 'center';
+        for (var x=0;x<13;x++) {
+            for (var y=0;y<13;y++) {
+                var damage = core.status.checkBlock[13*x+y];
+                if (damage>0) {
+                    core.setFillStyle('fg', '#000000');
+                    core.canvas.fg.fillText(damage, 32 * x + 17, 32 * (y + 1) - 13);
+                    core.canvas.fg.fillText(damage, 32 * x + 15, 32 * (y + 1) - 15);
+                    core.canvas.fg.fillText(damage, 32 * x + 17, 32 * (y + 1) - 15);
+                    core.canvas.fg.fillText(damage, 32 * x + 15, 32 * (y + 1) - 13);
+
+                    core.setFillStyle('fg', '#FF7F00');
+                    core.canvas.fg.fillText(damage, 32 * x + 16, 32 * (y + 1) - 14);
+                }
+            }
         }
     }
 }
@@ -2310,6 +2526,16 @@ core.prototype.addItem = function (itemId, itemNum) {
     core.status.hero.items[itemCls][itemId] += itemNum;
 }
 
+core.prototype.getNextItem = function() {
+    if (!core.status.heroStop || !core.flags.enableGentleClick) return;
+    var nextX = core.nextX(), nextY = core.nextY();
+    var block = core.getBlock(nextX, nextY);
+    if (block==null) return;
+    if (block.block.event.trigger=='getItem') {
+        core.getItem(block.block.event.id, 1, nextX, nextY);
+    }
+}
+
 core.prototype.getItem = function (itemId, itemNum, itemX, itemY, callback) {
     // core.getItemAnimate(itemId, itemNum, itemX, itemY);
     core.playSound('item', 'ogg');
@@ -2337,6 +2563,7 @@ core.prototype.drawTip = function (text, itemIcon) {
     core.setFont('data', "16px Arial");
     core.saveCanvas('data');
     core.setOpacity('data', 0);
+    core.canvas.data.textAlign = 'left';
     if (!core.isset(itemIcon)) {
         textX = 16;
         textY = 18;
@@ -2814,6 +3041,7 @@ core.prototype.saveData = function(dataId) {
         'hard': core.status.hard,
         'maps': core.maps.save(core.status.maps),
         'shops': {},
+        'flags': core.flags,
         'version': core.firstData.version,
         "time": new Date().getTime()
     };
@@ -2831,7 +3059,7 @@ core.prototype.saveData = function(dataId) {
 
 core.prototype.loadData = function (data, callback) {
 
-    core.resetStatus(data.hero, data.hard, data.floorId, core.maps.load(data.maps));
+    core.resetStatus(data.hero, data.hard, data.floorId, data.flags, core.maps.load(data.maps));
 
     // load shop times
     for (var shop in core.status.shops) {
@@ -3007,7 +3235,6 @@ core.prototype.updateStatusBar = function () {
         core.statusBar.weak.innerHTML = core.hasFlag('weak')?"衰":"";
         core.statusBar.curse.innerHTML = core.hasFlag('curse')?"咒":"";
     }
-    
 
     core.statusBar.hard.innerHTML = core.status.hard;
     if (core.hasItem('book')) {
@@ -3020,6 +3247,7 @@ core.prototype.updateStatusBar = function () {
     } else {
         core.statusBar.image.fly.style.opacity = 0.3;
     }
+    core.updateCheckBlock();
     core.updateFg();
 }
 

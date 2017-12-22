@@ -105,6 +105,7 @@
         border: 1px solid #ccc;
         border-radius: 2px;
         font-size: 15px;
+        line-height: 16px;
       }
       .files {
         width: 50%;
@@ -189,8 +190,8 @@
         /* display: none; */
 
         background-color:rgba(255, 255, 255, 0.0);
-        border: 2px solid rgb(87, 198, 232);
-        box-shadow: 0px 0px 2px rgb(87, 198, 232);
+        border: 2px solid #30DFF3;
+        box-shadow: 0px 0px 2px #30DFF3;
       }
       .warnText{
         color: #D50000;
@@ -237,6 +238,14 @@
       #mapColMark td{
         width: 29px;
       }
+      #mapColMark td:hover .colBlock{
+        position: absolute;
+        top: 19px;
+        height: 416px;
+        width: 32px;
+        z-index: 100;
+        background-color: rgba(38,166,154,.5);
+      }
       table.row{
         position: relative;
         text-align: right;
@@ -244,7 +253,7 @@
         border-collapse: collapse;
       }
       table.row td{
-        background-color: #795548;
+        background-color: #A1887F;
       }
       #arrRowMark{
         top: 5px;
@@ -262,6 +271,14 @@
       }
       #mapRowMark td{
         height: 29px;
+      }
+      #mapRowMark td:hover .rowBlock{
+        position: absolute;
+        left: 18px;
+        height: 32px;
+        width: 416px;
+        z-index: 100;
+        background-color: rgba(121,85,72,.5);
       }
       /* for vue dom */
       [v-cloak] {
@@ -301,7 +318,7 @@
             <p>图块索引：<span class="infoText">{{ infos['y'] }}</span></p>
           </div>
           <div v-else>
-            <p v-if="whichShow" v-bind:class="[ (whichShow%2) ? 'warnText' : 'successText']" >{{ mapMsg }}</p>
+              <p v-if="whichShow" v-bind:class="[ (whichShow%2) ? 'warnText' : 'successText']">{{ mapMsg }}</p>
           </div>
         </div>
         <input class='btn' id='clear' type="button" value="清除地图" v-on:click="clearMap"/>
@@ -367,14 +384,14 @@
   // 生成定位编号
   var colNum = ' ';
   for(var i=0; i<13; i++){
-    var tpl = '<td>'+i+'</td>';
+    var tpl = '<td>'+i+'<div class="colBlock" style="left:'+(i*32+1)+'px;"></div></td>';
     colNum += tpl;
   }
   arrColMark.innerHTML = '<tr>'+colNum+'</tr>';
   mapColMark.innerHTML = '<tr>'+colNum+'</tr>';
   var rowNum = ' ';
   for(var i=0; i<13; i++){
-    var tpl = '<tr><td>'+i+'</td></tr>';
+    var tpl = '<tr><td>'+i+'<div class="rowBlock" style="top:'+(i*32+1)+'px;"></div></td></tr>';
     rowNum += tpl;
   }
   arrRowMark.innerHTML = rowNum;
@@ -904,7 +921,7 @@
         if(editArea.error) {
           tip.whichShow = 3;
           return;
-        } 
+        }
         var filestr='';
         for (var yy = 0; yy < 13; yy++){
           filestr+='['
@@ -948,9 +965,10 @@
       formatTimer: null,
     },
     watch: {
-      mapArr: function () {
+      mapArr: function (val, oldval) {
         var that = this;
-        if(that.mapArr !='' && that.formatArr()){
+        if(val=='') return;
+        if(that.formatArr()){
           that.error = 0;
           clearTimeout(that.formatTimer);
           setTimeout(function(){
@@ -1007,7 +1025,8 @@
           } 
 
           for(var k=0; k<13; k++){
-            formatArrStr += Array(Math.max(4-a[k].length,0)).join(' ')+parseInt(a[k])+(k==12?'':',');
+            var num = parseInt(a[k]);
+            formatArrStr += Array(Math.max(4-String(num).length,0)).join(' ')+num+(k==12?'':',');
           }
           formatArrStr += ']'+(i==12?'':',\n');
         }
@@ -1055,6 +1074,7 @@
         ec = eventLayer.getContext('2d');
         ec.clearRect(0, 0, 416, 416);
         clearTimeout(editArea.formatTimer);
+        clearTimeout(tip.timer);
         pout.value = '';
         editArea.mapArr = '';
         tip.whichShow = 4;
@@ -1102,13 +1122,14 @@
         var that = this;
         that.mapMsg = '';
         that.msgs[4] = "复制失败！"+editTip.err;
-        if(that.whichShow)
-          that.mapMsg = that.msgs[that.whichShow-1];
-        
         clearTimeout(that.timer);
-        that.timer = setTimeout(function() {
-          tip.whichShow = 0;
-        }, 5000); //5秒后自动清除
+        if(that.whichShow){
+          that.mapMsg = that.msgs[that.whichShow-1];
+          that.timer = setTimeout(function() {
+            if(!(that.whichShow%2))
+              that.whichShow = 0;
+          }, 5000); //5秒后自动清除success，warn不清除
+        }
       }
     }
   })
@@ -1121,6 +1142,8 @@
     watch: {
       isSelected: function(){
         tip.isSelectedBlock = this.isSelected;
+        tip.whichShow = 0;
+        clearTimeout(tip.timer);
       }
     }
   })

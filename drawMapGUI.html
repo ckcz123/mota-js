@@ -5,7 +5,7 @@
     <style>
       html,body,div,img{margin:0;padding:0;}
       body{
-        font-family: -apple-system,"Helvetica Neue",Helvetica,Arial,"PingFang SC","Hiragino Sans GB","WenQuanYi Micro Hei","Microsoft Yahei",sans-serif;
+        font-family: Roboto,"Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;;
         background-color: #F5F5F5;
       }
       ::-webkit-scrollbar {
@@ -44,10 +44,13 @@
         height: 100%;
         box-sizing: border-box;
         margin-left: 22px;
-        margin-top: 21px;
+        margin-top: 23px;
         line-height: 20px;
-        font-size: 13.3333px;
-        font-family: monospace;
+        font-size: 12.3px;
+        font-family: 'Lucida Console', Monaco, monospace;
+        white-space: pre;
+        border: 1px solid #ddd;
+        border-radius: 2px;
       }
       #editTip{
         position: absolute;
@@ -208,6 +211,7 @@
       table, td {
           border: 1px solid #fff;
           color: #fff;
+          cursor:crosshair;
       }
       table.col{
         position: relative;
@@ -437,7 +441,7 @@
 
 <script type="text/javascript">
   //预处理草的源图片
-  importGrass=function(){
+importGrass=function(){
   autotile = new Image();
 
   autotile.src = "images/autotile.png"
@@ -608,8 +612,7 @@
       }
     }
   }
-
-  }
+}
 </script>
 
 <script>
@@ -909,10 +912,10 @@
   document.body.onmousedown = function(e){
     selectBox.isSelected = false;
     info = {};
-    canSelectAg = false;
-
   }
-
+  iconLib.onmousedown = function(e){
+    e.stopPropagation();
+  }
   var exportM = new Vue({
     el: '#exportM',
 

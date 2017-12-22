@@ -8,6 +8,9 @@
         font-family:Roboto,Helvetica,Arial,sans-serif;
         background-color: #F5F5F5;
       }
+      ::-webkit-scrollbar {
+          width: 5px;
+      }
       .main {
         max-width: 100%;
         min-height: 500px;
@@ -43,6 +46,7 @@
         margin-left: 22px;
         margin-top: 21px;
         line-height: 20px;
+        font: 400 13.3333px Arial;
       }
       #editTip{
         position: absolute;
@@ -314,11 +318,10 @@
     <div id="right">
       <div id="iconLib">
         <canvas class='gameCanvas' id='data' width='416' height='416' style='z-index:0'></canvas>
+        <div id="selectBox">
+            <div id='dataSelection' v-show="isSelected" v-cloak></div>
+        </div>
       </div>
-      <div id="selectBox">
-        <div id='dataSelection' v-show="isSelected"></div>
-      </div>
-      
     </div>
   </div>
 
@@ -664,7 +667,6 @@
 
   function locToPos(loc) {
     pos = { 'x': ~~(loc.x / loc.size), 'y': ~~(loc.y / loc.size) }
-    console.log(pos)
     return pos;
   }
 
@@ -806,8 +808,8 @@
         
         selectBox.isSelected = true;
         // console.log(pos,core.material.images[pos.images].height)
-        dataSelection.style.left = (iconLib.offsetLeft+pos.x*32) +'px';
-        dataSelection.style.top = (iconLib.offsetTop + pos.y*32) +'px';
+        dataSelection.style.left = pos.x*32 +'px';
+        dataSelection.style.top = pos.y*32 +'px';
         info={'images':pos.images,'y':pos.y};
         for (var ii=0;ii<ids.length;ii++){
           if(pos.images==ids[ii].images && pos.y==ids[ii].y)
@@ -885,9 +887,12 @@
 </script>
 
 <script type="text/javascript">
+
   document.body.onmousedown = function(e){
     selectBox.isSelected = false;
     info = {};
+    canSelectAg = false;
+
   }
 
   var exportM = new Vue({
@@ -944,7 +949,7 @@
     watch: {
       mapArr: function () {
         var that = this;
-        if(that.formatArr()){
+        if(that.mapArr !='' && that.formatArr()){
           that.error = 0;
           clearTimeout(that.formatTimer);
           setTimeout(function(){
@@ -957,10 +962,9 @@
         }else{
           that.error = 1;
         }
-        
       },
       error: function(){
-        
+        console.log(editArea.mapArr);
       }
     },
     methods: {
@@ -1049,7 +1053,9 @@
         for(var ii=0;ii<fullX + 1 + fullY * (fullX + 1);ii++)map[ii]=0;
         ec = eventLayer.getContext('2d');
         ec.clearRect(0, 0, 416, 416);
+        clearTimeout(editArea.formatTimer);
         pout.value = '';
+        editArea.mapArr = '';
         tip.whichShow = 4;
         editArea.error = 0;
       }

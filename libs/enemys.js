@@ -63,7 +63,7 @@ enemys.prototype.init = function () {
         'poisonZombie': {'name': '绿兽人', 'hp': 100, 'atk': 120, 'def': 0, 'money': 13, 'experience': 0, 'special': 12},
         'magicDragon': {'name': '魔龙', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
         'octopus': {'name': '血影', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
-        'fairy': {'name': '仙子', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
+        'darkFairy': {'name': '仙子', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
         'greenKnight': {'name': '强盾骑士', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
     }
 }
@@ -99,6 +99,7 @@ enemys.prototype.getSpecialText = function (enemyId) {
     if (this.hasSpecial(special, 14)) text.push("诅咒");
     if (this.hasSpecial(special, 15)) text.push("领域");
     if (this.hasSpecial(special, 16)) text.push("夹击");
+    if (this.hasSpecial(special, 17)) text.push("仇恨");
     return text.join("  ");
 }
 
@@ -117,6 +118,9 @@ enemys.prototype.getExtraDamage = function (monster) {
         // 吸血的比例
         extra_damage = core.status.hero.hp * monster.value;
         extra_damage = parseInt(extra_damage);
+    }
+    if (this.hasSpecial(monster.special, 17)) { // 仇恨
+        extra_damage += core.getFlag('hatred', 0);
     }
     return extra_damage;
 }

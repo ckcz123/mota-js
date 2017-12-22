@@ -46,7 +46,7 @@ items.prototype.init = function () {
         'steelKey': {'cls': 'tools', 'name': '铁门钥匙', 'text': '可以打开一扇铁门'},
         'pickaxe': {'cls': 'tools', 'name': '破墙镐', 'text': '可以破坏勇士面前的墙'},
         'icePickaxe': {'cls': 'tools', 'name': '破冰镐', 'text': '可以破坏勇士面前的一堵冰墙'},
-        'bomb': {'cls': 'tools', 'name': '炸弹', 'text': '可以炸掉勇士四周的怪物'},
+        'bomb': {'cls': 'tools', 'name': '炸弹', 'text': '可以炸掉勇士面前的怪物'},
         'centerFly': {'cls': 'tools', 'name': '中心对称飞行器', 'text': '可以飞向当前楼层中心对称的位置'},
         'upFly': {'cls': 'tools', 'name': '上楼器', 'text': '可以飞往楼上的相同位置'},
         'downFly': {'cls': 'tools', 'name': '下楼器', 'text': '可以飞往楼下的相同位置'},
@@ -67,6 +67,8 @@ items.prototype.getItems = function () {
     // 面前的墙？四周的墙？
     if (core.flags.pickaxeFourDirections)
         this.items.pickaxe.text = "可以破坏勇士四周的墙";
+    if (core.flags.bombFourDirections)
+        this.items.bomb.text = "可以炸掉勇士四周的怪物";
     return this.items;
 }
 
@@ -247,7 +249,8 @@ items.prototype.canUseItem = function (itemId) {
             if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls == 'enemys' && Math.abs(block.x-core.status.hero.loc.x)+Math.abs(block.y-core.status.hero.loc.y)<=1) {
                 var enemy = core.material.enemys[block.event.id];
                 if (core.isset(enemy.bomb) && !enemy.bomb) continue;
-                ids.push(i);
+                if (core.flags.bombFourDirections || (block.x==core.nextX() && block.y==core.nextY()))
+                    ids.push(i);
             }
         }
         if (ids.length>0) {

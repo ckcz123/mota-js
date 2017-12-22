@@ -111,12 +111,12 @@ data.prototype.init = function() {
         'breakArmor': 0.9, // 破甲的比例（战斗前，怪物附加角色防御的x%作为伤害）
         'counterAttack': 0.1, // 反击的比例（战斗时，怪物每回合附加角色攻击的x%作为伤害，无视角色防御）
         'purify': 3, // 净化的比例（战斗前，怪物附加勇士魔防的x倍作为伤害）
+        'hatred': 2, // 仇恨属性中，每杀死一个怪物获得的仇恨值
         /****** 系统相关 ******/
         'animateSpeed': 500, // 动画时间
     }
     // 系统FLAG，在游戏运行中中请不要修改它。
     this.flags = {
-
         /****** 角色状态相关 ******/
         "enableMDef": true, // 是否涉及勇士的魔防值；如果此项为false，则状态栏不会显示勇士的魔防值
         "enableExperience": true, // 是否涉及经验值；如果此项为false，则状态栏和怪物手册均将不会显示经验值
@@ -124,11 +124,14 @@ data.prototype.init = function() {
         /****** 道具相关 ******/
         "flyNearStair": true, // 是否需要在楼梯边使用传送器
         "pickaxeFourDirections": true, // 使用破墙镐是否四个方向都破坏；如果false则只破坏面前的墙壁
+        "bombFourDirections": true, // 使用炸弹是否四个方向都会炸；如果false则只炸面前的怪物（即和圣锤等价）
         "bigKeyIsBox": false, // 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙
-
         /****** 系统相关 ******/
         "startDirectly": false, // 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面
-        "battleAnimate": true, // 是否默认显示战斗动画；用户可以手动在菜单栏中关闭
+        "battleAnimate": true, // 是否默认显示战斗动画；用户可以手动在菜单栏中开关
+        "displayEnemyDamage": true, // 是否地图怪物显伤；用户可以手动在菜单栏中开关
+        "displayExtraDamage": false, // 是否地图高级显伤（领域、夹击等）；用户可以手动在菜单栏中开关
+        "enableGentleClick": true, // 是否允许轻触（获得面前物品）
         "portalWithoutTrigger": true, // 经过楼梯、传送门时是否能“穿透”。穿透的意思是，自动寻路得到的的路径中间经过了楼梯，行走时是否触发楼层转换事件
         "potionWhileRouting": false, // 寻路算法是否经过血瓶；如果该项为false，则寻路算法会自动尽量绕过血瓶
     }

@@ -887,16 +887,12 @@
 </script>
 
 <script type="text/javascript">
+
   document.body.onmousedown = function(e){
-    var flag = true;
-    dataSelection.onmousedown = function(e){
-      flag = false;
-    }
-    if(flag){
-      selectBox.isSelected = false;
-      info = {};
-    }
-    
+    selectBox.isSelected = false;
+    info = {};
+    canSelectAg = false;
+
   }
 
   var exportM = new Vue({

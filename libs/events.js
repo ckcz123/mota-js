@@ -457,8 +457,13 @@ events.prototype.useItem = function(itemId) {
         core.useFly(false);
         return;
     }
+    if (itemId=='centerFly') {
+        core.status.usingCenterFly= true;
+        core.fillRect('ui',(12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32,'rgba(0,255,0,0.5)');
+        return;
+    }
 
-    if (core.canUseItem(itemId)) core.useItem(itemId);
+    if (core.canUseItem(itemId))core.useItem(itemId);
     else core.drawTip("当前无法使用"+core.material.items[itemId].name);
 }
 

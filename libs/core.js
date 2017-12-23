@@ -76,6 +76,9 @@ function core() {
         'mouseOutCheck': 1,
         'moveStepBeforeStop': [],
 
+        // 勇士状态；中心对称飞行器
+        'usingCenterFly':false,
+
         // event事件
         'savePage': null,
         'shops': {},
@@ -373,7 +376,8 @@ core.prototype.onkeyUp = function(e) {
                 break;
             }
         }
-        core.stopHero();
+        //core.stopHero();
+        core.keyUp(e.keyCode);
     } else {
         core.keyUp(e.keyCode);
     }
@@ -424,6 +428,31 @@ core.prototype.keyDown = function(keyCode) {
         case 40:
             core.moveHero('down');
         break;
+        case 51: // 快捷键3：飞
+            // 因为加入了两次的检测机制,从keydown转移到keyup,同时保证位置信息正确,但以下情况会触发作图的bug:
+            // 在鼠标的路线移动中使用飞,绿块会滞后一格,显示的位置不对,同时也不会倍以下的代码清除
+            if (core.status.heroStop && core.hasItem('centerFly')) {
+                if (core.status.usingCenterFly) {
+                    if (core.canUseItem('centerFly')) {
+                        core.useItem('centerFly');
+                        core.clearMap('ui', core.getHeroLoc('x')*32,core.getHeroLoc('y')*32,32,32);
+                        
+                    }
+                    else {
+                        core.drawTip('当前不能使用中心对称飞行器');
+                        core.clearMap('ui', (12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32);
+                    }
+                    core.status.usingCenterFly = false;
+                } else {
+                    core.status.usingCenterFly = true;
+                    core.fillRect('ui',(12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32,'rgba(0,255,0,0.5)');
+                }
+            }
+            break;
+    }
+    if (core.status.usingCenterFly && keyCode!=51) {
+        core.clearMap('ui', (12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32);
+        core.status.usingCenterFly= false;
     }
 }
 
@@ -547,17 +576,9 @@ core.prototype.keyUp = function(keyCode) {
                 }
             }
             break;
-        case 51: // 快捷键3：飞
-            if (core.status.heroStop && core.hasItem('centerFly')) {
-                if (core.canUseItem('centerFly')) {
-                    core.useItem('centerFly');
-                }
-                else {
-                    core.drawTip('当前不能使用中心对称飞行器');
-                }
-            }
-            break;
+        
     }
+    
     core.stopHero();
 }
 
@@ -648,6 +669,25 @@ core.prototype.onclick = function (x, y, stepPostfix) {
 
     // 非游戏屏幕内
     if (x<0 || y<0 || x>12 || y>12) return;
+
+    // 中心对称飞行器
+    if (core.status.usingCenterFly) {
+        if (x!=12-core.getHeroLoc('x') || y!=12-core.getHeroLoc('y')) {
+            core.clearMap('ui', (12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32);
+        } else {
+            if (core.canUseItem('centerFly')) {
+                core.useItem('centerFly');
+                core.clearMap('ui', core.getHeroLoc('x')*32,core.getHeroLoc('y')*32,32,32);
+                
+                return;
+            }
+            else {
+                core.drawTip('当前不能使用中心对称飞行器');
+                core.clearMap('ui', (12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32);
+            }
+        }
+        core.status.usingCenterFly= false;
+    }
 
     // 寻路
     if (!core.status.lockControl) {

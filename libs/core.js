@@ -445,7 +445,9 @@ core.prototype.keyDown = function(keyCode) {
                     core.status.usingCenterFly = false;
                 } else {
                     core.status.usingCenterFly = true;
-                    core.fillRect('ui',(12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32,'rgba(0,255,0,0.5)');
+                    var fillstyle = 'rgba(255,0,0,0.5)';
+                    if (core.canUseItem('centerFly')) fillstyle = 'rgba(0,255,0,0.5)';
+                    core.fillRect('ui',(12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32,fillstyle);
                 }
             }
             break;

@@ -80,7 +80,7 @@ if (id == 65) tmp.event = {'cls': 'items', 'id': 'hammer'} // 圣锤
 1. 指定一个唯一的英文ID，不能和enemys中现有的重复。
 2. 进入icons.js，在enemys分类下进行添加（对应图标在图片上的位置，即index）
 3. 在maps.js的getBlock下继续进行添加。请注意其ID为200开始的顺序，即如果新增一行为261，依次类推
-4. 在items.js中仿照其他道具，来添加道具的信息。
+4. 在enemys.js中仿照其他怪物，来添加怪物的信息。
 
 ``` js
 if (id == 258) tmp.event = {'cls': 'enemys', 'id': 'octopus'};

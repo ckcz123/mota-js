@@ -251,7 +251,7 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
     {"type": "setValue", "name": "status:money", "value": "1000" } // 将金币数设为1000（不是+1000）
     {"type": "setValue", "name": "status:hp", "value": "status:hp*2" } // 生命值翻倍
     {"type": "setValue", "name": "item:yellowKey", "value": "item:yellowKey+3" } // 黄钥匙个数加3
-    {"type": "setValue", "name": "item:boom", "value": "item:boom+10" } // 炸弹个数+10
+    {"type": "setValue", "name": "item:bomb", "value": "item:bomb+10" } // 炸弹个数+10
     {"type": "setValue", "name": "flag:man_times", "value": "0" } // 将变量man_times设为0
     {"type": "setValue", "name": "flag:man_times", "value": "flag:man_times+2*status:atk" } // 将变量man_times的值加上勇士的攻击数值的两倍
 ]

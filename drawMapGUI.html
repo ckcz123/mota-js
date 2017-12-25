@@ -348,44 +348,9 @@
   </div>
 
 
-<script>main={'instance':{}}</script>
-<script src='libs/icons.js'></script>
-<script src='libs/maps.js'></script>
-<script src='_server/vendor/vue.min.js'></script>
-<!-- <script src="https://unpkg.com/vue"></script> -->
 <script>
-  main.instance.icons.init();//不知道为什么,需要手动init,明明maps是正常的
-  icons=main.instance.icons.getIcons();
-
-  var ids = [], indexs = []
-  ids.push({'idnum':0,'id':'ground','images':'terrains','y':0});
-
-  var point = 0
-  for(var i=0; i<400; i++){
-    var indexBlock = main.instance.maps.getBlock(0,0,i);
-    indexs[i] = [];
-    if('event' in indexBlock){
-      var id = indexBlock.event.id;
-      var indexId = indexBlock.id;
-      if(id=='autotile'){
-        ids.push({'idnum':indexId,'id':'autotile','images':'autotile','y':0});
-        point++;
-        indexs[i].push(point);
-        continue;
-      }
-      var allCls = Object.keys(icons);
-      for(var j=0; j<allCls.length; j++){
-        if(id in icons[allCls[j]] ){
-          
-          ids.push({'idnum':indexId,'id':id,'images':allCls[j],'y':icons[allCls[j]][id]});
-          point++;
-          indexs[i].push(point);
-        }
-      }
-    }
-  }
-
-  // 生成定位编号
+// 生成定位编号
+(function(){
   var colNum = ' ';
   for(var i=0; i<13; i++){
     var tpl = '<td>'+i+'<div class="colBlock" style="left:'+(i*32+1)+'px;"></div></td>';
@@ -400,11 +365,111 @@
   }
   arrRowMark.innerHTML = rowNum;
   mapRowMark.innerHTML = rowNum;
+})();
 </script>
 
+<!-- =========================================================== -->
 
+<script src='_server/vendor/vue.min.js'></script>
+<!-- <script src="https://unpkg.com/vue"></script> -->
+<script src='_server/fs.js'></script>
 <script>
-(function(){
+printf = function(str,weak) {
+  var prefix='<span class="result">',postfix='</span>';
+  if (weak){prefix='<span class="weakresult">';}
+  if (typeof(str)==="undefined")str='';
+  printOut.innerHTML=prefix+String(str)+postfix;
+}
+//所有全局量
+__all__=['Vue','fs','printf','editor','main','core','fullX','fullY'];
+__id__=['printOut','arrRowMark','mapRowMark','data','bg','dataSelection'];
+__Vue__=['exportM','editArea','editTip','clear','tip','selectBox'];
+
+var main={'instance':{}};
+var core={};
+
+function editor() {
+  this.version = "0.1";
+}
+editor.prototype.init = function() {
+  var loadedNum=0;
+  var tmp_callback = function () {
+    loadedNum++;
+    if (loadedNum==2)
+      editor.drawInitData(function(){
+        editor.listen();
+      });
+  }
+
+  editor.loadMod(function(){
+    editor.afterLoadMod(function(){
+      tmp_callback();
+    });
+  });
+
+  editor.loadImage(function(){
+    editor.importGrass(function(){
+      editor.afterImportGrass(function(){
+        tmp_callback();
+      });
+    });
+  });
+
+}
+
+editor.prototype.loadMod = function (callback) {
+  main={'instance':{}};
+  var loadedNum=0;
+  ['libs/icons.js','libs/maps.js'].forEach( function (value,ii,aa) {
+    var script = document.createElement('script');
+    script.src = value + '?' + editor.version;
+    document.body.appendChild(script);
+    script.onload = function () {
+      loadedNum++;
+      if (loadedNum==aa.length)
+        callback();
+    }
+  })
+}//main       加载['libs/icons.js','libs/maps.js']
+
+editor.prototype.afterLoadMod = function (callback) {
+  
+  main.instance.icons.init();
+  var icons=main.instance.icons.getIcons();
+
+  editor.ids = [];
+  editor.indexs = [];
+  editor.ids.push({'idnum':0,'id':'ground','images':'terrains','y':0});
+
+  var point = 0
+  for(var i=0; i<400; i++){
+    var indexBlock = main.instance.maps.getBlock(0,0,i);
+    editor.indexs[i] = [];
+    if('event' in indexBlock){
+      var id = indexBlock.event.id;
+      var indexId = indexBlock.id;
+      if(id=='autotile'){
+        editor.ids.push({'idnum':indexId,'id':'autotile','images':'autotile','y':0});
+        point++;
+        editor.indexs[i].push(point);
+        continue;
+      }
+      var allCls = Object.keys(icons);
+      for(var j=0; j<allCls.length; j++){
+        if(id in icons[allCls[j]] ){
+          
+          editor.ids.push({'idnum':indexId,'id':id,'images':allCls[j],'y':icons[allCls[j]][id]});
+          point++;
+          editor.indexs[i].push(point);
+        }
+      }
+    }
+  }
+
+  callback();
+}//editor.ids,editor.indexs
+
+editor.prototype.loadImage = function (callback) {
   core={};
   core.material={};
   core.material.images = {};
@@ -432,26 +497,30 @@
       imgName = imgName[0];
       core.material.images[imgName] = image;
       loadedImageNum++;
-      if (loadedImageNum == core.images.length) {importGrass();}
+      if (loadedImageNum == core.images.length) {callback();}
     });
   }
-})();
-//context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height)
-</script>
+}//core       加载['terrains','animates', 'enemys', 'items', 'npcs']
 
-<script type="text/javascript">
-  //预处理草的源图片
-importGrass=function(){
-  autotile = new Image();
+editor.prototype.importGrass = function (callback) {
+  var autotile = new Image();
 
-  autotile.src = "images/autotile.png"
+  autotile.src = "images/autotile.png";
 
+  if (autotile.complete) {
+    editor.autotile = autotile;
+    callback();
+    return;
+  }
   autotile.onload = function () {
-    console.log("loaded")
-    drawInitData();
+    editor.autotile = autotile;
+    callback();
   };
 
-  function drawAutotile(canvas, x, y, size, autotile, index) {
+}//           加载 'autotile'
+
+editor.prototype.afterImportGrass = function (callback) {
+  var drawAutotile = function (canvas, x, y, size, autotile, index) {
     switch (index) {
       case 0:
         canvas.drawImage(autotile, 0, 0, 32, 32, x, y, size, size);
@@ -529,36 +598,34 @@ importGrass=function(){
   //根据状态画图
   var cxt = eventLayer.getContext("2d");
 
-  grass = function (ii, x, y) {
+  var grass = function (ii, x, y) {
     cxt.clearRect(x * 32, y * 32, 32, 32);
     // cxt.putImageData(grassImageData[ii], x * 32, y * 32);
-    drawAutotile(cxt, x * 32, y * 32, 32, autotile, ii);
+    drawAutotile(cxt, x * 32, y * 32, 32, editor.autotile, ii);
   }
 
-  //function clearGrass() { cxt.clearRect(0, 0, 416, 416); }
-
-  fullX = 12;
-  fullY = 12;
-
-  map = [];//-2表示边界,0表示空地,其他对象对应实体
-  map[fullX + 1 + fullY * (fullX + 1)] = -2;
-  for(var ii=0;ii<fullX + 1 + fullY * (fullX + 1);ii++)map[ii]=0;
-
-  m = function (x, y) {
-    if (x < 0 || x > fullX || y < 0 || y > fullY) return fullX + 1 + fullY * (fullX + 1);
-    return x + y * (fullX + 1);
-  }
-
-  isGrass = function (xx, yy) { 
-    var mapxy=map[m(xx,yy)];
+  var isGrass = function (xx, yy) { 
+    var mapxy=editor.map[editor.m(xx,yy)];
     if (typeof(mapxy) == typeof(-1) || typeof(mapxy) == typeof([][0]))return 0;
     if (mapxy.images=='autotile')return 1;
     return 0;
   }
 
-  updateMap = function () {
+  fullX = 12;
+  fullY = 12;
+
+  editor.map = [];//-2表示边界,0表示空地,其他对象对应实体
+  editor.map[fullX + 1 + fullY * (fullX + 1)] = -2;
+  for(var ii=0;ii<fullX + 1 + fullY * (fullX + 1);ii++)editor.map[ii]=0;
+
+  editor.m = function (x, y) {
+    if (x < 0 || x > fullX || y < 0 || y > fullY) return fullX + 1 + fullY * (fullX + 1);
+    return x + y * (fullX + 1);
+  }
+
+  editor.updateMap = function (clearError) {
     //clearGrass();
-    // console.log(map)
+    // console.log(editor.map)
     for (var xx = 0; xx <= fullX; xx++) {
       for (var yy = 0; yy <= fullY; yy++) {
         if (!isGrass(xx, yy)) continue;
@@ -571,6 +638,7 @@ importGrass=function(){
     for (var xx = 0; xx < fullX; xx++) {
       for (var yy = 0; yy < fullY; yy++) {
         if (isGrass(xx, yy) + isGrass(xx + 1, yy) + isGrass(xx + 1, yy + 1) + isGrass(xx, yy + 1) != 3) continue;
+        var autotile = editor.autotile;
         if (!isGrass(xx, yy)) {
           // cxt.clearRect(xx * 32 + 32, yy * 32 + 32, 16, 16);
           // cxt.putImageData(grassImageData[16], xx * 32 + 32, yy * 32 + 32);
@@ -596,81 +664,79 @@ importGrass=function(){
     for (var xx = 0; xx <= fullX; xx++) {
       for (var yy = 0; yy <= fullY; yy++) {
         if (isGrass(xx, yy)) continue;
-        var mapxy=map[m(xx,yy)];
+        var mapxy=editor.map[editor.m(xx,yy)];
         if (typeof(mapxy) == typeof(-1)){
           if(mapxy == 0) cxt.clearRect(xx*32, yy*32, 32, 32);
           continue;
         }
-        else if(typeof(mapxy) == typeof([][0])) {//未定义块画红块
-          cxt.fillStyle = 'red';
-          cxt.fillRect(xx*32, yy*32, 32, 32);
-          continue;
-        } 
+        
         //context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height)
         cxt.clearRect(xx*32, yy*32, 32, 32);
         cxt.drawImage(core.material.images[mapxy.images], 0, mapxy.y*32, 32, 32, xx*32, yy*32, 32, 32);
+
+        if(typeof(mapxy) != typeof({}) || !('idnum' in mapxy) ) {//未定义块画红块
+          if (clearError=='clearError'){
+            editor.map[editor.m(xx,yy)]=0;
+            cxt.clearRect(xx*32, yy*32, 32, 32);
+            continue;
+          }
+          cxt.fillStyle = 'rgba(255,0,0,0.8)';
+          var tmpNum =6;
+          cxt.fillRect(xx*32+tmpNum, yy*32+tmpNum, 32-tmpNum*2, 32-tmpNum*2);
+        } 
       }
     }
   }
-}
-</script>
 
-<script>
-  //画背景以及拖拽相关的支持
+  callback();
+}//fullX,fullY,editor.map,editor.m,editor.updateMap
 
-  printf = function(str,weak) {
-    var prefix='<span class="result">',postfix='</span>';
-    if (weak){prefix='<span class="weakresult">';}
-    if (typeof(str)==="undefined")str='';
-    printOut.innerHTML=prefix+String(str)+postfix;
+editor.prototype.drawInitData = function (callback) {
+  var ratio=1;
+  var images=core.material.images;
+  var maxHeight=700;
+  var sumWidth=0;
+  editor.widthsX={};
+  for(var ii=0;ii<core.images.length;ii++){
+    var img=core.images[ii];
+    editor.widthsX[img]=[img,sumWidth/32,(sumWidth+images[img].width)/32];
+    sumWidth+=images[img].width;
+    maxHeight=Math.max(maxHeight,images[img].height);
   }
+  editor.widthsX['autotile']=['autotile',sumWidth/32,(sumWidth+3*32)/32];
+  sumWidth+=3*32;
+  
+  var fullWidth=~~(sumWidth*ratio);
+  var fullHeight=~~(maxHeight*ratio);
 
-  drawInitData = function(){
-    var ratio=1;
-    
-    var images=core.material.images;
-    maxHeight=700;
-    sumWidth=0;
-    widthsX={};
-    for(var ii=0;ii<core.images.length;ii++){
-      var img=core.images[ii];
-      widthsX[img]=[img,sumWidth/32,(sumWidth+images[img].width)/32];
-      sumWidth+=images[img].width;
-      maxHeight=Math.max(maxHeight,images[img].height);
+  if (fullWidth > data.width) data.style.width = (data.width = fullWidth)/ratio + 'px';
+  data.style.height = (data.height = fullHeight)/ratio + 'px';
+
+  var dc = data.getContext('2d');
+  var bgc = bg.getContext('2d');
+  //var colorA = ["#f8f8f8", "#cccccc"];
+  //var colorIndex = 1;
+  //在data内画一个13*13的灰白相间的格子
+  for (var ii = 0; ii < 13; ii++)
+    for (var jj = 0; jj < 13; jj++) {
+      //dc.fillStyle = colorA[colorIndex];
+      //colorIndex = 1 - colorIndex;
+      //dc.fillRect(ii * 32, jj * 32, 32, 32);
+      bgc.drawImage(core.material.images['terrains'], 0, 0, 32, 32, ii*32, jj*32, 32, 32);
     }
-    widthsX['autotile']=['autotile',sumWidth/32,(sumWidth+3*32)/32];
-    sumWidth+=3*32;
-    
-    var fullWidth=~~(sumWidth*ratio);
-    var fullHeight=~~(maxHeight*ratio);
+  var nowx=0;
+  for(var ii=0;ii<core.images.length;ii++){
+    var img=core.images[ii];
+    dc.drawImage(images[img], nowx, 0)
+    nowx+=images[img].width;
+  }
+  dc.drawImage(editor.autotile, nowx, 0)
 
-    // data.style.width = (data.width = fullWidth)/ratio + 'px';
-    data.style.height = (data.height = fullHeight)/ratio + 'px';
+  callback();
+}//editor.widthsX
 
-    var dc = data.getContext('2d');
-    var bgc = bg.getContext('2d');
-    //var colorA = ["#f8f8f8", "#cccccc"];
-    //var colorIndex = 1;
-    //在data内画一个13*13的灰白相间的格子
-    for (var ii = 0; ii < 13; ii++)
-      for (var jj = 0; jj < 13; jj++) {
-        //dc.fillStyle = colorA[colorIndex];
-        //colorIndex = 1 - colorIndex;
-        //dc.fillRect(ii * 32, jj * 32, 32, 32);
-        bgc.drawImage(core.material.images['terrains'], 0, 0, 32, 32, ii*32, jj*32, 32, 32);
-      }
-    var nowx=0;
-    for(var ii=0;ii<core.images.length;ii++){
-      var img=core.images[ii];
-      dc.drawImage(images[img], nowx, 0)
-      nowx+=images[img].width;
-    }
-    dc.drawImage(autotile, nowx, 0)
-    
-  };
+editor.prototype.listen = function() {
 
-
-(function () {
   var uc = ui.getContext('2d');
 
   function fillPos(pos) {
@@ -679,16 +745,16 @@ importGrass=function(){
   }//在格子内画一个随机色块
 
   function eToLoc(e) { 
-    var loc = { 
+    editor.loc = { 
       'x': document.documentElement.scrollLeft+e.clientX - mid.offsetLeft-mapEdit.offsetLeft, 
       'y': document.documentElement.scrollTop+e.clientY - mid.offsetTop-mapEdit.offsetTop, 
       'size': 32 
     };
-    return loc; }//返回可用的组件内坐标
+    return editor.loc; }//返回可用的组件内坐标
 
   function locToPos(loc) {
-    pos = { 'x': ~~(loc.x / loc.size), 'y': ~~(loc.y / loc.size) }
-    return pos;
+    editor.pos = { 'x': ~~(loc.x / loc.size), 'y': ~~(loc.y / loc.size) }
+    return editor.pos;
   }
 
   var holdingPath = 0;
@@ -718,7 +784,7 @@ importGrass=function(){
     e.stopPropagation();
     uc.clearRect(0, 0, 416, 416);
     var loc = eToLoc(e);
-    pos = locToPos(loc)
+    var pos = locToPos(loc)
     stepPostfix = [];
     stepPostfix.push(pos);
     fillPos(pos);
@@ -744,7 +810,7 @@ importGrass=function(){
         max = directionDistance[i];
       }
     }
-    pos = [{ 'x': 0, 'y': 1 }, { 'x': -1, 'y': 0 }, { 'x': 0, 'y': -1 }, { 'x': 1, 'y': 0 }, false][index]
+    var pos = [{ 'x': 0, 'y': 1 }, { 'x': -1, 'y': 0 }, { 'x': 0, 'y': -1 }, { 'x': 1, 'y': 0 }, false][index]
     if (pos) {
       pos.x += pos0.x;
       pos.y += pos0.y;
@@ -762,16 +828,16 @@ importGrass=function(){
     e.stopPropagation();
     var loc = eToLoc(e);
     if (stepPostfix.length) {
-      preMapData = JSON.parse(JSON.stringify(map));
+      preMapData = JSON.parse(JSON.stringify(editor.map));
       currDrawData.pos = JSON.parse(JSON.stringify(stepPostfix));
-      currDrawData.info = JSON.parse(JSON.stringify(info));
+      currDrawData.info = JSON.parse(JSON.stringify(editor.info));
       reDo = null;
       // console.log(stepPostfix);
       for (var ii = 0; ii < stepPostfix.length; ii++)
-        map[m(stepPostfix[ii].x, stepPostfix[ii].y)] = info;
-      map[fullX + 1 + fullY * (fullX + 1)] = -2;
-      // console.log(map);
-      updateMap();
+        editor.map[editor.m(stepPostfix[ii].x, stepPostfix[ii].y)] = editor.info;
+      editor.map[fullX + 1 + fullY * (fullX + 1)] = -2;
+      // console.log(editor.map);
+      editor.updateMap();
       holdingPath = 0;
       stepPostfix = [];
       uc.clearRect(0, 0, 416, 416);
@@ -790,38 +856,39 @@ importGrass=function(){
       e.preventDefault();
     //Ctrl+z 撤销上一步undo
     if(e.keyCode == 90 && e.ctrlKey && preMapData && currDrawData.pos.length){
-      map = JSON.parse(JSON.stringify(preMapData));
-      updateMap();
+      editor.map = JSON.parse(JSON.stringify(preMapData));
+      editor.updateMap();
       reDo = JSON.parse(JSON.stringify(currDrawData));
       currDrawData = {pos: [],info: {}};
       preMapData = null;
     }
     //Ctrl+y 重做一步redo
     if(e.keyCode == 89 && e.ctrlKey && reDo && reDo.pos.length){
-      preMapData = JSON.parse(JSON.stringify(map));
+      preMapData = JSON.parse(JSON.stringify(editor.map));
       for(var j=0; j<reDo.pos.length;j++)
-        map[m(reDo.pos[j].x, reDo.pos[j].y)] = JSON.parse(JSON.stringify(reDo.info));
+        editor.map[editor.m(reDo.pos[j].x, reDo.pos[j].y)] = JSON.parse(JSON.stringify(reDo.info));
 
-      map[fullX + 1 + fullY * (fullX + 1)] = -2;
-      updateMap();
+      editor.map[fullX + 1 + fullY * (fullX + 1)] = -2;
+      editor.updateMap();
       currDrawData = JSON.parse(JSON.stringify(reDo));
       reDo = null;
     }
   }
   
-  // info=ids[indexs[20][0]];//autotile
+  // info=editor.ids[editor.indexs[20][0]];//autotile
   data.onmousedown = function (e) {
     e.stopPropagation();
     var loc = { 
-      'x': document.documentElement.scrollLeft + e.clientX - right.offsetLeft-iconLib.offsetLeft, 
-      'y': document.documentElement.scrollTop + e.clientY + iconLib.scrollTop - right.offsetTop-iconLib.offsetTop, 
+      'x': document.documentElement.scrollLeft + e.clientX + (iconLib.scrollLeft||0) - right.offsetLeft-iconLib.offsetLeft, 
+      'y': document.documentElement.scrollTop + e.clientY + (iconLib.scrollTop||0) - right.offsetTop-iconLib.offsetTop, 
       'size': 32 
     };
-    pos = locToPos(loc);
-    for (var spriter in widthsX){
-      if(pos.x>=widthsX[spriter][1] && pos.x<widthsX[spriter][2]){
-          pos.x=widthsX[spriter][1];
-          pos.images=widthsX[spriter][0];
+    editor.loc =loc;
+    var pos = locToPos(loc);
+    for (var spriter in editor.widthsX){
+      if(pos.x>=editor.widthsX[spriter][1] && pos.x<editor.widthsX[spriter][2]){
+          pos.x=editor.widthsX[spriter][1];
+          pos.images=editor.widthsX[spriter][0];
         if(pos.images=='autotile'){
           pos.y=0;
         }else if((pos.y+1)*32>core.material.images[pos.images].height)
@@ -831,87 +898,38 @@ importGrass=function(){
         // console.log(pos,core.material.images[pos.images].height)
         dataSelection.style.left = pos.x*32 +'px';
         dataSelection.style.top = pos.y*32 +'px';
-        info={'images':pos.images,'y':pos.y};
-        for (var ii=0;ii<ids.length;ii++){
-          if(pos.images==ids[ii].images && pos.y==ids[ii].y)
-            info = ids[ii];
+        editor.info={'images':pos.images,'y':pos.y};
+        for (var ii=0;ii<editor.ids.length;ii++){
+          if(pos.images==editor.ids[ii].images && pos.y==editor.ids[ii].y)
+            editor.info = editor.ids[ii];
         }
-        tip.infos = JSON.parse(JSON.stringify(info));
+        tip.infos = JSON.parse(JSON.stringify(editor.info));
       }
     }
   }
 
-})();
+
+}//绑定事件
+
+/* 
+editor.updateMap
+现在可以通过editor.updateMap('clearError')把所有错误id置零并绘图
+
+editor.loc
+editor.pos
+editor.info
+始终是最后一次点击的结果
+注意editor.info可能因为点击其他地方而被清空
+*/
+var editor = new editor();
+editor.init();
 </script>
-
 <script type="text/javascript">
-
-  //var timecheck=0;
-  postsomething = function (data,callback) {
-    //if(timecheck!==0)return;
-    //timecheck=1;
-    setTimeout(function(){timecheck=0},5000);
-    var xhr = function(){
-      if (window.XMLHttpRequest) {
-        return new XMLHttpRequest();
-      }else{
-        return new ActiveObject('Micrsorf.XMLHttp');
-      }
-    }();
-    xhr.onreadystatechange = function(){
-    switch(xhr.readyState){
-      case 0 : 
-        printf('waiting... ','weak');
-        break;
-      case 1 : 
-        printf('waiting ...','weak');
-        break;
-      case 2 : 
-        printf('waiting... ','weak');
-        break;
-      case 3 : 
-        printf('waiting ...','weak');
-        break;
-      case 4 : 
-        if ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304) {
-          printf(xhr.responseText);
-          if (Boolean(callback))callback(xhr.responseText);
-        }else{
-          printf('error:' + xhr.status+'<br>'+(xhr.responseText||''),'weak');
-        }
-        //timecheck=0;
-        break;
-    }
-  }
-  xhr.open('post','http://127.0.0.1');
-  xhr.setRequestHeader('Content-Type','text/plain');
-  if(typeof(data)==typeof([][0]) || data==null)data=JSON.stringify({1:2});
-  xhr.send(data);
-  }
-
-  function readUTF8file(filename,callback){
-    data={};
-    data.name='readUTF8file';
-    data.func='open';
-    data.args=[String(filename)];
-    postsomething(JSON.stringify(data),callback);
-  }
-
-  function writeUTF8file(filename,filestr,callback){
-    data={};
-    data.name='writeUTF8file';
-    data.func='open';
-    data.args=[String(filename),String(filestr)];
-    postsomething(JSON.stringify(data),callback);
-  }
-
-</script>
-
-<script type="text/javascript">
-
+//Vue
+//var listenByVue = function() {
   document.body.onmousedown = function(e){
     selectBox.isSelected = false;
-    info = {};
+    editor.info = {};
   }
   iconLib.onmousedown = function(e){
     e.stopPropagation();
@@ -929,7 +947,7 @@ importGrass=function(){
         for (var yy = 0; yy < 13; yy++){
           filestr+='['
           for (var xx = 0; xx < 13; xx++) {
-            var mapxy=map[m(xx,yy)];
+            var mapxy=editor.map[editor.m(xx,yy)];
             if(typeof(mapxy)==typeof({})){
               if ('idnum' in mapxy)mapxy=mapxy.idnum;
               else {
@@ -997,17 +1015,17 @@ importGrass=function(){
         for(var i=0; i<mapArray.length; i++){
           var num = parseInt(mapArray[i]);
           if(num == 0 ) 
-            map[i] = 0;
+            editor.map[i] = 0;
           else if(num >= 400){
             that.error = 3;
-            map[i] = undefined;
-          }else if(indexs[num][0] == undefined){
+            editor.map[i] = undefined;
+          }else if(editor.indexs[num][0] == undefined){
             that.error = 2;
-            map[i] = undefined;
-          }else map[i] = ids[[indexs[num][0]]];
+            editor.map[i] = undefined;
+          }else editor.map[i] = editor.ids[[editor.indexs[num][0]]];
         }
 
-        updateMap();
+        editor.updateMap();
         
       },
       formatArr: function(){
@@ -1072,8 +1090,8 @@ importGrass=function(){
 
     methods: {
       clearMap: function(){
-        map[fullX + 1 + fullY * (fullX + 1)] = -2;
-        for(var ii=0;ii<fullX + 1 + fullY * (fullX + 1);ii++)map[ii]=0;
+        editor.map[fullX + 1 + fullY * (fullX + 1)] = -2;
+        for(var ii=0;ii<fullX + 1 + fullY * (fullX + 1);ii++)editor.map[ii]=0;
         ec = eventLayer.getContext('2d');
         ec.clearRect(0, 0, 416, 416);
         clearTimeout(editArea.formatTimer);
@@ -1088,7 +1106,7 @@ importGrass=function(){
   var tip = new Vue({
     el: '#tip',
     data: {
-      infos: ids[indexs[20][0]],
+      infos: {idnum: 20, id: "autotile", images: "autotile", y: 0},//editor.ids[editor.indexs[20][0]],
       hasId: true,
       isSelectedBlock: false,
       geneMapSuccess: false,
@@ -1150,6 +1168,11 @@ importGrass=function(){
       }
     }
   })
+//}
+//listenByVue()
 </script>
+
+
+
 </body>
 </html>

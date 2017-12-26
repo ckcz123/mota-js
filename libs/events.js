@@ -1153,7 +1153,7 @@ events.prototype.keyDownSwitchs = function (keycode) {
     }
     if (keycode==40) {
         core.status.event.selection++;
-        if (core.status.event.selection>=choices.length) core.status.event.selection=choices.length;
+        if (core.status.event.selection>=choices.length) core.status.event.selection=choices.length-1;
         core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
     }
 }
@@ -1230,7 +1230,7 @@ events.prototype.keyDownSettings = function (keycode) {
     }
     if (keycode==40) {
         core.status.event.selection++;
-        if (core.status.event.selection>=choices.length) core.status.event.selection=choices.length;
+        if (core.status.event.selection>=choices.length) core.status.event.selection=choices.length-1;
         core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
     }
 }
@@ -1295,7 +1295,7 @@ events.prototype.keyDownSyncSave = function (keycode) {
     }
     if (keycode==40) {
         core.status.event.selection++;
-        if (core.status.event.selection>=choices.length) core.status.event.selection=choices.length;
+        if (core.status.event.selection>=choices.length) core.status.event.selection=choices.length-1;
         core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
     }
 }

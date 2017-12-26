@@ -14,7 +14,7 @@ icons.prototype.init = function () {
             'ground': 0,
             'grass': 1,
             'grass2': 2,
-            'snow': 3,
+            'snowGround': 3,
             'ground2': 4,
             'ground3': 5,
             'ground4': 6,

@@ -398,6 +398,7 @@ editor.prototype.init = function() {
     if (loadedNum==2)
       editor.drawInitData(function(){
         editor.listen();
+        editor.listenByVue();
       });
   }
 
@@ -775,8 +776,8 @@ editor.prototype.listen = function() {
   }//用于鼠标移出canvas时的自动清除状态
 
   ui.onmousedown = function (e) {
-    if(!selectBox.isSelected) {
-      tip.whichShow = 1;
+    if(!editor.Vue.selectBox.isSelected) {
+      editor.Vue.tip.whichShow = 1;
       return;
     }
 
@@ -793,8 +794,8 @@ editor.prototype.listen = function() {
   }
 
   ui.onmousemove = function (e) {
-    if(!selectBox.isSelected) {
-      // tip.whichShow = 1;
+    if(!editor.Vue.selectBox.isSelected) {
+      // editor.Vue.tip.whichShow = 1;
       return;
     }
 
@@ -822,8 +823,8 @@ editor.prototype.listen = function() {
   }
 
   ui.onmouseup = function (e) {
-    if(!selectBox.isSelected) {
-      tip.whichShow = 1;
+    if(!editor.Vue.selectBox.isSelected) {
+      editor.Vue.tip.whichShow = 1;
       return;
     }
     holdingPath = 0;
@@ -896,7 +897,7 @@ editor.prototype.listen = function() {
         }else if((pos.y+1)*32>core.material.images[pos.images].height)
           pos.y=~~(core.material.images[pos.images].height/32)-1;
         
-        selectBox.isSelected = true;
+        editor.Vue.selectBox.isSelected = true;
         // console.log(pos,core.material.images[pos.images].height)
         dataSelection.style.left = pos.x*32 +'px';
         dataSelection.style.top = pos.y*32 +'px';
@@ -905,7 +906,7 @@ editor.prototype.listen = function() {
           if(pos.images==editor.ids[ii].images && pos.y==editor.ids[ii].y)
             editor.info = editor.ids[ii];
         }
-        tip.infos = JSON.parse(JSON.stringify(editor.info));
+        editor.Vue.tip.infos = JSON.parse(JSON.stringify(editor.info));
       }
     }
   }
@@ -913,38 +914,25 @@ editor.prototype.listen = function() {
 
 }//绑定事件
 
-/* 
-editor.updateMap
-现在可以通过editor.updateMap('clearError')把所有错误id置零并绘图
-以及editor.updateMap('showError')显示所有错误
-
-editor.loc
-editor.pos
-editor.info
-始终是最后一次点击的结果
-注意editor.info可能因为点击其他地方而被清空
-*/
-var editor = new editor();
-editor.init();
-</script>
-<script type="text/javascript">
-//Vue
-//var listenByVue = function() {
+editor.prototype.listenByVue = function() {
   document.body.onmousedown = function(e){
-    selectBox.isSelected = false;
+    editor.Vue.selectBox.isSelected = false;
     editor.info = {};
   }
   iconLib.onmousedown = function(e){
     e.stopPropagation();
   }
-  var exportM = new Vue({
+  editor.Vue={};
+  //([^#"'])(editor.Vue.tip)\b
+  //$1editor.Vue.$2
+  editor.Vue.exportM = new Vue({
     el: '#exportM',
 
     methods: {
       exportMap: function(){
         setTimeout(function(){editor.updateMap();},5000);
-        if(editArea.error) {
-          tip.whichShow = 3;
+        if(editor.Vue.editArea.error) {
+          editor.Vue.tip.whichShow = 3;
           editor.updateMap('showError');
           return;
         }
@@ -957,12 +945,12 @@ editor.init();
               if ('idnum' in mapxy)mapxy=mapxy.idnum;
               else {
                 // mapxy='!!?';
-                tip.whichShow = 3;
+                editor.Vue.tip.whichShow = 3;
                 editor.updateMap('showError');
                 return;
               }
             }else if(typeof(mapxy)=='undefined'){
-              tip.whichShow = 3;
+              editor.Vue.tip.whichShow = 3;
               editor.updateMap('showError');
               return;
             }
@@ -975,11 +963,11 @@ editor.init();
         }
         pout.value = filestr;
 
-        tip.whichShow = 2;
+        editor.Vue.tip.whichShow = 2;
       }
     }
   })
-  var editArea = new Vue({
+  editor.Vue.editArea = new Vue({
     el: '#editArea',
     data: {
       mapArr: '',
@@ -1001,7 +989,7 @@ editor.init();
           clearTimeout(that.formatTimer);
           setTimeout(function(){
             that.drawMap();
-            tip.whichShow = 8
+            editor.Vue.tip.whichShow = 8
           }, 1000);
           that.formatTimer = setTimeout(function(){
             pout.value = that.formatArr();
@@ -1011,7 +999,7 @@ editor.init();
         }
       },
       error: function(){
-        console.log(editArea.mapArr);
+        console.log(editor.Vue.editArea.mapArr);
       }
     },
     methods: {
@@ -1063,7 +1051,7 @@ editor.init();
       }
     }
   });
-  var editTip = new Vue({
+  editor.Vue.editTip = new Vue({
     el: '#editTip',
     data: {
       err: ''
@@ -1071,28 +1059,28 @@ editor.init();
     methods: {
       copyMap: function(){
 
-        tip.whichShow = 0;
+        editor.Vue.tip.whichShow = 0;
         if(pout.value.trim() != ''){
-          if(editArea.error) {
-            this.err = editArea.errors[editArea.error-1];
-            tip.whichShow = 5
+          if(editor.Vue.editArea.error) {
+            this.err = editor.Vue.editArea.errors[editor.Vue.editArea.error-1];
+            editor.Vue.tip.whichShow = 5
             return;
           }
           try{
             pout.select();
             document.execCommand("Copy");
-            tip.whichShow = 6;
+            editor.Vue.tip.whichShow = 6;
           }catch(e){
             this.err= e;
-            tip.whichShow = 5;
+            editor.Vue.tip.whichShow = 5;
           }
         }else{
-          tip.whichShow = 7;
+          editor.Vue.tip.whichShow = 7;
         }
       }
     },
   })
-  var clear = new Vue({
+  editor.Vue.clear = new Vue({
     el: '#clear',
 
     methods: {
@@ -1101,19 +1089,19 @@ editor.init();
         for(var ii=0;ii<fullX + 1 + fullY * (fullX + 1);ii++)editor.map[ii]=0;
         ec = eventLayer.getContext('2d');
         ec.clearRect(0, 0, 416, 416);
-        clearTimeout(editArea.formatTimer);
-        clearTimeout(tip.timer);
+        clearTimeout(editor.Vue.editArea.formatTimer);
+        clearTimeout(editor.Vue.tip.timer);
         pout.value = '';
-        editArea.mapArr = '';
-        tip.whichShow = 4;
-        editArea.error = 0;
+        editor.Vue.editArea.mapArr = '';
+        editor.Vue.tip.whichShow = 4;
+        editor.Vue.editArea.error = 0;
       }
     }
   })
-  var tip = new Vue({
+  editor.Vue.tip = new Vue({
     el: '#tip',
     data: {
-      infos: {idnum: 20, id: "autotile", images: "autotile", y: 0},//editor.ids[editor.indexs[20][0]],
+      infos: editor.ids[editor.indexs[20][0]],
       hasId: true,
       isSelectedBlock: false,
       geneMapSuccess: false,
@@ -1149,7 +1137,7 @@ editor.init();
       whichShow: function(){
         var that = this;
         that.mapMsg = '';
-        that.msgs[4] = "复制失败！"+editTip.err;
+        that.msgs[4] = "复制失败！"+editor.Vue.editTip.err;
         clearTimeout(that.timer);
         if(that.whichShow){
           that.mapMsg = that.msgs[that.whichShow-1];
@@ -1162,21 +1150,35 @@ editor.init();
     }
   })
 
-  var selectBox = new Vue({
+  editor.Vue.selectBox = new Vue({
     el: '#selectBox',
     data: {
       isSelected: false
     },
     watch: {
       isSelected: function(){
-        tip.isSelectedBlock = this.isSelected;
-        tip.whichShow = 0;
-        clearTimeout(tip.timer);
+        editor.Vue.tip.isSelectedBlock = this.isSelected;
+        editor.Vue.tip.whichShow = 0;
+        clearTimeout(editor.Vue.tip.timer);
       }
     }
   })
-//}
-//listenByVue()
+}//Vue
+
+/* 
+editor.updateMap
+现在可以通过editor.updateMap('clearError')把所有错误id置零并绘图
+以及editor.updateMap('showError')显示所有错误
+
+editor.loc
+editor.pos
+editor.info
+始终是最后一次点击的结果
+注意editor.info可能因为点击其他地方而被清空
+*/
+var editor = new editor();
+editor.init();
+
 </script>
 
 

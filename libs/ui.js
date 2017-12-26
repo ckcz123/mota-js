@@ -856,7 +856,7 @@ ui.prototype.drawFly = function(page) {
     if (page>0)
         core.fillText('ui', '▼', 356, 247+64, '#FFFFFF', "17px Verdana");
     core.strokeRect('ui', 20, 100, 273, 273, '#FFFFFF', 2);
-    this.drawThumbnail('ui', core.status.maps[floorId].blocks, 20, 100, 273);
+    this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 20, 100, 273);
 }
 
 ui.prototype.drawToolbox = function(index) {
@@ -1003,7 +1003,7 @@ ui.prototype.drawSLPanel = function(index) {
             core.fillText('ui', name+id, (2*i+1)*u, 35, '#FFFFFF', "bold 17px Verdana");
             core.strokeRect('ui', (2*i+1)*u-size/2, 50, size, size, id==index?'#FFD700':'#FFFFFF', id==index?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                this.drawThumbnail('ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc);
+                this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc);
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 65+size, '#FFFFFF', '10px Verdana');
             }
             else {
@@ -1015,7 +1015,7 @@ ui.prototype.drawSLPanel = function(index) {
             core.fillText('ui', name+id, (2*i-5)*u, 230, '#FFFFFF', "bold 17px Verdana");
             core.strokeRect('ui', (2*i-5)*u-size/2, 245, size, size, id==index?'#FFD700':'#FFFFFF', id==index?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                this.drawThumbnail('ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc);
+                this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc);
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 260+size, '#FFFFFF', '10px Verdana');
             }
             else {
@@ -1027,13 +1027,14 @@ ui.prototype.drawSLPanel = function(index) {
     this.drawPagination(page+1, 30);
 }
 
-ui.prototype.drawThumbnail = function(canvas, blocks, x, y, size, heroLoc) {
+ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroLoc) {
     core.clearMap(canvas, x, y, size, size);
+    var groundId = core.floors[floorId].defaultGround || "ground";
+    var blockIcon = core.material.icons.terrains[groundId];
+    var blockImage = core.material.images.terrains;
     var persize = size/13;
     for (var i=0;i<13;i++) {
         for (var j=0;j<13;j++) {
-            var blockIcon = core.material.icons.terrains.ground;
-            var blockImage = core.material.images.terrains;
             core.canvas[canvas].drawImage(blockImage, 0, blockIcon * 32, 32, 32, x + i * persize, y + j * persize, persize, persize);
         }
     }
@@ -1053,7 +1054,7 @@ ui.prototype.drawThumbnail = function(canvas, blocks, x, y, size, heroLoc) {
             }
         }
     }
-    core.drawAutotile('ui', autotileMaps, x, y, persize);
+    core.drawAutotile(floorId, 'ui', autotileMaps, x, y, persize);
 
     if (core.isset(heroLoc)) {
         var heroIcon = core.material.icons.hero[heroLoc.direction];

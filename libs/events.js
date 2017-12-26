@@ -66,17 +66,24 @@ events.prototype.startGame = function (hard) {
 
     core.hideStartAnimate(function() {
         core.drawText(core.clone(core.firstData.startText), function() {
-            core.status.event.selection = core.flags.battleAnimate?0:1;
-            core.ui.drawConfirmBox("你想开启战斗动画吗？\n之后可以在菜单栏中开启或关闭。\n（强烈建议新手开启此项）", function() {
-                console.log("1234");
-                core.flags.battleAnimate=true;
+            if (core.flags.showBattleAnimateConfirm) { // 是否提供“开启战斗动画”的选择项
+                core.status.event.selection = core.flags.battleAnimate ? 0 : 1;
+                core.ui.drawConfirmBox("你想开启战斗动画吗？\n之后可以在菜单栏中开启或关闭。\n（强烈建议新手开启此项）", function () {
+                    core.flags.battleAnimate = true;
+                    core.setLocalStorage('battleAnimate', true);
+                    core.startGame(hard);
+                    core.events.setInitData(hard);
+                }, function () {
+                    core.flags.battleAnimate = false;
+                    core.setLocalStorage('battleAnimate', false);
+                    core.startGame(hard);
+                    core.events.setInitData(hard);
+                });
+            }
+            else {
                 core.startGame(hard);
                 core.events.setInitData(hard);
-            }, function() {
-                core.flags.battleAnimate=false;
-                core.startGame(hard);
-                core.events.setInitData(hard);
-            });
+            }
         });
     })
 }
@@ -1119,23 +1126,25 @@ events.prototype.clickSwitchs = function (x,y) {
                 break;
             case 1:
                 core.flags.battleAnimate=!core.flags.battleAnimate;
+                core.setLocalStorage('battleAnimate', core.flags.battleAnimate);
                 core.ui.drawSwitchs();
                 break;
             case 2:
                 core.flags.displayEnemyDamage=!core.flags.displayEnemyDamage;
                 core.updateFg();
+                core.setLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
                 core.ui.drawSwitchs();
                 break;
             case 3:
                 core.flags.displayExtraDamage=!core.flags.displayExtraDamage;
                 core.updateFg();
+                core.setLocalStorage('extraDamage', core.flags.displayExtraDamage);
                 core.ui.drawSwitchs();
                 break;
             case 4:
                 core.status.event.selection=0;
                 core.ui.drawSettings(false);
                 break;
-
         }
     }
 }

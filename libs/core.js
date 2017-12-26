@@ -136,6 +136,11 @@ core.prototype.init = function (dom, statusBar, canvas, images, sounds, floorIds
         core.musicStatus.soundStatus = false;
     }
 
+    // switchs
+    core.flags.battleAnimate = core.getLocalStorage('battleAnimate', core.flags.battleAnimate);
+    core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
+    core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
+
     core.material.ground = new Image();
     core.material.ground.src = "images/ground.png";
 
@@ -1752,13 +1757,13 @@ core.prototype.drawMap = function (mapName, callback) {
     var mapBlocks = mapData.blocks;
     core.status.floorId = mapName;
     core.status.thisMap = mapData;
-    var blockIcon, blockImage;
     core.clearMap('all');
     core.removeGlobalAnimate(null, null, true);
+    var groundId = core.floors[mapName].defaultGround || "ground";
+    var blockIcon = core.material.icons.terrains[groundId];
+    var blockImage = core.material.images.terrains;
     for (var x = 0; x < 13; x++) {
         for (var y = 0; y < 13; y++) {
-            blockIcon = core.material.icons.terrains.ground;
-            blockImage = core.material.images.terrains;
             core.canvas.bg.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
         }
     }
@@ -1780,14 +1785,14 @@ core.prototype.drawMap = function (mapName, callback) {
             }
         }
     }
-    core.drawAutotile('event', autotileMaps, 0, 0, 32);
+    core.drawAutotile(mapName, 'event', autotileMaps, 0, 0, 32);
     core.setGlobalAnimate(core.values.animateSpeed);
 
     if (core.isset(callback))
         callback();
 }
 
-core.prototype.drawAutotile = function (canvas, autotileMaps, left, top, size) {
+core.prototype.drawAutotile = function (floorId, canvas, autotileMaps, left, top, size) {
     var isAutotile = function(x, y) {
         if (x<0 || x>12 || y<0 || y>12) return 0;
         return autotileMaps[13*x+y]?1:0;
@@ -1797,7 +1802,7 @@ core.prototype.drawAutotile = function (canvas, autotileMaps, left, top, size) {
             if (isAutotile(xx, yy)) {
                 // 绘制autotile
                 var id=isAutotile(xx, yy - 1) + 2 * isAutotile(xx - 1, yy) + 4 * isAutotile(xx, yy + 1) + 8 * isAutotile(xx + 1, yy);
-                core.drawAutotileBlock(canvas, left + xx * size, top + yy * size, size, core.material.images.autotile, id);
+                core.drawAutotileBlock(floorId, canvas, left + xx * size, top + yy * size, size, core.material.images.autotile, id);
             }
         }
     }
@@ -1805,24 +1810,25 @@ core.prototype.drawAutotile = function (canvas, autotileMaps, left, top, size) {
         for (var yy=0;yy<13;yy++) {
             if (isAutotile(xx, yy) + isAutotile(xx + 1, yy) + isAutotile(xx + 1, yy + 1) + isAutotile(xx, yy + 1) != 3) continue;
             if (!isAutotile(xx, yy)) {
-                core.drawAutotileBlock(canvas, left + xx * size + size, top + yy * size + size, size, core.material.images.autotile, 16);
+                core.drawAutotileBlock(floorId, canvas, left + xx * size + size, top + yy * size + size, size, core.material.images.autotile, 16);
             }
             if (!isAutotile(xx + 1, yy)) {
-                core.drawAutotileBlock(canvas, left + xx * size + size / 2, top + yy * size + size, size, core.material.images.autotile, 17);
+                core.drawAutotileBlock(floorId, canvas, left + xx * size + size / 2, top + yy * size + size, size, core.material.images.autotile, 17);
             }
             if (!isAutotile(xx + 1, yy + 1)) {
-                core.drawAutotileBlock(canvas, left + xx * size + size / 2, top + yy * size + size / 2, size, core.material.images.autotile, 18);
+                core.drawAutotileBlock(floorId, canvas, left + xx * size + size / 2, top + yy * size + size / 2, size, core.material.images.autotile, 18);
             }
             if (!isAutotile(xx, yy + 1)) {
-                core.drawAutotileBlock(canvas, left + xx * size + size, top + yy * size + size / 2, size, core.material.images.autotile, 19);
+                core.drawAutotileBlock(floorId, canvas, left + xx * size + size, top + yy * size + size / 2, size, core.material.images.autotile, 19);
             }
         }
     }
 }
 
-core.prototype.drawAutotileBlock = function (map, x, y, size, autotile, index) {
+core.prototype.drawAutotileBlock = function (floorId, map, x, y, size, autotile, index) {
     var canvas = core.canvas[map];
-    var blockIcon = core.material.icons.terrains.ground;
+    var groundId = core.floors[floorId].defaultGround || "ground";
+    var blockIcon = core.material.icons.terrains[groundId];
     var blockImage = core.material.images.terrains;
     switch (index) {
         case 0:

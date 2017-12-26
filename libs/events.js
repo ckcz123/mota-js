@@ -66,20 +66,34 @@ events.prototype.startGame = function (hard) {
 
     core.hideStartAnimate(function() {
         core.drawText(core.clone(core.firstData.startText), function() {
-            core.startGame(hard);
-            if (hard=='Easy') { // 简单难度
-                core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
-                // 可以在此设置一些初始福利，比如设置初始生命值可以调用：
-                // core.setStatus("hp", 10000);
-            }
-            if (hard=='Normal') { // 普通难度
-                core.setFlag('hard', 2); // 可以用flag:hard来获得当前难度
-            }
-            if (hard=='Hard') { // 困难难度
-                core.setFlag('hard', 3); // 可以用flag:hard来获得当前难度
-            }
+            core.status.event.selection = core.flags.battleAnimate?0:1;
+            core.ui.drawConfirmBox("你想开启战斗动画吗？\n之后可以在菜单栏中开启或关闭。\n（强烈建议新手开启此项）", function() {
+                console.log("1234");
+                core.flags.battleAnimate=true;
+                core.startGame(hard);
+                core.events.setInitData(hard);
+            }, function() {
+                core.flags.battleAnimate=false;
+                core.startGame(hard);
+                core.events.setInitData(hard);
+            });
         });
     })
+}
+
+////// 简单难度设置初始福利 //////
+events.prototype.setInitData = function (hard) {
+    if (hard=='Easy') { // 简单难度
+        core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
+        // 可以在此设置一些初始福利，比如设置初始生命值可以调用：
+        // core.setStatus("hp", 10000);
+    }
+    if (hard=='Normal') { // 普通难度
+        core.setFlag('hard', 2); // 可以用flag:hard来获得当前难度
+    }
+    if (hard=='Hard') { // 困难难度
+        core.setFlag('hard', 3); // 可以用flag:hard来获得当前难度
+    }
 }
 
 ////// 游戏结束事件 //////
@@ -166,6 +180,7 @@ events.prototype.doAction = function() {
         case "tip":
             core.drawTip(core.replaceText(data.text));
             core.events.doAction();
+            break;
         case "show": // 显示
             if (core.isset(data.time) && data.time>0 && (!core.isset(data.floorId) || data.floorId==core.status.floorId)) {
                 core.animateBlock(data.loc[0],data.loc[1],'show', data.time, function () {
@@ -361,7 +376,7 @@ events.prototype.doAction = function() {
             break;
         default:
             core.status.event.data.type='text';
-            core.ui.drawTextBox("\t[警告,]出错啦！\n"+data.type+" 事件不被支持...");
+            core.ui.drawTextBox("\t[警告]出错啦！\n"+data.type+" 事件不被支持...");
     }
     return;
 }
@@ -383,9 +398,14 @@ events.prototype.openShop = function(shopId, needVisited) {
     }
     shop.visited = true;
 
+    var selection = core.status.event.selection;
     core.ui.closePanel();
     core.lockControl();
-    core.status.event = {'id': 'shop', 'data': {'id': shopId, 'shop': shop}};
+    // core.status.event = {'id': 'shop', 'data': {'id': shopId, 'shop': shop}};
+    core.status.event.id = 'shop';
+    core.status.event.data = {'id': shopId, 'shop': shop};
+    core.status.event.selection = selection;
+
     // 拼词
     var content = "\t["+shop.name+","+shop.icon+"]";
     var times = shop.times, need=eval(shop.need);
@@ -402,9 +422,9 @@ events.prototype.openShop = function(shopId, needVisited) {
         var text = choice.text;
         if (core.isset(choice.need))
             text += "（"+eval(choice.need)+use+"）"
-        choices.push({"text": text});
+        choices.push(text);
     }
-    choices.push({"text": "离开"});
+    choices.push("离开");
     core.ui.drawChoices(content, choices);
 }
 
@@ -462,6 +482,7 @@ events.prototype.useItem = function(itemId) {
         var fillstyle = 'rgba(255,0,0,0.5)';
         if (core.canUseItem('centerFly')) fillstyle = 'rgba(0,255,0,0.5)';
         core.fillRect('ui',(12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32,fillstyle);
+        core.drawTip("请确认当前中心对称飞行器的位置");
         return;
     }
 
@@ -602,6 +623,46 @@ events.prototype.afterLoadData = function(data) {
 /*********** 界面上的点击事件 ***************/
 /******************************************/
 
+events.prototype.keyDownCtrl = function () {
+    if (core.status.event.id=='text') {
+        core.drawText();
+        return;
+    }
+    if (core.status.event.id=='action' && core.status.event.data.type=='text') {
+        this.doAction();
+        return;
+    }
+}
+
+events.prototype.keyUpConfirmBox = function (keycode) {
+    if (keycode==37) {
+        core.status.event.selection=0;
+        core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
+    }
+
+    if (keycode==39) {
+        core.status.event.selection=1;
+        core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
+    }
+
+    if (keycode==13 || keycode==32) {
+        if (core.status.event.selection==0 && core.isset(core.status.event.data.yes)) {
+            core.status.event.selection=null;
+            core.status.event.data.yes();
+        }
+        if (core.status.event.selection==1 && core.isset(core.status.event.data.no)) {
+            core.status.event.selection=null;
+            core.status.event.data.no();
+        }
+    }
+}
+events.prototype.clickConfirmBox = function (x,y) {
+    if ((x == 4 || x == 5) && y == 7 && core.isset(core.status.event.data.yes))
+        core.status.event.data.yes();
+    if ((x == 7 || x == 8) && y == 7 && core.isset(core.status.event.data.no))
+        core.status.event.data.no();
+}
+
 // 正在处理事件时的点击操作...
 events.prototype.clickAction = function (x,y) {
 
@@ -625,6 +686,42 @@ events.prototype.clickAction = function (x,y) {
     }
 }
 
+events.prototype.keyDownAction = function (keycode) {
+    if (core.status.event.data.type=='choices') {
+        var data = core.status.event.data.current;
+        var choices = data.choices;
+        if (choices.length>0) {
+            if (keycode==38) {
+                core.status.event.selection--;
+                if (core.status.event.selection<0) core.status.event.selection=0;
+                core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+            }
+            if (keycode==40) {
+                core.status.event.selection++;
+                if (core.status.event.selection>=choices.length) core.status.event.selection=choices.length-1;
+                core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+            }
+        }
+    }
+}
+
+events.prototype.keyUpAction = function (keycode) {
+    if (core.status.event.data.type=='text' && (keycode==13 || keycode==32)) {
+        this.doAction();
+        return;
+    }
+    if (core.status.event.data.type=='choices') {
+        var data = core.status.event.data.current;
+        var choices = data.choices;
+        if (choices.length>0) {
+            if (keycode==13 || keycode==32) {
+                this.insertAction(choices[core.status.event.selection].action);
+                this.doAction();
+            }
+        }
+    }
+}
+
 // 怪物手册
 events.prototype.clickBook = function(x,y) {
     // 上一页
@@ -642,6 +739,12 @@ events.prototype.clickBook = function(x,y) {
     return;
 }
 
+events.prototype.keyDownBook = function (keycode) {
+    if (keycode==37 || keycode==38) core.ui.drawEnemyBook(core.status.event.data - 1);
+    else if (keycode==39 || keycode==40) core.ui.drawEnemyBook(core.status.event.data + 1);
+    return;
+}
+
 // 飞行器
 events.prototype.clickFly = function(x,y) {
     if ((x==10 || x==11) && y==9) core.ui.drawFly(core.status.event.data-1);
@@ -655,6 +758,27 @@ events.prototype.clickFly = function(x,y) {
         core.ui.closePanel();
     }
     return;
+}
+
+events.prototype.keyDownFly = function (keycode) {
+    if (keycode==37 || keycode==38) core.ui.drawFly(core.status.event.data+1);
+    else if (keycode==39 || keycode==40) core.ui.drawFly(core.status.event.data-1);
+    return;
+}
+
+events.prototype.keyUpFly = function (keycode) {
+    if (keycode==71 || keycode==27)
+        core.ui.closePanel();
+    if (keycode==13 || keycode==32)
+        this.clickFly(5,5);
+    return;
+}
+
+events.prototype.keyUpBook = function (keycode) {
+    if (keycode==27 || keycode==88) {
+        core.ui.closePanel(true);
+        return;
+    }
 }
 
 // 商店
@@ -709,14 +833,47 @@ events.prototype.clickShop = function(x,y) {
     }
 }
 
+events.prototype.keyDownShop = function (keycode) {
+    var shop = core.status.event.data.shop;
+    var choices = shop.choices;
+    if (keycode==38) {
+        core.status.event.selection--;
+        if (core.status.event.selection<0) core.status.event.selection=0;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+    if (keycode==40) {
+        core.status.event.selection++;
+        if (core.status.event.selection>choices.length) core.status.event.selection=choices.length;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+}
+
+events.prototype.keyUpShop = function (keycode) {
+    if (keycode==27) {
+        if (core.status.event.data.fromList) {
+            core.status.boxAnimateObjs = [];
+            core.setBoxAnimate();
+            core.ui.drawQuickShop();
+        }
+        else
+            core.ui.closePanel();
+        return;
+    }
+    var shop = core.status.event.data.shop;
+    var choices = shop.choices;
+    if (keycode==13 || keycode==32) {
+        var topIndex = 6 - parseInt(choices.length / 2);
+        this.clickShop(6, topIndex+core.status.event.selection);
+    }
+    return;
+}
+
 // 快捷商店
 events.prototype.clickQuickShop = function(x, y) {
+    var shopList = core.status.shops, keys = Object.keys(shopList);
     if (x >= 5 && x <= 7) {
-        var shopList = core.status.shops, keys = Object.keys(shopList);
-        var topIndex = 6 - parseInt((keys.length + 1) / 2);
-        var exitIndex = 6 + parseInt((keys.length + 1) / 2);
-
-        if (y >= topIndex && y - topIndex < keys.length) {
+        var topIndex = 6 - parseInt(keys.length / 2);
+        if (y>=topIndex && y<topIndex+keys.length) {
             var reason = core.events.canUseQuickShop(y-topIndex);
             if (core.isset(reason)) {
                 core.drawText(reason);
@@ -726,42 +883,146 @@ events.prototype.clickQuickShop = function(x, y) {
             if (core.status.event.id=='shop')
                 core.status.event.data.fromList = true;
         }
-        if (y == exitIndex) {
+        // 离开
+        else if (y==topIndex+keys.length)
             core.ui.closePanel();
-        }
     }
+}
+
+events.prototype.keyDownQuickShop = function (keycode) {
+    var shopList = core.status.shops, keys = Object.keys(shopList);
+    if (keycode==38) {
+        core.status.event.selection--;
+        if (core.status.event.selection<0) core.status.event.selection=0;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+    if (keycode==40) {
+        core.status.event.selection++;
+        if (core.status.event.selection>keys.length) core.status.event.selection=keys.length;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+}
+
+events.prototype.keyUpQuickShop = function (keycode) {
+    if (keycode==27 || keycode==75) {
+        core.ui.closePanel();
+        return;
+    }
+    var shopList = core.status.shops, keys = Object.keys(shopList);
+    if (keycode==13 || keycode==32) {
+        var topIndex = 6 - parseInt(keys.length / 2);
+        this.clickQuickShop(6, topIndex+core.status.event.selection);
+    }
+    return;
 }
 
 // 工具栏
 events.prototype.clickToolbox = function(x,y) {
-
     // 返回
     if (x>=10 && x<=12 && y==12) {
         core.ui.closePanel(false);
         return;
     }
-
-    var items = null;
-
-    if (y>=4 && y<=7 && x!=12)
-        items = Object.keys(core.status.hero.items.tools).sort();
-
-    if (y>=9 && y<=12 && x!=12)
-        items = Object.keys(core.status.hero.items.constants).sort();
-
-    if (items==null) return;
     var index=0;
     if (y==4||y==5||y==9||y==10) index=parseInt(x/2);
     else index=6+parseInt(x/2);
+    if (y>=9) index+=100;
+    this.clickToolboxIndex(index);
+}
 
-    if (index>=items.length) return;
-    itemId=items[index];
-
+events.prototype.clickToolboxIndex = function(index) {
+    var items = null;
+    var ii=index;
+    if (ii<100)
+        items = Object.keys(core.status.hero.items.tools).sort();
+    else {
+        ii-=100;
+        items = Object.keys(core.status.hero.items.constants).sort();
+    }
+    if (items==null) return;
+    if (ii>=items.length) return;
+    var itemId=items[ii];
     if (itemId==core.status.event.data) {
         core.events.useItem(itemId);
     }
     else {
-        core.ui.drawToolbox(itemId);
+        core.ui.drawToolbox(index);
+    }
+}
+
+events.prototype.keyDownToolbox = function (keycode) {
+    if (!core.isset(core.status.event.data)) return;
+
+    var tools = Object.keys(core.status.hero.items.tools).sort();
+    var constants = Object.keys(core.status.hero.items.constants).sort();
+    var index=core.status.event.selection;
+
+    if (keycode==37) { // left
+        if ((index>0 && index<100) || index>100) {
+            this.clickToolboxIndex(index-1);
+            return;
+        }
+        if (index==100 && tools.length>0) {
+            this.clickToolboxIndex(tools.length-1);
+            return;
+        }
+    }
+    if (keycode==38) { // up
+        if ((index>5 && index<100) || index>105) {
+            this.clickToolboxIndex(index-6);
+            return;
+        }
+        if (index>=100 && index<=105) {
+            if (tools.length>6) {
+                this.clickToolboxIndex(Math.min(tools.length-1, index-100+6));
+            }
+            else if (tools.length>0) {
+                this.clickToolboxIndex(Math.min(tools.length-1, index-100));
+            }
+            return;
+        }
+    }
+    if (keycode==39) { // right
+        if ((index<tools.length-1) || (index>=100 && index<constants.length+100)) {
+            this.clickToolboxIndex(index+1);
+            return;
+        }
+        if (index==tools.length-1 && constants.length>0) {
+            this.clickToolboxIndex(100);
+            return;
+        }
+    }
+    if (keycode==40) { // down
+        if (index<=5) {
+            if (tools.length>6) {
+                this.clickToolboxIndex(Math.min(tools.length-1, index+6));
+            }
+            else if (constants.length>0) {
+                this.clickToolboxIndex(100+Math.min(constants.length-1, index));
+            }
+            return;
+        }
+        if (index>5 && index<100 && constants.length>0) {
+            this.clickToolboxIndex(100+Math.min(constants.length-1, index-6));
+            return;
+        }
+        if (index>=100 && index<=105 && constants.length>6) {
+            this.clickToolboxIndex(Math.min(100+constants.length-1, index+6));
+            return;
+        }
+    }
+}
+
+events.prototype.keyUpToolbox = function (keycode) {
+    if (keycode==84 || keycode==27) {
+        core.ui.closePanel();
+        return;
+    }
+    if (!core.isset(core.status.event.data)) return;
+
+    if (keycode==13 || keycode==32) {
+        this.clickToolboxIndex(core.status.event.selection);
+        return;
     }
 }
 
@@ -769,11 +1030,11 @@ events.prototype.clickToolbox = function(x,y) {
 events.prototype.clickSL = function(x,y) {
     // 上一页
     if ((x == 3 || x == 4) && y == 12) {
-        core.ui.drawSLPanel(core.status.event.data - 1);
+        core.ui.drawSLPanel(core.status.event.data - 6);
     }
     // 下一页
     if ((x == 8 || x == 9) && y == 12) {
-        core.ui.drawSLPanel(core.status.event.data + 1);
+        core.ui.drawSLPanel(core.status.event.data + 6);
     }
     // 返回
     if (x>=10 && x<=12 && y==12) {
@@ -784,7 +1045,8 @@ events.prototype.clickSL = function(x,y) {
         return;
     }
 
-    var index=6*core.status.event.data+1;
+    var page=parseInt((core.status.event.data-1)/6);
+    var index=6*page+1;
     if (y>=1 && y<=4) {
         if (x>=1 && x<=3) core.doSL(index, core.status.event.id);
         if (x>=5 && x<=7) core.doSL(index+1, core.status.event.id);
@@ -797,78 +1059,264 @@ events.prototype.clickSL = function(x,y) {
     }
 }
 
-events.prototype.clickSwitchs = function (x,y) {
-    if (x<5 || x>7) return;
-    if (y==4) {
-        if (core.musicStatus.isIOS) {
-            core.drawTip("iOS设备不支持播放音乐");
-            return;
-        }
-        core.changeSoundStatus();
-        core.ui.drawSwitchs();
+events.prototype.keyDownSL = function(keycode) {
+    if (keycode==37) { // left
+        core.ui.drawSLPanel(core.status.event.data - 1);
+        return;
     }
-    if (y==5) {
-        core.flags.battleAnimate=!core.flags.battleAnimate;
-        core.ui.drawSwitchs();
+    if (keycode==38) { // up
+        if ((core.status.event.data-1)%6>=3)
+            core.ui.drawSLPanel(core.status.event.data - 3);
+        return;
     }
-    if (y==6) {
-        core.flags.displayEnemyDamage=!core.flags.displayEnemyDamage;
-        core.updateFg();
-        core.ui.drawSwitchs();
+    if (keycode==39) { // right
+        core.ui.drawSLPanel(core.status.event.data + 1);
+        return;
     }
-    if (y==7) {
-        core.flags.displayExtraDamage=!core.flags.displayExtraDamage;
-        core.updateFg();
-        core.ui.drawSwitchs();
+    if (keycode==40) { // down
+        if ((core.status.event.data-1)%6<3)
+            core.ui.drawSLPanel(core.status.event.data + 3);
+        return;
     }
-    if (y==8) {
-        core.ui.drawSettings(false);
+    if (keycode==33) { // PAGEUP
+        core.ui.drawSLPanel(core.status.event.data - 6);
+        return;
+    }
+    if (keycode==34) { // PAGEDOWN
+        core.ui.drawSLPanel(core.status.event.data + 6);
+        return;
     }
 }
+
+events.prototype.keyUpSL = function (keycode) {
+    if (keycode==27 || (core.status.event.id == 'save' && keycode==83) || (core.status.event.id == 'load' && keycode==68)) {
+        core.ui.closePanel();
+        return;
+    }
+    if (keycode==13 || keycode==32) {
+        core.doSL(core.status.event.data, core.status.event.id);
+        return;
+    }
+}
+
+events.prototype.clickSwitchs = function (x,y) {
+    if (x<5 || x>7) return;
+    var choices = [
+        "背景音乐", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
+    ];
+    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    if (y>=topIndex && y<topIndex+choices.length) {
+        var selection = y-topIndex;
+        switch (selection) {
+            case 0:
+                if (core.musicStatus.isIOS) {
+                    core.drawTip("iOS设备不支持播放音乐");
+                    return;
+                }
+                core.changeSoundStatus();
+                core.ui.drawSwitchs();
+                break;
+            case 1:
+                core.flags.battleAnimate=!core.flags.battleAnimate;
+                core.ui.drawSwitchs();
+                break;
+            case 2:
+                core.flags.displayEnemyDamage=!core.flags.displayEnemyDamage;
+                core.updateFg();
+                core.ui.drawSwitchs();
+                break;
+            case 3:
+                core.flags.displayExtraDamage=!core.flags.displayExtraDamage;
+                core.updateFg();
+                core.ui.drawSwitchs();
+                break;
+            case 4:
+                core.status.event.selection=0;
+                core.ui.drawSettings(false);
+                break;
+
+        }
+    }
+}
+
+events.prototype.keyDownSwitchs = function (keycode) {
+    var choices = [
+        "背景音乐", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
+    ];
+    if (keycode==38) {
+        core.status.event.selection--;
+        if (core.status.event.selection<0) core.status.event.selection=0;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+    if (keycode==40) {
+        core.status.event.selection++;
+        if (core.status.event.selection>=choices.length) core.status.event.selection=choices.length;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+}
+
+events.prototype.keyUpSwitchs = function (keycode) {
+    if (keycode==27) {
+        core.status.event.selection=0;
+        core.ui.drawSettings(false);
+        return;
+    }
+    var choices = [
+        "背景音乐", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
+    ];
+    if (keycode==13 || keycode==32) {
+        var topIndex = 6 - parseInt((choices.length - 1) / 2);
+        this.clickSwitchs(6, topIndex+core.status.event.selection);
+    }
+}
+
 
 // 菜单栏
 events.prototype.clickSettings = function (x,y) {
     if (x<5 || x>7) return;
-    if (y == 3) {
-        core.ui.drawSwitchs();
+    var choices = [
+        "系统设置", "快捷商店", "同步存档", "重新开始", "关于本塔", "返回游戏"
+    ];
+    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    if (y>=topIndex && y<topIndex+choices.length) {
+        var selection = y-topIndex;
+
+        switch (selection) {
+            case 0:
+                core.status.event.selection=0;
+                core.ui.drawSwitchs();
+                break;
+            case 1:
+                core.status.event.selection=0;
+                core.ui.drawQuickShop();
+                break;
+            case 2:
+                core.status.event.selection=0;
+                core.ui.drawSyncSave();
+                break;
+            case 3:
+                core.status.event.selection=1;
+                core.ui.drawConfirmBox("你确定要重新开始吗？", function () {
+                    core.ui.closePanel();
+                    core.restart();
+                }, function () {
+                    core.status.event.selection=3;
+                    core.ui.drawSettings(false);
+                });
+                break;
+            case 4:
+                core.ui.drawAbout();
+                break;
+            case 5:
+                core.ui.closePanel();
+                break;
+
+        }
     }
-    if (y==4) {
-        /*
-        core.flags.battleAnimate=!core.flags.battleAnimate;
-        core.setLocalStorage('battleAnimate', core.flags.battleAnimate);
-        core.ui.drawSettings(false);
-        */
-        this.decreaseHard();
-    }
-    if (y == 5) core.ui.drawQuickShop();
-    // if (y == 5) this.decreaseHard();
-    if (y == 6) {
-        core.ui.drawSyncSave();
-    }
-    /*
-    if (y == 6) {
-        core.ui.drawConfirmBox("你确定要清空所有本地存档吗？", function() {
-            localStorage.clear();
-            core.drawText("\t[操作成功]你的本地所有存档已被清空。");
-        }, function() {
-            core.ui.drawSettings(false);
-        })
-    }
-    */
-    if (y == 7) {
-        core.ui.drawConfirmBox("你确定要重新开始吗？", function () {
-            core.ui.closePanel();
-            core.restart();
-        }, function () {
-            core.ui.drawSettings(false);
-        });
-    }
-    if (y==8) {
-        core.ui.drawAbout();
-        // core.debug();
-    }
-    if (y == 9) core.ui.closePanel();
     return;
+}
+
+events.prototype.keyDownSettings = function (keycode) {
+    var choices = [
+        "系统设置", "快捷商店", "同步存档", "重新开始", "关于本塔", "返回游戏"
+    ];
+    if (keycode==38) {
+        core.status.event.selection--;
+        if (core.status.event.selection<0) core.status.event.selection=0;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+    if (keycode==40) {
+        core.status.event.selection++;
+        if (core.status.event.selection>=choices.length) core.status.event.selection=choices.length;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+}
+
+events.prototype.keyUpSettings = function (keycode) {
+    if (keycode==27) {
+        core.ui.closePanel();
+        return;
+    }
+    var choices = [
+        "系统设置", "快捷商店", "同步存档", "重新开始", "关于本塔", "返回游戏"
+    ];
+    if (keycode==13 || keycode==32) {
+        var topIndex = 6 - parseInt((choices.length - 1) / 2);
+        this.clickSettings(6, topIndex+core.status.event.selection);
+    }
+}
+
+events.prototype.clickSyncSave = function (x,y) {
+    if (x<5 || x>7) return;
+    var choices = [
+        "同步存档到服务器", "从服务器加载存档", "清空本地存档", "返回主菜单"
+    ];
+    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    if (y>=topIndex && y<topIndex+choices.length) {
+        var selection = y-topIndex;
+        switch (selection) {
+            case 0:
+                core.syncSave("save");
+                break;
+            case 1:
+                core.syncSave("load");
+                break;
+            case 2:
+                core.status.event.selection=1;
+                core.ui.drawConfirmBox("你确定要清空所有本地存档吗？", function() {
+                    localStorage.clear();
+                    core.drawText("\t[操作成功]你的本地所有存档已被清空。");
+                }, function() {
+                    core.status.event.selection=2;
+                    core.ui.drawSyncSave(false);
+                })
+                break;
+            case 3:
+                core.status.event.selection=2;
+                core.ui.drawSettings(false);
+                break;
+
+        }
+    }
+    return;
+}
+
+events.prototype.keyDownSyncSave = function (keycode) {
+    var choices = [
+        "同步存档到服务器", "从服务器加载存档", "清空本地存档", "返回主菜单"
+    ];
+    if (keycode==38) {
+        core.status.event.selection--;
+        if (core.status.event.selection<0) core.status.event.selection=0;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+    if (keycode==40) {
+        core.status.event.selection++;
+        if (core.status.event.selection>=choices.length) core.status.event.selection=choices.length;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+}
+
+events.prototype.keyUpSyncSave = function (keycode) {
+    if (keycode==27) {
+        core.status.event.selection=2;
+        core.ui.drawSettings(false);
+        return;
+    }
+    var choices = [
+        "同步存档到服务器", "从服务器加载存档", "清空本地存档", "返回主菜单"
+    ];
+    if (keycode==13 || keycode==32) {
+        var topIndex = 6 - parseInt((choices.length - 1) / 2);
+        this.clickSyncSave(6, topIndex+core.status.event.selection);
+    }
+}
+
+events.prototype.clickAbout = function () {
+    if (core.isPlaying())
+        core.ui.closePanel(false);
+    else
+        core.showStartAnimate();
 }
 
 /*********** 点击事件 END ***************/

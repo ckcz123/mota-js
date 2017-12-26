@@ -26,6 +26,8 @@ ui.prototype.closePanel = function (clearData) {
     core.unLockControl();
     core.status.event.data = null;
     core.status.event.id = null;
+    core.status.event.selection = null;
+    core.status.event.ui = null;
 }
 
 
@@ -144,6 +146,8 @@ ui.prototype.drawChoices = function(content, choices) {
     core.setAlpha('ui', 1);
     core.setFillStyle('ui', background);
 
+    core.status.event.ui = {"text": content, "choices": choices};
+
     // Step 1: 计算长宽高
     var length = choices.length;
     var left=85, width = 416-2*left; // 宽度
@@ -258,10 +262,15 @@ ui.prototype.drawChoices = function(content, choices) {
     // 选项
     core.canvas.ui.textAlign = "center";
     for (var i = 0; i < choices.length; i++) {
-        core.fillText('ui', core.replaceText(choices[i].text), 208, choice_top + 32 * i, "#FFFFFF", "bold 17px Verdana");
+        core.fillText('ui', core.replaceText(choices[i].text || choices[i]), 208, choice_top + 32 * i, "#FFFFFF", "bold 17px Verdana");
+    }
+
+    if (choices.length>0) {
+        if (!core.isset(core.status.event.selection)) core.status.event.selection=0;
+        var len = core.canvas.ui.measureText(core.replaceText(choices[core.status.event.selection].text || choices[core.status.event.selection])).width;
+        core.strokeRect('ui', 208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28, "#FFD700", 2);
     }
     return;
-
 }
 
 /**
@@ -271,8 +280,13 @@ ui.prototype.drawChoices = function(content, choices) {
  * @param noCallback
  */
 ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
+    core.lockControl();
+
     core.status.event.id = 'confirmBox';
     core.status.event.data = {'yes': yesCallback, 'no': noCallback};
+    core.status.event.ui = text;
+
+    if (!core.isset(core.status.event.selection)) core.status.event.selection=1;
 
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
     core.clearMap('ui', 0, 0, 416, 416);
@@ -291,8 +305,10 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     var top = 140 - (lines-1)*30;
     var right = 416 - 2 * left, bottom = 416 - 140 - top;
 
-    core.fillRect('ui', left, top, right, bottom, background);
-    core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+    if (core.isPlaying())
+        core.fillRect('ui', left, top, right, bottom, background);
+    if (core.isPlaying())
+        core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
     core.canvas.ui.textAlign = "center";
     for (var i in contents) {
         core.fillText('ui', contents[i], 208, top + 50 + i*30, "#FFFFFF");
@@ -300,6 +316,15 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
 
     core.fillText('ui', "确定", 208 - 38, top + bottom - 35, "#FFFFFF", "bold 17px Verdana");
     core.fillText('ui', "取消", 208 + 38, top + bottom - 35);
+
+    var len=core.canvas.ui.measureText("确定").width;
+    if (core.status.event.selection==0) {
+        core.strokeRect('ui', 208-38-len/2-5, top+bottom-35-20, len+10, 28, "#FFD700", 2);
+    }
+    if (core.status.event.selection==1) {
+        core.strokeRect('ui', 208+38-len/2-5, top+bottom-35-20, len+10, 28, "#FFD700", 2);
+    }
+
 }
 
 ////// 绘制开关界面 //////
@@ -308,22 +333,15 @@ ui.prototype.drawSwitchs = function() {
 
     core.status.event.id = 'switchs';
 
-    var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
-    core.clearMap('ui', 0, 0, 416, 416);
-    core.setAlpha('ui', 1);
-    core.setFillStyle('ui', background);
-    var left = 97, top = 64 + 32, right = 416 - 2 * left, bottom = 416 - 2 * top;
-    core.fillRect('ui', left, top, right, bottom, background);
-    core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+    var choices = [
+        "背景音乐："+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
+        "战斗动画： " + (core.flags.battleAnimate ? "[ON]" : "[OFF]"),
+        "怪物显伤： " + (core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
+        "领域显伤： " + (core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
+        "返回主菜单"
+    ];
+    this.drawChoices(null, choices);
 
-    core.canvas.ui.textAlign = "center";
-    core.fillText('ui', "背景音乐： " + (core.musicStatus.soundStatus ? "[ON]" : "[OFF]"), 208, top + 56, "#FFFFFF", "bold 17px Verdana");
-    // core.fillText('ui', "背景音效" + (core.musicStatus.soundStatus ? "[ON]" : "[OFF]"), 208, top + 88, "#FFFFFF", "bold 17px Verdana")
-    core.fillText('ui', "战斗动画： " + (core.flags.battleAnimate ? "[ON]" : "[OFF]"), 208, top + 88, "#FFFFFF", "bold 17px Verdana")
-    core.fillText('ui', "怪物显伤： " + (core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"), 208, top + 120, "#FFFFFF", "bold 17px Verdana")
-    core.fillText('ui', "领域显伤： " + (core.flags.displayExtraDamage ? "[ON]" : "[OFF]"), 208, top + 152, "#FFFFFF", "bold 17px Verdana")
-
-    core.fillText('ui', "返回上级菜单", 208, top + 184, "#FFFFFF", "bold 17px Verdana");
 }
 
 /**
@@ -334,56 +352,27 @@ ui.prototype.drawSettings = function (need) {
     if (!core.checkStatus('settings', need))
         return;
 
-    var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
-    core.clearMap('ui', 0, 0, 416, 416);
-    core.setAlpha('ui', 1);
-    core.setFillStyle('ui', background);
-    var left = 97, top = 64, right = 416 - 2 * left, bottom = 416 - 2 * top;
-    core.fillRect('ui', left, top, right, bottom, background);
-    core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
-
-    core.canvas.ui.textAlign = "center";
-    core.fillText('ui', "系统设置", 208, top + 56, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "降低难度", 208, top + 88, "#FFFFFF", "bold 17px Verdana")
-    core.fillText('ui', "快捷商店", 208, top + 120, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "同步存档", 208, top + 152, "#FFFFFF", "bold 17px Verdana");
-    // core.fillText('ui', "清空存档", 208, top + 152, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "重新开始", 208, top + 184, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "关于本塔", 208, top + 216, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "返回游戏", 208, top + 248, "#FFFFFF", "bold 17px Verdana");
-
+    this.drawChoices(null, [
+        "系统设置", "快捷商店", "同步存档", "重新开始", "关于本塔", "返回游戏"
+    ]);
 }
 
-/**
- * 绘制“选择商店”窗口
- * @param need
- */
 ui.prototype.drawQuickShop = function (need) {
-
     if (core.isset(need) && !core.checkStatus('selectShop', need))
         return;
 
     core.status.event.id = 'selectShop';
-    var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
-    core.clearMap('ui', 0, 0, 416, 416);
-    core.setAlpha('ui', 1);
-    core.setFillStyle('ui', background);
 
     var shopList = core.status.shops, keys = Object.keys(shopList);
-    var len = keys.length + 1;
-    if (len % 2 == 0) len++;
 
-    var left = 97, top = 208 - 32 - 16 * len, right = 416 - 2 * left, bottom = 416 - 2 * top;
-    core.fillRect('ui', left, top, right, bottom, background);
-    core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
-
-    core.canvas.ui.textAlign = "center";
-    for (var i = 0; i < keys.length; i++) {
-        core.fillText('ui', shopList[keys[i]].textInList, 208, top + 56 + 32 * i, "#FFFFFF", "bold 17px Verdana");
+    var choices = [];
+    for (var i=0;i<keys.length;i++) {
+        choices.push(shopList[keys[i]].textInList);
     }
-
-    core.fillText('ui', "返回游戏", 208, top + bottom - 40, "#FFFFFF", "bold 17px Verdana");
+    choices.push("返回游戏");
+    this.drawChoices(null, choices);
 }
+
 
 ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
@@ -702,20 +691,11 @@ ui.prototype.drawWaiting = function(text) {
 ui.prototype.drawSyncSave = function () {
 
     core.status.event.id = 'syncSave';
-    var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
-    core.clearMap('ui', 0, 0, 416, 416);
-    core.setAlpha('ui', 1);
-    core.setFillStyle('ui', background);
 
-    var left = 97, top = 208 - 32 - 16 * 3, right = 416 - 2 * left, bottom = 416 - 2 * top + 32;
-    core.fillRect('ui', left, top, right, bottom, background);
-    core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+    this.drawChoices(null, [
+        "同步存档到服务器", "从服务器加载存档", "清空本地存档", "返回主菜单"
+    ]);
 
-    core.canvas.ui.textAlign = "center";
-    core.fillText('ui', "同步存档到服务器", 208, top + 56, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "从服务器加载存档", 208, top + 56 + 32, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "清空本地存档", 208, top + 56 + 64, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "返回游戏", 208, top + bottom - 40);
 }
 
 /**
@@ -879,14 +859,26 @@ ui.prototype.drawFly = function(page) {
     this.drawThumbnail('ui', core.status.maps[floorId].blocks, 20, 100, 273);
 }
 
-/**
- * 绘制工具栏
- * @param selectId
- */
-ui.prototype.drawToolbox = function(selectId) {
+ui.prototype.drawToolbox = function(index) {
 
-    if (!core.hasItem(selectId))
-        selectId=null;
+    var tools = Object.keys(core.status.hero.items.tools).sort();
+    var constants = Object.keys(core.status.hero.items.constants).sort();
+
+    if (!core.isset(index)) {
+        if (tools.length>0) index=0;
+        else if (constants.length>0) index=100;
+        else index=0;
+    }
+
+    core.status.event.selection=index;
+
+    var selectId;
+    if (index<100)
+        selectId = tools[index];
+    else
+        selectId = constants[index-100];
+
+    if (!core.hasItem(selectId)) selectId=null;
     core.status.event.data=selectId;
 
     core.clearMap('ui', 0, 0, 416, 416);
@@ -937,7 +929,7 @@ ui.prototype.drawToolbox = function(selectId) {
     core.canvas.ui.textAlign = 'right';
     var images = core.material.images.items;
     // 消耗道具
-    var tools = Object.keys(core.status.hero.items.tools).sort();
+
     for (var i=0;i<tools.length;i++) {
         var tool=tools[i];
         var icon=core.material.icons.items[tool];
@@ -959,7 +951,7 @@ ui.prototype.drawToolbox = function(selectId) {
     }
 
     // 永久道具
-    var constants = Object.keys(core.status.hero.items.constants).sort();
+
     for (var i=0;i<constants.length;i++) {
         var constant=constants[i];
         var icon=core.material.icons.items[constant];
@@ -981,16 +973,18 @@ ui.prototype.drawToolbox = function(selectId) {
     core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px Verdana');
 }
 
-/**
- * 绘制存档、读档
- * @param page
- */
-ui.prototype.drawSLPanel = function(page) {
 
-    if (page<0) page=0;
-    if (page>=30) page=29;
-    core.status.event.data = page;
-    core.status.savePage = page;
+ui.prototype.drawSLPanel = function(index) {
+    if (!core.isset(index)) index=1;
+    if (index<=0) index=1;
+    if (index>180) index=180;
+
+    core.status.event.data=index;
+
+    var page=parseInt((index-1)/6);
+
+    // core.status.event.data = page;
+    // core.status.savePage = page;
 
     core.clearMap('ui', 0, 0, 416, 416);
     core.setAlpha('ui', 0.85);
@@ -1007,7 +1001,7 @@ ui.prototype.drawSLPanel = function(page) {
 
         if (i<3) {
             core.fillText('ui', name+id, (2*i+1)*u, 35, '#FFFFFF', "bold 17px Verdana");
-            core.strokeRect('ui', (2*i+1)*u-size/2, 50, size, size, '#FFFFFF', 2);
+            core.strokeRect('ui', (2*i+1)*u-size/2, 50, size, size, id==index?'#FFD700':'#FFFFFF', id==index?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
                 this.drawThumbnail('ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc);
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 65+size, '#FFFFFF', '10px Verdana');
@@ -1019,7 +1013,7 @@ ui.prototype.drawSLPanel = function(page) {
         }
         else {
             core.fillText('ui', name+id, (2*i-5)*u, 230, '#FFFFFF', "bold 17px Verdana");
-            core.strokeRect('ui', (2*i-5)*u-size/2, 245, size, size, '#FFFFFF', 2);
+            core.strokeRect('ui', (2*i-5)*u-size/2, 245, size, size, id==index?'#FFD700':'#FFFFFF', id==index?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
                 this.drawThumbnail('ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc);
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 260+size, '#FFFFFF', '10px Verdana');
@@ -1031,7 +1025,6 @@ ui.prototype.drawSLPanel = function(page) {
         }
     }
     this.drawPagination(page+1, 30);
-
 }
 
 ui.prototype.drawThumbnail = function(canvas, blocks, x, y, size, heroLoc) {

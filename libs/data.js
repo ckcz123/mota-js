@@ -78,7 +78,7 @@ data.prototype.init = function() {
                     {"text": "攻击+5", "need": "30", "effect": "status:atk+=5"},
                     {"text": "防御+5", "need": "30", "effect": "status:def+=5"},
                 ]
-            }
+            },
         },
     }
     // 各种数值；一些数值可以在这里设置

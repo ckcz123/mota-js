@@ -1091,6 +1091,9 @@ events.prototype.keyDownSL = function(keycode) {
 events.prototype.keyUpSL = function (keycode) {
     if (keycode==27 || (core.status.event.id == 'save' && keycode==83) || (core.status.event.id == 'load' && keycode==68)) {
         core.ui.closePanel();
+        if (!core.isPlaying()) {
+            core.showStartAnimate();
+        }
         return;
     }
     if (keycode==13 || keycode==32) {

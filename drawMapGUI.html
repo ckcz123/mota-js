@@ -623,7 +623,7 @@ editor.prototype.afterImportGrass = function (callback) {
     return x + y * (fullX + 1);
   }
 
-  editor.updateMap = function (clearError) {
+  editor.updateMap = function (error) {
     //clearGrass();
     // console.log(editor.map)
     for (var xx = 0; xx <= fullX; xx++) {
@@ -675,14 +675,16 @@ editor.prototype.afterImportGrass = function (callback) {
         cxt.drawImage(core.material.images[mapxy.images], 0, mapxy.y*32, 32, 32, xx*32, yy*32, 32, 32);
 
         if(typeof(mapxy) != typeof({}) || !('idnum' in mapxy) ) {//未定义块画红块
-          if (clearError=='clearError'){
+          if (error=='clearError'){
             editor.map[editor.m(xx,yy)]=0;
             cxt.clearRect(xx*32, yy*32, 32, 32);
             continue;
           }
-          cxt.fillStyle = 'rgba(255,0,0,0.8)';
-          var tmpNum =6;
-          cxt.fillRect(xx*32+tmpNum, yy*32+tmpNum, 32-tmpNum*2, 32-tmpNum*2);
+          if (error=='showError'){
+            cxt.fillStyle = 'rgba(255,0,0,0.8)';
+            var tmpNum =6;
+            cxt.fillRect(xx*32+tmpNum, yy*32+tmpNum, 32-tmpNum*2, 32-tmpNum*2);
+          }
         } 
       }
     }
@@ -914,6 +916,7 @@ editor.prototype.listen = function() {
 /* 
 editor.updateMap
 现在可以通过editor.updateMap('clearError')把所有错误id置零并绘图
+以及editor.updateMap('showError')显示所有错误
 
 editor.loc
 editor.pos
@@ -939,8 +942,10 @@ editor.init();
 
     methods: {
       exportMap: function(){
+        setTimeout(function(){editor.updateMap();},5000);
         if(editArea.error) {
           tip.whichShow = 3;
+          editor.updateMap('showError');
           return;
         }
         var filestr='';
@@ -953,10 +958,12 @@ editor.init();
               else {
                 // mapxy='!!?';
                 tip.whichShow = 3;
+                editor.updateMap('showError');
                 return;
               }
             }else if(typeof(mapxy)=='undefined'){
               tip.whichShow = 3;
+              editor.updateMap('showError');
               return;
             }
             mapxy=String(mapxy);

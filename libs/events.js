@@ -645,7 +645,7 @@ events.prototype.keyUpConfirmBox = function (keycode) {
         core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
     }
 
-    if (keycode==13 || keycode==32) {
+    if (keycode==13 || keycode==32 || keycode==67) {
         if (core.status.event.selection==0 && core.isset(core.status.event.data.yes)) {
             core.status.event.selection=null;
             core.status.event.data.yes();
@@ -706,7 +706,7 @@ events.prototype.keyDownAction = function (keycode) {
 }
 
 events.prototype.keyUpAction = function (keycode) {
-    if (core.status.event.data.type=='text' && (keycode==13 || keycode==32)) {
+    if (core.status.event.data.type=='text' && (keycode==13 || keycode==32 || keycode==67)) {
         this.doAction();
         return;
     }
@@ -714,7 +714,7 @@ events.prototype.keyUpAction = function (keycode) {
         var data = core.status.event.data.current;
         var choices = data.choices;
         if (choices.length>0) {
-            if (keycode==13 || keycode==32) {
+            if (keycode==13 || keycode==32 || keycode==67) {
                 this.insertAction(choices[core.status.event.selection].action);
                 this.doAction();
             }
@@ -745,6 +745,13 @@ events.prototype.keyDownBook = function (keycode) {
     return;
 }
 
+events.prototype.keyUpBook = function (keycode) {
+    if (keycode==27 || keycode==88) {
+        core.ui.closePanel(true);
+        return;
+    }
+}
+
 // 飞行器
 events.prototype.clickFly = function(x,y) {
     if ((x==10 || x==11) && y==9) core.ui.drawFly(core.status.event.data-1);
@@ -767,18 +774,11 @@ events.prototype.keyDownFly = function (keycode) {
 }
 
 events.prototype.keyUpFly = function (keycode) {
-    if (keycode==71 || keycode==27)
+    if (keycode==71 || keycode==27 || keycode==88)
         core.ui.closePanel();
-    if (keycode==13 || keycode==32)
+    if (keycode==13 || keycode==32 || keycode==67)
         this.clickFly(5,5);
     return;
-}
-
-events.prototype.keyUpBook = function (keycode) {
-    if (keycode==27 || keycode==88) {
-        core.ui.closePanel(true);
-        return;
-    }
 }
 
 // 商店
@@ -849,7 +849,7 @@ events.prototype.keyDownShop = function (keycode) {
 }
 
 events.prototype.keyUpShop = function (keycode) {
-    if (keycode==27) {
+    if (keycode==27 || keycode==88) {
         if (core.status.event.data.fromList) {
             core.status.boxAnimateObjs = [];
             core.setBoxAnimate();
@@ -861,7 +861,7 @@ events.prototype.keyUpShop = function (keycode) {
     }
     var shop = core.status.event.data.shop;
     var choices = shop.choices;
-    if (keycode==13 || keycode==32) {
+    if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt(choices.length / 2);
         this.clickShop(6, topIndex+core.status.event.selection);
     }
@@ -904,12 +904,12 @@ events.prototype.keyDownQuickShop = function (keycode) {
 }
 
 events.prototype.keyUpQuickShop = function (keycode) {
-    if (keycode==27 || keycode==75) {
+    if (keycode==27 || keycode==75 || keycode==88) {
         core.ui.closePanel();
         return;
     }
     var shopList = core.status.shops, keys = Object.keys(shopList);
-    if (keycode==13 || keycode==32) {
+    if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt(keys.length / 2);
         this.clickQuickShop(6, topIndex+core.status.event.selection);
     }
@@ -1014,13 +1014,13 @@ events.prototype.keyDownToolbox = function (keycode) {
 }
 
 events.prototype.keyUpToolbox = function (keycode) {
-    if (keycode==84 || keycode==27) {
+    if (keycode==84 || keycode==27 || keycode==88) {
         core.ui.closePanel();
         return;
     }
     if (!core.isset(core.status.event.data)) return;
 
-    if (keycode==13 || keycode==32) {
+    if (keycode==13 || keycode==32 || keycode==67) {
         this.clickToolboxIndex(core.status.event.selection);
         return;
     }
@@ -1065,8 +1065,7 @@ events.prototype.keyDownSL = function(keycode) {
         return;
     }
     if (keycode==38) { // up
-        if ((core.status.event.data-1)%6>=3)
-            core.ui.drawSLPanel(core.status.event.data - 3);
+        core.ui.drawSLPanel(core.status.event.data - 3);
         return;
     }
     if (keycode==39) { // right
@@ -1074,8 +1073,7 @@ events.prototype.keyDownSL = function(keycode) {
         return;
     }
     if (keycode==40) { // down
-        if ((core.status.event.data-1)%6<3)
-            core.ui.drawSLPanel(core.status.event.data + 3);
+        core.ui.drawSLPanel(core.status.event.data + 3);
         return;
     }
     if (keycode==33) { // PAGEUP
@@ -1089,14 +1087,14 @@ events.prototype.keyDownSL = function(keycode) {
 }
 
 events.prototype.keyUpSL = function (keycode) {
-    if (keycode==27 || (core.status.event.id == 'save' && keycode==83) || (core.status.event.id == 'load' && keycode==68)) {
+    if (keycode==27 || keycode==88 || (core.status.event.id == 'save' && keycode==83) || (core.status.event.id == 'load' && keycode==68)) {
         core.ui.closePanel();
         if (!core.isPlaying()) {
             core.showStartAnimate();
         }
         return;
     }
-    if (keycode==13 || keycode==32) {
+    if (keycode==13 || keycode==32 || keycode==67) {
         core.doSL(core.status.event.data, core.status.event.id);
         return;
     }
@@ -1159,7 +1157,7 @@ events.prototype.keyDownSwitchs = function (keycode) {
 }
 
 events.prototype.keyUpSwitchs = function (keycode) {
-    if (keycode==27) {
+    if (keycode==27 || keycode==88) {
         core.status.event.selection=0;
         core.ui.drawSettings(false);
         return;
@@ -1167,7 +1165,7 @@ events.prototype.keyUpSwitchs = function (keycode) {
     var choices = [
         "背景音乐", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
     ];
-    if (keycode==13 || keycode==32) {
+    if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
         this.clickSwitchs(6, topIndex+core.status.event.selection);
     }
@@ -1178,7 +1176,7 @@ events.prototype.keyUpSwitchs = function (keycode) {
 events.prototype.clickSettings = function (x,y) {
     if (x<5 || x>7) return;
     var choices = [
-        "系统设置", "快捷商店", "同步存档", "重新开始", "关于本塔", "返回游戏"
+        "系统设置", "快捷商店", "同步存档", "重新开始", "操作帮助", "关于本塔", "返回游戏"
     ];
     var topIndex = 6 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
@@ -1208,12 +1206,14 @@ events.prototype.clickSettings = function (x,y) {
                 });
                 break;
             case 4:
-                core.ui.drawAbout();
+                core.ui.drawHelp();
                 break;
             case 5:
+                core.ui.drawAbout();
+                break;
+            case 6:
                 core.ui.closePanel();
                 break;
-
         }
     }
     return;
@@ -1221,7 +1221,7 @@ events.prototype.clickSettings = function (x,y) {
 
 events.prototype.keyDownSettings = function (keycode) {
     var choices = [
-        "系统设置", "快捷商店", "同步存档", "重新开始", "关于本塔", "返回游戏"
+        "系统设置", "快捷商店", "同步存档", "重新开始", "操作帮助", "关于本塔", "返回游戏"
     ];
     if (keycode==38) {
         core.status.event.selection--;
@@ -1236,14 +1236,14 @@ events.prototype.keyDownSettings = function (keycode) {
 }
 
 events.prototype.keyUpSettings = function (keycode) {
-    if (keycode==27) {
+    if (keycode==27 || keycode==88) {
         core.ui.closePanel();
         return;
     }
     var choices = [
-        "系统设置", "快捷商店", "同步存档", "重新开始", "关于本塔", "返回游戏"
+        "系统设置", "快捷商店", "同步存档", "重新开始", "操作帮助", "关于本塔", "返回游戏"
     ];
-    if (keycode==13 || keycode==32) {
+    if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
         this.clickSettings(6, topIndex+core.status.event.selection);
     }
@@ -1301,7 +1301,7 @@ events.prototype.keyDownSyncSave = function (keycode) {
 }
 
 events.prototype.keyUpSyncSave = function (keycode) {
-    if (keycode==27) {
+    if (keycode==27 || keycode==88) {
         core.status.event.selection=2;
         core.ui.drawSettings(false);
         return;
@@ -1309,7 +1309,7 @@ events.prototype.keyUpSyncSave = function (keycode) {
     var choices = [
         "同步存档到服务器", "从服务器加载存档", "清空本地存档", "返回主菜单"
     ];
-    if (keycode==13 || keycode==32) {
+    if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
         this.clickSyncSave(6, topIndex+core.status.event.selection);
     }

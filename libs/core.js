@@ -499,11 +499,8 @@ core.prototype.keyUp = function(keyCode) {
 
     if (core.status.lockControl) {
         core.status.holdingKeys = [];
-
-
-
         // 全键盘操作部分
-        if (core.status.event.id == 'text' && (keyCode==13 || keyCode==32)) {
+        if (core.status.event.id == 'text' && (keyCode==13 || keyCode==32 || keyCode==67)) {
             core.drawText();
             return;
         }
@@ -515,7 +512,7 @@ core.prototype.keyUp = function(keyCode) {
             core.events.keyUpAction(keyCode);
             return;
         }
-        if (core.status.event.id=='about' && (keyCode==13 || keyCode==32)) {
+        if (core.status.event.id=='about' && (keyCode==13 || keyCode==32 || keyCode==67)) {
             core.events.clickAbout();
             return;
         }
@@ -597,6 +594,10 @@ core.prototype.keyUp = function(keyCode) {
         case 32: // SPACE
             if (!core.status.lockControl && core.status.heroStop)
                 core.getNextItem();
+            break;
+        case 72: // H
+            if (!core.status.lockControl && core.status.heroStop)
+                core.ui.drawHelp();
             break;
         case 37: // UP
             break;

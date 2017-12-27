@@ -1044,7 +1044,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
         if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
             if (block.event.cls == 'autotile') {
                 // core.drawAutotile();
-                autotileMaps[13*block.x + block.y] = true;
+                autotileMaps[13*block.x + block.y] = block.event.id;
                 continue;
             }
             else {

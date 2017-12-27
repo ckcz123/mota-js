@@ -210,31 +210,24 @@ core.prototype.loader = function (callback) {
     for (var i = 0; i < core.images.length; i++) {
         core.loadImage(core.images[i], function (imgName, image) {
             core.setStartLoadTipText('正在加载图片 ' + imgName + "...");
-            imgName = imgName.split('-');
-            imgName = imgName[0];
             core.material.images[imgName] = image;
             loadedImageNum++;
             core.setStartLoadTipText(imgName + ' 加载完毕...');
             core.setStartProgressVal(loadedImageNum * (100 / allImageNum));
             if (loadedImageNum == allImageNum) {
-                // 加载音频
-                for (var key in core.sounds) {
-                    for (var i = 0; i < core.sounds[key].length; i++) {
-                        var soundName=core.sounds[key][i];
-                        soundName = soundName.split('-');
-                        var sound = new Audio();
-                        sound.preload = 'none';
-                        sound.src = 'sounds/' + soundName[0] + '.' + key;
-                        if (soundName[1] == 'loop') {
-                            sound.loop = 'loop';
+                
+                // 加载Autotile
+                core.material.images.autotile={};
+                var autotileIds = Object.keys(core.material.icons.autotile);
+                for (var x=0;x<autotileIds.length;x++) {
+                    core.loadImage(autotileIds[x], function (autotileId, image) {
+                        core.material.images.autotile[autotileId]=image;
+                        if (Object.keys(core.material.images.autotile).length==autotileIds.length) {
+                            // 音频
+                            core.loadSounds(callback);
                         }
-
-                        if (!core.isset(core.material.sounds[key]))
-                            core.material.sounds[key] = {};
-                        core.material.sounds[key][soundName[0]] = sound;
-                    }
+                    })
                 }
-                callback();
             }
         });
     }
@@ -256,6 +249,26 @@ core.prototype.loadImage = function (imgName, callback) {
     catch (e) {
         alert(e);
     }
+}
+
+core.prototype.loadSounds = function (callback) {
+    for (var key in core.sounds) {
+        for (var i = 0; i < core.sounds[key].length; i++) {
+            var soundName=core.sounds[key][i];
+            soundName = soundName.split('-');
+            var sound = new Audio();
+            sound.preload = 'none';
+            sound.src = 'sounds/' + soundName[0] + '.' + key;
+            if (soundName[1] == 'loop') {
+                sound.loop = 'loop';
+            }
+
+            if (!core.isset(core.material.sounds[key]))
+                core.material.sounds[key] = {};
+            core.material.sounds[key][soundName[0]] = sound;
+        }
+    }
+    callback();
 }
 
 core.prototype.loadSound = function() {
@@ -444,14 +457,6 @@ core.prototype.keyDown = function(keyCode) {
             core.events.keyDownSyncSave(keyCode);
             return;
         }
-
-        /*
-        if (core.status.event.id == 'save' || core.status.event.id == 'load') {
-            if (keyCode==37) core.ui.drawSLPanel(core.status.event.data-1);
-            else if (keyCode==39) core.ui.drawSLPanel(core.status.event.data+1);
-            return;
-        }
-        */
         return;
     }
     if(!core.status.played) {
@@ -1774,7 +1779,7 @@ core.prototype.drawMap = function (mapName, callback) {
         if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
             if (block.event.cls == 'autotile') {
                 // core.drawAutotile();
-                autotileMaps[13*block.x + block.y] = true;
+                autotileMaps[13*block.x + block.y] = block.event.id;
                 continue;
             }
             else {
@@ -1792,17 +1797,29 @@ core.prototype.drawMap = function (mapName, callback) {
         callback();
 }
 
-core.prototype.drawAutotile = function (floorId, canvas, autotileMaps, left, top, size) {
+core.prototype.drawAutotile = function (floorId, canvas, autotileMaps, left, top, size, autotileId) {
+
+    if (!core.isset(autotileId)) {
+        var autotileIds = {};
+        autotileMaps.forEach(function (t) {
+            if (core.isset(t)) autotileIds[t]=true;
+        });
+        Object.keys(autotileIds).forEach(function (t) {
+            core.drawAutotile(floorId, canvas, autotileMaps, left, top, size, t);
+        })
+        return;
+    }
+
     var isAutotile = function(x, y) {
         if (x<0 || x>12 || y<0 || y>12) return 0;
-        return autotileMaps[13*x+y]?1:0;
+        return autotileMaps[13*x+y]==autotileId?1:0;
     }
     for (var xx=0;xx<13;xx++) {
         for (var yy=0;yy<13;yy++) {
             if (isAutotile(xx, yy)) {
                 // 绘制autotile
                 var id=isAutotile(xx, yy - 1) + 2 * isAutotile(xx - 1, yy) + 4 * isAutotile(xx, yy + 1) + 8 * isAutotile(xx + 1, yy);
-                core.drawAutotileBlock(floorId, canvas, left + xx * size, top + yy * size, size, core.material.images.autotile, id);
+                core.drawAutotileBlock(floorId, canvas, left + xx * size, top + yy * size, size, core.material.images.autotile[autotileId], id);
             }
         }
     }
@@ -1810,16 +1827,16 @@ core.prototype.drawAutotile = function (floorId, canvas, autotileMaps, left, top
         for (var yy=0;yy<13;yy++) {
             if (isAutotile(xx, yy) + isAutotile(xx + 1, yy) + isAutotile(xx + 1, yy + 1) + isAutotile(xx, yy + 1) != 3) continue;
             if (!isAutotile(xx, yy)) {
-                core.drawAutotileBlock(floorId, canvas, left + xx * size + size, top + yy * size + size, size, core.material.images.autotile, 16);
+                core.drawAutotileBlock(floorId, canvas, left + xx * size + size, top + yy * size + size, size, core.material.images.autotile[autotileId], 16);
             }
             if (!isAutotile(xx + 1, yy)) {
-                core.drawAutotileBlock(floorId, canvas, left + xx * size + size / 2, top + yy * size + size, size, core.material.images.autotile, 17);
+                core.drawAutotileBlock(floorId, canvas, left + xx * size + size / 2, top + yy * size + size, size, core.material.images.autotile[autotileId], 17);
             }
             if (!isAutotile(xx + 1, yy + 1)) {
-                core.drawAutotileBlock(floorId, canvas, left + xx * size + size / 2, top + yy * size + size / 2, size, core.material.images.autotile, 18);
+                core.drawAutotileBlock(floorId, canvas, left + xx * size + size / 2, top + yy * size + size / 2, size, core.material.images.autotile[autotileId], 18);
             }
             if (!isAutotile(xx, yy + 1)) {
-                core.drawAutotileBlock(floorId, canvas, left + xx * size + size, top + yy * size + size / 2, size, core.material.images.autotile, 19);
+                core.drawAutotileBlock(floorId, canvas, left + xx * size + size, top + yy * size + size / 2, size, core.material.images.autotile[autotileId], 19);
             }
         }
     }

@@ -209,6 +209,12 @@ icons.prototype.init = function () {
             'moneyPocket': 46,
             'shoes': 47,
             'hammer': 48
+        },
+        'autotile': { // 所有的Autotile列表；后面的index简单取0即可
+            'autotile': 0,
+            'autotile1': 0,
+            'autotile2': 0,
+            'autotile3': 0,
         }
     }
 }

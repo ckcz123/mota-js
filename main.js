@@ -33,14 +33,12 @@ function main() {
         'mdefCol': document.getElementById('mdefCol'),
         'expCol': document.getElementById('expCol'),
     };
-    // console.log('加载游戏容器和开始界面dom对象完成 如下');
-    // console.log(this.dom);
     this.loadList = [
         'items', 'icons', 'maps', 'enemys', 'events', 'data', 'ui', 'core'
     ];
-    // console.log('加载js文件列表加载完成' + this.loadList);
     this.images = [
-        'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains', "autotile"
+        'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains'
+        // Autotile 动态添加
     ];
     this.sounds = {
         'mp3': ['bgm-loop', 'floor'],
@@ -78,6 +76,8 @@ function main() {
         'curse': document.getElementById('curse'),
         'hard': document.getElementById("hard")
     }
+
+    //------------------------ 用户修改内容 ------------------------//
     this.version = "0.1"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
     this.useCompress = false; // 是否使用压缩文件
@@ -88,6 +88,8 @@ function main() {
     this.floorIds = [ // 在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序
         "sample0", "sample1", "sample2"
     ]
+    //------------------------ 用户修改内容 END ------------------------//
+
     this.floors = {}
     this.instance = {};
     this.canvas = {};

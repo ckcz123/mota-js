@@ -128,7 +128,7 @@ data.prototype.init = function() {
         "bigKeyIsBox": false, // 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙
         /****** 系统相关 ******/
         "startDirectly": false, // 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面
-        "canOpenBattleAnimate": false, // 是否允许用户开启战斗过程；如果此项为false，则下面两项均强制视为false
+        "canOpenBattleAnimate": true, // 是否允许用户开启战斗过程；如果此项为false，则下面两项均强制视为false
         "showBattleAnimateConfirm": true, // 是否在游戏开始时提供“是否开启战斗动画”的选项
         "battleAnimate": true, // 是否默认显示战斗动画；用户可以手动在菜单栏中开关
         "displayEnemyDamage": true, // 是否地图怪物显伤；用户可以手动在菜单栏中开关

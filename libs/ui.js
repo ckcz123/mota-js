@@ -594,8 +594,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
             // 反击
             if (core.enemys.hasSpecial(mon_special, 8)) {
-                var counterDamage = parseInt(core.values.counterAttack * hero_atk);
-                hero_mdef -= counterDamage;
+                hero_mdef -= parseInt(core.values.counterAttack * hero_atk);
 
                 if (hero_mdef<0) {
                     hero_hp+=hero_mdef;

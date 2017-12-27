@@ -66,6 +66,14 @@ events.prototype.startGame = function (hard) {
 
     core.hideStartAnimate(function() {
         core.drawText(core.clone(core.firstData.startText), function() {
+
+            // 强制关闭战斗过程？
+            if (!core.flags.canOpenBattleAnimate) {
+                core.flags.showBattleAnimateConfirm=false;
+                core.flags.battleAnimate=false;
+                core.setLocalStorage('battleAnimate', false);
+            }
+
             if (core.flags.showBattleAnimateConfirm) { // 是否提供“开启战斗动画”的选择项
                 core.status.event.selection = core.flags.battleAnimate ? 0 : 1;
                 core.ui.drawConfirmBox("你想开启战斗动画吗？\n之后可以在菜单栏中开启或关闭。\n（强烈建议新手开启此项）", function () {
@@ -1125,9 +1133,14 @@ events.prototype.clickSwitchs = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 1:
-                core.flags.battleAnimate=!core.flags.battleAnimate;
-                core.setLocalStorage('battleAnimate', core.flags.battleAnimate);
-                core.ui.drawSwitchs();
+                if (!core.flags.canOpenBattleAnimate) {
+                    core.drawTip("本塔不能开启战斗动画！");
+                }
+                else {
+                    core.flags.battleAnimate=!core.flags.battleAnimate;
+                    core.setLocalStorage('battleAnimate', core.flags.battleAnimate);
+                    core.ui.drawSwitchs();
+                }
                 break;
             case 2:
                 core.flags.displayEnemyDamage=!core.flags.displayEnemyDamage;

@@ -443,6 +443,8 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     core.setAlpha('ui', 1);
     core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
     core.clearMap('data',0,0,416,416);
+
+    clearInterval(core.interval.tipAnimate);
     core.setAlpha('data', 1);
     core.setOpacity('data', 1);
     core.status.boxAnimateObjs = [];

@@ -76,7 +76,7 @@ enemys.prototype.getEnemys = function (enemyId) {
 }
 
 enemys.prototype.hasSpecial = function (special, test) {
-    return special!=0 && (special%100 == test || this.hasSpecial(parseInt(special/100), test));
+    return (special instanceof Array)?special.indexOf(test)>=0:(special!=0&&(special%100==test||this.hasSpecial(parseInt(special/100), test)));
 }
 
 enemys.prototype.getSpecialText = function (enemyId) {

@@ -87,6 +87,7 @@ function core() {
             'selection': null,
             'ui': null,
         },
+        'curtainColor': null,
         'usingCenterFly':false,
         'openingDoor': null,
 
@@ -475,7 +476,7 @@ core.prototype.keyDown = function(keyCode) {
         case 40:
             core.moveHero('down');
         break;
-        case 13: case 32: case 51: // 快捷键3：飞
+        case 13: case 32: case 67: case 51: // 快捷键3：飞
             // 因为加入了两次的检测机制,从keydown转移到keyup,同时保证位置信息正确,但以下情况会触发作图的bug:
             // 在鼠标的路线移动中使用飞,绿块会滞后一格,显示的位置不对,同时也不会倍以下的代码清除
             if (core.status.heroStop && core.hasItem('centerFly')) {
@@ -491,9 +492,9 @@ core.prototype.keyDown = function(keyCode) {
                     core.status.usingCenterFly = false;
                 } else if (keyCode==51) {
                     core.status.usingCenterFly = true;
-                    var fillstyle = 'rgba(255,0,0,0.5)';
-                    if (core.canUseItem('centerFly')) fillstyle = 'rgba(0,255,0,0.5)';
-                    core.fillRect('ui',(12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32,fillstyle);
+                    core.setAlpha('ui', 0.5);
+                    core.fillRect('ui',(12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32,core.canUseItem('centerFly')?'#00FF00':'#FF0000');
+                    core.setAlpha('ui', 1);
                     core.drawTip("请确认当前中心对称飞行器的位置");
                 }
             }
@@ -1600,10 +1601,16 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
     }
 
     window.setTimeout(function () {
-        // console.log('地图切换到' + floorId);
         core.playSound('floor', 'mp3');
         core.mapChangeAnimate('show', time/2, function () {
-            core.statusBar.floor.innerHTML = core.status.maps[floorId].name;
+
+            // 根据文字判断是否斜体
+            var floorName = core.status.maps[floorId].name;
+            core.statusBar.floor.innerHTML = floorName;
+            if (/^[+-]?\d+$/.test(floorName))
+                core.statusBar.floor.style.fontStyle = 'italic';
+            else core.statusBar.floor.style.fontStyle = 'normal';
+
             core.updateStatusBar();
             core.drawMap(floorId, function () {
                 setTimeout(function() {
@@ -2406,30 +2413,23 @@ core.prototype.hasBetweenAttack = function(x,y) {
 
 core.prototype.setFg = function(color, time, callback) {
     time = time || 750;
-    core.setOpacity('fg', 1);
 
-    var reset = false;
-
-    if (!core.isset(core.status.event.data.currentColor)) {
-        core.status.event.data.currentColor = [0,0,0,0];
+    if (!core.isset(core.status.curtainColor)) {
+        core.status.curtainColor = [0,0,0,0];
     }
 
-    var fromColor = core.status.event.data.currentColor;
+    var fromColor = core.status.curtainColor;
 
-    if (!core.isset(color)) {
+    if (!core.isset(color))
         color = [0,0,0,0];
-        reset = true;
-    }
-    if (color.length==3) {
+    if (color.length==3)
         color.push(1);
-    }
     if (color[3]<0) color[3]=0;
     if (color[3]>1) color[3]=1;
 
     var step=0;
     var changeAnimate = setInterval(function() {
         step++;
-        core.clearMap('fg', 0, 0, 416, 416);
 
         var nowAlpha = fromColor[3]+(color[3]-fromColor[3])*step/25;
         var nowR = parseInt(fromColor[0]+(color[0]-fromColor[0])*step/25);
@@ -2439,19 +2439,13 @@ core.prototype.setFg = function(color, time, callback) {
         if (nowG<0) nowG=0; if (nowG>255) nowG=255;
         if (nowB<0) nowB=0; if (nowB>255) nowB=255;
 
-        core.setAlpha('fg', nowAlpha);
-        var toRGB = "#"+((1<<24)+(nowR<<16)+(nowG<<8)+nowB).toString(16).slice(1)
-        core.fillRect('fg', 0, 0, 416, 416, toRGB);
+        var toRGB = "#"+((1<<24)+(nowR<<16)+(nowG<<8)+nowB).toString(16).slice(1);
+        core.dom.curtain.style.background = toRGB;
+        core.dom.curtain.style.opacity = nowAlpha;
 
         if (step>=25) {
             clearInterval(changeAnimate);
-            if (reset) {
-                core.clearMap('fg', 0, 0, 416, 416);
-                delete core.status.event.data.currentColor;
-                core.setAlpha('fg', 1);
-                core.updateFg();
-            }
-            else core.status.event.data.currentColor = color;
+            core.status.curtainColor = color;
             if (core.isset(callback)) callback();
         }
     }, time/25);
@@ -2501,6 +2495,7 @@ core.prototype.nextY = function () {
  */
 core.prototype.updateFg = function () {
 
+    /*
     // 如果存在颜色
     if (core.isset(core.status.event.data) && core.isset(core.status.event.data.currentColor)) {
         var color=core.status.event.data.currentColor;
@@ -2508,6 +2503,7 @@ core.prototype.updateFg = function () {
         core.fillRect("fg",0,0,416,416,"#"+((1<<24)+(color[0]<<16)+(color[1]<<8)+color[2]).toString(16).slice(1));
         return;
     }
+    */
 
     if (!core.isset(core.status.thisMap) || !core.isset(core.status.thisMap.blocks)) return;
     // 更新显伤
@@ -3324,7 +3320,6 @@ core.prototype.updateStatusBar = function () {
         core.setStatus('hp', Math.min(core.values.HPMAX, core.getStatus('hp')));
     }
 
-    // core.statusBar.floor.innerHTML = core.maps.maps[core.status.floorId].name;
     var statusList = ['hp', 'atk', 'def', 'mdef', 'money', 'experience'];
     statusList.forEach(function (item) {
         core.statusBar[item].innerHTML = core.getStatus(item);
@@ -3522,6 +3517,15 @@ core.prototype.resize = function(clientWidth, clientHeight) {
             }
         },
         {
+            id: 'curtain',
+            rules: {
+                width: (canvasWidth - SPACE*2) + unit,
+                height:(canvasWidth - SPACE*2) + unit,
+                top: (canvasTop + SPACE) + unit,
+                right: SPACE + unit,
+            }
+        },
+        {
             id: 'floorMsgGroup',
             rules:{
                 width: (canvasWidth - SPACE*2) + unit,
@@ -3602,6 +3606,12 @@ core.prototype.resize = function(clientWidth, clientHeight) {
                 display: mdefDisplay
             }
         },
+        {
+            id: 'hard',
+            rules: {
+                lineHeight: toolsHeight + unit
+            }
+        }
     ]
     core.domRenderer();
 }

@@ -20,6 +20,7 @@ function main() {
         'toolBar': document.getElementById('toolBar'),
         'tools': document.getElementsByClassName('tools'),
         'gameCanvas': document.getElementsByClassName('gameCanvas'),
+        'curtain': document.getElementById('curtain'),
         'startButtons': document.getElementById('startButtons'),
         'playGame': document.getElementById('playGame'),
         'loadGame': document.getElementById('loadGame'),
@@ -32,6 +33,7 @@ function main() {
         'statusLabels': document.getElementsByClassName('statusLabel'),
         'mdefCol': document.getElementById('mdefCol'),
         'expCol': document.getElementById('expCol'),
+        'hard': document.getElementById('hard'),
     };
     this.loadList = [
         'items', 'icons', 'maps', 'enemys', 'events', 'data', 'ui', 'core'

@@ -4,7 +4,7 @@
 main.floors.sample1 = {
     "floorId": "sample1", // 楼层唯一标识符，需要和名字完全一致
     "title": "样板 1 层", // 楼层中文名
-    "name": 1, // 显示在状态栏中的层数
+    "name": "样板1层", // 显示在状态栏中的层数
     "canFlyTo": true, // 该楼能否被楼传器飞到（不能的话在该楼也不允许使用楼传器）
     "canUseQuickShop": true, // 该层是否允许使用快捷商店
     "defaultGround": "grass", // 默认地面的图块ID（terrains中）

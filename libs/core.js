@@ -114,6 +114,13 @@ core.prototype.init = function (dom, statusBar, canvas, images, sounds, floorIds
         core[key] = coreData[key];
     }
     core.flags = core.clone(core.data.flags);
+    if (!core.flags.enableExperience)
+        core.flags.enableLevelUp = false;
+    if (!core.flags.canOpenBattleAnimate) {
+        core.flags.showBattleAnimateConfirm = false;
+        core.flags.battleAnimate = false;
+        core.setLocalStorage('battleAnimate', false);
+    }
     core.values = core.clone(core.data.values);
     core.firstData = core.data.getFirstData();
     core.initStatus.shops = core.firstData.shops;
@@ -1536,7 +1543,9 @@ core.prototype.afterBattle = function(id, x, y, callback) {
         core.canvas.event.clearRect(32 * x, 32 * y, 32, 32);
     }
     core.updateFg();
-    var hint = "打败 " + core.material.enemys[id].name + "，金币+" + money;
+    var hint = "打败 " + core.material.enemys[id].name;
+    if (core.flags.enableMoney)
+        hint += "，金币+" + money;
     if (core.flags.enableExperience)
         hint += "，经验+" + core.material.enemys[id].experience;
     core.drawTip(hint);
@@ -1583,14 +1592,18 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
     core.clearContinueAutomaticRoute();
     core.dom.floorNameLabel.innerHTML = core.status.maps[floorId].title;
     if (core.isset(stair)) {
-        // find heroLoc
-        heroLoc = core.status.hero.loc;
+        if (!core.isset(heroLoc)) heroLoc={};
         var blocks = core.status.maps[floorId].blocks;
         for (var i in blocks) {
             if (core.isset(blocks[i].event) && !(core.isset(blocks[i].enable) && !blocks[i].enable) && blocks[i].event.id === stair) {
                 heroLoc.x = blocks[i].x;
                 heroLoc.y = blocks[i].y;
+                break;
             }
+        }
+        if (!core.isset(heroLoc.x)) {
+            heroLoc.x=core.status.hero.loc.x;
+            heroLoc.y=core.status.hero.loc.y;
         }
     }
     if (core.status.maps[floorId].canFlyTo && core.status.hero.flyRange.indexOf(floorId)<0) {
@@ -1606,6 +1619,7 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
 
             // 根据文字判断是否斜体
             var floorName = core.status.maps[floorId].name;
+            if (!core.isset(floorName) || floorName=="") floorName="&nbsp;"
             core.statusBar.floor.innerHTML = floorName;
             if (/^[+-]?\d+$/.test(floorName))
                 core.statusBar.floor.style.fontStyle = 'italic';
@@ -3182,6 +3196,11 @@ core.prototype.getStatus = function (statusName) {
     return core.status.hero[statusName];
 }
 
+core.prototype.getLvName = function () {
+    if (core.status.hero.lv>core.firstData.levelUp.length) return core.status.hero.lv;
+    return core.firstData.levelUp[core.status.hero.lv-1].name || core.status.hero.lv;
+}
+
 core.prototype.setFlag = function(flag, value) {
     if (!core.isset(core.status.hero)) return;
     core.status.hero.flags[flag]=value;
@@ -3302,9 +3321,9 @@ core.prototype.hide = function (obj, speed, callback) {
 ////// 状态栏相关 //////
 
 core.prototype.clearStatusBar = function() {
-    var statusList = ['floor', 'hp', 'atk', 'def', 'mdef', 'money', 'experience', 'yellowKey', 'blueKey', 'redKey', 'poison', 'weak', 'curse', 'hard'];
+    var statusList = ['floor', 'lv', 'hp', 'atk', 'def', 'mdef', 'money', 'experience', 'up', 'yellowKey', 'blueKey', 'redKey', 'poison', 'weak', 'curse', 'hard'];
     statusList.forEach(function (e) {
-        core.statusBar[e].innerHTML = "";
+        core.statusBar[e].innerHTML = "&nbsp;";
     });
     core.statusBar.image.book.style.opacity = 0.3;
     core.statusBar.image.fly.style.opacity = 0.3;
@@ -3319,6 +3338,12 @@ core.prototype.updateStatusBar = function () {
     if (core.values.HPMAX>0) {
         core.setStatus('hp', Math.min(core.values.HPMAX, core.getStatus('hp')));
     }
+
+    var lvName = core.getLvName();
+    core.statusBar.lv.innerHTML = lvName;
+    if (/^[+-]?\d+$/.test(lvName))
+        core.statusBar.lv.style.fontStyle = 'italic';
+    else core.statusBar.lv.style.fontStyle = 'normal';
 
     var statusList = ['hp', 'atk', 'def', 'mdef', 'money', 'experience'];
     statusList.forEach(function (item) {
@@ -3376,18 +3401,22 @@ core.prototype.resize = function(clientWidth, clientHeight) {
         statusWidth, statusHeight, statusMaxWidth,statusLabelsLH,
         toolBarWidth, toolBarHeight, toolBarTop, toolBarBorder,
         toolsWidth, toolsHeight,toolsMargin,toolsPMaxwidth,
-        fontSize, margin;
+        fontSize, toolbarFontSize, margin;
         
-    var count = 9;
+    var count = 11;
+    if (!core.flags.enableFloor) count--;
+    if (!core.flags.enableLv) count--;
     if (!core.flags.enableMDef) count--;
+    if (!core.flags.enableMoney) count--;
     if (!core.flags.enableExperience) count--;
+    if (!core.flags.enableLevelUp) count--;
     if (!core.flags.enableDebuff) count--;
 
-    var statusLineHeight = BASE_LINEHEIGHT * 9/count;
+    var statusLineHeight = BASE_LINEHEIGHT * 9 / count;
+    var statusLineFontSize = DEFAULT_FONT_SIZE;
+    if (count>9) statusLineFontSize = statusLineFontSize * 9 / count;
     
-    var shopDisplay, mdefDisplay, expDisplay;
-    mdefDisplay = core.flags.enableMDef ? 'block' : 'none';
-    expDisplay = core.flags.enableExperience ? 'block' : 'none';
+    var shopDisplay;
 
     statusBarBorder = '3px #fff solid';
     toolBarBorder = '3px #fff solid';
@@ -3407,13 +3436,13 @@ core.prototype.resize = function(clientWidth, clientHeight) {
         
         var scale = core.domStyle.scale
         var tempWidth = DEFAULT_CANVAS_WIDTH * scale;
-        fontSize = DEFAULT_FONT_SIZE * scale;
         if(!isHorizontal){ //竖屏
             core.domStyle.screenMode = 'vertical';
             //显示快捷商店图标
             shopDisplay = 'block';
             //判断应该显示几行
-            var col = core.flags.enableMDef || core.flags.enableExperience || core.flags.enableDebuff ? 3 : 2;
+            // var col = core.flags.enableMDef || core.flags.enableExperience || core.flags.enableDebuff ? 3 : 2;
+            var col = parseInt((count-1)/3)+1;
 
             var tempTopBarH = scale * (BASE_LINEHEIGHT * col + SPACE * 2) + 6;
             var tempBotBarH = scale * (BASE_LINEHEIGHT + SPACE * 4) + 6;
@@ -3440,6 +3469,8 @@ core.prototype.resize = function(clientWidth, clientHeight) {
             
             margin = scale * SPACE * 2;
             toolsMargin = scale * SPACE * 4;
+            fontSize = DEFAULT_FONT_SIZE * scale;
+            toolbarFontSize = DEFAULT_FONT_SIZE * scale;
         }else { //横屏
             core.domStyle.screenMode = 'horizontal';
             shopDisplay = 'none';
@@ -3457,6 +3488,8 @@ core.prototype.resize = function(clientWidth, clientHeight) {
             toolBarTop = scale*statusLineHeight * count + SPACE * 2;
             toolBarBorder = '3px #fff solid';
             toolsHeight = scale * BASE_LINEHEIGHT;
+            fontSize = statusLineFontSize * scale;
+            toolbarFontSize = DEFAULT_FONT_SIZE * scale;
             borderRight = '';
             statusMaxWidth = scale * DEFAULT_BAR_WIDTH;
             toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH;
@@ -3486,7 +3519,8 @@ core.prototype.resize = function(clientWidth, clientHeight) {
         
         toolsHeight = BASE_LINEHEIGHT;
         borderRight = '';
-        fontSize = DEFAULT_FONT_SIZE;
+        fontSize = statusLineFontSize;
+        toolbarFontSize = DEFAULT_FONT_SIZE;
         statusMaxWidth = DEFAULT_BAR_WIDTH;
         toolsPMaxwidth = DEFAULT_BAR_WIDTH * .9;
         margin = SPACE * 2;
@@ -3511,8 +3545,6 @@ core.prototype.resize = function(clientWidth, clientHeight) {
                 height: canvasWidth + unit,
                 top: canvasTop + unit,
                 right: 0,
-                // left: canvasLeft + unit, 
-
                 border: '3px #fff solid',
             }
         },
@@ -3576,7 +3608,7 @@ core.prototype.resize = function(clientWidth, clientHeight) {
                 borderBottom: toolBarBorder,
                 borderLeft: toolBarBorder,
                 borderRight: borderRight,
-                fontSize: fontSize + unit
+                fontSize: toolbarFontSize + unit
             }
         },
         {
@@ -3595,15 +3627,45 @@ core.prototype.resize = function(clientWidth, clientHeight) {
             }
         },
         {
-            id: 'expCol',
+            id: 'floorCol',
             rules: {
-                display: expDisplay
+                display: core.flags.enableFloor ? 'block': 'none'
+            }
+        },
+        {
+            id: 'lvCol',
+            rules: {
+                display: core.flags.enableLv ? 'block': 'none'
             }
         },
         {
             id: 'mdefCol',
             rules: {
-                display: mdefDisplay
+                display: core.flags.enableMDef ? 'block': 'none'
+            }
+        },
+        {
+            id: 'moneyCol',
+            rules: {
+                display: core.flags.enableMoney ? 'block': 'none'
+            }
+        },
+        {
+            id: 'expCol',
+            rules: {
+                display: core.flags.enableExperience ? 'block': 'none'
+            }
+        },
+        {
+            id: 'upCol',
+            rules: {
+                display: core.flags.enableLevelUp ? 'block': 'none'
+            }
+        },
+        {
+            'id': 'debuffCol',
+            rules: {
+                display: core.flags.enableDebuff ? 'block': 'none'
             }
         },
         {

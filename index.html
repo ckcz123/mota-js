@@ -47,9 +47,13 @@
         <p id='floorNameLabel'></p>
     </div>
     <div id='statusBar' class="clearfix">
-        <div class="status">
+        <div class="status" id="floorCol">
             <img src='images/floor.png' id="img-floor">
             <p class='statusLabel' id='floor'></p>
+        </div>
+        <div class="status" id="lvCol">
+            <img src='images/lv.png' id="img-lv">
+            <p class='statusLabel' id='lv'></p>
         </div>
         <div class="status">
             <img src='images/hp.png' id="img-hp">
@@ -67,7 +71,7 @@
             <img src='images/mdef.png' id="img-mdef">
             <p class='statusLabel' id='mdef'></p>
         </div>
-        <div class="status">
+        <div class="status" id="moneyCol">
             <img src='images/money.png' id="img-money">
             <p class='statusLabel' id='money'></p>
         </div>
@@ -75,12 +79,16 @@
             <img src='images/experience.png' id="img-experience">
             <p class='statusLabel' id='experience'></p>
         </div>
+        <div class="status" id="upCol">
+            <img src='images/up.png' id="img-up">
+            <p class='statusLabel' id='up'></p>
+        </div>
         <div class="status">
             <span class='statusLabel' id='yellowKey' style="color:#FFCCAA"></span>
             <span class='statusLabel' id='blueKey' style="color:#AAAADD"></span>
             <span class='statusLabel' id='redKey' style="color:#FF8888"></span>
         </div>
-        <div class="status">
+        <div class="status" id="debuffCol">
             <span class='statusLabel' id='poison' style="color: #AFFCA8;"></span>
             <span class='statusLabel' id='weak' style="color: #FECCD0;"></span>
             <span class='statusLabel' id='curse' style="color: #C2F4E7;"></span>

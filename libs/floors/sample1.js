@@ -4,7 +4,7 @@
 main.floors.sample1 = {
     "floorId": "sample1", // 楼层唯一标识符，需要和名字完全一致
     "title": "样板 1 层", // 楼层中文名
-    "name": "样板1层", // 显示在状态栏中的层数
+    "name": "1", // 显示在状态栏中的层数
     "canFlyTo": true, // 该楼能否被楼传器飞到（不能的话在该楼也不允许使用楼传器）
     "canUseQuickShop": true, // 该层是否允许使用快捷商店
     "defaultGround": "grass", // 默认地面的图块ID（terrains中）
@@ -273,7 +273,7 @@ main.floors.sample1 = {
     },
     "changeFloor": { // 楼层转换事件；该事件不能和上面的events有冲突（同位置点），否则会被覆盖
         "4,12": {"floorId": "sample0", "loc": [6,0]}, // 由于楼下有多个上楼梯，所以需指定位置而不是简单地写"stair": "upFloor"
-        "5,5": {"floorId": "sample2", "stair": "downFloor"}
+        "5,5": {"floorId": "sample2", "stair": "downFloor", "direction": "up"}
     },
     "afterBattle": { // 战斗后可能触发的事件列表
         "9,6": [ // 初级卫兵1

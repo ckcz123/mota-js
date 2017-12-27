@@ -20,12 +20,11 @@ events.prototype.init = function () {
                 callback();
         },
         'changeFloor': function (data, core, callback) {
-            var heroLoc = null;
-            if (core.isset(data.event.data.loc)) {
+            var heroLoc = {};
+            if (core.isset(data.event.data.loc))
                 heroLoc = {'x': data.event.data.loc[0], 'y': data.event.data.loc[1]};
-                if (core.isset(data.event.data.direction))
-                    heroLoc.direction = data.event.data.direction;
-            }
+            if (core.isset(data.event.data.direction))
+                heroLoc.direction = data.event.data.direction;
             core.changeFloor(data.event.data.floorId, data.event.data.stair,
                 heroLoc, data.event.data.time, callback);
         },
@@ -66,14 +65,6 @@ events.prototype.startGame = function (hard) {
 
     core.hideStartAnimate(function() {
         core.drawText(core.clone(core.firstData.startText), function() {
-
-            // 强制关闭战斗过程？
-            if (!core.flags.canOpenBattleAnimate) {
-                core.flags.showBattleAnimateConfirm=false;
-                core.flags.battleAnimate=false;
-                core.setLocalStorage('battleAnimate', false);
-            }
-
             if (core.flags.showBattleAnimateConfirm) { // 是否提供“开启战斗动画”的选择项
                 core.status.event.selection = core.flags.battleAnimate ? 0 : 1;
                 core.ui.drawConfirmBox("你想开启战斗动画吗？\n之后可以在菜单栏中开启或关闭。\n（强烈建议新手开启此项）", function () {

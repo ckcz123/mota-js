@@ -430,7 +430,10 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     var left=10, right=416-2*left;
 
 
-    var lines = core.flags.enableExperience?5:4;
+    // var lines = core.flags.enableExperience?5:4;
+    var lines = 3;
+    if (core.flags.enableMDef || core.flags.enableMoney || core.flags.enableExperience) lines=4;
+    if (core.flags.enableMoney && core.flags.enableExperience) lines=5;
 
     var lineHeight = 60;
     var height = lineHeight * lines + 50;
@@ -515,7 +518,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     if (core.flags.enableMDef) {
         textTop += lineHeight;
         core.canvas.ui.textAlign='left';
-        core.fillText('ui', "魔防", left_start, textTop, '#DDDDDD', '16px Verdana');
+        core.fillText('ui', "护盾", left_start, textTop, '#DDDDDD', '16px Verdana');
         core.drawLine('ui', left_start, textTop + 8, left_end, textTop + 8, '#FFFFFF', 2);
         core.canvas.data.textAlign='right';
         core.fillText('data', hero_mdef, left_end, textTop+26, '#DDDDDD', 'bold 16px Verdana');
@@ -543,12 +546,14 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     core.canvas.ui.textAlign='left';
     core.fillText('ui', mon_def, right_start, textTop+26, '#DDDDDD', 'bold 16px Verdana');
 
-    textTop += lineHeight;
-    core.canvas.ui.textAlign='right';
-    core.fillText('ui', "金币", right_end, textTop, '#DDDDDD', '16px Verdana');
-    core.drawLine('ui', right_start, textTop + 8, right_end, textTop + 8, '#FFFFFF', 2);
-    core.canvas.ui.textAlign='left';
-    core.fillText('ui', mon_money, right_start, textTop+26, '#DDDDDD', 'bold 16px Verdana');
+    if (core.flags.enableMoney) {
+        textTop += lineHeight;
+        core.canvas.ui.textAlign = 'right';
+        core.fillText('ui', "金币", right_end, textTop, '#DDDDDD', '16px Verdana');
+        core.drawLine('ui', right_start, textTop + 8, right_end, textTop + 8, '#FFFFFF', 2);
+        core.canvas.ui.textAlign = 'left';
+        core.fillText('ui', mon_money, right_start, textTop + 26, '#DDDDDD', 'bold 16px Verdana');
+    }
 
     if (core.flags.enableExperience) {
         textTop += lineHeight;
@@ -564,12 +569,6 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
     core.canvas.ui.textAlign='right';
     core.fillText("ui", "S", right_start-8, 208+15, "#FFFFFF", "italic bold 40px Verdana");
-/*
-    core.drawLine('data', left + right - margin - boxWidth + 6, top+margin+boxWidth-6,
-        left+right-margin-6, top+margin+6, '#FF0000', 4);
-    core.drawLine('data', left + margin + 6, top+margin+heroHeight+(boxWidth-32)-6,
-        left+margin+boxWidth-6, top+margin+6, '#FF0000', 4);
-*/
 
     var battleInterval = setInterval(function() {
         core.playSound("attack", "ogg");
@@ -797,25 +796,34 @@ ui.prototype.drawEnemyBook = function (page) {
         core.fillText('ui', enemy.atk, 285, 62 * i + 32, '#DDDDDD', 'bold 13px Verdana');
         core.fillText('ui', '防御', 335, 62 * i + 32, '#DDDDDD', '13px Verdana');
         core.fillText('ui', enemy.def, 365, 62 * i + 32, '#DDDDDD', 'bold 13px Verdana');
-        core.fillText('ui', '金币', 165, 62 * i + 50, '#DDDDDD', '13px Verdana');
-        core.fillText('ui', enemy.money, 195, 62 * i + 50, '#DDDDDD', 'bold 13px Verdana');
 
-        var damage_offset = 326;
+        var expOffset = 165;
+        if (core.flags.enableMoney) {
+            core.fillText('ui', '金币', 165, 62 * i + 50, '#DDDDDD', '13px Verdana');
+            core.fillText('ui', enemy.money, 195, 62 * i + 50, '#DDDDDD', 'bold 13px Verdana');
+            expOffset = 255;
+        }
+
         if (core.flags.enableExperience) {
             core.canvas.ui.textAlign = "left";
-            core.fillText('ui', '经验', 255, 62 * i + 50, '#DDDDDD', '13px Verdana');
-            core.fillText('ui', enemy.experience, 285, 62 * i + 50, '#DDDDDD', 'bold 13px Verdana');
-            damage_offset = 361;
+            core.fillText('ui', '经验', expOffset, 62 * i + 50, '#DDDDDD', '13px Verdana');
+            core.fillText('ui', enemy.experience, expOffset + 30, 62 * i + 50, '#DDDDDD', 'bold 13px Verdana');
         }
+
+        var damageOffet = 281;
+        if (core.flags.enableMoney && core.flags.enableExperience)
+            damageOffet = 361;
+        else if (core.flags.enableMoney || core.flags.enableExperience)
+            damageOffet = 326;
+
 
         core.canvas.ui.textAlign = "center";
         var damage = enemy.damage;
         var color = '#FFFF00';
         if (damage >= core.status.hero.hp) color = '#FF0000';
-        if (damage == 0) color = '#00FF00';
+        if (damage <= 0) color = '#00FF00';
         if (damage >= 999999999) damage = '无法战斗';
-        var length = core.canvas.ui.measureText(damage).width;
-        core.fillText('ui', damage, damage_offset, 62 * i + 50, color, 'bold 13px Verdana');
+        core.fillText('ui', damage, damageOffet, 62 * i + 50, color, 'bold 13px Verdana');
 
         core.canvas.ui.textAlign = "left";
 

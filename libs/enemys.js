@@ -131,7 +131,7 @@ enemys.prototype.getCritical = function (monsterId) {
     if (this.hasSpecial(monster.special, 3) || this.hasSpecial(monster.special, 10)) return "???";
     var last = this.calDamage(core.status.hero.atk, core.status.hero.def, core.status.hero.mdef,
         monster.hp, monster.atk, monster.def, monster.special);
-    if (last == 0) return 0;
+    if (last <= 0) return 0;
 
     for (var i = core.status.hero.atk + 1; i <= monster.hp + monster.def; i++) {
         var damage = this.calDamage(i, core.status.hero.def, core.status.hero.mdef,
@@ -147,9 +147,8 @@ enemys.prototype.getCritical = function (monsterId) {
 enemys.prototype.getCriticalDamage = function (monsterId) {
     var c = this.getCritical(monsterId);
     if (c == '???') return '???';
-    if (c == 0) return 0;
+    if (c <= 0) return 0;
     var monster = core.material.enemys[monsterId];
-    // if (c<=0) return 0;
     var last = this.calDamage(core.status.hero.atk, core.status.hero.def, core.status.hero.mdef,
         monster.hp, monster.atk, monster.def, monster.special);
     if (last == 999999999) return '???';
@@ -202,11 +201,7 @@ enemys.prototype.calDamage = function (hero_atk, hero_def, hero_mdef, mon_hp, mo
     var ans = damage + turn * per_damage + (turn + 1) * counterDamage;
     ans -= hero_mdef;
 
-    // 魔防回血
-    // return ans;
-
-    // 魔防不回血
-    return ans <= 0 ? 0 : ans;
+    return core.flags.enableNegativeDamage?ans:Math.max(0, ans);
 }
 
 // 获得当前楼层的怪物列表

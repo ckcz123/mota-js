@@ -27,7 +27,7 @@ data.prototype.init = function() {
                 "tools": {}
             },
             "flyRange": [], // 初始可飞的楼层；一般留空数组即可
-            "loc": {"direction": "up", "x": 6, "y": 12}, // 勇士初始位置
+            "loc": {"direction": "up", "x": 6, "y": 10}, // 勇士初始位置
             "flags": { // 游戏过程中的变量或flags
                 "poison": false, // 毒
                 "weak": false, // 衰
@@ -75,7 +75,7 @@ data.prototype.init = function() {
                 "choices": [
                     // 在choices中写need，可以针对每个选项都有不同的需求。
                     // 这里的need同样可以以times作为参数，比如 "need": "100+20*times"
-                    {"text": "等级+1", "need": "100", "effect": "status:hp+=1000;status:atk+=7;status:def+=7"},
+                    {"text": "等级+1", "need": "100", "effect": "status:lv+=1;status:hp+=1000;status:atk+=7;status:def+=7"},
                     // 多个effect直接以分号分开即可。如上面的意思是生命+1000，攻击+7，防御+7。
                     {"text": "攻击+5", "need": "30", "effect": "status:atk+=5"},
                     {"text": "防御+5", "need": "30", "effect": "status:def+=5"},
@@ -146,8 +146,8 @@ data.prototype.init = function() {
         "enableMDef": true, // 是否在状态栏及战斗界面显示魔防（护盾）
         "enableMoney": true, // 是否在状态栏、怪物手册及战斗界面显示金币
         "enableExperience": true, // 是否在状态栏、怪物手册及战斗界面显示经验
-        "enableLevelUp": true, // 是否允许等级提升（进阶）；如果上面enableExperience为false，则此项恒视为false
-        "enableDebuff": false, // 是否涉及毒衰咒；如果此项为false则不会在状态栏中显示毒衰咒的debuff
+        "enableLevelUp": false, // 是否允许等级提升（进阶）；如果上面enableExperience为false，则此项恒视为false
+        "enableDebuff": true, // 是否涉及毒衰咒；如果此项为false则不会在状态栏中显示毒衰咒的debuff
         ////// 上述的几个开关将直接影响状态栏的显示效果 //////
         /****** 道具相关 ******/
         "flyNearStair": true, // 是否需要在楼梯边使用传送器

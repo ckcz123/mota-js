@@ -329,7 +329,6 @@ events.prototype.doAction = function() {
                 core.status.hero.hp=0;
                 core.updateStatusBar();
                 core.events.lose('damage');
-
             }
             else {
                 core.updateStatusBar();
@@ -817,12 +816,7 @@ events.prototype.clickShop = function(x,y) {
 
             // 更新属性
             choice.effect.split(";").forEach(function (t) {
-                if (t.indexOf("status:")==0) {
-                    eval(t.replace("status:", "core.status.hero."));
-                }
-                else if (t.indexOf("item:")==0) {
-                    eval(t.replace("item:", "core.getItem('").replace("+=", "', ")+")");
-                }
+                core.doEffect(t);
             });
             core.updateStatusBar();
             shop.times++;

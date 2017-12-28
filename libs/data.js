@@ -7,7 +7,7 @@ data.prototype.init = function() {
         "title": "魔塔样板", // 游戏名，将显示在标题页面以及切换楼层的界面中
         "name": "template", // 游戏的唯一英文标识符。由英文、数字、下划线组成，不能超过20个字符。
         "version": "Ver 1.0.0 (Beta)", // 当前游戏版本；版本不一致的存档不能通用。
-        "floorId": "sample0", // 初始楼层ID
+        "floorId": "test", // 初始楼层ID
         "hero": { // 勇士初始数据
             "name": "阳光", // 勇士名；可以改成喜欢的
             'lv': 1, // 初始等级，该项必须为正整数
@@ -27,7 +27,7 @@ data.prototype.init = function() {
                 "tools": {}
             },
             "flyRange": [], // 初始可飞的楼层；一般留空数组即可
-            "loc": {"direction": "up", "x": 6, "y": 10}, // 勇士初始位置
+            "loc": {"direction": "up", "x": 6, "y": 12}, // 勇士初始位置
             "flags": { // 游戏过程中的变量或flags
                 "poison": false, // 毒
                 "weak": false, // 衰
@@ -84,13 +84,22 @@ data.prototype.init = function() {
         },
         "levelUp": [ // 经验升级所需要的数值，是一个数组
             {}, // 第一项为初始等级，可以简单留空，也可以写name
-            {"need": 20, "name": "第二级", "effect": "status:hp+=2*(status:atk+status:def);status:atk+=10;status:def+=10"}, // 先将生命提升攻防和的2倍；再将攻击+10，防御+10
+
             // 每一个里面可以含有三个参数 name, need, effect
             // need为所需要的经验数值，是一个正整数。请确保need所需的依次递增
             // name为该等级的名称，也可以省略代表使用系统默认值；本项将显示在状态栏中
-            // effect为本次升级所执行的操作，可由若干项组成，由分号分开；
+            // effect为本次升级所执行的操作，可由若干项组成，由分号分开
             // 其中每一项写法和上面的商店完全相同，同样必须是X+=Y的形式，Y是一个表达式，同样可以使用status:xxx或item:xxx代表勇士的某项数值/道具个数
-            {"need": 40, "effect": "status:hp+=2*(status:atk+status:def);status:atk+=10;status:def+=10"},
+            {"need": 20, "name": "第二级", "effect": "status:hp+=2*(status:atk+status:def);status:atk+=10;status:def+=10"}, // 先将生命提升攻防和的2倍；再将攻击+10，防御+10
+
+            // effect也允许写一个function，代表本次升级将会执行的操作
+            {"need": 40, "effect": function () {
+                core.drawText("恭喜升级！");
+                core.status.hero.hp *= 2;
+                core.status.hero.atk += 100;
+                core.status.hero.def += 100;
+            }},
+
             // 依次往下写需要的数值即可
         ]
     }
@@ -132,13 +141,13 @@ data.prototype.init = function() {
     this.flags = {
         /****** 角色状态相关 ******/
         "enableNegativeDamage": true, // 是否支持负伤害（回血）
-        "enableFloor": true, // 是否在状态栏显示当前楼层
-        "enableLv": false, // 是否在状态栏显示当前等级
+        "enableFloor": false, // 是否在状态栏显示当前楼层
+        "enableLv": true, // 是否在状态栏显示当前等级
         "enableMDef": true, // 是否在状态栏及战斗界面显示魔防（护盾）
         "enableMoney": true, // 是否在状态栏、怪物手册及战斗界面显示金币
         "enableExperience": true, // 是否在状态栏、怪物手册及战斗界面显示经验
-        "enableLevelUp": false, // 是否允许等级提升（进阶）；如果上面enableExperience为false，则此项恒视为false
-        "enableDebuff": true, // 是否涉及毒衰咒；如果此项为false则不会在状态栏中显示毒衰咒的debuff
+        "enableLevelUp": true, // 是否允许等级提升（进阶）；如果上面enableExperience为false，则此项恒视为false
+        "enableDebuff": false, // 是否涉及毒衰咒；如果此项为false则不会在状态栏中显示毒衰咒的debuff
         ////// 上述的几个开关将直接影响状态栏的显示效果 //////
         /****** 道具相关 ******/
         "flyNearStair": true, // 是否需要在楼梯边使用传送器

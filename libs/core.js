@@ -1537,12 +1537,11 @@ core.prototype.afterBattle = function(id, x, y, callback) {
     var experience = core.material.enemys[id].experience;
     if (core.hasFlag('curse')) experience=0;
     core.status.hero.experience += experience;
-    core.updateStatusBar();
     if (core.isset(x) && core.isset(y)) {
         core.removeBlock(x, y);
         core.canvas.event.clearRect(32 * x, 32 * y, 32, 32);
     }
-    core.updateFg();
+    // core.updateStatusBar();
     var hint = "打败 " + core.material.enemys[id].name;
     if (core.flags.enableMoney)
         hint += "，金币+" + money;
@@ -1625,7 +1624,6 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
                 core.statusBar.floor.style.fontStyle = 'italic';
             else core.statusBar.floor.style.fontStyle = 'normal';
 
-            core.updateStatusBar();
             core.drawMap(floorId, function () {
                 setTimeout(function() {
                     core.mapChangeAnimate('hide', time/4, function () {
@@ -1638,9 +1636,10 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
                     core.setHeroLoc('x', heroLoc.x);
                     core.setHeroLoc('y', heroLoc.y);
                     core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
-                    core.updateCheckBlockMap();
-                    core.updateCheckBlock();
-                    core.updateFg();
+                    core.updateStatusBar();
+                    // core.updateCheckBlockMap();
+                    // core.updateCheckBlock();
+                    // core.updateFg();
                 }, 15)
             });
         });
@@ -2783,6 +2782,21 @@ core.prototype.calValue = function (value) {
     return eval(value);
 }
 
+core.prototype.doEffect = function (expression) {
+    // 必须使用"+="
+    var arr = expression.split("+=");
+    if (arr.length!=2) return;
+    var name=arr[0], value=core.calValue(arr[1]);
+    if (name.indexOf("status:")==0) {
+        var status=name.substring(7);
+        core.setStatus(status, core.getStatus(status)+value);
+    }
+    else if (name.indexOf("item:")==0) {
+        var itemId=name.substring(5);
+        core.setItem(itemId, core.itemCount(itemId)+value);
+    }
+}
+
 core.prototype.splitLines = function(canvas, text, maxLength, font) {
     if (core.isset(font)) core.setFont(canvas, font);
 
@@ -3334,6 +3348,9 @@ core.prototype.clearStatusBar = function() {
  */
 core.prototype.updateStatusBar = function () {
 
+    // 检查登记
+    core.checkLvUp();
+
     // 上限999999
     if (core.values.HPMAX>0) {
         core.setStatus('hp', Math.min(core.values.HPMAX, core.getStatus('hp')));
@@ -3349,6 +3366,12 @@ core.prototype.updateStatusBar = function () {
     statusList.forEach(function (item) {
         core.statusBar[item].innerHTML = core.getStatus(item);
     });
+    // 进阶
+    if (core.flags.enableLevelUp && core.status.hero.lv<core.firstData.levelUp.length) {
+        core.statusBar.up.innerHTML = core.firstData.levelUp[core.status.hero.lv].need || "&nbsp;";
+    }
+    else core.statusBar.up.innerHTML = "&nbsp;";
+
     var keys = ['yellowKey', 'blueKey', 'redKey'];
     keys.forEach(function (key) {
         core.statusBar[key].innerHTML = core.setTwoDigits(core.status.hero.items.keys[key]);
@@ -3372,6 +3395,27 @@ core.prototype.updateStatusBar = function () {
     }
     core.updateCheckBlock();
     core.updateFg();
+}
+
+core.prototype.checkLvUp = function () {
+    if (!core.flags.enableLevelUp || core.status.hero.lv>=core.firstData.levelUp.length) return;
+    // 计算下一个所需要的数值
+    var need=core.firstData.levelUp[core.status.hero.lv].need;
+    if (!core.isset(need)) return;
+    if (core.status.hero.experience>=need) {
+        // 升级
+        core.status.hero.lv++;
+        var effect = core.firstData.levelUp[core.status.hero.lv-1].effect;
+        if (typeof effect == "string") {
+            effect.split(";").forEach(function (t) {
+                core.doEffect(t);
+            });
+        }
+        else if (effect instanceof Function) {
+            effect();
+        }
+        core.checkLvUp();
+    }
 }
 
 core.prototype.resize = function(clientWidth, clientHeight) {

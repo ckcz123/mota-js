@@ -5,7 +5,7 @@ function enemys() {
 enemys.prototype.init = function () {
     // 怪物属性初始化定义：
     this.enemys = {
-        'greenSlime': {'name': '绿头怪', 'hp': 100, 'atk': 120, 'def': 0, 'money': 1, 'experience': 0, 'special': 0},
+        'greenSlime': {'name': '绿头怪', 'hp': 100, 'atk': 120, 'def': 0, 'money': 1, 'experience': 1, 'special': 0},
         'redSlime': {'name': '红头怪', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
         'blackSlime': {'name': '青头怪', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
         'slimelord': {'name': '怪王', 'hp': 100, 'atk': 120, 'def': 0, 'money': 10, 'experience': 0, 'special': 9},

@@ -2337,7 +2337,13 @@ core.prototype.updateCheckBlock = function() {
                 }
                 // 存在阻击
                 if (core.enemys.hasSpecial(enemy.special, 18)) {
-
+                    for (var dx=-1;dx<=1;dx++) {
+                        for (var dy=-1;dy<=1;dy++) {
+                            var nx=x+dx, ny=y+dy;
+                            if (nx<0 || nx>12 || ny<0 || ny>12 || Math.abs(dx)+Math.abs(dy)>1) continue;
+                            core.status.checkBlock.damage[13*nx+ny]+=enemy.value;
+                        }
+                    }
                 }
             }
         }
@@ -2389,6 +2395,17 @@ core.prototype.checkBlock = function () {
 
         // 检查阻击事件
         var snipe = [];
+        var scan = {
+            'up': {'x': 0, 'y': -1},
+            'left': {'x': -1, 'y': 0},
+            'down': {'x': 0, 'y': 1},
+            'right': {'x': 1, 'y': 0}
+        }
+        for (var direction in scan) {
+            var nx = x+scan[direction].x, ny=y+scan[direction].y;
+            if (nx<0 || nx>12 || ny<0 || ny>12) continue;
+        }
+
 
         if (core.status.checkBlock.betweenAttack[13*x+y]) {
             core.drawTip('受到夹击，生命变成一半');

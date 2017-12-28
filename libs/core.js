@@ -57,7 +57,7 @@ function core() {
         'floorId': null,
         'thisMap': null,
         'maps': null,
-        'checkBlock': [], // 显伤伤害
+        'checkBlock': {}, // 显伤伤害
 
         // 勇士状态；自动寻路相关
         'heroMoving': false,
@@ -1098,8 +1098,8 @@ core.prototype.automaticRoute = function (destX, destY) {
                 // 绕过可能的夹击点
                 // if (nextBlock.block.event.trigger == 'checkBlock') deepAdd=200;
             }
-            if (core.status.checkBlock[nid]>0)
-                deepAdd = core.status.checkBlock[nid];
+            if (core.status.checkBlock.damage[nid]>0)
+                deepAdd = core.status.checkBlock.damage[nid];
 
             if (nx == destX && ny == destY) {
                 route[nid] = direction;
@@ -1270,9 +1270,9 @@ core.prototype.setHeroMoveTriggerInterval = function () {
                     core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
                 }
                 core.trigger(core.getHeroLoc('x'), core.getHeroLoc('y'));
-                core.checkBlock();
                 clearInterval(core.interval.heroMoveInterval);
                 core.status.heroMoving = false;
+                core.checkBlock();
             });
         }
     }, 50);
@@ -1549,7 +1549,6 @@ core.prototype.afterBattle = function(id, x, y, callback) {
         hint += "，经验+" + core.material.enemys[id].experience;
     core.drawTip(hint);
 
-    core.updateCheckBlockMap();
     // 打完怪物，触发事件
     core.events.afterBattle(id,x,y,callback);
 
@@ -1637,9 +1636,6 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
                     core.setHeroLoc('y', heroLoc.y);
                     core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
                     core.updateStatusBar();
-                    // core.updateCheckBlockMap();
-                    // core.updateCheckBlock();
-                    // core.updateFg();
                 }, 15)
             });
         });
@@ -2153,7 +2149,6 @@ core.prototype.addBlock = function(x,y,floodId) {
     // 本身是禁用事件，启用之
     if (core.isset(block.enable) && !block.enable) {
         block.enable = true;
-        core.updateCheckBlockMap();
         // 在本层，添加动画
         if (floodId == core.status.floorId && core.isset(block.event)) {
             blockIcon = core.material.icons[block.event.cls][block.event.id];
@@ -2195,17 +2190,12 @@ core.prototype.removeBlockById = function (index, floorId) {
     if (!core.isset(event))
         event = core.floors[floorId].changeFloor[x+","+y];
 
-    var shouldUpdateBlockMap = blocks[index].event.cls == 'enemys';
     // 不存在事件，直接删除
     if (!core.isset(event)) {
         blocks.splice(index,1);
-        if (shouldUpdateBlockMap)
-            core.updateCheckBlockMap();
         return;
     }
     blocks[index].enable = false;
-    if (shouldUpdateBlockMap)
-        core.updateCheckBlockMap();
 }
 
 core.prototype.removeBlockByIds = function (floorId, ids) {
@@ -2304,70 +2294,88 @@ core.prototype.drawBoxAnimate = function (background) {
     }
 }
 
-core.prototype.updateCheckBlockMap = function() {
-    // 更新领域、夹击地图
-    core.status.checkBlockMap = [];
+// 更新领域、显伤
+core.prototype.updateCheckBlock = function() {
+    core.status.checkBlock = {};
+    if (!core.isset(core.status.thisMap)) return;
     var blocks = core.status.thisMap.blocks;
+
+    // Step1: 更新怪物地图
+    core.status.checkBlock.map = []; // 记录怪物地图
     for (var n=0;n<blocks.length;n++) {
         var block = blocks[n];
-        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
-            if (block.event.cls=='enemys') {
-                var enemy = core.enemys.getEnemys(block.event.id);
-                if (core.isset(enemy)) {
-                    var value=0;
-                    if (core.enemys.hasSpecial(enemy.special, 15)) // 领域
-                        value += enemy.value;
-                    if (core.enemys.hasSpecial(enemy.special, 16)) // 夹击
-                        value += 1000000 * block.id;
-                    core.status.checkBlockMap[13*block.x+block.y] = value;
+        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls=='enemys') {
+            var id = block.event.id, enemy = core.enemys.getEnemys(id);
+            if (core.isset(enemy)) {
+                core.status.checkBlock.map[13*block.x+block.y]=id;
+            }
+        }
+    }
+
+    // Step2: 更新领域、阻击伤害
+    core.status.checkBlock.damage = []; // 记录(x,y)点的伤害
+    for (var x=0;x<13*13;x++) core.status.checkBlock.damage[x]=0;
+
+    for (var x=0;x<13;x++) {
+        for (var y=0;y<13;y++) {
+            var id = core.status.checkBlock.map[13*x+y];
+            if (core.isset(id)) {
+                var enemy = core.enemys.getEnemys(id);
+                // 存在领域
+                if (core.enemys.hasSpecial(enemy.special, 15)) {
+                    var range = enemy.range || 1;
+                    var zoneSquare = core.flags.zoneSquare;
+                    if (core.isset(enemy.zoneSquare)) zoneSquare=enemy.zoneSquare;
+                    for (var dx=-range;dx<=range;dx++) {
+                        for (var dy=-range;dy<=range;dy++) {
+                            var nx=x+dx, ny=y+dy;
+                            if (nx<0 || nx>12 || ny<0 || ny>12) continue;
+                            if (!zoneSquare && Math.abs(dx)+Math.abs(dy)>range) continue;
+                            core.status.checkBlock.damage[13*nx+ny]+=enemy.value;
+                        }
+                    }
+                }
+                // 存在阻击
+                if (core.enemys.hasSpecial(enemy.special, 18)) {
+
                 }
             }
         }
     }
-}
 
-// 更新领域、显伤点
-core.prototype.updateCheckBlock = function() {
-    if (!core.isset(core.status.thisMap)) return;
-    if (!core.isset(core.status.checkBlockMap)) core.updateCheckBlockMap();
-    core.status.checkBlock = [];
+
+    // Step3: 更新夹击点坐标，并将夹击伤害加入到damage中
+    core.status.checkBlock.betweenAttack = []; // 记录(x,y)点是否有夹击
     for (var x=0;x<13;x++) {
         for (var y=0;y<13;y++) {
-            // 计算(x,y)点伤害
-            var damage = 0;
-            if (!core.enemyExists(x,y)) { // 如果该点本身不存在怪物（打死怪物会调用更新）
-
-                // 领域
-                [[-1,0],[0,-1],[1,0],[0,1]].forEach(function (dir) {
-                    var nx = x+dir[0], ny = y+dir[1];
-                    if (nx<0 || nx>12 || ny<0 || ny>12) return;
-                    if (core.status.checkBlockMap[13*nx+ny]%1000000>0) {
-                        damage += core.status.checkBlockMap[13*nx+ny] % 1000000;
-                    }
-                })
-
-                var leftValue = core.status.hero.hp - damage;
-                if (leftValue>1) {
-                    var has = false;
-                    // 夹击
-                    if (x>0 && x<12) {
-                        var id1=parseInt(core.status.checkBlockMap[13*(x-1)+y]/1000000),
-                            id2=parseInt(core.status.checkBlockMap[13*(x+1)+y]/1000000);
-                        if (id1>0 && id1==id2)
-                            has = true;
-                    }
-                    if (y>0 && y<12) {
-                        var id1=parseInt(core.status.checkBlockMap[13*x+y-1]/1000000),
-                            id2=parseInt(core.status.checkBlockMap[13*x+y+1]/1000000);
-                        if (id1>0 && id1==id2)
-                            has = true;
-                    }
-                    if (has) {
-                        damage += parseInt((leftValue+1) / 2);
+            var has=false;
+            if (x>0 && x<12) {
+                var id1=core.status.checkBlock.map[13*(x-1)+y],
+                    id2=core.status.checkBlock.map[13*(x+1)+y];
+                if (core.isset(id1) && core.isset(id2) && id1==id2) {
+                    var enemy = core.enemys.getEnemys(id1);
+                    if (core.enemys.hasSpecial(enemy.special, 16)) {
+                        has = true;
                     }
                 }
             }
-            core.status.checkBlock[13*x+y] = damage;
+            if (y>0 && y<12) {
+                var id1=core.status.checkBlock.map[13*x+y-1],
+                    id2=core.status.checkBlock.map[13*x+y+1];
+                if (core.isset(id1) && core.isset(id2) && id1==id2) {
+                    var enemy = core.enemys.getEnemys(id1);
+                    if (core.enemys.hasSpecial(enemy.special, 16)) {
+                        has = true;
+                    }
+                }
+            }
+            // 存在夹击
+            if (has) {
+                core.status.checkBlock.betweenAttack[13*x+y]=true;
+                var leftHp = core.status.hero.hp - core.status.checkBlock.damage[13*x+y];
+                if (leftHp>1)
+                    core.status.checkBlock.damage[13*x+y] += parseInt((leftHp+1)/2);
+            }
         }
     }
 }
@@ -2375,13 +2383,22 @@ core.prototype.updateCheckBlock = function() {
 core.prototype.checkBlock = function () {
     // 检查领域、夹击事件
     var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
-    if (core.status.checkBlock[13*x+y]>0) {
-        core.status.hero.hp -= core.status.checkBlock[13*x+y];
-        if (core.hasBetweenAttack(x,y)) {
+    var damage = core.status.checkBlock.damage[13*x+y];
+    if (damage>0) {
+        core.status.hero.hp -= damage;
+
+        // 检查阻击事件
+        var snipe = [];
+
+        if (core.status.checkBlock.betweenAttack[13*x+y]) {
             core.drawTip('受到夹击，生命变成一半');
         }
-        else if (core.hasZone(x,y)) {
-            core.drawTip('受到领域伤害'+core.status.checkBlock[13*x+y]+'点');
+        // 阻击
+        else if (snipe.length>0) {
+            core.drawTip('受到阻击伤害'+damage+'点');
+        }
+        else {
+            core.drawTip('受到领域伤害'+damage+'点');
         }
         if (core.status.hero.hp<=0) {
             core.status.hero.hp=0;
@@ -2390,37 +2407,6 @@ core.prototype.checkBlock = function () {
             return;
         }
         core.updateStatusBar();
-    }
-}
-
-core.prototype.hasZone = function (x,y) {
-    if (!core.isset(core.status.checkBlockMap)) core.updateCheckBlockMap();
-    var isZone = false;
-    // 领域
-    [[-1,0],[0,-1],[1,0],[0,1]].forEach(function (dir) {
-        var nx = x+dir[0], ny = y+dir[1];
-        if (nx<0 || nx>12 || ny<0 || ny>12) return;
-        if (core.status.checkBlockMap[13*nx+ny]%1000000>0) {
-            isZone = true;
-        }
-    })
-    return isZone;
-}
-
-core.prototype.hasBetweenAttack = function(x,y) {
-    if (!core.isset(core.status.checkBlockMap)) core.updateCheckBlockMap();
-    // 夹击
-    if (x>0 && x<12) {
-        var id1=parseInt(core.status.checkBlockMap[13*(x-1)+y]/1000000),
-            id2=parseInt(core.status.checkBlockMap[13*(x+1)+y]/1000000);
-        if (id1>0 && id1==id2)
-            return true;
-    }
-    if (y>0 && y<12) {
-        var id1=parseInt(core.status.checkBlockMap[13*x+y-1]/1000000),
-            id2=parseInt(core.status.checkBlockMap[13*x+y+1]/1000000);
-        if (id1>0 && id1==id2)
-            return true;
     }
 }
 
@@ -2508,16 +2494,6 @@ core.prototype.nextY = function () {
  */
 core.prototype.updateFg = function () {
 
-    /*
-    // 如果存在颜色
-    if (core.isset(core.status.event.data) && core.isset(core.status.event.data.currentColor)) {
-        var color=core.status.event.data.currentColor;
-        core.setAlpha('fg', color[3]);
-        core.fillRect("fg",0,0,416,416,"#"+((1<<24)+(color[0]<<16)+(color[1]<<8)+color[2]).toString(16).slice(1));
-        return;
-    }
-    */
-
     if (!core.isset(core.status.thisMap) || !core.isset(core.status.thisMap.blocks)) return;
     // 更新显伤
     var mapBlocks = core.status.thisMap.blocks;
@@ -2562,7 +2538,7 @@ core.prototype.updateFg = function () {
         core.canvas.fg.textAlign = 'center';
         for (var x=0;x<13;x++) {
             for (var y=0;y<13;y++) {
-                var damage = core.status.checkBlock[13*x+y];
+                var damage = core.status.checkBlock.damage[13*x+y];
                 if (damage>0) {
                     core.setFillStyle('fg', '#000000');
                     core.canvas.fg.fillText(damage, 32 * x + 17, 32 * (y + 1) - 13);
@@ -3348,13 +3324,16 @@ core.prototype.clearStatusBar = function() {
  */
 core.prototype.updateStatusBar = function () {
 
-    // 检查登记
+    // 检查等级
     core.checkLvUp();
 
-    // 上限999999
+    // 检查HP上限
     if (core.values.HPMAX>0) {
         core.setStatus('hp', Math.min(core.values.HPMAX, core.getStatus('hp')));
     }
+
+    // 更新领域、阻击、显伤
+    core.updateCheckBlock();
 
     var lvName = core.getLvName();
     core.statusBar.lv.innerHTML = lvName;
@@ -3393,7 +3372,6 @@ core.prototype.updateStatusBar = function () {
     } else {
         core.statusBar.image.fly.style.opacity = 0.3;
     }
-    core.updateCheckBlock();
     core.updateFg();
 }
 

@@ -886,7 +886,8 @@ core.prototype.onmousewheel = function (direct) {
 /////////// 寻路代码相关 ///////////
 
 core.prototype.clearAutomaticRouteNode = function (x, y) {
-    core.canvas.ui.clearRect(x * 32 + 5, y * 32 + 5, 27, 27);
+    if (core.status.event.id==null)
+        core.canvas.ui.clearRect(x * 32 + 5, y * 32 + 5, 27, 27);
 }
 
 core.prototype.stopAutomaticRoute = function () {
@@ -2272,6 +2273,15 @@ core.prototype.setGlobalAnimate = function (speed) {
     }, speed / 2);
 }
 
+core.prototype.syncGlobalAnimate = function () {
+    core.status.twoAnimateObjs.forEach(function (t) {
+        t.status=0;
+    })
+    core.status.fourAnimateObjs.forEach(function (t) {
+        t.status=0;
+    })
+}
+
 core.prototype.setBoxAnimate = function () {
     clearInterval(core.interval.boxAnimate);
     if (core.status.boxAnimateObjs.length > 0) {
@@ -2328,6 +2338,7 @@ core.prototype.updateCheckBlock = function() {
                     if (core.isset(enemy.zoneSquare)) zoneSquare=enemy.zoneSquare;
                     for (var dx=-range;dx<=range;dx++) {
                         for (var dy=-range;dy<=range;dy++) {
+                            if (dx==0 && dy==0) continue;
                             var nx=x+dx, ny=y+dy;
                             if (nx<0 || nx>12 || ny<0 || ny>12) continue;
                             if (!zoneSquare && Math.abs(dx)+Math.abs(dy)>range) continue;
@@ -2339,6 +2350,7 @@ core.prototype.updateCheckBlock = function() {
                 if (core.enemys.hasSpecial(enemy.special, 18)) {
                     for (var dx=-1;dx<=1;dx++) {
                         for (var dy=-1;dy<=1;dy++) {
+                            if (dx==0 && dy==0) continue;
                             var nx=x+dx, ny=y+dy;
                             if (nx<0 || nx>12 || ny<0 || ny>12 || Math.abs(dx)+Math.abs(dy)>1) continue;
                             core.status.checkBlock.damage[13*nx+ny]+=enemy.value;
@@ -2404,8 +2416,14 @@ core.prototype.checkBlock = function () {
         for (var direction in scan) {
             var nx = x+scan[direction].x, ny=y+scan[direction].y;
             if (nx<0 || nx>12 || ny<0 || ny>12) continue;
+            var id=core.status.checkBlock.map[13*nx+ny];
+            if (core.isset(id)) {
+                var enemy = core.enemys.getEnemys(id);
+                if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 18)) {
+                    snipe.push({'direction': direction, 'x': nx, 'y': ny});
+                }
+            }
         }
-
 
         if (core.status.checkBlock.betweenAttack[13*x+y]) {
             core.drawTip('受到夹击，生命变成一半');
@@ -2423,8 +2441,120 @@ core.prototype.checkBlock = function () {
             core.events.lose('zone');
             return;
         }
+        snipe = snipe.filter(function (t) {
+            var x=t.x, y=t.y, direction = t.direction;
+            var nx = x+scan[direction].x, ny=y+scan[direction].y;
+
+            return nx>=0 && nx<=12 && ny>=0 && ny<=12 && core.getBlock(nx, ny, core.status.floorId, false)==null;
+        });
         core.updateStatusBar();
+        if (snipe.length>0)
+            core.snipe(snipe);
     }
+}
+
+core.prototype.snipe = function (snipes) {
+    core.waitHeroToStop(function() {
+        core.lockControl();
+
+        var scan = {
+            'up': {'x': 0, 'y': -1},
+            'left': {'x': -1, 'y': 0},
+            'down': {'x': 0, 'y': 1},
+            'right': {'x': 1, 'y': 0}
+        };
+
+        snipes.forEach(function (snipe) {
+            var x=snipe.x, y=snipe.y, direction = snipe.direction;
+            snipe.nx = x+scan[snipe.direction].x;
+            snipe.ny = y+scan[snipe.direction].y;
+
+            core.removeGlobalAnimate(x, y);
+
+            var block = core.getBlock(x,y).block;
+
+            snipe.blockIcon = core.material.icons[block.event.cls][block.event.id];
+            snipe.blockImage = core.material.images[block.event.cls];
+            var damage = core.enemys.getDamage(block.event.id);
+
+            var color = "#000000";
+            if (damage <= 0) color = '#00FF00';
+            else if (damage < core.status.hero.hp / 3) color = '#FFFFFF';
+            else if (damage < core.status.hero.hp * 2 / 3) color = '#FFFF00';
+            else if (damage < core.status.hero.hp) color = '#FF7F00';
+            else color = '#FF0000';
+
+            if (damage >= 999999999) damage = "???";
+            else if (damage > 100000) damage = (damage / 10000).toFixed(1) + "w";
+
+            snipe.damage = damage;
+            snipe.color = color;
+            snipe.block = core.clone(block);
+        })
+
+        var time = 500, step = 0;
+
+        var animateValue = 2;
+        var animateCurrent = 0;
+        var animateTime = 0;
+
+        core.canvas.fg.textAlign = 'left';
+
+        var animate=window.setInterval(function() {
+
+            step++;
+            animateTime += time / 16;
+            if (animateTime >= core.values.animateSpeed * 2 / animateValue) {
+                animateCurrent++;
+                animateTime = 0;
+                if (animateCurrent>=animateValue) animateCurrent=0;
+            }
+
+            snipes.forEach(function (snipe) {
+                var x=snipe.x, y=snipe.y, direction = snipe.direction;
+
+                var nowX=32*x+scan[direction].x*2*step, nowY=32*y+scan[direction].y*2*step;
+
+                // 清空上一次
+                core.clearMap('event', nowX-2*scan[direction].x, nowY-2*scan[direction].y, 32, 32);
+                core.clearMap('fg', nowX-2*scan[direction].x, nowY-2*scan[direction].y, 32, 32);
+
+                core.canvas.event.drawImage(snipe.blockImage, animateCurrent*32, snipe.blockIcon*32, 32, 32, nowX, nowY, 32, 32);
+
+                if (core.hasItem('book')) {
+                    // drawFG
+                    core.setFillStyle('fg', '#000000');
+                    core.canvas.fg.fillText(snipe.damage, nowX + 2, nowY + 30);
+                    core.canvas.fg.fillText(snipe.damage, nowX, nowY + 30);
+                    core.canvas.fg.fillText(snipe.damage, nowX + 2, nowY + 32);
+                    core.canvas.fg.fillText(snipe.damage, nowX, nowY + 32);
+
+                    core.setFillStyle('fg', snipe.color);
+                    core.canvas.fg.fillText(snipe.damage, nowX + 1, nowY + 31);
+                }
+
+            })
+
+            if (step==16) { // 移动完毕
+                clearInterval(animate);
+                snipes.forEach(function (t) {
+                    core.removeBlock(t.x, t.y);
+                    var nBlock = core.clone(t.block);
+                    nBlock.x = t.nx; nBlock.y = t.ny;
+                    core.status.thisMap.blocks.push(nBlock);
+                    core.addGlobalAnimate(animateValue, 32*t.nx, 32*t.ny, t.blockIcon, t.blockImage);
+                });
+                core.syncGlobalAnimate();
+                core.updateStatusBar();
+                // 不存在自定义事件
+                if (core.status.event.id==null)
+                    core.unLockControl();
+            }
+        }, time/16);
+
+
+
+    });
 }
 
 core.prototype.setFg = function(color, time, callback) {
@@ -3402,9 +3532,14 @@ core.prototype.checkLvUp = function () {
         core.status.hero.lv++;
         var effect = core.firstData.levelUp[core.status.hero.lv-1].effect;
         if (typeof effect == "string") {
-            effect.split(";").forEach(function (t) {
-                core.doEffect(t);
-            });
+            if (effect.indexOf("function")==0) {
+                eval("("+effect+")()");
+            }
+            else {
+                effect.split(";").forEach(function (t) {
+                    core.doEffect(t);
+                });
+            }
         }
         else if (effect instanceof Function) {
             effect();

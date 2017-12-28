@@ -145,7 +145,7 @@ data.prototype.init = function() {
         "enableMDef": true, // 是否在状态栏及战斗界面显示魔防（护盾）
         "enableMoney": true, // 是否在状态栏、怪物手册及战斗界面显示金币
         "enableExperience": true, // 是否在状态栏、怪物手册及战斗界面显示经验
-        "enableLevelUp": false, // 是否允许等级提升（进阶）；如果上面enableExperience为false，则此项恒视为false
+        "enableLevelUp": true, // 是否允许等级提升（进阶）；如果上面enableExperience为false，则此项恒视为false
         "enableDebuff": true, // 是否涉及毒衰咒；如果此项为false则不会在状态栏中显示毒衰咒的debuff
         ////// 上述的几个开关将直接影响状态栏的显示效果 //////
         /****** 道具相关 ******/

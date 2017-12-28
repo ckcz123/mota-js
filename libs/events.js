@@ -352,8 +352,14 @@ events.prototype.doAction = function() {
             core.events.lose(data.reason);
             break;
         case "function":
-            if (core.isset(data["function"]))
-                data["function"]();
+            var func = data["function"];
+            if (core.isset(func)) {
+                if ((typeof func == "string") && func.indexOf("function")==0) {
+                    eval('('+func+')()');
+                }
+                else if (func instanceof Function)
+                    func();
+            }
             this.doAction();
             break;
         case "update":
@@ -528,6 +534,12 @@ events.prototype.afterBattle = function(enemyId,x,y,callback) {
         return;
     }
 
+    // 阻击：不处理任何事件
+    if (core.enemys.hasSpecial(special, 18)) {
+        if (core.isset(callback)) callback();
+        return;
+    }
+
     // 检查处理后的事件。
     var event = core.floors[core.status.floorId].afterBattle[x+","+y];
     if (core.isset(event)) {
@@ -536,8 +548,8 @@ events.prototype.afterBattle = function(enemyId,x,y,callback) {
     //继续行走
     else {
         core.continueAutomaticRoute();
-        if (core.isset(callback)) callback();
     }
+    if (core.isset(callback)) callback();
 }
 
 /****** 开完门 ******/

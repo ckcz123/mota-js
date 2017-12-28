@@ -77,15 +77,18 @@ function core() {
         'moveStepBeforeStop': [],
 
         // 勇士状态；中心对称飞行器
-        'usingCenterFly':false,
 
         // event事件
-        'savePage': null,
+        'saveIndex': null,
         'shops': {},
         'event': {
             'id': null,
-            'data': null
+            'data': null,
+            'selection': null,
+            'ui': null,
         },
+        'curtainColor': null,
+        'usingCenterFly':false,
         'openingDoor': null,
 
         // 动画
@@ -111,6 +114,13 @@ core.prototype.init = function (dom, statusBar, canvas, images, sounds, floorIds
         core[key] = coreData[key];
     }
     core.flags = core.clone(core.data.flags);
+    if (!core.flags.enableExperience)
+        core.flags.enableLevelUp = false;
+    if (!core.flags.canOpenBattleAnimate) {
+        core.flags.showBattleAnimateConfirm = false;
+        core.flags.battleAnimate = false;
+        core.setLocalStorage('battleAnimate', false);
+    }
     core.values = core.clone(core.data.values);
     core.firstData = core.data.getFirstData();
     core.initStatus.shops = core.firstData.shops;
@@ -133,6 +143,11 @@ core.prototype.init = function (dom, statusBar, canvas, images, sounds, floorIds
         core.musicStatus.isIOS = true;
         core.musicStatus.soundStatus = false;
     }
+
+    // switchs
+    core.flags.battleAnimate = core.getLocalStorage('battleAnimate', core.flags.battleAnimate);
+    core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
+    core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
 
     core.material.ground = new Image();
     core.material.ground.src = "images/ground.png";
@@ -203,31 +218,24 @@ core.prototype.loader = function (callback) {
     for (var i = 0; i < core.images.length; i++) {
         core.loadImage(core.images[i], function (imgName, image) {
             core.setStartLoadTipText('正在加载图片 ' + imgName + "...");
-            imgName = imgName.split('-');
-            imgName = imgName[0];
             core.material.images[imgName] = image;
             loadedImageNum++;
             core.setStartLoadTipText(imgName + ' 加载完毕...');
             core.setStartProgressVal(loadedImageNum * (100 / allImageNum));
             if (loadedImageNum == allImageNum) {
-                // 加载音频
-                for (var key in core.sounds) {
-                    for (var i = 0; i < core.sounds[key].length; i++) {
-                        var soundName=core.sounds[key][i];
-                        soundName = soundName.split('-');
-                        var sound = new Audio();
-                        sound.preload = 'none';
-                        sound.src = 'sounds/' + soundName[0] + '.' + key;
-                        if (soundName[1] == 'loop') {
-                            sound.loop = 'loop';
+                
+                // 加载Autotile
+                core.material.images.autotile={};
+                var autotileIds = Object.keys(core.material.icons.autotile);
+                for (var x=0;x<autotileIds.length;x++) {
+                    core.loadImage(autotileIds[x], function (autotileId, image) {
+                        core.material.images.autotile[autotileId]=image;
+                        if (Object.keys(core.material.images.autotile).length==autotileIds.length) {
+                            // 音频
+                            core.loadSounds(callback);
                         }
-
-                        if (!core.isset(core.material.sounds[key]))
-                            core.material.sounds[key] = {};
-                        core.material.sounds[key][soundName[0]] = sound;
-                    }
+                    })
                 }
-                callback();
             }
         });
     }
@@ -249,6 +257,26 @@ core.prototype.loadImage = function (imgName, callback) {
     catch (e) {
         alert(e);
     }
+}
+
+core.prototype.loadSounds = function (callback) {
+    for (var key in core.sounds) {
+        for (var i = 0; i < core.sounds[key].length; i++) {
+            var soundName=core.sounds[key][i];
+            soundName = soundName.split('-');
+            var sound = new Audio();
+            sound.preload = 'none';
+            sound.src = 'sounds/' + soundName[0] + '.' + key;
+            if (soundName[1] == 'loop') {
+                sound.loop = 'loop';
+            }
+
+            if (!core.isset(core.material.sounds[key]))
+                core.material.sounds[key] = {};
+            core.material.sounds[key][soundName[0]] = sound;
+        }
+    }
+    callback();
 }
 
 core.prototype.loadSound = function() {
@@ -300,7 +328,7 @@ core.prototype.clearStatus = function() {
     core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
 }
 
-core.prototype.resetStatus = function(hero, hard, floorId, flags, maps) {
+core.prototype.resetStatus = function(hero, hard, floorId, maps) {
 
     // 停止各个Timeout和Interval
     for (var i in core.interval) {
@@ -318,19 +346,16 @@ core.prototype.resetStatus = function(hero, hard, floorId, flags, maps) {
     // 初始化人物属性
     core.status.hero = core.clone(hero);
     core.status.hard = hard;
-    if (core.isset(flags))
-        core.flags = core.clone(flags);
-    // 保存页面
-    core.status.savePage = core.getLocalStorage('savePage', 0);
+    // 保存的Index
+    core.status.saveIndex = core.getLocalStorage('saveIndex', 1);
 
     core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
-
 }
 
 core.prototype.startGame = function (hard, callback) {
     console.log('开始游戏');
 
-    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, core.flags, core.initStatus.maps);
+    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, core.initStatus.maps);
 
     core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
         core.setHeroMoveTriggerInterval();
@@ -353,7 +378,7 @@ core.prototype.restart = function() {
 core.prototype.onkeyDown = function(e) {
     if (!core.isset(core.status.holdingKeys))core.status.holdingKeys=[];
     var isArrow={37:true,38:true,39:true,40:true}[e.keyCode]
-    if(isArrow){
+    if(isArrow && !core.status.lockControl){
         for(var ii =0;ii<core.status.holdingKeys.length;ii++){
             if (core.status.holdingKeys[ii]===e.keyCode){
                 return;
@@ -368,7 +393,7 @@ core.prototype.onkeyDown = function(e) {
 
 core.prototype.onkeyUp = function(e) {
     var isArrow={37:true,38:true,39:true,40:true}[e.keyCode]
-    if(isArrow){
+    if(isArrow && !core.status.lockControl){
         for(var ii =0;ii<core.status.holdingKeys.length;ii++){
             if (core.status.holdingKeys[ii]===e.keyCode){
                 core.status.holdingKeys= core.status.holdingKeys.slice(0,ii).concat(core.status.holdingKeys.slice(ii+1));
@@ -391,28 +416,58 @@ core.prototype.pressKey = function (keyCode) {
 }
 
 core.prototype.keyDown = function(keyCode) {
-    if(!core.status.played) {
-        return;
-    }
     if(core.status.automaticRouting || core.status.automaticRouted) {
         core.stopAutomaticRoute();
     }
     if (core.status.lockControl) {
+        // Ctrl跳过对话
+        if (keyCode==17) {
+            core.events.keyDownCtrl();
+            return;
+        }
+        if (core.status.event.id == 'action') {
+            core.events.keyDownAction(keyCode);
+            return;
+        }
         if (core.status.event.id == 'book') {
-            if (keyCode==37) core.ui.drawEnemyBook(core.status.event.data - 1);
-            else if (keyCode==39) core.ui.drawEnemyBook(core.status.event.data + 1);
+            core.events.keyDownBook(keyCode);
             return;
         }
         if (core.status.event.id == 'fly') {
-            if (keyCode==38) core.ui.drawFly(core.status.event.data+1);
-            else if (keyCode==40) core.ui.drawFly(core.status.event.data-1);
+            core.events.keyDownFly(keyCode);
             return;
         }
-        if (core.status.event.id == 'save' || core.status.event.id == 'load') {
-            if (keyCode==37) core.ui.drawSLPanel(core.status.event.data-1);
-            else if (keyCode==39) core.ui.drawSLPanel(core.status.event.data+1);
+        if (core.status.event.id=='shop') {
+            core.events.keyDownShop(keyCode);
             return;
         }
+        if (core.status.event.id=='selectShop') {
+            core.events.keyDownQuickShop(keyCode);
+            return;
+        }
+        if (core.status.event.id=='toolbox') {
+            core.events.keyDownToolbox(keyCode);
+            return;
+        }
+        if (core.status.event.id=='save' || core.status.event.id=='load') {
+            core.events.keyDownSL(keyCode);
+            return;
+        }
+        if (core.status.event.id=='switchs') {
+            core.events.keyDownSwitchs(keyCode);
+            return;
+        }
+        if (core.status.event.id=='settings') {
+            core.events.keyDownSettings(keyCode);
+            return;
+        }
+        if (core.status.event.id=='syncSave') {
+            core.events.keyDownSyncSave(keyCode);
+            return;
+        }
+        return;
+    }
+    if(!core.status.played) {
         return;
     }
     switch(keyCode) {
@@ -428,7 +483,7 @@ core.prototype.keyDown = function(keyCode) {
         case 40:
             core.moveHero('down');
         break;
-        case 51: // 快捷键3：飞
+        case 13: case 32: case 67: case 51: // 快捷键3：飞
             // 因为加入了两次的检测机制,从keydown转移到keyup,同时保证位置信息正确,但以下情况会触发作图的bug:
             // 在鼠标的路线移动中使用飞,绿块会滞后一格,显示的位置不对,同时也不会倍以下的代码清除
             if (core.status.heroStop && core.hasItem('centerFly')) {
@@ -436,18 +491,18 @@ core.prototype.keyDown = function(keyCode) {
                     if (core.canUseItem('centerFly')) {
                         core.useItem('centerFly');
                         core.clearMap('ui', core.getHeroLoc('x')*32,core.getHeroLoc('y')*32,32,32);
-                        
                     }
                     else {
                         core.drawTip('当前不能使用中心对称飞行器');
                         core.clearMap('ui', (12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32);
                     }
                     core.status.usingCenterFly = false;
-                } else {
+                } else if (keyCode==51) {
                     core.status.usingCenterFly = true;
-                    var fillstyle = 'rgba(255,0,0,0.5)';
-                    if (core.canUseItem('centerFly')) fillstyle = 'rgba(0,255,0,0.5)';
-                    core.fillRect('ui',(12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32,fillstyle);
+                    core.setAlpha('ui', 0.5);
+                    core.fillRect('ui',(12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32,core.canUseItem('centerFly')?'#00FF00':'#FF0000');
+                    core.setAlpha('ui', 1);
+                    core.drawTip("请确认当前中心对称飞行器的位置");
                 }
             }
             break;
@@ -459,48 +514,67 @@ core.prototype.keyDown = function(keyCode) {
 }
 
 core.prototype.keyUp = function(keyCode) {
-    if(!core.status.played)
-        return;
 
     if (core.status.lockControl) {
-        if (core.status.event.id == 'book' && (keyCode==27 || keyCode==88))
-            core.ui.closePanel(true);
-        if (core.status.event.id == 'fly' && (keyCode==71 || keyCode==27))
-            core.ui.closePanel();
-        if (core.status.event.id == 'fly' && keyCode==13) {
-            var index=core.status.hero.flyRange.indexOf(core.status.floorId);
-            var stair=core.status.event.data<index?"upFloor":"downFloor";
-            var floorId=core.status.event.data;
-            core.ui.closePanel();
-            core.changeFloor(core.status.hero.flyRange[floorId], stair);
-        }
-        if (core.status.event.id == 'save' && (keyCode==83 || keyCode==27))
-            core.ui.closePanel();
-        if (core.status.event.id == 'load' && (keyCode==68 || keyCode==27))
-            core.ui.closePanel();
-        if ((core.status.event.id == 'settings' || core.status.event.id == 'selectShop') && keyCode==27)
-            core.ui.closePanel();
-        if (core.status.event.id == 'selectShop' && keyCode==75)
-            core.ui.closePanel();
-        if (core.status.event.id == 'shop' && keyCode==27) {
-            core.status.boxAnimateObjs = [];
-            core.setBoxAnimate();
-            if (core.status.event.data.fromList)
-                core.ui.drawQuickShop();
-            else core.ui.closePanel();
-        }
-        if (core.status.event.id == 'toolbox' && (keyCode==84 || keyCode==27))
-            core.ui.closePanel();
-        if (core.status.event.id == 'about' && (keyCode==13 || keyCode==32))
-            core.ui.closePanel();
-        if (core.status.event.id == 'text' && (keyCode==13 || keyCode==32))
+        core.status.holdingKeys = [];
+        // 全键盘操作部分
+        if (core.status.event.id == 'text' && (keyCode==13 || keyCode==32 || keyCode==67)) {
             core.drawText();
-        if (core.status.event.id == 'action' && core.isset(core.status.event.data.current)
-            && core.status.event.data.type=='text'  && (keyCode==13 || keyCode==32))
-            core.events.doAction();
-
+            return;
+        }
+        if (core.status.event.id=='confirmBox') {
+            core.events.keyUpConfirmBox(keyCode);
+            return;
+        }
+        if (core.status.event.id == 'action') {
+            core.events.keyUpAction(keyCode);
+            return;
+        }
+        if (core.status.event.id=='about' && (keyCode==13 || keyCode==32 || keyCode==67)) {
+            core.events.clickAbout();
+            return;
+        }
+        if (core.status.event.id=='book') {
+            core.events.keyUpBook(keyCode);
+            return;
+        }
+        if (core.status.event.id=='fly') {
+            core.events.keyUpFly(keyCode);
+            return;
+        }
+        if (core.status.event.id=='shop') {
+            core.events.keyUpShop(keyCode);
+            return;
+        }
+        if (core.status.event.id=='selectShop') {
+            core.events.keyUpQuickShop(keyCode);
+            return;
+        }
+        if (core.status.event.id=='toolbox') {
+            core.events.keyUpToolbox(keyCode);
+            return;
+        }
+        if (core.status.event.id=='save' || core.status.event.id=='load') {
+            core.events.keyUpSL(keyCode);
+            return;
+        }
+        if (core.status.event.id=='switchs') {
+            core.events.keyUpSwitchs(keyCode);
+            return;
+        }
+        if (core.status.event.id=='settings') {
+            core.events.keyUpSettings(keyCode);
+            return;
+        }
+        if (core.status.event.id=='syncSave') {
+            core.events.keyUpSyncSave(keyCode);
+            return;
+        }
         return;
     }
+
+    if(!core.status.played)
+        return;
 
     switch (keyCode) {
         case 27: // ESC
@@ -538,6 +612,10 @@ core.prototype.keyUp = function(keyCode) {
         case 32: // SPACE
             if (!core.status.lockControl && core.status.heroStop)
                 core.getNextItem();
+            break;
+        case 72: // H
+            if (!core.status.lockControl && core.status.heroStop)
+                core.ui.drawHelp();
             break;
         case 37: // UP
             break;
@@ -680,7 +758,6 @@ core.prototype.onclick = function (x, y, stepPostfix) {
             if (core.canUseItem('centerFly')) {
                 core.useItem('centerFly');
                 core.clearMap('ui', core.getHeroLoc('x')*32,core.getHeroLoc('y')*32,32,32);
-                
                 return;
             }
             else {
@@ -747,19 +824,13 @@ core.prototype.onclick = function (x, y, stepPostfix) {
 
     // 选项
     if (core.status.event.id == 'confirmBox') {
-        if ((x == 4 || x == 5) && y == 7 && core.isset(core.status.event.data.yes))
-            core.status.event.data.yes();
-        if ((x == 7 || x == 8) && y == 7 && core.isset(core.status.event.data.no))
-            core.status.event.data.no();
+        core.events.clickConfirmBox(x,y);
         return;
     }
 
     // 关于
     if (core.status.event.id == 'about') {
-        if (core.isPlaying())
-            core.ui.closePanel(false);
-        else
-            core.showStartAnimate();
+        core.events.clickAbout(x,y);
         return;
     }
 
@@ -776,26 +847,8 @@ core.prototype.onclick = function (x, y, stepPostfix) {
 
     // 同步存档
     if (core.status.event.id == 'syncSave') {
-        if (x>=4 && x<=8) {
-            if (y==5) {
-                core.syncSave("save");
-            }
-            if (y==6) {
-                core.syncSave("load");
-            }
-        }
-        if (x>=5 && x<=7) {
-            if (y==7) {
-                core.ui.drawConfirmBox("你确定要清空所有本地存档吗？", function() {
-                    localStorage.clear();
-                    core.drawText("\t[操作成功]你的本地所有存档已被清空。");
-                }, function() {
-                    core.ui.drawSettings(false);
-                })
-            }
-            if (y==8)
-                core.ui.drawSettings(false);
-        }
+        core.events.clickSyncSave(x,y);
+        return;
     }
 
 }
@@ -819,8 +872,8 @@ core.prototype.onmousewheel = function (direct) {
 
     // 存读档
     if (core.status.lockControl && (core.status.event.id == 'save' || core.status.event.id == 'load')) {
-        if (direct==1) core.ui.drawSLPanel(core.status.event.data - 1);
-        if (direct==-1) core.ui.drawSLPanel(core.status.event.data + 1);
+        if (direct==1) core.ui.drawSLPanel(core.status.event.data - 6);
+        if (direct==-1) core.ui.drawSLPanel(core.status.event.data + 6);
         return;
     }
 }
@@ -1484,13 +1537,14 @@ core.prototype.afterBattle = function(id, x, y, callback) {
     var experience = core.material.enemys[id].experience;
     if (core.hasFlag('curse')) experience=0;
     core.status.hero.experience += experience;
-    core.updateStatusBar();
     if (core.isset(x) && core.isset(y)) {
         core.removeBlock(x, y);
         core.canvas.event.clearRect(32 * x, 32 * y, 32, 32);
     }
-    core.updateFg();
-    var hint = "打败 " + core.material.enemys[id].name + "，金币+" + money;
+    // core.updateStatusBar();
+    var hint = "打败 " + core.material.enemys[id].name;
+    if (core.flags.enableMoney)
+        hint += "，金币+" + money;
     if (core.flags.enableExperience)
         hint += "，经验+" + core.material.enemys[id].experience;
     core.drawTip(hint);
@@ -1537,14 +1591,18 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
     core.clearContinueAutomaticRoute();
     core.dom.floorNameLabel.innerHTML = core.status.maps[floorId].title;
     if (core.isset(stair)) {
-        // find heroLoc
-        heroLoc = core.status.hero.loc;
+        if (!core.isset(heroLoc)) heroLoc={};
         var blocks = core.status.maps[floorId].blocks;
         for (var i in blocks) {
             if (core.isset(blocks[i].event) && !(core.isset(blocks[i].enable) && !blocks[i].enable) && blocks[i].event.id === stair) {
                 heroLoc.x = blocks[i].x;
                 heroLoc.y = blocks[i].y;
+                break;
             }
+        }
+        if (!core.isset(heroLoc.x)) {
+            heroLoc.x=core.status.hero.loc.x;
+            heroLoc.y=core.status.hero.loc.y;
         }
     }
     if (core.status.maps[floorId].canFlyTo && core.status.hero.flyRange.indexOf(floorId)<0) {
@@ -1555,11 +1613,17 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
     }
 
     window.setTimeout(function () {
-        // console.log('地图切换到' + floorId);
         core.playSound('floor', 'mp3');
         core.mapChangeAnimate('show', time/2, function () {
-            core.statusBar.floor.innerHTML = core.status.maps[floorId].name;
-            core.updateStatusBar();
+
+            // 根据文字判断是否斜体
+            var floorName = core.status.maps[floorId].name;
+            if (!core.isset(floorName) || floorName=="") floorName="&nbsp;"
+            core.statusBar.floor.innerHTML = floorName;
+            if (/^[+-]?\d+$/.test(floorName))
+                core.statusBar.floor.style.fontStyle = 'italic';
+            else core.statusBar.floor.style.fontStyle = 'normal';
+
             core.drawMap(floorId, function () {
                 setTimeout(function() {
                     core.mapChangeAnimate('hide', time/4, function () {
@@ -1572,9 +1636,10 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
                     core.setHeroLoc('x', heroLoc.x);
                     core.setHeroLoc('y', heroLoc.y);
                     core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
-                    core.updateCheckBlockMap();
-                    core.updateCheckBlock();
-                    core.updateFg();
+                    core.updateStatusBar();
+                    // core.updateCheckBlockMap();
+                    // core.updateCheckBlock();
+                    // core.updateFg();
                 }, 15)
             });
         });
@@ -1717,13 +1782,13 @@ core.prototype.drawMap = function (mapName, callback) {
     var mapBlocks = mapData.blocks;
     core.status.floorId = mapName;
     core.status.thisMap = mapData;
-    var blockIcon, blockImage;
     core.clearMap('all');
     core.removeGlobalAnimate(null, null, true);
+    var groundId = core.floors[mapName].defaultGround || "ground";
+    var blockIcon = core.material.icons.terrains[groundId];
+    var blockImage = core.material.images.terrains;
     for (var x = 0; x < 13; x++) {
         for (var y = 0; y < 13; y++) {
-            blockIcon = core.material.icons.terrains.ground;
-            blockImage = core.material.images.terrains;
             core.canvas.bg.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
         }
     }
@@ -1734,7 +1799,7 @@ core.prototype.drawMap = function (mapName, callback) {
         if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
             if (block.event.cls == 'autotile') {
                 // core.drawAutotile();
-                autotileMaps[13*block.x + block.y] = true;
+                autotileMaps[13*block.x + block.y] = block.event.id;
                 continue;
             }
             else {
@@ -1745,24 +1810,36 @@ core.prototype.drawMap = function (mapName, callback) {
             }
         }
     }
-    core.drawAutotile('event', autotileMaps, 0, 0, 32);
+    core.drawAutotile(mapName, 'event', autotileMaps, 0, 0, 32);
     core.setGlobalAnimate(core.values.animateSpeed);
 
     if (core.isset(callback))
         callback();
 }
 
-core.prototype.drawAutotile = function (canvas, autotileMaps, left, top, size) {
+core.prototype.drawAutotile = function (floorId, canvas, autotileMaps, left, top, size, autotileId) {
+
+    if (!core.isset(autotileId)) {
+        var autotileIds = {};
+        autotileMaps.forEach(function (t) {
+            if (core.isset(t)) autotileIds[t]=true;
+        });
+        Object.keys(autotileIds).forEach(function (t) {
+            core.drawAutotile(floorId, canvas, autotileMaps, left, top, size, t);
+        })
+        return;
+    }
+
     var isAutotile = function(x, y) {
         if (x<0 || x>12 || y<0 || y>12) return 0;
-        return autotileMaps[13*x+y]?1:0;
+        return autotileMaps[13*x+y]==autotileId?1:0;
     }
     for (var xx=0;xx<13;xx++) {
         for (var yy=0;yy<13;yy++) {
             if (isAutotile(xx, yy)) {
                 // 绘制autotile
                 var id=isAutotile(xx, yy - 1) + 2 * isAutotile(xx - 1, yy) + 4 * isAutotile(xx, yy + 1) + 8 * isAutotile(xx + 1, yy);
-                core.drawAutotileBlock(canvas, left + xx * size, top + yy * size, size, core.material.images.autotile, id);
+                core.drawAutotileBlock(floorId, canvas, left + xx * size, top + yy * size, size, core.material.images.autotile[autotileId], id);
             }
         }
     }
@@ -1770,24 +1847,25 @@ core.prototype.drawAutotile = function (canvas, autotileMaps, left, top, size) {
         for (var yy=0;yy<13;yy++) {
             if (isAutotile(xx, yy) + isAutotile(xx + 1, yy) + isAutotile(xx + 1, yy + 1) + isAutotile(xx, yy + 1) != 3) continue;
             if (!isAutotile(xx, yy)) {
-                core.drawAutotileBlock(canvas, left + xx * size + size, top + yy * size + size, size, core.material.images.autotile, 16);
+                core.drawAutotileBlock(floorId, canvas, left + xx * size + size, top + yy * size + size, size, core.material.images.autotile[autotileId], 16);
             }
             if (!isAutotile(xx + 1, yy)) {
-                core.drawAutotileBlock(canvas, left + xx * size + size / 2, top + yy * size + size, size, core.material.images.autotile, 17);
+                core.drawAutotileBlock(floorId, canvas, left + xx * size + size / 2, top + yy * size + size, size, core.material.images.autotile[autotileId], 17);
             }
             if (!isAutotile(xx + 1, yy + 1)) {
-                core.drawAutotileBlock(canvas, left + xx * size + size / 2, top + yy * size + size / 2, size, core.material.images.autotile, 18);
+                core.drawAutotileBlock(floorId, canvas, left + xx * size + size / 2, top + yy * size + size / 2, size, core.material.images.autotile[autotileId], 18);
             }
             if (!isAutotile(xx, yy + 1)) {
-                core.drawAutotileBlock(canvas, left + xx * size + size, top + yy * size + size / 2, size, core.material.images.autotile, 19);
+                core.drawAutotileBlock(floorId, canvas, left + xx * size + size, top + yy * size + size / 2, size, core.material.images.autotile[autotileId], 19);
             }
         }
     }
 }
 
-core.prototype.drawAutotileBlock = function (map, x, y, size, autotile, index) {
+core.prototype.drawAutotileBlock = function (floorId, map, x, y, size, autotile, index) {
     var canvas = core.canvas[map];
-    var blockIcon = core.material.icons.terrains.ground;
+    var groundId = core.floors[floorId].defaultGround || "ground";
+    var blockIcon = core.material.icons.terrains[groundId];
     var blockImage = core.material.images.terrains;
     switch (index) {
         case 0:
@@ -2348,30 +2426,23 @@ core.prototype.hasBetweenAttack = function(x,y) {
 
 core.prototype.setFg = function(color, time, callback) {
     time = time || 750;
-    core.setOpacity('fg', 1);
 
-    var reset = false;
-
-    if (!core.isset(core.status.event.data.currentColor)) {
-        core.status.event.data.currentColor = [0,0,0,0];
+    if (!core.isset(core.status.curtainColor)) {
+        core.status.curtainColor = [0,0,0,0];
     }
 
-    var fromColor = core.status.event.data.currentColor;
+    var fromColor = core.status.curtainColor;
 
-    if (!core.isset(color)) {
+    if (!core.isset(color))
         color = [0,0,0,0];
-        reset = true;
-    }
-    if (color.length==3) {
+    if (color.length==3)
         color.push(1);
-    }
     if (color[3]<0) color[3]=0;
     if (color[3]>1) color[3]=1;
 
     var step=0;
     var changeAnimate = setInterval(function() {
         step++;
-        core.clearMap('fg', 0, 0, 416, 416);
 
         var nowAlpha = fromColor[3]+(color[3]-fromColor[3])*step/25;
         var nowR = parseInt(fromColor[0]+(color[0]-fromColor[0])*step/25);
@@ -2381,19 +2452,13 @@ core.prototype.setFg = function(color, time, callback) {
         if (nowG<0) nowG=0; if (nowG>255) nowG=255;
         if (nowB<0) nowB=0; if (nowB>255) nowB=255;
 
-        core.setAlpha('fg', nowAlpha);
-        var toRGB = "#"+((1<<24)+(nowR<<16)+(nowG<<8)+nowB).toString(16).slice(1)
-        core.fillRect('fg', 0, 0, 416, 416, toRGB);
+        var toRGB = "#"+((1<<24)+(nowR<<16)+(nowG<<8)+nowB).toString(16).slice(1);
+        core.dom.curtain.style.background = toRGB;
+        core.dom.curtain.style.opacity = nowAlpha;
 
         if (step>=25) {
             clearInterval(changeAnimate);
-            if (reset) {
-                core.clearMap('fg', 0, 0, 416, 416);
-                delete core.status.event.data.currentColor;
-                core.setAlpha('fg', 1);
-                core.updateFg();
-            }
-            else core.status.event.data.currentColor = color;
+            core.status.curtainColor = color;
             if (core.isset(callback)) callback();
         }
     }, time/25);
@@ -2443,6 +2508,7 @@ core.prototype.nextY = function () {
  */
 core.prototype.updateFg = function () {
 
+    /*
     // 如果存在颜色
     if (core.isset(core.status.event.data) && core.isset(core.status.event.data.currentColor)) {
         var color=core.status.event.data.currentColor;
@@ -2450,6 +2516,7 @@ core.prototype.updateFg = function () {
         core.fillRect("fg",0,0,416,416,"#"+((1<<24)+(color[0]<<16)+(color[1]<<8)+color[2]).toString(16).slice(1));
         return;
     }
+    */
 
     if (!core.isset(core.status.thisMap) || !core.isset(core.status.thisMap.blocks)) return;
     // 更新显伤
@@ -2715,6 +2782,21 @@ core.prototype.calValue = function (value) {
     return eval(value);
 }
 
+core.prototype.doEffect = function (expression) {
+    // 必须使用"+="
+    var arr = expression.split("+=");
+    if (arr.length!=2) return;
+    var name=arr[0], value=core.calValue(arr[1]);
+    if (name.indexOf("status:")==0) {
+        var status=name.substring(7);
+        core.setStatus(status, core.getStatus(status)+value);
+    }
+    else if (name.indexOf("item:")==0) {
+        var itemId=name.substring(5);
+        core.setItem(itemId, core.itemCount(itemId)+value);
+    }
+}
+
 core.prototype.splitLines = function(canvas, text, maxLength, font) {
     if (core.isset(font)) core.setFont(canvas, font);
 
@@ -2900,7 +2982,7 @@ core.prototype.openToolbox = function (need) {
 core.prototype.save = function(need) {
     if (!core.checkStatus('save', need))
         return;
-    core.ui.drawSLPanel(core.status.savePage);
+    core.ui.drawSLPanel(core.status.saveIndex);
 }
 
 core.prototype.load = function (need) {
@@ -2910,22 +2992,22 @@ core.prototype.load = function (need) {
         core.status.event = {'id': 'load', 'data': null};
         core.status.lockControl = true;
         core.dom.startPanel.style.display = 'none';
-        var page = core.getLocalStorage('savePage', 0);
-        core.ui.drawSLPanel(page);
+        core.ui.drawSLPanel(core.getLocalStorage('saveIndex', 1));
         return;
     }
 
     if (!core.checkStatus('load', need))
         return;
-    core.ui.drawSLPanel(core.status.savePage);
+    core.ui.drawSLPanel(core.status.saveIndex);
 }
 
 core.prototype.doSL = function (id, type) {
+    core.status.saveIndex=id;
     if (type=='save') {
         if (core.saveData("save"+id)) {
             core.ui.closePanel();
             core.drawTip('存档成功！');
-            core.setLocalStorage('savePage', core.status.savePage);
+            core.setLocalStorage('saveIndex', core.status.saveIndex);
         }
         else {
             core.drawTip('存储空间不足，请覆盖已有的存档或在菜单栏中进行清理');
@@ -2944,7 +3026,8 @@ core.prototype.doSL = function (id, type) {
         }
         core.ui.closePanel();
         core.loadData(data, function() {
-            core.setLocalStorage('savePage', core.status.savePage);
+            core.status.saveIndex=id;
+            core.setLocalStorage('saveIndex', core.status.saveIndex);
             core.drawTip("读档成功");
         });
         return;
@@ -2953,6 +3036,7 @@ core.prototype.doSL = function (id, type) {
 
 core.prototype.syncSave = function(type) {
     if (type=='save') {
+        core.status.event.selection=1;
         core.ui.drawConfirmBox("你确定要将本地存档同步到服务器吗？", function(){
             // console.log("同步存档...");
             core.ui.drawWaiting("正在同步，请稍后...");
@@ -2999,11 +3083,12 @@ core.prototype.syncSave = function(type) {
             }
             xhr.send(formData);
         }, function() {
+            core.status.event.selection=0;
             core.ui.drawSyncSave();
         })
     }
     else if (type=='load') {
-
+        core.status.event.selection=1;
         core.ui.drawConfirmBox("你确定要从服务器加载存档吗？\n该操作将覆盖所有本地存档且不可逆！", function(){
             var id = prompt("请输入存档编号：");
             if (id==null || id=="") {
@@ -3070,6 +3155,7 @@ core.prototype.syncSave = function(type) {
             }
             xhr.send(formData);
         }, function() {
+            core.status.event.selection=1;
             core.ui.drawSyncSave();
         })
     }
@@ -3083,7 +3169,6 @@ core.prototype.saveData = function(dataId) {
         'hard': core.status.hard,
         'maps': core.maps.save(core.status.maps),
         'shops': {},
-        'flags': core.flags,
         'version': core.firstData.version,
         "time": new Date().getTime()
     };
@@ -3101,7 +3186,7 @@ core.prototype.saveData = function(dataId) {
 
 core.prototype.loadData = function (data, callback) {
 
-    core.resetStatus(data.hero, data.hard, data.floorId, data.flags, core.maps.load(data.maps));
+    core.resetStatus(data.hero, data.hard, data.floorId, core.maps.load(data.maps));
 
     // load shop times
     for (var shop in core.status.shops) {
@@ -3123,6 +3208,11 @@ core.prototype.setStatus = function (statusName, statusVal) {
 
 core.prototype.getStatus = function (statusName) {
     return core.status.hero[statusName];
+}
+
+core.prototype.getLvName = function () {
+    if (core.status.hero.lv>core.firstData.levelUp.length) return core.status.hero.lv;
+    return core.firstData.levelUp[core.status.hero.lv-1].name || core.status.hero.lv;
 }
 
 core.prototype.setFlag = function(flag, value) {
@@ -3245,9 +3335,9 @@ core.prototype.hide = function (obj, speed, callback) {
 ////// 状态栏相关 //////
 
 core.prototype.clearStatusBar = function() {
-    var statusList = ['floor', 'hp', 'atk', 'def', 'mdef', 'money', 'experience', 'yellowKey', 'blueKey', 'redKey', 'poison', 'weak', 'curse', 'hard'];
+    var statusList = ['floor', 'lv', 'hp', 'atk', 'def', 'mdef', 'money', 'experience', 'up', 'yellowKey', 'blueKey', 'redKey', 'poison', 'weak', 'curse', 'hard'];
     statusList.forEach(function (e) {
-        core.statusBar[e].innerHTML = "";
+        core.statusBar[e].innerHTML = "&nbsp;";
     });
     core.statusBar.image.book.style.opacity = 0.3;
     core.statusBar.image.fly.style.opacity = 0.3;
@@ -3258,16 +3348,30 @@ core.prototype.clearStatusBar = function() {
  */
 core.prototype.updateStatusBar = function () {
 
+    // 检查登记
+    core.checkLvUp();
+
     // 上限999999
     if (core.values.HPMAX>0) {
         core.setStatus('hp', Math.min(core.values.HPMAX, core.getStatus('hp')));
     }
 
-    // core.statusBar.floor.innerHTML = core.maps.maps[core.status.floorId].name;
+    var lvName = core.getLvName();
+    core.statusBar.lv.innerHTML = lvName;
+    if (/^[+-]?\d+$/.test(lvName))
+        core.statusBar.lv.style.fontStyle = 'italic';
+    else core.statusBar.lv.style.fontStyle = 'normal';
+
     var statusList = ['hp', 'atk', 'def', 'mdef', 'money', 'experience'];
     statusList.forEach(function (item) {
         core.statusBar[item].innerHTML = core.getStatus(item);
     });
+    // 进阶
+    if (core.flags.enableLevelUp && core.status.hero.lv<core.firstData.levelUp.length) {
+        core.statusBar.up.innerHTML = core.firstData.levelUp[core.status.hero.lv].need || "&nbsp;";
+    }
+    else core.statusBar.up.innerHTML = "&nbsp;";
+
     var keys = ['yellowKey', 'blueKey', 'redKey'];
     keys.forEach(function (key) {
         core.statusBar[key].innerHTML = core.setTwoDigits(core.status.hero.items.keys[key]);
@@ -3291,6 +3395,27 @@ core.prototype.updateStatusBar = function () {
     }
     core.updateCheckBlock();
     core.updateFg();
+}
+
+core.prototype.checkLvUp = function () {
+    if (!core.flags.enableLevelUp || core.status.hero.lv>=core.firstData.levelUp.length) return;
+    // 计算下一个所需要的数值
+    var need=core.firstData.levelUp[core.status.hero.lv].need;
+    if (!core.isset(need)) return;
+    if (core.status.hero.experience>=need) {
+        // 升级
+        core.status.hero.lv++;
+        var effect = core.firstData.levelUp[core.status.hero.lv-1].effect;
+        if (typeof effect == "string") {
+            effect.split(";").forEach(function (t) {
+                core.doEffect(t);
+            });
+        }
+        else if (effect instanceof Function) {
+            effect();
+        }
+        core.checkLvUp();
+    }
 }
 
 core.prototype.resize = function(clientWidth, clientHeight) {
@@ -3320,18 +3445,22 @@ core.prototype.resize = function(clientWidth, clientHeight) {
         statusWidth, statusHeight, statusMaxWidth,statusLabelsLH,
         toolBarWidth, toolBarHeight, toolBarTop, toolBarBorder,
         toolsWidth, toolsHeight,toolsMargin,toolsPMaxwidth,
-        fontSize, margin;
+        fontSize, toolbarFontSize, margin;
         
-    var count = 9;
+    var count = 11;
+    if (!core.flags.enableFloor) count--;
+    if (!core.flags.enableLv) count--;
     if (!core.flags.enableMDef) count--;
+    if (!core.flags.enableMoney) count--;
     if (!core.flags.enableExperience) count--;
+    if (!core.flags.enableLevelUp) count--;
     if (!core.flags.enableDebuff) count--;
 
-    var statusLineHeight = BASE_LINEHEIGHT * 9/count;
+    var statusLineHeight = BASE_LINEHEIGHT * 9 / count;
+    var statusLineFontSize = DEFAULT_FONT_SIZE;
+    if (count>9) statusLineFontSize = statusLineFontSize * 9 / count;
     
-    var shopDisplay, mdefDisplay, expDisplay;
-    mdefDisplay = core.flags.enableMDef ? 'block' : 'none';
-    expDisplay = core.flags.enableExperience ? 'block' : 'none';
+    var shopDisplay;
 
     statusBarBorder = '3px #fff solid';
     toolBarBorder = '3px #fff solid';
@@ -3351,13 +3480,13 @@ core.prototype.resize = function(clientWidth, clientHeight) {
         
         var scale = core.domStyle.scale
         var tempWidth = DEFAULT_CANVAS_WIDTH * scale;
-        fontSize = DEFAULT_FONT_SIZE * scale;
         if(!isHorizontal){ //竖屏
             core.domStyle.screenMode = 'vertical';
             //显示快捷商店图标
             shopDisplay = 'block';
             //判断应该显示几行
-            var col = core.flags.enableMDef || core.flags.enableExperience || core.flags.enableDebuff ? 3 : 2;
+            // var col = core.flags.enableMDef || core.flags.enableExperience || core.flags.enableDebuff ? 3 : 2;
+            var col = parseInt((count-1)/3)+1;
 
             var tempTopBarH = scale * (BASE_LINEHEIGHT * col + SPACE * 2) + 6;
             var tempBotBarH = scale * (BASE_LINEHEIGHT + SPACE * 4) + 6;
@@ -3384,6 +3513,8 @@ core.prototype.resize = function(clientWidth, clientHeight) {
             
             margin = scale * SPACE * 2;
             toolsMargin = scale * SPACE * 4;
+            fontSize = DEFAULT_FONT_SIZE * scale;
+            toolbarFontSize = DEFAULT_FONT_SIZE * scale;
         }else { //横屏
             core.domStyle.screenMode = 'horizontal';
             shopDisplay = 'none';
@@ -3401,6 +3532,8 @@ core.prototype.resize = function(clientWidth, clientHeight) {
             toolBarTop = scale*statusLineHeight * count + SPACE * 2;
             toolBarBorder = '3px #fff solid';
             toolsHeight = scale * BASE_LINEHEIGHT;
+            fontSize = statusLineFontSize * scale;
+            toolbarFontSize = DEFAULT_FONT_SIZE * scale;
             borderRight = '';
             statusMaxWidth = scale * DEFAULT_BAR_WIDTH;
             toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH;
@@ -3430,7 +3563,8 @@ core.prototype.resize = function(clientWidth, clientHeight) {
         
         toolsHeight = BASE_LINEHEIGHT;
         borderRight = '';
-        fontSize = DEFAULT_FONT_SIZE;
+        fontSize = statusLineFontSize;
+        toolbarFontSize = DEFAULT_FONT_SIZE;
         statusMaxWidth = DEFAULT_BAR_WIDTH;
         toolsPMaxwidth = DEFAULT_BAR_WIDTH * .9;
         margin = SPACE * 2;
@@ -3455,9 +3589,16 @@ core.prototype.resize = function(clientWidth, clientHeight) {
                 height: canvasWidth + unit,
                 top: canvasTop + unit,
                 right: 0,
-                // left: canvasLeft + unit, 
-
                 border: '3px #fff solid',
+            }
+        },
+        {
+            id: 'curtain',
+            rules: {
+                width: (canvasWidth - SPACE*2) + unit,
+                height:(canvasWidth - SPACE*2) + unit,
+                top: (canvasTop + SPACE) + unit,
+                right: SPACE + unit,
             }
         },
         {
@@ -3511,7 +3652,7 @@ core.prototype.resize = function(clientWidth, clientHeight) {
                 borderBottom: toolBarBorder,
                 borderLeft: toolBarBorder,
                 borderRight: borderRight,
-                fontSize: fontSize + unit
+                fontSize: toolbarFontSize + unit
             }
         },
         {
@@ -3530,17 +3671,53 @@ core.prototype.resize = function(clientWidth, clientHeight) {
             }
         },
         {
-            id: 'expCol',
+            id: 'floorCol',
             rules: {
-                display: expDisplay
+                display: core.flags.enableFloor ? 'block': 'none'
+            }
+        },
+        {
+            id: 'lvCol',
+            rules: {
+                display: core.flags.enableLv ? 'block': 'none'
             }
         },
         {
             id: 'mdefCol',
             rules: {
-                display: mdefDisplay
+                display: core.flags.enableMDef ? 'block': 'none'
             }
         },
+        {
+            id: 'moneyCol',
+            rules: {
+                display: core.flags.enableMoney ? 'block': 'none'
+            }
+        },
+        {
+            id: 'expCol',
+            rules: {
+                display: core.flags.enableExperience ? 'block': 'none'
+            }
+        },
+        {
+            id: 'upCol',
+            rules: {
+                display: core.flags.enableLevelUp ? 'block': 'none'
+            }
+        },
+        {
+            'id': 'debuffCol',
+            rules: {
+                display: core.flags.enableDebuff ? 'block': 'none'
+            }
+        },
+        {
+            id: 'hard',
+            rules: {
+                lineHeight: toolsHeight + unit
+            }
+        }
     ]
     core.domRenderer();
 }

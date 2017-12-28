@@ -61,9 +61,9 @@ main.floors.sample1 = {
             {"type": "hide", "loc": [1,8]},
             {"type": "hide", "loc": [1,5], "time": 500}, // 隐藏红衣魔王，动画500ms
             {"type": "hide"}, // 隐藏本事件
-            {"type": "setFg", "color": [0,0,0], 'time': 1250}, // 渐变为白色
+            {"type": "setFg", "color": [0,0,0], "time": 1250}, // 渐变为白色
             {"type": "sleep", "time": 700},
-            {"type": "changeFloor", "floorId": "sample1", "loc": [1,11], 'direction': 'right', 'time': 1000}, // 楼层切换。changeFloor必须指定floorId和loc。
+            {"type": "changeFloor", "floorId": "sample1", "loc": [1,11], "direction": "right", "time": 1000}, // 楼层切换。changeFloor必须指定floorId和loc。
             // 备注：这里也可以下面的这种写法：
             // {"type": "changePos", "loc": [1,11]}
             // 使用这种写法将不会有“楼层切换动画”，而是直接让勇士到达本层的loc位置。

@@ -420,7 +420,7 @@ editor.prototype.init = function() {
 editor.prototype.loadMod = function (callback) {
   main={'instance':{}};
   var loadedNum=0;
-  ['libs/icons.js','libs/maps.js'].forEach( function (value,ii,aa) {
+  ['libs/floors/icons.js','libs/floors/maps.js','libs/icons.js','libs/maps.js'].forEach( function (value,ii,aa) {
     var script = document.createElement('script');
     script.src = value + '?' + editor.version;
     document.body.appendChild(script);
@@ -435,6 +435,7 @@ editor.prototype.loadMod = function (callback) {
 editor.prototype.afterLoadMod = function (callback) {
   
   main.instance.icons.init();
+  main.instance.maps.init();
   var icons=main.instance.icons.getIcons();
 
   editor.ids = [];

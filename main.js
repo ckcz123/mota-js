@@ -195,8 +195,9 @@ main.prototype.setMainTipsText = function (text) {
     main.dom.mainTips.innerHTML = text;
 }
 
-var main = new main();
-main.init();
+
+
+main.prototype.listen = function () {
 
 window.onresize = function () {
     try {
@@ -366,3 +367,7 @@ main.dom.normalLevel.onclick = function () {
 main.dom.hardLevel.onclick = function () {
     core.events.startGame('Hard');
 }
+
+}//listen end
+
+var main = new main();

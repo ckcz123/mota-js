@@ -47,7 +47,7 @@ function main() {
         'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains'
     ];
     this.bgms = [ // 在此存放所有的bgm，和文件名一致。第一项为默认播放项
-        '058-Slow01.mid', 'bgm.mp3', 'heianmigong.mid', 'star.mid'
+        '058-Slow01.mid', 'bgm.mp3', 'qianjin.mid', 'star.mid'
     ];
     this.sounds = [ // 在此存放所有的SE，和文件名一致
         'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg'

@@ -142,7 +142,7 @@ events.prototype.afterChangeFloor = function (floorId) {
         core.playBgm('star.mid');
     }
     if (floorId == 'sample2') {
-        core.playBgm('058-G2_koko.mid');
+        core.playBgm('G2_koko.mid');
     }
 }
 

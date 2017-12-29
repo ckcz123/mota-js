@@ -193,14 +193,14 @@ window.onresize = function () {
 
 main.dom.body.onkeydown = function(e) {
     try {
-        if (main.core.isPlaying())
+        if (main.core.isPlaying() || main.core.status.lockControl)
             main.core.onkeyDown(e);
     } catch (ee) {}
 }
 
 main.dom.body.onkeyup = function(e) {
     try {
-        if (main.core.isPlaying())
+        if (main.core.isPlaying() || main.core.status.lockControl)
             main.core.onkeyUp(e);
     } catch (ee) {}
 }

@@ -7,6 +7,7 @@ main.floors.MT0 = {
     "name": 0, // 显示在状态栏中的层数
     "canFlyTo": true, // 该楼能否被楼传器飞到（不能的话在该楼也不允许使用楼传器）
     "canUseQuickShop": true, // 该层是否允许使用快捷商店
+    "defaultGround": "ground", // 默认地面的图块ID（terrains中）
     "map": [ // 地图数据，需要是13x13，建议使用地图生成器来生成
 
     ],

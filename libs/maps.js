@@ -34,7 +34,7 @@ maps.prototype.loadFloor = function (floorId, map) {
                     }
                 }
             }
-            this.addEvent(block,j,i,floor.events[j+","+i])
+            this.addEvent(block,j,i,floor.events[j+","+i],floor.defaultGround || "ground")
             this.addChangeFloor(block,j,i,floor.changeFloor[j+","+i]);
             if (core.isset(block.event)) blocks.push(block);
         }
@@ -78,8 +78,14 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 14) tmp.event = {'cls': 'animates', 'id': 'curseNet', 'noPass': false, 'trigger': 'passNet'}; // 咒网
     if (id == 15) tmp.event = {'cls': 'animates', 'id': 'water', 'noPass': true}; // 水
 
-    // autotile: 20
+
+    // Autotile
     if (id == 20) tmp.event = {'cls': 'autotile', 'id': 'autotile', 'noPass': true}; // autotile
+    // 更多的autotile从151到160，只要不和现有的数字冲突即可
+    if (id == 151) tmp.event = {'cls': 'autotile', 'id': 'autotile1', 'noPass': true};
+    if (id == 152) tmp.event = {'cls': 'autotile', 'id': 'autotile2', 'noPass': true};
+    if (id == 153) tmp.event = {'cls': 'autotile', 'id': 'autotile3', 'noPass': true};
+
 
     // 21-80 物品
     if (id == 21) tmp.event = {'cls': 'items', 'id': 'yellowKey'}; // 黄钥匙
@@ -232,10 +238,10 @@ maps.prototype.getBlock = function (x, y, id) {
     return tmp;
 }
 
-maps.prototype.addEvent = function (block, x, y, event) {
+maps.prototype.addEvent = function (block, x, y, event, ground) {
     if (!core.isset(event)) return;
     if (!core.isset(block.event)) { // 本身是空地？
-        block.event = {'cls': 'terrains', 'id': 'ground', 'noPass': false};
+        block.event = {'cls': 'terrains', 'id': ground, 'noPass': false};
     }
     // event是字符串或数组？
     if (typeof event == "string") {
@@ -267,9 +273,9 @@ maps.prototype.addEvent = function (block, x, y, event) {
     }
 }
 
-maps.prototype.addChangeFloor = function (block, x, y, event) {
+maps.prototype.addChangeFloor = function (block, x, y, event, ground) {
     if (!core.isset(event)) return;
-    this.addEvent(block, x, y, {"trigger": "changeFloor", "data": event});
+    this.addEvent(block, x, y, {"trigger": "changeFloor", "data": event}, ground);
 }
 
 maps.prototype.initMaps = function (floorIds) {

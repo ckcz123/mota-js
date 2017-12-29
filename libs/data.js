@@ -78,7 +78,7 @@ data.prototype.init = function() {
                     {"text": "攻击+5", "need": "30", "effect": "status:atk+=5"},
                     {"text": "防御+5", "need": "30", "effect": "status:def+=5"},
                 ]
-            }
+            },
         },
     }
     // 各种数值；一些数值可以在这里设置
@@ -128,6 +128,7 @@ data.prototype.init = function() {
         "bigKeyIsBox": false, // 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙
         /****** 系统相关 ******/
         "startDirectly": false, // 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面
+        "showBattleAnimateConfirm": true, // 是否在游戏开始时提供“是否开启战斗动画”的选项
         "battleAnimate": true, // 是否默认显示战斗动画；用户可以手动在菜单栏中开关
         "displayEnemyDamage": true, // 是否地图怪物显伤；用户可以手动在菜单栏中开关
         "displayExtraDamage": false, // 是否地图高级显伤（领域、夹击等）；用户可以手动在菜单栏中开关

@@ -79,9 +79,12 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 15) tmp.event = {'cls': 'animates', 'id': 'water', 'noPass': true}; // 水
 
 
-    // autotile: 20
+    // Autotile
     if (id == 20) tmp.event = {'cls': 'autotile', 'id': 'autotile', 'noPass': true}; // autotile
-    // 更多的autotile从350继续放
+    // 更多的autotile从151到160，只要不和现有的数字冲突即可
+    if (id == 151) tmp.event = {'cls': 'autotile', 'id': 'autotile1', 'noPass': true};
+    if (id == 152) tmp.event = {'cls': 'autotile', 'id': 'autotile2', 'noPass': true};
+    if (id == 153) tmp.event = {'cls': 'autotile', 'id': 'autotile3', 'noPass': true};
 
 
     // 21-80 物品

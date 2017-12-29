@@ -165,9 +165,10 @@ enemys.prototype.getDefDamage = function (monsterId) {
     var monster = core.material.enemys[monsterId];
     var nowDamage = this.calDamage(core.status.hero.atk, core.status.hero.def, core.status.hero.mdef,
         monster.hp, monster.atk, monster.def, monster.special);
-    if (nowDamage == 999999999) return "???";
-    return nowDamage - this.calDamage(core.status.hero.atk, core.status.hero.def + 1, core.status.hero.mdef,
+    var nextDamage = this.calDamage(core.status.hero.atk, core.status.hero.def + 1, core.status.hero.mdef,
         monster.hp, monster.atk, monster.def, monster.special);
+    if (nowDamage == 999999999 || nextDamage == 999999999) return "???";
+    return nowDamage - nextDamage;
 }
 
 enemys.prototype.calDamage = function (hero_atk, hero_def, hero_mdef, mon_hp, mon_atk, mon_def, mon_special) {

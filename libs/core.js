@@ -7,12 +7,14 @@ function core() {
     this.statusBar = {};
     this.canvas = {};
     this.images = [];
-    this.sounds = {};
+    this.bgms = [];
+    this.sounds = [];
     this.floorIds = [];
     this.floors = {};
     this.firstData = {};
     this.material = {
         'images': {},
+        'bgms': {},
         'sounds': {},
         'ground': null,
         'items': {},
@@ -35,12 +37,12 @@ function core() {
         'openDoorAnimate': null
     }
     this.musicStatus = {
-        'isIOS': false,
-        'loaded': false,
-        'bgmStatus': false,
-        'soundStatus': true,
-        'playedSound': null,
-        'playedBgm': null,
+        'audioContext': null, // WebAudioContext
+        'startDirectly': false, // 是否直接播放（加载）音乐
+        'bgmStatus': false, // 是否播放BGM
+        'soundStatus': true, // 是否播放SE
+        'playingBgm': null, // 正在播放的BGM
+        'isPlaying': false,
     }
     // 样式
     this.domStyle = {
@@ -102,11 +104,12 @@ function core() {
 
 /////////// 系统事件相关 ///////////
 
-core.prototype.init = function (dom, statusBar, canvas, images, sounds, floorIds, floors, coreData) {
+core.prototype.init = function (dom, statusBar, canvas, images, bgms, sounds, floorIds, floors, coreData) {
     core.dom = dom;
     core.statusBar = statusBar;
     core.canvas = canvas;
     core.images = images;
+    core.bgms = bgms;
     core.sounds = sounds;
     core.floorIds = floorIds;
     core.floors = floors;
@@ -134,15 +137,42 @@ core.prototype.init = function (dom, statusBar, canvas, images, sounds, floorIds
     core.material.icons = core.icons.getIcons();
     core.material.events = core.events.getEvents();
 
-    // test if iOS
-    core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
-    var userAgent = navigator.userAgent;
 
-    if (userAgent.indexOf('iPhone') > -1 || userAgent.indexOf('iPad') > -1) {
-        console.log("你的设备为iphone，不自动播放音乐！");
-        core.musicStatus.isIOS = true;
-        core.musicStatus.soundStatus = false;
+
+    if (location.protocol.indexOf("http")==0) {
+        window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext;
+        try {
+            core.musicStatus.audioContext = new window.AudioContext();
+        } catch (e) {
+            console.log("该浏览器不支持AudioContext");
+            core.musicStatus.audioContext = null;
+        }
     }
+
+    // 音效设置部分
+    var isPC = true;
+    ["Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod"].forEach(function (t) {
+        if (navigator.userAgent.indexOf(t)>=0) isPC=false;
+    });
+    if (isPC) {
+        // 如果是PC端直接加载
+        core.musicStatus.startDirectly = true;
+    }
+    else {
+        var connection = navigator.connection;
+        if (core.isset(connection) && connection.type=='wifi')
+            core.musicStatus.startDirectly = true;
+    }
+
+    // 先从存储中读取BGM状态
+    core.musicStatus.bgmStatus = core.getLocalStorage('bgmStatus', true);
+    if (!core.musicStatus.startDirectly) // 如果当前网络环境不允许
+        core.musicStatus.bgmStatus = false;
+    core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
+
+    core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
+    core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
+
 
     // switchs
     core.flags.battleAnimate = core.getLocalStorage('battleAnimate', core.flags.battleAnimate);
@@ -232,7 +262,7 @@ core.prototype.loader = function (callback) {
                         core.material.images.autotile[autotileId]=image;
                         if (Object.keys(core.material.images.autotile).length==autotileIds.length) {
                             // 音频
-                            core.loadSounds(callback);
+                            core.loadMusic(callback);
                         }
                     })
                 }
@@ -259,56 +289,104 @@ core.prototype.loadImage = function (imgName, callback) {
     }
 }
 
-core.prototype.loadSounds = function (callback) {
-    for (var key in core.sounds) {
-        for (var i = 0; i < core.sounds[key].length; i++) {
-            var soundName=core.sounds[key][i];
-            soundName = soundName.split('-');
-            var sound = new Audio();
-            sound.preload = 'none';
-            sound.src = 'sounds/' + soundName[0] + '.' + key;
-            if (soundName[1] == 'loop') {
-                sound.loop = 'loop';
+core.prototype.loadMusic = function (callback) {
+
+    core.bgms.forEach(function (t) {
+
+        // 判断是不是mid
+        if (/^.*\.mid$/.test(t)) {
+
+            if (core.musicStatus.audioContext!=null) {
+                core.material.bgms[t] = 'loading';
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', 'sounds/'+t, true);
+                xhr.overrideMimeType("text/plain; charset=x-user-defined");
+                xhr.onload = function(e) { //下载完成
+                    try {
+                        var ff = [];
+                        var mx = this.responseText.length;
+                        for (var z = 0; z < mx; z++)
+                            ff[z] = String.fromCharCode(this.responseText.charCodeAt(z) & 255);
+                        var shouldStart = core.material.bgms[t] == 'starting';
+                        core.material.bgms[t] = AudioPlayer(core.musicStatus.audioContext, Replayer(MidiFile(ff.join("")), Synth(44100)), true);
+
+                        if (shouldStart)
+                            core.playBgm(t);
+                    }
+                    catch (ee) {
+                        console.log(ee);
+                        core.material.bgms[t] = null;
+                    }
+
+                };
+                xhr.ontimeout = function(e) {
+                    console.log(e);
+                    core.material.bgms[t] = null;
+                }
+                xhr.onerror = function(e) {
+                    console.log(e);
+                    core.material.bgms[t] = null;
+                }
+                xhr.send();
             }
-
-            if (!core.isset(core.material.sounds[key]))
-                core.material.sounds[key] = {};
-            core.material.sounds[key][soundName[0]] = sound;
+            else {
+                core.material.bgms[t] = null;
+            }
         }
-    }
+        else {
+            var music = new Audio();
+            if (!core.musicStatus.startDirectly)
+                music.preload = 'none'; // 默认不加载
+            music.src = 'sounds/'+t;
+            music.loop = 'loop';
+            core.material.bgms[t] = music;
+        }
+    });
+
+    core.sounds.forEach(function (t) {
+
+        if (core.musicStatus.audioContext != null) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'sounds/'+t, true);
+            xhr.responseType = 'arraybuffer';
+            xhr.onload = function(e) { //下载完成
+                try {
+                    core.musicStatus.audioContext.decodeAudioData(this.response, function (buffer) {
+                        core.material.sounds[t] = buffer;
+                    }, function (e) {
+                        console.log(e);
+                        core.material.sounds[t] = null;
+                    })
+                }
+                catch (ee) {
+                    console.log(ee);
+                    core.material.sounds[t] = null;
+                }
+            };
+
+            xhr.ontimeout = function(e) {
+                console.log(e);
+                core.material.sounds[t] = null;
+            }
+            xhr.onerror = function(e) {
+                console.log(e);
+                core.material.sounds[t] = null;
+            }
+            xhr.send();
+        }
+        else {
+            var music = new Audio();
+            music.src = 'sounds/'+t;
+            core.material.sounds[t] = music;
+        }
+
+    });
+
+    // 直接开始播放
+    if (core.musicStatus.startDirectly && core.bgms.length>0)
+        core.playBgm(core.bgms[0]);
+
     callback();
-}
-
-core.prototype.loadSound = function() {
-    if (!core.isset(core.material.sounds.mp3)) return;
-    if (core.musicStatus.isIOS) return;
-    if (core.musicStatus.loaded) return;
-    core.musicStatus.loaded=true;
-    console.log("加载音乐");
-
-    var toLoadList = [];
-
-    for (var key in core.material.sounds) {
-        for (var name in core.material.sounds[key]) {
-            toLoadList.push(core.material.sounds[key][name]);
-        }
-    }
-    core.loadSoundItem(toLoadList);
-}
-
-core.prototype.loadSoundItem = function (toLoadList) {
-    if (toLoadList.length==0) {
-        if (core.musicStatus.bgmStatus>0) return;
-        core.musicStatus.bgmStatus=1;
-        if (core.musicStatus.soundStatus)
-            core.playBgm('bgm', 'mp3');
-        return;
-    }
-    var item = toLoadList.shift();
-    item.oncanplay = function() {
-        core.loadSoundItem(toLoadList);
-    }
-    item.load();
 }
 
 core.prototype.isPlaying = function() {
@@ -316,7 +394,6 @@ core.prototype.isPlaying = function() {
         return true;
     return false;
 }
-
 
 core.prototype.clearStatus = function() {
     // 停止各个Timeout和Interval
@@ -1472,7 +1549,7 @@ core.prototype.openDoor = function (id, x, y, needKey, callback) {
         }
     }
     // open
-    core.playSound("door", "ogg");
+    core.playSound("door.ogg");
     var state = 0;
     var doorId = id;
     if (!(doorId.substring(doorId.length-4)=="Door")) {
@@ -1518,7 +1595,7 @@ core.prototype.battle = function (id, x, y, force, callback) {
         });
     }
     else {
-        core.playSound('attack', 'ogg');
+        core.playSound('attack.ogg');
         core.afterBattle(id, x, y, callback);
     }
 }
@@ -1613,7 +1690,7 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
     }
 
     window.setTimeout(function () {
-        core.playSound('floor', 'mp3');
+        core.playSound('floor.mp3');
         core.mapChangeAnimate('show', time/2, function () {
 
             // 根据文字判断是否斜体
@@ -2770,7 +2847,7 @@ core.prototype.getNextItem = function() {
 
 core.prototype.getItem = function (itemId, itemNum, itemX, itemY, callback) {
     // core.getItemAnimate(itemId, itemNum, itemX, itemY);
-    core.playSound('item', 'ogg');
+    core.playSound('item.ogg');
     var itemCls = core.material.items[itemId].cls;
     core.items.getItemEffect(itemId, itemNum);
     core.removeBlock(itemX, itemY);
@@ -3375,23 +3452,106 @@ core.prototype.isset = function (val) {
     return true
 }
 
-core.prototype.playSound = function (soundName, soundType) {
-    if (!core.musicStatus.soundStatus || !core.musicStatus.loaded) {
+core.prototype.playBgm = function (bgm) {
+
+    // 如果不允许播放
+    if (!core.musicStatus.bgmStatus) return;
+    // 音频不存在
+    if (!core.isset(core.material.bgms[bgm])) return;
+
+    // 延迟播放
+    if (core.material.bgms[bgm] == 'loading') {
+        core.material.bgms[bgm] = 'starting';
         return;
     }
-    if (!core.isset(core.material.sounds[soundType][soundName])) return;
-    core.musicStatus.playedSound = core.material.sounds[soundType][soundName];
-    core.musicStatus.playedSound.play();
+
+    try {
+        // 如果当前正在播放，且和本BGM相同，直接忽略
+        if (core.musicStatus.playingBgm == bgm && core.musicStatus.isPlaying) {
+            return;
+        }
+        // 如果正在播放中，暂停
+        if (core.isset(core.musicStatus.playingBgm) && core.musicStatus.isPlaying) {
+            core.material.bgms[core.musicStatus.playingBgm].pause();
+        }
+        // 播放当前BGM
+        core.musicStatus.playingBgm = bgm;
+        core.material.bgms[bgm].play();
+        core.musicStatus.isPlaying = true;
+
+    }
+    catch (e) {
+        console.log("无法播放BGM "+bgm);
+        console.log(e);
+        core.musicStatus.playingBgm = null;
+    }
 }
 
-core.prototype.playBgm = function (bgmName, bgmType) {
-    if (core.musicStatus.isIOS || !core.musicStatus.loaded) return;
-    if (core.isset(core.musicStatus.playedBgm)) {
-        core.musicStatus.playedBgm.pause();
+core.prototype.pauseBgm = function () {
+    // 直接暂停播放
+    try {
+        if (core.isset(core.musicStatus.playingBgm)) {
+            core.material.bgms[core.musicStatus.playingBgm].pause();
+        }
+        core.musicStatus.isPlaying = false;
     }
-    core.musicStatus.playedBgm = core.material.sounds[bgmType][bgmName];
-    if (core.musicStatus.soundStatus)
-        core.musicStatus.playedBgm.play();
+    catch (e) {
+        console.log("无法暂停BGM "+bgm);
+        console.log(e);
+    }
+}
+
+core.prototype.resumeBgm = function () {
+    // 恢复BGM
+    try {
+        if (core.isset(core.musicStatus.playingBgm)) {
+            core.material.bgms[core.musicStatus.playingBgm].play();
+            core.musicStatus.isPlaying = true;
+        }
+        else {
+            if (core.bgms.length>0) {
+                core.playBgm(core.bgms[0]);
+                core.musicStatus.isPlaying = true;
+            }
+        }
+    }
+    catch (e) {
+        console.log("无法恢复BGM "+bgm);
+        console.log(e);
+    }
+}
+
+core.prototype.playSound = function (sound) {
+
+    // 如果不允许播放
+    if (!core.musicStatus.soundStatus) return;
+    // 音频不存在
+    if (!core.isset(core.material.sounds[sound])) return;
+
+    try {
+        if (core.musicStatus.audioContext != null) {
+            var source = core.musicStatus.audioContext.createBufferSource();
+            source.buffer = core.material.sounds[sound];
+            source.connect(core.musicStatus.audioContext.destination);
+            try {
+                source.start(0);
+            }
+            catch (e) {
+                try {
+                    source.noteOn(0);
+                }
+                catch (ee) {
+                }
+            }
+        }
+        else {
+            core.material.sounds[sound].play();
+        }
+    }
+    catch (eee) {
+        console.log("无法播放SE "+bgm);
+        console.log(eee);
+    }
 }
 
 core.prototype.changeSoundStatus = function () {

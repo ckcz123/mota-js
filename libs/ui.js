@@ -334,7 +334,8 @@ ui.prototype.drawSwitchs = function() {
     core.status.event.id = 'switchs';
 
     var choices = [
-        "背景音乐："+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
+        "背景音乐："+(core.musicStatus.bgmStatus ? "[ON]" : "[OFF]"),
+        "背景音效："+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
         "战斗动画： " + (core.flags.battleAnimate ? "[ON]" : "[OFF]"),
         "怪物显伤： " + (core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
         "领域显伤： " + (core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
@@ -571,7 +572,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     core.fillText("ui", "S", right_start-8, 208+15, "#FFFFFF", "italic bold 40px Verdana");
 
     var battleInterval = setInterval(function() {
-        core.playSound("attack", "ogg");
+        core.playSound("attack.ogg");
 
         if (turn==0) {
             // 勇士攻击

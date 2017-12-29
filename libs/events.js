@@ -133,6 +133,17 @@ events.prototype.afterChangeFloor = function (floorId) {
         this.doEvents(core.floors[floorId].firstArrive);
         core.setFlag("visited_"+floorId, true);
     }
+
+    // 播放BGM
+    if (floorId == 'sample0') {
+        core.playBgm('bgm.mp3');
+    }
+    if (floorId == 'sample1') {
+        core.playBgm('star.mid');
+    }
+    if (floorId == 'sample2') {
+        core.playBgm('058-G2_koko.mid');
+    }
 }
 
 ////// 实际事件的处理 //////
@@ -285,11 +296,6 @@ events.prototype.doAction = function() {
                 block = block.block;
                 if (core.isset(block.event) && block.event.trigger=='action') {
                     // 触发
-                    /*
-                    core.status.event = {'id': 'action', 'data': {
-                        'list': core.clone(block.event.data), 'x': block.x, 'y': block.y, 'callback': core.status.event.data.callback
-                    }}
-                    */
                     core.status.event.data.list = core.clone(block.event.data);
                     core.status.event.data.x=block.x;
                     core.status.event.data.y=block.y;
@@ -298,11 +304,21 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "playSound":
-            var name=data.name.split(".");
-            if (name.length==2)
-                core.playSound(name[0],name[1]);
+            core.playSound(data.name);
             this.doAction();
             break;
+        case "playBgm":
+            core.playBgm(data.name);
+            this.doAction();
+            break
+        case "pauseBgm":
+            core.pauseBgm();
+            this.doAction();
+            break
+        case "resumeBgm":
+            core.resumeBgm();
+            this.doAction();
+            break
         case "setValue":
             try {
                 var value=core.calValue(data.value);
@@ -625,6 +641,12 @@ events.prototype.afterChangeLight = function(x,y) {
 
 }
 
+// 使用炸弹/圣锤后的事件
+events.prototype.afterUseBomb = function () {
+
+
+}
+
 // 存档事件前一刻的处理
 events.prototype.beforeSaveData = function(data) {
 
@@ -651,6 +673,13 @@ events.prototype.keyDownCtrl = function () {
     }
 }
 
+events.prototype.clickConfirmBox = function (x,y) {
+    if ((x == 4 || x == 5) && y == 7 && core.isset(core.status.event.data.yes))
+        core.status.event.data.yes();
+    if ((x == 7 || x == 8) && y == 7 && core.isset(core.status.event.data.no))
+        core.status.event.data.no();
+}
+
 events.prototype.keyUpConfirmBox = function (keycode) {
     if (keycode==37) {
         core.status.event.selection=0;
@@ -672,12 +701,6 @@ events.prototype.keyUpConfirmBox = function (keycode) {
             core.status.event.data.no();
         }
     }
-}
-events.prototype.clickConfirmBox = function (x,y) {
-    if ((x == 4 || x == 5) && y == 7 && core.isset(core.status.event.data.yes))
-        core.status.event.data.yes();
-    if ((x == 7 || x == 8) && y == 7 && core.isset(core.status.event.data.no))
-        core.status.event.data.no();
 }
 
 // 正在处理事件时的点击操作...
@@ -769,7 +792,6 @@ events.prototype.keyUpBook = function (keycode) {
     }
 }
 
-// 飞行器
 events.prototype.clickFly = function(x,y) {
     if ((x==10 || x==11) && y==9) core.ui.drawFly(core.status.event.data-1);
     if ((x==10 || x==11) && y==5) core.ui.drawFly(core.status.event.data+1);
@@ -1115,21 +1137,27 @@ events.prototype.keyUpSL = function (keycode) {
 events.prototype.clickSwitchs = function (x,y) {
     if (x<5 || x>7) return;
     var choices = [
-        "背景音乐", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
+        "背景音乐", "背景音效", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
     ];
     var topIndex = 6 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y-topIndex;
         switch (selection) {
             case 0:
-                if (core.musicStatus.isIOS) {
-                    core.drawTip("iOS设备不支持播放音乐");
-                    return;
-                }
-                core.changeSoundStatus();
+                core.musicStatus.bgmStatus = !core.musicStatus.bgmStatus;
+                if (core.musicStatus.bgmStatus)
+                    core.resumeBgm();
+                else
+                    core.pauseBgm();
+                core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
                 core.ui.drawSwitchs();
                 break;
             case 1:
+                core.musicStatus.soundStatus = !core.musicStatus.soundStatus;
+                core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
+                core.ui.drawSwitchs();
+                break;
+            case 2:
                 if (!core.flags.canOpenBattleAnimate) {
                     core.drawTip("本塔不能开启战斗动画！");
                 }
@@ -1139,19 +1167,19 @@ events.prototype.clickSwitchs = function (x,y) {
                     core.ui.drawSwitchs();
                 }
                 break;
-            case 2:
+            case 3:
                 core.flags.displayEnemyDamage=!core.flags.displayEnemyDamage;
                 core.updateFg();
                 core.setLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
                 core.ui.drawSwitchs();
                 break;
-            case 3:
+            case 4:
                 core.flags.displayExtraDamage=!core.flags.displayExtraDamage;
                 core.updateFg();
                 core.setLocalStorage('extraDamage', core.flags.displayExtraDamage);
                 core.ui.drawSwitchs();
                 break;
-            case 4:
+            case 5:
                 core.status.event.selection=0;
                 core.ui.drawSettings(false);
                 break;
@@ -1161,7 +1189,7 @@ events.prototype.clickSwitchs = function (x,y) {
 
 events.prototype.keyDownSwitchs = function (keycode) {
     var choices = [
-        "背景音乐", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
+        "背景音乐", "背景音效", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
     ];
     if (keycode==38) {
         core.status.event.selection--;
@@ -1182,7 +1210,7 @@ events.prototype.keyUpSwitchs = function (keycode) {
         return;
     }
     var choices = [
-        "背景音乐", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
+        "背景音乐", "背景音效", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
     ];
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);

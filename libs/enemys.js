@@ -101,6 +101,8 @@ enemys.prototype.getSpecialText = function (enemyId) {
     if (this.hasSpecial(special, 16)) text.push("夹击");
     if (this.hasSpecial(special, 17)) text.push("仇恨");
     if (this.hasSpecial(special, 18)) text.push("阻击");
+    if (this.hasSpecial(special, 19)) text.push("自爆");
+    if (this.hasSpecial(special, 20)) text.push("无敌");
     return text.join("  ");
 }
 
@@ -161,22 +163,27 @@ enemys.prototype.getCriticalDamage = function (monsterId) {
 // 1防减伤计算
 enemys.prototype.getDefDamage = function (monsterId) {
     var monster = core.material.enemys[monsterId];
-    return this.calDamage(core.status.hero.atk, core.status.hero.def, core.status.hero.mdef,
-        monster.hp, monster.atk, monster.def, monster.special) -
-        this.calDamage(core.status.hero.atk, core.status.hero.def + 1, core.status.hero.mdef,
-            monster.hp, monster.atk, monster.def, monster.special)
+    var nowDamage = this.calDamage(core.status.hero.atk, core.status.hero.def, core.status.hero.mdef,
+        monster.hp, monster.atk, monster.def, monster.special);
+    if (nowDamage == 999999999) return "???";
+    return nowDamage - this.calDamage(core.status.hero.atk, core.status.hero.def + 1, core.status.hero.mdef,
+        monster.hp, monster.atk, monster.def, monster.special);
 }
 
 enemys.prototype.calDamage = function (hero_atk, hero_def, hero_mdef, mon_hp, mon_atk, mon_def, mon_special) {
-    // 魔攻
-    if (this.hasSpecial(mon_special,2)) hero_def = 0;
-    // 坚固
-    if (this.hasSpecial(mon_special,3) && mon_def < hero_atk - 1) mon_def = hero_atk - 1;
+
+    if (this.hasSpecial(mon_special, 20) && !core.hasItem("cross")) // 如果是无敌属性，且勇士未持有十字架
+        return 999999999; // 返回无限大
+
     // 模仿
     if (this.hasSpecial(mon_special,10)) {
         mon_atk = hero_atk;
         mon_def = hero_def;
     }
+    // 魔攻
+    if (this.hasSpecial(mon_special,2)) hero_def = 0;
+    // 坚固
+    if (this.hasSpecial(mon_special,3) && mon_def < hero_atk - 1) mon_def = hero_atk - 1;
     if (hero_atk <= mon_def) return 999999999; // 不可战斗时请直接返回999999999
 
     var per_damage = mon_atk - hero_def;

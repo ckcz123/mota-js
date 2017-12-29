@@ -390,12 +390,12 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
     hero_hp -= core.enemys.getExtraDamage(monster);
 
-    if (core.enemys.hasSpecial(mon_special, 2)) hero_def=0; // 魔攻
-    if (core.enemys.hasSpecial(mon_special, 3) && mon_def<hero_atk) mon_def=hero_atk-1; // 坚固
     if (core.enemys.hasSpecial(mon_special, 10)) { // 模仿
         mon_atk=hero_atk;
         mon_def=hero_def;
     }
+    if (core.enemys.hasSpecial(mon_special, 2)) hero_def=0; // 魔攻
+    if (core.enemys.hasSpecial(mon_special, 3) && mon_def<hero_atk) mon_def=hero_atk-1; // 坚固
 
     // 实际操作
     var turn = 0; // 0为勇士攻击

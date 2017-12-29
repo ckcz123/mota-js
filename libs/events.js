@@ -540,6 +540,10 @@ events.prototype.afterBattle = function(enemyId,x,y,callback) {
     if (core.enemys.hasSpecial(special, 17)) {
         core.setFlag('hatred', parseInt(core.getFlag('hatred', 0)/2));
     }
+    // 自爆
+    if (core.enemys.hasSpecial(special, 19)) {
+        core.status.hero.hp = 1;
+    }
     // 增加仇恨值
     core.setFlag('hatred', core.getFlag('hatred',0)+core.values.hatred);
     core.updateStatusBar();

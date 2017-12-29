@@ -335,8 +335,7 @@ core.prototype.loadMusic = function (callback) {
         }
         else {
             var music = new Audio();
-            if (!core.musicStatus.startDirectly)
-                music.preload = 'none'; // 默认不加载
+            music.preload = core.musicStatus.startDirectly?'auto':'none';
             music.src = 'sounds/'+t;
             music.loop = 'loop';
             core.material.bgms[t] = music;

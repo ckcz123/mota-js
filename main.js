@@ -47,9 +47,11 @@ function main() {
         'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains'
     ];
     this.bgms = [ // 在此存放所有的bgm，和文件名一致。第一项为默认播放项
+        // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
         '058-Slow01.mid', 'bgm.mp3', 'qianjin.mid', 'star.mid'
     ];
     this.sounds = [ // 在此存放所有的SE，和文件名一致
+        // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
         'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg'
     ]
     this.statusBar = {

@@ -40,6 +40,7 @@ function main() {
         'debuffCol': document.getElementById('debuffCol'),
         'hard': document.getElementById('hard'),
     };
+    this.mode = 'play';
     this.loadList = [
         'items', 'icons', 'maps', 'enemys', 'events', 'data', 'ui', 'core'
     ];
@@ -100,9 +101,13 @@ function main() {
     this.canvas = {};
 }
 
-main.prototype.init = function () {
+main.prototype.init = function (mode) {
     for (var i = 0; i < main.dom.gameCanvas.length; i++) {
         main.canvas[main.dom.gameCanvas[i].id] = main.dom.gameCanvas[i].getContext('2d');
+    }
+    if (({"editor":0,"replay":0}).hasOwnProperty(mode)) {
+        main.mode = mode;
+        if (mode === 'editor')main.editor = {};
     }
     main.loadPureData(function(){
         main.useCompress=data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.useCompress;

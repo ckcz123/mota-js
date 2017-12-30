@@ -14,7 +14,7 @@
     if (isset(callback)) callback(null);
   }
   //callback(err:String)
-  editor_file.saveFloorFile = function(editor,saveAsFilename,callback){
+  editor_file.saveFloorFileAs = function(editor,saveAsFilename,callback){
     if (isset(callback)) callback(null);
   }
   //callback(err:String)

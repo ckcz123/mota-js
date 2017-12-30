@@ -81,14 +81,15 @@ enemys.prototype.hasSpecial = function (special, test) {
 
 enemys.prototype.getSpecialText = function (enemyId) {
     if (enemyId == undefined) return "";
-    var special = this.enemys[enemyId].special;
+    var enemy = this.enemys[enemyId];
+    var special = enemy.special;
     var text = [];
     if (this.hasSpecial(special, 1)) text.push("先攻");
     if (this.hasSpecial(special, 2)) text.push("魔攻");
     if (this.hasSpecial(special, 3)) text.push("坚固");
     if (this.hasSpecial(special, 4)) text.push("2连击");
     if (this.hasSpecial(special, 5)) text.push("3连击");
-    if (this.hasSpecial(special, 6)) text.push("4连击");
+    if (this.hasSpecial(special, 6)) text.push((enemy.n||4)+"连击");
     if (this.hasSpecial(special, 7)) text.push("破甲");
     if (this.hasSpecial(special, 8)) text.push("反击");
     if (this.hasSpecial(special, 9)) text.push("净化");
@@ -114,7 +115,7 @@ enemys.prototype.getSpecialHint = function (enemy, special) {
         case 3: return "勇士每回合最多只能对怪物造成1点伤害";
         case 4: return "怪物每回合攻击2次";
         case 5: return "怪物每回合攻击3次";
-        case 6: return "怪物每回合攻击4次";
+        case 6: return "怪物每回合攻击"+(enemy.n||4)+"次";
         case 7: return "战斗前，怪物附加角色防御的"+parseInt(100*core.values.breakArmor)+"%作为伤害";
         case 8: return "战斗时，怪物每回合附加角色攻击的"+parseInt(100*core.values.counterAttack)+"%作为伤害，无视角色防御";
         case 9: return "战斗前，怪物附加勇士魔防的"+core.values.purify+"倍作为伤害";
@@ -138,7 +139,7 @@ enemys.prototype.getDamage = function (monsterId) {
     var monster = core.material.enemys[monsterId];
     var hero_atk = core.status.hero.atk, hero_def = core.status.hero.def, hero_mdef = core.status.hero.mdef;
     var mon_hp = monster.hp, mon_atk = monster.atk, mon_def = monster.def, mon_special = monster.special;
-    var damage = this.calDamage(hero_atk, hero_def, hero_mdef, mon_hp, mon_atk, mon_def, mon_special);
+    var damage = this.calDamage(hero_atk, hero_def, hero_mdef, mon_hp, mon_atk, mon_def, mon_special, monster.n);
     if (damage == 999999999) return damage;
     return damage + this.getExtraDamage(monster);
 }
@@ -161,12 +162,12 @@ enemys.prototype.getCritical = function (monsterId) {
     var monster = core.material.enemys[monsterId];
     if (this.hasSpecial(monster.special, 3) || this.hasSpecial(monster.special, 10)) return "???";
     var last = this.calDamage(core.status.hero.atk, core.status.hero.def, core.status.hero.mdef,
-        monster.hp, monster.atk, monster.def, monster.special);
+        monster.hp, monster.atk, monster.def, monster.special, monster.n);
     if (last <= 0) return 0;
 
     for (var i = core.status.hero.atk + 1; i <= monster.hp + monster.def; i++) {
         var damage = this.calDamage(i, core.status.hero.def, core.status.hero.mdef,
-            monster.hp, monster.atk, monster.def, monster.special);
+            monster.hp, monster.atk, monster.def, monster.special, monster.n);
         if (damage < last)
             return i - core.status.hero.atk;
         last = damage;
@@ -181,25 +182,25 @@ enemys.prototype.getCriticalDamage = function (monsterId) {
     if (c <= 0) return 0;
     var monster = core.material.enemys[monsterId];
     var last = this.calDamage(core.status.hero.atk, core.status.hero.def, core.status.hero.mdef,
-        monster.hp, monster.atk, monster.def, monster.special);
+        monster.hp, monster.atk, monster.def, monster.special, monster.n);
     if (last == 999999999) return '???';
 
     return last - this.calDamage(core.status.hero.atk + c, core.status.hero.def, core.status.hero.mdef,
-        monster.hp, monster.atk, monster.def, monster.special);
+        monster.hp, monster.atk, monster.def, monster.special, monster.n);
 }
 
 // 1防减伤计算
 enemys.prototype.getDefDamage = function (monsterId) {
     var monster = core.material.enemys[monsterId];
     var nowDamage = this.calDamage(core.status.hero.atk, core.status.hero.def, core.status.hero.mdef,
-        monster.hp, monster.atk, monster.def, monster.special);
+        monster.hp, monster.atk, monster.def, monster.special, monster.n);
     var nextDamage = this.calDamage(core.status.hero.atk, core.status.hero.def + 1, core.status.hero.mdef,
-        monster.hp, monster.atk, monster.def, monster.special);
+        monster.hp, monster.atk, monster.def, monster.special, monster.n);
     if (nowDamage == 999999999 || nextDamage == 999999999) return "???";
     return nowDamage - nextDamage;
 }
 
-enemys.prototype.calDamage = function (hero_atk, hero_def, hero_mdef, mon_hp, mon_atk, mon_def, mon_special) {
+enemys.prototype.calDamage = function (hero_atk, hero_def, hero_mdef, mon_hp, mon_atk, mon_def, mon_special, n) {
 
     if (this.hasSpecial(mon_special, 20) && !core.hasItem("cross")) // 如果是无敌属性，且勇士未持有十字架
         return 999999999; // 返回无限大
@@ -221,7 +222,7 @@ enemys.prototype.calDamage = function (hero_atk, hero_def, hero_mdef, mon_hp, mo
 
     if (this.hasSpecial(mon_special, 4)) per_damage *= 2;
     if (this.hasSpecial(mon_special, 5)) per_damage *= 3;
-    if (this.hasSpecial(mon_special, 6)) per_damage *= 4;
+    if (this.hasSpecial(mon_special, 6)) per_damage *= (n||4);
 
     var counterDamage = 0;
     // 反击

@@ -405,7 +405,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     var turns = 2;
     if (core.enemys.hasSpecial(mon_special, 4)) turns=3;
     if (core.enemys.hasSpecial(mon_special, 5)) turns=4;
-    if (core.enemys.hasSpecial(mon_special, 6)) turns=5;
+    if (core.enemys.hasSpecial(mon_special, 6)) turns=1+(monster.n||4);
 
 
     // 初始伤害

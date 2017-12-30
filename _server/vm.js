@@ -245,3 +245,51 @@ var selectBox = new Vue({
     }
   }
 })
+
+var editFile4map = new Vue({
+  el: '#editFile4map',
+  data: {
+    selected: 'untitle',
+    options:[],
+    filelist: [],
+  },
+  watch: {
+    filelist: function(val){
+      if(val){
+        var oval = val.length ? JSON.parse(JSON.stringify(val)) : [];
+        for(var i=0; i<oval.length; i++)
+          this.$set("options", i, oval[i]);
+      }
+    },
+  }
+})
+var modSeletNav = new Vue({
+  el: '#modSeletNav',
+  data: {
+    currTabnum: 1,
+    tabs:[
+      {num: 1, title: "地图数组"},
+      {num: 2, title: "对象属性"},
+      {num: 3, title: "选点事件"},
+      {num: 4, title: "楼层事件"},
+    ]
+  },
+  watch: {
+    currTabnum(val){
+      this.$emit('on-change', val)
+      this.$emit('input', val)
+    }
+  },
+  methods: {
+    selectTab(num){
+      this.currTabnum = num;
+      tabSelection.showTab = num;
+    }
+  }
+})
+var tabSelection = new Vue({
+  el: '#tabSelection',
+  data: {
+    showTab: 1,
+  },
+})

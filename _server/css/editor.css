@@ -1,0 +1,340 @@
+
+html,body,div,img{margin:0;padding:0;}
+body{
+  font-family: Roboto,"Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;;
+  background-color: #F5F5F5;
+}
+/* ::-webkit-scrollbar {
+    width: 5px;
+} */
+.main {
+  max-width: 100%;
+  min-height: 500px;
+  margin: 0 auto;
+}
+#left, #mid, #right{
+  border-radius: 2px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,.14), 0 3px 1px -2px rgba(0,0,0,.2), 0 1px 5px 0 rgba(0,0,0,.12);
+} 
+#left{
+  position: absolute;
+  left: 5px;
+  top: 10px;
+  width: 435px;
+  height: 630px;
+}
+.nav {
+  width: 100%;
+  height: 40px;
+  margin-top: 5px;
+  box-sizing: border-box;
+}
+.nav a{
+  display: block;
+  float: left;
+  line-height: 30px;
+  font-size: 14px;
+  text-align: center;
+  color: #424242;
+  margin: 0 10px;
+  padding: 0 3px ;
+  list-style: none;
+  box-sizing: border-box;
+  cursor: pointer;
+  /* border-bottom: 3px solid #009688; */
+}
+.is-selected {
+  border-bottom: 3px solid #009688;
+}
+#left .tabs{
+  position: absolute;
+  top: 50px;
+  left: 0;
+  width: 435px;
+  height: 535px;
+}
+#left .card{
+  width: 100%;
+  height: 535px;
+  position: absolute;
+  left: 0;
+  top: 10px;
+  border-top: 1px solid #ccc;
+}
+#arrEditor{
+  z-index: 8;
+}
+.card .lineTitle {
+  position: absolute;
+  top: -12px;
+  left: 20px;
+  padding: 0 5px;
+  font-size: 14px;
+  color: #03A9F4;
+  background-color: #F5F5F5;
+  
+  z-index: 10;
+}
+#editArea{
+  width: 100%;
+  height: 70%;
+  /* padding: 10px 5px; */
+  box-sizing: border-box;
+  margin-top: 15px;
+}
+#pout{
+  position: absolute;
+  left: 22px;
+  top: 37px;
+  display: block;
+  width: 410px;
+  height: 300px;
+  box-sizing: border-box;
+  line-height: 20px;
+  font-size: 12.3px;
+  font-family: 'Lucida Console', Monaco, monospace;
+  white-space: pre;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+}
+#editTip{
+  position: absolute;
+  width: 100%;
+  height: 80px;
+  bottom:10px;
+  left: 10px;
+}
+#editArea p{
+  margin: 10px;
+  display: block;
+  width: 70%;
+  line-height: 20px;
+  text-align: left;
+  font-size: 14px;
+}
+#editTip .btn{
+  float: right;
+  margin-right: 20px;
+  margin-top: 5px;
+}
+.files {
+  width: 100%;
+  height: 120px;
+  /* padding: 10px; */
+  margin-top: 15px;
+}
+.files .input{
+  display: block;
+  max-width: 150px;
+  height: 20px;
+  padding: 6px 12px;
+  font-size: 14px;
+  margin-top: 10px;
+  color: #555;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+}
+/* ==================================== */
+#mid{
+  position: absolute;
+  left: 448px;
+  top: 10px;
+  width: 440px;
+  height: 630px;
+}
+.map {
+  position: absolute;
+  left: 20px;
+  top: 21px;
+  width: 416px;
+  height: 416px;
+}
+#mid .tools{
+  position: absolute;
+  width: 425px;
+  height: 180px;
+  left: 0;
+  bottom: 0;
+  border-top: 1px solid #ccc;
+  padding: 10px 5px;
+  margin-left: 8px;;
+  box-sizing: border-box;
+}
+#tip{
+  float: right;
+  width: 50%;
+  height: 95%;
+  padding: 5px 10px 10px 10px;
+  margin-right: 0;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  font-size: 15px;
+  line-height: 14px;
+}
+
+#printOut{
+  margin-top: 10px;
+  height: 20px;
+  
+}
+.btn {
+  width: 80px;
+  border-radius: 2px;
+  line-height: 30px;
+  margin: 0;
+  min-width: 50px;
+  padding: 0 5px;
+  display: inline-block;
+
+  font-size: 14px;
+  font-weight: 400;
+  /* text-transform: uppercase; */
+  letter-spacing: 0;
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  vertical-align: middle;
+  border: 0;
+  background: rgba(158,158,158,.2);
+  box-shadow: 0 1px 1px 0 rgba(0,0,0,.14), 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 3px 0 rgba(0,0,0,.12);
+  color: #fff;
+  background-color: #26A69A;
+}
+.btn:hover {
+  background-color: #009688;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,.14), 0 3px 1px -2px rgba(0,0,0,.2), 0 1px 5px 0 rgba(0,0,0,.12);
+}
+
+/* =========================== */
+#right{
+  position: absolute;
+  left: 900px;
+  top: 10px;
+  width: 440px;
+  height: 630px;
+  /* border: 1px solid rgb(238, 13, 13); */
+}
+#iconLib{
+  position: absolute;
+  width: 435px;
+  height: 620px;
+  left: 5px;
+  top: 5px;
+  overflow: auto;
+}
+.gameCanvas {
+  position: absolute;
+}
+#dataSelection{
+  position: absolute;
+  /* top:0;
+  left:320px; */
+  z-index:75;
+  width:26px;
+  height:26px;
+  margin: 3px 0 0 3px;
+  padding:0;
+  /* display: none; */
+  box-sizing: border-box;
+  background-color:rgba(255, 255, 255, 0.0);
+  border: 1px solid #000;
+  box-shadow: 0 0 0 2px #fff,
+              0 0 0 3px #000;
+}
+.warnText{
+  color: #D50000;
+  font-weight: 700;
+  font-size: 14px;
+}
+.infoText{
+  color: #2196F3;
+}
+.successText{
+  color: #00897B
+}
+
+table, td {
+    border: 1px solid #fff;
+    color: #fff;
+    cursor:crosshair;
+}
+table.col{
+  position: relative;
+  
+  text-align: center;
+  border-collapse: collapse;
+}
+table.col td{
+  background-color: #4DB6AC;
+}
+#arrColMark td{
+  width: 16px;
+}
+#arrColMark {
+  top: 2px;
+  left: 36px;
+  width: 385px;
+  height: 16px;
+  font-size: 13px;
+}
+#mapColMark {
+  top: 2px;
+  left: 19px;
+  width: 418px;
+  height: 16px;
+  font-size: 13px;
+}
+#mapColMark td{
+  width: 29px;
+}
+#mapColMark td:hover .colBlock{
+  position: absolute;
+  top: 19px;
+  height: 416px;
+  width: 32px;
+  z-index: 100;
+  background-color: rgba(38,166,154,.5);
+}
+table.row{
+  position: relative;
+  text-align: right;
+  vertical-align:middle;
+  border-collapse: collapse;
+}
+table.row td{
+  background-color: #4C221B;
+}
+#arrRowMark{
+  top: 5px;
+  left: 2px;
+  width: 16px;
+  height: 262px;
+  font-size: 12px;
+}
+#mapRowMark{
+  top: 1px;
+  left: 2px;
+  width: 16px;
+  height: 416px;
+  font-size: 12px;
+}
+#mapRowMark td{
+  height: 29px;
+}
+#mapRowMark td:hover .rowBlock{
+  position: absolute;
+  left: 18px;
+  height: 32px;
+  width: 416px;
+  z-index: 100;
+  background-color: rgba(76,34,27,.5);
+}
+/* for vue dom */
+[v-cloak] {
+  display: none !important;
+}

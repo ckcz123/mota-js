@@ -129,6 +129,16 @@
         border-radius: 3px;
         box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
       }
+      #bgSelect{
+        width: 50%;
+        height: 100px;
+        margin-top: 10px;
+      }
+      #bgSelect span{
+        display: block;
+        font-size: 14px;
+        line-height: 30px;
+      }
       #printOut{
         margin-top: 10px;
         height: 20px;
@@ -324,11 +334,14 @@
       <div class="tools">
         <div id="tip" v-cloak >
           <div v-if="isSelectedBlock" >
-            <p v-if="hasId">图块编号：<span class="infoText">{{ infos['idnum'] }}</span></p>
-            <p v-if="hasId">图块ID：<span class="infoText">{{ infos['id'] }}</span></p>
-            <p v-else class="warnText">该图块无对应的数字或ID存在，请先前往icons.js和maps.js中进行定义！</p>
-            <p>图块所在素材：<span class="infoText">{{ infos['images'] + (isAutotile ? '( '+infos['id']+' )' : '') }}</span></p>
-            <p>图块索引：<span class="infoText">{{ infos['y'] }}</span></p>
+            <p v-if="isClearBlock" class="infoText">当前选择为清除块，可擦除地图上块</p>
+            <div v-else>
+              <p v-if="hasId">图块编号：<span class="infoText">{{ infos['idnum'] }}</span></p>
+              <p v-if="hasId">图块ID：<span class="infoText">{{ infos['id'] }}</span></p>
+              <p v-else class="warnText">该图块无对应的数字或ID存在，请先前往icons.js和maps.js中进行定义！</p>
+              <p>图块所在素材：<span class="infoText">{{ infos['images'] + (isAutotile ? '( '+infos['id']+' )' : '') }}</span></p>
+              <p>图块索引：<span class="infoText">{{ infos['y'] }}</span></p>
+            </div>
           </div>
           <div v-else>
               <p v-if="whichShow" v-bind:class="[ (whichShow%2) ? 'warnText' : 'successText']">{{ mapMsg }}</p>
@@ -336,13 +349,14 @@
         </div>
         <input class='btn' id='clear' type="button" value="清除地图" v-on:click="clearMap"/>
         <input class='btn' type="button" value="导出地图" id="exportM" v-on:click="exportMap"/>
-        
-        <div class="files">
-          <input class='btn' type="button" value="read" onclick="readUTF8file(pin.value)" />
-          <input class='btn' type="button" value="write" onclick="writeUTF8file(pin.value,pout.innerText)" />
-          
-          <input class='input' id='pin' placeholder="请输入文件名"/>
-          <div id="printOut"></div>
+        <div id="bgSelect" v-cloak>
+          <select v-model="selectedBg">
+            <option disabled value="">请选择地板</option>
+            <option v-for="bg in bgs" v-bind:value="bg">
+              {{ bg }}
+            </option>
+          </select>
+          <span>当前地板: {{ selectedBg }}</span>
         </div>
       </div>
     </div>
@@ -378,7 +392,7 @@
 <!-- =========================================================== -->
 
 <script src='_server/vendor/vue.min.js'></script>
-<!-- <script src="https://unpkg.com/vue"></script> -->
+<!-- <script src="https://cdn.bootcss.com/vue/2.5.13/vue.js"></script> -->
 <script src='_server/fs.js'></script>
 <script src='_server/vm.js'></script>
 <script>
@@ -429,7 +443,7 @@ editor.prototype.init = function(){
   Promise.all([p1, p2, p3])
   .then(function([maps, icons, img]){
     editor.idsInit(maps, icons); // 初始化图片素材信息
-    editor.drawInitData(); // 初始化绘图
+    editor.drawInitData(icons); // 初始化绘图
     editor.listen(); // 开始监听事件
   })
 }
@@ -516,7 +530,7 @@ editor.prototype.idsInit = function(maps, icons){
     }
   }
 }
-editor.prototype.drawInitData = function () {
+editor.prototype.drawInitData = function (icons) {
   var ratio=1;
   var images=editor.material.images;
   var maxHeight=700;
@@ -537,7 +551,12 @@ editor.prototype.drawInitData = function () {
       maxHeight = Math.max(maxHeight, tempy);
       continue;
     }
-    
+    if(img == 'terrains'){
+      editor.widthsX[img]=[img, sumWidth/32, (sumWidth+images[img].width)/32, images[img].height+32]
+      sumWidth += images[img].width;
+      maxHeight = Math.max(maxHeight, images[img].height+32);
+      continue;
+    }
     editor.widthsX[img]=[img, sumWidth/32, (sumWidth+images[img].width)/32, images[img].height];
     sumWidth += images[img].width;
     maxHeight = Math.max(maxHeight, images[img].height);
@@ -552,6 +571,11 @@ editor.prototype.drawInitData = function () {
   var nowy = 0;
   for(var ii=0; ii<imgNames.length; ii++){
     var img=imgNames[ii];
+    if(img == 'terrains'){
+      dc.drawImage(images[img], nowx, 32);
+      nowx += images[img].width;
+      continue;
+    }
     if(img == 'autotile'){
       var autotiles = images[img];
       for(var im in autotiles){
@@ -563,7 +587,7 @@ editor.prototype.drawInitData = function () {
     dc.drawImage(images[img], nowx, 0)
     nowx += images[img].width;
   }
-
+  bgSelect.bgs = Object.keys(icons.terrains);
   editor.drawMapBg();
   editor.mapInit();
 }
@@ -583,6 +607,7 @@ editor.prototype.drawMapBg = function(){
 
   for (var ii = 0; ii < 13; ii++)
     for (var jj = 0; jj < 13; jj++) {
+      bgc.clearRect(ii*32, jj*32, 32, 32);
       bgc.drawImage(editor.material.images['terrains'], 0, 32*(editor.bgY||0), 32, 32, ii*32, jj*32, 32, 32);
     }
 }
@@ -612,23 +637,24 @@ editor.prototype.updateMap = function(){
   }
 
   // autotile的相关处理
-  var indexArrs = [   //16种组合的图块索引数组
-    [10, 9, 4, 3],    //0   bin:0000
-    [10, 9, 4, 13],   //1   bin:0001
-    [10, 9, 18, 3],   //2   bin:0010
-    [10, 9, 16, 15],  //3   bin:0011
-    [10, 43, 4, 3],   //4   bin:0100
-    [10, 31, 4, 25],  //5   bin:0101
-    [10, 7, 2, 3],    //6   bin:0110
-    [10, 19, 14, 5],  //7   bin:0111
-    [48, 9, 4, 3],    //8   bin:1000
-    [8, 9, 4, 1],     //9   bin:1001
-    [36, 9, 30, 3],   //10  bin:1010
-    [24, 9, 6, 17],   //11  bin:1011
-    [46, 45, 4, 3],   //12  bin:1100
-    [44, 11, 4, 37],  //13  bin:1101
-    [12, 47, 42, 3],  //14  bin:1110
-    [34, 33, 28, 27]  //15  bin:1111
+  var indexArrs = [ //16种组合的图块索引数组; // 将autotile分割成48块16*16的小块; 数组索引即对应各个小块
+  //                                       +----+----+----+----+----+----+
+    [10,  9,  4, 3 ],  //0   bin:0000      | 1  | 2  | 3  | 4  | 5  | 6  |
+    [10,  9,  4, 13],  //1   bin:0001      +----+----+----+----+----+----+
+    [10,  9, 18, 3 ],  //2   bin:0010      | 7  | 8  | 9  | 10 | 11 | 12 |
+    [10,  9, 16, 15],  //3   bin:0011      +----+----+----+----+----+----+
+    [10, 43,  4, 3 ],  //4   bin:0100      | 13 | 14 | 15 | 16 | 17 | 18 |
+    [10, 31,  4, 25],  //5   bin:0101      +----+----+----+----+----+----+
+    [10,  7,  2, 3 ],  //6   bin:0110      | 19 | 20 | 21 | 22 | 23 | 24 |
+    [10, 31, 16, 5 ],  //7   bin:0111      +----+----+----+----+----+----+
+    [48,  9,  4, 3 ],  //8   bin:1000      | 25 | 26 | 27 | 28 | 29 | 30 |
+    [ 8,  9,  4, 1 ],  //9   bin:1001      +----+----+----+----+----+----+
+    [36,  9, 30, 3 ],  //10  bin:1010      | 31 | 32 | 33 | 34 | 35 | 36 |
+    [36,  9,  6, 15],  //11  bin:1011      +----+----+----+----+----+----+
+    [46, 45,  4, 3 ],  //12  bin:1100      | 37 | 38 | 39 | 40 | 41 | 42 |
+    [46, 11,  4, 25],  //13  bin:1101      +----+----+----+----+----+----+
+    [12, 45, 30, 3 ],  //14  bin:1110      | 43 | 44 | 45 | 46 | 47 | 48 |
+    [34, 33, 28, 27]   //15  bin:1111      +----+----+----+----+----+----+
   ];
   var drawBlockByIndex = function(ctx, dx, dy, autotileImg, index){ //index为autotile的图块索引1-48
     var sx = 16*((index-1)%6), sy = 16*(~~((index-1)/6));
@@ -641,6 +667,7 @@ editor.prototype.updateMap = function(){
   var getAutotileAroundId = function(currId, x, y){ //与autotile当前idnum一致返回1，否则返回0
     if(x>=0 && y >=0 && x<13 && y<13 && isAutotile(editor.map[y][x]) && editor.map[y][x].idnum == currId)
       return 1;
+    else if(x<0 || y<0 || x>12 || y>12) return 1; //边界外视为通用autotile，这样好看些
     else
       return 0;
   }
@@ -878,14 +905,24 @@ editor.prototype.listen = function() {
         // console.log(pos,editor.material.images[pos.images].height)
         dataSelection.style.left = pos.x*32 +'px';
         dataSelection.style.top = pos.y*32 +'px';
+        
+        if(pos.x==0&&pos.y==0){
+          // editor.info={idnum:0, id:'empty','images':'清除块', 'y':0};
+          editor.info=0;
+        }else{
+          if(hasOwnProp(autotiles, pos.images)) editor.info={'images':pos.images, 'y':0};
+          else if(pos.images == 'terrains') editor.info={'images':pos.images, 'y':pos.y-1};
+          else editor.info={'images':pos.images, 'y':pos.y};
 
-        if(hasOwnProp(autotiles, pos.images)) editor.info={'images':pos.images, 'y':0};
-        else editor.info={'images':pos.images, 'y':pos.y};
+          for (var ii=0;ii<editor.ids.length;ii++){
+            if( ( editor.info.images==editor.ids[ii].images 
+                && editor.info.y==editor.ids[ii].y )
+                || (hasOwnProp(autotiles, pos.images) && editor.info.images==editor.ids[ii].id 
+                && editor.info.y==editor.ids[ii].y)){
 
-        for (var ii=0;ii<editor.ids.length;ii++){
-          if((editor.info.images==editor.ids[ii].images && editor.info.y==editor.ids[ii].y) || (hasOwnProp(autotiles, pos.images) && editor.info.images==editor.ids[ii].id && editor.info.y==editor.ids[ii].y)){
-            editor.info = editor.ids[ii];
-            break;
+              editor.info = editor.ids[ii];
+              break;
+            }
           }
         }
         tip.infos = JSON.parse(JSON.stringify(editor.info));

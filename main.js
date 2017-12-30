@@ -20,6 +20,7 @@ function main() {
         'toolBar': document.getElementById('toolBar'),
         'tools': document.getElementsByClassName('tools'),
         'gameCanvas': document.getElementsByClassName('gameCanvas'),
+        'curtain': document.getElementById('curtain'),
         'startButtons': document.getElementById('startButtons'),
         'playGame': document.getElementById('playGame'),
         'loadGame': document.getElementById('loadGame'),
@@ -30,31 +31,40 @@ function main() {
         'hardLevel': document.getElementById('hardLevel'),
         'data': document.getElementById('data'),
         'statusLabels': document.getElementsByClassName('statusLabel'),
+        'floorCol': document.getElementById('floorCol'),
+        'lvCol': document.getElementById('lvCol'),
         'mdefCol': document.getElementById('mdefCol'),
+        'moneyCol': document.getElementById('moneyCol'),
         'expCol': document.getElementById('expCol'),
+        'upCol': document.getElementById('upCol'),
+        'debuffCol': document.getElementById('debuffCol'),
+        'hard': document.getElementById('hard'),
     };
-    // console.log('加载游戏容器和开始界面dom对象完成 如下');
-    // console.log(this.dom);
     this.loadList = [
         'items', 'icons', 'maps', 'enemys', 'events', 'data', 'ui', 'core'
     ];
-    // console.log('加载js文件列表加载完成' + this.loadList);
     this.images = [
-        'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains', "autotile"
+        'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains'
     ];
-    this.sounds = {
-        'mp3': ['bgm-loop', 'floor'],
-        'ogg': ['attack', 'door', 'item']
-    }
+    this.bgms = [ // 在此存放所有的bgm，和文件名一致。第一项为默认播放项
+        // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
+        '058-Slow01.mid', 'bgm.mp3', 'qianjin.mid', 'star.mid'
+    ];
+    this.sounds = [ // 在此存放所有的SE，和文件名一致
+        // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
+        'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg'
+    ]
     this.statusBar = {
         'image': {
             'floor': document.getElementById('img-floor'),
+            'lv': document.getElementById('img-lv'),
             'hp': document.getElementById("img-hp"),
             'atk': document.getElementById("img-atk"),
             'def': document.getElementById("img-def"),
             'mdef': document.getElementById("img-mdef"),
             'money': document.getElementById("img-money"),
             'experience': document.getElementById("img-experience"),
+            'up': document.getElementById("img-up"),
             'book': document.getElementById("img-book"),
             'fly': document.getElementById("img-fly"),
             'toolbox': document.getElementById("img-toolbox"),
@@ -64,12 +74,14 @@ function main() {
             'settings': document.getElementById("img-settings")
         },
         'floor': document.getElementById('floor'),
+        'lv': document.getElementById('lv'),
         'hp': document.getElementById('hp'),
         'atk': document.getElementById('atk'),
         'def': document.getElementById("def"),
         'mdef': document.getElementById('mdef'),
         'money': document.getElementById("money"),
         'experience': document.getElementById("experience"),
+        'up': document.getElementById('up'),
         'yellowKey': document.getElementById("yellowKey"),
         'blueKey': document.getElementById("blueKey"),
         'redKey': document.getElementById("redKey"),
@@ -78,6 +90,8 @@ function main() {
         'curse': document.getElementById('curse'),
         'hard': document.getElementById("hard")
     }
+
+    //------------------------ 用户修改内容 ------------------------//
     this.version = "0.1"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
     this.useCompress = false; // 是否使用压缩文件
@@ -88,6 +102,8 @@ function main() {
     this.floorIds = [ // 在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序
         "sample0", "sample1", "sample2"
     ]
+    //------------------------ 用户修改内容 END ------------------------//
+
     this.floors = {}
     this.instance = {};
     this.canvas = {};
@@ -106,7 +122,7 @@ main.prototype.init = function () {
             coreData[name] = main[name];
         }
         main.loaderFloors(function() {
-            main.core.init(main.dom, main.statusBar, main.canvas, main.images, main.sounds, main.floorIds, main.floors, coreData);
+            main.core.init(main.dom, main.statusBar, main.canvas, main.images, main.bgms, main.sounds, main.floorIds, main.floors, coreData);
             main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
         })
     });
@@ -207,18 +223,6 @@ main.dom.body.onkeyup = function(e) {
 
 main.dom.body.onselectstart = function () {
     return false;
-}
-
-document.onmousemove = function() {
-    try {
-        main.core.loadSound();
-    }catch (e) {}
-}
-
-document.ontouchstart = function() {
-    try {
-        main.core.loadSound();
-    }catch (e) {}
 }
 
 main.dom.data.onmousedown = function (e) {

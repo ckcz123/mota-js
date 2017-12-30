@@ -61,6 +61,8 @@ maps.prototype.getBlock = function (x, y, id) {
     var tmp = {'x': x, 'y': y, 'id': id};
     if (enable!=null) tmp.enable = enable;
 
+    ////////////////////////// 地形部分 //////////////////////////
+
     // 0-20 地形
     if (id == 1) tmp.event = {'cls': 'terrains', 'id': 'yellowWall'}; // 黄墙
     if (id == 2) tmp.event = {'cls': 'terrains', 'id': 'whiteWall'}; // 白墙
@@ -77,7 +79,8 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 13) tmp.event = {'cls': 'animates', 'id': 'weakNet', 'noPass': false, 'trigger': 'passNet'}; // 衰网
     if (id == 14) tmp.event = {'cls': 'animates', 'id': 'curseNet', 'noPass': false, 'trigger': 'passNet'}; // 咒网
     if (id == 15) tmp.event = {'cls': 'animates', 'id': 'water', 'noPass': true}; // 水
-
+    // 在这里添加更多地形
+    // 如果空地不足，可以从180以后开始继续放，只要不和现有的数字冲突即可
 
     // Autotile
     if (id == 20) tmp.event = {'cls': 'autotile', 'id': 'autotile', 'noPass': true}; // autotile
@@ -86,6 +89,7 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 152) tmp.event = {'cls': 'autotile', 'id': 'autotile2', 'noPass': true};
     if (id == 153) tmp.event = {'cls': 'autotile', 'id': 'autotile3', 'noPass': true};
 
+    ////////////////////////// 物品部分 //////////////////////////
 
     // 21-80 物品
     if (id == 21) tmp.event = {'cls': 'items', 'id': 'yellowKey'}; // 黄钥匙
@@ -134,6 +138,9 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 64) tmp.event = {'cls': 'items', 'id': 'shoes'} // 绿鞋
     if (id == 65) tmp.event = {'cls': 'items', 'id': 'hammer'} // 圣锤
 
+
+    ////////////////////////// 门、楼梯、传送点部分 //////////////////////////
+
     // 81-100 门
     if (id == 81) tmp.event = {'cls': 'terrains', 'id': 'yellowDoor', 'trigger': 'openDoor'}; // 黄门
     if (id == 82) tmp.event = {'cls': 'terrains', 'id': 'blueDoor', 'trigger': 'openDoor'}; // 蓝门
@@ -151,6 +158,8 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 94) tmp.event = {'cls': 'animates', 'id': 'rightPortal', 'noPass': false}; // 右箭头
 
 
+    ////////////////////////// NPC部分 //////////////////////////
+
     // 121-150 NPC
     if (id == 121) tmp.event = {'cls': 'npcs', 'id': 'man'};
     if (id == 122) tmp.event = {'cls': 'npcs', 'id': 'woman'};
@@ -165,6 +174,8 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 131) tmp.event = {'cls': 'npcs', 'id': 'blueShop'};
     if (id == 132) tmp.event = {'cls': 'npcs', 'id': 'princess'};
 
+    ////////////////////////// 其他部分 //////////////////////////
+
     // 161-200 其他（单向箭头、灯、箱子等等）
     if (id == 161) tmp.event = {'cls': 'terrains', 'id': 'arrowUp', 'noPass': false}; // 单向上箭头
     if (id == 162) tmp.event = {'cls': 'terrains', 'id': 'arrowDown', 'noPass': false}; // 单向下箭头
@@ -172,6 +183,9 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 164) tmp.event = {'cls': 'terrains', 'id': 'arrowRight', 'noPass': false}; // 单向右箭头
     if (id == 165) tmp.event = {'cls': 'terrains', 'id': 'light', 'trigger': 'changeLight', 'noPass': false}; // 灯
     if (id == 166) tmp.event = {'cls': 'terrains', 'id': 'darkLight', 'noPass': true}; // 暗灯
+
+
+    ////////////////////////// 怪物部分 //////////////////////////
 
     // 201-300 怪物
     if (id == 201) tmp.event = {'cls': 'enemys', 'id': 'greenSlime'};
@@ -234,6 +248,9 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 258) tmp.event = {'cls': 'enemys', 'id': 'octopus'};
     if (id == 259) tmp.event = {'cls': 'enemys', 'id': 'darkFairy'};
     if (id == 260) tmp.event = {'cls': 'enemys', 'id': 'greenKnight'};
+
+    ////////////////////////// 待定... //////////////////////////
+    // 目前ID暂时不要超过400
 
     return tmp;
 }

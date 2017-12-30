@@ -10,12 +10,13 @@ data.prototype.init = function() {
         "floorId": "sample0", // 初始楼层ID
         "hero": { // 勇士初始数据
             "name": "阳光", // 勇士名；可以改成喜欢的
+            'lv': 1, // 初始等级，该项必须为正整数
             "hp": 1000, // 初始生命值
             "atk": 100, // 初始攻击
             "def": 100, // 初始防御
             "mdef": 100, // 初始魔防
             "money": 100, // 初始金币
-            "experience": 1000, // 初始经验
+            "experience": 0, // 初始经验
             "items": { // 初始道具个数
                 "keys": {
                     "yellowKey": 0,
@@ -57,10 +58,11 @@ data.prototype.init = function() {
                     {"text": "防御+4", "effect": "status:def+=4"},
                     {"text": "魔防+10", "effect": "status:mdef+=10"}
                     // effect只能对status和item进行操作，不能修改flag值。
-                    // 中间只能用+=符号（也就是只能增加某个属性或道具）
+                    // 必须是X+=Y的形式，其中Y可以是一个表达式，以status:xxx或item:xxx为参数
                     // 其他effect样例：
                     // "item:yellowKey+=1" 黄钥匙+1
                     // "item:pickaxe+=3" 破墙镐+3
+                    // "status:hp+=2*(status:atk+status:def)" 将生命提升攻防和的数值的两倍
                 ]
             },
             "expShop1": { // 商店唯一ID
@@ -73,13 +75,33 @@ data.prototype.init = function() {
                 "choices": [
                     // 在choices中写need，可以针对每个选项都有不同的需求。
                     // 这里的need同样可以以times作为参数，比如 "need": "100+20*times"
-                    {"text": "等级+1", "need": "100", "effect": "status:hp+=1000;status:atk+=7;status:def+=7"},
+                    {"text": "等级+1", "need": "100", "effect": "status:lv+=1;status:hp+=1000;status:atk+=7;status:def+=7"},
                     // 多个effect直接以分号分开即可。如上面的意思是生命+1000，攻击+7，防御+7。
                     {"text": "攻击+5", "need": "30", "effect": "status:atk+=5"},
                     {"text": "防御+5", "need": "30", "effect": "status:def+=5"},
                 ]
             },
         },
+        "levelUp": [ // 经验升级所需要的数值，是一个数组
+            {}, // 第一项为初始等级，可以简单留空，也可以写name
+
+            // 每一个里面可以含有三个参数 need, name, effect
+            // need为所需要的经验数值，是一个正整数。请确保need所需的依次递增
+            // name为该等级的名称，也可以省略代表使用系统默认值；本项将显示在状态栏中
+            // effect为本次升级所执行的操作，可由若干项组成，由分号分开
+            // 其中每一项写法和上面的商店完全相同，同样必须是X+=Y的形式，Y是一个表达式，同样可以使用status:xxx或item:xxx代表勇士的某项数值/道具个数
+            {"need": 20, "name": "第二级", "effect": "status:hp+=2*(status:atk+status:def);status:atk+=10;status:def+=10"}, // 先将生命提升攻防和的2倍；再将攻击+10，防御+10
+
+            // effect也允许写一个function，代表本次升级将会执行的操作
+            {"need": 40, "effect": function () {
+                core.drawText("恭喜升级！");
+                core.status.hero.hp *= 2;
+                core.status.hero.atk += 100;
+                core.status.hero.def += 100;
+            }},
+
+            // 依次往下写需要的数值即可
+        ]
     }
     // 各种数值；一些数值可以在这里设置
     this.values = {
@@ -117,17 +139,26 @@ data.prototype.init = function() {
     }
     // 系统FLAG，在游戏运行中中请不要修改它。
     this.flags = {
-        /****** 角色状态相关 ******/
-        "enableMDef": true, // 是否涉及勇士的魔防值；如果此项为false，则状态栏不会显示勇士的魔防值
-        "enableExperience": true, // 是否涉及经验值；如果此项为false，则状态栏和怪物手册均将不会显示经验值
+        /****** 状态栏相关 ******/
+        "enableFloor": true, // 是否在状态栏显示当前楼层
+        "enableLv": false, // 是否在状态栏显示当前等级
+        "enableMDef": true, // 是否在状态栏及战斗界面显示魔防（护盾）
+        "enableMoney": true, // 是否在状态栏、怪物手册及战斗界面显示金币
+        "enableExperience": true, // 是否在状态栏、怪物手册及战斗界面显示经验
+        "enableLevelUp": false, // 是否允许等级提升（进阶）；如果上面enableExperience为false，则此项恒视为false
         "enableDebuff": true, // 是否涉及毒衰咒；如果此项为false则不会在状态栏中显示毒衰咒的debuff
+        ////// 上述的几个开关将直接影响状态栏的显示效果 //////
         /****** 道具相关 ******/
         "flyNearStair": true, // 是否需要在楼梯边使用传送器
         "pickaxeFourDirections": true, // 使用破墙镐是否四个方向都破坏；如果false则只破坏面前的墙壁
         "bombFourDirections": true, // 使用炸弹是否四个方向都会炸；如果false则只炸面前的怪物（即和圣锤等价）
         "bigKeyIsBox": false, // 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙
+        /****** 怪物相关 ******/
+        "enableNegativeDamage": true, // 是否支持负伤害（回血）
+        "zoneSquare": false, // 领域类型。如果此项为true则为九宫格伤害，为false则为十字伤害
         /****** 系统相关 ******/
         "startDirectly": false, // 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面
+        "canOpenBattleAnimate": true, // 是否允许用户开启战斗过程；如果此项为false，则下面两项均强制视为false
         "showBattleAnimateConfirm": true, // 是否在游戏开始时提供“是否开启战斗动画”的选项
         "battleAnimate": true, // 是否默认显示战斗动画；用户可以手动在菜单栏中开关
         "displayEnemyDamage": true, // 是否地图怪物显伤；用户可以手动在菜单栏中开关

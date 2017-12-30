@@ -5,10 +5,10 @@ function enemys() {
 enemys.prototype.init = function () {
     // 怪物属性初始化定义：
     this.enemys = {
-        'greenSlime': {'name': '绿头怪', 'hp': 100, 'atk': 120, 'def': 0, 'money': 1, 'experience': 1, 'special': 0, 'point': 2},
+        'greenSlime': {'name': '绿头怪', 'hp': 100, 'atk': 120, 'def': 0, 'money': 1, 'experience': 1, 'special': [1,5,7,8]},
         'redSlime': {'name': '红头怪', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
         'blackSlime': {'name': '青头怪', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
-        'slimelord': {'name': '怪王', 'hp': 100, 'atk': 120, 'def': 0, 'money': 10, 'experience': 0, 'special': 9},
+        'slimelord': {'name': '怪王', 'hp': 100, 'atk': 120, 'def': 0, 'money': 10, 'experience': 0, 'special': [1,9]},
         'bat': {'name': '小蝙蝠', 'hp': 100, 'atk': 120, 'def': 0, 'money': 2, 'experience': 0, 'special': 1},
         'bigBat': {'name': '大蝙蝠', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
         'redBat': {'name': '红蝙蝠', 'hp': 100, 'atk': 120, 'def': 0, 'money': 5, 'experience': 0, 'special': 4},
@@ -58,7 +58,7 @@ enemys.prototype.init = function () {
         'badPrincess': {'name': '痛苦魔女', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
         'badFairy': {'name': '黑暗仙子', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
         'grayPriest': {'name': '中级法师', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
-        'redSwordsman': {'name': '剑王', 'hp': 100, 'atk': 120, 'def': 0, 'money': 7, 'experience': 0, 'special': 6},
+        'redSwordsman': {'name': '剑王', 'hp': 100, 'atk': 120, 'def': 0, 'money': 7, 'experience': 0, 'special': 6, 'n': 8}, // 多连击需要在后面指定n代表是几连击
         'whiteGhost': {'name': '水银战士', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
         'poisonZombie': {'name': '绿兽人', 'hp': 100, 'atk': 120, 'def': 0, 'money': 13, 'experience': 0, 'special': 12},
         'magicDragon': {'name': '魔龙', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
@@ -104,7 +104,7 @@ enemys.prototype.getSpecialText = function (enemyId) {
     if (this.hasSpecial(special, 18)) text.push("阻击");
     if (this.hasSpecial(special, 19)) text.push("自爆");
     if (this.hasSpecial(special, 20)) text.push("无敌");
-    return text.join("  ");
+    return text;
 }
 
 ////// 获得每个属性的文字提示 //////
@@ -262,6 +262,10 @@ enemys.prototype.getCurrentEnemys = function () {
                 mon_def=core.status.hero.def;
             }
 
+            var specialText = core.enemys.getSpecialText(monsterId);
+            if (specialText.length>=3) specialText = "多属性...";
+            else specialText = specialText.join("  ");
+
             enemys.push({
                 'id': monsterId,
                 'name': monster.name,
@@ -270,7 +274,7 @@ enemys.prototype.getCurrentEnemys = function () {
                 'def': mon_def,
                 'money': monster.money,
                 'experience': monster.experience,
-                'special': core.enemys.getSpecialText(monsterId),
+                'special': specialText,
                 'damage': this.getDamage(monsterId),
                 'critical': this.getCritical(monsterId),
                 'criticalDamage': this.getCriticalDamage(monsterId),

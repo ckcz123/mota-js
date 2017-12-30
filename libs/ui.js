@@ -423,7 +423,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
         hero_mdef=0;
     }
 
-    var specialText = core.enemys.getSpecialText(monsterId);
+    var specialTexts = core.enemys.getSpecialText(monsterId);
 
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
 
@@ -466,7 +466,6 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     core.canvas.ui.textAlign='center';
     core.fillText('ui', core.status.hero.name, left+margin+boxWidth/2, top+margin+heroHeight+40, '#FFD700', 'bold 22px Verdana');
     core.fillText('ui', "怪物", left+right-margin-boxWidth/2, top+margin+32+40);
-    var specialTexts = specialText.split(" ");
     for (var i=0, j=0; i<specialTexts.length;i++) {
         if (specialTexts[i]!='') {
             core.fillText('ui', specialTexts[i], left+right-margin-boxWidth/2, top+margin+32+44+20*(++j), '#FF6A6A', '15px Verdana');
@@ -727,9 +726,9 @@ ui.prototype.drawPagination = function (page, totalPage) {
 
 /**
  * 绘制怪物手册
- * @param page 页数
+ * @param index 怪物索引
  */
-ui.prototype.drawEnemyBook = function (page) {
+ui.prototype.drawEnemyBook = function (index) {
 
     var enemys = core.enemys.getCurrentEnemys();
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
@@ -759,11 +758,12 @@ ui.prototype.drawEnemyBook = function (page) {
         return;
     }
 
+    if (index<0) index=0;
+    if (index>=enemys.length) index=enemys.length-1;
     var perpage = 6;
+    var page=parseInt(index/perpage)+1;
     var totalPage = parseInt((enemys.length - 1) / perpage) + 1;
-    if (page < 1) page = 1;
-    if (page > totalPage) page = totalPage;
-    core.status.event.data = page;
+    core.status.event.data = index;
     var start = (page - 1) * perpage, end = Math.min(page * perpage, enemys.length);
 
     enemys = enemys.slice(start, end);

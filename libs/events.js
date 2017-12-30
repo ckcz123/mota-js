@@ -805,11 +805,11 @@ events.prototype.keyUpAction = function (keycode) {
 events.prototype.clickBook = function(x,y) {
     // 上一页
     if ((x == 3 || x == 4) && y == 12) {
-        core.ui.drawEnemyBook(core.status.event.data - 1);
+        core.ui.drawEnemyBook(core.status.event.data - 6);
     }
     // 下一页
     if ((x == 8 || x == 9) && y == 12) {
-        core.ui.drawEnemyBook(core.status.event.data + 1);
+        core.ui.drawEnemyBook(core.status.event.data + 6);
     }
     // 返回
     if (x>=10 && x<=12 && y==12) {

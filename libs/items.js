@@ -147,7 +147,7 @@ items.prototype.useItem = function (itemId) {
     if (!this.canUseItem(itemId)) return;
     var itemCls = core.material.items[itemId].cls;
 
-    if (itemId=='book') core.ui.drawEnemyBook(1);
+    if (itemId=='book') core.ui.drawEnemyBook(0);
     if (itemId=='fly') core.ui.drawFly(core.status.hero.flyRange.indexOf(core.status.floorId));
     if (itemId == 'earthquake' || itemId == 'bomb' || itemId == 'pickaxe' || itemId=='icePickaxe'
         || itemId == 'snow' || itemId == 'hammer' || itemId=='bigKey') {

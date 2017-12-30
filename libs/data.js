@@ -85,7 +85,7 @@ data.prototype.init = function() {
         "levelUp": [ // 经验升级所需要的数值，是一个数组
             {}, // 第一项为初始等级，可以简单留空，也可以写name
 
-            // 每一个里面可以含有三个参数 name, need, effect
+            // 每一个里面可以含有三个参数 need, name, effect
             // need为所需要的经验数值，是一个正整数。请确保need所需的依次递增
             // name为该等级的名称，也可以省略代表使用系统默认值；本项将显示在状态栏中
             // effect为本次升级所执行的操作，可由若干项组成，由分号分开
@@ -139,10 +139,9 @@ data.prototype.init = function() {
     }
     // 系统FLAG，在游戏运行中中请不要修改它。
     this.flags = {
-        /****** 角色状态相关 ******/
-        "enableNegativeDamage": true, // 是否支持负伤害（回血）
-        "enableFloor": false, // 是否在状态栏显示当前楼层
-        "enableLv": true, // 是否在状态栏显示当前等级
+        /****** 状态栏相关 ******/
+        "enableFloor": true, // 是否在状态栏显示当前楼层
+        "enableLv": false, // 是否在状态栏显示当前等级
         "enableMDef": true, // 是否在状态栏及战斗界面显示魔防（护盾）
         "enableMoney": true, // 是否在状态栏、怪物手册及战斗界面显示金币
         "enableExperience": true, // 是否在状态栏、怪物手册及战斗界面显示经验
@@ -154,6 +153,9 @@ data.prototype.init = function() {
         "pickaxeFourDirections": true, // 使用破墙镐是否四个方向都破坏；如果false则只破坏面前的墙壁
         "bombFourDirections": true, // 使用炸弹是否四个方向都会炸；如果false则只炸面前的怪物（即和圣锤等价）
         "bigKeyIsBox": false, // 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙
+        /****** 怪物相关 ******/
+        "enableNegativeDamage": true, // 是否支持负伤害（回血）
+        "zoneSquare": false, // 领域类型。如果此项为true则为九宫格伤害，为false则为十字伤害
         /****** 系统相关 ******/
         "startDirectly": false, // 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面
         "canOpenBattleAnimate": true, // 是否允许用户开启战斗过程；如果此项为false，则下面两项均强制视为false

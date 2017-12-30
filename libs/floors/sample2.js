@@ -8,6 +8,7 @@ main.floors.sample2 = {
     "canFlyTo": false, // 该楼能否被楼传器飞到（不能的话在该楼也不允许使用楼传器）
     "canUseQuickShop": true, // 该层是否允许使用快捷商店
     "defaultGround": "snowGround", // 默认地面的图块ID（terrains中）
+    "color": [255,0,0,0.3], // 可以设置该层的默认背景色调（RGBA）；本项可省略
     "map": [ // 地图数据，需要是13x13，建议使用地图生成器来生成
         [5,    5,    5,    5,    5,    5,    87,   5,    5,    5,    5,    5,    5],
         [5,    4,    4,    4,    4,    1,    0,    1,    4,    4,    4,    4,    5],

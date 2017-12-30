@@ -133,6 +133,17 @@ events.prototype.afterChangeFloor = function (floorId) {
         this.doEvents(core.floors[floorId].firstArrive);
         core.setFlag("visited_"+floorId, true);
     }
+
+    // 播放BGM
+    if (floorId == 'sample0') {
+        core.playBgm('bgm.mp3');
+    }
+    if (floorId == 'sample1') {
+        core.playBgm('star.mid');
+    }
+    if (floorId == 'sample2') {
+        core.playBgm('qianjin.mid');
+    }
 }
 
 ////// 实际事件的处理 //////
@@ -285,11 +296,6 @@ events.prototype.doAction = function() {
                 block = block.block;
                 if (core.isset(block.event) && block.event.trigger=='action') {
                     // 触发
-                    /*
-                    core.status.event = {'id': 'action', 'data': {
-                        'list': core.clone(block.event.data), 'x': block.x, 'y': block.y, 'callback': core.status.event.data.callback
-                    }}
-                    */
                     core.status.event.data.list = core.clone(block.event.data);
                     core.status.event.data.x=block.x;
                     core.status.event.data.y=block.y;
@@ -298,11 +304,21 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "playSound":
-            var name=data.name.split(".");
-            if (name.length==2)
-                core.playSound(name[0],name[1]);
+            core.playSound(data.name);
             this.doAction();
             break;
+        case "playBgm":
+            core.playBgm(data.name);
+            this.doAction();
+            break
+        case "pauseBgm":
+            core.pauseBgm();
+            this.doAction();
+            break
+        case "resumeBgm":
+            core.resumeBgm();
+            this.doAction();
+            break
         case "setValue":
             try {
                 var value=core.calValue(data.value);
@@ -352,8 +368,14 @@ events.prototype.doAction = function() {
             core.events.lose(data.reason);
             break;
         case "function":
-            if (core.isset(data["function"]))
-                data["function"]();
+            var func = data["function"];
+            if (core.isset(func)) {
+                if ((typeof func == "string") && func.indexOf("function")==0) {
+                    eval('('+func+')()');
+                }
+                else if (func instanceof Function)
+                    func();
+            }
             this.doAction();
             break;
         case "update":
@@ -388,7 +410,12 @@ events.prototype.doAction = function() {
 
 ////// 往当前事件列表之前添加一个或多个事件 //////
 events.prototype.insertAction = function (action) {
-    core.unshift(core.status.event.data.list, action)
+    if (core.status.event.id == null) {
+        this.doEvents(action);
+    }
+    else {
+        core.unshift(core.status.event.data.list, action)
+    }
 }
 
 ////// 打开商店 //////
@@ -495,6 +522,30 @@ events.prototype.useItem = function(itemId) {
     else core.drawTip("当前无法使用"+core.material.items[itemId].name);
 }
 
+////// 加点 //////
+events.prototype.addPoint = function (enemy) {
+    var point = enemy.point;
+    if (!core.isset(point) || point<=0) return [];
+
+    // 加点，返回一个choices事件
+    return [
+        {"type": "choices",
+            "choices": [
+                {"text": "生命+"+(200*point), "action": [
+                    {"type": "setValue", "name": "status:hp", "value": "status:hp+"+(200*point)}
+                ]},
+                {"text": "攻击+"+(1*point), "action": [
+                    {"type": "setValue", "name": "status:atk", "value": "status:atk+"+(1*point)}
+                ]},
+                {"text": "防御+"+(2*point), "action": [
+                    {"type": "setValue", "name": "status:def", "value": "status:def+"+(2*point)}
+                ]},
+            ]
+        }
+    ];
+
+}
+
 /****** 打完怪物 ******/
 events.prototype.afterBattle = function(enemyId,x,y,callback) {
 
@@ -518,47 +569,63 @@ events.prototype.afterBattle = function(enemyId,x,y,callback) {
     if (core.enemys.hasSpecial(special, 17)) {
         core.setFlag('hatred', parseInt(core.getFlag('hatred', 0)/2));
     }
+    // 自爆
+    if (core.enemys.hasSpecial(special, 19)) {
+        core.status.hero.hp = 1;
+    }
     // 增加仇恨值
     core.setFlag('hatred', core.getFlag('hatred',0)+core.values.hatred);
     core.updateStatusBar();
 
-    // 如果已有事件正在处理中
-    if (core.status.lockControl) {
-        if (core.isset(callback)) callback();
-        return;
+
+    // 事件的处理
+    var todo = [];
+    // 如果不为阻击，且该点存在，且有事件
+    if (!core.enemys.hasSpecial(special, 18) && core.isset(x) && core.isset(y)) {
+        var event = core.floors[core.status.floorId].afterBattle[x+","+y];
+        if (core.isset(event)) {
+            // 插入事件
+            core.unshift(todo, event);
+        }
+    }
+    // 如果有加点
+    var point = core.material.enemys[enemyId].point;
+    if (core.isset(point) && point>0) {
+        core.unshift(todo, core.events.addPoint(core.material.enemys[enemyId]));
     }
 
-    // 检查处理后的事件。
-    var event = core.floors[core.status.floorId].afterBattle[x+","+y];
-    if (core.isset(event)) {
-        core.events.doEvents(event, x, y, callback);
+    // 如果事件不为空，将其插入
+    if (todo.length>0) {
+        this.insertAction(todo);
     }
-    //继续行走
-    else {
+
+    // 如果已有事件正在处理中
+    if (core.status.event.id == null) {
         core.continueAutomaticRoute();
-        if (core.isset(callback)) callback();
     }
+    if (core.isset(callback)) callback();
+
 }
 
 /****** 开完门 ******/
 events.prototype.afterOpenDoor = function(doorId,x,y,callback) {
 
-    // 如果已有事件正在处理中
-    if (core.status.lockControl) {
-        if (core.isset(callback)) callback();
-        return;
+    var todo = [];
+    if (core.isset(x) && core.isset(y)) {
+        var event = core.floors[core.status.floorId].afterOpenDoor[x+","+y];
+        if (core.isset(event)) {
+            core.unshift(todo, event);
+        }
     }
 
-    // 检查处理后的事件。
-    var event = core.floors[core.status.floorId].afterOpenDoor[x+","+y];
-    if (core.isset(event)) {
-        core.events.doEvents(event, x, y, callback);
+    if (todo.length>0) {
+        this.insertAction(todo);
     }
-    //继续行走
-    else {
+
+    if (core.status.event.id == null) {
         core.continueAutomaticRoute();
-        if (core.isset(callback)) callback();
     }
+    if (core.isset(callback)) callback();
 }
 
 /****** 经过路障 ******/
@@ -613,6 +680,12 @@ events.prototype.afterChangeLight = function(x,y) {
 
 }
 
+// 使用炸弹/圣锤后的事件
+events.prototype.afterUseBomb = function () {
+
+
+}
+
 // 存档事件前一刻的处理
 events.prototype.beforeSaveData = function(data) {
 
@@ -639,6 +712,13 @@ events.prototype.keyDownCtrl = function () {
     }
 }
 
+events.prototype.clickConfirmBox = function (x,y) {
+    if ((x == 4 || x == 5) && y == 7 && core.isset(core.status.event.data.yes))
+        core.status.event.data.yes();
+    if ((x == 7 || x == 8) && y == 7 && core.isset(core.status.event.data.no))
+        core.status.event.data.no();
+}
+
 events.prototype.keyUpConfirmBox = function (keycode) {
     if (keycode==37) {
         core.status.event.selection=0;
@@ -660,12 +740,6 @@ events.prototype.keyUpConfirmBox = function (keycode) {
             core.status.event.data.no();
         }
     }
-}
-events.prototype.clickConfirmBox = function (x,y) {
-    if ((x == 4 || x == 5) && y == 7 && core.isset(core.status.event.data.yes))
-        core.status.event.data.yes();
-    if ((x == 7 || x == 8) && y == 7 && core.isset(core.status.event.data.no))
-        core.status.event.data.no();
 }
 
 // 正在处理事件时的点击操作...
@@ -731,22 +805,38 @@ events.prototype.keyUpAction = function (keycode) {
 events.prototype.clickBook = function(x,y) {
     // 上一页
     if ((x == 3 || x == 4) && y == 12) {
-        core.ui.drawEnemyBook(core.status.event.data - 1);
+        core.ui.drawEnemyBook(core.status.event.data - 6);
+        return;
     }
     // 下一页
     if ((x == 8 || x == 9) && y == 12) {
-        core.ui.drawEnemyBook(core.status.event.data + 1);
+        core.ui.drawEnemyBook(core.status.event.data + 6);
+        return;
     }
     // 返回
     if (x>=10 && x<=12 && y==12) {
         core.ui.closePanel(true);
+        return;
+    }
+    // 怪物信息
+    // var index = parseInt(y/2);
+    var data = core.status.event.data;
+    if (core.isset(data) && y<12) {
+        var page=parseInt(data/6);
+        var index=6*page+parseInt(y/2);
+        core.ui.drawEnemyBook(index);
+        core.ui.drawBookDetail(index);
     }
     return;
 }
 
 events.prototype.keyDownBook = function (keycode) {
-    if (keycode==37 || keycode==38) core.ui.drawEnemyBook(core.status.event.data - 1);
-    else if (keycode==39 || keycode==40) core.ui.drawEnemyBook(core.status.event.data + 1);
+    if (keycode==37) core.ui.drawEnemyBook(core.status.event.data-6);
+    if (keycode==38) core.ui.drawEnemyBook(core.status.event.data-1);
+    if (keycode==39) core.ui.drawEnemyBook(core.status.event.data+6);
+    if (keycode==40) core.ui.drawEnemyBook(core.status.event.data+1);
+    if (keycode==33) core.ui.drawEnemyBook(core.status.event.data-6);
+    if (keycode==34) core.ui.drawEnemyBook(core.status.event.data+6);
     return;
 }
 
@@ -755,9 +845,22 @@ events.prototype.keyUpBook = function (keycode) {
         core.ui.closePanel(true);
         return;
     }
+    if (keycode==13 || keycode==32 || keycode==67) {
+        var data=core.status.event.data;
+        if (core.isset(data)) {
+            this.clickBook(6, 2*(data%6));
+        }
+        return;
+    }
 }
 
-// 飞行器
+events.prototype.clickBookDetail = function (x,y) {
+    core.clearMap('data', 0, 0, 416, 416);
+
+    core.status.event.id = 'book';
+
+}
+
 events.prototype.clickFly = function(x,y) {
     if ((x==10 || x==11) && y==9) core.ui.drawFly(core.status.event.data-1);
     if ((x==10 || x==11) && y==5) core.ui.drawFly(core.status.event.data+1);
@@ -1103,21 +1206,27 @@ events.prototype.keyUpSL = function (keycode) {
 events.prototype.clickSwitchs = function (x,y) {
     if (x<5 || x>7) return;
     var choices = [
-        "背景音乐", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
+        "背景音乐", "背景音效", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
     ];
     var topIndex = 6 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y-topIndex;
         switch (selection) {
             case 0:
-                if (core.musicStatus.isIOS) {
-                    core.drawTip("iOS设备不支持播放音乐");
-                    return;
-                }
-                core.changeSoundStatus();
+                core.musicStatus.bgmStatus = !core.musicStatus.bgmStatus;
+                if (core.musicStatus.bgmStatus)
+                    core.resumeBgm();
+                else
+                    core.pauseBgm();
+                core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
                 core.ui.drawSwitchs();
                 break;
             case 1:
+                core.musicStatus.soundStatus = !core.musicStatus.soundStatus;
+                core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
+                core.ui.drawSwitchs();
+                break;
+            case 2:
                 if (!core.flags.canOpenBattleAnimate) {
                     core.drawTip("本塔不能开启战斗动画！");
                 }
@@ -1127,19 +1236,19 @@ events.prototype.clickSwitchs = function (x,y) {
                     core.ui.drawSwitchs();
                 }
                 break;
-            case 2:
+            case 3:
                 core.flags.displayEnemyDamage=!core.flags.displayEnemyDamage;
                 core.updateFg();
                 core.setLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
                 core.ui.drawSwitchs();
                 break;
-            case 3:
+            case 4:
                 core.flags.displayExtraDamage=!core.flags.displayExtraDamage;
                 core.updateFg();
                 core.setLocalStorage('extraDamage', core.flags.displayExtraDamage);
                 core.ui.drawSwitchs();
                 break;
-            case 4:
+            case 5:
                 core.status.event.selection=0;
                 core.ui.drawSettings(false);
                 break;
@@ -1149,7 +1258,7 @@ events.prototype.clickSwitchs = function (x,y) {
 
 events.prototype.keyDownSwitchs = function (keycode) {
     var choices = [
-        "背景音乐", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
+        "背景音乐", "背景音效", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
     ];
     if (keycode==38) {
         core.status.event.selection--;
@@ -1170,7 +1279,7 @@ events.prototype.keyUpSwitchs = function (keycode) {
         return;
     }
     var choices = [
-        "背景音乐", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
+        "背景音乐", "背景音效", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
     ];
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);

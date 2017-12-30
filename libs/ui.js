@@ -334,7 +334,8 @@ ui.prototype.drawSwitchs = function() {
     core.status.event.id = 'switchs';
 
     var choices = [
-        "背景音乐："+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
+        "背景音乐："+(core.musicStatus.bgmStatus ? "[ON]" : "[OFF]"),
+        "背景音效："+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
         "战斗动画： " + (core.flags.battleAnimate ? "[ON]" : "[OFF]"),
         "怪物显伤： " + (core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
         "领域显伤： " + (core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
@@ -389,12 +390,12 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
     hero_hp -= core.enemys.getExtraDamage(monster);
 
-    if (core.enemys.hasSpecial(mon_special, 2)) hero_def=0; // 魔攻
-    if (core.enemys.hasSpecial(mon_special, 3) && mon_def<hero_atk) mon_def=hero_atk-1; // 坚固
     if (core.enemys.hasSpecial(mon_special, 10)) { // 模仿
         mon_atk=hero_atk;
         mon_def=hero_def;
     }
+    if (core.enemys.hasSpecial(mon_special, 2)) hero_def=0; // 魔攻
+    if (core.enemys.hasSpecial(mon_special, 3) && mon_def<hero_atk) mon_def=hero_atk-1; // 坚固
 
     // 实际操作
     var turn = 0; // 0为勇士攻击
@@ -404,7 +405,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     var turns = 2;
     if (core.enemys.hasSpecial(mon_special, 4)) turns=3;
     if (core.enemys.hasSpecial(mon_special, 5)) turns=4;
-    if (core.enemys.hasSpecial(mon_special, 6)) turns=5;
+    if (core.enemys.hasSpecial(mon_special, 6)) turns=1+(monster.n||4);
 
 
     // 初始伤害
@@ -422,7 +423,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
         hero_mdef=0;
     }
 
-    var specialText = core.enemys.getSpecialText(monsterId);
+    var specialTexts = core.enemys.getSpecialText(monsterId);
 
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
 
@@ -465,7 +466,6 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     core.canvas.ui.textAlign='center';
     core.fillText('ui', core.status.hero.name, left+margin+boxWidth/2, top+margin+heroHeight+40, '#FFD700', 'bold 22px Verdana');
     core.fillText('ui', "怪物", left+right-margin-boxWidth/2, top+margin+32+40);
-    var specialTexts = specialText.split(" ");
     for (var i=0, j=0; i<specialTexts.length;i++) {
         if (specialTexts[i]!='') {
             core.fillText('ui', specialTexts[i], left+right-margin-boxWidth/2, top+margin+32+44+20*(++j), '#FF6A6A', '15px Verdana');
@@ -571,7 +571,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     core.fillText("ui", "S", right_start-8, 208+15, "#FFFFFF", "italic bold 40px Verdana");
 
     var battleInterval = setInterval(function() {
-        core.playSound("attack", "ogg");
+        core.playSound("attack.ogg");
 
         if (turn==0) {
             // 勇士攻击
@@ -726,9 +726,9 @@ ui.prototype.drawPagination = function (page, totalPage) {
 
 /**
  * 绘制怪物手册
- * @param page 页数
+ * @param index 怪物索引
  */
-ui.prototype.drawEnemyBook = function (page) {
+ui.prototype.drawEnemyBook = function (index) {
 
     var enemys = core.enemys.getCurrentEnemys();
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
@@ -758,11 +758,12 @@ ui.prototype.drawEnemyBook = function (page) {
         return;
     }
 
+    if (index<0) index=0;
+    if (index>=enemys.length) index=enemys.length-1;
     var perpage = 6;
+    var page=parseInt(index/perpage)+1;
     var totalPage = parseInt((enemys.length - 1) / perpage) + 1;
-    if (page < 1) page = 1;
-    if (page > totalPage) page = totalPage;
-    core.status.event.data = page;
+    core.status.event.data = index;
     var start = (page - 1) * perpage, end = Math.min(page * perpage, enemys.length);
 
     enemys = enemys.slice(start, end);
@@ -834,9 +835,75 @@ ui.prototype.drawEnemyBook = function (page) {
         core.fillText('ui', '1防', 335, 62 * i + 68, '#DDDDDD', '13px Verdana');
         core.fillText('ui', enemy.defDamage, 365, 62 * i + 68, '#DDDDDD', 'bold 13px Verdana');
 
+        if (index == start+i) {
+            core.strokeRect('ui', 10, 62 * i + 13, 416-10*2,  62, '#FFD700');
+        }
+
     }
     core.setBoxAnimate();
     this.drawPagination(page, totalPage);
+}
+
+ui.prototype.drawBookDetail = function (index) {
+    var enemys = core.enemys.getCurrentEnemys();
+    if (enemys.length==0) return;
+    if (index<0) index=0;
+    if (index>=enemys.length) index=enemys.length-1;
+
+    var enemy = enemys[index];
+    var enemyId=enemy.id;
+    var hints=core.enemys.getSpecialHint(core.enemys.getEnemys(enemyId));
+
+    if (hints.length==0) {
+        core.drawTip("该怪物无特殊属性！");
+        return;
+    }
+    var content=hints.join("\n");
+
+    core.status.event.id = 'book-detail';
+    clearInterval(core.interval.tipAnimate);
+
+    core.clearMap('data', 0, 0, 416, 416);
+    core.setOpacity('data', 1);
+
+    var left=10, right=416-2*left;
+    var content_left = left + 25;
+
+    var validWidth = right-(content_left-left)-13;
+    var contents = core.splitLines("data", content, validWidth, '16px Verdana');
+
+    var height = 416 - 10 - Math.min(416-24*(contents.length+1)-65, 250);
+    var top = (416-height)/2, bottom = height;
+
+    // var left = 97, top = 64, right = 416 - 2 * left, bottom = 416 - 2 * top;
+    core.setAlpha('data', 0.9);
+    core.fillRect('data', left, top, right, bottom, '#000000');
+    core.setAlpha('data', 1);
+    core.strokeRect('data', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+
+    // 名称
+    core.canvas.data.textAlign = "left";
+
+    core.fillText('data', enemy.name, content_left, top + 30, '#FFD700', 'bold 22px Verdana');
+    var content_top = top + 57;
+
+    for (var i=0;i<contents.length;i++) {
+        // core.fillText('data', contents[i], content_left, content_top, '#FFFFFF', '16px Verdana');
+        var text=contents[i];
+        var index=text.indexOf("：");
+        if (index>=0) {
+            var x1 = text.substring(0, index+1);
+            core.fillText('data', x1, content_left, content_top, '#FF6A6A', 'bold 16px Verdana');
+            var len=core.canvas.data.measureText(x1).width;
+            core.fillText('data', text.substring(index+1), content_left+len, content_top, '#FFFFFF', '16px Verdana');
+        }
+        else {
+            core.fillText('data', contents[i], content_left, content_top, '#FFFFFF', '16px Verdana');
+        }
+        content_top+=24;
+    }
+
+    core.fillText('data', '<点击任意位置继续>', 270, top+height-13, '#CCCCCC', '13px Verdana');
 }
 
 /**

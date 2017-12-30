@@ -1,6 +1,7 @@
 function maps() {}
 maps.prototype.init = function() {}
 
+////// 加载某个楼层（从剧本或存档中） //////
 maps.prototype.loadFloor = function (floorId, map) {
     var floor = core.floors[floorId];
     var content = {};
@@ -44,6 +45,7 @@ maps.prototype.loadFloor = function (floorId, map) {
     return content;
 }
 
+////// 数字和ID的对应关系 //////
 maps.prototype.getBlock = function (x, y, id) {
     var enable=null;
     id = ""+id;
@@ -80,11 +82,11 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 14) tmp.event = {'cls': 'animates', 'id': 'curseNet', 'noPass': false, 'trigger': 'passNet'}; // 咒网
     if (id == 15) tmp.event = {'cls': 'animates', 'id': 'water', 'noPass': true}; // 水
     // 在这里添加更多地形
-    // 如果空地不足，可以从180以后开始继续放，只要不和现有的数字冲突即可
+    // 如果空位不足，可以从180以后开始继续放，只要不和现有的数字冲突即可
 
     // Autotile
     if (id == 20) tmp.event = {'cls': 'autotile', 'id': 'autotile', 'noPass': true}; // autotile
-    // 更多的autotile从151到160，只要不和现有的数字冲突即可
+    // 更多的autotile从151到160等，只要不和现有的数字冲突即可
     if (id == 151) tmp.event = {'cls': 'autotile', 'id': 'autotile1', 'noPass': true};
     if (id == 152) tmp.event = {'cls': 'autotile', 'id': 'autotile2', 'noPass': true};
     if (id == 153) tmp.event = {'cls': 'autotile', 'id': 'autotile3', 'noPass': true};
@@ -256,6 +258,7 @@ maps.prototype.getBlock = function (x, y, id) {
     return tmp;
 }
 
+////// 向该楼层添加剧本的自定义事件 //////
 maps.prototype.addEvent = function (block, x, y, event, ground) {
     if (!core.isset(event)) return;
     if (!core.isset(block.event)) { // 本身是空地？
@@ -291,11 +294,13 @@ maps.prototype.addEvent = function (block, x, y, event, ground) {
     }
 }
 
+////// 向该楼层添加剧本的楼层转换事件 //////
 maps.prototype.addChangeFloor = function (block, x, y, event, ground) {
     if (!core.isset(event)) return;
     this.addEvent(block, x, y, {"trigger": "changeFloor", "data": event}, ground);
 }
 
+////// 初始化所有地图 //////
 maps.prototype.initMaps = function (floorIds) {
     var maps = {};
     for (var i=0;i<floorIds.length;i++) {
@@ -305,6 +310,7 @@ maps.prototype.initMaps = function (floorIds) {
     return maps;
 }
 
+////// 将当前地图重新变成数字，以便于存档 //////
 maps.prototype.save = function(maps, floorId) {
     if (!core.isset(floorId)) {
         var map = {};
@@ -334,6 +340,7 @@ maps.prototype.save = function(maps, floorId) {
     return blocks;
 }
 
+////// 将存档中的地图信息重新读取出来 //////
 maps.prototype.load = function (data, floorId) {
     if (floorId == undefined) {
         var map = {};

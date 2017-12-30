@@ -2,6 +2,7 @@ function items() {
 
 }
 
+////// 初始化 //////
 items.prototype.init = function () {
     this.items = {
         // 钥匙
@@ -59,7 +60,7 @@ items.prototype.init = function () {
     }
 }
 
-// 初始化道具
+////// 获得所有道具 //////
 items.prototype.getItems = function () {
     // 大黄门钥匙？钥匙盒？
     if (core.flags.bigKeyIsBox)
@@ -74,7 +75,7 @@ items.prototype.getItems = function () {
 
 main.instance.items = new items();
 
-
+////// “即捡即用类”道具的使用效果 //////
 items.prototype.getItemEffect = function(itemId, itemNum) {
     var itemCls = core.material.items[itemId].cls;
     // 消耗品
@@ -115,6 +116,7 @@ items.prototype.getItemEffect = function(itemId, itemNum) {
     }
 }
 
+////// “即捡即用类”道具的文字提示 //////
 items.prototype.getItemEffectTip = function(itemId) {
     if (itemId === 'redJewel') return "，攻击+"+core.values.redJewel;
     if (itemId === 'blueJewel') return "，防御+"+core.values.blueJewel;
@@ -140,14 +142,12 @@ items.prototype.getItemEffectTip = function(itemId) {
     return "";
 }
 
-
-
+////// 使用道具 //////
 items.prototype.useItem = function (itemId) {
-    // 使用道具
     if (!this.canUseItem(itemId)) return;
     var itemCls = core.material.items[itemId].cls;
 
-    if (itemId=='book') core.ui.drawEnemyBook(0);
+    if (itemId=='book') core.ui.drawBook(0);
     if (itemId=='fly') core.ui.drawFly(core.status.hero.flyRange.indexOf(core.status.floorId));
     if (itemId == 'earthquake' || itemId == 'bomb' || itemId == 'pickaxe' || itemId=='icePickaxe'
         || itemId == 'snow' || itemId == 'hammer' || itemId=='bigKey') {
@@ -198,11 +198,10 @@ items.prototype.useItem = function (itemId) {
         delete core.status.hero.items[itemCls][itemId];
 }
 
+////// 当前能否使用道具 //////
 items.prototype.canUseItem = function (itemId) {
     // 没有道具
     if (!core.hasItem(itemId)) return false;
-
-    var itemCls = core.material.items[itemId].cls;
 
     if (itemId == 'book') return true;
     if (itemId == 'fly') return core.status.hero.flyRange.indexOf(core.status.floorId)>=0;

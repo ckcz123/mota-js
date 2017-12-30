@@ -5,7 +5,7 @@ function enemys() {
 enemys.prototype.init = function () {
     // 怪物属性初始化定义：
     this.enemys = {
-        'greenSlime': {'name': '绿头怪', 'hp': 100, 'atk': 120, 'def': 0, 'money': 1, 'experience': 1, 'special': 0},
+        'greenSlime': {'name': '绿头怪', 'hp': 100, 'atk': 120, 'def': 0, 'money': 1, 'experience': 1, 'special': 0, 'point': 2},
         'redSlime': {'name': '红头怪', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
         'blackSlime': {'name': '青头怪', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
         'slimelord': {'name': '怪王', 'hp': 100, 'atk': 120, 'def': 0, 'money': 10, 'experience': 0, 'special': 9},
@@ -104,6 +104,34 @@ enemys.prototype.getSpecialText = function (enemyId) {
     if (this.hasSpecial(special, 19)) text.push("自爆");
     if (this.hasSpecial(special, 20)) text.push("无敌");
     return text.join("  ");
+}
+
+////// 获得每个属性的文字提示 //////
+enemys.prototype.getSpecialHint = function (enemy, special) {
+    switch (special) {
+        case 1: return "怪物首先攻击";
+        case 2: return "怪物无视勇士的魔防";
+        case 3: return "勇士每回合最多只能对怪物造成1点伤害";
+        case 4: return "怪物每回合攻击2次";
+        case 5: return "怪物每回合攻击3次";
+        case 6: return "怪物每回合攻击4次";
+        case 7: return "战斗前，怪物附加角色防御的"+parseInt(100*core.values.breakArmor)+"%作为伤害";
+        case 8: return "战斗时，怪物每回合附加角色攻击的"+parseInt(100*core.values.counterAttack)+"%作为伤害，无视角色防御";
+        case 9: return "战斗前，怪物附加勇士魔防的"+core.values.purify+"倍作为伤害";
+        case 10: return "怪物的攻防和勇士攻防相等";
+        case 11: return "战斗前，怪物首先吸取角色的"+parseInt(100*enemy.value)+"%生命作为伤害";
+        case 12: return "战斗后，勇士陷入中毒状态，每一步损失生命"+core.values.poisonDamage+"点";
+        case 13: return "战斗后，勇士陷入衰弱状态，攻防暂时下降"+core.values.weakValue+"点";
+        case 14: return "战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验";
+        case 15: return "经过怪物周围"+(enemy.range||1)+"格时自动减生命"+enemy.damage+"点";
+        case 16: return "经过两只相同的怪物中间，勇士生命值变成一半";
+        case 17: return "战斗前，怪物附加之前积累的仇恨值作为伤害；战斗后，释放一半的仇恨值。（每杀死一个怪物获得"+core.values.hatred+"点仇恨值）";
+        case 18: return "经过怪物的十字领域时自动减生命"+enemy.value+"点，同时怪物后退一格";
+        case 19: return "战斗后勇士的生命值变成1";
+        case 20: return "勇士无法打败怪物，除非拥有十字架";
+        default: break;
+    }
+    return ""
 }
 
 enemys.prototype.getDamage = function (monsterId) {

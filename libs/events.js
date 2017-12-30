@@ -410,7 +410,12 @@ events.prototype.doAction = function() {
 
 ////// 往当前事件列表之前添加一个或多个事件 //////
 events.prototype.insertAction = function (action) {
-    core.unshift(core.status.event.data.list, action)
+    if (core.status.event.id == null) {
+        this.doEvents(action);
+    }
+    else {
+        core.unshift(core.status.event.data.list, action)
+    }
 }
 
 ////// 打开商店 //////
@@ -517,6 +522,30 @@ events.prototype.useItem = function(itemId) {
     else core.drawTip("当前无法使用"+core.material.items[itemId].name);
 }
 
+////// 加点 //////
+events.prototype.addPoint = function (enemy) {
+    var point = enemy.point;
+    if (!core.isset(point) || point<=0) return [];
+
+    // 加点，返回一个choices事件
+    return [
+        {"type": "choices",
+            "choices": [
+                {"text": "生命+"+(200*point), "action": [
+                    {"type": "setValue", "name": "status:hp", "value": "status:hp+"+(200*point)}
+                ]},
+                {"text": "攻击+"+(1*point), "action": [
+                    {"type": "setValue", "name": "status:atk", "value": "status:atk+"+(1*point)}
+                ]},
+                {"text": "防御+"+(2*point), "action": [
+                    {"type": "setValue", "name": "status:def", "value": "status:def+"+(2*point)}
+                ]},
+            ]
+        }
+    ];
+
+}
+
 /****** 打完怪物 ******/
 events.prototype.afterBattle = function(enemyId,x,y,callback) {
 
@@ -548,49 +577,55 @@ events.prototype.afterBattle = function(enemyId,x,y,callback) {
     core.setFlag('hatred', core.getFlag('hatred',0)+core.values.hatred);
     core.updateStatusBar();
 
+
+    // 事件的处理
+    var todo = [];
+    // 如果不为阻击，且该点存在，且有事件
+    if (!core.enemys.hasSpecial(special, 18) && core.isset(x) && core.isset(y)) {
+        var event = core.floors[core.status.floorId].afterBattle[x+","+y];
+        if (core.isset(event)) {
+            // 插入事件
+            core.unshift(todo, event);
+        }
+    }
+    // 如果有加点
+    var point = core.material.enemys[enemyId].point;
+    if (core.isset(point) && point>0) {
+        core.unshift(todo, core.events.addPoint(core.material.enemys[enemyId]));
+    }
+
+    // 如果事件不为空，将其插入
+    if (todo.length>0) {
+        this.insertAction(todo);
+    }
+
     // 如果已有事件正在处理中
-    if (core.status.lockControl) {
-        if (core.isset(callback)) callback();
-        return;
-    }
-
-    // 阻击：不处理任何事件
-    if (core.enemys.hasSpecial(special, 18)) {
-        if (core.isset(callback)) callback();
-        return;
-    }
-
-    // 检查处理后的事件。
-    var event = core.floors[core.status.floorId].afterBattle[x+","+y];
-    if (core.isset(event)) {
-        core.events.doEvents(event, x, y, callback);
-    }
-    //继续行走
-    else {
+    if (core.status.event.id == null) {
         core.continueAutomaticRoute();
     }
     if (core.isset(callback)) callback();
+
 }
 
 /****** 开完门 ******/
 events.prototype.afterOpenDoor = function(doorId,x,y,callback) {
 
-    // 如果已有事件正在处理中
-    if (core.status.lockControl) {
-        if (core.isset(callback)) callback();
-        return;
+    var todo = [];
+    if (core.isset(x) && core.isset(y)) {
+        var event = core.floors[core.status.floorId].afterOpenDoor[x+","+y];
+        if (core.isset(event)) {
+            core.unshift(todo, event);
+        }
     }
 
-    // 检查处理后的事件。
-    var event = core.floors[core.status.floorId].afterOpenDoor[x+","+y];
-    if (core.isset(event)) {
-        core.events.doEvents(event, x, y, callback);
+    if (todo.length>0) {
+        this.insertAction(todo);
     }
-    //继续行走
-    else {
+
+    if (core.status.event.id == null) {
         core.continueAutomaticRoute();
-        if (core.isset(callback)) callback();
     }
+    if (core.isset(callback)) callback();
 }
 
 /****** 经过路障 ******/

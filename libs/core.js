@@ -1700,6 +1700,27 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
                 core.statusBar.floor.style.fontStyle = 'italic';
             else core.statusBar.floor.style.fontStyle = 'normal';
 
+            // 不存在事件时，更改画面色调
+            if (core.status.event.id == null) {
+                // 默认画面色调
+                if (core.isset(core.floors[floorId].color)) {
+                    var color = core.floors[floorId].color;
+
+                    // 直接变色
+                    var nowR = parseInt(color[0]), nowG = parseInt(color[1]), nowB = parseInt(color[2]);
+                    var toRGB = "#"+((1<<24)+(nowR<<16)+(nowG<<8)+nowB).toString(16).slice(1);
+                    core.dom.curtain.style.background = toRGB;
+                    if (core.isset(color[3]))
+                        core.dom.curtain.style.opacity = color[3];
+                    else core.dom.curtain.style.opacity=1;
+                    core.status.curtainColor = color;
+                }
+                else {
+                    core.dom.curtain.style.background = "#000000";
+                    core.dom.curtain.style.opacity = 0;
+                }
+            }
+
             core.drawMap(floorId, function () {
                 setTimeout(function() {
                     core.mapChangeAnimate('hide', time/4, function () {
@@ -1904,7 +1925,7 @@ core.prototype.drawAutotile = function (floorId, canvas, autotileMaps, left, top
     }
 
     var isAutotile = function(x, y) {
-        if (x<0 || x>12 || y<0 || y>12) return 0;
+        if (x<0 || x>12 || y<0 || y>12) return 1;
         return autotileMaps[13*x+y]==autotileId?1:0;
     }
     for (var xx=0;xx<13;xx++) {
@@ -2634,7 +2655,8 @@ core.prototype.snipe = function (snipes) {
 }
 
 core.prototype.setFg = function(color, time, callback) {
-    time = time || 750;
+    if (!core.isset(time)) time=750;
+    if (time<=0) time=0;
 
     if (!core.isset(core.status.curtainColor)) {
         core.status.curtainColor = [0,0,0,0];
@@ -2648,6 +2670,18 @@ core.prototype.setFg = function(color, time, callback) {
         color.push(1);
     if (color[3]<0) color[3]=0;
     if (color[3]>1) color[3]=1;
+
+
+    if (time==0) {
+        // 直接变色
+        var nowR = parseInt(color[0]), nowG = parseInt(color[1]), nowB = parseInt(color[2]);
+        var toRGB = "#"+((1<<24)+(nowR<<16)+(nowG<<8)+nowB).toString(16).slice(1);
+        core.dom.curtain.style.background = toRGB;
+        core.dom.curtain.style.opacity = color[3];
+        core.status.curtainColor = color;
+        if (core.isset(callback)) callback();
+        return;
+    }
 
     var step=0;
     var changeAnimate = setInterval(function() {

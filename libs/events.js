@@ -806,27 +806,50 @@ events.prototype.clickBook = function(x,y) {
     // 上一页
     if ((x == 3 || x == 4) && y == 12) {
         core.ui.drawEnemyBook(core.status.event.data - 6);
+        return;
     }
     // 下一页
     if ((x == 8 || x == 9) && y == 12) {
         core.ui.drawEnemyBook(core.status.event.data + 6);
+        return;
     }
     // 返回
     if (x>=10 && x<=12 && y==12) {
         core.ui.closePanel(true);
+        return;
+    }
+    // 怪物信息
+    // var index = parseInt(y/2);
+    var data = core.status.event.data;
+    if (core.isset(data) && y<12) {
+        var page=parseInt(data/6);
+        var index=6*page+parseInt(y/2);
+        core.ui.drawEnemyBook(index);
+        core.ui.drawEnemyDetail(index);
     }
     return;
 }
 
 events.prototype.keyDownBook = function (keycode) {
-    if (keycode==37 || keycode==38) core.ui.drawEnemyBook(core.status.event.data - 1);
-    else if (keycode==39 || keycode==40) core.ui.drawEnemyBook(core.status.event.data + 1);
+    if (keycode==37) core.ui.drawEnemyBook(core.status.event.data-6);
+    if (keycode==38) core.ui.drawEnemyBook(core.status.event.data-1);
+    if (keycode==39) core.ui.drawEnemyBook(core.status.event.data+6);
+    if (keycode==40) core.ui.drawEnemyBook(core.status.event.data+1);
+    if (keycode==33) core.ui.drawEnemyBook(core.status.event.data-6);
+    if (keycode==34) core.ui.drawEnemyBook(core.status.event.data+6);
     return;
 }
 
 events.prototype.keyUpBook = function (keycode) {
     if (keycode==27 || keycode==88) {
         core.ui.closePanel(true);
+        return;
+    }
+    if (keycode==13 || keycode==32 || keycode==67) {
+        var data=core.status.event.data;
+        if (core.isset(data)) {
+            this.clickBook(6, 2*(data%6));
+        }
         return;
     }
 }

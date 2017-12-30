@@ -109,27 +109,39 @@ enemys.prototype.getSpecialText = function (enemyId) {
 
 ////// 获得每个属性的文字提示 //////
 enemys.prototype.getSpecialHint = function (enemy, special) {
+    if (!core.isset(special)) {
+        var hints = [];
+        for (var i=1;i<100;i++) {
+            if (this.hasSpecial(enemy.special, i)) {
+                var hint=this.getSpecialHint(enemy, i);
+                if (hint!='')
+                    hints.push(hint);
+            }
+        }
+        return hints;
+    }
+
     switch (special) {
-        case 1: return "怪物首先攻击";
-        case 2: return "怪物无视勇士的魔防";
-        case 3: return "勇士每回合最多只能对怪物造成1点伤害";
-        case 4: return "怪物每回合攻击2次";
-        case 5: return "怪物每回合攻击3次";
-        case 6: return "怪物每回合攻击"+(enemy.n||4)+"次";
-        case 7: return "战斗前，怪物附加角色防御的"+parseInt(100*core.values.breakArmor)+"%作为伤害";
-        case 8: return "战斗时，怪物每回合附加角色攻击的"+parseInt(100*core.values.counterAttack)+"%作为伤害，无视角色防御";
-        case 9: return "战斗前，怪物附加勇士魔防的"+core.values.purify+"倍作为伤害";
-        case 10: return "怪物的攻防和勇士攻防相等";
-        case 11: return "战斗前，怪物首先吸取角色的"+parseInt(100*enemy.value)+"%生命作为伤害";
-        case 12: return "战斗后，勇士陷入中毒状态，每一步损失生命"+core.values.poisonDamage+"点";
-        case 13: return "战斗后，勇士陷入衰弱状态，攻防暂时下降"+core.values.weakValue+"点";
-        case 14: return "战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验";
-        case 15: return "经过怪物周围"+(enemy.range||1)+"格时自动减生命"+enemy.damage+"点";
-        case 16: return "经过两只相同的怪物中间，勇士生命值变成一半";
-        case 17: return "战斗前，怪物附加之前积累的仇恨值作为伤害；战斗后，释放一半的仇恨值。（每杀死一个怪物获得"+core.values.hatred+"点仇恨值）";
-        case 18: return "经过怪物的十字领域时自动减生命"+enemy.value+"点，同时怪物后退一格";
-        case 19: return "战斗后勇士的生命值变成1";
-        case 20: return "勇士无法打败怪物，除非拥有十字架";
+        case 1: return "先攻：怪物首先攻击";
+        case 2: return "魔攻：怪物无视勇士的魔防";
+        case 3: return "坚固：勇士每回合最多只能对怪物造成1点伤害";
+        case 4: return "2连击：怪物每回合攻击2次";
+        case 5: return "3连击：怪物每回合攻击3次";
+        case 6: return (enemy.n||4)+"连击： 怪物每回合攻击"+(enemy.n||4)+"次";
+        case 7: return "破甲：战斗前，怪物附加角色防御的"+parseInt(100*core.values.breakArmor)+"%作为伤害";
+        case 8: return "反击：战斗时，怪物每回合附加角色攻击的"+parseInt(100*core.values.counterAttack)+"%作为伤害，无视角色防御";
+        case 9: return "净化：战斗前，怪物附加勇士魔防的"+core.values.purify+"倍作为伤害";
+        case 10: return "模仿：怪物的攻防和勇士攻防相等";
+        case 11: return "吸血：战斗前，怪物首先吸取角色的"+parseInt(100*enemy.value)+"%生命作为伤害";
+        case 12: return "中毒：战斗后，勇士陷入中毒状态，每一步损失生命"+core.values.poisonDamage+"点";
+        case 13: return "衰弱：战斗后，勇士陷入衰弱状态，攻防暂时下降"+core.values.weakValue+"点";
+        case 14: return "诅咒：战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验";
+        case 15: return "领域：经过怪物周围"+(enemy.range||1)+"格时自动减生命"+enemy.damage+"点";
+        case 16: return "夹击：经过两只相同的怪物中间，勇士生命值变成一半";
+        case 17: return "仇恨：战斗前，怪物附加之前积累的仇恨值作为伤害；战斗后，释放一半的仇恨值。（每杀死一个怪物获得"+core.values.hatred+"点仇恨值）";
+        case 18: return "阻击：经过怪物的十字领域时自动减生命"+enemy.value+"点，同时怪物后退一格";
+        case 19: return "自爆：战斗后勇士的生命值变成1";
+        case 20: return "无敌：勇士无法打败怪物，除非拥有十字架";
         default: break;
     }
     return ""

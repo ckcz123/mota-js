@@ -825,7 +825,7 @@ events.prototype.clickBook = function(x,y) {
         var page=parseInt(data/6);
         var index=6*page+parseInt(y/2);
         core.ui.drawEnemyBook(index);
-        core.ui.drawEnemyDetail(index);
+        core.ui.drawBookDetail(index);
     }
     return;
 }
@@ -852,6 +852,13 @@ events.prototype.keyUpBook = function (keycode) {
         }
         return;
     }
+}
+
+events.prototype.clickBookDetail = function (x,y) {
+    core.clearMap('data', 0, 0, 416, 416);
+
+    core.status.event.id = 'book';
+
 }
 
 events.prototype.clickFly = function(x,y) {

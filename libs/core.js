@@ -614,6 +614,10 @@ core.prototype.keyUp = function(keyCode) {
             core.events.keyUpBook(keyCode);
             return;
         }
+        if (core.status.event.id=='book-detail' && (keyCode==13 || keyCode==32 || keyCode==67)) {
+            core.events.clickBookDetail();
+            return;
+        }
         if (core.status.event.id=='fly') {
             core.events.keyUpFly(keyCode);
             return;
@@ -853,6 +857,12 @@ core.prototype.onclick = function (x, y, stepPostfix) {
     // 怪物手册
     if (core.status.event.id == 'book') {
         core.events.clickBook(x,y);
+        return;
+    }
+
+    // 怪物详细信息
+    if (core.status.event.id == 'book-detail') {
+        core.events.clickBookDetail(x,y);
         return;
     }
 
@@ -2081,7 +2091,7 @@ core.prototype.nearStair = function() {
 core.prototype.enemyExists = function (x, y, id,floorId) {
     var block = core.getBlock(x,y,floorId);
     if (block==null) return false;
-    return block.block.event.cls=='enemys' && block.block.event.id==id;
+    return block.block.event.cls=='enemys' && (core.isset(id)?block.block.event.id==id:true);
 }
 
 core.prototype.getBlock = function (x, y, floorId, needEnable) {

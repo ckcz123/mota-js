@@ -844,7 +844,7 @@ ui.prototype.drawEnemyBook = function (index) {
     this.drawPagination(page, totalPage);
 }
 
-ui.prototype.drawEnemyDetail = function (index) {
+ui.prototype.drawBookDetail = function (index) {
     var enemys = core.enemys.getCurrentEnemys();
     if (enemys.length==0) return;
     if (index<0) index=0;

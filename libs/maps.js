@@ -89,7 +89,6 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 152) tmp.event = {'cls': 'autotile', 'id': 'autotile2', 'noPass': true};
     if (id == 153) tmp.event = {'cls': 'autotile', 'id': 'autotile3', 'noPass': true};
 
-
     ////////////////////////// 物品部分 //////////////////////////
 
     // 21-80 物品

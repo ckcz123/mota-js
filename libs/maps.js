@@ -82,20 +82,12 @@ maps.prototype.getBlock = function (x, y, id) {
     // 在这里添加更多地形
     // 如果空地不足，可以从180以后开始继续放，只要不和现有的数字冲突即可
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 2d9278f8f68fe9b269b14ae545ac03f67f572815
     // Autotile
     if (id == 20) tmp.event = {'cls': 'autotile', 'id': 'autotile', 'noPass': true}; // autotile
     // 更多的autotile从151到160，只要不和现有的数字冲突即可
     if (id == 151) tmp.event = {'cls': 'autotile', 'id': 'autotile1', 'noPass': true};
     if (id == 152) tmp.event = {'cls': 'autotile', 'id': 'autotile2', 'noPass': true};
     if (id == 153) tmp.event = {'cls': 'autotile', 'id': 'autotile3', 'noPass': true};
-<<<<<<< HEAD
-=======
-
->>>>>>> 2d9278f8f68fe9b269b14ae545ac03f67f572815
 
     ////////////////////////// 物品部分 //////////////////////////
 

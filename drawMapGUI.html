@@ -373,6 +373,7 @@
 <script src='_server/vendor/vue.min.js'></script>
 <!-- <script src="https://unpkg.com/vue"></script> -->
 <script src='_server/fs.js'></script>
+<script src='_server/editor_file.js'></script>
 <script>
 printf = function(str,weak) {
   var prefix='<span class="result">',postfix='</span>';
@@ -927,6 +928,10 @@ editor.info
 */
 var editor = new editor();
 editor.init();
+editor.main=main;
+editor.core=core;
+editor.fs=fs;
+editor.file=editor_file;
 </script>
 <script type="text/javascript">
 //Vue

@@ -328,8 +328,8 @@
       <table class="row" id='mapRowMark'></table>
       <div class="map" id="mapEdit">
         <canvas class='gameCanvas' id='bg' width='416' height='416' style='z-index:1'></canvas>
-        <canvas class='gameCanvas' id='eventLayer' width='416' height='416' style='z-index:2'></canvas>
-        <canvas class='gameCanvas' id='ui' width='416' height='416' style='z-index:100'></canvas>
+        <canvas class='gameCanvas' id='event' width='416' height='416' style='z-index:2'></canvas>
+        <canvas class='gameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
       </div>
       <div class="tools">
         <div id="tip" v-cloak >
@@ -362,13 +362,111 @@
     </div>
     <div id="right">
       <div id="iconLib">
-        <canvas class='gameCanvas' id='data' width='416' height='416' style='z-index:0'></canvas>
+        <canvas class='gameCanvas' id='edata' width='416' height='416' style='z-index:0'></canvas>
         <div id="selectBox">
             <div id='dataSelection' v-show="isSelected" v-cloak></div>
         </div>
       </div>
     </div>
   </div>
+  <!-- <script>/* -->
+  <div id='gameGroup' style='display:none'>
+    <p id='mainTips'>请稍后...</p>
+    <div id='startPanel'>
+        <div id='startTop'>
+            <div id='startTopProgressBar'>
+                <div id='startTopProgress'></div>
+            </div>
+            <p id='startTopLoadTips'>资源即将开始加载</p>
+        </div>
+        <img id='startBackground' src='images/bg.png'>
+        <!-- 标题界面；可以改style的color使标题改变颜色 -->
+        <p id='startLogo' style="color: black"></p>
+        <div id='startButtonGroup'>
+            <div id='startButtons'>
+                <span class='startButton' id='playGame'>开始游戏</span>
+                <span class='startButton' id='loadGame'>载入游戏</span>
+                <span class='startButton' id='aboutGame'>关于本塔</span>
+            </div>
+            <div id='levelChooseButtons'>
+                <span class='startButton' id='easyLevel'>简单</span>
+                <span class='startButton' id='normalLevel'>普通</span>
+                <span class='startButton' id='hardLevel'>困难</span>
+            </div>
+        </div>
+    </div>
+    <div id='floorMsgGroup'>
+        <p id='logoLabel'></p>
+        <p id='versionLabel'></p>
+        <p id='floorNameLabel'></p>
+    </div>
+    <div id='statusBar' class="clearfix">
+        <div class="status" id="floorCol">
+            <img src='images/floor.png' id="img-floor">
+            <p class='statusLabel' id='floor'></p>
+        </div>
+        <div class="status" id="lvCol">
+            <img src='images/lv.png' id="img-lv">
+            <p class='statusLabel' id='lv'></p>
+        </div>
+        <div class="status">
+            <img src='images/hp.png' id="img-hp">
+            <p class='statusLabel' id='hp'></p>
+        </div>
+        <div class="status">
+            <img src='images/atk.png' id="img-atk">
+            <p class='statusLabel' id='atk'></p>
+        </div>
+        <div class="status">
+            <img src='images/def.png' id="img-def">
+            <p class='statusLabel' id='def'></p>
+        </div>
+        <div class="status" id="mdefCol">
+            <img src='images/mdef.png' id="img-mdef">
+            <p class='statusLabel' id='mdef'></p>
+        </div>
+        <div class="status" id="moneyCol">
+            <img src='images/money.png' id="img-money">
+            <p class='statusLabel' id='money'></p>
+        </div>
+        <div class="status" id="expCol">
+            <img src='images/experience.png' id="img-experience">
+            <p class='statusLabel' id='experience'></p>
+        </div>
+        <div class="status" id="upCol">
+            <img src='images/up.png' id="img-up">
+            <p class='statusLabel' id='up'></p>
+        </div>
+        <div class="status">
+            <span class='statusLabel' id='yellowKey' style="color:#FFCCAA"></span>
+            <span class='statusLabel' id='blueKey' style="color:#AAAADD"></span>
+            <span class='statusLabel' id='redKey' style="color:#FF8888"></span>
+        </div>
+        <div class="status" id="debuffCol">
+            <span class='statusLabel' id='poison' style="color: #AFFCA8;"></span>
+            <span class='statusLabel' id='weak' style="color: #FECCD0;"></span>
+            <span class='statusLabel' id='curse' style="color: #C2F4E7;"></span>
+        </div>
+    </div>
+    <div id="toolBar" class="clearfix">
+        <img src="images/book.png" class="tools" id='img-book'>
+        <img src="images/fly.png" class="tools" id='img-fly'>
+        <img src="images/toolbox.png" class="tools" id='img-toolbox'>
+        <img src="images/shop.png" class="tools" id='img-shop'>
+        <img src="images/save.png" class="tools" id='img-save'>
+        <img src="images/load.png" class="tools" id='img-load'>
+        <img src="images/settings.png" class="tools" id='img-settings'>
+        <p class="statusLabel tools" id="hard"></p>
+    </div>
+    <div id="curtain"></div>
+    <!-- <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas>
+    <canvas class='gameCanvas' id='event' width='416' height='416'></canvas> -->
+    <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
+    <canvas class='gameCanvas' id='hero' width='416' height='416'></canvas>
+    <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
+    <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
+  </div>
+  <!-- */</script> -->
 <script>
 // 生成定位编号
 (function(){
@@ -396,6 +494,7 @@
 <script src='_server/fs.js'></script>
 <script src='_server/editor_file.js'></script>
 <script src='_server/vm.js'></script>
+<script id='mainScript' src='main.js'></script>
 <script>
 printf = function(str,weak) {
   var prefix='<span class="result">',postfix='</span>';
@@ -405,16 +504,16 @@ printf = function(str,weak) {
 }
 //所有全局量
 __all__=['Vue','fs','printf','editor','main','core','fullX','fullY'];
-__id__=['printOut','arrRowMark','mapRowMark','data','bg','dataSelection'];
+__id__=['printOut','arrRowMark','mapRowMark','edata','bg','dataSelection'];
 __Vue__=['exportM','editArea','editTip','clear','tip','selectBox'];
+//var event = document.getElementById('event');
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 function hasOwnProp (obj, key) {
   return hasOwnProperty.call(obj, key)
 }
 
-var main={'instance':{}};
-var core={};
+
 
 function editor() {
   this.version = "1.2";
@@ -580,9 +679,9 @@ editor.prototype.drawInitData = function (icons) {
   var fullWidth=~~(sumWidth*ratio);
   var fullHeight=~~(maxHeight*ratio);
 
-  if (fullWidth > data.width) data.style.width = (data.width = fullWidth)/ratio + 'px';
-  data.style.height = (data.height = fullHeight)/ratio + 'px';
-  var dc = data.getContext('2d');
+  if (fullWidth > edata.width) edata.style.width = (edata.width = fullWidth)/ratio + 'px';
+  edata.style.height = (edata.height = fullHeight)/ratio + 'px';
+  var dc = edata.getContext('2d');
   var nowx = 0;
   var nowy = 0;
   for(var ii=0; ii<imgNames.length; ii++){
@@ -608,7 +707,7 @@ editor.prototype.drawInitData = function (icons) {
   editor.mapInit();
 }
 editor.prototype.mapInit = function(){
-  var ec = eventLayer.getContext('2d');
+  var ec = document.getElementById('event').getContext('2d');
   ec.clearRect(0, 0, 416, 416);
   editor.map = [];
   for(var y=0; y<13; y++){
@@ -738,7 +837,7 @@ editor.prototype.updateMap = function(){
   }
 
   // 绘制地图 start
-  var eventCtx = eventLayer.getContext("2d");
+  var eventCtx = document.getElementById('event').getContext("2d");
   for(var y=0; y<13; y++)
     for(var x=0; x<13; x++){
       var tileInfo = editor.map[y][x];
@@ -752,7 +851,7 @@ editor.prototype.updateMap = function(){
 
 editor.prototype.listen = function() {
 
-  var uc = ui.getContext('2d');
+  var uc = eui.getContext('2d');
 
   function fillPos(pos) {
     uc.fillStyle = '#' + ~~(Math.random() * 8) + ~~(Math.random() * 8) + ~~(Math.random() * 8);
@@ -787,7 +886,7 @@ editor.prototype.listen = function() {
     uc.clearRect(0, 0, 416, 416);
   }//用于鼠标移出canvas时的自动清除状态
 
-  ui.onmousedown = function (e) {
+  eui.onmousedown = function (e) {
     if(!selectBox.isSelected) {
       tip.whichShow = 1;
       return;
@@ -805,7 +904,7 @@ editor.prototype.listen = function() {
     fillPos(pos);
   }
 
-  ui.onmousemove = function (e) {
+  eui.onmousemove = function (e) {
     if(!selectBox.isSelected) {
       // tip.whichShow = 1;
       return;
@@ -834,7 +933,7 @@ editor.prototype.listen = function() {
     }
   }
 
-  ui.onmouseup = function (e) {
+  eui.onmouseup = function (e) {
     if(!selectBox.isSelected) {
       tip.whichShow = 1;
       return;
@@ -888,7 +987,7 @@ editor.prototype.listen = function() {
     }
   }
 
-  data.onmousedown = function (e) {
+  edata.onmousedown = function (e) {
     e.stopPropagation();
     var loc = { 
       'x': document.documentElement.scrollLeft + e.clientX + iconLib.scrollLeft - right.offsetLeft-iconLib.offsetLeft, 
@@ -957,12 +1056,29 @@ editor.info
 始终是最后一次点击的结果
 注意editor.info可能因为点击其他地方而被清空
 */
-var editor = new editor();
-editor.init();
-editor.main=main;
-editor.core=core;
-editor.fs=fs;
-editor.file=editor_file;
+editor = new editor();
+main.init('editor');
+//main.listen();
+var afterMainInit = function(){
+  //main.editor.drawMapBg();
+  //main.editor.updateMap();
+  main.instance={};
+  editor.main=main;
+  editor.core=core;
+  editor.fs=fs;
+  editor.file=editor_file;
+  editor.init();
+}
+var startgame = function(){
+    var hard = 'Hard';
+    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, core.initStatus.maps);
+    core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
+        /* core.setHeroMoveTriggerInterval(); */
+        afterMainInit();
+    });
+    core.events.setInitData(hard);
+}
+setTimeout(startgame, 300);
 
 </script>
 <script type="text/javascript">

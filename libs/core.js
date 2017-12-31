@@ -1997,14 +1997,12 @@ core.prototype.drawMap = function (mapName, callback) {
             }
         }
     }
-
+    drawBg();
     if (main.mode=='editor'){
         main.editor.drawMapBg = function(){
             core.clearMap('bg', 0, 0, 416, 416);
             drawBg();
         }
-    } else {
-        drawBg();
     }
 
     var drawEvent = function(){
@@ -2032,14 +2030,12 @@ core.prototype.drawMap = function (mapName, callback) {
         }
         core.drawAutotile(mapName, 'event', autotileMaps, 0, 0, 32);
     }
-
+    drawEvent();
     if (main.mode=='editor'){
         main.editor.updateMap = function(){
             core.clearMap('event', 0, 0, 416, 416);
             drawEvent();
         }
-    } else {
-        drawEvent();
     }
     core.setGlobalAnimate(core.values.animateSpeed);
 
@@ -2448,7 +2444,7 @@ core.prototype.removeBlockByIds = function (floorId, ids) {
 
 ////// 添加一个全局动画 //////
 core.prototype.addGlobalAnimate = function (animateMore, x, y, loc, image) {
-    if (main.mode=='editor') return;
+    if (main.mode=='editor' && main.editor.disableGlobalAnimate) return;
     if (animateMore == 2) {
         core.status.twoAnimateObjs.push({
             'x': x,
@@ -2471,7 +2467,7 @@ core.prototype.addGlobalAnimate = function (animateMore, x, y, loc, image) {
 
 ////// 删除一个或所有全局动画 //////
 core.prototype.removeGlobalAnimate = function (x, y, all) {
-    if (main.mode=='editor') return;
+    if (main.mode=='editor' && main.editor.disableGlobalAnimate) return;
     if (all == true) {
         core.status.twoAnimateObjs = [];
         core.status.fourAnimateObjs = [];
@@ -2492,7 +2488,7 @@ core.prototype.removeGlobalAnimate = function (x, y, all) {
 
 ////// 设置全局动画的显示效果 //////
 core.prototype.setGlobalAnimate = function (speed) {
-    if (main.mode=='editor') return;
+    if (main.mode=='editor' && main.editor.disableGlobalAnimate) return;
     clearInterval(core.interval.twoAnimate);
     clearInterval(core.interval.fourAnimate);
     var animateClose = false;

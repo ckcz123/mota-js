@@ -110,7 +110,7 @@ main.prototype.init = function (mode) {
     }
     if (({"editor":0,"replay":0}).hasOwnProperty(mode)) {
         main.mode = mode;
-        if (mode === 'editor')main.editor = {};
+        if (mode === 'editor')main.editor = {'disableGlobalAnimate':true};
     }
     main.loadPureData(function(){
         main.useCompress=data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.useCompress;

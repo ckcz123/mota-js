@@ -175,7 +175,16 @@ body{
   font-size: 15px;
   line-height: 14px;
 }
-
+#bgSelect{
+  width: 50%;
+  height: 100px;
+  margin-top: 10px;
+}
+#bgSelect span{
+  display: block;
+  font-size: 14px;
+  line-height: 30px;
+}
 #printOut{
   margin-top: 10px;
   height: 20px;

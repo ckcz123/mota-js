@@ -13,38 +13,46 @@ maps.prototype.loadFloor = function (floorId, map) {
     content['title'] = floor.title;
     content['canFlyTo'] = floor.canFlyTo;
     if (!core.isset(map)) map=floor.map;
-    var blocks = [];
-    for (var i = 0; i < 13; i++) {
-        for (var j = 0; j < 13; j++) {
-            var block = this.getBlock(j, i, map[i][j]);
-            if (block.event != undefined) {
-                if (block.event.cls == 'enemys' && block.event.trigger==undefined) {
-                    block.event.trigger = 'battle';
-                }
-                if (block.event.cls == 'items' && block.event.trigger==undefined) {
-                    block.event.trigger = 'getItem';
-                }
-                if (block.event.noPass == undefined) {
-                    if (block.event.cls=='enemys' || block.event.cls=='terrains' || block.event.cls=='npcs') {
-                        block.event.noPass = true;
+    var mapIntoBlocks = function(map,maps,floor){
+        var blocks = [];
+        for (var i = 0; i < 13; i++) {
+            for (var j = 0; j < 13; j++) {
+                var block = maps.getBlock(j, i, map[i][j]);
+                if (block.event != undefined) {
+                    if (block.event.cls == 'enemys' && block.event.trigger==undefined) {
+                        block.event.trigger = 'battle';
+                    }
+                    if (block.event.cls == 'items' && block.event.trigger==undefined) {
+                        block.event.trigger = 'getItem';
+                    }
+                    if (block.event.noPass == undefined) {
+                        if (block.event.cls=='enemys' || block.event.cls=='terrains' || block.event.cls=='npcs') {
+                            block.event.noPass = true;
+                        }
+                    }
+                    if (block.event.animate == undefined) {
+                        if (block.event.cls=='enemys' || block.event.cls=='npcs') {
+                            block.event.animate = 2;
+                        }
+                        if (block.event.cls == 'animates') {
+                            block.event.animate = 4;
+                        }
                     }
                 }
-                if (block.event.animate == undefined) {
-                    if (block.event.cls=='enemys' || block.event.cls=='npcs') {
-                        block.event.animate = 2;
-                    }
-                    if (block.event.cls == 'animates') {
-                        block.event.animate = 4;
-                    }
-                }
+                maps.addEvent(block,j,i,floor.events[j+","+i],floor.defaultGround || "ground")
+                maps.addChangeFloor(block,j,i,floor.changeFloor[j+","+i]);
+                if (core.isset(block.event)) blocks.push(block);
             }
-            this.addEvent(block,j,i,floor.events[j+","+i],floor.defaultGround || "ground")
-            this.addChangeFloor(block,j,i,floor.changeFloor[j+","+i]);
-            if (core.isset(block.event)) blocks.push(block);
+        }
+        return blocks;
+    }
+    if (main.mode=='editor'){
+        main.editor.mapIntoBlocks = function(map,floor){
+            return mapIntoBlocks(map,core.maps,floor);
         }
     }
     // 事件处理
-    content['blocks'] = blocks;
+    content['blocks'] = mapIntoBlocks(map,this,floor);
     return content;
 }
 

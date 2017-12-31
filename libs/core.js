@@ -1997,19 +1997,21 @@ core.prototype.drawMap = function (mapName, callback) {
             }
         }
     }
-    drawBg();
     if (main.mode=='editor'){
         main.editor.drawMapBg = function(){
             core.clearMap('bg', 0, 0, 416, 416);
             drawBg();
         }
+    } else {
+        drawBg();
     }
 
+    core.status.floorId = mapName;
+    core.status.thisMap = core.status.maps[mapName];
     var drawEvent = function(){
-        var mapData = core.status.maps[mapName];
+        var mapData = core.status.maps[core.status.floorId];
         var mapBlocks = mapData.blocks;
-        core.status.floorId = mapName;
-        core.status.thisMap = mapData;
+        
         var autotileMaps = [];
         for (var b = 0; b < mapBlocks.length; b++) {
             // 事件启用
@@ -2030,12 +2032,16 @@ core.prototype.drawMap = function (mapName, callback) {
         }
         core.drawAutotile(mapName, 'event', autotileMaps, 0, 0, 32);
     }
-    drawEvent();
+    
     if (main.mode=='editor'){
         main.editor.updateMap = function(){
+            core.removeGlobalAnimate(null, null, true);
             core.clearMap('event', 0, 0, 416, 416);
             drawEvent();
+            core.setGlobalAnimate(core.values.animateSpeed);            
         }
+    } else {
+        drawEvent();
     }
     core.setGlobalAnimate(core.values.animateSpeed);
 
@@ -2467,11 +2473,13 @@ core.prototype.addGlobalAnimate = function (animateMore, x, y, loc, image) {
 
 ////// 删除一个或所有全局动画 //////
 core.prototype.removeGlobalAnimate = function (x, y, all) {
-    if (main.mode=='editor' && main.editor.disableGlobalAnimate) return;
     if (all == true) {
         core.status.twoAnimateObjs = [];
         core.status.fourAnimateObjs = [];
     }
+
+    if (main.mode=='editor' && main.editor.disableGlobalAnimate) return;
+
     for (var t = 0; t < core.status.twoAnimateObjs.length; t++) {
         if (core.status.twoAnimateObjs[t].x == x * 32 && core.status.twoAnimateObjs[t].y == y * 32) {
             core.status.twoAnimateObjs.splice(t, 1);

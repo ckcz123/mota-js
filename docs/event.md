@@ -971,9 +971,12 @@ events.prototype.addPoint = function (enemy) {
 
 要使用战前剧情，首先你需要覆盖该店的系统默认事件，改成你自己的自定义事件，然后在战前剧情后调用`{"type": "battle"}`强制战斗。
 
+值得注意的是，使用这种自定义事件来覆盖系统的默认战斗事件时，可以增加`displayDamage`代表该点是否需要显伤。此项可省略，默认为有显伤。
+
 ``` js
 "x,y": { // (x,y)为该怪物坐标
     "trigger": "action", // 覆盖该点本身默认事件，变成自定义事件
+    "displayDamage": true, // 覆盖后，该点是否有显伤；此项可忽略，默认为有。
     "data": [ // 该点的自定义事件列表
         // ... 战前剧情
         {"type": "battle", "id": "xxx"}, // 强制战斗
@@ -982,34 +985,6 @@ events.prototype.addPoint = function (enemy) {
 }
 ```
 
-这种方式可以实现战前剧情。
-
-**值得注意的是，如果一个怪物本身的系统默认事件被覆盖，则地图上也不会有显伤！**
-
-要想让被自定义事件覆盖的怪物也有显伤显示，则需要在`core.js`的`updateFg`函数中进行一些的修改：
-
-``` js
-// ... 上略
-
-// 非系统默认的战斗事件（被覆盖）：无显伤
-if (mapBlocks[b].event.trigger != 'battle') {
-
-    var shouldDisplayDamage = false;
-
-    // 部分特殊的点（例如战前剧情）需要显伤的可类似在这里手动添加
-    /*
-    if (core.status.floorId='???' && x=? && y=?)
-        shouldDisplayDamage = true;
-    */
-
-    if (!shouldDisplayDamage)
-        continue;
-}
-
-// ... 下略
-```
-
-即手动指定一下哪些层的哪些点上被覆盖的怪物也需要显伤。
 
 !> 如果想让所有怪物都有显伤，也可以简单直接删除或注释这一段。
 

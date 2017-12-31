@@ -202,10 +202,26 @@ main.floors.sample2 = {
                 {"type": "trigger", "loc": [6,6]} // 立刻触发妖精事件
             ]
         },
-        "4,3": {"trigger":"action","enable":false}, // 四个角的大法师，添加trigger:action可避免该点出现显伤
-        "8,3": {"trigger":"action","enable":false}, // 四个角的大法师
-        "4,6": {"trigger":"action","enable":false}, // 四个角的大法师
-        "8,6": {"trigger":"action","enable":false}, // 四个角的大法师
+        "4,3": { // 四个角的大法师，
+            "trigger": "action",
+            "displayDamage": false,
+            "enable":false
+        },
+        "8,3": { // 四个角的大法师，
+            "trigger": "action",
+            "displayDamage": false,
+            "enable":false
+        },
+        "4,6": { // 四个角的大法师，
+            "trigger": "action",
+            "displayDamage": false,
+            "enable":false
+        },
+        "8,6": { // 四个角的大法师，
+            "trigger": "action",
+            "displayDamage": false,
+            "enable":false
+        },
 
         "6,6": { // 妖精
             "enable":false, // 初始时禁用状态

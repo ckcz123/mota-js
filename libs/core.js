@@ -2879,19 +2879,14 @@ core.prototype.updateFg = function () {
             if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls == 'enemys'
                 && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable)) {
 
-                // 非系统默认的战斗事件（被覆盖）：无显伤
+                // 非系统默认的战斗事件（被覆盖）
                 if (mapBlocks[b].event.trigger != 'battle') {
-
-                    var shouldDisplayDamage = false;
-
-                    // 部分特殊的点（例如战前剧情）需要显伤的可类似在这里手动添加
-                    /*
-                    if (core.status.floorId='???' && x=? && y=?)
-                        shouldDisplayDamage = true;
-                    */
-
-                    if (!shouldDisplayDamage)
-                        continue;
+                    // 判断显伤
+                    var event = core.floors[core.status.floorId].events[x+","+y];
+                    if (core.isset(event) && !(event instanceof Array)) {
+                        if (core.isset(event.displayDamage) && !event.displayDamage)
+                            continue;
+                    }
                 }
 
                 var id = mapBlocks[b].event.id;

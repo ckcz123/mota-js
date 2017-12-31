@@ -1896,6 +1896,124 @@ core.prototype.drawMap = function (mapName, callback) {
             core.canvas.bg.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
         }
     }
+    var mapArr = core.maps.getMapArr(mapName);
+    for (var b = 0; b < mapBlocks.length; b++) {
+        // 事件启用
+        var block = mapBlocks[b];
+        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
+            if (block.event.cls == 'autotile') {
+                core.drawAutotile(core.canvas.event, mapArr, block, 32);
+                continue;
+            }
+            else {
+                blockIcon = core.material.icons[block.event.cls][block.event.id];
+                blockImage = core.material.images[block.event.cls];
+                core.canvas.event.drawImage(core.material.images[block.event.cls], 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+                core.addGlobalAnimate(block.event.animate, block.x * 32, block.y * 32, blockIcon, blockImage);
+            }
+        }
+    }
+    core.setGlobalAnimate(core.values.animateSpeed);
+    if (core.isset(callback))
+        callback();
+}
+core.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top){
+    var indexArrs = [ //16种组合的图块索引数组; // 将autotile分割成48块16*16的小块; 数组索引即对应各个小块
+    //                                       +----+----+----+----+----+----+
+        [10,  9,  4, 3 ],  //0   bin:0000      | 1  | 2  | 3  | 4  | 5  | 6  |
+        [10,  9,  4, 13],  //1   bin:0001      +----+----+----+----+----+----+
+        [10,  9, 18, 3 ],  //2   bin:0010      | 7  | 8  | 9  | 10 | 11 | 12 |
+        [10,  9, 16, 15],  //3   bin:0011      +----+----+----+----+----+----+
+        [10, 43,  4, 3 ],  //4   bin:0100      | 13 | 14 | 15 | 16 | 17 | 18 |
+        [10, 31,  4, 25],  //5   bin:0101      +----+----+----+----+----+----+
+        [10,  7,  2, 3 ],  //6   bin:0110      | 19 | 20 | 21 | 22 | 23 | 24 |
+        [10, 31, 16, 5 ],  //7   bin:0111      +----+----+----+----+----+----+
+        [48,  9,  4, 3 ],  //8   bin:1000      | 25 | 26 | 27 | 28 | 29 | 30 |
+        [ 8,  9,  4, 1 ],  //9   bin:1001      +----+----+----+----+----+----+
+        [36,  9, 30, 3 ],  //10  bin:1010      | 31 | 32 | 33 | 34 | 35 | 36 |
+        [36,  9,  6, 15],  //11  bin:1011      +----+----+----+----+----+----+
+        [46, 45,  4, 3 ],  //12  bin:1100      | 37 | 38 | 39 | 40 | 41 | 42 |
+        [46, 11,  4, 25],  //13  bin:1101      +----+----+----+----+----+----+
+        [12, 45, 30, 3 ],  //14  bin:1110      | 43 | 44 | 45 | 46 | 47 | 48 |
+        [34, 33, 28, 27]   //15  bin:1111      +----+----+----+----+----+----+
+    ];
+    
+    var drawBlockByIndex = function(ctx, dx, dy, autotileImg, index, size){ //index为autotile的图块索引1-48
+        var sx = 16*((index-1)%6), sy = 16*(~~((index-1)/6));
+        ctx.drawImage(autotileImg, sx, sy, 16, 16, dx, dy, size/2, size/2);
+    }
+    var getAutotileAroundId = function(currId, x, y){
+        if(x<0 || y<0 || x>12 || y>12) return 1;
+        else return mapArr[y][x]==currId ? 1:0;
+    }
+    var checkAround = function(x, y){ // 得到周围四个32*32块（周围每块都包含当前块的1/4，不清楚的话画下图你就明白）的数组索引
+        var currId = mapArr[y][x];
+        var pointBlock = [];
+        for(var i=0; i<4; i++){
+            var bsum = 0;
+            var offsetx = i%2, offsety = ~~(i/2);
+            for(var j=0; j<4; j++){
+            var mx = j%2, my = ~~(j/2);
+            var b = getAutotileAroundId(currId, x+offsetx+mx-1, y+offsety+my-1);
+            bsum += b*(Math.pow(2, 3-j));
+            }
+            pointBlock.push(bsum);
+        }
+        return pointBlock;
+    }
+    var getAutotileIndexs = function(x, y){
+        var indexArr = [];
+        var pointBlocks = checkAround(x, y);
+        for(var i=0; i<4; i++){
+            var arr = indexArrs[pointBlocks[i]]
+            indexArr.push(arr[3-i]);
+        }
+        return indexArr;
+    }
+    // 开始绘制autotile
+    var top = core.isset(top)? top : 0, left = core.isset(left) ? left : 0;
+    var x = block.x, y = block.y;
+    var pieceIndexs = getAutotileIndexs(x, y);
+    ctx.clearRect(x*size+left, y*size+top, size, size);
+
+    //修正四个边角的固定搭配
+    if(pieceIndexs[0] == 13){
+      if(pieceIndexs[1] == 16) pieceIndexs[1] = 14;
+      if(pieceIndexs[2] == 31) pieceIndexs[2] = 19;
+    }
+    if(pieceIndexs[1] == 18){
+      if(pieceIndexs[0] == 15) pieceIndexs[0] = 17;
+      if(pieceIndexs[3] == 36) pieceIndexs[3] = 24;
+    }
+    if(pieceIndexs[2] == 43){
+      if(pieceIndexs[0] == 25) pieceIndexs[0] = 37;
+      if(pieceIndexs[3] == 46) pieceIndexs[3] = 44;
+    }
+    if(pieceIndexs[3] == 48){
+      if(pieceIndexs[1] == 30) pieceIndexs[1] = 42;
+      if(pieceIndexs[2] == 45) pieceIndexs[2] = 47;
+    }
+    for(var i=0; i<4; i++){
+      var index = pieceIndexs[i];
+      var dx = x*size + size/2*(i%2), dy = y*size + size/2*(~~(i/2));
+      drawBlockByIndex(ctx, dx+left, dy+top, core.material.images['autotile'][block.event.id], index, size);
+    }
+}
+core.prototype.drawMap_old = function (mapName, callback) {
+    var mapData = core.status.maps[mapName];
+    var mapBlocks = mapData.blocks;
+    core.status.floorId = mapName;
+    core.status.thisMap = mapData;
+    core.clearMap('all');
+    core.removeGlobalAnimate(null, null, true);
+    var groundId = core.floors[mapName].defaultGround || "ground";
+    var blockIcon = core.material.icons.terrains[groundId];
+    var blockImage = core.material.images.terrains;
+    for (var x = 0; x < 13; x++) {
+        for (var y = 0; y < 13; y++) {
+            core.canvas.bg.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
+        }
+    }
     var autotileMaps = [];
     for (var b = 0; b < mapBlocks.length; b++) {
         // 事件启用
@@ -1921,7 +2039,7 @@ core.prototype.drawMap = function (mapName, callback) {
         callback();
 }
 
-core.prototype.drawAutotile = function (floorId, canvas, autotileMaps, left, top, size, autotileId) {
+core.prototype.drawAutotile_old = function (floorId, canvas, autotileMaps, left, top, size, autotileId) {
 
     if (!core.isset(autotileId)) {
         var autotileIds = {};

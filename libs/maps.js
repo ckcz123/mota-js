@@ -343,5 +343,11 @@ maps.prototype.load = function (data, floorId) {
     }
     return this.loadFloor(floorId, data[floorId]);
 }
+maps.prototype.getMapArr = function (floorId){
+    var floor = core.floors[floorId];
+    var map=floor.map;
+
+    return map;
+}
 
 main.instance.maps = new maps();

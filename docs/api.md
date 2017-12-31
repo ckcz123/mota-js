@@ -6,10 +6,39 @@
 
 可以在chrome浏览器的控制台中（`ctrl+shift+I`，找到Console）中直接进行调用，以查看效果。
 
-!> **`main.js`：游戏入口。所有其他JS文件都是被此文件加载。**
+!> **`main.js`：游戏入口，所有其他JS文件都是被此文件加载。**
 
 ``` js
-
+main.init // 初始化
+main.loaderJs // 动态加载所有核心JS文件
+main,loaderFloors // 动态加载所有楼层（剧本）
+main.loadMod // 加载某一个JS文件
+main.loadFloor // 加载某一个楼层
+main.setMainTipsText // 加载过程提示
+window.onresize // 窗口大小变化时
+main.dom.body.onkeydown // 在界面上按下某按键时
+main.dom.body.onkeydown // 在界面上放开某按键时
+main.dom.body.onselectstart // 开始选择时
+main.dom.data.onmousedown // 鼠标按下时
+main.dom.data.onmousemove // 鼠标移动时
+main.dom.data.onmouseup // 鼠标放开时
+main.dom.data.onmousewheel // 鼠标滑轮滚动时
+main.dom.data.ontouchstart // 手指在触摸屏开始触摸时
+main.dom.data.ontouchmove // 手指在触摸屏上移动时
+main.dom.data.ontouchend // 手指离开触摸屏时
+main.statusBar.image.book.onclick // 点击状态栏中的怪物手册时
+main.statusBar.image.fly.onclick // 点击状态栏中的楼层传送器时
+main.statusBar.image.toolbox.onclick // 点击状态栏中的工具箱时
+main.statusBar.image.shop.onclick // 点击状态栏中的快捷商店时
+main.statusBar.image.save.onclick // 点击状态栏中的存档按钮时
+main.statusBar.image.load.onclick // 点击状态栏中的读档按钮时
+main.statusBar.image.settings.onclick // 点击状态栏中的系统菜单时
+main.dom.playGame.onclick // 点击“开始游戏”时
+main.dom.loadGame.onclick // 点击“载入游戏”时
+main.dom.aboutGame.onclick // 点击“关于本塔”时
+main.dom.easyLevel.onclick // 点击“简单难度”时
+main.dom.normalLevel.onclick // 点击“普通难度”时
+main.dom.hardLevel.onclick // 点击“困难难度”时
 ```
 
 !> **`core.js`：系统核心文件。所有核心逻辑处理都在此文件完成。**

@@ -34,7 +34,7 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
         'fly': {'cls': 'constants', 'name': '楼层传送器', 'text': '可以自由往来去过的楼层'},
         'coin': {'cls': 'constants', 'name': '幸运金币', 'text': '持有时打败怪物可得双倍金币'},
         'snow': {'cls': 'constants', 'name': '冰冻徽章', 'text': '可以将四周的熔岩变成平地'},
-        'cross': {'cls': 'constants', 'name': '十字架', 'text': '该道具尚未被定义'},
+        'cross': {'cls': 'constants', 'name': '十字架', 'text': '持有后无视怪物的无敌属性'},
         'knife': {'cls': 'constants', 'name': '屠龙匕首', 'text': '该道具尚未被定义'},
         'shoes': {'cls': 'constants', 'name': '绿鞋', 'text': '持有时无视负面地形'},
 

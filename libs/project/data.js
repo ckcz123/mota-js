@@ -17,8 +17,8 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         "floorId": "sample0", // 初始楼层ID
         "hero": { // 勇士初始数据
             "name": "阳光", // 勇士名；可以改成喜欢的
-            "lv": 1, // 初始等级，该项必须为正整数
-            "hp": 2000, // 初始生命值
+            'lv': 1, // 初始等级，该项必须为正整数
+            "hp": 1000, // 初始生命值
             "atk": 100, // 初始攻击
             "def": 100, // 初始防御
             "mdef": 100, // 初始魔防
@@ -92,7 +92,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         "levelUp": [ // 经验升级所需要的数值，是一个数组
             {}, // 第一项为初始等级，可以简单留空，也可以写name
 
-            // 每一个里面可以含有三个参数 name, need, effect
+            // 每一个里面可以含有三个参数 need, name, effect
             // need为所需要的经验数值，是一个正整数。请确保need所需的依次递增
             // name为该等级的名称，也可以省略代表使用系统默认值；本项将显示在状态栏中
             // effect为本次升级所执行的操作，可由若干项组成，由分号分开
@@ -137,19 +137,18 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         "shield5": 160, // 神圣盾加防数值
         "moneyPocket": 500, // 金钱袋加金币的数值
         /****** 怪物相关 ******/
-        "breakArmor": 0.9, // 破甲的比例（战斗前，怪物附加角色防御的x%作为伤害）
-        "counterAttack": 0.1, // 反击的比例（战斗时，怪物每回合附加角色攻击的x%作为伤害，无视角色防御）
-        "purify": 3, // 净化的比例（战斗前，怪物附加勇士魔防的x倍作为伤害）
-        "hatred": 2, // 仇恨属性中，每杀死一个怪物获得的仇恨值
+        'breakArmor': 0.9, // 破甲的比例（战斗前，怪物附加角色防御的x%作为伤害）
+        'counterAttack': 0.1, // 反击的比例（战斗时，怪物每回合附加角色攻击的x%作为伤害，无视角色防御）
+        'purify': 3, // 净化的比例（战斗前，怪物附加勇士魔防的x倍作为伤害）
+        'hatred': 2, // 仇恨属性中，每杀死一个怪物获得的仇恨值
         /****** 系统相关 ******/
-        "animateSpeed": 500, // 动画时间
+        'animateSpeed': 500, // 动画时间
     },
     // 系统FLAG，在游戏运行中中请不要修改它。
     "flags" : {
-        /****** 角色状态相关 ******/
-        "enableNegativeDamage": true, // 是否支持负伤害（回血）
-        "enableFloor": false, // 是否在状态栏显示当前楼层
-        "enableLv": true, // 是否在状态栏显示当前等级
+        /****** 状态栏相关 ******/
+        "enableFloor": true, // 是否在状态栏显示当前楼层
+        "enableLv": false, // 是否在状态栏显示当前等级
         "enableMDef": true, // 是否在状态栏及战斗界面显示魔防（护盾）
         "enableMoney": true, // 是否在状态栏、怪物手册及战斗界面显示金币
         "enableExperience": true, // 是否在状态栏、怪物手册及战斗界面显示经验
@@ -161,6 +160,9 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         "pickaxeFourDirections": true, // 使用破墙镐是否四个方向都破坏；如果false则只破坏面前的墙壁
         "bombFourDirections": true, // 使用炸弹是否四个方向都会炸；如果false则只炸面前的怪物（即和圣锤等价）
         "bigKeyIsBox": false, // 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙
+        /****** 怪物相关 ******/
+        "enableNegativeDamage": true, // 是否支持负伤害（回血）
+        "zoneSquare": false, // 领域类型。如果此项为true则为九宫格伤害，为false则为十字伤害
         /****** 系统相关 ******/
         "startDirectly": false, // 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面
         "canOpenBattleAnimate": true, // 是否允许用户开启战斗过程；如果此项为false，则下面两项均强制视为false

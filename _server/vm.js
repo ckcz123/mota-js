@@ -184,6 +184,7 @@ var tip = new Vue({
     hasId: true,
     isAutotile: false,
     isSelectedBlock: false,
+    isClearBlock: false,
     geneMapSuccess: false,
     timer: null,
     msgs: [ //分别编号1,2,3,4,5,6,7,8；奇数警告，偶数成功
@@ -202,15 +203,19 @@ var tip = new Vue({
   watch: {
     infos: {
       handler: function(val, oldval){
+        this.isClearBlock = false;
         if(typeof(val) != 'undefined'){
-          this.infos = val;
+          if(val==0) {
+            this.isClearBlock = true;
+            return;
+          }
           if('id' in val){
             this.hasId = true;
           }else{
             this.hasId = false;
           }
           this.isAutotile = false;
-          if(this.infos.images == "autotile" && this.hasId) this.isAutotile = true;
+          if(val.images == "autotile" && this.hasId) this.isAutotile = true;
         }
       },
       deep: true
@@ -246,6 +251,20 @@ var selectBox = new Vue({
   }
 })
 
+var bgSelect = new Vue({
+  el: '#bgSelect',
+  data: {
+    bgs: {},
+    selectedBg: 'ground'
+  },
+  watch:{
+    selectedBg: function(){
+      editor.bgY = this.bgs.indexOf(this.selectedBg);
+      editor.drawMapBg();
+    }
+  }
+})
+
 var editFile4map = new Vue({
   el: '#editFile4map',
   data: {
@@ -257,8 +276,8 @@ var editFile4map = new Vue({
     filelist: function(val){
       if(val){
         var oval = val.length ? JSON.parse(JSON.stringify(val)) : [];
-        for(var i=0; i<oval.length; i++)
-          this.$set("options", i, oval[i]);
+        // for(var i=0; i<oval.length; i++)
+          // this.$set("options", i, oval[i]);
       }
     },
   }

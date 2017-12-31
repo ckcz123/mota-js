@@ -3,72 +3,26 @@
   editor_file = {};
 
   editor_file.getFloorFileList = function(editor,callback){
-    var fs = editor.fs;
-    if (isset(callback))
-    fs.readdir('libs/project/floors',function(err, data){
-      callback([data,err]);
-    });
+    if (isset(callback)) callback(['simple0.js','simple1.js','simple2.js'],null);
   }
-  //callback([Array<String>,err:String])
+  //callback(Array<String>,err:String)
   editor_file.loadFloorFile = function(editor,filename,callback){
-    //filename不含'/'不含'.js'
-    var fs = editor.fs;
-    if (isset(callback))
-    fs.readFile('libs/project/floors/'+filename+'.js','utf-8',function(err, data){
-      if (err!=null){callback(err);return;}
-      data=data.split('=')
-      data=[data[0],data.slice(1).join('=')]
-      var varnameId = data[0].split('.').slice(-1)[0].trim();
-      var filenameId = filename.split('/').slice(-1)[0].split('\\').slice(-1)[0];
-      eval('b3917d1d_71c2_41f2_a8aa_481b215ffb99='+data[1]);
-      var floorData = b3917d1d_71c2_41f2_a8aa_481b215ffb99;
-      delete(b3917d1d_71c2_41f2_a8aa_481b215ffb99);
-      var floorId = floorData.floorId;
-      if (varnameId!=filenameId || filenameId!=floorId){
-        callback('文件名,第一行的变量名以及floorId不一致');
-        return;
-      }
-      editor.currentFloorId = floorId;
-      editor.currentfloorData = floorData;
-      callback(null)
-    });
+    if (isset(callback)) callback('',null);
   }
-  //callback(err:String)
+  //callback(String,err:String)
   editor_file.saveFloorFile = function(editor,callback){
-    if (!isset(editor.currentFloorId) || !isset(editor.currentfloorData)) {
-      if (isset(callback)) callback('未选中文件或无数据');
-    }
-    var filename = 'libs/project/floors/' + editor.currentFloorId + '.js';
-    var datastr = ['main.floors.' , editor.currentFloorId , '=\n{'];
-    for(var ii in editor.currentfloorData)
-    if (editor.currentfloorData.hasOwnProperty(ii)) {
-      if (ii=='map')
-        datastr=datastr.concat(['\n"',ii,'": [\n',formatMap(editor.currentfloorData[ii]),'\n],']);
-      else
-        datastr=datastr.concat(['\n"',ii,'": ',JSON.stringify(editor.currentfloorData[ii],null,4),',']);
-    }
-    datastr=datastr.concat(['\n}']);
-    datastr=datastr.join('');
-    fs.writeFile(filename,datastr,'utf-8',function(err, data){
-      if (isset(callback)) callback(err);
-    });
+    if (isset(callback)) callback(null);
   }
   //callback(err:String)
   editor_file.saveFloorFileAs = function(editor,saveAsFilename,callback){
-    //saveAsFilename不含'/'不含'.js'
-    if (!isset(editor.currentfloorData)) {
-      if (isset(callback)) callback('无数据');
-    }
-    editor.currentfloorData.floorId=saveAsFilename;
-    editor.currentFloorId=saveAsFilename;
-    editor_file.saveFloorFile(editor,callback);
+    if (isset(callback)) callback(null);
   }
   //callback(err:String)
 
   ////////////////////////////////////////////////////////////////////
 
   editor_file.changeIdAndIdnum = function(editor,id,idnum,callback){
-    if (isset(callback)) callback('尚未实现');
+    if (isset(callback)) callback(null);
   }
   //callback(err:String)
   editor_file.editItem = function(editor,id,obj,callback){
@@ -131,23 +85,5 @@
         return false;
     }
     return true
-  }
-
-  var formatMap = function(mapArr){
-    //把13*13或者1*169数组格式化
-    var formatArrStr = '';
-    var arr = JSON.stringify(mapArr).replace(/\s+/g, '').split('],[');
-    for(var i =0; i<13; i++){
-      var a = [];
-      formatArrStr +='    [';
-      if(i==0||i==12) a = arr[i].split(/\D+/).join(' ').trim().split(' ');
-      else a = arr[i].split(/\D+/);
-      for(var k=0; k<13; k++){
-        var num = parseInt(a[k]);
-        formatArrStr += Array(Math.max(4-String(num).length,0)).join(' ')+num+(k==12?'':',');
-      }
-      formatArrStr += ']'+(i==12?'':',\n');
-    }
-    return formatArrStr;
   }
 })();

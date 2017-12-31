@@ -99,7 +99,6 @@ core.setOpacity // 设置某个canvas的透明度
 core.setFillStyle // 设置某个canvas的绘制属性（如颜色等）
 * core.drawMap(mapId, callback) // 绘制某张地图。mapId为地图Id，绘制完毕将执行callback回调函数。
 core.drawAutotile // 绘制Autotile
-core.drawAutotileBlock // 绘制Autotile的某一块
 * core.noPassExists(x,y) // 某个点是否不可通行
 core.noPass // 某个点是否在区域内且不可通行
 * core.npcExists(x,y) // 某个点是否存在NPC
@@ -293,6 +292,7 @@ core.maps.addChangeFloor // 向该楼层添加剧本的楼层转换事件
 core.maps.initMaps // 初始化所有地图
 core.maps.save // 将当前地图重新变成数字，以便于存档
 core.maps.load // 将存档中的地图信息重新读取出来
+core.maps.getMapArray // 将当前地图重新变成二维数组形式
 ```
 
 !> `ui.js` 定义了各种界面的绘制。

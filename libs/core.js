@@ -2044,6 +2044,8 @@ core.prototype.drawMap = function (mapName, callback) {
     if (core.isset(callback))
         callback();
 }
+
+////// 绘制Autotile //////
 core.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top){
     var indexArrs = [ //16种组合的图块索引数组; // 将autotile分割成48块16*16的小块; 数组索引即对应各个小块
     //                                       +----+----+----+----+----+----+

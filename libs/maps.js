@@ -354,6 +354,8 @@ maps.prototype.load = function (data, floorId) {
     }
     return this.loadFloor(floorId, data[floorId]);
 }
+
+////// 将当前地图重新变成二维数组形式 //////
 maps.prototype.getMapArray = function (maps, floorId){
     if (!core.isset(floorId)) {
         var map = {};

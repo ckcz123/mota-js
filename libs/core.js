@@ -104,6 +104,7 @@ function core() {
 
 /////////// 系统事件相关 ///////////
 
+////// 初始化 //////
 core.prototype.init = function (dom, statusBar, canvas, images, bgms, sounds, floorIds, floors, coreData) {
     core.dom = dom;
     core.statusBar = statusBar;
@@ -192,6 +193,7 @@ core.prototype.init = function (dom, statusBar, canvas, images, bgms, sounds, fl
     });
 }
 
+////// 显示游戏开始界面 //////
 core.prototype.showStartAnimate = function (callback) {
     core.dom.startPanel.style.opacity=1;
     core.dom.startPanel.style.display="block";
@@ -218,6 +220,7 @@ core.prototype.showStartAnimate = function (callback) {
     }, 20);
 }
 
+////// 隐藏游戏开始界面 //////
 core.prototype.hideStartAnimate = function (callback) {
     var opacityVal = 1;
     var startAnimate = window.setInterval(function () {
@@ -231,14 +234,17 @@ core.prototype.hideStartAnimate = function (callback) {
     }, 20);
 }
 
+////// 设置加载进度条进度 //////
 core.prototype.setStartProgressVal = function (val) {
     core.dom.startTopProgress.style.width = val + '%';
 }
 
+////// 设置加载进度条提示文字 //////
 core.prototype.setStartLoadTipText = function (text) {
     core.dom.startTopLoadTips.innerHTML = text;
 }
 
+////// 加载图片和音频 //////
 core.prototype.loader = function (callback) {
     var loadedImageNum = 0, allImageNum = 0, allSoundNum = 0;
     allImageNum = core.images.length;
@@ -271,6 +277,7 @@ core.prototype.loader = function (callback) {
     }
 }
 
+////// 加载图片 //////
 core.prototype.loadImage = function (imgName, callback) {
     try {
         core.setStartLoadTipText('加载图片 ' + imgName + ' 中...');
@@ -289,6 +296,7 @@ core.prototype.loadImage = function (imgName, callback) {
     }
 }
 
+////// 加载音频 //////
 core.prototype.loadMusic = function (callback) {
 
     core.bgms.forEach(function (t) {
@@ -388,12 +396,14 @@ core.prototype.loadMusic = function (callback) {
     callback();
 }
 
+////// 游戏是否已经开始 //////
 core.prototype.isPlaying = function() {
     if (core.isset(core.status.played) && core.status.played)
         return true;
     return false;
 }
 
+////// 清除游戏状态和数据 //////
 core.prototype.clearStatus = function() {
     // 停止各个Timeout和Interval
     for (var i in core.interval) {
@@ -404,6 +414,7 @@ core.prototype.clearStatus = function() {
     core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
 }
 
+////// 重置游戏状态和初始数据 //////
 core.prototype.resetStatus = function(hero, hard, floorId, maps) {
 
     // 停止各个Timeout和Interval
@@ -428,6 +439,7 @@ core.prototype.resetStatus = function(hero, hard, floorId, maps) {
     core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
 }
 
+////// 开始游戏 //////
 core.prototype.startGame = function (hard, callback) {
     console.log('开始游戏');
 
@@ -439,7 +451,7 @@ core.prototype.startGame = function (hard, callback) {
     });
 }
 
-
+////// 重新开始游戏；此函数将回到标题页面 //////
 core.prototype.restart = function() {
     core.showStartAnimate();
 }
@@ -451,6 +463,7 @@ core.prototype.restart = function() {
 
 /////////// 键盘、鼠标事件相关 ///////////
 
+////// 按下某个键时 //////
 core.prototype.onkeyDown = function(e) {
     if (!core.isset(core.status.holdingKeys))core.status.holdingKeys=[];
     var isArrow={37:true,38:true,39:true,40:true}[e.keyCode]
@@ -467,6 +480,7 @@ core.prototype.onkeyDown = function(e) {
     }
 }
 
+////// 放开某个键时 //////
 core.prototype.onkeyUp = function(e) {
     var isArrow={37:true,38:true,39:true,40:true}[e.keyCode]
     if(isArrow && !core.status.lockControl){
@@ -484,6 +498,7 @@ core.prototype.onkeyUp = function(e) {
     }
 }
 
+////// 按住某个键时 //////
 core.prototype.pressKey = function (keyCode) {
     if (keyCode === core.status.holdingKeys.slice(-1)[0]) {
         core.keyDown(keyCode);
@@ -491,6 +506,7 @@ core.prototype.pressKey = function (keyCode) {
     }
 }
 
+////// 根据按下键的code来执行一系列操作 //////
 core.prototype.keyDown = function(keyCode) {
     if(core.status.automaticRouting || core.status.automaticRouted) {
         core.stopAutomaticRoute();
@@ -589,6 +605,7 @@ core.prototype.keyDown = function(keyCode) {
     }
 }
 
+////// 根据放开键的code来执行一系列操作 //////
 core.prototype.keyUp = function(keyCode) {
 
     if (core.status.lockControl) {
@@ -742,6 +759,7 @@ core.prototype.keyUp = function(keyCode) {
     core.stopHero();
 }
 
+////// 点击（触摸）事件按下时 //////
 core.prototype.ondown = function (x ,y) {
     if (!core.status.played || core.status.lockControl) {
         core.onclick(x, y, []);
@@ -758,6 +776,7 @@ core.prototype.ondown = function (x ,y) {
     core.fillPosWithPoint(pos);
 }
 
+////// 当在触摸屏上滑动时 //////
 core.prototype.onmove = function (x ,y) {
     if (core.status.holdingPath==0){return;}
     core.status.mouseOutCheck =1;
@@ -780,6 +799,7 @@ core.prototype.onmove = function (x ,y) {
     }
 }
 
+////// 当点击（触摸）事件放开时 //////
 core.prototype.onup = function () {
     core.status.holdingPath=0;
     if(core.status.stepPostfix.length>0){
@@ -800,6 +820,7 @@ core.prototype.onup = function () {
     }
 }
 
+////// 获得点击事件相对左上角的坐标（0到12之间） //////
 core.prototype.getClickLoc = function (x, y) {
     
     var statusBar = {'x': 0, 'y': 0};
@@ -824,6 +845,7 @@ core.prototype.getClickLoc = function (x, y) {
     return loc;
 }
 
+////// 具体点击屏幕上(x,y)点时，执行的操作 //////
 core.prototype.onclick = function (x, y, stepPostfix) {
     // console.log("Click: (" + x + "," + y + ")");
 
@@ -939,6 +961,7 @@ core.prototype.onclick = function (x, y, stepPostfix) {
 
 }
 
+////// 滑动鼠标滚轮时的操作 //////
 core.prototype.onmousewheel = function (direct) {
     // 向下滚动是 -1 ,向上是 1
 
@@ -951,8 +974,8 @@ core.prototype.onmousewheel = function (direct) {
 
     // 怪物手册
     if (core.status.lockControl && core.status.event.id == 'book') {
-        if (direct==1) core.ui.drawEnemyBook(core.status.event.data - 1);
-        if (direct==-1) core.ui.drawEnemyBook(core.status.event.data + 1);
+        if (direct==1) core.ui.drawBook(core.status.event.data - 1);
+        if (direct==-1) core.ui.drawBook(core.status.event.data + 1);
         return;
     }
 
@@ -971,11 +994,13 @@ core.prototype.onmousewheel = function (direct) {
 
 /////////// 寻路代码相关 ///////////
 
+////// 清除自动寻路路线 //////
 core.prototype.clearAutomaticRouteNode = function (x, y) {
     if (core.status.event.id==null)
         core.canvas.ui.clearRect(x * 32 + 5, y * 32 + 5, 27, 27);
 }
 
+////// 停止自动寻路操作 //////
 core.prototype.stopAutomaticRoute = function () {
     if (!core.status.played) {
         return;
@@ -989,6 +1014,7 @@ core.prototype.stopAutomaticRoute = function () {
         core.canvas.ui.clearRect(0, 0, 416, 416);
 }
 
+////// 继续剩下的自动寻路操作 //////
 core.prototype.continueAutomaticRoute = function () {
     // 此函数只应由events.afterOpenDoor和events.afterBattle调用
     var moveStep = core.status.moveStepBeforeStop;
@@ -999,11 +1025,13 @@ core.prototype.continueAutomaticRoute = function () {
     core.setAutoHeroMove(moveStep);
 }
 
+////// 清空剩下的自动寻路列表 //////
 core.prototype.clearContinueAutomaticRoute = function () {
     core.canvas.ui.clearRect(0, 0, 416, 416);
     core.status.moveStepBeforeStop=[];
 }
 
+////// 设置自动寻路路线 //////
 core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     if (!core.status.played || core.status.lockControl) {
         return;
@@ -1118,7 +1146,8 @@ core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     core.status.automaticRoutingTemp = {'destX': 0, 'destY': 0, 'moveStep': []};
 
 }
-// BFS
+
+////// 自动寻路算法，找寻最优路径 //////
 core.prototype.automaticRoute = function (destX, destY) {
     var startX = core.getHeroLoc('x');
     var startY = core.getHeroLoc('y');
@@ -1217,10 +1246,12 @@ core.prototype.automaticRoute = function (destX, destY) {
     return ans;
 }
 
+////// 显示离散的寻路点 //////
 core.prototype.fillPosWithPoint = function (pos) {
     core.fillRect('ui', pos.x*32+12,pos.y*32+12,8,8, '#bfbfbf');
 }
 
+////// 清除已经寻路过的部分 //////
 core.prototype.clearStepPostfix = function () {
     if(core.status.mouseOutCheck >0){
         core.status.mouseOutCheck--;
@@ -1241,6 +1272,7 @@ core.prototype.clearStepPostfix = function () {
 
 /////////// 自动行走 & 行走控制 ///////////
 
+////// 停止勇士的自动行走 //////
 core.prototype.stopAutoHeroMove = function () {
     core.status.autoHeroMove = false;
     core.status.automaticRouting = false;
@@ -1253,6 +1285,7 @@ core.prototype.stopAutoHeroMove = function () {
     clearInterval(core.interval.heroAutoMoveScan);
 }
 
+////// 设置勇士的自动行走路线 //////
 core.prototype.setAutoHeroMove = function (steps, start) {
     if (steps.length == 0) {
         return;
@@ -1272,12 +1305,14 @@ core.prototype.setAutoHeroMove = function (steps, start) {
     }, 80);
 }
 
+////// 让勇士开始自动行走 //////
 core.prototype.autoHeroMove = function (direction, step) {
     core.status.autoHeroMove = true;
     core.status.destStep = step;
     core.moveHero(direction);
 }
 
+////// 设置行走的效果动画 //////
 core.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
     if (core.status.heroMoving) {
         return;
@@ -1309,6 +1344,7 @@ core.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
     }, 12.5);
 }
 
+////// 设置勇士行走过程中对事件的触发检测 //////
 core.prototype.setHeroMoveTriggerInterval = function () {
     var direction, x, y;
     var scan = {
@@ -1322,7 +1358,7 @@ core.prototype.setHeroMoveTriggerInterval = function () {
             direction = core.getHeroLoc('direction');
             x = core.getHeroLoc('x');
             y = core.getHeroLoc('y');
-            var noPass = core.noPass(x + scan[direction].x, y + scan[direction].y), canMove = core.canMove();
+            var noPass = core.noPass(x + scan[direction].x, y + scan[direction].y), canMove = core.canMoveHero();
             if (noPass || !canMove) {
                 if (canMove) // 非箭头：触发
                     core.trigger(x + scan[direction].x, y + scan[direction].y);
@@ -1365,6 +1401,7 @@ core.prototype.setHeroMoveTriggerInterval = function () {
     }, 50);
 }
 
+////// 设置勇士的方向（转向） //////
 core.prototype.turnHero = function(direction) {
     if (core.isset(direction)) {
         core.status.hero.loc.direction = direction;
@@ -1378,7 +1415,8 @@ core.prototype.turnHero = function(direction) {
     core.canvas.ui.clearRect(0, 0, 416, 416);
 }
 
-core.prototype.canMove = function() {
+////// 勇士能否前往某方向 //////
+core.prototype.canMoveHero = function() {
     var direction = core.getHeroLoc('direction');
     var nowBlock = core.getBlock(core.getHeroLoc('x'),core.getHeroLoc('y'));
     if (nowBlock!=null){
@@ -1416,11 +1454,13 @@ core.prototype.canMove = function() {
     return true;
 }
 
+////// 让勇士开始移动 //////
 core.prototype.moveHero = function (direction) {
     core.setHeroLoc('direction', direction);
     core.status.heroStop = false;
 }
 
+/////// 使用事件让勇士移动。这个函数将不会触发任何事件 //////
 core.prototype.eventMoveHero = function(steps, time, callback) {
 
     time = time || 100;
@@ -1481,6 +1521,7 @@ core.prototype.eventMoveHero = function(steps, time, callback) {
     }, time/8);
 }
 
+////// 每移动一格后执行的事件 //////
 core.prototype.moveOneStep = function() {
     // 中毒状态
     if (core.hasFlag('poison')) {
@@ -1495,6 +1536,7 @@ core.prototype.moveOneStep = function() {
     }
 }
 
+////// 停止勇士的一切行动，等待勇士行动结束后，再执行callback //////
 core.prototype.waitHeroToStop = function(callback) {
     core.stopAutomaticRoute();
     core.clearContinueAutomaticRoute();
@@ -1507,10 +1549,12 @@ core.prototype.waitHeroToStop = function(callback) {
     }
 }
 
+////// 停止勇士的移动状态 //////
 core.prototype.stopHero = function () {
     core.status.heroStop = true;
 }
 
+////// 绘制勇士 //////
 core.prototype.drawHero = function (direction, x, y, status, offsetX, offsetY) {
     offsetX = offsetX || 0;
     offsetY = offsetY || 0;
@@ -1523,13 +1567,54 @@ core.prototype.drawHero = function (direction, x, y, status, offsetX, offsetY) {
     core.canvas.hero.drawImage(core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height, x + offsetX, y + offsetY + 32-height, 32, height);
 }
 
+////// 设置勇士的位置 //////
+core.prototype.setHeroLoc = function (itemName, itemVal) {
+    if (itemVal == '++') {
+        core.status.hero.loc[itemName]++;
+        return;
+    }
+    else if (itemVal == '--') {
+        core.status.hero.loc[itemName]--;
+        return;
+    }
+    core.status.hero.loc[itemName] = itemVal;
+}
+
+////// 获得勇士的位置 //////
+core.prototype.getHeroLoc = function (itemName) {
+    if (!core.isset(itemName)) return core.status.hero.loc;
+    return core.status.hero.loc[itemName];
+}
+
+////// 获得勇士面对位置的x坐标 //////
+core.prototype.nextX = function() {
+    var scan = {
+        'up': {'x': 0, 'y': -1},
+        'left': {'x': -1, 'y': 0},
+        'down': {'x': 0, 'y': 1},
+        'right': {'x': 1, 'y': 0}
+    };
+    return core.getHeroLoc('x')+scan[core.getHeroLoc('direction')].x;
+}
+
+////// 获得勇士面对位置的y坐标 //////
+core.prototype.nextY = function () {
+    var scan = {
+        'up': {'x': 0, 'y': -1},
+        'left': {'x': -1, 'y': 0},
+        'down': {'x': 0, 'y': 1},
+        'right': {'x': 1, 'y': 0}
+    };
+    return core.getHeroLoc('y')+scan[core.getHeroLoc('direction')].y;
+}
+
 /////////// 自动行走 & 行走控制 END ///////////
 
 
 
 /////////// 地图处理 ///////////
 
-// 开门
+////// 开门 //////
 core.prototype.openDoor = function (id, x, y, needKey, callback) {
 
     if (core.interval.openDoorAnimate!=null) return;
@@ -1580,7 +1665,7 @@ core.prototype.openDoor = function (id, x, y, needKey, callback) {
     }, speed)
 }
 
-// 战斗
+////// 战斗 //////
 core.prototype.battle = function (id, x, y, force, callback) {
     if (core.status.moveStepBeforeStop.length==0) {
         core.status.moveStepBeforeStop=core.status.autoStepRoutes.slice(core.status.autoStep-1,core.status.autoStepRoutes.length);
@@ -1609,6 +1694,7 @@ core.prototype.battle = function (id, x, y, force, callback) {
     }
 }
 
+////// 战斗完毕 //////
 core.prototype.afterBattle = function(id, x, y, callback) {
     core.status.hero.hp -= core.enemys.getDamage(id);
     if (core.status.hero.hp<=0) {
@@ -1641,6 +1727,7 @@ core.prototype.afterBattle = function(id, x, y, callback) {
 
 }
 
+////// 触发(x,y)点的事件 //////
 core.prototype.trigger = function (x, y) {
     var mapBlocks = core.status.thisMap.blocks;
     var noPass;
@@ -1667,7 +1754,7 @@ core.prototype.trigger = function (x, y) {
     }
 }
 
-// 楼层切换
+////// 楼层切换 //////
 core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) {
     time = time || 800;
     time /= 20;
@@ -1676,6 +1763,8 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
     core.stopAutomaticRoute();
     core.clearContinueAutomaticRoute();
     core.dom.floorNameLabel.innerHTML = core.status.maps[floorId].title;
+    if (!core.isset(stair) && !core.isset(heroLoc))
+        heroLoc = core.status.hero.loc;
     if (core.isset(stair)) {
         if (!core.isset(heroLoc)) heroLoc={};
         var blocks = core.status.maps[floorId].blocks;
@@ -1709,6 +1798,11 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
             if (/^[+-]?\d+$/.test(floorName))
                 core.statusBar.floor.style.fontStyle = 'italic';
             else core.statusBar.floor.style.fontStyle = 'normal';
+
+            // 更改BGM
+            if (core.isset(core.floors[floorId].bgm)) {
+                core.playBgm(core.floors[floorId].bgm);
+            }
 
             // 不存在事件时，更改画面色调
             if (core.status.event.id == null) {
@@ -1750,7 +1844,7 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
     }, 50);
 }
 
-// 地图切换
+////// 地图切换动画效果 //////
 core.prototype.mapChangeAnimate = function (mode, time, callback) {
     if (mode == 'show') {
         core.show(core.dom.floorMsgGroup, time, function () {
@@ -1764,6 +1858,7 @@ core.prototype.mapChangeAnimate = function (mode, time, callback) {
     }
 }
 
+////// 清除地图 //////
 core.prototype.clearMap = function (map, x, y, width, height) {
     if (map == 'all') {
         for (var m in core.canvas) {
@@ -1775,6 +1870,7 @@ core.prototype.clearMap = function (map, x, y, width, height) {
     }
 }
 
+////// 在某个canvas上绘制一段文字 //////
 core.prototype.fillText = function (map, text, x, y, style, font) {
     if (core.isset(style)) {
         core.setFillStyle(map, style);
@@ -1785,6 +1881,7 @@ core.prototype.fillText = function (map, text, x, y, style, font) {
     core.canvas[map].fillText(text, x, y);
 }
 
+////// 在某个canvas上绘制一个矩形 //////
 core.prototype.fillRect = function (map, x, y, width, height, style) {
     if (core.isset(style)) {
         core.setFillStyle(map, style);
@@ -1792,6 +1889,7 @@ core.prototype.fillRect = function (map, x, y, width, height, style) {
     core.canvas[map].fillRect(x, y, width, height);
 }
 
+////// 在某个canvas上绘制一个矩形的边框 //////
 core.prototype.strokeRect = function (map, x, y, width, height, style, lineWidth) {
     if (core.isset(style)) {
         core.setStrokeStyle(map, style);
@@ -1802,6 +1900,7 @@ core.prototype.strokeRect = function (map, x, y, width, height, style, lineWidth
     core.canvas[map].strokeRect(x, y, width, height);
 }
 
+////// 在某个canvas上绘制一条线 //////
 core.prototype.drawLine = function (map, x1, y1, x2, y2, style, lineWidth) {
     if (core.isset(style)) {
         core.setStrokeStyle(map, style);
@@ -1815,10 +1914,12 @@ core.prototype.drawLine = function (map, x1, y1, x2, y2, style, lineWidth) {
     core.canvas[map].stroke();
 }
 
+////// 设置某个canvas的文字字体 //////
 core.prototype.setFont = function (map, font) {
     core.canvas[map].font = font;
 }
 
+////// 设置某个canvas的线宽度 //////
 core.prototype.setLineWidth = function (map, lineWidth) {
     if (map == 'all') {
         for (var m in core.canvas) {
@@ -1828,14 +1929,17 @@ core.prototype.setLineWidth = function (map, lineWidth) {
     core.canvas[map].lineWidth = lineWidth;
 }
 
+////// 保存某个canvas状态 //////
 core.prototype.saveCanvas = function (map) {
     core.canvas[map].save();
 }
 
+////// 加载某个canvas状态 //////
 core.prototype.loadCanvas = function (map) {
     core.canvas[map].restore();
 }
 
+////// 设置某个canvas边框属性 //////
 core.prototype.setStrokeStyle = function (map, style) {
     if (map == 'all') {
         for (var m in core.canvas) {
@@ -1847,6 +1951,7 @@ core.prototype.setStrokeStyle = function (map, style) {
     }
 }
 
+////// 设置某个canvas的alpha值 //////
 core.prototype.setAlpha = function (map, alpha) {
     if (map == 'all') {
         for (var m in core.canvas) {
@@ -1856,6 +1961,7 @@ core.prototype.setAlpha = function (map, alpha) {
     else core.canvas[map].globalAlpha = alpha;
 }
 
+////// 设置某个canvas的透明度 //////
 core.prototype.setOpacity = function (map, opacity) {
     if (map == 'all') {
         for (var m in core.canvas) {
@@ -1865,6 +1971,7 @@ core.prototype.setOpacity = function (map, opacity) {
     else core.canvas[map].canvas.style.opacity = opacity;
 }
 
+////// 设置某个canvas的绘制属性（如颜色等） //////
 core.prototype.setFillStyle = function (map, style) {
     if (map == 'all') {
         for (var m in core.canvas) {
@@ -1876,11 +1983,7 @@ core.prototype.setFillStyle = function (map, style) {
     }
 }
 
-/**
- * 地图绘制
- * @param mapName 地图ID
- * @param callback 绘制完毕后的回调函数
- */
+////// 绘制某张地图 //////
 core.prototype.drawMap = function (mapName, callback) {
     var mapData = core.status.maps[mapName];
     var mapBlocks = mapData.blocks;
@@ -1921,6 +2024,7 @@ core.prototype.drawMap = function (mapName, callback) {
         callback();
 }
 
+////// 绘制Autotile //////
 core.prototype.drawAutotile = function (floorId, canvas, autotileMaps, left, top, size, autotileId) {
 
     if (!core.isset(autotileId)) {
@@ -1966,6 +2070,7 @@ core.prototype.drawAutotile = function (floorId, canvas, autotileMaps, left, top
     }
 }
 
+////// 绘制Autotile的某一块 //////
 core.prototype.drawAutotileBlock = function (floorId, map, x, y, size, autotile, index) {
     var canvas = core.canvas[map];
     var groundId = core.floors[floorId].defaultGround || "ground";
@@ -2049,51 +2154,53 @@ core.prototype.drawAutotileBlock = function (floorId, map, x, y, size, autotile,
     }
 }
 
-core.prototype.autotileExists = function (x, y, floorId) {
-    var block = core.getBlock(x,y,floorId);
-    if (block==null) return false;
-    return block.block.event.cls == 'autotile';
-}
-
+////// 某个点是否不可通行 //////
 core.prototype.noPassExists = function (x, y, floorId) {
     var block = core.getBlock(x,y,floorId);
     if (block==null) return false;
     return core.isset(block.block.event.noPass) && block.block.event.noPass;
 }
 
+////// 某个点是否在区域内且不可通行 //////
 core.prototype.noPass = function (x, y) {
     return x<0 || x>12 || y<0 || y>12 || core.noPassExists(x,y);
 }
 
+////// 某个点是否存在NPC //////
 core.prototype.npcExists = function (x, y, floorId) {
     var block = core.getBlock(x,y,floorId);
     if (block==null) return false;
     return block.block.event.cls == 'npcs';
 }
 
+////// 某个点是否存在（指定的）地形 //////
 core.prototype.terrainExists = function (x, y, id, floorId) {
     var block = core.getBlock(x,y,floorId);
     if (block==null) return false;
-    return block.block.event.cls=='terrains' && block.block.event.id==id;
+    return block.block.event.cls=='terrains' && (core.isset(id)?block.block.event.id==id:true);
 }
 
+////// 某个点是否存在楼梯 //////
 core.prototype.stairExists = function (x, y, floorId) {
     var block = core.getBlock(x,y,floorId);
     if (block==null) return false;
     return block.block.event.cls=='terrains' && (block.block.event.id=='upFloor' || block.block.event.id=='downFloor');
 }
 
+////// 当前位置是否在楼梯边 //////
 core.prototype.nearStair = function() {
     var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
     return core.stairExists(x,y) || core.stairExists(x-1,y) || core.stairExists(x,y-1) || core.stairExists(x+1,y) || core.stairExists(x,y+1);
 }
 
+////// 某个点是否存在（指定的）怪物 //////
 core.prototype.enemyExists = function (x, y, id,floorId) {
     var block = core.getBlock(x,y,floorId);
     if (block==null) return false;
     return block.block.event.cls=='enemys' && (core.isset(id)?block.block.event.id==id:true);
 }
 
+////// 获得某个点的block //////
 core.prototype.getBlock = function (x, y, floorId, needEnable) {
     if (!core.isset(floorId)) floorId=core.status.floorId;
     if (!core.isset(needEnable)) needEnable=true;
@@ -2107,6 +2214,7 @@ core.prototype.getBlock = function (x, y, floorId, needEnable) {
     return null;
 }
 
+////// 显示移动某块的动画，达到{“type”:”move”}的效果 //////
 core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
     time = time || 500;
 
@@ -2206,6 +2314,7 @@ core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
     }, time/16);
 }
 
+////// 显示/隐藏某个块时的动画效果 //////
 core.prototype.animateBlock = function (x,y,type,time,callback) {
     if (type!='hide') type='show';
 
@@ -2248,8 +2357,8 @@ core.prototype.animateBlock = function (x,y,type,time,callback) {
     }, time/10);
 }
 
-// 显示一个事件
-core.prototype.addBlock = function(x,y,floodId) {
+////// 将某个块从禁用变成启用状态 //////
+core.prototype.showBlock = function(x, y, floodId) {
     floodId = floodId || core.status.floorId;
     var block = core.getBlock(x,y,floodId,false);
     if (block==null) return; // 不存在
@@ -2268,6 +2377,7 @@ core.prototype.addBlock = function(x,y,floodId) {
     }
 }
 
+////// 将某个块从启用变成禁用状态 //////
 core.prototype.removeBlock = function (x, y, floorId) {
     floorId = floorId || core.status.floorId;
 
@@ -2287,7 +2397,7 @@ core.prototype.removeBlock = function (x, y, floorId) {
     core.updateFg();
 }
 
-
+////// 根据block的索引删除该块 //////
 core.prototype.removeBlockById = function (index, floorId) {
 
     var blocks = core.status.maps[floorId].blocks;
@@ -2306,12 +2416,14 @@ core.prototype.removeBlockById = function (index, floorId) {
     blocks[index].enable = false;
 }
 
+////// 一次性删除多个block //////
 core.prototype.removeBlockByIds = function (floorId, ids) {
     ids.sort(function (a,b) {return b-a}).forEach(function (id) {
         core.removeBlockById(id, floorId);
     });
 }
 
+////// 添加一个全局动画 //////
 core.prototype.addGlobalAnimate = function (animateMore, x, y, loc, image) {
     if (animateMore == 2) {
         core.status.twoAnimateObjs.push({
@@ -2333,6 +2445,7 @@ core.prototype.addGlobalAnimate = function (animateMore, x, y, loc, image) {
     }
 }
 
+////// 删除一个或所有全局动画 //////
 core.prototype.removeGlobalAnimate = function (x, y, all) {
     if (all == true) {
         core.status.twoAnimateObjs = [];
@@ -2352,6 +2465,7 @@ core.prototype.removeGlobalAnimate = function (x, y, all) {
     }
 }
 
+////// 设置全局动画的显示效果 //////
 core.prototype.setGlobalAnimate = function (speed) {
     clearInterval(core.interval.twoAnimate);
     clearInterval(core.interval.fourAnimate);
@@ -2380,6 +2494,7 @@ core.prototype.setGlobalAnimate = function (speed) {
     }, speed / 2);
 }
 
+////// 同步所有的全局动画效果 //////
 core.prototype.syncGlobalAnimate = function () {
     core.status.twoAnimateObjs.forEach(function (t) {
         t.status=0;
@@ -2389,6 +2504,7 @@ core.prototype.syncGlobalAnimate = function () {
     })
 }
 
+////// 显示UI层某个box的动画 //////
 core.prototype.setBoxAnimate = function () {
     clearInterval(core.interval.boxAnimate);
     if (core.status.boxAnimateObjs.length > 0) {
@@ -2400,6 +2516,7 @@ core.prototype.setBoxAnimate = function () {
     }
 }
 
+////// 绘制UI层的box动画 //////
 core.prototype.drawBoxAnimate = function (background) {
     for (var a = 0; a < core.status.boxAnimateObjs.length; a++) {
         var obj = core.status.boxAnimateObjs[a];
@@ -2411,7 +2528,7 @@ core.prototype.drawBoxAnimate = function (background) {
     }
 }
 
-// 更新领域、显伤
+////// 更新领域、夹击、阻击的伤害地图 //////
 core.prototype.updateCheckBlock = function() {
     core.status.checkBlock = {};
     if (!core.isset(core.status.thisMap)) return;
@@ -2505,8 +2622,8 @@ core.prototype.updateCheckBlock = function() {
     }
 }
 
+////// 检查并执行领域、夹击、阻击事件 //////
 core.prototype.checkBlock = function () {
-    // 检查领域、夹击事件
     var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
     var damage = core.status.checkBlock.damage[13*x+y];
     if (damage>0) {
@@ -2532,14 +2649,14 @@ core.prototype.checkBlock = function () {
             }
         }
 
-        if (core.status.checkBlock.betweenAttack[13*x+y]) {
+        if (core.status.checkBlock.betweenAttack[13*x+y] && damage>0) {
             core.drawTip('受到夹击，生命变成一半');
         }
         // 阻击
-        else if (snipe.length>0) {
+        else if (snipe.length>0 && damage>0) {
             core.drawTip('受到阻击伤害'+damage+'点');
         }
-        else {
+        else if (damage>0) {
             core.drawTip('受到领域伤害'+damage+'点');
         }
         if (core.status.hero.hp<=0) {
@@ -2560,6 +2677,7 @@ core.prototype.checkBlock = function () {
     }
 }
 
+////// 阻击事件（动画效果） //////
 core.prototype.snipe = function (snipes) {
     core.waitHeroToStop(function() {
         core.lockControl();
@@ -2664,6 +2782,7 @@ core.prototype.snipe = function (snipes) {
     });
 }
 
+////// 更改画面色调 //////
 core.prototype.setFg = function(color, time, callback) {
     if (!core.isset(time)) time=750;
     if (time<=0) time=0;
@@ -2718,47 +2837,7 @@ core.prototype.setFg = function(color, time, callback) {
 
 }
 
-
-core.prototype.setHeroLoc = function (itemName, itemVal) {
-    if (itemVal == '++') {
-        core.status.hero.loc[itemName]++;
-        return;
-    }
-    else if (itemVal == '--') {
-        core.status.hero.loc[itemName]--;
-        return;
-    }
-    core.status.hero.loc[itemName] = itemVal;
-}
-
-core.prototype.getHeroLoc = function (itemName) {
-    if (!core.isset(itemName)) return core.status.hero.loc;
-    return core.status.hero.loc[itemName];
-}
-
-core.prototype.nextX = function() {
-    var scan = {
-        'up': {'x': 0, 'y': -1},
-        'left': {'x': -1, 'y': 0},
-        'down': {'x': 0, 'y': 1},
-        'right': {'x': 1, 'y': 0}
-    };
-    return core.getHeroLoc('x')+scan[core.getHeroLoc('direction')].x;
-}
-
-core.prototype.nextY = function () {
-    var scan = {
-        'up': {'x': 0, 'y': -1},
-        'left': {'x': -1, 'y': 0},
-        'down': {'x': 0, 'y': 1},
-        'right': {'x': 1, 'y': 0}
-    };
-    return core.getHeroLoc('y')+scan[core.getHeroLoc('direction')].y;
-}
-
-/**
- * 更新显伤
- */
+////// 更新全地图显伤 //////
 core.prototype.updateFg = function () {
 
     if (!core.isset(core.status.thisMap) || !core.isset(core.status.thisMap.blocks)) return;
@@ -2821,9 +2900,7 @@ core.prototype.updateFg = function () {
     }
 }
 
-/**
- * 物品处理 start
- */
+////// 获得某个物品的个数 //////
 core.prototype.itemCount = function (itemId) {
     if (!core.isset(itemId) || !core.isset(core.material.items[itemId])) return 0;
     var itemCls = core.material.items[itemId].cls;
@@ -2831,10 +2908,12 @@ core.prototype.itemCount = function (itemId) {
     return core.isset(core.status.hero.items[itemCls][itemId]) ? core.status.hero.items[itemCls][itemId] : 0;
 }
 
+////// 是否存在某个物品 //////
 core.prototype.hasItem = function (itemId) {
     return core.itemCount(itemId) > 0;
 }
 
+////// 设置某个物品的个数 //////
 core.prototype.setItem = function (itemId, itemNum) {
     var itemCls = core.material.items[itemId].cls;
     if (itemCls == 'items') return;
@@ -2844,6 +2923,7 @@ core.prototype.setItem = function (itemId, itemNum) {
     core.status.hero.items[itemCls][itemId] = itemNum;
 }
 
+////// 删除某个物品 //////
 core.prototype.removeItem = function (itemId) {
     if (!core.hasItem(itemId)) return false;
     var itemCls = core.material.items[itemId].cls;
@@ -2855,15 +2935,18 @@ core.prototype.removeItem = function (itemId) {
     return true;
 }
 
+////// 使用某个物品 //////
 core.prototype.useItem = function (itemId) {
     core.items.useItem(itemId);
     return;
 }
 
+////// 能否使用某个物品 //////
 core.prototype.canUseItem = function (itemId) {
     return core.items.canUseItem(itemId);
 }
 
+////// 增加某个物品的个数 //////
 core.prototype.addItem = function (itemId, itemNum) {
     var itemData = core.material.items[itemId];
     var itemCls = itemData.cls;
@@ -2878,6 +2961,7 @@ core.prototype.addItem = function (itemId, itemNum) {
     core.status.hero.items[itemCls][itemId] += itemNum;
 }
 
+////// 获得面前的物品（轻按） //////
 core.prototype.getNextItem = function() {
     if (!core.status.heroStop || !core.flags.enableGentleClick) return;
     var nextX = core.nextX(), nextY = core.nextY();
@@ -2888,6 +2972,7 @@ core.prototype.getNextItem = function() {
     }
 }
 
+////// 获得某个物品 //////
 core.prototype.getItem = function (itemId, itemNum, itemX, itemY, callback) {
     // core.getItemAnimate(itemId, itemNum, itemX, itemY);
     core.playSound('item.ogg');
@@ -2909,6 +2994,7 @@ core.prototype.getItem = function (itemId, itemNum, itemX, itemY, callback) {
     else if (core.isset(callback)) callback();
 }
 
+////// 左上角绘制一段提示 //////
 core.prototype.drawTip = function (text, itemIcon) {
     var textX, textY, width, height, hide = false, opacityVal = 0;
     clearInterval(core.interval.tipAnimate);
@@ -2964,6 +3050,7 @@ core.prototype.drawTip = function (text, itemIcon) {
     }, 30);
 }
 
+////// 地图中间绘制一段文字 //////
 core.prototype.drawText = function (contents, callback) {
     if (core.isset(contents)) {
         if (typeof contents == 'string') {
@@ -3006,18 +3093,19 @@ core.prototype.drawText = function (contents, callback) {
 
 /////////// 地图相关 END ///////////
 
-/**
- * 系统机制 start
- */
 
-// 替换文本中的数为实际值
+
+
+/////////// 系统机制 ///////////
+
+////// 将文字中的${和}（表达式）进行替换 //////
 core.prototype.replaceText = function (text) {
     return text.replace(/\${([^}]+)}/g, function (word, value) {
         return core.calValue(value);
     });
 }
 
-
+////// 计算表达式的值 //////
 core.prototype.calValue = function (value) {
     value=value.replace(/status:([\w\d_]+)/g, "core.getStatus('$1')");
     value=value.replace(/item:([\w\d_]+)/g, "core.itemCount('$1')");
@@ -3025,6 +3113,7 @@ core.prototype.calValue = function (value) {
     return eval(value);
 }
 
+////// 执行一个表达式的effect操作 //////
 core.prototype.doEffect = function (expression) {
     // 必须使用"+="
     var arr = expression.split("+=");
@@ -3040,6 +3129,7 @@ core.prototype.doEffect = function (expression) {
     }
 }
 
+////// 字符串自动换行的分割 //////
 core.prototype.splitLines = function(canvas, text, maxLength, font) {
     if (core.isset(font)) core.setFont(canvas, font);
 
@@ -3064,6 +3154,7 @@ core.prototype.splitLines = function(canvas, text, maxLength, font) {
     return contents;
 }
 
+////// 向某个数组前插入另一个数组或元素 //////
 core.prototype.unshift = function (a,b) {
     if (!(a instanceof Array) || !core.isset(b)) return;
     if (b instanceof Array) {
@@ -3075,6 +3166,7 @@ core.prototype.unshift = function (a,b) {
     return a;
 }
 
+////// 设置本地存储 //////
 core.prototype.setLocalStorage = function(key, value) {
     try {
         localStorage.setItem(core.firstData.name + "_" + key, JSON.stringify(value));
@@ -3085,16 +3177,20 @@ core.prototype.setLocalStorage = function(key, value) {
         return false;
     }
 }
+
+////// 获得本地存储 //////
 core.prototype.getLocalStorage = function(key, defaultValue) {
     var value = localStorage.getItem(core.firstData.name+"_"+key);
     if (core.isset(value)) return JSON.parse(value);
     return defaultValue;
 }
 
+////// 移除本地存储 //////
 core.prototype.removeLocalStorage = function (key) {
     localStorage.removeItem(core.firstData.name+"_"+key);
 }
 
+////// 深拷贝一个对象 //////
 core.prototype.clone = function (data) {
     if (!core.isset(data)) return data;
     // date
@@ -3129,25 +3225,19 @@ core.prototype.clone = function (data) {
     return data;
 }
 
+////// 格式化时间为字符串 //////
 core.prototype.formatDate = function(date) {
     if (!core.isset(date)) return "";
     return date.getFullYear()+"-"+core.setTwoDigits(date.getMonth()+1)+"-"+core.setTwoDigits(date.getDate())+" "
         +core.setTwoDigits(date.getHours())+":"+core.setTwoDigits(date.getMinutes())+":"+core.setTwoDigits(date.getSeconds());
 }
 
+////// 两位数显示 //////
 core.prototype.setTwoDigits = function (x) {
     return parseInt(x)<10?"0"+x:x;
 }
 
-core.prototype.win = function(reason) {
-    core.events.win(reason);
-}
-
-core.prototype.lose = function(reason) {
-    core.events.lose(reason);
-}
-
-// 作弊
+////// 作弊 //////
 core.prototype.debug = function() {
     core.setStatus('hp', 999999);
     core.setStatus('atk', 10000);
@@ -3167,9 +3257,10 @@ core.prototype.debug = function() {
     core.drawTip("作弊成功");
 }
 
-core.prototype.checkStatus = function (name, need, item, clearData) {
+////// 判断当前能否进入某个事件 //////
+core.prototype.checkStatus = function (name, need, item) {
     if (need && core.status.event.id == name) {
-        core.ui.closePanel(clearData);
+        core.ui.closePanel();
         return false;
     }
 
@@ -3189,12 +3280,14 @@ core.prototype.checkStatus = function (name, need, item, clearData) {
     return true;
 }
 
+////// 点击怪物手册时的打开操作 //////
 core.prototype.openBook = function (need) {
-    if (!core.checkStatus('book', need, true, true))
+    if (!core.checkStatus('book', need, true))
         return;
     core.useItem('book');
 }
 
+////// 点击楼层传送器时的打开操作 //////
 core.prototype.useFly = function (need) {
     if (!core.checkStatus('fly', need, true))
         return;
@@ -3216,18 +3309,21 @@ core.prototype.useFly = function (need) {
     return;
 }
 
+////// 点击工具栏时的打开操作 //////
 core.prototype.openToolbox = function (need) {
     if (!core.checkStatus('toolbox', need))
         return;
     core.ui.drawToolbox();
 }
 
+////// 点击保存按钮时的打开操作 //////
 core.prototype.save = function(need) {
     if (!core.checkStatus('save', need))
         return;
     core.ui.drawSLPanel(core.status.saveIndex);
 }
 
+////// 点击读取按钮时的打开操作 //////
 core.prototype.load = function (need) {
 
     // 游戏开始前读档
@@ -3244,6 +3340,7 @@ core.prototype.load = function (need) {
     core.ui.drawSLPanel(core.status.saveIndex);
 }
 
+////// 实际进行存读档事件 //////
 core.prototype.doSL = function (id, type) {
     core.status.saveIndex=id;
     if (type=='save') {
@@ -3277,6 +3374,7 @@ core.prototype.doSL = function (id, type) {
     }
 }
 
+////// 存档同步操作 //////
 core.prototype.syncSave = function(type) {
     if (type=='save') {
         core.status.event.selection=1;
@@ -3405,6 +3503,7 @@ core.prototype.syncSave = function(type) {
 
 }
 
+////// 存档到本地 //////
 core.prototype.saveData = function(dataId) {
     var data = {
         'floorId': core.status.floorId,
@@ -3427,6 +3526,7 @@ core.prototype.saveData = function(dataId) {
     return core.setLocalStorage(dataId, data);
 }
 
+////// 从本地读档 //////
 core.prototype.loadData = function (data, callback) {
 
     core.resetStatus(data.hero, data.hard, data.floorId, core.maps.load(data.maps));
@@ -3445,24 +3545,29 @@ core.prototype.loadData = function (data, callback) {
     });
 }
 
+////// 设置勇士属性 //////
 core.prototype.setStatus = function (statusName, statusVal) {
     core.status.hero[statusName] = statusVal;
 }
 
+////// 获得勇士属性 //////
 core.prototype.getStatus = function (statusName) {
     return core.status.hero[statusName];
 }
 
+////// 获得某个等级的名称 //////
 core.prototype.getLvName = function () {
     if (core.status.hero.lv>core.firstData.levelUp.length) return core.status.hero.lv;
     return core.firstData.levelUp[core.status.hero.lv-1].name || core.status.hero.lv;
 }
 
+////// 设置某个自定义变量或flag //////
 core.prototype.setFlag = function(flag, value) {
     if (!core.isset(core.status.hero)) return;
     core.status.hero.flags[flag]=value;
 }
 
+////// 获得某个自定义变量或flag //////
 core.prototype.getFlag = function(flag, defaultValue) {
     if (!core.isset(core.status.hero)) return defaultValue;
     var value = core.status.hero.flags[flag];
@@ -3470,24 +3575,28 @@ core.prototype.getFlag = function(flag, defaultValue) {
     return defaultValue;
 }
 
-// 只有不为0或false时才会返回true
+////// 是否存在某个自定义变量或flag，且值为true //////
 core.prototype.hasFlag = function(flag) {
     if (core.getFlag(flag)) return true;
     return false;
 }
 
+////// 往当前事件列表之前插入一系列事件 //////
 core.prototype.insertAction = function (list) {
     core.events.insertAction(list);
 }
 
+////// 锁定状态栏，常常用于事件处理 //////
 core.prototype.lockControl = function () {
     core.status.lockControl = true;
 }
 
+////// 解锁状态栏 //////
 core.prototype.unLockControl = function () {
     core.status.lockControl = false;
 }
 
+////// 判断某对象是否不为undefined也不会null //////
 core.prototype.isset = function (val) {
     if (val == undefined || val == null) {
         return false;
@@ -3495,6 +3604,7 @@ core.prototype.isset = function (val) {
     return true
 }
 
+////// 播放背景音乐 //////
 core.prototype.playBgm = function (bgm) {
 
     // 如果不允许播放
@@ -3530,6 +3640,7 @@ core.prototype.playBgm = function (bgm) {
     }
 }
 
+////// 暂停背景音乐的播放 //////
 core.prototype.pauseBgm = function () {
     // 直接暂停播放
     try {
@@ -3544,7 +3655,12 @@ core.prototype.pauseBgm = function () {
     }
 }
 
+////// 恢复背景音乐的播放 //////
 core.prototype.resumeBgm = function () {
+
+    // 如果不允许播放
+    if (!core.musicStatus.bgmStatus) return;
+
     // 恢复BGM
     try {
         if (core.isset(core.musicStatus.playingBgm)) {
@@ -3564,6 +3680,7 @@ core.prototype.resumeBgm = function () {
     }
 }
 
+////// 播放音频 //////
 core.prototype.playSound = function (sound) {
 
     // 如果不允许播放
@@ -3597,27 +3714,7 @@ core.prototype.playSound = function (sound) {
     }
 }
 
-core.prototype.changeSoundStatus = function () {
-    if (core.musicStatus.soundStatus) {
-        main.core.disabledSound();
-    }
-    else {
-        main.core.enabledSound();
-    }
-}
-
-core.prototype.enabledSound = function () {
-    core.musicStatus.soundStatus = true;
-    core.playBgm('bgm', 'mp3');
-    core.setLocalStorage('soundStatus', true);
-}
-
-core.prototype.disabledSound = function () {
-    core.musicStatus.playedBgm.pause();
-    core.musicStatus.soundStatus = false;
-    core.setLocalStorage('soundStatus', false);
-}
-
+////// 动画显示某对象 //////
 core.prototype.show = function (obj, speed, callback) {
     if (!core.isset(speed)) {
         obj.style.display = 'block';
@@ -3638,6 +3735,7 @@ core.prototype.show = function (obj, speed, callback) {
     }, speed);
 }
 
+////// 动画使某对象消失 //////
 core.prototype.hide = function (obj, speed, callback) {
     if (!core.isset(speed)) {
         obj.style.display = 'none';
@@ -3658,8 +3756,7 @@ core.prototype.hide = function (obj, speed, callback) {
 }
 
 
-////// 状态栏相关 //////
-
+////// 清空状态栏 //////
 core.prototype.clearStatusBar = function() {
     var statusList = ['floor', 'lv', 'hp', 'atk', 'def', 'mdef', 'money', 'experience', 'up', 'yellowKey', 'blueKey', 'redKey', 'poison', 'weak', 'curse', 'hard'];
     statusList.forEach(function (e) {
@@ -3669,13 +3766,11 @@ core.prototype.clearStatusBar = function() {
     core.statusBar.image.fly.style.opacity = 0.3;
 }
 
-/**
- * 更新状态栏
- */
+////// 更新状态栏 //////
 core.prototype.updateStatusBar = function () {
 
     // 检查等级
-    core.checkLvUp();
+    core.events.checkLvUp();
 
     // 检查HP上限
     if (core.values.HPMAX>0) {
@@ -3725,32 +3820,7 @@ core.prototype.updateStatusBar = function () {
     core.updateFg();
 }
 
-core.prototype.checkLvUp = function () {
-    if (!core.flags.enableLevelUp || core.status.hero.lv>=core.firstData.levelUp.length) return;
-    // 计算下一个所需要的数值
-    var need=core.firstData.levelUp[core.status.hero.lv].need;
-    if (!core.isset(need)) return;
-    if (core.status.hero.experience>=need) {
-        // 升级
-        core.status.hero.lv++;
-        var effect = core.firstData.levelUp[core.status.hero.lv-1].effect;
-        if (typeof effect == "string") {
-            if (effect.indexOf("function")==0) {
-                eval("("+effect+")()");
-            }
-            else {
-                effect.split(";").forEach(function (t) {
-                    core.doEffect(t);
-                });
-            }
-        }
-        else if (effect instanceof Function) {
-            effect();
-        }
-        core.checkLvUp();
-    }
-}
-
+////// 屏幕分辨率改变后重新自适应 //////
 core.prototype.resize = function(clientWidth, clientHeight) {
     
     // 默认画布大小
@@ -4055,6 +4125,7 @@ core.prototype.resize = function(clientWidth, clientHeight) {
     core.domRenderer();
 }
 
+////// 渲染DOM //////
 core.prototype.domRenderer = function(){
 
     core.dom.statusBar.style.display = 'block';

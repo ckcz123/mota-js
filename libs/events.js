@@ -2,6 +2,7 @@ function events() {
 
 }
 
+////// 初始化 //////
 events.prototype.init = function () {
     this.events = {
         'battle': function (data, core, callback) {
@@ -45,9 +46,9 @@ events.prototype.init = function () {
     }
 }
 
-// 初始化
+////// 获得一个或所有系统事件类型 //////
 events.prototype.getEvents = function (eventName) {
-    if (eventName == undefined) {
+    if (!core.isset(eventName)) {
         return this.events;
     }
     return this.events[eventName];
@@ -87,12 +88,14 @@ events.prototype.startGame = function (hard) {
     })
 }
 
-////// 简单难度设置初始福利 //////
+////// 不同难度分别设置初始属性 //////
 events.prototype.setInitData = function (hard) {
     if (hard=='Easy') { // 简单难度
         core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
         // 可以在此设置一些初始福利，比如设置初始生命值可以调用：
         // core.setStatus("hp", 10000);
+        // 赠送一把黄钥匙可以调用
+        // core.setItem("yellowKey", 1);
     }
     if (hard=='Normal') { // 普通难度
         core.setFlag('hard', 2); // 可以用flag:hard来获得当前难度
@@ -102,9 +105,8 @@ events.prototype.setInitData = function (hard) {
     }
 }
 
-////// 游戏结束事件 //////
+////// 游戏获胜事件 //////
 events.prototype.win = function(reason) {
-    // 获胜
     core.waitHeroToStop(function() {
         core.removeGlobalAnimate(0,0,true);
         core.clearMap('all'); // 清空全地图
@@ -116,8 +118,8 @@ events.prototype.win = function(reason) {
     });
 }
 
+////// 游戏失败事件 //////
 events.prototype.lose = function(reason) {
-    // 失败
     core.waitHeroToStop(function() {
         core.drawText([
             "\t[结局1]你死了。\n如题。"
@@ -133,20 +135,9 @@ events.prototype.afterChangeFloor = function (floorId) {
         this.doEvents(core.floors[floorId].firstArrive);
         core.setFlag("visited_"+floorId, true);
     }
-
-    // 播放BGM
-    if (floorId == 'sample0') {
-        core.playBgm('bgm.mp3');
-    }
-    if (floorId == 'sample1') {
-        core.playBgm('star.mid');
-    }
-    if (floorId == 'sample2') {
-        core.playBgm('qianjin.mid');
-    }
 }
 
-////// 实际事件的处理 //////
+////// 开始执行一系列自定义事件 //////
 events.prototype.doEvents = function (list, x, y, callback) {
     // 停止勇士
     core.waitHeroToStop(function() {
@@ -162,6 +153,7 @@ events.prototype.doEvents = function (list, x, y, callback) {
     });
 }
 
+////// 执行当前自定义事件列表中的下一个事件 //////
 events.prototype.doAction = function() {
     // 清空boxAnimate和UI层
     clearInterval(core.interval.boxAnimate);
@@ -172,7 +164,7 @@ events.prototype.doAction = function() {
     if (core.status.event.data.list.length==0) {
         if (core.isset(core.status.event.data.callback))
             core.status.event.data.callback();
-        core.ui.closePanel(false);
+        core.ui.closePanel();
         return;
     }
 
@@ -201,12 +193,12 @@ events.prototype.doAction = function() {
         case "show": // 显示
             if (core.isset(data.time) && data.time>0 && (!core.isset(data.floorId) || data.floorId==core.status.floorId)) {
                 core.animateBlock(data.loc[0],data.loc[1],'show', data.time, function () {
-                    core.addBlock(data.loc[0],data.loc[1],data.floorId);
+                    core.showBlock(data.loc[0],data.loc[1],data.floorId);
                     core.events.doAction();
                 });
             }
             else {
-                core.addBlock(data.loc[0],data.loc[1],data.floorId)
+                core.showBlock(data.loc[0],data.loc[1],data.floorId)
                 this.doAction();
             }
             break;
@@ -418,7 +410,7 @@ events.prototype.insertAction = function (action) {
     }
 }
 
-////// 打开商店 //////
+////// 打开一个全局商店 //////
 events.prototype.openShop = function(shopId, needVisited) {
     var shop = core.status.shops[shopId];
     shop.times = shop.times || 0;
@@ -460,33 +452,9 @@ events.prototype.openShop = function(shopId, needVisited) {
     core.ui.drawChoices(content, choices);
 }
 
+////// 禁用一个全局商店 //////
 events.prototype.disableQuickShop = function (shopId) {
     core.status.shops[shopId].visited = false;
-}
-
-////// 降低难度 //////
-
-events.prototype.decreaseHard = function() {
-    core.drawTip("本塔不支持降低难度！");
-    /*
-    if (core.status.hard == 0) {
-        core.drawTip("当前已是难度0，不能再降低难度了");
-        return;
-    }
-    var add = 100, x=core.status.hard;
-    while (x<10) {
-        x++; add*=2;
-    }
-    core.ui.drawConfirmBox("本次操作可生命+" + add + "，确定吗？", function () {
-        core.status.hero.hp += add;
-        core.status.hard--;
-        core.updateStatusBar();
-        core.ui.closePanel();
-        core.drawTip("降低难度成功，生命+" + add);
-    }, function () {
-        core.ui.drawSettings(false);
-    });
-    */
 }
 
 ////// 能否使用快捷商店 //////
@@ -497,9 +465,36 @@ events.prototype.canUseQuickShop = function(shopIndex) {
     return null;
 }
 
+////// 检查升级事件 //////
+events.prototype.checkLvUp = function () {
+    if (!core.flags.enableLevelUp || core.status.hero.lv>=core.firstData.levelUp.length) return;
+    // 计算下一个所需要的数值
+    var need=core.firstData.levelUp[core.status.hero.lv].need;
+    if (!core.isset(need)) return;
+    if (core.status.hero.experience>=need) {
+        // 升级
+        core.status.hero.lv++;
+        var effect = core.firstData.levelUp[core.status.hero.lv-1].effect;
+        if (typeof effect == "string") {
+            if (effect.indexOf("function")==0) {
+                eval("("+effect+")()");
+            }
+            else {
+                effect.split(";").forEach(function (t) {
+                    core.doEffect(t);
+                });
+            }
+        }
+        else if (effect instanceof Function) {
+            effect();
+        }
+        this.checkLvUp();
+    }
+}
+
 ////// 尝试使用道具 //////
 events.prototype.useItem = function(itemId) {
-    core.ui.closePanel(false);
+    core.ui.closePanel();
 
     if (itemId=='book') {
         core.openBook(false);
@@ -522,7 +517,7 @@ events.prototype.useItem = function(itemId) {
     else core.drawTip("当前无法使用"+core.material.items[itemId].name);
 }
 
-////// 加点 //////
+////// 加点事件 //////
 events.prototype.addPoint = function (enemy) {
     var point = enemy.point;
     if (!core.isset(point) || point<=0) return [];
@@ -531,22 +526,21 @@ events.prototype.addPoint = function (enemy) {
     return [
         {"type": "choices",
             "choices": [
-                {"text": "生命+"+(200*point), "action": [
-                    {"type": "setValue", "name": "status:hp", "value": "status:hp+"+(200*point)}
-                ]},
                 {"text": "攻击+"+(1*point), "action": [
                     {"type": "setValue", "name": "status:atk", "value": "status:atk+"+(1*point)}
                 ]},
                 {"text": "防御+"+(2*point), "action": [
                     {"type": "setValue", "name": "status:def", "value": "status:def+"+(2*point)}
                 ]},
+                {"text": "生命+"+(200*point), "action": [
+                    {"type": "setValue", "name": "status:hp", "value": "status:hp+"+(200*point)}
+                ]},
             ]
         }
     ];
-
 }
 
-/****** 打完怪物 ******/
+////// 战斗结束后触发的事件 //////
 events.prototype.afterBattle = function(enemyId,x,y,callback) {
 
     // 毒衰咒的处理
@@ -607,7 +601,7 @@ events.prototype.afterBattle = function(enemyId,x,y,callback) {
 
 }
 
-/****** 开完门 ******/
+////// 开一个门后触发的事件 //////
 events.prototype.afterOpenDoor = function(doorId,x,y,callback) {
 
     var todo = [];
@@ -628,7 +622,7 @@ events.prototype.afterOpenDoor = function(doorId,x,y,callback) {
     if (core.isset(callback)) callback();
 }
 
-/****** 经过路障 ******/
+////// 经过一个路障 //////
 events.prototype.passNet = function (data) {
     // 有鞋子
     if (core.hasItem('shoes')) return;
@@ -659,6 +653,7 @@ events.prototype.passNet = function (data) {
     core.updateStatusBar();
 }
 
+////// 改变亮灯（感叹号）的事件 //////
 events.prototype.changeLight = function(x, y) {
     var block = core.getBlock(x, y);
     if (block==null) return;
@@ -675,32 +670,33 @@ events.prototype.changeLight = function(x, y) {
     this.afterChangeLight(x,y);
 }
 
-// 改变灯后的事件
+////// 改变亮灯之后，可以触发的事件 //////
 events.prototype.afterChangeLight = function(x,y) {
 
 }
 
-// 使用炸弹/圣锤后的事件
+////// 使用炸弹/圣锤后的事件 //////
 events.prototype.afterUseBomb = function () {
 
 
 }
 
-// 存档事件前一刻的处理
+////// 即将存档前可以执行的操作 //////
 events.prototype.beforeSaveData = function(data) {
 
 }
 
-// 读档事件后，载入事件前，对数据的处理
+////// 读档事件后，载入事件前，可以执行的操作 //////
 events.prototype.afterLoadData = function(data) {
 
 }
 
 
-/******************************************/
-/*********** 界面上的点击事件 ***************/
-/******************************************/
+/****************************************/
+/********** 点击事件、键盘事件 ************/
+/****************************************/
 
+////// 按下Ctrl键时（快捷跳过对话） //////
 events.prototype.keyDownCtrl = function () {
     if (core.status.event.id=='text') {
         core.drawText();
@@ -712,6 +708,7 @@ events.prototype.keyDownCtrl = function () {
     }
 }
 
+////// 点击确认框时 //////
 events.prototype.clickConfirmBox = function (x,y) {
     if ((x == 4 || x == 5) && y == 7 && core.isset(core.status.event.data.yes))
         core.status.event.data.yes();
@@ -719,6 +716,7 @@ events.prototype.clickConfirmBox = function (x,y) {
         core.status.event.data.no();
 }
 
+////// 键盘操作确认框时 //////
 events.prototype.keyUpConfirmBox = function (keycode) {
     if (keycode==37) {
         core.status.event.selection=0;
@@ -742,7 +740,7 @@ events.prototype.keyUpConfirmBox = function (keycode) {
     }
 }
 
-// 正在处理事件时的点击操作...
+////// 自定义事件时的点击操作 //////
 events.prototype.clickAction = function (x,y) {
 
     if (core.status.event.data.type=='text') {
@@ -765,6 +763,7 @@ events.prototype.clickAction = function (x,y) {
     }
 }
 
+////// 自定义事件时，按下某个键的操作 //////
 events.prototype.keyDownAction = function (keycode) {
     if (core.status.event.data.type=='choices') {
         var data = core.status.event.data.current;
@@ -784,6 +783,7 @@ events.prototype.keyDownAction = function (keycode) {
     }
 }
 
+////// 自定义事件时，放开某个键的操作 //////
 events.prototype.keyUpAction = function (keycode) {
     if (core.status.event.data.type=='text' && (keycode==13 || keycode==32 || keycode==67)) {
         this.doAction();
@@ -801,48 +801,49 @@ events.prototype.keyUpAction = function (keycode) {
     }
 }
 
-// 怪物手册
+////// 怪物手册界面的点击操作 //////
 events.prototype.clickBook = function(x,y) {
     // 上一页
     if ((x == 3 || x == 4) && y == 12) {
-        core.ui.drawEnemyBook(core.status.event.data - 6);
+        core.ui.drawBook(core.status.event.data - 6);
         return;
     }
     // 下一页
     if ((x == 8 || x == 9) && y == 12) {
-        core.ui.drawEnemyBook(core.status.event.data + 6);
+        core.ui.drawBook(core.status.event.data + 6);
         return;
     }
     // 返回
     if (x>=10 && x<=12 && y==12) {
-        core.ui.closePanel(true);
+        core.ui.closePanel();
         return;
     }
     // 怪物信息
-    // var index = parseInt(y/2);
     var data = core.status.event.data;
     if (core.isset(data) && y<12) {
         var page=parseInt(data/6);
         var index=6*page+parseInt(y/2);
-        core.ui.drawEnemyBook(index);
+        core.ui.drawBook(index);
         core.ui.drawBookDetail(index);
     }
     return;
 }
 
+////// 怪物手册界面时，按下某个键的操作 //////
 events.prototype.keyDownBook = function (keycode) {
-    if (keycode==37) core.ui.drawEnemyBook(core.status.event.data-6);
-    if (keycode==38) core.ui.drawEnemyBook(core.status.event.data-1);
-    if (keycode==39) core.ui.drawEnemyBook(core.status.event.data+6);
-    if (keycode==40) core.ui.drawEnemyBook(core.status.event.data+1);
-    if (keycode==33) core.ui.drawEnemyBook(core.status.event.data-6);
-    if (keycode==34) core.ui.drawEnemyBook(core.status.event.data+6);
+    if (keycode==37) core.ui.drawBook(core.status.event.data-6);
+    if (keycode==38) core.ui.drawBook(core.status.event.data-1);
+    if (keycode==39) core.ui.drawBook(core.status.event.data+6);
+    if (keycode==40) core.ui.drawBook(core.status.event.data+1);
+    if (keycode==33) core.ui.drawBook(core.status.event.data-6);
+    if (keycode==34) core.ui.drawBook(core.status.event.data+6);
     return;
 }
 
+////// 怪物手册界面时，放开某个键的操作 //////
 events.prototype.keyUpBook = function (keycode) {
     if (keycode==27 || keycode==88) {
-        core.ui.closePanel(true);
+        core.ui.closePanel();
         return;
     }
     if (keycode==13 || keycode==32 || keycode==67) {
@@ -854,13 +855,13 @@ events.prototype.keyUpBook = function (keycode) {
     }
 }
 
-events.prototype.clickBookDetail = function (x,y) {
+////// 怪物手册属性显示界面时的点击操作 //////
+events.prototype.clickBookDetail = function () {
     core.clearMap('data', 0, 0, 416, 416);
-
     core.status.event.id = 'book';
-
 }
 
+////// 楼层传送器界面时的点击操作 //////
 events.prototype.clickFly = function(x,y) {
     if ((x==10 || x==11) && y==9) core.ui.drawFly(core.status.event.data-1);
     if ((x==10 || x==11) && y==5) core.ui.drawFly(core.status.event.data+1);
@@ -875,12 +876,14 @@ events.prototype.clickFly = function(x,y) {
     return;
 }
 
+////// 楼层传送器界面时，按下某个键的操作 //////
 events.prototype.keyDownFly = function (keycode) {
     if (keycode==37 || keycode==38) core.ui.drawFly(core.status.event.data+1);
     else if (keycode==39 || keycode==40) core.ui.drawFly(core.status.event.data-1);
     return;
 }
 
+////// 楼层传送器界面时，放开某个键的操作 //////
 events.prototype.keyUpFly = function (keycode) {
     if (keycode==71 || keycode==27 || keycode==88)
         core.ui.closePanel();
@@ -889,7 +892,7 @@ events.prototype.keyUpFly = function (keycode) {
     return;
 }
 
-// 商店
+////// 商店界面时的点击操作 //////
 events.prototype.clickShop = function(x,y) {
     var shop = core.status.event.data.shop;
     var choices = shop.choices;
@@ -936,6 +939,7 @@ events.prototype.clickShop = function(x,y) {
     }
 }
 
+////// 商店界面时，按下某个键的操作 //////
 events.prototype.keyDownShop = function (keycode) {
     var shop = core.status.event.data.shop;
     var choices = shop.choices;
@@ -951,6 +955,7 @@ events.prototype.keyDownShop = function (keycode) {
     }
 }
 
+////// 商店界面时，放开某个键的操作 //////
 events.prototype.keyUpShop = function (keycode) {
     if (keycode==27 || keycode==88) {
         if (core.status.event.data.fromList) {
@@ -971,7 +976,7 @@ events.prototype.keyUpShop = function (keycode) {
     return;
 }
 
-// 快捷商店
+////// 快捷商店界面时的点击操作 //////
 events.prototype.clickQuickShop = function(x, y) {
     var shopList = core.status.shops, keys = Object.keys(shopList);
     if (x >= 5 && x <= 7) {
@@ -992,6 +997,7 @@ events.prototype.clickQuickShop = function(x, y) {
     }
 }
 
+////// 快捷商店界面时，按下某个键的操作 //////
 events.prototype.keyDownQuickShop = function (keycode) {
     var shopList = core.status.shops, keys = Object.keys(shopList);
     if (keycode==38) {
@@ -1006,6 +1012,7 @@ events.prototype.keyDownQuickShop = function (keycode) {
     }
 }
 
+////// 快捷商店界面时，放开某个键的操作 //////
 events.prototype.keyUpQuickShop = function (keycode) {
     if (keycode==27 || keycode==75 || keycode==88) {
         core.ui.closePanel();
@@ -1019,11 +1026,11 @@ events.prototype.keyUpQuickShop = function (keycode) {
     return;
 }
 
-// 工具栏
+////// 工具栏界面时的点击操作 //////
 events.prototype.clickToolbox = function(x,y) {
     // 返回
     if (x>=10 && x<=12 && y==12) {
-        core.ui.closePanel(false);
+        core.ui.closePanel();
         return;
     }
     var index=0;
@@ -1033,6 +1040,7 @@ events.prototype.clickToolbox = function(x,y) {
     this.clickToolboxIndex(index);
 }
 
+////// 选择工具栏界面中某个Index后的操作 //////
 events.prototype.clickToolboxIndex = function(index) {
     var items = null;
     var ii=index;
@@ -1053,6 +1061,7 @@ events.prototype.clickToolboxIndex = function(index) {
     }
 }
 
+////// 工具栏界面时，按下某个键的操作 //////
 events.prototype.keyDownToolbox = function (keycode) {
     if (!core.isset(core.status.event.data)) return;
 
@@ -1116,6 +1125,7 @@ events.prototype.keyDownToolbox = function (keycode) {
     }
 }
 
+////// 工具栏界面时，放开某个键的操作 //////
 events.prototype.keyUpToolbox = function (keycode) {
     if (keycode==84 || keycode==27 || keycode==88) {
         core.ui.closePanel();
@@ -1129,7 +1139,7 @@ events.prototype.keyUpToolbox = function (keycode) {
     }
 }
 
-// 存读档
+////// 存读档界面时的点击操作 //////
 events.prototype.clickSL = function(x,y) {
     // 上一页
     if ((x == 3 || x == 4) && y == 12) {
@@ -1141,7 +1151,7 @@ events.prototype.clickSL = function(x,y) {
     }
     // 返回
     if (x>=10 && x<=12 && y==12) {
-        core.ui.closePanel(false);
+        core.ui.closePanel();
         if (!core.isPlaying()) {
             core.showStartAnimate();
         }
@@ -1162,6 +1172,7 @@ events.prototype.clickSL = function(x,y) {
     }
 }
 
+////// 存读档界面时，按下某个键的操作 //////
 events.prototype.keyDownSL = function(keycode) {
     if (keycode==37) { // left
         core.ui.drawSLPanel(core.status.event.data - 1);
@@ -1189,6 +1200,7 @@ events.prototype.keyDownSL = function(keycode) {
     }
 }
 
+////// 存读档界面时，放开某个键的操作 //////
 events.prototype.keyUpSL = function (keycode) {
     if (keycode==27 || keycode==88 || (core.status.event.id == 'save' && keycode==83) || (core.status.event.id == 'load' && keycode==68)) {
         core.ui.closePanel();
@@ -1203,6 +1215,7 @@ events.prototype.keyUpSL = function (keycode) {
     }
 }
 
+////// 系统设置界面时的点击操作 //////
 events.prototype.clickSwitchs = function (x,y) {
     if (x<5 || x>7) return;
     var choices = [
@@ -1256,6 +1269,7 @@ events.prototype.clickSwitchs = function (x,y) {
     }
 }
 
+////// 系统设置界面时，按下某个键的操作 //////
 events.prototype.keyDownSwitchs = function (keycode) {
     var choices = [
         "背景音乐", "背景音效", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
@@ -1272,6 +1286,7 @@ events.prototype.keyDownSwitchs = function (keycode) {
     }
 }
 
+////// 系统设置界面时，放开某个键的操作 //////
 events.prototype.keyUpSwitchs = function (keycode) {
     if (keycode==27 || keycode==88) {
         core.status.event.selection=0;
@@ -1288,7 +1303,7 @@ events.prototype.keyUpSwitchs = function (keycode) {
 }
 
 
-// 菜单栏
+////// 系统菜单栏界面时的点击事件 //////
 events.prototype.clickSettings = function (x,y) {
     if (x<5 || x>7) return;
     var choices = [
@@ -1335,6 +1350,7 @@ events.prototype.clickSettings = function (x,y) {
     return;
 }
 
+////// 系统菜单栏界面时，按下某个键的操作 //////
 events.prototype.keyDownSettings = function (keycode) {
     var choices = [
         "系统设置", "快捷商店", "同步存档", "重新开始", "操作帮助", "关于本塔", "返回游戏"
@@ -1351,6 +1367,7 @@ events.prototype.keyDownSettings = function (keycode) {
     }
 }
 
+////// 系统菜单栏界面时，放开某个键的操作 //////
 events.prototype.keyUpSettings = function (keycode) {
     if (keycode==27 || keycode==88) {
         core.ui.closePanel();
@@ -1365,6 +1382,7 @@ events.prototype.keyUpSettings = function (keycode) {
     }
 }
 
+////// 同步存档界面时的点击操作 //////
 events.prototype.clickSyncSave = function (x,y) {
     if (x<5 || x>7) return;
     var choices = [
@@ -1400,6 +1418,7 @@ events.prototype.clickSyncSave = function (x,y) {
     return;
 }
 
+////// 同步存档界面时，按下某个键的操作 //////
 events.prototype.keyDownSyncSave = function (keycode) {
     var choices = [
         "同步存档到服务器", "从服务器加载存档", "清空本地存档", "返回主菜单"
@@ -1416,6 +1435,7 @@ events.prototype.keyDownSyncSave = function (keycode) {
     }
 }
 
+////// 同步存档界面时，放开某个键的操作 //////
 events.prototype.keyUpSyncSave = function (keycode) {
     if (keycode==27 || keycode==88) {
         core.status.event.selection=2;
@@ -1431,11 +1451,11 @@ events.prototype.keyUpSyncSave = function (keycode) {
     }
 }
 
+////// “关于”界面时的点击操作 //////
 events.prototype.clickAbout = function () {
     if (core.isPlaying())
-        core.ui.closePanel(false);
+        core.ui.closePanel();
     else
         core.showStartAnimate();
 }
 
-/*********** 点击事件 END ***************/

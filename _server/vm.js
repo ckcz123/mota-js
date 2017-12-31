@@ -187,7 +187,7 @@ var tip = new Vue({
     isClearBlock: false,
     geneMapSuccess: false,
     timer: null,
-    msgs: [ //分别编号1,2,3,4,5,6,7,8；奇数警告，偶数成功
+    msgs: [ //分别编号1,2,3,4,5,6,7,8,9,10；奇数警告，偶数成功
       "当前未选择任何图块，请先在右边选择要画的图块!",
       "生成地图成功！可点击复制按钮复制地图数组到剪切板",
       "生成失败! 地图中有未定义的图块，建议先用其他有效图块覆盖或点击清除地图！",
@@ -195,7 +195,9 @@ var tip = new Vue({
       "复制失败！",
       "复制成功！可直接粘贴到楼层文件的地图数组中。",
       "复制失败！当前还没有数据",
-      "修改成功！可点击复制按钮复制地图数组到剪切板"
+      "修改成功！可点击复制按钮复制地图数组到剪切板",
+      "选择背景图片失败！文件名格式错误或图片不存在！",
+      "更新背景图片成功！",
     ],
     mapMsg: '',
     whichShow: 0,
@@ -255,12 +257,31 @@ var bgSelect = new Vue({
   el: '#bgSelect',
   data: {
     bgs: {},
-    selectedBg: 'ground'
+    selectedBg: 'ground',
+    imgname: ''
   },
   watch:{
     selectedBg: function(){
       editor.bgY = this.bgs.indexOf(this.selectedBg);
       editor.drawMapBg();
+    }
+  },
+  methods: {
+    updatebg: function(){
+      tip.whichShow = 0;
+      var regx = /\S+\.(png|bmp|jpg|jpeg|gif)$/i;
+      if(regx.test(this.imgname)){
+        var url = 'images/'+this.imgname;
+        editor.loadImg(url).then(function(img){
+          editor.drawMapBg(img);
+          tip.whichShow = 10;
+        }).catch(function(err){
+          console.log(err);
+          tip.whichShow = 9;
+        });
+      }else{
+        tip.whichShow = 9;
+      }
     }
   }
 })

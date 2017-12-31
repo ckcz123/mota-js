@@ -438,8 +438,8 @@ editor.prototype.init = function(){
     
     var p1 = editor.loadjs(mapsjsUrl).then(function(){ // 加载maps.js
       var maps_ = new maps(); //实例化maps
-      maps.init();
-      return maps
+      maps_.init();
+      return maps_
     }); 
     var p2 = editor.loadjs(iconsjsUrl)  // 加载icons.js
     .then(function(){  // 实例化并获取icons

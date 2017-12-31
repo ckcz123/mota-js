@@ -1,4 +1,33 @@
 function main() {
+
+    //------------------------ 用户修改内容 ------------------------//
+
+    this.version = "0.1"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+
+    this.useCompress = false; // 是否使用压缩文件
+    // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
+    // 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。
+    // 如果要进行剧本的修改请务必将其改成false。
+
+    this.floorIds = [ // 在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序
+        "sample0", "sample1", "sample2"
+    ];
+    this.pngs = [ // 在此存放所有可能的背景图片；背景图片最好是416*416像素，其他分辨率会被强制缩放成416*416
+        // 建议对于较大的图片，在网上使用在线的“图片压缩工具”来进行压缩，以节省流量
+        // 有关使用自定义背景图，请参见文档的“自定义素材”说明
+        "bg.png", "yewai.png", // 依次向后添加
+    ];
+    this.bgms = [ // 在此存放所有的bgm，和文件名一致。第一项为默认播放项
+        // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
+        '058-Slow01.mid', 'bgm.mp3', 'qianjin.mid', 'star.mid',
+    ];
+    this.sounds = [ // 在此存放所有的SE，和文件名一致
+        // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
+        'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg',
+    ];
+
+    //------------------------ 用户修改内容 END ------------------------//
+
     this.dom = {
         'body': document.body,
         'gameGroup': document.getElementById('gameGroup'),
@@ -46,14 +75,7 @@ function main() {
     this.images = [
         'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains'
     ];
-    this.bgms = [ // 在此存放所有的bgm，和文件名一致。第一项为默认播放项
-        // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
-        '058-Slow01.mid', 'bgm.mp3', 'qianjin.mid', 'star.mid'
-    ];
-    this.sounds = [ // 在此存放所有的SE，和文件名一致
-        // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
-        'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg'
-    ]
+
     this.statusBar = {
         'image': {
             'floor': document.getElementById('img-floor'),
@@ -90,20 +112,6 @@ function main() {
         'curse': document.getElementById('curse'),
         'hard': document.getElementById("hard")
     }
-
-    //------------------------ 用户修改内容 ------------------------//
-    this.version = "0.1"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
-
-    this.useCompress = false; // 是否使用压缩文件
-    // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
-    // 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。
-    // 如果要进行剧本的修改请务必将其改成false。
-
-    this.floorIds = [ // 在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序
-        "sample0", "sample1", "sample2"
-    ]
-    //------------------------ 用户修改内容 END ------------------------//
-
     this.floors = {}
     this.instance = {};
     this.canvas = {};
@@ -122,7 +130,7 @@ main.prototype.init = function () {
             coreData[name] = main[name];
         }
         main.loaderFloors(function() {
-            main.core.init(main.dom, main.statusBar, main.canvas, main.images, main.bgms, main.sounds, main.floorIds, main.floors, coreData);
+            main.core.init(main.dom, main.statusBar, main.canvas, main.images, main.pngs, main.bgms, main.sounds, main.floorIds, main.floors, coreData);
             main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
         })
     });

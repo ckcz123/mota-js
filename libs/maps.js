@@ -14,7 +14,7 @@ maps.prototype.loadFloor = function (floorId, map) {
     for (var i = 0; i < 13; i++) {
         for (var j = 0; j < 13; j++) {
             var block = this.getBlock(j, i, map[i][j]);
-            if (block.event != undefined) {
+            if (core.isset(block.event)) {
                 if (block.event.cls == 'enemys' && block.event.trigger==undefined) {
                     block.event.trigger = 'battle';
                 }
@@ -35,7 +35,7 @@ maps.prototype.loadFloor = function (floorId, map) {
                     }
                 }
             }
-            this.addEvent(block,j,i,floor.events[j+","+i],floor.defaultGround || "ground")
+            this.addEvent(block,j,i,floor.events[j+","+i])
             this.addChangeFloor(block,j,i,floor.changeFloor[j+","+i]);
             if (core.isset(block.event)) blocks.push(block);
         }
@@ -258,10 +258,10 @@ maps.prototype.getBlock = function (x, y, id) {
 }
 
 ////// 向该楼层添加剧本的自定义事件 //////
-maps.prototype.addEvent = function (block, x, y, event, ground) {
+maps.prototype.addEvent = function (block, x, y, event) {
     if (!core.isset(event)) return;
     if (!core.isset(block.event)) { // 本身是空地？
-        block.event = {'cls': 'terrains', 'id': ground, 'noPass': false};
+        block.event = {'cls': 'terrains', 'id': 'none', 'noPass': false};
     }
     // event是字符串或数组？
     if (typeof event == "string") {
@@ -272,6 +272,10 @@ maps.prototype.addEvent = function (block, x, y, event, ground) {
     }
     if (!core.isset(event.data))
         event.data = [];
+
+    // 覆盖noPass
+    if (core.isset(event.noPass))
+        block.event.noPass = event.noPass;
 
     // 覆盖enable
     if (!core.isset(block.enable) && core.isset(event.enable)) {

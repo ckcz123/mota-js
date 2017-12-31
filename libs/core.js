@@ -7,6 +7,7 @@ function core() {
     this.statusBar = {};
     this.canvas = {};
     this.images = [];
+    this.pngs = [];
     this.bgms = [];
     this.sounds = [];
     this.floorIds = [];
@@ -105,11 +106,12 @@ function core() {
 /////////// 系统事件相关 ///////////
 
 ////// 初始化 //////
-core.prototype.init = function (dom, statusBar, canvas, images, bgms, sounds, floorIds, floors, coreData) {
+core.prototype.init = function (dom, statusBar, canvas, images, pngs, bgms, sounds, floorIds, floors, coreData) {
     core.dom = dom;
     core.statusBar = statusBar;
     core.canvas = canvas;
     core.images = images;
+    core.pngs = pngs;
     core.bgms = bgms;
     core.sounds = sounds;
     core.floorIds = floorIds;
@@ -137,8 +139,6 @@ core.prototype.init = function (dom, statusBar, canvas, images, bgms, sounds, fl
     core.material.enemys = core.clone(core.enemys.getEnemys());
     core.material.icons = core.icons.getIcons();
     core.material.events = core.events.getEvents();
-
-
 
     if (location.protocol.indexOf("http")==0) {
         window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext;
@@ -259,18 +259,29 @@ core.prototype.loader = function (callback) {
             core.setStartLoadTipText(imgName + ' 加载完毕...');
             core.setStartProgressVal(loadedImageNum * (100 / allImageNum));
             if (loadedImageNum == allImageNum) {
-                
-                // 加载Autotile
-                core.material.images.autotile={};
-                var autotileIds = Object.keys(core.material.icons.autotile);
-                for (var x=0;x<autotileIds.length;x++) {
-                    core.loadImage(autotileIds[x], function (autotileId, image) {
-                        core.material.images.autotile[autotileId]=image;
-                        if (Object.keys(core.material.images.autotile).length==autotileIds.length) {
-                            // 音频
-                            core.loadMusic(callback);
+
+                // 加载pngs
+                core.material.images.pngs = {};
+                for (var x=0;x<core.pngs.length;x++) {
+                    core.loadImage(core.pngs[x], function (pngId, image) {
+                        core.material.images.pngs[pngId] = image;
+                        if (Object.keys(core.material.images.pngs).length==core.pngs.length) {
+
+                            // 加载Autotile
+                            core.material.images.autotile={};
+                            var autotileIds = Object.keys(core.material.icons.autotile);
+                            for (var x=0;x<autotileIds.length;x++) {
+                                core.loadImage(autotileIds[x], function (autotileId, image) {
+                                    core.material.images.autotile[autotileId]=image;
+                                    if (Object.keys(core.material.images.autotile).length==autotileIds.length) {
+
+                                        // 最后加载音频
+                                        core.loadMusic(callback);
+                                    }
+                                })
+                            }
                         }
-                    })
+                    });
                 }
             }
         });
@@ -281,8 +292,11 @@ core.prototype.loader = function (callback) {
 core.prototype.loadImage = function (imgName, callback) {
     try {
         core.setStartLoadTipText('加载图片 ' + imgName + ' 中...');
+        var name=imgName;
+        if (name.indexOf(".png")<0) // 不包含"png"
+            name=name+".png";
         var image = new Image();
-        image.src = 'images/' + imgName + '.png';
+        image.src = 'images/' + name;
         if (image.complete) {
             callback(imgName, image);
             return;
@@ -1999,6 +2013,14 @@ core.prototype.drawMap = function (mapName, callback) {
             core.canvas.bg.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
         }
     }
+    // 如果存在png
+    if (core.isset(core.floors[mapName].png)) {
+        var png = core.floors[mapName].png;
+        if (core.isset(core.material.images.pngs[png])) {
+            core.canvas.bg.drawImage(core.material.images.pngs[png], 0, 0, 416, 416);
+        }
+    }
+
     var autotileMaps = [];
     for (var b = 0; b < mapBlocks.length; b++) {
         // 事件启用
@@ -2010,10 +2032,12 @@ core.prototype.drawMap = function (mapName, callback) {
                 continue;
             }
             else {
-                blockIcon = core.material.icons[block.event.cls][block.event.id];
-                blockImage = core.material.images[block.event.cls];
-                core.canvas.event.drawImage(core.material.images[block.event.cls], 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
-                core.addGlobalAnimate(block.event.animate, block.x * 32, block.y * 32, blockIcon, blockImage);
+                if (block.event.id!='none') {
+                    blockIcon = core.material.icons[block.event.cls][block.event.id];
+                    blockImage = core.material.images[block.event.cls];
+                    core.canvas.event.drawImage(core.material.images[block.event.cls], 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+                    core.addGlobalAnimate(block.event.animate, block.x * 32, block.y * 32, blockIcon, blockImage);
+                }
             }
         }
     }

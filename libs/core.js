@@ -2876,8 +2876,24 @@ core.prototype.updateFg = function () {
         core.canvas.fg.textAlign = 'left';
         for (var b = 0; b < mapBlocks.length; b++) {
             var x = mapBlocks[b].x, y = mapBlocks[b].y;
-            if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls == 'enemys' && mapBlocks[b].event.trigger == 'battle'
+            if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls == 'enemys'
                 && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable)) {
+
+                // 非系统默认的战斗事件（被覆盖）：无显伤
+                if (mapBlocks[b].event.trigger != 'battle') {
+
+                    var shouldDisplayDamage = false;
+
+                    // 部分特殊的点（例如战前剧情）需要显伤的可类似在这里手动添加
+                    /*
+                    if (core.status.floorId='???' && x=? && y=?)
+                        shouldDisplayDamage = true;
+                    */
+
+                    if (!shouldDisplayDamage)
+                        continue;
+                }
+
                 var id = mapBlocks[b].event.id;
 
                 var damage = core.enemys.getDamage(id);

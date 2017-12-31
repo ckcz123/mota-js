@@ -519,105 +519,19 @@ function editor() {
   this.version = "1.2";
   this.material = {};
 }
-// 重构这一堆回调
+
 editor.prototype.init = function(callback){
-  var mapsdatajsUrl = 'libs/project/maps.js';
-  var iconsdatajsUrl = 'libs/project/icons.js';
-  var mapsjsUrl = 'libs/maps.js';
-  var iconsjsUrl = 'libs/icons.js';
-
-  var p1_data = editor.loadjs(mapsdatajsUrl).then(function(){ // 加载maps.js的数据
-    return 'complete'; 
-  }); 
-  var p2_data = editor.loadjs(iconsdatajsUrl).then(function(){ // 加载icons.js的数据
-    return 'complete'; 
-  });
-
-  Promise.all([p1_data, p2_data]).then(function([p1_data, p2_data]){
-    
-    var p1 = editor.loadjs(mapsjsUrl).then(function(){ // 加载maps.js
-      var maps_ = new maps(); //实例化maps
-      maps_.init();
-      return maps_
-    }); 
-    var p2 = editor.loadjs(iconsjsUrl)  // 加载icons.js
-    .then(function(){  // 实例化并获取icons
-      var ic = new icons();
-      ic.init();
-      return ic.getIcons();
-    });
-    var p3 = p2.then(function(icons){ // 加载所有图片
-      return editor.loadAllImgs(icons);
-    })
-    .catch(function(err){
-      console.log('发生错误！', err);
-    });
-
-    Promise.all([p1, p2, p3])
-    .then(function([maps, icons, img]){
-      editor.idsInit(maps, icons); // 初始化图片素材信息
-      editor.drawInitData(icons); // 初始化绘图
-      editor.listen(); // 开始监听事件
-      if(Boolean(callback))callback();
-    })
-
-  });
+  editor.main=main;
+  editor.core=core;
+  editor.fs=fs;
+  editor.file=editor_file;
+  editor.material.images=core.material.images;
+  editor.idsInit(core.maps, core.icons.icons); // 初始化图片素材信息
+  editor.drawInitData(core.icons.icons); // 初始化绘图
+  editor.listen(); // 开始监听事件
+  if(Boolean(callback))callback();
 }
 
-editor.prototype.loadjs = function(url){
-  return new Promise(function(resolve, reject){
-    var script = document.createElement('script');
-    script.src = url + '?' + editor.version;
-    document.body.appendChild(script);
-    script.onload = function () {
-      resolve( console.log(url+"加载完成"));
-    }
-    script.onerror = function(){
-      reject(new Error('Load js error at '+url))
-    }
-  });
-}
-editor.prototype.loadImg = function(url){
-  return new Promise(function(resolve, reject){
-    var img = new Image();
-    img.src = url;
-    img.onload = function(){
-      resolve(img);
-    }
-    img.onerror = function(){
-      reject(new Error('Load image error at '+url));
-    }
-  })
-}
-
-editor.prototype.loadAllImgs = function(icons){
-  editor.material.images = {};
-  var imgs = Object.keys(icons);
-  var autotiles = null;
-  if(hasOwnProp(icons, 'hero')){ // hero 图片不加载
-    var index = imgs.indexOf('hero');
-    imgs.splice(index, 1);
-  }
-  if(hasOwnProp(icons, 'autotile')){
-    editor.material.images['autotile'] = {};
-    var index = imgs.indexOf('autotile');
-    imgs.splice(index, 1);
-    autotiles = Object.keys(icons.autotile);
-    imgs = imgs.concat(autotiles);
-  }
-  var p = imgs.map(function(im){
-    var url = 'images/'+im+'.png'
-    return editor.loadImg(url).then(function(image){
-      if(autotiles.indexOf(im) >= 0){
-        editor.material.images['autotile'][im] = image;
-      }else editor.material.images[im] = image;
-    }).catch(function(err){
-      console.log('发生错误！', err);
-    });
-  });
-
-  return Promise.all(p);
-}
 editor.prototype.idsInit = function(maps, icons){
   editor.ids = [];
   editor.indexs = [];
@@ -1068,15 +982,6 @@ editor = new editor();
 main.init('editor');
 //main.listen();
 var afterMainInit = function(){
-  //main.editor.mapIntoBlocks(editor.map.map(function(v){return v.map(function(v){return v.idnum||v||0})}),{'events':{},'changeFloor':{},'defaultGround':null});
-  //main.editor.drawMapBg();
-  //main.editor.updateMap();
-  
-  main.instance={};
-  editor.main=main;
-  editor.core=core;
-  editor.fs=fs;
-  editor.file=editor_file;
 
   main.editor.disableGlobalAnimate=false;
   //core.status.maps = core.clone(core.maps.initMaps(floorIds));
@@ -1094,12 +999,6 @@ var startgame = function(){
 setTimeout(startgame, 300);
 
 </script>
-<script type="text/javascript">
-  //Vue
-  //var listenByVue = function() {
-  
-//}
-//listenByVue()
-</script>
+
 </body>
 </html>

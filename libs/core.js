@@ -296,7 +296,7 @@ core.prototype.loadImage = function (imgName, callback) {
         if (name.indexOf(".png")<0) // 不包含"png"
             name=name+".png";
         var image = new Image();
-        image.src = 'images/' + name;
+        image.src = 'images/' + name + "?v=" + main.version;
         if (image.complete) {
             callback(imgName, image);
             return;

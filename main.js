@@ -165,7 +165,7 @@ main.prototype.loaderFloors = function (callback) {
     main.setMainTipsText('正在加载楼层文件...')
     if (this.useCompress) { // 读取压缩文件
         var script = document.createElement('script');
-        script.src = 'libs/floors.min.js?' + this.version;
+        script.src = 'libs/floors.min.js?v=' + this.version;
         main.dom.body.appendChild(script);
         script.onload = function () {
             main.dom.mainTips.style.display = 'none';
@@ -189,7 +189,7 @@ main.prototype.loaderFloors = function (callback) {
 main.prototype.loadMod = function (modName, callback) {
     var script = document.createElement('script');
     var name = modName;
-    script.src = 'libs/' + modName + (this.useCompress?".min":"") + '.js?' + this.version;
+    script.src = 'libs/' + modName + (this.useCompress?".min":"") + '.js?v=' + this.version;
     main.dom.body.appendChild(script);
     script.onload = function () {
         main[name] = main.instance[name];
@@ -200,7 +200,7 @@ main.prototype.loadMod = function (modName, callback) {
 ////// 加载某一个楼层 //////
 main.prototype.loadFloor = function(floorId, callback) {
     var script = document.createElement('script');
-    script.src = 'libs/floors/' + floorId +'.js?' + this.version;
+    script.src = 'libs/floors/' + floorId +'.js?v=' + this.version;
     main.dom.body.appendChild(script);
     script.onload = function () {
         callback(floorId);

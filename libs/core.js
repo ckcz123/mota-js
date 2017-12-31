@@ -2013,20 +2013,30 @@ core.prototype.drawMap = function (mapName, callback) {
             core.canvas.bg.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
         }
     }
-    var mapArr = core.maps.getMapArr(mapName);
+
+    // 如果存在png
+    if (core.isset(core.floors[mapName].png)) {
+        var png = core.floors[mapName].png;
+        if (core.isset(core.material.images.pngs[png])) {
+            core.canvas.bg.drawImage(core.material.images.pngs[png], 0, 0, 416, 416);
+        }
+    }
+
+    var mapArray = core.maps.getMapArray(core.status.maps, mapName);
     for (var b = 0; b < mapBlocks.length; b++) {
         // 事件启用
         var block = mapBlocks[b];
         if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
             if (block.event.cls == 'autotile') {
-                core.drawAutotile(core.canvas.event, mapArr, block, 32);
-                continue;
+                core.drawAutotile(core.canvas.event, mapArray, block, 32, 0, 0);
             }
             else {
-                blockIcon = core.material.icons[block.event.cls][block.event.id];
-                blockImage = core.material.images[block.event.cls];
-                core.canvas.event.drawImage(core.material.images[block.event.cls], 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
-                core.addGlobalAnimate(block.event.animate, block.x * 32, block.y * 32, blockIcon, blockImage);
+                if (block.event.id!='none') {
+                    blockIcon = core.material.icons[block.event.cls][block.event.id];
+                    blockImage = core.material.images[block.event.cls];
+                    core.canvas.event.drawImage(core.material.images[block.event.cls], 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+                    core.addGlobalAnimate(block.event.animate, block.x * 32, block.y * 32, blockIcon, blockImage);
+                }
             }
         }
     }
@@ -2088,10 +2098,8 @@ core.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top){
         return indexArr;
     }
     // 开始绘制autotile
-    var top = core.isset(top)? top : 0, left = core.isset(left) ? left : 0;
     var x = block.x, y = block.y;
     var pieceIndexs = getAutotileIndexs(x, y);
-    ctx.clearRect(x*size+left, y*size+top, size, size);
 
     //修正四个边角的固定搭配
     if(pieceIndexs[0] == 13){

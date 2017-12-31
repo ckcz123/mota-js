@@ -354,11 +354,29 @@ maps.prototype.load = function (data, floorId) {
     }
     return this.loadFloor(floorId, data[floorId]);
 }
-maps.prototype.getMapArr = function (floorId){
-    var floor = core.floors[floorId];
-    var map=floor.map;
+maps.prototype.getMapArray = function (maps, floorId){
+    if (!core.isset(floorId)) {
+        var map = {};
+        for (var id in maps) {
+            map[id] = this.getMapArray(maps, id);
+        }
+        return map;
+    }
 
-    return map;
+    var thisFloor = maps[floorId];
+
+    var blocks = [];
+    for (var x=0;x<13;x++) {
+        blocks[x]=[];
+        for (var y=0;y<13;y++) {
+            blocks[x].push(0);
+        }
+    }
+    thisFloor.blocks.forEach(function (block) {
+        if (!(core.isset(block.enable) && !block.enable))
+            blocks[block.y][block.x] = block.id;
+    });
+    return blocks;
 }
 
 main.instance.maps = new maps();

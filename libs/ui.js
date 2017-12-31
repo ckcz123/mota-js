@@ -1083,13 +1083,20 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
             core.canvas[canvas].drawImage(blockImage, 0, blockIcon * 32, 32, 32, x + i * persize, y + j * persize, persize, persize);
         }
     }
-    var mapArr = core.maps.getMapArr(floorId);
+
+    if (core.isset(core.floors[floorId].png)) {
+        var png = core.floors[floorId].png;
+        if (core.isset(core.material.images.pngs[png])) {
+            core.canvas.ui.drawImage(core.material.images.pngs[png], x, y, size, size);
+        }
+    }
+
+    var mapArray = core.maps.getMapArray(core.status.maps, floorId);
     for (var b in blocks) {
         var block = blocks[b];
         if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
             if (block.event.cls == 'autotile') {
-                core.drawAutotile(core.canvas.ui, mapArr, block, persize, x, y);
-                continue;
+                core.drawAutotile(core.canvas.ui, mapArray, block, persize, x, y);
             }
             else {
                 if (block.event.id!='none') {

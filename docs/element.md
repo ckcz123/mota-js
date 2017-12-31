@@ -40,14 +40,15 @@
 ``` js
 enemys.prototype.getSpecialText = function (enemyId) {
     if (enemyId == undefined) return "";
-    var special = this.enemys[enemyId].special;
+    var enemy = this.enemys[enemyId];
+    var special = enemy.special;
     var text = [];
     if (this.hasSpecial(special, 1)) text.push("先攻");
     if (this.hasSpecial(special, 2)) text.push("魔攻");
     if (this.hasSpecial(special, 3)) text.push("坚固");
     if (this.hasSpecial(special, 4)) text.push("2连击");
     if (this.hasSpecial(special, 5)) text.push("3连击");
-    if (this.hasSpecial(special, 6)) text.push("4连击");
+    if (this.hasSpecial(special, 6)) text.push((enemy.n||4)+"连击");
     if (this.hasSpecial(special, 7)) text.push("破甲");
     if (this.hasSpecial(special, 8)) text.push("反击");
     if (this.hasSpecial(special, 9)) text.push("净化");
@@ -59,21 +60,34 @@ enemys.prototype.getSpecialText = function (enemyId) {
     if (this.hasSpecial(special, 15)) text.push("领域");
     if (this.hasSpecial(special, 16)) text.push("夹击");
     if (this.hasSpecial(special, 17)) text.push("仇恨");
+    if (this.hasSpecial(special, 18)) text.push("阻击");
+    if (this.hasSpecial(special, 19)) text.push("自爆");
+    if (this.hasSpecial(special, 20)) text.push("无敌");
     return text.join("  ");
 }
 ```
 
-如果需要双属性，则采用100x+y的写法。例如 103 则视为同时拥有1和3的属性，即先攻且坚固。同理1314为衰弱诅咒双属性。
+多属性可采用数组的写法，比如`'special': [1,3]`视为同时拥有先攻和坚固属性；`'special': [5,10,14,18]`视为拥有3连击、魔防、诅咒、阻击四个属性。
 
-如果需要三属性，则采用10000x+100y+z的写法。例如71116视为同时拥有7,11和16的属性，即破甲、吸血、夹击。
+本塔支持战斗动画，在`data.js`中存在三个全局选项：`canOpenBattleAnimate`, `showBattleAnimateConfirm`, `battleAnimate`。
+- `canOpenBattleAnimate`代表是否允许用户开启战斗动画。如果你添加了一些自定义属性，且不想修改战斗界面的UI，则可以将其关闭。
+- `showBattleAnimateConfirm`代表是否在游戏开始时给用户提供开启动画的选项。对于一些偏向于萌新的塔，可以开启此项。
+- `battleAnimate`代表是否默认开启战斗动画。此项会被用户存储的设置给覆盖。
+- 如果`canOpenBattleAnimate`为false，则后面两个也强制为false。
 
-四个乃至更多的属性以此类推。
+怪物可以负伤，在`data.js`的全局变量`enableNegativeDamage`中指定。
 
-怪物的伤害计算在下面的`calDamage`函数中，如有自己需求的伤害计算公式请修改该函数的代码。
+下面的`getSpecialHint`函数则给定了每个特殊属性的详细描述。这个描述将在怪物手册中看到。
+
+**打败怪物后可以进行加点操作。有关加点塔的制作可参见[加点事件](event#加点事件)。**
 
 如果`data.js`中的enableExperience为false，即不启用经验的话，怪物手册里将不显示怪物的经验值，打败怪物也不获得任何经验。
 
 拿到幸运金币后，打怪获得的金币将翻倍。
+
+N连击怪物的special是6，且我们可以为它定义n代表实际连击数。参见样板中剑王的写法。
+
+![N连击](./img/nattack.png)
 
 吸血怪需要在怪物后添加value，代表吸血的比例。
 
@@ -89,15 +103,21 @@ enemys.prototype.getSpecialText = function (enemyId) {
 
 领域怪需要在怪物后添加value，代表领域伤害的数值。如果勇士生命值扣减到0，则直接死亡触发lose事件。
 
-![怪物领域](./img/domainenemy.png)
+领域是十字伤害还是九宫格伤害由data.js中的全局变量`zoneSquare`设定。你也可以对该怪物自行进行设定。
 
-请注意如果吸血和领域同时存在，则value会冲突。**因此请勿将吸血和领域放置在同一个怪物身上。**
+`range`选项可选，代表该领域怪的范围，不写则默认为1。
 
-本塔暂不支持阻击、激光、自爆、退化等属性。
+![怪物领域](./img/zone.png)
+
+阻击怪同样需要在怪物后添加value，代表领域伤害的数值。如果勇士生命值扣减到0，则直接死亡触发lose事件。
+
+!> 阻击怪后退的地点不能有任何事件存在，即使是已经被禁用的自定义事件！
+
+请注意如果吸血、领域、阻击中任何两个同时存在，则value会冲突。**因此请勿将吸血、领域或阻击放置在同一个怪物身上。**
 
 如有额外需求，可参见[自定义怪物属性](personalization#自定义自定义怪物属性)，里面讲了如何设置一个新的怪物属性。
 
-### 路障、楼梯、传送门
+### 路障，楼梯，传送门
 
 血网的伤害数值、中毒后每步伤害数值、衰弱时暂时攻防下降的数值，都在 `data.js` 的values内定义。
 
@@ -122,6 +142,65 @@ floorId指定的是目标楼层的唯一标识符（ID）。
 楼梯和传送门默认可`"穿透"`。所谓穿透，就是当寻路穿过一个楼梯/传送门后，不会触发楼层传送事件，而是继续前进。通过系统Flag可以指定是否穿透，你也可以对每个传送点单独设置该项。
 
 ![楼层转换穿透](./img/floorset.png)
+
+### 背景音乐
+
+本塔支持BGM和SE的播放。
+
+要播放音乐和音效，你需要将对应的文件放在sounds目录下，然后在main.js中进行定义
+
+``` js
+this.bgms = [ // 在此存放所有的bgm，和文件名一致。第一项为默认播放项
+    // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
+    '058-Slow01.mid', 'bgm.mp3', 'qianjin.mid', 'star.mid'
+];
+this.sounds = [ // 在此存放所有的SE，和文件名一致
+    // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
+    'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg'
+]
+```
+
+!> 音频名不能使用中文，不能带空格或特殊字符。
+
+目前BGM支持主流的音乐格式，如mp3, ogg, mid格式等。SE则不支持mid格式的播放。
+
+!> mid格式是通过数学方法模拟出来的音乐效果，质量可能会和实际效果差距较大。
+
+定义完毕后，我们可以调用`playBgm`/`playSound`事件来播放对应的音乐/音效，有关事件的详细介绍请参见[事件](event)。
+
+**另外，考虑到用户的流量问题，将遵循如下规则：**
+- **如果用户当前使用的电脑，则默认开启音乐效果，并播放默认BGM**
+- **如果用户当前使用的手机，且处于Wifi状态，则默认开启音乐效果，并播放默认BGM**
+- **其他情况，将默认关闭音乐效果，只有在用户在菜单栏中点击“音乐开关”后才会播放音乐**
+
+!> iOS平台以及部分浏览器不支持获得当前网络状态，此时即使在使用Wifi也必须要用户点击“音乐开关”才能播放音乐。
+
+### 操作说明
+
+本塔主要支持鼠标（触摸屏）操作和键盘操作。
+
+鼠标（触摸屏）操作说明如下：
+- **点状态栏中图标：** 进行对应的操作
+- **点任意块：** 寻路并移动
+- **点任意块并拖动：** 指定寻路路线
+- **单击勇士：** 转向
+- **双击勇士：** 轻按（仅在轻按开关打开时有效）
+
+键盘操作快捷键如下：
+- **[CTRL]** 跳过对话
+- **[X]** 打开/关闭怪物手册
+- **[G]** 打开/关闭楼层传送器
+- **[S/D]** 打开/关闭存/读档页面
+- **[K]** 打开/关闭快捷商店选择列表
+- **[T]** 打开/关闭工具栏
+- **[ESC]** 打开/关闭系统菜单
+- **[H]** 打开帮助页面
+- **[SPACE]** 轻按（仅在轻按开关打开时有效）
+- **[1]** 快捷使用破墙镐
+- **[2]** 快捷使用炸弹/圣锤
+- **[3]** 快捷使用中心对称飞行器
+
+以上快捷键也能在游戏菜单中的操作说明中看到。
 
 &nbsp;
 

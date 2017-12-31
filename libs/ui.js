@@ -12,17 +12,12 @@ ui.prototype.init = function () {
 main.instance.ui = new ui();
 
 
-/**
- * 关闭一切UI窗口
- * @param clearData 是否同时清掉data层
- */
-ui.prototype.closePanel = function (clearData) {
+////// 结束一切事件和绘制，关闭UI窗口，返回游戏进程 //////
+ui.prototype.closePanel = function () {
     core.status.boxAnimateObjs = [];
     core.setBoxAnimate();
     core.clearMap('ui', 0, 0, 416, 416);
     core.setAlpha('ui', 1.0);
-    if (core.isset(clearData) && clearData)
-        core.clearMap('data', 0, 0, 416, 416);
     core.unLockControl();
     core.status.event.data = null;
     core.status.event.id = null;
@@ -30,12 +25,7 @@ ui.prototype.closePanel = function (clearData) {
     core.status.event.ui = null;
 }
 
-
-/**
- * 绘制对话框
- * @param content
- * @param id
- */
+////// 绘制一个对话框 //////
 ui.prototype.drawTextBox = function(content) {
 
     // 获得name, image, icon
@@ -137,7 +127,7 @@ ui.prototype.drawTextBox = function(content) {
     core.fillText('ui', '<点击任意位置继续>', 270, top+height-13, '#CCCCCC', '13px Verdana');
 }
 
-// 绘制选项事件
+////// 绘制一个选项界面 //////
 ui.prototype.drawChoices = function(content, choices) {
 
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
@@ -273,12 +263,7 @@ ui.prototype.drawChoices = function(content, choices) {
     return;
 }
 
-/**
- * 绘制确认/取消警告
- * @param text
- * @param yesCallback
- * @param noCallback
- */
+////// 绘制一个确认/取消的警告页面 //////
 ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     core.lockControl();
 
@@ -327,14 +312,13 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
 
 }
 
-////// 绘制开关界面 //////
+////// 绘制系统设置界面 //////
 ui.prototype.drawSwitchs = function() {
-    // 背景音乐、背景音效、战斗动画、怪物显伤、领域显伤、返回
-
     core.status.event.id = 'switchs';
 
     var choices = [
-        "背景音乐："+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
+        "背景音乐："+(core.musicStatus.bgmStatus ? "[ON]" : "[OFF]"),
+        "背景音效："+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
         "战斗动画： " + (core.flags.battleAnimate ? "[ON]" : "[OFF]"),
         "怪物显伤： " + (core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
         "领域显伤： " + (core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
@@ -344,10 +328,7 @@ ui.prototype.drawSwitchs = function() {
 
 }
 
-/**
- * 绘制菜单栏
- * @param need
- */
+////// 绘制系统菜单栏 //////
 ui.prototype.drawSettings = function (need) {
     if (!core.checkStatus('settings', need))
         return;
@@ -357,6 +338,7 @@ ui.prototype.drawSettings = function (need) {
     ]);
 }
 
+////// 绘制快捷商店选择栏 //////
 ui.prototype.drawQuickShop = function (need) {
     if (core.isset(need) && !core.checkStatus('selectShop', need))
         return;
@@ -373,7 +355,7 @@ ui.prototype.drawQuickShop = function (need) {
     this.drawChoices(null, choices);
 }
 
-
+////// 绘制战斗动画 //////
 ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
     // UI层
@@ -389,12 +371,12 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
     hero_hp -= core.enemys.getExtraDamage(monster);
 
-    if (core.enemys.hasSpecial(mon_special, 2)) hero_def=0; // 魔攻
-    if (core.enemys.hasSpecial(mon_special, 3) && mon_def<hero_atk) mon_def=hero_atk-1; // 坚固
     if (core.enemys.hasSpecial(mon_special, 10)) { // 模仿
         mon_atk=hero_atk;
         mon_def=hero_def;
     }
+    if (core.enemys.hasSpecial(mon_special, 2)) hero_def=0; // 魔攻
+    if (core.enemys.hasSpecial(mon_special, 3) && mon_def<hero_atk) mon_def=hero_atk-1; // 坚固
 
     // 实际操作
     var turn = 0; // 0为勇士攻击
@@ -404,7 +386,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     var turns = 2;
     if (core.enemys.hasSpecial(mon_special, 4)) turns=3;
     if (core.enemys.hasSpecial(mon_special, 5)) turns=4;
-    if (core.enemys.hasSpecial(mon_special, 6)) turns=5;
+    if (core.enemys.hasSpecial(mon_special, 6)) turns=1+(monster.n||4);
 
 
     // 初始伤害
@@ -422,7 +404,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
         hero_mdef=0;
     }
 
-    var specialText = core.enemys.getSpecialText(monsterId);
+    var specialTexts = core.enemys.getSpecialText(monsterId);
 
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
 
@@ -465,7 +447,6 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     core.canvas.ui.textAlign='center';
     core.fillText('ui', core.status.hero.name, left+margin+boxWidth/2, top+margin+heroHeight+40, '#FFD700', 'bold 22px Verdana');
     core.fillText('ui', "怪物", left+right-margin-boxWidth/2, top+margin+32+40);
-    var specialTexts = specialText.split(" ");
     for (var i=0, j=0; i<specialTexts.length;i++) {
         if (specialTexts[i]!='') {
             core.fillText('ui', specialTexts[i], left+right-margin-boxWidth/2, top+margin+32+44+20*(++j), '#FF6A6A', '15px Verdana');
@@ -571,7 +552,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     core.fillText("ui", "S", right_start-8, 208+15, "#FFFFFF", "italic bold 40px Verdana");
 
     var battleInterval = setInterval(function() {
-        core.playSound("attack", "ogg");
+        core.playSound("attack.ogg");
 
         if (turn==0) {
             // 勇士攻击
@@ -662,10 +643,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     }, 500);
 }
 
-/**
- * 绘制“请等候...”
- * @param text
- */
+////// 绘制等待界面 //////
 ui.prototype.drawWaiting = function(text) {
 
     core.lockControl();
@@ -685,9 +663,7 @@ ui.prototype.drawWaiting = function(text) {
 
 }
 
-/**
- * 绘制“存档同步”选项
- */
+////// 绘制存档同步界面 //////
 ui.prototype.drawSyncSave = function () {
 
     core.status.event.id = 'syncSave';
@@ -698,11 +674,7 @@ ui.prototype.drawSyncSave = function () {
 
 }
 
-/**
- * 绘制“分页”
- * @param page
- * @param totalPage
- */
+////// 绘制分页 //////
 ui.prototype.drawPagination = function (page, totalPage) {
 
     core.setFont('ui', 'bold 15px Verdana');
@@ -724,11 +696,8 @@ ui.prototype.drawPagination = function (page, totalPage) {
 
 }
 
-/**
- * 绘制怪物手册
- * @param page 页数
- */
-ui.prototype.drawEnemyBook = function (page) {
+////// 绘制怪物手册 //////
+ui.prototype.drawBook = function (index) {
 
     var enemys = core.enemys.getCurrentEnemys();
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
@@ -758,11 +727,12 @@ ui.prototype.drawEnemyBook = function (page) {
         return;
     }
 
+    if (index<0) index=0;
+    if (index>=enemys.length) index=enemys.length-1;
     var perpage = 6;
+    var page=parseInt(index/perpage)+1;
     var totalPage = parseInt((enemys.length - 1) / perpage) + 1;
-    if (page < 1) page = 1;
-    if (page > totalPage) page = totalPage;
-    core.status.event.data = page;
+    core.status.event.data = index;
     var start = (page - 1) * perpage, end = Math.min(page * perpage, enemys.length);
 
     enemys = enemys.slice(start, end);
@@ -834,15 +804,79 @@ ui.prototype.drawEnemyBook = function (page) {
         core.fillText('ui', '1防', 335, 62 * i + 68, '#DDDDDD', '13px Verdana');
         core.fillText('ui', enemy.defDamage, 365, 62 * i + 68, '#DDDDDD', 'bold 13px Verdana');
 
+        if (index == start+i) {
+            core.strokeRect('ui', 10, 62 * i + 13, 416-10*2,  62, '#FFD700');
+        }
+
     }
     core.setBoxAnimate();
     this.drawPagination(page, totalPage);
 }
 
-/**
- * 绘制楼传器
- * @param page
- */
+////// 绘制怪物属性的详细信息 //////
+ui.prototype.drawBookDetail = function (index) {
+    var enemys = core.enemys.getCurrentEnemys();
+    if (enemys.length==0) return;
+    if (index<0) index=0;
+    if (index>=enemys.length) index=enemys.length-1;
+
+    var enemy = enemys[index];
+    var enemyId=enemy.id;
+    var hints=core.enemys.getSpecialHint(core.enemys.getEnemys(enemyId));
+
+    if (hints.length==0) {
+        core.drawTip("该怪物无特殊属性！");
+        return;
+    }
+    var content=hints.join("\n");
+
+    core.status.event.id = 'book-detail';
+    clearInterval(core.interval.tipAnimate);
+
+    core.clearMap('data', 0, 0, 416, 416);
+    core.setOpacity('data', 1);
+
+    var left=10, right=416-2*left;
+    var content_left = left + 25;
+
+    var validWidth = right-(content_left-left)-13;
+    var contents = core.splitLines("data", content, validWidth, '16px Verdana');
+
+    var height = 416 - 10 - Math.min(416-24*(contents.length+1)-65, 250);
+    var top = (416-height)/2, bottom = height;
+
+    // var left = 97, top = 64, right = 416 - 2 * left, bottom = 416 - 2 * top;
+    core.setAlpha('data', 0.9);
+    core.fillRect('data', left, top, right, bottom, '#000000');
+    core.setAlpha('data', 1);
+    core.strokeRect('data', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+
+    // 名称
+    core.canvas.data.textAlign = "left";
+
+    core.fillText('data', enemy.name, content_left, top + 30, '#FFD700', 'bold 22px Verdana');
+    var content_top = top + 57;
+
+    for (var i=0;i<contents.length;i++) {
+        // core.fillText('data', contents[i], content_left, content_top, '#FFFFFF', '16px Verdana');
+        var text=contents[i];
+        var index=text.indexOf("：");
+        if (index>=0) {
+            var x1 = text.substring(0, index+1);
+            core.fillText('data', x1, content_left, content_top, '#FF6A6A', 'bold 16px Verdana');
+            var len=core.canvas.data.measureText(x1).width;
+            core.fillText('data', text.substring(index+1), content_left+len, content_top, '#FFFFFF', '16px Verdana');
+        }
+        else {
+            core.fillText('data', contents[i], content_left, content_top, '#FFFFFF', '16px Verdana');
+        }
+        content_top+=24;
+    }
+
+    core.fillText('data', '<点击任意位置继续>', 270, top+height-13, '#CCCCCC', '13px Verdana');
+}
+
+////// 绘制楼层传送器 //////
 ui.prototype.drawFly = function(page) {
 
     if (page<0) page=0;
@@ -868,6 +902,7 @@ ui.prototype.drawFly = function(page) {
     this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 20, 100, 273);
 }
 
+////// 绘制道具栏 //////
 ui.prototype.drawToolbox = function(index) {
 
     var tools = Object.keys(core.status.hero.items.tools).sort();
@@ -982,7 +1017,7 @@ ui.prototype.drawToolbox = function(index) {
     core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px Verdana');
 }
 
-
+////// 绘制存档/读档界面 //////
 ui.prototype.drawSLPanel = function(index) {
     if (!core.isset(index)) index=1;
     if (index<=0) index=1;
@@ -1036,6 +1071,7 @@ ui.prototype.drawSLPanel = function(index) {
     this.drawPagination(page+1, 30);
 }
 
+////// 绘制一个缩略图 //////
 ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroLoc) {
     core.clearMap(canvas, x, y, size, size);
     var groundId = core.floors[floorId].defaultGround || "ground";
@@ -1073,9 +1109,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
     }
 }
 
-/**
- * 绘制"关于"
- */
+////// 绘制“关于”界面 //////
 ui.prototype.drawAbout = function() {
 
     if (!core.isPlaying()) {
@@ -1101,18 +1135,9 @@ ui.prototype.drawAbout = function() {
     core.fillText('ui', "作者： 艾之葵", text_start, top + 80, "#FFFFFF", "bold 17px Verdana");
     core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112);
     // TODO: 写自己的“关于”页面
-    /*
-    core.fillText('ui', "原作： ss433_2", text_start, top + 112, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "制作工具： WebStorm", text_start, top + 144, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "测试平台： Chrome/微信/iOS", text_start, top + 176, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', '特别鸣谢： ss433_2', text_start, top+208);
-    var len = core.canvas.ui.measureText('特别鸣谢： ').width;
-    core.fillText('ui', 'iEcho', text_start+len, top+240);
-    core.fillText('ui', '打Dota的喵', text_start+len, top+272);
-    core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+304);
-    */
 }
 
+////// 绘制帮助页面 //////
 ui.prototype.drawHelp = function () {
     core.drawText([
         "\t[键盘快捷键列表]"+

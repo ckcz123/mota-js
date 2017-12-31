@@ -7,7 +7,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         // 如果要进行剧本的修改请务必将其改成false。
     
         "floorIds" : [ // 在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序
-            "sample0", "sample1", "sample2", "test"
+            "sample0", "sample1", "sample2"
         ]
     },
     "firstData" : {

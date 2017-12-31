@@ -49,12 +49,15 @@ function main() {
     ];
     this.images = [
         'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains'
-        // Autotile 动态添加
     ];
-    this.sounds = {
-        'mp3': ['bgm-loop', 'floor'],
-        'ogg': ['attack', 'door', 'item']
-    }
+    this.bgms = [ // 在此存放所有的bgm，和文件名一致。第一项为默认播放项
+        // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
+        '058-Slow01.mid', 'bgm.mp3', 'qianjin.mid', 'star.mid'
+    ];
+    this.sounds = [ // 在此存放所有的SE，和文件名一致
+        // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
+        'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg'
+    ]
     this.statusBar = {
         'image': {
             'floor': document.getElementById('img-floor'),
@@ -121,7 +124,7 @@ main.prototype.init = function (mode) {
                 coreData[name] = main[name];
             }
             main.loaderFloors(function() {
-                main.core.init(main.dom, main.statusBar, main.canvas, main.images, main.sounds, main.floorIds, main.floors, coreData);
+                main.core.init(main.dom, main.statusBar, main.canvas, main.images, main.bgms, main.sounds, main.floorIds, main.floors, coreData);
                 main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
             });
         });
@@ -238,18 +241,6 @@ main.dom.body.onkeyup = function(e) {
 
 main.dom.body.onselectstart = function () {
     return false;
-}
-
-document.onmousemove = function() {
-    try {
-        main.core.loadSound();
-    }catch (e) {}
-}
-
-document.ontouchstart = function() {
-    try {
-        main.core.loadSound();
-    }catch (e) {}
 }
 
 main.dom.data.onmousedown = function (e) {

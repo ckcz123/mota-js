@@ -4,6 +4,7 @@ maps.prototype.init = function() {
     delete(maps_90f36752_8815_4be8_b32b_d7fad1d0542e);
 }
 
+////// 加载某个楼层（从剧本或存档中） //////
 maps.prototype.loadFloor = function (floorId, map) {
     var floor = core.floors[floorId];
     var content = {};
@@ -47,6 +48,7 @@ maps.prototype.loadFloor = function (floorId, map) {
     return content;
 }
 
+////// 数字和ID的对应关系 //////
 maps.prototype.getBlock = function (x, y, id) {
     var enable=null;
     id = ""+id;
@@ -69,6 +71,7 @@ maps.prototype.getBlock = function (x, y, id) {
     return tmp;
 }
 
+////// 向该楼层添加剧本的自定义事件 //////
 maps.prototype.addEvent = function (block, x, y, event, ground) {
     if (!core.isset(event)) return;
     if (!core.isset(block.event)) { // 本身是空地？
@@ -104,11 +107,13 @@ maps.prototype.addEvent = function (block, x, y, event, ground) {
     }
 }
 
+////// 向该楼层添加剧本的楼层转换事件 //////
 maps.prototype.addChangeFloor = function (block, x, y, event, ground) {
     if (!core.isset(event)) return;
     this.addEvent(block, x, y, {"trigger": "changeFloor", "data": event}, ground);
 }
 
+////// 初始化所有地图 //////
 maps.prototype.initMaps = function (floorIds) {
     var maps = {};
     for (var i=0;i<floorIds.length;i++) {
@@ -118,6 +123,7 @@ maps.prototype.initMaps = function (floorIds) {
     return maps;
 }
 
+////// 将当前地图重新变成数字，以便于存档 //////
 maps.prototype.save = function(maps, floorId) {
     if (!core.isset(floorId)) {
         var map = {};
@@ -147,6 +153,7 @@ maps.prototype.save = function(maps, floorId) {
     return blocks;
 }
 
+////// 将存档中的地图信息重新读取出来 //////
 maps.prototype.load = function (data, floorId) {
     if (floorId == undefined) {
         var map = {};

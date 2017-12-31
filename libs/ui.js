@@ -1083,22 +1083,12 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
             core.canvas[canvas].drawImage(blockImage, 0, blockIcon * 32, 32, 32, x + i * persize, y + j * persize, persize, persize);
         }
     }
-
-    // 如果存在png
-    if (core.isset(core.floors[floorId].png)) {
-        var png = core.floors[floorId].png;
-        if (core.isset(core.material.images.pngs[png])) {
-            core.canvas[canvas].drawImage(core.material.images.pngs[png], x, y, size, size);
-        }
-    }
-
-    var autotileMaps = [];
+    var mapArr = core.maps.getMapArr(floorId);
     for (var b in blocks) {
         var block = blocks[b];
         if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
             if (block.event.cls == 'autotile') {
-                // core.drawAutotile();
-                autotileMaps[13*block.x + block.y] = block.event.id;
+                core.drawAutotile(core.canvas.ui, mapArr, block, persize, x, y);
                 continue;
             }
             else {
@@ -1110,7 +1100,6 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
             }
         }
     }
-    core.drawAutotile(floorId, 'ui', autotileMaps, x, y, persize);
 
     if (core.isset(heroLoc)) {
         var heroIcon = core.material.icons.hero[heroLoc.direction];

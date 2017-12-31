@@ -12,17 +12,12 @@ ui.prototype.init = function () {
 main.instance.ui = new ui();
 
 
-/**
- * 关闭一切UI窗口
- * @param clearData 是否同时清掉data层
- */
-ui.prototype.closePanel = function (clearData) {
+////// 结束一切事件和绘制，关闭UI窗口，返回游戏进程 //////
+ui.prototype.closePanel = function () {
     core.status.boxAnimateObjs = [];
     core.setBoxAnimate();
     core.clearMap('ui', 0, 0, 416, 416);
     core.setAlpha('ui', 1.0);
-    if (core.isset(clearData) && clearData)
-        core.clearMap('data', 0, 0, 416, 416);
     core.unLockControl();
     core.status.event.data = null;
     core.status.event.id = null;
@@ -30,12 +25,7 @@ ui.prototype.closePanel = function (clearData) {
     core.status.event.ui = null;
 }
 
-
-/**
- * 绘制对话框
- * @param content
- * @param id
- */
+////// 绘制一个对话框 //////
 ui.prototype.drawTextBox = function(content) {
 
     // 获得name, image, icon
@@ -137,7 +127,7 @@ ui.prototype.drawTextBox = function(content) {
     core.fillText('ui', '<点击任意位置继续>', 270, top+height-13, '#CCCCCC', '13px Verdana');
 }
 
-// 绘制选项事件
+////// 绘制一个选项界面 //////
 ui.prototype.drawChoices = function(content, choices) {
 
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
@@ -273,12 +263,7 @@ ui.prototype.drawChoices = function(content, choices) {
     return;
 }
 
-/**
- * 绘制确认/取消警告
- * @param text
- * @param yesCallback
- * @param noCallback
- */
+////// 绘制一个确认/取消的警告页面 //////
 ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     core.lockControl();
 
@@ -327,10 +312,8 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
 
 }
 
-////// 绘制开关界面 //////
+////// 绘制系统设置界面 //////
 ui.prototype.drawSwitchs = function() {
-    // 背景音乐、背景音效、战斗动画、怪物显伤、领域显伤、返回
-
     core.status.event.id = 'switchs';
 
     var choices = [
@@ -345,10 +328,7 @@ ui.prototype.drawSwitchs = function() {
 
 }
 
-/**
- * 绘制菜单栏
- * @param need
- */
+////// 绘制系统菜单栏 //////
 ui.prototype.drawSettings = function (need) {
     if (!core.checkStatus('settings', need))
         return;
@@ -358,6 +338,7 @@ ui.prototype.drawSettings = function (need) {
     ]);
 }
 
+////// 绘制快捷商店选择栏 //////
 ui.prototype.drawQuickShop = function (need) {
     if (core.isset(need) && !core.checkStatus('selectShop', need))
         return;
@@ -374,7 +355,7 @@ ui.prototype.drawQuickShop = function (need) {
     this.drawChoices(null, choices);
 }
 
-
+////// 绘制战斗动画 //////
 ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
     // UI层
@@ -662,10 +643,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     }, 500);
 }
 
-/**
- * 绘制“请等候...”
- * @param text
- */
+////// 绘制等待界面 //////
 ui.prototype.drawWaiting = function(text) {
 
     core.lockControl();
@@ -685,9 +663,7 @@ ui.prototype.drawWaiting = function(text) {
 
 }
 
-/**
- * 绘制“存档同步”选项
- */
+////// 绘制存档同步界面 //////
 ui.prototype.drawSyncSave = function () {
 
     core.status.event.id = 'syncSave';
@@ -698,11 +674,7 @@ ui.prototype.drawSyncSave = function () {
 
 }
 
-/**
- * 绘制“分页”
- * @param page
- * @param totalPage
- */
+////// 绘制分页 //////
 ui.prototype.drawPagination = function (page, totalPage) {
 
     core.setFont('ui', 'bold 15px Verdana');
@@ -724,11 +696,8 @@ ui.prototype.drawPagination = function (page, totalPage) {
 
 }
 
-/**
- * 绘制怪物手册
- * @param index 怪物索引
- */
-ui.prototype.drawEnemyBook = function (index) {
+////// 绘制怪物手册 //////
+ui.prototype.drawBook = function (index) {
 
     var enemys = core.enemys.getCurrentEnemys();
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
@@ -844,6 +813,7 @@ ui.prototype.drawEnemyBook = function (index) {
     this.drawPagination(page, totalPage);
 }
 
+////// 绘制怪物属性的详细信息 //////
 ui.prototype.drawBookDetail = function (index) {
     var enemys = core.enemys.getCurrentEnemys();
     if (enemys.length==0) return;
@@ -906,10 +876,7 @@ ui.prototype.drawBookDetail = function (index) {
     core.fillText('data', '<点击任意位置继续>', 270, top+height-13, '#CCCCCC', '13px Verdana');
 }
 
-/**
- * 绘制楼传器
- * @param page
- */
+////// 绘制楼层传送器 //////
 ui.prototype.drawFly = function(page) {
 
     if (page<0) page=0;
@@ -935,6 +902,7 @@ ui.prototype.drawFly = function(page) {
     this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 20, 100, 273);
 }
 
+////// 绘制道具栏 //////
 ui.prototype.drawToolbox = function(index) {
 
     var tools = Object.keys(core.status.hero.items.tools).sort();
@@ -1049,7 +1017,7 @@ ui.prototype.drawToolbox = function(index) {
     core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px Verdana');
 }
 
-
+////// 绘制存档/读档界面 //////
 ui.prototype.drawSLPanel = function(index) {
     if (!core.isset(index)) index=1;
     if (index<=0) index=1;
@@ -1103,6 +1071,7 @@ ui.prototype.drawSLPanel = function(index) {
     this.drawPagination(page+1, 30);
 }
 
+////// 绘制一个缩略图 //////
 ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroLoc) {
     core.clearMap(canvas, x, y, size, size);
     var groundId = core.floors[floorId].defaultGround || "ground";
@@ -1123,9 +1092,11 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
                 continue;
             }
             else {
-                var blockIcon = core.material.icons[block.event.cls][block.event.id];
-                var blockImage = core.material.images[block.event.cls];
-                core.canvas[canvas].drawImage(blockImage, 0, blockIcon * 32, 32, 32, x + block.x * persize, y + block.y * persize, persize, persize);
+                if (block.event.id!='none') {
+                    var blockIcon = core.material.icons[block.event.cls][block.event.id];
+                    var blockImage = core.material.images[block.event.cls];
+                    core.canvas[canvas].drawImage(blockImage, 0, blockIcon * 32, 32, 32, x + block.x * persize, y + block.y * persize, persize, persize);
+                }
             }
         }
     }
@@ -1138,9 +1109,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
     }
 }
 
-/**
- * 绘制"关于"
- */
+////// 绘制“关于”界面 //////
 ui.prototype.drawAbout = function() {
 
     if (!core.isPlaying()) {
@@ -1166,18 +1135,9 @@ ui.prototype.drawAbout = function() {
     core.fillText('ui', "作者： 艾之葵", text_start, top + 80, "#FFFFFF", "bold 17px Verdana");
     core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112);
     // TODO: 写自己的“关于”页面
-    /*
-    core.fillText('ui', "原作： ss433_2", text_start, top + 112, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "制作工具： WebStorm", text_start, top + 144, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "测试平台： Chrome/微信/iOS", text_start, top + 176, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', '特别鸣谢： ss433_2', text_start, top+208);
-    var len = core.canvas.ui.measureText('特别鸣谢： ').width;
-    core.fillText('ui', 'iEcho', text_start+len, top+240);
-    core.fillText('ui', '打Dota的喵', text_start+len, top+272);
-    core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+304);
-    */
 }
 
+////// 绘制帮助页面 //////
 ui.prototype.drawHelp = function () {
     core.drawText([
         "\t[键盘快捷键列表]"+

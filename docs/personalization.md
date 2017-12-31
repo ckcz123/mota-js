@@ -8,7 +8,7 @@
 
 所有素材的图片都在`images`目录下。
 - `animates.png` 为所有动画效果。主要是星空熔岩，开门，毒网，传送门之类的效果。为四帧。
-- `autotile.png` 为Autotile块。全塔只支持一种Autotile，其ID为20。
+- `autotile.png` 为Autotile块。
 - `enemys.png` 为所有怪物的图片。其对应的数字，从上至下依次是会从201开始计算（即，绿色史莱姆为201，小蝙蝠为205，依次类推）。请注意，动画效果为两帧，一般是原始四帧中的1和3。（四帧中12相同，34相同，因此只取1和3即可）
 - `heros.png` 为勇士行走图。
 - `items.png` 为所有道具的图标。
@@ -19,9 +19,44 @@
 
 ### 使用预定义的素材
 
-在images目录的“默认素材”下给定了若干预定义的自定义素材。包括野外（草地），星空，木板等等都已经被预先给定。
+在images目录的“默认素材”下给定了若干预定义的自定义素材。
 
 如果你需要某个素材已经存在，则可以直接将其覆盖images目录下的同名文件，就能看到效果。
+
+### 使用自己的图片作为某层楼的背景素材
+
+由于HTML5功能（素材）有限，导致了对很多比较复杂的素材（比如房子内）等无法有着较好的绘图方式。
+
+为了解决这个问题，我们允许用户自己放置一张图片作为某一层的背景素材。
+
+要启用这个功能，我们首先需要在`main.js`中将可能的图片进行加载。
+
+``` js
+this.pngs = [ // 在此存放所有可能的背景图片；背景图片最好是416*416像素，其他分辨率会被强制缩放成416*416
+    // 建议对于较大的图片，在网上使用在线的“图片压缩工具”来进行压缩，以节省流量
+    "bg.png", // "yewai.png",
+];
+```
+
+!> 背景素材只支持png格式，且会被强制缩放到416*416。
+
+!> 请使用网上的一些[在线图片压缩工具](http://www.asqql.com/gifzip/)对png图片进行压缩，以节省流量。一张500KB的png图片可以被压缩到20-30KB，显示效果不会有太大差异。
+
+之后，我们可以在每层剧本的`"png": "xxx"`里来定义该层的默认背景图片素材。
+
+``` js
+"png": "bg.png", // 背景图；你可以选择一张png图片来作为背景素材。
+```
+
+你的图片背景素材将会覆盖原来本身的背景层。
+
+**如果你需要让某些点不可通行（比如你建了个房子，墙壁和家具等位置不让通行），则需在`events`中指定`{"noPass": false}`，参见[自定义事件](event#自定义事件)的写法。
+
+``` js
+"events": {
+    "x,y": {"noPass": true} // (x,y)点不可通行
+}
+```
 
 ### 使用便捷PS工具生成素材
 
@@ -31,6 +66,8 @@
 
 我们可以打开有需求改变的素材，和我们需要被替换的素材，然后简单的Ctrl+C和Ctrl+V操作即可。
 
+便捷PS工具同样支持图片色相的修改，和RMXP几乎完全相同。
+
 用这种方式，我们能极快地替换或素材，包括需要新增的怪物。
 
 ### 添加素材到游戏
@@ -39,37 +76,50 @@
 
 这是因为，该素材没有被定义，无法被游戏所识别。
 
+#### 素材的机制
+
+本塔所有的素材都拥有三个属性：**ID**，**索引**，**数字**。
+- **ID** 为该素材的唯一标识符，任何两个素材的ID都不能相同。
+- **索引** 为该素材的在对应图片上的图标索引，即该素材是图片上的第几个。
+- **数字** 为该素材的对应数字，以方便地图的生成和存储。
+
+**`ID-索引` 对应关系定义在icons.js文件中。该文件将唯一确定一个ID在图片上所在的位置。**
+
+**`ID-数字` 对应关系定义在maps.js文件的getBlock函数中。该函数将唯一确定一个ID对应的数字是多少。**
+
+如果需要添加一个素材到游戏，则必须为其分配一个唯一标识符，并同时修改`icons.js`和`maps.js`两个文件。
+
 #### 新添加自定义地形（路面、墙壁等）
 
 如果你在terrains.png中新增了一行：
 
-1. 指定一个唯一的英文ID，不能和terrains中现有的重复。
-2. 进入icons.js，在terrains分类下进行添加（对应图标在图片上的位置，即index）
-3. 指定一个数字，在maps.js的getBlock下类似进行添加。
-``` js
-if (id == 13) tmp.event = {'cls': 'animates', 'id': 'weakNet', 'noPass': false, 'trigger': 'passNet'}; // 衰网
-if (id == 14) tmp.event = {'cls': 'animates', 'id': 'curseNet', 'noPass': false, 'trigger': 'passNet'}; // 咒网
-if (id == 15) tmp.event = {'cls': 'animates', 'id': 'water', 'noPass': true}; // 水
-// 可以在此处类似添加数字-ID对应关系，但不能和任何已有的数字重复
-// autotile: 20
-if (id == 20) tmp.event = {'cls': 'autotile', 'id': 'autotile', 'noPass': true}; // autotile
-``` 
+1. 指定一个唯一的英文ID，不能和现有的重复。
+2. 进入icons.js，在terrains分类下进行添加索引（对应图标在图片上的位置，即index）
+
+**如果你无须在游戏内使用本地形，而仅仅是将其作为“背景图”使用，则操作如下：**
+3. 修改对应楼层的剧本文件的`defaultGround`项，改成新的ID。
+
+**如果你要在游戏内使用本地形，则操作如下：**
+3. 指定一个数字，在maps.js的getBlock函数下类似进行添加。
+
+#### 新添加Autotile
+
+如果你需要新增一个Autotile：
+
+1. 将新的Autotile图片复制到images目录下。
+2. 进入icons.js，在autotile分类下进行添加该文件的名称，索引简单的写0。
+3. 指定一个数字，在maps.js的getBlock函数下类似进行添加。
+
+!> Autotile的ID和文件名完全相同！且其ID/文件名不能含有中文、空格或特殊字符。
 
 #### 新添加道具
 
 如果你需要新增一个未被定义的道具：
 
-1. 指定一个唯一的英文ID，不能和items中现有的重复。
-2. 进入icons.js，在items分类下进行添加（对应图标在图片上的位置，即index）
+1. 指定一个唯一的英文ID，不能和现有的重复。
+2. 进入icons.js，在items分类下进行添加索引（对应图标在图片上的位置，即index）
 3. 指定一个数字，在maps.js的getBlock下类似进行添加。
 4. 在items.js中仿照其他道具，来添加道具的信息。
-
-``` js
-if (id == 63) tmp.event = {'cls': 'items', 'id': 'moneyPocket'} // 金钱袋
-if (id == 64) tmp.event = {'cls': 'items', 'id': 'shoes'} // 绿鞋
-if (id == 65) tmp.event = {'cls': 'items', 'id': 'hammer'} // 圣锤
-// 可以在这里添加自己的数字-ID对应关系，但不能和任何已有的数字重复
-``` 
 
 有关如何自行实现一个道具的效果，参见[自定义道具效果](#自定义道具效果)。
 
@@ -77,25 +127,22 @@ if (id == 65) tmp.event = {'cls': 'items', 'id': 'hammer'} // 圣锤
 
 如果我们需要新添加怪物，请在enemys.png中新增一行，然后复制粘贴上四帧怪物图的**1和3帧**。
 
+你可以通过便捷PS工具的“更改色相”来将红头怪变成橙头怪等。
+
 然后执行如下操作：
 
 1. 指定一个唯一的英文ID，不能和enemys中现有的重复。
-2. 进入icons.js，在enemys分类下进行添加（对应图标在图片上的位置，即index）
+2. 进入icons.js，在enemys分类下进行添加索引（对应图标在图片上的位置，即index）
 3. 在maps.js的getBlock下继续进行添加。请注意其ID为200开始的顺序，即如果新增一行为261，依次类推
 4. 在enemys.js中仿照其他怪物，来添加怪物的信息。
-
-``` js
-if (id == 258) tmp.event = {'cls': 'enemys', 'id': 'octopus'};
-if (id == 259) tmp.event = {'cls': 'enemys', 'id': 'fairy'};
-if (id == 260) tmp.event = {'cls': 'enemys', 'id': 'greenKnight'};
-// 在此依次添加，数字要求是递增的
-```
 
 有关如何自行实现一个怪物的特殊属性或伤害计算公式，参见[怪物的特殊属性](#怪物的特殊属性)。
 
 #### 新添加NPC
 
-类似同上，给NPC指定ID，在icons.js中指定ID-index关系，在maps.js中指定ID-数字的关系，即可。
+1. 指定一个唯一的英文ID，不能和现有的重复。
+2. 进入icons.js，在npcs分类下进行添加索引（对应图标在图片上的位置，即index）
+3. 指定一个数字，在maps.js的getBlock下类似进行添加。
 
 ### 地图生成器使用自定义素材
 
@@ -178,18 +225,24 @@ enemys.prototype.getExtraDamage = function (monster) {
     }
 // ... 下略
 ```
-3. 免疫领域、夹击效果：在`core.js`中，找到updateCheckBlock函数，并编辑成如果有神圣盾标记，则直接返回。
+3. 免疫领域、夹击、阻击效果：在`core.js`中，找到checkBlock函数，并编辑成如果有神圣盾标记，则将伤害变成0。
 ``` js
-// 更新领域、显伤点
-core.prototype.updateCheckBlock = function() {
-    if (!core.isset(core.status.thisMap)) return;
-    if (!core.isset(core.status.checkBlockMap)) core.updateCheckBlockMap();
-    core.status.checkBlock = [];
-    if (core.hasItem('shield5')) return; // 如拥有神圣盾则直接返回
-    for (var x=0;x<13;x++) {
-        for (var y=0;y<13;y++) {
-            // 计算(x,y)点伤害
-            var damage = 0;
+// 检查领域、夹击、阻击事件
+core.prototype.checkBlock = function () {
+    var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
+    var damage = core.status.checkBlock.damage[13*x+y];
+    if (damage>0) {
+        if (core.hasFlag("shield5")) damage = 0; // 如果存在神圣盾，则将伤害变成0
+        core.status.hero.hp -= damage;
+
+        // 检查阻击事件
+        var snipe = [];
+        var scan = {
+            'up': {'x': 0, 'y': -1},
+            'left': {'x': -1, 'y': 0},
+            'down': {'x': 0, 'y': 1},
+            'right': {'x': 1, 'y': 0}
+        }
 // ... 下略
 ```
 4. 如果有更高的需求，例如想让吸血效果变成一半（如异空间），则还是在上面这些地方进行对应的修改即可。
@@ -198,42 +251,15 @@ core.prototype.updateCheckBlock = function() {
 
 如果你对现有的怪物不满意，想自行添加怪物属性（例如让怪物拥有双属性乃至更多属性），也是可以的。具体参见`enemys.js`文件。
 
-你需自己指定一个special数字，修改getSpecialText函数。
+你需自己指定一个special数字，修改getSpecialText函数（属性名）和getSpecialHint函数（属性提示文字）。
 
 如果要修改伤害计算公式，请修改下面的calDamage函数。请注意，如果无法战斗，该函数必须返回`999999999`。
-
-因此无敌属性可以这样设置：
-
-先给无敌属性指定一个数字，例如18，在getSpecialText中定义
-
-``` js
-// ... 上略
-    if (this.hasSpecial(special, 15)) text.push("领域");
-    if (this.hasSpecial(special, 16)) text.push("夹击");
-    if (this.hasSpecial(special, 17)) text.push("仇恨");
-    if (this.hasSpecial(special, 18)) text.push("无敌"); // 添加无敌的显示
-    return text.join("  ");
-}
-
-```
-
-然后修改calDamage，如果无敌属性且勇士没有拥有十字架，则立刻返回无穷大。
-
-``` js
-enemys.prototype.calDamage = function (hero_atk, hero_def, hero_mdef, mon_hp, mon_atk, mon_def, mon_special) {
-    if (this.hasSpecial(mon_special, 18) && !core.hasItem("cross")) // 如果是无敌属性，且勇士未持有十字架
-        return 999999999; // 返回无限大
-
-    // 魔攻
-    if (this.hasSpecial(mon_special, 2)) hero_def = 0;
-// ... 下略
-```
 
 对于吸血怪的额外伤害计算在getExtraDamage中。
 
 对于毒衰弱怪物的战斗后结算在`events.js`中的afterBattle函数中。
 
-对于领域、夹击怪物的检查在`events.js`中的checkBlock函数中。
+对于领域、夹击、阻击怪物的检查在`events.js`中的checkBlock函数中。
 
 `getCritical`, `getCriticalDamage`和`getDefDamage`三个函数依次计算的是该怪物的临界值、临界减伤和1防减伤。也可以适当进行修改。
 

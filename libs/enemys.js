@@ -2,6 +2,7 @@ function enemys() {
 
 }
 
+////// 初始化 //////
 enemys.prototype.init = function () {
     // 怪物属性初始化定义：
     this.enemys = {
@@ -68,17 +69,20 @@ enemys.prototype.init = function () {
     }
 }
 
+////// 获得一个或所有怪物数据 //////
 enemys.prototype.getEnemys = function (enemyId) {
-    if (enemyId == undefined) {
+    if (!core.isset(enemyId)) {
         return this.enemys;
     }
     return this.enemys[enemyId];
 }
 
+////// 判断是否含有某特殊属性 //////
 enemys.prototype.hasSpecial = function (special, test) {
     return (special instanceof Array)?special.indexOf(test)>=0:(special!=0&&(special%100==test||this.hasSpecial(parseInt(special/100), test)));
 }
 
+////// 获得所有特殊属性的名称 //////
 enemys.prototype.getSpecialText = function (enemyId) {
     if (enemyId == undefined) return "";
     var enemy = this.enemys[enemyId];
@@ -107,7 +111,7 @@ enemys.prototype.getSpecialText = function (enemyId) {
     return text;
 }
 
-////// 获得每个属性的文字提示 //////
+////// 获得每个特殊属性的说明 //////
 enemys.prototype.getSpecialHint = function (enemy, special) {
     if (!core.isset(special)) {
         var hints = [];
@@ -147,6 +151,7 @@ enemys.prototype.getSpecialHint = function (enemy, special) {
     return ""
 }
 
+////// 获得某个怪物的伤害 //////
 enemys.prototype.getDamage = function (monsterId) {
     var monster = core.material.enemys[monsterId];
     var hero_atk = core.status.hero.atk, hero_def = core.status.hero.def, hero_mdef = core.status.hero.mdef;
@@ -156,6 +161,7 @@ enemys.prototype.getDamage = function (monsterId) {
     return damage + this.getExtraDamage(monster);
 }
 
+////// 获得某个怪物的额外伤害 //////
 enemys.prototype.getExtraDamage = function (monster) {
     var extra_damage = 0;
     if (this.hasSpecial(monster.special, 11)) { // 吸血
@@ -169,7 +175,7 @@ enemys.prototype.getExtraDamage = function (monster) {
     return extra_damage;
 }
 
-// 临界值计算
+////// 临界值计算 //////
 enemys.prototype.getCritical = function (monsterId) {
     var monster = core.material.enemys[monsterId];
     if (this.hasSpecial(monster.special, 3) || this.hasSpecial(monster.special, 10)) return "???";
@@ -187,7 +193,7 @@ enemys.prototype.getCritical = function (monsterId) {
     return 0;
 }
 
-// 临界减伤计算
+////// 临界减伤计算 //////
 enemys.prototype.getCriticalDamage = function (monsterId) {
     var c = this.getCritical(monsterId);
     if (c == '???') return '???';
@@ -201,7 +207,7 @@ enemys.prototype.getCriticalDamage = function (monsterId) {
         monster.hp, monster.atk, monster.def, monster.special, monster.n);
 }
 
-// 1防减伤计算
+////// 1防减伤计算 //////
 enemys.prototype.getDefDamage = function (monsterId) {
     var monster = core.material.enemys[monsterId];
     var nowDamage = this.calDamage(core.status.hero.atk, core.status.hero.def, core.status.hero.mdef,
@@ -212,6 +218,7 @@ enemys.prototype.getDefDamage = function (monsterId) {
     return nowDamage - nextDamage;
 }
 
+////// 具体的伤害计算公式 //////
 enemys.prototype.calDamage = function (hero_atk, hero_def, hero_mdef, mon_hp, mon_atk, mon_def, mon_special, n) {
 
     if (this.hasSpecial(mon_special, 20) && !core.hasItem("cross")) // 如果是无敌属性，且勇士未持有十字架
@@ -254,7 +261,7 @@ enemys.prototype.calDamage = function (hero_atk, hero_def, hero_mdef, mon_hp, mo
     return core.flags.enableNegativeDamage?ans:Math.max(0, ans);
 }
 
-// 获得当前楼层的怪物列表
+////// 获得当前楼层的怪物列表 //////
 enemys.prototype.getCurrentEnemys = function () {
     var enemys = [];
     var used = {};

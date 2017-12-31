@@ -31,6 +31,7 @@
     "x,y": {
         "trigger": "action", // 触发的trigger, action代表自定义事件
         "enable": true, // 该事件初始状态下是否处于启用状态
+        "noPass": true, // 该点是否不可通行。true代表不可通行，false代表可通行。
         "data": [ // 实际执行的事件列表
             // 事件1
             // 事件2
@@ -55,6 +56,7 @@
     "x,y": {
         // 除非你要覆盖该点已存在的系统默认事件，否则"trigger": "action"可以省略
         "enable": true, // 该事件初始状态下是否处于启用状态
+        "noPass": true, // 该点是否不可通行。true代表不可通行，false代表可通行。
         "data": [ // 实际执行的事件列表
             // 事件1
             // 事件2
@@ -73,6 +75,28 @@
     "x,y": {
         // 除非你要覆盖该点已存在的系统默认事件，否则"trigger": "action"可以省略
         // 该事件初始状态下是启用状态，则可以省略"enable": true；如果是禁用状态则必须加上"enable": false
+        "noPass": true, // 该点是否不可通行。true代表不可通行，false代表可通行。
+        "data": [ // 实际执行的事件列表
+            // 事件1
+            // 事件2
+            // ...
+        ]
+    }
+}
+```
+
+`"noPass"`为该点是否可通行的标记。`true`代表该点不可通行，`false`代表该点可通行。
+
+对于目前所有的素材，都存在默认的是否可通行状态。如果你在该点指定`noPass`，则原本的可通行状态会被覆盖。
+
+因此，除非你想覆盖默认的可通行选项（比如将一个空地设为不可通行），否则该项可以忽略。
+
+``` js
+"events": { // 该楼的所有可能事件列表
+    "x,y": {
+        // 除非你要覆盖该点已存在的系统默认事件，否则"trigger": "action"可以省略
+        // 该事件初始状态下是启用状态，则可以省略"enable": true；如果是禁用状态则必须加上"enable": false
+        // 除非你想覆盖系统默认的可通行状态，否则"noPass"项可以忽略
         "data": [ // 实际执行的事件列表
             // 事件1
             // 事件2
@@ -88,7 +112,7 @@
 
 ``` js
 "events": { // 该楼的所有可能事件列表
-    // 如果大括号里只有"data"项(没有"action"或"enable")，则可以省略到只剩下中括号
+    // 如果大括号里只有"data"项(没有"action", "enable"或"noPass")，则可以省略到只剩下中括号
     "x,y": [ // 实际执行的事件列表
         // 事件1
         // 事件2
@@ -99,7 +123,7 @@
 
 这种简写方式可以极大方便地造塔者进行造塔。
 
-!> **请注意：如果该点初始的`enable`为`false`，或者该点本身有系统默认事件且需要覆盖（`trigger`），则必须采用上面那种大括号写的方式来定义。**
+!> **请注意：如果该点初始的`enable`为`false`，或者该点本身有系统默认事件且需要覆盖（`trigger`），或者你想覆盖该点的默认通行状态，则必须采用上面那种大括号写的方式来定义。**
 
 &nbsp;
 
@@ -399,7 +423,9 @@ revisit常常使用在一些商人之类的地方，当用户购买物品后不�
 
 如果强制战斗失败，则会立刻生命归0并死亡，调用lose函数，接下来的事件不会再被执行。
 
-强制战斗没有指定loc的选项，因此战斗后需要调用hide使怪物消失（如果有必要）。强制战斗不会触发任何afterBattle里的事件。
+打败怪物后可以进行加点操作。有关加点塔的制作可参见[加点事件](#加点事件)。
+
+强制战斗没有指定loc的选项，因此战斗后需要调用hide使怪物消失（如果有必要）。
 
 ### openDoor: 开门
 
@@ -417,8 +443,6 @@ loc指定门的坐标，floorId指定门所在的楼层ID。如果是当前层�
 如果loc所在的点是一个墙壁，则作为暗墙来开启。
 
 如果loc所在的点既不是门也不是墙壁，则忽略本事件。
-
-openDoor不会触发任何afterOpenDoor里的事件。
 
 ### changeFloor: 楼层切换
 
@@ -555,6 +579,26 @@ move完毕后移动的NPC/怪物一定会消失，只不过可以通过immediate
 
 不过值得注意的是，用这种方式移动勇士的过程中将无视一切地形，无视一切事件，中毒状态也不会扣血。
 
+### playBgm: 播放背景音乐
+
+使用playBgm可以播放一个背景音乐。
+
+使用方法：`{"type": "playBgm", "name": "bgm.mp3"}`
+
+值得注意的是，额外添加进文件的背景音乐，需在main.js中this.bgms里加载它。
+
+目前支持mp3/ogg/wav/mid等多种格式的音乐播放。
+
+有关BGM播放的详细说明参见[背景音乐](element#背景音乐)
+
+### pauseBgm: 暂停背景音乐
+
+使用`{"type": "pauseBgm"}`可以暂停背景音乐的播放。
+
+### resumeBgm: 恢复背景音乐
+
+使用`{"type": "resumeBgm"}`可以恢复背景音乐的播放。
+
 ### playSound: 播放音效
 
 使用playSound可以立刻播放一个音效。
@@ -562,10 +606,6 @@ move完毕后移动的NPC/怪物一定会消失，只不过可以通过immediate
 使用方法：`{"type": "playSound", "name": "item.ogg"}`
 
 值得注意的是，如果是额外添加进文件的音效，则需在main.js中this.sounds里加载它。
-
-!> 自定义添加的音效名请勿包含`-`，否则将无法正常使用！
-
-由于考虑到用户流量问题，每个额外音效最好不超过20KB。
 
 ### win: 获得胜利
 
@@ -758,6 +798,43 @@ core.insertAction(list) //往当前事件列表中插入一系列事件。使用
 // ……
 ```
 
+## 加点事件
+
+打败怪物后可以进行加点。
+
+如果要对某个怪物进行加点操作，则首先需要修改该怪物的点数值，即在怪物定义的后面添加`point`，代表怪物本身的加点数值。
+
+``` js
+... 'def': 0, 'money': 1, 'experience': 1, 'special': 0, 'point': 1}, // 在怪物后面添加point代表怪物的加点数
+```
+
+然后在`events.js`文件中找到`addPoint`函数。它将返回一个choices事件。修改此函数为我们需要的加点项即可。
+
+``` js
+////// 加点 //////
+events.prototype.addPoint = function (enemy) {
+    var point = enemy.point; // 获得该怪物的point
+    if (!core.isset(point) || point<=0) return [];
+
+    // 加点，返回一个choices事件
+    return [
+        {"type": "choices",
+            "choices": [ // 提供三个选项：对于每一点，攻击+1/防御+2/生命+200
+                {"text": "攻击+"+(1*point), "action": [
+                    {"type": "setValue", "name": "status:atk", "value": "status:atk+"+(1*point)}
+                ]},
+                {"text": "防御+"+(2*point), "action": [
+                    {"type": "setValue", "name": "status:def", "value": "status:def+"+(2*point)}
+                ]},
+                {"text": "生命+"+(200*point), "action": [
+                    {"type": "setValue", "name": "status:hp", "value": "status:hp+"+(200*point)}
+                ]},
+            ]
+        }
+    ];
+}
+```
+
 ## 全局商店
 
 我们可以采用上面的choices方式来给出一个商店。这样的商店确实可以有效地进行操作，但是却是"非全局"的，换句话说，只有在碰到NPC的时候才能触发商店事件。
@@ -778,7 +855,6 @@ core.insertAction(list) //往当前事件列表中插入一系列事件。使用
         // 上面的例子是50层商店的计算公式。你也可以写任意其他的计算公式，只要以times作为参数即可。
         // 例如： "need": "25" 就是恒定需要25金币的商店； "need": "20+2*times" 就是第一次访问要20金币，以后每次递增2金币的商店。
         // 如果是对于每个选项有不同的计算公式，写 "need": "-1" 即可。可参见下面的经验商店。
-    
         "text": "勇敢的武士啊，给我${need}金币就可以：", // 显示的文字，需手动加换行符。可以使用${need}表示上面的need值。
         "choices": [ // 商店的选项
             {"text": "生命+800", "effect": "status:hp+=800"},
@@ -786,10 +862,12 @@ core.insertAction(list) //往当前事件列表中插入一系列事件。使用
             {"text": "攻击+4", "effect": "status:atk+=4"},
             {"text": "防御+4", "effect": "status:def+=4"},
             {"text": "魔防+10", "effect": "status:mdef+=10"}
-            // effect只能对status和item进行操作，不能修改flag值。且其中间只能用+=符号（也就是只能增加某个属性或道具）
+            // effect只能对status和item进行操作，不能修改flag值。
+            // 必须是X+=Y的形式，其中Y可以是一个表达式，以status:xxx或item:xxx为参数
             // 其他effect样例：
             // "item:yellowKey+=1" 黄钥匙+1
             // "item:pickaxe+=3" 破墙镐+3
+            // "status:hp+=2*(status:atk+status:def)" 将生命提升攻防和的数值的两倍
         ]
     },
     "expShop1": { // 商店唯一ID
@@ -802,13 +880,13 @@ core.insertAction(list) //往当前事件列表中插入一系列事件。使用
         "choices": [
             // 在choices中写need，可以针对每个选项都有不同的需求。
             // 这里的need同样可以以times作为参数，比如 "need": "100+20*times"
-            {"text": "等级+1", "need": "100", "effect": "status:hp+=1000;status:atk+=7;status:def+=7"},
+            {"text": "等级+1", "need": "100", "effect": "status:lv+=1;status:hp+=1000;status:atk+=7;status:def+=7"},
             // 多个effect直接以分号分开即可。如上面的意思是生命+1000，攻击+7，防御+7。
             {"text": "攻击+5", "need": "30", "effect": "status:atk+=5"},
             {"text": "防御+5", "need": "30", "effect": "status:def+=5"},
         ]
-    }
-}
+    },
+},
 ```
 
 全局商店全部定义在`data.js`中的shops一项里。
@@ -889,37 +967,90 @@ core.insertAction(list) //往当前事件列表中插入一系列事件。使用
 
 当且仅当勇士第一次到达某层时，将会触发此事件。可以利用此事件来显示一些剧情，或再让它调用 `{"type": "trigger"}` 来继续调用其他的事件。
 
+## 战前剧情
+
+有时候光战后事件`afterBattle`是不够的，我们可能还需要战前剧情，例如Boss战之前和Boss进行一段对话。
+
+要使用战前剧情，首先你需要覆盖该店的系统默认事件，改成你自己的自定义事件，然后在战前剧情后调用`{"type": "battle"}`强制战斗。
+
+值得注意的是，使用这种自定义事件来覆盖系统的默认战斗事件时，可以增加`displayDamage`代表该点是否需要显伤。此项可省略，默认为有显伤。
+
+``` js
+"x,y": { // (x,y)为该怪物坐标
+    "trigger": "action", // 覆盖该点本身默认事件，变成自定义事件
+    "displayDamage": true, // 覆盖后，该点是否有显伤；此项可忽略，默认为有。
+    "data": [ // 该点的自定义事件列表
+        // ... 战前剧情
+        {"type": "battle", "id": "xxx"}, // 强制战斗
+        // ... 战后剧情；请注意上面的强制战斗不会使怪物消失，如有需要请调动{"type": "hide"}
+    ]
+}
+```
+
+## 经验升级（进阶/境界塔）
+
+本塔也支持经验升级，即用户杀怪获得经验后，可以到达某些数值自动进阶，全面提升属性。
+
+要经验升级，你需要先在`data.js`中的全局变量中启用。你需要将`enableExperience`启用经验，且`enableLevelUp`启用进阶。同时你也可以将`enableLv`置为true以在状态栏中显示当前等级（境界）。
+
+同时，你还需要在`data.js`中的`levelUp`来定义每一个进阶所需要的生命值，以及进阶时的效果。
+
+``` js
+"levelUp": [ // 经验升级所需要的数值，是一个数组
+    {}, // 第一项为初始等级，可以简单留空，也可以写name
+
+    // 每一个里面可以含有三个参数 need, name, effect
+    // need为所需要的经验数值，是一个正整数。请确保need所需的依次递增
+    // name为该等级的名称，也可以省略代表使用系统默认值；本项将显示在状态栏中
+    // effect为本次升级所执行的操作，可由若干项组成，由分号分开
+    // 其中每一项写法和上面的商店完全相同，同样必须是X+=Y的形式，Y是一个表达式，同样可以使用status:xxx或item:xxx代表勇士的某项数值/道具个数
+    {"need": 20, "name": "第二级", "effect": "status:hp+=2*(status:atk+status:def);status:atk+=10;status:def+=10"}, // 先将生命提升攻防和的2倍；再将攻击+10，防御+10
+
+    // effect也允许写一个function，代表本次升级将会执行的操作，比如可以显示一段提示文字，或者触发一个事件
+    {"need": 40, "effect": function () {
+        core.drawText("恭喜升级！");
+        core.status.hero.hp *= 2;
+        core.status.hero.atk += 100;
+        core.status.hero.def += 100;
+    }},
+
+    // 依次往下写需要的数值即可
+]
+```
+
+`levelUp`是一个数组，里面分别定义了每个等级的信息。里面每一项是一个object，主要有三个参数`need`, `name`, `effect`
+- `need` 该等级所需要的经验值，是一个正整数。请确保数组中的need依次递增。
+- `name` 该等级的名称，比如“佣兵下级”等。该项可以忽略，以使用系统默认的等级。该项将显示在状态栏中。
+- `effect` 为本次等级执行的操作。它有两种写法：字符串，或函数。
+  - 如果`effect`为字符串，则和上面的全局商店的写法完全相同。可由分号分开，每一项为X+=Y的形式，X为你要修改的勇士属性/道具个数，Y为一个表达式。
+  - 如果`effect`为函数，则也允许写一个`function`，来代表本次升级将会执行的操作。
+
 ## 开始，难度分歧，获胜与失败
 
-游戏开始时将调用`events.js`中的startGame函数。
+游戏开始时将调用`events.js`中的`startGame`函数。
 
-它将显示`data.js`中的startText内容（可以修改成自己的），并正式开始游戏。
+它将显示`data.js`中的startText内容（可以修改成自己的），提供战斗动画开启选择，设置初始福利，并正式开始游戏。
+
+我们可以修改`setInitData`函数来对于不同难度分别设置初始属性。
 
 其参数hard为以下三个字符串之一：`"Easy"`, `"Normal"`, `"Hard"`，分别对应三个难度。针对不同的难度，我们可以设置一些难度分歧。
 
 ``` js
-////// 游戏开始事件 //////
-events.prototype.startGame = function (hard) {
-
-    if (core.status.isStarting) return;
-    core.status.isStarting = true;
-
-    core.hideStartAnimate(function() {
-        core.drawText(core.clone(core.firstData.startText), function() {
-            core.startGame(hard);
-            if (hard=='Easy') { // 简单难度
-                core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
-                // 可以在此设置一些初始福利，比如设置初始生命值可以调用：
-                // core.setStatus("hp", 10000);
-            }
-            if (hard=='Normal') { // 普通难度
-                core.setFlag('hard', 2); // 可以用flag:hard来获得当前难度
-            }
-            if (hard=='Hard') { // 困难难度
-                core.setFlag('hard', 3); // 可以用flag:hard来获得当前难度
-            }
-        });
-    })
+////// 不同难度分别设置初始属性 //////
+events.prototype.setInitData = function (hard) {
+    if (hard=='Easy') { // 简单难度
+        core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
+        // 可以在此设置一些初始福利，比如设置初始生命值可以调用：
+        // core.setStatus("hp", 10000);
+        // 赠送一把黄钥匙可以调用
+        // core.setItem("yellowKey", 1);
+    }
+    if (hard=='Normal') { // 普通难度
+        core.setFlag('hard', 2); // 可以用flag:hard来获得当前难度
+    }
+    if (hard=='Hard') { // 困难难度
+        core.setFlag('hard', 3); // 可以用flag:hard来获得当前难度
+    }
 }
 ```
 

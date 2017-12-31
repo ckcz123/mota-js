@@ -1059,9 +1059,8 @@ events.prototype.setInitData = function (hard) {
 当获胜`{"type": "win"}`事件发生时，将调用`events.js`中的win事件。其显示一段恭喜文字，并重新开始游戏。
 
 ``` js
-////// 游戏结束事件 //////
+////// 游戏获胜事件 //////
 events.prototype.win = function(reason) {
-    // 获胜
     core.waitHeroToStop(function() {
         core.removeGlobalAnimate(0,0,true);
         core.clearMap('all'); // 清空全地图
@@ -1079,8 +1078,8 @@ events.prototype.win = function(reason) {
 当失败（`{"type": "lose"}`，或者被怪强制战斗打死、被领域怪扣血死、中毒导致扣血死，路障导致扣血死等等）事件发生时，将调用`events.js`中的`lose`事件。其直接显示一段文字，并重新开始游戏。
 
 ``` js
+////// 游戏失败事件 //////
 events.prototype.lose = function(reason) {
-    // 失败
     core.waitHeroToStop(function() {
         core.drawText([
             "\t[结局1]你死了。\n如题。"

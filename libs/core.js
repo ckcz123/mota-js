@@ -3072,7 +3072,7 @@ core.prototype.drawTip = function (text, itemIcon) {
                 return;
             }
             else {
-                if (!core.timeout.getItemTipTimeout) {
+                if (!core.isset(core.timeout.getItemTipTimeout)) {
                     core.timeout.getItemTipTimeout = window.setTimeout(function () {
                         hide = true;
                         core.timeout.getItemTipTimeout = null;
@@ -3432,30 +3432,29 @@ core.prototype.syncSave = function(type) {
 
             // send
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", "../sync.php");
-            xhr.timeout = 1000;
+            xhr.open("POST", "/games/sync.php");
             xhr.onload = function(e) {
                 if (xhr.status==200) {
                     // console.log("同步成功。");
                     var response = JSON.parse(xhr.response);
                     if (response.code<0) {
-                        core.drawText("出错啦！\n无法同步存档到服务器。");
+                        core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+response.msg);
                     }
                     else {
                         core.drawText("同步成功！\n\n您的存档编号： "+response.code+"\n您的存档密码： "+response.msg+"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。")
                     }
                 }
                 else {
-                    core.drawText("出错啦！\n无法同步存档到服务器。");
+                    core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因：HTTP "+xhr.status);
                 }
             };
             xhr.ontimeout = function(e) {
                 console.log(e);
-                core.drawText("出错啦！\n无法同步存档到服务器。");
+                core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+e);
             }
             xhr.onerror = function(e) {
                 console.log(e);
-                core.drawText("出错啦！\n无法同步存档到服务器。");
+                core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+e);
             }
             xhr.send(formData);
         }, function() {
@@ -3484,8 +3483,7 @@ core.prototype.syncSave = function(type) {
 
             // send
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", "../sync.php");
-            xhr.timeout = 1000;
+            xhr.open("POST", "/games/sync.php");
             xhr.onload = function(e) {
                 if (xhr.status==200) {
                     // console.log("同步成功。");
@@ -3512,22 +3510,19 @@ core.prototype.syncSave = function(type) {
                             core.drawText("出错啦！\n存档密码错误！");
                             break;
                         default:
-                            core.drawText("出错啦！\n无法从服务器同步存档。");
+                            core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因："+response.msg);
                             break;
                     }
-
                 }
                 else {
-                    core.drawText("出错啦！\n无法从服务器同步存档。");
+                    core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因：HTTP "+xhr.status);
                 }
             };
             xhr.ontimeout = function(e) {
-                console.log(e);
-                core.drawText("出错啦！\n无法从服务器同步存档。");
+                core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因："+e);
             }
             xhr.onerror = function(e) {
-                console.log(e);
-                core.drawText("出错啦！\n无法从服务器同步存档。");
+                core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因："+e);
             }
             xhr.send(formData);
         }, function() {

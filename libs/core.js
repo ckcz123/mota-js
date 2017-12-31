@@ -296,7 +296,7 @@ core.prototype.loadImage = function (imgName, callback) {
         if (name.indexOf(".png")<0) // 不包含"png"
             name=name+".png";
         var image = new Image();
-        image.src = 'images/' + name;
+        image.src = 'images/' + name + "?v=" + main.version;
         if (image.complete) {
             callback(imgName, image);
             return;
@@ -2013,6 +2013,7 @@ core.prototype.drawMap = function (mapName, callback) {
             core.canvas.bg.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
         }
     }
+
     // 如果存在png
     if (core.isset(core.floors[mapName].png)) {
         var png = core.floors[mapName].png;
@@ -2021,15 +2022,13 @@ core.prototype.drawMap = function (mapName, callback) {
         }
     }
 
-    var autotileMaps = [];
+    var mapArray = core.maps.getMapArray(core.status.maps, mapName);
     for (var b = 0; b < mapBlocks.length; b++) {
         // 事件启用
         var block = mapBlocks[b];
         if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
             if (block.event.cls == 'autotile') {
-                // core.drawAutotile();
-                autotileMaps[13*block.x + block.y] = block.event.id;
-                continue;
+                core.drawAutotile(core.canvas.event, mapArray, block, 32, 0, 0);
             }
             else {
                 if (block.event.id!='none') {
@@ -2041,140 +2040,90 @@ core.prototype.drawMap = function (mapName, callback) {
             }
         }
     }
-    core.drawAutotile(mapName, 'event', autotileMaps, 0, 0, 32);
     core.setGlobalAnimate(core.values.animateSpeed);
-
     if (core.isset(callback))
         callback();
 }
 
 ////// 绘制Autotile //////
-core.prototype.drawAutotile = function (floorId, canvas, autotileMaps, left, top, size, autotileId) {
-
-    if (!core.isset(autotileId)) {
-        var autotileIds = {};
-        autotileMaps.forEach(function (t) {
-            if (core.isset(t)) autotileIds[t]=true;
-        });
-        Object.keys(autotileIds).forEach(function (t) {
-            core.drawAutotile(floorId, canvas, autotileMaps, left, top, size, t);
-        })
-        return;
+core.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top){
+    var indexArrs = [ //16种组合的图块索引数组; // 将autotile分割成48块16*16的小块; 数组索引即对应各个小块
+    //                                       +----+----+----+----+----+----+
+        [10,  9,  4, 3 ],  //0   bin:0000      | 1  | 2  | 3  | 4  | 5  | 6  |
+        [10,  9,  4, 13],  //1   bin:0001      +----+----+----+----+----+----+
+        [10,  9, 18, 3 ],  //2   bin:0010      | 7  | 8  | 9  | 10 | 11 | 12 |
+        [10,  9, 16, 15],  //3   bin:0011      +----+----+----+----+----+----+
+        [10, 43,  4, 3 ],  //4   bin:0100      | 13 | 14 | 15 | 16 | 17 | 18 |
+        [10, 31,  4, 25],  //5   bin:0101      +----+----+----+----+----+----+
+        [10,  7,  2, 3 ],  //6   bin:0110      | 19 | 20 | 21 | 22 | 23 | 24 |
+        [10, 31, 16, 5 ],  //7   bin:0111      +----+----+----+----+----+----+
+        [48,  9,  4, 3 ],  //8   bin:1000      | 25 | 26 | 27 | 28 | 29 | 30 |
+        [ 8,  9,  4, 1 ],  //9   bin:1001      +----+----+----+----+----+----+
+        [36,  9, 30, 3 ],  //10  bin:1010      | 31 | 32 | 33 | 34 | 35 | 36 |
+        [36,  9,  6, 15],  //11  bin:1011      +----+----+----+----+----+----+
+        [46, 45,  4, 3 ],  //12  bin:1100      | 37 | 38 | 39 | 40 | 41 | 42 |
+        [46, 11,  4, 25],  //13  bin:1101      +----+----+----+----+----+----+
+        [12, 45, 30, 3 ],  //14  bin:1110      | 43 | 44 | 45 | 46 | 47 | 48 |
+        [34, 33, 28, 27]   //15  bin:1111      +----+----+----+----+----+----+
+    ];
+    
+    var drawBlockByIndex = function(ctx, dx, dy, autotileImg, index, size){ //index为autotile的图块索引1-48
+        var sx = 16*((index-1)%6), sy = 16*(~~((index-1)/6));
+        ctx.drawImage(autotileImg, sx, sy, 16, 16, dx, dy, size/2, size/2);
     }
-
-    var isAutotile = function(x, y) {
-        if (x<0 || x>12 || y<0 || y>12) return 1;
-        return autotileMaps[13*x+y]==autotileId?1:0;
+    var getAutotileAroundId = function(currId, x, y){
+        if(x<0 || y<0 || x>12 || y>12) return 1;
+        else return mapArr[y][x]==currId ? 1:0;
     }
-    for (var xx=0;xx<13;xx++) {
-        for (var yy=0;yy<13;yy++) {
-            if (isAutotile(xx, yy)) {
-                // 绘制autotile
-                var id=isAutotile(xx, yy - 1) + 2 * isAutotile(xx - 1, yy) + 4 * isAutotile(xx, yy + 1) + 8 * isAutotile(xx + 1, yy);
-                core.drawAutotileBlock(floorId, canvas, left + xx * size, top + yy * size, size, core.material.images.autotile[autotileId], id);
+    var checkAround = function(x, y){ // 得到周围四个32*32块（周围每块都包含当前块的1/4，不清楚的话画下图你就明白）的数组索引
+        var currId = mapArr[y][x];
+        var pointBlock = [];
+        for(var i=0; i<4; i++){
+            var bsum = 0;
+            var offsetx = i%2, offsety = ~~(i/2);
+            for(var j=0; j<4; j++){
+            var mx = j%2, my = ~~(j/2);
+            var b = getAutotileAroundId(currId, x+offsetx+mx-1, y+offsety+my-1);
+            bsum += b*(Math.pow(2, 3-j));
             }
+            pointBlock.push(bsum);
         }
+        return pointBlock;
     }
-    for (var xx=0;xx<13;xx++) {
-        for (var yy=0;yy<13;yy++) {
-            if (isAutotile(xx, yy) + isAutotile(xx + 1, yy) + isAutotile(xx + 1, yy + 1) + isAutotile(xx, yy + 1) != 3) continue;
-            if (!isAutotile(xx, yy)) {
-                core.drawAutotileBlock(floorId, canvas, left + xx * size + size, top + yy * size + size, size, core.material.images.autotile[autotileId], 16);
-            }
-            if (!isAutotile(xx + 1, yy)) {
-                core.drawAutotileBlock(floorId, canvas, left + xx * size + size / 2, top + yy * size + size, size, core.material.images.autotile[autotileId], 17);
-            }
-            if (!isAutotile(xx + 1, yy + 1)) {
-                core.drawAutotileBlock(floorId, canvas, left + xx * size + size / 2, top + yy * size + size / 2, size, core.material.images.autotile[autotileId], 18);
-            }
-            if (!isAutotile(xx, yy + 1)) {
-                core.drawAutotileBlock(floorId, canvas, left + xx * size + size, top + yy * size + size / 2, size, core.material.images.autotile[autotileId], 19);
-            }
+    var getAutotileIndexs = function(x, y){
+        var indexArr = [];
+        var pointBlocks = checkAround(x, y);
+        for(var i=0; i<4; i++){
+            var arr = indexArrs[pointBlocks[i]]
+            indexArr.push(arr[3-i]);
         }
+        return indexArr;
     }
-}
+    // 开始绘制autotile
+    var x = block.x, y = block.y;
+    var pieceIndexs = getAutotileIndexs(x, y);
 
-////// 绘制Autotile的某一块 //////
-core.prototype.drawAutotileBlock = function (floorId, map, x, y, size, autotile, index) {
-    var canvas = core.canvas[map];
-    var groundId = core.floors[floorId].defaultGround || "ground";
-    var blockIcon = core.material.icons.terrains[groundId];
-    var blockImage = core.material.images.terrains;
-    switch (index) {
-        case 0:
-            canvas.drawImage(autotile, 0, 0, 32, 32, x, y, size, size);
-            break;
-        case 1:
-            canvas.drawImage(autotile, 0, 3 * 32, 16, 32, x, y, size / 2, size);
-            canvas.drawImage(autotile, 2 * 32 + 16, 3 * 32, 16, 32, x + size / 2, y, size / 2, size);
-            break;
-        case 2:
-            canvas.drawImage(autotile, 2 * 32, 32, 32, 16, x, y, size, size / 2);
-            canvas.drawImage(autotile, 2 * 32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2);
-            break;
-        case 3:
-            canvas.drawImage(autotile, 2 * 32, 3 * 32, 32, 32, x, y, size, size);
-            break;
-        case 4:
-            canvas.drawImage(autotile, 0, 1 * 32, 16, 32, x, y, size / 2, size);
-            canvas.drawImage(autotile, 2 * 32 + 16, 1 * 32, 16, 32, x + size / 2, y, size / 2, size);
-            break;
-        case 5:
-            canvas.drawImage(autotile, 0, 2 * 32, 16, 32, x, y, size / 2, size);
-            canvas.drawImage(autotile, 2 * 32 + 16, 2 * 32, 16, 32, x + size / 2, y, size / 2, size);
-            break;
-        case 6:
-            canvas.drawImage(autotile, 2 * 32, 1 * 32, 32, 32, x, y, size, size);
-            break;
-        case 7:
-            canvas.drawImage(autotile, 2 * 32, 2 * 32, 32, 32, x, y, size, size);
-            break;
-        case 8:
-            canvas.drawImage(autotile, 0, 32, 32, 16, x, y, size, size / 2);
-            canvas.drawImage(autotile, 0, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2);
-            break;
-        case 9:
-            canvas.drawImage(autotile, 0, 3 * 32, 32, 32, x, y, size, size);
-            break;
-        case 10:
-            canvas.drawImage(autotile, 32, 32, 32, 16, x, y, size, size / 2);
-            canvas.drawImage(autotile, 32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2);
-            break;
-        case 11:
-            canvas.drawImage(autotile, 32, 3 * 32, 32, 32, x, y, size, size);
-            break;
-        case 12:
-            canvas.drawImage(autotile, 0, 32, 32, 32, x, y, size, size);
-            break;
-        case 13:
-            canvas.drawImage(autotile, 0, 2 * 32, 32, 32, x, y, size, size);
-            break;
-        case 14:
-            canvas.drawImage(autotile, 32, 32, 32, 32, x, y, size, size);
-            break;
-        case 15:
-            canvas.drawImage(autotile, 32, 2 * 32, 32, 32, x, y, size, size);
-            break;
-        case 16:
-            canvas.clearRect(x, y, size / 2, size / 2);
-            canvas.drawImage(blockImage, 0, blockIcon * 32, 16, 16, x, y, size / 2, size / 2);
-            canvas.drawImage(autotile, 2 * 32, 0, 16, 16, x, y, size / 2, size / 2);
-            break;
-        case 17:
-            canvas.clearRect(x, y, size / 2, size / 2);
-            canvas.drawImage(blockImage, 0, blockIcon * 32, 16, 16, x, y, size / 2, size / 2);
-            canvas.drawImage(autotile, 2 * 32 + 16, 0, 16, 16, x, y, size / 2, size / 2);
-            break;
-        case 18:
-            canvas.clearRect(x, y, size / 2, size / 2);
-            canvas.drawImage(blockImage, 0, blockIcon * 32, 16, 16, x, y, size / 2, size / 2);
-            canvas.drawImage(autotile, 2 * 32 + 16, 16, 16, 16, x, y, size / 2, size / 2);
-            break;
-        case 19:
-            canvas.clearRect(x, y, size / 2, size / 2);
-            canvas.drawImage(blockImage, 0, blockIcon * 32, 16, 16, x, y, size / 2, size / 2);
-            canvas.drawImage(autotile, 2 * 32, 16, 16, 16, x, y, size / 2, size / 2);
-            break;
+    //修正四个边角的固定搭配
+    if(pieceIndexs[0] == 13){
+      if(pieceIndexs[1] == 16) pieceIndexs[1] = 14;
+      if(pieceIndexs[2] == 31) pieceIndexs[2] = 19;
+    }
+    if(pieceIndexs[1] == 18){
+      if(pieceIndexs[0] == 15) pieceIndexs[0] = 17;
+      if(pieceIndexs[3] == 36) pieceIndexs[3] = 24;
+    }
+    if(pieceIndexs[2] == 43){
+      if(pieceIndexs[0] == 25) pieceIndexs[0] = 37;
+      if(pieceIndexs[3] == 46) pieceIndexs[3] = 44;
+    }
+    if(pieceIndexs[3] == 48){
+      if(pieceIndexs[1] == 30) pieceIndexs[1] = 42;
+      if(pieceIndexs[2] == 45) pieceIndexs[2] = 47;
+    }
+    for(var i=0; i<4; i++){
+      var index = pieceIndexs[i];
+      var dx = x*size + size/2*(i%2), dy = y*size + size/2*(~~(i/2));
+      drawBlockByIndex(ctx, dx+left, dy+top, core.material.images['autotile'][block.event.id], index, size);
     }
 }
 
@@ -2876,8 +2825,19 @@ core.prototype.updateFg = function () {
         core.canvas.fg.textAlign = 'left';
         for (var b = 0; b < mapBlocks.length; b++) {
             var x = mapBlocks[b].x, y = mapBlocks[b].y;
-            if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls == 'enemys' && mapBlocks[b].event.trigger == 'battle'
+            if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls == 'enemys'
                 && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable)) {
+
+                // 非系统默认的战斗事件（被覆盖）
+                if (mapBlocks[b].event.trigger != 'battle') {
+                    // 判断显伤
+                    var event = core.floors[core.status.floorId].events[x+","+y];
+                    if (core.isset(event) && !(event instanceof Array)) {
+                        if (core.isset(event.displayDamage) && !event.displayDamage)
+                            continue;
+                    }
+                }
+
                 var id = mapBlocks[b].event.id;
 
                 var damage = core.enemys.getDamage(id);
@@ -3061,7 +3021,7 @@ core.prototype.drawTip = function (text, itemIcon) {
                 return;
             }
             else {
-                if (!core.timeout.getItemTipTimeout) {
+                if (!core.isset(core.timeout.getItemTipTimeout)) {
                     core.timeout.getItemTipTimeout = window.setTimeout(function () {
                         hide = true;
                         core.timeout.getItemTipTimeout = null;
@@ -3421,30 +3381,29 @@ core.prototype.syncSave = function(type) {
 
             // send
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", "../sync.php");
-            xhr.timeout = 1000;
+            xhr.open("POST", "/games/sync.php");
             xhr.onload = function(e) {
                 if (xhr.status==200) {
                     // console.log("同步成功。");
                     var response = JSON.parse(xhr.response);
                     if (response.code<0) {
-                        core.drawText("出错啦！\n无法同步存档到服务器。");
+                        core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+response.msg);
                     }
                     else {
                         core.drawText("同步成功！\n\n您的存档编号： "+response.code+"\n您的存档密码： "+response.msg+"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。")
                     }
                 }
                 else {
-                    core.drawText("出错啦！\n无法同步存档到服务器。");
+                    core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因：HTTP "+xhr.status);
                 }
             };
             xhr.ontimeout = function(e) {
                 console.log(e);
-                core.drawText("出错啦！\n无法同步存档到服务器。");
+                core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+e);
             }
             xhr.onerror = function(e) {
                 console.log(e);
-                core.drawText("出错啦！\n无法同步存档到服务器。");
+                core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+e);
             }
             xhr.send(formData);
         }, function() {
@@ -3473,8 +3432,7 @@ core.prototype.syncSave = function(type) {
 
             // send
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", "../sync.php");
-            xhr.timeout = 1000;
+            xhr.open("POST", "/games/sync.php");
             xhr.onload = function(e) {
                 if (xhr.status==200) {
                     // console.log("同步成功。");
@@ -3501,22 +3459,19 @@ core.prototype.syncSave = function(type) {
                             core.drawText("出错啦！\n存档密码错误！");
                             break;
                         default:
-                            core.drawText("出错啦！\n无法从服务器同步存档。");
+                            core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因："+response.msg);
                             break;
                     }
-
                 }
                 else {
-                    core.drawText("出错啦！\n无法从服务器同步存档。");
+                    core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因：HTTP "+xhr.status);
                 }
             };
             xhr.ontimeout = function(e) {
-                console.log(e);
-                core.drawText("出错啦！\n无法从服务器同步存档。");
+                core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因："+e);
             }
             xhr.onerror = function(e) {
-                console.log(e);
-                core.drawText("出错啦！\n无法从服务器同步存档。");
+                core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因："+e);
             }
             xhr.send(formData);
         }, function() {

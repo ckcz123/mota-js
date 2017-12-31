@@ -1,13 +1,44 @@
 # 附录:API列表
 
+?> 上次更新时间：* {docsify-updated} *
+
 所有系统支持的API都列在了这里。所有可能被用到的API都在前面用\*标记。
 
 可以在chrome浏览器的控制台中（`ctrl+shift+I`，找到Console）中直接进行调用，以查看效果。
 
-!> **`main.js`：游戏入口。所有其他JS文件都是被此文件加载。**
+!> **`main.js`：游戏入口，所有其他JS文件都是被此文件加载。**
 
 ``` js
-
+main.init // 初始化
+main.loaderJs // 动态加载所有核心JS文件
+main,loaderFloors // 动态加载所有楼层（剧本）
+main.loadMod // 加载某一个JS文件
+main.loadFloor // 加载某一个楼层
+main.setMainTipsText // 加载过程提示
+window.onresize // 窗口大小变化时
+main.dom.body.onkeydown // 在界面上按下某按键时
+main.dom.body.onkeydown // 在界面上放开某按键时
+main.dom.body.onselectstart // 开始选择时
+main.dom.data.onmousedown // 鼠标按下时
+main.dom.data.onmousemove // 鼠标移动时
+main.dom.data.onmouseup // 鼠标放开时
+main.dom.data.onmousewheel // 鼠标滑轮滚动时
+main.dom.data.ontouchstart // 手指在触摸屏开始触摸时
+main.dom.data.ontouchmove // 手指在触摸屏上移动时
+main.dom.data.ontouchend // 手指离开触摸屏时
+main.statusBar.image.book.onclick // 点击状态栏中的怪物手册时
+main.statusBar.image.fly.onclick // 点击状态栏中的楼层传送器时
+main.statusBar.image.toolbox.onclick // 点击状态栏中的工具箱时
+main.statusBar.image.shop.onclick // 点击状态栏中的快捷商店时
+main.statusBar.image.save.onclick // 点击状态栏中的存档按钮时
+main.statusBar.image.load.onclick // 点击状态栏中的读档按钮时
+main.statusBar.image.settings.onclick // 点击状态栏中的系统菜单时
+main.dom.playGame.onclick // 点击“开始游戏”时
+main.dom.loadGame.onclick // 点击“载入游戏”时
+main.dom.aboutGame.onclick // 点击“关于本塔”时
+main.dom.easyLevel.onclick // 点击“简单难度”时
+main.dom.normalLevel.onclick // 点击“普通难度”时
+main.dom.hardLevel.onclick // 点击“困难难度”时
 ```
 
 !> **`core.js`：系统核心文件。所有核心逻辑处理都在此文件完成。**
@@ -97,7 +128,6 @@ core.setOpacity // 设置某个canvas的透明度
 core.setFillStyle // 设置某个canvas的绘制属性（如颜色等）
 * core.drawMap(mapId, callback) // 绘制某张地图。mapId为地图Id，绘制完毕将执行callback回调函数。
 core.drawAutotile // 绘制Autotile
-core.drawAutotileBlock // 绘制Autotile的某一块
 * core.noPassExists(x,y) // 某个点是否不可通行
 core.noPass // 某个点是否在区域内且不可通行
 * core.npcExists(x,y) // 某个点是否存在NPC
@@ -291,6 +321,7 @@ core.maps.addChangeFloor // 向该楼层添加剧本的楼层转换事件
 core.maps.initMaps // 初始化所有地图
 core.maps.save // 将当前地图重新变成数字，以便于存档
 core.maps.load // 将存档中的地图信息重新读取出来
+core.maps.getMapArray // 将当前地图重新变成二维数组形式
 ```
 
 !> `ui.js` 定义了各种界面的绘制。

@@ -19,7 +19,7 @@
       repo: 'https://github.com/ckcz123/mota-js',
       // basepath: '../docs/',
       
-      // Search Support
+        // Search Support
       // search: {
       //   maxAge: 43200000, // 过期时间，单位毫秒，默认一天
       //   paths: 'auto',
@@ -37,10 +37,9 @@
       loadSidebar: '_sidebar.md',
       subMaxLevel: 2,
       autoHeader: true,
-    }
-    //离线模式
-    if (typeof navigator.serviceWorker !== 'undefined') {
-       navigator.serviceWorker.register('serviceWorker.js')
+      auto2top: true,
+      mergeNavbar: true,
+      formatUpdated: '{YYYY}-{MM}-{DD} {HH}:{mm}:{ss}',
     }
   </script>
   <script src="https://cdn.bootcss.com/docsify/4.5.5/docsify.min.js"></script>

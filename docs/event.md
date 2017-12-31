@@ -1,5 +1,7 @@
 # 事件
 
+?> 上次更新时间：* {docsify-updated} *
+
 本章内将对样板所支持的事件进行介绍。
 
 ## 事件的机制
@@ -965,6 +967,26 @@ events.prototype.addPoint = function (enemy) {
 
 当且仅当勇士第一次到达某层时，将会触发此事件。可以利用此事件来显示一些剧情，或再让它调用 `{"type": "trigger"}` 来继续调用其他的事件。
 
+## 战前剧情
+
+有时候光战后事件`afterBattle`是不够的，我们可能还需要战前剧情，例如Boss战之前和Boss进行一段对话。
+
+要使用战前剧情，首先你需要覆盖该店的系统默认事件，改成你自己的自定义事件，然后在战前剧情后调用`{"type": "battle"}`强制战斗。
+
+值得注意的是，使用这种自定义事件来覆盖系统的默认战斗事件时，可以增加`displayDamage`代表该点是否需要显伤。此项可省略，默认为有显伤。
+
+``` js
+"x,y": { // (x,y)为该怪物坐标
+    "trigger": "action", // 覆盖该点本身默认事件，变成自定义事件
+    "displayDamage": true, // 覆盖后，该点是否有显伤；此项可忽略，默认为有。
+    "data": [ // 该点的自定义事件列表
+        // ... 战前剧情
+        {"type": "battle", "id": "xxx"}, // 强制战斗
+        // ... 战后剧情；请注意上面的强制战斗不会使怪物消失，如有需要请调动{"type": "hide"}
+    ]
+}
+```
+
 ## 经验升级（进阶/境界塔）
 
 本塔也支持经验升级，即用户杀怪获得经验后，可以到达某些数值自动进阶，全面提升属性。
@@ -1039,9 +1061,8 @@ events.prototype.setInitData = function (hard) {
 当获胜`{"type": "win"}`事件发生时，将调用`events.js`中的win事件。其显示一段恭喜文字，并重新开始游戏。
 
 ``` js
-////// 游戏结束事件 //////
+////// 游戏获胜事件 //////
 events.prototype.win = function(reason) {
-    // 获胜
     core.waitHeroToStop(function() {
         core.removeGlobalAnimate(0,0,true);
         core.clearMap('all'); // 清空全地图
@@ -1059,8 +1080,8 @@ events.prototype.win = function(reason) {
 当失败（`{"type": "lose"}`，或者被怪强制战斗打死、被领域怪扣血死、中毒导致扣血死，路障导致扣血死等等）事件发生时，将调用`events.js`中的`lose`事件。其直接显示一段文字，并重新开始游戏。
 
 ``` js
+////// 游戏失败事件 //////
 events.prototype.lose = function(reason) {
-    // 失败
     core.waitHeroToStop(function() {
         core.drawText([
             "\t[结局1]你死了。\n如题。"

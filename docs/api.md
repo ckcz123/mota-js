@@ -1,5 +1,7 @@
 # 附录:API列表
 
+?> 上次更新时间：* {docsify-updated} *
+
 所有系统支持的API都列在了这里。所有可能被用到的API都在前面用\*标记。
 
 可以在chrome浏览器的控制台中（`ctrl+shift+I`，找到Console）中直接进行调用，以查看效果。

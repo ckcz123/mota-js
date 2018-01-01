@@ -206,7 +206,7 @@ editor.prototype.loadAllImgs = function(icons){
   return Promise.all(p);
 }
 editor.prototype.idsInit = function(maps, icons){
-  editor.ids = [];
+  editor.ids = [0];
   editor.indexs = [];
   var MAX_NUM = 400;
   var getInfoById = function(id){

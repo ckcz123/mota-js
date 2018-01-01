@@ -18,7 +18,7 @@ maps.prototype.loadFloor = function (floorId, map) {
         for (var i = 0; i < 13; i++) {
             for (var j = 0; j < 13; j++) {
                 var block = maps.getBlock(j, i, map[i][j]);
-                if (block.event != undefined) {
+                if (core.isset(block.event)) {
                     if (block.event.cls == 'enemys' && block.event.trigger==undefined) {
                         block.event.trigger = 'battle';
                     }
@@ -39,7 +39,7 @@ maps.prototype.loadFloor = function (floorId, map) {
                         }
                     }
                 }
-                maps.addEvent(block,j,i,floor.events[j+","+i],floor.defaultGround || "ground")
+                maps.addEvent(block,j,i,floor.events[j+","+i]);
                 maps.addChangeFloor(block,j,i,floor.changeFloor[j+","+i]);
                 if (core.isset(block.event)) blocks.push(block);
             }
@@ -80,10 +80,10 @@ maps.prototype.getBlock = function (x, y, id) {
 }
 
 ////// 向该楼层添加剧本的自定义事件 //////
-maps.prototype.addEvent = function (block, x, y, event, ground) {
+maps.prototype.addEvent = function (block, x, y, event) {
     if (!core.isset(event)) return;
     if (!core.isset(block.event)) { // 本身是空地？
-        block.event = {'cls': 'terrains', 'id': ground, 'noPass': false};
+        block.event = {'cls': 'terrains', 'id': 'none', 'noPass': false};
     }
     // event是字符串或数组？
     if (typeof event == "string") {
@@ -94,6 +94,10 @@ maps.prototype.addEvent = function (block, x, y, event, ground) {
     }
     if (!core.isset(event.data))
         event.data = [];
+
+    // 覆盖noPass
+    if (core.isset(event.noPass))
+        block.event.noPass = event.noPass;
 
     // 覆盖enable
     if (!core.isset(block.enable) && core.isset(event.enable)) {
@@ -171,6 +175,32 @@ maps.prototype.load = function (data, floorId) {
         return map;
     }
     return this.loadFloor(floorId, data[floorId]);
+}
+
+////// 将当前地图重新变成二维数组形式 //////
+maps.prototype.getMapArray = function (maps, floorId){
+    if (!core.isset(floorId)) {
+        var map = {};
+        for (var id in maps) {
+            map[id] = this.getMapArray(maps, id);
+        }
+        return map;
+    }
+
+    var thisFloor = maps[floorId];
+
+    var blocks = [];
+    for (var x=0;x<13;x++) {
+        blocks[x]=[];
+        for (var y=0;y<13;y++) {
+            blocks[x].push(0);
+        }
+    }
+    thisFloor.blocks.forEach(function (block) {
+        if (!(core.isset(block.enable) && !block.enable))
+            blocks[block.y][block.x] = block.id;
+    });
+    return blocks;
 }
 
 main.instance.maps = new maps();

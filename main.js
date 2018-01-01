@@ -1,4 +1,11 @@
 function main() {
+
+    //------------------------ 用户修改内容 ------------------------//
+
+    this.version = "0.1"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+
+    //------------------------ 用户修改内容 END ------------------------//
+
     this.dom = {
         'body': document.body,
         'gameGroup': document.getElementById('gameGroup'),
@@ -50,14 +57,7 @@ function main() {
     this.images = [
         'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains'
     ];
-    this.bgms = [ // 在此存放所有的bgm，和文件名一致。第一项为默认播放项
-        // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
-        '058-Slow01.mid', 'bgm.mp3', 'qianjin.mid', 'star.mid'
-    ];
-    this.sounds = [ // 在此存放所有的SE，和文件名一致
-        // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
-        'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg'
-    ]
+
     this.statusBar = {
         'image': {
             'floor': document.getElementById('img-floor'),
@@ -94,11 +94,6 @@ function main() {
         'curse': document.getElementById('curse'),
         'hard': document.getElementById("hard")
     }
-
-    //------------------------ 用户修改内容 ------------------------//
-    this.version = "0.1"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
-    //------------------------ 用户修改内容 END ------------------------//
-
     this.floors = {}
     this.instance = {};
     this.canvas = {};
@@ -113,8 +108,8 @@ main.prototype.init = function (mode) {
         if (mode === 'editor')main.editor = {'disableGlobalAnimate':true};
     }
     main.loadPureData(function(){
-        main.useCompress=data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.useCompress;
-        main.floorIds=data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.floorIds;
+        var mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
+        for(var ii in mainData)main[ii]=mainData[ii];
         main.loaderJs(function () {
             var coreData = {};
             for (i = 0; i < main.loadList.length; i++) {
@@ -124,13 +119,14 @@ main.prototype.init = function (mode) {
                 coreData[name] = main[name];
             }
             main.loaderFloors(function() {
-                main.core.init(main.dom, main.statusBar, main.canvas, main.images, main.bgms, main.sounds, main.floorIds, main.floors, coreData);
+                main.core.init(main.dom, main.statusBar, main.canvas, main.images, main.pngs, main.bgms, main.sounds, main.floorIds, main.floors, coreData);
                 main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
             });
         });
     });
 }
 
+////// 动态加载所有核心JS文件 //////
 main.prototype.loaderJs = function (callback) {
     var instanceNum = 0;
     // 加载js
@@ -151,13 +147,14 @@ main.prototype.loaderJs = function (callback) {
     }
 }
 
+////// 动态加载所有楼层（剧本） //////
 main.prototype.loaderFloors = function (callback) {
 
     // 加载js
     main.setMainTipsText('正在加载楼层文件...')
     if (this.useCompress) { // 读取压缩文件
         var script = document.createElement('script');
-        script.src = 'libs/project/floors.min.js?' + this.version;
+        script.src = 'libs/project/floors.min.js?v=' + this.version;
         main.dom.body.appendChild(script);
         script.onload = function () {
             main.dom.mainTips.style.display = 'none';
@@ -177,10 +174,11 @@ main.prototype.loaderFloors = function (callback) {
     }
 }
 
+////// 加载某一个JS文件 //////
 main.prototype.loadMod = function (modName, callback) {
     var script = document.createElement('script');
     var name = modName;
-    script.src = 'libs/' + modName + (this.useCompress?".min":"") + '.js?' + this.version;
+    script.src = 'libs/' + modName + (this.useCompress?".min":"") + '.js?v=' + this.version;
     main.dom.body.appendChild(script);
     script.onload = function () {
         main[name] = main.instance[name];
@@ -188,9 +186,10 @@ main.prototype.loadMod = function (modName, callback) {
     }
 }
 
+////// 加载某一个楼层 //////
 main.prototype.loadFloor = function(floorId, callback) {
     var script = document.createElement('script');
-    script.src = 'libs/project/floors/' + floorId +'.js?' + this.version;
+    script.src = 'libs/project/floors/' + floorId +'.js?v=' + this.version;
     main.dom.body.appendChild(script);
     script.onload = function () {
         callback(floorId);
@@ -201,7 +200,7 @@ main.prototype.loadPureData = function(callback) {
     var loadedNum = 0;
     main.pureData.forEach(function(name){
         var script = document.createElement('script');
-        script.src = 'libs/project/' + name +'.js?' + this.version;
+        script.src = 'libs/project/' + name +'.js?v=' + this.version;
         main.dom.body.appendChild(script);
         script.onload = function () {
             loadedNum++;
@@ -211,6 +210,7 @@ main.prototype.loadPureData = function(callback) {
     
 }
 
+////// 加载过程提示 //////
 main.prototype.setMainTipsText = function (text) {
     main.dom.mainTips.innerHTML = text;
 }
@@ -219,12 +219,14 @@ main.prototype.setMainTipsText = function (text) {
 
 main.prototype.listen = function () {
 
+////// 窗口大小变化时 //////
 window.onresize = function () {
     try {
         main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
     }catch (e) {}
 }
 
+////// 在界面上按下某按键时 //////
 main.dom.body.onkeydown = function(e) {
     try {
         if (main.core.isPlaying() || main.core.status.lockControl)
@@ -232,6 +234,7 @@ main.dom.body.onkeydown = function(e) {
     } catch (ee) {}
 }
 
+////// 在界面上放开某按键时 //////
 main.dom.body.onkeyup = function(e) {
     try {
         if (main.core.isPlaying() || main.core.status.lockControl)
@@ -239,10 +242,12 @@ main.dom.body.onkeyup = function(e) {
     } catch (ee) {}
 }
 
+////// 开始选择时 //////
 main.dom.body.onselectstart = function () {
     return false;
 }
 
+////// 鼠标按下时 //////
 main.dom.data.onmousedown = function (e) {
     try {
         e.stopPropagation();
@@ -257,6 +262,7 @@ main.dom.data.onmousedown = function (e) {
     } catch (ee) {}
 }
 
+////// 鼠标移动时 //////
 main.dom.data.onmousemove = function (e) {
     try {
         e.stopPropagation();
@@ -267,12 +273,14 @@ main.dom.data.onmousemove = function (e) {
     }catch (ee) {}
 }
 
+////// 鼠标放开时 //////
 main.dom.data.onmouseup = function () {
     try {
         main.core.onup();
     }catch (e) {}
 }
 
+////// 鼠标滑轮滚动时 //////
 main.dom.data.onmousewheel = function(e) {
     try {
         if (e.wheelDelta)
@@ -282,6 +290,7 @@ main.dom.data.onmousewheel = function(e) {
     } catch (ee) {}
 }
 
+////// 手指在触摸屏开始触摸时 //////
 main.dom.data.ontouchstart = function (e) {
     try {
         e.preventDefault();
@@ -293,6 +302,7 @@ main.dom.data.ontouchstart = function (e) {
     }catch (ee) {}
 }
 
+////// 手指在触摸屏上移动时 //////
 main.dom.data.ontouchmove = function (e) {
     try {
         e.preventDefault();
@@ -303,6 +313,7 @@ main.dom.data.ontouchmove = function (e) {
     }catch (ee) {}
 }
 
+////// 手指离开触摸屏时 //////
 main.dom.data.ontouchend = function () {
     try {
         main.core.onup();
@@ -310,41 +321,49 @@ main.dom.data.ontouchend = function () {
     }
 }
 
+////// 点击状态栏中的怪物手册时 //////
 main.statusBar.image.book.onclick = function () {
     if (main.core.isPlaying())
         main.core.openBook(true);
 }
 
+////// 点击状态栏中的楼层传送器时 //////
 main.statusBar.image.fly.onclick = function () {
     if (main.core.isPlaying())
         main.core.useFly(true);
 }
 
+////// 点击状态栏中的工具箱时 //////
 main.statusBar.image.toolbox.onclick = function () {
     if (main.core.isPlaying())
         main.core.openToolbox(true);
 }
 
+////// 点击状态栏中的快捷商店时 //////
 main.statusBar.image.shop.onclick = function () {
     if (main.core.isPlaying())
         main.core.ui.drawQuickShop(true);
 }
 
+////// 点击状态栏中的存档按钮时 //////
 main.statusBar.image.save.onclick = function () {
     if (main.core.isPlaying())
         main.core.save(true);
 }
 
+////// 点击状态栏中的读档按钮时 //////
 main.statusBar.image.load.onclick = function () {
     if (main.core.isPlaying())
         main.core.load(true);
 }
 
+////// 点击状态栏中的系统菜单时 //////
 main.statusBar.image.settings.onclick = function () {
     if (main.core.isPlaying())
         main.core.ui.drawSettings(true);
 }
 
+////// 点击“开始游戏”时 //////
 main.dom.playGame.onclick = function () {
     main.dom.startButtons.style.display='none';
 
@@ -356,22 +375,27 @@ main.dom.playGame.onclick = function () {
     }
 }
 
+////// 点击“载入游戏”时 //////
 main.dom.loadGame.onclick = function() {
     main.core.load();
 }
 
+////// 点击“关于本塔”时 //////
 main.dom.aboutGame.onclick = function () {
     main.core.ui.drawAbout();
 }
 
+////// 点击“简单难度”时 //////
 main.dom.easyLevel.onclick = function() {
     core.events.startGame('Easy');
 }
 
+////// 点击“普通难度”时 //////
 main.dom.normalLevel.onclick = function () {
     core.events.startGame('Normal');
 }
 
+////// 点击“困难难度”时 //////
 main.dom.hardLevel.onclick = function () {
     core.events.startGame('Hard');
 }

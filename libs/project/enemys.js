@@ -16,7 +16,7 @@ enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = //1:先攻,2:魔攻,3:坚固,4:2�
         'zombieKnight': {'name': '兽人武士', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
         'rock': {'name': '石头人', 'hp': 100, 'atk': 120, 'def': 0, 'money': 4, 'experience': 0, 'special': 3},
         'slimeMan': {'name': '影子战士', 'hp': 100, 'atk': 0, 'def': 0, 'money': 11, 'experience': 0, 'special': 10}, // 模仿怪的攻防设为0就好
-        'bluePriest': {'name': '初级法师', 'hp': 100, 'atk': 120, 'def': 0, 'money': 3, 'experience': 0, 'special': 2},
+        'bluePriest': {'name': '初级法师', 'hp': 100, 'atk': 120, 'def': 0, 'money': 3, 'experience': 0, 'special': 2, 'point': 1}, // 'point'可以在打败怪物后进行加点，详见文档说明。
         'redPriest': {'name': '高级法师', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
         'brownWizard': {'name': '初级巫师', 'hp': 100, 'atk': 120, 'def': 0, 'money': 16, 'experience': 0, 'special': 15, 'value': 100, 'zoneSquare': true}, // 领域怪需要加value表示领域伤害的数值；zoneSquare代表是否九宫格伤害
         'redWizard': {'name': '高级巫师', 'hp': 1000, 'atk': 1200, 'def': 0, 'money': 160, 'experience': 0, 'special': 15, 'value': 200, 'range': 2}, // range可选，代表领域伤害的范围；不加默认为1

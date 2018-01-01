@@ -1,5 +1,7 @@
 # 快速上手
 
+?> 上次更新时间：* {docsify-updated} *
+
 在这一节中，将详细介绍做一部塔的流程。现在，让我们来做一部单层塔！
 
 ## 前置需求
@@ -8,8 +10,8 @@
 
 - Windows 8以上操作系统；Windows 7需要安装.Net Framework 4.0。（能打开同目录下的“启动服务.exe”即可）
 - 任一款现代浏览器。强烈推荐Chrome。
-- 一个很好的文本编辑器。推荐带有高亮染色、错误提示等效果。例如：WebStorm，VSCode，或者至少也要Sublime Text。  
-（[VSCode下载地址](https://code.visualstudio.com/)，群里的群文件中也有，强烈推荐之。）
+- 一个很好的文本编辑器。推荐带有高亮染色、错误提示等效果。例如：WebStorm，VSCode，或者至少也要Sublime Text。
+  - （[VSCode下载地址](https://code.visualstudio.com/)，群里的群文件中也有，强烈推荐之。）
 
 只要满足了上述条件，你就可以开始做自己的塔啦！
 

@@ -8,7 +8,20 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
     
         "floorIds" : [ // 在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序
             "sample0", "sample1", "sample2"
-        ]
+        ],
+        "pngs" : [ // 在此存放所有可能的背景图片；背景图片最好是416*416像素，其他分辨率会被强制缩放成416*416
+            // 建议对于较大的图片，在网上使用在线的“图片压缩工具”来进行压缩，以节省流量
+            // 有关使用自定义背景图，请参见文档的“自定义素材”说明
+            "bg.png", "yewai.png", // 依次向后添加
+        ],
+        "bgms" : [ // 在此存放所有的bgm，和文件名一致。第一项为默认播放项
+            // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
+            '058-Slow01.mid', 'bgm.mp3', 'qianjin.mid', 'star.mid',
+        ],
+        "sounds" : [ // 在此存放所有的SE，和文件名一致
+            // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
+            'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg',
+        ],
     },
     "firstData" : {
         "title": "魔塔样板", // 游戏名，将显示在标题页面以及切换楼层的界面中
@@ -148,11 +161,11 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
     "flags" : {
         /****** 状态栏相关 ******/
         "enableFloor": true, // 是否在状态栏显示当前楼层
-        "enableLv": false, // 是否在状态栏显示当前等级
+        "enableLv": true, // 是否在状态栏显示当前等级
         "enableMDef": true, // 是否在状态栏及战斗界面显示魔防（护盾）
         "enableMoney": true, // 是否在状态栏、怪物手册及战斗界面显示金币
         "enableExperience": true, // 是否在状态栏、怪物手册及战斗界面显示经验
-        "enableLevelUp": false, // 是否允许等级提升（进阶）；如果上面enableExperience为false，则此项恒视为false
+        "enableLevelUp": true, // 是否允许等级提升（进阶）；如果上面enableExperience为false，则此项恒视为false
         "enableDebuff": true, // 是否涉及毒衰咒；如果此项为false则不会在状态栏中显示毒衰咒的debuff
         ////// 上述的几个开关将直接影响状态栏的显示效果 //////
         /****** 道具相关 ******/

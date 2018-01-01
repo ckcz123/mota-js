@@ -85,6 +85,7 @@
         return;
       }
     }
+    throw('需要改实现')
     if (change!=-1 && change!=idnum){//修改idnum
       core.maps.blocksInfo[idnum] = core.maps.blocksInfo[change];
       delete(core.maps.blocksInfo[change]);
@@ -106,37 +107,24 @@
     callback(null);
   }
   //callback(err:String)
-  editor_file.editItem = function(editor,id,obj,callback){
-    //obj形式同callback的obj,为null或undefined时只查询不修改
+  editor_file.editItem = function(editor,id,actionList,callback){
+    /*actionList:[
+      ["change","['items']['name']","红宝石的新名字"],
+      ["add","['items']['新的和name同级的属性']",123],
+      ["change","['itemEffectTip']","'，攻击力+'+core.values.redJewel"],
+    ]
+    为[]时只查询不修改
+    */
     if (!isset(callback)) throw('未设置callback');
     callback(
       {'items':{'cls': 'items', 'name': '红宝石'},'itemEffect':'core.status.hero.atk += core.values.redJewel','itemEffectTip':"'，攻击+'+core.values.redJewel"},
-      {'items':'','itemEffect':'','itemEffectTip':''},
+      {'items':{'cls': "/*只能取keys items constants tools\\n$range(thiseval in ['keys','items','constants','tools'])\\n*/", 'name': '', 'text': ''},'itemEffect':'','itemEffectTip':''},
       null);
       //只有items.cls是items的才有itemEffect和itemEffectTip,keys和constants和tools只有items
   }
-  /*
-  <<
-  {'items':{'cls': 'items', 'name': '红宝石'},'itemEffect':'core.status.hero.atk += core.values.redJewel','itemEffectTip':"'，攻击+'+core.values.redJewel"}
-  ==
-  [
-    ["change","['items']['name']","红宝石的新名字"],
-    ["add","['items']['新的和name同级的属性']",123],
-    ["change","['itemEffectTip']","'，攻击力+'+core.values.redJewel"],
-  ]
-  >>
-  'yellowKey': {'cls': 'keys' \*只能取keys items constants tools\n$range(thiseval in ['keys','items','constants','tools'])\n*\ , 'name': '黄钥匙'}
-
-  $range((function(){typeof(thiseval)==typeof(0)||})())
-  if( 注释.indexof('$range(')!= -1){
-    thiseval = 新值;
-    evalstr = 注释.split('$range')[1].split('\n')[0];
-    if(eval(evalstr) !== true)alert('不在取值范围内')
-  }
-  */
 
   //callback(obj,commentObj,err:String)
-  editor_file.editEnemy = function(editor,id,obj,callback){
+  editor_file.editEnemy = function(editor,id,actionList,callback){
     //obj形式同callback的obj,为null或undefined时只查询不修改
     if (!isset(callback)) throw('未设置callback');
     callback(
@@ -148,7 +136,7 @@
 
   ////////////////////////////////////////////////////////////////////  
 
-  editor_file.editLoc = function(editor,x,y,obj,callback){
+  editor_file.editLoc = function(editor,x,y,actionList,callback){
     //obj形式同callback的obj,为null或undefined时只查询不修改
     if (!isset(callback)) throw('未设置callback');
     callback(
@@ -160,7 +148,7 @@
 
   ////////////////////////////////////////////////////////////////////  
 
-  editor_file.editFloor = function(editor,obj,callback){
+  editor_file.editFloor = function(editor,actionList,callback){
     //obj形式同callback的obj,为null或undefined时只查询不修改
     if (!isset(callback)) throw('未设置callback');
     callback(
@@ -174,7 +162,7 @@
 
 
 
-  editor_file.editTower = function(editor,obj,callback){
+  editor_file.editTower = function(editor,actionList,callback){
     //obj形式同callback的obj,为null或undefined时只查询不修改
     if (!isset(callback)) throw('未设置callback');
     callback(
@@ -210,4 +198,30 @@
     }
     return formatArrStr;
   }
+  
+  var saveSetting = function(file,actionList,callback) {
+    if (file=='icons') {}
+    if (file=='maps') {}
+    if (file=='items') {}
+    if (file=='enemys') {}
+    if (file=='data') {}
+    callback('出错了,要设置的文件名不识别');
+  }
+  /*
+  [
+    ["change","['items']['redJewel']['name']","红宝石的新名字"],
+    ["add","['items']['redJewel']['新的和name同级的属性']",123],
+    ["change","['itemEffectTip']['redJewel']","'，攻击力+'+core.values.redJewel"],
+  ]
+  >>
+  'yellowKey': {'cls': 'keys' \*只能取keys items constants tools\n$range(thiseval in ['keys','items','constants','tools'])\n*\ , 'name': '黄钥匙'}
+
+  $range((function(){typeof(thiseval)==typeof(0)||})())
+  if( 注释.indexof('$range(')!= -1){
+    thiseval = 新值;
+    evalstr = 注释.split('$range')[1].split('$end')[0];
+    if(eval(evalstr) !== true)alert('不在取值范围内')
+  }
+  */
+
 })();

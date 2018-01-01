@@ -202,6 +202,8 @@ core.prototype.showStartAnimate = function (callback) {
     core.dom.startButtonGroup.style.display = 'none';
     core.dom.startButtons.style.display = 'block';
     core.dom.levelChooseButtons.style.display = 'none';
+    core.dom.curtain.style.background = "#000000";
+    core.dom.curtain.style.opacity = 0;
     core.status.played = false;
     core.clearStatus();
     core.clearMap('all');

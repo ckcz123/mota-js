@@ -4,28 +4,6 @@ function main() {
 
     this.version = "0.1"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
-    this.useCompress = false; // 是否使用压缩文件
-    // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
-    // 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。
-    // 如果要进行剧本的修改请务必将其改成false。
-
-    this.floorIds = [ // 在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序
-        "sample0", "sample1", "sample2"
-    ];
-    this.pngs = [ // 在此存放所有可能的背景图片；背景图片最好是416*416像素，其他分辨率会被强制缩放成416*416
-        // 建议对于较大的图片，在网上使用在线的“图片压缩工具”来进行压缩，以节省流量
-        // 有关使用自定义背景图，请参见文档的“自定义素材”说明
-        "bg.png", "yewai.png", // 依次向后添加
-    ];
-    this.bgms = [ // 在此存放所有的bgm，和文件名一致。第一项为默认播放项
-        // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
-        '058-Slow01.mid', 'bgm.mp3', 'qianjin.mid', 'star.mid',
-    ];
-    this.sounds = [ // 在此存放所有的SE，和文件名一致
-        // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
-        'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg',
-    ];
-
     //------------------------ 用户修改内容 END ------------------------//
 
     this.dom = {
@@ -69,8 +47,12 @@ function main() {
         'debuffCol': document.getElementById('debuffCol'),
         'hard': document.getElementById('hard'),
     };
+    this.mode = 'play';
     this.loadList = [
         'items', 'icons', 'maps', 'enemys', 'events', 'data', 'ui', 'core'
+    ];
+    this.pureData = [ 
+        "data","enemys","icons","maps","items"
     ];
     this.images = [
         'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains'
@@ -117,23 +99,30 @@ function main() {
     this.canvas = {};
 }
 
-////// 初始化 //////
-main.prototype.init = function () {
+main.prototype.init = function (mode) {
     for (var i = 0; i < main.dom.gameCanvas.length; i++) {
         main.canvas[main.dom.gameCanvas[i].id] = main.dom.gameCanvas[i].getContext('2d');
     }
-    main.loaderJs(function () {
-        var coreData = {};
-        for (i = 0; i < main.loadList.length; i++) {
-            var name = main.loadList[i];
-            if (name === 'core') continue;
-            main[name].init(main.dom);
-            coreData[name] = main[name];
-        }
-        main.loaderFloors(function() {
-            main.core.init(main.dom, main.statusBar, main.canvas, main.images, main.pngs, main.bgms, main.sounds, main.floorIds, main.floors, coreData);
-            main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
-        })
+    if (({"editor":0,"replay":0}).hasOwnProperty(mode)) {
+        main.mode = mode;
+        if (mode === 'editor')main.editor = {'disableGlobalAnimate':true};
+    }
+    main.loadPureData(function(){
+        var mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
+        for(var ii in mainData)main[ii]=mainData[ii];
+        main.loaderJs(function () {
+            var coreData = {};
+            for (i = 0; i < main.loadList.length; i++) {
+                var name = main.loadList[i];
+                if (name === 'core') continue;
+                main[name].init(main.dom);
+                coreData[name] = main[name];
+            }
+            main.loaderFloors(function() {
+                main.core.init(main.dom, main.statusBar, main.canvas, main.images, main.pngs, main.bgms, main.sounds, main.floorIds, main.floors, coreData);
+                main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
+            });
+        });
     });
 }
 
@@ -165,7 +154,7 @@ main.prototype.loaderFloors = function (callback) {
     main.setMainTipsText('正在加载楼层文件...')
     if (this.useCompress) { // 读取压缩文件
         var script = document.createElement('script');
-        script.src = 'libs/floors.min.js?v=' + this.version;
+        script.src = 'libs/project/floors.min.js?v=' + this.version;
         main.dom.body.appendChild(script);
         script.onload = function () {
             main.dom.mainTips.style.display = 'none';
@@ -200,11 +189,25 @@ main.prototype.loadMod = function (modName, callback) {
 ////// 加载某一个楼层 //////
 main.prototype.loadFloor = function(floorId, callback) {
     var script = document.createElement('script');
-    script.src = 'libs/floors/' + floorId +'.js?v=' + this.version;
+    script.src = 'libs/project/floors/' + floorId +'.js?v=' + this.version;
     main.dom.body.appendChild(script);
     script.onload = function () {
         callback(floorId);
     }
+}
+
+main.prototype.loadPureData = function(callback) {
+    var loadedNum = 0;
+    main.pureData.forEach(function(name){
+        var script = document.createElement('script');
+        script.src = 'libs/project/' + name +'.js?v=' + this.version;
+        main.dom.body.appendChild(script);
+        script.onload = function () {
+            loadedNum++;
+            if (loadedNum == main.pureData.length)callback();
+        }
+    });
+    
 }
 
 ////// 加载过程提示 //////
@@ -212,8 +215,9 @@ main.prototype.setMainTipsText = function (text) {
     main.dom.mainTips.innerHTML = text;
 }
 
-var main = new main();
-main.init();
+
+
+main.prototype.listen = function () {
 
 ////// 窗口大小变化时 //////
 window.onresize = function () {
@@ -395,3 +399,7 @@ main.dom.normalLevel.onclick = function () {
 main.dom.hardLevel.onclick = function () {
     core.events.startGame('Hard');
 }
+
+}//listen end
+
+var main = new main();

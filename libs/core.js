@@ -2001,46 +2001,69 @@ core.prototype.setFillStyle = function (map, style) {
 
 ////// 绘制某张地图 //////
 core.prototype.drawMap = function (mapName, callback) {
-    var mapData = core.status.maps[mapName];
-    var mapBlocks = mapData.blocks;
-    core.status.floorId = mapName;
-    core.status.thisMap = mapData;
     core.clearMap('all');
     core.removeGlobalAnimate(null, null, true);
-    var groundId = core.floors[mapName].defaultGround || "ground";
-    var blockIcon = core.material.icons.terrains[groundId];
-    var blockImage = core.material.images.terrains;
-    for (var x = 0; x < 13; x++) {
-        for (var y = 0; y < 13; y++) {
-            core.canvas.bg.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
-        }
-    }
-
-    // 如果存在png
-    if (core.isset(core.floors[mapName].png)) {
-        var png = core.floors[mapName].png;
-        if (core.isset(core.material.images.pngs[png])) {
-            core.canvas.bg.drawImage(core.material.images.pngs[png], 0, 0, 416, 416);
-        }
-    }
-
-    var mapArray = core.maps.getMapArray(core.status.maps, mapName);
-    for (var b = 0; b < mapBlocks.length; b++) {
-        // 事件启用
-        var block = mapBlocks[b];
-        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
-            if (block.event.cls == 'autotile') {
-                core.drawAutotile(core.canvas.event, mapArray, block, 32, 0, 0);
+    var drawBg = function(){
+        var groundId = core.floors[mapName].defaultGround || "ground";
+        var blockIcon = core.material.icons.terrains[groundId];
+        var blockImage = core.material.images.terrains;
+        for (var x = 0; x < 13; x++) {
+            for (var y = 0; y < 13; y++) {
+                core.canvas.bg.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
             }
-            else {
-                if (block.event.id!='none') {
-                    blockIcon = core.material.icons[block.event.cls][block.event.id];
-                    blockImage = core.material.images[block.event.cls];
-                    core.canvas.event.drawImage(core.material.images[block.event.cls], 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
-                    core.addGlobalAnimate(block.event.animate, block.x * 32, block.y * 32, blockIcon, blockImage);
+        }
+        // 如果存在png
+        if (core.isset(core.floors[mapName].png)) {
+            var png = core.floors[mapName].png;
+            if (core.isset(core.material.images.pngs[png])) {
+                core.canvas.bg.drawImage(core.material.images.pngs[png], 0, 0, 416, 416);
+            }
+        }
+    }
+    if (main.mode=='editor'){
+        main.editor.drawMapBg = function(){
+            core.clearMap('bg', 0, 0, 416, 416);
+            drawBg();
+        }
+    } else {
+        drawBg();
+    }
+
+    core.status.floorId = mapName;
+    core.status.thisMap = core.status.maps[mapName];
+    var drawEvent = function(){
+        var mapData = core.status.maps[core.status.floorId];
+        var mapBlocks = mapData.blocks;
+        
+        var mapArray = core.maps.getMapArray(core.status.maps, core.status.floorId);
+        for (var b = 0; b < mapBlocks.length; b++) {
+            // 事件启用
+            var block = mapBlocks[b];
+            if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
+                if (block.event.cls == 'autotile') {
+                    core.drawAutotile(core.canvas.event, mapArray, block, 32, 0, 0);
+                }
+                else {
+                    if (block.event.id!='none') {
+                        var blockIcon = core.material.icons[block.event.cls][block.event.id];
+                        var blockImage = core.material.images[block.event.cls];
+                        core.canvas.event.drawImage(core.material.images[block.event.cls], 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+                        core.addGlobalAnimate(block.event.animate, block.x * 32, block.y * 32, blockIcon, blockImage);
+                    }
                 }
             }
         }
+    }
+    
+    if (main.mode=='editor'){
+        main.editor.updateMap = function(){
+            core.removeGlobalAnimate(null, null, true);
+            core.clearMap('event', 0, 0, 416, 416);
+            drawEvent();
+            core.setGlobalAnimate(core.values.animateSpeed);            
+        }
+    } else {
+        drawEvent();
     }
     core.setGlobalAnimate(core.values.animateSpeed);
     if (core.isset(callback))
@@ -2210,8 +2233,8 @@ core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
     core.setAlpha('ui', 1.0);
 
     block=block.block;
-    blockIcon = core.material.icons[block.event.cls][block.event.id];
-    blockImage = core.material.images[block.event.cls];
+    var blockIcon = core.material.icons[block.event.cls][block.event.id];
+    var blockImage = core.material.images[block.event.cls];
 
     // 绘制data层
     var opacityVal = 1;
@@ -2400,6 +2423,7 @@ core.prototype.removeBlockByIds = function (floorId, ids) {
 
 ////// 添加一个全局动画 //////
 core.prototype.addGlobalAnimate = function (animateMore, x, y, loc, image) {
+    if (main.mode=='editor' && main.editor.disableGlobalAnimate) return;
     if (animateMore == 2) {
         core.status.twoAnimateObjs.push({
             'x': x,
@@ -2426,6 +2450,9 @@ core.prototype.removeGlobalAnimate = function (x, y, all) {
         core.status.twoAnimateObjs = [];
         core.status.fourAnimateObjs = [];
     }
+
+    if (main.mode=='editor' && main.editor.disableGlobalAnimate) return;
+
     for (var t = 0; t < core.status.twoAnimateObjs.length; t++) {
         if (core.status.twoAnimateObjs[t].x == x * 32 && core.status.twoAnimateObjs[t].y == y * 32) {
             core.status.twoAnimateObjs.splice(t, 1);
@@ -2442,6 +2469,7 @@ core.prototype.removeGlobalAnimate = function (x, y, all) {
 
 ////// 设置全局动画的显示效果 //////
 core.prototype.setGlobalAnimate = function (speed) {
+    if (main.mode=='editor' && main.editor.disableGlobalAnimate) return;
     clearInterval(core.interval.twoAnimate);
     clearInterval(core.interval.fourAnimate);
     var animateClose = false;
@@ -3803,7 +3831,8 @@ core.prototype.updateStatusBar = function () {
 
 ////// 屏幕分辨率改变后重新自适应 //////
 core.prototype.resize = function(clientWidth, clientHeight) {
-    
+    if (main.mode=='editor')return;
+
     // 默认画布大小
     var DEFAULT_CANVAS_WIDTH = 422;
     // 默认边栏宽度

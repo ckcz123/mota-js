@@ -113,7 +113,38 @@
     <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
 </div>
 <script id='mainScript' src='main.js'></script>
-<script>main.init();main.listen();</script>
-<script src='libs/thirdparty/mid.js'></script>
+<script>
+main.init('editor');
+//main.init('replay');
+main.listen();
+
+var replayActions = function(){
+    //core.onclick(7,7,[]);
+}
+
+var replay = function(){
+    core.events.startGame('');
+    //setTimeout(function(){Array.from(Array(200)).forEach(function(){core.onclick(7,7,[]);});console.log(1);},1000);//关开场剧情
+    //setTimeout(function(){try {Array.from(Array(200)).forEach(function(){core.drawText();})} catch (error){}},3000);//关firstArrive
+    //console.log(1);
+    
+}
+
+var afterInit = function(){
+    main.editor.drawMapBg();
+    main.editor.updateMap();
+}
+var start = function(){
+    var hard = 'Hard';
+    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, core.initStatus.maps);
+    core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
+        /* core.setHeroMoveTriggerInterval(); */
+        //afterInit();
+    });
+    core.events.setInitData(hard);
+}
+setTimeout(start, 300);
+//setTimeout(replay, 300);
+</script>
 </body>
 </html>

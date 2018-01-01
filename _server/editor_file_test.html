@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <head><meta charset="utf-8"></head>
+  <body>
+    <pre id='pout'>
+
+    </pre>
+<script src="fs.js"></script>
+<script src="editor_file.js"></script>
+<script>
+pout.innerHTML='waiting\nwaiting  waiting';
+  var editor={};
+  editor.fs=fs;
+  editor.file=editor_file;
+  editor.file.loadFloorFile(editor,'sample0',function(err){console.log(err);
+    editor.file.saveFloorFileAs(editor,'aaa',function(err){console.log(err)});
+  });
+
+pout.innerHTML='succeed\nsucceed  succeed';
+
+</script>
+  </body>
+</html>

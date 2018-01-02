@@ -32,7 +32,7 @@
       <div class="map" id="mapEdit">
         <canvas class='gameCanvas' id='bg' width='416' height='416' style='z-index:1'></canvas>
         <canvas class='gameCanvas' id='event' width='416' height='416' style='z-index:2'></canvas>
-        <canvas class='gameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
+        <canvas class='egameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
       </div>
       <div class="tools">
         <div id="tip" v-cloak >
@@ -70,7 +70,7 @@
     </div>
     <div id="right">
       <div id="iconLib">
-        <canvas class='gameCanvas' id='edata' width='416' height='416' style='z-index:0'></canvas>
+        <canvas class='egameCanvas' id='edata' width='416' height='416' style='z-index:0'></canvas>
         <div id="selectBox">
             <div id='dataSelection' v-show="isSelected" v-cloak></div>
         </div>
@@ -262,6 +262,7 @@ editor.prototype.idsInit = function(maps, icons){
       }
     }
   }
+  editor.indexs[0]=[0];
 }
 editor.prototype.drawInitData = function (icons) {
   var ratio=1;
@@ -337,7 +338,7 @@ editor.prototype.mapInit = function(){
 }
 editor.prototype.drawMapBg = function(img){
   var bgc = bg.getContext('2d');
-  if (editor.bgY == 0){
+  if (!core.isset(editor.bgY) || editor.bgY == 0){
     editor.main.editor.drawMapBg();
     return;
   }
@@ -684,14 +685,33 @@ editor.info
 始终是最后一次点击的结果
 注意editor.info可能因为点击其他地方而被清空
 */
+
+
 editor = new editor();
 main.init('editor');
+editor.changeFloor = function(floorId,callback) {
+  core.changeFloor(floorId, null, core.firstData.hero.loc, null, function(){
+    editor.drawMapBg();
+    var mapArray = core.maps.getMapArray(core.status.maps, core.status.floorId);
+    editor.map = mapArray.map(function(v){return v.map(function(v){return editor.ids[[editor.indexs[v][0]]]})});
+    editor.updateMap();
+    if (core.isset(callback))callback();
+  });
+}
 //main.listen();
 var afterMainInit = function(){
 
   main.editor.disableGlobalAnimate=false;
   //core.status.maps = core.clone(core.maps.initMaps(floorIds));
-  editor.init(editor.updateMap);
+  editor.init(function(){
+    //core.changeFloor('sample1')
+    //editor.drawMapBg()
+    var mapArray = core.maps.getMapArray(core.status.maps, core.status.floorId);
+    editor.map = mapArray.map(function(v){return v.map(function(v){return editor.ids[[editor.indexs[v][0]]]})});
+    editor.updateMap();
+
+    
+  });
 }
 var startgame = function(){
     var hard = 'Hard';

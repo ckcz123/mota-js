@@ -3615,7 +3615,7 @@ core.prototype.isset = function (val) {
 
 ////// 播放背景音乐 //////
 core.prototype.playBgm = function (bgm) {
-
+    if (main.mode!='play')return;
     // 如果不允许播放
     if (!core.musicStatus.bgmStatus) return;
     // 音频不存在
@@ -3666,7 +3666,7 @@ core.prototype.pauseBgm = function () {
 
 ////// 恢复背景音乐的播放 //////
 core.prototype.resumeBgm = function () {
-
+    if (main.mode!='play')return;
     // 如果不允许播放
     if (!core.musicStatus.bgmStatus) return;
 
@@ -3691,7 +3691,7 @@ core.prototype.resumeBgm = function () {
 
 ////// 播放音频 //////
 core.prototype.playSound = function (sound) {
-
+    if (main.mode!='play')return;
     // 如果不允许播放
     if (!core.musicStatus.soundStatus) return;
     // 音频不存在
@@ -3730,6 +3730,11 @@ core.prototype.show = function (obj, speed, callback) {
         return;
     }
     obj.style.display = 'block';
+    if (main.mode!='play'){
+        obj.style.opacity = 1;
+        if (core.isset(callback)) {callback();}
+        return;
+    }
     obj.style.opacity = 0;
     var opacityVal = 0;
     var showAnimate = window.setInterval(function () {
@@ -3748,6 +3753,11 @@ core.prototype.show = function (obj, speed, callback) {
 core.prototype.hide = function (obj, speed, callback) {
     if (!core.isset(speed)) {
         obj.style.display = 'none';
+        return;
+    }
+    if (main.mode!='play'){
+        obj.style.display = 'none';
+        if (core.isset(callback)) {callback();}
         return;
     }
     var opacityVal = 1;

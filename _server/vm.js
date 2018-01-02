@@ -168,6 +168,7 @@ var clear = new Vue({
   methods: {
     clearMap: function(){
       editor.mapInit();
+      editor.updateMap();
       clearTimeout(editArea.formatTimer);
       clearTimeout(tip.timer);
       pout.value = '';

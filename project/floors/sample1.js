@@ -257,7 +257,7 @@ main.floors.sample1 = {
         "12,11": [ // 自定义事件的老人
             "\t[老人,womanMagician]使用 {\"type\":\"function\"} 可以写自定义的JS脚本。\n本塔支持的所有主要API会在doc文档内给出。",
             "\t[老人,womanMagician]例如这个例子：即将弹出一个输入窗口，然后会将你的输入结果直接加到你的攻击力上。",
-            {"type": "function", "function": function() { // 自己写JS脚本并执行
+            {"type": "function", "function": `function() { // 自己写JS脚本并执行
                 var value = prompt("请输入你要加攻击力的数值："); // 弹出一个输入框让用户输入数据
                 if (value!=null) {
                     value=parseInt(value);
@@ -271,7 +271,7 @@ main.floors.sample1 = {
                         ]);
                     }
                 }
-            }},
+            }`},
             "\t[老人,womanMagician]具体可参见样板中本事件的写法。"
         ]
     },

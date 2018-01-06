@@ -30,8 +30,8 @@
       <table class="col" id='mapColMark'></table>
       <table class="row" id='mapRowMark'></table>
       <div class="map" id="mapEdit">
-        <canvas class='gameCanvas' id='bg' width='416' height='416' style='z-index:1'></canvas>
-        <canvas class='gameCanvas' id='event' width='416' height='416' style='z-index:2'></canvas>
+        <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='event' width='416' height='416'></canvas>
         <canvas class='egameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
       </div>
       <div class="tools">
@@ -167,8 +167,8 @@
         <p class="statusLabel tools" id="hard"></p>
     </div>
     <div id="curtain"></div>
-    <!-- <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas>
-    <canvas class='gameCanvas' id='event' width='416' height='416'></canvas> -->
+    <!-- <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas> -->
+    <!-- <canvas class='gameCanvas' id='event' width='416' height='416'></canvas> -->
     <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
     <canvas class='gameCanvas' id='hero' width='416' height='416'></canvas>
     <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
@@ -206,7 +206,7 @@
 <script>
 
 //所有全局量
-__all__=['Vue','fs','printf','editor','main','core'];
+__all__=['Vue','fs','editor_file','printf','editor','main','core'];
 __id__=['printOut','arrRowMark','mapRowMark','data','bg','dataSelection'];
 __Vue__=['exportM','editArea','editTip','clear','tip','selectBox'];
 //var event = document.getElementById('event');
@@ -695,6 +695,8 @@ editor.changeFloor = function(floorId,callback) {
     var mapArray = core.maps.getMapArray(core.status.maps, core.status.floorId);
     editor.map = mapArray.map(function(v){return v.map(function(v){return editor.ids[[editor.indexs[v][0]]]})});
     editor.updateMap();
+    editor.currentFloorId=core.status.floorId;
+    editor.currentFloorData = core.floors[core.status.floorId];
     if (core.isset(callback))callback();
   });
 }
@@ -709,6 +711,8 @@ var afterMainInit = function(){
     var mapArray = core.maps.getMapArray(core.status.maps, core.status.floorId);
     editor.map = mapArray.map(function(v){return v.map(function(v){return editor.ids[[editor.indexs[v][0]]]})});
     editor.updateMap();
+    editor.currentFloorId=core.status.floorId;
+    editor.currentFloorData = core.floors[core.status.floorId];
 
     
   });

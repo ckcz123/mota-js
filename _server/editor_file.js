@@ -1,15 +1,32 @@
 (function(){
   
   editor_file = {};
+
   (function(){
     var script = document.createElement('script');
-    script.src = 'comment.js';
+    if (window.location.href.indexOf('_server')!==-1)
+      script.src = '../project/comment.js';
+    else
+      script.src = 'project/comment.js';
     document.body.appendChild(script);
     script.onload = function () {
       editor_file.comment=comment_c456ea59_6018_45ef_8bcc_211a24c627dc;
       delete(comment_c456ea59_6018_45ef_8bcc_211a24c627dc);
     }
   })();
+  (function(){
+    var script = document.createElement('script');
+    if (window.location.href.indexOf('_server')!==-1)
+      script.src = '../project/data.comment.js';
+    else
+      script.src = 'project/data.comment.js';
+    document.body.appendChild(script);
+    script.onload = function () {
+      editor_file.dataComment=data_comment_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d;
+      delete(data_comment_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d);
+    }
+  })();
+
 
   editor_file.getFloorFileList = function(editor,callback){
     if (!isset(callback)) throw('未设置callback');
@@ -38,24 +55,24 @@
         return;
       }
       editor.currentFloorId = floorId;
-      editor.currentfloorData = floorData;
+      editor.currentFloorData = floorData;
       callback(null)
     });
   }
   //callback(err:String)
   editor_file.saveFloorFile = function(editor,callback){
     if (!isset(callback)) throw('未设置callback');
-    if (!isset(editor.currentFloorId) || !isset(editor.currentfloorData)) {
+    if (!isset(editor.currentFloorId) || !isset(editor.currentFloorData)) {
       callback('未选中文件或无数据');
     }
     var filename = 'project/floors/' + editor.currentFloorId + '.js';
     var datastr = ['main.floors.' , editor.currentFloorId , '=\n{'];
-    for(var ii in editor.currentfloorData)
-    if (editor.currentfloorData.hasOwnProperty(ii)) {
+    for(var ii in editor.currentFloorData)
+    if (editor.currentFloorData.hasOwnProperty(ii)) {
       if (ii=='map')
-        datastr=datastr.concat(['\n"',ii,'": [\n',formatMap(editor.currentfloorData[ii]),'\n],']);
+        datastr=datastr.concat(['\n"',ii,'": [\n',formatMap(editor.currentFloorData[ii]),'\n],']);
       else
-        datastr=datastr.concat(['\n"',ii,'": ',JSON.stringify(editor.currentfloorData[ii],null,4),',']);
+        datastr=datastr.concat(['\n"',ii,'": ',JSON.stringify(editor.currentFloorData[ii],null,4),',']);
     }
     datastr=datastr.concat(['\n}']);
     datastr=datastr.join('');
@@ -67,10 +84,10 @@
   editor_file.saveFloorFileAs = function(editor,saveAsFilename,callback){
     //saveAsFilename不含'/'不含'.js'
     if (!isset(callback)) throw('未设置callback');
-    if (!isset(editor.currentfloorData)) {
+    if (!isset(editor.currentFloorData)) {
       callback('无数据');
     }
-    editor.currentfloorData.floorId=saveAsFilename;
+    editor.currentFloorData.floorId=saveAsFilename;
     editor.currentFloorId=saveAsFilename;
     editor_file.saveFloorFile(editor,callback);
   }
@@ -138,23 +155,53 @@
     为[]时只查询不修改
     */
     if (!isset(callback)) throw('未设置callback');
-    callback([
-      {'items':{'cls': 'items', 'name': '红宝石'},'itemEffect':'core.status.hero.atk += core.values.redJewel','itemEffectTip':"'，攻击+'+core.values.redJewel"},
-      editor_file.comment.items,
-      null]);
-      //只有items.cls是items的才有itemEffect和itemEffectTip,keys和constants和tools只有items
+    if (isset(actionList) && actionList.length > 0){
+      actionList.forEach(function (value) {
+        var tempindex = value[1].indexOf(']')+1;
+        value[1] = [value[1].slice(0,tempindex),"['"+id+"']",value[1].slice(tempindex)].join('');
+      });
+      saveSetting('items',actionList,function (err) {
+        callback([
+          {'items':editor.core.items.items[id],'itemEffect':editor.core.items.itemEffect[id],'itemEffectTip':editor.core.items.itemEffectTip[id]},
+          editor_file.comment.items,
+          err]);
+      });
+    } else {
+      callback([
+        {'items':editor.core.items.items[id],'itemEffect':editor.core.items.itemEffect[id],'itemEffectTip':editor.core.items.itemEffectTip[id]},
+        editor_file.comment.items,
+        null]);
+    }
+    //只有items.cls是items的才有itemEffect和itemEffectTip,keys和constants和tools只有items
   }
-
-  //callback(obj,commentObj,err:String)
+  //callback([obj,commentObj,err:String])
   editor_file.editEnemy = function(editor,id,actionList,callback){
-    //obj形式同callback的obj,为null或undefined时只查询不修改
+    /*actionList:[
+      ["change","['name']","初级巫师的新名字"],
+      ["add","['新的和name同级的属性']",123],
+      ["change","['bomb']",null],
+    ]
+    为[]时只查询不修改
+    */
     if (!isset(callback)) throw('未设置callback');
-    callback([
-      {'name': '初级巫师', 'hp': 100, 'atk': 120, 'def': 0, 'money': 16, 'experience': 0, 'special': 15, 'value': 100, "bomb": false},
-      editor_file.comment.enemys,
-      null]);
+    if (isset(actionList) && actionList.length > 0){
+      actionList.forEach(function (value) {
+        value[1] = "['"+id+"']"+value[1];
+      });
+      saveSetting('enemys',actionList,function (err) {
+        callback([
+          editor.core.enemys.enemys[id],
+          editor_file.comment.enemys,
+          err]);
+      });
+    } else {
+      callback([
+        editor.core.enemys.enemys[id],
+        editor_file.comment.enemys,
+        null]);
+    }
   }
-  //callback(obj,commentObj,err:String)
+  //callback([obj,commentObj,err:String])
 
   ////////////////////////////////////////////////////////////////////  
 
@@ -241,7 +288,7 @@
 
   $range((function(){typeof(thiseval)==typeof(0)||})())
   if( 注释.indexof('$range(')!= -1){
-    thiseval = 新值;
+    var thiseval = 新值;
     evalstr = 注释.split('$range')[1].split('$end')[0];
     if(eval(evalstr) !== true)alert('不在取值范围内')
   }

@@ -392,10 +392,7 @@
       if (value[0]!='change' && file!='icons' && file!='maps') throw('目前只支持change');
     });
 
-
-    throw('尚未实现');
-
-
+    //throw('尚未实现');
     if (file=='icons') {
       actionList.forEach(function (value) {
         if (value[0]!='add')return;
@@ -406,10 +403,11 @@
       fs.writeFile('project/icons.js',datastr,'utf-8',function(err, data){
         callback(err);
       });
+      return;
     }
     if (file=='maps') {
       actionList.forEach(function (value) {
-        if (value[0]!='change')return;
+        if (value[0]!='add')return;
         eval("maps_90f36752_8815_4be8_b32b_d7fad1d0542e"+value[1]+'='+JSON.stringify(value[2]));
       });
       var datastr='maps_90f36752_8815_4be8_b32b_d7fad1d0542e = \n';
@@ -417,6 +415,7 @@
       fs.writeFile('project/maps.js',datastr,'utf-8',function(err, data){
         callback(err);
       });
+      return;
     }
     if (file=='items') {
       actionList.forEach(function (value) {
@@ -428,6 +427,7 @@
       fs.writeFile('project/items.js',datastr,'utf-8',function(err, data){
         callback(err);
       });
+      return;
     }
     if (file=='enemys') {
       actionList.forEach(function (value) {
@@ -439,7 +439,7 @@
       fs.writeFile('project/enemys.js',datastr,'utf-8',function(err, data){
         callback(err);
       });
-
+      return;
     }
     if (file=='data') {
       actionList.forEach(function (value) {
@@ -451,6 +451,7 @@
       fs.writeFile('project/data.js',datastr,'utf-8',function(err, data){
         callback(err);
       });
+      return;
     }
     if (file=='floors') {
       actionList.forEach(function (value) {
@@ -458,10 +459,11 @@
         eval("editor.currentFloorData"+value[1]+'='+JSON.stringify(value[2]));
       });
       editor_file.saveFloorFile(editor,callback);
+      return;
     }
     callback('出错了,要设置的文件名不识别');
   }
-  
+
   /*
   $range((function(){typeof(thiseval)==typeof(0)||})())
   if( 注释.indexof('$range(')!= -1){

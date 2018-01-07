@@ -6,7 +6,7 @@ function enemys() {
 enemys.prototype.init = function () {
     // 怪物属性初始化定义：
     this.enemys = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80;
-    delete(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80);
+    //delete(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80);
 }
 
 ////// 获得一个或所有怪物数据 //////

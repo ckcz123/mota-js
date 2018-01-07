@@ -1,7 +1,7 @@
 function maps() {}
 maps.prototype.init = function() {
     this.blocksInfo = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
-    delete(maps_90f36752_8815_4be8_b32b_d7fad1d0542e);
+    //delete(maps_90f36752_8815_4be8_b32b_d7fad1d0542e);
 }
 
 ////// 加载某个楼层（从剧本或存档中） //////

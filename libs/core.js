@@ -181,7 +181,7 @@ core.prototype.init = function (dom, statusBar, canvas, images, pngs, bgms, soun
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
 
     core.material.ground = new Image();
-    core.material.ground.src = "images/ground.png";
+    core.material.ground.src = "project/images/ground.png";
 
     core.loader(function () {
         console.log(core.material);
@@ -298,7 +298,7 @@ core.prototype.loadImage = function (imgName, callback) {
         if (name.indexOf(".png")<0) // 不包含"png"
             name=name+".png";
         var image = new Image();
-        image.src = 'images/' + name + "?v=" + main.version;
+        image.src = 'project/images/' + name + "?v=" + main.version;
         if (image.complete) {
             callback(imgName, image);
             return;
@@ -323,7 +323,7 @@ core.prototype.loadMusic = function (callback) {
             if (core.musicStatus.audioContext!=null) {
                 core.material.bgms[t] = 'loading';
                 var xhr = new XMLHttpRequest();
-                xhr.open('GET', 'sounds/'+t, true);
+                xhr.open('GET', 'project/sounds/'+t, true);
                 xhr.overrideMimeType("text/plain; charset=x-user-defined");
                 xhr.onload = function(e) { //下载完成
                     try {
@@ -360,7 +360,7 @@ core.prototype.loadMusic = function (callback) {
         else {
             var music = new Audio();
             music.preload = core.musicStatus.startDirectly?'auto':'none';
-            music.src = 'sounds/'+t;
+            music.src = 'project/sounds/'+t;
             music.loop = 'loop';
             core.material.bgms[t] = music;
         }
@@ -370,7 +370,7 @@ core.prototype.loadMusic = function (callback) {
 
         if (core.musicStatus.audioContext != null) {
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'sounds/'+t, true);
+            xhr.open('GET', 'project/sounds/'+t, true);
             xhr.responseType = 'arraybuffer';
             xhr.onload = function(e) { //下载完成
                 try {
@@ -399,7 +399,7 @@ core.prototype.loadMusic = function (callback) {
         }
         else {
             var music = new Audio();
-            music.src = 'sounds/'+t;
+            music.src = 'project/sounds/'+t;
             core.material.sounds[t] = music;
         }
 
@@ -990,8 +990,8 @@ core.prototype.onmousewheel = function (direct) {
 
     // 怪物手册
     if (core.status.lockControl && core.status.event.id == 'book') {
-        if (direct==1) core.ui.drawBook(core.status.event.data - 1);
-        if (direct==-1) core.ui.drawBook(core.status.event.data + 1);
+        if (direct==1) core.ui.drawBook(core.status.event.data - 6);
+        if (direct==-1) core.ui.drawBook(core.status.event.data + 6);
         return;
     }
 
@@ -3615,7 +3615,7 @@ core.prototype.isset = function (val) {
 
 ////// 播放背景音乐 //////
 core.prototype.playBgm = function (bgm) {
-
+    if (main.mode!='play')return;
     // 如果不允许播放
     if (!core.musicStatus.bgmStatus) return;
     // 音频不存在
@@ -3666,7 +3666,7 @@ core.prototype.pauseBgm = function () {
 
 ////// 恢复背景音乐的播放 //////
 core.prototype.resumeBgm = function () {
-
+    if (main.mode!='play')return;
     // 如果不允许播放
     if (!core.musicStatus.bgmStatus) return;
 
@@ -3691,7 +3691,7 @@ core.prototype.resumeBgm = function () {
 
 ////// 播放音频 //////
 core.prototype.playSound = function (sound) {
-
+    if (main.mode!='play')return;
     // 如果不允许播放
     if (!core.musicStatus.soundStatus) return;
     // 音频不存在
@@ -3730,6 +3730,11 @@ core.prototype.show = function (obj, speed, callback) {
         return;
     }
     obj.style.display = 'block';
+    if (main.mode!='play'){
+        obj.style.opacity = 1;
+        if (core.isset(callback)) {callback();}
+        return;
+    }
     obj.style.opacity = 0;
     var opacityVal = 0;
     var showAnimate = window.setInterval(function () {
@@ -3748,6 +3753,11 @@ core.prototype.show = function (obj, speed, callback) {
 core.prototype.hide = function (obj, speed, callback) {
     if (!core.isset(speed)) {
         obj.style.display = 'none';
+        return;
+    }
+    if (main.mode!='play'){
+        obj.style.display = 'none';
+        if (core.isset(callback)) {callback();}
         return;
     }
     var opacityVal = 1;

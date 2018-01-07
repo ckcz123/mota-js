@@ -169,7 +169,7 @@
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
-    background: url(images/ground.png) round;
+    background: url(project/images/ground.png) round;
     z-index: 7;
     display: none;
 }
@@ -198,7 +198,7 @@
 }
 #toolBar {
     position: absolute;
-    background: url(images/ground.png) round;
+    background: url(project/images/ground.png) round;
     z-index: 6;
     box-sizing: border-box;
     -moz-box-sizing: border-box;

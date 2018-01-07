@@ -184,6 +184,9 @@ body{
   top: 5px;
   overflow: auto;
 }
+.egameCanvas {
+  position: absolute;
+}
 .gameCanvas {
   position: absolute;
 }

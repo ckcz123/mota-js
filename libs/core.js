@@ -79,7 +79,6 @@ function core() {
         'mouseOutCheck': 1,
         'moveStepBeforeStop': [],
 
-        // 勇士状态；中心对称飞行器
 
         // event事件
         'saveIndex': null,

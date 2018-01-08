@@ -1,0 +1,227 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link href="_server/css/editor.css" rel="stylesheet">
+  </head>
+<body>
+  <div class="main">
+    <div id="left">
+      <div id="arrEditor">
+        <table class="col" id='arrColMark'></table>
+        <table class="row" id='arrRowMark'></table>
+        <div id="editArea" v-cloak>
+          <textarea cols="10" rows="10" id="pout" v-model="mapArr"></textarea>
+          <p class="warnText" v-if="error">{{ errors[error-1] }}</p>
+        </div>
+        <div id="editTip" v-cloak>
+          <input class='btn' type="button" value="复制地图" v-on:click="copyMap"/>
+        </div>
+      </div>
+      <div id="objDataEditor">
+
+      </div>
+      <div id="eventEditor">
+
+      </div>
+      
+    </div>
+    <div id="mid">
+      <table class="col" id='mapColMark'></table>
+      <table class="row" id='mapRowMark'></table>
+      <div class="map" id="mapEdit">
+        <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='event' width='416' height='416'></canvas>
+        <canvas class='egameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
+      </div>
+      <div class="tools">
+        <div id="tip" v-cloak >
+          <div v-if="isSelectedBlock" >
+            <p v-if="isClearBlock" class="infoText">当前选择为清除块，可擦除地图上块</p>
+            <div v-else>
+              <p v-if="hasId">图块编号：<span class="infoText">{{ infos['idnum'] }}</span></p>
+              <p v-if="hasId">图块ID：<span class="infoText">{{ infos['id'] }}</span></p>
+              <p v-else class="warnText">该图块无对应的数字或ID存在，请先前往icons.js和maps.js中进行定义！</p>
+              <p>图块所在素材：<span class="infoText">{{ infos['images'] + (isAutotile ? '( '+infos['id']+' )' : '') }}</span></p>
+              <p>图块索引：<span class="infoText">{{ infos['y'] }}</span></p>
+            </div>
+          </div>
+          <div v-else>
+              <p v-if="whichShow" v-bind:class="[ (whichShow%2) ? 'warnText' : 'successText']">{{ mapMsg }}</p>
+          </div>
+        </div>
+        <input class='btn' id='clear' type="button" value="清除地图" v-on:click="clearMap"/>
+        <input class='btn' type="button" value="导出地图" id="exportM" v-on:click="exportMap"/>
+
+        <div id="bgSelect" v-cloak>
+          <span>当前地板: </span>
+          <select v-model="selectedBg">
+            <option disabled value="">请选择地板</option>
+            <option v-for="bg in bgs" v-bind:value="bg">
+              {{ bg }}
+            </option>
+          </select>
+          <div class="selectpng">
+              <input class='input' id='pin' v-model="imgname" placeholder="请输入自定义背景文件名"/>
+              <input class='btn' type="button" value="确定" v-on:click="updatebg"/>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="right">
+      <div id="iconLib">
+        <canvas class='egameCanvas' id='edata' width='416' height='416' style='z-index:0'></canvas>
+        <div id="selectBox">
+            <div id='dataSelection' v-show="isSelected" v-cloak></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- <script>/* -->
+  <div id='gameGroup' style='display:none'>
+    <p id='mainTips'>请稍后...</p>
+    <div id='startPanel'>
+        <div id='startTop'>
+            <div id='startTopProgressBar'>
+                <div id='startTopProgress'></div>
+            </div>
+            <p id='startTopLoadTips'>资源即将开始加载</p>
+        </div>
+        <img id='startBackground' src='project/images/bg.png'>
+        <!-- 标题界面；可以改style的color使标题改变颜色 -->
+        <p id='startLogo' style="color: black"></p>
+        <div id='startButtonGroup'>
+            <div id='startButtons'>
+                <span class='startButton' id='playGame'>开始游戏</span>
+                <span class='startButton' id='loadGame'>载入游戏</span>
+                <span class='startButton' id='aboutGame'>关于本塔</span>
+            </div>
+            <div id='levelChooseButtons'>
+                <span class='startButton' id='easyLevel'>简单</span>
+                <span class='startButton' id='normalLevel'>普通</span>
+                <span class='startButton' id='hardLevel'>困难</span>
+            </div>
+        </div>
+    </div>
+    <div id='floorMsgGroup'>
+        <p id='logoLabel'></p>
+        <p id='versionLabel'></p>
+        <p id='floorNameLabel'></p>
+    </div>
+    <div id='statusBar' class="clearfix">
+        <div class="status" id="floorCol">
+            <img src='project/images/floor.png' id="img-floor">
+            <p class='statusLabel' id='floor'></p>
+        </div>
+        <div class="status" id="lvCol">
+            <img src='project/images/lv.png' id="img-lv">
+            <p class='statusLabel' id='lv'></p>
+        </div>
+        <div class="status">
+            <img src='project/images/hp.png' id="img-hp">
+            <p class='statusLabel' id='hp'></p>
+        </div>
+        <div class="status">
+            <img src='project/images/atk.png' id="img-atk">
+            <p class='statusLabel' id='atk'></p>
+        </div>
+        <div class="status">
+            <img src='project/images/def.png' id="img-def">
+            <p class='statusLabel' id='def'></p>
+        </div>
+        <div class="status" id="mdefCol">
+            <img src='project/images/mdef.png' id="img-mdef">
+            <p class='statusLabel' id='mdef'></p>
+        </div>
+        <div class="status" id="moneyCol">
+            <img src='project/images/money.png' id="img-money">
+            <p class='statusLabel' id='money'></p>
+        </div>
+        <div class="status" id="expCol">
+            <img src='project/images/experience.png' id="img-experience">
+            <p class='statusLabel' id='experience'></p>
+        </div>
+        <div class="status" id="upCol">
+            <img src='project/images/up.png' id="img-up">
+            <p class='statusLabel' id='up'></p>
+        </div>
+        <div class="status">
+            <span class='statusLabel' id='yellowKey' style="color:#FFCCAA"></span>
+            <span class='statusLabel' id='blueKey' style="color:#AAAADD"></span>
+            <span class='statusLabel' id='redKey' style="color:#FF8888"></span>
+        </div>
+        <div class="status" id="debuffCol">
+            <span class='statusLabel' id='poison' style="color: #AFFCA8;"></span>
+            <span class='statusLabel' id='weak' style="color: #FECCD0;"></span>
+            <span class='statusLabel' id='curse' style="color: #C2F4E7;"></span>
+        </div>
+    </div>
+    <div id="toolBar" class="clearfix">
+        <img src="project/images/book.png" class="tools" id='img-book'>
+        <img src="project/images/fly.png" class="tools" id='img-fly'>
+        <img src="project/images/toolbox.png" class="tools" id='img-toolbox'>
+        <img src="project/images/shop.png" class="tools" id='img-shop'>
+        <img src="project/images/save.png" class="tools" id='img-save'>
+        <img src="project/images/load.png" class="tools" id='img-load'>
+        <img src="project/images/settings.png" class="tools" id='img-settings'>
+        <p class="statusLabel tools" id="hard"></p>
+    </div>
+    <div id="curtain"></div>
+    <!-- <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas> -->
+    <!-- <canvas class='gameCanvas' id='event' width='416' height='416'></canvas> -->
+    <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
+    <canvas class='gameCanvas' id='hero' width='416' height='416'></canvas>
+    <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
+    <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
+  </div>
+  <!-- */</script> -->
+<script>
+// 生成定位编号
+(function(){
+  var colNum = ' ';
+  for(var i=0; i<13; i++){
+    var tpl = '<td>'+i+'<div class="colBlock" style="left:'+(i*32+1)+'px;"></div></td>';
+    colNum += tpl;
+  }
+  arrColMark.innerHTML = '<tr>'+colNum+'</tr>';
+  mapColMark.innerHTML = '<tr>'+colNum+'</tr>';
+  var rowNum = ' ';
+  for(var i=0; i<13; i++){
+    var tpl = '<tr><td>'+i+'<div class="rowBlock" style="top:'+(i*32+1)+'px;"></div></td></tr>';
+    rowNum += tpl;
+  }
+  arrRowMark.innerHTML = rowNum;
+  mapRowMark.innerHTML = rowNum;
+})();
+</script>
+
+<!-- =========================================================== -->
+
+<script src='_server/vendor/vue.min.js'></script>
+<!-- <script src="https://cdn.bootcss.com/vue/2.5.13/vue.js"></script> -->
+<script src='_server/fs.js'></script>
+<script src='_server/editor_file.js'></script>
+<script src='_server/vm.js'></script>
+<script id='mainScript' src='main.js'></script>
+<script>
+//所有全局量
+__all__=['Vue','fs','editor_file','main','core','hasOwnProp','editor'];
+__id__=['editArea','arrRowMark','mapRowMark','data','bg','dataSelection'];
+__Vue__=['exportM','editArea','editTip','clear','tip','selectBox'];
+//var event = document.getElementById('event');
+
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+function hasOwnProp (obj, key) {
+  return hasOwnProperty.call(obj, key)
+}
+</script>
+<script src='_server/editor.js'></script>
+<script>
+main.init('editor');
+editor.init();
+//main.listen();
+//core.setHeroMoveTriggerInterval();
+</script>
+
+</body>
+</html>

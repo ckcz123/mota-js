@@ -185,9 +185,11 @@ items.prototype.useItem = function (itemId) {
     if (itemId == 'curseWine') core.setFlag('curse', false);
     if (itemId == 'superWine') {
         core.setFlag('poison', false);
-        core.setFlag('weak', false);
-        core.status.hero.atk += core.values.weakValue;
-        core.status.hero.def += core.values.weakValue;
+        if (core.hasFlag('weak')) {
+            core.setFlag('weak', false);
+            core.status.hero.atk += core.values.weakValue;
+            core.status.hero.def += core.values.weakValue;
+        }
         core.setFlag('curse', false);
     }
     core.updateStatusBar();

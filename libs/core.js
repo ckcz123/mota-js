@@ -264,29 +264,40 @@ core.prototype.loader = function (callback) {
 
                 // 加载pngs
                 core.material.images.pngs = {};
+                if (core.pngs.length==0) {
+                    core.loadAutotile(callback);
+                    return;
+                }
                 for (var x=0;x<core.pngs.length;x++) {
                     core.loadImage(core.pngs[x], function (pngId, image) {
                         core.material.images.pngs[pngId] = image;
                         if (Object.keys(core.material.images.pngs).length==core.pngs.length) {
-
-                            // 加载Autotile
-                            core.material.images.autotile={};
-                            var autotileIds = Object.keys(core.material.icons.autotile);
-                            for (var x=0;x<autotileIds.length;x++) {
-                                core.loadImage(autotileIds[x], function (autotileId, image) {
-                                    core.material.images.autotile[autotileId]=image;
-                                    if (Object.keys(core.material.images.autotile).length==autotileIds.length) {
-
-                                        // 最后加载音频
-                                        core.loadMusic(callback);
-                                    }
-                                })
-                            }
+                            core.loadAutotile(callback);
                         }
                     });
                 }
             }
         });
+    }
+}
+
+////// 加载Autotile //////
+core.prototype.loadAutotile = function (callback) {
+    core.material.images.autotile={};
+    var autotileIds = Object.keys(core.material.icons.autotile);
+    if (autotileIds.length==0) {
+        core.loadMusic(callback);
+        return;
+    }
+    for (var x=0;x<autotileIds.length;x++) {
+        core.loadImage(autotileIds[x], function (autotileId, image) {
+            core.material.images.autotile[autotileId]=image;
+            if (Object.keys(core.material.images.autotile).length==autotileIds.length) {
+
+                // 最后加载音频
+                core.loadMusic(callback);
+            }
+        })
     }
 }
 
@@ -2935,6 +2946,9 @@ core.prototype.setItem = function (itemId, itemNum) {
         core.status.hero.items[itemCls] = {};
     }
     core.status.hero.items[itemCls][itemId] = itemNum;
+    if (itemCls!='keys' && itemNum==0) {
+        delete core.status.hero.items[itemCls][itemId];
+    }
 }
 
 ////// 删除某个物品 //////
@@ -2942,10 +2956,10 @@ core.prototype.removeItem = function (itemId) {
     if (!core.hasItem(itemId)) return false;
     var itemCls = core.material.items[itemId].cls;
     core.status.hero.items[itemCls][itemId]--;
-    core.updateStatusBar();
-    if (itemCls=='tools' && core.status.hero.items[itemCls][itemId]==0) {
+    if (itemCls!='keys' && core.status.hero.items[itemCls][itemId]==0) {
         delete core.status.hero.items[itemCls][itemId];
     }
+    core.updateStatusBar();
     return true;
 }
 

@@ -465,7 +465,14 @@
   }
 
   /*
-  $range((function(){typeof(thiseval)==typeof(0)||})())
+  $range(thiseval in ['keys','items','constants','tools'])$end
+  $range(thiseval==~~thiseval &&thiseval>0)$end
+  $range(thiseval in [true,false])$end
+  $range(false)$end
+  $leaf(true)$end
+
+  //$range((function(){typeof(thiseval)==typeof(0)||})())$end
+
   if( 注释.indexof('$range(')!= -1){
     var thiseval = 新值;
     evalstr = 注释.split('$range')[1].split('$end')[0];

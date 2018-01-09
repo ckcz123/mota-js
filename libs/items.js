@@ -2,6 +2,7 @@ function items() {
 
 }
 
+////// 初始化 //////
 items.prototype.init = function () {
     this.items = {
         // 钥匙
@@ -36,7 +37,7 @@ items.prototype.init = function () {
         'fly': {'cls': 'constants', 'name': '楼层传送器', 'text': '可以自由往来去过的楼层'},
         'coin': {'cls': 'constants', 'name': '幸运金币', 'text': '持有时打败怪物可得双倍金币'},
         'snow': {'cls': 'constants', 'name': '冰冻徽章', 'text': '可以将四周的熔岩变成平地'},
-        'cross': {'cls': 'constants', 'name': '十字架', 'text': '该道具尚未被定义'},
+        'cross': {'cls': 'constants', 'name': '十字架', 'text': '持有后无视怪物的无敌属性'},
         'knife': {'cls': 'constants', 'name': '屠龙匕首', 'text': '该道具尚未被定义'},
         'shoes': {'cls': 'constants', 'name': '绿鞋', 'text': '持有时无视负面地形'},
 
@@ -59,7 +60,7 @@ items.prototype.init = function () {
     }
 }
 
-// 初始化道具
+////// 获得所有道具 //////
 items.prototype.getItems = function () {
     // 大黄门钥匙？钥匙盒？
     if (core.flags.bigKeyIsBox)
@@ -74,7 +75,7 @@ items.prototype.getItems = function () {
 
 main.instance.items = new items();
 
-
+////// “即捡即用类”道具的使用效果 //////
 items.prototype.getItemEffect = function(itemId, itemNum) {
     var itemCls = core.material.items[itemId].cls;
     // 消耗品
@@ -115,6 +116,7 @@ items.prototype.getItemEffect = function(itemId, itemNum) {
     }
 }
 
+////// “即捡即用类”道具的文字提示 //////
 items.prototype.getItemEffectTip = function(itemId) {
     if (itemId === 'redJewel') return "，攻击+"+core.values.redJewel;
     if (itemId === 'blueJewel') return "，防御+"+core.values.blueJewel;
@@ -140,14 +142,12 @@ items.prototype.getItemEffectTip = function(itemId) {
     return "";
 }
 
-
-
+////// 使用道具 //////
 items.prototype.useItem = function (itemId) {
-    // 使用道具
     if (!this.canUseItem(itemId)) return;
     var itemCls = core.material.items[itemId].cls;
 
-    if (itemId=='book') core.ui.drawEnemyBook(1);
+    if (itemId=='book') core.ui.drawBook(0);
     if (itemId=='fly') core.ui.drawFly(core.status.hero.flyRange.indexOf(core.status.floorId));
     if (itemId == 'earthquake' || itemId == 'bomb' || itemId == 'pickaxe' || itemId=='icePickaxe'
         || itemId == 'snow' || itemId == 'hammer' || itemId=='bigKey') {
@@ -157,6 +157,9 @@ items.prototype.useItem = function (itemId) {
             core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
             core.updateFg();
             core.drawTip(core.material.items[itemId].name + "使用成功");
+
+            if (itemId == 'bomb' || itemId == 'hammer')
+                core.events.afterUseBomb();
         });
     }
     if (itemId == 'centerFly') {
@@ -182,9 +185,11 @@ items.prototype.useItem = function (itemId) {
     if (itemId == 'curseWine') core.setFlag('curse', false);
     if (itemId == 'superWine') {
         core.setFlag('poison', false);
-        core.setFlag('weak', false);
-        core.status.hero.atk += core.values.weakValue;
-        core.status.hero.def += core.values.weakValue;
+        if (core.hasFlag('weak')) {
+            core.setFlag('weak', false);
+            core.status.hero.atk += core.values.weakValue;
+            core.status.hero.def += core.values.weakValue;
+        }
         core.setFlag('curse', false);
     }
     core.updateStatusBar();
@@ -195,11 +200,10 @@ items.prototype.useItem = function (itemId) {
         delete core.status.hero.items[itemCls][itemId];
 }
 
+////// 当前能否使用道具 //////
 items.prototype.canUseItem = function (itemId) {
     // 没有道具
     if (!core.hasItem(itemId)) return false;
-
-    var itemCls = core.material.items[itemId].cls;
 
     if (itemId == 'book') return true;
     if (itemId == 'fly') return core.status.hero.flyRange.indexOf(core.status.floorId)>=0;

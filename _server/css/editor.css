@@ -24,73 +24,23 @@ body{
   width: 435px;
   height: 630px;
 }
-.nav {
-  width: 100%;
-  height: 40px;
-  margin-top: 5px;
-  box-sizing: border-box;
-}
-.nav a{
-  display: block;
-  float: left;
-  line-height: 30px;
-  font-size: 14px;
-  text-align: center;
-  color: #424242;
-  margin: 0 10px;
-  padding: 0 3px ;
-  list-style: none;
-  box-sizing: border-box;
-  cursor: pointer;
-  /* border-bottom: 3px solid #009688; */
-}
-.is-selected {
-  border-bottom: 3px solid #009688;
-}
-#left .tabs{
-  position: absolute;
-  top: 50px;
-  left: 0;
-  width: 435px;
-  height: 535px;
-}
-#left .card{
-  width: 100%;
-  height: 535px;
-  position: absolute;
-  left: 0;
-  top: 10px;
-  border-top: 1px solid #ccc;
-}
-#arrEditor{
-  z-index: 8;
-}
-.card .lineTitle {
-  position: absolute;
-  top: -12px;
-  left: 20px;
-  padding: 0 5px;
-  font-size: 14px;
-  color: #03A9F4;
-  background-color: #F5F5F5;
-  
-  z-index: 10;
-}
+
 #editArea{
+  position: absolute;
   width: 100%;
   height: 70%;
+  left: 0;
+  top: 0;
   /* padding: 10px 5px; */
   box-sizing: border-box;
-  margin-top: 15px;
 }
 #pout{
-  position: absolute;
-  left: 22px;
-  top: 37px;
   display: block;
   width: 410px;
-  height: 300px;
+  height: 100%;
   box-sizing: border-box;
+  margin-left: 22px;
+  margin-top: 23px;
   line-height: 20px;
   font-size: 12.3px;
   font-family: 'Lucida Console', Monaco, monospace;
@@ -118,26 +68,6 @@ body{
   margin-right: 20px;
   margin-top: 5px;
 }
-.files {
-  width: 100%;
-  height: 120px;
-  /* padding: 10px; */
-  margin-top: 15px;
-}
-.files .input{
-  display: block;
-  max-width: 150px;
-  height: 20px;
-  padding: 6px 12px;
-  font-size: 14px;
-  margin-top: 10px;
-  color: #555;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
-}
-/* ==================================== */
 #mid{
   position: absolute;
   left: 448px;
@@ -175,13 +105,32 @@ body{
   font-size: 15px;
   line-height: 14px;
 }
+.files {
+  width: 50%;
+  height: 120px;
+  /* padding: 10px; */
+  margin-top: 15px;
+}
+.input{
+  display: block;
+  max-width: 150px;
+  height: 20px;
+  padding: 6px 12px;
+  font-size: 14px;
+  margin-top: 10px;
+  color: #555;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+}
 #bgSelect{
   width: 50%;
   height: 100px;
   margin-top: 10px;
 }
 #bgSelect span{
-  display: block;
+  /* display: block; */
   font-size: 14px;
   line-height: 30px;
 }
@@ -198,7 +147,7 @@ body{
   min-width: 50px;
   padding: 0 5px;
   display: inline-block;
-
+  margin-top: 5px;
   font-size: 14px;
   font-weight: 400;
   /* text-transform: uppercase; */
@@ -218,8 +167,6 @@ body{
   background-color: #009688;
   box-shadow: 0 2px 2px 0 rgba(0,0,0,.14), 0 3px 1px -2px rgba(0,0,0,.2), 0 1px 5px 0 rgba(0,0,0,.12);
 }
-
-/* =========================== */
 #right{
   position: absolute;
   left: 900px;

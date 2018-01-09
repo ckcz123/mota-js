@@ -7,52 +7,24 @@
 <body>
   <div class="main">
     <div id="left">
-      <div class="nav" id="modSeletNav" v-cloak>
-        <input v-model="currTabnum" type="hidden">
-        <a v-for="tab in tabs" :key="tab.num"
-          :class="{ 'is-selected': currTabnum == tab.num }" 
-          @click="selectTab(tab.num)" >
-          <span v-text="tab.title"></span>
-        </a>
-      </div>
-      <div class="tabs" id="tabSelection" v-cloak>
-        <div id="arrEditor" class="card" v-show="showTab==1">
-          <div class="lineTitle">地图数组编辑区</div>
-          <div id="editArea" v-cloak>
-            <table class="col" id='arrColMark'></table>
-            <table class="row" id='arrRowMark'></table>
-            <textarea cols="10" rows="10" id="pout" v-model="mapArr"></textarea>
-            <p class="warnText" v-if="error">{{ errors[error-1] }}</p>
-          </div>
-          <div id="editTip" v-cloak>
-            <!-- <input class='btn' type="button" value="复制地图" v-on:click="copyMap"/> -->
-          </div>
-          <div class="files" id="editFile4map" v-cloak >
-            <div class="lineTitle">文件操作区</div>
-            <select v-model="selected">
-              <option disabled value="">请选择要编辑的文件</option>
-              <option v-for="option in options" v-bind:value="option">
-                {{ option }}
-              </option>
-            </select>
-            <span>当前文件: {{ selected }}</span>
-            <input class='btn' type="button" value="保存" onclick="readUTF8file(pin.value)" />
-            <input class='btn' type="button" value="另存为" onclick="writeUTF8file(pin.value,pout.innerText)" />
-            
-            <input class='input' id='pin' placeholder="请输入文件名"/>
-            <div id="printOut"></div>
-          </div>
+      <div id="arrEditor">
+        <table class="col" id='arrColMark'></table>
+        <table class="row" id='arrRowMark'></table>
+        <div id="editArea" v-cloak>
+          <textarea cols="10" rows="10" id="pout" v-model="mapArr"></textarea>
+          <p class="warnText" v-if="error">{{ errors[error-1] }}</p>
         </div>
-        <div id="objDataEditor" class="card" v-show="showTab==2">
-          <div class="lineTitle">对象属性编辑区</div>
-        </div>
-        <div id="eventEditor" class="card" v-show="showTab==3">
-          <div class="lineTitle">地图选点事件编辑区</div>
-        </div>
-        <div id="floorEditor" class="card" v-show="showTab==4">
-          <div class="lineTitle">楼层事件编辑区</div>
+        <div id="editTip" v-cloak>
+          <input class='btn' type="button" value="复制地图" v-on:click="copyMap"/>
         </div>
       </div>
+      <div id="objDataEditor">
+
+      </div>
+      <div id="eventEditor">
+
+      </div>
+      
     </div>
     <div id="mid">
       <table class="col" id='mapColMark'></table>
@@ -80,14 +52,19 @@
         </div>
         <input class='btn' id='clear' type="button" value="清除地图" v-on:click="clearMap"/>
         <input class='btn' type="button" value="导出地图" id="exportM" v-on:click="exportMap"/>
+
         <div id="bgSelect" v-cloak>
+          <span>当前地板: </span>
           <select v-model="selectedBg">
             <option disabled value="">请选择地板</option>
             <option v-for="bg in bgs" v-bind:value="bg">
               {{ bg }}
             </option>
           </select>
-          <span>当前地板: {{ selectedBg }}</span>
+          <div class="selectpng">
+              <input class='input' id='pin' v-model="imgname" placeholder="请输入自定义背景文件名"/>
+              <input class='btn' type="button" value="确定" v-on:click="updatebg"/>
+          </div>
         </div>
       </div>
     </div>
@@ -129,14 +106,9 @@
 <script src='_server/editor_file.js'></script>
 <script src='_server/vm.js'></script>
 <script>
-printf = function(str,weak) {
-  var prefix='<span class="result">',postfix='</span>';
-  if (weak){prefix='<span class="weakresult">';}
-  if (typeof(str)==="undefined")str='';
-  printOut.innerHTML=prefix+String(str)+postfix;
-}
+
 //所有全局量
-__all__=['Vue','fs','printf','editor','main','core','fullX','fullY'];
+__all__=['Vue','fs','printf','editor','main','core'];
 __id__=['printOut','arrRowMark','mapRowMark','data','bg','dataSelection'];
 __Vue__=['exportM','editArea','editTip','clear','tip','selectBox'];
 
@@ -235,7 +207,7 @@ editor.prototype.loadAllImgs = function(icons){
   return Promise.all(p);
 }
 editor.prototype.idsInit = function(maps, icons){
-  editor.ids = [];
+  editor.ids = [0];
   editor.indexs = [];
   var MAX_NUM = 400;
   var getInfoById = function(id){
@@ -334,7 +306,7 @@ editor.prototype.mapInit = function(){
     }
   }
 }
-editor.prototype.drawMapBg = function(){
+editor.prototype.drawMapBg = function(img){
   var bgc = bg.getContext('2d');
 
   for (var ii = 0; ii < 13; ii++)
@@ -342,6 +314,9 @@ editor.prototype.drawMapBg = function(){
       bgc.clearRect(ii*32, jj*32, 32, 32);
       bgc.drawImage(editor.material.images['terrains'], 0, 32*(editor.bgY||0), 32, 32, ii*32, jj*32, 32, 32);
     }
+  if(img){
+    bgc.drawImage(img, 0, 0, 416, 416);
+  }
 }
 editor.prototype.updateMap = function(){
 
@@ -367,6 +342,7 @@ editor.prototype.updateMap = function(){
     ctx.drawImage(editor.material.images[tileInfo.images], 0, tileInfo.y*32, 32, 32, x*32, y*32, 32, 32); 
   }
 
+  // autotile的相关处理
   var indexArrs = [ //16种组合的图块索引数组; // 将autotile分割成48块16*16的小块; 数组索引即对应各个小块
   //                                       +----+----+----+----+----+----+
     [10,  9,  4, 3 ],  //0   bin:0000      | 1  | 2  | 3  | 4  | 5  | 6  |
@@ -634,7 +610,7 @@ editor.prototype.listen = function() {
         // console.log(pos,editor.material.images[pos.images].height)
         dataSelection.style.left = pos.x*32 +'px';
         dataSelection.style.top = pos.y*32 +'px';
-
+        
         if(pos.x==0&&pos.y==0){
           // editor.info={idnum:0, id:'empty','images':'清除块', 'y':0};
           editor.info=0;

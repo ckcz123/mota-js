@@ -4,10 +4,13 @@
 main.floors.sample2 = {
     "floorId": "sample2", // 楼层唯一标识符，需要和名字完全一致
     "title": "主塔 40 层", // 楼层中文名
-    "name": 40, // 显示在状态栏中的层数
+    "name": "40", // 显示在状态栏中的层数
     "canFlyTo": false, // 该楼能否被楼传器飞到（不能的话在该楼也不允许使用楼传器）
     "canUseQuickShop": true, // 该层是否允许使用快捷商店
-    "defaultGround": "soil", // 默认地面的图块ID（terrains中）
+    "defaultGround": "snowGround", // 默认地面的图块ID（terrains中）
+    // "png": "bg.png", // 背景图；你可以选择一张png图片来作为背景素材。详细用法请参见文档“自定义素材”中的说明。
+    "color": [255,0,0,0.3], // 该层的默认画面色调。本项可不写（代表无色调），如果写需要是一个RGBA数组。
+    "bgm": "qianjin.mid", // 到达该层后默认播放的BGM。本项可忽略。
     "map": [ // 地图数据，需要是13x13，建议使用地图生成器来生成
         [5,    5,    5,    5,    5,    5,    87,   5,    5,    5,    5,    5,    5],
         [5,    4,    4,    4,    4,    1,    0,    1,    4,    4,    4,    4,    5],
@@ -199,10 +202,26 @@ main.floors.sample2 = {
                 {"type": "trigger", "loc": [6,6]} // 立刻触发妖精事件
             ]
         },
-        "4,3": {"trigger":"action","enable":false}, // 四个角的大法师，添加trigger:action可避免该点出现显伤
-        "8,3": {"trigger":"action","enable":false}, // 四个角的大法师
-        "4,6": {"trigger":"action","enable":false}, // 四个角的大法师
-        "8,6": {"trigger":"action","enable":false}, // 四个角的大法师
+        "4,3": { // 四个角的大法师，
+            "trigger": "action",
+            "displayDamage": false,
+            "enable":false
+        },
+        "8,3": { // 四个角的大法师，
+            "trigger": "action",
+            "displayDamage": false,
+            "enable":false
+        },
+        "4,6": { // 四个角的大法师，
+            "trigger": "action",
+            "displayDamage": false,
+            "enable":false
+        },
+        "8,6": { // 四个角的大法师，
+            "trigger": "action",
+            "displayDamage": false,
+            "enable":false
+        },
 
         "6,6": { // 妖精
             "enable":false, // 初始时禁用状态

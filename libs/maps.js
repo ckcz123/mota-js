@@ -1,6 +1,7 @@
 function maps() {}
 maps.prototype.init = function() {}
 
+////// 加载某个楼层（从剧本或存档中） //////
 maps.prototype.loadFloor = function (floorId, map) {
     var floor = core.floors[floorId];
     var content = {};
@@ -13,7 +14,7 @@ maps.prototype.loadFloor = function (floorId, map) {
     for (var i = 0; i < 13; i++) {
         for (var j = 0; j < 13; j++) {
             var block = this.getBlock(j, i, map[i][j]);
-            if (block.event != undefined) {
+            if (core.isset(block.event)) {
                 if (block.event.cls == 'enemys' && block.event.trigger==undefined) {
                     block.event.trigger = 'battle';
                 }
@@ -34,7 +35,7 @@ maps.prototype.loadFloor = function (floorId, map) {
                     }
                 }
             }
-            this.addEvent(block,j,i,floor.events[j+","+i],floor.defaultGround || "ground")
+            this.addEvent(block,j,i,floor.events[j+","+i])
             this.addChangeFloor(block,j,i,floor.changeFloor[j+","+i]);
             if (core.isset(block.event)) blocks.push(block);
         }
@@ -44,6 +45,7 @@ maps.prototype.loadFloor = function (floorId, map) {
     return content;
 }
 
+////// 数字和ID的对应关系 //////
 maps.prototype.getBlock = function (x, y, id) {
     var enable=null;
     id = ""+id;
@@ -61,6 +63,8 @@ maps.prototype.getBlock = function (x, y, id) {
     var tmp = {'x': x, 'y': y, 'id': id};
     if (enable!=null) tmp.enable = enable;
 
+    ////////////////////////// 地形部分 //////////////////////////
+
     // 0-20 地形
     if (id == 1) tmp.event = {'cls': 'terrains', 'id': 'yellowWall'}; // 黄墙
     if (id == 2) tmp.event = {'cls': 'terrains', 'id': 'whiteWall'}; // 白墙
@@ -77,15 +81,17 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 13) tmp.event = {'cls': 'animates', 'id': 'weakNet', 'noPass': false, 'trigger': 'passNet'}; // 衰网
     if (id == 14) tmp.event = {'cls': 'animates', 'id': 'curseNet', 'noPass': false, 'trigger': 'passNet'}; // 咒网
     if (id == 15) tmp.event = {'cls': 'animates', 'id': 'water', 'noPass': true}; // 水
-
+    // 在这里添加更多地形
+    // 如果空位不足，可以从180以后开始继续放，只要不和现有的数字冲突即可
 
     // Autotile
     if (id == 20) tmp.event = {'cls': 'autotile', 'id': 'autotile', 'noPass': true}; // autotile
-    // 更多的autotile从151到160，只要不和现有的数字冲突即可
+    // 更多的autotile从151到160等，只要不和现有的数字冲突即可
     if (id == 151) tmp.event = {'cls': 'autotile', 'id': 'autotile1', 'noPass': true};
     if (id == 152) tmp.event = {'cls': 'autotile', 'id': 'autotile2', 'noPass': true};
     if (id == 153) tmp.event = {'cls': 'autotile', 'id': 'autotile3', 'noPass': true};
 
+    ////////////////////////// 物品部分 //////////////////////////
 
     // 21-80 物品
     if (id == 21) tmp.event = {'cls': 'items', 'id': 'yellowKey'}; // 黄钥匙
@@ -134,6 +140,9 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 64) tmp.event = {'cls': 'items', 'id': 'shoes'} // 绿鞋
     if (id == 65) tmp.event = {'cls': 'items', 'id': 'hammer'} // 圣锤
 
+
+    ////////////////////////// 门、楼梯、传送点部分 //////////////////////////
+
     // 81-100 门
     if (id == 81) tmp.event = {'cls': 'terrains', 'id': 'yellowDoor', 'trigger': 'openDoor'}; // 黄门
     if (id == 82) tmp.event = {'cls': 'terrains', 'id': 'blueDoor', 'trigger': 'openDoor'}; // 蓝门
@@ -151,6 +160,8 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 94) tmp.event = {'cls': 'animates', 'id': 'rightPortal', 'noPass': false}; // 右箭头
 
 
+    ////////////////////////// NPC部分 //////////////////////////
+
     // 121-150 NPC
     if (id == 121) tmp.event = {'cls': 'npcs', 'id': 'man'};
     if (id == 122) tmp.event = {'cls': 'npcs', 'id': 'woman'};
@@ -165,6 +176,8 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 131) tmp.event = {'cls': 'npcs', 'id': 'blueShop'};
     if (id == 132) tmp.event = {'cls': 'npcs', 'id': 'princess'};
 
+    ////////////////////////// 其他部分 //////////////////////////
+
     // 161-200 其他（单向箭头、灯、箱子等等）
     if (id == 161) tmp.event = {'cls': 'terrains', 'id': 'arrowUp', 'noPass': false}; // 单向上箭头
     if (id == 162) tmp.event = {'cls': 'terrains', 'id': 'arrowDown', 'noPass': false}; // 单向下箭头
@@ -172,6 +185,9 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 164) tmp.event = {'cls': 'terrains', 'id': 'arrowRight', 'noPass': false}; // 单向右箭头
     if (id == 165) tmp.event = {'cls': 'terrains', 'id': 'light', 'trigger': 'changeLight', 'noPass': false}; // 灯
     if (id == 166) tmp.event = {'cls': 'terrains', 'id': 'darkLight', 'noPass': true}; // 暗灯
+
+
+    ////////////////////////// 怪物部分 //////////////////////////
 
     // 201-300 怪物
     if (id == 201) tmp.event = {'cls': 'enemys', 'id': 'greenSlime'};
@@ -235,13 +251,17 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 259) tmp.event = {'cls': 'enemys', 'id': 'darkFairy'};
     if (id == 260) tmp.event = {'cls': 'enemys', 'id': 'greenKnight'};
 
+    ////////////////////////// 待定... //////////////////////////
+    // 目前ID暂时不要超过400
+
     return tmp;
 }
 
-maps.prototype.addEvent = function (block, x, y, event, ground) {
+////// 向该楼层添加剧本的自定义事件 //////
+maps.prototype.addEvent = function (block, x, y, event) {
     if (!core.isset(event)) return;
     if (!core.isset(block.event)) { // 本身是空地？
-        block.event = {'cls': 'terrains', 'id': ground, 'noPass': false};
+        block.event = {'cls': 'terrains', 'id': 'none', 'noPass': false};
     }
     // event是字符串或数组？
     if (typeof event == "string") {
@@ -252,6 +272,10 @@ maps.prototype.addEvent = function (block, x, y, event, ground) {
     }
     if (!core.isset(event.data))
         event.data = [];
+
+    // 覆盖noPass
+    if (core.isset(event.noPass))
+        block.event.noPass = event.noPass;
 
     // 覆盖enable
     if (!core.isset(block.enable) && core.isset(event.enable)) {
@@ -273,11 +297,13 @@ maps.prototype.addEvent = function (block, x, y, event, ground) {
     }
 }
 
+////// 向该楼层添加剧本的楼层转换事件 //////
 maps.prototype.addChangeFloor = function (block, x, y, event, ground) {
     if (!core.isset(event)) return;
     this.addEvent(block, x, y, {"trigger": "changeFloor", "data": event}, ground);
 }
 
+////// 初始化所有地图 //////
 maps.prototype.initMaps = function (floorIds) {
     var maps = {};
     for (var i=0;i<floorIds.length;i++) {
@@ -287,6 +313,7 @@ maps.prototype.initMaps = function (floorIds) {
     return maps;
 }
 
+////// 将当前地图重新变成数字，以便于存档 //////
 maps.prototype.save = function(maps, floorId) {
     if (!core.isset(floorId)) {
         var map = {};
@@ -316,6 +343,7 @@ maps.prototype.save = function(maps, floorId) {
     return blocks;
 }
 
+////// 将存档中的地图信息重新读取出来 //////
 maps.prototype.load = function (data, floorId) {
     if (floorId == undefined) {
         var map = {};
@@ -325,6 +353,32 @@ maps.prototype.load = function (data, floorId) {
         return map;
     }
     return this.loadFloor(floorId, data[floorId]);
+}
+
+////// 将当前地图重新变成二维数组形式 //////
+maps.prototype.getMapArray = function (maps, floorId){
+    if (!core.isset(floorId)) {
+        var map = {};
+        for (var id in maps) {
+            map[id] = this.getMapArray(maps, id);
+        }
+        return map;
+    }
+
+    var thisFloor = maps[floorId];
+
+    var blocks = [];
+    for (var x=0;x<13;x++) {
+        blocks[x]=[];
+        for (var y=0;y<13;y++) {
+            blocks[x].push(0);
+        }
+    }
+    thisFloor.blocks.forEach(function (block) {
+        if (!(core.isset(block.enable) && !block.enable))
+            blocks[block.y][block.x] = block.id;
+    });
+    return blocks;
 }
 
 main.instance.maps = new maps();

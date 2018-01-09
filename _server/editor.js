@@ -295,6 +295,7 @@ editor.prototype.changeFloor = function(floorId,callback) {
     editor.updateMap();
     editor.currentFloorId=core.status.floorId;
     editor.currentFloorData = core.floors[core.status.floorId];
+    editor_mode.floor();
     if (core.isset(callback))callback();
   });
 }
@@ -338,6 +339,11 @@ editor.prototype.listen = function() {
 
   eui.onmousedown = function (e) {
     if(!selectBox.isSelected) {
+      var loc = eToLoc(e);
+      var pos = locToPos(loc);
+      editor_mode.onmode('');//为了强制触发doAction
+      editor_mode.onmode('loc');
+      editor_mode.loc();
       tip.whichShow = 1;
       return;
     }
@@ -348,7 +354,7 @@ editor.prototype.listen = function() {
     e.stopPropagation();
     uc.clearRect(0, 0, 416, 416);
     var loc = eToLoc(e);
-    var pos = locToPos(loc)
+    var pos = locToPos(loc);
     stepPostfix = [];
     stepPostfix.push(pos);
     fillPos(pos);
@@ -491,6 +497,9 @@ editor.prototype.listen = function() {
           }
         }
         tip.infos = JSON.parse(JSON.stringify(editor.info));
+        editor_mode.onmode('');//为了强制触发doAction
+        editor_mode.onmode('emenyitem');
+        editor_mode.emenyitem();
       }
     }
   }

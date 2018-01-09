@@ -1,7 +1,7 @@
 data_comment_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d = 
 {
     "main": {
-        "useCompress": " 是否使用压缩文件 \n 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。 \n 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。 \n 如果要进行剧本的修改请务必将其改成false。 ",
+        "useCompress": " 是否使用压缩文件 \n 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。 \n 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。 \n 如果要进行剧本的修改请务必将其改成false。 \n$select({\"values\":[false]})$end",
         "floorIds": " 在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序 \n$leaf(true)$end",
         "pngs": " 在此存放所有可能的背景图片；背景图片最好是416*416像素，其他分辨率会被强制缩放成416*416 \n 建议对于较大的图片，在网上使用在线的“图片压缩工具”来进行压缩，以节省流量 \n 有关使用自定义背景图，请参见文档的“自定义素材”说明 \n\n 依次向后添加 \n$leaf(true)$end",
         "bgms": " 在此存放所有的bgm，和文件名一致。第一项为默认播放项 \n 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好 \n$leaf(true)$end",
@@ -14,7 +14,7 @@ data_comment_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         "floorId": " 初始楼层ID ",
         "hero": {
             "name": " 勇士初始数据 \n 勇士名；可以改成喜欢的 ",
-            "lv": " 初始等级，该项必须为正整数 ",
+            "lv": " 初始等级，该项必须为正整数 \n$range(thiseval==~~thiseval &&thiseval>0)$end",
             "hp": " 初始生命值 ",
             "atk": " 初始攻击 ",
             "def": " 初始防御 ",
@@ -139,27 +139,27 @@ data_comment_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         "animateSpeed": " /****** 系统相关 ******/ \n 动画时间 "
     },
     "flags": {
-        "enableFloor": " 系统FLAG，在游戏运行中中请不要修改它。 /****** 状态栏相关 ******/ \n 是否在状态栏显示当前楼层 ",
-        "enableLv": " 是否在状态栏显示当前等级 ",
-        "enableMDef": " 是否在状态栏及战斗界面显示魔防（护盾） ",
-        "enableMoney": " 是否在状态栏、怪物手册及战斗界面显示金币 ",
-        "enableExperience": " 是否在状态栏、怪物手册及战斗界面显示经验 ",
-        "enableLevelUp": " 是否允许等级提升（进阶）；如果上面enableExperience为false，则此项恒视为false ",
-        "enableDebuff": " 是否涉及毒衰咒；如果此项为false则不会在状态栏中显示毒衰咒的debuff ////// 上述的几个开关将直接影响状态栏的显示效果 ////// ",
-        "flyNearStair": " /****** 道具相关 ******/ \n 是否需要在楼梯边使用传送器 ",
-        "pickaxeFourDirections": " 使用破墙镐是否四个方向都破坏；如果false则只破坏面前的墙壁 ",
-        "bombFourDirections": " 使用炸弹是否四个方向都会炸；如果false则只炸面前的怪物（即和圣锤等价） ",
-        "bigKeyIsBox": " 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙 ",
-        "enableNegativeDamage": " /****** 怪物相关 ******/ \n 是否支持负伤害（回血） ",
-        "zoneSquare": " 领域类型。如果此项为true则为九宫格伤害，为false则为十字伤害 ",
-        "startDirectly": " /****** 系统相关 ******/ \n 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面 ",
-        "canOpenBattleAnimate": " 是否允许用户开启战斗过程；如果此项为false，则下面两项均强制视为false ",
-        "showBattleAnimateConfirm": " 是否在游戏开始时提供“是否开启战斗动画”的选项 ",
-        "battleAnimate": " 是否默认显示战斗动画；用户可以手动在菜单栏中开关 ",
-        "displayEnemyDamage": " 是否地图怪物显伤；用户可以手动在菜单栏中开关 ",
-        "displayExtraDamage": " 是否地图高级显伤（领域、夹击等）；用户可以手动在菜单栏中开关 ",
-        "enableGentleClick": " 是否允许轻触（获得面前物品） ",
-        "portalWithoutTrigger": " 经过楼梯、传送门时是否能“穿透”。穿透的意思是，自动寻路得到的的路径中间经过了楼梯，行走时是否触发楼层转换事件 ",
-        "potionWhileRouting": " 寻路算法是否经过血瓶；如果该项为false，则寻路算法会自动尽量绕过血瓶 "
+        "enableFloor": " 系统FLAG，在游戏运行中中请不要修改它。 /****** 状态栏相关 ******/ \n 是否在状态栏显示当前楼层 \n$select({\"values\":[true,false]})$end",
+        "enableLv": " 是否在状态栏显示当前等级 \n$select({\"values\":[true,false]})$end",
+        "enableMDef": " 是否在状态栏及战斗界面显示魔防（护盾） \n$select({\"values\":[true,false]})$end",
+        "enableMoney": " 是否在状态栏、怪物手册及战斗界面显示金币 \n$select({\"values\":[true,false]})$end",
+        "enableExperience": " 是否在状态栏、怪物手册及战斗界面显示经验 \n$select({\"values\":[true,false]})$end",
+        "enableLevelUp": " 是否允许等级提升（进阶）；如果上面enableExperience为false，则此项恒视为false \n$select({\"values\":[true,false]})$end",
+        "enableDebuff": " 是否涉及毒衰咒；如果此项为false则不会在状态栏中显示毒衰咒的debuff ////// 上述的几个开关将直接影响状态栏的显示效果 ////// \n$select({\"values\":[true,false]})$end",
+        "flyNearStair": " /****** 道具相关 ******/ \n 是否需要在楼梯边使用传送器 \n$select({\"values\":[true,false]})$end",
+        "pickaxeFourDirections": " 使用破墙镐是否四个方向都破坏；如果false则只破坏面前的墙壁 \n$select({\"values\":[true,false]})$end",
+        "bombFourDirections": " 使用炸弹是否四个方向都会炸；如果false则只炸面前的怪物（即和圣锤等价） \n$select({\"values\":[true,false]})$end",
+        "bigKeyIsBox": " 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙 \n$select({\"values\":[true,false]})$end",
+        "enableNegativeDamage": " /****** 怪物相关 ******/ \n 是否支持负伤害（回血） \n$select({\"values\":[true,false]})$end",
+        "zoneSquare": " 领域类型。如果此项为true则为九宫格伤害，为false则为十字伤害 \n$select({\"values\":[true,false]})$end",
+        "startDirectly": " /****** 系统相关 ******/ \n 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面 \n$select({\"values\":[true,false]})$end",
+        "canOpenBattleAnimate": " 是否允许用户开启战斗过程；如果此项为false，则下面两项均强制视为false \n$select({\"values\":[true,false]})$end",
+        "showBattleAnimateConfirm": " 是否在游戏开始时提供“是否开启战斗动画”的选项 \n$select({\"values\":[true,false]})$end",
+        "battleAnimate": " 是否默认显示战斗动画；用户可以手动在菜单栏中开关 \n$select({\"values\":[true,false]})$end",
+        "displayEnemyDamage": " 是否地图怪物显伤；用户可以手动在菜单栏中开关 \n$select({\"values\":[true,false]})$end",
+        "displayExtraDamage": " 是否地图高级显伤（领域、夹击等）；用户可以手动在菜单栏中开关 \n$select({\"values\":[true,false]})$end",
+        "enableGentleClick": " 是否允许轻触（获得面前物品） \n$select({\"values\":[true,false]})$end",
+        "portalWithoutTrigger": " 经过楼梯、传送门时是否能“穿透”。穿透的意思是，自动寻路得到的的路径中间经过了楼梯，行走时是否触发楼层转换事件 \n$select({\"values\":[true,false]})$end",
+        "potionWhileRouting": " 寻路算法是否经过血瓶；如果该项为false，则寻路算法会自动尽量绕过血瓶 \n$select({\"values\":[true,false]})$end"
     }
 }

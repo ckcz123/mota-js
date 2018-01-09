@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <link href="_server/css/editor.css" rel="stylesheet">
+    <link href="_server/css/editor_mode.css" rel="stylesheet">
   </head>
 <body>
   <div class="main">
@@ -26,6 +27,85 @@
       </div>
       
     </div>
+    <div id="left99" class='leftTab'><!-- 可以直接删掉,在editor_mode.js中,把ids中的'test':'left99'也要删掉 -->
+      <div >
+        <h3>测试用标签页</h3>
+        <div class='etable'>
+          <table>
+            <tbody id='test_tbody'>
+              <tr><td id='test_td' title="['aa']['bb']">条目</td><td>注释<span title='&#97;&#98;&#99;&#10;&#20013;&#25991;&#10;&#97;&#97;&#97;'>aaa</span></td><td>值</td></tr>
+              <tr><td></td><td></td><td></td></tr>
+              <tr><td></td><td></td><td></td></tr>
+              <tr><td>变量名字符串</td><td title='&#97;&#98;&#99;&#10;&#20013;&#25991;&#10;&#97;&#97;&#97;'>可能显示不全但是hover时通过span title='xxx'来显示</td><td>高度以此为准</td></tr>
+              <tr><td></td><td></td><td>此处是利用slice实现</td></tr>
+              <tr><td></td><td></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class='etable'>
+          <table>
+            <tbody id='test_tbody2'>
+              <tr><td>条目</td><td>注释</td><td>值</td></tr>
+              <tr><td></td><td></td><td><textarea spellcheck='false' id='temp_text' rows="2">abc</textarea></td></tr>
+              <tr><td></td><td></td><td><input spellcheck='false' id='temp_input' value='abc' /></td></tr>
+              <tr><td></td><td></td><td><select id="temp_select">
+                <option value="abc">abc</option>
+                <option value="ground2">ground2</option>
+              </select></tr>
+            </tbody>
+          </table>
+        </div>
+        <div >
+          <input  type="button" value="保存"/>
+        </div>
+      </div>
+    </div>
+    <div id="left2" class='leftTab'><div><!-- loc -->
+      <h3>地图选点</h3>
+      <p id='pos_a6771a78_a099_417c_828f_0a24851ebfce'>0,0</p>
+      <div class='etable'>
+        <table>
+          <tbody id='table_3d846fc4_7644_44d1_aa04_433d266a73df'>
+            <tr><td>条目</td><td>注释</td><td>值</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div></div>
+    <div id="left3" class='leftTab'><div><!-- emenyitem -->
+      <h3>图块属性</h3>
+      <div><!-- id and idnum -->
+          <!-- 尚未完成 -->
+      </div>
+      <div><!-- enemy and item -->
+        <div class='etable'>
+          <table>
+            <tbody id='table_a3f03d4c_55b8_4ef6_b362_b345783acd72'>
+              <tr><td>条目</td><td>注释</td><td>值</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div></div>
+    <div id="left4" class='leftTab'><div><!-- floor -->
+      <h3>楼层属性</h3>
+      <div class='etable'>
+        <table>
+          <tbody id='table_4a3b1b09_b2fb_4bdf_b9ab_9f4cdac14c74'>
+            <tr><td>条目</td><td>注释</td><td>值</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div></div>
+    <div id="left5" class='leftTab'><div><!-- tower -->
+      <h3>全塔属性</h3>
+      <div class='etable'>
+        <table>
+          <tbody id='table_b6a03e4c_5968_4633_ac40_0dfdd2c9cde5'>
+            <tr><td>条目</td><td>注释</td><td>值</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div></div>
     <div id="mid">
       <table class="col" id='mapColMark'></table>
       <table class="row" id='mapRowMark'></table>
@@ -201,11 +281,12 @@
 <!-- <script src="https://cdn.bootcss.com/vue/2.5.13/vue.js"></script> -->
 <script src='_server/fs.js'></script>
 <script src='_server/editor_file.js'></script>
+<script src='_server/editor_mode.js'></script>
 <script src='_server/vm.js'></script>
 <script id='mainScript' src='main.js'></script>
 <script>
 //所有全局量
-__all__=['Vue','fs','editor_file','main','core','hasOwnProp','editor'];
+__all__=['Vue','fs','editor_file','editor_mode','main','core','hasOwnProp','editor'];
 __id__=['editArea','arrRowMark','mapRowMark','data','bg','dataSelection'];
 __Vue__=['exportM','editArea','editTip','clear','tip','selectBox'];
 //var event = document.getElementById('event');
@@ -218,7 +299,14 @@ function hasOwnProp (obj, key) {
 <script src='_server/editor.js'></script>
 <script>
 main.init('editor');
-editor.init();
+editor.init(function(){
+  editor.pos={x: 0, y: 0};
+  editor_mode.loc();
+  editor.info=editor.ids[editor.indexs[201]];
+  editor_mode.emenyitem();
+  editor_mode.floor();
+  editor_mode.tower();
+});
 //main.listen();
 //core.setHeroMoveTriggerInterval();
 </script>

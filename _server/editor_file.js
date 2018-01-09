@@ -30,16 +30,17 @@
 
   editor_file.getFloorFileList = function(editor,callback){
     if (!isset(callback)) throw('未设置callback');
-    var fs = editor.fs;
+    /* var fs = editor.fs;
     fs.readdir('project/floors',function(err, data){
       callback([data,err]);
-    });
+    }); */
+    callback([editor.core.floorIds,null]);
   }
   //callback([Array<String>,err:String])
   editor_file.loadFloorFile = function(editor,filename,callback){
     //filename不含'/'不含'.js'
     if (!isset(callback)) throw('未设置callback');
-    var fs = editor.fs;
+    /* var fs = editor.fs;
     fs.readFile('project/floors/'+filename+'.js','utf-8',function(err, data){
       if (err!=null){callback(err);return;}
       data=data.split('=');
@@ -57,7 +58,9 @@
       editor.currentFloorId = floorId;
       editor.currentFloorData = floorData;
       callback(null)
-    });
+    }); */
+    editor.currentFloorId=editor.core.status.floorId;
+    editor.currentFloorData = editor.core.floors[editor.currentFloorId];
   }
   //callback(err:String)
   editor_file.saveFloorFile = function(editor,callback){
@@ -87,6 +90,7 @@
     if (!isset(editor.currentFloorData)) {
       callback('无数据');
     }
+    editor.currentFloorData=JSON.parse(JSON.stringify(editor.currentFloorData));
     editor.currentFloorData.floorId=saveAsFilename;
     editor.currentFloorId=saveAsFilename;
     editor_file.saveFloorFile(editor,callback);
@@ -465,19 +469,13 @@
   }
 
   /*
-  $range(thiseval in ['keys','items','constants','tools'])$end
+  $select({\"values\":[\"keys\",\"items\",\"constants\",\"tools\"]})$end
   $range(thiseval==~~thiseval &&thiseval>0)$end
-  $range(thiseval in [true,false])$end
-  $range(false)$end
   $leaf(true)$end
+  $select({\"values\":[true]})$end
+  $select({\"values\":[false]})$end
+  $select({\"values\":[true,false]})$end
 
-  //$range((function(){typeof(thiseval)==typeof(0)||})())$end
-
-  if( 注释.indexof('$range(')!= -1){
-    var thiseval = 新值;
-    evalstr = 注释.split('$range')[1].split('$end')[0];
-    if(eval(evalstr) !== true)alert('不在取值范围内')
-  }
   */
 
   /* 
@@ -487,19 +485,16 @@
   $leaf(evalstr:thiseval)$end
     强制指定为叶节点,如果eval(evalstr)为true
 
-  todo:
   //以下几个中选一个 [
   $select(evalstr)$end
     渲染成<select>,选项为数组eval(evalstr)['values']
-  $input
-    渲染成<input>,此为默认选项
+  $input(evalstr)$end
+    渲染成<input>
   $textarea(evalstr)$end
-    渲染成<textarea>,行数为正整数eval(evalstr)['rows']
+    渲染成<textarea>
+  默认选项为$textarea()$end
   // ]
   
-  ?:
-  //$childLeaf(evalstr:thiseval)$end
-  //  强制指定直接后代为叶节点,如果evalstr的值为true,此处thiseval为后代的值
   */
 
 })();

@@ -6,21 +6,24 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         // 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。
         // 如果要进行剧本的修改请务必将其改成false。
     
-        "floorIds" : [ // 在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序
+        "floorIds" : [ 
             "sample0", "sample1", "sample2"
-        ],
-        "pngs" : [ // 在此存放所有可能的背景图片；背景图片最好是416*416像素，其他分辨率会被强制缩放成416*416
+        ],// 在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序
+        "pngs" : [ 
+            "bg.png", "yewai.png", // 在此存放所有可能的背景图片；背景图片最好是416*416像素，其他分辨率会被强制缩放成416*416
             // 建议对于较大的图片，在网上使用在线的“图片压缩工具”来进行压缩，以节省流量
             // 有关使用自定义背景图，请参见文档的“自定义素材”说明
-            "bg.png", "yewai.png", // 依次向后添加
+            // 依次向后添加
         ],
-        "bgms" : [ // 在此存放所有的bgm，和文件名一致。第一项为默认播放项
-            // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
+        "bgms" : [ 
             '058-Slow01.mid', 'bgm.mp3', 'qianjin.mid', 'star.mid',
-        ],
-        "sounds" : [ // 在此存放所有的SE，和文件名一致
+            // 在此存放所有的bgm，和文件名一致。第一项为默认播放项
             // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
+        ],
+        "sounds" : [ 
             'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg',
+            // 在此存放所有的SE，和文件名一致
+            // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
         ],
     },
     "firstData" : {
@@ -28,8 +31,9 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         "name": "template", // 游戏的唯一英文标识符。由英文、数字、下划线组成，不能超过20个字符。
         "version": "Ver 1.0.0 (Beta)", // 当前游戏版本；版本不一致的存档不能通用。
         "floorId": "sample0", // 初始楼层ID
-        "hero": { // 勇士初始数据
-            "name": "阳光", // 勇士名；可以改成喜欢的
+        "hero": { 
+            "name": "阳光", // 勇士初始数据
+            // 勇士名；可以改成喜欢的
             'lv': 1, // 初始等级，该项必须为正整数
             "hp": 1000, // 初始生命值
             "atk": 100, // 初始攻击
@@ -37,7 +41,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
             "mdef": 100, // 初始魔防
             "money": 100, // 初始金币
             "experience": 0, // 初始经验
-            "items": { // 初始道具个数
+            "items": { 
                 "keys": {
                     "yellowKey": 0,
                     "blueKey": 0,
@@ -45,23 +49,26 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
                 },
                 "constants": {},
                 "tools": {}
-            },
+            },// 初始道具个数
             "flyRange": [], // 初始可飞的楼层；一般留空数组即可
             "loc": {"direction": "up", "x": 6, "y": 10}, // 勇士初始位置
-            "flags": { // 游戏过程中的变量或flags
-                "poison": false, // 毒
+            "flags": { 
+                "poison": false, // 游戏过程中的变量或flags
+                // 毒
                 "weak": false, // 衰
                 "curse": false, // 咒
             }
         },
-        "startText": [ // 游戏开始前剧情。如果无剧情直接留一个空数组即可。
+        "startText": [ 
             "Hi，欢迎来到 HTML5 魔塔样板！\n\n本样板由艾之葵制作，可以让你在不会写任何代码\n的情况下也能做出属于自己的H5魔塔！",
             "这里游戏开始时的剧情。\n定义在data.js的startText处。\n\n你可以在这里写上自己的内容。",
             "赶快来试一试吧！"
-        ],
-        "shops": { // 定义全局商店（即快捷商店）
-            "moneyShop1": { // 商店唯一ID
-                "name": "贪婪之神", // 商店名称（标题）
+        ], // 游戏开始前剧情。如果无剧情直接留一个空数组即可。
+        "shops": { 
+            "moneyShop1": { 
+                "name": "贪婪之神", // 定义全局商店（即快捷商店）
+                // 商店唯一ID
+                // 商店名称（标题）
                 "icon": "blueShop", // 商店图标，blueShop为蓝色商店，pinkShop为粉色商店
                 "textInList": "1F金币商店", // 在快捷商店栏中显示的名称
                 "use": "money", // 商店所要使用的。只能是"money"或"experience"。
@@ -71,8 +78,8 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
                 // 例如： "need": "25" 就是恒定需要25金币的商店； "need": "20+2*times" 就是第一次访问要20金币，以后每次递增2金币的商店。
                 // 如果是对于每个选项有不同的计算公式，写 "need": "-1" 即可。可参见下面的经验商店。
                 "text": "勇敢的武士啊，给我${need}金币就可以：", // 显示的文字，需手动加换行符。可以使用${need}表示上面的need值。
-                "choices": [ // 商店的选项
-                    {"text": "生命+800", "effect": "status:hp+=800"},
+                "choices": [ 
+                    {"text": "生命+800", "effect": "status:hp+=800"}, // 商店的选项
                     // 如果有多个effect以分号分开，参见下面的经验商店
                     {"text": "攻击+4", "effect": "status:atk+=4"},
                     {"text": "防御+4", "effect": "status:def+=4"},
@@ -85,25 +92,27 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
                     // "status:hp+=2*(status:atk+status:def)" 将生命提升攻防和的数值的两倍
                 ]
             },
-            "expShop1": { // 商店唯一ID
-                "name": "经验之神",
+            "expShop1": { 
+                "name": "经验之神", // 商店唯一ID
                 "icon": "pinkShop",
                 "textInList": "1F经验商店",
                 "use": "experience", // 该商店使用的是经验进行计算
                 "need": "-1", // 如果是对于每个选项所需要的数值不同，这里直接写-1，然后下面选项里给定具体数值
                 "text": "勇敢的武士啊，给我若干经验就可以：",
                 "choices": [
+                    {"text": "等级+1", "need": "100", "effect": "status:lv+=1;status:hp+=1000;status:atk+=7;status:def+=7"},
                     // 在choices中写need，可以针对每个选项都有不同的需求。
                     // 这里的need同样可以以times作为参数，比如 "need": "100+20*times"
-                    {"text": "等级+1", "need": "100", "effect": "status:lv+=1;status:hp+=1000;status:atk+=7;status:def+=7"},
+                    
                     // 多个effect直接以分号分开即可。如上面的意思是生命+1000，攻击+7，防御+7。
                     {"text": "攻击+5", "need": "30", "effect": "status:atk+=5"},
                     {"text": "防御+5", "need": "30", "effect": "status:def+=5"},
                 ]
             },
         },
-        "levelUp": [ // 经验升级所需要的数值，是一个数组
-            {}, // 第一项为初始等级，可以简单留空，也可以写name
+        "levelUp": [ 
+            {}, // 经验升级所需要的数值，是一个数组
+            // 第一项为初始等级，可以简单留空，也可以写name
 
             // 每一个里面可以含有三个参数 need, name, effect
             // need为所需要的经验数值，是一个正整数。请确保need所需的依次递增
@@ -112,26 +121,29 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
             // 其中每一项写法和上面的商店完全相同，同样必须是X+=Y的形式，Y是一个表达式，同样可以使用status:xxx或item:xxx代表勇士的某项数值/道具个数
             {"need": 20, "name": "第二级", "effect": "status:hp+=2*(status:atk+status:def);status:atk+=10;status:def+=10"}, // 先将生命提升攻防和的2倍；再将攻击+10，防御+10
 
-            // effect也允许写一个function，代表本次升级将会执行的操作
-            {"need": 40, "effect": function () {
+            
+            {"need": 40, "effect": `function () {
                 core.drawText("恭喜升级！");
                 core.status.hero.hp *= 2;
                 core.status.hero.atk += 100;
                 core.status.hero.def += 100;
-            }},
+            }`}, // effect也允许写一个function，代表本次升级将会执行的操作
 
             // 依次往下写需要的数值即可
         ]
     },
-    // 各种数值；一些数值可以在这里设置
+    
     "values" : {
+        
+        "HPMAX": 999999, // 各种数值；一些数值可以在这里设置
         /****** 角色相关 ******/
-        "HPMAX": 999999, // HP上限；-1则无上限
+        // HP上限；-1则无上限
         "lavaDamage": 100, // 经过血网受到的伤害
         "poisonDamage": 10, // 中毒后每步受到的伤害
         "weakValue": 20, // 衰弱状态下攻防减少的数值
-        /****** 道具相关 ******/
-        "redJewel": 3, // 红宝石加攻击的数值
+        
+        "redJewel": 3, /****** 道具相关 ******/
+        // 红宝石加攻击的数值
         "blueJewel": 3, // 蓝宝石加防御的数值
         "greenJewel": 5, // 绿宝石加魔防的数值
         "redPotion": 100, // 红血瓶加血数值
@@ -149,18 +161,22 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         "sword5": 160, // 神圣剑加攻数值
         "shield5": 160, // 神圣盾加防数值
         "moneyPocket": 500, // 金钱袋加金币的数值
-        /****** 怪物相关 ******/
-        'breakArmor': 0.9, // 破甲的比例（战斗前，怪物附加角色防御的x%作为伤害）
+        
+        'breakArmor': 0.9, /****** 怪物相关 ******/
+        // 破甲的比例（战斗前，怪物附加角色防御的x%作为伤害）
         'counterAttack': 0.1, // 反击的比例（战斗时，怪物每回合附加角色攻击的x%作为伤害，无视角色防御）
         'purify': 3, // 净化的比例（战斗前，怪物附加勇士魔防的x倍作为伤害）
         'hatred': 2, // 仇恨属性中，每杀死一个怪物获得的仇恨值
-        /****** 系统相关 ******/
-        'animateSpeed': 500, // 动画时间
+        
+        'animateSpeed': 500, /****** 系统相关 ******/
+        // 动画时间
     },
-    // 系统FLAG，在游戏运行中中请不要修改它。
+    
     "flags" : {
+        
+        "enableFloor": true, // 系统FLAG，在游戏运行中中请不要修改它。
         /****** 状态栏相关 ******/
-        "enableFloor": true, // 是否在状态栏显示当前楼层
+        // 是否在状态栏显示当前楼层
         "enableLv": true, // 是否在状态栏显示当前等级
         "enableMDef": true, // 是否在状态栏及战斗界面显示魔防（护盾）
         "enableMoney": true, // 是否在状态栏、怪物手册及战斗界面显示金币
@@ -168,16 +184,19 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         "enableLevelUp": true, // 是否允许等级提升（进阶）；如果上面enableExperience为false，则此项恒视为false
         "enableDebuff": true, // 是否涉及毒衰咒；如果此项为false则不会在状态栏中显示毒衰咒的debuff
         ////// 上述的几个开关将直接影响状态栏的显示效果 //////
-        /****** 道具相关 ******/
-        "flyNearStair": true, // 是否需要在楼梯边使用传送器
+        
+        "flyNearStair": true, /****** 道具相关 ******/
+        // 是否需要在楼梯边使用传送器
         "pickaxeFourDirections": true, // 使用破墙镐是否四个方向都破坏；如果false则只破坏面前的墙壁
         "bombFourDirections": true, // 使用炸弹是否四个方向都会炸；如果false则只炸面前的怪物（即和圣锤等价）
         "bigKeyIsBox": false, // 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙
-        /****** 怪物相关 ******/
-        "enableNegativeDamage": true, // 是否支持负伤害（回血）
+        
+        "enableNegativeDamage": true, /****** 怪物相关 ******/
+        // 是否支持负伤害（回血）
         "zoneSquare": false, // 领域类型。如果此项为true则为九宫格伤害，为false则为十字伤害
-        /****** 系统相关 ******/
-        "startDirectly": false, // 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面
+        
+        "startDirectly": false, /****** 系统相关 ******/
+        // 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面
         "canOpenBattleAnimate": true, // 是否允许用户开启战斗过程；如果此项为false，则下面两项均强制视为false
         "showBattleAnimateConfirm": true, // 是否在游戏开始时提供“是否开启战斗动画”的选项
         "battleAnimate": true, // 是否默认显示战斗动画；用户可以手动在菜单栏中开关

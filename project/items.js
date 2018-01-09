@@ -2,12 +2,12 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 {
 
 "items" : {
-        // 钥匙
+        
         'yellowKey': {'cls': 'keys', 'name': '黄钥匙'},
         'blueKey': {'cls': 'keys', 'name': '蓝钥匙'},
         'redKey': {'cls': 'keys', 'name': '红钥匙'},
 
-        // 宝石、血瓶
+        
         'redJewel': {'cls': 'items', 'name': '红宝石'},
         'blueJewel': {'cls': 'items', 'name': '蓝宝石'},
         'greenJewel': {'cls': 'items', 'name': '绿宝石'},
@@ -29,7 +29,7 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
         'superPotion': {'cls': 'items', 'name': '圣水'},
         'moneyPocket': {'cls': 'items', 'name': '金钱袋'},
 
-        // 物品
+        
         'book': {'cls': 'constants', 'name': '怪物手册', 'text': '可以查看当前楼层各怪物属性'},
         'fly': {'cls': 'constants', 'name': '楼层传送器', 'text': '可以自由往来去过的楼层'},
         'coin': {'cls': 'constants', 'name': '幸运金币', 'text': '持有时打败怪物可得双倍金币'},
@@ -38,7 +38,7 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
         'knife': {'cls': 'constants', 'name': '屠龙匕首', 'text': '该道具尚未被定义'},
         'shoes': {'cls': 'constants', 'name': '绿鞋', 'text': '持有时无视负面地形'},
 
-        // 道具
+        
         'bigKey': {'cls': 'tools', 'name': '大黄门钥匙', 'text': '可以开启当前层所有黄门'},
         'greenKey': {'cls': 'tools', 'name': '绿钥匙', 'text': '可以打开一扇绿门'},
         'steelKey': {'cls': 'tools', 'name': '铁门钥匙', 'text': '可以打开一扇铁门'},
@@ -63,8 +63,9 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
         "redJewel":"core.status.hero.atk += core.values.redJewel",
         "blueJewel":"core.status.hero.def += core.values.blueJewel",
         "greenJewel":"core.status.hero.mdef += core.values.greenJewel",
-        // 黄宝石属性：需自己定义
+        
         "yellowJewel":"core.status.hero.hp+=1000;core.status.hero.atk+=6;core.status.hero.def+=6;core.status.hero.mdef+=10;",
+        // 黄宝石属性：需自己定义
         "redPotion":"core.status.hero.hp += core.values.redPotion",
         "bluePotion":"core.status.hero.hp += core.values.bluePotion",
         "yellowPotion":"core.status.hero.hp += core.values.yellowPotion",
@@ -79,8 +80,9 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
         "shield3":"core.status.hero.def += core.values.shield3",
         "shield4":"core.status.hero.def += core.values.shield4",
         "shield5":"core.status.hero.def += core.values.shield5",
-        // 只有是钥匙盒才会执行这一步
+        
         "bigKey":"core.status.hero.items.keys.yellowKey++;core.status.hero.items.keys.blueKey++;core.status.hero.items.keys.redKey++;",
+        // 只有是钥匙盒才会执行这一步
         "superPotion":"core.status.hero.hp *= 2",
         "moneyPocket":"core.status.hero.money += core.values.moneyPocket",
 },

@@ -1,8 +1,9 @@
-// 这里需要改楼层名，请和文件名及下面的floorId保持完全一致
-// 楼层唯一标识符仅能由字母、数字、下划线组成，且不能由数字开头
-// 推荐用法：第20层就用MT20，第38层就用MT38，地下6层就用MT_6（用下划线代替负号），隐藏3层用MT3h（h表示隐藏），等等
-main.floors.sample1 = {
-    "floorId": "sample1", // 楼层唯一标识符，需要和名字完全一致
+main.floors.sample1 = 
+{
+    "floorId": "sample1", // 这里需要改楼层名，请和文件名及下面的floorId保持完全一致
+    // 楼层唯一标识符仅能由字母、数字、下划线组成，且不能由数字开头
+    // 推荐用法：第20层就用MT20，第38层就用MT38，地下6层就用MT_6（用下划线代替负号），隐藏3层用MT3h（h表示隐藏），等等
+    // 楼层唯一标识符，需要和名字完全一致
     "title": "样板 1 层", // 楼层中文名
     "name": "1", // 显示在状态栏中的层数
     "canFlyTo": true, // 该楼能否被楼传器飞到（不能的话在该楼也不允许使用楼传器）
@@ -257,7 +258,7 @@ main.floors.sample1 = {
         "12,11": [ // 自定义事件的老人
             "\t[老人,womanMagician]使用 {\"type\":\"function\"} 可以写自定义的JS脚本。\n本塔支持的所有主要API会在doc文档内给出。",
             "\t[老人,womanMagician]例如这个例子：即将弹出一个输入窗口，然后会将你的输入结果直接加到你的攻击力上。",
-            {"type": "function", "function": function() { // 自己写JS脚本并执行
+            {"type": "function", "function": `function() { // 自己写JS脚本并执行
                 var value = prompt("请输入你要加攻击力的数值："); // 弹出一个输入框让用户输入数据
                 if (value!=null) {
                     value=parseInt(value);
@@ -271,7 +272,7 @@ main.floors.sample1 = {
                         ]);
                     }
                 }
-            }},
+            }`},
             "\t[老人,womanMagician]具体可参见样板中本事件的写法。"
         ]
     },

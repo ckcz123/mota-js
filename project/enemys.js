@@ -1,4 +1,4 @@
-enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = //1:先攻,2:魔攻,3:坚固,4:2连击,5:3连击,6:4连击,7:破甲,8:反击,9:净化,10:模仿,11:吸血,12:中毒,13:衰弱,14:诅咒,15:领域,16:夹击,17:仇恨
+enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = 
 {
         'greenSlime': {'name': '绿头怪', 'hp': 100, 'atk': 120, 'def': 0, 'money': 1, 'experience': 1, 'special': [1,5,7,8]},
         'redSlime': {'name': '红头怪', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},

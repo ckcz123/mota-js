@@ -12,9 +12,31 @@ pout.innerHTML='waiting\nwaiting  waiting';
   var editor={};
   editor.fs=fs;
   editor.file=editor_file;
-  editor.file.loadFloorFile(editor,'sample0',function(err){console.log(err);
+  //代码复制到 http://127.0.0.1:1055/drawMapGUI.html 的console中进行测试
+
+  /* editor.file.loadFloorFile(editor,'sample0',function(err){console.log(err);
     editor.file.saveFloorFileAs(editor,'aaa',function(err){console.log(err)});
-  });
+  }); */
+
+  //查询
+  /*
+  editor_file.editItem(editor,'redJewel',[],function(a){console.log(a)});
+  editor_file.editEnemy(editor,'redBat',[],function(a){console.log(a)});
+  editor_file.editLoc(editor,2,0,[],function(a){console.log(a)});
+  editor_file.editFloor(editor,[],function(a){console.log(a)});
+  editor.file.editTower(editor,[],function(a){console.log(a)});
+  */
+
+  //编辑
+  /*
+  editor.info={images: "terrains", y: 9};
+  editor.file.changeIdAndIdnum(editor,'yellowWall2',16,editor.info,function(a){console.log(a)});
+  editor_file.editItem(editor,'book',[["change","['items']['name']","怪物手册的新名字"]],function(a){console.log(a)});
+  editor_file.editEnemy(editor,'redBat',[['change',"['atk']",20]],function(a){console.log(a)});
+  editor_file.editLoc(editor,2,6,[["change","['afterBattle']",null]],function(a){console.log(a)});
+  editor_file.editFloor(editor,[["change","['title']",'样板 33 层']],function(a){console.log(a)});
+  editor.file.editTower(editor,[["change","['values']['lavaDamage']",200]],function(a){console.log(a)});
+  */
 
 pout.innerHTML='succeed\nsucceed  succeed';
 

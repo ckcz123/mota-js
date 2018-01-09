@@ -6,7 +6,7 @@ function enemys() {
 enemys.prototype.init = function () {
     // 怪物属性初始化定义：
     this.enemys = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80;
-    delete(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80);
+    //delete(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80);
 }
 
 ////// 获得一个或所有怪物数据 //////
@@ -67,7 +67,7 @@ enemys.prototype.getSpecialHint = function (enemy, special) {
 
     switch (special) {
         case 1: return "先攻：怪物首先攻击";
-        case 2: return "魔攻：怪物无视勇士的魔防";
+        case 2: return "魔攻：怪物无视勇士的防御";
         case 3: return "坚固：勇士每回合最多只能对怪物造成1点伤害";
         case 4: return "2连击：怪物每回合攻击2次";
         case 5: return "3连击：怪物每回合攻击3次";

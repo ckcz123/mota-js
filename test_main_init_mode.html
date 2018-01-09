@@ -25,7 +25,7 @@
             </div>
             <p id='startTopLoadTips'>资源即将开始加载</p>
         </div>
-        <img id='startBackground' src='images/bg.png'>
+        <img id='startBackground' src='project/images/bg.png'>
         <!-- 标题界面；可以改style的color使标题改变颜色 -->
         <p id='startLogo' style="color: black"></p>
         <div id='startButtonGroup'>
@@ -48,39 +48,39 @@
     </div>
     <div id='statusBar' class="clearfix">
         <div class="status" id="floorCol">
-            <img src='images/floor.png' id="img-floor">
+            <img src='project/images/floor.png' id="img-floor">
             <p class='statusLabel' id='floor'></p>
         </div>
         <div class="status" id="lvCol">
-            <img src='images/lv.png' id="img-lv">
+            <img src='project/images/lv.png' id="img-lv">
             <p class='statusLabel' id='lv'></p>
         </div>
         <div class="status">
-            <img src='images/hp.png' id="img-hp">
+            <img src='project/images/hp.png' id="img-hp">
             <p class='statusLabel' id='hp'></p>
         </div>
         <div class="status">
-            <img src='images/atk.png' id="img-atk">
+            <img src='project/images/atk.png' id="img-atk">
             <p class='statusLabel' id='atk'></p>
         </div>
         <div class="status">
-            <img src='images/def.png' id="img-def">
+            <img src='project/images/def.png' id="img-def">
             <p class='statusLabel' id='def'></p>
         </div>
         <div class="status" id="mdefCol">
-            <img src='images/mdef.png' id="img-mdef">
+            <img src='project/images/mdef.png' id="img-mdef">
             <p class='statusLabel' id='mdef'></p>
         </div>
         <div class="status" id="moneyCol">
-            <img src='images/money.png' id="img-money">
+            <img src='project/images/money.png' id="img-money">
             <p class='statusLabel' id='money'></p>
         </div>
         <div class="status" id="expCol">
-            <img src='images/experience.png' id="img-experience">
+            <img src='project/images/experience.png' id="img-experience">
             <p class='statusLabel' id='experience'></p>
         </div>
         <div class="status" id="upCol">
-            <img src='images/up.png' id="img-up">
+            <img src='project/images/up.png' id="img-up">
             <p class='statusLabel' id='up'></p>
         </div>
         <div class="status">
@@ -95,13 +95,13 @@
         </div>
     </div>
     <div id="toolBar" class="clearfix">
-        <img src="images/book.png" class="tools" id='img-book'>
-        <img src="images/fly.png" class="tools" id='img-fly'>
-        <img src="images/toolbox.png" class="tools" id='img-toolbox'>
-        <img src="images/shop.png" class="tools" id='img-shop'>
-        <img src="images/save.png" class="tools" id='img-save'>
-        <img src="images/load.png" class="tools" id='img-load'>
-        <img src="images/settings.png" class="tools" id='img-settings'>
+        <img src="project/images/book.png" class="tools" id='img-book'>
+        <img src="project/images/fly.png" class="tools" id='img-fly'>
+        <img src="project/images/toolbox.png" class="tools" id='img-toolbox'>
+        <img src="project/images/shop.png" class="tools" id='img-shop'>
+        <img src="project/images/save.png" class="tools" id='img-save'>
+        <img src="project/images/load.png" class="tools" id='img-load'>
+        <img src="project/images/settings.png" class="tools" id='img-settings'>
         <p class="statusLabel tools" id="hard"></p>
     </div>
     <div id="curtain"></div>
@@ -131,15 +131,17 @@ var replay = function(){
 }
 
 var afterInit = function(){
+    main.editor.disableGlobalAnimate=false;
     main.editor.drawMapBg();
     main.editor.updateMap();
+    core.setHeroMoveTriggerInterval();
 }
 var start = function(){
     var hard = 'Hard';
     core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, core.initStatus.maps);
     core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
         /* core.setHeroMoveTriggerInterval(); */
-        //afterInit();
+        afterInit();
     });
     core.events.setInitData(hard);
 }

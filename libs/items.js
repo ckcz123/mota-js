@@ -7,7 +7,7 @@ items.prototype.init = function () {
     this.items = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.items;
     this.itemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.itemEffect;
     this.itemEffectTip = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.itemEffectTip;
-    delete(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a);
+    //delete(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a);
 }
 
 ////// 获得所有道具 //////
@@ -86,9 +86,11 @@ items.prototype.useItem = function (itemId) {
     if (itemId == 'curseWine') core.setFlag('curse', false);
     if (itemId == 'superWine') {
         core.setFlag('poison', false);
-        core.setFlag('weak', false);
-        core.status.hero.atk += core.values.weakValue;
-        core.status.hero.def += core.values.weakValue;
+        if (core.hasFlag('weak')) {
+            core.setFlag('weak', false);
+            core.status.hero.atk += core.values.weakValue;
+            core.status.hero.def += core.values.weakValue;
+        }
         core.setFlag('curse', false);
     }
     core.updateStatusBar();

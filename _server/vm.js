@@ -13,11 +13,7 @@ var exportM = new Vue({
   methods: {
     exportMap: function(){
       editor.updateMap();
-      if(editArea.error) {
-        tip.whichShow = 3;
-        
-        return;
-      }
+
       var filestr='';
       for (var yy = 0; yy < 13; yy++){
         filestr+='['
@@ -42,7 +38,8 @@ var exportM = new Vue({
         filestr += ']'+(yy==12?'':',\n');
       }
       pout.value = filestr;
-
+      editArea.mapArr = filestr;
+      editArea.error = 0;
       tip.whichShow = 2;
     }
   }

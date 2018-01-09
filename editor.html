@@ -16,6 +16,10 @@
           <p class="warnText" v-if="error">{{ errors[error-1] }}</p>
         </div>
         <div id="editTip" v-cloak>
+          <select id="selectFloor"></select><br>
+          <input id='saveAsName' placeholder="输入新楼层id"/>
+          <input class='btn' type="button" value="save" id='saveFloor'/>
+          <input class='btn' type="button" value="saveAs" id='saveFloorAs'/>
           <input class='btn' type="button" value="复制地图" v-on:click="copyMap"/>
         </div>
       </div>
@@ -73,8 +77,9 @@
     </div></div>
     <div id="left3" class='leftTab'><div><!-- emenyitem -->
       <h3>图块属性</h3>
-      <div><!-- id and idnum -->
-          <!-- 尚未完成 -->
+      <div id='newIdIdnum'><!-- id and idnum -->
+        <input placeholder="输入新id"/>
+        <input placeholder="输入新idnum"/>
       </div>
       <div><!-- enemy and item -->
         <div class='etable'>
@@ -306,6 +311,7 @@ editor.init(function(){
   editor_mode.emenyitem();
   editor_mode.floor();
   editor_mode.tower();
+  editor_mode.listen();
 });
 //main.listen();
 //core.setHeroMoveTriggerInterval();

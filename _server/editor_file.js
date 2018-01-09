@@ -70,6 +70,7 @@
     } */
     var filename = 'project/floors/' + editor.currentFloorId + '.js';
     var datastr = ['main.floors.' , editor.currentFloorId , '=\n{'];
+    editor.currentFloorData.map = editor.map.map(function(v){return v.map(function(v){return v.idnum||v||0})});
     for(var ii in editor.currentFloorData)
     if (editor.currentFloorData.hasOwnProperty(ii)) {
       if (ii=='map')
@@ -90,6 +91,7 @@
     if (!isset(editor.currentFloorData)) {
       callback('无数据');
     }
+    editor.currentFloorData.map = editor.map.map(function(v){return v.map(function(v){return v.idnum||v||0})});
     editor.currentFloorData=JSON.parse(JSON.stringify(editor.currentFloorData));
     editor.currentFloorData.floorId=saveAsFilename;
     editor.currentFloorId=saveAsFilename;
@@ -396,7 +398,6 @@
       if (value[0]!='change' && file!='icons' && file!='maps') throw('目前只支持change');
     });
 
-    //throw('尚未实现');
     if (file=='icons') {
       actionList.forEach(function (value) {
         if (value[0]!='add')return;

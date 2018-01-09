@@ -58,7 +58,7 @@ editor_mode.prototype.objToTable = function(obj,commentObj){
         }
         editor_mode.onmode(editor_mode._ids[node.getAttribute('id')]);
         editor_mode.addAction(['change',field,JSON.parse(input.value)]);
-        //尚未完成,目前没做$range的检查
+        //尚未完成,不完善,目前还没做$range的检查
       };
     });
   }
@@ -192,8 +192,10 @@ editor_mode.prototype.emenyitem = function(callback){
 
   if (!core.isset(editor_mode.info.id)){
     document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML='';
+    document.getElementById('newIdIdnum').style.display='';
     return;
-  }//尚未完成,此处要设置成允许添加新的id 和 idnum
+  }
+  document.getElementById('newIdIdnum').style.display='none';
 
   var objs=[];
   if (editor_mode.info.images=='enemys'){
@@ -229,6 +231,52 @@ editor_mode.prototype.tower = function(callback){
   var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
   document.getElementById('table_b6a03e4c_5968_4633_ac40_0dfdd2c9cde5').innerHTML=tableinfo.HTML;
   tableinfo.listen(tableinfo.guids);
+  if (Boolean(callback))callback();
+}
+
+editor_mode.prototype.listen = function(callback){
+
+  var newIdIdnum = document.getElementById('newIdIdnum');
+  newIdIdnum.children[0].onchange = newIdIdnum.children[1].onchange = function(){
+    if (newIdIdnum.children[0].value && newIdIdnum.children[1].value){
+      var id = newIdIdnum.children[0].value;
+      var idnum = parseInt(newIdIdnum.children[1].value);
+      editor_file.changeIdAndIdnum(editor,id,idnum,editor_mode.info,function(err){if(err)throw(err)});
+    }
+  }
+  //尚未完成,不完善,新物品需要手动改items,新地形的支持不错
+
+  var selectFloor = document.getElementById('selectFloor');
+  editor_file.getFloorFileList(editor,function(floors){
+    var outstr=[];
+    floors[0].forEach(function(floor){
+      outstr.push(["<option value='",floor,"'>",floor,'</option>\n'].join(''));
+    });
+    selectFloor.innerHTML=outstr.join('');
+    selectFloor.onchange = function(){
+      editor_mode.onmode('');
+      editor.changeFloor(selectFloor.value);
+    }
+  });
+
+  var saveFloor = document.getElementById('saveFloor');
+  saveFloor.onclick = function(){
+    editor_mode.onmode('');
+    editor_file.saveFloorFile(editor,function(err){if(err)throw(err)});
+  }
+
+  var saveFloorAs = document.getElementById('saveFloorAs');
+  var saveAsName = document.getElementById('saveAsName');
+  saveFloorAs.onclick = function(){
+    if (!saveAsName.value)return;
+    editor_mode.onmode('');
+    editor_file.saveFloorFileAs(editor,saveAsName.value,function(err){
+      if(err)throw(err);
+      core.floorIds.push(saveAsName.value);
+      editor.file.editTower(editor,[['change',"['main']['floorIds']",core.floorIds]],function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null)throw(objs_.slice(-1)[0])});
+    });
+  }
+
   if (Boolean(callback))callback();
 }
 

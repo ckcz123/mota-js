@@ -144,6 +144,13 @@ editor.prototype.mapInit = function(){
       editor.map[y][x] = 0;
     }
   }
+  editor.currentFloorData.map=editor.map;
+  editor.currentFloorData.firstArrive=[];
+  editor.currentFloorData.events={};
+  editor.currentFloorData.changeFloor={};
+  editor.currentFloorData.afterBattle={};
+  editor.currentFloorData.afterGetItem={};
+  editor.currentFloorData.afterOpenDoor={};
 }
 editor.prototype.drawMapBg = function(img){
   var bgc = bg.getContext('2d');
@@ -288,6 +295,7 @@ editor.prototype.updateMap = function(){
 }
 
 editor.prototype.changeFloor = function(floorId,callback) {
+  editor.currentFloorData.map = editor.map.map(function(v){return v.map(function(v){return v.idnum||v||0})});
   core.changeFloor(floorId, null, core.firstData.hero.loc, null, function(){
     editor.drawMapBg();
     var mapArray = core.maps.getMapArray(core.status.maps, core.status.floorId);

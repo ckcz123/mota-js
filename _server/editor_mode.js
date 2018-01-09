@@ -134,7 +134,30 @@ editor_mode.prototype.addAction = function(action){
 
 editor_mode.prototype.doActionList = function(mode,actionList){
   if (actionList.length==0)return;
-  //尚未完成
+  switch (mode) {
+    case 'loc':
+
+      editor_file.editLoc(editor,editor_mode.pos.x,editor_mode.pos.y,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null)throw(objs_.slice(-1)[0])});
+      break;
+    case 'emenyitem':
+
+      if (editor_mode.info.images=='enemys'){
+        editor_file.editEnemy(editor,editor_mode.info.id,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null)throw(objs_.slice(-1)[0])});
+      } else if (editor_mode.info.images=='items'){
+        editor_file.editItem(editor,editor_mode.info.id,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null)throw(objs_.slice(-1)[0])});
+      }
+      break;
+    case 'floor':
+      
+      editor_file.editFloor(editor,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null)throw(objs_.slice(-1)[0])});
+      break;
+    case 'tower':
+      
+      editor.file.editTower(editor,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null)throw(objs_.slice(-1)[0])});
+      break;
+    default:
+      break;
+  }
 }
 
 editor_mode.prototype.onmode = function (mode) {
@@ -149,10 +172,11 @@ editor_mode.prototype.onmode = function (mode) {
 editor_mode.prototype.loc = function(callback){
   //editor.pos={x: 0, y: 0};
   if (!core.isset(editor.pos))return;
-  document.getElementById('pos_a6771a78_a099_417c_828f_0a24851ebfce').innerText=editor.pos.x+','+editor.pos.y;
+  editor_mode.pos=editor.pos;
+  document.getElementById('pos_a6771a78_a099_417c_828f_0a24851ebfce').innerText=editor_mode.pos.x+','+editor_mode.pos.y;
 
   var objs=[];
-  editor_file.editLoc(editor,editor.pos.x,editor.pos.y,[],function(objs_){objs=objs_;console.log(objs_)});
+  editor_file.editLoc(editor,editor_mode.pos.x,editor_mode.pos.y,[],function(objs_){objs=objs_;console.log(objs_)});
   //只查询不修改时,内部实现不是异步的,所以可以这么写
   var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
   document.getElementById('table_3d846fc4_7644_44d1_aa04_433d266a73df').innerHTML=tableinfo.HTML;
@@ -167,8 +191,9 @@ editor_mode.prototype.emenyitem = function(callback){
   editor_mode.info=editor.info;//避免editor.info被清空导致无法获得是物品还是怪物
 
   if (!core.isset(editor_mode.info.id)){
+    document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML='';
     return;
-  }//尚未完成
+  }//尚未完成,此处要设置成允许添加新的id 和 idnum
 
   var objs=[];
   if (editor_mode.info.images=='enemys'){
@@ -176,6 +201,7 @@ editor_mode.prototype.emenyitem = function(callback){
   } else if (editor_mode.info.images=='items'){
     editor_file.editItem(editor,editor_mode.info.id,[],function(objs_){objs=objs_;console.log(objs_)});
   } else {
+    document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML='';
     return;
   }
   //只查询不修改时,内部实现不是异步的,所以可以这么写

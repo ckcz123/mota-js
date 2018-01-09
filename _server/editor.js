@@ -144,6 +144,13 @@ editor.prototype.mapInit = function(){
       editor.map[y][x] = 0;
     }
   }
+  editor.currentFloorData.map=editor.map;
+  editor.currentFloorData.firstArrive=[];
+  editor.currentFloorData.events={};
+  editor.currentFloorData.changeFloor={};
+  editor.currentFloorData.afterBattle={};
+  editor.currentFloorData.afterGetItem={};
+  editor.currentFloorData.afterOpenDoor={};
 }
 editor.prototype.drawMapBg = function(img){
   var bgc = bg.getContext('2d');
@@ -288,6 +295,7 @@ editor.prototype.updateMap = function(){
 }
 
 editor.prototype.changeFloor = function(floorId,callback) {
+  editor.currentFloorData.map = editor.map.map(function(v){return v.map(function(v){return v.idnum||v||0})});
   core.changeFloor(floorId, null, core.firstData.hero.loc, null, function(){
     editor.drawMapBg();
     var mapArray = core.maps.getMapArray(core.status.maps, core.status.floorId);
@@ -295,6 +303,7 @@ editor.prototype.changeFloor = function(floorId,callback) {
     editor.updateMap();
     editor.currentFloorId=core.status.floorId;
     editor.currentFloorData = core.floors[core.status.floorId];
+    editor_mode.floor();
     if (core.isset(callback))callback();
   });
 }
@@ -338,6 +347,11 @@ editor.prototype.listen = function() {
 
   eui.onmousedown = function (e) {
     if(!selectBox.isSelected) {
+      var loc = eToLoc(e);
+      var pos = locToPos(loc);
+      editor_mode.onmode('');//为了强制触发doAction
+      editor_mode.onmode('loc');
+      editor_mode.loc();
       tip.whichShow = 1;
       return;
     }
@@ -348,7 +362,7 @@ editor.prototype.listen = function() {
     e.stopPropagation();
     uc.clearRect(0, 0, 416, 416);
     var loc = eToLoc(e);
-    var pos = locToPos(loc)
+    var pos = locToPos(loc);
     stepPostfix = [];
     stepPostfix.push(pos);
     fillPos(pos);
@@ -491,6 +505,9 @@ editor.prototype.listen = function() {
           }
         }
         tip.infos = JSON.parse(JSON.stringify(editor.info));
+        editor_mode.onmode('');//为了强制触发doAction
+        editor_mode.onmode('emenyitem');
+        editor_mode.emenyitem();
       }
     }
   }

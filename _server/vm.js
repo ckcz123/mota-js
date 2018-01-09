@@ -2,6 +2,7 @@
 
 document.body.onmousedown = function(e){
   selectBox.isSelected = false;
+  editor_mode.onmode('');
   editor.info = {};
 }
 iconLib.onmousedown = function(e){

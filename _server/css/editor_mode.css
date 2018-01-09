@@ -1,0 +1,119 @@
+.leftTab {
+  border-radius: 2px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,.14), 0 3px 1px -2px rgba(0,0,0,.2), 0 1px 5px 0 rgba(0,0,0,.12);
+} 
+
+.leftTab {
+  overflow: auto;
+  position: absolute;
+  height: 630px;
+}
+.leftTab > *{margin:2.5px 5px;}
+.leftTab > :first-child{margin-top:5px;}
+.leftTab > :last-child{margin-bottom:5px;}
+
+#left99 {
+  left: 5px;
+  top: 650px;
+  width: 435px;
+}
+
+#left2 {
+  left: 448px;
+  top: 650px;
+  width: 440px;
+}
+
+#left3 {
+  left: 900px;
+  top: 650px;
+  width: 440px;
+}
+
+#left4 {
+  left: 5px;
+  top: 1290px;
+  width: 435px;
+}
+
+#left5 {
+  left: 448px;
+  top: 1290px;
+  width: 440px;
+}
+
+.etable table,
+.etable table td {
+  color: #000;
+  cursor: auto;
+}
+
+/* copy from github-css https://github.com/sindresorhus/github-markdown-css  */
+.etable table {
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+.etable table {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+.etable table {
+  display: block;
+  width: 100%;
+  overflow: auto;
+}
+.etable table th {
+  font-weight: 600;
+}
+.etable table th,
+.etable table td {
+  padding: 6px 13px;
+  border: 1px solid #dfe2e5;
+}
+.etable table tr {
+  background-color: #fff;
+  border-top: 1px solid #c6cbd1;
+}
+.etable table tr:nth-child(2n) {
+  background-color: #f6f8fa;
+}
+/* copy end ---------------------------------------------  */
+.etable tr {width:100%}
+.etable tr > :nth-child(1) {width:20%}
+.etable tr > :nth-child(2) {width:20%}
+.etable tr > :nth-child(3) {width:60%}
+
+.etable table {
+  overflow: visible;
+}
+
+.etable tr:not(:first-child) :last-child {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.etable tr:not(:first-child) input:last-child {
+  
+}
+
+.etable tr:not(:first-child) select:last-child {
+  
+}
+
+.etable tr:not(:first-child) textarea:last-child {
+  
+}
+
+.etable tr:not(:first-child) > :last-child:hover {
+  border: 1px solid rgb(87, 198, 232);
+  box-shadow: 0px 0px 3px rgb(87, 198, 232);
+}
+
+.etable tr:not(:first-child) > :nth-child(2):hover,
+.etable tr:not(:first-child) > :nth-child(1):hover {
+  border: 1px solid rgb(87, 232, 198);
+  box-shadow: 0px 0px 3px rgb(87, 232, 198);
+}

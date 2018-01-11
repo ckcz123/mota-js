@@ -1,12 +1,5 @@
 // vue 相关处理
 
-document.body.onmousedown = function(e){
-  selectBox.isSelected = false;
-  editor.info = {};
-}
-iconLib.onmousedown = function(e){
-  e.stopPropagation();
-}
 var exportM = new Vue({
   el: '#exportM',
 

@@ -634,7 +634,13 @@ editor.prototype.listen = function() {
       }
     }
   }
-
+  document.body.onmousedown = function(e){
+    selectBox.isSelected = false;
+    editor.info = {};
+  }
+  iconLib.onmousedown = function(e){
+    e.stopPropagation();
+  }
 }//绑定事件
 editor.prototype.locInfo = function(){
 
@@ -655,32 +661,32 @@ editor.file=editor_file;
 </script>
 <script>
   // 文件相关操作
-  var promisify = function (fn, receiver) {
-    return function () {
-      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-      return new Promise(function (resolve, reject) {
-        fn.apply(receiver, [].concat(args, [function (res, err) {
-          return err ? reject(err) : resolve(res);
-        }]));
-      });
-    };
-  };
-  var fns = Object.keys(editor.file);
-  var promiseFns = {};
-  fns.forEach(function(fn){
-    promiseFns[fn] = promisify(editor.file[fn], editor.file)
-  });
-  editor.promiseFiles = Object.assign(promiseFns);
+  // var promisify = function (fn, receiver) {
+  //   return function () {
+  //     for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+  //       args[_key] = arguments[_key];
+  //     }
+  //     return new Promise(function (resolve, reject) {
+  //       fn.apply(receiver, [].concat(args, [function (res, err) {
+  //         return err ? reject(err) : resolve(res);
+  //       }]));
+  //     });
+  //   };
+  // };
+  // var fns = Object.keys(editor.file);
+  // var promiseFns = {};
+  // fns.forEach(function(fn){
+  //   promiseFns[fn] = promisify(editor.file[fn], editor.file)
+  // });
+  // editor.promiseFiles = Object.assign(promiseFns);
 
-  editor.promiseFiles.getFloorFileList(editor)
-  .then(function(filelist){
-    editFile4map.filelist = filelist;
-  })
-  .catch(function(err){
-    console.log(err);
-  })
+  // editor.promiseFiles.getFloorFileList(editor)
+  // .then(function(filelist){
+  //   editFile4map.filelist = filelist;
+  // })
+  // .catch(function(err){
+  //   console.log(err);
+  // })
 </script>
 </body>
 </html>

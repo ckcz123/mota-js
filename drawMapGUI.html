@@ -77,31 +77,33 @@
       </div>
     </div>
   </div>
+
 <script>
-// 生成定位编号
-(function(){
-  var colNum = ' ';
-  for(var i=0; i<13; i++){
-    var tpl = '<td>'+i+'<div class="colBlock" style="left:'+(i*32+1)+'px;"></div></td>';
-    colNum += tpl;
-  }
-  arrColMark.innerHTML = '<tr>'+colNum+'</tr>';
-  mapColMark.innerHTML = '<tr>'+colNum+'</tr>';
-  var rowNum = ' ';
-  for(var i=0; i<13; i++){
-    var tpl = '<tr><td>'+i+'<div class="rowBlock" style="top:'+(i*32+1)+'px;"></div></td></tr>';
-    rowNum += tpl;
-  }
-  arrRowMark.innerHTML = rowNum;
-  mapRowMark.innerHTML = rowNum;
-})();
+  // 生成定位编号
+  (function(){
+    var colNum = ' ';
+    for(var i=0; i<13; i++){
+      var tpl = '<td>'+i+'<div class="colBlock" style="left:'+(i*32+1)+'px;"></div></td>';
+      colNum += tpl;
+    }
+    arrColMark.innerHTML = '<tr>'+colNum+'</tr>';
+    mapColMark.innerHTML = '<tr>'+colNum+'</tr>';
+    var rowNum = ' ';
+    for(var i=0; i<13; i++){
+      var tpl = '<tr><td>'+i+'<div class="rowBlock" style="top:'+(i*32+1)+'px;"></div></td></tr>';
+      rowNum += tpl;
+    }
+    arrRowMark.innerHTML = rowNum;
+    mapRowMark.innerHTML = rowNum;
+  })();
 </script>
 
 <!-- =========================================================== -->
 
-<script src='_server/vendor/vue.min.js'></script>
-<!-- <script src="https://cdn.bootcss.com/vue/2.5.13/vue.js"></script> -->
+<!-- <script src='_server/vendor/vue.min.js'></script> -->
+<script src="https://cdn.bootcss.com/vue/2.5.13/vue.js"></script>
 <script src='_server/fs.js'></script>
+<script src='_server/editor_file.js'></script>
 <script src='_server/vm.js'></script>
 <script>
 
@@ -176,7 +178,6 @@ editor.prototype.loadImg = function(url){
     }
   })
 }
-
 editor.prototype.loadAllImgs = function(icons){
   editor.material.images = {};
   var imgs = Object.keys(icons);
@@ -317,7 +318,6 @@ editor.prototype.drawMapBg = function(img){
     bgc.drawImage(img, 0, 0, 416, 416);
   }
 }
-
 editor.prototype.updateMap = function(){
 
   var drawTile = function(ctx, x, y, tileInfo){ // 绘制一个普通块
@@ -439,7 +439,6 @@ editor.prototype.updateMap = function(){
     }
   // 绘制地图 end
 }
-
 editor.prototype.listen = function() {
 
   var uc = ui.getContext('2d');
@@ -635,9 +634,17 @@ editor.prototype.listen = function() {
       }
     }
   }
-
+  document.body.onmousedown = function(e){
+    selectBox.isSelected = false;
+    editor.info = {};
+  }
+  iconLib.onmousedown = function(e){
+    e.stopPropagation();
+  }
 }//绑定事件
+editor.prototype.locInfo = function(){
 
+}
 /* 
 editor.updateMap
 
@@ -649,14 +656,37 @@ editor.info
 */
 var editor = new editor();
 editor.init();
-
+editor.fs=fs;
+editor.file=editor_file;
 </script>
-<script type="text/javascript">
-  //Vue
-  //var listenByVue = function() {
-  
-//}
-//listenByVue()
+<script>
+  // 文件相关操作
+  // var promisify = function (fn, receiver) {
+  //   return function () {
+  //     for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+  //       args[_key] = arguments[_key];
+  //     }
+  //     return new Promise(function (resolve, reject) {
+  //       fn.apply(receiver, [].concat(args, [function (res, err) {
+  //         return err ? reject(err) : resolve(res);
+  //       }]));
+  //     });
+  //   };
+  // };
+  // var fns = Object.keys(editor.file);
+  // var promiseFns = {};
+  // fns.forEach(function(fn){
+  //   promiseFns[fn] = promisify(editor.file[fn], editor.file)
+  // });
+  // editor.promiseFiles = Object.assign(promiseFns);
+
+  // editor.promiseFiles.getFloorFileList(editor)
+  // .then(function(filelist){
+  //   editFile4map.filelist = filelist;
+  // })
+  // .catch(function(err){
+  //   console.log(err);
+  // })
 </script>
 </body>
 </html>

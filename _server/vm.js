@@ -58,6 +58,7 @@ var editArea = new Vue({
         that.error = 0;
         clearTimeout(that.formatTimer);
         setTimeout(function(){
+          that.mapArr = that.formatArr();
           that.drawMap();
           tip.whichShow = 8
         }, 1000);
@@ -118,7 +119,6 @@ var editArea = new Vue({
         }
         formatArrStr += ']'+(i==12?'':',\n');
       }
-      
       return formatArrStr;
     }
   }

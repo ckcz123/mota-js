@@ -78,6 +78,7 @@ function core() {
         'stepPostfix': [],
         'mouseOutCheck': 1,
         'moveStepBeforeStop': [],
+        'downTime': null,
 
         // 勇士状态；中心对称飞行器
 
@@ -713,6 +714,9 @@ core.prototype.keyUp = function(keyCode) {
             if (core.status.heroStop)
                 core.openBook(true);
             break;
+        case 65: // A
+            core.doSL("autoSave", "load");
+            break;
         case 83: // S
             if (core.status.heroStop)
                 core.save(true);
@@ -792,9 +796,11 @@ core.prototype.ondown = function (x ,y) {
         core.onclick(x, y, []);
         return;
     }
+
+    core.status.downTime = new Date();
     core.status.holdingPath=1;
     core.status.mouseOutCheck =1;
-    window.setTimeout(core.clearStepPostfix);
+    // window.setTimeout(core.clearStepPostfix);
     core.saveCanvas('ui');
     core.clearMap('ui', 0, 0, 416,416);
     var pos={'x':x,'y':y}
@@ -842,8 +848,16 @@ core.prototype.onup = function () {
         core.status.stepPostfix=[];
         core.canvas.ui.clearRect(0, 0, 416,416);
         core.canvas.ui.restore();
-        core.onclick(posx,posy,stepPostfix);
-        //posx,posy是寻路的目标点,stepPostfix是后续的移动
+
+        // 长按
+        if (!core.status.lockControl && stepPostfix.length==0 && core.status.downTime!=null && new Date()-core.status.downTime>=1000) {
+            core.events.longClick();
+        }
+        else {
+            //posx,posy是寻路的目标点,stepPostfix是后续的移动
+            core.onclick(posx,posy,stepPostfix);
+        }
+        core.status.downTime=null;
     }
 }
 
@@ -960,6 +974,11 @@ core.prototype.onclick = function (x, y, stepPostfix) {
     // 选项
     if (core.status.event.id == 'confirmBox') {
         core.events.clickConfirmBox(x,y);
+        return;
+    }
+
+    if (core.status.event.id == 'keyBoard') {
+        core.events.clickKeyBoard(x,y);
         return;
     }
 
@@ -1783,6 +1802,9 @@ core.prototype.trigger = function (x, y) {
 
 ////// 楼层切换 //////
 core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) {
+
+    var displayAnimate=!(time==0);
+
     time = time || 800;
     time /= 20;
     core.lockControl();
@@ -1815,8 +1837,8 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
     }
 
     window.setTimeout(function () {
-        core.playSound('floor.mp3');
-        core.mapChangeAnimate('show', time/2, function () {
+
+        var changing = function () {
 
             // 根据文字判断是否斜体
             var floorName = core.status.maps[floorId].name;
@@ -1854,20 +1876,38 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
 
             core.drawMap(floorId, function () {
                 setTimeout(function() {
-                    core.mapChangeAnimate('hide', time/4, function () {
-                        core.unLockControl();
-                        core.events.afterChangeFloor(floorId);
-                        if (core.isset(callback)) callback();
-                    });
                     if (core.isset(heroLoc.direction))
                         core.setHeroLoc('direction', heroLoc.direction);
                     core.setHeroLoc('x', heroLoc.x);
                     core.setHeroLoc('y', heroLoc.y);
                     core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
                     core.updateStatusBar();
+
+                    var changed = function () {
+                        core.unLockControl();
+                        core.events.afterChangeFloor(floorId);
+                        if (core.isset(callback)) callback();
+                    }
+                    if (displayAnimate) {
+                        core.mapChangeAnimate('hide', time/4, function () {
+                            changed();
+                        });
+                    }
+                    else {
+                        changed();
+                    }
                 }, 15)
             });
-        });
+        }
+        if (displayAnimate) {
+            core.playSound('floor.mp3');
+            core.mapChangeAnimate('show', time/2, function () {
+                changing();
+            });
+        }
+        else {
+            changing();
+        }
     }, 50);
 }
 
@@ -3547,7 +3587,7 @@ core.prototype.loadData = function (data, callback) {
 
     core.events.afterLoadData(data);
 
-    core.changeFloor(data.floorId, null, data.hero.loc, null, function() {
+    core.changeFloor(data.floorId, null, data.hero.loc, 0, function() {
         core.setHeroMoveTriggerInterval();
         if (core.isset(callback)) callback();
     });

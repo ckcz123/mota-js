@@ -706,6 +706,14 @@ events.prototype.afterLoadData = function(data) {
 /********** 点击事件、键盘事件 ************/
 /****************************************/
 
+////// 长按 //////
+events.prototype.longClick = function () {
+    core.waitHeroToStop(function () {
+        // 绘制快捷键
+        core.ui.drawKeyBoard();
+    });
+}
+
 ////// 按下Ctrl键时（快捷跳过对话） //////
 events.prototype.keyDownCtrl = function () {
     if (core.status.event.id=='text') {
@@ -1495,6 +1503,65 @@ events.prototype.keyUpSyncSave = function (keycode) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
         this.clickSyncSave(6, topIndex+core.status.event.selection);
     }
+}
+
+////// “虚拟键盘”界面时的点击操作 //////
+events.prototype.clickKeyBoard = function (x, y) {
+    if (y==3 && x>=1 && x<=11) {
+        core.ui.closePanel();
+        core.keyUp(112+x-1); // F1-F12: 112-122
+    }
+    if (y==4 && x>=1 && x<=10) {
+        core.ui.closePanel();
+        core.keyUp(x==10?48:48+x); // 1-9: 49-57; 0: 48
+    }
+    // 字母
+    var lines = [
+        ["Q","W","E","R","T","Y","U","I","O","P"],
+        ["A","S","D","F","G","H","J","K","L"],
+        ["Z","X","C","V","B","N","M"],
+    ];
+    if (y==5 && x>=1 && x<=10) {
+        core.ui.closePanel();
+        core.keyUp(lines[0][x-1].charCodeAt(0));
+    }
+    if (y==6 && x>=1 && x<=9) {
+        core.ui.closePanel();
+        core.keyUp(lines[1][x-1].charCodeAt(0));
+    }
+    if (y==7 && x>=1 && x<=7) {
+        core.ui.closePanel();
+        core.keyUp(lines[2][x-1].charCodeAt(0));
+    }
+    if (y==8 && x>=1 && x<=11) {
+        core.ui.closePanel();
+        if (x==1) core.keyUp(189); // -
+        if (x==2) core.keyUp(187); // =
+        if (x==3) core.keyUp(219); // [
+        if (x==4) core.keyUp(221); // ]
+        if (x==5) core.keyUp(220); // \
+        if (x==6) core.keyUp(186); // ;
+        if (x==7) core.keyUp(222); // '
+        if (x==8) core.keyUp(188); // ,
+        if (x==9) core.keyUp(190); // .
+        if (x==10) core.keyUp(191); // /
+        if (x==11) core.keyUp(192); // `
+    }
+    if (y==9 && x>=1 && x<=10) {
+        core.ui.closePanel();
+        if (x==1) core.keyUp(27); // ESC
+        if (x==2) core.keyUp(9); // TAB
+        if (x==3) core.keyUp(20); // CAPS
+        if (x==4) core.keyUp(16); // SHIFT
+        if (x==5) core.keyUp(17); // CTRL
+        if (x==6) core.keyUp(18); // ALT
+        if (x==7) core.keyUp(32); // SPACE
+        if (x==8) core.keyUp(8); // BACKSPACE
+        if (x==9) core.keyUp(13); // ENTER
+        if (x==10) core.keyUp(46); // DEL
+    }
+    if (y==10 && x>=9 && x<=11)
+        core.ui.closePanel();
 }
 
 ////// “关于”界面时的点击操作 //////

@@ -1020,15 +1020,14 @@ ui.prototype.drawToolbox = function(index) {
 ////// 绘制存档/读档界面 //////
 ui.prototype.drawSLPanel = function(index) {
     if (!core.isset(index)) index=1;
-    if (index<=0) index=1;
-    if (index>180) index=180;
+    if (index<0) index=0;
+
+    var page = parseInt(index/10), offset=index%10;
+    if (page>=30) page=30;
+    if (offset>5) offset=5;
+    index=10*page+offset;
 
     core.status.event.data=index;
-
-    var page=parseInt((index-1)/6);
-
-    // core.status.event.data = page;
-    // core.status.savePage = page;
 
     core.clearMap('ui', 0, 0, 416, 416);
     core.setAlpha('ui', 0.85);
@@ -1040,12 +1039,11 @@ ui.prototype.drawSLPanel = function(index) {
 
     var name=core.status.event.id=='save'?"存档":"读档";
     for (var i=0;i<6;i++) {
-        var id=6*page+i+1;
-        var data=core.getLocalStorage("save"+id,null);
-
+        var id=5*page+i;
+        var data=core.getLocalStorage(i==0?"autoSave":"save"+id, null);
         if (i<3) {
-            core.fillText('ui', name+id, (2*i+1)*u, 35, '#FFFFFF', "bold 17px Verdana");
-            core.strokeRect('ui', (2*i+1)*u-size/2, 50, size, size, id==index?'#FFD700':'#FFFFFF', id==index?6:2);
+            core.fillText('ui', i==0?"自动存档":name+id, (2*i+1)*u, 35, '#FFFFFF', "bold 17px Verdana");
+            core.strokeRect('ui', (2*i+1)*u-size/2, 50, size, size, i==offset?'#FFD700':'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
                 this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc);
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 65+size, '#FFFFFF', '10px Verdana');
@@ -1057,7 +1055,7 @@ ui.prototype.drawSLPanel = function(index) {
         }
         else {
             core.fillText('ui', name+id, (2*i-5)*u, 230, '#FFFFFF', "bold 17px Verdana");
-            core.strokeRect('ui', (2*i-5)*u-size/2, 245, size, size, id==index?'#FFD700':'#FFFFFF', id==index?6:2);
+            core.strokeRect('ui', (2*i-5)*u-size/2, 245, size, size, i==offset?'#FFD700':'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
                 this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc);
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 260+size, '#FFFFFF', '10px Verdana');
@@ -1091,7 +1089,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
         }
     }
 
-    var mapArray = core.maps.getMapArray(core.status.maps, floorId);
+    var mapArray = core.maps.getMapArray(blocks);
     for (var b in blocks) {
         var block = blocks[b];
         if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {

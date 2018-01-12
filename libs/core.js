@@ -461,7 +461,7 @@ core.prototype.resetStatus = function(hero, hard, floorId, maps) {
     core.status.hero = core.clone(hero);
     core.status.hard = hard;
     // 保存的Index
-    core.status.saveIndex = core.getLocalStorage('saveIndex', 1);
+    core.status.saveIndex = core.getLocalStorage('saveIndex2', 1);
 
     core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
 }
@@ -1001,8 +1001,8 @@ core.prototype.onmousewheel = function (direct) {
 
     // 怪物手册
     if (core.status.lockControl && core.status.event.id == 'book') {
-        if (direct==1) core.ui.drawBook(core.status.event.data - 1);
-        if (direct==-1) core.ui.drawBook(core.status.event.data + 1);
+        if (direct==1) core.ui.drawBook(core.status.event.data - 6);
+        if (direct==-1) core.ui.drawBook(core.status.event.data + 6);
         return;
     }
 
@@ -2035,7 +2035,7 @@ core.prototype.drawMap = function (mapName, callback) {
         }
     }
 
-    var mapArray = core.maps.getMapArray(core.status.maps, mapName);
+    var mapArray = core.maps.getMapArray(mapBlocks);
     for (var b = 0; b < mapBlocks.length; b++) {
         // 事件启用
         var block = mapBlocks[b];
@@ -3331,7 +3331,7 @@ core.prototype.load = function (need) {
         core.status.event = {'id': 'load', 'data': null};
         core.status.lockControl = true;
         core.dom.startPanel.style.display = 'none';
-        core.ui.drawSLPanel(core.getLocalStorage('saveIndex', 1));
+        core.ui.drawSLPanel(core.getLocalStorage('saveIndex2', 1));
         return;
     }
 
@@ -3340,14 +3340,25 @@ core.prototype.load = function (need) {
     core.ui.drawSLPanel(core.status.saveIndex);
 }
 
+////// 自动存档 //////
+core.prototype.autosave = function () {
+    core.saveData("autoSave");
+}
+
 ////// 实际进行存读档事件 //////
 core.prototype.doSL = function (id, type) {
-    core.status.saveIndex=id;
     if (type=='save') {
+        if (id=='autoSave') {
+            core.drawTip('不能覆盖自动存档！');
+            return;
+        }
         if (core.saveData("save"+id)) {
             core.ui.closePanel();
             core.drawTip('存档成功！');
-            core.setLocalStorage('saveIndex', core.status.saveIndex);
+            if (id!="autoSave") {
+                core.status.saveIndex=id;
+                core.setLocalStorage('saveIndex2', core.status.saveIndex);
+            }
         }
         else {
             core.drawTip('存储空间不足，请覆盖已有的存档或在菜单栏中进行清理');
@@ -3355,7 +3366,7 @@ core.prototype.doSL = function (id, type) {
         return;
     }
     else if (type=='load') {
-        var data = core.getLocalStorage("save"+id, null);
+        var data = core.getLocalStorage(id=='autoSave'?id:"save"+id, null);
         if (!core.isset(data)) {
             core.drawTip("无效的存档");
             return;
@@ -3366,9 +3377,11 @@ core.prototype.doSL = function (id, type) {
         }
         core.ui.closePanel();
         core.loadData(data, function() {
-            core.status.saveIndex=id;
-            core.setLocalStorage('saveIndex', core.status.saveIndex);
             core.drawTip("读档成功");
+            if (id!="autoSave") {
+                core.status.saveIndex=id;
+                core.setLocalStorage('saveIndex2', core.status.saveIndex);
+            }
         });
         return;
     }

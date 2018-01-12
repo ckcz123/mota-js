@@ -356,16 +356,7 @@ maps.prototype.load = function (data, floorId) {
 }
 
 ////// 将当前地图重新变成二维数组形式 //////
-maps.prototype.getMapArray = function (maps, floorId){
-    if (!core.isset(floorId)) {
-        var map = {};
-        for (var id in maps) {
-            map[id] = this.getMapArray(maps, id);
-        }
-        return map;
-    }
-
-    var thisFloor = maps[floorId];
+maps.prototype.getMapArray = function (blockArray){
 
     var blocks = [];
     for (var x=0;x<13;x++) {
@@ -374,7 +365,7 @@ maps.prototype.getMapArray = function (maps, floorId){
             blocks[x].push(0);
         }
     }
-    thisFloor.blocks.forEach(function (block) {
+    blockArray.forEach(function (block) {
         if (!(core.isset(block.enable) && !block.enable))
             blocks[block.y][block.x] = block.id;
     });

@@ -260,6 +260,7 @@ core.events.changeLight // 改变亮灯（感叹号）的事件
 * core.events.afterLoadData // 读档事件后，载入事件前，可以执行的操作
 
 // ------ 点击事件和键盘事件的处理 ------
+core.events.longClick // 长按
 core.events.keyDownCtrl // 按下Ctrl键时（快捷跳过对话）
 core.events.clickConfirmBox // 确认框界面时的点击操作
 core.events.keyUpConfirmBox // 确认框界面时，放开某个键的操作
@@ -295,6 +296,7 @@ core.events.keyUpSettings // 系统菜单栏界面时，放开某个键的操作
 core.events.clickSyncSave // 同步存档界面时的点击操作
 core.events.keyDownSyncSave // 同步存档界面时，按下某个键的操作
 core.events.keyUpSyncSave // 同步存档界面时，放开某个键的操作
+core.events.clickKeyBoard // 虚拟键盘界面时的点击操作
 core.events.clickAbout // “关于”界面时的点击操作
 ```
 

@@ -39,8 +39,9 @@ data.prototype.init = function() {
             "这里游戏开始时的剧情。\n定义在data.js的startText处。\n\n你可以在这里写上自己的内容。",
             "赶快来试一试吧！"
         ],
-        "shops": { // 定义全局商店（即快捷商店）
-            "moneyShop1": { // 商店唯一ID
+        "shops": [ // 定义全局商店（即快捷商店）
+            {
+                "id": "moneyShop1", // 商店唯一ID
                 "name": "贪婪之神", // 商店名称（标题）
                 "icon": "blueShop", // 商店图标，blueShop为蓝色商店，pinkShop为粉色商店
                 "textInList": "1F金币商店", // 在快捷商店栏中显示的名称
@@ -65,7 +66,8 @@ data.prototype.init = function() {
                     // "status:hp+=2*(status:atk+status:def)" 将生命提升攻防和的数值的两倍
                 ]
             },
-            "expShop1": { // 商店唯一ID
+            {
+                "id": "expShop1", // 商店唯一ID
                 "name": "经验之神",
                 "icon": "pinkShop",
                 "textInList": "1F经验商店",
@@ -80,8 +82,8 @@ data.prototype.init = function() {
                     {"text": "攻击+5", "need": "30", "effect": "status:atk+=5"},
                     {"text": "防御+5", "need": "30", "effect": "status:def+=5"},
                 ]
-            },
-        },
+            }
+        ],
         "levelUp": [ // 经验升级所需要的数值，是一个数组
             {}, // 第一项为初始等级，可以简单留空，也可以写name
 

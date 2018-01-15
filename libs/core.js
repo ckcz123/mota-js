@@ -130,7 +130,12 @@ core.prototype.init = function (dom, statusBar, canvas, images, pngs, bgms, soun
     }
     core.values = core.clone(core.data.values);
     core.firstData = core.data.getFirstData();
-    core.initStatus.shops = core.firstData.shops;
+
+    // core.initStatus.shops = core.firstData.shops;
+    core.firstData.shops.forEach(function (t) {
+        core.initStatus.shops[t.id] = t;
+    })
+
     core.dom.versionLabel.innerHTML = core.firstData.version;
     core.dom.logoLabel.innerHTML = core.firstData.title;
     document.title = core.firstData.title + " - HTML5魔塔";

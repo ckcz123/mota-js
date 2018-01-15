@@ -449,7 +449,7 @@ core.prototype.clearStatus = function() {
 }
 
 ////// 重置游戏状态和初始数据 //////
-core.prototype.resetStatus = function(hero, hard, floorId, maps) {
+core.prototype.resetStatus = function(hero, hard, floorId, route, maps) {
 
     // 停止各个Timeout和Interval
     for (var i in core.interval) {
@@ -467,6 +467,9 @@ core.prototype.resetStatus = function(hero, hard, floorId, maps) {
     // 初始化人物属性
     core.status.hero = core.clone(hero);
     core.status.hard = hard;
+    // 初始化路线
+    if (core.isset(route))
+        core.status.route = route;
     // 保存的Index
     core.status.saveIndex = core.getLocalStorage('saveIndex2', 1);
 
@@ -477,7 +480,7 @@ core.prototype.resetStatus = function(hero, hard, floorId, maps) {
 core.prototype.startGame = function (hard, callback) {
     console.log('开始游戏');
 
-    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, core.initStatus.maps);
+    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
 
     core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
         core.setHeroMoveTriggerInterval();
@@ -3566,6 +3569,7 @@ core.prototype.saveData = function(dataId) {
         'hero': core.clone(core.status.hero),
         'hard': core.status.hard,
         'maps': core.maps.save(core.status.maps),
+        'route': core.encodeRoute(core.status.route),
         'shops': {},
         'version': core.firstData.version,
         "time": new Date().getTime()
@@ -3585,7 +3589,7 @@ core.prototype.saveData = function(dataId) {
 ////// 从本地读档 //////
 core.prototype.loadData = function (data, callback) {
 
-    core.resetStatus(data.hero, data.hard, data.floorId, core.maps.load(data.maps));
+    core.resetStatus(data.hero, data.hard, data.floorId, core.decodeRoute(data.route), core.maps.load(data.maps));
 
     // load shop times
     for (var shop in core.status.shops) {
@@ -3607,7 +3611,7 @@ core.prototype.encodeRoute = function (route) {
     var lastMove = "", cnt=0;
 
     var items=Object.keys(core.material.items).sort();
-    var shops=Object.keys(core.status.shops).sort();
+    var shops=Object.keys(core.initStatus.shops).sort();
     route.forEach(function (t) {
         if (t=='up' || t=='down' || t=='left' || t=='right') {
             if (t!=lastMove && cnt>0) {
@@ -3645,7 +3649,38 @@ core.prototype.encodeRoute = function (route) {
 
 ////// 解密路线 //////
 core.prototype.decodeRoute = function (route) {
-    
+
+    if (!core.isset(route)) return route;
+
+    var ans=[], index=0;
+
+    var getNumber = function (noparse) {
+        var num="";
+        while (index<route.length && !isNaN(route.charAt(index))) {
+            num+=route.charAt(index++);
+        }
+        if (num.length==0) num="1";
+        return core.isset(noparse)?num:parseInt(num);
+    }
+
+    var items=Object.keys(core.material.items).sort();
+    var shops=Object.keys(core.initStatus.shops).sort();
+    while (index<route.length) {
+        var c=route.charAt(index++);
+        var number=getNumber();
+
+        switch (c) {
+            case "U": for (var i=0;i<number;i++) ans.push("up"); break;
+            case "D": for (var i=0;i<number;i++) ans.push("down"); break;
+            case "L": for (var i=0;i<number;i++) ans.push("left"); break;
+            case "R": for (var i=0;i<number;i++) ans.push("right"); break;
+            case "I": ans.push("item:"+items[number]); break;
+            case "F": ans.push("fly:"+core.floorIds[number]); break;
+            case "C": ans.push("choices:"+number); break;
+            case "S": ++index; ans.push("shop:"+shops[number]+":"+getNumber(true)); break;
+        }
+    }
+    return ans;
 }
 
 ////// 设置勇士属性 //////

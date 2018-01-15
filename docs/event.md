@@ -846,8 +846,9 @@ events.prototype.addPoint = function (enemy) {
 全局商店定义在`data.js`中，找到shops一项。
 
 ``` js
-"shops": { // 定义全局商店（即快捷商店）
-    "moneyShop1": { // 商店唯一ID
+"shops": [ // 定义全局商店（即快捷商店）
+    {
+        "id": "moneyShop1", // 商店唯一ID
         "name": "贪婪之神", // 商店名称（标题）
         "icon": "blueShop", // 商店图标，blueShop为蓝色商店，pinkShop为粉色商店
         "textInList": "1F金币商店", // 在快捷商店栏中显示的名称
@@ -872,7 +873,8 @@ events.prototype.addPoint = function (enemy) {
             // "status:hp+=2*(status:atk+status:def)" 将生命提升攻防和的数值的两倍
         ]
     },
-    "expShop1": { // 商店唯一ID
+    {
+        "id": "expShop1", // 商店唯一ID
         "name": "经验之神",
         "icon": "pinkShop",
         "textInList": "1F经验商店",
@@ -887,15 +889,15 @@ events.prototype.addPoint = function (enemy) {
             {"text": "攻击+5", "need": "30", "effect": "status:atk+=5"},
             {"text": "防御+5", "need": "30", "effect": "status:def+=5"},
         ]
-    },
-},
+    }
+],
 ```
 
-全局商店全部定义在`data.js`中的shops一项里。
-每个全局商店有一个唯一标识符（ID），然后是一系列对该商店的定义。
+全局商店全部定义在`data.js`中的shops一项里。商店以数组形式存放，每一个商店都是其中的一个对象。
 
+- id 为商店的唯一标识符（ID），请确保任何两个商店的id都不相同
 - name 为商店的名称（打开商店后的标题）
-- icon 为商店的图标，blueShop为蓝色商店，pinkShop为粉色商店
+- icon 为商店的图标，在icons.js的npcs中定义。如woman可代表一个商人。
 - textInList 为其在快捷商店栏中显示的名称，如"3楼金币商店"等
 - use 为消耗的类型，是金币（money）还是经验（experience）。
 - need 是一个表达式，计算商店所需要用到的数值。

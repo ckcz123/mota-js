@@ -193,6 +193,12 @@ items.prototype.useItem = function (itemId) {
         core.setFlag('curse', false);
     }
     core.updateStatusBar();
+
+    // 记录路线
+    if (itemId!='book' && itemId!='fly') {
+        core.status.route.push("item:"+itemId);
+    }
+
     // 道具使用完毕：删除
     if (itemCls=='tools')
         core.status.hero.items[itemCls][itemId]--;

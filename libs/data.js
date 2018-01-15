@@ -43,7 +43,7 @@ data.prototype.init = function() {
             {
                 "id": "moneyShop1", // 商店唯一ID
                 "name": "贪婪之神", // 商店名称（标题）
-                "icon": "blueShop", // 商店图标，blueShop为蓝色商店，pinkShop为粉色商店
+                "icon": "blueShop", // 商店图标，在icons.js中的npc一项定义
                 "textInList": "1F金币商店", // 在快捷商店栏中显示的名称
                 "use": "money", // 商店所要使用的。只能是"money"或"experience"。
                 "need": "20+10*times*(times+1)",  // 商店需要的金币/经验数值；可以是一个表达式，以times作为参数计算。
@@ -96,7 +96,7 @@ data.prototype.init = function() {
 
             // effect也允许写一个function，代表本次升级将会执行的操作
             {"need": 40, "effect": function () {
-                core.drawText("恭喜升级！");
+                core.insertAction("恭喜升级！");
                 core.status.hero.hp *= 2;
                 core.status.hero.atk += 100;
                 core.status.hero.def += 100;

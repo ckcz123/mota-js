@@ -79,6 +79,7 @@ function core() {
         'mouseOutCheck': 1,
         'moveStepBeforeStop': [],
         'downTime': null,
+        'route': [], // 当前路线！
 
         // 勇士状态；中心对称飞行器
 
@@ -1411,6 +1412,7 @@ core.prototype.setHeroMoveTriggerInterval = function () {
             y = core.getHeroLoc('y');
             var noPass = core.noPass(x + scan[direction].x, y + scan[direction].y), canMove = core.canMoveHero();
             if (noPass || !canMove) {
+                core.status.route.push(direction);
                 if (canMove) // 非箭头：触发
                     core.trigger(x + scan[direction].x, y + scan[direction].y);
                 core.drawHero(direction, x, y, 'stop');
@@ -1443,6 +1445,7 @@ core.prototype.setHeroMoveTriggerInterval = function () {
                 else if (core.status.heroStop) {
                     core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
                 }
+                core.status.route.push(direction);
                 core.trigger(core.getHeroLoc('x'), core.getHeroLoc('y'));
                 clearInterval(core.interval.heroMoveInterval);
                 core.status.heroMoving = false;
@@ -3596,6 +3599,53 @@ core.prototype.loadData = function (data, callback) {
         core.setHeroMoveTriggerInterval();
         if (core.isset(callback)) callback();
     });
+}
+
+////// 加密路线 //////
+core.prototype.encodeRoute = function (route) {
+    var ans="";
+    var lastMove = "", cnt=0;
+
+    var items=Object.keys(core.material.items).sort();
+    var shops=Object.keys(core.status.shops).sort();
+    route.forEach(function (t) {
+        if (t=='up' || t=='down' || t=='left' || t=='right') {
+            if (t!=lastMove && cnt>0) {
+                ans+=lastMove.substring(0,1).toUpperCase();
+                if (cnt>1) ans+=cnt;
+                cnt=0;
+            }
+            lastMove=t;
+            cnt++;
+        }
+        else {
+            if (cnt>0) {
+                ans+=lastMove.substring(0,1).toUpperCase();
+                if (cnt>1) ans+=cnt;
+                cnt=0;
+            }
+            if (t.indexOf('item:')==0)
+                ans+="I"+items.indexOf(t.substring(5));
+            else if (t.indexOf('fly:')==0)
+                ans+="F"+core.floorIds.indexOf(t.substring(4));
+            else if (t.indexOf('choices:')==0)
+                ans+="C"+t.substring(8);
+            else if (t.indexOf('shop:')==0) {
+                var sp=t.substring(5).split(":");
+                ans+="S"+shops.indexOf(sp[0])+":"+sp[1];
+            }
+        }
+    });
+    if (cnt>0) {
+        ans+=lastMove.substring(0,1).toUpperCase();
+        if (cnt>1) ans+=cnt;
+    }
+    return ans;
+}
+
+////// 解密路线 //////
+core.prototype.decodeRoute = function (route) {
+    
 }
 
 ////// 设置勇士属性 //////

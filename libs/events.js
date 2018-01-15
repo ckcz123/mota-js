@@ -433,11 +433,15 @@ events.prototype.openShop = function(shopId, needVisited) {
     shop.visited = true;
 
     var selection = core.status.event.selection;
+    var actions = [];
+    if (core.isset(core.status.event.data) && core.isset(core.status.event.data.actions))
+        actions=core.status.event.data.actions;
+
     core.ui.closePanel();
     core.lockControl();
     // core.status.event = {'id': 'shop', 'data': {'id': shopId, 'shop': shop}};
     core.status.event.id = 'shop';
-    core.status.event.data = {'id': shopId, 'shop': shop};
+    core.status.event.data = {'id': shopId, 'shop': shop, 'actions': actions};
     core.status.event.selection = selection;
 
     // 拼词
@@ -774,6 +778,8 @@ events.prototype.clickAction = function (x,y) {
         if (x >= 5 && x <= 7) {
             var topIndex = 6 - parseInt((choices.length - 1) / 2);
             if (y>=topIndex && y<topIndex+choices.length) {
+                // 选择
+                core.status.route.push("choices:"+(y-topIndex));
                 this.insertAction(choices[y-topIndex].action);
                 this.doAction();
             }
@@ -812,6 +818,7 @@ events.prototype.keyUpAction = function (keycode) {
         var choices = data.choices;
         if (choices.length>0) {
             if (keycode==13 || keycode==32 || keycode==67) {
+                core.status.route.push("choices:"+core.status.event.selection);
                 this.insertAction(choices[core.status.event.selection].action);
                 this.doAction();
             }
@@ -888,6 +895,7 @@ events.prototype.clickFly = function(x,y) {
         var index=core.status.hero.flyRange.indexOf(core.status.floorId);
         var stair=core.status.event.data<index?"upFloor":"downFloor";
         var floorId=core.status.event.data;
+        core.status.route.push("fly:"+core.status.hero.flyRange[floorId]);
         core.changeFloor(core.status.hero.flyRange[floorId], stair);
         core.ui.closePanel();
     }
@@ -933,8 +941,9 @@ events.prototype.clickShop = function(x,y) {
                 return;
             }
 
-            eval(use+'-='+need);
+            core.status.event.data.actions.push(y-topIndex);
 
+            eval(use+'-='+need);
             core.setStatus('money', money);
             core.setStatus('experience', experience);
 
@@ -948,6 +957,10 @@ events.prototype.clickShop = function(x,y) {
         }
         // 离开
         else if (y==topIndex+choices.length) {
+            if (core.status.event.data.actions.length>0) {
+                core.status.route.push("shop:"+core.status.event.data.id+":"+core.status.event.data.actions.join(""));
+            }
+
             core.status.boxAnimateObjs = [];
             core.setBoxAnimate();
             if (core.status.event.data.fromList)

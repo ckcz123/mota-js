@@ -338,7 +338,7 @@ main.statusBar.image.toolbox.onclick = function () {
 ////// 点击状态栏中的快捷商店时 //////
 main.statusBar.image.shop.onclick = function () {
     if (main.core.isPlaying())
-        main.core.ui.drawQuickShop(true);
+        main.core.openQuickShop(true);
 }
 
 ////// 点击状态栏中的存档按钮时 //////
@@ -356,7 +356,7 @@ main.statusBar.image.load.onclick = function () {
 ////// 点击状态栏中的系统菜单时 //////
 main.statusBar.image.settings.onclick = function () {
     if (main.core.isPlaying())
-        main.core.ui.drawSettings(true);
+        main.core.openSettings(true);
 }
 
 ////// 点击“开始游戏”时 //////

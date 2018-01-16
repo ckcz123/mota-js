@@ -93,6 +93,7 @@ core.setAutoHeroMove // 设置勇士的自动行走路线
 core.autoHeroMove // 让勇士开始自动行走
 core.setHeroMoveInterval // 设置行走的效果动画
 core.setHeroMoveTriggerInterval // 设置勇士行走过程中对事件的触发检测
+core.moveAction // 实际每一步的行走过程
 * core.turnHero(direction) // 设置勇士的方向（转向）
 core.canMoveHero // 勇士能否前往某方向
 core.moveHero // 让勇士开始移动
@@ -178,16 +179,21 @@ core.clone // 深拷贝一个对象
 core.formatDate // 格式化时间为字符串
 core.setTwoDigits // 两位数显示
 core.debug // 进入Debug模式，攻防血和钥匙都调成很高的数值
+core.replay // 开始回放
 core.checkStatus // 判断当前能否进入某个事件
 core.openBook // 点击怪物手册时的打开操作
 core.useFly // 点击楼层传送器时的打开操作
 core.openToolbox // 点击工具栏时的打开操作
+core.openQuickShop // 点击快捷商店时的打开操作
 core.save // 点击保存按钮时的打开操作
 core.load // 点击读取按钮时的打开操作
+core.openSettings // 点击设置按钮时的打开操作
 core.doSL // 实际进行存读档事件
 core.syncSave // 存档同步操作
 core.saveData // 存档到本地
 core.loadData // 从本地读档
+core.encodeRoute // 将路线压缩
+core.decodeRoute // 将路线解压缩
 * core.setStatus // 设置勇士属性
 * core.getStatus // 获得勇士属性
 core.getLvName // 获得某个等级的名称

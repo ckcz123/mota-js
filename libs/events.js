@@ -18,9 +18,10 @@ events.prototype.init = function () {
         },
         'openDoor': function (data, core, callback) {
             core.autosave();
-            core.openDoor(data.event.id, data.x, data.y, true);
-            if (core.isset(callback))
-                callback();
+            core.openDoor(data.event.id, data.x, data.y, true, function () {
+                if (core.isset(callback)) callback();
+                core.replay();
+            });
         },
         'changeFloor': function (data, core, callback) {
             var heroLoc = {};
@@ -29,7 +30,10 @@ events.prototype.init = function () {
             if (core.isset(data.event.data.direction))
                 heroLoc.direction = data.event.data.direction;
             core.changeFloor(data.event.data.floorId, data.event.data.stair,
-                heroLoc, data.event.data.time, callback);
+                heroLoc, data.event.data.time, function () {
+                    if (core.isset(callback)) callback();
+                    core.replay();
+                });
         },
         'passNet': function (data, core, callback) {
             core.events.passNet(data);
@@ -149,12 +153,13 @@ events.prototype.afterChangeFloor = function (floorId) {
 
 ////// 开始执行一系列自定义事件 //////
 events.prototype.doEvents = function (list, x, y, callback) {
+    if (!core.isset(list)) return;
+    if (!(list instanceof Array)) {
+        list = [list];
+    }
+
     // 停止勇士
     core.waitHeroToStop(function() {
-        if (!core.isset(list)) return;
-        if (!(list instanceof Array)) {
-            list = [list];
-        }
         core.lockControl();
         core.status.event = {'id': 'action', 'data': {
             'list': core.clone(list), 'x': x, 'y': y, 'callback': callback
@@ -175,6 +180,7 @@ events.prototype.doAction = function() {
         if (core.isset(core.status.event.data.callback))
             core.status.event.data.callback();
         core.ui.closePanel();
+        core.replay();
         return;
     }
 
@@ -188,13 +194,20 @@ events.prototype.doAction = function() {
     // 如果是文字：显示
     if (typeof data == "string") {
         core.status.event.data.type='text';
-        core.ui.drawTextBox(data);
+        // 如果是正在回放中，不显示
+        if (core.status.replay.replaying)
+            core.events.doAction();
+        else
+            core.ui.drawTextBox(data);
         return;
     }
     core.status.event.data.type=data.type;
     switch (data.type) {
         case "text": // 文字/对话
-            core.ui.drawTextBox(data.data);
+            if (core.status.replay.isreplaying)
+                core.events.doAction();
+            else
+                core.ui.drawTextBox(data.data);
             break;
         case "tip":
             core.drawTip(core.replaceText(data.text));
@@ -411,12 +424,15 @@ events.prototype.doAction = function() {
 }
 
 ////// 往当前事件列表之前添加一个或多个事件 //////
-events.prototype.insertAction = function (action) {
+events.prototype.insertAction = function (action, x, y, callback) {
     if (core.status.event.id == null) {
-        this.doEvents(action);
+        this.doEvents(action, x, y, callback);
     }
     else {
         core.unshift(core.status.event.data.list, action)
+        if (core.isset(x)) core.status.event.data.x=x;
+        if (core.isset(y)) core.status.event.data.y=y;
+        if (core.isset(callback)) core.status.event.data.callback=callback;
     }
 }
 
@@ -795,12 +811,10 @@ events.prototype.keyDownAction = function (keycode) {
         if (choices.length>0) {
             if (keycode==38) {
                 core.status.event.selection--;
-                if (core.status.event.selection<0) core.status.event.selection=0;
                 core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
             }
             if (keycode==40) {
                 core.status.event.selection++;
-                if (core.status.event.selection>=choices.length) core.status.event.selection=choices.length-1;
                 core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
             }
         }
@@ -972,16 +986,12 @@ events.prototype.clickShop = function(x,y) {
 
 ////// 商店界面时，按下某个键的操作 //////
 events.prototype.keyDownShop = function (keycode) {
-    var shop = core.status.event.data.shop;
-    var choices = shop.choices;
     if (keycode==38) {
         core.status.event.selection--;
-        if (core.status.event.selection<0) core.status.event.selection=0;
         core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
     }
     if (keycode==40) {
         core.status.event.selection++;
-        if (core.status.event.selection>choices.length) core.status.event.selection=choices.length;
         core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
     }
 }
@@ -1030,15 +1040,12 @@ events.prototype.clickQuickShop = function(x, y) {
 
 ////// 快捷商店界面时，按下某个键的操作 //////
 events.prototype.keyDownQuickShop = function (keycode) {
-    var shopList = core.status.shops, keys = Object.keys(shopList);
     if (keycode==38) {
         core.status.event.selection--;
-        if (core.status.event.selection<0) core.status.event.selection=0;
         core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
     }
     if (keycode==40) {
         core.status.event.selection++;
-        if (core.status.event.selection>keys.length) core.status.event.selection=keys.length;
         core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
     }
 }
@@ -1330,7 +1337,7 @@ events.prototype.clickSwitchs = function (x,y) {
                 break;
             case 5:
                 core.status.event.selection=0;
-                core.ui.drawSettings(false);
+                core.ui.drawSettings();
                 break;
         }
     }
@@ -1338,17 +1345,12 @@ events.prototype.clickSwitchs = function (x,y) {
 
 ////// 系统设置界面时，按下某个键的操作 //////
 events.prototype.keyDownSwitchs = function (keycode) {
-    var choices = [
-        "背景音乐", "背景音效", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
-    ];
     if (keycode==38) {
         core.status.event.selection--;
-        if (core.status.event.selection<0) core.status.event.selection=0;
         core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
     }
     if (keycode==40) {
         core.status.event.selection++;
-        if (core.status.event.selection>=choices.length) core.status.event.selection=choices.length-1;
         core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
     }
 }
@@ -1357,7 +1359,7 @@ events.prototype.keyDownSwitchs = function (keycode) {
 events.prototype.keyUpSwitchs = function (keycode) {
     if (keycode==27 || keycode==88) {
         core.status.event.selection=0;
-        core.ui.drawSettings(false);
+        core.ui.drawSettings();
         return;
     }
     var choices = [
@@ -1400,7 +1402,7 @@ events.prototype.clickSettings = function (x,y) {
                     core.restart();
                 }, function () {
                     core.status.event.selection=3;
-                    core.ui.drawSettings(false);
+                    core.ui.drawSettings();
                 });
                 break;
             case 4:
@@ -1419,17 +1421,12 @@ events.prototype.clickSettings = function (x,y) {
 
 ////// 系统菜单栏界面时，按下某个键的操作 //////
 events.prototype.keyDownSettings = function (keycode) {
-    var choices = [
-        "系统设置", "快捷商店", "同步存档", "重新开始", "操作帮助", "关于本塔", "返回游戏"
-    ];
     if (keycode==38) {
         core.status.event.selection--;
-        if (core.status.event.selection<0) core.status.event.selection=0;
         core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
     }
     if (keycode==40) {
         core.status.event.selection++;
-        if (core.status.event.selection>=choices.length) core.status.event.selection=choices.length-1;
         core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
     }
 }
@@ -1477,7 +1474,7 @@ events.prototype.clickSyncSave = function (x,y) {
                 break;
             case 3:
                 core.status.event.selection=2;
-                core.ui.drawSettings(false);
+                core.ui.drawSettings();
                 break;
 
         }
@@ -1487,17 +1484,12 @@ events.prototype.clickSyncSave = function (x,y) {
 
 ////// 同步存档界面时，按下某个键的操作 //////
 events.prototype.keyDownSyncSave = function (keycode) {
-    var choices = [
-        "同步存档到服务器", "从服务器加载存档", "清空本地存档", "返回主菜单"
-    ];
     if (keycode==38) {
         core.status.event.selection--;
-        if (core.status.event.selection<0) core.status.event.selection=0;
         core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
     }
     if (keycode==40) {
         core.status.event.selection++;
-        if (core.status.event.selection>=choices.length) core.status.event.selection=choices.length-1;
         core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
     }
 }
@@ -1506,7 +1498,7 @@ events.prototype.keyDownSyncSave = function (keycode) {
 events.prototype.keyUpSyncSave = function (keycode) {
     if (keycode==27 || keycode==88) {
         core.status.event.selection=2;
-        core.ui.drawSettings(false);
+        core.ui.drawSettings();
         return;
     }
     var choices = [

@@ -257,6 +257,8 @@ ui.prototype.drawChoices = function(content, choices) {
 
     if (choices.length>0) {
         if (!core.isset(core.status.event.selection)) core.status.event.selection=0;
+        if (core.status.event.selection<0) core.status.event.selection=0;
+        if (core.status.event.selection>=choices.length) core.status.event.selection=choices.length-1;
         var len = core.canvas.ui.measureText(core.replaceText(choices[core.status.event.selection].text || choices[core.status.event.selection])).width;
         core.strokeRect('ui', 208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28, "#FFD700", 2);
     }
@@ -271,7 +273,8 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     core.status.event.data = {'yes': yesCallback, 'no': noCallback};
     core.status.event.ui = text;
 
-    if (!core.isset(core.status.event.selection)) core.status.event.selection=1;
+    if (!core.isset(core.status.event.selection) || core.status.event.selection>1) core.status.event.selection=1;
+    if (core.status.event.selection<0) core.status.event.selection=0;
 
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
     core.clearMap('ui', 0, 0, 416, 416);
@@ -325,13 +328,11 @@ ui.prototype.drawSwitchs = function() {
         "返回主菜单"
     ];
     this.drawChoices(null, choices);
-
 }
 
 ////// 绘制系统菜单栏 //////
-ui.prototype.drawSettings = function (need) {
-    if (!core.checkStatus('settings', need))
-        return;
+ui.prototype.drawSettings = function () {
+    core.status.event.id = 'settings';
 
     this.drawChoices(null, [
         "系统设置", "快捷商店", "同步存档", "重新开始", "操作帮助", "关于本塔", "返回游戏"
@@ -339,9 +340,7 @@ ui.prototype.drawSettings = function (need) {
 }
 
 ////// 绘制快捷商店选择栏 //////
-ui.prototype.drawQuickShop = function (need) {
-    if (core.isset(need) && !core.checkStatus('selectShop', need))
-        return;
+ui.prototype.drawQuickShop = function () {
 
     core.status.event.id = 'selectShop';
 

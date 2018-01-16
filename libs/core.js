@@ -79,9 +79,16 @@ function core() {
         'mouseOutCheck': 1,
         'moveStepBeforeStop': [],
         'downTime': null,
-        'route': [], // 当前路线！
 
-        // 勇士状态；中心对称飞行器
+        // 路线&回放
+        'route': [],
+        'replay': {
+            'replaying': false,
+            'pausing': false,
+            'animate': false, // 正在某段动画中
+            'toReplay': [],
+            'totalList': []
+        },
 
         // event事件
         'saveIndex': null,
@@ -502,6 +509,7 @@ core.prototype.restart = function() {
 
 ////// 按下某个键时 //////
 core.prototype.onkeyDown = function(e) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
     if (!core.isset(core.status.holdingKeys))core.status.holdingKeys=[];
     var isArrow={37:true,38:true,39:true,40:true}[e.keyCode]
     if(isArrow && !core.status.lockControl){
@@ -519,6 +527,7 @@ core.prototype.onkeyDown = function(e) {
 
 ////// 放开某个键时 //////
 core.prototype.onkeyUp = function(e) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
     var isArrow={37:true,38:true,39:true,40:true}[e.keyCode]
     if(isArrow && !core.status.lockControl){
         for(var ii =0;ii<core.status.holdingKeys.length;ii++){
@@ -537,6 +546,7 @@ core.prototype.onkeyUp = function(e) {
 
 ////// 按住某个键时 //////
 core.prototype.pressKey = function (keyCode) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
     if (keyCode === core.status.holdingKeys.slice(-1)[0]) {
         core.keyDown(keyCode);
         window.setTimeout(function(){core.pressKey(keyCode);},30);
@@ -545,6 +555,7 @@ core.prototype.pressKey = function (keyCode) {
 
 ////// 根据按下键的code来执行一系列操作 //////
 core.prototype.keyDown = function(keyCode) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
     if(core.status.automaticRouting || core.status.automaticRouted) {
         core.stopAutomaticRoute();
     }
@@ -644,6 +655,7 @@ core.prototype.keyDown = function(keyCode) {
 
 ////// 根据放开键的code来执行一系列操作 //////
 core.prototype.keyUp = function(keyCode) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
 
     if (core.status.lockControl) {
         core.status.holdingKeys = [];
@@ -713,7 +725,7 @@ core.prototype.keyUp = function(keyCode) {
     switch (keyCode) {
         case 27: // ESC
             if (core.status.heroStop)
-                core.ui.drawSettings(true);
+                core.openSettings(true);
             break;
         case 71: // G
             if (core.status.heroStop)
@@ -744,7 +756,7 @@ core.prototype.keyUp = function(keyCode) {
             break;
         case 75: // K
             if (core.status.heroStop)
-                core.ui.drawQuickShop(true);
+                core.openQuickShop(true);
             break;
         case 32: // SPACE
             if (!core.status.lockControl && core.status.heroStop)
@@ -801,6 +813,7 @@ core.prototype.keyUp = function(keyCode) {
 
 ////// 点击（触摸）事件按下时 //////
 core.prototype.ondown = function (x ,y) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
     if (!core.status.played || core.status.lockControl) {
         core.onclick(x, y, []);
         return;
@@ -820,6 +833,7 @@ core.prototype.ondown = function (x ,y) {
 
 ////// 当在触摸屏上滑动时 //////
 core.prototype.onmove = function (x ,y) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
     if (core.status.holdingPath==0){return;}
     core.status.mouseOutCheck =1;
     var pos={'x':x,'y':y};
@@ -843,6 +857,7 @@ core.prototype.onmove = function (x ,y) {
 
 ////// 当点击（触摸）事件放开时 //////
 core.prototype.onup = function () {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
     core.status.holdingPath=0;
     if(core.status.stepPostfix.length>0){
         var stepPostfix = [];
@@ -897,6 +912,7 @@ core.prototype.getClickLoc = function (x, y) {
 
 ////// 具体点击屏幕上(x,y)点时，执行的操作 //////
 core.prototype.onclick = function (x, y, stepPostfix) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
     // console.log("Click: (" + x + "," + y + ")");
 
     // 非游戏屏幕内
@@ -1018,6 +1034,7 @@ core.prototype.onclick = function (x, y, stepPostfix) {
 
 ////// 滑动鼠标滚轮时的操作 //////
 core.prototype.onmousewheel = function (direct) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
     // 向下滚动是 -1 ,向上是 1
 
     // 楼层飞行器
@@ -1341,7 +1358,7 @@ core.prototype.stopAutoHeroMove = function () {
 }
 
 ////// 设置勇士的自动行走路线 //////
-core.prototype.setAutoHeroMove = function (steps, start) {
+core.prototype.setAutoHeroMove = function (steps) {
     if (steps.length == 0) {
         return;
     }
@@ -1394,6 +1411,8 @@ core.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
             core.moveOneStep();
             if (core.status.heroStop)
                 core.drawHero(direction, core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+            clearInterval(core.interval.heroMoveInterval);
+            core.status.heroMoving = false;
             if (core.isset(callback)) callback();
         }
     }, 12.5);
@@ -1401,61 +1420,67 @@ core.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
 
 ////// 设置勇士行走过程中对事件的触发检测 //////
 core.prototype.setHeroMoveTriggerInterval = function () {
-    var direction, x, y;
+    core.interval.heroMoveTriggerInterval = window.setInterval(function () {
+        if (!core.status.heroStop) {
+            core.moveAction();
+        }
+    }, 50);
+}
+
+////// 实际每一步的行走过程 //////
+core.prototype.moveAction = function (callback) {
     var scan = {
         'up': {'x': 0, 'y': -1},
         'left': {'x': -1, 'y': 0},
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
-    core.interval.heroMoveTriggerInterval = window.setInterval(function () {
-        if (!core.status.heroStop) {
-            direction = core.getHeroLoc('direction');
-            x = core.getHeroLoc('x');
-            y = core.getHeroLoc('y');
-            var noPass = core.noPass(x + scan[direction].x, y + scan[direction].y), canMove = core.canMoveHero();
-            if (noPass || !canMove) {
-                core.status.route.push(direction);
-                if (canMove) // 非箭头：触发
-                    core.trigger(x + scan[direction].x, y + scan[direction].y);
-                core.drawHero(direction, x, y, 'stop');
-                if (core.status.autoHeroMove) {
-                    core.status.movedStep++;
-                    if (core.status.destStep == core.status.movedStep) {
-                        core.status.autoHeroMove = false;
-                        core.status.destStep = 0;
-                        core.status.movedStep = 0;
-                        core.status.moveStepBeforeStop=[];
-                        core.stopAutomaticRoute();
-                    }
-                }
-                else {
-                    core.status.heroStop = true;
-                }
-                return;
+    var direction = core.getHeroLoc('direction');
+    var x = core.getHeroLoc('x');
+    var y = core.getHeroLoc('y');
+    var noPass = core.noPass(x + scan[direction].x, y + scan[direction].y), canMove = core.canMoveHero();
+    if (noPass || !canMove) {
+        core.status.route.push(direction);
+        if (canMove) // 非箭头：触发
+            core.trigger(x + scan[direction].x, y + scan[direction].y);
+        core.drawHero(direction, x, y, 'stop');
+        if (core.status.autoHeroMove) {
+            core.status.movedStep++;
+            if (core.status.destStep == core.status.movedStep) {
+                core.status.autoHeroMove = false;
+                core.status.destStep = 0;
+                core.status.movedStep = 0;
+                core.status.moveStepBeforeStop=[];
+                core.stopAutomaticRoute();
             }
-            core.setHeroMoveInterval(direction, x, y, function () {
-                if (core.status.autoHeroMove) {
-                    core.status.movedStep++;
-                    if (core.status.destStep == core.status.movedStep) {
-                        core.status.autoHeroMove = false;
-                        core.status.destStep = 0;
-                        core.status.movedStep = 0;
-                        core.stopHero();
-                        core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
-                    }
-                }
-                else if (core.status.heroStop) {
+        }
+        else {
+            core.status.heroStop = true;
+        }
+        if (core.isset(callback))
+            callback();
+    }
+    else {
+        core.setHeroMoveInterval(direction, x, y, function () {
+            if (core.status.autoHeroMove) {
+                core.status.movedStep++;
+                if (core.status.destStep == core.status.movedStep) {
+                    core.status.autoHeroMove = false;
+                    core.status.destStep = 0;
+                    core.status.movedStep = 0;
+                    core.stopHero();
                     core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
                 }
-                core.status.route.push(direction);
-                core.trigger(core.getHeroLoc('x'), core.getHeroLoc('y'));
-                clearInterval(core.interval.heroMoveInterval);
-                core.status.heroMoving = false;
-                core.checkBlock();
-            });
-        }
-    }, 50);
+            }
+            else if (core.status.heroStop) {
+                core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+            }
+            core.status.route.push(direction);
+            core.trigger(core.getHeroLoc('x'), core.getHeroLoc('y'));
+            core.checkBlock();
+            if (core.isset(callback)) callback();
+        });
+    }
 }
 
 ////// 设置勇士的方向（转向） //////
@@ -1482,8 +1507,6 @@ core.prototype.canMoveHero = function() {
         if(nowIsArrow){
             var nowArrow = nowId.slice(5).toLowerCase();
             if (direction != nowArrow) {
-                // core.status.heroStop = true;
-                // core.turnHero(direction);
                 return false;
             }
         }
@@ -1502,8 +1525,6 @@ core.prototype.canMoveHero = function() {
         if(isArrow){
             var nextArrow = nextId.slice(5).toLowerCase();
             if ( (scan[direction].x + scan[nextArrow].x) == 0 && (scan[direction].y + scan[nextArrow].y) == 0 ) {
-                // core.status.heroStop = true;
-                // core.turnHero(direction);
                 return false;
             }
         }
@@ -1512,9 +1533,17 @@ core.prototype.canMoveHero = function() {
 }
 
 ////// 让勇士开始移动 //////
-core.prototype.moveHero = function (direction) {
-    core.setHeroLoc('direction', direction);
-    core.status.heroStop = false;
+core.prototype.moveHero = function (direction, callback) {
+    if (core.isset(direction))
+        core.setHeroLoc('direction', direction);
+    if (!core.isset(callback)) { // 如果不存在回调函数，则使用heroMoveTrigger
+        core.status.heroStop = false;
+    }
+    else { // 否则，只向某个方向移动一步，然后调用callback
+        core.moveAction(function () {
+            callback();
+        })
+    }
 }
 
 /////// 使用事件让勇士移动。这个函数将不会触发任何事件 //////
@@ -1551,11 +1580,14 @@ core.prototype.eventMoveHero = function(steps, time, callback) {
         'right': {'x': 1, 'y': 0}
     };
 
+    core.status.replay.animate=true;
+
     var animate=window.setInterval(function() {
         var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
         if (moveSteps.length==0) {
             clearInterval(animate);
             core.drawHero(core.getHeroLoc('direction'), x, y, 'stop');
+            core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
         else {
@@ -1598,8 +1630,10 @@ core.prototype.waitHeroToStop = function(callback) {
     core.stopAutomaticRoute();
     core.clearContinueAutomaticRoute();
     if (core.isset(callback)) {
+        core.status.replay.animate=true;
         core.lockControl();
         setTimeout(function(){
+            core.status.replay.animate=false;
             core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
             callback();
         }, 30);
@@ -1695,7 +1729,6 @@ core.prototype.openDoor = function (id, x, y, needKey, callback) {
                 core.drawTip("你没有" + core.material.items[key].name);
             else core.drawTip("无法开启此门");
             core.clearContinueAutomaticRoute();
-            if (core.isset(callback)) callback();
             return;
         }
     }
@@ -1708,12 +1741,14 @@ core.prototype.openDoor = function (id, x, y, needKey, callback) {
         speed=100;
     }
     var door = core.material.icons.animates[doorId];
+    core.status.replay.animate=true;
     core.interval.openDoorAnimate = window.setInterval(function () {
         state++;
         if (state == 4) {
             clearInterval(core.interval.openDoorAnimate);
             core.interval.openDoorAnimate=null;
             core.removeBlock(x, y);
+            core.status.replay.animate=false;
             core.events.afterOpenDoor(id,x,y,callback);
             return;
         }
@@ -1738,7 +1773,7 @@ core.prototype.battle = function (id, x, y, force, callback) {
         core.clearContinueAutomaticRoute();
         return;
     }
-    if (core.flags.battleAnimate) {
+    if (core.flags.battleAnimate&&!core.status.replay.replaying) {
         core.waitHeroToStop(function() {
             core.ui.drawBattleAnimate(id, function() {
                 core.afterBattle(id, x, y, callback);
@@ -1822,6 +1857,7 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
     core.stopHero();
     core.stopAutomaticRoute();
     core.clearContinueAutomaticRoute();
+    core.status.replay.animate=true;
     core.dom.floorNameLabel.innerHTML = core.status.maps[floorId].title;
     if (!core.isset(stair) && !core.isset(heroLoc))
         heroLoc = core.status.hero.loc;
@@ -1896,6 +1932,7 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
 
                     var changed = function () {
                         core.unLockControl();
+                        core.status.replay.animate=false;
                         core.events.afterChangeFloor(floorId);
                         if (core.isset(callback)) callback();
                     }
@@ -2254,6 +2291,7 @@ core.prototype.getBlock = function (x, y, floorId, needEnable) {
 ////// 显示移动某块的动画，达到{“type”:”move”}的效果 //////
 core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
     time = time || 500;
+    core.status.replay.animate=true;
 
     clearInterval(core.interval.tipAnimate);
     core.saveCanvas('data');
@@ -2331,6 +2369,7 @@ core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
                 core.loadCanvas('data');
                 core.clearMap('data', 0, 0, 416, 416);
                 core.setOpacity('data', 1);
+                core.status.replay.animate=false;
                 if (core.isset(callback)) callback();
             }
         }
@@ -2354,6 +2393,7 @@ core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
 ////// 显示/隐藏某个块时的动画效果 //////
 core.prototype.animateBlock = function (x,y,type,time,callback) {
     if (type!='hide') type='show';
+    core.status.replay.animate=true;
 
     clearInterval(core.interval.tipAnimate);
     core.saveCanvas('data');
@@ -2389,6 +2429,7 @@ core.prototype.animateBlock = function (x,y,type,time,callback) {
             core.loadCanvas('data');
             core.clearMap('data', 0, 0, 416, 416);
             core.setOpacity('data', 1);
+            core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
     }, time/10);
@@ -2811,11 +2852,9 @@ core.prototype.snipe = function (snipes) {
                 // 不存在自定义事件
                 if (core.status.event.id==null)
                     core.unLockControl();
+                core.replay();
             }
         }, time/16);
-
-
-
     });
 }
 
@@ -2850,6 +2889,7 @@ core.prototype.setFg = function(color, time, callback) {
     }
 
     var step=0;
+    core.status.replay.animate=true;
     var changeAnimate = setInterval(function() {
         step++;
 
@@ -2868,6 +2908,7 @@ core.prototype.setFg = function(color, time, callback) {
         if (step>=25) {
             clearInterval(changeAnimate);
             core.status.curtainColor = color;
+            core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
     }, time/25);
@@ -3104,6 +3145,13 @@ core.prototype.drawTip = function (text, itemIcon) {
 ////// 地图中间绘制一段文字 //////
 core.prototype.drawText = function (contents, callback) {
     if (core.isset(contents)) {
+
+        // 合并
+        if (core.isset(core.status.event)&&core.status.event.id=='action') {
+            core.insertAction(contents,null,null,callback);
+            return;
+        }
+
         if (typeof contents == 'string') {
             contents = [{'content': contents}];
         }
@@ -3308,6 +3356,47 @@ core.prototype.debug = function() {
     core.drawTip("作弊成功");
 }
 
+core.prototype.testReplay = function(list) {
+    core.status.replay.replaying=true;
+    core.status.replay.toReplay=core.clone(list);
+    core.replay();
+}
+
+////// 回放 //////
+core.prototype.replay = function () {
+    if (!core.status.replay.replaying) return; // 没有回放
+    if (core.status.replay.pausing) return; // 暂停状态
+    if (core.status.replay.animate) return; // 正在某段动画中
+
+    if (core.status.replay.toReplay.length==0) { // 回放完毕
+        core.status.replay.replaying=false;
+        core.insertAction("录像回放完毕！");
+        return;
+    }
+
+    var action=core.status.replay.toReplay.shift();
+
+    if (action=='up' || action=='down' || action=='left' || action=='right')
+        core.moveHero(action, function () {
+            core.replay();
+        });
+    else if (action.indexOf("item:")==0) {
+
+    }
+    else if (action.indexOf("fly:")==0) {
+
+    }
+    else if (action.indexOf("shop:")==0) {
+
+    }
+    else { // 其他情况：回放失败
+        core.status.replay.replaying=false;
+        core.insertAction("录像出错，回放失败。");
+        return;
+    }
+
+}
+
 ////// 判断当前能否进入某个事件 //////
 core.prototype.checkStatus = function (name, need, item) {
     if (need && core.status.event.id == name) {
@@ -3333,6 +3422,7 @@ core.prototype.checkStatus = function (name, need, item) {
 
 ////// 点击怪物手册时的打开操作 //////
 core.prototype.openBook = function (need) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
     if (!core.checkStatus('book', need, true))
         return;
     core.useItem('book');
@@ -3340,6 +3430,7 @@ core.prototype.openBook = function (need) {
 
 ////// 点击楼层传送器时的打开操作 //////
 core.prototype.useFly = function (need) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
     if (!core.checkStatus('fly', need, true))
         return;
     if (core.flags.flyNearStair && !core.nearStair()) {
@@ -3362,13 +3453,23 @@ core.prototype.useFly = function (need) {
 
 ////// 点击工具栏时的打开操作 //////
 core.prototype.openToolbox = function (need) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
     if (!core.checkStatus('toolbox', need))
         return;
     core.ui.drawToolbox();
 }
 
+////// 点击快捷商店按钮时的打开操作 //////
+core.prototype.openQuickShop = function (need) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (!core.checkStatus('selectShop', need))
+        return;
+    core.ui.drawQuickShop();
+}
+
 ////// 点击保存按钮时的打开操作 //////
 core.prototype.save = function(need) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
     if (!core.checkStatus('save', need))
         return;
     core.ui.drawSLPanel(core.status.saveIndex);
@@ -3376,6 +3477,7 @@ core.prototype.save = function(need) {
 
 ////// 点击读取按钮时的打开操作 //////
 core.prototype.load = function (need) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
 
     // 游戏开始前读档
     if (!core.isPlaying()) {
@@ -3389,6 +3491,14 @@ core.prototype.load = function (need) {
     if (!core.checkStatus('load', need))
         return;
     core.ui.drawSLPanel(core.status.saveIndex);
+}
+
+////// 点击设置按钮时的操作 //////
+core.prototype.openSettings = function (need) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (!core.checkStatus('settings', need))
+        return;
+    core.ui.drawSettings();
 }
 
 ////// 自动存档 //////
@@ -3720,8 +3830,8 @@ core.prototype.hasFlag = function(flag) {
 }
 
 ////// 往当前事件列表之前插入一系列事件 //////
-core.prototype.insertAction = function (list) {
-    core.events.insertAction(list);
+core.prototype.insertAction = function (list, x, y, callback) {
+    core.events.insertAction(list, x, y, callback);
 }
 
 ////// 锁定状态栏，常常用于事件处理 //////

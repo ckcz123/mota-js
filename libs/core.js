@@ -3936,6 +3936,20 @@ core.prototype.isset = function (val) {
     return true
 }
 
+////// 下载文件 //////
+core.prototype.download = function (filename, content) {
+
+    // 检测是否浏览器
+
+    var aLink = document.createElement('a');
+    var blob = new Blob([content]);
+    var evt = document.createEvent("HTMLEvents");
+    evt.initEvent("click", false, false);
+    aLink.download = fileName;
+    aLink.href = URL.createObjectURL(blob);
+    aLink.dispatchEvent(evt);
+}
+
 ////// 播放背景音乐 //////
 core.prototype.playBgm = function (bgm) {
 

@@ -119,7 +119,7 @@ events.prototype.win = function(reason) {
         core.drawText([
             "\t[结局2]恭喜通关！你的分数是${status:hp}。"
         ], function () {
-            core.restart();
+            core.events.gameOver();
         })
     });
 }
@@ -130,9 +130,36 @@ events.prototype.lose = function(reason) {
         core.drawText([
             "\t[结局1]你死了。\n如题。"
         ], function () {
-            core.restart();
+            core.events.gameOver();
         });
     })
+}
+
+////// 游戏结束 //////
+events.prototype.gameOver = function () {
+
+    // 上传成绩
+    var confirmUpload = function () {
+
+
+
+    }
+
+    // 下载录像
+    var confirmDownload = function () {
+        core.drawConfirmBox("你想下载录像吗？", function () {
+
+            // 检测是否微信浏览器
+            if ()
+
+
+        }, function () {
+            confirmUpload();
+        })
+    }
+
+    confirmDownload();
+
 }
 
 ////// 转换楼层结束的事件 //////

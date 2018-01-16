@@ -3441,7 +3441,7 @@ core.prototype.replay = function (list) {
                         return;
                     }
                     var selection = parseInt(selections.shift());
-                    if (isNaN(core.status.event.selection=selection) || selection<0 || selection>=choices.length || !core.events.clickShop(6, topIndex+selection)) {
+                    if (isNaN(selection) || selection<0 || selection>=choices.length || !core.events.clickShop(6, topIndex+selection)) {
                         clearInterval(shopInterval);
                         core.status.replay.replaying=false;
                         core.drawTip("录像文件出错");

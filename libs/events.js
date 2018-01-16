@@ -968,6 +968,9 @@ events.prototype.clickShop = function(x,y) {
     if (x >= 5 && x <= 7) {
         var topIndex = 6 - parseInt(choices.length / 2);
         if (y>=topIndex && y<topIndex+choices.length) {
+
+            core.status.event.selection=y-topIndex;
+
             //this.insertAction(choices[y-topIndex].action);
             //this.doAction();
             var money = core.getStatus('money'), experience = core.getStatus('experience');

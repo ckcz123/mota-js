@@ -293,7 +293,12 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "openShop": // 打开一个全局商店
-            core.events.openShop(data.id);
+            if (core.status.replay.replaying) { // 正在播放录像，简单将visited置为true
+                core.status.shops[data.id].visited=true;
+                this.doAction();
+            }
+            else
+                core.events.openShop(data.id);
             break;
         case "disableShop": // 禁用一个全局商店
             core.events.disableQuickShop(data.id);
@@ -374,6 +379,30 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "choices": // 提供选项
+            if (core.status.replay.replaying) {
+                if (core.status.replay.toReplay.length==0) { // 回放完毕
+                    core.status.replay.replaying=false;
+                    core.drawTip("录像回放完毕");
+                }
+                else {
+                    var action = core.status.replay.toReplay.shift(), index;
+                    if (action.indexOf("choices:")==0 && ((index=parseInt(action.substring(8)))>=0) && index<data.choices.length) {
+                            //core.status.route.push("choices:"+index);
+                            //this.insertAction(data.choices[index].action);
+                            //this.doAction();
+                            core.status.event.selection=index;
+                            setTimeout(function () {
+                                core.status.route.push("choices:"+index);
+                                core.events.insertAction(data.choices[index].action);
+                                core.events.doAction();
+                            }, 500)
+                    }
+                    else {
+                        core.status.replay.replaying=false;
+                        core.drawTip("录像文件出错");
+                    }
+                }
+            }
             core.ui.drawChoices(data.text, data.choices);
             break;
         case "win":
@@ -488,7 +517,7 @@ events.prototype.disableQuickShop = function (shopId) {
 }
 
 ////// 能否使用快捷商店 //////
-events.prototype.canUseQuickShop = function(shopIndex) {
+events.prototype.canUseQuickShop = function(shopId) {
     if (core.isset(core.floors[core.status.floorId].canUseQuickShop) && !core.isset(core.floors[core.status.floorId].canUseQuickShop))
         return '当前不能使用快捷商店。';
 
@@ -952,7 +981,7 @@ events.prototype.clickShop = function(x,y) {
 
             if (need > eval(use)) {
                 core.drawTip("你的"+use_text+"不足");
-                return;
+                return false;
             }
 
             core.status.event.data.actions.push(y-topIndex);
@@ -981,7 +1010,9 @@ events.prototype.clickShop = function(x,y) {
                 core.ui.drawQuickShop();
             else core.ui.closePanel();
         }
+        else return false;
     }
+    return true;
 }
 
 ////// 商店界面时，按下某个键的操作 //////
@@ -1023,7 +1054,7 @@ events.prototype.clickQuickShop = function(x, y) {
     if (x >= 5 && x <= 7) {
         var topIndex = 6 - parseInt(keys.length / 2);
         if (y>=topIndex && y<topIndex+keys.length) {
-            var reason = core.events.canUseQuickShop(y-topIndex);
+            var reason = core.events.canUseQuickShop(keys[y - topIndex]);
             if (core.isset(reason)) {
                 core.drawText(reason);
                 return;

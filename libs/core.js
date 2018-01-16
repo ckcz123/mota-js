@@ -766,6 +766,22 @@ core.prototype.keyUp = function(keyCode) {
             if (!core.status.lockControl && core.status.heroStop)
                 core.ui.drawHelp();
             break;
+        case 82: // R
+            if (!core.status.lockControl && core.status.heroStop) {
+                core.ui.drawConfirmBox("确定要回放录像吗？", function () {
+                    core.ui.closePanel();
+                    var hard=core.status.hard, route=core.clone(core.status.route);
+                    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
+                    core.events.setInitData(hard);
+                    core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
+                        core.setHeroMoveTriggerInterval();
+                        core.replay(route);
+                    });
+                }, function () {
+                    core.ui.closePanel();
+                });
+            }
+            break;
         case 37: // UP
             break;
         case 38: // DOWN
@@ -1483,18 +1499,16 @@ core.prototype.moveAction = function (callback) {
     }
 }
 
-////// 设置勇士的方向（转向） //////
-core.prototype.turnHero = function(direction) {
-    if (core.isset(direction)) {
-        core.status.hero.loc.direction = direction;
-    }
-    else if (core.status.hero.loc.direction == 'up') core.status.hero.loc.direction = 'right';
+////// 转向 //////
+core.prototype.turnHero = function() {
+    if (core.status.hero.loc.direction == 'up') core.status.hero.loc.direction = 'right';
     else if (core.status.hero.loc.direction == 'right') core.status.hero.loc.direction = 'down';
     else if (core.status.hero.loc.direction == 'down') core.status.hero.loc.direction = 'left';
     else if (core.status.hero.loc.direction == 'left') core.status.hero.loc.direction = 'up';
     core.drawHero(core.status.hero.loc.direction, core.status.hero.loc.x, core.status.hero.loc.y, 'stop', 0, 0);
     core.status.automaticRoutingTemp = {'destX': 0, 'destY': 0, 'moveStep': []};
     core.canvas.ui.clearRect(0, 0, 416, 416);
+    core.status.route.push("turn");
 }
 
 ////// 勇士能否前往某方向 //////
@@ -1832,12 +1846,14 @@ core.prototype.trigger = function (x, y) {
             if (core.isset(mapBlocks[b].event) && core.isset(mapBlocks[b].event.trigger)) {
                 var trigger = mapBlocks[b].event.trigger;
                 // 转换楼层能否穿透
+                /*
                 if (trigger=='changeFloor' && (core.status.autoHeroMove || core.status.autoStep<core.status.autoStepRoutes.length)) {
                     var canCross = core.flags.portalWithoutTrigger;
                     if (core.isset(mapBlocks[b].event.data) && core.isset(mapBlocks[b].event.data.portalWithoutTrigger))
                         canCross=mapBlocks[b].event.data.portalWithoutTrigger;
                     if (canCross) continue;
                 }
+                */
                 core.material.events[trigger](mapBlocks[b], core, function (data) {
 
                 });
@@ -3028,8 +3044,8 @@ core.prototype.removeItem = function (itemId) {
 }
 
 ////// 使用某个物品 //////
-core.prototype.useItem = function (itemId) {
-    core.items.useItem(itemId);
+core.prototype.useItem = function (itemId, callback) {
+    core.items.useItem(itemId, callback);
     return;
 }
 
@@ -3061,6 +3077,7 @@ core.prototype.getNextItem = function() {
     if (block==null) return;
     if (block.block.event.trigger=='getItem') {
         core.getItem(block.block.event.id, 1, nextX, nextY);
+        core.status.route.push("getNext");
     }
 }
 
@@ -3356,14 +3373,16 @@ core.prototype.debug = function() {
     core.drawTip("作弊成功");
 }
 
-core.prototype.testReplay = function(list) {
-    core.status.replay.replaying=true;
-    core.status.replay.toReplay=core.clone(list);
-    core.replay();
-}
-
 ////// 回放 //////
-core.prototype.replay = function () {
+core.prototype.replay = function (list) {
+
+    if (core.isset(list) && (list instanceof Array)) {
+        core.status.replay.replaying=true;
+        core.status.replay.toReplay = core.clone(list);
+        this.replay();
+        return;
+    }
+
     if (!core.status.replay.replaying) return; // 没有回放
     if (core.status.replay.pausing) return; // 暂停状态
     if (core.status.replay.animate) return; // 正在某段动画中
@@ -3376,24 +3395,83 @@ core.prototype.replay = function () {
 
     var action=core.status.replay.toReplay.shift();
 
-    if (action=='up' || action=='down' || action=='left' || action=='right')
+    if (action=='up' || action=='down' || action=='left' || action=='right') {
         core.moveHero(action, function () {
             core.replay();
         });
-    else if (action.indexOf("item:")==0) {
-
-    }
-    else if (action.indexOf("fly:")==0) {
-
-    }
-    else if (action.indexOf("shop:")==0) {
-
-    }
-    else { // 其他情况：回放失败
-        core.status.replay.replaying=false;
-        core.insertAction("录像出错，回放失败。");
         return;
     }
+    else if (action.indexOf("item:")==0) {
+        var itemId = action.substring(5);
+        if (core.canUseItem(itemId)) {
+            core.useItem(itemId, function () {
+                core.replay();
+            });
+            return;
+        }
+    }
+    else if (action.indexOf("fly:")==0) {
+        var floorId=action.substring(4);
+        var toIndex=core.status.hero.flyRange.indexOf(floorId);
+        var nowIndex=core.status.hero.flyRange.indexOf(core.status.floorId);
+        if (core.hasItem('fly') && toIndex>=0 && nowIndex>=0) {
+            var stair=toIndex<nowIndex?"upFloor":"downFloor";
+            core.status.route.push("fly:"+core.floorIds.indexOf(floorId));
+            core.changeFloor(floorId, stair, null, null, function () {
+                core.replay();
+            });
+            return;
+        }
+    }
+    else if (action.indexOf("shop:")==0) {
+        var sps=action.substring(5).split(":");
+        var shopId=sps[0], selections=sps[1].split("");
+
+        if (selections.length>0 && core.events.canUseQuickShop(shopId)==null) {
+            var shop=core.status.shops[shopId];
+            if (core.isset(shop) && shop.visited) { // 商店可用
+                var choices = shop.choices;
+                var topIndex = 6 - parseInt(choices.length / 2);
+                core.events.openShop(shopId, false);
+                var shopInterval = setInterval(function () {
+                    if (selections.length==0) {
+                        clearInterval(shopInterval);
+                        core.events.clickShop(6, topIndex+choices.length);
+                        core.replay();
+                        return;
+                    }
+                    var selection = parseInt(selections.shift());
+                    if (isNaN(core.status.event.selection=selection) || selection<0 || selection>=choices.length || !core.events.clickShop(6, topIndex+selection)) {
+                        clearInterval(shopInterval);
+                        core.status.replay.replaying=false;
+                        core.drawTip("录像文件出错");
+                        return;
+                    }
+                }, 500);
+                return;
+            }
+        }
+    }
+    else if (action=='turn') {
+        core.turnHero();
+        core.replay();
+        return;
+    }
+    else if (action=='getNext') {
+        if (core.flags.enableGentleClick && core.getBlock(core.nextX(), core.nextY())!=null) {
+            var nextX = core.nextX(), nextY = core.nextY();
+            var block = core.getBlock(nextX, nextY);
+            if (block!=null && block.block.event.trigger=='getItem') {
+                core.getItem(block.block.event.id, 1, nextX, nextY);
+                core.status.route.push("getNext");
+                core.replay();
+                return;
+            }
+        }
+    }
+
+    core.status.replay.replaying=false;
+    core.insertAction("录像文件出错");
 
 }
 
@@ -3748,6 +3826,10 @@ core.prototype.encodeRoute = function (route) {
                 var sp=t.substring(5).split(":");
                 ans+="S"+shops.indexOf(sp[0])+":"+sp[1];
             }
+            else if (t=='turn')
+                ans+='T';
+            else if (t=='getNext')
+                ans+='G';
         }
     });
     if (cnt>0) {
@@ -3788,6 +3870,8 @@ core.prototype.decodeRoute = function (route) {
             case "F": ans.push("fly:"+core.floorIds[number]); break;
             case "C": ans.push("choices:"+number); break;
             case "S": ++index; ans.push("shop:"+shops[number]+":"+getNumber(true)); break;
+            case "T": ans.push("turn"); break;
+            case "G": ans.push("getNext"); break;
         }
     }
     return ans;

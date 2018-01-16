@@ -166,7 +166,6 @@ data.prototype.init = function() {
         "displayEnemyDamage": true, // 是否地图怪物显伤；用户可以手动在菜单栏中开关
         "displayExtraDamage": false, // 是否地图高级显伤（领域、夹击等）；用户可以手动在菜单栏中开关
         "enableGentleClick": true, // 是否允许轻触（获得面前物品）
-        "portalWithoutTrigger": true, // 经过楼梯、传送门时是否能“穿透”。穿透的意思是，自动寻路得到的的路径中间经过了楼梯，行走时是否触发楼层转换事件
         "potionWhileRouting": false, // 寻路算法是否经过血瓶；如果该项为false，则寻路算法会自动尽量绕过血瓶
     }
 }

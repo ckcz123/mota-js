@@ -658,13 +658,13 @@ ui.prototype.drawWaiting = function(text) {
     var text_length = core.canvas.ui.measureText(text).width;
 
     var right = Math.max(text_length+50, 220);
-    var left = 416-2*right, top = 208 - 32 - 16, bottom = 416 - 2 * top;
+    var left = 208-right/2, top = 208 - 32 - 16, bottom = 416 - 2 * top;
 
     core.fillRect('ui', left, top, right, bottom, background);
     core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
 
     core.canvas.ui.textAlign = "center";
-    core.fillText('ui', text, 208, top + 56, "#FFFFFF", "bold 17px Verdana");
+    core.fillText('ui', text, 208, top + 56);
 
 }
 

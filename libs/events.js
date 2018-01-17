@@ -1549,8 +1549,8 @@ events.prototype.clickSettings = function (x,y) {
                             response.data.forEach(function (t) {
                                 if (toAdd) text+="\n\n";
                                 toAdd=true;
-                                if (t.hard!='') text+=t.hard+"难度：\n"
-                                text+="当前已有"+t.people+"人次游戏，"+t.score+"人次通关。";
+                                if (t.hard!='') text+=t.hard+"难度： "
+                                text+="已有"+t.people+"人次游戏，"+t.score+"人次通关。";
                                 if (core.isset(t.max) && t.max>0) {
                                     text+="\n当前MAX为"+t.max+"，最早由"+(t.username||"匿名")+"于"+core.formatDate(new Date(1000*t.timestamp))+"打出。";
                                 }

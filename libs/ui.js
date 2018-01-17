@@ -322,9 +322,10 @@ ui.prototype.drawSwitchs = function() {
     var choices = [
         "背景音乐："+(core.musicStatus.bgmStatus ? "[ON]" : "[OFF]"),
         "背景音效："+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
-        "战斗动画： " + (core.flags.battleAnimate ? "[ON]" : "[OFF]"),
-        "怪物显伤： " + (core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
-        "领域显伤： " + (core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
+        "战斗动画： "+(core.flags.battleAnimate ? "[ON]" : "[OFF]"),
+        "怪物显伤： "+(core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
+        "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
+        "下载离线版本",
         "返回主菜单"
     ];
     this.drawChoices(null, choices);
@@ -335,7 +336,7 @@ ui.prototype.drawSettings = function () {
     core.status.event.id = 'settings';
 
     this.drawChoices(null, [
-        "系统设置", "快捷商店", "同步存档", "重新开始", "数据统计", "操作帮助", "关于本塔", "返回游戏"
+        "系统设置", "快捷商店", "浏览地图", "同步存档", "重新开始", "数据统计", "操作帮助", "关于本塔", "返回游戏"
     ]);
 }
 
@@ -904,6 +905,36 @@ ui.prototype.drawFly = function(page) {
         core.fillText('ui', '▼', 356, 247+64, '#FFFFFF', "17px Verdana");
     core.strokeRect('ui', 20, 100, 273, 273, '#FFFFFF', 2);
     this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 20, 100, 273);
+}
+
+ui.prototype.drawMaps = function (index) {
+    if (!core.isset(index)) index=core.floorIds.indexOf(core.status.floorId);
+
+    if (index<0) index=0;
+    if (index>=core.floorIds.length) index=core.floorIds.length-1;
+
+    core.lockControl();
+    core.status.event.id = 'viewMaps';
+    core.status.event.data = index;
+
+    var floorId = core.floorIds[index];
+
+    clearTimeout(core.interval.tipAnimate);
+
+    core.clearMap('ui', 0, 0, 416, 416);
+    core.setAlpha('ui', 1);
+    this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 0, 0, 416);
+
+    core.clearMap('data', 0, 0, 416, 416);
+    core.setOpacity('data', 0.2);
+    core.canvas.data.textAlign = 'left';
+
+    var text = core.floors[floorId].title;
+    var textX = 16, textY = 18, width = textX + core.canvas.data.measureText(text).width + 16, height = 42;
+    core.fillRect('data', 5, 5, width, height, '#000');
+    core.setOpacity('data', 0.5);
+    core.fillText('data', text, textX + 5, textY + 15, '#fff', '16px Arial');
+
 }
 
 ////// 绘制道具栏 //////

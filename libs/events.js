@@ -1048,6 +1048,38 @@ events.prototype.keyUpFly = function (keycode) {
     return;
 }
 
+////// 查看地图界面时的点击操作 //////
+events.prototype.clickViewMaps = function (x,y) {
+    if(y<=4) {
+        core.ui.drawMaps(core.status.event.data+1);
+    }
+    else if (y>=8) {
+        core.ui.drawMaps(core.status.event.data-1);
+    }
+    else {
+        core.clearMap('data', 0, 0, 416, 416);
+        core.ui.closePanel();
+    }
+}
+
+////// 查看地图界面时，按下某个键的操作 //////
+events.prototype.keyDownViewMaps = function (keycode) {
+    if (keycode==37 || keycode==38) core.ui.drawMaps(core.status.event.data+1);
+    else if (keycode==39 || keycode==40) core.ui.drawMaps(core.status.event.data-1);
+    return;
+}
+
+////// 查看地图界面时，放开某个键的操作 //////
+events.prototype.keyUpViewMaps = function (keycode) {
+    if (keycode==71 || keycode==27 || keycode==88) {
+        core.clearMap('data', 0, 0, 416, 416);
+        core.ui.closePanel();
+    }
+    return;
+}
+
+
+
 ////// 商店界面时的点击操作 //////
 events.prototype.clickShop = function(x,y) {
     var shop = core.status.event.data.shop;
@@ -1414,7 +1446,7 @@ events.prototype.keyUpSL = function (keycode) {
 events.prototype.clickSwitchs = function (x,y) {
     if (x<5 || x>7) return;
     var choices = [
-        "背景音乐", "背景音效", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
+        "背景音乐", "背景音效", "战斗动画", "怪物显伤", "领域显伤", "下载离线版本", "返回主菜单"
     ];
     var topIndex = 6 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
@@ -1457,6 +1489,9 @@ events.prototype.clickSwitchs = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 5:
+                window.open(core.firstData.name+".zip", "_blank");
+                break;
+            case 6:
                 core.status.event.selection=0;
                 core.ui.drawSettings();
                 break;
@@ -1497,7 +1532,7 @@ events.prototype.keyUpSwitchs = function (keycode) {
 events.prototype.clickSettings = function (x,y) {
     if (x<5 || x>7) return;
     var choices = [
-        "系统设置", "快捷商店", "同步存档", "重新开始", "数据统计", "操作帮助", "关于本塔", "返回游戏"
+        "系统设置", "快捷商店", "浏览地图", "同步存档", "重新开始", "数据统计", "操作帮助", "关于本塔", "返回游戏"
     ];
     var topIndex = 6 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
@@ -1513,10 +1548,20 @@ events.prototype.clickSettings = function (x,y) {
                 core.ui.drawQuickShop();
                 break;
             case 2:
+                if (!core.flags.enableViewMaps) {
+                    core.drawTip("本塔不允许浏览地图！");
+                }
+                else {
+                    core.drawText("\t[系统提示]即将进入浏览地图模式。\n\n点击地图上半部分，或按[↑]键可查看前一张地图\n点击地图下半部分，或按[↓]键可查看后一张地图\n点击地图中间，或按[ESC]键可离开浏览地图模式", function () {
+                        core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
+                    })
+                }
+                break;
+            case 3:
                 core.status.event.selection=0;
                 core.ui.drawSyncSave();
                 break;
-            case 3:
+            case 4:
                 core.status.event.selection=1;
                 core.ui.drawConfirmBox("你确定要重新开始吗？", function () {
                     core.ui.closePanel();
@@ -1526,7 +1571,7 @@ events.prototype.clickSettings = function (x,y) {
                     core.ui.drawSettings();
                 });
                 break;
-            case 4:
+            case 5:
                 core.ui.drawWaiting("正在拉取统计信息，请稍后...");
 
                 var formData = new FormData();
@@ -1570,13 +1615,13 @@ events.prototype.clickSettings = function (x,y) {
                 }
                 xhr.send(formData);
                 break;
-            case 5:
+            case 6:
                 core.ui.drawHelp();
                 break;
-            case 6:
+            case 7:
                 core.ui.drawAbout();
                 break;
-            case 7:
+            case 8:
                 core.ui.closePanel();
                 break;
         }

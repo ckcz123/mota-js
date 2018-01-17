@@ -168,6 +168,7 @@ data.prototype.init = function() {
         "displayExtraDamage": false, // 是否地图高级显伤（领域、夹击等）；用户可以手动在菜单栏中开关
         "enableGentleClick": true, // 是否允许轻触（获得面前物品）
         "potionWhileRouting": false, // 寻路算法是否经过血瓶；如果该项为false，则寻路算法会自动尽量绕过血瓶
+        "enableViewMaps": true, // 是否支持在菜单栏中查看所有楼层的地图
     }
 }
 

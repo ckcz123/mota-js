@@ -653,6 +653,10 @@ core.prototype.keyDown = function(keyCode) {
             core.events.keyDownFly(keyCode);
             return;
         }
+        if (core.status.event.id == 'viewMaps') {
+            core.events.keyDownViewMaps(keyCode);
+            return;
+        }
         if (core.status.event.id=='shop') {
             core.events.keyDownShop(keyCode);
             return;
@@ -762,6 +766,10 @@ core.prototype.keyUp = function(keyCode) {
         }
         if (core.status.event.id=='fly') {
             core.events.keyUpFly(keyCode);
+            return;
+        }
+        if (core.status.event.id == 'viewMaps') {
+            core.events.keyUpViewMaps(keyCode);
             return;
         }
         if (core.status.event.id=='shop') {
@@ -1049,6 +1057,12 @@ core.prototype.onclick = function (x, y, stepPostfix) {
     // 楼层飞行器
     if (core.status.event.id == 'fly') {
         core.events.clickFly(x,y);
+        return;
+    }
+
+    // 查看地图
+    if (core.status.event.id == 'viewMaps') {
+        core.events.clickViewMaps(x,y);
         return;
     }
 

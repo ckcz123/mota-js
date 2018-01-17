@@ -181,7 +181,7 @@ events.prototype.gameOver = function (success, fromReplay) {
             core.restart();
         }
 
-        core.drawConfirmBox("你想记录你的ID和成绩吗？", function () {
+        core.ui.drawConfirmBox("你想记录你的ID和成绩吗？", function () {
             doUpload(prompt("请输入你的ID："));
         }, function () {
             doUpload("");

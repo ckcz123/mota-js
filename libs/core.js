@@ -45,6 +45,20 @@ function core() {
         'playingBgm': null, // 正在播放的BGM
         'isPlaying': false,
     }
+    this.platform = {
+        'isOnline': true, // 是否http
+        'isPC': true, // 是否是PC
+        'isIOS': false, // 是否是iOS
+        'isSafari': false, // 是否是Safari
+        'isChrome': false, // 是否是Chrome
+        'supportCopy': false, // 是否支持复制到剪切板
+
+        'inputButton': null, // FileInput
+        'file': null, // 读取的文件
+        'fileReader': null, // 是否支持FileReader
+        'successCallback': null, // 读取成功
+        'errorCallback': null, // 读取失败
+    },
     // 样式
     this.domStyle = {
         styles: [],
@@ -154,7 +168,8 @@ core.prototype.init = function (dom, statusBar, canvas, images, pngs, bgms, soun
     core.material.icons = core.icons.getIcons();
     core.material.events = core.events.getEvents();
 
-    if (location.protocol.indexOf("http")==0) {
+    core.platform.isOnline = location.protocol.indexOf("http")==0;
+    if (core.platform.isOnline) {
         window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext;
         try {
             core.musicStatus.audioContext = new window.AudioContext();
@@ -164,12 +179,36 @@ core.prototype.init = function (dom, statusBar, canvas, images, pngs, bgms, soun
         }
     }
 
-    // 音效设置部分
-    var isPC = true;
     ["Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod"].forEach(function (t) {
-        if (navigator.userAgent.indexOf(t)>=0) isPC=false;
+        if (navigator.userAgent.indexOf(t)>=0) {
+            if (t=='iPhone' || t=='iPad' || t=='iPod') core.platform.isIOS = true;
+            core.platform.isPC=false;
+        }
     });
-    if (isPC) {
+
+    try {
+        core.platform.supportCopy = document.queryCommandSupported("copy");
+    }
+    catch (e) {
+        core.platform.supportCopy = false;
+    }
+
+    core.platform.isSafari = /Safari/.test(navigator.userAgent);
+    core.platform.isChrome = /Chrome/.test(navigator.userAgent);
+
+    if (window.FileReader) {
+        core.platform.fileReader = new FileReader();
+        core.platform.fileReader.onload = function () {
+            if (core.isset(core.platform.successCallback))
+                core.platform.successCallback(core.platform.fileReader.result);
+        };
+        core.platform.fileReader.onerror = function () {
+            if (core.isset(core.platform.errorCallback))
+                core.platform.errorCallback();
+        }
+    }
+
+    if (core.platform.isPC) {
         // 如果是PC端直接加载
         core.musicStatus.startDirectly = true;
     }
@@ -187,7 +226,6 @@ core.prototype.init = function (dom, statusBar, canvas, images, pngs, bgms, soun
 
     core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
     core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
-
 
     // switchs
     core.flags.battleAnimate = core.getLocalStorage('battleAnimate', core.flags.battleAnimate);
@@ -3948,18 +3986,135 @@ core.prototype.isset = function (val) {
     return true
 }
 
-////// 下载文件 //////
+////// 读取一个本地文件内容 //////
+core.prototype.readFile = function (success, error) {
+
+    // step 0: 不为http/https，直接不支持
+    if (!core.platform.isOnline) {
+        alert("离线状态下不支持文件读取！");
+        if (core.isset(error)) error();
+        return;
+    }
+
+    // Step 1: 如果是iOS平台，直接不支持
+    if (core.platform.isIOS) {
+        alert("iOS平台下不支持文件读取！");
+        if (core.isset(error)) error();
+        return;
+    }
+
+    // Step 2: 如果不支持FileReader，直接不支持
+    if (core.platform.fileReader==null) {
+        alert("当前浏览器不支持FileReader！");
+        if (core.isset(error)) error();
+        return;
+    }
+
+    if (core.platform.fileInput==null) {
+        core.platform.fileInput = document.createElement("input");
+        core.platform.fileInput.style.display = 'none';
+        core.platform.fileInput.type = 'file';
+        core.platform.fileInput.onchange = function () {
+            var files = core.platform.fileInput.files;
+            if (files.length==0) {
+                core.platform.file = null;
+                if (core.isset(core.platform.errorCallback))
+                    core.platform.errorCallback();
+                return;
+            }
+            core.platform.file = core.platform.fileInput.files[0];
+            core.platform.fileReader.readAsText(core.platform.file);
+        }
+    }
+
+    core.platform.successCallback = success;
+    core.platform.errorCallback = error;
+    core.platform.fileInput.click();
+}
+
+////// 下载文件到本地 //////
 core.prototype.download = function (filename, content) {
 
-    // 检测是否浏览器
+    // Step 0: 不为http/https，直接不支持
+    if (!core.platform.isOnline) {
+        alert("离线状态下不支持下载操作！");
+        return;
+    }
 
-    var aLink = document.createElement('a');
-    var blob = new Blob([content]);
-    var evt = document.createEvent("HTMLEvents");
-    evt.initEvent("click", false, false);
-    aLink.download = fileName;
-    aLink.href = URL.createObjectURL(blob);
-    aLink.dispatchEvent(evt);
+    // Step 1: 如果是iOS平台，直接不支持
+    if (core.platform.isIOS) {
+        alert("iOS平台下不支持下载操作！");
+        return;
+    }
+
+    // Step 2: 如果不是PC平台（Android），则只支持chrome
+    if (!core.platform.isPC) {
+        if (!core.platform.isChrome) { // 检测chrome
+            if (core.copy(content)) {
+                alert("移动端只有Chrome浏览器支持直接下载文件！\n所有应下载内容已经复制到您的剪切板，请自行创建空白文件并粘贴。");
+            }
+            else {
+                alert("该平台或浏览器暂不支持下载操作！");
+            }
+            return;
+        }
+    }
+
+    // Step 3: 如果是Safari浏览器且不为Chrome，则提示并打开新窗口
+    if (core.platform.isSafari && !core.platform.isChrome) {
+        alert("你当前使用的是Safari浏览器，不支持直接下载文件。\n即将打开一个新窗口为应下载内容，请自行全选复制然后创建空白文件并粘贴。");
+        var blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
+        var href = window.URL.createObjectURL(blob);
+        var opened=window.open(href, "_blank");
+        if (!opened) window.location.href=href;
+        window.URL.revokeObjectURL(href);
+        return;
+    }
+
+    // Step 4: 下载
+    var blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
+    if(window.navigator.msSaveOrOpenBlob) {
+        window.navigator.msSaveBlob(blob, filename);
+    }
+    else {
+        var href = window.URL.createObjectURL(blob);
+        var elem = window.document.createElement('a');
+        elem.href = href;
+        elem.download = filename;
+        document.body.appendChild(elem);
+        elem.click();
+        document.body.removeChild(elem);
+        window.URL.revokeObjectURL(href);
+    }
+}
+
+////// 复制一段内容到剪切板 //////
+core.prototype.copy = function (data) {
+    if (!core.platform.supportCopy) return false;
+
+    var textArea = document.createElement("textarea");
+    textArea.style.position = 'fixed';
+    textArea.style.top = 0;
+    textArea.style.left = 0;
+    textArea.style.width = '2em';
+    textArea.style.height = '2em';
+    textArea.style.padding = 0;
+    textArea.style.border = 'none';
+    textArea.style.outline = 'none';
+    textArea.style.boxShadow = 'none';
+    textArea.style.background = 'transparent';
+    textArea.value = data;
+    document.body.appendChild(textArea);
+    textArea.select();
+    var successful = false;
+    try {
+        successful = document.execCommand('copy');
+    } catch (err) {
+        successful = false;
+    }
+
+    document.body.removeChild(textArea);
+    return successful;
 }
 
 ////// 播放背景音乐 //////

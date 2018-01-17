@@ -907,6 +907,7 @@ ui.prototype.drawFly = function(page) {
     this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 20, 100, 273);
 }
 
+////// 绘制浏览地图界面 //////
 ui.prototype.drawMaps = function (index) {
     if (!core.isset(index)) index=core.floorIds.indexOf(core.status.floorId);
 
@@ -928,12 +929,13 @@ ui.prototype.drawMaps = function (index) {
     core.clearMap('data', 0, 0, 416, 416);
     core.setOpacity('data', 0.2);
     core.canvas.data.textAlign = 'left';
+    core.setFont('data', '16px Arial');
 
     var text = core.floors[floorId].title;
     var textX = 16, textY = 18, width = textX + core.canvas.data.measureText(text).width + 16, height = 42;
     core.fillRect('data', 5, 5, width, height, '#000');
     core.setOpacity('data', 0.5);
-    core.fillText('data', text, textX + 5, textY + 15, '#fff', '16px Arial');
+    core.fillText('data', text, textX + 5, textY + 15, '#fff');
 
 }
 

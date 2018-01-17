@@ -1058,6 +1058,7 @@ events.prototype.clickViewMaps = function (x,y) {
     }
     else {
         core.clearMap('data', 0, 0, 416, 416);
+        core.setOpacity('data', 1);
         core.ui.closePanel();
     }
 }
@@ -1071,14 +1072,13 @@ events.prototype.keyDownViewMaps = function (keycode) {
 
 ////// 查看地图界面时，放开某个键的操作 //////
 events.prototype.keyUpViewMaps = function (keycode) {
-    if (keycode==71 || keycode==27 || keycode==88) {
+    if (keycode==27 || keycode==88 || keycode==13 || keycode==32 || keycode==67) {
         core.clearMap('data', 0, 0, 416, 416);
+        core.setOpacity('data', 1);
         core.ui.closePanel();
     }
     return;
 }
-
-
 
 ////// 商店界面时的点击操作 //////
 events.prototype.clickShop = function(x,y) {
@@ -1519,7 +1519,7 @@ events.prototype.keyUpSwitchs = function (keycode) {
         return;
     }
     var choices = [
-        "背景音乐", "背景音效", "战斗动画", "怪物显伤", "领域显伤", "返回主菜单"
+        "背景音乐", "背景音效", "战斗动画", "怪物显伤", "领域显伤", "下载离线版本", "返回主菜单"
     ];
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
@@ -1648,7 +1648,7 @@ events.prototype.keyUpSettings = function (keycode) {
         return;
     }
     var choices = [
-        "系统设置", "快捷商店", "同步存档", "重新开始", "操作帮助", "关于本塔", "返回游戏"
+        "系统设置", "快捷商店", "浏览地图", "同步存档", "重新开始", "数据统计", "操作帮助", "关于本塔", "返回游戏"
     ];
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
@@ -1726,7 +1726,7 @@ events.prototype.clickSyncSave = function (x,y) {
                 })
                 break;
             case 5:
-                core.status.event.selection=2;
+                core.status.event.selection=3;
                 core.ui.drawSettings();
                 break;
 
@@ -1755,7 +1755,7 @@ events.prototype.keyUpSyncSave = function (keycode) {
         return;
     }
     var choices = [
-        "同步存档到服务器", "从服务器加载存档", "清空本地存档", "返回主菜单"
+        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "清空所有存档", "返回主菜单"
     ];
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);

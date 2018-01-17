@@ -668,7 +668,7 @@ ui.prototype.drawSyncSave = function () {
     core.status.event.id = 'syncSave';
 
     this.drawChoices(null, [
-        "同步存档到服务器", "从服务器加载存档", "清空本地存档", "返回主菜单"
+        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "清空所有存档", "返回主菜单"
     ]);
 
 }
@@ -1022,7 +1022,7 @@ ui.prototype.drawSLPanel = function(index) {
     if (index<0) index=0;
 
     var page = parseInt(index/10), offset=index%10;
-    if (page>=30) page=30;
+    if (page>=30) page=29;
     if (offset>5) offset=5;
     index=10*page+offset;
 
@@ -1192,6 +1192,7 @@ ui.prototype.drawHelp = function () {
         "[T] 打开/关闭工具栏\n" +
         "[ESC] 打开/关闭系统菜单\n" +
         "[H] 打开帮助页面\n"+
+        "[R] 回放\n"+
         "[SPACE] 轻按（仅在轻按开关打开时有效）\n" +
         "[1] 快捷使用破墙镐\n" +
         "[2] 快捷使用炸弹/圣锤\n" +

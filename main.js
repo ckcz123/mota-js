@@ -53,7 +53,7 @@ function main() {
         'startButtons': document.getElementById('startButtons'),
         'playGame': document.getElementById('playGame'),
         'loadGame': document.getElementById('loadGame'),
-        'aboutGame': document.getElementById('aboutGame'),
+        'replayGame': document.getElementById('replayGame'),
         'levelChooseButtons': document.getElementById('levelChooseButtons'),
         'easyLevel': document.getElementById('easyLevel'),
         'normalLevel': document.getElementById('normalLevel'),
@@ -377,8 +377,33 @@ main.dom.loadGame.onclick = function() {
 }
 
 ////// 点击“关于本塔”时 //////
-main.dom.aboutGame.onclick = function () {
-    main.core.ui.drawAbout();
+main.dom.replayGame.onclick = function () {
+    // main.core.ui.drawAbout();
+
+    core.readFile(function (obj) {
+        if (obj.name!=core.firstData.name) {
+            alert("存档和游戏不一致！");
+            return;
+        }
+        if (obj.version!=core.firstData.version) {
+            alert("游戏版本不一致！");
+            return;
+        }
+        if (!core.isset(obj.route) || !core.isset(obj.hard)) {
+            alert("无效的录像！");
+            return;
+        }
+
+        core.dom.startPanel.style.display = 'none';
+        core.resetStatus(core.firstData.hero, obj.hard, core.firstData.floorId, null, core.initStatus.maps);
+        core.events.setInitData(obj.hard);
+        core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
+            core.setHeroMoveTriggerInterval();
+            core.replay(core.decodeRoute(obj.route));
+        });
+    }, function () {
+
+    })
 }
 
 ////// 点击“简单难度”时 //////

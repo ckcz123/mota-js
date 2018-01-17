@@ -53,12 +53,12 @@ function core() {
         'isChrome': false, // 是否是Chrome
         'supportCopy': false, // 是否支持复制到剪切板
 
-        'inputButton': null, // FileInput
+        'fileInput': null, // FileInput
         'file': null, // 读取的文件
         'fileReader': null, // 是否支持FileReader
         'successCallback': null, // 读取成功
         'errorCallback': null, // 读取失败
-    },
+    }
     // 样式
     this.domStyle = {
         styles: [],
@@ -199,8 +199,21 @@ core.prototype.init = function (dom, statusBar, canvas, images, pngs, bgms, soun
     if (window.FileReader) {
         core.platform.fileReader = new FileReader();
         core.platform.fileReader.onload = function () {
-            if (core.isset(core.platform.successCallback))
-                core.platform.successCallback(core.platform.fileReader.result);
+            var content=core.platform.fileReader.result;
+            var obj=null;
+            try {
+                obj=JSON.parse(content);
+                if (core.isset(obj) && core.isset(core.platform.successCallback)) {
+                    core.platform.successCallback(obj);
+                    return;
+                }
+            }
+            catch (e) {}
+            alert("不是有效的JSON文件！");
+
+            if (core.isset(core.platform.errorCallback))
+                core.platform.errorCallback();
+
         };
         core.platform.fileReader.onerror = function () {
             if (core.isset(core.platform.errorCallback))
@@ -1107,8 +1120,8 @@ core.prototype.onmousewheel = function (direct) {
 
     // 存读档
     if (core.status.lockControl && (core.status.event.id == 'save' || core.status.event.id == 'load')) {
-        if (direct==1) core.ui.drawSLPanel(core.status.event.data - 6);
-        if (direct==-1) core.ui.drawSLPanel(core.status.event.data + 6);
+        if (direct==1) core.ui.drawSLPanel(core.status.event.data - 10);
+        if (direct==-1) core.ui.drawSLPanel(core.status.event.data + 10);
         return;
     }
 }
@@ -3400,6 +3413,13 @@ core.prototype.formatDate = function(date) {
         +core.setTwoDigits(date.getHours())+":"+core.setTwoDigits(date.getMinutes())+":"+core.setTwoDigits(date.getSeconds());
 }
 
+////// 格式化时间为最简字符串 //////
+core.prototype.formatDate2 = function (date) {
+    if (!core.isset(date)) return "";
+    return date.getFullYear()+core.setTwoDigits(date.getMonth()+1)+core.setTwoDigits(date.getDate())
+        +core.setTwoDigits(date.getHours())+core.setTwoDigits(date.getMinutes())+core.setTwoDigits(date.getSeconds());
+}
+
 ////// 两位数显示 //////
 core.prototype.setTwoDigits = function (x) {
     return parseInt(x)<10?"0"+x:x;
@@ -3456,9 +3476,18 @@ core.prototype.replay = function (list) {
     else if (action.indexOf("item:")==0) {
         var itemId = action.substring(5);
         if (core.canUseItem(itemId)) {
-            core.useItem(itemId, function () {
-                core.replay();
-            });
+            var tools = Object.keys(core.status.hero.items.tools).sort();
+            var constants = Object.keys(core.status.hero.items.constants).sort();
+            var index;
+            if ((index=tools.indexOf(itemId))>=0 || (index=constants.indexOf(itemId)+100)>=100) {
+                core.ui.drawToolbox(index);
+                setTimeout(function () {
+                    core.ui.closePanel();
+                    core.useItem(itemId, function () {
+                        core.replay();
+                    });
+                }, 500);
+            }
             return;
         }
     }
@@ -3467,11 +3496,15 @@ core.prototype.replay = function (list) {
         var toIndex=core.status.hero.flyRange.indexOf(floorId);
         var nowIndex=core.status.hero.flyRange.indexOf(core.status.floorId);
         if (core.hasItem('fly') && toIndex>=0 && nowIndex>=0) {
-            var stair=toIndex<nowIndex?"upFloor":"downFloor";
-            core.status.route.push("fly:"+core.floorIds.indexOf(floorId));
-            core.changeFloor(floorId, stair, null, null, function () {
-                core.replay();
-            });
+            core.ui.drawFly(toIndex);
+            setTimeout(function () {
+                core.ui.closePanel();
+                var stair=toIndex<nowIndex?"upFloor":"downFloor";
+                core.status.route.push("fly:"+core.floorIds.indexOf(floorId));
+                core.changeFloor(floorId, stair, null, null, function () {
+                    core.replay();
+                });
+            }, 500);
             return;
         }
     }
@@ -3690,7 +3723,7 @@ core.prototype.syncSave = function(type) {
             formData.append('type', 'save');
             formData.append('name', core.firstData.name);
             var saves = [];
-            for (var i=1;i<=180;i++) {
+            for (var i=1;i<=150;i++) {
                 var data = core.getLocalStorage("save"+i, null);
                 if (core.isset(data)) {
                     saves.push(data);
@@ -3760,7 +3793,7 @@ core.prototype.syncSave = function(type) {
                             // 成功
                             var data=JSON.parse(response.msg);
                             // console.log(data);
-                            for (var i=1;i<=180;i++) {
+                            for (var i=1;i<=150;i++) {
                                 if (i<=data.length) {
                                     core.setLocalStorage("save"+i, data[i-1]);
                                 }
@@ -4017,13 +4050,11 @@ core.prototype.readFile = function (success, error) {
         core.platform.fileInput.onchange = function () {
             var files = core.platform.fileInput.files;
             if (files.length==0) {
-                core.platform.file = null;
                 if (core.isset(core.platform.errorCallback))
                     core.platform.errorCallback();
                 return;
             }
-            core.platform.file = core.platform.fileInput.files[0];
-            core.platform.fileReader.readAsText(core.platform.file);
+            core.platform.fileReader.readAsText(core.platform.fileInput.files[0]);
         }
     }
 

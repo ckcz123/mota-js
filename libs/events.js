@@ -113,52 +113,70 @@ events.prototype.setInitData = function (hard) {
 
 ////// 游戏获胜事件 //////
 events.prototype.win = function(reason) {
+    core.ui.closePanel();
+    var replaying = core.status.replay.replaying;
+    core.status.replay.replaying=false;
     core.waitHeroToStop(function() {
         core.removeGlobalAnimate(0,0,true);
         core.clearMap('all'); // 清空全地图
         core.drawText([
-            "\t[结局2]恭喜通关！你的分数是${status:hp}。"
+            "\t[恭喜通关]你的分数是${status:hp}。"
         ], function () {
-            core.events.gameOver();
+            core.events.gameOver(replaying);
         })
     });
 }
 
 ////// 游戏失败事件 //////
 events.prototype.lose = function(reason) {
+    core.ui.closePanel();
+    var replaying = core.status.replay.replaying;
+    core.status.replay.replaying=false;
     core.waitHeroToStop(function() {
+        core.status.replay.replaying=false;
         core.drawText([
             "\t[结局1]你死了。\n如题。"
         ], function () {
-            core.events.gameOver();
+            core.events.gameOver(replaying);
         });
     })
 }
 
 ////// 游戏结束 //////
-events.prototype.gameOver = function () {
+events.prototype.gameOver = function (fromReplay) {
 
     // 上传成绩
     var confirmUpload = function () {
 
-
+        core.restart();
 
     }
 
     // 下载录像
     var confirmDownload = function () {
-        core.drawConfirmBox("你想下载录像吗？", function () {
-
-            // 检测是否微信浏览器
-            // if ()
-
-
+        core.ui.closePanel();
+        core.ui.drawConfirmBox("你想下载录像吗？", function () {
+            var obj = {
+                'name': core.firstData.name,
+                'version': core.firstData.version,
+                'hard': core.status.hard,
+                'route': core.encodeRoute(core.status.route)
+            }
+            core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify(obj));
+            confirmUpload();
         }, function () {
             confirmUpload();
         })
     }
 
-    confirmDownload();
+    if (fromReplay) {
+        core.drawText("录像回放完毕！", function () {
+            core.restart();
+        });
+    }
+    else {
+        confirmDownload();
+    }
 
 }
 
@@ -433,10 +451,14 @@ events.prototype.doAction = function() {
             core.ui.drawChoices(data.text, data.choices);
             break;
         case "win":
-            core.events.win(data.reason);
+            core.events.win(data.reason, function () {
+                core.events.doAction();
+            });
             break;
         case "lose":
-            core.events.lose(data.reason);
+            core.events.lose(data.reason, function () {
+                core.events.doAction();
+            });
             break;
         case "function":
             var func = data["function"];
@@ -1317,11 +1339,11 @@ events.prototype.keyDownSL = function(keycode) {
         return;
     }
     if (keycode==33) { // PAGEUP
-        core.ui.drawSLPanel(10*(page+1) + offset);
+        core.ui.drawSLPanel(10*(page-1) + offset);
         return;
     }
     if (keycode==34) { // PAGEDOWN
-        core.ui.drawSLPanel(10*(page-1) + offset);
+        core.ui.drawSLPanel(10*(page+1) + offset);
         return;
     }
 }
@@ -1511,7 +1533,7 @@ events.prototype.keyUpSettings = function (keycode) {
 events.prototype.clickSyncSave = function (x,y) {
     if (x<5 || x>7) return;
     var choices = [
-        "同步存档到服务器", "从服务器加载存档", "清空本地存档", "返回主菜单"
+        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "清空所有存档", "返回主菜单"
     ];
     var topIndex = 6 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
@@ -1524,16 +1546,59 @@ events.prototype.clickSyncSave = function (x,y) {
                 core.syncSave("load");
                 break;
             case 2:
+                var saves = [];
+                for (var i=1;i<=150;i++) {
+                    var data = core.getLocalStorage("save"+i, null);
+                    if (core.isset(data)) {
+                        saves.push(data);
+                    }
+                }
+                var content = {
+                    "name": core.firstData.name,
+                    "version": core.firstData.version,
+                    "data": saves
+                }
+                core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5save", JSON.stringify(content));
+                break;
+            case 3:
+                core.readFile(function (obj) {
+                    if (obj.name!=core.firstData.name) {
+                        alert("存档和游戏不一致！");
+                        return;
+                    }
+                    if (obj.version!=core.firstData.version) {
+                        alert("游戏版本不一致！");
+                        return;
+                    }
+                    if (!core.isset(obj.data)) {
+                        alert("无效的存档！");
+                        return;
+                    }
+                    var data=obj.data;
+                    for (var i=1;i<=150;i++) {
+                        if (i<=data.length) {
+                            core.setLocalStorage("save"+i, data[i-1]);
+                        }
+                        else {
+                            core.removeLocalStorage("save"+i);
+                        }
+                    }
+                    core.drawText("读取成功！\n你的本地所有存档均已被覆盖。");
+                }, function () {
+                    
+                });
+                break;
+            case 4:
                 core.status.event.selection=1;
-                core.ui.drawConfirmBox("你确定要清空所有本地存档吗？", function() {
+                core.ui.drawConfirmBox("你确定要清空所有存档吗？", function() {
                     localStorage.clear();
-                    core.drawText("\t[操作成功]你的本地所有存档已被清空。");
+                    core.drawText("\t[操作成功]你的所有存档已被清空。");
                 }, function() {
                     core.status.event.selection=2;
                     core.ui.drawSyncSave(false);
                 })
                 break;
-            case 3:
+            case 5:
                 core.status.event.selection=2;
                 core.ui.drawSettings();
                 break;

@@ -252,7 +252,7 @@ enemys.prototype.calDamage = function (hero_atk, hero_def, hero_mdef, mon_hp, mo
     // 破甲
     if (this.hasSpecial(mon_special, 7)) damage += parseInt(core.values.breakArmor * hero_def);
     // 净化
-    if (this.hasSpecial(mon_special, 9)) damage = core.values.purify * hero_mdef;
+    if (this.hasSpecial(mon_special, 9)) damage += core.values.purify * hero_mdef;
 
     var turn = parseInt((mon_hp - 1) / (hero_atk - mon_def));
     var ans = damage + turn * per_damage + (turn + 1) * counterDamage;

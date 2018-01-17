@@ -653,7 +653,13 @@ ui.prototype.drawWaiting = function(text) {
     core.setAlpha('ui', 1);
     core.setFillStyle('ui', background);
 
-    var left = 97, top = 208 - 32 - 16, right = 416 - 2 * left, bottom = 416 - 2 * top;
+    core.setFont('ui', 'bold 17px Verdana');
+    core.setFillStyle('ui', '#FFFFFF');
+    var text_length = core.canvas.ui.measureText(text).width;
+
+    var right = Math.max(text_length+50, 220);
+    var left = 416-2*right, top = 208 - 32 - 16, bottom = 416 - 2 * top;
+
     core.fillRect('ui', left, top, right, bottom, background);
     core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
 

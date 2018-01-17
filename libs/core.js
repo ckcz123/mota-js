@@ -50,11 +50,11 @@ function core() {
         'isPC': true, // 是否是PC
         'isIOS': false, // 是否是iOS
         'isWeChat': false, // 是否是微信
+        'isQQ': false, // 是否是QQ
         'isChrome': false, // 是否是Chrome
         'supportCopy': false, // 是否支持复制到剪切板
 
         'fileInput': null, // FileInput
-        'file': null, // 读取的文件
         'fileReader': null, // 是否支持FileReader
         'successCallback': null, // 读取成功
         'errorCallback': null, // 读取失败
@@ -193,8 +193,12 @@ core.prototype.init = function (dom, statusBar, canvas, images, pngs, bgms, soun
         core.platform.supportCopy = false;
     }
 
-    core.platform.isSafari = /Safari/.test(navigator.userAgent);
-    core.platform.isChrome = /Chrome/.test(navigator.userAgent) && !!window.chrome && /Google Inc/.test(navigator.vendor);
+    var chrome=/Chrome\/(\d+)\./.exec(navigator.userAgent);
+    if (core.isset(chrome) && parseInt(chrome[1])>=50)
+        core.platform.isChrome = true;
+    core.platform.isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+    core.platform.isQQ = /QQ/.test(navigator.userAgent);
+    core.platform.isWeChat = /MicroMessenger/.test(navigator.userAgent);
 
     if (window.FileReader) {
         core.platform.fileReader = new FileReader();
@@ -203,8 +207,9 @@ core.prototype.init = function (dom, statusBar, canvas, images, pngs, bgms, soun
             var obj=null;
             try {
                 obj=JSON.parse(content);
-                if (core.isset(obj) && core.isset(core.platform.successCallback)) {
-                    core.platform.successCallback(obj);
+                if (core.isset(obj)) {
+                    if (core.isset(core.platform.successCallback))
+                        core.platform.successCallback(obj);
                     return;
                 }
             }
@@ -4029,14 +4034,7 @@ core.prototype.readFile = function (success, error) {
         return;
     }
 
-    // Step 1: 如果是iOS平台，直接不支持
-    if (core.platform.isIOS) {
-        alert("iOS平台下不支持文件读取！");
-        if (core.isset(error)) error();
-        return;
-    }
-
-    // Step 2: 如果不支持FileReader，直接不支持
+    // Step 1: 如果不支持FileReader，直接不支持
     if (core.platform.fileReader==null) {
         alert("当前浏览器不支持FileReader！");
         if (core.isset(error)) error();
@@ -4080,7 +4078,7 @@ core.prototype.download = function (filename, content) {
 
     // Step 2: 如果不是PC平台（Android），则只支持chrome
     if (!core.platform.isPC) {
-        if (!core.platform.isChrome) { // 检测chrome
+        if (!core.platform.isChrome || core.platform.isQQ || core.platform.isWeChat) { // 检测chrome
             if (core.copy(content)) {
                 alert("移动端只有Chrome浏览器支持直接下载文件！\n所有应下载内容已经复制到您的剪切板，请自行创建空白文件并粘贴。");
             }
@@ -4091,13 +4089,13 @@ core.prototype.download = function (filename, content) {
         }
     }
 
-    // Step 3: 如果是Safari浏览器且不为Chrome，则提示并打开新窗口
-    if (core.platform.isSafari && !core.platform.isChrome) {
+    // Step 3: 如果是Safari浏览器，则提示并打开新窗口
+    if (core.platform.isSafari) {
         alert("你当前使用的是Safari浏览器，不支持直接下载文件。\n即将打开一个新窗口为应下载内容，请自行全选复制然后创建空白文件并粘贴。");
         var blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
         var href = window.URL.createObjectURL(blob);
         var opened=window.open(href, "_blank");
-        if (!opened) window.location.href=href;
+        // if (!opened) window.location.href=href;
         window.URL.revokeObjectURL(href);
         return;
     }

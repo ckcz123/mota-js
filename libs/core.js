@@ -3538,7 +3538,7 @@ core.prototype.replay = function (list) {
         var sps=action.substring(5).split(":");
         var shopId=sps[0], selections=sps[1].split("");
 
-        if (selections.length>0 && core.events.canUseQuickShop(shopId)==null) {
+        if (selections.length>0) {
             var shop=core.status.shops[shopId];
             if (core.isset(shop) && shop.visited) { // 商店可用
                 var choices = shop.choices;

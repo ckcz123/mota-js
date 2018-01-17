@@ -32,7 +32,8 @@ data.prototype.init = function() {
                 "poison": false, // 毒
                 "weak": false, // 衰
                 "curse": false, // 咒
-            }
+            },
+            "steps": 0, // 行走步数统计
         },
         "startText": [ // 游戏开始前剧情。如果无剧情直接留一个空数组即可。
             "Hi，欢迎来到 HTML5 魔塔样板！\n\n本样板由艾之葵制作，可以让你在不会写任何代码\n的情况下也能做出属于自己的H5魔塔！",

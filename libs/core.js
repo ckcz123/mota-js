@@ -48,6 +48,7 @@ function core() {
     this.platform = {
         'isOnline': true, // 是否http
         'isPC': true, // 是否是PC
+        'isAndroid': false, // 是否是Android
         'isIOS': false, // 是否是iOS
         'isWeChat': false, // 是否是微信
         'isQQ': false, // 是否是QQ
@@ -182,6 +183,7 @@ core.prototype.init = function (dom, statusBar, canvas, images, pngs, bgms, soun
     ["Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod"].forEach(function (t) {
         if (navigator.userAgent.indexOf(t)>=0) {
             if (t=='iPhone' || t=='iPad' || t=='iPod') core.platform.isIOS = true;
+            if (t=='Android') core.platform.isAndroid=true;
             core.platform.isPC=false;
         }
     });
@@ -549,6 +551,19 @@ core.prototype.startGame = function (hard, callback) {
         core.setHeroMoveTriggerInterval();
         if (core.isset(callback)) callback();
     });
+
+    // Upload
+    var formData = new FormData();
+    formData.append('type', 'people');
+    formData.append('name', core.firstData.name);
+    formData.append('version', core.firstData.version);
+    formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
+    formData.append('hard', hard);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/games/upload.php");
+    xhr.send(formData);
+
 }
 
 ////// 重新开始游戏；此函数将回到标题页面 //////
@@ -1682,6 +1697,7 @@ core.prototype.eventMoveHero = function(steps, time, callback) {
 
 ////// 每移动一格后执行的事件 //////
 core.prototype.moveOneStep = function() {
+    core.status.hero.steps++;
     // 中毒状态
     if (core.hasFlag('poison')) {
         core.status.hero.hp -= core.values.poisonDamage;

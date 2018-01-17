@@ -122,7 +122,7 @@ events.prototype.win = function(reason) {
         core.drawText([
             "\t[恭喜通关]你的分数是${status:hp}。"
         ], function () {
-            core.events.gameOver(replaying);
+            core.events.gameOver(true, replaying);
         })
     });
 }
@@ -137,18 +137,49 @@ events.prototype.lose = function(reason) {
         core.drawText([
             "\t[结局1]你死了。\n如题。"
         ], function () {
-            core.events.gameOver(replaying);
+            core.events.gameOver(false, replaying);
         });
     })
 }
 
 ////// 游戏结束 //////
-events.prototype.gameOver = function (fromReplay) {
+events.prototype.gameOver = function (success, fromReplay) {
 
     // 上传成绩
     var confirmUpload = function () {
 
+        if (!success) {
+            core.restart();
+            return;
+        }
+
+        var username = prompt("恭喜通关！请输入你的ID：");
+        if (username==null) username="";
+
+        // upload
+        var formData = new FormData();
+        formData.append('type', 'score');
+        formData.append('name', core.firstData.name);
+        formData.append('version', core.firstData.version);
+        formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
+        formData.append('hard', core.status.hard);
+        formData.append('username', username);
+        formData.append('lv', core.status.hero.lv);
+        formData.append('hp', core.status.hero.hp);
+        formData.append('atk', core.status.hero.atk);
+        formData.append('def', core.status.hero.def);
+        formData.append('mdef', core.status.hero.mdef);
+        formData.append('money', core.status.hero.money);
+        formData.append('experience', core.status.hero.experience);
+        formData.append('steps', core.status.hero.steps);
+        formData.append('route', core.encodeRoute(core.status.route));
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/games/upload.php");
+        xhr.send(formData);
+
         core.restart();
+        return;
 
     }
 
@@ -1459,7 +1490,7 @@ events.prototype.keyUpSwitchs = function (keycode) {
 events.prototype.clickSettings = function (x,y) {
     if (x<5 || x>7) return;
     var choices = [
-        "系统设置", "快捷商店", "同步存档", "重新开始", "操作帮助", "关于本塔", "返回游戏"
+        "系统设置", "快捷商店", "同步存档", "重新开始", "数据统计", "操作帮助", "关于本塔", "返回游戏"
     ];
     var topIndex = 6 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
@@ -1489,12 +1520,51 @@ events.prototype.clickSettings = function (x,y) {
                 });
                 break;
             case 4:
-                core.ui.drawHelp();
+                core.ui.drawWaiting("正在拉取统计信息，请稍后...");
+
+                var formData = new FormData();
+                formData.append('type', 'getinfo');
+                formData.append('name', core.firstData.name);
+                formData.append('version', core.firstData.version);
+
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "/games/upload.php");
+
+                xhr.onload = function(e) {
+                    if (xhr.status==200) {
+                        var response = JSON.parse(xhr.response);
+                        if (response.code<0) {
+                            core.drawText("出错啦！\n无法拉取统计信息。\n错误原因："+response.msg);
+                        }
+                        else {
+                            var text="\t[本塔统计信息]";
+                            response.data.forEach(function (t) {
+                                if (t.hard!='') text+=t.hard+"难度：\n"
+                                text+="当前已有"+t.number+"人次游戏，"+t.number+"人次通关。\n";
+                                text+="当前MAX为"+t.max+"，由"+t.username+"于"+core.formatDate(new Date(1000*t.timestamp))+"打出。\n\n";
+                            })
+                            core.drawText(text);
+                        }
+                    }
+                    else {
+                        core.drawText("出错啦！\n无法拉取统计信息。\n错误原因：HTTP "+xhr.status);
+                    }
+                };
+                xhr.ontimeout = function() {
+                    core.drawText("出错啦！\n无法拉取统计信息。\n错误原因：Timeout");
+                }
+                xhr.onerror = function() {
+                    core.drawText("出错啦！\n无法拉取统计信息。\n错误原因：XHR Error");
+                }
+                xhr.send(formData);
                 break;
             case 5:
-                core.ui.drawAbout();
+                core.ui.drawHelp();
                 break;
             case 6:
+                core.ui.drawAbout();
+                break;
+            case 7:
                 core.ui.closePanel();
                 break;
         }

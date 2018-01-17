@@ -552,17 +552,22 @@ core.prototype.startGame = function (hard, callback) {
         if (core.isset(callback)) callback();
     });
 
-    // Upload
-    var formData = new FormData();
-    formData.append('type', 'people');
-    formData.append('name', core.firstData.name);
-    formData.append('version', core.firstData.version);
-    formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
-    formData.append('hard', hard);
 
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/games/upload.php");
-    xhr.send(formData);
+    setTimeout(function () {
+        // Upload
+        var formData = new FormData();
+        formData.append('type', 'people');
+        formData.append('name', core.firstData.name);
+        formData.append('version', core.firstData.version);
+        formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
+        formData.append('hard', hard);
+        formData.append('hardCode', core.getStatus('hard', 0));
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/games/upload.php");
+        xhr.send(formData);
+
+    })
 
 }
 

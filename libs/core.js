@@ -49,7 +49,7 @@ function core() {
         'isOnline': true, // 是否http
         'isPC': true, // 是否是PC
         'isIOS': false, // 是否是iOS
-        'isSafari': false, // 是否是Safari
+        'isWeChat': false, // 是否是微信
         'isChrome': false, // 是否是Chrome
         'supportCopy': false, // 是否支持复制到剪切板
 
@@ -194,7 +194,7 @@ core.prototype.init = function (dom, statusBar, canvas, images, pngs, bgms, soun
     }
 
     core.platform.isSafari = /Safari/.test(navigator.userAgent);
-    core.platform.isChrome = /Chrome/.test(navigator.userAgent);
+    core.platform.isChrome = /Chrome/.test(navigator.userAgent) && !!window.chrome && /Google Inc/.test(navigator.vendor);
 
     if (window.FileReader) {
         core.platform.fileReader = new FileReader();

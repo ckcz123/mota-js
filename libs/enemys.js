@@ -248,7 +248,7 @@ enemys.prototype.calDamage = function (hero_atk, hero_def, hero_mdef, mon_hp, mo
     if (this.hasSpecial(mon_special, 8)) counterDamage += parseInt(core.values.counterAttack * hero_atk);
 
     // 先攻
-    var damage = mon_special == 1 ? per_damage : 0;
+    var damage = this.hasSpecial(mon_special, 1) ? per_damage : 0;
     // 破甲
     if (this.hasSpecial(mon_special, 7)) damage += parseInt(core.values.breakArmor * hero_def);
     // 净化

@@ -153,34 +153,41 @@ events.prototype.gameOver = function (success, fromReplay) {
             return;
         }
 
-        var username = prompt("恭喜通关！请输入你的ID：");
-        if (username==null) username="";
+        var doUpload = function(username) {
+            if (username==null) username="";
 
-        // upload
-        var formData = new FormData();
-        formData.append('type', 'score');
-        formData.append('name', core.firstData.name);
-        formData.append('version', core.firstData.version);
-        formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
-        formData.append('hard', core.status.hard);
-        formData.append('username', username);
-        formData.append('lv', core.status.hero.lv);
-        formData.append('hp', core.status.hero.hp);
-        formData.append('atk', core.status.hero.atk);
-        formData.append('def', core.status.hero.def);
-        formData.append('mdef', core.status.hero.mdef);
-        formData.append('money', core.status.hero.money);
-        formData.append('experience', core.status.hero.experience);
-        formData.append('steps', core.status.hero.steps);
-        formData.append('route', core.encodeRoute(core.status.route));
+            // upload
+            var formData = new FormData();
+            formData.append('type', 'score');
+            formData.append('name', core.firstData.name);
+            formData.append('version', core.firstData.version);
+            formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
+            formData.append('hard', core.status.hard);
+            formData.append('username', username);
+            formData.append('lv', core.status.hero.lv);
+            formData.append('hp', core.status.hero.hp);
+            formData.append('atk', core.status.hero.atk);
+            formData.append('def', core.status.hero.def);
+            formData.append('mdef', core.status.hero.mdef);
+            formData.append('money', core.status.hero.money);
+            formData.append('experience', core.status.hero.experience);
+            formData.append('steps', core.status.hero.steps);
+            formData.append('route', core.encodeRoute(core.status.route));
 
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "/games/upload.php");
-        xhr.send(formData);
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/games/upload.php");
+            xhr.send(formData);
 
-        core.restart();
+            core.restart();
+        }
+
+        core.drawConfirmBox("你想记录你的ID和成绩吗？", function () {
+            doUpload(prompt("请输入你的ID："));
+        }, function () {
+            doUpload("");
+        })
+
         return;
-
     }
 
     // 下载录像

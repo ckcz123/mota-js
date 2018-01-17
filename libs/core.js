@@ -2773,105 +2773,119 @@ core.prototype.checkBlock = function () {
 
 ////// 阻击事件（动画效果） //////
 core.prototype.snipe = function (snipes) {
-    core.waitHeroToStop(function() {
-        core.lockControl();
 
-        var scan = {
-            'up': {'x': 0, 'y': -1},
-            'left': {'x': -1, 'y': 0},
-            'down': {'x': 0, 'y': 1},
-            'right': {'x': 1, 'y': 0}
-        };
+    var scan = {
+        'up': {'x': 0, 'y': -1},
+        'left': {'x': -1, 'y': 0},
+        'down': {'x': 0, 'y': 1},
+        'right': {'x': 1, 'y': 0}
+    };
 
-        snipes.forEach(function (snipe) {
-            var x=snipe.x, y=snipe.y, direction = snipe.direction;
-            snipe.nx = x+scan[snipe.direction].x;
-            snipe.ny = y+scan[snipe.direction].y;
+    snipes.forEach(function (snipe) {
+        var x=snipe.x, y=snipe.y, direction = snipe.direction;
+        snipe.nx = x+scan[snipe.direction].x;
+        snipe.ny = y+scan[snipe.direction].y;
 
-            core.removeGlobalAnimate(x, y);
+        core.removeGlobalAnimate(x, y);
 
-            var block = core.getBlock(x,y).block;
+        var block = core.getBlock(x,y).block;
 
-            snipe.blockIcon = core.material.icons[block.event.cls][block.event.id];
-            snipe.blockImage = core.material.images[block.event.cls];
-            var damage = core.enemys.getDamage(block.event.id);
+        snipe.blockIcon = core.material.icons[block.event.cls][block.event.id];
+        snipe.blockImage = core.material.images[block.event.cls];
+        var damage = core.enemys.getDamage(block.event.id);
 
-            var color = "#000000";
-            if (damage <= 0) color = '#00FF00';
-            else if (damage < core.status.hero.hp / 3) color = '#FFFFFF';
-            else if (damage < core.status.hero.hp * 2 / 3) color = '#FFFF00';
-            else if (damage < core.status.hero.hp) color = '#FF7F00';
-            else color = '#FF0000';
+        var color = "#000000";
+        if (damage <= 0) color = '#00FF00';
+        else if (damage < core.status.hero.hp / 3) color = '#FFFFFF';
+        else if (damage < core.status.hero.hp * 2 / 3) color = '#FFFF00';
+        else if (damage < core.status.hero.hp) color = '#FF7F00';
+        else color = '#FF0000';
 
-            if (damage >= 999999999) damage = "???";
-            else if (damage > 100000) damage = (damage / 10000).toFixed(1) + "w";
+        if (damage >= 999999999) damage = "???";
+        else if (damage > 100000) damage = (damage / 10000).toFixed(1) + "w";
 
-            snipe.damage = damage;
-            snipe.color = color;
-            snipe.block = core.clone(block);
-        })
+        snipe.damage = damage;
+        snipe.color = color;
+        snipe.block = core.clone(block);
+    })
 
-        var time = 500, step = 0;
+    var finishSnipe = function () {
+        snipes.forEach(function (t) {
+            core.removeBlock(t.x, t.y);
+            var nBlock = core.clone(t.block);
+            nBlock.x = t.nx; nBlock.y = t.ny;
+            core.status.thisMap.blocks.push(nBlock);
+            core.addGlobalAnimate(2, 32*t.nx, 32*t.ny, t.blockIcon, t.blockImage);
+            core.canvas.event.drawImage(t.blockImage, 0, t.blockIcon*32, 32, 32, 32*t.nx, 32*t.ny, 32, 32);
+        });
+        core.syncGlobalAnimate();
+        core.updateStatusBar();
+        return;
+    }
 
-        var animateValue = 2;
-        var animateCurrent = 0;
-        var animateTime = 0;
+    if (core.status.replay.replaying) {
+        finishSnipe();
+    }
+    else {
+        core.waitHeroToStop(function() {
 
-        core.canvas.fg.textAlign = 'left';
+            core.lockControl();
 
-        var animate=window.setInterval(function() {
+            var time = 500, step = 0;
 
-            step++;
-            animateTime += time / 16;
-            if (animateTime >= core.values.animateSpeed * 2 / animateValue) {
-                animateCurrent++;
-                animateTime = 0;
-                if (animateCurrent>=animateValue) animateCurrent=0;
-            }
+            var animateValue = 2;
+            var animateCurrent = 0;
+            var animateTime = 0;
 
-            snipes.forEach(function (snipe) {
-                var x=snipe.x, y=snipe.y, direction = snipe.direction;
+            core.canvas.fg.textAlign = 'left';
 
-                var nowX=32*x+scan[direction].x*2*step, nowY=32*y+scan[direction].y*2*step;
+            var animate=window.setInterval(function() {
 
-                // 清空上一次
-                core.clearMap('event', nowX-2*scan[direction].x, nowY-2*scan[direction].y, 32, 32);
-                core.clearMap('fg', nowX-2*scan[direction].x, nowY-2*scan[direction].y, 32, 32);
-
-                core.canvas.event.drawImage(snipe.blockImage, animateCurrent*32, snipe.blockIcon*32, 32, 32, nowX, nowY, 32, 32);
-
-                if (core.hasItem('book')) {
-                    // drawFG
-                    core.setFillStyle('fg', '#000000');
-                    core.canvas.fg.fillText(snipe.damage, nowX + 2, nowY + 30);
-                    core.canvas.fg.fillText(snipe.damage, nowX, nowY + 30);
-                    core.canvas.fg.fillText(snipe.damage, nowX + 2, nowY + 32);
-                    core.canvas.fg.fillText(snipe.damage, nowX, nowY + 32);
-
-                    core.setFillStyle('fg', snipe.color);
-                    core.canvas.fg.fillText(snipe.damage, nowX + 1, nowY + 31);
+                step++;
+                animateTime += time / 16;
+                if (animateTime >= core.values.animateSpeed * 2 / animateValue) {
+                    animateCurrent++;
+                    animateTime = 0;
+                    if (animateCurrent>=animateValue) animateCurrent=0;
                 }
 
-            })
+                snipes.forEach(function (snipe) {
+                    var x=snipe.x, y=snipe.y, direction = snipe.direction;
 
-            if (step==16) { // 移动完毕
-                clearInterval(animate);
-                snipes.forEach(function (t) {
-                    core.removeBlock(t.x, t.y);
-                    var nBlock = core.clone(t.block);
-                    nBlock.x = t.nx; nBlock.y = t.ny;
-                    core.status.thisMap.blocks.push(nBlock);
-                    core.addGlobalAnimate(animateValue, 32*t.nx, 32*t.ny, t.blockIcon, t.blockImage);
-                });
-                core.syncGlobalAnimate();
-                core.updateStatusBar();
-                // 不存在自定义事件
-                if (core.status.event.id==null)
-                    core.unLockControl();
-                core.replay();
-            }
-        }, time/16);
-    });
+                    var nowX=32*x+scan[direction].x*2*step, nowY=32*y+scan[direction].y*2*step;
+
+                    // 清空上一次
+                    core.clearMap('event', nowX-2*scan[direction].x, nowY-2*scan[direction].y, 32, 32);
+                    core.clearMap('fg', nowX-2*scan[direction].x, nowY-2*scan[direction].y, 32, 32);
+
+                    core.canvas.event.drawImage(snipe.blockImage, animateCurrent*32, snipe.blockIcon*32, 32, 32, nowX, nowY, 32, 32);
+
+                    if (core.hasItem('book')) {
+                        // drawFG
+                        core.setFillStyle('fg', '#000000');
+                        core.canvas.fg.fillText(snipe.damage, nowX + 2, nowY + 30);
+                        core.canvas.fg.fillText(snipe.damage, nowX, nowY + 30);
+                        core.canvas.fg.fillText(snipe.damage, nowX + 2, nowY + 32);
+                        core.canvas.fg.fillText(snipe.damage, nowX, nowY + 32);
+
+                        core.setFillStyle('fg', snipe.color);
+                        core.canvas.fg.fillText(snipe.damage, nowX + 1, nowY + 31);
+                    }
+
+                })
+
+                if (step==16) { // 移动完毕
+                    clearInterval(animate);
+                    finishSnipe();
+                    // 不存在自定义事件
+                    if (core.status.event.id==null)
+                        core.unLockControl();
+                }
+            }, time/16);
+        });
+    }
+
+
 }
 
 ////// 更改画面色调 //////
@@ -3665,13 +3679,11 @@ core.prototype.syncSave = function(type) {
                     core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因：HTTP "+xhr.status);
                 }
             };
-            xhr.ontimeout = function(e) {
-                console.log(e);
-                core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+e);
+            xhr.ontimeout = function() {
+                core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因：Timeout");
             }
-            xhr.onerror = function(e) {
-                console.log(e);
-                core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+e);
+            xhr.onerror = function() {
+                core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因：XHR Error");
             }
             xhr.send(formData);
         }, function() {
@@ -3735,11 +3747,11 @@ core.prototype.syncSave = function(type) {
                     core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因：HTTP "+xhr.status);
                 }
             };
-            xhr.ontimeout = function(e) {
-                core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因："+e);
+            xhr.ontimeout = function() {
+                core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因：Timeout");
             }
-            xhr.onerror = function(e) {
-                core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因："+e);
+            xhr.onerror = function() {
+                core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因：XHR Error");
             }
             xhr.send(formData);
         }, function() {

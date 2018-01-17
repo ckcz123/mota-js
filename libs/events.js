@@ -150,7 +150,7 @@ events.prototype.gameOver = function () {
         core.drawConfirmBox("你想下载录像吗？", function () {
 
             // 检测是否微信浏览器
-            if ()
+            // if ()
 
 
         }, function () {

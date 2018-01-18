@@ -1392,7 +1392,7 @@ events.prototype.keyDownSL = function(keycode) {
     }
     if (keycode==39) { // right
         if (offset==5) {
-            core.ui.drawSLPanel(10*(page+1));
+            core.ui.drawSLPanel(10*(page+1)+1);
         }
         else {
             core.ui.drawSLPanel(index + 1);

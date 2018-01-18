@@ -3675,25 +3675,32 @@ core.prototype.save = function(need) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
     if (!core.checkStatus('save', need))
         return;
-    core.ui.drawSLPanel(core.status.saveIndex);
+
+    var saveIndex = core.status.saveIndex;
+    var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
+
+    core.ui.drawSLPanel(10*page+offset);
 }
 
 ////// 点击读取按钮时的打开操作 //////
 core.prototype.load = function (need) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
 
+    var saveIndex = core.getLocalStorage('saveIndex2', 1);
+    var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
+
     // 游戏开始前读档
     if (!core.isPlaying()) {
         core.status.event = {'id': 'load', 'data': null};
         core.status.lockControl = true;
         core.dom.startPanel.style.display = 'none';
-        core.ui.drawSLPanel(core.getLocalStorage('saveIndex2', 1));
+        core.ui.drawSLPanel(10*page+offset);
         return;
     }
 
     if (!core.checkStatus('load', need))
         return;
-    core.ui.drawSLPanel(core.status.saveIndex);
+    core.ui.drawSLPanel(10*page+offset);
 }
 
 ////// 点击设置按钮时的操作 //////

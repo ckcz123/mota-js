@@ -2744,7 +2744,7 @@ core.prototype.updateCheckBlock = function() {
                 // 存在领域
                 if (core.enemys.hasSpecial(enemy.special, 15)) {
                     var range = enemy.range || 1;
-                    var zoneSquare = core.flags.zoneSquare;
+                    var zoneSquare = false;
                     if (core.isset(enemy.zoneSquare)) zoneSquare=enemy.zoneSquare;
                     for (var dx=-range;dx<=range;dx++) {
                         for (var dy=-range;dy<=range;dy++) {

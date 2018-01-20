@@ -100,8 +100,8 @@
 
 <!-- =========================================================== -->
 
-<!-- <script src='_server/vendor/vue.min.js'></script> -->
-<script src="https://cdn.bootcss.com/vue/2.5.13/vue.js"></script>
+<script src='_server/vendor/vue.min.js'></script>
+<!-- <script src="https://cdn.bootcss.com/vue/2.5.13/vue.js"></script> -->
 <script src='_server/fs.js'></script>
 <script src='_server/editor_file.js'></script>
 <script src='_server/vm.js'></script>
@@ -121,7 +121,7 @@ var main={'instance':{}};
 var core={};
 
 function editor() {
-  this.version = "1.2";
+  this.version = "1.3.2";
   this.material = {};
 }
 // 重构这一堆回调
@@ -449,9 +449,11 @@ editor.prototype.listen = function() {
   }//在格子内画一个随机色块
 
   function eToLoc(e) { 
+    var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
+    var scrollTop = document.documentElement.scrollTop || document.body.scrollTop
     editor.loc = { 
-      'x': document.documentElement.scrollLeft+e.clientX - mid.offsetLeft-mapEdit.offsetLeft, 
-      'y': document.documentElement.scrollTop+e.clientY - mid.offsetTop-mapEdit.offsetTop, 
+      'x': scrollLeft+e.clientX - mid.offsetLeft-mapEdit.offsetLeft, 
+      'y': scrollTop+e.clientY - mid.offsetTop-mapEdit.offsetTop, 
       'size': 32 
     };
     return editor.loc; }//返回可用的组件内坐标
@@ -579,9 +581,11 @@ editor.prototype.listen = function() {
 
   data.onmousedown = function (e) {
     e.stopPropagation();
+    var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
+    var scrollTop = document.documentElement.scrollTop || document.body.scrollTop
     var loc = { 
-      'x': document.documentElement.scrollLeft + e.clientX + iconLib.scrollLeft - right.offsetLeft-iconLib.offsetLeft, 
-      'y': document.documentElement.scrollTop + e.clientY + iconLib.scrollTop - right.offsetTop-iconLib.offsetTop, 
+      'x': scrollLeft + e.clientX + iconLib.scrollLeft - right.offsetLeft-iconLib.offsetLeft, 
+      'y': scrollTop + e.clientY + iconLib.scrollTop - right.offsetTop-iconLib.offsetTop, 
       'size': 32 
     };
     editor.loc = loc;

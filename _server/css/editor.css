@@ -47,6 +47,7 @@ body{
   white-space: pre;
   border: 1px solid #ddd;
   border-radius: 2px;
+  overflow: auto;
 }
 #editTip{
   position: absolute;

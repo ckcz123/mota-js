@@ -824,6 +824,16 @@ events.prototype.afterChangeLight = function(x,y) {
 ////// 使用炸弹/圣锤后的事件 //////
 events.prototype.afterUseBomb = function () {
 
+    // 这是一个使用炸弹也能开门的例子
+    /*
+    if (core.status.floorId=='xxx' && core.terrainExists(x0,y0,'specialDoor') // 某个楼层，该机关门存在
+        && !core.enemyExists(x1,y1) && !core.enemyExists(x2,y2)) // 且守门的怪物都不存在
+    {
+        core.insertAction([ // 插入事件
+            {"type": "openDoor", "loc": [x0,y0]} // 开门
+        ])
+    }
+    */
 
 }
 

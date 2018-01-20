@@ -68,10 +68,10 @@ maps.prototype.getBlock = function (x, y, id) {
     // 0-20 地形
     if (id == 1) tmp.event = {'cls': 'terrains', 'id': 'yellowWall'}; // 黄墙
     if (id == 2) tmp.event = {'cls': 'terrains', 'id': 'whiteWall'}; // 白墙
-    if (id == 3) tmp.event = {'cls': 'terrains', 'id': 'blueWall'}; // 白墙
+    if (id == 3) tmp.event = {'cls': 'terrains', 'id': 'blueWall'}; // 蓝墙
     if (id == 4) tmp.event = {'cls': 'animates', 'id': 'star', 'noPass': true}; // 星空
     if (id == 5) tmp.event = {'cls': 'animates', 'id': 'lava', 'noPass': true}; // 岩浆
-    if (id == 6) tmp.event = {'cls': 'terrains', 'id': 'ice'}; // 岩浆
+    if (id == 6) tmp.event = {'cls': 'terrains', 'id': 'ice'}; // 冰面
     if (id == 7) tmp.event = {'cls': 'terrains', 'id': 'blueShop-left'}; // 蓝色商店左
     if (id == 8) tmp.event = {'cls': 'terrains', 'id': 'blueShop-right'}; // 蓝色商店右
     if (id == 9) tmp.event = {'cls': 'terrains', 'id': 'pinkShop-left'}; // 粉色商店左

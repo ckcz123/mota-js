@@ -16,7 +16,8 @@
 - 启用状态下，该事件才处于可见状态，可被触发、交互与处理。  
 - 禁用状态下该事件相当于不存在，不可见、不可被触发、不可交互。
 
-所有事件默认情况下都是启用的，除非指定了`enable: false`。  
+所有事件默认情况下都是启用的，除非指定了`enable: false`。
+
 在事件列表中使用`type: show`和`type: hide`可以将一个禁用事件启用，或将一个启用事件给禁用。
 
 
@@ -970,6 +971,26 @@ events.prototype.addPoint = function (enemy) {
 同样，为了实现类似于RMXP中，到达某一层后自动触发某段事件的效果，样板中还存在`firstArrive`事件。
 
 当且仅当勇士第一次到达某层时，将会触发此事件。可以利用此事件来显示一些剧情，或再让它调用 `{"type": "trigger"}` 来继续调用其他的事件。
+
+## 使用炸弹后的事件
+
+上面的afterBattle事件只对和怪物进行战斗后才有会被处理。
+
+如果我们想在使用炸弹后也能触发一些事件（如开门），则可以在`events.js`里面的`afterUseBomb`函数进行处理：
+
+``` js
+////// 使用炸弹/圣锤后的事件 //////
+events.prototype.afterUseBomb = function () {
+    // 这是一个使用炸弹也能开门的例子
+    if (core.status.floorId=='xxx' && core.terrainExists(x0,y0,'specialDoor') // 某个楼层，该机关门存在
+        && !core.enemyExists(x1,y1) && !core.enemyExists(x2,y2)) // 且守门的怪物都不存在
+    {
+        core.insertAction([ // 插入事件
+            {"type": "openDoor", "loc": [x0,y0]} // 开门
+        ])
+    }
+}
+```
 
 ## 战前剧情
 

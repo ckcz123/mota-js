@@ -376,9 +376,8 @@ main.dom.loadGame.onclick = function() {
     main.core.load();
 }
 
-////// 点击“关于本塔”时 //////
+////// 点击“录像回放”时 //////
 main.dom.replayGame.onclick = function () {
-    // main.core.ui.drawAbout();
 
     core.readFile(function (obj) {
         if (obj.name!=core.firstData.name) {

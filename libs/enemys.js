@@ -79,7 +79,16 @@ enemys.prototype.getEnemys = function (enemyId) {
 
 ////// 判断是否含有某特殊属性 //////
 enemys.prototype.hasSpecial = function (special, test) {
-    return (special instanceof Array)?special.indexOf(test)>=0:(special!=0&&(special%100==test||this.hasSpecial(parseInt(special/100), test)));
+
+    if (special instanceof Array) {
+        return special.indexOf(test)>=0;
+    }
+
+    if (typeof special == 'number') {
+        return special!=0 && (special%100==test||this.hasSpecial(parseInt(special/100), test));
+    }
+
+    return false;
 }
 
 ////// 获得所有特殊属性的名称 //////

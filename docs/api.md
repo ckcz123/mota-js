@@ -35,7 +35,7 @@ main.statusBar.image.load.onclick // 点击状态栏中的读档按钮时
 main.statusBar.image.settings.onclick // 点击状态栏中的系统菜单时
 main.dom.playGame.onclick // 点击“开始游戏”时
 main.dom.loadGame.onclick // 点击“载入游戏”时
-main.dom.aboutGame.onclick // 点击“关于本塔”时
+main.dom.replayGame.onclick // 点击“录像回放”时
 main.dom.easyLevel.onclick // 点击“简单难度”时
 main.dom.normalLevel.onclick // 点击“普通难度”时
 main.dom.hardLevel.onclick // 点击“困难难度”时
@@ -56,6 +56,7 @@ core.hideStartAnimate // 隐藏游戏开始界面
 core.setStartProgressVal // 设置加载进度条进度
 core.setStartLoadTipText // 设置加载进度条提示文字
 core.loader // 加载图片和音频
+core.loadAutotile // 加载Autotile
 core.loadImage // 加载图片
 core.loadMusic // 加载音频
 core.isPlaying // 游戏是否已经开始
@@ -177,6 +178,7 @@ core.getLocalStorage // 获得本地存储
 core.removeLocalStorage // 移除本地存储
 core.clone // 深拷贝一个对象
 core.formatDate // 格式化时间为字符串
+core.formatDate2 // 格式化时间为最简字符串
 core.setTwoDigits // 两位数显示
 core.debug // 进入Debug模式，攻防血和钥匙都调成很高的数值
 core.replay // 开始回放
@@ -188,6 +190,7 @@ core.openQuickShop // 点击快捷商店时的打开操作
 core.save // 点击保存按钮时的打开操作
 core.load // 点击读取按钮时的打开操作
 core.openSettings // 点击设置按钮时的打开操作
+core.autosave // 自动存档
 core.doSL // 实际进行存读档事件
 core.syncSave // 存档同步操作
 core.saveData // 存档到本地
@@ -204,6 +207,9 @@ core.insertAction // 往当前事件列表之前插入一系列事件
 * core.lockControl // 锁定状态栏，常常用于事件处理
 * core.unlockControl // 解锁状态栏
 * core.isset // 判断某对象是否不为undefined也不会null
+core.readFile // 读取一个本地文件内容
+core.download // 下载文件到本地
+core.copy // 复制一段文字到剪切板
 * core.playBgm // 播放背景音乐
 * core.pauseBgm // 暂停背景音乐的播放
 * core.resumeBgm // 恢复背景音乐的播放
@@ -246,6 +252,7 @@ core.events.startGame // 游戏开始事件
 * core.events.setInitData // 不同难度分别设置初始属性
 * core.events.win // 游戏获胜事件
 * core.events.lose // 游戏失败事件
+core.evens.gameOver // 游戏结束
 core.events.afterChangeFloor // 转换楼层结束的事件
 core.events.doEvents // 开始执行一系列自定义事件
 core.events.doAction // 执行当前自定义事件列表中的下一个事件
@@ -280,6 +287,9 @@ core.events.clickBookDetail // 怪物手册属性显示界面时的点击操作
 core.events.clickFly // 楼层传送器界面时的点击操作
 core.events.keyDownFly // 楼层传送器界面时，按下某个键的操作
 core.events.keyUpFly // 楼层传送器界面时，放开某个键的操作
+core.events.clickViewMaps // 浏览地图界面时的点击操作
+core.events.keyDownViewMaps // 浏览地图界面时，按下某个键的操作
+core.events.keyUpViewMaps // 浏览地图界面时，放开某个键的操作
 core.events.clickShop // 商店界面时的点击操作
 core.events.keyDownShop // 商店界面时，按下某个键的操作
 core.events.keyUpShop // 商店界面时，放开某个键的操作
@@ -349,6 +359,7 @@ core.ui.drawPagination // 绘制分页
 core.ui.drawEnemyBook // 绘制怪物手册
 core.ui.drawBookDetail // 绘制怪物属性的详细信息
 core.ui.drawFly // 绘制楼层传送器
+core.ui.drawMaps // 绘制浏览地图界面
 core.ui.drawToolbox // 绘制道具栏
 core.ui.drawSLPanel // 绘制存档/读档界面
 core.ui.drawThumbnail // 绘制一个缩略图

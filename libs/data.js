@@ -121,6 +121,8 @@ data.prototype.init = function() {
         "bluePotion": 250, // 蓝血瓶加血数值
         "yellowPotion": 500, // 黄血瓶加血数值
         "greenPotion": 800, // 绿血瓶加血数值
+        "sword0": 0, // 默认装备折断的剑的攻击力
+        "shield0": 0, // 默认装备残破的盾的防御力
         "sword1": 10, // 铁剑加攻数值
         "shield1": 10, // 铁盾加防数值
         "sword2": 20, // 银剑加攻数值
@@ -156,8 +158,10 @@ data.prototype.init = function() {
         "pickaxeFourDirections": true, // 使用破墙镐是否四个方向都破坏；如果false则只破坏面前的墙壁
         "bombFourDirections": true, // 使用炸弹是否四个方向都会炸；如果false则只炸面前的怪物（即和圣锤等价）
         "bigKeyIsBox": false, // 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙
+        "equipment": false, // 剑和盾是否直接作为装备。如果此项为true，则作为装备，需要在道具栏使用，否则将直接加属性。
         /****** 怪物相关 ******/
         "enableNegativeDamage": true, // 是否支持负伤害（回血）
+        "hatredDecrease": true, // 是否在和仇恨怪战斗后减一半的仇恨值，此项为false则和仇恨怪不会扣减仇恨值。
         "betweenAttackCeil": false, // 夹击方式是向上取整还是向下取整。如果此项为true则为向上取整，为false则为向下取整
         /****** 系统相关 ******/
         "startDirectly": false, // 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面

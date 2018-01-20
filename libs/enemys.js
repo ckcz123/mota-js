@@ -142,7 +142,7 @@ enemys.prototype.getSpecialHint = function (enemy, special) {
         case 14: return "诅咒：战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验";
         case 15: return "领域：经过怪物周围"+(enemy.range||1)+"格时自动减生命"+enemy.value+"点";
         case 16: return "夹击：经过两只相同的怪物中间，勇士生命值变成一半";
-        case 17: return "仇恨：战斗前，怪物附加之前积累的仇恨值作为伤害；战斗后，释放一半的仇恨值。（每杀死一个怪物获得"+core.values.hatred+"点仇恨值）";
+        case 17: return "仇恨：战斗前，怪物附加之前积累的仇恨值作为伤害"+(core.flags.hatredDecrease?"；战斗后，释放一半的仇恨值":"")+"。（每杀死一个怪物获得"+core.values.hatred+"点仇恨值）";
         case 18: return "阻击：经过怪物的十字领域时自动减生命"+enemy.value+"点，同时怪物后退一格";
         case 19: return "自爆：战斗后勇士的生命值变成1";
         case 20: return "无敌：勇士无法打败怪物，除非拥有十字架";

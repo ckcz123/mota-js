@@ -706,7 +706,7 @@ events.prototype.afterBattle = function(enemyId,x,y,callback) {
         core.setFlag('curse', true);
     }
     // 仇恨属性：减半
-    if (core.enemys.hasSpecial(special, 17)) {
+    if (core.flags.hatredDecrease && core.enemys.hasSpecial(special, 17)) {
         core.setFlag('hatred', parseInt(core.getFlag('hatred', 0)/2));
     }
     // 自爆

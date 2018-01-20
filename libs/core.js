@@ -2727,7 +2727,7 @@ core.prototype.updateCheckBlock = function() {
         if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls=='enemys') {
             var id = block.event.id, enemy = core.enemys.getEnemys(id);
             if (core.isset(enemy)) {
-                core.status.checkBlock.map[13*block.x+block.y]=id;
+                 core.status.checkBlock.map[13*block.x+block.y]=id;
             }
         }
     }
@@ -2802,7 +2802,7 @@ core.prototype.updateCheckBlock = function() {
                 core.status.checkBlock.betweenAttack[13*x+y]=true;
                 var leftHp = core.status.hero.hp - core.status.checkBlock.damage[13*x+y];
                 if (leftHp>1)
-                    core.status.checkBlock.damage[13*x+y] += parseInt((leftHp+1)/2);
+                    core.status.checkBlock.damage[13*x+y] += parseInt((leftHp+(core.flags.betweenAttackCeil?0:1))/2);
             }
         }
     }

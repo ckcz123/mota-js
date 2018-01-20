@@ -158,6 +158,7 @@ data.prototype.init = function() {
         "bigKeyIsBox": false, // 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙
         /****** 怪物相关 ******/
         "enableNegativeDamage": true, // 是否支持负伤害（回血）
+        "betweenAttackCeil": true, // 夹击方式是向上取整还是向下取整。如果此项为true则为向上取整，为false则为向下取整
         /****** 系统相关 ******/
         "startDirectly": false, // 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面
         "canOpenBattleAnimate": true, // 是否允许用户开启战斗过程；如果此项为false，则下面两项均强制视为false

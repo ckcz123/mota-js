@@ -146,7 +146,8 @@ editor.prototype.init = function(){
   });
 
   Promise.all([p1, p2, p3])
-  .then(function([maps, icons, img]){
+  .then(function(results){
+    var maps = results[0], icons = results[1];
     editor.idsInit(maps, icons); // 初始化图片素材信息
     editor.drawInitData(icons); // 初始化绘图
     editor.listen(); // 开始监听事件

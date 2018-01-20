@@ -56,7 +56,7 @@ var editArea = new Vue({
       if(val=='') return;
       if(that.formatArr()){
         that.error = 0;
-        clearTimeout(that.formatTimer);
+        
         setTimeout(function(){
           that.mapArr = that.formatArr();
           that.drawMap();
@@ -98,7 +98,8 @@ var editArea = new Vue({
     },
     formatArr: function(){
       var formatArrStr = '';
-
+      var that = this;
+      clearTimeout(that.formatTimer);
       if(this.mapArr.split(/\D+/).join(' ').trim().split(' ').length != 169) return false;
       var arr = this.mapArr.replace(/\s+/g, '').split('],[');
       

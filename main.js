@@ -2,7 +2,7 @@ function main() {
 
     //------------------------ 用户修改内容 ------------------------//
 
-    this.version = "0.1"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+    this.version = "1.3.2"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
     this.useCompress = false; // 是否使用压缩文件
     // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
@@ -53,7 +53,7 @@ function main() {
         'startButtons': document.getElementById('startButtons'),
         'playGame': document.getElementById('playGame'),
         'loadGame': document.getElementById('loadGame'),
-        'aboutGame': document.getElementById('aboutGame'),
+        'replayGame': document.getElementById('replayGame'),
         'levelChooseButtons': document.getElementById('levelChooseButtons'),
         'easyLevel': document.getElementById('easyLevel'),
         'normalLevel': document.getElementById('normalLevel'),
@@ -338,7 +338,7 @@ main.statusBar.image.toolbox.onclick = function () {
 ////// 点击状态栏中的快捷商店时 //////
 main.statusBar.image.shop.onclick = function () {
     if (main.core.isPlaying())
-        main.core.ui.drawQuickShop(true);
+        main.core.openQuickShop(true);
 }
 
 ////// 点击状态栏中的存档按钮时 //////
@@ -356,7 +356,7 @@ main.statusBar.image.load.onclick = function () {
 ////// 点击状态栏中的系统菜单时 //////
 main.statusBar.image.settings.onclick = function () {
     if (main.core.isPlaying())
-        main.core.ui.drawSettings(true);
+        main.core.openSettings(true);
 }
 
 ////// 点击“开始游戏”时 //////
@@ -377,8 +377,33 @@ main.dom.loadGame.onclick = function() {
 }
 
 ////// 点击“关于本塔”时 //////
-main.dom.aboutGame.onclick = function () {
-    main.core.ui.drawAbout();
+main.dom.replayGame.onclick = function () {
+    // main.core.ui.drawAbout();
+
+    core.readFile(function (obj) {
+        if (obj.name!=core.firstData.name) {
+            alert("存档和游戏不一致！");
+            return;
+        }
+        if (obj.version!=core.firstData.version) {
+            alert("游戏版本不一致！");
+            return;
+        }
+        if (!core.isset(obj.route) || !core.isset(obj.hard)) {
+            alert("无效的录像！");
+            return;
+        }
+
+        core.dom.startPanel.style.display = 'none';
+        core.resetStatus(core.firstData.hero, obj.hard, core.firstData.floorId, null, core.initStatus.maps);
+        core.events.setInitData(obj.hard);
+        core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
+            core.setHeroMoveTriggerInterval();
+            core.replay(core.decodeRoute(obj.route));
+        });
+    }, function () {
+
+    })
 }
 
 ////// 点击“简单难度”时 //////

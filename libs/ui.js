@@ -257,6 +257,8 @@ ui.prototype.drawChoices = function(content, choices) {
 
     if (choices.length>0) {
         if (!core.isset(core.status.event.selection)) core.status.event.selection=0;
+        if (core.status.event.selection<0) core.status.event.selection=0;
+        if (core.status.event.selection>=choices.length) core.status.event.selection=choices.length-1;
         var len = core.canvas.ui.measureText(core.replaceText(choices[core.status.event.selection].text || choices[core.status.event.selection])).width;
         core.strokeRect('ui', 208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28, "#FFD700", 2);
     }
@@ -271,7 +273,8 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     core.status.event.data = {'yes': yesCallback, 'no': noCallback};
     core.status.event.ui = text;
 
-    if (!core.isset(core.status.event.selection)) core.status.event.selection=1;
+    if (!core.isset(core.status.event.selection) || core.status.event.selection>1) core.status.event.selection=1;
+    if (core.status.event.selection<0) core.status.event.selection=0;
 
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
     core.clearMap('ui', 0, 0, 416, 416);
@@ -319,29 +322,26 @@ ui.prototype.drawSwitchs = function() {
     var choices = [
         "背景音乐："+(core.musicStatus.bgmStatus ? "[ON]" : "[OFF]"),
         "背景音效："+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
-        "战斗动画： " + (core.flags.battleAnimate ? "[ON]" : "[OFF]"),
-        "怪物显伤： " + (core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
-        "领域显伤： " + (core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
+        "战斗动画： "+(core.flags.battleAnimate ? "[ON]" : "[OFF]"),
+        "怪物显伤： "+(core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
+        "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
+        "下载离线版本",
         "返回主菜单"
     ];
     this.drawChoices(null, choices);
-
 }
 
 ////// 绘制系统菜单栏 //////
-ui.prototype.drawSettings = function (need) {
-    if (!core.checkStatus('settings', need))
-        return;
+ui.prototype.drawSettings = function () {
+    core.status.event.id = 'settings';
 
     this.drawChoices(null, [
-        "系统设置", "快捷商店", "同步存档", "重新开始", "操作帮助", "关于本塔", "返回游戏"
+        "系统设置", "快捷商店", "浏览地图", "同步存档", "重新开始", "数据统计", "操作帮助", "关于本塔", "返回游戏"
     ]);
 }
 
 ////// 绘制快捷商店选择栏 //////
-ui.prototype.drawQuickShop = function (need) {
-    if (core.isset(need) && !core.checkStatus('selectShop', need))
-        return;
+ui.prototype.drawQuickShop = function () {
 
     core.status.event.id = 'selectShop';
 
@@ -654,12 +654,17 @@ ui.prototype.drawWaiting = function(text) {
     core.setAlpha('ui', 1);
     core.setFillStyle('ui', background);
 
-    var left = 97, top = 208 - 32 - 16, right = 416 - 2 * left, bottom = 416 - 2 * top;
+    core.setFont('ui', 'bold 17px Verdana');
+    var text_length = core.canvas.ui.measureText(text).width;
+
+    var right = Math.max(text_length+50, 220);
+    var left = 208-right/2, top = 208 - 32 - 16, bottom = 416 - 2 * top;
+
     core.fillRect('ui', left, top, right, bottom, background);
     core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
 
     core.canvas.ui.textAlign = "center";
-    core.fillText('ui', text, 208, top + 56, "#FFFFFF", "bold 17px Verdana");
+    core.fillText('ui', text, 208, top + 56, '#FFFFFF');
 
 }
 
@@ -669,7 +674,7 @@ ui.prototype.drawSyncSave = function () {
     core.status.event.id = 'syncSave';
 
     this.drawChoices(null, [
-        "同步存档到服务器", "从服务器加载存档", "清空本地存档", "返回主菜单"
+        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "清空所有存档", "返回主菜单"
     ]);
 
 }
@@ -902,6 +907,38 @@ ui.prototype.drawFly = function(page) {
     this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 20, 100, 273);
 }
 
+////// 绘制浏览地图界面 //////
+ui.prototype.drawMaps = function (index) {
+    if (!core.isset(index)) index=core.floorIds.indexOf(core.status.floorId);
+
+    if (index<0) index=0;
+    if (index>=core.floorIds.length) index=core.floorIds.length-1;
+
+    core.lockControl();
+    core.status.event.id = 'viewMaps';
+    core.status.event.data = index;
+
+    var floorId = core.floorIds[index];
+
+    clearTimeout(core.interval.tipAnimate);
+
+    core.clearMap('ui', 0, 0, 416, 416);
+    core.setAlpha('ui', 1);
+    this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 0, 0, 416);
+
+    core.clearMap('data', 0, 0, 416, 416);
+    core.setOpacity('data', 0.2);
+    core.canvas.data.textAlign = 'left';
+    core.setFont('data', '16px Arial');
+
+    var text = core.floors[floorId].title;
+    var textX = 16, textY = 18, width = textX + core.canvas.data.measureText(text).width + 16, height = 42;
+    core.fillRect('data', 5, 5, width, height, '#000');
+    core.setOpacity('data', 0.5);
+    core.fillText('data', text, textX + 5, textY + 15, '#fff');
+
+}
+
 ////// 绘制道具栏 //////
 ui.prototype.drawToolbox = function(index) {
 
@@ -1020,15 +1057,14 @@ ui.prototype.drawToolbox = function(index) {
 ////// 绘制存档/读档界面 //////
 ui.prototype.drawSLPanel = function(index) {
     if (!core.isset(index)) index=1;
-    if (index<=0) index=1;
-    if (index>180) index=180;
+    if (index<0) index=0;
+
+    var page = parseInt(index/10), offset=index%10;
+    if (page>=30) page=29;
+    if (offset>5) offset=5;
+    index=10*page+offset;
 
     core.status.event.data=index;
-
-    var page=parseInt((index-1)/6);
-
-    // core.status.event.data = page;
-    // core.status.savePage = page;
 
     core.clearMap('ui', 0, 0, 416, 416);
     core.setAlpha('ui', 0.85);
@@ -1040,12 +1076,11 @@ ui.prototype.drawSLPanel = function(index) {
 
     var name=core.status.event.id=='save'?"存档":"读档";
     for (var i=0;i<6;i++) {
-        var id=6*page+i+1;
-        var data=core.getLocalStorage("save"+id,null);
-
+        var id=5*page+i;
+        var data=core.getLocalStorage(i==0?"autoSave":"save"+id, null);
         if (i<3) {
-            core.fillText('ui', name+id, (2*i+1)*u, 35, '#FFFFFF', "bold 17px Verdana");
-            core.strokeRect('ui', (2*i+1)*u-size/2, 50, size, size, id==index?'#FFD700':'#FFFFFF', id==index?6:2);
+            core.fillText('ui', i==0?"自动存档":name+id, (2*i+1)*u, 35, '#FFFFFF', "bold 17px Verdana");
+            core.strokeRect('ui', (2*i+1)*u-size/2, 50, size, size, i==offset?'#FFD700':'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
                 this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc);
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 65+size, '#FFFFFF', '10px Verdana');
@@ -1057,7 +1092,7 @@ ui.prototype.drawSLPanel = function(index) {
         }
         else {
             core.fillText('ui', name+id, (2*i-5)*u, 230, '#FFFFFF', "bold 17px Verdana");
-            core.strokeRect('ui', (2*i-5)*u-size/2, 245, size, size, id==index?'#FFD700':'#FFFFFF', id==index?6:2);
+            core.strokeRect('ui', (2*i-5)*u-size/2, 245, size, size, i==offset?'#FFD700':'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
                 this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc);
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 260+size, '#FFFFFF', '10px Verdana');
@@ -1091,7 +1126,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
         }
     }
 
-    var mapArray = core.maps.getMapArray(core.status.maps, floorId);
+    var mapArray = core.maps.getMapArray(blocks);
     for (var b in blocks) {
         var block = blocks[b];
         if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
@@ -1114,6 +1149,44 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
         var realHeight = persize*height/32;
         core.canvas[canvas].drawImage(core.material.images.hero, heroIcon.stop * 32, heroIcon.loc * height, 32, height, x+persize*heroLoc.x, y+persize*heroLoc.y+persize-realHeight, persize, realHeight);
     }
+}
+
+ui.prototype.drawKeyBoard = function () {
+    core.lockControl();
+    core.status.event.id = 'keyBoard';
+
+    core.clearMap('ui', 0, 0, 416, 416);
+
+    var left = 16, top = 48, right = 416 - 2 * left, bottom = 416 - 2 * top;
+    var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
+    core.fillRect('ui', left, top, right, bottom, background);
+    core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+
+    core.canvas.ui.textAlign = "center";
+    core.fillText('ui', "虚拟键盘", 208, top+35, "#FFD700", "bold 22px Verdana");
+
+    core.setFont('ui', '17px Verdana');
+    core.setFillStyle('ui', '#FFFFFF');
+    var offset = 128-9;
+
+    var lines = [
+        ["F1","F2","F3","F4","F5","F6","F7","F8","F9","10","11"],
+        ["1","2","3","4","5","6","7","8","9","0"],
+        ["Q","W","E","R","T","Y","U","I","O","P"],
+        ["A","S","D","F","G","H","J","K","L"],
+        ["Z","X","C","V","B","N","M"],
+        ["-","=","[","]","\\",";","'",",",".","/","`"],
+        ["ES","TA","CA","SH","CT","AL","SP","BS","EN","DE"]
+    ]
+
+    lines.forEach(function (line) {
+        for (var i=0;i<line.length;i++) {
+            core.fillText('ui', line[i], 48+32*i, offset);
+        }
+        offset+=32;
+    });
+
+    core.fillText("ui", "返回游戏", 416-80, offset-3, '#FFFFFF', 'bold 15px Verdana');
 }
 
 ////// 绘制“关于”界面 //////
@@ -1151,11 +1224,13 @@ ui.prototype.drawHelp = function () {
         "[CTRL] 跳过对话\n" +
         "[X] 打开/关闭怪物手册\n" +
         "[G] 打开/关闭楼层传送器\n" +
+        "[A] 读取自动存档（回退）\n" +
         "[S/D] 打开/关闭存/读档页面\n" +
         "[K] 打开/关闭快捷商店选择列表\n" +
         "[T] 打开/关闭工具栏\n" +
         "[ESC] 打开/关闭系统菜单\n" +
         "[H] 打开帮助页面\n"+
+        "[R] 回放\n"+
         "[SPACE] 轻按（仅在轻按开关打开时有效）\n" +
         "[1] 快捷使用破墙镐\n" +
         "[2] 快捷使用炸弹/圣锤\n" +
@@ -1165,6 +1240,7 @@ ui.prototype.drawHelp = function () {
         "点任意块： 寻路并移动\n"+
         "点任意块并拖动： 指定寻路路线\n"+
         "单击勇士： 转向\n"+
-        "双击勇士： 轻按（仅在轻按开关打开时有效）"
+        "双击勇士： 轻按（仅在轻按开关打开时有效）\n"+
+        "长按任意位置：打开虚拟键盘"
     ]);
 }

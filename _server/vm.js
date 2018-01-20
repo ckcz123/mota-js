@@ -2,7 +2,9 @@
 
 var exportM = new Vue({
   el: '#exportM',
-
+  data: {
+    isExport: false,
+  },
   methods: {
     exportMap: function(){
       editor.updateMap();
@@ -31,7 +33,8 @@ var exportM = new Vue({
         filestr += ']'+(yy==12?'':',\n');
       }
       pout.value = filestr;
-      // editArea.mapArr = filestr;
+      editArea.mapArr = filestr;
+      this.isExport = true;
       editArea.error = 0;
       tip.whichShow = 2;
     }
@@ -54,6 +57,10 @@ var editArea = new Vue({
     mapArr: function (val, oldval) {
       var that = this;
       if(val=='') return;
+      if(exportM.isExport){
+        exportM.isExport = false;
+        return;
+      }
       if(that.formatArr()){
         that.error = 0;
         

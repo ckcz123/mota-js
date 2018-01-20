@@ -31,7 +31,7 @@ var exportM = new Vue({
         filestr += ']'+(yy==12?'':',\n');
       }
       pout.value = filestr;
-      editArea.mapArr = filestr;
+      // editArea.mapArr = filestr;
       editArea.error = 0;
       tip.whichShow = 2;
     }

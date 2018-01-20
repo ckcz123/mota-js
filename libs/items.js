@@ -143,8 +143,11 @@ items.prototype.getItemEffectTip = function(itemId) {
 }
 
 ////// 使用道具 //////
-items.prototype.useItem = function (itemId) {
-    if (!this.canUseItem(itemId)) return;
+items.prototype.useItem = function (itemId, callback) {
+    if (!this.canUseItem(itemId)) {
+        if (core.isset(callback)) callback();
+        return;
+    }
     var itemCls = core.material.items[itemId].cls;
 
     if (itemId=='book') core.ui.drawBook(0);
@@ -174,6 +177,7 @@ items.prototype.useItem = function (itemId) {
         // 上楼器/下楼器
         core.changeFloor(core.status.event.data.id, null, {'direction': core.status.hero.loc.direction, 'x': core.status.event.data.x, 'y': core.status.event.data.y}, null, function (){
             core.drawTip(core.material.items[itemId].name + "使用成功");
+            core.replay();
         });
     }
     if (itemId == 'poisonWine') core.setFlag('poison', false);
@@ -193,11 +197,19 @@ items.prototype.useItem = function (itemId) {
         core.setFlag('curse', false);
     }
     core.updateStatusBar();
+
+    // 记录路线
+    if (itemId!='book' && itemId!='fly') {
+        core.status.route.push("item:"+itemId);
+    }
+
     // 道具使用完毕：删除
     if (itemCls=='tools')
         core.status.hero.items[itemCls][itemId]--;
     if (core.status.hero.items[itemCls][itemId]==0)
         delete core.status.hero.items[itemCls][itemId];
+
+    if (core.isset(callback)) callback();
 }
 
 ////// 当前能否使用道具 //////

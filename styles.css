@@ -90,7 +90,7 @@
     margin-top: 8%;
     max-width: 100%;
     text-align: center;
-    font: bold 4rem 华文行楷;
+    font: bold 4rem STXingkai;
 }
 
 #startTitle {
@@ -147,7 +147,7 @@
 
 #logoLabel {
     margin-top: 8%;
-    font: bold 3rem 华文行楷;
+    font: bold 3rem STXingkai;
     margin-left: auto;
     margin-right: auto;
 }
@@ -169,7 +169,7 @@
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
-    background: url(images/ground.png) round;
+    background: url(images/ground.png) repeat;
     z-index: 7;
     display: none;
 }
@@ -198,7 +198,7 @@
 }
 #toolBar {
     position: absolute;
-    background: url(images/ground.png) round;
+    background: url(images/ground.png) repeat;
     z-index: 6;
     box-sizing: border-box;
     -moz-box-sizing: border-box;

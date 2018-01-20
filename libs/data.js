@@ -6,7 +6,7 @@ data.prototype.init = function() {
     this.firstData = {
         "title": "魔塔样板", // 游戏名，将显示在标题页面以及切换楼层的界面中
         "name": "template", // 游戏的唯一英文标识符。由英文、数字、下划线组成，不能超过20个字符。
-        "version": "Ver 1.0.0 (Beta)", // 当前游戏版本；版本不一致的存档不能通用。
+        "version": "Ver 1.3.2", // 当前游戏版本；版本不一致的存档不能通用。
         "floorId": "sample0", // 初始楼层ID
         "hero": { // 勇士初始数据
             "name": "阳光", // 勇士名；可以改成喜欢的
@@ -32,17 +32,19 @@ data.prototype.init = function() {
                 "poison": false, // 毒
                 "weak": false, // 衰
                 "curse": false, // 咒
-            }
+            },
+            "steps": 0, // 行走步数统计
         },
         "startText": [ // 游戏开始前剧情。如果无剧情直接留一个空数组即可。
             "Hi，欢迎来到 HTML5 魔塔样板！\n\n本样板由艾之葵制作，可以让你在不会写任何代码\n的情况下也能做出属于自己的H5魔塔！",
             "这里游戏开始时的剧情。\n定义在data.js的startText处。\n\n你可以在这里写上自己的内容。",
             "赶快来试一试吧！"
         ],
-        "shops": { // 定义全局商店（即快捷商店）
-            "moneyShop1": { // 商店唯一ID
+        "shops": [ // 定义全局商店（即快捷商店）
+            {
+                "id": "moneyShop1", // 商店唯一ID
                 "name": "贪婪之神", // 商店名称（标题）
-                "icon": "blueShop", // 商店图标，blueShop为蓝色商店，pinkShop为粉色商店
+                "icon": "blueShop", // 商店图标，在icons.js中的npc一项定义
                 "textInList": "1F金币商店", // 在快捷商店栏中显示的名称
                 "use": "money", // 商店所要使用的。只能是"money"或"experience"。
                 "need": "20+10*times*(times+1)",  // 商店需要的金币/经验数值；可以是一个表达式，以times作为参数计算。
@@ -65,7 +67,8 @@ data.prototype.init = function() {
                     // "status:hp+=2*(status:atk+status:def)" 将生命提升攻防和的数值的两倍
                 ]
             },
-            "expShop1": { // 商店唯一ID
+            {
+                "id": "expShop1", // 商店唯一ID
                 "name": "经验之神",
                 "icon": "pinkShop",
                 "textInList": "1F经验商店",
@@ -80,8 +83,8 @@ data.prototype.init = function() {
                     {"text": "攻击+5", "need": "30", "effect": "status:atk+=5"},
                     {"text": "防御+5", "need": "30", "effect": "status:def+=5"},
                 ]
-            },
-        },
+            }
+        ],
         "levelUp": [ // 经验升级所需要的数值，是一个数组
             {}, // 第一项为初始等级，可以简单留空，也可以写name
 
@@ -94,7 +97,7 @@ data.prototype.init = function() {
 
             // effect也允许写一个function，代表本次升级将会执行的操作
             {"need": 40, "effect": function () {
-                core.drawText("恭喜升级！");
+                core.insertAction("恭喜升级！");
                 core.status.hero.hp *= 2;
                 core.status.hero.atk += 100;
                 core.status.hero.def += 100;
@@ -155,7 +158,7 @@ data.prototype.init = function() {
         "bigKeyIsBox": false, // 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙
         /****** 怪物相关 ******/
         "enableNegativeDamage": true, // 是否支持负伤害（回血）
-        "zoneSquare": false, // 领域类型。如果此项为true则为九宫格伤害，为false则为十字伤害
+        "betweenAttackCeil": false, // 夹击方式是向上取整还是向下取整。如果此项为true则为向上取整，为false则为向下取整
         /****** 系统相关 ******/
         "startDirectly": false, // 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面
         "canOpenBattleAnimate": true, // 是否允许用户开启战斗过程；如果此项为false，则下面两项均强制视为false
@@ -164,8 +167,8 @@ data.prototype.init = function() {
         "displayEnemyDamage": true, // 是否地图怪物显伤；用户可以手动在菜单栏中开关
         "displayExtraDamage": false, // 是否地图高级显伤（领域、夹击等）；用户可以手动在菜单栏中开关
         "enableGentleClick": true, // 是否允许轻触（获得面前物品）
-        "portalWithoutTrigger": true, // 经过楼梯、传送门时是否能“穿透”。穿透的意思是，自动寻路得到的的路径中间经过了楼梯，行走时是否触发楼层转换事件
         "potionWhileRouting": false, // 寻路算法是否经过血瓶；如果该项为false，则寻路算法会自动尽量绕过血瓶
+        "enableViewMaps": true, // 是否支持在菜单栏中查看所有楼层的地图
     }
 }
 

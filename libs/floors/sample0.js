@@ -50,7 +50,6 @@ main.floors.sample0 = {
             "\t[老人,womanMagician]这些是路障、楼梯、传送门。",
             "\t[老人,womanMagician]血网的伤害数值、中毒后每步伤害数值、衰弱时攻防下降的数值，都在 data.js 内定义。\n\n路障同样会尽量被自动寻路绕过。",
             "\t[老人,womanMagician]楼梯和传送门需要在changeFloor中定义目标楼层和位置，可参见样板里已有的的写法。",
-            "\t[老人,womanMagician]楼梯和传送门是否可“穿透”，由data.js中的全局变量所决定，你也可以单独设置。\n穿透的意思是，自动寻路得到的路径中间经过了楼梯，行走时是否触发楼层转换事件。\n例如，下面的“下箭头”就是不能穿透的。",
             {"type": "hide", "time": 500}
         ],
         "2,8": [ // 守着第一批怪物的老人
@@ -75,7 +74,6 @@ main.floors.sample0 = {
                 {"type": "hide", "time": 500}
             ]
         },
-
     },
     "changeFloor": { // 楼层转换事件；该事件不能和上面的events有冲突（同位置点），否则会被覆盖
         "6,0": {"floorId": "sample1", "stair": "downFloor"}, // 目标点：sample1层的下楼梯位置
@@ -85,8 +83,8 @@ main.floors.sample0 = {
         "2,12": {"floorId": "sample0", "loc": [2,12]},
         "3,12": {"floorId": "sample0", "loc": [6,1], "direction": "up"}, // 切换楼层后勇士面对上方
         "4,12": {"floorId": "sample0", "loc": [0,9], "direction": "left", "time": 1000}, // 切换楼层后勇士面对左边，切换动画1000ms
-        "5,12": {"floorId": "sample0", "loc": [6,10], "portalWithoutTrigger": false}, // 不能穿透
-        "6,12": {"floorId": "sample0", "loc": [10,10], "direction": "left", "time": 1000, "portalWithoutTrigger": false},
+        "5,12": {"floorId": "sample0", "loc": [6,10], "time": 0}, // time=0表示无切换时间
+        "6,12": {"floorId": "sample0", "loc": [10,10], "direction": "left", "time": 1000},
     },
     "afterBattle": { // 战斗后可能触发的事件列表
         "2,6": ["\t[ghostSkeleton]不可能，你怎么可能打败我！\n（一个打败怪物触发的事件）"]

@@ -24,8 +24,8 @@ enemys.prototype.init = function () {
         'slimeMan': {'name': '影子战士', 'hp': 100, 'atk': 0, 'def': 0, 'money': 11, 'experience': 0, 'special': 10}, // 模仿怪的攻防设为0就好
         'bluePriest': {'name': '初级法师', 'hp': 100, 'atk': 120, 'def': 0, 'money': 3, 'experience': 0, 'special': 2, 'point': 1}, // 'point'可以在打败怪物后进行加点，详见文档说明。
         'redPriest': {'name': '高级法师', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
-        'brownWizard': {'name': '初级巫师', 'hp': 100, 'atk': 120, 'def': 0, 'money': 16, 'experience': 0, 'special': 15, 'value': 100, 'zoneSquare': true}, // 领域怪需要加value表示领域伤害的数值；zoneSquare代表是否九宫格伤害
-        'redWizard': {'name': '高级巫师', 'hp': 1000, 'atk': 1200, 'def': 0, 'money': 160, 'experience': 0, 'special': 15, 'value': 200, 'range': 2}, // range可选，代表领域伤害的范围；不加默认为1
+        'brownWizard': {'name': '初级巫师', 'hp': 100, 'atk': 120, 'def': 0, 'money': 16, 'experience': 0, 'special': 15, 'value': 100, 'range': 2}, // 领域怪需要加value表示领域伤害的数值；range可选，代表领域伤害的范围；不加默认为1
+        'redWizard': {'name': '高级巫师', 'hp': 1000, 'atk': 1200, 'def': 0, 'money': 160, 'experience': 0, 'special': 15, 'value': 200, 'zoneSquare': true}, // zoneSquare可选，代表是否九宫格伤害，true为是九宫格伤害，false或不设置为十字伤害
         'yellowGuard': {'name': '初级卫兵', 'hp': 100, 'atk': 120, 'def': 0, 'money': 10, 'experience': 0, 'special': 0},
         'blueGuard': {'name': '中级卫兵', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
         'redGuard': {'name': '高级卫兵', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
@@ -248,11 +248,11 @@ enemys.prototype.calDamage = function (hero_atk, hero_def, hero_mdef, mon_hp, mo
     if (this.hasSpecial(mon_special, 8)) counterDamage += parseInt(core.values.counterAttack * hero_atk);
 
     // 先攻
-    var damage = mon_special == 1 ? per_damage : 0;
+    var damage = this.hasSpecial(mon_special, 1) ? per_damage : 0;
     // 破甲
     if (this.hasSpecial(mon_special, 7)) damage += parseInt(core.values.breakArmor * hero_def);
     // 净化
-    if (this.hasSpecial(mon_special, 9)) damage = core.values.purify * hero_mdef;
+    if (this.hasSpecial(mon_special, 9)) damage += core.values.purify * hero_mdef;
 
     var turn = parseInt((mon_hp - 1) / (hero_atk - mon_def));
     var ans = damage + turn * per_damage + (turn + 1) * counterDamage;

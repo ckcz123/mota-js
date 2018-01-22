@@ -3966,6 +3966,8 @@ core.prototype.encodeRoute = function (route) {
                 ans+='T';
             else if (t=='getNext')
                 ans+='G';
+            else if (t.indexOf('input:')==0)
+                ans+="P"+t.substring(6);
         }
     });
     if (cnt>0) {
@@ -4008,6 +4010,7 @@ core.prototype.decodeRoute = function (route) {
             case "S": ++index; ans.push("shop:"+shops[number]+":"+getNumber(true)); break;
             case "T": ans.push("turn"); break;
             case "G": ans.push("getNext"); break;
+            case "P": ans.push("input:"+number); break;
         }
     }
     return ans;

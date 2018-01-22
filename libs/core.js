@@ -1917,7 +1917,7 @@ core.prototype.afterBattle = function(id, x, y, callback) {
     if (core.flags.enableMoney)
         hint += "，金币+" + money;
     if (core.flags.enableExperience)
-        hint += "，经验+" + core.material.enemys[id].experience;
+        hint += "，经验+" + experience;
     core.drawTip(hint);
 
     // 打完怪物，触发事件

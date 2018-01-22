@@ -3713,8 +3713,13 @@ core.prototype.openSettings = function (need) {
 }
 
 ////// 自动存档 //////
-core.prototype.autosave = function () {
+core.prototype.autosave = function (removeLast) {
+    var x;
+    if (removeLast)
+        x=core.status.route.pop();
     core.saveData("autoSave");
+    if (removeLast)
+        core.status.route.push(x);
 }
 
 ////// 实际进行存读档事件 //////

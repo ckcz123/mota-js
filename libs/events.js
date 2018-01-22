@@ -6,7 +6,7 @@ function events() {
 events.prototype.init = function () {
     this.events = {
         'battle': function (data, core, callback) {
-            core.autosave();
+            core.autosave(true);
             core.battle(data.event.id, data.x, data.y);
             if (core.isset(callback))
                 callback();
@@ -17,7 +17,7 @@ events.prototype.init = function () {
                 callback();
         },
         'openDoor': function (data, core, callback) {
-            core.autosave();
+            core.autosave(true);
             core.openDoor(data.event.id, data.x, data.y, true, function () {
                 if (core.isset(callback)) callback();
                 core.replay();

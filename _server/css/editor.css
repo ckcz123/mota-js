@@ -47,6 +47,7 @@ body{
   white-space: pre;
   border: 1px solid #ddd;
   border-radius: 2px;
+  overflow: auto;
 }
 #editTip{
   position: absolute;
@@ -68,7 +69,6 @@ body{
   margin-right: 20px;
   margin-top: 5px;
 }
-
 #mid{
   position: absolute;
   left: 448px;

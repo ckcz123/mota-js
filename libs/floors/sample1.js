@@ -258,18 +258,34 @@ main.floors.sample1 = {
             "\t[老人,womanMagician]使用 {\"type\":\"function\"} 可以写自定义的JS脚本。\n本塔支持的所有主要API会在doc文档内给出。",
             "\t[老人,womanMagician]例如这个例子：即将弹出一个输入窗口，然后会将你的输入结果直接加到你的攻击力上。",
             {"type": "function", "function": function() { // 自己写JS脚本并执行
-                var value = prompt("请输入你要加攻击力的数值："); // 弹出一个输入框让用户输入数据
-                if (value!=null) {
-                    value=parseInt(value);
-                    if (value>0) { // 检查
-                        core.setStatus("atk", core.getStatus("atk")+value);
-                        // core.updateStatusBar(); // 和下面的 {"type": "update"} 等价，立即更新状态栏和地图显伤
-                        core.drawTip("操作成功，攻击+"+value); // 左上角气泡提示
-                        core.events.insertAction([ // 往当前事件列表前插入两条事件
-                            {"type": "update"}, // 更新状态栏和地图显伤
-                            "操作成功，攻击+"+value // 对话框提示
-                        ]);
+
+                // 注意一下prompt对于录像是如何处理的
+                var value;
+                if (core.status.replay.replaying) {
+                    var action = core.status.replay.toReplay.shift();
+                    if (action.indexOf("input:")==0 ) {
+                        value=parseInt(action.substring(6));
                     }
+                    else {
+                        core.status.replay.replaying=false;
+                        core.drawTip("录像文件出错");
+                        return;
+                    }
+                }
+                else {
+                    value = prompt("请输入你要加攻击力的数值：");
+                }
+                value = parseInt(value)||0;
+                core.status.route.push("input:"+value);
+
+                if (value>0) { // 检查
+                    core.setStatus("atk", core.getStatus("atk")+value);
+                    // core.updateStatusBar(); // 和下面的 {"type": "update"} 等价，立即更新状态栏和地图显伤
+                    core.drawTip("操作成功，攻击+"+value); // 左上角气泡提示
+                    core.events.insertAction([ // 往当前事件列表前插入两条事件
+                        {"type": "update"}, // 更新状态栏和地图显伤
+                        "操作成功，攻击+"+value // 对话框提示
+                    ]);
                 }
             }},
             "\t[老人,womanMagician]具体可参见样板中本事件的写法。"

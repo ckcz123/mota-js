@@ -16,7 +16,8 @@
 - 启用状态下，该事件才处于可见状态，可被触发、交互与处理。  
 - 禁用状态下该事件相当于不存在，不可见、不可被触发、不可交互。
 
-所有事件默认情况下都是启用的，除非指定了`enable: false`。  
+所有事件默认情况下都是启用的，除非指定了`enable: false`。
+
 在事件列表中使用`type: show`和`type: hide`可以将一个禁用事件启用，或将一个启用事件给禁用。
 
 
@@ -465,6 +466,8 @@ direction为可选的，指定的话将使勇士的朝向变成该方向
 
 time为可选的，指定的话将作为楼层切换动画的时间。
 
+**time也可以置为0，如果为0则没有楼层切换动画。**
+
 !> **changeFloor到达一个新的楼层，将不会执行firstArrive事件！如有需求请在到达点设置自定义事件，然后使用type: trigger立刻调用之。**
 
 ### changePos: 当前位置切换/勇士转向
@@ -844,8 +847,9 @@ events.prototype.addPoint = function (enemy) {
 全局商店定义在`data.js`中，找到shops一项。
 
 ``` js
-"shops": { // 定义全局商店（即快捷商店）
-    "moneyShop1": { // 商店唯一ID
+"shops": [ // 定义全局商店（即快捷商店）
+    {
+        "id": "moneyShop1", // 商店唯一ID
         "name": "贪婪之神", // 商店名称（标题）
         "icon": "blueShop", // 商店图标，blueShop为蓝色商店，pinkShop为粉色商店
         "textInList": "1F金币商店", // 在快捷商店栏中显示的名称
@@ -870,7 +874,8 @@ events.prototype.addPoint = function (enemy) {
             // "status:hp+=2*(status:atk+status:def)" 将生命提升攻防和的数值的两倍
         ]
     },
-    "expShop1": { // 商店唯一ID
+    {
+        "id": "expShop1", // 商店唯一ID
         "name": "经验之神",
         "icon": "pinkShop",
         "textInList": "1F经验商店",
@@ -885,15 +890,15 @@ events.prototype.addPoint = function (enemy) {
             {"text": "攻击+5", "need": "30", "effect": "status:atk+=5"},
             {"text": "防御+5", "need": "30", "effect": "status:def+=5"},
         ]
-    },
-},
+    }
+],
 ```
 
-全局商店全部定义在`data.js`中的shops一项里。
-每个全局商店有一个唯一标识符（ID），然后是一系列对该商店的定义。
+全局商店全部定义在`data.js`中的shops一项里。商店以数组形式存放，每一个商店都是其中的一个对象。
 
+- id 为商店的唯一标识符（ID），请确保任何两个商店的id都不相同
 - name 为商店的名称（打开商店后的标题）
-- icon 为商店的图标，blueShop为蓝色商店，pinkShop为粉色商店
+- icon 为商店的图标，在icons.js的npcs中定义。如woman可代表一个商人。
 - textInList 为其在快捷商店栏中显示的名称，如"3楼金币商店"等
 - use 为消耗的类型，是金币（money）还是经验（experience）。
 - need 是一个表达式，计算商店所需要用到的数值。
@@ -966,6 +971,26 @@ events.prototype.addPoint = function (enemy) {
 同样，为了实现类似于RMXP中，到达某一层后自动触发某段事件的效果，样板中还存在`firstArrive`事件。
 
 当且仅当勇士第一次到达某层时，将会触发此事件。可以利用此事件来显示一些剧情，或再让它调用 `{"type": "trigger"}` 来继续调用其他的事件。
+
+## 使用炸弹后的事件
+
+上面的afterBattle事件只对和怪物进行战斗后才有会被处理。
+
+如果我们想在使用炸弹后也能触发一些事件（如开门），则可以在`events.js`里面的`afterUseBomb`函数进行处理：
+
+``` js
+////// 使用炸弹/圣锤后的事件 //////
+events.prototype.afterUseBomb = function () {
+    // 这是一个使用炸弹也能开门的例子
+    if (core.status.floorId=='xxx' && core.terrainExists(x0,y0,'specialDoor') // 某个楼层，该机关门存在
+        && !core.enemyExists(x1,y1) && !core.enemyExists(x2,y2)) // 且守门的怪物都不存在
+    {
+        core.insertAction([ // 插入事件
+            {"type": "openDoor", "loc": [x0,y0]} // 开门
+        ])
+    }
+}
+```
 
 ## 战前剧情
 

@@ -33,6 +33,8 @@ items.prototype.init = function () {
         'moneyPocket': {'cls': 'items', 'name': '金钱袋'},
 
         // 物品
+        'sword0': {'cls': 'constants', 'name': '折断的剑', 'text': '没有任何作用的剑，相当于脱掉装备。'},
+        'shield0': {'cls': 'constants', 'name': '残破的盾', 'text': '没有任何作用的盾，相当于脱掉装备。'},
         'book': {'cls': 'constants', 'name': '怪物手册', 'text': '可以查看当前楼层各怪物属性'},
         'fly': {'cls': 'constants', 'name': '楼层传送器', 'text': '可以自由往来去过的楼层'},
         'coin': {'cls': 'constants', 'name': '幸运金币', 'text': '持有时打败怪物可得双倍金币'},
@@ -70,6 +72,19 @@ items.prototype.getItems = function () {
         this.items.pickaxe.text = "可以破坏勇士四周的墙";
     if (core.flags.bombFourDirections)
         this.items.bomb.text = "可以炸掉勇士四周的怪物";
+    if (core.flags.equipment) {
+        this.items.sword1 = {'cls': 'constants', 'name': '铁剑', 'text': '一把很普通的铁剑，攻击+'+core.values.sword1};
+        this.items.sword2 = {'cls': 'constants', 'name': '银剑', 'text': '一把很普通的银剑，攻击+'+core.values.sword2};
+        this.items.sword3 = {'cls': 'constants', 'name': '骑士剑', 'text': '一把很普通的骑士剑，攻击+'+core.values.sword3};
+        this.items.sword4 = {'cls': 'constants', 'name': '圣剑', 'text': '一把很普通的圣剑，攻击+'+core.values.sword4};
+        this.items.sword5 = {'cls': 'constants', 'name': '神圣剑', 'text': '一把很普通的神圣剑，攻击+'+core.values.sword5};
+        this.items.shield1 = {'cls': 'constants', 'name': '铁盾', 'text': '一个很普通的铁盾，防御+'+core.values.shield1};
+        this.items.shield2 = {'cls': 'constants', 'name': '银盾', 'text': '一个很普通的银盾，防御+'+core.values.shield2};
+        this.items.shield3 = {'cls': 'constants', 'name': '骑士盾', 'text': '一个很普通的骑士盾，防御+'+core.values.shield3};
+        this.items.shield4 = {'cls': 'constants', 'name': '圣盾', 'text': '一个很普通的圣盾，防御+'+core.values.shield4};
+        this.items.shield5 = {'cls': 'constants', 'name': '神圣盾', 'text': '一个很普通的神圣盾，防御+'+core.values.shield5};
+    }
+
     return this.items;
 }
 
@@ -118,24 +133,24 @@ items.prototype.getItemEffect = function(itemId, itemNum) {
 
 ////// “即捡即用类”道具的文字提示 //////
 items.prototype.getItemEffectTip = function(itemId) {
-    if (itemId === 'redJewel') return "，攻击+"+core.values.redJewel;
-    if (itemId === 'blueJewel') return "，防御+"+core.values.blueJewel;
-    if (itemId === 'greenJewel') return "，魔防+"+core.values.greenJewel;
+    if (itemId == 'redJewel') return "，攻击+"+core.values.redJewel;
+    if (itemId == 'blueJewel') return "，防御+"+core.values.blueJewel;
+    if (itemId == 'greenJewel') return "，魔防+"+core.values.greenJewel;
     if (itemId == 'yellowJewel') return "，全属性提升";
-    if (itemId === 'redPotion') return "，生命+"+core.values.redPotion;
-    if (itemId === 'bluePotion') return "，生命+"+core.values.bluePotion;
-    if (itemId === 'yellowPotion') return "，生命+"+core.values.yellowPotion;
-    if (itemId === 'greenPotion') return "，生命+"+core.values.greenPotion;
-    if (itemId === 'sword1') return "，攻击+"+core.values.sword1;
-    if (itemId === 'sword2') return "，攻击+"+core.values.sword2;
-    if (itemId === 'sword3') return "，攻击+"+core.values.sword3;
-    if (itemId === 'sword4') return "，攻击+"+core.values.sword4;
-    if (itemId === 'sword5') return "，攻击+"+core.values.sword5;
-    if (itemId === 'shield1') return "，防御+"+core.values.shield1;
-    if (itemId === 'shield2') return "，防御+"+core.values.shield2;
-    if (itemId === 'shield3') return "，防御+"+core.values.shield3;
-    if (itemId === 'shield4') return "，防御+"+core.values.shield4;
-    if (itemId === 'shield5') return "，防御+"+core.values.shield5;
+    if (itemId == 'redPotion') return "，生命+"+core.values.redPotion;
+    if (itemId == 'bluePotion') return "，生命+"+core.values.bluePotion;
+    if (itemId == 'yellowPotion') return "，生命+"+core.values.yellowPotion;
+    if (itemId == 'greenPotion') return "，生命+"+core.values.greenPotion;
+    if (!core.flags.equipment && itemId == 'sword1') return "，攻击+"+core.values.sword1;
+    if (!core.flags.equipment && itemId == 'sword2') return "，攻击+"+core.values.sword2;
+    if (!core.flags.equipment && itemId == 'sword3') return "，攻击+"+core.values.sword3;
+    if (!core.flags.equipment && itemId == 'sword4') return "，攻击+"+core.values.sword4;
+    if (!core.flags.equipment && itemId == 'sword5') return "，攻击+"+core.values.sword5;
+    if (!core.flags.equipment && itemId == 'shield1') return "，防御+"+core.values.shield1;
+    if (!core.flags.equipment && itemId == 'shield2') return "，防御+"+core.values.shield2;
+    if (!core.flags.equipment && itemId == 'shield3') return "，防御+"+core.values.shield3;
+    if (!core.flags.equipment && itemId == 'shield4') return "，防御+"+core.values.shield4;
+    if (!core.flags.equipment && itemId == 'shield5') return "，防御+"+core.values.shield5;
     if (itemId === 'bigKey') return "，全钥匙+1";
     if (itemId === 'superPotion') return "，生命值翻倍";
     if (itemId == 'moneyPocket') return "，金币+"+core.values.moneyPocket;
@@ -143,8 +158,11 @@ items.prototype.getItemEffectTip = function(itemId) {
 }
 
 ////// 使用道具 //////
-items.prototype.useItem = function (itemId) {
-    if (!this.canUseItem(itemId)) return;
+items.prototype.useItem = function (itemId, callback) {
+    if (!this.canUseItem(itemId)) {
+        if (core.isset(callback)) callback();
+        return;
+    }
     var itemCls = core.material.items[itemId].cls;
 
     if (itemId=='book') core.ui.drawBook(0);
@@ -174,6 +192,7 @@ items.prototype.useItem = function (itemId) {
         // 上楼器/下楼器
         core.changeFloor(core.status.event.data.id, null, {'direction': core.status.hero.loc.direction, 'x': core.status.event.data.x, 'y': core.status.event.data.y}, null, function (){
             core.drawTip(core.material.items[itemId].name + "使用成功");
+            core.replay();
         });
     }
     if (itemId == 'poisonWine') core.setFlag('poison', false);
@@ -192,12 +211,42 @@ items.prototype.useItem = function (itemId) {
         }
         core.setFlag('curse', false);
     }
+
+    // 剑
+    if (itemId.indexOf("sword")==0) {
+        var now=core.getFlag('sword', 'sword0'); // 当前装备剑的ID
+        core.status.hero.atk -= core.values[now];
+        core.setItem(now, 1);
+        core.status.hero.atk += core.values[itemId];
+        core.setItem(itemId, 0);
+        core.setFlag('sword', itemId);
+        core.drawTip("已装备"+core.material.items[itemId].name);
+    }
+    // 盾
+    if (itemId.indexOf("shield")==0) {
+        var now=core.getFlag('shield', 'shield0');
+        core.status.hero.def -= core.values[now];
+        core.setItem(now, 1);
+        core.status.hero.def += core.values[itemId];
+        core.setItem(itemId, 0);
+        core.setFlag('shield', itemId);
+        core.drawTip("已装备"+core.material.items[itemId].name);
+    }
+
     core.updateStatusBar();
+
+    // 记录路线
+    if (itemId!='book' && itemId!='fly') {
+        core.status.route.push("item:"+itemId);
+    }
+
     // 道具使用完毕：删除
     if (itemCls=='tools')
         core.status.hero.items[itemCls][itemId]--;
     if (core.status.hero.items[itemCls][itemId]==0)
         delete core.status.hero.items[itemCls][itemId];
+
+    if (core.isset(callback)) callback();
 }
 
 ////// 当前能否使用道具 //////
@@ -363,5 +412,9 @@ items.prototype.canUseItem = function (itemId) {
     if (itemId=='weakWine') return core.hasFlag('weak');
     if (itemId=='curseWine') return core.hasFlag('curse');
     if (itemId=='superWine') return core.hasFlag('poison') || core.hasFlag('weak') || core.hasFlag('curse');
+
+    // 剑盾
+    if (itemId.indexOf("sword")==0 || itemId.indexOf("shield")==0) return true;
+
     return false;
 }

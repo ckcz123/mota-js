@@ -65,6 +65,7 @@ enemys.prototype.getSpecialText = function (enemyId) {
     if (this.hasSpecial(special, 18)) text.push("阻击");
     if (this.hasSpecial(special, 19)) text.push("自爆");
     if (this.hasSpecial(special, 20)) text.push("无敌");
+    if (this.hasSpecial(special, 21)) text.push("退化");
     return text.join("  ");
 }
 ```
@@ -94,6 +95,8 @@ N连击怪物的special是6，且我们可以为它定义n代表实际连击数�
 
 吸血怪需要在怪物后添加value，代表吸血的比例。
 
+可以给吸血怪添加`'add': true`来将吸血的数值加到自身上。
+
 ![怪物吸血](./img/blood.png)
 
 中毒怪让勇士中毒后，每步扣减的生命值由`data.js`中的values定义。
@@ -117,6 +120,10 @@ N连击怪物的special是6，且我们可以为它定义n代表实际连击数�
 !> 阻击怪后退的地点不能有任何事件存在，即使是已经被禁用的自定义事件！
 
 请注意如果吸血、领域、阻击中任何两个同时存在，则value会冲突。**因此请勿将吸血、领域或阻击放置在同一个怪物身上。**
+
+退化怪需要在后面增加'atkValue'和'defValue'表示退化的数值。
+
+![怪物退化](./img/tuihua.png)
 
 如有额外需求，可参见[自定义怪物属性](personalization#自定义自定义怪物属性)，里面讲了如何设置一个新的怪物属性。
 

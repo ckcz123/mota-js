@@ -689,8 +689,10 @@ events.prototype.addPoint = function (enemy) {
 ////// 战斗结束后触发的事件 //////
 events.prototype.afterBattle = function(enemyId,x,y,callback) {
 
+    var enemy = core.material.enemys[enemyId];
+
     // 毒衰咒的处理
-    var special = core.material.enemys[enemyId].special;
+    var special = enemy.special;
     // 中毒
     if (core.enemys.hasSpecial(special, 12) && !core.hasFlag('poison')) {
         core.setFlag('poison', true);
@@ -712,6 +714,13 @@ events.prototype.afterBattle = function(enemyId,x,y,callback) {
     // 自爆
     if (core.enemys.hasSpecial(special, 19)) {
         core.status.hero.hp = 1;
+    }
+    // 退化
+    if (core.enemys.hasSpecial(special, 21)) {
+        core.status.hero.atk -= (enemy.atkValue||0);
+        core.status.hero.def -= (enemy.defValue||0);
+        if (core.status.hero.atk<0) core.status.hero.atk=0;
+        if (core.status.hero.def<0) core.status.hero.def=0;
     }
     // 增加仇恨值
     core.setFlag('hatred', core.getFlag('hatred',0)+core.values.hatred);

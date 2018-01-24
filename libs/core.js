@@ -1163,6 +1163,13 @@ core.prototype.onmousewheel = function (direct) {
         if (direct==-1) core.ui.drawSLPanel(core.status.event.data + 10);
         return;
     }
+
+    // 浏览地图
+    if (core.status.lockControl && core.status.event.id == 'viewMaps') {
+        if (direct==1) core.ui.drawMaps(core.status.event.data+1);
+        if (direct==-1) core.ui.drawMaps(core.status.event.data-1);
+        return;
+    }
 }
 
 /////////// 键盘、鼠标事件相关 END ///////////

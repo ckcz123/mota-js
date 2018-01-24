@@ -1174,16 +1174,15 @@ events.prototype.keyDownShop = function (keycode) {
 ////// 商店界面时，放开某个键的操作 //////
 events.prototype.keyUpShop = function (keycode) {
     if (keycode==27 || keycode==88) {
-
         if (core.status.event.data.actions.length>0) {
             core.status.route.push("shop:"+core.status.event.data.id+":"+core.status.event.data.actions.join(""));
         }
 
-        if (core.status.event.data.fromList) {
-            core.status.boxAnimateObjs = [];
-            core.setBoxAnimate();
+        core.status.boxAnimateObjs = [];
+        core.setBoxAnimate();
+
+        if (core.status.event.data.fromList)
             core.ui.drawQuickShop();
-        }
         else
             core.ui.closePanel();
         return;

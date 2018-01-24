@@ -568,12 +568,15 @@ events.prototype.openShop = function(shopId, needVisited) {
     var actions = [];
     if (core.isset(core.status.event.data) && core.isset(core.status.event.data.actions))
         actions=core.status.event.data.actions;
+    var fromList;
+    if (core.isset(core.status.event.data) && core.isset(core.status.event.data.fromList))
+        fromList = core.status.event.data.fromList;
 
     core.ui.closePanel();
     core.lockControl();
     // core.status.event = {'id': 'shop', 'data': {'id': shopId, 'shop': shop}};
     core.status.event.id = 'shop';
-    core.status.event.data = {'id': shopId, 'shop': shop, 'actions': actions};
+    core.status.event.data = {'id': shopId, 'shop': shop, 'actions': actions, 'fromList': fromList};
     core.status.event.selection = selection;
 
     // 拼词
@@ -1171,6 +1174,11 @@ events.prototype.keyDownShop = function (keycode) {
 ////// 商店界面时，放开某个键的操作 //////
 events.prototype.keyUpShop = function (keycode) {
     if (keycode==27 || keycode==88) {
+
+        if (core.status.event.data.actions.length>0) {
+            core.status.route.push("shop:"+core.status.event.data.id+":"+core.status.event.data.actions.join(""));
+        }
+
         if (core.status.event.data.fromList) {
             core.status.boxAnimateObjs = [];
             core.setBoxAnimate();

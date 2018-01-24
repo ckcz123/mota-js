@@ -3603,7 +3603,7 @@ core.prototype.replay = function () {
                     core.useItem(itemId, function () {
                         core.replay();
                     });
-                }, 500);
+                }, 1000);
             }
             return;
         }
@@ -3621,7 +3621,7 @@ core.prototype.replay = function () {
                 core.changeFloor(floorId, stair, null, null, function () {
                     core.replay();
                 });
-            }, 500);
+            }, 1000);
             return;
         }
     }
@@ -3634,22 +3634,27 @@ core.prototype.replay = function () {
             if (core.isset(shop) && shop.visited) { // 商店可用
                 var choices = shop.choices;
                 var topIndex = 6 - parseInt(choices.length / 2);
+
+                core.status.event.selection = parseInt(selections.shift());
+
                 core.events.openShop(shopId, false);
                 var shopInterval = setInterval(function () {
+                    if (!core.events.clickShop(6, topIndex+core.status.event.selection)) {
+                        clearInterval(shopInterval);
+                        core.stopReplay();
+                        core.drawTip("录像文件出错");
+                        return;
+                    }
                     if (selections.length==0) {
                         clearInterval(shopInterval);
                         core.events.clickShop(6, topIndex+choices.length);
                         core.replay();
                         return;
                     }
-                    var selection = parseInt(selections.shift());
-                    if (isNaN(selection) || selection<0 || selection>=choices.length || !core.events.clickShop(6, topIndex+selection)) {
-                        clearInterval(shopInterval);
-                        core.stopReplay();
-                        core.drawTip("录像文件出错");
-                        return;
-                    }
-                }, 500);
+                    core.status.event.selection = parseInt(selections.shift());
+                    core.events.openShop(shopId, false);
+
+                }, 1000);
                 return;
             }
         }

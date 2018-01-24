@@ -286,7 +286,7 @@ events.prototype.doAction = function() {
     core.status.event.data.type=data.type;
     switch (data.type) {
         case "text": // 文字/对话
-            if (core.status.replay.isreplaying)
+            if (core.status.replay.replaying)
                 core.events.doAction();
             else
                 core.ui.drawTextBox(data.data);
@@ -377,6 +377,7 @@ events.prototype.doAction = function() {
         case "openShop": // 打开一个全局商店
             if (core.status.replay.replaying) { // 正在播放录像，简单将visited置为true
                 core.status.shops[data.id].visited=true;
+                core.status.event.data.list = [];
                 this.doAction();
             }
             else
@@ -477,7 +478,7 @@ events.prototype.doAction = function() {
                                 core.status.route.push("choices:"+index);
                                 core.events.insertAction(data.choices[index].action);
                                 core.events.doAction();
-                            }, 500)
+                            }, 1000)
                     }
                     else {
                         core.stopReplay();

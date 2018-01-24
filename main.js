@@ -95,6 +95,19 @@ function main() {
             'load': document.getElementById("img-load"),
             'settings': document.getElementById("img-settings")
         },
+        'icons': {
+            'book': null,
+            'fly': null,
+            'toolbox': null,
+            'save': null,
+            'load': null,
+            'settings': null,
+            'rewind': null, // 减速
+            'forward': null, // 加速
+            'play': null, // 播放
+            'pause': null, // 暂停
+            'stop': null, // 停止
+        },
         'floor': document.getElementById('floor'),
         'lv': document.getElementById('lv'),
         'hp': document.getElementById('hp'),
@@ -122,6 +135,11 @@ main.prototype.init = function () {
     for (var i = 0; i < main.dom.gameCanvas.length; i++) {
         main.canvas[main.dom.gameCanvas[i].id] = main.dom.gameCanvas[i].getContext('2d');
     }
+    Object.keys(this.statusBar.icons).forEach(function (t) {
+        var image=new Image();
+        image.src="images/"+t+".png";
+        main.statusBar.icons[t] = image;
+    })
     main.loaderJs(function () {
         var coreData = {};
         for (i = 0; i < main.loadList.length; i++) {
@@ -319,12 +337,23 @@ main.dom.data.ontouchend = function () {
 
 ////// 点击状态栏中的怪物手册时 //////
 main.statusBar.image.book.onclick = function () {
+    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+        core.triggerReplay();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.openBook(true);
 }
 
 ////// 点击状态栏中的楼层传送器时 //////
 main.statusBar.image.fly.onclick = function () {
+
+    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+        core.stopReplay();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.useFly(true);
 }
@@ -343,12 +372,24 @@ main.statusBar.image.shop.onclick = function () {
 
 ////// 点击状态栏中的存档按钮时 //////
 main.statusBar.image.save.onclick = function () {
+
+    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+        core.rewindReplay();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.save(true);
 }
 
 ////// 点击状态栏中的读档按钮时 //////
 main.statusBar.image.load.onclick = function () {
+
+    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+        core.forwardReplay();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.load(true);
 }
@@ -398,7 +439,7 @@ main.dom.replayGame.onclick = function () {
         core.events.setInitData(obj.hard);
         core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
             core.setHeroMoveTriggerInterval();
-            core.replay(core.decodeRoute(obj.route));
+            core.startReplay(core.decodeRoute(obj.route));
         });
     }, function () {
 

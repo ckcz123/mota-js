@@ -102,7 +102,8 @@ function core() {
             'pausing': false,
             'animate': false, // 正在某段动画中
             'toReplay': [],
-            'totalList': []
+            'totalList': [],
+            'speed': 1.0
         },
 
         // event事件
@@ -603,7 +604,18 @@ core.prototype.onkeyDown = function(e) {
 
 ////// 放开某个键时 //////
 core.prototype.onkeyUp = function(e) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) {
+        if (e.keyCode==27) // ESCAPE
+            core.stopReplay();
+        else if (e.keyCode==90) // Z
+            core.rewindReplay();
+        else if (e.keyCode==88) // X
+            core.forwardReplay();
+        else if (e.keyCode==32) // SPACE
+            core.triggerReplay();
+        return;
+    }
+
     var isArrow={37:true,38:true,39:true,40:true}[e.keyCode]
     if(isArrow && !core.status.lockControl){
         for(var ii =0;ii<core.status.holdingKeys.length;ii++){
@@ -859,7 +871,7 @@ core.prototype.keyUp = function(keyCode) {
                     core.events.setInitData(hard);
                     core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
                         core.setHeroMoveTriggerInterval();
-                        core.replay(route);
+                        core.startReplay(route);
                     });
                 }, function () {
                     core.ui.closePanel();
@@ -1528,7 +1540,7 @@ core.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
             core.status.heroMoving = false;
             if (core.isset(callback)) callback();
         }
-    }, 12.5);
+    }, 12.5 / core.status.replay.speed);
 }
 
 ////// 设置勇士行走过程中对事件的触发检测 //////
@@ -1719,7 +1731,7 @@ core.prototype.eventMoveHero = function(steps, time, callback) {
                 moveSteps.shift();
             }
         }
-    }, time/8);
+    }, time / 8 / core.status.replay.speed)
 }
 
 ////// 每移动一格后执行的事件 //////
@@ -1964,7 +1976,7 @@ core.prototype.trigger = function (x, y) {
 ////// 楼层切换 //////
 core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) {
 
-    var displayAnimate=!(time==0);
+    var displayAnimate=!(time==0) && !core.status.replay.replaying;
 
     time = time || 800;
     time /= 20;
@@ -2059,11 +2071,11 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
                     else {
                         changed();
                     }
-                }, 15)
+                }, 25)
             });
         }
+        core.playSound('floor.mp3');
         if (displayAnimate) {
-            core.playSound('floor.mp3');
             core.mapChangeAnimate('show', time/2, function () {
                 changing();
             });
@@ -2071,7 +2083,7 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
         else {
             changing();
         }
-    }, 50);
+    }, 25);
 }
 
 ////// 地图切换动画效果 //////
@@ -2465,7 +2477,7 @@ core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
 
     var animate=window.setInterval(function() {
 
-        animateTime += time / 16;
+        animateTime += time / 16 / core.status.replay.speed;
         if (animateTime >= core.values.animateSpeed * 2 / animateValue) {
             animateCurrent++;
             animateTime = 0;
@@ -2502,7 +2514,7 @@ core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
                 moveSteps.shift();
             }
         }
-    }, time/16);
+    }, time / 16 / core.status.replay.speed);
 }
 
 ////// 显示/隐藏某个块时的动画效果 //////
@@ -2547,7 +2559,7 @@ core.prototype.animateBlock = function (x,y,type,time,callback) {
             core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
-    }, time/10);
+    }, time / 10 / core.status.replay.speed);
 }
 
 ////// 将某个块从禁用变成启用状态 //////
@@ -3493,22 +3505,79 @@ core.prototype.debug = function() {
     core.drawTip("作弊成功");
 }
 
-////// 回放 //////
-core.prototype.replay = function (list) {
+////// 开始播放 //////
+core.prototype.startReplay = function (list) {
+    core.status.replay.replaying=true;
+    core.status.replay.pausing=false;
+    core.status.replay.speed=1.0;
+    core.status.replay.toReplay = core.clone(list);
+    core.status.replay.totalList = core.clone(list);
+    core.updateStatusBar();
+    core.drawTip("开始播放");
+    this.replay();
+    return;
+}
 
-    if (core.isset(list) && (list instanceof Array)) {
-        core.status.replay.replaying=true;
-        core.status.replay.toReplay = core.clone(list);
-        this.replay();
-        return;
-    }
+////// 更改播放状态 //////
+core.prototype.triggerReplay = function () {
+    if (core.status.replay.pausing) this.resumeReplay();
+    else this.pauseReplay();
+}
+
+////// 暂停播放 //////
+core.prototype.pauseReplay = function () {
+    if (!core.status.replay.replaying) return;
+    core.status.replay.pausing = true;
+    core.updateStatusBar();
+    core.drawTip("暂停播放");
+}
+
+////// 恢复播放 //////
+core.prototype.resumeReplay = function () {
+    if (!core.status.replay.replaying) return;
+    core.status.replay.pausing = false;
+    core.updateStatusBar();
+    core.drawTip("恢复播放");
+    core.replay();
+}
+
+////// 加速播放 //////
+core.prototype.forwardReplay = function () {
+    if (!core.status.replay.replaying) return;
+    core.status.replay.speed = parseInt(10*core.status.replay.speed + 1)/10;
+    if (core.status.replay.speed>2.5) core.status.replay.speed=2.5;
+    core.drawTip("x"+core.status.replay.speed+"倍");
+}
+
+////// 减速播放 //////
+core.prototype.rewindReplay = function () {
+    if (!core.status.replay.replaying) return;
+    core.status.replay.speed = parseInt(10*core.status.replay.speed - 1)/10;
+    if (core.status.replay.speed<0.3) core.status.replay.speed=0.3;
+    core.drawTip("x"+core.status.replay.speed+"倍");
+}
+
+////// 停止播放 //////
+core.prototype.stopReplay = function () {
+    if (!core.status.replay.replaying) return;
+    core.status.replay.toReplay = [];
+    core.status.replay.totalList = [];
+    core.status.replay.replaying=false;
+    core.status.replay.pausing=false;
+    core.status.replay.speed=1.0;
+    core.updateStatusBar();
+    core.drawTip("停止播放并恢复游戏");
+}
+
+////// 回放 //////
+core.prototype.replay = function () {
 
     if (!core.status.replay.replaying) return; // 没有回放
     if (core.status.replay.pausing) return; // 暂停状态
     if (core.status.replay.animate) return; // 正在某段动画中
 
     if (core.status.replay.toReplay.length==0) { // 回放完毕
-        core.status.replay.replaying=false;
+        core.stopReplay();
         core.insertAction("录像回放完毕！");
         return;
     }
@@ -3576,7 +3645,7 @@ core.prototype.replay = function (list) {
                     var selection = parseInt(selections.shift());
                     if (isNaN(selection) || selection<0 || selection>=choices.length || !core.events.clickShop(6, topIndex+selection)) {
                         clearInterval(shopInterval);
-                        core.status.replay.replaying=false;
+                        core.stopReplay();
                         core.drawTip("录像文件出错");
                         return;
                     }
@@ -3603,7 +3672,7 @@ core.prototype.replay = function (list) {
         }
     }
 
-    core.status.replay.replaying=false;
+    core.stopReplay();
     core.insertAction("录像文件出错");
 
 }
@@ -4111,6 +4180,7 @@ core.prototype.readFile = function (success, error) {
                 return;
             }
             core.platform.fileReader.readAsText(core.platform.fileInput.files[0]);
+            core.platform.fileInput.value = '';
         }
     }
 
@@ -4407,16 +4477,52 @@ core.prototype.updateStatusBar = function () {
     }
 
     core.statusBar.hard.innerHTML = core.status.hard;
-    if (core.hasItem('book')) {
+
+
+    // 回放
+    if (core.status.replay.replaying) {
+        core.statusBar.image.book.src = core.status.replay.pausing?core.statusBar.icons.play.src:core.statusBar.icons.pause.src;
         core.statusBar.image.book.style.opacity = 1;
-    } else {
-        core.statusBar.image.book.style.opacity = 0.3;
-    }
-    if (core.hasItem('fly')) {
+
+        core.statusBar.image.fly.src = core.statusBar.icons.stop.src;
         core.statusBar.image.fly.style.opacity = 1;
-    } else {
-        core.statusBar.image.fly.style.opacity = 0.3;
+
+        //core.statusBar.image.toolbox.src = core.statusBar.icons.forward.src;
+        core.statusBar.image.toolbox.style.opacity = 0;
+
+        core.statusBar.image.shop.style.opacity = 0;
+
+        core.statusBar.image.save.src = core.statusBar.icons.rewind.src;
+        core.statusBar.image.save.style.opacity = 1;
+
+        core.statusBar.image.load.src = core.statusBar.icons.forward.src;
+        core.statusBar.image.load.style.opacity = 1;
+
+        core.statusBar.image.settings.style.opacity = 0;
+
     }
+    else {
+        core.statusBar.image.book.src = core.statusBar.icons.book.src;
+        core.statusBar.image.book.style.opacity = core.hasItem('book')?1:0.3;
+
+        core.statusBar.image.fly.src = core.statusBar.icons.fly.src;
+        core.statusBar.image.fly.style.opacity = core.hasItem('fly')?1:0.3;
+
+        core.statusBar.image.toolbox.src = core.statusBar.icons.toolbox.src;
+        core.statusBar.image.toolbox.style.opacity = 1;
+
+        core.statusBar.image.shop.style.opacity = 1;
+
+        core.statusBar.image.save.src = core.statusBar.icons.save.src;
+        core.statusBar.image.save.style.opacity = 1;
+
+        core.statusBar.image.load.src = core.statusBar.icons.load.src;
+        core.statusBar.image.load.style.opacity = 1;
+
+        core.statusBar.image.settings.src = core.statusBar.icons.settings.src;
+        core.statusBar.image.settings.style.opacity = 1;
+    }
+
     core.updateFg();
 }
 

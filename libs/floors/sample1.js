@@ -267,7 +267,7 @@ main.floors.sample1 = {
                         value=parseInt(action.substring(6));
                     }
                     else {
-                        core.status.replay.replaying=false;
+                        core.stopReplay();
                         core.drawTip("录像文件出错");
                         return;
                     }

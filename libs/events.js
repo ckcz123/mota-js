@@ -115,7 +115,7 @@ events.prototype.setInitData = function (hard) {
 events.prototype.win = function(reason) {
     core.ui.closePanel();
     var replaying = core.status.replay.replaying;
-    core.status.replay.replaying=false;
+    core.stopReplay();
     core.waitHeroToStop(function() {
         core.removeGlobalAnimate(0,0,true);
         core.clearMap('all'); // 清空全地图
@@ -131,9 +131,8 @@ events.prototype.win = function(reason) {
 events.prototype.lose = function(reason) {
     core.ui.closePanel();
     var replaying = core.status.replay.replaying;
-    core.status.replay.replaying=false;
+    core.stopReplay();
     core.waitHeroToStop(function() {
-        core.status.replay.replaying=false;
         core.drawText([
             "\t[结局1]你死了。\n如题。"
         ], function () {
@@ -481,7 +480,7 @@ events.prototype.doAction = function() {
                             }, 500)
                     }
                     else {
-                        core.status.replay.replaying=false;
+                        core.stopReplay();
                         core.drawTip("录像文件出错");
                     }
                 }
@@ -1047,9 +1046,10 @@ events.prototype.clickFly = function(x,y) {
         var index=core.status.hero.flyRange.indexOf(core.status.floorId);
         var stair=core.status.event.data<index?"upFloor":"downFloor";
         var floorId=core.status.event.data;
-        core.status.route.push("fly:"+core.status.hero.flyRange[floorId]);
-        core.changeFloor(core.status.hero.flyRange[floorId], stair);
+        var toFloor = core.status.hero.flyRange[floorId];
+        core.status.route.push("fly:"+toFloor);
         core.ui.closePanel();
+        core.changeFloor(toFloor, stair);
     }
     return;
 }

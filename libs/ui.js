@@ -369,6 +369,22 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     var monster = core.material.enemys[monsterId];
     var mon_hp = monster.hp, mon_atk = monster.atk, mon_def = monster.def, mon_money=monster.money, mon_exp = monster.experience, mon_special=monster.special;
 
+    var initDamage = 0; // 战前伤害
+
+    // 吸血
+    if (this.hasSpecial(mon_special, 11)) {
+        var vampireDamage = hero_hp * monster.value;
+
+        // 如果有神圣盾免疫吸血等可以在这里写
+
+        vampireDamage = parseInt(vampireDamage);
+        // 加到自身
+        if (monster.add) // 如果加到自身
+            mon_hp += vampireDamage;
+
+        initDamage += vampireDamage;
+    }
+
     hero_hp -= core.enemys.getExtraDamage(monster);
 
     if (core.enemys.hasSpecial(mon_special, 10)) { // 模仿
@@ -388,16 +404,9 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     if (core.enemys.hasSpecial(mon_special, 5)) turns=4;
     if (core.enemys.hasSpecial(mon_special, 6)) turns=1+(monster.n||4);
 
-
     // 初始伤害
-    var initDamage = 0;
     if (core.enemys.hasSpecial(mon_special, 7)) initDamage+=parseInt(core.values.breakArmor * hero_def);
     if (core.enemys.hasSpecial(mon_special, 9)) initDamage+=parseInt(core.values.purify * hero_mdef);
-    if (core.enemys.hasSpecial(mon_special, 11)) { // 吸血
-        var extraDamage = monster.value * hero_hp;
-        initDamage+=parseInt(extraDamage);
-    }
-    if (core.enemys.hasSpecial(mon_special, 17)) initDamage+=core.getFlag('hatred', 0);
     hero_mdef-=initDamage;
     if (hero_mdef<0) {
         hero_hp+=hero_mdef;

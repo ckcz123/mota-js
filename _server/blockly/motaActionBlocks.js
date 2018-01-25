@@ -89,11 +89,8 @@ motaActionBlocks_4a3632a9_8716_48b3_bf55_4ebbc4ff040c = [
   },
   {
     "type": "actionlist",
-    "message0": "动作集合 %1 %2",
+    "message0": "%1",
     "args0": [
-      {
-        "type": "input_dummy"
-      },
       {
         "type": "input_statement",
         "name": "ACTIONS",

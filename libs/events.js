@@ -122,7 +122,7 @@ events.prototype.win = function(reason) {
         core.drawText([
             "\t[恭喜通关]你的分数是${status:hp}。"
         ], function () {
-            core.events.gameOver(true, replaying);
+            core.events.gameOver('', replaying);
         })
     });
 }
@@ -136,18 +136,18 @@ events.prototype.lose = function(reason) {
         core.drawText([
             "\t[结局1]你死了。\n如题。"
         ], function () {
-            core.events.gameOver(false, replaying);
+            core.events.gameOver(null, replaying);
         });
     })
 }
 
 ////// 游戏结束 //////
-events.prototype.gameOver = function (success, fromReplay) {
+events.prototype.gameOver = function (ending, fromReplay) {
 
     // 上传成绩
     var confirmUpload = function () {
 
-        if (!success) {
+        if (!core.isset(ending)) {
             core.restart();
             return;
         }
@@ -163,6 +163,7 @@ events.prototype.gameOver = function (success, fromReplay) {
             formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
             formData.append('hard', core.status.hard);
             formData.append('username', username);
+            formData.append('ending', ending);
             formData.append('lv', core.status.hero.lv);
             formData.append('hp', core.status.hero.hp);
             formData.append('atk', core.status.hero.atk);
@@ -608,7 +609,7 @@ events.prototype.disableQuickShop = function (shopId) {
 
 ////// 能否使用快捷商店 //////
 events.prototype.canUseQuickShop = function(shopId) {
-    if (core.isset(core.floors[core.status.floorId].canUseQuickShop) && !core.isset(core.floors[core.status.floorId].canUseQuickShop))
+    if (core.isset(core.floors[core.status.floorId].canUseQuickShop) && !core.floors[core.status.floorId].canUseQuickShop)
         return '当前不能使用快捷商店。';
 
     return null;
@@ -1602,7 +1603,7 @@ events.prototype.clickSettings = function (x,y) {
                 core.ui.drawWaiting("正在拉取统计信息，请稍后...");
 
                 var formData = new FormData();
-                formData.append('type', 'getinfo');
+                formData.append('type', 'statistics');
                 formData.append('name', core.firstData.name);
                 formData.append('version', core.firstData.version);
 
@@ -1623,9 +1624,14 @@ events.prototype.clickSettings = function (x,y) {
                                 toAdd=true;
                                 if (t.hard!='') text+=t.hard+"难度： "
                                 text+="已有"+t.people+"人次游戏，"+t.score+"人次通关。";
-                                if (core.isset(t.max) && t.max>0) {
-                                    text+="\n当前MAX为"+t.max+"，最早由 "+(t.username||"匿名")+" 于"+core.formatDate(new Date(1000*t.timestamp))+"打出。";
-                                }
+                                t.info.forEach(function(ending) {
+                                    if (ending.ending!='') {
+                                        text+="\n"+ending.ending+"： 已有"+ending.score+"人次通关。";
+                                    }
+                                    if (core.isset(ending.max) && ending.max>0) {
+                                        text+="\n当前MAX为"+ending.max+"，最早由 "+(ending.username||"匿名")+" 于"+core.formatDate(new Date(1000*ending.timestamp))+"打出。";
+                                    }
+                                })
                             })
                             core.drawText(text);
                         }
@@ -1687,7 +1693,7 @@ events.prototype.keyUpSettings = function (keycode) {
 events.prototype.clickSyncSave = function (x,y) {
     if (x<5 || x>7) return;
     var choices = [
-        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "清空所有存档", "返回主菜单"
+        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "下载当前录像", "清空所有存档", "返回主菜单"
     ];
     var topIndex = 6 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
@@ -1743,6 +1749,13 @@ events.prototype.clickSyncSave = function (x,y) {
                 });
                 break;
             case 4:
+                core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify({
+                        'name': core.firstData.name,
+                        'hard': core.status.hard,
+                        'route': core.encodeRoute(core.status.route)
+                    }));
+                break;
+            case 5:
                 core.status.event.selection=1;
                 core.ui.drawConfirmBox("你确定要清空所有存档吗？", function() {
                     localStorage.clear();
@@ -1752,7 +1765,7 @@ events.prototype.clickSyncSave = function (x,y) {
                     core.ui.drawSyncSave(false);
                 })
                 break;
-            case 5:
+            case 6:
                 core.status.event.selection=3;
                 core.ui.drawSettings();
                 break;
@@ -1782,7 +1795,7 @@ events.prototype.keyUpSyncSave = function (keycode) {
         return;
     }
     var choices = [
-        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "清空所有存档", "返回主菜单"
+        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "下载当前录像", "清空所有存档", "返回主菜单"
     ];
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);

@@ -3617,7 +3617,7 @@ core.prototype.replay = function () {
             setTimeout(function () {
                 core.ui.closePanel();
                 var stair=toIndex<nowIndex?"upFloor":"downFloor";
-                core.status.route.push("fly:"+core.floorIds.indexOf(floorId));
+                core.status.route.push("fly:"+floorId);
                 core.changeFloor(floorId, stair, null, null, function () {
                     core.replay();
                 });

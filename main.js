@@ -425,7 +425,7 @@ main.dom.replayGame.onclick = function () {
             alert("存档和游戏不一致！");
             return;
         }
-        if (obj.version!=core.firstData.version) {
+        if (core.isset(obj.version) && obj.version!=core.firstData.version) {
             alert("游戏版本不一致！");
             return;
         }

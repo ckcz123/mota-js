@@ -683,7 +683,7 @@ ui.prototype.drawSyncSave = function () {
     core.status.event.id = 'syncSave';
 
     this.drawChoices(null, [
-        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "清空所有存档", "返回主菜单"
+        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "下载当前录像", "清空本地存档", "返回主菜单"
     ]);
 
 }

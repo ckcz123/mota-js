@@ -1241,15 +1241,17 @@ core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     if (core.status.automaticRoute.automaticRouting) {
         var lastX = core.status.automaticRoute.destX, lastY=core.status.automaticRoute.destY;
         core.stopAutomaticRoute();
-        if (lastX==destX && lastY==destY && core.canMoveDirectly(destX, destY)) {
+        if (lastX==destX && lastY==destY) {
             core.lockControl();
             setTimeout(function () {
                 core.unLockControl();
-                core.clearMap('hero', 0, 0, 416, 416);
-                core.setHeroLoc('x', destX);
-                core.setHeroLoc('y', destY);
-                core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
-                core.status.route.push("go:"+destX+":"+destY);
+                if (core.canMoveDirectly(destX, destY)) {
+                    core.clearMap('hero', 0, 0, 416, 416);
+                    core.setHeroLoc('x', destX);
+                    core.setHeroLoc('y', destY);
+                    core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+                    core.status.route.push("move:"+destX+":"+destY);
+                }
             }, 100);
         }
         return;
@@ -3735,6 +3737,19 @@ core.prototype.replay = function () {
             }
         }
     }
+    else if (action.indexOf('move:')==0) {
+        var pos=action.substring(5).split(":");
+        var x=parseInt(pos[0]), y=parseInt(pos[1]);
+        if (core.canMoveDirectly(x,y)) {
+            core.clearMap('hero', 0, 0, 416, 416);
+            core.setHeroLoc('x', x);
+            core.setHeroLoc('y', y);
+            core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+            core.status.route.push("move:"+x+":"+y);
+            core.replay();
+            return;
+        }
+    }
 
     core.stopReplay();
     core.insertAction("录像文件出错");
@@ -4109,6 +4124,9 @@ core.prototype.encodeRoute = function (route) {
                 ans+="P"+t.substring(6);
             else if (t=='no')
                 ans+='N';
+            else if (t.indexOf('move:')==0) {
+                ans+="M"+t.substring(5);
+            }
         }
     });
     if (cnt>0) {
@@ -4153,6 +4171,7 @@ core.prototype.decodeRoute = function (route) {
             case "G": ans.push("getNext"); break;
             case "P": ans.push("input:"+number); break;
             case "N": ans.push("no"); break;
+            case "M": ++index; ans.push("move:"+number+":"+getNumber()); break;
         }
     }
     return ans;

@@ -77,22 +77,26 @@ function core() {
         'maps': null,
         'checkBlock': {}, // 显伤伤害
 
-        // 勇士状态；自动寻路相关
+        'lockControl': false,
+
+        // 勇士移动状态
         'heroMoving': false,
         'heroStop': true,
-        'lockControl': false,
-        'autoHeroMove': false,
-        'automaticRouting': false,
-        'automaticRouted': false,
-        'autoStep': 0,
-        'movedStep': 0,
-        'destStep': 0,
-        'automaticRoutingTemp': {'destX': 0, 'destY': 0, 'moveStep': []},
-        'autoStepRoutes':  [],
-        'holdingPath': 0,
-        'stepPostfix': [],
-        'mouseOutCheck': 1,
-        'moveStepBeforeStop': [],
+
+        // 自动寻路相关
+        'automaticRoute': {
+            'autoHeroMove': false,
+            'automaticRouting': false,
+            'autoStep': 0,
+            'movedStep': 0,
+            'destStep': 0,
+            'destX': null,
+            'destY': null,
+            'autoStepRoutes': [],
+            'moveStepBeforeStop': [],
+        },
+
+        // 按下键的时间：为了判定双击
         'downTime': null,
 
         // 路线&回放
@@ -196,12 +200,12 @@ core.prototype.init = function (dom, statusBar, canvas, images, pngs, bgms, soun
         core.platform.supportCopy = false;
     }
 
-    var chrome=/Chrome\/(\d+)\./.exec(navigator.userAgent);
+    var chrome=/Chrome\/(\d+)\./i.exec(navigator.userAgent);
     if (core.isset(chrome) && parseInt(chrome[1])>=50)
         core.platform.isChrome = true;
-    core.platform.isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-    core.platform.isQQ = /QQ/.test(navigator.userAgent);
-    core.platform.isWeChat = /MicroMessenger/.test(navigator.userAgent);
+    core.platform.isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent);
+    core.platform.isQQ = /QQ/i.test(navigator.userAgent);
+    core.platform.isWeChat = /MicroMessenger/i.test(navigator.userAgent);
 
     if (window.FileReader) {
         core.platform.fileReader = new FileReader();
@@ -402,7 +406,7 @@ core.prototype.loadMusic = function (callback) {
     core.bgms.forEach(function (t) {
 
         // 判断是不是mid
-        if (/^.*\.mid$/.test(t)) {
+        if (/^.*\.mid$/i.test(t)) {
 
             if (core.musicStatus.audioContext!=null) {
                 core.material.bgms[t] = 'loading';
@@ -644,7 +648,7 @@ core.prototype.pressKey = function (keyCode) {
 ////// 根据按下键的code来执行一系列操作 //////
 core.prototype.keyDown = function(keyCode) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
-    if(core.status.automaticRouting || core.status.automaticRouted) {
+    if (core.isset(core.status.automaticRoute)&&core.status.automaticRoute.automaticRouting) {
         core.stopAutomaticRoute();
     }
     if (core.status.lockControl) {
@@ -932,8 +936,8 @@ core.prototype.ondown = function (x ,y) {
     }
 
     core.status.downTime = new Date();
-    core.status.holdingPath=1;
-    core.status.mouseOutCheck =1;
+    // core.status.holdingPath=1;
+    //core.status.mouseOutCheck =1;
     // window.setTimeout(core.clearStepPostfix);
     core.saveCanvas('ui');
     core.clearMap('ui', 0, 0, 416,416);
@@ -946,8 +950,8 @@ core.prototype.ondown = function (x ,y) {
 ////// 当在触摸屏上滑动时 //////
 core.prototype.onmove = function (x ,y) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
-    if (core.status.holdingPath==0){return;}
-    core.status.mouseOutCheck =1;
+    // if (core.status.holdingPath==0){return;}
+    //core.status.mouseOutCheck =1;
     var pos={'x':x,'y':y};
     var pos0=core.status.stepPostfix[core.status.stepPostfix.length-1];
     var directionDistance=[pos.y-pos0.y,pos0.x-pos.x,pos0.y-pos.y,pos.x-pos0.x];
@@ -970,7 +974,7 @@ core.prototype.onmove = function (x ,y) {
 ////// 当点击（触摸）事件放开时 //////
 core.prototype.onup = function () {
     if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
-    core.status.holdingPath=0;
+    // core.status.holdingPath=0;
     if(core.status.stepPostfix.length>0){
         var stepPostfix = [];
         var direction={'0':{'1':'down','-1':'up'},'-1':{'0':'left'},'1':{'0':'right'}};
@@ -1203,29 +1207,29 @@ core.prototype.stopAutomaticRoute = function () {
         return;
     }
     core.stopAutoHeroMove();
-    core.status.automaticRouting = false;
-    core.status.automaticRouted = false;
-    core.status.autoStepRoutes = [];
-    core.status.automaticRoutingTemp = {'destX': 0, 'destY': 0, 'moveStep': []};
-    if (core.status.moveStepBeforeStop.length==0)
+    core.status.automaticRoute.automaticRouting = false;
+    core.status.automaticRoute.autoStepRoutes = [];
+    core.status.automaticRoute.destX=null;
+    core.status.automaticRoute.destY=null;
+    if (core.status.automaticRoute.moveStepBeforeStop.length==0)
         core.canvas.ui.clearRect(0, 0, 416, 416);
 }
 
 ////// 继续剩下的自动寻路操作 //////
 core.prototype.continueAutomaticRoute = function () {
     // 此函数只应由events.afterOpenDoor和events.afterBattle调用
-    var moveStep = core.status.moveStepBeforeStop;
-    core.status.moveStepBeforeStop = [];
+    var moveStep = core.status.automaticRoute.moveStepBeforeStop;
+    core.status.automaticRoute.moveStepBeforeStop = [];
     if(moveStep.length===0)return;
     if(moveStep.length===1 && moveStep[0].step===1)return;
-    core.status.automaticRouting = true;
+    core.status.automaticRoute.automaticRouting = true;
     core.setAutoHeroMove(moveStep);
 }
 
 ////// 清空剩下的自动寻路列表 //////
 core.prototype.clearContinueAutomaticRoute = function () {
     core.canvas.ui.clearRect(0, 0, 416, 416);
-    core.status.moveStepBeforeStop=[];
+    core.status.automaticRoute.moveStepBeforeStop=[];
 }
 
 ////// 设置自动寻路路线 //////
@@ -1233,8 +1237,21 @@ core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     if (!core.status.played || core.status.lockControl) {
         return;
     }
-    else if (core.status.automaticRouting) {
+    // 正在寻路中
+    if (core.status.automaticRoute.automaticRouting) {
+        var lastX = core.status.automaticRoute.destX, lastY=core.status.automaticRoute.destY;
         core.stopAutomaticRoute();
+        if (lastX==destX && lastY==destY && core.canMoveDirectly(destX, destY)) {
+            core.lockControl();
+            setTimeout(function () {
+                core.unLockControl();
+                core.clearMap('hero', 0, 0, 416, 416);
+                core.setHeroLoc('x', destX);
+                core.setHeroLoc('y', destY);
+                core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+                core.status.route.push("go:"+destX+":"+destY);
+            }, 100);
+        }
         return;
     }
     if (destX == core.status.hero.loc.x && destY == core.status.hero.loc.y && stepPostfix.length==0) {
@@ -1255,7 +1272,6 @@ core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     var step = 0;
     var tempStep = null;
     var moveStep;
-    core.status.automaticRoutingTemp = {'destX': 0, 'destY': 0, 'moveStep': []};
     if (!(moveStep = core.automaticRoute(destX, destY))) {
         if (destX == core.status.hero.loc.x && destY == core.status.hero.loc.y){
             moveStep=[];
@@ -1265,8 +1281,10 @@ core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
         }
     }
     moveStep=moveStep.concat(stepPostfix);
-    core.status.automaticRoutingTemp.destX = destX;
-    core.status.automaticRoutingTemp.destY = destY;
+    //core.status.automaticRoutingTemp.destX = destX;
+    //core.status.automaticRoutingTemp.destY = destY;
+    core.status.automaticRoute.destX=destX;
+    core.status.automaticRoute.destY=destY;
     core.canvas.ui.save();
     core.canvas.ui.clearRect(0, 0, 416, 416);
     core.canvas.ui.fillStyle = '#bfbfbf';
@@ -1281,12 +1299,14 @@ core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
             step++;
         }
         else {
-            core.status.automaticRoutingTemp.moveStep.push({'direction': tempStep, 'step': step});
+            //core.status.automaticRoutingTemp.moveStep.push({'direction': tempStep, 'step': step});
+            core.status.automaticRoute.autoStepRoutes.push({'direction': tempStep, 'step': step});
             step = 1;
             tempStep = moveStep[m].direction;
         }
         if (m == moveStep.length - 1) {
-            core.status.automaticRoutingTemp.moveStep.push({'direction': tempStep, 'step': step});
+            // core.status.automaticRoutingTemp.moveStep.push({'direction': tempStep, 'step': step});
+            core.status.automaticRoute.autoStepRoutes.push({'direction': tempStep, 'step': step});
             core.canvas.ui.fillRect(moveStep[m].x * 32 + 10, moveStep[m].y * 32 + 10, 12, 12);
         }
         else {
@@ -1334,13 +1354,10 @@ core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
         }
     }
     core.canvas.ui.restore();
-    core.status.automaticRouted = true;
 
     // 立刻移动
-    core.status.automaticRouting = true;
-    // core.setAutoHeroMove(core.status.automaticRoutingTemp.moveStep);
-    core.setAutoHeroMove(core.status.automaticRoutingTemp.moveStep);
-    core.status.automaticRoutingTemp = {'destX': 0, 'destY': 0, 'moveStep': []};
+    core.status.automaticRoute.automaticRouting = true;
+    core.setAutoHeroMove();
 
 }
 
@@ -1408,8 +1425,8 @@ core.prototype.automaticRoute = function (destX, destY) {
                 if (nextId.substring(nextId.length-3)=="Net") deepAdd=core.values.lavaDamage;
                 // 绕过血瓶
                 if (!core.flags.potionWhileRouting && nextId.substring(nextId.length-6)=="Potion") deepAdd=20;
-                // 绕过可能的夹击点
-                // if (nextBlock.block.event.trigger == 'checkBlock') deepAdd=200;
+                // 绕过传送点
+                if  (nextBlock.block.event.trigger == 'changeFloor') deepAdd = 10;
             }
             if (core.status.checkBlock.damage[nid]>0)
                 deepAdd = core.status.checkBlock.damage[nid];
@@ -1448,6 +1465,7 @@ core.prototype.fillPosWithPoint = function (pos) {
     core.fillRect('ui', pos.x*32+12,pos.y*32+12,8,8, '#bfbfbf');
 }
 
+/*
 ////// 清除已经寻路过的部分 //////
 core.prototype.clearStepPostfix = function () {
     if(core.status.mouseOutCheck >0){
@@ -1462,6 +1480,7 @@ core.prototype.clearStepPostfix = function () {
         core.canvas.ui.restore();
     }
 }
+*/
 
 /////////// 寻路代码相关 END ///////////
 
@@ -1471,41 +1490,41 @@ core.prototype.clearStepPostfix = function () {
 
 ////// 停止勇士的自动行走 //////
 core.prototype.stopAutoHeroMove = function () {
-    core.status.autoHeroMove = false;
-    core.status.automaticRouting = false;
-    core.status.automaticRouted = false;
-    core.status.autoStep = 0;
-    core.status.destStep = 0;
-    core.status.movedStep = 0;
-    core.status.autoStepRoutes = [];
+    core.status.automaticRoute.autoHeroMove = false;
+    core.status.automaticRoute.automaticRouting = false;
+    core.status.automaticRoute.autoStep = 0;
+    core.status.automaticRoute.destStep = 0;
+    core.status.automaticRoute.movedStep = 0;
+    core.status.automaticRoute.autoStepRoutes = [];
     core.stopHero();
     clearInterval(core.interval.heroAutoMoveScan);
 }
 
 ////// 设置勇士的自动行走路线 //////
 core.prototype.setAutoHeroMove = function (steps) {
+    steps=steps||core.status.automaticRoute.autoStepRoutes;
     if (steps.length == 0) {
         return;
     }
-    core.status.autoStepRoutes = steps;
-    core.status.autoStep = 0;
+    core.status.automaticRoute.autoStepRoutes=steps;
+    core.status.automaticRoute.autoStep = 0;
     clearInterval(core.interval.heroAutoMoveScan);
     core.interval.heroAutoMoveScan = window.setInterval(function () {
-        if (!core.status.autoHeroMove) {
-            if (core.status.autoStep == core.status.autoStepRoutes.length) {
+        if (!core.status.automaticRoute.autoHeroMove) {
+            if (core.status.automaticRoute.autoStep == core.status.automaticRoute.autoStepRoutes.length) {
                 core.stopAutoHeroMove();
                 return;
             }
-            core.autoHeroMove(core.status.autoStepRoutes[core.status.autoStep].direction, core.status.autoStepRoutes[core.status.autoStep].step);
-            core.status.autoStep++;
+            core.autoHeroMove(core.status.automaticRoute.autoStepRoutes[core.status.automaticRoute.autoStep].direction, core.status.automaticRoute.autoStepRoutes[core.status.automaticRoute.autoStep].step);
+            core.status.automaticRoute.autoStep++;
         }
     }, 80);
 }
 
 ////// 让勇士开始自动行走 //////
 core.prototype.autoHeroMove = function (direction, step) {
-    core.status.autoHeroMove = true;
-    core.status.destStep = step;
+    core.status.automaticRoute.autoHeroMove = true;
+    core.status.automaticRoute.destStep = step;
     core.moveHero(direction);
 }
 
@@ -1570,13 +1589,13 @@ core.prototype.moveAction = function (callback) {
         if (canMove) // 非箭头：触发
             core.trigger(x + scan[direction].x, y + scan[direction].y);
         core.drawHero(direction, x, y, 'stop');
-        if (core.status.autoHeroMove) {
-            core.status.movedStep++;
-            if (core.status.destStep == core.status.movedStep) {
-                core.status.autoHeroMove = false;
-                core.status.destStep = 0;
-                core.status.movedStep = 0;
-                core.status.moveStepBeforeStop=[];
+        if (core.status.automaticRoute.autoHeroMove) {
+            core.status.automaticRoute.movedStep++;
+            if (core.status.automaticRoute.destStep == core.status.automaticRoute.movedStep) {
+                core.status.automaticRoute.autoHeroMove = false;
+                core.status.automaticRoute.destStep = 0;
+                core.status.automaticRoute.movedStep = 0;
+                core.status.automaticRoute.moveStepBeforeStop=[];
                 core.stopAutomaticRoute();
             }
         }
@@ -1588,12 +1607,12 @@ core.prototype.moveAction = function (callback) {
     }
     else {
         core.setHeroMoveInterval(direction, x, y, function () {
-            if (core.status.autoHeroMove) {
-                core.status.movedStep++;
-                if (core.status.destStep == core.status.movedStep) {
-                    core.status.autoHeroMove = false;
-                    core.status.destStep = 0;
-                    core.status.movedStep = 0;
+            if (core.status.automaticRoute.autoHeroMove) {
+                core.status.automaticRoute.movedStep++;
+                if (core.status.automaticRoute.destStep == core.status.automaticRoute.movedStep) {
+                    core.status.automaticRoute.autoHeroMove = false;
+                    core.status.automaticRoute.destStep = 0;
+                    core.status.automaticRoute.movedStep = 0;
                     core.stopHero();
                     core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
                 }
@@ -1616,7 +1635,6 @@ core.prototype.turnHero = function() {
     else if (core.status.hero.loc.direction == 'down') core.status.hero.loc.direction = 'left';
     else if (core.status.hero.loc.direction == 'left') core.status.hero.loc.direction = 'up';
     core.drawHero(core.status.hero.loc.direction, core.status.hero.loc.x, core.status.hero.loc.y, 'stop', 0, 0);
-    core.status.automaticRoutingTemp = {'destX': 0, 'destY': 0, 'moveStep': []};
     core.canvas.ui.clearRect(0, 0, 416, 416);
     core.status.route.push("turn");
 }
@@ -1654,6 +1672,36 @@ core.prototype.canMoveHero = function() {
         }
     }
     return true;
+}
+
+////// 能否瞬间移动 //////
+core.prototype.canMoveDirectly = function (destX,destY) {
+    if (!core.flags.enableMoveDirectly) return false;
+
+    // 中毒状态：不能
+    if (core.hasFlag('poison')) return false;
+
+    var fromX = core.getHeroLoc('x'), fromY = core.getHeroLoc('y');
+    if (fromX==destX&&fromY==destY) return false;
+
+    // BFS
+    var visited=[], queue=[];
+    visited[13*fromX+fromY]=true;
+    queue.push(13*fromX+fromY);
+
+    var directions = [[-1,0],[1,0],[0,1],[0,-1]];
+    while (queue.length>0) {
+        var now=queue.shift(), nowX=parseInt(now/13), nowY=now%13;
+
+        for (var dir in directions) {
+            var nx=nowX+directions[dir][0], ny=nowY+directions[dir][1];
+            if (nx<0||nx>=13||ny<0||ny>=13||visited[13*nx+ny]||core.getBlock(nx,ny)!=null||core.status.checkBlock.damage[13*nx+ny]>0) continue;
+            if (nx==destX&&ny==destY) return true;
+            visited[13*nx+ny]=true;
+            queue.push(13*nx+ny);
+        }
+    }
+    return false;
 }
 
 ////// 让勇士开始移动 //////
@@ -1840,9 +1888,9 @@ core.prototype.openDoor = function (id, x, y, needKey, callback) {
         if (core.isset(callback)) callback();
         return;
     }
-    if (core.status.moveStepBeforeStop.length==0) {
-        core.status.moveStepBeforeStop=core.status.autoStepRoutes.slice(core.status.autoStep-1,core.status.autoStepRoutes.length);
-        if (core.status.moveStepBeforeStop.length>=1)core.status.moveStepBeforeStop[0].step-=core.status.movedStep;
+    if (core.status.automaticRoute.moveStepBeforeStop.length==0) {
+        core.status.automaticRoute.moveStepBeforeStop=core.status.automaticRoute.autoStepRoutes.slice(core.status.automaticRoute.autoStep-1,core.status.automaticRoute.autoStepRoutes.length);
+        if (core.status.automaticRoute.moveStepBeforeStop.length>=1)core.status.automaticRoute.moveStepBeforeStop[0].step-=core.status.automaticRoute.movedStep;
     }
     core.stopHero();
     core.stopAutomaticRoute();
@@ -1884,9 +1932,9 @@ core.prototype.openDoor = function (id, x, y, needKey, callback) {
 
 ////// 战斗 //////
 core.prototype.battle = function (id, x, y, force, callback) {
-    if (core.status.moveStepBeforeStop.length==0) {
-        core.status.moveStepBeforeStop=core.status.autoStepRoutes.slice(core.status.autoStep-1,core.status.autoStepRoutes.length);
-        if (core.status.moveStepBeforeStop.length>=1)core.status.moveStepBeforeStop[0].step-=core.status.movedStep;
+    if (core.status.automaticRoute.moveStepBeforeStop.length==0) {
+        core.status.automaticRoute.moveStepBeforeStop=core.status.automaticRoute.autoStepRoutes.slice(core.status.automaticRoute.autoStep-1,core.status.automaticRoute.autoStepRoutes.length);
+        if (core.status.automaticRoute.moveStepBeforeStop.length>=1)core.status.automaticRoute.moveStepBeforeStop[0].step-=core.status.automaticRoute.movedStep;
     }
     core.stopHero();
     core.stopAutomaticRoute();
@@ -1956,15 +2004,26 @@ core.prototype.trigger = function (x, y) {
             }
             if (core.isset(mapBlocks[b].event) && core.isset(mapBlocks[b].event.trigger)) {
                 var trigger = mapBlocks[b].event.trigger;
+
                 // 转换楼层能否穿透
-                /*
-                if (trigger=='changeFloor' && (core.status.autoHeroMove || core.status.autoStep<core.status.autoStepRoutes.length)) {
+                if (trigger=='changeFloor') {
                     var canCross = core.flags.portalWithoutTrigger;
                     if (core.isset(mapBlocks[b].event.data) && core.isset(mapBlocks[b].event.data.portalWithoutTrigger))
                         canCross=mapBlocks[b].event.data.portalWithoutTrigger;
-                    if (canCross) continue;
+                    if (canCross) {
+                        if (core.status.replay.replaying) {
+                            if (core.status.replay.toReplay[0]=='no') {
+                                core.status.replay.toReplay.shift();
+                                core.status.route.push("no");
+                                continue;
+                            }
+                        }
+                        else if (core.status.automaticRoute.autoHeroMove || core.status.automaticRoute.autoStep<core.status.automaticRoute.autoStepRoutes.length) {
+                            core.status.route.push("no");
+                            continue;
+                        }
+                    }
                 }
-                */
                 core.material.events[trigger](mapBlocks[b], core, function (data) {
 
                 });
@@ -3603,7 +3662,7 @@ core.prototype.replay = function () {
                     core.useItem(itemId, function () {
                         core.replay();
                     });
-                }, 1000);
+                }, 750);
             }
             return;
         }
@@ -3621,7 +3680,7 @@ core.prototype.replay = function () {
                 core.changeFloor(floorId, stair, null, null, function () {
                     core.replay();
                 });
-            }, 1000);
+            }, 750);
             return;
         }
     }
@@ -3654,7 +3713,7 @@ core.prototype.replay = function () {
                     core.status.event.selection = parseInt(selections.shift());
                     core.events.openShop(shopId, false);
 
-                }, 1000);
+                }, 750);
                 return;
             }
         }
@@ -3700,7 +3759,6 @@ core.prototype.checkStatus = function (name, need, item) {
     }
 
     core.lockControl();
-    core.status.automaticRoutingTemp = {'destX': 0, 'destY': 0, 'moveStep': []};
     core.status.event.id = name;
     return true;
 }
@@ -4049,6 +4107,8 @@ core.prototype.encodeRoute = function (route) {
                 ans+='G';
             else if (t.indexOf('input:')==0)
                 ans+="P"+t.substring(6);
+            else if (t=='no')
+                ans+='N';
         }
     });
     if (cnt>0) {
@@ -4092,6 +4152,7 @@ core.prototype.decodeRoute = function (route) {
             case "T": ans.push("turn"); break;
             case "G": ans.push("getNext"); break;
             case "P": ans.push("input:"+number); break;
+            case "N": ans.push("no"); break;
         }
     }
     return ans;

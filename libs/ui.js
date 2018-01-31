@@ -688,6 +688,15 @@ ui.prototype.drawSyncSave = function () {
 
 }
 
+////// 绘制存档同步选择页面 //////
+ui.prototype.drawSyncSelect = function () {
+    core.status.event.id = 'syncSelect';
+    this.drawChoices(null, [
+        "同步本地所有存档", "只同步最新单存档", "返回上级菜单"
+    ]);
+}
+
+
 ////// 绘制分页 //////
 ui.prototype.drawPagination = function (page, totalPage) {
 

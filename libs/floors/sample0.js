@@ -83,7 +83,7 @@ main.floors.sample0 = {
         "2,12": {"floorId": "sample0", "loc": [2,12]},
         "3,12": {"floorId": "sample0", "loc": [6,1], "direction": "up"}, // 切换楼层后勇士面对上方
         "4,12": {"floorId": "sample0", "loc": [0,9], "direction": "left", "time": 1000}, // 切换楼层后勇士面对左边，切换动画1000ms
-        "5,12": {"floorId": "sample0", "loc": [6,10], "time": 0}, // time=0表示无切换时间
+        "5,12": {"floorId": "sample0", "loc": [6,10], "time": 0, "portalWithoutTrigger": false}, // time=0表示无切换时间
         "6,12": {"floorId": "sample0", "loc": [10,10], "direction": "left", "time": 1000},
     },
     "afterBattle": { // 战斗后可能触发的事件列表

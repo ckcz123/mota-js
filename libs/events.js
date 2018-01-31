@@ -471,15 +471,12 @@ events.prototype.doAction = function() {
                 else {
                     var action = core.status.replay.toReplay.shift(), index;
                     if (action.indexOf("choices:")==0 && ((index=parseInt(action.substring(8)))>=0) && index<data.choices.length) {
-                            //core.status.route.push("choices:"+index);
-                            //this.insertAction(data.choices[index].action);
-                            //this.doAction();
                             core.status.event.selection=index;
                             setTimeout(function () {
                                 core.status.route.push("choices:"+index);
                                 core.events.insertAction(data.choices[index].action);
                                 core.events.doAction();
-                            }, 1000)
+                            }, 750)
                     }
                     else {
                         core.stopReplay();
@@ -1114,8 +1111,6 @@ events.prototype.clickShop = function(x,y) {
 
             core.status.event.selection=y-topIndex;
 
-            //this.insertAction(choices[y-topIndex].action);
-            //this.doAction();
             var money = core.getStatus('money'), experience = core.getStatus('experience');
             var times = shop.times, need = eval(shop.need);
             var use = shop.use;
@@ -1473,9 +1468,7 @@ events.prototype.keyUpSL = function (keycode) {
 ////// 系统设置界面时的点击操作 //////
 events.prototype.clickSwitchs = function (x,y) {
     if (x<5 || x>7) return;
-    var choices = [
-        "背景音乐", "背景音效", "战斗动画", "怪物显伤", "领域显伤", "下载离线版本", "返回主菜单"
-    ];
+    var choices = core.status.event.ui.choices;
     var topIndex = 6 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y-topIndex;
@@ -1546,9 +1539,7 @@ events.prototype.keyUpSwitchs = function (keycode) {
         core.ui.drawSettings();
         return;
     }
-    var choices = [
-        "背景音乐", "背景音效", "战斗动画", "怪物显伤", "领域显伤", "下载离线版本", "返回主菜单"
-    ];
+    var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
         this.clickSwitchs(6, topIndex+core.status.event.selection);
@@ -1559,9 +1550,7 @@ events.prototype.keyUpSwitchs = function (keycode) {
 ////// 系统菜单栏界面时的点击事件 //////
 events.prototype.clickSettings = function (x,y) {
     if (x<5 || x>7) return;
-    var choices = [
-        "系统设置", "快捷商店", "浏览地图", "同步存档", "重新开始", "数据统计", "操作帮助", "关于本塔", "返回游戏"
-    ];
+    var choices = core.status.event.ui.choices;
     var topIndex = 6 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y-topIndex;
@@ -1680,9 +1669,7 @@ events.prototype.keyUpSettings = function (keycode) {
         core.ui.closePanel();
         return;
     }
-    var choices = [
-        "系统设置", "快捷商店", "浏览地图", "同步存档", "重新开始", "数据统计", "操作帮助", "关于本塔", "返回游戏"
-    ];
+    var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
         this.clickSettings(6, topIndex+core.status.event.selection);
@@ -1692,15 +1679,14 @@ events.prototype.keyUpSettings = function (keycode) {
 ////// 同步存档界面时的点击操作 //////
 events.prototype.clickSyncSave = function (x,y) {
     if (x<5 || x>7) return;
-    var choices = [
-        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "下载当前录像", "清空所有存档", "返回主菜单"
-    ];
+    var choices = core.status.event.ui.choices;
     var topIndex = 6 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y-topIndex;
         switch (selection) {
             case 0:
-                core.syncSave("save");
+                // core.syncSave("save");
+                core.ui.drawSyncSelect();
                 break;
             case 1:
                 core.syncSave("load");
@@ -1794,13 +1780,29 @@ events.prototype.keyUpSyncSave = function (keycode) {
         core.ui.drawSettings();
         return;
     }
-    var choices = [
-        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "下载当前录像", "清空所有存档", "返回主菜单"
-    ];
+    var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
         this.clickSyncSave(6, topIndex+core.status.event.selection);
     }
+}
+
+////// 同步存档选择界面时的点击操作
+events.prototype.clickSyncSelect = function (x, y) {
+    if (x<5 || x>7) return;
+    var choices = core.status.event.ui.choices;
+
+    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    if (y>=topIndex && y<topIndex+choices.length) {
+        var selection = y - topIndex;
+        switch (selection) {
+            case 0:
+                break;
+
+
+        }
+    }
+
 }
 
 ////// “虚拟键盘”界面时的点击操作 //////

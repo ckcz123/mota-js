@@ -726,6 +726,30 @@ ui.prototype.drawPagination = function (page, totalPage) {
 
 }
 
+////// 绘制键盘光标 //////
+ui.prototype.drawCursor = function () {
+
+    if (!core.isset(core.status.automaticRoute.cursorX))
+        core.status.automaticRoute.cursorX=core.getHeroLoc('x');
+    if (core.status.automaticRoute.cursorX<0) core.status.automaticRoute.cursorX=0;
+    if (core.status.automaticRoute.cursorX>12) core.status.automaticRoute.cursorX=12;
+    if (!core.isset(core.status.automaticRoute.cursorY))
+        core.status.automaticRoute.cursorY=core.getHeroLoc('y');
+    if (core.status.automaticRoute.cursorY<0) core.status.automaticRoute.cursorY=0;
+    if (core.status.automaticRoute.cursorY>12) core.status.automaticRoute.cursorY=12;
+
+    core.status.event.id = 'cursor';
+    core.lockControl();
+
+    core.clearMap('ui', 0, 0, 416, 416);
+    core.setAlpha('ui', 1);
+
+    var width = 4;
+    core.strokeRect('ui', 32*core.status.automaticRoute.cursorX+width/2, 32*core.status.automaticRoute.cursorY+width/2,
+        32-width, 32-width, '#FFD700', width);
+
+}
+
 ////// 绘制怪物手册 //////
 ui.prototype.drawBook = function (index) {
 

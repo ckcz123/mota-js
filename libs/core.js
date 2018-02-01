@@ -94,6 +94,8 @@ function core() {
             'destY': null,
             'autoStepRoutes': [],
             'moveStepBeforeStop': [],
+            'cursorX': null,
+            'cursorY': null,
         },
 
         // 按下键的时间：为了判定双击
@@ -711,6 +713,10 @@ core.prototype.keyDown = function(keyCode) {
             core.events.keyDownLocalSaveSelect(keyCode);
             return;
         }
+        if (core.status.event.id=='cursor') {
+            core.events.keyDownCursor(keyCode);
+            return;
+        }
         return;
     }
     if(!core.status.played) {
@@ -834,6 +840,11 @@ core.prototype.keyUp = function(keyCode) {
             core.events.keyUpLocalSaveSelect(keyCode);
             return;
         }
+
+        if (core.status.event.id=='cursor') {
+            core.events.keyUpCursor(keyCode);
+            return;
+        }
         return;
     }
 
@@ -863,6 +874,10 @@ core.prototype.keyUp = function(keyCode) {
         case 68: // D
             if (core.status.heroStop)
                 core.load(true);
+            break;
+        case 69: // E
+            if (core.status.heroStop)
+                core.ui.drawCursor();
             break;
         case 84: // T
             if (core.status.heroStop)
@@ -1049,6 +1064,8 @@ core.prototype.onclick = function (x, y, stepPostfix) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
     // console.log("Click: (" + x + "," + y + ")");
 
+    stepPostfix=stepPostfix||[];
+
     // 非游戏屏幕内
     if (x<0 || y<0 || x>12 || y>12) return;
 
@@ -1177,6 +1194,11 @@ core.prototype.onclick = function (x, y, stepPostfix) {
 
     if (core.status.event.id == 'localSaveSelect') {
         core.events.clickLocalSaveSelect(x,y);
+        return;
+    }
+
+    if (core.status.event.id == 'cursor') {
+        core.events.clickCursor(x,y);
         return;
     }
 
@@ -1933,6 +1955,10 @@ core.prototype.openDoor = function (id, x, y, needKey, callback) {
             return;
         }
     }
+
+    if (!core.isset(core.status.event.id)) // 自动存档
+        core.autosave(true);
+
     // open
     core.playSound("door.ogg");
     var state = 0;
@@ -1974,6 +2000,10 @@ core.prototype.battle = function (id, x, y, force, callback) {
         core.clearContinueAutomaticRoute();
         return;
     }
+
+    if (!core.isset(core.status.event.id)) // 自动存档
+        core.autosave(true);
+
     if (core.flags.battleAnimate&&!core.status.replay.replaying) {
         core.waitHeroToStop(function() {
             core.ui.drawBattleAnimate(id, function() {

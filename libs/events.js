@@ -6,7 +6,7 @@ function events() {
 events.prototype.init = function () {
     this.events = {
         'battle': function (data, core, callback) {
-            core.autosave(true);
+            //core.autosave(true);
             core.battle(data.event.id, data.x, data.y);
             if (core.isset(callback))
                 callback();
@@ -17,7 +17,7 @@ events.prototype.init = function () {
                 callback();
         },
         'openDoor': function (data, core, callback) {
-            core.autosave(true);
+            //core.autosave(true);
             core.openDoor(data.event.id, data.x, data.y, true, function () {
                 if (core.isset(callback)) callback();
                 core.replay();
@@ -224,14 +224,14 @@ events.prototype.afterChangeFloor = function (floorId) {
 
     if (!core.hasFlag("visited_"+floorId)) {
         this.doEvents(core.floors[floorId].firstArrive, null, null, function () {
-            core.autosave();
+            //core.autosave();
         });
         core.setFlag("visited_"+floorId, true);
         return;
     }
 
     // 自动存档
-    core.autosave();
+    //core.autosave();
 }
 
 ////// 开始执行一系列自定义事件 //////
@@ -1987,6 +1987,56 @@ events.prototype.clickKeyBoard = function (x, y) {
     }
     if (y==10 && x>=9 && x<=11)
         core.ui.closePanel();
+}
+
+////// 光标界面时的点击操作 //////
+events.prototype.clickCursor = function (x,y) {
+
+    if (x==core.status.automaticRoute.cursorX && y==core.status.automaticRoute.cursorY) {
+        core.ui.closePanel();
+        core.onclick(x,y,[]);
+        return;
+    }
+    core.status.automaticRoute.cursorX=x;
+    core.status.automaticRoute.cursorY=y;
+    core.ui.drawCursor();
+}
+
+////// 光标界面时，按下某个键的操作 //////
+events.prototype.keyDownCursor = function (keycode) {
+    if (keycode==37) { // left
+        core.status.automaticRoute.cursorX--;
+        core.ui.drawCursor();
+        return;
+    }
+    if (keycode==38) { // up
+        core.status.automaticRoute.cursorY--;
+        core.ui.drawCursor();
+        return;
+    }
+    if (keycode==39) { // right
+        core.status.automaticRoute.cursorX++;
+        core.ui.drawCursor();
+        return;
+    }
+    if (keycode==40) { // down
+        core.status.automaticRoute.cursorY++;
+        core.ui.drawCursor();
+        return;
+    }
+}
+
+////// 光标界面时，放开某个键的操作 //////
+events.prototype.keyUpCursor = function (keycode) {
+    if (keycode==27 || keycode==88) {
+        core.ui.closePanel();
+        return;
+    }
+    if (keycode==13 || keycode==32 || keycode==67 || keycode==69) {
+        core.ui.closePanel();
+        core.onclick(core.status.automaticRoute.cursorX, core.status.automaticRoute.cursorY, []);
+        return;
+    }
 }
 
 ////// “关于”界面时的点击操作 //////

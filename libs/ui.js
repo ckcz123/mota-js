@@ -696,6 +696,13 @@ ui.prototype.drawSyncSelect = function () {
     ]);
 }
 
+////// 绘制单存档界面 //////
+ui.prototype.drawLocalSaveSelect = function () {
+    core.status.event.id = 'localSaveSelect';
+    this.drawChoices(null, [
+        "下载所有存档", "只下载最新单存档", "返回上级菜单"
+    ]);
+}
 
 ////// 绘制分页 //////
 ui.prototype.drawPagination = function (page, totalPage) {

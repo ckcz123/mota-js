@@ -220,7 +220,9 @@ core.prototype.init = function (dom, statusBar, canvas, images, pngs, bgms, soun
                     return;
                 }
             }
-            catch (e) {}
+            catch (e) {
+                console.log(e);
+            }
             alert("不是有效的JSON文件！");
 
             if (core.isset(core.platform.errorCallback))
@@ -701,6 +703,14 @@ core.prototype.keyDown = function(keyCode) {
             core.events.keyDownSyncSave(keyCode);
             return;
         }
+        if (core.status.event.id=='syncSelect') {
+            core.events.keyDownSyncSelect(keyCode);
+            return;
+        }
+        if (core.status.event.id=='localSaveSelect') {
+            core.events.keyDownLocalSaveSelect(keyCode);
+            return;
+        }
         return;
     }
     if(!core.status.played) {
@@ -814,6 +824,14 @@ core.prototype.keyUp = function(keyCode) {
         }
         if (core.status.event.id=='syncSave') {
             core.events.keyUpSyncSave(keyCode);
+            return;
+        }
+        if (core.status.event.id=='syncSelect') {
+            core.events.keyUpSyncSelect(keyCode);
+            return;
+        }
+        if (core.status.event.id=='localSaveSelect') {
+            core.events.keyUpLocalSaveSelect(keyCode);
             return;
         }
         return;
@@ -1152,6 +1170,16 @@ core.prototype.onclick = function (x, y, stepPostfix) {
         return;
     }
 
+    if (core.status.event.id == 'syncSelect') {
+        core.events.clickSyncSelect(x,y);
+        return;
+    }
+
+    if (core.status.event.id == 'localSaveSelect') {
+        core.events.clickLocalSaveSelect(x,y);
+        return;
+    }
+
 }
 
 ////// 滑动鼠标滚轮时的操作 //////
@@ -1283,8 +1311,6 @@ core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
         }
     }
     moveStep=moveStep.concat(stepPostfix);
-    //core.status.automaticRoutingTemp.destX = destX;
-    //core.status.automaticRoutingTemp.destY = destY;
     core.status.automaticRoute.destX=destX;
     core.status.automaticRoute.destY=destY;
     core.canvas.ui.save();
@@ -3918,6 +3944,151 @@ core.prototype.doSL = function (id, type) {
     }
 }
 
+////// 同步存档到服务器 //////
+core.prototype.syncSave = function (type) {
+    var saves=null;
+    // data
+    if (type=='all') {
+        saves=[];
+        for (var i=1;i<=150;i++) {
+            var data = core.getLocalStorage("save"+i, null);
+            if (core.isset(data)) {
+                saves.push(data);
+            }
+        }
+    }
+    else {
+        for (var i=150;i>=1;i--) {
+            saves=core.getLocalStorage("save"+i, null);
+            if (core.isset(saves)) {
+                break;
+            }
+        }
+    }
+    if (!core.isset(saves)) {
+        core.drawText("没有要同步的存档");
+        return;
+    }
+    core.ui.drawWaiting("正在同步，请稍后...");
+
+    var formData = new FormData();
+    formData.append('type', 'save');
+    formData.append('name', core.firstData.name);
+    var save_text = JSON.stringify(saves);
+    formData.append('data', save_text);
+
+    // send
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/games/sync.php");
+    xhr.onload = function(e) {
+        if (xhr.status==200) {
+            // console.log("同步成功。");
+            var response = JSON.parse(xhr.response);
+            if (response.code<0) {
+                core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+response.msg);
+            }
+            else {
+                core.drawText("同步成功！\n\n您的存档编号： "+response.code+"\n您的存档密码： "+response.msg+"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。")
+            }
+        }
+        else {
+            core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因：HTTP "+xhr.status);
+        }
+    };
+    xhr.ontimeout = function() {
+        core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因：Timeout");
+    }
+    xhr.onerror = function() {
+        core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因：XHR Error");
+    }
+    xhr.send(formData);
+}
+
+////// 从服务器加载存档 //////
+core.prototype.syncLoad = function () {
+    var id = prompt("请输入存档编号：");
+    if (id==null || id=="") {
+        core.ui.drawSyncSave(); return;
+    }
+    var password = prompt("请输入存档密码：");
+    if (password==null || password=="") {
+        core.ui.drawSyncSave(); return;
+    }
+    core.ui.drawWaiting("正在同步，请稍后...");
+
+    var formData = new FormData();
+    formData.append('type', 'load');
+    formData.append('name', core.firstData.name);
+    formData.append('id', id);
+    formData.append('password', password);
+
+    // send
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/games/sync.php");
+    xhr.onload = function(e) {
+        if (xhr.status==200) {
+            // console.log("同步成功。");
+            var response = JSON.parse(xhr.response);
+            switch (response.code) {
+                case 0:
+                    // 成功
+                    var data=JSON.parse(response.msg);
+                    // console.log(data);
+
+                    if (data instanceof Array) {
+                        core.status.event.selection=1;
+                        core.ui.drawConfirmBox("所有本地存档都将被覆盖，确认？", function () {
+                            for (var i=1;i<=150;i++) {
+                                if (i<=data.length) {
+                                    core.setLocalStorage("save"+i, data[i-1]);
+                                }
+                                else {
+                                    core.removeLocalStorage("save"+i);
+                                }
+                            }
+                            core.drawText("同步成功！\n你的本地所有存档均已被覆盖。");
+                        }, function () {
+                            core.status.event.selection=0;
+                            core.ui.drawSyncSave();
+                        })
+                    }
+                    else {
+                        // 只覆盖单存档
+                        var index=150;
+                        for (var i=150;i>=1;i--) {
+                            if (core.getLocalStorage("save"+i, null)==null)
+                                index=i;
+                            else break;
+                        }
+                        core.setLocalStorage("save"+index, data);
+                        core.drawText("同步成功！\n单存档已覆盖至存档"+index);
+                    }
+                    break;
+                case -1:
+                    core.drawText("出错啦！\n存档编号"+id+"不存在！");
+                    break;
+                case -2:
+                    core.drawText("出错啦！\n存档密码错误！");
+                    break;
+                default:
+                    core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因："+response.msg);
+                    break;
+            }
+        }
+        else {
+            core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因：HTTP "+xhr.status);
+        }
+    };
+    xhr.ontimeout = function() {
+        core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因：Timeout");
+    }
+    xhr.onerror = function() {
+        core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因：XHR Error");
+    }
+    xhr.send(formData);
+}
+/*
+
 ////// 存档同步操作 //////
 core.prototype.syncSave = function(type) {
     if (type=='save') {
@@ -4039,6 +4210,7 @@ core.prototype.syncSave = function(type) {
     }
 
 }
+*/
 
 ////// 存档到本地 //////
 core.prototype.saveData = function(dataId) {

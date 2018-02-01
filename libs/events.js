@@ -1686,12 +1686,14 @@ events.prototype.clickSyncSave = function (x,y) {
         switch (selection) {
             case 0:
                 // core.syncSave("save");
+                core.status.event.selection=0;
                 core.ui.drawSyncSelect();
                 break;
             case 1:
-                core.syncSave("load");
+                core.syncLoad();
                 break;
             case 2:
+                /*
                 var saves = [];
                 for (var i=1;i<=150;i++) {
                     var data = core.getLocalStorage("save"+i, null);
@@ -1705,6 +1707,9 @@ events.prototype.clickSyncSave = function (x,y) {
                     "data": saves
                 }
                 core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5save", JSON.stringify(content));
+                */
+                core.status.event.selection=0;
+                core.ui.drawLocalSaveSelect();
                 break;
             case 3:
                 core.readFile(function (obj) {
@@ -1721,15 +1726,33 @@ events.prototype.clickSyncSave = function (x,y) {
                         return;
                     }
                     var data=obj.data;
-                    for (var i=1;i<=150;i++) {
-                        if (i<=data.length) {
-                            core.setLocalStorage("save"+i, data[i-1]);
-                        }
-                        else {
-                            core.removeLocalStorage("save"+i);
-                        }
+
+                    if (data instanceof Array) {
+                        core.ui.drawConfirmBox("所有本地存档都将被覆盖，确认？", function () {
+                            for (var i=1;i<=150;i++) {
+                                if (i<=data.length) {
+                                    core.setLocalStorage("save"+i, data[i-1]);
+                                }
+                                else {
+                                    core.removeLocalStorage("save"+i);
+                                }
+                            }
+                            core.drawText("读取成功！\n你的本地所有存档均已被覆盖。");
+                        }, function () {
+                            core.status.event.selection=0;
+                            core.ui.drawSyncSave();
+                        })
                     }
-                    core.drawText("读取成功！\n你的本地所有存档均已被覆盖。");
+                    else {
+                        var index=150;
+                        for (var i=150;i>=1;i--) {
+                            if (core.getLocalStorage("save"+i, null)==null)
+                                index=i;
+                            else break;
+                        }
+                        core.setLocalStorage("save"+index, data);
+                        core.drawText("同步成功！\n单存档已覆盖至存档"+index);
+                    }
                 }, function () {
                     
                 });
@@ -1747,8 +1770,8 @@ events.prototype.clickSyncSave = function (x,y) {
                     localStorage.clear();
                     core.drawText("\t[操作成功]你的所有存档已被清空。");
                 }, function() {
-                    core.status.event.selection=2;
-                    core.ui.drawSyncSave(false);
+                    core.status.event.selection=5;
+                    core.ui.drawSyncSave();
                 })
                 break;
             case 6:
@@ -1787,7 +1810,7 @@ events.prototype.keyUpSyncSave = function (keycode) {
     }
 }
 
-////// 同步存档选择界面时的点击操作
+////// 同步存档选择界面时的点击操作 //////
 events.prototype.clickSyncSelect = function (x, y) {
     if (x<5 || x>7) return;
     var choices = core.status.event.ui.choices;
@@ -1797,12 +1820,114 @@ events.prototype.clickSyncSelect = function (x, y) {
         var selection = y - topIndex;
         switch (selection) {
             case 0:
+                core.syncSave('all');
                 break;
-
-
+            case 1:
+                core.syncSave();
+                break;
+            case 2:
+                core.status.event.selection=0;
+                core.ui.drawSyncSave();
+                break;
         }
     }
+}
 
+////// 同步存档选择界面时，按下某个键的操作 //////
+events.prototype.keyDownSyncSelect = function (keycode) {
+    if (keycode==38) {
+        core.status.event.selection--;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+    if (keycode==40) {
+        core.status.event.selection++;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+}
+
+////// 同步存档选择界面时，放开某个键的操作 //////
+events.prototype.keyUpSyncSelect = function (keycode) {
+    if (keycode==27 || keycode==88) {
+        core.status.event.selection=0;
+        core.ui.drawSettings();
+        return;
+    }
+    var choices = core.status.event.ui.choices;
+    if (keycode==13 || keycode==32 || keycode==67) {
+        var topIndex = 6 - parseInt((choices.length - 1) / 2);
+        this.clickSyncSelect(6, topIndex+core.status.event.selection);
+    }
+}
+
+////// 存档下载界面时的点击操作 //////
+events.prototype.clickLocalSaveSelect = function (x,y) {
+    if (x<5 || x>7) return;
+    var choices = core.status.event.ui.choices;
+
+    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+
+    var saves=null;
+
+    if (y>=topIndex && y<topIndex+choices.length) {
+        var selection = y - topIndex;
+        switch (selection) {
+            case 0:
+                saves=[];
+                for (var i=1;i<=150;i++) {
+                    var data = core.getLocalStorage("save"+i, null);
+                    if (core.isset(data)) {
+                        saves.push(data);
+                    }
+                }
+                break;
+            case 1:
+                for (var i=150;i>=1;i--) {
+                    saves=core.getLocalStorage("save"+i, null);
+                    if (core.isset(saves)) {
+                        break;
+                    }
+                }
+                break;
+            case 2:
+                break;
+        }
+    }
+    if (core.isset(saves)) {
+        var content = {
+            "name": core.firstData.name,
+            "version": core.firstData.version,
+            "data": saves
+        }
+        core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5save", JSON.stringify(content));
+    }
+    core.status.event.selection=2;
+    core.ui.drawSyncSave();
+}
+
+////// 存档下载界面时，按下某个键的操作 //////
+events.prototype.keyDownLocalSaveSelect = function (keycode) {
+    if (keycode==38) {
+        core.status.event.selection--;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+    if (keycode==40) {
+        core.status.event.selection++;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+}
+
+////// 存档下载界面时，放开某个键的操作 //////
+events.prototype.keyUpLocalSaveSelect = function (keycode) {
+    if (keycode==27 || keycode==88) {
+        core.status.event.selection=0;
+        core.ui.drawSettings();
+        return;
+    }
+    var choices = core.status.event.ui.choices;
+    if (keycode==13 || keycode==32 || keycode==67) {
+        var topIndex = 6 - parseInt((choices.length - 1) / 2);
+        this.clickLocalSaveSelect(6, topIndex+core.status.event.selection);
+    }
 }
 
 ////// “虚拟键盘”界面时的点击操作 //////

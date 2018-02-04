@@ -749,7 +749,7 @@ ui.prototype.drawCursor = function () {
 ////// 绘制怪物手册 //////
 ui.prototype.drawBook = function (index) {
 
-    var enemys = core.enemys.getCurrentEnemys();
+    var enemys = core.enemys.getCurrentEnemys(core.floorIds[core.status.event.selection]);
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
 
     clearInterval(core.interval.tipAnimate);

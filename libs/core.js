@@ -1990,7 +1990,8 @@ core.prototype.stopHero = function () {
 core.prototype.drawHero = function (direction, x, y, status, offsetX, offsetY) {
     offsetX = offsetX || 0;
     offsetY = offsetY || 0;
-    core.clearAutomaticRouteNode(x, y);
+    var dx=offsetX==0?0:offsetX/Math.abs(offsetX), dy=offsetY==0?0:offsetY/Math.abs(offsetY);
+    core.clearAutomaticRouteNode(x+dx, y+dy);
     var heroIcon = core.material.icons.hero[direction];
     x = x * 32;
     y = y * 32;
@@ -3948,6 +3949,13 @@ core.prototype.checkStatus = function (name, need, item) {
 ////// 点击怪物手册时的打开操作 //////
 core.prototype.openBook = function (need) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+
+    // 从“浏览地图”页面打开
+    if (core.status.event.id=='viewMaps') {
+        need=false;
+        core.status.event.selection = core.status.event.data;
+    }
+
     if (!core.checkStatus('book', need, true))
         return;
     core.useItem('book');

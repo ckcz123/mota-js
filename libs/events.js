@@ -996,7 +996,12 @@ events.prototype.clickBook = function(x,y) {
     }
     // 返回
     if (x>=10 && x<=12 && y==12) {
-        core.ui.closePanel();
+        if (core.status.event.selection==null)
+            core.ui.closePanel();
+        else {
+            core.status.boxAnimateObjs = [];
+            core.ui.drawMaps(core.status.event.selection);
+        }
         return;
     }
     // 怪物信息
@@ -1024,7 +1029,12 @@ events.prototype.keyDownBook = function (keycode) {
 ////// 怪物手册界面时，放开某个键的操作 //////
 events.prototype.keyUpBook = function (keycode) {
     if (keycode==27 || keycode==88) {
-        core.ui.closePanel();
+        if (core.status.event.selection==null)
+            core.ui.closePanel();
+        else {
+            core.status.boxAnimateObjs = [];
+            core.ui.drawMaps(core.status.event.selection);
+        }
         return;
     }
     if (keycode==13 || keycode==32 || keycode==67) {
@@ -1099,10 +1109,13 @@ events.prototype.keyDownViewMaps = function (keycode) {
 
 ////// 查看地图界面时，放开某个键的操作 //////
 events.prototype.keyUpViewMaps = function (keycode) {
-    if (keycode==27 || keycode==88 || keycode==13 || keycode==32 || keycode==67) {
+    if (keycode==27 || keycode==13 || keycode==32 || keycode==67) {
         core.clearMap('data', 0, 0, 416, 416);
         core.setOpacity('data', 1);
         core.ui.closePanel();
+    }
+    if (keycode==88) {
+        core.openBook(false);
     }
     return;
 }
@@ -1573,7 +1586,7 @@ events.prototype.clickSettings = function (x,y) {
                     core.drawTip("本塔不允许浏览地图！");
                 }
                 else {
-                    core.drawText("\t[系统提示]即将进入浏览地图模式。\n\n点击地图上半部分，或按[↑]键可查看前一张地图\n点击地图下半部分，或按[↓]键可查看后一张地图\n点击地图中间，或按[ESC]键可离开浏览地图模式", function () {
+                    core.drawText("\t[系统提示]即将进入浏览地图模式。\n\n点击地图上半部分，或按[↑]键可查看前一张地图\n点击地图下半部分，或按[↓]键可查看后一张地图\n点击地图中间，或按[ESC]键可离开浏览地图模式\n此模式下可以打开怪物手册以查看某层楼的怪物属性", function () {
                         core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
                     })
                 }

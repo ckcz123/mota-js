@@ -29,10 +29,11 @@ ui.prototype.drawTextBox = function(content) {
 
     // 获得name, image, icon
     var id=null, name=null, image=null, icon=null;
-    if (content.indexOf("\t[")==0) {
+    if (content.indexOf("\t[")==0 || content.indexOf("\\t[")==0) {
         var index = content.indexOf("]");
         if (index>=0) {
             var str=content.substring(2, index);
+            if (content.indexOf("\\t[")==0) str=content.substring(3, index);
             content=content.substring(index+1);
             var ss=str.split(",");
             if (ss.length==1) {
@@ -68,10 +69,11 @@ ui.prototype.drawTextBox = function(content) {
     var textAttribute = core.status.textAttribute || core.initStatus.textAttribute;
 
     var position = textAttribute.position, px=null, py=null, ydelta=0;
-    if (content.indexOf("\b[")==0) {
+    if (content.indexOf("\b[")==0 || content.indexOf("\\b[")==0) {
         var index = content.indexOf("]");
         if (index>=0) {
             var str = content.substring(2, index);
+            if (content.indexOf("\\b[")==0) str = content.substring(3, index);
             content = content.substring(index + 1);
 
             var ss=str.split(",");

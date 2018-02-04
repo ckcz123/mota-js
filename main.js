@@ -438,7 +438,7 @@ main.dom.replayGame.onclick = function () {
         core.resetStatus(core.firstData.hero, obj.hard, core.firstData.floorId, null, core.initStatus.maps);
         core.events.setInitData(obj.hard);
         core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-            core.setHeroMoveTriggerInterval();
+            //core.setHeroMoveTriggerInterval();
             core.startReplay(core.decodeRoute(obj.route));
         });
     }, function () {

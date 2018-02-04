@@ -753,6 +753,9 @@ events.prototype.afterBattle = function(enemyId,x,y,callback) {
     if (core.status.event.id == null) {
         core.continueAutomaticRoute();
     }
+    else {
+        core.clearContinueAutomaticRoute();
+    }
     if (core.isset(callback)) callback();
 
 }
@@ -774,6 +777,9 @@ events.prototype.afterOpenDoor = function(doorId,x,y,callback) {
 
     if (core.status.event.id == null) {
         core.continueAutomaticRoute();
+    }
+    else {
+        core.clearContinueAutomaticRoute();
     }
     if (core.isset(callback)) callback();
 }

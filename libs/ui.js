@@ -865,7 +865,7 @@ ui.prototype.drawBook = function (index) {
 
 ////// 绘制怪物属性的详细信息 //////
 ui.prototype.drawBookDetail = function (index) {
-    var enemys = core.enemys.getCurrentEnemys();
+    var enemys = core.enemys.getCurrentEnemys(core.floorIds[core.status.event.selection]);
     if (enemys.length==0) return;
     if (index<0) index=0;
     if (index>=enemys.length) index=enemys.length-1;

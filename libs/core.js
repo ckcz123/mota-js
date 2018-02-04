@@ -1264,7 +1264,6 @@ core.prototype.stopAutomaticRoute = function () {
     core.stopHero();
     if (core.status.automaticRoute.moveStepBeforeStop.length==0)
         core.canvas.ui.clearRect(0, 0, 416, 416);
-    core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
 }
 
 ////// 继续剩下的自动寻路操作 //////

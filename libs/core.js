@@ -28,13 +28,25 @@ function core() {
         'turnHeroTimeout': null,
     }
     this.interval = {
-        'twoAnimate': null,
-        'fourAnimate': null,
-        'boxAnimate': null,
+        //'twoAnimate': null,
+        //'fourAnimate': null,
+        //'boxAnimate': null,
+        //'twoTime': null,
+        //'fourTime': null,
+        //'boxTime': null,
+        //'globalAnimate': false,
         'heroMoveTriggerInterval': null,
         'heroMoveInterval': null,
         "tipAnimate": null,
         'openDoorAnimate': null
+    }
+    this.animateFrame = {
+        'background': null,
+        'globalAnimate': false,
+        'twoTime': null,
+        'fourTime': null,
+        'boxTime': null,
+        'speed': null,
     }
     this.musicStatus = {
         'audioContext': null, // WebAudioContext
@@ -79,7 +91,7 @@ function core() {
         'lockControl': false,
 
         // 勇士移动状态
-        'heroMoving': false,
+        'heroMoving': 0,
         'heroStop': true,
 
         // 自动寻路相关
@@ -268,9 +280,115 @@ core.prototype.init = function (dom, statusBar, canvas, images, pngs, bgms, soun
         // 设置勇士高度
         core.material.icons.hero.height = core.material.images.hero.height/4;
 
+        core.setRequestAnimationFrame();
+
         core.showStartAnimate();
     });
 }
+
+////// 设置requestAnimationFrame //////
+core.prototype.setRequestAnimationFrame = function () {
+
+    (function() {
+        var lastTime = 0;
+        var vendors = ['webkit', 'moz'];
+        for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+            window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
+            window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] ||    // Webkit中此取消方法的名字变了
+                window[vendors[x] + 'CancelRequestAnimationFrame'];
+        }
+
+        if (!window.requestAnimationFrame) {
+            window.requestAnimationFrame = function(callback, element) {
+                var currTime = new Date().getTime();
+                var timeToCall = Math.max(0, 16.7 - (currTime - lastTime));
+                var id = window.setTimeout(function() {
+                    callback(currTime + timeToCall);
+                }, timeToCall);
+                lastTime = currTime + timeToCall;
+                return id;
+            };
+        }
+        if (!window.cancelAnimationFrame) {
+            window.cancelAnimationFrame = function(id) {
+                clearTimeout(id);
+            };
+        }
+    }());
+
+    core.animateFrame.speed = core.values.animateSpeed;
+    core.animateFrame.background = core.canvas.ui.createPattern(core.material.ground, "repeat");
+
+    var scan = {
+        'up': {'x': 0, 'y': -1},
+        'left': {'x': -1, 'y': 0},
+        'down': {'x': 0, 'y': 1},
+        'right': {'x': 1, 'y': 0}
+    };
+    
+    var draw = function(timestamp) {
+
+        core.animateFrame.twoTime = core.animateFrame.twoTime||timestamp;
+        core.animateFrame.fourTime = core.animateFrame.fourTime||timestamp;
+        core.animateFrame.boxTime = core.animateFrame.boxTime||timestamp;
+
+        // Global Animate
+        if (core.animateFrame.globalAnimate && core.isPlaying()) {
+
+            if (timestamp-core.animateFrame.twoTime>core.animateFrame.speed && core.isset(core.status.twoAnimateObjs)) {
+
+                for (var a = 0; a < core.status.twoAnimateObjs.length; a++) {
+                    var obj = core.status.twoAnimateObjs[a];
+                    obj.status = (obj.status+1)%2;
+                    core.canvas.event.clearRect(obj.x, obj.y, 32, 32);
+                    core.canvas.event.drawImage(obj.image, obj.status * 32, obj.loc * 32, 32, 32, obj.x, obj.y, 32, 32);
+                }
+
+                core.animateFrame.twoTime = timestamp;
+            }
+
+            if (timestamp-core.animateFrame.fourTime>core.animateFrame.speed/2 && core.isset(core.status.fourAnimateObjs)) {
+                for (var a = 0; a < core.status.fourAnimateObjs.length; a++) {
+                    var obj=core.status.fourAnimateObjs[a];
+                    obj.status = (obj.status+1)%4;
+                    core.canvas.event.clearRect(obj.x, obj.y, 32, 32);
+                    core.canvas.event.drawImage(obj.image, obj.status * 32, obj.loc * 32, 32, 32, obj.x, obj.y, 32, 32);
+                }
+                // fourtime = timestamp % fourDelta;
+                core.animateFrame.fourTime = timestamp;
+            }
+
+        }
+
+        // Box
+        if (timestamp-core.animateFrame.boxTime>core.animateFrame.speed && core.isset(core.status.boxAnimateObjs) && core.status.boxAnimateObjs.length>0) {
+            core.drawBoxAnimate();
+            core.animateFrame.boxTime = timestamp;
+        }
+
+        // Hero move
+        if (core.status.heroMoving>0) {
+            var x=core.getHeroLoc('x'), y=core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
+            if (core.status.heroMoving<=4) {
+                core.drawHero(direction, x, y, 'leftFoot', 4*core.status.heroMoving*scan[direction].x, 4*core.status.heroMoving*scan[direction].y);
+            }
+            else if (core.status.heroMoving<=8) {
+                core.drawHero(direction, x, y, 'rightFoot', 4*core.status.heroMoving*scan[direction].x, 4*core.status.heroMoving*scan[direction].y);
+            }
+        }
+
+        window.requestAnimationFrame(draw);
+
+    }
+
+    window.requestAnimationFrame(draw);
+
+
+
+
+}
+
+
 
 ////// 显示游戏开始界面 //////
 core.prototype.showStartAnimate = function (callback) {
@@ -1555,11 +1673,11 @@ core.prototype.setAutoHeroMove = function (steps) {
 
 ////// 设置行走的效果动画 //////
 core.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
-    if (core.status.heroMoving) {
+    if (core.status.heroMoving>0) {
         return;
     }
-    core.status.heroMoving = true;
-    var moveStep = 0;
+    // core.status.heroMoving = true;
+    // var moveStep = 0;
     var scan = {
         'up': {'x': 0, 'y': -1},
         'left': {'x': -1, 'y': 0},
@@ -1567,22 +1685,25 @@ core.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
         'right': {'x': 1, 'y': 0}
     };
     core.interval.heroMoveInterval = window.setInterval(function () {
-        moveStep++;
+        core.status.heroMoving++;
+        /*
         if (moveStep<=4) {
             core.drawHero(direction, x, y, 'leftFoot', 4*moveStep*scan[direction].x, 4*moveStep*scan[direction].y);
         }
-        else if (moveStep<=8) {
+        else if (moveStep<8) {
             core.drawHero(direction, x, y, 'rightFoot', 4*moveStep*scan[direction].x, 4*moveStep*scan[direction].y);
         }
-        if (moveStep==8) {
+        */
+        if (core.status.heroMoving==8) {
             core.setHeroLoc('x', x+scan[direction].x);
             core.setHeroLoc('y', y+scan[direction].y);
             core.moveOneStep();
+            core.clearMap('hero', 0, 0, 416, 416);
             core.drawHero(direction, core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
             //if (core.status.heroStop)
             //    core.drawHero(direction, core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
             clearInterval(core.interval.heroMoveInterval);
-            core.status.heroMoving = false;
+            core.status.heroMoving = 0;
             if (core.isset(callback)) callback();
         }
     }, 12.5 / core.status.replay.speed);
@@ -2785,6 +2906,7 @@ core.prototype.removeGlobalAnimate = function (x, y, all) {
 
 ////// 设置全局动画的显示效果 //////
 core.prototype.setGlobalAnimate = function (speed) {
+    /*
     clearInterval(core.interval.twoAnimate);
     clearInterval(core.interval.fourAnimate);
     var animateClose = false;
@@ -2810,6 +2932,10 @@ core.prototype.setGlobalAnimate = function (speed) {
             animateClose = false;
         }
     }, speed / 2);
+    */
+    core.syncGlobalAnimate();
+    core.animateFrame.speed = speed;
+    core.animateFrame.globalAnimate = true;
 }
 
 ////// 同步所有的全局动画效果 //////
@@ -2822,25 +2948,13 @@ core.prototype.syncGlobalAnimate = function () {
     })
 }
 
-////// 显示UI层某个box的动画 //////
-core.prototype.setBoxAnimate = function () {
-    clearInterval(core.interval.boxAnimate);
-    if (core.status.boxAnimateObjs.length > 0) {
-        var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
-        core.drawBoxAnimate(background);
-        core.interval.boxAnimate = setInterval(function () {
-            core.drawBoxAnimate(background);
-        }, core.values.animateSpeed);
-    }
-}
-
 ////// 绘制UI层的box动画 //////
-core.prototype.drawBoxAnimate = function (background) {
+core.prototype.drawBoxAnimate = function () {
     for (var a = 0; a < core.status.boxAnimateObjs.length; a++) {
         var obj = core.status.boxAnimateObjs[a];
-        obj.status = obj.status == 0 ? 1 : 0;
+        obj.status = ((obj.status||0)+1)%2;
         core.clearMap('ui', obj.bgx, obj.bgy, obj.bgsize, obj.bgsize);
-        core.fillRect('ui', obj.bgx, obj.bgy, obj.bgsize, obj.bgsize, background);
+        core.fillRect('ui', obj.bgx, obj.bgy, obj.bgsize, obj.bgsize, core.animateFrame.background);
         core.canvas.ui.drawImage(obj.image, obj.status * 32, obj.icon * 32,
             32, 32, obj.x, obj.y, 32, 32);
     }

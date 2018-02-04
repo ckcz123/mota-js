@@ -148,7 +148,6 @@ core.addGlobalAnimate // 添加一个全局动画
 core.removeGlobalAnimate // 删除一个或所有全局动画
 core.setGlobalAnimate // 设置全局动画的显示效果
 core.syncGlobalAnimate // 同步所有的全局动画效果
-core.setBoxAnimate // 显示UI层某个box的动画（如怪物手册中怪物的动画）
 core.drawBoxAnimate // 绘制UI层的box动画
 core.updateCheckBlock // 更新领域、夹击、阻击的伤害地图
 core.checkBlock // 检查并执行领域、夹击、阻击事件

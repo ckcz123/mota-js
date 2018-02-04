@@ -254,7 +254,7 @@ events.prototype.doEvents = function (list, x, y, callback) {
 ////// 执行当前自定义事件列表中的下一个事件 //////
 events.prototype.doAction = function() {
     // 清空boxAnimate和UI层
-    clearInterval(core.interval.boxAnimate);
+    core.status.boxAnimateObjs = [];
     core.clearMap('ui', 0, 0, 416, 416);
     core.setAlpha('ui', 1.0);
 
@@ -1152,7 +1152,6 @@ events.prototype.clickShop = function(x,y) {
             }
 
             core.status.boxAnimateObjs = [];
-            core.setBoxAnimate();
             if (core.status.event.data.fromList)
                 core.ui.drawQuickShop();
             else core.ui.closePanel();
@@ -1182,7 +1181,6 @@ events.prototype.keyUpShop = function (keycode) {
         }
 
         core.status.boxAnimateObjs = [];
-        core.setBoxAnimate();
 
         if (core.status.event.data.fromList)
             core.ui.drawQuickShop();

@@ -15,7 +15,6 @@ main.instance.ui = new ui();
 ////// 结束一切事件和绘制，关闭UI窗口，返回游戏进程 //////
 ui.prototype.closePanel = function () {
     core.status.boxAnimateObjs = [];
-    core.setBoxAnimate();
     core.clearMap('ui', 0, 0, 416, 416);
     core.setAlpha('ui', 1.0);
     core.unLockControl();
@@ -86,7 +85,6 @@ ui.prototype.drawTextBox = function(content) {
     core.setAlpha('ui', 1);
     core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
     core.status.boxAnimateObjs = [];
-    core.setBoxAnimate();
 
     // 名称
     core.canvas.ui.textAlign = "left";
@@ -114,7 +112,7 @@ ui.prototype.drawTextBox = function(content) {
                     'bgx': left + 15, 'bgy': top + 40, 'bgsize': 32,
                     'image': image, 'x': left + 15, 'y': top + 40, 'icon': icon
                 });
-                core.setBoxAnimate();
+                core.drawBoxAnimate();
             }
         }
     }
@@ -237,7 +235,7 @@ ui.prototype.drawChoices = function(content, choices) {
                         'bgx': left + 15, 'bgy': top + 30, 'bgsize': 32,
                         'image': image, 'x': left + 15, 'y': top + 30, 'icon': icon
                     });
-                    core.setBoxAnimate();
+                    core.drawBoxAnimate();
                 }
             }
         }
@@ -442,7 +440,6 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     core.setAlpha('data', 1);
     core.setOpacity('data', 1);
     core.status.boxAnimateObjs = [];
-    core.setBoxAnimate();
 
     var margin = 35;
     var boxWidth = 40;
@@ -473,7 +470,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
         'bgx': left + right - margin - 40, 'bgy': top+margin, 'bgsize': boxWidth,
         'image': core.material.images.enemys, 'x': left + right - margin - 40 + (boxWidth-32)/2, 'y': top + margin + (boxWidth-32)/2, 'icon': core.material.icons.enemys[monsterId]
     });
-    core.setBoxAnimate();
+    core.drawBoxAnimate();
 
     var lineWidth = 80;
 
@@ -636,7 +633,6 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
             // 战斗结束
             clearInterval(battleInterval);
             core.status.boxAnimateObjs = [];
-            core.setBoxAnimate();
             core.clearMap('ui', 0, 0, 416, 416);
             core.setAlpha('ui', 1.0);
             core.clearMap('data', 0, 0, 416, 416);
@@ -863,7 +859,7 @@ ui.prototype.drawBook = function (index) {
         }
 
     }
-    core.setBoxAnimate();
+    core.drawBoxAnimate();
     this.drawPagination(page, totalPage);
 }
 

@@ -28,13 +28,6 @@ function core() {
         'turnHeroTimeout': null,
     }
     this.interval = {
-        //'twoAnimate': null,
-        //'fourAnimate': null,
-        //'boxAnimate': null,
-        //'twoTime': null,
-        //'fourTime': null,
-        //'boxTime': null,
-        //'globalAnimate': false,
         'heroMoveTriggerInterval': null,
         'heroMoveInterval': null,
         "tipAnimate": null,
@@ -130,6 +123,12 @@ function core() {
             'data': null,
             'selection': null,
             'ui': null,
+        },
+        'textAttribute': {
+            'position': "center",
+            "title": [255,215,0,1],
+            "background": [0,0,0,0.85],
+            "text": [255,255,255,1],
         },
         'curtainColor': null,
         'usingCenterFly':false,
@@ -2270,9 +2269,7 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
                     var color = core.floors[floorId].color;
 
                     // 直接变色
-                    var nowR = parseInt(color[0]), nowG = parseInt(color[1]), nowB = parseInt(color[2]);
-                    var toRGB = "#"+((1<<24)+(nowR<<16)+(nowG<<8)+nowB).toString(16).slice(1);
-                    core.dom.curtain.style.background = toRGB;
+                    core.dom.curtain.style.background = this.arrayToRGB(color);
                     if (core.isset(color[3]))
                         core.dom.curtain.style.opacity = color[3];
                     else core.dom.curtain.style.opacity=1;
@@ -2389,6 +2386,7 @@ core.prototype.drawLine = function (map, x1, y1, x2, y2, style, lineWidth) {
     core.canvas[map].beginPath();
     core.canvas[map].moveTo(x1, y1);
     core.canvas[map].lineTo(x2, y2);
+    core.canvas[map].closePath();
     core.canvas[map].stroke();
 }
 
@@ -3249,9 +3247,7 @@ core.prototype.setFg = function(color, time, callback) {
 
     if (time==0) {
         // 直接变色
-        var nowR = parseInt(color[0]), nowG = parseInt(color[1]), nowB = parseInt(color[2]);
-        var toRGB = "#"+((1<<24)+(nowR<<16)+(nowG<<8)+nowB).toString(16).slice(1);
-        core.dom.curtain.style.background = toRGB;
+        core.dom.curtain.style.background = this.arrayToRGB(color);
         core.dom.curtain.style.opacity = color[3];
         core.status.curtainColor = color;
         if (core.isset(callback)) callback();
@@ -3267,12 +3263,7 @@ core.prototype.setFg = function(color, time, callback) {
         var nowR = parseInt(fromColor[0]+(color[0]-fromColor[0])*step/25);
         var nowG = parseInt(fromColor[1]+(color[1]-fromColor[1])*step/25);
         var nowB = parseInt(fromColor[2]+(color[2]-fromColor[2])*step/25);
-        if (nowR<0) nowR=0; if (nowR>255) nowR=255;
-        if (nowG<0) nowG=0; if (nowG>255) nowG=255;
-        if (nowB<0) nowB=0; if (nowB>255) nowB=255;
-
-        var toRGB = "#"+((1<<24)+(nowR<<16)+(nowG<<8)+nowB).toString(16).slice(1);
-        core.dom.curtain.style.background = toRGB;
+        core.dom.curtain.style.background = this.arrayToRGB([nowR,nowG,nowB]);
         core.dom.curtain.style.opacity = nowAlpha;
 
         if (step>=25) {
@@ -3712,6 +3703,14 @@ core.prototype.formatDate2 = function (date) {
 ////// 两位数显示 //////
 core.prototype.setTwoDigits = function (x) {
     return parseInt(x)<10?"0"+x:x;
+}
+
+////// 数组转RGB //////
+core.prototype.arrayToRGB = function (color) {
+    var nowR = parseInt(color[0])||0, nowG = parseInt(color[1])||0, nowB = parseInt(color[2])||0;
+    if (nowR<0) nowR=0; if (nowB<0) nowB=0;if (nowG<0) nowG=0;
+    if (nowR>255) nowR=255; if (nowB>255) nowB=255; if (nowG>255) nowG=255;
+    return "#"+((1<<24)+(nowR<<16)+(nowG<<8)+nowB).toString(16).slice(1);
 }
 
 ////// 作弊 //////
@@ -4551,7 +4550,7 @@ core.prototype.unLockControl = function () {
 
 ////// 判断某对象是否不为undefined也不会null //////
 core.prototype.isset = function (val) {
-    if (val == undefined || val == null) {
+    if (val == undefined || val == null || val==NaN) {
         return false;
     }
     return true

@@ -292,6 +292,18 @@ events.prototype.doAction = function() {
             else
                 core.ui.drawTextBox(data.data);
             break;
+        case "setText": // 设置文本状态
+            if (data.position=='up'||data.position=='down'||data.position=='center') {
+                core.status.textAttribute.position=data.position;
+            }
+            ["background", "title", "text"].forEach(function (t) {
+                if (core.isset(data[t]) && (data[t] instanceof Array) && data[t].length>=3) {
+                    if (data[t].length==3) data[t].push(1);
+                    core.status.textAttribute[t]=data[t];
+                }
+            })
+            core.events.doAction();
+            break;
         case "tip":
             core.drawTip(core.replaceText(data.text));
             core.events.doAction();

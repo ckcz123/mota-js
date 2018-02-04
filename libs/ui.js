@@ -63,6 +63,48 @@ ui.prototype.drawTextBox = function(content) {
         }
     }
 
+    // 获得位置信息
+
+    var textAttribute = core.status.textAttribute || core.initStatus.textAttribute;
+
+    var position = textAttribute.position, px=null, py=null, ydelta=0;
+    if (content.indexOf("\b[")==0) {
+        var index = content.indexOf("]");
+        if (index>=0) {
+            var str = content.substring(2, index);
+            content = content.substring(index + 1);
+
+            var ss=str.split(",");
+
+            if (ss[0]=='up' || ss[0]=='center' || ss[0]=='down') {
+                position=ss[0];
+                if (core.status.event.id=='action') {
+                    px = core.status.event.data.x;
+                    py = core.status.event.data.y;
+                }
+
+                if (ss.length>=2) {
+                    if (ss[1]=='hero') {
+                        px=core.getHeroLoc('x');
+                        py=core.getHeroLoc('y');
+                        ydelta = core.material.icons.hero.height-32;
+                    }
+                    else if (ss.length>=3) {
+                        px=parseInt(ss[1]);
+                        py=parseInt(ss[2]);
+                    }
+                }
+            }
+            /*
+            if (ss.length==3) {
+                px=parseInt(ss[1]);
+                py=parseInt(ss[2]);
+            }
+            */
+
+        }
+    }
+
     content = core.replaceText(content);
 
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
@@ -76,14 +118,74 @@ ui.prototype.drawTextBox = function(content) {
     var validWidth = right-(content_left-left)-13;
     var contents = core.splitLines("ui", content, validWidth, '16px Verdana');
 
-    var height = 416 - 10 - Math.min(416-24*(contents.length+1)-65, 250);
-    var top = (416-height)/2, bottom = height;
+    var height = 20 + 21*(contents.length+1) + (id=='hero'?core.material.icons.hero.height-10:core.isset(name)?32-10:0);
+
+
+    var xoffset = 6, yoffset = 22;
+
+    var top;
+    if (position=='center') {
+        top = (416 - height) / 2;
+    }
+    else if (position=='up') {
+        if (px==null || py==null) {
+            top = 5;
+        }
+        else {
+            top = 32 * py - height - ydelta - yoffset;
+        }
+    }
+    else if (position=='down') {
+        if (px==null || py==null) {
+            top = 416 - height - 5;
+        }
+        else {
+            top = 32 * py + 32 + yoffset;
+        }
+    }
 
     // var left = 97, top = 64, right = 416 - 2 * left, bottom = 416 - 2 * top;
-    core.setAlpha('ui', 0.85);
-    core.fillRect('ui', left, top, right, bottom, '#000000');
-    core.setAlpha('ui', 1);
-    core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+    //core.setAlpha('ui', 0.85);
+    core.setAlpha('ui', textAttribute.background[3]);
+    core.setFillStyle('ui', core.arrayToRGB(textAttribute.background));
+    core.setStrokeStyle('ui', '#FFFFFF');
+
+
+    core.fillRect('ui', left, top, right, height);
+    core.strokeRect('ui', left - 1, top - 1, right + 1, height + 1, '#FFFFFF', 2);
+
+    var xoffset = 6;
+
+    // draw triangle
+    if (position=='up' && core.isset(px) && core.isset(py)) {
+        core.canvas.ui.clearRect(32*px+xoffset, top+height-1, 32-2*xoffset, 2);
+        core.canvas.ui.beginPath();
+        core.canvas.ui.moveTo(32*px+xoffset-1, top+height-1);
+        core.canvas.ui.lineTo(32*px+16, top+height+yoffset-2);
+        core.canvas.ui.lineTo(32*px+32-xoffset+1, top+height-1);
+        core.canvas.ui.moveTo(32*px+xoffset-1, top+height-1);
+        core.canvas.ui.closePath();
+        core.canvas.ui.fill();
+        // core.canvas.ui.stroke();
+        // core.drawLine('ui', 32*px+4+1, top+height+1, 32*px + 28-1, top+height+1, core.arrayToRGB(textAttribute.background), 3);
+        core.drawLine('ui', 32*px+xoffset, top+height, 32*px+16, top+height+yoffset-2);
+        core.drawLine('ui', 32*px+32-xoffset, top+height, 32*px+16, top+height+yoffset-2);
+    }
+    if (position=='down' && core.isset(px) && core.isset(py)) {
+        core.canvas.ui.clearRect(32*px+xoffset, top-2, 32-2*xoffset, 3);
+        core.canvas.ui.beginPath();
+        core.canvas.ui.moveTo(32*px+xoffset-1, top+1);
+        core.canvas.ui.lineTo(32*px+16-1, top-yoffset+2);
+        core.canvas.ui.lineTo(32*px+32-xoffset-1, top+1);
+        core.canvas.ui.moveTo(32*px+xoffset-1, top+1);
+        core.canvas.ui.closePath();
+        core.canvas.ui.fill();
+        // core.canvas.ui.stroke();
+        // core.drawLine('ui', 32*px+4+1, top+height+1, 32*px + 28-1, top+height+1, core.arrayToRGB(textAttribute.background), 3);
+        core.drawLine('ui', 32*px+xoffset, top, 32*px+16, top-yoffset+2);
+        core.drawLine('ui', 32*px+32-xoffset, top, 32*px+16, top-yoffset+2);
+    }
+
     core.status.boxAnimateObjs = [];
 
     // 名称
@@ -93,11 +195,14 @@ ui.prototype.drawTextBox = function(content) {
     if (core.isset(id)) {
 
         content_top = top+57;
+        core.setAlpha('ui', textAttribute.title[3]);
+        core.setFillStyle('ui', core.arrayToRGB(textAttribute.title));
+        core.setStrokeStyle('ui', core.arrayToRGB(textAttribute.title));
 
         if (id == 'hero') {
             var heroHeight=core.material.icons.hero.height;
-            core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, heroHeight+2, '#FFD700', 2);
-            core.fillText('ui', core.status.hero.name, content_left, top + 30, '#FFD700', 'bold 22px Verdana');
+            core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, heroHeight+2, null, 2);
+            core.fillText('ui', core.status.hero.name, content_left, top + 30, null, 'bold 22px Verdana');
             core.clearMap('ui', left + 15, top + 40, 32, heroHeight);
             core.fillRect('ui', left + 15, top + 40, 32, heroHeight, background);
             var heroIcon = core.material.icons.hero['down'];
@@ -106,7 +211,7 @@ ui.prototype.drawTextBox = function(content) {
         else {
             core.fillText('ui', name, content_left, top + 30, '#FFD700', 'bold 22px Verdana');
             if (core.isset(icon)) {
-                core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, 34, '#FFD700', 2);
+                core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, 34, null, 2);
                 core.status.boxAnimateObjs = [];
                 core.status.boxAnimateObjs.push({
                     'bgx': left + 15, 'bgy': top + 40, 'bgsize': 32,
@@ -117,12 +222,15 @@ ui.prototype.drawTextBox = function(content) {
         }
     }
 
+    core.setAlpha('ui', textAttribute.text[3]);
+    core.setFillStyle('ui', core.arrayToRGB(textAttribute.text));
+
     for (var i=0;i<contents.length;i++) {
-        core.fillText('ui', contents[i], content_left, content_top, '#FFFFFF', '16px Verdana');
-        content_top+=24;
+        core.fillText('ui', contents[i], content_left, content_top, null, '16px Verdana');
+        content_top+=21;
     }
 
-    core.fillText('ui', '<点击任意位置继续>', 270, top+height-13, '#CCCCCC', '13px Verdana');
+    // core.fillText('ui', '<点击任意位置继续>', 270, top+height-13, '#CCCCCC', '13px Verdana');
 }
 
 ////// 绘制一个选项界面 //////

@@ -1676,6 +1676,7 @@ core.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
     if (core.status.heroMoving>0) {
         return;
     }
+    core.status.heroMoving=1;
     // core.status.heroMoving = true;
     // var moveStep = 0;
     var scan = {

@@ -1578,8 +1578,9 @@ core.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
             core.setHeroLoc('x', x+scan[direction].x);
             core.setHeroLoc('y', y+scan[direction].y);
             core.moveOneStep();
-            if (core.status.heroStop)
-                core.drawHero(direction, core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+            core.drawHero(direction, core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+            //if (core.status.heroStop)
+            //    core.drawHero(direction, core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
             clearInterval(core.interval.heroMoveInterval);
             core.status.heroMoving = false;
             if (core.isset(callback)) callback();

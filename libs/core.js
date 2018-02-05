@@ -3329,7 +3329,7 @@ core.prototype.setWeather = function (type, level) {
 
     // 当前天气：则忽略
     if (type==core.animateFrame.weather.type &&
-        (!core.isset(level) || 15*level==core.animateFrame.weather.level)) {
+        (!core.isset(level) || 16*level==core.animateFrame.weather.level)) {
         return;
     }
 

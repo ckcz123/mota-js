@@ -530,6 +530,26 @@ time为可选的，指定的话将作为楼层切换动画的时间。
 
 使用disableShop可以永久禁用全局商店直到再次被openShop打开为止。有关全局商店的说明可参见[全局商店](#全局商店)。
 
+### showImage：显示图片
+
+我们可以使用 `{"type": "showImage"}` 来显示一张图片。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "showImage", "name": "bg.png", "x": 231, "y": 297}, // 在(231,297)显示bg.png
+    {"type": "showImage", "name": "1.png", "x": 109, "y": 167}, // 在(109,167)显示1.png
+    {"type": "showImage"} // 如果不指定name则清除所有图片。
+]
+```
+
+name为图片名。**请确保图片在main.js中的this.pngs中被定义过。**
+
+x和y为图片左上角坐标，以像素为单位进行计算。
+
+如果不指定name则清除所有显示的图片。
+
+调用show/hide/move/animate等几个事件同样会清除所有显示的图片。
+
 ### setFg: 更改画面色调
 
 我们可以使用 `{"type": "setFg"}` 来更改画面色调。

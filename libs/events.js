@@ -366,6 +366,13 @@ events.prototype.doAction = function() {
             core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
             this.doAction();
             break;
+        case "showImage": // 显示图片
+            if (core.isset(data.name) && core.isset(data.x) && core.isset(data.y) && core.isset(core.material.images.pngs[data.name])) {
+                core.canvas.animate.drawImage(core.material.images.pngs[data.name], data.x, data.y);
+            }
+            else core.clearMap('animate', 0, 0, 416, 416);
+            this.doAction();
+            break;
         case "setFg": // 颜色渐变
             core.setFg(data.color, data.time, function() {
                 core.events.doAction();

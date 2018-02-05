@@ -40,6 +40,13 @@ function core() {
         'fourTime': null,
         'boxTime': null,
         'speed': null,
+        'weather': {
+            'time': null,
+            'type': null,
+            'level': 0,
+            'nodes': [],
+            'data': null,
+        }
     }
     this.musicStatus = {
         'audioContext': null, // WebAudioContext
@@ -330,6 +337,7 @@ core.prototype.setRequestAnimationFrame = function () {
         core.animateFrame.twoTime = core.animateFrame.twoTime||timestamp;
         core.animateFrame.fourTime = core.animateFrame.fourTime||timestamp;
         core.animateFrame.boxTime = core.animateFrame.boxTime||timestamp;
+        core.animateFrame.weather.time = core.animateFrame.weather.time||timestamp;
 
         // Global Animate
         if (core.animateFrame.globalAnimate && core.isPlaying()) {
@@ -366,7 +374,7 @@ core.prototype.setRequestAnimationFrame = function () {
         }
 
         // Hero move
-        if (core.status.heroMoving>0) {
+        if (core.isset(core.status.heroMoving) && core.status.heroMoving>0) {
             var x=core.getHeroLoc('x'), y=core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
             if (core.status.heroMoving<=4) {
                 core.drawHero(direction, x, y, 'leftFoot', 4*core.status.heroMoving*scan[direction].x, 4*core.status.heroMoving*scan[direction].y);
@@ -374,6 +382,80 @@ core.prototype.setRequestAnimationFrame = function () {
             else if (core.status.heroMoving<=8) {
                 core.drawHero(direction, x, y, 'rightFoot', 4*core.status.heroMoving*scan[direction].x, 4*core.status.heroMoving*scan[direction].y);
             }
+        }
+
+        // weather
+        if (core.isPlaying() && timestamp-core.animateFrame.weather.time>30) {
+            if (core.animateFrame.weather.type=='rain' && core.animateFrame.weather.level>0) {
+
+                core.clearMap('weather', 0, 0, 416, 416);
+
+                core.canvas.weather.strokeStyle = 'rgba(174,194,224,0.8)';
+                core.canvas.weather.lineWidth = 1;
+                core.canvas.weather.lineCap = 'round';
+
+                core.animateFrame.weather.nodes.forEach(function (p) {
+                    core.canvas.weather.beginPath();
+                    core.canvas.weather.moveTo(p.x, p.y);
+                    core.canvas.weather.lineTo(p.x + p.l * p.xs, p.y + p.l * p.ys);
+                    core.canvas.weather.stroke();
+
+                    p.x += p.xs;
+                    p.y += p.ys;
+                    if (p.x>416 || p.y>416) {
+                        p.x = Math.random()*416;
+                        p.y = -10;
+                    }
+
+                })
+
+                core.canvas.weather.fill();
+
+            }
+            else if (core.animateFrame.weather.type=='snow' && core.animateFrame.weather.level>0) {
+
+                core.clearMap('weather', 0, 0, 416, 416);
+
+                core.canvas.weather.fillStyle = "rgba(255, 255, 255, 0.8)";
+                core.canvas.weather.beginPath();
+
+                if (!core.isset(core.animateFrame.weather.data))
+                    core.animateFrame.weather.data = 0;
+                core.animateFrame.weather.data+=0.01;
+
+                var angle = core.animateFrame.weather.data;
+                core.animateFrame.weather.nodes.forEach(function (p) {
+                    core.canvas.weather.moveTo(p.x, p.y);
+                    core.canvas.weather.arc(p.x, p.y, p.r, 0, Math.PI*2, true);
+
+                    // update
+                    p.x += Math.sin(angle) * 2;
+                    p.y += Math.cos(angle+p.d) + 1 + p.r/2;
+
+                    if (p.x>416+5 || p.x<-5 || p.y>416) {
+                        if (Math.random()>1/3) {
+                            p.x = Math.random()*416;
+                            p.y = -10;
+                        }
+                        else {
+                            if (Math.sin(angle)>0) {
+                                p.x = -5;
+                                p.y = Math.random()*416;
+                            }
+                            else {
+                                p.x = 416+5;
+                                p.y=Math.random()*416;
+                            }
+                        }
+                    }
+
+                })
+
+                core.canvas.weather.fill();
+
+            }
+            core.animateFrame.weather.time = timestamp;
+
         }
 
         window.requestAnimationFrame(draw);
@@ -2269,7 +2351,7 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
                     var color = core.floors[floorId].color;
 
                     // 直接变色
-                    core.dom.curtain.style.background = this.arrayToRGB(color);
+                    core.dom.curtain.style.background = core.arrayToRGB(color);
                     if (core.isset(color[3]))
                         core.dom.curtain.style.opacity = color[3];
                     else core.dom.curtain.style.opacity=1;
@@ -2280,6 +2362,12 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) 
                     core.dom.curtain.style.opacity = 0;
                 }
             }
+
+            // 更改天气
+            if (core.isset(core.floors[floorId].weather)) {
+                core.setWeather(core.floors[floorId].weather[0], core.floors[floorId].weather[1])
+            }
+            else core.setWeather();
 
             core.drawMap(floorId, function () {
                 setTimeout(function() {
@@ -2654,9 +2742,9 @@ core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
     time = time || 500;
     core.status.replay.animate=true;
 
-    clearInterval(core.interval.tipAnimate);
-    core.saveCanvas('data');
-    core.clearMap('data', 0, 0, 416, 416);
+    //clearInterval(core.interval.tipAnimate);
+    core.saveCanvas('animate');
+    core.clearMap('animate', 0, 0, 416, 416);
 
     var block = core.getBlock(x,y,core.status.floorId,false);
     if (block==null) {// 不存在
@@ -2674,10 +2762,9 @@ core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
     blockIcon = core.material.icons[block.event.cls][block.event.id];
     blockImage = core.material.images[block.event.cls];
 
-    // 绘制data层
     var opacityVal = 1;
-    core.setOpacity('data', opacityVal);
-    core.canvas.data.drawImage(blockImage, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+    core.setOpacity('animate', opacityVal);
+    core.canvas.animate.drawImage(blockImage, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
 
     // 要运行的轨迹：将steps展开
     var moveSteps=[];
@@ -2722,14 +2809,14 @@ core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
         if (moveSteps.length==0) {
             if (immediateHide) opacityVal=0;
             else opacityVal -= 0.06;
-            core.setOpacity('data', opacityVal);
-            core.clearMap('data', nowX, nowY, 32, 32);
-            core.canvas.data.drawImage(blockImage, animateCurrent * 32, blockIcon * 32, 32, 32, nowX, nowY, 32, 32);
+            core.setOpacity('animate', opacityVal);
+            core.clearMap('animate', nowX, nowY, 32, 32);
+            core.canvas.animate.drawImage(blockImage, animateCurrent * 32, blockIcon * 32, 32, 32, nowX, nowY, 32, 32);
             if (opacityVal<=0) {
                 clearInterval(animate);
-                core.loadCanvas('data');
-                core.clearMap('data', 0, 0, 416, 416);
-                core.setOpacity('data', 1);
+                core.loadCanvas('animate');
+                core.clearMap('animate', 0, 0, 416, 416);
+                core.setOpacity('animate', 1);
                 core.status.replay.animate=false;
                 if (core.isset(callback)) callback();
             }
@@ -2739,9 +2826,9 @@ core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
             step++;
             nowX+=scan[moveSteps[0]].x*2;
             nowY+=scan[moveSteps[0]].y*2;
-            core.clearMap('data', nowX-32, nowY-32, 96, 96);
+            core.clearMap('animate', nowX-32, nowY-32, 96, 96);
             // 绘制
-            core.canvas.data.drawImage(blockImage, animateCurrent * 32, blockIcon * 32, 32, 32, nowX, nowY, 32, 32);
+            core.canvas.animate.drawImage(blockImage, animateCurrent * 32, blockIcon * 32, 32, 32, nowX, nowY, 32, 32);
             if (step==16) {
                 // 该移动完毕，继续
                 step=0;
@@ -2756,9 +2843,9 @@ core.prototype.animateBlock = function (x,y,type,time,callback) {
     if (type!='hide') type='show';
     core.status.replay.animate=true;
 
-    clearInterval(core.interval.tipAnimate);
-    core.saveCanvas('data');
-    core.clearMap('data', 0, 0, 416, 416);
+    //clearInterval(core.interval.tipAnimate);
+    core.saveCanvas('animate');
+    core.clearMap('animate', 0, 0, 416, 416);
 
     var block = core.getBlock(x,y,core.status.floorId,false);
     if (block==null) {// 不存在
@@ -2766,8 +2853,8 @@ core.prototype.animateBlock = function (x,y,type,time,callback) {
         return;
     }
     // 清空UI
-    core.clearMap('ui', 0, 0, 416, 416);
-    core.setAlpha('ui', 1.0);
+    //core.clearMap('ui', 0, 0, 416, 416);
+    //core.setAlpha('ui', 1.0);
 
     block=block.block;
     blockIcon = core.material.icons[block.event.cls][block.event.id];
@@ -2776,20 +2863,20 @@ core.prototype.animateBlock = function (x,y,type,time,callback) {
     var opacityVal = 0;
     if (type=='hide') opacityVal=1;
 
-    core.setOpacity('data', opacityVal);
-    core.canvas.data.drawImage(blockImage, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+    core.setOpacity('animate', opacityVal);
+    core.canvas.animate.drawImage(blockImage, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
 
     var animate = window.setInterval(function () {
         if (type=='show') opacityVal += 0.1;
         else opacityVal -= 0.1;
-        core.setOpacity('data', opacityVal);
-        core.clearMap('data',block.x * 32, block.y * 32, 32, 32);
-        core.canvas.data.drawImage(blockImage, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+        core.setOpacity('animate', opacityVal);
+        core.clearMap('animate',block.x * 32, block.y * 32, 32, 32);
+        core.canvas.animate.drawImage(blockImage, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
         if (opacityVal >=1 || opacityVal<=0) {
             clearInterval(animate);
-            core.loadCanvas('data');
-            core.clearMap('data', 0, 0, 416, 416);
-            core.setOpacity('data', 1);
+            core.loadCanvas('animate');
+            core.clearMap('animate', 0, 0, 416, 416);
+            core.setOpacity('animate', 1);
             core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
@@ -3226,6 +3313,59 @@ core.prototype.snipe = function (snipes) {
 
 }
 
+////// 更改天气效果 //////
+core.prototype.setWeather = function (type, level) {
+
+    // 非雨雪
+    if (type!='rain' && type!='snow') {
+        core.clearMap('weather', 0, 0, 416, 416)
+        core.animateFrame.weather.type = null;
+        core.animateFrame.weather.level = 0;
+        core.animateFrame.weather.nodes = [];
+        return;
+    }
+
+    level = parseInt(level);
+
+    // 当前天气：则忽略
+    if (type==core.animateFrame.weather.type &&
+        (!core.isset(level) || 15*level==core.animateFrame.weather.level)) {
+        return;
+    }
+
+    if (!core.isset(level)) level=5;
+    if (level<1) level=1; if (level>10) level=10;
+    level *= 16;
+
+    core.clearMap('weather', 0, 0, 416, 416)
+    core.animateFrame.weather.type = type;
+    core.animateFrame.weather.level = level;
+
+    core.animateFrame.weather.nodes = [];
+
+    if (type == 'rain') {
+        for (var a=0;a<level;a++) {
+            core.animateFrame.weather.nodes.push({
+                'x': Math.random()*416,
+                'y': Math.random()*416,
+                'l': Math.random() * 1.2,
+                'xs': -4 + Math.random() * 4 + 2,
+                'ys': Math.random() * 10 + 10
+            })
+        }
+    }
+    else if (type=='snow') {
+        for (var a=0;a<level;a++) {
+            core.animateFrame.weather.nodes.push({
+                'x': Math.random()*416,
+                'y': Math.random()*416,
+                'r': Math.random() * 4 + 1,
+                'd': Math.random() * level,
+            })
+        }
+    }
+}
+
 ////// 更改画面色调 //////
 core.prototype.setFg = function(color, time, callback) {
     if (!core.isset(time)) time=750;
@@ -3244,10 +3384,9 @@ core.prototype.setFg = function(color, time, callback) {
     if (color[3]<0) color[3]=0;
     if (color[3]>1) color[3]=1;
 
-
     if (time==0) {
         // 直接变色
-        core.dom.curtain.style.background = this.arrayToRGB(color);
+        core.dom.curtain.style.background = core.arrayToRGB(color);
         core.dom.curtain.style.opacity = color[3];
         core.status.curtainColor = color;
         if (core.isset(callback)) callback();
@@ -3263,7 +3402,7 @@ core.prototype.setFg = function(color, time, callback) {
         var nowR = parseInt(fromColor[0]+(color[0]-fromColor[0])*step/25);
         var nowG = parseInt(fromColor[1]+(color[1]-fromColor[1])*step/25);
         var nowB = parseInt(fromColor[2]+(color[2]-fromColor[2])*step/25);
-        core.dom.curtain.style.background = this.arrayToRGB([nowR,nowG,nowB]);
+        core.dom.curtain.style.background = core.arrayToRGB([nowR,nowG,nowB]);
         core.dom.curtain.style.opacity = nowAlpha;
 
         if (step>=25) {
@@ -4550,7 +4689,7 @@ core.prototype.unLockControl = function () {
 
 ////// 判断某对象是否不为undefined也不会null //////
 core.prototype.isset = function (val) {
-    if (val == undefined || val == null || val==NaN) {
+    if (val == undefined || val == null || (typeof val=='number' && isNaN(val))) {
         return false;
     }
     return true

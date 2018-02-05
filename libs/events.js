@@ -371,6 +371,10 @@ events.prototype.doAction = function() {
                 core.events.doAction();
             });
             break;
+        case "setWeather": // 更改天气
+            core.setWeather(data.name, data.level);
+            this.doAction();
+            break;
         case "openDoor": // 开一个门，包括暗墙
             var floorId=data.floorId || core.status.floorId;
             var block=core.getBlock(data.loc[0], data.loc[1], floorId);

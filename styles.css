@@ -21,7 +21,7 @@
     position: fixed;
     top: 10px;
     left: 10px;
-    z-index: 13;
+    z-index: 15;
 }
 
 #startPanel {
@@ -32,7 +32,7 @@
     left: 0;
     background-color: #fff;
     overflow: hidden;
-    z-index: 9;
+    z-index: 11;
 }
 
 #startTop {
@@ -42,7 +42,7 @@
     top: 0;
     left: 0;
     background-color: #000;
-    z-index: 12;
+    z-index: 14;
 }
 
 #startTopProgressBar {
@@ -52,7 +52,7 @@
     position: absolute;
     top: 5%;
     background-color: #fff;
-    z-index: 13;
+    z-index: 15;
 }
 
 #startTopProgress {
@@ -67,7 +67,7 @@
     position: absolute;
     top: 8%;
     left: 5%;
-    z-index: 13;
+    z-index: 15;
 }
 
 #startBackground {
@@ -77,12 +77,12 @@
     height: 100%;
     width: auto;
     transform:translate(-50%,-50%);
-    z-index: 10;
+    z-index: 12;
 }
 
 #startLogo {
     position: absolute;
-    z-index: 10;
+    z-index: 12;
     left: 0;
     right: 0;
     margin-left: auto;
@@ -95,7 +95,7 @@
 
 #startTitle {
     position: absolute;
-    z-index: 11;
+    z-index: 13;
 }
 
 #startButtonGroup {
@@ -106,7 +106,7 @@
     background-color: #000;
     opacity: 0.85;
     display: none;
-    z-index: 10;
+    z-index: 12;
     bottom: 0;
     margin-bottom: 7%;
 }
@@ -142,7 +142,7 @@
     display: none;
     color: #fff;
     background-color: #000;
-    z-index: 8;
+    z-index: 10;
 }
 
 #logoLabel {
@@ -170,7 +170,7 @@
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     background: url(images/ground.png) repeat;
-    z-index: 7;
+    z-index: 9;
     display: none;
 }
 #statusBar .status{
@@ -199,7 +199,7 @@
 #toolBar {
     position: absolute;
     background: url(images/ground.png) repeat;
-    z-index: 6;
+    z-index: 8;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -234,7 +234,7 @@ span#poison, span#weak, span#curse {
 }
 
 #curtain {
-    z-index: 5;
+    z-index: 7;
     position: absolute;
     opacity: 0;
     background: #000000;
@@ -256,12 +256,20 @@ span#poison, span#weak, span#curse {
     z-index: 4;
 }
 
-#ui {
+#animate {
+    z-index: 5;
+}
+
+#weather {
     z-index: 6;
 }
 
+#ui {
+    z-index: 8;
+}
+
 #data {
-    z-index: 7;
+    z-index: 9;
 }
 
 .clearfix:before,

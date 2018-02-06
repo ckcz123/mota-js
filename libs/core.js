@@ -889,9 +889,11 @@ core.prototype.pressKey = function (keyCode) {
 ////// 根据按下键的code来执行一系列操作 //////
 core.prototype.keyDown = function(keyCode) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    /*
     if (core.isset(core.status.automaticRoute)&&core.status.automaticRoute.autoHeroMove) {
         core.stopAutomaticRoute();
     }
+    */
     if (core.status.lockControl) {
         // Ctrl跳过对话
         if (keyCode==17) {
@@ -1193,8 +1195,13 @@ core.prototype.keyUp = function(keyCode) {
             break;
         
     }
-    
+
+    if (core.isset(core.status.automaticRoute)&&core.status.automaticRoute.autoHeroMove) {
+        core.stopAutomaticRoute();
+    }
+
     core.stopHero();
+
 }
 
 ////// 点击（触摸）事件按下时 //////
@@ -4214,6 +4221,13 @@ core.prototype.checkStatus = function (name, need, item) {
 ////// 点击怪物手册时的打开操作 //////
 core.prototype.openBook = function (need) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+
+    // 当前是book，且从“浏览地图”打开
+    if (core.status.event.id == 'book' && core.isset(core.status.event.selection)) {
+        core.status.boxAnimateObjs = [];
+        core.ui.drawMaps(core.status.event.selection);
+        return;
+    }
 
     // 从“浏览地图”页面打开
     if (core.status.event.id=='viewMaps') {

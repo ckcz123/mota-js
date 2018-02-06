@@ -110,7 +110,9 @@ ui.prototype.drawTextBox = function(content) {
     content = core.replaceText(content);
 
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
+    core.status.boxAnimateObjs = [];
     core.clearMap('ui', 0, 0, 416, 416);
+
     // var contents = content.split('\n');
     // var contents = core.splitLines('ui', content, );
     var left=10, right=416-2*left;
@@ -188,7 +190,6 @@ ui.prototype.drawTextBox = function(content) {
         core.drawLine('ui', 32*px+32-xoffset, top, 32*px+16, top-yoffset+2);
     }
 
-    core.status.boxAnimateObjs = [];
 
     // 名称
     core.canvas.ui.textAlign = "left";
@@ -211,7 +212,7 @@ ui.prototype.drawTextBox = function(content) {
             core.canvas.ui.drawImage(core.material.images.hero, heroIcon.stop * 32, heroIcon.loc * heroHeight, 32, heroHeight, left+15, top+40, 32, heroHeight);
         }
         else {
-            core.fillText('ui', name, content_left, top + 30, '#FFD700', 'bold 22px Verdana');
+            core.fillText('ui', name, content_left, top + 30, null, 'bold 22px Verdana');
             if (core.isset(icon)) {
                 core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, 34, null, 2);
                 core.status.boxAnimateObjs = [];
@@ -1389,9 +1390,10 @@ ui.prototype.drawAbout = function() {
     // 名称
     core.canvas.ui.textAlign = "left";
     core.fillText('ui', "HTML5 魔塔样板", text_start, top+35, "#FFD700", "bold 22px Verdana");
-    core.fillText('ui', "作者： 艾之葵", text_start, top + 80, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112);
-    // TODO: 写自己的“关于”页面
+    core.fillText('ui', "版本： "+core.firstData.version, text_start, top + 80, "#FFFFFF", "bold 17px Verdana");
+    core.fillText('ui', "作者： 艾之葵", text_start, top + 112);
+    core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112+32);
+    // TODO: 写自己的“关于”页面，每次增加32像素即可
 }
 
 ////// 绘制帮助页面 //////
@@ -1406,6 +1408,7 @@ ui.prototype.drawHelp = function () {
         "[K] 打开/关闭快捷商店选择列表\n" +
         "[T] 打开/关闭工具栏\n" +
         "[ESC] 打开/关闭系统菜单\n" +
+        "[E] 显示光标\n" +
         "[H] 打开帮助页面\n"+
         "[R] 回放\n"+
         "[SPACE] 轻按（仅在轻按开关打开时有效）\n" +

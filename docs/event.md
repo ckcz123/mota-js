@@ -530,21 +530,43 @@ time为可选的，指定的话将作为楼层切换动画的时间。
 
 使用disableShop可以永久禁用全局商店直到再次被openShop打开为止。有关全局商店的说明可参见[全局商店](#全局商店)。
 
+### animate：显示动画
+
+我们可以使用 `{"type": "animate"}` 来显示一段动画。
+
+有关动画的详细介绍可参见[动画和天气系统](element#动画和天气系统)。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "animate", "name": "yongchang", "loc": [1,3]}, // 在(1,3)显示“咏唱魔法”动画
+    {"type": "animate", "name": "zone", "loc": "hero"}, // 在勇士位置显示“领域”动画
+    {"type": "animate", "name": "hand"} // 可以不指定loc，则默认为当前事件点
+]
+```
+
+name为动画名，**请确保动画在main.js中的this.animates中被定义过。**
+
+loc为动画的位置，可以是`[x,y]`表示在(x,y)点显示，也可以是字符串`"hero"`表示在勇士点显示。
+
+loc可忽略，如果忽略则显示为事件当前点。
+
+在动画播放结束后才会继续执行下一个事件。
+
 ### showImage：显示图片
 
 我们可以使用 `{"type": "showImage"}` 来显示一张图片。
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    {"type": "showImage", "name": "bg.png", "x": 231, "y": 297}, // 在(231,297)显示bg.png
-    {"type": "showImage", "name": "1.png", "x": 109, "y": 167}, // 在(109,167)显示1.png
+    {"type": "showImage", "name": "bg", "loc": [231,297]}, // 在(231,297)显示bg.png
+    {"type": "showImage", "name": "1", "loc": [109,167]}, // 在(109,167)显示1.png
     {"type": "showImage"} // 如果不指定name则清除所有图片。
 ]
 ```
 
 name为图片名。**请确保图片在main.js中的this.pngs中被定义过。**
 
-x和y为图片左上角坐标，以像素为单位进行计算。
+loc为图片左上角坐标，以像素为单位进行计算。
 
 如果不指定name则清除所有显示的图片。
 

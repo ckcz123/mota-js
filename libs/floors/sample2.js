@@ -10,7 +10,7 @@ main.floors.sample2 = {
     "defaultGround": "snowGround", // 默认地面的图块ID（terrains中）
     "png": [], // // 该层默认显示的所有图片；详细用法请查看文档“自定义素材”中的说明。
     "color": [255,0,0,0.3], // 该层的默认画面色调。本项可不写（代表无色调），如果写需要是一个RGBA数组。
-    "weather": ["rain",10], // 该层的默认天气。本项可不写，如果写则第一项为"rain"或"snow"代表雨雪，第二项为1-10之间的数代表强度。
+    "weather": ["rain",10], // 该层的默认天气。本项可忽略表示晴天，如果写则第一项为"rain"或"snow"代表雨雪，第二项为1-10之间的数代表强度。
     "bgm": "qianjin.mid", // 到达该层后默认播放的BGM。本项可忽略。
     "map": [ // 地图数据，需要是13x13，建议使用地图生成器来生成
         [5,    5,    5,    5,    5,    5,    87,   5,    5,    5,    5,    5,    5],
@@ -28,8 +28,7 @@ main.floors.sample2 = {
         [5,    5,    5,    5,    5,    5,    88,   5,    5,    5,    5,    5,    5],
     ],
     "firstArrive": [ // 第一次到该楼层触发的事件
-        "\t[实战！]本楼将尝试复刻《宿命的旋律》40F剧情。",
-        "由于暂不支持一些动画效果，例如雷电、振动、天气渲染等等，因此做出来的效果远远比不上原版。\n\n不过作为抛砖引玉，还是能展示一下H5的能力。\n（开音效食用更加）"
+        "\t[实战！]本楼将尝试复刻《宿命的旋律》40F剧情。"
     ],
     "events": { // 该楼的所有可能事件列表
 
@@ -182,6 +181,7 @@ main.floors.sample2 = {
                 {"type": "show", "loc": [8,3], "time": 500}, // 依次显示四个角的法师
                 {"type": "sleep", "time": 500},
                 "\t[blackMagician]感受绝望吧！冥顽不化的蠢货！",
+                /*
                 {"type": "hide", "loc": [4,3], "time": 150}, // 由于没有动画效果，暂时使用“闪一下”表示
                 {"type": "show", "loc": [4,3], "time": 150},
                 {"type": "hide", "loc": [4,6], "time": 150}, // 由于没有动画效果，暂时使用“闪一下”表示
@@ -190,8 +190,14 @@ main.floors.sample2 = {
                 {"type": "show", "loc": [8,6], "time": 150},
                 {"type": "hide", "loc": [8,3], "time": 150}, // 由于没有动画效果，暂时使用“闪一下”表示
                 {"type": "show", "loc": [8,3], "time": 150},
+                */
+                {"type": "animate", "name": "yongchang", "loc": [4,3]},
+                {"type": "animate", "name": "yongchang", "loc": [4,6]},
+                {"type": "animate", "name": "yongchang", "loc": [8,6]},
+                {"type": "animate", "name": "yongchang", "loc": [8,3]},
                 {"type": "sleep", "time": 200},
                 {"type": "playSound", "name": "attack.ogg"}, // 播放攻击音效
+                {"type": "animate", "name": "thunder", "loc": "hero"},
                 {"type": "sleep", "time": 200},
                 "\t[hero]唔……！！（吐血）",
                 {"type": "playSound", "name": "item.ogg"},
@@ -267,6 +273,7 @@ main.floors.sample2 = {
                 "\t[小妖精,fairy]别小瞧咱！咱好歹也是妖精族里实力数一数二的存在！",
                 {"type": "playSound", "name": "item.ogg"},
                 "\t[blackMagician]只会耍嘴皮子的恼人苍蝇！我倒要看看一块焦炭会不会说话！\n——招雷弹！！",
+                /*
                 {"type": "hide", "loc": [4,3], "time": 150}, // 由于没有动画效果，暂时使用“闪一下”表示
                 {"type": "show", "loc": [4,3], "time": 150},
                 {"type": "hide", "loc": [4,6], "time": 150}, // 由于没有动画效果，暂时使用“闪一下”表示
@@ -275,9 +282,17 @@ main.floors.sample2 = {
                 {"type": "show", "loc": [8,6], "time": 150},
                 {"type": "hide", "loc": [8,3], "time": 150}, // 由于没有动画效果，暂时使用“闪一下”表示
                 {"type": "show", "loc": [8,3], "time": 150},
+                */
+                {"type": "animate", "name": "yongchang", "loc": [4,3]},
+                {"type": "animate", "name": "yongchang", "loc": [4,6]},
+                {"type": "animate", "name": "yongchang", "loc": [8,6]},
+                {"type": "animate", "name": "yongchang", "loc": [8,3]},
                 {"type": "playSound", "name": "attack.ogg"}, // 播放攻击音效
+                /*
                 {"type": "hide", "loc": [6,6], "time": 150}, // 妖精也闪一下表示收到了伤害
                 {"type": "show", "loc": [6,6], "time": 150}, // 妖精也闪一下表示收到了伤害
+                */
+                {"type": "animate", "name": "thunder", "loc": [6,6]},
                 {"type": "sleep", "time": 500}, // 等待500毫秒
                 "\t[小妖精,fairy]切，这点伤痛跟他刚才经历的身心地狱相比根本就不算什么。",
                 {"type": "playSound", "name": "item.ogg"},

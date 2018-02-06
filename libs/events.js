@@ -334,6 +334,21 @@ events.prototype.doAction = function() {
             }
             else this.doAction();
             break;
+        case "animate": // 显示动画
+            if (core.isset(data.loc)) {
+                if (data.loc == 'hero') {
+                    x=core.getHeroLoc('x');
+                    y=core.getHeroLoc('y');
+                }
+                else if (data.loc instanceof Array) {
+                    x=data.loc[0];
+                    y=data.loc[1];
+                }
+            }
+            core.drawAnimate(data.name, x, y, function () {
+                core.events.doAction();
+            })
+            break;
         case "move": // 移动事件
             if (core.isset(data.loc)) {
                 x=data.loc[0];
@@ -367,8 +382,8 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "showImage": // 显示图片
-            if (core.isset(data.name) && core.isset(data.x) && core.isset(data.y) && core.isset(core.material.images.pngs[data.name])) {
-                core.canvas.animate.drawImage(core.material.images.pngs[data.name], data.x, data.y);
+            if (core.isset(data.loc) && core.isset(core.material.images.pngs[data.name])) {
+                core.canvas.animate.drawImage(core.material.images.pngs[data.name], data.loc[0], data.loc[1]);
             }
             else core.clearMap('animate', 0, 0, 416, 416);
             this.doAction();

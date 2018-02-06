@@ -3,17 +3,8 @@
  */
 
 function core() {
-    this.dom = {};
-    this.statusBar = {};
-    this.canvas = {};
-    this.images = [];
-    this.pngs = [];
-    this.bgms = [];
-    this.sounds = [];
-    this.floorIds = [];
-    this.floors = {};
-    this.firstData = {};
     this.material = {
+        'animates': {},
         'images': {},
         'bgms': {},
         'sounds': {},
@@ -31,7 +22,8 @@ function core() {
         'heroMoveTriggerInterval': null,
         'heroMoveInterval': null,
         "tipAnimate": null,
-        'openDoorAnimate': null
+        'openDoorAnimate': null,
+        'animateInterval': null,
     }
     this.animateFrame = {
         'background': null,
@@ -147,22 +139,12 @@ function core() {
         'boxAnimateObjs': [],
     };
     this.status = {};
-    this.flags = {};
 }
 
 /////////// 系统事件相关 ///////////
 
 ////// 初始化 //////
-core.prototype.init = function (dom, statusBar, canvas, images, pngs, bgms, sounds, floorIds, floors, coreData) {
-    core.dom = dom;
-    core.statusBar = statusBar;
-    core.canvas = canvas;
-    core.images = images;
-    core.pngs = pngs;
-    core.bgms = bgms;
-    core.sounds = sounds;
-    core.floorIds = floorIds;
-    core.floors = floors;
+core.prototype.init = function (coreData) {
     for (var key in coreData) {
         core[key] = coreData[key];
     }
@@ -187,7 +169,7 @@ core.prototype.init = function (dom, statusBar, canvas, images, pngs, bgms, soun
     document.title = core.firstData.title + " - HTML5魔塔";
     document.getElementById("startLogo").innerHTML = core.firstData.title;
     core.material.items = core.items.getItems();
-    core.initStatus.maps = core.maps.initMaps(floorIds);
+    core.initStatus.maps = core.maps.initMaps(core.floorIds);
     core.material.enemys = core.clone(core.enemys.getEnemys());
     core.material.icons = core.icons.getIcons();
     core.material.events = core.events.getEvents();
@@ -386,7 +368,7 @@ core.prototype.setRequestAnimationFrame = function () {
 
         // weather
         if (core.isPlaying() && timestamp-core.animateFrame.weather.time>30) {
-            if (core.animateFrame.weather.type=='rain' && core.animateFrame.weather.level>0) {
+            if (core.animateFrame.weather.type == 'rain' && core.animateFrame.weather.level > 0) {
 
                 core.clearMap('weather', 0, 0, 416, 416);
 
@@ -402,8 +384,8 @@ core.prototype.setRequestAnimationFrame = function () {
 
                     p.x += p.xs;
                     p.y += p.ys;
-                    if (p.x>416 || p.y>416) {
-                        p.x = Math.random()*416;
+                    if (p.x > 416 || p.y > 416) {
+                        p.x = Math.random() * 416;
                         p.y = -10;
                     }
 
@@ -412,7 +394,7 @@ core.prototype.setRequestAnimationFrame = function () {
                 core.canvas.weather.fill();
 
             }
-            else if (core.animateFrame.weather.type=='snow' && core.animateFrame.weather.level>0) {
+            else if (core.animateFrame.weather.type == 'snow' && core.animateFrame.weather.level > 0) {
 
                 core.clearMap('weather', 0, 0, 416, 416);
 
@@ -421,30 +403,30 @@ core.prototype.setRequestAnimationFrame = function () {
 
                 if (!core.isset(core.animateFrame.weather.data))
                     core.animateFrame.weather.data = 0;
-                core.animateFrame.weather.data+=0.01;
+                core.animateFrame.weather.data += 0.01;
 
                 var angle = core.animateFrame.weather.data;
                 core.animateFrame.weather.nodes.forEach(function (p) {
                     core.canvas.weather.moveTo(p.x, p.y);
-                    core.canvas.weather.arc(p.x, p.y, p.r, 0, Math.PI*2, true);
+                    core.canvas.weather.arc(p.x, p.y, p.r, 0, Math.PI * 2, true);
 
                     // update
                     p.x += Math.sin(angle) * 2;
-                    p.y += Math.cos(angle+p.d) + 1 + p.r/2;
+                    p.y += Math.cos(angle + p.d) + 1 + p.r / 2;
 
-                    if (p.x>416+5 || p.x<-5 || p.y>416) {
-                        if (Math.random()>1/3) {
-                            p.x = Math.random()*416;
+                    if (p.x > 416 + 5 || p.x < -5 || p.y > 416) {
+                        if (Math.random() > 1 / 3) {
+                            p.x = Math.random() * 416;
                             p.y = -10;
                         }
                         else {
-                            if (Math.sin(angle)>0) {
+                            if (Math.sin(angle) > 0) {
                                 p.x = -5;
-                                p.y = Math.random()*416;
+                                p.y = Math.random() * 416;
                             }
                             else {
-                                p.x = 416+5;
-                                p.y=Math.random()*416;
+                                p.x = 416 + 5;
+                                p.y = Math.random() * 416;
                             }
                         }
                     }
@@ -457,19 +439,10 @@ core.prototype.setRequestAnimationFrame = function () {
             core.animateFrame.weather.time = timestamp;
 
         }
-
         window.requestAnimationFrame(draw);
-
     }
-
     window.requestAnimationFrame(draw);
-
-
-
-
 }
-
-
 
 ////// 显示游戏开始界面 //////
 core.prototype.showStartAnimate = function (callback) {
@@ -564,7 +537,7 @@ core.prototype.loadAutotile = function (callback) {
     core.material.images.autotile={};
     var autotileIds = Object.keys(core.material.icons.autotile);
     if (autotileIds.length==0) {
-        core.loadMusic(callback);
+        core.loadAnimates(callback);
         return;
     }
     for (var x=0;x<autotileIds.length;x++) {
@@ -572,8 +545,8 @@ core.prototype.loadAutotile = function (callback) {
             core.material.images.autotile[autotileId]=image;
             if (Object.keys(core.material.images.autotile).length==autotileIds.length) {
 
-                // 最后加载音频
-                core.loadMusic(callback);
+                // 加载动画
+                core.loadAnimates(callback);
             }
         })
     }
@@ -599,6 +572,70 @@ core.prototype.loadImage = function (imgName, callback) {
     catch (e) {
         alert(e);
     }
+}
+
+////// 加载动画 //////
+core.prototype.loadAnimates = function (callback) {
+    core.animates.forEach(function (t) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'animates/' + t + ".animate", true);
+        xhr.overrideMimeType("text/plain; charset=x-user-defined");
+        xhr.onload = function (e) {
+            var content = this.responseText;
+            try {
+                content = JSON.parse(content);
+                var data = {};
+
+                data.ratio = content.ratio;
+                data.images = [];
+                content.bitmaps.forEach(function (t2) {
+                    if (!core.isset(t2) || t2=="") {
+                        data.images.push(null);
+                    }
+                    else {
+                        try {
+                            var image = new Image();
+                            image.src = t2;
+                            data.images.push(image);
+                        } catch (e) {
+                            data.images.push(null);
+                        }
+                    }
+                })
+                data.frame = content.frame_max;
+                data.frames = [];
+                content.frames.forEach(function (t2) {
+                    var info = [];
+                    t2.forEach(function (t3) {
+                        info.push({
+                            'index': t3[0],
+                            'x': t3[1],
+                            'y': t3[2],
+                            'zoom': t3[3],
+                            'opacity': t3[4]
+                        })
+                    })
+                    data.frames.push(info);
+                })
+                core.material.animates[t] = data;
+            }
+            catch (ee) {
+                console.log(ee);
+                core.material.animates[t]=null;
+            }
+        }
+        xhr.ontimeout = function(e) {
+            console.log(e);
+            core.material.animates[t]=null;
+        }
+        xhr.onerror = function (e) {
+            console.log(e);
+            core.material.animates[t]=null;
+        }
+        xhr.send();
+    })
+
+    core.loadMusic(callback);
 }
 
 ////// 加载音频 //////
@@ -2212,7 +2249,16 @@ core.prototype.battle = function (id, x, y, force, callback) {
         });
     }
     else {
-        core.playSound('attack.ogg');
+
+        if (core.flags.equipment && core.getFlag('sword', 'sword0')!='sword0') {
+            core.playSound('zone.ogg');
+            core.drawAnimate('sword', x, y);
+        }
+        else {
+            core.playSound('attack.ogg');
+            core.drawAnimate('hand', x, y);
+        }
+
         core.afterBattle(id, x, y, callback);
     }
 }
@@ -2917,7 +2963,8 @@ core.prototype.showBlock = function(x, y, floodId) {
             blockImage = core.material.images[block.event.cls];
             core.canvas.event.drawImage(core.material.images[block.event.cls], 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
             core.addGlobalAnimate(block.event.animate, block.x * 32, block.y * 32, blockIcon, blockImage);
-            core.setGlobalAnimate(core.values.animateSpeed);
+            // core.setGlobalAnimate(core.values.animateSpeed);
+            core.syncGlobalAnimate();
         }
     }
 }
@@ -3066,6 +3113,59 @@ core.prototype.drawBoxAnimate = function () {
     }
 }
 
+////// 绘制动画 //////
+core.prototype.drawAnimate = function (name, x, y, callback) {
+
+    // 正在播放录像：不显示动画
+    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+        if (core.isset(callback)) callback();
+        return;
+    }
+
+    // 检测动画是否存在
+    if (!core.isset(core.material.animates[name]) || !core.isset(x) || !core.isset(y)) {
+        if (core.isset(callback)) callback();
+        return;
+    }
+
+    // 清空animate层
+    clearInterval(core.interval.animateInterval);
+    core.clearMap('animate', 0, 0, 416, 416);
+
+    // 开始绘制
+    var animate = core.material.animates[name];
+    var ratio = animate.ratio;
+    var centerX = 32*x+16, centerY = 32*y+16;
+    var index=0;
+
+    var draw = function (index) {
+        core.clearMap('animate', 0, 0, 416, 416);
+
+        var frame = animate.frames[index];
+        frame.forEach(function (t) {
+            var image = animate.images[t.index];
+            if (!core.isset(image)) return;
+            var realWidth = image.width * ratio * t.zoom / 100;
+            var realHeight = image.height * ratio * t.zoom / 100;
+            core.setAlpha('animate', t.opacity / 255);
+            core.canvas.animate.drawImage(image, centerX+t.x-realWidth/2, centerY+t.y-realHeight/2, realWidth, realHeight);
+        })
+    }
+
+    draw(index++);
+
+    core.interval.animateInterval = setInterval(function (t) {
+        if (index == animate.frames.length) {
+            clearInterval(core.interval.animateInterval);
+            core.clearMap('animate', 0, 0, 416, 416);
+            core.setAlpha('animate', 1);
+            if (core.isset(callback)) callback();
+            return;
+        }
+        draw(index++);
+    }, 50);
+}
+
 ////// 更新领域、夹击、阻击的伤害地图 //////
 core.prototype.updateCheckBlock = function() {
     core.status.checkBlock = {};
@@ -3197,6 +3297,10 @@ core.prototype.checkBlock = function () {
         else if (damage>0) {
             core.drawTip('受到领域伤害'+damage+'点');
         }
+
+        core.playSound('zone.ogg');
+        core.drawAnimate("zone", x, y);
+
         if (core.status.hero.hp<=0) {
             core.status.hero.hp=0;
             core.updateStatusBar();

@@ -12,10 +12,15 @@ function main() {
     this.floorIds = [ // 在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序
         "sample0", "sample1", "sample2"
     ];
-    this.pngs = [ // 在此存放所有可能的背景图片；背景图片最好是416*416像素，其他分辨率会被强制缩放成416*416
-        // 建议对于较大的图片，在网上使用在线的“图片压缩工具”来进行压缩，以节省流量
-        // 有关使用自定义背景图，请参见文档的“自定义素材”说明
-        "bg.png", // 依次向后添加
+    this.pngs = [ // 在此存放所有可能使用的图片，只能是png格式，可以不写后缀名
+        // 图片可以被作为背景图（的一部分），也可以直接用自定义事件进行显示。
+        // 图片名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
+        // 建议对于较大的图片，在网上使用在线的“图片压缩工具(http://compresspng.com/zh/)”来进行压缩，以节省流量
+        "bg", // 依次向后添加
+    ];
+    this.animates = [ // 在此存放所有可能使用的动画，必须是animate格式，在这里不写后缀名
+        // 动画必须放在animates目录下；文件名不能使用中文，不能带空格或特殊字符
+        "hand", "sword", "zone", "yongchang", // "thunder" // 根据需求自行添加
     ];
     this.bgms = [ // 在此存放所有的bgm，和文件名一致。第一项为默认播放项
         // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
@@ -23,7 +28,7 @@ function main() {
     ];
     this.sounds = [ // 在此存放所有的SE，和文件名一致
         // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
-        'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg',
+        'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg', 'zone.ogg'
     ];
 
     //------------------------ 用户修改内容 END ------------------------//
@@ -149,7 +154,11 @@ main.prototype.init = function () {
             coreData[name] = main[name];
         }
         main.loaderFloors(function() {
-            main.core.init(main.dom, main.statusBar, main.canvas, main.images, main.pngs, main.bgms, main.sounds, main.floorIds, main.floors, coreData);
+            ["dom", "statusBar", "canvas", "images", "pngs",
+                "animates", "bgms", "sounds", "floorIds", "floors"].forEach(function (t) {
+                    coreData[t] = main[t];
+            })
+            main.core.init(coreData);
             main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
         })
     });

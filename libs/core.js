@@ -1988,6 +1988,7 @@ core.prototype.moveHero = function (direction, callback) {
     if (!core.isset(callback)) { // 如果不存在回调函数，则使用heroMoveTrigger
         core.status.heroStop = false;
         if (core.interval.heroMoveTriggerInterval==null) {
+            core.moveAction();
             core.interval.heroMoveTriggerInterval = setInterval(function () {
                 if (!core.status.heroStop) {
                     core.moveAction();

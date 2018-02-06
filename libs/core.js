@@ -31,6 +31,7 @@ function core() {
         'twoTime': null,
         'fourTime': null,
         'boxTime': null,
+        'moveTime': null,
         'speed': null,
         'weather': {
             'time': null,
@@ -319,6 +320,7 @@ core.prototype.setRequestAnimationFrame = function () {
         core.animateFrame.twoTime = core.animateFrame.twoTime||timestamp;
         core.animateFrame.fourTime = core.animateFrame.fourTime||timestamp;
         core.animateFrame.boxTime = core.animateFrame.boxTime||timestamp;
+        core.animateFrame.moveTime = core.animateFrame.moveTime||timestamp;
         core.animateFrame.weather.time = core.animateFrame.weather.time||timestamp;
 
         // Global Animate
@@ -356,7 +358,7 @@ core.prototype.setRequestAnimationFrame = function () {
         }
 
         // Hero move
-        if (core.isset(core.status.heroMoving) && core.status.heroMoving>0) {
+        if (timestamp-core.animateFrame.moveTime>16 && core.isset(core.status.heroMoving) && core.status.heroMoving>0) {
             var x=core.getHeroLoc('x'), y=core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
             if (core.status.heroMoving<=4) {
                 core.drawHero(direction, x, y, 'leftFoot', 4*core.status.heroMoving*scan[direction].x, 4*core.status.heroMoving*scan[direction].y);
@@ -364,6 +366,7 @@ core.prototype.setRequestAnimationFrame = function () {
             else if (core.status.heroMoving<=8) {
                 core.drawHero(direction, x, y, 'rightFoot', 4*core.status.heroMoving*scan[direction].x, 4*core.status.heroMoving*scan[direction].y);
             }
+            core.animateFrame.moveTime = timestamp;
         }
 
         // weather

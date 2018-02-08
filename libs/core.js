@@ -1841,6 +1841,7 @@ core.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
 ////// 实际每一步的行走过程 //////
 core.prototype.moveAction = function (callback) {
     if (core.interval.openDoorAnimate!=null) return; // 开门判断
+    if (core.status.heroMoving>0) return;
     var scan = {
         'up': {'x': 0, 'y': -1},
         'left': {'x': -1, 'y': 0},

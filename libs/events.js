@@ -811,7 +811,7 @@ events.prototype.afterBattle = function(enemyId,x,y,callback) {
 
     // 如果事件不为空，将其插入
     if (todo.length>0) {
-        this.insertAction(todo);
+        this.insertAction(todo,x,y);
     }
 
     // 如果已有事件正在处理中
@@ -837,7 +837,7 @@ events.prototype.afterOpenDoor = function(doorId,x,y,callback) {
     }
 
     if (todo.length>0) {
-        this.insertAction(todo);
+        this.insertAction(todo,x,y);
     }
 
     if (core.status.event.id == null) {

@@ -1,6 +1,6 @@
 # 事件
 
-?> 目前版本**v1.4**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v1.4.1**，上次更新时间：* {docsify-updated} *
 
 本章内将对样板所支持的事件进行介绍。
 
@@ -440,8 +440,10 @@ number为**要更改到的数字**，有关“数字”的定义详见参见[素
 图块更改后：
 
  - 其启用/禁用状态不会发生任何改变。原来是启用还是启用，原来是禁用还是禁用。
- - 可通行状态遵循覆盖原则，即**取该图块的默认noPass属性，如果剧本的events中定义该点的noPass则覆盖**。
- - 其触发器(trigger)亦采用覆盖原则，即**取该图块的默认触发器（例如怪物是battle，道具是getItem，门是openDoor），如果剧本的events中定义了该点的trigger则覆盖**。
+ - 可通行状态遵循覆盖原则，即**首先取该图块的默认noPass属性，如果剧本的events中定义该点的noPass则覆盖**。
+ - 触发器(trigger)亦采用覆盖原则，即**首先取该图块的默认触发器（例如怪物是battle，道具是getItem，门是openDoor），如果剧本的events中定义了该点的trigger则覆盖**。
+
+图块更改往往与[同一个点的多事件处理](#同一个点的多事件处理)相关。
 
 ### update: 立刻更新状态栏和地图显伤
 
@@ -925,6 +927,81 @@ core.updateStatusBar() //立刻更新状态栏和地图显伤。（上面各种g
 core.insertAction(list) //往当前事件列表中插入一系列事件。使用这个函数插入的事件将在这段自定义JS脚本执行完毕后立刻执行。
 // ……
 ```
+
+## 同一个点的多事件处理
+
+我们可以发现，就目前而且，每个点的事件是和该点进行绑定，并以该点坐标作为唯一索引来查询。
+
+而有时候，我们往往需要在同一个点存在多个不同的事件。这涉及到同一个点的多事件处理。
+
+我们可以依靠两来实现。**`setBlock`事件**和**if+flag的条件判断**。
+
+下面以几个具体例子来进行详细说明。
+
+### 打怪掉宝（怪物->道具）
+
+我们注意到怪物和道具都是系统默认事件，因此无需写events，而是直接在afterBattle中setBlock即可。
+
+``` js
+"afterBattle": {
+    "x,y": [
+        {"type": "setBlock", "number": 21} // 变成黄钥匙。注意是当前点因此可省略floorId和loc
+    ]
+}
+```
+
+### 打怪变成可对话的NPC（怪物->NPC）
+
+由于NPC是自定义事件，因此我们需要写events。注意到events中不覆盖trigger，则还是怪物时，存在系统trigger因此会战斗；变成NPC后没有系统trigger因此会触发自定义事件。
+
+``` js
+"events": {
+    "x,y": [
+        "可对话的NPC"
+    ]
+},
+"afterBattle": {
+    "x,y": [
+        {"type": "setBlock", "number": 121} // 变成老人
+    ]
+}
+```
+
+### 获得圣水后变成墙
+
+这个例子要求获得圣水时不前进（也就是不能走到圣水地方），然后把圣水位置变成墙。
+
+因此需要我们需要覆盖系统trigger（getItem），并覆盖noPass。
+
+通过if来判断有没有获得圣水，没有则触发圣水（生命x2）然后变成墙，否则不执行。
+
+``` js
+"events": {
+    "x,y": {
+        "trigger": "action", // 覆盖系统trigger，默认的getItem不会执行
+        "noPass": true, // 覆盖可通行状态，不允许走到该点
+        "data": [
+            {"type": "if", "condition": "flag:hasSuperPotion", // 条件判断：是否喝过圣水
+                "true": [], // 喝过了，不执行
+                "false": [
+                    {"type":"setValue", "name":"status:hp", "value":"status:hp*2"}, // 生命翻倍
+                    {"type":"setBlock", "number": 1}, // 将该点变成墙
+                    {"type":"setValue", "name":"flag:hasSuperPotion", "value": "true"} // 标记已经喝过了
+                ]
+            }
+        ]
+    ]
+}
+```
+
+
+总之，记住如下两点：
+
+ - 可以使用setBlock来更改一个图块。
+   - 可通行状态遵循覆盖原则，即**首先取该图块的默认noPass属性，如果剧本的events中定义该点的noPass则覆盖**。
+   - 触发器(trigger)亦采用覆盖原则，即**首先取该图块的默认触发器（例如怪物是battle，道具是getItem，门是openDoor），如果剧本的events中定义了该点的trigger则覆盖**。
+ - 可以通过if语句和flag来控制自定义事件具体走向哪个分支。
+   - 如果弄不清楚系统trigger和自定义事件等的区别，也可以全部覆盖为自定义事件，然后通过type:battle，type:openDoor等来具体进行控制。
 
 ## 加点事件
 

@@ -88,7 +88,7 @@ main.floors.sample0 = {
         "6,12": {"floorId": "sample0", "loc": [10,10], "direction": "left", "time": 1000},
     },
     "afterBattle": { // 战斗后可能触发的事件列表
-        "2,6": ["\t[ghostSkeleton]不可能，你怎么可能打败我！\n（一个打败怪物触发的事件）"]
+        "2,6": ["\t[ghostSkeleton]不可能，你怎么可能打败我！\n（一个打败怪物触发的事件）"],
     },
     "afterGetItem": { // 获得道具后可能触发的事件列表
         "11,8": ["由于状态栏放不下，绿钥匙和铁门钥匙均视为tools，放入工具栏中。\n碰到绿门和铁门仍然会自动使用开门。"],

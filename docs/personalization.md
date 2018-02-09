@@ -1,6 +1,6 @@
 # 个性化
 
-?> 目前版本**v1.4**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v1.4.1**，上次更新时间：* {docsify-updated} *
 
 有时候只靠样板本身可能是不够的。我们需要一些个性化、自定义的素材，道具效果，怪物属性，等等。
 
@@ -221,15 +221,23 @@ if (itemId === 'shield5') {
     core.setFlag("shield5", true); // 增加一个自定义Flag：已经拿到神圣盾
 }
 ```
-2. 免疫吸血效果：在`enemys.js`的getExtraDamage函数中，编辑成如果存在神圣盾标记，额外伤害为0。
+2. 免疫吸血效果：在`enemys.js`的伤害计算中，编辑成如果存在神圣盾标记，吸血伤害为0。
 ``` js
-enemys.prototype.getExtraDamage = function (monster) {
-    var extra_damage = 0;
-    if (this.hasSpecial(monster.special, 11)) { // 吸血
-        // 吸血的比例
-        extra_damage = core.status.hero.hp * monster.value;
-        if (core.hasFlag("shield5")) extra_damage = 0; // 如果存在神圣盾，则免疫吸血
-        extra_damage = parseInt(extra_damage);
+enemys.prototype.calDamage = function (monster, hero_hp, hero_atk, hero_def, hero_mdef) {
+// ... 上略
+    // 吸血
+    if (this.hasSpecial(mon_special, 11)) {
+        var vampireDamage = hero_hp * monster.value;
+
+        // 如果有神圣盾免疫吸血等可以在这里写
+        if (core.hasFlag("shield5")) vampireDamage = 0; // 存在神圣盾，吸血伤害为0
+
+        vampireDamage = parseInt(vampireDamage);
+        // 加到自身
+        if (monster.add) // 如果加到自身
+            mon_hp += vampireDamage;
+
+        initDamage += vampireDamage;
     }
 // ... 下略
 ```
@@ -262,8 +270,6 @@ core.prototype.checkBlock = function () {
 你需自己指定一个special数字，修改getSpecialText函数（属性名）和getSpecialHint函数（属性提示文字）。
 
 如果要修改伤害计算公式，请修改下面的calDamage函数。请注意，如果无法战斗，该函数必须返回`999999999`。
-
-对于吸血怪的额外伤害计算在getExtraDamage中。
 
 对于毒衰弱怪物的战斗后结算在`events.js`中的afterBattle函数中。
 

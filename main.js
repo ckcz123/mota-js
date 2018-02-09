@@ -20,7 +20,7 @@ function main() {
     ];
     this.animates = [ // 在此存放所有可能使用的动画，必须是animate格式，在这里不写后缀名
         // 动画必须放在animates目录下；文件名不能使用中文，不能带空格或特殊字符
-        "hand", "sword", "zone", "yongchang", // "thunder" // 根据需求自行添加
+        "hand", "sword", "zone", "yongchang", // "jianji", "thunder" // 根据需求自行添加
     ];
     this.bgms = [ // 在此存放所有的bgm，和文件名一致。第一项为默认播放项
         // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好

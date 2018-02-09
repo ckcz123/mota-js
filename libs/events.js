@@ -334,6 +334,33 @@ events.prototype.doAction = function() {
             }
             else this.doAction();
             break;
+        case "setBlock": // 设置某图块
+            {
+                if (core.isset(data.loc)) {
+                    x=data.loc[0];
+                    y=data.loc[1];
+                }
+                var floorId = data.floorId||core.status.floorId;
+                var originBlock=core.getBlock(x,y,toId,false);
+                var block = core.maps.getBlock(x,y,data.number);
+                core.maps.addInfo(block);
+                core.maps.addEvent(block,x,y,core.floors[floorId].events[x+","+y]);
+                core.maps.addChangeFloor(block,x,y,core.floors[floorId].changeFloor[x+","+y]);
+                if (core.isset(block.event)) {
+                    if (originBlock==null) {
+                        core.status.maps[floorId].blocks.push(block);
+                    }
+                    else {
+                        originBlock.block.id = data.number;
+                        originBlock.block.event = block.event;
+                    }
+                    core.drawMap(floorId);
+                    core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+                    core.updateStatusBar();
+                }
+                this.doAction();
+                break;
+            }
         case "animate": // 显示动画
             if (core.isset(data.loc)) {
                 if (data.loc == 'hero') {
@@ -1302,6 +1329,18 @@ events.prototype.clickToolbox = function(x,y) {
         core.ui.closePanel();
         return;
     }
+    if (x>=10 && x<=12 && y<=1) {
+        if (!core.isset(core.status.event.data)) return;
+        if (!core.flags.enableDeleteItem) {
+            core.drawTip("不支持删除道具！");
+            return;
+        }
+        core.removeItem(core.status.event.data);
+        core.status.event.data = null;
+        core.ui.drawToolbox();
+        return;
+    }
+
     var index=0;
     if (y==4||y==5||y==9||y==10) index=parseInt(x/2);
     else index=6+parseInt(x/2);
@@ -1406,6 +1445,19 @@ events.prototype.keyUpToolbox = function (keycode) {
         this.clickToolboxIndex(core.status.event.selection);
         return;
     }
+
+    if (keycode==46) { // delete
+        if (!core.isset(core.status.event.data)) return;
+        if (!core.flags.enableDeleteItem) {
+            core.drawTip("不支持删除道具！");
+            return;
+        }
+        core.removeItem(core.status.event.data);
+        core.status.event.data = null;
+        core.ui.drawToolbox();
+        return;
+    }
+
 }
 
 ////// 存读档界面时的点击操作 //////

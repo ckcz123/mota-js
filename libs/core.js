@@ -591,6 +591,7 @@ core.prototype.loadAnimates = function (callback) {
 
                 data.ratio = content.ratio;
                 data.images = [];
+                data.images_rev = [];
                 content.bitmaps.forEach(function (t2) {
                     if (!core.isset(t2) || t2=="") {
                         data.images.push(null);
@@ -615,7 +616,9 @@ core.prototype.loadAnimates = function (callback) {
                             'x': t3[1],
                             'y': t3[2],
                             'zoom': t3[3],
-                            'opacity': t3[4]
+                            'opacity': t3[4],
+                            'mirror': t3[5]||0,
+                            'angle': t3[6]||0,
                         })
                     })
                     data.frames.push(info);
@@ -1687,15 +1690,21 @@ core.prototype.automaticRoute = function (destX, destY) {
         f=f%169;
         var nowX = parseInt(f / 13), nowY = f % 13;
         var nowIsArrow = false, nowId, nowBlock = core.getBlock(nowX,nowY);
+        /*
         if (nowBlock!=null){
             nowId = nowBlock.block.event.id;
             nowIsArrow = nowId.slice(0, 5).toLowerCase() == 'arrow';
         }
+        */
         for (var direction in scan) {
+            /*
             if(nowIsArrow){
                 var nowArrow = nowId.slice(5).toLowerCase();
                 if (direction != nowArrow) continue;
             }
+            */
+            if (!core.canMoveHero(nowX, nowY, direction))
+                continue;
             
             var nx = nowX + scan[direction].x;
             var ny = nowY + scan[direction].y;
@@ -1711,12 +1720,14 @@ core.prototype.automaticRoute = function (destX, destY) {
             var nextId, nextBlock = core.getBlock(nx,ny);
             if (nextBlock!=null){
                 nextId = nextBlock.block.event.id;
+                /*
                 // 遇到单向箭头处理
                 var isArrow = nextId.slice(0, 5).toLowerCase() == 'arrow';
                 if(isArrow){
                     var nextArrow = nextId.slice(5).toLowerCase();
                     if ( (scan[direction].x + scan[nextArrow].x) == 0 && (scan[direction].y + scan[nextArrow].y) == 0 ) continue;
                 }
+                */
                 // 绕过亮灯（因为只有一次通行机会很宝贵）
                 if(nextId == "light") deepAdd=100;
                 // 绕过路障
@@ -1925,9 +1936,18 @@ core.prototype.turnHero = function() {
 }
 
 ////// 勇士能否前往某方向 //////
-core.prototype.canMoveHero = function() {
-    var direction = core.getHeroLoc('direction');
-    var nowBlock = core.getBlock(core.getHeroLoc('x'),core.getHeroLoc('y'));
+core.prototype.canMoveHero = function(x,y,direction,floorId) {
+    if (!core.isset(x)) x=core.getHeroLoc('x');
+    if (!core.isset(y)) y=core.getHeroLoc('y');
+    if (!core.isset(direction)) direction=core.getHeroLoc('direction');
+    if (!core.isset(floorId)) floorId=core.status.floorId;
+
+    // 检查当前块的cannotMove
+    var cannotMove = core.floors[floorId].cannotMove[x+","+y];
+    if (core.isset(cannotMove) && cannotMove instanceof Array && cannotMove.indexOf(direction)>=0)
+        return false;
+
+    var nowBlock = core.getBlock(x,y,floorId);
     if (nowBlock!=null){
         nowId = nowBlock.block.event.id;
         var nowIsArrow = nowId.slice(0, 5).toLowerCase() == 'arrow';
@@ -1944,7 +1964,7 @@ core.prototype.canMoveHero = function() {
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
-    var nextBlock = core.getBlock(core.nextX(),core.nextY());
+    var nextBlock = core.getBlock(x+scan[direction].x,y+scan[direction].y);
     if (nextBlock!=null){
         nextId = nextBlock.block.event.id;
         // 遇到单向箭头处理
@@ -1991,6 +2011,8 @@ core.prototype.canMoveDirectly = function (destX,destY) {
 
 ////// 让勇士开始移动 //////
 core.prototype.moveHero = function (direction, callback) {
+    // 如果正在移动，直接return
+    if (core.status.heroMoving>0) return;
     if (core.isset(direction))
         core.setHeroLoc('direction', direction);
     if (!core.isset(callback)) { // 如果不存在回调函数，则使用heroMoveTrigger
@@ -2978,6 +3000,7 @@ core.prototype.showBlock = function(x, y, floodId) {
             // core.setGlobalAnimate(core.values.animateSpeed);
             core.syncGlobalAnimate();
         }
+        core.updateStatusBar();
     }
 }
 
@@ -3160,7 +3183,22 @@ core.prototype.drawAnimate = function (name, x, y, callback) {
             var realWidth = image.width * ratio * t.zoom / 100;
             var realHeight = image.height * ratio * t.zoom / 100;
             core.setAlpha('animate', t.opacity / 255);
-            core.canvas.animate.drawImage(image, centerX+t.x-realWidth/2, centerY+t.y-realHeight/2, realWidth, realHeight);
+
+            var cx = centerX+t.x, cy=centerY+t.y;
+
+            if (!t.mirror && !t.angle) {
+                core.canvas.animate.drawImage(image, cx-realWidth/2, cy-realHeight/2, realWidth, realHeight);
+            }
+            else {
+                core.saveCanvas('animate');
+                core.canvas.animate.translate(cx,cy);
+                if (t.angle)
+                    core.canvas.animate.rotate(-t.angle*Math.PI/180);
+                if (t.mirror)
+                    core.canvas.animate.scale(-1,1);
+                core.canvas.animate.drawImage(image, -realWidth/2, -realHeight/2, realWidth, realHeight);
+                core.loadCanvas('animate');
+            }
         })
     }
 
@@ -3464,13 +3502,13 @@ core.prototype.setWeather = function (type, level) {
 
     // 当前天气：则忽略
     if (type==core.animateFrame.weather.type &&
-        (!core.isset(level) || 16*level==core.animateFrame.weather.level)) {
+        (!core.isset(level) || 20*level==core.animateFrame.weather.level)) {
         return;
     }
 
     if (!core.isset(level)) level=5;
     if (level<1) level=1; if (level>10) level=10;
-    level *= 16;
+    level *= 20;
 
     core.clearMap('weather', 0, 0, 416, 416)
     core.animateFrame.weather.type = type;
@@ -3483,7 +3521,7 @@ core.prototype.setWeather = function (type, level) {
             core.animateFrame.weather.nodes.push({
                 'x': Math.random()*416,
                 'y': Math.random()*416,
-                'l': Math.random() * 1.2,
+                'l': Math.random() * 2.5,
                 'xs': -4 + Math.random() * 4 + 2,
                 'ys': Math.random() * 10 + 10
             })
@@ -3494,7 +3532,7 @@ core.prototype.setWeather = function (type, level) {
             core.animateFrame.weather.nodes.push({
                 'x': Math.random()*416,
                 'y': Math.random()*416,
-                'r': Math.random() * 4 + 1,
+                'r': Math.random() * 5 + 1,
                 'd': Math.random() * level,
             })
         }

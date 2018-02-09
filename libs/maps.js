@@ -14,27 +14,7 @@ maps.prototype.loadFloor = function (floorId, map) {
     for (var i = 0; i < 13; i++) {
         for (var j = 0; j < 13; j++) {
             var block = this.getBlock(j, i, map[i][j]);
-            if (core.isset(block.event)) {
-                if (block.event.cls == 'enemys' && block.event.trigger==undefined) {
-                    block.event.trigger = 'battle';
-                }
-                if (block.event.cls == 'items' && block.event.trigger==undefined) {
-                    block.event.trigger = 'getItem';
-                }
-                if (block.event.noPass == undefined) {
-                    if (block.event.cls=='enemys' || block.event.cls=='terrains' || block.event.cls=='npcs') {
-                        block.event.noPass = true;
-                    }
-                }
-                if (block.event.animate == undefined) {
-                    if (block.event.cls=='enemys' || block.event.cls=='npcs') {
-                        block.event.animate = 2;
-                    }
-                    if (block.event.cls == 'animates') {
-                        block.event.animate = 4;
-                    }
-                }
-            }
+            this.addInfo(block);
             this.addEvent(block,j,i,floor.events[j+","+i])
             this.addChangeFloor(block,j,i,floor.changeFloor[j+","+i]);
             if (core.isset(block.event)) blocks.push(block);
@@ -255,6 +235,31 @@ maps.prototype.getBlock = function (x, y, id) {
     // 目前ID暂时不要超过400
 
     return tmp;
+}
+
+////// 添加一些信息到block上 //////
+maps.prototype.addInfo = function (block) {
+    if (core.isset(block.event)) {
+        if (block.event.cls == 'enemys' && block.event.trigger==undefined) {
+            block.event.trigger = 'battle';
+        }
+        if (block.event.cls == 'items' && block.event.trigger==undefined) {
+            block.event.trigger = 'getItem';
+        }
+        if (block.event.noPass == undefined) {
+            if (block.event.cls=='enemys' || block.event.cls=='terrains' || block.event.cls=='npcs') {
+                block.event.noPass = true;
+            }
+        }
+        if (block.event.animate == undefined) {
+            if (block.event.cls=='enemys' || block.event.cls=='npcs') {
+                block.event.animate = 2;
+            }
+            if (block.event.cls == 'animates') {
+                block.event.animate = 4;
+            }
+        }
+    }
 }
 
 ////// 向该楼层添加剧本的自定义事件 //////

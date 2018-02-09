@@ -481,7 +481,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     var initDamage = 0; // 战前伤害
 
     // 吸血
-    if (this.hasSpecial(mon_special, 11)) {
+    if (core.enemys.hasSpecial(mon_special, 11)) {
         var vampireDamage = hero_hp * monster.value;
 
         // 如果有神圣盾免疫吸血等可以在这里写
@@ -1207,6 +1207,7 @@ ui.prototype.drawToolbox = function(index) {
 
     // 退出
     core.canvas.ui.textAlign = 'center';
+    core.fillText('ui', '删除道具', 370, 32,'#DDDDDD', 'bold 15px Verdana');
     core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px Verdana');
 }
 

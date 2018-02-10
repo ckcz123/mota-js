@@ -9,8 +9,9 @@ main.floors.sample1 =
     "canFlyTo": true, // 该楼能否被楼传器飞到（不能的话在该楼也不允许使用楼传器）
     "canUseQuickShop": true, // 该层是否允许使用快捷商店
     "defaultGround": "grass", // 默认地面的图块ID（terrains中）
-    "png": "bg.png", // 背景图；你可以选择一张png图片来作为背景素材。详细用法请参见文档“自定义素材”中的说明。
+    "png": [[0,0,"bg"]], // // 该层默认显示的所有图片；详细用法请查看文档“自定义素材”中的说明。
     // "color": [0,0,0,0.3] // 该层的默认画面色调。本项可不写（代表无色调），如果写需要是一个RGBA数组。
+    "weather": ["snow",6], // 该层的默认天气。本项可忽略表示晴天，如果写则第一项为"rain"或"snow"代表雨雪，第二项为1-10之间的数代表强度。
     // "bgm": "bgm.mp3", // 到达该层后默认播放的BGM。本项可忽略。
     "map": [ // 地图数据，需要是13x13，建议使用地图生成器来生成
         [7,    131,  8,    152,  9,    130,  10,   152,  166,  165,  132,  165,  166],
@@ -35,8 +36,8 @@ main.floors.sample1 =
         "4,10": [ // 走到中间时的提示
             "\t[样板提示]本层楼将会对各类事件进行介绍。",
             "左边是一个仿50层的陷阱做法，上方是商店、快捷商店的使用方法，右上是一个典型的杀怪开门的例子，右下是各类可能的NPC事件。",
-            "本样板目前支持的事件列表大致有：\ntext: 显示一段文字（比如你现在正在看到的）\ntip: 左上角显示提示\nshow: 使一个事件有效（可见、可被交互）\nhide: 使一个事件失效（不可见、不可被交互）\ntrigger: 触发另一个地点的事件\nbattle: 强制和某怪物战斗\nopenDoor: 无需钥匙开门（例如机关门、暗墙）",
-            "openShop: 打开一个全局商店\ndisableShop: 禁用一个全局商店\nchangeFloor: 传送勇士到某层某位置\nchangePos: 传送勇士到当层某位置；转向\nsetFg: 更改画面色调\nmove: 移动事件效果\nmoveHero: 移动勇士效果\nplayBgm: 播放某个背景音乐\npauseBgm: 暂停背景音乐\nresumeBgm: 恢复背景音乐的播放\nplaySound: 播放某个音频",
+            "本样板目前支持的事件列表大致有：\ntext: 显示一段文字（比如你现在正在看到的）\ntip: 左上角显示提示\nshow: 使一个事件有效（可见、可被交互）\nhide: 使一个事件失效（不可见、不可被交互）\ntrigger: 触发另一个地点的事件\nanimate: 显示动画\nbattle: 强制和某怪物战斗\nopenDoor: 无需钥匙开门（例如机关门、暗墙）",
+            "openShop: 打开一个全局商店\ndisableShop: 禁用一个全局商店\nchangeFloor: 传送勇士到某层某位置\nchangePos: 传送勇士到当层某位置；转向\nshowImage: 显示图片\nsetFg: 更改画面色调\nsetWeather: 更改天气\nmove: 移动事件效果\nmoveHero: 移动勇士效果\nplayBgm: 播放某个背景音乐\npauseBgm: 暂停背景音乐\nresumeBgm: 恢复背景音乐的播放\nplaySound: 播放某个音频",
             "if: 条件判断\nchoices: 提供选项\nsetValue: 设置勇士属性道具，或某个变量/flag\nupdate: 更新状态栏和地图显伤\nwin: 获得胜利（游戏通关）\nlose: 游戏失败\nsleep: 等待多少毫秒\nexit: 立刻结束当前事件\nrevisit: 立刻结束事件并重新触发\nfunction: 自定义JS脚本\n\n更多支持的事件还在编写中，欢迎您宝贵的意见。",
             "有关各事件的样例，可参见本层一些NPC的写法。\n所有事件样例本层都有介绍。\n\n一个自定义事件处理完后，需要调用{\"type\": \"hide\"}该事件才不会再次出现。",
             {"type": "hide"}
@@ -259,18 +260,34 @@ main.floors.sample1 =
             "\t[老人,womanMagician]使用 {\"type\":\"function\"} 可以写自定义的JS脚本。\n本塔支持的所有主要API会在doc文档内给出。",
             "\t[老人,womanMagician]例如这个例子：即将弹出一个输入窗口，然后会将你的输入结果直接加到你的攻击力上。",
             {"type": "function", "function": `function() { // 自己写JS脚本并执行
-                var value = prompt("请输入你要加攻击力的数值："); // 弹出一个输入框让用户输入数据
-                if (value!=null) {
-                    value=parseInt(value);
-                    if (value>0) { // 检查
-                        core.setStatus("atk", core.getStatus("atk")+value);
-                        // core.updateStatusBar(); // 和下面的 {"type": "update"} 等价，立即更新状态栏和地图显伤
-                        core.drawTip("操作成功，攻击+"+value); // 左上角气泡提示
-                        core.events.insertAction([ // 往当前事件列表前插入两条事件
-                            {"type": "update"}, // 更新状态栏和地图显伤
-                            "操作成功，攻击+"+value // 对话框提示
-                        ]);
+
+                // 注意一下prompt对于录像是如何处理的
+                var value;
+                if (core.status.replay.replaying) {
+                    var action = core.status.replay.toReplay.shift();
+                    if (action.indexOf("input:")==0 ) {
+                        value=parseInt(action.substring(6));
                     }
+                    else {
+                        core.stopReplay();
+                        core.drawTip("录像文件出错");
+                        return;
+                    }
+                }
+                else {
+                    value = prompt("请输入你要加攻击力的数值：");
+                }
+                value = parseInt(value)||0;
+                core.status.route.push("input:"+value);
+
+                if (value>0) { // 检查
+                    core.setStatus("atk", core.getStatus("atk")+value);
+                    // core.updateStatusBar(); // 和下面的 {"type": "update"} 等价，立即更新状态栏和地图显伤
+                    core.drawTip("操作成功，攻击+"+value); // 左上角气泡提示
+                    core.events.insertAction([ // 往当前事件列表前插入两条事件
+                        {"type": "update"}, // 更新状态栏和地图显伤
+                        "操作成功，攻击+"+value // 对话框提示
+                    ]);
                 }
             }`},
             "\t[老人,womanMagician]具体可参见样板中本事件的写法。"
@@ -305,6 +322,11 @@ main.floors.sample1 =
     },
     "afterOpenDoor": { // 开完门后可能触发的事件列表
 
-    }
+    },
+    "cannotMove": { // 每个图块不可通行的方向
+        // 可以在这里定义每个点不能前往哪个方向，例如悬崖边不能跳下去
+        // "x,y": ["up", "left"], // (x,y)点不能往上和左走
+
+    },
 }
 

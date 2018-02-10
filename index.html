@@ -32,7 +32,7 @@
             <div id='startButtons'>
                 <span class='startButton' id='playGame'>开始游戏</span>
                 <span class='startButton' id='loadGame'>载入游戏</span>
-                <span class='startButton' id='aboutGame'>关于本塔</span>
+                <span class='startButton' id='replayGame'>录像回放</span>
             </div>
             <div id='levelChooseButtons'>
                 <span class='startButton' id='easyLevel'>简单</span>
@@ -109,11 +109,13 @@
     <canvas class='gameCanvas' id='event' width='416' height='416'></canvas>
     <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
     <canvas class='gameCanvas' id='hero' width='416' height='416'></canvas>
+    <canvas class='gameCanvas' id='animate' width='416' height='416'></canvas>
+    <canvas class='gameCanvas' id='weather' width='416' height='416'></canvas>
     <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
     <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
 </div>
 <script id='mainScript' src='main.js'></script>
 <script>main.init();main.listen();</script>
-<script src='libs/thirdparty/mid.js'></script>
+<script src='libs/thirdparty/mid.min.js'></script>
 </body>
 </html>

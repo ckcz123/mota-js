@@ -2,7 +2,7 @@ function main() {
 
     //------------------------ 用户修改内容 ------------------------//
 
-    this.version = "0.1"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+    this.version = "1.4.1"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
     //------------------------ 用户修改内容 END ------------------------//
 
@@ -31,7 +31,7 @@ function main() {
         'startButtons': document.getElementById('startButtons'),
         'playGame': document.getElementById('playGame'),
         'loadGame': document.getElementById('loadGame'),
-        'aboutGame': document.getElementById('aboutGame'),
+        'replayGame': document.getElementById('replayGame'),
         'levelChooseButtons': document.getElementById('levelChooseButtons'),
         'easyLevel': document.getElementById('easyLevel'),
         'normalLevel': document.getElementById('normalLevel'),
@@ -77,6 +77,19 @@ function main() {
             'load': document.getElementById("img-load"),
             'settings': document.getElementById("img-settings")
         },
+        'icons': {
+            'book': null,
+            'fly': null,
+            'toolbox': null,
+            'save': null,
+            'load': null,
+            'settings': null,
+            'rewind': null, // 减速
+            'forward': null, // 加速
+            'play': null, // 播放
+            'pause': null, // 暂停
+            'stop': null, // 停止
+        },
         'floor': document.getElementById('floor'),
         'lv': document.getElementById('lv'),
         'hp': document.getElementById('hp'),
@@ -107,6 +120,11 @@ main.prototype.init = function (mode) {
         main.mode = mode;
         if (mode === 'editor')main.editor = {'disableGlobalAnimate':true};
     }
+    Object.keys(this.statusBar.icons).forEach(function (t) {
+        var image=new Image();
+        image.src="project/images/"+t+".png";
+        main.statusBar.icons[t] = image;
+    })
     main.loadPureData(function(){
         var mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
         for(var ii in mainData)main[ii]=mainData[ii];
@@ -119,7 +137,11 @@ main.prototype.init = function (mode) {
                 coreData[name] = main[name];
             }
             main.loaderFloors(function() {
-                main.core.init(main.dom, main.statusBar, main.canvas, main.images, main.pngs, main.bgms, main.sounds, main.floorIds, main.floors, coreData);
+                ["dom", "statusBar", "canvas", "images", "pngs",
+                "animates", "bgms", "sounds", "floorIds", "floors"].forEach(function (t) {
+                    coreData[t] = main[t];
+                })
+                main.core.init(coreData);
                 main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
             });
         });
@@ -323,12 +345,23 @@ main.dom.data.ontouchend = function () {
 
 ////// 点击状态栏中的怪物手册时 //////
 main.statusBar.image.book.onclick = function () {
+    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+        core.triggerReplay();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.openBook(true);
 }
 
 ////// 点击状态栏中的楼层传送器时 //////
 main.statusBar.image.fly.onclick = function () {
+
+    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+        core.stopReplay();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.useFly(true);
 }
@@ -342,17 +375,29 @@ main.statusBar.image.toolbox.onclick = function () {
 ////// 点击状态栏中的快捷商店时 //////
 main.statusBar.image.shop.onclick = function () {
     if (main.core.isPlaying())
-        main.core.ui.drawQuickShop(true);
+        main.core.openQuickShop(true);
 }
 
 ////// 点击状态栏中的存档按钮时 //////
 main.statusBar.image.save.onclick = function () {
+
+    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+        core.rewindReplay();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.save(true);
 }
 
 ////// 点击状态栏中的读档按钮时 //////
 main.statusBar.image.load.onclick = function () {
+
+    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+        core.forwardReplay();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.load(true);
 }
@@ -360,7 +405,7 @@ main.statusBar.image.load.onclick = function () {
 ////// 点击状态栏中的系统菜单时 //////
 main.statusBar.image.settings.onclick = function () {
     if (main.core.isPlaying())
-        main.core.ui.drawSettings(true);
+        main.core.openSettings(true);
 }
 
 ////// 点击“开始游戏”时 //////
@@ -380,9 +425,33 @@ main.dom.loadGame.onclick = function() {
     main.core.load();
 }
 
-////// 点击“关于本塔”时 //////
-main.dom.aboutGame.onclick = function () {
-    main.core.ui.drawAbout();
+////// 点击“录像回放”时 //////
+main.dom.replayGame.onclick = function () {
+
+    core.readFile(function (obj) {
+        if (obj.name!=core.firstData.name) {
+            alert("存档和游戏不一致！");
+            return;
+        }
+        if (core.isset(obj.version) && obj.version!=core.firstData.version) {
+            alert("游戏版本不一致！");
+            return;
+        }
+        if (!core.isset(obj.route) || !core.isset(obj.hard)) {
+            alert("无效的录像！");
+            return;
+        }
+
+        core.dom.startPanel.style.display = 'none';
+        core.resetStatus(core.firstData.hero, obj.hard, core.firstData.floorId, null, core.initStatus.maps);
+        core.events.setInitData(obj.hard);
+        core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
+            //core.setHeroMoveTriggerInterval();
+            core.startReplay(core.decodeRoute(obj.route));
+        });
+    }, function () {
+
+    })
 }
 
 ////// 点击“简单难度”时 //////

@@ -18,28 +18,8 @@ maps.prototype.loadFloor = function (floorId, map) {
         for (var i = 0; i < 13; i++) {
             for (var j = 0; j < 13; j++) {
                 var block = maps.getBlock(j, i, map[i][j]);
-                if (core.isset(block.event)) {
-                    if (block.event.cls == 'enemys' && block.event.trigger==undefined) {
-                        block.event.trigger = 'battle';
-                    }
-                    if (block.event.cls == 'items' && block.event.trigger==undefined) {
-                        block.event.trigger = 'getItem';
-                    }
-                    if (block.event.noPass == undefined) {
-                        if (block.event.cls=='enemys' || block.event.cls=='terrains' || block.event.cls=='npcs') {
-                            block.event.noPass = true;
-                        }
-                    }
-                    if (block.event.animate == undefined) {
-                        if (block.event.cls=='enemys' || block.event.cls=='npcs') {
-                            block.event.animate = 2;
-                        }
-                        if (block.event.cls == 'animates') {
-                            block.event.animate = 4;
-                        }
-                    }
-                }
-                maps.addEvent(block,j,i,floor.events[j+","+i]);
+                maps.addInfo(block);
+                maps.addEvent(block,j,i,floor.events[j+","+i])
                 maps.addChangeFloor(block,j,i,floor.changeFloor[j+","+i]);
                 if (core.isset(block.event)) blocks.push(block);
             }
@@ -77,6 +57,31 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id in this.blocksInfo) tmp.event = JSON.parse(JSON.stringify(this.blocksInfo[id]));
 
     return tmp;
+}
+
+////// 添加一些信息到block上 //////
+maps.prototype.addInfo = function (block) {
+    if (core.isset(block.event)) {
+        if (block.event.cls == 'enemys' && block.event.trigger==undefined) {
+            block.event.trigger = 'battle';
+        }
+        if (block.event.cls == 'items' && block.event.trigger==undefined) {
+            block.event.trigger = 'getItem';
+        }
+        if (block.event.noPass == undefined) {
+            if (block.event.cls=='enemys' || block.event.cls=='terrains' || block.event.cls=='npcs') {
+                block.event.noPass = true;
+            }
+        }
+        if (block.event.animate == undefined) {
+            if (block.event.cls=='enemys' || block.event.cls=='npcs') {
+                block.event.animate = 2;
+            }
+            if (block.event.cls == 'animates') {
+                block.event.animate = 4;
+            }
+        }
+    }
 }
 
 ////// 向该楼层添加剧本的自定义事件 //////
@@ -178,16 +183,7 @@ maps.prototype.load = function (data, floorId) {
 }
 
 ////// 将当前地图重新变成二维数组形式 //////
-maps.prototype.getMapArray = function (maps, floorId){
-    if (!core.isset(floorId)) {
-        var map = {};
-        for (var id in maps) {
-            map[id] = this.getMapArray(maps, id);
-        }
-        return map;
-    }
-
-    var thisFloor = maps[floorId];
+maps.prototype.getMapArray = function (blockArray){
 
     var blocks = [];
     for (var x=0;x<13;x++) {
@@ -196,7 +192,7 @@ maps.prototype.getMapArray = function (maps, floorId){
             blocks[x].push(0);
         }
     }
-    thisFloor.blocks.forEach(function (block) {
+    blockArray.forEach(function (block) {
         if (!(core.isset(block.enable) && !block.enable))
             blocks[block.y][block.x] = block.id;
     });

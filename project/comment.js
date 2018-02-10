@@ -4,7 +4,8 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
         'items':{
             'cls': "只能取keys(钥匙) items(宝石、血瓶) constants(物品) tools(道具)\n$select({\"values\":[\"keys\",\"items\",\"constants\",\"tools\"]})$end", 
             'name': '名称', 
-            'text': '道具在道具栏中显示的描述'
+            'text': '道具在道具栏中显示的描述',
+            'isEquipment': '物品是否属于装备(仅在core.flags.equipment时有效)\n$select({\"values\":[true,false]})$end'
         },
         'itemEffect':'cls为items的即捡即用类物品的效果,执行时会对这里的字符串执行eval()',
         'itemEffectTip':'cls为items的即捡即用类物品,在获得时左上角额外显示的文字,执行时会对这里的字符串执行eval()得到字符串'

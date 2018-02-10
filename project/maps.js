@@ -5,10 +5,10 @@ maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
     // 0-20 地形
     '1':{'cls': 'terrains', 'id': 'yellowWall'}, // 黄墙
     '2':{'cls': 'terrains', 'id': 'whiteWall'}, // 白墙
-    '3':{'cls': 'terrains', 'id': 'blueWall'}, // 白墙
+    '3':{'cls': 'terrains', 'id': 'blueWall'}, // 蓝墙
     '4':{'cls': 'animates', 'id': 'star', 'noPass': true}, // 星空
     '5':{'cls': 'animates', 'id': 'lava', 'noPass': true}, // 岩浆
-    '6':{'cls': 'terrains', 'id': 'ice'}, // 岩浆
+    '6':{'cls': 'terrains', 'id': 'ice'}, // 冰面
     '7':{'cls': 'terrains', 'id': 'blueShop-left'}, // 蓝色商店左
     '8':{'cls': 'terrains', 'id': 'blueShop-right'}, // 蓝色商店右
     '9':{'cls': 'terrains', 'id': 'pinkShop-left'}, // 粉色商店左

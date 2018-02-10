@@ -10,15 +10,13 @@ iconLib.onmousedown = function(e){
 }
 var exportM = new Vue({
   el: '#exportM',
-
+  data: {
+    isExport: false,
+  },
   methods: {
     exportMap: function(){
       editor.updateMap();
-      if(editArea.error) {
-        tip.whichShow = 3;
-        
-        return;
-      }
+
       var filestr='';
       for (var yy = 0; yy < 13; yy++){
         filestr+='['
@@ -43,7 +41,9 @@ var exportM = new Vue({
         filestr += ']'+(yy==12?'':',\n');
       }
       pout.value = filestr;
-
+      editArea.mapArr = filestr;
+      this.isExport = true;
+      editArea.error = 0;
       tip.whichShow = 2;
     }
   }
@@ -65,10 +65,15 @@ var editArea = new Vue({
     mapArr: function (val, oldval) {
       var that = this;
       if(val=='') return;
+      if(exportM.isExport){
+        exportM.isExport = false;
+        return;
+      }
       if(that.formatArr()){
         that.error = 0;
-        clearTimeout(that.formatTimer);
+        
         setTimeout(function(){
+          that.mapArr = that.formatArr();
           that.drawMap();
           tip.whichShow = 8
         }, 1000);
@@ -108,7 +113,8 @@ var editArea = new Vue({
     },
     formatArr: function(){
       var formatArrStr = '';
-
+      var that = this;
+      clearTimeout(that.formatTimer);
       if(this.mapArr.split(/\D+/).join(' ').trim().split(' ').length != 169) return false;
       var arr = this.mapArr.replace(/\s+/g, '').split('],[');
       
@@ -129,7 +135,6 @@ var editArea = new Vue({
         }
         formatArrStr += ']'+(i==12?'':',\n');
       }
-      
       return formatArrStr;
     }
   }

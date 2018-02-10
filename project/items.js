@@ -2,12 +2,12 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 {
 
 "items" : {
-        
+        // 钥匙
         'yellowKey': {'cls': 'keys', 'name': '黄钥匙'},
         'blueKey': {'cls': 'keys', 'name': '蓝钥匙'},
         'redKey': {'cls': 'keys', 'name': '红钥匙'},
 
-        
+        // 宝石、血瓶
         'redJewel': {'cls': 'items', 'name': '红宝石'},
         'blueJewel': {'cls': 'items', 'name': '蓝宝石'},
         'greenJewel': {'cls': 'items', 'name': '绿宝石'},
@@ -16,20 +16,22 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
         'bluePotion': {'cls': 'items', 'name': '蓝血瓶'},
         'yellowPotion': {'cls': 'items', 'name': '黄血瓶'},
         'greenPotion': {'cls': 'items', 'name': '绿血瓶'},
-        'sword1': {'cls': 'items', 'name': '铁剑'},
-        'sword2': {'cls': 'items', 'name': '银剑'},
-        'sword3': {'cls': 'items', 'name': '骑士剑'},
-        'sword4': {'cls': 'items', 'name': '圣剑'},
-        'sword5': {'cls': 'items', 'name': '神圣剑'},
-        'shield1': {'cls': 'items', 'name': '铁盾'},
-        'shield2': {'cls': 'items', 'name': '银盾'},
-        'shield3': {'cls': 'items', 'name': '骑士盾'},
-        'shield4': {'cls': 'items', 'name': '圣盾'},
-        'shield5': {'cls': 'items', 'name': '神圣盾'},
+        'sword1': {'cls': 'items', 'name': '铁剑', 'isEquipment': true},
+        'sword2': {'cls': 'items', 'name': '银剑', 'isEquipment': true},
+        'sword3': {'cls': 'items', 'name': '骑士剑', 'isEquipment': true},
+        'sword4': {'cls': 'items', 'name': '圣剑', 'isEquipment': true},
+        'sword5': {'cls': 'items', 'name': '神圣剑', 'isEquipment': true},
+        'shield1': {'cls': 'items', 'name': '铁盾', 'isEquipment': true},
+        'shield2': {'cls': 'items', 'name': '银盾', 'isEquipment': true},
+        'shield3': {'cls': 'items', 'name': '骑士盾', 'isEquipment': true},
+        'shield4': {'cls': 'items', 'name': '圣盾', 'isEquipment': true},
+        'shield5': {'cls': 'items', 'name': '神圣盾', 'isEquipment': true},
         'superPotion': {'cls': 'items', 'name': '圣水'},
         'moneyPocket': {'cls': 'items', 'name': '金钱袋'},
 
-        
+        // 物品
+        'sword0': {'cls': 'constants', 'name': '折断的剑', 'text': '没有任何作用的剑，相当于脱掉装备。'},
+        'shield0': {'cls': 'constants', 'name': '残破的盾', 'text': '没有任何作用的盾，相当于脱掉装备。'},
         'book': {'cls': 'constants', 'name': '怪物手册', 'text': '可以查看当前楼层各怪物属性'},
         'fly': {'cls': 'constants', 'name': '楼层传送器', 'text': '可以自由往来去过的楼层'},
         'coin': {'cls': 'constants', 'name': '幸运金币', 'text': '持有时打败怪物可得双倍金币'},
@@ -38,7 +40,7 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
         'knife': {'cls': 'constants', 'name': '屠龙匕首', 'text': '该道具尚未被定义'},
         'shoes': {'cls': 'constants', 'name': '绿鞋', 'text': '持有时无视负面地形'},
 
-        
+        // 道具
         'bigKey': {'cls': 'tools', 'name': '大黄门钥匙', 'text': '可以开启当前层所有黄门'},
         'greenKey': {'cls': 'tools', 'name': '绿钥匙', 'text': '可以打开一扇绿门'},
         'steelKey': {'cls': 'tools', 'name': '铁门钥匙', 'text': '可以打开一扇铁门'},

@@ -10,18 +10,25 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
             "sample0", "sample1", "sample2"
         ],// 在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序
         "pngs" : [ 
-            "bg.png", "yewai.png", // 在此存放所有可能的背景图片；背景图片最好是416*416像素，其他分辨率会被强制缩放成416*416
-            // 建议对于较大的图片，在网上使用在线的“图片压缩工具”来进行压缩，以节省流量
-            // 有关使用自定义背景图，请参见文档的“自定义素材”说明
+            "bg", // 在此存放所有可能使用的图片，只能是png格式，可以不写后缀名
+            // 图片可以被作为背景图（的一部分），也可以直接用自定义事件进行显示。
+            // 图片名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
+            // 建议对于较大的图片，在网上使用在线的“图片压缩工具(http://compresspng.com/zh/)”来进行压缩，以节省流量
             // 依次向后添加
         ],
+        "animates" : [ 
+            "hand", "sword", "zone", "yongchang", // "jianji", "thunder" 
+            // 在此存放所有可能使用的动画，必须是animate格式，在这里不写后缀名
+            // 动画必须放在animates目录下；文件名不能使用中文，不能带空格或特殊字符
+            // 根据需求自行添加
+        ],
         "bgms" : [ 
-            '058-Slow01.mid', 'bgm.mp3', 'qianjin.mid', 'star.mid',
+            'bgm.mp3', 'qianjin.mid', 'star.mid',
             // 在此存放所有的bgm，和文件名一致。第一项为默认播放项
             // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
         ],
         "sounds" : [ 
-            'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg',
+            'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg', 'zone.ogg'
             // 在此存放所有的SE，和文件名一致
             // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
         ],
@@ -29,7 +36,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
     "firstData" : {
         "title": "魔塔样板", // 游戏名，将显示在标题页面以及切换楼层的界面中
         "name": "template", // 游戏的唯一英文标识符。由英文、数字、下划线组成，不能超过20个字符。
-        "version": "Ver 1.0.0 (Beta)", // 当前游戏版本；版本不一致的存档不能通用。
+        "version": "Ver 1.4.1", // 当前游戏版本；版本不一致的存档不能通用。
         "floorId": "sample0", // 初始楼层ID
         "hero": { 
             "name": "阳光", // 勇士初始数据
@@ -57,19 +64,19 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
                 // 毒
                 "weak": false, // 衰
                 "curse": false, // 咒
-            }
+            },
+            "steps": 0, // 行走步数统计
         },
         "startText": [ 
             "Hi，欢迎来到 HTML5 魔塔样板！\n\n本样板由艾之葵制作，可以让你在不会写任何代码\n的情况下也能做出属于自己的H5魔塔！",
             "这里游戏开始时的剧情。\n定义在data.js的startText处。\n\n你可以在这里写上自己的内容。",
             "赶快来试一试吧！"
         ], // 游戏开始前剧情。如果无剧情直接留一个空数组即可。
-        "shops": { 
-            "moneyShop1": { 
-                "name": "贪婪之神", // 定义全局商店（即快捷商店）
-                // 商店唯一ID
-                // 商店名称（标题）
-                "icon": "blueShop", // 商店图标，blueShop为蓝色商店，pinkShop为粉色商店
+        "shops": [ // 定义全局商店（即快捷商店）
+            {
+                "id": "moneyShop1", // 商店唯一ID
+                "name": "贪婪之神", // 商店名称（标题）
+                "icon": "blueShop", // 商店图标，在icons.js中的npc一项定义
                 "textInList": "1F金币商店", // 在快捷商店栏中显示的名称
                 "use": "money", // 商店所要使用的。只能是"money"或"experience"。
                 "need": "20+10*times*(times+1)",  // 商店需要的金币/经验数值；可以是一个表达式，以times作为参数计算。
@@ -78,8 +85,8 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
                 // 例如： "need": "25" 就是恒定需要25金币的商店； "need": "20+2*times" 就是第一次访问要20金币，以后每次递增2金币的商店。
                 // 如果是对于每个选项有不同的计算公式，写 "need": "-1" 即可。可参见下面的经验商店。
                 "text": "勇敢的武士啊，给我${need}金币就可以：", // 显示的文字，需手动加换行符。可以使用${need}表示上面的need值。
-                "choices": [ 
-                    {"text": "生命+800", "effect": "status:hp+=800"}, // 商店的选项
+                "choices": [ // 商店的选项
+                    {"text": "生命+800", "effect": "status:hp+=800"},
                     // 如果有多个effect以分号分开，参见下面的经验商店
                     {"text": "攻击+4", "effect": "status:atk+=4"},
                     {"text": "防御+4", "effect": "status:def+=4"},
@@ -92,24 +99,24 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
                     // "status:hp+=2*(status:atk+status:def)" 将生命提升攻防和的数值的两倍
                 ]
             },
-            "expShop1": { 
-                "name": "经验之神", // 商店唯一ID
+            {
+                "id": "expShop1", // 商店唯一ID
+                "name": "经验之神",
                 "icon": "pinkShop",
                 "textInList": "1F经验商店",
                 "use": "experience", // 该商店使用的是经验进行计算
                 "need": "-1", // 如果是对于每个选项所需要的数值不同，这里直接写-1，然后下面选项里给定具体数值
                 "text": "勇敢的武士啊，给我若干经验就可以：",
                 "choices": [
-                    {"text": "等级+1", "need": "100", "effect": "status:lv+=1;status:hp+=1000;status:atk+=7;status:def+=7"},
                     // 在choices中写need，可以针对每个选项都有不同的需求。
                     // 这里的need同样可以以times作为参数，比如 "need": "100+20*times"
-                    
+                    {"text": "等级+1", "need": "100", "effect": "status:lv+=1;status:hp+=1000;status:atk+=7;status:def+=7"},
                     // 多个effect直接以分号分开即可。如上面的意思是生命+1000，攻击+7，防御+7。
                     {"text": "攻击+5", "need": "30", "effect": "status:atk+=5"},
                     {"text": "防御+5", "need": "30", "effect": "status:def+=5"},
                 ]
-            },
-        },
+            }
+        ],
         "levelUp": [ 
             {}, // 经验升级所需要的数值，是一个数组
             // 第一项为初始等级，可以简单留空，也可以写name
@@ -150,6 +157,8 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         "bluePotion": 250, // 蓝血瓶加血数值
         "yellowPotion": 500, // 黄血瓶加血数值
         "greenPotion": 800, // 绿血瓶加血数值
+        "sword0": 0, // 默认装备折断的剑的攻击力
+        "shield0": 0, // 默认装备残破的盾的防御力
         "sword1": 10, // 铁剑加攻数值
         "shield1": 10, // 铁盾加防数值
         "sword2": 20, // 银剑加攻数值
@@ -190,10 +199,13 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         "pickaxeFourDirections": true, // 使用破墙镐是否四个方向都破坏；如果false则只破坏面前的墙壁
         "bombFourDirections": true, // 使用炸弹是否四个方向都会炸；如果false则只炸面前的怪物（即和圣锤等价）
         "bigKeyIsBox": false, // 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙
+        "equipment": false, // 剑和盾是否直接作为装备。如果此项为true，则作为装备，需要在道具栏使用，否则将直接加属性。
+        "enableDeleteItem": true, // 是否允许删除（丢弃）道具
         
         "enableNegativeDamage": true, /****** 怪物相关 ******/
         // 是否支持负伤害（回血）
-        "zoneSquare": false, // 领域类型。如果此项为true则为九宫格伤害，为false则为十字伤害
+        "hatredDecrease": true, // 是否在和仇恨怪战斗后减一半的仇恨值，此项为false则和仇恨怪不会扣减仇恨值。
+        "betweenAttackCeil": false, // 夹击方式是向上取整还是向下取整。如果此项为true则为向上取整，为false则为向下取整
         
         "startDirectly": false, /****** 系统相关 ******/
         // 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面
@@ -203,7 +215,9 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         "displayEnemyDamage": true, // 是否地图怪物显伤；用户可以手动在菜单栏中开关
         "displayExtraDamage": false, // 是否地图高级显伤（领域、夹击等）；用户可以手动在菜单栏中开关
         "enableGentleClick": true, // 是否允许轻触（获得面前物品）
-        "portalWithoutTrigger": true, // 经过楼梯、传送门时是否能“穿透”。穿透的意思是，自动寻路得到的的路径中间经过了楼梯，行走时是否触发楼层转换事件
         "potionWhileRouting": false, // 寻路算法是否经过血瓶；如果该项为false，则寻路算法会自动尽量绕过血瓶
+        "enableViewMaps": true, // 是否支持在菜单栏中查看所有楼层的地图
+        "portalWithoutTrigger": true, // 经过楼梯、传送门时是否能“穿透”。穿透的意思是，自动寻路得到的的路径中间经过了楼梯，行走时是否触发楼层转换事件
+        "enableMoveDirectly": true, // 是否允许瞬间移动
     }
 }

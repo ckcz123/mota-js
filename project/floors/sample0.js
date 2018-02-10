@@ -9,8 +9,9 @@ main.floors.sample0 =
     "canFlyTo": true, // 该楼能否被楼传器飞到（不能的话在该楼也不允许使用楼传器）
     "canUseQuickShop": true, // 该层是否允许使用快捷商店
     "defaultGround": "ground", // 默认地面的图块ID（terrains中）
-    // "png": "bg.png", // 背景图；你可以选择一张png图片来作为背景素材。详细用法请参见文档“自定义素材”中的说明。
+    "png": [], // 该层默认显示的所有图片；详细用法请查看文档“自定义素材”中的说明。
     // "color": [0,0,0,0.3] // 该层的默认画面色调。本项可不写（代表无色调），如果写需要是一个RGBA数组。
+    // "weather": ["snow",5], // 该层的默认天气。本项可忽略表示晴天，如果写则第一项为"rain"或"snow"代表雨雪，第二项为1-10之间的数代表强度。
     "bgm": "bgm.mp3", // 到达该层后默认播放的BGM。本项可忽略。
     "map": [ // 地图数据，需要是13x13，建议使用地图生成器来生成
         [0,    0,    220,  0,    0,    20,   87,   3,    65,   64,   44,   43,   42],
@@ -29,7 +30,7 @@ main.floors.sample0 =
     ],
     "firstArrive": [ // 第一次到该楼层触发的事件
         "\t[样板提示]首次到达某层可以触发 firstArrive 事件，该事件可类似于RMXP中的“自动执行脚本”。\n\n本事件支持一切的事件类型，常常用来触发对话，例如：",
-        "\t[hero]我是谁？我从哪来？我又要到哪去？",
+        "\t[hero]\b[up,hero]我是谁？我从哪来？我又要到哪去？",
         "\t[仙子,fairy]你问我...？我也不知道啊...",
         "本层主要对道具、门、怪物等进行介绍，有关事件的各种信息在下一层会有更为详细的说明。",
     ],
@@ -37,9 +38,9 @@ main.floors.sample0 =
 
         "10,9": [ // 守着道具的老人
             "\t[老人,man]这些是本样板支持的所有的道具。\n\n道具分为三类：items, constants, tools。\nitems 为即捡即用类道具，例如宝石、血瓶、剑盾等。\nconstants 为永久道具，例如怪物手册、楼层传送器、幸运金币等。\ntools 为消耗类道具，例如破墙镐、炸弹、中心对称飞行器等。\n\n后两类道具在工具栏中可以看到并使用。",
-            "\t[老人,man]有关道具效果，定义在items.js中。\n目前大多数道具已有默认行为，如有自定义的需求则需在items.js中修改代码。",
+            "\t[老人,man]\b[up]有关道具效果，定义在items.js中。\n目前大多数道具已有默认行为，如有自定义的需求则需在items.js中修改代码。",
             "\t[老人,man]constants 和 tools 各最多只允许12种，多了会导致图标溢出。",
-            "\t[老人,man]拾取道具结束后可触发 afterGetItem 事件。\n\n有关事件的各种信息在下一层会有更为详细的说明。",
+            "\t[老人,man]\b[up]拾取道具结束后可触发 afterGetItem 事件。\n\n有关事件的各种信息在下一层会有更为详细的说明。",
             {"type": "hide", "time": 500} // 消失
         ],
         "10,11": [ // 守着门的老人
@@ -51,7 +52,6 @@ main.floors.sample0 =
             "\t[老人,womanMagician]这些是路障、楼梯、传送门。",
             "\t[老人,womanMagician]血网的伤害数值、中毒后每步伤害数值、衰弱时攻防下降的数值，都在 data.js 内定义。\n\n路障同样会尽量被自动寻路绕过。",
             "\t[老人,womanMagician]楼梯和传送门需要在changeFloor中定义目标楼层和位置，可参见样板里已有的的写法。",
-            "\t[老人,womanMagician]楼梯和传送门是否可“穿透”，由data.js中的全局变量所决定，你也可以单独设置。\n穿透的意思是，自动寻路得到的路径中间经过了楼梯，行走时是否触发楼层转换事件。\n例如，下面的“下箭头”就是不能穿透的。",
             {"type": "hide", "time": 500}
         ],
         "2,8": [ // 守着第一批怪物的老人
@@ -76,7 +76,6 @@ main.floors.sample0 =
                 {"type": "hide", "time": 500}
             ]
         },
-
     },
     "changeFloor": { // 楼层转换事件；该事件不能和上面的events有冲突（同位置点），否则会被覆盖
         "6,0": {"floorId": "sample1", "stair": "downFloor"}, // 目标点：sample1层的下楼梯位置
@@ -86,11 +85,11 @@ main.floors.sample0 =
         "2,12": {"floorId": "sample0", "loc": [2,12]},
         "3,12": {"floorId": "sample0", "loc": [6,1], "direction": "up"}, // 切换楼层后勇士面对上方
         "4,12": {"floorId": "sample0", "loc": [0,9], "direction": "left", "time": 1000}, // 切换楼层后勇士面对左边，切换动画1000ms
-        "5,12": {"floorId": "sample0", "loc": [6,10], "portalWithoutTrigger": false}, // 不能穿透
-        "6,12": {"floorId": "sample0", "loc": [10,10], "direction": "left", "time": 1000, "portalWithoutTrigger": false},
+        "5,12": {"floorId": "sample0", "loc": [6,10], "time": 0, "portalWithoutTrigger": false}, // time=0表示无切换时间
+        "6,12": {"floorId": "sample0", "loc": [10,10], "direction": "left", "time": 1000},
     },
     "afterBattle": { // 战斗后可能触发的事件列表
-        "2,6": ["\t[ghostSkeleton]不可能，你怎么可能打败我！\n（一个打败怪物触发的事件）"]
+        "2,6": ["\t[ghostSkeleton]不可能，你怎么可能打败我！\n（一个打败怪物触发的事件）"],
     },
     "afterGetItem": { // 获得道具后可能触发的事件列表
         "11,8": ["由于状态栏放不下，绿钥匙和铁门钥匙均视为tools，放入工具栏中。\n碰到绿门和铁门仍然会自动使用开门。"],
@@ -111,7 +110,12 @@ main.floors.sample0 =
     },
     "afterOpenDoor": { // 开完门后可能触发的事件列表
         "11,12": ["你开了一个绿门，触发了一个afterOpenDoor事件"]
-    }
+    },
+    "cannotMove": { // 每个图块不可通行的方向
+        // 可以在这里定义每个点不能前往哪个方向，例如悬崖边不能跳下去
+        // "x,y": ["up", "left"], // (x,y)点不能往上和左走
+
+    },
 
 }
 

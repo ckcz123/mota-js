@@ -1,5 +1,5 @@
 function editor() {
-  this.version = "1.2";
+  this.version = "2.0";
   this.material = {};
 }
 
@@ -11,7 +11,7 @@ editor.prototype.init = function(callback){
     
     editor.reset(function(){
       editor.drawMapBg();
-      var mapArray = core.maps.getMapArray(core.status.maps, core.status.floorId);
+      var mapArray = core.maps.getMapArray(core.status.maps[core.status.floorId].blocks);
       editor.map = mapArray.map(function(v){return v.map(function(v){return editor.ids[[editor.indexs[v][0]]]})});
       editor.updateMap();
       editor.currentFloorId=core.status.floorId;
@@ -28,7 +28,7 @@ editor.prototype.init = function(callback){
     editor.material.images=core.material.images;
     editor.listen(); // 开始监听事件
     var hard = 'Hard';
-    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, core.initStatus.maps);
+    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
     //core.status.maps = core.clone(core.maps.initMaps(floorIds));
     core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
         afterCoreReset();
@@ -298,7 +298,7 @@ editor.prototype.changeFloor = function(floorId,callback) {
   editor.currentFloorData.map = editor.map.map(function(v){return v.map(function(v){return v.idnum||v||0})});
   core.changeFloor(floorId, null, core.firstData.hero.loc, null, function(){
     editor.drawMapBg();
-    var mapArray = core.maps.getMapArray(core.status.maps, core.status.floorId);
+    var mapArray = core.maps.getMapArray(core.status.maps[core.status.floorId].blocks);
     editor.map = mapArray.map(function(v){return v.map(function(v){return editor.ids[[editor.indexs[v][0]]]})});
     editor.updateMap();
     editor.currentFloorId=core.status.floorId;
@@ -318,9 +318,11 @@ editor.prototype.listen = function() {
   }//在格子内画一个随机色块
 
   function eToLoc(e) { 
+    var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
+    var scrollTop = document.documentElement.scrollTop || document.body.scrollTop
     editor.loc = { 
-      'x': document.documentElement.scrollLeft+e.clientX - mid.offsetLeft-mapEdit.offsetLeft, 
-      'y': document.documentElement.scrollTop+e.clientY - mid.offsetTop-mapEdit.offsetTop, 
+      'x': scrollLeft+e.clientX - mid.offsetLeft-mapEdit.offsetLeft, 
+      'y': scrollTop+e.clientY - mid.offsetTop-mapEdit.offsetTop, 
       'size': 32 
     };
     return editor.loc; }//返回可用的组件内坐标
@@ -453,9 +455,11 @@ editor.prototype.listen = function() {
 
   edata.onmousedown = function (e) {
     e.stopPropagation();
+    var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
+    var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
     var loc = { 
-      'x': document.documentElement.scrollLeft + e.clientX + iconLib.scrollLeft - right.offsetLeft-iconLib.offsetLeft, 
-      'y': document.documentElement.scrollTop + e.clientY + iconLib.scrollTop - right.offsetTop-iconLib.offsetTop, 
+      'x': scrollLeft + e.clientX + iconLib.scrollLeft - right.offsetLeft-iconLib.offsetLeft, 
+      'y': scrollTop + e.clientY + iconLib.scrollTop - right.offsetTop-iconLib.offsetTop, 
       'size': 32 
     };
     editor.loc = loc;

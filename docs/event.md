@@ -954,6 +954,8 @@ core.insertAction(list) //往当前事件列表中插入一系列事件。使用
 
 由于NPC是自定义事件，因此我们需要写events。注意到events中不覆盖trigger，则还是怪物时，存在系统trigger因此会战斗；变成NPC后没有系统trigger因此会触发自定义事件。
 
+请注意打死怪物时默认会禁用该点，因此替换后需要手动进行show来启用。
+
 ``` js
 "events": {
     "x,y": [
@@ -962,7 +964,8 @@ core.insertAction(list) //往当前事件列表中插入一系列事件。使用
 },
 "afterBattle": {
     "x,y": [
-        {"type": "setBlock", "number": 121} // 变成老人
+        {"type": "setBlock", "number": 121}, // 变成老人
+        {"type": "show", "loc": [x,y]} // 启用该点
     ]
 }
 ```

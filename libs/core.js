@@ -2220,17 +2220,16 @@ core.prototype.openDoor = function (id, x, y, needKey, callback) {
     var speed=30;
     if (needKey) {
         var key = id.replace("Door", "Key");
-        if (!core.removeItem(key)) {
+        if (!core.hasItem(key)) {
             if (key != "specialKey")
                 core.drawTip("你没有" + core.material.items[key].name);
             else core.drawTip("无法开启此门");
             core.clearContinueAutomaticRoute();
             return;
         }
-    }
-
-    if (!core.isset(core.status.event.id)) // 自动存档
         core.autosave(true);
+        core.removeItem(key);
+    }
 
     // open
     core.playSound("door.ogg");
@@ -4363,11 +4362,11 @@ core.prototype.openSettings = function (need) {
 
 ////// 自动存档 //////
 core.prototype.autosave = function (removeLast) {
-    var x;
+    var x=null;
     if (removeLast)
         x=core.status.route.pop();
     core.saveData("autoSave");
-    if (removeLast)
+    if (removeLast && core.isset(x))
         core.status.route.push(x);
 }
 

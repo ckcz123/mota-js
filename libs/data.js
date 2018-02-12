@@ -6,7 +6,7 @@ data.prototype.init = function() {
     this.firstData = {
         "title": "魔塔样板", // 游戏名，将显示在标题页面以及切换楼层的界面中
         "name": "template", // 游戏的唯一英文标识符。由英文、数字、下划线组成，不能超过20个字符。
-        "version": "Ver 1.3.2", // 当前游戏版本；版本不一致的存档不能通用。
+        "version": "Ver 1.4.1", // 当前游戏版本；版本不一致的存档不能通用。
         "floorId": "sample0", // 初始楼层ID
         "hero": { // 勇士初始数据
             "name": "阳光", // 勇士名；可以改成喜欢的
@@ -159,6 +159,7 @@ data.prototype.init = function() {
         "bombFourDirections": true, // 使用炸弹是否四个方向都会炸；如果false则只炸面前的怪物（即和圣锤等价）
         "bigKeyIsBox": false, // 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙
         "equipment": false, // 剑和盾是否直接作为装备。如果此项为true，则作为装备，需要在道具栏使用，否则将直接加属性。
+        "enableDeleteItem": true, // 是否允许删除（丢弃）道具
         /****** 怪物相关 ******/
         "enableNegativeDamage": true, // 是否支持负伤害（回血）
         "hatredDecrease": true, // 是否在和仇恨怪战斗后减一半的仇恨值，此项为false则和仇恨怪不会扣减仇恨值。
@@ -173,6 +174,8 @@ data.prototype.init = function() {
         "enableGentleClick": true, // 是否允许轻触（获得面前物品）
         "potionWhileRouting": false, // 寻路算法是否经过血瓶；如果该项为false，则寻路算法会自动尽量绕过血瓶
         "enableViewMaps": true, // 是否支持在菜单栏中查看所有楼层的地图
+        "portalWithoutTrigger": true, // 是否支持穿透。所谓穿透，即当自动寻路经过楼梯时，不触发楼层转换事件而是穿过它。
+        "enableMoveDirectly": true, // 是否允许瞬间移动
     }
 }
 

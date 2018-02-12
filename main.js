@@ -2,7 +2,7 @@ function main() {
 
     //------------------------ 用户修改内容 ------------------------//
 
-    this.version = "1.3.2"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+    this.version = "1.4.1"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
     this.useCompress = false; // 是否使用压缩文件
     // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
@@ -12,10 +12,15 @@ function main() {
     this.floorIds = [ // 在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序
         "sample0", "sample1", "sample2"
     ];
-    this.pngs = [ // 在此存放所有可能的背景图片；背景图片最好是416*416像素，其他分辨率会被强制缩放成416*416
-        // 建议对于较大的图片，在网上使用在线的“图片压缩工具”来进行压缩，以节省流量
-        // 有关使用自定义背景图，请参见文档的“自定义素材”说明
-        "bg.png", // 依次向后添加
+    this.pngs = [ // 在此存放所有可能使用的图片，只能是png格式，可以不写后缀名
+        // 图片可以被作为背景图（的一部分），也可以直接用自定义事件进行显示。
+        // 图片名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
+        // 建议对于较大的图片，在网上使用在线的“图片压缩工具(http://compresspng.com/zh/)”来进行压缩，以节省流量
+        "bg", // 依次向后添加
+    ];
+    this.animates = [ // 在此存放所有可能使用的动画，必须是animate格式，在这里不写后缀名
+        // 动画必须放在animates目录下；文件名不能使用中文，不能带空格或特殊字符
+        "hand", "sword", "zone", "yongchang", // "jianji", "thunder" // 根据需求自行添加
     ];
     this.bgms = [ // 在此存放所有的bgm，和文件名一致。第一项为默认播放项
         // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
@@ -23,7 +28,7 @@ function main() {
     ];
     this.sounds = [ // 在此存放所有的SE，和文件名一致
         // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
-        'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg',
+        'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg', 'zone.ogg'
     ];
 
     //------------------------ 用户修改内容 END ------------------------//
@@ -95,6 +100,19 @@ function main() {
             'load': document.getElementById("img-load"),
             'settings': document.getElementById("img-settings")
         },
+        'icons': {
+            'book': null,
+            'fly': null,
+            'toolbox': null,
+            'save': null,
+            'load': null,
+            'settings': null,
+            'rewind': null, // 减速
+            'forward': null, // 加速
+            'play': null, // 播放
+            'pause': null, // 暂停
+            'stop': null, // 停止
+        },
         'floor': document.getElementById('floor'),
         'lv': document.getElementById('lv'),
         'hp': document.getElementById('hp'),
@@ -122,6 +140,11 @@ main.prototype.init = function () {
     for (var i = 0; i < main.dom.gameCanvas.length; i++) {
         main.canvas[main.dom.gameCanvas[i].id] = main.dom.gameCanvas[i].getContext('2d');
     }
+    Object.keys(this.statusBar.icons).forEach(function (t) {
+        var image=new Image();
+        image.src="images/"+t+".png";
+        main.statusBar.icons[t] = image;
+    })
     main.loaderJs(function () {
         var coreData = {};
         for (i = 0; i < main.loadList.length; i++) {
@@ -131,7 +154,11 @@ main.prototype.init = function () {
             coreData[name] = main[name];
         }
         main.loaderFloors(function() {
-            main.core.init(main.dom, main.statusBar, main.canvas, main.images, main.pngs, main.bgms, main.sounds, main.floorIds, main.floors, coreData);
+            ["dom", "statusBar", "canvas", "images", "pngs",
+                "animates", "bgms", "sounds", "floorIds", "floors"].forEach(function (t) {
+                    coreData[t] = main[t];
+            })
+            main.core.init(coreData);
             main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
         })
     });
@@ -319,12 +346,23 @@ main.dom.data.ontouchend = function () {
 
 ////// 点击状态栏中的怪物手册时 //////
 main.statusBar.image.book.onclick = function () {
+    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+        core.triggerReplay();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.openBook(true);
 }
 
 ////// 点击状态栏中的楼层传送器时 //////
 main.statusBar.image.fly.onclick = function () {
+
+    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+        core.stopReplay();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.useFly(true);
 }
@@ -343,12 +381,24 @@ main.statusBar.image.shop.onclick = function () {
 
 ////// 点击状态栏中的存档按钮时 //////
 main.statusBar.image.save.onclick = function () {
+
+    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+        core.rewindReplay();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.save(true);
 }
 
 ////// 点击状态栏中的读档按钮时 //////
 main.statusBar.image.load.onclick = function () {
+
+    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+        core.forwardReplay();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.load(true);
 }
@@ -384,7 +434,7 @@ main.dom.replayGame.onclick = function () {
             alert("存档和游戏不一致！");
             return;
         }
-        if (obj.version!=core.firstData.version) {
+        if (core.isset(obj.version) && obj.version!=core.firstData.version) {
             alert("游戏版本不一致！");
             return;
         }
@@ -397,8 +447,8 @@ main.dom.replayGame.onclick = function () {
         core.resetStatus(core.firstData.hero, obj.hard, core.firstData.floorId, null, core.initStatus.maps);
         core.events.setInitData(obj.hard);
         core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-            core.setHeroMoveTriggerInterval();
-            core.replay(core.decodeRoute(obj.route));
+            //core.setHeroMoveTriggerInterval();
+            core.startReplay(core.decodeRoute(obj.route));
         });
     }, function () {
 

@@ -1,6 +1,6 @@
 # 个性化
 
-?> 上次更新时间：* {docsify-updated} *
+?> 目前版本**v1.4.1**，上次更新时间：* {docsify-updated} *
 
 有时候只靠样板本身可能是不够的。我们需要一些个性化、自定义的素材，道具效果，怪物属性，等等。
 
@@ -27,26 +27,34 @@
 
 由于HTML5功能（素材）有限，导致了对很多比较复杂的素材（比如房子内）等无法有着较好的绘图方式。
 
-为了解决这个问题，我们允许用户自己放置一张图片作为某一层的背景素材。
+为了解决这个问题，我们允许用户自己放置一张或多张图片作为某一层的背景素材。
 
 要启用这个功能，我们首先需要在`main.js`中将可能的图片进行加载。
 
 ``` js
-this.pngs = [ // 在此存放所有可能的背景图片；背景图片最好是416*416像素，其他分辨率会被强制缩放成416*416
-    // 建议对于较大的图片，在网上使用在线的“图片压缩工具”来进行压缩，以节省流量
-    "bg.png", // "yewai.png",
+this.pngs = [ // 在此存放所有可能使用的图片，只能是png格式，可以不写后缀名
+    // 图片可以被作为背景图（的一部分），也可以直接用自定义事件进行显示。
+    // 图片名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
+    // 建议对于较大的图片，在网上使用在线的“图片压缩工具(http://compresspng.com/zh/)”来进行压缩，以节省流量
+    "bg", // 依次向后添加
 ];
 ```
 
-!> 背景素材只支持png格式，且会被强制缩放到416*416。
+!> 背景素材只支持png格式。
 
-!> 请使用网上的一些[在线图片压缩工具](http://www.asqql.com/gifzip/)对png图片进行压缩，以节省流量。一张500KB的png图片可以被压缩到20-30KB，显示效果不会有太大差异。
+!> 请使用网上的一些[在线图片压缩工具](http://compresspng.com/zh/)对png图片进行压缩，以节省流量。一张500KB的png图片可以被压缩到20-30KB，显示效果不会有太大差异。
 
-之后，我们可以在每层剧本的`"png": "xxx"`里来定义该层的默认背景图片素材。
+之后，我们可以在每层剧本的`"png"`里来定义该层的默认背景图片素材。
 
 ``` js
-"png": "bg.png", // 背景图；你可以选择一张png图片来作为背景素材。
+"png": [[x,y,"bg"]], // 背景图；你可以选择一张或多张png图片来作为背景素材。
+"png": [], // 无任何背景图
+"png": [[1,1,"house"], [6,7,"house2"]] // 在(1,1)放一个house.png，且(6,7)放house2.png
 ```
+
+png为一个数组，代表当前层所有作为背景素材的图片信息。
+
+每一项为一个三元组，分别为该背景素材的x，y和图片名。其中x和y分别为横纵坐标，在0-12之间；图片名则必须在上面的this.pngs中定义过。
 
 你的图片背景素材将会覆盖原来本身的背景层。
 
@@ -213,15 +221,23 @@ if (itemId === 'shield5') {
     core.setFlag("shield5", true); // 增加一个自定义Flag：已经拿到神圣盾
 }
 ```
-2. 免疫吸血效果：在`enemys.js`的getExtraDamage函数中，编辑成如果存在神圣盾标记，额外伤害为0。
+2. 免疫吸血效果：在`enemys.js`的伤害计算中，编辑成如果存在神圣盾标记，吸血伤害为0。
 ``` js
-enemys.prototype.getExtraDamage = function (monster) {
-    var extra_damage = 0;
-    if (this.hasSpecial(monster.special, 11)) { // 吸血
-        // 吸血的比例
-        extra_damage = core.status.hero.hp * monster.value;
-        if (core.hasFlag("shield5")) extra_damage = 0; // 如果存在神圣盾，则免疫吸血
-        extra_damage = parseInt(extra_damage);
+enemys.prototype.calDamage = function (monster, hero_hp, hero_atk, hero_def, hero_mdef) {
+// ... 上略
+    // 吸血
+    if (this.hasSpecial(mon_special, 11)) {
+        var vampireDamage = hero_hp * monster.value;
+
+        // 如果有神圣盾免疫吸血等可以在这里写
+        if (core.hasFlag("shield5")) vampireDamage = 0; // 存在神圣盾，吸血伤害为0
+
+        vampireDamage = parseInt(vampireDamage);
+        // 加到自身
+        if (monster.add) // 如果加到自身
+            mon_hp += vampireDamage;
+
+        initDamage += vampireDamage;
     }
 // ... 下略
 ```
@@ -254,8 +270,6 @@ core.prototype.checkBlock = function () {
 你需自己指定一个special数字，修改getSpecialText函数（属性名）和getSpecialHint函数（属性提示文字）。
 
 如果要修改伤害计算公式，请修改下面的calDamage函数。请注意，如果无法战斗，该函数必须返回`999999999`。
-
-对于吸血怪的额外伤害计算在getExtraDamage中。
 
 对于毒衰弱怪物的战斗后结算在`events.js`中的afterBattle函数中。
 

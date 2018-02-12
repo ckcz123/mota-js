@@ -1229,6 +1229,7 @@ events.prototype.clickShop = function(x,y) {
                 core.status.route.push("shop:"+core.status.event.data.id+":"+core.status.event.data.actions.join(""));
             }
 
+            core.status.event.data.actions = [];
             core.status.boxAnimateObjs = [];
             if (core.status.event.data.fromList)
                 core.ui.drawQuickShop();
@@ -1257,6 +1258,8 @@ events.prototype.keyUpShop = function (keycode) {
         if (core.status.event.data.actions.length>0) {
             core.status.route.push("shop:"+core.status.event.data.id+":"+core.status.event.data.actions.join(""));
         }
+
+        core.status.event.data.actions = [];
 
         core.status.boxAnimateObjs = [];
 

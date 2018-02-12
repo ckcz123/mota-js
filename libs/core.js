@@ -1943,9 +1943,11 @@ core.prototype.canMoveHero = function(x,y,direction,floorId) {
     if (!core.isset(floorId)) floorId=core.status.floorId;
 
     // 检查当前块的cannotMove
-    var cannotMove = core.floors[floorId].cannotMove[x+","+y];
-    if (core.isset(cannotMove) && cannotMove instanceof Array && cannotMove.indexOf(direction)>=0)
-        return false;
+    if (core.isset(core.floors[floorId].cannotMove)) {
+        var cannotMove = core.floors[floorId].cannotMove[x+","+y];
+        if (core.isset(cannotMove) && cannotMove instanceof Array && cannotMove.indexOf(direction)>=0)
+            return false;
+    }
 
     var nowBlock = core.getBlock(x,y,floorId);
     if (nowBlock!=null){
@@ -2218,17 +2220,16 @@ core.prototype.openDoor = function (id, x, y, needKey, callback) {
     var speed=30;
     if (needKey) {
         var key = id.replace("Door", "Key");
-        if (!core.removeItem(key)) {
+        if (!core.hasItem(key)) {
             if (key != "specialKey")
                 core.drawTip("你没有" + core.material.items[key].name);
             else core.drawTip("无法开启此门");
             core.clearContinueAutomaticRoute();
             return;
         }
-    }
-
-    if (!core.isset(core.status.event.id)) // 自动存档
         core.autosave(true);
+        core.removeItem(key);
+    }
 
     // open
     core.playSound("door.ogg");
@@ -2344,7 +2345,7 @@ core.prototype.trigger = function (x, y) {
                 var trigger = mapBlocks[b].event.trigger;
 
                 // 转换楼层能否穿透
-                if (trigger=='changeFloor') {
+                if (trigger=='changeFloor' && !noPass) {
                     var canCross = core.flags.portalWithoutTrigger;
                     if (core.isset(mapBlocks[b].event.data) && core.isset(mapBlocks[b].event.data.portalWithoutTrigger))
                         canCross=mapBlocks[b].event.data.portalWithoutTrigger;
@@ -4389,11 +4390,11 @@ core.prototype.openSettings = function (need) {
 
 ////// 自动存档 //////
 core.prototype.autosave = function (removeLast) {
-    var x;
+    var x=null;
     if (removeLast)
         x=core.status.route.pop();
     core.saveData("autoSave");
-    if (removeLast)
+    if (removeLast && core.isset(x))
         core.status.route.push(x);
 }
 

@@ -1943,9 +1943,11 @@ core.prototype.canMoveHero = function(x,y,direction,floorId) {
     if (!core.isset(floorId)) floorId=core.status.floorId;
 
     // 检查当前块的cannotMove
-    var cannotMove = core.floors[floorId].cannotMove[x+","+y];
-    if (core.isset(cannotMove) && cannotMove instanceof Array && cannotMove.indexOf(direction)>=0)
-        return false;
+    if (core.isset(core.floors[floorId].cannotMove)) {
+        var cannotMove = core.floors[floorId].cannotMove[x+","+y];
+        if (core.isset(cannotMove) && cannotMove instanceof Array && cannotMove.indexOf(direction)>=0)
+            return false;
+    }
 
     var nowBlock = core.getBlock(x,y,floorId);
     if (nowBlock!=null){
@@ -2344,7 +2346,7 @@ core.prototype.trigger = function (x, y) {
                 var trigger = mapBlocks[b].event.trigger;
 
                 // 转换楼层能否穿透
-                if (trigger=='changeFloor') {
+                if (trigger=='changeFloor' && !noPass) {
                     var canCross = core.flags.portalWithoutTrigger;
                     if (core.isset(mapBlocks[b].event.data) && core.isset(mapBlocks[b].event.data.portalWithoutTrigger))
                         canCross=mapBlocks[b].event.data.portalWithoutTrigger;

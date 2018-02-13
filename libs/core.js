@@ -1161,9 +1161,7 @@ core.prototype.keyUp = function(keyCode) {
         case 33: case 34: // PAGEUP/PAGEDOWN
             if (core.status.heroStop) {
                 if (core.flags.enableViewMaps) {
-                    core.drawText("\t[系统提示]即将进入浏览地图模式。\n\n点击地图上半部分，或按[↑]键可查看前一张地图\n点击地图下半部分，或按[↓]键可查看后一张地图\n点击地图中间，或按[ESC]键可离开浏览地图模式\n此模式下可以打开怪物手册以查看某层楼的怪物属性", function () {
-                        core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
-                    })
+                    core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
                 }
                 else {
                     core.drawTip("本塔不允许浏览地图！");

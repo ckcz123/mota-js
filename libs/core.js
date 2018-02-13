@@ -150,6 +150,9 @@ core.prototype.init = function (coreData) {
         core[key] = coreData[key];
     }
     core.flags = core.clone(core.data.flags);
+    core.values = core.clone(core.data.values);
+    core.firstData = core.data.getFirstData();
+
     if (!core.flags.enableExperience)
         core.flags.enableLevelUp = false;
     if (!core.flags.canOpenBattleAnimate) {
@@ -157,9 +160,7 @@ core.prototype.init = function (coreData) {
         core.flags.battleAnimate = false;
         core.setLocalStorage('battleAnimate', false);
     }
-    core.values = core.clone(core.data.values);
-    core.firstData = core.data.getFirstData();
-
+    
     // core.initStatus.shops = core.firstData.shops;
     core.firstData.shops.forEach(function (t) {
         core.initStatus.shops[t.id] = t;
@@ -1155,6 +1156,16 @@ core.prototype.keyUp = function(keyCode) {
                 }, function () {
                     core.ui.closePanel();
                 });
+            }
+            break;
+        case 33: case 34: // PAGEUP/PAGEDOWN
+            if (core.status.heroStop) {
+                if (core.flags.enableViewMaps) {
+                    core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
+                }
+                else {
+                    core.drawTip("本塔不允许浏览地图！");
+                }
             }
             break;
         case 37: // UP

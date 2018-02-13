@@ -1167,8 +1167,8 @@ events.prototype.clickViewMaps = function (x,y) {
 
 ////// 查看地图界面时，按下某个键的操作 //////
 events.prototype.keyDownViewMaps = function (keycode) {
-    if (keycode==37 || keycode==38) core.ui.drawMaps(core.status.event.data+1);
-    else if (keycode==39 || keycode==40) core.ui.drawMaps(core.status.event.data-1);
+    if (keycode==37 || keycode==38 || keycode==33) core.ui.drawMaps(core.status.event.data+1);
+    else if (keycode==39 || keycode==40 || keycode==34) core.ui.drawMaps(core.status.event.data-1);
     return;
 }
 

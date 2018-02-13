@@ -150,6 +150,9 @@ core.prototype.init = function (coreData) {
         core[key] = coreData[key];
     }
     core.flags = core.clone(core.data.flags);
+    core.values = core.clone(core.data.values);
+    core.firstData = core.data.getFirstData();
+
     if (!core.flags.enableExperience)
         core.flags.enableLevelUp = false;
     if (!core.flags.canOpenBattleAnimate) {
@@ -157,9 +160,7 @@ core.prototype.init = function (coreData) {
         core.flags.battleAnimate = false;
         core.setLocalStorage('battleAnimate', false);
     }
-    core.values = core.clone(core.data.values);
-    core.firstData = core.data.getFirstData();
-
+    
     // core.initStatus.shops = core.firstData.shops;
     core.firstData.shops.forEach(function (t) {
         core.initStatus.shops[t.id] = t;

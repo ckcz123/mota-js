@@ -51,7 +51,11 @@ icons.prototype.init = function () {
             'arrowLeft': 37,
             'arrowRight': 38,
             'light': 39,
-            'darkLight': 40
+            'darkLight': 40,
+            'ski': 41,
+            'flower': 42,
+            'box': 43,
+            'boxed': 44
         },
         'animates': {
             'star': 0,

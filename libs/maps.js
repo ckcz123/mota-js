@@ -165,7 +165,10 @@ maps.prototype.getBlock = function (x, y, id) {
     if (id == 164) tmp.event = {'cls': 'terrains', 'id': 'arrowRight', 'noPass': false}; // 单向右箭头
     if (id == 165) tmp.event = {'cls': 'terrains', 'id': 'light', 'trigger': 'changeLight', 'noPass': false}; // 灯
     if (id == 166) tmp.event = {'cls': 'terrains', 'id': 'darkLight', 'noPass': true}; // 暗灯
-
+    if (id == 167) tmp.event = {'cls': 'terrains', 'id': 'ski', 'trigger': 'ski', 'noPass': false}; // 滑冰
+    if (id == 168) tmp.event = {'cls': 'terrains', 'id': 'flower', 'noPass': false}; // 花
+    if (id == 169) tmp.event = {'cls': 'terrains', 'id': 'box', 'trigger': 'pushBox', 'noPass': true}; // 箱子
+    if (id == 170) tmp.event = {'cls': 'terrains', 'id': 'boxed', 'trigger': 'pushBox', 'noPass': true}; // 完成的箱子
 
     ////////////////////////// 怪物部分 //////////////////////////
 

@@ -1197,6 +1197,51 @@ events.prototype.afterUseBomb = function () {
 }
 ```
 
+## 滑冰和推箱子事件
+
+最新的样板还支持滑冰和推箱子事件。
+
+滑冰事件的数字是167，trigger为ski。
+
+当角色走上冰面时，将触发ski事件，并会一直向前滑行，直到撞上不可通行的块会触发事件（比如撞上怪物会触发battle，撞上门会触发openDoor等等），或者离开冰面为止。
+
+!> 由于H5魔塔只有事件一层，因此滑冰的冰面上将无法摆放任何东西（如道具）。
+
+!> 撞上怪物将触发battle进行战斗，此战斗的触发和直接撞上怪物相同（战斗前自动存档，打不过则无法战斗）；如需不自动存档的强制战斗请使用自定义事件覆盖。开门同理。
+
+关于推箱子，存在三种状态：花（168），箱子（169）和已经推到花的箱子（170）。
+
+!> 推箱子的前方不允许存在任何事件（花除外），包括已经禁用的自定义事件。
+
+推完箱子后将触发events.js中的afterPushBox事件，你可以在这里进行开门判断。
+
+``` js
+////// 推箱子后的事件 //////
+events.prototype.afterPushBox = function () {
+
+    var noBoxLeft = function () {
+        // 地图上是否还存在未推到的箱子，如果不存在则返回true，存在则返回false
+        for (var i=0;i<core.status.thisMap.blocks.length;i++) {
+            var block=core.status.thisMap.blocks[i];
+            if (core.isset(block.event) && block.event.id=='box') return false;
+        }
+        return true;
+    }
+
+    if (noBoxLeft()) {
+        // 可以通过if语句来进行开门操作
+        /*
+        if (core.status.floorId=='xxx') { // 在某个楼层
+            core.insertAction([ // 插入一条事件
+                {"type": "openDoor", "loc": [x,y]} // 开门
+            ])
+        }
+        */
+    }
+}
+```
+
+
 ## 战前剧情
 
 有时候光战后事件`afterBattle`是不够的，我们可能还需要战前剧情，例如Boss战之前和Boss进行一段对话。

@@ -1319,11 +1319,13 @@ ActionParser.prototype.EvalString = function(EvalString) {
 
 MotaActionFunctions.actionParser = new ActionParser();
 
+MotaActionFunctions.workspace = function(){return workspace}
+
 MotaActionFunctions.parse = function(obj,type) {
-  workspace.clear();
+  MotaActionFunctions.workspace().clear();
   xml_text = MotaActionFunctions.actionParser.parse(obj,type||'event');
   xml = Blockly.Xml.textToDom('<xml>'+xml_text+'</xml>');
-  Blockly.Xml.domToWorkspace(xml, workspace);
+  Blockly.Xml.domToWorkspace(xml, MotaActionFunctions.workspace());
 }
 
 MotaActionFunctions.EvalString_pre = function(EvalString){

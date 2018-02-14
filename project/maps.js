@@ -122,6 +122,10 @@ maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
     '164':{'cls': 'terrains', 'id': 'arrowRight', 'noPass': false}, // 单向右箭头
     '165':{'cls': 'terrains', 'id': 'light', 'trigger': 'changeLight', 'noPass': false}, // 灯
     '166':{'cls': 'terrains', 'id': 'darkLight', 'noPass': true}, // 暗灯
+    '167':{'cls': 'terrains', 'id': 'ski', 'trigger': 'ski', 'noPass': false}, // 滑冰
+    '168':{'cls': 'terrains', 'id': 'flower', 'noPass': false}, // 花
+    '169':{'cls': 'terrains', 'id': 'box', 'trigger': 'pushBox', 'noPass': true}, // 箱子
+    '170':{'cls': 'terrains', 'id': 'boxed', 'trigger': 'pushBox', 'noPass': true}, // 完成的箱子
 
 
     ////////////////////////// 怪物部分 //////////////////////////

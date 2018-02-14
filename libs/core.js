@@ -97,6 +97,7 @@ function core() {
             'destY': null,
             'autoStepRoutes': [],
             'moveStepBeforeStop': [],
+            'lastDirection': null,
             'cursorX': null,
             'cursorY': null,
         },
@@ -150,6 +151,9 @@ core.prototype.init = function (coreData) {
         core[key] = coreData[key];
     }
     core.flags = core.clone(core.data.flags);
+    core.values = core.clone(core.data.values);
+    core.firstData = core.data.getFirstData();
+
     if (!core.flags.enableExperience)
         core.flags.enableLevelUp = false;
     if (!core.flags.canOpenBattleAnimate) {
@@ -157,9 +161,7 @@ core.prototype.init = function (coreData) {
         core.flags.battleAnimate = false;
         core.setLocalStorage('battleAnimate', false);
     }
-    core.values = core.clone(core.data.values);
-    core.firstData = core.data.getFirstData();
-
+    
     // core.initStatus.shops = core.firstData.shops;
     core.firstData.shops.forEach(function (t) {
         core.initStatus.shops[t.id] = t;
@@ -1157,6 +1159,16 @@ core.prototype.keyUp = function(keyCode) {
                 });
             }
             break;
+        case 33: case 34: // PAGEUP/PAGEDOWN
+            if (core.status.heroStop) {
+                if (core.flags.enableViewMaps) {
+                    core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
+                }
+                else {
+                    core.drawTip("本塔不允许浏览地图！");
+                }
+            }
+            break;
         case 37: // UP
             break;
         case 38: // DOWN
@@ -1510,6 +1522,7 @@ core.prototype.stopAutomaticRoute = function () {
     core.status.automaticRoute.autoStepRoutes = [];
     core.status.automaticRoute.destX=null;
     core.status.automaticRoute.destY=null;
+    core.status.automaticRoute.lastDirection = null;
     core.stopHero();
     if (core.status.automaticRoute.moveStepBeforeStop.length==0)
         core.canvas.ui.clearRect(0, 0, 416, 416);
@@ -1864,7 +1877,8 @@ core.prototype.moveAction = function (callback) {
     var y = core.getHeroLoc('y');
     var noPass = core.noPass(x + scan[direction].x, y + scan[direction].y), canMove = core.canMoveHero();
     if (noPass || !canMove) {
-        core.status.route.push(direction);
+        if (core.status.event.id!='ski')
+            core.status.route.push(direction);
         core.status.automaticRoute.moveStepBeforeStop = [];
         if (canMove) // 非箭头：触发
             core.trigger(x + scan[direction].x, y + scan[direction].y);
@@ -1900,6 +1914,7 @@ core.prototype.moveAction = function (callback) {
         core.setHeroMoveInterval(direction, x, y, function () {
             if (core.status.automaticRoute.autoHeroMove) {
                 core.status.automaticRoute.movedStep++;
+                core.status.automaticRoute.lastDirection = core.getHeroLoc('direction');
                 if (core.status.automaticRoute.destStep == core.status.automaticRoute.movedStep) {
                     if (core.status.automaticRoute.autoStep == core.status.automaticRoute.autoStepRoutes.length) {
                         core.clearContinueAutomaticRoute();
@@ -1916,7 +1931,8 @@ core.prototype.moveAction = function (callback) {
             else if (core.status.heroStop) {
                 core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
             }
-            core.status.route.push(direction);
+            if (core.status.event.id!='ski')
+                core.status.route.push(direction);
             core.trigger(core.getHeroLoc('x'), core.getHeroLoc('y'));
             core.checkBlock();
             if (core.isset(callback)) callback();

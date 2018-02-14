@@ -45,6 +45,16 @@ events.prototype.init = function () {
             if (core.isset(callback))
                 callback();
         },
+        "ski": function (data, core, callback) {
+            core.events.ski();
+            if (core.isset(callback))
+                callback();
+        },
+        "pushBox": function (data, core, callback) {
+            core.events.pushBox(data);
+            if (core.isset(callback))
+                callback();
+        },
         'action': function (data, core, callback) {
             core.events.doEvents(data.event.data, data.x, data.y);
             if (core.isset(callback)) callback();
@@ -902,6 +912,104 @@ events.prototype.afterChangeLight = function(x,y) {
 
 }
 
+////// 滑冰 //////
+events.prototype.ski = function (direction) {
+    if (!core.isset(direction))
+        direction = core.status.automaticRoute.lastDirection || core.getHeroLoc('direction');
+    if (core.status.event.id!='ski') {
+        core.waitHeroToStop(function () {
+            core.status.event.id='ski';
+            core.events.ski(direction);
+        });
+    }
+    else {
+        core.moveHero(direction, function () {
+            if (core.status.event.id=='ski') {
+                core.status.event.id=null;
+                core.unLockControl();
+                core.replay();
+            }
+        })
+    }
+}
+
+////// 推箱子 //////
+events.prototype.pushBox = function (data) {
+    if (data.event.id!='box' && data.event.id!='boxed') return;
+
+    // 判断还能否前进，看看是否存在事件
+    var scan = {
+        'up': {'x': 0, 'y': -1},
+        'left': {'x': -1, 'y': 0},
+        'down': {'x': 0, 'y': 1},
+        'right': {'x': 1, 'y': 0}
+    };
+
+    var direction = core.getHeroLoc('direction'), nx=data.x+scan[direction].x, ny=data.y+scan[direction].y;
+
+    if (nx<0||nx>=12||ny<0||ny>=12) return;
+
+    var block = core.getBlock(nx, ny, null, false);
+    if (block!=null && !(core.isset(block.block.event) && block.block.event.id=='flower'))
+        return;
+
+    var blockIcon;
+    if (block==null) {
+        core.status.thisMap.blocks.push(core.maps.getBlock(nx, ny, 169));
+        blockIcon=core.material.icons.terrains.box;
+    }
+    else {
+        block.block.id=170;
+        block.block.event=core.maps.getBlock(null,null,170).event;
+        blockIcon=core.material.icons.terrains.boxed;
+    }
+    core.canvas.event.clearRect(nx * 32, ny * 32, 32, 32);
+    core.canvas.event.drawImage(core.material.images.terrains, 0, blockIcon * 32, 32, 32, nx * 32, ny * 32, 32, 32);
+
+    if (data.event.id=='box') {
+        core.removeBlock(data.x, data.y);
+    }
+    else {
+        data.id=168;
+        data.event=core.maps.getBlock(null,null,168).event;
+        core.canvas.event.clearRect(data.x * 32, data.y * 32, 32, 32);
+        core.canvas.event.drawImage(core.material.images.terrains, 0, core.material.icons.terrains.flower * 32, 32, 32, data.x * 32, data.y * 32, 32, 32);
+    }
+
+    core.updateStatusBar();
+    core.lockControl();
+    core.eventMoveHero([direction], null, function () {
+        core.unLockControl();
+        core.events.afterPushBox();
+        core.replay();
+    })
+
+}
+
+////// 推箱子后的事件 //////
+events.prototype.afterPushBox = function () {
+
+    var noBoxLeft = function () {
+        // 地图上是否还存在未推到的箱子，如果不存在则返回true，存在则返回false
+        for (var i=0;i<core.status.thisMap.blocks.length;i++) {
+            var block=core.status.thisMap.blocks[i];
+            if (core.isset(block.event) && block.event.id=='box') return false;
+        }
+        return true;
+    }
+
+    if (noBoxLeft()) {
+        // 可以通过if语句来进行开门操作
+        /*
+        if (core.status.floorId=='xxx') { // 在某个楼层
+            core.insertAction([ // 插入一条事件
+                {"type": "openDoor", "loc": [x,y]} // 开门
+            ])
+        }
+        */
+    }
+}
+
 ////// 使用炸弹/圣锤后的事件 //////
 events.prototype.afterUseBomb = function () {
 
@@ -1167,8 +1275,8 @@ events.prototype.clickViewMaps = function (x,y) {
 
 ////// 查看地图界面时，按下某个键的操作 //////
 events.prototype.keyDownViewMaps = function (keycode) {
-    if (keycode==37 || keycode==38) core.ui.drawMaps(core.status.event.data+1);
-    else if (keycode==39 || keycode==40) core.ui.drawMaps(core.status.event.data-1);
+    if (keycode==37 || keycode==38 || keycode==33) core.ui.drawMaps(core.status.event.data+1);
+    else if (keycode==39 || keycode==40 || keycode==34) core.ui.drawMaps(core.status.event.data-1);
     return;
 }
 

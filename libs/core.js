@@ -97,6 +97,7 @@ function core() {
             'destY': null,
             'autoStepRoutes': [],
             'moveStepBeforeStop': [],
+            'lastDirection': null,
             'cursorX': null,
             'cursorY': null,
         },
@@ -1521,6 +1522,7 @@ core.prototype.stopAutomaticRoute = function () {
     core.status.automaticRoute.autoStepRoutes = [];
     core.status.automaticRoute.destX=null;
     core.status.automaticRoute.destY=null;
+    core.status.automaticRoute.lastDirection = null;
     core.stopHero();
     if (core.status.automaticRoute.moveStepBeforeStop.length==0)
         core.canvas.ui.clearRect(0, 0, 416, 416);
@@ -1875,7 +1877,8 @@ core.prototype.moveAction = function (callback) {
     var y = core.getHeroLoc('y');
     var noPass = core.noPass(x + scan[direction].x, y + scan[direction].y), canMove = core.canMoveHero();
     if (noPass || !canMove) {
-        core.status.route.push(direction);
+        if (core.status.event.id!='ski')
+            core.status.route.push(direction);
         core.status.automaticRoute.moveStepBeforeStop = [];
         if (canMove) // 非箭头：触发
             core.trigger(x + scan[direction].x, y + scan[direction].y);
@@ -1911,6 +1914,7 @@ core.prototype.moveAction = function (callback) {
         core.setHeroMoveInterval(direction, x, y, function () {
             if (core.status.automaticRoute.autoHeroMove) {
                 core.status.automaticRoute.movedStep++;
+                core.status.automaticRoute.lastDirection = core.getHeroLoc('direction');
                 if (core.status.automaticRoute.destStep == core.status.automaticRoute.movedStep) {
                     if (core.status.automaticRoute.autoStep == core.status.automaticRoute.autoStepRoutes.length) {
                         core.clearContinueAutomaticRoute();
@@ -1927,7 +1931,8 @@ core.prototype.moveAction = function (callback) {
             else if (core.status.heroStop) {
                 core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
             }
-            core.status.route.push(direction);
+            if (core.status.event.id!='ski')
+                core.status.route.push(direction);
             core.trigger(core.getHeroLoc('x'), core.getHeroLoc('y'));
             core.checkBlock();
             if (core.isset(callback)) callback();

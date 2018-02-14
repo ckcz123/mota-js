@@ -43,6 +43,12 @@
   width: 440px;
 }
 
+#left6 {
+  left: 5px;
+  top: 1930px;
+  width: 440px;
+}
+
 .etable table,
 .etable table td {
   color: #000;

@@ -257,6 +257,7 @@ editor_mode.prototype.listen = function(callback){
       outstr.push(["<option value='",floor,"'>",floor,'</option>\n'].join(''));
     });
     selectFloor.innerHTML=outstr.join('');
+    selectFloor.value=core.status.floorId;
     selectFloor.onchange = function(){
       editor_mode.onmode('');
       editor.changeFloor(selectFloor.value);

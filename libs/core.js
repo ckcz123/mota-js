@@ -3931,6 +3931,10 @@ core.prototype.splitLines = function(canvas, text, maxLength, font) {
             contents.push(text.substring(last, i));
             last=i+1;
         }
+        else if (text.charAt(i)=='\\' && text.charAt(i+1)=='n') {
+            contents.push(text.substring(last, i));
+            last=i+2;
+        }
         else {
             var toAdd = text.substring(last, i+1);
             var width = core.canvas[canvas].measureText(toAdd).width;

@@ -33,7 +33,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             "canFlyTo": "该楼能否被楼传器飞到（不能的话在该楼也不允许使用楼传器） \n$select({\"values\":[true,false]})$end",
             "canUseQuickShop": "该层是否允许使用快捷商店 \n$select({\"values\":[true,false]})$end",
             "defaultGround": "默认地面的图块ID（terrains中） ",
-            "png": "背景图；你可以选择一张png图片来作为背景素材。详细用法请参见文档“自定义素材”中的说明。 ",
+            "png": "背景图；你可以选择一张png图片来作为背景素材。详细用法请参见文档“自定义素材”中的说明。 \n$leaf(true)$end",
             "color": "该层的默认画面色调。本项可不写（代表无色调），如果写需要是一个RGBA数组。 \n$leaf(true)$end",
             "bgm": "到达该层后默认播放的BGM。本项可忽略。 ",
             //"map": "地图数据，需要是13x13，建议使用地图生成器来生成 ",

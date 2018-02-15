@@ -59,7 +59,10 @@ editor_mode.prototype.objToTable = function(obj,commentObj){
         editor_mode.onmode(editor_mode._ids[node.getAttribute('id')]);
         editor_mode.addAction(['change',field,JSON.parse(input.value)]);
         //尚未完成,不完善,目前还没做$range的检查
-      };
+      }
+      input.ondblclick = function(){
+        editor_blockly.import(guid);
+      }
     });
   }
   return {"HTML":outstr.join(''),"guids":guids,"listen":listen};
@@ -87,6 +90,7 @@ editor_mode.prototype.objToTr = function(obj,commentObj,field){
   try {
     comment = eval('commentObj'+field);
   } catch (error) {}
+  if(!comment)comment='';
 
   var charlength=10;
 

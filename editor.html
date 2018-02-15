@@ -111,6 +111,34 @@
         </table>
       </div>
     </div></div>
+    <div id="left6" class='leftTab'><div><!-- eventsEditor -->
+      <h3>事件编辑器 &nbsp;&nbsp;
+        <button onclick="editor_blockly.showXML()">Show XML</button>
+        <button onclick="editor_blockly.runCode()">console.log(obj=code)</button>
+        <select id="entryType" disabled="disabled">
+            <option value="event">event</option>
+            <option value="changeFloor">changeFloor</option>
+            <option value="point">point</option>
+            <option value="shop">shop</option>
+            <option value="afterBattle">afterBattle</option>
+            <option value="afterGetItem">afterGetItem</option>
+            <option value="afterOpenDoor">afterOpenDoor</option>
+            <option value="firstArrive">firstArrive</option>
+        </select>
+        <button onclick="editor_blockly.parse()">parse</button>
+        <button onclick="editor_blockly.confirm()">confirm</button>
+        <xml id="toolbox" style="display:none">
+          <category name="entry"></category>
+          <category name="statement"></category>
+          <category name="value"></category>
+          <category name="template"></category>
+        </xml>
+      </h3>
+      <div>
+        <div id="blocklyDiv" style="height: 480px; width: 940px;"></div>
+        <textarea id="codeArea" style="width: 99.5%; height: 15.4em;overflow:y;/* resize:none; */" spellcheck="false"></textarea>
+      </div>
+    </div></div>
     <div id="mid">
       <table class="col" id='mapColMark'></table>
       <table class="row" id='mapRowMark'></table>
@@ -294,8 +322,8 @@
 <script id='mainScript' src='main.js'></script>
 <script>
 //所有全局量
-__all__=['Vue','fs','editor_file','editor_mode','main','core','hasOwnProp','editor'];
-__id__=['editArea','arrRowMark','mapRowMark','data','bg','dataSelection'];
+__all__=['Vue','fs','editor_file','editor_mode','main','core','hasOwnProp','editor','converter','ActionParser','MotaActionFunctions','MotaActionBlocks'];
+__id__=['editArea','arrRowMark','mapRowMark','data','bg','dataSelection','blocklyDiv','codeArea','entryType'];
 __Vue__=['exportM','editArea','editTip','clear','tip','selectBox'];
 //var event = document.getElementById('event');
 
@@ -315,10 +343,20 @@ editor.init(function(){
   editor_mode.floor();
   editor_mode.tower();
   editor_mode.listen();
+  editor_blockly=editor_blockly();
 });
+
+
 //main.listen();
-//core.setHeroMoveTriggerInterval();
 </script>
+
+<!-- blockly -->
+<script src="_server/blockly/Converter.bundle.min.js"></script>
+<script src="_server/blockly/blockly_compressed.js"></script>
+<script src="_server/blockly/blocks_compressed.js"></script>
+<script src="_server/blockly/javascript_compressed.js"></script>
+<script src="_server/blockly/zh-hans.js"></script>
+<script src='_server/editor_blockly.js'></script>
 
 </body>
 </html>

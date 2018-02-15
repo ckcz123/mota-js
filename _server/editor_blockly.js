@@ -304,6 +304,9 @@ editor_blockly.import = function(id_){
     
     "['firstData']['shops']":'shop',
 
+    "['firstArrive']":'firstArrive',
+    "['firstData']['startText']":'firstArrive',
+
     "--point--未完成数据转移":'point',
   }[field];
   if(!type)return;
@@ -311,7 +314,10 @@ editor_blockly.import = function(id_){
   document.getElementById('codeArea').value = input.value;
   document.getElementById('entryType').value = type;
   editor_blockly.parse();
+  editor_blockly.show();
 }
+
+editor_blockly.show = function(){}
 
 editor_blockly.confirm =  function (){
   if(!editor_blockly.id){
@@ -346,6 +352,7 @@ editor_blockly.doubleClickBlock = function (blockId){
   var f=textStringDict[b];
   if(f){
       var value = b.getFieldValue(f);
+      //多行编辑
       //func(value,function(newvalue,b,f){b.setFieldValue(newvalue,f);})
   }
 }

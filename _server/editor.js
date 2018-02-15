@@ -11,8 +11,8 @@ editor.prototype.init = function(callback){
     
     editor.reset(function(){
       editor.drawMapBg();
-      var mapArray = core.maps.getMapArray(core.status.maps[core.status.floorId].blocks);
-      editor.map = mapArray.map(function(v){return v.map(function(v){return editor.ids[[editor.indexs[v][0]]]})});
+      var mapArray = core.maps.save(core.status.maps,core.status.floorId);
+      editor.map = mapArray.map(function(v){return v.map(function(v){return editor.ids[[editor.indexs[parseInt(v)][0]]]})});
       editor.updateMap();
       editor.currentFloorId=core.status.floorId;
       editor.currentFloorData = core.floors[core.status.floorId];
@@ -35,7 +35,7 @@ editor.prototype.init = function(callback){
     });
     core.events.setInitData(hard);
   }
-  setTimeout(afterMainInit, 300);
+  setTimeout(afterMainInit, 500);
 }
 
 editor.prototype.reset = function(callback){
@@ -298,8 +298,8 @@ editor.prototype.changeFloor = function(floorId,callback) {
   editor.currentFloorData.map = editor.map.map(function(v){return v.map(function(v){return v.idnum||v||0})});
   core.changeFloor(floorId, null, core.firstData.hero.loc, null, function(){
     editor.drawMapBg();
-    var mapArray = core.maps.getMapArray(core.status.maps[core.status.floorId].blocks);
-    editor.map = mapArray.map(function(v){return v.map(function(v){return editor.ids[[editor.indexs[v][0]]]})});
+    var mapArray = core.maps.save(core.status.maps,core.status.floorId);
+    editor.map = mapArray.map(function(v){return v.map(function(v){return editor.ids[[editor.indexs[parseInt(v)][0]]]})});
     editor.updateMap();
     editor.currentFloorId=core.status.floorId;
     editor.currentFloorData = core.floors[core.status.floorId];

@@ -118,6 +118,7 @@ enemys.prototype.getSpecialText = function (enemyId) {
     if (this.hasSpecial(special, 19)) text.push("自爆");
     if (this.hasSpecial(special, 20)) text.push("无敌");
     if (this.hasSpecial(special, 21)) text.push("退化");
+    if (this.hasSpecial(special, 22)) text.push("固伤");
     return text;
 }
 
@@ -150,13 +151,14 @@ enemys.prototype.getSpecialHint = function (enemy, special) {
         case 12: return "中毒：战斗后，勇士陷入中毒状态，每一步损失生命"+core.values.poisonDamage+"点";
         case 13: return "衰弱：战斗后，勇士陷入衰弱状态，攻防暂时下降"+core.values.weakValue+"点";
         case 14: return "诅咒：战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验";
-        case 15: return "领域：经过怪物周围"+(enemy.range||1)+"格时自动减生命"+enemy.value+"点";
+        case 15: return "领域：经过怪物周围"+(enemy.range||1)+"格时自动减生命"+(enemy.value||0)+"点";
         case 16: return "夹击：经过两只相同的怪物中间，勇士生命值变成一半";
         case 17: return "仇恨：战斗前，怪物附加之前积累的仇恨值作为伤害"+(core.flags.hatredDecrease?"；战斗后，释放一半的仇恨值":"")+"。（每杀死一个怪物获得"+core.values.hatred+"点仇恨值）";
-        case 18: return "阻击：经过怪物的十字领域时自动减生命"+enemy.value+"点，同时怪物后退一格";
+        case 18: return "阻击：经过怪物的十字领域时自动减生命"+(enemy.value||0)+"点，同时怪物后退一格";
         case 19: return "自爆：战斗后勇士的生命值变成1";
         case 20: return "无敌：勇士无法打败怪物，除非拥有十字架";
         case 21: return "退化：战斗后勇士永久下降"+(enemy.atkValue||0)+"点攻击和"+(enemy.defValue||0)+"点防御";
+        case 22: return "固伤：战斗前，怪物对勇士造成"+(enemy.damage||0)+"点固定伤害，无视勇士魔防。";
         default: break;
     }
     return ""
@@ -175,6 +177,9 @@ enemys.prototype.getExtraDamage = function (monster) {
     var extra_damage = 0;
     if (this.hasSpecial(monster.special, 17)) { // 仇恨
         extra_damage += core.getFlag('hatred', 0);
+    }
+    if (this.hasSpecial(monster.special, 22)) { // 固伤
+        extra_damage += monster.damage||0;
     }
     return extra_damage;
 }

@@ -4417,7 +4417,16 @@ core.prototype.doSL = function (id, type) {
             return;
         }
         if (data.version != core.firstData.version) {
-            core.drawTip("存档版本不匹配");
+            // core.drawTip("存档版本不匹配");
+            if (confirm("存档版本不匹配！\n你想回放此存档的录像吗？")) {
+                core.dom.startPanel.style.display = 'none';
+                core.resetStatus(core.firstData.hero, data.hard, core.firstData.floorId, null, core.initStatus.maps);
+                core.events.setInitData(data.hard);
+                core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
+                    //core.setHeroMoveTriggerInterval();
+                    core.startReplay(core.decodeRoute(data.route));
+                });
+            }
             return;
         }
         core.ui.closePanel();

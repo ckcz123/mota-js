@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <link href="_server/css/editor.css" rel="stylesheet">
+    <link href="_server/CodeMirror/codemirror.css" rel="stylesheet">
     <link href="_server/css/editor_mode.css" rel="stylesheet">
   </head>
 <body>
@@ -135,8 +136,12 @@
         </xml>
       </h3>
       <div>
-        <div id="blocklyDiv" style="height: 480px; width: 940px;"></div>
-        <textarea id="codeArea" style="width: 99.5%; height: 15.4em;overflow:y;/* resize:none; */" spellcheck="false"></textarea>
+        <div id="blocklyDiv"></div>
+        <div id="multiLineDiv" style="display:none">
+          <textarea id="multiLineCode" name="multiLineCode"></textarea>
+          <button onclick="editor_blockly.multiLineDone()">done</button>
+        </div>
+        <textarea id="codeArea" spellcheck="false"></textarea>
       </div>
     </div></div>
     <div id="mid">
@@ -357,6 +362,7 @@ editor.init(function(){
 <script src="_server/blockly/javascript_compressed.js"></script>
 <script src="_server/blockly/zh-hans.js"></script>
 <script src='_server/editor_blockly.js'></script>
+<script src="_server/CodeMirror/codeMirror.bundle.min.js"></script>
 
 </body>
 </html>

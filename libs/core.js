@@ -3959,6 +3959,10 @@ core.prototype.splitLines = function(canvas, text, maxLength, font) {
             contents.push(text.substring(last, i));
             last=i+1;
         }
+        else if (text.charAt(i)=='\\' && text.charAt(i+1)=='n') {
+            contents.push(text.substring(last, i));
+            last=i+2;
+        }
         else {
             var toAdd = text.substring(last, i+1);
             var width = core.canvas[canvas].measureText(toAdd).width;
@@ -4441,7 +4445,16 @@ core.prototype.doSL = function (id, type) {
             return;
         }
         if (data.version != core.firstData.version) {
-            core.drawTip("存档版本不匹配");
+            // core.drawTip("存档版本不匹配");
+            if (confirm("存档版本不匹配！\n你想回放此存档的录像吗？")) {
+                core.dom.startPanel.style.display = 'none';
+                core.resetStatus(core.firstData.hero, data.hard, core.firstData.floorId, null, core.initStatus.maps);
+                core.events.setInitData(data.hard);
+                core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
+                    //core.setHeroMoveTriggerInterval();
+                    core.startReplay(core.decodeRoute(data.route));
+                });
+            }
             return;
         }
         core.ui.closePanel();

@@ -59,6 +59,10 @@ editor_mode.prototype.objToTable = function(obj,commentObj){
         editor_mode.onmode(editor_mode._ids[node.getAttribute('id')]);
         editor_mode.addAction(['change',field,JSON.parse(input.value)]);
         //尚未完成,不完善,目前还没做$range的检查
+        
+        /*临时*/editor_mode.onmode('');/*临时*/
+        //临时改为立刻写入文件,删去此句的时,切换模式才会真正写入
+        //现阶段这样会更实用,20180218
       }
       input.ondblclick = function(){
         editor_blockly.import(guid);

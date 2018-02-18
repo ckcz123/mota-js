@@ -10,6 +10,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
         'itemEffect':'cls为items的即捡即用类物品的效果,执行时会对这里的字符串执行eval()',
         'itemEffectTip':'cls为items的即捡即用类物品,在获得时左上角额外显示的文字,执行时会对这里的字符串执行eval()得到字符串'
     },
+    "items_template" : {'cls': 'items', 'name': '新物品'},
     "enemys" : {
         'name': '名称', 
         'hp': '生命值', 
@@ -25,6 +26,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
         'point': 'point可以在打败怪物后进行加点，详见文档说明\n$range((thiseval==~~thiseval && thiseval>0)||thiseval==null)$end',
         'n': '多连击需要在后面指定n代表是几连击\n$range((thiseval==~~thiseval && thiseval>0)||thiseval==null)$end',
     },
+    "enemys_template" : {'name': '新敌人', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
     "floors" : {
         'floor' : {
             "floorId": "文件名和floorId需要保持完全一致 \n楼层唯一标识符仅能由字母、数字、下划线组成，且不能由数字开头 \n推荐用法：第20层就用MT20，第38层就用MT38，地下6层就用MT_6（用下划线代替负号），隐藏3层用MT3h（h表示隐藏），等等 \n楼层唯一标识符，需要和名字完全一致 \n这里不能更改floorId,请通过另存为来实现\n$range(false)$end",
@@ -44,11 +46,12 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             "changeFloor": "楼层转换事件；该事件不能和上面的events有冲突（同位置点），否则会被覆盖 \n$leaf(true)$end",
             "afterBattle": "战斗后可能触发的事件列表 \n$leaf(true)$end",
             "afterGetItem": "获得道具后可能触发的事件列表 \n$leaf(true)$end",
-            "afterOpenDoor": "开完门后可能触发的事件列表 \n$leaf(true)$end"
+            "afterOpenDoor": "开完门后可能触发的事件列表 \n$leaf(true)$end",
+            "cannotMove": "每个图块不可通行的方向 \n 可以在这里定义每个点不能前往哪个方向，例如悬崖边不能跳下去 \n'x,y': ['up', 'left'], // (x,y)点不能往上和左走\n$leaf(true)$end",
         }
     },
     /* 
-    'template' : {
+    'floors_template' : {
         "floorId": "tempfloor",
         "title": "主塔 0 层",
         "name": "0",

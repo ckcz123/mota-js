@@ -149,6 +149,12 @@
     }
     saveSetting('maps',[["add","['"+idnum+"']",{'cls': info.images, 'id':id}]],tempcallback);
     saveSetting('icons',[["add","['"+info.images+"']['"+id+"']",info.y]],tempcallback);
+    if(info.images==='items'){
+      saveSetting('items',[["change"/*其实应该是add*/,"['items']['"+id+"']",editor_file.comment.items_template]],function(err){if(err)throw(err)});
+    }
+    if(info.images==='enemys'){
+      saveSetting('enemys',[["change"/*其实应该是add*/,"['enemys']['"+id+"']",editor_file.comment.enemys_template]],function(err){if(err)throw(err)});
+    }
     
     callback(null);
   }
@@ -169,13 +175,33 @@
       });
       saveSetting('items',actionList,function (err) {
         callback([
-          {'items':editor.core.items.items[id],'itemEffect':editor.core.items.itemEffect[id],'itemEffectTip':editor.core.items.itemEffectTip[id]},
+          {'items':(function(){
+            var locObj={};
+            Object.keys(editor_file.comment.items.items).forEach(function(v){
+              if (isset(editor.core.items.items[id][v]))
+                locObj[v]=editor.core.items.items[id][v];
+              else
+                locObj[v]=null;
+            });
+            return locObj;
+          })(),
+          'itemEffect':editor.core.items.itemEffect[id],'itemEffectTip':editor.core.items.itemEffectTip[id]},
           editor_file.comment.items,
           err]);
       });
     } else {
       callback([
-        {'items':editor.core.items.items[id],'itemEffect':editor.core.items.itemEffect[id],'itemEffectTip':editor.core.items.itemEffectTip[id]},
+        {'items':(function(){
+          var locObj={};
+          Object.keys(editor_file.comment.items.items).forEach(function(v){
+            if (isset(editor.core.items.items[id][v]))
+              locObj[v]=editor.core.items.items[id][v];
+            else
+              locObj[v]=null;
+          });
+          return locObj;
+        })(),
+        'itemEffect':editor.core.items.itemEffect[id],'itemEffectTip':editor.core.items.itemEffectTip[id]},
         editor_file.comment.items,
         null]);
     }

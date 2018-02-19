@@ -32,39 +32,25 @@
       </div>
       
     </div>
-    <div id="left99" class='leftTab'><!-- 可以直接删掉,在editor_mode.js中,把ids中的'test':'left99'也要删掉 -->
-      <div >
-        <h3>测试用标签页</h3>
-        <div class='etable'>
-          <table>
-            <tbody id='test_tbody'>
-              <tr><td id='test_td' title="['aa']['bb']">条目</td><td>注释<span title='&#97;&#98;&#99;&#10;&#20013;&#25991;&#10;&#97;&#97;&#97;'>aaa</span></td><td>值</td></tr>
-              <tr><td></td><td></td><td></td></tr>
-              <tr><td></td><td></td><td></td></tr>
-              <tr><td>变量名字符串</td><td title='&#97;&#98;&#99;&#10;&#20013;&#25991;&#10;&#97;&#97;&#97;'>可能显示不全但是hover时通过span title='xxx'来显示</td><td>高度以此为准</td></tr>
-              <tr><td></td><td></td><td>此处是利用slice实现</td></tr>
-              <tr><td></td><td></td><td></td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class='etable'>
-          <table>
-            <tbody id='test_tbody2'>
-              <tr><td>条目</td><td>注释</td><td>值</td></tr>
-              <tr><td></td><td></td><td><textarea spellcheck='false' id='temp_text' rows="2">abc</textarea></td></tr>
-              <tr><td></td><td></td><td><input spellcheck='false' id='temp_input' value='abc' /></td></tr>
-              <tr><td></td><td></td><td><select id="temp_select">
-                <option value="abc">abc</option>
-                <option value="ground2">ground2</option>
-              </select></tr>
-            </tbody>
-          </table>
-        </div>
-        <div >
-          <input  type="button" value="保存"/>
+    <div id="left1" class='leftTab'><div ><!-- appendpic -->
+      <h3>追加素材</h3>
+      <p>
+        <input type="button" value="选择文件"/>
+        <select id="selectAppend"></select><!-- ["terrains", "animates", "enemys", "items", "npcs"] -->
+        <input type="button" value="追加"/>
+      </p>
+      <div id="appendPicCanvas" style="position:relative;overflow: auto;height:500px;">
+        <canvas style="position:absolute"></canvas><!-- 用于画出选中文件 -->
+        <canvas style="position:absolute;z-index:100"></canvas><!-- 用于响应鼠标点击 -->
+        <canvas style="position:absolute;display:none;"></canvas><!-- 画出追加后的sprite用于储存 -->
+        <div>
+          <div class="appendSelection"><span style="font-size:10px">1</span></div>
+          <div class="appendSelection"><span style="font-size:10px">&nbsp;&nbsp;2</span></div>
+          <div class="appendSelection"><span style="font-size:10px">&nbsp;&nbsp;&nbsp;&nbsp;3</span></div>
+          <div class="appendSelection"><span style="font-size:10px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4</span></div>
         </div>
       </div>
-    </div>
+    </div></div>
     <div id="left2" class='leftTab'><div><!-- loc -->
       <h3>地图选点</h3>
       <p id='pos_a6771a78_a099_417c_828f_0a24851ebfce'>0,0</p>

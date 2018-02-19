@@ -3,8 +3,7 @@ function editor_mode(){
     'loc':'left2',
     'emenyitem':'left3',
     'floor':'left4',
-    'tower':'left5',
-    'test':'left99'
+    'tower':'left5'
   }
   this._ids={}
   this.dom={}
@@ -22,6 +21,8 @@ editor_mode.prototype.init = function(callback){
 
   if (Boolean(callback))callback();
 }
+
+/////////////////////////////////////////////////////////////////////////////
 
 editor_mode.prototype.objToTable = function(obj,commentObj){
   var outstr=["\n<tr><td>条目</td><td>注释</td><td>值</td></tr>\n"];
@@ -241,6 +242,8 @@ editor_mode.prototype.tower = function(callback){
   tableinfo.listen(tableinfo.guids);
   if (Boolean(callback))callback();
 }
+
+/////////////////////////////////////////////////////////////////////////////
 
 editor_mode.prototype.listen = function(callback){
 

@@ -190,7 +190,7 @@ body{
 .gameCanvas {
   position: absolute;
 }
-#dataSelection{
+#dataSelection , .appendSelection{
   position: absolute;
   /* top:0;
   left:320px; */

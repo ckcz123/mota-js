@@ -226,15 +226,15 @@ initscript=String.raw`
 var input_='';
 editor_blockly.runOne = function (){
     //var printf = console.log;
-    var printf = function(){};
+    //var printf = function(){};
     var grammerFile = input_;
     converter = new Converter().init();
     converter.generBlocks(grammerFile,[]);
-    printf(converter.blocks);
+    //printf(converter.blocks);
     converter.renderGrammerName();
     converter.generToolbox();
     converter.generMainFile();
-    printf(converter.mainFile.join(''));
+    //printf(converter.mainFile.join(''));
     console.log(converter);
 
 

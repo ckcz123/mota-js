@@ -145,23 +145,23 @@ editor_mode.prototype.doActionList = function(mode,actionList){
   switch (mode) {
     case 'loc':
 
-      editor_file.editLoc(editor,editor_mode.pos.x,editor_mode.pos.y,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null)throw(objs_.slice(-1)[0])});
+      editor_file.editLoc(editor,editor_mode.pos.x,editor_mode.pos.y,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       break;
     case 'emenyitem':
 
       if (editor_mode.info.images=='enemys'){
-        editor_file.editEnemy(editor,editor_mode.info.id,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null)throw(objs_.slice(-1)[0])});
+        editor_file.editEnemy(editor,editor_mode.info.id,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       } else if (editor_mode.info.images=='items'){
-        editor_file.editItem(editor,editor_mode.info.id,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null)throw(objs_.slice(-1)[0])});
+        editor_file.editItem(editor,editor_mode.info.id,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       }
       break;
     case 'floor':
       
-      editor_file.editFloor(editor,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null)throw(objs_.slice(-1)[0])});
+      editor_file.editFloor(editor,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       break;
     case 'tower':
       
-      editor.file.editTower(editor,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null)throw(objs_.slice(-1)[0])});
+      editor.file.editTower(editor,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       break;
     default:
       break;
@@ -249,10 +249,12 @@ editor_mode.prototype.listen = function(callback){
     if (newIdIdnum.children[0].value && newIdIdnum.children[1].value){
       var id = newIdIdnum.children[0].value;
       var idnum = parseInt(newIdIdnum.children[1].value);
-      editor_file.changeIdAndIdnum(editor,id,idnum,editor_mode.info,function(err){if(err)throw(err)});
+      editor_file.changeIdAndIdnum(editor,id,idnum,editor_mode.info,function(err){
+        if(err){printe(err);throw(err)}
+        printf('添加id的idnum成功');
+      });
     }
   }
-  //尚未完成,不完善,新物品需要手动改items,新地形的支持不错
 
   var selectFloor = document.getElementById('selectFloor');
   editor_file.getFloorFileList(editor,function(floors){
@@ -271,7 +273,7 @@ editor_mode.prototype.listen = function(callback){
   var saveFloor = document.getElementById('saveFloor');
   saveFloor.onclick = function(){
     editor_mode.onmode('');
-    editor_file.saveFloorFile(editor,function(err){if(err)throw(err)});
+    editor_file.saveFloorFile(editor,function(err){if(err){printe(err);throw(err)}});
   }
 
   var saveFloorAs = document.getElementById('saveFloorAs');
@@ -280,9 +282,9 @@ editor_mode.prototype.listen = function(callback){
     if (!saveAsName.value)return;
     editor_mode.onmode('');
     editor_file.saveFloorFileAs(editor,saveAsName.value,function(err){
-      if(err)throw(err);
+      if(err){printe(err);throw(err)}
       core.floorIds.push(saveAsName.value);
-      editor.file.editTower(editor,[['change',"['main']['floorIds']",core.floorIds]],function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null)throw(objs_.slice(-1)[0])});
+      editor.file.editTower(editor,[['change',"['main']['floorIds']",core.floorIds]],function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])}});
     });
   }
 

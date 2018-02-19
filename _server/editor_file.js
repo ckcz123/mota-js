@@ -29,7 +29,7 @@
 
 
   editor_file.getFloorFileList = function(editor,callback){
-    if (!isset(callback)) throw('未设置callback');
+    if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
     /* var fs = editor.fs;
     fs.readdir('project/floors',function(err, data){
       callback([data,err]);
@@ -39,7 +39,7 @@
   //callback([Array<String>,err:String])
   editor_file.loadFloorFile = function(editor,filename,callback){
     //filename不含'/'不含'.js'
-    if (!isset(callback)) throw('未设置callback');
+    if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
     /* var fs = editor.fs;
     fs.readFile('project/floors/'+filename+'.js','utf-8',function(err, data){
       if (err!=null){callback(err);return;}
@@ -64,7 +64,7 @@
   }
   //callback(err:String)
   editor_file.saveFloorFile = function(editor,callback){
-    if (!isset(callback)) throw('未设置callback');
+    if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
     /* if (!isset(editor.currentFloorId) || !isset(editor.currentFloorData)) {
       callback('未选中文件或无数据');
     } */
@@ -87,7 +87,7 @@
   //callback(err:String)
   editor_file.saveFloorFileAs = function(editor,saveAsFilename,callback){
     //saveAsFilename不含'/'不含'.js'
-    if (!isset(callback)) throw('未设置callback');
+    if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
     if (!isset(editor.currentFloorData)) {
       callback('无数据');
     }
@@ -102,7 +102,7 @@
   ////////////////////////////////////////////////////////////////////
 
   editor_file.changeIdAndIdnum = function(editor,id,idnum,info,callback){
-    if (!isset(callback)) throw('未设置callback');
+    if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
     //检查maps中是否有重复的idnum或id
     var change = -1;
     for(var ii in editor.core.maps.blocksInfo){
@@ -150,10 +150,10 @@
     saveSetting('maps',[["add","['"+idnum+"']",{'cls': info.images, 'id':id}]],tempcallback);
     saveSetting('icons',[["add","['"+info.images+"']['"+id+"']",info.y]],tempcallback);
     if(info.images==='items'){
-      saveSetting('items',[["change"/*其实应该是add*/,"['items']['"+id+"']",editor_file.comment.items_template]],function(err){if(err)throw(err)});
+      saveSetting('items',[["change"/*其实应该是add*/,"['items']['"+id+"']",editor_file.comment.items_template]],function(err){if(err){printe(err);throw(err)}});
     }
     if(info.images==='enemys'){
-      saveSetting('enemys',[["change"/*其实应该是add*/,"['enemys']['"+id+"']",editor_file.comment.enemys_template]],function(err){if(err)throw(err)});
+      saveSetting('enemys',[["change"/*其实应该是add*/,"['enemys']['"+id+"']",editor_file.comment.enemys_template]],function(err){if(err){printe(err);throw(err)}});
     }
     
     callback(null);
@@ -167,7 +167,7 @@
     ]
     为[]时只查询不修改
     */
-    if (!isset(callback)) throw('未设置callback');
+    if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
     if (isset(actionList) && actionList.length > 0){
       actionList.forEach(function (value) {
         var tempindex = value[1].indexOf(']')+1;
@@ -216,7 +216,7 @@
     ]
     为[]时只查询不修改
     */
-    if (!isset(callback)) throw('未设置callback');
+    if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
     if (isset(actionList) && actionList.length > 0){
       actionList.forEach(function (value) {
         value[1] = "['"+id+"']"+value[1];
@@ -263,7 +263,7 @@
     ]
     为[]时只查询不修改
     */
-    if (!isset(callback)) throw('未设置callback');
+    if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
     if (isset(actionList) && actionList.length > 0){
       actionList.forEach(function (value) {
         value[1] = value[1]+"['"+x+","+y+"']";
@@ -311,7 +311,7 @@
     ]
     为[]时只查询不修改
     */
-    if (!isset(callback)) throw('未设置callback');
+    if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
     if (isset(actionList) && actionList.length > 0){
       saveSetting('floors',actionList,function (err) {
         callback([
@@ -355,7 +355,7 @@
     ]
     为[]时只查询不修改
     */
-    if (!isset(callback)) throw('未设置callback');
+    if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
     if (isset(actionList) && actionList.length > 0){
       saveSetting('data',actionList,function (err) {
         callback([
@@ -421,7 +421,7 @@
     console.log(file);
     console.log(actionList);
     actionList.forEach(function (value) {
-      if (value[0]!='change' && file!='icons' && file!='maps') throw('目前只支持change');
+      if (value[0]!='change' && file!='icons' && file!='maps') {printe('目前只支持change');throw('目前只支持change')};
     });
 
     if (file=='icons') {

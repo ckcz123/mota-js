@@ -184,6 +184,16 @@ var clear = new Vue({
     }
   }
 })
+printf = function(str_,type) {
+  if(!type){
+    tip.msgs[11]=String(str_);
+    tip.whichShow=12;
+  } else {
+    tip.msgs[10]=String(str_);
+    tip.whichShow=11;
+  }
+}
+printe = function(str_){printf(str_,'error')}
 var tip = new Vue({
   el: '#tip',
   data: {
@@ -205,6 +215,8 @@ var tip = new Vue({
       "修改成功！可点击复制按钮复制地图数组到剪切板",
       "选择背景图片失败！文件名格式错误或图片不存在！",
       "更新背景图片成功！",
+      "11:警告",
+      "12:成功"
     ],
     mapMsg: '',
     whichShow: 0,

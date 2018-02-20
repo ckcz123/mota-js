@@ -359,7 +359,7 @@ events.prototype.doAction = function() {
                     y=data.loc[1];
                 }
                 var floorId = data.floorId||core.status.floorId;
-                var originBlock=core.getBlock(x,y,toId,false);
+                var originBlock=core.getBlock(x,y,floorId,false);
                 var block = core.maps.getBlock(x,y,data.number);
                 core.maps.addInfo(block);
                 core.maps.addEvent(block,x,y,core.floors[floorId].events[x+","+y]);

@@ -130,6 +130,7 @@ function core() {
             "title": [255,215,0,1],
             "background": [0,0,0,0.85],
             "text": [255,255,255,1],
+            "bold": false,
         },
         'curtainColor': null,
         'usingCenterFly':false,

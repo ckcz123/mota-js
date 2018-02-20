@@ -120,7 +120,9 @@ ui.prototype.drawTextBox = function(content) {
     if (id=='hero' || core.isset(icon)) content_left=left+63;
 
     var validWidth = right-(content_left-left)-13;
-    var contents = core.splitLines("ui", content, validWidth, '16px Verdana');
+    var font = '16px Verdana';
+    if (textAttribute.bold) font = "bold "+font;
+    var contents = core.splitLines("ui", content, validWidth, font);
 
     var height = 20 + 21*(contents.length+1) + (id=='hero'?core.material.icons.hero.height-10:core.isset(name)?32-10:0);
 
@@ -229,7 +231,7 @@ ui.prototype.drawTextBox = function(content) {
     core.setFillStyle('ui', core.arrayToRGB(textAttribute.text));
 
     for (var i=0;i<contents.length;i++) {
-        core.fillText('ui', contents[i], content_left, content_top, null, '16px Verdana');
+        core.fillText('ui', contents[i], content_left, content_top, null, font);
         content_top+=21;
     }
 

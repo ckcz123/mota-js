@@ -313,6 +313,9 @@ events.prototype.doAction = function() {
                     core.status.textAttribute[t]=data[t];
                 }
             })
+            if (core.isset(data.bold)) {
+                core.status.textAttribute.bold=data.bold;
+            }
             core.events.doAction();
             break;
         case "tip":

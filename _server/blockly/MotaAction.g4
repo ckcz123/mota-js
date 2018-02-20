@@ -221,7 +221,7 @@ if (EvalString_0==''){
     if (IdString_0=='')title='\\t['+EvalString_0+']';
     else title='\\t['+EvalString_0+','+IdString_0+']';
 }
-if(EvalString_1 && !(/^(up|down)(,hero)?(,([0-9]|1[0-2]),([0-9]|1[0-2]))?$/.test(EvalString_1))) {
+if(EvalString_1 && !(/^(up|down)(,hero)?(,([+-]?\d+),([+-]?\d+))?$/.test(EvalString_1))) {
   throw new Error('对话框效果的用法请右键点击帮助');
 }
 EvalString_1 = EvalString_1 && ('\\b['+EvalString_1+']');
@@ -289,7 +289,7 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=show-%e5%b0%86%e4%b8%80%e
 default : [0,0,"",500]
 colour : this.eventColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var pattern = /^(\d|1[0-2])(,\d|1[0-2])*$/;
+var pattern = /^([+-]?\d+)(,[+-]?\d+)*$/;
 if(!pattern.test(EvalString_0) || !pattern.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
 EvalString_0=EvalString_0.split(',');
 EvalString_1=EvalString_1.split(',');
@@ -311,7 +311,7 @@ default : ["","","",500]
 colour : this.eventColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-    var pattern = /^(\d|1[0-2])(,\d|1[0-2])*$/;
+    var pattern = /^([+-]?\d+)(,[+-]?\d+)*$/;
     if(!pattern.test(EvalString_0) || !pattern.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
     EvalString_0=EvalString_0.split(',');
     EvalString_1=EvalString_1.split(',');
@@ -508,7 +508,7 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=animate%ef%bc%9a%e6%98%be
 default : ["zone","hero"]
 colour : this.soundColor
 if (EvalString_0) {
-  if(/hero|([0-9]|1[0-2]),([0-9]|1[0-2])/.test(EvalString_0)) {
+  if(/hero|([+-]?\d+),([+-]?\d+)/.test(EvalString_0)) {
     if(EvalString_0.indexOf(',')!==-1)EvalString_0='['+EvalString_0+']';
     else EvalString_0='"'+EvalString_0+'"';
     EvalString_0 = ', "loc": '+EvalString_0;

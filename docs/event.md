@@ -1324,7 +1324,7 @@ events.prototype.afterPushBox = function () {
   - 如果`effect`为字符串，则和上面的全局商店的写法完全相同。可由分号分开，每一项为X+=Y的形式，X为你要修改的勇士属性/道具个数，Y为一个表达式。
   - 如果`effect`为函数，则也允许写一个`function`，来代表本次升级将会执行的操作。
 
-## 开始，难度分歧，获胜与失败
+## 开始，难度分歧，获胜与失败，多结局
 
 游戏开始时将调用`events.js`中的`startGame`函数。
 
@@ -1362,13 +1362,16 @@ events.prototype.setInitData = function (hard) {
 ``` js
 ////// 游戏获胜事件 //////
 events.prototype.win = function(reason) {
+    core.ui.closePanel();
+    var replaying = core.status.replay.replaying;
+    core.stopReplay();
     core.waitHeroToStop(function() {
         core.removeGlobalAnimate(0,0,true);
         core.clearMap('all'); // 清空全地图
         core.drawText([
-            "\t[结局2]恭喜通关！你的分数是${status:hp}。"
+            "\t[恭喜通关]你的分数是${status:hp}。"
         ], function () {
-            core.restart();
+            core.events.gameOver('', replaying);
         })
     });
 }
@@ -1381,17 +1384,40 @@ events.prototype.win = function(reason) {
 ``` js
 ////// 游戏失败事件 //////
 events.prototype.lose = function(reason) {
+    core.ui.closePanel();
+    var replaying = core.status.replay.replaying;
+    core.stopReplay();
     core.waitHeroToStop(function() {
         core.drawText([
             "\t[结局1]你死了。\n如题。"
         ], function () {
-            core.restart();
+            core.events.gameOver(null, replaying);
         });
     })
 }
 ```
 
 其参数reason为失败原因。你可以在这里修改失败界面时显示的文字。
+
+如果要设置多种不同的结局，只需要在win的传参中把`core.events.gameOver('', replaying);`的空字符串改成具体的结局名。
+
+例如：
+
+``` js
+events.prototype.win = function(reason) { // 传入参数"reason"为结局名
+// ... 上略
+        ], function () {
+            core.events.gameOver(reason, replaying); // 使用reason作为结局名
+        })
+    });
+}
+
+// 然后在事件可以调用
+{"type": "win", "reason": "TRUE END"}, // TE结局
+{"type": "win", "reason": "NORMAL END"} // NE结局
+```
+
+上面这个例子中，我们直接把reason作为结局名的参数传入gameOver函数，这样的话就可以直接在{"type": "win"}中加上"reason"代表具体的结局。
 
 ==========================================================================================
 

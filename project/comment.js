@@ -18,13 +18,16 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
         'def': '防御力', 
         'money': '金币', 
         'experience': '经验', 
-        'special': '特殊属性\n\n0:无,1:先攻,2:魔攻,3:坚固,4:2连击,\n5:3连击,6:n连击,7:破甲,8:反击,9:净化,\n10:模仿,11:吸血,12:中毒,13:衰弱,14:诅咒,\n15:领域,16:夹击,17:仇恨,18:阻击,19:自爆,\n20:无敌\n\n多个属性例如用[1,4,11]表示先攻2连击吸血\n模仿怪的攻防设为0就好\n$leaf(true)$end', 
+        'special': '特殊属性\n\n0:无,1:先攻,2:魔攻,3:坚固,4:2连击,\n5:3连击,6:n连击,7:破甲,8:反击,9:净化,\n10:模仿,11:吸血,12:中毒,13:衰弱,14:诅咒,\n15:领域,16:夹击,17:仇恨,18:阻击,19:自爆,\n20:无敌,21:退化,22:固伤\n\n多个属性例如用[1,4,11]表示先攻2连击吸血\n模仿怪的攻防设为0就好\n$leaf(true)$end', 
         'value': '特殊属性的数值\n领域怪需要加value表示领域伤害的数值\n吸血怪需要在后面添加value代表吸血比例', 
         'zoneSquare': '领域怪zoneSquare代表是否九宫格伤害',
         'range': 'range可选，代表领域伤害的范围；不加默认为1\n$range((thiseval==~~thiseval && thiseval>0)||thiseval==null)$end',
         'bomb':' 加入 "bomb": false 代表该怪物不可被炸弹或圣锤炸掉\n$select({\"values\":[true,false]})$end',
         'point': 'point可以在打败怪物后进行加点，详见文档说明\n$range((thiseval==~~thiseval && thiseval>0)||thiseval==null)$end',
         'n': '多连击需要在后面指定n代表是几连击\n$range((thiseval==~~thiseval && thiseval>0)||thiseval==null)$end',
+        'atkValue':'退化时勇士下降的攻击力点数\n$range(thiseval==~~thiseval||thiseval==null)$end',
+        'defValue':'退化时勇士下降的防御力点数\n$range(thiseval==~~thiseval||thiseval==null)$end',
+        'damage':'战前扣血的点数\n$range(thiseval==~~thiseval||thiseval==null)$end'
     },
     "enemys_template" : {'name': '新敌人', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
     "floors" : {

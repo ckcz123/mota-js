@@ -70,6 +70,7 @@ initscript=String.raw`
       ]),
       '<label text="数据相关"></label>',
       MotaActionBlocks['setValue_s'].xmlText(),
+      MotaActionBlocks['input_s'].xmlText(),
       MotaActionBlocks['update_s'].xmlText(),
       MotaActionBlocks['moveHero_s'].xmlText(),
       MotaActionBlocks['changeFloor_s'].xmlText(),
@@ -154,12 +155,7 @@ initscript=String.raw`
           }
         ]
       },'event'),
-      '<label text="获取用户输入的字符串"></label>',
-      MotaActionFunctions.actionParser.parseList([
-        {"type": "setValue", "name": "flag:inputMsg", "value": "请输入密码"},
-        {"type": "function", "function": "function(){core.setFlag('input',prompt(core.getFlag('inputMsg','请输入字符串'),'xxx')||'')}"},
-        {"type": "if", "condition": 'flag:input == "123456"',"true": [],"false": []},
-      ]),
+
     ],
   }
   var toolboxgap = '<sep gap="5"></sep>'

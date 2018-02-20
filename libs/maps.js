@@ -174,9 +174,9 @@ maps.prototype.save = function(maps, floorId) {
 maps.prototype.load = function (data, floorId) {
     if (floorId == undefined) {
         var map = {};
-        for (var id in data) {
-            map[id] = this.load(data, id);
-        }
+        core.floorIds.forEach(function (id) {
+            map[id] = core.maps.loadFloor(id, data[id]);
+        })
         return map;
     }
     return this.loadFloor(floorId, data[floorId]);

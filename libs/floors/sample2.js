@@ -175,10 +175,7 @@ main.floors.sample2 = {
                 {"type": "changePos", "direction": "up"},
                 {"type": "playSound", "name": "item.ogg"},
                 "\t[blackMagician]出来吧！禁忌——紫电凶杀阵！",
-                {"type": "show", "loc": [4,3], "time": 500}, // 依次显示四个角的法师
-                {"type": "show", "loc": [4,6], "time": 500}, // 依次显示四个角的法师
-                {"type": "show", "loc": [8,6], "time": 500}, // 依次显示四个角的法师
-                {"type": "show", "loc": [8,3], "time": 500}, // 依次显示四个角的法师
+                {"type": "show", "loc": [[4,3],[4,6],[8,6],[8,3]], "time": 500}, // 依次显示四个角的法师
                 {"type": "sleep", "time": 500},
                 "\t[blackMagician]感受绝望吧！冥顽不化的蠢货！",
                 /*

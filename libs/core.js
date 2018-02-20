@@ -1982,7 +1982,7 @@ core.prototype.canMoveHero = function(x,y,direction,floorId) {
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
-    var nextBlock = core.getBlock(x+scan[direction].x,y+scan[direction].y);
+    var nextBlock = core.getBlock(x+scan[direction].x,y+scan[direction].y,floorId);
     if (nextBlock!=null){
         nextId = nextBlock.block.event.id;
         // 遇到单向箭头处理
@@ -2955,7 +2955,7 @@ core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
 }
 
 ////// 显示/隐藏某个块时的动画效果 //////
-core.prototype.animateBlock = function (x,y,type,time,callback) {
+core.prototype.animateBlock = function (loc,type,time,callback) {
     if (type!='hide') type='show';
     core.status.replay.animate=true;
 
@@ -2963,31 +2963,46 @@ core.prototype.animateBlock = function (x,y,type,time,callback) {
     core.saveCanvas('animate');
     core.clearMap('animate', 0, 0, 416, 416);
 
-    var block = core.getBlock(x,y,core.status.floorId,false);
-    if (block==null) {// 不存在
+    if (typeof loc[0] == 'number' && typeof loc[1] == 'number')
+        loc = [loc];
+
+    var list = [];
+    loc.forEach(function (t) {
+        var block = core.getBlock(t[0],t[1],core.status.floorId,false);
+        if (block==null) return;
+        block=block.block;
+        list.push({
+            'x': t[0], 'y': t[1],
+            'blockIcon': core.material.icons[block.event.cls][block.event.id],
+            'blockImage': core.material.images[block.event.cls]
+        })
+    })
+
+    if (list.length==0) {
         if (core.isset(callback)) callback();
         return;
     }
-    // 清空UI
-    //core.clearMap('ui', 0, 0, 416, 416);
-    //core.setAlpha('ui', 1.0);
 
-    block=block.block;
-    blockIcon = core.material.icons[block.event.cls][block.event.id];
-    blockImage = core.material.images[block.event.cls];
+    var draw = function () {
+        list.forEach(function (t) {
+            core.canvas.animate.drawImage(t.blockImage, 0, t.blockIcon * 32, 32, 32, t.x * 32, t.y * 32, 32, 32);
+        })
+    }
 
     var opacityVal = 0;
     if (type=='hide') opacityVal=1;
 
     core.setOpacity('animate', opacityVal);
-    core.canvas.animate.drawImage(blockImage, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+    draw();
 
     var animate = window.setInterval(function () {
         if (type=='show') opacityVal += 0.1;
         else opacityVal -= 0.1;
         core.setOpacity('animate', opacityVal);
-        core.clearMap('animate',block.x * 32, block.y * 32, 32, 32);
-        core.canvas.animate.drawImage(blockImage, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+        core.clearMap('animate',0,0,416,416);
+
+        // core.canvas.animate.drawImage(blockImage, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+        draw();
         if (opacityVal >=1 || opacityVal<=0) {
             clearInterval(animate);
             core.loadCanvas('animate');

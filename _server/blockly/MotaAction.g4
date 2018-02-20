@@ -187,6 +187,7 @@ action
     |   win_s
     |   lose_s
     |   if_s
+    |   input_s
     |   choices_s
     |   function_s
     |   pass_s
@@ -220,7 +221,7 @@ if (EvalString_0==''){
     if (IdString_0=='')title='\\t['+EvalString_0+']';
     else title='\\t['+EvalString_0+','+IdString_0+']';
 }
-if(EvalString_1 && !(/^(up|down)(,hero)?(,([0-9]|1[0-2]),([0-9]|1[0-2]))?$/.test(EvalString_1))) {
+if(EvalString_1 && !(/^(up|down)(,hero)?(,([+-]?\d+),([+-]?\d+))?$/.test(EvalString_1))) {
   throw new Error('对话框效果的用法请右键点击帮助');
 }
 EvalString_1 = EvalString_1 && ('\\b['+EvalString_1+']');
@@ -279,17 +280,23 @@ return code;
 */
 
 show_s
-    :   '显示事件' 'x' Int ',' 'y' Int '楼层' IdString? '动画时间' Int? Newline
+    :   '显示事件' 'x' EvalString ',' 'y' EvalString '楼层' IdString? '动画时间' Int? Newline
     ;
 
 /* show_s
-tooltip : show: 将一个禁用事件启用,楼层和动画时间可不填
+tooltip : show: 将禁用事件启用,楼层和动画时间可不填,xy可用逗号分隔表示多个点
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=show-%e5%b0%86%e4%b8%80%e4%b8%aa%e7%a6%81%e7%94%a8%e4%ba%8b%e4%bb%b6%e5%90%af%e7%94%a8
 default : [0,0,"",500]
 colour : this.eventColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-Int_2 = Int_2 ?(', "time": '+Int_2):'';
-var code = '{"type": "show", "loc": ['+Int_0+','+Int_1+']'+IdString_0+''+Int_2+'},\n';
+var pattern = /^([+-]?\d+)(,[+-]?\d+)*$/;
+if(!pattern.test(EvalString_0) || !pattern.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
+EvalString_0=EvalString_0.split(',');
+EvalString_1=EvalString_1.split(',');
+if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
+for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+Int_0 = Int_0 ?(', "time": '+Int_0):'';
+var code = '{"type": "show", "loc": ['+EvalString_0.join(',')+']'+IdString_0+''+Int_0+'},\n';
 return code;
 */
 
@@ -298,13 +305,19 @@ hide_s
     ;
 
 /* hide_s
-tooltip : hide: 将一个启用事件禁用,所有参数均可不填,代表禁用事件自身
+tooltip : hide: 将一个启用事件禁用,所有参数均可不填,代表禁用事件自身,xy可用逗号分隔表示多个点
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=hide-%e5%b0%86%e4%b8%80%e4%b8%aa%e5%90%af%e7%94%a8%e4%ba%8b%e4%bb%b6%e7%a6%81%e7%94%a8
 default : ["","","",500]
 colour : this.eventColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-    floorstr = ', "loc": ['+EvalString_0+','+EvalString_1+']';
+    var pattern = /^([+-]?\d+)(,[+-]?\d+)*$/;
+    if(!pattern.test(EvalString_0) || !pattern.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    EvalString_0=EvalString_0.split(',');
+    EvalString_1=EvalString_1.split(',');
+    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+    floorstr = ', "loc": ['+EvalString_0.join(',')+']';
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
@@ -495,7 +508,7 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=animate%ef%bc%9a%e6%98%be
 default : ["zone","hero"]
 colour : this.soundColor
 if (EvalString_0) {
-  if(/hero|([0-9]|1[0-2]),([0-9]|1[0-2])/.test(EvalString_0)) {
+  if(/hero|([+-]?\d+),([+-]?\d+)/.test(EvalString_0)) {
     if(EvalString_0.indexOf(',')!==-1)EvalString_0='['+EvalString_0+']';
     else EvalString_0='"'+EvalString_0+'"';
     EvalString_0 = ', "loc": '+EvalString_0;
@@ -687,6 +700,19 @@ tooltip : lose: 游戏失败, 该事件会显示失败页面, 并重新开始游
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=lose-%e6%b8%b8%e6%88%8f%e5%a4%b1%e8%b4%a5
 default : [" "]
 var code = '{"type": "lose", "reason": "'+EvalString_0+'"},\n';
+return code;
+*/
+
+input_s
+    :   '接受用户输入,提示' ':' EvalString Newline
+    ;
+
+/* input_s
+tooltip : input：接受用户输入, 事件只能接受非负整数输入, 所有非法的输入将全部变成0
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=input%ef%bc%9a%e6%8e%a5%e5%8f%97%e7%94%a8%e6%88%b7%e8%be%93%e5%85%a5
+default : ["请输入一个数"]
+colour : this.dataColor
+var code = '{"type": "input", "text": "'+EvalString_0+'"},\n';
 return code;
 */
 
@@ -1109,13 +1135,27 @@ ActionParser.prototype.parseAction = function() {
       this.parseAction();
       break;
     case "show": // 显示
+      if (typeof data.loc[0] == 'number' && typeof data.loc[1] == 'number')
+        data.loc = [data.loc];
+      var x_str=[],y_str=[];
+      data.loc.forEach(function (t) {
+        x_str.push(t[0]);
+        y_str.push(t[1]);
+      })
       this.next = MotaActionBlocks['show_s'].xmlText([
-        data.loc[0],data.loc[1],data.floorId||'',data.time||0,this.next]);
+        x_str.join(','),y_str.join(','),data.floorId||'',data.time||0,this.next]);
       break;
     case "hide": // 消失
       data.loc=data.loc||[];
+      if (typeof data.loc[0] == 'number' && typeof data.loc[1] == 'number')
+        data.loc = [data.loc];
+      var x_str=[],y_str=[];
+      data.loc.forEach(function (t) {
+        x_str.push(t[0]);
+        y_str.push(t[1]);
+      })
       this.next = MotaActionBlocks['hide_s'].xmlText([
-        data.loc[0]||'',data.loc[1]||'',data.floorId||'',data.time||0,this.next]);
+        x_str.join(','),y_str.join(','),data.floorId||'',data.time||0,this.next]);
       break;
     case "setBlock": // 设置图块
       data.loc=data.loc||[];
@@ -1213,6 +1253,10 @@ ActionParser.prototype.parseAction = function() {
         MotaActionBlocks['idString_e'].xmlText([data.name]),
         MotaActionBlocks['evalString_e'].xmlText([data.value]),
         this.next]);
+      break;
+    case "input":
+      this.next = MotaActionBlocks['input_s'].xmlText([
+        data.text,this.next]);
       break;
     case "if": // 条件判断
       this.next = MotaActionBlocks['if_s'].xmlText([

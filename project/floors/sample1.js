@@ -53,18 +53,12 @@ main.floors.sample1 =
             {"type": "show", "loc": [1,5], "time": 1500}, // 显示红衣魔王，动画效果1500ms
             {"type": "sleep", "time": 500}, // 等待500ms
             "\t[redKing]欢迎来到魔塔，你是第一百位挑战者。\n若你能打败我所有的手下，我就与你一对一的决斗。\n现在你必须接受我的安排。",
-            {"type": "show", "loc": [1,6], "time": 500}, // 显示四个白衣武士，每个动画效果500ms
-            {"type": "show", "loc": [0,7], "time": 500},
-            {"type": "show", "loc": [1,8], "time": 500},
-            {"type": "show", "loc": [2,7], "time": 500},
+            {"type": "show", "loc": [[1,6],[0,7],[1,8],[2,7]], "time": 500}, // 显示四个白衣武士，每个动画效果500ms
             "\t[hero]什么？",
             {"type": "playSound", "name": "attack.ogg"}, // 播放战斗音频
             {"type": "setValue", "name": "status:atk", "value": "status:atk/10"}, // 勇士的攻防变成原来的十分之一
             {"type": "setValue", "name": "status:def", "value": "status:def/10"},
-            {"type": "hide", "loc": [1,6]}, // 直接隐藏四个白衣武士，没有动画效果
-            {"type": "hide", "loc": [0,7]},
-            {"type": "hide", "loc": [2,7]},
-            {"type": "hide", "loc": [1,8]},
+            {"type": "hide", "loc": [[1,6],[0,7],[2,7],[1,8]]}, // 直接隐藏四个白衣武士，没有动画效果
             {"type": "hide", "loc": [1,5], "time": 500}, // 隐藏红衣魔王，动画500ms
             {"type": "hide"}, // 隐藏本事件
             {"type": "setFg", "color": [0,0,0], "time": 1250}, // 渐变为白色
@@ -259,7 +253,8 @@ main.floors.sample1 =
         "12,11": [ // 自定义事件的老人
             "\t[老人,womanMagician]使用 {\"type\":\"function\"} 可以写自定义的JS脚本。\n本塔支持的所有主要API会在doc文档内给出。",
             "\t[老人,womanMagician]例如这个例子：即将弹出一个输入窗口，然后会将你的输入结果直接加到你的攻击力上。",
-            {"type": "function", "function": `function() { // 自己写JS脚本并执行
+            /*
+            {"type": "function", "function": function() { // 自己写JS脚本并执行
 
                 // 注意一下prompt对于录像是如何处理的
                 var value;
@@ -289,7 +284,19 @@ main.floors.sample1 =
                         "操作成功，攻击+"+value // 对话框提示
                     ]);
                 }
-            }`},
+            }},
+            */
+            {"type": "input", "text": "请输入你要加攻击力的数值："},
+            {"type": "if", "condition": "flag:input>0",
+                "true": [
+                    {"type": "setValue", "name": "status:atk", "value": "status:atk+flag:input"},
+                    {"type": "tip", "text": "操作成功，攻击+${flag:input}"},
+                    "操作成功，攻击+${flag:input}"
+                ],
+                "false": [
+
+                ]
+            },
             "\t[老人,womanMagician]具体可参见样板中本事件的写法。"
         ]
     },

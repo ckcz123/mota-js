@@ -320,26 +320,33 @@ events.prototype.doAction = function() {
             core.events.doAction();
             break;
         case "show": // 显示
+            if (typeof data.loc[0] == 'number' && typeof data.loc[1] == 'number')
+                data.loc = [data.loc];
             if (core.isset(data.time) && data.time>0 && (!core.isset(data.floorId) || data.floorId==core.status.floorId)) {
-                core.animateBlock(data.loc[0],data.loc[1],'show', data.time, function () {
-                    core.showBlock(data.loc[0],data.loc[1],data.floorId);
+                core.animateBlock(data.loc,'show', data.time, function () {
+                    data.loc.forEach(function (t) {
+                        core.showBlock(t[0],t[1],data.floorId)
+                    })
                     core.events.doAction();
                 });
             }
             else {
-                core.showBlock(data.loc[0],data.loc[1],data.floorId)
+                data.loc.forEach(function (t) {
+                    core.showBlock(t[0],t[1],data.floorId)
+                })
                 this.doAction();
             }
             break;
         case "hide": // 消失
-            var toX=x, toY=y, toId=core.status.floorId;
-            if (core.isset(data.loc)) {
-                toX=data.loc[0]; toY=data.loc[1];
-            }
-            if (core.isset(data.floorId)) toId=data.floorId;
-            core.removeBlock(toX,toY,toId)
-            if (core.isset(data.time) && data.time>0 && toId==core.status.floorId) {
-                core.animateBlock(toX,toY,'hide',data.time, function () {
+            if (!core.isset(data.loc))
+                data.loc = [x,y];
+            if (typeof data.loc[0] == 'number' && typeof data.loc[1] == 'number')
+                data.loc = [data.loc];
+            data.loc.forEach(function (t) {
+                core.removeBlock(t[0],t[1],data.floorId);
+            })
+            if (core.isset(data.time) && data.time>0 && (!core.isset(data.floorId) || data.floorId==core.status.floorId)) {
+                core.animateBlock(data.loc,'hide',data.time, function () {
                     core.events.doAction();
                 });
             }
@@ -352,7 +359,7 @@ events.prototype.doAction = function() {
                     y=data.loc[1];
                 }
                 var floorId = data.floorId||core.status.floorId;
-                var originBlock=core.getBlock(x,y,toId,false);
+                var originBlock=core.getBlock(x,y,floorId,false);
                 var block = core.maps.getBlock(x,y,data.number);
                 core.maps.addInfo(block);
                 core.maps.addEvent(block,x,y,core.floors[floorId].events[x+","+y]);
@@ -528,6 +535,30 @@ events.prototype.doAction = function() {
             }
             else {
                 core.updateStatusBar();
+                this.doAction();
+            }
+            break;
+        case "input":
+            {
+                var value;
+                if (core.status.replay.replaying) {
+                    var action = core.status.replay.toReplay.shift();
+                    if (action.indexOf("input:")==0 ) {
+                        value=parseInt(action.substring(6));
+                    }
+                    else {
+                        core.stopReplay();
+                        core.drawTip("录像文件出错");
+                        return;
+                    }
+
+                }
+                else {
+                    value = prompt(core.replaceText(data.text));
+                }
+                value = Math.abs(parseInt(value)||0);
+                core.status.route.push("input:"+value);
+                core.setFlag("input", value);
                 this.doAction();
             }
             break;

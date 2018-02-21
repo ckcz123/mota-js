@@ -216,6 +216,11 @@ core.prototype.init = function (coreData) {
         core.platform.fileReader.onload = function () {
             var content=core.platform.fileReader.result;
             var obj=null;
+            if(content.slice(0,4)==='data'){
+                if (core.isset(core.platform.successCallback))
+                    core.platform.successCallback(content);
+                return;
+            }
             try {
                 obj=JSON.parse(content);
                 if (core.isset(obj)) {
@@ -4952,7 +4957,7 @@ core.prototype.isset = function (val) {
 }
 
 ////// 读取一个本地文件内容 //////
-core.prototype.readFile = function (success, error) {
+core.prototype.readFile = function (success, error, readType) {
 
     // step 0: 不为http/https，直接不支持
     if (!core.platform.isOnline) {
@@ -4979,7 +4984,8 @@ core.prototype.readFile = function (success, error) {
                     core.platform.errorCallback();
                 return;
             }
-            core.platform.fileReader.readAsText(core.platform.fileInput.files[0]);
+            if(!readType)core.platform.fileReader.readAsText(core.platform.fileInput.files[0]);
+            else core.platform.fileReader.readAsDataURL(core.platform.fileInput.files[0]);
             core.platform.fileInput.value = '';
         }
     }

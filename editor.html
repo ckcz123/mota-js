@@ -35,15 +35,16 @@
     <div id="left1" class='leftTab'><div ><!-- appendpic -->
       <h3>追加素材</h3>
       <p>
-        <input type="button" value="选择文件"/>
+        <input id="selectFileBtn" type="button" value="导入文件到画板"/>
         <select id="selectAppend"></select><!-- ["terrains", "animates", "enemys", "items", "npcs"] -->
-        <input type="button" value="追加"/>
+        <input id="appendConfirm" type="button" value="追加"/>
       </p>
-      <div id="appendPicCanvas" style="position:relative;overflow: auto;height:500px;">
+      <div id="appendPicCanvas" style="position:relative;overflow: auto;height:470px;">
+        <canvas style="position:absolute"></canvas><!-- 用于画出灰白相间背景 -->
         <canvas style="position:absolute"></canvas><!-- 用于画出选中文件 -->
         <canvas style="position:absolute;z-index:100"></canvas><!-- 用于响应鼠标点击 -->
         <canvas style="position:absolute;display:none;"></canvas><!-- 画出追加后的sprite用于储存 -->
-        <div>
+        <div id="appendPicSelection">
           <div class="appendSelection"><span style="font-size:10px">1</span></div>
           <div class="appendSelection"><span style="font-size:10px">&nbsp;&nbsp;2</span></div>
           <div class="appendSelection"><span style="font-size:10px">&nbsp;&nbsp;&nbsp;&nbsp;3</span></div>

@@ -230,13 +230,13 @@ return code;
 */
 
 setText_s
-    :   '设置剧情文本的属性' '位置' SetTextPosition_List BGNL? '标题颜色' EvalString? '正文颜色' EvalString? '背景色' EvalString? Newline
+    :   '设置剧情文本的属性' '位置' SetTextPosition_List BGNL? '标题颜色' EvalString? '正文颜色' EvalString? '背景色' EvalString? '粗体' B_List Newline
     ;
 
 /* setText_s
 tooltip : setText：设置剧情文本的属性,颜色为RGB三元组或RGBA四元组
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=settext%ef%bc%9a%e8%ae%be%e7%bd%ae%e5%89%a7%e6%83%85%e6%96%87%e6%9c%ac%e7%9a%84%e5%b1%9e%e6%80%a7
-default : [null,"255,215,0,1","255,255,255,1","0,0,0,0.85"]
+default : [null,"255,215,0,1","255,255,255,1","0,0,0,0.85",[['不改变','null'],['设为粗体','true'],['取消粗体','false']]]
 SetTextPosition_List_0 = ', "position": "'+SetTextPosition_List_0+'"';
 var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
 if (EvalString_0) {
@@ -251,7 +251,8 @@ if (EvalString_2) {
   if (!colorRe.test(EvalString_2))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
   EvalString_2 = ', "background": ['+EvalString_2+']';
 }
-var code = '{"type": "setText"'+SetTextPosition_List_0+EvalString_0+EvalString_1+EvalString_2+'},\n';
+B_List_0 = ', "bold": '+B_List_0;
+var code = '{"type": "setText"'+SetTextPosition_List_0+EvalString_0+EvalString_1+EvalString_2+B_List_0+'},\n';
 return code;
 */
 
@@ -922,6 +923,12 @@ Weather_List
     :   '无'|'rain'|'snow'
     ;
 
+B_List
+    :   'null'
+    |   'true'
+    |   'false'
+    ;
+
 Bool:   'TRUE' 
     |   'FALSE'
     ;
@@ -1127,7 +1134,7 @@ ActionParser.prototype.parseAction = function() {
       data.text=setTextfunc(data.text);
       data.background=setTextfunc(data.background);
       this.next = MotaActionBlocks['setText_s'].xmlText([
-        data.position,data.title,data.text,data.background,this.next]);
+        data.position,data.title,data.text,data.background,data.bold,this.next]);
       break;
     case "tip":
       this.next = MotaActionBlocks['tip_s'].xmlText([

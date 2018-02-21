@@ -130,6 +130,7 @@ function core() {
             "title": [255,215,0,1],
             "background": [0,0,0,0.85],
             "text": [255,255,255,1],
+            "bold": false,
         },
         'curtainColor': null,
         'usingCenterFly':false,
@@ -4788,8 +4789,10 @@ core.prototype.loadData = function (data, callback) {
 
     // load shop times
     for (var shop in core.status.shops) {
-        core.status.shops[shop].times = data.shops[shop].times;
-        core.status.shops[shop].visited = data.shops[shop].visited;
+        if (core.isset(data.shops[shop])) {
+            core.status.shops[shop].times = data.shops[shop].times;
+            core.status.shops[shop].visited = data.shops[shop].visited;
+        }
     }
 
     core.events.afterLoadData(data);

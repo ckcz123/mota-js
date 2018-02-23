@@ -375,9 +375,11 @@ events.prototype.doAction = function() {
                         originBlock.block.id = data.number;
                         originBlock.block.event = block.event;
                     }
-                    core.drawMap(floorId);
-                    core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
-                    core.updateStatusBar();
+                    if (floorId==core.status.floorId) {
+                        core.drawMap(floorId);
+                        core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+                        core.updateStatusBar();
+                    }
                 }
                 this.doAction();
                 break;

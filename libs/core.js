@@ -100,6 +100,7 @@ function core() {
             'lastDirection': null,
             'cursorX': null,
             'cursorY': null,
+            "moveDirectly": false,
         },
 
         // 按下键的时间：为了判定双击
@@ -1279,8 +1280,10 @@ core.prototype.onup = function () {
         var posx=core.status.stepPostfix[0].x;
         var posy=core.status.stepPostfix[0].y;
         core.status.stepPostfix=[];
-        core.canvas.ui.clearRect(0, 0, 416,416);
-        core.canvas.ui.restore();
+        if (!core.status.lockControl) {
+            core.canvas.ui.clearRect(0, 0, 416,416);
+            core.canvas.ui.restore();
+        }
 
         // 长按
         if (!core.status.lockControl && stepPostfix.length==0 && core.status.downTime!=null && new Date()-core.status.downTime>=1000) {
@@ -1559,15 +1562,19 @@ core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
         core.stopAutomaticRoute();
         if (lastX==destX && lastY==destY) {
             core.lockControl();
+            core.status.automaticRoute.moveDirectly = true;
             setTimeout(function () {
-                core.unLockControl();
-                if (core.canMoveDirectly(destX, destY)) {
-                    core.clearMap('hero', 0, 0, 416, 416);
-                    core.setHeroLoc('x', destX);
-                    core.setHeroLoc('y', destY);
-                    core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
-                    core.status.route.push("move:"+destX+":"+destY);
+                if (core.status.automaticRoute.moveDirectly) {
+                    core.unLockControl();
+                    if (core.canMoveDirectly(destX, destY)) {
+                        core.clearMap('hero', 0, 0, 416, 416);
+                        core.setHeroLoc('x', destX);
+                        core.setHeroLoc('y', destY);
+                        core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+                        core.status.route.push("move:"+destX+":"+destY);
+                    }
                 }
+                core.status.automaticRoute.moveDirectly = false;
             }, 100);
         }
         return;
@@ -2008,6 +2015,9 @@ core.prototype.canMoveDirectly = function (destX,destY) {
     var fromX = core.getHeroLoc('x'), fromY = core.getHeroLoc('y');
     if (fromX==destX&&fromY==destY) return false;
 
+    if (core.getBlock(fromX,fromY)!=null||core.status.checkBlock.damage[13*fromX+fromY]>0)
+        return false;
+
     // BFS
     var visited=[], queue=[];
     visited[13*fromX+fromY]=true;
@@ -2142,6 +2152,7 @@ core.prototype.waitHeroToStop = function(callback) {
     if (core.isset(callback)) {
         core.status.replay.animate=true;
         core.lockControl();
+        core.status.automaticRoute.moveDirectly = false;
         setTimeout(function(){
             core.status.replay.animate=false;
             core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
@@ -2153,6 +2164,7 @@ core.prototype.waitHeroToStop = function(callback) {
 ////// 停止勇士的移动状态 //////
 core.prototype.stopHero = function () {
     core.status.heroStop = true;
+    core.status.automaticRoute.moveDirectly = false;
     clearInterval(core.interval.heroMoveTriggerInterval);
     core.interval.heroMoveTriggerInterval=null;
 }
@@ -2380,6 +2392,7 @@ core.prototype.trigger = function (x, y) {
                         }
                     }
                 }
+                core.status.automaticRoute.moveDirectly = false;
                 core.material.events[trigger](mapBlocks[b], core, function (data) {
 
                 });

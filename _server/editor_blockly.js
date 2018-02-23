@@ -112,6 +112,13 @@ initscript=String.raw`
       MotaActionBlocks['evalString_e'].xmlText(),
     ],
     'template':[
+      '<label text="检测音乐如果没有开启则系统提示开启"></label>',
+      MotaActionFunctions.actionParser.parseList({"type": "if", "condition": "!core.musicStatus.bgmStatus",
+        "true": [
+          "\t[系统提示]你当前音乐处于关闭状态，本塔开音乐游戏效果更佳"
+        ],
+        "false": []
+      }),
       '<label text="战前剧情"></label>',
       MotaActionFunctions.actionParser.parse({ 
         "trigger": "action", 
@@ -363,19 +370,19 @@ editor_blockly.doubleClickBlock = function (blockId){
   var b=editor_blockly.workspace.getBlockById(blockId);
   console.log(b);
   var textStringDict = {
-      'text_0_s':'EvalString_0',
-      'text_1_s':'EvalString_2',
-      'choices_s':'EvalString_0',
-      'function_s':'RawEvalString_0',
+    'text_0_s':'EvalString_0',
+    'text_1_s':'EvalString_2',
+    'choices_s':'EvalString_0',
+    'function_s':'RawEvalString_0',
   }
-  var f=textStringDict[b.type];
+  var f=b?textStringDict[b.type]:null;
   if(f){
-      var value = b.getFieldValue(f);
-      //多行编辑
-      editor_blockly.multiLineEdit(value,b,f,function(newvalue,b,f){
-        if(textStringDict[b.type]!=='RawEvalString_0'){}
-        b.setFieldValue(newvalue.split('\n').join('\\n'),f);
-      });
+    var value = b.getFieldValue(f);
+    //多行编辑
+    editor_blockly.multiLineEdit(value,b,f,function(newvalue,b,f){
+      if(textStringDict[b.type]!=='RawEvalString_0'){}
+      b.setFieldValue(newvalue.split('\n').join('\\n'),f);
+    });
   }
 }
 

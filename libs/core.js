@@ -4606,10 +4606,10 @@ core.prototype.syncLoad = function () {
         }
     };
     xhr.ontimeout = function() {
-        core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因：Timeout");
+        core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因：Timeout");
     }
     xhr.onerror = function() {
-        core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因：XHR Error");
+        core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因：XHR Error");
     }
     xhr.send(formData);
 }

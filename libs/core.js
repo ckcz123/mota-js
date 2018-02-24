@@ -1561,11 +1561,9 @@ core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
         var lastX = core.status.automaticRoute.destX, lastY=core.status.automaticRoute.destY;
         core.stopAutomaticRoute();
         if (lastX==destX && lastY==destY) {
-            core.lockControl();
             core.status.automaticRoute.moveDirectly = true;
             setTimeout(function () {
                 if (core.status.automaticRoute.moveDirectly) {
-                    core.unLockControl();
                     if (core.canMoveDirectly(destX, destY)) {
                         core.clearMap('hero', 0, 0, 416, 416);
                         core.setHeroLoc('x', destX);
@@ -2046,6 +2044,7 @@ core.prototype.moveHero = function (direction, callback) {
         core.setHeroLoc('direction', direction);
     if (!core.isset(callback)) { // 如果不存在回调函数，则使用heroMoveTrigger
         core.status.heroStop = false;
+        core.status.automaticRoute.moveDirectly = false;
         if (core.interval.heroMoveTriggerInterval==null) {
             core.moveAction();
             core.interval.heroMoveTriggerInterval = setInterval(function () {
@@ -4606,10 +4605,10 @@ core.prototype.syncLoad = function () {
         }
     };
     xhr.ontimeout = function() {
-        core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因：Timeout");
+        core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因：Timeout");
     }
     xhr.onerror = function() {
-        core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因：XHR Error");
+        core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因：XHR Error");
     }
     xhr.send(formData);
 }

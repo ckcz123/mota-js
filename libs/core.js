@@ -1570,7 +1570,7 @@ core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
                     }
                 }
                 core.status.automaticRoute.moveDirectly = false;
-            }, 100);
+            }, 200);
         }
         return;
     }

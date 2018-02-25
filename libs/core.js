@@ -19,7 +19,6 @@ function core() {
         'turnHeroTimeout': null,
     }
     this.interval = {
-        'heroMoveTriggerInterval': null,
         'heroMoveInterval': null,
         "tipAnimate": null,
         'openDoorAnimate': null,
@@ -100,6 +99,7 @@ function core() {
             'lastDirection': null,
             'cursorX': null,
             'cursorY': null,
+            "moveDirectly": false,
         },
 
         // 按下键的时间：为了判定双击
@@ -805,7 +805,6 @@ core.prototype.startGame = function (hard, callback) {
     core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
 
     core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-        //core.setHeroMoveTriggerInterval();
         if (core.isset(callback)) callback();
     });
 
@@ -1157,7 +1156,6 @@ core.prototype.keyUp = function(keyCode) {
                     core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
                     core.events.setInitData(hard);
                     core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-                        //core.setHeroMoveTriggerInterval();
                         core.startReplay(route);
                     });
                 }, function () {
@@ -1284,8 +1282,10 @@ core.prototype.onup = function () {
         var posx=core.status.stepPostfix[0].x;
         var posy=core.status.stepPostfix[0].y;
         core.status.stepPostfix=[];
-        core.canvas.ui.clearRect(0, 0, 416,416);
-        core.canvas.ui.restore();
+        if (!core.status.lockControl) {
+            core.canvas.ui.clearRect(0, 0, 416,416);
+            core.canvas.ui.restore();
+        }
 
         // 长按
         if (!core.status.lockControl && stepPostfix.length==0 && core.status.downTime!=null && new Date()-core.status.downTime>=1000) {
@@ -1563,16 +1563,18 @@ core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
         var lastX = core.status.automaticRoute.destX, lastY=core.status.automaticRoute.destY;
         core.stopAutomaticRoute();
         if (lastX==destX && lastY==destY) {
-            core.lockControl();
+            core.status.automaticRoute.moveDirectly = true;
             setTimeout(function () {
-                core.unLockControl();
-                if (core.canMoveDirectly(destX, destY)) {
-                    core.clearMap('hero', 0, 0, 416, 416);
-                    core.setHeroLoc('x', destX);
-                    core.setHeroLoc('y', destY);
-                    core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
-                    core.status.route.push("move:"+destX+":"+destY);
+                if (core.status.automaticRoute.moveDirectly && core.status.heroMoving==0) {
+                    if (core.canMoveDirectly(destX, destY)) {
+                        core.clearMap('hero', 0, 0, 416, 416);
+                        core.setHeroLoc('x', destX);
+                        core.setHeroLoc('y', destY);
+                        core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+                        core.status.route.push("move:"+destX+":"+destY);
+                    }
                 }
+                core.status.automaticRoute.moveDirectly = false;
             }, 100);
         }
         return;
@@ -2013,6 +2015,9 @@ core.prototype.canMoveDirectly = function (destX,destY) {
     var fromX = core.getHeroLoc('x'), fromY = core.getHeroLoc('y');
     if (fromX==destX&&fromY==destY) return false;
 
+    if (core.getBlock(fromX,fromY)!=null||core.status.checkBlock.damage[13*fromX+fromY]>0)
+        return false;
+
     // BFS
     var visited=[], queue=[];
     visited[13*fromX+fromY]=true;
@@ -2041,17 +2046,18 @@ core.prototype.moveHero = function (direction, callback) {
         core.setHeroLoc('direction', direction);
     if (!core.isset(callback)) { // 如果不存在回调函数，则使用heroMoveTrigger
         core.status.heroStop = false;
-        if (core.interval.heroMoveTriggerInterval==null) {
-            core.moveAction();
-            core.interval.heroMoveTriggerInterval = setInterval(function () {
-                if (!core.status.heroStop) {
-                    core.moveAction();
-                }
-                else {
-                    core.stopHero();
-                }
-            }, 50)
+        core.status.automaticRoute.moveDirectly = false;
+
+        var doAction = function () {
+            if (!core.status.heroStop) {
+                core.moveAction();
+                setTimeout(doAction, 50);
+            }
+            else {
+                core.stopHero();
+            }
         }
+        doAction();
     }
     else { // 否则，只向某个方向移动一步，然后调用callback
         core.moveAction(function () {
@@ -2147,6 +2153,7 @@ core.prototype.waitHeroToStop = function(callback) {
     if (core.isset(callback)) {
         core.status.replay.animate=true;
         core.lockControl();
+        core.status.automaticRoute.moveDirectly = false;
         setTimeout(function(){
             core.status.replay.animate=false;
             core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
@@ -2158,8 +2165,6 @@ core.prototype.waitHeroToStop = function(callback) {
 ////// 停止勇士的移动状态 //////
 core.prototype.stopHero = function () {
     core.status.heroStop = true;
-    clearInterval(core.interval.heroMoveTriggerInterval);
-    core.interval.heroMoveTriggerInterval=null;
 }
 
 ////// 绘制勇士 //////
@@ -2385,6 +2390,7 @@ core.prototype.trigger = function (x, y) {
                         }
                     }
                 }
+                core.status.automaticRoute.moveDirectly = false;
                 core.material.events[trigger](mapBlocks[b], core, function (data) {
 
                 });
@@ -4472,7 +4478,6 @@ core.prototype.doSL = function (id, type) {
                 core.resetStatus(core.firstData.hero, data.hard, core.firstData.floorId, null, core.initStatus.maps);
                 core.events.setInitData(data.hard);
                 core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-                    //core.setHeroMoveTriggerInterval();
                     core.startReplay(core.decodeRoute(data.route));
                 });
             }
@@ -4626,10 +4631,10 @@ core.prototype.syncLoad = function () {
         }
     };
     xhr.ontimeout = function() {
-        core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因：Timeout");
+        core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因：Timeout");
     }
     xhr.onerror = function() {
-        core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因：XHR Error");
+        core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因：XHR Error");
     }
     xhr.send(formData);
 }
@@ -4798,7 +4803,6 @@ core.prototype.loadData = function (data, callback) {
     core.events.afterLoadData(data);
 
     core.changeFloor(data.floorId, null, data.hero.loc, 0, function() {
-        //core.setHeroMoveTriggerInterval();
         if (core.isset(callback)) callback();
     });
 }

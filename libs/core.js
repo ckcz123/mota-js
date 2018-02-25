@@ -1560,7 +1560,7 @@ core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
         if (lastX==destX && lastY==destY) {
             core.status.automaticRoute.moveDirectly = true;
             setTimeout(function () {
-                if (core.status.automaticRoute.moveDirectly) {
+                if (core.status.automaticRoute.moveDirectly && core.status.heroMoving==0) {
                     if (core.canMoveDirectly(destX, destY)) {
                         core.clearMap('hero', 0, 0, 416, 416);
                         core.setHeroLoc('x', destX);
@@ -1570,7 +1570,7 @@ core.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
                     }
                 }
                 core.status.automaticRoute.moveDirectly = false;
-            }, 200);
+            }, 100);
         }
         return;
     }

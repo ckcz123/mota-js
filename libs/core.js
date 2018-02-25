@@ -19,7 +19,6 @@ function core() {
         'turnHeroTimeout': null,
     }
     this.interval = {
-        'heroMoveTriggerInterval': null,
         'heroMoveInterval': null,
         "tipAnimate": null,
         'openDoorAnimate': null,
@@ -801,7 +800,6 @@ core.prototype.startGame = function (hard, callback) {
     core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
 
     core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-        //core.setHeroMoveTriggerInterval();
         if (core.isset(callback)) callback();
     });
 
@@ -1153,7 +1151,6 @@ core.prototype.keyUp = function(keyCode) {
                     core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
                     core.events.setInitData(hard);
                     core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-                        //core.setHeroMoveTriggerInterval();
                         core.startReplay(route);
                     });
                 }, function () {
@@ -2045,17 +2042,17 @@ core.prototype.moveHero = function (direction, callback) {
     if (!core.isset(callback)) { // 如果不存在回调函数，则使用heroMoveTrigger
         core.status.heroStop = false;
         core.status.automaticRoute.moveDirectly = false;
-        if (core.interval.heroMoveTriggerInterval==null) {
-            core.moveAction();
-            core.interval.heroMoveTriggerInterval = setInterval(function () {
-                if (!core.status.heroStop) {
-                    core.moveAction();
-                }
-                else {
-                    core.stopHero();
-                }
-            }, 50)
+
+        var doAction = function () {
+            if (!core.status.heroStop) {
+                core.moveAction();
+                setTimeout(doAction, 50);
+            }
+            else {
+                core.stopHero();
+            }
         }
+        doAction();
     }
     else { // 否则，只向某个方向移动一步，然后调用callback
         core.moveAction(function () {
@@ -2163,9 +2160,6 @@ core.prototype.waitHeroToStop = function(callback) {
 ////// 停止勇士的移动状态 //////
 core.prototype.stopHero = function () {
     core.status.heroStop = true;
-    core.status.automaticRoute.moveDirectly = false;
-    clearInterval(core.interval.heroMoveTriggerInterval);
-    core.interval.heroMoveTriggerInterval=null;
 }
 
 ////// 绘制勇士 //////
@@ -4451,7 +4445,6 @@ core.prototype.doSL = function (id, type) {
                 core.resetStatus(core.firstData.hero, data.hard, core.firstData.floorId, null, core.initStatus.maps);
                 core.events.setInitData(data.hard);
                 core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-                    //core.setHeroMoveTriggerInterval();
                     core.startReplay(core.decodeRoute(data.route));
                 });
             }
@@ -4777,7 +4770,6 @@ core.prototype.loadData = function (data, callback) {
     core.events.afterLoadData(data);
 
     core.changeFloor(data.floorId, null, data.hero.loc, 0, function() {
-        //core.setHeroMoveTriggerInterval();
         if (core.isset(callback)) callback();
     });
 }

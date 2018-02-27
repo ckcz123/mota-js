@@ -700,7 +700,8 @@ core.prototype.loadMusic = function (callback) {
         else {
             var music = new Audio();
             music.preload = core.musicStatus.startDirectly?'auto':'none';
-            music.src = 'project/sounds/'+t;
+            if (main.bgmRemote) music.src = 'https://gitee.com/ckcz123/h5music/raw/master/'+core.firstData.name+'/'+t;
+            else music.src = 'project/sounds/'+t;
             music.loop = 'loop';
             core.material.bgms[t] = music;
         }

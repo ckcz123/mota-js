@@ -2965,7 +2965,6 @@ core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
 ////// 显示/隐藏某个块时的动画效果 //////
 core.prototype.animateBlock = function (loc,type,time,callback) {
     if (type!='hide') type='show';
-    core.status.replay.animate=true;
 
     //clearInterval(core.interval.tipAnimate);
     core.saveCanvas('animate');
@@ -2991,6 +2990,7 @@ core.prototype.animateBlock = function (loc,type,time,callback) {
         return;
     }
 
+    core.status.replay.animate=true;
     var draw = function () {
         list.forEach(function (t) {
             core.canvas.animate.drawImage(t.blockImage, 0, t.blockIcon * 32, 32, 32, t.x * 32, t.y * 32, 32, 32);

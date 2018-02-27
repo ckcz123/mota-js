@@ -30,6 +30,7 @@ function main() {
         // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
         'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg', 'zone.ogg'
     ];
+    this.bgmRemote = false; // 是否使用远程的背景音乐；此项一般不要开启
 
     //------------------------ 用户修改内容 END ------------------------//
 

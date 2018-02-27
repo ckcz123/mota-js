@@ -52,7 +52,7 @@ function main() {
         'items', 'icons', 'maps', 'enemys', 'events', 'data', 'ui', 'core'
     ];
     this.pureData = [ 
-        "data","enemys","icons","maps","items"
+        "data","enemys","icons","maps","items","functions"
     ];
     this.images = [
         'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains'

@@ -1,7 +1,7 @@
 function events() {
 
 }
-
+var eventdata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.events;
 ////// 初始化 //////
 events.prototype.init = function () {
     this.events = {
@@ -105,52 +105,16 @@ events.prototype.startGame = function (hard) {
 }
 
 ////// 不同难度分别设置初始属性 //////
-events.prototype.setInitData = function (hard) {
-    if (hard=='Easy') { // 简单难度
-        core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
-        // 可以在此设置一些初始福利，比如设置初始生命值可以调用：
-        // core.setStatus("hp", 10000);
-        // 赠送一把黄钥匙可以调用
-        // core.setItem("yellowKey", 1);
-    }
-    if (hard=='Normal') { // 普通难度
-        core.setFlag('hard', 2); // 可以用flag:hard来获得当前难度
-    }
-    if (hard=='Hard') { // 困难难度
-        core.setFlag('hard', 3); // 可以用flag:hard来获得当前难度
-    }
-    this.afterLoadData();
-}
+events.prototype.setInitData = eventdata.setInitData
+// function (hard)
 
 ////// 游戏获胜事件 //////
-events.prototype.win = function(reason) {
-    core.ui.closePanel();
-    var replaying = core.status.replay.replaying;
-    core.stopReplay();
-    core.waitHeroToStop(function() {
-        core.removeGlobalAnimate(0,0,true);
-        core.clearMap('all'); // 清空全地图
-        core.drawText([
-            "\t[恭喜通关]你的分数是${status:hp}。"
-        ], function () {
-            core.events.gameOver('', replaying);
-        })
-    });
-}
+events.prototype.win = eventdata.win
+// function(reason)
 
 ////// 游戏失败事件 //////
-events.prototype.lose = function(reason) {
-    core.ui.closePanel();
-    var replaying = core.status.replay.replaying;
-    core.stopReplay();
-    core.waitHeroToStop(function() {
-        core.drawText([
-            "\t[结局1]你死了。\n如题。"
-        ], function () {
-            core.events.gameOver(null, replaying);
-        });
-    })
-}
+events.prototype.lose = eventdata.lose
+// function(reason)
 
 ////// 游戏结束 //////
 events.prototype.gameOver = function (ending, fromReplay) {
@@ -230,20 +194,8 @@ events.prototype.gameOver = function (ending, fromReplay) {
 }
 
 ////// 转换楼层结束的事件 //////
-events.prototype.afterChangeFloor = function (floorId) {
-    if (core.isset(core.status.event.id)) return; // 当前存在事件
-
-    if (!core.hasFlag("visited_"+floorId)) {
-        this.doEvents(core.floors[floorId].firstArrive, null, null, function () {
-            //core.autosave();
-        });
-        core.setFlag("visited_"+floorId, true);
-        return;
-    }
-
-    // 自动存档
-    //core.autosave();
-}
+events.prototype.afterChangeFloor = eventdata.afterChangeFloor
+// function (floorId)
 
 ////// 开始执行一系列自定义事件 //////
 events.prototype.doEvents = function (list, x, y, callback) {
@@ -777,124 +729,16 @@ events.prototype.useItem = function(itemId) {
 }
 
 ////// 加点事件 //////
-events.prototype.addPoint = function (enemy) {
-    var point = enemy.point;
-    if (!core.isset(point) || point<=0) return [];
-
-    // 加点，返回一个choices事件
-    return [
-        {"type": "choices",
-            "choices": [
-                {"text": "攻击+"+(1*point), "action": [
-                    {"type": "setValue", "name": "status:atk", "value": "status:atk+"+(1*point)}
-                ]},
-                {"text": "防御+"+(2*point), "action": [
-                    {"type": "setValue", "name": "status:def", "value": "status:def+"+(2*point)}
-                ]},
-                {"text": "生命+"+(200*point), "action": [
-                    {"type": "setValue", "name": "status:hp", "value": "status:hp+"+(200*point)}
-                ]},
-            ]
-        }
-    ];
-}
+events.prototype.addPoint = eventdata.addPoint
+// function (enemy)
 
 ////// 战斗结束后触发的事件 //////
-events.prototype.afterBattle = function(enemyId,x,y,callback) {
-
-    var enemy = core.material.enemys[enemyId];
-
-    // 毒衰咒的处理
-    var special = enemy.special;
-    // 中毒
-    if (core.enemys.hasSpecial(special, 12) && !core.hasFlag('poison')) {
-        core.setFlag('poison', true);
-    }
-    // 衰弱
-    if (core.enemys.hasSpecial(special, 13) && !core.hasFlag('weak')) {
-        core.setFlag('weak', true);
-        core.status.hero.atk-=core.values.weakValue;
-        core.status.hero.def-=core.values.weakValue;
-    }
-    // 诅咒
-    if (core.enemys.hasSpecial(special, 14) && !core.hasFlag('curse')) {
-        core.setFlag('curse', true);
-    }
-    // 仇恨属性：减半
-    if (core.flags.hatredDecrease && core.enemys.hasSpecial(special, 17)) {
-        core.setFlag('hatred', parseInt(core.getFlag('hatred', 0)/2));
-    }
-    // 自爆
-    if (core.enemys.hasSpecial(special, 19)) {
-        core.status.hero.hp = 1;
-    }
-    // 退化
-    if (core.enemys.hasSpecial(special, 21)) {
-        core.status.hero.atk -= (enemy.atkValue||0);
-        core.status.hero.def -= (enemy.defValue||0);
-        if (core.status.hero.atk<0) core.status.hero.atk=0;
-        if (core.status.hero.def<0) core.status.hero.def=0;
-    }
-    // 增加仇恨值
-    core.setFlag('hatred', core.getFlag('hatred',0)+core.values.hatred);
-    core.updateStatusBar();
-
-
-    // 事件的处理
-    var todo = [];
-    // 如果不为阻击，且该点存在，且有事件
-    if (!core.enemys.hasSpecial(special, 18) && core.isset(x) && core.isset(y)) {
-        var event = core.floors[core.status.floorId].afterBattle[x+","+y];
-        if (core.isset(event)) {
-            // 插入事件
-            core.unshift(todo, event);
-        }
-    }
-    // 如果有加点
-    var point = core.material.enemys[enemyId].point;
-    if (core.isset(point) && point>0) {
-        core.unshift(todo, core.events.addPoint(core.material.enemys[enemyId]));
-    }
-
-    // 如果事件不为空，将其插入
-    if (todo.length>0) {
-        this.insertAction(todo,x,y);
-    }
-
-    // 如果已有事件正在处理中
-    if (core.status.event.id == null) {
-        core.continueAutomaticRoute();
-    }
-    else {
-        core.clearContinueAutomaticRoute();
-    }
-    if (core.isset(callback)) callback();
-
-}
+events.prototype.afterBattle = eventdata.afterBattle
+// function(enemyId,x,y,callback)
 
 ////// 开一个门后触发的事件 //////
-events.prototype.afterOpenDoor = function(doorId,x,y,callback) {
-
-    var todo = [];
-    if (core.isset(x) && core.isset(y)) {
-        var event = core.floors[core.status.floorId].afterOpenDoor[x+","+y];
-        if (core.isset(event)) {
-            core.unshift(todo, event);
-        }
-    }
-
-    if (todo.length>0) {
-        this.insertAction(todo,x,y);
-    }
-
-    if (core.status.event.id == null) {
-        core.continueAutomaticRoute();
-    }
-    else {
-        core.clearContinueAutomaticRoute();
-    }
-    if (core.isset(callback)) callback();
-}
+events.prototype.afterOpenDoor = eventdata.afterOpenDoor
+// function(doorId,x,y,callback)
 
 ////// 经过一个路障 //////
 events.prototype.passNet = function (data) {
@@ -945,9 +789,8 @@ events.prototype.changeLight = function(x, y) {
 }
 
 ////// 改变亮灯之后，可以触发的事件 //////
-events.prototype.afterChangeLight = function(x,y) {
-
-}
+events.prototype.afterChangeLight = eventdata.afterChangeLight
+// function(x,y)
 
 ////// 滑冰 //////
 events.prototype.ski = function (direction) {
@@ -1024,54 +867,20 @@ events.prototype.pushBox = function (data) {
 }
 
 ////// 推箱子后的事件 //////
-events.prototype.afterPushBox = function () {
-
-    var noBoxLeft = function () {
-        // 地图上是否还存在未推到的箱子，如果不存在则返回true，存在则返回false
-        for (var i=0;i<core.status.thisMap.blocks.length;i++) {
-            var block=core.status.thisMap.blocks[i];
-            if (core.isset(block.event) && block.event.id=='box') return false;
-        }
-        return true;
-    }
-
-    if (noBoxLeft()) {
-        // 可以通过if语句来进行开门操作
-        /*
-        if (core.status.floorId=='xxx') { // 在某个楼层
-            core.insertAction([ // 插入一条事件
-                {"type": "openDoor", "loc": [x,y]} // 开门
-            ])
-        }
-        */
-    }
-}
+events.prototype.afterPushBox = eventdata.afterPushBox
+// function ()
 
 ////// 使用炸弹/圣锤后的事件 //////
-events.prototype.afterUseBomb = function () {
-
-    // 这是一个使用炸弹也能开门的例子
-    /*
-    if (core.status.floorId=='xxx' && core.terrainExists(x0,y0,'specialDoor') // 某个楼层，该机关门存在
-        && !core.enemyExists(x1,y1) && !core.enemyExists(x2,y2)) // 且守门的怪物都不存在
-    {
-        core.insertAction([ // 插入事件
-            {"type": "openDoor", "loc": [x0,y0]} // 开门
-        ])
-    }
-    */
-
-}
+events.prototype.afterUseBomb = eventdata.afterUseBomb
+// function ()
 
 ////// 即将存档前可以执行的操作 //////
-events.prototype.beforeSaveData = function(data) {
-
-}
+events.prototype.beforeSaveData = eventdata.beforeSaveData
+// function(data)
 
 ////// 读档事件后，载入事件前，可以执行的操作 //////
-events.prototype.afterLoadData = function(data) {
-
-}
+events.prototype.afterLoadData = eventdata.afterLoadData
+// function(data)
 
 
 /****************************************/
@@ -2302,3 +2111,4 @@ events.prototype.clickAbout = function () {
         core.showStartAnimate();
 }
 
+delete(eventdata);

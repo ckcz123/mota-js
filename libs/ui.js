@@ -4,7 +4,7 @@
  * 自动寻路、怪物手册、楼传器、存读档、菜单栏、NPC对话事件、等等
  */
 function ui() {}
-
+var uidata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.ui;
 // 初始化UI
 ui.prototype.init = function () {
 }
@@ -1371,33 +1371,7 @@ ui.prototype.drawKeyBoard = function () {
 }
 
 ////// 绘制“关于”界面 //////
-ui.prototype.drawAbout = function() {
-
-    if (!core.isPlaying()) {
-        core.status.event = {'id': null, 'data': null};
-        core.dom.startPanel.style.display = 'none';
-    }
-    core.lockControl();
-    core.status.event.id = 'about';
-
-    core.clearMap('ui', 0, 0, 416, 416);
-    var left = 48, top = 36, right = 416 - 2 * left, bottom = 416 - 2 * top;
-
-    core.setAlpha('ui', 0.85);
-    core.fillRect('ui', left, top, right, bottom, '#000000');
-    core.setAlpha('ui', 1);
-    core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
-
-    var text_start = left + 24;
-
-    // 名称
-    core.canvas.ui.textAlign = "left";
-    core.fillText('ui', "HTML5 魔塔样板", text_start, top+35, "#FFD700", "bold 22px Verdana");
-    core.fillText('ui', "版本： "+core.firstData.version, text_start, top + 80, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "作者： 艾之葵", text_start, top + 112);
-    core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112+32);
-    // TODO: 写自己的“关于”页面，每次增加32像素即可
-}
+ui.prototype.drawAbout = uidata.drawAbout
 
 ////// 绘制帮助页面 //////
 ui.prototype.drawHelp = function () {
@@ -1427,3 +1401,5 @@ ui.prototype.drawHelp = function () {
         "长按任意位置：打开虚拟键盘"
     ]);
 }
+
+delete(uidata)

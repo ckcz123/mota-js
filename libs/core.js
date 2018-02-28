@@ -124,6 +124,7 @@ function core() {
             'data': null,
             'selection': null,
             'ui': null,
+            'interval': null,
         },
         'textAttribute': {
             'position': "center",
@@ -131,6 +132,7 @@ function core() {
             "background": [0,0,0,0.85],
             "text": [255,255,255,1],
             "bold": false,
+            "scroll": 50,
         },
         'curtainColor': null,
         'usingCenterFly':false,

@@ -1119,7 +1119,8 @@ core.prototype.keyUp = function(keyCode) {
                 core.openBook(true);
             break;
         case 65: // A
-            core.doSL("autoSave", "load");
+            if (core.status.heroStop)
+                core.doSL("autoSave", "load");
             break;
         case 83: // S
             if (core.status.heroStop)
@@ -1146,15 +1147,15 @@ core.prototype.keyUp = function(keyCode) {
                 core.openQuickShop(true);
             break;
         case 32: // SPACE
-            if (!core.status.lockControl && core.status.heroStop)
+            if (core.status.heroStop)
                 core.getNextItem();
             break;
         case 72: // H
-            if (!core.status.lockControl && core.status.heroStop)
+            if (core.status.heroStop)
                 core.ui.drawHelp();
             break;
         case 82: // R
-            if (!core.status.lockControl && core.status.heroStop) {
+            if (core.status.heroStop) {
                 core.ui.drawConfirmBox("确定要回放录像吗？", function () {
                     core.ui.closePanel();
                     var hard=core.status.hard, route=core.clone(core.status.route);

@@ -5,21 +5,22 @@ grammar MotaAction;
 
 //事件 事件编辑器入口之一
 event_m
-    :   '事件' BGNL? Newline '启用' Bool '不可通行' Bool '显伤' Bool BGNL? Newline action+ BEND
+    :   '事件' BGNL? Newline '启用' Bool '通行状态' B_List '显伤' Bool BGNL? Newline action+ BEND
     ;
 
 /* event_m
 tooltip : 编辑魔塔的事件
 helpUrl : https://ckcz123.github.io/mota-js/#/event
-default : [null,null,false]
+default : [null,[['不改变','null'],['不可通行','true'],['可以通行','false']],false]
+B_List_0=eval(B_List_0);
 var code = {
     'trigger': 'action',
     'enable': Bool_0,
-    'noPass': Bool_1,
-    'displayDamage': Bool_2,
+    'noPass': B_List_0,
+    'displayDamage': Bool_1,
     'data': 'data_asdfefw'
 }
-if (Bool_0 && Bool_1 && !Bool_2) code = 'data_asdfefw';
+if (Bool_0 && (B_List_0===null) && !Bool_1) code = 'data_asdfefw';
 code=JSON.stringify(code,null,2).split('"data_asdfefw"').join('[\n'+action_0+']\n');
 return code;
 */
@@ -236,8 +237,8 @@ setText_s
 /* setText_s
 tooltip : setText：设置剧情文本的属性,颜色为RGB三元组或RGBA四元组
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=settext%ef%bc%9a%e8%ae%be%e7%bd%ae%e5%89%a7%e6%83%85%e6%96%87%e6%9c%ac%e7%9a%84%e5%b1%9e%e6%80%a7
-default : [null,"255,215,0,1","255,255,255,1","0,0,0,0.85",[['不改变','null'],['设为粗体','true'],['取消粗体','false']]]
-SetTextPosition_List_0 = ', "position": "'+SetTextPosition_List_0+'"';
+default : [[['不改变','null'],['上','up'],['中','center'],['下','down']],"255,215,0,1","255,255,255,1","0,0,0,0.85",[['不改变','null'],['设为粗体','true'],['取消粗体','false']]]
+SetTextPosition_List_0 =SetTextPosition_List_0==='null'?'': ', "position": "'+SetTextPosition_List_0+'"';
 var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
 if (EvalString_0) {
   if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
@@ -908,7 +909,7 @@ Stair_List
     ;
 
 SetTextPosition_List
-    :   'center'|'up'|'down'
+    :   'null'|'center'|'up'|'down'
     ;
 
 ShopUse_List

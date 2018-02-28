@@ -7,7 +7,10 @@ data_comment_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         "animates": "  在此存放所有可能使用的动画，必须是animate格式，在这里不写后缀名 \n 动画必须放在animates目录下；文件名不能使用中文，不能带空格或特殊字符 \n \"jianji\", \"thunder\" \n 根据需求自行添加 \n$leaf(true)$end",
         "bgms": " 在此存放所有的bgm，和文件名一致。第一项为默认播放项 \n 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好 \n$leaf(true)$end",
         "sounds": " 在此存放所有的SE，和文件名一致 \n 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好 \n$leaf(true)$end",
-        "bgmRemote" : " 是否使用远程的背景音乐；此项一般不要开启 \n$select({\"values\":[false]})$end"
+        "bgmRemote" : " 是否使用远程的背景音乐；此项一般不要开启 \n$select({\"values\":[false]})$end",
+        "startBackground" : "标题界面的背景,建议使用jpg格式以压缩背景图空间",
+        "startLogoStyle" : "标题样式:可以改变颜色，也可以隐藏标题（如果背景图自带）",
+        "levelChoose" : " 难度选择:每个数组的第一个是其在标题界面显示的难度,第二个是在游戏内部传输的字符串,会显示在状态栏,修改此处后需要在project/functions中作相应更改 \n$leaf(true)$end"
     },
     "firstData": {
         "title": " 游戏名，将显示在标题页面以及切换楼层的界面中 ",

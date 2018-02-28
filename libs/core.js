@@ -17,12 +17,14 @@ function core() {
     this.timeout = {
         'getItemTipTimeout': null,
         'turnHeroTimeout': null,
+        'onDownTimeout': null,
     }
     this.interval = {
         'heroMoveInterval': null,
         "tipAnimate": null,
         'openDoorAnimate': null,
         'animateInterval': null,
+        'onDownInterval': null,
     }
     this.animateFrame = {
         'background': null,
@@ -124,6 +126,7 @@ function core() {
             'data': null,
             'selection': null,
             'ui': null,
+            'interval': null,
         },
         'textAttribute': {
             'position': "center",
@@ -131,6 +134,7 @@ function core() {
             "background": [0,0,0,0.85],
             "text": [255,255,255,1],
             "bold": false,
+            "time": 0,
         },
         'curtainColor': null,
         'usingCenterFly':false,
@@ -775,8 +779,13 @@ core.prototype.clearStatus = function() {
 core.prototype.resetStatus = function(hero, hard, floorId, route, maps) {
 
     // 停止各个Timeout和Interval
+    for (var i in core.timeout) {
+        clearTimeout(core.timeout[i]);
+        core.timeout[i] = null;
+    }
     for (var i in core.interval) {
         clearInterval(core.interval[i]);
+        core.interval[i] = null;
     }
 
     // 初始化status
@@ -1229,6 +1238,18 @@ core.prototype.ondown = function (x ,y) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
     if (!core.status.played || core.status.lockControl) {
         core.onclick(x, y, []);
+        if (core.timeout.onDownTimeout==null) {
+            core.timeout.onDownTimeout = setTimeout(function () {
+                if (core.interval.onDownInterval == null) {
+                    core.interval.onDownInterval = setInterval(function () {
+                        if (!core.events.longClick()) {
+                            clearInterval(core.interval.onDownInterval);
+                            core.interval.onDownInterval = null;
+                        }
+                    }, 40)
+                }
+            }, 500);
+        }
         return;
     }
 
@@ -1271,6 +1292,12 @@ core.prototype.onmove = function (x ,y) {
 ////// 当点击（触摸）事件放开时 //////
 core.prototype.onup = function () {
     if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+
+    clearTimeout(core.timeout.onDownTimeout);
+    core.timeout.onDownTimeout = null;
+    clearInterval(core.interval.onDownInterval);
+    core.interval.onDownInterval = null;
+
     // core.status.holdingPath=0;
     if(core.status.stepPostfix.length>0){
         var stepPostfix = [];
@@ -1290,7 +1317,10 @@ core.prototype.onup = function () {
 
         // 长按
         if (!core.status.lockControl && stepPostfix.length==0 && core.status.downTime!=null && new Date()-core.status.downTime>=1000) {
-            core.events.longClick();
+            core.waitHeroToStop(function () {
+                // 绘制快捷键
+                core.ui.drawKeyBoard();
+            });
         }
         else {
             //posx,posy是寻路的目标点,stepPostfix是后续的移动

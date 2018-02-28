@@ -155,6 +155,7 @@ return code;
 action
     :   text_0_s
     |   text_1_s
+    |   autoText_s
     |   setText_s
     |   tip_s
     |   setValue_s
@@ -201,7 +202,7 @@ text_0_s
 /* text_0_s
 tooltip : text：显示一段文字（剧情）
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=text%ef%bc%9a%e6%98%be%e7%a4%ba%e4%b8%80%e6%ae%b5%e6%96%87%e5%ad%97%ef%bc%88%e5%89%a7%e6%83%85%ef%bc%89
-default : ["欢迎使用事件编辑器"]
+default : ["欢迎使用事件编辑器(双击方块进入多行编辑)"]
 var code = '"'+EvalString_0+'",\n';
 return code;
 */
@@ -213,7 +214,7 @@ text_1_s
 /* text_1_s
 tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮助
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=text%ef%bc%9a%e6%98%be%e7%a4%ba%e4%b8%80%e6%ae%b5%e6%96%87%e5%ad%97%ef%bc%88%e5%89%a7%e6%83%85%ef%bc%89
-default : ["小妖精","fairy","","欢迎使用事件编辑器"]
+default : ["小妖精","fairy","","欢迎使用事件编辑器(双击方块进入多行编辑)"]
 var title='';
 if (EvalString_0==''){
     if (IdString_0=='')title='';
@@ -230,14 +231,38 @@ var code =  '"'+title+EvalString_1+EvalString_2+'",\n';
 return code;
 */
 
+autoText_s
+    :   '自动剧情文本: 标题' EvalString? '图像' IdString? '对话框效果' EvalString? '时间' Int BGNL? EvalString Newline
+    ;
+
+/* autoText_s
+tooltip : autoText：自动剧情文本,用户无法跳过自动剧情文本,大段剧情文本请添加“是否跳过剧情”的提示
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=autotext%ef%bc%9a%e8%87%aa%e5%8a%a8%e5%89%a7%e6%83%85%e6%96%87%e6%9c%ac
+default : ["小妖精","fairy","",3000,"双击方块进入多行编辑\\n自动剧情文本\\n自动剧情文本\\n自动剧情文本"]
+var title='';
+if (EvalString_0==''){
+    if (IdString_0=='')title='';
+    else title='\\t['+IdString_0+']';
+} else {
+    if (IdString_0=='')title='\\t['+EvalString_0+']';
+    else title='\\t['+EvalString_0+','+IdString_0+']';
+}
+if(EvalString_1 && !(/^(up|down)(,hero)?(,([+-]?\d+),([+-]?\d+))?$/.test(EvalString_1))) {
+  throw new Error('对话框效果的用法请右键点击帮助');
+}
+EvalString_1 = EvalString_1 && ('\\b['+EvalString_1+']');
+var code =  '{"type": "autoText", "text": "'+title+EvalString_1+EvalString_2+'", "time" :'+Int_0+'},\n';
+return code;
+*/
+
 setText_s
-    :   '设置剧情文本的属性' '位置' SetTextPosition_List BGNL? '标题颜色' EvalString? '正文颜色' EvalString? '背景色' EvalString? '粗体' B_List Newline
+    :   '设置剧情文本的属性' '位置' SetTextPosition_List BGNL? '标题颜色' EvalString? '正文颜色' EvalString? '背景色' EvalString? BGNL? '粗体' B_List '打字间隔' EvalString? Newline
     ;
 
 /* setText_s
-tooltip : setText：设置剧情文本的属性,颜色为RGB三元组或RGBA四元组
+tooltip : setText：设置剧情文本的属性,颜色为RGB三元组或RGBA四元组,打字间隔为剧情文字添加的时间间隔,为整数或不填
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=settext%ef%bc%9a%e8%ae%be%e7%bd%ae%e5%89%a7%e6%83%85%e6%96%87%e6%9c%ac%e7%9a%84%e5%b1%9e%e6%80%a7
-default : [[['不改变','null'],['上','up'],['中','center'],['下','down']],"255,215,0,1","255,255,255,1","0,0,0,0.85",[['不改变','null'],['设为粗体','true'],['取消粗体','false']]]
+default : [[['不改变','null'],['上','up'],['中','center'],['下','down']],"","","",[['不改变','null'],['设为粗体','true'],['取消粗体','false']],'']
 SetTextPosition_List_0 =SetTextPosition_List_0==='null'?'': ', "position": "'+SetTextPosition_List_0+'"';
 var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
 if (EvalString_0) {
@@ -252,8 +277,12 @@ if (EvalString_2) {
   if (!colorRe.test(EvalString_2))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
   EvalString_2 = ', "background": ['+EvalString_2+']';
 }
+if (EvalString_3) {
+  if (!/^\d+$/.test(EvalString_3))throw new Error('打字时间间隔必须是整数或不填');
+  EvalString_3 = ', "time": '+EvalString_3;
+}
 B_List_0 = ', "bold": '+B_List_0;
-var code = '{"type": "setText"'+SetTextPosition_List_0+EvalString_0+EvalString_1+EvalString_2+B_List_0+'},\n';
+var code = '{"type": "setText"'+SetTextPosition_List_0+EvalString_0+EvalString_1+EvalString_2+B_List_0+EvalString_3+'},\n';
 return code;
 */
 
@@ -1117,7 +1146,7 @@ ActionParser.prototype.parseAction = function() {
 
   // 如果是文字：显示
   if (typeof data == "string") {
-      data={"type": "text", "data": data}
+      data={"type": "text", "text": data}
   }
   this.event.data.type=data.type;
   switch (data.type) {
@@ -1127,7 +1156,12 @@ ActionParser.prototype.parseAction = function() {
       return;
     case "text": // 文字/对话
       this.next = MotaActionBlocks['text_0_s'].xmlText([
-        this.EvalString(data.data),this.next]);
+        this.EvalString(data.text),this.next]);
+      break;
+    case "autoText": // 自动剧情文本
+      data.time=this.isset(data.time)?data.time:MotaActionBlocks['autoText_s'].fieldDefault[3];
+      this.next = MotaActionBlocks['autoText_s'].xmlText([
+        '','','',data.time,this.EvalString(data.text),this.next]);
       break;
     case "setText": // 设置剧情文本的属性
       var setTextfunc = function(a){return a?JSON.stringify(a).slice(1,-1):null;}
@@ -1135,7 +1169,7 @@ ActionParser.prototype.parseAction = function() {
       data.text=setTextfunc(data.text);
       data.background=setTextfunc(data.background);
       this.next = MotaActionBlocks['setText_s'].xmlText([
-        data.position,data.title,data.text,data.background,data.bold,this.next]);
+        data.position,data.title,data.text,data.background,data.bold,data.time,this.next]);
       break;
     case "tip":
       this.next = MotaActionBlocks['tip_s'].xmlText([

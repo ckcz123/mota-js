@@ -17,6 +17,7 @@ function main() {
         'startTopProgress': document.getElementById('startTopProgress'),
         'startTopLoadTips': document.getElementById('startTopLoadTips'),
         'startBackground': document.getElementById('startBackground'),
+        'startLogo': document.getElementById('startLogo'),
         'startButtonGroup': document.getElementById('startButtonGroup'),
         'floorMsgGroup': document.getElementById('floorMsgGroup'),
         'logoLabel': document.getElementById('logoLabel'),
@@ -33,9 +34,6 @@ function main() {
         'loadGame': document.getElementById('loadGame'),
         'replayGame': document.getElementById('replayGame'),
         'levelChooseButtons': document.getElementById('levelChooseButtons'),
-        'easyLevel': document.getElementById('easyLevel'),
-        'normalLevel': document.getElementById('normalLevel'),
-        'hardLevel': document.getElementById('hardLevel'),
         'data': document.getElementById('data'),
         'statusLabels': document.getElementsByClassName('statusLabel'),
         'floorCol': document.getElementById('floorCol'),
@@ -128,6 +126,21 @@ main.prototype.init = function (mode) {
     main.loadPureData(function(){
         var mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
         for(var ii in mainData)main[ii]=mainData[ii];
+        
+        main.dom.startBackground.src="project/images/"+main.startBackground;
+        main.dom.startLogo.style=main.startLogoStyle;
+        main.levelChoose.forEach(function(value){
+            var span = document.createElement('span');
+            span.setAttribute('class','startButton');
+            span.innerText=value[0];
+            (function(span,str_){
+                span.onclick = function () {
+                    core.events.startGame(str_);
+                }
+            })(span,value[1]);
+            main.dom.levelChooseButtons.appendChild(span);
+        });
+        
         main.loaderJs(function () {
             var coreData = {};
             for (i = 0; i < main.loadList.length; i++) {
@@ -454,20 +467,6 @@ main.dom.replayGame.onclick = function () {
     })
 }
 
-////// 点击“简单难度”时 //////
-main.dom.easyLevel.onclick = function() {
-    core.events.startGame('Easy');
-}
-
-////// 点击“普通难度”时 //////
-main.dom.normalLevel.onclick = function () {
-    core.events.startGame('Normal');
-}
-
-////// 点击“困难难度”时 //////
-main.dom.hardLevel.onclick = function () {
-    core.events.startGame('Hard');
-}
 
 }//listen end
 

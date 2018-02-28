@@ -33,7 +33,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
             // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
         ],
         "bgmRemote" : false, // 是否使用远程的背景音乐；此项一般不要开启
-        "startBackground" : "bg.png",// 标题界面的背景
+        "startBackground" : "bg.png",// 标题界面的背景,建议使用jpg格式以压缩背景图空间
         "startLogoStyle" : "color: black",// 标题样式:可以改变颜色，也可以隐藏标题（如果背景图自带）
         "levelChoose" : [["简单","Easy"],["普通","Normal"],["困难","Hard"],["噩梦","Hell"]],
         //难度选择:每个数组的第一个是其在标题界面显示的难度,第二个是在游戏内部传输的字符串,会显示在状态栏,修改此处后需要在project/functions中作相应更改

@@ -904,10 +904,15 @@ events.prototype.afterLoadData = eventdata.afterLoadData
 
 ////// 长按 //////
 events.prototype.longClick = function () {
-    core.waitHeroToStop(function () {
-        // 绘制快捷键
-        core.ui.drawKeyBoard();
-    });
+    if (core.status.event.id=='text') {
+        core.drawText();
+        return true;
+    }
+    if (core.status.event.id=='action' && core.status.event.data.type=='text') {
+        this.doAction();
+        return true;
+    }
+    return false;
 }
 
 ////// 按下Ctrl键时（快捷跳过对话） //////

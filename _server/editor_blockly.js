@@ -53,6 +53,13 @@ initscript=String.raw`
       '<label text="显示文字"></label>',
       MotaActionBlocks['text_0_s'].xmlText(),
       MotaActionBlocks['text_1_s'].xmlText(),
+      MotaActionFunctions.actionParser.parseList({"type": "choices", "text": "是否跳过剧情", "choices": [
+        {"text": "是", "action": []},
+        {"text": "否", "action": [
+          {"type": "autoText", "text": "\\t[小妖精,fairy]双击方块进入多行编辑\\n用户无法跳过自动剧情文本,大段剧情文本请添加“是否跳过剧情”的提示\\n自动剧情文本\\n自动剧情文本\\n自动剧情文本", "time" :3000},
+          {"type": "autoText", "text": "(可以右键方块后点复制)", "time" :3000},
+        ]},
+      ]}),
       MotaActionBlocks['setText_s'].xmlText(),
       MotaActionBlocks['showImage_0_s'].xmlText(),
       MotaActionBlocks['showImage_1_s'].xmlText(),
@@ -372,6 +379,7 @@ editor_blockly.doubleClickBlock = function (blockId){
   var textStringDict = {
     'text_0_s':'EvalString_0',
     'text_1_s':'EvalString_2',
+    'autoText_s':'EvalString_2',
     'choices_s':'EvalString_0',
     'function_s':'RawEvalString_0',
   }

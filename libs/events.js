@@ -328,8 +328,8 @@ events.prototype.doAction = function() {
             if (core.isset(data.bold)) {
                 core.status.textAttribute.bold=data.bold;
             }
-            if (core.isset(data.scroll)) {
-                core.status.textAttribute.scroll=data.scroll;
+            if (core.isset(data.time)) {
+                core.status.textAttribute.time=data.time;
             }
             core.events.doAction();
             break;

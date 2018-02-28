@@ -242,7 +242,7 @@ ui.prototype.drawTextBox = function(content) {
 
     }
 
-    if (textAttribute.scroll<=0 || core.status.event.id!='action') {
+    if (textAttribute.time<=0 || core.status.event.id!='action') {
         drawContent(content);
     }
     else {
@@ -252,7 +252,7 @@ ui.prototype.drawTextBox = function(content) {
             if (index==content.length) {
                 clearInterval(core.status.event.interval);
             }
-        }, textAttribute.scroll);
+        }, textAttribute.time);
     }
 
 }

@@ -16,6 +16,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
     if (hard=='Hard') { // 困难难度
         core.setFlag('hard', 3); // 可以用flag:hard来获得当前难度
     }
+    if (hard=='Hell') { // 噩梦难度
+        core.setFlag('hard', 4); // 可以用flag:hard来获得当前难度
+    }
     this.afterLoadData();
 },
 ////// 游戏获胜事件 //////

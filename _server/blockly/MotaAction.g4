@@ -11,7 +11,7 @@ event_m
 /* event_m
 tooltip : 编辑魔塔的事件
 helpUrl : https://ckcz123.github.io/mota-js/#/event
-default : [null,[['不改变','null'],['不可通行','true'],['可以通行','false']],false]
+default : [null,[['不改变','null'],['不可通行','true'],['可以通行','false']],null]
 B_List_0=eval(B_List_0);
 var code = {
     'trigger': 'action',
@@ -20,7 +20,7 @@ var code = {
     'displayDamage': Bool_1,
     'data': 'data_asdfefw'
 }
-if (Bool_0 && (B_List_0===null) && !Bool_1) code = 'data_asdfefw';
+if (Bool_0 && (B_List_0===null) && Bool_1) code = 'data_asdfefw';
 code=JSON.stringify(code,null,2).split('"data_asdfefw"').join('[\n'+action_0+']\n');
 return code;
 */

@@ -256,11 +256,11 @@ return code;
 */
 
 setText_s
-    :   '设置剧情文本的属性' '位置' SetTextPosition_List BGNL? '标题颜色' EvalString? '正文颜色' EvalString? '背景色' EvalString? BGNL? '粗体' B_List '剧情文字添加时间间隔' EvalString? Newline
+    :   '设置剧情文本的属性' '位置' SetTextPosition_List BGNL? '标题颜色' EvalString? '正文颜色' EvalString? '背景色' EvalString? BGNL? '粗体' B_List '打字间隔' EvalString? Newline
     ;
 
 /* setText_s
-tooltip : setText：设置剧情文本的属性,颜色为RGB三元组或RGBA四元组,剧情文字添加时间间隔为整数或不填
+tooltip : setText：设置剧情文本的属性,颜色为RGB三元组或RGBA四元组,打字间隔为剧情文字添加的时间间隔,为整数或不填
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=settext%ef%bc%9a%e8%ae%be%e7%bd%ae%e5%89%a7%e6%83%85%e6%96%87%e6%9c%ac%e7%9a%84%e5%b1%9e%e6%80%a7
 default : [[['不改变','null'],['上','up'],['中','center'],['下','down']],"","","",[['不改变','null'],['设为粗体','true'],['取消粗体','false']],'']
 SetTextPosition_List_0 =SetTextPosition_List_0==='null'?'': ', "position": "'+SetTextPosition_List_0+'"';
@@ -278,7 +278,7 @@ if (EvalString_2) {
   EvalString_2 = ', "background": ['+EvalString_2+']';
 }
 if (EvalString_3) {
-  if (!/^\d+$/.test(EvalString_3))throw new Error('时间间隔必须是整数或不填');
+  if (!/^\d+$/.test(EvalString_3))throw new Error('打字时间间隔必须是整数或不填');
   EvalString_3 = ', "time": '+EvalString_3;
 }
 B_List_0 = ', "bold": '+B_List_0;

@@ -15,6 +15,7 @@ main.instance.ui = new ui();
 ////// 结束一切事件和绘制，关闭UI窗口，返回游戏进程 //////
 ui.prototype.closePanel = function () {
     core.status.boxAnimateObjs = [];
+    clearInterval(core.status.event.interval);
     core.clearMap('ui', 0, 0, 416, 416);
     core.setAlpha('ui', 1.0);
     core.unLockControl();
@@ -22,10 +23,13 @@ ui.prototype.closePanel = function () {
     core.status.event.id = null;
     core.status.event.selection = null;
     core.status.event.ui = null;
+    core.status.event.interval = null;
 }
 
 ////// 绘制一个对话框 //////
 ui.prototype.drawTextBox = function(content) {
+
+    clearInterval(core.status.event.interval);
 
     // 获得name, image, icon
     var id=null, name=null, image=null, icon=null;
@@ -97,13 +101,6 @@ ui.prototype.drawTextBox = function(content) {
                     }
                 }
             }
-            /*
-            if (ss.length==3) {
-                px=parseInt(ss[1]);
-                py=parseInt(ss[2]);
-            }
-            */
-
         }
     }
 
@@ -131,7 +128,7 @@ ui.prototype.drawTextBox = function(content) {
 
     var top;
     if (position=='center') {
-        top = (416 - height) / 2;
+        top = parseInt((416 - height) / 2);
     }
     else if (position=='up') {
         if (px==null || py==null) {
@@ -227,15 +224,37 @@ ui.prototype.drawTextBox = function(content) {
         }
     }
 
-    core.setAlpha('ui', textAttribute.text[3]);
-    core.setFillStyle('ui', core.arrayToRGB(textAttribute.text));
 
-    for (var i=0;i<contents.length;i++) {
-        core.fillText('ui', contents[i], content_left, content_top, null, font);
-        content_top+=21;
+    var drawContent = function (content) {
+
+        core.clearMap("ui", content_left, content_top - 18, validWidth,  top + height - content_top + 10);
+        core.setAlpha('ui', textAttribute.background[3]);
+        core.setFillStyle('ui', core.arrayToRGB(textAttribute.background));
+        core.fillRect("ui",  content_left, content_top - 18, validWidth,  top + height - content_top + 10);
+
+        core.setAlpha('ui', textAttribute.text[3]);
+        core.setFillStyle('ui', core.arrayToRGB(textAttribute.text));
+        var contents = core.splitLines("ui", content, validWidth, font);
+
+        for (var i=0;i<contents.length;i++) {
+            core.fillText('ui', contents[i], content_left, content_top + 21*i, null, font);
+        }
+
     }
 
-    // core.fillText('ui', '<点击任意位置继续>', 270, top+height-13, '#CCCCCC', '13px Verdana');
+    if (textAttribute.time<=0 || core.status.event.id!='action') {
+        drawContent(content);
+    }
+    else {
+        var index=0;
+        core.status.event.interval = setInterval(function () {
+            drawContent(content.substring(0, ++index));
+            if (index==content.length) {
+                clearInterval(core.status.event.interval);
+            }
+        }, textAttribute.time);
+    }
+
 }
 
 ////// 绘制一个选项界面 //////
@@ -400,7 +419,7 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
         max_length = Math.max(max_length, core.canvas.ui.measureText(contents[i]).width);
     }
 
-    var left = Math.min(208 - 40 - max_length / 2, 100);
+    var left = Math.min(208 - 40 - parseInt(max_length / 2), 100);
     var top = 140 - (lines-1)*30;
     var right = 416 - 2 * left, bottom = 416 - 140 - top;
 
@@ -418,10 +437,10 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
 
     var len=core.canvas.ui.measureText("确定").width;
     if (core.status.event.selection==0) {
-        core.strokeRect('ui', 208-38-len/2-5, top+bottom-35-20, len+10, 28, "#FFD700", 2);
+        core.strokeRect('ui', 208-38-parseInt(len/2)-5, top+bottom-35-20, len+10, 28, "#FFD700", 2);
     }
     if (core.status.event.selection==1) {
-        core.strokeRect('ui', 208+38-len/2-5, top+bottom-35-20, len+10, 28, "#FFD700", 2);
+        core.strokeRect('ui', 208+38-parseInt(len/2)-5, top+bottom-35-20, len+10, 28, "#FFD700", 2);
     }
 
 }
@@ -776,7 +795,7 @@ ui.prototype.drawWaiting = function(text) {
     var text_length = core.canvas.ui.measureText(text).width;
 
     var right = Math.max(text_length+50, 220);
-    var left = 208-right/2, top = 208 - 32 - 16, bottom = 416 - 2 * top;
+    var left = 208-parseInt(right/2), top = 208 - 32 - 16, bottom = 416 - 2 * top;
 
     core.fillRect('ui', left, top, right, bottom, background);
     core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
@@ -822,7 +841,7 @@ ui.prototype.drawPagination = function (page, totalPage) {
     var length = core.canvas.ui.measureText(page + " / " + page).width;
 
     core.canvas.ui.textAlign = 'left';
-    core.fillText('ui', page + " / " + totalPage, (416 - length) / 2, 403);
+    core.fillText('ui', page + " / " + totalPage, parseInt((416 - length) / 2), 403);
 
     core.canvas.ui.textAlign = 'center';
     if (page > 1)
@@ -1231,7 +1250,7 @@ ui.prototype.drawSLPanel = function(index) {
     core.setAlpha('ui', 1);
     core.canvas.ui.textAlign = 'center';
 
-    var u=416/6, size=117;
+    var u=416/6, size=118;
 
     var name=core.status.event.id=='save'?"存档":"读档";
     for (var i=0;i<6;i++) {

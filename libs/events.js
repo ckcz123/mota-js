@@ -218,6 +218,8 @@ events.prototype.doEvents = function (list, x, y, callback) {
 events.prototype.doAction = function() {
     // 清空boxAnimate和UI层
     core.status.boxAnimateObjs = [];
+    clearInterval(core.status.event.interval);
+
     core.clearMap('ui', 0, 0, 416, 416);
     core.setAlpha('ui', 1.0);
 
@@ -253,7 +255,17 @@ events.prototype.doAction = function() {
             if (core.status.replay.replaying)
                 core.events.doAction();
             else
-                core.ui.drawTextBox(data.data);
+                core.ui.drawTextBox(data.text);
+            break;
+        case "autoText":
+            if (core.status.replay.replaying)
+                core.events.doAction();
+            else {
+                core.ui.drawTextBox(data.text);
+                setTimeout(function () {
+                    core.events.doAction();
+                }, data.time || 3000);
+            }
             break;
         case "setText": // 设置文本状态
             if (data.position=='up'||data.position=='down'||data.position=='center') {
@@ -267,6 +279,9 @@ events.prototype.doAction = function() {
             })
             if (core.isset(data.bold)) {
                 core.status.textAttribute.bold=data.bold;
+            }
+            if (core.isset(data.time)) {
+                core.status.textAttribute.time=data.time;
             }
             core.events.doAction();
             break;

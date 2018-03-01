@@ -840,8 +840,8 @@ var ops = {
 }
 if (ops[Arithmetic_List_0])code = ops[Arithmetic_List_0];
 var orders = {
-    '+': Blockly.JavaScript.ORDER_UNARY_PLUS,
-    '-': Blockly.JavaScript.ORDER_UNARY_NEGATION,
+    '+': Blockly.JavaScript.ORDER_ADDITION,
+    '-': Blockly.JavaScript.ORDER_SUBTRACTION,
     '*': Blockly.JavaScript.ORDER_MULTIPLICATION,
     '/': Blockly.JavaScript.ORDER_DIVISION,
     '^': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA

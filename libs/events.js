@@ -133,7 +133,7 @@ events.prototype.win = function(reason) {
         core.drawText([
             "\t[恭喜通关]你的分数是${status:hp}。"
         ], function () {
-            core.events.gameOver('', replaying);
+            core.events.gameOver(reason||'', replaying);
         })
     });
 }

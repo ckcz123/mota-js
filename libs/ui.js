@@ -3,14 +3,146 @@
  * 包括：
  * 自动寻路、怪物手册、楼传器、存读档、菜单栏、NPC对话事件、等等
  */
-function ui() {}
-var uidata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.ui;
-// 初始化UI
-ui.prototype.init = function () {
+function ui() {
+    this.init();
 }
 
-main.instance.ui = new ui();
+// 初始化UI
+ui.prototype.init = function () {
+    this.uidata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.ui;
+}
 
+////////////////// 地图设置
+
+////// 清除地图 //////
+ui.prototype.clearMap = function (map, x, y, width, height) {
+    if (map == 'all') {
+        for (var m in core.canvas) {
+            core.canvas[m].clearRect(0, 0, 416, 416);
+        }
+    }
+    else {
+        core.canvas[map].clearRect(x||0, y||0, width||416, height||416);
+    }
+}
+
+////// 在某个canvas上绘制一段文字 //////
+ui.prototype.fillText = function (map, text, x, y, style, font) {
+    if (core.isset(style)) {
+        core.setFillStyle(map, style);
+    }
+    if (core.isset(font)) {
+        core.setFont(map, font);
+    }
+    core.canvas[map].fillText(text, x, y);
+}
+
+////// 在某个canvas上绘制一个矩形 //////
+ui.prototype.fillRect = function (map, x, y, width, height, style) {
+    if (core.isset(style)) {
+        core.setFillStyle(map, style);
+    }
+    core.canvas[map].fillRect(x, y, width, height);
+}
+
+////// 在某个canvas上绘制一个矩形的边框 //////
+ui.prototype.strokeRect = function (map, x, y, width, height, style, lineWidth) {
+    if (core.isset(style)) {
+        core.setStrokeStyle(map, style);
+    }
+    if (core.isset(lineWidth)) {
+        core.setLineWidth(map, lineWidth);
+    }
+    core.canvas[map].strokeRect(x, y, width, height);
+}
+
+////// 在某个canvas上绘制一条线 //////
+ui.prototype.drawLine = function (map, x1, y1, x2, y2, style, lineWidth) {
+    if (core.isset(style)) {
+        core.setStrokeStyle(map, style);
+    }
+    if (core.isset(lineWidth)) {
+        core.setLineWidth(map, lineWidth);
+    }
+    core.canvas[map].beginPath();
+    core.canvas[map].moveTo(x1, y1);
+    core.canvas[map].lineTo(x2, y2);
+    core.canvas[map].closePath();
+    core.canvas[map].stroke();
+}
+
+////// 设置某个canvas的文字字体 //////
+ui.prototype.setFont = function (map, font) {
+    core.canvas[map].font = font;
+}
+
+////// 设置某个canvas的线宽度 //////
+ui.prototype.setLineWidth = function (map, lineWidth) {
+    if (map == 'all') {
+        for (var m in core.canvas) {
+            core.canvas[m].lineWidth = lineWidth;
+        }
+    }
+    core.canvas[map].lineWidth = lineWidth;
+}
+
+////// 保存某个canvas状态 //////
+ui.prototype.saveCanvas = function (map) {
+    core.canvas[map].save();
+}
+
+////// 加载某个canvas状态 //////
+ui.prototype.loadCanvas = function (map) {
+    core.canvas[map].restore();
+}
+
+////// 设置某个canvas边框属性 //////
+ui.prototype.setStrokeStyle = function (map, style) {
+    if (map == 'all') {
+        for (var m in core.canvas) {
+            core.canvas[m].strokeStyle = style;
+        }
+    }
+    else {
+        core.canvas[map].strokeStyle = style;
+    }
+}
+
+////// 设置某个canvas的alpha值 //////
+ui.prototype.setAlpha = function (map, alpha) {
+    if (map == 'all') {
+        for (var m in core.canvas) {
+            core.canvas[m].globalAlpha = alpha;
+        }
+    }
+    else core.canvas[map].globalAlpha = alpha;
+}
+
+////// 设置某个canvas的透明度 //////
+ui.prototype.setOpacity = function (map, opacity) {
+    if (map == 'all') {
+        for (var m in core.canvas) {
+            core.canvas[m].canvas.style.opacity = opacity;
+        }
+    }
+    else core.canvas[map].canvas.style.opacity = opacity;
+}
+
+////// 设置某个canvas的绘制属性（如颜色等） //////
+ui.prototype.setFillStyle = function (map, style) {
+    if (map == 'all') {
+        for (var m in core.canvas) {
+            core.canvas[m].fillStyle = style;
+        }
+    }
+    else {
+        core.canvas[map].fillStyle = style;
+    }
+}
+
+
+
+///////////////// UI绘制
 
 ////// 结束一切事件和绘制，关闭UI窗口，返回游戏进程 //////
 ui.prototype.closePanel = function () {
@@ -24,6 +156,110 @@ ui.prototype.closePanel = function () {
     core.status.event.selection = null;
     core.status.event.ui = null;
     core.status.event.interval = null;
+}
+
+////// 左上角绘制一段提示 //////
+ui.prototype.drawTip = function (text, itemIcon) {
+    var textX, textY, width, height, hide = false, opacityVal = 0;
+    clearInterval(core.interval.tipAnimate);
+    core.setFont('data', "16px Arial");
+    core.saveCanvas('data');
+    core.setOpacity('data', 0);
+    core.canvas.data.textAlign = 'left';
+    if (!core.isset(itemIcon)) {
+        textX = 16;
+        textY = 18;
+        width = textX + core.canvas.data.measureText(text).width + 16;
+        height = 42;
+    }
+    else {
+        textX = 44;
+        textY = 18;
+        width = textX + core.canvas.data.measureText(text).width + 8;
+        height = 42;
+    }
+    core.interval.tipAnimate = window.setInterval(function () {
+        if (hide) {
+            opacityVal -= 0.1;
+        }
+        else {
+            opacityVal += 0.1;
+        }
+        core.setOpacity('data', opacityVal);
+        core.clearMap('data', 5, 5, 400, height);
+        core.fillRect('data', 5, 5, width, height, '#000');
+        if (core.isset(itemIcon)) {
+            core.canvas.data.drawImage(core.material.images.items, 0, itemIcon * 32, 32, 32, 10, 8, 32, 32);
+        }
+        core.fillText('data', text, textX + 5, textY + 15, '#fff');
+        if (opacityVal > 0.6 || opacityVal < 0) {
+            if (hide) {
+                core.loadCanvas('data');
+                core.clearMap('data', 5, 5, 400, height);
+                core.setOpacity('data', 1);
+                clearInterval(core.interval.tipAnimate);
+                return;
+            }
+            else {
+                if (!core.isset(core.timeout.getItemTipTimeout)) {
+                    core.timeout.getItemTipTimeout = window.setTimeout(function () {
+                        hide = true;
+                        core.timeout.getItemTipTimeout = null;
+                    }, 750);
+                }
+                opacityVal = 0.6;
+                core.setOpacity('data', opacityVal);
+            }
+        }
+    }, 30);
+}
+
+////// 地图中间绘制一段文字 //////
+ui.prototype.drawText = function (contents, callback) {
+    if (core.isset(contents)) {
+
+        // 合并
+        if (core.isset(core.status.event)&&core.status.event.id=='action') {
+            core.insertAction(contents,null,null,callback);
+            return;
+        }
+
+        if (typeof contents == 'string') {
+            contents = [{'content': contents}];
+        }
+        else if (contents instanceof Object && core.isset(contents.content)) {
+            contents = [contents];
+        }
+        else if (!(contents instanceof Array)) {
+            core.drawTip("出错了");
+            console.log(contents);
+            return;
+        }
+
+        core.status.event = {'id': 'text', 'data': {'list': contents, 'callback': callback}};
+        core.lockControl();
+
+        // wait the hero to stop
+        core.stopAutomaticRoute();
+        setTimeout(function() {
+            core.drawText();
+        }, 30);
+        return;
+    }
+
+    if (core.status.event.data.list.length==0) {
+        var callback = core.status.event.data.callback;
+        core.ui.closePanel(false);
+        if (core.isset(callback)) callback();
+        return;
+    }
+
+    var data=core.status.event.data.list.shift();
+    if (typeof data == 'string')
+        core.ui.drawTextBox(data);
+    else
+        core.ui.drawTextBox(data.content, data.id);
+    // core.drawTextBox(content);
 }
 
 ////// 绘制一个对话框 //////
@@ -1390,7 +1626,9 @@ ui.prototype.drawKeyBoard = function () {
 }
 
 ////// 绘制“关于”界面 //////
-ui.prototype.drawAbout = uidata.drawAbout
+ui.prototype.drawAbout = function () {
+    return this.uidata.drawAbout();
+}
 
 ////// 绘制帮助页面 //////
 ui.prototype.drawHelp = function () {
@@ -1421,4 +1659,3 @@ ui.prototype.drawHelp = function () {
     ]);
 }
 
-delete(uidata)

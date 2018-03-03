@@ -19,7 +19,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
     if (hard=='Hell') { // 噩梦难度
         core.setFlag('hard', 4); // 可以用flag:hard来获得当前难度
     }
-    this.afterLoadData();
+    core.events.afterLoadData();
 },
 ////// 游戏获胜事件 //////
 "win" : function(reason) {
@@ -54,7 +54,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
     if (core.isset(core.status.event.id)) return; // 当前存在事件
 
     if (!core.hasFlag("visited_"+floorId)) {
-        this.doEvents(core.floors[floorId].firstArrive, null, null, function () {
+        core.events.doEvents(core.floors[floorId].firstArrive, null, null, function () {
             //core.autosave();
         });
         core.setFlag("visited_"+floorId, true);
@@ -88,8 +88,37 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 },
 ////// 战斗结束后触发的事件 //////
 "afterBattle" : function(enemyId,x,y,callback) {
-    
+
     var enemy = core.material.enemys[enemyId];
+
+    // 扣减体力值
+    core.status.hero.hp -= core.enemys.getDamage(enemyId);
+    if (core.status.hero.hp<=0) {
+        core.status.hero.hp=0;
+        core.updateStatusBar();
+        core.events.lose('battle');
+        return;
+    }
+    // 获得金币和经验
+    var money = enemy.money;
+    if (core.hasItem('coin')) money *= 2;
+    if (core.hasFlag('curse')) money=0;
+    core.status.hero.money += money;
+    var experience =enemy.experience;
+    if (core.hasFlag('curse')) experience=0;
+    core.status.hero.experience += experience;
+    var hint = "打败 " + enemy.name;
+    if (core.flags.enableMoney)
+        hint += "，金币+" + money;
+    if (core.flags.enableExperience)
+        hint += "，经验+" + experience;
+    core.drawTip(hint);
+
+    // 删除该块
+    if (core.isset(x) && core.isset(y)) {
+        core.removeBlock(x, y);
+        core.canvas.event.clearRect(32 * x, 32 * y, 32, 32);
+    }
 
     // 毒衰咒的处理
     var special = enemy.special;
@@ -145,7 +174,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
     // 如果事件不为空，将其插入
     if (todo.length>0) {
-        this.insertAction(todo,x,y);
+        core.events.insertAction(todo,x,y);
     }
 
     // 如果已有事件正在处理中
@@ -170,7 +199,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
     }
 
     if (todo.length>0) {
-        this.insertAction(todo,x,y);
+        core.events.insertAction(todo,x,y);
     }
 
     if (core.status.event.id == null) {

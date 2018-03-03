@@ -32,7 +32,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
         core.drawText([
             "\t[恭喜通关]你的分数是${status:hp}。"
         ], function () {
-            core.events.gameOver('', replaying);
+            core.events.gameOver(reason||'', replaying);
         })
     });
 },

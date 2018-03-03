@@ -19,7 +19,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
     if (hard=='Hell') { // 噩梦难度
         core.setFlag('hard', 4); // 可以用flag:hard来获得当前难度
     }
-    this.afterLoadData();
+    core.events.afterLoadData();
 },
 ////// 游戏获胜事件 //////
 "win" : function(reason) {
@@ -54,7 +54,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
     if (core.isset(core.status.event.id)) return; // 当前存在事件
 
     if (!core.hasFlag("visited_"+floorId)) {
-        this.doEvents(core.floors[floorId].firstArrive, null, null, function () {
+        core.events.doEvents(core.floors[floorId].firstArrive, null, null, function () {
             //core.autosave();
         });
         core.setFlag("visited_"+floorId, true);
@@ -174,7 +174,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
     // 如果事件不为空，将其插入
     if (todo.length>0) {
-        this.insertAction(todo,x,y);
+        core.events.insertAction(todo,x,y);
     }
 
     // 如果已有事件正在处理中
@@ -199,7 +199,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
     }
 
     if (todo.length>0) {
-        this.insertAction(todo,x,y);
+        core.events.insertAction(todo,x,y);
     }
 
     if (core.status.event.id == null) {

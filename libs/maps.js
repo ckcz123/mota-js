@@ -722,7 +722,7 @@ maps.prototype.removeBlock = function (x, y, floorId) {
 maps.prototype.removeBlockById = function (index, floorId) {
 
     var blocks = core.status.maps[floorId].blocks, block = blocks[index];
-    var x=blocks.x, y=blocks.y;
+    var x=block.x, y=block.y;
 
     // 检查该点是否存在事件
     var event = core.floors[floorId].events[x+","+y];
@@ -740,7 +740,7 @@ maps.prototype.removeBlockById = function (index, floorId) {
         blocks.splice(index,1);
         return;
     }
-    blocks[index].enable = false;
+    block.enable = false;
 }
 
 ////// 一次性删除多个block //////

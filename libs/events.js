@@ -801,7 +801,7 @@ events.prototype.trigger = function (x, y) {
 }
 
 ////// 楼层切换 //////
-events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) {
+events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback, fromLoad) {
 
     var displayAnimate=!(time==0) && !core.status.replay.replaying;
 
@@ -879,12 +879,15 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             }
             else core.setWeather();
 
-            core.status.maps[floorId].blocks.forEach(function(block) {
-                if (core.isset(block.enable) && !block.enable && core.isset(block.event) && block.event.cls=='enemys'
-                    && core.enemys.hasSpecial(core.material.enemys[block.event.id].special, 23)) {
-                    block.enable = true;
-                }
-            })
+            // 检查重生
+            if (!core.isset(fromLoad)) {
+                core.status.maps[floorId].blocks.forEach(function(block) {
+                    if (core.isset(block.enable) && !block.enable && core.isset(block.event) && block.event.cls=='enemys'
+                        && core.enemys.hasSpecial(core.material.enemys[block.event.id].special, 23)) {
+                        block.enable = true;
+                    }
+                })
+            }
 
             core.drawMap(floorId, function () {
                 setTimeout(function() {

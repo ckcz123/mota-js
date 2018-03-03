@@ -1880,7 +1880,7 @@ control.prototype.loadData = function (data, callback) {
 
     core.changeFloor(data.floorId, null, data.hero.loc, 0, function() {
         if (core.isset(callback)) callback();
-    });
+    }, true);
 }
 
 ////// 设置勇士属性 //////

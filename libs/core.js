@@ -536,8 +536,8 @@ core.prototype.trigger = function (x, y) {
 }
 
 ////// 楼层切换 //////
-core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) {
-    core.events.changeFloor(floorId, stair, heroLoc, time, callback);
+core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback, fromLoad) {
+    core.events.changeFloor(floorId, stair, heroLoc, time, callback, fromLoad);
 }
 
 ////// 清除地图 //////

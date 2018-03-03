@@ -324,7 +324,7 @@ actions.prototype.keyUp = function(keyCode) {
                     core.events.setInitData(hard);
                     core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
                         core.startReplay(route);
-                    });
+                    }, true);
                 }, function () {
                     core.ui.closePanel();
                 });

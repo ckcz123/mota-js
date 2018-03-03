@@ -32,7 +32,7 @@ editor.prototype.init = function(callback){
     //core.status.maps = core.clone(core.maps.initMaps(floorIds));
     core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
         afterCoreReset();
-    });
+    }, true);
     core.events.setInitData(hard);
   }
   setTimeout(afterMainInit, 500);

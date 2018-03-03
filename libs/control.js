@@ -280,7 +280,7 @@ control.prototype.startGame = function (hard, callback) {
 
     core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
         if (core.isset(callback)) callback();
-    });
+    }, true);
 
     setTimeout(function () {
         // Upload
@@ -1707,7 +1707,7 @@ control.prototype.doSL = function (id, type) {
                 core.events.setInitData(data.hard);
                 core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
                     core.startReplay(core.decodeRoute(data.route));
-                });
+                }, true);
             }
             return;
         }

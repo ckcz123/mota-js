@@ -879,6 +879,13 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             }
             else core.setWeather();
 
+            core.status.maps[floorId].blocks.forEach(function(block) {
+                if (core.isset(block.enable) && !block.enable && core.isset(block.event) && block.event.cls=='enemys'
+                    && core.enemys.hasSpecial(core.material.enemys[block.event.id].special, 23)) {
+                    block.enable = true;
+                }
+            })
+
             core.drawMap(floorId, function () {
                 setTimeout(function() {
                     if (core.isset(heroLoc.direction))

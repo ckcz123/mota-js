@@ -47,7 +47,7 @@ function main() {
     };
     this.mode = 'play';
     this.loadList = [
-        'items', 'icons', 'maps', 'enemys', 'events', 'data', 'ui', 'core'
+        'loader', 'control', 'utils', 'items', 'icons', 'maps', 'enemys', 'events', 'actions', 'data', 'ui', 'core'
     ];
     this.pureData = [ 
         "data","enemys","icons","maps","items","functions"
@@ -142,14 +142,16 @@ main.prototype.init = function (mode) {
         });
         
         main.loaderJs(function () {
-            var coreData = {};
+            main.core = core;
+
             for (i = 0; i < main.loadList.length; i++) {
                 var name = main.loadList[i];
                 if (name === 'core') continue;
-                main[name].init(main.dom);
-                coreData[name] = main[name];
+                main.core[name] = new (eval(name))();
             }
+
             main.loaderFloors(function() {
+                var coreData = {};
                 ["dom", "statusBar", "canvas", "images", "pngs",
                 "animates", "bgms", "sounds", "floorIds", "floors"].forEach(function (t) {
                     coreData[t] = main[t];
@@ -168,14 +170,9 @@ main.prototype.loaderJs = function (callback) {
     main.setMainTipsText('正在加载核心js文件...')
     for (var i = 0; i < main.loadList.length; i++) {
         main.loadMod(main.loadList[i], function (modName) {
-            instanceNum = 0;
             main.setMainTipsText(modName + '.js 加载完毕');
-            for (var key in main.instance) {
-                instanceNum++;
-            }
+            instanceNum++;
             if (instanceNum === main.loadList.length) {
-                delete main.instance;
-                // main.dom.mainTips.style.display = 'none';
                 callback();
             }
         });

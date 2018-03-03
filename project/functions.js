@@ -88,8 +88,37 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 },
 ////// 战斗结束后触发的事件 //////
 "afterBattle" : function(enemyId,x,y,callback) {
-    
+
     var enemy = core.material.enemys[enemyId];
+
+    // 扣减体力值
+    core.status.hero.hp -= core.enemys.getDamage(enemyId);
+    if (core.status.hero.hp<=0) {
+        core.status.hero.hp=0;
+        core.updateStatusBar();
+        core.events.lose('battle');
+        return;
+    }
+    // 获得金币和经验
+    var money = enemy.money;
+    if (core.hasItem('coin')) money *= 2;
+    if (core.hasFlag('curse')) money=0;
+    core.status.hero.money += money;
+    var experience =enemy.experience;
+    if (core.hasFlag('curse')) experience=0;
+    core.status.hero.experience += experience;
+    var hint = "打败 " + enemy.name;
+    if (core.flags.enableMoney)
+        hint += "，金币+" + money;
+    if (core.flags.enableExperience)
+        hint += "，经验+" + experience;
+    core.drawTip(hint);
+
+    // 删除该块
+    if (core.isset(x) && core.isset(y)) {
+        core.removeBlock(x, y);
+        core.canvas.event.clearRect(32 * x, 32 * y, 32, 32);
+    }
 
     // 毒衰咒的处理
     var special = enemy.special;

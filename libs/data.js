@@ -1,5 +1,5 @@
 function data() {
-
+    this.init();
 }
 
 data.prototype.init = function() {
@@ -12,5 +12,3 @@ data.prototype.init = function() {
 data.prototype.getFirstData = function() {
     return core.clone(this.firstData);
 }
-
-main.instance.data = new data();

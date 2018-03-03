@@ -1,5 +1,5 @@
 function items() {
-
+    this.init();
 }
 
 ////// 初始化 //////
@@ -35,8 +35,6 @@ items.prototype.getItems = function () {
 
     return this.items;
 }
-
-main.instance.items = new items();
 
 ////// “即捡即用类”道具的使用效果 //////
 items.prototype.getItemEffect = function(itemId, itemNum) {
@@ -319,3 +317,57 @@ items.prototype.canUseItem = function (itemId) {
 
     return false;
 }
+
+////// 获得某个物品的个数 //////
+items.prototype.itemCount = function (itemId) {
+    if (!core.isset(itemId) || !core.isset(core.material.items[itemId])) return 0;
+    var itemCls = core.material.items[itemId].cls;
+    if (itemCls=="items") return 0;
+    return core.isset(core.status.hero.items[itemCls][itemId]) ? core.status.hero.items[itemCls][itemId] : 0;
+}
+
+////// 是否存在某个物品 //////
+items.prototype.hasItem = function (itemId) {
+    return core.itemCount(itemId) > 0;
+}
+
+////// 设置某个物品的个数 //////
+items.prototype.setItem = function (itemId, itemNum) {
+    var itemCls = core.material.items[itemId].cls;
+    if (itemCls == 'items') return;
+    if (!core.isset(core.status.hero.items[itemCls])) {
+        core.status.hero.items[itemCls] = {};
+    }
+    core.status.hero.items[itemCls][itemId] = itemNum;
+    if (itemCls!='keys' && itemNum==0) {
+        delete core.status.hero.items[itemCls][itemId];
+    }
+}
+
+////// 删除某个物品 //////
+items.prototype.removeItem = function (itemId) {
+    if (!core.hasItem(itemId)) return false;
+    var itemCls = core.material.items[itemId].cls;
+    core.status.hero.items[itemCls][itemId]--;
+    if (itemCls!='keys' && core.status.hero.items[itemCls][itemId]==0) {
+        delete core.status.hero.items[itemCls][itemId];
+    }
+    core.updateStatusBar();
+    return true;
+}
+
+////// 增加某个物品的个数 //////
+items.prototype.addItem = function (itemId, itemNum) {
+    var itemData = core.material.items[itemId];
+    var itemCls = itemData.cls;
+    if (itemCls == 'items') return;
+    if (!core.isset(core.status.hero.items[itemCls])) {
+        core.status.hero.items[itemCls] = {};
+        core.status.hero.items[itemCls][itemId] = 0;
+    }
+    else if (!core.isset(core.status.hero.items[itemCls][itemId])) {
+        core.status.hero.items[itemCls][itemId] = 0;
+    }
+    core.status.hero.items[itemCls][itemId] += itemNum;
+}
+

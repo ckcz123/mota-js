@@ -49,7 +49,7 @@ editor.prototype.idsInit = function(maps, icons){
   editor.indexs = [];
   var MAX_NUM = 400;
   var getInfoById = function(id){
-    var block = maps.getBlock(0, 0, id);
+    var block = maps.initBlock(0, 0, id);
     if(hasOwnProp(block, 'event')){
       return block;
     }

@@ -1,5 +1,5 @@
 function enemys() {
-
+    this.init();
 }
 
 ////// 初始化 //////
@@ -286,5 +286,3 @@ enemys.prototype.getCurrentEnemys = function (floorId) {
     });
     return enemys;
 }
-
-main.instance.enemys = new enemys();

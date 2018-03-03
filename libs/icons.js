@@ -1,5 +1,5 @@
 function icons() {
-
+    this.init();
 }
 
 icons.prototype.init = function () {
@@ -10,5 +10,3 @@ icons.prototype.init = function () {
 icons.prototype.getIcons = function () {
     return this.icons;
 }
-
-main.instance.icons = new icons();

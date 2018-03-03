@@ -1095,6 +1095,7 @@ events.prototype.afterLoadData = function(data) {
 
 ////// 长按 //////
 events.prototype.longClick = function () {
+    if (!core.isPlaying()) return false;
     if (core.status.event.id=='text') {
         core.drawText();
         return true;

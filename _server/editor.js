@@ -24,7 +24,10 @@ editor.prototype.init = function(callback){
     editor.main=main;
     editor.core=core;
     editor.fs=fs;
+    editor_file = editor_file(editor);
     editor.file=editor_file;
+    editor_mode = editor_mode(editor);
+    editor.mode=editor_mode;
     editor.material.images=core.material.images;
     editor.listen(); // 开始监听事件
     var hard = 'Hard';
@@ -305,6 +308,13 @@ editor.prototype.changeFloor = function(floorId,callback) {
     editor.currentFloorData = core.floors[core.status.floorId];
     editor_mode.floor();
     if (core.isset(callback))callback();
+  });
+}
+
+editor.prototype.guid = function() {
+  return 'id_'+'xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+    return v.toString(16);
   });
 }
 

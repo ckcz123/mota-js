@@ -324,12 +324,12 @@ function hasOwnProp (obj, key) {
 main.init('editor');
 editor.init(function(){
   editor.pos={x: 0, y: 0};
-  editor_mode.loc();
+  editor.mode.loc();
   editor.info=editor.ids[editor.indexs[201]];
-  editor_mode.emenyitem();
-  editor_mode.floor();
-  editor_mode.tower();
-  editor_mode.listen();
+  editor.mode.emenyitem();
+  editor.mode.floor();
+  editor.mode.tower();
+  editor.mode.listen();
   editor_blockly=editor_blockly();
 });
 

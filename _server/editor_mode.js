@@ -1,3 +1,5 @@
+editor_mode = function(editor){
+
 function editor_mode(){
   this.ids={
     'loc':'left2',
@@ -12,8 +14,11 @@ function editor_mode(){
   this.info={};
   this.appendPic={};
 }
-
 editor_mode.prototype.init = function(callback){
+  if (Boolean(callback))callback();
+}
+
+editor_mode.prototype.init_dom_ids = function(callback){
 
   Object.keys(editor_mode.ids).forEach(function(v){
     editor_mode.dom[v]=document.getElementById(editor_mode.ids[v]);
@@ -90,7 +95,7 @@ editor_mode.prototype.checkIsLeaf = function(obj,commentObj,field){
 }
 
 editor_mode.prototype.objToTr = function(obj,commentObj,field){
-  var guid = editor_mode.guid();
+  var guid = editor.guid();
   var thiseval = eval('obj'+field);
   var comment = '';
   try {
@@ -131,13 +136,6 @@ editor_mode.prototype.objToTd = function(thiseval,comment){
   }
 }
 
-editor_mode.prototype.guid = function() {
-  return 'id_'+'xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-    return v.toString(16);
-  });
-}
-
 editor_mode.prototype.addAction = function(action){
   editor_mode.actionList.push(action);
 }
@@ -147,23 +145,23 @@ editor_mode.prototype.doActionList = function(mode,actionList){
   switch (mode) {
     case 'loc':
 
-      editor_file.editLoc(editor,editor_mode.pos.x,editor_mode.pos.y,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
+      editor.file.editLoc(editor_mode.pos.x,editor_mode.pos.y,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       break;
     case 'emenyitem':
 
       if (editor_mode.info.images=='enemys'){
-        editor_file.editEnemy(editor,editor_mode.info.id,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
+        editor.file.editEnemy(editor_mode.info.id,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       } else if (editor_mode.info.images=='items'){
-        editor_file.editItem(editor,editor_mode.info.id,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
+        editor.file.editItem(editor_mode.info.id,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       }
       break;
     case 'floor':
       
-      editor_file.editFloor(editor,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
+      editor.file.editFloor(actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       break;
     case 'tower':
       
-      editor.file.editTower(editor,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
+      editor.file.editTower(actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       break;
     default:
       break;
@@ -186,7 +184,7 @@ editor_mode.prototype.loc = function(callback){
   document.getElementById('pos_a6771a78_a099_417c_828f_0a24851ebfce').innerText=editor_mode.pos.x+','+editor_mode.pos.y;
 
   var objs=[];
-  editor_file.editLoc(editor,editor_mode.pos.x,editor_mode.pos.y,[],function(objs_){objs=objs_;console.log(objs_)});
+  editor.file.editLoc(editor_mode.pos.x,editor_mode.pos.y,[],function(objs_){objs=objs_;console.log(objs_)});
   //只查询不修改时,内部实现不是异步的,所以可以这么写
   var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
   document.getElementById('table_3d846fc4_7644_44d1_aa04_433d266a73df').innerHTML=tableinfo.HTML;
@@ -209,9 +207,9 @@ editor_mode.prototype.emenyitem = function(callback){
 
   var objs=[];
   if (editor_mode.info.images=='enemys'){
-    editor_file.editEnemy(editor,editor_mode.info.id,[],function(objs_){objs=objs_;console.log(objs_)});
+    editor.file.editEnemy(editor_mode.info.id,[],function(objs_){objs=objs_;console.log(objs_)});
   } else if (editor_mode.info.images=='items'){
-    editor_file.editItem(editor,editor_mode.info.id,[],function(objs_){objs=objs_;console.log(objs_)});
+    editor.file.editItem(editor_mode.info.id,[],function(objs_){objs=objs_;console.log(objs_)});
   } else {
     document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML='';
     return;
@@ -226,7 +224,7 @@ editor_mode.prototype.emenyitem = function(callback){
 
 editor_mode.prototype.floor = function(callback){
   var objs=[];
-  editor_file.editFloor(editor,[],function(objs_){objs=objs_;console.log(objs_)});
+  editor.file.editFloor([],function(objs_){objs=objs_;console.log(objs_)});
   //只查询不修改时,内部实现不是异步的,所以可以这么写
   var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
   document.getElementById('table_4a3b1b09_b2fb_4bdf_b9ab_9f4cdac14c74').innerHTML=tableinfo.HTML;
@@ -236,7 +234,7 @@ editor_mode.prototype.floor = function(callback){
 
 editor_mode.prototype.tower = function(callback){
   var objs=[];
-  editor.file.editTower(editor,[],function(objs_){objs=objs_;console.log(objs_)});
+  editor.file.editTower([],function(objs_){objs=objs_;console.log(objs_)});
   //只查询不修改时,内部实现不是异步的,所以可以这么写
   var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
   document.getElementById('table_b6a03e4c_5968_4633_ac40_0dfdd2c9cde5').innerHTML=tableinfo.HTML;
@@ -253,7 +251,7 @@ editor_mode.prototype.listen = function(callback){
     if (newIdIdnum.children[0].value && newIdIdnum.children[1].value){
       var id = newIdIdnum.children[0].value;
       var idnum = parseInt(newIdIdnum.children[1].value);
-      editor_file.changeIdAndIdnum(editor,id,idnum,editor_mode.info,function(err){
+      editor.file.changeIdAndIdnum(id,idnum,editor_mode.info,function(err){
         if(err){printe(err);throw(err)}
         printe('添加id的idnum成功,请F5刷新编辑器');
       });
@@ -261,7 +259,7 @@ editor_mode.prototype.listen = function(callback){
   }
 
   var selectFloor = document.getElementById('selectFloor');
-  editor_file.getFloorFileList(editor,function(floors){
+  editor.file.getFloorFileList(function(floors){
     var outstr=[];
     floors[0].forEach(function(floor){
       outstr.push(["<option value='",floor,"'>",floor,'</option>\n'].join(''));
@@ -277,7 +275,7 @@ editor_mode.prototype.listen = function(callback){
   var saveFloor = document.getElementById('saveFloor');
   saveFloor.onclick = function(){
     editor_mode.onmode('');
-    editor_file.saveFloorFile(editor,function(err){if(err){printe(err);throw(err)}});
+    editor.file.saveFloorFile(function(err){if(err){printe(err);throw(err)}});
   }
 
   var saveFloorAs = document.getElementById('saveFloorAs');
@@ -285,10 +283,10 @@ editor_mode.prototype.listen = function(callback){
   saveFloorAs.onclick = function(){
     if (!saveAsName.value)return;
     editor_mode.onmode('');
-    editor_file.saveFloorFileAs(editor,saveAsName.value,function(err){
+    editor.file.saveFloorFileAs(saveAsName.value,function(err){
       if(err){printe(err);throw(err)}
       core.floorIds.push(saveAsName.value);
-      editor.file.editTower(editor,[['change',"['main']['floorIds']",core.floorIds]],function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])}});
+      editor.file.editTower([['change',"['main']['floorIds']",core.floorIds]],function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])}});
     });
   }
 
@@ -436,5 +434,9 @@ editor_mode.prototype.listen = function(callback){
   if (Boolean(callback))callback();
 }
 
-editor_mode = new editor_mode();
-editor_mode.init();
+var editor_mode = new editor_mode();
+editor_mode.init_dom_ids();
+
+return editor_mode;
+}
+//editor_mode = editor_mode(editor);

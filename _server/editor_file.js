@@ -1,6 +1,6 @@
-(function(){
+editor_file = function(editor){
   
-  editor_file = {};
+  var editor_file = {};
 
   (function(){
     var script = document.createElement('script');
@@ -28,7 +28,7 @@
   })();
 
 
-  editor_file.getFloorFileList = function(editor,callback){
+  editor_file.getFloorFileList = function(callback){
     if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
     /* var fs = editor.fs;
     fs.readdir('project/floors',function(err, data){
@@ -37,7 +37,7 @@
     callback([editor.core.floorIds,null]);
   }
   //callback([Array<String>,err:String])
-  editor_file.loadFloorFile = function(editor,filename,callback){
+  editor_file.loadFloorFile = function(filename,callback){
     //filename不含'/'不含'.js'
     if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
     /* var fs = editor.fs;
@@ -63,7 +63,7 @@
     editor.currentFloorData = editor.core.floors[editor.currentFloorId];
   }
   //callback(err:String)
-  editor_file.saveFloorFile = function(editor,callback){
+  editor_file.saveFloorFile = function(callback){
     if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
     /* if (!isset(editor.currentFloorId) || !isset(editor.currentFloorData)) {
       callback('未选中文件或无数据');
@@ -85,7 +85,7 @@
     });
   }
   //callback(err:String)
-  editor_file.saveFloorFileAs = function(editor,saveAsFilename,callback){
+  editor_file.saveFloorFileAs = function(saveAsFilename,callback){
     //saveAsFilename不含'/'不含'.js'
     if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
     if (!isset(editor.currentFloorData)) {
@@ -95,13 +95,13 @@
     editor.currentFloorData=JSON.parse(JSON.stringify(editor.currentFloorData));
     editor.currentFloorData.floorId=saveAsFilename;
     editor.currentFloorId=saveAsFilename;
-    editor_file.saveFloorFile(editor,callback);
+    editor_file.saveFloorFile(callback);
   }
   //callback(err:String)
 
   ////////////////////////////////////////////////////////////////////
 
-  editor_file.changeIdAndIdnum = function(editor,id,idnum,info,callback){
+  editor_file.changeIdAndIdnum = function(id,idnum,info,callback){
     if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
     //检查maps中是否有重复的idnum或id
     var change = -1;
@@ -159,7 +159,7 @@
     callback(null);
   }
   //callback(err:String)
-  editor_file.editItem = function(editor,id,actionList,callback){
+  editor_file.editItem = function(id,actionList,callback){
     /*actionList:[
       ["change","['items']['name']","红宝石的新名字"],
       ["add","['items']['新的和name同级的属性']",123],
@@ -208,7 +208,7 @@
     //只有items.cls是items的才有itemEffect和itemEffectTip,keys和constants和tools只有items
   }
   //callback([obj,commentObj,err:String])
-  editor_file.editEnemy = function(editor,id,actionList,callback){
+  editor_file.editEnemy = function(id,actionList,callback){
     /*actionList:[
       ["change","['name']","初级巫师的新名字"],
       ["add","['新的和name同级的属性']",123],
@@ -256,7 +256,7 @@
 
   ////////////////////////////////////////////////////////////////////  
 
-  editor_file.editLoc = function(editor,x,y,actionList,callback){
+  editor_file.editLoc = function(x,y,actionList,callback){
     /*actionList:[
       ["change","['events']",["\t[老人,magician]领域、夹击。\n请注意领域怪需要设置value为伤害数值，可参见样板中初级巫师的写法。"]],
       ["change","['afterBattle']",null],
@@ -304,7 +304,7 @@
 
   ////////////////////////////////////////////////////////////////////  
 
-  editor_file.editFloor = function(editor,actionList,callback){
+  editor_file.editFloor = function(actionList,callback){
     /*actionList:[
       ["change","['title']",'样板 3 层'],
       ["change","['color']",null],
@@ -348,7 +348,7 @@
 
   ////////////////////////////////////////////////////////////////////
 
-  editor_file.editTower = function(editor,actionList,callback){
+  editor_file.editTower = function(actionList,callback){
     /*actionList:[
       ["change","['firstData']['version']",'Ver 1.0.1 (Beta)'],
       ["change","['values']['lavaDamage']",200],
@@ -489,7 +489,7 @@
         if (value[0]!='change')return;
         eval("editor.currentFloorData"+value[1]+'='+JSON.stringify(value[2]));
       });
-      editor_file.saveFloorFile(editor,callback);
+      editor_file.saveFloorFile(callback);
       return;
     }
     callback('出错了,要设置的文件名不识别');
@@ -523,5 +523,6 @@
   // ]
   
   */
-
-})();
+  return editor_file;
+}
+//editor_file = editor_file(editor);

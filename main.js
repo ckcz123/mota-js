@@ -106,7 +106,6 @@ function main() {
         'hard': document.getElementById("hard")
     }
     this.floors = {}
-    this.instance = {};
     this.canvas = {};
 }
 
@@ -213,7 +212,6 @@ main.prototype.loadMod = function (modName, callback) {
     script.src = 'libs/' + modName + (this.useCompress?".min":"") + '.js?v=' + this.version;
     main.dom.body.appendChild(script);
     script.onload = function () {
-        main[name] = main.instance[name];
         callback(name);
     }
 }

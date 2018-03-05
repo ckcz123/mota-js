@@ -20,25 +20,25 @@ editor.prototype.init = function(callback){
       if (Boolean(callback))callback();
     });
   }
+
   var afterMainInit = function(){
     editor.main=main;
     editor.core=core;
     editor.fs=fs;
-    editor_file = editor_file(editor);
-    editor.file=editor_file;
-    editor_mode = editor_mode(editor);
-    editor.mode=editor_mode;
-    editor.material.images=core.material.images;
-    editor.listen(); // 开始监听事件
-    var hard = 'Hard';
-    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
-    //core.status.maps = core.clone(core.maps.initMaps(floorIds));
-    core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-        afterCoreReset();
-    }, true);
-    core.events.setInitData(hard);
+    editor_file = editor_file(editor, function() {
+      editor.file=editor_file;
+      editor_mode = editor_mode(editor);
+      editor.mode=editor_mode;
+      editor.material.images=core.material.images;
+      editor.listen(); // 开始监听事件
+      core.resetStatus(core.firstData.hero, null, core.firstData.floorId, null, core.initStatus.maps);
+      core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
+          afterCoreReset();
+      }, true);
+      core.events.setInitData(null);
+    });
   }
-  setTimeout(afterMainInit, 500);
+  afterMainInit();
 }
 
 editor.prototype.reset = function(callback){

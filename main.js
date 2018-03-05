@@ -109,7 +109,7 @@ function main() {
     this.canvas = {};
 }
 
-main.prototype.init = function (mode) {
+main.prototype.init = function (mode, callback) {
     for (var i = 0; i < main.dom.gameCanvas.length; i++) {
         main.canvas[main.dom.gameCanvas[i].id] = main.dom.gameCanvas[i].getContext('2d');
     }
@@ -155,7 +155,7 @@ main.prototype.init = function (mode) {
                 "animates", "bgms", "sounds", "floorIds", "floors"].forEach(function (t) {
                     coreData[t] = main[t];
                 })
-                main.core.init(coreData);
+                main.core.init(coreData, callback);
                 main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
             });
         });

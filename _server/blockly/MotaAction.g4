@@ -140,7 +140,7 @@ changeFloor_m
 /* changeFloor_m
 tooltip : 楼梯, 传送门, 如果目标楼层有多个楼梯, 写upFloor或downFloor可能会导致到达的楼梯不确定, 这时候请使用loc方式来指定具体的点位置
 helpUrl : https://ckcz123.github.io/mota-js/#/element?id=%e8%b7%af%e9%9a%9c%ef%bc%8c%e6%a5%bc%e6%a2%af%ef%bc%8c%e4%bc%a0%e9%80%81%e9%97%a8
-default : ["MT1",null,0,0,null,500,null]
+default : ["MT1",null,0,0,[['不变',''],['上','up'],['下','down'],['左','left'],['右','right']],500,null]
 var loc = ', "loc": ['+Int_0+', '+Int_1+']';
 if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
@@ -470,7 +470,7 @@ changeFloor_s
 /* changeFloor_s
 tooltip : changeFloor: 楼层切换,动画时间可不填
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=changefloor-%e6%a5%bc%e5%b1%82%e5%88%87%e6%8d%a2
-default : ["MT1",0,0,null,500]
+default : ["MT1",0,0,[['不变',''],['上','up'],['下','down'],['左','left'],['右','right']],500]
 colour : this.dataColor
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 Int_2 = Int_2 ?(', "time": '+Int_2):'';
@@ -485,7 +485,7 @@ changePos_0_s
 /* changePos_0_s
 tooltip : changePos: 当前位置切换
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=changepos-%e5%bd%93%e5%89%8d%e4%bd%8d%e7%bd%ae%e5%88%87%e6%8d%a2%e5%8b%87%e5%a3%ab%e8%bd%ac%e5%90%91
-default : [0,0,null]
+default : [0,0,[['不变',''],['上','up'],['下','down'],['左','left'],['右','right']]]
 colour : this.dataColor
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 var code = '{"type": "changePos", "loc": ['+Int_0+','+Int_1+']'+DirectionEx_List_0+'},\n';
@@ -500,6 +500,7 @@ changePos_1_s
 tooltip : changePos: 勇士转向
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=changepos-%e5%bd%93%e5%89%8d%e4%bd%8d%e7%bd%ae%e5%88%87%e6%8d%a2%e5%8b%87%e5%a3%ab%e8%bd%ac%e5%90%91
 colour : this.dataColor
+default : [[['上','up'],['下','down'],['左','left'],['右','right']]]
 var code = '{"type": "changePos", "direction": "'+Direction_List_0+'"},\n';
 return code;
 */
@@ -1037,23 +1038,23 @@ LineComment
     ;
 
 /* Function_0
-//converter.evisitor.recieveOrder='ORDER_NONE';
-converter.evisitor.valueColor=330;
-converter.evisitor.statementColor=70;
-converter.evisitor.entryColor=250;
+//this.evisitor.recieveOrder='ORDER_NONE';
+this.evisitor.valueColor=330;
+this.evisitor.statementColor=70;
+this.evisitor.entryColor=250;
 
-converter.evisitor.idstring_eColor=310;
-converter.evisitor.subColor=190;
-converter.evisitor.printColor=70;
-converter.evisitor.dataColor=130;
-converter.evisitor.eventColor=220;
-converter.evisitor.soundColor=20;
+this.evisitor.idstring_eColor=310;
+this.evisitor.subColor=190;
+this.evisitor.printColor=70;
+this.evisitor.dataColor=130;
+this.evisitor.eventColor=220;
+this.evisitor.soundColor=20;
 */
 
 /* Function_1
-delete(converter.evisitor.expressionRules.negate_e.blockjs.inputsInline);
-converter.evisitor.expressionRules.idString_1_e.blockjs.output='idString_e';
-converter.evisitor.expressionRules.idString_2_e.blockjs.output='idString_e';
+delete(this.block('negate_e').inputsInline);
+this.block('idString_1_e').output='idString_e';
+this.block('idString_2_e').output='idString_e';
 */
 
 /* Functions
@@ -1075,7 +1076,7 @@ ActionParser.prototype.parse = function (obj,type) {
       if(!obj)obj={};
       if(!this.isset(obj.loc))obj.loc=[0,0];
       return MotaActionBlocks['changeFloor_m'].xmlText([
-        obj.floorId,obj.stair||'loc',obj.loc[0],obj.loc[1],this.Direction(obj.direction),obj.time||0,!this.isset(obj.portalWithoutTrigger)
+        obj.floorId,obj.stair||'loc',obj.loc[0],obj.loc[1],obj.direction,obj.time||0,!this.isset(obj.portalWithoutTrigger)
       ]);
 
     case 'point':
@@ -1215,15 +1216,15 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "changeFloor": // 楼层转换
       this.next = MotaActionBlocks['changeFloor_s'].xmlText([
-        data.floorId,data.loc[0],data.loc[1],this.Direction(data.direction),this.time||0,this.next]);
+        data.floorId,data.loc[0],data.loc[1],data.direction,this.time||0,this.next]);
       break;
     case "changePos": // 直接更换勇士位置, 不切换楼层
       if(this.isset(data.loc)){
         this.next = MotaActionBlocks['changePos_0_s'].xmlText([
-          data.loc[0],data.loc[1],this.Direction(data.direction),this.next]);
+          data.loc[0],data.loc[1],data.direction,this.next]);
       } else {
         this.next = MotaActionBlocks['changePos_1_s'].xmlText([
-          this.Direction(data.direction),this.next]);
+          data.direction,this.next]);
       }
       break;
     case "animate": // 显示动画
@@ -1390,18 +1391,6 @@ ActionParser.prototype.StepString = function(steplist) {
   return StepString.join('');
 }
 
-ActionParser.prototype.Direction = function(Direction) {
-  var stepchar = {
-    'up': '上',
-    'down': '下',
-    'left': '左',
-    'right': '右'
-  }
-  Direction=stepchar[Direction];
-  if(!Direction)Direction='不变';
-  return Direction;
-}
-
 ActionParser.prototype.EvalString = function(EvalString) {
   return EvalString.split('\b').join('\\b').split('\t').join('\\t').split('\n').join('\\n');
 }
@@ -1427,20 +1416,6 @@ MotaActionFunctions.IdString_pre = function(IdString){
   if (IdString && !(/^[a-zA-Z_][0-9a-zA-Z_\-:]*$/.test(IdString)))throw new Error('id: '+IdString+'中包含了0-9 a-z A-Z _ - :之外的字符');
   return IdString;
 }
-
-MotaActionFunctions.DirectionEx_List_pre = function(DirectionEx_List){
-  var directionchar = {
-    '上': 'up',
-    '下': 'down',
-    '左': 'left',
-    '右': 'right'
-  }
-  Direction=directionchar[DirectionEx_List];
-  if(!Direction)Direction='';
-  return Direction;
-}
-
-MotaActionFunctions.Direction_List_pre = MotaActionFunctions.DirectionEx_List_pre
 
 MotaActionFunctions.StepString_pre = function(StepString){
   //StepString='上右3下2左上左2'

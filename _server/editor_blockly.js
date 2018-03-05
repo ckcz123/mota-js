@@ -239,10 +239,10 @@ editor_blockly.runOne = function (){
     //var printf = function(){};
     var grammerFile = input_;
     converter = new Converter().init();
-    converter.generBlocks(grammerFile,[]);
+    converter.generBlocks(grammerFile);
     //printf(converter.blocks);
     converter.renderGrammerName();
-    converter.generToolbox();
+    //converter.generToolbox();
     converter.generMainFile();
     //printf(converter.mainFile.join(''));
     console.log(converter);

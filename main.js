@@ -106,11 +106,10 @@ function main() {
         'hard': document.getElementById("hard")
     }
     this.floors = {}
-    this.instance = {};
     this.canvas = {};
 }
 
-main.prototype.init = function (mode) {
+main.prototype.init = function (mode, callback) {
     for (var i = 0; i < main.dom.gameCanvas.length; i++) {
         main.canvas[main.dom.gameCanvas[i].id] = main.dom.gameCanvas[i].getContext('2d');
     }
@@ -156,7 +155,7 @@ main.prototype.init = function (mode) {
                 "animates", "bgms", "sounds", "floorIds", "floors"].forEach(function (t) {
                     coreData[t] = main[t];
                 })
-                main.core.init(coreData);
+                main.core.init(coreData, callback);
                 main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
             });
         });
@@ -213,7 +212,6 @@ main.prototype.loadMod = function (modName, callback) {
     script.src = 'libs/' + modName + (this.useCompress?".min":"") + '.js?v=' + this.version;
     main.dom.body.appendChild(script);
     script.onload = function () {
-        main[name] = main.instance[name];
         callback(name);
     }
 }

@@ -1,6 +1,8 @@
-editor_file = function(editor){
+editor_file = function(editor, callback){
   
   var editor_file = {};
+
+
 
   (function(){
     var script = document.createElement('script');
@@ -12,6 +14,8 @@ editor_file = function(editor){
     script.onload = function () {
       editor_file.comment=comment_c456ea59_6018_45ef_8bcc_211a24c627dc;
       delete(comment_c456ea59_6018_45ef_8bcc_211a24c627dc);
+      if (editor_file.comment && editor_file.dataComment && callback)
+        callback();
     }
   })();
   (function(){
@@ -24,6 +28,8 @@ editor_file = function(editor){
     script.onload = function () {
       editor_file.dataComment=data_comment_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d;
       delete(data_comment_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d);
+      if (editor_file.comment && editor_file.dataComment && callback)
+        callback();
     }
   })();
 

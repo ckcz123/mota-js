@@ -151,7 +151,7 @@ function core() {
 /////////// 系统事件相关 ///////////
 
 ////// 初始化 //////
-core.prototype.init = function (coreData) {
+core.prototype.init = function (coreData, callback) {
     for (var key in coreData) {
         core[key] = coreData[key];
     }
@@ -281,6 +281,9 @@ core.prototype.init = function (coreData) {
         core.material.icons.hero.height = core.material.images.hero.height/4;
         core.setRequestAnimationFrame();
         core.showStartAnimate();
+
+        if (core.isset(callback)) callback();
+
     });
 }
 

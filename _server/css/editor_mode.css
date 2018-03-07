@@ -45,7 +45,11 @@
 
 #left6 {
   left: 5px;
-  top: 1930px;
+  /* top: 1930px; */
+  top: 5px;
+  z-index: 200;
+  position: fixed;
+  background-color: rgb(245, 245, 245);
   width: 1335px;
   height: 780px;
 }

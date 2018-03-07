@@ -327,7 +327,13 @@ editor_blockly.import = function(id_){
   editor_blockly.show();
 }
 
-editor_blockly.show = function(){}
+editor_blockly.show = function(){document.getElementById('left6').style='';}
+editor_blockly.hide = function(){document.getElementById('left6').style='z-index:-1;opacity: 0;';}
+
+editor_blockly.cancel = function(){
+  editor_blockly.id='';
+  editor_blockly.hide();
+}
 
 editor_blockly.confirm =  function (){
   if(!editor_blockly.id){
@@ -339,6 +345,7 @@ editor_blockly.confirm =  function (){
     editor_blockly.id='';
     var input = thisTr.children[2].children[0].children[0];
     input.value = value;
+    editor_blockly.hide();
     input.onchange();
   }
   if(document.getElementById('codeArea').value===''){
@@ -357,20 +364,26 @@ var codeEditor = CodeMirror.fromTextArea(document.getElementById("multiLineCode"
   continueComments: "Enter",
   extraKeys: {"Ctrl-Q": "toggleComment"}
 });
+editor_blockly.showCodeEditor = function(){document.getElementById("multiLineDiv").style='';}
+editor_blockly.hideCodeEditor = function(){document.getElementById("multiLineDiv").style='z-index:-1;opacity: 0;';}
 
 var multiLineArgs=[null,null,null];
 editor_blockly.multiLineEdit = function(value,b,f,callback){
-  document.getElementById("multiLineDiv").style.display='';
+  editor_blockly.showCodeEditor();
   codeEditor.setValue(value.split('\\n').join('\n')||'');
   multiLineArgs[0]=b;
   multiLineArgs[1]=f;
   multiLineArgs[2]=callback;
 }
 editor_blockly.multiLineDone = function(){
-  document.getElementById("multiLineDiv").style.display='none';
+  editor_blockly.hideCodeEditor();
   if(!multiLineArgs[0] || !multiLineArgs[1] || !multiLineArgs[2])return;
   var newvalue = codeEditor.getValue()||'';
   multiLineArgs[2](newvalue,multiLineArgs[0],multiLineArgs[1])
+}
+editor_blockly.multiLineCancel = function(){
+  multiLineArgs=[null,null,null];
+  editor_blockly.hideCodeEditor();
 }
 
 editor_blockly.doubleClickBlock = function (blockId){

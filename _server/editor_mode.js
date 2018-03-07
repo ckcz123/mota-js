@@ -1,4 +1,5 @@
 editor_mode = function(editor){
+var core = editor.core;
 
 function editor_mode(){
   this.ids={

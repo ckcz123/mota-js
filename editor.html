@@ -99,7 +99,7 @@
         </table>
       </div>
     </div></div>
-    <div id="left6" class='leftTab'><div><!-- eventsEditor -->
+    <div id="left6" class='leftTab' style="z-index:-1;opacity: 0;"><div><!-- eventsEditor -->
       <h3>事件编辑器 &nbsp;&nbsp;
         <button onclick="editor_blockly.showXML()">Show XML</button>
         <button onclick="editor_blockly.runCode()">console.log(obj=code)</button>
@@ -115,6 +115,7 @@
         </select>
         <button onclick="editor_blockly.parse()">parse</button>
         <button onclick="editor_blockly.confirm()">confirm</button>
+        <button onclick="editor_blockly.cancel()">cancel</button>
         <xml id="toolbox" style="display:none">
           <category name="entry"></category>
           <category name="statement"></category>
@@ -124,9 +125,10 @@
       </h3>
       <div>
         <div id="blocklyDiv"></div>
-        <div id="multiLineDiv" style="display:none">
+        <div id="multiLineDiv" style="z-index:-1;opacity: 0;">
           <textarea id="multiLineCode" name="multiLineCode"></textarea>
           <button onclick="editor_blockly.multiLineDone()">done</button>
+          <button onclick="editor_blockly.multiLineCancel()">cancel</button>
         </div>
         <textarea id="codeArea" spellcheck="false"></textarea>
       </div>

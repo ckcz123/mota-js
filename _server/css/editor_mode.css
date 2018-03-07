@@ -45,20 +45,40 @@
 
 #left6 {
   left: 5px;
-  top: 1930px;
+  /* top: 1930px; */
+  top: 5px;
+  z-index: 200;
+  position: fixed;
+  background-color: rgb(245, 245, 245);
   width: 1335px;
   height: 780px;
 }
 
 #left6 #blocklyDiv {height: 480px; width: 940px;float:left;}
 #left6 #codeArea {width: 99.5%; height: 15.4em;overflow:y;/* resize:none; */clear:both;}
-#left6 #multiLineDiv {height: 440px; width: 375px;float:left;}
-#left6 #multiLineDiv .CodeMirror {
+
+#left7 {
+  /* height: 440px; width: 375px;float:left; */
+  left: 5px;
+  top: 5px;
+  z-index: 200;
+  position: fixed;
+  background-color: rgb(245, 245, 245);
+  width: 1335px;
+  height: 780px;
+}
+#left7 .CodeMirror {
   /* border-top: 1px solid black;
   border-bottom: 1px solid black; */
   border: 1px solid #eee;
-  height: 438px;
-   width: 373px;
+  height: 700px;
+  width: 940px;
+}
+
+#left8 {
+  left: 900px;
+  top: 1290px;
+  width: 440px;
 }
 
 .etable table,

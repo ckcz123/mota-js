@@ -1,11 +1,13 @@
 editor_mode = function(editor){
+var core = editor.core;
 
 function editor_mode(){
   this.ids={
     'loc':'left2',
     'emenyitem':'left3',
     'floor':'left4',
-    'tower':'left5'
+    'tower':'left5',
+    'functions':'left8'
   }
   this._ids={}
   this.dom={}
@@ -73,6 +75,7 @@ editor_mode.prototype.objToTable = function(obj,commentObj){
       }
       input.ondblclick = function(){
         editor_blockly.import(guid);
+        editor_multi.import(guid);
       }
     });
   }
@@ -163,6 +166,10 @@ editor_mode.prototype.doActionList = function(mode,actionList){
       
       editor.file.editTower(actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       break;
+    case 'functions':
+      
+      editor.file.editFunctions(actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
+      break;
     default:
       break;
   }
@@ -238,6 +245,16 @@ editor_mode.prototype.tower = function(callback){
   //只查询不修改时,内部实现不是异步的,所以可以这么写
   var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
   document.getElementById('table_b6a03e4c_5968_4633_ac40_0dfdd2c9cde5').innerHTML=tableinfo.HTML;
+  tableinfo.listen(tableinfo.guids);
+  if (Boolean(callback))callback();
+}
+
+editor_mode.prototype.functions = function(callback){
+  var objs=[];
+  editor.file.editFunctions([],function(objs_){objs=objs_;console.log(objs_)});
+  //只查询不修改时,内部实现不是异步的,所以可以这么写
+  var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
+  document.getElementById('table_e260a2be_5690_476a_b04e_dacddede78b3').innerHTML=tableinfo.HTML;
   tableinfo.listen(tableinfo.guids);
   if (Boolean(callback))callback();
 }

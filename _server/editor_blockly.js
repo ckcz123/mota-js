@@ -327,7 +327,13 @@ editor_blockly.import = function(id_){
   editor_blockly.show();
 }
 
-editor_blockly.show = function(){}
+editor_blockly.show = function(){document.getElementById('left6').style='';}
+editor_blockly.hide = function(){document.getElementById('left6').style='z-index:-1;opacity: 0;';}
+
+editor_blockly.cancel = function(){
+  editor_blockly.id='';
+  editor_blockly.hide();
+}
 
 editor_blockly.confirm =  function (){
   if(!editor_blockly.id){
@@ -339,6 +345,7 @@ editor_blockly.confirm =  function (){
     editor_blockly.id='';
     var input = thisTr.children[2].children[0].children[0];
     input.value = value;
+    editor_blockly.hide();
     input.onchange();
   }
   if(document.getElementById('codeArea').value===''){
@@ -348,29 +355,6 @@ editor_blockly.confirm =  function (){
   var code = Blockly.JavaScript.workspaceToCode(editor_blockly.workspace);
   eval('var obj=' + code);
   setvalue(JSON.stringify(obj));
-}
-
-var codeEditor = CodeMirror.fromTextArea(document.getElementById("multiLineCode"), {
-  lineNumbers: true,
-  matchBrackets: true,
-  lineWrapping: true,
-  continueComments: "Enter",
-  extraKeys: {"Ctrl-Q": "toggleComment"}
-});
-
-var multiLineArgs=[null,null,null];
-editor_blockly.multiLineEdit = function(value,b,f,callback){
-  document.getElementById("multiLineDiv").style.display='';
-  codeEditor.setValue(value.split('\\n').join('\n')||'');
-  multiLineArgs[0]=b;
-  multiLineArgs[1]=f;
-  multiLineArgs[2]=callback;
-}
-editor_blockly.multiLineDone = function(){
-  document.getElementById("multiLineDiv").style.display='none';
-  if(!multiLineArgs[0] || !multiLineArgs[1] || !multiLineArgs[2])return;
-  var newvalue = codeEditor.getValue()||'';
-  multiLineArgs[2](newvalue,multiLineArgs[0],multiLineArgs[1])
 }
 
 editor_blockly.doubleClickBlock = function (blockId){
@@ -387,7 +371,7 @@ editor_blockly.doubleClickBlock = function (blockId){
   if(f){
     var value = b.getFieldValue(f);
     //多行编辑
-    editor_blockly.multiLineEdit(value,b,f,function(newvalue,b,f){
+    editor_multi.multiLineEdit(value,b,f,function(newvalue,b,f){
       if(textStringDict[b.type]!=='RawEvalString_0'){}
       b.setFieldValue(newvalue.split('\n').join('\\n'),f);
     });

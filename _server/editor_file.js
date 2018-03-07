@@ -3,35 +3,28 @@ editor_file = function(editor, callback){
   var editor_file = {};
 
 
-
-  (function(){
-    var script = document.createElement('script');
-    if (window.location.href.indexOf('_server')!==-1)
-      script.src = '../project/comment.js';
-    else
-      script.src = 'project/comment.js';
-    document.body.appendChild(script);
-    script.onload = function () {
-      editor_file.comment=comment_c456ea59_6018_45ef_8bcc_211a24c627dc;
-      delete(comment_c456ea59_6018_45ef_8bcc_211a24c627dc);
-      if (editor_file.comment && editor_file.dataComment && callback)
-        callback();
-    }
-  })();
-  (function(){
-    var script = document.createElement('script');
-    if (window.location.href.indexOf('_server')!==-1)
-      script.src = '../project/data.comment.js';
-    else
-      script.src = 'project/data.comment.js';
-    document.body.appendChild(script);
-    script.onload = function () {
-      editor_file.dataComment=data_comment_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d;
-      delete(data_comment_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d);
-      if (editor_file.comment && editor_file.dataComment && callback)
-        callback();
-    }
-  })();
+  var commentjs={
+    'comment':'comment',
+    'data.comment':'dataComment',
+    'functions.comment':'functionsComment',
+  }
+  for(var key in commentjs){
+    (function(key){
+      var value = commentjs[key];
+      var script = document.createElement('script');
+      if (window.location.href.indexOf('_server')!==-1)
+        script.src = '../project/'+key+'.js';
+      else
+        script.src = 'project/'+key+'.js';
+      document.body.appendChild(script);
+      script.onload = function () {
+        editor_file[value]=eval(key.replace('.','_')+'_c456ea59_6018_45ef_8bcc_211a24c627dc');
+        var loaded = Boolean(callback);
+        for(var key_ in commentjs){loaded = loaded && editor_file[commentjs[key_]]}
+        if (loaded)callback();
+      }
+    })(key);
+  }
 
 
   editor_file.getFloorFileList = function(callback){
@@ -396,6 +389,52 @@ editor_file = function(editor, callback){
   }
   //callback([obj,commentObj,err:String])
 
+  ////////////////////////////////////////////////////////////////////
+
+  var fmap = {};
+  var fjson = JSON.stringify(functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a,function(k,v){if(v instanceof Function){var id_ = editor.guid();fmap[id_]=v.toString();return id_;}else return v},4);
+  var fobj = JSON.parse(fjson);
+  editor_file.functionsMap = fmap;
+  editor_file.functionsJSON = fjson;
+  var buildlocobj = function(locObj){
+    for(var key in locObj){
+      if(typeof(locObj[key])!==typeof(''))buildlocobj(locObj[key]);
+      else locObj[key]=fmap[locObj[key]];
+    }
+  };
+
+  editor_file.editFunctions = function(actionList,callback){
+    /*actionList:[
+      ["change","['events']['afterChangeLight']","function(x,y){console.log(x,y)}"],
+      ["change","['ui']['drawAbout']","function(){...}"],
+    ]
+    为[]时只查询不修改
+    */
+    if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
+    if (isset(actionList) && actionList.length > 0){
+      saveSetting('functions',actionList,function (err) {
+        callback([
+          (function(){
+            var locObj=JSON.parse(fjson);
+            buildlocobj(locObj);
+            return locObj;
+          })(),
+          editor_file.functionsComment,
+          err]);
+      });
+    } else {
+      callback([
+        (function(){
+          var locObj=JSON.parse(fjson);
+          buildlocobj(locObj);
+          return locObj;
+        })(),
+        editor_file.functionsComment,
+        null]);
+    }
+  }
+  //callback([obj,commentObj,err:String])
+
   ////////////////////////////////////////////////////////////////////  
   
   var isset = function (val) {
@@ -421,6 +460,12 @@ editor_file = function(editor, callback){
       formatArrStr += ']'+(i==12?'':',\n');
     }
     return formatArrStr;
+  }
+
+  var encode = function (str) {
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+        return String.fromCharCode(parseInt(p1, 16))
+    }))
   }
   
   var saveSetting = function(file,actionList,callback) {
@@ -486,6 +531,22 @@ editor_file = function(editor, callback){
       var datastr='data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d = \n';
       datastr+=JSON.stringify(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d,null,4);
       fs.writeFile('project/data.js',datastr,'utf-8',function(err, data){
+        callback(err);
+      });
+      return;
+    }
+    if (file=='functions') {
+      actionList.forEach(function (value) {
+        if (value[0]!='change')return;
+        eval("fmap[fobj"+value[1]+']='+JSON.stringify(value[2]));
+      });
+      var fraw = fjson;
+      for(var id_ in fmap){
+        fraw = fraw.replace('"'+id_+'"',fmap[id_])
+      }
+      var datastr='functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = \n';
+      datastr+=fraw;
+      fs.writeFile('project/functions.js',encode(datastr),'base64',function(err, data){
         callback(err);
       });
       return;

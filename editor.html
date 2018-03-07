@@ -125,12 +125,22 @@
       </h3>
       <div>
         <div id="blocklyDiv"></div>
-        <div id="multiLineDiv" style="z-index:-1;opacity: 0;">
-          <textarea id="multiLineCode" name="multiLineCode"></textarea>
-          <button onclick="editor_blockly.multiLineDone()">done</button>
-          <button onclick="editor_blockly.multiLineCancel()">cancel</button>
-        </div>
         <textarea id="codeArea" spellcheck="false"></textarea>
+      </div>
+    </div></div>
+    <div id="left7" style="z-index:-1;opacity: 0;"><div>
+      <button onclick="editor_multi.confirm()">confirm</button>
+      <button onclick="editor_multi.cancel()">cancel</button>
+      <textarea id="multiLineCode" name="multiLineCode"></textarea>
+    </div></div>
+    <div id="left8" class='leftTab'><div><!-- tower -->
+      <h3>脚本编辑</h3>
+      <div class='etable'>
+        <table>
+          <tbody id='table_e260a2be_5690_476a_b04e_dacddede78b3'>
+            <tr><td>条目</td><td>注释</td><td>值</td></tr>
+          </tbody>
+        </table>
       </div>
     </div></div>
     <div id="mid">
@@ -331,7 +341,9 @@ main.init('editor', function() {
     editor.mode.emenyitem();
     editor.mode.floor();
     editor.mode.tower();
+    editor.mode.functions();
     editor.mode.listen();
+    editor_multi=editor_multi();
     editor_blockly=editor_blockly();
   });
 });
@@ -341,6 +353,8 @@ main.init('editor', function() {
 //main.listen();
 </script>
 
+<!-- hightlight textarea -->
+<script src='_server/editor_multi.js'></script>
 <!-- blockly -->
 <script src="_server/blockly/Converter.bundle.min.js"></script>
 <script src="_server/blockly/blockly_compressed.js"></script>

@@ -3,6 +3,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 "events":{
 ////// 不同难度分别设置初始属性 //////
 "setInitData":function (hard) {
+    // 不同难度分别设置初始属性
     if (hard=='Easy') { // 简单难度
         core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
         // 可以在此设置一些初始福利，比如设置初始生命值可以调用：
@@ -23,6 +24,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 },
 ////// 游戏获胜事件 //////
 "win" : function(reason) {
+    // 游戏获胜事件 
     core.ui.closePanel();
     var replaying = core.status.replay.replaying;
     core.stopReplay();
@@ -38,6 +40,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 },
 ////// 游戏失败事件 //////
 "lose" : function(reason) {
+    // 游戏失败事件
     core.ui.closePanel();
     var replaying = core.status.replay.replaying;
     core.stopReplay();
@@ -51,6 +54,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 },
 ////// 转换楼层结束的事件 //////
 "afterChangeFloor" : function (floorId) {
+    // 转换楼层结束的事件
     if (core.isset(core.status.event.id)) return; // 当前存在事件
 
     if (!core.hasFlag("visited_"+floorId)) {
@@ -66,6 +70,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 },
 ////// 加点事件 //////
 "addPoint" : function (enemy) {
+    // 加点事件
     var point = enemy.point;
     if (!core.isset(point) || point<=0) return [];
 
@@ -88,6 +93,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 },
 ////// 战斗结束后触发的事件 //////
 "afterBattle" : function(enemyId,x,y,callback) {
+    // 战斗结束后触发的事件
 
     var enemy = core.material.enemys[enemyId];
 
@@ -189,6 +195,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 },
 ////// 开一个门后触发的事件 //////
 "afterOpenDoor" : function(doorId,x,y,callback) {
+    // 开一个门后触发的事件
     
     var todo = [];
     if (core.isset(x) && core.isset(y)) {
@@ -212,10 +219,12 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 },
 ////// 改变亮灯之后，可以触发的事件 //////
 "afterChangeLight" : function(x,y) {
+    // 改变亮灯之后，可以触发的事件
 
 },
 ////// 推箱子后的事件 //////
 "afterPushBox" : function () {
+    // 推箱子后的事件
 
     var noBoxLeft = function () {
         // 地图上是否还存在未推到的箱子，如果不存在则返回true，存在则返回false
@@ -239,6 +248,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 },
 ////// 使用炸弹/圣锤后的事件 //////
 "afterUseBomb" : function () {
+    // 使用炸弹/圣锤后的事件
 
     // 这是一个使用炸弹也能开门的例子
     /*
@@ -254,10 +264,12 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 },
 ////// 即将存档前可以执行的操作 //////
 "beforeSaveData" : function(data) {
+    // 即将存档前可以执行的操作
 
 },
 ////// 读档事件后，载入事件前，可以执行的操作 //////
 "afterLoadData" : function(data) {
+    // 读档事件后，载入事件前，可以执行的操作
 
 }
 
@@ -266,6 +278,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 "ui":{
 ////// 绘制“关于”界面 //////
 "drawAbout" : function() {
+    // 绘制“关于”界面
     
         if (!core.isPlaying()) {
             core.status.event = {'id': null, 'data': null};

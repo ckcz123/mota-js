@@ -18,15 +18,16 @@ editor.file.loadFloorFile
 editor.file.saveFloorFile
 editor.file.saveFloorFileAs
 ```
-5个编辑模式有关的查询
+6个编辑模式有关的查询
 ```javascript
 editor.file.editItem('redJewel',[],function(a){console.log(a)});
 editor.file.editEnemy('redBat',[],function(a){console.log(a)});
 editor.file.editLoc(2,0,[],function(a){console.log(a)});
 editor.file.editFloor([],function(a){console.log(a)});
 editor.file.editTower([],function(a){console.log(a)});
+editor.file.editFunctions([],function(a){console.log(a)});
 ```
-5个编辑模式有关的编辑
+6个编辑模式有关的编辑
 ```javascript
 editor.info={images: "terrains", y: 9};
 editor.file.changeIdAndIdnum('yellowWall2',16,editor.info,function(a){console.log(a)});
@@ -35,15 +36,17 @@ editor.file.editEnemy('redBat',[['change',"['atk']",20]],function(a){console.log
 editor.file.editLoc(2,6,[["change","['afterBattle']",null]],function(a){console.log(a)});
 editor.file.editFloor([["change","['title']",'样板 33 层']],function(a){console.log(a)});
 editor.file.editTower([["change","['values']['lavaDamage']",200]],function(a){console.log(a)});
+editor.file.editFunctions(["change","['events']['afterChangeLight']","function(x,y){console.log(x,y)}"],function(a){console.log(a)});
 ```
 
 ### editor_mode.js
-4个生成表格并绑定事件的函数
+5个生成表格并绑定事件的函数
 ```javascript
 editor.mode.loc();
 editor.mode.emenyitem();
 editor.mode.floor();
 editor.mode.tower();
+editor.mode.functions();
 ```
 切换模式
 ```javascript
@@ -52,6 +55,7 @@ editor.mode.onmode('loc');
 editor.mode.onmode('emenyitem');
 editor.mode.onmode('floor');
 editor.mode.onmode('tower');
+editor.mode.onmode('functions');
 ```
 在切换模式时,改动才会保存到文件,并且需要刷新页面使得`editor`能看到改动
 

@@ -1,4 +1,4 @@
-data_comment_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d = 
+data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = 
 {
     "main": {
         "useCompress": " 是否使用压缩文件 \n 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。 \n 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。 \n 如果要进行剧本的修改请务必将其改成false。 \n$select({\"values\":[false]})$end",

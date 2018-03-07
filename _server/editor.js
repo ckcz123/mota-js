@@ -22,6 +22,7 @@ editor.prototype.init = function(callback){
   }
 
   var afterMainInit = function(){
+    core.floors=JSON.parse(JSON.stringify(core.floors,function(k,v){if(v instanceof Function){return v.toString()}else return v}));
     editor.main=main;
     editor.core=core;
     editor.fs=fs;
@@ -154,6 +155,7 @@ editor.prototype.mapInit = function(){
   editor.currentFloorData.afterBattle={};
   editor.currentFloorData.afterGetItem={};
   editor.currentFloorData.afterOpenDoor={};
+  editor.currentFloorData.cannotMove={};
 }
 editor.prototype.drawMapBg = function(img){
   var bgc = bg.getContext('2d');

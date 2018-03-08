@@ -363,7 +363,7 @@ editor.prototype.listen = function() {
     if(!selectBox.isSelected) {
       var loc = eToLoc(e);
       var pos = locToPos(loc);
-      editor_mode.onmode('');//为了强制触发doAction
+      editor_mode.onmode('nextChange');//为了强制触发doAction
       editor_mode.onmode('loc');
       editor_mode.loc();
       tip.whichShow = 1;
@@ -521,7 +521,7 @@ editor.prototype.listen = function() {
           }
         }
         tip.infos = JSON.parse(JSON.stringify(editor.info));
-        editor_mode.onmode('');//为了强制触发doAction
+        editor_mode.onmode('nextChange');//为了强制触发doAction
         editor_mode.onmode('emenyitem');
         editor_mode.emenyitem();
       }

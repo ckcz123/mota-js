@@ -7,7 +7,10 @@ function editor_mode(){
     'emenyitem':'left3',
     'floor':'left4',
     'tower':'left5',
-    'functions':'left8'
+    'functions':'left8',
+
+    'map':'left',
+    'appendpic':'left1',
   }
   this._ids={}
   this.dom={}
@@ -179,9 +182,18 @@ editor_mode.prototype.onmode = function (mode) {
   if (editor_mode.mode!=mode) {
     console.log('change mode into : '+mode);
     editor_mode.doActionList(editor_mode.mode,editor_mode.actionList);
+    if(editor_mode.mode==='nextChange' && mode)editor_mode.showMode(mode);
     editor_mode.mode=mode;
     editor_mode.actionList=[];
   }
+}
+
+editor_mode.prototype.showMode = function (mode) {
+  for(var name in this.dom){
+    editor_mode.dom[name].style='z-index:-1;opacity: 0;';
+  }
+  editor_mode.dom[mode].style='';
+  document.getElementById('editModeSelect').value=mode;
 }
 
 editor_mode.prototype.loc = function(callback){
@@ -446,6 +458,12 @@ editor_mode.prototype.listen = function(callback){
       if(err){printe(err);throw(err)}
       printe('追加素材成功,请刷新编辑器');
     });
+  }
+
+  var editModeSelect = document.getElementById('editModeSelect');
+  editModeSelect.onchange = function(){
+    editor_mode.onmode('nextChange');
+    editor_mode.onmode(editModeSelect.value);
   }
 
   if (Boolean(callback))callback();

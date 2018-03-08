@@ -1,7 +1,20 @@
 // vue 相关处理
 
 document.body.onmousedown = function(e){
-  selectBox.isSelected = false;
+  console.log(e);
+  var eid=[];
+  e.path.forEach(function(node){
+    if(!node.getAttribute)return;
+    var id_ = node.getAttribute('id');
+    if (id_){
+      if(['left','left1','left2','left3','left4','left5','left8'].indexOf(id_)!==-1)eid.push('edit');
+      eid.push(id_);
+    }
+  });
+  console.log(eid);
+  if(eid.indexOf('edit')===-1){
+    if(eid.indexOf('tip')===-1)selectBox.isSelected = false;
+  }
   editor_mode.onmode('');
   editor.info = {};
 }

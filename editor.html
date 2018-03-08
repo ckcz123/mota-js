@@ -8,7 +8,7 @@
   </head>
 <body>
   <div class="main">
-    <div id="left">
+    <div id="left" style="z-index:-1;opacity: 0;"><!-- map -->
       <div id="arrEditor">
         <table class="col" id='arrColMark'></table>
         <table class="row" id='arrRowMark'></table>
@@ -32,7 +32,7 @@
       </div>
       
     </div>
-    <div id="left1" class='leftTab'><div ><!-- appendpic -->
+    <div id="left1" class='leftTab' style="z-index:-1;opacity: 0;"><div ><!-- appendpic -->
       <h3>追加素材</h3>
       <p>
         <input id="selectFileBtn" type="button" value="导入文件到画板"/>
@@ -52,7 +52,7 @@
         </div>
       </div>
     </div></div>
-    <div id="left2" class='leftTab'><div><!-- loc -->
+    <div id="left2" class='leftTab' style="z-index:-1;opacity: 0;"><div><!-- loc -->
       <h3>地图选点</h3>
       <p id='pos_a6771a78_a099_417c_828f_0a24851ebfce'>0,0</p>
       <div class='etable'>
@@ -63,7 +63,7 @@
         </table>
       </div>
     </div></div>
-    <div id="left3" class='leftTab'><div><!-- emenyitem -->
+    <div id="left3" class='leftTab' style="z-index:-1;opacity: 0;"><div><!-- emenyitem -->
       <h3>图块属性</h3>
       <div id='newIdIdnum'><!-- id and idnum -->
         <input placeholder="输入新id"/>
@@ -79,7 +79,7 @@
         </div>
       </div>
     </div></div>
-    <div id="left4" class='leftTab'><div><!-- floor -->
+    <div id="left4" class='leftTab' style="z-index:-1;opacity: 0;"><div><!-- floor -->
       <h3>楼层属性</h3>
       <div class='etable'>
         <table>
@@ -89,7 +89,7 @@
         </table>
       </div>
     </div></div>
-    <div id="left5" class='leftTab'><div><!-- tower -->
+    <div id="left5" class='leftTab' style="z-index:-1;opacity: 0;"><div><!-- tower -->
       <h3>全塔属性</h3>
       <div class='etable'>
         <table>
@@ -128,12 +128,12 @@
         <textarea id="codeArea" spellcheck="false"></textarea>
       </div>
     </div></div>
-    <div id="left7" style="z-index:-1;opacity: 0;"><div>
+    <div id="left7" style="z-index:-1;opacity: 0;"><div><!-- 多行文本编辑器 -->
       <button onclick="editor_multi.confirm()">confirm</button>
       <button onclick="editor_multi.cancel()">cancel</button>
       <textarea id="multiLineCode" name="multiLineCode"></textarea>
     </div></div>
-    <div id="left8" class='leftTab'><div><!-- tower -->
+    <div id="left8" class='leftTab' style="z-index:-1;opacity: 0;"><div><!-- functions -->
       <h3>脚本编辑</h3>
       <div class='etable'>
         <table>
@@ -170,7 +170,17 @@
         <input class='btn' id='clear' type="button" value="清除地图" v-on:click="clearMap"/>
         <input class='btn' type="button" value="导出地图" id="exportM" v-on:click="exportMap"/>
 
-        <div id="bgSelect" v-cloak>
+        <select id="editModeSelect">
+          <option value="loc">地图选点</option>
+          <option value="emenyitem">图块属性</option>
+          <option value="floor">楼层属性</option>
+          <option value="tower">全塔属性</option>
+          <option value="functions">脚本编辑</option>
+          <option value="map">地图编辑</option>
+          <option value="appendpic">追加素材</option>
+        </select>
+        <!--  -->
+        <div id="bgSelect" v-cloak style="display:none">
           <span>当前地板: </span>
           <select v-model="selectedBg">
             <option disabled value="">请选择地板</option>
@@ -183,6 +193,7 @@
               <input class='btn' type="button" value="确定" v-on:click="updatebg"/>
           </div>
         </div>
+        <!--  -->
       </div>
     </div>
     <div id="right">
@@ -342,6 +353,7 @@ main.init('editor', function() {
     editor.mode.floor();
     editor.mode.tower();
     editor.mode.functions();
+    editor.mode.showMode('loc');
     editor.mode.listen();
     editor_multi=editor_multi();
     editor_blockly=editor_blockly();

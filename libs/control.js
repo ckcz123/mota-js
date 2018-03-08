@@ -300,9 +300,12 @@ control.prototype.startGame = function (hard, callback) {
 ////// 重新开始游戏；此函数将回到标题页面 //////
 control.prototype.restart = function() {
     this.showStartAnimate();
-    if (core.bgms.length>0)
-        core.playBgm(core.bgms[0]);
 }
+
+
+
+
+
 
 /////////////////////// 寻路算法 & 人物行走控制 ///////////////////////
 
@@ -1972,7 +1975,7 @@ control.prototype.pauseBgm = function () {
         core.musicStatus.isPlaying = false;
     }
     catch (e) {
-        console.log("无法暂停BGM");
+        console.log("无法暂停BGM "+bgm);
         console.log(e);
     }
 }
@@ -1991,18 +1994,13 @@ control.prototype.resumeBgm = function () {
         }
         else {
             if (core.bgms.length>0) {
-                if (core.isset(core.floors[core.status.floorId].bgm)) {
-                    core.playBgm(core.floors[core.status.floorId].bgm);
-                }
-                else {
-                    core.playBgm(core.bgms[0]);
-                }
+                core.playBgm(core.bgms[0]);
                 core.musicStatus.isPlaying = true;
             }
         }
     }
     catch (e) {
-        console.log("无法恢复BGM");
+        console.log("无法恢复BGM "+bgm);
         console.log(e);
     }
 }

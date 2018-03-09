@@ -11,6 +11,7 @@ var codeEditor = CodeMirror.fromTextArea(document.getElementById("multiLineCode"
 });
 
 editor_multi.id='';
+editor_multi.isString=false;
 
 editor_multi.show = function(){document.getElementById('left7').style='';}
 editor_multi.hide = function(){document.getElementById('left7').style='z-index:-1;opacity: 0;';}
@@ -18,14 +19,20 @@ editor_multi.hide = function(){document.getElementById('left7').style='z-index:-
 
 editor_multi.import = function(id_){
   var thisTr = document.getElementById(id_);
-  if(!thisTr)return;
+  if(!thisTr)return false;
   var input = thisTr.children[2].children[0].children[0];
   var field = thisTr.children[0].getAttribute('title');
-  var type = input.value && (input.value.slice(0,11)==='"function (');
-  if(!type)return;
+  if(!input.type || input.type!=='textarea')return false;
   editor_multi.id=id_;
-  codeEditor.setValue(JSON.parse(input.value)||'');
+  editor_multi.isString=false;
+  if(input.value.slice(0,1)==='"'){
+    editor_multi.isString=true;
+    codeEditor.setValue(JSON.parse(input.value)||'');
+  } else {
+    codeEditor.setValue(input.value||'');
+  }
   editor_multi.show();
+  return true;
 }
 
 editor_multi.cancel = function(){
@@ -48,7 +55,11 @@ editor_multi.confirm =  function (){
     var thisTr = document.getElementById(editor_multi.id);
     editor_multi.id='';
     var input = thisTr.children[2].children[0].children[0];
-    input.value = JSON.stringify(value);
+    if(editor_multi.isString){
+      input.value = JSON.stringify(value);
+    } else {
+      input.value = value;
+    }
     editor_multi.hide();
     input.onchange();
   }

@@ -77,8 +77,9 @@ editor_mode.prototype.objToTable = function(obj,commentObj){
         //现阶段这样会更实用,20180218
       }
       input.ondblclick = function(){
-        editor_blockly.import(guid);
-        editor_multi.import(guid);
+        if(!editor_blockly.import(guid))
+        if(!editor_multi.import(guid)){}
+        
       }
     });
   }
@@ -119,7 +120,7 @@ editor_mode.prototype.objToTr = function(obj,commentObj,field){
 
   var outstr=['<tr id="',guid,'"><td title="',field,'">',shortField,'</td>',
   '<td title="',commentHTMLescape,'">',shortCommentHTMLescape,'</td>',
-  '<td><div>',editor_mode.objToTd(thiseval,comment),'</div></td></tr>\n',
+  '<td><div class="etableInputDiv">',editor_mode.objToTd(thiseval,comment),'</div></td></tr>\n',
   ];
   return [outstr.join(''),guid];
 }

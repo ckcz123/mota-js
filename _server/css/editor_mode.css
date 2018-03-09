@@ -19,37 +19,6 @@
   width: 435px;
 }
 
-/*
-#left1 {
-  left: 5px;
-  top: 650px;
-  width: 435px;
-}
-
-#left2 {
-  left: 448px;
-  top: 650px;
-  width: 440px;
-}
-
-#left3 {
-  left: 900px;
-  top: 650px;
-  width: 440px;
-}
-
-#left4 {
-  left: 5px;
-  top: 1290px;
-  width: 435px;
-}
-
-#left5 {
-  left: 448px;
-  top: 1290px;
-  width: 440px;
-}
- */
 #left6 {
   left: 5px;
   /* top: 1930px; */
@@ -81,13 +50,7 @@
   height: 700px;
   width: 940px;
 }
-/* 
-#left8 {
-  left: 900px;
-  top: 1290px;
-  width: 440px;
-}
- */
+
 .etable table,
 .etable table td {
   color: #000;
@@ -133,25 +96,6 @@
   overflow: visible;
 }
 
-.etable tr:not(:first-child) :last-child {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  width: 100%;
-}
-
-.etable tr:not(:first-child) input:last-child {
-  
-}
-
-.etable tr:not(:first-child) select:last-child {
-  
-}
-
-.etable tr:not(:first-child) textarea:last-child {
-  
-}
-
 .etable tr:not(:first-child) > :last-child:hover {
   border: 1px solid rgb(87, 198, 232);
   box-shadow: 0px 0px 3px rgb(87, 198, 232);
@@ -161,4 +105,45 @@
 .etable tr:not(:first-child) > :nth-child(1):hover {
   border: 1px solid rgb(87, 232, 198);
   box-shadow: 0px 0px 3px rgb(87, 232, 198);
+}
+
+.etable tr:not(:first-child) > :last-child {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+div.etableInputDiv {
+  position: absolute;
+  padding: 5px 0 0 5px;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.etableInputDiv > * {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0);
+  border: none;
+}
+
+.etableInputDiv input {
+
+}
+
+.etableInputDiv select {
+  
+}
+
+.etableInputDiv textarea {
+  resize: none;
+}
+.etableInputDiv textarea:hover {
+  margin: -5px;
 }

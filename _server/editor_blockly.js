@@ -302,7 +302,7 @@ editor_blockly.id='';
 
 editor_blockly.import = function(id_){
   var thisTr = document.getElementById(id_);
-  if(!thisTr)return;
+  if(!thisTr)return false;
   var input = thisTr.children[2].children[0].children[0];
   var field = thisTr.children[0].getAttribute('title');
   var type = {
@@ -319,12 +319,13 @@ editor_blockly.import = function(id_){
 
     "--point--未完成数据转移":'point',
   }[field];
-  if(!type)return;
+  if(!type)return false;
   editor_blockly.id=id_;
   document.getElementById('codeArea').value = input.value;
   document.getElementById('entryType').value = type;
   editor_blockly.parse();
   editor_blockly.show();
+  return true;
 }
 
 editor_blockly.show = function(){document.getElementById('left6').style='';}

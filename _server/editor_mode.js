@@ -72,7 +72,7 @@ editor_mode.prototype.objToTable = function(obj,commentObj){
         editor_mode.addAction(['change',field,JSON.parse(input.value)]);
         //尚未完成,不完善,目前还没做$range的检查
         
-        /*临时*/editor_mode.onmode('');/*临时*/
+        // /*临时*/editor_mode.onmode('');/*临时*/
         //临时改为立刻写入文件,删去此句的时,切换模式才会真正写入
         //现阶段这样会更实用,20180218
       }
@@ -149,6 +149,7 @@ editor_mode.prototype.addAction = function(action){
 
 editor_mode.prototype.doActionList = function(mode,actionList){
   if (actionList.length==0)return;
+  printf('修改中...');
   switch (mode) {
     case 'loc':
 
@@ -182,7 +183,7 @@ editor_mode.prototype.doActionList = function(mode,actionList){
 editor_mode.prototype.onmode = function (mode) {
   if (editor_mode.mode!=mode) {
     console.log('change mode into : '+mode);
-    editor_mode.doActionList(editor_mode.mode,editor_mode.actionList);
+    if(mode==='save')editor_mode.doActionList(editor_mode.mode,editor_mode.actionList);
     if(editor_mode.mode==='nextChange' && mode)editor_mode.showMode(mode);
     editor_mode.mode=mode;
     editor_mode.actionList=[];
@@ -194,6 +195,7 @@ editor_mode.prototype.showMode = function (mode) {
     editor_mode.dom[name].style='z-index:-1;opacity: 0;';
   }
   editor_mode.dom[mode].style='';
+  if(editor_mode[mode])editor_mode[mode]();
   document.getElementById('editModeSelect').value=mode;
 }
 
@@ -216,7 +218,8 @@ editor_mode.prototype.loc = function(callback){
 editor_mode.prototype.emenyitem = function(callback){
   //editor.info=editor.ids[editor.indexs[201]];
   if (!core.isset(editor.info))return;
-  editor_mode.info=editor.info;//避免editor.info被清空导致无法获得是物品还是怪物
+  
+  if(Object.keys(editor.info).length!==0)editor_mode.info=editor.info;//避免editor.info被清空导致无法获得是物品还是怪物
 
   if (!core.isset(editor_mode.info.id)){
     document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML='';
@@ -277,7 +280,7 @@ editor_mode.prototype.functions = function(callback){
 editor_mode.prototype.listen = function(callback){
 
   var newIdIdnum = document.getElementById('newIdIdnum');
-  newIdIdnum.children[0].onchange = newIdIdnum.children[1].onchange = function(){
+  newIdIdnum.children[2].onclick = function(){
     if (newIdIdnum.children[0].value && newIdIdnum.children[1].value){
       var id = newIdIdnum.children[0].value;
       var idnum = parseInt(newIdIdnum.children[1].value);
@@ -285,6 +288,8 @@ editor_mode.prototype.listen = function(callback){
         if(err){printe(err);throw(err)}
         printe('添加id的idnum成功,请F5刷新编辑器');
       });
+    } else {
+      printe('请输入id和idnum');
     }
   }
 

@@ -23,6 +23,10 @@
           <input class='btn' type="button" value="saveAs" id='saveFloorAs'/>
           <input class='btn' type="button" value="复制地图" v-on:click="copyMap"/>
         </div>
+        <div style="position: absolute;right: 10px;bottom:70px;">
+          <input class='btn' id='clear' type="button" value="清除地图" v-on:click="clearMap"/>
+          <input class='btn' type="button" value="导出地图" id="exportM" v-on:click="exportMap"/>
+        </div>
       </div>
       <div id="objDataEditor">
 
@@ -53,7 +57,7 @@
       </div>
     </div></div>
     <div id="left2" class='leftTab' style="z-index:-1;opacity: 0;"><div><!-- loc -->
-      <h3>地图选点</h3>
+      <h3>地图选点&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button></h3>
       <p id='pos_a6771a78_a099_417c_828f_0a24851ebfce'>0,0</p>
       <div class='etable'>
         <table>
@@ -64,10 +68,11 @@
       </div>
     </div></div>
     <div id="left3" class='leftTab' style="z-index:-1;opacity: 0;"><div><!-- emenyitem -->
-      <h3>图块属性</h3>
+      <h3>图块属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button></h3>
       <div id='newIdIdnum'><!-- id and idnum -->
         <input placeholder="输入新id"/>
         <input placeholder="输入新idnum"/>
+        <button>save</button>
       </div>
       <div><!-- enemy and item -->
         <div class='etable'>
@@ -80,7 +85,7 @@
       </div>
     </div></div>
     <div id="left4" class='leftTab' style="z-index:-1;opacity: 0;"><div><!-- floor -->
-      <h3>楼层属性</h3>
+      <h3>楼层属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button></h3>
       <div class='etable'>
         <table>
           <tbody id='table_4a3b1b09_b2fb_4bdf_b9ab_9f4cdac14c74'>
@@ -90,7 +95,7 @@
       </div>
     </div></div>
     <div id="left5" class='leftTab' style="z-index:-1;opacity: 0;"><div><!-- tower -->
-      <h3>全塔属性</h3>
+      <h3>全塔属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button></h3>
       <div class='etable'>
         <table>
           <tbody id='table_b6a03e4c_5968_4633_ac40_0dfdd2c9cde5'>
@@ -134,7 +139,7 @@
       <textarea id="multiLineCode" name="multiLineCode"></textarea>
     </div></div>
     <div id="left8" class='leftTab' style="z-index:-1;opacity: 0;"><div><!-- functions -->
-      <h3>脚本编辑</h3>
+      <h3>脚本编辑&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button></h3>
       <div class='etable'>
         <table>
           <tbody id='table_e260a2be_5690_476a_b04e_dacddede78b3'>
@@ -167,16 +172,15 @@
               <p v-if="whichShow" v-bind:class="[ (whichShow%2) ? 'warnText' : 'successText']">{{ mapMsg }}</p>
           </div>
         </div>
-        <input class='btn' id='clear' type="button" value="清除地图" v-on:click="clearMap"/>
-        <input class='btn' type="button" value="导出地图" id="exportM" v-on:click="exportMap"/>
+        
 
         <select id="editModeSelect">
+          <option value="map">地图编辑</option>
           <option value="loc">地图选点</option>
           <option value="emenyitem">图块属性</option>
           <option value="floor">楼层属性</option>
           <option value="tower">全塔属性</option>
           <option value="functions">脚本编辑</option>
-          <option value="map">地图编辑</option>
           <option value="appendpic">追加素材</option>
         </select>
         <!--  -->

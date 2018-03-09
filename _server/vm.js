@@ -15,7 +15,7 @@ document.body.onmousedown = function(e){
   if(eid.indexOf('edit')===-1){
     if(eid.indexOf('tip')===-1)selectBox.isSelected = false;
   }
-  editor_mode.onmode('');
+  //editor.mode.onmode('');
   editor.info = {};
 }
 iconLib.onmousedown = function(e){
@@ -198,13 +198,21 @@ var clear = new Vue({
   }
 })
 printf = function(str_,type) {
+  selectBox.isSelected = false;
   if(!type){
-    tip.msgs[11]=String(str_);
-    tip.whichShow=12;
-  } else {
-    tip.msgs[10]=String(str_);
     tip.whichShow=11;
+  } else {
+    tip.whichShow=12;
   }
+  setTimeout(function(){
+    if(!type){
+      tip.msgs[11]=String(str_);
+      tip.whichShow=12;
+    } else {
+      tip.msgs[10]=String(str_);
+      tip.whichShow=11;
+    }
+  },1);
 }
 printe = function(str_){printf(str_,'error')}
 var tip = new Vue({

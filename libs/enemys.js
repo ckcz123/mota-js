@@ -170,6 +170,10 @@ enemys.prototype.getDefDamage = function (monsterId) {
 enemys.prototype.calDamage = function (monster, hero_hp, hero_atk, hero_def, hero_mdef) {
 
     var mon_hp = monster.hp, mon_atk = monster.atk, mon_def = monster.def, mon_special = monster.special;
+    hero_hp=Math.max(0, hero_hp);
+    hero_atk=Math.max(0, hero_atk);
+    hero_def=Math.max(0, hero_def);
+    hero_mdef=Math.max(0, hero_mdef);
 
     if (this.hasSpecial(mon_special, 20) && !core.hasItem("cross")) // 如果是无敌属性，且勇士未持有十字架
         return 999999999; // 返回无限大

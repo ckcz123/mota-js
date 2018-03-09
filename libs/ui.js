@@ -1068,6 +1068,14 @@ ui.prototype.drawLocalSaveSelect = function () {
     ]);
 }
 
+////// 绘制存档删除页面 //////
+ui.prototype.drawStorageRemove = function () {
+    core.status.event.id = 'storageRemove';
+    this.drawChoices(null, [
+        "清空全部塔的存档", "只清空当前塔的存档", "返回上级菜单"
+    ]);
+}
+
 ////// 绘制分页 //////
 ui.prototype.drawPagination = function (page, totalPage) {
 

@@ -27,11 +27,11 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             "money": " 初始金币 ",
             "experience": " 初始经验 ",
             "items": {
-                "keys": {
+                "keys": " 初始道具个数 \n$leaf(true)$end"/* {
                     "yellowKey": " 初始道具个数 ",
                     "blueKey": "",
                     "redKey": ""
-                },
+                } */,
                 "constants": "\n$leaf(true)$end",
                 "tools": "\n$leaf(true)$end"
             },
@@ -41,11 +41,11 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "x": "",
                 "y": ""
             },
-            "flags": {
+            "flags": " 游戏过程中的变量或flags \n$leaf(true)$end"/* {
                 "poison": " 游戏过程中的变量或flags \n 毒 ",
                 "weak": " 衰 ",
                 "curse": " 咒 "
-            },
+            } */,
             "steps": " 行走步数统计 ",
         },
         "startText": " 游戏开始前剧情。如果无剧情直接留一个空数组即可。 \n$leaf(true)$end",

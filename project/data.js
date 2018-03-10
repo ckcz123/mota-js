@@ -135,7 +135,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 
             
             {"need": 40, "effect": function () {
-                core.drawText("恭喜升级！");
+                core.insertAction("恭喜升级！");
                 core.status.hero.hp *= 2;
                 core.status.hero.atk += 100;
                 core.status.hero.def += 100;

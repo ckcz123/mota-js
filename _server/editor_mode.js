@@ -38,11 +38,25 @@ editor_mode.prototype.init_dom_ids = function(callback){
 editor_mode.prototype.objToTable = function(obj,commentObj){
   var outstr=["\n<tr><td>条目</td><td>注释</td><td>值</td></tr>\n"];
   var guids=[];
+  var checkIsLeaf = function(obj,commentObj,field){
+    var thiseval = eval('obj'+field);
+    if (thiseval == null || thiseval == undefined)return true;//null,undefined
+    if (typeof(thiseval) == typeof(''))return true;//字符串
+    if (Object.keys(thiseval).length == 0)return true;//数字,true,false,空数组,空对象
+    try {
+      var comment = eval('commentObj'+field);
+      if( comment.indexOf('$leaf') != -1){
+        evalstr = comment.split('$leaf')[1].split('$end')[0];
+        if(eval(evalstr) === true)return true;
+      }
+    } catch (error) {}
+    return false;
+  }
   //深度优先遍历
   var recursionParse = function(tfield) {
     for(var ii in eval("obj"+tfield)){
       var field = tfield+"['"+ii+"']";
-      var isleaf = editor_mode.checkIsLeaf(obj,commentObj,field);
+      var isleaf = checkIsLeaf(obj,commentObj,field);
       if (isleaf) {
         var leafnode = editor_mode.objToTr(obj,commentObj,field);
         outstr.push(leafnode[0]);
@@ -54,6 +68,13 @@ editor_mode.prototype.objToTable = function(obj,commentObj){
     }
   }
   recursionParse("");
+  var checkRange = function(comment,thiseval){
+    if( comment.indexOf('$range') !== -1){
+      var evalstr = comment.split('$range')[1].split('$end')[0];
+      return eval(evalstr);
+    }
+    return true;
+  }
   var listen = function(guids) {
     guids.forEach(function(guid){
       // tr>td[title=field]
@@ -69,12 +90,12 @@ editor_mode.prototype.objToTable = function(obj,commentObj){
           node = node.parentNode;
         }
         editor_mode.onmode(editor_mode._ids[node.getAttribute('id')]);
-        editor_mode.addAction(['change',field,JSON.parse(input.value)]);
-        //尚未完成,不完善,目前还没做$range的检查
-        
-        // /*临时*/editor_mode.onmode('');/*临时*/
-        //临时改为立刻写入文件,删去此句的时,切换模式才会真正写入
-        //现阶段这样会更实用,20180218
+        var thiseval = JSON.parse(input.value);
+        if(checkRange(comment,thiseval)){
+          editor_mode.addAction(['change',field,thiseval]);
+        } else {
+          printe('输入的值不合要求,请鼠标放置在注释上查看说明');
+        }
       }
       input.ondblclick = function(){
         if(!editor_blockly.import(guid))
@@ -84,21 +105,6 @@ editor_mode.prototype.objToTable = function(obj,commentObj){
     });
   }
   return {"HTML":outstr.join(''),"guids":guids,"listen":listen};
-}
-
-editor_mode.prototype.checkIsLeaf = function(obj,commentObj,field){
-  var thiseval = eval('obj'+field);
-  if (thiseval == null || thiseval == undefined)return true;//null,undefined
-  if (typeof(thiseval) == typeof(''))return true;//字符串
-  if (Object.keys(thiseval).length == 0)return true;//数字,true,false,空数组,空对象
-  try {
-    var comment = eval('commentObj'+field);
-    if( comment.indexOf('$leaf') != -1){
-      evalstr = comment.split('$leaf')[1].split('$end')[0];
-      if(eval(evalstr) === true)return true;
-    }
-  } catch (error) {}
-  return false;
 }
 
 editor_mode.prototype.objToTr = function(obj,commentObj,field){
@@ -197,6 +203,12 @@ editor_mode.prototype.showMode = function (mode) {
   editor_mode.dom[mode].style='';
   if(editor_mode[mode])editor_mode[mode]();
   document.getElementById('editModeSelect').value=mode;
+  var tips = [
+    '涉及图片的更改需要F5刷新浏览器来生效',
+    '文本域可以通过双击,在文本编辑器或事件编辑器中编辑',
+    '事件编辑器中的显示文本和自定义脚本的方块也可以双击',
+  ];
+  if(!selectBox.isSelected)printf('tips: '+tips[~~(tips.length*Math.random())]);
 }
 
 editor_mode.prototype.loc = function(callback){
@@ -462,7 +474,7 @@ editor_mode.prototype.listen = function(callback){
     var imgbase64 = sprite.toDataURL().split(',')[1];
     fs.writeFile('./project/images/'+editor_mode.appendPic.imageName+'.png',imgbase64,'base64',function(err,data){
       if(err){printe(err);throw(err)}
-      printe('追加素材成功,请刷新编辑器');
+      printe('追加素材成功,请F5刷新编辑器');
     });
   }
 

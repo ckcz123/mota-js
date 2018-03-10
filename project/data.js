@@ -134,12 +134,12 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
             {"need": 20, "name": "第二级", "effect": "status:hp+=2*(status:atk+status:def);status:atk+=10;status:def+=10"}, // 先将生命提升攻防和的2倍；再将攻击+10，防御+10
 
             
-            {"need": 40, "effect": `function () {
+            {"need": 40, "effect": function () {
                 core.drawText("恭喜升级！");
                 core.status.hero.hp *= 2;
                 core.status.hero.atk += 100;
                 core.status.hero.def += 100;
-            }`}, // effect也允许写一个function，代表本次升级将会执行的操作
+            }}, // effect也允许写一个function，代表本次升级将会执行的操作
 
             // 依次往下写需要的数值即可
         ]

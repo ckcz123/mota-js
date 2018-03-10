@@ -23,6 +23,8 @@ editor.prototype.init = function(callback){
 
   var afterMainInit = function(){
     core.floors=JSON.parse(JSON.stringify(core.floors,function(k,v){if(v instanceof Function){return v.toString()}else return v}));
+    core.data=JSON.parse(JSON.stringify(core.data,function(k,v){if(v instanceof Function){return v.toString()}else return v}));
+    data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d=JSON.parse(JSON.stringify(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d,function(k,v){if(v instanceof Function){return v.toString()}else return v}));
     editor.main=main;
     editor.core=core;
     editor.fs=fs;

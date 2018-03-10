@@ -79,7 +79,7 @@ editor_file = function(editor, callback){
     }
     datastr=datastr.concat(['\n}']);
     datastr=datastr.join('');
-    fs.writeFile(filename,datastr,'utf-8',function(err, data){
+    fs.writeFile(filename,encode(datastr),'base64',function(err, data){
       callback(err);
     });
   }
@@ -482,7 +482,7 @@ editor_file = function(editor, callback){
       });
       var datastr='icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1 = \n';
       datastr+=JSON.stringify(icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1,null,4);
-      fs.writeFile('project/icons.js',datastr,'utf-8',function(err, data){
+      fs.writeFile('project/icons.js',encode(datastr),'base64',function(err, data){
         callback(err);
       });
       return;
@@ -494,7 +494,7 @@ editor_file = function(editor, callback){
       });
       var datastr='maps_90f36752_8815_4be8_b32b_d7fad1d0542e = \n';
       datastr+=JSON.stringify(maps_90f36752_8815_4be8_b32b_d7fad1d0542e,null,4);
-      fs.writeFile('project/maps.js',datastr,'utf-8',function(err, data){
+      fs.writeFile('project/maps.js',encode(datastr),'base64',function(err, data){
         callback(err);
       });
       return;
@@ -506,7 +506,7 @@ editor_file = function(editor, callback){
       });
       var datastr='items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a = \n';
       datastr+=JSON.stringify(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a,null,4);
-      fs.writeFile('project/items.js',datastr,'utf-8',function(err, data){
+      fs.writeFile('project/items.js',encode(datastr),'base64',function(err, data){
         callback(err);
       });
       return;
@@ -518,7 +518,7 @@ editor_file = function(editor, callback){
       });
       var datastr='enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = \n';
       datastr+=JSON.stringify(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80,null,4);
-      fs.writeFile('project/enemys.js',datastr,'utf-8',function(err, data){
+      fs.writeFile('project/enemys.js',encode(datastr),'base64',function(err, data){
         callback(err);
       });
       return;
@@ -530,7 +530,7 @@ editor_file = function(editor, callback){
       });
       var datastr='data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d = \n';
       datastr+=JSON.stringify(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d,null,4);
-      fs.writeFile('project/data.js',datastr,'utf-8',function(err, data){
+      fs.writeFile('project/data.js',encode(datastr),'base64',function(err, data){
         callback(err);
       });
       return;

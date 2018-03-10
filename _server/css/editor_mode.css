@@ -19,6 +19,11 @@
   width: 435px;
 }
 
+#appendPicSelection span {
+  font-size:11px;
+  -webkit-text-stroke: 1px black;
+}
+
 #left6 {
   left: 5px;
   /* top: 1930px; */
@@ -87,6 +92,7 @@
   background-color: #f6f8fa;
 }
 /* copy end ---------------------------------------------  */
+
 .etable tr {width:100%}
 .etable tr > :nth-child(1) {width:20%}
 .etable tr > :nth-child(2) {width:20%}

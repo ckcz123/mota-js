@@ -442,8 +442,9 @@ main.dom.replayGame.onclick = function () {
             return;
         }
         if (core.isset(obj.version) && obj.version!=core.firstData.version) {
-            alert("游戏版本不一致！");
-            return;
+            // alert("游戏版本不一致！");
+            if (!confirm("游戏版本不一致！\n你仍然想播放录像吗？"))
+                return;
         }
         if (!core.isset(obj.route) || !core.isset(obj.hard)) {
             alert("无效的录像！");
@@ -454,7 +455,6 @@ main.dom.replayGame.onclick = function () {
         core.resetStatus(core.firstData.hero, obj.hard, core.firstData.floorId, null, core.initStatus.maps);
         core.events.setInitData(obj.hard);
         core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-            //core.setHeroMoveTriggerInterval();
             core.startReplay(core.decodeRoute(obj.route));
         }, true);
     }, function () {

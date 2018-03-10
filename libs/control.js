@@ -300,6 +300,8 @@ control.prototype.startGame = function (hard, callback) {
 ////// 重新开始游戏；此函数将回到标题页面 //////
 control.prototype.restart = function() {
     this.showStartAnimate();
+    if (core.bgms.length>0)
+        core.playBgm(core.bgms[0]);
 }
 
 
@@ -1994,7 +1996,11 @@ control.prototype.resumeBgm = function () {
         }
         else {
             if (core.bgms.length>0) {
-                core.playBgm(core.bgms[0]);
+                if (core.isset(core.floors[core.status.floorId].bgm)) {
+                    core.playBgm(core.floors[core.status.floorId].bgm);
+                }
+                else
+                    core.playBgm(core.bgms[0]);
                 core.musicStatus.isPlaying = true;
             }
         }

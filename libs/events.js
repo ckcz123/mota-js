@@ -224,9 +224,9 @@ events.prototype.doAction = function() {
 
     // 事件处理完毕
     if (core.status.event.data.list.length==0) {
+        core.ui.closePanel();
         if (core.isset(core.status.event.data.callback))
             core.status.event.data.callback();
-        core.ui.closePanel();
         core.replay();
         return;
     }

@@ -128,6 +128,10 @@ actions.prototype.keyDown = function(keyCode) {
             this.keyDownLocalSaveSelect(keyCode);
             return;
         }
+        if (core.status.event.id=='storageRemove') {
+            this.keyDownStorageRemove(keyCode);
+            return;
+        }
         if (core.status.event.id=='cursor') {
             this.keyDownCursor(keyCode);
             return;
@@ -255,7 +259,10 @@ actions.prototype.keyUp = function(keyCode) {
             this.keyUpLocalSaveSelect(keyCode);
             return;
         }
-
+        if (core.status.event.id=='storageRemove') {
+            this.keyUpStorageRemove(keyCode);
+            return;
+        }
         if (core.status.event.id=='cursor') {
             this.keyUpCursor(keyCode);
             return;
@@ -647,6 +654,10 @@ actions.prototype.onclick = function (x, y, stepPostfix) {
 
     if (core.status.event.id == 'localSaveSelect') {
         this.clickLocalSaveSelect(x,y);
+        return;
+    }
+    if (core.status.event.id=='storageRemove') {
+        this.clickStorageRemove(x,y);
         return;
     }
 
@@ -1353,8 +1364,10 @@ actions.prototype.clickSwitchs = function (x,y) {
                 core.musicStatus.bgmStatus = !core.musicStatus.bgmStatus;
                 if (core.musicStatus.bgmStatus)
                     core.resumeBgm();
-                else
+                else {
                     core.pauseBgm();
+                    core.musicStatus.playingBgm = null;
+                }
                 core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
                 core.ui.drawSwitchs();
                 break;
@@ -1626,14 +1639,8 @@ actions.prototype.clickSyncSave = function (x,y) {
                 }));
                 break;
             case 5:
-                core.status.event.selection=1;
-                core.ui.drawConfirmBox("你确定要清空所有存档吗？", function() {
-                    localStorage.clear();
-                    core.drawText("\t[操作成功]你的所有存档已被清空。");
-                }, function() {
-                    core.status.event.selection=5;
-                    core.ui.drawSyncSave();
-                })
+                core.status.event.selection=0;
+                core.ui.drawStorageRemove();
                 break;
             case 6:
                 core.status.event.selection=3;
@@ -1788,6 +1795,61 @@ actions.prototype.keyUpLocalSaveSelect = function (keycode) {
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
         this.clickLocalSaveSelect(6, topIndex+core.status.event.selection);
+    }
+}
+
+////// 存档删除界面时的点击操作 //////
+actions.prototype.clickStorageRemove = function (x, y) {
+    if (x<5 || x>7) return;
+    var choices = core.status.event.ui.choices;
+
+    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+
+    if (y>=topIndex && y<topIndex+choices.length) {
+        var selection = y - topIndex;
+        switch (selection) {
+            case 0:
+                localStorage.clear();
+                core.drawText("\t[操作成功]你的所有存档已被清空。");
+                break;
+            case 1:
+                for (var i=1;i<=150;i++) {
+                    core.removeLocalStorage("save"+i);
+                }
+                core.drawText("\t[操作成功]当前塔的存档已被清空。");
+                core.removeLocalStorage("autoSave");
+                break;
+            case 2:
+                core.status.event.selection=5;
+                core.ui.drawSyncSave();
+                break;
+        }
+    }
+}
+
+////// 存档删除界面时，按下某个键的操作 //////
+actions.prototype.keyDownStorageRemove = function (keycode) {
+    if (keycode==38) {
+        core.status.event.selection--;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+    if (keycode==40) {
+        core.status.event.selection++;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+}
+
+////// 存档删除界面时，放开某个键的操作 //////
+actions.prototype.keyUpStorageRemove = function (keycode) {
+    if (keycode==27 || keycode==88) {
+        core.status.event.selection=5;
+        core.ui.drawSyncSave();
+        return;
+    }
+    var choices = core.status.event.ui.choices;
+    if (keycode==13 || keycode==32 || keycode==67) {
+        var topIndex = 6 - parseInt((choices.length - 1) / 2);
+        this.clickStorageRemove(6, topIndex+core.status.event.selection);
     }
 }
 

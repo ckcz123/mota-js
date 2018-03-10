@@ -145,17 +145,14 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         ]
     },
     
-    "values" : {
-        
-        "HPMAX": 999999, // 各种数值；一些数值可以在这里设置
+    "values" : { // 各种数值；一些数值可以在这里设置
         /****** 角色相关 ******/
-        // HP上限；-1则无上限
+        "HPMAX": 999999, // HP上限；-1则无上限
         "lavaDamage": 100, // 经过血网受到的伤害
         "poisonDamage": 10, // 中毒后每步受到的伤害
         "weakValue": 20, // 衰弱状态下攻防减少的数值
-        
-        "redJewel": 3, /****** 道具相关 ******/
-        // 红宝石加攻击的数值
+        /****** 道具相关 ******/
+        "redJewel": 3, // 红宝石加攻击的数值
         "blueJewel": 3, // 蓝宝石加防御的数值
         "greenJewel": 5, // 绿宝石加魔防的数值
         "redPotion": 100, // 红血瓶加血数值
@@ -175,22 +172,18 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         "sword5": 160, // 神圣剑加攻数值
         "shield5": 160, // 神圣盾加防数值
         "moneyPocket": 500, // 金钱袋加金币的数值
-        
-        'breakArmor': 0.9, /****** 怪物相关 ******/
-        // 破甲的比例（战斗前，怪物附加角色防御的x%作为伤害）
+        /****** 怪物相关 ******/
+        'breakArmor': 0.9, // 破甲的比例（战斗前，怪物附加角色防御的x%作为伤害）
         'counterAttack': 0.1, // 反击的比例（战斗时，怪物每回合附加角色攻击的x%作为伤害，无视角色防御）
         'purify': 3, // 净化的比例（战斗前，怪物附加勇士魔防的x倍作为伤害）
         'hatred': 2, // 仇恨属性中，每杀死一个怪物获得的仇恨值
-        
-        'animateSpeed': 500, /****** 系统相关 ******/
-        // 动画时间
+        /****** 系统相关 ******/
+        'animateSpeed': 500, // 动画时间
     },
     
-    "flags" : {
-        
-        "enableFloor": true, // 系统FLAG，在游戏运行中中请不要修改它。
+    "flags" : { // 系统FLAG，在游戏运行中中请不要修改它。
         /****** 状态栏相关 ******/
-        // 是否在状态栏显示当前楼层
+        "enableFloor": true, // 是否在状态栏显示当前楼层
         "enableLv": true, // 是否在状态栏显示当前等级
         "enableMDef": true, // 是否在状态栏及战斗界面显示魔防（护盾）
         "enableMoney": true, // 是否在状态栏、怪物手册及战斗界面显示金币
@@ -198,22 +191,20 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         "enableLevelUp": true, // 是否允许等级提升（进阶）；如果上面enableExperience为false，则此项恒视为false
         "enableDebuff": true, // 是否涉及毒衰咒；如果此项为false则不会在状态栏中显示毒衰咒的debuff
         ////// 上述的几个开关将直接影响状态栏的显示效果 //////
-        
-        "flyNearStair": true, /****** 道具相关 ******/
-        // 是否需要在楼梯边使用传送器
+        /****** 道具相关 ******/
+        "flyNearStair": true, // 是否需要在楼梯边使用传送器
         "pickaxeFourDirections": true, // 使用破墙镐是否四个方向都破坏；如果false则只破坏面前的墙壁
         "bombFourDirections": true, // 使用炸弹是否四个方向都会炸；如果false则只炸面前的怪物（即和圣锤等价）
         "bigKeyIsBox": false, // 如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙
         "equipment": false, // 剑和盾是否直接作为装备。如果此项为true，则作为装备，需要在道具栏使用，否则将直接加属性。
         "enableDeleteItem": true, // 是否允许删除（丢弃）道具
-        
-        "enableNegativeDamage": true, /****** 怪物相关 ******/
-        // 是否支持负伤害（回血）
+        /****** 怪物相关 ******/
+        "enableAddPoint": false, // 是否支持加点
+        "enableNegativeDamage": true, // 是否支持负伤害（回血）
         "hatredDecrease": true, // 是否在和仇恨怪战斗后减一半的仇恨值，此项为false则和仇恨怪不会扣减仇恨值。
         "betweenAttackCeil": false, // 夹击方式是向上取整还是向下取整。如果此项为true则为向上取整，为false则为向下取整
-        
-        "startDirectly": false, /****** 系统相关 ******/
-        // 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面
+        /****** 系统相关 ******/
+        "startDirectly": false, // 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面
         "canOpenBattleAnimate": true, // 是否允许用户开启战斗过程；如果此项为false，则下面两项均强制视为false
         "showBattleAnimateConfirm": true, // 是否在游戏开始时提供“是否开启战斗动画”的选项
         "battleAnimate": true, // 是否默认显示战斗动画；用户可以手动在菜单栏中开关
@@ -222,7 +213,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         "enableGentleClick": true, // 是否允许轻触（获得面前物品）
         "potionWhileRouting": false, // 寻路算法是否经过血瓶；如果该项为false，则寻路算法会自动尽量绕过血瓶
         "enableViewMaps": true, // 是否支持在菜单栏中查看所有楼层的地图
-        "portalWithoutTrigger": true, // 经过楼梯、传送门时是否能“穿透”。穿透的意思是，自动寻路得到的的路径中间经过了楼梯，行走时是否触发楼层转换事件
+        "portalWithoutTrigger": true, // 是否支持穿透。所谓穿透，即当自动寻路经过楼梯时，不触发楼层转换事件而是穿过它。
         "enableMoveDirectly": true, // 是否允许瞬间移动
     }
 }

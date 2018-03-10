@@ -223,6 +223,7 @@ utils.prototype.decodeRoute = function (route) {
         while (index<route.length && /\w/.test(route.charAt(index))) {
             str+=route.charAt(index++);
         }
+        index++;
         return str;
     }
 
@@ -235,10 +236,10 @@ utils.prototype.decodeRoute = function (route) {
             case "D": for (var i=0;i<nxt;i++) ans.push("down"); break;
             case "L": for (var i=0;i<nxt;i++) ans.push("left"); break;
             case "R": for (var i=0;i<nxt;i++) ans.push("right"); break;
-            case "I": ++index; ans.push("item:"+nxt); break;
-            case "F": ++index; ans.push("fly:"+nxt); break;
+            case "I": ans.push("item:"+nxt); break;
+            case "F": ans.push("fly:"+nxt); break;
             case "C": ans.push("choices:"+nxt); break;
-            case "S": ++index; ans.push("shop:"+nxt+":"+getNumber(true)); break;
+            case "S": ans.push("shop:"+nxt+":"+getNumber(true)); break;
             case "T": ans.push("turn"); break;
             case "G": ans.push("getNext"); break;
             case "P": ans.push("input:"+nxt); break;

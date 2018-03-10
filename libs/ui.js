@@ -1193,24 +1193,41 @@ ui.prototype.drawBook = function (index) {
         core.fillText('ui', '防御', 335, 62 * i + 32, '#DDDDDD', '13px Verdana');
         core.fillText('ui', enemy.def, 365, 62 * i + 32, '#DDDDDD', 'bold 13px Verdana');
 
-        var expOffset = 165;
+        var expOffset = 165, line_cnt=0;
         if (core.flags.enableMoney) {
             core.fillText('ui', '金币', 165, 62 * i + 50, '#DDDDDD', '13px Verdana');
             core.fillText('ui', enemy.money, 195, 62 * i + 50, '#DDDDDD', 'bold 13px Verdana');
             expOffset = 255;
+            line_cnt++;
         }
 
-        if (core.flags.enableExperience) {
+        // 加点
+        if (core.flags.enableAddPoint) {
+            core.canvas.ui.textAlign = "left";
+            core.fillText('ui', '加点', expOffset, 62 * i + 50, '#DDDDDD', '13px Verdana');
+            core.fillText('ui', enemy.point, expOffset + 30, 62 * i + 50, '#DDDDDD', 'bold 13px Verdana');
+            expOffset = 255;
+            line_cnt++;
+        }
+
+        if (core.flags.enableExperience && line_cnt<2) {
             core.canvas.ui.textAlign = "left";
             core.fillText('ui', '经验', expOffset, 62 * i + 50, '#DDDDDD', '13px Verdana');
             core.fillText('ui', enemy.experience, expOffset + 30, 62 * i + 50, '#DDDDDD', 'bold 13px Verdana');
+            line_cnt++;
         }
 
+        var damageOffset = 281;
+        if (line_cnt==1) damageOffset=326;
+        if (line_cnt==2) damageOffset=361;
+
+        /*
         var damageOffet = 281;
         if (core.flags.enableMoney && core.flags.enableExperience)
             damageOffet = 361;
         else if (core.flags.enableMoney || core.flags.enableExperience)
             damageOffet = 326;
+            */
 
 
         core.canvas.ui.textAlign = "center";
@@ -1219,7 +1236,7 @@ ui.prototype.drawBook = function (index) {
         if (damage >= core.status.hero.hp) color = '#FF0000';
         if (damage <= 0) color = '#00FF00';
         if (damage >= 999999999) damage = '无法战斗';
-        core.fillText('ui', damage, damageOffet, 62 * i + 50, color, 'bold 13px Verdana');
+        core.fillText('ui', damage, damageOffset, 62 * i + 50, color, 'bold 13px Verdana');
 
         core.canvas.ui.textAlign = "left";
 

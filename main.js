@@ -113,7 +113,7 @@ main.prototype.init = function (mode, callback) {
     for (var i = 0; i < main.dom.gameCanvas.length; i++) {
         main.canvas[main.dom.gameCanvas[i].id] = main.dom.gameCanvas[i].getContext('2d');
     }
-    if (({"editor":0,"replay":0}).hasOwnProperty(mode)) {
+    if (({"editor":0}).hasOwnProperty(mode)) {
         main.mode = mode;
         if (mode === 'editor')main.editor = {'disableGlobalAnimate':true};
     }

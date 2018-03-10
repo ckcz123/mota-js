@@ -6,6 +6,24 @@
 
 ## 各组件功能
 
+### 总体上
+
+以`display:none`的形式引入了`index.html`的`dom`,修改了原来的`.gameCanvas #ui #data`等的名字以避免冲突
+
+通过`main.init('editor')`加载数据
+
+`editor`模式关闭了部分动画
+
+`core.drawMap`中`editor`模式下不再画图,而是生成画图的函数提供给`editor`
+
+`editor`模式下`GlobalAnimate`可以独立的选择是否播放
+
+`core.playBgm`和`core.playSound`中非`play`模式不再播放声音
+
+`core.show`和`core.hide`中非`play`模式不再进行动画而是立刻完成并执行回调
+
+`editor`模式不执行`core.resize`
+
 ### editor.js
 
 ``` js
@@ -13,6 +31,8 @@ editor.mapInit();//清空地图
 editor.changeFloor('MT2')//切换地图
 editor.guid()//产生一个可以作为id的长随机字符串
 ```
+
+`editor.updateMap`中画未定义快的报错
 
 ### editor_file.js
 
@@ -82,6 +102,24 @@ editor_mode.onmode(editor_mode._ids[node.getAttribute('id')]);
 ```
 
 `editor.mode.listen`中提供了追加素材的支持.
+
+处理注释的特殊指令
+```
+$range(evalstr:thiseval)$end
+  限制取值范围,要求修改后的eval(evalstr)为true
+$leaf(evalstr:thiseval)$end
+  强制指定为叶节点,如果eval(evalstr)为true
+
+//以下几个中选一个 [
+$select(evalstr)$end
+  渲染成<select>,选项为数组eval(evalstr)['values']
+$input(evalstr)$end
+  渲染成<input>
+$textarea(evalstr)$end
+  渲染成<textarea>
+默认选项为$textarea()$end
+// ]
+```
 
 ### editor_blockly.js
 

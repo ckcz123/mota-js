@@ -78,7 +78,6 @@ main.floors.sample0 =
         },
     },
     "changeFloor": { // 楼层转换事件；该事件不能和上面的events有冲突（同位置点），否则会被覆盖
-        "7,9": {"floorId": "sample1", "stair": "downFloor"},
         "6,0": {"floorId": "sample1", "stair": "downFloor"}, // 目标点：sample1层的下楼梯位置
         "0,11": {"floorId": "sample0", "loc": [0,12]}, // 目标点：sample0层的x=0,y=12位置
         "0,12": {"floorId": "sample0", "stair": "upFloor"}, // 注意，目标层有多个楼梯的话，写stair可能会导致到达位置不确定。这时候推荐写loc指明目标点位置。

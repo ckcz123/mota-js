@@ -29,7 +29,13 @@ editor_multi.import = function(id_){
     editor_multi.isString=true;
     codeEditor.setValue(JSON.parse(input.value)||'');
   } else {
-    codeEditor.setValue(input.value||'');
+    eval('var tobj='+input.value);
+    var tmap={};
+    var tstr = JSON.stringify(tobj,function(k,v){if(typeof(v)===typeof('') && v.slice(0,8)==='function'){var id_ = editor.guid();tmap[id_]=v.toString();return id_;}else return v},4);
+    for(var id_ in tmap){
+      tstr = tstr.replace('"'+id_+'"',tmap[id_])
+    }
+    codeEditor.setValue(tstr||'');
   }
   editor_multi.show();
   return true;
@@ -58,7 +64,13 @@ editor_multi.confirm =  function (){
     if(editor_multi.isString){
       input.value = JSON.stringify(value);
     } else {
-      input.value = value;
+      eval('var tobj='+value);
+      var tmap={};
+      var tstr = JSON.stringify(tobj,function(k,v){if(v instanceof Function){var id_ = editor.guid();tmap[id_]=v.toString();return id_;}else return v},4);
+      for(var id_ in tmap){
+        tstr = tstr.replace('"'+id_+'"',JSON.stringify(tmap[id_]))
+      }
+      input.value = tstr;
     }
     editor_multi.hide();
     input.onchange();

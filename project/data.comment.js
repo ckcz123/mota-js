@@ -1,7 +1,6 @@
 data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = 
 {
     "main": {
-        "useCompress": " 是否使用压缩文件 \n 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。 \n 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。 \n 如果要进行剧本的修改请务必将其改成false。 \n$select({\"values\":[false]})$end",
         "floorIds": " 在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序 \n$leaf(true)$end",
         "pngs": "  在此存放所有可能使用的图片，只能是png格式，可以不写后缀名 \n  图片可以被作为背景图（的一部分），也可以直接用自定义事件进行显示。 \n 图片名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好 \n 建议对于较大的图片，在网上使用在线的“图片压缩工具(http://compresspng.com/zh/)”来进行压缩，以节省流量 \n 依次向后添加 \n$leaf(true)$end",
         "animates": "  在此存放所有可能使用的动画，必须是animate格式，在这里不写后缀名 \n 动画必须放在animates目录下；文件名不能使用中文，不能带空格或特殊字符 \n \"jianji\", \"thunder\" \n 根据需求自行添加 \n$leaf(true)$end",

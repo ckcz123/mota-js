@@ -1,11 +1,6 @@
 data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d = 
 {
     "main" : {
-        "useCompress" : false, // 是否使用压缩文件
-        // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
-        // 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。
-        // 如果要进行剧本的修改请务必将其改成false。
-    
         "floorIds" : [ 
             "sample0", "sample1", "sample2"
         ],// 在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序

@@ -4,6 +4,11 @@ function main() {
 
     this.version = "1.4.1"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
+    this.useCompress = false; // 是否使用压缩文件
+    // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
+    // 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。
+    // 如果要进行剧本的修改请务必将其改成false。
+
     //------------------------ 用户修改内容 END ------------------------//
 
     this.dom = {
@@ -122,7 +127,7 @@ main.prototype.init = function (mode, callback) {
         image.src="project/images/"+t+".png";
         main.statusBar.icons[t] = image;
     })
-    main.loadPureData(function(){
+    main.loaderJs('project', main.pureData, function(){
         var mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
         for(var ii in mainData)main[ii]=mainData[ii];
         
@@ -140,7 +145,7 @@ main.prototype.init = function (mode, callback) {
             main.dom.levelChooseButtons.appendChild(span);
         });
         
-        main.loaderJs(function () {
+        main.loaderJs('libs', main.loadList, function () {
             main.core = core;
 
             for (i = 0; i < main.loadList.length; i++) {
@@ -163,18 +168,29 @@ main.prototype.init = function (mode, callback) {
 }
 
 ////// 动态加载所有核心JS文件 //////
-main.prototype.loaderJs = function (callback) {
+main.prototype.loaderJs = function (dir, loadList, callback) {
     var instanceNum = 0;
     // 加载js
     main.setMainTipsText('正在加载核心js文件...')
-    for (var i = 0; i < main.loadList.length; i++) {
-        main.loadMod(main.loadList[i], function (modName) {
+    for (var i = 0; i < loadList.length; i++) {
+        main.loadMod(dir, loadList[i], function (modName) {
             main.setMainTipsText(modName + '.js 加载完毕');
             instanceNum++;
-            if (instanceNum === main.loadList.length) {
+            if (instanceNum === loadList.length) {
                 callback();
             }
         });
+    }
+}
+
+////// 加载某一个JS文件 //////
+main.prototype.loadMod = function (dir, modName, callback) {
+    var script = document.createElement('script');
+    var name = modName;
+    script.src = dir + '/' + modName + (this.useCompress?".min":"") + '.js?v=' + this.version;
+    main.dom.body.appendChild(script);
+    script.onload = function () {
+        callback(name);
     }
 }
 
@@ -205,17 +221,6 @@ main.prototype.loaderFloors = function (callback) {
     }
 }
 
-////// 加载某一个JS文件 //////
-main.prototype.loadMod = function (modName, callback) {
-    var script = document.createElement('script');
-    var name = modName;
-    script.src = 'libs/' + modName + (this.useCompress?".min":"") + '.js?v=' + this.version;
-    main.dom.body.appendChild(script);
-    script.onload = function () {
-        callback(name);
-    }
-}
-
 ////// 加载某一个楼层 //////
 main.prototype.loadFloor = function(floorId, callback) {
     var script = document.createElement('script');
@@ -226,25 +231,10 @@ main.prototype.loadFloor = function(floorId, callback) {
     }
 }
 
-main.prototype.loadPureData = function(callback) {
-    var loadedNum = 0;
-    main.pureData.forEach(function(name){
-        var script = document.createElement('script');
-        script.src = 'project/' + name +'.js?v=' + main.version;
-        main.dom.body.appendChild(script);
-        script.onload = function () {
-            loadedNum++;
-            if (loadedNum == main.pureData.length)callback();
-        }
-    });
-    
-}
-
 ////// 加载过程提示 //////
 main.prototype.setMainTipsText = function (text) {
     main.dom.mainTips.innerHTML = text;
 }
-
 
 
 main.prototype.listen = function () {

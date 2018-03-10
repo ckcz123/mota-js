@@ -215,6 +215,11 @@ printf = function(str_,type) {
   },1);
 }
 printe = function(str_){printf(str_,'error')}
+tip_in_showMode = [
+  '涉及图片的更改需要F5刷新浏览器来生效',
+  '文本域可以通过双击,在文本编辑器或事件编辑器中编辑',
+  '事件编辑器中的显示文本和自定义脚本的方块也可以双击',
+];
 var tip = new Vue({
   el: '#tip',
   data: {

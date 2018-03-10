@@ -210,12 +210,14 @@ body{
   color: #D50000;
   font-weight: 700;
   font-size: 14px;
+  line-height: 1.2em;
 }
 .infoText{
   color: #2196F3;
 }
 .successText{
-  color: #00897B
+  color: #00897B;
+  line-height: 1.2em;
 }
 
 table, td {

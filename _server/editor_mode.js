@@ -203,11 +203,7 @@ editor_mode.prototype.showMode = function (mode) {
   editor_mode.dom[mode].style='';
   if(editor_mode[mode])editor_mode[mode]();
   document.getElementById('editModeSelect').value=mode;
-  var tips = [
-    '涉及图片的更改需要F5刷新浏览器来生效',
-    '文本域可以通过双击,在文本编辑器或事件编辑器中编辑',
-    '事件编辑器中的显示文本和自定义脚本的方块也可以双击',
-  ];
+  var tips = tip_in_showMode;
   if(!selectBox.isSelected)printf('tips: '+tips[~~(tips.length*Math.random())]);
 }
 

@@ -185,8 +185,8 @@ actions.prototype.keyDown = function(keyCode) {
 }
 
 ////// 根据放开键的code来执行一系列操作 //////
-actions.prototype.keyUp = function(keyCode) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+actions.prototype.keyUp = function(keyCode, fromReplay) {
+    if (!fromReplay&&core.isset(core.status.replay)&&core.status.replay.replaying) return;
 
     if (core.status.lockControl) {
         core.status.holdingKeys = [];

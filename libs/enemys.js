@@ -252,13 +252,12 @@ enemys.prototype.getCurrentEnemys = function (floorId) {
 
             var monster = core.material.enemys[monsterId];
             var mon_hp = monster.hp, mon_atk = monster.atk, mon_def = monster.def;
-            // 坚固
-            if (this.hasSpecial(monster.special, 3) && mon_def < core.status.hero.atk - 1)
-                mon_def = core.status.hero.atk - 1;
             if (this.hasSpecial(monster.special, 10)) {
                 mon_atk=core.status.hero.atk;
                 mon_def=core.status.hero.def;
             }
+            if (this.hasSpecial(monster.special, 3) && mon_def < core.status.hero.atk - 1)
+                mon_def = core.status.hero.atk - 1;
 
             var specialText = core.enemys.getSpecialText(monsterId);
             if (specialText.length>=3) specialText = "多属性...";

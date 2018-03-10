@@ -158,8 +158,6 @@ utils.prototype.encodeRoute = function (route) {
     var ans="";
     var lastMove = "", cnt=0;
 
-    var items=Object.keys(core.material.items).sort();
-    var shops=Object.keys(core.initStatus.shops).sort();
     route.forEach(function (t) {
         if (t=='up' || t=='down' || t=='left' || t=='right') {
             if (t!=lastMove && cnt>0) {
@@ -177,15 +175,13 @@ utils.prototype.encodeRoute = function (route) {
                 cnt=0;
             }
             if (t.indexOf('item:')==0)
-                ans+="I"+items.indexOf(t.substring(5));
+                ans+="I"+t.substring(5)+":";
             else if (t.indexOf('fly:')==0)
-                ans+="F"+core.floorIds.indexOf(t.substring(4));
+                ans+="F"+t.substring(4)+":";
             else if (t.indexOf('choices:')==0)
                 ans+="C"+t.substring(8);
-            else if (t.indexOf('shop:')==0) {
-                var sp=t.substring(5).split(":");
-                ans+="S"+shops.indexOf(sp[0])+":"+sp[1];
-            }
+            else if (t.indexOf('shop:')==0)
+                ans+="S"+t.substring(5);
             else if (t=='turn')
                 ans+='T';
             else if (t=='getNext')
@@ -194,9 +190,10 @@ utils.prototype.encodeRoute = function (route) {
                 ans+="P"+t.substring(6);
             else if (t=='no')
                 ans+='N';
-            else if (t.indexOf('move:')==0) {
+            else if (t.indexOf('move:')==0)
                 ans+="M"+t.substring(5);
-            }
+            else if (t=='key:')
+                ans+='K'+t.substring(4);
         }
     });
     if (cnt>0) {
@@ -221,27 +218,34 @@ utils.prototype.decodeRoute = function (route) {
         if (num.length==0) num="1";
         return core.isset(noparse)?num:parseInt(num);
     }
+    var getString = function () {
+        var str="";
+        while (index<route.length && /\w/.test(route.charAt(index))) {
+            str+=route.charAt(index++);
+        }
+        index++;
+        return str;
+    }
 
-    var items=Object.keys(core.material.items).sort();
-    var shops=Object.keys(core.initStatus.shops).sort();
     while (index<route.length) {
         var c=route.charAt(index++);
-        var number=getNumber();
+        var nxt=(c=='I'||c=='F'||c=='S')?getString():getNumber();
 
         switch (c) {
-            case "U": for (var i=0;i<number;i++) ans.push("up"); break;
-            case "D": for (var i=0;i<number;i++) ans.push("down"); break;
-            case "L": for (var i=0;i<number;i++) ans.push("left"); break;
-            case "R": for (var i=0;i<number;i++) ans.push("right"); break;
-            case "I": ans.push("item:"+items[number]); break;
-            case "F": ans.push("fly:"+core.floorIds[number]); break;
-            case "C": ans.push("choices:"+number); break;
-            case "S": ++index; ans.push("shop:"+shops[number]+":"+getNumber(true)); break;
+            case "U": for (var i=0;i<nxt;i++) ans.push("up"); break;
+            case "D": for (var i=0;i<nxt;i++) ans.push("down"); break;
+            case "L": for (var i=0;i<nxt;i++) ans.push("left"); break;
+            case "R": for (var i=0;i<nxt;i++) ans.push("right"); break;
+            case "I": ans.push("item:"+nxt); break;
+            case "F": ans.push("fly:"+nxt); break;
+            case "C": ans.push("choices:"+nxt); break;
+            case "S": ans.push("shop:"+nxt+":"+getNumber(true)); break;
             case "T": ans.push("turn"); break;
             case "G": ans.push("getNext"); break;
-            case "P": ans.push("input:"+number); break;
+            case "P": ans.push("input:"+nxt); break;
             case "N": ans.push("no"); break;
-            case "M": ++index; ans.push("move:"+number+":"+getNumber()); break;
+            case "M": ++index; ans.push("move:"+nxt+":"+getNumber()); break;
+            case "K": ans.push("key:"+nxt); break;
         }
     }
     return ans;

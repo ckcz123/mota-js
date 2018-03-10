@@ -72,7 +72,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 "addPoint" : function (enemy) {
     // 加点事件
     var point = enemy.point;
-    if (!core.isset(point) || point<=0) return [];
+    if (!core.flags.enableAddPoint || !core.isset(point) || point<=0) return [];
 
     // 加点，返回一个choices事件
     return [

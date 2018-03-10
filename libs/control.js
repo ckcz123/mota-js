@@ -1485,7 +1485,7 @@ control.prototype.replay = function () {
 
                 core.events.openShop(shopId, false);
                 var shopInterval = setInterval(function () {
-                    if (!core.events.clickShop(6, topIndex+core.status.event.selection)) {
+                    if (!core.actions.clickShop(6, topIndex+core.status.event.selection)) {
                         clearInterval(shopInterval);
                         core.stopReplay();
                         core.drawTip("录像文件出错");
@@ -1493,7 +1493,7 @@ control.prototype.replay = function () {
                     }
                     if (selections.length==0) {
                         clearInterval(shopInterval);
-                        core.events.clickShop(6, topIndex+choices.length);
+                        core.actions.clickShop(6, topIndex+choices.length);
                         core.replay();
                         return;
                     }
@@ -1534,6 +1534,11 @@ control.prototype.replay = function () {
             core.replay();
             return;
         }
+    }
+    else if (action.indexOf('key:')==0) {
+        core.actions.keyUp(parseInt(action.substring(4)), true);
+        core.replay();
+        return;
     }
 
     core.stopReplay();

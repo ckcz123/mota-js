@@ -62,16 +62,16 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 
 
 "itemEffect" : {
-        "redJewel":"core.status.hero.atk += core.values.redJewel",
-        "blueJewel":"core.status.hero.def += core.values.blueJewel",
-        "greenJewel":"core.status.hero.mdef += core.values.greenJewel",
+        "redJewel":"core.status.hero.atk += core.values.redJewel * ratio",
+        "blueJewel":"core.status.hero.def += core.values.blueJewel * ratio",
+        "greenJewel":"core.status.hero.mdef += core.values.greenJewel * ratio",
         
         "yellowJewel":"core.status.hero.hp+=1000;core.status.hero.atk+=6;core.status.hero.def+=6;core.status.hero.mdef+=10;",
         // 黄宝石属性：需自己定义
-        "redPotion":"core.status.hero.hp += core.values.redPotion",
-        "bluePotion":"core.status.hero.hp += core.values.bluePotion",
-        "yellowPotion":"core.status.hero.hp += core.values.yellowPotion",
-        "greenPotion":"core.status.hero.hp += core.values.greenPotion",
+        "redPotion":"core.status.hero.hp += core.values.redPotion * ratio",
+        "bluePotion":"core.status.hero.hp += core.values.bluePotion * ratio",
+        "yellowPotion":"core.status.hero.hp += core.values.yellowPotion * ratio",
+        "greenPotion":"core.status.hero.hp += core.values.greenPotion * ratio",
         "sword1":"core.status.hero.atk += core.values.sword1",
         "sword2":"core.status.hero.atk += core.values.sword2",
         "sword3":"core.status.hero.atk += core.values.sword3",
@@ -91,14 +91,14 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
     
 
 "itemEffectTip" : {
-    "redJewel":"'，攻击+'+core.values.redJewel",
-    "blueJewel":"'，防御+'+core.values.blueJewel",
-    "greenJewel":"'，魔防+'+core.values.greenJewel",
+    "redJewel":"'，攻击+'+core.values.redJewel * ratio",
+    "blueJewel":"'，防御+'+core.values.blueJewel * ratio",
+    "greenJewel":"'，魔防+'+core.values.greenJewel * ratio",
     "yellowJewel":"'，全属性提升'",
-    "redPotion":"'，生命+'+core.values.redPotion",
-    "bluePotion":"'，生命+'+core.values.bluePotion",
-    "yellowPotion":"'，生命+'+core.values.yellowPotion",
-    "greenPotion":"'，生命+'+core.values.greenPotion",
+    "redPotion":"'，生命+'+core.values.redPotion * ratio",
+    "bluePotion":"'，生命+'+core.values.bluePotion * ratio",
+    "yellowPotion":"'，生命+'+core.values.yellowPotion * ratio",
+    "greenPotion":"'，生命+'+core.values.greenPotion * ratio",
     "sword1":"'，攻击+'+core.values.sword1",
     "sword2":"'，攻击+'+core.values.sword2",
     "sword3":"'，攻击+'+core.values.sword3",

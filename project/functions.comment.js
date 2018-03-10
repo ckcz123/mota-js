@@ -1,4 +1,4 @@
-functions_comment_d6ad677b_427a_4623_b50f_a445a3b0ef8a = 
+functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = 
 {
     "events" : {
         "setInitData" : "不同难度分别设置初始属性",

@@ -1,4 +1,4 @@
-data_comment_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d = 
+data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = 
 {
     "main": {
         "useCompress": " 是否使用压缩文件 \n 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。 \n 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。 \n 如果要进行剧本的修改请务必将其改成false。 \n$select({\"values\":[false]})$end",
@@ -27,11 +27,11 @@ data_comment_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
             "money": " 初始金币 ",
             "experience": " 初始经验 ",
             "items": {
-                "keys": {
+                "keys": " 初始道具个数 \n$leaf(true)$end"/* {
                     "yellowKey": " 初始道具个数 ",
                     "blueKey": "",
                     "redKey": ""
-                },
+                } */,
                 "constants": "\n$leaf(true)$end",
                 "tools": "\n$leaf(true)$end"
             },
@@ -41,11 +41,11 @@ data_comment_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
                 "x": "",
                 "y": ""
             },
-            "flags": {
+            "flags": " 游戏过程中的变量或flags \n$leaf(true)$end"/* {
                 "poison": " 游戏过程中的变量或flags \n 毒 ",
                 "weak": " 衰 ",
                 "curse": " 咒 "
-            },
+            } */,
             "steps": " 行走步数统计 ",
         },
         "startText": " 游戏开始前剧情。如果无剧情直接留一个空数组即可。 \n$leaf(true)$end",
@@ -102,7 +102,7 @@ data_comment_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
                 ]
             }
         },*/
-        "levelUp": [
+        "levelUp": " 经验升级所需要的数值，是一个数组 \n 第一项为初始等级，可以简单留空，也可以写name \n 每一个里面可以含有三个参数 need, name, effect \n need为所需要的经验数值，是一个正整数。请确保need所需的依次递增 \n name为该等级的名称，也可以省略代表使用系统默认值；本项将显示在状态栏中 \n effect为本次升级所执行的操作，可由若干项组成，由分号分开 \n 其中每一项写法和上面的商店完全相同，同样必须是X+=Y的形式，Y是一个表达式，同样可以使用status:xxx或item:xxx代表勇士的某项数值/道具个数 \n$leaf(true)$end"/* [
             " 经验升级所需要的数值，是一个数组 \n 第一项为初始等级，可以简单留空，也可以写name \n 每一个里面可以含有三个参数 need, name, effect \n need为所需要的经验数值，是一个正整数。请确保need所需的依次递增 \n name为该等级的名称，也可以省略代表使用系统默认值；本项将显示在状态栏中 \n effect为本次升级所执行的操作，可由若干项组成，由分号分开 \n 其中每一项写法和上面的商店完全相同，同样必须是X+=Y的形式，Y是一个表达式，同样可以使用status:xxx或item:xxx代表勇士的某项数值/道具个数 \n$leaf(true)$end",
             {
                 "need": "",
@@ -113,7 +113,7 @@ data_comment_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
                 "need": "",
                 "effect": " effect也允许写一个function，代表本次升级将会执行的操作 \n 依次往下写需要的数值即可 "
             }
-        ]
+        ] */
     },
     "values": {
         "HPMAX": " 各种数值；一些数值可以在这里设置\n /****** 角色相关 ******/ \n HP上限；-1则无上限 ",

@@ -20,22 +20,28 @@ editor.prototype.init = function(callback){
       if (Boolean(callback))callback();
     });
   }
+
   var afterMainInit = function(){
+    core.floors=JSON.parse(JSON.stringify(core.floors,function(k,v){if(v instanceof Function){return v.toString()}else return v}));
+    core.data=JSON.parse(JSON.stringify(core.data,function(k,v){if(v instanceof Function){return v.toString()}else return v}));
+    data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d=JSON.parse(JSON.stringify(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d,function(k,v){if(v instanceof Function){return v.toString()}else return v}));
     editor.main=main;
     editor.core=core;
     editor.fs=fs;
-    editor.file=editor_file;
-    editor.material.images=core.material.images;
-    editor.listen(); // 开始监听事件
-    var hard = 'Hard';
-    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
-    //core.status.maps = core.clone(core.maps.initMaps(floorIds));
-    core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-        afterCoreReset();
+    editor_file = editor_file(editor, function() {
+      editor.file=editor_file;
+      editor_mode = editor_mode(editor);
+      editor.mode=editor_mode;
+      editor.material.images=core.material.images;
+      editor.listen(); // 开始监听事件
+      core.resetStatus(core.firstData.hero, null, core.firstData.floorId, null, core.initStatus.maps);
+      core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
+          afterCoreReset();
+      }, true);
+      core.events.setInitData(null);
     });
-    core.events.setInitData(hard);
   }
-  setTimeout(afterMainInit, 500);
+  afterMainInit();
 }
 
 editor.prototype.reset = function(callback){
@@ -151,6 +157,7 @@ editor.prototype.mapInit = function(){
   editor.currentFloorData.afterBattle={};
   editor.currentFloorData.afterGetItem={};
   editor.currentFloorData.afterOpenDoor={};
+  editor.currentFloorData.cannotMove={};
 }
 editor.prototype.drawMapBg = function(img){
   var bgc = bg.getContext('2d');
@@ -308,6 +315,13 @@ editor.prototype.changeFloor = function(floorId,callback) {
   });
 }
 
+editor.prototype.guid = function() {
+  return 'id_'+'xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+    return v.toString(16);
+  });
+}
+
 editor.prototype.listen = function() {
 
   var uc = eui.getContext('2d');
@@ -351,7 +365,7 @@ editor.prototype.listen = function() {
     if(!selectBox.isSelected) {
       var loc = eToLoc(e);
       var pos = locToPos(loc);
-      editor_mode.onmode('');//为了强制触发doAction
+      editor_mode.onmode('nextChange');
       editor_mode.onmode('loc');
       editor_mode.loc();
       tip.whichShow = 1;
@@ -509,7 +523,7 @@ editor.prototype.listen = function() {
           }
         }
         tip.infos = JSON.parse(JSON.stringify(editor.info));
-        editor_mode.onmode('');//为了强制触发doAction
+        editor_mode.onmode('nextChange');
         editor_mode.onmode('emenyitem');
         editor_mode.emenyitem();
       }

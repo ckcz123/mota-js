@@ -106,11 +106,10 @@ function main() {
         'hard': document.getElementById("hard")
     }
     this.floors = {}
-    this.instance = {};
     this.canvas = {};
 }
 
-main.prototype.init = function (mode) {
+main.prototype.init = function (mode, callback) {
     for (var i = 0; i < main.dom.gameCanvas.length; i++) {
         main.canvas[main.dom.gameCanvas[i].id] = main.dom.gameCanvas[i].getContext('2d');
     }
@@ -156,7 +155,7 @@ main.prototype.init = function (mode) {
                 "animates", "bgms", "sounds", "floorIds", "floors"].forEach(function (t) {
                     coreData[t] = main[t];
                 })
-                main.core.init(coreData);
+                main.core.init(coreData, callback);
                 main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
             });
         });
@@ -213,7 +212,6 @@ main.prototype.loadMod = function (modName, callback) {
     script.src = 'libs/' + modName + (this.useCompress?".min":"") + '.js?v=' + this.version;
     main.dom.body.appendChild(script);
     script.onload = function () {
-        main[name] = main.instance[name];
         callback(name);
     }
 }
@@ -444,8 +442,9 @@ main.dom.replayGame.onclick = function () {
             return;
         }
         if (core.isset(obj.version) && obj.version!=core.firstData.version) {
-            alert("游戏版本不一致！");
-            return;
+            // alert("游戏版本不一致！");
+            if (!confirm("游戏版本不一致！\n你仍然想播放录像吗？"))
+                return;
         }
         if (!core.isset(obj.route) || !core.isset(obj.hard)) {
             alert("无效的录像！");
@@ -456,9 +455,8 @@ main.dom.replayGame.onclick = function () {
         core.resetStatus(core.firstData.hero, obj.hard, core.firstData.floorId, null, core.initStatus.maps);
         core.events.setInitData(obj.hard);
         core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-            //core.setHeroMoveTriggerInterval();
             core.startReplay(core.decodeRoute(obj.route));
-        });
+        }, true);
     }, function () {
 
     })

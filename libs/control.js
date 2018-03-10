@@ -280,7 +280,7 @@ control.prototype.startGame = function (hard, callback) {
 
     core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
         if (core.isset(callback)) callback();
-    });
+    }, true);
 
     setTimeout(function () {
         // Upload
@@ -300,6 +300,8 @@ control.prototype.startGame = function (hard, callback) {
 ////// 重新开始游戏；此函数将回到标题页面 //////
 control.prototype.restart = function() {
     this.showStartAnimate();
+    if (core.bgms.length>0)
+        core.playBgm(core.bgms[0]);
 }
 
 
@@ -1483,7 +1485,7 @@ control.prototype.replay = function () {
 
                 core.events.openShop(shopId, false);
                 var shopInterval = setInterval(function () {
-                    if (!core.events.clickShop(6, topIndex+core.status.event.selection)) {
+                    if (!core.actions.clickShop(6, topIndex+core.status.event.selection)) {
                         clearInterval(shopInterval);
                         core.stopReplay();
                         core.drawTip("录像文件出错");
@@ -1491,7 +1493,7 @@ control.prototype.replay = function () {
                     }
                     if (selections.length==0) {
                         clearInterval(shopInterval);
-                        core.events.clickShop(6, topIndex+choices.length);
+                        core.actions.clickShop(6, topIndex+choices.length);
                         core.replay();
                         return;
                     }
@@ -1532,6 +1534,11 @@ control.prototype.replay = function () {
             core.replay();
             return;
         }
+    }
+    else if (action.indexOf('key:')==0) {
+        core.actions.keyUp(parseInt(action.substring(4)), true);
+        core.replay();
+        return;
     }
 
     core.stopReplay();
@@ -1707,7 +1714,7 @@ control.prototype.doSL = function (id, type) {
                 core.events.setInitData(data.hard);
                 core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
                     core.startReplay(core.decodeRoute(data.route));
-                });
+                }, true);
             }
             return;
         }
@@ -1880,7 +1887,7 @@ control.prototype.loadData = function (data, callback) {
 
     core.changeFloor(data.floorId, null, data.hero.loc, 0, function() {
         if (core.isset(callback)) callback();
-    });
+    }, true);
 }
 
 ////// 设置勇士属性 //////
@@ -1994,7 +2001,11 @@ control.prototype.resumeBgm = function () {
         }
         else {
             if (core.bgms.length>0) {
-                core.playBgm(core.bgms[0]);
+                if (core.isset(core.floors[core.status.floorId].bgm)) {
+                    core.playBgm(core.floors[core.status.floorId].bgm);
+                }
+                else
+                    core.playBgm(core.bgms[0]);
                 core.musicStatus.isPlaying = true;
             }
         }

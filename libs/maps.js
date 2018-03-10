@@ -721,20 +721,26 @@ maps.prototype.removeBlock = function (x, y, floorId) {
 ////// 根据block的索引删除该块 //////
 maps.prototype.removeBlockById = function (index, floorId) {
 
-    var blocks = core.status.maps[floorId].blocks;
-    var x=blocks[index].x, y=blocks[index].y;
+    var blocks = core.status.maps[floorId].blocks, block = blocks[index];
+    var x=block.x, y=block.y;
 
     // 检查该点是否存在事件
     var event = core.floors[floorId].events[x+","+y];
     if (!core.isset(event))
         event = core.floors[floorId].changeFloor[x+","+y];
 
+    // 检查是否存在重生
+    var isReborn = false;
+    if (core.isset(block.event) && block.event.cls=='enemys'
+        && core.enemys.hasSpecial(core.material.enemys[block.event.id].special, 23))
+        isReborn = true;
+
     // 不存在事件，直接删除
-    if (!core.isset(event)) {
+    if (!isReborn && !core.isset(event)) {
         blocks.splice(index,1);
         return;
     }
-    blocks[index].enable = false;
+    block.enable = false;
 }
 
 ////// 一次性删除多个block //////

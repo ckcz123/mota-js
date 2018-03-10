@@ -1,8 +1,21 @@
 // vue 相关处理
 
 document.body.onmousedown = function(e){
-  selectBox.isSelected = false;
-  editor_mode.onmode('');
+  console.log(e);
+  var eid=[];
+  e.path.forEach(function(node){
+    if(!node.getAttribute)return;
+    var id_ = node.getAttribute('id');
+    if (id_){
+      if(['left','left1','left2','left3','left4','left5','left8'].indexOf(id_)!==-1)eid.push('edit');
+      eid.push(id_);
+    }
+  });
+  console.log(eid);
+  if(eid.indexOf('edit')===-1){
+    if(eid.indexOf('tip')===-1)selectBox.isSelected = false;
+  }
+  //editor.mode.onmode('');
   editor.info = {};
 }
 iconLib.onmousedown = function(e){
@@ -185,13 +198,21 @@ var clear = new Vue({
   }
 })
 printf = function(str_,type) {
+  selectBox.isSelected = false;
   if(!type){
-    tip.msgs[11]=String(str_);
-    tip.whichShow=12;
-  } else {
-    tip.msgs[10]=String(str_);
     tip.whichShow=11;
+  } else {
+    tip.whichShow=12;
   }
+  setTimeout(function(){
+    if(!type){
+      tip.msgs[11]=String(str_);
+      tip.whichShow=12;
+    } else {
+      tip.msgs[10]=String(str_);
+      tip.whichShow=11;
+    }
+  },1);
 }
 printe = function(str_){printf(str_,'error')}
 var tip = new Vue({

@@ -1,9 +1,10 @@
 function events() {
     this.init();
 }
-var eventdata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.events;
+
 ////// 初始化 //////
 events.prototype.init = function () {
+    this.eventdata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.events;
     this.events = {
         'battle': function (data, core, callback) {
             //core.autosave(true);
@@ -101,16 +102,19 @@ events.prototype.startGame = function (hard) {
 }
 
 ////// 不同难度分别设置初始属性 //////
-events.prototype.setInitData = eventdata.setInitData
-// function (hard)
+events.prototype.setInitData = function (hard) {
+    return this.eventdata.setInitData(hard);
+}
 
 ////// 游戏获胜事件 //////
-events.prototype.win = eventdata.win
-// function(reason)
+events.prototype.win = function (reason) {
+    return this.eventdata.win(reason);
+}
 
 ////// 游戏失败事件 //////
-events.prototype.lose = eventdata.lose
-// function(reason)
+events.prototype.lose = function (reason) {
+    return this.eventdata.lose(reason);
+}
 
 ////// 游戏结束 //////
 events.prototype.gameOver = function (ending, fromReplay) {
@@ -188,8 +192,9 @@ events.prototype.gameOver = function (ending, fromReplay) {
 }
 
 ////// 转换楼层结束的事件 //////
-events.prototype.afterChangeFloor = eventdata.afterChangeFloor
-// function (floorId)
+events.prototype.afterChangeFloor = function (floorId) {
+    return this.eventdata.afterChangeFloor(floorId);
+}
 
 ////// 开始执行一系列自定义事件 //////
 events.prototype.doEvents = function (list, x, y, callback) {
@@ -219,9 +224,10 @@ events.prototype.doAction = function() {
 
     // 事件处理完毕
     if (core.status.event.data.list.length==0) {
-        if (core.isset(core.status.event.data.callback))
-            core.status.event.data.callback();
+        var callback = core.status.event.data.callback;
         core.ui.closePanel();
+        if (core.isset(callback))
+            callback();
         core.replay();
         return;
     }
@@ -796,7 +802,7 @@ events.prototype.trigger = function (x, y) {
 }
 
 ////// 楼层切换 //////
-events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) {
+events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback, fromLoad) {
 
     var displayAnimate=!(time==0) && !core.status.replay.replaying;
 
@@ -873,6 +879,16 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
                 core.setWeather(core.floors[floorId].weather[0], core.floors[floorId].weather[1])
             }
             else core.setWeather();
+
+            // 检查重生
+            if (!core.isset(fromLoad)) {
+                core.status.maps[floorId].blocks.forEach(function(block) {
+                    if (core.isset(block.enable) && !block.enable && core.isset(block.event) && block.event.cls=='enemys'
+                        && core.enemys.hasSpecial(core.material.enemys[block.event.id].special, 23)) {
+                        block.enable = true;
+                    }
+                })
+            }
 
             core.drawMap(floorId, function () {
                 setTimeout(function() {
@@ -1027,16 +1043,19 @@ events.prototype.useItem = function(itemId) {
 }
 
 ////// 加点事件 //////
-events.prototype.addPoint = eventdata.addPoint
-// function (enemy)
+events.prototype.addPoint = function (enemy) {
+    return this.eventdata.addPoint(enemy);
+}
 
 ////// 战斗结束后触发的事件 //////
-events.prototype.afterBattle = eventdata.afterBattle
-// function(enemyId,x,y,callback)
+events.prototype.afterBattle = function (enemyId,x,y,callback) {
+    return this.eventdata.afterBattle(enemyId,x,y,callback);
+}
 
 ////// 开一个门后触发的事件 //////
-events.prototype.afterOpenDoor = eventdata.afterOpenDoor
-// function(doorId,x,y,callback)
+events.prototype.afterOpenDoor = function (doorId,x,y,callback) {
+    return this.eventdata.afterOpenDoor(doorId,x,y,callback);
+}
 
 ////// 经过一个路障 //////
 events.prototype.passNet = function (data) {
@@ -1087,8 +1106,9 @@ events.prototype.changeLight = function(x, y) {
 }
 
 ////// 改变亮灯之后，可以触发的事件 //////
-events.prototype.afterChangeLight = eventdata.afterChangeLight
-// function(x,y)
+events.prototype.afterChangeLight = function (x,y) {
+    return this.eventdata.afterChangeLight(x,y);
+}
 
 ////// 滑冰 //////
 events.prototype.ski = function (direction) {
@@ -1165,21 +1185,23 @@ events.prototype.pushBox = function (data) {
 }
 
 ////// 推箱子后的事件 //////
-events.prototype.afterPushBox = eventdata.afterPushBox
-// function ()
+events.prototype.afterPushBox = function () {
+    return this.eventdata.afterPushBox();
+}
 
 ////// 使用炸弹/圣锤后的事件 //////
-events.prototype.afterUseBomb = eventdata.afterUseBomb
-// function ()
+events.prototype.afterUseBomb = function () {
+    return this.eventdata.afterUseBomb();
+}
 
 ////// 即将存档前可以执行的操作 //////
-events.prototype.beforeSaveData = eventdata.beforeSaveData
-// function(data)
+events.prototype.beforeSaveData = function (data) {
+    return this.eventdata.beforeSaveData(data);
+}
 
 ////// 读档事件后，载入事件前，可以执行的操作 //////
-events.prototype.afterLoadData = eventdata.afterLoadData
-// function(data)
+events.prototype.afterLoadData = function (data) {
+    return this.eventdata.afterLoadData(data);
+}
 
 
-
-delete(eventdata);

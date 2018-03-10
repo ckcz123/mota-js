@@ -13,52 +13,42 @@
 .leftTab > :first-child{margin-top:5px;}
 .leftTab > :last-child{margin-bottom:5px;}
 
-#left1 {
+.leftTab {
   left: 5px;
-  top: 650px;
+  top: 10px;
   width: 435px;
-}
-
-#left2 {
-  left: 448px;
-  top: 650px;
-  width: 440px;
-}
-
-#left3 {
-  left: 900px;
-  top: 650px;
-  width: 440px;
-}
-
-#left4 {
-  left: 5px;
-  top: 1290px;
-  width: 435px;
-}
-
-#left5 {
-  left: 448px;
-  top: 1290px;
-  width: 440px;
 }
 
 #left6 {
   left: 5px;
-  top: 1930px;
+  /* top: 1930px; */
+  top: 5px;
+  z-index: 200;
+  position: fixed;
+  background-color: rgb(245, 245, 245);
   width: 1335px;
   height: 780px;
 }
 
 #left6 #blocklyDiv {height: 480px; width: 940px;float:left;}
 #left6 #codeArea {width: 99.5%; height: 15.4em;overflow:y;/* resize:none; */clear:both;}
-#left6 #multiLineDiv {height: 440px; width: 375px;float:left;}
-#left6 #multiLineDiv .CodeMirror {
+
+#left7 {
+  /* height: 440px; width: 375px;float:left; */
+  left: 5px;
+  top: 5px;
+  z-index: 200;
+  position: fixed;
+  background-color: rgb(245, 245, 245);
+  width: 1335px;
+  height: 780px;
+}
+#left7 .CodeMirror {
   /* border-top: 1px solid black;
   border-bottom: 1px solid black; */
   border: 1px solid #eee;
-  height: 438px;
-   width: 373px;
+  height: 700px;
+  width: 940px;
 }
 
 .etable table,
@@ -106,25 +96,6 @@
   overflow: visible;
 }
 
-.etable tr:not(:first-child) :last-child {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  width: 100%;
-}
-
-.etable tr:not(:first-child) input:last-child {
-  
-}
-
-.etable tr:not(:first-child) select:last-child {
-  
-}
-
-.etable tr:not(:first-child) textarea:last-child {
-  
-}
-
 .etable tr:not(:first-child) > :last-child:hover {
   border: 1px solid rgb(87, 198, 232);
   box-shadow: 0px 0px 3px rgb(87, 198, 232);
@@ -134,4 +105,45 @@
 .etable tr:not(:first-child) > :nth-child(1):hover {
   border: 1px solid rgb(87, 232, 198);
   box-shadow: 0px 0px 3px rgb(87, 232, 198);
+}
+
+.etable tr:not(:first-child) > :last-child {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+div.etableInputDiv {
+  position: absolute;
+  padding: 5px 0 0 5px;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.etableInputDiv > * {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0);
+  border: none;
+}
+
+.etableInputDiv input {
+
+}
+
+.etableInputDiv select {
+  
+}
+
+.etableInputDiv textarea {
+  resize: none;
+}
+.etableInputDiv textarea:hover {
+  margin: -5px;
 }

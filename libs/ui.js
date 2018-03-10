@@ -6,10 +6,10 @@
 function ui() {
     this.init();
 }
-var uidata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.ui;
+
 // 初始化UI
 ui.prototype.init = function () {
-
+    this.uidata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.ui;
 }
 
 ////////////////// 地图设置
@@ -1068,6 +1068,14 @@ ui.prototype.drawLocalSaveSelect = function () {
     ]);
 }
 
+////// 绘制存档删除页面 //////
+ui.prototype.drawStorageRemove = function () {
+    core.status.event.id = 'storageRemove';
+    this.drawChoices(null, [
+        "清空全部塔的存档", "只清空当前塔的存档", "返回上级菜单"
+    ]);
+}
+
 ////// 绘制分页 //////
 ui.prototype.drawPagination = function (page, totalPage) {
 
@@ -1626,7 +1634,9 @@ ui.prototype.drawKeyBoard = function () {
 }
 
 ////// 绘制“关于”界面 //////
-ui.prototype.drawAbout = uidata.drawAbout
+ui.prototype.drawAbout = function () {
+    return this.uidata.drawAbout();
+}
 
 ////// 绘制帮助页面 //////
 ui.prototype.drawHelp = function () {
@@ -1657,4 +1667,3 @@ ui.prototype.drawHelp = function () {
     ]);
 }
 
-delete(uidata)

@@ -35,8 +35,17 @@
   height: 780px;
 }
 
-#left6 #blocklyDiv {height: 480px; width: 940px;float:left;}
-#left6 #codeArea {width: 99.5%; height: 15.4em;overflow:y;/* resize:none; */clear:both;}
+#left6 #blocklyDiv {
+  height: 480px; 
+  width: 940px;
+}
+
+#left6 .CodeMirror {
+  border: 1px solid #eee;
+  height: 200px;
+  width: 1300px;
+}
+#left6 #codeArea {width: 99.5%; height: 15.4em;overflow:y;/* resize:none; */}
 
 #left7 {
   /* height: 440px; width: 375px;float:left; */

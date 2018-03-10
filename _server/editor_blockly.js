@@ -209,9 +209,9 @@ initscript=String.raw`
   }
   try {
     var code = Blockly.JavaScript.workspaceToCode(workspace);
-    document.getElementById('codeArea').value = code;
+    codeAreaHL.setValue(code);
   } catch (error) {
-    document.getElementById('codeArea').value = String(error);
+    codeAreaHL.setValue(String(error));
     if (error instanceof OmitedError){
     var blockName = error.blockName;
     var varName = error.varName;
@@ -267,6 +267,14 @@ xhr.onreadystatechange = function (){
 xhr.open('GET','_server/blockly/MotaAction.g4',true);
 xhr.send(null);
 
+var codeAreaHL = CodeMirror.fromTextArea(document.getElementById("codeArea"), {
+  lineNumbers: true,
+  matchBrackets: true,
+  lineWrapping: true,
+  continueComments: "Enter",
+  extraKeys: {"Ctrl-Q": "toggleComment"}
+});
+
 editor_blockly.showXML = function () {
   var xml = Blockly.Xml.workspaceToDom(editor_blockly.workspace);
   var xml_text = Blockly.Xml.domToPrettyText(xml);
@@ -293,7 +301,7 @@ editor_blockly.runCode = function () {
 
 editor_blockly.parse = function () {
     MotaActionFunctions.parse(
-        eval('obj=' + document.getElementById('codeArea').value.replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];})),
+        eval('obj=' + codeAreaHL.getValue().replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];})),
         document.getElementById('entryType').value
     );
 }
@@ -322,7 +330,7 @@ editor_blockly.import = function(id_){
   }[field];
   if(!type)return false;
   editor_blockly.id=id_;
-  document.getElementById('codeArea').value = input.value;
+  codeAreaHL.setValue(input.value);
   document.getElementById('entryType').value = type;
   editor_blockly.parse();
   editor_blockly.show();
@@ -350,7 +358,7 @@ editor_blockly.confirm =  function (){
     editor_blockly.hide();
     input.onchange();
   }
-  if(document.getElementById('codeArea').value===''){
+  if(codeAreaHL.getValue()===''){
     setvalue('null');
     return;
   }

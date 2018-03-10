@@ -322,6 +322,10 @@ editor_file = function(editor, callback){
               else */
                 locObj[v]=null;
             });
+            Object.keys(editor_file.comment.floors.loc).forEach(function(v){
+              delete(locObj[v]);
+            });
+            delete(locObj.map);
             return locObj;
           })(),
           editor_file.comment.floors.floor,
@@ -337,6 +341,10 @@ editor_file = function(editor, callback){
             else */
               locObj[v]=null;
           });
+          Object.keys(editor_file.comment.floors.loc).forEach(function(v){
+            delete(locObj[v]);
+          });
+          delete(locObj.map);
           return locObj;
         })(),
         editor_file.comment.floors.floor,

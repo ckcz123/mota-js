@@ -17,10 +17,9 @@
           <p class="warnText" v-if="error">{{ errors[error-1] }}</p>
         </div>
         <div id="editTip" v-cloak>
-          <select id="selectFloor"></select><br>
+          <br>
+          <input type="button" value="当前地图另存为" id='saveFloorAs'/>
           <input id='saveAsName' placeholder="输入新楼层id"/>
-          <input class='btn' type="button" value="save" id='saveFloor'/>
-          <input class='btn' type="button" value="saveAs" id='saveFloorAs'/>
           <input class='btn' type="button" value="复制地图" v-on:click="copyMap"/>
         </div>
         <div style="position: absolute;right: 10px;bottom:70px;">
@@ -128,7 +127,7 @@
           <category name="template"></category>
         </xml>
       </h3>
-      <div>
+      <div style="position: relative;">
         <div id="blocklyDiv"></div>
         <textarea id="codeArea" spellcheck="false"></textarea>
       </div>
@@ -183,6 +182,9 @@
           <option value="functions">脚本编辑</option>
           <option value="appendpic">追加素材</option>
         </select>
+        <br><br><br><br>
+        <select id="selectFloor"></select>
+        <input type="button" value="保存地图" id='saveFloor'/>
         <!--  -->
         <div id="bgSelect" v-cloak style="display:none">
           <span>当前地板: </span>
@@ -337,7 +339,7 @@
 <script>
 //所有全局量
 __all__=['Vue','fs','editor_file','editor_mode','main','core','hasOwnProp','printf','printe','editor','converter','ActionParser','MotaActionFunctions','MotaActionBlocks'];
-__id__=['editArea','arrRowMark','mapRowMark','data','bg','dataSelection','blocklyDiv','codeArea','entryType'];
+__id__=['editArea','arrRowMark','mapRowMark','data','bg','dataSelection','blocklyDiv','codeAreaHL','entryType'];
 __Vue__=['exportM','editArea','editTip','clear','tip','selectBox'];
 //var event = document.getElementById('event');
 
@@ -357,7 +359,7 @@ main.init('editor', function() {
     editor.mode.floor();
     editor.mode.tower();
     editor.mode.functions();
-    editor.mode.showMode('loc');
+    editor.mode.showMode('floor');
     editor.mode.listen();
     editor_multi=editor_multi();
     editor_blockly=editor_blockly();

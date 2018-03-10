@@ -175,11 +175,11 @@ editor_file = function(editor, callback){
       saveSetting('items',actionList,function (err) {
         callback([
           {'items':(function(){
-            var locObj={};
+            var locObj=Object.assign({},editor.core.items.items[id]);
             Object.keys(editor_file.comment.items.items).forEach(function(v){
-              if (isset(editor.core.items.items[id][v]))
-                locObj[v]=editor.core.items.items[id][v];
-              else
+              if (!isset(editor.core.items.items[id][v]))
+                /* locObj[v]=editor.core.items.items[id][v];
+              else */
                 locObj[v]=null;
             });
             return locObj;
@@ -191,11 +191,11 @@ editor_file = function(editor, callback){
     } else {
       callback([
         {'items':(function(){
-          var locObj={};
+          var locObj=Object.assign({},editor.core.items.items[id]);
           Object.keys(editor_file.comment.items.items).forEach(function(v){
-            if (isset(editor.core.items.items[id][v]))
-              locObj[v]=editor.core.items.items[id][v];
-            else
+            if (!isset(editor.core.items.items[id][v]))
+              /* locObj[v]=editor.core.items.items[id][v];
+            else */
               locObj[v]=null;
           });
           return locObj;
@@ -223,11 +223,11 @@ editor_file = function(editor, callback){
       saveSetting('enemys',actionList,function (err) {
         callback([
           (function(){
-            var locObj={};
+            var locObj=Object.assign({},editor.core.enemys.enemys[id]);
             Object.keys(editor_file.comment.enemys).forEach(function(v){
-              if (isset(editor.core.enemys.enemys[id][v]))
-                locObj[v]=editor.core.enemys.enemys[id][v];
-              else
+              if (!isset(editor.core.enemys.enemys[id][v]))
+                /* locObj[v]=editor.core.enemys.enemys[id][v];
+              else */
                 locObj[v]=null;
             });
             return locObj;
@@ -238,11 +238,11 @@ editor_file = function(editor, callback){
     } else {
       callback([
         (function(){
-          var locObj={};
+          var locObj=Object.assign({},editor.core.enemys.enemys[id]);
           Object.keys(editor_file.comment.enemys).forEach(function(v){
-            if (isset(editor.core.enemys.enemys[id][v]))
-              locObj[v]=editor.core.enemys.enemys[id][v];
-            else
+            if (!isset(editor.core.enemys.enemys[id][v]))
+              /* locObj[v]=editor.core.enemys.enemys[id][v];
+            else */
               locObj[v]=null;
           });
           return locObj;
@@ -315,13 +315,17 @@ editor_file = function(editor, callback){
       saveSetting('floors',actionList,function (err) {
         callback([
           (function(){
-            var locObj={};
+            var locObj=Object.assign({},editor.currentFloorData);
             Object.keys(editor_file.comment.floors.floor).forEach(function(v){
-              if (isset(editor.currentFloorData[v]))
-                locObj[v]=editor.currentFloorData[v];
-              else
+              if (!isset(editor.currentFloorData[v]))
+                /* locObj[v]=editor.currentFloorData[v];
+              else */
                 locObj[v]=null;
             });
+            Object.keys(editor_file.comment.floors.loc).forEach(function(v){
+              delete(locObj[v]);
+            });
+            delete(locObj.map);
             return locObj;
           })(),
           editor_file.comment.floors.floor,
@@ -330,13 +334,17 @@ editor_file = function(editor, callback){
     } else {
       callback([
         (function(){
-          var locObj={};
+          var locObj=Object.assign({},editor.currentFloorData);
           Object.keys(editor_file.comment.floors.floor).forEach(function(v){
-            if (isset(editor.currentFloorData[v]))
-              locObj[v]=editor.currentFloorData[v];
-            else
+            if (!isset(editor.currentFloorData[v]))
+              /* locObj[v]=editor.currentFloorData[v];
+            else */
               locObj[v]=null;
           });
+          Object.keys(editor_file.comment.floors.loc).forEach(function(v){
+            delete(locObj[v]);
+          });
+          delete(locObj.map);
           return locObj;
         })(),
         editor_file.comment.floors.floor,

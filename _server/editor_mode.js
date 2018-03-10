@@ -371,7 +371,6 @@ editor_mode.prototype.listen = function(callback){
   selectAppend.onchange();
 
   var selectFileBtn = document.getElementById('selectFileBtn');
-  var selectFileStr = document.getElementById('selectFileStr');
   selectFileBtn.onclick = function(){
     var loadImage = function (content, callback) {
       var image = new Image();

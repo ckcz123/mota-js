@@ -29,7 +29,7 @@ editor_multi.import = function(id_){
     editor_multi.isString=true;
     codeEditor.setValue(JSON.parse(input.value)||'');
   } else {
-    eval('var tobj='+input.value);
+    eval('var tobj='+(input.value||'null'));
     var tmap={};
     var tstr = JSON.stringify(tobj,function(k,v){if(typeof(v)===typeof('') && v.slice(0,8)==='function'){var id_ = editor.guid();tmap[id_]=v.toString();return id_;}else return v},4);
     for(var id_ in tmap){
@@ -64,7 +64,7 @@ editor_multi.confirm =  function (){
     if(editor_multi.isString){
       input.value = JSON.stringify(value);
     } else {
-      eval('var tobj='+value);
+      eval('var tobj='+(value||'null'));
       var tmap={};
       var tstr = JSON.stringify(tobj,function(k,v){if(v instanceof Function){var id_ = editor.guid();tmap[id_]=v.toString();return id_;}else return v},4);
       for(var id_ in tmap){

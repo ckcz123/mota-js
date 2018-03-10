@@ -25,6 +25,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
         'range': 'range可选，代表领域伤害的范围；不加默认为1\n$range((thiseval==~~thiseval && thiseval>0)||thiseval==null)$end',
         'bomb':' 加入 "bomb": false 代表该怪物不可被炸弹或圣锤炸掉\n$select({\"values\":[true,false]})$end',
         'n': '多连击需要在后面指定n代表是几连击\n$range((thiseval==~~thiseval && thiseval>0)||thiseval==null)$end',
+        'add': '代表吸血后是否加到自身\n$select({\"values\":[true,false]})$end',
         'atkValue':'退化时勇士下降的攻击力点数\n$range(thiseval==~~thiseval||thiseval==null)$end',
         'defValue':'退化时勇士下降的防御力点数\n$range(thiseval==~~thiseval||thiseval==null)$end',
         'damage':'战前扣血的点数\n$range(thiseval==~~thiseval||thiseval==null)$end'

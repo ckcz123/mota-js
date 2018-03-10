@@ -312,7 +312,8 @@ editor_blockly.import = function(id_){
     "['afterGetItem']":'afterGetItem',
     "['afterOpenDoor']":'afterOpenDoor',
     
-    "['firstData']['shops']":'shop',
+    //"['firstData']['shops']":'shop',
+    "--shop--未完成数组的处理":'shop',
 
     "['firstArrive']":'firstArrive',
     "['firstData']['startText']":'firstArrive',

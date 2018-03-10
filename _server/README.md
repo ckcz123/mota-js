@@ -18,7 +18,7 @@ editor.file.loadFloorFile
 editor.file.saveFloorFile
 editor.file.saveFloorFileAs
 ```
-6个编辑模式有关的查询
+编辑模式有关的查询
 ```javascript
 editor.file.editItem('redJewel',[],function(a){console.log(a)});
 editor.file.editEnemy('redBat',[],function(a){console.log(a)});
@@ -27,7 +27,7 @@ editor.file.editFloor([],function(a){console.log(a)});
 editor.file.editTower([],function(a){console.log(a)});
 editor.file.editFunctions([],function(a){console.log(a)});
 ```
-6个编辑模式有关的编辑
+编辑模式有关的编辑
 ```javascript
 editor.info={images: "terrains", y: 9};
 editor.file.changeIdAndIdnum('yellowWall2',16,editor.info,function(a){console.log(a)});
@@ -50,14 +50,19 @@ editor.mode.functions();
 ```
 切换模式
 ```javascript
-editor.mode.onmode('');
+editor.mode.onmode('');//清空
+editor.mode.onmode('save');//保存
+editor.mode.onmode('nextChange');//下次onmode时前端进行切换
+
 editor.mode.onmode('loc');
 editor.mode.onmode('emenyitem');
 editor.mode.onmode('floor');
 editor.mode.onmode('tower');
 editor.mode.onmode('functions');
+editor.mode.onmode('map');
+editor.mode.onmode('appendpic');
 ```
-在切换模式时,改动才会保存到文件,并且需要刷新页面使得`editor`能看到改动
+在`onmode('save')`时,改动才会保存到文件,涉及到图片的改动需要刷新页面使得`editor`能看到
 
 表格的`onchange`的实现中,获得当前模式的方式.不注意的话,修改`index.html`中页面的结构,会被坑
 ```javascript
@@ -83,8 +88,8 @@ editor_blockly.confirm();
 
 ### 待调整
 
-多行文本编辑器独立作为组件
-editor_multi.js
++ [x] 多行文本编辑器独立作为组件
++ [x] editor_multi.js
 
 ## z-index
 

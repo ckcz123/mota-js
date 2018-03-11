@@ -126,12 +126,12 @@ editor_mode.prototype.objToTr = function(obj,commentObj,field){
 
   var outstr=['<tr id="',guid,'"><td title="',field,'">',shortField,'</td>',
   '<td title="',commentHTMLescape,'">',shortCommentHTMLescape,'</td>',
-  '<td><div class="etableInputDiv">',editor_mode.objToTd(thiseval,comment),'</div></td></tr>\n',
+  '<td><div class="etableInputDiv">',editor_mode.objToTd(thiseval,comment,field),'</div></td></tr>\n',
   ];
   return [outstr.join(''),guid];
 }
 
-editor_mode.prototype.objToTd = function(thiseval,comment){
+editor_mode.prototype.objToTd = function(thiseval,comment,field){
   if( comment.indexOf('$select') != -1){
     var evalstr = comment.split('$select')[1].split('$end')[0];
     var values = eval(evalstr)['values'];
@@ -145,8 +145,17 @@ editor_mode.prototype.objToTd = function(thiseval,comment){
     return ["<input spellcheck='false' value='",JSON.stringify(thiseval),"'/>\n"].join('');
   } else {
     //rows='",rows,"'
-    return ["<textarea spellcheck='false' >",JSON.stringify(thiseval,null,4),'</textarea>\n'].join('');
+    var num = 0;//editor_mode.indent(field);
+    return ["<textarea spellcheck='false' >",JSON.stringify(thiseval,null,num),'</textarea>\n'].join('');
   }
+}
+
+editor_mode.prototype.indent = function(field){
+  var num = 4;
+  if(field.indexOf("['main']")===0)return 0;
+  if(field.indexOf("['flyRange']")!==-1)return 0;
+  if(field==="['special']")return 0;
+  return num;
 }
 
 editor_mode.prototype.addAction = function(action){

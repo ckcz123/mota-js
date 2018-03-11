@@ -16,6 +16,10 @@ editor_multi.isString=false;
 editor_multi.show = function(){document.getElementById('left7').style='';}
 editor_multi.hide = function(){document.getElementById('left7').style='z-index:-1;opacity: 0;';}
 
+editor_multi.indent = function(field){
+  if(editor && editor.mode && editor.mode.indent)return editor.mode.indent(field);
+  return 4;
+}
 
 editor_multi.import = function(id_){
   var thisTr = document.getElementById(id_);
@@ -29,9 +33,10 @@ editor_multi.import = function(id_){
     editor_multi.isString=true;
     codeEditor.setValue(JSON.parse(input.value)||'');
   } else {
+    var num = editor_multi.indent(field);
     eval('var tobj='+(input.value||'null'));
     var tmap={};
-    var tstr = JSON.stringify(tobj,function(k,v){if(typeof(v)===typeof('') && v.slice(0,8)==='function'){var id_ = editor.guid();tmap[id_]=v.toString();return id_;}else return v},4);
+    var tstr = JSON.stringify(tobj,function(k,v){if(typeof(v)===typeof('') && v.slice(0,8)==='function'){var id_ = editor.guid();tmap[id_]=v.toString();return id_;}else return v},num);
     for(var id_ in tmap){
       tstr = tstr.replace('"'+id_+'"',tmap[id_])
     }

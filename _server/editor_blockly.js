@@ -267,7 +267,7 @@ xhr.onreadystatechange = function (){
 xhr.open('GET','_server/blockly/MotaAction.g4',true);
 xhr.send(null);
 
-var codeAreaHL = CodeMirror.fromTextArea(document.getElementById("codeArea"), {
+codeAreaHL = CodeMirror.fromTextArea(document.getElementById("codeArea"), {
   lineNumbers: true,
   matchBrackets: true,
   lineWrapping: true,

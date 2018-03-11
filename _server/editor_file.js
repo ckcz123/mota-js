@@ -525,7 +525,12 @@ editor_file = function(editor, callback){
         eval("enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80"+value[1]+'='+JSON.stringify(value[2]));
       });
       var datastr='enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = \n';
-      datastr+=JSON.stringify(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80,null,4);
+      var emap={};
+      var estr = JSON.stringify(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80,function(k,v){if(v.hp!=null){var id_ = editor.guid();emap[id_]=JSON.stringify(v);return id_;}else return v},4);
+      for(var id_ in emap){
+        estr = estr.replace('"'+id_+'"',emap[id_])
+      }
+      datastr+=estr;
       fs.writeFile('project/enemys.js',encode(datastr),'base64',function(err, data){
         callback(err);
       });

@@ -19,6 +19,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
         "hero": {
             "name": " 勇士初始数据 \n 勇士名；可以改成喜欢的 ",
             "lv": " 初始等级，该项必须为正整数 \n$range(thiseval==~~thiseval &&thiseval>0)$end",
+            "hpmax": " 初始生命上限，只有在enableHPMax开启时才有效",
             "hp": " 初始生命值 ",
             "atk": " 初始攻击 ",
             "def": " 初始防御 ",
@@ -115,8 +116,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
         ] */
     },
     "values": {
-        "HPMAX": " 各种数值；一些数值可以在这里设置\n /****** 角色相关 ******/ \n HP上限；-1则无上限 ",
-        "lavaDamage": " 经过血网受到的伤害 ",
+        "lavaDamage": " 各种数值；一些数值可以在这里设置\n /****** 角色相关 ******/ \n 经过血网受到的伤害 ",
         "poisonDamage": " 中毒后每步受到的伤害 ",
         "weakValue": " 衰弱状态下攻防减少的数值 ",
         "redJewel": " /****** 道具相关 ******/ \n 红宝石加攻击的数值 ",
@@ -148,6 +148,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
     "flags": {
         "enableFloor": " 系统FLAG，在游戏运行中中请不要修改它。 /****** 状态栏相关 ******/ \n 是否在状态栏显示当前楼层 \n$select({\"values\":[true,false]})$end",
         "enableLv": " 是否在状态栏显示当前等级 \n$select({\"values\":[true,false]})$end",
+        "enableHPMax": " 是否是否启用生命上限 \n$select({\"values\":[true,false]})$end",
         "enableMDef": " 是否在状态栏及战斗界面显示魔防（护盾） \n$select({\"values\":[true,false]})$end",
         "enableMoney": " 是否在状态栏、怪物手册及战斗界面显示金币 \n$select({\"values\":[true,false]})$end",
         "enableExperience": " 是否在状态栏、怪物手册及战斗界面显示经验 \n$select({\"values\":[true,false]})$end",

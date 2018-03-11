@@ -43,6 +43,7 @@ function main() {
         'statusLabels': document.getElementsByClassName('statusLabel'),
         'floorCol': document.getElementById('floorCol'),
         'lvCol': document.getElementById('lvCol'),
+        'hpmaxCol': document.getElementById('hpmaxCol'),
         'mdefCol': document.getElementById('mdefCol'),
         'moneyCol': document.getElementById('moneyCol'),
         'expCol': document.getElementById('expCol'),
@@ -65,6 +66,7 @@ function main() {
         'image': {
             'floor': document.getElementById('img-floor'),
             'lv': document.getElementById('img-lv'),
+            'hpmax': document.getElementById('img-hpmax'),
             'hp': document.getElementById("img-hp"),
             'atk': document.getElementById("img-atk"),
             'def': document.getElementById("img-def"),
@@ -95,6 +97,7 @@ function main() {
         },
         'floor': document.getElementById('floor'),
         'lv': document.getElementById('lv'),
+        'hpmax': document.getElementById('hpmax'),
         'hp': document.getElementById('hp'),
         'atk': document.getElementById('atk'),
         'def': document.getElementById("def"),

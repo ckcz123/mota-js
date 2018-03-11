@@ -2067,8 +2067,8 @@ control.prototype.updateStatusBar = function () {
     core.events.checkLvUp();
 
     // 检查HP上限
-    if (core.values.HPMAX>0) {
-        core.setStatus('hp', Math.min(core.values.HPMAX, core.getStatus('hp')));
+    if (core.flags.enableHPMax) {
+        core.setStatus('hp', Math.min(core.getStatus('hpmax'), core.getStatus('hp')));
     }
 
     // 更新领域、阻击、显伤
@@ -2080,7 +2080,7 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.lv.style.fontStyle = 'italic';
     else core.statusBar.lv.style.fontStyle = 'normal';
 
-    var statusList = ['hp', 'atk', 'def', 'mdef', 'money', 'experience'];
+    var statusList = ['hpmax', 'hp', 'atk', 'def', 'mdef', 'money', 'experience'];
     statusList.forEach(function (item) {
         core.statusBar[item].innerHTML = core.getStatus(item);
     });
@@ -2181,9 +2181,10 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         toolsWidth, toolsHeight,toolsMargin,toolsPMaxwidth,
         fontSize, toolbarFontSize, margin;
 
-    var count = 11;
+    var count = 12;
     if (!core.flags.enableFloor) count--;
     if (!core.flags.enableLv) count--;
+    if (!core.flags.enableHPMax) count--;
     if (!core.flags.enableMDef) count--;
     if (!core.flags.enableMoney) count--;
     if (!core.flags.enableExperience) count--;
@@ -2414,6 +2415,12 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             id: 'lvCol',
             rules: {
                 display: core.flags.enableLv ? 'block': 'none'
+            }
+        },
+        {
+            id: 'hpmaxCol',
+            rules: {
+                display: core.flags.enableHPMax ? 'block': 'none'
             }
         },
         {

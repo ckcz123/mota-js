@@ -1,7 +1,7 @@
 // vue 相关处理
 
 document.body.onmousedown = function(e){
-  console.log(e);
+  //console.log(e);
   var eid=[];
   e.path.forEach(function(node){
     if(!node.getAttribute)return;
@@ -11,7 +11,7 @@ document.body.onmousedown = function(e){
       eid.push(id_);
     }
   });
-  console.log(eid);
+  //console.log(eid);
   if(eid.indexOf('edit')===-1){
     if(eid.indexOf('tip')===-1)selectBox.isSelected = false;
   }

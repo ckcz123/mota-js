@@ -266,7 +266,7 @@ ui.prototype.drawTextBox = function(content) {
     clearInterval(core.status.event.interval);
 
     // 获得name, image, icon
-    var id=null, name=null, image=null, icon=null;
+    var id=null, name=null, image=null, icon=null, iconHeight=32, animate=null;
     if (content.indexOf("\t[")==0 || content.indexOf("\\t[")==0) {
         var index = content.indexOf("]");
         if (index>=0) {
@@ -279,11 +279,21 @@ ui.prototype.drawTextBox = function(content) {
                 id=ss[0];
                 // monster
                 if (id!='hero') {
-                    var enemys = core.material.enemys[id];
-                    if (core.isset(enemys)) {
+                    if (core.isset(core.material.enemys[id])) {
                         name = core.material.enemys[id].name;
-                        image = core.material.images.enemys;
-                        icon = core.material.icons.enemys[id];
+
+                        if (core.isset(core.material.icons.enemy48[id])) {
+                            image = core.material.images.enemy48;
+                            icon = core.material.icons.enemy48[id];
+                            iconHeight = 48;
+                            animate=4;
+                        }
+                        else {
+                            image = core.material.images.enemys;
+                            icon = core.material.icons.enemys[id];
+                            iconHeight = 32;
+                            animate=2;
+                        }
                     }
                     else {
                         name=id;
@@ -296,8 +306,18 @@ ui.prototype.drawTextBox = function(content) {
             else {
                 id='npc';
                 name=ss[0];
-                image=core.material.images.npcs;
-                icon=core.material.icons.npcs[ss[1]];
+                if (core.isset(core.material.icons.npc48[ss[1]])) {
+                    image = core.material.images.npc48;
+                    icon = core.material.icons.npc48[ss[1]];
+                    iconHeight = 48;
+                    animate=4;
+                }
+                else {
+                    image = core.material.images.npcs;
+                    icon = core.material.icons.npcs[ss[1]];
+                    iconHeight = 32;
+                    animate=2;
+                }
             }
         }
     }
@@ -306,7 +326,7 @@ ui.prototype.drawTextBox = function(content) {
 
     var textAttribute = core.status.textAttribute || core.initStatus.textAttribute;
 
-    var position = textAttribute.position, px=null, py=null, ydelta=0;
+    var position = textAttribute.position, px=null, py=null, ydelta=iconHeight-32;
     if (content.indexOf("\b[")==0 || content.indexOf("\\b[")==0) {
         var index = content.indexOf("]");
         if (index>=0) {
@@ -355,7 +375,7 @@ ui.prototype.drawTextBox = function(content) {
     if (textAttribute.bold) font = "bold "+font;
     var contents = core.splitLines("ui", content, validWidth, font);
 
-    var height = 20 + 21*(contents.length+1) + (id=='hero'?core.material.icons.hero.height-10:core.isset(name)?32-10:0);
+    var height = 20 + 21*(contents.length+1) + (id=='hero'?core.material.icons.hero.height-10:core.isset(name)?iconHeight-10:0);
 
 
     var xoffset = 6, yoffset = 22;
@@ -447,12 +467,16 @@ ui.prototype.drawTextBox = function(content) {
         else {
             core.fillText('ui', name, content_left, top + 30, null, 'bold 22px Verdana');
             if (core.isset(icon)) {
-                core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, 34, null, 2);
+
+                core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, iconHeight + 2, null, 2);
                 core.status.boxAnimateObjs = [];
                 core.status.boxAnimateObjs.push({
-                    'bgx': left + 15, 'bgy': top + 40, 'bgsize': 32,
-                    'image': image, 'x': left + 15, 'y': top + 40, 'icon': icon
+                    'bgx': left + 15, 'bgy': top + 40, 'bgWidth': 32, 'bgHeight': iconHeight,
+                    'x': left+15, 'y': top+40, 'height': iconHeight, 'animate': animate,
+                    'image': image,
+                    'pos': icon*iconHeight
                 });
+
                 core.drawBoxAnimate();
             }
         }
@@ -510,7 +534,7 @@ ui.prototype.drawChoices = function(content, choices) {
     if (length%2==0) bottom+=16;
     var choice_top = bottom-height+56;
 
-    var id=null, name=null, image=null, icon=null;
+    var id=null, name=null, image=null, icon=null, iconHeight=32, animate=null;
 
     var contents = null;
     var content_left = left + 15;
@@ -528,11 +552,21 @@ ui.prototype.drawChoices = function(content, choices) {
                     id=ss[0];
                     // monster
                     if (id!='hero') {
-                        var enemys = core.material.enemys[id];
-                        if (core.isset(enemys)) {
+                        if (core.isset(core.material.enemys[id])) {
                             name = core.material.enemys[id].name;
-                            image = core.material.images.enemys;
-                            icon = core.material.icons.enemys[id];
+
+                            if (core.isset(core.material.icons.enemy48[id])) {
+                                image = core.material.images.enemy48;
+                                icon = core.material.icons.enemy48[id];
+                                iconHeight = 48;
+                                animate=4;
+                            }
+                            else {
+                                image = core.material.images.enemys;
+                                icon = core.material.icons.enemys[id];
+                                iconHeight = 32;
+                                animate=2;
+                            }
                         }
                         else {
                             name=id;
@@ -545,8 +579,18 @@ ui.prototype.drawChoices = function(content, choices) {
                 else {
                     id='npc';
                     name=ss[0];
-                    image=core.material.images.npcs;
-                    icon=core.material.icons.npcs[ss[1]];
+                    if (core.isset(core.material.icons.npc48[ss[1]])) {
+                        image = core.material.images.npc48;
+                        icon = core.material.icons.npc48[ss[1]];
+                        iconHeight = 48;
+                        animate=4;
+                    }
+                    else {
+                        image = core.material.images.npcs;
+                        icon = core.material.icons.npcs[ss[1]];
+                        iconHeight = 32;
+                        animate=2;
+                    }
                 }
             }
         }
@@ -595,11 +639,13 @@ ui.prototype.drawChoices = function(content, choices) {
             else {
                 core.fillText('ui', name, title_offset, top + 27, '#FFD700', 'bold 19px Verdana');
                 if (core.isset(icon)) {
-                    core.strokeRect('ui', left + 15 - 1, top + 30 - 1, 34, 34, '#DDDDDD', 2);
+                    core.strokeRect('ui', left + 15 - 1, top + 30 - 1, 34, iconHeight + 2, '#DDDDDD', 2);
                     core.status.boxAnimateObjs = [];
                     core.status.boxAnimateObjs.push({
-                        'bgx': left + 15, 'bgy': top + 30, 'bgsize': 32,
-                        'image': image, 'x': left + 15, 'y': top + 30, 'icon': icon
+                        'bgx': left + 15, 'bgy': top + 30, 'bgWidth': 32, 'bgHeight': iconHeight,
+                        'x': left+15, 'y': top+30, 'height': iconHeight, 'animate': animate,
+                        'image': image,
+                        'pos': icon*iconHeight
                     });
                     core.drawBoxAnimate();
                 }
@@ -809,19 +855,28 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
     var margin = 35;
     var boxWidth = 40;
+    var monsterHeight = 32, animate=2;
+
+    var image = core.material.images.enemys, icon = core.material.icons.enemys;
+    if (core.isset(core.material.icons.enemy48[monsterId])) {
+        image = core.material.images.enemy48;
+        icon = core.material.icons.enemy48;
+        monsterHeight = 48;
+        animate=4;
+    }
 
     // 方块
     var heroHeight = core.material.icons.hero.height;
     core.strokeRect('ui', left + margin - 1, top + margin - 1, boxWidth+2, heroHeight+boxWidth-32+2, '#FFD700', 2);
-    core.strokeRect('ui', left + right - margin - boxWidth - 1 , top+margin-1, boxWidth+2, boxWidth+2);
+    core.strokeRect('ui', left + right - margin - boxWidth - 1 , top+margin-1, boxWidth+2, monsterHeight+boxWidth-32+2);
 
     // 名称
     core.canvas.ui.textAlign='center';
     core.fillText('ui', core.status.hero.name, left+margin+boxWidth/2, top+margin+heroHeight+40, '#FFD700', 'bold 22px Verdana');
-    core.fillText('ui', "怪物", left+right-margin-boxWidth/2, top+margin+32+40);
+    core.fillText('ui', "怪物", left+right-margin-boxWidth/2, top+margin+monsterHeight+40);
     for (var i=0, j=0; i<specialTexts.length;i++) {
         if (specialTexts[i]!='') {
-            core.fillText('ui', specialTexts[i], left+right-margin-boxWidth/2, top+margin+32+44+20*(++j), '#FF6A6A', '15px Verdana');
+            core.fillText('ui', specialTexts[i], left+right-margin-boxWidth/2, top+margin+monsterHeight+44+20*(++j), '#FF6A6A', '15px Verdana');
         }
     }
 
@@ -833,11 +888,11 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     // 怪物的
     core.status.boxAnimateObjs = [];
     core.status.boxAnimateObjs.push({
-        'bgx': left + right - margin - 40, 'bgy': top+margin, 'bgsize': boxWidth,
-        'image': core.material.images.enemys, 'x': left + right - margin - 40 + (boxWidth-32)/2, 'y': top + margin + (boxWidth-32)/2, 'icon': core.material.icons.enemys[monsterId]
-    });
+        'bgx': left+right-margin-40, 'bgy': top+margin, 'bgWidth': boxWidth, 'bgHeight': monsterHeight+boxWidth-32,
+        'x': left + right - margin - 40 + (boxWidth-32)/2, 'y': top + margin + (boxWidth-32)/2, 'height': monsterHeight,
+        'image': image, 'pos': monsterHeight*icon[monsterId], 'animate': animate
+    })
     core.drawBoxAnimate();
-
     var lineWidth = 80;
 
     var left_start = left + margin + boxWidth + 10;
@@ -928,11 +983,11 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
         if (turn==0) {
             // 勇士攻击
-            core.drawLine('data', left + right - margin - boxWidth + 6, top+margin+boxWidth-6,
+            core.drawLine('data', left + right - margin - boxWidth + 6, top+margin+monsterHeight+boxWidth-32-6,
                 left+right-margin-6, top+margin+6, '#FF0000', 4);
             setTimeout(function() {
                 core.clearMap('data', left + right - margin - boxWidth, top+margin,
-                    boxWidth, boxWidth);
+                    boxWidth, boxWidth+monsterHeight-32);
             }, 250);
 
             if (hero_atk-mon_def>0)
@@ -1166,11 +1221,18 @@ ui.prototype.drawBook = function (index) {
         var enemy = enemys[i];
         core.strokeRect('ui', 22, 62 * i + 22, 42, 42, '#DDDDDD', 2);
 
+        var cls = 'enemys';
+        if (core.isset(core.material.icons.enemy48[enemy.id]))
+            cls = 'enemy48';
+        var height = cls=='enemy48'?48:32;
+        var animate = cls=='enemy48'?4:2;
+
         // 怪物
         core.status.boxAnimateObjs.push({
-            'bgx': 22, 'bgy': 62 * i + 22, 'bgsize': 42,
-            'image': core.material.images.enemys,
-            'x': 27, 'y': 62 * i + 27, 'icon': core.material.icons.enemys[enemy.id]
+            'bgx': 22, 'bgy': 62 * i + 22, 'bgWidth': 42, 'bgHeight': 42,
+            'x': 27, 'y': 62 * i + 27, 'height': 32, 'animate': animate,
+            'image': core.material.images[cls],
+            'pos': core.material.icons[cls][enemy.id] * height
         });
 
         // 数据
@@ -1558,12 +1620,6 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
 
     if (core.isset(core.floors[floorId].png)) {
         var png = core.floors[floorId].png;
-        /*
-        if (core.isset(core.material.images.pngs[png])) {
-            core.canvas.ui.drawImage(core.material.images.pngs[png], x, y, size, size);
-        }
-        */
-
         var ratio = size/416;
 
         if (typeof png == 'string') {
@@ -1596,7 +1652,8 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
                 if (block.event.id!='none') {
                     var blockIcon = core.material.icons[block.event.cls][block.event.id];
                     var blockImage = core.material.images[block.event.cls];
-                    core.canvas[canvas].drawImage(blockImage, 0, blockIcon * 32, 32, 32, x + block.x * persize, y + block.y * persize, persize, persize);
+                    var height = block.event.height || 32;
+                    core.canvas[canvas].drawImage(blockImage, 0, blockIcon * height, 32, height, x + block.x * persize, y + block.y * persize + (persize-persize*height/32), persize, persize * height/32);
                 }
             }
         }

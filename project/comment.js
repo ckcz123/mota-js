@@ -30,7 +30,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
         'defValue':'退化时勇士下降的防御力点数\n$range(thiseval==~~thiseval||thiseval==null)$end',
         'damage':'战前扣血的点数\n$range(thiseval==~~thiseval||thiseval==null)$end'
     },
-    "enemys_template" : {'name': '新敌人', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'special': 0},
+    "enemys_template" : {'name': '新敌人', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'point': 0, 'special': 0},
     "floors" : {
         'floor' : {
             "floorId": "文件名和floorId需要保持完全一致 \n楼层唯一标识符仅能由字母、数字、下划线组成，且不能由数字开头 \n推荐用法：第20层就用MT20，第38层就用MT38，地下6层就用MT_6（用下划线代替负号），隐藏3层用MT3h（h表示隐藏），等等 \n楼层唯一标识符，需要和名字完全一致 \n这里不能更改floorId,请通过另存为来实现\n$range(false)$end",

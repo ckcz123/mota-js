@@ -200,7 +200,7 @@ items.prototype.canUseItem = function (itemId) {
         var ids = [];
         for (var i in core.status.thisMap.blocks) {
             var block = core.status.thisMap.blocks[i];
-            if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls == 'enemys' && Math.abs(block.x-core.status.hero.loc.x)+Math.abs(block.y-core.status.hero.loc.y)<=1) {
+            if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls.indexOf('enemy')==0 && Math.abs(block.x-core.status.hero.loc.x)+Math.abs(block.y-core.status.hero.loc.y)<=1) {
                 var enemy = core.material.enemys[block.event.id];
                 if (core.isset(enemy.bomb) && !enemy.bomb) continue;
                 if (core.flags.bombFourDirections || (block.x==core.nextX() && block.y==core.nextY()))
@@ -217,7 +217,7 @@ items.prototype.canUseItem = function (itemId) {
         // 圣锤
         for (var i in core.status.thisMap.blocks) {
             var block = core.status.thisMap.blocks[i];
-            if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls == 'enemys' && block.x==core.nextX() && block.y==core.nextY()) {
+            if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls.indexOf('enemy')==0 && block.x==core.nextX() && block.y==core.nextY()) {
                 var enemy = core.material.enemys[block.event.id];
                 if (core.isset(enemy.bomb) && !enemy.bomb) continue;
                 core.status.event.data = [i];

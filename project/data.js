@@ -131,7 +131,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         'counterAttack': 0.1,
         'purify': 3,
         'hatred': 2,
-        'animateSpeed': 500,
+        'animateSpeed': 300,
     },
     
     "flags" : {

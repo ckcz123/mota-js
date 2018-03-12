@@ -883,7 +883,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             // 检查重生
             if (!core.isset(fromLoad)) {
                 core.status.maps[floorId].blocks.forEach(function(block) {
-                    if (core.isset(block.enable) && !block.enable && core.isset(block.event) && block.event.cls=='enemys'
+                    if (core.isset(block.enable) && !block.enable && core.isset(block.event) && block.event.cls.indexOf('enemy')==0
                         && core.enemys.hasSpecial(core.material.enemys[block.event.id].special, 23)) {
                         block.enable = true;
                     }
@@ -1098,10 +1098,7 @@ events.prototype.changeLight = function(x, y) {
     // 改变为dark
     block.id = 166;
     block.event = {'cls': 'terrains', 'id': 'darkLight', 'noPass': true};
-    // 更新地图
-    core.canvas.event.clearRect(x * 32, y * 32, 32, 32);
-    var blockIcon = core.material.icons[block.event.cls][block.event.id];
-    core.canvas.event.drawImage(core.material.images[block.event.cls], 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+    core.drawBlock(block);
     this.afterChangeLight(x,y);
 }
 
@@ -1151,18 +1148,14 @@ events.prototype.pushBox = function (data) {
     if (block!=null && !(core.isset(block.block.event) && block.block.event.id=='flower'))
         return;
 
-    var blockIcon;
     if (block==null) {
         core.status.thisMap.blocks.push(core.maps.initBlock(nx, ny, 169));
-        blockIcon=core.material.icons.terrains.box;
     }
     else {
         block.block.id=170;
         block.block.event=core.maps.initBlock(null,null,170).event;
-        blockIcon=core.material.icons.terrains.boxed;
     }
-    core.canvas.event.clearRect(nx * 32, ny * 32, 32, 32);
-    core.canvas.event.drawImage(core.material.images.terrains, 0, blockIcon * 32, 32, 32, nx * 32, ny * 32, 32, 32);
+    core.drawBlock(block.block);
 
     if (data.event.id=='box') {
         core.removeBlock(data.x, data.y);
@@ -1170,8 +1163,7 @@ events.prototype.pushBox = function (data) {
     else {
         data.id=168;
         data.event=core.maps.initBlock(null,null,168).event;
-        core.canvas.event.clearRect(data.x * 32, data.y * 32, 32, 32);
-        core.canvas.event.drawImage(core.material.images.terrains, 0, core.material.icons.terrains.flower * 32, 32, 32, data.x * 32, data.y * 32, 32, 32);
+        core.drawBlock(data);
     }
 
     core.updateStatusBar();

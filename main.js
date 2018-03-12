@@ -59,7 +59,7 @@ function main() {
         "data","enemys","icons","maps","items","functions"
     ];
     this.images = [
-        'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains'
+        'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains', 'enemy48', 'npc48'
     ];
 
     this.statusBar = {

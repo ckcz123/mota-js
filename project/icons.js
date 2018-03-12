@@ -101,6 +101,13 @@ icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1 =
             'blueShop': 10,
             'princess': 11
         },
+        'npc48': {
+            'npc0': 0,
+            'npc1': 1,
+            'npc2': 2,
+            'npc3': 3,
+            'npc4': 4,
+        },
         'enemys': {
             'greenSlime': 0,
             'redSlime': 1,
@@ -162,6 +169,12 @@ icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1 =
             'octopus': 57,
             'darkFairy': 58,
             'greenKnight': 59,
+        },
+        'enemy48': {
+            'angel': 0,
+            'elemental': 1,
+            'steelGuard': 2,
+            'evilBat': 3,
         },
         'items': {
             'yellowKey': 0,

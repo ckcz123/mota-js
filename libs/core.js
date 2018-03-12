@@ -29,8 +29,7 @@ function core() {
     this.animateFrame = {
         'background': null,
         'globalAnimate': false,
-        'twoTime': null,
-        'fourTime': null,
+        'globalTime': null,
         'boxTime': null,
         'moveTime': null,
         'speed': null,
@@ -141,8 +140,7 @@ function core() {
         'openingDoor': null,
 
         // 动画
-        'twoAnimateObjs': [],
-        'fourAnimateObjs': [],
+        'globalAnimateObjs': [],
         'boxAnimateObjs': [],
     };
     this.status = {};
@@ -608,6 +606,10 @@ core.prototype.setFillStyle = function (map, style) {
     core.ui.setFillStyle(map, style);
 }
 
+core.prototype.drawBlock = function (block, animate, dx, dy) {
+    core.maps.drawBlock(block, animate, dx, dy);
+}
+
 ////// 绘制某张地图 //////
 core.prototype.drawMap = function (mapName, callback) {
     core.maps.drawMap(mapName, callback);
@@ -689,8 +691,8 @@ core.prototype.removeBlockByIds = function (floorId, ids) {
 }
 
 ////// 添加一个全局动画 //////
-core.prototype.addGlobalAnimate = function (animateMore, x, y, loc, image) {
-    core.maps.addGlobalAnimate(animateMore, x, y, loc, image);
+core.prototype.addGlobalAnimate = function (block) {
+    core.maps.addGlobalAnimate(block);
 }
 
 ////// 删除一个或所有全局动画 //////

@@ -246,7 +246,8 @@ enemys.prototype.getCurrentEnemys = function (floorId) {
     var used = {};
     var mapBlocks = core.status.maps[floorId].blocks;
     for (var b = 0; b < mapBlocks.length; b++) {
-        if (core.isset(mapBlocks[b].event) && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable) && mapBlocks[b].event.cls == 'enemys') {
+        if (core.isset(mapBlocks[b].event) && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable)
+            && mapBlocks[b].event.cls.indexOf('enemy')==0) {
             var monsterId = mapBlocks[b].event.id;
             if (core.isset(used[monsterId])) continue;
 

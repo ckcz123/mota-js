@@ -54,8 +54,7 @@ control.prototype.setRequestAnimationFrame = function () {
 
     var draw = function(timestamp) {
 
-        core.animateFrame.twoTime = core.animateFrame.twoTime||timestamp;
-        core.animateFrame.fourTime = core.animateFrame.fourTime||timestamp;
+        core.animateFrame.globalTime = core.animateFrame.globalTime||timestamp;
         core.animateFrame.boxTime = core.animateFrame.boxTime||timestamp;
         core.animateFrame.moveTime = core.animateFrame.moveTime||timestamp;
         core.animateFrame.weather.time = core.animateFrame.weather.time||timestamp;
@@ -63,29 +62,16 @@ control.prototype.setRequestAnimationFrame = function () {
         // Global Animate
         if (core.animateFrame.globalAnimate && core.isPlaying()) {
 
-            if (timestamp-core.animateFrame.twoTime>core.animateFrame.speed && core.isset(core.status.twoAnimateObjs)) {
+            if (timestamp-core.animateFrame.globalTime>core.animateFrame.speed && core.isset(core.status.globalAnimateObjs)) {
 
-                for (var a = 0; a < core.status.twoAnimateObjs.length; a++) {
-                    var obj = core.status.twoAnimateObjs[a];
-                    obj.status = (obj.status+1)%2;
-                    core.canvas.event.clearRect(obj.x, obj.y, 32, 32);
-                    core.canvas.event.drawImage(obj.image, obj.status * 32, obj.loc * 32, 32, 32, obj.x, obj.y, 32, 32);
+                for (var a = 0; a < core.status.globalAnimateObjs.length; a++) {
+                    var obj = core.status.globalAnimateObjs[a];
+                    obj.status = (obj.status+1)%(obj.event.animate||1);
+                    core.drawBlock(obj, obj.status);
                 }
 
-                core.animateFrame.twoTime = timestamp;
+                core.animateFrame.globalTime = timestamp;
             }
-
-            if (timestamp-core.animateFrame.fourTime>core.animateFrame.speed/2 && core.isset(core.status.fourAnimateObjs)) {
-                for (var a = 0; a < core.status.fourAnimateObjs.length; a++) {
-                    var obj=core.status.fourAnimateObjs[a];
-                    obj.status = (obj.status+1)%4;
-                    core.canvas.event.clearRect(obj.x, obj.y, 32, 32);
-                    core.canvas.event.drawImage(obj.image, obj.status * 32, obj.loc * 32, 32, 32, obj.x, obj.y, 32, 32);
-                }
-                // fourtime = timestamp % fourDelta;
-                core.animateFrame.fourTime = timestamp;
-            }
-
         }
 
         // Box
@@ -882,7 +868,7 @@ control.prototype.updateCheckBlock = function() {
     core.status.checkBlock.map = []; // 记录怪物地图
     for (var n=0;n<blocks.length;n++) {
         var block = blocks[n];
-        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls=='enemys') {
+        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls.indexOf('enemy')==0) {
             var id = block.event.id, enemy = core.enemys.getEnemys(id);
             if (core.isset(enemy)) {
                 core.status.checkBlock.map[13*block.x+block.y]=id;
@@ -1044,8 +1030,13 @@ control.prototype.snipe = function (snipes) {
 
         var block = core.getBlock(x,y).block;
 
-        snipe.blockIcon = core.material.icons[block.event.cls][block.event.id];
-        snipe.blockImage = core.material.images[block.event.cls];
+        var cls = block.event.cls;
+        var height = block.event.height || 32;
+
+        snipe.animate = block.event.animate || 1;
+        snipe.blockIcon = core.material.icons[cls][block.event.id];
+        snipe.blockImage = core.material.images[cls];
+        snipe.height = height;
         var damage = core.enemys.getDamage(block.event.id);
 
         var color = "#000000";
@@ -1069,8 +1060,8 @@ control.prototype.snipe = function (snipes) {
             var nBlock = core.clone(t.block);
             nBlock.x = t.nx; nBlock.y = t.ny;
             core.status.thisMap.blocks.push(nBlock);
-            core.addGlobalAnimate(2, 32*t.nx, 32*t.ny, t.blockIcon, t.blockImage);
-            core.canvas.event.drawImage(t.blockImage, 0, t.blockIcon*32, 32, 32, 32*t.nx, 32*t.ny, 32, 32);
+            core.drawBlock(nBlock);
+            core.addGlobalAnimate(nBlock);
         });
         core.syncGlobalAnimate();
         core.updateStatusBar();
@@ -1087,7 +1078,6 @@ control.prototype.snipe = function (snipes) {
 
             var time = 500, step = 0;
 
-            var animateValue = 2;
             var animateCurrent = 0;
             var animateTime = 0;
 
@@ -1097,22 +1087,23 @@ control.prototype.snipe = function (snipes) {
 
                 step++;
                 animateTime += time / 16;
-                if (animateTime >= core.values.animateSpeed * 2 / animateValue) {
+                if (animateTime >= core.values.animateSpeed) {
                     animateCurrent++;
                     animateTime = 0;
-                    if (animateCurrent>=animateValue) animateCurrent=0;
                 }
 
                 snipes.forEach(function (snipe) {
                     var x=snipe.x, y=snipe.y, direction = snipe.direction;
 
-                    var nowX=32*x+scan[direction].x*2*step, nowY=32*y+scan[direction].y*2*step;
+                    var dx = scan[direction].x*2*step, dy = scan[direction].y*2*step;
+                    var nowX = 32*x+dx, nowY = 32*y+dy;
 
                     // 清空上一次
-                    core.clearMap('event', nowX-2*scan[direction].x, nowY-2*scan[direction].y, 32, 32);
                     core.clearMap('fg', nowX-2*scan[direction].x, nowY-2*scan[direction].y, 32, 32);
+                    core.canvas.event.clearRect(nowX-2*scan[direction].x, nowY-2*scan[direction].y, 32, 32);
+                    core.canvas.event2.clearRect(nowX-2*scan[direction].x, nowY-2*scan[direction].y-32, 32, 32)
 
-                    core.canvas.event.drawImage(snipe.blockImage, animateCurrent*32, snipe.blockIcon*32, 32, 32, nowX, nowY, 32, 32);
+                    core.drawBlock(snipe.block, animateCurrent, dx, dy);
 
                     if (core.hasItem('book')) {
                         // drawFG
@@ -1256,7 +1247,7 @@ control.prototype.updateFg = function () {
         core.canvas.fg.textAlign = 'left';
         for (var b = 0; b < mapBlocks.length; b++) {
             var x = mapBlocks[b].x, y = mapBlocks[b].y;
-            if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls == 'enemys'
+            if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls.indexOf('enemy')==0
                 && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable)) {
 
                 // 非系统默认的战斗事件（被覆盖）

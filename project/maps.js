@@ -112,6 +112,12 @@ maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
     '130':{'cls': 'npcs', 'id': 'pinkShop'},
     '131':{'cls': 'npcs', 'id': 'blueShop'},
     '132':{'cls': 'npcs', 'id': 'princess'},
+    '133':{'cls': 'npc48', 'id': 'npc0'},
+    '134':{'cls': 'npc48', 'id': 'npc1'},
+    '135':{'cls': 'npc48', 'id': 'npc2'},
+    '136':{'cls': 'npc48', 'id': 'npc3'},
+    '137':{'cls': 'npc48', 'id': 'npc4'},
+
 
     ////////////////////////// 其他部分 //////////////////////////
 
@@ -192,6 +198,10 @@ maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
     '259':{'cls': 'enemys', 'id': 'darkFairy'},
     '260':{'cls': 'enemys', 'id': 'greenKnight'},
 
+    '261':{'cls': 'enemy48', 'id': 'angel'},
+    '262':{'cls': 'enemy48', 'id': 'elemental'},
+    '263':{'cls': 'enemy48', 'id': 'steelGuard'},
+    '264':{'cls': 'enemy48', 'id': 'evilBat'},
+
     ////////////////////////// 待定... //////////////////////////
-    // 目前ID暂时不要超过400
 }

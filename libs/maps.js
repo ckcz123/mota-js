@@ -65,14 +65,14 @@ maps.prototype.initBlock = function (x, y, id) {
 ////// 添加一些信息到block上 //////
 maps.prototype.addInfo = function (block) {
     if (core.isset(block.event)) {
-        if (block.event.cls == 'enemys' && block.event.trigger==undefined) {
+        if (block.event.cls.indexOf("enemy")==0 && block.event.trigger==undefined) {
             block.event.trigger = 'battle';
         }
         if (block.event.cls == 'items' && block.event.trigger==undefined) {
             block.event.trigger = 'getItem';
         }
         if (block.event.noPass == undefined) {
-            if (block.event.cls=='enemys' || block.event.cls=='terrains' || block.event.cls=='npcs') {
+            if (block.event.cls.indexOf("enemy")==0 || block.event.cls.indexOf("npc")==0 || block.event.cls=='terrains') {
                 block.event.noPass = true;
             }
         }
@@ -80,10 +80,13 @@ maps.prototype.addInfo = function (block) {
             if (block.event.cls=='enemys' || block.event.cls=='npcs') {
                 block.event.animate = 2;
             }
-            if (block.event.cls == 'animates') {
+            if (block.event.cls == 'animates' || block.event.cls == 'enemy48' || block.event.cls == 'npc48') {
                 block.event.animate = 4;
             }
         }
+        block.event.height = 32;
+        if (block.event.cls == 'enemy48' || block.event.cls == 'npc48')
+            block.event.height = 48;
     }
 }
 
@@ -283,6 +286,19 @@ maps.prototype.canMoveDirectly = function (destX,destY) {
     return false;
 }
 
+maps.prototype.drawBlock = function (block, animate, dx, dy) {
+    var cls = block.event.cls, height = block.event.height || 32;
+    var blockIcon = core.material.icons[cls][block.event.id];
+    var blockImage = core.material.images[cls];
+    animate=(animate||0)%(block.event.animate||1);
+    dx = dx || 0;
+    dy = dy || 0;
+    core.canvas.event.clearRect(block.x * 32 + dx, block.y * 32 + dy, 32, 32);
+    core.canvas.event2.clearRect(block.x * 32 + dx, block.y * 32 - 32 + dy, 32, 32)
+    core.canvas.event.drawImage(blockImage, animate * 32, blockIcon * height + height-32, 32, 32, block.x * 32 + dx, block.y * 32 + dy, 32, 32);
+    core.canvas.event2.drawImage(blockImage, animate * 32, blockIcon * height, 32, height-32, block.x * 32 + dx, block.y*32 + 32 - height + dy, 32, height-32);
+}
+
 ////// 绘制某张地图 //////
 maps.prototype.drawMap = function (mapName, callback) {
     core.clearMap('all');
@@ -348,10 +364,8 @@ maps.prototype.drawMap = function (mapName, callback) {
                 }
                 else {
                     if (block.event.id!='none') {
-                        blockIcon = core.material.icons[block.event.cls][block.event.id];
-                        blockImage = core.material.images[block.event.cls];
-                        core.canvas.event.drawImage(core.material.images[block.event.cls], 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
-                        core.addGlobalAnimate(block.event.animate, block.x * 32, block.y * 32, blockIcon, blockImage);
+                        core.drawBlock(block);
+                        core.addGlobalAnimate(block);
                     }
                 }
             }
@@ -471,7 +485,7 @@ maps.prototype.noPass = function (x, y) {
 maps.prototype.npcExists = function (x, y, floorId) {
     var block = this.getBlock(x,y,floorId);
     if (block==null) return false;
-    return block.block.event.cls == 'npcs';
+    return block.block.event.cls.indexOf('npc')==0;
 }
 
 ////// 某个点是否存在（指定的）地形 //////
@@ -498,7 +512,7 @@ maps.prototype.nearStair = function() {
 maps.prototype.enemyExists = function (x, y, id,floorId) {
     var block = this.getBlock(x,y,floorId);
     if (block==null) return false;
-    return block.block.event.cls=='enemys' && (core.isset(id)?block.block.event.id==id:true);
+    return block.block.event.cls.indexOf('enemy')==0 && (core.isset(id)?block.block.event.id==id:true);
 }
 
 ////// 获得某个点的block //////
@@ -537,10 +551,11 @@ maps.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
     block=block.block;
     var blockIcon = core.material.icons[block.event.cls][block.event.id];
     var blockImage = core.material.images[block.event.cls];
+    var height = block.event.height || 32;
 
     var opacityVal = 1;
     core.setOpacity('animate', opacityVal);
-    core.canvas.animate.drawImage(blockImage, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+    core.canvas.animate.drawImage(blockImage, 0, blockIcon * height, 32, height, block.x * 32, block.y * 32 +32 - height, 32, height);
 
     // 要运行的轨迹：将steps展开
     var moveSteps=[];
@@ -575,7 +590,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
     var animate=window.setInterval(function() {
 
         animateTime += time / 16 / core.status.replay.speed;
-        if (animateTime >= core.values.animateSpeed * 2 / animateValue) {
+        if (animateTime >= core.values.animateSpeed) {
             animateCurrent++;
             animateTime = 0;
             if (animateCurrent>=animateValue) animateCurrent=0;
@@ -586,8 +601,8 @@ maps.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
             if (immediateHide) opacityVal=0;
             else opacityVal -= 0.06;
             core.setOpacity('animate', opacityVal);
-            core.clearMap('animate', nowX, nowY, 32, 32);
-            core.canvas.animate.drawImage(blockImage, animateCurrent * 32, blockIcon * 32, 32, 32, nowX, nowY, 32, 32);
+            core.clearMap('animate', nowX, nowY-height+32, 32, height);
+            core.canvas.animate.drawImage(blockImage, animateCurrent * 32, blockIcon * height, 32, height, nowX, nowY-height+32, 32, height);
             if (opacityVal<=0) {
                 clearInterval(animate);
                 core.clearMap('animate', 0, 0, 416, 416);
@@ -603,7 +618,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
             nowY+=scan[moveSteps[0]].y*2;
             core.clearMap('animate', nowX-32, nowY-32, 96, 96);
             // 绘制
-            core.canvas.animate.drawImage(blockImage, animateCurrent * 32, blockIcon * 32, 32, 32, nowX, nowY, 32, 32);
+            core.canvas.animate.drawImage(blockImage, animateCurrent * 32, blockIcon * height, 32, height, nowX, nowY-height+32, 32, height);
             if (step==16) {
                 // 该移动完毕，继续
                 step=0;
@@ -628,7 +643,7 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
         if (block==null) return;
         block=block.block;
         list.push({
-            'x': t[0], 'y': t[1],
+            'x': t[0], 'y': t[1], 'height': block.event.height||32,
             'blockIcon': core.material.icons[block.event.cls][block.event.id],
             'blockImage': core.material.images[block.event.cls]
         })
@@ -642,7 +657,7 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
     core.status.replay.animate=true;
     var draw = function () {
         list.forEach(function (t) {
-            core.canvas.animate.drawImage(t.blockImage, 0, t.blockIcon * 32, 32, 32, t.x * 32, t.y * 32, 32, 32);
+            core.canvas.animate.drawImage(t.blockImage, 0, t.blockIcon*t.height, 32, t.height, t.x*32, t.y*32+32-t.height, 32, t.height);
         })
     }
 
@@ -680,11 +695,8 @@ maps.prototype.showBlock = function(x, y, floodId) {
         block.enable = true;
         // 在本层，添加动画
         if (floodId == core.status.floorId && core.isset(block.event)) {
-            blockIcon = core.material.icons[block.event.cls][block.event.id];
-            blockImage = core.material.images[block.event.cls];
-            core.canvas.event.drawImage(core.material.images[block.event.cls], 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
-            core.addGlobalAnimate(block.event.animate, block.x * 32, block.y * 32, blockIcon, blockImage);
-            // core.setGlobalAnimate(core.values.animateSpeed);
+            core.drawBlock(block);
+            core.addGlobalAnimate(block);
             core.syncGlobalAnimate();
         }
         core.updateStatusBar();
@@ -704,6 +716,7 @@ maps.prototype.removeBlock = function (x, y, floorId) {
     if (floorId==core.status.floorId) {
         core.removeGlobalAnimate(x, y);
         core.canvas.event.clearRect(x * 32, y * 32, 32, 32);
+        core.canvas.event2.clearRect(x * 32, y * 32 - 32, 32, 32);
     }
 
     // 删除Index
@@ -724,7 +737,7 @@ maps.prototype.removeBlockById = function (index, floorId) {
 
     // 检查是否存在重生
     var isReborn = false;
-    if (core.isset(block.event) && block.event.cls=='enemys'
+    if (core.isset(block.event) && block.event.cls.indexOf('enemy')==0
         && core.enemys.hasSpecial(core.material.enemys[block.event.id].special, 23))
         isReborn = true;
 
@@ -744,46 +757,29 @@ maps.prototype.removeBlockByIds = function (floorId, ids) {
 }
 
 ////// 添加一个全局动画 //////
-maps.prototype.addGlobalAnimate = function (animateMore, x, y, loc, image) {
+maps.prototype.addGlobalAnimate = function (b) {
     if (main.mode=='editor' && main.editor.disableGlobalAnimate) return;
-    if (animateMore == 2) {
-        core.status.twoAnimateObjs.push({
-            'x': x,
-            'y': y,
-            'status': 0,
-            'loc': loc,
-            'image': image
-        });
-    }
-    else if (animateMore == 4) {
-        core.status.fourAnimateObjs.push({
-            'x': x,
-            'y': y,
-            'status': 0,
-            'loc': loc,
-            'image': image
-        });
-    }
+    if (!core.isset(b.event) || !core.isset(b.event.animate) || b.event.animate==1) return;
+
+    var block = core.clone(b);
+    block.status = 0;
+
+    core.status.globalAnimateObjs.push(block);
+
 }
 
 ////// 删除一个或所有全局动画 //////
 maps.prototype.removeGlobalAnimate = function (x, y, all) {
-    if (all == true) {
-        core.status.twoAnimateObjs = [];
-        core.status.fourAnimateObjs = [];
-    }
-
     if (main.mode=='editor' && main.editor.disableGlobalAnimate) return;
 
-    for (var t = 0; t < core.status.twoAnimateObjs.length; t++) {
-        if (core.status.twoAnimateObjs[t].x == x * 32 && core.status.twoAnimateObjs[t].y == y * 32) {
-            core.status.twoAnimateObjs.splice(t, 1);
-            return;
-        }
+    if (all) {
+        core.status.globalAnimateObjs = [];
+        return;
     }
-    for (var f = 0; f < core.status.fourAnimateObjs.length; f++) {
-        if (core.status.fourAnimateObjs[f].x == x * 32 && core.status.fourAnimateObjs[f].y == y * 32) {
-            core.status.fourAnimateObjs.splice(f, 1);
+
+    for (var t = 0; t < core.status.globalAnimateObjs.length; t++) {
+        if (core.status.globalAnimateObjs[t].x == x && core.status.globalAnimateObjs[t].y == y) {
+            core.status.globalAnimateObjs.splice(t, 1);
             return;
         }
     }
@@ -799,10 +795,7 @@ maps.prototype.setGlobalAnimate = function (speed) {
 
 ////// 同步所有的全局动画效果 //////
 maps.prototype.syncGlobalAnimate = function () {
-    core.status.twoAnimateObjs.forEach(function (t) {
-        t.status=0;
-    })
-    core.status.fourAnimateObjs.forEach(function (t) {
+    core.status.globalAnimateObjs.forEach(function (t) {
         t.status=0;
     })
 }
@@ -811,11 +804,11 @@ maps.prototype.syncGlobalAnimate = function () {
 maps.prototype.drawBoxAnimate = function () {
     for (var a = 0; a < core.status.boxAnimateObjs.length; a++) {
         var obj = core.status.boxAnimateObjs[a];
-        obj.status = ((obj.status||0)+1)%2;
-        core.clearMap('ui', obj.bgx, obj.bgy, obj.bgsize, obj.bgsize);
-        core.fillRect('ui', obj.bgx, obj.bgy, obj.bgsize, obj.bgsize, core.animateFrame.background);
-        core.canvas.ui.drawImage(obj.image, obj.status * 32, obj.icon * 32,
-            32, 32, obj.x, obj.y, 32, 32);
+        obj.status = ((obj.status||0)+1)%obj.animate;
+        core.clearMap('ui', obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight);
+        core.fillRect('ui', obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight, core.animateFrame.background);
+        core.canvas.ui.drawImage(obj.image, obj.status * 32, obj.pos,
+            32, obj.height, obj.x, obj.y, 32, obj.height);
     }
 }
 

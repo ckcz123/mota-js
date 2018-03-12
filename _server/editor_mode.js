@@ -90,11 +90,17 @@ editor_mode.prototype.objToTable = function(obj,commentObj){
           node = node.parentNode;
         }
         editor_mode.onmode(editor_mode._ids[node.getAttribute('id')]);
-        var thiseval = JSON.parse(input.value);
+        var thiseval=null;
+        try{
+          thiseval = JSON.parse(input.value);
+        }catch(ee){
+          printe(field+' : '+ee);
+          throw ee;
+        }
         if(checkRange(comment,thiseval)){
           editor_mode.addAction(['change',field,thiseval]);
         } else {
-          printe('输入的值不合要求,请鼠标放置在注释上查看说明');
+          printe(field+' : 输入的值不合要求,请鼠标放置在注释上查看说明');
         }
       }
       input.ondblclick = function(){

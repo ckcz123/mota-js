@@ -1150,6 +1150,7 @@ events.prototype.pushBox = function (data) {
 
     if (block==null) {
         core.status.thisMap.blocks.push(core.maps.initBlock(nx, ny, 169));
+        block = core.getBlock(nx, ny);
     }
     else {
         block.block.id=170;

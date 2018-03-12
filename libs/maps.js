@@ -520,8 +520,6 @@ maps.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
     time = time || 500;
     core.status.replay.animate=true;
 
-    //clearInterval(core.interval.tipAnimate);
-    core.saveCanvas('animate');
     core.clearMap('animate', 0, 0, 416, 416);
 
     var block = core.getBlock(x,y,core.status.floorId,false);
@@ -592,7 +590,6 @@ maps.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
             core.canvas.animate.drawImage(blockImage, animateCurrent * 32, blockIcon * 32, 32, 32, nowX, nowY, 32, 32);
             if (opacityVal<=0) {
                 clearInterval(animate);
-                core.loadCanvas('animate');
                 core.clearMap('animate', 0, 0, 416, 416);
                 core.setOpacity('animate', 1);
                 core.status.replay.animate=false;
@@ -620,8 +617,6 @@ maps.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
 maps.prototype.animateBlock = function (loc,type,time,callback) {
     if (type!='hide') type='show';
 
-    //clearInterval(core.interval.tipAnimate);
-    core.saveCanvas('animate');
     core.clearMap('animate', 0, 0, 416, 416);
 
     if (typeof loc[0] == 'number' && typeof loc[1] == 'number')
@@ -663,11 +658,9 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
         core.setOpacity('animate', opacityVal);
         core.clearMap('animate',0,0,416,416);
 
-        // core.canvas.animate.drawImage(blockImage, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
         draw();
         if (opacityVal >=1 || opacityVal<=0) {
             clearInterval(animate);
-            core.loadCanvas('animate');
             core.clearMap('animate', 0, 0, 416, 416);
             core.setOpacity('animate', 1);
             core.status.replay.animate=false;

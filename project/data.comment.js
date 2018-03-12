@@ -1,7 +1,6 @@
 data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = 
 {
     "main": {
-        "useCompress": " 是否使用压缩文件 \n 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。 \n 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。 \n 如果要进行剧本的修改请务必将其改成false。 \n$select({\"values\":[false]})$end",
         "floorIds": " 在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序 \n$leaf(true)$end",
         "pngs": "  在此存放所有可能使用的图片，只能是png格式，可以不写后缀名 \n  图片可以被作为背景图（的一部分），也可以直接用自定义事件进行显示。 \n 图片名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好 \n 建议对于较大的图片，在网上使用在线的“图片压缩工具(http://compresspng.com/zh/)”来进行压缩，以节省流量 \n 依次向后添加 \n$leaf(true)$end",
         "animates": "  在此存放所有可能使用的动画，必须是animate格式，在这里不写后缀名 \n 动画必须放在animates目录下；文件名不能使用中文，不能带空格或特殊字符 \n \"jianji\", \"thunder\" \n 根据需求自行添加 \n$leaf(true)$end",
@@ -20,6 +19,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
         "hero": {
             "name": " 勇士初始数据 \n 勇士名；可以改成喜欢的 ",
             "lv": " 初始等级，该项必须为正整数 \n$range(thiseval==~~thiseval &&thiseval>0)$end",
+            "hpmax": " 初始生命上限，只有在enableHPMax开启时才有效",
             "hp": " 初始生命值 ",
             "atk": " 初始攻击 ",
             "def": " 初始防御 ",
@@ -116,8 +116,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
         ] */
     },
     "values": {
-        "HPMAX": " 各种数值；一些数值可以在这里设置\n /****** 角色相关 ******/ \n HP上限；-1则无上限 ",
-        "lavaDamage": " 经过血网受到的伤害 ",
+        "lavaDamage": " 各种数值；一些数值可以在这里设置\n /****** 角色相关 ******/ \n 经过血网受到的伤害 ",
         "poisonDamage": " 中毒后每步受到的伤害 ",
         "weakValue": " 衰弱状态下攻防减少的数值 ",
         "redJewel": " /****** 道具相关 ******/ \n 红宝石加攻击的数值 ",
@@ -149,6 +148,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
     "flags": {
         "enableFloor": " 系统FLAG，在游戏运行中中请不要修改它。 /****** 状态栏相关 ******/ \n 是否在状态栏显示当前楼层 \n$select({\"values\":[true,false]})$end",
         "enableLv": " 是否在状态栏显示当前等级 \n$select({\"values\":[true,false]})$end",
+        "enableHPMax": " 是否是否启用生命上限 \n$select({\"values\":[true,false]})$end",
         "enableMDef": " 是否在状态栏及战斗界面显示魔防（护盾） \n$select({\"values\":[true,false]})$end",
         "enableMoney": " 是否在状态栏、怪物手册及战斗界面显示金币 \n$select({\"values\":[true,false]})$end",
         "enableExperience": " 是否在状态栏、怪物手册及战斗界面显示经验 \n$select({\"values\":[true,false]})$end",

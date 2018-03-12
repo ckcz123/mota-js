@@ -418,10 +418,6 @@ actions.prototype.ondown = function (x ,y) {
     }
 
     core.status.downTime = new Date();
-    // core.status.holdingPath=1;
-    //core.status.mouseOutCheck =1;
-    // window.setTimeout(core.clearStepPostfix);
-    core.saveCanvas('ui');
     core.clearMap('ui', 0, 0, 416,416);
     var pos={'x':x,'y':y}
     core.status.stepPostfix=[];

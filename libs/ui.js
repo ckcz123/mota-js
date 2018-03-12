@@ -163,7 +163,6 @@ ui.prototype.drawTip = function (text, itemIcon) {
     var textX, textY, width, height, hide = false, opacityVal = 0;
     clearInterval(core.interval.tipAnimate);
     core.setFont('data', "16px Arial");
-    core.saveCanvas('data');
     core.setOpacity('data', 0);
     core.canvas.data.textAlign = 'left';
     if (!core.isset(itemIcon)) {
@@ -194,7 +193,6 @@ ui.prototype.drawTip = function (text, itemIcon) {
         core.fillText('data', text, textX + 5, textY + 15, '#fff');
         if (opacityVal > 0.6 || opacityVal < 0) {
             if (hide) {
-                core.loadCanvas('data');
                 core.clearMap('data', 5, 5, 400, height);
                 core.setOpacity('data', 1);
                 clearInterval(core.interval.tipAnimate);

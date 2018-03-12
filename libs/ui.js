@@ -391,7 +391,7 @@ ui.prototype.drawTextBox = function(content) {
     core.fillRect('ui', left, top, right, height);
     core.strokeRect('ui', left - 1, top - 1, right + 1, height + 1, '#FFFFFF', 2);
 
-    var xoffset = 6;
+    var xoffset = 9;
 
     // draw triangle
     if (position=='up' && core.isset(px) && core.isset(py)) {

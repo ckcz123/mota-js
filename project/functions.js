@@ -55,18 +55,10 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 ////// 转换楼层结束的事件 //////
 "afterChangeFloor" : function (floorId) {
     // 转换楼层结束的事件
-    if (core.isset(core.status.event.id)) return; // 当前存在事件
-
     if (!core.hasFlag("visited_"+floorId)) {
-        core.events.doEvents(core.floors[floorId].firstArrive, null, null, function () {
-            //core.autosave();
-        });
+        core.insertAction(core.floors[floorId].firstArrive);
         core.setFlag("visited_"+floorId, true);
-        return;
     }
-
-    // 自动存档
-    //core.autosave();
 },
 ////// 加点事件 //////
 "addPoint" : function (enemy) {

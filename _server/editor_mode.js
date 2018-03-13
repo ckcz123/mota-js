@@ -333,7 +333,7 @@ editor_mode.prototype.listen = function(callback){
   var saveFloor = document.getElementById('saveFloor');
   saveFloor.onclick = function(){
     editor_mode.onmode('');
-    editor.file.saveFloorFile(function(err){if(err){printe(err);throw(err)}});
+    editor.file.saveFloorFile(function(err){if(err){printe(err);throw(err)};printf('保存成功');});
   }
 
   var saveFloorAs = document.getElementById('saveFloorAs');
@@ -344,7 +344,7 @@ editor_mode.prototype.listen = function(callback){
     editor.file.saveFloorFileAs(saveAsName.value,function(err){
       if(err){printe(err);throw(err)}
       core.floorIds.push(saveAsName.value);
-      editor.file.editTower([['change',"['main']['floorIds']",core.floorIds]],function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])}});
+      editor.file.editTower([['change',"['main']['floorIds']",core.floorIds]],function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printe('另存为成功,请F5刷新编辑器生效');});
     });
   }
 
@@ -358,12 +358,13 @@ editor_mode.prototype.listen = function(callback){
 
   var selectAppend = document.getElementById('selectAppend');
   var selectAppend_str=[];
-  ["terrains", "animates", "enemys", "items", "npcs"].forEach(function(image){
+  ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48"].forEach(function(image){
     selectAppend_str.push(["<option value='",image,"'>",image,'</option>\n'].join(''));
   });
   selectAppend.innerHTML=selectAppend_str.join('');
   selectAppend.onchange = function(){
     var value = selectAppend.value;
+    var ysize = selectAppend.value.indexOf('48')===-1?32:48;
     editor_mode.appendPic.imageName = value;
     var img = editor.material.images[value];
     editor_mode.appendPic.toImg = img;
@@ -372,7 +373,7 @@ editor_mode.prototype.listen = function(callback){
     editor_mode.appendPic.index = 0;
     var selectStr = '';
     for(var ii=0;ii<num;ii++){
-      appendPicSelection.children[ii].style='left:0;top:0';
+      appendPicSelection.children[ii].style='left:0;top:0;height:'+(ysize-6)+'px';
       selectStr+='{"x":0,"y":0},'
     }
     editor_mode.appendPic.selectPos = eval('['+selectStr+']');
@@ -380,7 +381,7 @@ editor_mode.prototype.listen = function(callback){
       appendPicSelection.children[jj].style='display:none';
     }
     sprite.style.width = (sprite.width = img.width)/ratio + 'px';
-    sprite.style.height = (sprite.height = img.height+32)/ratio + 'px';
+    sprite.style.height = (sprite.height = img.height+ysize)/ratio + 'px';
     sprite.getContext('2d').drawImage(img, 0, 0);
   }
   selectAppend.onchange();
@@ -408,10 +409,11 @@ editor_mode.prototype.listen = function(callback){
         editor_mode.appendPic.img = image;
         editor_mode.appendPic.width = image.width;
         editor_mode.appendPic.height = image.height;
+        var ysize = selectAppend.value.indexOf('48')===-1?32:48;
         for(var ii=0;ii<3;ii++){
           var newsprite = appendPicCanvas.children[ii];
           newsprite.style.width = (newsprite.width = Math.floor(image.width/32)*32)/ratio + 'px';
-          newsprite.style.height = (newsprite.height = Math.floor(image.height/32)*32)/ratio + 'px';
+          newsprite.style.height = (newsprite.height = Math.floor(image.height/ysize)*ysize)/ratio + 'px';
         }
 
         //画灰白相间的格子
@@ -446,13 +448,14 @@ editor_mode.prototype.listen = function(callback){
     var loc = { 
       'x': scrollLeft+e.clientX + appendPicCanvas.scrollLeft  - left1.offsetLeft-appendPicCanvas.offsetLeft, 
       'y': scrollTop+e.clientY + appendPicCanvas.scrollTop - left1.offsetTop-appendPicCanvas.offsetTop, 
-      'size': 32 
+      'size': 32, 
+      'ysize': selectAppend.value.indexOf('48')===-1?32:48
     };
     return loc; 
   }//返回可用的组件内坐标
 
   var locToPos = function (loc) {
-    var pos = { 'x': ~~(loc.x / loc.size), 'y': ~~(loc.y / loc.size) }
+    var pos = { 'x': ~~(loc.x / loc.size), 'y': ~~(loc.y / loc.ysize) ,'ysize': loc.ysize}
     return pos;
   }
   
@@ -467,18 +470,20 @@ editor_mode.prototype.listen = function(callback){
     editor_mode.appendPic.selectPos[ii]=pos;
     appendPicSelection.children[ii].style=[
       'left:',pos.x*32,'px;',
-      'top:',pos.y*32,'px'
+      'top:',pos.y*pos.ysize,'px;',
+      'height:',pos.ysize-6,'px;'
     ].join('');
   }
 
   var appendConfirm = document.getElementById('appendConfirm');
   appendConfirm.onclick = function(){
+    var ysize = selectAppend.value.indexOf('48')===-1?32:48;
     var sprited = sprite.getContext('2d');
     //sprited.drawImage(img, 0, 0);
     var height = editor_mode.appendPic.toImg.height;
     var sourced = source.getContext('2d');
     for(var ii=0,v;v=editor_mode.appendPic.selectPos[ii];ii++){
-      var imgData=sourced.getImageData(v.x*32,v.y*32,32,32);
+      var imgData=sourced.getImageData(v.x*32,v.y*ysize,32,ysize);
       sprited.putImageData(imgData,ii*32,height);
     }
     var imgbase64 = sprite.toDataURL().split(',')[1];

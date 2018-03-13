@@ -86,7 +86,7 @@ editor.prototype.drawInitData = function (icons) {
   var sumWidth=0;
   editor.widthsX={};
   // var imgNames = Object.keys(images);  //还是固定顺序吧；
-  var imgNames = ["terrains", "animates", "enemys", "items", "npcs", "autotile"];
+  var imgNames = ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"];
   
   for(var ii=0; ii<imgNames.length; ii++){
     var img=imgNames[ii], tempy = 0;
@@ -474,19 +474,22 @@ editor.prototype.listen = function() {
     var loc = { 
       'x': scrollLeft + e.clientX + iconLib.scrollLeft - right.offsetLeft-iconLib.offsetLeft, 
       'y': scrollTop + e.clientY + iconLib.scrollTop - right.offsetTop-iconLib.offsetTop, 
-      'size': 32 
+      'size': 32
     };
     editor.loc = loc;
     var pos = locToPos(loc);
     for (var spriter in editor.widthsX){
       if(pos.x>=editor.widthsX[spriter][1] && pos.x<editor.widthsX[spriter][2]){
+        var ysize = spriter.indexOf('48')===-1?32:48;
+        loc.ysize = ysize;
+        pos.y = ~~(loc.y / loc.ysize);
         pos.x=editor.widthsX[spriter][1];
         pos.images = editor.widthsX[spriter][0];
         var autotiles = editor.material.images['autotile'];
         if(pos.images=='autotile'){
           var imNames = Object.keys(autotiles);
-          if((pos.y+1)*32 > editor.widthsX[spriter][3])
-            pos.y = ~~(editor.widthsX[spriter][3]/32)-4;
+          if((pos.y+1)*ysize > editor.widthsX[spriter][3])
+            pos.y = ~~(editor.widthsX[spriter][3]/ysize)-4;
           else{
             for(var i=0; i<imNames.length; i++){
               if(pos.y >= 4*i && pos.y < 4*(i+1)){
@@ -495,13 +498,14 @@ editor.prototype.listen = function() {
               }
             }
           }
-        }else if((pos.y+1)*32 > editor.widthsX[spriter][3])
-          pos.y = ~~(editor.widthsX[spriter][3]/32)-1;
+        }else if((pos.y+1)*ysize > editor.widthsX[spriter][3])
+          pos.y = ~~(editor.widthsX[spriter][3]/ysize)-1;
         
         selectBox.isSelected = true;
         // console.log(pos,editor.material.images[pos.images].height)
         dataSelection.style.left = pos.x*32 +'px';
-        dataSelection.style.top = pos.y*32 +'px';
+        dataSelection.style.top = pos.y*ysize +'px';
+        dataSelection.style.height = ysize-6+'px';
         
         if(pos.x==0&&pos.y==0){
           // editor.info={idnum:0, id:'empty','images':'清除块', 'y':0};

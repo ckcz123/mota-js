@@ -325,7 +325,8 @@ editor_mode.prototype.listen = function(callback){
     selectFloor.innerHTML=outstr.join('');
     selectFloor.value=core.status.floorId;
     selectFloor.onchange = function(){
-      editor_mode.onmode('');
+      editor_mode.onmode('nextChange');
+      editor_mode.onmode('floor');
       editor.changeFloor(selectFloor.value);
     }
   });

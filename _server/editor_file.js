@@ -477,8 +477,8 @@ editor_file = function(editor, callback){
   }
   
   var saveSetting = function(file,actionList,callback) {
-    console.log(file);
-    console.log(actionList);
+    //console.log(file);
+    //console.log(actionList);
     actionList.forEach(function (value) {
       if (value[0]!='change' && file!='icons' && file!='maps') {printe('目前只支持change');throw('目前只支持change')};
     });

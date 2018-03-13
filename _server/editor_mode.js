@@ -174,27 +174,27 @@ editor_mode.prototype.doActionList = function(mode,actionList){
   switch (mode) {
     case 'loc':
 
-      editor.file.editLoc(editor_mode.pos.x,editor_mode.pos.y,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
+      editor.file.editLoc(editor_mode.pos.x,editor_mode.pos.y,actionList,function(objs_){/*console.log(objs_);*/if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       break;
     case 'emenyitem':
 
       if (editor_mode.info.images=='enemys'){
-        editor.file.editEnemy(editor_mode.info.id,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
+        editor.file.editEnemy(editor_mode.info.id,actionList,function(objs_){/*console.log(objs_);*/if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       } else if (editor_mode.info.images=='items'){
-        editor.file.editItem(editor_mode.info.id,actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
+        editor.file.editItem(editor_mode.info.id,actionList,function(objs_){/*console.log(objs_);*/if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       }
       break;
     case 'floor':
       
-      editor.file.editFloor(actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
+      editor.file.editFloor(actionList,function(objs_){/*console.log(objs_);*/if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       break;
     case 'tower':
       
-      editor.file.editTower(actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
+      editor.file.editTower(actionList,function(objs_){/*console.log(objs_);*/if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       break;
     case 'functions':
       
-      editor.file.editFunctions(actionList,function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
+      editor.file.editFunctions(actionList,function(objs_){/*console.log(objs_);*/if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       break;
     default:
       break;
@@ -229,7 +229,7 @@ editor_mode.prototype.loc = function(callback){
   document.getElementById('pos_a6771a78_a099_417c_828f_0a24851ebfce').innerText=editor_mode.pos.x+','+editor_mode.pos.y;
 
   var objs=[];
-  editor.file.editLoc(editor_mode.pos.x,editor_mode.pos.y,[],function(objs_){objs=objs_;console.log(objs_)});
+  editor.file.editLoc(editor_mode.pos.x,editor_mode.pos.y,[],function(objs_){objs=objs_;/*console.log(objs_)*/});
   //只查询不修改时,内部实现不是异步的,所以可以这么写
   var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
   document.getElementById('table_3d846fc4_7644_44d1_aa04_433d266a73df').innerHTML=tableinfo.HTML;
@@ -253,9 +253,9 @@ editor_mode.prototype.emenyitem = function(callback){
 
   var objs=[];
   if (editor_mode.info.images=='enemys'){
-    editor.file.editEnemy(editor_mode.info.id,[],function(objs_){objs=objs_;console.log(objs_)});
+    editor.file.editEnemy(editor_mode.info.id,[],function(objs_){objs=objs_;/*console.log(objs_)*/});
   } else if (editor_mode.info.images=='items'){
-    editor.file.editItem(editor_mode.info.id,[],function(objs_){objs=objs_;console.log(objs_)});
+    editor.file.editItem(editor_mode.info.id,[],function(objs_){objs=objs_;/*console.log(objs_)*/});
   } else {
     document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML='';
     return;
@@ -270,7 +270,7 @@ editor_mode.prototype.emenyitem = function(callback){
 
 editor_mode.prototype.floor = function(callback){
   var objs=[];
-  editor.file.editFloor([],function(objs_){objs=objs_;console.log(objs_)});
+  editor.file.editFloor([],function(objs_){objs=objs_;/*console.log(objs_)*/});
   //只查询不修改时,内部实现不是异步的,所以可以这么写
   var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
   document.getElementById('table_4a3b1b09_b2fb_4bdf_b9ab_9f4cdac14c74').innerHTML=tableinfo.HTML;
@@ -280,7 +280,7 @@ editor_mode.prototype.floor = function(callback){
 
 editor_mode.prototype.tower = function(callback){
   var objs=[];
-  editor.file.editTower([],function(objs_){objs=objs_;console.log(objs_)});
+  editor.file.editTower([],function(objs_){objs=objs_;/*console.log(objs_)*/});
   //只查询不修改时,内部实现不是异步的,所以可以这么写
   var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
   document.getElementById('table_b6a03e4c_5968_4633_ac40_0dfdd2c9cde5').innerHTML=tableinfo.HTML;
@@ -290,7 +290,7 @@ editor_mode.prototype.tower = function(callback){
 
 editor_mode.prototype.functions = function(callback){
   var objs=[];
-  editor.file.editFunctions([],function(objs_){objs=objs_;console.log(objs_)});
+  editor.file.editFunctions([],function(objs_){objs=objs_;/*console.log(objs_)*/});
   //只查询不修改时,内部实现不是异步的,所以可以这么写
   var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
   document.getElementById('table_e260a2be_5690_476a_b04e_dacddede78b3').innerHTML=tableinfo.HTML;
@@ -345,7 +345,7 @@ editor_mode.prototype.listen = function(callback){
     editor.file.saveFloorFileAs(saveAsName.value,function(err){
       if(err){printe(err);throw(err)}
       core.floorIds.push(saveAsName.value);
-      editor.file.editTower([['change',"['main']['floorIds']",core.floorIds]],function(objs_){console.log(objs_);if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printe('另存为成功,请F5刷新编辑器生效');});
+      editor.file.editTower([['change',"['main']['floorIds']",core.floorIds]],function(objs_){/*console.log(objs_);*/if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printe('另存为成功,请F5刷新编辑器生效');});
     });
   }
 

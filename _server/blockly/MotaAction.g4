@@ -5,22 +5,22 @@ grammar MotaAction;
 
 //事件 事件编辑器入口之一
 event_m
-    :   '事件' BGNL? Newline '启用' Bool '通行状态' B_List '显伤' Bool BGNL? Newline action+ BEND
+    :   '事件' BGNL? Newline '覆盖触发器' Bool '启用' Bool '通行状态' B_List '显伤' Bool BGNL? Newline action+ BEND
     ;
 
 /* event_m
 tooltip : 编辑魔塔的事件
 helpUrl : https://ckcz123.github.io/mota-js/#/event
-default : [null,[['不改变','null'],['不可通行','true'],['可以通行','false']],null]
+default : [false,null,[['不改变','null'],['不可通行','true'],['可以通行','false']],null]
 B_List_0=eval(B_List_0);
 var code = {
-    'trigger': 'action',
-    'enable': Bool_0,
+    'trigger': Bool_0?'action':null,
+    'enable': Bool_1,
     'noPass': B_List_0,
-    'displayDamage': Bool_1,
+    'displayDamage': Bool_2,
     'data': 'data_asdfefw'
 }
-if (Bool_0 && (B_List_0===null) && Bool_1) code = 'data_asdfefw';
+if (!Bool_0 && Bool_1 && (B_List_0===null) && Bool_2) code = 'data_asdfefw';
 code=JSON.stringify(code,null,2).split('"data_asdfefw"').join('[\n'+action_0+']\n');
 return code;
 */
@@ -317,7 +317,7 @@ show_s
 /* show_s
 tooltip : show: 将禁用事件启用,楼层和动画时间可不填,xy可用逗号分隔表示多个点
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=show-%e5%b0%86%e4%b8%80%e4%b8%aa%e7%a6%81%e7%94%a8%e4%ba%8b%e4%bb%b6%e5%90%af%e7%94%a8
-default : [0,0,"",500]
+default : ["0","0","",500]
 colour : this.eventColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var pattern = /^([+-]?\d+)(,[+-]?\d+)*$/;
@@ -1069,7 +1069,7 @@ ActionParser.prototype.parse = function (obj,type) {
       if(typeof(obj)===typeof('')) obj={'data':[obj]};
       if(obj instanceof Array) obj={'data':obj};
       return MotaActionBlocks['event_m'].xmlText([
-        obj.enable,obj.noPass,obj.displayDamage,this.parseList(obj.data)
+        obj.trigger==='action',obj.enable,obj.noPass,obj.displayDamage,this.parseList(obj.data)
       ]);
     
     case 'changeFloor':

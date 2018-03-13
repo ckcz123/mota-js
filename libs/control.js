@@ -2172,7 +2172,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         toolsWidth, toolsHeight,toolsMargin,toolsPMaxwidth,
         fontSize, toolbarFontSize, margin;
 
-    var count = 12;
+    var count = core.dom.statusBar.children.length;
     if (!core.flags.enableFloor) count--;
     if (!core.flags.enableLv) count--;
     if (!core.flags.enableHPMax) count--;

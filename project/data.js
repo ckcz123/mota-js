@@ -4,8 +4,8 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
         "floorIds" : [ 
             "sample0", "sample1", "sample2"
         ],
-        "pngs" : [ 
-            "bg",
+        "images" : [
+            "bg.jpg",
         ],
         "animates" : [ 
             "hand", "sword", "zone", "yongchang",
@@ -17,7 +17,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
             'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg', 'zone.ogg'
         ],
         "bgmRemote" : false,
-        "startBackground" : "bg.png",
+        "startBackground" : "bg.jpg",
         "startLogoStyle" : "color: black",
         "levelChoose" : [["简单","Easy"],["普通","Normal"],["困难","Hard"],["噩梦","Hell"]],
     },

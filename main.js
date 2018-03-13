@@ -58,7 +58,7 @@ function main() {
     this.pureData = [ 
         "data","enemys","icons","maps","items","functions"
     ];
-    this.images = [
+    this.materials = [
         'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains', 'enemy48', 'npc48'
     ];
 
@@ -159,7 +159,7 @@ main.prototype.init = function (mode, callback) {
 
             main.loaderFloors(function() {
                 var coreData = {};
-                ["dom", "statusBar", "canvas", "images", "pngs",
+                ["dom", "statusBar", "canvas", "images", "materials",
                 "animates", "bgms", "sounds", "floorIds", "floors"].forEach(function (t) {
                     coreData[t] = main[t];
                 })

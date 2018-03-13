@@ -294,9 +294,11 @@ maps.prototype.drawBlock = function (block, animate, dx, dy) {
     dx = dx || 0;
     dy = dy || 0;
     core.canvas.event.clearRect(block.x * 32 + dx, block.y * 32 + dy, 32, 32);
-    core.canvas.event2.clearRect(block.x * 32 + dx, block.y * 32 - 32 + dy, 32, 32)
     core.canvas.event.drawImage(blockImage, animate * 32, blockIcon * height + height-32, 32, 32, block.x * 32 + dx, block.y * 32 + dy, 32, 32);
-    core.canvas.event2.drawImage(blockImage, animate * 32, blockIcon * height, 32, height-32, block.x * 32 + dx, block.y*32 + 32 - height + dy, 32, height-32);
+    if (height>32) {
+        core.canvas.event2.clearRect(block.x * 32 + dx, block.y * 32 + 32 - height + dy, 32, height-32)
+        core.canvas.event2.drawImage(blockImage, animate * 32, blockIcon * height, 32, height-32, block.x * 32 + dx, block.y*32 + 32 - height + dy, 32, height-32);
+    }
 }
 
 ////// 绘制某张地图 //////
@@ -312,32 +314,27 @@ maps.prototype.drawMap = function (mapName, callback) {
                 core.canvas.bg.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
             }
         }
-        // 如果存在png
-        if (core.isset(core.floors[mapName].png)) {
 
-            var x=0, y=0, size=416;
-
-            var png = core.floors[mapName].png;
-
-            var ratio = size/416;
-
-            if (typeof png == 'string') {
-                if (core.isset(core.material.images.pngs[png])) {
-                    core.canvas.bg.drawImage(core.material.images.pngs[png], x, y, size, size);
-                }
-            }
-            else if (png instanceof Array) {
-                png.forEach(function (t) {
-                    if (t.length!=3) return;
-                    var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
-                    if (core.isset(dx) && core.isset(dy) && core.isset(core.material.images.pngs[p])) {
-                        dx*=32; dy*=32;
-                        var image = core.material.images.pngs[p];
-                        core.canvas.bg.drawImage(image, x+dx*ratio, y+dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
-                    }
-                })
+        var images = [];
+        if (core.isset(core.floors[mapName].images)) {
+            images = core.floors[mapName].images;
+            if (typeof images == 'string') {
+                images = [[0, 0, images]];
             }
         }
+        images.forEach(function (t) {
+            var size=416, ratio=1;
+            var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
+            if (core.isset(dx) && core.isset(dy) && core.isset(core.material.images.images[p])) {
+                dx*=32; dy*=32;
+                var image = core.material.images.images[p];
+                if (!t[3])
+                    core.canvas.bg.drawImage(image, dx*ratio, dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
+                else
+                    core.canvas.event2.drawImage(image, dx*ratio, dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
+            }
+        })
+
     }
     if (main.mode=='editor'){
         main.editor.drawMapBg = function(){
@@ -716,7 +713,10 @@ maps.prototype.removeBlock = function (x, y, floorId) {
     if (floorId==core.status.floorId) {
         core.removeGlobalAnimate(x, y);
         core.canvas.event.clearRect(x * 32, y * 32, 32, 32);
-        core.canvas.event2.clearRect(x * 32, y * 32 - 32, 32, 32);
+        var height = 32;
+        if (core.isset(block.block.event)) height=block.block.event.height||32;
+        if (height>32)
+            core.canvas.event2.clearRect(x * 32, y * 32 +32-height, 32, height-32);
     }
 
     // 删除Index

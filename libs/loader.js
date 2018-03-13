@@ -24,10 +24,10 @@ loader.prototype.setStartLoadTipText = function (text) {
 loader.prototype.load = function (callback) {
 
     // 加载图片
-    core.loader.loadImages(core.images, core.material.images, function () {
+    core.loader.loadImages(core.materials, core.material.images, function () {
         // 加载png图片
-        core.material.images.pngs = {};
-        core.loader.loadImages(core.pngs, core.material.images.pngs, function () {
+        core.material.images.images = {};
+        core.loader.loadImages(core.images, core.material.images.images, function () {
             // 加载autotile
             core.material.images.autotile = {};
             core.loader.loadImages(Object.keys(core.material.icons.autotile), core.material.images.autotile, function () {
@@ -62,7 +62,7 @@ loader.prototype.loadImages = function (names, toSave, callback) {
 loader.prototype.loadImage = function (imgName, callback) {
     try {
         var name=imgName;
-        if (name.indexOf(".png")<0) // 不包含"png"
+        if (name.indexOf(".")<0)
             name=name+".png";
         var image = new Image();
         image.src = 'project/images/' + name + "?v=" + main.version;

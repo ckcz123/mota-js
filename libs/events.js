@@ -399,8 +399,8 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "showImage": // 显示图片
-            if (core.isset(data.loc) && core.isset(core.material.images.pngs[data.name])) {
-                core.canvas.animate.drawImage(core.material.images.pngs[data.name], data.loc[0], data.loc[1]);
+            if (core.isset(data.loc) && core.isset(core.material.images.images[data.name])) {
+                core.canvas.animate.drawImage(core.material.images.images[data.name], data.loc[0], data.loc[1]);
             }
             else core.clearMap('animate', 0, 0, 416, 416);
             this.doAction();

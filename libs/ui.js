@@ -1618,28 +1618,23 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
         }
     }
 
-    if (core.isset(core.floors[floorId].png)) {
-        var png = core.floors[floorId].png;
-        var ratio = size/416;
-
-        if (typeof png == 'string') {
-            if (core.isset(core.material.images.pngs[png])) {
-                core.canvas.ui.drawImage(core.material.images.pngs[png], x, y, size, size);
-            }
+    var images = [];
+    if (core.isset(core.floors[floorId].images)) {
+        images = core.floors[floorId].images;
+        if (typeof images == 'string') {
+            images = [[0, 0, images]];
         }
-        else if (png instanceof Array) {
-            png.forEach(function (t) {
-                if (t.length!=3) return;
-                var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
-                if (core.isset(dx) && core.isset(dy) && core.isset(core.material.images.pngs[p])) {
-                    dx*=32; dy*=32;
-                    var image = core.material.images.pngs[p];
-                    core.canvas.ui.drawImage(image, x+dx*ratio, y+dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
-                }
-            })
-        }
-
     }
+
+    images.forEach(function (t) {
+        var ratio = size/416;
+        var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
+        if (core.isset(dx) && core.isset(dy) && !t[3] && core.isset(core.material.images.images[p])) {
+            dx*=32; dy*=32;
+            var image = core.material.images.images[p];
+            core.canvas.ui.drawImage(image, x+dx*ratio, y+dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
+        }
+    })
 
     var mapArray = core.maps.getMapArray(blocks);
     for (var b in blocks) {
@@ -1665,6 +1660,17 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
         var realHeight = persize*height/32;
         core.canvas[canvas].drawImage(core.material.images.hero, heroIcon.stop * 32, heroIcon.loc * height, 32, height, x+persize*heroLoc.x, y+persize*heroLoc.y+persize-realHeight, persize, realHeight);
     }
+
+    images.forEach(function (t) {
+        var ratio = size/416;
+        var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
+        if (core.isset(dx) && core.isset(dy) && t[3] && core.isset(core.material.images.images[p])) {
+            dx*=32; dy*=32;
+            var image = core.material.images.images[p];
+            core.canvas.ui.drawImage(image, x+dx*ratio, y+dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
+        }
+    })
+
 }
 
 ui.prototype.drawKeyBoard = function () {

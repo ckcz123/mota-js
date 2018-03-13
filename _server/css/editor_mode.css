@@ -20,8 +20,10 @@
 }
 
 #appendPicSelection span {
+  position: absolute;
   font-size:11px;
-  -webkit-text-stroke: 1px black;
+  -webkit-text-stroke: 1px red;
+  text-shadow: black 1px 0, black 0 1px, black -1px 0, black 0 -1px;
 }
 
 #left6 {

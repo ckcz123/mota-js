@@ -712,25 +712,25 @@ return code;
 */
 
 win_s
-    :   '游戏胜利,原因' ':' EvalString Newline
+    :   '游戏胜利,原因' ':' EvalString? Newline
     ;
 
 /* win_s
 tooltip : win: 获得胜利, 该事件会显示获胜页面, 并重新游戏
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=win-%e8%8e%b7%e5%be%97%e8%83%9c%e5%88%a9
-default : [" "]
+default : [""]
 var code = '{"type": "win", "reason": "'+EvalString_0+'"},\n';
 return code;
 */
 
 lose_s
-    :   '游戏失败,原因' ':' EvalString Newline
+    :   '游戏失败,原因' ':' EvalString? Newline
     ;
 
 /* lose_s
 tooltip : lose: 游戏失败, 该事件会显示失败页面, 并重新开始游戏
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=lose-%e6%b8%b8%e6%88%8f%e5%a4%b1%e8%b4%a5
-default : [" "]
+default : [""]
 var code = '{"type": "lose", "reason": "'+EvalString_0+'"},\n';
 return code;
 */

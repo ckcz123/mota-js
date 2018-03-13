@@ -3,14 +3,146 @@
  * 包括：
  * 自动寻路、怪物手册、楼传器、存读档、菜单栏、NPC对话事件、等等
  */
-function ui() {}
+function ui() {
+    this.init();
+}
 
 // 初始化UI
 ui.prototype.init = function () {
+    this.uidata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.ui;
 }
 
-main.instance.ui = new ui();
+////////////////// 地图设置
 
+////// 清除地图 //////
+ui.prototype.clearMap = function (map, x, y, width, height) {
+    if (map == 'all') {
+        for (var m in core.canvas) {
+            core.canvas[m].clearRect(0, 0, 416, 416);
+        }
+    }
+    else {
+        core.canvas[map].clearRect(x||0, y||0, width||416, height||416);
+    }
+}
+
+////// 在某个canvas上绘制一段文字 //////
+ui.prototype.fillText = function (map, text, x, y, style, font) {
+    if (core.isset(style)) {
+        core.setFillStyle(map, style);
+    }
+    if (core.isset(font)) {
+        core.setFont(map, font);
+    }
+    core.canvas[map].fillText(text, x, y);
+}
+
+////// 在某个canvas上绘制一个矩形 //////
+ui.prototype.fillRect = function (map, x, y, width, height, style) {
+    if (core.isset(style)) {
+        core.setFillStyle(map, style);
+    }
+    core.canvas[map].fillRect(x, y, width, height);
+}
+
+////// 在某个canvas上绘制一个矩形的边框 //////
+ui.prototype.strokeRect = function (map, x, y, width, height, style, lineWidth) {
+    if (core.isset(style)) {
+        core.setStrokeStyle(map, style);
+    }
+    if (core.isset(lineWidth)) {
+        core.setLineWidth(map, lineWidth);
+    }
+    core.canvas[map].strokeRect(x, y, width, height);
+}
+
+////// 在某个canvas上绘制一条线 //////
+ui.prototype.drawLine = function (map, x1, y1, x2, y2, style, lineWidth) {
+    if (core.isset(style)) {
+        core.setStrokeStyle(map, style);
+    }
+    if (core.isset(lineWidth)) {
+        core.setLineWidth(map, lineWidth);
+    }
+    core.canvas[map].beginPath();
+    core.canvas[map].moveTo(x1, y1);
+    core.canvas[map].lineTo(x2, y2);
+    core.canvas[map].closePath();
+    core.canvas[map].stroke();
+}
+
+////// 设置某个canvas的文字字体 //////
+ui.prototype.setFont = function (map, font) {
+    core.canvas[map].font = font;
+}
+
+////// 设置某个canvas的线宽度 //////
+ui.prototype.setLineWidth = function (map, lineWidth) {
+    if (map == 'all') {
+        for (var m in core.canvas) {
+            core.canvas[m].lineWidth = lineWidth;
+        }
+    }
+    core.canvas[map].lineWidth = lineWidth;
+}
+
+////// 保存某个canvas状态 //////
+ui.prototype.saveCanvas = function (map) {
+    core.canvas[map].save();
+}
+
+////// 加载某个canvas状态 //////
+ui.prototype.loadCanvas = function (map) {
+    core.canvas[map].restore();
+}
+
+////// 设置某个canvas边框属性 //////
+ui.prototype.setStrokeStyle = function (map, style) {
+    if (map == 'all') {
+        for (var m in core.canvas) {
+            core.canvas[m].strokeStyle = style;
+        }
+    }
+    else {
+        core.canvas[map].strokeStyle = style;
+    }
+}
+
+////// 设置某个canvas的alpha值 //////
+ui.prototype.setAlpha = function (map, alpha) {
+    if (map == 'all') {
+        for (var m in core.canvas) {
+            core.canvas[m].globalAlpha = alpha;
+        }
+    }
+    else core.canvas[map].globalAlpha = alpha;
+}
+
+////// 设置某个canvas的透明度 //////
+ui.prototype.setOpacity = function (map, opacity) {
+    if (map == 'all') {
+        for (var m in core.canvas) {
+            core.canvas[m].canvas.style.opacity = opacity;
+        }
+    }
+    else core.canvas[map].canvas.style.opacity = opacity;
+}
+
+////// 设置某个canvas的绘制属性（如颜色等） //////
+ui.prototype.setFillStyle = function (map, style) {
+    if (map == 'all') {
+        for (var m in core.canvas) {
+            core.canvas[m].fillStyle = style;
+        }
+    }
+    else {
+        core.canvas[map].fillStyle = style;
+    }
+}
+
+
+
+///////////////// UI绘制
 
 ////// 结束一切事件和绘制，关闭UI窗口，返回游戏进程 //////
 ui.prototype.closePanel = function () {
@@ -26,13 +158,115 @@ ui.prototype.closePanel = function () {
     core.status.event.interval = null;
 }
 
+////// 左上角绘制一段提示 //////
+ui.prototype.drawTip = function (text, itemIcon) {
+    var textX, textY, width, height, hide = false, opacityVal = 0;
+    clearInterval(core.interval.tipAnimate);
+    core.setFont('data', "16px Arial");
+    core.setOpacity('data', 0);
+    core.canvas.data.textAlign = 'left';
+    if (!core.isset(itemIcon)) {
+        textX = 16;
+        textY = 18;
+        width = textX + core.canvas.data.measureText(text).width + 16;
+        height = 42;
+    }
+    else {
+        textX = 44;
+        textY = 18;
+        width = textX + core.canvas.data.measureText(text).width + 8;
+        height = 42;
+    }
+    core.interval.tipAnimate = window.setInterval(function () {
+        if (hide) {
+            opacityVal -= 0.1;
+        }
+        else {
+            opacityVal += 0.1;
+        }
+        core.setOpacity('data', opacityVal);
+        core.clearMap('data', 5, 5, 400, height);
+        core.fillRect('data', 5, 5, width, height, '#000');
+        if (core.isset(itemIcon)) {
+            core.canvas.data.drawImage(core.material.images.items, 0, itemIcon * 32, 32, 32, 10, 8, 32, 32);
+        }
+        core.fillText('data', text, textX + 5, textY + 15, '#fff');
+        if (opacityVal > 0.6 || opacityVal < 0) {
+            if (hide) {
+                core.clearMap('data', 5, 5, 400, height);
+                core.setOpacity('data', 1);
+                clearInterval(core.interval.tipAnimate);
+                return;
+            }
+            else {
+                if (!core.isset(core.timeout.getItemTipTimeout)) {
+                    core.timeout.getItemTipTimeout = window.setTimeout(function () {
+                        hide = true;
+                        core.timeout.getItemTipTimeout = null;
+                    }, 750);
+                }
+                opacityVal = 0.6;
+                core.setOpacity('data', opacityVal);
+            }
+        }
+    }, 30);
+}
+
+////// 地图中间绘制一段文字 //////
+ui.prototype.drawText = function (contents, callback) {
+    if (core.isset(contents)) {
+
+        // 合并
+        if ((core.isset(core.status.event)&&core.status.event.id=='action') || (core.isset(core.status.replay)&&core.status.replay.replaying)) {
+            core.insertAction(contents,null,null,callback);
+            return;
+        }
+
+        if (typeof contents == 'string') {
+            contents = [{'content': contents}];
+        }
+        else if (contents instanceof Object && core.isset(contents.content)) {
+            contents = [contents];
+        }
+        else if (!(contents instanceof Array)) {
+            core.drawTip("出错了");
+            console.log(contents);
+            return;
+        }
+
+        core.status.event = {'id': 'text', 'data': {'list': contents, 'callback': callback}};
+        core.lockControl();
+
+        // wait the hero to stop
+        core.stopAutomaticRoute();
+        setTimeout(function() {
+            core.drawText();
+        }, 30);
+        return;
+    }
+
+    if (core.status.event.data.list.length==0) {
+        var callback = core.status.event.data.callback;
+        core.ui.closePanel(false);
+        if (core.isset(callback)) callback();
+        return;
+    }
+
+    var data=core.status.event.data.list.shift();
+    if (typeof data == 'string')
+        core.ui.drawTextBox(data);
+    else
+        core.ui.drawTextBox(data.content, data.id);
+    // core.drawTextBox(content);
+}
+
 ////// 绘制一个对话框 //////
 ui.prototype.drawTextBox = function(content) {
 
     clearInterval(core.status.event.interval);
 
     // 获得name, image, icon
-    var id=null, name=null, image=null, icon=null;
+    var id=null, name=null, image=null, icon=null, iconHeight=32, animate=null;
     if (content.indexOf("\t[")==0 || content.indexOf("\\t[")==0) {
         var index = content.indexOf("]");
         if (index>=0) {
@@ -45,11 +279,21 @@ ui.prototype.drawTextBox = function(content) {
                 id=ss[0];
                 // monster
                 if (id!='hero') {
-                    var enemys = core.material.enemys[id];
-                    if (core.isset(enemys)) {
+                    if (core.isset(core.material.enemys[id])) {
                         name = core.material.enemys[id].name;
-                        image = core.material.images.enemys;
-                        icon = core.material.icons.enemys[id];
+
+                        if (core.isset(core.material.icons.enemy48[id])) {
+                            image = core.material.images.enemy48;
+                            icon = core.material.icons.enemy48[id];
+                            iconHeight = 48;
+                            animate=4;
+                        }
+                        else {
+                            image = core.material.images.enemys;
+                            icon = core.material.icons.enemys[id];
+                            iconHeight = 32;
+                            animate=2;
+                        }
                     }
                     else {
                         name=id;
@@ -62,8 +306,18 @@ ui.prototype.drawTextBox = function(content) {
             else {
                 id='npc';
                 name=ss[0];
-                image=core.material.images.npcs;
-                icon=core.material.icons.npcs[ss[1]];
+                if (core.isset(core.material.icons.npc48[ss[1]])) {
+                    image = core.material.images.npc48;
+                    icon = core.material.icons.npc48[ss[1]];
+                    iconHeight = 48;
+                    animate=4;
+                }
+                else {
+                    image = core.material.images.npcs;
+                    icon = core.material.icons.npcs[ss[1]];
+                    iconHeight = 32;
+                    animate=2;
+                }
             }
         }
     }
@@ -72,7 +326,7 @@ ui.prototype.drawTextBox = function(content) {
 
     var textAttribute = core.status.textAttribute || core.initStatus.textAttribute;
 
-    var position = textAttribute.position, px=null, py=null, ydelta=0;
+    var position = textAttribute.position, px=null, py=null, ydelta=iconHeight-32;
     if (content.indexOf("\b[")==0 || content.indexOf("\\b[")==0) {
         var index = content.indexOf("]");
         if (index>=0) {
@@ -121,7 +375,7 @@ ui.prototype.drawTextBox = function(content) {
     if (textAttribute.bold) font = "bold "+font;
     var contents = core.splitLines("ui", content, validWidth, font);
 
-    var height = 20 + 21*(contents.length+1) + (id=='hero'?core.material.icons.hero.height-10:core.isset(name)?32-10:0);
+    var height = 20 + 21*(contents.length+1) + (id=='hero'?core.material.icons.hero.height-10:core.isset(name)?iconHeight-10:0);
 
 
     var xoffset = 6, yoffset = 22;
@@ -157,7 +411,7 @@ ui.prototype.drawTextBox = function(content) {
     core.fillRect('ui', left, top, right, height);
     core.strokeRect('ui', left - 1, top - 1, right + 1, height + 1, '#FFFFFF', 2);
 
-    var xoffset = 6;
+    var xoffset = 9;
 
     // draw triangle
     if (position=='up' && core.isset(px) && core.isset(py)) {
@@ -213,12 +467,16 @@ ui.prototype.drawTextBox = function(content) {
         else {
             core.fillText('ui', name, content_left, top + 30, null, 'bold 22px Verdana');
             if (core.isset(icon)) {
-                core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, 34, null, 2);
+
+                core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, iconHeight + 2, null, 2);
                 core.status.boxAnimateObjs = [];
                 core.status.boxAnimateObjs.push({
-                    'bgx': left + 15, 'bgy': top + 40, 'bgsize': 32,
-                    'image': image, 'x': left + 15, 'y': top + 40, 'icon': icon
+                    'bgx': left + 15, 'bgy': top + 40, 'bgWidth': 32, 'bgHeight': iconHeight,
+                    'x': left+15, 'y': top+40, 'height': iconHeight, 'animate': animate,
+                    'image': image,
+                    'pos': icon*iconHeight
                 });
+
                 core.drawBoxAnimate();
             }
         }
@@ -276,7 +534,7 @@ ui.prototype.drawChoices = function(content, choices) {
     if (length%2==0) bottom+=16;
     var choice_top = bottom-height+56;
 
-    var id=null, name=null, image=null, icon=null;
+    var id=null, name=null, image=null, icon=null, iconHeight=32, animate=null;
 
     var contents = null;
     var content_left = left + 15;
@@ -294,11 +552,21 @@ ui.prototype.drawChoices = function(content, choices) {
                     id=ss[0];
                     // monster
                     if (id!='hero') {
-                        var enemys = core.material.enemys[id];
-                        if (core.isset(enemys)) {
+                        if (core.isset(core.material.enemys[id])) {
                             name = core.material.enemys[id].name;
-                            image = core.material.images.enemys;
-                            icon = core.material.icons.enemys[id];
+
+                            if (core.isset(core.material.icons.enemy48[id])) {
+                                image = core.material.images.enemy48;
+                                icon = core.material.icons.enemy48[id];
+                                iconHeight = 48;
+                                animate=4;
+                            }
+                            else {
+                                image = core.material.images.enemys;
+                                icon = core.material.icons.enemys[id];
+                                iconHeight = 32;
+                                animate=2;
+                            }
                         }
                         else {
                             name=id;
@@ -311,8 +579,18 @@ ui.prototype.drawChoices = function(content, choices) {
                 else {
                     id='npc';
                     name=ss[0];
-                    image=core.material.images.npcs;
-                    icon=core.material.icons.npcs[ss[1]];
+                    if (core.isset(core.material.icons.npc48[ss[1]])) {
+                        image = core.material.images.npc48;
+                        icon = core.material.icons.npc48[ss[1]];
+                        iconHeight = 48;
+                        animate=4;
+                    }
+                    else {
+                        image = core.material.images.npcs;
+                        icon = core.material.icons.npcs[ss[1]];
+                        iconHeight = 32;
+                        animate=2;
+                    }
                 }
             }
         }
@@ -361,11 +639,13 @@ ui.prototype.drawChoices = function(content, choices) {
             else {
                 core.fillText('ui', name, title_offset, top + 27, '#FFD700', 'bold 19px Verdana');
                 if (core.isset(icon)) {
-                    core.strokeRect('ui', left + 15 - 1, top + 30 - 1, 34, 34, '#DDDDDD', 2);
+                    core.strokeRect('ui', left + 15 - 1, top + 30 - 1, 34, iconHeight + 2, '#DDDDDD', 2);
                     core.status.boxAnimateObjs = [];
                     core.status.boxAnimateObjs.push({
-                        'bgx': left + 15, 'bgy': top + 30, 'bgsize': 32,
-                        'image': image, 'x': left + 15, 'y': top + 30, 'icon': icon
+                        'bgx': left + 15, 'bgy': top + 30, 'bgWidth': 32, 'bgHeight': iconHeight,
+                        'x': left+15, 'y': top+30, 'height': iconHeight, 'animate': animate,
+                        'image': image,
+                        'pos': icon*iconHeight
                     });
                     core.drawBoxAnimate();
                 }
@@ -575,19 +855,28 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
     var margin = 35;
     var boxWidth = 40;
+    var monsterHeight = 32, animate=2;
+
+    var image = core.material.images.enemys, icon = core.material.icons.enemys;
+    if (core.isset(core.material.icons.enemy48[monsterId])) {
+        image = core.material.images.enemy48;
+        icon = core.material.icons.enemy48;
+        monsterHeight = 48;
+        animate=4;
+    }
 
     // 方块
     var heroHeight = core.material.icons.hero.height;
     core.strokeRect('ui', left + margin - 1, top + margin - 1, boxWidth+2, heroHeight+boxWidth-32+2, '#FFD700', 2);
-    core.strokeRect('ui', left + right - margin - boxWidth - 1 , top+margin-1, boxWidth+2, boxWidth+2);
+    core.strokeRect('ui', left + right - margin - boxWidth - 1 , top+margin-1, boxWidth+2, monsterHeight+boxWidth-32+2);
 
     // 名称
     core.canvas.ui.textAlign='center';
     core.fillText('ui', core.status.hero.name, left+margin+boxWidth/2, top+margin+heroHeight+40, '#FFD700', 'bold 22px Verdana');
-    core.fillText('ui', "怪物", left+right-margin-boxWidth/2, top+margin+32+40);
+    core.fillText('ui', "怪物", left+right-margin-boxWidth/2, top+margin+monsterHeight+40);
     for (var i=0, j=0; i<specialTexts.length;i++) {
         if (specialTexts[i]!='') {
-            core.fillText('ui', specialTexts[i], left+right-margin-boxWidth/2, top+margin+32+44+20*(++j), '#FF6A6A', '15px Verdana');
+            core.fillText('ui', specialTexts[i], left+right-margin-boxWidth/2, top+margin+monsterHeight+44+20*(++j), '#FF6A6A', '15px Verdana');
         }
     }
 
@@ -599,11 +888,11 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     // 怪物的
     core.status.boxAnimateObjs = [];
     core.status.boxAnimateObjs.push({
-        'bgx': left + right - margin - 40, 'bgy': top+margin, 'bgsize': boxWidth,
-        'image': core.material.images.enemys, 'x': left + right - margin - 40 + (boxWidth-32)/2, 'y': top + margin + (boxWidth-32)/2, 'icon': core.material.icons.enemys[monsterId]
-    });
+        'bgx': left+right-margin-40, 'bgy': top+margin, 'bgWidth': boxWidth, 'bgHeight': monsterHeight+boxWidth-32,
+        'x': left + right - margin - 40 + (boxWidth-32)/2, 'y': top + margin + (boxWidth-32)/2, 'height': monsterHeight,
+        'image': image, 'pos': monsterHeight*icon[monsterId], 'animate': animate
+    })
     core.drawBoxAnimate();
-
     var lineWidth = 80;
 
     var left_start = left + margin + boxWidth + 10;
@@ -694,11 +983,11 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
         if (turn==0) {
             // 勇士攻击
-            core.drawLine('data', left + right - margin - boxWidth + 6, top+margin+boxWidth-6,
+            core.drawLine('data', left + right - margin - boxWidth + 6, top+margin+monsterHeight+boxWidth-32-6,
                 left+right-margin-6, top+margin+6, '#FF0000', 4);
             setTimeout(function() {
                 core.clearMap('data', left + right - margin - boxWidth, top+margin,
-                    boxWidth, boxWidth);
+                    boxWidth, boxWidth+monsterHeight-32);
             }, 250);
 
             if (hero_atk-mon_def>0)
@@ -832,6 +1121,14 @@ ui.prototype.drawLocalSaveSelect = function () {
     ]);
 }
 
+////// 绘制存档删除页面 //////
+ui.prototype.drawStorageRemove = function () {
+    core.status.event.id = 'storageRemove';
+    this.drawChoices(null, [
+        "清空全部塔的存档", "只清空当前塔的存档", "返回上级菜单"
+    ]);
+}
+
 ////// 绘制分页 //////
 ui.prototype.drawPagination = function (page, totalPage) {
 
@@ -924,11 +1221,18 @@ ui.prototype.drawBook = function (index) {
         var enemy = enemys[i];
         core.strokeRect('ui', 22, 62 * i + 22, 42, 42, '#DDDDDD', 2);
 
+        var cls = 'enemys';
+        if (core.isset(core.material.icons.enemy48[enemy.id]))
+            cls = 'enemy48';
+        var height = cls=='enemy48'?48:32;
+        var animate = cls=='enemy48'?4:2;
+
         // 怪物
         core.status.boxAnimateObjs.push({
-            'bgx': 22, 'bgy': 62 * i + 22, 'bgsize': 42,
-            'image': core.material.images.enemys,
-            'x': 27, 'y': 62 * i + 27, 'icon': core.material.icons.enemys[enemy.id]
+            'bgx': 22, 'bgy': 62 * i + 22, 'bgWidth': 42, 'bgHeight': 42,
+            'x': 27, 'y': 62 * i + 27, 'height': 32, 'animate': animate,
+            'image': core.material.images[cls],
+            'pos': core.material.icons[cls][enemy.id] * height
         });
 
         // 数据
@@ -949,24 +1253,41 @@ ui.prototype.drawBook = function (index) {
         core.fillText('ui', '防御', 335, 62 * i + 32, '#DDDDDD', '13px Verdana');
         core.fillText('ui', enemy.def, 365, 62 * i + 32, '#DDDDDD', 'bold 13px Verdana');
 
-        var expOffset = 165;
+        var expOffset = 165, line_cnt=0;
         if (core.flags.enableMoney) {
             core.fillText('ui', '金币', 165, 62 * i + 50, '#DDDDDD', '13px Verdana');
             core.fillText('ui', enemy.money, 195, 62 * i + 50, '#DDDDDD', 'bold 13px Verdana');
             expOffset = 255;
+            line_cnt++;
         }
 
-        if (core.flags.enableExperience) {
+        // 加点
+        if (core.flags.enableAddPoint) {
+            core.canvas.ui.textAlign = "left";
+            core.fillText('ui', '加点', expOffset, 62 * i + 50, '#DDDDDD', '13px Verdana');
+            core.fillText('ui', enemy.point, expOffset + 30, 62 * i + 50, '#DDDDDD', 'bold 13px Verdana');
+            expOffset = 255;
+            line_cnt++;
+        }
+
+        if (core.flags.enableExperience && line_cnt<2) {
             core.canvas.ui.textAlign = "left";
             core.fillText('ui', '经验', expOffset, 62 * i + 50, '#DDDDDD', '13px Verdana');
             core.fillText('ui', enemy.experience, expOffset + 30, 62 * i + 50, '#DDDDDD', 'bold 13px Verdana');
+            line_cnt++;
         }
 
+        var damageOffset = 281;
+        if (line_cnt==1) damageOffset=326;
+        if (line_cnt==2) damageOffset=361;
+
+        /*
         var damageOffet = 281;
         if (core.flags.enableMoney && core.flags.enableExperience)
             damageOffet = 361;
         else if (core.flags.enableMoney || core.flags.enableExperience)
             damageOffet = 326;
+            */
 
 
         core.canvas.ui.textAlign = "center";
@@ -975,7 +1296,7 @@ ui.prototype.drawBook = function (index) {
         if (damage >= core.status.hero.hp) color = '#FF0000';
         if (damage <= 0) color = '#00FF00';
         if (damage >= 999999999) damage = '无法战斗';
-        core.fillText('ui', damage, damageOffet, 62 * i + 50, color, 'bold 13px Verdana');
+        core.fillText('ui', damage, damageOffset, 62 * i + 50, color, 'bold 13px Verdana');
 
         core.canvas.ui.textAlign = "left";
 
@@ -1297,34 +1618,23 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
         }
     }
 
-    if (core.isset(core.floors[floorId].png)) {
-        var png = core.floors[floorId].png;
-        /*
-        if (core.isset(core.material.images.pngs[png])) {
-            core.canvas.ui.drawImage(core.material.images.pngs[png], x, y, size, size);
+    var images = [];
+    if (core.isset(core.floors[floorId].images)) {
+        images = core.floors[floorId].images;
+        if (typeof images == 'string') {
+            images = [[0, 0, images]];
         }
-        */
-
-        var ratio = size/416;
-
-        if (typeof png == 'string') {
-            if (core.isset(core.material.images.pngs[png])) {
-                core.canvas.ui.drawImage(core.material.images.pngs[png], x, y, size, size);
-            }
-        }
-        else if (png instanceof Array) {
-            png.forEach(function (t) {
-                if (t.length!=3) return;
-                var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
-                if (core.isset(dx) && core.isset(dy) && core.isset(core.material.images.pngs[p])) {
-                    dx*=32; dy*=32;
-                    var image = core.material.images.pngs[p];
-                    core.canvas.ui.drawImage(image, x+dx*ratio, y+dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
-                }
-            })
-        }
-
     }
+
+    images.forEach(function (t) {
+        var ratio = size/416;
+        var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
+        if (core.isset(dx) && core.isset(dy) && !t[3] && core.isset(core.material.images.images[p])) {
+            dx*=32; dy*=32;
+            var image = core.material.images.images[p];
+            core.canvas.ui.drawImage(image, x+dx*ratio, y+dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
+        }
+    })
 
     var mapArray = core.maps.getMapArray(blocks);
     for (var b in blocks) {
@@ -1337,7 +1647,8 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
                 if (block.event.id!='none') {
                     var blockIcon = core.material.icons[block.event.cls][block.event.id];
                     var blockImage = core.material.images[block.event.cls];
-                    core.canvas[canvas].drawImage(blockImage, 0, blockIcon * 32, 32, 32, x + block.x * persize, y + block.y * persize, persize, persize);
+                    var height = block.event.height || 32;
+                    core.canvas[canvas].drawImage(blockImage, 0, blockIcon * height, 32, height, x + block.x * persize, y + block.y * persize + (persize-persize*height/32), persize, persize * height/32);
                 }
             }
         }
@@ -1349,6 +1660,17 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
         var realHeight = persize*height/32;
         core.canvas[canvas].drawImage(core.material.images.hero, heroIcon.stop * 32, heroIcon.loc * height, 32, height, x+persize*heroLoc.x, y+persize*heroLoc.y+persize-realHeight, persize, realHeight);
     }
+
+    images.forEach(function (t) {
+        var ratio = size/416;
+        var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
+        if (core.isset(dx) && core.isset(dy) && t[3] && core.isset(core.material.images.images[p])) {
+            dx*=32; dy*=32;
+            var image = core.material.images.images[p];
+            core.canvas.ui.drawImage(image, x+dx*ratio, y+dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
+        }
+    })
+
 }
 
 ui.prototype.drawKeyBoard = function () {
@@ -1390,32 +1712,8 @@ ui.prototype.drawKeyBoard = function () {
 }
 
 ////// 绘制“关于”界面 //////
-ui.prototype.drawAbout = function() {
-
-    if (!core.isPlaying()) {
-        core.status.event = {'id': null, 'data': null};
-        core.dom.startPanel.style.display = 'none';
-    }
-    core.lockControl();
-    core.status.event.id = 'about';
-
-    core.clearMap('ui', 0, 0, 416, 416);
-    var left = 48, top = 36, right = 416 - 2 * left, bottom = 416 - 2 * top;
-
-    core.setAlpha('ui', 0.85);
-    core.fillRect('ui', left, top, right, bottom, '#000000');
-    core.setAlpha('ui', 1);
-    core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
-
-    var text_start = left + 24;
-
-    // 名称
-    core.canvas.ui.textAlign = "left";
-    core.fillText('ui', "HTML5 魔塔样板", text_start, top+35, "#FFD700", "bold 22px Verdana");
-    core.fillText('ui', "版本： "+core.firstData.version, text_start, top + 80, "#FFFFFF", "bold 17px Verdana");
-    core.fillText('ui', "作者： 艾之葵", text_start, top + 112);
-    core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112+32);
-    // TODO: 写自己的“关于”页面，每次增加32像素即可
+ui.prototype.drawAbout = function () {
+    return this.uidata.drawAbout();
 }
 
 ////// 绘制帮助页面 //////
@@ -1446,3 +1744,4 @@ ui.prototype.drawHelp = function () {
         "长按任意位置：跳过剧情对话或打开虚拟键盘\n"
     ]);
 }
+

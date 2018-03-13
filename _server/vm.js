@@ -1,5 +1,26 @@
 // vue 相关处理
 
+document.body.onmousedown = function(e){
+  //console.log(e);
+  var eid=[];
+  e.path.forEach(function(node){
+    if(!node.getAttribute)return;
+    var id_ = node.getAttribute('id');
+    if (id_){
+      if(['left','left1','left2','left3','left4','left5','left8'].indexOf(id_)!==-1)eid.push('edit');
+      eid.push(id_);
+    }
+  });
+  //console.log(eid);
+  if(eid.indexOf('edit')===-1){
+    if(eid.indexOf('tip')===-1)selectBox.isSelected = false;
+  }
+  //editor.mode.onmode('');
+  editor.info = {};
+}
+iconLib.onmousedown = function(e){
+  e.stopPropagation();
+}
 var exportM = new Vue({
   el: '#exportM',
   data: {
@@ -166,6 +187,7 @@ var clear = new Vue({
   methods: {
     clearMap: function(){
       editor.mapInit();
+      editor.updateMap();
       clearTimeout(editArea.formatTimer);
       clearTimeout(tip.timer);
       pout.value = '';
@@ -175,6 +197,30 @@ var clear = new Vue({
     }
   }
 })
+printf = function(str_,type) {
+  selectBox.isSelected = false;
+  if(!type){
+    tip.whichShow=11;
+  } else {
+    tip.whichShow=12;
+  }
+  setTimeout(function(){
+    if(!type){
+      tip.msgs[11]=String(str_);
+      tip.whichShow=12;
+    } else {
+      tip.msgs[10]=String(str_);
+      tip.whichShow=11;
+    }
+  },1);
+}
+printe = function(str_){printf(str_,'error')}
+tip_in_showMode = [
+  '涉及图片的更改需要F5刷新浏览器来生效',
+  '文本域可以通过双击,在文本编辑器或事件编辑器中编辑',
+  '事件编辑器中的显示文本和自定义脚本的方块也可以双击',
+  "画出的地图要点击\"保存地图\"才会写入到文件中",
+];
 var tip = new Vue({
   el: '#tip',
   data: {
@@ -196,6 +242,8 @@ var tip = new Vue({
       "修改成功！可点击复制按钮复制地图数组到剪切板",
       "选择背景图片失败！文件名格式错误或图片不存在！",
       "更新背景图片成功！",
+      "11:警告",
+      "12:成功"
     ],
     mapMsg: '',
     whichShow: 0,

@@ -1,6 +1,6 @@
 # 事件
 
-?> 目前版本**v1.4.1**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.0**，上次更新时间：* {docsify-updated} *
 
 本章内将对样板所支持的事件进行介绍。
 
@@ -20,6 +20,13 @@
 
 在事件列表中使用`type: show`和`type: hide`可以将一个禁用事件启用，或将一个启用事件给禁用。
 
+## 关于V2.0的重要说明
+
+在V2.0版本中，所有事件均可以使用blockly来进行块的可视化编辑。
+
+它能通过拖动、复制粘贴等方式帮助你快速生成事件列表，而不用手动打大量字符。
+
+但是，仍然强烈建议要对每个事件的写法进行了解。
 
 ## 自定义事件
 
@@ -615,13 +622,13 @@ loc可忽略，如果忽略则显示为事件当前点。
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    {"type": "showImage", "name": "bg", "loc": [231,297]}, // 在(231,297)显示bg.png
-    {"type": "showImage", "name": "1", "loc": [109,167]}, // 在(109,167)显示1.png
+    {"type": "showImage", "name": "bg.jpg", "loc": [231,297]}, // 在(231,297)显示bg.jpg
+    {"type": "showImage", "name": "1.png", "loc": [109,167]}, // 在(109,167)显示1.png
     {"type": "showImage"} // 如果不指定name则清除所有图片。
 ]
 ```
 
-name为图片名。**请确保图片在main.js中的this.pngs中被定义过。**
+name为图片名。**请确保图片在data.js中的images中被定义过。**
 
 loc为图片左上角坐标，以像素为单位进行计算。
 
@@ -769,9 +776,11 @@ move完毕后移动的NPC/怪物一定会消失，只不过可以通过immediate
 
 ### win: 获得胜利
 
-`{"type": "win", "reason": "xxx"}` 将会直接调用events.js中的win函数，并将reason作为参数传入。
+`{"type": "win", "reason": "xxx"}` 将会直接调用events.js中的win函数，并将reason作为结局传入。
 
 该事件会显示获胜页面，并重新游戏。
+
+!> 如果`reason`不为空，则会以reason作为获胜的结局!
 
 ### lose: 游戏失败
 
@@ -1059,19 +1068,24 @@ core.insertAction(list) //往当前事件列表中插入一系列事件。使用
 
 打败怪物后可以进行加点。
 
-如果要对某个怪物进行加点操作，则首先需要修改该怪物的点数值，即在怪物定义的后面添加`point`，代表怪物本身的加点数值。
+要启用加点，首先需要在`data.js`中将`enableAddPoint`置为true。
+
+如果要对某个怪物进行加点操作，则首先需要修改该怪物的`point`数值，代表怪物本身的加点数值。
 
 ``` js
-... 'def': 0, 'money': 1, 'experience': 1, 'special': 0, 'point': 1}, // 在怪物后面添加point代表怪物的加点数
+... 'def': 0, 'money': 1, 'experience': 1, 'point': 1, 'special': 0}, // 在怪物后面添加point代表怪物的加点数
 ```
 
-然后在`events.js`文件中找到`addPoint`函数。它将返回一个choices事件。修改此函数为我们需要的加点项即可。
+然后在`functions.js`文件中找到`addPoint`函数。它将返回一个choices事件。修改此函数为我们需要的加点项即可。
+
+!> V2.0版本可以直接在“脚本编辑 - 加点事件”中双击进行修改！
 
 ``` js
-////// 加点 //////
-events.prototype.addPoint = function (enemy) {
-    var point = enemy.point; // 获得该怪物的point
-    if (!core.isset(point) || point<=0) return [];
+////// 加点事件 //////
+"addPoint" : function (enemy) {
+    // 加点事件
+    var point = enemy.point;
+    if (!core.flags.enableAddPoint || !core.isset(point) || point<=0) return [];
 
     // 加点，返回一个choices事件
     return [
@@ -1230,11 +1244,13 @@ events.prototype.addPoint = function (enemy) {
 
 上面的afterBattle事件只对和怪物进行战斗后才有会被处理。
 
-如果我们想在使用炸弹后也能触发一些事件（如开门），则可以在`events.js`里面的`afterUseBomb`函数进行处理：
+如果我们想在使用炸弹后也能触发一些事件（如开门），则可以在`functions.js`里面的`afterUseBomb`函数进行处理：
+
+!> V2.0版本可以直接在“脚本编辑 - 使用炸弹后的事件”中双击进行修改！
 
 ``` js
 ////// 使用炸弹/圣锤后的事件 //////
-events.prototype.afterUseBomb = function () {
+"afterUseBomb": function () {
     // 这是一个使用炸弹也能开门的例子
     if (core.status.floorId=='xxx' && core.terrainExists(x0,y0,'specialDoor') // 某个楼层，该机关门存在
         && !core.enemyExists(x1,y1) && !core.enemyExists(x2,y2)) // 且守门的怪物都不存在
@@ -1262,11 +1278,11 @@ events.prototype.afterUseBomb = function () {
 
 !> 推箱子的前方不允许存在任何事件（花除外），包括已经禁用的自定义事件。
 
-推完箱子后将触发events.js中的afterPushBox事件，你可以在这里进行开门判断。
+推完箱子后将触发functions.js中的afterPushBox事件，你可以在这里进行开门判断。
 
 ``` js
 ////// 推箱子后的事件 //////
-events.prototype.afterPushBox = function () {
+"afterPushBox" = function () {
 
     var noBoxLeft = function () {
         // 地图上是否还存在未推到的箱子，如果不存在则返回true，存在则返回false
@@ -1290,6 +1306,33 @@ events.prototype.afterPushBox = function () {
 }
 ```
 
+## 怪物数据的动态修改
+
+有时候我们可能还需要在游戏过程中动态修改怪物数据，例如50层魔塔的封印魔王，或者根据难度分歧来调整最终Boss的属性数据。
+
+而在我们的存档中，是不会对怪物数据进行存储的，只会存各个变量和Flag，因此我们需要在读档后根据变量或Flag来调整怪物数据。
+
+我们可以在functions.js中的`afterLoadData`进行处理。
+
+``` js
+////// 读档事件后，载入事件前，可以执行的操作 //////
+"afterLoadData" : function(data) {
+    // 读档事件后，载入事件前，可以执行的操作
+    if (core.hasFlag("fengyin")) { // 如果存在封印（flag为真）
+        core.material.enemys.blackKing.hp/=10; // 将怪物的血量变成原来的十分之一
+        // ... 
+    }
+    // 同样难度分歧可以类似写 if (core.getFlag('hard', 0)==3) {...
+}
+
+// 在封印时，可以调用setValue将该flag置为真，然后调用自定义脚本 core.afterLoadData() 即可。
+"x,y": [ // 封印
+    {"type": "setValue", "name": "flag:fengyin", "value": "true"},
+    {"type": "function", "function": function() {
+        core.afterLoadData();
+    }}
+]
+```
 
 ## 战前剧情
 
@@ -1361,7 +1404,7 @@ events.prototype.afterPushBox = function () {
 
 ``` js
 ////// 不同难度分别设置初始属性 //////
-events.prototype.setInitData = function (hard) {
+"setInitData": function (hard) {
     if (hard=='Easy') { // 简单难度
         core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
         // 可以在此设置一些初始福利，比如设置初始生命值可以调用：
@@ -1386,7 +1429,7 @@ events.prototype.setInitData = function (hard) {
 
 ``` js
 ////// 游戏获胜事件 //////
-events.prototype.win = function(reason) {
+"win": function(reason) {
     core.ui.closePanel();
     var replaying = core.status.replay.replaying;
     core.stopReplay();
@@ -1396,19 +1439,21 @@ events.prototype.win = function(reason) {
         core.drawText([
             "\t[恭喜通关]你的分数是${status:hp}。"
         ], function () {
-            core.events.gameOver('', replaying);
+            core.events.gameOver(reason||'', replaying);
         })
     });
 }
 ```
 
-其参数reason为获胜原因（即type:win事件里面的reason参数）。你可以在这里修改自己的获胜界面显示的文字。
+其参数reason为获胜原因（即type:win事件里面的reason参数）。
+
+!> 如果reason不为空，则将会作为结局名！
 
 当失败（`{"type": "lose"}`，或者被怪强制战斗打死、被领域怪扣血死、中毒导致扣血死，路障导致扣血死等等）事件发生时，将调用`events.js`中的`lose`事件。其直接显示一段文字，并重新开始游戏。
 
 ``` js
 ////// 游戏失败事件 //////
-events.prototype.lose = function(reason) {
+"lose": function(reason) {
     core.ui.closePanel();
     var replaying = core.status.replay.replaying;
     core.stopReplay();
@@ -1423,26 +1468,6 @@ events.prototype.lose = function(reason) {
 ```
 
 其参数reason为失败原因。你可以在这里修改失败界面时显示的文字。
-
-如果要设置多种不同的结局，只需要在win的传参中把`core.events.gameOver('', replaying);`的空字符串改成具体的结局名。
-
-例如：
-
-``` js
-events.prototype.win = function(reason) { // 传入参数"reason"为结局名
-// ... 上略
-        ], function () {
-            core.events.gameOver(reason, replaying); // 使用reason作为结局名
-        })
-    });
-}
-
-// 然后在事件可以调用
-{"type": "win", "reason": "TRUE END"}, // TE结局
-{"type": "win", "reason": "NORMAL END"} // NE结局
-```
-
-上面这个例子中，我们直接把reason作为结局名的参数传入gameOver函数，这样的话就可以直接在{"type": "win"}中加上"reason"代表具体的结局。
 
 ==========================================================================================
 

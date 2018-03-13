@@ -196,7 +196,7 @@ initscript=String.raw`
 
   var doubleClickCheck=[[0,'abc']];
   function omitedcheckUpdateFunction(event) {
-  console.log(event);
+  //console.log(event);
   if(event.type==='ui'){
     var newClick = [new Date().getTime(),event.blockId];
     var lastClick = doubleClickCheck.shift();
@@ -369,7 +369,7 @@ editor_blockly.confirm =  function (){
 
 editor_blockly.doubleClickBlock = function (blockId){
   var b=editor_blockly.workspace.getBlockById(blockId);
-  console.log(b);
+  //console.log(b);
   var textStringDict = {
     'text_0_s':'EvalString_0',
     'text_1_s':'EvalString_2',

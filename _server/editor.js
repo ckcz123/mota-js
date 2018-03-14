@@ -53,7 +53,7 @@ editor.prototype.reset = function(callback){
 editor.prototype.idsInit = function(maps, icons){
   editor.ids = [0];
   editor.indexs = [];
-  var MAX_NUM = 400;
+  var MAX_NUM = 1000;
   var getInfoById = function(id){
     var block = maps.initBlock(0, 0, id);
     if(hasOwnProp(block, 'event')){
@@ -143,6 +143,7 @@ editor.prototype.drawInitData = function (icons) {
 editor.prototype.mapInit = function(){
   var ec = document.getElementById('event').getContext('2d');
   ec.clearRect(0, 0, 416, 416);
+  document.getElementById('event2').getContext('2d').clearRect(0,0,416,416);
   editor.map = [];
   for(var y=0; y<13; y++){
     editor.map[y] = [];

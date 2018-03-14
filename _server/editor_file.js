@@ -151,8 +151,8 @@ editor_file = function(editor, callback){
     if(info.images==='items'){
       saveSetting('items',[["change"/*其实应该是add*/,"['items']['"+id+"']",editor_file.comment.items_template]],function(err){if(err){printe(err);throw(err)}});
     }
-    if(info.images==='enemys'){
-      saveSetting('enemys',[["change"/*其实应该是add*/,"['enemys']['"+id+"']",editor_file.comment.enemys_template]],function(err){if(err){printe(err);throw(err)}});
+    if(info.images==='enemys' || info.images==='enemy48'){
+      saveSetting('enemys',[["change"/*其实应该是add*/,"['"+id+"']",editor_file.comment.enemys_template]],function(err){if(err){printe(err);throw(err)}});
     }
     
     callback(null);
@@ -501,7 +501,15 @@ editor_file = function(editor, callback){
         eval("maps_90f36752_8815_4be8_b32b_d7fad1d0542e"+value[1]+'='+JSON.stringify(value[2]));
       });
       var datastr='maps_90f36752_8815_4be8_b32b_d7fad1d0542e = \n';
-      datastr+=JSON.stringify(maps_90f36752_8815_4be8_b32b_d7fad1d0542e,null,4);
+      //datastr+=JSON.stringify(maps_90f36752_8815_4be8_b32b_d7fad1d0542e,null,4);
+
+      var emap={};
+      var estr = JSON.stringify(maps_90f36752_8815_4be8_b32b_d7fad1d0542e,function(k,v){if(v.id!=null){var id_ = editor.guid();emap[id_]=JSON.stringify(v);return id_;}else return v},4);
+      for(var id_ in emap){
+          estr = estr.replace('"'+id_+'"',emap[id_])
+      }
+      datastr+=estr;
+
       fs.writeFile('project/maps.js',encode(datastr),'base64',function(err, data){
         callback(err);
       });

@@ -112,7 +112,7 @@ var editArea = new Vue({
           var num = mapArray[y][x];
           if(num == 0 )
             editor.map[y][x] = 0;
-          else if(num >= 400){
+          else if(num >= 1000){
             that.error = 3;
             editor.map[y][x] = undefined;
           }else if(typeof(editor.indexs[num][0]) == 'undefined'){

@@ -373,6 +373,7 @@ maps.prototype.drawMap = function (mapName, callback) {
         main.editor.updateMap = function(){
             core.removeGlobalAnimate(null, null, true);
             core.clearMap('event', 0, 0, 416, 416);
+            core.clearMap('event2', 0, 0, 416, 416);
             drawEvent();
             core.setGlobalAnimate(core.values.animateSpeed);
         }

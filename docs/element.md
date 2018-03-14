@@ -1,6 +1,6 @@
 # 元件说明
 
-?> 目前版本**v1.4.1**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.0**，上次更新时间：* {docsify-updated} *
 
 在本章中，将对样板里的各个元件进行说明。各个元件主要包括道具、门、怪物、楼梯等等。
 
@@ -37,7 +37,7 @@
 
 怪物可以有特殊属性，每个怪物可以有多个自定义属性。
 
-怪物的特殊属性所对应的数字（special）在下面的`getSpecialText`中定义，请勿对已有的属性进行修改。
+怪物的特殊属性所对应的数字（special）在`libs/enemys.js`中的`getSpecialText`中定义，请勿对已有的属性进行修改。
 
 ``` js
 enemys.prototype.getSpecialText = function (enemyId) {
@@ -66,6 +66,8 @@ enemys.prototype.getSpecialText = function (enemyId) {
     if (this.hasSpecial(special, 19)) text.push("自爆");
     if (this.hasSpecial(special, 20)) text.push("无敌");
     if (this.hasSpecial(special, 21)) text.push("退化");
+    if (this.hasSpecial(special, 22)) text.push("固伤");
+    if (this.hasSpecial(special, 23)) text.push("重生");
     return text.join("  ");
 }
 ```
@@ -125,6 +127,8 @@ N连击怪物的special是6，且我们可以为它定义n代表实际连击数�
 
 ![怪物退化](./img/tuihua.png)
 
+固伤怪则需要在后面增加`damage`选项，代表战前扣血数值。
+
 如有额外需求，可参见[自定义怪物属性](personalization#自定义自定义怪物属性)，里面讲了如何设置一个新的怪物属性。
 
 ## 路障，楼梯，传送门
@@ -153,18 +157,16 @@ floorId指定的是目标楼层的唯一标识符（ID）。
 
 现在我们的H5魔塔支持播放动画，也支持天气系统了。
 
-要播放动画，你需要先使用“RM动画导出器”将动画导出，放在animates目录下，然后在main.js中定义。
+要播放动画，你需要先使用“RM动画导出器”将动画导出，放在animates目录下，然后再data.js中定义。
 
 ``` js
-this.animates = [// 在此存放所有可能使用的动画，必须是animate格式，在这里不写后缀名
+"animates": [// 在此存放所有可能使用的动画，必须是animate格式，在这里不写后缀名
     // 动画必须放在animates目录下；文件名不能使用中文，不能带空格或特殊字符
     "hand", "sword", "zone", "yongchang", "thunder" // 根据需求自行添加
 ]
 ```
 
 !> 动画必须是animate格式，名称不能使用中文，不能带空格或特殊字符。
-
-目前暂时不支持带旋转和翻转的帧。
 
 导出动画时可能会进行一些压缩以节省流量，因此清晰度可能不如原版。
 
@@ -192,13 +194,13 @@ this.animates = [// 在此存放所有可能使用的动画，必须是animate�
 要播放音乐和音效，你需要将对应的文件放在sounds目录下，然后在main.js中进行定义
 
 ``` js
-this.bgms = [ // 在此存放所有的bgm，和文件名一致。第一项为默认播放项
+"bgms": [ // 在此存放所有的bgm，和文件名一致。第一项为默认播放项
     // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
-    '058-Slow01.mid', 'bgm.mp3', 'qianjin.mid', 'star.mid'
+    'bgm.mp3', 'qianjin.mid', 'star.mid',
 ];
-this.sounds = [ // 在此存放所有的SE，和文件名一致
+"sounds": [ // 在此存放所有的SE，和文件名一致
     // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
-    'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg'
+    'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg', 'zone.ogg'
 ]
 ```
 
@@ -245,7 +247,7 @@ this.sounds = [ // 在此存放所有的SE，和文件名一致
 - **[ESC]** 打开/关闭系统菜单
 - **[H]** 打开帮助页面
 - **[Z]** 转向
-- **[R]** 回退
+- **[R]** 回放录像
 - **[SPACE]** 轻按（仅在轻按开关打开时有效）
 - **[1]** 快捷使用破墙镐
 - **[2]** 快捷使用炸弹/圣锤

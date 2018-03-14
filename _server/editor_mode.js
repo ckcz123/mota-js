@@ -178,7 +178,7 @@ editor_mode.prototype.doActionList = function(mode,actionList){
       break;
     case 'emenyitem':
 
-      if (editor_mode.info.images=='enemys'){
+      if (editor_mode.info.images=='enemys'||editor_mode.info.images=='enemy48'){
         editor.file.editEnemy(editor_mode.info.id,actionList,function(objs_){/*console.log(objs_);*/if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       } else if (editor_mode.info.images=='items'){
         editor.file.editItem(editor_mode.info.id,actionList,function(objs_){/*console.log(objs_);*/if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
@@ -203,7 +203,6 @@ editor_mode.prototype.doActionList = function(mode,actionList){
 
 editor_mode.prototype.onmode = function (mode) {
   if (editor_mode.mode!=mode) {
-    console.log('change mode into : '+mode);
     if(mode==='save')editor_mode.doActionList(editor_mode.mode,editor_mode.actionList);
     if(editor_mode.mode==='nextChange' && mode)editor_mode.showMode(mode);
     editor_mode.mode=mode;
@@ -252,7 +251,7 @@ editor_mode.prototype.emenyitem = function(callback){
   document.getElementById('newIdIdnum').style.display='none';
 
   var objs=[];
-  if (editor_mode.info.images=='enemys'){
+  if (editor_mode.info.images=='enemys' || editor_mode.info.images=='enemy48'){
     editor.file.editEnemy(editor_mode.info.id,[],function(objs_){objs=objs_;/*console.log(objs_)*/});
   } else if (editor_mode.info.images=='items'){
     editor.file.editItem(editor_mode.info.id,[],function(objs_){objs=objs_;/*console.log(objs_)*/});
@@ -307,6 +306,10 @@ editor_mode.prototype.listen = function(callback){
     if (newIdIdnum.children[0].value && newIdIdnum.children[1].value){
       var id = newIdIdnum.children[0].value;
       var idnum = parseInt(newIdIdnum.children[1].value);
+      if (!core.isset(idnum)) {
+          printe('不合法的idnum');
+          return;
+      }
       editor.file.changeIdAndIdnum(id,idnum,editor_mode.info,function(err){
         if(err){printe(err);throw(err)}
         printe('添加id的idnum成功,请F5刷新编辑器');
@@ -463,7 +466,7 @@ editor_mode.prototype.listen = function(callback){
   picClick.onclick = function(e){
     var loc = eToLoc(e);
     var pos = locToPos(loc);
-    console.log(e,loc,pos);
+    /*console.log(e,loc,pos);*/
     var num = editor_mode.appendPic.num;
     var ii = editor_mode.appendPic.index;
     if(ii+1>=num)editor_mode.appendPic.index=ii+1-num;

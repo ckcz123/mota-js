@@ -196,7 +196,6 @@ initscript=String.raw`
 
   var doubleClickCheck=[[0,'abc']];
   function omitedcheckUpdateFunction(event) {
-  //console.log(event);
   if(event.type==='ui'){
     var newClick = [new Date().getTime(),event.blockId];
     var lastClick = doubleClickCheck.shift();
@@ -245,7 +244,7 @@ editor_blockly.runOne = function (){
     //converter.generToolbox();
     converter.generMainFile();
     //printf(converter.mainFile.join(''));
-    console.log(converter);
+    //console.log(converter);
 
 
 

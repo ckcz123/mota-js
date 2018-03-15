@@ -307,6 +307,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
     // 在这里写所有需要自定义的函数
     // 写法必须是 this.xxx = function (args) { ...
+    // 如果不写this的话，函数将无法被外部所访问
     this.test  = function () {
         console.log("插件函数执行测试");
     }

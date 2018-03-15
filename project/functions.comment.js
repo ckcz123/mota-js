@@ -17,5 +17,8 @@ functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
     },
     "ui" : {
         "drawAbout" : "绘制“关于”界面"
+    },
+    "plugins": {
+        "plugin": "自定义插件编写"
     }
 }

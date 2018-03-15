@@ -262,40 +262,57 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 ////// 读档事件后，载入事件前，可以执行的操作 //////
 "afterLoadData" : function(data) {
     // 读档事件后，载入事件前，可以执行的操作
+    // 可以在这里对怪物数据进行动态修改，详见文档——事件——怪物数据的动态修改
+
 
 }
-
-
 },
 "ui":{
 ////// 绘制“关于”界面 //////
 "drawAbout" : function() {
     // 绘制“关于”界面
-    
-        if (!core.isPlaying()) {
-            core.status.event = {'id': null, 'data': null};
-            core.dom.startPanel.style.display = 'none';
-        }
-        core.lockControl();
-        core.status.event.id = 'about';
-    
-        core.clearMap('ui', 0, 0, 416, 416);
-        var left = 48, top = 36, right = 416 - 2 * left, bottom = 416 - 2 * top;
-    
-        core.setAlpha('ui', 0.85);
-        core.fillRect('ui', left, top, right, bottom, '#000000');
-        core.setAlpha('ui', 1);
-        core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
-    
-        var text_start = left + 24;
-    
-        // 名称
-        core.canvas.ui.textAlign = "left";
-        core.fillText('ui', "HTML5 魔塔样板", text_start, top+35, "#FFD700", "bold 22px Verdana");
-        core.fillText('ui', "版本： "+core.firstData.version, text_start, top + 80, "#FFFFFF", "bold 17px Verdana");
-        core.fillText('ui', "作者： 艾之葵", text_start, top + 112);
-        core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112+32);
-        // TODO: 写自己的“关于”页面，每次增加32像素即可
+    if (!core.isPlaying()) {
+        core.status.event = {'id': null, 'data': null};
+        core.dom.startPanel.style.display = 'none';
     }
+    core.lockControl();
+    core.status.event.id = 'about';
+
+    core.clearMap('ui', 0, 0, 416, 416);
+    var left = 48, top = 36, right = 416 - 2 * left, bottom = 416 - 2 * top;
+
+    core.setAlpha('ui', 0.85);
+    core.fillRect('ui', left, top, right, bottom, '#000000');
+    core.setAlpha('ui', 1);
+    core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+
+    var text_start = left + 24;
+
+    // 名称
+    core.canvas.ui.textAlign = "left";
+    core.fillText('ui', "HTML5 魔塔样板", text_start, top+35, "#FFD700", "bold 22px Verdana");
+    core.fillText('ui', "版本： "+core.firstData.version, text_start, top + 80, "#FFFFFF", "bold 17px Verdana");
+    core.fillText('ui', "作者： 艾之葵", text_start, top + 112);
+    core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112+32);
+    // TODO: 写自己的“关于”页面，每次增加32像素即可
+}
+},
+"plugins": {
+"plugin": function () {
+    ////// 插件编写，可以在这里写自己额外需要执行的脚本 //////
+
+    // 在这里写的代码，在所有模块加载完毕后，游戏开始前会被执行
+    console.log("插件编写测试");
+    // 可以写一些其他的被直接执行的代码
+
+    // 在这里写所有需要自定义的函数
+    // 写法必须是 this.xxx = function (args) { ...
+    // 如果不写this的话，函数将无法被外部所访问
+    this.test  = function () {
+        console.log("插件函数执行测试");
+    }
+    // 可以在任何地方（如afterXXX或自定义脚本事件）调用函数，方法为  core.plugin.xxx();
+
+}
 }
 }

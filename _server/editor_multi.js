@@ -9,17 +9,20 @@ var codeEditor = CodeMirror.fromTextArea(document.getElementById("multiLineCode"
   tabSize: 4,
   indentWithTabs: true,
   smartIndent: true,
-  mode: {name: "javascript", json: true, globalVars: true},
+  mode: {name: "javascript", globalVars: true, localVars: true},
   lineWrapping: true,
   continueComments: "Enter",
   gutters: ["CodeMirror-lint-markers"],
   lint: true,
+  autocomplete: true,
   extraKeys: {"Ctrl-Q": "toggleComment"},
 });
 
 codeEditor.on("keyup", function (cm, event) {
-  if ((event.keyCode >= 65 && event.keyCode<=90) || (event.keyCode>=49 && event.keyCode<=57) || event.keyCode==190) {
+  if (codeEditor.getOption("autocomplete") && (event.keyCode >= 65 && event.keyCode<=90) || (event.keyCode>=49 && event.keyCode<=57) || event.keyCode==190) {
+    try {
       CodeMirror.commands.autocomplete(cm, null, {completeSingle: false});
+    } catch (e) {}
   }
 });
 

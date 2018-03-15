@@ -213,7 +213,6 @@ var workspace = Blockly.inject(blocklyDiv,{
   toolbox: document.getElementById('toolbox'),
   zoom:{
     controls: true,
-    wheel: true,//false
     startScale: 1.0,
     maxScale: 3,
     minScale: 0.3,

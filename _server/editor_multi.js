@@ -5,9 +5,15 @@ var editor_multi = {};
 var codeEditor = CodeMirror.fromTextArea(document.getElementById("multiLineCode"), {
   lineNumbers: true,
   matchBrackets: true,
+  indentUnit: 4,
+  tabSize: 4,
+  indentWithTabs: true,
+  smartIndent: true,
   mode: {name: "javascript", json: true, globalVars: true},
   lineWrapping: true,
   continueComments: "Enter",
+  gutters: ["CodeMirror-lint-markers"],
+  lint: true,
   extraKeys: {"Ctrl-Q": "toggleComment"},
 });
 

@@ -5,6 +5,7 @@
     <link href="_server/css/editor.css" rel="stylesheet">
     <link href="_server/CodeMirror/codemirror.css" rel="stylesheet">
     <link href="_server/CodeMirror/show-hint.css" rel="stylesheet">
+    <link href="_server/CodeMirror/lint.css" rel="stylesheet">
     <link href="_server/css/editor_mode.css" rel="stylesheet">
   </head>
 <body>
@@ -36,8 +37,9 @@
       </div>
       
     </div>
-    <div id="left1" class='leftTab' style="z-index:-1;opacity: 0;"><div ><!-- appendpic -->
-      <h3>追加素材</h3>
+    <div id="left1" class='leftTab' style="z-index:-1;opacity: 0;"><!-- appendpic -->
+      <h3 class="leftTabHeader">追加素材</h3>
+      <div class="leftTabContent">
       <p>
         <input id="selectFileBtn" type="button" value="导入文件到画板"/>
         <select id="selectAppend"></select><!-- ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48"] -->
@@ -56,9 +58,10 @@
         </div>
       </div>
     </div></div>
-    <div id="left2" class='leftTab' style="z-index:-1;opacity: 0;"><div><!-- loc -->
-      <h3>地图选点&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button></h3>
-      <p id='pos_a6771a78_a099_417c_828f_0a24851ebfce'>0,0</p>
+    <div id="left2" class='leftTab' style="z-index:-1;opacity: 0;"><!-- loc -->
+      <h3 class="leftTabHeader">地图选点&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button></h3>
+      <div class="leftTabContent">
+      <p id='pos_a6771a78_a099_417c_828f_0a24851ebfce' style="margin-left: 15px">0,0</p>
       <div class='etable'>
         <table>
           <tbody id='table_3d846fc4_7644_44d1_aa04_433d266a73df'>
@@ -67,8 +70,9 @@
         </table>
       </div>
     </div></div>
-    <div id="left3" class='leftTab' style="z-index:-1;opacity: 0;"><div><!-- emenyitem -->
-      <h3>图块属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button></h3>
+    <div id="left3" class='leftTab' style="z-index:-1;opacity: 0;"><!-- emenyitem -->
+      <h3 class="leftTabHeader">图块属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button></h3>
+      <div class="leftTabContent">
       <div id='newIdIdnum'><!-- id and idnum -->
         <input placeholder="输入新id"/>
         <input placeholder="输入新idnum"/>
@@ -84,8 +88,9 @@
         </div>
       </div>
     </div></div>
-    <div id="left4" class='leftTab' style="z-index:-1;opacity: 0;"><div><!-- floor -->
-      <h3>楼层属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button></h3>
+    <div id="left4" class='leftTab' style="z-index:-1;opacity: 0;"><!-- floor -->
+      <h3 class="leftTabHeader">楼层属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button></h3>
+      <div class="leftTabContent">
       <div class='etable'>
         <table>
           <tbody id='table_4a3b1b09_b2fb_4bdf_b9ab_9f4cdac14c74'>
@@ -94,8 +99,9 @@
         </table>
       </div>
     </div></div>
-    <div id="left5" class='leftTab' style="z-index:-1;opacity: 0;"><div><!-- tower -->
-      <h3>全塔属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button></h3>
+    <div id="left5" class='leftTab' style="z-index:-1;opacity: 0;"><!-- tower -->
+      <h3 class="leftTabHeader">全塔属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button></h3>
+      <div class="leftTabContent">
       <div class='etable'>
         <table>
           <tbody id='table_b6a03e4c_5968_4633_ac40_0dfdd2c9cde5'>
@@ -138,8 +144,9 @@
       <button onclick="editor_multi.cancel()">cancel</button>
       <textarea id="multiLineCode" name="multiLineCode"></textarea>
     </div>
-    <div id="left8" class='leftTab' style="z-index:-1;opacity: 0;"><div><!-- functions -->
-      <h3>脚本编辑&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button></h3>
+    <div id="left8" class='leftTab' style="z-index:-1;opacity: 0;"><!-- functions -->
+      <h3 class="leftTabHeader">脚本编辑&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button></h3>
+      <div class="leftTabContent">
       <div class='etable'>
         <table>
           <tbody id='table_e260a2be_5690_476a_b04e_dacddede78b3'>
@@ -390,6 +397,9 @@ main.init('editor', function() {
 <script src="_server/CodeMirror/codeMirror.bundle.min.js"></script>
 <script src="_server/CodeMirror/show-hint.js"></script>
 <script src="_server/CodeMirror/javascript-hint.js"></script>
+<script src="_server/CodeMirror/jshint.min.js"></script>
+<script src="_server/CodeMirror/lint.js"></script>
+<script src="_server/CodeMirror/javascript-lint.js"></script>
 
 </body>
 </html>

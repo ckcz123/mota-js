@@ -19,6 +19,16 @@
   width: 435px;
 }
 
+.leftTab .leftTabHeader {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+}
+
+.leftTab .leftTabContent {
+  padding-top: 50px;
+}
+
 #appendPicSelection span {
   position: absolute;
   font-size:11px;
@@ -28,19 +38,19 @@
 
 #left6 {
   left: 5px;
-  /* top: 1930px; */
   top: 5px;
   z-index: 200;
   position: fixed;
   background-color: rgb(245, 245, 245);
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 
 #left6 #blocklyArea {
   float: left;
   width: 60%;
-  height: 100%;
+  height: 95%;
 }
 
 #left6 #blocklyDiv {
@@ -50,7 +60,7 @@
 #left6 .CodeMirror {
   border: 1px solid #eee;
   float: left;
-  height: 100%;
+  height: 95%;
   width: 35%;
 }
 #left6 #codeArea {width: 99.5%; height: 15.4em;overflow:y;/* resize:none; */}

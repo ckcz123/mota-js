@@ -300,20 +300,18 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 "plugins": {
 "plugin": function () {
     ////// 插件编写，可以在这里写自己额外需要执行的脚本 //////
-    var closure = {};
 
     // 在这里写的代码，在所有模块加载完毕后，游戏开始前会被执行
     console.log("插件编写测试");
     // 可以写一些其他的被直接执行的代码
 
     // 在这里写所有需要自定义的函数
-    // 写法必须是 closure.xxx = function (args) { ...
-    closure.test  = function () {
+    // 写法必须是 this.xxx = function (args) { ...
+    this.test  = function () {
         console.log("插件函数执行测试");
     }
     // 可以在任何地方（如afterXXX或自定义脚本事件）调用函数，方法为  core.plugin.xxx();
 
-    return closure;
 }
 }
 }

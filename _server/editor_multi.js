@@ -28,8 +28,14 @@ codeEditor.on("keyup", function (cm, event) {
 
 editor_multi.id='';
 editor_multi.isString=false;
+editor_multi.lintAutocomplete=false;
 
-editor_multi.show = function(){document.getElementById('left7').style='';}
+editor_multi.show = function(){
+  if(codeEditor.getValue().slice(0,8)==='function')editor_multi.lintAutocomplete=true;
+  codeEditor.setOption("lint", editor_multi.lintAutocomplete);
+  codeEditor.setOption("autocomplete", editor_multi.lintAutocomplete);
+  document.getElementById('left7').style='';
+}
 editor_multi.hide = function(){document.getElementById('left7').style='z-index:-1;opacity: 0;';}
 
 editor_multi.indent = function(field){
@@ -42,9 +48,12 @@ editor_multi.import = function(id_){
   if(!thisTr)return false;
   var input = thisTr.children[2].children[0].children[0];
   var field = thisTr.children[0].getAttribute('title');
+  var comment = thisTr.children[1].getAttribute('title');
   if(!input.type || input.type!=='textarea')return false;
   editor_multi.id=id_;
   editor_multi.isString=false;
+  editor_multi.lintAutocomplete=false;
+  if(field.indexOf('Effect') !== -1)editor_multi.lintAutocomplete=true;
   if(input.value.slice(0,1)==='"'){
     editor_multi.isString=true;
     codeEditor.setValue(JSON.parse(input.value)||'');
@@ -106,6 +115,7 @@ editor_multi.multiLineEdit = function(value,b,f,callback){
   multiLineArgs[0]=b;
   multiLineArgs[1]=f;
   multiLineArgs[2]=callback;
+  editor_multi.lintAutocomplete=false;
   editor_multi.show();
 }
 editor_multi.multiLineDone = function(){

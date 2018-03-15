@@ -1,6 +1,7 @@
 functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = 
 {
     "events" : {
+        "initGame": "游戏开始前的一些初始化操作",
         "setInitData" : "不同难度分别设置初始属性",
         "win" : "游戏获胜事件",
         "lose" : "游戏失败事件",

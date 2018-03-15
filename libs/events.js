@@ -71,6 +71,10 @@ events.prototype.getEvents = function (eventName) {
     return this.events[eventName];
 }
 
+events.prototype.initGame = function () {
+    return this.eventdata.initGame();
+}
+
 ////// 游戏开始事件 //////
 events.prototype.startGame = function (hard) {
 

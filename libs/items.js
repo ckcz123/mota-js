@@ -14,27 +14,6 @@ items.prototype.init = function () {
 
 ////// 获得所有道具 //////
 items.prototype.getItems = function () {
-    // 大黄门钥匙？钥匙盒？
-    if (core.flags.bigKeyIsBox)
-        this.items['bigKey'] = {'cls': 'items', 'name': '钥匙盒'};
-    // 面前的墙？四周的墙？
-    if (core.flags.pickaxeFourDirections)
-        this.items.pickaxe.text = "可以破坏勇士四周的墙";
-    if (core.flags.bombFourDirections)
-        this.items.bomb.text = "可以炸掉勇士四周的怪物";
-    if (core.flags.equipment) {
-        this.items.sword1 = {'cls': 'constants', 'name': '铁剑', 'text': '一把很普通的铁剑'};
-        this.items.sword2 = {'cls': 'constants', 'name': '银剑', 'text': '一把很普通的银剑'};
-        this.items.sword3 = {'cls': 'constants', 'name': '骑士剑', 'text': '一把很普通的骑士剑'};
-        this.items.sword4 = {'cls': 'constants', 'name': '圣剑', 'text': '一把很普通的圣剑'};
-        this.items.sword5 = {'cls': 'constants', 'name': '神圣剑', 'text': '一把很普通的神圣剑'};
-        this.items.shield1 = {'cls': 'constants', 'name': '铁盾', 'text': '一个很普通的铁盾'};
-        this.items.shield2 = {'cls': 'constants', 'name': '银盾', 'text': '一个很普通的银盾'};
-        this.items.shield3 = {'cls': 'constants', 'name': '骑士盾', 'text': '一个很普通的骑士盾'};
-        this.items.shield4 = {'cls': 'constants', 'name': '圣盾', 'text': '一个很普通的圣盾'};
-        this.items.shield5 = {'cls': 'constants', 'name': '神圣盾', 'text': '一个很普通的神圣盾'};
-    }
-
     return this.items;
 }
 

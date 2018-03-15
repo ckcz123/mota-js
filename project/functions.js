@@ -1,6 +1,33 @@
 functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = 
 {
 "events":{
+////// 游戏开始前的一些初始化操作 //////
+"initGame": function() {
+    // 游戏开始前的一些初始化操作
+
+    // 根据flag来对道具进行修改
+    if (core.flags.bigKeyIsBox)
+        core.material.items.bigKey = {'cls': 'items', 'name': '钥匙盒'};
+    // 面前的墙？四周的墙？
+    if (core.flags.pickaxeFourDirections)
+        core.material.items.pickaxe.text = "可以破坏勇士四周的墙";
+    if (core.flags.bombFourDirections)
+        core.material.items.bomb.text = "可以炸掉勇士四周的怪物";
+    if (core.flags.equipment) {
+        core.material.items.sword1 = {'cls': 'constants', 'name': '铁剑', 'text': '一把很普通的铁剑'};
+        core.material.items.sword2 = {'cls': 'constants', 'name': '银剑', 'text': '一把很普通的银剑'};
+        core.material.items.sword3 = {'cls': 'constants', 'name': '骑士剑', 'text': '一把很普通的骑士剑'};
+        core.material.items.sword4 = {'cls': 'constants', 'name': '圣剑', 'text': '一把很普通的圣剑'};
+        core.material.items.sword5 = {'cls': 'constants', 'name': '神圣剑', 'text': '一把很普通的神圣剑'};
+        core.material.items.shield1 = {'cls': 'constants', 'name': '铁盾', 'text': '一个很普通的铁盾'};
+        core.material.items.shield2 = {'cls': 'constants', 'name': '银盾', 'text': '一个很普通的银盾'};
+        core.material.items.shield3 = {'cls': 'constants', 'name': '骑士盾', 'text': '一个很普通的骑士盾'};
+        core.material.items.shield4 = {'cls': 'constants', 'name': '圣盾', 'text': '一个很普通的圣盾'};
+        core.material.items.shield5 = {'cls': 'constants', 'name': '神圣盾', 'text': '一个很普通的神圣盾'};
+    }
+
+
+},
 ////// 不同难度分别设置初始属性 //////
 "setInitData":function (hard) {
     // 不同难度分别设置初始属性
@@ -305,13 +332,14 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
     console.log("插件编写测试");
     // 可以写一些其他的被直接执行的代码
 
+
     // 在这里写所有需要自定义的函数
     // 写法必须是 this.xxx = function (args) { ...
     // 如果不写this的话，函数将无法被外部所访问
     this.test  = function () {
         console.log("插件函数执行测试");
     }
-    
+
     this.useEquipment = function (itemId) { // 使用装备
         if (itemId.indexOf("sword")==0) {
             var now=core.getFlag('sword', 'sword0'); // 当前装备剑的ID

@@ -19,6 +19,16 @@
   width: 435px;
 }
 
+.leftTab .leftTabHeader {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+}
+
+.leftTab .leftTabContent {
+  padding-top: 50px;
+}
+
 #appendPicSelection span {
   position: absolute;
   font-size:11px;

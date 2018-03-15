@@ -368,7 +368,7 @@ editor.prototype.listen = function() {
       var pos = locToPos(loc);
       editor_mode.onmode('nextChange');
       editor_mode.onmode('loc');
-      editor_mode.loc();
+      //editor_mode.loc();
       tip.whichShow = 1;
       return;
     }
@@ -530,7 +530,7 @@ editor.prototype.listen = function() {
         tip.infos = JSON.parse(JSON.stringify(editor.info));
         editor_mode.onmode('nextChange');
         editor_mode.onmode('emenyitem');
-        editor_mode.emenyitem();
+        //editor_mode.emenyitem();
       }
     }
   }

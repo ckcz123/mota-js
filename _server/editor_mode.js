@@ -182,6 +182,8 @@ editor_mode.prototype.doActionList = function(mode,actionList){
         editor.file.editEnemy(editor_mode.info.id,actionList,function(objs_){/*console.log(objs_);*/if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       } else if (editor_mode.info.images=='items'){
         editor.file.editItem(editor_mode.info.id,actionList,function(objs_){/*console.log(objs_);*/if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
+      } else {
+        editor.file.editMapBlocksInfo(editor_mode.info.idnum,actionList,function(objs_){/*console.log(objs_);*/if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printf('修改成功')});
       }
       break;
     case 'floor':
@@ -256,8 +258,9 @@ editor_mode.prototype.emenyitem = function(callback){
   } else if (editor_mode.info.images=='items'){
     editor.file.editItem(editor_mode.info.id,[],function(objs_){objs=objs_;/*console.log(objs_)*/});
   } else {
-    document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML='';
-    return;
+    /* document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML='';
+    return; */
+    editor.file.editMapBlocksInfo(editor_mode.info.idnum,[],function(objs_){objs=objs_;/*console.log(objs_)*/});
   }
   //只查询不修改时,内部实现不是异步的,所以可以这么写
   var tableinfo=editor_mode.objToTable(objs[0],objs[1]);

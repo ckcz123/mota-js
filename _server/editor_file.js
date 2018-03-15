@@ -253,6 +253,29 @@ editor_file = function(editor, callback){
   }
   //callback([obj,commentObj,err:String])
 
+  editor_file.editMapBlocksInfo = function(idnum,actionList,callback){
+    /*actionList:[]
+    只允许[]查询
+    */
+    if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
+    if (isset(actionList) && actionList.length > 0){
+      printe('editor中不允许修改图块的地形信息');throw('editor中不允许修改图块的地形信息');
+    } else {
+      callback([
+        (function(){
+          var locObj=Object.assign({},editor.core.maps.blocksInfo[idnum]);
+          /* Object.keys(editor_file.comment.enemys).forEach(function(v){
+            if (!isset(editor.core.enemys.enemys[id][v]))
+              locObj[v]=null;
+          }); */
+          return locObj;
+        })(),
+        {},/* editor_file.comment.enemys, */
+        null]);
+    }
+  }
+  //callback([obj,commentObj,err:String])
+
   ////////////////////////////////////////////////////////////////////  
 
   editor_file.editLoc = function(x,y,actionList,callback){

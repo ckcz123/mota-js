@@ -213,8 +213,7 @@ var workspace = Blockly.inject(blocklyDiv,{
   toolbox: document.getElementById('toolbox'),
   zoom:{
     controls: true,
-    wheel: true,//false
-    //滚轮改为上下(shift:左右)翻滚
+    wheel: false,//滚轮改为上下(shift:左右)翻滚
     startScale: 1.0,
     maxScale: 3,
     minScale: 0.3,

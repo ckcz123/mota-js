@@ -126,6 +126,32 @@ initscript=String.raw`
         ],
         "false": []
       }),
+      '<label text="商店购买属性/钥匙"></label>',
+      MotaActionFunctions.actionParser.parse([
+        {"type": "choices", "text": "\t[老人,man]少年，你需要钥匙吗？\n我这里有大把的！",
+        "choices": [
+            {"text": "黄钥匙（\${9+flag:shop_times}金币）", "action": [
+                {"type": "if", "condition": "status:money>=9+flag:shop_times",
+                    "true": [
+                        {"type": "setValue", "name": "status:money", "value": "status:money-(9+flag:shop_times)"},
+                        {"type": "setValue", "name": "item:yellowKey", "value": "item:yellowKey+1"},
+                    ],
+                    "false": [
+                        "\t[老人,man]你的金钱不足！",
+                        {"type": "revisit"}
+                    ]
+                }
+            ]},
+            {"text": "蓝钥匙（\${18+2*flag:shop_times}金币）", "action": [
+            ]},
+            {"text": "离开", "action": [
+                {"type": "exit"}
+            ]}
+        ]
+    },
+    {"type": "setValue", "name": "flag:shop_times", "value": "flag:shop_times+1"},
+    {"type": "revisit"}
+      ], 'event'),  
       '<label text="战前剧情"></label>',
       MotaActionFunctions.actionParser.parse({ 
         "trigger": "action", 

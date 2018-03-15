@@ -1,6 +1,33 @@
 functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = 
 {
 "events":{
+////// 游戏开始前的一些初始化操作 //////
+"initGame": function() {
+    // 游戏开始前的一些初始化操作
+
+    // 根据flag来对道具进行修改
+    if (core.flags.bigKeyIsBox)
+        core.material.items.bigKey = {'cls': 'items', 'name': '钥匙盒'};
+    // 面前的墙？四周的墙？
+    if (core.flags.pickaxeFourDirections)
+        core.material.items.pickaxe.text = "可以破坏勇士四周的墙";
+    if (core.flags.bombFourDirections)
+        core.material.items.bomb.text = "可以炸掉勇士四周的怪物";
+    if (core.flags.equipment) {
+        core.material.items.sword1 = {'cls': 'constants', 'name': '铁剑', 'text': '一把很普通的铁剑'};
+        core.material.items.sword2 = {'cls': 'constants', 'name': '银剑', 'text': '一把很普通的银剑'};
+        core.material.items.sword3 = {'cls': 'constants', 'name': '骑士剑', 'text': '一把很普通的骑士剑'};
+        core.material.items.sword4 = {'cls': 'constants', 'name': '圣剑', 'text': '一把很普通的圣剑'};
+        core.material.items.sword5 = {'cls': 'constants', 'name': '神圣剑', 'text': '一把很普通的神圣剑'};
+        core.material.items.shield1 = {'cls': 'constants', 'name': '铁盾', 'text': '一个很普通的铁盾'};
+        core.material.items.shield2 = {'cls': 'constants', 'name': '银盾', 'text': '一个很普通的银盾'};
+        core.material.items.shield3 = {'cls': 'constants', 'name': '骑士盾', 'text': '一个很普通的骑士盾'};
+        core.material.items.shield4 = {'cls': 'constants', 'name': '圣盾', 'text': '一个很普通的圣盾'};
+        core.material.items.shield5 = {'cls': 'constants', 'name': '神圣盾', 'text': '一个很普通的神圣盾'};
+    }
+
+
+},
 ////// 不同难度分别设置初始属性 //////
 "setInitData":function (hard) {
     // 不同难度分别设置初始属性
@@ -262,40 +289,80 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 ////// 读档事件后，载入事件前，可以执行的操作 //////
 "afterLoadData" : function(data) {
     // 读档事件后，载入事件前，可以执行的操作
+    // 可以在这里对怪物数据进行动态修改，详见文档——事件——怪物数据的动态修改
+
 
 }
-
-
 },
 "ui":{
 ////// 绘制“关于”界面 //////
 "drawAbout" : function() {
     // 绘制“关于”界面
-    
-        if (!core.isPlaying()) {
-            core.status.event = {'id': null, 'data': null};
-            core.dom.startPanel.style.display = 'none';
-        }
-        core.lockControl();
-        core.status.event.id = 'about';
-    
-        core.clearMap('ui', 0, 0, 416, 416);
-        var left = 48, top = 36, right = 416 - 2 * left, bottom = 416 - 2 * top;
-    
-        core.setAlpha('ui', 0.85);
-        core.fillRect('ui', left, top, right, bottom, '#000000');
-        core.setAlpha('ui', 1);
-        core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
-    
-        var text_start = left + 24;
-    
-        // 名称
-        core.canvas.ui.textAlign = "left";
-        core.fillText('ui', "HTML5 魔塔样板", text_start, top+35, "#FFD700", "bold 22px Verdana");
-        core.fillText('ui', "版本： "+core.firstData.version, text_start, top + 80, "#FFFFFF", "bold 17px Verdana");
-        core.fillText('ui', "作者： 艾之葵", text_start, top + 112);
-        core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112+32);
-        // TODO: 写自己的“关于”页面，每次增加32像素即可
+    if (!core.isPlaying()) {
+        core.status.event = {'id': null, 'data': null};
+        core.dom.startPanel.style.display = 'none';
     }
+    core.lockControl();
+    core.status.event.id = 'about';
+
+    core.clearMap('ui', 0, 0, 416, 416);
+    var left = 48, top = 36, right = 416 - 2 * left, bottom = 416 - 2 * top;
+
+    core.setAlpha('ui', 0.85);
+    core.fillRect('ui', left, top, right, bottom, '#000000');
+    core.setAlpha('ui', 1);
+    core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+
+    var text_start = left + 24;
+
+    // 名称
+    core.canvas.ui.textAlign = "left";
+    core.fillText('ui', "HTML5 魔塔样板", text_start, top+35, "#FFD700", "bold 22px Verdana");
+    core.fillText('ui', "版本： "+core.firstData.version, text_start, top + 80, "#FFFFFF", "bold 17px Verdana");
+    core.fillText('ui', "作者： 艾之葵", text_start, top + 112);
+    core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112+32);
+    // TODO: 写自己的“关于”页面，每次增加32像素即可
+}
+},
+"plugins": {
+"plugin": function () {
+    ////// 插件编写，可以在这里写自己额外需要执行的脚本 //////
+
+    // 在这里写的代码，在所有模块加载完毕后，游戏开始前会被执行
+    console.log("插件编写测试");
+    // 可以写一些其他的被直接执行的代码
+
+
+    // 在这里写所有需要自定义的函数
+    // 写法必须是 this.xxx = function (args) { ...
+    // 如果不写this的话，函数将无法被外部所访问
+    this.test  = function () {
+        console.log("插件函数执行测试");
+    }
+
+    this.useEquipment = function (itemId) { // 使用装备
+        if (itemId.indexOf("sword")==0) {
+            var now=core.getFlag('sword', 'sword0'); // 当前装备剑的ID
+            core.status.hero.atk -= core.values[now];
+            core.setItem(now, 1);
+            core.status.hero.atk += core.values[itemId];
+            core.setItem(itemId, 0);
+            core.setFlag('sword', itemId);
+            core.drawTip("已装备"+core.material.items[itemId].name);
+        }
+        if (itemId.indexOf("shield")==0) {
+            var now=core.getFlag('shield', 'shield0');
+            core.status.hero.def -= core.values[now];
+            core.setItem(now, 1);
+            core.status.hero.def += core.values[itemId];
+            core.setItem(itemId, 0);
+            core.setFlag('shield', itemId);
+            core.drawTip("已装备"+core.material.items[itemId].name);
+        }
+    }
+    
+    // 可以在任何地方（如afterXXX或自定义脚本事件）调用函数，方法为  core.plugin.xxx();
+
+}
 }
 }

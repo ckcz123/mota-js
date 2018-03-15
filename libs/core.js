@@ -273,12 +273,18 @@ core.prototype.init = function (coreData, callback) {
     core.material.ground = new Image();
     core.material.ground.src = "project/images/ground.png";
 
+
     core.loader.load(function () {
         console.log(core.material);
         // 设置勇士高度
         core.material.icons.hero.height = core.material.images.hero.height/4;
         core.setRequestAnimationFrame();
         core.showStartAnimate();
+
+
+
+        if (core.isset(functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins))
+            core.plugin = new functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.plugin();
 
         if (core.isset(callback)) callback();
 

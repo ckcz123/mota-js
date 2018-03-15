@@ -1458,7 +1458,7 @@ control.prototype.replay = function () {
                 core.changeFloor(floorId, stair, null, null, function () {
                     core.replay();
                 });
-            }, 750);
+            }, 750 / Math.sqrt(core.status.replay.speed));
             return;
         }
     }
@@ -1491,7 +1491,7 @@ control.prototype.replay = function () {
                     core.status.event.selection = parseInt(selections.shift());
                     core.events.openShop(shopId, false);
 
-                }, 750);
+                }, 750 / Math.sqrt(core.status.replay.speed));
                 return;
             }
         }

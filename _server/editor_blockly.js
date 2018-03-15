@@ -126,6 +126,32 @@ initscript=String.raw`
         ],
         "false": []
       }),
+      '<label text="商店购买属性/钥匙"></label>',
+      MotaActionFunctions.actionParser.parse([
+        {"type": "choices", "text": "\t[老人,man]少年，你需要钥匙吗？\n我这里有大把的！",
+        "choices": [
+            {"text": "黄钥匙（\${9+flag:shop_times}金币）", "action": [
+                {"type": "if", "condition": "status:money>=9+flag:shop_times",
+                    "true": [
+                        {"type": "setValue", "name": "status:money", "value": "status:money-(9+flag:shop_times)"},
+                        {"type": "setValue", "name": "item:yellowKey", "value": "item:yellowKey+1"},
+                    ],
+                    "false": [
+                        "\t[老人,man]你的金钱不足！",
+                        {"type": "revisit"}
+                    ]
+                }
+            ]},
+            {"text": "蓝钥匙（\${18+2*flag:shop_times}金币）", "action": [
+            ]},
+            {"text": "离开", "action": [
+                {"type": "exit"}
+            ]}
+        ]
+    },
+    {"type": "setValue", "name": "flag:shop_times", "value": "flag:shop_times+1"},
+    {"type": "revisit"}
+      ], 'event'),  
       '<label text="战前剧情"></label>',
       MotaActionFunctions.actionParser.parse({ 
         "trigger": "action", 
@@ -180,7 +206,9 @@ initscript=String.raw`
     getCategory(name).innerHTML = toolboxObj[name].join(toolboxgap);
   }
 
-  var workspace = Blockly.inject('blocklyDiv',{
+var blocklyArea = document.getElementById('blocklyArea');
+var blocklyDiv = document.getElementById('blocklyDiv');
+var workspace = Blockly.inject(blocklyDiv,{
   media: '_server/blockly/media/',
   toolbox: document.getElementById('toolbox'),
   zoom:{
@@ -192,7 +220,16 @@ initscript=String.raw`
     scaleSpeed: 1.08
   },
   trashcan: false,
-  });
+});
+ 
+var onresize = function(e) {
+  blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
+  blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
+};
+window.addEventListener('resize', onresize, false);
+onresize();
+Blockly.svgResize(workspace);
+
 
   var doubleClickCheck=[[0,'abc']];
   function omitedcheckUpdateFunction(event) {
@@ -336,8 +373,21 @@ editor_blockly.import = function(id_){
   return true;
 }
 
-editor_blockly.show = function(){document.getElementById('left6').style='';}
-editor_blockly.hide = function(){document.getElementById('left6').style='z-index:-1;opacity: 0;';}
+var blocklyWidgetDiv = document.getElementsByClassName('blocklyWidgetDiv');
+editor_blockly.show = function(){
+  document.getElementById('left6').style='';
+  for(var ii =0,node;node=blocklyWidgetDiv[ii];ii++){
+    node.style.zIndex = 201;
+    node.style.opacity = '';
+  }
+}
+editor_blockly.hide = function(){
+  document.getElementById('left6').style='z-index:-1;opacity: 0;';
+  for(var ii =0,node;node=blocklyWidgetDiv[ii];ii++){
+    node.style.zIndex = -1;
+    node.style.opacity = 0;
+  }
+}
 
 editor_blockly.cancel = function(){
   editor_blockly.id='';

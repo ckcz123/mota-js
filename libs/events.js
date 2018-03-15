@@ -71,6 +71,10 @@ events.prototype.getEvents = function (eventName) {
     return this.events[eventName];
 }
 
+events.prototype.initGame = function () {
+    return this.eventdata.initGame();
+}
+
 ////// 游戏开始事件 //////
 events.prototype.startGame = function (hard) {
 
@@ -555,7 +559,7 @@ events.prototype.doAction = function() {
                                 core.status.route.push("choices:"+index);
                                 core.events.insertAction(data.choices[index].action);
                                 core.events.doAction();
-                            }, 750)
+                            }, 750 / Math.sqrt(core.status.replay.speed))
                     }
                     else {
                         core.stopReplay();

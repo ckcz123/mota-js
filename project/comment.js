@@ -8,7 +8,9 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             'isEquipment': '物品是否属于装备(仅在core.flags.equipment时有效)\n$select({\"values\":[true,false]})$end'
         },
         'itemEffect':'cls为items的即捡即用类物品的效果,执行时会对这里的字符串执行eval()',
-        'itemEffectTip':'cls为items的即捡即用类物品,在获得时左上角额外显示的文字,执行时会对这里的字符串执行eval()得到字符串'
+        'itemEffectTip':'cls为items的即捡即用类物品,在获得时左上角额外显示的文字,执行时会对这里的字符串执行eval()得到字符串',
+        'useItem':'cls为tools或contants时的使用物品效果,执行时会对这里的字符串执行eval()',
+        'canUseItem':'cls为tools或contants时能否使用物品的判断,执行时会return这里的字符串执行eval()后的结果',
     },
     "items_template" : {'cls': 'items', 'name': '新物品'},
     "enemys" : {

@@ -311,6 +311,28 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
     this.test  = function () {
         console.log("插件函数执行测试");
     }
+    
+    this.useEquipment = function (itemId) { // 使用装备
+        if (itemId.indexOf("sword")==0) {
+            var now=core.getFlag('sword', 'sword0'); // 当前装备剑的ID
+            core.status.hero.atk -= core.values[now];
+            core.setItem(now, 1);
+            core.status.hero.atk += core.values[itemId];
+            core.setItem(itemId, 0);
+            core.setFlag('sword', itemId);
+            core.drawTip("已装备"+core.material.items[itemId].name);
+        }
+        if (itemId.indexOf("shield")==0) {
+            var now=core.getFlag('shield', 'shield0');
+            core.status.hero.def -= core.values[now];
+            core.setItem(now, 1);
+            core.status.hero.def += core.values[itemId];
+            core.setItem(itemId, 0);
+            core.setFlag('shield', itemId);
+            core.drawTip("已装备"+core.material.items[itemId].name);
+        }
+    }
+    
     // 可以在任何地方（如afterXXX或自定义脚本事件）调用函数，方法为  core.plugin.xxx();
 
 }

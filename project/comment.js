@@ -34,11 +34,11 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
     },
     "enemys_template" : {'name': '新敌人', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'point': 0, 'special': 0},
     "maps" : {
-        "id" : "$range(false)$end",
-        "idnum" : "$range(false)$end",
-        "cls" : "$range(false)$end",
-        "trigger" : "$select({\"values\":[null,\"openDoor\",\"passNet\",\"changeLight\",\"ski\",\"pushBox\"]})$end",
-        "noPass" : "$select({\"values\":[null,true,false]})$end"
+        "id" : "图块ID \n$range(false)$end",
+        "idnum" : "图块数字 \n$range(false)$end",
+        "cls" : "图块类别 \n$range(false)$end",
+        "trigger" : "图块的默认触发器 \n$select({\"values\":[null,\"openDoor\",\"passNet\",\"changeLight\",\"ski\",\"pushBox\"]})$end",
+        "noPass" : "图块默认可通行状态 \n$select({\"values\":[null,true,false]})$end"
     },
     "floors" : {
         'floor' : {

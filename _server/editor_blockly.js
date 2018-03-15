@@ -214,6 +214,7 @@ var workspace = Blockly.inject(blocklyDiv,{
   zoom:{
     controls: true,
     wheel: true,//false
+    //滚轮改为上下(shift:左右)翻滚
     startScale: 1.0,
     maxScale: 3,
     minScale: 0.3,
@@ -230,6 +231,14 @@ window.addEventListener('resize', onresize, false);
 onresize();
 Blockly.svgResize(workspace);
 
+//Blockly.bindEventWithChecks_(editor_blockly.workspace.svgGroup_,"wheel",editor_blockly.workspace,function(e){});
+document.getElementById('blocklyDiv').onmousewheel = function(e){
+  console.log(e);
+  e.preventDefault();
+  var hvScroll = e.shiftKey?'hScroll':'vScroll';
+  editor_blockly.workspace.scrollbar[hvScroll].handlePosition_+=( ((e.deltaY||0)+(e.detail||0)) >0?20:-20);
+  editor_blockly.workspace.scrollbar[hvScroll].onScroll_();
+}
 
   var doubleClickCheck=[[0,'abc']];
   function omitedcheckUpdateFunction(event) {

@@ -174,33 +174,47 @@ editor_file = function(editor, callback){
       });
       saveSetting('items',actionList,function (err) {
         callback([
-          {'items':(function(){
-            var locObj=Object.assign({},editor.core.items.items[id]);
-            Object.keys(editor_file.comment.items.items).forEach(function(v){
-              if (!isset(editor.core.items.items[id][v]))
-                /* locObj[v]=editor.core.items.items[id][v];
-              else */
-                locObj[v]=null;
+          (function(){
+            var locObj_ ={};
+            Object.keys(editor_file.comment.items).forEach(function(v){
+              if (isset(editor.core.items[v][id]) && v!=='items')
+                locObj_[v]=editor.core.items[v][id];
+              else
+                locObj_[v]=null;
             });
-            return locObj;
+            locObj_['items']=(function(){
+              var locObj=Object.assign({},editor.core.items.items[id]);
+              Object.keys(editor_file.comment.items.items).forEach(function(v){
+                if (!isset(editor.core.items.items[id][v]))
+                  locObj[v]=null;
+              });
+              return locObj;
+            })();
+            return locObj_;
           })(),
-          'itemEffect':editor.core.items.itemEffect[id],'itemEffectTip':editor.core.items.itemEffectTip[id]},
           editor_file.comment.items,
           err]);
       });
     } else {
       callback([
-        {'items':(function(){
-          var locObj=Object.assign({},editor.core.items.items[id]);
-          Object.keys(editor_file.comment.items.items).forEach(function(v){
-            if (!isset(editor.core.items.items[id][v]))
-              /* locObj[v]=editor.core.items.items[id][v];
-            else */
-              locObj[v]=null;
+        (function(){
+          var locObj_ ={};
+          Object.keys(editor_file.comment.items).forEach(function(v){
+            if (isset(editor.core.items[v][id]) && v!=='items')
+              locObj_[v]=editor.core.items[v][id];
+            else
+              locObj_[v]=null;
           });
-          return locObj;
+          locObj_['items']=(function(){
+            var locObj=Object.assign({},editor.core.items.items[id]);
+            Object.keys(editor_file.comment.items.items).forEach(function(v){
+              if (!isset(editor.core.items.items[id][v]))
+                locObj[v]=null;
+            });
+            return locObj;
+          })();
+          return locObj_;
         })(),
-        'itemEffect':editor.core.items.itemEffect[id],'itemEffectTip':editor.core.items.itemEffectTip[id]},
         editor_file.comment.items,
         null]);
     }

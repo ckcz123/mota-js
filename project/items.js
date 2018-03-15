@@ -114,7 +114,7 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
     "moneyPocket":"'，金币+'+core.values.moneyPocket",
 },
 
-"useItem": {
+"useItemEffect": {
     "book": "core.ui.drawBook(0);",
     "fly": "core.ui.drawFly(core.status.hero.flyRange.indexOf(core.status.floorId));",
     "earthquake": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n    core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');\n    core.updateFg();\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n});",
@@ -145,7 +145,7 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
     "shield5": "core.plugin.useEquipment(itemId)",
 },
 
-"canUseItem": {
+"canUseItemEffect": {
     "book": "true",
     "fly": "core.status.hero.flyRange.indexOf(core.status.floorId)>=0",
     "pickaxe": "var able=false;\nvar ids = [];\nfor (var i in core.status.thisMap.blocks) {\n    var block = core.status.thisMap.blocks[i];\n    if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) &&\n        (block.event.id == 'yellowWall' || block.event.id=='whiteWall' || block.event.id=='blueWall')) // 能破哪些墙\n    {\n        // 四个方向\n        if (core.flags.pickaxeFourDirections) {\n            if (Math.abs(block.x-core.status.hero.loc.x)+Math.abs(block.y-core.status.hero.loc.y)<=1) {\n                ids.push(i);\n            }\n        }\n        else {\n            if (block.x == core.nextX() && block.y == core.nextY()) {\n                ids.push(i);\n            }\n        }\n    }\n}\nif (ids.length>0) {\n    core.status.event.data = ids;\n    able=true;\n}\nable",

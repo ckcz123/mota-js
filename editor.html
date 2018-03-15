@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <link href="_server/css/editor.css" rel="stylesheet">
     <link href="_server/CodeMirror/codemirror.css" rel="stylesheet">
+    <link href="_server/CodeMirror/show-hint.css" rel="stylesheet">
     <link href="_server/css/editor_mode.css" rel="stylesheet">
   </head>
 <body>
@@ -103,7 +104,7 @@
         </table>
       </div>
     </div></div>
-    <div id="left6" class='leftTab' style="z-index:-1;opacity: 0;"><div><!-- eventsEditor -->
+    <div id="left6" class='leftTab' style="z-index:-1;opacity: 0;"><div style="position: relative; height: 95%"><!-- eventsEditor -->
       <h3>事件编辑器 &nbsp;&nbsp;
         <button onclick="editor_blockly.showXML()">Show XML</button>
         <button onclick="editor_blockly.runCode()">console.log(obj=code)</button>
@@ -127,16 +128,16 @@
           <category name="template"></category>
         </xml>
       </h3>
-      <div style="position: relative;">
-        <div id="blocklyDiv"></div>
+      <div style="position: relative;height: 100%">
+        <div id="blocklyArea"><div id="blocklyDiv"></div></div>
         <textarea id="codeArea" spellcheck="false"></textarea>
       </div>
     </div></div>
-    <div id="left7" style="z-index:-1;opacity: 0;"><div><!-- 多行文本编辑器 -->
+    <div id="left7" style="z-index:-1;opacity: 0;"><!-- 多行文本编辑器 -->
       <button onclick="editor_multi.confirm()">confirm</button>
       <button onclick="editor_multi.cancel()">cancel</button>
       <textarea id="multiLineCode" name="multiLineCode"></textarea>
-    </div></div>
+    </div>
     <div id="left8" class='leftTab' style="z-index:-1;opacity: 0;"><div><!-- functions -->
       <h3>脚本编辑&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button></h3>
       <div class='etable'>
@@ -387,6 +388,8 @@ main.init('editor', function() {
 <script src="_server/blockly/zh-hans.js"></script>
 <script src='_server/editor_blockly.js'></script>
 <script src="_server/CodeMirror/codeMirror.bundle.min.js"></script>
+<script src="_server/CodeMirror/show-hint.js"></script>
+<script src="_server/CodeMirror/javascript-hint.js"></script>
 
 </body>
 </html>

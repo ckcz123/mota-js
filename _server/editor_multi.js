@@ -5,9 +5,16 @@ var editor_multi = {};
 var codeEditor = CodeMirror.fromTextArea(document.getElementById("multiLineCode"), {
   lineNumbers: true,
   matchBrackets: true,
+  mode: {name: "javascript", json: true, globalVars: true},
   lineWrapping: true,
   continueComments: "Enter",
-  extraKeys: {"Ctrl-Q": "toggleComment"}
+  extraKeys: {"Ctrl-Q": "toggleComment"},
+});
+
+codeEditor.on("keyup", function (cm, event) {
+  if ((event.keyCode >= 65 && event.keyCode<=90) || (event.keyCode>=49 && event.keyCode<=57) || event.keyCode==190) {
+      CodeMirror.commands.autocomplete(cm, null, {completeSingle: false});
+  }
 });
 
 editor_multi.id='';

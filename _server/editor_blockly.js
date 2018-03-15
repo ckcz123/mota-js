@@ -180,7 +180,9 @@ initscript=String.raw`
     getCategory(name).innerHTML = toolboxObj[name].join(toolboxgap);
   }
 
-  var workspace = Blockly.inject('blocklyDiv',{
+var blocklyArea = document.getElementById('blocklyArea');
+var blocklyDiv = document.getElementById('blocklyDiv');
+var workspace = Blockly.inject(blocklyDiv,{
   media: '_server/blockly/media/',
   toolbox: document.getElementById('toolbox'),
   zoom:{
@@ -192,7 +194,16 @@ initscript=String.raw`
     scaleSpeed: 1.08
   },
   trashcan: false,
-  });
+});
+ 
+var onresize = function(e) {
+  blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
+  blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
+};
+window.addEventListener('resize', onresize, false);
+onresize();
+Blockly.svgResize(workspace);
+
 
   var doubleClickCheck=[[0,'abc']];
   function omitedcheckUpdateFunction(event) {

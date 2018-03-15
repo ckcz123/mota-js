@@ -336,8 +336,21 @@ editor_blockly.import = function(id_){
   return true;
 }
 
-editor_blockly.show = function(){document.getElementById('left6').style='';}
-editor_blockly.hide = function(){document.getElementById('left6').style='z-index:-1;opacity: 0;';}
+var blocklyWidgetDiv = document.getElementsByClassName('blocklyWidgetDiv');
+editor_blockly.show = function(){
+  document.getElementById('left6').style='';
+  for(var ii =0,node;node=blocklyWidgetDiv[ii];ii++){
+    node.style.zIndex = 201;
+    node.style.opacity = '';
+  }
+}
+editor_blockly.hide = function(){
+  document.getElementById('left6').style='z-index:-1;opacity: 0;';
+  for(var ii =0,node;node=blocklyWidgetDiv[ii];ii++){
+    node.style.zIndex = -1;
+    node.style.opacity = 0;
+  }
+}
 
 editor_blockly.cancel = function(){
   editor_blockly.id='';

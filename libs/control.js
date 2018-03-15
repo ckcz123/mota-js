@@ -1382,7 +1382,7 @@ control.prototype.resumeReplay = function () {
 control.prototype.forwardReplay = function () {
     if (!core.status.replay.replaying) return;
     core.status.replay.speed = parseInt(10*core.status.replay.speed + 1)/10;
-    if (core.status.replay.speed>2.5) core.status.replay.speed=2.5;
+    if (core.status.replay.speed>3.0) core.status.replay.speed=3.0;
     core.drawTip("x"+core.status.replay.speed+"倍");
 }
 
@@ -1440,7 +1440,7 @@ control.prototype.replay = function () {
                     core.useItem(itemId, function () {
                         core.replay();
                     });
-                }, 750);
+                }, 750 / Math.sqrt(core.status.replay.speed));
             }
             return;
         }

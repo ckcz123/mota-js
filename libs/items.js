@@ -7,8 +7,8 @@ items.prototype.init = function () {
     this.items = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.items;
     this.itemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.itemEffect;
     this.itemEffectTip = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.itemEffectTip;
-    this.useItemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.useItem;
-    this.canUseItemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canUseItem;
+    this.useItemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.useItemEffect;
+    this.canUseItemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canUseItemEffect;
     //delete(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a);
 }
 

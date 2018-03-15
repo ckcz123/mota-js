@@ -764,13 +764,13 @@ return code;
 */
 
 choices_s
-    :   '选项' ':' EvalString BGNL? '标题' EvalString? '图像' IdString? BGNL? Newline choicesContext+ BEND Newline
+    :   '选项' ':' EvalString? BGNL? '标题' EvalString? '图像' IdString? BGNL? Newline choicesContext+ BEND Newline
     ;
 
 /* choices_s
 tooltip : choices: 给用户提供选项
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=choices-%e7%bb%99%e7%94%a8%e6%88%b7%e6%8f%90%e4%be%9b%e9%80%89%e9%a1%b9
-default : ["提示文字:选择一种钥匙","流浪者","woman"]
+default : ["","流浪者","woman"]
 var title='';
 if (EvalString_1==''){
     if (IdString_0=='')title='';
@@ -779,7 +779,9 @@ if (EvalString_1==''){
     if (IdString_0=='')title='\\t['+EvalString_1+']';
     else title='\\t['+EvalString_1+','+IdString_0+']';
 }
-var code = ['{"type": "choices", "text": "',title+EvalString_0,'", "choices": [\n',
+EvalString_0 = title+EvalString_0;
+EvalString_0 = EvalString_0 ?(', "text": "'+EvalString_0+'"'):'';
+var code = ['{"type": "choices"',EvalString_0,', "choices": [\n',
     choicesContext_0,
 ']},\n'].join('');
 return code;
@@ -1315,7 +1317,7 @@ ActionParser.prototype.parseAction = function() {
           choice.text,this.insertActionList(choice.action),text_choices]);
       }
       this.next = MotaActionBlocks['choices_s'].xmlText([
-        this.EvalString(data.text),'','',text_choices,this.next]);
+        this.isset(data.text)?this.EvalString(data.text):null,'','',text_choices,this.next]);
       break;
     case "win":
       this.next = MotaActionBlocks['win_s'].xmlText([

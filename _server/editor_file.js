@@ -149,10 +149,10 @@ editor_file = function(editor, callback){
     saveSetting('maps',[["add","['"+idnum+"']",{'cls': info.images, 'id':id}]],tempcallback);
     saveSetting('icons',[["add","['"+info.images+"']['"+id+"']",info.y]],tempcallback);
     if(info.images==='items'){
-      saveSetting('items',[["change"/*其实应该是add*/,"['items']['"+id+"']",editor_file.comment.items_template]],function(err){if(err){printe(err);throw(err)}});
+      saveSetting('items',[["add","['items']['"+id+"']",editor_file.comment.items_template]],function(err){if(err){printe(err);throw(err)}});
     }
     if(info.images==='enemys' || info.images==='enemy48'){
-      saveSetting('enemys',[["change"/*其实应该是add*/,"['"+id+"']",editor_file.comment.enemys_template]],function(err){if(err){printe(err);throw(err)}});
+      saveSetting('enemys',[["add","['"+id+"']",editor_file.comment.enemys_template]],function(err){if(err){printe(err);throw(err)}});
     }
     
     callback(null);
@@ -174,33 +174,47 @@ editor_file = function(editor, callback){
       });
       saveSetting('items',actionList,function (err) {
         callback([
-          {'items':(function(){
-            var locObj=Object.assign({},editor.core.items.items[id]);
-            Object.keys(editor_file.comment.items.items).forEach(function(v){
-              if (!isset(editor.core.items.items[id][v]))
-                /* locObj[v]=editor.core.items.items[id][v];
-              else */
-                locObj[v]=null;
+          (function(){
+            var locObj_ ={};
+            Object.keys(editor_file.comment.items).forEach(function(v){
+              if (isset(editor.core.items[v][id]) && v!=='items')
+                locObj_[v]=editor.core.items[v][id];
+              else
+                locObj_[v]=null;
             });
-            return locObj;
+            locObj_['items']=(function(){
+              var locObj=Object.assign({},editor.core.items.items[id]);
+              Object.keys(editor_file.comment.items.items).forEach(function(v){
+                if (!isset(editor.core.items.items[id][v]))
+                  locObj[v]=null;
+              });
+              return locObj;
+            })();
+            return locObj_;
           })(),
-          'itemEffect':editor.core.items.itemEffect[id],'itemEffectTip':editor.core.items.itemEffectTip[id]},
           editor_file.comment.items,
           err]);
       });
     } else {
       callback([
-        {'items':(function(){
-          var locObj=Object.assign({},editor.core.items.items[id]);
-          Object.keys(editor_file.comment.items.items).forEach(function(v){
-            if (!isset(editor.core.items.items[id][v]))
-              /* locObj[v]=editor.core.items.items[id][v];
-            else */
-              locObj[v]=null;
+        (function(){
+          var locObj_ ={};
+          Object.keys(editor_file.comment.items).forEach(function(v){
+            if (isset(editor.core.items[v][id]) && v!=='items')
+              locObj_[v]=editor.core.items[v][id];
+            else
+              locObj_[v]=null;
           });
-          return locObj;
+          locObj_['items']=(function(){
+            var locObj=Object.assign({},editor.core.items.items[id]);
+            Object.keys(editor_file.comment.items.items).forEach(function(v){
+              if (!isset(editor.core.items.items[id][v]))
+                locObj[v]=null;
+            });
+            return locObj;
+          })();
+          return locObj_;
         })(),
-        'itemEffect':editor.core.items.itemEffect[id],'itemEffectTip':editor.core.items.itemEffectTip[id]},
         editor_file.comment.items,
         null]);
     }
@@ -248,6 +262,49 @@ editor_file = function(editor, callback){
           return locObj;
         })(),
         editor_file.comment.enemys,
+        null]);
+    }
+  }
+  //callback([obj,commentObj,err:String])
+
+  editor_file.editMapBlocksInfo = function(idnum,actionList,callback){
+    /*actionList:[
+      ["change","['events']",["\t[老人,magician]领域、夹击。\n请注意领域怪需要设置value为伤害数值，可参见样板中初级巫师的写法。"]],
+      ["change","['afterBattle']",null],
+    ]
+    为[]时只查询不修改
+    */
+    if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
+    if (isset(actionList) && actionList.length > 0){
+      actionList.forEach(function (value) {
+        value[1] = "['"+idnum+"']"+value[1];
+      });
+      saveSetting('maps',actionList,function (err) {
+        callback([
+          (function(){
+            var locObj=Object.assign({},editor.core.maps.blocksInfo[idnum]);
+            Object.keys(editor_file.comment.maps).forEach(function(v){
+              if (!isset(editor.core.maps.blocksInfo[idnum][v]))
+                locObj[v]=null;
+            });
+            locObj.idnum = idnum;
+            return locObj;
+          })(),
+          editor_file.comment.maps,
+          null]);
+      });
+    } else {
+      callback([
+        (function(){
+          var locObj=Object.assign({},editor.core.maps.blocksInfo[idnum]);
+          Object.keys(editor_file.comment.maps).forEach(function(v){
+            if (!isset(editor.core.maps.blocksInfo[idnum][v]))
+              locObj[v]=null;
+          });
+          locObj.idnum = idnum;
+          return locObj;
+        })(),
+        editor_file.comment.maps,
         null]);
     }
   }
@@ -479,13 +536,9 @@ editor_file = function(editor, callback){
   var saveSetting = function(file,actionList,callback) {
     //console.log(file);
     //console.log(actionList);
-    actionList.forEach(function (value) {
-      if (value[0]!='change' && file!='icons' && file!='maps') {printe('目前只支持change');throw('目前只支持change')};
-    });
 
     if (file=='icons') {
       actionList.forEach(function (value) {
-        if (value[0]!='add')return;
         eval("icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1"+value[1]+'='+JSON.stringify(value[2]));
       });
       var datastr='icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1 = \n';
@@ -497,7 +550,6 @@ editor_file = function(editor, callback){
     }
     if (file=='maps') {
       actionList.forEach(function (value) {
-        if (value[0]!='add')return;
         eval("maps_90f36752_8815_4be8_b32b_d7fad1d0542e"+value[1]+'='+JSON.stringify(value[2]));
       });
       var datastr='maps_90f36752_8815_4be8_b32b_d7fad1d0542e = \n';
@@ -517,7 +569,6 @@ editor_file = function(editor, callback){
     }
     if (file=='items') {
       actionList.forEach(function (value) {
-        if (value[0]!='change')return;
         eval("items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a"+value[1]+'='+JSON.stringify(value[2]));
       });
       var datastr='items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a = \n';
@@ -529,7 +580,6 @@ editor_file = function(editor, callback){
     }
     if (file=='enemys') {
       actionList.forEach(function (value) {
-        if (value[0]!='change')return;
         eval("enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80"+value[1]+'='+JSON.stringify(value[2]));
       });
       var datastr='enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = \n';
@@ -546,7 +596,6 @@ editor_file = function(editor, callback){
     }
     if (file=='data') {
       actionList.forEach(function (value) {
-        if (value[0]!='change')return;
         eval("data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d"+value[1]+'='+JSON.stringify(value[2]));
       });
       var datastr='data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d = \n';
@@ -558,7 +607,6 @@ editor_file = function(editor, callback){
     }
     if (file=='functions') {
       actionList.forEach(function (value) {
-        if (value[0]!='change')return;
         eval("fmap[fobj"+value[1]+']='+JSON.stringify(value[2]));
       });
       var fraw = fjson;
@@ -574,7 +622,6 @@ editor_file = function(editor, callback){
     }
     if (file=='floors') {
       actionList.forEach(function (value) {
-        if (value[0]!='change')return;
         eval("editor.currentFloorData"+value[1]+'='+JSON.stringify(value[2]));
       });
       editor_file.saveFloorFile(callback);

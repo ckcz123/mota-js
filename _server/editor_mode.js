@@ -157,7 +157,7 @@ editor_mode.prototype.objToTd = function(thiseval,comment,field){
 }
 
 editor_mode.prototype.indent = function(field){
-  var num = 4;
+  var num = '\t';
   if(field.indexOf("['main']")===0)return 0;
   if(field.indexOf("['flyRange']")!==-1)return 0;
   if(field==="['special']")return 0;

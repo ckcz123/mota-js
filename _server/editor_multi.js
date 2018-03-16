@@ -40,7 +40,7 @@ editor_multi.hide = function(){document.getElementById('left7').style='z-index:-
 
 editor_multi.indent = function(field){
   if(editor && editor.mode && editor.mode.indent)return editor.mode.indent(field);
-  return 4;
+  return '\t';
 }
 
 editor_multi.import = function(id_){

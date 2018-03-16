@@ -34,6 +34,28 @@ editor_mode.prototype.init_dom_ids = function(callback){
 }
 
 /////////////////////////////////////////////////////////////////////////////
+editor_mode.prototype.objToTable_ = function(obj,commentObj){
+  var outstr=["\n<tr><td>条目</td><td>注释</td><td>值</td></tr>\n"];
+  var guids=[];
+  var recursionParse = function(pfield,pcfield,pvobj,pcobj) {
+    for(var ii in pvobj){
+      var field = pfield+"['"+ii+"']";
+      var cfield = pcfield+"['"+ii+"']['_data']";
+      var vobj = pvobj[ii];
+      var cobj = pcobj[ii]['_data'];
+      var isleaf = checkIsLeaf(vobj,cobj);
+      if (isleaf) {
+        var leafnode = editor_mode.objToTr_(obj,commentObj,field,cfield,vobj,cobj);
+        outstr.push(leafnode[0]);
+        guids.push(leafnode[1]);
+      } else {
+        outstr.push(["<tr><td>----</td><td>----</td><td>",field,"</td></tr>\n"].join(''));
+        recursionParse(field,cfield,vobj,cobj);
+      }
+    }
+  }
+  recursionParse("","",obj,commentObj);
+}
 
 editor_mode.prototype.objToTable = function(obj,commentObj){
   var outstr=["\n<tr><td>条目</td><td>注释</td><td>值</td></tr>\n"];

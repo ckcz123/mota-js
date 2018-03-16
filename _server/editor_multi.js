@@ -109,13 +109,13 @@ editor_multi.confirm =  function (){
 }
 
 var multiLineArgs=[null,null,null];
-editor_multi.multiLineEdit = function(value,b,f,callback){
+editor_multi.multiLineEdit = function(value,b,f,args,callback){
   editor_multi.id='callFromBlockly';
   codeEditor.setValue(value.split('\\n').join('\n')||'');
   multiLineArgs[0]=b;
   multiLineArgs[1]=f;
   multiLineArgs[2]=callback;
-  editor_multi.lintAutocomplete=false;
+  editor_multi.lintAutocomplete=Boolean(args.lint);
   editor_multi.show();
 }
 editor_multi.multiLineDone = function(){

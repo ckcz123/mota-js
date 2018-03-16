@@ -438,7 +438,7 @@ editor_blockly.doubleClickBlock = function (blockId){
   if(f){
     var value = b.getFieldValue(f);
     //多行编辑
-    editor_multi.multiLineEdit(value,b,f,function(newvalue,b,f){
+    editor_multi.multiLineEdit(value,b,f,{'lint':f==='RawEvalString_0'},function(newvalue,b,f){
       if(textStringDict[b.type]!=='RawEvalString_0'){}
       b.setFieldValue(newvalue.split('\n').join('\\n'),f);
     });

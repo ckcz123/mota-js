@@ -542,7 +542,7 @@ editor_file = function(editor, callback){
         eval("icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1"+value[1]+'='+JSON.stringify(value[2]));
       });
       var datastr='icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1 = \n';
-      datastr+=JSON.stringify(icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1,null,4);
+      datastr+=JSON.stringify(icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1,null,'\t');
       fs.writeFile('project/icons.js',encode(datastr),'base64',function(err, data){
         callback(err);
       });
@@ -556,7 +556,7 @@ editor_file = function(editor, callback){
       //datastr+=JSON.stringify(maps_90f36752_8815_4be8_b32b_d7fad1d0542e,null,4);
 
       var emap={};
-      var estr = JSON.stringify(maps_90f36752_8815_4be8_b32b_d7fad1d0542e,function(k,v){if(v.id!=null){var id_ = editor.guid();emap[id_]=JSON.stringify(v);return id_;}else return v},4);
+      var estr = JSON.stringify(maps_90f36752_8815_4be8_b32b_d7fad1d0542e,function(k,v){if(v.id!=null){var id_ = editor.guid();emap[id_]=JSON.stringify(v);return id_;}else return v},'\t');
       for(var id_ in emap){
           estr = estr.replace('"'+id_+'"',emap[id_])
       }
@@ -572,7 +572,7 @@ editor_file = function(editor, callback){
         eval("items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a"+value[1]+'='+JSON.stringify(value[2]));
       });
       var datastr='items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a = \n';
-      datastr+=JSON.stringify(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a,null,4);
+      datastr+=JSON.stringify(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a,null,'\t');
       fs.writeFile('project/items.js',encode(datastr),'base64',function(err, data){
         callback(err);
       });
@@ -584,7 +584,7 @@ editor_file = function(editor, callback){
       });
       var datastr='enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = \n';
       var emap={};
-      var estr = JSON.stringify(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80,function(k,v){if(v.hp!=null){var id_ = editor.guid();emap[id_]=JSON.stringify(v);return id_;}else return v},4);
+      var estr = JSON.stringify(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80,function(k,v){if(v.hp!=null){var id_ = editor.guid();emap[id_]=JSON.stringify(v);return id_;}else return v},'\t');
       for(var id_ in emap){
         estr = estr.replace('"'+id_+'"',emap[id_])
       }
@@ -598,8 +598,10 @@ editor_file = function(editor, callback){
       actionList.forEach(function (value) {
         eval("data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d"+value[1]+'='+JSON.stringify(value[2]));
       });
+      if (data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.floorIds.indexOf(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.floorId)<0)
+        data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.floorId = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.floorIds[0];
       var datastr='data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d = \n';
-      datastr+=JSON.stringify(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d,null,4);
+      datastr+=JSON.stringify(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d,null,'\t');
       fs.writeFile('project/data.js',encode(datastr),'base64',function(err, data){
         callback(err);
       });

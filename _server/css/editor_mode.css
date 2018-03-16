@@ -167,8 +167,12 @@ div.etableInputDiv {
   border: none;
 }
 
-.etableInputDiv input {
+.etableInputDiv input[type="text"] {
 
+}
+
+.etableInputDiv input[type="checkbox"] {
+  
 }
 
 .etableInputDiv select {

@@ -167,8 +167,14 @@ div.etableInputDiv {
   border: none;
 }
 
-.etableInputDiv input {
+.etableInputDiv input[type="text"] {
 
+}
+
+.etableInputDiv input[type="checkbox"] {
+  position:relative;
+  top: 35%;
+  height: 30px;
 }
 
 .etableInputDiv select {

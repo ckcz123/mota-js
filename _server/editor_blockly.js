@@ -353,26 +353,12 @@ editor_blockly.parse = function () {
 
 editor_blockly.id='';
 
-editor_blockly.import = function(id_){
+editor_blockly.import = function(id_,args){
   var thisTr = document.getElementById(id_);
   if(!thisTr)return false;
   var input = thisTr.children[2].children[0].children[0];
   var field = thisTr.children[0].getAttribute('title');
-  var type = {
-    "['events']":'event',
-    "['changeFloor']":'changeFloor',
-    "['afterBattle']":'afterBattle',
-    "['afterGetItem']":'afterGetItem',
-    "['afterOpenDoor']":'afterOpenDoor',
-    
-    //"['firstData']['shops']":'shop',
-    "--shop--未完成数组的处理":'shop',
-
-    "['firstArrive']":'firstArrive',
-    "['firstData']['startText']":'firstArrive',
-
-    "--point--未完成数据转移":'point',
-  }[field];
+  var type = args.type;
   if(!type)return false;
   editor_blockly.id=id_;
   codeAreaHL.setValue(input.value);

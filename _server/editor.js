@@ -323,6 +323,10 @@ editor.prototype.guid = function() {
   });
 }
 
+editor.prototype.HTMLescape = function(str_) {
+  return String(str_).split('').map(function(v){return '&#'+v.charCodeAt(0)+';'}).join('');
+}
+
 editor.prototype.listen = function() {
 
   var uc = eui.getContext('2d');

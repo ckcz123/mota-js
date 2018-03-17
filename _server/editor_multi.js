@@ -45,7 +45,7 @@ editor_multi.indent = function(field){
   return '\t';
 }
 
-editor_multi.import = function(id_){
+editor_multi.import = function(id_,args){
   var thisTr = document.getElementById(id_);
   if(!thisTr)return false;
   var input = thisTr.children[2].children[0].children[0];
@@ -55,6 +55,7 @@ editor_multi.import = function(id_){
   editor_multi.id=id_;
   editor_multi.isString=false;
   editor_multi.lintAutocomplete=false;
+  if(args.lint===true)editor_multi.lintAutocomplete=true;
   if(field.indexOf('Effect') !== -1)editor_multi.lintAutocomplete=true;
   if(input.value.slice(0,1)==='"'){
     editor_multi.isString=true;

@@ -65,6 +65,7 @@ editor_mode.prototype.objToTable_ = function(obj,commentObj){
         else cobj = Object.assign({},defaultcobj);
       }
       var args = {field:field,cfield:cfield,vobj:vobj,cobj:cobj}
+      if(cobj._leaf instanceof Function)cobj._leaf=cobj._leaf(args);
       for(var key in cobj){
         if(key==='_data')continue;
         if(cobj[key] instanceof Function)cobj[key]=cobj[key](args);
@@ -116,8 +117,8 @@ editor_mode.prototype.objToTable_ = function(obj,commentObj){
         }
       }
       input.ondblclick = function(){
-        if(cobj.type==='event')editor_blockly.import(guid,{type:cobj._event});
-        if(cobj.type==='textarea')editor_multi.import(guid,{lint:cobj._lint});
+        if(cobj._type==='event')editor_blockly.import(guid,{type:cobj._event});
+        if(cobj._type==='textarea')editor_multi.import(guid,{lint:cobj._lint});
         
       }
     });
@@ -366,7 +367,7 @@ editor_mode.prototype.loc = function(callback){
   var objs=[];
   editor.file.editLoc(editor_mode.pos.x,editor_mode.pos.y,[],function(objs_){objs=objs_;/*console.log(objs_)*/});
   //只查询不修改时,内部实现不是异步的,所以可以这么写
-  var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
+  var tableinfo=editor_mode.objToTable_(objs[0],objs[1]);
   document.getElementById('table_3d846fc4_7644_44d1_aa04_433d266a73df').innerHTML=tableinfo.HTML;
   tableinfo.listen(tableinfo.guids);
 
@@ -397,7 +398,7 @@ editor_mode.prototype.emenyitem = function(callback){
     editor.file.editMapBlocksInfo(editor_mode.info.idnum,[],function(objs_){objs=objs_;/*console.log(objs_)*/});
   }
   //只查询不修改时,内部实现不是异步的,所以可以这么写
-  var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
+  var tableinfo=editor_mode.objToTable_(objs[0],objs[1]);
   document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML=tableinfo.HTML;
   tableinfo.listen(tableinfo.guids);
 
@@ -408,7 +409,7 @@ editor_mode.prototype.floor = function(callback){
   var objs=[];
   editor.file.editFloor([],function(objs_){objs=objs_;/*console.log(objs_)*/});
   //只查询不修改时,内部实现不是异步的,所以可以这么写
-  var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
+  var tableinfo=editor_mode.objToTable_(objs[0],objs[1]);
   document.getElementById('table_4a3b1b09_b2fb_4bdf_b9ab_9f4cdac14c74').innerHTML=tableinfo.HTML;
   tableinfo.listen(tableinfo.guids);
   if (Boolean(callback))callback();
@@ -418,7 +419,7 @@ editor_mode.prototype.tower = function(callback){
   var objs=[];
   editor.file.editTower([],function(objs_){objs=objs_;/*console.log(objs_)*/});
   //只查询不修改时,内部实现不是异步的,所以可以这么写
-  var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
+  var tableinfo=editor_mode.objToTable_(objs[0],objs[1]);
   document.getElementById('table_b6a03e4c_5968_4633_ac40_0dfdd2c9cde5').innerHTML=tableinfo.HTML;
   tableinfo.listen(tableinfo.guids);
   if (Boolean(callback))callback();
@@ -428,7 +429,7 @@ editor_mode.prototype.functions = function(callback){
   var objs=[];
   editor.file.editFunctions([],function(objs_){objs=objs_;/*console.log(objs_)*/});
   //只查询不修改时,内部实现不是异步的,所以可以这么写
-  var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
+  var tableinfo=editor_mode.objToTable_(objs[0],objs[1]);
   document.getElementById('table_e260a2be_5690_476a_b04e_dacddede78b3').innerHTML=tableinfo.HTML;
   tableinfo.listen(tableinfo.guids);
   if (Boolean(callback))callback();

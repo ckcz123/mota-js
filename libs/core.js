@@ -985,7 +985,7 @@ core.prototype.syncSave = function (type) {
 
 ////// 从服务器加载存档 //////
 core.prototype.syncLoad = function () {
-    core.control.synvLoad();
+    core.control.syncLoad();
 }
 
 ////// 存档到本地 //////

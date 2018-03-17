@@ -149,10 +149,10 @@ editor_file = function(editor, callback){
     saveSetting('maps',[["add","['"+idnum+"']",{'cls': info.images, 'id':id}]],tempcallback);
     saveSetting('icons',[["add","['"+info.images+"']['"+id+"']",info.y]],tempcallback);
     if(info.images==='items'){
-      saveSetting('items',[["add","['items']['"+id+"']",editor_file.comment.items_template]],function(err){if(err){printe(err);throw(err)}});
+      saveSetting('items',[["add","['items']['"+id+"']",editor_file.comment._data.items_template]],function(err){if(err){printe(err);throw(err)}});
     }
     if(info.images==='enemys' || info.images==='enemy48'){
-      saveSetting('enemys',[["add","['"+id+"']",editor_file.comment.enemys_template]],function(err){if(err){printe(err);throw(err)}});
+      saveSetting('enemys',[["add","['"+id+"']",editor_file.comment._data.enemys_template]],function(err){if(err){printe(err);throw(err)}});
     }
     
     callback(null);
@@ -176,7 +176,7 @@ editor_file = function(editor, callback){
         callback([
           (function(){
             var locObj_ ={};
-            Object.keys(editor_file.comment.items).forEach(function(v){
+            Object.keys(editor_file.comment._data.items._data).forEach(function(v){
               if (isset(editor.core.items[v][id]) && v!=='items')
                 locObj_[v]=editor.core.items[v][id];
               else
@@ -184,7 +184,7 @@ editor_file = function(editor, callback){
             });
             locObj_['items']=(function(){
               var locObj=Object.assign({},editor.core.items.items[id]);
-              Object.keys(editor_file.comment.items.items).forEach(function(v){
+              Object.keys(editor_file.comment._data.items._data.items._data).forEach(function(v){
                 if (!isset(editor.core.items.items[id][v]))
                   locObj[v]=null;
               });
@@ -192,14 +192,14 @@ editor_file = function(editor, callback){
             })();
             return locObj_;
           })(),
-          editor_file.comment.items,
+          editor_file.comment._data.items,
           err]);
       });
     } else {
       callback([
         (function(){
           var locObj_ ={};
-          Object.keys(editor_file.comment.items).forEach(function(v){
+          Object.keys(editor_file.comment._data.items._data).forEach(function(v){
             if (isset(editor.core.items[v][id]) && v!=='items')
               locObj_[v]=editor.core.items[v][id];
             else
@@ -207,7 +207,7 @@ editor_file = function(editor, callback){
           });
           locObj_['items']=(function(){
             var locObj=Object.assign({},editor.core.items.items[id]);
-            Object.keys(editor_file.comment.items.items).forEach(function(v){
+            Object.keys(editor_file.comment._data.items._data.items._data).forEach(function(v){
               if (!isset(editor.core.items.items[id][v]))
                 locObj[v]=null;
             });
@@ -215,7 +215,7 @@ editor_file = function(editor, callback){
           })();
           return locObj_;
         })(),
-        editor_file.comment.items,
+        editor_file.comment._data.items,
         null]);
     }
     //只有items.cls是items的才有itemEffect和itemEffectTip,keys和constants和tools只有items
@@ -238,7 +238,7 @@ editor_file = function(editor, callback){
         callback([
           (function(){
             var locObj=Object.assign({},editor.core.enemys.enemys[id]);
-            Object.keys(editor_file.comment.enemys).forEach(function(v){
+            Object.keys(editor_file.comment._data.enemys._data).forEach(function(v){
               if (!isset(editor.core.enemys.enemys[id][v]))
                 /* locObj[v]=editor.core.enemys.enemys[id][v];
               else */
@@ -246,14 +246,14 @@ editor_file = function(editor, callback){
             });
             return locObj;
           })(),
-          editor_file.comment.enemys,
+          editor_file.comment._data.enemys,
           err]);
       });
     } else {
       callback([
         (function(){
           var locObj=Object.assign({},editor.core.enemys.enemys[id]);
-          Object.keys(editor_file.comment.enemys).forEach(function(v){
+          Object.keys(editor_file.comment._data.enemys._data).forEach(function(v){
             if (!isset(editor.core.enemys.enemys[id][v]))
               /* locObj[v]=editor.core.enemys.enemys[id][v];
             else */
@@ -261,7 +261,7 @@ editor_file = function(editor, callback){
           });
           return locObj;
         })(),
-        editor_file.comment.enemys,
+        editor_file.comment._data.enemys,
         null]);
     }
   }
@@ -283,28 +283,28 @@ editor_file = function(editor, callback){
         callback([
           (function(){
             var locObj=Object.assign({},editor.core.maps.blocksInfo[idnum]);
-            Object.keys(editor_file.comment.maps).forEach(function(v){
+            Object.keys(editor_file.comment._data.maps._data).forEach(function(v){
               if (!isset(editor.core.maps.blocksInfo[idnum][v]))
                 locObj[v]=null;
             });
             locObj.idnum = idnum;
             return locObj;
           })(),
-          editor_file.comment.maps,
+          editor_file.comment._data.maps,
           null]);
       });
     } else {
       callback([
         (function(){
           var locObj=Object.assign({},editor.core.maps.blocksInfo[idnum]);
-          Object.keys(editor_file.comment.maps).forEach(function(v){
+          Object.keys(editor_file.comment._data.maps._data).forEach(function(v){
             if (!isset(editor.core.maps.blocksInfo[idnum][v]))
               locObj[v]=null;
           });
           locObj.idnum = idnum;
           return locObj;
         })(),
-        editor_file.comment.maps,
+        editor_file.comment._data.maps,
         null]);
     }
   }
@@ -328,7 +328,7 @@ editor_file = function(editor, callback){
         callback([
           (function(){
             var locObj={};
-            Object.keys(editor_file.comment.floors.loc).forEach(function(v){
+            Object.keys(editor_file.comment._data.floors._data.loc._data).forEach(function(v){
               if (isset(editor.currentFloorData[v][x+','+y]))
                 locObj[v]=editor.currentFloorData[v][x+','+y];
               else
@@ -336,14 +336,14 @@ editor_file = function(editor, callback){
             });
             return locObj;
           })(),
-          editor_file.comment.floors.loc,
+          editor_file.comment._data.floors._data.loc,
           err]);
       });
     } else {
       callback([
         (function(){
           var locObj={};
-          Object.keys(editor_file.comment.floors.loc).forEach(function(v){
+          Object.keys(editor_file.comment._data.floors._data.loc._data).forEach(function(v){
             if (isset(editor.currentFloorData[v][x+','+y]))
               locObj[v]=editor.currentFloorData[v][x+','+y];
             else
@@ -351,7 +351,7 @@ editor_file = function(editor, callback){
           });
           return locObj;
         })(),
-        editor_file.comment.floors.loc,
+        editor_file.comment._data.floors._data.loc,
         null]);
     }
     
@@ -373,38 +373,38 @@ editor_file = function(editor, callback){
         callback([
           (function(){
             var locObj=Object.assign({},editor.currentFloorData);
-            Object.keys(editor_file.comment.floors.floor).forEach(function(v){
+            Object.keys(editor_file.comment._data.floors._data.floor._data).forEach(function(v){
               if (!isset(editor.currentFloorData[v]))
                 /* locObj[v]=editor.currentFloorData[v];
               else */
                 locObj[v]=null;
             });
-            Object.keys(editor_file.comment.floors.loc).forEach(function(v){
+            Object.keys(editor_file.comment._data.floors._data.loc._data).forEach(function(v){
               delete(locObj[v]);
             });
             delete(locObj.map);
             return locObj;
           })(),
-          editor_file.comment.floors.floor,
+          editor_file.comment._data.floors._data.floor,
           err]);
       });
     } else {
       callback([
         (function(){
           var locObj=Object.assign({},editor.currentFloorData);
-          Object.keys(editor_file.comment.floors.floor).forEach(function(v){
+          Object.keys(editor_file.comment._data.floors._data.floor._data).forEach(function(v){
             if (!isset(editor.currentFloorData[v]))
               /* locObj[v]=editor.currentFloorData[v];
             else */
               locObj[v]=null;
           });
-          Object.keys(editor_file.comment.floors.loc).forEach(function(v){
+          Object.keys(editor_file.comment._data.floors._data.loc._data).forEach(function(v){
             delete(locObj[v]);
           });
           delete(locObj.map);
           return locObj;
         })(),
-        editor_file.comment.floors.floor,
+        editor_file.comment._data.floors._data.floor,
         null]);
     }
   }
@@ -425,7 +425,7 @@ editor_file = function(editor, callback){
         callback([
           (function(){
             var locObj=Object.assign({'main':{}},editor.core.data);
-            Object.keys(editor_file.dataComment.main).forEach(function(v){
+            Object.keys(editor_file.dataComment._data.main._data).forEach(function(v){
               if (isset(editor.main[v]))
                 locObj.main[v]=editor.main[v];
               else
@@ -440,7 +440,7 @@ editor_file = function(editor, callback){
       callback([
         (function(){
           var locObj=Object.assign({'main':{}},editor.core.data);
-          Object.keys(editor_file.dataComment.main).forEach(function(v){
+          Object.keys(editor_file.dataComment._data.main._data).forEach(function(v){
             if (isset(editor.main[v]))
               locObj.main[v]=editor.main[v];
             else
@@ -542,7 +542,7 @@ editor_file = function(editor, callback){
         eval("icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1"+value[1]+'='+JSON.stringify(value[2]));
       });
       var datastr='icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1 = \n';
-      datastr+=JSON.stringify(icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1,null,4);
+      datastr+=JSON.stringify(icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1,null,'\t');
       fs.writeFile('project/icons.js',encode(datastr),'base64',function(err, data){
         callback(err);
       });
@@ -556,7 +556,7 @@ editor_file = function(editor, callback){
       //datastr+=JSON.stringify(maps_90f36752_8815_4be8_b32b_d7fad1d0542e,null,4);
 
       var emap={};
-      var estr = JSON.stringify(maps_90f36752_8815_4be8_b32b_d7fad1d0542e,function(k,v){if(v.id!=null){var id_ = editor.guid();emap[id_]=JSON.stringify(v);return id_;}else return v},4);
+      var estr = JSON.stringify(maps_90f36752_8815_4be8_b32b_d7fad1d0542e,function(k,v){if(v.id!=null){var id_ = editor.guid();emap[id_]=JSON.stringify(v);return id_;}else return v},'\t');
       for(var id_ in emap){
           estr = estr.replace('"'+id_+'"',emap[id_])
       }
@@ -572,7 +572,7 @@ editor_file = function(editor, callback){
         eval("items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a"+value[1]+'='+JSON.stringify(value[2]));
       });
       var datastr='items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a = \n';
-      datastr+=JSON.stringify(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a,null,4);
+      datastr+=JSON.stringify(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a,null,'\t');
       fs.writeFile('project/items.js',encode(datastr),'base64',function(err, data){
         callback(err);
       });
@@ -584,7 +584,7 @@ editor_file = function(editor, callback){
       });
       var datastr='enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = \n';
       var emap={};
-      var estr = JSON.stringify(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80,function(k,v){if(v.hp!=null){var id_ = editor.guid();emap[id_]=JSON.stringify(v);return id_;}else return v},4);
+      var estr = JSON.stringify(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80,function(k,v){if(v.hp!=null){var id_ = editor.guid();emap[id_]=JSON.stringify(v);return id_;}else return v},'\t');
       for(var id_ in emap){
         estr = estr.replace('"'+id_+'"',emap[id_])
       }
@@ -598,8 +598,10 @@ editor_file = function(editor, callback){
       actionList.forEach(function (value) {
         eval("data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d"+value[1]+'='+JSON.stringify(value[2]));
       });
+      if (data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.floorIds.indexOf(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.floorId)<0)
+        data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.floorId = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.floorIds[0];
       var datastr='data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d = \n';
-      datastr+=JSON.stringify(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d,null,4);
+      datastr+=JSON.stringify(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d,null,'\t');
       fs.writeFile('project/data.js',encode(datastr),'base64',function(err, data){
         callback(err);
       });

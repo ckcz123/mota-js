@@ -213,7 +213,7 @@ var workspace = Blockly.inject(blocklyDiv,{
   toolbox: document.getElementById('toolbox'),
   zoom:{
     controls: true,
-    wheel: true,//false
+    wheel: false,//滚轮改为上下(shift:左右)翻滚
     startScale: 1.0,
     maxScale: 3,
     minScale: 0.3,
@@ -230,6 +230,15 @@ window.addEventListener('resize', onresize, false);
 onresize();
 Blockly.svgResize(workspace);
 
+//Blockly.bindEventWithChecks_(workspace.svgGroup_,"wheel",workspace,function(e){});
+document.getElementById('blocklyDiv').onmousewheel = function(e){
+  //console.log(e);
+  e.preventDefault();
+  var hvScroll = e.shiftKey?'hScroll':'vScroll';
+  workspace.scrollbar[hvScroll].handlePosition_+=( ((e.deltaY||0)+(e.detail||0)) <0?20:-20);
+  workspace.scrollbar[hvScroll].onScroll_();
+  workspace.setScale(workspace.scale);
+}
 
   var doubleClickCheck=[[0,'abc']];
   function omitedcheckUpdateFunction(event) {
@@ -344,26 +353,12 @@ editor_blockly.parse = function () {
 
 editor_blockly.id='';
 
-editor_blockly.import = function(id_){
+editor_blockly.import = function(id_,args){
   var thisTr = document.getElementById(id_);
   if(!thisTr)return false;
   var input = thisTr.children[2].children[0].children[0];
   var field = thisTr.children[0].getAttribute('title');
-  var type = {
-    "['events']":'event',
-    "['changeFloor']":'changeFloor',
-    "['afterBattle']":'afterBattle',
-    "['afterGetItem']":'afterGetItem',
-    "['afterOpenDoor']":'afterOpenDoor',
-    
-    //"['firstData']['shops']":'shop',
-    "--shop--未完成数组的处理":'shop',
-
-    "['firstArrive']":'firstArrive',
-    "['firstData']['startText']":'firstArrive',
-
-    "--point--未完成数据转移":'point',
-  }[field];
+  var type = args.type;
   if(!type)return false;
   editor_blockly.id=id_;
   codeAreaHL.setValue(input.value);
@@ -430,7 +425,7 @@ editor_blockly.doubleClickBlock = function (blockId){
   if(f){
     var value = b.getFieldValue(f);
     //多行编辑
-    editor_multi.multiLineEdit(value,b,f,function(newvalue,b,f){
+    editor_multi.multiLineEdit(value,b,f,{'lint':f==='RawEvalString_0'},function(newvalue,b,f){
       if(textStringDict[b.type]!=='RawEvalString_0'){}
       b.setFieldValue(newvalue.split('\n').join('\\n'),f);
     });

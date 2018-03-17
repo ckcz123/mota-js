@@ -9,39 +9,62 @@ var codeEditor = CodeMirror.fromTextArea(document.getElementById("multiLineCode"
   tabSize: 4,
   indentWithTabs: true,
   smartIndent: true,
-  mode: {name: "javascript", json: true, globalVars: true},
+  mode: {name: "javascript", globalVars: true, localVars: true},
   lineWrapping: true,
   continueComments: "Enter",
   gutters: ["CodeMirror-lint-markers"],
   lint: true,
+  autocomplete: true,
   extraKeys: {"Ctrl-Q": "toggleComment"},
 });
 
 codeEditor.on("keyup", function (cm, event) {
-  if ((event.keyCode >= 65 && event.keyCode<=90) || (event.keyCode>=49 && event.keyCode<=57) || event.keyCode==190) {
+  if (codeEditor.getOption("autocomplete") && (event.keyCode >= 65 && event.keyCode<=90) || (event.keyCode>=49 && event.keyCode<=57) || event.keyCode==190) {
+    try {
       CodeMirror.commands.autocomplete(cm, null, {completeSingle: false});
+    } catch (e) {}
   }
 });
 
 editor_multi.id='';
 editor_multi.isString=false;
+editor_multi.lintAutocomplete=false;
 
-editor_multi.show = function(){document.getElementById('left7').style='';}
+editor_multi.show = function(){
+  var valueNow = codeEditor.getValue();
+  //try{eval('function _asdygakufyg_() { return '+valueNow+'\n}');editor_multi.lintAutocomplete=true;}catch(ee){}
+  if(valueNow.slice(0,8)==='function')editor_multi.lintAutocomplete=true;
+  editor_multi.setLint();
+  document.getElementById('left7').style='';
+}
 editor_multi.hide = function(){document.getElementById('left7').style='z-index:-1;opacity: 0;';}
+editor_multi.setLint = function() {
+  codeEditor.setOption("lint", editor_multi.lintAutocomplete);
+  codeEditor.setOption("autocomplete", editor_multi.lintAutocomplete);
+  document.getElementById("lintCheckbox").checked = editor_multi.lintAutocomplete;
+}
+editor_multi.toggerLint = function() {
+  editor_multi.lintAutocomplete = document.getElementById("lintCheckbox").checked;
+  editor_multi.setLint();
+}
 
 editor_multi.indent = function(field){
   if(editor && editor.mode && editor.mode.indent)return editor.mode.indent(field);
-  return 4;
+  return '\t';
 }
 
-editor_multi.import = function(id_){
+editor_multi.import = function(id_,args){
   var thisTr = document.getElementById(id_);
   if(!thisTr)return false;
   var input = thisTr.children[2].children[0].children[0];
   var field = thisTr.children[0].getAttribute('title');
+  var comment = thisTr.children[1].getAttribute('title');
   if(!input.type || input.type!=='textarea')return false;
   editor_multi.id=id_;
   editor_multi.isString=false;
+  editor_multi.lintAutocomplete=false;
+  if(args.lint===true)editor_multi.lintAutocomplete=true;
+  if(field.indexOf('Effect') !== -1)editor_multi.lintAutocomplete=true;
   if(input.value.slice(0,1)==='"'){
     editor_multi.isString=true;
     codeEditor.setValue(JSON.parse(input.value)||'');
@@ -97,12 +120,13 @@ editor_multi.confirm =  function (){
 }
 
 var multiLineArgs=[null,null,null];
-editor_multi.multiLineEdit = function(value,b,f,callback){
+editor_multi.multiLineEdit = function(value,b,f,args,callback){
   editor_multi.id='callFromBlockly';
   codeEditor.setValue(value.split('\\n').join('\n')||'');
   multiLineArgs[0]=b;
   multiLineArgs[1]=f;
   multiLineArgs[2]=callback;
+  editor_multi.lintAutocomplete=Boolean(args.lint);
   editor_multi.show();
 }
 editor_multi.multiLineDone = function(){

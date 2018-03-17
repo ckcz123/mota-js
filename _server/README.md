@@ -125,7 +125,7 @@ $textarea(evalstr)$end
 
 把选定`id_`的事件用blockly编辑
 ``` js
-editor_blockly.import(id_);
+editor_blockly.import(id_,{type:'event'});
 ```
 
 把文本区域的代码转换成图块
@@ -139,12 +139,12 @@ editor_blockly.parse();
 
 编辑选定`id_`的文本域
 ``` js
-editor_multi.import(id_)
+editor_multi.import(id_,{lint:true})
 ```
 
 编辑blockly方块的特定域
 ``` js
-editor_multi.multiLineEdit(value,b,f,callback)
+editor_multi.multiLineEdit(value,b,f,{lint:true},callback)
 ```
 
 ### fs.js

@@ -34,6 +34,141 @@ editor_mode.prototype.init_dom_ids = function(callback){
 }
 
 /////////////////////////////////////////////////////////////////////////////
+editor_mode.prototype.objToTable_ = function(obj,commentObj){
+  var outstr=["\n<tr><td>条目</td><td>注释</td><td>值</td></tr>\n"];
+  var guids=[];
+  var defaultcobj={
+    _type:'textarea',
+    _data:'',
+    _string:function(args){//object~[field,cfield,vobj,cobj]
+      var thiseval = args.vobj;
+      return (typeof(thiseval) === typeof('')) && thiseval[0]==='"';
+    },
+    _leaf:function(args){//object~[field,cfield,vobj,cobj]
+      var thiseval = args.vobj;
+      if (thiseval == null || thiseval == undefined)return true;//null,undefined
+      if (typeof(thiseval) === typeof(''))return true;//字符串
+      if (Object.keys(thiseval).length === 0)return true;//数字,true,false,空数组,空对象
+      return false;
+    },
+  }
+  var recursionParse = function(pfield,pcfield,pvobj,pcobj) {
+    for(var ii in pvobj){
+      var field = pfield+"['"+ii+"']";
+      var cfield = pcfield+"['_data']['"+ii+"']";
+      var vobj = pvobj[ii];
+      var cobj = null;
+      if(pcobj && pcobj['_data'] && pcobj['_data'][ii]){
+        cobj = Object.assign({},defaultcobj,pcobj['_data'][ii]);
+      } else {
+        if(pcobj && (pcobj['_data'] instanceof Function))cobj = Object.assign({},defaultcobj,pcobj['_data'](ii));
+        else cobj = Object.assign({},defaultcobj);
+      }
+      var args = {field:field,cfield:cfield,vobj:vobj,cobj:cobj}
+      if(cobj._leaf instanceof Function)cobj._leaf=cobj._leaf(args);
+      for(var key in cobj){
+        if(key==='_data')continue;
+        if(cobj[key] instanceof Function)cobj[key]=cobj[key](args);
+      }
+      if (cobj._leaf) {
+        var leafnode = editor_mode.objToTr_(obj,commentObj,field,cfield,vobj,cobj);
+        outstr.push(leafnode[0]);
+        guids.push(leafnode[1]);
+      } else {
+        outstr.push(["<tr><td>----</td><td>----</td><td>",field,"</td></tr>\n"].join(''));
+        recursionParse(field,cfield,vobj,cobj);
+      }
+    }
+  }
+  recursionParse("","",obj,commentObj);
+  var checkRange = function(evalstr,thiseval){
+    if(evalstr){
+      return eval(evalstr);
+    }
+    return true;
+  }
+  var listen = function(guids) {
+    guids.forEach(function(guid){
+      // tr>td[title=field]
+      //   >td[title=comment,cobj=cobj:json]
+      //   >td>div>input[value=thiseval]
+      var thisTr = document.getElementById(guid);
+      var input = thisTr.children[2].children[0].children[0];
+      var field = thisTr.children[0].getAttribute('title');
+      var cobj = JSON.parse(thisTr.children[1].getAttribute('cobj'));
+      input.onchange = function(){
+        var node = thisTr.parentNode;
+        while (!editor_mode._ids.hasOwnProperty(node.getAttribute('id'))) {
+          node = node.parentNode;
+        }
+        editor_mode.onmode(editor_mode._ids[node.getAttribute('id')]);
+        var thiseval=null;
+        if(input.checked!=null)input.value=input.checked;
+        try{
+          thiseval = JSON.parse(input.value);
+        }catch(ee){
+          printe(field+' : '+ee);
+          throw ee;
+        }
+        if(checkRange(cobj._range,thiseval)){
+          editor_mode.addAction(['change',field,thiseval]);
+        } else {
+          printe(field+' : 输入的值不合要求,请鼠标放置在注释上查看说明');
+        }
+      }
+      input.ondblclick = function(){
+        if(cobj._type==='event')editor_blockly.import(guid,{type:cobj._event});
+        if(cobj._type==='textarea')editor_multi.import(guid,{lint:cobj._lint});
+        
+      }
+    });
+  }
+  return {"HTML":outstr.join(''),"guids":guids,"listen":listen};
+}
+
+editor_mode.prototype.objToTr_ = function(obj,commentObj,field,cfield,vobj,cobj){
+  var guid = editor.guid();
+  var thiseval = vobj;
+  var comment = cobj._data;
+
+  var charlength=10;
+
+  var shortField = field.split("']").slice(-2)[0].split("['").slice(-1)[0];
+  shortField = (shortField.length<charlength?shortField:shortField.slice(0,charlength)+'...');
+
+  var commentHTMLescape=editor.HTMLescape(comment);
+  var shortCommentHTMLescape=(comment.length<charlength?commentHTMLescape:editor.HTMLescape(comment.slice(0,charlength))+'...');
+
+  var cobjstr = Object.assign({},cobj);
+  delete cobjstr._data;
+  cobjstr = editor.HTMLescape(JSON.stringify(cobjstr));
+
+  var outstr=['<tr id="',guid,'"><td title="',field,'">',shortField,'</td>',
+  '<td title="',commentHTMLescape,'" cobj="',cobjstr,'">',shortCommentHTMLescape,'</td>',
+  '<td><div class="etableInputDiv">',editor_mode.objToTd_(obj,commentObj,field,cfield,vobj,cobj),'</div></td></tr>\n',
+  ];
+  return [outstr.join(''),guid];
+}
+
+editor_mode.prototype.objToTd_ = function(obj,commentObj,field,cfield,vobj,cobj){
+  var thiseval = vobj;
+  if(cobj._select){
+    var values = cobj._select.values;
+    var outstr = ['<select>\n',"<option value='",JSON.stringify(thiseval),"'>",JSON.stringify(thiseval),'</option>\n'];
+    values.forEach(function(v){
+      outstr.push(["<option value='",JSON.stringify(v),"'>",JSON.stringify(v),'</option>\n'].join(''))
+    });
+    outstr.push('</select>');
+    return outstr.join('');
+  } else if(cobj._input){
+    return ["<input type='text' spellcheck='false' value='",JSON.stringify(thiseval),"'/>\n"].join('');
+  } else if(cobj._bool){
+    return ["<input type='checkbox' ",(thiseval?'checked ':''),"/>\n"].join('');
+  } else {
+    var num = 0;//editor_mode.indent(field);
+    return ["<textarea spellcheck='false' >",JSON.stringify(thiseval,null,num),'</textarea>\n'].join('');
+  }
+}
 
 editor_mode.prototype.objToTable = function(obj,commentObj){
   var outstr=["\n<tr><td>条目</td><td>注释</td><td>值</td></tr>\n"];
@@ -127,8 +262,8 @@ editor_mode.prototype.objToTr = function(obj,commentObj,field){
   var shortField = field.split("']").slice(-2)[0].split("['").slice(-1)[0];
   shortField = (shortField.length<charlength?shortField:shortField.slice(0,charlength)+'...');
 
-  var commentHTMLescape=comment.split('').map(function(v){return '&#'+v.charCodeAt(0)+';'}).join('');
-  var shortCommentHTMLescape=(comment.length<charlength?commentHTMLescape:comment.slice(0,charlength).split('').map(function(v){return '&#'+v.charCodeAt(0)+';'}).join('')+'...');
+  var commentHTMLescape=editor.HTMLescape(comment);
+  var shortCommentHTMLescape=(comment.length<charlength?commentHTMLescape:editor.HTMLescape(comment.slice(0,charlength))+'...');
 
   var outstr=['<tr id="',guid,'"><td title="',field,'">',shortField,'</td>',
   '<td title="',commentHTMLescape,'">',shortCommentHTMLescape,'</td>',
@@ -157,7 +292,7 @@ editor_mode.prototype.objToTd = function(thiseval,comment,field){
 }
 
 editor_mode.prototype.indent = function(field){
-  var num = 4;
+  var num = '\t';
   if(field.indexOf("['main']")===0)return 0;
   if(field.indexOf("['flyRange']")!==-1)return 0;
   if(field==="['special']")return 0;
@@ -232,7 +367,7 @@ editor_mode.prototype.loc = function(callback){
   var objs=[];
   editor.file.editLoc(editor_mode.pos.x,editor_mode.pos.y,[],function(objs_){objs=objs_;/*console.log(objs_)*/});
   //只查询不修改时,内部实现不是异步的,所以可以这么写
-  var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
+  var tableinfo=editor_mode.objToTable_(objs[0],objs[1]);
   document.getElementById('table_3d846fc4_7644_44d1_aa04_433d266a73df').innerHTML=tableinfo.HTML;
   tableinfo.listen(tableinfo.guids);
 
@@ -263,7 +398,7 @@ editor_mode.prototype.emenyitem = function(callback){
     editor.file.editMapBlocksInfo(editor_mode.info.idnum,[],function(objs_){objs=objs_;/*console.log(objs_)*/});
   }
   //只查询不修改时,内部实现不是异步的,所以可以这么写
-  var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
+  var tableinfo=editor_mode.objToTable_(objs[0],objs[1]);
   document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML=tableinfo.HTML;
   tableinfo.listen(tableinfo.guids);
 
@@ -274,7 +409,7 @@ editor_mode.prototype.floor = function(callback){
   var objs=[];
   editor.file.editFloor([],function(objs_){objs=objs_;/*console.log(objs_)*/});
   //只查询不修改时,内部实现不是异步的,所以可以这么写
-  var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
+  var tableinfo=editor_mode.objToTable_(objs[0],objs[1]);
   document.getElementById('table_4a3b1b09_b2fb_4bdf_b9ab_9f4cdac14c74').innerHTML=tableinfo.HTML;
   tableinfo.listen(tableinfo.guids);
   if (Boolean(callback))callback();
@@ -284,7 +419,7 @@ editor_mode.prototype.tower = function(callback){
   var objs=[];
   editor.file.editTower([],function(objs_){objs=objs_;/*console.log(objs_)*/});
   //只查询不修改时,内部实现不是异步的,所以可以这么写
-  var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
+  var tableinfo=editor_mode.objToTable_(objs[0],objs[1]);
   document.getElementById('table_b6a03e4c_5968_4633_ac40_0dfdd2c9cde5').innerHTML=tableinfo.HTML;
   tableinfo.listen(tableinfo.guids);
   if (Boolean(callback))callback();
@@ -294,7 +429,7 @@ editor_mode.prototype.functions = function(callback){
   var objs=[];
   editor.file.editFunctions([],function(objs_){objs=objs_;/*console.log(objs_)*/});
   //只查询不修改时,内部实现不是异步的,所以可以这么写
-  var tableinfo=editor_mode.objToTable(objs[0],objs[1]);
+  var tableinfo=editor_mode.objToTable_(objs[0],objs[1]);
   document.getElementById('table_e260a2be_5690_476a_b04e_dacddede78b3').innerHTML=tableinfo.HTML;
   tableinfo.listen(tableinfo.guids);
   if (Boolean(callback))callback();

@@ -22,7 +22,7 @@ utils.prototype.replaceText = function (text) {
 utils.prototype.calValue = function (value) {
     value=value.replace(/status:([\w\d_]+)/g, "core.getStatus('$1')");
     value=value.replace(/item:([\w\d_]+)/g, "core.itemCount('$1')");
-    value=value.replace(/flag:([\w\d_]+)/g, "core.getFlag('$1', false)");
+    value=value.replace(/flag:([\w\d_]+)/g, "core.getFlag('$1', 0)");
     return eval(value);
 }
 

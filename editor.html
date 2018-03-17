@@ -74,8 +74,8 @@
       <h3 class="leftTabHeader">图块属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button></h3>
       <div class="leftTabContent">
       <div id='newIdIdnum'><!-- id and idnum -->
-        <input placeholder="输入新id"/>
-        <input placeholder="输入新idnum"/>
+        <input placeholder="输入新id（唯一标识符）"/>
+        <input placeholder="输入新idnum（数字，1000以内）"/>
         <button>save</button>
       </div>
       <div><!-- enemy and item -->
@@ -142,6 +142,8 @@
     <div id="left7" style="z-index:-1;opacity: 0;"><!-- 多行文本编辑器 -->
       <button onclick="editor_multi.confirm()">confirm</button>
       <button onclick="editor_multi.cancel()">cancel</button>
+      <input type="checkbox" onclick="editor_multi.toggerLint()" id="lintCheckbox" style="vertical-align: bottom;margin-left:6px" />
+      <span style="vertical-align: bottom; margin-left: -3px">Lint</span>
       <textarea id="multiLineCode" name="multiLineCode"></textarea>
     </div>
     <div id="left8" class='leftTab' style="z-index:-1;opacity: 0;"><!-- functions -->

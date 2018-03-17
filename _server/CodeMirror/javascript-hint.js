@@ -109,6 +109,7 @@
     function getCompletions(token, context, keywords, options) {
       var found = [], start = token.string, global = options && options.globalScope || window;
       function maybeAdd(str) {
+        if (str==null || str==undefined) return;
         if (str.lastIndexOf(start, 0) == 0 && !arrayContains(found, str)) found.push(str);
       }
       function gatherCompletions(obj) {

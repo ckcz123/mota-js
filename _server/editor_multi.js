@@ -34,11 +34,19 @@ editor_multi.show = function(){
   var valueNow = codeEditor.getValue();
   //try{eval('function _asdygakufyg_() { return '+valueNow+'\n}');editor_multi.lintAutocomplete=true;}catch(ee){}
   if(valueNow.slice(0,8)==='function')editor_multi.lintAutocomplete=true;
-  codeEditor.setOption("lint", editor_multi.lintAutocomplete);
-  codeEditor.setOption("autocomplete", editor_multi.lintAutocomplete);
+  editor_multi.setLint();
   document.getElementById('left7').style='';
 }
 editor_multi.hide = function(){document.getElementById('left7').style='z-index:-1;opacity: 0;';}
+editor_multi.setLint = function() {
+  codeEditor.setOption("lint", editor_multi.lintAutocomplete);
+  codeEditor.setOption("autocomplete", editor_multi.lintAutocomplete);
+  document.getElementById("lintCheckbox").checked = editor_multi.lintAutocomplete;
+}
+editor_multi.toggerLint = function() {
+  editor_multi.lintAutocomplete = document.getElementById("lintCheckbox").checked;
+  editor_multi.setLint();
+}
 
 editor_multi.indent = function(field){
   if(editor && editor.mode && editor.mode.indent)return editor.mode.indent(field);

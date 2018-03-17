@@ -230,13 +230,14 @@ window.addEventListener('resize', onresize, false);
 onresize();
 Blockly.svgResize(workspace);
 
-//Blockly.bindEventWithChecks_(editor_blockly.workspace.svgGroup_,"wheel",editor_blockly.workspace,function(e){});
+//Blockly.bindEventWithChecks_(workspace.svgGroup_,"wheel",workspace,function(e){});
 document.getElementById('blocklyDiv').onmousewheel = function(e){
   //console.log(e);
   e.preventDefault();
   var hvScroll = e.shiftKey?'hScroll':'vScroll';
-  editor_blockly.workspace.scrollbar[hvScroll].handlePosition_+=( ((e.deltaY||0)+(e.detail||0)) >0?20:-20);
-  editor_blockly.workspace.scrollbar[hvScroll].onScroll_();
+  workspace.scrollbar[hvScroll].handlePosition_+=( ((e.deltaY||0)+(e.detail||0)) <0?20:-20);
+  workspace.scrollbar[hvScroll].onScroll_();
+  workspace.setScale(workspace.scale);
 }
 
   var doubleClickCheck=[[0,'abc']];

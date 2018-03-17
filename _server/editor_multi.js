@@ -31,7 +31,9 @@ editor_multi.isString=false;
 editor_multi.lintAutocomplete=false;
 
 editor_multi.show = function(){
-  if(codeEditor.getValue().slice(0,8)==='function')editor_multi.lintAutocomplete=true;
+  var valueNow = codeEditor.getValue();
+  try{eval('function _asdygakufyg_() { return '+valueNow+'\n}');editor_multi.lintAutocomplete=true;}catch(ee){}
+  if(valueNow.slice(0,8)==='function')editor_multi.lintAutocomplete=true;
   codeEditor.setOption("lint", editor_multi.lintAutocomplete);
   codeEditor.setOption("autocomplete", editor_multi.lintAutocomplete);
   document.getElementById('left7').style='';

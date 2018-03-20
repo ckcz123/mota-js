@@ -809,7 +809,7 @@ tooltip : function: 自定义JS脚本
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=function-%e8%87%aa%e5%ae%9a%e4%b9%89js%e8%84%9a%e6%9c%ac
 default : ["alert(core.getStatus(\"atk\"));"]
 colour : this.dataColor
-var code = '{"type": "function", "function": "function(){\\n'+JSON.stringify(RawEvalString_0).slice(1,-1)+'\\n}"},\n';
+var code = '{"type": "function", "function": "function(){\\n'+JSON.stringify(RawEvalString_0).slice(1,-1).split('\\\\n').join('\\n')+'\\n}"},\n';
 return code;
 */
 
@@ -1329,9 +1329,9 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "function":
       var func = data["function"];
-      func=func.split('{').slice(1).join('{').split('}').slice(0,-1).join('}').trim();
+      func=func.split('{').slice(1).join('{').split('}').slice(0,-1).join('}').trim().split('\n').join('\\n');
       this.next = MotaActionBlocks['function_s'].xmlText([
-        this.EvalString(func),this.next]);
+        func,this.next]);
       break;
     case "update":
       this.next = MotaActionBlocks['update_s'].xmlText([

@@ -129,11 +129,11 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_range": "(thiseval==~~thiseval && thiseval>0)||thiseval==null",
                     "_data": "range可选，代表领域伤害的范围；不加默认为1"
                 },
-                "bomb": {
+                "notBomb": {
                     "_leaf": true,
                     "_type": "checkbox",
                     "_bool": "bool",
-                    "_data": "加入 \"bomb\": false 代表该怪物不可被炸弹或圣锤炸掉"
+                    "_data": "加入 \"notBomb\": true 代表该怪物不可被炸弹或圣锤炸掉"
                 },
                 "n": {
                     "_leaf": true,

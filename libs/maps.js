@@ -124,7 +124,7 @@ maps.prototype.addEvent = function (block, x, y, event) {
     }
     // 覆盖其他属性
     for (var key in event) {
-        if (key!="enable" && key!="trigger" && key!="noPass") {
+        if (key!="enable" && key!="trigger" && key!="noPass" && core.isset(event[key])) {
             block.event[key]=core.clone(event[key]);
         }
     }

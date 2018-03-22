@@ -424,7 +424,8 @@ editor_file = function(editor, callback){
       saveSetting('data',actionList,function (err) {
         callback([
           (function(){
-            var locObj=Object.assign({'main':{}},editor.core.data);
+            //var locObj=Object.assign({'main':{}},editor.core.data);
+            var locObj=Object.assign({},data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d,{'main':{}});
             Object.keys(editor_file.dataComment._data.main._data).forEach(function(v){
               if (isset(editor.main[v]))
                 locObj.main[v]=editor.main[v];
@@ -439,7 +440,8 @@ editor_file = function(editor, callback){
     } else {
       callback([
         (function(){
-          var locObj=Object.assign({'main':{}},editor.core.data);
+          //var locObj=Object.assign({'main':{}},editor.core.data);
+          var locObj=Object.assign({},data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d,{'main':{}});
           Object.keys(editor_file.dataComment._data.main._data).forEach(function(v){
             if (isset(editor.main[v]))
               locObj.main[v]=editor.main[v];

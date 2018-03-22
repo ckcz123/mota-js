@@ -112,6 +112,7 @@ editor_mode.prototype.objToTable_ = function(obj,commentObj){
         }
         if(checkRange(cobj._range,thiseval)){
           editor_mode.addAction(['change',field,thiseval]);
+          editor_mode.onmode('save');//自动保存
         } else {
           printe(field+' : 输入的值不合要求,请鼠标放置在注释上查看说明');
         }
@@ -165,127 +166,6 @@ editor_mode.prototype.objToTd_ = function(obj,commentObj,field,cfield,vobj,cobj)
   } else if(cobj._bool){
     return ["<input type='checkbox' ",(thiseval?'checked ':''),"/>\n"].join('');
   } else {
-    var num = 0;//editor_mode.indent(field);
-    return ["<textarea spellcheck='false' >",JSON.stringify(thiseval,null,num),'</textarea>\n'].join('');
-  }
-}
-
-editor_mode.prototype.objToTable = function(obj,commentObj){
-  var outstr=["\n<tr><td>条目</td><td>注释</td><td>值</td></tr>\n"];
-  var guids=[];
-  var checkIsLeaf = function(obj,commentObj,field){
-    var thiseval = eval('obj'+field);
-    if (thiseval == null || thiseval == undefined)return true;//null,undefined
-    if (typeof(thiseval) == typeof(''))return true;//字符串
-    if (Object.keys(thiseval).length == 0)return true;//数字,true,false,空数组,空对象
-    try {
-      var comment = eval('commentObj'+field);
-      if( comment.indexOf('$leaf') != -1){
-        evalstr = comment.split('$leaf')[1].split('$end')[0];
-        if(eval(evalstr) === true)return true;
-      }
-    } catch (error) {}
-    return false;
-  }
-  //深度优先遍历
-  var recursionParse = function(tfield) {
-    for(var ii in eval("obj"+tfield)){
-      var field = tfield+"['"+ii+"']";
-      var isleaf = checkIsLeaf(obj,commentObj,field);
-      if (isleaf) {
-        var leafnode = editor_mode.objToTr(obj,commentObj,field);
-        outstr.push(leafnode[0]);
-        guids.push(leafnode[1]);
-      } else {
-        outstr.push(["<tr><td>----</td><td>----</td><td>",field,"</td></tr>\n"].join(''));
-        recursionParse(field);
-      }
-    }
-  }
-  recursionParse("");
-  var checkRange = function(comment,thiseval){
-    if( comment.indexOf('$range') !== -1){
-      var evalstr = comment.split('$range')[1].split('$end')[0];
-      return eval(evalstr);
-    }
-    return true;
-  }
-  var listen = function(guids) {
-    guids.forEach(function(guid){
-      // tr>td[title=field]
-      //   >td[title=comment]
-      //   >td>div>input[value=thsieval]
-      var thisTr = document.getElementById(guid);
-      var input = thisTr.children[2].children[0].children[0];
-      var field = thisTr.children[0].getAttribute('title');
-      var comment = thisTr.children[1].getAttribute('title');
-      input.onchange = function(){
-        var node = thisTr.parentNode;
-        while (!editor_mode._ids.hasOwnProperty(node.getAttribute('id'))) {
-          node = node.parentNode;
-        }
-        editor_mode.onmode(editor_mode._ids[node.getAttribute('id')]);
-        var thiseval=null;
-        try{
-          thiseval = JSON.parse(input.value);
-        }catch(ee){
-          printe(field+' : '+ee);
-          throw ee;
-        }
-        if(checkRange(comment,thiseval)){
-          editor_mode.addAction(['change',field,thiseval]);
-        } else {
-          printe(field+' : 输入的值不合要求,请鼠标放置在注释上查看说明');
-        }
-      }
-      input.ondblclick = function(){
-        if(!editor_blockly.import(guid))
-        if(!editor_multi.import(guid)){}
-        
-      }
-    });
-  }
-  return {"HTML":outstr.join(''),"guids":guids,"listen":listen};
-}
-
-editor_mode.prototype.objToTr = function(obj,commentObj,field){
-  var guid = editor.guid();
-  var thiseval = eval('obj'+field);
-  var comment = '';
-  try {
-    comment = eval('commentObj'+field);
-  } catch (error) {}
-  if(!comment)comment='';
-
-  var charlength=10;
-
-  var shortField = field.split("']").slice(-2)[0].split("['").slice(-1)[0];
-  shortField = (shortField.length<charlength?shortField:shortField.slice(0,charlength)+'...');
-
-  var commentHTMLescape=editor.HTMLescape(comment);
-  var shortCommentHTMLescape=(comment.length<charlength?commentHTMLescape:editor.HTMLescape(comment.slice(0,charlength))+'...');
-
-  var outstr=['<tr id="',guid,'"><td title="',field,'">',shortField,'</td>',
-  '<td title="',commentHTMLescape,'">',shortCommentHTMLescape,'</td>',
-  '<td><div class="etableInputDiv">',editor_mode.objToTd(thiseval,comment,field),'</div></td></tr>\n',
-  ];
-  return [outstr.join(''),guid];
-}
-
-editor_mode.prototype.objToTd = function(thiseval,comment,field){
-  if( comment.indexOf('$select') != -1){
-    var evalstr = comment.split('$select')[1].split('$end')[0];
-    var values = eval(evalstr)['values'];
-    var outstr = ['<select>\n',"<option value='",JSON.stringify(thiseval),"'>",JSON.stringify(thiseval),'</option>\n'];
-    values.forEach(function(v){
-      outstr.push(["<option value='",JSON.stringify(v),"'>",JSON.stringify(v),'</option>\n'].join(''))
-    });
-    outstr.push('</select>');
-    return outstr.join('');
-  } else if( comment.indexOf('$input') != -1){
-    return ["<input spellcheck='false' value='",JSON.stringify(thiseval),"'/>\n"].join('');
-  } else {
-    //rows='",rows,"'
     var num = 0;//editor_mode.indent(field);
     return ["<textarea spellcheck='false' >",JSON.stringify(thiseval,null,num),'</textarea>\n'].join('');
   }

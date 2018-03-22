@@ -31,6 +31,7 @@ editor_multi.isString=false;
 editor_multi.lintAutocomplete=false;
 
 editor_multi.show = function(){
+  if(typeof(selectBox)!==typeof(undefined))selectBox.isSelected = false;
   var valueNow = codeEditor.getValue();
   //try{eval('function _asdygakufyg_() { return '+valueNow+'\n}');editor_multi.lintAutocomplete=true;}catch(ee){}
   if(valueNow.slice(0,8)==='function')editor_multi.lintAutocomplete=true;
@@ -49,7 +50,7 @@ editor_multi.toggerLint = function() {
 }
 
 editor_multi.indent = function(field){
-  if(editor && editor.mode && editor.mode.indent)return editor.mode.indent(field);
+  if(typeof(editor)!==typeof(undefined) && editor && editor.mode && editor.mode.indent)return editor.mode.indent(field);
   return '\t';
 }
 

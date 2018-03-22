@@ -235,7 +235,7 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
   //console.log(e);
   e.preventDefault();
   var hvScroll = e.shiftKey?'hScroll':'vScroll';
-  workspace.scrollbar[hvScroll].handlePosition_+=( ((e.deltaY||0)+(e.detail||0)) <0?20:-20);
+  workspace.scrollbar[hvScroll].handlePosition_+=( ((e.deltaY||0)+(e.detail||0)) >0?20:-20);
   workspace.scrollbar[hvScroll].onScroll_();
   workspace.setScale(workspace.scale);
 }
@@ -370,6 +370,7 @@ editor_blockly.import = function(id_,args){
 
 var blocklyWidgetDiv = document.getElementsByClassName('blocklyWidgetDiv');
 editor_blockly.show = function(){
+  if(typeof(selectBox)!==typeof(undefined))selectBox.isSelected = false;
   document.getElementById('left6').style='';
   for(var ii =0,node;node=blocklyWidgetDiv[ii];ii++){
     node.style.zIndex = 201;

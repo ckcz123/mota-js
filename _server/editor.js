@@ -453,7 +453,7 @@ editor.prototype.listen = function() {
     if( e.ctrlKey && ( e.keyCode == 90 || e.keyCode == 89 ) )
       e.preventDefault();
     //Ctrl+z 撤销上一步undo
-    if(e.keyCode == 90 && e.ctrlKey && preMapData && currDrawData.pos.length){
+    if(e.keyCode == 90 && e.ctrlKey && preMapData && currDrawData.pos.length && selectBox.isSelected){
       editor.map = JSON.parse(JSON.stringify(preMapData));
       editor.updateMap();
       reDo = JSON.parse(JSON.stringify(currDrawData));
@@ -461,7 +461,7 @@ editor.prototype.listen = function() {
       preMapData = null;
     }
     //Ctrl+y 重做一步redo
-    if(e.keyCode == 89 && e.ctrlKey && reDo && reDo.pos.length){
+    if(e.keyCode == 89 && e.ctrlKey && reDo && reDo.pos.length && selectBox.isSelected){
       preMapData = JSON.parse(JSON.stringify(editor.map));
       for(var j=0; j<reDo.pos.length;j++)
         editor.map[reDo.pos[j].y][reDo.pos[j].x] = JSON.parse(JSON.stringify(reDo.info));

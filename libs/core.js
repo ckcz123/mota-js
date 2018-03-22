@@ -281,7 +281,7 @@ core.prototype.init = function (coreData, callback) {
         core.setRequestAnimationFrame();
         core.showStartAnimate();
 
-
+        core.events.initGame();
 
         if (core.isset(functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins))
             core.plugin = new functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.plugin();

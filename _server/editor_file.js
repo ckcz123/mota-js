@@ -419,15 +419,17 @@ editor_file = function(editor, callback){
     ]
     为[]时只查询不修改
     */
+    var data_obj = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d;
     if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
     if (isset(actionList) && actionList.length > 0){
       saveSetting('data',actionList,function (err) {
         callback([
           (function(){
-            var locObj=Object.assign({'main':{}},editor.core.data);
+            //var locObj=Object.assign({'main':{}},editor.core.data);
+            var locObj=Object.assign({},data_obj,{'main':{}});
             Object.keys(editor_file.dataComment._data.main._data).forEach(function(v){
               if (isset(editor.main[v]))
-                locObj.main[v]=editor.main[v];
+                locObj.main[v]=data_obj.main[v];
               else
                 locObj[v]=null;
             });
@@ -439,10 +441,11 @@ editor_file = function(editor, callback){
     } else {
       callback([
         (function(){
-          var locObj=Object.assign({'main':{}},editor.core.data);
+          //var locObj=Object.assign({'main':{}},editor.core.data);
+          var locObj=Object.assign({},data_obj,{'main':{}});
           Object.keys(editor_file.dataComment._data.main._data).forEach(function(v){
             if (isset(editor.main[v]))
-              locObj.main[v]=editor.main[v];
+              locObj.main[v]=data_obj.main[v];
             else
               locObj[v]=null;
           });

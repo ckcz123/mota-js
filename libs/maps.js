@@ -65,18 +65,18 @@ maps.prototype.initBlock = function (x, y, id) {
 ////// 添加一些信息到block上 //////
 maps.prototype.addInfo = function (block) {
     if (core.isset(block.event)) {
-        if (block.event.cls.indexOf("enemy")==0 && block.event.trigger==undefined) {
+        if (block.event.cls.indexOf("enemy")==0 && !core.isset(block.event.trigger)) {
             block.event.trigger = 'battle';
         }
-        if (block.event.cls == 'items' && block.event.trigger==undefined) {
+        if (block.event.cls == 'items' && !core.isset(block.event.trigger)) {
             block.event.trigger = 'getItem';
         }
-        if (block.event.noPass == undefined) {
+        if (!core.isset(block.event.noPass)) {
             if (block.event.cls.indexOf("enemy")==0 || block.event.cls.indexOf("npc")==0 || block.event.cls=='terrains') {
                 block.event.noPass = true;
             }
         }
-        if (block.event.animate == undefined) {
+        if (!core.isset(block.event.animate)) {
             if (block.event.cls=='enemys' || block.event.cls=='npcs') {
                 block.event.animate = 2;
             }
@@ -124,7 +124,7 @@ maps.prototype.addEvent = function (block, x, y, event) {
     }
     // 覆盖其他属性
     for (var key in event) {
-        if (key!="enable" && key!="trigger") {
+        if (key!="enable" && key!="trigger" && key!="noPass" && core.isset(event[key])) {
             block.event[key]=core.clone(event[key]);
         }
     }

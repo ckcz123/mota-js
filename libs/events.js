@@ -197,6 +197,7 @@ events.prototype.gameOver = function (ending, fromReplay) {
 
 ////// 转换楼层结束的事件 //////
 events.prototype.afterChangeFloor = function (floorId) {
+    if (main.mode!='play') return;
     return this.eventdata.afterChangeFloor(floorId);
 }
 

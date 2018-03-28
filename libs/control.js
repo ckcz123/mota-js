@@ -990,8 +990,10 @@ control.prototype.checkBlock = function () {
             core.drawTip('受到领域伤害'+damage+'点');
         }
 
-        core.playSound('zone.ogg');
-        core.drawAnimate("zone", x, y);
+        if (damage>0) {
+            core.playSound('zone.ogg');
+            core.drawAnimate("zone", x, y);
+        }
 
         if (core.status.hero.hp<=0) {
             core.status.hero.hp=0;

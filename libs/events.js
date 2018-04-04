@@ -197,6 +197,7 @@ events.prototype.gameOver = function (ending, fromReplay) {
 
 ////// 转换楼层结束的事件 //////
 events.prototype.afterChangeFloor = function (floorId) {
+    if (main.mode!='play') return;
     return this.eventdata.afterChangeFloor(floorId);
 }
 
@@ -1172,12 +1173,14 @@ events.prototype.pushBox = function (data) {
     }
 
     core.updateStatusBar();
-    core.lockControl();
-    core.eventMoveHero([direction], null, function () {
-        core.unLockControl();
+
+    core.status.replay.animate = true;
+    core.moveHero(direction, function() {
+        core.status.replay.animate = false;
+        core.status.route.pop();
         core.events.afterPushBox();
         core.replay();
-    })
+    });
 
 }
 

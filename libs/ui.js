@@ -1325,7 +1325,7 @@ ui.prototype.drawBookDetail = function (index) {
 
     var enemy = enemys[index];
     var enemyId=enemy.id;
-    var hints=core.enemys.getSpecialHint(core.enemys.getEnemys(enemyId));
+    var hints=core.enemys.getSpecialHint(core.material.enemys[enemyId]);
 
     if (hints.length==0) {
         core.drawTip("该怪物无特殊属性！");

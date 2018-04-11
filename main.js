@@ -9,6 +9,8 @@ function main() {
     // 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。
     // 如果要进行剧本的修改请务必将其改成false。
 
+    this.bgmRemote = false; // 是否采用远程BGM
+
     //------------------------ 用户修改内容 END ------------------------//
 
     this.dom = {

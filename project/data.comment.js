@@ -32,16 +32,6 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "textarea",
                     "_data": "在此存放所有的SE，和文件名一致 \n 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好"
                 },
-                "bgmRemote": {
-                    "_leaf": true,
-                    "_type": "select",
-                    "_select": {
-                        "values": [
-                            false
-                        ]
-                    },
-                    "_data": "是否使用远程的背景音乐；此项一般不要开启"
-                },
                 "startBackground": {
                     "_leaf": true,
                     "_type": "textarea",

@@ -134,19 +134,19 @@ return code;
 
 //changeFloor 事件编辑器入口之一
 changeFloor_m
-    :   '楼梯, 传送门' BGNL? Newline '目标楼层' IdString Stair_List 'x' Int ',' 'y' Int '朝向' DirectionEx_List '动画时间' Int? '允许穿透' Bool BEND
+    :   '楼梯, 传送门' BGNL? Newline '目标楼层' IdString Stair_List 'x' Number ',' 'y' Number '朝向' DirectionEx_List '动画时间' Int? '允许穿透' Bool BEND
     ;
 
 /* changeFloor_m
 tooltip : 楼梯, 传送门, 如果目标楼层有多个楼梯, 写upFloor或downFloor可能会导致到达的楼梯不确定, 这时候请使用loc方式来指定具体的点位置
 helpUrl : https://ckcz123.github.io/mota-js/#/element?id=%e8%b7%af%e9%9a%9c%ef%bc%8c%e6%a5%bc%e6%a2%af%ef%bc%8c%e4%bc%a0%e9%80%81%e9%97%a8
 default : ["MT1",null,0,0,[['不变',''],['上','up'],['下','down'],['左','left'],['右','right']],500,null]
-var loc = ', "loc": ['+Int_0+', '+Int_1+']';
+var loc = ', "loc": ['+Number_0+', '+Number_1+']';
 if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
-Int_2 = Int_2 ?(', "time": '+Int_2):'';
+Int_0 = Int_0 ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0 ?'':(', "portalWithoutTrigger": false');
-var code = '{"floorId": "'+IdString_0+'"'+loc+DirectionEx_List_0+Int_2+Bool_0+' }\n';
+var code = '{"floorId": "'+IdString_0+'"'+loc+DirectionEx_List_0+Int_0+Bool_0+' }\n';
 return code;
 */
 
@@ -464,7 +464,7 @@ return code;
 */
 
 changeFloor_s
-    :   '楼层切换' IdString 'x' Int ',' 'y' Int '朝向' DirectionEx_List '动画时间' Int? Newline
+    :   '楼层切换' IdString 'x' Number ',' 'y' Number '朝向' DirectionEx_List '动画时间' Int? Newline
     ;
 
 /* changeFloor_s
@@ -473,13 +473,13 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=changefloor-%e6%a5%bc%e5%
 default : ["MT1",0,0,[['不变',''],['上','up'],['下','down'],['左','left'],['右','right']],500]
 colour : this.dataColor
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
-Int_2 = Int_2 ?(', "time": '+Int_2):'';
-var code = '{"type": "changeFloor", "floorId": "'+IdString_0+'", "loc": ['+Int_0+', '+Int_1+']'+DirectionEx_List_0+Int_2+' },\n';
+Int_0 = Int_0 ?(', "time": '+Int_0):'';
+var code = '{"type": "changeFloor", "floorId": "'+IdString_0+'", "loc": ['+Number_0+', '+Number_1+']'+DirectionEx_List_0+Int_0+' },\n';
 return code;
 */
 
 changePos_0_s
-    :   '位置切换' 'x' Int ',' 'y' Int '朝向' DirectionEx_List Newline
+    :   '位置切换' 'x' Number ',' 'y' Number '朝向' DirectionEx_List Newline
     ;
 
 /* changePos_0_s
@@ -988,7 +988,7 @@ StepString
     ;
 
 IdString
-    :   [a-zA-Z_][0-9a-zA-Z_\-:]*
+    :   [0-9a-zA-Z_][0-9a-zA-Z_:]*
     ;
 
 FixedId_List
@@ -1415,7 +1415,7 @@ MotaActionFunctions.EvalString_pre = function(EvalString){
 
 MotaActionFunctions.IdString_pre = function(IdString){
   if (IdString.indexOf('__door_name__')!==-1) throw new Error('请修改__door_name__,建议如开MT1层的[3,3]点的门, 则使用flag:MT1_3_3作为开门变量');
-  if (IdString && !(/^[a-zA-Z_][0-9a-zA-Z_\-:]*$/.test(IdString)))throw new Error('id: '+IdString+'中包含了0-9 a-z A-Z _ - :之外的字符');
+  if (IdString && !(/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/.test(IdString)))throw new Error('id: '+IdString+'中包含了0-9 a-z A-Z _ - :之外的字符');
   return IdString;
 }
 

@@ -5,6 +5,7 @@
 HTML5 canvas制作的魔塔样板，支持全平台游戏！
 **即使完全不会编程的用户，按照模板和说明文档也能很快做出一个魔塔游戏！**
 
+* [List / HTML5魔塔游戏列表](http://mota.pw/)
 * [Demo / 样板效果](https://ckcz123.com/games/template/)
 * [Docs / 使用文档说明](https://ckcz123.github.io/mota-js/)
 * [Video / 视频教程](http://www.bilibili.com/video/av17608025/)

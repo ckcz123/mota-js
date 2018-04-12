@@ -59,7 +59,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.removeGlobalAnimate(0,0,true);
 		core.clearMap('all'); // 清空全地图
 		core.drawText([
-			"\t[恭喜通关]你的分数是${status:hp}。"
+			"\t[" + (reason||"恭喜通关") + "]你的分数是${status:hp}。"
 		], function () {
 			core.events.gameOver(reason||'', replaying);
 		})
@@ -343,18 +343,52 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	this.useEquipment = function (itemId) { // 使用装备
 		if (itemId.indexOf("sword")==0) {
 			var now=core.getFlag('sword', 'sword0'); // 当前装备剑的ID
-			core.status.hero.atk -= core.values[now];
+
+			if (typeof core.values[now] == 'number') {
+				core.status.hero.atk -= core.values[now];
+			}
+			else {
+				core.status.hero.atk -= core.values[now].atk || 0;
+				core.status.hero.def -= core.values[now].def || 0;
+				core.status.hero.mdef -= core.values[now].mdef || 0;
+			}
+
+			if (typeof core.values[itemId] == 'number') {
+				core.status.hero.atk += core.values[itemId];
+			}
+			else {
+				core.status.hero.atk -= core.values[itemId].atk || 0;
+				core.status.hero.def -= core.values[itemId].def || 0;
+				core.status.hero.mdef -= core.values[itemId].mdef || 0;
+			}
+
 			core.setItem(now, 1);
-			core.status.hero.atk += core.values[itemId];
 			core.setItem(itemId, 0);
 			core.setFlag('sword', itemId);
 			core.drawTip("已装备"+core.material.items[itemId].name);
 		}
 		if (itemId.indexOf("shield")==0) {
 			var now=core.getFlag('shield', 'shield0');
-			core.status.hero.def -= core.values[now];
+
+			if (typeof core.values[now] == 'number') {
+				core.status.hero.def -= core.values[now];
+			}
+			else {
+				core.status.hero.atk -= core.values[now].atk || 0;
+				core.status.hero.def -= core.values[now].def || 0;
+				core.status.hero.mdef -= core.values[now].mdef || 0;
+			}
+
+			if (typeof core.values[itemId] == 'number') {
+				core.status.hero.def += core.values[itemId];
+			}
+			else {
+				core.status.hero.atk -= core.values[itemId].atk || 0;
+				core.status.hero.def -= core.values[itemId].def || 0;
+				core.status.hero.mdef -= core.values[itemId].mdef || 0;
+			}
+
 			core.setItem(now, 1);
-			core.status.hero.def += core.values[itemId];
 			core.setItem(itemId, 0);
 			core.setFlag('shield', itemId);
 			core.drawTip("已装备"+core.material.items[itemId].name);

@@ -2075,8 +2075,11 @@ control.prototype.updateStatusBar = function () {
 
     var statusList = ['hpmax', 'hp', 'atk', 'def', 'mdef', 'money', 'experience'];
     statusList.forEach(function (item) {
-        core.statusBar[item].innerHTML = core.getStatus(item);
+        var val = core.getStatus(item);
+        if (val>=10000000) val = parseInt(val/10000) + "W";
+        core.statusBar[item].innerHTML = val;
     });
+
     // 进阶
     if (core.flags.enableLevelUp && core.status.hero.lv<core.firstData.levelUp.length) {
         core.statusBar.up.innerHTML = core.firstData.levelUp[core.status.hero.lv].need || "&nbsp;";

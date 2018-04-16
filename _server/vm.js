@@ -13,7 +13,13 @@ document.body.onmousedown = function(e){
   });
   //console.log(eid);
   if(eid.indexOf('edit')===-1){
-    if(eid.indexOf('tip')===-1)selectBox.isSelected = false;
+    if(eid.indexOf('tip')===-1) {
+      if (selectBox.isSelected) {
+        editor_mode.onmode('');
+        editor.file.saveFloorFile(function(err){if(err){printe(err);throw(err)};printf('地图保存成功');});
+      }
+      selectBox.isSelected = false;
+    }
   }
   //editor.mode.onmode('');
   editor.info = {};

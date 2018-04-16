@@ -69,7 +69,10 @@ editor_file = function(editor, callback){
     } */
     var filename = 'project/floors/' + editor.currentFloorId + '.js';
     var datastr = ['main.floors.' , editor.currentFloorId , '=\n{'];
-    editor.currentFloorData.map = editor.map.map(function(v){return v.map(function(v){return v.idnum||v||0})});
+    if (editor.currentFloorData.map == 'new')
+      editor.currentFloorData.map = editor.map.map(function(v){return v.map(function(){return 0})});
+    else
+      editor.currentFloorData.map = editor.map.map(function(v){return v.map(function(v){return v.idnum||v||0})});
     for(var ii in editor.currentFloorData)
     if (editor.currentFloorData.hasOwnProperty(ii)) {
       if (ii=='map')
@@ -84,16 +87,16 @@ editor_file = function(editor, callback){
     });
   }
   //callback(err:String)
-  editor_file.saveFloorFileAs = function(saveAsFilename,callback){
+  editor_file.saveNewFile = function(saveFilename,callback){
     //saveAsFilename不含'/'不含'.js'
     if (!isset(callback)) {printe('未设置callback');throw('未设置callback')};
     if (!isset(editor.currentFloorData)) {
       callback('无数据');
     }
-    editor.currentFloorData.map = editor.map.map(function(v){return v.map(function(v){return v.idnum||v||0})});
-    editor.currentFloorData=JSON.parse(JSON.stringify(editor.currentFloorData));
-    editor.currentFloorData.floorId=saveAsFilename;
-    editor.currentFloorId=saveAsFilename;
+    editor.currentFloorData={floorId: saveFilename, title: "新建楼层", name: "0", canFlyTo: true, canUseQuickShop: true, images: [], item_ratio: 1,
+        firstArrive: [], events: {}, changeFloor: {}, afterBattle: {}, afterGetItem: {}, afterOpenDoor: {}, cannotMove: {}};
+    editor.currentFloorData.map = "new";
+    editor.currentFloorId=saveFilename;
     editor_file.saveFloorFile(callback);
   }
   //callback(err:String)

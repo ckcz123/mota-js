@@ -363,10 +363,10 @@ editor_mode.prototype.listen = function(callback){
   saveFloorAs.onclick = function(){
     if (!saveAsName.value)return;
     editor_mode.onmode('');
-    editor.file.saveFloorFileAs(saveAsName.value,function(err){
+    editor.file.saveNewFile(saveAsName.value,function(err){
       if(err){printe(err);throw(err)}
       core.floorIds.push(saveAsName.value);
-      editor.file.editTower([['change',"['main']['floorIds']",core.floorIds]],function(objs_){/*console.log(objs_);*/if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printe('另存为成功,请F5刷新编辑器生效');});
+      editor.file.editTower([['change',"['main']['floorIds']",core.floorIds]],function(objs_){/*console.log(objs_);*/if(objs_.slice(-1)[0]!=null){printe(objs_.slice(-1)[0]);throw(objs_.slice(-1)[0])};printe('新建成功,请F5刷新编辑器生效');});
     });
   }
 

@@ -553,7 +553,7 @@ return code;
 */
 
 showImage_0_s
-    :   '显示图片' EvalString '起点像素位置' 'x' Int 'y' Int Newline
+    :   '显示图片' EvalString '起点像素位置' 'x' Number 'y' Number Newline
     ;
 
 /* showImage_0_s
@@ -561,7 +561,7 @@ tooltip : showImage：显示图片
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=showimage%ef%bc%9a%e6%98%be%e7%a4%ba%e5%9b%be%e7%89%87
 default : ["bg.jpg",0,0]
 colour : this.printColor
-var code = '{"type": "showImage", "name": "'+EvalString_0+'", "loc": ['+Int_0+','+Int_1+']},\n';
+var code = '{"type": "showImage", "name": "'+EvalString_0+'", "loc": ['+Number_0+','+Number_1+']},\n';
 return code;
 */
 

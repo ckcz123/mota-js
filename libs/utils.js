@@ -301,7 +301,7 @@ utils.prototype.readFile = function (success, error, readType) {
 
     if (core.platform.fileInput==null) {
         core.platform.fileInput = document.createElement("input");
-        core.platform.fileInput.style.display = 'none';
+        core.platform.fileInput.style.opacity = 0;
         core.platform.fileInput.type = 'file';
         core.platform.fileInput.onchange = function () {
             var files = core.platform.fileInput.files;

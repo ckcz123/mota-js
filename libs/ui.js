@@ -1292,10 +1292,22 @@ ui.prototype.drawBook = function (index) {
 
         core.canvas.ui.textAlign = "center";
         var damage = enemy.damage;
+
         var color = '#FFFF00';
-        if (damage >= core.status.hero.hp) color = '#FF0000';
-        if (damage <= 0) color = '#00FF00';
-        if (damage >= 999999999) damage = '无法战斗';
+        if (damage == null) {
+            damage = '无法战斗';
+            color = '#FF0000';
+        }
+        else {
+            if (damage >= core.status.hero.hp) color = '#FF0000';
+            if (damage<=0) color = '#00FF00';
+
+            if (damage>=1e17) damage = (damage / 1e16).toFixed(2) + "j";
+            else if (damage>=1e13) damage = (damage / 1e12).toFixed(2) + "z";
+            else if (damage>=1e9) damage = (damage / 1e8).toFixed(2) + "e";
+            else if (damage>=1e5) damage = (damage / 1e4).toFixed(2) + "w";
+
+        }
         core.fillText('ui', damage, damageOffset, 62 * i + 50, color, 'bold 13px Verdana');
 
         core.canvas.ui.textAlign = "left";
@@ -1327,10 +1339,9 @@ ui.prototype.drawBookDetail = function (index) {
     var enemyId=enemy.id;
     var hints=core.enemys.getSpecialHint(core.material.enemys[enemyId]);
 
-    if (hints.length==0) {
-        core.drawTip("该怪物无特殊属性！");
-        return;
-    }
+
+    if (hints.length==0)
+        hints.push("该怪物无特殊属性。");
     var content=hints.join("\n");
 
     core.status.event.id = 'book-detail';

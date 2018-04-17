@@ -488,6 +488,12 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "是否地图怪物显伤；用户可以手动在菜单栏中开关"
                 },
+                "displayCritical": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "是否地图显示临界；用户可以手动在菜单栏中开关"
+                },
                 "displayExtraDamage": {
                     "_leaf": true,
                     "_type": "checkbox",

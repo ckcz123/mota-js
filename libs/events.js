@@ -732,9 +732,8 @@ events.prototype.battle = function (id, x, y, force, callback) {
     core.stopHero();
     core.stopAutomaticRoute();
 
-    var damage = core.enemys.getDamage(id);
     // 非强制战斗
-    if (damage >= core.status.hero.hp && !force) {
+    if (!core.enemys.canBattle(id) && !force) {
         core.drawTip("你打不过此怪物！");
         core.clearContinueAutomaticRoute();
         return;

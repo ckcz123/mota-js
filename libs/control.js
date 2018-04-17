@@ -1039,21 +1039,31 @@ control.prototype.snipe = function (snipes) {
         snipe.blockIcon = core.material.icons[cls][block.event.id];
         snipe.blockImage = core.material.images[cls];
         snipe.height = height;
+
         var damage = core.enemys.getDamage(block.event.id);
+        var color = '#000000';
 
-        var color = "#000000";
-        if (damage <= 0) color = '#00FF00';
-        else if (damage < core.status.hero.hp / 3) color = '#FFFFFF';
-        else if (damage < core.status.hero.hp * 2 / 3) color = '#FFFF00';
-        else if (damage < core.status.hero.hp) color = '#FF7F00';
-        else color = '#FF0000';
+        if (damage == null) {
+            damage = "???";
+            color = '#FF0000';
+        }
+        else {
+            if (damage <= 0) color = '#00FF00';
+            else if (damage < hero_hp / 3) color = '#FFFFFF';
+            else if (damage < hero_hp * 2 / 3) color = '#FFFF00';
+            else if (damage < hero_hp) color = '#FF7F00';
+            else color = '#FF0000';
 
-        if (damage >= 999999999) damage = "???";
-        else if (damage > 100000) damage = (damage / 10000).toFixed(1) + "w";
+            if (damage>=1e17) damage = (damage / 1e16).toFixed(1) + "j";
+            else if (damage>=1e13) damage = (damage / 1e12).toFixed(1) + "z";
+            else if (damage>=1e9) damage = (damage / 1e8).toFixed(1) + "e";
+            else if (damage>=1e5) damage = (damage / 1e4).toFixed(1) + "w";
+        }
 
         snipe.damage = damage;
         snipe.color = color;
         snipe.block = core.clone(block);
+
     })
 
     var finishSnipe = function () {
@@ -1265,15 +1275,24 @@ control.prototype.updateFg = function () {
                 var id = mapBlocks[b].event.id;
 
                 var damage = core.enemys.getDamage(id);
-                var color = "#000000";
-                if (damage <= 0) color = '#00FF00';
-                else if (damage < hero_hp / 3) color = '#FFFFFF';
-                else if (damage < hero_hp * 2 / 3) color = '#FFFF00';
-                else if (damage < hero_hp) color = '#FF7F00';
-                else color = '#FF0000';
+                var color = '#000000';
 
-                if (damage >= 999999999) damage = "???";
-                else if (damage > 100000) damage = (damage / 10000).toFixed(1) + "w";
+                if (damage == null) {
+                    damage = "???";
+                    color = '#FF0000';
+                }
+                else {
+                    if (damage <= 0) color = '#00FF00';
+                    else if (damage < hero_hp / 3) color = '#FFFFFF';
+                    else if (damage < hero_hp * 2 / 3) color = '#FFFF00';
+                    else if (damage < hero_hp) color = '#FF7F00';
+                    else color = '#FF0000';
+
+                    if (damage>=1e17) damage = (damage / 1e16).toFixed(1) + "j";
+                    else if (damage>=1e13) damage = (damage / 1e12).toFixed(1) + "z";
+                    else if (damage>=1e9) damage = (damage / 1e8).toFixed(1) + "e";
+                    else if (damage>=1e5) damage = (damage / 1e4).toFixed(1) + "w";
+                }
 
                 core.setFillStyle('fg', '#000000');
                 core.canvas.fg.fillText(damage, 32 * x + 2, 32 * (y + 1) - 2);

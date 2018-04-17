@@ -286,7 +286,7 @@ control.prototype.checkBlock = function () {
 
 你需自己指定一个special数字，修改getSpecialText函数（属性名）和getSpecialHint函数（属性提示文字）。
 
-如果要修改伤害计算公式，请修改下面的calDamage函数。请注意，如果无法战斗，该函数必须返回`999999999`。
+如果要修改伤害计算公式，请修改下面的calDamage函数。请注意，如果无法战斗，该函数必须返回`null`。
 
 对于毒衰弱怪物的战斗后结算在`functions.js`中的afterBattle函数中。
 

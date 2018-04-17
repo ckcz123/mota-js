@@ -116,8 +116,11 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	var enemy = core.material.enemys[enemyId];
 
+	var damage = core.enemys.getDamage(enemyId);
+	if (damage == null) damage = core.status.hero.hp+1;
+
 	// 扣减体力值
-	core.status.hero.hp -= core.enemys.getDamage(enemyId);
+	core.status.hero.hp -= damage;
 	if (core.status.hero.hp<=0) {
 		core.status.hero.hp=0;
 		core.updateStatusBar();

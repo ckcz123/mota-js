@@ -488,7 +488,7 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=changepos-%e5%bd%93%e5%89
 default : [0,0,[['不变',''],['上','up'],['下','down'],['左','left'],['右','right']]]
 colour : this.dataColor
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
-var code = '{"type": "changePos", "loc": ['+Int_0+','+Int_1+']'+DirectionEx_List_0+'},\n';
+var code = '{"type": "changePos", "loc": ['+Number_0+','+Number_1+']'+DirectionEx_List_0+'},\n';
 return code;
 */
 

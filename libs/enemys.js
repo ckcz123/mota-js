@@ -84,11 +84,11 @@ enemys.prototype.getSpecialHint = function (enemy, special) {
         case 4: return "2连击：怪物每回合攻击2次";
         case 5: return "3连击：怪物每回合攻击3次";
         case 6: return (enemy.n||4)+"连击： 怪物每回合攻击"+(enemy.n||4)+"次";
-        case 7: return "破甲：战斗前，怪物附加角色防御的"+parseInt(100*core.values.breakArmor||0)+"%作为伤害";
-        case 8: return "反击：战斗时，怪物每回合附加角色攻击的"+parseInt(100*core.values.counterAttack||0)+"%作为伤害，无视角色防御";
+        case 7: return "破甲：战斗前，怪物附加角色防御的"+Math.floor(100*core.values.breakArmor||0)+"%作为伤害";
+        case 8: return "反击：战斗时，怪物每回合附加角色攻击的"+Math.floor(100*core.values.counterAttack||0)+"%作为伤害，无视角色防御";
         case 9: return "净化：战斗前，怪物附加勇士魔防的"+core.values.purify+"倍作为伤害";
         case 10: return "模仿：怪物的攻防和勇士攻防相等";
-        case 11: return "吸血：战斗前，怪物首先吸取角色的"+parseInt(100*enemy.value||0)+"%生命作为伤害"+(enemy.add?"，并把伤害数值加到自身生命上":"");
+        case 11: return "吸血：战斗前，怪物首先吸取角色的"+Math.floor(100*enemy.value||0)+"%生命作为伤害"+(enemy.add?"，并把伤害数值加到自身生命上":"");
         case 12: return "中毒：战斗后，勇士陷入中毒状态，每一步损失生命"+core.values.poisonDamage+"点";
         case 13: return "衰弱：战斗后，勇士陷入衰弱状态，攻防暂时下降"+core.values.weakValue+"点";
         case 14: return "诅咒：战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验";
@@ -138,7 +138,7 @@ enemys.prototype.getCritical = function (monsterId) {
     // 坚固、模仿怪物没有临界！
     if (this.hasSpecial(monster.special, 3) || this.hasSpecial(monster.special, 10)) return "???";
 
-    if (monster.def + monster.hp/2 <= 10000) {
+    if (monster.def + monster.hp/2 <= 0) {
 
         var last = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
 
@@ -157,23 +157,22 @@ enemys.prototype.getCritical = function (monsterId) {
 
     }
     else {
-        var info = this.getDamageInfo(monster, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
+
+        var info = this.getDamageInfo(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
 
         if (info == null) return '???';
         if (info.damage <= 0) return 0;
 
         var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = monster.def, turn = info.turn;
 
-        // turn 是怪物攻击次数
-
-        if (turn<=0) return '???';
-        var nextTurn = turn - 1; // 怪物攻击次数少1
+        // turn 是勇士攻击次数
+        if (turn<=1) return 0; // 攻杀
 
         // 每回合最小伤害 = ⎡怪物生命/勇士攻击次数⎤
-        var nextAtk = parseInt((mon_hp - 1)/(nextTurn+1)) + 1 + mon_def;
+        var nextAtk = Math.ceil(mon_hp/(turn-1)) + mon_def;
 
-        if (nextAtk <= hero_atk) return '???';
-        return core.formatBigNumber(nextAtk - hero_atk);
+        if (nextAtk <= hero_atk) return 0;
+        return nextAtk - hero_atk;
     }
 
 }
@@ -187,7 +186,7 @@ enemys.prototype.getCriticalDamage = function (monsterId) {
     var last = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
     var now = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk+c, core.status.hero.def, core.status.hero.mdef);
     if (last == null || now==null) return '???';
-    return core.formatBigNumber(last - now);
+    return last - now;
 }
 
 ////// 1防减伤计算 //////
@@ -196,7 +195,7 @@ enemys.prototype.getDefDamage = function (monsterId) {
     var nowDamage = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
     var nextDamage = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def + 1, core.status.hero.mdef);
     if (nowDamage == null || nextDamage ==null) return "???";
-    return core.formatBigNumber(nowDamage - nextDamage);
+    return nowDamage - nextDamage;
 }
 
 ////// 获得战斗伤害信息 //////
@@ -219,7 +218,7 @@ enemys.prototype.getDamageInfo = function(monster, hero_hp, hero_atk, hero_def, 
 
         // 如果有神圣盾免疫吸血等可以在这里写
 
-        vampireDamage = parseInt(vampireDamage) || 0;
+        vampireDamage = Math.floor(vampireDamage) || 0;
         // 加到自身
         if (monster.add) // 如果加到自身
             mon_hp += vampireDamage;
@@ -248,7 +247,7 @@ enemys.prototype.getDamageInfo = function(monster, hero_hp, hero_atk, hero_def, 
 
     var counterDamage = 0;
     // 反击
-    if (this.hasSpecial(mon_special, 8)) counterDamage += parseInt(core.values.counterAttack * hero_atk);
+    if (this.hasSpecial(mon_special, 8)) counterDamage += Math.floor(core.values.counterAttack * hero_atk);
 
     // 先攻
     if (this.hasSpecial(mon_special, 1))
@@ -256,14 +255,15 @@ enemys.prototype.getDamageInfo = function(monster, hero_hp, hero_atk, hero_def, 
 
     // 破甲
     if (this.hasSpecial(mon_special, 7))
-        initDamage += parseInt(core.values.breakArmor * hero_def);
+        initDamage += Math.floor(core.values.breakArmor * hero_def);
 
     // 净化
     if (this.hasSpecial(mon_special, 9))
-        initDamage += parseInt(core.values.purify * hero_mdef);
+        initDamage += Math.floor(core.values.purify * hero_mdef);
 
-    var turn = parseInt((mon_hp - 1) / (hero_atk - mon_def));
-    var ans = initDamage + turn * per_damage + (turn + 1) * counterDamage;
+    // turn: 勇士攻击回合数
+    var turn = Math.ceil(mon_hp / (hero_atk - mon_def));
+    var ans = initDamage + (turn - 1) * per_damage + turn * counterDamage;
     ans -= hero_mdef;
 
     if (!core.flags.enableNegativeDamage)
@@ -275,8 +275,7 @@ enemys.prototype.getDamageInfo = function(monster, hero_hp, hero_atk, hero_def, 
         "hero_mdef": hero_mdef,
         "mon_hp": mon_hp,
         "mon_atk": mon_atk,
-        "mod_def": mon_def,
-        "mon_mdef": mon_mdef,
+        "mon_def": mon_def,
         "per_damage": per_damage,
         "initDamage": initDamage,
         "turn": turn,

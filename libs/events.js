@@ -488,7 +488,7 @@ events.prototype.doAction = function() {
                 var value=core.calValue(data.value);
                 // 属性
                 if (data.name.indexOf("status:")==0) {
-                    value=parseInt(value);
+                    value=parseFloat(value);
                     core.setStatus(data.name.substring(7), value);
                 }
                 // 道具

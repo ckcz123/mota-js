@@ -249,7 +249,7 @@ enemys.prototype.calDamage = function (monster, hero_hp, hero_atk, hero_def, her
         // 如果有神圣盾免疫吸血等可以在这里写
         if (core.hasFlag("shield5")) vampireDamage = 0; // 存在神圣盾，吸血伤害为0
 
-        vampireDamage = parseInt(vampireDamage);
+        vampireDamage = Math.floor(vampireDamage) || 0;
         // 加到自身
         if (monster.add) // 如果加到自身
             mon_hp += vampireDamage;

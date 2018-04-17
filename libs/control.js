@@ -946,7 +946,7 @@ control.prototype.updateCheckBlock = function() {
                 core.status.checkBlock.betweenAttack[13*x+y]=true;
                 var leftHp = core.status.hero.hp - core.status.checkBlock.damage[13*x+y];
                 if (leftHp>1)
-                    core.status.checkBlock.damage[13*x+y] += parseInt((leftHp+(core.flags.betweenAttackCeil?0:1))/2);
+                    core.status.checkBlock.damage[13*x+y] += Math.floor((leftHp+(core.flags.betweenAttackCeil?0:1))/2);
             }
         }
     }
@@ -2088,9 +2088,7 @@ control.prototype.updateStatusBar = function () {
 
     var statusList = ['hpmax', 'hp', 'atk', 'def', 'mdef', 'money', 'experience'];
     statusList.forEach(function (item) {
-        var val = core.getStatus(item);
-        if (val>=10000000) val = parseInt(val/10000) + "W";
-        core.statusBar[item].innerHTML = val;
+        core.statusBar[item].innerHTML = core.formatBigNumber(core.getStatus(item));
     });
 
     // 进阶

@@ -146,13 +146,24 @@ utils.prototype.setTwoDigits = function (x) {
 }
 
 utils.prototype.formatBigNumber = function (x) {
-    x = parseInt(x);
-    if (!core.isset(x)) return x;
+    x = parseFloat(x);
+    if (!core.isset(x)) return '???';
 
-    if (x>=1e17) return (x / 1e16).toFixed(1) + "j";
-    else if (x>=1e13) return (x / 1e12).toFixed(1) + "z";
-    else if (x>=1e9) return (x / 1e8).toFixed(1) + "e";
-    else if (x>=1e5) return (x / 1e4).toFixed(1) + "w";
+    var all = [
+        {"val": 10e20, "char": "g"},
+        {"val": 10e16, "char": "j"},
+        {"val": 10e12, "char": "z"},
+        {"val": 10e8, "char": "e"},
+        {"val": 10e4, "char": "w"},
+    ]
+
+    for (var i=0;i<all.length;i++) {
+        var one = all[i];
+        if (x>=10*one.val) {
+            var v = x/one.val;
+            return v.toFixed(Math.max(0, Math.floor(4-Math.log10(v)))) + one.char;
+        }
+    }
 
     return x;
 }

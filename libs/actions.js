@@ -1389,15 +1389,21 @@ actions.prototype.clickSwitchs = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 4:
+                core.flags.displayCritical=!core.flags.displayCritical;
+                core.updateFg();
+                core.setLocalStorage('critical', core.flags.displayCritical);
+                core.ui.drawSwitchs();
+                break;
+            case 5:
                 core.flags.displayExtraDamage=!core.flags.displayExtraDamage;
                 core.updateFg();
                 core.setLocalStorage('extraDamage', core.flags.displayExtraDamage);
                 core.ui.drawSwitchs();
                 break;
-            case 5:
+            case 6:
                 window.open(core.firstData.name+".zip", "_blank");
                 break;
-            case 6:
+            case 7:
                 core.status.event.selection=0;
                 core.ui.drawSettings();
                 break;

@@ -1252,7 +1252,7 @@ control.prototype.updateFg = function () {
     if (!core.hasItem('book')) return;
     core.setFont('fg', "bold 11px Arial");
     var hero_hp = core.status.hero.hp;
-    if (core.flags.displayEnemyDamage) {
+    if (core.flags.displayEnemyDamage || core.flags.displayCritical) {
         core.canvas.fg.textAlign = 'left';
         for (var b = 0; b < mapBlocks.length; b++) {
             var x = mapBlocks[b].x, y = mapBlocks[b].y;
@@ -1271,31 +1271,46 @@ control.prototype.updateFg = function () {
 
                 var id = mapBlocks[b].event.id;
 
-                var damage = core.enemys.getDamage(id);
-                var color = '#000000';
+                if (core.flags.displayEnemyDamage) {
+                    var damage = core.enemys.getDamage(id);
+                    var color = '#000000';
 
-                if (damage == null) {
-                    damage = "???";
-                    color = '#FF0000';
+                    if (damage == null) {
+                        damage = "???";
+                        color = '#FF0000';
+                    }
+                    else {
+                        if (damage <= 0) color = '#00FF00';
+                        else if (damage < hero_hp / 3) color = '#FFFFFF';
+                        else if (damage < hero_hp * 2 / 3) color = '#FFFF00';
+                        else if (damage < hero_hp) color = '#FF7F00';
+                        else color = '#FF0000';
+
+                        damage = core.formatBigNumber(damage);
+                    }
+
+                    core.setFillStyle('fg', '#000000');
+                    core.canvas.fg.fillText(damage, 32 * x + 2, 32 * (y + 1) - 2);
+                    core.canvas.fg.fillText(damage, 32 * x, 32 * (y + 1) - 2);
+                    core.canvas.fg.fillText(damage, 32 * x + 2, 32 * (y + 1));
+                    core.canvas.fg.fillText(damage, 32 * x, 32 * (y + 1));
+
+                    core.setFillStyle('fg', color);
+                    core.canvas.fg.fillText(damage, 32 * x + 1, 32 * (y + 1) - 1);
                 }
-                else {
-                    if (damage <= 0) color = '#00FF00';
-                    else if (damage < hero_hp / 3) color = '#FFFFFF';
-                    else if (damage < hero_hp * 2 / 3) color = '#FFFF00';
-                    else if (damage < hero_hp) color = '#FF7F00';
-                    else color = '#FF0000';
 
-                    damage = core.formatBigNumber(damage);
+                // 临界显伤
+                if (core.flags.displayCritical) {
+                    var critical = core.formatBigNumber(core.enemys.getCritical(id));
+                    if (critical == '???') critical = '?';
+                    core.setFillStyle('fg', '#000000');
+                    core.canvas.fg.fillText(critical, 32 * x + 2, 32 * (y + 1) - 2 - 10);
+                    core.canvas.fg.fillText(critical, 32 * x, 32 * (y + 1) - 2 - 10);
+                    core.canvas.fg.fillText(critical, 32 * x + 2, 32 * (y + 1) - 10);
+                    core.canvas.fg.fillText(critical, 32 * x, 32 * (y + 1) - 10);
+                    core.setFillStyle('fg', '#FFFFFF');
+                    core.canvas.fg.fillText(critical, 32 * x + 1, 32 * (y + 1) - 1 - 10);
                 }
-
-                core.setFillStyle('fg', '#000000');
-                core.canvas.fg.fillText(damage, 32 * x + 2, 32 * (y + 1) - 2);
-                core.canvas.fg.fillText(damage, 32 * x, 32 * (y + 1) - 2);
-                core.canvas.fg.fillText(damage, 32 * x + 2, 32 * (y + 1));
-                core.canvas.fg.fillText(damage, 32 * x, 32 * (y + 1));
-
-                core.setFillStyle('fg', color);
-                core.canvas.fg.fillText(damage, 32 * x + 1, 32 * (y + 1) - 1);
 
             }
         }

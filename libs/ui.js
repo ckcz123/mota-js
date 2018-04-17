@@ -1302,10 +1302,7 @@ ui.prototype.drawBook = function (index) {
             if (damage >= core.status.hero.hp) color = '#FF0000';
             if (damage<=0) color = '#00FF00';
 
-            if (damage>=1e17) damage = (damage / 1e16).toFixed(2) + "j";
-            else if (damage>=1e13) damage = (damage / 1e12).toFixed(2) + "z";
-            else if (damage>=1e9) damage = (damage / 1e8).toFixed(2) + "e";
-            else if (damage>=1e5) damage = (damage / 1e4).toFixed(2) + "w";
+            damage = core.formatBigNumber(damage);
 
         }
         core.fillText('ui', damage, damageOffset, 62 * i + 50, color, 'bold 13px Verdana');

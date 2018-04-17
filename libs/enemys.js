@@ -138,20 +138,44 @@ enemys.prototype.getCritical = function (monsterId) {
     // 坚固、模仿怪物没有临界！
     if (this.hasSpecial(monster.special, 3) || this.hasSpecial(monster.special, 10)) return "???";
 
-    var last = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
+    if (monster.def + monster.hp/2 <= 10000) {
 
-    if (last == null) return '???';
+        var last = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
 
-    if (last <= 0) return 0;
+        if (last == null) return '???';
 
-    for (var i = core.status.hero.atk + 1; i <= monster.hp + monster.def; i++) {
-        var damage = this.calDamage(monster, core.status.hero.hp, i, core.status.hero.def, core.status.hero.mdef);
-        if (damage == null) return '???';
-        if (damage < last)
-            return i - core.status.hero.atk;
-        last = damage;
+        if (last <= 0) return 0;
+
+        for (var i = core.status.hero.atk + 1; i <= monster.hp + monster.def; i++) {
+            var damage = this.calDamage(monster, core.status.hero.hp, i, core.status.hero.def, core.status.hero.mdef);
+            if (damage == null) return '???';
+            if (damage < last)
+                return core.formatBigNumber(i - core.status.hero.atk);
+            last = damage;
+        }
+        return 0;
+
     }
-    return 0;
+    else {
+        var info = this.getDamageInfo(monster, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
+
+        if (info == null) return '???';
+        if (info.damage <= 0) return 0;
+
+        var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = monster.def, turn = info.turn;
+
+        // turn 是怪物攻击次数
+
+        if (turn<=0) return '???';
+        var nextTurn = turn - 1; // 怪物攻击次数少1
+
+        // 每回合最小伤害 = ⎡怪物生命/勇士攻击次数⎤
+        var nextAtk = parseInt((mon_hp - 1)/(nextTurn+1)) + 1 + mon_def;
+
+        if (nextAtk <= hero_atk) return '???';
+        return core.formatBigNumber(nextAtk - hero_atk);
+    }
+
 }
 
 ////// 临界减伤计算 //////
@@ -161,9 +185,9 @@ enemys.prototype.getCriticalDamage = function (monsterId) {
     if (c <= 0) return 0;
     var monster = core.material.enemys[monsterId];
     var last = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
-    if (last == null) return '???';
-
-    return last - this.calDamage(monster, core.status.hero.hp, core.status.hero.atk + c, core.status.hero.def, core.status.hero.mdef);
+    var now = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk+c, core.status.hero.def, core.status.hero.mdef);
+    if (last == null || now==null) return '???';
+    return core.formatBigNumber(last - now);
 }
 
 ////// 1防减伤计算 //////
@@ -172,11 +196,11 @@ enemys.prototype.getDefDamage = function (monsterId) {
     var nowDamage = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
     var nextDamage = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def + 1, core.status.hero.mdef);
     if (nowDamage == null || nextDamage ==null) return "???";
-    return nowDamage - nextDamage;
+    return core.formatBigNumber(nowDamage - nextDamage);
 }
 
-////// 具体的伤害计算公式 //////
-enemys.prototype.calDamage = function (monster, hero_hp, hero_atk, hero_def, hero_mdef) {
+////// 获得战斗伤害信息 //////
+enemys.prototype.getDamageInfo = function(monster, hero_hp, hero_atk, hero_def, hero_mdef) {
 
     var mon_hp = monster.hp, mon_atk = monster.atk, mon_def = monster.def, mon_special = monster.special;
     hero_hp=Math.max(0, hero_hp);
@@ -245,7 +269,28 @@ enemys.prototype.calDamage = function (monster, hero_hp, hero_atk, hero_def, her
     if (!core.flags.enableNegativeDamage)
         ans=Math.max(0, ans);
 
-    return ans;
+    return {
+        "hero_atk": hero_atk,
+        "hero_def": hero_def,
+        "hero_mdef": hero_mdef,
+        "mon_hp": mon_hp,
+        "mon_atk": mon_atk,
+        "mod_def": mon_def,
+        "mon_mdef": mon_mdef,
+        "per_damage": per_damage,
+        "initDamage": initDamage,
+        "turn": turn,
+        "damage": ans
+    };
+}
+
+////// 具体的伤害计算公式 //////
+enemys.prototype.calDamage = function (monster, hero_hp, hero_atk, hero_def, hero_mdef) {
+
+    var info = this.getDamageInfo(monster, hero_hp, hero_atk, hero_def, hero_mdef);
+    if (info == null) return null;
+    return info.damage;
+
 }
 
 ////// 获得当前楼层的怪物列表 //////

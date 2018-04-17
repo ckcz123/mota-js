@@ -1054,10 +1054,7 @@ control.prototype.snipe = function (snipes) {
             else if (damage < hero_hp) color = '#FF7F00';
             else color = '#FF0000';
 
-            if (damage>=1e17) damage = (damage / 1e16).toFixed(1) + "j";
-            else if (damage>=1e13) damage = (damage / 1e12).toFixed(1) + "z";
-            else if (damage>=1e9) damage = (damage / 1e8).toFixed(1) + "e";
-            else if (damage>=1e5) damage = (damage / 1e4).toFixed(1) + "w";
+            damage = core.formatBigNumber(damage);
         }
 
         snipe.damage = damage;
@@ -1288,10 +1285,7 @@ control.prototype.updateFg = function () {
                     else if (damage < hero_hp) color = '#FF7F00';
                     else color = '#FF0000';
 
-                    if (damage>=1e17) damage = (damage / 1e16).toFixed(1) + "j";
-                    else if (damage>=1e13) damage = (damage / 1e12).toFixed(1) + "z";
-                    else if (damage>=1e9) damage = (damage / 1e8).toFixed(1) + "e";
-                    else if (damage>=1e5) damage = (damage / 1e4).toFixed(1) + "w";
+                    damage = core.formatBigNumber(damage);
                 }
 
                 core.setFillStyle('fg', '#000000');

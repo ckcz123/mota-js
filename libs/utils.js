@@ -145,6 +145,18 @@ utils.prototype.setTwoDigits = function (x) {
     return parseInt(x)<10?"0"+x:x;
 }
 
+utils.prototype.formatBigNumber = function (x) {
+    x = parseInt(x);
+    if (!core.isset(x)) return x;
+
+    if (x>=1e17) return (x / 1e16).toFixed(1) + "j";
+    else if (x>=1e13) return (x / 1e12).toFixed(1) + "z";
+    else if (x>=1e9) return (x / 1e8).toFixed(1) + "e";
+    else if (x>=1e5) return (x / 1e4).toFixed(1) + "w";
+
+    return x;
+}
+
 ////// 数组转RGB //////
 utils.prototype.arrayToRGB = function (color) {
     var nowR = parseInt(color[0])||0, nowG = parseInt(color[1])||0, nowB = parseInt(color[2])||0;

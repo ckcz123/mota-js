@@ -873,6 +873,11 @@ core.prototype.formatDate2 = function (date) {
     return core.utils.formatDate2(date);
 }
 
+////// 格式化大数 //////
+core.prototype.formatBigNumber = function (x) {
+    return core.utils.formatBigNumber(x);
+}
+
 ////// 两位数显示 //////
 core.prototype.setTwoDigits = function (x) {
     return core.utils.setTwoDigits(x);

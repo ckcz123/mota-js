@@ -123,11 +123,32 @@ events.prototype.lose = function (reason) {
 ////// 游戏结束 //////
 events.prototype.gameOver = function (ending, fromReplay) {
 
+    // 下载录像
+    var confirmDownload = function () {
+        core.ui.closePanel();
+        setTimeout(function () {
+            core.ui.drawConfirmBox("你想下载录像吗？", function () {
+                var obj = {
+                    'name': core.firstData.name,
+                    'version': core.firstData.version,
+                    'hard': core.status.hard,
+                    'route': core.encodeRoute(core.status.route)
+                }
+                core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify(obj));
+                core.restart();
+            }, function () {
+                core.restart();
+            })
+        }, 150);
+    }
+
     // 上传成绩
     var confirmUpload = function () {
 
+        core.ui.closePanel();
+
         if (!core.isset(ending)) {
-            core.restart();
+            confirmDownload();
             return;
         }
 
@@ -154,8 +175,7 @@ events.prototype.gameOver = function (ending, fromReplay) {
             formData.append('route', core.encodeRoute(core.status.route));
 
             core.http("POST", "/games/upload.php", formData);
-
-            core.restart();
+            confirmDownload();
         }
 
         core.ui.drawConfirmBox("你想记录你的ID和成绩吗？", function () {
@@ -167,30 +187,14 @@ events.prototype.gameOver = function (ending, fromReplay) {
         return;
     }
 
-    // 下载录像
-    var confirmDownload = function () {
-        core.ui.closePanel();
-        core.ui.drawConfirmBox("你想下载录像吗？", function () {
-            var obj = {
-                'name': core.firstData.name,
-                'version': core.firstData.version,
-                'hard': core.status.hard,
-                'route': core.encodeRoute(core.status.route)
-            }
-            core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify(obj));
-            confirmUpload();
-        }, function () {
-            confirmUpload();
-        })
-    }
-
     if (fromReplay) {
         core.drawText("录像回放完毕！", function () {
             core.restart();
         });
     }
     else {
-        confirmDownload();
+        // confirmDownload();
+        confirmUpload();
     }
 
 }

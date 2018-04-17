@@ -1572,13 +1572,16 @@ ui.prototype.drawSLPanel = function(index) {
 
     var u=416/6, size=118;
 
+    var strokeColor = '#FFD700';
+    if (core.status.event.selection) strokeColor = '#FF6A6A';
+
     var name=core.status.event.id=='save'?"存档":"读档";
     for (var i=0;i<6;i++) {
         var id=5*page+i;
         var data=core.getLocalStorage(i==0?"autoSave":"save"+id, null);
         if (i<3) {
             core.fillText('ui', i==0?"自动存档":name+id, (2*i+1)*u, 35, '#FFFFFF', "bold 17px Verdana");
-            core.strokeRect('ui', (2*i+1)*u-size/2, 50, size, size, i==offset?'#FFD700':'#FFFFFF', i==offset?6:2);
+            core.strokeRect('ui', (2*i+1)*u-size/2, 50, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
                 this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc);
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 65+size, '#FFFFFF', '10px Verdana');
@@ -1590,7 +1593,7 @@ ui.prototype.drawSLPanel = function(index) {
         }
         else {
             core.fillText('ui', name+id, (2*i-5)*u, 230, '#FFFFFF', "bold 17px Verdana");
-            core.strokeRect('ui', (2*i-5)*u-size/2, 245, size, size, i==offset?'#FFD700':'#FFFFFF', i==offset?6:2);
+            core.strokeRect('ui', (2*i-5)*u-size/2, 245, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
                 this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc);
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 260+size, '#FFFFFF', '10px Verdana');
@@ -1602,6 +1605,11 @@ ui.prototype.drawSLPanel = function(index) {
         }
     }
     this.drawPagination(page+1, 30);
+
+    if (core.status.event.selection)
+        core.setFillStyle('ui', '#FF6A6A');
+    core.fillText('ui', '删除模式', 48, 403);
+
 }
 
 ////// 绘制一个缩略图 //////

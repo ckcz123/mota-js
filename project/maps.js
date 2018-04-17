@@ -23,10 +23,10 @@ maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
 
     // Autotile
     '20':{'cls': 'autotile', 'id': 'autotile', 'noPass': true}, // autotile
-    // 更多的autotile从151到160等，只要不和现有的数字冲突即可
-    '151':{'cls': 'autotile', 'id': 'autotile1', 'noPass': true},
-    '152':{'cls': 'autotile', 'id': 'autotile2', 'noPass': true},
-    '153':{'cls': 'autotile', 'id': 'autotile3', 'noPass': true},
+    // 更多的autotile只要不和现有的数字冲突即可
+    '351':{'cls': 'autotile', 'id': 'autotile1', 'noPass': true},
+    '352':{'cls': 'autotile', 'id': 'autotile2', 'noPass': true},
+    '353':{'cls': 'autotile', 'id': 'autotile3', 'noPass': true},
 
     ////////////////////////// 物品部分 //////////////////////////
 
@@ -99,40 +99,54 @@ maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
 
     ////////////////////////// NPC部分 //////////////////////////
 
-    // 121-150 NPC
-    '121':{'cls': 'npcs', 'id': 'man'},
-    '122':{'cls': 'npcs', 'id': 'woman'},
-    '123':{'cls': 'npcs', 'id': 'thief'},
-    '124':{'cls': 'npcs', 'id': 'fairy'},
-    '125':{'cls': 'npcs', 'id': 'magician'},
-    '126':{'cls': 'npcs', 'id': 'womanMagician'},
-    '127':{'cls': 'npcs', 'id': 'oldMan'},
-    '128':{'cls': 'npcs', 'id': 'child'},
-    '129':{'cls': 'npcs', 'id': 'wood'},
-    '130':{'cls': 'npcs', 'id': 'pinkShop'},
-    '131':{'cls': 'npcs', 'id': 'blueShop'},
-    '132':{'cls': 'npcs', 'id': 'princess'},
-    '133':{'cls': 'npc48', 'id': 'npc0'},
-    '134':{'cls': 'npc48', 'id': 'npc1'},
-    '135':{'cls': 'npc48', 'id': 'npc2'},
-    '136':{'cls': 'npc48', 'id': 'npc3'},
-    '137':{'cls': 'npc48', 'id': 'npc4'},
-
+    // 111-150 NPC
+    '111':{'cls': 'npcs', 'id': 'man'},
+    '112':{'cls': 'npcs', 'id': 'woman'},
+    '113':{'cls': 'npcs', 'id': 'thief'},
+    '114':{'cls': 'npcs', 'id': 'fairy'},
+    '115':{'cls': 'npcs', 'id': 'magician'},
+    '116':{'cls': 'npcs', 'id': 'womanMagician'},
+    '117':{'cls': 'npcs', 'id': 'oldMan'},
+    '118':{'cls': 'npcs', 'id': 'child'},
+    '119':{'cls': 'npcs', 'id': 'wood'},
+    '120':{'cls': 'npcs', 'id': 'pinkShop'},
+    '121':{'cls': 'npcs', 'id': 'blueShop'},
+    '122':{'cls': 'npcs', 'id': 'princess'},
+    '123': {'cls': 'npcs', 'id': 'wlt'},
+    '124': {'cls': 'npcs', 'id': 'wt'},
+    '125': {'cls': 'npcs', 'id': 'wrt'},
+    '126': {'cls': 'npcs', 'id': 'wl'},
+    '127': {'cls': 'npcs', 'id': 'wc'},
+    '128': {'cls': 'npcs', 'id': 'wr'},
+    '129': {'cls': 'npcs', 'id': 'wlb'},
+    '130': {'cls': 'npcs', 'id': 'wrb'},
+    '131': {'cls': 'npcs', 'id': 'dlt'},
+    '132': {'cls': 'npcs', 'id': 'dt'},
+    '133': {'cls': 'npcs', 'id': 'drt'},
+    '134': {'cls': 'npcs', 'id': 'dl'},
+    '135': {'cls': 'npcs', 'id': 'dc'},
+    '136': {'cls': 'npcs', 'id': 'dr'},
+    '137': {'cls': 'npcs', 'id': 'dlb'},
+    '138': {'cls': 'npcs', 'id': 'drb'},
+    '139': {'cls': 'npc48', 'id': 'npc0'},
+    '140': {'cls': 'npc48', 'id': 'npc1'},
+    '141': {'cls': 'npc48', 'id': 'npc2'},
+    '142': {'cls': 'npc48', 'id': 'npc3'},
+    '143': {'cls': 'npc48', 'id': 'npc4'},
 
     ////////////////////////// 其他部分 //////////////////////////
 
-    // 161-200 其他（单向箭头、灯、箱子等等）
-    '161':{'cls': 'terrains', 'id': 'arrowUp', 'noPass': false}, // 单向上箭头
-    '162':{'cls': 'terrains', 'id': 'arrowDown', 'noPass': false}, // 单向下箭头
-    '163':{'cls': 'terrains', 'id': 'arrowLeft', 'noPass': false}, // 单向左箭头
-    '164':{'cls': 'terrains', 'id': 'arrowRight', 'noPass': false}, // 单向右箭头
-    '165':{'cls': 'terrains', 'id': 'light', 'trigger': 'changeLight', 'noPass': false}, // 灯
-    '166':{'cls': 'terrains', 'id': 'darkLight', 'noPass': true}, // 暗灯
-    '167':{'cls': 'terrains', 'id': 'ski', 'trigger': 'ski', 'noPass': false}, // 滑冰
-    '168':{'cls': 'terrains', 'id': 'flower', 'noPass': false}, // 花
-    '169':{'cls': 'terrains', 'id': 'box', 'trigger': 'pushBox', 'noPass': true}, // 箱子
-    '170':{'cls': 'terrains', 'id': 'boxed', 'trigger': 'pushBox', 'noPass': true}, // 完成的箱子
-
+    // 171-200 其他（单向箭头、灯、箱子等等）
+    '171':{'cls': 'terrains', 'id': 'arrowUp', 'noPass': false}, // 单向上箭头
+    '172':{'cls': 'terrains', 'id': 'arrowDown', 'noPass': false}, // 单向下箭头
+    '173':{'cls': 'terrains', 'id': 'arrowLeft', 'noPass': false}, // 单向左箭头
+    '174':{'cls': 'terrains', 'id': 'arrowRight', 'noPass': false}, // 单向右箭头
+    '175':{'cls': 'terrains', 'id': 'light', 'trigger': 'changeLight', 'noPass': false}, // 灯
+    '176':{'cls': 'terrains', 'id': 'darkLight', 'noPass': true}, // 暗灯
+    '177':{'cls': 'terrains', 'id': 'ski', 'trigger': 'ski', 'noPass': false}, // 滑冰
+    '178':{'cls': 'terrains', 'id': 'flower', 'noPass': false}, // 花
+    '179':{'cls': 'terrains', 'id': 'box', 'trigger': 'pushBox', 'noPass': true}, // 箱子
+    '180':{'cls': 'terrains', 'id': 'boxed', 'trigger': 'pushBox', 'noPass': true}, // 完成的箱子
 
     ////////////////////////// 怪物部分 //////////////////////////
 

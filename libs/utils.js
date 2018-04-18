@@ -150,18 +150,18 @@ utils.prototype.formatBigNumber = function (x) {
     if (!core.isset(x)) return '???';
 
     var all = [
-        {"val": 10e20, "char": "g"},
-        {"val": 10e16, "char": "j"},
-        {"val": 10e12, "char": "z"},
-        {"val": 10e8, "char": "e"},
-        {"val": 10e4, "char": "w"},
+        {"val": 10e20, "c": "g"},
+        {"val": 10e16, "c": "j"},
+        {"val": 10e12, "c": "z"},
+        {"val": 10e8, "c": "e"},
+        {"val": 10e4, "c": "w"},
     ]
 
     for (var i=0;i<all.length;i++) {
         var one = all[i];
         if (x>=10*one.val) {
             var v = x/one.val;
-            return v.toFixed(Math.max(0, Math.floor(4-Math.log10(v)))) + one.char;
+            return v.toFixed(Math.max(0, Math.floor(4-Math.log10(v)))) + one.c;
         }
     }
 

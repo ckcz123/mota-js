@@ -324,6 +324,11 @@ utils.prototype.readFile = function (success, error, readType) {
 ////// 下载文件到本地 //////
 utils.prototype.download = function (filename, content) {
 
+    if (core.isset(window.jsinterface)) {
+        window.jsinterface.download(filename, content);
+        return;
+    }
+
     // Step 0: 不为http/https，直接不支持
     if (!core.platform.isOnline) {
         alert("离线状态下不支持下载操作！");

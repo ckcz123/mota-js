@@ -285,6 +285,14 @@ utils.prototype.isset = function (val) {
 ////// 读取一个本地文件内容 //////
 utils.prototype.readFile = function (success, error, readType) {
 
+    core.platform.successCallback = success;
+    core.platform.errorCallback = error;
+
+    if (core.isset(window.jsinterface)) {
+        window.jsinterface.readFile();
+        return;
+    }
+
     // step 0: 不为http/https，直接不支持
     if (!core.platform.isOnline) {
         alert("离线状态下不支持文件读取！");
@@ -316,9 +324,32 @@ utils.prototype.readFile = function (success, error, readType) {
         }
     }
 
-    core.platform.successCallback = success;
-    core.platform.errorCallback = error;
     core.platform.fileInput.click();
+}
+
+////// 读取文件完毕 //////
+utils.prototype.readFileContent = function (content) {
+    var obj=null;
+    if(content.slice(0,4)==='data'){
+        if (core.isset(core.platform.successCallback))
+            core.platform.successCallback(content);
+        return;
+    }
+    try {
+        obj=JSON.parse(content);
+        if (core.isset(obj)) {
+            if (core.isset(core.platform.successCallback))
+                core.platform.successCallback(obj);
+            return;
+        }
+    }
+    catch (e) {
+        console.log(e);
+    }
+    alert("不是有效的JSON文件！");
+
+    if (core.isset(core.platform.errorCallback))
+        core.platform.errorCallback();
 }
 
 ////// 下载文件到本地 //////
@@ -384,6 +415,12 @@ utils.prototype.download = function (filename, content) {
 
 ////// 复制一段内容到剪切板 //////
 utils.prototype.copy = function (data) {
+
+    if (core.isset(window.jsinterface)) {
+        window.jsinterface.copy(filename, content);
+        return true;
+    }
+
     if (!core.platform.supportCopy) return false;
 
     var textArea = document.createElement("textarea");

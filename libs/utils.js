@@ -324,8 +324,6 @@ utils.prototype.readFile = function (success, error, readType) {
         }
     }
 
-    core.platform.successCallback = success;
-    core.platform.errorCallback = error;
     core.platform.fileInput.click();
 }
 

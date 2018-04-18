@@ -946,7 +946,7 @@ control.prototype.updateCheckBlock = function() {
                 core.status.checkBlock.betweenAttack[13*x+y]=true;
                 var leftHp = core.status.hero.hp - core.status.checkBlock.damage[13*x+y];
                 if (leftHp>1)
-                    core.status.checkBlock.damage[13*x+y] += parseInt((leftHp+(core.flags.betweenAttackCeil?0:1))/2);
+                    core.status.checkBlock.damage[13*x+y] += Math.floor((leftHp+(core.flags.betweenAttackCeil?0:1))/2);
             }
         }
     }
@@ -1039,21 +1039,28 @@ control.prototype.snipe = function (snipes) {
         snipe.blockIcon = core.material.icons[cls][block.event.id];
         snipe.blockImage = core.material.images[cls];
         snipe.height = height;
+
         var damage = core.enemys.getDamage(block.event.id);
+        var color = '#000000';
 
-        var color = "#000000";
-        if (damage <= 0) color = '#00FF00';
-        else if (damage < core.status.hero.hp / 3) color = '#FFFFFF';
-        else if (damage < core.status.hero.hp * 2 / 3) color = '#FFFF00';
-        else if (damage < core.status.hero.hp) color = '#FF7F00';
-        else color = '#FF0000';
+        if (damage == null) {
+            damage = "???";
+            color = '#FF0000';
+        }
+        else {
+            if (damage <= 0) color = '#00FF00';
+            else if (damage < hero_hp / 3) color = '#FFFFFF';
+            else if (damage < hero_hp * 2 / 3) color = '#FFFF00';
+            else if (damage < hero_hp) color = '#FF7F00';
+            else color = '#FF0000';
 
-        if (damage >= 999999999) damage = "???";
-        else if (damage > 100000) damage = (damage / 10000).toFixed(1) + "w";
+            damage = core.formatBigNumber(damage);
+        }
 
         snipe.damage = damage;
         snipe.color = color;
         snipe.block = core.clone(block);
+
     })
 
     var finishSnipe = function () {
@@ -1245,7 +1252,7 @@ control.prototype.updateFg = function () {
     if (!core.hasItem('book')) return;
     core.setFont('fg', "bold 11px Arial");
     var hero_hp = core.status.hero.hp;
-    if (core.flags.displayEnemyDamage) {
+    if (core.flags.displayEnemyDamage || core.flags.displayCritical) {
         core.canvas.fg.textAlign = 'left';
         for (var b = 0; b < mapBlocks.length; b++) {
             var x = mapBlocks[b].x, y = mapBlocks[b].y;
@@ -1264,25 +1271,46 @@ control.prototype.updateFg = function () {
 
                 var id = mapBlocks[b].event.id;
 
-                var damage = core.enemys.getDamage(id);
-                var color = "#000000";
-                if (damage <= 0) color = '#00FF00';
-                else if (damage < hero_hp / 3) color = '#FFFFFF';
-                else if (damage < hero_hp * 2 / 3) color = '#FFFF00';
-                else if (damage < hero_hp) color = '#FF7F00';
-                else color = '#FF0000';
+                if (core.flags.displayEnemyDamage) {
+                    var damage = core.enemys.getDamage(id);
+                    var color = '#000000';
 
-                if (damage >= 999999999) damage = "???";
-                else if (damage > 100000) damage = (damage / 10000).toFixed(1) + "w";
+                    if (damage == null) {
+                        damage = "???";
+                        color = '#FF0000';
+                    }
+                    else {
+                        if (damage <= 0) color = '#00FF00';
+                        else if (damage < hero_hp / 3) color = '#FFFFFF';
+                        else if (damage < hero_hp * 2 / 3) color = '#FFFF00';
+                        else if (damage < hero_hp) color = '#FF7F00';
+                        else color = '#FF0000';
 
-                core.setFillStyle('fg', '#000000');
-                core.canvas.fg.fillText(damage, 32 * x + 2, 32 * (y + 1) - 2);
-                core.canvas.fg.fillText(damage, 32 * x, 32 * (y + 1) - 2);
-                core.canvas.fg.fillText(damage, 32 * x + 2, 32 * (y + 1));
-                core.canvas.fg.fillText(damage, 32 * x, 32 * (y + 1));
+                        damage = core.formatBigNumber(damage);
+                    }
 
-                core.setFillStyle('fg', color);
-                core.canvas.fg.fillText(damage, 32 * x + 1, 32 * (y + 1) - 1);
+                    core.setFillStyle('fg', '#000000');
+                    core.canvas.fg.fillText(damage, 32 * x + 2, 32 * (y + 1) - 2);
+                    core.canvas.fg.fillText(damage, 32 * x, 32 * (y + 1) - 2);
+                    core.canvas.fg.fillText(damage, 32 * x + 2, 32 * (y + 1));
+                    core.canvas.fg.fillText(damage, 32 * x, 32 * (y + 1));
+
+                    core.setFillStyle('fg', color);
+                    core.canvas.fg.fillText(damage, 32 * x + 1, 32 * (y + 1) - 1);
+                }
+
+                // 临界显伤
+                if (core.flags.displayCritical) {
+                    var critical = core.formatBigNumber(core.enemys.getCritical(id));
+                    if (critical == '???') critical = '?';
+                    core.setFillStyle('fg', '#000000');
+                    core.canvas.fg.fillText(critical, 32 * x + 2, 32 * (y + 1) - 2 - 10);
+                    core.canvas.fg.fillText(critical, 32 * x, 32 * (y + 1) - 2 - 10);
+                    core.canvas.fg.fillText(critical, 32 * x + 2, 32 * (y + 1) - 10);
+                    core.canvas.fg.fillText(critical, 32 * x, 32 * (y + 1) - 10);
+                    core.setFillStyle('fg', '#FFFFFF');
+                    core.canvas.fg.fillText(critical, 32 * x + 1, 32 * (y + 1) - 1 - 10);
+                }
 
             }
         }
@@ -2075,8 +2103,9 @@ control.prototype.updateStatusBar = function () {
 
     var statusList = ['hpmax', 'hp', 'atk', 'def', 'mdef', 'money', 'experience'];
     statusList.forEach(function (item) {
-        core.statusBar[item].innerHTML = core.getStatus(item);
+        core.statusBar[item].innerHTML = core.formatBigNumber(core.getStatus(item));
     });
+
     // 进阶
     if (core.flags.enableLevelUp && core.status.hero.lv<core.firstData.levelUp.length) {
         core.statusBar.up.innerHTML = core.firstData.levelUp[core.status.hero.lv].need || "&nbsp;";
@@ -2318,6 +2347,24 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 top: canvasTop + unit,
                 right: 0,
                 border: '3px #fff solid',
+            }
+        },
+        {
+            id: 'gif',
+            rules: {
+                width: (canvasWidth - SPACE*2) + unit,
+                height:(canvasWidth - SPACE*2) + unit,
+                top: (canvasTop + SPACE) + unit,
+                right: SPACE + unit,
+            }
+        },
+        {
+            id: 'gif2',
+            rules: {
+                width: (canvasWidth - SPACE*2) + unit,
+                height:(canvasWidth - SPACE*2) + unit,
+                top: (canvasTop + SPACE) + unit,
+                right: SPACE + unit,
             }
         },
         {

@@ -5,13 +5,13 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"sample0", "sample1", "sample2", "MT0"
 		],
 		"images" : [
-			"bg.jpg",
+			"bg.jpg"
 		],
 		"animates" : [ 
-			"hand", "sword", "zone", "yongchang",
+			"hand", "sword", "zone",
 		],
 		"bgms" : [ 
-			'bgm.mp3', 'qianjin.mid', 'star.mid',
+			'bgm.mp3'
 		],
 		"sounds" : [ 
 			'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg', 'zone.ogg'
@@ -142,13 +142,13 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"enableLevelUp": false,
 		"enableDebuff": false,
 		"flyNearStair": true,
-		"pickaxeFourDirections": true,
-		"bombFourDirections": true,
+		"pickaxeFourDirections": false,
+		"bombFourDirections": false,
 		"bigKeyIsBox": false,
-		"equipment": true,
+		"equipment": false,
 		"enableDeleteItem": true,
 		"enableAddPoint": false,
-		"enableNegativeDamage": true,
+		"enableNegativeDamage": false,
 		"hatredDecrease": true,
 		"betweenAttackCeil": false,
 		"startDirectly": false,
@@ -156,6 +156,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"showBattleAnimateConfirm": true,
 		"battleAnimate": true,
 		"displayEnemyDamage": true,
+		"displayCritical": true,
 		"displayExtraDamage": true,
 		"enableGentleClick": true,
 		"potionWhileRouting": false,

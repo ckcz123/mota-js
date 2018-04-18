@@ -1245,10 +1245,12 @@ actions.prototype.clickSL = function(x,y) {
     // 上一页
     if ((x == 3 || x == 4) && y == 12) {
         core.ui.drawSLPanel(10*(page-1)+offset);
+        return;
     }
     // 下一页
     if ((x == 8 || x == 9) && y == 12) {
         core.ui.drawSLPanel(10*(page+1)+offset);
+        return;
     }
     // 返回
     if (x>=10 && x<=12 && y==12) {
@@ -1258,17 +1260,37 @@ actions.prototype.clickSL = function(x,y) {
         }
         return;
     }
+    // 删除
+    if (x>=0 && x<=2 && y==12) {
+        core.status.event.selection=!core.status.event.selection;
+        core.ui.drawSLPanel(index);
+        return;
+    }
 
-    var index=6*page+1;
+    var id=null;
     if (y>=1 && y<=4) {
-        if (x>=1 && x<=3) core.doSL("autoSave", core.status.event.id);
-        if (x>=5 && x<=7) core.doSL(5*page+1, core.status.event.id);
-        if (x>=9 && x<=11) core.doSL(5*page+2, core.status.event.id);
+        if (x>=1 && x<=3) id = "autoSave";
+        if (x>=5 && x<=7) id = 5*page+1;
+        if (x>=9 && x<=11) id = 5*page+2;
     }
     if (y>=7 && y<=10) {
-        if (x>=1 && x<=3) core.doSL(5*page+3, core.status.event.id);
-        if (x>=5 && x<=7) core.doSL(5*page+4, core.status.event.id);
-        if (x>=9 && x<=11) core.doSL(5*page+5, core.status.event.id);
+        if (x>=1 && x<=3) id = 5*page+3;
+        if (x>=5 && x<=7) id = 5*page+4;
+        if (x>=9 && x<=11) id = 5*page+5;
+    }
+    if (id!=null) {
+        if (core.status.event.selection)  {
+            if (id == 'autoSave') {
+                core.drawTip("无法删除自动存档！");
+            }
+            else {
+                core.removeLocalStorage("save"+id);
+                core.ui.drawSLPanel(index);
+            }
+        }
+        else {
+            core.doSL(id, core.status.event.id);
+        }
     }
 }
 
@@ -1346,6 +1368,15 @@ actions.prototype.keyUpSL = function (keycode) {
         }
         return;
     }
+    if (keycode==46) {
+        if (offset==0) {
+            core.drawTip("无法删除自动存档！");
+        }
+        else {
+            core.removeLocalStorage("save"+(5*page+offset));
+            core.ui.drawSLPanel(index);
+        }
+    }
 }
 
 ////// 系统设置界面时的点击操作 //////
@@ -1389,15 +1420,21 @@ actions.prototype.clickSwitchs = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 4:
+                core.flags.displayCritical=!core.flags.displayCritical;
+                core.updateFg();
+                core.setLocalStorage('critical', core.flags.displayCritical);
+                core.ui.drawSwitchs();
+                break;
+            case 5:
                 core.flags.displayExtraDamage=!core.flags.displayExtraDamage;
                 core.updateFg();
                 core.setLocalStorage('extraDamage', core.flags.displayExtraDamage);
                 core.ui.drawSwitchs();
                 break;
-            case 5:
+            case 6:
                 window.open(core.firstData.name+".zip", "_blank");
                 break;
-            case 6:
+            case 7:
                 core.status.event.selection=0;
                 core.ui.drawSettings();
                 break;

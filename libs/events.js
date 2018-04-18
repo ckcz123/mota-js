@@ -123,11 +123,32 @@ events.prototype.lose = function (reason) {
 ////// 游戏结束 //////
 events.prototype.gameOver = function (ending, fromReplay) {
 
+    // 下载录像
+    var confirmDownload = function () {
+        core.ui.closePanel();
+        setTimeout(function () {
+            core.ui.drawConfirmBox("你想下载录像吗？", function () {
+                var obj = {
+                    'name': core.firstData.name,
+                    'version': core.firstData.version,
+                    'hard': core.status.hard,
+                    'route': core.encodeRoute(core.status.route)
+                }
+                core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify(obj));
+                core.restart();
+            }, function () {
+                core.restart();
+            })
+        }, 150);
+    }
+
     // 上传成绩
     var confirmUpload = function () {
 
+        core.ui.closePanel();
+
         if (!core.isset(ending)) {
-            core.restart();
+            confirmDownload();
             return;
         }
 
@@ -154,8 +175,7 @@ events.prototype.gameOver = function (ending, fromReplay) {
             formData.append('route', core.encodeRoute(core.status.route));
 
             core.http("POST", "/games/upload.php", formData);
-
-            core.restart();
+            confirmDownload();
         }
 
         core.ui.drawConfirmBox("你想记录你的ID和成绩吗？", function () {
@@ -167,30 +187,14 @@ events.prototype.gameOver = function (ending, fromReplay) {
         return;
     }
 
-    // 下载录像
-    var confirmDownload = function () {
-        core.ui.closePanel();
-        core.ui.drawConfirmBox("你想下载录像吗？", function () {
-            var obj = {
-                'name': core.firstData.name,
-                'version': core.firstData.version,
-                'hard': core.status.hard,
-                'route': core.encodeRoute(core.status.route)
-            }
-            core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify(obj));
-            confirmUpload();
-        }, function () {
-            confirmUpload();
-        })
-    }
-
     if (fromReplay) {
         core.drawText("录像回放完毕！", function () {
             core.restart();
         });
     }
     else {
-        confirmDownload();
+        // confirmDownload();
+        confirmUpload();
     }
 
 }
@@ -386,13 +390,15 @@ events.prototype.doAction = function() {
             });
             break;
         case "changeFloor": // 楼层转换
-            var heroLoc = {"x": data.loc[0], "y": data.loc[1]};
-            if (core.isset(data.direction)) heroLoc.direction=data.direction;
-            core.changeFloor(data.floorId||core.status.floorId, null, heroLoc, data.time, function() {
-                core.lockControl();
-                core.events.doAction();
-            });
-            break;
+            {
+                var heroLoc = {"x": data.loc[0], "y": data.loc[1]};
+                if (core.isset(data.direction)) heroLoc.direction=data.direction;
+                core.changeFloor(data.floorId||core.status.floorId, null, heroLoc, data.time, function() {
+                    core.lockControl();
+                    core.events.doAction();
+                });
+                break;
+            }
         case "changePos": // 直接更换勇士位置，不切换楼层
             core.clearMap('hero', 0, 0, 416, 416);
             if (core.isset(data.loc)) {
@@ -410,6 +416,36 @@ events.prototype.doAction = function() {
             else core.clearMap('animate', 0, 0, 416, 416);
             this.doAction();
             break;
+        case "animateImage": // 淡入淡出图片
+            if (core.status.replay.replaying) { // 正在播放录像
+                this.doAction();
+            }
+            else {
+                if (core.isset(data.loc) && core.isset(core.material.images.images[data.name]) && (data.action=="show" || data.action=="hide")) {
+                    core.events.animateImage(data.action, core.material.images.images[data.name], data.loc, data.time, function() {
+                        core.events.doAction();
+                    });
+                }
+                else {
+                    this.doAction();
+                }
+            }
+            break;
+        case "showGif": // 显示动图
+            if (core.isset(data.loc) && core.isset(core.material.images.images[data.name])) {
+                var gif = new Image();
+                gif.src = core.material.images.images[data.name].src;
+                gif.style.position = 'absolute';
+                gif.style.left = (data.loc[0]*core.domStyle.scale)+"px";
+                gif.style.top = (data.loc[1]*core.domStyle.scale)+"px";
+                core.dom.gif2.appendChild(gif);
+            }
+            else {
+                while (core.dom.gif2.firstChild)
+                    core.dom.gif2.removeChild(core.dom.gif2.firstChild);
+            }
+            this.doAction();
+            break;
         case "setFg": // 颜色渐变
             core.setFg(data.color, data.time, function() {
                 core.events.doAction();
@@ -420,21 +456,23 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "openDoor": // 开一个门，包括暗墙
-            var floorId=data.floorId || core.status.floorId;
-            var block=core.getBlock(data.loc[0], data.loc[1], floorId);
-            if (block!=null) {
-                if (floorId==core.status.floorId)
-                    core.openDoor(block.block.event.id, block.block.x, block.block.y, false, function() {
-                        core.events.doAction();
-                    })
-                else {
-                    core.removeBlock(block.block.x,block.block.y,floorId);
-                    this.doAction();
+            {
+                var floorId=data.floorId || core.status.floorId;
+                var block=core.getBlock(data.loc[0], data.loc[1], floorId);
+                if (block!=null) {
+                    if (floorId==core.status.floorId)
+                        core.openDoor(block.block.event.id, block.block.x, block.block.y, false, function() {
+                            core.events.doAction();
+                        })
+                    else {
+                        core.removeBlock(block.block.x,block.block.y,floorId);
+                        this.doAction();
+                    }
+                    break;
                 }
+                this.doAction();
                 break;
             }
-            this.doAction();
-            break;
         case "openShop": // 打开一个全局商店
             if (core.status.replay.replaying) { // 正在播放录像，简单将visited置为true
                 core.status.shops[data.id].visited=true;
@@ -454,21 +492,24 @@ events.prototype.doAction = function() {
             })
             break;
         case "trigger": // 触发另一个事件；当前事件会被立刻结束。需要另一个地点的事件是有效的
-            var toX=data.loc[0], toY=data.loc[1];
-            var block=core.getBlock(toX, toY);
-            if (block!=null) {
-                block = block.block;
-                if (core.isset(block.event) && block.event.trigger=='action') {
-                    // 触发
-                    core.status.event.data.list = core.clone(block.event.data);
-                    core.status.event.data.x=block.x;
-                    core.status.event.data.y=block.y;
+            {
+                var toX=data.loc[0], toY=data.loc[1];
+                var block=core.getBlock(toX, toY);
+                if (block!=null) {
+                    block = block.block;
+                    if (core.isset(block.event) && block.event.trigger=='action') {
+                        // 触发
+                        core.status.event.data.list = core.clone(block.event.data);
+                        core.status.event.data.x=block.x;
+                        core.status.event.data.y=block.y;
+                    }
                 }
+                this.doAction();
+                break;
             }
-            this.doAction();
-            break;
         case "playSound":
-            core.playSound(data.name);
+            if (!core.status.replay.replaying)
+                core.playSound(data.name);
             this.doAction();
             break;
         case "playBgm":
@@ -488,7 +529,7 @@ events.prototype.doAction = function() {
                 var value=core.calValue(data.value);
                 // 属性
                 if (data.name.indexOf("status:")==0) {
-                    value=parseInt(value);
+                    value=parseFloat(value);
                     core.setStatus(data.name.substring(7), value);
                 }
                 // 道具
@@ -581,35 +622,43 @@ events.prototype.doAction = function() {
             });
             break;
         case "function":
-            var func = data["function"];
-            if (core.isset(func)) {
-                if ((typeof func == "string") && func.indexOf("function")==0) {
-                    eval('('+func+')()');
+            {
+                var func = data["function"];
+                if (core.isset(func)) {
+                    if ((typeof func == "string") && func.indexOf("function")==0) {
+                        eval('('+func+')()');
+                    }
+                    else if (func instanceof Function)
+                        func();
                 }
-                else if (func instanceof Function)
-                    func();
+                this.doAction();
+                break;
             }
-            this.doAction();
-            break;
         case "update":
             core.updateStatusBar();
             this.doAction();
             break;
         case "sleep": // 等待多少毫秒
-            setTimeout(function () {
+            if (core.status.replay.replaying)
                 core.events.doAction();
-            }, data.time);
+            else {
+                setTimeout(function () {
+                    core.events.doAction();
+                }, data.time);
+            }
             break;
         case "revisit": // 立刻重新执行该事件
-            var block=core.getBlock(x,y); // 重新获得事件
-            if (block!=null) {
-                block = block.block;
-                if (core.isset(block.event) && block.event.trigger=='action') {
-                    core.status.event.data.list = core.clone(block.event.data);
+            {
+                var block=core.getBlock(x,y); // 重新获得事件
+                if (block!=null) {
+                    block = block.block;
+                    if (core.isset(block.event) && block.event.trigger=='action') {
+                        core.status.event.data.list = core.clone(block.event.data);
+                    }
                 }
+                this.doAction();
+                break;
             }
-            this.doAction();
-            break;
         case "exit": // 立刻结束事件
             core.status.event.data.list = [];
             core.events.doAction();
@@ -732,9 +781,8 @@ events.prototype.battle = function (id, x, y, force, callback) {
     core.stopHero();
     core.stopAutomaticRoute();
 
-    var damage = core.enemys.getDamage(id);
     // 非强制战斗
-    if (damage >= core.status.hero.hp && !force) {
+    if (!core.enemys.canBattle(id) && !force) {
         core.drawTip("你打不过此怪物！");
         core.clearContinueAutomaticRoute();
         return;
@@ -885,6 +933,10 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             }
             else core.setWeather();
 
+            // 清除gif
+            while (core.dom.gif.firstChild)
+                core.dom.gif.removeChild(core.dom.gif.firstChild);
+
             // 检查重生
             if (!core.isset(fromLoad)) {
                 core.status.maps[floorId].blocks.forEach(function(block) {
@@ -894,7 +946,6 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
                     }
                 })
             }
-
             core.drawMap(floorId, function () {
                 setTimeout(function() {
                     if (core.isset(heroLoc.direction))
@@ -931,6 +982,37 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             changing();
         }
     }, 25);
+}
+
+////// 图片淡入/淡出 //////
+events.prototype.animateImage = function (type, image, loc, time, callback) {
+    time = time||0;
+    if ((type!='show' && type!='hide') || time<=0) {
+        if (core.isset(callback)) callback();
+        return;
+    }
+
+    clearInterval(core.interval.tipAnimate);
+    core.setAlpha('data', 1);
+
+    var opacityVal = 0;
+    if (type == 'hide') opacityVal = 1;
+
+    core.setOpacity('data', opacityVal);
+    core.canvas.data.drawImage(image, loc[0], loc[1]);
+    core.status.replay.animate=true;
+    var animate = setInterval(function () {
+        if (type=='show') opacityVal += 0.1;
+        else opacityVal -= 0.1;
+        core.setOpacity('data', opacityVal);
+        if (opacityVal >=1 || opacityVal<=0) {
+            clearInterval(animate);
+            core.clearMap('data', 0, 0, 416, 416);
+            core.setOpacity('data', 1);
+            core.status.replay.animate=false;
+            if (core.isset(callback)) callback();
+        }
+    }, time / 10 / core.status.replay.speed);
 }
 
 ////// 打开一个全局商店 //////

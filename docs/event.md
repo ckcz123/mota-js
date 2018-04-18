@@ -636,6 +636,50 @@ loc为图片左上角坐标，以像素为单位进行计算。
 
 调用show/hide/move/animate等几个事件同样会清除所有显示的图片。
 
+### animateImage：图片淡入淡出
+
+我们还可以使用 `{"type": "animateImage"}` 来造成显示图片的淡入淡出效果。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "animateImage", "action": "show", "name": "bg.jpg", "loc": [231,297], "time": 500}, // 在(231,297)淡入bg.jpg，动画时间500ms
+    {"type": "animateImage", "action": "hide", "name": "1.png", "loc": [109,167], "time": 300}, // 在(109,167)淡出1.png，动画时间300ms
+]
+```
+
+action为淡入还是淡出，`show`为淡入，`hide`会淡出。
+
+name为图片名。**请确保图片在data.js中的images中被定义过。**
+
+loc为图片左上角坐标，以像素为单位进行计算。
+
+time为淡入淡出的时间，如果是0则忽略此项。
+
+!> 淡入淡出图片只是会在顶层绘制“淡入”和“淡出”效果，动画结束即消失，并不会实际对图片的显示造成影响。请与showImage事件合用。
+
+如果多张图片的淡入淡出可以采用以下方式（仅供参考）：
+
+假设我现在已经有了`1.jpg`显示在屏幕上：
+- 淡入显示`2.png`：调用`animateImage`淡入图片，然后立刻调用`showImage`显示图片。
+- 淡出`1.png`：清除所有图片，`showImage`显示`2.png`，然后调用`animateImage`淡出`1.jpg`
+
+### showGif：显示动图
+
+我们可以使用 `{"type": "showGif"}` 来显示一张图片。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "showGif", "name": "timg.gif", "loc": [231,297]}, // 在(231,297)显示一张动图
+    {"type": "showGif"} // 如果不指定name则清除所有动图。
+]
+```
+
+name为图片名。**请确保图片在data.js中的images中被定义过。**
+
+loc为动图左上角坐标，以像素为单位进行计算。
+
+如果不指定name则清除所有显示的动图。
+
 ### setFg: 更改画面色调
 
 我们可以使用 `{"type": "setFg"}` 来更改画面色调。

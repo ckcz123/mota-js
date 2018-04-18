@@ -145,6 +145,29 @@ utils.prototype.setTwoDigits = function (x) {
     return parseInt(x)<10?"0"+x:x;
 }
 
+utils.prototype.formatBigNumber = function (x) {
+    x = parseFloat(x);
+    if (!core.isset(x)) return '???';
+
+    var all = [
+        {"val": 10e20, "c": "g"},
+        {"val": 10e16, "c": "j"},
+        {"val": 10e12, "c": "z"},
+        {"val": 10e8, "c": "e"},
+        {"val": 10e4, "c": "w"},
+    ]
+
+    for (var i=0;i<all.length;i++) {
+        var one = all[i];
+        if (x>=10*one.val) {
+            var v = x/one.val;
+            return v.toFixed(Math.max(0, Math.floor(4-Math.log10(v)))) + one.c;
+        }
+    }
+
+    return x;
+}
+
 ////// 数组转RGB //////
 utils.prototype.arrayToRGB = function (color) {
     var nowR = parseInt(color[0])||0, nowG = parseInt(color[1])||0, nowB = parseInt(color[2])||0;
@@ -278,7 +301,7 @@ utils.prototype.readFile = function (success, error, readType) {
 
     if (core.platform.fileInput==null) {
         core.platform.fileInput = document.createElement("input");
-        core.platform.fileInput.style.display = 'none';
+        core.platform.fileInput.style.opacity = 0;
         core.platform.fileInput.type = 'file';
         core.platform.fileInput.onchange = function () {
             var files = core.platform.fileInput.files;
@@ -300,6 +323,11 @@ utils.prototype.readFile = function (success, error, readType) {
 
 ////// 下载文件到本地 //////
 utils.prototype.download = function (filename, content) {
+
+    if (core.isset(window.jsinterface)) {
+        window.jsinterface.download(filename, content);
+        return;
+    }
 
     // Step 0: 不为http/https，直接不支持
     if (!core.platform.isOnline) {

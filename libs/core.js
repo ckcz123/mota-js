@@ -268,6 +268,7 @@ core.prototype.init = function (coreData, callback) {
     // switchs
     core.flags.battleAnimate = core.getLocalStorage('battleAnimate', core.flags.battleAnimate);
     core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
+    core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
 
     core.material.ground = new Image();
@@ -871,6 +872,11 @@ core.prototype.formatDate = function(date) {
 ////// 格式化时间为最简字符串 //////
 core.prototype.formatDate2 = function (date) {
     return core.utils.formatDate2(date);
+}
+
+////// 格式化大数 //////
+core.prototype.formatBigNumber = function (x) {
+    return core.utils.formatBigNumber(x);
 }
 
 ////// 两位数显示 //////

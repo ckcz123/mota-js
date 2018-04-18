@@ -249,7 +249,7 @@ enemys.prototype.calDamage = function (monster, hero_hp, hero_atk, hero_def, her
         // 如果有神圣盾免疫吸血等可以在这里写
         if (core.hasFlag("shield5")) vampireDamage = 0; // 存在神圣盾，吸血伤害为0
 
-        vampireDamage = parseInt(vampireDamage);
+        vampireDamage = Math.floor(vampireDamage) || 0;
         // 加到自身
         if (monster.add) // 如果加到自身
             mon_hp += vampireDamage;
@@ -286,7 +286,7 @@ control.prototype.checkBlock = function () {
 
 你需自己指定一个special数字，修改getSpecialText函数（属性名）和getSpecialHint函数（属性提示文字）。
 
-如果要修改伤害计算公式，请修改下面的calDamage函数。请注意，如果无法战斗，该函数必须返回`999999999`。
+如果要修改伤害计算公式，请修改下面的calDamage函数。请注意，如果无法战斗，该函数必须返回`null`。
 
 对于毒衰弱怪物的战斗后结算在`functions.js`中的afterBattle函数中。
 

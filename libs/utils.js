@@ -285,6 +285,14 @@ utils.prototype.isset = function (val) {
 ////// 读取一个本地文件内容 //////
 utils.prototype.readFile = function (success, error, readType) {
 
+    core.platform.successCallback = success;
+    core.platform.errorCallback = error;
+
+    if (core.isset(window.jsinterface)) {
+        window.jsinterface.readFile();
+        return;
+    }
+
     // step 0: 不为http/https，直接不支持
     if (!core.platform.isOnline) {
         alert("离线状态下不支持文件读取！");
@@ -409,6 +417,12 @@ utils.prototype.download = function (filename, content) {
 
 ////// 复制一段内容到剪切板 //////
 utils.prototype.copy = function (data) {
+
+    if (core.isset(window.jsinterface)) {
+        window.jsinterface.copy(filename, content);
+        return true;
+    }
+
     if (!core.platform.supportCopy) return false;
 
     var textArea = document.createElement("textarea");

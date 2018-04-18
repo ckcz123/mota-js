@@ -472,7 +472,8 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "playSound":
-            core.playSound(data.name);
+            if (!core.status.replay.replaying)
+                core.playSound(data.name);
             this.doAction();
             break;
         case "playBgm":
@@ -600,9 +601,13 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "sleep": // 等待多少毫秒
-            setTimeout(function () {
+            if (core.status.replay.replaying)
                 core.events.doAction();
-            }, data.time);
+            else {
+                setTimeout(function () {
+                    core.events.doAction();
+                }, data.time);
+            }
             break;
         case "revisit": // 立刻重新执行该事件
             var block=core.getBlock(x,y); // 重新获得事件

@@ -712,7 +712,7 @@ return code;
 */
 
 win_s
-    :   '游戏胜利,原因' ':' EvalString? Newline
+    :   '游戏胜利,结局' ':' EvalString? Newline
     ;
 
 /* win_s
@@ -724,7 +724,7 @@ return code;
 */
 
 lose_s
-    :   '游戏失败,原因' ':' EvalString? Newline
+    :   '游戏失败,结局' ':' EvalString? Newline
     ;
 
 /* lose_s

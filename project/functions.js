@@ -73,7 +73,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.stopReplay();
 	core.waitHeroToStop(function() {
 		core.drawText([
-			"\t[结局1]你死了。\n如题。"
+			"\t["+(reason||"结局1")+"]你死了。\n如题。"
 		], function () {
 			core.events.gameOver(null, replaying);
 		});

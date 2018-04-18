@@ -177,6 +177,10 @@ action
     |   animate_s
     |   showImage_0_s
     |   showImage_1_s
+    |   animateImage_0_s
+    |   animateImage_1_s
+    |   showGif_0_s
+    |   showGif_1_s
     |   setFg_0_s
     |   setFg_1_s
     |   setWeather_s
@@ -574,6 +578,57 @@ tooltip : showImage：清除所有显示的图片
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=showimage%ef%bc%9a%e6%98%be%e7%a4%ba%e5%9b%be%e7%89%87
 colour : this.printColor
 var code = '{"type": "showImage"},\n';
+return code;
+*/
+
+animateImage_0_s
+    : '图片淡入' EvalString '起点像素位置' 'x' Number 'y' Number '动画时间' Int Newline
+    ;
+
+/* animateImage_0_s
+tooltip : animageImage：图片淡入
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=animateimage%ef%bc%9a%e5%9b%be%e7%89%87%e6%b7%a1%e5%85%a5%e6%b7%a1%e5%87%b
+default : ["bg.jpg",0,0,500]
+colour : this.printColor
+var code = '{"type": "animateImage", "action": "show", "name": "'+EvalString_0+'", "loc": ['+Number_0+','+Number_1+'], "time": '+Int_0+'},\n';
+return code;
+*/
+
+animateImage_1_s
+    : '图片淡出' EvalString '起点像素位置' 'x' Number 'y' Number '动画时间' Int Newline
+    ;
+
+/* animateImage_1_s
+tooltip : animageImage：图片淡出
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=animateimage%ef%bc%9a%e5%9b%be%e7%89%87%e6%b7%a1%e5%85%a5%e6%b7%a1%e5%87%b
+default : ["bg.jpg",0,0,500]
+colour : this.printColor
+var code = '{"type": "animateImage", "action": "hide", "name": "'+EvalString_0+'", "loc": ['+Number_0+','+Number_1+'], "time": '+Int_0+'},\n';
+return code;
+*/
+
+showGif_0_s
+    :   '显示动图' EvalString '起点像素位置' 'x' Number 'y' Number Newline
+    ;
+
+/* showGif_0_s
+tooltip : showGif：显示动图
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=showgif%ef%bc%9a%e6%98%be%e7%a4%ba%e5%8a%a8%e5%9b%be
+default : ["bg.gif",0,0]
+colour : this.printColor
+var code = '{"type": "showGif", "name": "'+EvalString_0+'", "loc": ['+Number_0+','+Number_1+']},\n';
+return code;
+*/
+
+showGif_1_s
+    :   '清除所有动图' Newline
+    ;
+
+/* showGif_1_s
+tooltip : showGif：清除所有显示的动图
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=showgif%ef%bc%9a%e6%98%be%e7%a4%ba%e5%8a%a8%e5%9b%be
+colour : this.printColor
+var code = '{"type": "showGif"},\n';
 return code;
 */
 
@@ -1244,6 +1299,24 @@ ActionParser.prototype.parseAction = function() {
           this.next]);
       }
       break;
+    case "animateImage": // 显示图片
+      if(data.action == 'show'){
+        this.next = MotaActionBlocks['animateImage_0_s'].xmlText([
+          data.name,data.loc[0],data.loc[1],data.time,this.next]);
+      } else if (data.action == 'hide') {
+        this.next = MotaActionBlocks['animateImage_1_s'].xmlText([
+          data.name,data.loc[0],data.loc[1],data.time,this.next]);
+      }
+      break;
+    case "showGif": // 显示动图
+      if(this.isset(data.name)){
+        this.next = MotaActionBlocks['showGif_0_s'].xmlText([
+          data.name,data.loc[0],data.loc[1],this.next]);
+        } else {
+          this.next = MotaActionBlocks['showGif_1_s'].xmlText([
+            this.next]);
+        }
+        break;
     case "setFg": // 颜色渐变
       if(this.isset(data.color)){
         this.next = MotaActionBlocks['setFg_0_s'].xmlText([

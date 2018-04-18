@@ -328,8 +328,19 @@ maps.prototype.drawMap = function (mapName, callback) {
             if (core.isset(dx) && core.isset(dy) && core.isset(core.material.images.images[p])) {
                 dx*=32; dy*=32;
                 var image = core.material.images.images[p];
-                if (!t[3])
-                    core.canvas.bg.drawImage(image, dx*ratio, dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
+                if (!t[3]) {
+                    core.canvas.bg.drawImage(image, dx * ratio, dy * ratio, Math.min(size - dx * ratio, ratio * image.width), Math.min(size - dy * ratio, ratio * image.height));
+                    if (/.*\.gif/i.test(p)) {
+                        while (core.dom.gif.firstChild)
+                            core.dom.gif.removeChild(core.dom.gif.firstChild);
+                        var gif = new Image();
+                        gif.src = core.material.images.images[p].src;
+                        gif.style.position = 'absolute';
+                        gif.style.left = (dx*core.domStyle.scale)+"px";
+                        gif.style.top = (dy*core.domStyle.scale)+"px";
+                        core.dom.gif.appendChild(gif);
+                    }
+                }
                 else
                     core.canvas.event2.drawImage(image, dx*ratio, dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
             }
@@ -669,9 +680,6 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
         if (type=='show') opacityVal += 0.1;
         else opacityVal -= 0.1;
         core.setOpacity('animate', opacityVal);
-        core.clearMap('animate',0,0,416,416);
-
-        draw();
         if (opacityVal >=1 || opacityVal<=0) {
             clearInterval(animate);
             core.clearMap('animate', 0, 0, 416, 416);

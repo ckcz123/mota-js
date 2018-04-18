@@ -21,7 +21,7 @@
     position: fixed;
     top: 10px;
     left: 10px;
-    z-index: 15;
+    z-index: 320;
 }
 
 #startPanel {
@@ -32,7 +32,7 @@
     left: 0;
     background-color: #fff;
     overflow: hidden;
-    z-index: 12;
+    z-index: 250;
 }
 
 #startTop {
@@ -42,7 +42,7 @@
     top: 0;
     left: 0;
     background-color: #000;
-    z-index: 14;
+    z-index: 300;
 }
 
 #startTopProgressBar {
@@ -77,12 +77,12 @@
     height: 100%;
     width: auto;
     transform:translate(-50%,-50%);
-    z-index: 12;
+    z-index: 210;
 }
 
 #startLogo {
     position: absolute;
-    z-index: 12;
+    z-index: 240;
     left: 0;
     right: 0;
     margin-left: auto;
@@ -95,7 +95,7 @@
 
 #startTitle {
     position: absolute;
-    z-index: 13;
+    z-index: 230;
 }
 
 #startButtonGroup {
@@ -106,7 +106,7 @@
     background-color: #000;
     opacity: 0.85;
     display: none;
-    z-index: 12;
+    z-index: 220;
     bottom: 0;
     margin-bottom: 7%;
 }
@@ -142,7 +142,7 @@
     display: none;
     color: #fff;
     background-color: #000;
-    z-index: 11;
+    z-index: 180;
 }
 
 #logoLabel {
@@ -170,7 +170,7 @@
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     background: url(project/images/ground.png) repeat;
-    z-index: 9;
+    z-index: 160;
     display: none;
 }
 #statusBar .status{
@@ -199,7 +199,7 @@
 #toolBar {
     position: absolute;
     background: url(project/images/ground.png) repeat;
-    z-index: 8;
+    z-index: 150;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -233,47 +233,59 @@ span#poison, span#weak, span#curse {
     -webkit-box-sizing: border-box;
 }
 
+#gif {
+    z-index: 20;
+    position: absolute;
+    overflow: hidden;
+}
+
+#gif2 {
+    z-index: 90;
+    position: absolute;
+    overflow: hidden;
+}
+
 #curtain {
-    z-index: 8;
+    z-index: 100;
     position: absolute;
     opacity: 0;
     background: #000000;
 }
 
 #bg {
-    z-index: 1;
+    z-index: 10;
 }
 
 #event {
-    z-index: 2;
+    z-index: 30;
 }
 
 #hero {
-    z-index: 3;
+    z-index: 40;
 }
 
 #event2 {
-    z-index: 4;
+    z-index: 50;
 }
 
 #fg {
-    z-index: 5;
+    z-index: 60;
 }
 
 #animate {
-    z-index: 6;
+    z-index: 70;
 }
 
 #weather {
-    z-index: 7;
+    z-index: 80;
 }
 
 #ui {
-    z-index: 9;
+    z-index: 110;
 }
 
 #data {
-    z-index: 10;
+    z-index: 120;
 }
 
 .clearfix:before,

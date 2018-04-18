@@ -35,6 +35,8 @@ function main() {
         'toolBar': document.getElementById('toolBar'),
         'tools': document.getElementsByClassName('tools'),
         'gameCanvas': document.getElementsByClassName('gameCanvas'),
+        'gif': document.getElementById('gif'),
+        'gif2': document.getElementById('gif2'),
         'curtain': document.getElementById('curtain'),
         'startButtons': document.getElementById('startButtons'),
         'playGame': document.getElementById('playGame'),

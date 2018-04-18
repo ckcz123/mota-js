@@ -216,29 +216,7 @@ core.prototype.init = function (coreData, callback) {
     if (window.FileReader) {
         core.platform.fileReader = new FileReader();
         core.platform.fileReader.onload = function () {
-            var content=core.platform.fileReader.result;
-            var obj=null;
-            if(content.slice(0,4)==='data'){
-                if (core.isset(core.platform.successCallback))
-                    core.platform.successCallback(content);
-                return;
-            }
-            try {
-                obj=JSON.parse(content);
-                if (core.isset(obj)) {
-                    if (core.isset(core.platform.successCallback))
-                        core.platform.successCallback(obj);
-                    return;
-                }
-            }
-            catch (e) {
-                console.log(e);
-            }
-            alert("不是有效的JSON文件！");
-
-            if (core.isset(core.platform.errorCallback))
-                core.platform.errorCallback();
-
+            core.readFileContent(core.platform.fileReader.result);
         };
         core.platform.fileReader.onerror = function () {
             if (core.isset(core.platform.errorCallback))
@@ -1076,6 +1054,11 @@ core.prototype.isset = function (val) {
 ////// 读取一个本地文件内容 //////
 core.prototype.readFile = function (success, error, readType) {
     core.utils.readFile(success, error, readType);
+}
+
+////// 读取本地文件完毕 //////
+core.prototype.readFileContent = function (content) {
+    core.utils.readFileContent(content);
 }
 
 ////// 下载文件到本地 //////

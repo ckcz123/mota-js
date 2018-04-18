@@ -321,6 +321,31 @@ utils.prototype.readFile = function (success, error, readType) {
     core.platform.fileInput.click();
 }
 
+////// 读取文件完毕 //////
+utils.prototype.readFileContent = function (content) {
+    var obj=null;
+    if(content.slice(0,4)==='data'){
+        if (core.isset(core.platform.successCallback))
+            core.platform.successCallback(content);
+        return;
+    }
+    try {
+        obj=JSON.parse(content);
+        if (core.isset(obj)) {
+            if (core.isset(core.platform.successCallback))
+                core.platform.successCallback(obj);
+            return;
+        }
+    }
+    catch (e) {
+        console.log(e);
+    }
+    alert("不是有效的JSON文件！");
+
+    if (core.isset(core.platform.errorCallback))
+        core.platform.errorCallback();
+}
+
 ////// 下载文件到本地 //////
 utils.prototype.download = function (filename, content) {
 

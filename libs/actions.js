@@ -35,11 +35,13 @@ actions.prototype.onkeyUp = function(e) {
         if (e.keyCode==27) // ESCAPE
             core.stopReplay();
         else if (e.keyCode==90) // Z
-            core.rewindReplay();
+            core.speedDownReplay();
         else if (e.keyCode==88) // X
-            core.forwardReplay();
+            core.speedUpReplay();
         else if (e.keyCode==32) // SPACE
             core.triggerReplay();
+        else if (e.keyCode==65) // A
+            core.rewindReplay();
         return;
     }
 

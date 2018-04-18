@@ -126,6 +126,24 @@ utils.prototype.clone = function (data) {
     return data;
 }
 
+////// 裁剪图片 //////
+utils.prototype.cropImage = function (image, size) {
+    size = size||32;
+    var canvas = document.createElement("canvas");
+    var context = canvas.getContext("2d");
+    canvas.width = size;
+    canvas.height = size;
+    var ans = [];
+    for (var i=0;i<image.height;i+=size) {
+        context.drawImage(image, 0, i, size, size, 0, 0, size, size);
+        var img = new Image();
+        img.src = canvas.toDataURL("image/png");
+        ans.push(img);
+        context.clearRect(0,0,size,size);
+    }
+    return ans;
+}
+
 ////// 格式化时间为字符串 //////
 utils.prototype.formatDate = function(date) {
     if (!core.isset(date)) return "";

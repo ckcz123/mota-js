@@ -114,7 +114,9 @@ function core() {
             'animate': false, // 正在某段动画中
             'toReplay': [],
             'totalList': [],
-            'speed': 1.0
+            'speed': 1.0,
+            'steps': 0,
+            'save': [],
         },
 
         // event事件
@@ -251,7 +253,6 @@ core.prototype.init = function (coreData, callback) {
 
     core.material.ground = new Image();
     core.material.ground.src = "project/images/ground.png";
-
 
     core.loader.load(function () {
         console.log(core.material);
@@ -842,6 +843,11 @@ core.prototype.clone = function (data) {
     return core.utils.clone(data);
 }
 
+////// 裁剪图片 //////
+core.prototype.cropImage = function (image, size) {
+    return core.utils.cropImage(image, size);
+}
+
 ////// 格式化时间为字符串 //////
 core.prototype.formatDate = function(date) {
     return core.utils.formatDate(date);
@@ -893,11 +899,16 @@ core.prototype.resumeReplay = function () {
 }
 
 ////// 加速播放 //////
-core.prototype.forwardReplay = function () {
-    core.control.forwardReplay();
+core.prototype.speedUpReplay = function () {
+    core.control.speedUpReplay();
 }
 
 ////// 减速播放 //////
+core.prototype.speedDownReplay = function () {
+    core.control.speedDownReplay();
+}
+
+////// 回退播放 //////
 core.prototype.rewindReplay = function () {
     core.control.rewindReplay();
 }
@@ -973,8 +984,8 @@ core.prototype.syncLoad = function () {
 }
 
 ////// 存档到本地 //////
-core.prototype.saveData = function(dataId) {
-    return core.control.saveData(dataId);
+core.prototype.saveData = function() {
+    return core.control.saveData();
 }
 
 ////// 从本地读档 //////

@@ -123,6 +123,16 @@ events.prototype.lose = function (reason) {
 ////// 游戏结束 //////
 events.prototype.gameOver = function (ending, fromReplay) {
 
+    // 清空图片和天气
+    core.clearMap('animate', 0, 0, 416, 416);
+    while (core.dom.gif2.firstChild)
+        core.dom.gif2.removeChild(core.dom.gif2.firstChild);
+    core.clearMap('weather', 0, 0, 416, 416)
+    core.animateFrame.weather.type = null;
+    core.animateFrame.weather.level = 0;
+    core.animateFrame.weather.nodes = [];
+    core.setFg(null, 0);
+
     // 下载录像
     var confirmDownload = function () {
         core.ui.closePanel();

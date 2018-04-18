@@ -10,6 +10,7 @@ function main() {
     // 如果要进行剧本的修改请务必将其改成false。
 
     this.bgmRemote = false; // 是否采用远程BGM
+    this.bgmRemoteRoot = "https://gitee.com/ckcz123/h5music/raw/master/"; // 远程BGM的根目录
 
     //------------------------ 用户修改内容 END ------------------------//
 
@@ -176,17 +177,26 @@ main.prototype.init = function (mode, callback) {
 
 ////// 动态加载所有核心JS文件 //////
 main.prototype.loaderJs = function (dir, loadList, callback) {
-    var instanceNum = 0;
+
     // 加载js
     main.setMainTipsText('正在加载核心js文件...')
-    for (var i = 0; i < loadList.length; i++) {
-        main.loadMod(dir, loadList[i], function (modName) {
-            main.setMainTipsText(modName + '.js 加载完毕');
-            instanceNum++;
-            if (instanceNum === loadList.length) {
-                callback();
-            }
-        });
+
+    if (this.useCompress) {
+        main.loadMod(dir, dir, function () {
+            callback();
+        })
+    }
+    else {
+        var instanceNum = 0;
+        for (var i = 0; i < loadList.length; i++) {
+            main.loadMod(dir, loadList[i], function (modName) {
+                main.setMainTipsText(modName + '.js 加载完毕');
+                instanceNum++;
+                if (instanceNum === loadList.length) {
+                    callback();
+                }
+            });
+        }
     }
 }
 

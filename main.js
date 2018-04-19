@@ -88,17 +88,29 @@ function main() {
             'settings': document.getElementById("img-settings")
         },
         'icons': {
-            'book': null,
-            'fly': null,
-            'toolbox': null,
-            'save': null,
-            'load': null,
-            'settings': null,
-            'rewind': null, // 减速
-            'forward': null, // 加速
-            'play': null, // 播放
-            'pause': null, // 暂停
-            'stop': null, // 停止
+            'floor': 0,
+            'lv': 1,
+            'hpmax': 2,
+            'hp': 3,
+            'atk': 4,
+            'def': 5,
+            'mdef': 6,
+            'money': 7,
+            'experience': 8,
+            'up': 9,
+            'book': 10,
+            'fly': 11,
+            'toolbox': 12,
+            'shop': 13,
+            'save': 14,
+            'load': 15,
+            'settings': 16,
+            'play': 17,
+            'pause': 18,
+            'stop': 19,
+            'speedDown': 20,
+            'speedUp': 21,
+            'rewind': 22,
         },
         'floor': document.getElementById('floor'),
         'lv': document.getElementById('lv'),
@@ -130,11 +142,7 @@ main.prototype.init = function (mode, callback) {
         main.mode = mode;
         if (mode === 'editor')main.editor = {'disableGlobalAnimate':true};
     }
-    Object.keys(this.statusBar.icons).forEach(function (t) {
-        var image=new Image();
-        image.src="project/images/"+t+".png";
-        main.statusBar.icons[t] = image;
-    })
+
     main.loaderJs('project', main.pureData, function(){
         var mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
         for(var ii in mainData)main[ii]=mainData[ii];
@@ -383,6 +391,12 @@ main.statusBar.image.fly.onclick = function () {
 
 ////// 点击状态栏中的工具箱时 //////
 main.statusBar.image.toolbox.onclick = function () {
+
+    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+        core.rewindReplay();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.openToolbox(true);
 }
@@ -397,7 +411,7 @@ main.statusBar.image.shop.onclick = function () {
 main.statusBar.image.save.onclick = function () {
 
     if (core.isset(core.status.replay) && core.status.replay.replaying) {
-        core.rewindReplay();
+        core.speedDownReplay();
         return;
     }
 
@@ -409,7 +423,7 @@ main.statusBar.image.save.onclick = function () {
 main.statusBar.image.load.onclick = function () {
 
     if (core.isset(core.status.replay) && core.status.replay.replaying) {
-        core.forwardReplay();
+        core.speedUpReplay();
         return;
     }
 

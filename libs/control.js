@@ -1379,6 +1379,8 @@ control.prototype.startReplay = function (list) {
     core.status.replay.speed=1.0;
     core.status.replay.toReplay = core.clone(list);
     core.status.replay.totalList = core.clone(list);
+    core.status.replay.steps = 0;
+    core.status.replay.save = [];
     core.updateStatusBar();
     core.drawTip("开始播放");
     this.replay();
@@ -1409,7 +1411,7 @@ control.prototype.resumeReplay = function () {
 }
 
 ////// 加速播放 //////
-control.prototype.forwardReplay = function () {
+control.prototype.speedUpReplay = function () {
     if (!core.status.replay.replaying) return;
     core.status.replay.speed = parseInt(10*core.status.replay.speed + 1)/10;
     if (core.status.replay.speed>3.0) core.status.replay.speed=3.0;
@@ -1417,7 +1419,7 @@ control.prototype.forwardReplay = function () {
 }
 
 ////// 减速播放 //////
-control.prototype.rewindReplay = function () {
+control.prototype.speedDownReplay = function () {
     if (!core.status.replay.replaying) return;
     core.status.replay.speed = parseInt(10*core.status.replay.speed - 1)/10;
     if (core.status.replay.speed<0.3) core.status.replay.speed=0.3;
@@ -1432,8 +1434,45 @@ control.prototype.stopReplay = function () {
     core.status.replay.replaying=false;
     core.status.replay.pausing=false;
     core.status.replay.speed=1.0;
+    core.status.replay.steps = 0;
+    core.status.replay.save = [];
     core.updateStatusBar();
     core.drawTip("停止播放并恢复游戏");
+}
+
+////// 回退 //////
+control.prototype.rewindReplay = function () {
+    if (!core.status.replay.replaying) return;
+    if (!core.status.replay.pausing) {
+        core.drawTip("请先暂停录像");
+        return;
+    }
+    if (core.status.replay.animate) {
+        core.drawTip("请等待当前事件的处理结束");
+        return;
+    }
+    if (core.status.replay.save.length==0) {
+        core.drawTip("无法再回到上一个节点");
+        return;
+    }
+
+    var save = core.status.replay.save;
+    var data = save.pop();
+    core.loadData(data.data, function () {
+        core.status.replay = {
+            "replaying": true,
+            "pausing": true,
+            "animate": false,
+            "toReplay": data.replay.toReplay,
+            "totalList": data.replay.totalList,
+            "speed": data.replay.speed,
+            "steps": data.replay.steps,
+            "save": save
+        }
+        core.updateStatusBar();
+        core.drawTip("成功回退到上一个节点");
+    })
+
 }
 
 ////// 回放 //////
@@ -1447,6 +1486,18 @@ control.prototype.replay = function () {
         core.stopReplay();
         core.insertAction("录像回放完毕！");
         return;
+    }
+
+    core.status.replay.steps++;
+    if (core.status.replay.steps%20==0) {
+        if (core.status.replay.save.length == 30)
+            core.status.replay.save.shift();
+        core.status.replay.save.push({"data": core.saveData(), "replay": {
+            "totalList": core.clone(core.status.replay.totalList),
+            "toReplay": core.clone(core.status.replay.toReplay),
+            "speed": core.status.replay.speed,
+            "steps": core.status.replay.steps
+        }});
     }
 
     var action=core.status.replay.toReplay.shift();
@@ -1696,7 +1747,7 @@ control.prototype.autosave = function (removeLast) {
     var x=null;
     if (removeLast)
         x=core.status.route.pop();
-    core.saveData("autoSave");
+    core.setLocalStorage("autoSave", core.saveData())
     if (removeLast && core.isset(x))
         core.status.route.push(x);
 }
@@ -1708,7 +1759,7 @@ control.prototype.doSL = function (id, type) {
             core.drawTip('不能覆盖自动存档！');
             return;
         }
-        if (core.saveData("save"+id)) {
+        if (core.setLocalStorage("save"+id, core.saveData())) {
             core.ui.closePanel();
             core.drawTip('存档成功！');
             if (id!="autoSave") {
@@ -1868,7 +1919,7 @@ control.prototype.syncLoad = function () {
 }
 
 ////// 存档到本地 //////
-control.prototype.saveData = function(dataId) {
+control.prototype.saveData = function() {
     var data = {
         'floorId': core.status.floorId,
         'hero': core.clone(core.status.hero),
@@ -1888,7 +1939,7 @@ control.prototype.saveData = function(dataId) {
     }
     core.events.beforeSaveData(data);
 
-    return core.setLocalStorage(dataId, data);
+    return data;
 }
 
 ////// 从本地读档 //////
@@ -2133,15 +2184,15 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.image.fly.src = core.statusBar.icons.stop.src;
         core.statusBar.image.fly.style.opacity = 1;
 
-        //core.statusBar.image.toolbox.src = core.statusBar.icons.forward.src;
-        core.statusBar.image.toolbox.style.opacity = 0;
+        core.statusBar.image.toolbox.src = core.statusBar.icons.rewind.src;
+        core.statusBar.image.toolbox.style.opacity = 1;
 
         core.statusBar.image.shop.style.opacity = 0;
 
-        core.statusBar.image.save.src = core.statusBar.icons.rewind.src;
+        core.statusBar.image.save.src = core.statusBar.icons.speedDown.src;
         core.statusBar.image.save.style.opacity = 1;
 
-        core.statusBar.image.load.src = core.statusBar.icons.forward.src;
+        core.statusBar.image.load.src = core.statusBar.icons.speedUp.src;
         core.statusBar.image.load.style.opacity = 1;
 
         core.statusBar.image.settings.style.opacity = 0;

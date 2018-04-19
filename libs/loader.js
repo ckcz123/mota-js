@@ -23,6 +23,9 @@ loader.prototype.setStartLoadTipText = function (text) {
 
 loader.prototype.load = function (callback) {
 
+    // 加载icons
+    core.loader.loadIcons();
+
     // 加载图片
     core.loader.loadImages(core.materials, core.material.images, function () {
         // 加载png图片
@@ -38,6 +41,20 @@ loader.prototype.load = function (callback) {
             })
         })
     })
+}
+
+loader.prototype.loadIcons = function () {
+
+    this.loadImage("icons.png", function (id, image) {
+        var images = core.cropImage(image);
+        for (var key in core.statusBar.icons) {
+            if (typeof core.statusBar.icons[key] == 'number') {
+                core.statusBar.icons[key] = images[core.statusBar.icons[key]];
+                if (core.isset(core.statusBar.image[key]))
+                    core.statusBar.image[key].src = core.statusBar.icons[key].src;
+            }
+        }
+    });
 }
 
 loader.prototype.loadImages = function (names, toSave, callback) {

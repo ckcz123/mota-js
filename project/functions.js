@@ -360,9 +360,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				core.status.hero.atk += core.values[itemId];
 			}
 			else {
-				core.status.hero.atk -= core.values[itemId].atk || 0;
-				core.status.hero.def -= core.values[itemId].def || 0;
-				core.status.hero.mdef -= core.values[itemId].mdef || 0;
+				core.status.hero.atk += core.values[itemId].atk || 0;
+				core.status.hero.def += core.values[itemId].def || 0;
+				core.status.hero.mdef += core.values[itemId].mdef || 0;
 			}
 
 			core.setItem(now, 1);
@@ -386,9 +386,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				core.status.hero.def += core.values[itemId];
 			}
 			else {
-				core.status.hero.atk -= core.values[itemId].atk || 0;
-				core.status.hero.def -= core.values[itemId].def || 0;
-				core.status.hero.mdef -= core.values[itemId].mdef || 0;
+				core.status.hero.atk += core.values[itemId].atk || 0;
+				core.status.hero.def += core.values[itemId].def || 0;
+				core.status.hero.mdef += core.values[itemId].mdef || 0;
 			}
 
 			core.setItem(now, 1);

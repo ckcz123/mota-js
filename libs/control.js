@@ -775,7 +775,7 @@ control.prototype.moveOneStep = function() {
         if (core.status.hero.hp<=0) {
             core.status.hero.hp=0;
             core.updateStatusBar();
-            core.events.lose('poison');
+            core.events.lose();
             return;
         }
         core.updateStatusBar();
@@ -998,7 +998,7 @@ control.prototype.checkBlock = function () {
         if (core.status.hero.hp<=0) {
             core.status.hero.hp=0;
             core.updateStatusBar();
-            core.events.lose('zone');
+            core.events.lose();
             return;
         }
         snipe = snipe.filter(function (t) {

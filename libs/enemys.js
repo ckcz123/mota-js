@@ -142,7 +142,12 @@ enemys.prototype.getCritical = function (monsterId) {
 
         var last = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
 
-        if (last == null) return '???';
+        if (last == null) {
+            if (core.status.hero.atk<=monster.def)
+                return monster.def+1-core.status.hero.atk;
+
+            return '???';
+        }
 
         if (last <= 0) return 0;
 
@@ -160,13 +165,17 @@ enemys.prototype.getCritical = function (monsterId) {
 
         var info = this.getDamageInfo(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
 
-        if (info == null) return '???';
+        if (info == null) {
+            if (core.status.hero.atk<=monster.def)
+                return monster.def+1-core.status.hero.atk;
+            return '???';
+        }
         if (info.damage <= 0) return 0;
-
-        var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = monster.def, turn = info.turn;
 
         // turn 是勇士攻击次数
         if (turn<=1) return 0; // 攻杀
+
+        var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = monster.def, turn = info.turn;
 
         // 每回合最小伤害 = ⎡怪物生命/勇士攻击次数⎤
         var nextAtk = Math.ceil(mon_hp/(turn-1)) + mon_def;

@@ -130,17 +130,17 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                                 "keys": {
                                     "_leaf": true,
                                     "_type": "textarea",
-                                    "_data": "初始道具个数"
+                                    "_data": "初始三种钥匙个数"
                                 },
                                 "constants": {
                                     "_leaf": true,
                                     "_type": "textarea",
-                                    "_data": ""
+                                    "_data": "初始永久道具个数，例如初始送手册可以写 {'book': true}"
                                 },
                                 "tools": {
                                     "_leaf": true,
                                     "_type": "textarea",
-                                    "_data": ""
+                                    "_data": "初始消耗道具个数，例如初始有两破可以写 {'pickaxe': 2}"
                                 }
                             }
                         },
@@ -156,17 +156,17 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                                 "direction": {
                                     "_leaf": true,
                                     "_type": "textarea",
-                                    "_data": "勇士初始位置"
+                                    "_data": "勇士初始方向"
                                 },
                                 "x": {
                                     "_leaf": true,
                                     "_type": "textarea",
-                                    "_data": ""
+                                    "_data": "勇士初始x坐标"
                                 },
                                 "y": {
                                     "_leaf": true,
                                     "_type": "textarea",
-                                    "_data": ""
+                                    "_data": "勇士初始y坐标"
                                 }
                             }
                         },
@@ -191,7 +191,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "shops": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "全局商店"
+                    "_data": "全局商店，是一个数组 \n 每一项是一个Object代表一个全局商店 \n id 为商店的唯一标识符（ID），请确保任何两个商店的id都不相同 \n name 为商店的名称（打开商店后的标题） \n icon 为商店的图标，在icons.js的npcs中定义。如blueShop可代表蓝色商店。 \n textInList 为其在快捷商店栏中显示的名称，如\"3楼金币商店\"等 \n use 为消耗的类型，是金币（money）还是经验（experience）。 \n need 是一个表达式，计算商店所需要用到的数值，可以以times作为参数。 \n text 为商店所说的话。可以用${need}表示需要的数值。\n choices 为商店的各个选项，是一个list，每一项是一个选项，里面text为显示文字，effect为选项的效果，只能用+=，分号分开。"
                 },
                 "levelUp": {
                     "_leaf": true,
@@ -207,7 +207,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "lavaDamage": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "各种数值；一些数值可以在这里设置\n /****** 角色相关 ******/ \n 经过血网受到的伤害"
+                    "_data": "经过血网受到的伤害"
                 },
                 "poisonDamage": {
                     "_leaf": true,
@@ -222,7 +222,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "redJewel": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "/****** 道具相关 ******/ \n 红宝石加攻击的数值"
+                    "_data": "红宝石加攻击的数值"
                 },
                 "blueJewel": {
                     "_leaf": true,
@@ -322,7 +322,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "breakArmor": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "/****** 怪物相关 ******/ \n 破甲的比例（战斗前，怪物附加角色防御的x%作为伤害）"
+                    "_data": "破甲的比例（战斗前，怪物附加角色防御的x%作为伤害）"
                 },
                 "counterAttack": {
                     "_leaf": true,
@@ -342,7 +342,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "animateSpeed": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "/****** 系统相关 ******/ \n 动画时间"
+                    "_data": "动画时间"
                 }
             }
         },
@@ -354,7 +354,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "checkbox",
                     "_bool": "bool",
-                    "_data": "系统FLAG，在游戏运行中中请不要修改它。 /****** 状态栏相关 ******/ \n 是否在状态栏显示当前楼层"
+                    "_data": "是否在状态栏显示当前楼层"
                 },
                 "enableLv": {
                     "_leaf": true,
@@ -396,13 +396,13 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "checkbox",
                     "_bool": "bool",
-                    "_data": "是否涉及毒衰咒；如果此项为false则不会在状态栏中显示毒衰咒的debuff ////// 上述的几个开关将直接影响状态栏的显示效果 //////"
+                    "_data": "是否涉及毒衰咒；如果此项为false则不会在状态栏中显示毒衰咒的debuff"
                 },
                 "flyNearStair": {
                     "_leaf": true,
                     "_type": "checkbox",
                     "_bool": "bool",
-                    "_data": "/****** 道具相关 ******/ \n 是否需要在楼梯边使用传送器"
+                    "_data": "是否需要在楼梯边使用传送器"
                 },
                 "pickaxeFourDirections": {
                     "_leaf": true,
@@ -438,7 +438,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "checkbox",
                     "_bool": "bool",
-                    "_data": "/****** 怪物相关 ******/ \n 是否支持加点"
+                    "_data": "是否支持加点"
                 },
                 "enableNegativeDamage": {
                     "_leaf": true,
@@ -462,7 +462,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "checkbox",
                     "_bool": "bool",
-                    "_data": "/****** 系统相关 ******/ \n 点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面"
+                    "_data": "点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面"
                 },
                 "canOpenBattleAnimate": {
                     "_leaf": true,

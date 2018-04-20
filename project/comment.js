@@ -38,7 +38,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_leaf": true,
                             "_type": "checkbox",
                             "_bool": "bool",
-                            "_data": "物品是否属于装备(仅在core.flags.equipment时有效)"
+                            "_data": "物品是否属于装备(仅在全塔属性的equipment为true时有效)"
                         }
                     }
                 },
@@ -266,7 +266,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         "images": {
                             "_leaf": true,
                             "_type": "textarea",
-                            "_data": "背景/前景图；你可以选择一张图片来作为背景/前景素材。详细用法请参见文档“自定义素材”中的说明。"
+                            "_data": "背景/前景图；你可以选择若干张图片来作为背景/前景素材。详细用法请参见文档“自定义素材”中的说明。"
                         },
                         "color": {
                             "_leaf": true,
@@ -305,36 +305,36 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_leaf": true,
                             "_type": "event",
                             "_event": "event",
-                            "_data": "该楼的所有可能事件列表"
+                            "_data": "该点的可能事件列表"
                         },
                         "changeFloor": {
                             "_leaf": true,
                             "_type": "event",
                             "_event": "changeFloor",
-                            "_data": "楼层转换事件；该事件不能和上面的events有冲突（同位置点），否则会被覆盖"
+                            "_data": "该点楼层转换事件；该事件不能和上面的events同时出现，否则会被覆盖"
                         },
                         "afterBattle": {
                             "_leaf": true,
                             "_type": "event",
                             "_event": "afterBattle",
-                            "_data": "战斗后可能触发的事件列表"
+                            "_data": "该点战斗后可能触发的事件列表"
                         },
                         "afterGetItem": {
                             "_leaf": true,
                             "_type": "event",
                             "_event": "afterGetItem",
-                            "_data": "获得道具后可能触发的事件列表"
+                            "_data": "该点获得道具后可能触发的事件列表"
                         },
                         "afterOpenDoor": {
                             "_leaf": true,
                             "_type": "event",
                             "_event": "afterOpenDoor",
-                            "_data": "开完门后可能触发的事件列表"
+                            "_data": "该点开完门后可能触发的事件列表"
                         },
                         "cannotMove": {
                             "_leaf": true,
                             "_type": "textarea",
-                            "_data": "每个图块不可通行的方向 \n 可以在这里定义每个点不能前往哪个方向，例如悬崖边不能跳下去 \n'x,y': ['up', 'left'], // (x,y)点不能往上和左走"
+                            "_data": "该点不可通行的方向 \n 可以在这里定义该点不能前往哪个方向，例如悬崖边不能跳下去 \n'x,y': ['up', 'left'], // (x,y)点不能往上和左走"
                         }
                     }
                 }

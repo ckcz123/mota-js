@@ -138,7 +138,7 @@ enemys.prototype.getCritical = function (monsterId) {
     // 坚固、模仿怪物没有临界！
     if (this.hasSpecial(monster.special, 3) || this.hasSpecial(monster.special, 10)) return "???";
 
-    if (monster.def + monster.hp/2 <= 0) {
+    if (false) { // 采用回合方式
 
         var last = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
 
@@ -172,10 +172,10 @@ enemys.prototype.getCritical = function (monsterId) {
         }
         if (info.damage <= 0) return 0;
 
+        var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = monster.def, turn = info.turn;
+
         // turn 是勇士攻击次数
         if (turn<=1) return 0; // 攻杀
-
-        var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = monster.def, turn = info.turn;
 
         // 每回合最小伤害 = ⎡怪物生命/勇士攻击次数⎤
         var nextAtk = Math.ceil(mon_hp/(turn-1)) + mon_def;

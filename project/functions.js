@@ -124,7 +124,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.status.hero.hp<=0) {
 		core.status.hero.hp=0;
 		core.updateStatusBar();
-		core.events.lose('battle');
+		core.events.lose('战斗失败');
 		return;
 	}
 	// 获得金币和经验

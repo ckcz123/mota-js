@@ -83,8 +83,8 @@
         </h3>
         <div class="leftTabContent">
             <div id='newIdIdnum'><!-- id and idnum -->
-                <input placeholder="输入新id（唯一标识符）"/>
-                <input placeholder="输入新idnum（数字，1000以内）"/>
+                <input placeholder="新id（唯一标识符）"/>
+                <input placeholder="新idnum（1000以内数字）"/>
                 <button>save</button>
             </div>
             <div><!-- enemy and item -->
@@ -154,8 +154,8 @@
                     <option value="firstArrive">firstArrive</option>
                 </select>
                 <button onclick="editor_blockly.confirm()">confirm</button>
-                <button onclick="editor_blockly.cancel()">cancel</button>
                 <button onclick="editor_blockly.parse()">parse</button>
+                <button onclick="editor_blockly.cancel()">cancel</button>
                 <xml id="toolbox" style="display:none">
                     <category name="entry"></category>
                     <category name="statement"></category>
@@ -385,6 +385,12 @@
 </script>
 
 <!-- =========================================================== -->
+
+<script>
+if (location.protocol.indexOf("http")!=0) {
+    alert("请在启动服务中打开本编辑器！不然包括编辑在内的绝大多数功能都无法使用。");
+}
+</script>
 
 <script src='_server/vendor/vue.min.js'></script>
 <!-- <script src="https://cdn.bootcss.com/vue/2.5.13/vue.js"></script> -->

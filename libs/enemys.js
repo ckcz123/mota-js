@@ -138,11 +138,16 @@ enemys.prototype.getCritical = function (monsterId) {
     // 坚固、模仿怪物没有临界！
     if (this.hasSpecial(monster.special, 3) || this.hasSpecial(monster.special, 10)) return "???";
 
-    if (monster.def + monster.hp/2 <= 0) {
+    if (false) { // 采用回合方式
 
         var last = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
 
-        if (last == null) return '???';
+        if (last == null) {
+            if (core.status.hero.atk<=monster.def)
+                return monster.def+1-core.status.hero.atk;
+
+            return '???';
+        }
 
         if (last <= 0) return 0;
 
@@ -160,7 +165,11 @@ enemys.prototype.getCritical = function (monsterId) {
 
         var info = this.getDamageInfo(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
 
-        if (info == null) return '???';
+        if (info == null) {
+            if (core.status.hero.atk<=monster.def)
+                return monster.def+1-core.status.hero.atk;
+            return '???';
+        }
         if (info.damage <= 0) return 0;
 
         var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = monster.def, turn = info.turn;

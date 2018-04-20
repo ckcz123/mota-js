@@ -559,7 +559,7 @@ events.prototype.doAction = function() {
             if (core.status.hero.hp<=0) {
                 core.status.hero.hp=0;
                 core.updateStatusBar();
-                core.events.lose('damage');
+                core.events.lose();
             }
             else {
                 core.updateStatusBar();
@@ -1163,7 +1163,7 @@ events.prototype.passNet = function (data) {
         if (core.status.hero.hp<=0) {
             core.status.hero.hp=0;
             core.updateStatusBar();
-            core.events.lose('lava');
+            core.events.lose();
             return;
         }
         core.drawTip('经过血网，生命-'+core.values.lavaDamage);

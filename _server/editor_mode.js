@@ -435,6 +435,10 @@ editor_mode = function (editor) {
         var newFileName = document.getElementById('newFileName');
         newMap.onclick = function () {
             if (!newFileName.value) return;
+            if (core.floorIds.indexOf(newFileName.value)>=0) {
+                printe("该楼层已存在！");
+                return;
+            }
             editor_mode.onmode('');
             editor.file.saveNewFile(newFileName.value, function (err) {
                 if (err) {

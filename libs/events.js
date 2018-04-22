@@ -132,24 +132,25 @@ events.prototype.gameOver = function (ending, fromReplay) {
     core.animateFrame.weather.level = 0;
     core.animateFrame.weather.nodes = [];
     core.setFg(null, 0);
+    core.ui.closePanel();
 
     // 下载录像
     var confirmDownload = function () {
+
         core.ui.closePanel();
-        setTimeout(function () {
-            core.ui.drawConfirmBox("你想下载录像吗？", function () {
-                var obj = {
-                    'name': core.firstData.name,
-                    'version': core.firstData.version,
-                    'hard': core.status.hard,
-                    'route': core.encodeRoute(core.status.route)
-                }
-                core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify(obj));
-                core.restart();
-            }, function () {
-                core.restart();
-            })
-        }, 150);
+        core.ui.drawConfirmBox("你想下载录像吗？", function () {
+            var obj = {
+                'name': core.firstData.name,
+                'version': core.firstData.version,
+                'hard': core.status.hard,
+                'route': core.encodeRoute(core.status.route)
+            }
+            core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify(obj));
+            core.restart();
+        }, function () {
+            core.restart();
+        })
+
     }
 
     // 上传成绩
@@ -185,7 +186,10 @@ events.prototype.gameOver = function (ending, fromReplay) {
             formData.append('route', core.encodeRoute(core.status.route));
 
             core.http("POST", "/games/upload.php", formData);
-            confirmDownload();
+
+            setTimeout(function() {
+                confirmDownload();
+            }, 150);
         }
 
         core.ui.drawConfirmBox("你想记录你的ID和成绩吗？", function () {
@@ -203,7 +207,6 @@ events.prototype.gameOver = function (ending, fromReplay) {
         });
     }
     else {
-        // confirmDownload();
         confirmUpload();
     }
 

@@ -1049,9 +1049,9 @@ control.prototype.snipe = function (snipes) {
         }
         else {
             if (damage <= 0) color = '#00FF00';
-            else if (damage < hero_hp / 3) color = '#FFFFFF';
-            else if (damage < hero_hp * 2 / 3) color = '#FFFF00';
-            else if (damage < hero_hp) color = '#FF7F00';
+            else if (damage < core.status.hero.hp / 3) color = '#FFFFFF';
+            else if (damage < core.status.hero.hp * 2 / 3) color = '#FFFF00';
+            else if (damage < core.status.hero.hp) color = '#FF7F00';
             else color = '#FF0000';
 
             damage = core.formatBigNumber(damage);

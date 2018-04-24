@@ -878,6 +878,11 @@ core.prototype.debug = function() {
     core.control.debug();
 }
 
+////// 重置当前地图 //////
+core.prototype.resetMap = function() {
+    core.maps.resetMap();
+}
+
 ////// 开始播放 //////
 core.prototype.startReplay = function (list) {
     core.control.startReplay(list);

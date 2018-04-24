@@ -177,7 +177,7 @@ utils.prototype.formatBigNumber = function (x) {
 
     for (var i=0;i<all.length;i++) {
         var one = all[i];
-        if (x>=10*one.val) {
+        if (x>=100*one.val) {
             var v = x/one.val;
             return v.toFixed(Math.max(0, Math.floor(4-Math.log10(v+1)))) + one.c;
         }

@@ -120,7 +120,8 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 },
                 "zoneSquare": {
                     "_leaf": true,
-                    "_type": "textarea",
+                    "_type": "checkbox",
+                    "_bool": "bool",
                     "_data": "领域怪zoneSquare代表是否九宫格伤害"
                 },
                 "range": {
@@ -286,7 +287,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         "item_ratio": {
                             "_leaf": true,
                             "_type": "textarea",
-                            "_range": "(thiseval==~~thiseval && thiseval>0)||thiseval==null",
+                            "_range": "(thiseval==~~thiseval && thiseval>=0)||thiseval==null",
                             "_data": "每一层的宝石/血瓶效果，即获得宝石和血瓶时框内\"ratio\"的值。"
                         },
                         "firstArrive": {

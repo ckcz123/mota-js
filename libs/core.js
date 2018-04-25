@@ -923,6 +923,11 @@ core.prototype.stopReplay = function () {
     core.control.stopReplay();
 }
 
+////// 回放时存档 //////
+core.prototype.saveReplay = function () {
+    core.control.saveReplay();
+}
+
 ////// 回放 //////
 core.prototype.replay = function () {
     core.control.replay();

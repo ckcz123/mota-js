@@ -1616,11 +1616,9 @@ ui.prototype.drawSLPanel = function(index) {
     }
     this.drawPagination(page+1, 30);
 
-    if (core.status.event.id == 'save' || core.status.event.id=='load') {
-        if (core.status.event.selection)
-            core.setFillStyle('ui', '#FF6A6A');
-        core.fillText('ui', '删除模式', 48, 403);
-    }
+    if (core.status.event.selection)
+        core.setFillStyle('ui', '#FF6A6A');
+    core.fillText('ui', '删除模式', 48, 403);
 
 }
 

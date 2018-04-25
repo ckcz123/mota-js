@@ -433,6 +433,12 @@ main.statusBar.image.load.onclick = function () {
 
 ////// 点击状态栏中的系统菜单时 //////
 main.statusBar.image.settings.onclick = function () {
+
+    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+        core.saveReplay();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.openSettings(true);
 }

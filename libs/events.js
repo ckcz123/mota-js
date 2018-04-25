@@ -570,14 +570,17 @@ events.prototype.doAction = function() {
             }
             break;
         case "setHero":
-            if (core.isset(core.material.images.images[data.name]) && core.material.images.images[data.name].width==128) {
+            {
+                var name = "hero.png";
+                if (core.isset(core.material.images.images[data.name]) && core.material.images.images[data.name].width==128)
+                    name = data.name;
                 core.setFlag("heroIcon", data.name);
                 core.material.images.hero.src = core.material.images.images[data.name].src;
-                core.material.icons.hero.height = core.material.images.hero.height/4;
+                core.material.icons.hero.height = core.material.images.images[data.name].height/4;
                 core.drawHero();
+                this.doAction();
+                break;
             }
-            this.doAction();
-            break;
         case "input":
             {
                 var value;

@@ -1974,7 +1974,7 @@ control.prototype.loadData = function (data, callback) {
     var icon = core.getFlag("heroIcon", "hero.png");
     if (core.isset(core.material.images.images[icon])) {
         core.material.images.hero.src = core.material.images.images[icon].src;
-        core.material.icons.hero.height = core.material.images.hero.height/4;
+        core.material.icons.hero.height = core.material.images.images[icon].height/4;
     }
 
     core.events.afterLoadData(data);

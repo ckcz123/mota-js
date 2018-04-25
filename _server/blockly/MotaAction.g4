@@ -417,7 +417,7 @@ return code;
 */
 
 setHero_s
-    :   '更改角色行走图' EvalString Newline
+    :   '更改角色行走图' EvalString? Newline
     ;
 
 /* setHero_s
@@ -425,7 +425,8 @@ tooltip : setHero：更改角色行走图
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=setHero-%e6%9b%b4%e6%94%b9%e8%a7%92%e8%89%b2%e8%a1%8c%e8%b5%b0%e5%9b%be
 colour : this.dataColor
 default : ["hero.png"]
-var code = '{"type": "setHero", "name": "'+EvalString_0+'"},\n';
+EvalString_0 = EvalString_0 && (', "name": "'+EvalString_0+'"');
+var code = '{"type": "setHero"'+EvalString_0+'},\n';
 return code;
 */
 

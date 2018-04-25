@@ -1067,6 +1067,11 @@ core.prototype.isset = function (val) {
     return core.utils.isset(val);
 }
 
+////// 获得子数组 //////
+core.prototype.subarray = function (a, b) {
+    return core.utils.subarray(a, b);
+}
+
 ////// 读取一个本地文件内容 //////
 core.prototype.readFile = function (success, error, readType) {
     core.utils.readFile(success, error, readType);

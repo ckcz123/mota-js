@@ -1132,6 +1132,14 @@ ui.prototype.drawStorageRemove = function () {
     ]);
 }
 
+ui.prototype.drawReplay = function () {
+    core.lockControl();
+    core.status.event.id = 'replay';
+    this.drawChoices(null, [
+        "从头回放录像", "从存档开始回放", "返回游戏"
+    ]);
+}
+
 ////// 绘制分页 //////
 ui.prototype.drawPagination = function (page, totalPage) {
 
@@ -1577,7 +1585,7 @@ ui.prototype.drawSLPanel = function(index) {
     var strokeColor = '#FFD700';
     if (core.status.event.selection) strokeColor = '#FF6A6A';
 
-    var name=core.status.event.id=='save'?"存档":"读档";
+    var name=core.status.event.id=='save'?"存档":core.status.event.id=='load'?"读档":core.status.event.id=='replayLoad'?"回放":"";
     for (var i=0;i<6;i++) {
         var id=5*page+i;
         var data=core.getLocalStorage(i==0?"autoSave":"save"+id, null);
@@ -1608,9 +1616,11 @@ ui.prototype.drawSLPanel = function(index) {
     }
     this.drawPagination(page+1, 30);
 
-    if (core.status.event.selection)
-        core.setFillStyle('ui', '#FF6A6A');
-    core.fillText('ui', '删除模式', 48, 403);
+    if (core.status.event.id == 'save' || core.status.event.id=='load') {
+        if (core.status.event.selection)
+            core.setFillStyle('ui', '#FF6A6A');
+        core.fillText('ui', '删除模式', 48, 403);
+    }
 
 }
 

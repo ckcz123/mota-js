@@ -106,7 +106,7 @@ actions.prototype.keyDown = function(keyCode) {
             this.keyDownToolbox(keyCode);
             return;
         }
-        if (core.status.event.id=='save' || core.status.event.id=='load') {
+        if (core.status.event.id=='save' || core.status.event.id=='load' || core.status.event.id=='replayLoad') {
             this.keyDownSL(keyCode);
             return;
         }
@@ -137,6 +137,9 @@ actions.prototype.keyDown = function(keyCode) {
         if (core.status.event.id=='cursor') {
             this.keyDownCursor(keyCode);
             return;
+        }
+        if (core.status.event.id=='replay') {
+            this.keyDownReplay(keyCode);
         }
         return;
     }
@@ -237,7 +240,7 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
             this.keyUpToolbox(keyCode);
             return;
         }
-        if (core.status.event.id=='save' || core.status.event.id=='load') {
+        if (core.status.event.id=='save' || core.status.event.id=='load' || core.status.event.id=='replayLoad') {
             this.keyUpSL(keyCode);
             return;
         }
@@ -267,6 +270,10 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
         }
         if (core.status.event.id=='cursor') {
             this.keyUpCursor(keyCode);
+            return;
+        }
+        if (core.status.event.id=='replay') {
+            this.keyUpReplay(keyCode);
             return;
         }
         return;
@@ -325,19 +332,8 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
                 core.ui.drawHelp();
             break;
         case 82: // R
-            if (core.status.heroStop) {
-                core.ui.drawConfirmBox("确定要回放录像吗？", function () {
-                    core.ui.closePanel();
-                    var hard=core.status.hard, route=core.clone(core.status.route);
-                    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
-                    core.events.setInitData(hard);
-                    core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-                        core.startReplay(route);
-                    }, true);
-                }, function () {
-                    core.ui.closePanel();
-                });
-            }
+            if (core.status.heroStop)
+                core.ui.drawReplay();
             break;
         case 33: case 34: // PAGEUP/PAGEDOWN
         if (core.status.heroStop) {
@@ -606,7 +602,7 @@ actions.prototype.onclick = function (x, y, stepPostfix) {
     }
 
     // 存读档
-    if (core.status.event.id == 'save' || core.status.event.id == 'load') {
+    if (core.status.event.id == 'save' || core.status.event.id == 'load' || core.status.event.id=='replayLoad') {
         this.clickSL(x,y);
         return;
     }
@@ -661,6 +657,11 @@ actions.prototype.onclick = function (x, y, stepPostfix) {
 
     if (core.status.event.id == 'cursor') {
         this.clickCursor(x,y);
+        return;
+    }
+
+    if (core.status.event.id == 'replay') {
+        this.clickReplay(x,y);
         return;
     }
 
@@ -1899,6 +1900,68 @@ actions.prototype.keyUpStorageRemove = function (keycode) {
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
         this.clickStorageRemove(6, topIndex+core.status.event.selection);
+    }
+}
+
+////// 回放选择界面时的点击操作 //////
+actions.prototype.clickReplay = function (x, y) {
+    if (x<5 || x>7) return;
+    var choices = core.status.event.ui.choices;
+
+    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+
+    if (y>=topIndex && y<topIndex+choices.length) {
+        var selection = y - topIndex;
+        switch (selection) {
+            case 0:
+                {
+                    core.ui.closePanel();
+                    var hard=core.status.hard, route=core.clone(core.status.route);
+                    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
+                    core.events.setInitData(hard);
+                    core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
+                        core.startReplay(route);
+                    }, true);
+                    break;
+                }
+            case 1:
+                {
+                    core.status.event.id = 'replayLoad';
+                    core.status.event.selection = null;
+                    var saveIndex = core.status.saveIndex;
+                    var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
+                    core.ui.drawSLPanel(10*page+offset);
+                    break;
+                }
+            case 2:
+                core.ui.closePanel();
+                break;
+        }
+    }
+}
+
+////// 回放选择界面时，按下某个键的操作 //////
+actions.prototype.keyDownReplay = function (keycode) {
+    if (keycode==38) {
+        core.status.event.selection--;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+    if (keycode==40) {
+        core.status.event.selection++;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+}
+
+////// 回放选择界面时，放开某个键的操作 //////
+actions.prototype.keyUpReplay = function (keycode) {
+    if (keycode==27 || keycode==88) {
+        core.ui.closePanel();
+        return;
+    }
+    var choices = core.status.event.ui.choices;
+    if (keycode==13 || keycode==32 || keycode==67) {
+        var topIndex = 6 - parseInt((choices.length - 1) / 2);
+        this.clickReplay(6, topIndex+core.status.event.selection);
     }
 }
 

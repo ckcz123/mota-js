@@ -1815,6 +1815,30 @@ control.prototype.doSL = function (id, type) {
         });
         return;
     }
+    else if (type == 'replayLoad') {
+        var data = core.getLocalStorage(id=='autoSave'?id:"save"+id, null);
+        if (!core.isset(data)) {
+            core.drawTip("无效的存档");
+            return;
+        }
+        if (data.version != core.firstData.version) {
+            core.drawTip("存档版本不匹配");
+            return;
+        }
+        if (data.hard != core.status.hard) {
+            core.drawTip("游戏难度不匹配！");
+            return;
+        }
+        var route = core.subarray(core.status.route, core.decodeRoute(data.route));
+        if (!core.isset(route)) {
+            core.drawTip("无法从此存档回放录像");
+            return;
+        }
+        core.loadData(data, function () {
+            core.startReplay(route);
+            core.drawTip("回退到存档节点");
+        });
+    }
 }
 
 ////// 同步存档到服务器 //////

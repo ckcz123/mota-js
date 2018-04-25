@@ -966,8 +966,12 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             else core.setWeather();
 
             // 清除gif
-            while (core.dom.gif.firstChild)
+            /*
+            while (core.dom.gif.firstChild) {
                 core.dom.gif.removeChild(core.dom.gif.firstChild);
+            }
+            */
+            core.dom.gif.innerHTML = "";
 
             // 检查重生
             if (!core.isset(fromLoad)) {

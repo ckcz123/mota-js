@@ -90,7 +90,7 @@ editor_blockly = function () {
       MotaActionBlocks['battle_s'].xmlText(),
       MotaActionBlocks['openDoor_s'].xmlText(),
       MotaActionBlocks['setBlock_s'].xmlText(),
-      MotaActionBlocks['setHero_s'].xmlText(),
+      MotaActionBlocks['setHeroIcon_s'].xmlText(),
       '<label text="事件控制"></label>',
       MotaActionBlocks['if_s'].xmlText(),
       MotaActionBlocks['revisit_s'].xmlText(),

@@ -569,14 +569,14 @@ events.prototype.doAction = function() {
                 this.doAction();
             }
             break;
-        case "setHero":
+        case "setHeroIcon":
             {
                 var name = "hero.png";
                 if (core.isset(core.material.images.images[data.name]) && core.material.images.images[data.name].width==128)
                     name = data.name;
-                core.setFlag("heroIcon", data.name);
-                core.material.images.hero.src = core.material.images.images[data.name].src;
-                core.material.icons.hero.height = core.material.images.images[data.name].height/4;
+                core.setFlag("heroIcon", name);
+                core.material.images.hero.src = core.material.images.images[name].src;
+                core.material.icons.hero.height = core.material.images.images[name].height/4;
                 core.drawHero();
                 this.doAction();
                 break;

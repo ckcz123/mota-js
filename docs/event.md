@@ -482,14 +482,14 @@ number为**要更改到的数字**，有关“数字”的定义详见参见[素
 
 图块更改往往与[同一个点的多事件处理](#同一个点的多事件处理)相关。
 
-### setHero：更改角色行走图
+### setHeroIcon：更改角色行走图
 
-使用`{"type": "setHero"}`可以更改角色行走图。
+使用`{"type": "setHeroIcon"}`可以更改角色行走图。
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    {"type": "setHero", "name": "hero2.png"}, // 将勇士行走图改成hero2.png；必须在全塔属性的images中被定义过。
-    {"type": "setHero"}, // 如果不加name则恢复最初默认状态
+    {"type": "setHeroIcon", "name": "hero2.png"}, // 将勇士行走图改成hero2.png；必须在全塔属性的images中被定义过。
+    {"type": "setHeroIcon"}, // 如果不加name则恢复最初默认状态
     {"type": "setValue", "name": "status:name", "value": "'可绒'"}, // 修改勇士名；请注意value必须加单引号。
 ]
 ```

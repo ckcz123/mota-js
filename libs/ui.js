@@ -1339,6 +1339,10 @@ ui.prototype.drawBookDetail = function (index) {
 
     if (hints.length==0)
         hints.push("该怪物无特殊属性。");
+
+    hints.push("");
+    hints.push("临界表："+JSON.stringify(core.enemys.nextCriticals(enemyId,10)))
+
     var content=hints.join("\n");
 
     core.status.event.id = 'book-detail';

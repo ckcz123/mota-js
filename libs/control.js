@@ -874,6 +874,11 @@ control.prototype.updateCheckBlock = function() {
                 core.status.checkBlock.map[13*block.x+block.y]=id;
             }
         }
+        // 血网
+        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) &&
+            block.event.id=='lavaNet' && block.event.trigger=='passNet' && !core.hasItem("shoes")) {
+            core.status.checkBlock.map[13*block.x+block.y]="lavaNet";
+        }
     }
 
     // Step2: 更新领域、阻击伤害
@@ -884,7 +889,13 @@ control.prototype.updateCheckBlock = function() {
         for (var y=0;y<13;y++) {
             var id = core.status.checkBlock.map[13*x+y];
             if (core.isset(id)) {
-                var enemy = core.enemys.getEnemys(id);
+
+                if (id=="lavaNet") {
+                    core.status.checkBlock.damage[13*x+y]+=core.values.lavaDamage;
+                    continue;
+                }
+
+                var enemy = core.material.enemys[id];
                 // 存在领域
                 if (core.enemys.hasSpecial(enemy.special, 15)) {
                     var range = enemy.range || 1;
@@ -925,8 +936,8 @@ control.prototype.updateCheckBlock = function() {
                 var id1=core.status.checkBlock.map[13*(x-1)+y],
                     id2=core.status.checkBlock.map[13*(x+1)+y];
                 if (core.isset(id1) && core.isset(id2) && id1==id2) {
-                    var enemy = core.enemys.getEnemys(id1);
-                    if (core.enemys.hasSpecial(enemy.special, 16)) {
+                    var enemy = core.material.enemys[id1];
+                    if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {
                         has = true;
                     }
                 }
@@ -935,8 +946,8 @@ control.prototype.updateCheckBlock = function() {
                 var id1=core.status.checkBlock.map[13*x+y-1],
                     id2=core.status.checkBlock.map[13*x+y+1];
                 if (core.isset(id1) && core.isset(id2) && id1==id2) {
-                    var enemy = core.enemys.getEnemys(id1);
-                    if (core.enemys.hasSpecial(enemy.special, 16)) {
+                    var enemy = core.material.enemys[id1];
+                    if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {
                         has = true;
                     }
                 }
@@ -981,6 +992,9 @@ control.prototype.checkBlock = function () {
 
         if (core.status.checkBlock.betweenAttack[13*x+y] && damage>0) {
             core.drawTip('受到夹击，生命变成一半');
+        }
+        else if (core.status.checkBlock.map[13*x+y]=='lavaNet') {
+            core.drawTip('受到血网伤害'+damage+'点');
         }
         // 阻击
         else if (snipe.length>0 && damage>0) {

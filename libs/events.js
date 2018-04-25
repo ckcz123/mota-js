@@ -884,12 +884,19 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
         heroLoc = core.status.hero.loc;
     if (core.isset(stair)) {
         if (!core.isset(heroLoc)) heroLoc={};
-        var blocks = core.status.maps[floorId].blocks;
-        for (var i in blocks) {
-            if (core.isset(blocks[i].event) && !(core.isset(blocks[i].enable) && !blocks[i].enable) && blocks[i].event.id === stair) {
-                heroLoc.x = blocks[i].x;
-                heroLoc.y = blocks[i].y;
-                break;
+
+        if (core.isset(core.floors[floorId][stair])) {
+            heroLoc.x = core.floors[floorId][stair][0];
+            heroLoc.y = core.floors[floorId][stair][1];
+        }
+        else {
+            var blocks = core.status.maps[floorId].blocks;
+            for (var i in blocks) {
+                if (core.isset(blocks[i].event) && !(core.isset(blocks[i].enable) && !blocks[i].enable) && blocks[i].event.id === stair) {
+                    heroLoc.x = blocks[i].x;
+                    heroLoc.y = blocks[i].y;
+                    break;
+                }
             }
         }
         if (!core.isset(heroLoc.x)) {
@@ -1162,6 +1169,8 @@ events.prototype.passNet = function (data) {
     // 有鞋子
     if (core.hasItem('shoes')) return;
     if (data.event.id=='lavaNet') { // 血网
+        // 在checkBlock中进行处理
+        /*
         core.status.hero.hp -= core.values.lavaDamage;
         if (core.status.hero.hp<=0) {
             core.status.hero.hp=0;
@@ -1169,7 +1178,8 @@ events.prototype.passNet = function (data) {
             core.events.lose();
             return;
         }
-        core.drawTip('经过血网，生命-'+core.values.lavaDamage);
+        */
+        // core.drawTip('经过血网，生命-'+core.values.lavaDamage);
     }
     if (data.event.id=='poisonNet') { // 毒网
         if (core.hasFlag('poison')) return;

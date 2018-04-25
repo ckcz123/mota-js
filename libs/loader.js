@@ -30,7 +30,12 @@ loader.prototype.load = function (callback) {
     core.loader.loadImages(core.materials, core.material.images, function () {
         // 加载png图片
         core.material.images.images = {};
-        core.loader.loadImages(core.images, core.material.images.images, function () {
+
+        var images = core.clone(core.images);
+        if (images.indexOf("hero.png")<0)
+            images.push("hero.png");
+
+        core.loader.loadImages(images, core.material.images.images, function () {
             // 加载autotile
             core.material.images.autotile = {};
             core.loader.loadImages(Object.keys(core.material.icons.autotile), core.material.images.autotile, function () {

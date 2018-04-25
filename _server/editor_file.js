@@ -125,6 +125,7 @@ editor_file = function (editor, callback) {
             name: "0",
             canFlyTo: true,
             canUseQuickShop: true,
+            cannotViewMap: false,
             images: [],
             item_ratio: 1,
             firstArrive: [],

@@ -694,8 +694,8 @@ actions.prototype.onmousewheel = function (direct) {
 
     // 浏览地图
     if (core.status.lockControl && core.status.event.id == 'viewMaps') {
-        if (direct==1) core.ui.drawMaps(core.status.event.data+1);
-        if (direct==-1) core.ui.drawMaps(core.status.event.data-1);
+        if (direct==1) this.clickViewMaps(6,2);
+        if (direct==-1) this.clickViewMaps(6,10);
         return;
     }
 }
@@ -927,11 +927,21 @@ actions.prototype.keyUpFly = function (keycode) {
 
 ////// 查看地图界面时的点击操作 //////
 actions.prototype.clickViewMaps = function (x,y) {
+    var now = core.floorIds.indexOf(core.status.floorId);
+    var nextId = core.status.event.data;
     if(y<=4) {
-        core.ui.drawMaps(core.status.event.data+1);
+        nextId++;
+        while (nextId<core.floorIds.length && nextId!=now && core.floors[core.floorIds[nextId]].cannotViewMap)
+            nextId++;
+        if (nextId<core.floorIds.length)
+            core.ui.drawMaps(nextId);
     }
     else if (y>=8) {
-        core.ui.drawMaps(core.status.event.data-1);
+        nextId--;
+        while (nextId>=0 && nextId!=now && core.floors[core.floorIds[nextId]].cannotViewMap)
+            nextId--;
+        if (nextId>=0)
+            core.ui.drawMaps(nextId);
     }
     else {
         core.clearMap('data', 0, 0, 416, 416);
@@ -942,8 +952,12 @@ actions.prototype.clickViewMaps = function (x,y) {
 
 ////// 查看地图界面时，按下某个键的操作 //////
 actions.prototype.keyDownViewMaps = function (keycode) {
-    if (keycode==37 || keycode==38 || keycode==33) core.ui.drawMaps(core.status.event.data+1);
-    else if (keycode==39 || keycode==40 || keycode==34) core.ui.drawMaps(core.status.event.data-1);
+    if (keycode==37 || keycode==38 || keycode==33) {
+        this.clickViewMaps(6,2);
+    }
+    else if (keycode==39 || keycode==40 || keycode==34) {
+        this.clickViewMaps(6,10);
+    }
     return;
 }
 

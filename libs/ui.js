@@ -20,8 +20,7 @@ ui.prototype.clearMap = function (map, x, y, width, height) {
         for (var m in core.canvas) {
             core.canvas[m].clearRect(0, 0, 416, 416);
         }
-        while (core.dom.gif.firstChild)
-            core.dom.gif.removeChild(core.dom.gif.firstChild);
+        core.dom.gif.innerHTML = "";
     }
     else {
         core.canvas[map].clearRect(x||0, y||0, width||416, height||416);

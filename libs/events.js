@@ -125,8 +125,7 @@ events.prototype.gameOver = function (ending, fromReplay) {
 
     // 清空图片和天气
     core.clearMap('animate', 0, 0, 416, 416);
-    while (core.dom.gif2.firstChild)
-        core.dom.gif2.removeChild(core.dom.gif2.firstChild);
+    core.dom.gif2.innerHTML = "";
     core.clearMap('weather', 0, 0, 416, 416)
     core.animateFrame.weather.type = null;
     core.animateFrame.weather.level = 0;
@@ -454,8 +453,7 @@ events.prototype.doAction = function() {
                 core.dom.gif2.appendChild(gif);
             }
             else {
-                while (core.dom.gif2.firstChild)
-                    core.dom.gif2.removeChild(core.dom.gif2.firstChild);
+                core.dom.gif2.innerHTML = "";
             }
             this.doAction();
             break;
@@ -966,11 +964,6 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             else core.setWeather();
 
             // 清除gif
-            /*
-            while (core.dom.gif.firstChild) {
-                core.dom.gif.removeChild(core.dom.gif.firstChild);
-            }
-            */
             core.dom.gif.innerHTML = "";
 
             // 检查重生

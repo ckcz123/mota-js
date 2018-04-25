@@ -366,7 +366,7 @@ events.prototype.doAction = function() {
                     }
                     if (floorId==core.status.floorId) {
                         core.drawMap(floorId);
-                        core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+                        core.drawHero();
                         core.updateStatusBar();
                     }
                 }
@@ -419,7 +419,7 @@ events.prototype.doAction = function() {
                 core.setHeroLoc('y', data.loc[1]);
             }
             if (core.isset(data.direction)) core.setHeroLoc('direction', data.direction);
-            core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+            core.drawHero();
             this.doAction();
             break;
         case "showImage": // 显示图片
@@ -568,6 +568,15 @@ events.prototype.doAction = function() {
                 core.updateStatusBar();
                 this.doAction();
             }
+            break;
+        case "setHero":
+            if (core.isset(core.material.images.images[data.name]) && core.material.images.images[data.name].width==128) {
+                core.setFlag("heroIcon", data.name);
+                core.material.images.hero.src = core.material.images.images[data.name].src;
+                core.material.icons.hero.height = core.material.images.hero.height/4;
+                core.drawHero();
+            }
+            this.doAction();
             break;
         case "input":
             {
@@ -972,7 +981,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
                         core.setHeroLoc('direction', heroLoc.direction);
                     core.setHeroLoc('x', heroLoc.x);
                     core.setHeroLoc('y', heroLoc.y);
-                    core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+                    core.drawHero();
                     core.updateStatusBar();
 
                     var changed = function () {

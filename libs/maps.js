@@ -893,7 +893,7 @@ maps.prototype.resetMap = function() {
     var floorId = core.status.floorId;
     core.status.maps[floorId] = this.loadFloor(floorId);
     this.drawMap(floorId, function() {
-        core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+        core.drawHero();
         core.updateStatusBar();
     })
 }

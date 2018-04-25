@@ -1585,7 +1585,7 @@ ui.prototype.drawSLPanel = function(index) {
             core.fillText('ui', i==0?"自动存档":name+id, (2*i+1)*u, 35, '#FFFFFF', "bold 17px Verdana");
             core.strokeRect('ui', (2*i+1)*u-size/2, 50, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc);
+                this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 65+size, '#FFFFFF', '10px Verdana');
             }
             else {
@@ -1597,7 +1597,7 @@ ui.prototype.drawSLPanel = function(index) {
             core.fillText('ui', name+id, (2*i-5)*u, 230, '#FFFFFF', "bold 17px Verdana");
             core.strokeRect('ui', (2*i-5)*u-size/2, 245, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc);
+                this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 260+size, '#FFFFFF', '10px Verdana');
             }
             else {
@@ -1615,7 +1615,7 @@ ui.prototype.drawSLPanel = function(index) {
 }
 
 ////// 绘制一个缩略图 //////
-ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroLoc) {
+ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroLoc, heroIcon) {
     core.clearMap(canvas, x, y, size, size);
     var groundId = core.floors[floorId].defaultGround || "ground";
     var blockIcon = core.material.icons.terrains[groundId];
@@ -1664,10 +1664,12 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
     }
 
     if (core.isset(heroLoc)) {
-        var heroIcon = core.material.icons.hero[heroLoc.direction];
-        var height = core.material.icons.hero.height;
+        if (!core.isset(core.material.images.images[heroIcon]))
+            heroIcon = "hero.png";
+        var icon = core.material.icons.hero[heroLoc.direction];
+        var height = core.material.images.images[heroIcon].height/4;
         var realHeight = persize*height/32;
-        core.canvas[canvas].drawImage(core.material.images.hero, heroIcon.stop * 32, heroIcon.loc * height, 32, height, x+persize*heroLoc.x, y+persize*heroLoc.y+persize-realHeight, persize, realHeight);
+        core.canvas[canvas].drawImage(core.material.images.images[heroIcon], icon.stop * 32, icon.loc * height, 32, height, x+persize*heroLoc.x, y+persize*heroLoc.y+persize-realHeight, persize, realHeight);
     }
 
     images.forEach(function (t) {

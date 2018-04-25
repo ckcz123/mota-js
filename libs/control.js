@@ -357,7 +357,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
                         core.clearMap('hero', 0, 0, 416, 416);
                         core.setHeroLoc('x', destX);
                         core.setHeroLoc('y', destY);
-                        core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+                        core.drawHero();
                         core.status.route.push("move:"+destX+":"+destY);
                     }
                 }
@@ -594,9 +594,7 @@ control.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
             core.setHeroLoc('y', y+scan[direction].y);
             core.moveOneStep();
             core.clearMap('hero', 0, 0, 416, 416);
-            core.drawHero(direction, core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
-            //if (core.status.heroStop)
-            //    core.drawHero(direction, core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+            core.drawHero(direction);
             clearInterval(core.interval.heroMoveInterval);
             core.status.heroMoving = 0;
             if (core.isset(callback)) callback();
@@ -624,7 +622,7 @@ control.prototype.moveAction = function (callback) {
         core.status.automaticRoute.moveStepBeforeStop = [];
         if (canMove) // 非箭头：触发
             core.trigger(x + scan[direction].x, y + scan[direction].y);
-        core.drawHero(direction, x, y, 'stop');
+        core.drawHero(direction, x, y);
 
         if (core.status.automaticRoute.moveStepBeforeStop.length==0) {
             core.clearContinueAutomaticRoute();
@@ -652,7 +650,7 @@ control.prototype.moveAction = function (callback) {
                 }
             }
             else if (core.status.heroStop) {
-                core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+                core.drawHero();
             }
             if (core.status.event.id!='ski')
                 core.status.route.push(direction);
@@ -669,7 +667,7 @@ control.prototype.turnHero = function() {
     else if (core.status.hero.loc.direction == 'right') core.status.hero.loc.direction = 'down';
     else if (core.status.hero.loc.direction == 'down') core.status.hero.loc.direction = 'left';
     else if (core.status.hero.loc.direction == 'left') core.status.hero.loc.direction = 'up';
-    core.drawHero(core.status.hero.loc.direction, core.status.hero.loc.x, core.status.hero.loc.y, 'stop', 0, 0);
+    core.drawHero();
     core.canvas.ui.clearRect(0, 0, 416, 416);
     core.status.route.push("turn");
 }
@@ -742,7 +740,7 @@ control.prototype.eventMoveHero = function(steps, time, callback) {
         var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
         if (moveSteps.length==0) {
             clearInterval(animate);
-            core.drawHero(core.getHeroLoc('direction'), x, y, 'stop');
+            core.drawHero(null, x, y);
             core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
@@ -792,7 +790,7 @@ control.prototype.waitHeroToStop = function(callback) {
         core.status.automaticRoute.moveDirectly = false;
         setTimeout(function(){
             core.status.replay.animate=false;
-            core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+            core.drawHero();
             callback();
         }, 30);
     }
@@ -808,10 +806,13 @@ control.prototype.drawHero = function (direction, x, y, status, offsetX, offsetY
     offsetX = offsetX || 0;
     offsetY = offsetY || 0;
     var dx=offsetX==0?0:offsetX/Math.abs(offsetX), dy=offsetY==0?0:offsetY/Math.abs(offsetY);
+    if (!core.isset(x)) x = core.getHeroLoc('x');
+    if (!core.isset(y)) y = core.getHeroLoc('y');
     core.clearAutomaticRouteNode(x+dx, y+dy);
-    var heroIcon = core.material.icons.hero[direction];
     x = x * 32;
     y = y * 32;
+    status = status || 'stop';
+    var heroIcon = core.material.icons.hero[direction || core.getHeroLoc('direction')];
     core.canvas.hero.clearRect(x - 32, y - 32, 96, 96);
     var height=core.material.icons.hero.height;
     core.canvas.hero.drawImage(core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height, x + offsetX, y + offsetY + 32-height, 32, height);
@@ -869,7 +870,7 @@ control.prototype.updateCheckBlock = function() {
     for (var n=0;n<blocks.length;n++) {
         var block = blocks[n];
         if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls.indexOf('enemy')==0) {
-            var id = block.event.id, enemy = core.enemys.getEnemys(id);
+            var id = block.event.id, enemy = core.material.enemys[id];
             if (core.isset(enemy)) {
                 core.status.checkBlock.map[13*block.x+block.y]=id;
             }
@@ -983,7 +984,7 @@ control.prototype.checkBlock = function () {
             if (nx<0 || nx>12 || ny<0 || ny>12) continue;
             var id=core.status.checkBlock.map[13*nx+ny];
             if (core.isset(id)) {
-                var enemy = core.enemys.getEnemys(id);
+                var enemy = core.material.enemys[id];
                 if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 18)) {
                     snipe.push({'direction': direction, 'x': nx, 'y': ny});
                 }
@@ -1615,7 +1616,7 @@ control.prototype.replay = function () {
             core.clearMap('hero', 0, 0, 416, 416);
             core.setHeroLoc('x', x);
             core.setHeroLoc('y', y);
-            core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+            core.drawHero();
             core.status.route.push("move:"+x+":"+y);
             core.replay();
             return;
@@ -1967,6 +1968,13 @@ control.prototype.loadData = function (data, callback) {
             core.status.shops[shop].times = data.shops[shop].times;
             core.status.shops[shop].visited = data.shops[shop].visited;
         }
+    }
+
+    // load icons
+    var icon = core.getFlag("heroIcon", "hero.png");
+    if (core.isset(core.material.images.images[icon])) {
+        core.material.images.hero.src = core.material.images.images[icon].src;
+        core.material.icons.hero.height = core.material.images.hero.height/4;
     }
 
     core.events.afterLoadData(data);

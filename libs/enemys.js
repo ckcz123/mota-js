@@ -365,6 +365,12 @@ enemys.prototype.getCurrentEnemys = function (floorId) {
         if (a.damage == b.damage) {
             return a.money - b.money;
         }
+        if (a.damage == null) {
+            return 1;
+        }
+        if (b.damage == null) {
+            return -1;
+        }
         return a.damage - b.damage;
     });
     return enemys;

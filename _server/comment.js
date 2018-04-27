@@ -256,6 +256,24 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_bool": "bool",
                             "_data": "该层是否允许使用快捷商店"
                         },
+                        "cannotViewMap": {
+                            "_leaf": true,
+                            "_type": "checkbox",
+                            "_bool": "bool",
+                            "_data": "该层是否不允许被浏览地图看到；如果勾上则浏览地图会跳过该层"
+                        },
+                        "upFloor": {
+                            "_leaf": true,
+                            "_type": "textarea",
+                            "_range": "thiseval==null||((thiseval instanceof Array) && thiseval.length==2)",
+                            "_data": "该层上楼点，如[2,3]。\n如果此项不为null，则楼层转换时的stair:upFloor，以及楼传器的落点会被替换成该点而不是该层的上楼梯。"
+                        },
+                        "downFloor": {
+                            "_leaf": true,
+                            "_type": "textarea",
+                            "_range": "thiseval==null||((thiseval instanceof Array) && thiseval.length==2)",
+                            "_data": "该层上楼点，如[2,3]。\n如果此项不为null，则楼层转换时的stair:downFloor，以及楼传器的落点会被替换成该点而不是该层的下楼梯。"
+                        },
                         "defaultGround": {
                             "_leaf": true,
                             "_type": "select",

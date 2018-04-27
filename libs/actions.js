@@ -13,7 +13,7 @@ actions.prototype.init = function () {
 
 ////// 按下某个键时 //////
 actions.prototype.onkeyDown = function (e) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') return;
     if (!core.isset(core.status.holdingKeys))core.status.holdingKeys=[];
     var isArrow={37:true,38:true,39:true,40:true}[e.keyCode]
     if(isArrow && !core.status.lockControl){
@@ -31,7 +31,7 @@ actions.prototype.onkeyDown = function (e) {
 
 ////// 放开某个键时 //////
 actions.prototype.onkeyUp = function(e) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') {
         if (e.keyCode==27) // ESCAPE
             core.stopReplay();
         else if (e.keyCode==90) // Z
@@ -42,6 +42,8 @@ actions.prototype.onkeyUp = function(e) {
             core.triggerReplay();
         else if (e.keyCode==65) // A
             core.rewindReplay();
+        else if (e.keyCode==83)
+            core.saveReplay();
         return;
     }
 
@@ -62,7 +64,7 @@ actions.prototype.onkeyUp = function(e) {
 
 ////// 按住某个键时 //////
 actions.prototype.pressKey = function (keyCode) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') return;
     if (keyCode === core.status.holdingKeys.slice(-1)[0]) {
         this.keyDown(keyCode);
         window.setTimeout(function(){core.pressKey(keyCode);},30);
@@ -71,7 +73,7 @@ actions.prototype.pressKey = function (keyCode) {
 
 ////// 根据按下键的code来执行一系列操作 //////
 actions.prototype.keyDown = function(keyCode) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') return;
     if (core.status.lockControl) {
         // Ctrl跳过对话
         if (keyCode==17) {
@@ -106,7 +108,7 @@ actions.prototype.keyDown = function(keyCode) {
             this.keyDownToolbox(keyCode);
             return;
         }
-        if (core.status.event.id=='save' || core.status.event.id=='load') {
+        if (core.status.event.id=='save' || core.status.event.id=='load' || core.status.event.id=='replayLoad') {
             this.keyDownSL(keyCode);
             return;
         }
@@ -137,6 +139,9 @@ actions.prototype.keyDown = function(keyCode) {
         if (core.status.event.id=='cursor') {
             this.keyDownCursor(keyCode);
             return;
+        }
+        if (core.status.event.id=='replay') {
+            this.keyDownReplay(keyCode);
         }
         return;
     }
@@ -188,7 +193,7 @@ actions.prototype.keyDown = function(keyCode) {
 
 ////// 根据放开键的code来执行一系列操作 //////
 actions.prototype.keyUp = function(keyCode, fromReplay) {
-    if (!fromReplay&&core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (!fromReplay&&core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') return;
 
     if (core.status.lockControl) {
         core.status.holdingKeys = [];
@@ -237,7 +242,7 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
             this.keyUpToolbox(keyCode);
             return;
         }
-        if (core.status.event.id=='save' || core.status.event.id=='load') {
+        if (core.status.event.id=='save' || core.status.event.id=='load' || core.status.event.id=='replayLoad') {
             this.keyUpSL(keyCode);
             return;
         }
@@ -267,6 +272,10 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
         }
         if (core.status.event.id=='cursor') {
             this.keyUpCursor(keyCode);
+            return;
+        }
+        if (core.status.event.id=='replay') {
+            this.keyUpReplay(keyCode);
             return;
         }
         return;
@@ -325,19 +334,8 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
                 core.ui.drawHelp();
             break;
         case 82: // R
-            if (core.status.heroStop) {
-                core.ui.drawConfirmBox("确定要回放录像吗？", function () {
-                    core.ui.closePanel();
-                    var hard=core.status.hard, route=core.clone(core.status.route);
-                    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
-                    core.events.setInitData(hard);
-                    core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-                        core.startReplay(route);
-                    }, true);
-                }, function () {
-                    core.ui.closePanel();
-                });
-            }
+            if (core.status.heroStop)
+                core.ui.drawReplay();
             break;
         case 33: case 34: // PAGEUP/PAGEDOWN
         if (core.status.heroStop) {
@@ -401,7 +399,7 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
 
 ////// 点击（触摸）事件按下时 //////
 actions.prototype.ondown = function (x ,y) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') return;
     if (!core.status.played || core.status.lockControl) {
         this.onclick(x, y, []);
         if (core.timeout.onDownTimeout==null) {
@@ -429,7 +427,7 @@ actions.prototype.ondown = function (x ,y) {
 
 ////// 当在触摸屏上滑动时 //////
 actions.prototype.onmove = function (x ,y) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') return;
     // if (core.status.holdingPath==0){return;}
     //core.status.mouseOutCheck =1;
     var pos={'x':x,'y':y};
@@ -453,7 +451,7 @@ actions.prototype.onmove = function (x ,y) {
 
 ////// 当点击（触摸）事件放开时 //////
 actions.prototype.onup = function () {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') return;
 
     clearTimeout(core.timeout.onDownTimeout);
     core.timeout.onDownTimeout = null;
@@ -519,7 +517,7 @@ actions.prototype.getClickLoc = function (x, y) {
 
 ////// 具体点击屏幕上(x,y)点时，执行的操作 //////
 actions.prototype.onclick = function (x, y, stepPostfix) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') return;
     // console.log("Click: (" + x + "," + y + ")");
 
     stepPostfix=stepPostfix||[];
@@ -606,7 +604,7 @@ actions.prototype.onclick = function (x, y, stepPostfix) {
     }
 
     // 存读档
-    if (core.status.event.id == 'save' || core.status.event.id == 'load') {
+    if (core.status.event.id == 'save' || core.status.event.id == 'load' || core.status.event.id=='replayLoad') {
         this.clickSL(x,y);
         return;
     }
@@ -664,11 +662,16 @@ actions.prototype.onclick = function (x, y, stepPostfix) {
         return;
     }
 
+    if (core.status.event.id == 'replay') {
+        this.clickReplay(x,y);
+        return;
+    }
+
 }
 
 ////// 滑动鼠标滚轮时的操作 //////
 actions.prototype.onmousewheel = function (direct) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') return;
     // 向下滚动是 -1 ,向上是 1
 
     // 楼层飞行器
@@ -694,8 +697,8 @@ actions.prototype.onmousewheel = function (direct) {
 
     // 浏览地图
     if (core.status.lockControl && core.status.event.id == 'viewMaps') {
-        if (direct==1) core.ui.drawMaps(core.status.event.data+1);
-        if (direct==-1) core.ui.drawMaps(core.status.event.data-1);
+        if (direct==1) this.clickViewMaps(6,2);
+        if (direct==-1) this.clickViewMaps(6,10);
         return;
     }
 }
@@ -927,11 +930,21 @@ actions.prototype.keyUpFly = function (keycode) {
 
 ////// 查看地图界面时的点击操作 //////
 actions.prototype.clickViewMaps = function (x,y) {
+    var now = core.floorIds.indexOf(core.status.floorId);
+    var nextId = core.status.event.data;
     if(y<=4) {
-        core.ui.drawMaps(core.status.event.data+1);
+        nextId++;
+        while (nextId<core.floorIds.length && nextId!=now && core.floors[core.floorIds[nextId]].cannotViewMap)
+            nextId++;
+        if (nextId<core.floorIds.length)
+            core.ui.drawMaps(nextId);
     }
     else if (y>=8) {
-        core.ui.drawMaps(core.status.event.data-1);
+        nextId--;
+        while (nextId>=0 && nextId!=now && core.floors[core.floorIds[nextId]].cannotViewMap)
+            nextId--;
+        if (nextId>=0)
+            core.ui.drawMaps(nextId);
     }
     else {
         core.clearMap('data', 0, 0, 416, 416);
@@ -942,8 +955,12 @@ actions.prototype.clickViewMaps = function (x,y) {
 
 ////// 查看地图界面时，按下某个键的操作 //////
 actions.prototype.keyDownViewMaps = function (keycode) {
-    if (keycode==37 || keycode==38 || keycode==33) core.ui.drawMaps(core.status.event.data+1);
-    else if (keycode==39 || keycode==40 || keycode==34) core.ui.drawMaps(core.status.event.data-1);
+    if (keycode==37 || keycode==38 || keycode==33) {
+        this.clickViewMaps(6,2);
+    }
+    else if (keycode==39 || keycode==40 || keycode==34) {
+        this.clickViewMaps(6,10);
+    }
     return;
 }
 
@@ -1885,6 +1902,68 @@ actions.prototype.keyUpStorageRemove = function (keycode) {
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
         this.clickStorageRemove(6, topIndex+core.status.event.selection);
+    }
+}
+
+////// 回放选择界面时的点击操作 //////
+actions.prototype.clickReplay = function (x, y) {
+    if (x<5 || x>7) return;
+    var choices = core.status.event.ui.choices;
+
+    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+
+    if (y>=topIndex && y<topIndex+choices.length) {
+        var selection = y - topIndex;
+        switch (selection) {
+            case 0:
+                {
+                    core.ui.closePanel();
+                    var hard=core.status.hard, route=core.clone(core.status.route);
+                    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
+                    core.events.setInitData(hard);
+                    core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
+                        core.startReplay(route);
+                    }, true);
+                    break;
+                }
+            case 1:
+                {
+                    core.status.event.id = 'replayLoad';
+                    core.status.event.selection = null;
+                    var saveIndex = core.status.saveIndex;
+                    var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
+                    core.ui.drawSLPanel(10*page+offset);
+                    break;
+                }
+            case 2:
+                core.ui.closePanel();
+                break;
+        }
+    }
+}
+
+////// 回放选择界面时，按下某个键的操作 //////
+actions.prototype.keyDownReplay = function (keycode) {
+    if (keycode==38) {
+        core.status.event.selection--;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+    if (keycode==40) {
+        core.status.event.selection++;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+}
+
+////// 回放选择界面时，放开某个键的操作 //////
+actions.prototype.keyUpReplay = function (keycode) {
+    if (keycode==27 || keycode==88) {
+        core.ui.closePanel();
+        return;
+    }
+    var choices = core.status.event.ui.choices;
+    if (keycode==13 || keycode==32 || keycode==67) {
+        var topIndex = 6 - parseInt((choices.length - 1) / 2);
+        this.clickReplay(6, topIndex+core.status.event.selection);
     }
 }
 

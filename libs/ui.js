@@ -20,8 +20,7 @@ ui.prototype.clearMap = function (map, x, y, width, height) {
         for (var m in core.canvas) {
             core.canvas[m].clearRect(0, 0, 416, 416);
         }
-        while (core.dom.gif.firstChild)
-            core.dom.gif.removeChild(core.dom.gif.firstChild);
+        core.dom.gif.innerHTML = "";
     }
     else {
         core.canvas[map].clearRect(x||0, y||0, width||416, height||416);
@@ -1132,6 +1131,14 @@ ui.prototype.drawStorageRemove = function () {
     ]);
 }
 
+ui.prototype.drawReplay = function () {
+    core.lockControl();
+    core.status.event.id = 'replay';
+    this.drawChoices(null, [
+        "从头回放录像", "从存档开始回放", "返回游戏"
+    ]);
+}
+
 ////// 绘制分页 //////
 ui.prototype.drawPagination = function (page, totalPage) {
 
@@ -1332,6 +1339,10 @@ ui.prototype.drawBookDetail = function (index) {
 
     if (hints.length==0)
         hints.push("该怪物无特殊属性。");
+
+    hints.push("");
+    hints.push("临界表："+JSON.stringify(core.enemys.nextCriticals(enemyId,10)))
+
     var content=hints.join("\n");
 
     core.status.event.id = 'book-detail';
@@ -1577,7 +1588,7 @@ ui.prototype.drawSLPanel = function(index) {
     var strokeColor = '#FFD700';
     if (core.status.event.selection) strokeColor = '#FF6A6A';
 
-    var name=core.status.event.id=='save'?"存档":"读档";
+    var name=core.status.event.id=='save'?"存档":core.status.event.id=='load'?"读档":core.status.event.id=='replayLoad'?"回放":"";
     for (var i=0;i<6;i++) {
         var id=5*page+i;
         var data=core.getLocalStorage(i==0?"autoSave":"save"+id, null);
@@ -1585,7 +1596,7 @@ ui.prototype.drawSLPanel = function(index) {
             core.fillText('ui', i==0?"自动存档":name+id, (2*i+1)*u, 35, '#FFFFFF', "bold 17px Verdana");
             core.strokeRect('ui', (2*i+1)*u-size/2, 50, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc);
+                this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 65+size, '#FFFFFF', '10px Verdana');
             }
             else {
@@ -1597,7 +1608,7 @@ ui.prototype.drawSLPanel = function(index) {
             core.fillText('ui', name+id, (2*i-5)*u, 230, '#FFFFFF', "bold 17px Verdana");
             core.strokeRect('ui', (2*i-5)*u-size/2, 245, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc);
+                this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 260+size, '#FFFFFF', '10px Verdana');
             }
             else {
@@ -1615,7 +1626,7 @@ ui.prototype.drawSLPanel = function(index) {
 }
 
 ////// 绘制一个缩略图 //////
-ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroLoc) {
+ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroLoc, heroIcon) {
     core.clearMap(canvas, x, y, size, size);
     var groundId = core.floors[floorId].defaultGround || "ground";
     var blockIcon = core.material.icons.terrains[groundId];
@@ -1664,10 +1675,12 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
     }
 
     if (core.isset(heroLoc)) {
-        var heroIcon = core.material.icons.hero[heroLoc.direction];
-        var height = core.material.icons.hero.height;
+        if (!core.isset(core.material.images.images[heroIcon]))
+            heroIcon = "hero.png";
+        var icon = core.material.icons.hero[heroLoc.direction];
+        var height = core.material.images.images[heroIcon].height/4;
         var realHeight = persize*height/32;
-        core.canvas[canvas].drawImage(core.material.images.hero, heroIcon.stop * 32, heroIcon.loc * height, 32, height, x+persize*heroLoc.x, y+persize*heroLoc.y+persize-realHeight, persize, realHeight);
+        core.canvas[canvas].drawImage(core.material.images.images[heroIcon], icon.stop * 32, icon.loc * height, 32, height, x+persize*heroLoc.x, y+persize*heroLoc.y+persize-realHeight, persize, realHeight);
     }
 
     images.forEach(function (t) {

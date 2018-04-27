@@ -132,57 +132,72 @@ enemys.prototype.getExtraDamage = function (monster) {
     return extra_damage;
 }
 
+////// 接下来若干个临界值计算 /////
+enemys.prototype.nextCriticals = function (monsterId, number) {
+
+    number = number||1;
+
+    var monster = core.material.enemys[monsterId];
+    // 坚固、模仿怪物没有临界！
+    if (this.hasSpecial(monster.special, 3) || this.hasSpecial(monster.special, 10)) return [];
+
+    var info = this.getDamageInfo(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
+
+    if (info == null) {
+        if (core.status.hero.atk<=monster.def) {
+            return [(monster.def+1-core.status.hero.atk)+":?"];
+        }
+        return [];
+    }
+    if (info.damage <= 0) return [];
+
+    var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = monster.def, turn = info.turn;
+
+    if (turn<=1) return [];
+
+    var list = [], pre = null;
+
+    for (var t = turn-1;t>=1;t--) {
+        var nextAtk = Math.ceil(mon_hp/t) + mon_def;
+        if (nextAtk<=hero_atk) break;
+        if (nextAtk!=pre) {
+            var nextInfo = this.getDamageInfo(monster, core.status.hero.hp, nextAtk, core.status.hero.def, core.status.hero.mdef);
+            if (nextInfo==null) break;
+            list.push((nextAtk-hero_atk)+":"+(info.damage-nextInfo.damage));
+            if (nextInfo.damage<=0) break;
+            pre = nextAtk;
+        }
+        if (list.length>=number)
+            break;
+    }
+    return list;
+}
+
 ////// 临界值计算 //////
 enemys.prototype.getCritical = function (monsterId) {
     var monster = core.material.enemys[monsterId];
     // 坚固、模仿怪物没有临界！
     if (this.hasSpecial(monster.special, 3) || this.hasSpecial(monster.special, 10)) return "???";
 
-    if (false) { // 采用回合方式
+    var info = this.getDamageInfo(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
 
-        var last = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
-
-        if (last == null) {
-            if (core.status.hero.atk<=monster.def)
-                return monster.def+1-core.status.hero.atk;
-
-            return '???';
-        }
-
-        if (last <= 0) return 0;
-
-        for (var i = core.status.hero.atk + 1; i <= monster.hp + monster.def; i++) {
-            var damage = this.calDamage(monster, core.status.hero.hp, i, core.status.hero.def, core.status.hero.mdef);
-            if (damage == null) return '???';
-            if (damage < last)
-                return core.formatBigNumber(i - core.status.hero.atk);
-            last = damage;
-        }
-        return 0;
-
+    if (info == null) {
+        if (core.status.hero.atk<=monster.def)
+            return monster.def+1-core.status.hero.atk;
+        return '???';
     }
-    else {
+    if (info.damage <= 0) return 0;
 
-        var info = this.getDamageInfo(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
+    var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = monster.def, turn = info.turn;
 
-        if (info == null) {
-            if (core.status.hero.atk<=monster.def)
-                return monster.def+1-core.status.hero.atk;
-            return '???';
-        }
-        if (info.damage <= 0) return 0;
+    // turn 是勇士攻击次数
+    if (turn<=1) return 0; // 攻杀
 
-        var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = monster.def, turn = info.turn;
+    // 每回合最小伤害 = ⎡怪物生命/勇士攻击次数⎤
+    var nextAtk = Math.ceil(mon_hp/(turn-1)) + mon_def;
 
-        // turn 是勇士攻击次数
-        if (turn<=1) return 0; // 攻杀
-
-        // 每回合最小伤害 = ⎡怪物生命/勇士攻击次数⎤
-        var nextAtk = Math.ceil(mon_hp/(turn-1)) + mon_def;
-
-        if (nextAtk <= hero_atk) return 0;
-        return nextAtk - hero_atk;
-    }
+    if (nextAtk <= hero_atk) return 0;
+    return nextAtk - hero_atk;
 
 }
 
@@ -349,6 +364,12 @@ enemys.prototype.getCurrentEnemys = function (floorId) {
     enemys.sort(function (a, b) {
         if (a.damage == b.damage) {
             return a.money - b.money;
+        }
+        if (a.damage == null) {
+            return 1;
+        }
+        if (b.damage == null) {
+            return -1;
         }
         return a.damage - b.damage;
     });

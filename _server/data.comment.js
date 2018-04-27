@@ -135,7 +135,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                                 "constants": {
                                     "_leaf": true,
                                     "_type": "textarea",
-                                    "_data": "初始永久道具个数，例如初始送手册可以写 {'book': true}"
+                                    "_data": "初始永久道具个数，例如初始送手册可以写 {'book': 1}"
                                 },
                                 "tools": {
                                     "_leaf": true,

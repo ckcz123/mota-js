@@ -291,10 +291,6 @@ control.prototype.restart = function() {
 }
 
 
-
-
-
-
 /////////////////////// 寻路算法 & 人物行走控制 ///////////////////////
 
 ////// 清除自动寻路路线 //////
@@ -357,7 +353,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
                         core.clearMap('hero', 0, 0, 416, 416);
                         core.setHeroLoc('x', destX);
                         core.setHeroLoc('y', destY);
-                        core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+                        core.drawHero();
                         core.status.route.push("move:"+destX+":"+destY);
                     }
                 }
@@ -594,9 +590,7 @@ control.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
             core.setHeroLoc('y', y+scan[direction].y);
             core.moveOneStep();
             core.clearMap('hero', 0, 0, 416, 416);
-            core.drawHero(direction, core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
-            //if (core.status.heroStop)
-            //    core.drawHero(direction, core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+            core.drawHero(direction);
             clearInterval(core.interval.heroMoveInterval);
             core.status.heroMoving = 0;
             if (core.isset(callback)) callback();
@@ -624,7 +618,7 @@ control.prototype.moveAction = function (callback) {
         core.status.automaticRoute.moveStepBeforeStop = [];
         if (canMove) // 非箭头：触发
             core.trigger(x + scan[direction].x, y + scan[direction].y);
-        core.drawHero(direction, x, y, 'stop');
+        core.drawHero(direction, x, y);
 
         if (core.status.automaticRoute.moveStepBeforeStop.length==0) {
             core.clearContinueAutomaticRoute();
@@ -652,7 +646,7 @@ control.prototype.moveAction = function (callback) {
                 }
             }
             else if (core.status.heroStop) {
-                core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+                core.drawHero();
             }
             if (core.status.event.id!='ski')
                 core.status.route.push(direction);
@@ -669,7 +663,7 @@ control.prototype.turnHero = function() {
     else if (core.status.hero.loc.direction == 'right') core.status.hero.loc.direction = 'down';
     else if (core.status.hero.loc.direction == 'down') core.status.hero.loc.direction = 'left';
     else if (core.status.hero.loc.direction == 'left') core.status.hero.loc.direction = 'up';
-    core.drawHero(core.status.hero.loc.direction, core.status.hero.loc.x, core.status.hero.loc.y, 'stop', 0, 0);
+    core.drawHero();
     core.canvas.ui.clearRect(0, 0, 416, 416);
     core.status.route.push("turn");
 }
@@ -742,7 +736,7 @@ control.prototype.eventMoveHero = function(steps, time, callback) {
         var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
         if (moveSteps.length==0) {
             clearInterval(animate);
-            core.drawHero(core.getHeroLoc('direction'), x, y, 'stop');
+            core.drawHero(null, x, y);
             core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
@@ -792,7 +786,7 @@ control.prototype.waitHeroToStop = function(callback) {
         core.status.automaticRoute.moveDirectly = false;
         setTimeout(function(){
             core.status.replay.animate=false;
-            core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+            core.drawHero();
             callback();
         }, 30);
     }
@@ -808,10 +802,13 @@ control.prototype.drawHero = function (direction, x, y, status, offsetX, offsetY
     offsetX = offsetX || 0;
     offsetY = offsetY || 0;
     var dx=offsetX==0?0:offsetX/Math.abs(offsetX), dy=offsetY==0?0:offsetY/Math.abs(offsetY);
+    if (!core.isset(x)) x = core.getHeroLoc('x');
+    if (!core.isset(y)) y = core.getHeroLoc('y');
     core.clearAutomaticRouteNode(x+dx, y+dy);
-    var heroIcon = core.material.icons.hero[direction];
     x = x * 32;
     y = y * 32;
+    status = status || 'stop';
+    var heroIcon = core.material.icons.hero[direction || core.getHeroLoc('direction')];
     core.canvas.hero.clearRect(x - 32, y - 32, 96, 96);
     var height=core.material.icons.hero.height;
     core.canvas.hero.drawImage(core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height, x + offsetX, y + offsetY + 32-height, 32, height);
@@ -869,10 +866,15 @@ control.prototype.updateCheckBlock = function() {
     for (var n=0;n<blocks.length;n++) {
         var block = blocks[n];
         if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls.indexOf('enemy')==0) {
-            var id = block.event.id, enemy = core.enemys.getEnemys(id);
+            var id = block.event.id, enemy = core.material.enemys[id];
             if (core.isset(enemy)) {
                 core.status.checkBlock.map[13*block.x+block.y]=id;
             }
+        }
+        // 血网
+        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) &&
+            block.event.id=='lavaNet' && block.event.trigger=='passNet' && !core.hasItem("shoes")) {
+            core.status.checkBlock.map[13*block.x+block.y]="lavaNet";
         }
     }
 
@@ -884,7 +886,13 @@ control.prototype.updateCheckBlock = function() {
         for (var y=0;y<13;y++) {
             var id = core.status.checkBlock.map[13*x+y];
             if (core.isset(id)) {
-                var enemy = core.enemys.getEnemys(id);
+
+                if (id=="lavaNet") {
+                    core.status.checkBlock.damage[13*x+y]+=core.values.lavaDamage;
+                    continue;
+                }
+
+                var enemy = core.material.enemys[id];
                 // 存在领域
                 if (core.enemys.hasSpecial(enemy.special, 15)) {
                     var range = enemy.range || 1;
@@ -925,8 +933,8 @@ control.prototype.updateCheckBlock = function() {
                 var id1=core.status.checkBlock.map[13*(x-1)+y],
                     id2=core.status.checkBlock.map[13*(x+1)+y];
                 if (core.isset(id1) && core.isset(id2) && id1==id2) {
-                    var enemy = core.enemys.getEnemys(id1);
-                    if (core.enemys.hasSpecial(enemy.special, 16)) {
+                    var enemy = core.material.enemys[id1];
+                    if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {
                         has = true;
                     }
                 }
@@ -935,8 +943,8 @@ control.prototype.updateCheckBlock = function() {
                 var id1=core.status.checkBlock.map[13*x+y-1],
                     id2=core.status.checkBlock.map[13*x+y+1];
                 if (core.isset(id1) && core.isset(id2) && id1==id2) {
-                    var enemy = core.enemys.getEnemys(id1);
-                    if (core.enemys.hasSpecial(enemy.special, 16)) {
+                    var enemy = core.material.enemys[id1];
+                    if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {
                         has = true;
                     }
                 }
@@ -972,7 +980,7 @@ control.prototype.checkBlock = function () {
             if (nx<0 || nx>12 || ny<0 || ny>12) continue;
             var id=core.status.checkBlock.map[13*nx+ny];
             if (core.isset(id)) {
-                var enemy = core.enemys.getEnemys(id);
+                var enemy = core.material.enemys[id];
                 if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 18)) {
                     snipe.push({'direction': direction, 'x': nx, 'y': ny});
                 }
@@ -981,6 +989,9 @@ control.prototype.checkBlock = function () {
 
         if (core.status.checkBlock.betweenAttack[13*x+y] && damage>0) {
             core.drawTip('受到夹击，生命变成一半');
+        }
+        else if (core.status.checkBlock.map[13*x+y]=='lavaNet') {
+            core.drawTip('受到血网伤害'+damage+'点');
         }
         // 阻击
         else if (snipe.length>0 && damage>0) {
@@ -1389,12 +1400,14 @@ control.prototype.startReplay = function (list) {
 
 ////// 更改播放状态 //////
 control.prototype.triggerReplay = function () {
+    if (core.status.event.id=='save') return;
     if (core.status.replay.pausing) this.resumeReplay();
     else this.pauseReplay();
 }
 
 ////// 暂停播放 //////
 control.prototype.pauseReplay = function () {
+    if (core.status.event.id=='save') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.pausing = true;
     core.updateStatusBar();
@@ -1403,6 +1416,7 @@ control.prototype.pauseReplay = function () {
 
 ////// 恢复播放 //////
 control.prototype.resumeReplay = function () {
+    if (core.status.event.id=='save') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.pausing = false;
     core.updateStatusBar();
@@ -1412,6 +1426,7 @@ control.prototype.resumeReplay = function () {
 
 ////// 加速播放 //////
 control.prototype.speedUpReplay = function () {
+    if (core.status.event.id=='save') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.speed = parseInt(10*core.status.replay.speed + 1)/10;
     if (core.status.replay.speed>3.0) core.status.replay.speed=3.0;
@@ -1420,6 +1435,7 @@ control.prototype.speedUpReplay = function () {
 
 ////// 减速播放 //////
 control.prototype.speedDownReplay = function () {
+    if (core.status.event.id=='save') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.speed = parseInt(10*core.status.replay.speed - 1)/10;
     if (core.status.replay.speed<0.3) core.status.replay.speed=0.3;
@@ -1428,6 +1444,7 @@ control.prototype.speedDownReplay = function () {
 
 ////// 停止播放 //////
 control.prototype.stopReplay = function () {
+    if (core.status.event.id=='save') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.toReplay = [];
     core.status.replay.totalList = [];
@@ -1442,6 +1459,7 @@ control.prototype.stopReplay = function () {
 
 ////// 回退 //////
 control.prototype.rewindReplay = function () {
+    if (core.status.event.id=='save') return;
     if (!core.status.replay.replaying) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
@@ -1472,7 +1490,26 @@ control.prototype.rewindReplay = function () {
         core.updateStatusBar();
         core.drawTip("成功回退到上一个节点");
     })
+}
 
+////// 回放时存档 //////
+control.prototype.saveReplay = function () {
+    if (!core.status.replay.replaying) return;
+    if (!core.status.replay.pausing) {
+        core.drawTip("请先暂停录像");
+        return;
+    }
+    if (core.status.replay.animate || core.isset(core.status.event.id)) {
+        core.drawTip("请等待当前事件的处理结束");
+        return;
+    }
+
+    core.lockControl();
+    core.status.event.id='save';
+    var saveIndex = core.status.saveIndex;
+    var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
+
+    core.ui.drawSLPanel(10*page+offset);
 }
 
 ////// 回放 //////
@@ -1601,7 +1638,7 @@ control.prototype.replay = function () {
             core.clearMap('hero', 0, 0, 416, 416);
             core.setHeroLoc('x', x);
             core.setHeroLoc('y', y);
-            core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+            core.drawHero();
             core.status.route.push("move:"+x+":"+y);
             core.replay();
             return;
@@ -1800,6 +1837,30 @@ control.prototype.doSL = function (id, type) {
         });
         return;
     }
+    else if (type == 'replayLoad') {
+        var data = core.getLocalStorage(id=='autoSave'?id:"save"+id, null);
+        if (!core.isset(data)) {
+            core.drawTip("无效的存档");
+            return;
+        }
+        if (data.version != core.firstData.version) {
+            core.drawTip("存档版本不匹配");
+            return;
+        }
+        if (data.hard != core.status.hard) {
+            core.drawTip("游戏难度不匹配！");
+            return;
+        }
+        var route = core.subarray(core.status.route, core.decodeRoute(data.route));
+        if (!core.isset(route)) {
+            core.drawTip("无法从此存档回放录像");
+            return;
+        }
+        core.loadData(data, function () {
+            core.startReplay(route);
+            core.drawTip("回退到存档节点");
+        });
+    }
 }
 
 ////// 同步存档到服务器 //////
@@ -1953,6 +2014,13 @@ control.prototype.loadData = function (data, callback) {
             core.status.shops[shop].times = data.shops[shop].times;
             core.status.shops[shop].visited = data.shops[shop].visited;
         }
+    }
+
+    // load icons
+    var icon = core.getFlag("heroIcon", "hero.png");
+    if (core.isset(core.material.images.images[icon])) {
+        core.material.images.hero.src = core.material.images.images[icon].src;
+        core.material.icons.hero.height = core.material.images.images[icon].height/4;
     }
 
     core.events.afterLoadData(data);
@@ -2195,7 +2263,8 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.image.load.src = core.statusBar.icons.speedUp.src;
         core.statusBar.image.load.style.opacity = 1;
 
-        core.statusBar.image.settings.style.opacity = 0;
+        core.statusBar.image.settings.src = core.statusBar.icons.save.src;
+        core.statusBar.image.settings.style.opacity = 1;
 
     }
     else {

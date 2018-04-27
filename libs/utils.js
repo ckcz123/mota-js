@@ -300,6 +300,17 @@ utils.prototype.isset = function (val) {
     return true
 }
 
+////// 获得子数组 //////
+utils.prototype.subarray = function (a, b) {
+    if (!core.isset(a) || !core.isset(b) || !(a instanceof Array) || !(b instanceof Array) || a.length<b.length)
+        return null;
+    var na = core.clone(a), nb=core.clone(b);
+    while (nb.length>0) {
+        if (na.shift() != nb.shift()) return null;
+    }
+    return na;
+}
+
 ////// 读取一个本地文件内容 //////
 utils.prototype.readFile = function (success, error, readType) {
 

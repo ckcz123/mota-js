@@ -125,8 +125,7 @@ events.prototype.gameOver = function (ending, fromReplay) {
 
     // 清空图片和天气
     core.clearMap('animate', 0, 0, 416, 416);
-    while (core.dom.gif2.firstChild)
-        core.dom.gif2.removeChild(core.dom.gif2.firstChild);
+    core.dom.gif2.innerHTML = "";
     core.clearMap('weather', 0, 0, 416, 416)
     core.animateFrame.weather.type = null;
     core.animateFrame.weather.level = 0;
@@ -366,7 +365,7 @@ events.prototype.doAction = function() {
                     }
                     if (floorId==core.status.floorId) {
                         core.drawMap(floorId);
-                        core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+                        core.drawHero();
                         core.updateStatusBar();
                     }
                 }
@@ -419,7 +418,7 @@ events.prototype.doAction = function() {
                 core.setHeroLoc('y', data.loc[1]);
             }
             if (core.isset(data.direction)) core.setHeroLoc('direction', data.direction);
-            core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+            core.drawHero();
             this.doAction();
             break;
         case "showImage": // 显示图片
@@ -454,8 +453,7 @@ events.prototype.doAction = function() {
                 core.dom.gif2.appendChild(gif);
             }
             else {
-                while (core.dom.gif2.firstChild)
-                    core.dom.gif2.removeChild(core.dom.gif2.firstChild);
+                core.dom.gif2.innerHTML = "";
             }
             this.doAction();
             break;
@@ -569,6 +567,18 @@ events.prototype.doAction = function() {
                 this.doAction();
             }
             break;
+        case "setHeroIcon":
+            {
+                var name = "hero.png";
+                if (core.isset(core.material.images.images[data.name]) && core.material.images.images[data.name].width==128)
+                    name = data.name;
+                core.setFlag("heroIcon", name);
+                core.material.images.hero.src = core.material.images.images[name].src;
+                core.material.icons.hero.height = core.material.images.images[name].height/4;
+                core.drawHero();
+                this.doAction();
+                break;
+            }
         case "input":
             {
                 var value;
@@ -884,12 +894,19 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
         heroLoc = core.status.hero.loc;
     if (core.isset(stair)) {
         if (!core.isset(heroLoc)) heroLoc={};
-        var blocks = core.status.maps[floorId].blocks;
-        for (var i in blocks) {
-            if (core.isset(blocks[i].event) && !(core.isset(blocks[i].enable) && !blocks[i].enable) && blocks[i].event.id === stair) {
-                heroLoc.x = blocks[i].x;
-                heroLoc.y = blocks[i].y;
-                break;
+
+        if (core.isset(core.floors[floorId][stair])) {
+            heroLoc.x = core.floors[floorId][stair][0];
+            heroLoc.y = core.floors[floorId][stair][1];
+        }
+        else {
+            var blocks = core.status.maps[floorId].blocks;
+            for (var i in blocks) {
+                if (core.isset(blocks[i].event) && !(core.isset(blocks[i].enable) && !blocks[i].enable) && blocks[i].event.id === stair) {
+                    heroLoc.x = blocks[i].x;
+                    heroLoc.y = blocks[i].y;
+                    break;
+                }
             }
         }
         if (!core.isset(heroLoc.x)) {
@@ -947,8 +964,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             else core.setWeather();
 
             // 清除gif
-            while (core.dom.gif.firstChild)
-                core.dom.gif.removeChild(core.dom.gif.firstChild);
+            core.dom.gif.innerHTML = "";
 
             // 检查重生
             if (!core.isset(fromLoad)) {
@@ -965,7 +981,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
                         core.setHeroLoc('direction', heroLoc.direction);
                     core.setHeroLoc('x', heroLoc.x);
                     core.setHeroLoc('y', heroLoc.y);
-                    core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+                    core.drawHero();
                     core.updateStatusBar();
 
                     var changed = function () {
@@ -1162,6 +1178,8 @@ events.prototype.passNet = function (data) {
     // 有鞋子
     if (core.hasItem('shoes')) return;
     if (data.event.id=='lavaNet') { // 血网
+        // 在checkBlock中进行处理
+        /*
         core.status.hero.hp -= core.values.lavaDamage;
         if (core.status.hero.hp<=0) {
             core.status.hero.hp=0;
@@ -1169,7 +1187,8 @@ events.prototype.passNet = function (data) {
             core.events.lose();
             return;
         }
-        core.drawTip('经过血网，生命-'+core.values.lavaDamage);
+        */
+        // core.drawTip('经过血网，生命-'+core.values.lavaDamage);
     }
     if (data.event.id=='poisonNet') { // 毒网
         if (core.hasFlag('poison')) return;

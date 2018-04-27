@@ -165,6 +165,7 @@ action
     |   revisit_s
     |   exit_s
     |   setBlock_s
+    |   setHeroIcon_s
     |   update_s
     |   sleep_s
     |   battle_s
@@ -412,6 +413,20 @@ if (EvalString_0 && EvalString_1) {
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "setBlock", "number":'+Int_0+floorstr+IdString_0+'},\n';
+return code;
+*/
+
+setHeroIcon_s
+    :   '更改角色行走图' EvalString? Newline
+    ;
+
+/* setHeroIcon_s
+tooltip : setHeroIcon：更改角色行走图
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=setHeroIcon-%e6%9b%b4%e6%94%b9%e8%a7%92%e8%89%b2%e8%a1%8c%e8%b5%b0%e5%9b%be
+colour : this.dataColor
+default : ["hero.png"]
+EvalString_0 = EvalString_0 && (', "name": "'+EvalString_0+'"');
+var code = '{"type": "setHeroIcon"'+EvalString_0+'},\n';
 return code;
 */
 
@@ -1261,6 +1276,10 @@ ActionParser.prototype.parseAction = function() {
       data.loc=data.loc||[];
       this.next = MotaActionBlocks['setBlock_s'].xmlText([
         data.number||0,data.loc[0]||'',data.loc[1]||'',data.floorId||'',this.next]);
+      break;
+    case "setHeroIcon": // 改变勇士
+      this.next = MotaActionBlocks['setHeroIcon_s'].xmlText([
+        data.name||"",this.next]);
       break;
     case "move": // 移动事件
       data.loc=data.loc||[];

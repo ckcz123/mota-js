@@ -331,8 +331,7 @@ maps.prototype.drawMap = function (mapName, callback) {
                 if (!t[3]) {
                     core.canvas.bg.drawImage(image, dx * ratio, dy * ratio, Math.min(size - dx * ratio, ratio * image.width), Math.min(size - dy * ratio, ratio * image.height));
                     if (/.*\.gif/i.test(p)) {
-                        while (core.dom.gif.firstChild)
-                            core.dom.gif.removeChild(core.dom.gif.firstChild);
+                        core.dom.gif.innerHTML = "";
                         var gif = new Image();
                         gif.src = core.material.images.images[p].src;
                         gif.style.position = 'absolute';
@@ -893,7 +892,7 @@ maps.prototype.resetMap = function() {
     var floorId = core.status.floorId;
     core.status.maps[floorId] = this.loadFloor(floorId);
     this.drawMap(floorId, function() {
-        core.drawHero(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop');
+        core.drawHero();
         core.updateStatusBar();
     })
 }

@@ -923,6 +923,11 @@ core.prototype.stopReplay = function () {
     core.control.stopReplay();
 }
 
+////// 回放时存档 //////
+core.prototype.saveReplay = function () {
+    core.control.saveReplay();
+}
+
 ////// 回放 //////
 core.prototype.replay = function () {
     core.control.replay();
@@ -1065,6 +1070,11 @@ core.prototype.unLockControl = function () {
 ////// 判断某对象是否不为undefined也不会null //////
 core.prototype.isset = function (val) {
     return core.utils.isset(val);
+}
+
+////// 获得子数组 //////
+core.prototype.subarray = function (a, b) {
+    return core.utils.subarray(a, b);
 }
 
 ////// 读取一个本地文件内容 //////

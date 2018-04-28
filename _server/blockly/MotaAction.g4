@@ -168,6 +168,7 @@ action
     |   setHeroIcon_s
     |   update_s
     |   sleep_s
+    |   wait_s
     |   battle_s
     |   openDoor_s
     |   changeFloor_s
@@ -452,6 +453,18 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=sleep-%e7%ad%89%e5%be%85%
 default : [500]
 colour : this.soundColor
 var code = '{"type": "sleep", "time": '+Int_0+'},\n';
+return code;
+*/
+
+wait_s
+    :   '等待用户操作'
+    ;
+
+/* wait_s
+tooltip : wait: 等待用户操作
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=wait-%e7%ad%89%e5%be%85%e7%94%a8%e6%88%b7%e6%93%8d%e4%bd%9c
+colour : this.soundColor
+var code = '{"type": "wait"},\n';
 return code;
 */
 
@@ -1432,6 +1445,10 @@ ActionParser.prototype.parseAction = function() {
     case "sleep": // 等待多少毫秒
       this.next = MotaActionBlocks['sleep_s'].xmlText([
         data.time,this.next]);
+      break;
+    case "wait": // 等待用户操作
+      this.next = MotaActionBlocks['wait_s'].xmlText([
+        this.next]);
       break;
     case "revisit": // 立刻重新执行该事件
       this.next = MotaActionBlocks['revisit_s'].xmlText([

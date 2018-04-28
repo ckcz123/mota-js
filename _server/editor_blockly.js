@@ -102,6 +102,7 @@ editor_blockly = function () {
       MotaActionBlocks['disableShop_s'].xmlText(),
       '<label text="特效/声音"></label>',
       MotaActionBlocks['sleep_s'].xmlText(),
+      MotaActionBlocks['wait_s'].xmlText(),
       MotaActionBlocks['animate_s'].xmlText(),
       MotaActionBlocks['setFg_0_s'].xmlText(),
       MotaActionBlocks['setFg_1_s'].xmlText(),

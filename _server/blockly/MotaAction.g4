@@ -5,22 +5,22 @@ grammar MotaAction;
 
 //事件 事件编辑器入口之一
 event_m
-    :   '事件' BGNL? Newline '覆盖触发器' Bool '启用' Bool '通行状态' B_List '显伤' Bool BGNL? Newline action+ BEND
+    :   '事件' BGNL? Newline '覆盖触发器' Bool '启用' Bool '通行状态' B_0_List '显伤' Bool BGNL? Newline action+ BEND
     ;
 
 /* event_m
 tooltip : 编辑魔塔的事件
 helpUrl : https://ckcz123.github.io/mota-js/#/event
-default : [false,null,[['不改变','null'],['不可通行','true'],['可以通行','false']],null]
-B_List_0=eval(B_List_0);
+default : [false,null,null,null]
+B_0_List_0=eval(B_0_List_0);
 var code = {
     'trigger': Bool_0?'action':null,
     'enable': Bool_1,
-    'noPass': B_List_0,
+    'noPass': B_0_List_0,
     'displayDamage': Bool_2,
     'data': 'data_asdfefw'
 }
-if (!Bool_0 && Bool_1 && (B_List_0===null) && Bool_2) code = 'data_asdfefw';
+if (!Bool_0 && Bool_1 && (B_0_List_0===null) && Bool_2) code = 'data_asdfefw';
 code=JSON.stringify(code,null,2).split('"data_asdfefw"').join('[\n'+action_0+']\n');
 return code;
 */
@@ -140,7 +140,7 @@ changeFloor_m
 /* changeFloor_m
 tooltip : 楼梯, 传送门, 如果目标楼层有多个楼梯, 写upFloor或downFloor可能会导致到达的楼梯不确定, 这时候请使用loc方式来指定具体的点位置
 helpUrl : https://ckcz123.github.io/mota-js/#/element?id=%e8%b7%af%e9%9a%9c%ef%bc%8c%e6%a5%bc%e6%a2%af%ef%bc%8c%e4%bc%a0%e9%80%81%e9%97%a8
-default : ["MT1",null,0,0,[['不变',''],['上','up'],['下','down'],['左','left'],['右','right']],500,null]
+default : ["MT1",null,0,0,null,500,null]
 var loc = ', "loc": ['+Number_0+', '+Number_1+']';
 if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
@@ -261,13 +261,13 @@ return code;
 */
 
 setText_s
-    :   '设置剧情文本的属性' '位置' SetTextPosition_List BGNL? '标题颜色' EvalString? '正文颜色' EvalString? '背景色' EvalString? BGNL? '粗体' B_List '打字间隔' EvalString? Newline
+    :   '设置剧情文本的属性' '位置' SetTextPosition_List BGNL? '标题颜色' EvalString? '正文颜色' EvalString? '背景色' EvalString? BGNL? '粗体' B_1_List '打字间隔' EvalString? Newline
     ;
 
 /* setText_s
 tooltip : setText：设置剧情文本的属性,颜色为RGB三元组或RGBA四元组,打字间隔为剧情文字添加的时间间隔,为整数或不填
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=settext%ef%bc%9a%e8%ae%be%e7%bd%ae%e5%89%a7%e6%83%85%e6%96%87%e6%9c%ac%e7%9a%84%e5%b1%9e%e6%80%a7
-default : [[['不改变','null'],['上','up'],['中','center'],['下','down']],"","","",[['不改变','null'],['设为粗体','true'],['取消粗体','false']],'']
+default : [null,"","","",null,'']
 SetTextPosition_List_0 =SetTextPosition_List_0==='null'?'': ', "position": "'+SetTextPosition_List_0+'"';
 var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
 if (EvalString_0) {
@@ -286,8 +286,8 @@ if (EvalString_3) {
   if (!/^\d+$/.test(EvalString_3))throw new Error('打字时间间隔必须是整数或不填');
   EvalString_3 = ', "time": '+EvalString_3;
 }
-B_List_0 = ', "bold": '+B_List_0;
-var code = '{"type": "setText"'+SetTextPosition_List_0+EvalString_0+EvalString_1+EvalString_2+B_List_0+EvalString_3+'},\n';
+B_1_List_0 = ', "bold": '+B_1_List_0;
+var code = '{"type": "setText"'+SetTextPosition_List_0+EvalString_0+EvalString_1+EvalString_2+B_1_List_0+EvalString_3+'},\n';
 return code;
 */
 
@@ -489,7 +489,7 @@ changeFloor_s
 /* changeFloor_s
 tooltip : changeFloor: 楼层切换,动画时间可不填
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=changefloor-%e6%a5%bc%e5%b1%82%e5%88%87%e6%8d%a2
-default : ["MT1",0,0,[['不变',''],['上','up'],['下','down'],['左','left'],['右','right']],500]
+default : ["MT1",0,0,null,500]
 colour : this.dataColor
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
@@ -504,7 +504,7 @@ changePos_0_s
 /* changePos_0_s
 tooltip : changePos: 当前位置切换
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=changepos-%e5%bd%93%e5%89%8d%e4%bd%8d%e7%bd%ae%e5%88%87%e6%8d%a2%e5%8b%87%e5%a3%ab%e8%bd%ac%e5%90%91
-default : [0,0,[['不变',''],['上','up'],['下','down'],['左','left'],['右','right']]]
+default : [0,0,null]
 colour : this.dataColor
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 var code = '{"type": "changePos", "loc": ['+Number_0+','+Number_1+']'+DirectionEx_List_0+'},\n';
@@ -519,7 +519,7 @@ changePos_1_s
 tooltip : changePos: 勇士转向
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=changepos-%e5%bd%93%e5%89%8d%e4%bd%8d%e7%bd%ae%e5%88%87%e6%8d%a2%e5%8b%87%e5%a3%ab%e8%bd%ac%e5%90%91
 colour : this.dataColor
-default : [[['上','up'],['下','down'],['左','left'],['右','right']]]
+default : [null]
 var code = '{"type": "changePos", "direction": "'+Direction_List_0+'"},\n';
 return code;
 */
@@ -695,7 +695,7 @@ default : [null,1]
 colour : this.soundColor
 if(Int_0<1 || Int_0>10) throw new Error('天气的强度等级, 在1-10之间');
 var code = '{"type": "setWeather", "name": "'+Weather_List_0+'", "level": '+Int_0+'},\n';
-if(Weather_List_0==='无')code = '{"type": "setWeather"},\n';
+if(Weather_List_0==='')code = '{"type": "setWeather"},\n';
 return code;
 */
 
@@ -1007,30 +1007,32 @@ RawEvalString
     ;
 
 Stair_List
-    :   'loc'|'upFloor'|'downFloor'
-    ;
+    :   '坐标'|'上楼'|'下楼'
+    /*Stair_List ['loc','upFloor','downFloor']*/;
 
 SetTextPosition_List
-    :   'null'|'center'|'up'|'down'
-    ;
+    :   '不改变'|'上'|'中'|'下'
+    /*SetTextPosition_List ['null','up','center','down']*/;
 
 ShopUse_List
-    :   'money' | 'experience'
-    ;
+    :   '金币' | '经验'
+    /*ShopUse_List ['money','experience']*/;
 
 Arithmetic_List
     :   '+'|'-'|'*'|'/'|'^'|'=='|'!='|'>'|'<'|'>='|'<='|'和'|'或'
     ;
 
 Weather_List
-    :   '无'|'rain'|'snow'
-    ;
+    :   '无'|'雨'|'雪'
+    /*Weather_List ['','rain','snow']*/;
 
-B_List
-    :   'null'
-    |   'true'
-    |   'false'
-    ;
+B_0_List
+    :   '不改变'|'不可通行'|'可以通行'
+    /*B_0_List ['null','true','false']*/;
+
+B_1_List
+    :   '不改变'|'设为粗体'|'取消粗体'
+    /*B_1_List ['null','true','false']*/;
 
 Bool:   'TRUE' 
     |   'FALSE'
@@ -1047,11 +1049,11 @@ fragment EXP : [Ee] [+\-]? Int ; // \- since - means "range" inside [...]
 
 Direction_List
     :   '上'|'下'|'左'|'右'
-    ;
+    /*Direction_List ['up','down','left','right']*/;
 
 DirectionEx_List
     :   '不变'|'上'|'下'|'左'|'右'
-    ;
+    /*DirectionEx_List ['','up','down','left','right']*/;
 
 StepString
     :   (Direction_List Int?)+

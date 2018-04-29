@@ -39,10 +39,34 @@ return code;
 
 //商店 事件编辑器入口之一
 shop_m
+    :   '全局商店列表' BGNL? Newline shoplist+
+    ;
+/* shop_m
+tooltip : 全局商店列表
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=%e5%85%a8%e5%b1%80%e5%95%86%e5%ba%97
+var code = '['+shoplist_0+']\n';
+return code;
+*/
+
+shoplist
+    :   shopsub
+    |   emptyshop
+    ;
+
+emptyshop
+    :   Newline
+    ;
+
+/* emptyshop
+var code = ' \n';
+return code;
+*/
+
+shopsub
     :   '商店 id' IdString '标题' EvalString '图标' IdString BGNL? Newline '快捷商店栏中名称' EvalString BGNL? Newline '使用' ShopUse_List '消耗' EvalString BGNL? Newline '显示文字' EvalString BGNL? Newline shopChoices+ BEND
     ;
 
-/* shop_m
+/* shopsub
 tooltip : 全局商店,消耗填-1表示每个选项的消耗不同,正数表示消耗数值
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=%e5%85%a8%e5%b1%80%e5%95%86%e5%ba%97
 default : ["shop1","贪婪之神","blueShop","1F金币商店",null,"20+10*times*(times+1)","勇敢的武士啊, 给我${need}金币就可以："]
@@ -56,7 +80,7 @@ var code = {
     'text': EvalString_3,
     'choices': 'choices_asdfefw'
 }
-code=JSON.stringify(code,null,2).split('"choices_asdfefw"').join('[\n'+shopChoices_0+']\n');
+code=JSON.stringify(code,null,2).split('"choices_asdfefw"').join('[\n'+shopChoices_0+']\n')+',\n';
 return code;
 */
 
@@ -1183,25 +1207,33 @@ ActionParser.prototype.parse = function (obj,type) {
       return MotaActionBlocks['point_m'].xmlText([text_choices]);
 
     case 'shop':
-      var text_choices = null;
-      for(var ii=obj.choices.length-1,choice;choice=obj.choices[ii];ii--) {
-        var text_effect = null;
-        var effectList = choice.effect.split(';');
-        for(var jj=effectList.length-1,effect;effect=effectList[jj];jj--) {
-          if(effect.split('+=').length!==2){
-            throw new Error('一个商店效果中必须包含恰好一个"+="');
+      var buildsub = function(obj,parser,next){
+        var text_choices = null;
+        for(var ii=obj.choices.length-1,choice;choice=obj.choices[ii];ii--) {
+          var text_effect = null;
+          var effectList = choice.effect.split(';');
+          for(var jj=effectList.length-1,effect;effect=effectList[jj];jj--) {
+            if(effect.split('+=').length!==2){
+              throw new Error('一个商店效果中必须包含恰好一个"+="');
+            }
+            text_effect=MotaActionBlocks['shopEffect'].xmlText([
+              MotaActionBlocks['idString_e'].xmlText([effect.split('+=')[0]]),
+              MotaActionBlocks['evalString_e'].xmlText([effect.split('+=')[1]]),
+              text_effect]);
           }
-          text_effect=MotaActionBlocks['shopEffect'].xmlText([
-            MotaActionBlocks['idString_e'].xmlText([effect.split('+=')[0]]),
-            MotaActionBlocks['evalString_e'].xmlText([effect.split('+=')[1]]),
-            text_effect]);
+          text_choices=MotaActionBlocks['shopChoices'].xmlText([
+            choice.text,choice.need||'',text_effect,text_choices]);
         }
-        text_choices=MotaActionBlocks['shopChoices'].xmlText([
-          choice.text,choice.need||'',text_effect,text_choices]);
+        return MotaActionBlocks['shopsub'].xmlText([
+          obj.id,obj.name,obj.icon,obj.textInList,obj.use,obj.need,parser.EvalString(obj.text),text_choices,next
+        ]);
       }
-      return MotaActionBlocks['shop_m'].xmlText([
-        obj.id,obj.name,obj.icon,obj.textInList,obj.use,obj.need,this.EvalString(obj.text),text_choices
-      ]);
+      var next=null;
+      if(!obj)obj=[];
+      while(obj.length){
+        next=buildsub(obj.pop(),this,next);
+      }
+      return MotaActionBlocks['shop_m'].xmlText([next]);
     
     default:
       return MotaActionBlocks[type+'_m'].xmlText([this.parseList(obj)]);

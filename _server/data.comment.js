@@ -190,7 +190,8 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 },
                 "shops": {
                     "_leaf": true,
-                    "_type": "textarea",
+                    "_type": "event",
+                    "_event": "shop",
                     "_data": "全局商店，是一个数组 \n 每一项是一个Object代表一个全局商店 \n id 为商店的唯一标识符（ID），请确保任何两个商店的id都不相同 \n name 为商店的名称（打开商店后的标题） \n icon 为商店的图标，在icons.js的npcs中定义。如blueShop可代表蓝色商店。 \n textInList 为其在快捷商店栏中显示的名称，如\"3楼金币商店\"等 \n use 为消耗的类型，是金币（money）还是经验（experience）。 \n need 是一个表达式，计算商店所需要用到的数值，可以以times作为参数。 \n text 为商店所说的话。可以用${need}表示需要的数值。\n choices 为商店的各个选项，是一个list，每一项是一个选项，里面text为显示文字，effect为选项的效果，只能用+=，分号分开。"
                 },
                 "levelUp": {

@@ -325,12 +325,19 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=show-%e5%b0%86%e4%b8%80%e
 default : ["0","0","",500]
 colour : this.eventColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var pattern = /^([+-]?\d+)(,[+-]?\d+)*$/;
-if(!pattern.test(EvalString_0) || !pattern.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-EvalString_0=EvalString_0.split(',');
-EvalString_1=EvalString_1.split(',');
-if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+var pattern1 = /^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
+if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
+  EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
+  EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
+  EvalString_0=[EvalString_0,EvalString_1]
+} else {
+  var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
+  if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
+  EvalString_0=EvalString_0.split(',');
+  EvalString_1=EvalString_1.split(',');
+  if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
+  for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+}
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
 var code = '{"type": "show", "loc": ['+EvalString_0.join(',')+']'+IdString_0+''+Int_0+'},\n';
 return code;
@@ -347,13 +354,20 @@ default : ["","","",500]
 colour : this.eventColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-    var pattern = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern.test(EvalString_0) || !pattern.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
+  var pattern1 = /^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
+  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
+    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
+    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
+    EvalString_0=[EvalString_0,EvalString_1]
+  } else {
+    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
+    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
     EvalString_0=EvalString_0.split(',');
     EvalString_1=EvalString_1.split(',');
     if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
     for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
-    floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+  }
+  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
@@ -362,7 +376,7 @@ return code;
 */
 
 trigger_s
-    :   '触发事件' 'x' Int ',' 'y' Int Newline
+    :   '触发事件' 'x' PosString ',' 'y' PosString Newline
     ;
 
 /* trigger_s
@@ -370,7 +384,7 @@ tooltip : trigger: 立即触发另一个地点的事件
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=trigger-%e7%ab%8b%e5%8d%b3%e8%a7%a6%e5%8f%91%e5%8f%a6%e4%b8%80%e4%b8%aa%e5%9c%b0%e7%82%b9%e7%9a%84%e4%ba%8b%e4%bb%b6
 default : [0,0]
 colour : this.eventColor
-var code = '{"type": "trigger", "loc": ['+Int_0+','+Int_1+']},\n';
+var code = '{"type": "trigger", "loc": ['+PosString_0+','+PosString_1+']},\n';
 return code;
 */
 
@@ -399,7 +413,7 @@ return code;
 */
 
 setBlock_s
-    :   '转变图块为' Int 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
+    :   '转变图块为' Int 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
     ;
 
 /* setBlock_s
@@ -408,8 +422,8 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=setblock%ef%bc%9a%e8%ae%b
 colour : this.dataColor
 default : [0,"","",""]
 var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-    floorstr = ', "loc": ['+EvalString_0+','+EvalString_1+']';
+if (PosString_0 && PosString_1) {
+    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "setBlock", "number":'+Int_0+floorstr+IdString_0+'},\n';
@@ -469,7 +483,7 @@ return code;
 */
 
 openDoor_s
-    :   '开门' 'x' Int ',' 'y' Int '楼层' IdString? Newline
+    :   '开门' 'x' PosString ',' 'y' PosString '楼层' IdString? Newline
     ;
 
 /* openDoor_s
@@ -478,12 +492,12 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=opendoor-%e5%bc%80%e9%97%
 default : [0,0,""]
 colour : this.dataColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var code = '{"type": "openDoor", "loc": ['+Int_0+','+Int_1+']'+IdString_0+'},\n';
+var code = '{"type": "openDoor", "loc": ['+PosString_0+','+PosString_1+']'+IdString_0+'},\n';
 return code;
 */
 
 changeFloor_s
-    :   '楼层切换' IdString 'x' Number ',' 'y' Number '朝向' DirectionEx_List '动画时间' Int? Newline
+    :   '楼层切换' IdString 'x' PosString ',' 'y' PosString '朝向' DirectionEx_List '动画时间' Int? Newline
     ;
 
 /* changeFloor_s
@@ -493,12 +507,12 @@ default : ["MT1",0,0,null,500]
 colour : this.dataColor
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
-var code = '{"type": "changeFloor", "floorId": "'+IdString_0+'", "loc": ['+Number_0+', '+Number_1+']'+DirectionEx_List_0+Int_0+' },\n';
+var code = '{"type": "changeFloor", "floorId": "'+IdString_0+'", "loc": ['+PosString_0+', '+PosString_1+']'+DirectionEx_List_0+Int_0+' },\n';
 return code;
 */
 
 changePos_0_s
-    :   '位置切换' 'x' Number ',' 'y' Number '朝向' DirectionEx_List Newline
+    :   '位置切换' 'x' PosString ',' 'y' PosString '朝向' DirectionEx_List Newline
     ;
 
 /* changePos_0_s
@@ -507,7 +521,7 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=changepos-%e5%bd%93%e5%89
 default : [0,0,null]
 colour : this.dataColor
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
-var code = '{"type": "changePos", "loc": ['+Number_0+','+Number_1+']'+DirectionEx_List_0+'},\n';
+var code = '{"type": "changePos", "loc": ['+PosString_0+','+PosString_1+']'+DirectionEx_List_0+'},\n';
 return code;
 */
 
@@ -559,7 +573,9 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=animate%ef%bc%9a%e6%98%be
 default : ["zone","hero"]
 colour : this.soundColor
 if (EvalString_0) {
-  if(/hero|([+-]?\d+),([+-]?\d+)/.test(EvalString_0)) {
+  if(/^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-]*,flag:[0-9a-zA-Z_][0-9a-zA-Z_\-]*$/.test(EvalString_0)) {
+    EvalString_0=', "loc": ["'+EvalString_0.split(',').join('","')+'"]';
+  } else if (/hero|([+-]?\d+),([+-]?\d+)/.test(EvalString_0)) {
     if(EvalString_0.indexOf(',')!==-1)EvalString_0='['+EvalString_0+']';
     else EvalString_0='"'+EvalString_0+'"';
     EvalString_0 = ', "loc": '+EvalString_0;
@@ -572,7 +588,7 @@ return code;
 */
 
 showImage_0_s
-    :   '显示图片' EvalString '起点像素位置' 'x' Number 'y' Number Newline
+    :   '显示图片' EvalString '起点像素位置' 'x' PosString 'y' PosString Newline
     ;
 
 /* showImage_0_s
@@ -580,7 +596,7 @@ tooltip : showImage：显示图片
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=showimage%ef%bc%9a%e6%98%be%e7%a4%ba%e5%9b%be%e7%89%87
 default : ["bg.jpg",0,0]
 colour : this.printColor
-var code = '{"type": "showImage", "name": "'+EvalString_0+'", "loc": ['+Number_0+','+Number_1+']},\n';
+var code = '{"type": "showImage", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+']},\n';
 return code;
 */
 
@@ -700,7 +716,7 @@ return code;
 */
 
 move_s
-    :   '移动事件' 'x' EvalString? ',' 'y' EvalString? '动画时间' Int? '消失时无动画时间' Bool BGNL? StepString Newline
+    :   '移动事件' 'x' PosString? ',' 'y' PosString? '动画时间' Int? '消失时无动画时间' Bool BGNL? StepString Newline
     ;
 
 /* move_s
@@ -709,8 +725,8 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=move-%e8%ae%a9%e6%9f%90%e
 default : ["","",500,null,"上右3下2左上左2"]
 colour : this.eventColor
 var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-    floorstr = ', "loc": ['+EvalString_0+','+EvalString_1+']';
+if (PosString_0 && PosString_1) {
+    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
 var code = '{"type": "move"'+floorstr+''+Int_0+', "steps": '+JSON.stringify(StepString_0)+', "immediateHide": '+Bool_0+'},\n';
@@ -1006,6 +1022,10 @@ RawEvalString
     :   'sdeirughvuiyasdbe'+ //为了被识别为复杂词法规则
     ;
 
+PosString
+    :   'sdeirughvuiyasbde'+ //为了被识别为复杂词法规则
+    ;
+
 Stair_List
     :   '坐标'|'上楼'|'下楼'
     /*Stair_List ['loc','upFloor','downFloor']*/;
@@ -1252,7 +1272,7 @@ ActionParser.prototype.parseAction = function() {
       this.parseAction();
       break;
     case "show": // 显示
-      if (typeof data.loc[0] == 'number' && typeof data.loc[1] == 'number')
+      if (!(data.loc[0] instanceof Array))
         data.loc = [data.loc];
       var x_str=[],y_str=[];
       data.loc.forEach(function (t) {
@@ -1264,7 +1284,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "hide": // 消失
       data.loc=data.loc||[];
-      if (typeof data.loc[0] == 'number' && typeof data.loc[1] == 'number')
+      if (!(data.loc[0] instanceof Array))
         data.loc = [data.loc];
       var x_str=[],y_str=[];
       data.loc.forEach(function (t) {
@@ -1511,6 +1531,12 @@ MotaActionFunctions.IdString_pre = function(IdString){
   if (IdString.indexOf('__door_name__')!==-1) throw new Error('请修改__door_name__,建议如开MT1层的[3,3]点的门, 则使用flag:MT1_3_3作为开门变量');
   if (IdString && !(/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/.test(IdString)))throw new Error('id: '+IdString+'中包含了0-9 a-z A-Z _ - :之外的字符');
   return IdString;
+}
+
+MotaActionFunctions.PosString_pre = function(PosString){
+  if (!PosString || /^-?\d+$/.test(PosString)) return PosString;
+  if (!(/^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ - :之外的字符,或者是没有以flag: 开头');
+  return '"'+PosString+'"';
 }
 
 MotaActionFunctions.StepString_pre = function(StepString){

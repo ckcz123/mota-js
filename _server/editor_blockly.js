@@ -29,7 +29,7 @@ editor_blockly = function () {
           {"type": "setValue", "name": "status:hp", "value": "status:hp+\${200*point}"},
         ]},
       ]},'point'),
-      MotaActionFunctions.actionParser.parse({
+      MotaActionFunctions.actionParser.parse([{
         "id": "moneyShop1",
         "name": "贪婪之神", 
         "icon": "blueShop",
@@ -43,7 +43,7 @@ editor_blockly = function () {
           {"text": "防御+4", "effect": "status:def+=4"},
           {"text": "魔防+10", "effect": "status:mdef+=10"}
         ]
-      },'shop'),
+      }],'shop'),
       MotaActionBlocks['afterBattle_m'].xmlText(),
       MotaActionBlocks['afterGetItem_m'].xmlText(),
       MotaActionBlocks['afterOpenDoor_m'].xmlText(),
@@ -102,6 +102,7 @@ editor_blockly = function () {
       MotaActionBlocks['disableShop_s'].xmlText(),
       '<label text="特效/声音"></label>',
       MotaActionBlocks['sleep_s'].xmlText(),
+      MotaActionBlocks['wait_s'].xmlText(),
       MotaActionBlocks['animate_s'].xmlText(),
       MotaActionBlocks['setFg_0_s'].xmlText(),
       MotaActionBlocks['setFg_1_s'].xmlText(),
@@ -427,6 +428,7 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
             'autoText_s': 'EvalString_2',
             'choices_s': 'EvalString_0',
             'function_s': 'RawEvalString_0',
+            'shopsub': 'EvalString_3',
         }
         var f = b ? textStringDict[b.type] : null;
         if (f) {

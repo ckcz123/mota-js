@@ -712,7 +712,7 @@ actions.prototype.longClick = function () {
         core.drawText();
         return true;
     }
-    if (core.status.event.id=='action' && core.status.event.data.type=='text') {
+    if (core.status.event.id=='action' && (core.status.event.data.type=='text' || core.status.event.data.type=='wait')) {
         core.doAction();
         return true;
     }
@@ -725,7 +725,7 @@ actions.prototype.keyDownCtrl = function () {
         core.drawText();
         return;
     }
-    if (core.status.event.id=='action' && core.status.event.data.type=='text') {
+    if (core.status.event.id=='action' && (core.status.event.data.type=='text' || core.status.event.data.type=='wait')) {
         core.doAction();
         return;
     }
@@ -766,7 +766,7 @@ actions.prototype.keyUpConfirmBox = function (keycode) {
 ////// 自定义事件时的点击操作 //////
 actions.prototype.clickAction = function (x,y) {
 
-    if (core.status.event.data.type=='text') {
+    if (core.status.event.data.type=='text' || core.status.event.data.type=='wait') {
         // 文字
         core.doAction();
         return;
@@ -808,7 +808,7 @@ actions.prototype.keyDownAction = function (keycode) {
 
 ////// 自定义事件时，放开某个键的操作 //////
 actions.prototype.keyUpAction = function (keycode) {
-    if (core.status.event.data.type=='text' && (keycode==13 || keycode==32 || keycode==67)) {
+    if ((core.status.event.data.type=='text' || core.status.event.data.type=='wait') && (keycode==13 || keycode==32 || keycode==67)) {
         core.doAction();
         return;
     }

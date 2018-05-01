@@ -57,8 +57,7 @@ events.prototype.init = function () {
                 callback();
         },
         'action': function (data, core, callback) {
-            core.events.doEvents(data.event.data, data.x, data.y);
-            if (core.isset(callback)) callback();
+            core.events.insertAction(data.event.data, data.x, data.y, callback);
         }
     }
 }
@@ -669,6 +668,10 @@ events.prototype.doAction = function() {
                     core.events.doAction();
                 }, data.time);
             }
+            break;
+        case "wait":
+            if (core.status.replay.replaying)
+                core.events.doAction();
             break;
         case "revisit": // 立刻重新执行该事件
             {

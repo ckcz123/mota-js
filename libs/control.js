@@ -1541,7 +1541,9 @@ control.prototype.replay = function () {
 
     if (action=='up' || action=='down' || action=='left' || action=='right') {
         core.moveHero(action, function () {
-            core.replay();
+            setTimeout(function() {
+                core.replay();
+            });
         });
         return;
     }

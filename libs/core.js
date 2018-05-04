@@ -48,6 +48,8 @@ function core() {
         'soundStatus': true, // 是否播放SE
         'playingBgm': null, // 正在播放的BGM
         'isPlaying': false,
+        'gainNode': null,
+        'volume': 1.0, // 音量
     }
     this.platform = {
         'isOnline': true, // 是否http
@@ -187,6 +189,8 @@ core.prototype.init = function (coreData, callback) {
         window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext;
         try {
             core.musicStatus.audioContext = new window.AudioContext();
+            core.musicStatus.gainNode = core.musicStatus.audioContext.createGain();
+            core.musicStatus.gainNode.connect(core.musicStatus.audioContext.destination);
         } catch (e) {
             console.log("该浏览器不支持AudioContext");
             core.musicStatus.audioContext = null;

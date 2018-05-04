@@ -216,6 +216,7 @@ action
     |   pauseBgm_s
     |   resumeBgm_s
     |   playSound_s
+    |   setVolume_s
     |   win_s
     |   lose_s
     |   if_s
@@ -831,6 +832,19 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=playsound-%e6%92%ad%e6%94
 default : ["item.ogg"]
 colour : this.soundColor
 var code = '{"type": "playSound", "name": "'+EvalString_0+'"},\n';
+return code;
+*/
+
+setVolume_s
+    :   '设置音量' Int Newline
+    ;
+
+/* setVolume_s
+tooltip : setVolume: 设置音量
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=setVolume-%e8%ae%be%e7%bd%ae%e9%9f%b3%e9%87%8f
+default : [90]
+colour : this.soundColor
+var code = '{"type": "setVolume", "value": '+Int_0+'},\n';
 return code;
 */
 
@@ -1451,6 +1465,10 @@ ActionParser.prototype.parseAction = function() {
     case "resumeBgm":
       this.next = MotaActionBlocks['resumeBgm_s'].xmlText([
         this.next]);
+      break
+    case "setVolume":
+      this.next = MotaActionBlocks['setVolume_s'].xmlText([
+        data.value, this.next]);
       break
     case "setValue":
       this.next = MotaActionBlocks['setValue_s'].xmlText([

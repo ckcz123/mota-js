@@ -842,6 +842,14 @@ move完毕后移动的NPC/怪物一定会消失，只不过可以通过immediate
 
 值得注意的是，如果是额外添加进文件的音效，则需在main.js中this.sounds里加载它。
 
+### setVolume：设置音量
+
+使用setVolume可以设置音量大小。
+
+使用方法： `{"type": "setVolume", "value": 90}`
+
+value为音量大小，在0到100之间，默认为100。设置后，BGM和SE都将使用该音量进行播放。
+
 ### win: 获得胜利
 
 `{"type": "win", "reason": "xxx"}` 将会直接调用events.js中的win函数，并将reason作为结局传入。

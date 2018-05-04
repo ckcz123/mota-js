@@ -111,6 +111,7 @@ editor_blockly = function () {
       MotaActionBlocks['pauseBgm_s'].xmlText(),
       MotaActionBlocks['resumeBgm_s'].xmlText(),
       MotaActionBlocks['playSound_s'].xmlText(),
+      MotaActionBlocks['setVolume_s'].xmlText(),
       '<label text="其他"></label>',
       MotaActionBlocks['function_s'].xmlText(),
     ],

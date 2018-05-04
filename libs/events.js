@@ -537,6 +537,17 @@ events.prototype.doAction = function() {
             core.resumeBgm();
             this.doAction();
             break
+        case "setVolume":
+            data.value = parseInt(data.value||0);
+            if (data.value>100) data.value=100;
+            data.value = data.value / 100;
+            core.musicStatus.volume = data.value;
+            if (core.isset(core.musicStatus.playingBgm)) {
+                core.material.bgms[core.musicStatus.playingBgm].volume = data.value;
+            }
+            core.musicStatus.gainNode.gain.value = data.value;
+            this.doAction();
+            break;
         case "setValue":
             try {
                 var value=core.calValue(data.value);

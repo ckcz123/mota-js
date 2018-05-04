@@ -2110,6 +2110,7 @@ control.prototype.playBgm = function (bgm) {
         }
         // 播放当前BGM
         core.musicStatus.playingBgm = bgm;
+        core.material.bgms[bgm].volume = core.musicStatus.volume;
         core.material.bgms[bgm].play();
         core.musicStatus.isPlaying = true;
 
@@ -2177,7 +2178,7 @@ control.prototype.playSound = function (sound) {
         if (core.musicStatus.audioContext != null) {
             var source = core.musicStatus.audioContext.createBufferSource();
             source.buffer = core.material.sounds[sound];
-            source.connect(core.musicStatus.audioContext.destination);
+            source.connect(core.musicStatus.gainNode);
             try {
                 source.start(0);
             }
@@ -2190,11 +2191,12 @@ control.prototype.playSound = function (sound) {
             }
         }
         else {
+            core.material.sounds[sound].volume = core.musicStatus.volume;
             core.material.sounds[sound].play();
         }
     }
     catch (eee) {
-        console.log("无法播放SE "+bgm);
+        console.log("无法播放SE "+sound);
         console.log(eee);
     }
 }

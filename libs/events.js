@@ -591,9 +591,9 @@ events.prototype.doAction = function() {
                         core.drawTip("录像文件出错");
                         return;
                     }
-
                 }
                 else {
+                    core.interval.onDownInterval = 'tmp';
                     value = prompt(core.replaceText(data.text));
                 }
                 value = Math.abs(parseInt(value)||0);

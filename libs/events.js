@@ -310,8 +310,9 @@ events.prototype.doAction = function() {
             core.events.doAction();
             break;
         case "show": // 显示
-            if (typeof data.loc[0] == 'number' && typeof data.loc[1] == 'number')
-                data.loc = [data.loc];
+            if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
+                    && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
+                data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];
             if (core.isset(data.time) && data.time>0 && (!core.isset(data.floorId) || data.floorId==core.status.floorId)) {
                 core.animateBlock(data.loc,'show', data.time, function () {
                     data.loc.forEach(function (t) {
@@ -330,8 +331,9 @@ events.prototype.doAction = function() {
         case "hide": // 消失
             if (!core.isset(data.loc))
                 data.loc = [x,y];
-            if (typeof data.loc[0] == 'number' && typeof data.loc[1] == 'number')
-                data.loc = [data.loc];
+            if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
+                && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
+                data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];
             data.loc.forEach(function (t) {
                 core.removeBlock(t[0],t[1],data.floorId);
             })
@@ -345,8 +347,8 @@ events.prototype.doAction = function() {
         case "setBlock": // 设置某图块
             {
                 if (core.isset(data.loc)) {
-                    x=data.loc[0];
-                    y=data.loc[1];
+                    x=core.calValue(data.loc[0]);
+                    y=core.calValue(data.loc[1]);
                 }
                 var floorId = data.floorId||core.status.floorId;
                 var originBlock=core.getBlock(x,y,floorId,false);
@@ -378,8 +380,8 @@ events.prototype.doAction = function() {
                     y=core.getHeroLoc('y');
                 }
                 else if (data.loc instanceof Array) {
-                    x=data.loc[0];
-                    y=data.loc[1];
+                    x=core.calValue(data.loc[0]);
+                    y=core.calValue(data.loc[1]);
                 }
             }
             core.drawAnimate(data.name, x, y, function () {
@@ -388,8 +390,8 @@ events.prototype.doAction = function() {
             break;
         case "move": // 移动事件
             if (core.isset(data.loc)) {
-                x=data.loc[0];
-                y=data.loc[1];
+                x=core.calValue(data.loc[0]);
+                y=core.calValue(data.loc[1]);
             }
             core.moveBlock(x,y,data.steps,data.time,data.immediateHide,function() {
                 core.events.doAction();
@@ -402,7 +404,7 @@ events.prototype.doAction = function() {
             break;
         case "changeFloor": // 楼层转换
             {
-                var heroLoc = {"x": data.loc[0], "y": data.loc[1]};
+                var heroLoc = {"x": core.calValue(data.loc[0]), "y": core.calValue(data.loc[1])};
                 if (core.isset(data.direction)) heroLoc.direction=data.direction;
                 core.changeFloor(data.floorId||core.status.floorId, null, heroLoc, data.time, function() {
                     core.lockControl();
@@ -413,8 +415,8 @@ events.prototype.doAction = function() {
         case "changePos": // 直接更换勇士位置，不切换楼层
             core.clearMap('hero', 0, 0, 416, 416);
             if (core.isset(data.loc)) {
-                core.setHeroLoc('x', data.loc[0]);
-                core.setHeroLoc('y', data.loc[1]);
+                core.setHeroLoc('x', core.calValue(data.loc[0]));
+                core.setHeroLoc('y', core.calValue(data.loc[1]));
             }
             if (core.isset(data.direction)) core.setHeroLoc('direction', data.direction);
             core.drawHero();
@@ -422,7 +424,8 @@ events.prototype.doAction = function() {
             break;
         case "showImage": // 显示图片
             if (core.isset(data.loc) && core.isset(core.material.images.images[data.name])) {
-                core.canvas.animate.drawImage(core.material.images.images[data.name], data.loc[0], data.loc[1]);
+                core.canvas.animate.drawImage(core.material.images.images[data.name],
+                    core.calValue(data.loc[0]), core.calValue(data.loc[1]));
             }
             else core.clearMap('animate', 0, 0, 416, 416);
             this.doAction();
@@ -447,8 +450,8 @@ events.prototype.doAction = function() {
                 var gif = new Image();
                 gif.src = core.material.images.images[data.name].src;
                 gif.style.position = 'absolute';
-                gif.style.left = (data.loc[0]*core.domStyle.scale)+"px";
-                gif.style.top = (data.loc[1]*core.domStyle.scale)+"px";
+                gif.style.left = (core.calValue(data.loc[0])*core.domStyle.scale)+"px";
+                gif.style.top = (core.calValue(data.loc[1])*core.domStyle.scale)+"px";
                 core.dom.gif2.appendChild(gif);
             }
             else {
@@ -468,7 +471,7 @@ events.prototype.doAction = function() {
         case "openDoor": // 开一个门，包括暗墙
             {
                 var floorId=data.floorId || core.status.floorId;
-                var block=core.getBlock(data.loc[0], data.loc[1], floorId);
+                var block=core.getBlock(core.calValue(data.loc[0]), core.calValue(data.loc[1]), floorId);
                 if (block!=null) {
                     if (floorId==core.status.floorId)
                         core.openDoor(block.block.event.id, block.block.x, block.block.y, false, function() {
@@ -503,7 +506,7 @@ events.prototype.doAction = function() {
             break;
         case "trigger": // 触发另一个事件；当前事件会被立刻结束。需要另一个地点的事件是有效的
             {
-                var toX=data.loc[0], toY=data.loc[1];
+                var toX=core.calValue(data.loc[0]), toY=core.calValue(data.loc[1]);
                 var block=core.getBlock(toX, toY);
                 if (block!=null) {
                     block = block.block;
@@ -1031,7 +1034,7 @@ events.prototype.animateImage = function (type, image, loc, time, callback) {
     if (type == 'hide') opacityVal = 1;
 
     core.setOpacity('data', opacityVal);
-    core.canvas.data.drawImage(image, loc[0], loc[1]);
+    core.canvas.data.drawImage(image, core.calValue(loc[0]), core.calValue(loc[1]));
     core.status.replay.animate=true;
     var animate = setInterval(function () {
         if (type=='show') opacityVal += 0.1;

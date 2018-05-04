@@ -20,6 +20,12 @@ utils.prototype.replaceText = function (text) {
 
 ////// 计算表达式的值 //////
 utils.prototype.calValue = function (value) {
+    if (typeof value == 'number') {
+        return value;
+    }
+    if (value instanceof Function) {
+        return value();
+    }
     value=value.replace(/status:([\w\d_]+)/g, "core.getStatus('$1')");
     value=value.replace(/item:([\w\d_]+)/g, "core.itemCount('$1')");
     value=value.replace(/flag:([\w\d_]+)/g, "core.getFlag('$1', 0)");

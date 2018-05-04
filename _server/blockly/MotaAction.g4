@@ -650,7 +650,7 @@ return code;
 */
 
 animateImage_0_s
-    : '图片淡入' EvalString '起点像素位置' 'x' Number 'y' Number '动画时间' Int Newline
+    : '图片淡入' EvalString '起点像素位置' 'x' PosString 'y' PosString '动画时间' Int Newline
     ;
 
 /* animateImage_0_s
@@ -658,12 +658,12 @@ tooltip : animageImage：图片淡入
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=animateimage%ef%bc%9a%e5%9b%be%e7%89%87%e6%b7%a1%e5%85%a5%e6%b7%a1%e5%87%b
 default : ["bg.jpg",0,0,500]
 colour : this.printColor
-var code = '{"type": "animateImage", "action": "show", "name": "'+EvalString_0+'", "loc": ['+Number_0+','+Number_1+'], "time": '+Int_0+'},\n';
+var code = '{"type": "animateImage", "action": "show", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "time": '+Int_0+'},\n';
 return code;
 */
 
 animateImage_1_s
-    : '图片淡出' EvalString '起点像素位置' 'x' Number 'y' Number '动画时间' Int Newline
+    : '图片淡出' EvalString '起点像素位置' 'x' PosString 'y' PosString '动画时间' Int Newline
     ;
 
 /* animateImage_1_s
@@ -671,12 +671,12 @@ tooltip : animageImage：图片淡出
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=animateimage%ef%bc%9a%e5%9b%be%e7%89%87%e6%b7%a1%e5%85%a5%e6%b7%a1%e5%87%b
 default : ["bg.jpg",0,0,500]
 colour : this.printColor
-var code = '{"type": "animateImage", "action": "hide", "name": "'+EvalString_0+'", "loc": ['+Number_0+','+Number_1+'], "time": '+Int_0+'},\n';
+var code = '{"type": "animateImage", "action": "hide", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "time": '+Int_0+'},\n';
 return code;
 */
 
 showGif_0_s
-    :   '显示动图' EvalString '起点像素位置' 'x' Number 'y' Number Newline
+    :   '显示动图' EvalString '起点像素位置' 'x' PosString 'y' PosString Newline
     ;
 
 /* showGif_0_s
@@ -684,7 +684,7 @@ tooltip : showGif：显示动图
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=showgif%ef%bc%9a%e6%98%be%e7%a4%ba%e5%8a%a8%e5%9b%be
 default : ["bg.gif",0,0]
 colour : this.printColor
-var code = '{"type": "showGif", "name": "'+EvalString_0+'", "loc": ['+Number_0+','+Number_1+']},\n';
+var code = '{"type": "showGif", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+']},\n';
 return code;
 */
 

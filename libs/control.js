@@ -583,9 +583,14 @@ control.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
+
+    var toAdd = 1;
+    if (core.status.replay.speed>3)
+        toAdd = 2;
+
     core.interval.heroMoveInterval = window.setInterval(function () {
-        core.status.heroMoving++;
-        if (core.status.heroMoving==8) {
+        core.status.heroMoving+=toAdd;
+        if (core.status.heroMoving>=8) {
             core.setHeroLoc('x', x+scan[direction].x);
             core.setHeroLoc('y', y+scan[direction].y);
             core.moveOneStep();
@@ -595,7 +600,7 @@ control.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
             core.status.heroMoving = 0;
             if (core.isset(callback)) callback();
         }
-    }, 12.5 / core.status.replay.speed);
+    }, 12.5 * toAdd / core.status.replay.speed);
 }
 
 ////// 实际每一步的行走过程 //////
@@ -1428,8 +1433,9 @@ control.prototype.resumeReplay = function () {
 control.prototype.speedUpReplay = function () {
     if (core.status.event.id=='save') return;
     if (!core.status.replay.replaying) return;
-    core.status.replay.speed = parseInt(10*core.status.replay.speed + 1)/10;
-    if (core.status.replay.speed>3.0) core.status.replay.speed=3.0;
+    var toAdd = core.status.replay.speed>2?2:1;
+    core.status.replay.speed = parseInt(10*core.status.replay.speed + toAdd)/10;
+    if (core.status.replay.speed>6.0) core.status.replay.speed=6.0;
     core.drawTip("x"+core.status.replay.speed+"倍");
 }
 
@@ -1437,7 +1443,8 @@ control.prototype.speedUpReplay = function () {
 control.prototype.speedDownReplay = function () {
     if (core.status.event.id=='save') return;
     if (!core.status.replay.replaying) return;
-    core.status.replay.speed = parseInt(10*core.status.replay.speed - 1)/10;
+    var toAdd = core.status.replay.speed>2?2:1;
+    core.status.replay.speed = parseInt(10*core.status.replay.speed - toAdd)/10;
     if (core.status.replay.speed<0.3) core.status.replay.speed=0.3;
     core.drawTip("x"+core.status.replay.speed+"倍");
 }

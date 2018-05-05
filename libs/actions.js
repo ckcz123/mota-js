@@ -1690,6 +1690,7 @@ actions.prototype.clickSyncSave = function (x,y) {
                 core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify({
                     'name': core.firstData.name,
                     'hard': core.status.hard,
+                    'seed': core.getFlag('seed'),
                     'route': core.encodeRoute(core.status.route)
                 }));
                 break;
@@ -1922,8 +1923,11 @@ actions.prototype.clickReplay = function (x, y) {
                 {
                     core.ui.closePanel();
                     var hard=core.status.hard, route=core.clone(core.status.route);
+                    var seed = core.getFlag('seed');
                     core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
                     core.events.setInitData(hard);
+                    core.setFlag('seed', seed);
+                    core.setFlag('rand', seed);
                     core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
                         core.startReplay(route);
                     }, true);

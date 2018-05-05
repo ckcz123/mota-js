@@ -1845,8 +1845,11 @@ control.prototype.doSL = function (id, type) {
             // core.drawTip("存档版本不匹配");
             if (confirm("存档版本不匹配！\n你想回放此存档的录像吗？")) {
                 core.dom.startPanel.style.display = 'none';
+                var seed = data.hero.flags.seed;
                 core.resetStatus(core.firstData.hero, data.hard, core.firstData.floorId, null, core.initStatus.maps);
                 core.events.setInitData(data.hard);
+                core.setFlag('seed', seed);
+                core.setFlag('rand', seed);
                 core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
                     core.startReplay(core.decodeRoute(data.route));
                 }, true);
@@ -1878,7 +1881,7 @@ control.prototype.doSL = function (id, type) {
             return;
         }
         var route = core.subarray(core.status.route, core.decodeRoute(data.route));
-        if (!core.isset(route)) {
+        if (!core.isset(route) || data.hero.flags.seed!=core.getFlag('seed')) {
             core.drawTip("无法从此存档回放录像");
             return;
         }

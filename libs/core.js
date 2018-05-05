@@ -1085,6 +1085,16 @@ core.prototype.subarray = function (a, b) {
     return core.utils.subarray(a, b);
 }
 
+////// 生成随机数（seed方法） //////
+core.prototype.rand = function (num) {
+    return core.utils.rand(num);
+}
+
+////// 生成随机数（录像方法） //////
+core.prototype.rand2 = function (num) {
+    return core.utils.rand2(num);
+}
+
 ////// 读取一个本地文件内容 //////
 core.prototype.readFile = function (success, error, readType) {
     core.utils.readFile(success, error, readType);

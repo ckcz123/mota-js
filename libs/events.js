@@ -88,16 +88,19 @@ events.prototype.startGame = function (hard) {
                     core.flags.battleAnimate = true;
                     core.setLocalStorage('battleAnimate', true);
                     core.startGame(hard);
+                    core.utils.__init_seed();
                     core.events.setInitData(hard);
                 }, function () {
                     core.flags.battleAnimate = false;
                     core.setLocalStorage('battleAnimate', false);
                     core.startGame(hard);
+                    core.utils.__init_seed();
                     core.events.setInitData(hard);
                 });
             }
             else {
                 core.startGame(hard);
+                core.utils.__init_seed();
                 core.events.setInitData(hard);
             }
         });
@@ -141,6 +144,7 @@ events.prototype.gameOver = function (ending, fromReplay) {
                 'name': core.firstData.name,
                 'version': core.firstData.version,
                 'hard': core.status.hard,
+                'seed': core.getFlag('seed'),
                 'route': core.encodeRoute(core.status.route)
             }
             core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify(obj));
@@ -181,6 +185,7 @@ events.prototype.gameOver = function (ending, fromReplay) {
             formData.append('money', core.status.hero.money);
             formData.append('experience', core.status.hero.experience);
             formData.append('steps', core.status.hero.steps);
+            formData.append('seed', core.getFlag('seed'));
             formData.append('route', core.encodeRoute(core.status.route));
 
             core.http("POST", "/games/upload.php", formData);

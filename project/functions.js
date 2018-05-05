@@ -15,15 +15,15 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.material.items.bomb.text = "可以炸掉勇士四周的怪物";
 	if (core.flags.equipment) {
 		core.material.items.sword1.cls = 'constants';
-        core.material.items.sword2.cls = 'constants';
-        core.material.items.sword3.cls = 'constants';
-        core.material.items.sword4.cls = 'constants';
-        core.material.items.sword5.cls = 'constants';
-        core.material.items.shield1.cls = 'constants';
-        core.material.items.shield2.cls = 'constants';
-        core.material.items.shield3.cls = 'constants';
-        core.material.items.shield4.cls = 'constants';
-        core.material.items.shield5.cls = 'constants';
+		core.material.items.sword2.cls = 'constants';
+		core.material.items.sword3.cls = 'constants';
+		core.material.items.sword4.cls = 'constants';
+		core.material.items.sword5.cls = 'constants';
+		core.material.items.shield1.cls = 'constants';
+		core.material.items.shield2.cls = 'constants';
+		core.material.items.shield3.cls = 'constants';
+		core.material.items.shield4.cls = 'constants';
+		core.material.items.shield5.cls = 'constants';
 	}
 },
 ////// 不同难度分别设置初始属性 //////
@@ -341,59 +341,38 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		console.log("插件函数执行测试");
 	}
 
+	var _useEquipment = function (itemId, name, type) {
+		if (itemId.indexOf(name)==0) {
+			var now=core.getFlag(name, name+"0");
+
+			if (typeof core.values[now] == 'number') {
+				core.status.hero[type] -= core.values[now];
+			}
+			else {
+				core.status.hero.atk -= core.values[now].atk || 0;
+				core.status.hero.def -= core.values[now].def || 0;
+			core.status.hero.mdef -= core.values[now].mdef || 0;
+			}
+
+			if (typeof core.values[itemId] == 'number') {
+				core.status.hero[type] += core.values[itemId];
+			}
+			else {
+				core.status.hero.atk += core.values[itemId].atk || 0;
+				core.status.hero.def += core.values[itemId].def || 0;
+				core.status.hero.mdef += core.values[itemId].mdef || 0;
+			}
+
+			core.setItem(now, 1);
+			core.setItem(itemId, 0);
+			core.setFlag(name, itemId);
+			core.drawTip("已装备"+core.material.items[itemId].name);
+		}
+	}
+
 	this.useEquipment = function (itemId) { // 使用装备
-		if (itemId.indexOf("sword")==0) {
-			var now=core.getFlag('sword', 'sword0'); // 当前装备剑的ID
-
-			if (typeof core.values[now] == 'number') {
-				core.status.hero.atk -= core.values[now];
-			}
-			else {
-				core.status.hero.atk -= core.values[now].atk || 0;
-				core.status.hero.def -= core.values[now].def || 0;
-				core.status.hero.mdef -= core.values[now].mdef || 0;
-			}
-
-			if (typeof core.values[itemId] == 'number') {
-				core.status.hero.atk += core.values[itemId];
-			}
-			else {
-				core.status.hero.atk += core.values[itemId].atk || 0;
-				core.status.hero.def += core.values[itemId].def || 0;
-				core.status.hero.mdef += core.values[itemId].mdef || 0;
-			}
-
-			core.setItem(now, 1);
-			core.setItem(itemId, 0);
-			core.setFlag('sword', itemId);
-			core.drawTip("已装备"+core.material.items[itemId].name);
-		}
-		if (itemId.indexOf("shield")==0) {
-			var now=core.getFlag('shield', 'shield0');
-
-			if (typeof core.values[now] == 'number') {
-				core.status.hero.def -= core.values[now];
-			}
-			else {
-				core.status.hero.atk -= core.values[now].atk || 0;
-				core.status.hero.def -= core.values[now].def || 0;
-				core.status.hero.mdef -= core.values[now].mdef || 0;
-			}
-
-			if (typeof core.values[itemId] == 'number') {
-				core.status.hero.def += core.values[itemId];
-			}
-			else {
-				core.status.hero.atk += core.values[itemId].atk || 0;
-				core.status.hero.def += core.values[itemId].def || 0;
-				core.status.hero.mdef += core.values[itemId].mdef || 0;
-			}
-
-			core.setItem(now, 1);
-			core.setItem(itemId, 0);
-			core.setFlag('shield', itemId);
-			core.drawTip("已装备"+core.material.items[itemId].name);
-		}
+		_useEquipment(itemId, "sword", "atk");
+		_useEquipment(itemId, "shield", "def");
 	}
 	
 	// 可以在任何地方（如afterXXX或自定义脚本事件）调用函数，方法为  core.plugin.xxx();

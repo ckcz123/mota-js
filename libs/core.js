@@ -932,6 +932,10 @@ core.prototype.saveReplay = function () {
     core.control.saveReplay();
 }
 
+core.prototype.bookReplay = function () {
+    core.control.bookReplay();
+}
+
 ////// 回放 //////
 core.prototype.replay = function () {
     core.control.replay();

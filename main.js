@@ -403,6 +403,12 @@ main.statusBar.image.toolbox.onclick = function () {
 
 ////// 点击状态栏中的快捷商店时 //////
 main.statusBar.image.shop.onclick = function () {
+
+    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+        core.bookReplay();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.openQuickShop(true);
 }

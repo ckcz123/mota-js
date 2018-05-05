@@ -1433,7 +1433,7 @@ control.prototype.resumeReplay = function () {
 control.prototype.speedUpReplay = function () {
     if (core.status.event.id=='save') return;
     if (!core.status.replay.replaying) return;
-    var toAdd = core.status.replay.speed>2?2:1;
+    var toAdd = core.status.replay.speed>=3?3:core.status.replay.speed>=2?2:1;
     core.status.replay.speed = parseInt(10*core.status.replay.speed + toAdd)/10;
     if (core.status.replay.speed>6.0) core.status.replay.speed=6.0;
     core.drawTip("x"+core.status.replay.speed+"倍");
@@ -1443,7 +1443,7 @@ control.prototype.speedUpReplay = function () {
 control.prototype.speedDownReplay = function () {
     if (core.status.event.id=='save') return;
     if (!core.status.replay.replaying) return;
-    var toAdd = core.status.replay.speed>2?2:1;
+    var toAdd = core.status.replay.speed>3?3:core.status.replay.speed>2?2:1;
     core.status.replay.speed = parseInt(10*core.status.replay.speed - toAdd)/10;
     if (core.status.replay.speed<0.3) core.status.replay.speed=0.3;
     core.drawTip("x"+core.status.replay.speed+"倍");
@@ -1517,6 +1517,23 @@ control.prototype.saveReplay = function () {
     var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
 
     core.ui.drawSLPanel(10*page+offset);
+}
+
+////// 回放时查看怪物手册 //////
+control.prototype.bookReplay = function () {
+    if (!core.status.replay.replaying) return;
+    if (!core.status.replay.pausing) {
+        core.drawTip("请先暂停录像");
+        return;
+    }
+    if (core.status.replay.animate || core.isset(core.status.event.id)) {
+        core.drawTip("请等待当前事件的处理结束");
+        return;
+    }
+
+    core.lockControl();
+    core.status.event.id='book';
+    core.useItem('book');
 }
 
 ////// 回放 //////
@@ -2264,18 +2281,14 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.image.fly.style.opacity = 1;
 
         core.statusBar.image.toolbox.src = core.statusBar.icons.rewind.src;
-        core.statusBar.image.toolbox.style.opacity = 1;
 
-        core.statusBar.image.shop.style.opacity = 0;
+        core.statusBar.image.shop.src = core.statusBar.icons.book.src;
 
         core.statusBar.image.save.src = core.statusBar.icons.speedDown.src;
-        core.statusBar.image.save.style.opacity = 1;
 
         core.statusBar.image.load.src = core.statusBar.icons.speedUp.src;
-        core.statusBar.image.load.style.opacity = 1;
 
         core.statusBar.image.settings.src = core.statusBar.icons.save.src;
-        core.statusBar.image.settings.style.opacity = 1;
 
     }
     else {
@@ -2286,18 +2299,14 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.image.fly.style.opacity = core.hasItem('fly')?1:0.3;
 
         core.statusBar.image.toolbox.src = core.statusBar.icons.toolbox.src;
-        core.statusBar.image.toolbox.style.opacity = 1;
 
-        core.statusBar.image.shop.style.opacity = 1;
+        core.statusBar.image.shop.src = core.statusBar.icons.shop.src;
 
         core.statusBar.image.save.src = core.statusBar.icons.save.src;
-        core.statusBar.image.save.style.opacity = 1;
 
         core.statusBar.image.load.src = core.statusBar.icons.load.src;
-        core.statusBar.image.load.style.opacity = 1;
 
         core.statusBar.image.settings.src = core.statusBar.icons.settings.src;
-        core.statusBar.image.settings.style.opacity = 1;
     }
 
     core.updateFg();

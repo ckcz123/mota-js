@@ -67,6 +67,7 @@ editor_blockly = function () {
       MotaActionBlocks['showImage_1_s'].xmlText(),
       MotaActionBlocks['showGif_0_s'].xmlText(),
       MotaActionBlocks['showGif_1_s'].xmlText(),
+      MotaActionBlocks['moveImage_0_s'].xmlText(),
       MotaActionBlocks['tip_s'].xmlText(),
       MotaActionBlocks['openShop_s'].xmlText(),
       MotaActionBlocks['win_s'].xmlText(),
@@ -269,7 +270,7 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
     var varName = error.varName;
     var block = error.block;
     }
-    console.log(error);
+    // console.log(error);
   }
   }
 

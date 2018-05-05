@@ -474,6 +474,21 @@ events.prototype.doAction = function() {
             }
             this.doAction();
             break;
+        case "moveImage": // 图片移动
+            if (core.status.replay.replaying) { // 正在播放录像
+                this.doAction();
+            }
+            else {
+                if (core.isset(data.from) && core.isset(data.to) && core.isset(core.material.images.images[data.name])) {
+                    core.events.moveImage(core.material.images.images[data.name], data.from, data.to, data.time, function() {
+                        core.events.doAction();
+                    });
+                }
+                else {
+                    this.doAction();
+                }
+            }
+            break;
         case "setFg": // 颜色渐变
             core.setFg(data.color, data.time, function() {
                 core.events.doAction();
@@ -1073,7 +1088,38 @@ events.prototype.animateImage = function (type, image, loc, time, callback) {
             core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
-    }, time / 10 / core.status.replay.speed);
+    }, time / 10);
+}
+
+////// 移动图片 //////
+events.prototype.moveImage = function (image, from, to, time, callback) {
+    time = time || 1000;
+    clearInterval(core.interval.tipAnimate);
+    core.setAlpha('data', 1);
+    core.setOpacity('data', 1);
+
+    core.status.replay.animate=true;
+    var fromX = core.calValue(from[0]), fromY = core.calValue(from[1]),
+        toX = core.calValue(to[0]), toY = core.calValue(to[1]);
+    var step = 0;
+    var drawImage = function () {
+        core.clearMap('data', 0, 0, 416, 416);
+        var nowX = parseInt(fromX + (toX-fromX)*step/64);
+        var nowY = parseInt(fromY + (toY-fromY)*step/64);
+        core.canvas.data.drawImage(image, nowX, nowY);
+    }
+
+    drawImage();
+    var animate = setInterval(function () {
+        step++;
+        drawImage();
+        if (step>=64) {
+            clearInterval(animate);
+            core.clearMap('data', 0, 0, 416, 416);
+            core.status.replay.animate=false;
+            if (core.isset(callback)) callback();
+        }
+    }, time / 64);
 }
 
 ////// 打开一个全局商店 //////

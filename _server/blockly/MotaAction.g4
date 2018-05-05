@@ -207,6 +207,7 @@ action
     |   animateImage_1_s
     |   showGif_0_s
     |   showGif_1_s
+    |   moveImage_0_s
     |   setFg_0_s
     |   setFg_1_s
     |   setWeather_s
@@ -408,7 +409,7 @@ trigger_s
 /* trigger_s
 tooltip : trigger: 立即触发另一个地点的事件
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=trigger-%e7%ab%8b%e5%8d%b3%e8%a7%a6%e5%8f%91%e5%8f%a6%e4%b8%80%e4%b8%aa%e5%9c%b0%e7%82%b9%e7%9a%84%e4%ba%8b%e4%bb%b6
-default : [0,0]
+default : ["0","0"]
 colour : this.eventColor
 var code = '{"type": "trigger", "loc": ['+PosString_0+','+PosString_1+']},\n';
 return code;
@@ -527,7 +528,7 @@ openDoor_s
 /* openDoor_s
 tooltip : openDoor: 开门,楼层可不填表示当前层
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=opendoor-%e5%bc%80%e9%97%a8
-default : [0,0,""]
+default : ["","",""]
 colour : this.dataColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "openDoor", "loc": ['+PosString_0+','+PosString_1+']'+IdString_0+'},\n';
@@ -541,7 +542,7 @@ changeFloor_s
 /* changeFloor_s
 tooltip : changeFloor: 楼层切换,动画时间可不填
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=changefloor-%e6%a5%bc%e5%b1%82%e5%88%87%e6%8d%a2
-default : ["MT1",0,0,null,500]
+default : ["MT1","0","0",null,500]
 colour : this.dataColor
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
@@ -556,7 +557,7 @@ changePos_0_s
 /* changePos_0_s
 tooltip : changePos: 当前位置切换
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=changepos-%e5%bd%93%e5%89%8d%e4%bd%8d%e7%bd%ae%e5%88%87%e6%8d%a2%e5%8b%87%e5%a3%ab%e8%bd%ac%e5%90%91
-default : [0,0,null]
+default : ["","",null]
 colour : this.dataColor
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 var code = '{"type": "changePos", "loc": ['+PosString_0+','+PosString_1+']'+DirectionEx_List_0+'},\n';
@@ -632,7 +633,7 @@ showImage_0_s
 /* showImage_0_s
 tooltip : showImage：显示图片
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=showimage%ef%bc%9a%e6%98%be%e7%a4%ba%e5%9b%be%e7%89%87
-default : ["bg.jpg",0,0]
+default : ["bg.jpg","0","0"]
 colour : this.printColor
 var code = '{"type": "showImage", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+']},\n';
 return code;
@@ -657,7 +658,7 @@ animateImage_0_s
 /* animateImage_0_s
 tooltip : animageImage：图片淡入
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=animateimage%ef%bc%9a%e5%9b%be%e7%89%87%e6%b7%a1%e5%85%a5%e6%b7%a1%e5%87%b
-default : ["bg.jpg",0,0,500]
+default : ["bg.jpg","0","0",500]
 colour : this.printColor
 var code = '{"type": "animateImage", "action": "show", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "time": '+Int_0+'},\n';
 return code;
@@ -670,7 +671,7 @@ animateImage_1_s
 /* animateImage_1_s
 tooltip : animageImage：图片淡出
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=animateimage%ef%bc%9a%e5%9b%be%e7%89%87%e6%b7%a1%e5%85%a5%e6%b7%a1%e5%87%b
-default : ["bg.jpg",0,0,500]
+default : ["bg.jpg","0","0",500]
 colour : this.printColor
 var code = '{"type": "animateImage", "action": "hide", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "time": '+Int_0+'},\n';
 return code;
@@ -683,7 +684,7 @@ showGif_0_s
 /* showGif_0_s
 tooltip : showGif：显示动图
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=showgif%ef%bc%9a%e6%98%be%e7%a4%ba%e5%8a%a8%e5%9b%be
-default : ["bg.gif",0,0]
+default : ["bg.gif","0","0"]
 colour : this.printColor
 var code = '{"type": "showGif", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+']},\n';
 return code;
@@ -698,6 +699,20 @@ tooltip : showGif：清除所有显示的动图
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=showgif%ef%bc%9a%e6%98%be%e7%a4%ba%e5%8a%a8%e5%9b%be
 colour : this.printColor
 var code = '{"type": "showGif"},\n';
+return code;
+*/
+
+moveImage_0_s
+    :   '图片移动' EvalString '起点像素位置' 'x' PosString 'y' PosString BGNL
+        '终点像素位置' 'x' PosString 'y' PosString '移动时间' Int Newline
+    ;
+
+/* moveImage_0_s
+tooltip : moveImage：图片移动
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=moveImage%ef%bc%9a%e6%98%be%e7%a4%ba%e5%8a%a8%e5%9b%be
+default : ["bg.jpg","0","0","0","0",500]
+colour : this.printColor
+var code = '{"type": "moveImage", "name": "'+EvalString_0+'", "from": ['+PosString_0+','+PosString_1+'], "to": ['+PosString_2+','+PosString_3+'], "time": '+Int_0+'},\n';
 return code;
 */
 
@@ -1417,6 +1432,11 @@ ActionParser.prototype.parseAction = function() {
             this.next]);
         }
         break;
+    case "moveImage": // 移动图片
+      this.next = MotaActionBlocks['moveImage_0_s'].xmlText([
+        data.name, data.from[0], data.from[1], data.to[0], data.to[1], data.time, this.next
+      ]);
+      break;
     case "setFg": // 颜色渐变
       if(this.isset(data.color)){
         this.next = MotaActionBlocks['setFg_0_s'].xmlText([

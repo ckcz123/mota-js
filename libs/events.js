@@ -166,7 +166,8 @@ events.prototype.gameOver = function (ending, fromReplay) {
         }
 
         var doUpload = function(username) {
-            if (username==null) username="";
+            var hp = core.status.hero.hp;
+            if (username==undefined) hp = 1;
 
             // upload
             var formData = new FormData();
@@ -175,10 +176,10 @@ events.prototype.gameOver = function (ending, fromReplay) {
             formData.append('version', core.firstData.version);
             formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
             formData.append('hard', core.status.hard);
-            formData.append('username', username);
+            formData.append('username', username||"");
             formData.append('ending', ending);
             formData.append('lv', core.status.hero.lv);
-            formData.append('hp', core.status.hero.hp);
+            formData.append('hp', hp);
             formData.append('atk', core.status.hero.atk);
             formData.append('def', core.status.hero.def);
             formData.append('mdef', core.status.hero.mdef);
@@ -198,7 +199,7 @@ events.prototype.gameOver = function (ending, fromReplay) {
         core.ui.drawConfirmBox("你想记录你的ID和成绩吗？", function () {
             doUpload(prompt("请输入你的ID："));
         }, function () {
-            doUpload("");
+            doUpload(undefined);
         })
 
         return;
@@ -210,7 +211,16 @@ events.prototype.gameOver = function (ending, fromReplay) {
         });
     }
     else {
-        confirmUpload();
+
+        if (core.isset(core.values.maxValidHp) && core.status.hero.hp>core.values.maxValidHp) {
+            core.drawText("作弊可耻！", function () {
+                core.restart();
+            });
+        }
+        else {
+            confirmUpload();
+        }
+
     }
 
 }

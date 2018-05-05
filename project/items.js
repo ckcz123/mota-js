@@ -1,180 +1,344 @@
 items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a = 
 {
-
-"items" : {
-        // 钥匙
-        'yellowKey': {'cls': 'keys', 'name': '黄钥匙'},
-        'blueKey': {'cls': 'keys', 'name': '蓝钥匙'},
-        'redKey': {'cls': 'keys', 'name': '红钥匙'},
-
-        // 宝石、血瓶
-        'redJewel': {'cls': 'items', 'name': '红宝石'},
-        'blueJewel': {'cls': 'items', 'name': '蓝宝石'},
-        'greenJewel': {'cls': 'items', 'name': '绿宝石'},
-        'yellowJewel': {'cls': 'items', 'name': '黄宝石'},
-        'redPotion': {'cls': 'items', 'name': '红血瓶'},
-        'bluePotion': {'cls': 'items', 'name': '蓝血瓶'},
-        'yellowPotion': {'cls': 'items', 'name': '黄血瓶'},
-        'greenPotion': {'cls': 'items', 'name': '绿血瓶'},
-        'sword1': {'cls': 'items', 'name': '铁剑', 'isEquipment': true},
-        'sword2': {'cls': 'items', 'name': '银剑', 'isEquipment': true},
-        'sword3': {'cls': 'items', 'name': '骑士剑', 'isEquipment': true},
-        'sword4': {'cls': 'items', 'name': '圣剑', 'isEquipment': true},
-        'sword5': {'cls': 'items', 'name': '神圣剑', 'isEquipment': true},
-        'shield1': {'cls': 'items', 'name': '铁盾', 'isEquipment': true},
-        'shield2': {'cls': 'items', 'name': '银盾', 'isEquipment': true},
-        'shield3': {'cls': 'items', 'name': '骑士盾', 'isEquipment': true},
-        'shield4': {'cls': 'items', 'name': '圣盾', 'isEquipment': true},
-        'shield5': {'cls': 'items', 'name': '神圣盾', 'isEquipment': true},
-        'superPotion': {'cls': 'items', 'name': '圣水'},
-        'moneyPocket': {'cls': 'items', 'name': '金钱袋'},
-
-        // 物品
-        'sword0': {'cls': 'constants', 'name': '折断的剑', 'text': '没有任何作用的剑，相当于脱掉装备。'},
-        'shield0': {'cls': 'constants', 'name': '残破的盾', 'text': '没有任何作用的盾，相当于脱掉装备。'},
-        'book': {'cls': 'constants', 'name': '怪物手册', 'text': '可以查看当前楼层各怪物属性'},
-        'fly': {'cls': 'constants', 'name': '楼层传送器', 'text': '可以自由往来去过的楼层'},
-        'coin': {'cls': 'constants', 'name': '幸运金币', 'text': '持有时打败怪物可得双倍金币'},
-        'snow': {'cls': 'constants', 'name': '冰冻徽章', 'text': '可以将四周的熔岩变成平地'},
-        'cross': {'cls': 'constants', 'name': '十字架', 'text': '持有后无视怪物的无敌属性'},
-        'knife': {'cls': 'constants', 'name': '屠龙匕首', 'text': '该道具尚未被定义'},
-        'shoes': {'cls': 'constants', 'name': '绿鞋', 'text': '持有时无视负面地形'},
-
-        // 道具
-        'bigKey': {'cls': 'tools', 'name': '大黄门钥匙', 'text': '可以开启当前层所有黄门'},
-        'greenKey': {'cls': 'tools', 'name': '绿钥匙', 'text': '可以打开一扇绿门'},
-        'steelKey': {'cls': 'tools', 'name': '铁门钥匙', 'text': '可以打开一扇铁门'},
-        'pickaxe': {'cls': 'tools', 'name': '破墙镐', 'text': '可以破坏勇士面前的墙'},
-        'icePickaxe': {'cls': 'tools', 'name': '破冰镐', 'text': '可以破坏勇士面前的一堵冰墙'},
-        'bomb': {'cls': 'tools', 'name': '炸弹', 'text': '可以炸掉勇士面前的怪物'},
-        'centerFly': {'cls': 'tools', 'name': '中心对称飞行器', 'text': '可以飞向当前楼层中心对称的位置'},
-        'upFly': {'cls': 'tools', 'name': '上楼器', 'text': '可以飞往楼上的相同位置'},
-        'downFly': {'cls': 'tools', 'name': '下楼器', 'text': '可以飞往楼下的相同位置'},
-        'earthquake': {'cls': 'tools', 'name': '地震卷轴', 'text': '可以破坏当前层的所有墙'},
-        'poisonWine': {'cls': 'tools', 'name': '解毒药水', 'text': '可以解除中毒状态'},
-        'weakWine': {'cls': 'tools', 'name': '解衰药水', 'text': '可以解除衰弱状态'},
-        'curseWine': {'cls': 'tools', 'name': '解咒药水', 'text': '可以解除诅咒状态'},
-        'superWine': {'cls': 'tools', 'name': '万能药水', 'text': '可以解除所有不良状态'},
-        'hammer': {'cls': 'tools', 'name': '圣锤', 'text': '可以炸掉勇士面前的怪物'}
-},
-
-
-
-
-"itemEffect" : {
-        "redJewel":"core.status.hero.atk += core.values.redJewel * ratio",
-        "blueJewel":"core.status.hero.def += core.values.blueJewel * ratio",
-        "greenJewel":"core.status.hero.mdef += core.values.greenJewel * ratio",
-        
-        "yellowJewel":"core.status.hero.hp+=1000;core.status.hero.atk+=6;core.status.hero.def+=6;core.status.hero.mdef+=10;",
-        // 黄宝石属性：需自己定义
-        "redPotion":"core.status.hero.hp += core.values.redPotion * ratio",
-        "bluePotion":"core.status.hero.hp += core.values.bluePotion * ratio",
-        "yellowPotion":"core.status.hero.hp += core.values.yellowPotion * ratio",
-        "greenPotion":"core.status.hero.hp += core.values.greenPotion * ratio",
-        "sword1":"core.status.hero.atk += core.values.sword1",
-        "sword2":"core.status.hero.atk += core.values.sword2",
-        "sword3":"core.status.hero.atk += core.values.sword3",
-        "sword4":"core.status.hero.atk += core.values.sword4",
-        "sword5":"core.status.hero.atk += core.values.sword5",
-        "shield1":"core.status.hero.def += core.values.shield1",
-        "shield2":"core.status.hero.def += core.values.shield2",
-        "shield3":"core.status.hero.def += core.values.shield3",
-        "shield4":"core.status.hero.def += core.values.shield4",
-        "shield5":"core.status.hero.def += core.values.shield5",
-        
-        "bigKey":"core.status.hero.items.keys.yellowKey++;core.status.hero.items.keys.blueKey++;core.status.hero.items.keys.redKey++;",
-        // 只有是钥匙盒才会执行这一步
-        "superPotion":"core.status.hero.hp *= 2",
-        "moneyPocket":"core.status.hero.money += core.values.moneyPocket",
-},
-    
-
-"itemEffectTip" : {
-    "redJewel":"'，攻击+'+core.values.redJewel * ratio",
-    "blueJewel":"'，防御+'+core.values.blueJewel * ratio",
-    "greenJewel":"'，魔防+'+core.values.greenJewel * ratio",
-    "yellowJewel":"'，全属性提升'",
-    "redPotion":"'，生命+'+core.values.redPotion * ratio",
-    "bluePotion":"'，生命+'+core.values.bluePotion * ratio",
-    "yellowPotion":"'，生命+'+core.values.yellowPotion * ratio",
-    "greenPotion":"'，生命+'+core.values.greenPotion * ratio",
-    "sword1":"'，攻击+'+core.values.sword1",
-    "sword2":"'，攻击+'+core.values.sword2",
-    "sword3":"'，攻击+'+core.values.sword3",
-    "sword4":"'，攻击+'+core.values.sword4",
-    "sword5":"'，攻击+'+core.values.sword5",
-    "shield1":"'，防御+'+core.values.shield1",
-    "shield2":"'，防御+'+core.values.shield2",
-    "shield3":"'，防御+'+core.values.shield3",
-    "shield4":"'，防御+'+core.values.shield4",
-    "shield5":"'，防御+'+core.values.shield5",
-    "bigKey":"'，全钥匙+1'",
-    "superPotion":"'，生命值翻倍'",
-    "moneyPocket":"'，金币+'+core.values.moneyPocket",
-},
-
-"useItemEffect": {
-    "book": "core.ui.drawBook(0);",
-    "fly": "core.ui.drawFly(core.status.hero.flyRange.indexOf(core.status.floorId));",
-    "earthquake": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n    core.drawHero();\n    core.updateFg();\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n});",
-    "pickaxe": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n    core.drawHero();\n    core.updateFg();\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n});",
-    "icePickaxe": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n    core.drawHero(), 'stop');\n    core.updateFg();\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n});",
-    "snow": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n    core.drawHero();\n    core.updateFg();\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n});",
-    "bigKey": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n    core.drawHero();\n    core.updateFg();\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n});",
-    "bomb": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n    core.drawHero();\n    core.updateFg();\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n    core.events.afterUseBomb();\n});",
-    "hammer": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n    core.drawHero();\n    core.updateFg();\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n    core.events.afterUseBomb();\n});",
-    "centerFly": "core.clearMap('hero', 0, 0, 416, 416);\ncore.setHeroLoc('x', core.status.event.data.x);\ncore.setHeroLoc('y', core.status.event.data.y);\ncore.drawHero();\ncore.drawTip(core.material.items[itemId].name + '使用成功');",
-    "upFly": "var loc = {'direction': core.status.hero.loc.direction, 'x': core.status.event.data.x, 'y': core.status.event.data.y};\ncore.changeFloor(core.status.event.data.id, null, loc, null, function (){\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n    core.replay();\n});",
-    "downFly": "var loc = {'direction': core.status.hero.loc.direction, 'x': core.status.event.data.x, 'y': core.status.event.data.y};\ncore.changeFloor(core.status.event.data.id, null, loc, null, function (){\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n    core.replay();\n});",
-    "poisonWine": "core.setFlag('poison', false);",
-    "weakWine": "core.setFlag('weak', false);\ncore.status.hero.atk += core.values.weakValue;\ncore.status.hero.def += core.values.weakValue;",
-    "curseWine": "core.setFlag('curse', false);",
-    "superWine": "core.setFlag('poison', false);\nif (core.hasFlag('weak')) {\n    core.setFlag('weak', false);\n    core.status.hero.atk += core.values.weakValue;\n    core.status.hero.def += core.values.weakValue;\n}\ncore.setFlag('curse', false);",
-    "sword0": "core.plugin.useEquipment(itemId)",
-    "sword1": "core.plugin.useEquipment(itemId)",
-    "sword2": "core.plugin.useEquipment(itemId)",
-    "sword3": "core.plugin.useEquipment(itemId)",
-    "sword4": "core.plugin.useEquipment(itemId)",
-    "sword5": "core.plugin.useEquipment(itemId)",
-    "shield0": "core.plugin.useEquipment(itemId)",
-    "shield1": "core.plugin.useEquipment(itemId)",
-    "shield2": "core.plugin.useEquipment(itemId)",
-    "shield3": "core.plugin.useEquipment(itemId)",
-    "shield4": "core.plugin.useEquipment(itemId)",
-    "shield5": "core.plugin.useEquipment(itemId)",
-},
-
-"canUseItemEffect": {
-    "book": "true",
-    "fly": "core.status.hero.flyRange.indexOf(core.status.floorId)>=0",
-    "pickaxe": "var able=false;\nvar ids = [];\nfor (var i in core.status.thisMap.blocks) {\n    var block = core.status.thisMap.blocks[i];\n    if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) &&\n        (block.event.id == 'yellowWall' || block.event.id=='whiteWall' || block.event.id=='blueWall')) // 能破哪些墙\n    {\n        // 四个方向\n        if (core.flags.pickaxeFourDirections) {\n            if (Math.abs(block.x-core.status.hero.loc.x)+Math.abs(block.y-core.status.hero.loc.y)<=1) {\n                ids.push(i);\n            }\n        }\n        else {\n            if (block.x == core.nextX() && block.y == core.nextY()) {\n                ids.push(i);\n            }\n        }\n    }\n}\nif (ids.length>0) {\n    core.status.event.data = ids;\n    able=true;\n}\nable",
-    "icePickaxe": "var able=false;\nfor (var i in core.status.thisMap.blocks) {\n    var block = core.status.thisMap.blocks[i];\n    if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.x==core.nextX() && block.y==core.nextY() && block.event.id=='ice') {\n        core.status.event.data = [i];\n        able=true;\n    }\n}\nable",
-    "bomb": "var able=false;\nvar ids = [];\nfor (var i in core.status.thisMap.blocks) {\n    var block = core.status.thisMap.blocks[i];\n    if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls.indexOf('enemy')==0 && Math.abs(block.x-core.status.hero.loc.x)+Math.abs(block.y-core.status.hero.loc.y)<=1) {\n        var enemy = core.material.enemys[block.event.id];\n        if ((core.isset(enemy.bomb) && !enemy.bomb) || (core.isset(enemy.notBomb) && enemy.notBomb)) continue;\n        if (core.flags.bombFourDirections || (block.x==core.nextX() && block.y==core.nextY()))\n            ids.push(i);\n    }\n}\nif (ids.length>0) {\n    core.status.event.data = ids;\n    able=true;\n}\nable",
-    "hammer": "var able=false;\nfor (var i in core.status.thisMap.blocks) {\n    var block = core.status.thisMap.blocks[i];\n    if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls.indexOf('enemy')==0 && block.x==core.nextX() && block.y==core.nextY()) {\n        var enemy = core.material.enemys[block.event.id];\n        ((core.isset(enemy.bomb) && !enemy.bomb) || (core.isset(enemy.notBomb) && enemy.notBomb)) continue;\n        core.status.event.data = [i];\n        able=true;\n    }\n}\nable",
-    "earthquake": "var able=false;\nvar ids = [];\nfor (var i in core.status.thisMap.blocks) {\n    var block = core.status.thisMap.blocks[i];\n    if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && (block.event.id == 'yellowWall' || block.event.id == 'blueWall' || block.event.id == 'whiteWall')) // 能炸的墙壁\n        ids.push(i);\n}\nif (ids.length>0) {\n    core.status.event.data = ids;\n    able=true;\n}\nable",
-    "centerFly": "var able=false;\nvar toX = 12 - core.getHeroLoc('x'), toY = 12-core.getHeroLoc('y');\nvar block = core.getBlock(toX, toY);\nif (block==null) {\n    core.status.event.data = {'x': toX, 'y': toY};\n    able = true;\n}\nable",
-    "upFly": "var able=false;\nvar floorId = core.status.floorId, index = core.floorIds.indexOf(floorId);\nif (index<core.floorIds.length-1) {\n\tvar toId = core.floorIds[index+1], toX = core.getHeroLoc('x'), toY = core.getHeroLoc('y');\n\tif (core.getBlock(toX, toY, toId)==null) {\n\t\tcore.status.event.data = {'id': toId, 'x': toX, 'y': toY};\n\t\table=true;\n\t}\n}\nable",
-    "downFly": "var able=false;\nvar floorId = core.status.floorId, index = core.floorIds.indexOf(floorId);\nif (index>0) {\n\tvar toId = core.floorIds[index-1], toX = core.getHeroLoc('x'), toY = core.getHeroLoc('y');\n\tif (core.getBlock(toX, toY, toId)==null) {\n\t\tcore.status.event.data = {'id': toId, 'x': toX, 'y': toY};\n\t\table=true;\n\t}\n}\nable",
-    "snow": "var able=false;\nvar ids = [];\nfor (var i in core.status.thisMap.blocks) {\n    var block = core.status.thisMap.blocks[i];\n    if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.id == 'lava' && Math.abs(block.x-core.status.hero.loc.x)+Math.abs(block.y-core.status.hero.loc.y)<=1) {\n        ids.push(i);\n    }\n}\nif (ids.length>0) {\n    core.status.event.data = ids;\n    able=true;\n}\nable",
-    "bigKey": "var able=false;\nvar ids = [];\nfor (var i in core.status.thisMap.blocks) {\n    var block = core.status.thisMap.blocks[i];\n    if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.id == 'yellowDoor') {\n        ids.push(i);\n    }\n}\nif (ids.length>0) {\n    core.status.event.data = ids;\n    able=true;\n}\nable",
-    "poisonWine": "core.hasFlag('poison')",
-    "weakWine": "core.hasFlag('weak')",
-    "curseWine": "core.hasFlag('curse')",
-    "superWine": "core.hasFlag('poison') || core.hasFlag('weak') || core.hasFlag('curse')",
-    "sword0": "true",
-    "sword1": "true",
-    "sword2": "true",
-    "sword3": "true",
-    "sword4": "true",
-    "sword5": "true",
-    "shield0": "true",
-    "shield1": "true",
-    "shield2": "true",
-    "shield3": "true",
-    "shield4": "true",
-    "shiled5": "true",
-
-}
-
+	"items": {
+		"yellowKey": {
+			"cls": "keys",
+			"name": "黄钥匙"
+		},
+		"blueKey": {
+			"cls": "keys",
+			"name": "蓝钥匙"
+		},
+		"redKey": {
+			"cls": "keys",
+			"name": "红钥匙"
+		},
+		"redJewel": {
+			"cls": "items",
+			"name": "红宝石"
+		},
+		"blueJewel": {
+			"cls": "items",
+			"name": "蓝宝石"
+		},
+		"greenJewel": {
+			"cls": "items",
+			"name": "绿宝石"
+		},
+		"yellowJewel": {
+			"cls": "items",
+			"name": "黄宝石"
+		},
+		"redPotion": {
+			"cls": "items",
+			"name": "红血瓶"
+		},
+		"bluePotion": {
+			"cls": "items",
+			"name": "蓝血瓶"
+		},
+		"yellowPotion": {
+			"cls": "items",
+			"name": "黄血瓶"
+		},
+		"greenPotion": {
+			"cls": "items",
+			"name": "绿血瓶"
+		},
+		"sword1": {
+			"cls": "items",
+			"name": "铁剑",
+			"isEquipment": true,
+			"text": "一把很普通的铁剑"
+		},
+		"sword2": {
+			"cls": "items",
+			"name": "银剑",
+			"isEquipment": true,
+			"text": "一把很普通的银剑"
+		},
+		"sword3": {
+			"cls": "items",
+			"name": "骑士剑",
+			"isEquipment": true,
+			"text": "一把很普通的骑士剑"
+		},
+		"sword4": {
+			"cls": "items",
+			"name": "圣剑",
+			"isEquipment": true,
+			"text": "一把很普通的圣剑"
+		},
+		"sword5": {
+			"cls": "items",
+			"name": "神圣剑",
+			"isEquipment": true,
+			"text": "一把很普通的神圣剑"
+		},
+		"shield1": {
+			"cls": "items",
+			"name": "铁盾",
+			"isEquipment": true,
+			"text": "一个很普通的铁盾"
+		},
+		"shield2": {
+			"cls": "items",
+			"name": "银盾",
+			"isEquipment": true,
+			"text": "一个很普通的银盾"
+		},
+		"shield3": {
+			"cls": "items",
+			"name": "骑士盾",
+			"isEquipment": true,
+			"text": "一个很普通的骑士盾"
+		},
+		"shield4": {
+			"cls": "items",
+			"name": "圣盾",
+			"isEquipment": true,
+			"text": "一个很普通的圣盾"
+		},
+		"shield5": {
+			"cls": "items",
+			"name": "神圣盾",
+			"isEquipment": true,
+			"text": "一个很普通的神圣盾"
+		},
+		"superPotion": {
+			"cls": "items",
+			"name": "圣水"
+		},
+		"moneyPocket": {
+			"cls": "items",
+			"name": "金钱袋"
+		},
+		"sword0": {
+			"cls": "constants",
+			"name": "折断的剑",
+			"text": "没有任何作用的剑，相当于脱掉装备。"
+		},
+		"shield0": {
+			"cls": "constants",
+			"name": "残破的盾",
+			"text": "没有任何作用的盾，相当于脱掉装备。"
+		},
+		"book": {
+			"cls": "constants",
+			"name": "怪物手册",
+			"text": "可以查看当前楼层各怪物属性"
+		},
+		"fly": {
+			"cls": "constants",
+			"name": "楼层传送器",
+			"text": "可以自由往来去过的楼层"
+		},
+		"coin": {
+			"cls": "constants",
+			"name": "幸运金币",
+			"text": "持有时打败怪物可得双倍金币"
+		},
+		"snow": {
+			"cls": "constants",
+			"name": "冰冻徽章",
+			"text": "可以将四周的熔岩变成平地"
+		},
+		"cross": {
+			"cls": "constants",
+			"name": "十字架",
+			"text": "持有后无视怪物的无敌属性"
+		},
+		"knife": {
+			"cls": "constants",
+			"name": "屠龙匕首",
+			"text": "该道具尚未被定义"
+		},
+		"shoes": {
+			"cls": "constants",
+			"name": "绿鞋",
+			"text": "持有时无视负面地形"
+		},
+		"bigKey": {
+			"cls": "tools",
+			"name": "大黄门钥匙",
+			"text": "可以开启当前层所有黄门"
+		},
+		"greenKey": {
+			"cls": "tools",
+			"name": "绿钥匙",
+			"text": "可以打开一扇绿门"
+		},
+		"steelKey": {
+			"cls": "tools",
+			"name": "铁门钥匙",
+			"text": "可以打开一扇铁门"
+		},
+		"pickaxe": {
+			"cls": "tools",
+			"name": "破墙镐",
+			"text": "可以破坏勇士面前的墙"
+		},
+		"icePickaxe": {
+			"cls": "tools",
+			"name": "破冰镐",
+			"text": "可以破坏勇士面前的一堵冰墙"
+		},
+		"bomb": {
+			"cls": "tools",
+			"name": "炸弹",
+			"text": "可以炸掉勇士面前的怪物"
+		},
+		"centerFly": {
+			"cls": "tools",
+			"name": "中心对称飞行器",
+			"text": "可以飞向当前楼层中心对称的位置"
+		},
+		"upFly": {
+			"cls": "tools",
+			"name": "上楼器",
+			"text": "可以飞往楼上的相同位置"
+		},
+		"downFly": {
+			"cls": "tools",
+			"name": "下楼器",
+			"text": "可以飞往楼下的相同位置"
+		},
+		"earthquake": {
+			"cls": "tools",
+			"name": "地震卷轴",
+			"text": "可以破坏当前层的所有墙"
+		},
+		"poisonWine": {
+			"cls": "tools",
+			"name": "解毒药水",
+			"text": "可以解除中毒状态"
+		},
+		"weakWine": {
+			"cls": "tools",
+			"name": "解衰药水",
+			"text": "可以解除衰弱状态"
+		},
+		"curseWine": {
+			"cls": "tools",
+			"name": "解咒药水",
+			"text": "可以解除诅咒状态"
+		},
+		"superWine": {
+			"cls": "tools",
+			"name": "万能药水",
+			"text": "可以解除所有不良状态"
+		},
+		"hammer": {
+			"cls": "tools",
+			"name": "圣锤",
+			"text": "可以炸掉勇士面前的怪物"
+		}
+	},
+	"itemEffect": {
+		"redJewel": "core.status.hero.atk += core.values.redJewel * ratio",
+		"blueJewel": "core.status.hero.def += core.values.blueJewel * ratio",
+		"greenJewel": "core.status.hero.mdef += core.values.greenJewel * ratio",
+		"yellowJewel": "core.status.hero.hp+=1000;core.status.hero.atk+=6;core.status.hero.def+=6;core.status.hero.mdef+=10;",
+		"redPotion": "core.status.hero.hp += core.values.redPotion * ratio",
+		"bluePotion": "core.status.hero.hp += core.values.bluePotion * ratio",
+		"yellowPotion": "core.status.hero.hp += core.values.yellowPotion * ratio",
+		"greenPotion": "core.status.hero.hp += core.values.greenPotion * ratio",
+		"sword1": "core.status.hero.atk += core.values.sword1",
+		"sword2": "core.status.hero.atk += core.values.sword2",
+		"sword3": "core.status.hero.atk += core.values.sword3",
+		"sword4": "core.status.hero.atk += core.values.sword4",
+		"sword5": "core.status.hero.atk += core.values.sword5",
+		"shield1": "core.status.hero.def += core.values.shield1",
+		"shield2": "core.status.hero.def += core.values.shield2",
+		"shield3": "core.status.hero.def += core.values.shield3",
+		"shield4": "core.status.hero.def += core.values.shield4",
+		"shield5": "core.status.hero.def += core.values.shield5",
+		"bigKey": "core.status.hero.items.keys.yellowKey++;core.status.hero.items.keys.blueKey++;core.status.hero.items.keys.redKey++;",
+		"superPotion": "core.status.hero.hp *= 2",
+		"moneyPocket": "core.status.hero.money += core.values.moneyPocket"
+	},
+	"itemEffectTip": {
+		"redJewel": "'，攻击+'+core.values.redJewel * ratio",
+		"blueJewel": "'，防御+'+core.values.blueJewel * ratio",
+		"greenJewel": "'，魔防+'+core.values.greenJewel * ratio",
+		"yellowJewel": "'，全属性提升'",
+		"redPotion": "'，生命+'+core.values.redPotion * ratio",
+		"bluePotion": "'，生命+'+core.values.bluePotion * ratio",
+		"yellowPotion": "'，生命+'+core.values.yellowPotion * ratio",
+		"greenPotion": "'，生命+'+core.values.greenPotion * ratio",
+		"sword1": "'，攻击+'+core.values.sword1",
+		"sword2": "'，攻击+'+core.values.sword2",
+		"sword3": "'，攻击+'+core.values.sword3",
+		"sword4": "'，攻击+'+core.values.sword4",
+		"sword5": "'，攻击+'+core.values.sword5",
+		"shield1": "'，防御+'+core.values.shield1",
+		"shield2": "'，防御+'+core.values.shield2",
+		"shield3": "'，防御+'+core.values.shield3",
+		"shield4": "'，防御+'+core.values.shield4",
+		"shield5": "'，防御+'+core.values.shield5",
+		"bigKey": "'，全钥匙+1'",
+		"superPotion": "'，生命值翻倍'",
+		"moneyPocket": "'，金币+'+core.values.moneyPocket"
+	},
+	"useItemEffect": {
+		"book": "core.ui.drawBook(0);",
+		"fly": "core.ui.drawFly(core.status.hero.flyRange.indexOf(core.status.floorId));",
+		"earthquake": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n    core.drawHero();\n    core.updateFg();\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n});",
+		"pickaxe": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n    core.drawHero();\n    core.updateFg();\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n});",
+		"icePickaxe": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n    core.drawHero(), 'stop');\n    core.updateFg();\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n});",
+		"snow": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n    core.drawHero();\n    core.updateFg();\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n});",
+		"bigKey": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n    core.drawHero();\n    core.updateFg();\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n});",
+		"bomb": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n    core.drawHero();\n    core.updateFg();\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n    core.events.afterUseBomb();\n});",
+		"hammer": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n    core.drawHero();\n    core.updateFg();\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n    core.events.afterUseBomb();\n});",
+		"centerFly": "core.clearMap('hero', 0, 0, 416, 416);\ncore.setHeroLoc('x', core.status.event.data.x);\ncore.setHeroLoc('y', core.status.event.data.y);\ncore.drawHero();\ncore.drawTip(core.material.items[itemId].name + '使用成功');",
+		"upFly": "var loc = {'direction': core.status.hero.loc.direction, 'x': core.status.event.data.x, 'y': core.status.event.data.y};\ncore.changeFloor(core.status.event.data.id, null, loc, null, function (){\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n    core.replay();\n});",
+		"downFly": "var loc = {'direction': core.status.hero.loc.direction, 'x': core.status.event.data.x, 'y': core.status.event.data.y};\ncore.changeFloor(core.status.event.data.id, null, loc, null, function (){\n    core.drawTip(core.material.items[itemId].name + '使用成功');\n    core.replay();\n});",
+		"poisonWine": "core.setFlag('poison', false);",
+		"weakWine": "core.setFlag('weak', false);\ncore.status.hero.atk += core.values.weakValue;\ncore.status.hero.def += core.values.weakValue;",
+		"curseWine": "core.setFlag('curse', false);",
+		"superWine": "core.setFlag('poison', false);\nif (core.hasFlag('weak')) {\n    core.setFlag('weak', false);\n    core.status.hero.atk += core.values.weakValue;\n    core.status.hero.def += core.values.weakValue;\n}\ncore.setFlag('curse', false);",
+		"sword0": "core.plugin.useEquipment(itemId)",
+		"sword1": "core.plugin.useEquipment(itemId)",
+		"sword2": "core.plugin.useEquipment(itemId)",
+		"sword3": "core.plugin.useEquipment(itemId)",
+		"sword4": "core.plugin.useEquipment(itemId)",
+		"sword5": "core.plugin.useEquipment(itemId)",
+		"shield0": "core.plugin.useEquipment(itemId)",
+		"shield1": "core.plugin.useEquipment(itemId)",
+		"shield2": "core.plugin.useEquipment(itemId)",
+		"shield3": "core.plugin.useEquipment(itemId)",
+		"shield4": "core.plugin.useEquipment(itemId)",
+		"shield5": "core.plugin.useEquipment(itemId)"
+	},
+	"canUseItemEffect": {
+		"book": "true",
+		"fly": "core.status.hero.flyRange.indexOf(core.status.floorId)>=0",
+		"pickaxe": "var able=false;\nvar ids = [];\nfor (var i in core.status.thisMap.blocks) {\n    var block = core.status.thisMap.blocks[i];\n    if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) &&\n        (block.event.id == 'yellowWall' || block.event.id=='whiteWall' || block.event.id=='blueWall')) // 能破哪些墙\n    {\n        // 四个方向\n        if (core.flags.pickaxeFourDirections) {\n            if (Math.abs(block.x-core.status.hero.loc.x)+Math.abs(block.y-core.status.hero.loc.y)<=1) {\n                ids.push(i);\n            }\n        }\n        else {\n            if (block.x == core.nextX() && block.y == core.nextY()) {\n                ids.push(i);\n            }\n        }\n    }\n}\nif (ids.length>0) {\n    core.status.event.data = ids;\n    able=true;\n}\nable",
+		"icePickaxe": "var able=false;\nfor (var i in core.status.thisMap.blocks) {\n    var block = core.status.thisMap.blocks[i];\n    if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.x==core.nextX() && block.y==core.nextY() && block.event.id=='ice') {\n        core.status.event.data = [i];\n        able=true;\n    }\n}\nable",
+		"bomb": "var able=false;\nvar ids = [];\nfor (var i in core.status.thisMap.blocks) {\n    var block = core.status.thisMap.blocks[i];\n    if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls.indexOf('enemy')==0 && Math.abs(block.x-core.status.hero.loc.x)+Math.abs(block.y-core.status.hero.loc.y)<=1) {\n        var enemy = core.material.enemys[block.event.id];\n        if ((core.isset(enemy.bomb) && !enemy.bomb) || (core.isset(enemy.notBomb) && enemy.notBomb)) continue;\n        if (core.flags.bombFourDirections || (block.x==core.nextX() && block.y==core.nextY()))\n            ids.push(i);\n    }\n}\nif (ids.length>0) {\n    core.status.event.data = ids;\n    able=true;\n}\nable",
+		"hammer": "var able=false;\nfor (var i in core.status.thisMap.blocks) {\n    var block = core.status.thisMap.blocks[i];\n    if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls.indexOf('enemy')==0 && block.x==core.nextX() && block.y==core.nextY()) {\n        var enemy = core.material.enemys[block.event.id];\n        ((core.isset(enemy.bomb) && !enemy.bomb) || (core.isset(enemy.notBomb) && enemy.notBomb)) continue;\n        core.status.event.data = [i];\n        able=true;\n    }\n}\nable",
+		"earthquake": "var able=false;\nvar ids = [];\nfor (var i in core.status.thisMap.blocks) {\n    var block = core.status.thisMap.blocks[i];\n    if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && (block.event.id == 'yellowWall' || block.event.id == 'blueWall' || block.event.id == 'whiteWall')) // 能炸的墙壁\n        ids.push(i);\n}\nif (ids.length>0) {\n    core.status.event.data = ids;\n    able=true;\n}\nable",
+		"centerFly": "var able=false;\nvar toX = 12 - core.getHeroLoc('x'), toY = 12-core.getHeroLoc('y');\nvar block = core.getBlock(toX, toY);\nif (block==null) {\n    core.status.event.data = {'x': toX, 'y': toY};\n    able = true;\n}\nable",
+		"upFly": "var able=false;\nvar floorId = core.status.floorId, index = core.floorIds.indexOf(floorId);\nif (index<core.floorIds.length-1) {\n\tvar toId = core.floorIds[index+1], toX = core.getHeroLoc('x'), toY = core.getHeroLoc('y');\n\tif (core.getBlock(toX, toY, toId)==null) {\n\t\tcore.status.event.data = {'id': toId, 'x': toX, 'y': toY};\n\t\table=true;\n\t}\n}\nable",
+		"downFly": "var able=false;\nvar floorId = core.status.floorId, index = core.floorIds.indexOf(floorId);\nif (index>0) {\n\tvar toId = core.floorIds[index-1], toX = core.getHeroLoc('x'), toY = core.getHeroLoc('y');\n\tif (core.getBlock(toX, toY, toId)==null) {\n\t\tcore.status.event.data = {'id': toId, 'x': toX, 'y': toY};\n\t\table=true;\n\t}\n}\nable",
+		"snow": "var able=false;\nvar ids = [];\nfor (var i in core.status.thisMap.blocks) {\n    var block = core.status.thisMap.blocks[i];\n    if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.id == 'lava' && Math.abs(block.x-core.status.hero.loc.x)+Math.abs(block.y-core.status.hero.loc.y)<=1) {\n        ids.push(i);\n    }\n}\nif (ids.length>0) {\n    core.status.event.data = ids;\n    able=true;\n}\nable",
+		"bigKey": "var able=false;\nvar ids = [];\nfor (var i in core.status.thisMap.blocks) {\n    var block = core.status.thisMap.blocks[i];\n    if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.id == 'yellowDoor') {\n        ids.push(i);\n    }\n}\nif (ids.length>0) {\n    core.status.event.data = ids;\n    able=true;\n}\nable",
+		"poisonWine": "core.hasFlag('poison')",
+		"weakWine": "core.hasFlag('weak')",
+		"curseWine": "core.hasFlag('curse')",
+		"superWine": "core.hasFlag('poison') || core.hasFlag('weak') || core.hasFlag('curse')",
+		"sword0": "true",
+		"sword1": "true",
+		"sword2": "true",
+		"sword3": "true",
+		"sword4": "true",
+		"sword5": "true",
+		"shield0": "true",
+		"shield1": "true",
+		"shield2": "true",
+		"shield3": "true",
+		"shield4": "true",
+		"shiled5": "true",
+		"shield5": "true"
+	}
 }

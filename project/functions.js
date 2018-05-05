@@ -14,19 +14,17 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.flags.bombFourDirections)
 		core.material.items.bomb.text = "可以炸掉勇士四周的怪物";
 	if (core.flags.equipment) {
-		core.material.items.sword1 = {'cls': 'constants', 'name': '铁剑', 'text': '一把很普通的铁剑'};
-		core.material.items.sword2 = {'cls': 'constants', 'name': '银剑', 'text': '一把很普通的银剑'};
-		core.material.items.sword3 = {'cls': 'constants', 'name': '骑士剑', 'text': '一把很普通的骑士剑'};
-		core.material.items.sword4 = {'cls': 'constants', 'name': '圣剑', 'text': '一把很普通的圣剑'};
-		core.material.items.sword5 = {'cls': 'constants', 'name': '神圣剑', 'text': '一把很普通的神圣剑'};
-		core.material.items.shield1 = {'cls': 'constants', 'name': '铁盾', 'text': '一个很普通的铁盾'};
-		core.material.items.shield2 = {'cls': 'constants', 'name': '银盾', 'text': '一个很普通的银盾'};
-		core.material.items.shield3 = {'cls': 'constants', 'name': '骑士盾', 'text': '一个很普通的骑士盾'};
-		core.material.items.shield4 = {'cls': 'constants', 'name': '圣盾', 'text': '一个很普通的圣盾'};
-		core.material.items.shield5 = {'cls': 'constants', 'name': '神圣盾', 'text': '一个很普通的神圣盾'};
+		core.material.items.sword1.cls = 'constants';
+        core.material.items.sword2.cls = 'constants';
+        core.material.items.sword3.cls = 'constants';
+        core.material.items.sword4.cls = 'constants';
+        core.material.items.sword5.cls = 'constants';
+        core.material.items.shield1.cls = 'constants';
+        core.material.items.shield2.cls = 'constants';
+        core.material.items.shield3.cls = 'constants';
+        core.material.items.shield4.cls = 'constants';
+        core.material.items.shield5.cls = 'constants';
 	}
-
-
 },
 ////// 不同难度分别设置初始属性 //////
 "setInitData":function (hard) {

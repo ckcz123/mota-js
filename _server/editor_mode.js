@@ -308,11 +308,13 @@ editor_mode = function (editor) {
         if (Object.keys(editor.info).length !== 0) editor_mode.info = editor.info;//避免editor.info被清空导致无法获得是物品还是怪物
 
         if (!core.isset(editor_mode.info.id)) {
-            document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML = '';
-            document.getElementById('newIdIdnum').style.display = '';
+            // document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML = '';
+            document.getElementById('enemyItemTable').style.display = 'none';
+            document.getElementById('newIdIdnum').style.display = 'block';
             return;
         }
         document.getElementById('newIdIdnum').style.display = 'none';
+        document.getElementById('enemyItemTable').style.display = 'block';
 
         var objs = [];
         if (editor_mode.info.images == 'enemys' || editor_mode.info.images == 'enemy48') {
@@ -403,6 +405,16 @@ editor_mode = function (editor) {
             } else {
                 printe('请输入id和idnum');
             }
+        }
+
+        newIdIdnum.children[4].onclick = function () {
+            editor.file.autoRegister(editor_mode.info, function (err) {
+                if (err) {
+                    printe(err);
+                    throw(err)
+                }
+                printe('该列所有剩余项全部自动注册成功,请F5刷新编辑器');
+            })
         }
 
         var selectFloor = document.getElementById('selectFloor');

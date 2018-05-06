@@ -354,8 +354,8 @@ utils.prototype.rand2 = function (num) {
     var value;
     if (core.status.replay.replaying) {
         var action = core.status.replay.toReplay.shift();
-        if (action.indexOf("input:")==0 ) {
-            value=parseInt(action.substring(6));
+        if (action.indexOf("random:")==0 ) {
+            value=parseInt(action.substring(7));
         }
         else {
             core.stopReplay();

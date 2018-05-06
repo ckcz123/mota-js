@@ -2344,7 +2344,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         statusWidth, statusHeight, statusMaxWidth,statusLabelsLH,
         toolBarWidth, toolBarHeight, toolBarTop, toolBarBorder,
         toolsWidth, toolsHeight,toolsMargin,toolsPMaxwidth,
-        fontSize, toolbarFontSize, margin;
+        fontSize, toolbarFontSize, margin, statusBackground, toolsBackground;
 
     var count = core.dom.statusBar.children.length;
     if (!core.flags.enableFloor) count--;
@@ -2403,12 +2403,14 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             statusHeight = scale*BASE_LINEHEIGHT * .8;
             statusLabelsLH = .8 * BASE_LINEHEIGHT *scale;
             statusMaxWidth = scale * DEFAULT_BAR_WIDTH * .95;
+            statusBackground = main.statusTopBackground;
             toolBarHeight = tempBotBarH;
 
             toolBarTop = statusBarHeight + canvasWidth;
             toolBarBorder = '3px #fff solid';
             toolsHeight = scale * BASE_LINEHEIGHT;
             toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH * .4;
+            toolsBackground = main.toolsBackground;
             borderRight = '3px #fff solid';
 
             margin = scale * SPACE * 2;
@@ -2423,15 +2425,17 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             canvasTop = 0;
             // canvasLeft = DEFAULT_BAR_WIDTH * scale;
             toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH * scale;
-            statusBarHeight = scale * statusLineHeight * count + SPACE * 2; //一共有9行加上两个padding空隙
+            statusBarHeight = gameGroupHeight - SPACE;
             statusBarBorder = '3px #fff solid';
+            statusBackground = main.statusLeftBackground;
 
             statusHeight = scale*statusLineHeight * .8;
             statusLabelsLH = .8 * statusLineHeight *scale;
-            toolBarHeight = canvasWidth - statusBarHeight;
             toolBarTop = scale*statusLineHeight * count + SPACE * 2;
+            toolBarHeight = canvasWidth - toolBarTop;
             toolBarBorder = '3px #fff solid';
             toolsHeight = scale * BASE_LINEHEIGHT;
+            toolsBackground = 'transparent';
             fontSize = statusLineFontSize * scale;
             toolbarFontSize = DEFAULT_FONT_SIZE * scale;
             borderRight = '';
@@ -2454,12 +2458,15 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         // canvasLeft = DEFAULT_BAR_WIDTH;
 
         toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH;
-        statusBarHeight = statusLineHeight * count + SPACE * 2; //一共有9行
+        // statusBarHeight = statusLineHeight * count + SPACE * 2; //一共有9行
+        statusBackground = main.statusLeftBackground;
+        statusBarHeight = gameGroupHeight - SPACE;
 
         statusHeight = statusLineHeight * .8;
         statusLabelsLH = .8 * statusLineHeight;
-        toolBarHeight = DEFAULT_CANVAS_WIDTH - statusBarHeight;
         toolBarTop = statusLineHeight * count + SPACE * 2;
+        toolBarHeight = DEFAULT_CANVAS_WIDTH - toolBarTop;
+        toolsBackground = 'transparent';
 
         toolsHeight = BASE_LINEHEIGHT;
         borderRight = '';
@@ -2540,7 +2547,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 borderTop: statusBarBorder,
                 borderLeft: statusBarBorder,
                 borderRight: borderRight,
-                fontSize: fontSize + unit
+                fontSize: fontSize + unit,
+                background: statusBackground,
             }
         },
         {
@@ -2570,7 +2578,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 borderBottom: toolBarBorder,
                 borderLeft: toolBarBorder,
                 borderRight: borderRight,
-                fontSize: toolbarFontSize + unit
+                fontSize: toolbarFontSize + unit,
+                background: toolsBackground,
             }
         },
         {

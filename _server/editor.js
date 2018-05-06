@@ -206,16 +206,16 @@ editor.prototype.drawEventBlock = function () {
             else if (core.isset(editor.currentFloorData.changeFloor[loc]))
                 color = '#00FF00';
             else if (core.isset(editor.currentFloorData.afterBattle[loc]))
-                color = '#0000FF';
-            else if (core.isset(editor.currentFloorData.afterGetItem[loc]))
                 color = '#FFFF00';
+            else if (core.isset(editor.currentFloorData.afterGetItem[loc]))
+                color = '#00FFFF';
             else if (core.isset(editor.currentFloorData.afterOpenDoor[loc]))
                 color = '#FF00FF';
             else if (core.isset(editor.currentFloorData.cannotMove[loc]))
-                color = '#00FFFF';
+                color = '#0000FF';
             if (color!=null) {
                 fg.fillStyle = color;
-                fg.fillRect(32*i, 32*j+32-12, 12, 12);
+                fg.fillRect(32*i, 32*j+32-8, 8, 8);
             }
         }
     }

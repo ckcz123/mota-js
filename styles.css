@@ -170,7 +170,7 @@
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     background: url(project/images/ground.png) repeat;
-    z-index: 160;
+    z-index: 150;
     display: none;
 }
 #statusBar .status{
@@ -199,7 +199,7 @@
 #toolBar {
     position: absolute;
     background: url(project/images/ground.png) repeat;
-    z-index: 150;
+    z-index: 160;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;

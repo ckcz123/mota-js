@@ -46,7 +46,22 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "textarea",
                     "_data": "难度选择:每个数组的第一个是其在标题界面显示的难度,第二个是在游戏内部传输的字符串,会显示在状态栏,修改此处后需要在project/functions中作相应更改"
-                }
+                },
+                "statusLeftBackground": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_data": "横屏时左侧状态栏的背景样式，可以定义背景图、平铺方式等。\n具体请网上搜索\"css background\"了解写法。\n如果弄一张图片作为背景图，推荐写法：\n\"url(project/images/XXX.png) 0 0/100% 100% no-repeat\"\n图片最好进行一些压缩等操作节省流量。"
+                },
+                "statusTopBackground": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_data": "竖屏时上方状态栏的背景样式，可以定义背景图、平铺方式等。\n具体请网上搜索\"css background\"了解写法。\n如果弄一张图片作为背景图，推荐写法：\n\"url(project/images/XXX.png) 0 0/100% 100% no-repeat\"\n图片最好进行一些压缩等操作节省流量。"
+                },
+                "toolsBackground": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_data": "竖屏时下方道具栏的背景样式，可以定义背景图、平铺方式等。\n具体请网上搜索\"css background\"了解写法。\n如果弄一张图片作为背景图，推荐写法：\n\"url(project/images/XXX.png) 0 0/100% 100% no-repeat\"\n图片最好进行一些压缩等操作节省流量。"
+                },
             }
         },
         "firstData": {
@@ -339,6 +354,12 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "textarea",
                     "_data": "仇恨属性中，每杀死一个怪物获得的仇恨值"
+                },
+                "maxValidHp": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_range": "thiseval==null||thiseval>0",
+                    "_data": "最大合法生命值；如果此项不为null且用户通关血量超过本值，则视为作弊，不上传成绩"
                 },
                 "animateSpeed": {
                     "_leaf": true,

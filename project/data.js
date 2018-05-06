@@ -19,11 +19,14 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"startBackground" : "bg.jpg",
 		"startLogoStyle" : "color: black",
 		"levelChoose" : [["简单","Easy"],["普通","Normal"],["困难","Hard"],["噩梦","Hell"]],
+		"statusLeftBackground": "url(project/images/ground.png) repeat",
+		"statusTopBackground": "url(project/images/ground.png) repeat",
+		"toolsBackground": "url(project/images/ground.png) repeat"
 	},
 	"firstData" : {
 		"title": "魔塔样板",
 		"name": "template",
-		"version": "Ver 2.1.1",
+		"version": "Ver 2.2",
 		"floorId": "sample0",
 		"hero": { 
 			"name": "阳光",
@@ -129,6 +132,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		'counterAttack': 0.1,
 		'purify': 3,
 		'hatred': 2,
+		'maxValidHp': null,
 		'animateSpeed': 300,
 	},
 	

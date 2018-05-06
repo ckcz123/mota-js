@@ -48,61 +48,51 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"sword1": {
 			"cls": "items",
 			"name": "铁剑",
-			"isEquipment": true,
 			"text": "一把很普通的铁剑"
 		},
 		"sword2": {
 			"cls": "items",
 			"name": "银剑",
-			"isEquipment": true,
 			"text": "一把很普通的银剑"
 		},
 		"sword3": {
 			"cls": "items",
 			"name": "骑士剑",
-			"isEquipment": true,
 			"text": "一把很普通的骑士剑"
 		},
 		"sword4": {
 			"cls": "items",
 			"name": "圣剑",
-			"isEquipment": true,
 			"text": "一把很普通的圣剑"
 		},
 		"sword5": {
 			"cls": "items",
 			"name": "神圣剑",
-			"isEquipment": true,
 			"text": "一把很普通的神圣剑"
 		},
 		"shield1": {
 			"cls": "items",
 			"name": "铁盾",
-			"isEquipment": true,
 			"text": "一个很普通的铁盾"
 		},
 		"shield2": {
 			"cls": "items",
 			"name": "银盾",
-			"isEquipment": true,
 			"text": "一个很普通的银盾"
 		},
 		"shield3": {
 			"cls": "items",
 			"name": "骑士盾",
-			"isEquipment": true,
 			"text": "一个很普通的骑士盾"
 		},
 		"shield4": {
 			"cls": "items",
 			"name": "圣盾",
-			"isEquipment": true,
 			"text": "一个很普通的圣盾"
 		},
 		"shield5": {
 			"cls": "items",
 			"name": "神圣盾",
-			"isEquipment": true,
 			"text": "一个很普通的神圣盾"
 		},
 		"superPotion": {

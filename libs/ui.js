@@ -1513,7 +1513,7 @@ ui.prototype.drawToolbox = function(index) {
     if (core.isset(selectId)) {
         var item=core.material.items[selectId];
         core.fillText('ui', item.name, 10, 32, '#FFD700', "bold 20px Verdana")
-        core.fillText('ui', item.text, 10, 62, '#FFFFFF', '17px Verdana');
+        core.fillText('ui', item.text||"该道具暂无描述。", 10, 62, '#FFFFFF', '17px Verdana');
         core.fillText('ui', '<继续点击该道具即可进行使用>', 10, 89, '#CCCCCC', '14px Verdana');
     }
 

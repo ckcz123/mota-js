@@ -189,7 +189,10 @@ events.prototype.gameOver = function (ending, fromReplay) {
             formData.append('seed', core.getFlag('seed'));
             formData.append('route', core.encodeRoute(core.status.route));
 
-            core.http("POST", "/games/upload.php", formData);
+            if (main.isCompetition)
+                core.http("POST", "/games/competition/upload.php", formData);
+            else
+                core.http("POST", "/games/upload.php", formData);
 
             setTimeout(function() {
                 confirmDownload();
@@ -197,9 +200,17 @@ events.prototype.gameOver = function (ending, fromReplay) {
         }
 
         core.ui.drawConfirmBox("你想记录你的ID和成绩吗？", function () {
-            doUpload(prompt("请输入你的ID："));
+            if (main.isCompetition) {
+                doUpload("");
+            }
+            else {
+                doUpload(prompt("请输入你的ID："));
+            }
         }, function () {
-            doUpload(undefined);
+            if (main.isCompetition)
+                confirmDownload();
+            else
+                doUpload(undefined);
         })
 
         return;

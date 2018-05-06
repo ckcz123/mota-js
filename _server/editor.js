@@ -193,6 +193,8 @@ editor.prototype.drawMapBg = function (img) {
     }
 }
 
+editor.prototype
+
 editor.prototype.updateMap = function () {
     var blocks = main.editor.mapIntoBlocks(editor.map.map(function (v) {
         return v.map(function (v) {

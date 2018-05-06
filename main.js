@@ -12,6 +12,8 @@ function main() {
     this.bgmRemote = false; // 是否采用远程BGM
     this.bgmRemoteRoot = "https://gitee.com/ckcz123/h5music/raw/master/"; // 远程BGM的根目录
 
+    this.isCompetition = false; // 是否是比赛模式
+
     //------------------------ 用户修改内容 END ------------------------//
 
     this.dom = {

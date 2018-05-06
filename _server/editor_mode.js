@@ -195,7 +195,8 @@ editor_mode = function (editor) {
                         printe(objs_.slice(-1)[0]);
                         throw(objs_.slice(-1)[0])
                     }
-                    ;printf('修改成功')
+                    ;printf('修改成功');
+                    editor.drawEventBlock();
                 });
                 break;
             case 'emenyitem':
@@ -222,7 +223,7 @@ editor_mode = function (editor) {
                             printe(objs_.slice(-1)[0]);
                             throw(objs_.slice(-1)[0])
                         }
-                        ;printf('修改成功')
+                        ;printf('修改成功');
                     });
                 }
                 break;
@@ -233,7 +234,7 @@ editor_mode = function (editor) {
                         printe(objs_.slice(-1)[0]);
                         throw(objs_.slice(-1)[0])
                     }
-                    ;printf('修改成功')
+                    ;printf('修改成功');
                 });
                 break;
             case 'tower':

@@ -170,10 +170,13 @@ utils.prototype.setTwoDigits = function (x) {
 }
 
 utils.prototype.formatBigNumber = function (x) {
-    x = parseFloat(x);
+    x = Math.floor(parseFloat(x));
     if (!core.isset(x)) return '???';
 
-    if (x<=999999) return x;
+    var c = x<0?"-":"";
+    x = Math.abs(x);
+
+    if (x<=999999) return c + x;
 
     var all = [
         {"val": 1e20, "c": "g"},
@@ -187,11 +190,11 @@ utils.prototype.formatBigNumber = function (x) {
         var one = all[i];
         if (x>=10*one.val) {
             var v = x/one.val;
-            return v.toFixed(Math.max(0, Math.floor(4-Math.log10(v+1)))) + one.c;
+            return c + v.toFixed(Math.max(0, Math.floor(4-Math.log10(v+1)))) + one.c;
         }
     }
 
-    return x;
+    return c+x;
 }
 
 ////// 数组转RGB //////

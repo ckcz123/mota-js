@@ -1550,9 +1550,9 @@ control.prototype.replay = function () {
     }
 
     core.status.replay.steps++;
-    if (core.status.replay.steps%20==0) {
-        if (core.status.replay.save.length == 30)
-            core.status.replay.save.shift();
+    if (core.status.replay.steps%50==0) {
+        //if (core.status.replay.save.length == 30)
+        //    core.status.replay.save.shift();
         core.status.replay.save.push({"data": core.saveData(), "replay": {
             "totalList": core.clone(core.status.replay.totalList),
             "toReplay": core.clone(core.status.replay.toReplay),
@@ -1584,7 +1584,7 @@ control.prototype.replay = function () {
                     core.useItem(itemId, function () {
                         core.replay();
                     });
-                }, 750 / Math.sqrt(core.status.replay.speed));
+                }, 750 / core.status.replay.speed);
             }
             return;
         }
@@ -1602,7 +1602,7 @@ control.prototype.replay = function () {
                 core.changeFloor(floorId, stair, null, null, function () {
                     core.replay();
                 });
-            }, 750 / Math.sqrt(core.status.replay.speed));
+            }, 750 / core.status.replay.speed);
             return;
         }
     }
@@ -1635,7 +1635,7 @@ control.prototype.replay = function () {
                     core.status.event.selection = parseInt(selections.shift());
                     core.events.openShop(shopId, false);
 
-                }, 750 / Math.sqrt(core.status.replay.speed));
+                }, 750 / core.status.replay.speed);
                 return;
             }
         }
@@ -1898,7 +1898,7 @@ control.prototype.syncSave = function (type) {
     // data
     if (type=='all') {
         saves=[];
-        for (var i=1;i<=150;i++) {
+        for (var i=1;i<=5*(main.savePages||30);i++) {
             var data = core.getLocalStorage("save"+i, null);
             if (core.isset(data)) {
                 saves.push(data);
@@ -1906,7 +1906,7 @@ control.prototype.syncSave = function (type) {
         }
     }
     else {
-        for (var i=150;i>=1;i--) {
+        for (var i=5*(main.savePages||30);i>=1;i--) {
             saves=core.getLocalStorage("save"+i, null);
             if (core.isset(saves)) {
                 break;
@@ -1967,7 +1967,7 @@ control.prototype.syncLoad = function () {
                 if (data instanceof Array) {
                     core.status.event.selection=1;
                     core.ui.drawConfirmBox("所有本地存档都将被覆盖，确认？", function () {
-                        for (var i=1;i<=150;i++) {
+                        for (var i=1;i<=5*(main.savePages||30);i++) {
                             if (i<=data.length) {
                                 core.setLocalStorage("save"+i, data[i-1]);
                             }
@@ -1983,8 +1983,8 @@ control.prototype.syncLoad = function () {
                 }
                 else {
                     // 只覆盖单存档
-                    var index=150;
-                    for (var i=150;i>=1;i--) {
+                    var index=5*(main.savePages||30);
+                    for (var i=5*(main.savePages||30);i>=1;i--) {
                         if (core.getLocalStorage("save"+i, null)==null)
                             index=i;
                         else break;

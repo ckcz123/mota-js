@@ -155,8 +155,13 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 衰弱
 	if (core.enemys.hasSpecial(special, 13) && !core.hasFlag('weak')) {
 		core.setFlag('weak', true);
-		core.status.hero.atk-=core.values.weakValue;
-		core.status.hero.def-=core.values.weakValue;
+		var weakValue = core.status.weakValue;
+		var weakAtk = weakValue>=1?weakValue:Math.floor(weakValue*core.status.hero.atk);
+		var weakDef = weakValue>=1?weakValue:Math.floor(weakValue*core.status.hero.def);
+		core.setFlag('weakAtk', weakAtk);
+		core.setFlag('weakDef', weakDef);
+		core.status.hero.atk-=weakAtk;
+		core.status.hero.def-=weakDef;
 	}
 	// 诅咒
 	if (core.enemys.hasSpecial(special, 14) && !core.hasFlag('curse')) {

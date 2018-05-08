@@ -1571,7 +1571,8 @@ ui.prototype.drawSLPanel = function(index) {
     if (index<0) index=0;
 
     var page = parseInt(index/10), offset=index%10;
-    if (page>=30) page=29;
+    var max_page = main.savePages || 30;
+    if (page>=max_page) page=max_page - 1;
     if (offset>5) offset=5;
     index=10*page+offset;
 
@@ -1617,7 +1618,7 @@ ui.prototype.drawSLPanel = function(index) {
             }
         }
     }
-    this.drawPagination(page+1, 30);
+    this.drawPagination(page+1, max_page);
 
     if (core.status.event.selection)
         core.setFillStyle('ui', '#FF6A6A');

@@ -207,6 +207,7 @@ icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1 =
             'bluePotion': 21,
             'greenPotion': 22,
             'yellowPotion': 23,
+            'lifeWand': 33,
             'sword0': 60,
             'sword1': 50,
             'sword2': 51,

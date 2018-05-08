@@ -14,6 +14,8 @@ function main() {
 
     this.isCompetition = false; // 是否是比赛模式
 
+    this.savePages = 30; // 存档页数，每页可存5个；默认为30页150个存档
+
     //------------------------ 用户修改内容 END ------------------------//
 
     this.dom = {

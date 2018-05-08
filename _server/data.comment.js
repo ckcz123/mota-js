@@ -233,7 +233,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "weakValue": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "衰弱状态下攻防减少的数值"
+                    "_data": "衰弱状态下攻防减少的数值\n如果此项不小于1，则作为实际下降的数值（比如10就是攻防各下降10）\n如果在0到1之间则为下降的比例（比如0.3就是下降30%的攻防）"
                 },
                 "redJewel": {
                     "_leaf": true,

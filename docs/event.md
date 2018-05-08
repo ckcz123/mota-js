@@ -1051,6 +1051,91 @@ choices为一个数组，其中每一项都是一个选项列表。
 ],
 ```
 
+### while：循环处理
+
+从2.2.1样板开始，我们提供了循环处理（while事件）。
+
+其大致写法如下：
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "while", "condition": "...", // 循环测试某个条件
+        "data": [ // 条件成立则执行data里面的事件
+            
+        ]
+    },
+]
+```
+
+我们可以在condition中给出一个表达式（能将`status:xxx, item:xxx, flag:xxx`来作为参数），并进行判断是否成立。
+
+如果条件成立，则将执行`"data"`中的列表事件内容。
+
+该事件列表执行完毕后，将继续测试`"condition"`，如果还为true则重新进行执行data内容。
+
+下面是一个输出1到10之间的数字，每隔1秒显示一个的例子。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type":"while", "condition": "flag:i<=10", // 循环处理；注意flag未设置则默认为0
+        "data":[
+            {"type": "setValue", "name": "flag:i", "value": "flag:i+1"}, // 递增i
+            "${flag:i}", // 输出i
+            {"type": "sleep","time":1000}, // 等待1秒
+        ]
+    },
+]
+```
+
+### break：跳出循环
+
+使用 `{"type": "break"}` 可以跳出当前循环。
+
+上面的输出例子也可以这么写：
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type":"while", "condition": "true", // 循环处理；永远为真
+        "data":[
+            {"type": "setValue", "name": "flag:i", "value": "flag:i+1"}, // 递增i
+            {"type": "if", "condition": "flag:i>10", // 测试i是否超过了10
+                "true": [{"type": "break"}], // 是的，则直接break调出循环
+                "false": []
+            },
+            "${flag:i}", // 输出i
+            {"type": "sleep","time":1000}, // 等待1秒
+        ]
+    },
+]
+```
+
+!> 如果break事件不在任何循环中被执行，则和exit等价，即会立刻结束当前事件！
+
+### continue：继续执行当前循环
+
+使用 `{"type": "continue"}` 可以继续执行当前循环。
+
+上面的输出例子也可以这么写：
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type":"while", "condition": "true", // 循环处理；永远为真
+        "data":[
+            {"type": "setValue", "name": "flag:i", "value": "flag:i+1"}, // 递增i
+            "${flag:i}", // 输出i
+            {"type": "sleep","time":1000}, // 等待1秒
+            {"type": "if", "condition": "flag:i<10", // 测试i是否小于10
+                "true": [{"type": "continue"}], // 是的，则继续循环
+                "false": []
+            },
+            {"type": "break"}, // 跳出循环
+        ]
+    },
+]
+```
+
+!> 如果continue事件不在任何循环中被执行，则和exit等价，即会立刻结束当前事件！
+
 ### function: 自定义JS脚本
 
 上述给出了这么多事件，但有时候往往不能满足需求，这时候就需要执行自定义脚本了。

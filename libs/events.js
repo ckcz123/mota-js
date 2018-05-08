@@ -253,7 +253,9 @@ events.prototype.doEvents = function (list, x, y, callback) {
     core.waitHeroToStop(function() {
         core.lockControl();
         core.status.event = {'id': 'action', 'data': {
-            'list': core.clone(list), 'x': x, 'y': y, 'callback': callback
+            'list': [
+                {"todo": core.clone(list), "total": core.clone(list), "condition": "false"}
+            ], 'x': x, 'y': y, 'callback': callback
         }}
         core.events.doAction();
     });
@@ -278,7 +280,18 @@ events.prototype.doAction = function() {
         return;
     }
 
-    var data = core.status.event.data.list.shift();
+    var current = core.status.data.list[0];
+    if (current.todo.length == 0) { // current list is empty
+        if (core.calValue(current.condition)) { // check condition
+            current.todo = core.clone(current.total);
+        }
+        else {
+            core.status.data.list.shift(); // remove stackc
+        }
+        this.doAction();
+        return;
+    }
+    var data = current.todo.shift();
     core.status.event.data.current = data;
 
     var x=core.status.event.data.x, y=core.status.event.data.y;
@@ -553,7 +566,9 @@ events.prototype.doAction = function() {
                     block = block.block;
                     if (core.isset(block.event) && block.event.trigger=='action') {
                         // 触发
-                        core.status.event.data.list = core.clone(block.event.data);
+                        core.status.event.data.list = [
+                            {"todo": core.clone(block.event.data), "total": core.clone(block.event.data), "condition": "false"}
+                        ];
                         core.status.event.data.x=block.x;
                         core.status.event.data.y=block.y;
                     }
@@ -688,6 +703,27 @@ events.prototype.doAction = function() {
             }
             core.ui.drawChoices(data.text, data.choices);
             break;
+        case "while":
+            if (core.calValue(data.condition)) {
+                core.unshift(core.status.event.data.list,
+                    {"todo": core.clone(data.actions), "total": core.clone(data.actions), "condition": data.condition}
+                );
+            }
+            this.doAction();
+            break;
+        case "break":
+            core.status.event.data.list.shift();
+            this.doAction();
+            break;
+        case "continue":
+            if (core.calValue(core.status.event.data.list[0].condition)) {
+                core.status.event.data.list[0].todo = core.clone(core.status.event.data.list[0].total);
+            }
+            else {
+                core.status.event.data.list.shift();
+            }
+            this.doAction();
+            break;
         case "win":
             core.events.win(data.reason, function () {
                 core.events.doAction();
@@ -734,7 +770,9 @@ events.prototype.doAction = function() {
                 if (block!=null) {
                     block = block.block;
                     if (core.isset(block.event) && block.event.trigger=='action') {
-                        core.status.event.data.list = core.clone(block.event.data);
+                        core.status.event.data.list = [
+                            {"todo": core.clone(block.event.data), "total": core.clone(block.event.data), "condition": "false"}
+                        ];
                     }
                 }
                 this.doAction();
@@ -757,7 +795,7 @@ events.prototype.insertAction = function (action, x, y, callback) {
         this.doEvents(action, x, y, callback);
     }
     else {
-        core.unshift(core.status.event.data.list, action)
+        core.unshift(core.status.event.data.list[0].todo, action)
         if (core.isset(x)) core.status.event.data.x=x;
         if (core.isset(y)) core.status.event.data.y=y;
         if (core.isset(callback)) core.status.event.data.callback=callback;

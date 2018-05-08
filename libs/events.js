@@ -280,13 +280,13 @@ events.prototype.doAction = function() {
         return;
     }
 
-    var current = core.status.data.list[0];
+    var current = core.status.event.data.list[0];
     if (current.todo.length == 0) { // current list is empty
         if (core.calValue(current.condition)) { // check condition
             current.todo = core.clone(current.total);
         }
         else {
-            core.status.data.list.shift(); // remove stackc
+            core.status.event.data.list.shift(); // remove stackc
         }
         this.doAction();
         return;
@@ -706,7 +706,7 @@ events.prototype.doAction = function() {
         case "while":
             if (core.calValue(data.condition)) {
                 core.unshift(core.status.event.data.list,
-                    {"todo": core.clone(data.actions), "total": core.clone(data.actions), "condition": data.condition}
+                    {"todo": core.clone(data.data), "total": core.clone(data.data), "condition": data.condition}
                 );
             }
             this.doAction();

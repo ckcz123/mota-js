@@ -33,8 +33,8 @@ enemys.prototype.hasSpecial = function (special, test) {
 
 ////// 获得所有特殊属性的名称 //////
 enemys.prototype.getSpecialText = function (enemyId) {
-    if (enemyId == undefined) return "";
-    var enemy = this.enemys[enemyId];
+    var enemy = core.material.enemys[enemyId];
+    if (!core.isset(enemy)) return [];
     var special = enemy.special;
     var text = [];
     if (this.hasSpecial(special, 1)) text.push("先攻");

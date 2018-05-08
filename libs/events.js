@@ -57,8 +57,7 @@ events.prototype.init = function () {
                 callback();
         },
         'action': function (data, core, callback) {
-            core.events.doEvents(data.event.data, data.x, data.y);
-            if (core.isset(callback)) callback();
+            core.events.insertAction(data.event.data, data.x, data.y, callback);
         }
     }
 }
@@ -89,16 +88,19 @@ events.prototype.startGame = function (hard) {
                     core.flags.battleAnimate = true;
                     core.setLocalStorage('battleAnimate', true);
                     core.startGame(hard);
+                    core.utils.__init_seed();
                     core.events.setInitData(hard);
                 }, function () {
                     core.flags.battleAnimate = false;
                     core.setLocalStorage('battleAnimate', false);
                     core.startGame(hard);
+                    core.utils.__init_seed();
                     core.events.setInitData(hard);
                 });
             }
             else {
                 core.startGame(hard);
+                core.utils.__init_seed();
                 core.events.setInitData(hard);
             }
         });
@@ -142,6 +144,7 @@ events.prototype.gameOver = function (ending, fromReplay) {
                 'name': core.firstData.name,
                 'version': core.firstData.version,
                 'hard': core.status.hard,
+                'seed': core.getFlag('seed'),
                 'route': core.encodeRoute(core.status.route)
             }
             core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify(obj));
@@ -163,7 +166,8 @@ events.prototype.gameOver = function (ending, fromReplay) {
         }
 
         var doUpload = function(username) {
-            if (username==null) username="";
+            var hp = core.status.hero.hp;
+            if (username==undefined) hp = 1;
 
             // upload
             var formData = new FormData();
@@ -172,19 +176,23 @@ events.prototype.gameOver = function (ending, fromReplay) {
             formData.append('version', core.firstData.version);
             formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
             formData.append('hard', core.status.hard);
-            formData.append('username', username);
+            formData.append('username', username||"");
             formData.append('ending', ending);
             formData.append('lv', core.status.hero.lv);
-            formData.append('hp', core.status.hero.hp);
+            formData.append('hp', hp);
             formData.append('atk', core.status.hero.atk);
             formData.append('def', core.status.hero.def);
             formData.append('mdef', core.status.hero.mdef);
             formData.append('money', core.status.hero.money);
             formData.append('experience', core.status.hero.experience);
             formData.append('steps', core.status.hero.steps);
+            formData.append('seed', core.getFlag('seed'));
             formData.append('route', core.encodeRoute(core.status.route));
 
-            core.http("POST", "/games/upload.php", formData);
+            if (main.isCompetition)
+                core.http("POST", "/games/competition/upload.php", formData);
+            else
+                core.http("POST", "/games/upload.php", formData);
 
             setTimeout(function() {
                 confirmDownload();
@@ -192,9 +200,17 @@ events.prototype.gameOver = function (ending, fromReplay) {
         }
 
         core.ui.drawConfirmBox("你想记录你的ID和成绩吗？", function () {
-            doUpload(prompt("请输入你的ID："));
+            if (main.isCompetition) {
+                doUpload("");
+            }
+            else {
+                doUpload(prompt("请输入你的ID："));
+            }
         }, function () {
-            doUpload("");
+            if (main.isCompetition)
+                confirmDownload();
+            else
+                doUpload(undefined);
         })
 
         return;
@@ -206,7 +222,16 @@ events.prototype.gameOver = function (ending, fromReplay) {
         });
     }
     else {
-        confirmUpload();
+
+        if (core.isset(core.values.maxValidHp) && core.status.hero.hp>core.values.maxValidHp) {
+            core.drawText("作弊可耻！", function () {
+                core.restart();
+            });
+        }
+        else {
+            confirmUpload();
+        }
+
     }
 
 }
@@ -228,7 +253,9 @@ events.prototype.doEvents = function (list, x, y, callback) {
     core.waitHeroToStop(function() {
         core.lockControl();
         core.status.event = {'id': 'action', 'data': {
-            'list': core.clone(list), 'x': x, 'y': y, 'callback': callback
+            'list': [
+                {"todo": core.clone(list), "total": core.clone(list), "condition": "false"}
+            ], 'x': x, 'y': y, 'callback': callback
         }}
         core.events.doAction();
     });
@@ -253,7 +280,18 @@ events.prototype.doAction = function() {
         return;
     }
 
-    var data = core.status.event.data.list.shift();
+    var current = core.status.event.data.list[0];
+    if (current.todo.length == 0) { // current list is empty
+        if (core.calValue(current.condition)) { // check condition
+            current.todo = core.clone(current.total);
+        }
+        else {
+            core.status.event.data.list.shift(); // remove stackc
+        }
+        this.doAction();
+        return;
+    }
+    var data = current.todo.shift();
     core.status.event.data.current = data;
 
     var x=core.status.event.data.x, y=core.status.event.data.y;
@@ -311,8 +349,9 @@ events.prototype.doAction = function() {
             core.events.doAction();
             break;
         case "show": // 显示
-            if (typeof data.loc[0] == 'number' && typeof data.loc[1] == 'number')
-                data.loc = [data.loc];
+            if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
+                    && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
+                data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];
             if (core.isset(data.time) && data.time>0 && (!core.isset(data.floorId) || data.floorId==core.status.floorId)) {
                 core.animateBlock(data.loc,'show', data.time, function () {
                     data.loc.forEach(function (t) {
@@ -331,8 +370,9 @@ events.prototype.doAction = function() {
         case "hide": // 消失
             if (!core.isset(data.loc))
                 data.loc = [x,y];
-            if (typeof data.loc[0] == 'number' && typeof data.loc[1] == 'number')
-                data.loc = [data.loc];
+            if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
+                && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
+                data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];
             data.loc.forEach(function (t) {
                 core.removeBlock(t[0],t[1],data.floorId);
             })
@@ -346,8 +386,8 @@ events.prototype.doAction = function() {
         case "setBlock": // 设置某图块
             {
                 if (core.isset(data.loc)) {
-                    x=data.loc[0];
-                    y=data.loc[1];
+                    x=core.calValue(data.loc[0]);
+                    y=core.calValue(data.loc[1]);
                 }
                 var floorId = data.floorId||core.status.floorId;
                 var originBlock=core.getBlock(x,y,floorId,false);
@@ -379,8 +419,8 @@ events.prototype.doAction = function() {
                     y=core.getHeroLoc('y');
                 }
                 else if (data.loc instanceof Array) {
-                    x=data.loc[0];
-                    y=data.loc[1];
+                    x=core.calValue(data.loc[0]);
+                    y=core.calValue(data.loc[1]);
                 }
             }
             core.drawAnimate(data.name, x, y, function () {
@@ -389,8 +429,8 @@ events.prototype.doAction = function() {
             break;
         case "move": // 移动事件
             if (core.isset(data.loc)) {
-                x=data.loc[0];
-                y=data.loc[1];
+                x=core.calValue(data.loc[0]);
+                y=core.calValue(data.loc[1]);
             }
             core.moveBlock(x,y,data.steps,data.time,data.immediateHide,function() {
                 core.events.doAction();
@@ -403,7 +443,7 @@ events.prototype.doAction = function() {
             break;
         case "changeFloor": // 楼层转换
             {
-                var heroLoc = {"x": data.loc[0], "y": data.loc[1]};
+                var heroLoc = {"x": core.calValue(data.loc[0]), "y": core.calValue(data.loc[1])};
                 if (core.isset(data.direction)) heroLoc.direction=data.direction;
                 core.changeFloor(data.floorId||core.status.floorId, null, heroLoc, data.time, function() {
                     core.lockControl();
@@ -414,8 +454,8 @@ events.prototype.doAction = function() {
         case "changePos": // 直接更换勇士位置，不切换楼层
             core.clearMap('hero', 0, 0, 416, 416);
             if (core.isset(data.loc)) {
-                core.setHeroLoc('x', data.loc[0]);
-                core.setHeroLoc('y', data.loc[1]);
+                core.setHeroLoc('x', core.calValue(data.loc[0]));
+                core.setHeroLoc('y', core.calValue(data.loc[1]));
             }
             if (core.isset(data.direction)) core.setHeroLoc('direction', data.direction);
             core.drawHero();
@@ -423,7 +463,8 @@ events.prototype.doAction = function() {
             break;
         case "showImage": // 显示图片
             if (core.isset(data.loc) && core.isset(core.material.images.images[data.name])) {
-                core.canvas.animate.drawImage(core.material.images.images[data.name], data.loc[0], data.loc[1]);
+                core.canvas.animate.drawImage(core.material.images.images[data.name],
+                    core.calValue(data.loc[0]), core.calValue(data.loc[1]));
             }
             else core.clearMap('animate', 0, 0, 416, 416);
             this.doAction();
@@ -448,14 +489,29 @@ events.prototype.doAction = function() {
                 var gif = new Image();
                 gif.src = core.material.images.images[data.name].src;
                 gif.style.position = 'absolute';
-                gif.style.left = (data.loc[0]*core.domStyle.scale)+"px";
-                gif.style.top = (data.loc[1]*core.domStyle.scale)+"px";
+                gif.style.left = (core.calValue(data.loc[0])*core.domStyle.scale)+"px";
+                gif.style.top = (core.calValue(data.loc[1])*core.domStyle.scale)+"px";
                 core.dom.gif2.appendChild(gif);
             }
             else {
                 core.dom.gif2.innerHTML = "";
             }
             this.doAction();
+            break;
+        case "moveImage": // 图片移动
+            if (core.status.replay.replaying) { // 正在播放录像
+                this.doAction();
+            }
+            else {
+                if (core.isset(data.from) && core.isset(data.to) && core.isset(core.material.images.images[data.name])) {
+                    core.events.moveImage(core.material.images.images[data.name], data.from, data.to, data.time, function() {
+                        core.events.doAction();
+                    });
+                }
+                else {
+                    this.doAction();
+                }
+            }
             break;
         case "setFg": // 颜色渐变
             core.setFg(data.color, data.time, function() {
@@ -469,7 +525,7 @@ events.prototype.doAction = function() {
         case "openDoor": // 开一个门，包括暗墙
             {
                 var floorId=data.floorId || core.status.floorId;
-                var block=core.getBlock(data.loc[0], data.loc[1], floorId);
+                var block=core.getBlock(core.calValue(data.loc[0]), core.calValue(data.loc[1]), floorId);
                 if (block!=null) {
                     if (floorId==core.status.floorId)
                         core.openDoor(block.block.event.id, block.block.x, block.block.y, false, function() {
@@ -504,13 +560,15 @@ events.prototype.doAction = function() {
             break;
         case "trigger": // 触发另一个事件；当前事件会被立刻结束。需要另一个地点的事件是有效的
             {
-                var toX=data.loc[0], toY=data.loc[1];
+                var toX=core.calValue(data.loc[0]), toY=core.calValue(data.loc[1]);
                 var block=core.getBlock(toX, toY);
                 if (block!=null) {
                     block = block.block;
                     if (core.isset(block.event) && block.event.trigger=='action') {
                         // 触发
-                        core.status.event.data.list = core.clone(block.event.data);
+                        core.status.event.data.list = [
+                            {"todo": core.clone(block.event.data), "total": core.clone(block.event.data), "condition": "false"}
+                        ];
                         core.status.event.data.x=block.x;
                         core.status.event.data.y=block.y;
                     }
@@ -535,6 +593,17 @@ events.prototype.doAction = function() {
             core.resumeBgm();
             this.doAction();
             break
+        case "setVolume":
+            data.value = parseInt(data.value||0);
+            if (data.value>100) data.value=100;
+            data.value = data.value / 100;
+            core.musicStatus.volume = data.value;
+            if (core.isset(core.musicStatus.playingBgm)) {
+                core.material.bgms[core.musicStatus.playingBgm].volume = data.value;
+            }
+            core.musicStatus.gainNode.gain.value = data.value;
+            this.doAction();
+            break;
         case "setValue":
             try {
                 var value=core.calValue(data.value);
@@ -592,9 +661,9 @@ events.prototype.doAction = function() {
                         core.drawTip("录像文件出错");
                         return;
                     }
-
                 }
                 else {
+                    core.interval.onDownInterval = 'tmp';
                     value = prompt(core.replaceText(data.text));
                 }
                 value = Math.abs(parseInt(value)||0);
@@ -624,7 +693,7 @@ events.prototype.doAction = function() {
                                 core.status.route.push("choices:"+index);
                                 core.events.insertAction(data.choices[index].action);
                                 core.events.doAction();
-                            }, 750 / Math.sqrt(core.status.replay.speed))
+                            }, 750 / core.status.replay.speed)
                     }
                     else {
                         core.stopReplay();
@@ -633,6 +702,27 @@ events.prototype.doAction = function() {
                 }
             }
             core.ui.drawChoices(data.text, data.choices);
+            break;
+        case "while":
+            if (core.calValue(data.condition)) {
+                core.unshift(core.status.event.data.list,
+                    {"todo": core.clone(data.data), "total": core.clone(data.data), "condition": data.condition}
+                );
+            }
+            this.doAction();
+            break;
+        case "break":
+            core.status.event.data.list.shift();
+            this.doAction();
+            break;
+        case "continue":
+            if (core.calValue(core.status.event.data.list[0].condition)) {
+                core.status.event.data.list[0].todo = core.clone(core.status.event.data.list[0].total);
+            }
+            else {
+                core.status.event.data.list.shift();
+            }
+            this.doAction();
             break;
         case "win":
             core.events.win(data.reason, function () {
@@ -670,13 +760,19 @@ events.prototype.doAction = function() {
                 }, data.time);
             }
             break;
+        case "wait":
+            if (core.status.replay.replaying)
+                core.events.doAction();
+            break;
         case "revisit": // 立刻重新执行该事件
             {
                 var block=core.getBlock(x,y); // 重新获得事件
                 if (block!=null) {
                     block = block.block;
                     if (core.isset(block.event) && block.event.trigger=='action') {
-                        core.status.event.data.list = core.clone(block.event.data);
+                        core.status.event.data.list = [
+                            {"todo": core.clone(block.event.data), "total": core.clone(block.event.data), "condition": "false"}
+                        ];
                     }
                 }
                 this.doAction();
@@ -699,7 +795,7 @@ events.prototype.insertAction = function (action, x, y, callback) {
         this.doEvents(action, x, y, callback);
     }
     else {
-        core.unshift(core.status.event.data.list, action)
+        core.unshift(core.status.event.data.list[0].todo, action)
         if (core.isset(x)) core.status.event.data.x=x;
         if (core.isset(y)) core.status.event.data.y=y;
         if (core.isset(callback)) core.status.event.data.callback=callback;
@@ -1028,7 +1124,7 @@ events.prototype.animateImage = function (type, image, loc, time, callback) {
     if (type == 'hide') opacityVal = 1;
 
     core.setOpacity('data', opacityVal);
-    core.canvas.data.drawImage(image, loc[0], loc[1]);
+    core.canvas.data.drawImage(image, core.calValue(loc[0]), core.calValue(loc[1]));
     core.status.replay.animate=true;
     var animate = setInterval(function () {
         if (type=='show') opacityVal += 0.1;
@@ -1041,7 +1137,38 @@ events.prototype.animateImage = function (type, image, loc, time, callback) {
             core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
-    }, time / 10 / core.status.replay.speed);
+    }, time / 10);
+}
+
+////// 移动图片 //////
+events.prototype.moveImage = function (image, from, to, time, callback) {
+    time = time || 1000;
+    clearInterval(core.interval.tipAnimate);
+    core.setAlpha('data', 1);
+    core.setOpacity('data', 1);
+
+    core.status.replay.animate=true;
+    var fromX = core.calValue(from[0]), fromY = core.calValue(from[1]),
+        toX = core.calValue(to[0]), toY = core.calValue(to[1]);
+    var step = 0;
+    var drawImage = function () {
+        core.clearMap('data', 0, 0, 416, 416);
+        var nowX = parseInt(fromX + (toX-fromX)*step/64);
+        var nowY = parseInt(fromY + (toY-fromY)*step/64);
+        core.canvas.data.drawImage(image, nowX, nowY);
+    }
+
+    drawImage();
+    var animate = setInterval(function () {
+        step++;
+        drawImage();
+        if (step>=64) {
+            clearInterval(animate);
+            core.clearMap('data', 0, 0, 416, 416);
+            core.status.replay.animate=false;
+            if (core.isset(callback)) callback();
+        }
+    }, time / 64);
 }
 
 ////// 打开一个全局商店 //////
@@ -1197,8 +1324,13 @@ events.prototype.passNet = function (data) {
     if (data.event.id=='weakNet') { // 衰网
         if (core.hasFlag('weak')) return;
         core.setFlag('weak', true);
-        core.status.hero.atk-=core.values.weakValue;
-        core.status.hero.def-=core.values.weakValue;
+        var weakValue = core.status.weakValue;
+        var weakAtk = weakValue>=1?weakValue:Math.floor(weakValue*core.status.hero.atk);
+        var weakDef = weakValue>=1?weakValue:Math.floor(weakValue*core.status.hero.def);
+        core.setFlag('weakAtk', weakAtk);
+        core.setFlag('weakDef', weakDef);
+        core.status.hero.atk-=weakAtk;
+        core.status.hero.def-=weakDef;
     }
     if (data.event.id=='curseNet') { // 咒网
         if (core.hasFlag('curse')) return;

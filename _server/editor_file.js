@@ -144,6 +144,67 @@ editor_file = function (editor, callback) {
 
     ////////////////////////////////////////////////////////////////////
 
+    editor_file.autoRegister = function (info, callback) {
+
+        var iconActions = [];
+        var mapActions = [];
+        var templateActions = [];
+
+        var image = info.images;
+
+        if (image!='items' && image.indexOf('enemy')!=0) {
+            callback('只有怪物和道具才能自动注册！');
+            return;
+        }
+        var c=image=='items'?'I':'M';
+
+        var allIds = [];
+        editor.ids.forEach(function (v) {
+            if (v.images==image) {
+                allIds[v.y]=true;
+            }
+        })
+
+        var per_height = image.indexOf('48')>=0?48:32;
+
+        var idnum=300;
+        for (var y=0; y<editor.widthsX[image][3]/per_height;y++) {
+            if (allIds[y]) continue;
+            while (editor.core.maps.blocksInfo[idnum]) idnum++;
+            var id = c+idnum;
+            iconActions.push(["add", "['" + image + "']['" + id + "']", y])
+            mapActions.push(["add", "['" + idnum + "']", {'cls': image, 'id': id}])
+            if (image=='items')
+                templateActions.push(["add", "['items']['" + id + "']", editor_file.comment._data.items_template]);
+            else
+                templateActions.push(["add", "['" + id + "']", editor_file.comment._data.enemys_template]);
+            idnum++;
+        }
+
+        if (iconActions.length==0) {
+            callback("没有要注册的项！");
+            return;
+        }
+
+        var templist = [];
+        var tempcallback = function (err) {
+            templist.push(err);
+            if (templist.length == 2) {
+                if (templist[0] != null || templist[1] != null || templist[2] != null)
+                    callback((templist[0] || '') + '\n' + (templist[1] || '') + '\n' + (templist[2] || ''));
+                //这里如果一个成功一个失败会出严重bug
+                else
+                    callback(null);
+            }
+        }
+        saveSetting('icons', iconActions, tempcallback);
+        saveSetting('maps', mapActions, tempcallback);
+        if (image=='items')
+            saveSetting('items', templateActions, tempcallback);
+        else
+            saveSetting('enemys', templateActions, tempcallback);
+    }
+
     editor_file.changeIdAndIdnum = function (id, idnum, info, callback) {
         if (!isset(callback)) {
             printe('未设置callback');

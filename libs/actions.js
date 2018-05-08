@@ -13,7 +13,7 @@ actions.prototype.init = function () {
 
 ////// 按下某个键时 //////
 actions.prototype.onkeyDown = function (e) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0) return;
     if (!core.isset(core.status.holdingKeys))core.status.holdingKeys=[];
     var isArrow={37:true,38:true,39:true,40:true}[e.keyCode]
     if(isArrow && !core.status.lockControl){
@@ -31,7 +31,7 @@ actions.prototype.onkeyDown = function (e) {
 
 ////// 放开某个键时 //////
 actions.prototype.onkeyUp = function(e) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0) {
         if (e.keyCode==27) // ESCAPE
             core.stopReplay();
         else if (e.keyCode==90) // Z
@@ -44,6 +44,8 @@ actions.prototype.onkeyUp = function(e) {
             core.rewindReplay();
         else if (e.keyCode==83)
             core.saveReplay();
+        else if (e.keyCode==67)
+            core.bookReplay();
         return;
     }
 
@@ -64,7 +66,7 @@ actions.prototype.onkeyUp = function(e) {
 
 ////// 按住某个键时 //////
 actions.prototype.pressKey = function (keyCode) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0) return;
     if (keyCode === core.status.holdingKeys.slice(-1)[0]) {
         this.keyDown(keyCode);
         window.setTimeout(function(){core.pressKey(keyCode);},30);
@@ -73,7 +75,7 @@ actions.prototype.pressKey = function (keyCode) {
 
 ////// 根据按下键的code来执行一系列操作 //////
 actions.prototype.keyDown = function(keyCode) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0) return;
     if (core.status.lockControl) {
         // Ctrl跳过对话
         if (keyCode==17) {
@@ -193,7 +195,8 @@ actions.prototype.keyDown = function(keyCode) {
 
 ////// 根据放开键的code来执行一系列操作 //////
 actions.prototype.keyUp = function(keyCode, fromReplay) {
-    if (!fromReplay&&core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') return;
+    if (!fromReplay&&core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0)
+        return;
 
     if (core.status.lockControl) {
         core.status.holdingKeys = [];
@@ -399,7 +402,7 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
 
 ////// 点击（触摸）事件按下时 //////
 actions.prototype.ondown = function (x ,y) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0) return;
     if (!core.status.played || core.status.lockControl) {
         this.onclick(x, y, []);
         if (core.timeout.onDownTimeout==null) {
@@ -427,7 +430,7 @@ actions.prototype.ondown = function (x ,y) {
 
 ////// 当在触摸屏上滑动时 //////
 actions.prototype.onmove = function (x ,y) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0) return;
     // if (core.status.holdingPath==0){return;}
     //core.status.mouseOutCheck =1;
     var pos={'x':x,'y':y};
@@ -451,7 +454,7 @@ actions.prototype.onmove = function (x ,y) {
 
 ////// 当点击（触摸）事件放开时 //////
 actions.prototype.onup = function () {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0) return;
 
     clearTimeout(core.timeout.onDownTimeout);
     core.timeout.onDownTimeout = null;
@@ -517,7 +520,7 @@ actions.prototype.getClickLoc = function (x, y) {
 
 ////// 具体点击屏幕上(x,y)点时，执行的操作 //////
 actions.prototype.onclick = function (x, y, stepPostfix) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0) return;
     // console.log("Click: (" + x + "," + y + ")");
 
     stepPostfix=stepPostfix||[];
@@ -671,7 +674,7 @@ actions.prototype.onclick = function (x, y, stepPostfix) {
 
 ////// 滑动鼠标滚轮时的操作 //////
 actions.prototype.onmousewheel = function (direct) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save') return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0) return;
     // 向下滚动是 -1 ,向上是 1
 
     // 楼层飞行器
@@ -712,7 +715,7 @@ actions.prototype.longClick = function () {
         core.drawText();
         return true;
     }
-    if (core.status.event.id=='action' && core.status.event.data.type=='text') {
+    if (core.status.event.id=='action' && (core.status.event.data.type=='text' || core.status.event.data.type=='wait')) {
         core.doAction();
         return true;
     }
@@ -725,7 +728,7 @@ actions.prototype.keyDownCtrl = function () {
         core.drawText();
         return;
     }
-    if (core.status.event.id=='action' && core.status.event.data.type=='text') {
+    if (core.status.event.id=='action' && (core.status.event.data.type=='text' || core.status.event.data.type=='wait')) {
         core.doAction();
         return;
     }
@@ -766,7 +769,7 @@ actions.prototype.keyUpConfirmBox = function (keycode) {
 ////// 自定义事件时的点击操作 //////
 actions.prototype.clickAction = function (x,y) {
 
-    if (core.status.event.data.type=='text') {
+    if (core.status.event.data.type=='text' || core.status.event.data.type=='wait') {
         // 文字
         core.doAction();
         return;
@@ -808,7 +811,7 @@ actions.prototype.keyDownAction = function (keycode) {
 
 ////// 自定义事件时，放开某个键的操作 //////
 actions.prototype.keyUpAction = function (keycode) {
-    if (core.status.event.data.type=='text' && (keycode==13 || keycode==32 || keycode==67)) {
+    if ((core.status.event.data.type=='text' || core.status.event.data.type=='wait') && (keycode==13 || keycode==32 || keycode==67)) {
         core.doAction();
         return;
     }
@@ -1655,7 +1658,7 @@ actions.prototype.clickSyncSave = function (x,y) {
 
                     if (data instanceof Array) {
                         core.ui.drawConfirmBox("所有本地存档都将被覆盖，确认？", function () {
-                            for (var i=1;i<=150;i++) {
+                            for (var i=1;i<=5*(main.savePages||30);i++) {
                                 if (i<=data.length) {
                                     core.setLocalStorage("save"+i, data[i-1]);
                                 }
@@ -1670,8 +1673,8 @@ actions.prototype.clickSyncSave = function (x,y) {
                         })
                     }
                     else {
-                        var index=150;
-                        for (var i=150;i>=1;i--) {
+                        var index=5*(main.savePages||30);
+                        for (var i=5*(main.savePages||30);i>=1;i--) {
                             if (core.getLocalStorage("save"+i, null)==null)
                                 index=i;
                             else break;
@@ -1687,6 +1690,7 @@ actions.prototype.clickSyncSave = function (x,y) {
                 core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify({
                     'name': core.firstData.name,
                     'hard': core.status.hard,
+                    'seed': core.getFlag('seed'),
                     'route': core.encodeRoute(core.status.route)
                 }));
                 break;
@@ -1793,7 +1797,7 @@ actions.prototype.clickLocalSaveSelect = function (x,y) {
         switch (selection) {
             case 0:
                 saves=[];
-                for (var i=1;i<=150;i++) {
+                for (var i=1;i<=5*(main.savePages||30);i++) {
                     var data = core.getLocalStorage("save"+i, null);
                     if (core.isset(data)) {
                         saves.push(data);
@@ -1801,7 +1805,7 @@ actions.prototype.clickLocalSaveSelect = function (x,y) {
                 }
                 break;
             case 1:
-                for (var i=150;i>=1;i--) {
+                for (var i=5*(main.savePages||30);i>=1;i--) {
                     saves=core.getLocalStorage("save"+i, null);
                     if (core.isset(saves)) {
                         break;
@@ -1865,7 +1869,7 @@ actions.prototype.clickStorageRemove = function (x, y) {
                 core.drawText("\t[操作成功]你的所有存档已被清空。");
                 break;
             case 1:
-                for (var i=1;i<=150;i++) {
+                for (var i=1;i<=5*(main.savePages||30);i++) {
                     core.removeLocalStorage("save"+i);
                 }
                 core.drawText("\t[操作成功]当前塔的存档已被清空。");
@@ -1919,8 +1923,11 @@ actions.prototype.clickReplay = function (x, y) {
                 {
                     core.ui.closePanel();
                     var hard=core.status.hard, route=core.clone(core.status.route);
+                    var seed = core.getFlag('seed');
                     core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
                     core.events.setInitData(hard);
+                    core.setFlag('seed', seed);
+                    core.setFlag('rand', seed);
                     core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
                         core.startReplay(route);
                     }, true);

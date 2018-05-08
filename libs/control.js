@@ -583,9 +583,14 @@ control.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
+
+    var toAdd = 1;
+    if (core.status.replay.speed>3)
+        toAdd = 2;
+
     core.interval.heroMoveInterval = window.setInterval(function () {
-        core.status.heroMoving++;
-        if (core.status.heroMoving==8) {
+        core.status.heroMoving+=toAdd;
+        if (core.status.heroMoving>=8) {
             core.setHeroLoc('x', x+scan[direction].x);
             core.setHeroLoc('y', y+scan[direction].y);
             core.moveOneStep();
@@ -595,7 +600,7 @@ control.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
             core.status.heroMoving = 0;
             if (core.isset(callback)) callback();
         }
-    }, 12.5 / core.status.replay.speed);
+    }, 12.5 * toAdd / core.status.replay.speed);
 }
 
 ////// 实际每一步的行走过程 //////
@@ -1428,8 +1433,9 @@ control.prototype.resumeReplay = function () {
 control.prototype.speedUpReplay = function () {
     if (core.status.event.id=='save') return;
     if (!core.status.replay.replaying) return;
-    core.status.replay.speed = parseInt(10*core.status.replay.speed + 1)/10;
-    if (core.status.replay.speed>3.0) core.status.replay.speed=3.0;
+    var toAdd = core.status.replay.speed>=3?3:core.status.replay.speed>=2?2:1;
+    core.status.replay.speed = parseInt(10*core.status.replay.speed + toAdd)/10;
+    if (core.status.replay.speed>6.0) core.status.replay.speed=6.0;
     core.drawTip("x"+core.status.replay.speed+"倍");
 }
 
@@ -1437,7 +1443,8 @@ control.prototype.speedUpReplay = function () {
 control.prototype.speedDownReplay = function () {
     if (core.status.event.id=='save') return;
     if (!core.status.replay.replaying) return;
-    core.status.replay.speed = parseInt(10*core.status.replay.speed - 1)/10;
+    var toAdd = core.status.replay.speed>3?3:core.status.replay.speed>2?2:1;
+    core.status.replay.speed = parseInt(10*core.status.replay.speed - toAdd)/10;
     if (core.status.replay.speed<0.3) core.status.replay.speed=0.3;
     core.drawTip("x"+core.status.replay.speed+"倍");
 }
@@ -1512,6 +1519,23 @@ control.prototype.saveReplay = function () {
     core.ui.drawSLPanel(10*page+offset);
 }
 
+////// 回放时查看怪物手册 //////
+control.prototype.bookReplay = function () {
+    if (!core.status.replay.replaying) return;
+    if (!core.status.replay.pausing) {
+        core.drawTip("请先暂停录像");
+        return;
+    }
+    if (core.status.replay.animate || core.isset(core.status.event.id)) {
+        core.drawTip("请等待当前事件的处理结束");
+        return;
+    }
+
+    core.lockControl();
+    core.status.event.id='book';
+    core.useItem('book');
+}
+
 ////// 回放 //////
 control.prototype.replay = function () {
 
@@ -1526,9 +1550,9 @@ control.prototype.replay = function () {
     }
 
     core.status.replay.steps++;
-    if (core.status.replay.steps%20==0) {
-        if (core.status.replay.save.length == 30)
-            core.status.replay.save.shift();
+    if (core.status.replay.steps%50==0) {
+        //if (core.status.replay.save.length == 30)
+        //    core.status.replay.save.shift();
         core.status.replay.save.push({"data": core.saveData(), "replay": {
             "totalList": core.clone(core.status.replay.totalList),
             "toReplay": core.clone(core.status.replay.toReplay),
@@ -1541,7 +1565,9 @@ control.prototype.replay = function () {
 
     if (action=='up' || action=='down' || action=='left' || action=='right') {
         core.moveHero(action, function () {
-            core.replay();
+            setTimeout(function() {
+                core.replay();
+            });
         });
         return;
     }
@@ -1558,7 +1584,7 @@ control.prototype.replay = function () {
                     core.useItem(itemId, function () {
                         core.replay();
                     });
-                }, 750 / Math.sqrt(core.status.replay.speed));
+                }, 750 / core.status.replay.speed);
             }
             return;
         }
@@ -1576,7 +1602,7 @@ control.prototype.replay = function () {
                 core.changeFloor(floorId, stair, null, null, function () {
                     core.replay();
                 });
-            }, 750 / Math.sqrt(core.status.replay.speed));
+            }, 750 / core.status.replay.speed);
             return;
         }
     }
@@ -1609,7 +1635,7 @@ control.prototype.replay = function () {
                     core.status.event.selection = parseInt(selections.shift());
                     core.events.openShop(shopId, false);
 
-                }, 750 / Math.sqrt(core.status.replay.speed));
+                }, 750 / core.status.replay.speed);
                 return;
             }
         }
@@ -1819,8 +1845,11 @@ control.prototype.doSL = function (id, type) {
             // core.drawTip("存档版本不匹配");
             if (confirm("存档版本不匹配！\n你想回放此存档的录像吗？")) {
                 core.dom.startPanel.style.display = 'none';
+                var seed = data.hero.flags.seed;
                 core.resetStatus(core.firstData.hero, data.hard, core.firstData.floorId, null, core.initStatus.maps);
                 core.events.setInitData(data.hard);
+                core.setFlag('seed', seed);
+                core.setFlag('rand', seed);
                 core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
                     core.startReplay(core.decodeRoute(data.route));
                 }, true);
@@ -1852,7 +1881,7 @@ control.prototype.doSL = function (id, type) {
             return;
         }
         var route = core.subarray(core.status.route, core.decodeRoute(data.route));
-        if (!core.isset(route)) {
+        if (!core.isset(route) || data.hero.flags.seed!=core.getFlag('seed')) {
             core.drawTip("无法从此存档回放录像");
             return;
         }
@@ -1869,7 +1898,7 @@ control.prototype.syncSave = function (type) {
     // data
     if (type=='all') {
         saves=[];
-        for (var i=1;i<=150;i++) {
+        for (var i=1;i<=5*(main.savePages||30);i++) {
             var data = core.getLocalStorage("save"+i, null);
             if (core.isset(data)) {
                 saves.push(data);
@@ -1877,7 +1906,7 @@ control.prototype.syncSave = function (type) {
         }
     }
     else {
-        for (var i=150;i>=1;i--) {
+        for (var i=5*(main.savePages||30);i>=1;i--) {
             saves=core.getLocalStorage("save"+i, null);
             if (core.isset(saves)) {
                 break;
@@ -1938,7 +1967,7 @@ control.prototype.syncLoad = function () {
                 if (data instanceof Array) {
                     core.status.event.selection=1;
                     core.ui.drawConfirmBox("所有本地存档都将被覆盖，确认？", function () {
-                        for (var i=1;i<=150;i++) {
+                        for (var i=1;i<=5*(main.savePages||30);i++) {
                             if (i<=data.length) {
                                 core.setLocalStorage("save"+i, data[i-1]);
                             }
@@ -1954,8 +1983,8 @@ control.prototype.syncLoad = function () {
                 }
                 else {
                     // 只覆盖单存档
-                    var index=150;
-                    for (var i=150;i>=1;i--) {
+                    var index=5*(main.savePages||30);
+                    for (var i=5*(main.savePages||30);i>=1;i--) {
                         if (core.getLocalStorage("save"+i, null)==null)
                             index=i;
                         else break;
@@ -2101,6 +2130,7 @@ control.prototype.playBgm = function (bgm) {
         }
         // 播放当前BGM
         core.musicStatus.playingBgm = bgm;
+        core.material.bgms[bgm].volume = core.musicStatus.volume;
         core.material.bgms[bgm].play();
         core.musicStatus.isPlaying = true;
 
@@ -2168,7 +2198,7 @@ control.prototype.playSound = function (sound) {
         if (core.musicStatus.audioContext != null) {
             var source = core.musicStatus.audioContext.createBufferSource();
             source.buffer = core.material.sounds[sound];
-            source.connect(core.musicStatus.audioContext.destination);
+            source.connect(core.musicStatus.gainNode);
             try {
                 source.start(0);
             }
@@ -2181,11 +2211,12 @@ control.prototype.playSound = function (sound) {
             }
         }
         else {
+            core.material.sounds[sound].volume = core.musicStatus.volume;
             core.material.sounds[sound].play();
         }
     }
     catch (eee) {
-        console.log("无法播放SE "+bgm);
+        console.log("无法播放SE "+sound);
         console.log(eee);
     }
 }
@@ -2253,18 +2284,14 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.image.fly.style.opacity = 1;
 
         core.statusBar.image.toolbox.src = core.statusBar.icons.rewind.src;
-        core.statusBar.image.toolbox.style.opacity = 1;
 
-        core.statusBar.image.shop.style.opacity = 0;
+        core.statusBar.image.shop.src = core.statusBar.icons.book.src;
 
         core.statusBar.image.save.src = core.statusBar.icons.speedDown.src;
-        core.statusBar.image.save.style.opacity = 1;
 
         core.statusBar.image.load.src = core.statusBar.icons.speedUp.src;
-        core.statusBar.image.load.style.opacity = 1;
 
         core.statusBar.image.settings.src = core.statusBar.icons.save.src;
-        core.statusBar.image.settings.style.opacity = 1;
 
     }
     else {
@@ -2275,18 +2302,14 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.image.fly.style.opacity = core.hasItem('fly')?1:0.3;
 
         core.statusBar.image.toolbox.src = core.statusBar.icons.toolbox.src;
-        core.statusBar.image.toolbox.style.opacity = 1;
 
-        core.statusBar.image.shop.style.opacity = 1;
+        core.statusBar.image.shop.src = core.statusBar.icons.shop.src;
 
         core.statusBar.image.save.src = core.statusBar.icons.save.src;
-        core.statusBar.image.save.style.opacity = 1;
 
         core.statusBar.image.load.src = core.statusBar.icons.load.src;
-        core.statusBar.image.load.style.opacity = 1;
 
         core.statusBar.image.settings.src = core.statusBar.icons.settings.src;
-        core.statusBar.image.settings.style.opacity = 1;
     }
 
     core.updateFg();
@@ -2321,7 +2344,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         statusWidth, statusHeight, statusMaxWidth,statusLabelsLH,
         toolBarWidth, toolBarHeight, toolBarTop, toolBarBorder,
         toolsWidth, toolsHeight,toolsMargin,toolsPMaxwidth,
-        fontSize, toolbarFontSize, margin;
+        fontSize, toolbarFontSize, margin, statusBackground, toolsBackground;
 
     var count = core.dom.statusBar.children.length;
     if (!core.flags.enableFloor) count--;
@@ -2380,12 +2403,14 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             statusHeight = scale*BASE_LINEHEIGHT * .8;
             statusLabelsLH = .8 * BASE_LINEHEIGHT *scale;
             statusMaxWidth = scale * DEFAULT_BAR_WIDTH * .95;
+            statusBackground = main.statusTopBackground;
             toolBarHeight = tempBotBarH;
 
             toolBarTop = statusBarHeight + canvasWidth;
             toolBarBorder = '3px #fff solid';
             toolsHeight = scale * BASE_LINEHEIGHT;
             toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH * .4;
+            toolsBackground = main.toolsBackground;
             borderRight = '3px #fff solid';
 
             margin = scale * SPACE * 2;
@@ -2400,15 +2425,17 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             canvasTop = 0;
             // canvasLeft = DEFAULT_BAR_WIDTH * scale;
             toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH * scale;
-            statusBarHeight = scale * statusLineHeight * count + SPACE * 2; //一共有9行加上两个padding空隙
+            statusBarHeight = gameGroupHeight - SPACE;
             statusBarBorder = '3px #fff solid';
+            statusBackground = main.statusLeftBackground;
 
             statusHeight = scale*statusLineHeight * .8;
             statusLabelsLH = .8 * statusLineHeight *scale;
-            toolBarHeight = canvasWidth - statusBarHeight;
             toolBarTop = scale*statusLineHeight * count + SPACE * 2;
+            toolBarHeight = canvasWidth - toolBarTop;
             toolBarBorder = '3px #fff solid';
             toolsHeight = scale * BASE_LINEHEIGHT;
+            toolsBackground = 'transparent';
             fontSize = statusLineFontSize * scale;
             toolbarFontSize = DEFAULT_FONT_SIZE * scale;
             borderRight = '';
@@ -2431,12 +2458,15 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         // canvasLeft = DEFAULT_BAR_WIDTH;
 
         toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH;
-        statusBarHeight = statusLineHeight * count + SPACE * 2; //一共有9行
+        // statusBarHeight = statusLineHeight * count + SPACE * 2; //一共有9行
+        statusBackground = main.statusLeftBackground;
+        statusBarHeight = gameGroupHeight - SPACE;
 
         statusHeight = statusLineHeight * .8;
         statusLabelsLH = .8 * statusLineHeight;
-        toolBarHeight = DEFAULT_CANVAS_WIDTH - statusBarHeight;
         toolBarTop = statusLineHeight * count + SPACE * 2;
+        toolBarHeight = DEFAULT_CANVAS_WIDTH - toolBarTop;
+        toolsBackground = 'transparent';
 
         toolsHeight = BASE_LINEHEIGHT;
         borderRight = '';
@@ -2517,7 +2547,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 borderTop: statusBarBorder,
                 borderLeft: statusBarBorder,
                 borderRight: borderRight,
-                fontSize: fontSize + unit
+                fontSize: fontSize + unit,
+                background: statusBackground,
             }
         },
         {
@@ -2547,7 +2578,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 borderBottom: toolBarBorder,
                 borderLeft: toolBarBorder,
                 borderRight: borderRight,
-                fontSize: toolbarFontSize + unit
+                fontSize: toolbarFontSize + unit,
+                background: toolsBackground,
             }
         },
         {

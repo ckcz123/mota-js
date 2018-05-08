@@ -48,6 +48,8 @@ function core() {
         'soundStatus': true, // 是否播放SE
         'playingBgm': null, // 正在播放的BGM
         'isPlaying': false,
+        'gainNode': null,
+        'volume': 1.0, // 音量
     }
     this.platform = {
         'isOnline': true, // 是否http
@@ -187,6 +189,8 @@ core.prototype.init = function (coreData, callback) {
         window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext;
         try {
             core.musicStatus.audioContext = new window.AudioContext();
+            core.musicStatus.gainNode = core.musicStatus.audioContext.createGain();
+            core.musicStatus.gainNode.connect(core.musicStatus.audioContext.destination);
         } catch (e) {
             console.log("该浏览器不支持AudioContext");
             core.musicStatus.audioContext = null;
@@ -261,7 +265,8 @@ core.prototype.init = function (coreData, callback) {
         core.setRequestAnimationFrame();
         core.showStartAnimate();
 
-        core.events.initGame();
+        if (main.mode=='play')
+            core.events.initGame();
 
         if (core.isset(functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins))
             core.plugin = new functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.plugin();
@@ -928,6 +933,10 @@ core.prototype.saveReplay = function () {
     core.control.saveReplay();
 }
 
+core.prototype.bookReplay = function () {
+    core.control.bookReplay();
+}
+
 ////// 回放 //////
 core.prototype.replay = function () {
     core.control.replay();
@@ -1075,6 +1084,16 @@ core.prototype.isset = function (val) {
 ////// 获得子数组 //////
 core.prototype.subarray = function (a, b) {
     return core.utils.subarray(a, b);
+}
+
+////// 生成随机数（seed方法） //////
+core.prototype.rand = function (num) {
+    return core.utils.rand(num);
+}
+
+////// 生成随机数（录像方法） //////
+core.prototype.rand2 = function (num) {
+    return core.utils.rand2(num);
 }
 
 ////// 读取一个本地文件内容 //////

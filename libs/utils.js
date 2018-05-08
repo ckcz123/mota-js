@@ -20,6 +20,12 @@ utils.prototype.replaceText = function (text) {
 
 ////// 计算表达式的值 //////
 utils.prototype.calValue = function (value) {
+    if (typeof value == 'number') {
+        return value;
+    }
+    if (value instanceof Function) {
+        return value();
+    }
     value=value.replace(/status:([\w\d_]+)/g, "core.getStatus('$1')");
     value=value.replace(/item:([\w\d_]+)/g, "core.itemCount('$1')");
     value=value.replace(/flag:([\w\d_]+)/g, "core.getFlag('$1', 0)");
@@ -164,8 +170,13 @@ utils.prototype.setTwoDigits = function (x) {
 }
 
 utils.prototype.formatBigNumber = function (x) {
-    x = parseFloat(x);
+    x = Math.floor(parseFloat(x));
     if (!core.isset(x)) return '???';
+
+    var c = x<0?"-":"";
+    x = Math.abs(x);
+
+    if (x<=999999) return c + x;
 
     var all = [
         {"val": 1e20, "c": "g"},
@@ -177,13 +188,13 @@ utils.prototype.formatBigNumber = function (x) {
 
     for (var i=0;i<all.length;i++) {
         var one = all[i];
-        if (x>=100*one.val) {
+        if (x>=10*one.val) {
             var v = x/one.val;
-            return v.toFixed(Math.max(0, Math.floor(4-Math.log10(v+1)))) + one.c;
+            return c + v.toFixed(Math.max(0, Math.floor(4-Math.log10(v+1)))) + one.c;
         }
     }
 
-    return x;
+    return c+x;
 }
 
 ////// 数组转RGB //////
@@ -233,8 +244,10 @@ utils.prototype.encodeRoute = function (route) {
                 ans+='N';
             else if (t.indexOf('move:')==0)
                 ans+="M"+t.substring(5);
-            else if (t=='key:')
+            else if (t.indexOf('key:')==0)
                 ans+='K'+t.substring(4);
+            else if (t.indexOf('random:')==0)
+                ans+='X'+t.substring(7);
         }
     });
     if (cnt>0) {
@@ -287,6 +300,7 @@ utils.prototype.decodeRoute = function (route) {
             case "N": ans.push("no"); break;
             case "M": ++index; ans.push("move:"+nxt+":"+getNumber()); break;
             case "K": ans.push("key:"+nxt); break;
+            case "X": ans.push("random:"+nxt); break;
         }
     }
     return ans;
@@ -309,6 +323,54 @@ utils.prototype.subarray = function (a, b) {
         if (na.shift() != nb.shift()) return null;
     }
     return na;
+}
+
+utils.prototype.__init_seed = function () {
+    var rand = new Date().getTime()%34834795 + 3534;
+    rand = this.__next_rand(rand);
+    rand = this.__next_rand(rand);
+    rand = this.__next_rand(rand);
+    core.setFlag('seed', rand);
+    core.setFlag('rand', rand);
+}
+
+utils.prototype.__next_rand = function (_rand) {
+    _rand=(_rand%127773)*16807-~~(_rand/127773)*2836;
+    _rand+=_rand<0?2147483647:0;
+    return _rand;
+}
+
+utils.prototype.rand = function (num) {
+    var rand = core.getFlag('rand');
+    rand = this.__next_rand(rand);
+    core.setFlag('rand', rand);
+    var ans = rand/2147483647;
+    if (core.isset(num) && num>0)
+        return Math.floor(ans*num);
+    return ans;
+}
+
+////// 生成随机数（录像方法） //////
+utils.prototype.rand2 = function (num) {
+    num = num||2147483648;
+
+    var value;
+    if (core.status.replay.replaying) {
+        var action = core.status.replay.toReplay.shift();
+        if (action.indexOf("random:")==0 ) {
+            value=parseInt(action.substring(7));
+        }
+        else {
+            core.stopReplay();
+            core.drawTip("录像文件出错");
+            return;
+        }
+    }
+    else {
+        value = Math.floor(Math.random()*num);
+    }
+    core.status.route.push("random:"+value);
+    return value;
 }
 
 ////// 读取一个本地文件内容 //////

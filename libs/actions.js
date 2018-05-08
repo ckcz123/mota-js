@@ -1658,7 +1658,7 @@ actions.prototype.clickSyncSave = function (x,y) {
 
                     if (data instanceof Array) {
                         core.ui.drawConfirmBox("所有本地存档都将被覆盖，确认？", function () {
-                            for (var i=1;i<=150;i++) {
+                            for (var i=1;i<=5*(main.savePages||30);i++) {
                                 if (i<=data.length) {
                                     core.setLocalStorage("save"+i, data[i-1]);
                                 }
@@ -1673,8 +1673,8 @@ actions.prototype.clickSyncSave = function (x,y) {
                         })
                     }
                     else {
-                        var index=150;
-                        for (var i=150;i>=1;i--) {
+                        var index=5*(main.savePages||30);
+                        for (var i=5*(main.savePages||30);i>=1;i--) {
                             if (core.getLocalStorage("save"+i, null)==null)
                                 index=i;
                             else break;
@@ -1797,7 +1797,7 @@ actions.prototype.clickLocalSaveSelect = function (x,y) {
         switch (selection) {
             case 0:
                 saves=[];
-                for (var i=1;i<=150;i++) {
+                for (var i=1;i<=5*(main.savePages||30);i++) {
                     var data = core.getLocalStorage("save"+i, null);
                     if (core.isset(data)) {
                         saves.push(data);
@@ -1805,7 +1805,7 @@ actions.prototype.clickLocalSaveSelect = function (x,y) {
                 }
                 break;
             case 1:
-                for (var i=150;i>=1;i--) {
+                for (var i=5*(main.savePages||30);i>=1;i--) {
                     saves=core.getLocalStorage("save"+i, null);
                     if (core.isset(saves)) {
                         break;
@@ -1869,7 +1869,7 @@ actions.prototype.clickStorageRemove = function (x, y) {
                 core.drawText("\t[操作成功]你的所有存档已被清空。");
                 break;
             case 1:
-                for (var i=1;i<=150;i++) {
+                for (var i=1;i<=5*(main.savePages||30);i++) {
                     core.removeLocalStorage("save"+i);
                 }
                 core.drawText("\t[操作成功]当前塔的存档已被清空。");

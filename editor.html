@@ -20,7 +20,9 @@
             </div>
             <div id="editTip">
                 <input type="button" value="新建空白地图" id='newMap'/>
-                <input id='newFileName' placeholder="输入新楼层id"/>
+                <input id='newFileName' placeholder="输入新楼层id" style="width: 120px"/>
+                <input type="checkbox" id='newMapStatus' checked='checked' style='vertical-align: bottom'/>
+                <span style='vertical-align: bottom; margin-left: -4px'>保留楼层属性</span>
             </div>
             <div style="position: absolute;left: 10px;bottom:0; margin-bottom: 90px">
                 <input type="button" value="导出地图" id="exportMap" v-on:click="exportMap"/>

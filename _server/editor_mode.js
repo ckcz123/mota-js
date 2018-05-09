@@ -395,6 +395,10 @@ editor_mode = function (editor) {
                     printe('不合法的idnum');
                     return;
                 }
+                if (!/^[0-9a-zA-Z_]+$/.test(id)) {
+                    printe('不合法的id，请使用字母、数字或下划线')
+                    return;
+                }
                 editor.file.changeIdAndIdnum(id, idnum, editor_mode.info, function (err) {
                     if (err) {
                         printe(err);
@@ -452,6 +456,11 @@ editor_mode = function (editor) {
                 printe("该楼层已存在！");
                 return;
             }
+            if (!/^[a-zA-Z_]*[a-zA-Z0-9_]*$/.test(newFileName)) {
+                printe("楼层名不合法！请使用字母、数字、下划线，且不能以数字开头！");
+                return;
+            }
+
             editor_mode.onmode('');
             editor.file.saveNewFile(newFileName.value, function (err) {
                 if (err) {

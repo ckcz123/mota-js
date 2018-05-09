@@ -22,7 +22,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                                     "tools"
                                 ]
                             },
-                            "_data": "只能取keys(钥匙) items(宝石、血瓶) constants(物品) tools(道具)"
+                            "_data": "只能取keys(钥匙) items(宝石、血瓶) constants(永久物品) tools(消耗道具)"
                         },
                         "name": {
                             "_leaf": true,
@@ -40,25 +40,25 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "cls为items的即捡即用类物品的效果,执行时会对这里的字符串执行eval()"
+                    "_data": "cls为items的即捡即用类物品的效果，如需设置可以先将其设置为空字符串\"\"，然后双击进行编辑。"
                 },
                 "itemEffectTip": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "cls为items的即捡即用类物品,在获得时左上角额外显示的文字,执行时会对这里的字符串执行eval()得到字符串"
+                    "_data": "cls为items的即捡即用类物品，在获得时左上角额外显示的文字，如需设置可以先将其设置为空字符串\"\"，然后双击进行编辑。"
                 },
                 "useItemEffect": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "cls为tools或contants时的使用物品效果,执行时会对这里的字符串执行eval()"
+                    "_data": "cls为tools或contants时的使用物品效果，如需设置可以先将其设置为空字符串\"\"，然后双击进行编辑。"
                 },
                 "canUseItemEffect": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "cls为tools或contants时能否使用物品的判断,执行时会return这里的字符串执行eval()后的结果"
+                    "_data": "cls为tools或contants时对当前能否使用该物品的判断，如需设置可以先将其设置为空字符串\"\"，然后双击进行编辑。"
                 }
             }
         },
@@ -231,7 +231,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         "title": {
                             "_leaf": true,
                             "_type": "textarea",
-                            "_data": "楼层中文名"
+                            "_data": "楼层中文名，将在切换楼层和浏览地图时显示"
                         },
                         "name": {
                             "_leaf": true,
@@ -274,7 +274,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_select": {
                                 "values": Object.keys(editor.core.icons.icons.terrains)
                             },
-                            "_data": "默认地面的图块ID（terrains中）"
+                            "_data": "默认地面的图块ID，此项修改后需要刷新才能看到效果。"
                         },
                         "images": {
                             "_leaf": true,
@@ -284,17 +284,17 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         "color": {
                             "_leaf": true,
                             "_type": "textarea",
-                            "_data": "该层的默认画面色调。本项可不写（代表无色调），如果写需要是一个RGBA数组。"
+                            "_data": "该层的默认画面色调。本项可不写（代表无色调），如果写需要是一个RGBA数组如[255,0,0,0.3]"
                         },
                         "weather": {
                             "_leaf": true,
                             "_type": "textarea",
-                            "_data": "该层的默认天气。本项可忽略表示晴天，如果写则第一项为\"rain\"或\"snow\"代表雨雪，第二项为1-10之间的数代表强度。"
+                            "_data": "该层的默认天气。本项可忽略表示晴天，如果写则第一项为\"rain\"或\"snow\"代表雨雪，第二项为1-10之间的数代表强度。\n如[\"rain\", 8]代表8级雨天。"
                         },
                         "bgm": {
                             "_leaf": true,
                             "_type": "textarea",
-                            "_data": "到达该层后默认播放的BGM。本项可忽略。"
+                            "_data": "到达该层后默认播放的BGM。本项可忽略，或者为一个定义过的背景音乐如\"bgm.mp3\"。"
                         },
                         "item_ratio": {
                             "_leaf": true,
@@ -306,7 +306,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_leaf": true,
                             "_type": "event",
                             "_event": "firstArrive",
-                            "_data": "第一次到该楼层触发的事件"
+                            "_data": "第一次到该楼层触发的事件，可以双击进入事件编辑器。"
                         }
                     }
                 },
@@ -318,7 +318,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_leaf": true,
                             "_type": "event",
                             "_event": "event",
-                            "_data": "该点的可能事件列表"
+                            "_data": "该点的可能事件列表，可以双击进入事件编辑器。"
                         },
                         "changeFloor": {
                             "_leaf": true,
@@ -330,24 +330,24 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_leaf": true,
                             "_type": "event",
                             "_event": "afterBattle",
-                            "_data": "该点战斗后可能触发的事件列表"
+                            "_data": "该点战斗后可能触发的事件列表，可以双击进入事件编辑器。"
                         },
                         "afterGetItem": {
                             "_leaf": true,
                             "_type": "event",
                             "_event": "afterGetItem",
-                            "_data": "该点获得道具后可能触发的事件列表"
+                            "_data": "该点获得道具后可能触发的事件列表，可以双击进入事件编辑器。"
                         },
                         "afterOpenDoor": {
                             "_leaf": true,
                             "_type": "event",
                             "_event": "afterOpenDoor",
-                            "_data": "该点开完门后可能触发的事件列表"
+                            "_data": "该点开完门后可能触发的事件列表，可以双击进入事件编辑器。"
                         },
                         "cannotMove": {
                             "_leaf": true,
                             "_type": "textarea",
-                            "_data": "该点不可通行的方向 \n 可以在这里定义该点不能前往哪个方向，例如悬崖边不能跳下去 \n'x,y': ['up', 'left'], // (x,y)点不能往上和左走"
+                            "_data": "该点不可通行的方向 \n 可以在这里定义该点不能前往哪个方向，可以达到悬崖之类的效果\n例如 [\"up\", \"left\"], // 代表该点不能往上和左走"
                         }
                     }
                 }

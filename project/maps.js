@@ -17,7 +17,8 @@ maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
     '12':{'cls': 'animates', 'id': 'poisonNet', 'noPass': false, 'trigger': 'passNet'}, // 毒网
     '13':{'cls': 'animates', 'id': 'weakNet', 'noPass': false, 'trigger': 'passNet'}, // 衰网
     '14':{'cls': 'animates', 'id': 'curseNet', 'noPass': false, 'trigger': 'passNet'}, // 咒网
-    '15':{'cls': 'animates', 'id': 'water', 'noPass': true}, // 水
+    '15':{'cls': 'animates', 'id': 'blueWater', 'noPass': true}, // 水
+    '16':{'cls': 'animates', 'id': 'water', 'noPass': true}, // 水
     // 在这里添加更多地形
     // 如果空位不足，可以从180以后开始继续放，只要不和现有的数字冲突即可
 

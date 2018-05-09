@@ -842,7 +842,7 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
     if (core.interval.openDoorAnimate!=null) return;
 
     // 是否存在门
-    if (!core.terrainExists(x, y, id)) {
+    if (!core.terrainExists(x, y, id) && id!='lava' && id!='star') {
         if (core.isset(callback)) callback();
         return;
     }
@@ -876,6 +876,7 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
     }
     var door = core.material.icons.animates[doorId];
     core.status.replay.animate=true;
+    core.removeGlobalAnimate(x,y);
     core.interval.openDoorAnimate = window.setInterval(function () {
         state++;
         if (state == 4) {

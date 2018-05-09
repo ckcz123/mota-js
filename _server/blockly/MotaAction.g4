@@ -919,7 +919,7 @@ return code;
 */;
 
 while_s
-    :   '循环' ':' '当' expression '时' BGNL? Newline action+ BEND Newline
+    :   '循环处理' '：' '当' expression '时' BGNL? Newline action+ BEND Newline
 
 /* while_s
 tooltip : while：循环处理
@@ -943,7 +943,7 @@ return code;
 */;
 
 continue_s
-    :   '跳置当前循环的下一轮' Newline
+    :   '继续当前循环' Newline
 
 /* continue_s
 tooltip : continue：继续执行当前循环的下一轮, 如果continue事件不在任何循环中被执行，则和exit等价，即会立刻结束当前事件！

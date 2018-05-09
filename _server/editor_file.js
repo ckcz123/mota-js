@@ -116,18 +116,23 @@ editor_file = function (editor, callback) {
             throw('未设置callback')
         }
         ;
-        if (!isset(editor.currentFloorData)) {
-            callback('无数据');
-        }
+        var currData=editor.currentFloorData;
+        var saveStatus = document.getElementById('newMapStatus').checked;
         editor.currentFloorData = {
             floorId: saveFilename,
-            title: "新建楼层",
-            name: "0",
-            canFlyTo: true,
-            canUseQuickShop: true,
-            cannotViewMap: false,
+            title: saveStatus?currData.title:"新建楼层",
+            name: saveStatus?currData.name:"0",
+            canFlyTo: saveStatus?currData.canFlyTo:true,
+            canUseQuickShop: saveStatus?currData.canUseQuickShop:true,
+            cannotViewMap: saveStatus?currData.cannotViewMap:false,
             images: [],
-            item_ratio: 1,
+            item_ratio: saveStatus?currData.item_ratio:1,
+            defaultGround: saveStatus?currData.defaultGround:"ground",
+            bgm: saveStatus?currData.bgm:null,
+            upFloor: null,
+            downFloor: null,
+            color: saveStatus?currData.color:null,
+            weather: saveStatus?currData.weather:null,
             firstArrive: [],
             events: {},
             changeFloor: {},
@@ -136,6 +141,10 @@ editor_file = function (editor, callback) {
             afterOpenDoor: {},
             cannotMove: {}
         };
+        Object.keys(editor.currentFloorData).forEach(function (t) {
+            if (!core.isset(editor.currentFloorData[t]))
+                delete editor.currentFloorData[t];
+        })
         editor.currentFloorData.map = "new";
         editor.currentFloorId = saveFilename;
         editor_file.saveFloorFile(callback);

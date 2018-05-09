@@ -1091,24 +1091,6 @@ choices为一个数组，其中每一项都是一个选项列表。
 
 使用 `{"type": "break"}` 可以跳出当前循环。
 
-上面的输出例子也可以这么写：
-
-``` js
-"x,y": [ // 实际执行的事件列表
-    {"type":"while", "condition": "true", // 循环处理；永远为真
-        "data":[
-            {"type": "setValue", "name": "flag:i", "value": "flag:i+1"}, // 递增i
-            {"type": "if", "condition": "flag:i>10", // 测试i是否超过了10
-                "true": [{"type": "break"}], // 是的，则直接break调出循环
-                "false": []
-            },
-            "${flag:i}", // 输出i
-            {"type": "sleep","time":1000}, // 等待1秒
-        ]
-    },
-]
-```
-
 !> 如果break事件不在任何循环中被执行，则和exit等价，即会立刻结束当前事件！
 
 ### continue：继续执行当前循环

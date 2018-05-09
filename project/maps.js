@@ -76,7 +76,9 @@ maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
     '63':{'cls': 'items', 'id': 'moneyPocket'}, // 金钱袋
     '64':{'cls': 'items', 'id': 'shoes'}, // 绿鞋
     '65':{'cls': 'items', 'id': 'hammer'}, // 圣锤
-    '66':{'cls': 'items', 'id': 'lifeWand'}, // 生命魔杖
+    '66':{'cls': 'items', 'id': 'sword0'}, // 空剑
+    '67':{'cls': 'items', 'id': 'shield0'}, // 空盾
+    '68':{'cls': 'items', 'id': 'lifeWand'}, // 生命魔杖
 
 
     ////////////////////////// 门、楼梯、传送点部分 //////////////////////////

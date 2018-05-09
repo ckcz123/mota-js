@@ -105,13 +105,13 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		},
 		"sword0": {
 			"cls": "constants",
-			"name": "折断的剑",
-			"text": "没有任何作用的剑，相当于脱掉装备。"
+			"name": "空剑",
+			"text": "使用可脱掉当前装备的剑。"
 		},
 		"shield0": {
 			"cls": "constants",
-			"name": "残破的盾",
-			"text": "没有任何作用的盾，相当于脱掉装备。"
+			"name": "空盾",
+			"text": "使用可脱掉当前装备的盾。"
 		},
 		"book": {
 			"cls": "constants",

@@ -10,7 +10,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "floorIds": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器的顺序和上楼器/下楼器的顺序"
+                    "_data": "在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器、浏览地图和上/下楼器的顺序"
                 },
                 "images": {
                     "_leaf": true,
@@ -35,12 +35,12 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "startBackground": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "标题界面的背景,建议使用jpg格式以压缩背景图空间"
+                    "_data": "标题界面的背景，建议使用jpg格式以压缩背景图空间"
                 },
                 "startLogoStyle": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "标题样式:可以改变颜色，也可以隐藏标题（如果背景图自带）"
+                    "_data": "标题样式：可以改变颜色，也可以写\"display: none\"来隐藏标题"
                 },
                 "levelChoose": {
                     "_leaf": true,
@@ -76,7 +76,8 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "name": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "游戏的唯一英文标识符。由英文、数字、下划线组成，不能超过20个字符。"
+                    "_range": "/^[a-zA-Z0-9_]{1,30}$/.test(thiseval)",
+                    "_data": "游戏的唯一英文标识符。由英文、数字、下划线组成，不能超过30个字符。\n此项必须修改，其将直接影响到存档的定位！"
                 },
                 "version": {
                     "_leaf": true,
@@ -86,7 +87,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "floorId": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "初始楼层ID"
+                    "_data": "初始楼层的ID"
                 },
                 "hero": {
                     "_leaf": false,
@@ -95,7 +96,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         "name": {
                             "_leaf": true,
                             "_type": "textarea",
-                            "_data": "勇士初始数据 \n 勇士名；可以改成喜欢的"
+                            "_data": "勇士名；可以改成喜欢的"
                         },
                         "lv": {
                             "_leaf": true,
@@ -201,18 +202,18 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "event",
                     "_event": "firstArrive",
-                    "_data": "游戏开始前剧情。如果无剧情直接留一个空数组即可。"
+                    "_data": "游戏开始前剧情。\n可以双击进入事件编辑器。\n如果无剧情直接留一个空数组即可。"
                 },
                 "shops": {
                     "_leaf": true,
                     "_type": "event",
                     "_event": "shop",
-                    "_data": "全局商店，是一个数组 \n 每一项是一个Object代表一个全局商店 \n id 为商店的唯一标识符（ID），请确保任何两个商店的id都不相同 \n name 为商店的名称（打开商店后的标题） \n icon 为商店的图标，在icons.js的npcs中定义。如blueShop可代表蓝色商店。 \n textInList 为其在快捷商店栏中显示的名称，如\"3楼金币商店\"等 \n use 为消耗的类型，是金币（money）还是经验（experience）。 \n need 是一个表达式，计算商店所需要用到的数值，可以以times作为参数。 \n text 为商店所说的话。可以用${need}表示需要的数值。\n choices 为商店的各个选项，是一个list，每一项是一个选项，里面text为显示文字，effect为选项的效果，只能用+=，分号分开。"
+                    "_data": "全局商店，是一个数组，可以双击进入事件编辑器。"
                 },
                 "levelUp": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "经验升级所需要的数值，是一个数组 \n 第一项为初始等级，可以简单留空，也可以写name \n 每一个里面可以含有三个参数 need, name, effect \n need为所需要的经验数值，是一个正整数。请确保need所需的依次递增 \n name为该等级的名称，也可以省略代表使用系统默认值；本项将显示在状态栏中 \n effect为本次升级所执行的操作，可由若干项组成，由分号分开 \n 其中每一项写法和上面的商店完全相同，同样必须是X+=Y的形式，Y是一个表达式，同样可以使用status:xxx或item:xxx代表勇士的某项数值/道具个数"
+                    "_data": "经验升级所需要的数值，是一个数组，可以双击进行编辑。 \n 第一项为初始等级，可以简单留空，也可以写name \n 每一个里面可以含有三个参数 need, name, effect \n need为所需要的经验数值，是一个正整数。请确保need所需的依次递增 \n name为该等级的名称，也可以省略代表使用系统默认值；本项将显示在状态栏中 \n effect为本次升级所执行的操作，可由若干项组成，由分号分开 \n 其中每一项写法和上面的商店完全相同，同样必须是X+=Y的形式，Y是一个表达式，同样可以使用status:xxx或item:xxx代表勇士的某项数值/道具个数"
                 }
             }
         },
@@ -273,12 +274,12 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "sword0": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "默认装备折断的剑的攻击力"
+                    "_data": "空剑的攻击力，此项请保持为0"
                 },
                 "shield0": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "默认装备残破的盾的防御力"
+                    "_data": "空盾的防御力，此项请保持为0"
                 },
                 "sword1": {
                     "_leaf": true,
@@ -338,12 +339,12 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "breakArmor": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "破甲的比例（战斗前，怪物附加角色防御的x%作为伤害）"
+                    "_data": "破甲的比例（战斗前，怪物附加角色防御的x倍作为伤害）"
                 },
                 "counterAttack": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "反击的比例（战斗时，怪物每回合附加角色攻击的x%作为伤害，无视角色防御）"
+                    "_data": "反击的比例（战斗时，怪物每回合附加角色攻击的x倍作为伤害，无视角色防御）"
                 },
                 "purify": {
                     "_leaf": true,
@@ -364,7 +365,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "animateSpeed": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "动画时间"
+                    "_data": "动画时间，一般300比较合适"
                 }
             }
         },
@@ -544,7 +545,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "checkbox",
                     "_bool": "bool",
-                    "_data": "经过楼梯、传送门时是否能“穿透”。穿透的意思是，自动寻路得到的的路径中间经过了楼梯，行走时是否触发楼层转换事件"
+                    "_data": "经过楼梯、传送门时是否能“穿透”。\n穿透的意思是，自动寻路得到的的路径中间经过了楼梯，行走时是否触发楼层转换事件"
                 },
                 "enableMoveDirectly": {
                     "_leaf": true,

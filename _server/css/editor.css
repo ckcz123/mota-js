@@ -340,6 +340,29 @@ table.row td {
     background-color: rgba(76, 34, 27, .5);
 }
 
+#menuDiv * { margin: 0; padding: 0; }
+#midMenu{
+    z-index: 101;
+    width: 10em;
+    background: rgba(255, 255, 255, 0.65);
+    position: absolute;
+    /* display: none; */
+}
+#midMenu ul{
+    width: 100%;
+    list-style: none;
+    border: 1px solid #000;
+    border-bottom: 0px;
+}
+#midMenu ul li{
+    /* height: 30px; */
+    /* font-size: 16px; */
+    color: #000;
+    /* line-height: 30px; */
+    /* text-align: center; */
+    border-bottom: 1px solid #000;
+}
+
 /* for vue dom */
 [v-cloak] {
     display: none !important;

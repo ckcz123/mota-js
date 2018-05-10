@@ -427,7 +427,15 @@ editor.prototype.listen = function () {
         uc.clearRect(0, 0, 416, 416);
     }//用于鼠标移出canvas时的自动清除状态
 
+    eui.oncontextmenu=function(e){e.preventDefault()}
+
     eui.onmousedown = function (e) {
+        if (e.button==2){
+            editor.showMidMenu(e.clientX,e.clientY);
+            var loc = eToLoc(e);
+            var pos = locToPos(loc);
+            return;
+        }
         if (!selectBox.isSelected) {
             var loc = eToLoc(e);
             var pos = locToPos(loc);
@@ -489,7 +497,7 @@ editor.prototype.listen = function () {
         holdingPath = 0;
         e.stopPropagation();
         var loc = eToLoc(e);
-        if (stepPostfix.length) {
+        if (stepPostfix && stepPostfix.length) {
             preMapData = JSON.parse(JSON.stringify(editor.map));
             currDrawData.pos = JSON.parse(JSON.stringify(stepPostfix));
             currDrawData.info = JSON.parse(JSON.stringify(editor.info));
@@ -535,6 +543,7 @@ editor.prototype.listen = function () {
         }
     }
 
+    var dataSelection = document.getElementById('dataSelection');
     edata.onmousedown = function (e) {
         e.stopPropagation();
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
@@ -600,6 +609,42 @@ editor.prototype.listen = function () {
                 //editor_mode.emenyitem();
             }
         }
+    }
+
+    var midMenu=document.getElementById('midMenu');
+    midMenu.oncontextmenu=function(e){e.preventDefault()}
+    editor.showMidMenu=function(x,y){
+        var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
+        var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        midMenu.style='top:'+(y+scrollTop)+'px;left:'+(x+scrollLeft)+'px;';
+    }
+    editor.hideMidMenu=function(){midMenu.style='display:none';}
+
+    var chooseInRight = document.getElementById('chooseInRight');
+    chooseInRight.onmousedown = function(e){
+        editor.hideMidMenu();
+        e.stopPropagation();
+        var thisevent = editor.map[editor.pos.y][editor.pos.x];
+        var pos={x: 0, y: 0, images: "terrains"};
+        var ysize = 32;
+        console.log(thisevent)
+        if(thisevent==0){
+            //选中清除块
+            editor.info = 0;
+            editor.pos=pos;
+        } else {
+            editor.info=editor.ids[editor.indexs[thisevent.idnum]];
+            pos.x=editor.widthsX[thisevent.images][1];
+            pos.y=editor.info.y;
+            ysize = thisevent.images.indexOf('48') === -1 ? 32 : 48;
+        }
+        setTimeout(function(){selectBox.isSelected = true;});
+        dataSelection.style.left = pos.x * 32 + 'px';
+        dataSelection.style.top = pos.y * ysize + 'px';
+        dataSelection.style.height = ysize - 6 + 'px';
+        tip.infos = JSON.parse(JSON.stringify(editor.info));
+        editor_mode.onmode('nextChange');
+        editor_mode.onmode('emenyitem');
     }
 
 }//绑定事件

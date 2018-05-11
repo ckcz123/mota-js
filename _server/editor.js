@@ -348,6 +348,7 @@ editor.prototype.updateMap = function () {
             } else drawTile(eventCtx, x, y, tileInfo);
         }
     // 绘制地图 end
+    
 }
 
 editor.prototype.changeFloor = function (floorId, callback) {
@@ -431,9 +432,9 @@ editor.prototype.listen = function () {
 
     eui.onmousedown = function (e) {
         if (e.button==2){
-            editor.showMidMenu(e.clientX,e.clientY);
             var loc = eToLoc(e);
             var pos = locToPos(loc);
+            editor.showMidMenu(e.clientX,e.clientY);
             return;
         }
         if (!selectBox.isSelected) {
@@ -442,7 +443,7 @@ editor.prototype.listen = function () {
             editor_mode.onmode('nextChange');
             editor_mode.onmode('loc');
             //editor_mode.loc();
-            tip.whichShow = 1;
+            //tip.whichShow = 1;
             return;
         }
 
@@ -460,7 +461,7 @@ editor.prototype.listen = function () {
 
     eui.onmousemove = function (e) {
         if (!selectBox.isSelected) {
-            // tip.whichShow = 1;
+            //tip.whichShow = 1;
             return;
         }
 
@@ -491,7 +492,7 @@ editor.prototype.listen = function () {
 
     eui.onmouseup = function (e) {
         if (!selectBox.isSelected) {
-            tip.whichShow = 1;
+            //tip.whichShow = 1;
             return;
         }
         holdingPath = 0;
@@ -613,12 +614,32 @@ editor.prototype.listen = function () {
 
     var midMenu=document.getElementById('midMenu');
     midMenu.oncontextmenu=function(e){e.preventDefault()}
+    editor.lastRightButtonPos=[{x:0,y:0},{x:0,y:0}];
     editor.showMidMenu=function(x,y){
+        editor.lastRightButtonPos=JSON.parse(JSON.stringify(
+            [editor.pos,editor.lastRightButtonPos[0]]
+        ));
+        var locStr='('+editor.lastRightButtonPos[1].x+','+editor.lastRightButtonPos[1].y+')';
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        copyLoc.children[0].innerHTML='复制此事件到'+locStr;
+        moveLoc.children[0].innerHTML='移动此事件到'+locStr;
         midMenu.style='top:'+(y+scrollTop)+'px;left:'+(x+scrollLeft)+'px;';
     }
     editor.hideMidMenu=function(){midMenu.style='display:none';}
+
+    var chooseThis = document.getElementById('chooseThis');
+    chooseThis.onmousedown = function(e){
+        editor.hideMidMenu();
+        e.stopPropagation();
+        selectBox.isSelected = false;
+        var loc = eToLoc(e);
+        var pos = locToPos(loc);
+        editor_mode.onmode('nextChange');
+        editor_mode.onmode('loc');
+        //editor_mode.loc();
+        //tip.whichShow = 1;
+    }
 
     var chooseInRight = document.getElementById('chooseInRight');
     chooseInRight.onmousedown = function(e){
@@ -627,7 +648,6 @@ editor.prototype.listen = function () {
         var thisevent = editor.map[editor.pos.y][editor.pos.x];
         var pos={x: 0, y: 0, images: "terrains"};
         var ysize = 32;
-        console.log(thisevent)
         if(thisevent==0){
             //选中清除块
             editor.info = 0;
@@ -650,28 +670,108 @@ editor.prototype.listen = function () {
         editor_mode.onmode('emenyitem');
     }
 
+    var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
+
     var copyLoc = document.getElementById('copyLoc');
     copyLoc.onmousedown = function(e){
         editor.hideMidMenu();
         e.stopPropagation();
+        preMapData = null;
+        reDo = null;
         var thisevent = editor.map[editor.pos.y][editor.pos.x];
         if(thisevent==0){
-
+            editor.info = 0;
         } else {
-
+            var ids=editor.indexs[thisevent.idnum];
+            ids=ids[0]?ids[0]:ids;
+            editor.info=editor.ids[ids];
         }
+        editor_mode.onmode('');
+        var now = editor.pos;
+        var last = editor.lastRightButtonPos[1];
+        editor.map[last.y][last.x]=editor.info;
+        editor.updateMap();
+        fields.forEach(function(v){
+            editor.currentFloorData[v][last.x+','+last.y]=editor.currentFloorData[v][now.x+','+now.y]
+        })
+        editor.file.saveFloorFile(function (err) {
+            if (err) {
+                printe(err);
+                throw(err)
+            }
+            ;printf('复制事件成功');
+            editor.drawEventBlock();
+        });
     }
 
     var moveLoc = document.getElementById('moveLoc');
     moveLoc.onmousedown = function(e){
         editor.hideMidMenu();
         e.stopPropagation();
+        preMapData = null;
+        reDo = null;
         var thisevent = editor.map[editor.pos.y][editor.pos.x];
         if(thisevent==0){
-
+            editor.info = 0;
         } else {
-
+            var ids=editor.indexs[thisevent.idnum];
+            ids=ids[0]?ids[0]:ids;
+            editor.info=editor.ids[ids];
         }
+        editor_mode.onmode('');
+        var now = editor.pos;
+        var last = editor.lastRightButtonPos[1];
+        
+        var lastevent = editor.map[last.y][last.x];
+        var lastinfo = 0;
+        if(lastevent==0){
+            lastinfo = 0;
+        } else {
+            var ids=editor.indexs[lastevent.idnum];
+            ids=ids[0]?ids[0]:ids;
+            lastinfo=editor.ids[ids];
+        }
+        editor.map[last.y][last.x]=editor.info;
+        editor.map[now.y][now.x]=lastinfo;
+        editor.updateMap();
+
+        fields.forEach(function(v){
+            var temp_atsfcytaf=editor.currentFloorData[v][now.x+','+now.y];
+            editor.currentFloorData[v][now.x+','+now.y]=editor.currentFloorData[v][last.x+','+last.y];
+            editor.currentFloorData[v][last.x+','+last.y]=temp_atsfcytaf
+        })
+        editor.file.saveFloorFile(function (err) {
+            if (err) {
+                printe(err);
+                throw(err)
+            }
+            ;printf('两位置的事件已互换');
+            editor.drawEventBlock();
+        });
+    }
+
+    var clearLoc = document.getElementById('clearLoc');
+    clearLoc.onmousedown = function(e){
+        editor.hideMidMenu();
+        e.stopPropagation();
+        preMapData = null;
+        reDo = null;
+        editor.info = 0;
+        editor_mode.onmode('');
+        var now = editor.pos;
+        editor.map[now.y][now.x]=editor.info;
+        editor.updateMap();
+        fields.forEach(function(v){
+            editor.currentFloorData[v][now.x+','+now.y]=null;
+        })
+        editor.file.saveFloorFile(function (err) {
+            if (err) {
+                printe(err);
+                throw(err)
+            }
+            ;printf('清空此点及事件成功');
+            editor.drawEventBlock();
+        });
     }
 
 }//绑定事件

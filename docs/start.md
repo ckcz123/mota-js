@@ -168,9 +168,36 @@
 
 素材注册完毕后，即可在游戏中正常使用，也可以被地图生成器所识别（需要重开地图生成器）。
 
+## 控制台调试
+
+HTML5的塔都是可以进行控制台调试的。
+
+当我们使用Chrome进入游戏后，可以按 `Ctrl+Shift+I` ，并找到 `Console` 控制台。
+
+![控制台](./img/console.png)
+
+在控制台中，我们可以输入一些命令对游戏进行调试，常见的命令有：
+
+- `core.debug()` 无敌模式；使用此命令将会把攻防都置为10000，方便进行乱撞。
+- `core.setStatus('atk', 100)` 直接设置勇士的属性；这里可以把`atk`换成`hp`, `def`, `mdef`, `money`, `experience`等之一。
+- `core.getStatus('atk')` 获得勇士的属性数据。
+- `core.setItem('pickaxe', 10)` 直接设置勇士某个道具的个数。这里可以需要写道具的ID。
+- `core.itemCount('pickaxe')` 获得勇士某个道具的个数。请注意不是getItem，那个函数是用来游戏中获取道具的。
+- `core.setFlag('xxx', 1)` 设置某个flag/自定义变量的值
+- `core.getFlag('xxx', 10)` 获得某个flag/自定义变量的值；如果该项不存在（未被定义），则返回第二个参数的值。
+- `core.insertAction(list)` 执行一段自定义事件。比如 `core.insertAction(["你好"])` 将执行一个剧情文本显示事件。
+- `core.status.floorId` 获得当前层的floorId
+- `core.changeFloor('MT2')` 立刻执行楼层切换到MT2层。
+- `core.getBlock(3, 5, 'MT1')` 获得当前地图上某一个块的信息。第三个参数为floorId，可省略表示当前楼层。
+- `core.resetMap()` 重置当前层地图。当修改地图后，再读档时修改的地图不会立刻生效，此时可以使用resetMap来重置当前楼层的地图。
+……
+
+更多API和详细参数介绍可参见[API列表](api)。
+
+
 ## 报错处理
 
-有时候刷新后可能页面变成空白，即无法正确加载，游戏也无法正常进入。
+有时候刷新后可能地图编辑器页面变成空白，即无法正确加载，游戏也无法正常进入。
 
 出现这种问题的原因往往是如下几种：
 - 手动直接打开并错误编辑了文件

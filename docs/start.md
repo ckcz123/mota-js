@@ -178,19 +178,28 @@ HTML5的塔都是可以进行控制台调试的。
 
 在控制台中，我们可以输入一些命令对游戏进行调试，常见的命令有：
 
+- `core.status.floorId` 获得当前层的floorId。
+- `core.status.thisMap` 获得当前地图信息。
+- `core.status.hero` 获得当前勇士状态信息。例如core.status.hero.atk就是当前勇士的攻击力数值。
+- `core.material.enemys` 获得所有怪物信息。例如core.material.enemys.greenSlime就是获得绿色史莱姆的属性数据。
+- `core.material.items` 获得所有道具的信息。
 - `core.debug()` 无敌模式；使用此命令将会把攻防都置为10000，方便进行乱撞。
-- `core.setStatus('atk', 100)` 直接设置勇士的属性；这里可以把`atk`换成`hp`, `def`, `mdef`, `money`, `experience`等之一。
-- `core.getStatus('atk')` 获得勇士的属性数据。
+- `core.updateStatusBar()` 立刻更新状态栏和地图显伤。
+- `core.setStatus('atk', 100)` 直接设置勇士的属性。本句等价于 `core.status.hero.atk = 1000`
+- `core.getStatus('atk')` 返回当前属性数值。本句等价于 `core.status.hero.atk`
 - `core.setItem('pickaxe', 10)` 直接设置勇士某个道具的个数。这里可以需要写道具的ID。
+- `core.hasItem('pickaxe')` 返回勇士是否拥有某个道具。
 - `core.itemCount('pickaxe')` 获得勇士某个道具的个数。请注意不是getItem，那个函数是用来游戏中获取道具的。
 - `core.setFlag('xxx', 1)` 设置某个flag/自定义变量的值
 - `core.getFlag('xxx', 10)` 获得某个flag/自定义变量的值；如果该项不存在（未被定义），则返回第二个参数的值。
+- `core.hasFlag('xxx')` 返回是否存在某个变量且不为0。
 - `core.insertAction(list)` 执行一段自定义事件。比如 `core.insertAction(["你好"])` 将执行一个剧情文本显示事件。
 - `core.status.floorId` 获得当前层的floorId
-- `core.changeFloor('MT2')` 立刻执行楼层切换到MT2层。
+- `core.changeFloor('MT2', 'downFloor')` 立刻执行楼层切换到MT2层的下楼点位置。
 - `core.getBlock(3, 5, 'MT1')` 获得当前地图上某一个块的信息。第三个参数为floorId，可省略表示当前楼层。
 - `core.resetMap()` 重置当前层地图。当修改地图后，再读档时修改的地图不会立刻生效，此时可以使用resetMap来重置当前楼层的地图。
-……
+- `localStorage` 获得所有的存档数据。可以用 `core.getLocalStorage('save1')` 来具体获得某个存档。
+- ……
 
 更多API和详细参数介绍可参见[API列表](api)。
 

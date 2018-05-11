@@ -783,6 +783,7 @@ control.prototype.moveOneStep = function() {
 
 ////// 停止勇士的一切行动，等待勇士行动结束后，再执行callback //////
 control.prototype.waitHeroToStop = function(callback) {
+    var lastDirection = core.status.automaticRoute.lastDirection;
     core.stopAutomaticRoute();
     core.clearContinueAutomaticRoute();
     if (core.isset(callback)) {
@@ -791,6 +792,8 @@ control.prototype.waitHeroToStop = function(callback) {
         core.status.automaticRoute.moveDirectly = false;
         setTimeout(function(){
             core.status.replay.animate=false;
+            if (core.isset(lastDirection))
+                core.setHeroLoc('direction', lastDirection);
             core.drawHero();
             callback();
         }, 30);

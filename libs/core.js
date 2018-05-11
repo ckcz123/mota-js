@@ -893,6 +893,11 @@ core.prototype.startReplay = function (list) {
     core.control.startReplay(list);
 }
 
+////// 关闭UI窗口 //////
+core.prototype.closePanel = function () {
+    core.ui.closePanel();
+}
+
 ////// 更改播放状态 //////
 core.prototype.triggerReplay = function () {
     core.control.triggerReplay();

@@ -2,366 +2,453 @@
 
 ?> 目前版本**v2.2.1**，上次更新时间：* {docsify-updated} *
 
-所有系统支持的API都列在了这里。所有可能被用到的API都在前面用\*标记。
+**这里只列出所有可能会被造塔者用到的常用API，更多的有关内容请在代码内进行查询。**
+
+如有任何疑问，请联系小艾寻求帮助。
 
 可以在chrome浏览器的控制台中（`ctrl+shift+I`，找到Console）中直接进行调用，以查看效果。
 
-!> **`main.js`：游戏入口，所有其他JS文件都是被此文件加载。**
+!> 最常用的新手向命令，强烈建议每个人了解
 
-``` js
-main.init // 初始化
-main.loaderJs // 动态加载所有核心JS文件
-main,loaderFloors // 动态加载所有楼层（剧本）
-main.loadMod // 加载某一个JS文件
-main.loadFloor // 加载某一个楼层
-main.setMainTipsText // 加载过程提示
-window.onresize // 窗口大小变化时
-main.dom.body.onkeydown // 在界面上按下某按键时
-main.dom.body.onkeydown // 在界面上放开某按键时
-main.dom.body.onselectstart // 开始选择时
-main.dom.data.onmousedown // 鼠标按下时
-main.dom.data.onmousemove // 鼠标移动时
-main.dom.data.onmouseup // 鼠标放开时
-main.dom.data.onmousewheel // 鼠标滑轮滚动时
-main.dom.data.ontouchstart // 手指在触摸屏开始触摸时
-main.dom.data.ontouchmove // 手指在触摸屏上移动时
-main.dom.data.ontouchend // 手指离开触摸屏时
-main.statusBar.image.book.onclick // 点击状态栏中的怪物手册时
-main.statusBar.image.fly.onclick // 点击状态栏中的楼层传送器时
-main.statusBar.image.toolbox.onclick // 点击状态栏中的工具箱时
-main.statusBar.image.shop.onclick // 点击状态栏中的快捷商店时
-main.statusBar.image.save.onclick // 点击状态栏中的存档按钮时
-main.statusBar.image.load.onclick // 点击状态栏中的读档按钮时
-main.statusBar.image.settings.onclick // 点击状态栏中的系统菜单时
-main.dom.playGame.onclick // 点击“开始游戏”时
-main.dom.loadGame.onclick // 点击“载入游戏”时
-main.dom.replayGame.onclick // 点击“录像回放”时
-main.dom.easyLevel.onclick // 点击“简单难度”时
-main.dom.normalLevel.onclick // 点击“普通难度”时
-main.dom.hardLevel.onclick // 点击“困难难度”时
+``` text
+
+core.status.floorId
+获得当前层的floorId。
+
+
+core.status.maps
+获得所有楼层的地图信息。
+
+
+core.status.thisMap
+获得当前楼层信息，其等价于core.status.maps[core.status.floorId]。
+
+
+core.floors
+获得所有楼层的信息，常常用来获取事件坐标。
+
+
+core.status.hero
+获得当前勇士状态信息。例如core.status.hero.atk就是当前勇士的攻击力数值。
+
+
+core.material.enemys
+获得所有怪物信息。例如core.material.enemys.greenSlime就是获得绿色史莱姆的属性数据。
+
+
+core.material.items
+获得所有道具的信息。
+
+
+core.debug()
+将攻防设置为10000，近似于无敌模式。
+
+
+core.updateStatusBar()
+立刻刷新状态栏和地图显伤。
+
+
+core.setStatus('atk', 1000)
+将攻击力设置为1000；这里把atk可以改成hp, def, mdef, money, experience等等。
+本句等价于 core.status.hero.atk = 1000
+
+
+core.getStatus('atk')
+返回当前攻击力数值。本句等价于 core.status.hero.atk
+
+
+core.setHeroLoc('x', 5)
+设置勇士位置。这句话的意思是将勇士当前位置的横坐标设置为5。
+同理可以设置勇士纵坐标 core.setHeroLoc('y', 3)。
+值得注意的是，这句话虽然会使勇士改变位置，但并不会使界面重新绘制；如需立刻重新绘制地图还需调用：
+core.clearMap('hero'); core.drawHero();
+来对界面进行更新。
+
+
+core.setItem('pickaxe', 10)
+将破墙镐个数设置为10个。这里可以写任何道具的ID。
+
+
+core.getItem('pickaxe', 4)
+另勇士获得四个破墙镐。这里可以写任何道具的ID。
+
+
+core.itemCount('pickaxe')
+返回当前破墙镐的个数。这里可以写任何道具的ID。
+
+
+core.hasItem('pickaxe')
+返回当前是否存在某个道具。等价于 core.itemCount('pickaxe')>0 。
+
+
+core.setFlag('xyz', 2)
+设置某个flag/变量的值为2。这里可以写任何的flag变量名。
+
+
+core.getFlag('xyz', 7)
+获得某个flag/变量的值；如果该变量不存在，则返回第二个参数。
+比如 core.getFlag('point', 2) 则获得变量point的值；如果该变量从未定义过则返回2。
+
+
+core.hasFlag('xyz')
+返回是否存在某个变量且不为0。等价于 core.getFlag('xyz', 0)!=0 。
+
+
+core.insertAction(list)
+插入并执行一段自定义事件。在这里你可以写任意的自定义事件列表，有关详细写法请参见文档-事件。
+例如： core.insertAction(["楼层切换", {"type":"changeFloor", "floorId": "MT3"}])
+将依次显示剧情文本，并执行一个楼层切换的自定义事件。
+
+
+core.changeFloor(floorId, stair, heroLoc, time, callback)
+立刻切换到指定楼层。
+floorId为目标楼层ID，stair为到达的目标楼梯，heroLoc为到达的指定点，time为动画时间，callback为切换完毕后的回调。
+例如：
+core.changeFloor('MT2', 'upFloor', null, 600) 切换到MT2层的上楼点，动画事件600ms
+core.changeFloor('MT5', null, {'x': 3, 'y': 6}, 0) 无动画切换到MT5层的(3,6)位置。
+
+
+core.resetMap()
+重置当前楼层地图。
+当我们修改某一层地图后，进游戏读档，会发现修改的内容并没有被更新上去。
+这是因为，H5的存档是会存下来每一个楼层的地图的，读档会从档里面获得地图信息。
+此时，如果我们在某一层地图执行 core.resetMap() ，则可以立刻从剧本中读取并重置当前楼层地图。
+已经被修改过的内容也会相应出现。
+
+
+R
+录像回放的快捷键；这不是一个控制台命令，但是也把它放在这里供使用。
+录像回放在修改地图或新增数据后会很有用。
+
+
+localStorage
+获得所有的存档数据。可以用 core.getLocalStorage('save1') 来具体获得某个存档。
+
 ```
 
-!> **`core.js`：系统核心文件。所有核心逻辑处理都在此文件完成。**
+!> 一些相对高级的命令，针对有一定脚本经验的人
 
-``` js
-* core.status.floorId // 获得当前层floorId
-* core.status.thisMap // 获得当前层的地图信息
-* core.status.maps // 获得所有楼层的地图信息
-* core.floors // 获得所有楼层的剧本
+``` text
 
-// ------ 初始化部分 ------
-core.init // 初始化
-core.showStartAnimate // 显示游戏开始界面
-core.hideStartAnimate // 隐藏游戏开始界面
-core.setStartProgressVal // 设置加载进度条进度
-core.setStartLoadTipText // 设置加载进度条提示文字
-core.loader // 加载图片和音频
-core.loadAutotile // 加载Autotile
-core.loadImage // 加载图片
-core.loadMusic // 加载音频
-core.isPlaying // 游戏是否已经开始
-core.clearStatus // 清除游戏状态和数据
-core.resetStatus // 重置游戏状态和初始数据
-core.startGame // 开始游戏
-* core.restart // 重新开始游戏；此函数将回到标题页面
+========== 可直接从core中调用的，最常被使用的函数 ==========
+core.js实际上是所有API的入口（路由），核心API的实现在其他几个文件中，core.js主要进行转发操作。
 
-// ------ 键盘、鼠标事件 ------
-core.onKeyDown // 按下某个键时
-core.onKeyUp // 放开某个键时
-core.pressKey // 按住某个键时
-core.keyDown // 根据按下键的code来执行一系列操作
-core.keyUp // 根据放开键的code来执行一系列操作
-core.ondown // 点击（触摸）事件按下时
-core.onmove // 当在触摸屏上滑动时
-core.onup // 当点击（触摸）事件放开时
-core.getClickLoc // 获得点击事件相对左上角的坐标（0到12之间）
-core.onclick // 具体点击屏幕上(x,y)点时，执行的操作
-core.onmousewheel // 滑动鼠标滚轮时的操作
 
-// ------ 自动寻路代码相关 ------
-core.clearAutomaticRouteNode // 清除自动寻路路线
-core.stopAutomaticRoute // 停止自动寻路操作
-core.continueAutomaticRoute // 继续剩下的自动寻路操作
-core.clearContinueAutomaticRoute // 清空剩下的自动寻路列表
-core.setAutomaticRoute // 设置自动寻路路线
-core.automaticRoute // 自动寻路算法，找寻最优路径
-core.fillPosWithPoint // 显示离散的寻路点
-core.clearStepPostfix // 清除已经寻路过的部分
+core.nextX()
+获得勇士面向的下一个位置的x坐标
 
-// ------ 自动行走，行走控制 ------
-core.stopAutoHeroMove // 停止勇士的自动行走
-core.setAutoHeroMove // 设置勇士的自动行走路线
-core.autoHeroMove // 让勇士开始自动行走
-core.setHeroMoveInterval // 设置行走的效果动画
-core.setHeroMoveTriggerInterval // 设置勇士行走过程中对事件的触发检测
-core.moveAction // 实际每一步的行走过程
-* core.turnHero(direction) // 设置勇士的方向（转向）
-core.canMoveHero // 勇士能否前往某方向
-core.moveHero // 让勇士开始移动
-core.eventMoveHero // 使用事件让勇士移动。这个函数将不会触发任何事件。
-core.moveOneStep // 每移动一格后执行的事件。中毒时在这里进行扣血判断。
-core.waitHeroToStop(callback) // 停止勇士的一切行动，等待勇士行动结束后，再执行callback回调函数。
-core.stopHero // 停止勇士的移动状态。
-core.drawHero // 绘制勇士。
-* core.setHeroLoc(name, value) // 设置勇士的位置。name为”direction”,”x”,”y”
-* core.getHeroLoc(name) // 获得勇士的位置。
-* core.nextX // 获得勇士面对位置的x坐标
-* core.nextY // 获得勇士面对位置的y坐标
+core.nextY()
+获得勇士面向的下一个位置的y坐标
 
-// ------ 地图和事件处理 ------
-* core.openDoor(id, x, y, needKey, callback) // 打开一扇位于 (x,y) 的门
-* core.battle(id, x, y, force, callback) // 进行战斗；force表示是否强制战斗
-core.afterBattle // 战斗完毕
-core.trigger(x,y) // 触发x,y点的事件
-* core.changeFloor(floorId, stair, heroLoc, time, callback) // 楼层切换。floorId为目标楼层Id，stair可指定为上/下楼梯，time动画时间
-core.mapChangeAnimate // 地图切换动画效果
-core.clearMap // 清除地图
-core.fillText // 在某个canvas上绘制一段文字
-core.fillRect // 在某个canvas上绘制一个矩形
-core.strokeRect // 在某个canvas上绘制一个矩形的边框
-core.drawLine // 在某个canvas上绘制一条线
-core.setFont // 设置某个canvas的文字字体
-core.setLineWidth // 设置某个canvas的线宽度
-core.saveCanvas // 保存某个canvas状态
-core.loadCanvas // 加载某个canvas状态
-core.setStrokeStyle // 设置某个canvas边框属性
-core.setAlpha // 设置某个canvas的alpha值
-core.setOpacity // 设置某个canvas的透明度
-core.setFillStyle // 设置某个canvas的绘制属性（如颜色等）
-* core.drawMap(mapId, callback) // 绘制某张地图。mapId为地图Id，绘制完毕将执行callback回调函数。
-core.drawAutotile // 绘制Autotile
-* core.noPassExists(x,y) // 某个点是否不可通行
-core.noPass // 某个点是否在区域内且不可通行
-* core.npcExists(x,y) // 某个点是否存在NPC
-* core.terrainExists(x,y) // 某个点是否存在（指定的）地形
-* core.stairExists(x,y) // 某个点是否存在楼梯
-* core.nearStair // 当前位置是否在楼梯边
-* core.enemyExists(x,y) // 某个点是否存在（指定的）怪物
-* core.getBlock(x, y, floorId, needEnable) // 获得某个点的block。floorId指定目标楼层，needEnable如果为false则即使该点的事件处于禁用状态也将被返回（否则只有事件启用的点才被返回）
-core.moveBlock // 显示移动某块的动画，达到{“type”:”move”}的效果
-core.animateBlock // 显示/隐藏某个块时的动画效果
-core.showBlock // 将某个块从禁用变成启用状态
-core.removeBlock // 将某个块从启用变成禁用状态
-core.removeBlockById // 根据block的索引删除该块
-core.removeBlockByIds // 一次性删除多个block
-core.addGlobalAnimate // 添加一个全局动画
-core.removeGlobalAnimate // 删除一个或所有全局动画
-core.setGlobalAnimate // 设置全局动画的显示效果
-core.syncGlobalAnimate // 同步所有的全局动画效果
-core.drawBoxAnimate // 绘制UI层的box动画
-core.updateCheckBlock // 更新领域、夹击、阻击的伤害地图
-core.checkBlock // 检查并执行领域、夹击、阻击事件
-core.snipe // 阻击事件（动画效果）
-core.setFg // 更改画面色调
-* core.updateFg // 更新全地图显伤
-* core.itemCount // 获得某个物品的个数
-* core.hasItem // 是否存在某个物品
-* core.setItem // 设置某个物品的个数
-* core.removeItem // 删除某个物品
-* core.useItem // 使用某个物品；直接调用items.js中的useItem函数。
-* core.canUseItem // 能否使用某个物品。直接调用items.js中的canUseItem函数。
-* core.addItem // 增加某个物品的个数
-core.getNextItem // 获得面前的物品（轻按）
-* core.getItem // 获得某个物品
-* core.drawTip // 左上角绘制一段提示
-* core.drawText // 地图中间绘制一段文字
+core.openDoor(id, x, y, needKey, callback)
+尝试开门操作。id为目标点的ID，x和y为坐标，needKey表示是否需要使用钥匙，callback为开门完毕后的回调函数。
+例如：core.openDoor('yellowDoor', 10, 3, false, function() {console.log("1")})
 
-// ------ 系统机制 ------
-core.replaceText // 将文字中的${和}（表达式）进行替换
-core.calValue // 计算表达式的值
-core.doEffect // 执行一个表达式的effect操作
-core.splitLines // 字符串自动换行的分割
-core.unshift // 向某个数组前插入另一个数组或元素
-core.setLocalStorage // 设置本地存储
-core.getLocalStorage // 获得本地存储
-core.removeLocalStorage // 移除本地存储
-core.clone // 深拷贝一个对象
-core.formatDate // 格式化时间为字符串
-core.formatDate2 // 格式化时间为最简字符串
-core.setTwoDigits // 两位数显示
-core.debug // 进入Debug模式，攻防血和钥匙都调成很高的数值
-core.replay // 开始回放
-core.checkStatus // 判断当前能否进入某个事件
-core.openBook // 点击怪物手册时的打开操作
-core.useFly // 点击楼层传送器时的打开操作
-core.openToolbox // 点击工具栏时的打开操作
-core.openQuickShop // 点击快捷商店时的打开操作
-core.save // 点击保存按钮时的打开操作
-core.load // 点击读取按钮时的打开操作
-core.openSettings // 点击设置按钮时的打开操作
-core.autosave // 自动存档
-core.doSL // 实际进行存读档事件
-core.syncSave // 存档同步操作
-core.saveData // 存档到本地
-core.loadData // 从本地读档
-core.encodeRoute // 将路线压缩
-core.decodeRoute // 将路线解压缩
-* core.setStatus // 设置勇士属性
-* core.getStatus // 获得勇士属性
-core.getLvName // 获得某个等级的名称
-* core.setFlag // 设置某个自定义变量或flag
-* core.getFlag // 获得某个自定义变量或flag
-* core.hasFlag // 是否存在某个自定义变量或flag，且值为true
-core.insertAction // 往当前事件列表之前插入一系列事件
-* core.lockControl // 锁定状态栏，常常用于事件处理
-* core.unlockControl // 解锁状态栏
-* core.isset // 判断某对象是否不为undefined也不会null
-core.readFile // 读取一个本地文件内容
-core.download // 下载文件到本地
-core.copy // 复制一段文字到剪切板
-* core.playBgm // 播放背景音乐
-* core.pauseBgm // 暂停背景音乐的播放
-* core.resumeBgm // 恢复背景音乐的播放
-* core.playSound // 播放音频
-core.show // 动画显示某对象
-core.hide // 动画使某对象消失
-core.clearStatusBar // 清空状态栏
-core.updateStatusBar // 更新状态栏
-core.resize // 屏幕分辨率改变后重新自适应
-core.domRenderer // 渲染DOM
 
-// ------ core.js 结束 ------
-```
+core.battle(id, x, y, force, callback)
+执行战斗事件。id为怪物的id，x和y为坐标，force为bool值表示打不过是否强制战斗，callback为战斗完毕后的回调函数。
+例如：core.battle('greenSlime', null, null, true)
 
-!> **`data.js` 定义了一些初始化的数据信息。**
 
-!> **`enemys.js` 定义了怪物信息。**
+core.trigger(x, y)
+触发某个地点的事件。
 
-``` js
-core.enemys.init // 初始化
-* core.enemys.getEnemys // 获得一个或所有怪物数据
-* core.enemys.hasSpecial // 判断是否含有某特殊属性
-* core.enemys.getSpecialText // 获得所有特殊属性的名称
-* core.enemys.getSpecialHint // 获得每个特殊属性的说明
-* core.enemys.getDamage // 获得某个怪物的伤害
-* core.enemys.getExtraDamage // 获得某个怪物的额外伤害
-* core.enemys.getCritical // 临界值计算
-* core.enemys.getCriticalDamage // 临界减伤计算
-* core.enemys.getDefDamage // 1防减伤计算
-* core.enemys.calDamage // 具体的伤害计算公式
-core.enemys.getCurrentEnemys // 获得当前楼层的怪物列表
-```
 
-!> **`events.js` 定义了各个事件的处理流程。**
+core.clearMap(mapName)
+清空某个画布。mapName可为'bg', 'event', 'fg', 'event2', 'hero', 'animate', 'weather', 'ui', 'data', 'all'之一。
+如果mapName为'all'，则为清空所有画布；否则只清空对应的画布。
 
-``` js
-core.events.init // 初始化
-core.events.getEvents // 获得一个或所有系统事件类型
-core.events.startGame // 游戏开始事件
-* core.events.setInitData // 不同难度分别设置初始属性
-* core.events.win // 游戏获胜事件
-* core.events.lose // 游戏失败事件
-core.evens.gameOver // 游戏结束
-core.events.afterChangeFloor // 转换楼层结束的事件
-core.events.doEvents // 开始执行一系列自定义事件
-core.events.doAction // 执行当前自定义事件列表中的下一个事件
-core.events.insertAction // 往当前事件列表之前添加一个或多个事件
-core.events.openShop // 打开一个全局商店
-core.events.disableQuickShop // 禁用一个全局商店
-* core.events.canUseQuickShop // 当前能否使用快捷商店
-* core.events.checkLvUp // 检查升级事件
-* core.events.useItem // 尝试使用道具
-core.events.addPoint // 加点事件
-core.events.afterBattle // 战斗结束后触发的事件
-core.events.afterOpenDoor // 开一个门后触发的事件
-core.events.passNet // 经过一个路障
-core.events.changeLight // 改变亮灯（感叹号）的事件
-* core.events.afterChangeLight // 改变亮灯之后，可以触发的事件
-* core.events.afterUseBomb // 使用炸弹/圣锤后的事件
-* core.events.beforeSaveData // 即将存档前可以执行的操作
-* core.events.afterLoadData // 读档事件后，载入事件前，可以执行的操作
 
-// ------ 点击事件和键盘事件的处理 ------
-core.events.longClick // 长按
-core.events.keyDownCtrl // 按下Ctrl键时（快捷跳过对话）
-core.events.clickConfirmBox // 确认框界面时的点击操作
-core.events.keyUpConfirmBox // 确认框界面时，放开某个键的操作
-core.events.clickAction // 自定义事件时的点击操作
-core.events.keyDownAction // 自定义事件时，按下某个键的操作
-core.events.keyUpAction // 自定义事件时，放开某个键的操作
-core.events.clickBook // 怪物手册界面的点击操作
-core.events.keyDownBook // 怪物手册界面时，按下某个键的操作
-core.events.keyUpBook // 怪物手册界面时，放开某个键的操作
-core.events.clickBookDetail // 怪物手册属性显示界面时的点击操作
-core.events.clickFly // 楼层传送器界面时的点击操作
-core.events.keyDownFly // 楼层传送器界面时，按下某个键的操作
-core.events.keyUpFly // 楼层传送器界面时，放开某个键的操作
-core.events.clickViewMaps // 浏览地图界面时的点击操作
-core.events.keyDownViewMaps // 浏览地图界面时，按下某个键的操作
-core.events.keyUpViewMaps // 浏览地图界面时，放开某个键的操作
-core.events.clickShop // 商店界面时的点击操作
-core.events.keyDownShop // 商店界面时，按下某个键的操作
-core.events.keyUpShop // 商店界面时，放开某个键的操作
-core.events.clickQuickShop // 快捷商店界面时的点击操作
-core.events.keyDownQuickShop // 快捷商店界面时，按下某个键的操作
-core.events.keyUpQuickShop // 快捷商店界面时，放开某个键的操作
-core.events.clickToolbox // 工具栏界面时的点击操作
-core.events.clickToolboxIndex // 选择工具栏界面中某个Index后的操作
-core.events.keyDownToolbox // 工具栏界面时，按下某个键的操作
-core.events.keyUpToolbox // 工具栏界面时，放开某个键的操作
-core.events.clickSL // 存读档界面时的点击操作
-core.events.keyDownSL // 存读档界面时，按下某个键的操作
-core.events.keyUpSL // 存读档界面时，放开某个键的操作
-core.events.clickSwitchs // 系统设置界面时的点击操作
-core.events.keyDownSwitchs // 系统设置界面时，按下某个键的操作
-core.events.keyUpSwitchs // 系统设置界面时，放开某个键的操作
-core.events.clickSettings // 系统菜单栏界面时的点击事件
-core.events.keyDownSettings // 系统菜单栏界面时，按下某个键的操作
-core.events.keyUpSettings // 系统菜单栏界面时，放开某个键的操作
-core.events.clickSyncSave // 同步存档界面时的点击操作
-core.events.keyDownSyncSave // 同步存档界面时，按下某个键的操作
-core.events.keyUpSyncSave // 同步存档界面时，放开某个键的操作
-core.events.clickKeyBoard // 虚拟键盘界面时的点击操作
-core.events.clickAbout // “关于”界面时的点击操作
-```
+core.drawBlock(block)
+重绘某个图块。block应为core.status.thisMap.blocks中的一项。
 
-!> `icons.js` 定义了素材ID和它在图片上的索引的对应关系。
 
-!> `items.js` 定义了每个道具的名称，以及使用效果。
+core.drawMap(floorId, callback)
+重绘某一层的地图数据。floorId为要绘制那一层的floorId，callback为绘制完毕后的回调函数。
 
-``` js
-core.items.init // 初始化
-core.items.getItems // 获得所有道具
-core.items.getItemEffect // “即捡即用类”道具的使用效果
-core.items.getItemEffectTip // “即捡即用类”道具的文字提示
-* core.items.useItem // 使用道具
-* core.items.cauUseItem // 当前能否使用道具
-```
 
-!> `maps.js` 定义了数字-ID的对应关系。
+core.terrainExists(x, y, id, floorId)
+检测某个点是否存在（指定的）地形。
+x和y为坐标；id为地形ID，可为null表示任意地形；floorId为楼层ID，可忽略表示当前楼层。
 
-``` js
-core.maps.loadFloor // 加载某个楼层（从剧本或存档中）
-core.maps.getBlock // 数字和ID的对应关系
-core.maps.addEvent // 向该楼层添加剧本的自定义事件
-core.maps.addChangeFloor // 向该楼层添加剧本的楼层转换事件
-core.maps.initMaps // 初始化所有地图
-core.maps.save // 将当前地图重新变成数字，以便于存档
-core.maps.load // 将存档中的地图信息重新读取出来
-core.maps.getMapArray // 将当前地图重新变成二维数组形式
-```
 
-!> `ui.js` 定义了各种界面的绘制。
+core.enemyExists(x, y, id, floorId)
+检测某个点是否存在（指定的）怪物。
+x和y为坐标；id为怪物ID，可为null表示任意怪物；floorId为楼层ID，可忽略表示当前楼层。
 
-``` js
-core.ui.closePanel // 结束一切事件和绘制，关闭UI窗口，返回游戏进程
-core.ui.drawTextBox // 绘制一个对话框
-core.ui.drawChoices // 绘制一个选项界面
-core.ui.drawConfirmBox // 绘制一个确认/取消的警告页面
-core.ui.drawSwitchs // 绘制系统设置界面
-core.ui.drawSettings // 绘制系统菜单栏
-core.ui.drawQuickShop // 绘制快捷商店选择栏
-core.ui.drawBattleAnimate // 绘制战斗动画
-core.ui.drawWaiting // 绘制等待界面
-core.ui.drawSyncSave // 绘制存档同步界面
-core.ui.drawPagination // 绘制分页
-core.ui.drawEnemyBook // 绘制怪物手册
-core.ui.drawBookDetail // 绘制怪物属性的详细信息
-core.ui.drawFly // 绘制楼层传送器
-core.ui.drawMaps // 绘制浏览地图界面
-core.ui.drawToolbox // 绘制道具栏
-core.ui.drawSLPanel // 绘制存档/读档界面
-core.ui.drawThumbnail // 绘制一个缩略图
-core.ui.drawAbout // 绘制“关于”界面
-core.ui.drawHelp // 绘制帮助界面
+
+core.getBlock(x, y, floorId, needEnable)
+获得某个点的当前图块信息。
+x和y为坐标；floorId为楼层ID，可忽略或null表示当前楼层。
+needEnable表示该点是否启用时才返回，其值不设置则默认为true。
+该函数返回值如下： {"index": xxx, "block": xxx}
+其中index为该点在该楼层blocks数组中的索引，block为该图块实际内容。
+
+
+core.showBlock(x, y, floorId)
+将某个点从禁用变成启用状态
+
+
+core.removeBlock(x, y, floorId)
+将某个点删除或从禁用变成启用状态。
+如果该点不存在自定义事件（比如普通的怪物），则将直接从地图中删除。
+否则将该点设置为禁用，以供以后可能的启用事件。
+
+
+core.useItem(itemId, callback)
+尝试使用某个道具。itemId为道具ID，callback为成功或失败后的回调。
+
+
+core.canUseItem(itemId)
+返回当前能否使用某个道具。
+
+
+core.getNextItem()
+轻按。
+
+
+core.drawTip(text, itemIcon)
+在左上角绘制一段提示信息，2秒后消失。itemIcon为道具图标的索引。
+
+
+core.drawText(contents, callback)
+绘制一段文字。
+
+
+core.closePanel()
+结束一切事件和绘制，关闭UI窗口，返回游戏进程。
+
+
+core.replaceText(text)
+将一段文字中的${}进行计算并替换。
+
+
+core.calValue(value)
+计算表达式的实际值。这个函数可以传入status:atk等这样的参数。
+
+
+core.getLocalStorage(key, defaultValue)
+从localStorage中获得某个数据（已被parse）；如果对应的key不存在则返回defaultValue。
+
+
+core.clone(data)
+深拷贝某个对象。
+
+
+core.isset(x)
+测试x是否不为null，不为undefined也不为NaN。
+
+
+core.rand(num)
+使用伪种子生成伪随机数。该随机函数能被录像支持。
+num如果设置大于0，则生成一个[0, num-1]之间的数；否则生成一个0到1之间的浮点数。
+此函数为伪随机算法，SL大法无效。（即多次SL后调用的该函数返回的值都是相同的。）
+
+
+core.rand2(num)
+使用系统的随机数算法得到的随机数。该随机函数能被录像支持。
+num如果设置大于0，则生成一个[0, num-1]之间的数；否则生成一个0到2147483647之间的整数。
+此函数使用了系统的Math.random()函数，支持SL大法。
+但是，此函数会将生成的随机数值存入录像，因此如果调用次数太多则会导致录像文件过大。
+
+
+core.restart()
+返回标题界面。
+
+
+core.updateFg()
+更新全地图显伤。包括怪物显伤、临界显示和领域显伤等。
+
+
+========== core.actions.XXX 和游戏控制相关的函数 ==========
+actions.js主要用来进行用户交互行为的处理。
+所有用户行为，比如按键、点击、滑动等等，都会被此文件接收并进行操作。
+
+
+========== core.control.XXX 和游戏控制相关的函数 ==========
+control.js主要用来进行游戏控制，比如行走控制、自动寻路、存读档等等游戏核心内容。
+
+
+========== core.enemys.XXX 和怪物相关的函数 ==========
+enemys.js主要用来进行怪物相关的内容，比如怪物的特殊属性，伤害和临界计算等。
+
+
+core.enemys.hasSpecial(special, test)
+测试怪物是否含有某个特殊属性。
+常见用法： core.enemys.hasSpecial(monster.special, 3)  ## 测试是否拥有坚固
+
+
+core.enemys.getSpecialText(enemyId)
+返回一个列表，包含该怪物ID对应的所有特殊属性。
+
+
+core.enemys.getSpecialHint(enemy, special)
+获得怪物某个（或全部）特殊属性的文字说明。
+
+
+core.enemys.canBattle(enemyId)
+返回当前能否战胜某个怪物。
+
+
+core.enemys.getDamage(enemyId)
+返回当前对某个怪物的战斗伤害。如果无法战斗，返回null。
+
+
+core.enemys.getExtraDamage(enemyId)
+返回某个怪物会对勇士造成的额外伤害（不可被魔防抵消），例如仇恨、固伤等等。
+
+
+core.enemys.nextCriticals(enemyId, number)
+返回接下来number个该怪物的临界。列表每一项类似 "x:y" 表示临界值为x，该临界减伤为y。
+
+
+core.enemys.getCritical(enemyId)
+返回怪物的下一个临界值。无临界（如坚固、魔防等）返回'???'。
+
+
+core.enemys.getCriticalDamage(enemyId)
+获得怪物的下一个临界减伤。
+
+
+core.enemys.getDefDamage(enemyId)
+获得一防减伤值。
+
+
+core.enemys.getDamageInfo(enemyId, hero_hp, hero_atk, hero_def, hero_mdef)
+获得实际战斗信息，比如伤害，回合数，每回合伤害等等。
+此函数是实际战斗过程的计算。
+
+
+core.enemys.calDamage(enemyId, hero_hp, hero_atk, hero_def, hero_mdef)
+计算战斗伤害；实际返回的是上面getDamageInfo中伤害的数值。
+
+
+core.enemys.getCurrentEnemys(floorId)
+获得某一层楼剩余所有怪物的信息（供怪物手册使用）
+
+
+========== core.events.XXX 和事件相关的函数 ==========
+events.js主要用来进行事件处理，比如自定义事件，以及某些条件下可能会被触发的事件。
+大多数事件API都在脚本编辑中存在，这里只列出部分比较重要的脚本编辑中不存在的API。 
+
+
+core.events.gameOver(ending, fromReplay)
+游戏结束并上传的事件。
+该函数将提问是否上传和是否下载录像，并返回标题界面。
+
+
+core.events.doEvents(list, x, y, callback)
+开始执行某个事件。
+
+
+core.events.doAction()
+执行下一个事件。此函数中将对所有自定义事件类型分别处理。
+
+
+core.events.openShop(shopId, needVisited)
+打开一个全局商店。needVisited表示是否需要该商店已被打开过。
+
+
+core.events.disableQuickShop(shopId)
+禁用一个全局商店
+
+
+core.events.canUseQuickShop(shopId)
+当前能否使用某个快捷商店
+
+
+========== core.items.XXX 和道具相关的函数 ==========
+items.js将处理和道具相关的内容，比如道具的使用，获取和删除等等。
+
+
+========== core.loader.XXX 和游戏加载相关的函数 ==========
+loader.js将主要用来进行资源的加载，比如加载音乐、图片、动画等等。
+
+
+========== core.maps.XXX 和地图处理相关的函数 ==========
+maps.js主要用来进行地图相关的的操作。包括绘制地图，获取地图上的点等等。
+
+
+core.maps.canMoveHero(x,y,direction,floorId)
+判断能否前往某个方向。x,y为坐标，可忽略为当前点；direction为方向，可忽略为当前方向。
+floorId为楼层ID，可忽略为当前楼层。
+
+
+core.maps.canMoveDirectly(destX, destY)
+判断当前能否瞬间移动到某个点。
+
+
+core.maps.removeBlockById(index, floorId)
+根据索引删除或禁用某块。
+
+
+core.maps.removeBlockByIds(floorId, ids)
+根据索引删除或禁用若干块。
+
+
+========== core.ui.XXX 和地图处理相关的函数 ==========
+ui.js主要用来进行UI窗口的绘制，比如对话框、怪物手册、楼传器、存读档界面等等。
+
+
+core.ui.drawThumbnail(floorId, canvas, blocks, x, y, size, heroLoc, heroIcon)
+绘制一个缩略图，比如楼传器界面，存读档界面等情况。
+floorId为目标楼层ID，canvas为要绘制到的图层，blocks为要绘制的所有图块。
+x,y为该图层开始绘制的起始点坐标，size为每一格的像素，heroLoc为勇士坐标，heroIcon为勇士图标。
+
+
+========== core.utils.XXX 和地图处理相关的函数 ==========
+utils.js主要用来进行一些辅助函数的计算。
+
+
+core.utils.splitLines(canvas, text, maxLength, font)
+自动切分长文本的换行。
+canvas为图层，text为要自动换行的内容，maxLength为每行最长像素，font为文本的字体。
+
+
+core.utils.cropImage(image, size)
+纵向对图片进行切分（裁剪）。
+
+
+core.utils.unshift(a, b)
+向某个数组前插入另一个数组或元素
+
+
+core.utils.formatBigNumber(x)
+大数据的格式化
+
+
+core.utils.arrayToRGB(color)
+将形如[255,0,0]之类的数组转成#FF0000这样的RGB形式。
+
+
+core.utils.encodeRoute(list)
+压缩加密路线。可以使用core.encodeRoute(core.status.route)来压缩当前路线。
+
+
+core.utils.decodeRoute(route)
+解压缩（解密）路线。
+
+
+core.utils.readFile(success, error, readType)
+尝试请求读取一个本地文件内容。
+success和error为成功/失败后的回调，readType不设置则以文本读取，否则以DataUrl形式读取。
+
+
+core.utils.readFileContent(content)
+文件读取完毕后的内容处理。
+
+
+core.utils.download(filename, content)
+尝试生成并下载一个文件。
+
+
+core.utils.copy(data)
+尝试复制一段文本到剪切板。
+
+
+core.http(type, url, formData, success, error, mimeType)
+发送一个异步HTTP请求。
+type为'GET'或者'POST'；url为目标地址；formData如果是POST请求则为表单数据。
+success为成功后的回调，error会失败后的回调，mimeType如果设置则覆盖。
+
 ```

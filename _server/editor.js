@@ -633,9 +633,12 @@ editor.prototype.listen = function () {
             editor.info = 0;
             editor.pos=pos;
         } else {
-            editor.info=editor.ids[editor.indexs[thisevent.idnum]];
+            var ids=editor.indexs[thisevent.idnum];
+            ids=ids[0]?ids[0]:ids;
+            editor.info=editor.ids[ids];
             pos.x=editor.widthsX[thisevent.images][1];
             pos.y=editor.info.y;
+            if(thisevent.images=='terrains')pos.y++;
             ysize = thisevent.images.indexOf('48') === -1 ? 32 : 48;
         }
         setTimeout(function(){selectBox.isSelected = true;});
@@ -645,6 +648,30 @@ editor.prototype.listen = function () {
         tip.infos = JSON.parse(JSON.stringify(editor.info));
         editor_mode.onmode('nextChange');
         editor_mode.onmode('emenyitem');
+    }
+
+    var copyLoc = document.getElementById('copyLoc');
+    copyLoc.onmousedown = function(e){
+        editor.hideMidMenu();
+        e.stopPropagation();
+        var thisevent = editor.map[editor.pos.y][editor.pos.x];
+        if(thisevent==0){
+
+        } else {
+
+        }
+    }
+
+    var moveLoc = document.getElementById('moveLoc');
+    moveLoc.onmousedown = function(e){
+        editor.hideMidMenu();
+        e.stopPropagation();
+        var thisevent = editor.map[editor.pos.y][editor.pos.x];
+        if(thisevent==0){
+
+        } else {
+
+        }
     }
 
 }//绑定事件

@@ -342,25 +342,46 @@ table.row td {
 
 #menuDiv * { margin: 0; padding: 0; }
 #midMenu{
-    z-index: 101;
-    width: 10em;
-    background: rgba(255, 255, 255, 0.65);
+    background: #fff;
+    border-color: #ccc #666 #666 #ccc;
+    border-style: solid;
+    border-width: 1px;
+    cursor: default;
+    font: normal 13px Arial, sans-serif;
+    margin: 0;
+    outline: none;
+    padding: 4px 0;
     position: absolute;
-    /* display: none; */
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 100%;
+    z-index: 101;
+
+    border-radius: 4px;
 }
-#midMenu ul{
-    width: 100%;
-    list-style: none;
-    border: 1px solid #000;
-    border-bottom: 0px;
-}
-#midMenu ul li{
-    /* height: 30px; */
-    /* font-size: 16px; */
+#midMenu .menuitem{
     color: #000;
-    /* line-height: 30px; */
-    /* text-align: center; */
-    border-bottom: 1px solid #000;
+    font: normal 13px Arial, sans-serif;
+    list-style: none;
+    margin: 0;
+    padding: 4px 7em 4px 28px;
+    white-space: nowrap;
+
+    /* padding-left: 12px; */
+
+    /* padding-right: 20px; */
+}
+#midMenu .menuitem:hover{
+    background-color: #d6e9f8;
+    border-color: #d6e9f8;
+    border-style: dotted;
+    border-width: 1px 0;
+    padding-bottom: 3px;
+    padding-top: 3px;
+}
+#midMenu .menuitem-content{
+    color: #000;
+    font: normal 13px Arial, sans-serif;
 }
 
 /* for vue dom */

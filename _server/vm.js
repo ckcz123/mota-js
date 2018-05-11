@@ -29,6 +29,9 @@ document.body.onmousedown = function (e) {
     }
     //editor.mode.onmode('');
     editor.info = {};
+    if (e.button!=2){
+        editor.hideMidMenu();
+    }
 }
 iconLib.onmousedown = function (e) {
     e.stopPropagation();

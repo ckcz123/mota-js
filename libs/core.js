@@ -1028,8 +1028,8 @@ core.prototype.decodeRoute = function (route) {
 }
 
 ////// 发送HTTP //////
-core.prototype.http = function (type, url, formData, success, error, header) {
-    core.utils.http(type, url, formData, success, error, header)
+core.prototype.http = function (type, url, formData, success, error, mimeType, responseType) {
+    core.utils.http(type, url, formData, success, error, mimeType, responseType)
 }
 
 ////// 设置勇士属性 //////

@@ -2064,11 +2064,17 @@ control.prototype.loadData = function (data, callback) {
 
 ////// 设置勇士属性 //////
 control.prototype.setStatus = function (statusName, statusVal) {
-    core.status.hero[statusName] = statusVal;
+    if (core.isset(core.status.hero.loc[statusName]))
+        core.status.hero.loc[statusName] = statusVal;
+    else
+        core.status.hero[statusName] = statusVal;
 }
 
 ////// 获得勇士属性 //////
 control.prototype.getStatus = function (statusName) {
+    // support status:x
+    if (core.isset(core.status.hero.loc[statusName]))
+        return core.status.hero.loc[statusName];
     return core.status.hero[statusName];
 }
 

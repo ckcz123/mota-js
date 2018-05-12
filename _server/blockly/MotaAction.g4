@@ -500,12 +500,12 @@ return code;
 */;
 
 wait_s
-    :   '等待用户操作'
+    :   '等待用户操作并获得按键或点击信息'
     
 
 /* wait_s
-tooltip : wait: 等待用户操作
-helpUrl : https://ckcz123.github.io/mota-js/#/event?id=wait-%e7%ad%89%e5%be%85%e7%94%a8%e6%88%b7%e6%93%8d%e4%bd%9c
+tooltip : wait: 等待用户操作并获得按键或点击信息（具体用法看文档）
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=https://ckcz123.github.io/mota-js/#/event?id=wait%EF%BC%9A%E7%AD%89%E5%BE%85%E7%94%A8%E6%88%B7%E6%93%8D%E4%BD%9C
 colour : this.soundColor
 var code = '{"type": "wait"},\n';
 return code;

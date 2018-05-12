@@ -715,7 +715,7 @@ actions.prototype.longClick = function () {
         core.drawText();
         return true;
     }
-    if (core.status.event.id=='action' && (core.status.event.data.type=='text' || core.status.event.data.type=='wait')) {
+    if (core.status.event.id=='action' && core.status.event.data.type=='text') {
         core.doAction();
         return true;
     }
@@ -728,7 +728,7 @@ actions.prototype.keyDownCtrl = function () {
         core.drawText();
         return;
     }
-    if (core.status.event.id=='action' && (core.status.event.data.type=='text' || core.status.event.data.type=='wait')) {
+    if (core.status.event.id=='action' && core.status.event.data.type=='text') {
         core.doAction();
         return;
     }
@@ -769,11 +769,20 @@ actions.prototype.keyUpConfirmBox = function (keycode) {
 ////// 自定义事件时的点击操作 //////
 actions.prototype.clickAction = function (x,y) {
 
-    if (core.status.event.data.type=='text' || core.status.event.data.type=='wait') {
+    if (core.status.event.data.type=='text') {
         // 文字
         core.doAction();
         return;
     }
+    if (core.status.event.data.type=='wait') {
+        core.setFlag('type', 1);
+        core.setFlag('x', x);
+        core.setFlag('y', y);
+        core.status.route.push("input:"+(10000+100*x+y));
+        core.doAction();
+        return;
+    }
+
     if (core.status.event.data.type=='choices') {
         // 选项
         var data = core.status.event.data.current;
@@ -811,7 +820,14 @@ actions.prototype.keyDownAction = function (keycode) {
 
 ////// 自定义事件时，放开某个键的操作 //////
 actions.prototype.keyUpAction = function (keycode) {
-    if ((core.status.event.data.type=='text' || core.status.event.data.type=='wait') && (keycode==13 || keycode==32 || keycode==67)) {
+    if (core.status.event.data.type=='text' && (keycode==13 || keycode==32 || keycode==67)) {
+        core.doAction();
+        return;
+    }
+    if (core.status.event.data.type=='wait') {
+        core.setFlag('type', 0);
+        core.setFlag('keycode', keycode);
+        core.status.route.push("input:"+keycode);
         core.doAction();
         return;
     }

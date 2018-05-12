@@ -54,7 +54,7 @@ core.setStatus('atk', 1000)
 
 
 core.getStatus('atk')
-返回当前攻击力数值。本句等价于 core.status.hero.atk
+返回当前攻击力数值。本句等价于 core.status.hero.atk。
 
 
 core.setHeroLoc('x', 5)

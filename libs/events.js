@@ -761,8 +761,27 @@ events.prototype.doAction = function() {
             }
             break;
         case "wait":
-            if (core.status.replay.replaying)
-                core.events.doAction();
+            if (core.status.replay.replaying) {
+                var code = core.status.replay.toReplay.shift();
+                if (code.indexOf("input:")==0) {
+                    var value = parseInt(code.substring(6));
+                    core.status.route.push("input:"+value);
+                    if (value>=10000) {
+                        core.setFlag('type', 1);
+                        core.setFlag('x', parseInt((value-10000)/100));
+                        core.setFlag('y', value%100);
+                    }
+                    else {
+                        core.setFlag('type', 0);
+                        core.setFlag('keycode', value);
+                    }
+                    core.events.doAction();
+                }
+                else {
+                    core.stopReplay();
+                    core.drawTip("录像文件出错");
+                }
+            }
             break;
         case "revisit": // 立刻重新执行该事件
             {

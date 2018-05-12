@@ -252,14 +252,14 @@
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    "你当前的攻击力是${status:atk}, 防御是${status:def}",
+    "你当前的攻击力是${status:atk}, 防御是${status:def}，坐标是(${status:x},${status:y})",
     "你的攻防和的十倍是${10*(status:atk+status:def)}",
     "你的红黄蓝钥匙总数为${item:yellowKey+item:blueKey+item:redKey}",
     "你访问某个老人的次数为${flag:man_times}",
 ]
 ```
 
-- `status:xxx` 获取勇士属性时只能使用如下几个：hp（生命值），atk（攻击力），def（防御力），mdef（魔防值），money（金币），experience（经验）。
+- `status:xxx` 获取勇士属性时只能使用如下几个：hp（生命值），atk（攻击力），def（防御力），mdef（魔防值），money（金币），experience（经验），x（勇士的横坐标），y（勇士的纵坐标），direction（勇士的方向）。
 - `item:xxx` 中的xxx为道具ID。所有道具的ID定义在items.js中，请自行查看。例如，`item:centerFly` 代表中心对称飞行器的个数。
 - `flag:xxx` 中的xxx为一个自定义的变量/Flag；如果没有对其进行赋值则默认值为false。
 
@@ -520,10 +520,6 @@ name是可选的，代表目标行走图的文件名。
     "等待1000ms后才开始执行这个事件"
 ]
 ```
-
-### wait：等待用户操作
-
-使用 `{"type": "wait"}` 可以等待用户进行操作（如点击、回车等）。
 
 ### battle: 强制战斗
 
@@ -1117,6 +1113,46 @@ choices为一个数组，其中每一项都是一个选项列表。
 ```
 
 !> 如果continue事件不在任何循环中被执行，则和exit等价，即会立刻结束当前事件！
+
+### wait：等待用户操作
+
+使用 `{"type": "wait"}` 可以等待用户进行操作（如点击、按键等）。
+
+当用户执行操作后：
+- 如果是键盘的按键操作，则会将flag:type置为0，并且把flag:keycode置为刚刚按键的keycode。
+- 如果是屏幕的点击操作，则会将flag:type置为1，并且设置flag:x和flag:y为刚刚的点击坐标。
+
+下面是一个while事件和wait合并使用的例子，这个例子将不断接收用户的点击或按键行为，并输出该信息。
+如果用户按下了ESC或者点击了屏幕正中心，则退出循环。
+
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "while", "condition": "true", // 永久循环
+        "data": [
+            {"type": "wait"}, // 等待用户操作
+            {"type": "if", "condition": "flag:type==0", // flag:type==0，键盘按键
+                "true": [
+                    "你当前按键了，keycode是${flag:keycode}",
+                    {"type": "if", "condition": "flag:keycode==27", // ESC的keycode是27
+                        "true": [{"type": "break"}], // 跳出循环
+                        "false": []
+                    }
+                ],
+                "false": [ // flag:type==1，鼠标点击
+                    "你当前点击屏幕了，坐标是[${flag:x},${flag:y}]",
+                    {"type": "if", "condition": "flag:x==6 && flag:y==6", // 点击(6,6)
+                        "true": [{"type": "break"}], // 跳出循环
+                        "false": []
+                    }
+                ]
+            }
+        ]
+    }
+]
+
+```
+
 
 ### function: 自定义JS脚本
 

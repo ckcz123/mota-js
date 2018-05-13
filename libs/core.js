@@ -651,6 +651,11 @@ core.prototype.getBlock = function (x, y, floorId, needEnable) {
     return core.maps.getBlock(x,y,floorId,needEnable);
 }
 
+////// 获得某个点的blockId //////
+core.prototype.getBlockId = function (x, y, floorId, needEnable) {
+    return core.maps.getBlockId(x, y, floorId, needEnable);
+}
+
 ////// 显示移动某块的动画，达到{“type”:”move”}的效果 //////
 core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
     core.maps.moveBlock(x,y,steps,time,immediateHide,callback)

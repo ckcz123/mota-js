@@ -349,6 +349,8 @@ events.prototype.doAction = function() {
             core.events.doAction();
             break;
         case "show": // 显示
+            if (!core.isset(data.loc))
+                data.loc = [x,y];
             if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
                     && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
                 data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];

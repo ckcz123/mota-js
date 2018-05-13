@@ -2138,11 +2138,10 @@ control.prototype.playBgm = function (bgm) {
             core.material.bgms[core.musicStatus.playingBgm].pause();
         }
         // 播放当前BGM
-        core.musicStatus.playingBgm = bgm;
         core.material.bgms[bgm].volume = core.musicStatus.volume;
         core.material.bgms[bgm].play();
+        core.musicStatus.playingBgm = bgm;
         core.musicStatus.isPlaying = true;
-
     }
     catch (e) {
         console.log("无法播放BGM "+bgm);

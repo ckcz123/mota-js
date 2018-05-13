@@ -783,6 +783,7 @@ control.prototype.moveOneStep = function() {
 
 ////// 停止勇士的一切行动，等待勇士行动结束后，再执行callback //////
 control.prototype.waitHeroToStop = function(callback) {
+    var lastDirection = core.status.automaticRoute.lastDirection;
     core.stopAutomaticRoute();
     core.clearContinueAutomaticRoute();
     if (core.isset(callback)) {
@@ -791,6 +792,8 @@ control.prototype.waitHeroToStop = function(callback) {
         core.status.automaticRoute.moveDirectly = false;
         setTimeout(function(){
             core.status.replay.animate=false;
+            if (core.isset(lastDirection))
+                core.setHeroLoc('direction', lastDirection);
             core.drawHero();
             callback();
         }, 30);
@@ -2061,11 +2064,17 @@ control.prototype.loadData = function (data, callback) {
 
 ////// 设置勇士属性 //////
 control.prototype.setStatus = function (statusName, statusVal) {
-    core.status.hero[statusName] = statusVal;
+    if (core.isset(core.status.hero.loc[statusName]))
+        core.status.hero.loc[statusName] = statusVal;
+    else
+        core.status.hero[statusName] = statusVal;
 }
 
 ////// 获得勇士属性 //////
 control.prototype.getStatus = function (statusName) {
+    // support status:x
+    if (core.isset(core.status.hero.loc[statusName]))
+        return core.status.hero.loc[statusName];
     return core.status.hero[statusName];
 }
 
@@ -2129,11 +2138,10 @@ control.prototype.playBgm = function (bgm) {
             core.material.bgms[core.musicStatus.playingBgm].pause();
         }
         // 播放当前BGM
-        core.musicStatus.playingBgm = bgm;
         core.material.bgms[bgm].volume = core.musicStatus.volume;
         core.material.bgms[bgm].play();
+        core.musicStatus.playingBgm = bgm;
         core.musicStatus.isPlaying = true;
-
     }
     catch (e) {
         console.log("无法播放BGM "+bgm);

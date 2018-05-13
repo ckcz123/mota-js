@@ -537,6 +537,14 @@ maps.prototype.getBlock = function (x, y, floorId, needEnable) {
     return null;
 }
 
+////// 获得某个点的blockId //////
+maps.prototype.getBlockId = function (x, y, floorId, needEnable) {
+    var block = core.getBlock(x, y, floorId, needEnable);
+    if (block == null) return null;
+    if (core.isset(block.block.event)) return block.block.event.id;
+    return null;
+}
+
 ////// 显示移动某块的动画，达到{“type”:”move”}的效果 //////
 maps.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
     time = time || 500;

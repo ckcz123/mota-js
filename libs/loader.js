@@ -204,12 +204,10 @@ loader.prototype.loadMusic = function () {
     core.sounds.forEach(function (t) {
 
         if (core.musicStatus.audioContext != null) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'project/sounds/'+t, true);
-            xhr.responseType = 'arraybuffer';
-            xhr.onload = function(e) { //下载完成
+
+            core.http('GET', 'project/sounds/'+t, null, function (data) {
                 try {
-                    core.musicStatus.audioContext.decodeAudioData(this.response, function (buffer) {
+                    core.musicStatus.audioContext.decodeAudioData(data, function (buffer) {
                         core.material.sounds[t] = buffer;
                     }, function (e) {
                         console.log(e);
@@ -220,17 +218,10 @@ loader.prototype.loadMusic = function () {
                     console.log(ee);
                     core.material.sounds[t] = null;
                 }
-            };
-
-            xhr.ontimeout = function(e) {
+            }, function () {
                 console.log(e);
                 core.material.sounds[t] = null;
-            }
-            xhr.onerror = function(e) {
-                console.log(e);
-                core.material.sounds[t] = null;
-            }
-            xhr.send();
+            }, null, 'arraybuffer');
         }
         else {
             var music = new Audio();

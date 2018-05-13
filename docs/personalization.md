@@ -75,7 +75,7 @@ images为一个数组，代表当前层所有作为背景素材的图片信息�
 
 如果第四项为true，则会在前景层（event2）上绘制，能覆盖勇士，常常用来作为柱子的上半部分等情况。
 
-**如果你需要让某些点不可通行（比如你建了个房子，墙壁和家具等位置不让通行），则需在`events`中指定`{"noPass": false}`，参见[自定义事件](event#自定义事件)的写法。
+**如果你需要让某些点不可通行（比如你建了个房子，墙壁和家具等位置不让通行），则需在`events`中指定`{"noPass": false}`，参见[自定义事件](event#自定义事件)的写法。**
 
 ``` js
 "events": {
@@ -114,8 +114,35 @@ images为一个数组，代表当前层所有作为背景素材的图片信息�
 
 **`ID-数字` 对应关系定义在maps.js文件中。该文件将唯一确定一个ID对应的数字是多少。**
 
-如果需要添加一个素材到游戏，则必须为其分配一个唯一标识符，并同时修改`icons.js`和`maps.js`两个文件。
+在V2.0中，我们可以在地图编辑器中很方便查看每个图块的三个属性信息。
 
+#### 注册素材
+
+在V2.0的地图编辑器中，要注册新素材，我们只需要在图块属性一栏输入新素材的ID和数字。
+
+![素材注册](./img/register.png)
+
+ID必须由数字字母下划线组成，数字在1000以内，且均不能和已有的进行重复。
+
+之后刷新编辑器即可。
+
+对于怪物和道具，我们也可以进行自动注册，只需要点击“自动注册”按钮，将对该栏下所有未注册的素材进行自动注册（自动分配ID和数字）。
+
+素材注册完毕后，即可在游戏中正常使用，也可以被地图生成器所识别（需要重开地图生成器）。
+
+#### Autotile的注册
+
+但是，通过上面这种方式，我们是没办法新增并注册Autotile的。
+
+除了替换样板现有的几个外，如果我们还需要新添加Autotile，则：
+
+1. 将新的Autotile图片复制到images目录下。文件名必须是字母数字和下划线组成。
+2. 进入icons.js，在autotile分类下进行添加该文件的名称，索引简单的写0。
+3. 指定一个数字，在maps.js中类似进行添加。
+
+!> Autotile的ID和文件名应确保完全相同！
+
+<!--
 #### 新添加自定义地形（路面、墙壁等）
 
 如果你在terrains.png中新增了一行：
@@ -177,6 +204,8 @@ images为一个数组，代表当前层所有作为背景素材的图片信息�
 
 !> 如果是48x32的怪物素材，请放在npc48.png中，然后在icons.js的npc48下添加索引。
 
+-->
+
 ### 地图生成器使用自定义素材
 
 地图生成器是直接从js文件中读取数字-图标对应关系的。
@@ -196,7 +225,7 @@ images为一个数组，代表当前层所有作为背景素材的图片信息�
 如果你想要同种宝石在不同层效果不同的话，可以进行如下操作：
 
 1. 在楼层的item_ratio中定义宝石的比率（比如1-10的写1，11-20层写2等）
-2. 修改获得道具的itemEffect函数（在items.js中的itemEffect中编辑，V2.0中也可以使用编辑器）
+2. 修改获得道具的itemEffect函数（编辑器中双击进行编辑）
 
 ``` js
 // ratio为楼层的item_ratio值，可以进行翻倍宝石属性
@@ -278,7 +307,7 @@ control.prototype.checkBlock = function () {
         }
 // ... 下略
 ```
-4. 如果有更高的需求，例如想让吸血效果变成一半（如异空间），则还是在上面这些地方进行对应的修改即可。
+4. 如果有更高的需求，例如想让吸血效果变成一半，则还是在上面这些地方进行对应的修改即可。
 
 ## 自定义装备
 
@@ -359,13 +388,216 @@ this.useEquipment = function (itemId) { // 使用装备
 
 你需自己指定一个special数字，修改getSpecialText函数（属性名）和getSpecialHint函数（属性提示文字）。
 
-如果要修改伤害计算公式，请修改下面的calDamage函数。请注意，如果无法战斗，该函数必须返回`null`。
+如果要修改伤害计算公式，请修改下面的getDamageInfo函数。请注意，如果无法战斗，该函数必须返回`null`。
 
 对于毒衰弱怪物的战斗后结算在`functions.js`中的afterBattle函数中。
 
 对于领域、夹击、阻击怪物的检查在`control.js`中的checkBlock函数中。
 
 `getCritical`, `getCriticalDamage`和`getDefDamage`三个函数依次计算的是该怪物的临界值、临界减伤和1防减伤。也可以适当进行修改。
+
+## 公共事件
+
+在RM中，存在公共事件的说法；也就是通过某个指令来调用一系列事件的触发。
+
+在H5中，我们可以使用“插件”的形式来达成这个效果。具体参见“脚本编辑 - 插件编写”。
+
+![插件编写](./img/plugin.png)
+
+当我们在这上面定义了自己需要的函数（插件后），就可以通过任何方式进行调用。
+
+在这个插件编写的过程中，我们可以使用任何[常见API](api)里面的代码调用；也可以通过`core.insertAction`来插入自定义事件执行。
+
+下面是一个很简单的例子，我编写一个公共事件（插件），其效果是让勇士生命值变成原来的x倍，并令面前的图块消失。
+
+``` js
+this.myfunc = function(x) {
+    core.status.hero.hp *= x; // 勇士生命翻若干倍
+    core.insertAction([ // 自定义事件：令面前的图块消失。
+        {"type": "setValue", "name": "flag:x", "value": "core.nextX()"},
+        {"type": "setValue", "name": "flag:y", "value": "core.nextY()"},
+        {"type": "hide", "loc": ["flag:x", "flag:y"]}
+    ]);
+}
+```
+
+然后比如我们在某个道具的使用效果 `useItemEffect` 中写 `core.plugin.myfunc(2)` 即可调用此公共事件（插件）。也可以在战后事件或自定义脚本等位置来写。
+
+通过这种，将脚本和自定义事件混用的方式，可以达到和RM中公共事件类似的效果，即一个调用触发一系列事件。
+
+## 自定义状态栏（新增显示项）
+
+在V2.2以后，我们可以自定义状态栏背景图（全塔属性 - statusLeftBackground）等等。
+
+但是，如果我们还想新增其他项目的显示，比如技能塔所需要的魔力值（气息），该怎么办？
+
+需要进行如下几个操作：
+
+1. 定义图标ID；比如魔力我就定义mana，气息可以简单的定义qixi；你也可以定义其他的ID，但是不能和已有的重复。这里以mana为例。
+2. 在index.html的statusBar中（44行起），进行该状态栏项的定义。仿照其他几项，插在其应当显示的位置，注意替换掉相应的ID。
+``` html
+<div class="status" id="manaCol">
+    <img id="img-mana">
+    <p class='statusLabel' id='mana'></p>
+</div>
+```
+3. 在editor.html中的statusBar（305行起），仿照第二点同样添加；这一项如果不进行则会地图编辑器报错。
+4. 使用便捷PS工具，打开icons.png，新增一行并将魔力的图标P上去；记下其索引比如23（减速播放图标的下方）。
+5. 在main.js的this.statusBar中增加图片、图标和内容的定义。
+``` js
+this.statusBar = {
+    'images': {
+        // ...其他略
+        'mana': document.getElementById("img-mana"), // 图片的定义
+    },
+    'icons': {
+        // ...其他略
+        'mana': 23, // 图标的定义，这里对应的是icons.png中的索引
+    },
+    // ...其他略
+    'mana': document.getElementById('mana'), // 显示内容（数据）的定义
+}
+```
+6. 显示内容的设置。在control.js的updateStatusBar函数，可以对该状态栏显示内容进行设置，下面是几个例子。
+``` js
+core.statusBar.mana.innerHTML = core.getFlag('mana', 0); // 设置其显示内容为flag:mana值。
+core.statusBar.mana.innerHTML = core.getFlag('mana', 0) + '/' + core.getFlag('manaMax', 0); // 显示内容将类似 "32/60" 这样。
+core.statusBar.mana.style.fontStyle = 'normal'; // 这一行会取消斜体。如果是汉字（比如技能名）的话，斜体起来会非常难看，可以通过这一句取消。
+```
+7. 在control.js的clearStatusBar函数，`statusList`里面也要增加mana项，这样清空状态栏时也会对其清空。
+
+## 技能塔的支持
+
+其实，在HTML5上制作技能塔是完全可行的。
+
+要支持技能塔，可能需要如下几个方面：
+
+- 魔力（和上限）的定义添加
+- 状态栏的显示
+- 技能的触发（按键与录像问题）
+- 技能的效果
+
+下面依次进行描述。
+
+### 魔力的定义添加
+
+当我们定义了魔力的ID，比如`mana`后，要使用它，一般有两种方式：属性获取`status:mana`或者flag标记`flag:mana`。
+
+如果要属性获取，则需要打开`data.js`文件，并在`hero`中添加定义。
+
+通过这种方式定义的，可以通过`core.setStatus('mana', 0)`以及`core.getStatus('mana')`来设置或获取。
+
+``` js
+'hero': {
+    // ... 上略
+    'mana': 0, // 增添mana定义，可以放在experience之后。同理可定义manaMax表示当前最大魔力值。
+}
+```
+
+如果要flag标记，则无需额外在任何地方进行定义。只需要在设置或取用的时候使用 `core.setFlag('mana', 0)` 或 `core.getFlag('mana', 0)` 即可。
+
+下面我都使用属性获取的方式来进行说明。
+
+### 状态栏的显示
+
+首先我们需要额外新增一个状态栏；参见上面的自定义状态栏的做法来新增一栏。
+
+我们可以在魔力那一行显示当前值和最大值：
+
+``` js
+core.setStatus('mana', Math.min(core.getStatus('mana'), core.getStatus('manaMax')); // 如果魔力存在上限，则不能超过其上限值
+core.statusBar.mana.innerHTML = core.getStatus('mana') + '/' + core.getStatus('manaMax', 0); // 显示比如 6/30 这样
+```
+
+如果我们还需要显示当前使用的技能名，也是可以的；定义一个ID为skill，然后按照上面的做法新增一行。
+
+请注意，如果是中文字符，需要取消斜体（不然会非常难看的）！
+
+``` js
+core.statusBar.skill.style.fontStyle = 'normal'; // 取消斜体显示
+core.statusBar.skill.innerHTML = core.getFlag('skillName', '无'); // 使用flag:skillName表示当前激活的技能名。
+```
+
+### 技能的触发
+
+我们可以按键触发技能。
+
+要修改按键，我们可以在`actions.js`的`keyUp`进行处理：
+
+我们设置一个快捷键进行绑定，比如`W`，其keycode是87。（有关每个键的keycode搜一下就能得到）
+
+!> H5不支持组合快捷键，所以不存在`W+1`这种组合快捷键的说法！
+
+然后在`actions.js`的`keyUp`函数的`switch`中进行处理。
+
+``` js
+case 87: // W
+    if (core.status.heroStop) { // 当前停止状态；这个if需要加，不能在行走过程中触发不然容易出错。
+        if (core.getFlag('skill', 0)==0) { // 判断当前是否已经开了技能
+            if (能开技能) { // 这里要写当前能否开技能的条件判断
+                core.setFlag('skill', 1); // 开技能1
+                core.setFlag('skillName', '二倍斩'); // 设置技能名
+            }
+            else {
+                core.drawTip("当前不能开技能！");
+            }
+        }
+        else { // 关闭技能
+            core.setFlag('skill', 0); // 关闭技能状态
+            core.setFlag('skillName', '无');
+        }
+        core.updateStatusBar(); // 立刻更新状态栏和地图显伤
+        core.status.route.push("key:"+keyCode); // 录像的支持！这句话必须要加，不然录像回放会出错！
+    }
+    break;
+```
+
+简单的说，用flag:skill判断当前开启的技能，flag:skillName表示该技能名。（可在状态栏显示）
+
+在勇士处于停止的条件下，按下W键时，判断当前是否开启了技能，如果开启则关闭，没开则再判断是否允许开启（魔力值够不够等）。
+
+`core.status.route.push("key:"+keyCode);` 这句话是对录像的支持，一定要加（这样录像播放时也会模拟该按键）。
+
+!> 1，2，3这三个键被默认绑定到了破炸飞；如果想用的话也是一样，只不过是把已有的实现进行替换。
+
+!> 手机端可以通过长按任何位置调出虚拟键盘，再进行按键，和键盘按键是等价的效果！
+
+### 技能的效果
+
+最后一点就是技能的效果；其实到了这里就和RM差不多了。
+
+技能的效果要分的话有地图类技能，战斗效果类技能，后续影响类技能什么的，这里只介绍最简单的战斗效果类技能。
+其他的几类技能根据需求可能更为麻烦，有兴趣可自行进行研究。
+
+战斗效果内技能要改两个地方：战斗伤害计算，战后扣除魔力值。
+
+战斗伤害计算在`enenmys.js`的`getDamageInfo`函数，有需求直接修改这个函数即可。
+
+战后扣除魔力值则在脚本编辑的`afterBattle`中进行编辑即可。
+
+举个例子，我设置一个勇士的技能：二倍斩，开启技能消耗5点魔力，下一场战斗攻击力翻倍。
+
+那么，直接在`getDamageInfo`中进行判断：
+
+``` js
+if (core.getFlag('skill', 0)==1) { // 开启了技能1
+    hero_atk *= 2; // 计算时攻击力翻倍
+}
+```
+
+然后在脚本编辑的战后事件中进行魔力值的扣除：
+
+``` js
+if (core.getFlag('skill', 0)==1) { // 开启了技能1
+    core.status.hero.mana -= 5; // 扣除5点魔力值
+    core.setFlag('skill', 0); // 自动关闭技能
+    core.setFlag('skillName', '无');
+}
+```
+
+&nbsp;
+
+通过上述这几种方式，我们就能成功的让H5支持技能啦！
 
 ## 根据难度分歧来自定义地图
 

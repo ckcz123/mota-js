@@ -457,6 +457,10 @@ main.statusBar.image.settings.onclick = function () {
 main.dom.playGame.onclick = function () {
     main.dom.startButtons.style.display='none';
 
+    if (main.core.isset(main.core.musicStatus) && main.core.musicStatus.startDirectly
+        && main.core.musicStatus.bgmStatus && main.core.musicStatus.playingBgm==null)
+        main.core.playBgm(main.core.bgms[0]);
+
     if (main.core.isset(main.core.flags.startDirectly) && main.core.flags.startDirectly) {
         core.events.startGame("");
     }
@@ -467,11 +471,20 @@ main.dom.playGame.onclick = function () {
 
 ////// 点击“载入游戏”时 //////
 main.dom.loadGame.onclick = function() {
+
+    if (main.core.isset(main.core.musicStatus) && main.core.musicStatus.startDirectly
+        && main.core.musicStatus.bgmStatus && main.core.musicStatus.playingBgm==null)
+        main.core.playBgm(main.core.bgms[0]);
+
     main.core.load();
 }
 
 ////// 点击“录像回放”时 //////
 main.dom.replayGame.onclick = function () {
+
+    if (main.core.isset(main.core.musicStatus) && main.core.musicStatus.startDirectly
+        && main.core.musicStatus.bgmStatus && main.core.musicStatus.playingBgm==null)
+        main.core.playBgm(main.core.bgms[0]);
 
     core.readFile(function (obj) {
         if (obj.name!=core.firstData.name) {

@@ -25,7 +25,7 @@ core.status.thisMap
 
 
 core.floors
-获得所有楼层的信息，常常用来获取事件坐标。
+获得所有楼层的信息。例如core.floors[core.status.floorId].events可获得本楼层的所有自定义事件。
 
 
 core.status.hero
@@ -146,7 +146,7 @@ core.openDoor(id, x, y, needKey, callback)
 
 
 core.battle(id, x, y, force, callback)
-执行战斗事件。id为怪物的id，x和y为坐标，force为bool值表示打不过是否强制战斗，callback为战斗完毕后的回调函数。
+执行战斗事件。id为怪物的id，x和y为坐标，force为bool值表示是否是强制战斗，callback为战斗完毕后的回调函数。
 例如：core.battle('greenSlime', null, null, true)
 
 
@@ -155,7 +155,8 @@ core.trigger(x, y)
 
 
 core.clearMap(mapName)
-清空某个画布。mapName可为'bg', 'event', 'fg', 'event2', 'hero', 'animate', 'weather', 'ui', 'data', 'all'之一。
+清空某个画布图层。
+mapName可为'bg', 'event', 'fg', 'event2', 'hero', 'animate', 'weather', 'ui', 'data', 'all'之一。
 如果mapName为'all'，则为清空所有画布；否则只清空对应的画布。
 
 
@@ -164,7 +165,7 @@ core.drawBlock(block)
 
 
 core.drawMap(floorId, callback)
-重绘某一层的地图数据。floorId为要绘制那一层的floorId，callback为绘制完毕后的回调函数。
+重绘某一层的地图。floorId为要绘制楼层的floorId，callback为绘制完毕后的回调函数。
 
 
 core.terrainExists(x, y, id, floorId)
@@ -187,7 +188,7 @@ needEnable表示该点是否启用时才返回，其值不设置则默认为true
 
 
 core.getBlockId(x, y, floorId, needEnable)
-获得某个点的图块ID
+获得某个点的图块ID。
 x和y为坐标；floorId为楼层ID，可忽略或null表示当前楼层。
 needEnable表示是否需要该点处于启用状态才返回，其值不设置则默认为true。
 如果该点不存在图块，则返回null，否则返回该点的图块ID。
@@ -394,7 +395,7 @@ core.maps.removeBlockByIds(floorId, ids)
 根据索引删除或禁用若干块。
 
 
-========== core.ui.XXX 和地图处理相关的函数 ==========
+========== core.ui.XXX 和对话框绘制相关的函数 ==========
 ui.js主要用来进行UI窗口的绘制，比如对话框、怪物手册、楼传器、存读档界面等等。
 
 
@@ -404,7 +405,7 @@ floorId为目标楼层ID，canvas为要绘制到的图层，blocks为要绘制�
 x,y为该图层开始绘制的起始点坐标，size为每一格的像素，heroLoc为勇士坐标，heroIcon为勇士图标。
 
 
-========== core.utils.XXX 和地图处理相关的函数 ==========
+========== core.utils.XXX 工具类的辅助函数 ==========
 utils.js主要用来进行一些辅助函数的计算。
 
 
@@ -454,9 +455,9 @@ core.utils.copy(data)
 尝试复制一段文本到剪切板。
 
 
-core.http(type, url, formData, success, error, mimeType)
+core.utils.http(type, url, formData, success, error, mimeType, responseType)
 发送一个异步HTTP请求。
 type为'GET'或者'POST'；url为目标地址；formData如果是POST请求则为表单数据。
-success为成功后的回调，error会失败后的回调，mimeType如果设置则覆盖。
+success为成功后的回调，error为失败后的回调，最后两个参数如果设置则覆盖。
 
 ```

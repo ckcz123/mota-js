@@ -1,8 +1,47 @@
 (function () {
     fs = {};
+
+
+    var _http = function (type, url, formData, success, error, mimeType, responseType) {
+        var xhr = new XMLHttpRequest();
+        xhr.open(type, url, true);
+        if (core.isset(mimeType))
+            xhr.overrideMimeType(mimeType);
+        if (core.isset(responseType))
+            xhr.responseType = responseType;
+        xhr.onload = function(e) {
+            if (xhr.status==200) {
+                if (core.isset(success)) {
+                    success(xhr.response);
+                }
+            }
+            else {
+                if (core.isset(error))
+                    error("HTTP "+xhr.status);
+            }
+        };
+        xhr.onabort = function () {
+            if (core.isset(error))
+                error("Abort");
+        }
+        xhr.ontimeout = function() {
+            if (core.isset(error))
+                error("Timeout");
+        }
+        xhr.onerror = function() {
+            if (core.isset(error))
+                error("Error on Connection");
+        }
+        if (core.isset(formData))
+            xhr.send(formData);
+        else xhr.send();
+    }
+
+
     var postsomething = function (data, _ip, callback) {
         if (typeof(data) == typeof([][0]) || data == null) data = JSON.stringify({1: 2});
-        core.http("POST", _ip, data, function (data) {
+
+        _http("POST", _ip, data, function (data) {
             if (data.slice(0, 6) == 'error:') {
                 callback(data, null);
             }

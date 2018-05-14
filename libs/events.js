@@ -1033,10 +1033,10 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
         }
     }
     if (core.status.maps[floorId].canFlyTo && core.status.hero.flyRange.indexOf(floorId)<0) {
-        if (core.floorIds.indexOf(floorId)>core.floorIds.indexOf(core.status.floorId))
-            core.status.hero.flyRange.push(floorId);
-        else
-            core.status.hero.flyRange.unshift(floorId);
+        core.status.hero.flyRange.push(floorId);
+        core.status.hero.flyRange.sort(function (a, b) {
+            return core.floorIds.indexOf(a) - core.floorIds.indexOf(b);
+        })
     }
 
     window.setTimeout(function () {

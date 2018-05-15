@@ -1010,7 +1010,7 @@ control.prototype.checkBlock = function () {
         }
 
         if (damage>0) {
-            core.playSound('zone.ogg');
+            core.playSound('zone.mp3');
             core.drawAnimate("zone", x, y);
         }
 

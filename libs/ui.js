@@ -981,7 +981,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     core.fillText("ui", "S", right_start-8, 208+15, "#FFFFFF", "italic bold 40px Verdana");
 
     var battleInterval = setInterval(function() {
-        core.playSound("attack.ogg");
+        core.playSound("attack.mp3");
 
         if (turn==0) {
             // 勇士攻击

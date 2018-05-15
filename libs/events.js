@@ -838,7 +838,7 @@ events.prototype.getNextItem = function() {
 ////// 获得某个物品 //////
 events.prototype.getItem = function (itemId, itemNum, itemX, itemY, callback) {
     // core.getItemAnimate(itemId, itemNum, itemX, itemY);
-    core.playSound('item.ogg');
+    core.playSound('item.mp3');
     var itemCls = core.material.items[itemId].cls;
     core.items.getItemEffect(itemId, itemNum);
     core.removeBlock(itemX, itemY);
@@ -888,7 +888,7 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
     }
 
     // open
-    core.playSound("door.ogg");
+    core.playSound("door.mp3");
     var state = 0;
     var doorId = id;
     if (!(doorId.substring(doorId.length-4)=="Door")) {
@@ -942,11 +942,11 @@ events.prototype.battle = function (id, x, y, force, callback) {
     else {
 
         if (core.flags.equipment && core.getFlag('sword', 'sword0')!='sword0') {
-            core.playSound('zone.ogg');
+            core.playSound('zone.mp3');
             core.drawAnimate('sword', x, y);
         }
         else {
-            core.playSound('attack.ogg');
+            core.playSound('attack.mp3');
             core.drawAnimate('hand', x, y);
         }
 

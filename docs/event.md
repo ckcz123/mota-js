@@ -857,7 +857,7 @@ move完毕后移动的NPC/怪物一定会消失，只不过可以通过immediate
 
 使用playSound可以立刻播放一个音效。
 
-使用方法：`{"type": "playSound", "name": "item.ogg"}`
+使用方法：`{"type": "playSound", "name": "item.mp3"}`
 
 值得注意的是，如果是额外添加进文件的音效，则需在main.js中this.sounds里加载它。
 

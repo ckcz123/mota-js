@@ -839,7 +839,7 @@ playSound_s
 /* playSound_s
 tooltip : playSound: 播放音效
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=playsound%EF%BC%9A%E6%92%AD%E6%94%BE%E9%9F%B3%E6%95%88
-default : ["item.ogg"]
+default : ["item.mp3"]
 colour : this.soundColor
 var code = '{"type": "playSound", "name": "'+EvalString_0+'"},\n';
 return code;

@@ -165,12 +165,6 @@ editor_file = function (editor, callback) {
             callback('不能对自动元件进行自动注册！');
             return;
         }
-        /*
-        if (image!='items' && image.indexOf('enemy')!=0) {
-            callback('只有怪物和道具才能自动注册！');
-            return;
-        }
-        */
         var c=image.toUpperCase().charAt(0);
 
         // terrains id
@@ -178,8 +172,6 @@ editor_file = function (editor, callback) {
         Object.keys(core.material.icons.terrains).forEach(function (id) {
             terrainsId[core.material.icons.terrains[id]]=id;
         })
-        //console.log(terrainsId);
-        //return;
 
         var allIds = [];
         editor.ids.forEach(function (v) {

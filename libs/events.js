@@ -407,8 +407,6 @@ events.prototype.doAction = function() {
                     }
                     if (floorId==core.status.floorId) {
                         core.drawMap(floorId);
-                        core.drawHero();
-                        core.updateStatusBar();
                     }
                 }
                 this.doAction();
@@ -1094,29 +1092,27 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
                 })
             }
             core.drawMap(floorId, function () {
-                setTimeout(function() {
-                    if (core.isset(heroLoc.direction))
-                        core.setHeroLoc('direction', heroLoc.direction);
-                    core.setHeroLoc('x', heroLoc.x);
-                    core.setHeroLoc('y', heroLoc.y);
-                    core.drawHero();
-                    core.updateStatusBar();
+                if (core.isset(heroLoc.direction))
+                    core.setHeroLoc('direction', heroLoc.direction);
+                core.setHeroLoc('x', heroLoc.x);
+                core.setHeroLoc('y', heroLoc.y);
+                core.clearMap('hero', 0, 0, 416, 416);
+                core.drawHero();
 
-                    var changed = function () {
-                        core.unLockControl();
-                        core.status.replay.animate=false;
-                        core.events.afterChangeFloor(floorId);
-                        if (core.isset(callback)) callback();
-                    }
-                    if (displayAnimate) {
-                        core.hide(core.dom.floorMsgGroup, time/4, function () {
-                            changed();
-                        });
-                    }
-                    else {
+                var changed = function () {
+                    core.unLockControl();
+                    core.status.replay.animate=false;
+                    core.events.afterChangeFloor(floorId);
+                    if (core.isset(callback)) callback();
+                }
+                if (displayAnimate) {
+                    core.hide(core.dom.floorMsgGroup, time/4, function () {
                         changed();
-                    }
-                }, 25)
+                    });
+                }
+                else {
+                    changed();
+                }
             });
         }
         core.playSound('floor.mp3');

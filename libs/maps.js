@@ -389,8 +389,10 @@ maps.prototype.drawMap = function (mapName, callback) {
         }
     } else {
         drawEvent();
+        core.setGlobalAnimate(core.values.animateSpeed);
+        core.drawHero();
+        core.updateStatusBar();
     }
-    core.setGlobalAnimate(core.values.animateSpeed);
     if (core.isset(callback))
         callback();
 }
@@ -398,7 +400,7 @@ maps.prototype.drawMap = function (mapName, callback) {
 ////// 绘制Autotile //////
 maps.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top){
     var indexArrs = [ //16种组合的图块索引数组; // 将autotile分割成48块16*16的小块; 数组索引即对应各个小块
-        //                                       +----+----+----+----+----+----+
+        //                                     +----+----+----+----+----+----+
         [10,  9,  4, 3 ],  //0   bin:0000      | 1  | 2  | 3  | 4  | 5  | 6  |
         [10,  9,  4, 13],  //1   bin:0001      +----+----+----+----+----+----+
         [10,  9, 18, 3 ],  //2   bin:0010      | 7  | 8  | 9  | 10 | 11 | 12 |
@@ -899,8 +901,5 @@ maps.prototype.drawAnimate = function (name, x, y, callback) {
 maps.prototype.resetMap = function() {
     var floorId = core.status.floorId;
     core.status.maps[floorId] = this.loadFloor(floorId);
-    this.drawMap(floorId, function() {
-        core.drawHero();
-        core.updateStatusBar();
-    })
+    this.drawMap(floorId)
 }

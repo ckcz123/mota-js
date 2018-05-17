@@ -898,8 +898,15 @@ maps.prototype.drawAnimate = function (name, x, y, callback) {
     }, 50);
 }
 
-maps.prototype.resetMap = function() {
-    var floorId = core.status.floorId;
+maps.prototype.resetMap = function(floorId) {
+    var floorId = floorId||core.status.floorId;
     core.status.maps[floorId] = this.loadFloor(floorId);
-    this.drawMap(floorId)
+    if (floorId==core.status.floorId) {
+        this.drawMap(floorId, function () {
+            core.drawTip("地图重置成功");
+        })
+    }
+    else {
+        core.drawTip(floorId+"地图重置成功");
+    }
 }

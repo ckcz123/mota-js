@@ -1169,7 +1169,24 @@ choices为一个数组，其中每一项都是一个选项列表。
 
 `{"type":"function"}`需要有一个`"function"`参数，它是一个JS函数，里面可以写任何自定义的JS脚本；系统将会执行它。
 
-系统所有支持的API都在[附录](api)中给出，请进行参照。
+系统常见可能会被造塔所用到的的API都在[附录：API列表](api)中给出，请进行参照。
+
+**警告：自定义脚本中只能执行同步代码，不可执行任何异步代码，比如直接调用core.changeFloor(...)之类都是不行的。**
+
+[附录：API列表](api)中的所有异步API都进行了标记；如果你不确定一个函数是同步的还是异步的，请向小艾咨询。
+
+如果需要异步的代码都需要用事件（insertAction）来执行，这样事件处理过程和录像回放才不会出错。
+
+举个例子，如果我们想随机切换到某个楼层的某个点，我们可以这么写自定义脚本：
+
+``` js
+var toFloor = core.floorIds[core.rand(core.floorIds.length)]; // 随机一个楼层ID
+var toX = core.rand(13), toY = core.rand(13); // 随机一个点
+core.insertAction([
+    {"type": "changeFloor", "floorId": toFloor, "loc": [toX, toY]} // 插入一个changeFloor事件，并在该脚本结束后执行。
+])
+// 请勿直接调用 core.changeFloor(toFloor, ...)，这个代码是异步的，会导致事件处理和录像出问题！
+```
 
 ## 同一个点的多事件处理
 

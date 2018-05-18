@@ -1,4 +1,4 @@
-# 附录:API列表
+# 附录: API列表
 
 ?> 目前版本**v2.2.1**，上次更新时间：* {docsify-updated} *
 
@@ -7,6 +7,8 @@
 如有任何疑问，请联系小艾寻求帮助。
 
 可以在chrome浏览器的控制台中（`ctrl+shift+I`，找到Console）中直接进行调用，以查看效果。
+
+**以下所有异步API都会加上[异步]的说明，存在此说明的请勿在事件处理的自定义脚本中使用。**
 
 !> 最常用的新手向命令，强烈建议每个人了解
 
@@ -94,13 +96,14 @@ core.hasFlag('xyz')
 返回是否存在某个变量且不为0。等价于 core.getFlag('xyz', 0)!=0 。
 
 
-core.insertAction(list)
+core.insertAction(list, x, y, callback)
 插入并执行一段自定义事件。在这里你可以写任意的自定义事件列表，有关详细写法请参见文档-事件。
+x和y如果设置则覆盖"当前事件点"的坐标，callback如果设置则覆盖事件执行完毕后的回调函数。
 例如： core.insertAction(["楼层切换", {"type":"changeFloor", "floorId": "MT3"}])
 将依次显示剧情文本，并执行一个楼层切换的自定义事件。
 
 
-core.changeFloor(floorId, stair, heroLoc, time, callback)
+core.changeFloor(floorId, stair, heroLoc, time, callback)    [异步]
 立刻切换到指定楼层。
 floorId为目标楼层ID，stair为到达的目标楼梯，heroLoc为到达的指定点，time为动画时间，callback为切换完毕后的回调。
 例如：
@@ -140,12 +143,12 @@ core.nextX()
 core.nextY()
 获得勇士面向的下一个位置的y坐标
 
-core.openDoor(id, x, y, needKey, callback)
+core.openDoor(id, x, y, needKey, callback)    [异步]
 尝试开门操作。id为目标点的ID，x和y为坐标，needKey表示是否需要使用钥匙，callback为开门完毕后的回调函数。
 例如：core.openDoor('yellowDoor', 10, 3, false, function() {console.log("1")})
 
 
-core.battle(id, x, y, force, callback)
+core.battle(id, x, y, force, callback)    [异步]
 执行战斗事件。id为怪物的id，x和y为坐标，force为bool值表示是否是强制战斗，callback为战斗完毕后的回调函数。
 例如：core.battle('greenSlime', null, null, true)
 
@@ -220,8 +223,9 @@ core.drawTip(text, itemIcon)
 在左上角绘制一段提示信息，2秒后消失。itemIcon为道具图标的索引。
 
 
-core.drawText(contents, callback)
+core.drawText(contents, callback)    [异步]
 绘制一段文字。
+不推荐使用此函数，尽量使用core.insertAction(contents)来显示剧情文本。
 
 
 core.closePanel()
@@ -261,7 +265,7 @@ num如果设置大于0，则生成一个[0, num-1]之间的数；否则生成一
 但是，此函数会将生成的随机数值存入录像，因此如果调用次数太多则会导致录像文件过大。
 
 
-core.restart()
+core.restart()    [异步]
 返回标题界面。
 
 
@@ -346,15 +350,16 @@ core.events.gameOver(ending, fromReplay)
 该函数将提问是否上传和是否下载录像，并返回标题界面。
 
 
-core.events.doEvents(list, x, y, callback)
+core.events.doEvents(list, x, y, callback)    [异步]
 开始执行某个事件。
+请不要执行此函数，尽量使用 core.insertAction(list, x, y, callback) 来开始执行一段事件。
 
 
 core.events.doAction()
 执行下一个事件。此函数中将对所有自定义事件类型分别处理。
 
 
-core.events.openShop(shopId, needVisited)
+core.events.openShop(shopId, needVisited)    [异步]
 打开一个全局商店。needVisited表示是否需要该商店已被打开过。
 
 
@@ -438,12 +443,12 @@ core.utils.decodeRoute(route)
 解压缩（解密）路线。
 
 
-core.utils.readFile(success, error, readType)
+core.utils.readFile(success, error, readType)    [异步]
 尝试请求读取一个本地文件内容。
 success和error为成功/失败后的回调，readType不设置则以文本读取，否则以DataUrl形式读取。
 
 
-core.utils.readFileContent(content)
+core.utils.readFileContent(content)    [异步]
 文件读取完毕后的内容处理。
 
 
@@ -455,9 +460,9 @@ core.utils.copy(data)
 尝试复制一段文本到剪切板。
 
 
-core.utils.http(type, url, formData, success, error, mimeType, responseType)
+core.utils.http(type, url, formData, success, error)    [异步]
 发送一个异步HTTP请求。
 type为'GET'或者'POST'；url为目标地址；formData如果是POST请求则为表单数据。
-success为成功后的回调，error为失败后的回调，最后两个参数如果设置则覆盖。
+success为成功后的回调，error为失败后的回调。
 
 ```

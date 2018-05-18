@@ -712,23 +712,23 @@ if (core.getFlag('skill', 0)==1) { // 开启了技能1
     var currHeroId = core.getFlag("heroId", 0); // 获得当前角色ID
     var toHeroId = (currHeroId+1)%2; // 获得要切换到的角色ID，比如 0->1，1->0
     
-    core.setFlag("hero"+currHeroId, toSave); // 将当前勇士信息进行保存
+    core.setFlag("hero"+currHeroId, toSave); // 将当前角色信息进行保存
     
-    var data = core.getFlag("hero"+toHeroId); // 获得要切换的勇士保存内容
+    var data = core.getFlag("hero"+toHeroId); // 获得要切换的角色保存内容
     
-    // 设置勇士属性值
+    // 设置角色的属性值
     saveList.forEach(function(name) {
         if (core.isset(core.status.hero[name]) && core.isset(data[name]))
             core.status.hero[name] = core.clone(data[name]);
     })
     
-    // 插入事件：改变勇士行走图并进行楼层切换
+    // 插入事件：改变角色行走图并进行楼层切换
     core.insertAction([
         {"type": "setHeroIcon", "name": data.icon||"hero.png"}, // 改变行走图
         {"type": "changeFloor", "floorId": data.floorId, "loc": [data.loc.x, data.loc.y], 
             "direction": data.loc.direction, "time": 0} // 楼层切换事件
     ])
-    core.setFlag("heroId", toHeroId); // 保存切换到的勇士ID
+    core.setFlag("heroId", toHeroId); // 保存切换到的角色ID
     ```
 
 ## 根据难度分歧来自定义地图

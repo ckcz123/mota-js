@@ -43,7 +43,8 @@ core.material.items
 
 
 core.debug()
-将攻防设置为10000，近似于无敌模式。
+开启调试模式。此模式下可以按Ctrl键进行穿墙，并忽略一切事件。
+此模式下不可回放录像和上传成绩。
 
 
 core.updateStatusBar()

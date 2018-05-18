@@ -25,6 +25,7 @@ actions.prototype.onkeyDown = function (e) {
         core.status.holdingKeys.push(e.keyCode);
         this.pressKey(e.keyCode);
     } else {
+        if (e.keyCode==17) core.status.ctrlDown = true;
         this.keyDown(e.keyCode);
     }
 }
@@ -60,6 +61,7 @@ actions.prototype.onkeyUp = function(e) {
         }
         this.keyUp(e.keyCode);
     } else {
+        if (e.keyCode==17) core.status.ctrlDown = false;
         this.keyUp(e.keyCode);
     }
 }
@@ -337,8 +339,14 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
                 core.ui.drawHelp();
             break;
         case 82: // R
-            if (core.status.heroStop)
-                core.ui.drawReplay();
+            if (core.status.heroStop) {
+                if (core.hasFlag('debug')) {
+                    core.drawText("\t[系统提示]调试模式下无法回放录像");
+                }
+                else {
+                    core.ui.drawReplay();
+                }
+            }
             break;
         case 33: case 34: // PAGEUP/PAGEDOWN
         if (core.status.heroStop) {
@@ -1703,6 +1711,10 @@ actions.prototype.clickSyncSave = function (x,y) {
                 });
                 break;
             case 4:
+                if (core.hasFlag('debug')) {
+                    core.drawText("\t[系统提示]调试模式下无法下载录像");
+                    break;
+                }
                 core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify({
                     'name': core.firstData.name,
                     'hard': core.status.hard,

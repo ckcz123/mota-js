@@ -621,6 +621,7 @@ control.prototype.moveAction = function (callback) {
         if (core.status.event.id!='ski')
             core.status.route.push(direction);
         core.status.automaticRoute.moveStepBeforeStop = [];
+        core.status.automaticRoute.lastDirection = core.getHeroLoc('direction');
         if (canMove) // 非箭头：触发
             core.trigger(x + scan[direction].x, y + scan[direction].y);
         core.drawHero(direction, x, y);
@@ -676,7 +677,7 @@ control.prototype.turnHero = function() {
 ////// 让勇士开始移动 //////
 control.prototype.moveHero = function (direction, callback) {
     // 如果正在移动，直接return
-    if (core.status.heroMoving>0) return;
+    if (core.status.heroMoving!=0) return;
     if (core.isset(direction))
         core.setHeroLoc('direction', direction);
     if (!core.isset(callback)) { // 如果不存在回调函数，则使用heroMoveTrigger
@@ -685,8 +686,18 @@ control.prototype.moveHero = function (direction, callback) {
 
         var doAction = function () {
             if (!core.status.heroStop) {
-                core.moveAction();
-                setTimeout(doAction, 50);
+                if (core.hasFlag('debug') && core.status.ctrlDown) {
+                    if (core.status.heroMoving!=0) return;
+                    core.status.heroMoving=-1;
+                    core.eventMoveHero([core.getHeroLoc('direction')], 100, function () {
+                        core.status.heroMoving=0;
+                        doAction();
+                    });
+                }
+                else {
+                    core.moveAction();
+                    setTimeout(doAction, 50);
+                }
             }
             else {
                 core.stopHero();
@@ -1371,8 +1382,11 @@ control.prototype.doEffect = function (expression) {
     }
 }
 
-////// 作弊 //////
+////// 开启debug模式 //////
 control.prototype.debug = function() {
+    core.setFlag('debug', true);
+    core.insertAction(["\t[调试模式开启]此模式下按住Ctrl键可以穿墙并忽略一切事件。\n同时，录像将失效，也无法上传成绩。"]);
+    /*
     core.setStatus('hp', 999999);
     core.setStatus('atk', 10000);
     core.setStatus('def', 10000);
@@ -1389,6 +1403,7 @@ control.prototype.debug = function() {
             core.status.hero.flyRange.push(i);
     core.updateStatusBar();
     core.drawTip("作弊成功");
+    */
 }
 
 ////// 开始播放 //////

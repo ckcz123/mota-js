@@ -107,6 +107,7 @@ function core() {
 
         // 按下键的时间：为了判定双击
         'downTime': null,
+        'ctrlDown': false,
 
         // 路线&回放
         'route': [],

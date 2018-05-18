@@ -668,8 +668,8 @@ ui.prototype.drawChoices = function(content, choices) {
 
     if (choices.length>0) {
         if (!core.isset(core.status.event.selection)) core.status.event.selection=0;
-        if (core.status.event.selection<0) core.status.event.selection=0;
-        if (core.status.event.selection>=choices.length) core.status.event.selection=choices.length-1;
+        while (core.status.event.selection<0) core.status.event.selection+=choices.length;
+        while (core.status.event.selection>=choices.length) core.status.event.selection-=choices.length;
         var len = core.canvas.ui.measureText(core.replaceText(choices[core.status.event.selection].text || choices[core.status.event.selection])).width;
         core.strokeRect('ui', 208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28, "#FFD700", 2);
     }

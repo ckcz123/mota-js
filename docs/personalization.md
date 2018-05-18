@@ -582,7 +582,7 @@ core.statusBar.mana.style.fontStyle = 'normal'; // 这一行会取消斜体。�
 我们可以在魔力那一行显示当前值和最大值：
 
 ``` js
-core.setStatus('mana', Math.min(core.getStatus('mana'), core.getStatus('manaMax')); // 如果魔力存在上限，则不能超过其上限值
+core.setStatus('mana', Math.min(core.getStatus('mana'), core.getStatus('manaMax'))); // 如果魔力存在上限，则不能超过其上限值
 core.statusBar.mana.innerHTML = core.getStatus('mana') + '/' + core.getStatus('manaMax', 0); // 显示比如 6/30 这样
 ```
 

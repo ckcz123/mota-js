@@ -716,16 +716,16 @@ core.setFlag("hero"+currHeroId, toSave); // 将当前勇士信息进行保存
 
 var data = core.getFlag("hero"+toHeroId); // 获得要切换的勇士保存内容
 
-// 将勇士属性值设置回来
+// 设置勇士属性值
 saveList.forEach(function(name) {
-    if (core.isset(core.status.hero[name]) && core.isset(loadData[name]))
-        core.status.hero[name] = core.clone(loadData[name]);
+    if (core.isset(core.status.hero[name]) && core.isset(data[name]))
+        core.status.hero[name] = core.clone(data[name]);
 })
 
 // 插入事件：改变勇士行走图并进行楼层切换
 core.insertAction([
     {"type": "setHeroIcon", "name": data.icon||"hero.png"}, // 改变行走图
-    {"type": "changeFloor", "floorId": data.floorId, "loc": [loadData.loc.x, loadData.loc.y], 
+    {"type": "changeFloor", "floorId": data.floorId, "loc": [data.loc.x, data.loc.y], 
         "direction": data.loc.direction, "time": 0} // 楼层切换事件
 ])
 core.setFlag("heroId", toHeroId); // 保存切换到的勇士ID

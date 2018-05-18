@@ -309,6 +309,52 @@ control.prototype.checkBlock = function () {
 ```
 4. 如果有更高的需求，例如想让吸血效果变成一半，则还是在上面这些地方进行对应的修改即可。
 
+## 新增门和对应的钥匙
+
+如果要新增一个门和对应的钥匙，需要进行如下几步：
+
+1. 在terrains.png中添加新的门的素材，并在地图编辑器中注册门的ID。该ID必须是以`Door`结尾，例如`abcDoor`。
+2. 在animates.png中添加开门的四格动画，然后直接打开icons.js文件，在animates下直接添加ID和索引信息，例如`'abcDoor': 34`。
+3. 在items.png中添加钥匙的素材，并在地图编辑器中注册钥匙的ID。该ID必须是和门对应且以`Key`结尾，例如`abcKey`。
+4. 该道具的cls应为`tools`，可以自行写道具描述，最下面几项均留`null`即可。
+
+!> **请勿在animates中对门的动画素材进行注册！而是请直接打开icons.js文件并添加ID和索引信息！！！**
+
+!> terrains和animates的门ID必须完全一致，且以`Door`结尾；所对应的钥匙ID应当是把`Door`换成`Key`，这样才能对应的上！
+
+## 覆盖楼传事件
+
+对于特殊的塔，我们可以考虑修改楼传事件来完成一些特殊的要求，比如镜子可以按楼传来切换表里。
+
+要修改楼传事件，需要进行如下几步：
+
+1. 截获楼传的点击事件。在control.js中找到useFly函数，并将其替换成如下内容：
+``` js
+////// 点击楼层传送器时的打开操作 //////
+control.prototype.useFly = function (need) {
+    if (!core.status.heroStop) {
+        core.drawTip("请先停止勇士行动");
+        return;
+    }
+    if (core.canUseItem('fly')) core.useItem('fly');
+    else core.drawTip("当前无法使用"+core.material.items.fly.name);
+}
+```
+2. 让录像记下楼传的使用。在items.js的useItem函数中找到记录路线的那几行，修改为：
+``` js
+    // 记录路线
+    if (itemId!='book') {  // 把 `&& itemId!='fly'` 给删除
+        core.status.route.push("item:"+itemId);
+    }
+```
+3. 修改楼传的使用事件。和其他永久道具一样，在地图编辑器的图块属性中修改楼传的useItemEffect和canUseItemEffect两个内容。例如：
+``` js
+"useItemEffect": "core.insertAction([...])" // 执行某段自定义事件，或者其他脚本
+"canUseItemEffect": "true" // 任何时候可用
+```
+修改时，请先把`null`改成空字符串`""`，然后再双击进行编辑。
+
+
 ## 自定义装备
 
 由于HTML5魔塔并不像RM那样存在一个装备界面可供我们对装备进行调整，但是我们也可以使用一个替代的方式实现这个目标。
@@ -334,7 +380,7 @@ control.prototype.checkBlock = function () {
 "shield1": {"atk": 0, "def": 10, "mdef": 10}, // 铁盾加10防和10魔防
 ```
 
-通过这种方式，当穿上装备时，将会给你的三围分别加上对应项的数值。
+通过这种方式，当穿上装备时，将会给你的三围分别加上对应项的数值（支持负数，比如装剑减防御）。
 
 ### 新增剑盾
 
@@ -395,6 +441,37 @@ this.useEquipment = function (itemId) { // 使用装备
 对于领域、夹击、阻击怪物的检查在`control.js`中的checkBlock函数中。
 
 `getCritical`, `getCriticalDamage`和`getDefDamage`三个函数依次计算的是该怪物的临界值、临界减伤和1防减伤。也可以适当进行修改。
+
+## 自定义快捷键
+
+如果需要绑定某个快捷键为处理一段事件，也是可行的。
+
+要修改按键，我们可以在`actions.js`的`keyUp`进行处理：
+
+比如，我们设置一个快捷键进行绑定，比如`W`，其keycode是87。（有关每个键的keycode搜一下就能得到）
+
+然后在`actions.js`的`keyUp`函数的`switch`中进行处理。
+
+``` js
+case 87: // W
+    if (core.status.heroStop) { 
+        // ... 在这里写你要执行脚本
+        // 请使用同步脚本，请勿执行任何异步代码，否则可能导致游戏过程或录像出现问题。
+        core.insertAction([...]) // 例如，插入一段自定义事件并执行。
+        
+        core.status.route.push("key:"+keyCode); // 录像的支持！这句话必须要加，不然录像回放会出错！
+    }
+    break;
+```
+
+
+在勇士处于停止的条件下，按下W键时，将执行你写的脚本代码。请只使用同步脚本而不要使用异步代码，不然可能导致游戏出现问题。
+
+`core.status.route.push("key:"+keyCode);` 这句话是对录像的支持，一定要加（这样录像播放时也会模拟该按键）。
+
+!> H5不支持组合快捷键，所以不存在`W+1`这种组合快捷键的说法！
+
+!> 手机端可以通过长按任何位置调出虚拟键盘，再进行按键，和键盘按键是等价的效果！
 
 ## 公共事件
 
@@ -520,26 +597,20 @@ core.statusBar.skill.innerHTML = core.getFlag('skillName', '无'); // 使用flag
 
 ### 技能的触发
 
-我们可以按键触发技能。
+我们可以按键触发技能。有关绑定按键请参见[自定义快捷键](#自定义快捷键)。
 
-要修改按键，我们可以在`actions.js`的`keyUp`进行处理：
-
-我们设置一个快捷键进行绑定，比如`W`，其keycode是87。（有关每个键的keycode搜一下就能得到）
-
-!> H5不支持组合快捷键，所以不存在`W+1`这种组合快捷键的说法！
-
-然后在`actions.js`的`keyUp`函数的`switch`中进行处理。
+下面是一个很简单的例子，当勇士按下W后，如果魔力不小于5点则允许开启技能"二倍斩"，再次按W则关闭技能。
 
 ``` js
 case 87: // W
     if (core.status.heroStop) { // 当前停止状态；这个if需要加，不能在行走过程中触发不然容易出错。
         if (core.getFlag('skill', 0)==0) { // 判断当前是否已经开了技能
-            if (能开技能) { // 这里要写当前能否开技能的条件判断
+            if (core.getStatus('mana')>=5) { // 这里要写当前能否开技能的条件判断，比如魔力值至少要多少
                 core.setFlag('skill', 1); // 开技能1
                 core.setFlag('skillName', '二倍斩'); // 设置技能名
             }
             else {
-                core.drawTip("当前不能开技能！");
+                core.drawTip("魔力不足，无法开技能");
             }
         }
         else { // 关闭技能
@@ -598,6 +669,69 @@ if (core.getFlag('skill', 0)==1) { // 开启了技能1
 &nbsp;
 
 通过上述这几种方式，我们就能成功的让H5支持技能啦！
+
+## 多角色的支持
+
+其实，我们的样板还能支持多角色的制作。比如《黑·白·间》之类的塔也是完全可以刻的。
+
+你只需要如下几步来达到多角色的效果。
+
+1. 每个勇士弄一张行走图。相关信息参见[自定义事件：setHeroIcon](event#setHeroIcon：更改角色行走图)
+2. [覆盖楼传事件](#覆盖楼传事件)，这样可以通过点工具栏的楼层传送按钮来切换角色。
+当然你也完全可以自己写一个道具来实现，或[自定义快捷键](#自定义快捷键)来进行绑定。
+3. 在脚本编辑的setInitData中初始化新角色的属性值。
+``` js
+// 所有需要保存的内容；这些保存的内容不会多角色共用，在切换时会进行恢复。
+// 你也可以自行新增或删除，比如不共用金币则可以加上"money"的初始化，不共用道具则可以加上"items"的初始化，
+// 多勇士共用hp的话则删除hp，等等。
+var initData = {
+    "floorId": "MT0", // 该角色楼层ID
+    "icon": "hero2.png", // 角色的行走图名称
+    "name": "2号角色",
+    "lv": 1,
+    "hp": 1000,
+    "atk": 10,
+    "def": 10,
+    "mdef": 0,
+    "loc": {"x": 0, "y": 0, "direction": "up"},
+    // 不共用的数据都可以在这里加上定义
+}
+core.setFlag("hero1", initData); // 将属性值存到变量中
+```
+
+3. 道具（或快捷键）的脚本如下：
+``` js
+// 这个saveList和上面的初始化定义中的的key，除了不要icon（行走图名称）其他应完全相同。
+var saveList = ["floorId", "name", "lv", "hp", "atk", "def", "mdef", "loc"];
+
+// 保存当前内容
+var toSave = {};
+saveList.forEach(function(name) {
+    if (name=='floorId') toSave[name] = core.status.floorId; // 楼层单独设置
+    else toSave[name] = core.clone(core.status.hero[name]); // 使用core.clone()来创建新对象
+})
+
+var currHeroId = core.getFlag("heroId", 0); // 获得当前角色ID
+var toHeroId = (currHeroId+1)%2; // 获得要切换到的角色ID，比如 0->1，1->0
+
+core.setFlag("hero"+currHeroId, toSave); // 将当前勇士信息进行保存
+
+var data = core.getFlag("hero"+toHeroId); // 获得要切换的勇士保存内容
+
+// 将勇士属性值设置回来
+saveList.forEach(function(name) {
+    if (core.isset(core.status.hero[name]) && core.isset(loadData[name]))
+        core.status.hero[name] = core.clone(loadData[name]);
+})
+
+// 插入事件：改变勇士行走图并进行楼层切换
+core.insertAction([
+    {"type": "setHeroIcon", "name": loadData.icon||"hero.png"}, // 改变行走图
+    {"type": "changeFloor", "floorId": loadData.floorId, "loc": [loadData.loc.x, loadData.loc.y], 
+        "direction": loadData.loc.direction, "time": 0}
+])
+core.setFlag("heroId", toHeroId); // 保存切换到的勇士ID
+```
 
 ## 根据难度分歧来自定义地图
 

@@ -542,6 +542,29 @@ editor.prototype.listen = function () {
             currDrawData = JSON.parse(JSON.stringify(reDo));
             reDo = null;
         }
+        // PGUP和PGDOWN切换楼层
+        if (e.keyCode==33) {
+            e.preventDefault();
+            var index=editor.core.floorIds.indexOf(editor.currentFloorId);
+            if (index>0) {
+                var toId = editor.core.floorIds[index-1];
+                editor_mode.onmode('nextChange');
+                editor_mode.onmode('floor');
+                document.getElementById('selectFloor').value = toId;
+                editor.changeFloor(toId);
+            }
+        }
+        if (e.keyCode==34) {
+            e.preventDefault();
+            var index=editor.core.floorIds.indexOf(editor.currentFloorId);
+            if (index<editor.core.floorIds.length-1) {
+                var toId = editor.core.floorIds[index+1];
+                editor_mode.onmode('nextChange');
+                editor_mode.onmode('floor');
+                document.getElementById('selectFloor').value = toId;
+                editor.changeFloor(toId);
+            }
+        }
     }
 
     var dataSelection = document.getElementById('dataSelection');

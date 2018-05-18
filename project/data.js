@@ -14,7 +14,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			'bgm.mp3'
 		],
 		"sounds" : [ 
-			'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg', 'zone.ogg'
+			'floor.mp3', 'attack.mp3', 'door.mp3', 'item.mp3', 'zone.mp3'
 		],
 		"startBackground" : "bg.jpg",
 		"startLogoStyle" : "color: black",

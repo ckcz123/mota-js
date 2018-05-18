@@ -199,7 +199,7 @@ floorId指定的是目标楼层的唯一标识符（ID）。
 ];
 "sounds": [ // 在此存放所有的SE，和文件名一致
     // 音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好
-    'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg', 'zone.ogg'
+    'floor.mp3', 'attack.mp3', 'door.mp3', 'item.mp3', 'zone.mp3'
 ]
 ```
 

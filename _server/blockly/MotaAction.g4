@@ -839,7 +839,7 @@ playSound_s
 /* playSound_s
 tooltip : playSound: 播放音效
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=playsound%EF%BC%9A%E6%92%AD%E6%94%BE%E9%9F%B3%E6%95%88
-default : ["item.ogg"]
+default : ["item.mp3"]
 colour : this.soundColor
 var code = '{"type": "playSound", "name": "'+EvalString_0+'"},\n';
 return code;
@@ -1000,7 +1000,7 @@ function_s
     
 
 /* function_s
-tooltip : function: 自定义JS脚本
+tooltip : function: 自定义JS脚本\n可以双击进行多行编辑，常见可能会被用到的系统API请参见文档的附录
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=function%EF%BC%9A%E8%87%AA%E5%AE%9A%E4%B9%89js%E8%84%9A%E6%9C%AC
 default : ["alert(core.getStatus(\"atk\"));"]
 colour : this.dataColor

@@ -889,8 +889,8 @@ core.prototype.debug = function() {
 }
 
 ////// 重置当前地图 //////
-core.prototype.resetMap = function() {
-    core.maps.resetMap();
+core.prototype.resetMap = function(floorId) {
+    core.maps.resetMap(floorId);
 }
 
 ////// 开始播放 //////

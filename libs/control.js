@@ -1010,7 +1010,7 @@ control.prototype.checkBlock = function () {
         }
 
         if (damage>0) {
-            core.playSound('zone.ogg');
+            core.playSound('zone.mp3');
             core.drawAnimate("zone", x, y);
         }
 
@@ -1810,6 +1810,8 @@ control.prototype.openSettings = function (need) {
 
 ////// 自动存档 //////
 control.prototype.autosave = function (removeLast) {
+    if (core.status.event.id!=null)
+        return;
     var x=null;
     if (removeLast)
         x=core.status.route.pop();

@@ -676,60 +676,60 @@ if (core.getFlag('skill', 0)==1) { // 开启了技能1
 
 你只需要如下几步来达到多角色的效果。
 
-1. 每个勇士弄一张行走图。相关信息参见[自定义事件：setHeroIcon](event#setHeroIcon：更改角色行走图)
+1. 每个勇士弄一张行走图。相关信息参见[自定义事件：setHeroIcon](event#setHeroIcon：更改角色行走图)。
 2. [覆盖楼传事件](#覆盖楼传事件)，这样可以通过点工具栏的楼层传送按钮来切换角色。当然你也完全可以自己写一个道具，或[自定义快捷键](#自定义快捷键)来进行绑定。
 3. 在脚本编辑的setInitData中初始化新角色的属性值。
-```js
-// 所有需要保存的内容；这些保存的内容不会多角色共用，在切换时会进行恢复。
-// 你也可以自行新增或删除，比如不共用金币则可以加上"money"的初始化，不共用道具则可以加上"items"的初始化，
-// 多勇士共用hp的话则删除hp，等等。
-var initData = {
-    "floorId": "MT0", // 该角色楼层ID
-    "icon": "hero2.png", // 角色的行走图名称
-    "name": "2号角色",
-    "lv": 1,
-    "hp": 1000,
-    "atk": 10,
-    "def": 10,
-    "mdef": 0,
-    "loc": {"x": 0, "y": 0, "direction": "up"},
-    // 不共用的数据都可以在这里加上定义
-}
-core.setFlag("hero1", initData); // 将属性值存到变量中
-```
+    ``` js
+    // 所有需要保存的内容；这些保存的内容不会多角色共用，在切换时会进行恢复。
+    // 你也可以自行新增或删除，比如不共用金币则可以加上"money"的初始化，不共用道具则可以加上"items"的初始化，
+    // 多勇士共用hp的话则删除hp，等等。
+    var initData = {
+        "floorId": "MT0", // 该角色楼层ID
+        "icon": "hero2.png", // 角色的行走图名称
+        "name": "2号角色",
+        "lv": 1,
+        "hp": 1000,
+        "atk": 10,
+        "def": 10,
+        "mdef": 0,
+        "loc": {"x": 0, "y": 0, "direction": "up"},
+        // 不共用的数据都可以在这里加上定义
+    }
+    core.setFlag("hero1", initData); // 将属性值存到变量中
+    ```
 4. 道具（或快捷键）的脚本如下。
-```js
-// 这个saveList和上面的初始化定义中的的key，除了不要icon（行走图名称）其他应完全相同。
-var saveList = ["floorId", "name", "lv", "hp", "atk", "def", "mdef", "loc"];
-
-// 保存当前内容
-var toSave = {};
-saveList.forEach(function(name) {
-    if (name=='floorId') toSave[name] = core.status.floorId; // 楼层单独设置
-    else toSave[name] = core.clone(core.status.hero[name]); // 使用core.clone()来创建新对象
-})
-
-var currHeroId = core.getFlag("heroId", 0); // 获得当前角色ID
-var toHeroId = (currHeroId+1)%2; // 获得要切换到的角色ID，比如 0->1，1->0
-
-core.setFlag("hero"+currHeroId, toSave); // 将当前勇士信息进行保存
-
-var data = core.getFlag("hero"+toHeroId); // 获得要切换的勇士保存内容
-
-// 设置勇士属性值
-saveList.forEach(function(name) {
-    if (core.isset(core.status.hero[name]) && core.isset(data[name]))
-        core.status.hero[name] = core.clone(data[name]);
-})
-
-// 插入事件：改变勇士行走图并进行楼层切换
-core.insertAction([
-    {"type": "setHeroIcon", "name": data.icon||"hero.png"}, // 改变行走图
-    {"type": "changeFloor", "floorId": data.floorId, "loc": [data.loc.x, data.loc.y], 
-        "direction": data.loc.direction, "time": 0} // 楼层切换事件
-])
-core.setFlag("heroId", toHeroId); // 保存切换到的勇士ID
-```
+    ``` js
+    // 这个saveList和上面的初始化定义中的的key，除了不要icon（行走图名称）其他应完全相同。
+    var saveList = ["floorId", "name", "lv", "hp", "atk", "def", "mdef", "loc"];
+    
+    // 保存当前内容
+    var toSave = {};
+    saveList.forEach(function(name) {
+        if (name=='floorId') toSave[name] = core.status.floorId; // 楼层单独设置
+        else toSave[name] = core.clone(core.status.hero[name]); // 使用core.clone()来创建新对象
+    })
+    
+    var currHeroId = core.getFlag("heroId", 0); // 获得当前角色ID
+    var toHeroId = (currHeroId+1)%2; // 获得要切换到的角色ID，比如 0->1，1->0
+    
+    core.setFlag("hero"+currHeroId, toSave); // 将当前勇士信息进行保存
+    
+    var data = core.getFlag("hero"+toHeroId); // 获得要切换的勇士保存内容
+    
+    // 设置勇士属性值
+    saveList.forEach(function(name) {
+        if (core.isset(core.status.hero[name]) && core.isset(data[name]))
+            core.status.hero[name] = core.clone(data[name]);
+    })
+    
+    // 插入事件：改变勇士行走图并进行楼层切换
+    core.insertAction([
+        {"type": "setHeroIcon", "name": data.icon||"hero.png"}, // 改变行走图
+        {"type": "changeFloor", "floorId": data.floorId, "loc": [data.loc.x, data.loc.y], 
+            "direction": data.loc.direction, "time": 0} // 楼层切换事件
+    ])
+    core.setFlag("heroId", toHeroId); // 保存切换到的勇士ID
+    ```
 
 ## 根据难度分歧来自定义地图
 

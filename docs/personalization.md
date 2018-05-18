@@ -577,7 +577,7 @@ core.statusBar.mana.style.fontStyle = 'normal'; // 这一行会取消斜体。�
 
 ### 状态栏的显示
 
-首先我们需要额外新增一个状态栏；参见上面的自定义状态栏的做法来新增一栏。
+首先我们需要额外新增一个状态栏；请参见[自定义状态栏（新增显示项）](#自定义状态栏（新增显示项）)。
 
 我们可以在魔力那一行显示当前值和最大值：
 
@@ -679,8 +679,7 @@ if (core.getFlag('skill', 0)==1) { // 开启了技能1
 1. 每个勇士弄一张行走图。相关信息参见[自定义事件：setHeroIcon](event#setHeroIcon：更改角色行走图)
 2. [覆盖楼传事件](#覆盖楼传事件)，这样可以通过点工具栏的楼层传送按钮来切换角色。当然你也完全可以自己写一个道具，或[自定义快捷键](#自定义快捷键)来进行绑定。
 3. 在脚本编辑的setInitData中初始化新角色的属性值。
-
-``` js
+```js
 // 所有需要保存的内容；这些保存的内容不会多角色共用，在切换时会进行恢复。
 // 你也可以自行新增或删除，比如不共用金币则可以加上"money"的初始化，不共用道具则可以加上"items"的初始化，
 // 多勇士共用hp的话则删除hp，等等。
@@ -698,10 +697,8 @@ var initData = {
 }
 core.setFlag("hero1", initData); // 将属性值存到变量中
 ```
-
-4. 道具（或快捷键）的脚本如下：
-
-``` js
+4. 道具（或快捷键）的脚本如下。
+```js
 // 这个saveList和上面的初始化定义中的的key，除了不要icon（行走图名称）其他应完全相同。
 var saveList = ["floorId", "name", "lv", "hp", "atk", "def", "mdef", "loc"];
 
@@ -727,9 +724,9 @@ saveList.forEach(function(name) {
 
 // 插入事件：改变勇士行走图并进行楼层切换
 core.insertAction([
-    {"type": "setHeroIcon", "name": loadData.icon||"hero.png"}, // 改变行走图
-    {"type": "changeFloor", "floorId": loadData.floorId, "loc": [loadData.loc.x, loadData.loc.y], 
-        "direction": loadData.loc.direction, "time": 0}
+    {"type": "setHeroIcon", "name": data.icon||"hero.png"}, // 改变行走图
+    {"type": "changeFloor", "floorId": data.floorId, "loc": [loadData.loc.x, loadData.loc.y], 
+        "direction": data.loc.direction, "time": 0} // 楼层切换事件
 ])
 core.setFlag("heroId", toHeroId); // 保存切换到的勇士ID
 ```

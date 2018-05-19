@@ -417,7 +417,7 @@ actions.prototype.ondown = function (x ,y) {
             core.timeout.onDownTimeout = setTimeout(function () {
                 if (core.interval.onDownInterval == null) {
                     core.interval.onDownInterval = setInterval(function () {
-                        if (!core.actions.longClick()) {
+                        if (!core.actions.longClick(x, y, true)) {
                             clearInterval(core.interval.onDownInterval);
                             core.interval.onDownInterval = null;
                         }
@@ -488,10 +488,7 @@ actions.prototype.onup = function () {
 
         // 长按
         if (!core.status.lockControl && stepPostfix.length==0 && core.status.downTime!=null && new Date()-core.status.downTime>=1000) {
-            core.waitHeroToStop(function () {
-                // 绘制快捷键
-                core.ui.drawKeyBoard();
-            });
+            this.longClick(posx, posy);
         }
         else {
             //posx,posy是寻路的目标点,stepPostfix是后续的移动
@@ -717,15 +714,23 @@ actions.prototype.onmousewheel = function (direct) {
 /////////////////// 在某个界面时的按键点击效果 ///////////////////
 
 ////// 长按 //////
-actions.prototype.longClick = function () {
+actions.prototype.longClick = function (x, y, fromEvent) {
     if (!core.isPlaying()) return false;
-    if (core.status.event.id=='text') {
-        core.drawText();
-        return true;
+    if (core.status.lockControl) {
+        if (core.status.event.id=='text') {
+            core.drawText();
+            return true;
+        }
+        if (core.status.event.id=='action' && core.status.event.data.type=='text') {
+            core.doAction();
+            return true;
+        }
     }
-    if (core.status.event.id=='action' && core.status.event.data.type=='text') {
-        core.doAction();
-        return true;
+    else if (!fromEvent) {
+        core.waitHeroToStop(function () {
+            // 绘制快捷键
+            core.ui.drawKeyBoard();
+        });
     }
     return false;
 }

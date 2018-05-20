@@ -503,9 +503,9 @@ main.dom.replayGame.onclick = function () {
 
         core.dom.startPanel.style.display = 'none';
         core.resetStatus(core.firstData.hero, obj.hard, core.firstData.floorId, null, core.initStatus.maps);
-        core.events.setInitData(obj.hard);
         core.setFlag('seed', obj.seed);
         core.setFlag('rand', obj.seed);
+        core.events.setInitData(obj.hard);
         core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
             core.startReplay(core.decodeRoute(obj.route));
         }, true);

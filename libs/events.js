@@ -1351,7 +1351,7 @@ events.prototype.passNet = function (data) {
     if (data.event.id=='weakNet') { // 衰网
         if (core.hasFlag('weak')) return;
         core.setFlag('weak', true);
-        var weakValue = core.status.weakValue;
+        var weakValue = core.values.weakValue;
         var weakAtk = weakValue>=1?weakValue:Math.floor(weakValue*core.status.hero.atk);
         var weakDef = weakValue>=1?weakValue:Math.floor(weakValue*core.status.hero.def);
         core.setFlag('weakAtk', weakAtk);

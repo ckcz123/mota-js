@@ -57,6 +57,7 @@ function main() {
         'moneyCol': document.getElementById('moneyCol'),
         'expCol': document.getElementById('expCol'),
         'upCol': document.getElementById('upCol'),
+        'keyCol': document.getElementById('keyCol'),
         'debuffCol': document.getElementById('debuffCol'),
         'hard': document.getElementById('hard'),
     };

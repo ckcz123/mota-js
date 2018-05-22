@@ -59,6 +59,13 @@ control.prototype.setRequestAnimationFrame = function () {
         core.animateFrame.moveTime = core.animateFrame.moveTime||timestamp;
         core.animateFrame.weather.time = core.animateFrame.weather.time||timestamp;
 
+        // move time
+        if (core.isPlaying() && core.isset(core.status) && core.isset(core.status.hero)
+            && core.isset(core.status.hero.statistics)) {
+            core.status.hero.statistics.totalTime += timestamp-(core.status.hero.statistics.start||timestamp);
+            core.status.hero.statistics.start=timestamp;
+        }
+
         // Global Animate
         if (core.animateFrame.globalAnimate && core.isPlaying()) {
 
@@ -237,6 +244,12 @@ control.prototype.clearStatus = function() {
 ////// 重置游戏状态和初始数据 //////
 control.prototype.resetStatus = function(hero, hard, floorId, route, maps) {
 
+    var totalTime=0;
+    if (core.isset(core.status) && core.isset(core.status.hero)
+        && core.isset(core.status.hero.statistics) && core.isset(route)) {
+        totalTime=core.status.hero.statistics.totalTime;
+    }
+
     this.clearStatus();
 
     // 初始化status
@@ -249,6 +262,20 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps) {
     core.material.enemys = core.clone(core.enemys.getEnemys());
     // 初始化人物属性
     core.status.hero = core.clone(hero);
+    // 统计数据
+    if (!core.isset(core.status.hero.statistics))
+        core.status.hero.statistics = {
+            'totalTime': totalTime,
+            'hp': 0,
+            'battleDamage': 0,
+            'poisonDamage': 0,
+            'extraDamage': 0,
+            'moveDirectly': 0,
+            'ignoreSteps': 0,
+        }
+    core.status.hero.statistics.totalTime = Math.max(core.status.hero.statistics.totalTime, totalTime);
+    core.status.hero.statistics.start = null;
+
     core.status.hard = hard;
     // 初始化路线
     if (core.isset(route))
@@ -349,12 +376,15 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
             core.status.automaticRoute.moveDirectly = true;
             setTimeout(function () {
                 if (core.status.automaticRoute.moveDirectly && core.status.heroMoving==0) {
-                    if (core.canMoveDirectly(destX, destY)) {
+                    var ignoreSteps = core.canMoveDirectly(destX, destY);
+                    if (ignoreSteps>0) {
                         core.clearMap('hero', 0, 0, 416, 416);
                         core.setHeroLoc('x', destX);
                         core.setHeroLoc('y', destY);
                         core.drawHero();
                         core.status.route.push("move:"+destX+":"+destY);
+                        core.status.hero.statistics.moveDirectly++;
+                        core.status.hero.statistics.ignoreSteps+=ignoreSteps;
                     }
                 }
                 core.status.automaticRoute.moveDirectly = false;
@@ -781,6 +811,7 @@ control.prototype.moveOneStep = function() {
     core.status.hero.steps++;
     // 中毒状态
     if (core.hasFlag('poison')) {
+        core.status.hero.statistics.poisonDamage += core.values.poisonDamage;
         core.status.hero.hp -= core.values.poisonDamage;
         if (core.status.hero.hp<=0) {
             core.status.hero.hp=0;
@@ -1024,6 +1055,7 @@ control.prototype.checkBlock = function () {
             core.playSound('zone.mp3');
             core.drawAnimate("zone", x, y);
         }
+        core.status.hero.statistics.extraDamage += damage;
 
         if (core.status.hero.hp<=0) {
             core.status.hero.hp=0;
@@ -1680,12 +1712,16 @@ control.prototype.replay = function () {
     else if (action.indexOf('move:')==0) {
         var pos=action.substring(5).split(":");
         var x=parseInt(pos[0]), y=parseInt(pos[1]);
-        if (core.canMoveDirectly(x,y)) {
+
+        var ignoreSteps = core.canMoveDirectly(x, y);
+        if (ignoreSteps>0) {
             core.clearMap('hero', 0, 0, 416, 416);
             core.setHeroLoc('x', x);
             core.setHeroLoc('y', y);
             core.drawHero();
             core.status.route.push("move:"+x+":"+y);
+            core.status.hero.statistics.moveDirectly++;
+            core.status.hero.statistics.ignoreSteps+=ignoreSteps;
             core.replay();
             return;
         }
@@ -2382,6 +2418,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     if (!core.flags.enableExperience) count--;
     if (!core.flags.enableLevelUp) count--;
     if (!core.flags.enableDebuff) count--;
+    if (core.isset(core.flags.enableKeys) && !core.flags.enableKeys) count--;
 
     var statusLineHeight = BASE_LINEHEIGHT * 9 / count;
     var statusLineFontSize = DEFAULT_FONT_SIZE;
@@ -2664,6 +2701,12 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             id: 'upCol',
             rules: {
                 display: core.flags.enableLevelUp ? 'block': 'none'
+            }
+        },
+        {
+            id: 'keyCol',
+            rules: {
+                display: !core.isset(core.flags.enableKeys)||core.flags.enableKeys?'block':'none'
             }
         },
         {

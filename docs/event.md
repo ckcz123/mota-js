@@ -1576,7 +1576,7 @@ core.insertAction([
 
     // effect也允许写一个function，代表本次升级将会执行的操作，比如可以显示一段提示文字，或者触发一个事件
     {"need": 40, "effect": function () {
-        core.drawText("恭喜升级！");
+        core.drawTip("恭喜升级！");
         core.status.hero.hp *= 2;
         core.status.hero.atk += 100;
         core.status.hero.def += 100;

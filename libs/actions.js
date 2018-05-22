@@ -1562,6 +1562,8 @@ actions.prototype.clickSettings = function (x,y) {
                 });
                 break;
             case 5:
+                core.ui.drawStatistics();
+                /*
                 core.ui.drawWaiting("正在拉取统计信息，请稍后...");
 
                 var formData = new FormData();
@@ -1609,6 +1611,7 @@ actions.prototype.clickSettings = function (x,y) {
                     core.drawText("出错啦！\n无法拉取统计信息。\n错误原因：XHR Error");
                 }
                 xhr.send(formData);
+                */
                 break;
             case 6:
                 core.ui.drawHelp();

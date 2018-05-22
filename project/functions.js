@@ -119,6 +119,10 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 扣减体力值
 	core.status.hero.hp -= damage;
+
+	// 记录
+	core.status.hero.statistics.battleDamage += damage;
+
 	if (core.status.hero.hp<=0) {
 		core.status.hero.hp=0;
 		core.updateStatusBar();

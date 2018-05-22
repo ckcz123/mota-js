@@ -1341,7 +1341,11 @@ ui.prototype.drawBookDetail = function (index) {
         hints.push("该怪物无特殊属性。");
 
     hints.push("");
-    hints.push("临界表："+JSON.stringify(core.enemys.nextCriticals(enemyId,10)))
+    var criticals = core.enemys.nextCriticals(enemyId, 10).map(function (v) {
+        return v[0]+":"+v[1];
+    });
+    while (criticals[0]=='0:0') criticals.shift();
+    hints.push("临界表："+JSON.stringify(criticals))
 
     var content=hints.join("\n");
 

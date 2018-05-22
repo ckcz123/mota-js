@@ -1331,7 +1331,9 @@ control.prototype.updateFg = function () {
 
                 // 临界显伤
                 if (core.flags.displayCritical) {
-                    var critical = core.formatBigNumber(core.enemys.getCritical(id));
+                    var critical = core.enemys.nextCriticals(id);
+                    if (critical.length>0) critical=critical[0];
+                    critical = core.formatBigNumber(critical[0]);
                     if (critical == '???') critical = '?';
                     core.setFillStyle('fg', '#000000');
                     core.canvas.fg.fillText(critical, 32 * x + 2, 32 * (y + 1) - 2 - 10);

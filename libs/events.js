@@ -643,13 +643,7 @@ events.prototype.doAction = function() {
             break;
         case "setHeroIcon":
             {
-                var name = "hero.png";
-                if (core.isset(core.material.images.images[data.name]) && core.material.images.images[data.name].width==128)
-                    name = data.name;
-                core.setFlag("heroIcon", name);
-                core.material.images.hero.src = core.material.images.images[name].src;
-                core.material.icons.hero.height = core.material.images.images[name].height/4;
-                core.drawHero();
+                this.setHeroIcon(data.name);
                 this.doAction();
                 break;
             }
@@ -1254,6 +1248,16 @@ events.prototype.canUseQuickShop = function(shopId) {
         return '当前不能使用快捷商店。';
 
     return null;
+}
+
+////// 设置角色行走图 //////
+events.prototype.setHeroIcon = function (name) {
+    if (core.isset(core.material.images.images[name]) && core.material.images.images[name].width==128) {
+        core.setFlag("heroIcon", name);
+        core.material.images.hero.src = core.material.images.images[name].src;
+        core.material.icons.hero.height = core.material.images.images[name].height/4;
+        core.drawHero();
+    }
 }
 
 ////// 检查升级事件 //////

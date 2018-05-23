@@ -1902,10 +1902,10 @@ ui.prototype.drawStatistics = function () {
         +"，其中战斗伤害"+core.formatBigNumber(statistics.battleDamage)+"点"
         +(core.flags.enableDebuff?("，中毒伤害"+core.formatBigNumber(statistics.poisonDamage)+"点"):"")
         +"，领域/夹击/阻击/血网伤害"+core.formatBigNumber(statistics.extraDamage)+"点。",
-        "\t[说明]1. 地图数据统计的效果仅模拟当前立刻获得该道具的效果。\n2. 无法获得“不可被浏览地图”层的数据统计。\n" +
-        "3. 不会计算通过任何事件得到或生成的道具（比如利用显示事件或改变图块）个数和效果。\n"+
-        "4. 如自定义道具（比如其他宝石）后，需手动在ui.js的drawStatistics中参与统计，不然默认不会进行统计。\n"+
-        "5. 以上所有统计信息仅供参考，如有错误，概不负责。"
+        "\t[说明]1. 地图数据统计的效果仅模拟当前立刻获得该道具的效果。\n2. 不会计算“不可被浏览地图”的隐藏层的数据。\n" +
+        "3. 不会计算任何通过事件得到的道具（显示事件、改变图块、或直接增加道具等）。\n"+
+        "4. 在自定义道具（例如其他宝石）后，需在ui.js的drawStatistics中注册，不然不会进行统计。\n"+
+        "5. 所有统计信息仅供参考，如有错误，概不负责。"
     ])
 
 }

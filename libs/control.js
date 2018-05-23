@@ -1386,6 +1386,7 @@ control.prototype.updateFg = function () {
             for (var y=0;y<13;y++) {
                 var damage = core.status.checkBlock.damage[13*x+y];
                 if (damage>0) {
+                    damage = core.formatBigNumber(damage);
                     core.setFillStyle('fg', '#000000');
                     core.canvas.fg.fillText(damage, 32 * x + 17, 32 * (y + 1) - 13);
                     core.canvas.fg.fillText(damage, 32 * x + 15, 32 * (y + 1) - 15);

@@ -739,7 +739,7 @@ maps.prototype.removeBlock = function (x, y, floorId) {
 
     // 删除Index
     core.removeBlockById(index, floorId);
-    core.updateFg();
+    core.updateStatusBar();
 }
 
 ////// 根据block的索引删除该块 //////

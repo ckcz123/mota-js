@@ -1885,10 +1885,23 @@ ui.prototype.drawStatistics = function () {
         return text;
     }
 
+    var formatTime = function (time) {
+        return core.setTwoDigits(parseInt(time/3600000))
+            +":"+core.setTwoDigits(parseInt(time/60000)%60)
+            +":"+core.setTwoDigits(parseInt(time/1000)%60);
+    }
+
+    var statistics = core.status.hero.statistics;
     core.drawText([
         getText("全塔", total),
         getText("当前", current),
-        "当前总步数为"+core.status.hero.steps+"，"
+        "当前总步数："+core.status.hero.steps+"，游戏时长："+formatTime(statistics.totalTime)
+        +"。\n瞬间移动次数："+statistics.moveDirectly+"，共计少走"+statistics.ignoreSteps+"步。"
+        +"\n\n总计通过血瓶恢复生命值为"+core.formatBigNumber(statistics.hp)+"点。\n\n"
+        +"总计受到的伤害为"+core.formatBigNumber(statistics.battleDamage+statistics.poisonDamage+statistics.extraDamage)
+        +"，其中战斗伤害"+core.formatBigNumber(statistics.battleDamage)+"点"
+        +(core.flags.enableDebuff?("，中毒伤害"+core.formatBigNumber(statistics.poisonDamage)+"点"):"")
+        +"，领域/夹击/阻击/血网伤害"+core.formatBigNumber(statistics.extraDamage)+"点。"
     ])
 
 }

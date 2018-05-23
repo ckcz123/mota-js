@@ -1862,7 +1862,7 @@ ui.prototype.drawStatistics = function () {
         if (core.flags.enableMoney) text+="，总金币数"+data.monster.money;
         if (core.flags.enableExperience) text+="，总经验数"+data.monster.experience;
         if (core.flags.enableAddPoint) text+="，总加点数"+data.monster.point;
-        text+="。\n";
+        text+="。\n\n";
         Object.keys(data.count).forEach(function (key) {
             var value=data.count[key];
             if (value>0) {
@@ -1877,7 +1877,7 @@ ui.prototype.drawStatistics = function () {
                 }
             }
         })
-        text+="\n";
+        text+="\n\n";
         text+="共加生命值"+core.formatBigNumber(data.add.hp)+"点，攻击"
             +core.formatBigNumber(data.add.atk)+"点，防御"
             +core.formatBigNumber(data.add.def)+"点，魔防"
@@ -1901,7 +1901,11 @@ ui.prototype.drawStatistics = function () {
         +"总计受到的伤害为"+core.formatBigNumber(statistics.battleDamage+statistics.poisonDamage+statistics.extraDamage)
         +"，其中战斗伤害"+core.formatBigNumber(statistics.battleDamage)+"点"
         +(core.flags.enableDebuff?("，中毒伤害"+core.formatBigNumber(statistics.poisonDamage)+"点"):"")
-        +"，领域/夹击/阻击/血网伤害"+core.formatBigNumber(statistics.extraDamage)+"点。"
+        +"，领域/夹击/阻击/血网伤害"+core.formatBigNumber(statistics.extraDamage)+"点。",
+        "\t[说明]1. 地图数据统计的效果仅模拟当前立刻获得该道具的效果。\n2. 无法获得“不可被浏览地图”层的数据统计。\n" +
+        "3. 不会计算通过任何事件得到或生成的道具（比如利用显示事件或改变图块）个数和效果。\n"+
+        "4. 如自定义道具（比如其他宝石）后，需手动在ui.js的drawStatistics中参与统计，不然默认不会进行统计。\n"+
+        "5. 以上所有统计信息仅供参考，如有错误，概不负责。"
     ])
 
 }

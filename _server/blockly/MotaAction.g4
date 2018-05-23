@@ -1385,8 +1385,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "tip":
       this.next = MotaActionBlocks['tip_s'].xmlText([
-        data.data,this.next]);
-      this.parseAction();
+        data.text,this.next]);
       break;
     case "show": // 显示
       if (!(data.loc[0] instanceof Array))

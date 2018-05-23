@@ -889,6 +889,16 @@ core.prototype.debug = function() {
     core.control.debug();
 }
 
+////// 存档前 //////
+core.prototype.beforeSaveData = function (data) {
+    return core.events.beforeSaveData(data);
+}
+
+////// 读档后 //////
+core.prototype.afterLoadData = function (data) {
+    return core.events.afterLoadData(data);
+}
+
 ////// 重置当前地图 //////
 core.prototype.resetMap = function(floorId) {
     core.maps.resetMap(floorId);

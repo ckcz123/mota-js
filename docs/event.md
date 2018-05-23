@@ -1513,7 +1513,7 @@ core.insertAction([
 
 而在我们的存档中，是不会对怪物数据进行存储的，只会存各个变量和Flag，因此我们需要在读档后根据变量或Flag来调整怪物数据。
 
-我们可以在functions.js中的`afterLoadData`进行处理。
+我们可以在脚本编辑中的`afterLoadData`进行处理。
 
 ``` js
 ////// 读档事件后，载入事件前，可以执行的操作 //////

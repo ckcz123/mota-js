@@ -429,6 +429,7 @@ if (location.protocol.indexOf("http")!=0) {
 </script>
 <script src='_server/editor.js'></script>
 <script>
+    var useCompress = main.useCompress;
     main.useCompress = false;
     main.init('editor', function () {
         editor.init(function () {
@@ -443,6 +444,8 @@ if (location.protocol.indexOf("http")!=0) {
             editor.mode.listen();
             editor_multi = editor_multi();
             editor_blockly = editor_blockly();
+            editor.useCompress = useCompress;
+            delete(useCompress);
         });
     });
 

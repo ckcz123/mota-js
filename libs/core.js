@@ -107,6 +107,7 @@ function core() {
 
         // 按下键的时间：为了判定双击
         'downTime': null,
+        'ctrlDown': false,
 
         // 路线&回放
         'route': [],
@@ -651,6 +652,11 @@ core.prototype.getBlock = function (x, y, floorId, needEnable) {
     return core.maps.getBlock(x,y,floorId,needEnable);
 }
 
+////// 获得某个点的blockId //////
+core.prototype.getBlockId = function (x, y, floorId, needEnable) {
+    return core.maps.getBlockId(x, y, floorId, needEnable);
+}
+
 ////// 显示移动某块的动画，达到{“type”:”move”}的效果 //////
 core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
     core.maps.moveBlock(x,y,steps,time,immediateHide,callback)
@@ -883,14 +889,29 @@ core.prototype.debug = function() {
     core.control.debug();
 }
 
+////// 存档前 //////
+core.prototype.beforeSaveData = function (data) {
+    return core.events.beforeSaveData(data);
+}
+
+////// 读档后 //////
+core.prototype.afterLoadData = function (data) {
+    return core.events.afterLoadData(data);
+}
+
 ////// 重置当前地图 //////
-core.prototype.resetMap = function() {
-    core.maps.resetMap();
+core.prototype.resetMap = function(floorId) {
+    core.maps.resetMap(floorId);
 }
 
 ////// 开始播放 //////
 core.prototype.startReplay = function (list) {
     core.control.startReplay(list);
+}
+
+////// 关闭UI窗口 //////
+core.prototype.closePanel = function () {
+    core.ui.closePanel();
 }
 
 ////// 更改播放状态 //////
@@ -1023,8 +1044,8 @@ core.prototype.decodeRoute = function (route) {
 }
 
 ////// 发送HTTP //////
-core.prototype.http = function (type, url, formData, success, error, header) {
-    core.utils.http(type, url, formData, success, error, header)
+core.prototype.http = function (type, url, formData, success, error, mimeType, responseType) {
+    core.utils.http(type, url, formData, success, error, mimeType, responseType)
 }
 
 ////// 设置勇士属性 //////

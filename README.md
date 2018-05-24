@@ -5,7 +5,7 @@
 HTML5 canvas制作的魔塔样板，支持全平台游戏！
 **即使完全不会编程的用户，按照模板和说明文档也能很快做出一个魔塔游戏！**
 
-* [List / HTML5魔塔游戏列表](http://mota.pw/)
+* [List / HTML5魔塔游戏列表](https://h5mota.com/)
 * [Demo / 样板效果](https://ckcz123.com/games/template/)
 * [Docs / 使用文档说明](https://ckcz123.github.io/mota-js/)
 * [Video / 视频教程](http://www.bilibili.com/video/av17608025/)
@@ -35,18 +35,12 @@ HTML5 canvas制作的魔塔样板，支持全平台游戏！
 │ ├─ /animates/      # 动画目录
 │ ├─ /floors/        # 剧本文件，记录了每个地图的数据和事件
 │ ├─ /images/        # 所有图片素材目录
-│ │ ├─ /常用素材/     # 可以被直接替换的素材
-│ │ └─ *.png         # 对应的某个具体的图片素材
 │ ├─ /sounds/        # 音效目录
-│ ├─ comments.js     # 对怪物、道具、楼层等的注释
-│ ├─ data.comment.js # 对全局变量的注释
 │ ├─ data.js         # 全局变量信息
 │ ├─ enemys.js       # 怪物属性数据
-│ ├─ functions.comment.js   # 脚本编辑的注释
 │ ├─ functions.js    # 可能会被修改的脚本代码
 │ ├─ icons.js        # 素材和ID的对应关系定义
 │ ├─ items.js        # 道具的定义，获得道具的效果
-│ ├─ maps.commment.js   # 地图信息的注释
 │ └─ maps.js         # 地图和数字的对应关系
 ├── /常用工具/        # 一些常用工具，可以辅助造塔  
 │ ├─ RM动画导出器.exe      # 能从RMXP中导出动画，以供H5使用。 http://github.com/ckcz123/animate_export/
@@ -224,4 +218,4 @@ HTML5 canvas制作的魔塔样板，支持全平台游戏！
 
 HTML5魔塔交流群群号： `539113091`
 
-如有其它意见或建议，也可以通过发[issues](https://github.com/ckcz123/mota-js/issues)、或邮件至[ckcz123.com](mailto:ckcz123.com)联系我。
+如有其它意见或建议，也可以通过发[issues](https://github.com/ckcz123/mota-js/issues)、或邮件至[ckcz123@126.com](mailto:ckcz123@126.com)联系我。

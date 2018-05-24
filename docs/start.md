@@ -30,6 +30,8 @@
 * “JS代码压缩工具”能对JS代码进行压缩，从而减少IO请求数和文件大小。
 * “伤害和临界值计算器”是一个很便捷的小工具，能对怪物的伤害和临界值进行计算。
 
+!> **整个造塔过程中，启动服务必须全程处于开启状态！切不可手滑关闭，否则做的都是无用功！**
+
 ## 绘制地图
 
 有两种绘制地图的方式：从头绘制地图；从RMXP中导入已有的地图。
@@ -43,6 +45,8 @@
 ![绘制地图](./img/drawmap.jpg)
 
 如果提示“该素材未被定义”或有红色问号框，请参见[素材注册](#素材注册)。
+
+绘制地图时可以右键弹出菜单，移动图块和事件。
 
 ### 从RMXP导入已有的地图
 
@@ -168,9 +172,47 @@
 
 素材注册完毕后，即可在游戏中正常使用，也可以被地图生成器所识别（需要重开地图生成器）。
 
+## 控制台调试
+
+HTML5的塔都是可以进行控制台调试的。
+
+当我们使用Chrome进入游戏后，可以按 `Ctrl+Shift+I` ，并找到 `Console` 控制台。
+
+![控制台](./img/console.png)
+
+在控制台中，我们可以输入一些命令对游戏进行调试，常见的命令有：
+
+- `core.status.floorId` 获得当前层的floorId。
+- `core.status.thisMap` 获得当前地图信息。例如`core.status.thisMap.blocks`可以获得当前层所有图块。
+- `core.floors` 获得所有剧本的信息。例如`core.floors[core.status.floorId].events`可以获得当前层所有事件。
+- `core.status.hero` 获得当前勇士状态信息。例如`core.status.hero.atk`就是当前勇士的攻击力数值。
+- `core.material.enemys` 获得所有怪物信息。例如`core.material.enemys.greenSlime`就是获得绿色史莱姆的属性数据。
+- `core.material.items` 获得所有道具的信息。例如`core.material.items.pickaxe`就是获得破墙镐的信息。
+- `core.debug()` 开启调试模式；此模式下可以按住Ctrl键进行穿墙。
+- `core.updateStatusBar()` 立刻更新状态栏和地图显伤。
+- `core.setStatus('atk', 1000)` 直接设置勇士的某项属性。本句等价于 `core.status.hero.atk = 1000`。
+- `core.getStatus('atk')` 返回勇士当前某项属性数值。本句等价于 `core.status.hero.atk`。
+- `core.setItem('pickaxe', 10)` 直接设置勇士某个道具的个数。这里可以需要写道具的ID。
+- `core.getItem('pickaxe', 2)` 令勇士获得两个破墙镐。
+- `core.itemCount('pickaxe')` 返回勇士某个道具的个数。
+- `core.hasItem('pickaxe')` 返回勇士是否拥有某个道具。等价于`core.itemCount('pickaxe')!=0`。
+- `core.setFlag('xxx', 1)` 设置某个flag/自定义变量的值。
+- `core.getFlag('xxx', 10)` 获得某个flag/自定义变量的值；如果该项不存在（未被定义），则返回第二个参数的值。
+- `core.hasFlag('xxx')` 返回是否存在某个变量且不为0。等价于`core.getFlag('xxx', 0)!=0`。
+- `core.insertAction(list)` 执行一段自定义事件。比如 `core.insertAction(["剧情文本"])` 将执行一个剧情文本显示事件。
+- `core.changeFloor('MT2', 'downFloor')` 立刻执行楼层切换到MT2层的下楼点位置。
+- `core.changeFloor('MT5', null, {'x': 4, 'y': 7})` 立刻切换楼层到MT5层的(4,7)点。
+- `core.getBlock(3, 5, 'MT1')` 获得当前地图上某一个块的信息。第三个参数为floorId，可省略表示当前楼层。
+- `core.resetMap()` 重置当前层地图。**当修改地图后再读档，修改的地图不会立刻生效，此时可以使用resetMap来重置当前楼层的地图。**
+- `localStorage` 获得所有的存档数据。可以用 `core.getLocalStorage('save1')` 来具体获得某个存档。
+- ……
+
+更多API和详细参数介绍可参见[API列表](api)。
+
+
 ## 报错处理
 
-有时候刷新后可能页面变成空白，即无法正确加载，游戏也无法正常进入。
+有时候刷新后可能地图编辑器页面变成空白，即无法正确加载，游戏也无法正常进入。
 
 出现这种问题的原因往往是如下几种：
 - 手动直接打开并错误编辑了文件

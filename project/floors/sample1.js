@@ -56,7 +56,7 @@ main.floors.sample1 =
             "\t[redKing]欢迎来到魔塔，你是第一百位挑战者。\n若你能打败我所有的手下，我就与你一对一的决斗。\n现在你必须接受我的安排。",
             {"type": "show", "loc": [[1,6],[0,7],[1,8],[2,7]], "time": 500}, // 显示四个白衣武士，每个动画效果500ms
             "\t[hero]什么？",
-            {"type": "playSound", "name": "attack.ogg"}, // 播放战斗音频
+            {"type": "playSound", "name": "attack.mp3"}, // 播放战斗音频
             {"type": "setValue", "name": "status:atk", "value": "status:atk/10"}, // 勇士的攻防变成原来的十分之一
             {"type": "setValue", "name": "status:def", "value": "status:def/10"},
             {"type": "hide", "loc": [[1,6],[0,7],[2,7],[1,8]]}, // 直接隐藏四个白衣武士，没有动画效果

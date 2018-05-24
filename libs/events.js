@@ -228,6 +228,11 @@ events.prototype.gameOver = function (ending, fromReplay) {
                 core.restart();
             });
         }
+        else if (core.hasFlag('debug')) {
+            core.drawText("\t[系统提示]调试模式下无法上传成绩", function () {
+                core.restart();
+            })
+        }
         else {
             confirmUpload();
         }
@@ -349,6 +354,8 @@ events.prototype.doAction = function() {
             core.events.doAction();
             break;
         case "show": // 显示
+            if (!core.isset(data.loc))
+                data.loc = [x,y];
             if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
                     && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
                 data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];
@@ -405,8 +412,6 @@ events.prototype.doAction = function() {
                     }
                     if (floorId==core.status.floorId) {
                         core.drawMap(floorId);
-                        core.drawHero();
-                        core.updateStatusBar();
                     }
                 }
                 this.doAction();
@@ -638,13 +643,7 @@ events.prototype.doAction = function() {
             break;
         case "setHeroIcon":
             {
-                var name = "hero.png";
-                if (core.isset(core.material.images.images[data.name]) && core.material.images.images[data.name].width==128)
-                    name = data.name;
-                core.setFlag("heroIcon", name);
-                core.material.images.hero.src = core.material.images.images[name].src;
-                core.material.icons.hero.height = core.material.images.images[name].height/4;
-                core.drawHero();
+                this.setHeroIcon(data.name);
                 this.doAction();
                 break;
             }
@@ -761,8 +760,27 @@ events.prototype.doAction = function() {
             }
             break;
         case "wait":
-            if (core.status.replay.replaying)
-                core.events.doAction();
+            if (core.status.replay.replaying) {
+                var code = core.status.replay.toReplay.shift();
+                if (code.indexOf("input:")==0) {
+                    var value = parseInt(code.substring(6));
+                    core.status.route.push("input:"+value);
+                    if (value>=10000) {
+                        core.setFlag('type', 1);
+                        core.setFlag('x', parseInt((value-10000)/100));
+                        core.setFlag('y', value%100);
+                    }
+                    else {
+                        core.setFlag('type', 0);
+                        core.setFlag('keycode', value);
+                    }
+                    core.events.doAction();
+                }
+                else {
+                    core.stopReplay();
+                    core.drawTip("录像文件出错");
+                }
+            }
             break;
         case "revisit": // 立刻重新执行该事件
             {
@@ -817,7 +835,7 @@ events.prototype.getNextItem = function() {
 ////// 获得某个物品 //////
 events.prototype.getItem = function (itemId, itemNum, itemX, itemY, callback) {
     // core.getItemAnimate(itemId, itemNum, itemX, itemY);
-    core.playSound('item.ogg');
+    core.playSound('item.mp3');
     var itemCls = core.material.items[itemId].cls;
     core.items.getItemEffect(itemId, itemNum);
     core.removeBlock(itemX, itemY);
@@ -867,7 +885,7 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
     }
 
     // open
-    core.playSound("door.ogg");
+    core.playSound("door.mp3");
     var state = 0;
     var doorId = id;
     if (!(doorId.substring(doorId.length-4)=="Door")) {
@@ -921,11 +939,11 @@ events.prototype.battle = function (id, x, y, force, callback) {
     else {
 
         if (core.flags.equipment && core.getFlag('sword', 'sword0')!='sword0') {
-            core.playSound('zone.ogg');
+            core.playSound('zone.mp3');
             core.drawAnimate('sword', x, y);
         }
         else {
-            core.playSound('attack.ogg');
+            core.playSound('attack.mp3');
             core.drawAnimate('hand', x, y);
         }
 
@@ -1012,10 +1030,10 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
         }
     }
     if (core.status.maps[floorId].canFlyTo && core.status.hero.flyRange.indexOf(floorId)<0) {
-        if (core.floorIds.indexOf(floorId)>core.floorIds.indexOf(core.status.floorId))
-            core.status.hero.flyRange.push(floorId);
-        else
-            core.status.hero.flyRange.unshift(floorId);
+        core.status.hero.flyRange.push(floorId);
+        core.status.hero.flyRange.sort(function (a, b) {
+            return core.floorIds.indexOf(a) - core.floorIds.indexOf(b);
+        })
     }
 
     window.setTimeout(function () {
@@ -1073,29 +1091,27 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
                 })
             }
             core.drawMap(floorId, function () {
-                setTimeout(function() {
-                    if (core.isset(heroLoc.direction))
-                        core.setHeroLoc('direction', heroLoc.direction);
-                    core.setHeroLoc('x', heroLoc.x);
-                    core.setHeroLoc('y', heroLoc.y);
-                    core.drawHero();
-                    core.updateStatusBar();
+                if (core.isset(heroLoc.direction))
+                    core.setHeroLoc('direction', heroLoc.direction);
+                core.setHeroLoc('x', heroLoc.x);
+                core.setHeroLoc('y', heroLoc.y);
+                core.clearMap('hero', 0, 0, 416, 416);
+                core.drawHero();
 
-                    var changed = function () {
-                        core.unLockControl();
-                        core.status.replay.animate=false;
-                        core.events.afterChangeFloor(floorId);
-                        if (core.isset(callback)) callback();
-                    }
-                    if (displayAnimate) {
-                        core.hide(core.dom.floorMsgGroup, time/4, function () {
-                            changed();
-                        });
-                    }
-                    else {
+                var changed = function () {
+                    core.unLockControl();
+                    core.status.replay.animate=false;
+                    core.events.afterChangeFloor(floorId);
+                    if (core.isset(callback)) callback();
+                }
+                if (displayAnimate) {
+                    core.hide(core.dom.floorMsgGroup, time/4, function () {
                         changed();
-                    }
-                }, 25)
+                    });
+                }
+                else {
+                    changed();
+                }
             });
         }
         core.playSound('floor.mp3');
@@ -1234,6 +1250,16 @@ events.prototype.canUseQuickShop = function(shopId) {
     return null;
 }
 
+////// 设置角色行走图 //////
+events.prototype.setHeroIcon = function (name) {
+    if (core.isset(core.material.images.images[name]) && core.material.images.images[name].width==128) {
+        core.setFlag("heroIcon", name);
+        core.material.images.hero.src = core.material.images.images[name].src;
+        core.material.icons.hero.height = core.material.images.images[name].height/4;
+        core.drawHero();
+    }
+}
+
 ////// 检查升级事件 //////
 events.prototype.checkLvUp = function () {
     if (!core.flags.enableLevelUp || core.status.hero.lv>=core.firstData.levelUp.length) return;
@@ -1325,7 +1351,7 @@ events.prototype.passNet = function (data) {
     if (data.event.id=='weakNet') { // 衰网
         if (core.hasFlag('weak')) return;
         core.setFlag('weak', true);
-        var weakValue = core.status.weakValue;
+        var weakValue = core.values.weakValue;
         var weakAtk = weakValue>=1?weakValue:Math.floor(weakValue*core.status.hero.atk);
         var weakDef = weakValue>=1?weakValue:Math.floor(weakValue*core.status.hero.def);
         core.setFlag('weakAtk', weakAtk);

@@ -255,20 +255,20 @@ maps.prototype.canMoveHero = function(x,y,direction,floorId) {
 
 ////// 能否瞬间移动 //////
 maps.prototype.canMoveDirectly = function (destX,destY) {
-    if (!core.flags.enableMoveDirectly) return false;
+    if (!core.flags.enableMoveDirectly) return -1;
 
     // 中毒状态：不能
-    if (core.hasFlag('poison')) return false;
+    if (core.hasFlag('poison')) return -1;
 
     var fromX = core.getHeroLoc('x'), fromY = core.getHeroLoc('y');
-    if (fromX==destX&&fromY==destY) return false;
+    if (fromX==destX&&fromY==destY) return -1;
 
     if (core.getBlock(fromX,fromY)!=null||core.status.checkBlock.damage[13*fromX+fromY]>0)
-        return false;
+        return -1;
 
     // BFS
     var visited=[], queue=[];
-    visited[13*fromX+fromY]=true;
+    visited[13*fromX+fromY]=0;
     queue.push(13*fromX+fromY);
 
     var directions = [[-1,0],[1,0],[0,1],[0,-1]];
@@ -278,12 +278,12 @@ maps.prototype.canMoveDirectly = function (destX,destY) {
         for (var dir in directions) {
             var nx=nowX+directions[dir][0], ny=nowY+directions[dir][1];
             if (nx<0||nx>=13||ny<0||ny>=13||visited[13*nx+ny]||core.getBlock(nx,ny)!=null||core.status.checkBlock.damage[13*nx+ny]>0) continue;
-            if (nx==destX&&ny==destY) return true;
-            visited[13*nx+ny]=true;
+            visited[13*nx+ny]=visited[13*nowX+nowY]+1;
+            if (nx==destX&&ny==destY) return visited[13*nx+ny];
             queue.push(13*nx+ny);
         }
     }
-    return false;
+    return -1;
 }
 
 maps.prototype.drawBlock = function (block, animate, dx, dy) {
@@ -389,8 +389,10 @@ maps.prototype.drawMap = function (mapName, callback) {
         }
     } else {
         drawEvent();
+        core.setGlobalAnimate(core.values.animateSpeed);
+        core.drawHero();
+        core.updateStatusBar();
     }
-    core.setGlobalAnimate(core.values.animateSpeed);
     if (core.isset(callback))
         callback();
 }
@@ -398,7 +400,7 @@ maps.prototype.drawMap = function (mapName, callback) {
 ////// 绘制Autotile //////
 maps.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top){
     var indexArrs = [ //16种组合的图块索引数组; // 将autotile分割成48块16*16的小块; 数组索引即对应各个小块
-        //                                       +----+----+----+----+----+----+
+        //                                     +----+----+----+----+----+----+
         [10,  9,  4, 3 ],  //0   bin:0000      | 1  | 2  | 3  | 4  | 5  | 6  |
         [10,  9,  4, 13],  //1   bin:0001      +----+----+----+----+----+----+
         [10,  9, 18, 3 ],  //2   bin:0010      | 7  | 8  | 9  | 10 | 11 | 12 |
@@ -534,6 +536,14 @@ maps.prototype.getBlock = function (x, y, floorId, needEnable) {
             return {"index": n, "block": blocks[n]};
         }
     }
+    return null;
+}
+
+////// 获得某个点的blockId //////
+maps.prototype.getBlockId = function (x, y, floorId, needEnable) {
+    var block = core.getBlock(x, y, floorId, needEnable);
+    if (block == null) return null;
+    if (core.isset(block.block.event)) return block.block.event.id;
     return null;
 }
 
@@ -729,7 +739,7 @@ maps.prototype.removeBlock = function (x, y, floorId) {
 
     // 删除Index
     core.removeBlockById(index, floorId);
-    core.updateFg();
+    core.updateStatusBar();
 }
 
 ////// 根据block的索引删除该块 //////
@@ -888,11 +898,15 @@ maps.prototype.drawAnimate = function (name, x, y, callback) {
     }, 50);
 }
 
-maps.prototype.resetMap = function() {
-    var floorId = core.status.floorId;
+maps.prototype.resetMap = function(floorId) {
+    var floorId = floorId||core.status.floorId;
     core.status.maps[floorId] = this.loadFloor(floorId);
-    this.drawMap(floorId, function() {
-        core.drawHero();
-        core.updateStatusBar();
-    })
+    if (floorId==core.status.floorId) {
+        this.drawMap(floorId, function () {
+            core.drawTip("地图重置成功");
+        })
+    }
+    else {
+        core.drawTip(floorId+"地图重置成功");
+    }
 }

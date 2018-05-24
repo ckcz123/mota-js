@@ -119,6 +119,10 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 扣减体力值
 	core.status.hero.hp -= damage;
+
+	// 记录
+	core.status.hero.statistics.battleDamage += damage;
+
 	if (core.status.hero.hp<=0) {
 		core.status.hero.hp=0;
 		core.updateStatusBar();
@@ -155,7 +159,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 衰弱
 	if (core.enemys.hasSpecial(special, 13) && !core.hasFlag('weak')) {
 		core.setFlag('weak', true);
-		var weakValue = core.status.weakValue;
+		var weakValue = core.values.weakValue;
 		var weakAtk = weakValue>=1?weakValue:Math.floor(weakValue*core.status.hero.atk);
 		var weakDef = weakValue>=1?weakValue:Math.floor(weakValue*core.status.hero.def);
 		core.setFlag('weakAtk', weakAtk);
@@ -346,7 +350,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		console.log("插件函数执行测试");
 	}
 
-	var _useEquipment = function (itemId, name, type) {
+	var _useEquipment = function (itemId, name, type) { // 具体的装备使用效果
 		if (itemId.indexOf(name)==0) {
 			var now=core.getFlag(name, name+"0");
 
@@ -356,7 +360,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			else {
 				core.status.hero.atk -= core.values[now].atk || 0;
 				core.status.hero.def -= core.values[now].def || 0;
-			core.status.hero.mdef -= core.values[now].mdef || 0;
+				core.status.hero.mdef -= core.values[now].mdef || 0;
 			}
 
 			if (typeof core.values[itemId] == 'number') {

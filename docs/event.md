@@ -26,7 +26,7 @@
 
 它能通过拖动、复制粘贴等方式帮助你快速生成事件列表，而不用手动打大量字符。
 
-但是，仍然强烈建议要对每个事件的写法进行了解。
+但是，仍然强烈建议要对每个事件的写法进行了解，因为在脚本编辑，`insertAction`等地方需要插入自定义事件时，还是很有必要的。
 
 ## 自定义事件
 
@@ -252,18 +252,19 @@
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    "你当前的攻击力是${status:atk}, 防御是${status:def}",
+    "你当前的攻击力是${status:atk}, 防御是${status:def}，坐标是(${status:x},${status:y})",
     "你的攻防和的十倍是${10*(status:atk+status:def)}",
     "你的红黄蓝钥匙总数为${item:yellowKey+item:blueKey+item:redKey}",
     "你访问某个老人的次数为${flag:man_times}",
 ]
 ```
 
-- `status:xxx` 获取勇士属性时只能使用如下几个：hp（生命值），atk（攻击力），def（防御力），mdef（魔防值），money（金币），experience（经验）。
+- `status:xxx` 获取勇士属性时只能使用如下几个：hp（生命值），atk（攻击力），def（防御力），mdef（魔防值），money（金币），experience（经验），x（勇士的横坐标），y（勇士的纵坐标），direction（勇士的方向）。
 - `item:xxx` 中的xxx为道具ID。所有道具的ID定义在items.js中，请自行查看。例如，`item:centerFly` 代表中心对称飞行器的个数。
 - `flag:xxx` 中的xxx为一个自定义的变量/Flag；如果没有对其进行赋值则默认值为false。
 
 另外，有个小`trick`。是否想立刻知道显示效果？
+
 你可以用Chrome浏览器打开游戏，按Ctrl+Shift+I打开开发者工具，找到Console（控制台），并中输入`core.drawText("...")` 即可立刻看到文字显示的效果。适当调整文字，使得显示效果满意后，再复制粘贴到你的剧情文本中。
 
 ![调试](./img/eventdebug.png)
@@ -322,7 +323,7 @@ time为可选项，表示文字添加的速度。若此项设置为0将直接全
 ]
 ```
 
-值得注意的是，提示的text内容是可以使用`${ }`来计算表达式的值的。
+值得注意的是，提示的text内容也是可以使用`${ }`来计算表达式的值的。
 
 ### setValue：设置勇士的某个属性、道具个数，或某个变量/Flag的值
 
@@ -356,7 +357,7 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 
 另外注意一点的是，如果hp被设置成了0或以下，将触发lose事件，直接死亡。
 
-### show: 将一个禁用事件启用
+### show：将一个禁用事件启用
 
 我们上面提到了，所有事件都必须靠其他事件驱动来完成，不存在当某个flag为true时自动执行的说法。那么，我们自然要有启用事件的写法。
 
@@ -381,7 +382,7 @@ time为动画效果时间，如果指定了某个大于0的数，则会以动画
 
 !> **要注意的是，调用show事件后只是让该事件从禁用状态变成启用，从不可见不可交互变成可见可交互，但本身不会去执行该点的事件。**
 
-### hide: 将一个启用事件禁用
+### hide：将一个启用事件禁用
 
 `{"type":"hide"}`和show刚好相反，它会让一个已经启用的事件被禁用。
 
@@ -407,7 +408,7 @@ NPC对话事件结束后如果需要NPC消失也需要调用 `{"type": "hide"}`�
 ]
 ```
 
-### trigger: 立即触发另一个地点的事件
+### trigger：立即触发另一个地点的事件
 
 `{"type":"trigger"}` 会立刻触发当层另一个地点的自定义事件。
 
@@ -428,7 +429,7 @@ NPC对话事件结束后如果需要NPC消失也需要调用 `{"type": "hide"}`�
 
 例如上面这个例子，下面的文字将不会再被显示，而是直接跳转到`"3,6"`对应的事件列表从头执行。
 
-### revisit: 立即重启当前事件
+### revisit：立即重启当前事件
 
 revisit和trigger完全相同，只不过是立刻触发的还是本地点的事件
 
@@ -443,7 +444,7 @@ revisit其实是trigger的简写，只不过是loc固定为当前点。
 
 revisit常常使用在一些商人之类的地方，当用户购买物品后不是离开，而是立刻重新访问重新进入购买页面。
 
-### exit: 立刻结束当前事件
+### exit：立刻结束当前事件
 
 上面说到像商人一类，购买物品后可以立刻revisit重新访问，但是这样就相当于陷入了死循环导致无法离开。
 
@@ -504,11 +505,11 @@ name是可选的，代表目标行走图的文件名。
 
 如果你需要同时修改勇士的名称，可以使用`setValue`事件来修改`status:name`，但请注意value必须加单引号，不然会报错。
 
-### update: 立刻更新状态栏和地图显伤
+### update：立刻更新状态栏和地图显伤
 
 如果你需要刷新状态栏和地图显伤，只需要简单地调用 `{"type": "update"}` 即可。
 
-### sleep: 等待多少毫秒
+### sleep：等待多少毫秒
 
 等价于RMXP中的"等待x帧"，不过是以毫秒来计算。
 
@@ -521,11 +522,7 @@ name是可选的，代表目标行走图的文件名。
 ]
 ```
 
-### wait：等待用户操作
-
-使用 `{"type": "wait"}` 可以等待用户进行操作（如点击、回车等）。
-
-### battle: 强制战斗
+### battle：强制战斗
 
 调用battle可强制与某怪物进行战斗（而无需去触碰到它）。
 
@@ -556,7 +553,7 @@ name是可选的，代表目标行走图的文件名。
 
 强制战斗没有指定loc的选项，因此战斗后需要调用hide使怪物消失（如果有必要）。
 
-### openDoor: 开门
+### openDoor：开门
 
 调用`{"type":"openDoor"}`可以打开一扇门。
 
@@ -573,7 +570,7 @@ loc指定门的坐标，floorId指定门所在的楼层ID。如果是当前层�
 
 如果loc所在的点既不是门也不是墙壁，则忽略本事件。
 
-### changeFloor: 楼层切换
+### changeFloor：楼层切换
 
 在事件中也可以对楼层进行切换。一个比较典型的例子就是TSW中，勇士在三楼的陷阱被扔到了二楼，就是一个楼层切换事件。
 
@@ -598,7 +595,7 @@ time为可选的，指定的话将作为楼层切换动画的时间。
 
 !> **changeFloor到达一个新的楼层，将不会执行firstArrive事件！如有需求请在到达点设置自定义事件，然后使用type: trigger立刻调用之。**
 
-### changePos: 当前位置切换/勇士转向
+### changePos：当前位置切换/勇士转向
 
 有时候我们不想要楼层切换的动画效果，而是直接让勇士从A点到B点。
 
@@ -612,11 +609,11 @@ time为可选的，指定的话将作为楼层切换动画的时间。
 ]
 ```
 
-### openShop: 打开一个全局商店
+### openShop：打开一个全局商店
 
 使用openShop可以打开一个全局商店。有关全局商店的说明可参见[全局商店](#全局商店)。
 
-### disableShop: 禁用一个全局商店
+### disableShop：禁用一个全局商店
 
 使用disableShop可以永久禁用全局商店直到再次被openShop打开为止。有关全局商店的说明可参见[全局商店](#全局商店)。
 
@@ -726,7 +723,7 @@ time为总移动的时间。
 
 !> 移动图片只是会在顶层绘制“移动”效果，动画结束即消失，并不会实际对图片的显示造成影响。请与showImage事件合用。
 
-### setFg: 更改画面色调
+### setFg：更改画面色调
 
 我们可以使用 `{"type": "setFg"}` 来更改画面色调。
 
@@ -766,7 +763,7 @@ level为天气的强度等级，在1-10之间。1级为最弱，10级为最强�
 
 !> 使用setWeather更改的天气在切换地图后会被目标地图的默认天气覆盖。
 
-### move: 让某个NPC/怪物移动
+### move：让某个NPC/怪物移动
 
 如果我们需要移动某个NPC或怪物，可以使用`{"type": "move"}`。
 
@@ -836,7 +833,7 @@ move完毕后移动的NPC/怪物一定会消失，只不过可以通过immediate
 
 不过值得注意的是，用这种方式移动勇士的过程中将无视一切地形，无视一切事件，中毒状态也不会扣血。
 
-### playBgm: 播放背景音乐
+### playBgm：播放背景音乐
 
 使用playBgm可以播放一个背景音乐。
 
@@ -848,19 +845,19 @@ move完毕后移动的NPC/怪物一定会消失，只不过可以通过immediate
 
 有关BGM播放的详细说明参见[背景音乐](element#背景音乐)
 
-### pauseBgm: 暂停背景音乐
+### pauseBgm：暂停背景音乐
 
 使用`{"type": "pauseBgm"}`可以暂停背景音乐的播放。
 
-### resumeBgm: 恢复背景音乐
+### resumeBgm：恢复背景音乐
 
 使用`{"type": "resumeBgm"}`可以恢复背景音乐的播放。
 
-### playSound: 播放音效
+### playSound：播放音效
 
 使用playSound可以立刻播放一个音效。
 
-使用方法：`{"type": "playSound", "name": "item.ogg"}`
+使用方法：`{"type": "playSound", "name": "item.mp3"}`
 
 值得注意的是，如果是额外添加进文件的音效，则需在main.js中this.sounds里加载它。
 
@@ -872,7 +869,7 @@ move完毕后移动的NPC/怪物一定会消失，只不过可以通过immediate
 
 value为音量大小，在0到100之间，默认为100。设置后，BGM和SE都将使用该音量进行播放。
 
-### win: 获得胜利
+### win：获得胜利
 
 `{"type": "win", "reason": "xxx"}` 将会直接调用events.js中的win函数，并将reason作为结局传入。
 
@@ -880,7 +877,7 @@ value为音量大小，在0到100之间，默认为100。设置后，BGM和SE都
 
 !> 如果`reason`不为空，则会以reason作为获胜的结局!
 
-### lose: 游戏失败
+### lose：游戏失败
 
 `{"type": "lose", "reason": "xxx"}` 将会直接调用`events.js`中的lose函数，并将reason作为参数传入。
 
@@ -905,7 +902,7 @@ text为提示文字，可以在这里给输入提示文字。这里同样可以�
 
 输入得到的结果将被赋值给flag:input，可以供后续if来进行判断。
 
-### if: 条件判断
+### if：条件判断
 
 使用`{"type": "if"}`可以对条件进行判断，根据判断结果将会选择不同的分支执行。
 
@@ -956,7 +953,7 @@ text为提示文字，可以在这里给输入提示文字。这里同样可以�
 - if可以不断进行嵌套，一层套一层；如成立的场合再进行另一个if判断等。
 - if语句内的内容执行完毕后将接着其后面的语句继续执行。
 
-### choices: 给用户提供选项
+### choices：给用户提供选项
 
 choices是一个很麻烦的事件，它将弹出一个列表供用户进行选择。
 
@@ -1118,6 +1115,45 @@ choices为一个数组，其中每一项都是一个选项列表。
 
 !> 如果continue事件不在任何循环中被执行，则和exit等价，即会立刻结束当前事件！
 
+### wait：等待用户操作
+
+使用 `{"type": "wait"}` 可以等待用户进行操作（如点击、按键等）。
+
+当用户执行操作后：
+- 如果是键盘的按键操作，则会将flag:type置为0，并且把flag:keycode置为刚刚按键的keycode。
+- 如果是屏幕的点击操作，则会将flag:type置为1，并且设置flag:x和flag:y为刚刚的点击坐标。
+
+下面是一个while事件和wait合并使用的例子，这个例子将不断接收用户的点击或按键行为，并输出该信息。
+如果用户按下了ESC或者点击了屏幕正中心，则退出循环。
+
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "while", "condition": "true", // 永久循环
+        "data": [
+            {"type": "wait"}, // 等待用户操作
+            {"type": "if", "condition": "flag:type==0", // flag:type==0，键盘按键
+                "true": [
+                    "你当前按键了，keycode是${flag:keycode}",
+                    {"type": "if", "condition": "flag:keycode==27", // ESC的keycode是27
+                        "true": [{"type": "break"}], // 跳出循环
+                        "false": []
+                    }
+                ],
+                "false": [ // flag:type==1，鼠标点击
+                    "你当前点击屏幕了，坐标是[${flag:x},${flag:y}]",
+                    {"type": "if", "condition": "flag:x==6 && flag:y==6", // 点击(6,6)
+                        "true": [{"type": "break"}], // 跳出循环
+                        "false": []
+                    }
+                ]
+            }
+        ]
+    }
+]
+
+```
+
 ### function: 自定义JS脚本
 
 上述给出了这么多事件，但有时候往往不能满足需求，这时候就需要执行自定义脚本了。
@@ -1133,22 +1169,23 @@ choices为一个数组，其中每一项都是一个选项列表。
 
 `{"type":"function"}`需要有一个`"function"`参数，它是一个JS函数，里面可以写任何自定义的JS脚本；系统将会执行它。
 
-系统所有支持的API都在[附录](api)中给出。
+系统常见可能会被造塔所用到的的API都在[附录：API列表](api)中给出，请进行参照。
 
-这里只简单列出给一些最常见的API：
+**警告：自定义脚本中只能执行同步代码，不可执行任何异步代码，比如直接调用core.changeFloor(...)之类都是不行的。**
+
+[附录：API列表](api)中的所有异步API都进行了标记；如果你不确定一个函数是同步的还是异步的，请向小艾咨询。
+
+如果需要异步的代码都需要用事件（insertAction）来执行，这样事件处理过程和录像回放才不会出错。
+
+举个例子，如果我们想随机切换到某个楼层的某个点，我们可以这么写自定义脚本：
 
 ``` js
-core.getStatus(name) //获得勇士的某个属性（hp/atk/def/…）
-core.setStatus(name, value) //设置勇士某个属性值为value
-core.itemCount(name) //获得某个道具的个数
-core.getItem(name, count) //获得某个道具count个
-core.setItem(name, value) //设置某个道具为value个
-core.getFlag(name, defaultValue) //获得某个自定义变量flag；如果未定义则返回defaultValue
-core.setFlag(name, value) //将某个自定义变量/flag设置为value
-core.hasFlag(name) //判断某个自定义flag是否成立。只有被被赋值过，且不为0或false时才会返回true。
-core.updateStatusBar() //立刻更新状态栏和地图显伤。（上面各种get和set均不会对状态栏和地图显伤更新，需要手动调用这个函数。）
-core.insertAction(list) //往当前事件列表中插入一系列事件。使用这个函数插入的事件将在这段自定义JS脚本执行完毕后立刻执行。
-// ……
+var toFloor = core.floorIds[core.rand(core.floorIds.length)]; // 随机一个楼层ID
+var toX = core.rand(13), toY = core.rand(13); // 随机一个点
+core.insertAction([
+    {"type": "changeFloor", "floorId": toFloor, "loc": [toX, toY]} // 插入一个changeFloor事件，并在该脚本结束后执行。
+])
+// 请勿直接调用 core.changeFloor(toFloor, ...)，这个代码是异步的，会导致事件处理和录像出问题！
 ```
 
 ## 同一个点的多事件处理
@@ -1161,7 +1198,7 @@ core.insertAction(list) //往当前事件列表中插入一系列事件。使用
 
 下面以几个具体例子来进行详细说明。
 
-### 打怪掉宝（怪物->道具）
+### 打怪掉宝
 
 我们注意到怪物和道具都是系统默认事件，因此无需写events，而是直接在afterBattle中setBlock即可。
 
@@ -1173,22 +1210,24 @@ core.insertAction(list) //往当前事件列表中插入一系列事件。使用
 }
 ```
 
-### 打怪变成可对话的NPC（怪物->NPC）
+### 打怪变成楼梯
 
-由于NPC是自定义事件，因此我们需要写events。注意到events中不覆盖trigger，则还是怪物时，存在系统trigger因此会战斗；变成NPC后没有系统trigger因此会触发自定义事件。
+因为涉及到多事件处理，因此我们不能写changeFloor那一项，而是使用events（自定义事件里写楼层转换）。
+
+注意到events中不覆盖trigger，则还是怪物时，存在系统trigger因此会战斗并触发afterBattle；变成NPC后没有系统trigger因此会触发自定义事件（楼层转换）。
 
 请注意打死怪物时默认会禁用该点，因此替换后需要手动进行show来启用。
 
 ``` js
 "events": {
     "x,y": [
-        "可对话的NPC"
+        {"type": "changeFloor", "loc": [0,0], "floorId": "MT1"}
     ]
 },
 "afterBattle": {
     "x,y": [
-        {"type": "setBlock", "number": 121}, // 变成老人
-        {"type": "show", "loc": [x,y]} // 启用该点
+        {"type": "setBlock", "number": 87}, // 变成上楼梯
+        {"type": "show"} // 启用该点
     ]
 }
 ```
@@ -1228,6 +1267,7 @@ core.insertAction(list) //往当前事件列表中插入一系列事件。使用
    - 触发器(trigger)亦采用覆盖原则，即**首先取该图块的默认触发器（例如怪物是battle，道具是getItem，门是openDoor），如果剧本的events中定义了该点的trigger则覆盖**。
  - 可以通过if语句和flag来控制自定义事件具体走向哪个分支。
    - 如果弄不清楚系统trigger和自定义事件等的区别，也可以全部覆盖为自定义事件，然后通过type:battle，type:openDoor等来具体进行控制。
+ - 多事件处理时请不要使用`changeFloor`那一项，而是使用`events`或者`afterXXX`来处理。
 
 ## 加点事件
 
@@ -1237,13 +1277,7 @@ core.insertAction(list) //往当前事件列表中插入一系列事件。使用
 
 如果要对某个怪物进行加点操作，则首先需要修改该怪物的`point`数值，代表怪物本身的加点数值。
 
-``` js
-... 'def': 0, 'money': 1, 'experience': 1, 'point': 1, 'special': 0}, // 在怪物后面添加point代表怪物的加点数
-```
-
-然后在`functions.js`文件中找到`addPoint`函数。它将返回一个choices事件。修改此函数为我们需要的加点项即可。
-
-!> V2.0版本可以直接在“脚本编辑 - 加点事件”中双击进行修改！
+然后在脚本编辑中找到加点事件，双击进行修改。它将返回一个choices事件。修改此函数为我们需要的加点项即可。
 
 ``` js
 ////// 加点事件 //////
@@ -1278,6 +1312,8 @@ core.insertAction(list) //往当前事件列表中插入一系列事件。使用
 我们可以定义"全局商店"，其可以直接被快捷栏中的"快捷商店"进行调用。换句话说，我们可以定义快捷商店，让用户在任意楼层都能快速使用商店。
 
 全局商店定义在`data.js`中，找到shops一项。
+
+从V2.2以后，全局商店也可以使用图块进行编辑，但仍需知道每一项的使用。
 
 ``` js
 "shops": [ // 定义全局商店（即快捷商店）
@@ -1477,7 +1513,7 @@ core.insertAction(list) //往当前事件列表中插入一系列事件。使用
 
 而在我们的存档中，是不会对怪物数据进行存储的，只会存各个变量和Flag，因此我们需要在读档后根据变量或Flag来调整怪物数据。
 
-我们可以在functions.js中的`afterLoadData`进行处理。
+我们可以在脚本编辑中的`afterLoadData`进行处理。
 
 ``` js
 ////// 读档事件后，载入事件前，可以执行的操作 //////
@@ -1540,7 +1576,7 @@ core.insertAction(list) //往当前事件列表中插入一系列事件。使用
 
     // effect也允许写一个function，代表本次升级将会执行的操作，比如可以显示一段提示文字，或者触发一个事件
     {"need": 40, "effect": function () {
-        core.drawText("恭喜升级！");
+        core.drawTip("恭喜升级！");
         core.status.hero.hp *= 2;
         core.status.hero.atk += 100;
         core.status.hero.def += 100;

@@ -590,11 +590,13 @@ utils.prototype.hide = function (obj, speed, callback) {
     }, speed);
 }
 
-utils.prototype.http = function (type, url, formData, success, error, mimeType) {
+utils.prototype.http = function (type, url, formData, success, error, mimeType, responseType) {
     var xhr = new XMLHttpRequest();
     xhr.open(type, url, true);
     if (core.isset(mimeType))
         xhr.overrideMimeType(mimeType);
+    if (core.isset(responseType))
+        xhr.responseType = responseType;
     xhr.onload = function(e) {
         if (xhr.status==200) {
             if (core.isset(success)) {

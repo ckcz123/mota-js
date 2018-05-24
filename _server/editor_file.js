@@ -161,11 +161,17 @@ editor_file = function (editor, callback) {
 
         var image = info.images;
 
-        if (image!='items' && image.indexOf('enemy')!=0) {
-            callback('只有怪物和道具才能自动注册！');
+        if (image=='autotile') {
+            callback('不能对自动元件进行自动注册！');
             return;
         }
-        var c=image=='items'?'I':'M';
+        var c=image.toUpperCase().charAt(0);
+
+        // terrains id
+        var terrainsId = [];
+        Object.keys(core.material.icons.terrains).forEach(function (id) {
+            terrainsId[core.material.icons.terrains[id]]=id;
+        })
 
         var allIds = [];
         editor.ids.forEach(function (v) {
@@ -180,17 +186,25 @@ editor_file = function (editor, callback) {
         for (var y=0; y<editor.widthsX[image][3]/per_height;y++) {
             if (allIds[y]) continue;
             while (editor.core.maps.blocksInfo[idnum]) idnum++;
+
+            // get id num
             var id = c+idnum;
-            iconActions.push(["add", "['" + image + "']['" + id + "']", y])
+
+            if (image=='terrains' && core.isset(terrainsId[y])) {
+                id=terrainsId[y];
+            }
+            else {
+                iconActions.push(["add", "['" + image + "']['" + id + "']", y])
+            }
             mapActions.push(["add", "['" + idnum + "']", {'cls': image, 'id': id}])
             if (image=='items')
                 templateActions.push(["add", "['items']['" + id + "']", editor_file.comment._data.items_template]);
-            else
+            else if (image.indexOf('enemy')==0)
                 templateActions.push(["add", "['" + id + "']", editor_file.comment._data.enemys_template]);
             idnum++;
         }
 
-        if (iconActions.length==0) {
+        if (mapActions.length==0) {
             callback("没有要注册的项！");
             return;
         }
@@ -198,7 +212,7 @@ editor_file = function (editor, callback) {
         var templist = [];
         var tempcallback = function (err) {
             templist.push(err);
-            if (templist.length == 2) {
+            if (templist.length == 3) {
                 if (templist[0] != null || templist[1] != null || templist[2] != null)
                     callback((templist[0] || '') + '\n' + (templist[1] || '') + '\n' + (templist[2] || ''));
                 //这里如果一个成功一个失败会出严重bug
@@ -206,12 +220,17 @@ editor_file = function (editor, callback) {
                     callback(null);
             }
         }
-        saveSetting('icons', iconActions, tempcallback);
+        if (iconActions.length>0)
+            saveSetting('icons', iconActions, tempcallback);
+        else tempcallback(null);
+
         saveSetting('maps', mapActions, tempcallback);
+
         if (image=='items')
             saveSetting('items', templateActions, tempcallback);
-        else
+        else if (image.indexOf('enemy')==0)
             saveSetting('enemys', templateActions, tempcallback);
+        else tempcallback(null);
     }
 
     editor_file.changeIdAndIdnum = function (id, idnum, info, callback) {

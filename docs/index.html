@@ -44,8 +44,13 @@
       mergeNavbar: true,
       formatUpdated: '{YYYY}-{MM}-{DD} {HH}:{mm}:{ss}',
     }
-    if (typeof navigator.serviceWorker !== 'undefined') {
-        navigator.serviceWorker.register('serviceWorker.js')
+    if (navigator.serviceWorker) {
+        navigator.serviceWorker.getRegistrations()
+            .then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+            });
     }
   </script>
   <script src="https://cdn.bootcss.com/docsify/4.5.5/docsify.min.js"></script>

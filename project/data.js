@@ -14,7 +14,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			'bgm.mp3'
 		],
 		"sounds" : [ 
-			'floor.mp3', 'attack.ogg', 'door.ogg', 'item.ogg', 'zone.ogg'
+			'floor.mp3', 'attack.mp3', 'door.mp3', 'item.mp3', 'zone.mp3'
 		],
 		"startBackground" : "bg.jpg",
 		"startLogoStyle" : "color: black",
@@ -49,11 +49,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			},
 			"flyRange": [],
 			"loc": {"direction": "up", "x": 6, "y": 10},
-			"flags": { 
-				"poison": false,
-				"weak": false,
-				"curse": false,
-			},
+			"flags": {},
 			"steps": 0,
 		},
 		"startText": [ 
@@ -144,6 +140,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"enableMoney": true,
 		"enableExperience": false,
 		"enableLevelUp": false,
+		"enableKeys": true,
 		"enableDebuff": false,
 		"flyNearStair": true,
 		"pickaxeFourDirections": false,

@@ -1,32 +1,57 @@
 (function () {
     fs = {};
-    var postsomething = function (data, _ip, callback) {
-        //callback:function(err, data)
-        //data:字符串
+
+
+    var _http = function (type, url, formData, success, error, mimeType, responseType) {
         var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function () {
-            switch (xhr.readyState) {
-                case 4 :
-                    if ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304) {
-                        if (Boolean(callback)) {
-                            if (xhr.responseText.slice(0, 6) == 'error:') {
-                                callback(xhr.responseText, null);
-                            } else {
-                                callback(null, xhr.responseText);
-                            }
-                        }
-                        //printf(xhr.responseText)
-                    } else {
-                        if (Boolean(callback)) callback(xhr.status, null);
-                        //printf('error:' + xhr.status+'<br>'+(xhr.responseText||''));
-                    }
-                    break;
+        xhr.open(type, url, true);
+        if (core.isset(mimeType))
+            xhr.overrideMimeType(mimeType);
+        if (core.isset(responseType))
+            xhr.responseType = responseType;
+        xhr.onload = function(e) {
+            if (xhr.status==200) {
+                if (core.isset(success)) {
+                    success(xhr.response);
+                }
             }
+            else {
+                if (core.isset(error))
+                    error("HTTP "+xhr.status);
+            }
+        };
+        xhr.onabort = function () {
+            if (core.isset(error))
+                error("Abort");
         }
-        xhr.open('post', _ip);
-        xhr.setRequestHeader('Content-Type', 'text/plain');
+        xhr.ontimeout = function() {
+            if (core.isset(error))
+                error("Timeout");
+        }
+        xhr.onerror = function() {
+            if (core.isset(error))
+                error("Error on Connection");
+        }
+        if (core.isset(formData))
+            xhr.send(formData);
+        else xhr.send();
+    }
+
+
+    var postsomething = function (data, _ip, callback) {
         if (typeof(data) == typeof([][0]) || data == null) data = JSON.stringify({1: 2});
-        xhr.send(data);
+
+        _http("POST", _ip, data, function (data) {
+            if (data.slice(0, 6) == 'error:') {
+                callback(data, null);
+            }
+            else {
+                callback(null, data);
+            }
+        }, function (e) {
+            console.log(e);
+            callback(e+"：请检查启动服务是否处于正常运行状态。");
+        }, "text/plain; charset=x-user-defined");
     }
 
     fs.readFile = function (filename, encoding, callback) {

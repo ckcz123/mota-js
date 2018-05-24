@@ -23,7 +23,9 @@ items.prototype.getItemEffect = function(itemId, itemNum) {
     // 消耗品
     if (itemCls === 'items') {
         var ratio = parseInt(core.floors[core.status.floorId].item_ratio) || 1;
+        var curr_hp = core.status.hero.hp;
         if (itemId in this.itemEffect)eval(this.itemEffect[itemId]);
+        core.status.hero.statistics.hp += core.status.hero.hp - curr_hp;
     }
     else {
         core.addItem(itemId, itemNum);

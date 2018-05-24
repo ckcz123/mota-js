@@ -104,6 +104,7 @@ editor_file = function (editor, callback) {
             }
         datastr = datastr.concat(['\n}']);
         datastr = datastr.join('');
+        alertWhenCompress();
         fs.writeFile(filename, encode(datastr), 'base64', function (err, data) {
             callback(err);
         });
@@ -717,9 +718,17 @@ editor_file = function (editor, callback) {
         }))
     }
 
+    var alertWhenCompress = function(){
+        if(editor.useCompress===true){
+            editor.useCompress=null;
+            setTimeout("alert('当前游戏使用的是压缩文件,修改完成后请重新压缩')",1000)
+        }
+    }
+
     var saveSetting = function (file, actionList, callback) {
         //console.log(file);
         //console.log(actionList);
+        alertWhenCompress();
 
         if (file == 'icons') {
             actionList.forEach(function (value) {

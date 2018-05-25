@@ -61,7 +61,7 @@
         </div>
     </div>
     <div id="left2" class='leftTab' style="z-index:-1;opacity: 0;"><!-- loc -->
-        <h3 class="leftTabHeader">地图选点&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button>
+        <h3 class="leftTabHeader">地图选点&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>
         </h3>
         <div class="leftTabContent">
             <p id='pos_a6771a78_a099_417c_828f_0a24851ebfce' style="margin-left: 15px">0,0</p>
@@ -79,7 +79,7 @@
         </div>
     </div>
     <div id="left3" class='leftTab' style="z-index:-1;opacity: 0;"><!-- emenyitem -->
-        <h3 class="leftTabHeader">图块属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button>
+        <h3 class="leftTabHeader">图块属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>
         </h3>
         <div class="leftTabContent">
             <div id='newIdIdnum'><!-- id and idnum -->
@@ -105,7 +105,7 @@
         </div>
     </div>
     <div id="left4" class='leftTab' style="z-index:-1;opacity: 0;"><!-- floor -->
-        <h3 class="leftTabHeader">楼层属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button>
+        <h3 class="leftTabHeader">楼层属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>
         </h3>
         <div class="leftTabContent">
             <div class='etable'>
@@ -122,7 +122,7 @@
         </div>
     </div>
     <div id="left5" class='leftTab' style="z-index:-1;opacity: 0;"><!-- tower -->
-        <h3 class="leftTabHeader">全塔属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button>
+        <h3 class="leftTabHeader">全塔属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>
         </h3>
         <div class="leftTabContent">
             <div class='etable'>
@@ -155,9 +155,9 @@
                     <option value="afterOpenDoor">afterOpenDoor</option>
                     <option value="firstArrive">firstArrive</option>
                 </select>
-                <button onclick="editor_blockly.confirm()">confirm</button>
-                <button onclick="editor_blockly.parse()">parse</button>
-                <button onclick="editor_blockly.cancel()">cancel</button>
+                <button onclick="editor_blockly.confirm()">确认</button>
+                <button onclick="editor_blockly.parse()">解析</button>
+                <button onclick="editor_blockly.cancel()">取消</button>
                 <xml id="toolbox" style="display:none">
                     <category name="entry"></category>
                     <category name="statement"></category>
@@ -174,15 +174,15 @@
         </div>
     </div>
     <div id="left7" style="z-index:-1;opacity: 0;"><!-- 多行文本编辑器 -->
-        <button onclick="editor_multi.confirm()">confirm</button>
-        <button onclick="editor_multi.cancel()">cancel</button>
+        <button onclick="editor_multi.confirm()">确认</button>
+        <button onclick="editor_multi.cancel()">取消</button>
         <input type="checkbox" onclick="editor_multi.toggerLint()" id="lintCheckbox"
                style="vertical-align: bottom;margin-left:6px"/>
-        <span style="vertical-align: bottom; margin-left: -3px">Lint</span>
+        <span style="vertical-align: bottom; margin-left: -3px">语法检查</span>
         <textarea id="multiLineCode" name="multiLineCode"></textarea>
     </div>
     <div id="left8" class='leftTab' style="z-index:-1;opacity: 0;"><!-- functions -->
-        <h3 class="leftTabHeader">脚本编辑&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">save</button>
+        <h3 class="leftTabHeader">脚本编辑&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>
         </h3>
         <div class="leftTabContent">
             <div class='etable'>

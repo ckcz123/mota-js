@@ -4,8 +4,6 @@
     <meta charset="utf-8">
     <link href="_server/css/editor.css" rel="stylesheet">
     <link href="_server/CodeMirror/codemirror.css" rel="stylesheet">
-    <link href="_server/CodeMirror/show-hint.css" rel="stylesheet">
-    <link href="_server/CodeMirror/lint.css" rel="stylesheet">
     <link href="_server/css/editor_mode.css" rel="stylesheet">
 </head>
 <body>
@@ -457,17 +455,13 @@ if (location.protocol.indexOf("http")!=0) {
 <script src='_server/editor_multi.js'></script>
 <!-- blockly -->
 <script src="_server/blockly/Converter.bundle.min.js"></script>
-<script src="_server/blockly/blockly_compressed.js"></script>
-<script src="_server/blockly/blocks_compressed.js"></script>
-<script src="_server/blockly/javascript_compressed.js"></script>
-<script src="_server/blockly/zh-hans.js"></script>
+<script src="_server/blockly/blockly_compressed.min.js"></script>
+<script src="_server/blockly/blockly_config.min.js"></script>
 <script src='_server/editor_blockly.js'></script>
+<!-- codemirror -->
 <script src="_server/CodeMirror/codeMirror.bundle.min.js"></script>
-<script src="_server/CodeMirror/show-hint.js"></script>
-<script src="_server/CodeMirror/javascript-hint.js"></script>
 <script src="_server/CodeMirror/jshint.min.js"></script>
-<script src="_server/CodeMirror/lint.js"></script>
-<script src="_server/CodeMirror/javascript-lint.js"></script>
+<script src="_server/CodeMirror/codeMirror.plugin.min.js"></script>
 
 </body>
 </html>

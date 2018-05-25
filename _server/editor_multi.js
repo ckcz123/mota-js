@@ -15,11 +15,14 @@ editor_multi = function () {
         gutters: ["CodeMirror-lint-markers"],
         lint: true,
         autocomplete: true,
-        extraKeys: {"Ctrl-Q": "toggleComment"},
+        autoCloseBrackets: true,
+        highlightSelectionMatches: {showToken: /\w/, annotateScrollbar: true}
     });
 
     codeEditor.on("keyup", function (cm, event) {
-        if (codeEditor.getOption("autocomplete") && (event.keyCode >= 65 && event.keyCode <= 90) || (event.keyCode >= 49 && event.keyCode <= 57) || event.keyCode == 190) {
+        if (codeEditor.getOption("autocomplete") && !event.ctrlKey && (
+            (event.keyCode >= 65 && event.keyCode <= 90) ||
+                (!event.shiftKey && event.keyCode == 190) || (event.shiftKey && event.keyCode == 189))){
             try {
                 CodeMirror.commands.autocomplete(cm, null, {completeSingle: false});
             } catch (e) {

@@ -255,16 +255,18 @@ maps.prototype.canMoveHero = function(x,y,direction,floorId) {
 
 ////// 能否瞬间移动 //////
 maps.prototype.canMoveDirectly = function (destX,destY) {
-    if (!core.flags.enableMoveDirectly) return -1;
+
+    // 不可瞬间移动请返回0
+    if (!core.flags.enableMoveDirectly) return 0;
 
     // 中毒状态：不能
-    if (core.hasFlag('poison')) return -1;
+    if (core.hasFlag('poison')) return 0;
 
     var fromX = core.getHeroLoc('x'), fromY = core.getHeroLoc('y');
-    if (fromX==destX&&fromY==destY) return -1;
+    if (fromX==destX&&fromY==destY) return 0;
 
     if (core.getBlock(fromX,fromY)!=null||core.status.checkBlock.damage[13*fromX+fromY]>0)
-        return -1;
+        return 0;
 
     // BFS
     var visited=[], queue=[];
@@ -283,7 +285,7 @@ maps.prototype.canMoveDirectly = function (destX,destY) {
             queue.push(13*nx+ny);
         }
     }
-    return -1;
+    return 0;
 }
 
 maps.prototype.drawBlock = function (block, animate, dx, dy) {

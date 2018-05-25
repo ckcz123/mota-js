@@ -1437,6 +1437,8 @@ core.insertAction([
 },
 ```
 
+!> 多个机关门请分别设置开门变量如door1, door2等等。请勿存在两个机关门用相同的变量！
+
 同样，为了实现类似于RMXP中，到达某一层后自动触发某段事件的效果，样板中还存在`firstArrive`事件。
 
 当且仅当勇士第一次到达某层时，将会触发此事件。可以利用此事件来显示一些剧情，或再让它调用 `{"type": "trigger"}` 来继续调用其他的事件。
@@ -1527,9 +1529,9 @@ core.insertAction([
 }
 
 // 在封印时，可以调用setValue将该flag置为真，然后调用自定义脚本 core.afterLoadData() 即可。
-"x,y": [ // 封印
-    {"type": "setValue", "name": "flag:fengyin", "value": "true"},
-    {"type": "function", "function": function() {
+"x,y": [
+    {"type": "setValue", "name": "flag:fengyin", "value": "true"}, // 封印
+    {"type": "function", "function": function() { // 手动调用自定义JS脚本 core.afterLoadData()
         core.afterLoadData();
     }}
 ]

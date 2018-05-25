@@ -187,6 +187,7 @@ events.prototype.gameOver = function (ending, fromReplay) {
             formData.append('experience', core.status.hero.experience);
             formData.append('steps', core.status.hero.steps);
             formData.append('seed', core.getFlag('seed'));
+            formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime));
             formData.append('route', core.encodeRoute(core.status.route));
 
             if (main.isCompetition)

@@ -1666,12 +1666,12 @@ MotaActionFunctions.parse = function(obj,type) {
 }
 
 MotaActionFunctions.EvalString_pre = function(EvalString){
-  if (EvalString.indexOf('__door_name__')!==-1) throw new Error('请修改__door_name__,建议如开MT1层的[3,3]点的门, 则使用flag:MT1_3_3作为开门变量');
+  if (EvalString.indexOf('__door__')!==-1) throw new Error('请修改开门变量__door__，如door1，door2，door3等依次向后。请勿存在两个门使用相同的开门变量。');
   return EvalString.replace(/([^\\])"/g,'$1\\"').replace(/^"/g,'\\"').replace(/""/g,'"\\"');
 }
 
 MotaActionFunctions.IdString_pre = function(IdString){
-  if (IdString.indexOf('__door_name__')!==-1) throw new Error('请修改__door_name__,建议如开MT1层的[3,3]点的门, 则使用flag:MT1_3_3作为开门变量');
+  if (IdString.indexOf('__door__')!==-1) throw new Error('请修改开门变量__door__，如door1，door2，door3等依次向后。请勿存在两个门使用相同的开门变量。');
   if (IdString && !(/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/.test(IdString)))throw new Error('id: '+IdString+'中包含了0-9 a-z A-Z _ - :之外的字符');
   return IdString;
 }

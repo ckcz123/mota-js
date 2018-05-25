@@ -183,8 +183,8 @@ editor_blockly = function () {
       ],'afterBattle'),
       '<label text="打怪开门"></label>',
       MotaActionFunctions.actionParser.parse([
-        {"type": "setValue", "name": "flag:__door_name__", "value": "flag:__door_name__+1"},
-        {"type": "if", "condition": "flag:__door_name__==2", 
+        {"type": "setValue", "name": "flag:__door__", "value": "flag:__door__+1"},
+        {"type": "if", "condition": "flag:__door__==2", 
           "true": [
             {"type": "openDoor", "loc": [10,5]}
           ],

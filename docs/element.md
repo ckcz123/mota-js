@@ -30,9 +30,31 @@
 
 本塔支持6种门，黄蓝红绿铁花。前五种门需要有对应的钥匙打开，花门只能通过调用`openDoor`事件进行打开。
 
-本塔支持暗墙，但是暗墙也必须通过`openDoor`事件开启。例如，样板2层的小偷事件，就是可以打开一个暗墙的。
-
 开门后可触发该层的`afterOpenDoor`事件，有关事件的详细介绍请参见第四章。
+
+## 暗墙
+
+本塔支持暗墙。
+
+要制作一个暗墙非常简单：在该点直接放一个普通墙壁，然后事件写“开门”，坐标为该点就行。
+
+``` js
+// 该点画一个普通的墙壁，比如`yellowWall`
+
+// 在该点的事件events中:
+"x,y": [
+    {"type": "openDoor", "loc": [x,y]} // 直接使用开门事件即可。
+]
+```
+
+系统会自动调用animates中的开暗墙动画。
+
+目前只有如下ID支持以这种方式开门：
+
+``` text
+yellowDoor, blueDoor, redDoor, greenDoor, specialDoor, steelDoor,
+yellowWall, blueWall, whiteWall, lava, star
+```
 
 ## 怪物
 

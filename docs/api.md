@@ -43,7 +43,8 @@ core.material.items
 
 
 core.debug()
-将攻防设置为10000，近似于无敌模式。
+开启调试模式。此模式下可以按Ctrl键进行穿墙，并忽略一切事件。
+此模式下不可回放录像和上传成绩。
 
 
 core.updateStatusBar()
@@ -312,27 +313,21 @@ core.enemys.getExtraDamage(enemyId)
 
 
 core.enemys.nextCriticals(enemyId, number)
-返回接下来number个该怪物的临界。列表每一项类似 "x:y" 表示临界值为x，该临界减伤为y。
+返回一个列表，为接下来number（可忽略，默认为1）个该怪物的临界值和临界减伤。
+列表每一项类似 [x,y] 表示临界值为x，且临界减伤为y。
+如果无临界值，则返回空列表。
 
 
-core.enemys.getCritical(enemyId)
-返回怪物的下一个临界值。无临界（如坚固、魔防等）返回'???'。
+core.enemys.getDefDamage(enemyId, k)
+获得k（可忽略，默认为1）防减伤值。
 
 
-core.enemys.getCriticalDamage(enemyId)
-获得怪物的下一个临界减伤。
-
-
-core.enemys.getDefDamage(enemyId)
-获得一防减伤值。
-
-
-core.enemys.getDamageInfo(enemyId, hero_hp, hero_atk, hero_def, hero_mdef)
+core.enemys.getDamageInfo(enemy, hero_hp, hero_atk, hero_def, hero_mdef)
 获得实际战斗信息，比如伤害，回合数，每回合伤害等等。
 此函数是实际战斗过程的计算。
 
 
-core.enemys.calDamage(enemyId, hero_hp, hero_atk, hero_def, hero_mdef)
+core.enemys.calDamage(enemy, hero_hp, hero_atk, hero_def, hero_mdef)
 计算战斗伤害；实际返回的是上面getDamageInfo中伤害的数值。
 
 
@@ -369,6 +364,10 @@ core.events.disableQuickShop(shopId)
 
 core.events.canUseQuickShop(shopId)
 当前能否使用某个快捷商店
+
+
+core.events.setHeroIcon(name)
+设置勇士行走图
 
 
 ========== core.items.XXX 和道具相关的函数 ==========

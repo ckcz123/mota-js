@@ -132,98 +132,73 @@ enemys.prototype.getExtraDamage = function (monster) {
     return extra_damage;
 }
 
-////// 接下来若干个临界值计算 /////
+////// 接下来N个临界值和临界减伤计算 //////
 enemys.prototype.nextCriticals = function (monsterId, number) {
 
-    number = number||1;
+    var useTurn = true; // 是否使用回合法计算临界值；如果要用循环法，则直接改为false。
 
+    number = number||1;
     var monster = core.material.enemys[monsterId];
     // 坚固、模仿怪物没有临界！
     if (this.hasSpecial(monster.special, 3) || this.hasSpecial(monster.special, 10)) return [];
-
     var info = this.getDamageInfo(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
 
     if (info == null) {
         if (core.status.hero.atk<=monster.def) {
-            return [(monster.def+1-core.status.hero.atk)+":?"];
+            return [[monster.def+1-core.status.hero.atk,'?']];
         }
         return [];
     }
-    if (info.damage <= 0) return [];
-
-    var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = monster.def, turn = info.turn;
-
-    if (turn<=1) return [];
 
     var list = [], pre = null;
+    var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = monster.def, turn = info.turn;
 
-    for (var t = turn-1;t>=1;t--) {
-        var nextAtk = Math.ceil(mon_hp/t) + mon_def;
-        if (nextAtk<=hero_atk) break;
-        if (nextAtk!=pre) {
-            var nextInfo = this.getDamageInfo(monster, core.status.hero.hp, nextAtk, core.status.hero.def, core.status.hero.mdef);
-            if (nextInfo==null) break;
-            list.push((nextAtk-hero_atk)+":"+(info.damage-nextInfo.damage));
-            if (nextInfo.damage<=0) break;
-            pre = nextAtk;
+    if (useTurn) { // 回合数计算法
+        for (var t = turn-1;t>=1;t--) {
+            var nextAtk = Math.ceil(mon_hp/t) + mon_def;
+            if (nextAtk<=hero_atk) break;
+            if (nextAtk!=pre) {
+                var nextInfo = this.getDamageInfo(monster, core.status.hero.hp, nextAtk, core.status.hero.def, core.status.hero.mdef);
+                if (nextInfo==null) break;
+                list.push([nextAtk-hero_atk,info.damage-nextInfo.damage]);
+                pre = nextAtk;
+            }
+            if (list.length>=number)
+                break;
         }
-        if (list.length>=number)
-            break;
     }
+    else { // 暴力for循环法
+        pre = info.damage;
+        for (var atk=hero_atk+1;atk<=mon_hp+mon_def;atk++) {
+            var nextInfo = this.getDamageInfo(monster, core.status.hero.hp, atk, core.status.hero.def, core.status.hero.mdef);
+            if (nextInfo==null) break;
+            if (pre>nextInfo.damage) {
+                pre = nextInfo.damage;
+                list.push([atk-hero_atk, info.damage-nextInfo.damage]);
+                if (list.length>=number) break;
+            }
+        }
+    }
+    if (list.length==0) list.push([0,0]);
     return list;
 }
 
-////// 临界值计算 //////
-enemys.prototype.getCritical = function (monsterId) {
-    var monster = core.material.enemys[monsterId];
-    // 坚固、模仿怪物没有临界！
-    if (this.hasSpecial(monster.special, 3) || this.hasSpecial(monster.special, 10)) return "???";
-
-    var info = this.getDamageInfo(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
-
-    if (info == null) {
-        if (core.status.hero.atk<=monster.def)
-            return monster.def+1-core.status.hero.atk;
-        return '???';
-    }
-    if (info.damage <= 0) return 0;
-
-    var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = monster.def, turn = info.turn;
-
-    // turn 是勇士攻击次数
-    if (turn<=1) return 0; // 攻杀
-
-    // 每回合最小伤害 = ⎡怪物生命/勇士攻击次数⎤
-    var nextAtk = Math.ceil(mon_hp/(turn-1)) + mon_def;
-
-    if (nextAtk <= hero_atk) return 0;
-    return nextAtk - hero_atk;
-
-}
-
-////// 临界减伤计算 //////
-enemys.prototype.getCriticalDamage = function (monsterId) {
-    var c = this.getCritical(monsterId);
-    if (c == '???') return '???';
-    if (c <= 0) return 0;
-    var monster = core.material.enemys[monsterId];
-    var last = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
-    var now = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk+c, core.status.hero.def, core.status.hero.mdef);
-    if (last == null || now==null) return '???';
-    return last - now;
-}
-
-////// 1防减伤计算 //////
-enemys.prototype.getDefDamage = function (monsterId) {
+////// N防减伤计算 //////
+enemys.prototype.getDefDamage = function (monsterId, k) {
+    k = k || 1;
     var monster = core.material.enemys[monsterId];
     var nowDamage = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
-    var nextDamage = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def + 1, core.status.hero.mdef);
+    var nextDamage = this.calDamage(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def + k, core.status.hero.mdef);
     if (nowDamage == null || nextDamage ==null) return "???";
     return nowDamage - nextDamage;
 }
 
 ////// 获得战斗伤害信息 //////
 enemys.prototype.getDamageInfo = function(monster, hero_hp, hero_atk, hero_def, hero_mdef) {
+
+    if (typeof monster == 'string') {
+        monster = core.material.enemys[monster];
+    }
 
     var mon_hp = monster.hp, mon_atk = monster.atk, mon_def = monster.def, mon_special = monster.special;
     hero_hp=Math.max(0, hero_hp);
@@ -310,6 +285,10 @@ enemys.prototype.getDamageInfo = function(monster, hero_hp, hero_atk, hero_def, 
 ////// 具体的伤害计算公式 //////
 enemys.prototype.calDamage = function (monster, hero_hp, hero_atk, hero_def, hero_mdef) {
 
+    if (typeof monster == 'string') {
+        monster = core.material.enemys[monsterId];
+    }
+
     var info = this.getDamageInfo(monster, hero_hp, hero_atk, hero_def, hero_mdef);
     if (info == null) return null;
     return info.damage;
@@ -341,6 +320,9 @@ enemys.prototype.getCurrentEnemys = function (floorId) {
             if (specialText.length>=3) specialText = "多属性...";
             else specialText = specialText.join("  ");
 
+            var critical = this.nextCriticals(monsterId);
+            if (critical.length>0) critical=critical[0];
+
             enemys.push({
                 'id': monsterId,
                 'name': monster.name,
@@ -352,8 +334,8 @@ enemys.prototype.getCurrentEnemys = function (floorId) {
                 'point': monster.point||0, // 加点
                 'special': specialText,
                 'damage': this.getDamage(monsterId),
-                'critical': this.getCritical(monsterId),
-                'criticalDamage': this.getCriticalDamage(monsterId),
+                'critical': critical[0],
+                'criticalDamage': critical[1],
                 'defDamage': this.getDefDamage(monsterId)
             });
 

@@ -228,6 +228,11 @@ events.prototype.gameOver = function (ending, fromReplay) {
                 core.restart();
             });
         }
+        else if (core.hasFlag('debug')) {
+            core.drawText("\t[系统提示]调试模式下无法上传成绩", function () {
+                core.restart();
+            })
+        }
         else {
             confirmUpload();
         }
@@ -638,13 +643,7 @@ events.prototype.doAction = function() {
             break;
         case "setHeroIcon":
             {
-                var name = "hero.png";
-                if (core.isset(core.material.images.images[data.name]) && core.material.images.images[data.name].width==128)
-                    name = data.name;
-                core.setFlag("heroIcon", name);
-                core.material.images.hero.src = core.material.images.images[name].src;
-                core.material.icons.hero.height = core.material.images.images[name].height/4;
-                core.drawHero();
+                this.setHeroIcon(data.name);
                 this.doAction();
                 break;
             }
@@ -1251,6 +1250,16 @@ events.prototype.canUseQuickShop = function(shopId) {
     return null;
 }
 
+////// 设置角色行走图 //////
+events.prototype.setHeroIcon = function (name) {
+    if (core.isset(core.material.images.images[name]) && core.material.images.images[name].width==128) {
+        core.setFlag("heroIcon", name);
+        core.material.images.hero.src = core.material.images.images[name].src;
+        core.material.icons.hero.height = core.material.images.images[name].height/4;
+        core.drawHero();
+    }
+}
+
 ////// 检查升级事件 //////
 events.prototype.checkLvUp = function () {
     if (!core.flags.enableLevelUp || core.status.hero.lv>=core.firstData.levelUp.length) return;
@@ -1342,7 +1351,7 @@ events.prototype.passNet = function (data) {
     if (data.event.id=='weakNet') { // 衰网
         if (core.hasFlag('weak')) return;
         core.setFlag('weak', true);
-        var weakValue = core.status.weakValue;
+        var weakValue = core.values.weakValue;
         var weakAtk = weakValue>=1?weakValue:Math.floor(weakValue*core.status.hero.atk);
         var weakDef = weakValue>=1?weakValue:Math.floor(weakValue*core.status.hero.def);
         core.setFlag('weakAtk', weakAtk);

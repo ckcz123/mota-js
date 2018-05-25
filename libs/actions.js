@@ -25,6 +25,7 @@ actions.prototype.onkeyDown = function (e) {
         core.status.holdingKeys.push(e.keyCode);
         this.pressKey(e.keyCode);
     } else {
+        if (e.keyCode==17) core.status.ctrlDown = true;
         this.keyDown(e.keyCode);
     }
 }
@@ -60,6 +61,7 @@ actions.prototype.onkeyUp = function(e) {
         }
         this.keyUp(e.keyCode);
     } else {
+        if (e.keyCode==17) core.status.ctrlDown = false;
         this.keyUp(e.keyCode);
     }
 }
@@ -337,8 +339,14 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
                 core.ui.drawHelp();
             break;
         case 82: // R
-            if (core.status.heroStop)
-                core.ui.drawReplay();
+            if (core.status.heroStop) {
+                if (core.hasFlag('debug')) {
+                    core.drawText("\t[系统提示]调试模式下无法回放录像");
+                }
+                else {
+                    core.ui.drawReplay();
+                }
+            }
             break;
         case 33: case 34: // PAGEUP/PAGEDOWN
         if (core.status.heroStop) {
@@ -409,7 +417,7 @@ actions.prototype.ondown = function (x ,y) {
             core.timeout.onDownTimeout = setTimeout(function () {
                 if (core.interval.onDownInterval == null) {
                     core.interval.onDownInterval = setInterval(function () {
-                        if (!core.actions.longClick()) {
+                        if (!core.actions.longClick(x, y, true)) {
                             clearInterval(core.interval.onDownInterval);
                             core.interval.onDownInterval = null;
                         }
@@ -480,10 +488,7 @@ actions.prototype.onup = function () {
 
         // 长按
         if (!core.status.lockControl && stepPostfix.length==0 && core.status.downTime!=null && new Date()-core.status.downTime>=1000) {
-            core.waitHeroToStop(function () {
-                // 绘制快捷键
-                core.ui.drawKeyBoard();
-            });
+            this.longClick(posx, posy);
         }
         else {
             //posx,posy是寻路的目标点,stepPostfix是后续的移动
@@ -709,15 +714,23 @@ actions.prototype.onmousewheel = function (direct) {
 /////////////////// 在某个界面时的按键点击效果 ///////////////////
 
 ////// 长按 //////
-actions.prototype.longClick = function () {
+actions.prototype.longClick = function (x, y, fromEvent) {
     if (!core.isPlaying()) return false;
-    if (core.status.event.id=='text') {
-        core.drawText();
-        return true;
+    if (core.status.lockControl) {
+        if (core.status.event.id=='text') {
+            core.drawText();
+            return true;
+        }
+        if (core.status.event.id=='action' && core.status.event.data.type=='text') {
+            core.doAction();
+            return true;
+        }
     }
-    if (core.status.event.id=='action' && core.status.event.data.type=='text') {
-        core.doAction();
-        return true;
+    else if (!fromEvent) {
+        core.waitHeroToStop(function () {
+            // 绘制快捷键
+            core.ui.drawKeyBoard();
+        });
     }
     return false;
 }
@@ -1549,6 +1562,8 @@ actions.prototype.clickSettings = function (x,y) {
                 });
                 break;
             case 5:
+                core.ui.drawStatistics();
+                /*
                 core.ui.drawWaiting("正在拉取统计信息，请稍后...");
 
                 var formData = new FormData();
@@ -1596,6 +1611,7 @@ actions.prototype.clickSettings = function (x,y) {
                     core.drawText("出错啦！\n无法拉取统计信息。\n错误原因：XHR Error");
                 }
                 xhr.send(formData);
+                */
                 break;
             case 6:
                 core.ui.drawHelp();
@@ -1703,6 +1719,10 @@ actions.prototype.clickSyncSave = function (x,y) {
                 });
                 break;
             case 4:
+                if (core.hasFlag('debug')) {
+                    core.drawText("\t[系统提示]调试模式下无法下载录像");
+                    break;
+                }
                 core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify({
                     'name': core.firstData.name,
                     'hard': core.status.hard,

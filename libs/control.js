@@ -59,6 +59,13 @@ control.prototype.setRequestAnimationFrame = function () {
         core.animateFrame.moveTime = core.animateFrame.moveTime||timestamp;
         core.animateFrame.weather.time = core.animateFrame.weather.time||timestamp;
 
+        // move time
+        if (core.isPlaying() && core.isset(core.status) && core.isset(core.status.hero)
+            && core.isset(core.status.hero.statistics)) {
+            core.status.hero.statistics.totalTime += timestamp-(core.status.hero.statistics.start||timestamp);
+            core.status.hero.statistics.start=timestamp;
+        }
+
         // Global Animate
         if (core.animateFrame.globalAnimate && core.isPlaying()) {
 
@@ -237,6 +244,12 @@ control.prototype.clearStatus = function() {
 ////// 重置游戏状态和初始数据 //////
 control.prototype.resetStatus = function(hero, hard, floorId, route, maps) {
 
+    var totalTime=0;
+    if (core.isset(core.status) && core.isset(core.status.hero)
+        && core.isset(core.status.hero.statistics) && core.isset(route)) {
+        totalTime=core.status.hero.statistics.totalTime;
+    }
+
     this.clearStatus();
 
     // 初始化status
@@ -249,6 +262,20 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps) {
     core.material.enemys = core.clone(core.enemys.getEnemys());
     // 初始化人物属性
     core.status.hero = core.clone(hero);
+    // 统计数据
+    if (!core.isset(core.status.hero.statistics))
+        core.status.hero.statistics = {
+            'totalTime': totalTime,
+            'hp': 0,
+            'battleDamage': 0,
+            'poisonDamage': 0,
+            'extraDamage': 0,
+            'moveDirectly': 0,
+            'ignoreSteps': 0,
+        }
+    core.status.hero.statistics.totalTime = Math.max(core.status.hero.statistics.totalTime, totalTime);
+    core.status.hero.statistics.start = null;
+
     core.status.hard = hard;
     // 初始化路线
     if (core.isset(route))
@@ -349,12 +376,15 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
             core.status.automaticRoute.moveDirectly = true;
             setTimeout(function () {
                 if (core.status.automaticRoute.moveDirectly && core.status.heroMoving==0) {
-                    if (core.canMoveDirectly(destX, destY)) {
+                    var ignoreSteps = core.canMoveDirectly(destX, destY);
+                    if (ignoreSteps>0) {
                         core.clearMap('hero', 0, 0, 416, 416);
                         core.setHeroLoc('x', destX);
                         core.setHeroLoc('y', destY);
                         core.drawHero();
                         core.status.route.push("move:"+destX+":"+destY);
+                        core.status.hero.statistics.moveDirectly++;
+                        core.status.hero.statistics.ignoreSteps+=ignoreSteps;
                     }
                 }
                 core.status.automaticRoute.moveDirectly = false;
@@ -621,6 +651,7 @@ control.prototype.moveAction = function (callback) {
         if (core.status.event.id!='ski')
             core.status.route.push(direction);
         core.status.automaticRoute.moveStepBeforeStop = [];
+        core.status.automaticRoute.lastDirection = core.getHeroLoc('direction');
         if (canMove) // 非箭头：触发
             core.trigger(x + scan[direction].x, y + scan[direction].y);
         core.drawHero(direction, x, y);
@@ -676,7 +707,7 @@ control.prototype.turnHero = function() {
 ////// 让勇士开始移动 //////
 control.prototype.moveHero = function (direction, callback) {
     // 如果正在移动，直接return
-    if (core.status.heroMoving>0) return;
+    if (core.status.heroMoving!=0) return;
     if (core.isset(direction))
         core.setHeroLoc('direction', direction);
     if (!core.isset(callback)) { // 如果不存在回调函数，则使用heroMoveTrigger
@@ -685,8 +716,18 @@ control.prototype.moveHero = function (direction, callback) {
 
         var doAction = function () {
             if (!core.status.heroStop) {
-                core.moveAction();
-                setTimeout(doAction, 50);
+                if (core.hasFlag('debug') && core.status.ctrlDown) {
+                    if (core.status.heroMoving!=0) return;
+                    core.status.heroMoving=-1;
+                    core.eventMoveHero([core.getHeroLoc('direction')], 100, function () {
+                        core.status.heroMoving=0;
+                        doAction();
+                    });
+                }
+                else {
+                    core.moveAction();
+                    setTimeout(doAction, 50);
+                }
             }
             else {
                 core.stopHero();
@@ -770,6 +811,7 @@ control.prototype.moveOneStep = function() {
     core.status.hero.steps++;
     // 中毒状态
     if (core.hasFlag('poison')) {
+        core.status.hero.statistics.poisonDamage += core.values.poisonDamage;
         core.status.hero.hp -= core.values.poisonDamage;
         if (core.status.hero.hp<=0) {
             core.status.hero.hp=0;
@@ -1013,6 +1055,7 @@ control.prototype.checkBlock = function () {
             core.playSound('zone.mp3');
             core.drawAnimate("zone", x, y);
         }
+        core.status.hero.statistics.extraDamage += damage;
 
         if (core.status.hero.hp<=0) {
             core.status.hero.hp=0;
@@ -1320,7 +1363,9 @@ control.prototype.updateFg = function () {
 
                 // 临界显伤
                 if (core.flags.displayCritical) {
-                    var critical = core.formatBigNumber(core.enemys.getCritical(id));
+                    var critical = core.enemys.nextCriticals(id);
+                    if (critical.length>0) critical=critical[0];
+                    critical = core.formatBigNumber(critical[0]);
                     if (critical == '???') critical = '?';
                     core.setFillStyle('fg', '#000000');
                     core.canvas.fg.fillText(critical, 32 * x + 2, 32 * (y + 1) - 2 - 10);
@@ -1341,6 +1386,7 @@ control.prototype.updateFg = function () {
             for (var y=0;y<13;y++) {
                 var damage = core.status.checkBlock.damage[13*x+y];
                 if (damage>0) {
+                    damage = core.formatBigNumber(damage);
                     core.setFillStyle('fg', '#000000');
                     core.canvas.fg.fillText(damage, 32 * x + 17, 32 * (y + 1) - 13);
                     core.canvas.fg.fillText(damage, 32 * x + 15, 32 * (y + 1) - 15);
@@ -1371,8 +1417,11 @@ control.prototype.doEffect = function (expression) {
     }
 }
 
-////// 作弊 //////
+////// 开启debug模式 //////
 control.prototype.debug = function() {
+    core.setFlag('debug', true);
+    core.insertAction(["\t[调试模式开启]此模式下按住Ctrl键可以穿墙并忽略一切事件。\n同时，录像将失效，也无法上传成绩。"]);
+    /*
     core.setStatus('hp', 999999);
     core.setStatus('atk', 10000);
     core.setStatus('def', 10000);
@@ -1389,6 +1438,7 @@ control.prototype.debug = function() {
             core.status.hero.flyRange.push(i);
     core.updateStatusBar();
     core.drawTip("作弊成功");
+    */
 }
 
 ////// 开始播放 //////
@@ -1663,12 +1713,16 @@ control.prototype.replay = function () {
     else if (action.indexOf('move:')==0) {
         var pos=action.substring(5).split(":");
         var x=parseInt(pos[0]), y=parseInt(pos[1]);
-        if (core.canMoveDirectly(x,y)) {
+
+        var ignoreSteps = core.canMoveDirectly(x, y);
+        if (ignoreSteps>0) {
             core.clearMap('hero', 0, 0, 416, 416);
             core.setHeroLoc('x', x);
             core.setHeroLoc('y', y);
             core.drawHero();
             core.status.route.push("move:"+x+":"+y);
+            core.status.hero.statistics.moveDirectly++;
+            core.status.hero.statistics.ignoreSteps+=ignoreSteps;
             core.replay();
             return;
         }
@@ -2365,6 +2419,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     if (!core.flags.enableExperience) count--;
     if (!core.flags.enableLevelUp) count--;
     if (!core.flags.enableDebuff) count--;
+    if (core.isset(core.flags.enableKeys) && !core.flags.enableKeys) count--;
 
     var statusLineHeight = BASE_LINEHEIGHT * 9 / count;
     var statusLineFontSize = DEFAULT_FONT_SIZE;
@@ -2647,6 +2702,12 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             id: 'upCol',
             rules: {
                 display: core.flags.enableLevelUp ? 'block': 'none'
+            }
+        },
+        {
+            id: 'keyCol',
+            rules: {
+                display: !core.isset(core.flags.enableKeys)||core.flags.enableKeys?'block':'none'
             }
         },
         {

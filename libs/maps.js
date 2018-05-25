@@ -255,20 +255,20 @@ maps.prototype.canMoveHero = function(x,y,direction,floorId) {
 
 ////// 能否瞬间移动 //////
 maps.prototype.canMoveDirectly = function (destX,destY) {
-    if (!core.flags.enableMoveDirectly) return false;
+    if (!core.flags.enableMoveDirectly) return -1;
 
     // 中毒状态：不能
-    if (core.hasFlag('poison')) return false;
+    if (core.hasFlag('poison')) return -1;
 
     var fromX = core.getHeroLoc('x'), fromY = core.getHeroLoc('y');
-    if (fromX==destX&&fromY==destY) return false;
+    if (fromX==destX&&fromY==destY) return -1;
 
     if (core.getBlock(fromX,fromY)!=null||core.status.checkBlock.damage[13*fromX+fromY]>0)
-        return false;
+        return -1;
 
     // BFS
     var visited=[], queue=[];
-    visited[13*fromX+fromY]=true;
+    visited[13*fromX+fromY]=0;
     queue.push(13*fromX+fromY);
 
     var directions = [[-1,0],[1,0],[0,1],[0,-1]];
@@ -278,12 +278,12 @@ maps.prototype.canMoveDirectly = function (destX,destY) {
         for (var dir in directions) {
             var nx=nowX+directions[dir][0], ny=nowY+directions[dir][1];
             if (nx<0||nx>=13||ny<0||ny>=13||visited[13*nx+ny]||core.getBlock(nx,ny)!=null||core.status.checkBlock.damage[13*nx+ny]>0) continue;
-            if (nx==destX&&ny==destY) return true;
-            visited[13*nx+ny]=true;
+            visited[13*nx+ny]=visited[13*nowX+nowY]+1;
+            if (nx==destX&&ny==destY) return visited[13*nx+ny];
             queue.push(13*nx+ny);
         }
     }
-    return false;
+    return -1;
 }
 
 maps.prototype.drawBlock = function (block, animate, dx, dy) {
@@ -739,7 +739,7 @@ maps.prototype.removeBlock = function (x, y, floorId) {
 
     // 删除Index
     core.removeBlockById(index, floorId);
-    core.updateFg();
+    core.updateStatusBar();
 }
 
 ////// 根据block的索引删除该块 //////

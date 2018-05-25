@@ -57,6 +57,7 @@ function main() {
         'moneyCol': document.getElementById('moneyCol'),
         'expCol': document.getElementById('expCol'),
         'upCol': document.getElementById('upCol'),
+        'keyCol': document.getElementById('keyCol'),
         'debuffCol': document.getElementById('debuffCol'),
         'hard': document.getElementById('hard'),
     };
@@ -458,8 +459,13 @@ main.dom.playGame.onclick = function () {
     main.dom.startButtons.style.display='none';
 
     if (main.core.isset(main.core.musicStatus) && main.core.musicStatus.startDirectly
-        && main.core.musicStatus.bgmStatus && main.core.musicStatus.playingBgm==null)
-        main.core.playBgm(main.core.bgms[0]);
+        && main.core.musicStatus.bgmStatus) {
+        if (main.core.musicStatus.playingBgm==null
+            || core.material.bgms[main.core.musicStatus.playingBgm].paused) {
+            main.core.musicStatus.playingBgm=null;
+            main.core.playBgm(main.core.bgms[0]);
+        }
+    }
 
     if (main.core.isset(main.core.flags.startDirectly) && main.core.flags.startDirectly) {
         core.events.startGame("");
@@ -473,8 +479,13 @@ main.dom.playGame.onclick = function () {
 main.dom.loadGame.onclick = function() {
 
     if (main.core.isset(main.core.musicStatus) && main.core.musicStatus.startDirectly
-        && main.core.musicStatus.bgmStatus && main.core.musicStatus.playingBgm==null)
-        main.core.playBgm(main.core.bgms[0]);
+        && main.core.musicStatus.bgmStatus) {
+        if (main.core.musicStatus.playingBgm==null
+            || core.material.bgms[main.core.musicStatus.playingBgm].paused) {
+            main.core.musicStatus.playingBgm=null;
+            main.core.playBgm(main.core.bgms[0]);
+        }
+    }
 
     main.core.load();
 }
@@ -483,8 +494,13 @@ main.dom.loadGame.onclick = function() {
 main.dom.replayGame.onclick = function () {
 
     if (main.core.isset(main.core.musicStatus) && main.core.musicStatus.startDirectly
-        && main.core.musicStatus.bgmStatus && main.core.musicStatus.playingBgm==null)
-        main.core.playBgm(main.core.bgms[0]);
+        && main.core.musicStatus.bgmStatus) {
+        if (main.core.musicStatus.playingBgm==null
+            || core.material.bgms[main.core.musicStatus.playingBgm].paused) {
+            main.core.musicStatus.playingBgm=null;
+            main.core.playBgm(main.core.bgms[0]);
+        }
+    }
 
     core.readFile(function (obj) {
         if (obj.name!=core.firstData.name) {
@@ -503,9 +519,9 @@ main.dom.replayGame.onclick = function () {
 
         core.dom.startPanel.style.display = 'none';
         core.resetStatus(core.firstData.hero, obj.hard, core.firstData.floorId, null, core.initStatus.maps);
-        core.events.setInitData(obj.hard);
         core.setFlag('seed', obj.seed);
         core.setFlag('rand', obj.seed);
+        core.events.setInitData(obj.hard);
         core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
             core.startReplay(core.decodeRoute(obj.route));
         }, true);

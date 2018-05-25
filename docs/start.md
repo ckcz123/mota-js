@@ -30,6 +30,8 @@
 * “JS代码压缩工具”能对JS代码进行压缩，从而减少IO请求数和文件大小。
 * “伤害和临界值计算器”是一个很便捷的小工具，能对怪物的伤害和临界值进行计算。
 
+!> **整个造塔过程中，启动服务必须全程处于开启状态！切不可手滑关闭，否则做的都是无用功！**
+
 ## 绘制地图
 
 有两种绘制地图的方式：从头绘制地图；从RMXP中导入已有的地图。
@@ -186,7 +188,7 @@ HTML5的塔都是可以进行控制台调试的。
 - `core.status.hero` 获得当前勇士状态信息。例如`core.status.hero.atk`就是当前勇士的攻击力数值。
 - `core.material.enemys` 获得所有怪物信息。例如`core.material.enemys.greenSlime`就是获得绿色史莱姆的属性数据。
 - `core.material.items` 获得所有道具的信息。例如`core.material.items.pickaxe`就是获得破墙镐的信息。
-- `core.debug()` 无敌模式；使用此命令将会把攻防都置为10000，方便进行乱撞。
+- `core.debug()` 开启调试模式；此模式下可以按住Ctrl键进行穿墙。
 - `core.updateStatusBar()` 立刻更新状态栏和地图显伤。
 - `core.setStatus('atk', 1000)` 直接设置勇士的某项属性。本句等价于 `core.status.hero.atk = 1000`。
 - `core.getStatus('atk')` 返回勇士当前某项属性数值。本句等价于 `core.status.hero.atk`。

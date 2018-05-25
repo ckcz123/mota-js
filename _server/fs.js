@@ -2,37 +2,44 @@
     fs = {};
 
 
+    var _isset = function (val) {
+        if (val == undefined || val == null || (typeof val=='number' && isNaN(val))) {
+            return false;
+        }
+        return true
+    }
+
     var _http = function (type, url, formData, success, error, mimeType, responseType) {
         var xhr = new XMLHttpRequest();
         xhr.open(type, url, true);
-        if (core.isset(mimeType))
+        if (_isset(mimeType))
             xhr.overrideMimeType(mimeType);
-        if (core.isset(responseType))
+        if (_isset(responseType))
             xhr.responseType = responseType;
         xhr.onload = function(e) {
             if (xhr.status==200) {
-                if (core.isset(success)) {
+                if (_isset(success)) {
                     success(xhr.response);
                 }
             }
             else {
-                if (core.isset(error))
+                if (_isset(error))
                     error("HTTP "+xhr.status);
             }
         };
         xhr.onabort = function () {
-            if (core.isset(error))
+            if (_isset(error))
                 error("Abort");
         }
         xhr.ontimeout = function() {
-            if (core.isset(error))
+            if (_isset(error))
                 error("Timeout");
         }
         xhr.onerror = function() {
-            if (core.isset(error))
+            if (_isset(error))
                 error("Error on Connection");
         }
-        if (core.isset(formData))
+        if (_isset(formData))
             xhr.send(formData);
         else xhr.send();
     }

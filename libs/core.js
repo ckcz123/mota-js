@@ -107,6 +107,7 @@ function core() {
 
         // 按下键的时间：为了判定双击
         'downTime': null,
+        'ctrlDown': false,
 
         // 路线&回放
         'route': [],
@@ -886,6 +887,16 @@ core.prototype.arrayToRGB = function (color) {
 ////// 作弊 //////
 core.prototype.debug = function() {
     core.control.debug();
+}
+
+////// 存档前 //////
+core.prototype.beforeSaveData = function (data) {
+    return core.events.beforeSaveData(data);
+}
+
+////// 读档后 //////
+core.prototype.afterLoadData = function (data) {
+    return core.events.afterLoadData(data);
 }
 
 ////// 重置当前地图 //////

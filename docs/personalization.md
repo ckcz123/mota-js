@@ -582,7 +582,7 @@ core.statusBar.mana.style.fontStyle = 'normal'; // 这一行会取消斜体。�
 我们可以在魔力那一行显示当前值和最大值：
 
 ``` js
-core.setStatus('mana', Math.min(core.getStatus('mana'), core.getStatus('manaMax')); // 如果魔力存在上限，则不能超过其上限值
+core.setStatus('mana', Math.min(core.getStatus('mana'), core.getStatus('manaMax'))); // 如果魔力存在上限，则不能超过其上限值
 core.statusBar.mana.innerHTML = core.getStatus('mana') + '/' + core.getStatus('manaMax', 0); // 显示比如 6/30 这样
 ```
 
@@ -676,13 +676,13 @@ if (core.getFlag('skill', 0)==1) { // 开启了技能1
 
 你只需要如下几步来达到多角色的效果。
 
-1. 每个勇士弄一张行走图。相关信息参见[自定义事件：setHeroIcon](event#setHeroIcon：更改角色行走图)。
+1. 每个角色弄一张行走图。相关信息参见[自定义事件：setHeroIcon](event#setHeroIcon：更改角色行走图)。
 2. [覆盖楼传事件](#覆盖楼传事件)，这样可以通过点工具栏的楼层传送按钮来切换角色。当然你也完全可以自己写一个道具，或[自定义快捷键](#自定义快捷键)来进行绑定。
 3. 在脚本编辑的setInitData中初始化新角色的属性值。
     ```js
     // 所有需要保存的内容；这些保存的内容不会多角色共用，在切换时会进行恢复。
     // 你也可以自行新增或删除，比如不共用金币则可以加上"money"的初始化，不共用道具则可以加上"items"的初始化，
-    // 多勇士共用hp的话则删除hp，等等。
+    // 多角色共用hp的话则删除hp，等等。总之，不共用的属性都在这里进行定义就好。
     var initData = {
         "floorId": "MT0", // 该角色楼层ID
         "icon": "hero2.png", // 角色的行走图名称

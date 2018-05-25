@@ -871,7 +871,13 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
 
     core.stopAutomaticRoute();
     var speed=30;
-    if (needKey) {
+    var doorId = id;
+    if (!(doorId.substring(doorId.length-4)=="Door")) {
+        doorId=doorId+"Door";
+        speed=70;
+    }
+    var key = id.replace("Door", "Key");
+    if (needKey && (key=="specialKey" || core.isset(core.material.items[key]))) {
         var key = id.replace("Door", "Key");
         if (!core.hasItem(key)) {
             if (key != "specialKey")
@@ -887,11 +893,6 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
     // open
     core.playSound("door.mp3");
     var state = 0;
-    var doorId = id;
-    if (!(doorId.substring(doorId.length-4)=="Door")) {
-        doorId=doorId+"Door";
-        speed=100;
-    }
     var door = core.material.icons.animates[doorId];
     core.status.replay.animate=true;
     core.removeGlobalAnimate(x,y);
@@ -907,7 +908,7 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
         }
         core.canvas.event.clearRect(32 * x, 32 * y, 32, 32);
         core.canvas.event.drawImage(core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
-    }, speed)
+    }, speed / core.status.replay.speed)
 }
 
 ////// 战斗 //////

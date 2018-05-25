@@ -396,24 +396,7 @@ events.prototype.doAction = function() {
                     x=core.calValue(data.loc[0]);
                     y=core.calValue(data.loc[1]);
                 }
-                var floorId = data.floorId||core.status.floorId;
-                var originBlock=core.getBlock(x,y,floorId,false);
-                var block = core.maps.initBlock(x,y,data.number);
-                core.maps.addInfo(block);
-                core.maps.addEvent(block,x,y,core.floors[floorId].events[x+","+y]);
-                core.maps.addChangeFloor(block,x,y,core.floors[floorId].changeFloor[x+","+y]);
-                if (core.isset(block.event)) {
-                    if (originBlock==null) {
-                        core.status.maps[floorId].blocks.push(block);
-                    }
-                    else {
-                        originBlock.block.id = data.number;
-                        originBlock.block.event = block.event;
-                    }
-                    if (floorId==core.status.floorId) {
-                        core.drawMap(floorId);
-                    }
-                }
+                core.setBlock(data.number, x, y, data.floorId);
                 this.doAction();
                 break;
             }
@@ -872,10 +855,16 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
     core.stopAutomaticRoute();
     var speed=30;
     var doorId = id;
-    if (!(doorId.substring(doorId.length-4)=="Door")) {
+    if (doorId.length<4 || doorId.substring(doorId.length-4)!="Door") {
         doorId=doorId+"Door";
         speed=70;
     }
+    // 不存在门
+    if (!core.isset(core.material.icons.animates[doorId])) {
+        if (core.isset(callback)) callback();
+        return;
+    }
+
     var key = id.replace("Door", "Key");
     if (needKey && (key=="specialKey" || core.isset(core.material.items[key]))) {
         var key = id.replace("Door", "Key");

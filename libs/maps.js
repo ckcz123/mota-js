@@ -774,6 +774,30 @@ maps.prototype.removeBlockByIds = function (floorId, ids) {
     });
 }
 
+////// 改变图块 //////
+maps.prototype.setBlock = function (number, x, y, floorId) {
+    floorId = floorId || core.status.floorId;
+    if (!core.isset(number) || !core.isset(x) || !core.isset(y)) return;
+
+    var originBlock=core.getBlock(x,y,floorId,false);
+    var block = core.maps.initBlock(x,y,number);
+    core.maps.addInfo(block);
+    core.maps.addEvent(block,x,y,core.floors[floorId].events[x+","+y]);
+    core.maps.addChangeFloor(block,x,y,core.floors[floorId].changeFloor[x+","+y]);
+    if (core.isset(block.event)) {
+        if (originBlock==null) {
+            core.status.maps[floorId].blocks.push(block);
+        }
+        else {
+            originBlock.block.id = data.number;
+            originBlock.block.event = block.event;
+        }
+        if (floorId==core.status.floorId) {
+            core.drawMap(floorId);
+        }
+    }
+}
+
 ////// 添加一个全局动画 //////
 maps.prototype.addGlobalAnimate = function (b) {
     if (main.mode=='editor' && main.editor.disableGlobalAnimate) return;

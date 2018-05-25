@@ -687,6 +687,11 @@ core.prototype.removeBlockByIds = function (floorId, ids) {
     core.maps.removeBlockByIds(floorId, ids);
 }
 
+////// 改变图块 //////
+core.prototype.setBlock = function (number, x, y, floorId) {
+    core.maps.setBlock(number, x, y, floorId);
+}
+
 ////// 添加一个全局动画 //////
 core.prototype.addGlobalAnimate = function (block) {
     core.maps.addGlobalAnimate(block);

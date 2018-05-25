@@ -63,6 +63,7 @@ control.prototype.setRequestAnimationFrame = function () {
         if (core.isPlaying() && core.isset(core.status) && core.isset(core.status.hero)
             && core.isset(core.status.hero.statistics)) {
             core.status.hero.statistics.totalTime += timestamp-(core.status.hero.statistics.start||timestamp);
+            core.status.hero.statistics.currTime += timestamp-(core.status.hero.statistics.start||timestamp);
             core.status.hero.statistics.start=timestamp;
         }
 
@@ -266,6 +267,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps) {
     if (!core.isset(core.status.hero.statistics))
         core.status.hero.statistics = {
             'totalTime': totalTime,
+            'currTime': 0,
             'hp': 0,
             'battleDamage': 0,
             'poisonDamage': 0,
@@ -2317,6 +2319,8 @@ control.prototype.updateStatusBar = function () {
 
     var statusList = ['hpmax', 'hp', 'atk', 'def', 'mdef', 'money', 'experience'];
     statusList.forEach(function (item) {
+        if (core.isset(core.status.hero[item]))
+            core.status.hero[item] = Math.floor(core.status.hero[item]);
         core.statusBar[item].innerHTML = core.formatBigNumber(core.getStatus(item));
     });
 

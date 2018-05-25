@@ -141,8 +141,10 @@ core.js实际上是所有API的入口（路由），核心API的实现在其他�
 core.nextX()
 获得勇士面向的下一个位置的x坐标
 
+
 core.nextY()
 获得勇士面向的下一个位置的y坐标
+
 
 core.openDoor(id, x, y, needKey, callback)    [异步]
 尝试开门操作。id为目标点的ID，x和y为坐标，needKey表示是否需要使用钥匙，callback为开门完毕后的回调函数。
@@ -208,6 +210,10 @@ core.removeBlock(x, y, floorId)
 否则将该点设置为禁用，以供以后可能的启用事件。
 
 
+core.setBlock(number, x, y, floorId)
+改变图块。number为要改变到的图块数字，x和y为坐标，floorId为楼层ID，可忽略表示当前楼层。
+
+
 core.useItem(itemId, callback)
 尝试使用某个道具。itemId为道具ID，callback为成功或失败后的回调。
 
@@ -268,10 +274,6 @@ num如果设置大于0，则生成一个[0, num-1]之间的数；否则生成一
 
 core.restart()    [异步]
 返回标题界面。
-
-
-core.updateFg()
-更新全地图显伤。包括怪物显伤、临界显示和领域显伤等。
 
 
 ========== core.actions.XXX 和游戏控制相关的函数 ==========
@@ -389,6 +391,7 @@ floorId为楼层ID，可忽略为当前楼层。
 
 core.maps.canMoveDirectly(destX, destY)
 判断当前能否瞬间移动到某个点。
+该函数如果返回0则不可瞬间移动，大于0则可以瞬间移动，且返回值是跨度（即少走的步数）。
 
 
 core.maps.removeBlockById(index, floorId)

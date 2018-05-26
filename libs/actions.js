@@ -1553,7 +1553,7 @@ actions.prototype.clickSettings = function (x,y) {
                 break;
             case 4:
                 core.status.event.selection=1;
-                core.ui.drawConfirmBox("你确定要重新开始吗？", function () {
+                core.ui.drawConfirmBox("你确定要返回标题页面吗？", function () {
                     core.ui.closePanel();
                     core.restart();
                 }, function () {

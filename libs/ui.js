@@ -748,7 +748,7 @@ ui.prototype.drawSettings = function () {
     core.status.event.id = 'settings';
 
     this.drawChoices(null, [
-        "系统设置", "快捷商店", "浏览地图", "同步存档", "重新开始", "数据统计", "操作帮助", "关于本塔", "返回游戏"
+        "系统设置", "快捷商店", "浏览地图", "同步存档", "返回标题", "数据统计", "操作帮助", "关于本塔", "返回游戏"
     ]);
 }
 

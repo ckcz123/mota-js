@@ -179,7 +179,7 @@ events.prototype.gameOver = function (ending, fromReplay) {
             formData.append('username', username||"");
             formData.append('ending', ending);
             formData.append('lv', core.status.hero.lv);
-            formData.append('hp', hp);
+            formData.append('hp', Math.min(hp, Math.pow(2, 63)));
             formData.append('atk', core.status.hero.atk);
             formData.append('def', core.status.hero.def);
             formData.append('mdef', core.status.hero.mdef);

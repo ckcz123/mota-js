@@ -179,7 +179,7 @@ events.prototype.gameOver = function (ending, fromReplay) {
             formData.append('username', username||"");
             formData.append('ending', ending);
             formData.append('lv', core.status.hero.lv);
-            formData.append('hp', hp);
+            formData.append('hp', Math.min(hp, Math.pow(2, 63)));
             formData.append('atk', core.status.hero.atk);
             formData.append('def', core.status.hero.def);
             formData.append('mdef', core.status.hero.mdef);
@@ -187,7 +187,7 @@ events.prototype.gameOver = function (ending, fromReplay) {
             formData.append('experience', core.status.hero.experience);
             formData.append('steps', core.status.hero.steps);
             formData.append('seed', core.getFlag('seed'));
-            formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime));
+            formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime/1000));
             formData.append('route', core.encodeRoute(core.status.route));
 
             if (main.isCompetition)

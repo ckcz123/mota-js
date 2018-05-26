@@ -1895,7 +1895,8 @@ ui.prototype.drawStatistics = function () {
     core.drawText([
         getText("全塔", total),
         getText("当前", current),
-        "当前总步数："+core.status.hero.steps+"，游戏时长："+formatTime(statistics.totalTime)
+        "当前总步数："+core.status.hero.steps+"，当前游戏时长："+formatTime(statistics.currTime)
+        +"，总游戏时长"+formatTime(statistics.totalTime)
         +"。\n瞬间移动次数："+statistics.moveDirectly+"，共计少走"+statistics.ignoreSteps+"步。"
         +"\n\n总计通过血瓶恢复生命值为"+core.formatBigNumber(statistics.hp)+"点。\n\n"
         +"总计受到的伤害为"+core.formatBigNumber(statistics.battleDamage+statistics.poisonDamage+statistics.extraDamage)

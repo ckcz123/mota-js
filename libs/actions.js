@@ -315,8 +315,11 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
                 core.load(true);
             break;
         case 69: // E
+            /*
+            // Cursor is unnecessary!
             if (core.status.heroStop)
                 core.ui.drawCursor();
+            */
             break;
         case 84: // T
             if (core.status.heroStop)

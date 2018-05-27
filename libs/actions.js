@@ -315,8 +315,11 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
                 core.load(true);
             break;
         case 69: // E
+            /*
+            // Cursor is unnecessary!
             if (core.status.heroStop)
                 core.ui.drawCursor();
+            */
             break;
         case 84: // T
             if (core.status.heroStop)
@@ -1553,7 +1556,7 @@ actions.prototype.clickSettings = function (x,y) {
                 break;
             case 4:
                 core.status.event.selection=1;
-                core.ui.drawConfirmBox("你确定要重新开始吗？", function () {
+                core.ui.drawConfirmBox("你确定要返回标题页面吗？", function () {
                     core.ui.closePanel();
                     core.restart();
                 }, function () {

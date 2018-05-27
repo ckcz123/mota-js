@@ -456,7 +456,7 @@ editor_mode = function (editor) {
                 printe("该楼层已存在！");
                 return;
             }
-            if (!/^[a-zA-Z_]*[a-zA-Z0-9_]*$/.test(newFileName)) {
+            if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(newFileName.value)) {
                 printe("楼层名不合法！请使用字母、数字、下划线，且不能以数字开头！");
                 return;
             }

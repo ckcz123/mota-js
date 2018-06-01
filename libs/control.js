@@ -2289,7 +2289,8 @@ control.prototype.playSound = function (sound) {
 
 ////// 清空状态栏 //////
 control.prototype.clearStatusBar = function() {
-    var statusList = ['floor', 'lv', 'hp', 'atk', 'def', 'mdef', 'money', 'experience', 'up', 'yellowKey', 'blueKey', 'redKey', 'poison', 'weak', 'curse', 'hard'];
+    var statusList = ['floor', 'lv', 'hpmax', 'hp', 'atk', 'def', 'mdef', 'money', 'experience',
+        'up', 'yellowKey', 'blueKey', 'redKey', 'poison', 'weak', 'curse', 'hard'];
     statusList.forEach(function (e) {
         core.statusBar[e].innerHTML = "&nbsp;";
     });

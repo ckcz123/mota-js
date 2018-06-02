@@ -139,8 +139,16 @@ enemys.prototype.nextCriticals = function (monsterId, number) {
 
     number = number||1;
     var monster = core.material.enemys[monsterId];
+
+    if (this.hasSpecial(monster.special, 3)) {
+        if (core.status.hero.atk<=monster.def) {
+            return [[monster.def+1-core.status.hero.atk,'?']];
+        }
+        return [];
+    }
+
     // 坚固、模仿怪物没有临界！
-    if (this.hasSpecial(monster.special, 3) || this.hasSpecial(monster.special, 10)) return [];
+    if (this.hasSpecial(monster.special, 10)) return [];
     var info = this.getDamageInfo(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
 
     if (info == null) {
@@ -148,6 +156,10 @@ enemys.prototype.nextCriticals = function (monsterId, number) {
             return [[monster.def+1-core.status.hero.atk,'?']];
         }
         return [];
+    }
+
+    if (info.damage<=0 && !core.flags.enableNegativeDamage) {
+        return [[0,0]];
     }
 
     var list = [], pre = null;
@@ -161,6 +173,7 @@ enemys.prototype.nextCriticals = function (monsterId, number) {
                 var nextInfo = this.getDamageInfo(monster, core.status.hero.hp, nextAtk, core.status.hero.def, core.status.hero.mdef);
                 if (nextInfo==null) break;
                 list.push([nextAtk-hero_atk,info.damage-nextInfo.damage]);
+                if (nextInfo.damage<=0 && !core.flags.enableNegativeDamage) break;
                 pre = nextAtk;
             }
             if (list.length>=number)
@@ -175,6 +188,7 @@ enemys.prototype.nextCriticals = function (monsterId, number) {
             if (pre>nextInfo.damage) {
                 pre = nextInfo.damage;
                 list.push([atk-hero_atk, info.damage-nextInfo.damage]);
+                if (nextInfo.damage<=0 && !core.flags.enableNegativeDamage) break;
                 if (list.length>=number) break;
             }
         }

@@ -13,6 +13,8 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.material.items.pickaxe.text = "可以破坏勇士四周的墙";
 	if (core.flags.bombFourDirections)
 		core.material.items.bomb.text = "可以炸掉勇士四周的怪物";
+    if (core.flags.snowFourDirections)
+        core.material.items.bomb.text = "可以将四周的熔岩变成平地";
 	if (core.flags.equipment) {
 		core.material.items.sword1.cls = 'constants';
 		core.material.items.sword2.cls = 'constants';

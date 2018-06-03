@@ -20,12 +20,22 @@ enemys.prototype.getEnemys = function (enemyId) {
 ////// 判断是否含有某特殊属性 //////
 enemys.prototype.hasSpecial = function (special, test) {
 
+    if (!core.isset(special)) return false;
+
     if (special instanceof Array) {
         return special.indexOf(test)>=0;
     }
 
     if (typeof special == 'number') {
         return special!=0 && (special%100==test||this.hasSpecial(parseInt(special/100), test));
+    }
+
+    if (typeof special == 'string') {
+        return this.hasSpecial(core.material.enemys[special], test);
+    }
+
+    if (core.isset(special.special)) {
+        return this.hasSpecial(special.special, test);
     }
 
     return false;
@@ -300,7 +310,7 @@ enemys.prototype.getDamageInfo = function(monster, hero_hp, hero_atk, hero_def, 
 enemys.prototype.calDamage = function (monster, hero_hp, hero_atk, hero_def, hero_mdef) {
 
     if (typeof monster == 'string') {
-        monster = core.material.enemys[monsterId];
+        monster = core.material.enemys[monster];
     }
 
     var info = this.getDamageInfo(monster, hero_hp, hero_atk, hero_def, hero_mdef);

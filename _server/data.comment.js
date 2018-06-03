@@ -445,6 +445,12 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "使用炸弹是否四个方向都会炸；如果false则只炸面前的怪物（即和圣锤等价）"
                 },
+                "snowFourDirections": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "使用冰冻徽章是否四个方向都会消除熔岩；如果false则只消除面前的熔岩"
+                },
                 "bigKeyIsBox": {
                     "_leaf": true,
                     "_type": "checkbox",

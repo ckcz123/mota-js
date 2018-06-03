@@ -158,19 +158,21 @@ return code;
 
 //changeFloor 事件编辑器入口之一
 changeFloor_m
-    :   '楼梯, 传送门' BGNL? Newline '目标楼层' IdString Stair_List 'x' Number ',' 'y' Number '朝向' DirectionEx_List '动画时间' Int? '允许穿透' Bool BEND
+    :   '楼梯, 传送门' BGNL? Newline Floor_List IdString? Stair_List 'x' Number ',' 'y' Number '朝向' DirectionEx_List '动画时间' Int? '允许穿透' Bool BEND
     
 
 /* changeFloor_m
 tooltip : 楼梯, 传送门, 如果目标楼层有多个楼梯, 写upFloor或downFloor可能会导致到达的楼梯不确定, 这时候请使用loc方式来指定具体的点位置
 helpUrl : https://ckcz123.github.io/mota-js/#/element?id=%e8%b7%af%e9%9a%9c%ef%bc%8c%e6%a5%bc%e6%a2%af%ef%bc%8c%e4%bc%a0%e9%80%81%e9%97%a8
-default : ["MT1",null,0,0,null,500,null]
+default : [null,"MT1",null,0,0,null,500,null]
+var toFloorId = IdString_0;
+if (Floor_List_0!='floorId') toFloorId = Floor_List_0;
 var loc = ', "loc": ['+Number_0+', '+Number_1+']';
 if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0 ?'':(', "portalWithoutTrigger": false');
-var code = '{"floorId": "'+IdString_0+'"'+loc+DirectionEx_List_0+Int_0+Bool_0+' }\n';
+var code = '{"floorId": "'+toFloorId+'"'+loc+DirectionEx_List_0+Int_0+Bool_0+' }\n';
 return code;
 */;
 
@@ -531,7 +533,7 @@ return code;
 */;
 
 changeFloor_s
-    :   '楼层切换' IdString 'x' PosString ',' 'y' PosString '朝向' DirectionEx_List '动画时间' Int? Newline
+    :   '楼层切换' IdString? 'x' PosString ',' 'y' PosString '朝向' DirectionEx_List '动画时间' Int? Newline
     
 
 /* changeFloor_s
@@ -1135,6 +1137,10 @@ PosString
     :   'sdeirughvuiyasbde'+ //为了被识别为复杂词法规则
     ;
 
+Floor_List
+    :   '楼层ID'|'前一楼'|'后一楼'
+    /*Floor_List ['floorId',':before',':next']*/;
+
 Stair_List
     :   '坐标'|'上楼'|'下楼'
     /*Stair_List ['loc','upFloor','downFloor']*/;
@@ -1278,8 +1284,12 @@ ActionParser.prototype.parse = function (obj,type) {
     case 'changeFloor':
       if(!obj)obj={};
       if(!this.isset(obj.loc))obj.loc=[0,0];
+      if (obj.floorId==':before'||obj.floorId==':next') {
+        obj.floorType=obj.floorId;
+        delete obj.floorId;
+      }
       return MotaActionBlocks['changeFloor_m'].xmlText([
-        obj.floorId,obj.stair||'loc',obj.loc[0],obj.loc[1],obj.direction,obj.time||0,!this.isset(obj.portalWithoutTrigger)
+        obj.floorType||'floorId',obj.floorId,obj.stair||'loc',obj.loc[0],obj.loc[1],obj.direction,obj.time||0,!this.isset(obj.portalWithoutTrigger)
       ]);
 
     case 'point':

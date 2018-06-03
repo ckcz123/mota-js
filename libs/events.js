@@ -986,6 +986,19 @@ events.prototype.trigger = function (x, y) {
 ////// 楼层切换 //////
 events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback, fromLoad) {
 
+    if (!core.isset(floorId)) floorId = core.status.floorId;
+
+    if (floorId == ':before') {
+        var index=core.floorIds.indexOf(core.status.floorId);
+        if (index>0) floorId = core.floorIds[index-1];
+        else floorId=core.status.floorId;
+    }
+    else if (floorId == ':next') {
+        var index=core.floorIds.indexOf(core.status.floorId);
+        if (index<core.floorIds.length-1) floorId = core.floorIds[index+1];
+        else floorId=core.status.floorId;
+    }
+
     var displayAnimate=!(time==0) && !core.status.replay.replaying;
 
     time = time || 800;

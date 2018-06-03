@@ -223,11 +223,11 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"name": "圣锤",
 			"text": "可以炸掉勇士面前的怪物"
 		},
-        "lifeWand": {
-            "cls": "tools",
-            "name": "生命魔杖",
-            "text": "可以恢复100点生命值"
-        }
+		"lifeWand": {
+			"cls": "tools",
+			"name": "生命魔杖",
+			"text": "可以恢复100点生命值"
+		}
 	},
 	"itemEffect": {
 		"redJewel": "core.status.hero.atk += core.values.redJewel * ratio",
@@ -317,7 +317,7 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"centerFly": "var able=false;\nvar toX = 12 - core.getHeroLoc('x'), toY = 12-core.getHeroLoc('y');\nvar block = core.getBlock(toX, toY);\nif (block==null) {\n    core.status.event.data = {'x': toX, 'y': toY};\n    able = true;\n}\nable",
 		"upFly": "var able=false;\nvar floorId = core.status.floorId, index = core.floorIds.indexOf(floorId);\nif (index<core.floorIds.length-1) {\n\tvar toId = core.floorIds[index+1], toX = core.getHeroLoc('x'), toY = core.getHeroLoc('y');\n\tif (core.getBlock(toX, toY, toId)==null) {\n\t\tcore.status.event.data = {'id': toId, 'x': toX, 'y': toY};\n\t\table=true;\n\t}\n}\nable",
 		"downFly": "var able=false;\nvar floorId = core.status.floorId, index = core.floorIds.indexOf(floorId);\nif (index>0) {\n\tvar toId = core.floorIds[index-1], toX = core.getHeroLoc('x'), toY = core.getHeroLoc('y');\n\tif (core.getBlock(toX, toY, toId)==null) {\n\t\tcore.status.event.data = {'id': toId, 'x': toX, 'y': toY};\n\t\table=true;\n\t}\n}\nable",
-		"snow": "var able=false;\nvar ids = [];\nfor (var i in core.status.thisMap.blocks) {\n    var block = core.status.thisMap.blocks[i];\n    if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.id == 'lava' && Math.abs(block.x-core.status.hero.loc.x)+Math.abs(block.y-core.status.hero.loc.y)<=1) {\n        ids.push(i);\n    }\n}\nif (ids.length>0) {\n    core.status.event.data = ids;\n    able=true;\n}\nable",
+		"snow": "var able=false;\nvar ids = [];\nfor (var i in core.status.thisMap.blocks) {\n    var block = core.status.thisMap.blocks[i];\n    if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.id == 'lava') {\n\t\tif (core.flags.snowFourDirections) {\n            if (Math.abs(block.x-core.status.hero.loc.x)+Math.abs(block.y-core.status.hero.loc.y)<=1) {\n                ids.push(i);\n            }\n        }\n        else {\n            if (block.x == core.nextX() && block.y == core.nextY()) {\n                ids.push(i);\n            }\n        }\n    }\n}\nif (ids.length>0) {\n    core.status.event.data = ids;\n    able=true;\n}\nable",
 		"bigKey": "var able=false;\nvar ids = [];\nfor (var i in core.status.thisMap.blocks) {\n    var block = core.status.thisMap.blocks[i];\n    if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.id == 'yellowDoor') {\n        ids.push(i);\n    }\n}\nif (ids.length>0) {\n    core.status.event.data = ids;\n    able=true;\n}\nable",
 		"poisonWine": "core.hasFlag('poison')",
 		"weakWine": "core.hasFlag('weak')",

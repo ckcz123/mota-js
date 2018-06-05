@@ -204,6 +204,7 @@ HTML5的塔都是可以进行控制台调试的。
 - `core.changeFloor('MT2', 'downFloor')` 立刻执行楼层切换到MT2层的下楼点位置。
 - `core.changeFloor('MT5', null, {'x': 4, 'y': 7})` 立刻切换楼层到MT5层的(4,7)点。
 - `core.getBlock(3, 5, 'MT1')` 获得当前地图上某一个块的信息。第三个参数为floorId，可省略表示当前楼层。
+- `core.getBlockId(3, 5, 'MT1')` 获得当前地图上某一个点的图块ID。第三个参数为floorId，可省略表示当前楼层。
 - `core.resetMap()` 重置当前层地图。**当修改地图后再读档，修改的地图不会立刻生效，此时可以使用resetMap来重置当前楼层的地图。**
 - `localStorage` 获得所有的存档数据。可以用 `core.getLocalStorage('save1')` 来具体获得某个存档。
 - ……

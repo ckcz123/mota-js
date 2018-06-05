@@ -131,7 +131,7 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"snow": {
 			"cls": "constants",
 			"name": "冰冻徽章",
-			"text": "可以将四周的熔岩变成平地"
+			"text": "可以将面前的熔岩变成平地"
 		},
 		"cross": {
 			"cls": "constants",

@@ -11,7 +11,7 @@ editor_blockly = function () {
   }
 
   var toolboxObj = {
-    'entry':[
+    '入口方块':[
       MotaActionFunctions.actionParser.parse([
         "欢迎使用事件编辑器",
         "本事件触发一次后会消失",
@@ -49,7 +49,7 @@ editor_blockly = function () {
       MotaActionBlocks['afterOpenDoor_m'].xmlText(),
       MotaActionBlocks['firstArrive_m'].xmlText(),
     ],
-    'statement':[
+    '语句块':[
       '<label text="显示文字"></label>',
       MotaActionBlocks['text_0_s'].xmlText(),
       MotaActionBlocks['text_1_s'].xmlText(),
@@ -119,7 +119,7 @@ editor_blockly = function () {
       '<label text="其他"></label>',
       MotaActionBlocks['function_s'].xmlText(),
     ],
-    'value':[
+    '值块':[
       MotaActionBlocks['setValue_s'].xmlText(),
       MotaActionBlocks['expression_arithmetic_0'].xmlText(),
       MotaActionBlocks['negate_e'].xmlText(),
@@ -129,7 +129,7 @@ editor_blockly = function () {
       MotaActionBlocks['idString_2_e'].xmlText(),
       MotaActionBlocks['evalString_e'].xmlText(),
     ],
-    'template':[
+    '常见事件模板':[
       '<label text="检测音乐如果没有开启则系统提示开启"></label>',
       MotaActionFunctions.actionParser.parseList({"type": "if", "condition": "!core.musicStatus.bgmStatus",
         "true": [

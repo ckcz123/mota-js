@@ -100,7 +100,7 @@ enemys.prototype.getSpecialHint = function (enemy, special) {
         case 10: return "模仿：怪物的攻防和勇士攻防相等";
         case 11: return "吸血：战斗前，怪物首先吸取角色的"+Math.floor(100*enemy.value||0)+"%生命作为伤害"+(enemy.add?"，并把伤害数值加到自身生命上":"");
         case 12: return "中毒：战斗后，勇士陷入中毒状态，每一步损失生命"+core.values.poisonDamage+"点";
-        case 13: return "衰弱：战斗后，勇士陷入衰弱状态，攻防暂时下降"+core.values.weakValue+"点";
+        case 13: return "衰弱：战斗后，勇士陷入衰弱状态，攻防暂时下降"+(core.values.weakValue>=1?core.values.weakValue+"点":parseInt(core.values.weakValue*100)+"%");
         case 14: return "诅咒：战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验";
         case 15: return "领域：经过怪物周围"+(enemy.range||1)+"格时自动减生命"+(enemy.value||0)+"点";
         case 16: return "夹击：经过两只相同的怪物中间，勇士生命值变成一半";

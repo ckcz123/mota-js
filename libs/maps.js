@@ -791,7 +791,7 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
             core.status.maps[floorId].blocks.push(block);
         }
         else {
-            originBlock.block.id = data.number;
+            originBlock.block.id = number;
             originBlock.block.event = block.event;
         }
         if (floorId==core.status.floorId) {

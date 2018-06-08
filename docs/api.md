@@ -222,6 +222,14 @@ core.canUseItem(itemId)
 返回当前能否使用某个道具。
 
 
+core.addItem(itemId, number)
+将某个道具增加number个。
+
+
+core.removeItem(itemId)
+将某个道具个数-1；如果道具个数归0则从道具列表删除。
+
+
 core.getNextItem()
 轻按。
 

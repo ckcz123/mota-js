@@ -255,14 +255,15 @@ events.prototype.doEvents = function (list, x, y, callback) {
         list = [list];
     }
 
+    core.status.event = {'id': 'action', 'data': {
+        'list': [
+            {"todo": core.clone(list), "total": core.clone(list), "condition": "false"}
+        ], 'x': x, 'y': y, 'callback': callback
+    }}
+
     // 停止勇士
     core.waitHeroToStop(function() {
         core.lockControl();
-        core.status.event = {'id': 'action', 'data': {
-            'list': [
-                {"todo": core.clone(list), "total": core.clone(list), "condition": "false"}
-            ], 'x': x, 'y': y, 'callback': callback
-        }}
         core.events.doAction();
     });
 }

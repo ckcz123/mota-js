@@ -103,6 +103,7 @@ function core() {
             'cursorX': null,
             'cursorY': null,
             "moveDirectly": false,
+            'clickMoveDirectly': false,
         },
 
         // 按下键的时间：为了判定双击
@@ -179,7 +180,7 @@ core.prototype.init = function (coreData, callback) {
     core.dom.logoLabel.innerHTML = core.firstData.title;
     document.title = core.firstData.title + " - HTML5魔塔";
     document.getElementById("startLogo").innerHTML = core.firstData.title;
-    core.material.items = core.items.getItems();
+    core.material.items = core.clone(core.items.getItems());
     core.initStatus.maps = core.maps.initMaps(core.floorIds);
     core.material.enemys = core.clone(core.enemys.getEnemys());
     core.material.icons = core.icons.getIcons();
@@ -303,8 +304,8 @@ core.prototype.clearStatus = function() {
 }
 
 ////// 重置游戏状态和初始数据 //////
-core.prototype.resetStatus = function(hero, hard, floorId, route, maps) {
-    core.control.resetStatus(hero, hard, floorId, route, maps)
+core.prototype.resetStatus = function(hero, hard, floorId, route, maps, values, flags) {
+    core.control.resetStatus(hero, hard, floorId, route, maps, values, flags);
 }
 
 ////// 开始游戏 //////

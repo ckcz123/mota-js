@@ -1491,8 +1491,10 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "setFg": // 颜色渐变
       if(this.isset(data.color)){
+        var alpha = data.color[3];
+        if (alpha==undefined || alpha==null) alpha=1;
         this.next = MotaActionBlocks['setFg_0_s'].xmlText([
-          data.color[0],data.color[1],data.color[2],data.color[3]||1,data.time||0,this.next]);
+          data.color[0],data.color[1],data.color[2],alpha,data.time||0,this.next]);
       } else {
         this.next = MotaActionBlocks['setFg_1_s'].xmlText([
           data.time||0,this.next]);

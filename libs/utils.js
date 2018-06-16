@@ -76,7 +76,7 @@ utils.prototype.unshift = function (a,b) {
 ////// 设置本地存储 //////
 utils.prototype.setLocalStorage = function(key, value) {
     try {
-        localStorage.setItem(core.firstData.name + "_" + key, JSON.stringify(value));
+        localStorage.setItem(core.firstData.name + "_" + key, LZString.compress(JSON.stringify(value)));
         return true;
     }
     catch (e) {
@@ -87,9 +87,24 @@ utils.prototype.setLocalStorage = function(key, value) {
 
 ////// 获得本地存储 //////
 utils.prototype.getLocalStorage = function(key, defaultValue) {
-    var value = localStorage.getItem(core.firstData.name+"_"+key);
-    if (core.isset(value)) return JSON.parse(value);
-    return defaultValue;
+    try {
+        var value = localStorage.getItem(core.firstData.name+"_"+key);
+        if (core.isset(value)) {
+            var output = LZString.decompress(value);
+            if (core.isset(output) && output.length>0) {
+                try {
+                    return JSON.parse(output);
+                }
+                catch (ee) {}
+            }
+            return JSON.parse(value);
+        }
+        return defaultValue;
+    }
+    catch (e) {
+        console.log(e);
+        return defaultValue;
+    }
 }
 
 ////// 移除本地存储 //////

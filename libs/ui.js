@@ -737,6 +737,7 @@ ui.prototype.drawSwitchs = function() {
         "怪物显伤： "+(core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
         "临界显伤： "+(core.flags.displayCritical ? "[ON]" : "[OFF]"),
         "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
+        "单击瞬移： "+(core.status.automaticRoute.clickMoveDirectly ? "[ON]" : "[OFF]"),
         "下载离线版本",
         "返回主菜单"
     ];
@@ -1461,19 +1462,27 @@ ui.prototype.drawToolbox = function(index) {
 
     if (!core.isset(index)) {
         if (tools.length>0) index=0;
-        else if (constants.length>0) index=100;
+        else if (constants.length>0) index=1000;
         else index=0;
     }
 
     core.status.event.selection=index;
 
     var selectId;
-    if (index<100)
+    if (index<1000) {
+        if (index>=tools.length) index=Math.max(0, tools.length-1);
         selectId = tools[index];
-    else
-        selectId = constants[index-100];
+    }
+    else {
+        if (index-1000>=constants.length) index=1000+Math.max(0, constants.length-1);
+        selectId = constants[index-1000];
+    }
+
+    var page = parseInt((index%1000)/12)+1;
+    var totalPage = parseInt(Math.max(tools.length, constants.length)/12)+1;
 
     if (!core.hasItem(selectId)) selectId=null;
+
     core.status.event.data=selectId;
 
     core.clearMap('ui', 0, 0, 416, 416);
@@ -1485,34 +1494,37 @@ ui.prototype.drawToolbox = function(index) {
     core.canvas.ui.lineWidth = 2;
     core.canvas.ui.strokeWidth = 2;
 
+    var ydelta = 20;
+
     // 画线
     core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(0, 130);
-    core.canvas.ui.lineTo(416, 130);
+    core.canvas.ui.moveTo(0, 130-ydelta);
+    core.canvas.ui.lineTo(416, 130-ydelta);
     core.canvas.ui.stroke();
     core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(0,129);
-    core.canvas.ui.lineTo(0,105);
-    core.canvas.ui.lineTo(72,105);
-    core.canvas.ui.lineTo(102,129);
+    core.canvas.ui.moveTo(416,129-ydelta);
+    core.canvas.ui.lineTo(416,105-ydelta);
+    core.canvas.ui.lineTo(416-72,105-ydelta);
+    core.canvas.ui.lineTo(416-102,129-ydelta);
     core.canvas.ui.fill();
 
     core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(0, 290);
-    core.canvas.ui.lineTo(416, 290);
+    core.canvas.ui.moveTo(0, 290-ydelta);
+    core.canvas.ui.lineTo(416, 290-ydelta);
     core.canvas.ui.stroke();
     core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(0,289);
-    core.canvas.ui.lineTo(0,265);
-    core.canvas.ui.lineTo(72,265);
-    core.canvas.ui.lineTo(102,289);
+    core.canvas.ui.moveTo(416,289-ydelta);
+    core.canvas.ui.lineTo(416,265-ydelta);
+    core.canvas.ui.lineTo(416-72,265-ydelta);
+    core.canvas.ui.lineTo(416-102,289-ydelta);
     core.canvas.ui.fill();
 
     // 文字
-    core.canvas.ui.textAlign = 'left';
-    core.fillText('ui', "消耗道具", 5, 124, '#333333', "bold 16px Verdana");
-    core.fillText('ui', "永久道具", 5, 284);
+    core.canvas.ui.textAlign = 'right';
+    core.fillText('ui', "消耗道具", 411, 124-ydelta, '#333333', "bold 16px Verdana");
+    core.fillText('ui', "永久道具", 411, 284-ydelta);
 
+    core.canvas.ui.textAlign = 'left';
     // 描述
     if (core.isset(selectId)) {
         var item=core.material.items[selectId];
@@ -1536,47 +1548,49 @@ ui.prototype.drawToolbox = function(index) {
     var images = core.material.images.items;
     // 消耗道具
 
-    for (var i=0;i<tools.length;i++) {
-        var tool=tools[i];
+    for (var i=0;i<12;i++) {
+        var tool=tools[12*(page-1)+i];
+        if (!core.isset(tool)) break;
         var icon=core.material.icons.items[tool];
         if (i<6) {
-            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*i+1)+5, 144+5, 32, 32)
+            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*i+1)+5, 144+5-ydelta, 32, 32)
             // 个数
-            core.fillText('ui', core.itemCount(tool), 16*(4*i+1)+40, 144+38, '#FFFFFF', "bold 14px Verdana");
+            core.fillText('ui', core.itemCount(tool), 16*(4*i+1)+40, 144+38-ydelta, '#FFFFFF', "bold 14px Verdana");
             if (selectId == tool)
-                core.strokeRect('ui', 16*(4*i+1)+1, 144+1, 40, 40, '#FFD700');
+                core.strokeRect('ui', 16*(4*i+1)+1, 144+1-ydelta, 40, 40, '#FFD700');
         }
         else {
-            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*(i-6)+1)+5, 144+64+5, 32, 32)
+            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*(i-6)+1)+5, 144+64+5-ydelta, 32, 32)
             // 个数
-            core.fillText('ui', core.itemCount(tool), 16*(4*(i-6)+1)+40, 144+64+38, '#FFFFFF', "bold 14px Verdana");
+            core.fillText('ui', core.itemCount(tool), 16*(4*(i-6)+1)+40, 144+64+38-ydelta, '#FFFFFF', "bold 14px Verdana");
             if (selectId == tool)
-                core.strokeRect('ui', 16*(4*(i-6)+1)+1, 144+64+1, 40, 40, '#FFD700');
+                core.strokeRect('ui', 16*(4*(i-6)+1)+1, 144+64+1-ydelta, 40, 40, '#FFD700');
 
         }
     }
 
     // 永久道具
-
-    for (var i=0;i<constants.length;i++) {
-        var constant=constants[i];
+    for (var i=0;i<12;i++) {
+        var constant=constants[12*(page-1)+i];
+        if (!core.isset(constant)) break;
         var icon=core.material.icons.items[constant];
         if (i<6) {
-            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*i+1)+5, 304+5, 32, 32)
-            // core.fillText('ui', core.itemCount(constant), 16*(4*i+1)+40, 304+38, '#FFFFFF', "bold 16px Verdana")
+            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*i+1)+5, 304+5-ydelta, 32, 32)
+
             if (selectId == constant)
-                core.strokeRect('ui', 16*(4*i+1)+1, 304+1, 40, 40, '#FFD700');
+                core.strokeRect('ui', 16*(4*i+1)+1, 304+1-ydelta, 40, 40, '#FFD700');
         }
         else {
-            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*(i-6)+1)+5, 304+64+5, 32, 32)
+            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*(i-6)+1)+5, 304+64+5-ydelta, 32, 32)
             if (selectId == constant)
-                core.strokeRect('ui', 16*(4*(i-6)+1)+1, 304+64+1, 40, 40, '#FFD700');
+                core.strokeRect('ui', 16*(4*(i-6)+1)+1, 304+64+1-ydelta, 40, 40, '#FFD700');
         }
     }
 
     // 退出
+    this.drawPagination(page, totalPage);
     core.canvas.ui.textAlign = 'center';
-    core.fillText('ui', '删除道具', 370, 32,'#DDDDDD', 'bold 15px Verdana');
+    // core.fillText('ui', '删除道具', 370, 32,'#DDDDDD', 'bold 15px Verdana');
     core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px Verdana');
 }
 
@@ -1941,6 +1955,7 @@ ui.prototype.drawHelp = function () {
         "点状态栏中图标： 进行对应的操作\n"+
         "点任意块： 寻路并移动\n"+
         "点任意块并拖动： 指定寻路路线\n"+
+        "双击空地： 瞬间移动\n"+
         "单击勇士： 转向\n"+
         "双击勇士： 轻按（仅在轻按开关打开时有效）\n"+
         "长按任意位置：跳过剧情对话或打开虚拟键盘\n"

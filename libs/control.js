@@ -243,7 +243,7 @@ control.prototype.clearStatus = function() {
 }
 
 ////// 重置游戏状态和初始数据 //////
-control.prototype.resetStatus = function(hero, hard, floorId, route, maps) {
+control.prototype.resetStatus = function(hero, hard, floorId, route, maps, values, flags) {
 
     var totalTime=0;
     if (core.isset(core.status) && core.isset(core.status.hero)
@@ -261,6 +261,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps) {
     core.status.maps = core.clone(maps);
     // 初始化怪物
     core.material.enemys = core.clone(core.enemys.getEnemys());
+    core.material.items = core.clone(core.items.getItems());
     // 初始化人物属性
     core.status.hero = core.clone(hero);
     // 统计数据
@@ -285,6 +286,16 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps) {
     // 保存的Index
     core.status.saveIndex = core.getLocalStorage('saveIndex2', 1);
 
+    core.status.automaticRoute.clickMoveDirectly = core.getLocalStorage('clickMoveDirectly', false);
+
+    if (core.isset(values))
+        core.values = core.clone(values);
+
+    if (core.isset(flags))
+        core.flags = core.clone(flags);
+
+    core.events.initGame();
+
 }
 
 ////// 开始游戏 //////
@@ -304,8 +315,9 @@ control.prototype.startGame = function (hard, callback) {
         formData.append('name', core.firstData.name);
         formData.append('version', core.firstData.version);
         formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
-        formData.append('hard', hard);
+        formData.append('hard', LZString.compressToBase64(hard));
         formData.append('hardCode', core.getFlag('hard', 0));
+        formData.append('base64', 1);
 
         core.utils.http("POST", "/games/upload.php", formData);
     })
@@ -409,6 +421,22 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
         }
         return;
     }
+
+    // 单击瞬间移动
+    if (core.status.automaticRoute.clickMoveDirectly && core.status.heroStop) {
+        var ignoreSteps = core.canMoveDirectly(destX, destY);
+        if (ignoreSteps>0) {
+            core.clearMap('hero', 0, 0, 416, 416);
+            core.setHeroLoc('x', destX);
+            core.setHeroLoc('y', destY);
+            core.drawHero();
+            core.status.route.push("move:"+destX+":"+destY);
+            core.status.hero.statistics.moveDirectly++;
+            core.status.hero.statistics.ignoreSteps+=ignoreSteps;
+            return;
+        }
+    }
+
     var step = 0;
     var tempStep = null;
     var moveStep;
@@ -720,8 +748,19 @@ control.prototype.moveHero = function (direction, callback) {
             if (!core.status.heroStop) {
                 if (core.hasFlag('debug') && core.status.ctrlDown) {
                     if (core.status.heroMoving!=0) return;
+                    // 检测是否穿出去
+                    var scan = {
+                        'up': {'x': 0, 'y': -1},
+                        'left': {'x': -1, 'y': 0},
+                        'down': {'x': 0, 'y': 1},
+                        'right': {'x': 1, 'y': 0}
+                    };
+                    direction = core.getHeroLoc('direction');
+                    var nx = core.getHeroLoc('x') + scan[direction].x, ny=core.getHeroLoc('y') + scan[direction].y;
+                    if (nx<0 || nx>12 || ny<0 || ny>12) return;
+
                     core.status.heroMoving=-1;
-                    core.eventMoveHero([core.getHeroLoc('direction')], 100, function () {
+                    core.eventMoveHero([direction], 100, function () {
                         core.status.heroMoving=0;
                         doAction();
                     });
@@ -2077,6 +2116,8 @@ control.prototype.saveData = function() {
         'hard': core.status.hard,
         'maps': core.maps.save(core.status.maps),
         'route': core.encodeRoute(core.status.route),
+        'values': core.clone(core.values),
+        'flags': core.clone(core.flags),
         'shops': {},
         'version': core.firstData.version,
         "time": new Date().getTime()
@@ -2096,7 +2137,8 @@ control.prototype.saveData = function() {
 ////// 从本地读档 //////
 control.prototype.loadData = function (data, callback) {
 
-    core.resetStatus(data.hero, data.hard, data.floorId, core.decodeRoute(data.route), core.maps.load(data.maps));
+    core.resetStatus(data.hero, data.hard, data.floorId, core.decodeRoute(data.route), core.maps.load(data.maps),
+        data.values, data.flags);
 
     // load shop times
     for (var shop in core.status.shops) {

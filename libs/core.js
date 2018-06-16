@@ -1113,6 +1113,16 @@ core.prototype.subarray = function (a, b) {
     return core.utils.subarray(a, b);
 }
 
+////// Base64加密 //////
+core.prototype.encodeBase64 = function (str) {
+    return core.utils.encodeBase64(str);
+}
+
+////// Base64解密 //////
+core.prototype.decodeBase64 = function (str) {
+    return core.utils.decodeBase64(str);
+}
+
 ////// 生成随机数（seed方法） //////
 core.prototype.rand = function (num) {
     return core.utils.rand(num);

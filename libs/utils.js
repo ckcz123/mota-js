@@ -340,6 +340,20 @@ utils.prototype.subarray = function (a, b) {
     return na;
 }
 
+////// Base64加密 //////
+utils.prototype.encodeBase64 = function (str) {
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
+        return String.fromCharCode(parseInt(p1, 16))
+    }))
+}
+
+////// Base64解密 //////
+utils.prototype.decodeBase64 = function (str) {
+    return decodeURIComponent(atob(str).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+}
+
 utils.prototype.__init_seed = function () {
     var rand = new Date().getTime()%34834795 + 3534;
     rand = this.__next_rand(rand);

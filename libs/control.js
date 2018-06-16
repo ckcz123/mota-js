@@ -1671,7 +1671,7 @@ control.prototype.replay = function () {
             var tools = Object.keys(core.status.hero.items.tools).sort();
             var constants = Object.keys(core.status.hero.items.constants).sort();
             var index;
-            if ((index=tools.indexOf(itemId))>=0 || (index=constants.indexOf(itemId)+100)>=100) {
+            if ((index=tools.indexOf(itemId))>=0 || (index=constants.indexOf(itemId)+1000)>=1000) {
                 core.ui.drawToolbox(index);
                 setTimeout(function () {
                     core.ui.closePanel();

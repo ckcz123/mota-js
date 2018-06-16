@@ -175,9 +175,9 @@ events.prototype.gameOver = function (ending, fromReplay) {
             formData.append('name', core.firstData.name);
             formData.append('version', core.firstData.version);
             formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
-            formData.append('hard', LZString.compressToBase64(core.status.hard));
-            formData.append('username', LZString.compressToBase64(username||""));
-            formData.append('ending', LZString.compressToBase64(ending));
+            formData.append('hard', core.encodeBase64(core.status.hard));
+            formData.append('username', core.encodeBase64(username||""));
+            formData.append('ending', core.encodeBase64(ending));
             formData.append('lv', core.status.hero.lv);
             formData.append('hp', Math.min(hp, Math.pow(2, 63)));
             formData.append('atk', core.status.hero.atk);
@@ -1491,7 +1491,7 @@ events.prototype.uploadCurrent = function () {
     formData.append('name', core.firstData.name);
     formData.append('version', core.firstData.version);
     formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
-    formData.append('hard', LZString.compressToBase64(core.status.hard));
+    formData.append('hard', core.encodeBase64(core.status.hard));
     formData.append('lv', core.status.hero.lv);
     formData.append('hp', Math.min(hp, Math.pow(2, 63)));
     formData.append('atk', core.status.hero.atk);

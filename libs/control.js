@@ -315,7 +315,7 @@ control.prototype.startGame = function (hard, callback) {
         formData.append('name', core.firstData.name);
         formData.append('version', core.firstData.version);
         formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
-        formData.append('hard', LZString.compressToBase64(hard));
+        formData.append('hard', core.encodeBase64(hard));
         formData.append('hardCode', core.getFlag('hard', 0));
         formData.append('base64', 1);
 

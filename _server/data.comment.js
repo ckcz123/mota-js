@@ -463,12 +463,14 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "剑和盾是否直接作为装备。如果此项为true，则作为装备，需要在道具栏使用，否则将直接加属性。"
                 },
+                /*
                 "enableDeleteItem": {
                     "_leaf": true,
                     "_type": "checkbox",
                     "_bool": "bool",
                     "_data": "是否允许删除（丢弃）道具"
                 },
+                */
                 "enableAddPoint": {
                     "_leaf": true,
                     "_type": "checkbox",

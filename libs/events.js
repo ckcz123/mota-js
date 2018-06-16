@@ -175,9 +175,9 @@ events.prototype.gameOver = function (ending, fromReplay) {
             formData.append('name', core.firstData.name);
             formData.append('version', core.firstData.version);
             formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
-            formData.append('hard', core.status.hard);
-            formData.append('username', username||"");
-            formData.append('ending', ending);
+            formData.append('hard', LZString.compressToBase64(core.status.hard));
+            formData.append('username', LZString.compressToBase64(username||""));
+            formData.append('ending', LZString.compressToBase64(ending));
             formData.append('lv', core.status.hero.lv);
             formData.append('hp', Math.min(hp, Math.pow(2, 63)));
             formData.append('atk', core.status.hero.atk);
@@ -189,6 +189,7 @@ events.prototype.gameOver = function (ending, fromReplay) {
             formData.append('seed', core.getFlag('seed'));
             formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime/1000));
             formData.append('route', core.encodeRoute(core.status.route));
+            formData.append('base64', 1);
 
             if (main.isCompetition)
                 core.http("POST", "/games/competition/upload.php", formData);
@@ -1482,4 +1483,28 @@ events.prototype.afterLoadData = function (data) {
     return this.eventdata.afterLoadData(data);
 }
 
+////// 上传当前数据 //////
+events.prototype.uploadCurrent = function () {
+    var formData = new FormData();
 
+    formData.append('type', 'score');
+    formData.append('name', core.firstData.name);
+    formData.append('version', core.firstData.version);
+    formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
+    formData.append('hard', LZString.compressToBase64(core.status.hard));
+    formData.append('lv', core.status.hero.lv);
+    formData.append('hp', Math.min(hp, Math.pow(2, 63)));
+    formData.append('atk', core.status.hero.atk);
+    formData.append('def', core.status.hero.def);
+    formData.append('mdef', core.status.hero.mdef);
+    formData.append('money', core.status.hero.money);
+    formData.append('experience', core.status.hero.experience);
+    formData.append('steps', core.status.hero.steps);
+    formData.append('seed', core.getFlag('seed'));
+    formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime/1000));
+    formData.append('route', core.encodeRoute(core.status.route));
+    formData.append('deler', 'current');
+    formData.append('base64', 1);
+
+    core.http("POST", "/games/upload.php", formData);
+}

@@ -437,6 +437,14 @@ core.utils.unshift(a, b)
 向某个数组前插入另一个数组或元素
 
 
+core.utils.encodeBase64(str)
+Base64加密字符串
+
+
+core.utils.decodeBase64(str)
+Base64解密字符串
+
+
 core.utils.formatBigNumber(x)
 大数据的格式化
 

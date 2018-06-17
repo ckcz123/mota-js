@@ -384,8 +384,10 @@ maps.prototype.drawMap = function (mapName, callback) {
     if (main.mode=='editor'){
         main.editor.updateMap = function(){
             core.removeGlobalAnimate(null, null, true);
+            core.clearMap('bg', 0, 0, 416, 416);
             core.clearMap('event', 0, 0, 416, 416);
             core.clearMap('event2', 0, 0, 416, 416);
+            drawBg();
             drawEvent();
             core.setGlobalAnimate(core.values.animateSpeed);
         }

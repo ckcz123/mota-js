@@ -1001,7 +1001,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
         else floorId=core.status.floorId;
     }
 
-    var displayAnimate=!(time==0) && !core.status.replay.replaying;
+    var displayAnimate=(!core.isset(time) || time>=100) && !core.status.replay.replaying;
 
     time = time || 800;
     time /= 20;

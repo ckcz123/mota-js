@@ -1494,7 +1494,7 @@ events.prototype.uploadCurrent = function (username) {
     formData.append('hard', core.encodeBase64(core.status.hard));
     formData.append('username', core.encodeBase64(username||"current"));
     formData.append('lv', core.status.hero.lv);
-    formData.append('hp', Math.min(hp, Math.pow(2, 63)));
+    formData.append('hp', Math.min(core.status.hero.hp, Math.pow(2, 63)));
     formData.append('atk', core.status.hero.atk);
     formData.append('def', core.status.hero.def);
     formData.append('mdef', core.status.hero.mdef);

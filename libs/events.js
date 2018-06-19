@@ -1001,7 +1001,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
         else floorId=core.status.floorId;
     }
 
-    var displayAnimate=!(time==0) && !core.status.replay.replaying;
+    var displayAnimate=(!core.isset(time) || time>=100) && !core.status.replay.replaying;
 
     time = time || 800;
     time /= 20;
@@ -1484,7 +1484,7 @@ events.prototype.afterLoadData = function (data) {
 }
 
 ////// 上传当前数据 //////
-events.prototype.uploadCurrent = function () {
+events.prototype.uploadCurrent = function (username) {
     var formData = new FormData();
 
     formData.append('type', 'score');
@@ -1492,8 +1492,9 @@ events.prototype.uploadCurrent = function () {
     formData.append('version', core.firstData.version);
     formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
     formData.append('hard', core.encodeBase64(core.status.hard));
+    formData.append('username', core.encodeBase64(username||"current"));
     formData.append('lv', core.status.hero.lv);
-    formData.append('hp', Math.min(hp, Math.pow(2, 63)));
+    formData.append('hp', Math.min(core.status.hero.hp, Math.pow(2, 63)));
     formData.append('atk', core.status.hero.atk);
     formData.append('def', core.status.hero.def);
     formData.append('mdef', core.status.hero.mdef);

@@ -76,7 +76,19 @@ utils.prototype.unshift = function (a,b) {
 ////// 设置本地存储 //////
 utils.prototype.setLocalStorage = function(key, value) {
     try {
-        localStorage.setItem(core.firstData.name + "_" + key, LZString.compress(JSON.stringify(value)));
+        var str = JSON.stringify(value);
+        var compressed = LZString.compress(str);
+
+        // test if we can save to localStorage
+        localStorage.setItem("__tmp__", compressed);
+        if (LZString.decompress(localStorage.getItem("__tmp__"))==str) {
+            localStorage.setItem(core.firstData.name + "_" + key, compressed);
+        }
+        else {
+            // We cannot compress the data
+            localStorage.setItem(core.firstData.name + "_" + key, str);
+        }
+        localStorage.removeItem("__tmp__");
         return true;
     }
     catch (e) {

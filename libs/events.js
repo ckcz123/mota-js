@@ -1484,7 +1484,7 @@ events.prototype.afterLoadData = function (data) {
 }
 
 ////// 上传当前数据 //////
-events.prototype.uploadCurrent = function () {
+events.prototype.uploadCurrent = function (username) {
     var formData = new FormData();
 
     formData.append('type', 'score');
@@ -1492,6 +1492,7 @@ events.prototype.uploadCurrent = function () {
     formData.append('version', core.firstData.version);
     formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
     formData.append('hard', core.encodeBase64(core.status.hard));
+    formData.append('username', core.encodeBase64(username||"current"));
     formData.append('lv', core.status.hero.lv);
     formData.append('hp', Math.min(hp, Math.pow(2, 63)));
     formData.append('atk', core.status.hero.atk);

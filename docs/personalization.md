@@ -695,15 +695,26 @@ if (core.getFlag('skill', 0)==1) { // 开启了技能1
         "loc": {"x": 0, "y": 0, "direction": "up"},
         // 不共用的数据都可以在这里加上定义
     }
+    // 也可以类似新增其他勇士
+    // var hero2 = { ...
+
+    var heroCount = 2; // 包含默认的在内总共多少个勇士，该值需手动修改。
     
     // 初始化该勇士
-    this.initHero1 = function () {
+    this.initHeros = function () {
         core.status.hero.icon = "hero.png";
         core.setFlag("hero1", core.clone(hero1)); // 将属性值存到变量中
+        // core.setFlag("hero2", core.clone(hero2)); // 更多的勇士...
     }
     
     // 切换勇士
-    this.changeHero = function () {
+    this.changeHero = function (toHeroId) {
+        var currHeroId = core.getFlag("heroId", 0); // 获得当前角色ID
+        if (!core.isset(toHeroId)) {
+            toHeroId = (currHeroId+1)%heroCount;
+        }
+        if (currHeroId == toHeroId) return;
+
         var saveList = Object.keys(hero1);
 
 	    // 保存当前内容
@@ -712,12 +723,8 @@ if (core.getFlag('skill', 0)==1) { // 开启了技能1
             if (name=='floorId') toSave[name] = core.status.floorId; // 楼层单独设置
             else toSave[name] = core.clone(core.status.hero[name]); // 使用core.clone()来创建新对象
         })
-
-        var currHeroId = core.getFlag("heroId", 0); // 获得当前角色ID
-        var toHeroId = (currHeroId+1)%2; // 获得要切换到的角色ID，比如 0->1，1->0
     
         core.setFlag("hero"+currHeroId, toSave); // 将当前角色信息进行保存
-    
         var data = core.getFlag("hero"+toHeroId); // 获得要切换的角色保存内容
     
         // 设置角色的属性值
@@ -735,8 +742,8 @@ if (core.getFlag('skill', 0)==1) { // 开启了技能1
         core.setFlag("heroId", toHeroId); // 保存切换到的角色ID
     }
     ```
-3. 在脚本编辑 - setInitData中加上`core.plugin.initHero1()`来初始化新勇士。（写在`core.events.afterLoadData()`后，反大括号之前。）
-4. 如果需要切换角色（包括事件、道具或者快捷键等），可以直接调用自定义JS脚本：`core.plugin.changeHero();` 。
+3. 在脚本编辑 - setInitData中加上`core.plugin.initHeros()`来初始化新勇士。（写在`core.events.afterLoadData()`后，反大括号之前。）
+4. 如果需要切换角色（包括事件、道具或者快捷键等），可以直接调用自定义JS脚本：`core.plugin.changeHero();`进行切换。也可以指定参数调用`core.plugin.changeHero(1)`来切换到某个具体的勇士上。
 
 
 ## 根据难度分歧来自定义地图

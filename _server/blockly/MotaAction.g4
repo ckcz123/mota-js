@@ -1398,6 +1398,7 @@ ActionParser.prototype.parseAction = function() {
         data.text,this.next]);
       break;
     case "show": // 显示
+      data.loc=data.loc||[];
       if (!(data.loc[0] instanceof Array))
         data.loc = [data.loc];
       var x_str=[],y_str=[];

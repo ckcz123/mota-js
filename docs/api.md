@@ -156,7 +156,7 @@ core.battle(id, x, y, force, callback)    [异步]
 例如：core.battle('greenSlime', null, null, true)
 
 
-core.trigger(x, y)
+core.trigger(x, y)    [异步]
 触发某个地点的事件。
 
 

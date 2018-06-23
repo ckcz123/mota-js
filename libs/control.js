@@ -393,6 +393,9 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
                     var ignoreSteps = core.canMoveDirectly(destX, destY);
                     if (ignoreSteps>0) {
                         core.clearMap('hero', 0, 0, 416, 416);
+                        var lastDirection = core.status.route[core.status.route.length-1];
+                        if (['left', 'right', 'up', 'down'].indexOf(lastDirection)>=0)
+                            core.setHeroLoc('direction', lastDirection);
                         core.setHeroLoc('x', destX);
                         core.setHeroLoc('y', destY);
                         core.drawHero();
@@ -1943,7 +1946,7 @@ control.prototype.doSL = function (id, type) {
         }
         if (data.version != core.firstData.version) {
             // core.drawTip("存档版本不匹配");
-            if (confirm("存档版本不匹配！\n你想回放此存档的录像吗？")) {
+            if (confirm("存档版本不匹配！\n你想回放此存档的录像吗？\n可以随时停止录像播放以继续游戏。")) {
                 core.dom.startPanel.style.display = 'none';
                 var seed = data.hero.flags.seed;
                 core.resetStatus(core.firstData.hero, data.hard, core.firstData.floorId, null, core.initStatus.maps);

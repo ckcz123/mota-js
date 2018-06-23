@@ -693,7 +693,8 @@ if (core.getFlag('skill', 0)==1) { // 开启了技能1
         "def": 10,
         "mdef": 0,
         "loc": {"x": 0, "y": 0, "direction": "up"},
-        // 不共用的数据都可以在这里加上定义
+        // 如果道具不共用就将下面这句话取消注释
+        // "items": {"keys":{"yellowKey":0,"blueKey":0,"redKey":0},"tools":{},"constants":{}}
     }
     // 也可以类似新增其他勇士
     // var hero2 = { ...
@@ -745,6 +746,7 @@ if (core.getFlag('skill', 0)==1) { // 开启了技能1
 3. 在脚本编辑 - setInitData中加上`core.plugin.initHeros()`来初始化新勇士。（写在`core.events.afterLoadData()`后，反大括号之前。）
 4. 如果需要切换角色（包括事件、道具或者快捷键等），可以直接调用自定义JS脚本：`core.plugin.changeHero();`进行切换。也可以指定参数调用`core.plugin.changeHero(1)`来切换到某个具体的勇士上。
 
+!> 如果道具不共用，需要在初始定义那里写 `'items': {"keys": {"yellowKey": 0, "blueKey": 0, "redKey": 0}, "tools": {}, "constants": {}}`
 
 ## 根据难度分歧来自定义地图
 

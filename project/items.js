@@ -343,6 +343,6 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"shiled5": "true",
 		"shield5": "true",
 		"lifeWand": "true",
-		"jumpShoes": "var nx=core.nextX(2),ny=core.nextY(2);nx>=0&&nx<=12&&ny>=0&&ny<=12&&core.getBlock(core.nextX(2), core.nextY(2))==null"
+		"jumpShoes": "var nx=core.nextX(2),ny=core.nextY(2);nx>=0&&nx<=12&&ny>=0&&ny<=12&&core.getBlock(nx,ny)==null"
 	}
 }

@@ -123,6 +123,7 @@ items.prototype.removeItem = function (itemId) {
 
 ////// 增加某个物品的个数 //////
 items.prototype.addItem = function (itemId, itemNum) {
+    itemNum=itemNum||1;
     var itemData = core.material.items[itemId];
     var itemCls = itemData.cls;
     if (itemCls == 'items') return;

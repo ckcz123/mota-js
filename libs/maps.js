@@ -558,7 +558,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
 
     core.clearMap('animate', 0, 0, 416, 416);
 
-    var block = core.getBlock(x,y,core.status.floorId,false);
+    var block = core.getBlock(x,y);
     if (block==null) {// 不存在
         if (core.isset(callback)) callback();
         return;
@@ -647,6 +647,92 @@ maps.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
                 moveSteps.shift();
             }
         }
+    }, time / 16 / core.status.replay.speed);
+}
+
+////// 显示跳跃某块的动画，达到{"type":"jump"}的效果 //////
+maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,immediateHide,callback) {
+    time = time || 500;
+    core.status.replay.animate=true;
+    core.clearMap('animate', 0, 0, 416, 416);
+    var block = core.getBlock(sx,sy);
+    if (block==null) {
+        if (core.isset(callback)) callback();
+        return;
+    }
+
+    // 需要删除该块
+    core.removeBlock(sx,sy);
+    core.clearMap('ui', 0, 0, 416, 416);
+    core.setAlpha('ui', 1.0);
+
+    block=block.block;
+    var blockIcon = core.material.icons[block.event.cls][block.event.id];
+    var blockImage = core.material.images[block.event.cls];
+    var height = block.event.height || 32;
+
+    var opacityVal = 1;
+    core.setOpacity('animate', opacityVal);
+    core.canvas.animate.drawImage(blockImage, 0, blockIcon * height, 32, height, block.x * 32, block.y * 32 +32 - height, 32, height);
+
+    core.playSound('jump.mp3');
+
+    var dx = ex-sx, dy=ey-sy, distance = Math.round(Math.sqrt(dx * dx + dy * dy));
+    var jump_peak = 6 + distance, jump_count = jump_peak * 2;
+    var currx = sx, curry = sy;
+
+    var drawX = function() {
+        return currx * 32;
+    }
+
+    var drawY = function() {
+        var ret = curry * 32;
+        if(jump_count >= jump_peak){
+            var n = jump_count - jump_peak;
+        }else{
+            var n = jump_peak - jump_count;
+        }
+        return ret - (jump_peak * jump_peak - n * n) / 2;
+    }
+
+    var updateJump = function() {
+        jump_count--;
+        currx = (currx * jump_count + ex) / (jump_count + 1.0);
+        curry = (curry * jump_count + ey) / (jump_count + 1.0);
+    }
+
+    var animateValue = block.event.animate || 1;
+    var animateCurrent = 0;
+    var animateTime = 0;
+    var animate=window.setInterval(function() {
+
+        animateTime += time / 16 / core.status.replay.speed;
+        if (animateTime >= core.values.animateSpeed) {
+            animateCurrent++;
+            animateTime = 0;
+            if (animateCurrent >= animateValue) animateCurrent = 0;
+        }
+
+        if (jump_count>0) {
+            core.clearMap('animate', drawX(), drawY()-height+32, 32, height);
+            updateJump();
+            core.canvas.animate.drawImage(blockImage, animateCurrent * 32, blockIcon * height, 32, height, drawX(), drawY()-height+32, 32, height);
+        }
+        else {
+            if (immediateHide) opacityVal=0;
+            else opacityVal -= 0.06;
+            core.setOpacity('animate', opacityVal);
+            core.clearMap('animate', drawX(), drawY()-height+32, 32, height);
+            core.canvas.animate.drawImage(blockImage, animateCurrent * 32, blockIcon * height, 32, height, drawX(), drawY()-height+32, 32, height);
+            if (opacityVal<=0) {
+                clearInterval(animate);
+                core.clearMap('animate', 0, 0, 416, 416);
+                core.setOpacity('animate', 1);
+                core.status.replay.animate=false;
+                if (core.isset(callback)) callback();
+            }
+        }
+
     }, time / 16 / core.status.replay.speed);
 }
 

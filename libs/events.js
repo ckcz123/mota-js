@@ -85,12 +85,14 @@ events.prototype.startGame = function (hard) {
             if (core.flags.showBattleAnimateConfirm) { // 是否提供“开启战斗动画”的选择项
                 core.status.event.selection = core.flags.battleAnimate ? 0 : 1;
                 core.ui.drawConfirmBox("你想开启战斗动画吗？\n之后可以在菜单栏中开启或关闭。\n（强烈建议新手开启此项）", function () {
+                    core.data.flags.battleAnimate = true;
                     core.flags.battleAnimate = true;
                     core.setLocalStorage('battleAnimate', true);
                     core.startGame(hard);
                     core.utils.__init_seed();
                     core.events.setInitData(hard);
                 }, function () {
+                    core.data.flags.battleAnimate = false;
                     core.flags.battleAnimate = false;
                     core.setLocalStorage('battleAnimate', false);
                     core.startGame(hard);
@@ -432,6 +434,34 @@ events.prototype.doAction = function() {
                 core.events.doAction();
             });
             break;
+        case "jump": // 跳跃事件
+            {
+                var sx=x, sy=y, ex=x,ey=y;
+                if (core.isset(data.from)) {
+                    sx=core.calValue(data.from[0]);
+                    sy=core.calValue(data.from[1]);
+                }
+                if (core.isset(data.to)) {
+                    ex=core.calValue(data.to[0]);
+                    ey=core.calValue(data.to[1]);
+                }
+                core.jumpBlock(sx,sy,ex,ey,data.time,data.immediateHide,function() {
+                    core.events.doAction();
+                });
+                break;
+            }
+        case "jumpHero":
+            {
+                var ex=core.status.hero.loc.x, ey=core.status.hero.loc.y;
+                if (core.isset(data.loc)) {
+                    ex=core.calValue(data.loc[0]);
+                    ey=core.calValue(data.loc[1]);
+                }
+                core.jumpHero(ex,ey,data.time,function() {
+                    core.events.doAction();
+                });
+                break;
+            }
         case "changeFloor": // 楼层转换
             {
                 var heroLoc = {"x": core.calValue(data.loc[0]), "y": core.calValue(data.loc[1])};
@@ -820,7 +850,7 @@ events.prototype.getNextItem = function() {
 
 ////// 获得某个物品 //////
 events.prototype.getItem = function (itemId, itemNum, itemX, itemY, callback) {
-    // core.getItemAnimate(itemId, itemNum, itemX, itemY);
+    itemNum=itemNum||1;
     core.playSound('item.mp3');
     var itemCls = core.material.items[itemId].cls;
     core.items.getItemEffect(itemId, itemNum);

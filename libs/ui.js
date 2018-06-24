@@ -1305,6 +1305,8 @@ ui.prototype.drawBook = function (index) {
             if (damage<=0) color = '#00FF00';
 
             damage = core.formatBigNumber(damage);
+            if (core.enemys.hasSpecial(core.material.enemys[enemy.id], 19))
+                damage += "+";
         }
         core.fillText('ui', damage, damageOffset, 62 * i + 50, color, 'bold 13px Verdana');
 

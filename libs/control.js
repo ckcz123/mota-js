@@ -290,9 +290,11 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
 
     if (core.isset(values))
         core.values = core.clone(values);
+    else core.values = core.clone(core.data.values);
 
     if (core.isset(flags))
         core.flags = core.clone(flags);
+    else core.flags = core.clone(core.data.flags);
 
     core.events.initGame();
 
@@ -850,6 +852,66 @@ control.prototype.eventMoveHero = function(steps, time, callback) {
     }, time / 8 / core.status.replay.speed)
 }
 
+////// 勇士跳跃事件 //////
+control.prototype.jumpHero = function (ex, ey, time, callback) {
+    var sx=core.status.hero.loc.x, sy=core.status.hero.loc.y;
+    if (!core.isset(ex)) ex=sx;
+    if (!core.isset(ey)) ey=sy;
+
+    time = time || 500;
+    core.clearMap('ui', 0, 0, 416, 416);
+    core.setAlpha('ui', 1.0);
+    core.status.replay.animate=true;
+
+    core.playSound('jump.mp3');
+
+    var dx = ex-sx, dy=ey-sy, distance = Math.round(Math.sqrt(dx * dx + dy * dy));
+    var jump_peak = 6 + distance, jump_count = jump_peak * 2;
+    var currx = sx, curry = sy;
+
+    var heroIcon = core.material.icons.hero[core.getHeroLoc('direction')];
+    var status = 'stop';
+    var height = core.material.icons.hero.height;
+
+    var drawX = function() {
+        return currx * 32;
+    }
+    var drawY = function() {
+        var ret = curry * 32;
+        if(jump_count >= jump_peak){
+            var n = jump_count - jump_peak;
+        }else{
+            var n = jump_peak - jump_count;
+        }
+        return ret - (jump_peak * jump_peak - n * n) / 2;
+    }
+    var updateJump = function() {
+        jump_count--;
+        currx = (currx * jump_count + ex) / (jump_count + 1.0);
+        curry = (curry * jump_count + ey) / (jump_count + 1.0);
+    }
+
+    var animate=window.setInterval(function() {
+
+        if (jump_count>0) {
+            core.clearMap('hero', drawX(), drawY()-height+32, 32, height);
+            updateJump();
+            core.canvas.hero.drawImage(core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height, drawX(), drawY() + 32-height, 32, height);        }
+        else {
+            clearInterval(animate);
+            core.setHeroLoc('x', ex);
+            core.setHeroLoc('y', ey);
+            core.drawHero();
+            core.status.replay.animate=false;
+            if (core.isset(callback)) callback();
+        }
+
+    }, time / 16 / core.status.replay.speed);
+
+
+
+}
+
 ////// 每移动一格后执行的事件 //////
 control.prototype.moveOneStep = function() {
     core.status.hero.steps++;
@@ -928,25 +990,25 @@ control.prototype.getHeroLoc = function (itemName) {
 }
 
 ////// 获得勇士面对位置的x坐标 //////
-control.prototype.nextX = function() {
+control.prototype.nextX = function(n) {
     var scan = {
         'up': {'x': 0, 'y': -1},
         'left': {'x': -1, 'y': 0},
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
-    return core.getHeroLoc('x')+scan[core.getHeroLoc('direction')].x;
+    return core.getHeroLoc('x')+scan[core.getHeroLoc('direction')].x*(n||1);
 }
 
 ////// 获得勇士面对位置的y坐标 //////
-control.prototype.nextY = function () {
+control.prototype.nextY = function (n) {
     var scan = {
         'up': {'x': 0, 'y': -1},
         'left': {'x': -1, 'y': 0},
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
-    return core.getHeroLoc('y')+scan[core.getHeroLoc('direction')].y;
+    return core.getHeroLoc('y')+scan[core.getHeroLoc('direction')].y*(n||1);
 }
 
 ////// 更新领域、夹击、阻击的伤害地图 //////
@@ -1391,8 +1453,9 @@ control.prototype.updateFg = function () {
                         else if (damage < hero_hp * 2 / 3) color = '#FFFF00';
                         else if (damage < hero_hp) color = '#FF7F00';
                         else color = '#FF0000';
-
                         damage = core.formatBigNumber(damage);
+                        if (core.enemys.hasSpecial(core.material.enemys[id], 19))
+                            damage += "+";
                     }
 
                     core.setFillStyle('fg', '#000000');

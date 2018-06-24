@@ -215,6 +215,8 @@ action
     |   setWeather_s
     |   move_s
     |   moveHero_s
+    |   jump_s
+    |   jumpHero_s
     |   playBgm_s
     |   pauseBgm_s
     |   resumeBgm_s
@@ -794,6 +796,45 @@ default : [500,"上右3下2左上左2"]
 colour : this.dataColor
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
 var code = '{"type": "moveHero"'+Int_0+', "steps": '+JSON.stringify(StepString_0)+'},\n';
+return code;
+*/;
+
+jump_s
+    :   '跳跃事件' '起始 x' PosString? ',' 'y' PosString? '终止 x' PosString? ',' 'y' PosString? BGNL? '动画时间' Int? '消失时无动画时间' Bool Newline
+
+
+/* jump_s
+tooltip : jump: 让某个NPC/怪物跳跃
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=jump%EF%BC%9A%E8%AE%A9%E6%9F%90%E4%B8%AANPC%2F%E6%80%AA%E7%89%A9%E8%B7%B3%E8%B7%83
+default : ["","","","",500,null]
+colour : this.eventColor
+var floorstr = '';
+if (PosString_0 && PosString_1) {
+    floorstr += ', "from": ['+PosString_0+','+PosString_1+']';
+}
+if (PosString_2 && PosString_3) {
+    floorstr += ', "to": ['+PosString_2+','+PosString_3+']';
+}
+Int_0 = Int_0 ?(', "time": '+Int_0):'';
+var code = '{"type": "jump"'+floorstr+''+Int_0+', "immediateHide": '+Bool_0+'},\n';
+return code;
+*/;
+
+jumpHero_s
+    :   '跳跃勇士' 'x' PosString? ',' 'y' PosString? '动画时间' Int? Newline
+
+
+/* jumpHero_s
+tooltip : jumpHero: 跳跃勇士
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=jumpHero%EF%BC%9A%E8%B7%B3%E8%B7%83%E5%8B%87%E5%A3%AB
+default : ["","",500]
+colour : this.dataColor
+var floorstr = '';
+if (PosString_0 && PosString_1) {
+    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+}
+Int_0 = Int_0 ?(', "time": '+Int_0):'';
+var code = '{"type": "jumpHero"'+floorstr+Int_0+'},\n';
 return code;
 */;
 
@@ -1438,6 +1479,17 @@ ActionParser.prototype.parseAction = function() {
     case "moveHero":
       this.next = MotaActionBlocks['moveHero_s'].xmlText([
         data.time||0,this.StepString(data.steps),this.next]);
+      break;
+    case "jump": // 跳跃事件
+      data.from=data.from||[];
+      data.to=data.to||[];
+      this.next = MotaActionBlocks['jump_s'].xmlText([
+        data.from[0]||'',data.from[1]||'',data.to[0]||'',data.to[1]||'',data.time||0,data.immediateHide,this.next]);
+      break;
+    case "jumpHero": // 跳跃勇士
+      data.loc=data.loc||[]
+      this.next = MotaActionBlocks['jumpHero_s'].xmlText([
+        data.loc[0]||'',data.loc[1]||'',data.time||0,this.next]);
       break;
     case "changeFloor": // 楼层转换
       this.next = MotaActionBlocks['changeFloor_s'].xmlText([

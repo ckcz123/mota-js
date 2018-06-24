@@ -138,12 +138,12 @@ localStorage
 core.js实际上是所有API的入口（路由），核心API的实现在其他几个文件中，core.js主要进行转发操作。
 
 
-core.nextX()
-获得勇士面向的下一个位置的x坐标
+core.nextX(n)
+获得勇士面向的第n个位置的x坐标，n可以省略默认为1（即正前方）
 
 
-core.nextY()
-获得勇士面向的下一个位置的y坐标
+core.nextY(n)
+获得勇士面向的第n个位置的y坐标，n可以省略默认为1（即正前方）
 
 
 core.openDoor(id, x, y, needKey, callback)    [异步]

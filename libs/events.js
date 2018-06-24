@@ -850,7 +850,7 @@ events.prototype.getNextItem = function() {
 
 ////// 获得某个物品 //////
 events.prototype.getItem = function (itemId, itemNum, itemX, itemY, callback) {
-    // core.getItemAnimate(itemId, itemNum, itemX, itemY);
+    itemNum=itemNum||1;
     core.playSound('item.mp3');
     var itemCls = core.material.items[itemId].cls;
     core.items.getItemEffect(itemId, itemNum);

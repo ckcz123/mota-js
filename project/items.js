@@ -227,6 +227,11 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"cls": "tools",
 			"name": "生命魔杖",
 			"text": "可以恢复100点生命值"
+		},
+		"jumpShoes": {
+			"cls": "tools",
+			"name": "跳跃靴",
+			"text": "能跳跃到前方两格处"
 		}
 	},
 	"itemEffect": {
@@ -304,7 +309,8 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"shield3": "core.plugin.useEquipment(itemId)",
 		"shield4": "core.plugin.useEquipment(itemId)",
 		"shield5": "core.plugin.useEquipment(itemId)",
-		"lifeWand": "core.insertAction([\n\t{\"type\": \"input\", \"text\": \"请输入生命魔杖使用次数：(0-${item:lifeWand})\"},\n\t{\"type\": \"if\", \"condition\": \"flag:input<=item:lifeWand\",\n\t\t\"true\": [\n\t\t\t{\"type\": \"setValue\", \"name\": \"item:lifeWand\", \"value\": \"item:lifeWand-flag:input\"},\n\t\t\t{\"type\": \"setValue\", \"name\": \"status:hp\", \"value\": \"status:hp+flag:input*100\"},\n\t\t\t\"成功使用${flag:input}次生命魔杖，恢复${flag:input*100}点生命。\"\n\t\t],\n\t\t\"false\": [\"输入不合法！\"]\n\t},\n]);\ncore.setItem('lifeWand', core.itemCount('lifeWand')+1);"
+		"lifeWand": "core.insertAction([\n\t{\"type\": \"input\", \"text\": \"请输入生命魔杖使用次数：(0-${item:lifeWand})\"},\n\t{\"type\": \"if\", \"condition\": \"flag:input<=item:lifeWand\",\n\t\t\"true\": [\n\t\t\t{\"type\": \"setValue\", \"name\": \"item:lifeWand\", \"value\": \"item:lifeWand-flag:input\"},\n\t\t\t{\"type\": \"setValue\", \"name\": \"status:hp\", \"value\": \"status:hp+flag:input*100\"},\n\t\t\t\"成功使用${flag:input}次生命魔杖，恢复${flag:input*100}点生命。\"\n\t\t],\n\t\t\"false\": [\"输入不合法！\"]\n\t},\n]);\ncore.setItem('lifeWand', core.itemCount('lifeWand')+1);",
+		"jumpShoes": "core.insertAction({\"type\":\"jumpHero\",\"loc\":[core.nextX(2),core.nextY(2)]});"
 	},
 	"canUseItemEffect": {
 		"book": "true",
@@ -336,6 +342,7 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"shield4": "true",
 		"shiled5": "true",
 		"shield5": "true",
-		"lifeWand": "true"
+		"lifeWand": "true",
+		"jumpShoes": "var nx=core.nextX(2),ny=core.nextY(2);nx>=0&&nx<=12&&ny>=0&&ny<=12&&core.getBlock(core.nextX(2), core.nextY(2))==null"
 	}
 }

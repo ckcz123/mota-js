@@ -990,25 +990,25 @@ control.prototype.getHeroLoc = function (itemName) {
 }
 
 ////// 获得勇士面对位置的x坐标 //////
-control.prototype.nextX = function() {
+control.prototype.nextX = function(n) {
     var scan = {
         'up': {'x': 0, 'y': -1},
         'left': {'x': -1, 'y': 0},
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
-    return core.getHeroLoc('x')+scan[core.getHeroLoc('direction')].x;
+    return core.getHeroLoc('x')+scan[core.getHeroLoc('direction')].x*(n||1);
 }
 
 ////// 获得勇士面对位置的y坐标 //////
-control.prototype.nextY = function () {
+control.prototype.nextY = function (n) {
     var scan = {
         'up': {'x': 0, 'y': -1},
         'left': {'x': -1, 'y': 0},
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
-    return core.getHeroLoc('y')+scan[core.getHeroLoc('direction')].y;
+    return core.getHeroLoc('y')+scan[core.getHeroLoc('direction')].y*(n||1);
 }
 
 ////// 更新领域、夹击、阻击的伤害地图 //////

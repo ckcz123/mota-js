@@ -499,13 +499,13 @@ core.prototype.getHeroLoc = function (itemName) {
 }
 
 ////// 获得勇士面对位置的x坐标 //////
-core.prototype.nextX = function() {
-    return core.control.nextX();
+core.prototype.nextX = function(n) {
+    return core.control.nextX(n);
 }
 
 ////// 获得勇士面对位置的y坐标 //////
-core.prototype.nextY = function () {
-    return core.control.nextY();
+core.prototype.nextY = function (n) {
+    return core.control.nextY(n);
 }
 
 /////////// 自动行走 & 行走控制 END ///////////

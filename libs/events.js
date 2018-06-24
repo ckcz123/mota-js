@@ -432,6 +432,34 @@ events.prototype.doAction = function() {
                 core.events.doAction();
             });
             break;
+        case "jump": // 跳跃事件
+            {
+                var sx=x, sy=y, ex=x,ey=y;
+                if (core.isset(data.from)) {
+                    sx=core.calValue(data.from[0]);
+                    sy=core.calValue(data.from[1]);
+                }
+                if (core.isset(data.to)) {
+                    ex=core.calValue(data.to[0]);
+                    ey=core.calValue(data.to[1]);
+                }
+                core.jumpBlock(sx,sy,ex,ey,data.time,data.immediateHide,function() {
+                    core.events.doAction();
+                });
+                break;
+            }
+        case "jumpHero":
+            {
+                var ex=core.status.hero.loc.x, ey=core.status.hero.loc.y;
+                if (core.isset(data.loc)) {
+                    ex=core.calValue(data.loc[0]);
+                    ey=core.calValue(data.loc[1]);
+                }
+                core.jumpHero(ex,ey,data.time,function() {
+                    core.events.doAction();
+                });
+                break;
+            }
         case "changeFloor": // 楼层转换
             {
                 var heroLoc = {"x": core.calValue(data.loc[0]), "y": core.calValue(data.loc[1])};

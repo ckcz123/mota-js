@@ -463,6 +463,11 @@ core.prototype.eventMoveHero = function(steps, time, callback) {
     core.control.eventMoveHero(steps, time, callback);
 }
 
+////// 使用事件让勇士跳跃。这个函数将不会触发任何事件 //////
+core.prototype.jumpHero = function (ex,ey,time,callback) {
+    core.control.jumpHero(ex,ey,time,callback);
+}
+
 ////// 每移动一格后执行的事件 //////
 core.prototype.moveOneStep = function() {
     core.control.moveOneStep();
@@ -661,6 +666,11 @@ core.prototype.getBlockId = function (x, y, floorId, needEnable) {
 ////// 显示移动某块的动画，达到{“type”:”move”}的效果 //////
 core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
     core.maps.moveBlock(x,y,steps,time,immediateHide,callback)
+}
+
+////// 显示跳跃某块的动画，达到{"type":"jump"}的效果 //////
+core.prototype.jumpBlock = function(sx,sy,ex,ey,time,immediateHide,callback) {
+    core.maps.jumpBlock(sx,sy,ex,ey,time,immediateHide,callback);
 }
 
 ////// 显示/隐藏某个块时的动画效果 //////

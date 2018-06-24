@@ -863,6 +863,8 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
     core.setAlpha('ui', 1.0);
     core.status.replay.animate=true;
 
+    core.playSound('jump.mp3');
+
     var dx = ex-sx, dy=ey-sy, distance = Math.round(Math.sqrt(dx * dx + dy * dy));
     var jump_peak = 6 + distance, jump_count = jump_peak * 2;
     var currx = sx, curry = sy;

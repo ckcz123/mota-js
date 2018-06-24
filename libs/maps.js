@@ -675,7 +675,7 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,immediateHide,callback) {
     core.setOpacity('animate', opacityVal);
     core.canvas.animate.drawImage(blockImage, 0, blockIcon * height, 32, height, block.x * 32, block.y * 32 +32 - height, 32, height);
 
-    core.playSound('jump.ogg');
+    core.playSound('jump.mp3');
 
     var dx = ex-sx, dy=ey-sy, distance = Math.round(Math.sqrt(dx * dx + dy * dy));
     var jump_peak = 6 + distance, jump_count = jump_peak * 2;

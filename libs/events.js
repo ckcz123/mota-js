@@ -85,12 +85,14 @@ events.prototype.startGame = function (hard) {
             if (core.flags.showBattleAnimateConfirm) { // 是否提供“开启战斗动画”的选择项
                 core.status.event.selection = core.flags.battleAnimate ? 0 : 1;
                 core.ui.drawConfirmBox("你想开启战斗动画吗？\n之后可以在菜单栏中开启或关闭。\n（强烈建议新手开启此项）", function () {
+                    core.data.flags.battleAnimate = true;
                     core.flags.battleAnimate = true;
                     core.setLocalStorage('battleAnimate', true);
                     core.startGame(hard);
                     core.utils.__init_seed();
                     core.events.setInitData(hard);
                 }, function () {
+                    core.data.flags.battleAnimate = false;
                     core.flags.battleAnimate = false;
                     core.setLocalStorage('battleAnimate', false);
                     core.startGame(hard);

@@ -2072,12 +2072,15 @@ control.prototype.syncSave = function (type) {
         }
     }
     else {
+        /*
         for (var i=5*(main.savePages||30);i>=1;i--) {
             saves=core.getLocalStorage("save"+i, null);
             if (core.isset(saves)) {
                 break;
             }
         }
+        */
+        saves=core.getLocalStorage("save"+core.status.saveIndex, null);
     }
     if (!core.isset(saves)) {
         core.drawText("没有要同步的存档");
@@ -2097,7 +2100,9 @@ control.prototype.syncSave = function (type) {
             core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+response.msg);
         }
         else {
-            core.drawText("同步成功！\n\n您的存档编号： "+response.code+"\n您的存档密码： "+response.msg+"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。")
+            core.drawText((type=='all'?"所有存档":"存档"+core.status.saveIndex)+"同步成功！\n\n您的存档编号： "
+                +response.code+"\n您的存档密码： "+response.msg
+                +"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。")
         }
     }, function (e) {
         core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+e);
@@ -2149,12 +2154,15 @@ control.prototype.syncLoad = function () {
                 }
                 else {
                     // 只覆盖单存档
+                    /*
                     var index=5*(main.savePages||30);
                     for (var i=5*(main.savePages||30);i>=1;i--) {
                         if (core.getLocalStorage("save"+i, null)==null)
                             index=i;
                         else break;
                     }
+                    */
+                    var index = core.status.saveIndex;
                     core.setLocalStorage("save"+index, data);
                     core.drawText("同步成功！\n单存档已覆盖至存档"+index);
                 }

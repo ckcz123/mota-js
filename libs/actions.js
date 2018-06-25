@@ -1744,14 +1744,8 @@ actions.prototype.clickSyncSave = function (x,y) {
                         })
                     }
                     else {
-                        var index=5*(main.savePages||30);
-                        for (var i=5*(main.savePages||30);i>=1;i--) {
-                            if (core.getLocalStorage("save"+i, null)==null)
-                                index=i;
-                            else break;
-                        }
-                        core.setLocalStorage("save"+index, data);
-                        core.drawText("同步成功！\n单存档已覆盖至存档"+index);
+                        core.setLocalStorage("save"+core.status.saveIndex, data);
+                        core.drawText("同步成功！\n单存档已覆盖至存档"+core.status.saveIndex);
                     }
                 }, function () {
 
@@ -1880,12 +1874,7 @@ actions.prototype.clickLocalSaveSelect = function (x,y) {
                 }
                 break;
             case 1:
-                for (var i=5*(main.savePages||30);i>=1;i--) {
-                    saves=core.getLocalStorage("save"+i, null);
-                    if (core.isset(saves)) {
-                        break;
-                    }
-                }
+                saves=core.getLocalStorage("save"+core.status.saveIndex, null);
                 break;
             case 2:
                 break;

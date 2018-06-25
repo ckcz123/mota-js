@@ -1112,7 +1112,7 @@ ui.prototype.drawSyncSave = function () {
 ui.prototype.drawSyncSelect = function () {
     core.status.event.id = 'syncSelect';
     this.drawChoices(null, [
-        "同步本地所有存档", "只同步最新单存档", "返回上级菜单"
+        "同步本地所有存档", "只同步选中单存档", "返回上级菜单"
     ]);
 }
 
@@ -1120,7 +1120,7 @@ ui.prototype.drawSyncSelect = function () {
 ui.prototype.drawLocalSaveSelect = function () {
     core.status.event.id = 'localSaveSelect';
     this.drawChoices(null, [
-        "下载所有存档", "只下载最新单存档", "返回上级菜单"
+        "下载所有存档", "只下载选中单存档", "返回上级菜单"
     ]);
 }
 
@@ -1307,6 +1307,9 @@ ui.prototype.drawBook = function (index) {
             damage = core.formatBigNumber(damage);
             if (core.enemys.hasSpecial(core.material.enemys[enemy.id], 19))
                 damage += "+";
+            if (core.material.enemys[enemy.id].notBomb)
+                damage += "[b]";
+
         }
         core.fillText('ui', damage, damageOffset, 62 * i + 50, color, 'bold 13px Verdana');
 

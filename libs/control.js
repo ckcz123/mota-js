@@ -2072,14 +2072,6 @@ control.prototype.syncSave = function (type) {
         }
     }
     else {
-        /*
-        for (var i=5*(main.savePages||30);i>=1;i--) {
-            saves=core.getLocalStorage("save"+i, null);
-            if (core.isset(saves)) {
-                break;
-            }
-        }
-        */
         saves=core.getLocalStorage("save"+core.status.saveIndex, null);
     }
     if (!core.isset(saves)) {
@@ -2111,10 +2103,12 @@ control.prototype.syncSave = function (type) {
 
 ////// 从服务器加载存档 //////
 control.prototype.syncLoad = function () {
+    core.interval.onDownInterval = 'tmp';
     var id = prompt("请输入存档编号：");
     if (id==null || id=="") {
         core.ui.drawSyncSave(); return;
     }
+    core.interval.onDownInterval = 'tmp';
     var password = prompt("请输入存档密码：");
     if (password==null || password=="") {
         core.ui.drawSyncSave(); return;
@@ -2154,17 +2148,8 @@ control.prototype.syncLoad = function () {
                 }
                 else {
                     // 只覆盖单存档
-                    /*
-                    var index=5*(main.savePages||30);
-                    for (var i=5*(main.savePages||30);i>=1;i--) {
-                        if (core.getLocalStorage("save"+i, null)==null)
-                            index=i;
-                        else break;
-                    }
-                    */
-                    var index = core.status.saveIndex;
-                    core.setLocalStorage("save"+index, data);
-                    core.drawText("同步成功！\n单存档已覆盖至存档"+index);
+                    core.setLocalStorage("save"+core.status.saveIndex, data);
+                    core.drawText("同步成功！\n单存档已覆盖至存档"+core.status.saveIndex);
                 }
                 break;
             case -1:

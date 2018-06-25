@@ -1112,7 +1112,7 @@ ui.prototype.drawSyncSave = function () {
 ui.prototype.drawSyncSelect = function () {
     core.status.event.id = 'syncSelect';
     this.drawChoices(null, [
-        "同步本地所有存档", "只同步选中单存档", "返回上级菜单"
+        "同步本地所有存档", "只同步当前单存档", "返回上级菜单"
     ]);
 }
 
@@ -1120,7 +1120,7 @@ ui.prototype.drawSyncSelect = function () {
 ui.prototype.drawLocalSaveSelect = function () {
     core.status.event.id = 'localSaveSelect';
     this.drawChoices(null, [
-        "下载所有存档", "只下载选中单存档", "返回上级菜单"
+        "下载所有存档", "只下载当前单存档", "返回上级菜单"
     ]);
 }
 

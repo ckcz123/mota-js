@@ -63,6 +63,7 @@ control.prototype.setRequestAnimationFrame = function () {
         if (core.isPlaying() && core.isset(core.status) && core.isset(core.status.hero)
             && core.isset(core.status.hero.statistics)) {
             core.status.hero.statistics.totalTime += timestamp-(core.status.hero.statistics.start||timestamp);
+            core.status.hero.statistics.currTime += timestamp-(core.status.hero.statistics.start||timestamp);
             core.status.hero.statistics.start=timestamp;
         }
 
@@ -242,7 +243,7 @@ control.prototype.clearStatus = function() {
 }
 
 ////// 重置游戏状态和初始数据 //////
-control.prototype.resetStatus = function(hero, hard, floorId, route, maps) {
+control.prototype.resetStatus = function(hero, hard, floorId, route, maps, values, flags) {
 
     var totalTime=0;
     if (core.isset(core.status) && core.isset(core.status.hero)
@@ -260,12 +261,14 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps) {
     core.status.maps = core.clone(maps);
     // 初始化怪物
     core.material.enemys = core.clone(core.enemys.getEnemys());
+    core.material.items = core.clone(core.items.getItems());
     // 初始化人物属性
     core.status.hero = core.clone(hero);
     // 统计数据
     if (!core.isset(core.status.hero.statistics))
         core.status.hero.statistics = {
             'totalTime': totalTime,
+            'currTime': 0,
             'hp': 0,
             'battleDamage': 0,
             'poisonDamage': 0,
@@ -282,6 +285,18 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps) {
         core.status.route = route;
     // 保存的Index
     core.status.saveIndex = core.getLocalStorage('saveIndex2', 1);
+
+    core.status.automaticRoute.clickMoveDirectly = core.getLocalStorage('clickMoveDirectly', false);
+
+    if (core.isset(values))
+        core.values = core.clone(values);
+    else core.values = core.clone(core.data.values);
+
+    if (core.isset(flags))
+        core.flags = core.clone(flags);
+    else core.flags = core.clone(core.data.flags);
+
+    core.events.initGame();
 
 }
 
@@ -302,8 +317,9 @@ control.prototype.startGame = function (hard, callback) {
         formData.append('name', core.firstData.name);
         formData.append('version', core.firstData.version);
         formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
-        formData.append('hard', hard);
+        formData.append('hard', core.encodeBase64(hard));
         formData.append('hardCode', core.getFlag('hard', 0));
+        formData.append('base64', 1);
 
         core.utils.http("POST", "/games/upload.php", formData);
     })
@@ -379,6 +395,9 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
                     var ignoreSteps = core.canMoveDirectly(destX, destY);
                     if (ignoreSteps>0) {
                         core.clearMap('hero', 0, 0, 416, 416);
+                        var lastDirection = core.status.route[core.status.route.length-1];
+                        if (['left', 'right', 'up', 'down'].indexOf(lastDirection)>=0)
+                            core.setHeroLoc('direction', lastDirection);
                         core.setHeroLoc('x', destX);
                         core.setHeroLoc('y', destY);
                         core.drawHero();
@@ -407,6 +426,22 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
         }
         return;
     }
+
+    // 单击瞬间移动
+    if (core.status.automaticRoute.clickMoveDirectly && core.status.heroStop) {
+        var ignoreSteps = core.canMoveDirectly(destX, destY);
+        if (ignoreSteps>0) {
+            core.clearMap('hero', 0, 0, 416, 416);
+            core.setHeroLoc('x', destX);
+            core.setHeroLoc('y', destY);
+            core.drawHero();
+            core.status.route.push("move:"+destX+":"+destY);
+            core.status.hero.statistics.moveDirectly++;
+            core.status.hero.statistics.ignoreSteps+=ignoreSteps;
+            return;
+        }
+    }
+
     var step = 0;
     var tempStep = null;
     var moveStep;
@@ -718,8 +753,19 @@ control.prototype.moveHero = function (direction, callback) {
             if (!core.status.heroStop) {
                 if (core.hasFlag('debug') && core.status.ctrlDown) {
                     if (core.status.heroMoving!=0) return;
+                    // 检测是否穿出去
+                    var scan = {
+                        'up': {'x': 0, 'y': -1},
+                        'left': {'x': -1, 'y': 0},
+                        'down': {'x': 0, 'y': 1},
+                        'right': {'x': 1, 'y': 0}
+                    };
+                    direction = core.getHeroLoc('direction');
+                    var nx = core.getHeroLoc('x') + scan[direction].x, ny=core.getHeroLoc('y') + scan[direction].y;
+                    if (nx<0 || nx>12 || ny<0 || ny>12) return;
+
                     core.status.heroMoving=-1;
-                    core.eventMoveHero([core.getHeroLoc('direction')], 100, function () {
+                    core.eventMoveHero([direction], 100, function () {
                         core.status.heroMoving=0;
                         doAction();
                     });
@@ -806,6 +852,66 @@ control.prototype.eventMoveHero = function(steps, time, callback) {
     }, time / 8 / core.status.replay.speed)
 }
 
+////// 勇士跳跃事件 //////
+control.prototype.jumpHero = function (ex, ey, time, callback) {
+    var sx=core.status.hero.loc.x, sy=core.status.hero.loc.y;
+    if (!core.isset(ex)) ex=sx;
+    if (!core.isset(ey)) ey=sy;
+
+    time = time || 500;
+    core.clearMap('ui', 0, 0, 416, 416);
+    core.setAlpha('ui', 1.0);
+    core.status.replay.animate=true;
+
+    core.playSound('jump.mp3');
+
+    var dx = ex-sx, dy=ey-sy, distance = Math.round(Math.sqrt(dx * dx + dy * dy));
+    var jump_peak = 6 + distance, jump_count = jump_peak * 2;
+    var currx = sx, curry = sy;
+
+    var heroIcon = core.material.icons.hero[core.getHeroLoc('direction')];
+    var status = 'stop';
+    var height = core.material.icons.hero.height;
+
+    var drawX = function() {
+        return currx * 32;
+    }
+    var drawY = function() {
+        var ret = curry * 32;
+        if(jump_count >= jump_peak){
+            var n = jump_count - jump_peak;
+        }else{
+            var n = jump_peak - jump_count;
+        }
+        return ret - (jump_peak * jump_peak - n * n) / 2;
+    }
+    var updateJump = function() {
+        jump_count--;
+        currx = (currx * jump_count + ex) / (jump_count + 1.0);
+        curry = (curry * jump_count + ey) / (jump_count + 1.0);
+    }
+
+    var animate=window.setInterval(function() {
+
+        if (jump_count>0) {
+            core.clearMap('hero', drawX(), drawY()-height+32, 32, height);
+            updateJump();
+            core.canvas.hero.drawImage(core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height, drawX(), drawY() + 32-height, 32, height);        }
+        else {
+            clearInterval(animate);
+            core.setHeroLoc('x', ex);
+            core.setHeroLoc('y', ey);
+            core.drawHero();
+            core.status.replay.animate=false;
+            if (core.isset(callback)) callback();
+        }
+
+    }, time / 16 / core.status.replay.speed);
+
+
+
+}
+
 ////// 每移动一格后执行的事件 //////
 control.prototype.moveOneStep = function() {
     core.status.hero.steps++;
@@ -884,25 +990,25 @@ control.prototype.getHeroLoc = function (itemName) {
 }
 
 ////// 获得勇士面对位置的x坐标 //////
-control.prototype.nextX = function() {
+control.prototype.nextX = function(n) {
     var scan = {
         'up': {'x': 0, 'y': -1},
         'left': {'x': -1, 'y': 0},
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
-    return core.getHeroLoc('x')+scan[core.getHeroLoc('direction')].x;
+    return core.getHeroLoc('x')+scan[core.getHeroLoc('direction')].x*(n||1);
 }
 
 ////// 获得勇士面对位置的y坐标 //////
-control.prototype.nextY = function () {
+control.prototype.nextY = function (n) {
     var scan = {
         'up': {'x': 0, 'y': -1},
         'left': {'x': -1, 'y': 0},
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
-    return core.getHeroLoc('y')+scan[core.getHeroLoc('direction')].y;
+    return core.getHeroLoc('y')+scan[core.getHeroLoc('direction')].y*(n||1);
 }
 
 ////// 更新领域、夹击、阻击的伤害地图 //////
@@ -1347,8 +1453,9 @@ control.prototype.updateFg = function () {
                         else if (damage < hero_hp * 2 / 3) color = '#FFFF00';
                         else if (damage < hero_hp) color = '#FF7F00';
                         else color = '#FF0000';
-
                         damage = core.formatBigNumber(damage);
+                        if (core.enemys.hasSpecial(core.material.enemys[id], 19))
+                            damage += "+";
                     }
 
                     core.setFillStyle('fg', '#000000');
@@ -1630,7 +1737,7 @@ control.prototype.replay = function () {
             var tools = Object.keys(core.status.hero.items.tools).sort();
             var constants = Object.keys(core.status.hero.items.constants).sort();
             var index;
-            if ((index=tools.indexOf(itemId))>=0 || (index=constants.indexOf(itemId)+100)>=100) {
+            if ((index=tools.indexOf(itemId))>=0 || (index=constants.indexOf(itemId)+1000)>=1000) {
                 core.ui.drawToolbox(index);
                 setTimeout(function () {
                     core.ui.closePanel();
@@ -1902,7 +2009,7 @@ control.prototype.doSL = function (id, type) {
         }
         if (data.version != core.firstData.version) {
             // core.drawTip("存档版本不匹配");
-            if (confirm("存档版本不匹配！\n你想回放此存档的录像吗？")) {
+            if (confirm("存档版本不匹配！\n你想回放此存档的录像吗？\n可以随时停止录像播放以继续游戏。")) {
                 core.dom.startPanel.style.display = 'none';
                 var seed = data.hero.flags.seed;
                 core.resetStatus(core.firstData.hero, data.hard, core.firstData.floorId, null, core.initStatus.maps);
@@ -1965,12 +2072,7 @@ control.prototype.syncSave = function (type) {
         }
     }
     else {
-        for (var i=5*(main.savePages||30);i>=1;i--) {
-            saves=core.getLocalStorage("save"+i, null);
-            if (core.isset(saves)) {
-                break;
-            }
-        }
+        saves=core.getLocalStorage("save"+core.status.saveIndex, null);
     }
     if (!core.isset(saves)) {
         core.drawText("没有要同步的存档");
@@ -1990,7 +2092,9 @@ control.prototype.syncSave = function (type) {
             core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+response.msg);
         }
         else {
-            core.drawText("同步成功！\n\n您的存档编号： "+response.code+"\n您的存档密码： "+response.msg+"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。")
+            core.drawText((type=='all'?"所有存档":"存档"+core.status.saveIndex)+"同步成功！\n\n您的存档编号： "
+                +response.code+"\n您的存档密码： "+response.msg
+                +"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。")
         }
     }, function (e) {
         core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+e);
@@ -1999,10 +2103,12 @@ control.prototype.syncSave = function (type) {
 
 ////// 从服务器加载存档 //////
 control.prototype.syncLoad = function () {
+    core.interval.onDownInterval = 'tmp';
     var id = prompt("请输入存档编号：");
     if (id==null || id=="") {
         core.ui.drawSyncSave(); return;
     }
+    core.interval.onDownInterval = 'tmp';
     var password = prompt("请输入存档密码：");
     if (password==null || password=="") {
         core.ui.drawSyncSave(); return;
@@ -2042,14 +2148,8 @@ control.prototype.syncLoad = function () {
                 }
                 else {
                     // 只覆盖单存档
-                    var index=5*(main.savePages||30);
-                    for (var i=5*(main.savePages||30);i>=1;i--) {
-                        if (core.getLocalStorage("save"+i, null)==null)
-                            index=i;
-                        else break;
-                    }
-                    core.setLocalStorage("save"+index, data);
-                    core.drawText("同步成功！\n单存档已覆盖至存档"+index);
+                    core.setLocalStorage("save"+core.status.saveIndex, data);
+                    core.drawText("同步成功！\n单存档已覆盖至存档"+core.status.saveIndex);
                 }
                 break;
             case -1:
@@ -2075,6 +2175,8 @@ control.prototype.saveData = function() {
         'hard': core.status.hard,
         'maps': core.maps.save(core.status.maps),
         'route': core.encodeRoute(core.status.route),
+        'values': core.clone(core.values),
+        'flags': core.clone(core.flags),
         'shops': {},
         'version': core.firstData.version,
         "time": new Date().getTime()
@@ -2094,7 +2196,8 @@ control.prototype.saveData = function() {
 ////// 从本地读档 //////
 control.prototype.loadData = function (data, callback) {
 
-    core.resetStatus(data.hero, data.hard, data.floorId, core.decodeRoute(data.route), core.maps.load(data.maps));
+    core.resetStatus(data.hero, data.hard, data.floorId, core.decodeRoute(data.route), core.maps.load(data.maps),
+        data.values, data.flags);
 
     // load shop times
     for (var shop in core.status.shops) {
@@ -2287,7 +2390,8 @@ control.prototype.playSound = function (sound) {
 
 ////// 清空状态栏 //////
 control.prototype.clearStatusBar = function() {
-    var statusList = ['floor', 'lv', 'hp', 'atk', 'def', 'mdef', 'money', 'experience', 'up', 'yellowKey', 'blueKey', 'redKey', 'poison', 'weak', 'curse', 'hard'];
+    var statusList = ['floor', 'lv', 'hpmax', 'hp', 'atk', 'def', 'mdef', 'money', 'experience',
+        'up', 'yellowKey', 'blueKey', 'redKey', 'poison', 'weak', 'curse', 'hard'];
     statusList.forEach(function (e) {
         core.statusBar[e].innerHTML = "&nbsp;";
     });
@@ -2317,6 +2421,8 @@ control.prototype.updateStatusBar = function () {
 
     var statusList = ['hpmax', 'hp', 'atk', 'def', 'mdef', 'money', 'experience'];
     statusList.forEach(function (item) {
+        if (core.isset(core.status.hero[item]))
+            core.status.hero[item] = Math.floor(core.status.hero[item]);
         core.statusBar[item].innerHTML = core.formatBigNumber(core.getStatus(item));
     });
 

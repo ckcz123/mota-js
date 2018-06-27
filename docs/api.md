@@ -1,6 +1,6 @@
 # 附录: API列表
 
-?> 目前版本**v2.2.1**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.3**，上次更新时间：* {docsify-updated} *
 
 **这里只列出所有可能会被造塔者用到的常用API，更多的有关内容请在代码内进行查询。**
 
@@ -138,11 +138,13 @@ localStorage
 core.js实际上是所有API的入口（路由），核心API的实现在其他几个文件中，core.js主要进行转发操作。
 
 
-core.nextX()
-获得勇士面向的下一个位置的x坐标
+core.nextX(n)
+获得勇士面向的第n个位置的x坐标，n可以省略默认为1（即正前方）
 
-core.nextY()
-获得勇士面向的下一个位置的y坐标
+
+core.nextY(n)
+获得勇士面向的第n个位置的y坐标，n可以省略默认为1（即正前方）
+
 
 core.openDoor(id, x, y, needKey, callback)    [异步]
 尝试开门操作。id为目标点的ID，x和y为坐标，needKey表示是否需要使用钥匙，callback为开门完毕后的回调函数。
@@ -154,7 +156,7 @@ core.battle(id, x, y, force, callback)    [异步]
 例如：core.battle('greenSlime', null, null, true)
 
 
-core.trigger(x, y)
+core.trigger(x, y)    [异步]
 触发某个地点的事件。
 
 
@@ -199,13 +201,17 @@ needEnable表示是否需要该点处于启用状态才返回，其值不设置�
 
 
 core.showBlock(x, y, floorId)
-将某个点从禁用变成启用状态
+将某个点从禁用变成启用状态。
 
 
 core.removeBlock(x, y, floorId)
-将某个点删除或从禁用变成启用状态。
+将某个点删除或从启用变成禁用状态。
 如果该点不存在自定义事件（比如普通的怪物），则将直接从地图中删除。
 否则将该点设置为禁用，以供以后可能的启用事件。
+
+
+core.setBlock(number, x, y, floorId)
+改变图块。number为要改变到的图块数字，x和y为坐标，floorId为楼层ID，可忽略表示当前楼层。
 
 
 core.useItem(itemId, callback)
@@ -214,6 +220,14 @@ core.useItem(itemId, callback)
 
 core.canUseItem(itemId)
 返回当前能否使用某个道具。
+
+
+core.addItem(itemId, number)
+将某个道具增加number个。
+
+
+core.removeItem(itemId)
+将某个道具个数-1；如果道具个数归0则从道具列表删除。
 
 
 core.getNextItem()
@@ -268,10 +282,6 @@ num如果设置大于0，则生成一个[0, num-1]之间的数；否则生成一
 
 core.restart()    [异步]
 返回标题界面。
-
-
-core.updateFg()
-更新全地图显伤。包括怪物显伤、临界显示和领域显伤等。
 
 
 ========== core.actions.XXX 和游戏控制相关的函数 ==========
@@ -389,6 +399,7 @@ floorId为楼层ID，可忽略为当前楼层。
 
 core.maps.canMoveDirectly(destX, destY)
 判断当前能否瞬间移动到某个点。
+该函数如果返回0则不可瞬间移动，大于0则可以瞬间移动，且返回值是跨度（即少走的步数）。
 
 
 core.maps.removeBlockById(index, floorId)
@@ -424,6 +435,14 @@ core.utils.cropImage(image, size)
 
 core.utils.unshift(a, b)
 向某个数组前插入另一个数组或元素
+
+
+core.utils.encodeBase64(str)
+Base64加密字符串
+
+
+core.utils.decodeBase64(str)
+Base64解密字符串
 
 
 core.utils.formatBigNumber(x)

@@ -76,7 +76,19 @@ utils.prototype.unshift = function (a,b) {
 ////// 设置本地存储 //////
 utils.prototype.setLocalStorage = function(key, value) {
     try {
-        localStorage.setItem(core.firstData.name + "_" + key, JSON.stringify(value));
+        var str = JSON.stringify(value);
+        var compressed = LZString.compress(str);
+
+        // test if we can save to localStorage
+        localStorage.setItem("__tmp__", compressed);
+        if (LZString.decompress(localStorage.getItem("__tmp__"))==str) {
+            localStorage.setItem(core.firstData.name + "_" + key, compressed);
+        }
+        else {
+            // We cannot compress the data
+            localStorage.setItem(core.firstData.name + "_" + key, str);
+        }
+        localStorage.removeItem("__tmp__");
         return true;
     }
     catch (e) {
@@ -87,9 +99,24 @@ utils.prototype.setLocalStorage = function(key, value) {
 
 ////// 获得本地存储 //////
 utils.prototype.getLocalStorage = function(key, defaultValue) {
-    var value = localStorage.getItem(core.firstData.name+"_"+key);
-    if (core.isset(value)) return JSON.parse(value);
-    return defaultValue;
+    try {
+        var value = localStorage.getItem(core.firstData.name+"_"+key);
+        if (core.isset(value)) {
+            var output = LZString.decompress(value);
+            if (core.isset(output) && output.length>0) {
+                try {
+                    return JSON.parse(output);
+                }
+                catch (ee) {}
+            }
+            return JSON.parse(value);
+        }
+        return defaultValue;
+    }
+    catch (e) {
+        console.log(e);
+        return defaultValue;
+    }
 }
 
 ////// 移除本地存储 //////
@@ -323,6 +350,20 @@ utils.prototype.subarray = function (a, b) {
         if (na.shift() != nb.shift()) return null;
     }
     return na;
+}
+
+////// Base64加密 //////
+utils.prototype.encodeBase64 = function (str) {
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
+        return String.fromCharCode(parseInt(p1, 16))
+    }))
+}
+
+////// Base64解密 //////
+utils.prototype.decodeBase64 = function (str) {
+    return decodeURIComponent(atob(str).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
 }
 
 utils.prototype.__init_seed = function () {

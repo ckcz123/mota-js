@@ -1,6 +1,6 @@
 # 事件
 
-?> 目前版本**v2.2.1**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.3**，上次更新时间：* {docsify-updated} *
 
 本章内将对样板所支持的事件进行介绍。
 
@@ -591,7 +591,7 @@ direction为可选的，指定的话将使勇士的朝向变成该方向
 
 time为可选的，指定的话将作为楼层切换动画的时间。
 
-**time也可以置为0，如果为0则没有楼层切换动画。**
+**如果time指定为小于100，则视为没有楼层切换动画。**
 
 !> **changeFloor到达一个新的楼层，将不会执行firstArrive事件！如有需求请在到达点设置自定义事件，然后使用type: trigger立刻调用之。**
 
@@ -832,6 +832,48 @@ move完毕后移动的NPC/怪物一定会消失，只不过可以通过immediate
 可以看到，和上面的move事件几乎完全相同，除了不能指定loc，且少了immediateHide选项。
 
 不过值得注意的是，用这种方式移动勇士的过程中将无视一切地形，无视一切事件，中毒状态也不会扣血。
+
+### jump：让某个NPC/怪物跳跃
+
+如果我们需要移动某个NPC或怪物，可以使用`{"type": "jump"}`。
+
+下面是该事件常见的写法：
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "jump", "from": [3,6], "to": [2,1], "time": 750, "immediateHide": true},
+]
+```
+
+from为需要跳跃的事件位置。可以省略，如果省略则移动本事件。
+
+to为要跳跃到的坐标。可以省略，如果省略则跳跃到当前坐标。
+
+time选项必须指定，为全程跳跃所需要用到的时间。
+
+immediateHide为一个可选项，同上代表该跳跃完毕后是否立刻消失。如果该项指定了并为true，则跳跃完毕后直接消失，否则以动画效果消失。
+
+值得注意的是，当调用jump事件时，实际上是使事件脱离了原始地点。
+
+为了避免冲突，同move事件一样规定：jump事件会自动调用该点的hide事件。
+
+如果是本地跳跃，需要在跳跃完毕后再启用事件。
+
+### jumpHero：跳跃勇士
+
+如果我们需要跳跃勇士，可以使用`{"type": "jumpHero"}`。
+
+下面是该事件常见的写法：
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "jump", "loc": [3,6], "time": 750},
+]
+```
+
+loc为目标坐标，可以忽略表示原地跳跃（请注意是原地跳跃而不是跳跃到当前事件点）。
+
+time选项为该跳跃所需要用到的时间。
 
 ### playBgm：播放背景音乐
 
@@ -1437,6 +1479,8 @@ core.insertAction([
 },
 ```
 
+!> 多个机关门请分别设置开门变量如door1, door2等等。请勿存在两个机关门用相同的变量！
+
 同样，为了实现类似于RMXP中，到达某一层后自动触发某段事件的效果，样板中还存在`firstArrive`事件。
 
 当且仅当勇士第一次到达某层时，将会触发此事件。可以利用此事件来显示一些剧情，或再让它调用 `{"type": "trigger"}` 来继续调用其他的事件。
@@ -1527,9 +1571,9 @@ core.insertAction([
 }
 
 // 在封印时，可以调用setValue将该flag置为真，然后调用自定义脚本 core.afterLoadData() 即可。
-"x,y": [ // 封印
-    {"type": "setValue", "name": "flag:fengyin", "value": "true"},
-    {"type": "function", "function": function() {
+"x,y": [
+    {"type": "setValue", "name": "flag:fengyin", "value": "true"}, // 封印
+    {"type": "function", "function": function() { // 手动调用自定义JS脚本 core.afterLoadData()
         core.afterLoadData();
     }}
 ]

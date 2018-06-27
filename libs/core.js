@@ -103,6 +103,7 @@ function core() {
             'cursorX': null,
             'cursorY': null,
             "moveDirectly": false,
+            'clickMoveDirectly': false,
         },
 
         // 按下键的时间：为了判定双击
@@ -179,7 +180,7 @@ core.prototype.init = function (coreData, callback) {
     core.dom.logoLabel.innerHTML = core.firstData.title;
     document.title = core.firstData.title + " - HTML5魔塔";
     document.getElementById("startLogo").innerHTML = core.firstData.title;
-    core.material.items = core.items.getItems();
+    core.material.items = core.clone(core.items.getItems());
     core.initStatus.maps = core.maps.initMaps(core.floorIds);
     core.material.enemys = core.clone(core.enemys.getEnemys());
     core.material.icons = core.icons.getIcons();
@@ -303,8 +304,8 @@ core.prototype.clearStatus = function() {
 }
 
 ////// 重置游戏状态和初始数据 //////
-core.prototype.resetStatus = function(hero, hard, floorId, route, maps) {
-    core.control.resetStatus(hero, hard, floorId, route, maps)
+core.prototype.resetStatus = function(hero, hard, floorId, route, maps, values, flags) {
+    core.control.resetStatus(hero, hard, floorId, route, maps, values, flags);
 }
 
 ////// 开始游戏 //////
@@ -462,6 +463,11 @@ core.prototype.eventMoveHero = function(steps, time, callback) {
     core.control.eventMoveHero(steps, time, callback);
 }
 
+////// 使用事件让勇士跳跃。这个函数将不会触发任何事件 //////
+core.prototype.jumpHero = function (ex,ey,time,callback) {
+    core.control.jumpHero(ex,ey,time,callback);
+}
+
 ////// 每移动一格后执行的事件 //////
 core.prototype.moveOneStep = function() {
     core.control.moveOneStep();
@@ -493,13 +499,13 @@ core.prototype.getHeroLoc = function (itemName) {
 }
 
 ////// 获得勇士面对位置的x坐标 //////
-core.prototype.nextX = function() {
-    return core.control.nextX();
+core.prototype.nextX = function(n) {
+    return core.control.nextX(n);
 }
 
 ////// 获得勇士面对位置的y坐标 //////
-core.prototype.nextY = function () {
-    return core.control.nextY();
+core.prototype.nextY = function (n) {
+    return core.control.nextY(n);
 }
 
 /////////// 自动行走 & 行走控制 END ///////////
@@ -662,6 +668,11 @@ core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
     core.maps.moveBlock(x,y,steps,time,immediateHide,callback)
 }
 
+////// 显示跳跃某块的动画，达到{"type":"jump"}的效果 //////
+core.prototype.jumpBlock = function(sx,sy,ex,ey,time,immediateHide,callback) {
+    core.maps.jumpBlock(sx,sy,ex,ey,time,immediateHide,callback);
+}
+
 ////// 显示/隐藏某个块时的动画效果 //////
 core.prototype.animateBlock = function (loc,type,time,callback) {
     core.maps.animateBlock(loc,type,time,callback)
@@ -685,6 +696,11 @@ core.prototype.removeBlockById = function (index, floorId) {
 ////// 一次性删除多个block //////
 core.prototype.removeBlockByIds = function (floorId, ids) {
     core.maps.removeBlockByIds(floorId, ids);
+}
+
+////// 改变图块 //////
+core.prototype.setBlock = function (number, x, y, floorId) {
+    core.maps.setBlock(number, x, y, floorId);
 }
 
 ////// 添加一个全局动画 //////
@@ -1105,6 +1121,16 @@ core.prototype.isset = function (val) {
 ////// 获得子数组 //////
 core.prototype.subarray = function (a, b) {
     return core.utils.subarray(a, b);
+}
+
+////// Base64加密 //////
+core.prototype.encodeBase64 = function (str) {
+    return core.utils.encodeBase64(str);
+}
+
+////// Base64解密 //////
+core.prototype.decodeBase64 = function (str) {
+    return core.utils.decodeBase64(str);
 }
 
 ////// 生成随机数（seed方法） //////

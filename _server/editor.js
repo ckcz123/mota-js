@@ -514,6 +514,35 @@ editor.prototype.listen = function () {
         }
     }
 
+    document.getElementById('mid').onmousewheel = function (e) {
+        e.preventDefault();
+        var wheel = function (direct) {
+            var index=editor.core.floorIds.indexOf(editor.currentFloorId);
+            var toId = editor.currentFloorId;
+
+            if (direct>0 && index<editor.core.floorIds.length-1)
+                toId = editor.core.floorIds[index+1];
+            else if (direct<0 && index>0)
+                toId = editor.core.floorIds[index-1];
+            else return;
+
+            editor_mode.onmode('nextChange');
+            editor_mode.onmode('floor');
+            document.getElementById('selectFloor').value = toId;
+            editor.changeFloor(toId);
+        }
+
+        try {
+            if (e.wheelDelta)
+                wheel(Math.sign(e.wheelDelta))
+            else if (e.detail)
+                wheel(Math.sign(e.detail));
+        }
+        catch (ee) {
+            console.log(ee);
+        }
+    }
+
     var preMapData = {};
     var currDrawData = {
         pos: [],
@@ -546,8 +575,8 @@ editor.prototype.listen = function () {
         if (e.keyCode==33) {
             e.preventDefault();
             var index=editor.core.floorIds.indexOf(editor.currentFloorId);
-            if (index>0) {
-                var toId = editor.core.floorIds[index-1];
+            if (index<editor.core.floorIds.length-1) {
+                var toId = editor.core.floorIds[index+1];
                 editor_mode.onmode('nextChange');
                 editor_mode.onmode('floor');
                 document.getElementById('selectFloor').value = toId;
@@ -557,8 +586,8 @@ editor.prototype.listen = function () {
         if (e.keyCode==34) {
             e.preventDefault();
             var index=editor.core.floorIds.indexOf(editor.currentFloorId);
-            if (index<editor.core.floorIds.length-1) {
-                var toId = editor.core.floorIds[index+1];
+            if (index>0) {
+                var toId = editor.core.floorIds[index-1];
                 editor_mode.onmode('nextChange');
                 editor_mode.onmode('floor');
                 document.getElementById('selectFloor').value = toId;

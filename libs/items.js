@@ -123,6 +123,7 @@ items.prototype.removeItem = function (itemId) {
 
 ////// 增加某个物品的个数 //////
 items.prototype.addItem = function (itemId, itemNum) {
+    itemNum=itemNum||1;
     var itemData = core.material.items[itemId];
     var itemCls = itemData.cls;
     if (itemCls == 'items') return;
@@ -134,5 +135,8 @@ items.prototype.addItem = function (itemId, itemNum) {
         core.status.hero.items[itemCls][itemId] = 0;
     }
     core.status.hero.items[itemCls][itemId] += itemNum;
+    // 永久道具只能有一个
+    if (itemCls == 'constants' && core.status.hero.items[itemCls][itemId]>1)
+        core.status.hero.items[itemCls][itemId] = 1;
 }
 

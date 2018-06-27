@@ -20,12 +20,22 @@ enemys.prototype.getEnemys = function (enemyId) {
 ////// 判断是否含有某特殊属性 //////
 enemys.prototype.hasSpecial = function (special, test) {
 
+    if (!core.isset(special)) return false;
+
     if (special instanceof Array) {
         return special.indexOf(test)>=0;
     }
 
     if (typeof special == 'number') {
         return special!=0 && (special%100==test||this.hasSpecial(parseInt(special/100), test));
+    }
+
+    if (typeof special == 'string') {
+        return this.hasSpecial(core.material.enemys[special], test);
+    }
+
+    if (core.isset(special.special)) {
+        return this.hasSpecial(special.special, test);
     }
 
     return false;
@@ -90,7 +100,7 @@ enemys.prototype.getSpecialHint = function (enemy, special) {
         case 10: return "模仿：怪物的攻防和勇士攻防相等";
         case 11: return "吸血：战斗前，怪物首先吸取角色的"+Math.floor(100*enemy.value||0)+"%生命作为伤害"+(enemy.add?"，并把伤害数值加到自身生命上":"");
         case 12: return "中毒：战斗后，勇士陷入中毒状态，每一步损失生命"+core.values.poisonDamage+"点";
-        case 13: return "衰弱：战斗后，勇士陷入衰弱状态，攻防暂时下降"+core.values.weakValue+"点";
+        case 13: return "衰弱：战斗后，勇士陷入衰弱状态，攻防暂时下降"+(core.values.weakValue>=1?core.values.weakValue+"点":parseInt(core.values.weakValue*100)+"%");
         case 14: return "诅咒：战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验";
         case 15: return "领域：经过怪物周围"+(enemy.range||1)+"格时自动减生命"+(enemy.value||0)+"点";
         case 16: return "夹击：经过两只相同的怪物中间，勇士生命值变成一半";
@@ -139,8 +149,16 @@ enemys.prototype.nextCriticals = function (monsterId, number) {
 
     number = number||1;
     var monster = core.material.enemys[monsterId];
+
+    if (this.hasSpecial(monster.special, 3)) {
+        if (core.status.hero.atk<=monster.def) {
+            return [[monster.def+1-core.status.hero.atk,'?']];
+        }
+        return [];
+    }
+
     // 坚固、模仿怪物没有临界！
-    if (this.hasSpecial(monster.special, 3) || this.hasSpecial(monster.special, 10)) return [];
+    if (this.hasSpecial(monster.special, 10)) return [];
     var info = this.getDamageInfo(monster, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef);
 
     if (info == null) {
@@ -148,6 +166,10 @@ enemys.prototype.nextCriticals = function (monsterId, number) {
             return [[monster.def+1-core.status.hero.atk,'?']];
         }
         return [];
+    }
+
+    if (info.damage<=0 && !core.flags.enableNegativeDamage) {
+        return [[0,0]];
     }
 
     var list = [], pre = null;
@@ -161,6 +183,7 @@ enemys.prototype.nextCriticals = function (monsterId, number) {
                 var nextInfo = this.getDamageInfo(monster, core.status.hero.hp, nextAtk, core.status.hero.def, core.status.hero.mdef);
                 if (nextInfo==null) break;
                 list.push([nextAtk-hero_atk,info.damage-nextInfo.damage]);
+                if (nextInfo.damage<=0 && !core.flags.enableNegativeDamage) break;
                 pre = nextAtk;
             }
             if (list.length>=number)
@@ -175,6 +198,7 @@ enemys.prototype.nextCriticals = function (monsterId, number) {
             if (pre>nextInfo.damage) {
                 pre = nextInfo.damage;
                 list.push([atk-hero_atk, info.damage-nextInfo.damage]);
+                if (nextInfo.damage<=0 && !core.flags.enableNegativeDamage) break;
                 if (list.length>=number) break;
             }
         }
@@ -286,7 +310,7 @@ enemys.prototype.getDamageInfo = function(monster, hero_hp, hero_atk, hero_def, 
 enemys.prototype.calDamage = function (monster, hero_hp, hero_atk, hero_def, hero_mdef) {
 
     if (typeof monster == 'string') {
-        monster = core.material.enemys[monsterId];
+        monster = core.material.enemys[monster];
     }
 
     var info = this.getDamageInfo(monster, hero_hp, hero_atk, hero_def, hero_mdef);

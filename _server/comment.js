@@ -307,6 +307,12 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_type": "event",
                             "_event": "firstArrive",
                             "_data": "第一次到该楼层触发的事件，可以双击进入事件编辑器。"
+                        },
+                        "underGround": {
+                            "_leaf": true,
+                            "_type": "checkbox",
+                            "_bool": "bool",
+                            "_data": "是否是地下层；如果该项为true则同层传送将传送至上楼梯"
                         }
                     }
                 },

@@ -158,19 +158,21 @@ return code;
 
 //changeFloor 事件编辑器入口之一
 changeFloor_m
-    :   '楼梯, 传送门' BGNL? Newline '目标楼层' IdString Stair_List 'x' Number ',' 'y' Number '朝向' DirectionEx_List '动画时间' Int? '允许穿透' Bool BEND
+    :   '楼梯, 传送门' BGNL? Newline Floor_List IdString? Stair_List 'x' Number ',' 'y' Number '朝向' DirectionEx_List '动画时间' Int? '允许穿透' Bool BEND
     
 
 /* changeFloor_m
 tooltip : 楼梯, 传送门, 如果目标楼层有多个楼梯, 写upFloor或downFloor可能会导致到达的楼梯不确定, 这时候请使用loc方式来指定具体的点位置
 helpUrl : https://ckcz123.github.io/mota-js/#/element?id=%e8%b7%af%e9%9a%9c%ef%bc%8c%e6%a5%bc%e6%a2%af%ef%bc%8c%e4%bc%a0%e9%80%81%e9%97%a8
-default : ["MT1",null,0,0,null,500,null]
+default : [null,"MT1",null,0,0,null,500,null]
+var toFloorId = IdString_0;
+if (Floor_List_0!='floorId') toFloorId = Floor_List_0;
 var loc = ', "loc": ['+Number_0+', '+Number_1+']';
 if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0 ?'':(', "portalWithoutTrigger": false');
-var code = '{"floorId": "'+IdString_0+'"'+loc+DirectionEx_List_0+Int_0+Bool_0+' }\n';
+var code = '{"floorId": "'+toFloorId+'"'+loc+DirectionEx_List_0+Int_0+Bool_0+' }\n';
 return code;
 */;
 
@@ -213,6 +215,8 @@ action
     |   setWeather_s
     |   move_s
     |   moveHero_s
+    |   jump_s
+    |   jumpHero_s
     |   playBgm_s
     |   pauseBgm_s
     |   resumeBgm_s
@@ -531,7 +535,7 @@ return code;
 */;
 
 changeFloor_s
-    :   '楼层切换' IdString 'x' PosString ',' 'y' PosString '朝向' DirectionEx_List '动画时间' Int? Newline
+    :   '楼层切换' IdString? 'x' PosString ',' 'y' PosString '朝向' DirectionEx_List '动画时间' Int? Newline
     
 
 /* changeFloor_s
@@ -792,6 +796,45 @@ default : [500,"上右3下2左上左2"]
 colour : this.dataColor
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
 var code = '{"type": "moveHero"'+Int_0+', "steps": '+JSON.stringify(StepString_0)+'},\n';
+return code;
+*/;
+
+jump_s
+    :   '跳跃事件' '起始 x' PosString? ',' 'y' PosString? '终止 x' PosString? ',' 'y' PosString? BGNL? '动画时间' Int? '消失时无动画时间' Bool Newline
+
+
+/* jump_s
+tooltip : jump: 让某个NPC/怪物跳跃
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=jump%EF%BC%9A%E8%AE%A9%E6%9F%90%E4%B8%AANPC%2F%E6%80%AA%E7%89%A9%E8%B7%B3%E8%B7%83
+default : ["","","","",500,null]
+colour : this.eventColor
+var floorstr = '';
+if (PosString_0 && PosString_1) {
+    floorstr += ', "from": ['+PosString_0+','+PosString_1+']';
+}
+if (PosString_2 && PosString_3) {
+    floorstr += ', "to": ['+PosString_2+','+PosString_3+']';
+}
+Int_0 = Int_0 ?(', "time": '+Int_0):'';
+var code = '{"type": "jump"'+floorstr+''+Int_0+', "immediateHide": '+Bool_0+'},\n';
+return code;
+*/;
+
+jumpHero_s
+    :   '跳跃勇士' 'x' PosString? ',' 'y' PosString? '动画时间' Int? Newline
+
+
+/* jumpHero_s
+tooltip : jumpHero: 跳跃勇士
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=jumpHero%EF%BC%9A%E8%B7%B3%E8%B7%83%E5%8B%87%E5%A3%AB
+default : ["","",500]
+colour : this.dataColor
+var floorstr = '';
+if (PosString_0 && PosString_1) {
+    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+}
+Int_0 = Int_0 ?(', "time": '+Int_0):'';
+var code = '{"type": "jumpHero"'+floorstr+Int_0+'},\n';
 return code;
 */;
 
@@ -1135,6 +1178,10 @@ PosString
     :   'sdeirughvuiyasbde'+ //为了被识别为复杂词法规则
     ;
 
+Floor_List
+    :   '楼层ID'|'前一楼'|'后一楼'
+    /*Floor_List ['floorId',':before',':next']*/;
+
 Stair_List
     :   '坐标'|'上楼'|'下楼'
     /*Stair_List ['loc','upFloor','downFloor']*/;
@@ -1278,8 +1325,12 @@ ActionParser.prototype.parse = function (obj,type) {
     case 'changeFloor':
       if(!obj)obj={};
       if(!this.isset(obj.loc))obj.loc=[0,0];
+      if (obj.floorId==':before'||obj.floorId==':next') {
+        obj.floorType=obj.floorId;
+        delete obj.floorId;
+      }
       return MotaActionBlocks['changeFloor_m'].xmlText([
-        obj.floorId,obj.stair||'loc',obj.loc[0],obj.loc[1],obj.direction,obj.time||0,!this.isset(obj.portalWithoutTrigger)
+        obj.floorType||'floorId',obj.floorId,obj.stair||'loc',obj.loc[0],obj.loc[1],obj.direction,obj.time||0,!this.isset(obj.portalWithoutTrigger)
       ]);
 
     case 'point':
@@ -1388,6 +1439,7 @@ ActionParser.prototype.parseAction = function() {
         data.text,this.next]);
       break;
     case "show": // 显示
+      data.loc=data.loc||[];
       if (!(data.loc[0] instanceof Array))
         data.loc = [data.loc];
       var x_str=[],y_str=[];
@@ -1427,6 +1479,17 @@ ActionParser.prototype.parseAction = function() {
     case "moveHero":
       this.next = MotaActionBlocks['moveHero_s'].xmlText([
         data.time||0,this.StepString(data.steps),this.next]);
+      break;
+    case "jump": // 跳跃事件
+      data.from=data.from||[];
+      data.to=data.to||[];
+      this.next = MotaActionBlocks['jump_s'].xmlText([
+        data.from[0]||'',data.from[1]||'',data.to[0]||'',data.to[1]||'',data.time||0,data.immediateHide,this.next]);
+      break;
+    case "jumpHero": // 跳跃勇士
+      data.loc=data.loc||[]
+      this.next = MotaActionBlocks['jumpHero_s'].xmlText([
+        data.loc[0]||'',data.loc[1]||'',data.time||0,this.next]);
       break;
     case "changeFloor": // 楼层转换
       this.next = MotaActionBlocks['changeFloor_s'].xmlText([
@@ -1481,8 +1544,10 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "setFg": // 颜色渐变
       if(this.isset(data.color)){
+        var alpha = data.color[3];
+        if (alpha==undefined || alpha==null) alpha=1;
         this.next = MotaActionBlocks['setFg_0_s'].xmlText([
-          data.color[0],data.color[1],data.color[2],data.color[3]||1,data.time||0,this.next]);
+          data.color[0],data.color[1],data.color[2],alpha,data.time||0,this.next]);
       } else {
         this.next = MotaActionBlocks['setFg_1_s'].xmlText([
           data.time||0,this.next]);
@@ -1666,12 +1731,12 @@ MotaActionFunctions.parse = function(obj,type) {
 }
 
 MotaActionFunctions.EvalString_pre = function(EvalString){
-  if (EvalString.indexOf('__door_name__')!==-1) throw new Error('请修改__door_name__,建议如开MT1层的[3,3]点的门, 则使用flag:MT1_3_3作为开门变量');
+  if (EvalString.indexOf('__door__')!==-1) throw new Error('请修改开门变量__door__，如door1，door2，door3等依次向后。请勿存在两个门使用相同的开门变量。');
   return EvalString.replace(/([^\\])"/g,'$1\\"').replace(/^"/g,'\\"').replace(/""/g,'"\\"');
 }
 
 MotaActionFunctions.IdString_pre = function(IdString){
-  if (IdString.indexOf('__door_name__')!==-1) throw new Error('请修改__door_name__,建议如开MT1层的[3,3]点的门, 则使用flag:MT1_3_3作为开门变量');
+  if (IdString.indexOf('__door__')!==-1) throw new Error('请修改开门变量__door__，如door1，door2，door3等依次向后。请勿存在两个门使用相同的开门变量。');
   if (IdString && !(/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/.test(IdString)))throw new Error('id: '+IdString+'中包含了0-9 a-z A-Z _ - :之外的字符');
   return IdString;
 }

@@ -85,12 +85,14 @@ events.prototype.startGame = function (hard) {
             if (core.flags.showBattleAnimateConfirm) { // 是否提供“开启战斗动画”的选择项
                 core.status.event.selection = core.flags.battleAnimate ? 0 : 1;
                 core.ui.drawConfirmBox("你想开启战斗动画吗？\n之后可以在菜单栏中开启或关闭。\n（强烈建议新手开启此项）", function () {
+                    core.data.flags.battleAnimate = true;
                     core.flags.battleAnimate = true;
                     core.setLocalStorage('battleAnimate', true);
                     core.startGame(hard);
                     core.utils.__init_seed();
                     core.events.setInitData(hard);
                 }, function () {
+                    core.data.flags.battleAnimate = false;
                     core.flags.battleAnimate = false;
                     core.setLocalStorage('battleAnimate', false);
                     core.startGame(hard);
@@ -175,11 +177,11 @@ events.prototype.gameOver = function (ending, fromReplay) {
             formData.append('name', core.firstData.name);
             formData.append('version', core.firstData.version);
             formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
-            formData.append('hard', core.status.hard);
-            formData.append('username', username||"");
-            formData.append('ending', ending);
+            formData.append('hard', core.encodeBase64(core.status.hard));
+            formData.append('username', core.encodeBase64(username||""));
+            formData.append('ending', core.encodeBase64(ending));
             formData.append('lv', core.status.hero.lv);
-            formData.append('hp', hp);
+            formData.append('hp', Math.min(hp, Math.pow(2, 63)));
             formData.append('atk', core.status.hero.atk);
             formData.append('def', core.status.hero.def);
             formData.append('mdef', core.status.hero.mdef);
@@ -187,7 +189,9 @@ events.prototype.gameOver = function (ending, fromReplay) {
             formData.append('experience', core.status.hero.experience);
             formData.append('steps', core.status.hero.steps);
             formData.append('seed', core.getFlag('seed'));
+            formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime/1000));
             formData.append('route', core.encodeRoute(core.status.route));
+            formData.append('base64', 1);
 
             if (main.isCompetition)
                 core.http("POST", "/games/competition/upload.php", formData);
@@ -254,14 +258,15 @@ events.prototype.doEvents = function (list, x, y, callback) {
         list = [list];
     }
 
+    core.status.event = {'id': 'action', 'data': {
+        'list': [
+            {"todo": core.clone(list), "total": core.clone(list), "condition": "false"}
+        ], 'x': x, 'y': y, 'callback': callback
+    }}
+
     // 停止勇士
     core.waitHeroToStop(function() {
         core.lockControl();
-        core.status.event = {'id': 'action', 'data': {
-            'list': [
-                {"todo": core.clone(list), "total": core.clone(list), "condition": "false"}
-            ], 'x': x, 'y': y, 'callback': callback
-        }}
         core.events.doAction();
     });
 }
@@ -396,24 +401,7 @@ events.prototype.doAction = function() {
                     x=core.calValue(data.loc[0]);
                     y=core.calValue(data.loc[1]);
                 }
-                var floorId = data.floorId||core.status.floorId;
-                var originBlock=core.getBlock(x,y,floorId,false);
-                var block = core.maps.initBlock(x,y,data.number);
-                core.maps.addInfo(block);
-                core.maps.addEvent(block,x,y,core.floors[floorId].events[x+","+y]);
-                core.maps.addChangeFloor(block,x,y,core.floors[floorId].changeFloor[x+","+y]);
-                if (core.isset(block.event)) {
-                    if (originBlock==null) {
-                        core.status.maps[floorId].blocks.push(block);
-                    }
-                    else {
-                        originBlock.block.id = data.number;
-                        originBlock.block.event = block.event;
-                    }
-                    if (floorId==core.status.floorId) {
-                        core.drawMap(floorId);
-                    }
-                }
+                core.setBlock(data.number, x, y, data.floorId);
                 this.doAction();
                 break;
             }
@@ -446,6 +434,34 @@ events.prototype.doAction = function() {
                 core.events.doAction();
             });
             break;
+        case "jump": // 跳跃事件
+            {
+                var sx=x, sy=y, ex=x,ey=y;
+                if (core.isset(data.from)) {
+                    sx=core.calValue(data.from[0]);
+                    sy=core.calValue(data.from[1]);
+                }
+                if (core.isset(data.to)) {
+                    ex=core.calValue(data.to[0]);
+                    ey=core.calValue(data.to[1]);
+                }
+                core.jumpBlock(sx,sy,ex,ey,data.time,data.immediateHide,function() {
+                    core.events.doAction();
+                });
+                break;
+            }
+        case "jumpHero":
+            {
+                var ex=core.status.hero.loc.x, ey=core.status.hero.loc.y;
+                if (core.isset(data.loc)) {
+                    ex=core.calValue(data.loc[0]);
+                    ey=core.calValue(data.loc[1]);
+                }
+                core.jumpHero(ex,ey,data.time,function() {
+                    core.events.doAction();
+                });
+                break;
+            }
         case "changeFloor": // 楼层转换
             {
                 var heroLoc = {"x": core.calValue(data.loc[0]), "y": core.calValue(data.loc[1])};
@@ -834,7 +850,7 @@ events.prototype.getNextItem = function() {
 
 ////// 获得某个物品 //////
 events.prototype.getItem = function (itemId, itemNum, itemX, itemY, callback) {
-    // core.getItemAnimate(itemId, itemNum, itemX, itemY);
+    itemNum=itemNum||1;
     core.playSound('item.mp3');
     var itemCls = core.material.items[itemId].cls;
     core.items.getItemEffect(itemId, itemNum);
@@ -871,7 +887,19 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
 
     core.stopAutomaticRoute();
     var speed=30;
-    if (needKey) {
+    var doorId = id;
+    if (doorId.length<4 || doorId.substring(doorId.length-4)!="Door") {
+        doorId=doorId+"Door";
+        speed=70;
+    }
+    // 不存在门
+    if (!core.isset(core.material.icons.animates[doorId])) {
+        if (core.isset(callback)) callback();
+        return;
+    }
+
+    var key = id.replace("Door", "Key");
+    if (needKey && (key=="specialKey" || core.isset(core.material.items[key]))) {
         var key = id.replace("Door", "Key");
         if (!core.hasItem(key)) {
             if (key != "specialKey")
@@ -887,11 +915,6 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
     // open
     core.playSound("door.mp3");
     var state = 0;
-    var doorId = id;
-    if (!(doorId.substring(doorId.length-4)=="Door")) {
-        doorId=doorId+"Door";
-        speed=100;
-    }
     var door = core.material.icons.animates[doorId];
     core.status.replay.animate=true;
     core.removeGlobalAnimate(x,y);
@@ -907,7 +930,7 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
         }
         core.canvas.event.clearRect(32 * x, 32 * y, 32, 32);
         core.canvas.event.drawImage(core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
-    }, speed)
+    }, speed / core.status.replay.speed)
 }
 
 ////// 战斗 //////
@@ -995,7 +1018,20 @@ events.prototype.trigger = function (x, y) {
 ////// 楼层切换 //////
 events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback, fromLoad) {
 
-    var displayAnimate=!(time==0) && !core.status.replay.replaying;
+    if (!core.isset(floorId)) floorId = core.status.floorId;
+
+    if (floorId == ':before') {
+        var index=core.floorIds.indexOf(core.status.floorId);
+        if (index>0) floorId = core.floorIds[index-1];
+        else floorId=core.status.floorId;
+    }
+    else if (floorId == ':next') {
+        var index=core.floorIds.indexOf(core.status.floorId);
+        if (index<core.floorIds.length-1) floorId = core.floorIds[index+1];
+        else floorId=core.status.floorId;
+    }
+
+    var displayAnimate=(!core.isset(time) || time>=100) && !core.status.replay.replaying;
 
     time = time || 800;
     time /= 20;
@@ -1477,4 +1513,29 @@ events.prototype.afterLoadData = function (data) {
     return this.eventdata.afterLoadData(data);
 }
 
+////// 上传当前数据 //////
+events.prototype.uploadCurrent = function (username) {
+    var formData = new FormData();
 
+    formData.append('type', 'score');
+    formData.append('name', core.firstData.name);
+    formData.append('version', core.firstData.version);
+    formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
+    formData.append('hard', core.encodeBase64(core.status.hard));
+    formData.append('username', core.encodeBase64(username||"current"));
+    formData.append('lv', core.status.hero.lv);
+    formData.append('hp', Math.min(core.status.hero.hp, Math.pow(2, 63)));
+    formData.append('atk', core.status.hero.atk);
+    formData.append('def', core.status.hero.def);
+    formData.append('mdef', core.status.hero.mdef);
+    formData.append('money', core.status.hero.money);
+    formData.append('experience', core.status.hero.experience);
+    formData.append('steps', core.status.hero.steps);
+    formData.append('seed', core.getFlag('seed'));
+    formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime/1000));
+    formData.append('route', core.encodeRoute(core.status.route));
+    formData.append('deler', 'current');
+    formData.append('base64', 1);
+
+    core.http("POST", "/games/upload.php", formData);
+}

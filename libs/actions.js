@@ -935,6 +935,8 @@ actions.prototype.clickFly = function(x,y) {
     if (x>=0 && x<=9 && y>=3 && y<=11) {
         var index=core.status.hero.flyRange.indexOf(core.status.floorId);
         var stair=core.status.event.data<index?"upFloor":"downFloor";
+        if (core.status.event.data==index && core.floors[core.status.floorId].underGround)
+            stair = "upFloor";
         var floorId=core.status.event.data;
         var toFloor = core.status.hero.flyRange[floorId];
         core.status.route.push("fly:"+toFloor);
@@ -1156,6 +1158,7 @@ actions.prototype.clickToolbox = function(x,y) {
         core.ui.closePanel();
         return;
     }
+    /*
     if (x>=10 && x<=12 && y<=1) {
         if (!core.isset(core.status.event.data)) return;
         if (!core.flags.enableDeleteItem) {
@@ -1167,22 +1170,50 @@ actions.prototype.clickToolbox = function(x,y) {
         core.ui.drawToolbox();
         return;
     }
+    */
 
-    var index=0;
-    if (y==4||y==5||y==9||y==10) index=parseInt(x/2);
-    else index=6+parseInt(x/2);
-    if (y>=9) index+=100;
-    this.clickToolboxIndex(index);
+    // 当前页面
+    var page = parseInt((core.status.event.selection%1000)/12)+1;
+
+    // 上一页
+    if ((x == 3 || x == 4) && y == 12) {
+        if (page>1) {
+            core.ui.drawToolbox(core.status.event.selection-12);
+        }
+        return;
+    }
+    // 下一页
+    if ((x == 8 || x == 9) && y == 12) {
+        var toolPage = parseInt(Object.keys(core.status.hero.items.tools).length/12)+1,
+            constantPage = parseInt(Object.keys(core.status.hero.items.constants).length/12)+1;
+        if (page<toolPage) {
+            core.ui.drawToolbox(12*page);
+        }
+        else if (page<constantPage) {
+            core.ui.drawToolbox(1000+12*page);
+        }
+        return;
+    }
+
+    var index=parseInt(12*(page-1)+x/2);
+    if (y==4) index+=0;
+    else if (y==6) index+=6;
+    else if (y==9) index+=1000;
+    else if (y==11) index+=1006;
+    else index=-1;
+
+    if (index>=0)
+        this.clickToolboxIndex(index);
 }
 
 ////// 选择工具栏界面中某个Index后的操作 //////
 actions.prototype.clickToolboxIndex = function(index) {
     var items = null;
     var ii=index;
-    if (ii<100)
+    if (ii<1000)
         items = Object.keys(core.status.hero.items.tools).sort();
     else {
-        ii-=100;
+        ii-=1000;
         items = Object.keys(core.status.hero.items.constants).sort();
     }
     if (items==null) return;
@@ -1203,58 +1234,59 @@ actions.prototype.keyDownToolbox = function (keycode) {
     var tools = Object.keys(core.status.hero.items.tools).sort();
     var constants = Object.keys(core.status.hero.items.constants).sort();
     var index=core.status.event.selection;
+    var page=parseInt(index%1000/12), offset=12*page;
 
     if (keycode==37) { // left
-        if ((index>0 && index<100) || index>100) {
+        if ((index>0 && index<1000) || index>1000) {
             this.clickToolboxIndex(index-1);
             return;
         }
-        if (index==100 && tools.length>0) {
+        if (index==1000 && tools.length>0) {
             this.clickToolboxIndex(tools.length-1);
             return;
         }
     }
     if (keycode==38) { // up
-        if ((index>5 && index<100) || index>105) {
+        if ((index>offset+5 && index<1000) || index>offset+1005) {
             this.clickToolboxIndex(index-6);
             return;
         }
-        if (index>=100 && index<=105) {
-            if (tools.length>6) {
-                this.clickToolboxIndex(Math.min(tools.length-1, index-100+6));
+        if (index>=offset+1000 && index<=offset+1005) {
+            if (tools.length>offset+6) {
+                this.clickToolboxIndex(Math.min(tools.length-1, index-1000+6));
             }
-            else if (tools.length>0) {
-                this.clickToolboxIndex(Math.min(tools.length-1, index-100));
+            else if (tools.length>offset) {
+                this.clickToolboxIndex(Math.min(tools.length-1, index-1000));
             }
             return;
         }
     }
     if (keycode==39) { // right
-        if ((index<tools.length-1) || (index>=100 && index<constants.length+100)) {
+        if ((index<tools.length-1) || (index>=1000 && index<constants.length+1000)) {
             this.clickToolboxIndex(index+1);
             return;
         }
         if (index==tools.length-1 && constants.length>0) {
-            this.clickToolboxIndex(100);
+            this.clickToolboxIndex(1000);
             return;
         }
     }
     if (keycode==40) { // down
-        if (index<=5) {
-            if (tools.length>6) {
+        if (index<=offset+5) {
+            if (tools.length>offset+6) {
                 this.clickToolboxIndex(Math.min(tools.length-1, index+6));
             }
-            else if (constants.length>0) {
-                this.clickToolboxIndex(100+Math.min(constants.length-1, index));
+            else if (constants.length>offset) {
+                this.clickToolboxIndex(1000+Math.min(constants.length-1, index));
             }
             return;
         }
-        if (index>5 && index<100 && constants.length>0) {
-            this.clickToolboxIndex(100+Math.min(constants.length-1, index-6));
+        if (index>offset+5 && index<offset+1000 && constants.length>offset) {
+            this.clickToolboxIndex(1000+Math.min(constants.length-1, index-6));
             return;
         }
-        if (index>=100 && index<=105 && constants.length>6) {
-            this.clickToolboxIndex(Math.min(100+constants.length-1, index+6));
+        if (index>=offset+1000 && index<=offset+1005 && constants.length>offset+6) {
+            this.clickToolboxIndex(Math.min(1000+constants.length-1, index+6));
             return;
         }
     }
@@ -1273,6 +1305,7 @@ actions.prototype.keyUpToolbox = function (keycode) {
         return;
     }
 
+    /*
     if (keycode==46) { // delete
         if (!core.isset(core.status.event.data)) return;
         if (!core.flags.enableDeleteItem) {
@@ -1284,6 +1317,7 @@ actions.prototype.keyUpToolbox = function (keycode) {
         core.ui.drawToolbox();
         return;
     }
+    */
 
 }
 
@@ -1483,9 +1517,14 @@ actions.prototype.clickSwitchs = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 6:
-                window.open(core.firstData.name+".zip", "_blank");
+                core.status.automaticRoute.clickMoveDirectly=!core.status.automaticRoute.clickMoveDirectly;
+                core.setLocalStorage('clickMoveDirectly', core.status.automaticRoute.clickMoveDirectly);
+                core.ui.drawSwitchs();
                 break;
             case 7:
+                window.open(core.firstData.name+".zip", "_blank");
+                break;
+            case 8:
                 core.status.event.selection=0;
                 core.ui.drawSettings();
                 break;
@@ -1553,7 +1592,7 @@ actions.prototype.clickSettings = function (x,y) {
                 break;
             case 4:
                 core.status.event.selection=1;
-                core.ui.drawConfirmBox("你确定要重新开始吗？", function () {
+                core.ui.drawConfirmBox("你确定要返回标题页面吗？", function () {
                     core.ui.closePanel();
                     core.restart();
                 }, function () {
@@ -1705,14 +1744,8 @@ actions.prototype.clickSyncSave = function (x,y) {
                         })
                     }
                     else {
-                        var index=5*(main.savePages||30);
-                        for (var i=5*(main.savePages||30);i>=1;i--) {
-                            if (core.getLocalStorage("save"+i, null)==null)
-                                index=i;
-                            else break;
-                        }
-                        core.setLocalStorage("save"+index, data);
-                        core.drawText("同步成功！\n单存档已覆盖至存档"+index);
+                        core.setLocalStorage("save"+core.status.saveIndex, data);
+                        core.drawText("同步成功！\n单存档已覆盖至存档"+core.status.saveIndex);
                     }
                 }, function () {
 
@@ -1841,12 +1874,7 @@ actions.prototype.clickLocalSaveSelect = function (x,y) {
                 }
                 break;
             case 1:
-                for (var i=5*(main.savePages||30);i>=1;i--) {
-                    saves=core.getLocalStorage("save"+i, null);
-                    if (core.isset(saves)) {
-                        break;
-                    }
-                }
+                saves=core.getLocalStorage("save"+core.status.saveIndex, null);
                 break;
             case 2:
                 break;

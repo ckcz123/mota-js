@@ -512,8 +512,8 @@ events.prototype.doAction = function() {
                 gif.style.position = 'absolute';
                 gif.style.left = (core.calValue(data.loc[0])*core.domStyle.scale)+"px";
                 gif.style.top = (core.calValue(data.loc[1])*core.domStyle.scale)+"px";
-                gif.style.width = core.material.images.images[data.name].style.width*core.domStyle.scale+"px";
-                gif.style.height = core.material.images.images[data.name].style.height*core.domStyle.scale+"px";
+                gif.style.width = core.material.images.images[data.name].width*core.domStyle.scale+"px";
+                gif.style.height = core.material.images.images[data.name].height*core.domStyle.scale+"px";
                 core.dom.gif2.appendChild(gif);
             }
             else {

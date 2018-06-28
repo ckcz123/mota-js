@@ -331,7 +331,7 @@ maps.prototype.drawMap = function (mapName, callback) {
                 dx*=32; dy*=32;
                 var image = core.material.images.images[p];
                 if (!t[3]) {
-                    if (/.*\.gif/i.test(p)) {
+                    if (/.*\.gif/i.test(p) && main.mode=='play') {
                         core.dom.gif.innerHTML = "";
                         var gif = new Image();
                         gif.src = core.material.images.images[p].src;

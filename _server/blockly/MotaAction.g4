@@ -521,7 +521,7 @@ return code;
 */;
 
 openDoor_s
-    :   '开门' 'x' PosString ',' 'y' PosString '楼层' IdString? Newline
+    :   '开门' 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
     
 
 /* openDoor_s
@@ -530,12 +530,16 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=opendoor%EF%BC%9A%E5%BC%8
 default : ["","",""]
 colour : this.dataColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var code = '{"type": "openDoor", "loc": ['+PosString_0+','+PosString_1+']'+IdString_0+'},\n';
+var floorstr = '';
+if (PosString_0 && PosString_1) {
+    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+}
+var code = '{"type": "openDoor"'+floorstr+IdString_0+'},\n';
 return code;
 */;
 
 changeFloor_s
-    :   '楼层切换' IdString? 'x' PosString ',' 'y' PosString '朝向' DirectionEx_List '动画时间' Int? Newline
+    :   '楼层切换' IdString? 'x' PosString? ',' 'y' PosString? '朝向' DirectionEx_List '动画时间' Int? Newline
     
 
 /* changeFloor_s
@@ -545,7 +549,11 @@ default : ["MT1","0","0",null,500]
 colour : this.dataColor
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
-var code = '{"type": "changeFloor", "floorId": "'+IdString_0+'", "loc": ['+PosString_0+', '+PosString_1+']'+DirectionEx_List_0+Int_0+' },\n';
+var floorstr = '';
+if (PosString_0 && PosString_1) {
+    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+}
+var code = '{"type": "changeFloor", "floorId": "'+IdString_0+floorstr+DirectionEx_List_0+Int_0+' },\n';
 return code;
 */;
 
@@ -1463,35 +1471,36 @@ ActionParser.prototype.parseAction = function() {
         x_str.join(','),y_str.join(','),data.floorId||'',data.time||0,this.next]);
       break;
     case "setBlock": // 设置图块
-      data.loc=data.loc||[];
+      data.loc=data.loc||['',''];
       this.next = MotaActionBlocks['setBlock_s'].xmlText([
-        data.number||0,data.loc[0]||'',data.loc[1]||'',data.floorId||'',this.next]);
+        data.number||0,data.loc[0],data.loc[1],data.floorId||'',this.next]);
       break;
     case "setHeroIcon": // 改变勇士
       this.next = MotaActionBlocks['setHeroIcon_s'].xmlText([
         data.name||"",this.next]);
       break;
     case "move": // 移动事件
-      data.loc=data.loc||[];
+      data.loc=data.loc||['',''];
       this.next = MotaActionBlocks['move_s'].xmlText([
-        data.loc[0]||'',data.loc[1]||'',data.time||0,data.immediateHide,this.StepString(data.steps),this.next]);
+        data.loc[0],data.loc[1],data.time||0,data.immediateHide,this.StepString(data.steps),this.next]);
       break;
     case "moveHero":
       this.next = MotaActionBlocks['moveHero_s'].xmlText([
         data.time||0,this.StepString(data.steps),this.next]);
       break;
     case "jump": // 跳跃事件
-      data.from=data.from||[];
-      data.to=data.to||[];
+      data.from=data.from||['',''];
+      data.to=data.to||['',''];
       this.next = MotaActionBlocks['jump_s'].xmlText([
-        data.from[0]||'',data.from[1]||'',data.to[0]||'',data.to[1]||'',data.time||0,data.immediateHide,this.next]);
+        data.from[0],data.from[1],data.to[0],data.to[1],data.time||0,data.immediateHide,this.next]);
       break;
     case "jumpHero": // 跳跃勇士
-      data.loc=data.loc||[]
+      data.loc=data.loc||['','']
       this.next = MotaActionBlocks['jumpHero_s'].xmlText([
-        data.loc[0]||'',data.loc[1]||'',data.time||0,this.next]);
+        data.loc[0],data.loc[1],data.time||0,this.next]);
       break;
     case "changeFloor": // 楼层转换
+      data.loc=data.loc||['','']
       this.next = MotaActionBlocks['changeFloor_s'].xmlText([
         data.floorId,data.loc[0],data.loc[1],data.direction,this.time||0,this.next]);
       break;
@@ -1558,6 +1567,7 @@ ActionParser.prototype.parseAction = function() {
         data.name||'无',data.level||1,this.next]);
       break;
     case "openDoor": // 开一个门, 包括暗墙
+      data.loc=data.loc||['','']
       this.next = MotaActionBlocks['openDoor_s'].xmlText([
         data.loc[0],data.loc[1],data.floorId||'',this.next]);
       break;

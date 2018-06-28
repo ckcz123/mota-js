@@ -331,7 +331,6 @@ maps.prototype.drawMap = function (mapName, callback) {
                 dx*=32; dy*=32;
                 var image = core.material.images.images[p];
                 if (!t[3]) {
-                    core.canvas.bg.drawImage(image, dx * ratio, dy * ratio, Math.min(size - dx * ratio, ratio * image.width), Math.min(size - dy * ratio, ratio * image.height));
                     if (/.*\.gif/i.test(p)) {
                         core.dom.gif.innerHTML = "";
                         var gif = new Image();
@@ -339,7 +338,12 @@ maps.prototype.drawMap = function (mapName, callback) {
                         gif.style.position = 'absolute';
                         gif.style.left = (dx*core.domStyle.scale)+"px";
                         gif.style.top = (dy*core.domStyle.scale)+"px";
+                        gif.style.width = core.material.images.images[p].width*core.domStyle.scale+"px";
+                        gif.style.height = core.material.images.images[p].height*core.domStyle.scale+"px";
                         core.dom.gif.appendChild(gif);
+                    }
+                    else {
+                        core.canvas.bg.drawImage(image, dx * ratio, dy * ratio, Math.min(size - dx * ratio, ratio * image.width), Math.min(size - dy * ratio, ratio * image.height));
                     }
                 }
                 else

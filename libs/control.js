@@ -1758,6 +1758,8 @@ control.prototype.replay = function () {
             setTimeout(function () {
                 core.ui.closePanel();
                 var stair=toIndex<nowIndex?"upFloor":"downFloor";
+                if (toIndex==nowIndex && core.floors[core.status.floorId].underGround)
+                    stair = "upFloor";
                 core.status.route.push("fly:"+floorId);
                 core.changeFloor(floorId, stair, null, null, function () {
                     core.replay();

@@ -18,17 +18,17 @@ editor_blockly = function () {
         {"type": "hide", "time": 500},
       ],'event'),
       MotaActionBlocks['changeFloor_m'].xmlText(),
-      MotaActionFunctions.actionParser.parse({"type": "choices", "choices": [
-        {"text": "攻击+\${point}", "action": [
-          {"type": "setValue", "name": "status:atk", "value": "status:atk+\${point}"},
-        ]},
-        {"text": "防御+\${2*point}", "action": [
-          {"type": "setValue", "name": "status:def", "value": "status:def+\${2*point}"},
-        ]},
-        {"text": "生命+\${200*point}", "action": [
-          {"type": "setValue", "name": "status:hp", "value": "status:hp+\${200*point}"},
-        ]},
-      ]},'point'),
+      //MotaActionFunctions.actionParser.parse({"type": "choices", "choices": [
+      //  {"text": "攻击+\${point}", "action": [
+      //    {"type": "setValue", "name": "status:atk", "value": "status:atk+\${point}"},
+      //  ]},
+      //  {"text": "防御+\${2*point}", "action": [
+      //    {"type": "setValue", "name": "status:def", "value": "status:def+\${2*point}"},
+      //  ]},
+      //  {"text": "生命+\${200*point}", "action": [
+      //    {"type": "setValue", "name": "status:hp", "value": "status:hp+\${200*point}"},
+      //  ]},
+      //]},'point'),
       MotaActionFunctions.actionParser.parse([{
         "id": "moneyShop1",
         "name": "贪婪之神", 
@@ -267,6 +267,18 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
       if(newClick[1]===lastClick[1]){
         editor_blockly.doubleClickBlock(newClick[1]);
       }
+    }
+  }
+  if(editor_blockly.workspace.topBlocks_.length>=2){
+    codeAreaHL.setValue('入口方块只能有一个');
+    return;
+  }
+  var eventType = document.getElementById('entryType').value;
+  if(editor_blockly.workspace.topBlocks_.length==1){
+    var blockType = editor_blockly.workspace.topBlocks_[0].type;
+    if(blockType!==eventType+'_m'){
+      codeAreaHL.setValue('入口方块类型错误');
+      return;
     }
   }
   try {

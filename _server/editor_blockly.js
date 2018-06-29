@@ -413,6 +413,18 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
             editor_blockly.id = '';
             return;
         }
+        if(editor_blockly.workspace.topBlocks_.length>=2){
+          codeAreaHL.setValue('入口方块只能有一个');
+          return;
+        }
+        var eventType = document.getElementById('entryType').value;
+        if(editor_blockly.workspace.topBlocks_.length==1){
+          var blockType = editor_blockly.workspace.topBlocks_[0].type;
+          if(blockType!==eventType+'_m'){
+            codeAreaHL.setValue('入口方块类型错误');
+            return;
+          }
+        }
         var setvalue = function (value) {
             var thisTr = document.getElementById(editor_blockly.id);
             editor_blockly.id = '';
@@ -422,7 +434,7 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
             input.onchange();
         }
         if (codeAreaHL.getValue() === '') {
-            setvalue('null');
+            eventType==='shop'?setvalue('[]'):setvalue('null');
             return;
         }
         var code = Blockly.JavaScript.workspaceToCode(editor_blockly.workspace);

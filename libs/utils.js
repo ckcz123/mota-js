@@ -631,6 +631,49 @@ utils.prototype.hide = function (obj, speed, callback) {
     }, speed);
 }
 
+utils.prototype.export = function (floorIds) {
+    if (!core.isset(floorIds)) floorIds = [core.status.floorId];
+    else if (floorIds=='all') floorIds = core.clone(core.floorIds);
+    else if (typeof floorIds == 'string') floorIds = [floorIds];
+
+    var monsterMap = {};
+
+    // map
+    var content = floorIds.length+"\n13 13\n\n";
+    floorIds.forEach(function (floorId) {
+        var arr = core.maps.getMapArray(core.status.maps[floorId].blocks);
+        content += arr.map(function (x) {
+            // check monster
+            x.forEach(function (t) {
+                var block = core.maps.initBlock(null, null, t);
+                if (core.isset(block.event) && block.event.cls.indexOf("enemy")==0) {
+                    monsterMap[t] = block.event.id;
+                }
+            })
+            return x.join("\t");
+        }).join("\n") + "\n\n";
+    })
+
+    // values
+    content += ["redJewel", "blueJewel", "greenJewel", "redPotion", "bluePotion",
+        "yellowPotion", "greenPotion", "sword1", "shield1"].map(function (x) {return core.values[x]}).join(" ") + "\n\n";
+
+    // monster
+    content += Object.keys(monsterMap).length + "\n";
+    for (var t in monsterMap) {
+        var id = monsterMap[t], monster = core.material.enemys[id];
+        content += t + " " + monster.hp + " " + monster.atk + " " +
+            monster.def + " " + monster.money + " " + monster.special + "\n";
+    }
+    content += "\n0 0 0 0 0 0\n\n";
+    content += core.status.hero.hp + " " + core.status.hero.atk + " "
+        + core.status.hero.def + " " + core.status.hero.mdef + " " + core.status.hero.money + " "
+        + core.itemCount('yellowKey') + " " + core.itemCount("blueKey") + " " + core.itemCount("redKey") + " 0 "
+        + core.status.hero.loc.x + " " + core.status.hero.loc.y + "\n";
+
+    console.log(content);
+}
+
 utils.prototype.http = function (type, url, formData, success, error, mimeType, responseType) {
     var xhr = new XMLHttpRequest();
     xhr.open(type, url, true);

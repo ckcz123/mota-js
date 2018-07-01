@@ -1509,25 +1509,26 @@ control.prototype.updateFg = function () {
 }
 
 ////// 执行一个表达式的effect操作 //////
-control.prototype.doEffect = function (expression) {
-    // 必须使用"+="
-    var arr = expression.split("+=");
-    if (arr.length!=2) return;
-    var name=arr[0], value=core.calValue(arr[1]);
-    if (name.indexOf("status:")==0) {
-        var status=name.substring(7);
-        core.setStatus(status, core.getStatus(status)+value);
-    }
-    else if (name.indexOf("item:")==0) {
-        var itemId=name.substring(5);
-        core.setItem(itemId, core.itemCount(itemId)+value);
-    }
+control.prototype.doEffect = function (effect) {
+    effect.split(";").forEach(function (expression) {
+        var arr = expression.split("+=");
+        if (arr.length!=2) return;
+        var name=arr[0], value=core.calValue(arr[1]);
+        if (name.indexOf("status:")==0) {
+            var status=name.substring(7);
+            core.setStatus(status, core.getStatus(status)+value);
+        }
+        else if (name.indexOf("item:")==0) {
+            var itemId=name.substring(5);
+            core.setItem(itemId, core.itemCount(itemId)+value);
+        }
+    });
 }
 
 ////// 开启debug模式 //////
 control.prototype.debug = function() {
     core.setFlag('debug', true);
-    core.insertAction(["\t[调试模式开启]此模式下按住Ctrl键可以穿墙并忽略一切事件。\n同时，录像将失效，也无法上传成绩。"]);
+    core.insertAction(["\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n同时，录像将失效，也无法上传成绩。"]);
     /*
     core.setStatus('hp', 999999);
     core.setStatus('atk', 10000);

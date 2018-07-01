@@ -2225,6 +2225,7 @@ control.prototype.loadData = function (data, callback) {
 
 ////// 设置勇士属性 //////
 control.prototype.setStatus = function (statusName, statusVal) {
+    if (statusName == 'exp') statusName = 'experience';
     if (core.isset(core.status.hero.loc[statusName]))
         core.status.hero.loc[statusName] = statusVal;
     else
@@ -2236,6 +2237,7 @@ control.prototype.getStatus = function (statusName) {
     // support status:x
     if (core.isset(core.status.hero.loc[statusName]))
         return core.status.hero.loc[statusName];
+    if (statusName == 'exp') statusName = 'experience';
     return core.status.hero[statusName];
 }
 
@@ -2445,7 +2447,6 @@ control.prototype.updateStatusBar = function () {
     }
 
     core.statusBar.hard.innerHTML = core.status.hard;
-
 
     // 回放
     if (core.status.replay.replaying) {

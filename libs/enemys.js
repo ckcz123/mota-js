@@ -254,13 +254,13 @@ enemys.prototype.getDamageInfo = function(monster, hero_hp, hero_atk, hero_def, 
         mon_atk = hero_atk;
         mon_def = hero_def;
     }
-    // 魔攻
-    if (this.hasSpecial(mon_special,2)) hero_def = 0;
     // 坚固
     if (this.hasSpecial(mon_special,3) && mon_def < hero_atk - 1) mon_def = hero_atk - 1;
     if (hero_atk <= mon_def) return null; // 不可战斗时请直接返回null
 
     var per_damage = mon_atk - hero_def;
+    // 魔攻
+    if (this.hasSpecial(mon_special,2)) per_damage = mon_atk;
     if (per_damage < 0) per_damage = 0;
 
     // 2连击 & 3连击 & N连击

@@ -1082,9 +1082,19 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             var floorName = core.status.maps[floorId].name;
             if (!core.isset(floorName) || floorName=="") floorName="&nbsp;"
             core.statusBar.floor.innerHTML = floorName;
-            if (/^[+-]?\d+$/.test(floorName))
+            if (/^[+-]?\d+$/.test(floorName)) {
                 core.statusBar.floor.style.fontStyle = 'italic';
-            else core.statusBar.floor.style.fontStyle = 'normal';
+                core.statusBar.floor.style.fontSize = '1.1em';
+            }
+            else {
+                core.statusBar.floor.style.fontStyle = 'normal';
+                if (floorName.length<=5)
+                    core.statusBar.floor.style.fontSize = '1.1em';
+                else if (floorName.length==6)
+                    core.statusBar.floor.style.fontSize = '0.9em';
+                else
+                    core.statusBar.floor.style.fontSize = '0.7em';
+            }
 
             // 更改BGM
             if (core.isset(core.floors[floorId].bgm)) {

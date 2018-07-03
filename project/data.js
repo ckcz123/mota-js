@@ -5,7 +5,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"sample0", "sample1", "sample2", "MT0"
 		],
 		"images" : [
-			"bg.jpg"
+			"bg.jpg", "A1.png"
 		],
 		"animates" : [ 
 			"hand", "sword", "zone",

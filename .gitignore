@@ -1,6 +1,8 @@
 .vscode
 *ce5eec52_2fa1_447b_8dad_764e267a7fab*
 
+.DS_Store
+
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 

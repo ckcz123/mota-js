@@ -674,8 +674,8 @@ editor.prototype.listen = function () {
         var locStr='('+editor.lastRightButtonPos[1].x+','+editor.lastRightButtonPos[1].y+')';
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-        copyLoc.children[0].innerHTML='复制此事件到'+locStr;
-        moveLoc.children[0].innerHTML='移动此事件到'+locStr;
+        copyLoc.children[0].innerHTML='复制事件'+locStr+'到此处';
+        moveLoc.children[0].innerHTML='交换事件'+locStr+'与此事件的位置';
         midMenu.style='top:'+(y+scrollTop)+'px;left:'+(x+scrollLeft)+'px;';
     }
     editor.hideMidMenu=function(){midMenu.style='display:none';}
@@ -730,21 +730,22 @@ editor.prototype.listen = function () {
         e.stopPropagation();
         preMapData = null;
         reDo = null;
-        var thisevent = editor.map[editor.pos.y][editor.pos.x];
-        if(thisevent==0){
-            editor.info = 0;
-        } else {
-            var ids=editor.indexs[thisevent.idnum];
-            ids=ids[0]?ids[0]:ids;
-            editor.info=editor.ids[ids];
-        }
         editor_mode.onmode('');
         var now = editor.pos;
         var last = editor.lastRightButtonPos[1];
-        editor.map[last.y][last.x]=editor.info;
+        var lastevent = editor.map[last.y][last.x];
+        var lastinfo = 0;
+        if(lastevent==0){
+            lastinfo = 0;
+        } else {
+            var ids=editor.indexs[lastevent.idnum];
+            ids=ids[0]?ids[0]:ids;
+            lastinfo=editor.ids[ids];
+        }
+        editor.map[now.y][now.x]=lastinfo;
         editor.updateMap();
         fields.forEach(function(v){
-            editor.currentFloorData[v][last.x+','+last.y]=editor.currentFloorData[v][now.x+','+now.y]
+            editor.currentFloorData[v][now.x+','+now.y]=editor.currentFloorData[v][last.x+','+last.y]
         })
         editor.file.saveFloorFile(function (err) {
             if (err) {

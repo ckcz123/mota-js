@@ -18,17 +18,17 @@ editor_blockly = function () {
         {"type": "hide", "time": 500},
       ],'event'),
       MotaActionBlocks['changeFloor_m'].xmlText(),
-      MotaActionFunctions.actionParser.parse({"type": "choices", "choices": [
-        {"text": "攻击+\${point}", "action": [
-          {"type": "setValue", "name": "status:atk", "value": "status:atk+\${point}"},
-        ]},
-        {"text": "防御+\${2*point}", "action": [
-          {"type": "setValue", "name": "status:def", "value": "status:def+\${2*point}"},
-        ]},
-        {"text": "生命+\${200*point}", "action": [
-          {"type": "setValue", "name": "status:hp", "value": "status:hp+\${200*point}"},
-        ]},
-      ]},'point'),
+      //MotaActionFunctions.actionParser.parse({"type": "choices", "choices": [
+      //  {"text": "攻击+\${point}", "action": [
+      //    {"type": "setValue", "name": "status:atk", "value": "status:atk+\${point}"},
+      //  ]},
+      //  {"text": "防御+\${2*point}", "action": [
+      //    {"type": "setValue", "name": "status:def", "value": "status:def+\${2*point}"},
+      //  ]},
+      //  {"text": "生命+\${200*point}", "action": [
+      //    {"type": "setValue", "name": "status:hp", "value": "status:hp+\${200*point}"},
+      //  ]},
+      //]},'point'),
       MotaActionFunctions.actionParser.parse([{
         "id": "moneyShop1",
         "name": "贪婪之神", 
@@ -69,7 +69,6 @@ editor_blockly = function () {
       MotaActionBlocks['showGif_1_s'].xmlText(),
       MotaActionBlocks['moveImage_0_s'].xmlText(),
       MotaActionBlocks['tip_s'].xmlText(),
-      MotaActionBlocks['openShop_s'].xmlText(),
       MotaActionBlocks['win_s'].xmlText(),
       MotaActionBlocks['lose_s'].xmlText(),
       MotaActionBlocks['choices_s'].xmlText([
@@ -91,8 +90,11 @@ editor_blockly = function () {
       MotaActionBlocks['changePos_1_s'].xmlText(),
       MotaActionBlocks['battle_s'].xmlText(),
       MotaActionBlocks['openDoor_s'].xmlText(),
+      MotaActionBlocks['openShop_s'].xmlText(),
       MotaActionBlocks['setBlock_s'].xmlText(),
       MotaActionBlocks['setHeroIcon_s'].xmlText(),
+      MotaActionBlocks['follow_s'].xmlText(),
+      MotaActionBlocks['unfollow_s'].xmlText(),
       '<label text="事件控制"></label>',
       MotaActionBlocks['if_s'].xmlText(),
       MotaActionBlocks['while_s'].xmlText(),
@@ -269,6 +271,18 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
       }
     }
   }
+  if(editor_blockly.workspace.topBlocks_.length>=2){
+    codeAreaHL.setValue('入口方块只能有一个');
+    return;
+  }
+  var eventType = document.getElementById('entryType').value;
+  if(editor_blockly.workspace.topBlocks_.length==1){
+    var blockType = editor_blockly.workspace.topBlocks_[0].type;
+    if(blockType!==eventType+'_m'){
+      codeAreaHL.setValue('入口方块类型错误');
+      return;
+    }
+  }
   try {
     var code = Blockly.JavaScript.workspaceToCode(workspace);
     codeAreaHL.setValue(code);
@@ -413,6 +427,18 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
             editor_blockly.id = '';
             return;
         }
+        if(editor_blockly.workspace.topBlocks_.length>=2){
+          codeAreaHL.setValue('入口方块只能有一个');
+          return;
+        }
+        var eventType = document.getElementById('entryType').value;
+        if(editor_blockly.workspace.topBlocks_.length==1){
+          var blockType = editor_blockly.workspace.topBlocks_[0].type;
+          if(blockType!==eventType+'_m'){
+            codeAreaHL.setValue('入口方块类型错误');
+            return;
+          }
+        }
         var setvalue = function (value) {
             var thisTr = document.getElementById(editor_blockly.id);
             editor_blockly.id = '';
@@ -422,7 +448,7 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
             input.onchange();
         }
         if (codeAreaHL.getValue() === '') {
-            setvalue('null');
+            eventType==='shop'?setvalue('[]'):setvalue('null');
             return;
         }
         var code = Blockly.JavaScript.workspaceToCode(editor_blockly.workspace);

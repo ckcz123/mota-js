@@ -405,6 +405,42 @@ events.prototype.doAction = function() {
                 this.doAction();
                 break;
             }
+        case "follow": // 跟随
+            if (core.isset(core.material.images.images[data.name])
+                && core.material.images.images[data.name].width==128) {
+                if (!core.isset(core.status.hero.followers))
+                    core.status.hero.followers = [];
+                core.status.hero.followers.push({"img": data.name});
+                core.control.gatherFollowers();
+                core.clearMap('hero');
+                core.drawHero();
+            }
+            this.doAction();
+            break;
+        case "unfollow": // 取消跟随
+            if (core.isset(core.status.hero.followers)) {
+                var remove = false;
+                if (!core.isset(data.name) && core.status.hero.followers.length>0) {
+                    core.status.hero.followers = [];
+                    remove=true;
+                }
+                if (core.isset(data.name)) {
+                    for (var i=0;i<core.status.hero.followers.length;i++) {
+                        if (core.status.hero.followers[i].img == data.name) {
+                            core.status.hero.followers.splice(i, 1);
+                            remove=true;
+                            break;
+                        }
+                    }
+                }
+                if (remove) {
+                    core.control.gatherFollowers();
+                    core.clearMap('hero');
+                    core.drawHero();
+                }
+            }
+            this.doAction();
+            break;
         case "animate": // 显示动画
             if (core.isset(data.loc)) {
                 if (data.loc == 'hero') {
@@ -1082,9 +1118,19 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             var floorName = core.status.maps[floorId].name;
             if (!core.isset(floorName) || floorName=="") floorName="&nbsp;"
             core.statusBar.floor.innerHTML = floorName;
-            if (/^[+-]?\d+$/.test(floorName))
+            if (/^[+-]?\d+$/.test(floorName)) {
                 core.statusBar.floor.style.fontStyle = 'italic';
-            else core.statusBar.floor.style.fontStyle = 'normal';
+                core.statusBar.floor.style.fontSize = '1.1em';
+            }
+            else {
+                core.statusBar.floor.style.fontStyle = 'normal';
+                if (floorName.length<=5)
+                    core.statusBar.floor.style.fontSize = '1.1em';
+                else if (floorName.length==6)
+                    core.statusBar.floor.style.fontSize = '0.9em';
+                else
+                    core.statusBar.floor.style.fontSize = '0.7em';
+            }
 
             // 更改BGM
             if (core.isset(core.floors[floorId].bgm)) {

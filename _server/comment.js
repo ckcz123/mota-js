@@ -27,11 +27,13 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         "name": {
                             "_leaf": true,
                             "_type": "textarea",
+                            "_string": true,
                             "_data": "名称"
                         },
                         "text": {
                             "_leaf": true,
                             "_type": "textarea",
+                            "_string": true,
                             "_data": "道具在道具栏中显示的描述"
                         }
                     }
@@ -39,26 +41,30 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "itemEffect": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_string": true,
                     "_lint": true,
-                    "_data": "cls为items的即捡即用类物品的效果，如需设置可以先将其设置为空字符串\"\"，然后双击进行编辑。"
+                    "_data": "cls为items的即捡即用类物品的效果。"
                 },
                 "itemEffectTip": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_string": true,
                     "_lint": true,
-                    "_data": "cls为items的即捡即用类物品，在获得时左上角额外显示的文字，如需设置可以先将其设置为空字符串\"\"，然后双击进行编辑。"
+                    "_data": "cls为items的即捡即用类物品，在获得时左上角额外显示的文字。"
                 },
                 "useItemEffect": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_string": true,
                     "_lint": true,
-                    "_data": "cls为tools或contants时的使用物品效果，如需设置可以先将其设置为空字符串\"\"，然后双击进行编辑。"
+                    "_data": "cls为tools或contants时的使用物品效果。"
                 },
                 "canUseItemEffect": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_string": true,
                     "_lint": true,
-                    "_data": "cls为tools或contants时对当前能否使用该物品的判断，如需设置可以先将其设置为空字符串\"\"，然后双击进行编辑。"
+                    "_data": "cls为tools或contants时对当前能否使用该物品的判断。"
                 }
             }
         },
@@ -70,6 +76,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "name": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_string": true,
                     "_data": "名称"
                 },
                 "hp": {

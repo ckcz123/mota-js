@@ -202,6 +202,8 @@ action
     |   changePos_1_s
     |   openShop_s
     |   disableShop_s
+    |   follow_s
+    |   unfollow_s
     |   animate_s
     |   showImage_0_s
     |   showImage_1_s
@@ -338,7 +340,7 @@ return code;
 */;
 
 setValue_s
-    :   '变量操作' ':' '名称' idString_e '值' expression Newline
+    :   '变量设置' ':' '名称' idString_e '值' expression Newline
     
 
 /* setValue_s
@@ -591,6 +593,7 @@ openShop_s
 /* openShop_s
 tooltip : 全局商店
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=openshop%EF%BC%9A%E6%89%93%E5%BC%80%E4%B8%80%E4%B8%AA%E5%85%A8%E5%B1%80%E5%95%86%E5%BA%97
+colour : this.dataColor
 default : ["shop1"]
 var code = '{"type": "openShop", "id": "'+IdString_0+'"},\n';
 return code;
@@ -606,6 +609,33 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=disableshop%EF%BC%9A%E7%A
 default : ["shop1"]
 colour : this.eventColor
 var code = '{"type": "disableShop", "id": "'+IdString_0+'"},\n';
+return code;
+*/;
+
+follow_s
+    :   '跟随勇士' '行走图' EvalString Newline
+
+
+/* follow_s
+tooltip : follow: 跟随勇士
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=follow%ef%bc%9a%e8%b7%9f%e9%9a%8f%e5%8b%87%e5%a3%ab
+default : ["npc.png"]
+colour : this.dataColor
+var code = '{"type": "follow", "name": "'+EvalString_0+'"},\n';
+return code;
+*/;
+
+unfollow_s
+    :   '取消跟随' '行走图' EvalString? Newline
+
+
+/* unfollow_s
+tooltip : unfollow: 取消跟随
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=unfollow%ef%bc%9a%e5%8f%96%e6%b6%88%e8%b7%9f%e9%9a%8f
+default : [""]
+colour : this.dataColor
+EvalString_0 = EvalString_0 ? (', "name": "' + EvalString_0 + '"') : "";
+var code = '{"type": "unfollow"' + EvalString_0 + '},\n';
 return code;
 */;
 
@@ -1512,6 +1542,12 @@ ActionParser.prototype.parseAction = function() {
         this.next = MotaActionBlocks['changePos_1_s'].xmlText([
           data.direction,this.next]);
       }
+      break;
+    case "follow": // 跟随勇士
+      this.next = MotaActionBlocks['follow_s'].xmlText([data.name||"", this.next]);
+      break;
+    case "unfollow": // 取消跟随
+      this.next = MotaActionBlocks['unfollow_s'].xmlText([data.name||"", this.next]);
       break;
     case "animate": // 显示动画
       var animate_loc = data.loc||'';

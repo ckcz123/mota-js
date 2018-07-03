@@ -484,13 +484,13 @@ core.prototype.stopHero = function () {
 }
 
 ////// 绘制勇士 //////
-core.prototype.drawHero = function (direction, x, y, status, offsetX, offsetY) {
-    core.control.drawHero(direction, x, y, status, offsetX, offsetY);
+core.prototype.drawHero = function (direction, x, y, status, offset) {
+    core.control.drawHero(direction, x, y, status, offset);
 }
 
 ////// 设置勇士的位置 //////
-core.prototype.setHeroLoc = function (itemName, itemVal) {
-    core.control.setHeroLoc(itemName, itemVal);
+core.prototype.setHeroLoc = function (itemName, itemVal, noGather) {
+    core.control.setHeroLoc(itemName, itemVal, noGather);
 }
 
 ////// 获得勇士的位置 //////

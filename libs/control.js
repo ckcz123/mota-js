@@ -92,10 +92,10 @@ control.prototype.setRequestAnimationFrame = function () {
         if (timestamp-core.animateFrame.moveTime>16 && core.isset(core.status.heroMoving) && core.status.heroMoving>0) {
             var x=core.getHeroLoc('x'), y=core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
             if (core.status.heroMoving<=4) {
-                core.drawHero(direction, x, y, 'leftFoot', 4*core.status.heroMoving*scan[direction].x, 4*core.status.heroMoving*scan[direction].y);
+                core.drawHero(direction, x, y, 'leftFoot', 4*core.status.heroMoving);
             }
             else if (core.status.heroMoving<=8) {
-                core.drawHero(direction, x, y, 'rightFoot', 4*core.status.heroMoving*scan[direction].x, 4*core.status.heroMoving*scan[direction].y);
+                core.drawHero(direction, x, y, 'rightFoot', 4*core.status.heroMoving);
             }
             core.animateFrame.moveTime = timestamp;
         }
@@ -379,6 +379,25 @@ control.prototype.clearContinueAutomaticRoute = function () {
     core.status.automaticRoute.moveStepBeforeStop=[];
 }
 
+////// 瞬间移动 //////
+control.prototype.moveDirectly = function (destX, destY) {
+    var ignoreSteps = core.canMoveDirectly(destX, destY);
+    if (ignoreSteps>0) {
+        core.clearMap('hero', 0, 0, 416, 416);
+        var lastDirection = core.status.route[core.status.route.length-1];
+        if (['left', 'right', 'up', 'down'].indexOf(lastDirection)>=0)
+            core.setHeroLoc('direction', lastDirection);
+        core.setHeroLoc('x', destX);
+        core.setHeroLoc('y', destY);
+        core.drawHero();
+        core.status.route.push("move:"+destX+":"+destY);
+        core.status.hero.statistics.moveDirectly++;
+        core.status.hero.statistics.ignoreSteps+=ignoreSteps;
+        return true;
+    }
+    return false;
+}
+
 ////// 设置自动寻路路线 //////
 control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     if (!core.status.played || core.status.lockControl) {
@@ -392,19 +411,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
             core.status.automaticRoute.moveDirectly = true;
             setTimeout(function () {
                 if (core.status.automaticRoute.moveDirectly && core.status.heroMoving==0) {
-                    var ignoreSteps = core.canMoveDirectly(destX, destY);
-                    if (ignoreSteps>0) {
-                        core.clearMap('hero', 0, 0, 416, 416);
-                        var lastDirection = core.status.route[core.status.route.length-1];
-                        if (['left', 'right', 'up', 'down'].indexOf(lastDirection)>=0)
-                            core.setHeroLoc('direction', lastDirection);
-                        core.setHeroLoc('x', destX);
-                        core.setHeroLoc('y', destY);
-                        core.drawHero();
-                        core.status.route.push("move:"+destX+":"+destY);
-                        core.status.hero.statistics.moveDirectly++;
-                        core.status.hero.statistics.ignoreSteps+=ignoreSteps;
-                    }
+                    core.control.moveDirectly(destX, destY);
                 }
                 core.status.automaticRoute.moveDirectly = false;
             }, 100);
@@ -429,17 +436,8 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
 
     // 单击瞬间移动
     if (core.status.automaticRoute.clickMoveDirectly && core.status.heroStop) {
-        var ignoreSteps = core.canMoveDirectly(destX, destY);
-        if (ignoreSteps>0) {
-            core.clearMap('hero', 0, 0, 416, 416);
-            core.setHeroLoc('x', destX);
-            core.setHeroLoc('y', destY);
-            core.drawHero();
-            core.status.route.push("move:"+destX+":"+destY);
-            core.status.hero.statistics.moveDirectly++;
-            core.status.hero.statistics.ignoreSteps+=ignoreSteps;
+        if (core.control.moveDirectly(destX, destY))
             return;
-        }
     }
 
     var step = 0;
@@ -656,8 +654,9 @@ control.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
     core.interval.heroMoveInterval = window.setInterval(function () {
         core.status.heroMoving+=toAdd;
         if (core.status.heroMoving>=8) {
-            core.setHeroLoc('x', x+scan[direction].x);
-            core.setHeroLoc('y', y+scan[direction].y);
+            core.setHeroLoc('x', x+scan[direction].x, true);
+            core.setHeroLoc('y', y+scan[direction].y, true);
+            core.control.updateFollowers();
             core.moveOneStep();
             core.clearMap('hero', 0, 0, 416, 416);
             core.drawHero(direction);
@@ -837,15 +836,16 @@ control.prototype.eventMoveHero = function(steps, time, callback) {
             core.setHeroLoc('direction', direction);
             step++;
             if (step <= 4) {
-                core.drawHero(direction, x, y, 'leftFoot', 4 * step * scan[direction].x, 4 * step * scan[direction].y);
+                core.drawHero(direction, x, y, 'leftFoot', 4 * step);
             }
             else if (step <= 8) {
-                core.drawHero(direction, x, y, 'rightFoot', 4 * step * scan[direction].x, 4 * step * scan[direction].y);
+                core.drawHero(direction, x, y, 'rightFoot', 4 * step);
             }
             if (step == 8) {
                 step = 0;
-                core.setHeroLoc('x', x + scan[direction].x);
-                core.setHeroLoc('y', y + scan[direction].y);
+                core.setHeroLoc('x', x + scan[direction].x, true);
+                core.setHeroLoc('y', y + scan[direction].y, true);
+                core.control.updateFollowers();
                 moveSteps.shift();
             }
         }
@@ -891,12 +891,16 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
         curry = (curry * jump_count + ey) / (jump_count + 1.0);
     }
 
+    if (core.isset(core.status.hero.followers) && core.status.hero.followers.length>0)
+        core.clearMap('hero');
+
     var animate=window.setInterval(function() {
 
         if (jump_count>0) {
             core.clearMap('hero', drawX(), drawY()-height+32, 32, height);
             updateJump();
-            core.canvas.hero.drawImage(core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height, drawX(), drawY() + 32-height, 32, height);        }
+            core.canvas.hero.drawImage(core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height, drawX(), drawY() + 32-height, 32, height);
+        }
         else {
             clearInterval(animate);
             core.setHeroLoc('x', ex);
@@ -954,33 +958,72 @@ control.prototype.stopHero = function () {
 }
 
 ////// 绘制勇士 //////
-control.prototype.drawHero = function (direction, x, y, status, offsetX, offsetY) {
-    offsetX = offsetX || 0;
-    offsetY = offsetY || 0;
-    var dx=offsetX==0?0:offsetX/Math.abs(offsetX), dy=offsetY==0?0:offsetY/Math.abs(offsetY);
+control.prototype.drawHero = function (direction, x, y, status, offset) {
+    var scan = {
+        'up': {'x': 0, 'y': -1},
+        'left': {'x': -1, 'y': 0},
+        'down': {'x': 0, 'y': 1},
+        'right': {'x': 1, 'y': 0}
+    };
+
     if (!core.isset(x)) x = core.getHeroLoc('x');
     if (!core.isset(y)) y = core.getHeroLoc('y');
-    core.clearAutomaticRouteNode(x+dx, y+dy);
-    x = x * 32;
-    y = y * 32;
     status = status || 'stop';
-    var heroIcon = core.material.icons.hero[direction || core.getHeroLoc('direction')];
-    core.canvas.hero.clearRect(x - 32, y - 32, 96, 96);
-    var height=core.material.icons.hero.height;
-    core.canvas.hero.drawImage(core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height, x + offsetX, y + offsetY + 32-height, 32, height);
+    direction = direction || core.getHeroLoc('direction');
+    offset = offset || 0;
+    var dx=offset==0?0:scan[direction].x, dy=offset==0?0:scan[direction].y;
+    core.clearAutomaticRouteNode(x+dx, y+dy);
+    core.canvas.hero.clearRect(32 * x - 32, 32 * y - 32, 96, 96);
+
+    var heroIconArr = core.material.icons.hero;
+    var drawObjs = [];
+    // add hero
+    drawObjs.push({
+        "img": core.material.images.hero,
+        "height": core.material.icons.hero.height,
+        "heroIcon": heroIconArr[direction],
+        "posx": 32 * x + scan[direction].x*offset,
+        "posy": 32 * y + scan[direction].y*offset,
+        "status": status,
+        "index": 0,
+    });
+    
+    // Add other followers
+    if (core.isset(core.status.hero.followers)) {
+        var index=1;
+        core.status.hero.followers.forEach(function (t) {
+            core.canvas.hero.clearRect(32*t.x-32, 32*t.y-32, 96, 96);
+            if (core.isset(core.material.images.images[t.img])) {
+                drawObjs.push({
+                    "img": core.material.images.images[t.img],
+                    "height": core.material.images.images[t.img].height/4,
+                    "heroIcon": heroIconArr[t.direction],
+                    "posx": 32*t.x + (t.stop?0:scan[t.direction].x*offset),
+                    "posy": 32*t.y + (t.stop?0:scan[t.direction].y*offset),
+                    "status": t.stop?"stop":status,
+                    "index": index++
+                });
+            }
+        });
+    }
+
+    drawObjs.sort(function (a, b) {
+        return a.posy==b.posy?b.index-a.index:a.posy-b.posy;
+    })
+
+    drawObjs.forEach(function (block) {
+        core.canvas.hero.drawImage(block.img, block.heroIcon[block.status]*32,
+            block.heroIcon.loc * block.height, 32, block.height,
+            block.posx, block.posy+32-block.height, 32, block.height);
+    })
 }
 
 ////// 设置勇士的位置 //////
-control.prototype.setHeroLoc = function (itemName, itemVal) {
-    if (itemVal == '++') {
-        core.status.hero.loc[itemName]++;
-        return;
-    }
-    else if (itemVal == '--') {
-        core.status.hero.loc[itemName]--;
-        return;
-    }
+control.prototype.setHeroLoc = function (itemName, itemVal, noGather) {
     core.status.hero.loc[itemName] = itemVal;
+    if ((itemName=='x' || itemName=='y') && !noGather) {
+        this.gatherFollowers();
+    }
 }
 
 ////// 获得勇士的位置 //////
@@ -1009,6 +1052,62 @@ control.prototype.nextY = function (n) {
         'right': {'x': 1, 'y': 0}
     };
     return core.getHeroLoc('y')+scan[core.getHeroLoc('direction')].y*(n||1);
+}
+
+////// 聚集跟随者 //////
+control.prototype.gatherFollowers = function () {
+    if (!core.isset(core.status.hero.followers) || core.status.hero.followers.length==0) return;
+    var x=core.getHeroLoc('x'), y=core.getHeroLoc('y'), dir=core.getHeroLoc('direction');
+    core.status.hero.followers.forEach(function (t) {
+        t.x = x;
+        t.y = y;
+        t.stop = true;
+        t.direction = dir;
+    });
+}
+
+////// 更新跟随者坐标 //////
+control.prototype.updateFollowers = function () {
+    if (!core.isset(core.status.hero.followers) || core.status.hero.followers.length==0) return;
+    var scan = {
+        'up': {'x': 0, 'y': -1},
+        'left': {'x': -1, 'y': 0},
+        'down': {'x': 0, 'y': 1},
+        'right': {'x': 1, 'y': 0}
+    };
+    core.status.hero.followers.forEach(function (t) {
+        if (!t.stop) {
+            t.x += scan[t.direction].x;
+            t.y += scan[t.direction].y;
+        }
+    })
+
+    var nowx = core.getHeroLoc('x'), nowy = core.getHeroLoc('y');
+    core.status.hero.followers.forEach(function (t) {
+        if (t.x == nowx && t.y == nowy) {
+            t.stop = true;
+        }
+        else {
+            var dx = nowx-t.x, dy = nowy-t.y;
+            if (dx==-1) {
+                t.stop=false;
+                t.direction='left';
+            }
+            else if (dx==1) {
+                t.stop=false;
+                t.direction='right';
+            }
+            else if (dy==-1) {
+                t.stop=false;
+                t.direction='up';
+            }
+            else if (dy==1) {
+                t.stop=false;
+                t.direction='down';
+            }
+        }
+        nowx=t.x; nowy=t.y;
+    })
 }
 
 ////// 更新领域、夹击、阻击的伤害地图 //////
@@ -1509,25 +1608,26 @@ control.prototype.updateFg = function () {
 }
 
 ////// 执行一个表达式的effect操作 //////
-control.prototype.doEffect = function (expression) {
-    // 必须使用"+="
-    var arr = expression.split("+=");
-    if (arr.length!=2) return;
-    var name=arr[0], value=core.calValue(arr[1]);
-    if (name.indexOf("status:")==0) {
-        var status=name.substring(7);
-        core.setStatus(status, core.getStatus(status)+value);
-    }
-    else if (name.indexOf("item:")==0) {
-        var itemId=name.substring(5);
-        core.setItem(itemId, core.itemCount(itemId)+value);
-    }
+control.prototype.doEffect = function (effect) {
+    effect.split(";").forEach(function (expression) {
+        var arr = expression.split("+=");
+        if (arr.length!=2) return;
+        var name=arr[0], value=core.calValue(arr[1]);
+        if (name.indexOf("status:")==0) {
+            var status=name.substring(7);
+            core.setStatus(status, core.getStatus(status)+value);
+        }
+        else if (name.indexOf("item:")==0) {
+            var itemId=name.substring(5);
+            core.setItem(itemId, core.itemCount(itemId)+value);
+        }
+    });
 }
 
 ////// 开启debug模式 //////
 control.prototype.debug = function() {
     core.setFlag('debug', true);
-    core.insertAction(["\t[调试模式开启]此模式下按住Ctrl键可以穿墙并忽略一切事件。\n同时，录像将失效，也无法上传成绩。"]);
+    core.insertAction(["\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n同时，录像将失效，也无法上传成绩。"]);
     /*
     core.setStatus('hp', 999999);
     core.setStatus('atk', 10000);
@@ -1822,16 +1922,7 @@ control.prototype.replay = function () {
     else if (action.indexOf('move:')==0) {
         var pos=action.substring(5).split(":");
         var x=parseInt(pos[0]), y=parseInt(pos[1]);
-
-        var ignoreSteps = core.canMoveDirectly(x, y);
-        if (ignoreSteps>0) {
-            core.clearMap('hero', 0, 0, 416, 416);
-            core.setHeroLoc('x', x);
-            core.setHeroLoc('y', y);
-            core.drawHero();
-            core.status.route.push("move:"+x+":"+y);
-            core.status.hero.statistics.moveDirectly++;
-            core.status.hero.statistics.ignoreSteps+=ignoreSteps;
+        if (core.control.moveDirectly(x,y)) {
             core.replay();
             return;
         }
@@ -2225,6 +2316,7 @@ control.prototype.loadData = function (data, callback) {
 
 ////// 设置勇士属性 //////
 control.prototype.setStatus = function (statusName, statusVal) {
+    if (statusName == 'exp') statusName = 'experience';
     if (core.isset(core.status.hero.loc[statusName]))
         core.status.hero.loc[statusName] = statusVal;
     else
@@ -2236,6 +2328,7 @@ control.prototype.getStatus = function (statusName) {
     // support status:x
     if (core.isset(core.status.hero.loc[statusName]))
         return core.status.hero.loc[statusName];
+    if (statusName == 'exp') statusName = 'experience';
     return core.status.hero[statusName];
 }
 
@@ -2445,7 +2538,6 @@ control.prototype.updateStatusBar = function () {
     }
 
     core.statusBar.hard.innerHTML = core.status.hard;
-
 
     // 回放
     if (core.status.replay.replaying) {

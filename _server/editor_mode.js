@@ -120,7 +120,7 @@ editor_mode = function (editor) {
                 }
                 input.ondblclick = function () {
                     if (cobj._type === 'event') editor_blockly.import(guid, {type: cobj._event});
-                    if (cobj._type === 'textarea') editor_multi.import(guid, {lint: cobj._lint});
+                    if (cobj._type === 'textarea') editor_multi.import(guid, {lint: cobj._lint, string: cobj._string});
 
                 }
             });

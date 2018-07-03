@@ -555,7 +555,7 @@ var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
-var code = '{"type": "changeFloor", "floorId": "'+IdString_0+floorstr+DirectionEx_List_0+Int_0+' },\n';
+var code = '{"type": "changeFloor", "floorId": "'+IdString_0+'"'+floorstr+DirectionEx_List_0+Int_0+' },\n';
 return code;
 */;
 

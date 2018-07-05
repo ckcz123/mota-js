@@ -1,0 +1,390 @@
+
+html, body, div, img {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Roboto, "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;;
+    background-color: #F5F5F5;
+}
+
+/* ::-webkit-scrollbar {
+    width: 5px;
+} */
+.main {
+    max-width: 100%;
+    min-height: 500px;
+    margin: 0 auto;
+}
+
+#left, #mid, #right {
+    border-radius: 2px;
+    box-sizing: border-box;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
+}
+
+#left {
+    position: absolute;
+    left: 5px;
+    top: 10px;
+    width: 435px;
+    height: 630px;
+}
+
+#editArea {
+    position: absolute;
+    width: 100%;
+    height: 70%;
+    left: 0;
+    top: 0;
+    /* padding: 10px 5px; */
+    box-sizing: border-box;
+}
+
+#pout {
+    display: block;
+    width: 410px;
+    height: 100%;
+    box-sizing: border-box;
+    margin-left: 22px;
+    margin-top: 23px;
+    line-height: 20px;
+    font-size: 12.3px;
+    font-family: 'Lucida Console', Monaco, monospace;
+    white-space: pre;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    overflow: auto;
+}
+
+#editTip {
+    position: absolute;
+    width: 100%;
+    margin-bottom: 120px;
+    bottom: 0;
+    left: 10px;
+}
+
+#editArea p {
+    margin: 10px;
+    display: block;
+    width: 70%;
+    line-height: 20px;
+    text-align: left;
+    font-size: 14px;
+}
+
+#editTip .btn {
+    float: right;
+    margin-right: 20px;
+    margin-top: 5px;
+}
+
+#mid {
+    position: absolute;
+    left: 448px;
+    top: 10px;
+    width: 440px;
+    height: 630px;
+}
+
+.map {
+    position: absolute;
+    left: 20px;
+    top: 21px;
+    width: 416px;
+    height: 416px;
+}
+
+#mid .tools {
+    position: absolute;
+    width: 425px;
+    height: 180px;
+    left: 0;
+    bottom: 0;
+    border-top: 1px solid #ccc;
+    padding: 10px 5px;
+    margin-left: 8px;;
+    box-sizing: border-box;
+}
+
+#tip {
+    float: right;
+    width: 50%;
+    height: 95%;
+    padding: 5px 10px 10px 10px;
+    margin-right: 0;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    font-size: 15px;
+    line-height: 14px;
+}
+
+.files {
+    width: 50%;
+    height: 120px;
+    /* padding: 10px; */
+    margin-top: 15px;
+}
+
+.input {
+    display: block;
+    max-width: 150px;
+    height: 20px;
+    padding: 6px 12px;
+    font-size: 14px;
+    margin-top: 10px;
+    color: #555;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+}
+
+#bgSelect {
+    width: 50%;
+    height: 100px;
+    margin-top: 10px;
+}
+
+#bgSelect span {
+    /* display: block; */
+    font-size: 14px;
+    line-height: 30px;
+}
+
+#printOut {
+    margin-top: 10px;
+    height: 20px;
+
+}
+
+.btn {
+    width: 80px;
+    border-radius: 2px;
+    line-height: 30px;
+    margin: 0;
+    min-width: 50px;
+    padding: 0 5px;
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 14px;
+    font-weight: 400;
+    /* text-transform: uppercase; */
+    letter-spacing: 0;
+    overflow: hidden;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    vertical-align: middle;
+    border: 0;
+    background: rgba(158, 158, 158, .2);
+    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, .14), 0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 3px 0 rgba(0, 0, 0, .12);
+    color: #fff;
+    background-color: #26A69A;
+}
+
+.btn:hover {
+    background-color: #009688;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
+}
+
+#right {
+    position: absolute;
+    left: 900px;
+    top: 10px;
+    width: 440px;
+    height: 630px;
+    /* border: 1px solid rgb(238, 13, 13); */
+}
+
+#iconLib {
+    position: absolute;
+    width: 435px;
+    height: 620px;
+    left: 5px;
+    top: 5px;
+    overflow: auto;
+}
+
+.egameCanvas {
+    position: absolute;
+}
+
+.gameCanvas {
+    position: absolute;
+}
+
+#dataSelection, .appendSelection {
+    position: absolute;
+    /* top:0;
+    left:320px; */
+    z-index: 75;
+    width: 26px;
+    height: 26px;
+    margin: 3px 0 0 3px;
+    padding: 0;
+    /* display: none; */
+    box-sizing: border-box;
+    background-color: rgba(255, 255, 255, 0.0);
+    border: 1px solid #000;
+    box-shadow: 0 0 0 2px #fff,
+    0 0 0 3px #000;
+}
+
+.warnText {
+    color: #D50000;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.2em;
+}
+
+.infoText {
+    color: #2196F3;
+}
+
+.successText {
+    color: #00897B;
+    line-height: 1.2em;
+}
+
+table, td {
+    border: 1px solid #fff;
+    color: #fff;
+    cursor: crosshair;
+}
+
+table.col {
+    position: relative;
+
+    text-align: center;
+    border-collapse: collapse;
+}
+
+table.col td {
+    background-color: #4DB6AC;
+}
+
+#arrColMark td {
+    width: 16px;
+}
+
+#arrColMark {
+    top: 2px;
+    left: 36px;
+    width: 385px;
+    height: 16px;
+    font-size: 13px;
+}
+
+#mapColMark {
+    top: 2px;
+    left: 19px;
+    width: 418px;
+    height: 16px;
+    font-size: 13px;
+}
+
+#mapColMark td {
+    width: 29px;
+}
+
+#mapColMark td:hover .colBlock {
+    position: absolute;
+    top: 19px;
+    height: 416px;
+    width: 32px;
+    z-index: 100;
+    background-color: rgba(38, 166, 154, .5);
+}
+
+table.row {
+    position: relative;
+    text-align: right;
+    vertical-align: middle;
+    border-collapse: collapse;
+}
+
+table.row td {
+    background-color: #4C221B;
+}
+
+#arrRowMark {
+    top: 5px;
+    left: 2px;
+    width: 16px;
+    height: 262px;
+    font-size: 12px;
+}
+
+#mapRowMark {
+    top: 1px;
+    left: 2px;
+    width: 16px;
+    height: 416px;
+    font-size: 12px;
+}
+
+#mapRowMark td {
+    height: 29px;
+}
+
+#mapRowMark td:hover .rowBlock {
+    position: absolute;
+    left: 18px;
+    height: 32px;
+    width: 416px;
+    z-index: 100;
+    background-color: rgba(76, 34, 27, .5);
+}
+
+#menuDiv * { margin: 0; padding: 0; }
+#midMenu{
+    background: #fff;
+    border-color: #ccc #666 #666 #ccc;
+    border-style: solid;
+    border-width: 1px;
+    cursor: default;
+    font: normal 13px Arial, sans-serif;
+    margin: 0;
+    outline: none;
+    padding: 4px 0;
+    position: absolute;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 100%;
+    z-index: 101;
+
+    border-radius: 4px;
+}
+#midMenu .menuitem{
+    color: #000;
+    font: normal 13px Arial, sans-serif;
+    list-style: none;
+    margin: 0;
+    padding: 4px 7em 4px 28px;
+    white-space: nowrap;
+
+    /* padding-left: 12px; */
+
+    /* padding-right: 20px; */
+}
+#midMenu .menuitem:hover{
+    background-color: #d6e9f8;
+    border-color: #d6e9f8;
+    border-style: dotted;
+    border-width: 1px 0;
+    padding-bottom: 3px;
+    padding-top: 3px;
+}
+#midMenu .menuitem-content{
+    color: #000;
+    font: normal 13px Arial, sans-serif;
+}
+
+/* for vue dom */
+[v-cloak] {
+    display: none !important;
+}

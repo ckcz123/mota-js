@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
     <link href="_server/css/editor_mobile.css" rel="stylesheet">
     <link href="_server/CodeMirror/codemirror.css" rel="stylesheet">
     <link href="_server/css/editor_mode_mobile.css" rel="stylesheet">
@@ -9,8 +10,7 @@
 <body>
 <script>
     if(innerWidth>innerHeight){ //pic:1242*2208 | chrome info:1340*2380
-        alert('宽大于高的设备请使用正常版本的editor, 点击确定跳转')
-        window.location='./editor.html'
+        confirm('宽大于高的设备请使用正常版本的editor, 点击确定跳转')?(window.location='./editor.html'):'';
     }
 </script>
 <div class="main">
@@ -244,7 +244,11 @@
                     </div>
                 </div>
     
-                <input type="button" value="数据区"/><input type="button" value="地图区"/><input type="button" value="素材库"/>
+                <span id='mobileview'>
+                    <input type="button" value="数据区"/>
+                    <input type="button" value="地图区"/>
+                    <input type="button" value="素材库"/>
+                </span>
                 <select id="editModeSelect">
                     <option value="map">地图编辑</option>
                     <option value="loc">地图选点</option>
@@ -254,9 +258,24 @@
                     <option value="functions">脚本编辑</option>
                     <option value="appendpic">追加素材</option>
                 </select>
-                <br><br>
+                <br>
                 <select id="selectFloor"></select>
                 <input type="button" value="保存地图" id='saveFloor'/>
+                <div id="menuDiv">
+                    <div id="midMenu" style="display:none">
+                        <div id='chooseThis' class="menuitem"><div class="menuitem-content">选中此点</div></div>
+                        <div id='chooseInRight' class="menuitem"><div class="menuitem-content">在素材区选中此图块</div></div>
+                        <div id='copyLoc' class="menuitem"><div class="menuitem-content">复制此事件</div></div>
+                        <div id='moveLoc' class="menuitem"><div class="menuitem-content">移动此事件</div></div>
+                        <div id='clearLoc' class="menuitem"><div class="menuitem-content">清空此点及事件</div></div>
+                    </div>
+                </div>
+                <span id='mobileeditdata' style="display:none">
+                    <input type="button" value="编辑"/>
+                    <input type="button" value="显示完整名称"/>
+                    <input type="button" value="显示完整注释"/>
+                </span>
+                <input type="button" value="取消素材区的选中" id='cancelright'/>
                 <!--  -->
                 <div id="bgSelect" v-cloak style="display:none">
                     <span>当前地板: </span>
@@ -275,15 +294,7 @@
             </div>
         </div>
     </div>
-    <div id="menuDiv">
-        <div id="midMenu" style="display:none">
-            <div id='chooseThis' class="menuitem"><div class="menuitem-content">选中此点</div></div>
-            <div id='chooseInRight' class="menuitem"><div class="menuitem-content">在素材区选中此图块</div></div>
-            <div id='copyLoc' class="menuitem"><div class="menuitem-content">复制此事件</div></div>
-            <div id='moveLoc' class="menuitem"><div class="menuitem-content">移动此事件</div></div>
-            <div id='clearLoc' class="menuitem"><div class="menuitem-content">清空此点及事件</div></div>
-        </div>
-    </div>
+    
 </div>
 <!-- <script>/* -->
 <div id='gameGroup' style='display:none'>
@@ -439,6 +450,66 @@ if (location.protocol.indexOf("http")!=0) {
 </script>
 <script src='_server/editor.js'></script>
 <script>
+editor.isMobile=true
+var editor_mobile_listen=function(){
+    var mobileview=document.getElementById('mobileview');
+    var editModeSelect=document.getElementById('editModeSelect');
+    var mid=document.getElementById('mid');
+    var right=document.getElementById('right');
+    var mobileeditdata=document.getElementById('mobileeditdata');
+    var cancelright=document.getElementById('cancelright');
+
+    mobileview.children[0].onclick=function(){
+        mid.style='z-index:-1;opacity: 0;';
+        right.style='z-index:-1;opacity: 0;';
+        mobileeditdata.style='';
+        editor.mode.showMode(editModeSelect.value);
+        editor.hideMidMenu();
+    }
+    mobileview.children[1].onclick=function(){
+        mid.style='';
+        right.style='z-index:-1;opacity: 0;';
+        mobileeditdata.style='z-index:-1;opacity: 0;';
+        editor.lastClickId='';
+    }
+    mobileview.children[2].onclick=function(){
+        mid.style='z-index:-1;opacity: 0;';
+        right.style='';
+        mobileeditdata.style='z-index:-1;opacity: 0;';
+        editor.lastClickId='';
+    }
+
+
+    var gettrbyid=function(){
+        if(!editor.lastClickId)return false;
+        thisTr = document.getElementById(editor.lastClickId);
+        input = thisTr.children[2].children[0].children[0];
+        field = thisTr.children[0].getAttribute('title');
+        cobj = JSON.parse(thisTr.children[1].getAttribute('cobj'));
+        return [thisTr,input,field,cobj];
+    }
+    mobileeditdata.children[0].onclick=function(){
+        var info = gettrbyid()
+        if(!info)return;
+        info[1].ondblclick()
+    }
+    mobileeditdata.children[1].onclick=function(){
+        var info = gettrbyid()
+        if(!info)return;
+        printf(info[2])
+    }
+    mobileeditdata.children[2].onclick=function(){
+        var info = gettrbyid()
+        if(!info)return;
+        printf(info[0].children[1].getAttribute('title'))
+    }
+
+    cancelright.onclick=function(){
+        selectBox.isSelected = false;
+        editor.info = {};
+    }
+}
+
     var useCompress = main.useCompress;
     main.useCompress = false;
     main.init('editor', function () {
@@ -456,6 +527,7 @@ if (location.protocol.indexOf("http")!=0) {
             editor_blockly = editor_blockly();
             editor.useCompress = useCompress;
             delete(useCompress);
+            editor_mobile_listen();
         });
     });
 

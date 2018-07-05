@@ -203,8 +203,8 @@ body {
 
 #iconLib {
     position: absolute;
-    width: 435px;
-    height: 620px;
+    width: 100vmin;
+    height: 100vmin;
     left: 5px;
     top: 5px;
     overflow: auto;
@@ -349,21 +349,21 @@ table.row td {
     border-style: solid;
     border-width: 1px;
     cursor: default;
-    font: normal 13px Arial, sans-serif;
+    font: normal 2.5vmin Arial, sans-serif;
     margin: 0;
     outline: none;
     padding: 4px 0;
-    position: absolute;
     overflow-y: auto;
     overflow-x: hidden;
     max-height: 100%;
+    max-width: 40%;
     z-index: 101;
 
     border-radius: 4px;
 }
 #midMenu .menuitem{
     color: #000;
-    font: normal 13px Arial, sans-serif;
+    font: normal 2.5vmin Arial, sans-serif;
     list-style: none;
     margin: 0;
     padding: 4px 7em 4px 28px;
@@ -383,7 +383,7 @@ table.row td {
 }
 #midMenu .menuitem-content{
     color: #000;
-    font: normal 13px Arial, sans-serif;
+    font: normal 2.5vmin Arial, sans-serif;
 }
 
 /* for vue dom */

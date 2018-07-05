@@ -10,7 +10,7 @@
 .leftTab {
     overflow: auto;
     position: absolute;
-    height: 630px;
+    height: 100vmin;
 }
 
 .leftTab > * {
@@ -26,9 +26,9 @@
 }
 
 .leftTab {
-    left: 5px;
-    top: 10px;
-    width: 435px;
+    left: 0;
+    top: 0;
+    width: 100vmin;
 }
 
 .leftTab .leftTabHeader {
@@ -49,8 +49,8 @@
 }
 
 #left6 {
-    left: 5px;
-    top: 5px;
+    left: 0;
+    top: 0;
     z-index: 200;
     position: fixed;
     background-color: rgb(245, 245, 245);
@@ -58,11 +58,16 @@
     height: 100%;
     overflow: hidden;
 }
+#left6 h3{
+    font-size: 3vmax;
+    margin: 2vmax 0;
+    
+}
 
 #left6 #blocklyArea {
-    float: left;
-    width: 60%;
-    height: 95%;
+
+    width: 100vmin;
+    height: 55vmax;
 }
 
 #left6 #blocklyDiv {
@@ -71,9 +76,9 @@
 
 #left6 .CodeMirror {
     border: 1px solid #eee;
-    float: left;
-    height: 95%;
-    width: 35%;
+
+    height: 27vmax;
+    width: 100%;
 }
 
 #left6 #codeArea {
@@ -84,8 +89,8 @@
 
 #left7 {
     /* height: 440px; width: 375px;float:left; */
-    left: 5px;
-    top: 5px;
+    left: 0;
+    top: 0;
     z-index: 200;
     position: fixed;
     background-color: rgb(245, 245, 245);

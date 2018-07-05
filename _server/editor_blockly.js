@@ -5,9 +5,13 @@ editor_blockly = function () {
     initscript = String.raw`
 (function(){
   var getCategory = function(name){
-  for(var node of document.getElementById('toolbox').children) {
-    if(node.getAttribute('name')==name) return node;
-  }
+    for(var node of document.getElementById('toolbox').children) {
+      if(node.getAttribute('name')==name) return node;
+    }
+    var node = document.createElement('category');
+    node.setAttribute('name',name);
+    document.getElementById('toolbox').appendChild(node);
+    return node;
   }
 
   var toolboxObj = {

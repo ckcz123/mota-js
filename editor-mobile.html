@@ -2,14 +2,15 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <link href="_server/css/editor.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
+    <link href="_server/css/editor_mobile.css" rel="stylesheet">
     <link href="_server/CodeMirror/codemirror.css" rel="stylesheet">
-    <link href="_server/css/editor_mode.css" rel="stylesheet">
+    <link href="_server/css/editor_mode_mobile.css" rel="stylesheet">
 </head>
 <body>
 <script>
-    if(innerWidth<innerHeight){ //pic:1242*2208 | chrome info:1340*2380
-        confirm('高大于宽的设备请使用移动版本的editor, 点击确定跳转')?(window.location='./editor-mobile.html'):'';
+    if(innerWidth>innerHeight){ //pic:1242*2208 | chrome info:1340*2380
+        confirm('宽大于高的设备请使用正常版本的editor, 点击确定跳转')?(window.location='./editor.html'):'';
     }
 </script>
 <div class="main">
@@ -213,55 +214,9 @@
             <canvas class='gameCanvas' id='efg' width='416' height='416'></canvas>
             <canvas class='egameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
         </div>
-        <div class="tools">
-            <div id="tip" v-cloak>
-                <div v-if="isSelectedBlock">
-                    <p v-if="isClearBlock" class="infoText">当前选择为清除块，可擦除地图上块</p>
-                    <div v-else>
-                        <p v-if="hasId">图块编号：<span class="infoText">{{ infos['idnum'] }}</span></p>
-                        <p v-if="hasId">图块ID：<span class="infoText">{{ infos['id'] }}</span></p>
-                        <p v-else class="warnText">该图块无对应的数字或ID存在，请先前往icons.js和maps.js中进行定义！</p>
-                        <p>图块所在素材：<span class="infoText">{{ infos['images'] + (isAutotile ? '( '+infos['id']+' )' : '') }}</span>
-                        </p>
-                        <p>图块索引：<span class="infoText">{{ infos['y'] }}</span></p>
-                    </div>
-                </div>
-                <div v-else>
-                    <p v-if="whichShow" v-bind:class="[ (whichShow%2) ? 'warnText' : 'successText']">{{ mapMsg }}</p>
-                </div>
-            </div>
-
-
-            <select id="editModeSelect">
-                <option value="map">地图编辑</option>
-                <option value="loc">地图选点</option>
-                <option value="emenyitem">图块属性</option>
-                <option value="floor">楼层属性</option>
-                <option value="tower">全塔属性</option>
-                <option value="functions">脚本编辑</option>
-                <option value="appendpic">追加素材</option>
-            </select>
-            <br><br><br><br>
-            <select id="selectFloor"></select>
-            <input type="button" value="保存地图" id='saveFloor'/>
-            <!--  -->
-            <div id="bgSelect" v-cloak style="display:none">
-                <span>当前地板: </span>
-                <select v-model="selectedBg">
-                    <option disabled value="">请选择地板</option>
-                    <option v-for="bg in bgs" v-bind:value="bg">
-                        {{ bg }}
-                    </option>
-                </select>
-                <div class="selectpng">
-                    <input class='input' id='pin' v-model="imgname" placeholder="请输入自定义背景文件名"/>
-                    <input class='btn' type="button" value="确定" v-on:click="updatebg"/>
-                </div>
-            </div>
-            <!--  -->
-        </div>
+        
     </div>
-    <div id="right">
+    <div id="right" style="z-index:-1;opacity: 0;">
         <div id="iconLib">
             <canvas class='egameCanvas' id='edata' width='416' height='416' style='z-index:0'></canvas>
             <div id="selectBox">
@@ -269,15 +224,77 @@
             </div>
         </div>
     </div>
-    <div id="menuDiv">
-        <div id="midMenu" style="display:none">
-            <div id='chooseThis' class="menuitem"><div class="menuitem-content">选中此点</div></div>
-            <div id='chooseInRight' class="menuitem"><div class="menuitem-content">在素材区选中此图块</div></div>
-            <div id='copyLoc' class="menuitem"><div class="menuitem-content">复制此事件</div></div>
-            <div id='moveLoc' class="menuitem"><div class="menuitem-content">移动此事件</div></div>
-            <div id='clearLoc' class="menuitem"><div class="menuitem-content">清空此点及事件</div></div>
+    <div id="down">
+        <div style="margin:1rem">
+            <div class="tools">
+                <div id="tip" v-cloak>
+                    <div v-if="isSelectedBlock">
+                        <p v-if="isClearBlock" class="infoText">当前选择为清除块，可擦除地图上块</p>
+                        <div v-else>
+                            <p v-if="hasId">图块编号：<span class="infoText">{{ infos['idnum'] }}</span></p>
+                            <p v-if="hasId">图块ID：<span class="infoText">{{ infos['id'] }}</span></p>
+                            <p v-else class="warnText">该图块无对应的数字或ID存在，请先前往icons.js和maps.js中进行定义！</p>
+                            <p>图块所在素材：<span class="infoText">{{ infos['images'] + (isAutotile ? '( '+infos['id']+' )' : '') }}</span>
+                            </p>
+                            <p>图块索引：<span class="infoText">{{ infos['y'] }}</span></p>
+                        </div>
+                    </div>
+                    <div v-else>
+                        <p v-if="whichShow" v-bind:class="[ (whichShow%2) ? 'warnText' : 'successText']">{{ mapMsg }}</p>
+                    </div>
+                </div>
+    
+                <span id='mobileview'>
+                    <input type="button" value="数据区"/>
+                    <input type="button" value="地图区"/>
+                    <input type="button" value="素材库"/>
+                </span>
+                <select id="editModeSelect">
+                    <option value="map">地图编辑</option>
+                    <option value="loc">地图选点</option>
+                    <option value="emenyitem">图块属性</option>
+                    <option value="floor">楼层属性</option>
+                    <option value="tower">全塔属性</option>
+                    <option value="functions">脚本编辑</option>
+                    <option value="appendpic">追加素材</option>
+                </select>
+                <br>
+                <select id="selectFloor"></select>
+                <input type="button" value="保存地图" id='saveFloor'/>
+                <div id="menuDiv">
+                    <div id="midMenu" style="display:none">
+                        <div id='chooseThis' class="menuitem"><div class="menuitem-content">选中此点</div></div>
+                        <div id='chooseInRight' class="menuitem"><div class="menuitem-content">在素材区选中此图块</div></div>
+                        <div id='copyLoc' class="menuitem"><div class="menuitem-content">复制此事件</div></div>
+                        <div id='moveLoc' class="menuitem"><div class="menuitem-content">移动此事件</div></div>
+                        <div id='clearLoc' class="menuitem"><div class="menuitem-content">清空此点及事件</div></div>
+                    </div>
+                </div>
+                <span id='mobileeditdata' style="display:none">
+                    <input type="button" value="编辑"/>
+                    <input type="button" value="显示完整名称"/>
+                    <input type="button" value="显示完整注释"/>
+                </span>
+                <input type="button" value="取消素材区的选中" id='cancelright'/>
+                <!--  -->
+                <div id="bgSelect" v-cloak style="display:none">
+                    <span>当前地板: </span>
+                    <select v-model="selectedBg">
+                        <option disabled value="">请选择地板</option>
+                        <option v-for="bg in bgs" v-bind:value="bg">
+                            {{ bg }}
+                        </option>
+                    </select>
+                    <div class="selectpng">
+                        <input class='input' id='pin' v-model="imgname" placeholder="请输入自定义背景文件名"/>
+                        <input class='btn' type="button" value="确定" v-on:click="updatebg"/>
+                    </div>
+                </div>
+                <!--  -->
+            </div>
         </div>
     </div>
+    
 </div>
 <!-- <script>/* -->
 <div id='gameGroup' style='display:none'>
@@ -386,14 +403,14 @@
     (function () {
         var colNum = ' ';
         for (var i = 0; i < 13; i++) {
-            var tpl = '<td>' + i + '<div class="colBlock" style="left:' + (i * 32 + 1) + 'px;"></div></td>';
+            var tpl = '<td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="colBlock" style="left:' + (i * 96/13 ) + 'vmin;"></div></td>';
             colNum += tpl;
         }
         arrColMark.innerHTML = '<tr>' + colNum + '</tr>';
         mapColMark.innerHTML = '<tr>' + colNum + '</tr>';
         var rowNum = ' ';
         for (var i = 0; i < 13; i++) {
-            var tpl = '<tr><td>' + i + '<div class="rowBlock" style="top:' + (i * 32 + 1) + 'px;"></div></td></tr>';
+            var tpl = '<tr><td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="rowBlock" style="top:' + (i * 96/13 ) + 'vmin;"></div></td></tr>';
             rowNum += tpl;
         }
         arrRowMark.innerHTML = rowNum;
@@ -433,6 +450,66 @@ if (location.protocol.indexOf("http")!=0) {
 </script>
 <script src='_server/editor.js'></script>
 <script>
+editor.isMobile=true
+var editor_mobile_listen=function(){
+    var mobileview=document.getElementById('mobileview');
+    var editModeSelect=document.getElementById('editModeSelect');
+    var mid=document.getElementById('mid');
+    var right=document.getElementById('right');
+    var mobileeditdata=document.getElementById('mobileeditdata');
+    var cancelright=document.getElementById('cancelright');
+
+    mobileview.children[0].onclick=function(){
+        mid.style='z-index:-1;opacity: 0;';
+        right.style='z-index:-1;opacity: 0;';
+        mobileeditdata.style='';
+        editor.mode.showMode(editModeSelect.value);
+        editor.hideMidMenu();
+    }
+    mobileview.children[1].onclick=function(){
+        mid.style='';
+        right.style='z-index:-1;opacity: 0;';
+        mobileeditdata.style='z-index:-1;opacity: 0;';
+        editor.lastClickId='';
+    }
+    mobileview.children[2].onclick=function(){
+        mid.style='z-index:-1;opacity: 0;';
+        right.style='';
+        mobileeditdata.style='z-index:-1;opacity: 0;';
+        editor.lastClickId='';
+    }
+
+
+    var gettrbyid=function(){
+        if(!editor.lastClickId)return false;
+        thisTr = document.getElementById(editor.lastClickId);
+        input = thisTr.children[2].children[0].children[0];
+        field = thisTr.children[0].getAttribute('title');
+        cobj = JSON.parse(thisTr.children[1].getAttribute('cobj'));
+        return [thisTr,input,field,cobj];
+    }
+    mobileeditdata.children[0].onclick=function(){
+        var info = gettrbyid()
+        if(!info)return;
+        info[1].ondblclick()
+    }
+    mobileeditdata.children[1].onclick=function(){
+        var info = gettrbyid()
+        if(!info)return;
+        printf(info[2])
+    }
+    mobileeditdata.children[2].onclick=function(){
+        var info = gettrbyid()
+        if(!info)return;
+        printf(info[0].children[1].getAttribute('title'))
+    }
+
+    cancelright.onclick=function(){
+        selectBox.isSelected = false;
+        editor.info = {};
+    }
+}
+
     var useCompress = main.useCompress;
     main.useCompress = false;
     main.init('editor', function () {
@@ -450,6 +527,7 @@ if (location.protocol.indexOf("http")!=0) {
             editor_blockly = editor_blockly();
             editor.useCompress = useCompress;
             delete(useCompress);
+            editor_mobile_listen();
         });
     });
 

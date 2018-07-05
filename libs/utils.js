@@ -631,7 +631,7 @@ utils.prototype.hide = function (obj, speed, callback) {
     }, speed);
 }
 
-utils.prototype.export = function (floorIds) {
+utils.prototype._export = function (floorIds) {
     if (!core.isset(floorIds)) floorIds = [core.status.floorId];
     else if (floorIds=='all') floorIds = core.clone(core.floorIds);
     else if (typeof floorIds == 'string') floorIds = [floorIds];

@@ -108,6 +108,7 @@ loader.prototype.loadAnimates = function () {
                 content = JSON.parse(content);
                 var data = {};
                 data.ratio = content.ratio;
+                data.se = content.se;
                 data.images = [];
                 data.images_rev = [];
                 content.bitmaps.forEach(function (t2) {

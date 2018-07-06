@@ -326,7 +326,7 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
             if (core.status.heroStop)
                 core.turnHero();
             break;
-        case 75: // K
+        case 75: case 86: // K/V
             if (core.status.heroStop)
                 core.openQuickShop(true);
             break;
@@ -1139,7 +1139,7 @@ actions.prototype.keyDownQuickShop = function (keycode) {
 
 ////// 快捷商店界面时，放开某个键的操作 //////
 actions.prototype.keyUpQuickShop = function (keycode) {
-    if (keycode==27 || keycode==75 || keycode==88) {
+    if (keycode==27 || keycode==75 || keycode==88 || keycode==86) {
         core.ui.closePanel();
         return;
     }

@@ -8,7 +8,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"bg.jpg"
 		],
 		"animates" : [ 
-			"hand", "sword", "zone",
+			"hand", "sword", "zone"
 		],
 		"bgms" : [ 
 			'bgm.mp3'
@@ -155,7 +155,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"startDirectly": false,
 		"canOpenBattleAnimate": true,
 		"showBattleAnimateConfirm": true,
-		"battleAnimate": true,
+		"battleAnimate": false,
 		"displayEnemyDamage": true,
 		"displayCritical": true,
 		"displayExtraDamage": true,

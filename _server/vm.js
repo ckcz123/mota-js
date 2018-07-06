@@ -1,19 +1,19 @@
 // vue 相关处理
-
 document.body.onmousedown = function (e) {
     //console.log(e);
-    var eid = [];
+
+    var clickpath = [];
     e.path.forEach(function (node) {
         if (!node.getAttribute) return;
         var id_ = node.getAttribute('id');
         if (id_) {
-            if (['left', 'left1', 'left2', 'left3', 'left4', 'left5', 'left8'].indexOf(id_) !== -1) eid.push('edit');
-            eid.push(id_);
+            if (['left', 'left1', 'left2', 'left3', 'left4', 'left5', 'left8', 'mobileview'].indexOf(id_) !== -1) clickpath.push('edit');
+            clickpath.push(id_);
         }
     });
-    //console.log(eid);
-    if (eid.indexOf('edit') === -1) {
-        if (eid.indexOf('tip') === -1) {
+
+    if (clickpath.indexOf('edit') === -1 && clickpath.indexOf('tip') === -1) {
+        if (clickpath.indexOf('eui') === -1) {
             if (selectBox.isSelected) {
                 editor_mode.onmode('');
                 editor.file.saveFloorFile(function (err) {
@@ -25,13 +25,17 @@ document.body.onmousedown = function (e) {
                 });
             }
             selectBox.isSelected = false;
+            editor.info = {};
         }
     }
     //editor.mode.onmode('');
-    editor.info = {};
-    if (e.button!=2){
+    if (e.button!=2 && !editor.isMobile){
         editor.hideMidMenu();
     }
+    if (clickpath.indexOf('down') !== -1 && editor.isMobile){
+        editor.hideMidMenu();
+    }
+    if(clickpath.length>=2 && clickpath[0].indexOf('id_')===0){editor.lastClickId=clickpath[0]}
 }
 iconLib.onmousedown = function (e) {
     e.stopPropagation();

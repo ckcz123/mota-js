@@ -654,14 +654,11 @@ events.prototype.doAction = function() {
             break
         case "setVolume":
             data.value = parseInt(data.value||0);
+            if (data.value<0) data.value=0;
             if (data.value>100) data.value=100;
-            data.value = data.value / 100;
-            core.musicStatus.volume = data.value;
-            if (core.isset(core.musicStatus.playingBgm)) {
-                core.material.bgms[core.musicStatus.playingBgm].volume = data.value;
-            }
-            core.musicStatus.gainNode.gain.value = data.value;
-            this.doAction();
+            this.setVolume(data.value/100, data.time, function() {
+                core.doAction();
+            });
             break;
         case "setValue":
             try {
@@ -1270,6 +1267,38 @@ events.prototype.moveImage = function (image, from, to, time, callback) {
             if (core.isset(callback)) callback();
         }
     }, time / 64);
+}
+
+////// 淡入淡出音乐 //////
+events.prototype.setVolume = function (value, time, callback) {
+
+    var set = function (value) {
+        core.musicStatus.volume = value;
+        if (core.isset(core.musicStatus.playingBgm)) {
+            core.material.bgms[core.musicStatus.playingBgm].volume = value;
+        }
+        core.musicStatus.gainNode.gain.value = value;
+    }
+
+    if (!core.isset(time) || time<100) {
+        set(value);
+        if (core.isset(callback)) callback();
+        return;
+    }
+    core.status.replay.animate=true;
+    var currVolume = core.musicStatus.volume;
+    var step = 0;
+    var fade = setInterval(function () {
+        step++;
+        var nowVolume = currVolume+(value-currVolume)*step/32;
+        set(nowVolume);
+        if (step>=32) {
+            clearInterval(fade);
+            core.status.replay.animate=false;
+            if (core.isset(callback))
+                callback();
+        }
+    }, time / 32);
 }
 
 ////// 打开一个全局商店 //////

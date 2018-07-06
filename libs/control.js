@@ -243,7 +243,7 @@ control.prototype.clearStatus = function() {
 }
 
 ////// 重置游戏状态和初始数据 //////
-control.prototype.resetStatus = function(hero, hard, floorId, route, maps, values, flags) {
+control.prototype.resetStatus = function(hero, hard, floorId, route, maps, values) {
 
     var totalTime=0;
     if (core.isset(core.status) && core.isset(core.status.hero)
@@ -292,9 +292,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
         core.values = core.clone(values);
     else core.values = core.clone(core.data.values);
 
-    if (core.isset(flags))
-        core.flags = core.clone(flags);
-    else core.flags = core.clone(core.data.flags);
+    core.flags = core.clone(core.data.flags);
 
     core.events.initGame();
 
@@ -2269,7 +2267,6 @@ control.prototype.saveData = function() {
         'maps': core.maps.save(core.status.maps),
         'route': core.encodeRoute(core.status.route),
         'values': core.clone(core.values),
-        'flags': core.clone(core.flags),
         'shops': {},
         'version': core.firstData.version,
         "time": new Date().getTime()
@@ -2290,7 +2287,7 @@ control.prototype.saveData = function() {
 control.prototype.loadData = function (data, callback) {
 
     core.resetStatus(data.hero, data.hard, data.floorId, core.decodeRoute(data.route), core.maps.load(data.maps),
-        data.values, data.flags);
+        data.values);
 
     // load shop times
     for (var shop in core.status.shops) {

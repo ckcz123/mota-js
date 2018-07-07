@@ -122,9 +122,9 @@ editor_mode = function (editor) {
                     if (cobj._type === 'event') editor_blockly.import(guid, {type: cobj._event});
                     if (cobj._type === 'textarea') editor_multi.import(guid, {lint: cobj._lint, string: cobj._string});
                 }
-                thisTr.onclick = function(){
-                    editor.lastClickId=guid;
-                }
+                // thisTr.onclick = function(){
+                //     editor.lastClickId=guid;
+                // }
             });
         }
         return {"HTML": outstr.join(''), "guids": guids, "listen": listen};

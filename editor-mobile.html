@@ -22,13 +22,13 @@
                 <textarea cols="10" rows="10" id="pout" v-model="mapArr"></textarea>
                 <p class="warnText" v-if="error">{{ errors[error-1] }}</p>
             </div>
-            <div id="editTip">
+            <div id="editTip" style="position: absolute;width: 100%;margin-bottom: 20%;bottom: 0;left: 10px;">
                 <input type="button" value="新建空白地图" id='newMap'/>
                 <input id='newFileName' placeholder="输入新楼层id" style="width: 120px"/>
                 <input type="checkbox" id='newMapStatus' checked='checked' style='vertical-align: bottom'/>
                 <span style='vertical-align: bottom; margin-left: -4px'>保留楼层属性</span>
             </div>
-            <div style="position: absolute;left: 10px;bottom:0; margin-bottom: 90px">
+            <div style="position: absolute;left: 10px;bottom:0; margin-bottom: 0%">
                 <input type="button" value="导出地图" id="exportMap" v-on:click="exportMap"/>
                 <input type="button" value="复制地图" id="copyMap" v-on:click="copyMap"/>
                 <input type="button" value="清除地图" id='clearMap' v-on:click="clearMap"/>
@@ -221,7 +221,7 @@
         </div>
     </div>
     <div id="down">
-        <div style="margin:1rem">
+        <div style="margin:0.5rem">
             <div class="tools">
                 <div id="tip" v-cloak>
                     <div v-if="isSelectedBlock">
@@ -245,6 +245,15 @@
                     <input type="button" value="地图区"/>
                     <input type="button" value="素材库"/>
                 </span>
+                <div id="menuDiv">
+                    <div id="midMenu" style="display:none">
+                        <div id='chooseThis' class="menuitem"><div class="menuitem-content">选中此点</div></div>
+                        <div id='chooseInRight' class="menuitem"><div class="menuitem-content">在素材区选中此图块</div></div>
+                        <div id='copyLoc' class="menuitem"><div class="menuitem-content">复制此事件</div></div>
+                        <div id='moveLoc' class="menuitem"><div class="menuitem-content">移动此事件</div></div>
+                        <div id='clearLoc' class="menuitem"><div class="menuitem-content">清空此点及事件</div></div>
+                    </div>
+                </div>
                 <select id="editModeSelect">
                     <option value="map">地图编辑</option>
                     <option value="loc">地图选点</option>
@@ -257,21 +266,11 @@
                 <br>
                 <select id="selectFloor"></select>
                 <input type="button" value="保存地图" id='saveFloor'/>
-                <div id="menuDiv">
-                    <div id="midMenu" style="display:none">
-                        <div id='chooseThis' class="menuitem"><div class="menuitem-content">选中此点</div></div>
-                        <div id='chooseInRight' class="menuitem"><div class="menuitem-content">在素材区选中此图块</div></div>
-                        <div id='copyLoc' class="menuitem"><div class="menuitem-content">复制此事件</div></div>
-                        <div id='moveLoc' class="menuitem"><div class="menuitem-content">移动此事件</div></div>
-                        <div id='clearLoc' class="menuitem"><div class="menuitem-content">清空此点及事件</div></div>
-                    </div>
-                </div>
                 <span id='mobileeditdata' style="display:none">
                     <input type="button" value="编辑"/>
                     <input type="button" value="显示完整名称"/>
                     <input type="button" value="显示完整注释"/>
                 </span>
-                <input type="button" value="取消素材区的选中" id='cancelright'/>
                 <!--  -->
                 <div id="bgSelect" v-cloak style="display:none">
                     <span>当前地板: </span>
@@ -453,7 +452,6 @@ var editor_mobile_listen=function(){
     var mid=document.getElementById('mid');
     var right=document.getElementById('right');
     var mobileeditdata=document.getElementById('mobileeditdata');
-    var cancelright=document.getElementById('cancelright');
 
     mobileview.children[0].onclick=function(){
         mid.style='z-index:-1;opacity: 0;';
@@ -500,10 +498,27 @@ var editor_mobile_listen=function(){
         printf(info[0].children[1].getAttribute('title'))
     }
 
-    cancelright.onclick=function(){
-        selectBox.isSelected = false;
-        editor.info = {};
-    }
+    document.body.ontouchstart=document.body.onmousedown;
+    document.body.onmousedown=null;
+
+    //=====
+
+    var chooseThis = document.getElementById('chooseThis');
+    chooseThis.ontouchstart=chooseThis.onmousedown
+    chooseThis.onmousedown=null
+    var chooseInRight = document.getElementById('chooseInRight');
+    chooseInRight.ontouchstart=chooseInRight.onmousedown
+    chooseInRight.onmousedown=null
+    var copyLoc = document.getElementById('copyLoc');
+    copyLoc.ontouchstart=copyLoc.onmousedown
+    copyLoc.onmousedown=null
+    var moveLoc = document.getElementById('moveLoc');
+    moveLoc.ontouchstart=moveLoc.onmousedown
+    moveLoc.onmousedown=null
+    var clearLoc = document.getElementById('clearLoc');
+    clearLoc.ontouchstart=clearLoc.onmousedown
+    clearLoc.onmousedown=null
+    
 }
 
     var useCompress = main.useCompress;

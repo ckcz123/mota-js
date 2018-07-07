@@ -927,15 +927,16 @@ return code;
 */;
 
 setVolume_s
-    :   '设置音量' Int Newline
+    :   '设置音量' Int '渐变时间' Int? Newline
     
 
 /* setVolume_s
 tooltip : setVolume: 设置音量
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=setvolume%EF%BC%9A%E8%AE%BE%E7%BD%AE%E9%9F%B3%E9%87%8F
-default : [90]
+default : [90, 500]
 colour : this.soundColor
-var code = '{"type": "setVolume", "value": '+Int_0+'},\n';
+Int_1 = Int_1?(', "time": '+Int_1):""
+var code = '{"type": "setVolume", "value": '+Int_0+Int_1+'},\n';
 return code;
 */;
 
@@ -1641,7 +1642,7 @@ ActionParser.prototype.parseAction = function() {
       break
     case "setVolume":
       this.next = MotaActionBlocks['setVolume_s'].xmlText([
-        data.value, this.next]);
+        data.value, data.time, this.next]);
       break
     case "setValue":
       this.next = MotaActionBlocks['setValue_s'].xmlText([

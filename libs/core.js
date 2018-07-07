@@ -304,13 +304,13 @@ core.prototype.clearStatus = function() {
 }
 
 ////// 重置游戏状态和初始数据 //////
-core.prototype.resetStatus = function(hero, hard, floorId, route, maps, values, flags) {
-    core.control.resetStatus(hero, hard, floorId, route, maps, values, flags);
+core.prototype.resetStatus = function(hero, hard, floorId, route, maps, values) {
+    core.control.resetStatus(hero, hard, floorId, route, maps, values);
 }
 
 ////// 开始游戏 //////
 core.prototype.startGame = function (hard, callback) {
-    core.control.startGame(hard, callback);
+    core.control.startGame(hard, callback);huo
 }
 
 ////// 重新开始游戏；此函数将回到标题页面 //////

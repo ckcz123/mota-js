@@ -737,6 +737,7 @@ events.prototype.doAction = function() {
                 }
                 else {
                     var action = core.status.replay.toReplay.shift(), index;
+                    if (action == 'turn') action = core.status.replay.toReplay.shift();
                     if (action.indexOf("choices:")==0 && ((index=parseInt(action.substring(8)))>=0) && index<data.choices.length) {
                             core.status.event.selection=index;
                             setTimeout(function () {

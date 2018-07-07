@@ -63,14 +63,6 @@ body {
     overflow: auto;
 }
 
-#editTip {
-    position: absolute;
-    width: 100%;
-    margin-bottom: 120px;
-    bottom: 0;
-    left: 10px;
-}
-
 #editArea p {
     margin: 10px;
     display: block;
@@ -117,14 +109,19 @@ body {
 #tip {
     float: right;
     width: 50%;
-    height: 95%;
+    /* height: 95%; */
+    min-height: 9rem;
     padding: 5px 10px 10px 10px;
     margin-right: 0;
     box-sizing: border-box;
     border: 1px solid #ccc;
     border-radius: 2px;
-    font-size: 15px;
-    line-height: 14px;
+    font-size: 1rem;
+    line-height: 0.93rem;
+}
+
+#tip p{
+    margin: 0.5rem
 }
 
 .files {
@@ -251,8 +248,8 @@ body {
     line-height: 1.2em;
 }
 
-table, td {
-    border: 1px solid #fff;
+td {
+    border: 0.230vmin solid #fff;
     color: #fff;
     cursor: crosshair;
 }
@@ -290,14 +287,17 @@ table.col td {
 
 
 #mapColMark td {
-    width: 29px;
+    width: 7.15vmin;
+    padding: 0;
+    border-bottom-width: 0px;
+    border-top-width: 0px;
 }
 
 #mapColMark td:hover .colBlock {
     position: absolute;
     top: 4vmin;
     height: 96vmin;
-    width: 7.38vmin;
+    width: 7.15vmin;
     z-index: 100;
     background-color: rgba(38, 166, 154, .5);
 }
@@ -330,13 +330,16 @@ table.row td {
 }
 
 #mapRowMark td {
-    height: 29px;
+    height: 7.15vmin;
+    padding: 0;
+    border-left-width: 0px;
+    border-right-width: 0px;
 }
 
 #mapRowMark td:hover .rowBlock {
     position: absolute;
     left: 4vmin;
-    height: 7.38vmin;
+    height: 7.15vmin;
     width: 96vmin;
     z-index: 100;
     background-color: rgba(76, 34, 27, .5);

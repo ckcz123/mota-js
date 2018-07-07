@@ -1,9 +1,21 @@
 // vue 相关处理
 document.body.onmousedown = function (e) {
     //console.log(e);
-
     var clickpath = [];
-    e.path.forEach(function (node) {
+    var getpath=function(e) {
+        var path = [];
+        var currentElem = e.target;
+        while (currentElem) {
+            path.push(currentElem);
+            currentElem = currentElem.parentElement;
+        }
+        if (path.indexOf(window) === -1 && path.indexOf(document) === -1)
+            path.push(document);
+        if (path.indexOf(window) === -1)
+            path.push(window);
+        return path;
+    }
+    getpath(e).forEach(function (node) {
         if (!node.getAttribute) return;
         var id_ = node.getAttribute('id');
         if (id_) {
@@ -32,7 +44,7 @@ document.body.onmousedown = function (e) {
     if (e.button!=2 && !editor.isMobile){
         editor.hideMidMenu();
     }
-    if (clickpath.indexOf('down') !== -1 && editor.isMobile){
+    if (clickpath.indexOf('down') !== -1 && editor.isMobile && clickpath.indexOf('midMenu') === -1){
         editor.hideMidMenu();
     }
     if(clickpath.length>=2 && clickpath[0].indexOf('id_')===0){editor.lastClickId=clickpath[0]}

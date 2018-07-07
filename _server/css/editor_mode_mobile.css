@@ -59,15 +59,15 @@
     overflow: hidden;
 }
 #left6 h3{
-    font-size: 3vmax;
-    margin: 2vmax 0;
+    font-size: 3.5vh;
+    margin: 1vh 0;
     
 }
 
 #left6 #blocklyArea {
 
     width: 100vmin;
-    height: 55vmax;
+    height: 60vh;
 }
 
 #left6 #blocklyDiv {
@@ -77,7 +77,7 @@
 #left6 .CodeMirror {
     border: 1px solid #eee;
 
-    height: 27vmax;
+    height: 21vh;
     width: 100%;
 }
 

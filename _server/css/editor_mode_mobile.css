@@ -87,6 +87,13 @@
     overflow: y; /* resize:none; */
 }
 
+#left6 #blocklyDiv .blocklyToolboxDiv{
+    width:6vmin;
+}
+#left6 #blocklyDiv .blocklyTreeLabel{
+    margin-left:-4vmin;
+}
+
 #left7 {
     /* height: 440px; width: 375px;float:left; */
     left: 0;

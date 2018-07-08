@@ -248,10 +248,11 @@ var workspace = Blockly.inject(blocklyDiv,{
 var onresize = function(e) {
   blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
   blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
+  Blockly.svgResize(workspace);
 };
 window.addEventListener('resize', onresize, false);
 onresize();
-Blockly.svgResize(workspace);
+//Blockly.svgResize(workspace);
 
 //Blockly.bindEventWithChecks_(workspace.svgGroup_,"wheel",workspace,function(e){});
 document.getElementById('blocklyDiv').onmousewheel = function(e){

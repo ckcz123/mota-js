@@ -1188,8 +1188,8 @@ actions.prototype.clickToolbox = function(x,y) {
     }
     // 下一页
     if ((x == 8 || x == 9) && y == 12) {
-        var toolPage = parseInt(Object.keys(core.status.hero.items.tools).length/12)+1,
-            constantPage = parseInt(Object.keys(core.status.hero.items.constants).length/12)+1;
+        var toolPage = Math.ceil(Object.keys(core.status.hero.items.tools).length/12),
+            constantPage = Math.ceil(Object.keys(core.status.hero.items.constants).length/12);
         if (page<toolPage) {
             core.ui.drawToolbox(12*page);
         }

@@ -1490,7 +1490,7 @@ ui.prototype.drawToolbox = function(index) {
     }
 
     var page = parseInt((index%1000)/12)+1;
-    var totalPage = parseInt(Math.max(tools.length, constants.length)/12)+1;
+    var totalPage = Math.ceil(Math.max(tools.length, constants.length)/12);
 
     if (!core.hasItem(selectId)) selectId=null;
 

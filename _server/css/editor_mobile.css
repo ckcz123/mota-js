@@ -49,13 +49,13 @@ body {
 
 #pout {
     display: block;
-    width: 410px;
-    height: 100%;
+    width: 95vw;
+    height: 62vw;
     box-sizing: border-box;
-    margin-left: 22px;
+    margin-left: 5vw;
     margin-top: 23px;
-    line-height: 20px;
-    font-size: 12.3px;
+    line-height: 5vw;
+    font-size: 12px;
     font-family: 'Lucida Console', Monaco, monospace;
     white-space: pre;
     border: 1px solid #ddd;
@@ -202,7 +202,6 @@ body {
     position: absolute;
     width: 100vw;
     height: 100vw;
-    left: 5px;
     top: 5px;
     overflow: auto;
 }
@@ -271,8 +270,8 @@ table.col td {
 
 #arrColMark {
     top: 2px;
-    left: 36px;
-    width: 385px;
+    left: 5vw;
+    width: 95vw;
     height: 16px;
     font-size: 13px;
 }
@@ -315,9 +314,9 @@ table.row td {
 
 #arrRowMark {
     top: 5px;
-    left: 2px;
-    width: 16px;
-    height: 262px;
+    left: 0;
+    width: 4vw;
+    height: 62vw;
     font-size: 12px;
 }
 

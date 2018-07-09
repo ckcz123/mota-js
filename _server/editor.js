@@ -681,7 +681,15 @@ editor.prototype.listen = function () {
         moveLoc.children[0].innerHTML='交换事件'+locStr+'与此事件的位置';
         midMenu.style='top:'+(y+scrollTop)+'px;left:'+(x+scrollLeft)+'px;';
     }
-    editor.hideMidMenu=function(){midMenu.style='display:none';}
+    editor.hideMidMenu=function(){
+        if(editor.isMobile){
+            setTimeout(function(){
+                midMenu.style='display:none';
+            },200)
+        } else {
+            midMenu.style='display:none';
+        }
+    }
 
     var chooseThis = document.getElementById('chooseThis');
     chooseThis.onmousedown = function(e){

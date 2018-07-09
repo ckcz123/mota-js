@@ -250,7 +250,7 @@ var onresize = function(e) {
   blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
   Blockly.svgResize(workspace);
 };
-window.addEventListener('resize', onresize, false);
+if(typeof editor !== "undefined" && !editor.isMobile)window.addEventListener('resize', onresize, false);
 onresize();
 //Blockly.svgResize(workspace);
 

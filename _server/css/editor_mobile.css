@@ -1,5 +1,5 @@
 html{
-    font-size: 4vmin;
+    font-size: 4vw;
 }
 input, textarea, select, button {
     font-size: 1rem;
@@ -29,8 +29,8 @@ body {
     box-sizing: border-box;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12); */
     background-color: #F5F5F5;
-    width: 100vmin;
-    height: 100vmin;
+    width: 100vw;
+    height: 100vw;
 }
 
 #left {
@@ -84,14 +84,14 @@ body {
 
 .map {
     position: absolute;
-    left: 4vmin;
-    top: 4vmin;
-    width: 96vmin;
-    height: 96vmin;
+    left: 4vw;
+    top: 4vw;
+    width: 96vw;
+    height: 96vw;
 }
 .map canvas{
-    width: 96vmin;
-    height: 96vmin;
+    width: 96vw;
+    height: 96vw;
 }
 
 #mid .tools {
@@ -200,8 +200,8 @@ body {
 
 #iconLib {
     position: absolute;
-    width: 100vmin;
-    height: 100vmin;
+    width: 100vw;
+    height: 100vw;
     left: 5px;
     top: 5px;
     overflow: auto;
@@ -249,7 +249,7 @@ body {
 }
 
 td {
-    border: 0.230vmin solid #fff;
+    border: 0.230vw solid #fff;
     color: #fff;
     cursor: crosshair;
 }
@@ -279,15 +279,15 @@ table.col td {
 
 #mapColMark {
     top: 0;
-    left: 4vmin;
-    width: 96vmin;
-    height: 4vmin;
-    font-size: 3vmin;
+    left: 4vw;
+    width: 96vw;
+    height: 4vw;
+    font-size: 3vw;
 }
 
 
 #mapColMark td {
-    width: 7.15vmin;
+    width: 7.15vw;
     padding: 0;
     border-bottom-width: 0px;
     border-top-width: 0px;
@@ -295,9 +295,9 @@ table.col td {
 
 #mapColMark td:hover .colBlock {
     position: absolute;
-    top: 4vmin;
-    height: 96vmin;
-    width: 7.15vmin;
+    top: 4vw;
+    height: 96vw;
+    width: 7.15vw;
     z-index: 100;
     background-color: rgba(38, 166, 154, .5);
 }
@@ -324,13 +324,13 @@ table.row td {
 #mapRowMark {
     top: 0;
     left: 0;
-    width: 4vmin;
-    height: 96vmin;
-    font-size: 3vmin;
+    width: 4vw;
+    height: 96vw;
+    font-size: 3vw;
 }
 
 #mapRowMark td {
-    height: 7.15vmin;
+    height: 7.15vw;
     padding: 0;
     border-left-width: 0px;
     border-right-width: 0px;
@@ -338,9 +338,9 @@ table.row td {
 
 #mapRowMark td:hover .rowBlock {
     position: absolute;
-    left: 4vmin;
-    height: 7.15vmin;
-    width: 96vmin;
+    left: 4vw;
+    height: 7.15vw;
+    width: 96vw;
     z-index: 100;
     background-color: rgba(76, 34, 27, .5);
 }
@@ -352,7 +352,7 @@ table.row td {
     border-style: solid;
     border-width: 1px;
     cursor: default;
-    font: normal 2.5vmin Arial, sans-serif;
+    font: normal 2.5vw Arial, sans-serif;
     margin: 0;
     outline: none;
     padding: 4px 0;
@@ -366,7 +366,7 @@ table.row td {
 }
 #midMenu .menuitem{
     color: #000;
-    font: normal 2.5vmin Arial, sans-serif;
+    font: normal 2.5vw Arial, sans-serif;
     list-style: none;
     margin: 0;
     padding: 4px 7em 4px 28px;
@@ -386,7 +386,7 @@ table.row td {
 }
 #midMenu .menuitem-content{
     color: #000;
-    font: normal 2.5vmin Arial, sans-serif;
+    font: normal 2.5vw Arial, sans-serif;
 }
 
 /* for vue dom */
@@ -397,7 +397,7 @@ table.row td {
 #down{
     position: absolute;
     left:0;
-    top:100vmin;
+    top:100vw;
     bottom: 0;
-    width: 100vmin;
+    width: 100vw;
 }

@@ -1419,10 +1419,16 @@ ui.prototype.drawFly = function(page) {
     core.fillText('ui', '楼层跳跃', 208, 60, '#FFFFFF', "bold 28px Verdana");
     core.fillText('ui', '返回游戏', 208, 403, '#FFFFFF', "bold 15px Verdana")
     core.fillText('ui', title, 356, 247, '#FFFFFF', "bold 19px Verdana");
-    if (page<core.status.hero.flyRange.length-1)
-        core.fillText('ui', '▲', 356, 247-64, '#FFFFFF', "17px Verdana");
-    if (page>0)
-        core.fillText('ui', '▼', 356, 247+64, '#FFFFFF', "17px Verdana");
+    if (page<core.status.hero.flyRange.length-1) {
+        core.fillText('ui', '▲', 356, 247 - 64, '#FFFFFF', "17px Verdana");
+        core.fillText('ui', '▲', 356, 247 - 96, '#FFFFFF', "17px Verdana");
+        core.fillText('ui', '▲', 356, 247 - 96 - 7, '#FFFFFF', "17px Verdana");
+    }
+    if (page>0) {
+        core.fillText('ui', '▼', 356, 247 + 64, '#FFFFFF', "17px Verdana");
+        core.fillText('ui', '▼', 356, 247 + 96, '#FFFFFF', "17px Verdana");
+        core.fillText('ui', '▼', 356, 247 + 96 + 7, '#FFFFFF', "17px Verdana");
+    }
     core.strokeRect('ui', 20, 100, 273, 273, '#FFFFFF', 2);
     this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 20, 100, 273);
 }

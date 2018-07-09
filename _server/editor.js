@@ -388,7 +388,7 @@ editor.prototype.HTMLescape = function (str_) {
 }
 
 editor.prototype.listen = function () {
-
+    var eui=document.getElementById('eui');
     var uc = eui.getContext('2d');
 
     function fillPos(pos) {
@@ -399,9 +399,11 @@ editor.prototype.listen = function () {
     function eToLoc(e) {
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop
+        var xx=e.clientX,yy=e.clientY
+        if(editor.isMobile){xx=e.touches[0].clientX,yy=e.touches[0].clientY}
         editor.loc = {
-            'x': scrollLeft + e.clientX - mid.offsetLeft - mapEdit.offsetLeft,
-            'y': scrollTop + e.clientY - mid.offsetTop - mapEdit.offsetTop,
+            'x': scrollLeft + xx - mid.offsetLeft - mapEdit.offsetLeft,
+            'y': scrollTop + yy - mid.offsetTop - mapEdit.offsetTop,
             'size': editor.isMobile?(32*innerWidth*0.96/416):32
         };
         return editor.loc;
@@ -499,7 +501,6 @@ editor.prototype.listen = function () {
         }
         holdingPath = 0;
         e.stopPropagation();
-        var loc = eToLoc(e);
         if (stepPostfix && stepPostfix.length) {
             preMapData = JSON.parse(JSON.stringify(editor.map));
             currDrawData.pos = JSON.parse(JSON.stringify(stepPostfix));

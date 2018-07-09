@@ -503,10 +503,20 @@ var editor_mobile_listen=function(){
         printf(info[0].children[1].getAttribute('title'))
     }
 
+    //=====
+
     document.body.ontouchstart=document.body.onmousedown;
     document.body.onmousedown=null;
 
-    //=====
+
+    var eui=document.getElementById('eui');
+    eui.ontouchstart=eui.onmousedown
+    eui.onmousedown=null
+    eui.ontouchmove=eui.onmousemove
+    eui.onmousemove=null
+    eui.ontouchend=eui.onmouseup
+    eui.onmouseup=null
+
 
     var chooseThis = document.getElementById('chooseThis');
     chooseThis.ontouchstart=chooseThis.onmousedown

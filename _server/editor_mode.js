@@ -632,6 +632,7 @@ editor_mode = function (editor) {
         editModeSelect.onchange = function () {
             editor_mode.onmode('nextChange');
             editor_mode.onmode(editModeSelect.value);
+            if(editor.isMobile)editor.showdataarea(false);
         }
 
         if (Boolean(callback)) callback();

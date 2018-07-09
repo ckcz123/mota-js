@@ -701,6 +701,7 @@ editor.prototype.listen = function () {
         editor_mode.onmode('loc');
         //editor_mode.loc();
         //tip.whichShow = 1;
+        if(editor.isMobile)editor.showdataarea(false);
     }
 
     var chooseInRight = document.getElementById('chooseInRight');

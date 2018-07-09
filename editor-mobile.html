@@ -454,12 +454,16 @@ var editor_mobile_listen=function(){
     var right=document.getElementById('right');
     var mobileeditdata=document.getElementById('mobileeditdata');
 
-    mobileview.children[0].onclick=function(){
+    
+    editor.showdataarea=function(callShowMode){
         mid.style='z-index:-1;opacity: 0;';
         right.style='z-index:-1;opacity: 0;';
         mobileeditdata.style='';
-        editor.mode.showMode(editModeSelect.value);
+        if(callShowMode)editor.mode.showMode(editModeSelect.value);
         editor.hideMidMenu();
+    }
+    mobileview.children[0].onclick=function(){
+        editor.showdataarea(true)
     }
     mobileview.children[1].onclick=function(){
         mid.style='';

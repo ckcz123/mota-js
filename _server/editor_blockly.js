@@ -5,9 +5,13 @@ editor_blockly = function () {
     initscript = String.raw`
 (function(){
   var getCategory = function(name){
-  for(var node of document.getElementById('toolbox').children) {
-    if(node.getAttribute('name')==name) return node;
-  }
+    for(var node of document.getElementById('toolbox').children) {
+      if(node.getAttribute('name')==name) return node;
+    }
+    var node = document.createElement('category');
+    node.setAttribute('name',name);
+    document.getElementById('toolbox').appendChild(node);
+    return node;
   }
 
   var toolboxObj = {
@@ -244,10 +248,11 @@ var workspace = Blockly.inject(blocklyDiv,{
 var onresize = function(e) {
   blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
   blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
+  Blockly.svgResize(workspace);
 };
-window.addEventListener('resize', onresize, false);
+if(typeof editor !== "undefined" && !editor.isMobile)window.addEventListener('resize', onresize, false);
 onresize();
-Blockly.svgResize(workspace);
+//Blockly.svgResize(workspace);
 
 //Blockly.bindEventWithChecks_(workspace.svgGroup_,"wheel",workspace,function(e){});
 document.getElementById('blocklyDiv').onmousewheel = function(e){

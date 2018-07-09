@@ -939,9 +939,11 @@ time选项为该跳跃所需要用到的时间。
 
 使用setVolume可以设置音量大小。
 
-使用方法： `{"type": "setVolume", "value": 90}`
+使用方法： `{"type": "setVolume", "value": 90, "time": 500}`
 
 value为音量大小，在0到100之间，默认为100。设置后，BGM和SE都将使用该音量进行播放。
+
+可以设置time为音量渐变时间。
 
 ### win：获得胜利
 

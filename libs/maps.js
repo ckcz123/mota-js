@@ -974,6 +974,9 @@ maps.prototype.drawAnimate = function (name, x, y, callback) {
     var centerX = 32*x+16, centerY = 32*y+16;
     var index=0;
 
+    // 播放音效
+    core.playSound(animate.se);
+
     var draw = function (index) {
         core.clearMap('animate', 0, 0, 416, 416);
 

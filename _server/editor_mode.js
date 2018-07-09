@@ -121,8 +121,10 @@ editor_mode = function (editor) {
                 input.ondblclick = function () {
                     if (cobj._type === 'event') editor_blockly.import(guid, {type: cobj._event});
                     if (cobj._type === 'textarea') editor_multi.import(guid, {lint: cobj._lint, string: cobj._string});
-
                 }
+                // thisTr.onclick = function(){
+                //     editor.lastClickId=guid;
+                // }
             });
         }
         return {"HTML": outstr.join(''), "guids": guids, "listen": listen};
@@ -630,6 +632,7 @@ editor_mode = function (editor) {
         editModeSelect.onchange = function () {
             editor_mode.onmode('nextChange');
             editor_mode.onmode(editModeSelect.value);
+            if(editor.isMobile)editor.showdataarea(false);
         }
 
         if (Boolean(callback)) callback();

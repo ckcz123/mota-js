@@ -388,7 +388,7 @@ editor.prototype.HTMLescape = function (str_) {
 }
 
 editor.prototype.listen = function () {
-
+    var eui=document.getElementById('eui');
     var uc = eui.getContext('2d');
 
     function fillPos(pos) {
@@ -399,9 +399,11 @@ editor.prototype.listen = function () {
     function eToLoc(e) {
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop
+        var xx=e.clientX,yy=e.clientY
+        if(editor.isMobile){xx=e.touches[0].clientX,yy=e.touches[0].clientY}
         editor.loc = {
-            'x': scrollLeft + e.clientX - mid.offsetLeft - mapEdit.offsetLeft,
-            'y': scrollTop + e.clientY - mid.offsetTop - mapEdit.offsetTop,
+            'x': scrollLeft + xx - mid.offsetLeft - mapEdit.offsetLeft,
+            'y': scrollTop + yy - mid.offsetTop - mapEdit.offsetTop,
             'size': editor.isMobile?(32*innerWidth*0.96/416):32
         };
         return editor.loc;
@@ -499,7 +501,6 @@ editor.prototype.listen = function () {
         }
         holdingPath = 0;
         e.stopPropagation();
-        var loc = eToLoc(e);
         if (stepPostfix && stepPostfix.length) {
             preMapData = JSON.parse(JSON.stringify(editor.map));
             currDrawData.pos = JSON.parse(JSON.stringify(stepPostfix));
@@ -681,7 +682,15 @@ editor.prototype.listen = function () {
         moveLoc.children[0].innerHTML='交换事件'+locStr+'与此事件的位置';
         midMenu.style='top:'+(y+scrollTop)+'px;left:'+(x+scrollLeft)+'px;';
     }
-    editor.hideMidMenu=function(){midMenu.style='display:none';}
+    editor.hideMidMenu=function(){
+        if(editor.isMobile){
+            setTimeout(function(){
+                midMenu.style='display:none';
+            },200)
+        } else {
+            midMenu.style='display:none';
+        }
+    }
 
     var chooseThis = document.getElementById('chooseThis');
     chooseThis.onmousedown = function(e){
@@ -693,6 +702,7 @@ editor.prototype.listen = function () {
         editor_mode.onmode('loc');
         //editor_mode.loc();
         //tip.whichShow = 1;
+        if(editor.isMobile)editor.showdataarea(false);
     }
 
     var chooseInRight = document.getElementById('chooseInRight');

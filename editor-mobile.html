@@ -22,7 +22,7 @@
                 <textarea cols="10" rows="10" id="pout" v-model="mapArr"></textarea>
                 <p class="warnText" v-if="error">{{ errors[error-1] }}</p>
             </div>
-            <div id="editTip" style="position: absolute;width: 100%;margin-bottom: 20%;bottom: 0;left: 10px;">
+            <div id="editTip" style="position: absolute; width: 95vw;margin-bottom: 10%;bottom: 0;left: 4vw;">
                 <input type="button" value="新建空白地图" id='newMap'/>
                 <input id='newFileName' placeholder="输入新楼层id" style="width: 120px"/>
                 <input type="checkbox" id='newMapStatus' checked='checked' style='vertical-align: bottom'/>
@@ -271,6 +271,7 @@
                     <input type="button" value="显示完整名称"/>
                     <input type="button" value="显示完整注释"/>
                 </span>
+                <input type="button" value="前往游戏" onclick="window.location='./index.html'"/>
                 <!--  -->
                 <div id="bgSelect" v-cloak style="display:none">
                     <span>当前地板: </span>
@@ -453,12 +454,16 @@ var editor_mobile_listen=function(){
     var right=document.getElementById('right');
     var mobileeditdata=document.getElementById('mobileeditdata');
 
-    mobileview.children[0].onclick=function(){
+    
+    editor.showdataarea=function(callShowMode){
         mid.style='z-index:-1;opacity: 0;';
         right.style='z-index:-1;opacity: 0;';
         mobileeditdata.style='';
-        editor.mode.showMode(editModeSelect.value);
+        if(callShowMode)editor.mode.showMode(editModeSelect.value);
         editor.hideMidMenu();
+    }
+    mobileview.children[0].onclick=function(){
+        editor.showdataarea(true)
     }
     mobileview.children[1].onclick=function(){
         mid.style='';
@@ -498,10 +503,20 @@ var editor_mobile_listen=function(){
         printf(info[0].children[1].getAttribute('title'))
     }
 
+    //=====
+
     document.body.ontouchstart=document.body.onmousedown;
     document.body.onmousedown=null;
 
-    //=====
+
+    var eui=document.getElementById('eui');
+    eui.ontouchstart=eui.onmousedown
+    eui.onmousedown=null
+    eui.ontouchmove=eui.onmousemove
+    eui.onmousemove=null
+    eui.ontouchend=eui.onmouseup
+    eui.onmouseup=null
+
 
     var chooseThis = document.getElementById('chooseThis');
     chooseThis.ontouchstart=chooseThis.onmousedown

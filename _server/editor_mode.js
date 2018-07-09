@@ -118,13 +118,20 @@ editor_mode = function (editor) {
                         printe(field + ' : 输入的值不合要求,请鼠标放置在注释上查看说明');
                     }
                 }
-                input.ondblclick = function () {
+                var dblclickfunc=function () {
                     if (cobj._type === 'event') editor_blockly.import(guid, {type: cobj._event});
                     if (cobj._type === 'textarea') editor_multi.import(guid, {lint: cobj._lint, string: cobj._string});
                 }
-                // thisTr.onclick = function(){
-                //     editor.lastClickId=guid;
-                // }
+                input.ondblclick = dblclickfunc
+                var doubleClickCheck=[0];
+                thisTr.onclick = function(){
+                    var newClick = new Date().getTime();
+                    var lastClick = doubleClickCheck.shift();
+                    doubleClickCheck.push(newClick);
+                    if(newClick-lastClick<500){
+                        dblclickfunc()
+                    }
+                }
             });
         }
         return {"HTML": outstr.join(''), "guids": guids, "listen": listen};
@@ -632,6 +639,7 @@ editor_mode = function (editor) {
         editModeSelect.onchange = function () {
             editor_mode.onmode('nextChange');
             editor_mode.onmode(editModeSelect.value);
+            if(editor.isMobile)editor.showdataarea(false);
         }
 
         if (Boolean(callback)) callback();

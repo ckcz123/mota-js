@@ -338,7 +338,7 @@ core.enemys.getDamageInfo(enemy, hero_hp, hero_atk, hero_def, hero_mdef)
 
 
 core.enemys.calDamage(enemy, hero_hp, hero_atk, hero_def, hero_mdef)
-计算战斗伤害；实际返回的是上面getDamageInfo中伤害的数值。
+获得在某个勇士属性下怪物伤害；实际返回的是上面getDamageInfo中伤害的数值。
 
 
 core.enemys.getCurrentEnemys(floorId)

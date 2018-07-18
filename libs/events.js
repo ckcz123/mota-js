@@ -802,6 +802,11 @@ events.prototype.doAction = function() {
             core.updateStatusBar();
             this.doAction();
             break;
+        case "updateEnemys":
+            core.enemys.updateEnemys();
+            core.updateStatusBar();
+            this.doAction();
+            break;
         case "sleep": // 等待多少毫秒
             if (core.status.replay.replaying)
                 core.events.doAction();
@@ -1376,7 +1381,8 @@ events.prototype.setHeroIcon = function (name) {
 
 ////// 检查升级事件 //////
 events.prototype.checkLvUp = function () {
-    if (!core.flags.enableLevelUp || core.status.hero.lv>=core.firstData.levelUp.length) return;
+    if (!core.flags.enableLevelUp || !core.isset(core.firstData.levelUp)
+        || core.status.hero.lv>=core.firstData.levelUp.length) return;
     // 计算下一个所需要的数值
     var need=core.firstData.levelUp[core.status.hero.lv].need;
     if (!core.isset(need)) return;

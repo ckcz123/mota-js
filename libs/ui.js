@@ -1307,10 +1307,10 @@ ui.prototype.drawBook = function (index) {
             damage = core.formatBigNumber(damage);
             if (core.enemys.hasSpecial(core.material.enemys[enemy.id], 19))
                 damage += "+";
-            if (core.material.enemys[enemy.id].notBomb)
-                damage += "[b]";
-
         }
+        if (core.material.enemys[enemy.id].notBomb)
+            damage += "[b]";
+
         core.fillText('ui', damage, damageOffset, 62 * i + 50, color, 'bold 13px Verdana');
 
         core.canvas.ui.textAlign = "left";

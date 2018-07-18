@@ -509,6 +509,12 @@ name是可选的，代表目标行走图的文件名。
 
 如果你需要刷新状态栏和地图显伤，只需要简单地调用 `{"type": "update"}` 即可。
 
+### updateEnemys：更新怪物数据
+
+使用 `{"type": "updateEnemys"}` 可以动态修改怪物数据。
+
+详见[怪物数据的动态修改](#怪物数据的动态修改)。
+
 ### sleep：等待多少毫秒
 
 等价于RMXP中的"等待x帧"，不过是以毫秒来计算。
@@ -1591,25 +1597,33 @@ core.insertAction([
 
 而在我们的存档中，是不会对怪物数据进行存储的，只会存各个变量和Flag，因此我们需要在读档后根据变量或Flag来调整怪物数据。
 
-我们可以在脚本编辑中的`afterLoadData`进行处理。
+我们可以在脚本编辑中的`updateEnemys`进行处理。
 
 ``` js
 ////// 读档事件后，载入事件前，可以执行的操作 //////
-"afterLoadData" : function(data) {
-    // 读档事件后，载入事件前，可以执行的操作
-    if (core.hasFlag("fengyin")) { // 如果存在封印（flag为真）
-        core.material.enemys.blackKing.hp/=10; // 将怪物的血量变成原来的十分之一
-        // ... 
-    }
-    // 同样难度分歧可以类似写 if (core.getFlag('hard', 0)==3) {...
+"updateEnemys" : function () {
+	// 更新怪物数据，可以在这里对怪物属性和数据进行动态更新，详见文档——事件——怪物数据的动态修改
+	// 比如下面这个例子，如果flag:xxx为真，则将绿头怪的攻击设为100，红头怪的金币设为20
+	// 推荐写变化后的具体数值，以免多次变化导致冲突
+	/*
+	// 如果flag:xxx为真；你也可以写其他判断语句比如core.hasItem(...)等等
+	if (core.hasFlag('xxx')) { 
+		core.material.enemys.greenSlime.atk = 100;
+		core.material.enemys.redSlime.money = 20;
+	}
+	*/
+	// 别忘了在事件中调用“更新怪物数据”事件！
 }
+```
 
-// 在封印时，可以调用setValue将该flag置为真，然后调用自定义脚本 core.afterLoadData() 即可。
+当我们获得一个道具（或者触发某个事件等）后，需要在事件中调用“更新怪物数据”事件。
+
+``` js
+// 调用`updateEnemys`（更新怪物数据）事件就可以触发了
 "x,y": [
-    {"type": "setValue", "name": "flag:fengyin", "value": "true"}, // 封印
-    {"type": "function", "function": function() { // 手动调用自定义JS脚本 core.afterLoadData()
-        core.afterLoadData();
-    }}
+    "将flag:xxx置为真，就可以让怪物数据发生改变！",
+    {"type": "setValue", "name": "flag:xxx", "value": "true"}, // 将flag:xxx置为真
+    {"type": "updateEnemys"} // 更新怪物数据；此时绿头怪攻击就会变成100了
 ]
 ```
 

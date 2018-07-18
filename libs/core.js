@@ -170,11 +170,12 @@ core.prototype.init = function (coreData, callback) {
         core.flags.battleAnimate = false;
         core.setLocalStorage('battleAnimate', false);
     }
-    
-    // core.initStatus.shops = core.firstData.shops;
-    core.firstData.shops.forEach(function (t) {
-        core.initStatus.shops[t.id] = t;
-    })
+
+    if (core.isset(core.firstData.shops)) {
+        core.firstData.shops.forEach(function (t) {
+            core.initStatus.shops[t.id] = t;
+        })
+    }
 
     core.dom.versionLabel.innerHTML = core.firstData.version;
     core.dom.logoLabel.innerHTML = core.firstData.title;

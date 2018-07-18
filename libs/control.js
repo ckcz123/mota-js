@@ -292,10 +292,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
         core.values = core.clone(values);
     else core.values = core.clone(core.data.values);
 
-    core.flags = core.clone(core.data.flags);
-
     core.events.initGame();
-
 }
 
 ////// 开始游戏 //////
@@ -1663,14 +1660,14 @@ control.prototype.startReplay = function (list) {
 
 ////// 更改播放状态 //////
 control.prototype.triggerReplay = function () {
-    if (core.status.event.id=='save') return;
+    if (core.status.event.id=='save' || core.status.event.id=='book') return;
     if (core.status.replay.pausing) this.resumeReplay();
     else this.pauseReplay();
 }
 
 ////// 暂停播放 //////
 control.prototype.pauseReplay = function () {
-    if (core.status.event.id=='save') return;
+    if (core.status.event.id=='save' || core.status.event.id=='book') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.pausing = true;
     core.updateStatusBar();
@@ -1679,7 +1676,7 @@ control.prototype.pauseReplay = function () {
 
 ////// 恢复播放 //////
 control.prototype.resumeReplay = function () {
-    if (core.status.event.id=='save') return;
+    if (core.status.event.id=='save' || core.status.event.id=='book') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.pausing = false;
     core.updateStatusBar();
@@ -1689,7 +1686,7 @@ control.prototype.resumeReplay = function () {
 
 ////// 加速播放 //////
 control.prototype.speedUpReplay = function () {
-    if (core.status.event.id=='save') return;
+    if (core.status.event.id=='save' || core.status.event.id=='book') return;
     if (!core.status.replay.replaying) return;
     var toAdd = core.status.replay.speed>=3?3:core.status.replay.speed>=2?2:1;
     core.status.replay.speed = parseInt(10*core.status.replay.speed + toAdd)/10;
@@ -1699,7 +1696,7 @@ control.prototype.speedUpReplay = function () {
 
 ////// 减速播放 //////
 control.prototype.speedDownReplay = function () {
-    if (core.status.event.id=='save') return;
+    if (core.status.event.id=='save' || core.status.event.id=='book') return;
     if (!core.status.replay.replaying) return;
     var toAdd = core.status.replay.speed>3?3:core.status.replay.speed>2?2:1;
     core.status.replay.speed = parseInt(10*core.status.replay.speed - toAdd)/10;
@@ -1709,7 +1706,7 @@ control.prototype.speedDownReplay = function () {
 
 ////// 停止播放 //////
 control.prototype.stopReplay = function () {
-    if (core.status.event.id=='save') return;
+    if (core.status.event.id=='save' || core.status.event.id=='book') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.toReplay = [];
     core.status.replay.totalList = [];
@@ -1724,7 +1721,7 @@ control.prototype.stopReplay = function () {
 
 ////// 回退 //////
 control.prototype.rewindReplay = function () {
-    if (core.status.event.id=='save') return;
+    if (core.status.event.id=='save' || core.status.event.id=='book') return;
     if (!core.status.replay.replaying) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
@@ -1759,6 +1756,7 @@ control.prototype.rewindReplay = function () {
 
 ////// 回放时存档 //////
 control.prototype.saveReplay = function () {
+    if (core.status.event.id=='save' || core.status.event.id=='book') return;
     if (!core.status.replay.replaying) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
@@ -1779,6 +1777,7 @@ control.prototype.saveReplay = function () {
 
 ////// 回放时查看怪物手册 //////
 control.prototype.bookReplay = function () {
+    if (core.status.event.id=='save' || core.status.event.id=='book') return;
     if (!core.status.replay.replaying) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
@@ -2331,7 +2330,8 @@ control.prototype.getStatus = function (statusName) {
 
 ////// 获得某个等级的名称 //////
 control.prototype.getLvName = function () {
-    if (core.status.hero.lv>core.firstData.levelUp.length) return core.status.hero.lv;
+    if (!core.isset(core.firstData.levelUp) || core.status.hero.lv<=0
+        || core.status.hero.lv>core.firstData.levelUp.length) return core.status.hero.lv;
     return core.firstData.levelUp[core.status.hero.lv-1].name || core.status.hero.lv;
 }
 

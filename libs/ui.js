@@ -1791,8 +1791,8 @@ ui.prototype.drawStatistics = function () {
             'count': 0, 'money': 0, 'experience': 0, 'point': 0,
         },
         'count': {
-            'yellowDoor': 0, 'blueDoor': 0, 'redDoor': 0, 'steelDoor': 0,
-            'yellowKey': 0, 'blueKey': 0, 'redKey': 0, 'steelKey': 0,
+            'yellowDoor': 0, 'blueDoor': 0, 'redDoor': 0, 'greenDoor': 0, 'steelDoor': 0,
+            'yellowKey': 0, 'blueKey': 0, 'redKey': 0, 'greenKey': 0, 'steelKey': 0,
             'redJewel': 0, 'blueJewel': 0, 'greenJewel': 0, 'yellowJewel': 0,
             'redPotion': 0, 'bluePotion': 0, 'greenPotion': 0, 'yellowPotion': 0, 'superPotion': 0,
             'pickaxe': 0, 'bomb': 0, 'centerFly': 0,
@@ -1895,6 +1895,7 @@ ui.prototype.drawStatistics = function () {
                 if (key=='yellowDoor') name="黄门";
                 else if (key=='blueDoor') name="蓝门";
                 else if (key=='redDoor') name="红门";
+                else if (key=='greenDoor') name="绿门";
                 else if (key=='steelDoor') name="铁门";
                 else name=core.material.items[key].name;
                 if (core.isset(name)) {

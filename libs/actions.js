@@ -931,6 +931,8 @@ actions.prototype.clickBookDetail = function () {
 actions.prototype.clickFly = function(x,y) {
     if ((x==10 || x==11) && y==9) core.ui.drawFly(core.status.event.data-1);
     if ((x==10 || x==11) && y==5) core.ui.drawFly(core.status.event.data+1);
+    if ((x==10 || x==11) && y==10) core.ui.drawFly(core.status.event.data-10);
+    if ((x==10 || x==11) && y==4) core.ui.drawFly(core.status.event.data+10);
     if (x>=5 && x<=7 && y==12) core.ui.closePanel();
     if (x>=0 && x<=9 && y>=3 && y<=11) {
         var index=core.status.hero.flyRange.indexOf(core.status.floorId);
@@ -948,8 +950,10 @@ actions.prototype.clickFly = function(x,y) {
 
 ////// 楼层传送器界面时，按下某个键的操作 //////
 actions.prototype.keyDownFly = function (keycode) {
-    if (keycode==37 || keycode==38) core.ui.drawFly(core.status.event.data+1);
-    else if (keycode==39 || keycode==40) core.ui.drawFly(core.status.event.data-1);
+    if (keycode==37) core.ui.drawFly(core.status.event.data-10);
+    else if ( keycode==38) core.ui.drawFly(core.status.event.data+1);
+    else if (keycode==39) core.ui.drawFly(core.status.event.data+10);
+    else if (keycode==40) core.ui.drawFly(core.status.event.data-1);
     return;
 }
 
@@ -1184,8 +1188,8 @@ actions.prototype.clickToolbox = function(x,y) {
     }
     // 下一页
     if ((x == 8 || x == 9) && y == 12) {
-        var toolPage = parseInt(Object.keys(core.status.hero.items.tools).length/12)+1,
-            constantPage = parseInt(Object.keys(core.status.hero.items.constants).length/12)+1;
+        var toolPage = Math.ceil(Object.keys(core.status.hero.items.tools).length/12),
+            constantPage = Math.ceil(Object.keys(core.status.hero.items.constants).length/12);
         if (page<toolPage) {
             core.ui.drawToolbox(12*page);
         }

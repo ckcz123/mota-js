@@ -170,11 +170,12 @@ core.prototype.init = function (coreData, callback) {
         core.flags.battleAnimate = false;
         core.setLocalStorage('battleAnimate', false);
     }
-    
-    // core.initStatus.shops = core.firstData.shops;
-    core.firstData.shops.forEach(function (t) {
-        core.initStatus.shops[t.id] = t;
-    })
+
+    if (core.isset(core.firstData.shops)) {
+        core.firstData.shops.forEach(function (t) {
+            core.initStatus.shops[t.id] = t;
+        })
+    }
 
     core.dom.versionLabel.innerHTML = core.firstData.version;
     core.dom.logoLabel.innerHTML = core.firstData.title;
@@ -310,7 +311,7 @@ core.prototype.resetStatus = function(hero, hard, floorId, route, maps, values) 
 
 ////// 开始游戏 //////
 core.prototype.startGame = function (hard, callback) {
-    core.control.startGame(hard, callback);huo
+    core.control.startGame(hard, callback);
 }
 
 ////// 重新开始游戏；此函数将回到标题页面 //////

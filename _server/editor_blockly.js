@@ -87,6 +87,7 @@ editor_blockly = function () {
       MotaActionBlocks['setValue_s'].xmlText(),
       MotaActionBlocks['input_s'].xmlText(),
       MotaActionBlocks['update_s'].xmlText(),
+      MotaActionBlocks['updateEnemys_s'].xmlText(),
       MotaActionBlocks['moveHero_s'].xmlText(),
       MotaActionBlocks['jumpHero_s'].xmlText(),
       MotaActionBlocks['changeFloor_s'].xmlText(),

@@ -301,9 +301,145 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 ////// 读档事件后，载入事件前，可以执行的操作 //////
 "afterLoadData" : function(data) {
 	// 读档事件后，载入事件前，可以执行的操作
-	// 可以在这里对怪物数据进行动态修改，详见文档——事件——怪物数据的动态修改
+	// 怪物数据的动态修改迁移到了“脚本编辑 - updateEnemys”中，详见文档说明
 
+	core.enemys.updateEnemys();
+}
+},
+"enemy": {
+"getSpecials" : function() {
+	// 获得怪物的特殊属性，每一行定义一个特殊属性。
+	// 分为三项，第一项为该特殊属性的数字，第二项为特殊属性的名字，第三项为特殊属性的描述
+	// 可以直接写字符串，也可以写个function将怪物传进去
+	return [
+		[1, "先攻", "怪物首先攻击"],
+		[2, "魔攻", "怪物无视勇士的防御"],
+		[3, "坚固", "勇士每回合最多只能对怪物造成1点伤害"],
+		[4, "2连击", "怪物每回合攻击2次"],
+		[5, "3连击", "怪物每回合攻击3次"],
+		[6, function(enemy) {return (enemy.n||4)+"连击";}, function(enemy) {return "怪物每回合攻击"+(enemy.n||4)+"次";}],
+		[7, "破甲", "战斗前，怪物附加角色防御的"+Math.floor(100*core.values.breakArmor||0)+"%作为伤害"],
+		[8, "反击", "战斗时，怪物每回合附加角色攻击的"+Math.floor(100*core.values.counterAttack||0)+"%作为伤害，无视角色防御"],
+		[9, "净化", "战斗前，怪物附加勇士魔防的"+core.values.purify+"倍作为伤害"],
+		[10, "模仿", "怪物的攻防和勇士攻防相等"],
+		[11, "吸血", function (enemy) {return "吸血：战斗前，怪物首先吸取角色的"+Math.floor(100*enemy.value||0)+"%生命作为伤害"+(enemy.add?"，并把伤害数值加到自身生命上":"");}],
+		[12, "中毒", "战斗后，勇士陷入中毒状态，每一步损失生命"+core.values.poisonDamage+"点"],
+		[13, "衰弱", "战斗后，勇士陷入衰弱状态，攻防暂时下降"+(core.values.weakValue>=1?core.values.weakValue+"点":parseInt(core.values.weakValue*100)+"%")],
+		[14, "诅咒", "战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验"],
+		[15, "领域", function (enemy) {return "经过怪物周围"+(enemy.range||1)+"格时自动减生命"+(enemy.value||0)+"点";}],
+		[16, "夹击", "经过两只相同的怪物中间，勇士生命值变成一半"],
+		[17, "仇恨", "战斗前，怪物附加之前积累的仇恨值作为伤害"+(core.flags.hatredDecrease?"；战斗后，释放一半的仇恨值":"")+"。（每杀死一个怪物获得"+(core.values.hatred||0)+"点仇恨值）"],
+		[18, "阻击", function (enemy) {return "经过怪物的十字领域时自动减生命"+(enemy.value||0)+"点，同时怪物后退一格";}],
+		[19, "自爆", "战斗后勇士的生命值变成1"],
+		[20, "无敌", "勇士无法打败怪物，除非拥有十字架"],
+		[21, "退化", function (enemy) {return "战斗后勇士永久下降"+(enemy.atkValue||0)+"点攻击和"+(enemy.defValue||0)+"点防御";}],
+		[22, "固伤", function (enemy) {return "战斗前，怪物对勇士造成"+(enemy.damage||0)+"点固定伤害，无视勇士魔防。";}],
+		[23, "重生", "怪物被击败后，角色转换楼层则怪物将再次出现"]
+	];
+},
+"getDamageInfo" : function (enemy, hero_hp, hero_atk, hero_def, hero_mdef) {
+	// 获得战斗伤害信息（实际伤害计算函数）
 
+	// 怪物生命，怪物攻击、防御、特殊属性
+	var mon_hp = enemy.hp, mon_atk = enemy.atk, mon_def = enemy.def, mon_special = enemy.special;
+	// 勇士的负属性都按0计算
+	hero_hp=Math.max(0, hero_hp); hero_atk=Math.max(0, hero_atk); hero_def=Math.max(0, hero_def); hero_mdef=Math.max(0, hero_mdef);
+
+	// 如果是无敌属性，且勇士未持有十字架
+	if (this.hasSpecial(mon_special, 20) && !core.hasItem("cross"))
+		return null; // 不可战斗
+
+	// 战前造成的额外伤害（可被魔防抵消）
+	var init_damage = 0;
+
+	// 吸血
+	if (this.hasSpecial(mon_special, 11)) {
+		var vampire_damage = hero_hp * enemy.value;
+
+		// 如果有神圣盾免疫吸血等可以在这里写
+		// if (core.hasFlag('shield5')) vampire_damage = 0;
+
+		vampire_damage = Math.floor(vampire_damage) || 0;
+		// 加到自身
+		if (enemy.add) // 如果加到自身
+			mon_hp += vampire_damage;
+
+		init_damage += vampire_damage;
+	}
+
+	// 模仿
+	if (this.hasSpecial(mon_special, 10)) {
+		mon_atk = hero_atk;
+		mon_def = hero_def;
+	}
+	// 坚固
+	if (this.hasSpecial(mon_special, 3) && mon_def < hero_atk - 1)
+		mon_def = hero_atk - 1;
+
+	// 检查是否破防；否则直接返回不可战斗
+	if (hero_atk <= mon_def) return null;
+
+	// 每回合怪物对勇士造成的战斗伤害
+	var per_damage = mon_atk - hero_def;
+	// 魔攻：战斗伤害就是怪物攻击力
+	if (this.hasSpecial(mon_special, 2)) per_damage = mon_atk;
+	// 战斗伤害不能为负值
+	if (per_damage < 0) per_damage = 0;
+
+	// 2连击 & 3连击 & N连击
+	if (this.hasSpecial(mon_special, 4)) per_damage *= 2;
+	if (this.hasSpecial(mon_special, 5)) per_damage *= 3;
+	if (this.hasSpecial(mon_special, 6)) per_damage *= (enemy.n||4);
+
+	// 每回合的反击伤害；反击是按照勇士的攻击次数来计算回合
+	var counterDamage = 0;
+	if (this.hasSpecial(mon_special, 8)) counterDamage += Math.floor(core.values.counterAttack * hero_atk);
+
+	// 先攻
+	if (this.hasSpecial(mon_special, 1)) init_damage += per_damage;
+
+	// 破甲
+	if (this.hasSpecial(mon_special, 7))
+		init_damage += Math.floor(core.values.breakArmor * hero_def);
+
+	// 净化
+	if (this.hasSpecial(mon_special, 9))
+		init_damage += Math.floor(core.values.purify * hero_mdef);
+
+	// 勇士每回合对怪物造成的伤害
+	var hero_per_damage = hero_atk - mon_def;
+	// 勇士的攻击回合数；为怪物生命除以每回合伤害向上取整
+	var turn = Math.ceil(mon_hp / hero_per_damage);
+	// 最终伤害：初始伤害 + 怪物对勇士造成的伤害 + 反击伤害
+	var damage = init_damage + (turn - 1) * per_damage + turn * counterDamage;
+	// 再扣去魔防
+	damage -= hero_mdef;
+
+	// 检查是否允许负伤
+	if (!core.flags.enableNegativeDamage)
+		damage=Math.max(0, damage);
+
+	return {
+		"mon_hp": mon_hp,
+		"mon_atk": mon_atk,
+		"mon_def": mon_def,
+		"init_damage": init_damage,
+		"per_damage": per_damage,
+		"hero_per_damage": hero_per_damage,
+		"turn": turn,
+		"damage": damage
+	};
+},
+"updateEnemys" : function () {
+	// 更新怪物数据，可以在这里对怪物属性和数据进行动态更新，详见文档——事件——怪物数据的动态修改
+	// 比如下面这个例子，如果flag:xxx为真，则将绿头怪的攻击设为100，金币设为20
+	/*
+	if (core.hasFlag('xxx')) {
+		core.material.enemys.greenSlime.atk = 100;
+		core.material.enemys.greenSlime.money = 20;
+	}
+	*/
+	// 别忘了在事件中调用“更新怪物数据”事件！
 }
 },
 "ui":{

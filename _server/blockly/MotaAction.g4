@@ -193,6 +193,7 @@ action
     |   setBlock_s
     |   setHeroIcon_s
     |   update_s
+    |   updateEnemys_s
     |   sleep_s
     |   wait_s
     |   battle_s
@@ -493,6 +494,18 @@ tooltip : update: 立刻更新状态栏和地图显伤
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=update%EF%BC%9A%E7%AB%8B%E5%88%BB%E6%9B%B4%E6%96%B0%E7%8A%B6%E6%80%81%E6%A0%8F%E5%92%8C%E5%9C%B0%E5%9B%BE%E6%98%BE%E4%BC%A4
 colour : this.dataColor
 var code = '{"type": "update"},\n';
+return code;
+*/;
+
+updateEnemys_s
+    :   '更新怪物数据' Newline
+
+
+/* updateEnemys_s
+tooltip : updateEnemys: 立刻更新怪物数据
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=updateEnemys%ef%bc%9a%e6%9b%b4%e6%96%b0%e6%80%aa%e7%89%a9%e6%95%b0%e6%8d%ae
+colour : this.dataColor
+var code = '{"type": "updateEnemys"},\n';
 return code;
 */;
 
@@ -1700,6 +1713,10 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "update":
       this.next = MotaActionBlocks['update_s'].xmlText([
+        this.next]);
+      break;
+    case "updateEnemys":
+      this.next = MotaActionBlocks['updateEnemys_s'].xmlText([
         this.next]);
       break;
     case "sleep": // 等待多少毫秒

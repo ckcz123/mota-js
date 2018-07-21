@@ -1307,10 +1307,10 @@ ui.prototype.drawBook = function (index) {
             damage = core.formatBigNumber(damage);
             if (core.enemys.hasSpecial(core.material.enemys[enemy.id], 19))
                 damage += "+";
-            if (core.material.enemys[enemy.id].notBomb)
-                damage += "[b]";
-
         }
+        if (core.material.enemys[enemy.id].notBomb)
+            damage += "[b]";
+
         core.fillText('ui', damage, damageOffset, 62 * i + 50, color, 'bold 13px Verdana');
 
         core.canvas.ui.textAlign = "left";
@@ -1419,10 +1419,16 @@ ui.prototype.drawFly = function(page) {
     core.fillText('ui', '楼层跳跃', 208, 60, '#FFFFFF', "bold 28px Verdana");
     core.fillText('ui', '返回游戏', 208, 403, '#FFFFFF', "bold 15px Verdana")
     core.fillText('ui', title, 356, 247, '#FFFFFF', "bold 19px Verdana");
-    if (page<core.status.hero.flyRange.length-1)
-        core.fillText('ui', '▲', 356, 247-64, '#FFFFFF', "17px Verdana");
-    if (page>0)
-        core.fillText('ui', '▼', 356, 247+64, '#FFFFFF', "17px Verdana");
+    if (page<core.status.hero.flyRange.length-1) {
+        core.fillText('ui', '▲', 356, 247 - 64, '#FFFFFF', "17px Verdana");
+        core.fillText('ui', '▲', 356, 247 - 96, '#FFFFFF', "17px Verdana");
+        core.fillText('ui', '▲', 356, 247 - 96 - 7, '#FFFFFF', "17px Verdana");
+    }
+    if (page>0) {
+        core.fillText('ui', '▼', 356, 247 + 64, '#FFFFFF', "17px Verdana");
+        core.fillText('ui', '▼', 356, 247 + 96, '#FFFFFF', "17px Verdana");
+        core.fillText('ui', '▼', 356, 247 + 96 + 7, '#FFFFFF', "17px Verdana");
+    }
     core.strokeRect('ui', 20, 100, 273, 273, '#FFFFFF', 2);
     this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 20, 100, 273);
 }
@@ -1484,7 +1490,7 @@ ui.prototype.drawToolbox = function(index) {
     }
 
     var page = parseInt((index%1000)/12)+1;
-    var totalPage = parseInt(Math.max(tools.length, constants.length)/12)+1;
+    var totalPage = Math.ceil(Math.max(tools.length, constants.length)/12);
 
     if (!core.hasItem(selectId)) selectId=null;
 
@@ -1785,8 +1791,8 @@ ui.prototype.drawStatistics = function () {
             'count': 0, 'money': 0, 'experience': 0, 'point': 0,
         },
         'count': {
-            'yellowDoor': 0, 'blueDoor': 0, 'redDoor': 0, 'steelDoor': 0,
-            'yellowKey': 0, 'blueKey': 0, 'redKey': 0, 'steelKey': 0,
+            'yellowDoor': 0, 'blueDoor': 0, 'redDoor': 0, 'greenDoor': 0, 'steelDoor': 0,
+            'yellowKey': 0, 'blueKey': 0, 'redKey': 0, 'greenKey': 0, 'steelKey': 0,
             'redJewel': 0, 'blueJewel': 0, 'greenJewel': 0, 'yellowJewel': 0,
             'redPotion': 0, 'bluePotion': 0, 'greenPotion': 0, 'yellowPotion': 0, 'superPotion': 0,
             'pickaxe': 0, 'bomb': 0, 'centerFly': 0,
@@ -1889,6 +1895,7 @@ ui.prototype.drawStatistics = function () {
                 if (key=='yellowDoor') name="黄门";
                 else if (key=='blueDoor') name="蓝门";
                 else if (key=='redDoor') name="红门";
+                else if (key=='greenDoor') name="绿门";
                 else if (key=='steelDoor') name="铁门";
                 else name=core.material.items[key].name;
                 if (core.isset(name)) {

@@ -306,7 +306,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.enemys.updateEnemys();
 }
 },
-"enemy": {
+"enemys": {
 "getSpecials" : function() {
 	// 获得怪物的特殊属性，每一行定义一个特殊属性。
 	// 分为三项，第一项为该特殊属性的数字，第二项为特殊属性的名字，第三项为特殊属性的描述

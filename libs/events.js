@@ -461,7 +461,7 @@ events.prototype.doAction = function() {
                 x=core.calValue(data.loc[0]);
                 y=core.calValue(data.loc[1]);
             }
-            core.moveBlock(x,y,data.steps,data.time,data.immediateHide,function() {
+            core.moveBlock(x,y,data.steps,data.time,data.keep,function() {
                 core.events.doAction();
             })
             break;
@@ -481,7 +481,7 @@ events.prototype.doAction = function() {
                     ex=core.calValue(data.to[0]);
                     ey=core.calValue(data.to[1]);
                 }
-                core.jumpBlock(sx,sy,ex,ey,data.time,data.immediateHide,function() {
+                core.jumpBlock(sx,sy,ex,ey,data.time,data.keep,function() {
                     core.events.doAction();
                 });
                 break;
@@ -806,6 +806,11 @@ events.prototype.doAction = function() {
             core.enemys.updateEnemys();
             core.updateStatusBar();
             this.doAction();
+            break;
+        case "viberate":
+            core.events.vibrate(data.time, function () {
+                core.events.doAction();
+            })
             break;
         case "sleep": // 等待多少毫秒
             if (core.status.replay.replaying)
@@ -1305,6 +1310,65 @@ events.prototype.setVolume = function (value, time, callback) {
                 callback();
         }
     }, time / 32);
+}
+
+////// 画面震动 //////
+events.prototype.vibrate = function(time, callback) {
+
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) {
+        if (core.isset(callback)) callback();
+        return;
+    }
+
+    core.status.replay.animate=true;
+
+    var setGameCanvasTranslate=function(x,y){
+        for(var ii=0,canvas;canvas=core.dom.gameCanvas[ii];ii++){
+            if(['data','ui'].indexOf(canvas.getAttribute('id'))!==-1)continue;
+            canvas.style.transform='translate('+x+'px,'+y+'px)';
+            canvas.style.webkitTransform='translate('+x+'px,'+y+'px)';
+            canvas.style.OTransform='translate('+x+'px,'+y+'px)';
+            canvas.style.MozTransform='translate('+x+'px,'+y+'px)';
+        }
+    }
+
+    if (!core.isset(time) || time<1000) time=1000;
+
+    var shake_duration = time*3/50;
+    var shake_speed = 5;
+    var shake_power = 5;
+    var shake_direction = 1;
+    var shake = 0;
+
+    var update = function() {
+        if(shake_duration >= 1 || shake != 0){
+            var delta = (shake_power * shake_speed * shake_direction) / 10.0;
+            if(shake_duration <= 1 && shake * (shake + delta) < 0){
+                shake = 0;
+            }else{
+                shake += delta;
+            }
+            if(shake > shake_power * 2){
+                shake_direction = -1;
+            }
+            if(shake < - shake_power * 2){
+                shake_direction = 1;
+            }
+            if(shake_duration >= 1){
+                shake_duration -= 1
+            }
+        }
+    }
+
+    var animate=setInterval(function(){
+        update();
+        setGameCanvasTranslate(shake,0);
+        if(shake_duration===0) {
+            clearInterval(animate);
+            core.status.replay.animate=false;
+            if (core.isset(callback)) callback();
+        }
+    }, 50/3);
 }
 
 ////// 打开一个全局商店 //////

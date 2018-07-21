@@ -1917,10 +1917,17 @@ control.prototype.replay = function () {
         }
     }
     else if (action.indexOf('move:')==0) {
+        while (core.status.replay.toReplay.length>0 &&
+            core.status.replay.toReplay[0].indexOf('move:')==0) {
+            action = core.status.replay.toReplay.shift();
+        }
+
         var pos=action.substring(5).split(":");
         var x=parseInt(pos[0]), y=parseInt(pos[1]);
         if (core.control.moveDirectly(x,y)) {
-            core.replay();
+            setTimeout(function () {
+                core.replay();
+            }, 750 / core.status.replay.speed);
             return;
         }
     }

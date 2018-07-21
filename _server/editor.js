@@ -1,6 +1,7 @@
 function editor() {
     this.version = "2.0";
     this.material = {};
+    this.brushMod = "line";//["line","rectangle"]
 }
 
 editor.prototype.init = function (callback) {
@@ -503,6 +504,20 @@ editor.prototype.listen = function () {
         e.stopPropagation();
         if (stepPostfix && stepPostfix.length) {
             preMapData = JSON.parse(JSON.stringify(editor.map));
+            if(editor.brushMod==='rectangle'){
+                var x0=stepPostfix[0].x;
+                var y0=stepPostfix[0].y;
+                var x1=stepPostfix[stepPostfix.length-1].x;
+                var y1=stepPostfix[stepPostfix.length-1].y;
+                if(x0>x1){x0^=x1;x1^=x0;x0^=x1;}//swap
+                if(y0>y1){y0^=y1;y1^=y0;y0^=y1;}//swap
+                stepPostfix=[];
+                for(var ii=x0;ii<=x1;ii++){
+                    for(var jj=y0;jj<=y1;jj++){
+                        stepPostfix.push({x:ii,y:jj})
+                    }
+                }
+            }
             currDrawData.pos = JSON.parse(JSON.stringify(stepPostfix));
             currDrawData.info = JSON.parse(JSON.stringify(editor.info));
             reDo = null;
@@ -837,6 +852,16 @@ editor.prototype.listen = function () {
             ;printf('清空此点及事件成功');
             editor.drawEventBlock();
         });
+    }
+
+    var brushMod=document.getElementById('brushMod');
+    brushMod.onchange=function(){
+        editor.brushMod=brushMod.value;
+    }
+
+    var brushMod2=document.getElementById('brushMod2');
+    if(brushMod2)brushMod2.onchange=function(){
+        editor.brushMod=brushMod2.value;
     }
 
 }//绑定事件

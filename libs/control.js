@@ -292,10 +292,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
         core.values = core.clone(values);
     else core.values = core.clone(core.data.values);
 
-    core.flags = core.clone(core.data.flags);
-
     core.events.initGame();
-
 }
 
 ////// 开始游戏 //////
@@ -380,7 +377,7 @@ control.prototype.clearContinueAutomaticRoute = function () {
 ////// 瞬间移动 //////
 control.prototype.moveDirectly = function (destX, destY) {
     var ignoreSteps = core.canMoveDirectly(destX, destY);
-    if (ignoreSteps>0) {
+    if (ignoreSteps>=0) {
         core.clearMap('hero', 0, 0, 416, 416);
         var lastDirection = core.status.route[core.status.route.length-1];
         if (['left', 'right', 'up', 'down'].indexOf(lastDirection)>=0)
@@ -396,6 +393,22 @@ control.prototype.moveDirectly = function (destX, destY) {
     return false;
 }
 
+////// 尝试瞬间移动 //////
+control.prototype.tryMoveDirectly = function (destX, destY) {
+    if (Math.abs(core.getHeroLoc('x')-destX)+Math.abs(core.getHeroLoc('y')-destY)<=1)
+        return false;
+    var testMove = function (dx, dy, dir) {
+        if (dx<0 || dx>12 || dy<0 || dy>12) return false;
+        if (core.control.moveDirectly(dx, dy)) {
+            if (core.isset(dir)) core.moveHero(dir, function() {});
+            return true;
+        }
+        return false;
+    }
+    return testMove(destX,destY) || testMove(destX-1, destY, "right") || testMove(destX,destY-1,"down")
+        || testMove(destX,destY+1,"up") || testMove(destX+1,destY,"left");
+}
+
 ////// 设置自动寻路路线 //////
 control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     if (!core.status.played || core.status.lockControl) {
@@ -409,7 +422,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
             core.status.automaticRoute.moveDirectly = true;
             setTimeout(function () {
                 if (core.status.automaticRoute.moveDirectly && core.status.heroMoving==0) {
-                    core.control.moveDirectly(destX, destY);
+                    core.control.tryMoveDirectly(destX, destY);
                 }
                 core.status.automaticRoute.moveDirectly = false;
             }, 100);
@@ -434,7 +447,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
 
     // 单击瞬间移动
     if (core.status.automaticRoute.clickMoveDirectly && core.status.heroStop) {
-        if (core.control.moveDirectly(destX, destY))
+        if (core.control.tryMoveDirectly(destX, destY))
             return;
     }
 
@@ -1663,14 +1676,14 @@ control.prototype.startReplay = function (list) {
 
 ////// 更改播放状态 //////
 control.prototype.triggerReplay = function () {
-    if (core.status.event.id=='save') return;
+    if (core.status.event.id=='save' || core.status.event.id=='book') return;
     if (core.status.replay.pausing) this.resumeReplay();
     else this.pauseReplay();
 }
 
 ////// 暂停播放 //////
 control.prototype.pauseReplay = function () {
-    if (core.status.event.id=='save') return;
+    if (core.status.event.id=='save' || core.status.event.id=='book') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.pausing = true;
     core.updateStatusBar();
@@ -1679,7 +1692,7 @@ control.prototype.pauseReplay = function () {
 
 ////// 恢复播放 //////
 control.prototype.resumeReplay = function () {
-    if (core.status.event.id=='save') return;
+    if (core.status.event.id=='save' || core.status.event.id=='book') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.pausing = false;
     core.updateStatusBar();
@@ -1689,7 +1702,7 @@ control.prototype.resumeReplay = function () {
 
 ////// 加速播放 //////
 control.prototype.speedUpReplay = function () {
-    if (core.status.event.id=='save') return;
+    if (core.status.event.id=='save' || core.status.event.id=='book') return;
     if (!core.status.replay.replaying) return;
     var toAdd = core.status.replay.speed>=3?3:core.status.replay.speed>=2?2:1;
     core.status.replay.speed = parseInt(10*core.status.replay.speed + toAdd)/10;
@@ -1699,7 +1712,7 @@ control.prototype.speedUpReplay = function () {
 
 ////// 减速播放 //////
 control.prototype.speedDownReplay = function () {
-    if (core.status.event.id=='save') return;
+    if (core.status.event.id=='save' || core.status.event.id=='book') return;
     if (!core.status.replay.replaying) return;
     var toAdd = core.status.replay.speed>3?3:core.status.replay.speed>2?2:1;
     core.status.replay.speed = parseInt(10*core.status.replay.speed - toAdd)/10;
@@ -1709,7 +1722,7 @@ control.prototype.speedDownReplay = function () {
 
 ////// 停止播放 //////
 control.prototype.stopReplay = function () {
-    if (core.status.event.id=='save') return;
+    if (core.status.event.id=='save' || core.status.event.id=='book') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.toReplay = [];
     core.status.replay.totalList = [];
@@ -1724,7 +1737,7 @@ control.prototype.stopReplay = function () {
 
 ////// 回退 //////
 control.prototype.rewindReplay = function () {
-    if (core.status.event.id=='save') return;
+    if (core.status.event.id=='save' || core.status.event.id=='book') return;
     if (!core.status.replay.replaying) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
@@ -1759,6 +1772,7 @@ control.prototype.rewindReplay = function () {
 
 ////// 回放时存档 //////
 control.prototype.saveReplay = function () {
+    if (core.status.event.id=='save' || core.status.event.id=='book') return;
     if (!core.status.replay.replaying) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
@@ -1779,6 +1793,7 @@ control.prototype.saveReplay = function () {
 
 ////// 回放时查看怪物手册 //////
 control.prototype.bookReplay = function () {
+    if (core.status.event.id=='save' || core.status.event.id=='book') return;
     if (!core.status.replay.replaying) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
@@ -1842,7 +1857,7 @@ control.prototype.replay = function () {
                     core.useItem(itemId, function () {
                         core.replay();
                     });
-                }, 750 / core.status.replay.speed);
+                }, 750 / Math.max(1, core.status.replay.speed));
             }
             return;
         }
@@ -1862,7 +1877,7 @@ control.prototype.replay = function () {
                 core.changeFloor(floorId, stair, null, null, function () {
                     core.replay();
                 });
-            }, 750 / core.status.replay.speed);
+            }, 750 / Math.max(1, core.status.replay.speed));
             return;
         }
     }
@@ -1895,7 +1910,7 @@ control.prototype.replay = function () {
                     core.status.event.selection = parseInt(selections.shift());
                     core.events.openShop(shopId, false);
 
-                }, 750 / core.status.replay.speed);
+                }, 750 / Math.max(1, core.status.replay.speed));
                 return;
             }
         }
@@ -1918,10 +1933,17 @@ control.prototype.replay = function () {
         }
     }
     else if (action.indexOf('move:')==0) {
+        while (core.status.replay.toReplay.length>0 &&
+            core.status.replay.toReplay[0].indexOf('move:')==0) {
+            action = core.status.replay.toReplay.shift();
+        }
+
         var pos=action.substring(5).split(":");
         var x=parseInt(pos[0]), y=parseInt(pos[1]);
         if (core.control.moveDirectly(x,y)) {
-            core.replay();
+            setTimeout(function () {
+                core.replay();
+            }, 750 / Math.max(1, core.status.replay.speed));
             return;
         }
     }
@@ -2331,7 +2353,8 @@ control.prototype.getStatus = function (statusName) {
 
 ////// 获得某个等级的名称 //////
 control.prototype.getLvName = function () {
-    if (core.status.hero.lv>core.firstData.levelUp.length) return core.status.hero.lv;
+    if (!core.isset(core.firstData.levelUp) || core.status.hero.lv<=0
+        || core.status.hero.lv>core.firstData.levelUp.length) return core.status.hero.lv;
     return core.firstData.levelUp[core.status.hero.lv-1].name || core.status.hero.lv;
 }
 

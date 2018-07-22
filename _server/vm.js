@@ -24,7 +24,7 @@ document.body.onmousedown = function (e) {
         }
     });
 
-    if (clickpath.indexOf('edit') === -1 && clickpath.indexOf('tip') === -1) {
+    if (clickpath.indexOf('edit') === -1 && clickpath.indexOf('tip') === -1 && clickpath.indexOf('brushMod') === -1 && clickpath.indexOf('brushMod2') === -1) {
         if (clickpath.indexOf('eui') === -1) {
             if (selectBox.isSelected) {
                 editor_mode.onmode('');

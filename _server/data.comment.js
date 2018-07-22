@@ -495,6 +495,12 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "夹击方式是向上取整还是向下取整。如果此项为true则为向上取整，为false则为向下取整"
                 },
+                "useLoop": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "是否循环计算临界；如果此项为true则使用循环法（而不是回合数计算法）来算临界"
+                },
                 "startDirectly": {
                     "_leaf": true,
                     "_type": "checkbox",

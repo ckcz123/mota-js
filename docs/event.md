@@ -509,6 +509,12 @@ name是可选的，代表目标行走图的文件名。
 
 如果你需要刷新状态栏和地图显伤，只需要简单地调用 `{"type": "update"}` 即可。
 
+### updateEnemys：更新怪物数据
+
+使用 `{"type": "updateEnemys"}` 可以动态修改怪物数据。
+
+详见[怪物数据的动态修改](#怪物数据的动态修改)。
+
 ### sleep：等待多少毫秒
 
 等价于RMXP中的"等待x帧"，不过是以毫秒来计算。
@@ -648,6 +654,10 @@ name为可选的，是要取消跟随的行走图文件名。
 如果name指定了，则会检查所有当前正在跟随的行走图，并删除第一个文件名是name的跟随效果。
 
 如果name省略，则会取消所有的跟随效果。
+
+### viberate：画面震动
+
+使用 `{"type": "viberate", "time": 2000}` 可以造成画面震动效果，后面time可以指定震动时间。
 
 ### animate：显示动画
 
@@ -806,7 +816,7 @@ level为天气的强度等级，在1-10之间。1级为最弱，10级为最强�
     {"type": "move", "time": 750, "loc": [x,y], "steps": [// 动画效果，time为移动速度(比如这里每750ms一步)，loc为位置可选，steps为移动数组
         {"direction": "right", "value": 2},// 这里steps 的效果为向右移动2步，在向下移动一步并消失
         "down" // 如果该方向上只移动一步则可以这样简写，效果等价于上面value为1
-    ], "immediateHide": true }, //immediateHide可选，制定为true则立刻消失，否则渐变消失
+    ], "keep": true }, // keep可选，如果为true则不消失，否则渐变消失
 ]
 ```
 
@@ -818,13 +828,13 @@ steps为一个数组，其每一项为一个 `{"direction" : xxx, "value": n}`�
 
 如果只移动一步可以直接简单的写方向字符串（`up/left/down/right`）。
 
-immediateHide为一个可选项，代表该事件移动完毕后是否立刻消失。如果该项指定了并为true，则移动完毕后直接消失，否则以动画效果消失。
+keep为一个可选项，代表该事件移动完毕后是否消失。如果该项指定了并为true，则移动完毕后将不消失，否则以动画效果消失。
 
 值得注意的是，当调用move事件时，实际上是使事件脱离了原始地点。为了避免冲突，规定：move事件会自动调用该点的hide事件。
 
 换句话说，当move事件被调用后，该点本身的事件将被禁用。
 
-move完毕后移动的NPC/怪物一定会消失，只不过可以通过immediateHide决定是否立刻消失还是以time作为时间来动画效果消失。
+如果指定了`"keep": true`，则相当于会在目标地点触发一个`setBlock`事件；如需能继续对话交互请在目标地点再写事件。
 
 如果想让move后的NPC/怪物仍然可以被交互，需采用如下的写法：
 
@@ -832,11 +842,9 @@ move完毕后移动的NPC/怪物一定会消失，只不过可以通过immediate
 "4,3": [ // [4,3]是一个NPC，比如小偷
     {"type": "move", "time": 750, "steps": [ // 向上移动两格，每步750毫秒
         {"direction": "up", "value": 2},
-    ], "immediateHide": true}, // 移动完毕立刻消失
-    {"type": "show", "loc": [4,1]} // 指定[4,1]点的NPC立刻生效（显示）
-    {"type": "trigger", "loc": [4,1]} // 立刻触发[4,1]点的事件
+    ], "keep": true}, // 移动完毕后不消失
 ],
-"4,1": { // [4,1]也是这个NPC，而且是向上移动两个的位置
+"4,1": { // [4,1]为目标地点
     "enable": false, // 初始时需要是禁用状态，被show调用后将显示出来
     "data": [
         "\t[杰克,thief]这样看起来就好像移动过去后也可以被交互。"
@@ -873,7 +881,7 @@ move完毕后移动的NPC/怪物一定会消失，只不过可以通过immediate
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    {"type": "jump", "from": [3,6], "to": [2,1], "time": 750, "immediateHide": true},
+    {"type": "jump", "from": [3,6], "to": [2,1], "time": 750, "keep": true},
 ]
 ```
 
@@ -883,13 +891,9 @@ to为要跳跃到的坐标。可以省略，如果省略则跳跃到当前坐标
 
 time选项必须指定，为全程跳跃所需要用到的时间。
 
-immediateHide为一个可选项，同上代表该跳跃完毕后是否立刻消失。如果该项指定了并为true，则跳跃完毕后直接消失，否则以动画效果消失。
+keep为一个可选项，同上代表该跳跃完毕后是否不消失。如果该项指定了并为true，则跳跃完毕后不会消失，否则以动画效果消失。
 
-值得注意的是，当调用jump事件时，实际上是使事件脱离了原始地点。
-
-为了避免冲突，同move事件一样规定：jump事件会自动调用该点的hide事件。
-
-如果是本地跳跃，需要在跳跃完毕后再启用事件。
+如果指定了`"keep": true`，则相当于会在目标地点触发一个`setBlock`事件；如需能继续对话交互请在目标地点再写事件。
 
 ### jumpHero：跳跃勇士
 
@@ -1591,25 +1595,33 @@ core.insertAction([
 
 而在我们的存档中，是不会对怪物数据进行存储的，只会存各个变量和Flag，因此我们需要在读档后根据变量或Flag来调整怪物数据。
 
-我们可以在脚本编辑中的`afterLoadData`进行处理。
+我们可以在脚本编辑中的`updateEnemys`进行处理。
 
 ``` js
 ////// 读档事件后，载入事件前，可以执行的操作 //////
-"afterLoadData" : function(data) {
-    // 读档事件后，载入事件前，可以执行的操作
-    if (core.hasFlag("fengyin")) { // 如果存在封印（flag为真）
-        core.material.enemys.blackKing.hp/=10; // 将怪物的血量变成原来的十分之一
-        // ... 
-    }
-    // 同样难度分歧可以类似写 if (core.getFlag('hard', 0)==3) {...
+"updateEnemys" : function () {
+	// 更新怪物数据，可以在这里对怪物属性和数据进行动态更新，详见文档——事件——怪物数据的动态修改
+	// 比如下面这个例子，如果flag:xxx为真，则将绿头怪的攻击设为100，红头怪的金币设为20
+	// 推荐写变化后的具体数值，以免多次变化导致冲突
+	/*
+	// 如果flag:xxx为真；你也可以写其他判断语句比如core.hasItem(...)等等
+	if (core.hasFlag('xxx')) { 
+		core.material.enemys.greenSlime.atk = 100;
+		core.material.enemys.redSlime.money = 20;
+	}
+	*/
+	// 别忘了在事件中调用“更新怪物数据”事件！
 }
+```
 
-// 在封印时，可以调用setValue将该flag置为真，然后调用自定义脚本 core.afterLoadData() 即可。
+当我们获得一个道具（或者触发某个事件等）后，需要在事件中调用“更新怪物数据”事件。
+
+``` js
+// 调用`updateEnemys`（更新怪物数据）事件就可以触发了
 "x,y": [
-    {"type": "setValue", "name": "flag:fengyin", "value": "true"}, // 封印
-    {"type": "function", "function": function() { // 手动调用自定义JS脚本 core.afterLoadData()
-        core.afterLoadData();
-    }}
+    "将flag:xxx置为真，就可以让怪物数据发生改变！",
+    {"type": "setValue", "name": "flag:xxx", "value": "true"}, // 将flag:xxx置为真
+    {"type": "updateEnemys"} // 更新怪物数据；此时绿头怪攻击就会变成100了
 ]
 ```
 

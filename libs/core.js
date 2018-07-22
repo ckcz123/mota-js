@@ -170,11 +170,12 @@ core.prototype.init = function (coreData, callback) {
         core.flags.battleAnimate = false;
         core.setLocalStorage('battleAnimate', false);
     }
-    
-    // core.initStatus.shops = core.firstData.shops;
-    core.firstData.shops.forEach(function (t) {
-        core.initStatus.shops[t.id] = t;
-    })
+
+    if (core.isset(core.firstData.shops)) {
+        core.firstData.shops.forEach(function (t) {
+            core.initStatus.shops[t.id] = t;
+        })
+    }
 
     core.dom.versionLabel.innerHTML = core.firstData.version;
     core.dom.logoLabel.innerHTML = core.firstData.title;
@@ -310,7 +311,7 @@ core.prototype.resetStatus = function(hero, hard, floorId, route, maps, values) 
 
 ////// 开始游戏 //////
 core.prototype.startGame = function (hard, callback) {
-    core.control.startGame(hard, callback);huo
+    core.control.startGame(hard, callback);
 }
 
 ////// 重新开始游戏；此函数将回到标题页面 //////
@@ -664,13 +665,13 @@ core.prototype.getBlockId = function (x, y, floorId, needEnable) {
 }
 
 ////// 显示移动某块的动画，达到{“type”:”move”}的效果 //////
-core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
-    core.maps.moveBlock(x,y,steps,time,immediateHide,callback)
+core.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
+    core.maps.moveBlock(x,y,steps,time,keep,callback)
 }
 
 ////// 显示跳跃某块的动画，达到{"type":"jump"}的效果 //////
-core.prototype.jumpBlock = function(sx,sy,ex,ey,time,immediateHide,callback) {
-    core.maps.jumpBlock(sx,sy,ex,ey,time,immediateHide,callback);
+core.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
+    core.maps.jumpBlock(sx,sy,ex,ey,time,keep,callback);
 }
 
 ////// 显示/隐藏某个块时的动画效果 //////

@@ -744,7 +744,7 @@ events.prototype.doAction = function() {
                                 core.status.route.push("choices:"+index);
                                 core.events.insertAction(data.choices[index].action);
                                 core.events.doAction();
-                            }, 750 / core.status.replay.speed)
+                            }, 750 / Math.max(1, core.status.replay.speed))
                     }
                     else {
                         core.stopReplay();

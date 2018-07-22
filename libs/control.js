@@ -393,6 +393,20 @@ control.prototype.moveDirectly = function (destX, destY) {
     return false;
 }
 
+////// 尝试瞬间移动 //////
+control.prototype.tryMoveDirectly = function (destX, destY) {
+    var testMove = function (dx, dy, dir) {
+        if (dx<0 || dx>12 || dy<0 || dy>12) return false;
+        if (core.control.moveDirectly(dx, dy)) {
+            if (core.isset(dir)) core.moveHero(dir, function() {});
+            return true;
+        }
+        return false;
+    }
+    return !(!testMove(destX,destY) && !testMove(destX-1, destY, "right") && !testMove(destX,destY-1,"down")
+        && !testMove(destX,destY+1,"up") && !testMove(destX+1,destY,"left"));
+}
+
 ////// 设置自动寻路路线 //////
 control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     if (!core.status.played || core.status.lockControl) {
@@ -406,7 +420,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
             core.status.automaticRoute.moveDirectly = true;
             setTimeout(function () {
                 if (core.status.automaticRoute.moveDirectly && core.status.heroMoving==0) {
-                    core.control.moveDirectly(destX, destY);
+                    core.control.tryMoveDirectly(destX, destY);
                 }
                 core.status.automaticRoute.moveDirectly = false;
             }, 100);
@@ -431,7 +445,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
 
     // 单击瞬间移动
     if (core.status.automaticRoute.clickMoveDirectly && core.status.heroStop) {
-        if (core.control.moveDirectly(destX, destY))
+        if (core.control.tryMoveDirectly(destX, destY))
             return;
     }
 
@@ -1841,7 +1855,7 @@ control.prototype.replay = function () {
                     core.useItem(itemId, function () {
                         core.replay();
                     });
-                }, 750 / core.status.replay.speed);
+                }, 750 / Math.max(1, core.status.replay.speed));
             }
             return;
         }
@@ -1861,7 +1875,7 @@ control.prototype.replay = function () {
                 core.changeFloor(floorId, stair, null, null, function () {
                     core.replay();
                 });
-            }, 750 / core.status.replay.speed);
+            }, 750 / Math.max(1, core.status.replay.speed));
             return;
         }
     }
@@ -1894,7 +1908,7 @@ control.prototype.replay = function () {
                     core.status.event.selection = parseInt(selections.shift());
                     core.events.openShop(shopId, false);
 
-                }, 750 / core.status.replay.speed);
+                }, 750 / Math.max(1, core.status.replay.speed));
                 return;
             }
         }
@@ -1927,7 +1941,7 @@ control.prototype.replay = function () {
         if (core.control.moveDirectly(x,y)) {
             setTimeout(function () {
                 core.replay();
-            }, 750 / core.status.replay.speed);
+            }, 750 / Math.max(1, core.status.replay.speed));
             return;
         }
     }

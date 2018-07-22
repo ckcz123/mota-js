@@ -115,8 +115,8 @@ events.prototype.setInitData = function (hard) {
 }
 
 ////// 游戏获胜事件 //////
-events.prototype.win = function (reason) {
-    return this.eventdata.win(reason);
+events.prototype.win = function (reason, norank) {
+    return this.eventdata.win(reason, norank);
 }
 
 ////// 游戏失败事件 //////
@@ -125,7 +125,7 @@ events.prototype.lose = function (reason) {
 }
 
 ////// 游戏结束 //////
-events.prototype.gameOver = function (ending, fromReplay) {
+events.prototype.gameOver = function (ending, fromReplay, norank) {
 
     // 清空图片和天气
     core.clearMap('animate', 0, 0, 416, 416);
@@ -188,6 +188,7 @@ events.prototype.gameOver = function (ending, fromReplay) {
             formData.append('money', core.status.hero.money);
             formData.append('experience', core.status.hero.experience);
             formData.append('steps', core.status.hero.steps);
+            formData.append('norank', norank||0);
             formData.append('seed', core.getFlag('seed'));
             formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime/1000));
             formData.append('route', core.encodeRoute(core.status.route));
@@ -776,14 +777,10 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "win":
-            core.events.win(data.reason, function () {
-                core.events.doAction();
-            });
+            core.events.win(data.reason, data.norank);
             break;
         case "lose":
-            core.events.lose(data.reason, function () {
-                core.events.doAction();
-            });
+            core.events.lose(data.reason);
             break;
         case "function":
             {

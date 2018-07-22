@@ -6,7 +6,7 @@ function enemys() {
 enemys.prototype.init = function () {
     this.enemys = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80;
     this.enemydata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.enemys;
-    this.enemydata.hasSpecial = function (a, b) {return core.enemys.hasSpecial(a, b)};
+    if (main.mode=='play') this.enemydata.hasSpecial = function (a, b) {return core.enemys.hasSpecial(a, b)};
 }
 
 ////// 获得一个或所有怪物数据 //////

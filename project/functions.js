@@ -50,7 +50,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.events.afterLoadData();
 },
 ////// 游戏获胜事件 //////
-"win" : function(reason) {
+"win" : function(reason, norank) {
 	// 游戏获胜事件 
 	core.ui.closePanel();
 	var replaying = core.status.replay.replaying;
@@ -61,7 +61,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.drawText([
 			"\t[" + (reason||"恭喜通关") + "]你的分数是${status:hp}。"
 		], function () {
-			core.events.gameOver(reason||'', replaying);
+			core.events.gameOver(reason||'', replaying, norank);
 		})
 	});
 },

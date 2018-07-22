@@ -377,7 +377,7 @@ control.prototype.clearContinueAutomaticRoute = function () {
 ////// 瞬间移动 //////
 control.prototype.moveDirectly = function (destX, destY) {
     var ignoreSteps = core.canMoveDirectly(destX, destY);
-    if (ignoreSteps>0) {
+    if (ignoreSteps>=0) {
         core.clearMap('hero', 0, 0, 416, 416);
         var lastDirection = core.status.route[core.status.route.length-1];
         if (['left', 'right', 'up', 'down'].indexOf(lastDirection)>=0)
@@ -395,6 +395,8 @@ control.prototype.moveDirectly = function (destX, destY) {
 
 ////// 尝试瞬间移动 //////
 control.prototype.tryMoveDirectly = function (destX, destY) {
+    if (Math.abs(core.getHeroLoc('x')-destX)+Math.abs(core.getHeroLoc('y')-destY)<=1)
+        return false;
     var testMove = function (dx, dy, dir) {
         if (dx<0 || dx>12 || dy<0 || dy>12) return false;
         if (core.control.moveDirectly(dx, dy)) {
@@ -403,8 +405,8 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
         }
         return false;
     }
-    return !(!testMove(destX,destY) && !testMove(destX-1, destY, "right") && !testMove(destX,destY-1,"down")
-        && !testMove(destX,destY+1,"up") && !testMove(destX+1,destY,"left"));
+    return testMove(destX,destY) || testMove(destX-1, destY, "right") || testMove(destX,destY-1,"down")
+        || testMove(destX,destY+1,"up") || testMove(destX+1,destY,"left");
 }
 
 ////// 设置自动寻路路线 //////

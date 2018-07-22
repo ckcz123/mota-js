@@ -764,6 +764,21 @@ core.prototype.updateFg = function () {
     core.control.updateFg();
 }
 
+////// 测试是否拥有某个特殊属性 //////
+core.prototype.hasSpecial = function (special, test) {
+    return core.enemys.hasSpecial(special, test);
+}
+
+////// 判断能否战斗 //////
+core.prototype.canBattle = function(enemyId) {
+    return core.enemys.canBattle(enemyId);
+}
+
+////// 获得伤害数值 //////
+core.prototype.getDamage = function(enemy) {
+    return core.enemys.getDamage(enemy);
+}
+
 ////// 获得某个物品的个数 //////
 core.prototype.itemCount = function (itemId) {
     return core.items.itemCount(itemId);

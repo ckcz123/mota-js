@@ -976,7 +976,7 @@ win_s
 tooltip : win: 获得胜利, 该事件会显示获胜页面, 并重新游戏
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=win%EF%BC%9A%E8%8E%B7%E5%BE%97%E8%83%9C%E5%88%A9
 default : ["",false]
-var code = '{"type": "win", "reason": "'+EvalString_0+'", "norank": '+Bool_0+'},\n';
+var code = '{"type": "win", "reason": "'+EvalString_0+'", "norank": '+(Bool_0?1:0)+'},\n';
 return code;
 */;
 
@@ -1717,7 +1717,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "win":
       this.next = MotaActionBlocks['win_s'].xmlText([
-        data.reason,data.norank||false,this.next]);
+        data.reason,data.norank?true:false,this.next]);
       break;
     case "lose":
       this.next = MotaActionBlocks['lose_s'].xmlText([

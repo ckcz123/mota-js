@@ -201,8 +201,8 @@
         </div>
     </div>
     <div id="mid">
-        <table class="col" id='mapColMark'></table>
-        <table class="row" id='mapRowMark'></table>
+        <div class="col" id='mapColMark'></div>
+        <div class="row" id='mapRowMark'></div>
         <div class="map" id="mapEdit">
             <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas>
             <canvas class='gameCanvas' id='event' width='416' height='416'></canvas>
@@ -407,13 +407,27 @@
             colNum += tpl;
         }
         arrColMark.innerHTML = '<tr>' + colNum + '</tr>';
-        mapColMark.innerHTML = '<tr>' + colNum + '</tr>';
+        //mapColMark.innerHTML = '<tr>' + colNum + '</tr>';
         var rowNum = ' ';
         for (var i = 0; i < 13; i++) {
             var tpl = '<tr><td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="rowBlock" style="top:' + (i * 96/13 ) + 'vw;"></div></td></tr>';
             rowNum += tpl;
         }
         arrRowMark.innerHTML = rowNum;
+        //mapRowMark.innerHTML = rowNum;
+    })();
+    (function () {
+        var colNum = ' ';
+        for (var i = 0; i < 13; i++) {
+            var tpl = '<div class="coltd" style="left:' + (i * 96/13 ) + 'vw;"><div class="coltext">' + (' '+i).slice(-2).replace(' ','&nbsp;') + '</div><div class="colBlock"></div></div>';
+            colNum += tpl;
+        }
+        mapColMark.innerHTML = '<div class="coltr">' + colNum + '</div>';
+        var rowNum = ' ';
+        for (var i = 0; i < 13; i++) {
+            var tpl = '<div class="rowtr"><div class="rowtd"  style="top:' + (i * 96/13 ) + 'vw;"><div class="rowtext">' + (' '+i).slice(-2).replace(' ','&nbsp;') + '</div><div class="rowBlock"></div></div></div>';
+            rowNum += tpl;
+        }
         mapRowMark.innerHTML = rowNum;
     })();
 </script>

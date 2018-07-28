@@ -247,20 +247,21 @@ body {
     line-height: 1.2em;
 }
 
-td {
+td, .coltd, .rowtd {
     border: 0.230vw solid #fff;
     color: #fff;
     cursor: crosshair;
 }
 
-table.col {
+table.col, div.col {
     position: relative;
 
     text-align: center;
     border-collapse: collapse;
 }
 
-table.col td {
+table.col td,
+div.col .coltd {
     background-color: #4DB6AC;
 }
 
@@ -277,6 +278,7 @@ table.col td {
 }
 
 #mapColMark {
+    position: absolute;
     top: 0;
     left: 4vw;
     width: 96vw;
@@ -285,41 +287,40 @@ table.col td {
 }
 
 
-#mapColMark td {
+#mapColMark .coltd,
+#mapColMark .coltd .coltext {
+    position: absolute;
     width: 7.15vw;
+    height: 4vw;
+    line-height: 4vw;
     padding: 0;
     border-bottom-width: 0px;
     border-top-width: 0px;
     border-left-width: 0.117307vw;
     border-right-width: 0.117307vw;
 }
-#mapColMark tr > td:nth-child(10){
-    width: 6.86vw;
-}
-#mapColMark tr > td:nth-child(12){
-    width: 6.86vw;
-}
-#mapColMark tr > td:nth-child(13){
-    width: 6.56vw;
-}
 
-#mapColMark td:hover .colBlock {
+#mapColMark .coltd:hover .colBlock {
     position: absolute;
     top: 4vw;
+    left:0;
     height: 96vw;
     width: 7.384615vw;
     z-index: 100;
     background-color: rgba(38, 166, 154, .5);
 }
 
-table.row {
+table.row,div.row,
+table.row,div.row .rowtext {
+    width:4vw;
     position: relative;
     text-align: right;
     vertical-align: middle;
     border-collapse: collapse;
 }
 
-table.row td {
+table.row td,
+div.row .rowtd .rowtext{
     background-color: #4C221B;
 }
 
@@ -332,34 +333,33 @@ table.row td {
 }
 
 #mapRowMark {
-    top: 0;
+    position: absolute;
+    top: 4vw;
     left: 0;
     width: 4vw;
     height: 96vw;
     font-size: 3vw;
 }
 
-#mapRowMark td {
+#mapRowMark .rowtd{
+    position: absolute;
+}
+
+#mapRowMark .rowtd,
+#mapRowMark .rowtd .rowtext{
     height: 7.15vw;
+    line-height: 7.15vw;
     padding: 0;
     border-left-width: 0px;
     border-right-width: 0px;
     border-top-width: 0.117307vw;
     border-bottom-width: 0.117397vw;
 }
-#mapRowMark tbody > tr:nth-child(2n) td {
-    height: 7.25vw;
-}
-#mapRowMark tbody > tr:nth-child(5) td {
-    height: 7.25vw;
-}
-#mapRowMark tbody > tr:nth-child(11) td {
-    height: 7.25vw;
-}
 
-#mapRowMark td:hover .rowBlock {
+#mapRowMark .rowtd:hover .rowBlock {
     position: absolute;
     left: 4vw;
+    top: 0;
     height: 7.384615vw;
     width: 96vw;
     z-index: 100;

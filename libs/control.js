@@ -731,8 +731,19 @@ control.prototype.moveAction = function (callback) {
             }
             if (core.status.event.id!='ski')
                 core.status.route.push(direction);
-            core.trigger(core.getHeroLoc('x'), core.getHeroLoc('y'));
+
+            // 检查是不是无事件的道具
+            var nowx = core.getHeroLoc('x'), nowy = core.getHeroLoc('y');
+            var block = core.getBlock(nowx,nowy);
+            var hasTrigger = false;
+            if (block!=null && block.block.event.trigger=='getItem' &&
+                !core.isset(core.floors[core.status.floorId].afterGetItem[nowx+","+nowy])) {
+                hasTrigger = true;
+                core.trigger(nowx, nowy);
+            }
             core.checkBlock();
+            if (!hasTrigger && !core.status.gameOver)
+                core.trigger(nowx, nowy);
             if (core.isset(callback)) callback();
         });
     }

@@ -288,17 +288,17 @@ HTML5魔塔交流群群号： `539113091`
 
 感谢对本样板做出贡献的人员：
 
-@ckcz123 本样板的的主要编写者。样板的运行时的核心代码，所有常用小工具，以及安卓APP等，都是其所写。
+[@ckcz123](https://github.com/ckcz123) 本样板的的主要编写者。样板的运行时的核心代码，所有常用小工具，以及安卓APP等，都是其所写。
 
-@Vinlic 第一个HTML5魔塔[纪元魔塔前传](https://tieba.baidu.com/p/4545234500)（[游戏地址](http://vinlic.gitee.io/mota/)，[开发记录贴](https://tieba.baidu.com/p/4397526540)，[源代码](https://gitee.com/Vinlic/Mota)）的编写者。
+[@Vinlic](https://github.com/Vinlic) 第一个HTML5魔塔[纪元魔塔前传](https://tieba.baidu.com/p/4545234500)（[游戏地址](http://vinlic.gitee.io/mota/)，[开发记录贴](https://tieba.baidu.com/p/4397526540)，[源代码](https://gitee.com/Vinlic/Mota)）的编写者。
 该塔的[第三版内核](https://tieba.baidu.com/p/4738973089)是现在HTML5魔塔样板的前身，现在样板的很多核心逻辑控制，以及UI界面等相关代码都是继承于该塔。
 
-@zhaouv V2.0的推动者，可视化地图编辑器和事件编辑器的制作者，手机端魔塔制作界面的编写者。现在我们能在V2.0用到方便快捷的可视化地图编辑器，以及通过拖动图块来编写事件，能在手机端造塔等，都需要归功于zhaouv的贡献。
+[@zhaouv](https://github.com/zhaouv) V2.0的推动者，可视化地图编辑器和事件编辑器的制作者，手机端魔塔制作界面的编写者。现在我们能在V2.0用到方便快捷的可视化地图编辑器，以及通过拖动图块来编写事件，能在手机端造塔等，都需要归功于zhaouv的贡献。
 
-@iEcho V2.0的推动者，可视化地图编辑器的制作者，游戏界面自适应匹配的编写者。和zhaouv一起推动和开发了V2.0的制作。
+[@iEcho](https://github.com/iEcho) V2.0的推动者，可视化地图编辑器的制作者，游戏界面自适应匹配的编写者。和zhaouv一起推动和开发了V2.0的制作。
 
-@wadxm iOS平台的APP（因为苹果政策无法上架）和启动服务mac版的开发者。我们现在能在mac上制作魔塔得归功于他。
+[@wadxm](https://github.com/wadxm) iOS平台的APP（因为苹果政策无法上架）和启动服务mac版的开发者。我们现在能在mac上制作魔塔得归功于他。
 
-@fux4 打通了RM和H5之间的障壁（从而使RM动画导出器和怪物数据导出器成为可能），同时也是部分新功能（如跳跃、跟随、画面震动）等的编写者。
+[@fux4](https://github.com/fux4) 打通了RM和H5之间的障壁（从而使RM动画导出器和怪物数据导出器成为可能），同时也是部分新功能（如跳跃、跟随、画面震动）等的编写者。
 
 以及[百度贴吧魔塔吧](https://tieba.baidu.com/f?kw=%E9%AD%94%E5%A1%94)和H5魔塔交流群`539113091`内的诸位魔塔爱好者们对本样板的大力支持！

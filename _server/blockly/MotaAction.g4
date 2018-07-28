@@ -206,6 +206,7 @@ action
     |   follow_s
     |   unfollow_s
     |   animate_s
+    |   viberate_s
     |   showImage_0_s
     |   showImage_1_s
     |   animateImage_0_s
@@ -652,6 +653,20 @@ var code = '{"type": "unfollow"' + EvalString_0 + '},\n';
 return code;
 */;
 
+viberate_s
+    :   '画面震动' '时间' Int Newline
+
+
+/* viberate_s
+tooltip : viberate: 画面震动
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=viberate%ef%bc%9a%e7%94%bb%e9%9d%a2%e9%9c%87%e5%8a%a8
+default : [2000]
+colour : this.soundColor
+Int_0 = Int_0 ?(', "time": '+Int_0):'';
+var code = '{"type": "viberate"' + Int_0 + '},\n';
+return code;
+*/;
+
 animate_s
     :   '显示动画' IdString '位置' EvalString? Newline
     
@@ -819,20 +834,20 @@ return code;
 */;
 
 move_s
-    :   '移动事件' 'x' PosString? ',' 'y' PosString? '动画时间' Int? '消失时无动画时间' Bool BGNL? StepString Newline
+    :   '移动事件' 'x' PosString? ',' 'y' PosString? '动画时间' Int? '不消失' Bool BGNL? StepString Newline
     
 
 /* move_s
 tooltip : move: 让某个NPC/怪物移动,位置可不填代表当前事件
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=move%EF%BC%9A%E8%AE%A9%E6%9F%90%E4%B8%AAnpc%E6%80%AA%E7%89%A9%E7%A7%BB%E5%8A%A8
-default : ["","",500,null,"上右3下2左上左2"]
+default : ["","",500,false,"上右3下2左上左2"]
 colour : this.eventColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
-var code = '{"type": "move"'+floorstr+''+Int_0+', "steps": '+JSON.stringify(StepString_0)+', "immediateHide": '+Bool_0+'},\n';
+var code = '{"type": "move"'+floorstr+''+Int_0+', "steps": '+JSON.stringify(StepString_0)+', "keep": '+Bool_0+'},\n';
 return code;
 */;
 
@@ -851,13 +866,13 @@ return code;
 */;
 
 jump_s
-    :   '跳跃事件' '起始 x' PosString? ',' 'y' PosString? '终止 x' PosString? ',' 'y' PosString? BGNL? '动画时间' Int? '消失时无动画时间' Bool Newline
+    :   '跳跃事件' '起始 x' PosString? ',' 'y' PosString? '终止 x' PosString? ',' 'y' PosString? '动画时间' Int? '不消失' Bool Newline
 
 
 /* jump_s
 tooltip : jump: 让某个NPC/怪物跳跃
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=jump%EF%BC%9A%E8%AE%A9%E6%9F%90%E4%B8%AANPC%2F%E6%80%AA%E7%89%A9%E8%B7%B3%E8%B7%83
-default : ["","","","",500,null]
+default : ["","","","",500,true]
 colour : this.eventColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
@@ -867,7 +882,7 @@ if (PosString_2 && PosString_3) {
     floorstr += ', "to": ['+PosString_2+','+PosString_3+']';
 }
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
-var code = '{"type": "jump"'+floorstr+''+Int_0+', "immediateHide": '+Bool_0+'},\n';
+var code = '{"type": "jump"'+floorstr+''+Int_0+', "keep": '+Bool_0+'},\n';
 return code;
 */;
 
@@ -954,14 +969,14 @@ return code;
 */;
 
 win_s
-    :   '游戏胜利,结局' ':' EvalString? Newline
+    :   '游戏胜利,结局' ':' EvalString? '不计入榜单' Bool Newline
     
 
 /* win_s
 tooltip : win: 获得胜利, 该事件会显示获胜页面, 并重新游戏
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=win%EF%BC%9A%E8%8E%B7%E5%BE%97%E8%83%9C%E5%88%A9
-default : [""]
-var code = '{"type": "win", "reason": "'+EvalString_0+'"},\n';
+default : ["",false]
+var code = '{"type": "win", "reason": "'+EvalString_0+'", "norank": '+(Bool_0?1:0)+'},\n';
 return code;
 */;
 
@@ -1235,7 +1250,7 @@ Floor_List
     /*Floor_List ['floorId',':before',':next']*/;
 
 Stair_List
-    :   '坐标'|'上楼'|'下楼'
+    :   '坐标'|'上楼梯'|'下楼梯'
     /*Stair_List ['loc','upFloor','downFloor']*/;
 
 SetTextPosition_List
@@ -1526,7 +1541,7 @@ ActionParser.prototype.parseAction = function() {
     case "move": // 移动事件
       data.loc=data.loc||['',''];
       this.next = MotaActionBlocks['move_s'].xmlText([
-        data.loc[0],data.loc[1],data.time||0,data.immediateHide,this.StepString(data.steps),this.next]);
+        data.loc[0],data.loc[1],data.time||0,data.keep,this.StepString(data.steps),this.next]);
       break;
     case "moveHero":
       this.next = MotaActionBlocks['moveHero_s'].xmlText([
@@ -1536,7 +1551,7 @@ ActionParser.prototype.parseAction = function() {
       data.from=data.from||['',''];
       data.to=data.to||['',''];
       this.next = MotaActionBlocks['jump_s'].xmlText([
-        data.from[0],data.from[1],data.to[0],data.to[1],data.time||0,data.immediateHide,this.next]);
+        data.from[0],data.from[1],data.to[0],data.to[1],data.time||0,data.keep,this.next]);
       break;
     case "jumpHero": // 跳跃勇士
       data.loc=data.loc||['','']
@@ -1568,6 +1583,9 @@ ActionParser.prototype.parseAction = function() {
       if(animate_loc && animate_loc!=='hero')animate_loc = animate_loc[0]+','+animate_loc[1];
       this.next = MotaActionBlocks['animate_s'].xmlText([
         data.name,animate_loc,this.next]);
+      break;
+    case "viberate": // 画面震动
+      this.next = MotaActionBlocks['viberate_s'].xmlText([data.time||0, this.next]);
       break;
     case "showImage": // 显示图片
       if(this.isset(data.name)){
@@ -1699,7 +1717,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "win":
       this.next = MotaActionBlocks['win_s'].xmlText([
-        data.reason,this.next]);
+        data.reason,data.norank?true:false,this.next]);
       break;
     case "lose":
       this.next = MotaActionBlocks['lose_s'].xmlText([

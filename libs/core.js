@@ -73,6 +73,7 @@ function core() {
     }
     this.initStatus = {
         'played': false,
+        'gameOver': false,
 
         // 勇士属性
         'hero': {},
@@ -144,6 +145,7 @@ function core() {
         'curtainColor': null,
         'usingCenterFly':false,
         'openingDoor': null,
+        'isSkiing': false,
 
         // 动画
         'globalAnimateObjs': [],
@@ -665,13 +667,13 @@ core.prototype.getBlockId = function (x, y, floorId, needEnable) {
 }
 
 ////// 显示移动某块的动画，达到{“type”:”move”}的效果 //////
-core.prototype.moveBlock = function(x,y,steps,time,immediateHide,callback) {
-    core.maps.moveBlock(x,y,steps,time,immediateHide,callback)
+core.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
+    core.maps.moveBlock(x,y,steps,time,keep,callback)
 }
 
 ////// 显示跳跃某块的动画，达到{"type":"jump"}的效果 //////
-core.prototype.jumpBlock = function(sx,sy,ex,ey,time,immediateHide,callback) {
-    core.maps.jumpBlock(sx,sy,ex,ey,time,immediateHide,callback);
+core.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
+    core.maps.jumpBlock(sx,sy,ex,ey,time,keep,callback);
 }
 
 ////// 显示/隐藏某个块时的动画效果 //////
@@ -762,6 +764,21 @@ core.prototype.setFg = function(color, time, callback) {
 ////// 更新全地图显伤 //////
 core.prototype.updateFg = function () {
     core.control.updateFg();
+}
+
+////// 测试是否拥有某个特殊属性 //////
+core.prototype.hasSpecial = function (special, test) {
+    return core.enemys.hasSpecial(special, test);
+}
+
+////// 判断能否战斗 //////
+core.prototype.canBattle = function(enemyId) {
+    return core.enemys.canBattle(enemyId);
+}
+
+////// 获得伤害数值 //////
+core.prototype.getDamage = function(enemy) {
+    return core.enemys.getDamage(enemy);
 }
 
 ////// 获得某个物品的个数 //////

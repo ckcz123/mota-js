@@ -5,8 +5,8 @@ function enemys() {
 ////// 初始化 //////
 enemys.prototype.init = function () {
     this.enemys = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80;
-    this.enemydata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.enemy;
-    this.enemydata.hasSpecial = function (a, b) {return core.enemys.hasSpecial(a, b)};
+    this.enemydata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.enemys;
+    if (main.mode=='play') this.enemydata.hasSpecial = function (a, b) {return core.enemys.hasSpecial(a, b)};
 }
 
 ////// 获得一个或所有怪物数据 //////

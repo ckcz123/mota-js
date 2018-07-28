@@ -30,6 +30,7 @@ events.prototype.init = function () {
                 heroLoc = {'x': data.event.data.loc[0], 'y': data.event.data.loc[1]};
             if (core.isset(data.event.data.direction))
                 heroLoc.direction = data.event.data.direction;
+            if (core.status.event.id!='action') core.status.event.id=null;
             core.changeFloor(data.event.data.floorId, data.event.data.stair,
                 heroLoc, data.event.data.time, function () {
                     if (core.isset(callback)) callback();
@@ -115,17 +116,19 @@ events.prototype.setInitData = function (hard) {
 }
 
 ////// 游戏获胜事件 //////
-events.prototype.win = function (reason) {
-    return this.eventdata.win(reason);
+events.prototype.win = function (reason, norank) {
+    core.status.gameOver = true;
+    return this.eventdata.win(reason, norank);
 }
 
 ////// 游戏失败事件 //////
 events.prototype.lose = function (reason) {
+    core.status.gameOver = true;
     return this.eventdata.lose(reason);
 }
 
 ////// 游戏结束 //////
-events.prototype.gameOver = function (ending, fromReplay) {
+events.prototype.gameOver = function (ending, fromReplay, norank) {
 
     // 清空图片和天气
     core.clearMap('animate', 0, 0, 416, 416);
@@ -188,6 +191,7 @@ events.prototype.gameOver = function (ending, fromReplay) {
             formData.append('money', core.status.hero.money);
             formData.append('experience', core.status.hero.experience);
             formData.append('steps', core.status.hero.steps);
+            formData.append('norank', norank||0);
             formData.append('seed', core.getFlag('seed'));
             formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime/1000));
             formData.append('route', core.encodeRoute(core.status.route));
@@ -461,7 +465,7 @@ events.prototype.doAction = function() {
                 x=core.calValue(data.loc[0]);
                 y=core.calValue(data.loc[1]);
             }
-            core.moveBlock(x,y,data.steps,data.time,data.immediateHide,function() {
+            core.moveBlock(x,y,data.steps,data.time,data.keep,function() {
                 core.events.doAction();
             })
             break;
@@ -481,7 +485,7 @@ events.prototype.doAction = function() {
                     ex=core.calValue(data.to[0]);
                     ey=core.calValue(data.to[1]);
                 }
-                core.jumpBlock(sx,sy,ex,ey,data.time,data.immediateHide,function() {
+                core.jumpBlock(sx,sy,ex,ey,data.time,data.keep,function() {
                     core.events.doAction();
                 });
                 break;
@@ -744,7 +748,7 @@ events.prototype.doAction = function() {
                                 core.status.route.push("choices:"+index);
                                 core.events.insertAction(data.choices[index].action);
                                 core.events.doAction();
-                            }, 750 / core.status.replay.speed)
+                            }, 750 / Math.max(1, core.status.replay.speed))
                     }
                     else {
                         core.stopReplay();
@@ -776,14 +780,10 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "win":
-            core.events.win(data.reason, function () {
-                core.events.doAction();
-            });
+            core.events.win(data.reason, data.norank);
             break;
         case "lose":
-            core.events.lose(data.reason, function () {
-                core.events.doAction();
-            });
+            core.events.lose(data.reason);
             break;
         case "function":
             {
@@ -806,6 +806,11 @@ events.prototype.doAction = function() {
             core.enemys.updateEnemys();
             core.updateStatusBar();
             this.doAction();
+            break;
+        case "viberate":
+            core.events.vibrate(data.time, function () {
+                core.events.doAction();
+            })
             break;
         case "sleep": // 等待多少毫秒
             if (core.status.replay.replaying)
@@ -866,7 +871,7 @@ events.prototype.doAction = function() {
 
 ////// 往当前事件列表之前添加一个或多个事件 //////
 events.prototype.insertAction = function (action, x, y, callback) {
-    if (core.status.event.id == null) {
+    if (core.status.event.id != 'action') {
         this.doEvents(action, x, y, callback);
     }
     else {
@@ -1017,6 +1022,7 @@ events.prototype.battle = function (id, x, y, force, callback) {
 
 ////// 触发(x,y)点的事件 //////
 events.prototype.trigger = function (x, y) {
+    core.status.isSkiing = false;
     var mapBlocks = core.status.thisMap.blocks;
     var noPass;
     for (var b = 0; b < mapBlocks.length; b++) {
@@ -1027,6 +1033,8 @@ events.prototype.trigger = function (x, y) {
             }
             if (core.isset(mapBlocks[b].event) && core.isset(mapBlocks[b].event.trigger)) {
                 var trigger = mapBlocks[b].event.trigger;
+
+                if (trigger == 'ski') core.status.isSkiing = true;
 
                 // 转换楼层能否穿透
                 if (trigger=='changeFloor' && !noPass) {
@@ -1307,6 +1315,65 @@ events.prototype.setVolume = function (value, time, callback) {
     }, time / 32);
 }
 
+////// 画面震动 //////
+events.prototype.vibrate = function(time, callback) {
+
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) {
+        if (core.isset(callback)) callback();
+        return;
+    }
+
+    core.status.replay.animate=true;
+
+    var setGameCanvasTranslate=function(x,y){
+        for(var ii=0,canvas;canvas=core.dom.gameCanvas[ii];ii++){
+            if(['data','ui'].indexOf(canvas.getAttribute('id'))!==-1)continue;
+            canvas.style.transform='translate('+x+'px,'+y+'px)';
+            canvas.style.webkitTransform='translate('+x+'px,'+y+'px)';
+            canvas.style.OTransform='translate('+x+'px,'+y+'px)';
+            canvas.style.MozTransform='translate('+x+'px,'+y+'px)';
+        }
+    }
+
+    if (!core.isset(time) || time<1000) time=1000;
+
+    var shake_duration = time*3/50;
+    var shake_speed = 5;
+    var shake_power = 5;
+    var shake_direction = 1;
+    var shake = 0;
+
+    var update = function() {
+        if(shake_duration >= 1 || shake != 0){
+            var delta = (shake_power * shake_speed * shake_direction) / 10.0;
+            if(shake_duration <= 1 && shake * (shake + delta) < 0){
+                shake = 0;
+            }else{
+                shake += delta;
+            }
+            if(shake > shake_power * 2){
+                shake_direction = -1;
+            }
+            if(shake < - shake_power * 2){
+                shake_direction = 1;
+            }
+            if(shake_duration >= 1){
+                shake_duration -= 1
+            }
+        }
+    }
+
+    var animate=setInterval(function(){
+        update();
+        setGameCanvasTranslate(shake,0);
+        if(shake_duration===0) {
+            clearInterval(animate);
+            core.status.replay.animate=false;
+            if (core.isset(callback)) callback();
+        }
+    }, 50/3);
+}
+
 ////// 打开一个全局商店 //////
 events.prototype.openShop = function(shopId, needVisited) {
     var shop = core.status.shops[shopId];
@@ -1517,7 +1584,7 @@ events.prototype.ski = function (direction) {
     }
     else {
         core.moveHero(direction, function () {
-            if (core.status.event.id=='ski') {
+            if (core.status.event.id=='ski' && !core.status.isSkiing) {
                 core.status.event.id=null;
                 core.unLockControl();
                 core.replay();

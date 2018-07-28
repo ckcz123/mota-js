@@ -87,19 +87,7 @@ functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 }
             }
         },
-        "ui": {
-            "_leaf": false,
-            "_type": "object",
-            "_data": {
-                "drawAbout": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_lint": true,
-                    "_data": "绘制“关于”界面"
-                }
-            }
-        },
-        "enemy": {
+        "enemys": {
             "_leaf": false,
             "_type": "object",
             "_data": {
@@ -120,6 +108,18 @@ functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "textarea",
                     "_lint": true,
                     "_data": "更新怪物数据，可以在这里对怪物属性和数据进行动态更新"
+                }
+            }
+        },
+        "ui": {
+            "_leaf": false,
+            "_type": "object",
+            "_data": {
+                "drawAbout": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "绘制“关于”界面"
                 }
             }
         },

@@ -377,7 +377,7 @@ control.prototype.clearContinueAutomaticRoute = function () {
 ////// 瞬间移动 //////
 control.prototype.moveDirectly = function (destX, destY) {
     var ignoreSteps = core.canMoveDirectly(destX, destY);
-    if (ignoreSteps>0) {
+    if (ignoreSteps>=0) {
         core.clearMap('hero', 0, 0, 416, 416);
         var lastDirection = core.status.route[core.status.route.length-1];
         if (['left', 'right', 'up', 'down'].indexOf(lastDirection)>=0)
@@ -393,6 +393,22 @@ control.prototype.moveDirectly = function (destX, destY) {
     return false;
 }
 
+////// 尝试瞬间移动 //////
+control.prototype.tryMoveDirectly = function (destX, destY) {
+    if (Math.abs(core.getHeroLoc('x')-destX)+Math.abs(core.getHeroLoc('y')-destY)<=1)
+        return false;
+    var testMove = function (dx, dy, dir) {
+        if (dx<0 || dx>12 || dy<0 || dy>12) return false;
+        if (core.control.moveDirectly(dx, dy)) {
+            if (core.isset(dir)) core.moveHero(dir, function() {});
+            return true;
+        }
+        return false;
+    }
+    return testMove(destX,destY) || testMove(destX-1, destY, "right") || testMove(destX,destY-1,"down")
+        || testMove(destX,destY+1,"up") || testMove(destX+1,destY,"left");
+}
+
 ////// 设置自动寻路路线 //////
 control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     if (!core.status.played || core.status.lockControl) {
@@ -406,7 +422,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
             core.status.automaticRoute.moveDirectly = true;
             setTimeout(function () {
                 if (core.status.automaticRoute.moveDirectly && core.status.heroMoving==0) {
-                    core.control.moveDirectly(destX, destY);
+                    core.control.tryMoveDirectly(destX, destY);
                 }
                 core.status.automaticRoute.moveDirectly = false;
             }, 100);
@@ -431,7 +447,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
 
     // 单击瞬间移动
     if (core.status.automaticRoute.clickMoveDirectly && core.status.heroStop) {
-        if (core.control.moveDirectly(destX, destY))
+        if (core.control.tryMoveDirectly(destX, destY))
             return;
     }
 
@@ -715,8 +731,19 @@ control.prototype.moveAction = function (callback) {
             }
             if (core.status.event.id!='ski')
                 core.status.route.push(direction);
-            core.trigger(core.getHeroLoc('x'), core.getHeroLoc('y'));
+
+            // 检查是不是无事件的道具
+            var nowx = core.getHeroLoc('x'), nowy = core.getHeroLoc('y');
+            var block = core.getBlock(nowx,nowy);
+            var hasTrigger = false;
+            if (block!=null && block.block.event.trigger=='getItem' &&
+                !core.isset(core.floors[core.status.floorId].afterGetItem[nowx+","+nowy])) {
+                hasTrigger = true;
+                core.trigger(nowx, nowy);
+            }
             core.checkBlock();
+            if (!hasTrigger && !core.status.gameOver)
+                core.trigger(nowx, nowy);
             if (core.isset(callback)) callback();
         });
     }
@@ -1841,7 +1868,7 @@ control.prototype.replay = function () {
                     core.useItem(itemId, function () {
                         core.replay();
                     });
-                }, 750 / core.status.replay.speed);
+                }, 750 / Math.max(1, core.status.replay.speed));
             }
             return;
         }
@@ -1861,7 +1888,7 @@ control.prototype.replay = function () {
                 core.changeFloor(floorId, stair, null, null, function () {
                     core.replay();
                 });
-            }, 750 / core.status.replay.speed);
+            }, 750 / Math.max(1, core.status.replay.speed));
             return;
         }
     }
@@ -1894,7 +1921,7 @@ control.prototype.replay = function () {
                     core.status.event.selection = parseInt(selections.shift());
                     core.events.openShop(shopId, false);
 
-                }, 750 / core.status.replay.speed);
+                }, 750 / Math.max(1, core.status.replay.speed));
                 return;
             }
         }
@@ -1917,10 +1944,17 @@ control.prototype.replay = function () {
         }
     }
     else if (action.indexOf('move:')==0) {
+        while (core.status.replay.toReplay.length>0 &&
+            core.status.replay.toReplay[0].indexOf('move:')==0) {
+            action = core.status.replay.toReplay.shift();
+        }
+
         var pos=action.substring(5).split(":");
         var x=parseInt(pos[0]), y=parseInt(pos[1]);
         if (core.control.moveDirectly(x,y)) {
-            core.replay();
+            setTimeout(function () {
+                core.replay();
+            }, 750 / Math.max(1, core.status.replay.speed));
             return;
         }
     }

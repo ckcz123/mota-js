@@ -50,7 +50,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.events.afterLoadData();
 },
 ////// 游戏获胜事件 //////
-"win" : function(reason) {
+"win" : function(reason, norank) {
 	// 游戏获胜事件 
 	core.ui.closePanel();
 	var replaying = core.status.replay.replaying;
@@ -61,7 +61,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.drawText([
 			"\t[" + (reason||"恭喜通关") + "]你的分数是${status:hp}。"
 		], function () {
-			core.events.gameOver(reason||'', replaying);
+			core.events.gameOver(reason||'', replaying, norank);
 		})
 	});
 },
@@ -306,7 +306,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.enemys.updateEnemys();
 }
 },
-"enemy": {
+"enemys": {
 "getSpecials" : function() {
 	// 获得怪物的特殊属性，每一行定义一个特殊属性。
 	// 分为三项，第一项为该特殊属性的数字，第二项为特殊属性的名字，第三项为特殊属性的描述

@@ -290,13 +290,15 @@ table.col td {
     padding: 0;
     border-bottom-width: 0px;
     border-top-width: 0px;
+    border-left-width: 0.117307vw;
+    border-right-width: 0.117307vw;
 }
 
 #mapColMark td:hover .colBlock {
     position: absolute;
     top: 4vw;
     height: 96vw;
-    width: 7.15vw;
+    width: 7.384615vw;
     z-index: 100;
     background-color: rgba(38, 166, 154, .5);
 }
@@ -333,12 +335,14 @@ table.row td {
     padding: 0;
     border-left-width: 0px;
     border-right-width: 0px;
+    border-top-width: 0.117307vw;
+    border-bottom-width: 0.117397vw;
 }
 
 #mapRowMark td:hover .rowBlock {
     position: absolute;
     left: 4vw;
-    height: 7.15vw;
+    height: 7.384615vw;
     width: 96vw;
     z-index: 100;
     background-color: rgba(76, 34, 27, .5);

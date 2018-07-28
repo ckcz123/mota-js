@@ -403,14 +403,14 @@
     (function () {
         var colNum = ' ';
         for (var i = 0; i < 13; i++) {
-            var tpl = '<td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="colBlock" style="left:' + (i * 96/13 ) + 'vmin;"></div></td>';
+            var tpl = '<td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="colBlock" style="left:' + (i * 96/13 ) + 'vw;"></div></td>';
             colNum += tpl;
         }
         arrColMark.innerHTML = '<tr>' + colNum + '</tr>';
         mapColMark.innerHTML = '<tr>' + colNum + '</tr>';
         var rowNum = ' ';
         for (var i = 0; i < 13; i++) {
-            var tpl = '<tr><td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="rowBlock" style="top:' + (i * 96/13 ) + 'vmin;"></div></td></tr>';
+            var tpl = '<tr><td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="rowBlock" style="top:' + (i * 96/13 ) + 'vw;"></div></td></tr>';
             rowNum += tpl;
         }
         arrRowMark.innerHTML = rowNum;

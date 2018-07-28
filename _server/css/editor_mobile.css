@@ -293,6 +293,15 @@ table.col td {
     border-left-width: 0.117307vw;
     border-right-width: 0.117307vw;
 }
+#mapColMark tr > td:nth-child(10){
+    width: 6.86vw;
+}
+#mapColMark tr > td:nth-child(12){
+    width: 6.86vw;
+}
+#mapColMark tr > td:nth-child(13){
+    width: 6.56vw;
+}
 
 #mapColMark td:hover .colBlock {
     position: absolute;
@@ -337,6 +346,15 @@ table.row td {
     border-right-width: 0px;
     border-top-width: 0.117307vw;
     border-bottom-width: 0.117397vw;
+}
+#mapRowMark tbody > tr:nth-child(2n) td {
+    height: 7.25vw;
+}
+#mapRowMark tbody > tr:nth-child(5) td {
+    height: 7.25vw;
+}
+#mapRowMark tbody > tr:nth-child(11) td {
+    height: 7.25vw;
 }
 
 #mapRowMark td:hover .rowBlock {

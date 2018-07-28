@@ -278,8 +278,10 @@ ui.prototype.drawTextBox = function(content) {
             if (ss.length==1) {
                 // id
                 id=ss[0];
-                // monster
-                if (id!='hero') {
+                if (id=='hero') {
+                    name = core.status.hero.name;
+                }
+                else {
                     if (core.isset(core.material.enemys[id])) {
                         name = core.material.enemys[id].name;
 
@@ -305,17 +307,32 @@ ui.prototype.drawTextBox = function(content) {
                 }
             }
             else {
-                id='npc';
                 name=ss[0];
-                if (core.isset(core.material.icons.npc48[ss[1]])) {
+                id = 'npc';
+                if (ss[1]=='hero') {
+                    id = 'hero';
+                }
+                else if (core.isset(core.material.icons.npc48[ss[1]])) {
                     image = core.material.images.npc48;
                     icon = core.material.icons.npc48[ss[1]];
                     iconHeight = 48;
                     animate=4;
                 }
-                else {
+                else if (core.isset(core.material.icons.npcs[ss[1]])){
                     image = core.material.images.npcs;
                     icon = core.material.icons.npcs[ss[1]];
+                    iconHeight = 32;
+                    animate=2;
+                }
+                else if (core.isset(core.material.icons.enemy48[ss[1]])) {
+                    image = core.material.images.enemy48;
+                    icon = core.material.icons.enemy48[ss[1]];
+                    iconHeight = 48;
+                    animate=4;
+                }
+                else if (core.isset(core.material.icons.enemys[ss[1]])) {
+                    image = core.material.images.enemys;
+                    icon = core.material.icons.enemys[ss[1]];
                     iconHeight = 32;
                     animate=2;
                 }
@@ -459,7 +476,7 @@ ui.prototype.drawTextBox = function(content) {
         if (id == 'hero') {
             var heroHeight=core.material.icons.hero.height;
             core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, heroHeight+2, null, 2);
-            core.fillText('ui', core.status.hero.name, content_left, top + 30, null, 'bold 22px Verdana');
+            core.fillText('ui', name, content_left, top + 30, null, 'bold 22px Verdana');
             core.clearMap('ui', left + 15, top + 40, 32, heroHeight);
             core.fillRect('ui', left + 15, top + 40, 32, heroHeight, background);
             var heroIcon = core.material.icons.hero['down'];
@@ -542,17 +559,20 @@ ui.prototype.drawChoices = function(content, choices) {
 
     if (core.isset(content)) {
         // 获得name, image, icon
-        if (content.indexOf("\t[")==0) {
+        if (content.indexOf("\t[")==0 || content.indexOf("\\t[")==0) {
             var index = content.indexOf("]");
             if (index>=0) {
                 var str=content.substring(2, index);
+                if (content.indexOf("\\t[")==0) str=content.substring(3, index);
                 content=content.substring(index+1);
                 var ss=str.split(",");
                 if (ss.length==1) {
                     // id
                     id=ss[0];
-                    // monster
-                    if (id!='hero') {
+                    if (id=='hero') {
+                        name = core.status.hero.name;
+                    }
+                    else {
                         if (core.isset(core.material.enemys[id])) {
                             name = core.material.enemys[id].name;
 
@@ -578,17 +598,32 @@ ui.prototype.drawChoices = function(content, choices) {
                     }
                 }
                 else {
-                    id='npc';
                     name=ss[0];
-                    if (core.isset(core.material.icons.npc48[ss[1]])) {
+                    id = 'npc';
+                    if (ss[1]=='hero') {
+                        id = 'hero';
+                    }
+                    else if (core.isset(core.material.icons.npc48[ss[1]])) {
                         image = core.material.images.npc48;
                         icon = core.material.icons.npc48[ss[1]];
                         iconHeight = 48;
                         animate=4;
                     }
-                    else {
+                    else if (core.isset(core.material.icons.npcs[ss[1]])){
                         image = core.material.images.npcs;
                         icon = core.material.icons.npcs[ss[1]];
+                        iconHeight = 32;
+                        animate=2;
+                    }
+                    else if (core.isset(core.material.icons.enemy48[ss[1]])) {
+                        image = core.material.images.enemy48;
+                        icon = core.material.icons.enemy48[ss[1]];
+                        iconHeight = 48;
+                        animate=4;
+                    }
+                    else if (core.isset(core.material.icons.enemys[ss[1]])) {
+                        image = core.material.images.enemys;
+                        icon = core.material.icons.enemys[ss[1]];
                         iconHeight = 32;
                         animate=2;
                     }
@@ -631,7 +666,7 @@ ui.prototype.drawChoices = function(content, choices) {
             if (id == 'hero') {
                 var heroHeight = core.material.icons.hero.height;
                 core.strokeRect('ui', left + 15 - 1, top + 30 - 1, 34, heroHeight+2, '#DDDDDD', 2);
-                core.fillText('ui', core.status.hero.name, title_offset, top + 27, '#FFD700', 'bold 19px Verdana');
+                core.fillText('ui', name, title_offset, top + 27, '#FFD700', 'bold 19px Verdana');
                 core.clearMap('ui', left + 15, top + 30, 32, heroHeight);
                 core.fillRect('ui', left + 15, top + 30, 32, heroHeight, background);
                 var heroIcon = core.material.icons.hero['down'];

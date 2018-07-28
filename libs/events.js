@@ -30,6 +30,7 @@ events.prototype.init = function () {
                 heroLoc = {'x': data.event.data.loc[0], 'y': data.event.data.loc[1]};
             if (core.isset(data.event.data.direction))
                 heroLoc.direction = data.event.data.direction;
+            if (core.status.event.id!='action') core.status.event.id=null;
             core.changeFloor(data.event.data.floorId, data.event.data.stair,
                 heroLoc, data.event.data.time, function () {
                     if (core.isset(callback)) callback();
@@ -116,11 +117,13 @@ events.prototype.setInitData = function (hard) {
 
 ////// 游戏获胜事件 //////
 events.prototype.win = function (reason, norank) {
+    core.status.gameOver = true;
     return this.eventdata.win(reason, norank);
 }
 
 ////// 游戏失败事件 //////
 events.prototype.lose = function (reason) {
+    core.status.gameOver = true;
     return this.eventdata.lose(reason);
 }
 
@@ -868,7 +871,7 @@ events.prototype.doAction = function() {
 
 ////// 往当前事件列表之前添加一个或多个事件 //////
 events.prototype.insertAction = function (action, x, y, callback) {
-    if (core.status.event.id == null) {
+    if (core.status.event.id != 'action') {
         this.doEvents(action, x, y, callback);
     }
     else {
@@ -1019,6 +1022,7 @@ events.prototype.battle = function (id, x, y, force, callback) {
 
 ////// 触发(x,y)点的事件 //////
 events.prototype.trigger = function (x, y) {
+    core.status.isSkiing = false;
     var mapBlocks = core.status.thisMap.blocks;
     var noPass;
     for (var b = 0; b < mapBlocks.length; b++) {
@@ -1029,6 +1033,8 @@ events.prototype.trigger = function (x, y) {
             }
             if (core.isset(mapBlocks[b].event) && core.isset(mapBlocks[b].event.trigger)) {
                 var trigger = mapBlocks[b].event.trigger;
+
+                if (trigger == 'ski') core.status.isSkiing = true;
 
                 // 转换楼层能否穿透
                 if (trigger=='changeFloor' && !noPass) {
@@ -1578,7 +1584,7 @@ events.prototype.ski = function (direction) {
     }
     else {
         core.moveHero(direction, function () {
-            if (core.status.event.id=='ski') {
+            if (core.status.event.id=='ski' && !core.status.isSkiing) {
                 core.status.event.id=null;
                 core.unLockControl();
                 core.replay();

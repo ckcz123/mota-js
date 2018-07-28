@@ -73,6 +73,7 @@ function core() {
     }
     this.initStatus = {
         'played': false,
+        'gameOver': false,
 
         // 勇士属性
         'hero': {},
@@ -144,6 +145,7 @@ function core() {
         'curtainColor': null,
         'usingCenterFly':false,
         'openingDoor': null,
+        'isSkiing': false,
 
         // 动画
         'globalAnimateObjs': [],

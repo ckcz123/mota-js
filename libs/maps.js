@@ -266,8 +266,10 @@ maps.prototype.canMoveDirectly = function (destX,destY) {
     if (fromX==destX&&fromY==destY) return 0;
 
     // 可以无视起点事件
-    // if (core.getBlock(fromX,fromY)!=null||core.status.checkBlock.damage[13*fromX+fromY]>0)
-    //     return -1;
+    var nowBlockId = core.getBlockId(fromX, fromY);
+    if ((nowBlockId!=null&&nowBlockId!='upFloor'&&nowBlockId!='downFloor')
+        ||core.status.checkBlock.damage[13*fromX+fromY]>0)
+        return -1;
 
     // BFS
     var visited=[], queue=[];

@@ -2658,8 +2658,10 @@ control.prototype.resize = function(clientWidth, clientHeight) {
 
     var shopDisplay;
 
-    statusBarBorder = '3px #fff solid';
-    toolBarBorder = '3px #fff solid';
+    var borderColor = main.borderColor||"white";
+
+    statusBarBorder = '3px '+borderColor+' solid';
+    toolBarBorder = '3px '+borderColor+' solid';
     var zoom = (ADAPT_WIDTH - width) / 4.22;
     var aScale = 1 - zoom / 100;
 
@@ -2694,7 +2696,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             // canvasLeft = 0;
             toolBarWidth = statusBarWidth = canvasWidth;
             statusBarHeight = tempTopBarH;
-            statusBarBorder = '3px #fff solid';
+            statusBarBorder = '3px '+borderColor+' solid';
 
             statusHeight = scale*BASE_LINEHEIGHT * .8;
             statusLabelsLH = .8 * BASE_LINEHEIGHT *scale;
@@ -2703,11 +2705,11 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             toolBarHeight = tempBotBarH;
 
             toolBarTop = statusBarHeight + canvasWidth;
-            toolBarBorder = '3px #fff solid';
+            toolBarBorder = '3px '+borderColor+' solid';
             toolsHeight = scale * BASE_LINEHEIGHT;
             toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH * .4;
             toolsBackground = main.toolsBackground;
-            borderRight = '3px #fff solid';
+            borderRight = '3px '+borderColor+' solid';
 
             margin = scale * SPACE * 2;
             toolsMargin = scale * SPACE * 4;
@@ -2722,14 +2724,14 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             // canvasLeft = DEFAULT_BAR_WIDTH * scale;
             toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH * scale;
             statusBarHeight = gameGroupHeight - SPACE;
-            statusBarBorder = '3px #fff solid';
+            statusBarBorder = '3px '+borderColor+' solid';
             statusBackground = main.statusLeftBackground;
 
             statusHeight = scale*statusLineHeight * .8;
             statusLabelsLH = .8 * statusLineHeight *scale;
             toolBarTop = scale*statusLineHeight * count + SPACE * 2;
             toolBarHeight = canvasWidth - toolBarTop;
-            toolBarBorder = '3px #fff solid';
+            toolBarBorder = '3px '+borderColor+' solid';
             toolsHeight = scale * BASE_LINEHEIGHT;
             toolsBackground = 'transparent';
             fontSize = statusLineFontSize * scale;
@@ -2792,7 +2794,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 height: canvasWidth + unit,
                 top: canvasTop + unit,
                 right: 0,
-                border: '3px #fff solid',
+                border: '3px '+borderColor+' solid',
             }
         },
         {

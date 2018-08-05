@@ -10,7 +10,7 @@ function main() {
     // 如果要进行剧本的修改请务必将其改成false。
 
     this.bgmRemote = false; // 是否采用远程BGM
-    this.bgmRemoteRoot = "https://gitee.com/ckcz123/h5music/raw/master/"; // 远程BGM的根目录
+    this.bgmRemoteRoot = "https://h5mota.com/music/"; // 远程BGM的根目录
 
     this.isCompetition = false; // 是否是比赛模式
 

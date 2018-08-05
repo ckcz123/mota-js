@@ -238,7 +238,8 @@ maps.prototype.canMoveHero = function(x,y,direction,floorId) {
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
-    var nextBlock = core.getBlock(x+scan[direction].x,y+scan[direction].y,floorId);
+    var nx = x+scan[direction].x, ny = y+scan[direction].y;
+    var nextBlock = core.getBlock(nx,ny);
     if (nextBlock!=null){
         nextId = nextBlock.block.event.id;
         // 遇到单向箭头处理
@@ -250,6 +251,11 @@ maps.prototype.canMoveHero = function(x,y,direction,floorId) {
             }
         }
     }
+
+    // 检查将死的领域
+    if (core.status.hero.hp <= core.status.checkBlock.damage[13*nx+ny] && !core.flags.canGoDeadZone)
+        return false;
+
     return true;
 }
 
@@ -349,8 +355,14 @@ maps.prototype.drawMap = function (mapName, callback) {
                         core.canvas.bg.drawImage(image, dx * ratio, dy * ratio, Math.min(size - dx * ratio, ratio * image.width), Math.min(size - dy * ratio, ratio * image.height));
                     }
                 }
-                else
+                else if (t[3]==1)
                     core.canvas.event2.drawImage(image, dx*ratio, dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
+                else if (t[3]==2) {
+                    core.canvas.event2.drawImage(image, 0, 0, image.width, image.height-32,
+                        dx * ratio, dy * ratio, ratio * image.width, ratio * (image.height-32));
+                    core.canvas.bg.drawImage(image, 0, image.height-32, image.width, 32,
+                        dx * ratio, (dy + image.height - 32) * ratio, ratio*image.width, 32*ratio);
+                }
             }
         })
 

@@ -21,7 +21,8 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"levelChoose" : [["简单","Easy"],["普通","Normal"],["困难","Hard"],["噩梦","Hell"]],
 		"statusLeftBackground": "url(project/images/ground.png) repeat",
 		"statusTopBackground": "url(project/images/ground.png) repeat",
-		"toolsBackground": "url(project/images/ground.png) repeat"
+		"toolsBackground": "url(project/images/ground.png) repeat",
+		"borderColor": "white"
 	},
 	"firstData" : {
 		"title": "魔塔样板",
@@ -164,6 +165,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"potionWhileRouting": false,
 		"enableViewMaps": true,
 		"portalWithoutTrigger": true,
+		"canGoDeadZone": false,
 		"enableMoveDirectly": true,
 	}
 }

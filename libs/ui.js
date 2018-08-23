@@ -421,13 +421,16 @@ ui.prototype.drawTextBox = function(content) {
 
     // var left = 97, top = 64, right = 416 - 2 * left, bottom = 416 - 2 * top;
     //core.setAlpha('ui', 0.85);
+
+    var borderColor = main.borderColor||"#FFFFFF";
+
     core.setAlpha('ui', textAttribute.background[3]);
     core.setFillStyle('ui', core.arrayToRGB(textAttribute.background));
-    core.setStrokeStyle('ui', '#FFFFFF');
+    core.setStrokeStyle('ui', borderColor);
 
 
     core.fillRect('ui', left, top, right, height);
-    core.strokeRect('ui', left - 1, top - 1, right + 1, height + 1, '#FFFFFF', 2);
+    core.strokeRect('ui', left - 1, top - 1, right + 1, height + 1, borderColor, 2);
 
     var xoffset = 9;
 
@@ -475,7 +478,7 @@ ui.prototype.drawTextBox = function(content) {
 
         if (id == 'hero') {
             var heroHeight=core.material.icons.hero.height;
-            core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, heroHeight+2, null, 2);
+            core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, heroHeight+2, borderColor, 2);
             core.fillText('ui', name, content_left, top + 30, null, 'bold 22px Verdana');
             core.clearMap('ui', left + 15, top + 40, 32, heroHeight);
             core.fillRect('ui', left + 15, top + 40, 32, heroHeight, background);
@@ -486,7 +489,7 @@ ui.prototype.drawTextBox = function(content) {
             core.fillText('ui', name, content_left, top + 30, null, 'bold 22px Verdana');
             if (core.isset(icon)) {
 
-                core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, iconHeight + 2, null, 2);
+                core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, iconHeight + 2, borderColor, 2);
                 core.status.boxAnimateObjs = [];
                 core.status.boxAnimateObjs.push({
                     'bgx': left + 15, 'bgy': top + 40, 'bgWidth': 32, 'bgHeight': iconHeight,
@@ -646,8 +649,10 @@ ui.prototype.drawChoices = function(content, choices) {
     }
     var top = bottom-height;
 
+    var borderColor = main.borderColor||"#FFFFFF";
+
     core.fillRect('ui', left, top, width, height, background);
-    core.strokeRect('ui', left - 1, top - 1, width + 1, height + 1, '#FFFFFF', 2);
+    core.strokeRect('ui', left - 1, top - 1, width + 1, height + 1, borderColor, 2);
 
     // 如果有内容
     if (core.isset(contents)) {
@@ -739,10 +744,12 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     var top = 140 - (lines-1)*30;
     var right = 416 - 2 * left, bottom = 416 - 140 - top;
 
+    var borderColor = main.borderColor||"#FFFFFF";
+
     if (core.isPlaying())
         core.fillRect('ui', left, top, right, bottom, background);
     if (core.isPlaying())
-        core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+        core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, borderColor, 2);
     core.canvas.ui.textAlign = "center";
     for (var i in contents) {
         core.fillText('ui', contents[i], 208, top + 50 + i*30, "#FFFFFF");
@@ -1725,10 +1732,14 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
     images.forEach(function (t) {
         var ratio = size/416;
         var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
-        if (core.isset(dx) && core.isset(dy) && !t[3] && core.isset(core.material.images.images[p])) {
+        if (core.isset(dx) && core.isset(dy) && core.isset(core.material.images.images[p])) {
             dx*=32; dy*=32;
             var image = core.material.images.images[p];
-            core.canvas.ui.drawImage(image, x+dx*ratio, y+dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
+            if (!t[3])
+                core.canvas.ui.drawImage(image, x+dx*ratio, y+dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
+            else if (t[3]==2)
+                core.canvas.ui.drawImage(image, 0, image.height-32, image.width, 32,
+                    x+dx * ratio, y+(dy + image.height - 32) * ratio, ratio*image.width, 32*ratio);
         }
     })
 
@@ -1762,10 +1773,14 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
     images.forEach(function (t) {
         var ratio = size/416;
         var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
-        if (core.isset(dx) && core.isset(dy) && t[3] && core.isset(core.material.images.images[p])) {
+        if (core.isset(dx) && core.isset(dy) && core.isset(core.material.images.images[p])) {
             dx*=32; dy*=32;
             var image = core.material.images.images[p];
-            core.canvas.ui.drawImage(image, x+dx*ratio, y+dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
+            if (t[3]==1)
+                core.canvas.ui.drawImage(image, x+dx*ratio, y+dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
+            else if (t[3]==2)
+                core.canvas.ui.drawImage(image, 0, 0, image.width, image.height-32,
+                    x+dx * ratio, y+dy * ratio, ratio * image.width, ratio * (image.height-32));
         }
     })
 

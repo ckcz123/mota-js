@@ -62,6 +62,11 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "textarea",
                     "_data": "竖屏时下方道具栏的背景样式，可以定义背景图、平铺方式等。\n具体请网上搜索\"css background\"了解写法。\n如果弄一张图片作为背景图，推荐写法：\n\"url(project/images/XXX.png) 0 0/100% 100% no-repeat\"\n图片最好进行一些压缩等操作节省流量。"
                 },
+                "borderColor": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_data": "边框颜色，包括游戏边界的边框和对话框边框等。"
+                }
             }
         },
         "firstData": {
@@ -566,6 +571,12 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "checkbox",
                     "_bool": "bool",
                     "_data": "经过楼梯、传送门时是否能“穿透”。\n穿透的意思是，自动寻路得到的的路径中间经过了楼梯，行走时是否触发楼层转换事件"
+                },
+                "canGoDeadZone": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "是否允许走到将死的领域上。如果此项为true，则可以走到将死的领域上"
                 },
                 "enableMoveDirectly": {
                     "_leaf": true,

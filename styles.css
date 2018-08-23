@@ -253,6 +253,12 @@ span#poison, span#weak, span#curse {
     background: #000000;
 }
 
+#gameDraw {
+    position: absolute;
+    background: #000000;
+    overflow: hidden;
+}
+
 #bg {
     z-index: 10;
 }

@@ -1715,6 +1715,8 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
     var blockIcon = core.material.icons.terrains[groundId];
     var blockImage = core.material.images.terrains;
     var persize = size/13;
+    var mw = core.floors[floorId].tileWidth;
+    var mh = core.floors[floorId].tileHeight;
     for (var i=0;i<13;i++) {
         for (var j=0;j<13;j++) {
             core.canvas[canvas].drawImage(blockImage, 0, blockIcon * 32, 32, 32, x + i * persize, y + j * persize, persize, persize);
@@ -1743,7 +1745,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
         }
     })
 
-    var mapArray = core.maps.getMapArray(blocks);
+    var mapArray = core.maps.getMapArray(blocks,mw,mh);
     for (var b in blocks) {
         var block = blocks[b];
         if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {

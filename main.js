@@ -43,6 +43,7 @@ function main() {
         'gif': document.getElementById('gif'),
         'gif2': document.getElementById('gif2'),
         'curtain': document.getElementById('curtain'),
+        'gameDraw': document.getElementById('gameDraw'),
         'startButtons': document.getElementById('startButtons'),
         'playGame': document.getElementById('playGame'),
         'loadGame': document.getElementById('loadGame'),

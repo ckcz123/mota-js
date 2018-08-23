@@ -553,7 +553,9 @@ actions.prototype.onclick = function (x, y, stepPostfix) {
 
     // 寻路
     if (!core.status.lockControl) {
-        core.setAutomaticRoute(x, y, stepPostfix);
+        var dx = ~~(core.maps.currentOffsetPos.x/32);
+        var dy = ~~(core.maps.currentOffsetPos.y/32);
+        core.setAutomaticRoute(x+dx, y+dy, stepPostfix);
         return;
     }
 

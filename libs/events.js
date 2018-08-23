@@ -1185,6 +1185,9 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
                     }
                 })
             }
+            // 重置画布尺寸
+            core.maps.resizeCanvas(floorId);
+            // 画地图
             core.drawMap(floorId, function () {
                 if (core.isset(heroLoc.direction))
                     core.setHeroLoc('direction', heroLoc.direction);

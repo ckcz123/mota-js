@@ -18,8 +18,10 @@ maps.prototype.loadFloor = function (floorId, map) {
     if (!core.isset(map)) map=floor.map;
     var mapIntoBlocks = function(map,maps,floor){
         var blocks = [];
-        for (var i = 0; i < 13; i++) {
-            for (var j = 0; j < 13; j++) {
+        var mw = core.floors[floorId].tileWidth;
+        var mh = core.floors[floorId].tileHeight;
+        for (var i = 0; i < mh; i++) {
+            for (var j = 0; j < mw; j++) {
                 var block = maps.initBlock(j, i, map[i][j]);
                 maps.addInfo(block);
                 maps.addEvent(block,j,i,floor.events[j+","+i])
@@ -158,11 +160,13 @@ maps.prototype.save = function(maps, floorId) {
     }
 
     var thisFloor = maps[floorId];
+    var mw = core.floors[floorId].tileWidth;
+    var mh = core.floors[floorId].tileHeight;
 
     var blocks = [];
-    for (var x=0;x<13;x++) {
+    for (var x=0;x<mw;x++) {
         blocks[x]=[];
-        for (var y=0;y<13;y++) {
+        for (var y=0;y<mh;y++) {
             blocks[x].push(0);
         }
     }
@@ -174,6 +178,23 @@ maps.prototype.save = function(maps, floorId) {
         else blocks[block.y][block.x] = block.id;
     });
     return blocks;
+}
+
+////// 需要更改尺寸的画布
+maps.prototype.activeCanvas = ['bg','event','event2'];
+////// 记忆偏移量
+maps.prototype.currentOffsetPos = {x :0 ,y :0};
+
+////// 更改地图画布的尺寸
+maps.prototype.resizeCanvas = function(floorId) {
+    var cwidth = core.floors[floorId].tileWidth * 32;
+    var cheight = core.floors[floorId].tileHeight * 32;
+    this.activeCanvas.forEach(function(cn){
+        core.canvas[cn].canvas.setAttribute("width",cwidth);
+        core.canvas[cn].canvas.setAttribute("height",cheight);
+        core.canvas[cn].canvas.style.width = cwidth;
+        core.canvas[cn].canvas.style.height = cheight;
+    });
 }
 
 ////// 将存档中的地图信息重新读取出来 //////
@@ -189,12 +210,12 @@ maps.prototype.load = function (data, floorId) {
 }
 
 ////// 将当前地图重新变成二维数组形式 //////
-maps.prototype.getMapArray = function (blockArray){
+maps.prototype.getMapArray = function (blockArray,width,height){
 
     var blocks = [];
-    for (var x=0;x<13;x++) {
+    for (var x=0;x<width;x++) {
         blocks[x]=[];
-        for (var y=0;y<13;y++) {
+        for (var y=0;y<height;y++) {
             blocks[x].push(0);
         }
     }
@@ -316,12 +337,17 @@ maps.prototype.drawBlock = function (block, animate, dx, dy) {
 maps.prototype.drawMap = function (mapName, callback) {
     core.clearMap('all');
     core.removeGlobalAnimate(null, null, true);
+    var mw = core.floors[mapName].tileWidth;
+    var mh = core.floors[mapName].tileHeight;
     var drawBg = function(){
         var groundId = core.floors[mapName].defaultGround || "ground";
         var blockIcon = core.material.icons.terrains[groundId];
         var blockImage = core.material.images.terrains;
-        for (var x = 0; x < 13; x++) {
-            for (var y = 0; y < 13; y++) {
+        var dx = core.getHeroLoc('x');
+        var dy = core.getHeroLoc('y');
+        
+        for (var x = 0; x < mw; x++) {
+            for (var y = 0; y < mh; y++) {
                 core.canvas.bg.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
             }
         }
@@ -382,7 +408,7 @@ maps.prototype.drawMap = function (mapName, callback) {
         var mapData = core.status.maps[core.status.floorId];
         var mapBlocks = mapData.blocks;
 
-        var mapArray = core.maps.getMapArray(mapBlocks);
+        var mapArray = core.maps.getMapArray(mapBlocks,mw,mh);
         for (var b = 0; b < mapBlocks.length; b++) {
             // 事件启用
             var block = mapBlocks[b];
@@ -511,7 +537,8 @@ maps.prototype.noPassExists = function (x, y, floorId) {
 
 ////// 某个点是否在区域内且不可通行 //////
 maps.prototype.noPass = function (x, y) {
-    return x<0 || x>12 || y<0 || y>12 || this.noPassExists(x,y);
+    var floor = core.floors[core.status.floorId];
+    return x<0 || x>=floor.tileWidth || y<0 || y>=floor.tileHeight || this.noPassExists(x,y);
 }
 
 ////// 某个点是否存在NPC //////
@@ -1019,7 +1046,7 @@ maps.prototype.drawAnimate = function (name, x, y, callback) {
             var cx = centerX+t.x, cy=centerY+t.y;
 
             if (!t.mirror && !t.angle) {
-                core.canvas.animate.drawImage(image, cx-realWidth/2, cy-realHeight/2, realWidth, realHeight);
+                core.canvas.animate.drawImage(image, cx-realWidth/2 - core.maps.currentOffsetPos.x, cy-realHeight/2 - core.maps.currentOffsetPos.y, realWidth, realHeight);
             }
             else {
                 core.saveCanvas('animate');
@@ -1028,7 +1055,7 @@ maps.prototype.drawAnimate = function (name, x, y, callback) {
                     core.canvas.animate.rotate(-t.angle*Math.PI/180);
                 if (t.mirror)
                     core.canvas.animate.scale(-1,1);
-                core.canvas.animate.drawImage(image, -realWidth/2, -realHeight/2, realWidth, realHeight);
+                core.canvas.animate.drawImage(image, -realWidth/2 - core.maps.currentOffsetPos.x, -realHeight/2 - core.maps.currentOffsetPos.y, realWidth, realHeight);
                 core.loadCanvas('animate');
             }
         })

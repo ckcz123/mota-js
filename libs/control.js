@@ -542,6 +542,9 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
 
 ////// 自动寻路算法，找寻最优路径 //////
 control.prototype.automaticRoute = function (destX, destY) {
+    var fw = core.floors[core.status.floorId].tileWidth;
+    var fh = core.floors[core.status.floorId].tileHeight
+    var tsize = fw * fw;
     var startX = core.getHeroLoc('x');
     var startY = core.getHeroLoc('y');
     var scan = {
@@ -556,17 +559,17 @@ control.prototype.automaticRoute = function (destX, destY) {
     var ans = []
 
     if (destX == startX && destY == startY) return false;
-    queue.push(13 * startX + startY);
+    queue.push(fw * startX + startY);
     queue.push(-1);
-    route[13 * startX + startY] = '';
+    route[fw * startX + startY] = '';
 
     while (queue.length != 1) {
         var f = queue.shift();
         if (f===-1) {nowDeep+=1;queue.push(-1);continue;}
-        var deep = ~~(f/169);
+        var deep = ~~(f/tsize);
         if (deep!==nowDeep) {queue.push(f);continue;}
-        f=f%169;
-        var nowX = parseInt(f / 13), nowY = f % 13;
+        f=f%tsize;
+        var nowX = parseInt(f / fw), nowY = f % fw;
         var nowIsArrow = false, nowId, nowBlock = core.getBlock(nowX,nowY);
         for (var direction in scan) {
             if (!core.canMoveHero(nowX, nowY, direction))
@@ -575,9 +578,9 @@ control.prototype.automaticRoute = function (destX, destY) {
             var nx = nowX + scan[direction].x;
             var ny = nowY + scan[direction].y;
 
-            if (nx<0 || nx>12 || ny<0 || ny>12) continue;
+            if (nx<0 || nx>=fw || ny<0 || ny>=fh) continue;
 
-            var nid = 13 * nx + ny;
+            var nid = fw * nx + ny;
 
             if (core.isset(route[nid])) continue;
 
@@ -606,18 +609,18 @@ control.prototype.automaticRoute = function (destX, destY) {
                 continue;
 
             route[nid] = direction;
-            queue.push(169*(nowDeep+deepAdd)+nid);
+            queue.push(tsize*(nowDeep+deepAdd)+nid);
         }
-        if (core.isset(route[13 * destX + destY])) break;
+        if (core.isset(route[fw * destX + destY])) break;
     }
 
-    if (!core.isset(route[13 * destX + destY])) {
+    if (!core.isset(route[fw * destX + destY])) {
         return false;
     }
 
     var nowX = destX, nowY = destY;
     while (nowX != startX || nowY != startY) {
-        var dir = route[13 * nowX + nowY];
+        var dir = route[fw * nowX + nowY];
         ans.push({'direction': dir, 'x': nowX, 'y': nowY});
         nowX -= scan[dir].x;
         nowY -= scan[dir].y;
@@ -979,8 +982,23 @@ control.prototype.stopHero = function () {
     core.status.heroStop = true;
 }
 
+////// 设置画布偏移
+control.prototype.setGameCanvasTranslate = function(canvas,x,y){
+    var c=core.dom.gameCanvas[canvas];
+    c.style.transform='translate('+x+'px,'+y+'px)';
+    c.style.webkitTransform='translate('+x+'px,'+y+'px)';
+    c.style.OTransform='translate('+x+'px,'+y+'px)';
+    c.style.MozTransform='translate('+x+'px,'+y+'px)';
+};
+
+////// 更新视野范围
+control.prototype.updateViewport = function() {
+    core.maps.activeCanvas.forEach(function(cn){ core.control.setGameCanvasTranslate(cn,-core.maps.currentOffsetPos.x,-core.maps.currentOffsetPos.y);});
+}
+
 ////// 绘制勇士 //////
 control.prototype.drawHero = function (direction, x, y, status, offset) {
+
     var scan = {
         'up': {'x': 0, 'y': -1},
         'left': {'x': -1, 'y': 0},
@@ -993,9 +1011,16 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
     status = status || 'stop';
     direction = direction || core.getHeroLoc('direction');
     offset = offset || 0;
-    var dx=offset==0?0:scan[direction].x, dy=offset==0?0:scan[direction].y;
+    var way = scan[direction];
+    var offsetX = way.x*offset;
+    var offsetY = way.y*offset;
+    var dx=offsetX==0?0:offsetX/Math.abs(offsetX), dy=offsetY==0?0:offsetY/Math.abs(offsetY);
+    core.maps.currentOffsetPos.x = ((x - 6) * 32 + offsetX).clamp(0,416);
+    core.maps.currentOffsetPos.y = ((y - 6) * 32 + offsetY).clamp(0,416);
+
     core.clearAutomaticRouteNode(x+dx, y+dy);
-    core.canvas.hero.clearRect(32 * x - 32, 32 * y - 32, 96, 96);
+
+    core.canvas.hero.clearRect(x * 32 - core.maps.currentOffsetPos.x - 32, y * 32 - core.maps.currentOffsetPos.y - 32, 96, 96);
 
     var heroIconArr = core.material.icons.hero;
     var drawObjs = [];
@@ -1004,8 +1029,8 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
         "img": core.material.images.hero,
         "height": core.material.icons.hero.height,
         "heroIcon": heroIconArr[direction],
-        "posx": 32 * x + scan[direction].x*offset,
-        "posy": 32 * y + scan[direction].y*offset,
+        "posx": x * 32 - core.maps.currentOffsetPos.x + offsetX,
+        "posy": y * 32 - core.maps.currentOffsetPos.y + offsetY,
         "status": status,
         "index": 0,
     });
@@ -1020,8 +1045,8 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
                     "img": core.material.images.images[t.img],
                     "height": core.material.images.images[t.img].height/4,
                     "heroIcon": heroIconArr[t.direction],
-                    "posx": 32*t.x + (t.stop?0:scan[t.direction].x*offset),
-                    "posy": 32*t.y + (t.stop?0:scan[t.direction].y*offset),
+                    "posx": 32*t.x - core.maps.currentOffsetPos.x + (t.stop?0:scan[t.direction].x*offset),
+                    "posy": 32*t.y - core.maps.currentOffsetPos.y + (t.stop?0:scan[t.direction].y*offset),
                     "status": t.stop?"stop":status,
                     "index": index++
                 });
@@ -1031,13 +1056,15 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
 
     drawObjs.sort(function (a, b) {
         return a.posy==b.posy?b.index-a.index:a.posy-b.posy;
-    })
+    });
 
     drawObjs.forEach(function (block) {
         core.canvas.hero.drawImage(block.img, block.heroIcon[block.status]*32,
             block.heroIcon.loc * block.height, 32, block.height,
             block.posx, block.posy+32-block.height, 32, block.height);
-    })
+    });
+
+    core.control.updateViewport();
 }
 
 ////// 设置勇士的位置 //////
@@ -2790,10 +2817,10 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         {
             className: 'gameCanvas',
             rules:{
-                width: canvasWidth + unit,
-                height: canvasWidth + unit,
+                // width: canvasWidth + unit,
+                // height: canvasWidth + unit,
                 top: canvasTop + unit,
-                right: 0,
+                left: 0,
                 border: '3px '+borderColor+' solid',
             }
         },
@@ -2822,6 +2849,16 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 height:(canvasWidth - SPACE*2) + unit,
                 top: (canvasTop + SPACE) + unit,
                 right: SPACE + unit,
+            }
+        },
+        {
+            id: 'gameDraw',
+            rules: {
+                width: (canvasWidth - SPACE*2) + unit,
+                height:(canvasWidth - SPACE*2) + unit,
+                top: canvasTop + unit,
+                right: SPACE + unit,
+                border: '3px #fff solid'
             }
         },
         {

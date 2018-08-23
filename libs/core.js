@@ -2,6 +2,11 @@
  * 初始化 start
  */
 
+// 额外功能
+Number.prototype.clamp = function(min, max) {
+    return Math.min(Math.max(this, min), max);
+};
+
 function core() {
     this.material = {
         'animates': {},

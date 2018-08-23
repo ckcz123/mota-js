@@ -622,8 +622,9 @@ editor_mode = function (editor) {
             var height = editor_mode.appendPic.toImg.height;
             var sourced = source.getContext('2d');
             for (var ii = 0, v; v = editor_mode.appendPic.selectPos[ii]; ii++) {
-                var imgData = sourced.getImageData(v.x * 32, v.y * ysize, 32, ysize);
-                sprited.putImageData(imgData, ii * 32, height);
+                // var imgData = sourced.getImageData(v.x * 32, v.y * ysize, 32, ysize);
+                // sprited.putImageData(imgData, ii * 32, height);
+                sprited.drawImage(editor_mode.appendPic.img, v.x * 32, v.y * ysize, 32, ysize,  ii * 32, height,  32, ysize)
             }
             var imgbase64 = sprite.toDataURL().split(',')[1];
             fs.writeFile('./project/images/' + editor_mode.appendPic.imageName + '.png', imgbase64, 'base64', function (err, data) {

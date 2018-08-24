@@ -77,7 +77,7 @@ function core() {
         scale: 1.0,
     }
     this.bigmap = {
-        canvas: ["bg", "event", "event2", "fg"],
+        canvas: ["bg", "event", "event2", "fg", "route"],
         offsetX: 0, // in pixel
         offsetY: 0,
         width: 13, // map width and height
@@ -116,7 +116,7 @@ function core() {
             'cursorX': null,
             'cursorY': null,
             "moveDirectly": false,
-            'clickMoveDirectly': true,
+            'clickMoveDirectly': false,
         },
 
         // 按下键的时间：为了判定双击

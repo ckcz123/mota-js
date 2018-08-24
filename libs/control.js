@@ -286,7 +286,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
     // 保存的Index
     core.status.saveIndex = core.getLocalStorage('saveIndex2', 1);
 
-    core.status.automaticRoute.clickMoveDirectly = core.getLocalStorage('clickMoveDirectly', true);
+    core.status.automaticRoute.clickMoveDirectly = core.getLocalStorage('clickMoveDirectly', false);
 
     if (core.isset(values))
         core.values = core.clone(values);
@@ -334,7 +334,7 @@ control.prototype.restart = function() {
 ////// 清除自动寻路路线 //////
 control.prototype.clearAutomaticRouteNode = function (x, y) {
     if (core.status.event.id==null)
-        core.canvas.ui.clearRect(x * 32 + 5, y * 32 + 5, 27, 27);
+        core.canvas.route.clearRect(x * 32 + 5, y * 32 + 5, 27, 27);
 }
 
 ////// 停止自动寻路操作 //////
@@ -352,7 +352,7 @@ control.prototype.stopAutomaticRoute = function () {
     core.status.automaticRoute.lastDirection = null;
     core.stopHero();
     if (core.status.automaticRoute.moveStepBeforeStop.length==0)
-        core.canvas.ui.clearRect(0, 0, 416, 416);
+        core.clearMap('route');
 }
 
 ////// 继续剩下的自动寻路操作 //////
@@ -370,7 +370,7 @@ control.prototype.continueAutomaticRoute = function () {
 
 ////// 清空剩下的自动寻路列表 //////
 control.prototype.clearContinueAutomaticRoute = function () {
-    core.canvas.ui.clearRect(0, 0, 416, 416);
+    core.clearMap('route');
     core.status.automaticRoute.moveStepBeforeStop=[];
 }
 
@@ -458,18 +458,18 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
         if (destX == core.status.hero.loc.x && destY == core.status.hero.loc.y){
             moveStep=[];
         } else {
-            core.canvas.ui.clearRect(0, 0, 416, 416);
+            core.clearMap('route');
             return;
         }
     }
     moveStep=moveStep.concat(stepPostfix);
     core.status.automaticRoute.destX=destX;
     core.status.automaticRoute.destY=destY;
-    core.canvas.ui.save();
-    core.canvas.ui.clearRect(0, 0, 416, 416);
-    core.canvas.ui.fillStyle = '#bfbfbf';
-    core.canvas.ui.strokeStyle = '#bfbfbf';
-    core.canvas.ui.lineWidth = 8;
+    core.canvas.route.save();
+    core.clearMap('route');
+    core.canvas.route.fillStyle = '#bfbfbf';
+    core.canvas.route.strokeStyle = '#bfbfbf';
+    core.canvas.route.lineWidth = 8;
     for (var m = 0; m < moveStep.length; m++) {
         if (tempStep == null) {
             step++;
@@ -487,53 +487,53 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
         if (m == moveStep.length - 1) {
             // core.status.automaticRoutingTemp.moveStep.push({'direction': tempStep, 'step': step});
             core.status.automaticRoute.autoStepRoutes.push({'direction': tempStep, 'step': step});
-            core.canvas.ui.fillRect(moveStep[m].x * 32 + 10, moveStep[m].y * 32 + 10, 12, 12);
+            core.canvas.route.fillRect(moveStep[m].x * 32 + 10, moveStep[m].y * 32 + 10, 12, 12);
         }
         else {
-            core.canvas.ui.beginPath();
+            core.canvas.route.beginPath();
             if (core.isset(moveStep[m + 1]) && tempStep != moveStep[m + 1].direction) {
                 if (tempStep == 'up' && moveStep[m + 1].direction == 'left' || tempStep == 'right' && moveStep[m + 1].direction == 'down') {
-                    core.canvas.ui.moveTo(moveStep[m].x * 32 + 5, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 27);
+                    core.canvas.route.moveTo(moveStep[m].x * 32 + 5, moveStep[m].y * 32 + 16);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 16);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 27);
                 }
                 else if (tempStep == 'up' && moveStep[m + 1].direction == 'right' || tempStep == 'left' && moveStep[m + 1].direction == 'down') {
-                    core.canvas.ui.moveTo(moveStep[m].x * 32 + 27, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 27);
+                    core.canvas.route.moveTo(moveStep[m].x * 32 + 27, moveStep[m].y * 32 + 16);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 16);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 27);
                 }
                 else if (tempStep == 'left' && moveStep[m + 1].direction == 'up' || tempStep == 'down' && moveStep[m + 1].direction == 'right') {
-                    core.canvas.ui.moveTo(moveStep[m].x * 32 + 27, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 5);
+                    core.canvas.route.moveTo(moveStep[m].x * 32 + 27, moveStep[m].y * 32 + 16);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 16);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 5);
                 }
                 else if (tempStep == 'right' && moveStep[m + 1].direction == 'up' || tempStep == 'down' && moveStep[m + 1].direction == 'left') {
-                    core.canvas.ui.moveTo(moveStep[m].x * 32 + 5, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 5);
+                    core.canvas.route.moveTo(moveStep[m].x * 32 + 5, moveStep[m].y * 32 + 16);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 16);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 5);
                 }
-                core.canvas.ui.stroke();
+                core.canvas.route.stroke();
                 continue;
             }
             switch (tempStep) {
                 case 'up':
                 case 'down':
-                    core.canvas.ui.beginPath();
-                    core.canvas.ui.moveTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 5);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 27);
-                    core.canvas.ui.stroke();
+                    core.canvas.route.beginPath();
+                    core.canvas.route.moveTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 5);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 27);
+                    core.canvas.route.stroke();
                     break;
                 case 'left':
                 case 'right':
-                    core.canvas.ui.beginPath();
-                    core.canvas.ui.moveTo(moveStep[m].x * 32 + 5, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 27, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.stroke();
+                    core.canvas.route.beginPath();
+                    core.canvas.route.moveTo(moveStep[m].x * 32 + 5, moveStep[m].y * 32 + 16);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 27, moveStep[m].y * 32 + 16);
+                    core.canvas.route.stroke();
                     break;
             }
         }
     }
-    core.canvas.ui.restore();
+    core.canvas.route.restore();
 
     // 立刻移动
     core.setAutoHeroMove();
@@ -632,7 +632,7 @@ control.prototype.automaticRoute = function (destX, destY) {
 
 ////// 显示离散的寻路点 //////
 control.prototype.fillPosWithPoint = function (pos) {
-    core.fillRect('ui', pos.x*32+12,pos.y*32+12,8,8, '#bfbfbf');
+    core.fillRect('route', pos.x*32+12,pos.y*32+12,8,8, '#bfbfbf');
 }
 
 ////// 设置勇士的自动行走路线 //////
@@ -759,7 +759,7 @@ control.prototype.turnHero = function() {
     else if (core.status.hero.loc.direction == 'down') core.status.hero.loc.direction = 'left';
     else if (core.status.hero.loc.direction == 'left') core.status.hero.loc.direction = 'up';
     core.drawHero();
-    core.canvas.ui.clearRect(0, 0, 416, 416);
+    core.clearMap('route');
     core.status.route.push("turn");
 }
 

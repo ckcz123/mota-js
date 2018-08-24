@@ -288,6 +288,10 @@ span#poison, span#weak, span#curse {
     z-index: 80;
 }
 
+#route {
+    z-index: 105;
+}
+
 #ui {
     z-index: 110;
 }

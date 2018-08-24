@@ -429,7 +429,7 @@ actions.prototype.ondown = function (x ,y) {
     }
 
     core.status.downTime = new Date();
-    core.clearMap('ui');
+    core.clearMap('route');
     var pos={'x':x,'y':y}
     core.status.stepPostfix=[];
     core.status.stepPostfix.push(pos);
@@ -482,8 +482,8 @@ actions.prototype.onup = function () {
         var posy=core.status.stepPostfix[0].y;
         core.status.stepPostfix=[];
         if (!core.status.lockControl) {
-            core.canvas.ui.clearRect(0, 0, 416,416);
-            core.canvas.ui.restore();
+            core.clearMap('route');
+            core.canvas.route.restore();
         }
 
         // 长按

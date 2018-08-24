@@ -159,8 +159,8 @@ editor.prototype.drawInitData = function (icons) {
 }
 editor.prototype.mapInit = function () {
     var ec = document.getElementById('event').getContext('2d');
-    ec.clearRect(0, 0, 416, 416);
-    document.getElementById('event2').getContext('2d').clearRect(0, 0, 416, 416);
+    ec.clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
+    document.getElementById('event2').getContext('2d').clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
     editor.map = [];
     for (var y = 0; y < 13; y++) {
         editor.map[y] = [];

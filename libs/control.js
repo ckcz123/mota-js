@@ -3032,4 +3032,12 @@ control.prototype.domRenderer = function(){
         }
 
     }
+    // resize map
+    if (core.isPlaying() && core.isset(core.status) && core.isset(core.bigmap)) {
+        core.bigmap.canvas.forEach(function(cn){
+            core.canvas[cn].canvas.style.width = core.bigmap.width*32*core.domStyle.scale + "px";
+            core.canvas[cn].canvas.style.height = core.bigmap.height*32*core.domStyle.scale + "px";
+        });
+    }
+
 }

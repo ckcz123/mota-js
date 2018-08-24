@@ -170,7 +170,7 @@
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     background: url(project/images/ground.png) repeat;
-    z-index: 150;
+    z-index: 135;
     display: none;
 }
 #statusBar .status{
@@ -257,6 +257,7 @@ span#poison, span#weak, span#curse {
     position: absolute;
     background: #000000;
     overflow: hidden;
+    z-index: 135;
 }
 
 #bg {

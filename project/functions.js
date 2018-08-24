@@ -453,7 +453,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.lockControl();
 	core.status.event.id = 'about';
 
-	core.clearMap('ui', 0, 0, 416, 416);
+	core.clearMap('ui');
 	var left = 48, top = 36, right = 416 - 2 * left, bottom = 416 - 2 * top;
 
 	core.setAlpha('ui', 0.85);

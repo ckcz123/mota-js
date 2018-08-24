@@ -1,7 +1,7 @@
 enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = 
 {
     'greenSlime': {'name': '绿头怪', 'hp': 100, 'atk': 120, 'def': 0, 'money': 1, 'experience': 1, 'point': 0, 'special': [1,5,7,8]},
-    'redSlime': {'name': '红头怪', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'point': 0, 'special': 0},
+    'redSlime': {'name': '红头怪', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'point': 0, 'special': [16,18], 'value': 10},
     'blackSlime': {'name': '青头怪', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'point': 0, 'special': 0},
     'slimelord': {'name': '怪王', 'hp': 100, 'atk': 120, 'def': 0, 'money': 10, 'experience': 0, 'point': 0, 'special': [1,9]},
     'bat': {'name': '小蝙蝠', 'hp': 100, 'atk': 120, 'def': 0, 'money': 2, 'experience': 0, 'point': 0, 'special': 1},

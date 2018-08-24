@@ -18,12 +18,12 @@ ui.prototype.init = function () {
 ui.prototype.clearMap = function (map, x, y, width, height) {
     if (map == 'all') {
         for (var m in core.canvas) {
-            core.canvas[m].clearRect(0, 0, 416, 416);
+            core.canvas[m].clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
         }
         core.dom.gif.innerHTML = "";
     }
     else {
-        core.canvas[map].clearRect(x||0, y||0, width||416, height||416);
+        core.canvas[map].clearRect(x||0, y||0, width||core.bigmap.width*32, height||core.bigmap.height*32);
     }
 }
 
@@ -149,7 +149,7 @@ ui.prototype.setFillStyle = function (map, style) {
 ui.prototype.closePanel = function () {
     core.status.boxAnimateObjs = [];
     clearInterval(core.status.event.interval);
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
     core.setAlpha('ui', 1.0);
     core.unLockControl();
     core.status.event.data = null;
@@ -380,7 +380,7 @@ ui.prototype.drawTextBox = function(content) {
 
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
     core.status.boxAnimateObjs = [];
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
 
     // var contents = content.split('\n');
     // var contents = core.splitLines('ui', content, );
@@ -541,7 +541,7 @@ ui.prototype.drawChoices = function(content, choices) {
 
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
 
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
     core.setAlpha('ui', 1);
     core.setFillStyle('ui', background);
 
@@ -728,7 +728,7 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     if (core.status.event.selection<0) core.status.event.selection=0;
 
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
     core.setAlpha('ui', 1);
     core.setFillStyle('ui', background);
     core.setFont('ui', "bold 19px Verdana");
@@ -872,7 +872,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
 
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
     var left=10, right=416-2*left;
 
 
@@ -891,7 +891,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     core.fillRect('ui', left, top, right, bottom, '#000000');
     core.setAlpha('ui', 1);
     core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
-    core.clearMap('data',0,0,416,416);
+    core.clearMap('data');
 
     clearInterval(core.interval.tipAnimate);
     core.setAlpha('data', 1);
@@ -1099,9 +1099,9 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
             // 战斗结束
             clearInterval(battleInterval);
             core.status.boxAnimateObjs = [];
-            core.clearMap('ui', 0, 0, 416, 416);
+            core.clearMap('ui');
             core.setAlpha('ui', 1.0);
-            core.clearMap('data', 0, 0, 416, 416);
+            core.clearMap('data');
             if (core.status.event.id=='battle') {
                 core.unLockControl();
                 core.status.event.id=null;
@@ -1121,7 +1121,7 @@ ui.prototype.drawWaiting = function(text) {
     core.status.event.id = 'waiting';
 
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
     core.setAlpha('ui', 1);
     core.setFillStyle('ui', background);
 
@@ -1219,7 +1219,7 @@ ui.prototype.drawCursor = function () {
     core.status.event.id = 'cursor';
     core.lockControl();
 
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
     core.setAlpha('ui', 1);
 
     var width = 4;
@@ -1235,10 +1235,10 @@ ui.prototype.drawBook = function (index) {
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
 
     clearInterval(core.interval.tipAnimate);
-    core.clearMap('data', 0, 0, 416, 416);
+    core.clearMap('data');
     core.setOpacity('data', 1);
 
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
     core.setAlpha('ui', 1);
     core.setFillStyle('ui', background);
     core.fillRect('ui', 0, 0, 416, 416);
@@ -1400,7 +1400,7 @@ ui.prototype.drawBookDetail = function (index) {
     core.status.event.id = 'book-detail';
     clearInterval(core.interval.tipAnimate);
 
-    core.clearMap('data', 0, 0, 416, 416);
+    core.clearMap('data');
     core.setOpacity('data', 1);
 
     var left=10, right=416-2*left;
@@ -1453,7 +1453,7 @@ ui.prototype.drawFly = function(page) {
     var floorId = core.status.hero.flyRange[page];
     var title = core.status.maps[floorId].title;
 
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
     core.setAlpha('ui', 0.85);
     core.fillRect('ui', 0, 0, 416, 416, '#000000');
     core.setAlpha('ui', 1);
@@ -1490,11 +1490,11 @@ ui.prototype.drawMaps = function (index) {
 
     clearTimeout(core.interval.tipAnimate);
 
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
     core.setAlpha('ui', 1);
     this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 0, 0, 416);
 
-    core.clearMap('data', 0, 0, 416, 416);
+    core.clearMap('data');
     core.setOpacity('data', 0.2);
     core.canvas.data.textAlign = 'left';
     core.setFont('data', '16px Arial');
@@ -1538,7 +1538,7 @@ ui.prototype.drawToolbox = function(index) {
 
     core.status.event.data=selectId;
 
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
     core.setAlpha('ui', 0.85);
     core.fillRect('ui', 0, 0, 416, 416, '#000000');
     core.setAlpha('ui', 1);
@@ -1660,7 +1660,7 @@ ui.prototype.drawSLPanel = function(index) {
 
     core.status.event.data=index;
 
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
     core.setAlpha('ui', 0.85);
     core.fillRect('ui', 0, 0, 416, 416, '#000000');
     core.setAlpha('ui', 1);
@@ -1715,8 +1715,8 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
     var blockIcon = core.material.icons.terrains[groundId];
     var blockImage = core.material.images.terrains;
     var persize = size/13;
-    var mw = core.floors[floorId].tileWidth;
-    var mh = core.floors[floorId].tileHeight;
+    var mw = core.floors[floorId].width || 13;
+    var mh = core.floors[floorId].height || 13;
     for (var i=0;i<13;i++) {
         for (var j=0;j<13;j++) {
             core.canvas[canvas].drawImage(blockImage, 0, blockIcon * 32, 32, 32, x + i * persize, y + j * persize, persize, persize);
@@ -1792,7 +1792,7 @@ ui.prototype.drawKeyBoard = function () {
     core.lockControl();
     core.status.event.id = 'keyBoard';
 
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
 
     var left = 16, top = 48, right = 416 - 2 * left, bottom = 416 - 2 * top;
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");

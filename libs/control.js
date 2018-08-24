@@ -104,7 +104,7 @@ control.prototype.setRequestAnimationFrame = function () {
         if (core.isPlaying() && timestamp-core.animateFrame.weather.time>30) {
             if (core.animateFrame.weather.type == 'rain' && core.animateFrame.weather.level > 0) {
 
-                core.clearMap('weather', 0, 0, 416, 416);
+                core.clearMap('weather');
 
                 core.canvas.weather.strokeStyle = 'rgba(174,194,224,0.8)';
                 core.canvas.weather.lineWidth = 1;
@@ -130,7 +130,7 @@ control.prototype.setRequestAnimationFrame = function () {
             }
             else if (core.animateFrame.weather.type == 'snow' && core.animateFrame.weather.level > 0) {
 
-                core.clearMap('weather', 0, 0, 416, 416);
+                core.clearMap('weather');
 
                 core.canvas.weather.fillStyle = "rgba(255, 255, 255, 0.8)";
                 core.canvas.weather.beginPath();
@@ -378,7 +378,7 @@ control.prototype.clearContinueAutomaticRoute = function () {
 control.prototype.moveDirectly = function (destX, destY) {
     var ignoreSteps = core.canMoveDirectly(destX, destY);
     if (ignoreSteps>=0) {
-        core.clearMap('hero', 0, 0, 416, 416);
+        core.clearMap('hero');
         var lastDirection = core.status.route[core.status.route.length-1];
         if (['left', 'right', 'up', 'down'].indexOf(lastDirection)>=0)
             core.setHeroLoc('direction', lastDirection);
@@ -398,7 +398,7 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
     if (Math.abs(core.getHeroLoc('x')-destX)+Math.abs(core.getHeroLoc('y')-destY)<=1)
         return false;
     var testMove = function (dx, dy, dir) {
-        if (dx<0 || dx>12 || dy<0 || dy>12) return false;
+        if (dx<0 || dx>=core.bigmap.width|| dy<0 || dy>core.bigmap.height) return false;
         if (core.control.moveDirectly(dx, dy)) {
             if (core.isset(dir)) core.moveHero(dir, function() {});
             return true;
@@ -542,9 +542,9 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
 
 ////// 自动寻路算法，找寻最优路径 //////
 control.prototype.automaticRoute = function (destX, destY) {
-    var fw = core.floors[core.status.floorId].tileWidth;
-    var fh = core.floors[core.status.floorId].tileHeight
-    var tsize = fw * fw;
+    var fw = core.bigmap.width;
+    var fh = core.bigmap.height;
+    var total = fw * fh;
     var startX = core.getHeroLoc('x');
     var startY = core.getHeroLoc('y');
     var scan = {
@@ -559,17 +559,17 @@ control.prototype.automaticRoute = function (destX, destY) {
     var ans = []
 
     if (destX == startX && destY == startY) return false;
-    queue.push(fw * startX + startY);
+    queue.push(startX + fw * startY);
     queue.push(-1);
-    route[fw * startX + startY] = '';
+    route[startX + fw * startY] = '';
 
     while (queue.length != 1) {
         var f = queue.shift();
         if (f===-1) {nowDeep+=1;queue.push(-1);continue;}
-        var deep = ~~(f/tsize);
+        var deep = parseInt(f/total);
         if (deep!==nowDeep) {queue.push(f);continue;}
-        f=f%tsize;
-        var nowX = parseInt(f / fw), nowY = f % fw;
+        f=f%total;
+        var nowX = parseInt(f % fw), nowY = parseInt(f / fw);
         var nowIsArrow = false, nowId, nowBlock = core.getBlock(nowX,nowY);
         for (var direction in scan) {
             if (!core.canMoveHero(nowX, nowY, direction))
@@ -580,7 +580,7 @@ control.prototype.automaticRoute = function (destX, destY) {
 
             if (nx<0 || nx>=fw || ny<0 || ny>=fh) continue;
 
-            var nid = fw * nx + ny;
+            var nid = nx + fw * ny;
 
             if (core.isset(route[nid])) continue;
 
@@ -609,18 +609,18 @@ control.prototype.automaticRoute = function (destX, destY) {
                 continue;
 
             route[nid] = direction;
-            queue.push(tsize*(nowDeep+deepAdd)+nid);
+            queue.push(total*(nowDeep+deepAdd)+nid);
         }
-        if (core.isset(route[fw * destX + destY])) break;
+        if (core.isset(route[destX + fw * destY])) break;
     }
 
-    if (!core.isset(route[fw * destX + destY])) {
+    if (!core.isset(route[destX + fw * destY])) {
         return false;
     }
 
     var nowX = destX, nowY = destY;
     while (nowX != startX || nowY != startY) {
-        var dir = route[fw * nowX + nowY];
+        var dir = route[nowX + fw * nowY];
         ans.push({'direction': dir, 'x': nowX, 'y': nowY});
         nowX -= scan[dir].x;
         nowY -= scan[dir].y;
@@ -672,7 +672,7 @@ control.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
             core.setHeroLoc('y', y+scan[direction].y, true);
             core.control.updateFollowers();
             core.moveOneStep();
-            core.clearMap('hero', 0, 0, 416, 416);
+            core.clearMap('hero');
             core.drawHero(direction);
             clearInterval(core.interval.heroMoveInterval);
             core.status.heroMoving = 0;
@@ -786,7 +786,7 @@ control.prototype.moveHero = function (direction, callback) {
                     };
                     direction = core.getHeroLoc('direction');
                     var nx = core.getHeroLoc('x') + scan[direction].x, ny=core.getHeroLoc('y') + scan[direction].y;
-                    if (nx<0 || nx>12 || ny<0 || ny>12) return;
+                    if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height) return;
 
                     core.status.heroMoving=-1;
                     core.eventMoveHero([direction], 100, function () {
@@ -817,7 +817,7 @@ control.prototype.eventMoveHero = function(steps, time, callback) {
 
     time = time || 100;
 
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
     core.setAlpha('ui', 1.0);
 
     // 要运行的轨迹：将steps展开
@@ -884,7 +884,7 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
     if (!core.isset(ey)) ey=sy;
 
     time = time || 500;
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
     core.setAlpha('ui', 1.0);
     core.status.replay.animate=true;
 
@@ -991,9 +991,11 @@ control.prototype.setGameCanvasTranslate = function(canvas,x,y){
     c.style.MozTransform='translate('+x+'px,'+y+'px)';
 };
 
-////// 更新视野范围
+////// 更新视野范围 //////
 control.prototype.updateViewport = function() {
-    core.maps.activeCanvas.forEach(function(cn){ core.control.setGameCanvasTranslate(cn,-core.maps.currentOffsetPos.x,-core.maps.currentOffsetPos.y);});
+    core.bigmap.canvas.forEach(function(cn){
+        core.control.setGameCanvasTranslate(cn,-core.bigmap.offsetX,-core.bigmap.offsetY);
+    });
 }
 
 ////// 绘制勇士 //////
@@ -1015,12 +1017,13 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
     var offsetX = way.x*offset;
     var offsetY = way.y*offset;
     var dx=offsetX==0?0:offsetX/Math.abs(offsetX), dy=offsetY==0?0:offsetY/Math.abs(offsetY);
-    core.maps.currentOffsetPos.x = ((x - 6) * 32 + offsetX).clamp(0,416);
-    core.maps.currentOffsetPos.y = ((y - 6) * 32 + offsetY).clamp(0,416);
+
+    core.bigmap.offsetX = core.clamp((x - 6) * 32 + offsetX, 0, 32*core.bigmap.width-416);
+    core.bigmap.offsetY = core.clamp((y - 6) * 32 + offsetY, 0, 32*core.bigmap.height-416);
 
     core.clearAutomaticRouteNode(x+dx, y+dy);
 
-    core.canvas.hero.clearRect(x * 32 - core.maps.currentOffsetPos.x - 32, y * 32 - core.maps.currentOffsetPos.y - 32, 96, 96);
+    core.canvas.hero.clearRect(x * 32 - core.bigmap.offsetX - 32, y * 32 - core.bigmap.offsetY - 32, 96, 96);
 
     var heroIconArr = core.material.icons.hero;
     var drawObjs = [];
@@ -1029,8 +1032,8 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
         "img": core.material.images.hero,
         "height": core.material.icons.hero.height,
         "heroIcon": heroIconArr[direction],
-        "posx": x * 32 - core.maps.currentOffsetPos.x + offsetX,
-        "posy": y * 32 - core.maps.currentOffsetPos.y + offsetY,
+        "posx": x * 32 - core.bigmap.offsetX + offsetX,
+        "posy": y * 32 - core.bigmap.offsetY + offsetY,
         "status": status,
         "index": 0,
     });
@@ -1045,8 +1048,8 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
                     "img": core.material.images.images[t.img],
                     "height": core.material.images.images[t.img].height/4,
                     "heroIcon": heroIconArr[t.direction],
-                    "posx": 32*t.x - core.maps.currentOffsetPos.x + (t.stop?0:scan[t.direction].x*offset),
-                    "posy": 32*t.y - core.maps.currentOffsetPos.y + (t.stop?0:scan[t.direction].y*offset),
+                    "posx": 32*t.x - core.bigmap.offsetX + (t.stop?0:scan[t.direction].x*offset),
+                    "posy": 32*t.y - core.bigmap.offsetY + (t.stop?0:scan[t.direction].y*offset),
                     "status": t.stop?"stop":status,
                     "index": index++
                 });
@@ -1172,27 +1175,27 @@ control.prototype.updateCheckBlock = function() {
         if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls.indexOf('enemy')==0) {
             var id = block.event.id, enemy = core.material.enemys[id];
             if (core.isset(enemy)) {
-                core.status.checkBlock.map[13*block.x+block.y]=id;
+                core.status.checkBlock.map[block.x+core.bigmap.width*block.y]=id;
             }
         }
         // 血网
         if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) &&
             block.event.id=='lavaNet' && block.event.trigger=='passNet' && !core.hasItem("shoes")) {
-            core.status.checkBlock.map[13*block.x+block.y]="lavaNet";
+            core.status.checkBlock.map[block.x+core.bigmap.width*block.y]="lavaNet";
         }
     }
 
     // Step2: 更新领域、阻击伤害
     core.status.checkBlock.damage = []; // 记录(x,y)点的伤害
-    for (var x=0;x<13*13;x++) core.status.checkBlock.damage[x]=0;
+    for (var x=0;x<core.bigmap.width*core.bigmap.height;x++) core.status.checkBlock.damage[x]=0;
 
-    for (var x=0;x<13;x++) {
-        for (var y=0;y<13;y++) {
-            var id = core.status.checkBlock.map[13*x+y];
+    for (var x=0;x<core.bigmap.width;x++) {
+        for (var y=0;y<core.bigmap.height;y++) {
+            var id = core.status.checkBlock.map[x+core.bigmap.width*y];
             if (core.isset(id)) {
 
                 if (id=="lavaNet") {
-                    core.status.checkBlock.damage[13*x+y]+=core.values.lavaDamage;
+                    core.status.checkBlock.damage[x+core.bigmap.width*y]+=core.values.lavaDamage;
                     continue;
                 }
 
@@ -1206,9 +1209,9 @@ control.prototype.updateCheckBlock = function() {
                         for (var dy=-range;dy<=range;dy++) {
                             if (dx==0 && dy==0) continue;
                             var nx=x+dx, ny=y+dy;
-                            if (nx<0 || nx>12 || ny<0 || ny>12) continue;
+                            if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height) continue;
                             if (!zoneSquare && Math.abs(dx)+Math.abs(dy)>range) continue;
-                            core.status.checkBlock.damage[13*nx+ny]+=enemy.value;
+                            core.status.checkBlock.damage[nx+ny*core.bigmap.width]+=enemy.value;
                         }
                     }
                 }
@@ -1218,8 +1221,8 @@ control.prototype.updateCheckBlock = function() {
                         for (var dy=-1;dy<=1;dy++) {
                             if (dx==0 && dy==0) continue;
                             var nx=x+dx, ny=y+dy;
-                            if (nx<0 || nx>12 || ny<0 || ny>12 || Math.abs(dx)+Math.abs(dy)>1) continue;
-                            core.status.checkBlock.damage[13*nx+ny]+=enemy.value;
+                            if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height || Math.abs(dx)+Math.abs(dy)>1) continue;
+                            core.status.checkBlock.damage[nx+ny*core.bigmap.width]+=enemy.value;
                         }
                     }
                 }
@@ -1230,12 +1233,12 @@ control.prototype.updateCheckBlock = function() {
 
     // Step3: 更新夹击点坐标，并将夹击伤害加入到damage中
     core.status.checkBlock.betweenAttack = []; // 记录(x,y)点是否有夹击
-    for (var x=0;x<13;x++) {
-        for (var y=0;y<13;y++) {
+    for (var x=0;x<core.bigmap.width;x++) {
+        for (var y=0;y<core.bigmap.height;y++) {
             var has=false;
-            if (x>0 && x<12) {
-                var id1=core.status.checkBlock.map[13*(x-1)+y],
-                    id2=core.status.checkBlock.map[13*(x+1)+y];
+            if (x>0 && x<core.bigmap.width-1) {
+                var id1=core.status.checkBlock.map[x-1+core.bigmap.width*y],
+                    id2=core.status.checkBlock.map[x+1+core.bigmap.height*y];
                 if (core.isset(id1) && core.isset(id2) && id1==id2) {
                     var enemy = core.material.enemys[id1];
                     if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {
@@ -1243,9 +1246,9 @@ control.prototype.updateCheckBlock = function() {
                     }
                 }
             }
-            if (y>0 && y<12) {
-                var id1=core.status.checkBlock.map[13*x+y-1],
-                    id2=core.status.checkBlock.map[13*x+y+1];
+            if (y>0 && y<core.bigmap.height-1) {
+                var id1=core.status.checkBlock.map[x+core.bigmap.width*(y-1)],
+                    id2=core.status.checkBlock.map[x+core.bigmap.width*(y+1)];
                 if (core.isset(id1) && core.isset(id2) && id1==id2) {
                     var enemy = core.material.enemys[id1];
                     if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {
@@ -1255,10 +1258,10 @@ control.prototype.updateCheckBlock = function() {
             }
             // 存在夹击
             if (has) {
-                core.status.checkBlock.betweenAttack[13*x+y]=true;
-                var leftHp = core.status.hero.hp - core.status.checkBlock.damage[13*x+y];
+                core.status.checkBlock.betweenAttack[x+core.bigmap.width*y]=true;
+                var leftHp = core.status.hero.hp - core.status.checkBlock.damage[x+core.bigmap.width*y];
                 if (leftHp>1)
-                    core.status.checkBlock.damage[13*x+y] += Math.floor((leftHp+(core.flags.betweenAttackCeil?0:1))/2);
+                    core.status.checkBlock.damage[x+core.bigmap.width*y] += Math.floor((leftHp+(core.flags.betweenAttackCeil?0:1))/2);
             }
         }
     }
@@ -1267,7 +1270,7 @@ control.prototype.updateCheckBlock = function() {
 ////// 检查并执行领域、夹击、阻击事件 //////
 control.prototype.checkBlock = function () {
     var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
-    var damage = core.status.checkBlock.damage[13*x+y];
+    var damage = core.status.checkBlock.damage[x+core.bigmap.width*y];
     if (damage>0) {
         core.status.hero.hp -= damage;
 
@@ -1281,8 +1284,8 @@ control.prototype.checkBlock = function () {
         }
         for (var direction in scan) {
             var nx = x+scan[direction].x, ny=y+scan[direction].y;
-            if (nx<0 || nx>12 || ny<0 || ny>12) continue;
-            var id=core.status.checkBlock.map[13*nx+ny];
+            if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height) continue;
+            var id=core.status.checkBlock.map[nx+core.bigmap.width*ny];
             if (core.isset(id)) {
                 var enemy = core.material.enemys[id];
                 if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 18)) {
@@ -1291,10 +1294,10 @@ control.prototype.checkBlock = function () {
             }
         }
 
-        if (core.status.checkBlock.betweenAttack[13*x+y] && damage>0) {
+        if (core.status.checkBlock.betweenAttack[x+core.bigmap.width*y] && damage>0) {
             core.drawTip('受到夹击，生命变成一半');
         }
-        else if (core.status.checkBlock.map[13*x+y]=='lavaNet') {
+        else if (core.status.checkBlock.map[x+core.bigmap.width*y]=='lavaNet') {
             core.drawTip('受到血网伤害'+damage+'点');
         }
         // 阻击
@@ -1321,7 +1324,7 @@ control.prototype.checkBlock = function () {
             var x=t.x, y=t.y, direction = t.direction;
             var nx = x+scan[direction].x, ny=y+scan[direction].y;
 
-            return nx>=0 && nx<=12 && ny>=0 && ny<=12 && core.getBlock(nx, ny, core.status.floorId, false)==null;
+            return nx>=0 && nx<core.bigmap.width && ny>=0 && ny<core.bigmap.height && core.getBlock(nx, ny, core.status.floorId, false)==null;
         });
         core.updateStatusBar();
         if (snipe.length>0)
@@ -1461,7 +1464,7 @@ control.prototype.setWeather = function (type, level) {
 
     // 非雨雪
     if (type!='rain' && type!='snow') {
-        core.clearMap('weather', 0, 0, 416, 416)
+        core.clearMap('weather')
         core.animateFrame.weather.type = null;
         core.animateFrame.weather.level = 0;
         core.animateFrame.weather.nodes = [];
@@ -1480,7 +1483,7 @@ control.prototype.setWeather = function (type, level) {
     if (level<1) level=1; if (level>10) level=10;
     level *= 20;
 
-    core.clearMap('weather', 0, 0, 416, 416)
+    core.clearMap('weather')
     core.animateFrame.weather.type = type;
     core.animateFrame.weather.level = level;
 
@@ -1563,7 +1566,7 @@ control.prototype.updateFg = function () {
     if (!core.isset(core.status.thisMap) || !core.isset(core.status.thisMap.blocks)) return;
     // 更新显伤
     var mapBlocks = core.status.thisMap.blocks;
-    core.clearMap('fg', 0, 0, 416, 416);
+    core.clearMap('fg');
     // 没有怪物手册
     if (!core.hasItem('book')) return;
     core.setFont('fg', "bold 11px Arial");
@@ -1637,9 +1640,9 @@ control.prototype.updateFg = function () {
     // 如果是领域&夹击
     if (core.flags.displayExtraDamage) {
         core.canvas.fg.textAlign = 'center';
-        for (var x=0;x<13;x++) {
-            for (var y=0;y<13;y++) {
-                var damage = core.status.checkBlock.damage[13*x+y];
+        for (var x=0;x<core.bigmap.width;x++) {
+            for (var y=0;y<core.bigmap.height;y++) {
+                var damage = core.status.checkBlock.damage[x+core.bigmap.width*y];
                 if (damage>0) {
                     damage = core.formatBigNumber(damage);
                     core.setFillStyle('fg', '#000000');
@@ -2815,16 +2818,6 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             }
         },
         {
-            className: 'gameCanvas',
-            rules:{
-                // width: canvasWidth + unit,
-                // height: canvasWidth + unit,
-                top: canvasTop + unit,
-                left: 0,
-                border: '3px '+borderColor+' solid',
-            }
-        },
-        {
             id: 'gif',
             rules: {
                 width: (canvasWidth - SPACE*2) + unit,
@@ -2857,7 +2850,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 width: (canvasWidth - SPACE*2) + unit,
                 height:(canvasWidth - SPACE*2) + unit,
                 top: canvasTop + unit,
-                right: SPACE + unit,
+                right: 0,
                 border: '3px #fff solid'
             }
         },

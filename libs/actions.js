@@ -429,7 +429,7 @@ actions.prototype.ondown = function (x ,y) {
     }
 
     core.status.downTime = new Date();
-    core.clearMap('ui', 0, 0, 416,416);
+    core.clearMap('ui');
     var pos={'x':x,'y':y}
     core.status.stepPostfix=[];
     core.status.stepPostfix.push(pos);
@@ -553,9 +553,7 @@ actions.prototype.onclick = function (x, y, stepPostfix) {
 
     // 寻路
     if (!core.status.lockControl) {
-        var dx = ~~(core.maps.currentOffsetPos.x/32);
-        var dy = ~~(core.maps.currentOffsetPos.y/32);
-        core.setAutomaticRoute(x+dx, y+dy, stepPostfix);
+        core.setAutomaticRoute(x+parseInt(core.bigmap.offsetX/32), y+parseInt(core.bigmap.offsetY/32), stepPostfix);
         return;
     }
 
@@ -925,7 +923,7 @@ actions.prototype.keyUpBook = function (keycode) {
 
 ////// 怪物手册属性显示界面时的点击操作 //////
 actions.prototype.clickBookDetail = function () {
-    core.clearMap('data', 0, 0, 416, 416);
+    core.clearMap('data');
     core.status.event.id = 'book';
 }
 
@@ -987,7 +985,7 @@ actions.prototype.clickViewMaps = function (x,y) {
             core.ui.drawMaps(nextId);
     }
     else {
-        core.clearMap('data', 0, 0, 416, 416);
+        core.clearMap('data');
         core.setOpacity('data', 1);
         core.ui.closePanel();
     }
@@ -1007,7 +1005,7 @@ actions.prototype.keyDownViewMaps = function (keycode) {
 ////// 查看地图界面时，放开某个键的操作 //////
 actions.prototype.keyUpViewMaps = function (keycode) {
     if (keycode==27 || keycode==13 || keycode==32 || keycode==67) {
-        core.clearMap('data', 0, 0, 416, 416);
+        core.clearMap('data');
         core.setOpacity('data', 1);
         core.ui.closePanel();
     }

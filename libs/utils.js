@@ -352,6 +352,11 @@ utils.prototype.subarray = function (a, b) {
     return na;
 }
 
+utils.prototype.clamp = function (x, a, b) {
+    var min=Math.min(a, b), max=Math.max(a, b);
+    return Math.min(Math.max(x, min), max);
+}
+
 ////// Base64加密 //////
 utils.prototype.encodeBase64 = function (str) {
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {

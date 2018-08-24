@@ -299,7 +299,7 @@ enemys.prototype.calDamage = function (monster, hero_hp, hero_atk, hero_def, her
 // 检查领域、夹击、阻击事件
 control.prototype.checkBlock = function () {
     var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
-    var damage = core.status.checkBlock.damage[13*x+y];
+    var damage = core.status.checkBlock.damage[x+core.bigmap.width*y];
     if (damage>0) {
         if (core.hasFlag("shield5")) damage = 0; // 如果存在神圣盾，则将伤害变成0
         core.status.hero.hp -= damage;

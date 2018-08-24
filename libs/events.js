@@ -131,9 +131,9 @@ events.prototype.lose = function (reason) {
 events.prototype.gameOver = function (ending, fromReplay, norank) {
 
     // 清空图片和天气
-    core.clearMap('animate', 0, 0, 416, 416);
+    core.clearMap('animate');
     core.dom.gif2.innerHTML = "";
-    core.clearMap('weather', 0, 0, 416, 416)
+    core.clearMap('weather')
     core.animateFrame.weather.type = null;
     core.animateFrame.weather.level = 0;
     core.animateFrame.weather.nodes = [];
@@ -281,7 +281,7 @@ events.prototype.doAction = function() {
     core.status.boxAnimateObjs = [];
     clearInterval(core.status.event.interval);
 
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
     core.setAlpha('ui', 1.0);
 
     // 事件处理完毕
@@ -513,7 +513,7 @@ events.prototype.doAction = function() {
                 break;
             }
         case "changePos": // 直接更换勇士位置，不切换楼层
-            core.clearMap('hero', 0, 0, 416, 416);
+            core.clearMap('hero');
             if (core.isset(data.loc)) {
                 core.setHeroLoc('x', core.calValue(data.loc[0]));
                 core.setHeroLoc('y', core.calValue(data.loc[1]));
@@ -527,7 +527,7 @@ events.prototype.doAction = function() {
                 core.canvas.animate.drawImage(core.material.images.images[data.name],
                     core.calValue(data.loc[0]), core.calValue(data.loc[1]));
             }
-            else core.clearMap('animate', 0, 0, 416, 416);
+            else core.clearMap('animate');
             this.doAction();
             break;
         case "animateImage": // 淡入淡出图片
@@ -1186,14 +1186,14 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
                 })
             }
             // 重置画布尺寸
-            core.maps.resizeCanvas(floorId);
+            core.maps.resizeMap(floorId);
             // 画地图
             core.drawMap(floorId, function () {
                 if (core.isset(heroLoc.direction))
                     core.setHeroLoc('direction', heroLoc.direction);
                 core.setHeroLoc('x', heroLoc.x);
                 core.setHeroLoc('y', heroLoc.y);
-                core.clearMap('hero', 0, 0, 416, 416);
+                core.clearMap('hero');
                 core.drawHero();
 
                 var changed = function () {
@@ -1247,7 +1247,7 @@ events.prototype.animateImage = function (type, image, loc, time, callback) {
         core.setOpacity('data', opacityVal);
         if (opacityVal >=1 || opacityVal<=0) {
             clearInterval(animate);
-            core.clearMap('data', 0, 0, 416, 416);
+            core.clearMap('data');
             core.setOpacity('data', 1);
             core.status.replay.animate=false;
             if (core.isset(callback)) callback();
@@ -1267,7 +1267,7 @@ events.prototype.moveImage = function (image, from, to, time, callback) {
         toX = core.calValue(to[0]), toY = core.calValue(to[1]);
     var step = 0;
     var drawImage = function () {
-        core.clearMap('data', 0, 0, 416, 416);
+        core.clearMap('data');
         var nowX = parseInt(fromX + (toX-fromX)*step/64);
         var nowY = parseInt(fromY + (toY-fromY)*step/64);
         core.canvas.data.drawImage(image, nowX, nowY);
@@ -1279,7 +1279,7 @@ events.prototype.moveImage = function (image, from, to, time, callback) {
         drawImage();
         if (step>=64) {
             clearInterval(animate);
-            core.clearMap('data', 0, 0, 416, 416);
+            core.clearMap('data');
             core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
@@ -1610,7 +1610,7 @@ events.prototype.pushBox = function (data) {
 
     var direction = core.getHeroLoc('direction'), nx=data.x+scan[direction].x, ny=data.y+scan[direction].y;
 
-    if (nx<0||nx>12||ny<0||ny>12) return;
+    if (nx<0||nx>=core.bigmap.width||ny<0||ny>=core.bigmap.height) return;
 
     var block = core.getBlock(nx, ny, null, false);
     if (block!=null && !(core.isset(block.block.event) && block.block.event.id=='flower'))

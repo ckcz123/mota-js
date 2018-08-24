@@ -76,6 +76,13 @@ function core() {
         styles: [],
         scale: 1.0,
     }
+    this.bigmap = {
+        canvas: ["bg", "event", "event2", "fg"],
+        offsetX: 0, // in pixel
+        offsetY: 0,
+        width: 13, // map width and height
+        height: 13
+    }
     this.initStatus = {
         'played': false,
         'gameOver': false,
@@ -1144,6 +1151,10 @@ core.prototype.isset = function (val) {
 ////// 获得子数组 //////
 core.prototype.subarray = function (a, b) {
     return core.utils.subarray(a, b);
+}
+
+core.prototype.clamp = function (x, a, b) {
+    return core.utils.clamp(x, a, b);
 }
 
 ////// Base64加密 //////

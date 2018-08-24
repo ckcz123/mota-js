@@ -476,7 +476,7 @@ actions.prototype.onup = function () {
         for(var ii=1;ii<core.status.stepPostfix.length;ii++){
             var pos0 = core.status.stepPostfix[ii-1];
             var pos = core.status.stepPostfix[ii];
-            stepPostfix.push({'direction': direction[pos.x-pos0.x][pos.y-pos0.y], 'x': pos.x, 'y': pos.y});
+            stepPostfix.push({'direction': direction[pos.x-pos0.x][pos.y-pos0.y], 'x': pos.x+parseInt(core.bigmap.offsetX/32), 'y': pos.y+parseInt(core.bigmap.offsetY/32)});
         }
         var posx=core.status.stepPostfix[0].x;
         var posy=core.status.stepPostfix[0].y;

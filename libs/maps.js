@@ -190,8 +190,8 @@ maps.prototype.resizeMap = function(floorId) {
     core.bigmap.canvas.forEach(function(cn){
         core.canvas[cn].canvas.setAttribute("width",cwidth);
         core.canvas[cn].canvas.setAttribute("height",cheight);
-        core.canvas[cn].canvas.style.width = cwidth;
-        core.canvas[cn].canvas.style.height = cheight;
+        core.canvas[cn].canvas.style.width = cwidth*core.domStyle.scale + "px";
+        core.canvas[cn].canvas.style.height = cheight*core.domStyle.scale + "px";
     });
 }
 

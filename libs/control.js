@@ -632,7 +632,7 @@ control.prototype.automaticRoute = function (destX, destY) {
 
 ////// 显示离散的寻路点 //////
 control.prototype.fillPosWithPoint = function (pos) {
-    core.fillRect('route', pos.x*32+12,pos.y*32+12,8,8, '#bfbfbf');
+    core.fillRect('route', pos.x*32+12+core.bigmap.offsetX,pos.y*32+12+core.bigmap.offsetY,8,8, '#bfbfbf');
 }
 
 ////// 设置勇士的自动行走路线 //////
@@ -985,6 +985,8 @@ control.prototype.stopHero = function () {
 ////// 设置画布偏移
 control.prototype.setGameCanvasTranslate = function(canvas,x,y){
     var c=core.dom.gameCanvas[canvas];
+    x=x*core.domStyle.scale;
+    y=y*core.domStyle.scale;
     c.style.transform='translate('+x+'px,'+y+'px)';
     c.style.webkitTransform='translate('+x+'px,'+y+'px)';
     c.style.OTransform='translate('+x+'px,'+y+'px)';
@@ -2815,6 +2817,13 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 height: gameGroupHeight + unit,
                 top: (clientHeight-gameGroupHeight)/2 + unit,
                 left: (clientWidth-gameGroupWidth)/2 + unit,
+            }
+        },
+        {
+            className: 'gameCanvas',
+            rules:{
+                width: (canvasWidth - SPACE*2) + unit,
+                height: (canvasWidth - SPACE*2) + unit,
             }
         },
         {

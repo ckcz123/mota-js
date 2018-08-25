@@ -2,11 +2,6 @@
  * 初始化 start
  */
 
-// 额外功能
-Number.prototype.clamp = function(min, max) {
-    return Math.min(Math.max(this, min), max);
-};
-
 function core() {
     this.material = {
         'animates': {},
@@ -81,7 +76,8 @@ function core() {
         offsetX: 0, // in pixel
         offsetY: 0,
         width: 13, // map width and height
-        height: 13
+        height: 13,
+        tempCanvas: null, // A temp canvas for drawing
     }
     this.initStatus = {
         'played': false,
@@ -274,6 +270,8 @@ core.prototype.init = function (coreData, callback) {
 
     core.material.ground = new Image();
     core.material.ground.src = "project/images/ground.png";
+
+    core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
 
     core.loader.load(function () {
         console.log(core.material);

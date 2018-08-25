@@ -354,10 +354,8 @@ maps.prototype.drawMap = function (mapName, callback) {
             }
         }
         images.forEach(function (t) {
-            var size=416, ratio=1;
             var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
             if (core.isset(dx) && core.isset(dy) && core.isset(core.material.images.images[p])) {
-                dx*=32; dy*=32;
                 var image = core.material.images.images[p];
                 if (!t[3]) {
                     if (/.*\.gif/i.test(p) && main.mode=='play') {
@@ -365,23 +363,23 @@ maps.prototype.drawMap = function (mapName, callback) {
                         var gif = new Image();
                         gif.src = core.material.images.images[p].src;
                         gif.style.position = 'absolute';
-                        gif.style.left = (dx*core.domStyle.scale)+"px";
-                        gif.style.top = (dy*core.domStyle.scale)+"px";
+                        gif.style.left = (32*dx*core.domStyle.scale)+"px";
+                        gif.style.top = (32*dy*core.domStyle.scale)+"px";
                         gif.style.width = core.material.images.images[p].width*core.domStyle.scale+"px";
                         gif.style.height = core.material.images.images[p].height*core.domStyle.scale+"px";
                         core.dom.gif.appendChild(gif);
                     }
                     else {
-                        core.canvas.bg.drawImage(image, dx * ratio, dy * ratio, Math.min(size - dx * ratio, ratio * image.width), Math.min(size - dy * ratio, ratio * image.height));
+                        core.canvas.bg.drawImage(image, 32*dx, 32*dy, image.width, image.height);
                     }
                 }
                 else if (t[3]==1)
-                    core.canvas.event2.drawImage(image, dx*ratio, dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
+                    core.canvas.event2.drawImage(image, 32*dx, 32*dy, image.width, image.height);
                 else if (t[3]==2) {
                     core.canvas.event2.drawImage(image, 0, 0, image.width, image.height-32,
-                        dx * ratio, dy * ratio, ratio * image.width, ratio * (image.height-32));
+                        32*dx, 32*dy, image.width, image.height-32);
                     core.canvas.bg.drawImage(image, 0, image.height-32, image.width, 32,
-                        dx * ratio, (dy + image.height - 32) * ratio, ratio*image.width, 32*ratio);
+                        32*dx, 32*dy + image.height - 32, image.width, 32);
                 }
             }
         })

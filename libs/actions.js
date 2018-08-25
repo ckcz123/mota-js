@@ -351,7 +351,7 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
         case 33: case 34: // PAGEUP/PAGEDOWN
         if (core.status.heroStop) {
             if (core.flags.enableViewMaps) {
-                core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
+                core.ui.drawMaps();
             }
             else {
                 core.drawTip("本塔不允许浏览地图！");
@@ -968,23 +968,47 @@ actions.prototype.keyUpFly = function (keycode) {
 
 ////// 查看地图界面时的点击操作 //////
 actions.prototype.clickViewMaps = function (x,y) {
+    if (!core.isset(core.status.event.data)) {
+        core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
+        return;
+    }
+
     var now = core.floorIds.indexOf(core.status.floorId);
-    var nextId = core.status.event.data;
-    if(y<=4) {
-        nextId++;
-        while (nextId<core.floorIds.length && nextId!=now && core.floors[core.floorIds[nextId]].cannotViewMap)
-            nextId++;
-        if (nextId<core.floorIds.length)
-            core.ui.drawMaps(nextId);
+    var index = core.status.event.data.index;
+    var cx = core.status.event.data.x, cy = core.status.event.data.y;
+
+    if (x>=2 && x<=10 && y<=1) {
+        core.ui.drawMaps(index, cx, cy-1);
+        return;
     }
-    else if (y>=8) {
-        nextId--;
-        while (nextId>=0 && nextId!=now && core.floors[core.floorIds[nextId]].cannotViewMap)
-            nextId--;
-        if (nextId>=0)
-            core.ui.drawMaps(nextId);
+    if (x>=2 && x<=10 && y>=11) {
+        core.ui.drawMaps(index, cx, cy+1);
+        return;
     }
-    else {
+    if (x<=1 && y>=2 && y<=10) {
+        core.ui.drawMaps(index, cx-1, cy);
+        return;
+    }
+    if (x>=11 && y>=2 && y<=10) {
+        core.ui.drawMaps(index, cx+1, cy);
+        return;
+    }
+
+    if(x>=2 && x<=10 && y<=4) {
+        index++;
+        while (index<core.floorIds.length && index!=now && core.floors[core.floorIds[index]].cannotViewMap)
+            index++;
+        if (index<core.floorIds.length)
+            core.ui.drawMaps(index);
+    }
+    else if (x>=2 && x<=10 && y>=8) {
+        index--;
+        while (index>=0 && index!=now && core.floors[core.floorIds[index]].cannotViewMap)
+            index--;
+        if (index>=0)
+            core.ui.drawMaps(index);
+    }
+    else if (x>=2 && x<=10 && y>=5 && y<=7) {
         core.clearMap('data');
         core.setOpacity('data', 1);
         core.ui.closePanel();
@@ -993,17 +1017,23 @@ actions.prototype.clickViewMaps = function (x,y) {
 
 ////// 查看地图界面时，按下某个键的操作 //////
 actions.prototype.keyDownViewMaps = function (keycode) {
-    if (keycode==37 || keycode==38 || keycode==33) {
-        this.clickViewMaps(6,2);
-    }
-    else if (keycode==39 || keycode==40 || keycode==34) {
-        this.clickViewMaps(6,10);
-    }
+    if (!core.isset(core.status.event.data)) return;
+    if (keycode==38||keycode==33) this.clickViewMaps(6, 3);
+    if (keycode==40||keycode==34) this.clickViewMaps(6, 9);
+    if (keycode==87) this.clickViewMaps(6,0);
+    if (keycode==65) this.clickViewMaps(0,6);
+    if (keycode==83) this.clickViewMaps(6,12);
+    if (keycode==68) this.clickViewMaps(12,6);
     return;
 }
 
 ////// 查看地图界面时，放开某个键的操作 //////
 actions.prototype.keyUpViewMaps = function (keycode) {
+    if (!core.isset(core.status.event.data)) {
+        core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
+        return;
+    }
+
     if (keycode==27 || keycode==13 || keycode==32 || keycode==67) {
         core.clearMap('data');
         core.setOpacity('data', 1);
@@ -1585,9 +1615,12 @@ actions.prototype.clickSettings = function (x,y) {
                     core.drawTip("本塔不允许浏览地图！");
                 }
                 else {
+                    /*
                     core.drawText("\t[系统提示]即将进入浏览地图模式。\n\n点击地图上半部分，或按[↑]键可查看前一张地图\n点击地图下半部分，或按[↓]键可查看后一张地图\n点击地图中间，或按[ESC]键可离开浏览地图模式\n此模式下可以打开怪物手册以查看某层楼的怪物属性", function () {
                         core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
                     })
+                    */
+                    core.ui.drawMaps();
                 }
                 break;
             case 3:

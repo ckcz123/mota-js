@@ -308,7 +308,7 @@ editor.prototype.listen = function () {
 
     function fillPos(pos) {
         uc.fillStyle = '#' + ~~(Math.random() * 8) + ~~(Math.random() * 8) + ~~(Math.random() * 8);
-        uc.fillRect(pos.x * 32 + 12, pos.y * 32 + 12, 8, 8);
+        uc.fillRect(pos.x * 32 + 12 - core.bigmap.offsetX, pos.y * 32 + 12 - core.bigmap.offsetY, 8, 8);
     }//在格子内画一个随机色块
 
     function eToLoc(e) {
@@ -325,7 +325,7 @@ editor.prototype.listen = function () {
     }//返回可用的组件内坐标
 
     function locToPos(loc) {
-        editor.pos = {'x': ~~(loc.x / loc.size), 'y': ~~(loc.y / loc.size)}
+        editor.pos = {'x': ~~(loc.x / loc.size)+core.bigmap.offsetX/32, 'y': ~~(loc.y / loc.size)+core.bigmap.offsetY/32}
         return editor.pos;
     }
 

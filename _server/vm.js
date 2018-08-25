@@ -24,7 +24,14 @@ document.body.onmousedown = function (e) {
         }
     });
 
-    if (clickpath.indexOf('edit') === -1 && clickpath.indexOf('tip') === -1 && clickpath.indexOf('brushMod') === -1 && clickpath.indexOf('brushMod2') === -1) {
+    var unselect=true;
+    for(var ii=0,thisId;thisId=['edit','tip','brushMod','brushMod2','viewportButtons'][ii];ii++){
+        if (clickpath.indexOf(thisId) !== -1){
+            unselect=false;
+            break;
+        }
+    }
+    if (unselect) {
         if (clickpath.indexOf('eui') === -1) {
             if (selectBox.isSelected) {
                 editor_mode.onmode('');

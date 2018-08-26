@@ -591,6 +591,18 @@ editor.prototype.listen = function () {
                 editor.changeFloor(toId);
             }
         }
+        if (e.keyCode==37) {
+            editor.moveViewport(-1, 0);
+        }
+        if (e.keyCode==38) {
+            editor.moveViewport(0, -1);
+        }
+        if (e.keyCode==39) {
+            editor.moveViewport(1, 0);
+        }
+        if (e.keyCode==40) {
+            editor.moveViewport(0, 1);
+        }
     }
 
     var dataSelection = document.getElementById('dataSelection');

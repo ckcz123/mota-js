@@ -511,6 +511,24 @@ editor.prototype.listen = function () {
         }
     }
 
+    /*
+    document.getElementById('mid').onkeydown = function (e) {
+        console.log(e);
+        if (e.keyCode==37) {
+            editor.moveViewport(-1, 0);
+        }
+        if (e.keyCode==38) {
+            editor.moveViewport(0, -1);
+        }
+        if (e.keyCode==39) {
+            editor.moveViewport(1, 0);
+        }
+        if (e.keyCode==40) {
+            editor.moveViewport(0, 1);
+        }
+    }
+    */
+
     document.getElementById('mid').onmousewheel = function (e) {
         e.preventDefault();
         var wheel = function (direct) {
@@ -590,18 +608,6 @@ editor.prototype.listen = function () {
                 document.getElementById('selectFloor').value = toId;
                 editor.changeFloor(toId);
             }
-        }
-        if (e.keyCode==37) {
-            editor.moveViewport(-1, 0);
-        }
-        if (e.keyCode==38) {
-            editor.moveViewport(0, -1);
-        }
-        if (e.keyCode==39) {
-            editor.moveViewport(1, 0);
-        }
-        if (e.keyCode==40) {
-            editor.moveViewport(0, 1);
         }
     }
 

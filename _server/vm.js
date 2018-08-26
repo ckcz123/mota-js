@@ -199,7 +199,8 @@ var copyMap = new Vue({
                     return;
                 }
                 try {
-                    pout.select();
+                    pout.focus();
+                    pout.setSelectionRange(0, pout.value.length);
                     document.execCommand("Copy");
                     tip.whichShow = 6;
                 } catch (e) {

@@ -151,7 +151,6 @@ function core() {
             "time": 0,
         },
         'curtainColor': null,
-        'usingCenterFly':false,
         'openingDoor': null,
         'isSkiing': false,
 

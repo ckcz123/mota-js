@@ -1843,7 +1843,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
     if (!core.isset(centerX)) centerX=parseInt(mw/2);
     if (!core.isset(centerY)) centerY=parseInt(mh/2);
 
-    var offsetX = core.clamp(centerX-6, 0, mw), offsetY = core.clamp(centerY-6, 0, mh);
+    var offsetX = core.clamp(centerX-6, 0, mw-13), offsetY = core.clamp(centerY-6, 0, mh-13);
     // offsetX~offsetX+12; offsetY~offsetY+12
     core.canvas[canvas].drawImage(tempCanvas.canvas, offsetX*32, offsetY*32, 416, 416, x, y, size, size);
 }

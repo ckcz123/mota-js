@@ -18,9 +18,9 @@ editor.prototype.init = function (callback) {
                     return editor.ids[[editor.indexs[parseInt(v)][0]]]
                 })
             });
-            editor.updateMap();
             editor.currentFloorId = core.status.floorId;
             editor.currentFloorData = core.floors[core.status.floorId];
+            editor.updateMap();
             editor.buildMark();
             editor.drawEventBlock();
             if (Boolean(callback)) callback();
@@ -229,7 +229,7 @@ editor.prototype.updateMap = function () {
         return v.map(function (v) {
             return v.idnum || v || 0
         })
-    }), {'events': {}, 'changeFloor': {}});
+    }), {'events': {}, 'changeFloor': {}}, editor.currentFloorId);
     core.status.thisMap.blocks = blocks;
     main.editor.updateMap();
 
@@ -340,9 +340,9 @@ editor.prototype.changeFloor = function (floorId, callback) {
                 return editor.ids[[editor.indexs[parseInt(v)][0]]]
             })
         });
-        editor.updateMap();
         editor.currentFloorId = core.status.floorId;
         editor.currentFloorData = core.floors[core.status.floorId];
+        editor.updateMap();
         editor_mode.floor();
         editor.drawEventBlock();
         if (core.isset(callback)) callback();

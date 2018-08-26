@@ -16,7 +16,7 @@ maps.prototype.loadFloor = function (floorId, map) {
     content['title'] = floor.title;
     content['canFlyTo'] = floor.canFlyTo;
     if (!core.isset(map)) map=floor.map;
-    var mapIntoBlocks = function(map,maps,floor){
+    var mapIntoBlocks = function(map,maps,floor,floorId){
         var blocks = [];
         var mw = core.floors[floorId].width || 13;
         var mh = core.floors[floorId].height || 13;
@@ -32,12 +32,12 @@ maps.prototype.loadFloor = function (floorId, map) {
         return blocks;
     }
     if (main.mode=='editor'){
-        main.editor.mapIntoBlocks = function(map,floor){
-            return mapIntoBlocks(map,core.maps,floor);
+        main.editor.mapIntoBlocks = function(map,floor,floorId){
+            return mapIntoBlocks(map,core.maps,floor,floorId);
         }
     }
     // 事件处理
-    content['blocks'] = mapIntoBlocks(map,this,floor);
+    content['blocks'] = mapIntoBlocks(map,this,floor,floorId);
     return content;
 }
 

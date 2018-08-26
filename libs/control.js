@@ -1164,14 +1164,14 @@ control.prototype.updateCheckBlock = function() {
     core.status.checkBlock.map = []; // 记录怪物地图
     for (var n=0;n<blocks.length;n++) {
         var block = blocks[n];
-        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls.indexOf('enemy')==0) {
+        if (core.isset(block.event) && !block.disable && block.event.cls.indexOf('enemy')==0) {
             var id = block.event.id, enemy = core.material.enemys[id];
             if (core.isset(enemy)) {
                 core.status.checkBlock.map[block.x+core.bigmap.width*block.y]=id;
             }
         }
         // 血网
-        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) &&
+        if (core.isset(block.event) && !block.disable &&
             block.event.id=='lavaNet' && block.event.trigger=='passNet' && !core.hasItem("shoes")) {
             core.status.checkBlock.map[block.x+core.bigmap.width*block.y]="lavaNet";
         }
@@ -1316,7 +1316,7 @@ control.prototype.checkBlock = function () {
             var x=t.x, y=t.y, direction = t.direction;
             var nx = x+scan[direction].x, ny=y+scan[direction].y;
 
-            return nx>=0 && nx<core.bigmap.width && ny>=0 && ny<core.bigmap.height && core.getBlock(nx, ny, core.status.floorId, false)==null;
+            return nx>=0 && nx<core.bigmap.width && ny>=0 && ny<core.bigmap.height && core.getBlock(nx, ny, null, true)==null;
         });
         core.updateStatusBar();
         if (snipe.length>0)
@@ -1568,7 +1568,7 @@ control.prototype.updateFg = function () {
         for (var b = 0; b < mapBlocks.length; b++) {
             var x = mapBlocks[b].x, y = mapBlocks[b].y;
             if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls.indexOf('enemy')==0
-                && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable)) {
+                && !mapBlocks[b].disable) {
 
                 // 非系统默认的战斗事件（被覆盖）
                 if (mapBlocks[b].event.trigger != 'battle') {

@@ -43,21 +43,21 @@ maps.prototype.loadFloor = function (floorId, map) {
 
 ////// 数字和ID的对应关系 //////
 maps.prototype.initBlock = function (x, y, id) {
-    var enable=null;
+    var disable=null;
     id = ""+id;
     if (id.length>2) {
         if (id.indexOf(":f")==id.length-2) {
             id = id.substring(0, id.length - 2);
-            enable = false;
+            disable = false;
         }
         else if (id.indexOf(":t")==id.length-2) {
             id = id.substring(0, id.length - 2);
-            enable = true;
+            disable = true;
         }
     }
     id=parseInt(id);
     var tmp = {'x': x, 'y': y, 'id': id};
-    if (enable!=null) tmp.enable = enable;
+    if (disable!=null) tmp.disable = disable;
 
     if (id in this.blocksInfo) tmp.event = JSON.parse(JSON.stringify(this.blocksInfo[id]));
 
@@ -113,8 +113,8 @@ maps.prototype.addEvent = function (block, x, y, event) {
         block.event.noPass = event.noPass;
 
     // 覆盖enable
-    if (!core.isset(block.enable) && core.isset(event.enable)) {
-        block.enable=event.enable;
+    if (!core.isset(block.disable) && core.isset(event.enable)) {
+        block.disable=!event.enable;
     }
     // 覆盖trigger
     if (!core.isset(block.event.trigger)) {
@@ -126,7 +126,7 @@ maps.prototype.addEvent = function (block, x, y, event) {
     }
     // 覆盖其他属性
     for (var key in event) {
-        if (key!="enable" && key!="trigger" && key!="noPass" && core.isset(event[key])) {
+        if (key!="disable" && key!="trigger" && key!="noPass" && core.isset(event[key])) {
             block.event[key]=core.clone(event[key]);
         }
     }
@@ -171,8 +171,8 @@ maps.prototype.save = function(maps, floorId) {
         }
     }
     thisFloor.blocks.forEach(function (block) {
-        if (core.isset(block.enable)) {
-            if (block.enable) blocks[block.y][block.x] = block.id+":t";
+        if (core.isset(block.disable)) {
+            if (!block.disable) blocks[block.y][block.x] = block.id+":t";
             else blocks[block.y][block.x] = block.id+":f";
         }
         else blocks[block.y][block.x] = block.id;
@@ -218,7 +218,7 @@ maps.prototype.getMapArray = function (blockArray,width,height){
         }
     }
     blockArray.forEach(function (block) {
-        if (!(core.isset(block.enable) && !block.enable))
+        if (!block.disable)
             blocks[block.y][block.x] = block.id;
     });
     return blocks;
@@ -404,7 +404,7 @@ maps.prototype.drawMap = function (mapName, callback) {
         for (var b = 0; b < mapBlocks.length; b++) {
             // 事件启用
             var block = mapBlocks[b];
-            if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
+            if (core.isset(block.event) && !block.disable) {
                 if (block.event.cls == 'autotile') {
                     core.drawAutotile(core.canvas.event, mapArray, block, 32, 0, 0);
                 }
@@ -567,13 +567,12 @@ maps.prototype.enemyExists = function (x, y, id,floorId) {
 }
 
 ////// 获得某个点的block //////
-maps.prototype.getBlock = function (x, y, floorId, needEnable) {
+maps.prototype.getBlock = function (x, y, floorId, showDisable) {
     if (!core.isset(floorId)) floorId=core.status.floorId;
-    if (!core.isset(needEnable)) needEnable=true;
     var blocks = core.status.maps[floorId].blocks;
     for (var n=0;n<blocks.length;n++) {
         if (blocks[n].x==x && blocks[n].y==y && core.isset(blocks[n].event)) {
-            if (needEnable && core.isset(blocks[n].enable) && !blocks[n].enable) return null;
+            if (!showDisable && blocks[n].disable) return null;
             return {"index": n, "block": blocks[n]};
         }
     }
@@ -581,10 +580,18 @@ maps.prototype.getBlock = function (x, y, floorId, needEnable) {
 }
 
 ////// 获得某个点的blockId //////
-maps.prototype.getBlockId = function (x, y, floorId, needEnable) {
-    var block = core.getBlock(x, y, floorId, needEnable);
+maps.prototype.getBlockId = function (x, y, floorId, showDisable) {
+    var block = core.getBlock(x, y, floorId, showDisable);
     if (block == null) return null;
     if (core.isset(block.block.event)) return block.block.event.id;
+    return null;
+}
+
+////// 获得某个点的blockCls //////
+maps.prototype.getBlockCls = function (x, y, floorId, showDisable) {
+    var block = core.getBlock(x, y, floorId, showDisable);
+    if (block == null) return null;
+    if (core.isset(block.block.event)) return block.block.event.cls;
     return null;
 }
 
@@ -797,7 +804,7 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
 
     var list = [];
     loc.forEach(function (t) {
-        var block = core.getBlock(t[0],t[1],core.status.floorId,false);
+        var block = core.getBlock(t[0],t[1],null,true);
         if (block==null) return;
         block=block.block;
         list.push({
@@ -842,12 +849,12 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
 ////// 将某个块从禁用变成启用状态 //////
 maps.prototype.showBlock = function(x, y, floodId) {
     floodId = floodId || core.status.floorId;
-    var block = core.getBlock(x,y,floodId,false);
+    var block = core.getBlock(x,y,floodId,true);
     if (block==null) return; // 不存在
     block=block.block;
     // 本身是禁用事件，启用之
-    if (core.isset(block.enable) && !block.enable) {
-        block.enable = true;
+    if (block.disable) {
+        block.disable = false;
         // 在本层，添加动画
         if (floodId == core.status.floorId && core.isset(block.event)) {
             core.drawBlock(block);
@@ -862,7 +869,7 @@ maps.prototype.showBlock = function(x, y, floodId) {
 maps.prototype.removeBlock = function (x, y, floorId) {
     floorId = floorId || core.status.floorId;
 
-    var block = core.getBlock(x,y,floorId,false);
+    var block = core.getBlock(x,y,floorId,true);
     if (block==null) return; // 不存在
 
     var index=block.index;
@@ -904,7 +911,7 @@ maps.prototype.removeBlockById = function (index, floorId) {
         blocks.splice(index,1);
         return;
     }
-    block.enable = false;
+    block.disable = true;
 }
 
 ////// 一次性删除多个block //////
@@ -920,7 +927,7 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     if (!core.isset(number) || !core.isset(x) || !core.isset(y)) return;
     if (x<0 || x>=core.bigmap.width || y<0 || y>=core.bigmap.height) return;
 
-    var originBlock=core.getBlock(x,y,floorId,false);
+    var originBlock=core.getBlock(x,y,floorId,true);
     var block = core.maps.initBlock(x,y,number);
     core.maps.addInfo(block);
     core.maps.addEvent(block,x,y,core.floors[floorId].events[x+","+y]);

@@ -1026,7 +1026,7 @@ events.prototype.trigger = function (x, y) {
     var mapBlocks = core.status.thisMap.blocks;
     var noPass;
     for (var b = 0; b < mapBlocks.length; b++) {
-        if (mapBlocks[b].x == x && mapBlocks[b].y == y && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable)) { // 启用事件
+        if (mapBlocks[b].x == x && mapBlocks[b].y == y && !mapBlocks[b].disable) { // 启用事件
             noPass = mapBlocks[b].event && mapBlocks[b].event.noPass;
             if (noPass) {
                 core.clearAutomaticRouteNode(x, y);
@@ -1102,7 +1102,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
         else {
             var blocks = core.status.maps[floorId].blocks;
             for (var i in blocks) {
-                if (core.isset(blocks[i].event) && !(core.isset(blocks[i].enable) && !blocks[i].enable) && blocks[i].event.id === stair) {
+                if (core.isset(blocks[i].event) && !blocks[i].disable && blocks[i].event.id === stair) {
                     heroLoc.x = blocks[i].x;
                     heroLoc.y = blocks[i].y;
                     break;
@@ -1179,9 +1179,9 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             // 检查重生
             if (!core.isset(fromLoad)) {
                 core.status.maps[floorId].blocks.forEach(function(block) {
-                    if (core.isset(block.enable) && !block.enable && core.isset(block.event) && block.event.cls.indexOf('enemy')==0
+                    if (block.disable && core.isset(block.event) && block.event.cls.indexOf('enemy')==0
                         && core.enemys.hasSpecial(core.material.enemys[block.event.id].special, 23)) {
-                        block.enable = true;
+                        block.disable = false;
                     }
                 })
             }
@@ -1617,7 +1617,7 @@ events.prototype.pushBox = function (data) {
 
     if (nx<0||nx>=core.bigmap.width||ny<0||ny>=core.bigmap.height) return;
 
-    var block = core.getBlock(nx, ny, null, false);
+    var block = core.getBlock(nx, ny, null, true);
     if (block!=null && !(core.isset(block.block.event) && block.block.event.id=='flower'))
         return;
 

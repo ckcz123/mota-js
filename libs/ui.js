@@ -1803,7 +1803,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
     var mapArray = core.maps.getMapArray(blocks,mw,mh);
     for (var b in blocks) {
         var block = blocks[b];
-        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
+        if (core.isset(block.event) && !block.disable) {
             if (block.event.cls == 'autotile') {
                 core.drawAutotile(tempCanvas, mapArray, block, 32, 0, 0);
             }
@@ -1925,7 +1925,7 @@ ui.prototype.drawStatistics = function () {
         if (floor.cannotViewMap && floorId!=core.status.floorId) return;
 
         blocks.forEach(function (block) {
-            if (!core.isset(block.event) || (core.isset(block.enable) && !block.enable))
+            if (!core.isset(block.event) || block.disable)
                 return;
             var event = block.event;
             if (event.cls.indexOf("enemy")==0) {

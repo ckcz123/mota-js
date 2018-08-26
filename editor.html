@@ -5,11 +5,6 @@
     <link href="_server/css/editor.css" rel="stylesheet">
     <link href="_server/CodeMirror/codemirror.css" rel="stylesheet">
     <link href="_server/css/editor_mode.css" rel="stylesheet">
-    <style>
-        #mapEdit {
-            overflow: hidden;
-        }
-    </style>
 </head>
 <body>
 <script>
@@ -248,9 +243,9 @@
             </span>
             <br>
             <div id="viewportButtons">
+                <input type="button" value="←"/>
                 <input type="button" value="↑"/>
                 <input type="button" value="↓"/>
-                <input type="button" value="←"/>
                 <input type="button" value="→"/>
             </div>
             <br>
@@ -396,25 +391,6 @@
     </div>
 </div>
 <!-- */</script> -->
-<script>
-    // 生成定位编号
-    buildMark_c3cac94e_bf59_4388_a8e3_a22bac1f4f6a = function (offsetX,offsetY) {
-        var colNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<td>' + (i+offsetX) + '<div class="colBlock" style="left:' + (i * 32 + 1) + 'px;"></div></td>';
-            colNum += tpl;
-        }
-        arrColMark.innerHTML = '<tr>' + colNum + '</tr>';
-        mapColMark.innerHTML = '<tr>' + colNum + '</tr>';
-        var rowNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<tr><td>' + (i+offsetY) + '<div class="rowBlock" style="top:' + (i * 32 + 1) + 'px;"></div></td></tr>';
-            rowNum += tpl;
-        }
-        arrRowMark.innerHTML = rowNum;
-        mapRowMark.innerHTML = rowNum;
-    }
-</script>
 
 <!-- =========================================================== -->
 
@@ -448,24 +424,6 @@ if (location.protocol.indexOf("http")!=0) {
 </script>
 <script src='_server/editor.js'></script>
 <script>
-    editor.buildMark=buildMark_c3cac94e_bf59_4388_a8e3_a22bac1f4f6a;
-    delete(buildMark_c3cac94e_bf59_4388_a8e3_a22bac1f4f6a);
-    editor.moveViewport=function(x,y){
-        core.bigmap.offsetX = core.clamp(core.bigmap.offsetX+32*x, 0, 32*core.bigmap.width-416);
-        core.bigmap.offsetY = core.clamp(core.bigmap.offsetY+32*y, 0, 32*core.bigmap.height-416);
-        core.control.updateViewport()
-        editor.buildMark(core.bigmap.offsetX/32,core.bigmap.offsetY/32);
-    }
-
-    var viewportButtons=document.getElementById('viewportButtons');
-    for(var ii=0,node;node=viewportButtons.children[ii];ii++){
-        (function(x,y){
-            node.onclick=function(){
-                editor.moveViewport(x,y);
-            }
-        })([0,0,-1,1][ii],[-1,1,0,0][ii]);
-    }
-
     var useCompress = main.useCompress;
     main.useCompress = false;
     main.init('editor', function () {
@@ -483,7 +441,6 @@ if (location.protocol.indexOf("http")!=0) {
             editor_blockly = editor_blockly();
             editor.useCompress = useCompress;
             delete(useCompress);
-            editor.moveViewport(0,0);
         });
     });
 

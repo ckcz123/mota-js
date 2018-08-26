@@ -268,7 +268,12 @@
                     <option value="line">画线</option>
                     <option value="rectangle">画矩形</option>
                 </select>
-                <br>
+                <div id="viewportButtons">
+                    <input type="button" value="←"/>
+                    <input type="button" value="↑"/>
+                    <input type="button" value="↓"/>
+                    <input type="button" value="→"/>
+                </div>
                 <select id="selectFloor"></select>
                 <input type="button" value="保存地图" id='saveFloor'/>
                 <span id='mobileeditdata' style="display:none">
@@ -387,50 +392,20 @@
     <div id="gif"></div>
     <div id="gif2"></div>
     <div id="curtain"></div>
-    <!-- <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas> -->
-    <!-- <canvas class='gameCanvas' id='event' width='416' height='416'></canvas> -->
-    <canvas class='gameCanvas' id='hero' width='416' height='416'></canvas>
-    <!-- <canvas class='gameCanvas' id='event2' width='416' height='416'></canvas> -->
-    <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
-    <canvas class='gameCanvas' id='animate' width='416' height='416'></canvas>
-    <canvas class='gameCanvas' id='weather' width='416' height='416'></canvas>
-    <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
-    <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
+    <div id="gameDraw">
+        <!-- <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas> -->
+        <!-- <canvas class='gameCanvas' id='event' width='416' height='416'></canvas> -->
+        <canvas class='gameCanvas' id='hero' width='416' height='416'></canvas>
+        <!-- <canvas class='gameCanvas' id='event2' width='416' height='416'></canvas> -->
+        <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='animate' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='weather' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='route' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
+    </div>
 </div>
 <!-- */</script> -->
-<script>
-    // 生成定位编号
-    (function () {
-        var colNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="colBlock" style="left:' + (i * 96/13 ) + 'vw;"></div></td>';
-            colNum += tpl;
-        }
-        arrColMark.innerHTML = '<tr>' + colNum + '</tr>';
-        //mapColMark.innerHTML = '<tr>' + colNum + '</tr>';
-        var rowNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<tr><td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="rowBlock" style="top:' + (i * 96/13 ) + 'vw;"></div></td></tr>';
-            rowNum += tpl;
-        }
-        arrRowMark.innerHTML = rowNum;
-        //mapRowMark.innerHTML = rowNum;
-    })();
-    (function () {
-        var colNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<div class="coltd" style="left:' + (i * 96/13 ) + 'vw;"><div class="coltext">' + (' '+i).slice(-2).replace(' ','&nbsp;') + '</div><div class="colBlock"></div></div>';
-            colNum += tpl;
-        }
-        mapColMark.innerHTML = '<div class="coltr">' + colNum + '</div>';
-        var rowNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<div class="rowtr"><div class="rowtd"  style="top:' + (i * 96/13 ) + 'vw;"><div class="rowtext">' + (' '+i).slice(-2).replace(' ','&nbsp;') + '</div><div class="rowBlock"></div></div></div>';
-            rowNum += tpl;
-        }
-        mapRowMark.innerHTML = rowNum;
-    })();
-</script>
 
 <!-- =========================================================== -->
 

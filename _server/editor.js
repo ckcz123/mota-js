@@ -21,6 +21,7 @@ editor.prototype.init = function (callback) {
             editor.updateMap();
             editor.currentFloorId = core.status.floorId;
             editor.currentFloorData = core.floors[core.status.floorId];
+            editor.buildMark();
             editor.drawEventBlock();
             if (Boolean(callback)) callback();
         });
@@ -162,9 +163,10 @@ editor.prototype.mapInit = function () {
     ec.clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
     document.getElementById('event2').getContext('2d').clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
     editor.map = [];
-    for (var y = 0; y < 13; y++) {
+    var sy=editor.currentFloorData.map.length,sy=editor.currentFloorData.map[0].length;
+    for (var y = 0; y < sy; y++) {
         editor.map[y] = [];
-        for (var x = 0; x < 13; x++) {
+        for (var x = 0; x < sx; x++) {
             editor.map[y][x] = 0;
         }
     }
@@ -201,7 +203,7 @@ editor.prototype.drawEventBlock = function () {
     for (var i=0;i<13;i++) {
         for (var j=0;j<13;j++) {
             var color=null;
-            var loc=i+","+j;
+            var loc=(i+core.bigmap.offsetX/32)+","+(j+core.bigmap.offsetY/32);
             if (core.isset(editor.currentFloorData.events[loc]))
                 color = '#FF0000';
             else if (core.isset(editor.currentFloorData.changeFloor[loc]))
@@ -254,8 +256,8 @@ editor.prototype.updateMap = function () {
     }
     // 绘制地图 start
     var eventCtx = document.getElementById('event').getContext("2d");
-    for (var y = 0; y < 13; y++)
-        for (var x = 0; x < 13; x++) {
+    for (var y = 0; y < editor.map.length; y++)
+        for (var x = 0; x < editor.map[0].length; x++) {
             var tileInfo = editor.map[y][x];
             if (false && isAutotile(tileInfo)) {
                 addIndexToAutotileInfo(x, y);
@@ -264,6 +266,64 @@ editor.prototype.updateMap = function () {
         }
     // 绘制地图 end
     
+}
+
+editor.prototype.buildMark = function(){
+    // 生成定位编号
+    var arrColMark=document.getElementById('arrColMark');
+    var arrRowMark=document.getElementById('arrRowMark');
+    var mapColMark=document.getElementById('mapColMark');
+    var mapRowMark=document.getElementById('mapRowMark');
+    var buildMark = function (offsetX,offsetY) {
+        var colNum = ' ';
+        for (var i = 0; i < 13; i++) {
+            var tpl = '<td>' + (i+offsetX) + '<div class="colBlock" style="left:' + (i * 32 + 1) + 'px;"></div></td>';
+            colNum += tpl;
+        }
+        arrColMark.innerHTML = '<tr>' + colNum + '</tr>';
+        mapColMark.innerHTML = '<tr>' + colNum + '</tr>';
+        var rowNum = ' ';
+        for (var i = 0; i < 13; i++) {
+            var tpl = '<tr><td>' + (i+offsetY) + '<div class="rowBlock" style="top:' + (i * 32 + 1) + 'px;"></div></td></tr>';
+            rowNum += tpl;
+        }
+        arrRowMark.innerHTML = rowNum;
+        mapRowMark.innerHTML = rowNum;
+    }
+    var buildMark_mobile = function (offsetX,offsetY) {
+        var colNum = ' ';
+        for (var i = 0; i < 13; i++) {
+            var tpl = '<td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="colBlock" style="left:' + (i * 96/13 ) + 'vw;"></div></td>';
+            colNum += tpl;
+        }
+        arrColMark.innerHTML = '<tr>' + colNum + '</tr>';
+        //mapColMark.innerHTML = '<tr>' + colNum + '</tr>';
+        var rowNum = ' ';
+        for (var i = 0; i < 13; i++) {
+            var tpl = '<tr><td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="rowBlock" style="top:' + (i * 96/13 ) + 'vw;"></div></td></tr>';
+            rowNum += tpl;
+        }
+        arrRowMark.innerHTML = rowNum;
+        //mapRowMark.innerHTML = rowNum;
+        //=====
+        var colNum = ' ';
+        for (var i = 0; i < 13; i++) {
+            var tpl = '<div class="coltd" style="left:' + (i * 96/13 ) + 'vw;"><div class="coltext">' + (' '+(i+offsetX)).slice(-2).replace(' ','&nbsp;') + '</div><div class="colBlock"></div></div>';
+            colNum += tpl;
+        }
+        mapColMark.innerHTML = '<div class="coltr">' + colNum + '</div>';
+        var rowNum = ' ';
+        for (var i = 0; i < 13; i++) {
+            var tpl = '<div class="rowtr"><div class="rowtd"  style="top:' + (i * 96/13 ) + 'vw;"><div class="rowtext">' + (' '+(i+offsetY)).slice(-2).replace(' ','&nbsp;') + '</div><div class="rowBlock"></div></div></div>';
+            rowNum += tpl;
+        }
+        mapRowMark.innerHTML = rowNum;
+    }
+    if(editor.isMobile){
+        buildMark_mobile(core.bigmap.offsetX/32,core.bigmap.offsetY/32);
+    } else {
+        buildMark(core.bigmap.offsetX/32,core.bigmap.offsetY/32);
+    }
 }
 
 editor.prototype.changeFloor = function (floorId, callback) {
@@ -308,7 +368,7 @@ editor.prototype.listen = function () {
 
     function fillPos(pos) {
         uc.fillStyle = '#' + ~~(Math.random() * 8) + ~~(Math.random() * 8) + ~~(Math.random() * 8);
-        uc.fillRect(pos.x * 32 + 12, pos.y * 32 + 12, 8, 8);
+        uc.fillRect(pos.x * 32 + 12 - core.bigmap.offsetX, pos.y * 32 + 12 - core.bigmap.offsetY, 8, 8);
     }//在格子内画一个随机色块
 
     function eToLoc(e) {
@@ -324,8 +384,13 @@ editor.prototype.listen = function () {
         return editor.loc;
     }//返回可用的组件内坐标
 
-    function locToPos(loc) {
-        editor.pos = {'x': ~~(loc.x / loc.size), 'y': ~~(loc.y / loc.size)}
+    function locToPos(loc, addViewportOffset) {
+        var offsetX=0, offsetY=0;
+        if (addViewportOffset){
+            offsetX=core.bigmap.offsetX/32;
+            offsetY=core.bigmap.offsetY/32;
+        }
+        editor.pos = {'x': ~~(loc.x / loc.size)+offsetX, 'y': ~~(loc.y / loc.size)+offsetY}
         return editor.pos;
     }
 
@@ -350,13 +415,13 @@ editor.prototype.listen = function () {
     eui.onmousedown = function (e) {
         if (e.button==2){
             var loc = eToLoc(e);
-            var pos = locToPos(loc);
+            var pos = locToPos(loc,true);
             editor.showMidMenu(e.clientX,e.clientY);
             return;
         }
         if (!selectBox.isSelected) {
             var loc = eToLoc(e);
-            var pos = locToPos(loc);
+            var pos = locToPos(loc,true);
             editor_mode.onmode('nextChange');
             editor_mode.onmode('loc');
             //editor_mode.loc();
@@ -372,7 +437,7 @@ editor.prototype.listen = function () {
         e.stopPropagation();
         uc.clearRect(0, 0, 416, 416);
         var loc = eToLoc(e);
-        var pos = locToPos(loc);
+        var pos = locToPos(loc,true);
         stepPostfix = [];
         stepPostfix.push(pos);
         fillPos(pos);
@@ -390,7 +455,7 @@ editor.prototype.listen = function () {
         mouseOutCheck = 2;
         e.stopPropagation();
         var loc = eToLoc(e);
-        var pos = locToPos(loc);
+        var pos = locToPos(loc,true);
         var pos0 = stepPostfix[stepPostfix.length - 1]
         var directionDistance = [pos.y - pos0.y, pos0.x - pos.x, pos0.y - pos.y, pos.x - pos0.x]
         var max = 0, index = 4;
@@ -776,6 +841,24 @@ editor.prototype.listen = function () {
     var brushMod2=document.getElementById('brushMod2');
     if(brushMod2)brushMod2.onchange=function(){
         editor.brushMod=brushMod2.value;
+    }
+
+
+    editor.moveViewport=function(x,y){
+        core.bigmap.offsetX = core.clamp(core.bigmap.offsetX+32*x, 0, 32*core.bigmap.width-416);
+        core.bigmap.offsetY = core.clamp(core.bigmap.offsetY+32*y, 0, 32*core.bigmap.height-416);
+        core.control.updateViewport();
+        editor.buildMark();
+        editor.drawEventBlock();
+    }
+
+    var viewportButtons=document.getElementById('viewportButtons');
+    for(var ii=0,node;node=viewportButtons.children[ii];ii++){
+        (function(x,y){
+            node.onclick=function(){
+                editor.moveViewport(x,y);
+            }
+        })([-1,0,0,1][ii],[0,-1,1,0][ii]);
     }
 
 }//绑定事件

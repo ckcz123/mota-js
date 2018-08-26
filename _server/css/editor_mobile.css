@@ -82,6 +82,10 @@ body {
     position: absolute;
 }
 
+#mapEdit {
+    overflow: hidden;
+}
+
 .map {
     position: absolute;
     left: 4vw;

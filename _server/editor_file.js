@@ -695,19 +695,20 @@ editor_file = function (editor, callback) {
     }
 
     var formatMap = function (mapArr) {
-        //把13*13或者1*169数组格式化
+        //把二维数组格式化
         var formatArrStr = '';
         var arr = JSON.stringify(mapArr).replace(/\s+/g, '').split('],[');
-        for (var i = 0; i < 13; i++) {
+        var si=mapArr.length-1,sk=mapArr[0].length-1;
+        for (var i = 0; i <= si; i++) {
             var a = [];
             formatArrStr += '    [';
-            if (i == 0 || i == 12) a = arr[i].split(/\D+/).join(' ').trim().split(' ');
+            if (i == 0 || i == si) a = arr[i].split(/\D+/).join(' ').trim().split(' ');
             else a = arr[i].split(/\D+/);
-            for (var k = 0; k < 13; k++) {
+            for (var k = 0; k <= sk; k++) {
                 var num = parseInt(a[k]);
-                formatArrStr += Array(Math.max(4 - String(num).length, 0)).join(' ') + num + (k == 12 ? '' : ',');
+                formatArrStr += Array(Math.max(4 - String(num).length, 0)).join(' ') + num + (k == sk ? '' : ',');
             }
-            formatArrStr += ']' + (i == 12 ? '' : ',\n');
+            formatArrStr += ']' + (i == si ? '' : ',\n');
         }
         return formatArrStr;
     }

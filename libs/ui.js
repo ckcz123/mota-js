@@ -1178,7 +1178,7 @@ ui.prototype.drawReplay = function () {
     core.lockControl();
     core.status.event.id = 'replay';
     this.drawChoices(null, [
-        "从头回放录像", "从存档开始回放", "返回游戏"
+        "从头回放录像", "从存档开始回放", "下载当前录像", "返回游戏"
     ]);
 }
 

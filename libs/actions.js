@@ -2042,6 +2042,19 @@ actions.prototype.clickReplay = function (x, y) {
                     break;
                 }
             case 2:
+                if (core.hasFlag('debug')) {
+                    core.drawText("\t[系统提示]调试模式下无法下载录像");
+                    break;
+                }
+                core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify({
+                    'name': core.firstData.name,
+                    'hard': core.status.hard,
+                    'seed': core.getFlag('seed'),
+                    'route': core.encodeRoute(core.status.route)
+                }));
+                break;
+                break;
+            case 3:
                 core.ui.closePanel();
                 break;
         }

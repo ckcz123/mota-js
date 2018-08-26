@@ -568,7 +568,8 @@ utils.prototype.copy = function (data) {
     textArea.style.background = 'transparent';
     textArea.value = data;
     document.body.appendChild(textArea);
-    textArea.select();
+    textArea.focus();
+    textArea.setSelectionRange(0, textArea.value.length);
     var successful = false;
     try {
         successful = document.execCommand('copy');

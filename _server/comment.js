@@ -245,6 +245,18 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_type": "textarea",
                             "_data": "显示在状态栏中的层数"
                         },
+                        "width": {
+                            "_leaf": true,
+                            "_type": "textarea",
+                            "_range": "false",
+                            "_data": "地图x方向大小,这里不能更改,仅能在新建地图时设置,null视为13"
+                        },
+                        "height": {
+                            "_leaf": true,
+                            "_type": "textarea",
+                            "_range": "false",
+                            "_data": "地图y方向大小,这里不能更改,仅能在新建地图时设置,null视为13"
+                        },
                         "canFlyTo": {
                             "_leaf": true,
                             "_type": "checkbox",

@@ -163,9 +163,10 @@ editor.prototype.mapInit = function () {
     ec.clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
     document.getElementById('event2').getContext('2d').clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
     editor.map = [];
-    for (var y = 0; y < 13; y++) {
+    var sy=editor.currentFloorData.map.length,sy=editor.currentFloorData.map[0].length;
+    for (var y = 0; y < sy; y++) {
         editor.map[y] = [];
-        for (var x = 0; x < 13; x++) {
+        for (var x = 0; x < sx; x++) {
             editor.map[y][x] = 0;
         }
     }
@@ -202,7 +203,7 @@ editor.prototype.drawEventBlock = function () {
     for (var i=0;i<13;i++) {
         for (var j=0;j<13;j++) {
             var color=null;
-            var loc=i+","+j;
+            var loc=(i+core.bigmap.offsetX/32)+","+(j+core.bigmap.offsetY/32);
             if (core.isset(editor.currentFloorData.events[loc]))
                 color = '#FF0000';
             else if (core.isset(editor.currentFloorData.changeFloor[loc]))
@@ -255,8 +256,8 @@ editor.prototype.updateMap = function () {
     }
     // 绘制地图 start
     var eventCtx = document.getElementById('event').getContext("2d");
-    for (var y = 0; y < 13; y++)
-        for (var x = 0; x < 13; x++) {
+    for (var y = 0; y < editor.map.length; y++)
+        for (var x = 0; x < editor.map[0].length; x++) {
             var tileInfo = editor.map[y][x];
             if (false && isAutotile(tileInfo)) {
                 addIndexToAutotileInfo(x, y);
@@ -848,6 +849,7 @@ editor.prototype.listen = function () {
         core.bigmap.offsetY = core.clamp(core.bigmap.offsetY+32*y, 0, 32*core.bigmap.height-416);
         core.control.updateViewport();
         editor.buildMark();
+        editor.drawEventBlock();
     }
 
     var viewportButtons=document.getElementById('viewportButtons');

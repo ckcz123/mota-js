@@ -149,7 +149,6 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 删除该块
 	if (core.isset(x) && core.isset(y)) {
 		core.removeBlock(x, y);
-		core.canvas.event.clearRect(32 * x, 32 * y, 32, 32);
 	}
 
 	// 毒衰咒的处理
@@ -208,6 +207,15 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.isset(point) && point>0) {
 		core.unshift(todo, core.events.addPoint(core.material.enemys[enemyId]));
 	}
+
+	// 在这里增加其他的自定义事件需求
+	/*
+	if (enemyId=='xxx') {
+	    core.unshift(todo, [
+	        {"type": "...", ...},
+        ]);
+	}
+	*/
 
 	// 如果事件不为空，将其插入
 	if (todo.length>0) {
@@ -322,7 +330,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		[8, "反击", "战斗时，怪物每回合附加角色攻击的"+Math.floor(100*core.values.counterAttack||0)+"%作为伤害，无视角色防御"],
 		[9, "净化", "战斗前，怪物附加勇士魔防的"+core.values.purify+"倍作为伤害"],
 		[10, "模仿", "怪物的攻防和勇士攻防相等"],
-		[11, "吸血", function (enemy) {return "吸血：战斗前，怪物首先吸取角色的"+Math.floor(100*enemy.value||0)+"%生命作为伤害"+(enemy.add?"，并把伤害数值加到自身生命上":"");}],
+		[11, "吸血", function (enemy) {return "战斗前，怪物首先吸取角色的"+Math.floor(100*enemy.value||0)+"%生命作为伤害"+(enemy.add?"，并把伤害数值加到自身生命上":"");}],
 		[12, "中毒", "战斗后，勇士陷入中毒状态，每一步损失生命"+core.values.poisonDamage+"点"],
 		[13, "衰弱", "战斗后，勇士陷入衰弱状态，攻防暂时下降"+(core.values.weakValue>=1?core.values.weakValue+"点":parseInt(core.values.weakValue*100)+"%")],
 		[14, "诅咒", "战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验"],

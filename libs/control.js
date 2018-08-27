@@ -986,6 +986,12 @@ control.prototype.setGameCanvasTranslate = function(canvas,x,y){
     c.style.webkitTransform='translate('+x+'px,'+y+'px)';
     c.style.OTransform='translate('+x+'px,'+y+'px)';
     c.style.MozTransform='translate('+x+'px,'+y+'px)';
+    if(main.mode==='editor' && editor.isMobile){
+        c.style.transform='translate('+(x/416*96)+'vw,'+(y/416*96)+'vw)';
+        c.style.webkitTransform='translate('+(x/416*96)+'vw,'+(y/416*96)+'vw)';
+        c.style.OTransform='translate('+(x/416*96)+'vw,'+(y/416*96)+'vw)';
+        c.style.MozTransform='translate('+(x/416*96)+'vw,'+(y/416*96)+'vw)';
+    }
 };
 
 ////// 更新视野范围 //////

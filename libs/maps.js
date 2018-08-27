@@ -192,6 +192,10 @@ maps.prototype.resizeMap = function(floorId) {
         core.canvas[cn].canvas.setAttribute("height",cheight);
         core.canvas[cn].canvas.style.width = cwidth*core.domStyle.scale + "px";
         core.canvas[cn].canvas.style.height = cheight*core.domStyle.scale + "px";
+        if(main.mode==='editor' && editor.isMobile){
+            core.canvas[cn].canvas.style.width = core.bigmap.width*32/416*96 + "vw";
+            core.canvas[cn].canvas.style.height = core.bigmap.height*32/416*96 + "vw";
+        }
     });
 }
 

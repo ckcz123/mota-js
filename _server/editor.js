@@ -202,23 +202,23 @@ editor.prototype.drawEventBlock = function () {
     fg.clearRect(0, 0, 416, 416);
     for (var i=0;i<13;i++) {
         for (var j=0;j<13;j++) {
-            var color=null;
+            var color=[];
             var loc=(i+core.bigmap.offsetX/32)+","+(j+core.bigmap.offsetY/32);
             if (core.isset(editor.currentFloorData.events[loc]))
-                color = '#FF0000';
-            else if (core.isset(editor.currentFloorData.changeFloor[loc]))
-                color = '#00FF00';
-            else if (core.isset(editor.currentFloorData.afterBattle[loc]))
-                color = '#FFFF00';
-            else if (core.isset(editor.currentFloorData.afterGetItem[loc]))
-                color = '#00FFFF';
-            else if (core.isset(editor.currentFloorData.afterOpenDoor[loc]))
-                color = '#FF00FF';
-            else if (core.isset(editor.currentFloorData.cannotMove[loc]))
-                color = '#0000FF';
-            if (color!=null) {
-                fg.fillStyle = color;
-                fg.fillRect(32*i, 32*j+32-8, 8, 8);
+                color.push('#FF0000');
+            if (core.isset(editor.currentFloorData.changeFloor[loc]))
+                color.push('#00FF00');
+            if (core.isset(editor.currentFloorData.afterBattle[loc]))
+                color.push('#FFFF00');
+            if (core.isset(editor.currentFloorData.afterGetItem[loc]))
+                color.push('#00FFFF');
+            if (core.isset(editor.currentFloorData.afterOpenDoor[loc]))
+                color.push('#FF00FF');
+            if (core.isset(editor.currentFloorData.cannotMove[loc]))
+                color.push('#0000FF');
+            for(var kk=0,cc;cc=color[kk];kk++){
+                fg.fillStyle = cc;
+                fg.fillRect(32*i+8*kk, 32*j+32-8, 8, 8);
             }
         }
     }

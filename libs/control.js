@@ -1198,7 +1198,7 @@ control.prototype.updateCheckBlock = function() {
             if (core.isset(id)) {
 
                 if (id=="lavaNet") {
-                    core.status.checkBlock.damage[x+core.bigmap.width*y]+=core.values.lavaDamage;
+                    core.status.checkBlock.damage[x+core.bigmap.width*y]+=core.values.lavaDamage||0;
                     continue;
                 }
 
@@ -1214,8 +1214,17 @@ control.prototype.updateCheckBlock = function() {
                             var nx=x+dx, ny=y+dy;
                             if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height) continue;
                             if (!zoneSquare && Math.abs(dx)+Math.abs(dy)>range) continue;
-                            core.status.checkBlock.damage[nx+ny*core.bigmap.width]+=enemy.value;
+                            core.status.checkBlock.damage[nx+ny*core.bigmap.width]+=enemy.value||0;
                         }
+                    }
+                }
+                // 存在激光
+                if (core.enemys.hasSpecial(enemy.special, 24)) {
+                    for (var nx=0;nx<core.bigmap.width;nx++) {
+                        if (nx!=x) core.status.checkBlock.damage[nx+y*core.bigmap.width]+=enemy.value||0;
+                    }
+                    for (var ny=0;ny<core.bigmap.height;ny++) {
+                        if (ny!=y) core.status.checkBlock.damage[x+ny*core.bigmap.width]+=enemy.value||0;
                     }
                 }
                 // 存在阻击
@@ -1225,7 +1234,7 @@ control.prototype.updateCheckBlock = function() {
                             if (dx==0 && dy==0) continue;
                             var nx=x+dx, ny=y+dy;
                             if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height || Math.abs(dx)+Math.abs(dy)>1) continue;
-                            core.status.checkBlock.damage[nx+ny*core.bigmap.width]+=enemy.value;
+                            core.status.checkBlock.damage[nx+ny*core.bigmap.width]+=enemy.value||0;
                         }
                     }
                 }
@@ -1308,7 +1317,7 @@ control.prototype.checkBlock = function () {
             core.drawTip('受到阻击伤害'+damage+'点');
         }
         else if (damage>0) {
-            core.drawTip('受到领域伤害'+damage+'点');
+            core.drawTip('受到领域或激光伤害'+damage+'点');
         }
 
         if (damage>0) {

@@ -276,7 +276,8 @@ maps.prototype.canMoveHero = function(x,y,direction,floorId) {
     }
 
     // 检查将死的领域
-    if (core.status.hero.hp <= core.status.checkBlock.damage[nx+core.bigmap.width*ny] && !core.flags.canGoDeadZone && core.getBlock(nx, ny, floorId)==null)
+    if (floorId==core.status.floorId && core.status.hero.hp <= core.status.checkBlock.damage[nx+core.bigmap.width*ny]
+        && !core.flags.canGoDeadZone && core.getBlock(nx, ny)==null)
         return false;
 
     return true;

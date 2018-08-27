@@ -53,8 +53,7 @@ editor_blockly = function () {
       MotaActionBlocks['afterOpenDoor_m'].xmlText(),
       MotaActionBlocks['firstArrive_m'].xmlText(),
     ],
-    '语句块':[
-      '<label text="显示文字"></label>',
+    '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),
       MotaActionBlocks['text_1_s'].xmlText(),
       MotaActionFunctions.actionParser.parseList({"type": "choices", "text": "是否跳过剧情", "choices": [
@@ -83,8 +82,11 @@ editor_blockly = function () {
           ])
         ])
       ]),
-      '<label text="数据相关"></label>',
-      MotaActionBlocks['setValue_s'].xmlText(),
+    ],
+    '数据相关':[
+      MotaActionBlocks['setValue_s'].xmlText([
+        MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
+      ]),
       MotaActionBlocks['input_s'].xmlText(),
       MotaActionBlocks['update_s'].xmlText(),
       MotaActionBlocks['updateEnemys_s'].xmlText(),
@@ -100,7 +102,8 @@ editor_blockly = function () {
       MotaActionBlocks['setHeroIcon_s'].xmlText(),
       MotaActionBlocks['follow_s'].xmlText(),
       MotaActionBlocks['unfollow_s'].xmlText(),
-      '<label text="事件控制"></label>',
+    ],
+    '事件控制':[
       MotaActionBlocks['if_s'].xmlText(),
       MotaActionBlocks['while_s'].xmlText(),
       MotaActionBlocks['break_s'].xmlText(),
@@ -113,7 +116,8 @@ editor_blockly = function () {
       MotaActionBlocks['move_s'].xmlText(),
       MotaActionBlocks['jump_s'].xmlText(),
       MotaActionBlocks['disableShop_s'].xmlText(),
-      '<label text="特效/声音"></label>',
+    ],
+    '特效/声音':[
       MotaActionBlocks['sleep_s'].xmlText(),
       MotaActionBlocks['wait_s'].xmlText(),
       MotaActionBlocks['viberate_s'].xmlText(),
@@ -126,11 +130,14 @@ editor_blockly = function () {
       MotaActionBlocks['resumeBgm_s'].xmlText(),
       MotaActionBlocks['playSound_s'].xmlText(),
       MotaActionBlocks['setVolume_s'].xmlText(),
-      '<label text="其他"></label>',
+    ],
+    '原生脚本':[
       MotaActionBlocks['function_s'].xmlText(),
     ],
     '值块':[
-      MotaActionBlocks['setValue_s'].xmlText(),
+      MotaActionBlocks['setValue_s'].xmlText([
+        MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
+      ]),
       MotaActionBlocks['expression_arithmetic_0'].xmlText(),
       MotaActionBlocks['negate_e'].xmlText(),
       MotaActionBlocks['bool_e'].xmlText(),

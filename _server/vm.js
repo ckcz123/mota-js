@@ -24,7 +24,14 @@ document.body.onmousedown = function (e) {
         }
     });
 
-    if (clickpath.indexOf('edit') === -1 && clickpath.indexOf('tip') === -1 && clickpath.indexOf('brushMod') === -1 && clickpath.indexOf('brushMod2') === -1) {
+    var unselect=true;
+    for(var ii=0,thisId;thisId=['edit','tip','brushMod','brushMod2','viewportButtons'][ii];ii++){
+        if (clickpath.indexOf(thisId) !== -1){
+            unselect=false;
+            break;
+        }
+    }
+    if (unselect) {
         if (clickpath.indexOf('eui') === -1) {
             if (selectBox.isSelected) {
                 editor_mode.onmode('');
@@ -60,11 +67,12 @@ var exportMap = new Vue({
     methods: {
         exportMap: function () {
             editor.updateMap();
+            var sx=editor.map.length-1,sy=editor.map[0].length-1;
 
             var filestr = '';
-            for (var yy = 0; yy < 13; yy++) {
+            for (var yy = 0; yy <= sy; yy++) {
                 filestr += '['
-                for (var xx = 0; xx < 13; xx++) {
+                for (var xx = 0; xx <= sx; xx++) {
                     var mapxy = editor.map[yy][xx];
                     if (typeof(mapxy) == typeof({})) {
                         if ('idnum' in mapxy) mapxy = mapxy.idnum;
@@ -79,10 +87,10 @@ var exportMap = new Vue({
                     }
                     mapxy = String(mapxy);
                     mapxy = Array(Math.max(4 - mapxy.length, 0)).join(' ') + mapxy;
-                    filestr += mapxy + (xx == 12 ? '' : ',')
+                    filestr += mapxy + (xx == sx ? '' : ',')
                 }
 
-                filestr += ']' + (yy == 12 ? '' : ',\n');
+                filestr += ']' + (yy == sy ? '' : ',\n');
             }
             pout.value = filestr;
             editArea.mapArr = filestr;
@@ -97,7 +105,7 @@ var editArea = new Vue({
     data: {
         mapArr: '',
         errors: [ // 编号1,2,3,4
-            "格式错误！请使用正确格式(13*13数组，如不清楚，可先点击生成地图查看正确格式)",
+            "格式错误！请使用正确格式(width*height数组，如不清楚，可先点击生成地图查看正确格式)",
             "当前有未定义ID（在地图区域显示红块），请修改ID或者到icons.js和maps.js中进行定义！",
             "ID越界（在地图区域显示红块），当前编辑器暂时支持编号小于400，请修改编号！",
             // "发生错误！",
@@ -138,8 +146,9 @@ var editArea = new Vue({
 
             // var mapArray = that.mapArr.split(/\D+/).join(' ').trim().split(' ');
             var mapArray = JSON.parse('[' + that.mapArr + ']');
-            for (var y = 0; y < 13; y++)
-                for (var x = 0; x < 13; x++) {
+            var sy=editor.map.length,sx=editor.map[0].length;
+            for (var y = 0; y < sy; y++)
+                for (var x = 0; x < sx; x++) {
                     var num = mapArray[y][x];
                     if (num == 0)
                         editor.map[y][x] = 0;
@@ -159,25 +168,26 @@ var editArea = new Vue({
             var formatArrStr = '';
             var that = this;
             clearTimeout(that.formatTimer);
-            if (this.mapArr.split(/\D+/).join(' ').trim().split(' ').length != 169) return false;
+            var si=this.mapArr.length,sk=this.mapArr[0].length;
+            if (this.mapArr.split(/\D+/).join(' ').trim().split(' ').length != si*sk) return false;
             var arr = this.mapArr.replace(/\s+/g, '').split('],[');
 
-            if (arr.length != 13) return;
-            for (var i = 0; i < 13; i++) {
+            if (arr.length != si) return;
+            for (var i = 0; i < si; i++) {
                 var a = [];
                 formatArrStr += '[';
-                if (i == 0 || i == 12) a = arr[i].split(/\D+/).join(' ').trim().split(' ');
+                if (i == 0 || i == si-1) a = arr[i].split(/\D+/).join(' ').trim().split(' ');
                 else a = arr[i].split(/\D+/);
-                if (a.length != 13) {
+                if (a.length != sk) {
                     formatArrStr = '';
                     return;
                 }
 
-                for (var k = 0; k < 13; k++) {
+                for (var k = 0; k < sk; k++) {
                     var num = parseInt(a[k]);
-                    formatArrStr += Array(Math.max(4 - String(num).length, 0)).join(' ') + num + (k == 12 ? '' : ',');
+                    formatArrStr += Array(Math.max(4 - String(num).length, 0)).join(' ') + num + (k == sk-1 ? '' : ',');
                 }
-                formatArrStr += ']' + (i == 12 ? '' : ',\n');
+                formatArrStr += ']' + (i == si-1 ? '' : ',\n');
             }
             return formatArrStr;
         }
@@ -199,7 +209,8 @@ var copyMap = new Vue({
                     return;
                 }
                 try {
-                    pout.select();
+                    pout.focus();
+                    pout.setSelectionRange(0, pout.value.length);
                     document.execCommand("Copy");
                     tip.whichShow = 6;
                 } catch (e) {

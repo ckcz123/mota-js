@@ -469,6 +469,12 @@ editor_mode = function (editor) {
                 printe("楼层名不合法！请使用字母、数字、下划线，且不能以数字开头！");
                 return;
             }
+            var width = parseInt(document.getElementById('newMapWidth').value);
+            var height = parseInt(document.getElementById('newMapHeight').value);
+            if (!core.isset(width) || !core.isset(height) || width<13 || height<13 || width*height>1000) {
+                printe("新建地图的宽高都不得小于13，且宽高之积不能超过1000");
+                return;
+            }
 
             editor_mode.onmode('');
             editor.file.saveNewFile(newFileName.value, function (err) {
@@ -622,8 +628,9 @@ editor_mode = function (editor) {
             var height = editor_mode.appendPic.toImg.height;
             var sourced = source.getContext('2d');
             for (var ii = 0, v; v = editor_mode.appendPic.selectPos[ii]; ii++) {
-                var imgData = sourced.getImageData(v.x * 32, v.y * ysize, 32, ysize);
-                sprited.putImageData(imgData, ii * 32, height);
+                // var imgData = sourced.getImageData(v.x * 32, v.y * ysize, 32, ysize);
+                // sprited.putImageData(imgData, ii * 32, height);
+                sprited.drawImage(editor_mode.appendPic.img, v.x * 32, v.y * ysize, 32, ysize,  ii * 32, height,  32, ysize)
             }
             var imgbase64 = sprite.toDataURL().split(',')[1];
             fs.writeFile('./project/images/' + editor_mode.appendPic.imageName + '.png', imgbase64, 'base64', function (err, data) {

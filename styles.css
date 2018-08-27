@@ -170,7 +170,7 @@
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     background: url(project/images/ground.png) repeat;
-    z-index: 150;
+    z-index: 135;
     display: none;
 }
 #statusBar .status{
@@ -222,7 +222,7 @@ p#hard {
     margin: 0 6px 6px 0;
 }
 
-span#poison, span#weak, span#curse {
+span#poison, span#weak, span#curse, span#pickaxe, span#bomb, span#fly {
     font-style: normal;
     font-size: 1em;
 }
@@ -253,6 +253,13 @@ span#poison, span#weak, span#curse {
     background: #000000;
 }
 
+#gameDraw {
+    position: absolute;
+    background: #000000;
+    overflow: hidden;
+    z-index: 135;
+}
+
 #bg {
     z-index: 10;
 }
@@ -279,6 +286,10 @@ span#poison, span#weak, span#curse {
 
 #weather {
     z-index: 80;
+}
+
+#route {
+    z-index: 105;
 }
 
 #ui {

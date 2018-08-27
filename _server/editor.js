@@ -18,9 +18,10 @@ editor.prototype.init = function (callback) {
                     return editor.ids[[editor.indexs[parseInt(v)][0]]]
                 })
             });
-            editor.updateMap();
             editor.currentFloorId = core.status.floorId;
             editor.currentFloorData = core.floors[core.status.floorId];
+            editor.updateMap();
+            editor.buildMark();
             editor.drawEventBlock();
             if (Boolean(callback)) callback();
         });
@@ -159,12 +160,13 @@ editor.prototype.drawInitData = function (icons) {
 }
 editor.prototype.mapInit = function () {
     var ec = document.getElementById('event').getContext('2d');
-    ec.clearRect(0, 0, 416, 416);
-    document.getElementById('event2').getContext('2d').clearRect(0, 0, 416, 416);
+    ec.clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
+    document.getElementById('event2').getContext('2d').clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
     editor.map = [];
-    for (var y = 0; y < 13; y++) {
+    var sy=editor.currentFloorData.map.length,sy=editor.currentFloorData.map[0].length;
+    for (var y = 0; y < sy; y++) {
         editor.map[y] = [];
-        for (var x = 0; x < 13; x++) {
+        for (var x = 0; x < sx; x++) {
             editor.map[y][x] = 0;
         }
     }
@@ -200,23 +202,23 @@ editor.prototype.drawEventBlock = function () {
     fg.clearRect(0, 0, 416, 416);
     for (var i=0;i<13;i++) {
         for (var j=0;j<13;j++) {
-            var color=null;
-            var loc=i+","+j;
+            var color=[];
+            var loc=(i+core.bigmap.offsetX/32)+","+(j+core.bigmap.offsetY/32);
             if (core.isset(editor.currentFloorData.events[loc]))
-                color = '#FF0000';
-            else if (core.isset(editor.currentFloorData.changeFloor[loc]))
-                color = '#00FF00';
-            else if (core.isset(editor.currentFloorData.afterBattle[loc]))
-                color = '#FFFF00';
-            else if (core.isset(editor.currentFloorData.afterGetItem[loc]))
-                color = '#00FFFF';
-            else if (core.isset(editor.currentFloorData.afterOpenDoor[loc]))
-                color = '#FF00FF';
-            else if (core.isset(editor.currentFloorData.cannotMove[loc]))
-                color = '#0000FF';
-            if (color!=null) {
-                fg.fillStyle = color;
-                fg.fillRect(32*i, 32*j+32-8, 8, 8);
+                color.push('#FF0000');
+            if (core.isset(editor.currentFloorData.changeFloor[loc]))
+                color.push('#00FF00');
+            if (core.isset(editor.currentFloorData.afterBattle[loc]))
+                color.push('#FFFF00');
+            if (core.isset(editor.currentFloorData.afterGetItem[loc]))
+                color.push('#00FFFF');
+            if (core.isset(editor.currentFloorData.afterOpenDoor[loc]))
+                color.push('#FF00FF');
+            if (core.isset(editor.currentFloorData.cannotMove[loc]))
+                color.push('#0000FF');
+            for(var kk=0,cc;cc=color[kk];kk++){
+                fg.fillStyle = cc;
+                fg.fillRect(32*i+8*kk, 32*j+32-8, 8, 8);
             }
         }
     }
@@ -227,7 +229,7 @@ editor.prototype.updateMap = function () {
         return v.map(function (v) {
             return v.idnum || v || 0
         })
-    }), {'events': {}, 'changeFloor': {}});
+    }), {'events': {}, 'changeFloor': {}}, editor.currentFloorId);
     core.status.thisMap.blocks = blocks;
     main.editor.updateMap();
 
@@ -252,96 +254,10 @@ editor.prototype.updateMap = function () {
         }
         //ctx.drawImage(editor.material.images[tileInfo.images], 0, tileInfo.y*32, 32, 32, x*32, y*32, 32, 32);
     }
-    /*
-    // autotile的相关处理
-    var indexArrs = [ //16种组合的图块索引数组; // 将autotile分割成48块16*16的小块; 数组索引即对应各个小块
-    //                                       +----+----+----+----+----+----+
-      [10,  9,  4, 3 ],  //0   bin:0000      | 1  | 2  | 3  | 4  | 5  | 6  |
-      [10,  9,  4, 13],  //1   bin:0001      +----+----+----+----+----+----+
-      [10,  9, 18, 3 ],  //2   bin:0010      | 7  | 8  | 9  | 10 | 11 | 12 |
-      [10,  9, 16, 15],  //3   bin:0011      +----+----+----+----+----+----+
-      [10, 43,  4, 3 ],  //4   bin:0100      | 13 | 14 | 15 | 16 | 17 | 18 |
-      [10, 31,  4, 25],  //5   bin:0101      +----+----+----+----+----+----+
-      [10,  7,  2, 3 ],  //6   bin:0110      | 19 | 20 | 21 | 22 | 23 | 24 |
-      [10, 31, 16, 5 ],  //7   bin:0111      +----+----+----+----+----+----+
-      [48,  9,  4, 3 ],  //8   bin:1000      | 25 | 26 | 27 | 28 | 29 | 30 |
-      [ 8,  9,  4, 1 ],  //9   bin:1001      +----+----+----+----+----+----+
-      [36,  9, 30, 3 ],  //10  bin:1010      | 31 | 32 | 33 | 34 | 35 | 36 |
-      [36,  9,  6, 15],  //11  bin:1011      +----+----+----+----+----+----+
-      [46, 45,  4, 3 ],  //12  bin:1100      | 37 | 38 | 39 | 40 | 41 | 42 |
-      [46, 11,  4, 25],  //13  bin:1101      +----+----+----+----+----+----+
-      [12, 45, 30, 3 ],  //14  bin:1110      | 43 | 44 | 45 | 46 | 47 | 48 |
-      [34, 33, 28, 27]   //15  bin:1111      +----+----+----+----+----+----+
-    ];
-    var drawBlockByIndex = function(ctx, dx, dy, autotileImg, index){ //index为autotile的图块索引1-48
-      var sx = 16*((index-1)%6), sy = 16*(~~((index-1)/6));
-      ctx.drawImage(autotileImg, sx, sy, 16, 16, dx, dy, 16, 16);
-    }
-    var isAutotile = function(info){
-      if(typeof(info)=='object' && hasOwnProp(info, 'images') && info.images=='autotile') return true;
-      return false;
-    }
-    var getAutotileAroundId = function(currId, x, y){ //与autotile当前idnum一致返回1，否则返回0
-      if(x>=0 && y >=0 && x<13 && y<13 && isAutotile(editor.map[y][x]) && editor.map[y][x].idnum == currId)
-        return 1;
-      else if(x<0 || y<0 || x>12 || y>12) return 1; //边界外视为通用autotile，这样好看些
-      else
-        return 0;
-    }
-    var checkAround = function(x, y){ // 得到周围四个32*32块（周围每块都包含当前块的1/4，不清楚的话画下图你就明白）的数组索引
-      var currId = editor.map[y][x].idnum;
-      var pointBlock = [];
-      for(var i=0; i<4; i++){
-        var bsum = 0;
-        var offsetx = i%2, offsety = ~~(i/2);
-        for(var j=0; j<4; j++){
-          var mx = j%2, my = ~~(j/2);
-          var b = getAutotileAroundId(currId, x+offsetx+mx-1, y+offsety+my-1);
-          bsum += b*(Math.pow(2, 3-j));
-        }
-        pointBlock.push(bsum);
-      }
-      return pointBlock;
-    }
-    var addIndexToAutotileInfo = function(x, y){
-      var indexArr = [];
-      var pointBlocks = checkAround(x, y);
-      for(var i=0; i<4; i++){
-        var arr = indexArrs[pointBlocks[i]]
-        indexArr.push(arr[3-i]);
-      }
-      editor.map[y][x].blockIndex = indexArr;
-    }
-    var drawAutotile = function(ctx, x, y, info){ // 绘制一个autotile
-      ctx.clearRect(x*32, y*32, 32, 32);
-      //修正四个边角的固定搭配
-      if(info.blockIndex[0] == 13){
-        if(info.blockIndex[1] == 16) info.blockIndex[1] = 14;
-        if(info.blockIndex[2] == 31) info.blockIndex[2] = 19;
-      }
-      if(info.blockIndex[1] == 18){
-        if(info.blockIndex[0] == 15) info.blockIndex[0] = 17;
-        if(info.blockIndex[3] == 36) info.blockIndex[3] = 24;
-      }
-      if(info.blockIndex[2] == 43){
-        if(info.blockIndex[0] == 25) info.blockIndex[0] = 37;
-        if(info.blockIndex[3] == 46) info.blockIndex[3] = 44;
-      }
-      if(info.blockIndex[3] == 48){
-        if(info.blockIndex[1] == 30) info.blockIndex[1] = 42;
-        if(info.blockIndex[2] == 45) info.blockIndex[2] = 47;
-      }
-      for(var i=0; i<4; i++){
-        var index = info.blockIndex[i];
-        var dx = x*32 + 16*(i%2), dy = y*32 + 16*(~~(i/2));
-        drawBlockByIndex(ctx, dx, dy, editor.material.images[info.images][info.id], index);
-      }
-    }
-    */
     // 绘制地图 start
     var eventCtx = document.getElementById('event').getContext("2d");
-    for (var y = 0; y < 13; y++)
-        for (var x = 0; x < 13; x++) {
+    for (var y = 0; y < editor.map.length; y++)
+        for (var x = 0; x < editor.map[0].length; x++) {
             var tileInfo = editor.map[y][x];
             if (false && isAutotile(tileInfo)) {
                 addIndexToAutotileInfo(x, y);
@@ -350,6 +266,64 @@ editor.prototype.updateMap = function () {
         }
     // 绘制地图 end
     
+}
+
+editor.prototype.buildMark = function(){
+    // 生成定位编号
+    var arrColMark=document.getElementById('arrColMark');
+    var arrRowMark=document.getElementById('arrRowMark');
+    var mapColMark=document.getElementById('mapColMark');
+    var mapRowMark=document.getElementById('mapRowMark');
+    var buildMark = function (offsetX,offsetY) {
+        var colNum = ' ';
+        for (var i = 0; i < 13; i++) {
+            var tpl = '<td>' + (i+offsetX) + '<div class="colBlock" style="left:' + (i * 32 + 1) + 'px;"></div></td>';
+            colNum += tpl;
+        }
+        arrColMark.innerHTML = '<tr>' + colNum + '</tr>';
+        mapColMark.innerHTML = '<tr>' + colNum + '</tr>';
+        var rowNum = ' ';
+        for (var i = 0; i < 13; i++) {
+            var tpl = '<tr><td>' + (i+offsetY) + '<div class="rowBlock" style="top:' + (i * 32 + 1) + 'px;"></div></td></tr>';
+            rowNum += tpl;
+        }
+        arrRowMark.innerHTML = rowNum;
+        mapRowMark.innerHTML = rowNum;
+    }
+    var buildMark_mobile = function (offsetX,offsetY) {
+        var colNum = ' ';
+        for (var i = 0; i < 13; i++) {
+            var tpl = '<td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="colBlock" style="left:' + (i * 96/13 ) + 'vw;"></div></td>';
+            colNum += tpl;
+        }
+        arrColMark.innerHTML = '<tr>' + colNum + '</tr>';
+        //mapColMark.innerHTML = '<tr>' + colNum + '</tr>';
+        var rowNum = ' ';
+        for (var i = 0; i < 13; i++) {
+            var tpl = '<tr><td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="rowBlock" style="top:' + (i * 96/13 ) + 'vw;"></div></td></tr>';
+            rowNum += tpl;
+        }
+        arrRowMark.innerHTML = rowNum;
+        //mapRowMark.innerHTML = rowNum;
+        //=====
+        var colNum = ' ';
+        for (var i = 0; i < 13; i++) {
+            var tpl = '<div class="coltd" style="left:' + (i * 96/13 ) + 'vw;"><div class="coltext">' + (' '+(i+offsetX)).slice(-2).replace(' ','&nbsp;') + '</div><div class="colBlock"></div></div>';
+            colNum += tpl;
+        }
+        mapColMark.innerHTML = '<div class="coltr">' + colNum + '</div>';
+        var rowNum = ' ';
+        for (var i = 0; i < 13; i++) {
+            var tpl = '<div class="rowtr"><div class="rowtd"  style="top:' + (i * 96/13 ) + 'vw;"><div class="rowtext">' + (' '+(i+offsetY)).slice(-2).replace(' ','&nbsp;') + '</div><div class="rowBlock"></div></div></div>';
+            rowNum += tpl;
+        }
+        mapRowMark.innerHTML = rowNum;
+    }
+    if(editor.isMobile){
+        buildMark_mobile(core.bigmap.offsetX/32,core.bigmap.offsetY/32);
+    } else {
+        buildMark(core.bigmap.offsetX/32,core.bigmap.offsetY/32);
+    }
 }
 
 editor.prototype.changeFloor = function (floorId, callback) {
@@ -366,9 +340,9 @@ editor.prototype.changeFloor = function (floorId, callback) {
                 return editor.ids[[editor.indexs[parseInt(v)][0]]]
             })
         });
-        editor.updateMap();
         editor.currentFloorId = core.status.floorId;
         editor.currentFloorData = core.floors[core.status.floorId];
+        editor.updateMap();
         editor_mode.floor();
         editor.drawEventBlock();
         if (core.isset(callback)) callback();
@@ -394,7 +368,7 @@ editor.prototype.listen = function () {
 
     function fillPos(pos) {
         uc.fillStyle = '#' + ~~(Math.random() * 8) + ~~(Math.random() * 8) + ~~(Math.random() * 8);
-        uc.fillRect(pos.x * 32 + 12, pos.y * 32 + 12, 8, 8);
+        uc.fillRect(pos.x * 32 + 12 - core.bigmap.offsetX, pos.y * 32 + 12 - core.bigmap.offsetY, 8, 8);
     }//在格子内画一个随机色块
 
     function eToLoc(e) {
@@ -410,8 +384,13 @@ editor.prototype.listen = function () {
         return editor.loc;
     }//返回可用的组件内坐标
 
-    function locToPos(loc) {
-        editor.pos = {'x': ~~(loc.x / loc.size), 'y': ~~(loc.y / loc.size)}
+    function locToPos(loc, addViewportOffset) {
+        var offsetX=0, offsetY=0;
+        if (addViewportOffset){
+            offsetX=core.bigmap.offsetX/32;
+            offsetY=core.bigmap.offsetY/32;
+        }
+        editor.pos = {'x': ~~(loc.x / loc.size)+offsetX, 'y': ~~(loc.y / loc.size)+offsetY}
         return editor.pos;
     }
 
@@ -436,13 +415,13 @@ editor.prototype.listen = function () {
     eui.onmousedown = function (e) {
         if (e.button==2){
             var loc = eToLoc(e);
-            var pos = locToPos(loc);
+            var pos = locToPos(loc,true);
             editor.showMidMenu(e.clientX,e.clientY);
             return;
         }
         if (!selectBox.isSelected) {
             var loc = eToLoc(e);
-            var pos = locToPos(loc);
+            var pos = locToPos(loc,true);
             editor_mode.onmode('nextChange');
             editor_mode.onmode('loc');
             //editor_mode.loc();
@@ -458,7 +437,7 @@ editor.prototype.listen = function () {
         e.stopPropagation();
         uc.clearRect(0, 0, 416, 416);
         var loc = eToLoc(e);
-        var pos = locToPos(loc);
+        var pos = locToPos(loc,true);
         stepPostfix = [];
         stepPostfix.push(pos);
         fillPos(pos);
@@ -476,7 +455,7 @@ editor.prototype.listen = function () {
         mouseOutCheck = 2;
         e.stopPropagation();
         var loc = eToLoc(e);
-        var pos = locToPos(loc);
+        var pos = locToPos(loc,true);
         var pos0 = stepPostfix[stepPostfix.length - 1]
         var directionDistance = [pos.y - pos0.y, pos0.x - pos.x, pos0.y - pos.y, pos.x - pos0.x]
         var max = 0, index = 4;
@@ -531,6 +510,24 @@ editor.prototype.listen = function () {
             uc.clearRect(0, 0, 416, 416);
         }
     }
+
+    /*
+    document.getElementById('mid').onkeydown = function (e) {
+        console.log(e);
+        if (e.keyCode==37) {
+            editor.moveViewport(-1, 0);
+        }
+        if (e.keyCode==38) {
+            editor.moveViewport(0, -1);
+        }
+        if (e.keyCode==39) {
+            editor.moveViewport(1, 0);
+        }
+        if (e.keyCode==40) {
+            editor.moveViewport(0, 1);
+        }
+    }
+    */
 
     document.getElementById('mid').onmousewheel = function (e) {
         e.preventDefault();
@@ -862,6 +859,24 @@ editor.prototype.listen = function () {
     var brushMod2=document.getElementById('brushMod2');
     if(brushMod2)brushMod2.onchange=function(){
         editor.brushMod=brushMod2.value;
+    }
+
+
+    editor.moveViewport=function(x,y){
+        core.bigmap.offsetX = core.clamp(core.bigmap.offsetX+32*x, 0, 32*core.bigmap.width-416);
+        core.bigmap.offsetY = core.clamp(core.bigmap.offsetY+32*y, 0, 32*core.bigmap.height-416);
+        core.control.updateViewport();
+        editor.buildMark();
+        editor.drawEventBlock();
+    }
+
+    var viewportButtons=document.getElementById('viewportButtons');
+    for(var ii=0,node;node=viewportButtons.children[ii];ii++){
+        (function(x,y){
+            node.onclick=function(){
+                editor.moveViewport(x,y);
+            }
+        })([-1,0,0,1][ii],[0,-1,1,0][ii]);
     }
 
 }//绑定事件

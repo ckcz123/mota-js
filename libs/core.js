@@ -71,6 +71,14 @@ function core() {
         styles: [],
         scale: 1.0,
     }
+    this.bigmap = {
+        canvas: ["bg", "event", "event2", "fg", "route"],
+        offsetX: 0, // in pixel
+        offsetY: 0,
+        width: 13, // map width and height
+        height: 13,
+        tempCanvas: null, // A temp canvas for drawing
+    }
     this.initStatus = {
         'played': false,
         'gameOver': false,
@@ -104,7 +112,7 @@ function core() {
             'cursorX': null,
             'cursorY': null,
             "moveDirectly": false,
-            'clickMoveDirectly': true,
+            'clickMoveDirectly': false,
         },
 
         // 按下键的时间：为了判定双击
@@ -143,7 +151,6 @@ function core() {
             "time": 0,
         },
         'curtainColor': null,
-        'usingCenterFly':false,
         'openingDoor': null,
         'isSkiing': false,
 
@@ -262,6 +269,8 @@ core.prototype.init = function (coreData, callback) {
 
     core.material.ground = new Image();
     core.material.ground.src = "project/images/ground.png";
+
+    core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
 
     core.loader.load(function () {
         console.log(core.material);
@@ -657,13 +666,18 @@ core.prototype.enemyExists = function (x, y, id,floorId) {
 }
 
 ////// 获得某个点的block //////
-core.prototype.getBlock = function (x, y, floorId, needEnable) {
-    return core.maps.getBlock(x,y,floorId,needEnable);
+core.prototype.getBlock = function (x, y, floorId, showDisable) {
+    return core.maps.getBlock(x,y,floorId,showDisable);
 }
 
 ////// 获得某个点的blockId //////
-core.prototype.getBlockId = function (x, y, floorId, needEnable) {
-    return core.maps.getBlockId(x, y, floorId, needEnable);
+core.prototype.getBlockId = function (x, y, floorId, showDisable) {
+    return core.maps.getBlockId(x, y, floorId, showDisable);
+}
+
+////// 获得某个点的blockCls //////
+core.prototype.getBlockCls = function (x, y, floorId, showDisable) {
+    return core.maps.getBlockCls(x, y, floorId, showDisable);
 }
 
 ////// 显示移动某块的动画，达到{“type”:”move”}的效果 //////
@@ -988,8 +1002,14 @@ core.prototype.saveReplay = function () {
     core.control.saveReplay();
 }
 
+////// 回放时查看怪物手册 //////
 core.prototype.bookReplay = function () {
     core.control.bookReplay();
+}
+
+////// 回放录像时浏览地图 //////
+core.prototype.viewMapReplay = function () {
+    core.control.viewMapReplay();
 }
 
 ////// 回放 //////
@@ -1139,6 +1159,10 @@ core.prototype.isset = function (val) {
 ////// 获得子数组 //////
 core.prototype.subarray = function (a, b) {
     return core.utils.subarray(a, b);
+}
+
+core.prototype.clamp = function (x, a, b) {
+    return core.utils.clamp(x, a, b);
 }
 
 ////// Base64加密 //////

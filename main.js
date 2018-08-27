@@ -43,6 +43,7 @@ function main() {
         'gif': document.getElementById('gif'),
         'gif2': document.getElementById('gif2'),
         'curtain': document.getElementById('curtain'),
+        'gameDraw': document.getElementById('gameDraw'),
         'startButtons': document.getElementById('startButtons'),
         'playGame': document.getElementById('playGame'),
         'loadGame': document.getElementById('loadGame'),
@@ -58,6 +59,7 @@ function main() {
         'expCol': document.getElementById('expCol'),
         'upCol': document.getElementById('upCol'),
         'keyCol': document.getElementById('keyCol'),
+        'pzfCol': document.getElementById('pzfCol'),
         'debuffCol': document.getElementById('debuffCol'),
         'hard': document.getElementById('hard'),
     };
@@ -133,6 +135,9 @@ function main() {
         'poison': document.getElementById('poison'),
         'weak':document.getElementById('weak'),
         'curse': document.getElementById('curse'),
+        'pickaxe': document.getElementById('pickaxe'),
+        'bomb': document.getElementById('bomb'),
+        'fly': document.getElementById('fly'),
         'hard': document.getElementById("hard")
     }
     this.floors = {}

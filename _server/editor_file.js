@@ -83,12 +83,21 @@ editor_file = function (editor, callback) {
         } */
         var filename = 'project/floors/' + editor.currentFloorId + '.js';
         var datastr = ['main.floors.', editor.currentFloorId, '=\n{'];
-        if (editor.currentFloorData.map == 'new')
+        if (editor.currentFloorData.map == 'new') {
+            /*
             editor.currentFloorData.map = editor.map.map(function (v) {
                 return v.map(function () {
                     return 0
                 })
             });
+            */
+            var width = parseInt(document.getElementById('newMapWidth').value);
+            var height = parseInt(document.getElementById('newMapHeight').value);
+            var row = [];
+            for (var i=0;i<width;i++) row.push(0);
+            editor.currentFloorData.map = [];
+            for (var i=0;i<height;i++) editor.currentFloorData.map.push(row);
+        }
         else
             editor.currentFloorData.map = editor.map.map(function (v) {
                 return v.map(function (v) {
@@ -115,14 +124,15 @@ editor_file = function (editor, callback) {
         if (!isset(callback)) {
             printe('未设置callback');
             throw('未设置callback')
-        }
-        ;
+        };
         var currData=editor.currentFloorData;
         var saveStatus = document.getElementById('newMapStatus').checked;
         editor.currentFloorData = {
             floorId: saveFilename,
             title: saveStatus?currData.title:"新建楼层",
             name: saveStatus?currData.name:"0",
+            width: parseInt(document.getElementById('newMapWidth').value),
+            height: parseInt(document.getElementById('newMapHeight').value),
             canFlyTo: saveStatus?currData.canFlyTo:true,
             canUseQuickShop: saveStatus?currData.canUseQuickShop:true,
             cannotViewMap: saveStatus?currData.cannotViewMap:false,
@@ -695,19 +705,20 @@ editor_file = function (editor, callback) {
     }
 
     var formatMap = function (mapArr) {
-        //把13*13或者1*169数组格式化
+        //把二维数组格式化
         var formatArrStr = '';
         var arr = JSON.stringify(mapArr).replace(/\s+/g, '').split('],[');
-        for (var i = 0; i < 13; i++) {
+        var si=mapArr.length-1,sk=mapArr[0].length-1;
+        for (var i = 0; i <= si; i++) {
             var a = [];
             formatArrStr += '    [';
-            if (i == 0 || i == 12) a = arr[i].split(/\D+/).join(' ').trim().split(' ');
+            if (i == 0 || i == si) a = arr[i].split(/\D+/).join(' ').trim().split(' ');
             else a = arr[i].split(/\D+/);
-            for (var k = 0; k < 13; k++) {
+            for (var k = 0; k <= sk; k++) {
                 var num = parseInt(a[k]);
-                formatArrStr += Array(Math.max(4 - String(num).length, 0)).join(' ') + num + (k == 12 ? '' : ',');
+                formatArrStr += Array(Math.max(4 - String(num).length, 0)).join(' ') + num + (k == sk ? '' : ',');
             }
-            formatArrStr += ']' + (i == 12 ? '' : ',\n');
+            formatArrStr += ']' + (i == si ? '' : ',\n');
         }
         return formatArrStr;
     }

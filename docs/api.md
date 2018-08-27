@@ -184,20 +184,27 @@ core.enemyExists(x, y, id, floorId)
 x和y为坐标；id为怪物ID，可为null表示任意怪物；floorId为楼层ID，可忽略表示当前楼层。
 
 
-core.getBlock(x, y, floorId, needEnable)
+core.getBlock(x, y, floorId, showDisable)
 获得某个点的当前图块信息。
 x和y为坐标；floorId为楼层ID，可忽略或null表示当前楼层。
-needEnable表示该点是否启用时才返回，其值不设置则默认为true。
+showDisable如果为true，则对于禁用的点和事件也会进行返回。
 如果该点不存在图块，则返回null。
 否则，返回值如下： {"index": xxx, "block": xxx}
 其中index为该点在该楼层blocks数组中的索引，block为该图块实际内容。
 
 
-core.getBlockId(x, y, floorId, needEnable)
+core.getBlockId(x, y, floorId, showDisable)
 获得某个点的图块ID。
 x和y为坐标；floorId为楼层ID，可忽略或null表示当前楼层。
-needEnable表示是否需要该点处于启用状态才返回，其值不设置则默认为true。
+showDisable如果为true，则对于禁用的点和事件也会进行返回。
 如果该点不存在图块，则返回null，否则返回该点的图块ID。
+
+
+core.getBlockCls(x, y, floorId, showDisable)
+获得某个点的图块cls。
+x和y为坐标；floorId为楼层ID，可忽略或null表示当前楼层。
+showDisable如果为true，则对于禁用的点和事件也会进行返回。
+如果该点不存在图块，则返回null，否则返回该点的图块cls。
 
 
 core.showBlock(x, y, floorId)

@@ -1755,8 +1755,10 @@ ui.prototype.drawSLPanel = function(index) {
 
     if (core.status.event.selection)
         core.setFillStyle('ui', '#FF6A6A');
-    core.fillText('ui', '删除模式', 48, 403);
-
+    if (core.status.event.id=='save')
+        core.fillText('ui', '删除模式', 48, 403);
+    else
+        core.fillText('ui', '输入编号', 48, 403);
 }
 
 ////// 绘制一个缩略图 //////

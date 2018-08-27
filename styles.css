@@ -222,7 +222,7 @@ p#hard {
     margin: 0 6px 6px 0;
 }
 
-span#poison, span#weak, span#curse {
+span#poison, span#weak, span#curse, span#pickaxe, span#bomb, span#fly {
     font-style: normal;
     font-size: 1em;
 }

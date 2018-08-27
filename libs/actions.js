@@ -13,7 +13,8 @@ actions.prototype.init = function () {
 
 ////// 按下某个键时 //////
 actions.prototype.onkeyDown = function (e) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0) return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying
+        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
     if (!core.isset(core.status.holdingKeys))core.status.holdingKeys=[];
     var isArrow={37:true,38:true,39:true,40:true}[e.keyCode]
     if(isArrow && !core.status.lockControl){
@@ -32,7 +33,8 @@ actions.prototype.onkeyDown = function (e) {
 
 ////// 放开某个键时 //////
 actions.prototype.onkeyUp = function(e) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying
+        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') {
         if (e.keyCode==27) // ESCAPE
             core.stopReplay();
         else if (e.keyCode==90) // Z
@@ -47,6 +49,8 @@ actions.prototype.onkeyUp = function(e) {
             core.saveReplay();
         else if (e.keyCode==67)
             core.bookReplay();
+        else if (e.keyCode==33||e.keyCode==34)
+            core.viewMapReplay();
         return;
     }
 
@@ -77,7 +81,8 @@ actions.prototype.pressKey = function (keyCode) {
 
 ////// 根据按下键的code来执行一系列操作 //////
 actions.prototype.keyDown = function(keyCode) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0) return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying
+        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
     if (core.status.lockControl) {
         // Ctrl跳过对话
         if (keyCode==17) {
@@ -171,8 +176,8 @@ actions.prototype.keyDown = function(keyCode) {
 
 ////// 根据放开键的code来执行一系列操作 //////
 actions.prototype.keyUp = function(keyCode, fromReplay) {
-    if (!fromReplay&&core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0)
-        return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying
+        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
 
     if (core.status.lockControl) {
         core.status.holdingKeys = [];
@@ -393,7 +398,8 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
 
 ////// 点击（触摸）事件按下时 //////
 actions.prototype.ondown = function (x ,y) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0) return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying
+        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
     if (!core.status.played || core.status.lockControl) {
         this.onclick(x, y, []);
         if (core.timeout.onDownTimeout==null) {
@@ -421,7 +427,8 @@ actions.prototype.ondown = function (x ,y) {
 
 ////// 当在触摸屏上滑动时 //////
 actions.prototype.onmove = function (x ,y) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0) return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying
+        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
     // if (core.status.holdingPath==0){return;}
     //core.status.mouseOutCheck =1;
     var pos={'x':x,'y':y};
@@ -445,7 +452,8 @@ actions.prototype.onmove = function (x ,y) {
 
 ////// 当点击（触摸）事件放开时 //////
 actions.prototype.onup = function () {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0) return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying
+        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
 
     clearTimeout(core.timeout.onDownTimeout);
     core.timeout.onDownTimeout = null;
@@ -508,7 +516,8 @@ actions.prototype.getClickLoc = function (x, y) {
 
 ////// 具体点击屏幕上(x,y)点时，执行的操作 //////
 actions.prototype.onclick = function (x, y, stepPostfix) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0) return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying
+        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
     // console.log("Click: (" + x + "," + y + ")");
 
     stepPostfix=stepPostfix||[];
@@ -650,7 +659,8 @@ actions.prototype.onclick = function (x, y, stepPostfix) {
 
 ////// 滑动鼠标滚轮时的操作 //////
 actions.prototype.onmousewheel = function (direct) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0) return;
+    if (core.isset(core.status.replay)&&core.status.replay.replaying
+        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
     // 向下滚动是 -1 ,向上是 1
 
     // 楼层飞行器
@@ -1379,8 +1389,17 @@ actions.prototype.clickSL = function(x,y) {
     }
     // 删除
     if (x>=0 && x<=2 && y==12) {
-        core.status.event.selection=!core.status.event.selection;
-        core.ui.drawSLPanel(index);
+
+        if (core.status.event.id=='save') {
+            core.status.event.selection=!core.status.event.selection;
+            core.ui.drawSLPanel(index);
+        }
+        else {
+            var index = parseInt(prompt("请输入读档编号"))||0;
+            if (index>0) {
+                core.doSL(index, core.status.event.id);
+            }
+        }
         return;
     }
 
@@ -1482,6 +1501,13 @@ actions.prototype.keyUpSL = function (keycode) {
         }
         else {
             core.doSL(5*page+offset, core.status.event.id);
+        }
+        return;
+    }
+    if (keycode==69 && core.status.event.id == 'load') { // E
+        var index = parseInt(prompt("请输入读档编号"))||0;
+        if (index>0) {
+            core.doSL(index, core.status.event.id);
         }
         return;
     }

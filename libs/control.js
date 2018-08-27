@@ -2600,6 +2600,11 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.weak.innerHTML = core.hasFlag('weak')?"衰":"";
         core.statusBar.curse.innerHTML = core.hasFlag('curse')?"咒":"";
     }
+    if (core.flags.enablePZF) {
+        core.statusBar.pickaxe.innerHTML = "破"+core.itemCount('pickaxe');
+        core.statusBar.bomb.innerHTML = "炸"+core.itemCount('bomb');
+        core.statusBar.fly.innerHTML = "飞"+core.itemCount('centerFly');
+    }
 
     core.statusBar.hard.innerHTML = core.status.hard;
 
@@ -2981,6 +2986,12 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             id: 'keyCol',
             rules: {
                 display: !core.isset(core.flags.enableKeys)||core.flags.enableKeys?'block':'none'
+            }
+        },
+        {
+            id: 'pzfCol',
+            rules: {
+                display: core.flags.enablePZF?'block':'none'
             }
         },
         {

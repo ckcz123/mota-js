@@ -398,7 +398,7 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
     if (Math.abs(core.getHeroLoc('x')-destX)+Math.abs(core.getHeroLoc('y')-destY)<=1)
         return false;
     var testMove = function (dx, dy, dir) {
-        if (dx<0 || dx>=core.bigmap.width|| dy<0 || dy>core.bigmap.height) return false;
+        if (dx<0 || dx>=core.bigmap.width|| dy<0 || dy>=core.bigmap.height) return false;
         if (core.control.moveDirectly(dx, dy)) {
             if (core.isset(dir)) core.moveHero(dir, function() {});
             return true;

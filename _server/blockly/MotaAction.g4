@@ -1307,12 +1307,12 @@ IdString
     ;
 
 FixedId_List
-    :   'item:blueKey'|'status:hp'|'status:atk'|'status:def'|'item:yellowKey'
-    ;
+    :   '生命'|'攻击'|'防御'|'魔防'|'黄钥匙'|'蓝钥匙'|'红钥匙'|'金币'|'经验'
+    /*FixedId_List ['status:hp','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:experience']*/;
 
 Id_List
-    :   'flag' | 'status' | 'item'
-    ;
+    :   '变量' | '状态' | '物品'
+    /*Id_List ['flag','status','item']*/;
 
 //转blockly后不保留需要加"
 EvalString

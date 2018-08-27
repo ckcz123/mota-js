@@ -333,7 +333,7 @@ main.floors.sample3 =
                 {"type": "hide", "loc": [4,6]},
                 {"type": "hide", "loc": [8,6]},
                 {"type": "hide", "loc": [8,3]},
-                {"type": "changeFloor", "floorId": "sample2", "loc": [6,6], "direction": "up", "time": 1000}, // 更换勇士地点，合计1秒
+                {"type": "changeFloor", "floorId": "sample3", "loc": [6,6], "direction": "up", "time": 1000}, // 更换勇士地点，合计1秒
                 {"type": "show", "loc": [6,5]}, // 显示黄宝石
                 {"type": "sleep", "time": 200}, // 等待200毫秒
                 {"type": "playSound", "name": "item.mp3"},

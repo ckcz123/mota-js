@@ -297,7 +297,8 @@ maps.prototype.canMoveDirectly = function (destX,destY) {
 
     // 可以无视起点事件
     var nowBlockId = core.getBlockId(fromX, fromY);
-    if ((nowBlockId!=null&&nowBlockId!='upFloor'&&nowBlockId!='downFloor')
+    if ((nowBlockId!=null&&nowBlockId!='upFloor'&&nowBlockId!='downFloor'&&nowBlockId!='portal'
+        &&nowBlockId!='upPortal'&&nowBlockId!='leftPortal'&&nowBlockId!='downPortal'&&nowBlockId!='rightPortal')
         ||core.status.checkBlock.damage[fromX+core.bigmap.width*fromY]>0)
         return -1;
 

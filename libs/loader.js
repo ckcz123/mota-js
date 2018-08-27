@@ -157,79 +157,12 @@ loader.prototype.loadAnimates = function () {
 
 ////// 加载音频 //////
 loader.prototype.loadMusic = function () {
-
     core.bgms.forEach(function (t) {
-
-        // 判断是不是mid
-        if (/^.*\.mid$/i.test(t)) {
-
-            if (core.musicStatus.audioContext!=null) {
-                core.material.bgms[t] = 'loading';
-
-                core.http('GET', 'project/sounds/'+t, null, function (data) {
-                    try {
-                        var ff = [];
-                        var mx = data.length;
-                        for (var z = 0; z < mx; z++)
-                            ff[z] = String.fromCharCode(data.charCodeAt(z) & 255);
-                        var shouldStart = core.material.bgms[t] == 'starting';
-                        core.material.bgms[t] = AudioPlayer(core.musicStatus.audioContext, Replayer(MidiFile(ff.join("")), Synth(44100)), true);
-
-                        if (shouldStart)
-                            core.playBgm(t);
-                    }
-                    catch (e) {
-                        console.log(e);
-                        core.material.bgms[t] = null;
-                    }
-                }, function (e) {
-                    console.log(e);
-                    core.material.bgms[t] = null;
-                }, "text/plain; charset=x-user-defined")
-
-            }
-            else {
-                core.material.bgms[t] = null;
-            }
-        }
-        else {
-            var music = new Audio();
-            music.preload = 'none';
-            if (main.bgmRemote) music.src = main.bgmRemoteRoot+core.firstData.name+'/'+t;
-            else music.src = 'project/sounds/'+t;
-            music.loop = 'loop';
-            core.material.bgms[t] = music;
-        }
+        SoundManager.preloadBgm(t);
     });
 
     core.sounds.forEach(function (t) {
-
-        if (core.musicStatus.audioContext != null) {
-
-            core.http('GET', 'project/sounds/'+t, null, function (data) {
-                try {
-                    core.musicStatus.audioContext.decodeAudioData(data, function (buffer) {
-                        core.material.sounds[t] = buffer;
-                    }, function (e) {
-                        console.log(e);
-                        core.material.sounds[t] = null;
-                    })
-                }
-                catch (ee) {
-                    console.log(ee);
-                    core.material.sounds[t] = null;
-                }
-            }, function () {
-                console.log(e);
-                core.material.sounds[t] = null;
-            }, null, 'arraybuffer');
-        }
-        else {
-            var music = new Audio();
-            music.src = 'project/sounds/'+t;
-            core.material.sounds[t] = music;
-        }
-
+        SoundManager.preloadSe(t);
     });
 
     // 直接开始播放

@@ -1539,12 +1539,7 @@ actions.prototype.clickSwitchs = function (x,y) {
         switch (selection) {
             case 0:
                 core.musicStatus.bgmStatus = !core.musicStatus.bgmStatus;
-                if (core.musicStatus.bgmStatus)
-                    core.resumeBgm();
-                else {
-                    core.pauseBgm();
-                    core.musicStatus.playingBgm = null;
-                }
+                SoundManager.setMute(!core.musicStatus.bgmStatus);
                 core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
                 core.ui.drawSwitchs();
                 break;

@@ -645,11 +645,11 @@ events.prototype.doAction = function() {
             }
         case "playSound":
             if (!core.status.replay.replaying)
-                core.playSound(data.name);
+                core.playSound(data.name,data.volume,data.pitch);
             this.doAction();
             break;
         case "playBgm":
-            core.playBgm(data.name);
+            core.playBgm(data.name,data.volume,data.pitch);
             this.doAction();
             break
         case "pauseBgm":
@@ -661,10 +661,7 @@ events.prototype.doAction = function() {
             this.doAction();
             break
         case "setVolume":
-            data.value = parseInt(data.value||0);
-            if (data.value<0) data.value=0;
-            if (data.value>100) data.value=100;
-            this.setVolume(data.value/100, data.time, function() {
+            this.setVolume(data.volume, function() {
                 core.doAction();
             });
             break;
@@ -1291,35 +1288,9 @@ events.prototype.moveImage = function (image, from, to, time, callback) {
 }
 
 ////// 淡入淡出音乐 //////
-events.prototype.setVolume = function (value, time, callback) {
-
-    var set = function (value) {
-        core.musicStatus.volume = value;
-        if (core.isset(core.musicStatus.playingBgm)) {
-            core.material.bgms[core.musicStatus.playingBgm].volume = value;
-        }
-        core.musicStatus.gainNode.gain.value = value;
-    }
-
-    if (!core.isset(time) || time<100) {
-        set(value);
-        if (core.isset(callback)) callback();
-        return;
-    }
-    core.status.replay.animate=true;
-    var currVolume = core.musicStatus.volume;
-    var step = 0;
-    var fade = setInterval(function () {
-        step++;
-        var nowVolume = currVolume+(value-currVolume)*step/32;
-        set(nowVolume);
-        if (step>=32) {
-            clearInterval(fade);
-            core.status.replay.animate=false;
-            if (core.isset(callback))
-                callback();
-        }
-    }, time / 32);
+events.prototype.setVolume = function (time, callback) {
+    SoundManager.fadeOutBgm(time/1000);
+    if(core.isset(callback)) callback();
 }
 
 ////// 画面震动 //////

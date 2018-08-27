@@ -257,6 +257,7 @@ core.prototype.init = function (coreData, callback) {
     if (!core.musicStatus.startDirectly) // 如果当前网络环境不允许
         core.musicStatus.bgmStatus = false;
     core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
+    SoundManager.setMute(!core.musicStatus.bgmStatus);
 
     core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
     core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
@@ -1207,7 +1208,7 @@ core.prototype.copy = function (data) {
 
 ////// 播放背景音乐 //////
 core.prototype.playBgm = function (bgm) {
-    core.control.playBgm(bgm);
+    core.control.playBgm.apply(core.control, arguments);
 }
 
 ////// 暂停背景音乐的播放 //////
@@ -1221,8 +1222,8 @@ core.prototype.resumeBgm = function () {
 }
 
 ////// 播放音频 //////
-core.prototype.playSound = function (sound) {
-    core.control.playSound(sound);
+core.prototype.playSound = function () {
+    core.control.playSound.apply(core.control, arguments);
 }
 
 ////// 动画显示某对象 //////

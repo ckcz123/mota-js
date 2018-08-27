@@ -251,7 +251,16 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
         totalTime=core.status.hero.statistics.totalTime;
     }
 
-    this.clearStatus();
+    // 停止各个Timeout和Interval
+    for (var i in core.timeout) {
+        clearTimeout(core.timeout[i]);
+        core.timeout[i] = null;
+    }
+    for (var i in core.interval) {
+        clearInterval(core.interval[i]);
+        core.interval[i] = null;
+    }
+    core.clearStatusBar();
 
     // 初始化status
     core.status = core.clone(core.initStatus);
@@ -2019,8 +2028,11 @@ control.prototype.replay = function () {
 
         var pos=action.substring(5).split(":");
         var x=parseInt(pos[0]), y=parseInt(pos[1]);
+        var nowx=core.getHeroLoc('x'), nowy=core.getHeroLoc('y');
         if (core.control.moveDirectly(x,y)) {
+            core.ui.drawArrow('route', 32*nowx+16, 32*nowy+16, 32*x+16, 32*y+16, '#FF0000', 3);
             setTimeout(function () {
+                core.clearMap('route');
                 core.replay();
             }, 750 / Math.max(1, core.status.replay.speed));
             return;
@@ -2724,6 +2736,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     if (!core.flags.enableLevelUp) count--;
     if (!core.flags.enableDebuff) count--;
     if (core.isset(core.flags.enableKeys) && !core.flags.enableKeys) count--;
+    if (!core.flags.enablePZF) count--;
 
     var statusLineHeight = BASE_LINEHEIGHT * 9 / count;
     var statusLineFontSize = DEFAULT_FONT_SIZE;

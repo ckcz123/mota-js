@@ -1026,11 +1026,14 @@ actions.prototype.clickViewMaps = function (x,y) {
 ////// 查看地图界面时，按下某个键的操作 //////
 actions.prototype.keyDownViewMaps = function (keycode) {
     if (!core.isset(core.status.event.data)) return;
+
+    var floorId = core.floorIds[core.status.event.data.index], mh = core.floors[floorId].height||13;
+
     if (keycode==38||keycode==33) this.clickViewMaps(6, 3);
     if (keycode==40||keycode==34) this.clickViewMaps(6, 9);
-    if (keycode==87) this.clickViewMaps(6,0);
+    if (keycode==87 && mh>13) this.clickViewMaps(6,0);
     if (keycode==65) this.clickViewMaps(0,6);
-    if (keycode==83) this.clickViewMaps(6,12);
+    if (keycode==83 && mh>13) this.clickViewMaps(6,12);
     if (keycode==68) this.clickViewMaps(12,6);
     return;
 }
@@ -1042,12 +1045,12 @@ actions.prototype.keyUpViewMaps = function (keycode) {
         return;
     }
 
-    if (keycode==27 || keycode==13 || keycode==32 || keycode==67) {
+    if (keycode==27 || keycode==13 || keycode==32 || (!core.status.replay.replaying && keycode==67)) {
         core.clearMap('data');
         core.setOpacity('data', 1);
         core.ui.closePanel();
     }
-    if (keycode==88) {
+    if (keycode==88 || (core.status.replay.replaying && keycode==67)) {
         if (core.isset(core.status.replay)&&core.status.replay.replaying) {
             core.bookReplay();
         } else {

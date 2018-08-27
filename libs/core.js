@@ -2,11 +2,6 @@
  * 初始化 start
  */
 
-// 额外功能
-Number.prototype.clamp = function(min, max) {
-    return Math.min(Math.max(this, min), max);
-};
-
 function core() {
     this.material = {
         'animates': {},
@@ -81,7 +76,8 @@ function core() {
         offsetX: 0, // in pixel
         offsetY: 0,
         width: 13, // map width and height
-        height: 13
+        height: 13,
+        tempCanvas: null, // A temp canvas for drawing
     }
     this.initStatus = {
         'played': false,
@@ -155,7 +151,6 @@ function core() {
             "time": 0,
         },
         'curtainColor': null,
-        'usingCenterFly':false,
         'openingDoor': null,
         'isSkiing': false,
 
@@ -274,6 +269,8 @@ core.prototype.init = function (coreData, callback) {
 
     core.material.ground = new Image();
     core.material.ground.src = "project/images/ground.png";
+
+    core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
 
     core.loader.load(function () {
         console.log(core.material);
@@ -669,13 +666,18 @@ core.prototype.enemyExists = function (x, y, id,floorId) {
 }
 
 ////// 获得某个点的block //////
-core.prototype.getBlock = function (x, y, floorId, needEnable) {
-    return core.maps.getBlock(x,y,floorId,needEnable);
+core.prototype.getBlock = function (x, y, floorId, showDisable) {
+    return core.maps.getBlock(x,y,floorId,showDisable);
 }
 
 ////// 获得某个点的blockId //////
-core.prototype.getBlockId = function (x, y, floorId, needEnable) {
-    return core.maps.getBlockId(x, y, floorId, needEnable);
+core.prototype.getBlockId = function (x, y, floorId, showDisable) {
+    return core.maps.getBlockId(x, y, floorId, showDisable);
+}
+
+////// 获得某个点的blockCls //////
+core.prototype.getBlockCls = function (x, y, floorId, showDisable) {
+    return core.maps.getBlockCls(x, y, floorId, showDisable);
 }
 
 ////// 显示移动某块的动画，达到{“type”:”move”}的效果 //////

@@ -2,7 +2,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 {
 	"main" : {
 		"floorIds" : [ 
-			"MT0"
+			"sample0", "sample1", "sample2", "MT0"
 		],
 		"images" : [
 			"bg.jpg"
@@ -28,7 +28,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"title": "魔塔样板",
 		"name": "template",
 		"version": "Ver 2.3.3",
-		"floorId": "MT0",
+		"floorId": "sample0",
 		"hero": { 
 			"name": "阳光",
 			'lv': 1,

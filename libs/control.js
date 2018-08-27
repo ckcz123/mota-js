@@ -542,9 +542,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
 
 ////// 自动寻路算法，找寻最优路径 //////
 control.prototype.automaticRoute = function (destX, destY) {
-    var fw = core.bigmap.width;
-    var fh = core.bigmap.height;
-    var total = fw * fh;
+    var fw = core.bigmap.width, fh = core.bigmap.height;
     var startX = core.getHeroLoc('x');
     var startY = core.getHeroLoc('y');
     var scan = {
@@ -553,31 +551,26 @@ control.prototype.automaticRoute = function (destX, destY) {
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
-    var queue = [];
-    var nowDeep = 0;
-    var route = [];
-    var ans = []
-
     if (destX == startX && destY == startY) return false;
-    queue.push(startX + fw * startY);
-    queue.push(-1);
-    route[startX + fw * startY] = '';
 
-    while (queue.length != 1) {
-        var f = queue.shift();
-        if (f===-1) {nowDeep+=1;queue.push(-1);continue;}
-        var deep = parseInt(f/total);
-        if (deep!==nowDeep) {queue.push(f);continue;}
-        f=f%total;
-        var nowX = parseInt(f % fw), nowY = parseInt(f / fw);
-        var nowIsArrow = false, nowId, nowBlock = core.getBlock(nowX,nowY);
+    var route = [];
+    var queue = new PriorityQueue({comparator: function (a,b) {
+        return a.depth - b.depth;
+    }});
+    var ans = [];
+
+    route[startX + fw * startY] = '';
+    queue.queue({depth: 0, x: startX, y: startY});
+    while (queue.length!=0) {
+        var curr = queue.dequeue();
+        var deep = curr.depth, nowX = curr.x, nowY = curr.y;
+
         for (var direction in scan) {
             if (!core.canMoveHero(nowX, nowY, direction))
                 continue;
 
             var nx = nowX + scan[direction].x;
             var ny = nowY + scan[direction].y;
-
             if (nx<0 || nx>=fw || ny<0 || ny>=fh) continue;
 
             var nid = nx + fw * ny;
@@ -585,21 +578,19 @@ control.prototype.automaticRoute = function (destX, destY) {
             if (core.isset(route[nid])) continue;
 
             var deepAdd=1;
-
             var nextId, nextBlock = core.getBlock(nx,ny);
             if (nextBlock!=null){
                 nextId = nextBlock.block.event.id;
                 // 绕过亮灯（因为只有一次通行机会很宝贵）
                 if(nextId == "light") deepAdd=100;
                 // 绕过路障
-                if (nextId.substring(nextId.length-3)=="Net") deepAdd=core.values.lavaDamage;
+                // if (nextId.substring(nextId.length-3)=="Net") deepAdd=core.values.lavaDamage*10;
                 // 绕过血瓶
-                if (!core.flags.potionWhileRouting && nextId.substring(nextId.length-6)=="Potion") deepAdd=20;
+                if (!core.flags.potionWhileRouting && nextId.substring(nextId.length-6)=="Potion") deepAdd+=20;
                 // 绕过传送点
-                if  (nextBlock.block.event.trigger == 'changeFloor') deepAdd = 10;
+                if  (nextBlock.block.event.trigger == 'changeFloor') deepAdd+=10;
             }
-            if (core.status.checkBlock.damage[nid]>0)
-                deepAdd = core.status.checkBlock.damage[nid];
+            deepAdd+=core.status.checkBlock.damage[nid]*10;
 
             if (nx == destX && ny == destY) {
                 route[nid] = direction;
@@ -609,11 +600,10 @@ control.prototype.automaticRoute = function (destX, destY) {
                 continue;
 
             route[nid] = direction;
-            queue.push(total*(nowDeep+deepAdd)+nid);
+            queue.queue({depth: deep+deepAdd, x: nx, y: ny});
         }
         if (core.isset(route[destX + fw * destY])) break;
     }
-
     if (!core.isset(route[destX + fw * destY])) {
         return false;
     }
@@ -922,9 +912,14 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
     var animate=window.setInterval(function() {
 
         if (jump_count>0) {
-            core.clearMap('hero', drawX(), drawY()-height+32, 32, height);
+            core.clearMap('hero', drawX()-core.bigmap.offsetX, drawY()-height+32-core.bigmap.offsetY, 32, height);
             updateJump();
-            core.canvas.hero.drawImage(core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height, drawX(), drawY() + 32-height, 32, height);
+            var nowx = drawX(), nowy = drawY();
+            core.bigmap.offsetX = core.clamp(nowx - 32*6, 0, 32*core.bigmap.width-416);
+            core.bigmap.offsetY = core.clamp(nowy - 32*6, 0, 32*core.bigmap.height-416);
+            core.control.updateViewport();
+            core.canvas.hero.drawImage(core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height,
+                nowx - core.bigmap.offsetX, nowy + 32-height - core.bigmap.offsetY, 32, height);
         }
         else {
             clearInterval(animate);
@@ -1044,7 +1039,7 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
     if (core.isset(core.status.hero.followers)) {
         var index=1;
         core.status.hero.followers.forEach(function (t) {
-            core.canvas.hero.clearRect(32*t.x-32, 32*t.y-32, 96, 96);
+            core.canvas.hero.clearRect(32*t.x-core.bigmap.offsetX-32, 32*t.y-core.bigmap.offsetY-32, 96, 96);
             if (core.isset(core.material.images.images[t.img])) {
                 drawObjs.push({
                     "img": core.material.images.images[t.img],
@@ -1174,14 +1169,14 @@ control.prototype.updateCheckBlock = function() {
     core.status.checkBlock.map = []; // 记录怪物地图
     for (var n=0;n<blocks.length;n++) {
         var block = blocks[n];
-        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls.indexOf('enemy')==0) {
+        if (core.isset(block.event) && !block.disable && block.event.cls.indexOf('enemy')==0) {
             var id = block.event.id, enemy = core.material.enemys[id];
             if (core.isset(enemy)) {
                 core.status.checkBlock.map[block.x+core.bigmap.width*block.y]=id;
             }
         }
         // 血网
-        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) &&
+        if (core.isset(block.event) && !block.disable &&
             block.event.id=='lavaNet' && block.event.trigger=='passNet' && !core.hasItem("shoes")) {
             core.status.checkBlock.map[block.x+core.bigmap.width*block.y]="lavaNet";
         }
@@ -1326,7 +1321,7 @@ control.prototype.checkBlock = function () {
             var x=t.x, y=t.y, direction = t.direction;
             var nx = x+scan[direction].x, ny=y+scan[direction].y;
 
-            return nx>=0 && nx<core.bigmap.width && ny>=0 && ny<core.bigmap.height && core.getBlock(nx, ny, core.status.floorId, false)==null;
+            return nx>=0 && nx<core.bigmap.width && ny>=0 && ny<core.bigmap.height && core.getBlock(nx, ny, null, true)==null;
         });
         core.updateStatusBar();
         if (snipe.length>0)
@@ -1578,7 +1573,7 @@ control.prototype.updateFg = function () {
         for (var b = 0; b < mapBlocks.length; b++) {
             var x = mapBlocks[b].x, y = mapBlocks[b].y;
             if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls.indexOf('enemy')==0
-                && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable)) {
+                && !mapBlocks[b].disable) {
 
                 // 非系统默认的战斗事件（被覆盖）
                 if (mapBlocks[b].event.trigger != 'battle') {

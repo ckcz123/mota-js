@@ -1178,7 +1178,7 @@ ui.prototype.drawReplay = function () {
     core.lockControl();
     core.status.event.id = 'replay';
     this.drawChoices(null, [
-        "从头回放录像", "从存档开始回放", "返回游戏"
+        "从头回放录像", "从存档开始回放", "下载当前录像", "返回游戏"
     ]);
 }
 
@@ -1476,30 +1476,81 @@ ui.prototype.drawFly = function(page) {
 }
 
 ////// 绘制浏览地图界面 //////
-ui.prototype.drawMaps = function (index) {
-    if (!core.isset(index)) index=core.floorIds.indexOf(core.status.floorId);
+ui.prototype.drawMaps = function (index, x, y) {
+    core.lockControl();
+    core.status.event.id = 'viewMaps';
+
+    if (!core.isset(index)) {
+        core.status.event.data = null;
+        core.clearMap('ui');
+        core.setAlpha('ui', 1);
+
+        core.clearMap('animate');
+        core.setOpacity('animate', 0.4);
+        core.fillRect('animate', 0, 0, 416, 416, '#000000');
+
+        core.strokeRect('ui', 66, 2, 284, 60, "#FFD700", 4);
+        core.strokeRect('ui', 2, 66, 60, 284);
+        core.strokeRect('ui', 66, 416-62, 284, 60);
+        core.strokeRect('ui', 416-62, 66, 60, 284);
+        core.strokeRect('ui', 66, 66, 284, 92);
+        core.strokeRect('ui', 66, 32*8+2, 284, 92);
+        core.canvas.ui.textAlign = 'center';
+        core.fillText('ui', "上移地图 [W]", 208, 38, '#FFD700', '20px Arial');
+        core.fillText('ui', "下移地图 [S]", 208, 390);
+
+        var top = 150;
+        core.fillText('ui', "左", 32, top);
+        core.fillText('ui', "移", 32, top+32);
+        core.fillText('ui', "地", 32, top+32*2);
+        core.fillText('ui', "图", 32, top+32*3);
+        core.fillText('ui', "[A]", 32, top+32*4);
+        core.fillText('ui', "右", 384, top);
+        core.fillText('ui', "移", 384, top+32);
+        core.fillText('ui', "地", 384, top+32*2);
+        core.fillText('ui', "图", 384, top+32*3);
+        core.fillText('ui', "[D]", 384, top+32*4);
+
+        core.fillText('ui', "前张地图 [▲ / PGUP]", 208, 64+54);
+        core.fillText('ui', "后张地图 [▼ / PGDN]", 208, 32*8+54);
+
+        core.fillText('ui', "退出 [ESC / ENTER]", 208, 208+8);
+        core.fillText('ui', "[X] 可查看怪物手册", 285, 208+40, null, '13px Arial');
+        return;
+    }
+
+    core.clearMap('animate');
+    core.setOpacity('animate', 1);
+
+    if (core.isset(index.index)) {
+        x=index.x;
+        y=index.y;
+        index=index.index;
+    }
 
     if (index<0) index=0;
     if (index>=core.floorIds.length) index=core.floorIds.length-1;
+    var floorId = core.floorIds[index], mw = core.floors[floorId].width||13, mh = core.floors[floorId].height||13;
+    if (!core.isset(x)) x = parseInt(mw/2);
+    if (!core.isset(y)) y = parseInt(mh/2);
+    if (x<6) x=6;
+    if (x>mw-7) x=mw-7;
+    if (y<6) y=6;
+    if (y>mh-7) y=mh-7;
 
-    core.lockControl();
-    core.status.event.id = 'viewMaps';
-    core.status.event.data = index;
-
-    var floorId = core.floorIds[index];
+    core.status.event.data = {"index": index, "x": x, "y": y};
 
     clearTimeout(core.interval.tipAnimate);
-
     core.clearMap('ui');
     core.setAlpha('ui', 1);
-    this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 0, 0, 416);
+    this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 0, 0, 416, x, y);
 
     core.clearMap('data');
     core.setOpacity('data', 0.2);
     core.canvas.data.textAlign = 'left';
     core.setFont('data', '16px Arial');
 
-    var text = core.floors[floorId].title;
+    var text = core.floors[floorId].title + " ["+(x-6)+","+(y-6)+"]";
     var textX = 16, textY = 18, width = textX + core.canvas.data.measureText(text).width + 16, height = 42;
     core.fillRect('data', 5, 5, width, height, '#000');
     core.setOpacity('data', 0.5);
@@ -1679,7 +1730,7 @@ ui.prototype.drawSLPanel = function(index) {
             core.fillText('ui', i==0?"自动存档":name+id, (2*i+1)*u, 35, '#FFFFFF', "bold 17px Verdana");
             core.strokeRect('ui', (2*i+1)*u-size/2, 50, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
+                this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 65+size, '#FFFFFF', '10px Verdana');
             }
             else {
@@ -1691,7 +1742,7 @@ ui.prototype.drawSLPanel = function(index) {
             core.fillText('ui', name+id, (2*i-5)*u, 230, '#FFFFFF', "bold 17px Verdana");
             core.strokeRect('ui', (2*i-5)*u-size/2, 245, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
+                this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 260+size, '#FFFFFF', '10px Verdana');
             }
             else {
@@ -1709,20 +1760,27 @@ ui.prototype.drawSLPanel = function(index) {
 }
 
 ////// 绘制一个缩略图 //////
-ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroLoc, heroIcon) {
-    core.clearMap(canvas, x, y, size, size);
+ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, centerX, centerY, heroLoc, heroIcon) {
+
+    var mw = core.floors[floorId].width || 13;
+    var mh = core.floors[floorId].height || 13;
+    // 绘制到tempCanvas上面
+    var tempCanvas = core.bigmap.tempCanvas;
+    var tempWidth = mw*32, tempHeight = mh*32;
+    tempCanvas.canvas.width = tempWidth;
+    tempCanvas.canvas.height = tempHeight;
+    tempCanvas.clearRect(0, 0, tempWidth, tempHeight);
+
     var groundId = core.floors[floorId].defaultGround || "ground";
     var blockIcon = core.material.icons.terrains[groundId];
     var blockImage = core.material.images.terrains;
-    var persize = size/13;
-    var mw = core.floors[floorId].width || 13;
-    var mh = core.floors[floorId].height || 13;
-    for (var i=0;i<13;i++) {
-        for (var j=0;j<13;j++) {
-            core.canvas[canvas].drawImage(blockImage, 0, blockIcon * 32, 32, 32, x + i * persize, y + j * persize, persize, persize);
+    // background
+    for (var i=0;i<mw;i++) {
+        for (var j=0;j<mh;j++) {
+            tempCanvas.drawImage(blockImage, 0, blockIcon * 32, 32, 32, i * 32, j * 32, 32, 32);
         }
     }
-
+    // background image
     var images = [];
     if (core.isset(core.floors[floorId].images)) {
         images = core.floors[floorId].images;
@@ -1730,62 +1788,64 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, heroL
             images = [[0, 0, images]];
         }
     }
-
     images.forEach(function (t) {
-        var ratio = size/416;
         var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
         if (core.isset(dx) && core.isset(dy) && core.isset(core.material.images.images[p])) {
-            dx*=32; dy*=32;
             var image = core.material.images.images[p];
             if (!t[3])
-                core.canvas.ui.drawImage(image, x+dx*ratio, y+dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
+                tempCanvas.drawImage(image, 32 * dx, 32 * dy, image.width, image.height);
             else if (t[3]==2)
-                core.canvas.ui.drawImage(image, 0, image.height-32, image.width, 32,
-                    x+dx * ratio, y+(dy + image.height - 32) * ratio, ratio*image.width, 32*ratio);
+                tempCanvas.drawImage(image, 0, image.height-32, image.width, 32,
+                    32 * dx, 32 * dy + image.height - 32, image.width, 32);
         }
     })
-
+    // draw block
     var mapArray = core.maps.getMapArray(blocks,mw,mh);
     for (var b in blocks) {
         var block = blocks[b];
-        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable)) {
+        if (core.isset(block.event) && !block.disable) {
             if (block.event.cls == 'autotile') {
-                core.drawAutotile(core.canvas.ui, mapArray, block, persize, x, y);
+                core.drawAutotile(tempCanvas, mapArray, block, 32, 0, 0);
             }
             else {
                 if (block.event.id!='none') {
                     var blockIcon = core.material.icons[block.event.cls][block.event.id];
                     var blockImage = core.material.images[block.event.cls];
                     var height = block.event.height || 32;
-                    core.canvas[canvas].drawImage(blockImage, 0, blockIcon * height, 32, height, x + block.x * persize, y + block.y * persize + (persize-persize*height/32), persize, persize * height/32);
+                    tempCanvas.drawImage(blockImage, 0, blockIcon * height, 32, height, 32*block.x, 32*block.y + 32 - height, 32, height);
                 }
             }
         }
     }
-
+    // draw hero
     if (core.isset(heroLoc)) {
         if (!core.isset(core.material.images.images[heroIcon]))
             heroIcon = "hero.png";
         var icon = core.material.icons.hero[heroLoc.direction];
         var height = core.material.images.images[heroIcon].height/4;
-        var realHeight = persize*height/32;
-        core.canvas[canvas].drawImage(core.material.images.images[heroIcon], icon.stop * 32, icon.loc * height, 32, height, x+persize*heroLoc.x, y+persize*heroLoc.y+persize-realHeight, persize, realHeight);
+        tempCanvas.drawImage(core.material.images.images[heroIcon], icon.stop * 32, icon.loc * height, 32, height, 32*heroLoc.x, 32*heroLoc.y+32-height, 32, height);
     }
-
+    // draw fg
     images.forEach(function (t) {
-        var ratio = size/416;
         var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
         if (core.isset(dx) && core.isset(dy) && core.isset(core.material.images.images[p])) {
-            dx*=32; dy*=32;
             var image = core.material.images.images[p];
             if (t[3]==1)
-                core.canvas.ui.drawImage(image, x+dx*ratio, y+dy*ratio, Math.min(size-dx*ratio, ratio*image.width), Math.min(size-dy*ratio, ratio*image.height));
+                tempCanvas.drawImage(image, 32*dx, 32*dy, image.width, image.height);
             else if (t[3]==2)
-                core.canvas.ui.drawImage(image, 0, 0, image.width, image.height-32,
-                    x+dx * ratio, y+dy * ratio, ratio * image.width, ratio * (image.height-32));
+                tempCanvas.drawImage(image, 0, 0, image.width, image.height-32,
+                    32*dx, 32*dy, image.width, image.height-32);
         }
     })
 
+    // draw to canvas
+    core.clearMap(canvas, x, y, size, size);
+    if (!core.isset(centerX)) centerX=parseInt(mw/2);
+    if (!core.isset(centerY)) centerY=parseInt(mh/2);
+
+    var offsetX = core.clamp(centerX-6, 0, mw-13), offsetY = core.clamp(centerY-6, 0, mh-13);
+    // offsetX~offsetX+12; offsetY~offsetY+12
+    core.canvas[canvas].drawImage(tempCanvas.canvas, offsetX*32, offsetY*32, 416, 416, x, y, size, size);
 }
 
 ui.prototype.drawKeyBoard = function () {
@@ -1865,7 +1925,7 @@ ui.prototype.drawStatistics = function () {
         if (floor.cannotViewMap && floorId!=core.status.floorId) return;
 
         blocks.forEach(function (block) {
-            if (!core.isset(block.event) || (core.isset(block.enable) && !block.enable))
+            if (!core.isset(block.event) || block.disable)
                 return;
             var event = block.event;
             if (event.cls.indexOf("enemy")==0) {

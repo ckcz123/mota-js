@@ -165,33 +165,7 @@ actions.prototype.keyDown = function(keyCode) {
         case 40:
             core.moveHero('down');
             break;
-        case 13: case 32: case 67: case 51: // 快捷键3：飞
-        // 因为加入了两次的检测机制,从keydown转移到keyup,同时保证位置信息正确,但以下情况会触发作图的bug:
-        // 在鼠标的路线移动中使用飞,绿块会滞后一格,显示的位置不对,同时也不会倍以下的代码清除
-        if (core.status.heroStop && core.hasItem('centerFly')) {
-            if (core.status.usingCenterFly) {
-                if (core.canUseItem('centerFly')) {
-                    core.useItem('centerFly');
-                    core.clearMap('ui', core.getHeroLoc('x')*32,core.getHeroLoc('y')*32,32,32);
-                }
-                else {
-                    core.drawTip('当前不能使用中心对称飞行器');
-                    core.clearMap('ui', (12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32);
-                }
-                core.status.usingCenterFly = false;
-            } else if (keyCode==51) {
-                core.status.usingCenterFly = true;
-                core.setAlpha('ui', 0.5);
-                core.fillRect('ui',(12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32,core.canUseItem('centerFly')?'#00FF00':'#FF0000');
-                core.setAlpha('ui', 1);
-                core.drawTip("请确认当前中心对称飞行器的位置");
-            }
-        }
         break;
-    }
-    if (core.status.usingCenterFly && keyCode!=51) {
-        core.clearMap('ui', (12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32);
-        core.status.usingCenterFly= false;
     }
 }
 
@@ -283,6 +257,10 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
             this.keyUpReplay(keyCode);
             return;
         }
+        if (core.status.event.id=='centerFly') {
+            this.keyUpCenterFly(keyCode);
+            return;
+        }
         return;
     }
 
@@ -351,7 +329,7 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
         case 33: case 34: // PAGEUP/PAGEDOWN
         if (core.status.heroStop) {
             if (core.flags.enableViewMaps) {
-                core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
+                core.ui.drawMaps();
             }
             else {
                 core.drawTip("本塔不允许浏览地图！");
@@ -366,7 +344,7 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
             break;
         case 40: // DOWN
             break;
-        case 49: // 快捷键1：破
+        case 49: // 快捷键1: 破
             if (core.status.heroStop && core.hasItem('pickaxe')) {
                 if (core.canUseItem('pickaxe')) {
                     core.useItem('pickaxe');
@@ -376,7 +354,7 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
                 }
             }
             break;
-        case 50: // 快捷键2：炸
+        case 50: // 快捷键2: 炸
             if (core.status.heroStop) {
                 if (core.hasItem('bomb')) {
                     if (core.canUseItem('bomb')) {
@@ -395,6 +373,11 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
                     }
 
                 }
+            }
+            break;
+        case 51: // 快捷键3: 飞
+            if (core.status.heroStop && core.hasItem('centerFly')) {
+                core.events.useItem('centerFly');
             }
             break;
 
@@ -533,27 +516,15 @@ actions.prototype.onclick = function (x, y, stepPostfix) {
     // 非游戏屏幕内
     if (x<0 || y<0 || x>12 || y>12) return;
 
-    // 中心对称飞行器
-    if (core.status.usingCenterFly) {
-        if (x!=12-core.getHeroLoc('x') || y!=12-core.getHeroLoc('y')) {
-            core.clearMap('ui', (12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32);
-        } else {
-            if (core.canUseItem('centerFly')) {
-                core.useItem('centerFly');
-                core.clearMap('ui', core.getHeroLoc('x')*32,core.getHeroLoc('y')*32,32,32);
-                return;
-            }
-            else {
-                core.drawTip('当前不能使用中心对称飞行器');
-                core.clearMap('ui', (12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32);
-            }
-        }
-        core.status.usingCenterFly= false;
-    }
-
     // 寻路
     if (!core.status.lockControl) {
         core.setAutomaticRoute(x+parseInt(core.bigmap.offsetX/32), y+parseInt(core.bigmap.offsetY/32), stepPostfix);
+        return;
+    }
+
+    // 中心对称飞行器
+    if (core.status.event.id == 'centerFly') {
+        this.clickCenterFly(x, y);
         return;
     }
 
@@ -705,8 +676,8 @@ actions.prototype.onmousewheel = function (direct) {
 
     // 浏览地图
     if (core.status.lockControl && core.status.event.id == 'viewMaps') {
-        if (direct==1) this.clickViewMaps(6,2);
-        if (direct==-1) this.clickViewMaps(6,10);
+        if (direct==1) this.clickViewMaps(6,3);
+        if (direct==-1) this.clickViewMaps(6,9);
         return;
     }
 }
@@ -746,6 +717,32 @@ actions.prototype.keyDownCtrl = function () {
         return;
     }
 }
+
+//////
+actions.prototype.clickCenterFly = function(x, y) {
+    if (x==core.status.event.data.x && y==core.status.event.data.y) {
+        if (core.canUseItem('centerFly')) {
+            core.useItem('centerFly');
+        }
+        else {
+            core.drawTip('当前不能使用中心对称飞行器');
+        }
+    }
+    core.ui.closePanel();
+}
+
+actions.prototype.keyUpCenterFly = function (keycode) {
+    if (keycode==51 ||  keycode==13 || keycode==32 || keycode==67) {
+        if (core.canUseItem('centerFly')) {
+            core.useItem('centerFly');
+        }
+        else {
+            core.drawTip('当前不能使用中心对称飞行器');
+        }
+    }
+    core.ui.closePanel();
+}
+
 
 ////// 点击确认框时 //////
 actions.prototype.clickConfirmBox = function (x,y) {
@@ -968,23 +965,48 @@ actions.prototype.keyUpFly = function (keycode) {
 
 ////// 查看地图界面时的点击操作 //////
 actions.prototype.clickViewMaps = function (x,y) {
+    if (!core.isset(core.status.event.data)) {
+        core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
+        return;
+    }
+
     var now = core.floorIds.indexOf(core.status.floorId);
-    var nextId = core.status.event.data;
-    if(y<=4) {
-        nextId++;
-        while (nextId<core.floorIds.length && nextId!=now && core.floors[core.floorIds[nextId]].cannotViewMap)
-            nextId++;
-        if (nextId<core.floorIds.length)
-            core.ui.drawMaps(nextId);
+    var index = core.status.event.data.index;
+    var cx = core.status.event.data.x, cy = core.status.event.data.y;
+    var floorId = core.floorIds[index], mw = core.floors[floorId].width||13, mh = core.floors[floorId].height||13;
+
+    if (x>=2 && x<=10 && y<=1 && mh>13) {
+        core.ui.drawMaps(index, cx, cy-1);
+        return;
     }
-    else if (y>=8) {
-        nextId--;
-        while (nextId>=0 && nextId!=now && core.floors[core.floorIds[nextId]].cannotViewMap)
-            nextId--;
-        if (nextId>=0)
-            core.ui.drawMaps(nextId);
+    if (x>=2 && x<=10 && y>=11 && mh>13) {
+        core.ui.drawMaps(index, cx, cy+1);
+        return;
     }
-    else {
+    if (x<=1 && y>=2 && y<=10) {
+        core.ui.drawMaps(index, cx-1, cy);
+        return;
+    }
+    if (x>=11 && y>=2 && y<=10) {
+        core.ui.drawMaps(index, cx+1, cy);
+        return;
+    }
+
+    if(x>=2 && x<=10 && y<=4) {
+        index++;
+        while (index<core.floorIds.length && index!=now && core.floors[core.floorIds[index]].cannotViewMap)
+            index++;
+        if (index<core.floorIds.length)
+            core.ui.drawMaps(index);
+    }
+    else if (x>=2 && x<=10 && y>=8) {
+        index--;
+        while (index>=0 && index!=now && core.floors[core.floorIds[index]].cannotViewMap)
+            index--;
+        if (index>=0)
+            core.ui.drawMaps(index);
+    }
+    else if (x>=2 && x<=10 && y>=5 && y<=7) {
         core.clearMap('data');
         core.setOpacity('data', 1);
         core.ui.closePanel();
@@ -993,17 +1015,23 @@ actions.prototype.clickViewMaps = function (x,y) {
 
 ////// 查看地图界面时，按下某个键的操作 //////
 actions.prototype.keyDownViewMaps = function (keycode) {
-    if (keycode==37 || keycode==38 || keycode==33) {
-        this.clickViewMaps(6,2);
-    }
-    else if (keycode==39 || keycode==40 || keycode==34) {
-        this.clickViewMaps(6,10);
-    }
+    if (!core.isset(core.status.event.data)) return;
+    if (keycode==38||keycode==33) this.clickViewMaps(6, 3);
+    if (keycode==40||keycode==34) this.clickViewMaps(6, 9);
+    if (keycode==87) this.clickViewMaps(6,0);
+    if (keycode==65) this.clickViewMaps(0,6);
+    if (keycode==83) this.clickViewMaps(6,12);
+    if (keycode==68) this.clickViewMaps(12,6);
     return;
 }
 
 ////// 查看地图界面时，放开某个键的操作 //////
 actions.prototype.keyUpViewMaps = function (keycode) {
+    if (!core.isset(core.status.event.data)) {
+        core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
+        return;
+    }
+
     if (keycode==27 || keycode==13 || keycode==32 || keycode==67) {
         core.clearMap('data');
         core.setOpacity('data', 1);
@@ -1585,9 +1613,12 @@ actions.prototype.clickSettings = function (x,y) {
                     core.drawTip("本塔不允许浏览地图！");
                 }
                 else {
+                    /*
                     core.drawText("\t[系统提示]即将进入浏览地图模式。\n\n点击地图上半部分，或按[↑]键可查看前一张地图\n点击地图下半部分，或按[↓]键可查看后一张地图\n点击地图中间，或按[ESC]键可离开浏览地图模式\n此模式下可以打开怪物手册以查看某层楼的怪物属性", function () {
                         core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
                     })
+                    */
+                    core.ui.drawMaps();
                 }
                 break;
             case 3:
@@ -2011,6 +2042,19 @@ actions.prototype.clickReplay = function (x, y) {
                     break;
                 }
             case 2:
+                if (core.hasFlag('debug')) {
+                    core.drawText("\t[系统提示]调试模式下无法下载录像");
+                    break;
+                }
+                core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify({
+                    'name': core.firstData.name,
+                    'hard': core.status.hard,
+                    'seed': core.getFlag('seed'),
+                    'route': core.encodeRoute(core.status.route)
+                }));
+                break;
+                break;
+            case 3:
                 core.ui.closePanel();
                 break;
         }

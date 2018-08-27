@@ -354,7 +354,7 @@ utils.prototype.subarray = function (a, b) {
 
 utils.prototype.clamp = function (x, a, b) {
     var min=Math.min(a, b), max=Math.max(a, b);
-    return Math.min(Math.max(x, min), max);
+    return Math.min(Math.max(x||0, min), max);
 }
 
 ////// Base64加密 //////

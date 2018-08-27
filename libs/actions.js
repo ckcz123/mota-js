@@ -1048,7 +1048,11 @@ actions.prototype.keyUpViewMaps = function (keycode) {
         core.ui.closePanel();
     }
     if (keycode==88) {
-        core.openBook(false);
+        if (core.isset(core.status.replay)&&core.status.replay.replaying) {
+            core.bookReplay();
+        } else {
+            core.openBook(false);
+        }
     }
     return;
 }

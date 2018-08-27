@@ -1720,14 +1720,14 @@ control.prototype.startReplay = function (list) {
 
 ////// 更改播放状态 //////
 control.prototype.triggerReplay = function () {
-    if (core.status.event.id=='save' || core.status.event.id=='book') return;
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (core.status.replay.pausing) this.resumeReplay();
     else this.pauseReplay();
 }
 
 ////// 暂停播放 //////
 control.prototype.pauseReplay = function () {
-    if (core.status.event.id=='save' || core.status.event.id=='book') return;
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.pausing = true;
     core.updateStatusBar();
@@ -1736,7 +1736,7 @@ control.prototype.pauseReplay = function () {
 
 ////// 恢复播放 //////
 control.prototype.resumeReplay = function () {
-    if (core.status.event.id=='save' || core.status.event.id=='book') return;
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.pausing = false;
     core.updateStatusBar();
@@ -1746,7 +1746,7 @@ control.prototype.resumeReplay = function () {
 
 ////// 加速播放 //////
 control.prototype.speedUpReplay = function () {
-    if (core.status.event.id=='save' || core.status.event.id=='book') return;
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     var toAdd = core.status.replay.speed>=3?3:core.status.replay.speed>=2?2:1;
     core.status.replay.speed = parseInt(10*core.status.replay.speed + toAdd)/10;
@@ -1756,7 +1756,7 @@ control.prototype.speedUpReplay = function () {
 
 ////// 减速播放 //////
 control.prototype.speedDownReplay = function () {
-    if (core.status.event.id=='save' || core.status.event.id=='book') return;
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     var toAdd = core.status.replay.speed>3?3:core.status.replay.speed>2?2:1;
     core.status.replay.speed = parseInt(10*core.status.replay.speed - toAdd)/10;
@@ -1766,7 +1766,7 @@ control.prototype.speedDownReplay = function () {
 
 ////// 停止播放 //////
 control.prototype.stopReplay = function () {
-    if (core.status.event.id=='save' || core.status.event.id=='book') return;
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.toReplay = [];
     core.status.replay.totalList = [];
@@ -1781,7 +1781,7 @@ control.prototype.stopReplay = function () {
 
 ////// 回退 //////
 control.prototype.rewindReplay = function () {
-    if (core.status.event.id=='save' || core.status.event.id=='book') return;
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
@@ -1816,7 +1816,7 @@ control.prototype.rewindReplay = function () {
 
 ////// 回放时存档 //////
 control.prototype.saveReplay = function () {
-    if (core.status.event.id=='save' || core.status.event.id=='book') return;
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
@@ -1837,7 +1837,33 @@ control.prototype.saveReplay = function () {
 
 ////// 回放时查看怪物手册 //////
 control.prototype.bookReplay = function () {
-    if (core.status.event.id=='save' || core.status.event.id=='book') return;
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0) return;
+    if (!core.status.replay.replaying) return;
+    if (!core.status.replay.pausing) {
+        core.drawTip("请先暂停录像");
+        return;
+    }
+
+    // 从“浏览地图”页面打开
+    if (core.status.event.id=='viewMaps') {
+        core.status.event.selection = core.status.event.data;
+        core.status.event.id=null;
+    }
+
+    if (core.status.replay.animate || core.isset(core.status.event.id)) {
+        core.drawTip("请等待当前事件的处理结束");
+        return;
+    }
+
+    core.lockControl();
+    core.status.event.id='book';
+    core.useItem('book');
+}
+
+////// 回放录像时浏览地图 //////
+control.prototype.viewMapReplay = function () {
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
+
     if (!core.status.replay.replaying) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
@@ -1849,8 +1875,8 @@ control.prototype.bookReplay = function () {
     }
 
     core.lockControl();
-    core.status.event.id='book';
-    core.useItem('book');
+    core.status.event.id='viewMaps';
+    core.ui.drawMaps();
 }
 
 ////// 回放 //////

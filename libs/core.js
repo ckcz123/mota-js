@@ -1002,8 +1002,14 @@ core.prototype.saveReplay = function () {
     core.control.saveReplay();
 }
 
+////// 回放时查看怪物手册 //////
 core.prototype.bookReplay = function () {
     core.control.bookReplay();
+}
+
+////// 回放录像时浏览地图 //////
+core.prototype.viewMapReplay = function () {
+    core.control.viewMapReplay();
 }
 
 ////// 回放 //////

@@ -730,7 +730,7 @@ actions.prototype.keyDownCtrl = function () {
 
 //////
 actions.prototype.clickCenterFly = function(x, y) {
-    if (x==core.status.event.data.x && y==core.status.event.data.y) {
+    if (x==core.status.event.data.poxX && y==core.status.event.data.posY) {
         if (core.canUseItem('centerFly')) {
             core.useItem('centerFly');
         }

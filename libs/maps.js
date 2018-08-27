@@ -464,8 +464,8 @@ maps.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top){
         var sx = 16*((index-1)%6), sy = 16*(~~((index-1)/6));
         ctx.drawImage(autotileImg, sx, sy, 16, 16, dx, dy, size/2, size/2);
     }
-    var getAutotileAroundId = function(currId, x, y){
-        if(x<0 || y<0 || x>=core.bigmap.width || y>=core.bigmap.height) return 1;
+    var getAutotileAroundId = function(currId, x, y) {
+        if(x<0 || y<0 || x>=mapArr[0].length || y>=mapArr.length) return 1;
         else return mapArr[y][x]==currId ? 1:0;
     }
     var checkAround = function(x, y){ // 得到周围四个32*32块（周围每块都包含当前块的1/4，不清楚的话画下图你就明白）的数组索引
@@ -599,7 +599,7 @@ maps.prototype.getBlockCls = function (x, y, floorId, showDisable) {
 maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
     time = time || 500;
 
-    core.clearMap('animate');
+    core.clearMap('route');
 
     var block = core.getBlock(x,y);
     if (block==null) {// 不存在
@@ -622,8 +622,8 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
     var height = block.event.height || 32;
 
     var opacityVal = 1;
-    core.setOpacity('animate', opacityVal);
-    core.canvas.animate.drawImage(blockImage, 0, blockIcon * height, 32, height, block.x * 32, block.y * 32 +32 - height, 32, height);
+    core.setOpacity('route', opacityVal);
+    core.canvas.route.drawImage(blockImage, 0, blockIcon * height, 32, height, block.x * 32, block.y * 32 +32 - height, 32, height);
 
     // 要运行的轨迹：将steps展开
     var moveSteps=[];
@@ -668,13 +668,13 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
         if (moveSteps.length==0) {
             if (keep) opacityVal=0;
             else opacityVal -= 0.06;
-            core.setOpacity('animate', opacityVal);
-            core.clearMap('animate', nowX, nowY-height+32, 32, height);
-            core.canvas.animate.drawImage(blockImage, animateCurrent * 32, blockIcon * height, 32, height, nowX, nowY-height+32, 32, height);
+            core.setOpacity('route', opacityVal);
+            core.clearMap('route', nowX, nowY-height+32, 32, height);
+            core.canvas.route.drawImage(blockImage, animateCurrent * 32, blockIcon * height, 32, height, nowX, nowY-height+32, 32, height);
             if (opacityVal<=0) {
                 clearInterval(animate);
-                core.clearMap('animate');
-                core.setOpacity('animate', 1);
+                core.clearMap('route');
+                core.setOpacity('route', 1);
                 // 不消失
                 if (keep) {
                     core.setBlock(id, nowX/32, nowY/32);
@@ -689,9 +689,9 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
             step++;
             nowX+=scan[moveSteps[0]].x*2;
             nowY+=scan[moveSteps[0]].y*2;
-            core.clearMap('animate', nowX-32, nowY-32, 96, 96);
+            core.clearMap('route', nowX-32, nowY-32, 96, 96);
             // 绘制
-            core.canvas.animate.drawImage(blockImage, animateCurrent * 32, blockIcon * height, 32, height, nowX, nowY-height+32, 32, height);
+            core.canvas.route.drawImage(blockImage, animateCurrent * 32, blockIcon * height, 32, height, nowX, nowY-height+32, 32, height);
             if (step==16) {
                 // 该移动完毕，继续
                 step=0;
@@ -704,7 +704,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
 ////// 显示跳跃某块的动画，达到{"type":"jump"}的效果 //////
 maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
     time = time || 500;
-    core.clearMap('animate');
+    core.clearMap('route');
     var block = core.getBlock(sx,sy);
     if (block==null) {
         if (core.isset(callback)) callback();
@@ -725,8 +725,8 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
     var height = block.event.height || 32;
 
     var opacityVal = 1;
-    core.setOpacity('animate', opacityVal);
-    core.canvas.animate.drawImage(blockImage, 0, blockIcon * height, 32, height, block.x * 32, block.y * 32 +32 - height, 32, height);
+    core.setOpacity('route', opacityVal);
+    core.canvas.route.drawImage(blockImage, 0, blockIcon * height, 32, height, block.x * 32, block.y * 32 +32 - height, 32, height);
 
     core.playSound('jump.mp3');
 
@@ -767,20 +767,20 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
         }
 
         if (jump_count>0) {
-            core.clearMap('animate', drawX(), drawY()-height+32, 32, height);
+            core.clearMap('route', drawX(), drawY()-height+32, 32, height);
             updateJump();
-            core.canvas.animate.drawImage(blockImage, animateCurrent * 32, blockIcon * height, 32, height, drawX(), drawY()-height+32, 32, height);
+            core.canvas.route.drawImage(blockImage, animateCurrent * 32, blockIcon * height, 32, height, drawX(), drawY()-height+32, 32, height);
         }
         else {
             if (keep) opacityVal=0;
             else opacityVal -= 0.06;
-            core.setOpacity('animate', opacityVal);
-            core.clearMap('animate', drawX(), drawY()-height+32, 32, height);
-            core.canvas.animate.drawImage(blockImage, animateCurrent * 32, blockIcon * height, 32, height, drawX(), drawY()-height+32, 32, height);
+            core.setOpacity('route', opacityVal);
+            core.clearMap('route', drawX(), drawY()-height+32, 32, height);
+            core.canvas.route.drawImage(blockImage, animateCurrent * 32, blockIcon * height, 32, height, drawX(), drawY()-height+32, 32, height);
             if (opacityVal<=0) {
                 clearInterval(animate);
-                core.clearMap('animate');
-                core.setOpacity('animate', 1);
+                core.clearMap('route');
+                core.setOpacity('route', 1);
                 if (keep) {
                     core.setBlock(id, ex, ey);
                     core.showBlock(ex, ey);
@@ -797,7 +797,7 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
 maps.prototype.animateBlock = function (loc,type,time,callback) {
     if (type!='hide') type='show';
 
-    core.clearMap('animate');
+    core.clearMap('route');
 
     if (typeof loc[0] == 'number' && typeof loc[1] == 'number')
         loc = [loc];
@@ -822,24 +822,24 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
     core.status.replay.animate=true;
     var draw = function () {
         list.forEach(function (t) {
-            core.canvas.animate.drawImage(t.blockImage, 0, t.blockIcon*t.height, 32, t.height, t.x*32, t.y*32+32-t.height, 32, t.height);
+            core.canvas.route.drawImage(t.blockImage, 0, t.blockIcon*t.height, 32, t.height, t.x*32, t.y*32+32-t.height, 32, t.height);
         })
     }
 
     var opacityVal = 0;
     if (type=='hide') opacityVal=1;
 
-    core.setOpacity('animate', opacityVal);
+    core.setOpacity('route', opacityVal);
     draw();
 
     var animate = window.setInterval(function () {
         if (type=='show') opacityVal += 0.1;
         else opacityVal -= 0.1;
-        core.setOpacity('animate', opacityVal);
+        core.setOpacity('route', opacityVal);
         if (opacityVal >=1 || opacityVal<=0) {
             clearInterval(animate);
-            core.clearMap('animate');
-            core.setOpacity('animate', 1);
+            core.clearMap('route');
+            core.setOpacity('route', 1);
             core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }

@@ -587,8 +587,12 @@ events.prototype.doAction = function() {
             break;
         case "openDoor": // 开一个门，包括暗墙
             {
+                if (core.isset(data.loc)) {
+                    x = core.calValue(data.loc[0]);
+                    y = core.calValue(data.loc[1]);
+                }
                 var floorId=data.floorId || core.status.floorId;
-                var block=core.getBlock(core.calValue(data.loc[0]), core.calValue(data.loc[1]), floorId);
+                var block=core.getBlock(x, y, floorId);
                 if (block!=null) {
                     if (floorId==core.status.floorId)
                         core.openDoor(block.block.event.id, block.block.x, block.block.y, false, function() {
@@ -1328,13 +1332,16 @@ events.prototype.vibrate = function(time, callback) {
 
     core.status.replay.animate=true;
 
-    var setGameCanvasTranslate=function(x,y){
+    var addGameCanvasTranslate=function(x,y){
         for(var ii=0,canvas;canvas=core.dom.gameCanvas[ii];ii++){
-            if(['data','ui'].indexOf(canvas.getAttribute('id'))!==-1)continue;
-            canvas.style.transform='translate('+x+'px,'+y+'px)';
-            canvas.style.webkitTransform='translate('+x+'px,'+y+'px)';
-            canvas.style.OTransform='translate('+x+'px,'+y+'px)';
-            canvas.style.MozTransform='translate('+x+'px,'+y+'px)';
+            var id = canvas.getAttribute('id');
+            if (id=='ui' || id=='data') continue;
+            var offsetX = x, offsetY = y;
+            if (core.bigmap.canvas.indexOf(id)>=0) {
+                offsetX-=core.bigmap.offsetX;
+                offsetY-=core.bigmap.offsetY;
+            }
+            core.control.setGameCanvasTranslate(id, offsetX, offsetY);
         }
     }
 
@@ -1368,7 +1375,7 @@ events.prototype.vibrate = function(time, callback) {
 
     var animate=setInterval(function(){
         update();
-        setGameCanvasTranslate(shake,0);
+        addGameCanvasTranslate(shake, 0);
         if(shake_duration===0) {
             clearInterval(animate);
             core.status.replay.animate=false;

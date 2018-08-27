@@ -912,9 +912,14 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
     var animate=window.setInterval(function() {
 
         if (jump_count>0) {
-            core.clearMap('hero', drawX(), drawY()-height+32, 32, height);
+            core.clearMap('hero', drawX()-core.bigmap.offsetX, drawY()-height+32-core.bigmap.offsetY, 32, height);
             updateJump();
-            core.canvas.hero.drawImage(core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height, drawX(), drawY() + 32-height, 32, height);
+            var nowx = drawX(), nowy = drawY();
+            core.bigmap.offsetX = core.clamp(nowx - 32*6, 0, 32*core.bigmap.width-416);
+            core.bigmap.offsetY = core.clamp(nowy - 32*6, 0, 32*core.bigmap.height-416);
+            core.control.updateViewport();
+            core.canvas.hero.drawImage(core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height,
+                nowx - core.bigmap.offsetX, nowy + 32-height - core.bigmap.offsetY, 32, height);
         }
         else {
             clearInterval(animate);
@@ -1034,7 +1039,7 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
     if (core.isset(core.status.hero.followers)) {
         var index=1;
         core.status.hero.followers.forEach(function (t) {
-            core.canvas.hero.clearRect(32*t.x-32, 32*t.y-32, 96, 96);
+            core.canvas.hero.clearRect(32*t.x-core.bigmap.offsetX-32, 32*t.y-core.bigmap.offsetY-32, 96, 96);
             if (core.isset(core.material.images.images[t.img])) {
                 drawObjs.push({
                     "img": core.material.images.images[t.img],

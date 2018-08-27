@@ -104,7 +104,7 @@ control.prototype.setRequestAnimationFrame = function () {
         if (core.isPlaying() && timestamp-core.animateFrame.weather.time>30) {
             if (core.animateFrame.weather.type == 'rain' && core.animateFrame.weather.level > 0) {
 
-                core.clearMap('weather', 0, 0, 416, 416);
+                core.clearMap('weather');
 
                 core.canvas.weather.strokeStyle = 'rgba(174,194,224,0.8)';
                 core.canvas.weather.lineWidth = 1;
@@ -130,7 +130,7 @@ control.prototype.setRequestAnimationFrame = function () {
             }
             else if (core.animateFrame.weather.type == 'snow' && core.animateFrame.weather.level > 0) {
 
-                core.clearMap('weather', 0, 0, 416, 416);
+                core.clearMap('weather');
 
                 core.canvas.weather.fillStyle = "rgba(255, 255, 255, 0.8)";
                 core.canvas.weather.beginPath();
@@ -251,7 +251,16 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
         totalTime=core.status.hero.statistics.totalTime;
     }
 
-    this.clearStatus();
+    // 停止各个Timeout和Interval
+    for (var i in core.timeout) {
+        clearTimeout(core.timeout[i]);
+        core.timeout[i] = null;
+    }
+    for (var i in core.interval) {
+        clearInterval(core.interval[i]);
+        core.interval[i] = null;
+    }
+    core.clearStatusBar();
 
     // 初始化status
     core.status = core.clone(core.initStatus);
@@ -334,7 +343,7 @@ control.prototype.restart = function() {
 ////// 清除自动寻路路线 //////
 control.prototype.clearAutomaticRouteNode = function (x, y) {
     if (core.status.event.id==null)
-        core.canvas.ui.clearRect(x * 32 + 5, y * 32 + 5, 27, 27);
+        core.canvas.route.clearRect(x * 32 + 5, y * 32 + 5, 27, 27);
 }
 
 ////// 停止自动寻路操作 //////
@@ -352,7 +361,7 @@ control.prototype.stopAutomaticRoute = function () {
     core.status.automaticRoute.lastDirection = null;
     core.stopHero();
     if (core.status.automaticRoute.moveStepBeforeStop.length==0)
-        core.canvas.ui.clearRect(0, 0, 416, 416);
+        core.clearMap('route');
 }
 
 ////// 继续剩下的自动寻路操作 //////
@@ -370,7 +379,7 @@ control.prototype.continueAutomaticRoute = function () {
 
 ////// 清空剩下的自动寻路列表 //////
 control.prototype.clearContinueAutomaticRoute = function () {
-    core.canvas.ui.clearRect(0, 0, 416, 416);
+    core.clearMap('route');
     core.status.automaticRoute.moveStepBeforeStop=[];
 }
 
@@ -378,7 +387,7 @@ control.prototype.clearContinueAutomaticRoute = function () {
 control.prototype.moveDirectly = function (destX, destY) {
     var ignoreSteps = core.canMoveDirectly(destX, destY);
     if (ignoreSteps>=0) {
-        core.clearMap('hero', 0, 0, 416, 416);
+        core.clearMap('hero');
         var lastDirection = core.status.route[core.status.route.length-1];
         if (['left', 'right', 'up', 'down'].indexOf(lastDirection)>=0)
             core.setHeroLoc('direction', lastDirection);
@@ -398,7 +407,7 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
     if (Math.abs(core.getHeroLoc('x')-destX)+Math.abs(core.getHeroLoc('y')-destY)<=1)
         return false;
     var testMove = function (dx, dy, dir) {
-        if (dx<0 || dx>12 || dy<0 || dy>12) return false;
+        if (dx<0 || dx>=core.bigmap.width|| dy<0 || dy>=core.bigmap.height) return false;
         if (core.control.moveDirectly(dx, dy)) {
             if (core.isset(dir)) core.moveHero(dir, function() {});
             return true;
@@ -458,18 +467,18 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
         if (destX == core.status.hero.loc.x && destY == core.status.hero.loc.y){
             moveStep=[];
         } else {
-            core.canvas.ui.clearRect(0, 0, 416, 416);
+            core.clearMap('route');
             return;
         }
     }
     moveStep=moveStep.concat(stepPostfix);
     core.status.automaticRoute.destX=destX;
     core.status.automaticRoute.destY=destY;
-    core.canvas.ui.save();
-    core.canvas.ui.clearRect(0, 0, 416, 416);
-    core.canvas.ui.fillStyle = '#bfbfbf';
-    core.canvas.ui.strokeStyle = '#bfbfbf';
-    core.canvas.ui.lineWidth = 8;
+    core.canvas.route.save();
+    core.clearMap('route');
+    core.canvas.route.fillStyle = '#bfbfbf';
+    core.canvas.route.strokeStyle = '#bfbfbf';
+    core.canvas.route.lineWidth = 8;
     for (var m = 0; m < moveStep.length; m++) {
         if (tempStep == null) {
             step++;
@@ -487,53 +496,53 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
         if (m == moveStep.length - 1) {
             // core.status.automaticRoutingTemp.moveStep.push({'direction': tempStep, 'step': step});
             core.status.automaticRoute.autoStepRoutes.push({'direction': tempStep, 'step': step});
-            core.canvas.ui.fillRect(moveStep[m].x * 32 + 10, moveStep[m].y * 32 + 10, 12, 12);
+            core.canvas.route.fillRect(moveStep[m].x * 32 + 10, moveStep[m].y * 32 + 10, 12, 12);
         }
         else {
-            core.canvas.ui.beginPath();
+            core.canvas.route.beginPath();
             if (core.isset(moveStep[m + 1]) && tempStep != moveStep[m + 1].direction) {
                 if (tempStep == 'up' && moveStep[m + 1].direction == 'left' || tempStep == 'right' && moveStep[m + 1].direction == 'down') {
-                    core.canvas.ui.moveTo(moveStep[m].x * 32 + 5, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 27);
+                    core.canvas.route.moveTo(moveStep[m].x * 32 + 5, moveStep[m].y * 32 + 16);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 16);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 27);
                 }
                 else if (tempStep == 'up' && moveStep[m + 1].direction == 'right' || tempStep == 'left' && moveStep[m + 1].direction == 'down') {
-                    core.canvas.ui.moveTo(moveStep[m].x * 32 + 27, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 27);
+                    core.canvas.route.moveTo(moveStep[m].x * 32 + 27, moveStep[m].y * 32 + 16);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 16);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 27);
                 }
                 else if (tempStep == 'left' && moveStep[m + 1].direction == 'up' || tempStep == 'down' && moveStep[m + 1].direction == 'right') {
-                    core.canvas.ui.moveTo(moveStep[m].x * 32 + 27, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 5);
+                    core.canvas.route.moveTo(moveStep[m].x * 32 + 27, moveStep[m].y * 32 + 16);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 16);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 5);
                 }
                 else if (tempStep == 'right' && moveStep[m + 1].direction == 'up' || tempStep == 'down' && moveStep[m + 1].direction == 'left') {
-                    core.canvas.ui.moveTo(moveStep[m].x * 32 + 5, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 5);
+                    core.canvas.route.moveTo(moveStep[m].x * 32 + 5, moveStep[m].y * 32 + 16);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 16);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 5);
                 }
-                core.canvas.ui.stroke();
+                core.canvas.route.stroke();
                 continue;
             }
             switch (tempStep) {
                 case 'up':
                 case 'down':
-                    core.canvas.ui.beginPath();
-                    core.canvas.ui.moveTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 5);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 27);
-                    core.canvas.ui.stroke();
+                    core.canvas.route.beginPath();
+                    core.canvas.route.moveTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 5);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 16, moveStep[m].y * 32 + 27);
+                    core.canvas.route.stroke();
                     break;
                 case 'left':
                 case 'right':
-                    core.canvas.ui.beginPath();
-                    core.canvas.ui.moveTo(moveStep[m].x * 32 + 5, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.lineTo(moveStep[m].x * 32 + 27, moveStep[m].y * 32 + 16);
-                    core.canvas.ui.stroke();
+                    core.canvas.route.beginPath();
+                    core.canvas.route.moveTo(moveStep[m].x * 32 + 5, moveStep[m].y * 32 + 16);
+                    core.canvas.route.lineTo(moveStep[m].x * 32 + 27, moveStep[m].y * 32 + 16);
+                    core.canvas.route.stroke();
                     break;
             }
         }
     }
-    core.canvas.ui.restore();
+    core.canvas.route.restore();
 
     // 立刻移动
     core.setAutoHeroMove();
@@ -542,6 +551,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
 
 ////// 自动寻路算法，找寻最优路径 //////
 control.prototype.automaticRoute = function (destX, destY) {
+    var fw = core.bigmap.width, fh = core.bigmap.height;
     var startX = core.getHeroLoc('x');
     var startY = core.getHeroLoc('y');
     var scan = {
@@ -550,53 +560,46 @@ control.prototype.automaticRoute = function (destX, destY) {
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
-    var queue = [];
-    var nowDeep = 0;
-    var route = [];
-    var ans = []
-
     if (destX == startX && destY == startY) return false;
-    queue.push(13 * startX + startY);
-    queue.push(-1);
-    route[13 * startX + startY] = '';
 
-    while (queue.length != 1) {
-        var f = queue.shift();
-        if (f===-1) {nowDeep+=1;queue.push(-1);continue;}
-        var deep = ~~(f/169);
-        if (deep!==nowDeep) {queue.push(f);continue;}
-        f=f%169;
-        var nowX = parseInt(f / 13), nowY = f % 13;
-        var nowIsArrow = false, nowId, nowBlock = core.getBlock(nowX,nowY);
+    var route = [];
+    var queue = new PriorityQueue({comparator: function (a,b) {
+        return a.depth - b.depth;
+    }});
+    var ans = [];
+
+    route[startX + fw * startY] = '';
+    queue.queue({depth: 0, x: startX, y: startY});
+    while (queue.length!=0) {
+        var curr = queue.dequeue();
+        var deep = curr.depth, nowX = curr.x, nowY = curr.y;
+
         for (var direction in scan) {
             if (!core.canMoveHero(nowX, nowY, direction))
                 continue;
 
             var nx = nowX + scan[direction].x;
             var ny = nowY + scan[direction].y;
+            if (nx<0 || nx>=fw || ny<0 || ny>=fh) continue;
 
-            if (nx<0 || nx>12 || ny<0 || ny>12) continue;
-
-            var nid = 13 * nx + ny;
+            var nid = nx + fw * ny;
 
             if (core.isset(route[nid])) continue;
 
             var deepAdd=1;
-
             var nextId, nextBlock = core.getBlock(nx,ny);
             if (nextBlock!=null){
                 nextId = nextBlock.block.event.id;
                 // 绕过亮灯（因为只有一次通行机会很宝贵）
                 if(nextId == "light") deepAdd=100;
                 // 绕过路障
-                if (nextId.substring(nextId.length-3)=="Net") deepAdd=core.values.lavaDamage;
+                // if (nextId.substring(nextId.length-3)=="Net") deepAdd=core.values.lavaDamage*10;
                 // 绕过血瓶
-                if (!core.flags.potionWhileRouting && nextId.substring(nextId.length-6)=="Potion") deepAdd=20;
+                if (!core.flags.potionWhileRouting && nextId.substring(nextId.length-6)=="Potion") deepAdd+=20;
                 // 绕过传送点
-                if  (nextBlock.block.event.trigger == 'changeFloor') deepAdd = 10;
+                if  (nextBlock.block.event.trigger == 'changeFloor') deepAdd+=10;
             }
-            if (core.status.checkBlock.damage[nid]>0)
-                deepAdd = core.status.checkBlock.damage[nid];
+            deepAdd+=core.status.checkBlock.damage[nid]*10;
 
             if (nx == destX && ny == destY) {
                 route[nid] = direction;
@@ -606,18 +609,17 @@ control.prototype.automaticRoute = function (destX, destY) {
                 continue;
 
             route[nid] = direction;
-            queue.push(169*(nowDeep+deepAdd)+nid);
+            queue.queue({depth: deep+deepAdd, x: nx, y: ny});
         }
-        if (core.isset(route[13 * destX + destY])) break;
+        if (core.isset(route[destX + fw * destY])) break;
     }
-
-    if (!core.isset(route[13 * destX + destY])) {
+    if (!core.isset(route[destX + fw * destY])) {
         return false;
     }
 
     var nowX = destX, nowY = destY;
     while (nowX != startX || nowY != startY) {
-        var dir = route[13 * nowX + nowY];
+        var dir = route[nowX + fw * nowY];
         ans.push({'direction': dir, 'x': nowX, 'y': nowY});
         nowX -= scan[dir].x;
         nowY -= scan[dir].y;
@@ -629,7 +631,7 @@ control.prototype.automaticRoute = function (destX, destY) {
 
 ////// 显示离散的寻路点 //////
 control.prototype.fillPosWithPoint = function (pos) {
-    core.fillRect('ui', pos.x*32+12,pos.y*32+12,8,8, '#bfbfbf');
+    core.fillRect('route', pos.x*32+12+core.bigmap.offsetX,pos.y*32+12+core.bigmap.offsetY,8,8, '#bfbfbf');
 }
 
 ////// 设置勇士的自动行走路线 //////
@@ -669,7 +671,7 @@ control.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
             core.setHeroLoc('y', y+scan[direction].y, true);
             core.control.updateFollowers();
             core.moveOneStep();
-            core.clearMap('hero', 0, 0, 416, 416);
+            core.clearMap('hero');
             core.drawHero(direction);
             clearInterval(core.interval.heroMoveInterval);
             core.status.heroMoving = 0;
@@ -756,7 +758,7 @@ control.prototype.turnHero = function() {
     else if (core.status.hero.loc.direction == 'down') core.status.hero.loc.direction = 'left';
     else if (core.status.hero.loc.direction == 'left') core.status.hero.loc.direction = 'up';
     core.drawHero();
-    core.canvas.ui.clearRect(0, 0, 416, 416);
+    core.clearMap('route');
     core.status.route.push("turn");
 }
 
@@ -783,7 +785,7 @@ control.prototype.moveHero = function (direction, callback) {
                     };
                     direction = core.getHeroLoc('direction');
                     var nx = core.getHeroLoc('x') + scan[direction].x, ny=core.getHeroLoc('y') + scan[direction].y;
-                    if (nx<0 || nx>12 || ny<0 || ny>12) return;
+                    if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height) return;
 
                     core.status.heroMoving=-1;
                     core.eventMoveHero([direction], 100, function () {
@@ -814,7 +816,7 @@ control.prototype.eventMoveHero = function(steps, time, callback) {
 
     time = time || 100;
 
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
     core.setAlpha('ui', 1.0);
 
     // 要运行的轨迹：将steps展开
@@ -881,7 +883,7 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
     if (!core.isset(ey)) ey=sy;
 
     time = time || 500;
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
     core.setAlpha('ui', 1.0);
     core.status.replay.animate=true;
 
@@ -919,9 +921,14 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
     var animate=window.setInterval(function() {
 
         if (jump_count>0) {
-            core.clearMap('hero', drawX(), drawY()-height+32, 32, height);
+            core.clearMap('hero', drawX()-core.bigmap.offsetX, drawY()-height+32-core.bigmap.offsetY, 32, height);
             updateJump();
-            core.canvas.hero.drawImage(core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height, drawX(), drawY() + 32-height, 32, height);
+            var nowx = drawX(), nowy = drawY();
+            core.bigmap.offsetX = core.clamp(nowx - 32*6, 0, 32*core.bigmap.width-416);
+            core.bigmap.offsetY = core.clamp(nowy - 32*6, 0, 32*core.bigmap.height-416);
+            core.control.updateViewport();
+            core.canvas.hero.drawImage(core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height,
+                nowx - core.bigmap.offsetX, nowy + 32-height - core.bigmap.offsetY, 32, height);
         }
         else {
             clearInterval(animate);
@@ -979,8 +986,33 @@ control.prototype.stopHero = function () {
     core.status.heroStop = true;
 }
 
+////// 设置画布偏移
+control.prototype.setGameCanvasTranslate = function(canvas,x,y){
+    var c=core.dom.gameCanvas[canvas];
+    x=x*core.domStyle.scale;
+    y=y*core.domStyle.scale;
+    c.style.transform='translate('+x+'px,'+y+'px)';
+    c.style.webkitTransform='translate('+x+'px,'+y+'px)';
+    c.style.OTransform='translate('+x+'px,'+y+'px)';
+    c.style.MozTransform='translate('+x+'px,'+y+'px)';
+    if(main.mode==='editor' && editor.isMobile){
+        c.style.transform='translate('+(x/416*96)+'vw,'+(y/416*96)+'vw)';
+        c.style.webkitTransform='translate('+(x/416*96)+'vw,'+(y/416*96)+'vw)';
+        c.style.OTransform='translate('+(x/416*96)+'vw,'+(y/416*96)+'vw)';
+        c.style.MozTransform='translate('+(x/416*96)+'vw,'+(y/416*96)+'vw)';
+    }
+};
+
+////// 更新视野范围 //////
+control.prototype.updateViewport = function() {
+    core.bigmap.canvas.forEach(function(cn){
+        core.control.setGameCanvasTranslate(cn,-core.bigmap.offsetX,-core.bigmap.offsetY);
+    });
+}
+
 ////// 绘制勇士 //////
 control.prototype.drawHero = function (direction, x, y, status, offset) {
+
     var scan = {
         'up': {'x': 0, 'y': -1},
         'left': {'x': -1, 'y': 0},
@@ -993,9 +1025,17 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
     status = status || 'stop';
     direction = direction || core.getHeroLoc('direction');
     offset = offset || 0;
-    var dx=offset==0?0:scan[direction].x, dy=offset==0?0:scan[direction].y;
+    var way = scan[direction];
+    var offsetX = way.x*offset;
+    var offsetY = way.y*offset;
+    var dx=offsetX==0?0:offsetX/Math.abs(offsetX), dy=offsetY==0?0:offsetY/Math.abs(offsetY);
+
+    core.bigmap.offsetX = core.clamp((x - 6) * 32 + offsetX, 0, 32*core.bigmap.width-416);
+    core.bigmap.offsetY = core.clamp((y - 6) * 32 + offsetY, 0, 32*core.bigmap.height-416);
+
     core.clearAutomaticRouteNode(x+dx, y+dy);
-    core.canvas.hero.clearRect(32 * x - 32, 32 * y - 32, 96, 96);
+
+    core.canvas.hero.clearRect(x * 32 - core.bigmap.offsetX - 32, y * 32 - core.bigmap.offsetY - 32, 96, 96);
 
     var heroIconArr = core.material.icons.hero;
     var drawObjs = [];
@@ -1004,8 +1044,8 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
         "img": core.material.images.hero,
         "height": core.material.icons.hero.height,
         "heroIcon": heroIconArr[direction],
-        "posx": 32 * x + scan[direction].x*offset,
-        "posy": 32 * y + scan[direction].y*offset,
+        "posx": x * 32 - core.bigmap.offsetX + offsetX,
+        "posy": y * 32 - core.bigmap.offsetY + offsetY,
         "status": status,
         "index": 0,
     });
@@ -1014,14 +1054,14 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
     if (core.isset(core.status.hero.followers)) {
         var index=1;
         core.status.hero.followers.forEach(function (t) {
-            core.canvas.hero.clearRect(32*t.x-32, 32*t.y-32, 96, 96);
+            core.canvas.hero.clearRect(32*t.x-core.bigmap.offsetX-32, 32*t.y-core.bigmap.offsetY-32, 96, 96);
             if (core.isset(core.material.images.images[t.img])) {
                 drawObjs.push({
                     "img": core.material.images.images[t.img],
                     "height": core.material.images.images[t.img].height/4,
                     "heroIcon": heroIconArr[t.direction],
-                    "posx": 32*t.x + (t.stop?0:scan[t.direction].x*offset),
-                    "posy": 32*t.y + (t.stop?0:scan[t.direction].y*offset),
+                    "posx": 32*t.x - core.bigmap.offsetX + (t.stop?0:scan[t.direction].x*offset),
+                    "posy": 32*t.y - core.bigmap.offsetY + (t.stop?0:scan[t.direction].y*offset),
                     "status": t.stop?"stop":status,
                     "index": index++
                 });
@@ -1031,13 +1071,15 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
 
     drawObjs.sort(function (a, b) {
         return a.posy==b.posy?b.index-a.index:a.posy-b.posy;
-    })
+    });
 
     drawObjs.forEach(function (block) {
         core.canvas.hero.drawImage(block.img, block.heroIcon[block.status]*32,
             block.heroIcon.loc * block.height, 32, block.height,
             block.posx, block.posy+32-block.height, 32, block.height);
-    })
+    });
+
+    core.control.updateViewport();
 }
 
 ////// 设置勇士的位置 //////
@@ -1142,30 +1184,30 @@ control.prototype.updateCheckBlock = function() {
     core.status.checkBlock.map = []; // 记录怪物地图
     for (var n=0;n<blocks.length;n++) {
         var block = blocks[n];
-        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) && block.event.cls.indexOf('enemy')==0) {
+        if (core.isset(block.event) && !block.disable && block.event.cls.indexOf('enemy')==0) {
             var id = block.event.id, enemy = core.material.enemys[id];
             if (core.isset(enemy)) {
-                core.status.checkBlock.map[13*block.x+block.y]=id;
+                core.status.checkBlock.map[block.x+core.bigmap.width*block.y]=id;
             }
         }
         // 血网
-        if (core.isset(block.event) && !(core.isset(block.enable) && !block.enable) &&
+        if (core.isset(block.event) && !block.disable &&
             block.event.id=='lavaNet' && block.event.trigger=='passNet' && !core.hasItem("shoes")) {
-            core.status.checkBlock.map[13*block.x+block.y]="lavaNet";
+            core.status.checkBlock.map[block.x+core.bigmap.width*block.y]="lavaNet";
         }
     }
 
     // Step2: 更新领域、阻击伤害
     core.status.checkBlock.damage = []; // 记录(x,y)点的伤害
-    for (var x=0;x<13*13;x++) core.status.checkBlock.damage[x]=0;
+    for (var x=0;x<core.bigmap.width*core.bigmap.height;x++) core.status.checkBlock.damage[x]=0;
 
-    for (var x=0;x<13;x++) {
-        for (var y=0;y<13;y++) {
-            var id = core.status.checkBlock.map[13*x+y];
+    for (var x=0;x<core.bigmap.width;x++) {
+        for (var y=0;y<core.bigmap.height;y++) {
+            var id = core.status.checkBlock.map[x+core.bigmap.width*y];
             if (core.isset(id)) {
 
                 if (id=="lavaNet") {
-                    core.status.checkBlock.damage[13*x+y]+=core.values.lavaDamage;
+                    core.status.checkBlock.damage[x+core.bigmap.width*y]+=core.values.lavaDamage||0;
                     continue;
                 }
 
@@ -1179,10 +1221,19 @@ control.prototype.updateCheckBlock = function() {
                         for (var dy=-range;dy<=range;dy++) {
                             if (dx==0 && dy==0) continue;
                             var nx=x+dx, ny=y+dy;
-                            if (nx<0 || nx>12 || ny<0 || ny>12) continue;
+                            if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height) continue;
                             if (!zoneSquare && Math.abs(dx)+Math.abs(dy)>range) continue;
-                            core.status.checkBlock.damage[13*nx+ny]+=enemy.value;
+                            core.status.checkBlock.damage[nx+ny*core.bigmap.width]+=enemy.value||0;
                         }
+                    }
+                }
+                // 存在激光
+                if (core.enemys.hasSpecial(enemy.special, 24)) {
+                    for (var nx=0;nx<core.bigmap.width;nx++) {
+                        if (nx!=x) core.status.checkBlock.damage[nx+y*core.bigmap.width]+=enemy.value||0;
+                    }
+                    for (var ny=0;ny<core.bigmap.height;ny++) {
+                        if (ny!=y) core.status.checkBlock.damage[x+ny*core.bigmap.width]+=enemy.value||0;
                     }
                 }
                 // 存在阻击
@@ -1191,8 +1242,8 @@ control.prototype.updateCheckBlock = function() {
                         for (var dy=-1;dy<=1;dy++) {
                             if (dx==0 && dy==0) continue;
                             var nx=x+dx, ny=y+dy;
-                            if (nx<0 || nx>12 || ny<0 || ny>12 || Math.abs(dx)+Math.abs(dy)>1) continue;
-                            core.status.checkBlock.damage[13*nx+ny]+=enemy.value;
+                            if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height || Math.abs(dx)+Math.abs(dy)>1) continue;
+                            core.status.checkBlock.damage[nx+ny*core.bigmap.width]+=enemy.value||0;
                         }
                     }
                 }
@@ -1203,12 +1254,12 @@ control.prototype.updateCheckBlock = function() {
 
     // Step3: 更新夹击点坐标，并将夹击伤害加入到damage中
     core.status.checkBlock.betweenAttack = []; // 记录(x,y)点是否有夹击
-    for (var x=0;x<13;x++) {
-        for (var y=0;y<13;y++) {
+    for (var x=0;x<core.bigmap.width;x++) {
+        for (var y=0;y<core.bigmap.height;y++) {
             var has=false;
-            if (x>0 && x<12) {
-                var id1=core.status.checkBlock.map[13*(x-1)+y],
-                    id2=core.status.checkBlock.map[13*(x+1)+y];
+            if (x>0 && x<core.bigmap.width-1) {
+                var id1=core.status.checkBlock.map[x-1+core.bigmap.width*y],
+                    id2=core.status.checkBlock.map[x+1+core.bigmap.height*y];
                 if (core.isset(id1) && core.isset(id2) && id1==id2) {
                     var enemy = core.material.enemys[id1];
                     if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {
@@ -1216,9 +1267,9 @@ control.prototype.updateCheckBlock = function() {
                     }
                 }
             }
-            if (y>0 && y<12) {
-                var id1=core.status.checkBlock.map[13*x+y-1],
-                    id2=core.status.checkBlock.map[13*x+y+1];
+            if (y>0 && y<core.bigmap.height-1) {
+                var id1=core.status.checkBlock.map[x+core.bigmap.width*(y-1)],
+                    id2=core.status.checkBlock.map[x+core.bigmap.width*(y+1)];
                 if (core.isset(id1) && core.isset(id2) && id1==id2) {
                     var enemy = core.material.enemys[id1];
                     if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {
@@ -1228,10 +1279,10 @@ control.prototype.updateCheckBlock = function() {
             }
             // 存在夹击
             if (has) {
-                core.status.checkBlock.betweenAttack[13*x+y]=true;
-                var leftHp = core.status.hero.hp - core.status.checkBlock.damage[13*x+y];
+                core.status.checkBlock.betweenAttack[x+core.bigmap.width*y]=true;
+                var leftHp = core.status.hero.hp - core.status.checkBlock.damage[x+core.bigmap.width*y];
                 if (leftHp>1)
-                    core.status.checkBlock.damage[13*x+y] += Math.floor((leftHp+(core.flags.betweenAttackCeil?0:1))/2);
+                    core.status.checkBlock.damage[x+core.bigmap.width*y] += Math.floor((leftHp+(core.flags.betweenAttackCeil?0:1))/2);
             }
         }
     }
@@ -1240,7 +1291,7 @@ control.prototype.updateCheckBlock = function() {
 ////// 检查并执行领域、夹击、阻击事件 //////
 control.prototype.checkBlock = function () {
     var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
-    var damage = core.status.checkBlock.damage[13*x+y];
+    var damage = core.status.checkBlock.damage[x+core.bigmap.width*y];
     if (damage>0) {
         core.status.hero.hp -= damage;
 
@@ -1254,8 +1305,8 @@ control.prototype.checkBlock = function () {
         }
         for (var direction in scan) {
             var nx = x+scan[direction].x, ny=y+scan[direction].y;
-            if (nx<0 || nx>12 || ny<0 || ny>12) continue;
-            var id=core.status.checkBlock.map[13*nx+ny];
+            if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height) continue;
+            var id=core.status.checkBlock.map[nx+core.bigmap.width*ny];
             if (core.isset(id)) {
                 var enemy = core.material.enemys[id];
                 if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 18)) {
@@ -1264,10 +1315,10 @@ control.prototype.checkBlock = function () {
             }
         }
 
-        if (core.status.checkBlock.betweenAttack[13*x+y] && damage>0) {
+        if (core.status.checkBlock.betweenAttack[x+core.bigmap.width*y] && damage>0) {
             core.drawTip('受到夹击，生命变成一半');
         }
-        else if (core.status.checkBlock.map[13*x+y]=='lavaNet') {
+        else if (core.status.checkBlock.map[x+core.bigmap.width*y]=='lavaNet') {
             core.drawTip('受到血网伤害'+damage+'点');
         }
         // 阻击
@@ -1275,7 +1326,7 @@ control.prototype.checkBlock = function () {
             core.drawTip('受到阻击伤害'+damage+'点');
         }
         else if (damage>0) {
-            core.drawTip('受到领域伤害'+damage+'点');
+            core.drawTip('受到领域或激光伤害'+damage+'点');
         }
 
         if (damage>0) {
@@ -1294,7 +1345,7 @@ control.prototype.checkBlock = function () {
             var x=t.x, y=t.y, direction = t.direction;
             var nx = x+scan[direction].x, ny=y+scan[direction].y;
 
-            return nx>=0 && nx<=12 && ny>=0 && ny<=12 && core.getBlock(nx, ny, core.status.floorId, false)==null;
+            return nx>=0 && nx<core.bigmap.width && ny>=0 && ny<core.bigmap.height && core.getBlock(nx, ny, null, true)==null;
         });
         core.updateStatusBar();
         if (snipe.length>0)
@@ -1434,7 +1485,7 @@ control.prototype.setWeather = function (type, level) {
 
     // 非雨雪
     if (type!='rain' && type!='snow') {
-        core.clearMap('weather', 0, 0, 416, 416)
+        core.clearMap('weather')
         core.animateFrame.weather.type = null;
         core.animateFrame.weather.level = 0;
         core.animateFrame.weather.nodes = [];
@@ -1453,7 +1504,7 @@ control.prototype.setWeather = function (type, level) {
     if (level<1) level=1; if (level>10) level=10;
     level *= 20;
 
-    core.clearMap('weather', 0, 0, 416, 416)
+    core.clearMap('weather')
     core.animateFrame.weather.type = type;
     core.animateFrame.weather.level = level;
 
@@ -1536,7 +1587,7 @@ control.prototype.updateFg = function () {
     if (!core.isset(core.status.thisMap) || !core.isset(core.status.thisMap.blocks)) return;
     // 更新显伤
     var mapBlocks = core.status.thisMap.blocks;
-    core.clearMap('fg', 0, 0, 416, 416);
+    core.clearMap('fg');
     // 没有怪物手册
     if (!core.hasItem('book')) return;
     core.setFont('fg', "bold 11px Arial");
@@ -1546,7 +1597,7 @@ control.prototype.updateFg = function () {
         for (var b = 0; b < mapBlocks.length; b++) {
             var x = mapBlocks[b].x, y = mapBlocks[b].y;
             if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls.indexOf('enemy')==0
-                && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable)) {
+                && !mapBlocks[b].disable) {
 
                 // 非系统默认的战斗事件（被覆盖）
                 if (mapBlocks[b].event.trigger != 'battle') {
@@ -1610,9 +1661,9 @@ control.prototype.updateFg = function () {
     // 如果是领域&夹击
     if (core.flags.displayExtraDamage) {
         core.canvas.fg.textAlign = 'center';
-        for (var x=0;x<13;x++) {
-            for (var y=0;y<13;y++) {
-                var damage = core.status.checkBlock.damage[13*x+y];
+        for (var x=0;x<core.bigmap.width;x++) {
+            for (var y=0;y<core.bigmap.height;y++) {
+                var damage = core.status.checkBlock.damage[x+core.bigmap.width*y];
                 if (damage>0) {
                     damage = core.formatBigNumber(damage);
                     core.setFillStyle('fg', '#000000');
@@ -1687,14 +1738,14 @@ control.prototype.startReplay = function (list) {
 
 ////// 更改播放状态 //////
 control.prototype.triggerReplay = function () {
-    if (core.status.event.id=='save' || core.status.event.id=='book') return;
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (core.status.replay.pausing) this.resumeReplay();
     else this.pauseReplay();
 }
 
 ////// 暂停播放 //////
 control.prototype.pauseReplay = function () {
-    if (core.status.event.id=='save' || core.status.event.id=='book') return;
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.pausing = true;
     core.updateStatusBar();
@@ -1703,7 +1754,7 @@ control.prototype.pauseReplay = function () {
 
 ////// 恢复播放 //////
 control.prototype.resumeReplay = function () {
-    if (core.status.event.id=='save' || core.status.event.id=='book') return;
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.pausing = false;
     core.updateStatusBar();
@@ -1713,7 +1764,7 @@ control.prototype.resumeReplay = function () {
 
 ////// 加速播放 //////
 control.prototype.speedUpReplay = function () {
-    if (core.status.event.id=='save' || core.status.event.id=='book') return;
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     var toAdd = core.status.replay.speed>=3?3:core.status.replay.speed>=2?2:1;
     core.status.replay.speed = parseInt(10*core.status.replay.speed + toAdd)/10;
@@ -1723,7 +1774,7 @@ control.prototype.speedUpReplay = function () {
 
 ////// 减速播放 //////
 control.prototype.speedDownReplay = function () {
-    if (core.status.event.id=='save' || core.status.event.id=='book') return;
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     var toAdd = core.status.replay.speed>3?3:core.status.replay.speed>2?2:1;
     core.status.replay.speed = parseInt(10*core.status.replay.speed - toAdd)/10;
@@ -1733,7 +1784,7 @@ control.prototype.speedDownReplay = function () {
 
 ////// 停止播放 //////
 control.prototype.stopReplay = function () {
-    if (core.status.event.id=='save' || core.status.event.id=='book') return;
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.toReplay = [];
     core.status.replay.totalList = [];
@@ -1748,7 +1799,7 @@ control.prototype.stopReplay = function () {
 
 ////// 回退 //////
 control.prototype.rewindReplay = function () {
-    if (core.status.event.id=='save' || core.status.event.id=='book') return;
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
@@ -1783,7 +1834,7 @@ control.prototype.rewindReplay = function () {
 
 ////// 回放时存档 //////
 control.prototype.saveReplay = function () {
-    if (core.status.event.id=='save' || core.status.event.id=='book') return;
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
@@ -1804,7 +1855,33 @@ control.prototype.saveReplay = function () {
 
 ////// 回放时查看怪物手册 //////
 control.prototype.bookReplay = function () {
-    if (core.status.event.id=='save' || core.status.event.id=='book') return;
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0) return;
+    if (!core.status.replay.replaying) return;
+    if (!core.status.replay.pausing) {
+        core.drawTip("请先暂停录像");
+        return;
+    }
+
+    // 从“浏览地图”页面打开
+    if (core.status.event.id=='viewMaps') {
+        core.status.event.selection = core.status.event.data;
+        core.status.event.id=null;
+    }
+
+    if (core.status.replay.animate || core.isset(core.status.event.id)) {
+        core.drawTip("请等待当前事件的处理结束");
+        return;
+    }
+
+    core.lockControl();
+    core.status.event.id='book';
+    core.useItem('book');
+}
+
+////// 回放录像时浏览地图 //////
+control.prototype.viewMapReplay = function () {
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
+
     if (!core.status.replay.replaying) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
@@ -1816,8 +1893,8 @@ control.prototype.bookReplay = function () {
     }
 
     core.lockControl();
-    core.status.event.id='book';
-    core.useItem('book');
+    core.status.event.id='viewMaps';
+    core.ui.drawMaps();
 }
 
 ////// 回放 //////
@@ -1951,8 +2028,11 @@ control.prototype.replay = function () {
 
         var pos=action.substring(5).split(":");
         var x=parseInt(pos[0]), y=parseInt(pos[1]);
+        var nowx=core.getHeroLoc('x'), nowy=core.getHeroLoc('y');
         if (core.control.moveDirectly(x,y)) {
+            core.ui.drawArrow('route', 32*nowx+16, 32*nowy+16, 32*x+16, 32*y+16, '#FF0000', 3);
             setTimeout(function () {
+                core.clearMap('route');
                 core.replay();
             }, 750 / Math.max(1, core.status.replay.speed));
             return;
@@ -2567,6 +2647,11 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.weak.innerHTML = core.hasFlag('weak')?"衰":"";
         core.statusBar.curse.innerHTML = core.hasFlag('curse')?"咒":"";
     }
+    if (core.flags.enablePZF) {
+        core.statusBar.pickaxe.innerHTML = "破"+core.itemCount('pickaxe');
+        core.statusBar.bomb.innerHTML = "炸"+core.itemCount('bomb');
+        core.statusBar.fly.innerHTML = "飞"+core.itemCount('centerFly');
+    }
 
     core.statusBar.hard.innerHTML = core.status.hard;
 
@@ -2651,6 +2736,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     if (!core.flags.enableLevelUp) count--;
     if (!core.flags.enableDebuff) count--;
     if (core.isset(core.flags.enableKeys) && !core.flags.enableKeys) count--;
+    if (!core.flags.enablePZF) count--;
 
     var statusLineHeight = BASE_LINEHEIGHT * 9 / count;
     var statusLineFontSize = DEFAULT_FONT_SIZE;
@@ -2790,11 +2876,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         {
             className: 'gameCanvas',
             rules:{
-                width: canvasWidth + unit,
-                height: canvasWidth + unit,
-                top: canvasTop + unit,
-                right: 0,
-                border: '3px '+borderColor+' solid',
+                width: (canvasWidth - SPACE*2) + unit,
+                height: (canvasWidth - SPACE*2) + unit,
             }
         },
         {
@@ -2822,6 +2905,16 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 height:(canvasWidth - SPACE*2) + unit,
                 top: (canvasTop + SPACE) + unit,
                 right: SPACE + unit,
+            }
+        },
+        {
+            id: 'gameDraw',
+            rules: {
+                width: (canvasWidth - SPACE*2) + unit,
+                height:(canvasWidth - SPACE*2) + unit,
+                top: canvasTop + unit,
+                right: 0,
+                border: '3px #fff solid'
             }
         },
         {
@@ -2944,6 +3037,12 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             }
         },
         {
+            id: 'pzfCol',
+            rules: {
+                display: core.flags.enablePZF?'block':'none'
+            }
+        },
+        {
             'id': 'debuffCol',
             rules: {
                 display: core.flags.enableDebuff ? 'block': 'none'
@@ -2993,4 +3092,12 @@ control.prototype.domRenderer = function(){
         }
 
     }
+    // resize map
+    if (core.isPlaying() && core.isset(core.status) && core.isset(core.bigmap)) {
+        core.bigmap.canvas.forEach(function(cn){
+            core.canvas[cn].canvas.style.width = core.bigmap.width*32*core.domStyle.scale + "px";
+            core.canvas[cn].canvas.style.height = core.bigmap.height*32*core.domStyle.scale + "px";
+        });
+    }
+
 }

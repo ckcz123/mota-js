@@ -426,6 +426,12 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "是否在状态栏显示三色钥匙数量"
                 },
+                "enablePZF": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "是否在状态栏显示破炸飞数量"
+                },
                 "enableDebuff": {
                     "_leaf": true,
                     "_type": "checkbox",

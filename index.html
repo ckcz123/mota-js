@@ -87,6 +87,11 @@
             <span class='statusLabel' id='blueKey' style="color:#AAAADD"></span>
             <span class='statusLabel' id='redKey' style="color:#FF8888"></span>
         </div>
+        <div class="status" id='pzfCol'>
+            <span class='statusLabel' id='pickaxe' style="color: #BC6E27"></span>
+            <span class='statusLabel' id='bomb' style="color: #FA14B9"></span>
+            <span class='statusLabel' id='fly' style="color: #8DB600"></span>
+        </div>
         <div class="status" id="debuffCol">
             <span class='statusLabel' id='poison' style="color: #AFFCA8;"></span>
             <span class='statusLabel' id='weak' style="color: #FECCD0;"></span>
@@ -106,18 +111,22 @@
     <div id="gif"></div>
     <div id="gif2"></div>
     <div id="curtain"></div>
-    <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas>
-    <canvas class='gameCanvas' id='event' width='416' height='416'></canvas>
-    <canvas class='gameCanvas' id='hero' width='416' height='416'></canvas>
-    <canvas class='gameCanvas' id='event2' width='416' height='416'></canvas>
-    <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
-    <canvas class='gameCanvas' id='animate' width='416' height='416'></canvas>
-    <canvas class='gameCanvas' id='weather' width='416' height='416'></canvas>
-    <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
-    <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
+    <div id="gameDraw">
+        <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='event' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='hero' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='event2' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='animate' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='weather' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='route' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
+    </div>
 </div>
 <script src='libs/thirdparty/mid.min.js'></script>
 <script src='libs/thirdparty/lz-string.min.js'></script>
+<script src='libs/thirdparty/priority-queue.min.js'></script>
 <script id='mainScript' src='main.js'></script>
 <script>main.init();main.listen();</script>
 </body>

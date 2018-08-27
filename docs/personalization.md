@@ -1,6 +1,6 @@
 # 个性化
 
-?> 目前版本**v2.3.3**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.4**，上次更新时间：* {docsify-updated} *
 
 有时候只靠样板本身可能是不够的。我们需要一些个性化、自定义的素材，道具效果，怪物属性，等等。
 
@@ -15,9 +15,10 @@ HTML5魔塔是使用画布（canvas）来绘制，存在若干个图层，它们
 - hero：勇士层；主要用来绘制勇士
 - event2：事件2层；本层主要用来绘制48x32的图片素材的上半部分（避免和勇士错位），也可以用来绘制该层的前景图片素材
 - fg：显伤层；主要用来绘制怪物显伤和领域显伤
-- animate：动画层；主要用来绘制动画，图块的淡入/淡出效果，图块的移动。showImage事件绘制的图片也是在这一层。
+- animate：动画层；主要用来绘制动画。showImage事件绘制的图片也是在这一层。
 - weather：天气层；主要用来绘制天气（雨/雪）
 - curtain：色调层；用来控制当前楼层的画面色调
+- route：路线层；主要用来绘制勇士的行走路线图，也用来绘制图块的淡入/淡出效果，图块的移动等。
 - ui：UI层；用来绘制一切UI窗口，如剧情文本、怪物手册、楼传器、系统菜单等等
 - data：数据层；用来绘制一些顶层的或更新比较快的数据，如左上角的提示，战斗界面中数据的变化等等。
 
@@ -299,7 +300,7 @@ enemys.prototype.calDamage = function (monster, hero_hp, hero_atk, hero_def, her
 // 检查领域、夹击、阻击事件
 control.prototype.checkBlock = function () {
     var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
-    var damage = core.status.checkBlock.damage[13*x+y];
+    var damage = core.status.checkBlock.damage[x+core.bigmap.width*y];
     if (damage>0) {
         if (core.hasFlag("shield5")) damage = 0; // 如果存在神圣盾，则将伤害变成0
         core.status.hero.hp -= damage;
@@ -437,17 +438,17 @@ this.useEquipment = function (itemId) { // 使用装备
 
 ## 自定义怪物属性
 
-如果你对现有的怪物不满意，想自行添加怪物属性（例如让怪物拥有双属性乃至更多属性），也是可以的。具体参见`enemys.js`文件。
+如果你对现有的怪物不满意，想自行添加怪物属性也是可以的。具体参见脚本编辑-getSpecials。
 
-你需自己指定一个special数字，修改getSpecialText函数（属性名）和getSpecialHint函数（属性提示文字）。
+你需自己指定一个special数字，修改属性名和属性提示文字。后两者可以直接写字符串，或写个函数传入怪物。
 
 如果要修改伤害计算公式，请修改下面的getDamageInfo函数。请注意，如果无法战斗，该函数必须返回`null`。
 
-对于毒衰弱怪物的战斗后结算在`functions.js`中的afterBattle函数中。
+!> 如果改动了伤害计算公式，可能导致临界计算崩掉，因此建议将全塔属性中的`useLoop`置为true。
+
+对于毒衰弱怪物的战斗后结算在脚本编辑中的afterBattle函数中。
 
 对于领域、夹击、阻击怪物的检查在`control.js`中的checkBlock函数中。
-
-`getCritical`, `getCriticalDamage`和`getDefDamage`三个函数依次计算的是该怪物的临界值、临界减伤和1防减伤。也可以适当进行修改。
 
 ## 自定义快捷键
 

@@ -131,9 +131,9 @@ events.prototype.lose = function (reason) {
 events.prototype.gameOver = function (ending, fromReplay, norank) {
 
     // 清空图片和天气
-    core.clearMap('animate', 0, 0, 416, 416);
+    core.clearMap('animate');
     core.dom.gif2.innerHTML = "";
-    core.clearMap('weather', 0, 0, 416, 416)
+    core.clearMap('weather')
     core.animateFrame.weather.type = null;
     core.animateFrame.weather.level = 0;
     core.animateFrame.weather.nodes = [];
@@ -281,7 +281,7 @@ events.prototype.doAction = function() {
     core.status.boxAnimateObjs = [];
     clearInterval(core.status.event.interval);
 
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui');
     core.setAlpha('ui', 1.0);
 
     // 事件处理完毕
@@ -513,7 +513,7 @@ events.prototype.doAction = function() {
                 break;
             }
         case "changePos": // 直接更换勇士位置，不切换楼层
-            core.clearMap('hero', 0, 0, 416, 416);
+            core.clearMap('hero');
             if (core.isset(data.loc)) {
                 core.setHeroLoc('x', core.calValue(data.loc[0]));
                 core.setHeroLoc('y', core.calValue(data.loc[1]));
@@ -527,7 +527,7 @@ events.prototype.doAction = function() {
                 core.canvas.animate.drawImage(core.material.images.images[data.name],
                     core.calValue(data.loc[0]), core.calValue(data.loc[1]));
             }
-            else core.clearMap('animate', 0, 0, 416, 416);
+            else core.clearMap('animate');
             this.doAction();
             break;
         case "animateImage": // 淡入淡出图片
@@ -587,8 +587,12 @@ events.prototype.doAction = function() {
             break;
         case "openDoor": // 开一个门，包括暗墙
             {
+                if (core.isset(data.loc)) {
+                    x = core.calValue(data.loc[0]);
+                    y = core.calValue(data.loc[1]);
+                }
                 var floorId=data.floorId || core.status.floorId;
-                var block=core.getBlock(core.calValue(data.loc[0]), core.calValue(data.loc[1]), floorId);
+                var block=core.getBlock(x, y, floorId);
                 if (block!=null) {
                     if (floorId==core.status.floorId)
                         core.openDoor(block.block.event.id, block.block.x, block.block.y, false, function() {
@@ -1026,7 +1030,7 @@ events.prototype.trigger = function (x, y) {
     var mapBlocks = core.status.thisMap.blocks;
     var noPass;
     for (var b = 0; b < mapBlocks.length; b++) {
-        if (mapBlocks[b].x == x && mapBlocks[b].y == y && !(core.isset(mapBlocks[b].enable) && !mapBlocks[b].enable)) { // 启用事件
+        if (mapBlocks[b].x == x && mapBlocks[b].y == y && !mapBlocks[b].disable) { // 启用事件
             noPass = mapBlocks[b].event && mapBlocks[b].event.noPass;
             if (noPass) {
                 core.clearAutomaticRouteNode(x, y);
@@ -1102,7 +1106,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
         else {
             var blocks = core.status.maps[floorId].blocks;
             for (var i in blocks) {
-                if (core.isset(blocks[i].event) && !(core.isset(blocks[i].enable) && !blocks[i].enable) && blocks[i].event.id === stair) {
+                if (core.isset(blocks[i].event) && !blocks[i].disable && blocks[i].event.id === stair) {
                     heroLoc.x = blocks[i].x;
                     heroLoc.y = blocks[i].y;
                     break;
@@ -1179,18 +1183,21 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             // 检查重生
             if (!core.isset(fromLoad)) {
                 core.status.maps[floorId].blocks.forEach(function(block) {
-                    if (core.isset(block.enable) && !block.enable && core.isset(block.event) && block.event.cls.indexOf('enemy')==0
+                    if (block.disable && core.isset(block.event) && block.event.cls.indexOf('enemy')==0
                         && core.enemys.hasSpecial(core.material.enemys[block.event.id].special, 23)) {
-                        block.enable = true;
+                        block.disable = false;
                     }
                 })
             }
+            // 重置画布尺寸
+            core.maps.resizeMap(floorId);
+            // 画地图
             core.drawMap(floorId, function () {
                 if (core.isset(heroLoc.direction))
                     core.setHeroLoc('direction', heroLoc.direction);
                 core.setHeroLoc('x', heroLoc.x);
                 core.setHeroLoc('y', heroLoc.y);
-                core.clearMap('hero', 0, 0, 416, 416);
+                core.clearMap('hero');
                 core.drawHero();
 
                 var changed = function () {
@@ -1244,7 +1251,7 @@ events.prototype.animateImage = function (type, image, loc, time, callback) {
         core.setOpacity('data', opacityVal);
         if (opacityVal >=1 || opacityVal<=0) {
             clearInterval(animate);
-            core.clearMap('data', 0, 0, 416, 416);
+            core.clearMap('data');
             core.setOpacity('data', 1);
             core.status.replay.animate=false;
             if (core.isset(callback)) callback();
@@ -1264,7 +1271,7 @@ events.prototype.moveImage = function (image, from, to, time, callback) {
         toX = core.calValue(to[0]), toY = core.calValue(to[1]);
     var step = 0;
     var drawImage = function () {
-        core.clearMap('data', 0, 0, 416, 416);
+        core.clearMap('data');
         var nowX = parseInt(fromX + (toX-fromX)*step/64);
         var nowY = parseInt(fromY + (toY-fromY)*step/64);
         core.canvas.data.drawImage(image, nowX, nowY);
@@ -1276,7 +1283,7 @@ events.prototype.moveImage = function (image, from, to, time, callback) {
         drawImage();
         if (step>=64) {
             clearInterval(animate);
-            core.clearMap('data', 0, 0, 416, 416);
+            core.clearMap('data');
             core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
@@ -1325,13 +1332,16 @@ events.prototype.vibrate = function(time, callback) {
 
     core.status.replay.animate=true;
 
-    var setGameCanvasTranslate=function(x,y){
+    var addGameCanvasTranslate=function(x,y){
         for(var ii=0,canvas;canvas=core.dom.gameCanvas[ii];ii++){
-            if(['data','ui'].indexOf(canvas.getAttribute('id'))!==-1)continue;
-            canvas.style.transform='translate('+x+'px,'+y+'px)';
-            canvas.style.webkitTransform='translate('+x+'px,'+y+'px)';
-            canvas.style.OTransform='translate('+x+'px,'+y+'px)';
-            canvas.style.MozTransform='translate('+x+'px,'+y+'px)';
+            var id = canvas.getAttribute('id');
+            if (id=='ui' || id=='data') continue;
+            var offsetX = x, offsetY = y;
+            if (core.bigmap.canvas.indexOf(id)>=0) {
+                offsetX-=core.bigmap.offsetX;
+                offsetY-=core.bigmap.offsetY;
+            }
+            core.control.setGameCanvasTranslate(id, offsetX, offsetY);
         }
     }
 
@@ -1365,7 +1375,7 @@ events.prototype.vibrate = function(time, callback) {
 
     var animate=setInterval(function(){
         update();
-        setGameCanvasTranslate(shake,0);
+        addGameCanvasTranslate(shake, 0);
         if(shake_duration===0) {
             clearInterval(animate);
             core.status.replay.animate=false;
@@ -1487,10 +1497,15 @@ events.prototype.useItem = function(itemId) {
         return;
     }
     if (itemId=='centerFly') {
-        core.status.usingCenterFly= true;
+        core.lockControl();
+        core.status.event.id = 'centerFly';
         var fillstyle = 'rgba(255,0,0,0.5)';
         if (core.canUseItem('centerFly')) fillstyle = 'rgba(0,255,0,0.5)';
-        core.fillRect('ui',(12-core.getHeroLoc('x'))*32,(12-core.getHeroLoc('y'))*32,32,32,fillstyle);
+        var toX = core.bigmap.width-1 - core.getHeroLoc('x'), toY = core.bigmap.height-1-core.getHeroLoc('y');
+        core.ui.drawThumbnail(core.status.floorId, 'ui', core.status.thisMap.blocks, 0, 0, 416, toX, toY, core.status.hero.loc, core.getFlag('heroIcon', "hero.png"));
+        var offsetX = core.clamp(toX-6, 0, core.bigmap.width-13), offsetY = core.clamp(toY-6, 0, core.bigmap.height-13);
+        core.fillRect('ui',(toX-offsetX)*32,(toY-offsetY)*32,32,32,fillstyle);
+        core.status.event.data = {"x": toX, "y": toY, "poxX": toX-offsetX, "posY": toY-offsetY};
         core.drawTip("请确认当前中心对称飞行器的位置");
         return;
     }
@@ -1607,9 +1622,9 @@ events.prototype.pushBox = function (data) {
 
     var direction = core.getHeroLoc('direction'), nx=data.x+scan[direction].x, ny=data.y+scan[direction].y;
 
-    if (nx<0||nx>12||ny<0||ny>12) return;
+    if (nx<0||nx>=core.bigmap.width||ny<0||ny>=core.bigmap.height) return;
 
-    var block = core.getBlock(nx, ny, null, false);
+    var block = core.getBlock(nx, ny, null, true);
     if (block!=null && !(core.isset(block.block.event) && block.block.event.id=='flower'))
         return;
 

@@ -19,11 +19,15 @@
             <table class="row" id='arrRowMark'></table>
             <div id="editArea" v-cloak>
                 <textarea cols="10" rows="10" id="pout" v-model="mapArr"></textarea>
-                <p class="warnText" v-if="error">{{ errors[error-1] }}</p>
+                <!-- <p class="warnText" v-if="error">{{ errors[error-1] }}</p> -->
             </div>
             <div id="editTip">
                 <input type="button" value="新建空白地图" id='newMap'/>
-                <input id='newFileName' placeholder="输入新楼层id" style="width: 120px"/>
+                <input id='newFileName' placeholder="新楼层id" style="width: 70px"/>
+                <span style="vertical-align: bottom">宽</span>
+                <input id='newMapWidth' value="13" style="width: 20px"/>
+                <span style="vertical-align: bottom">高</span>
+                <input id='newMapHeight' value="13" style="width: 20px"/>
                 <input type="checkbox" id='newMapStatus' checked='checked' style='vertical-align: bottom'/>
                 <span style='vertical-align: bottom; margin-left: -4px'>保留楼层属性</span>
             </div>
@@ -241,7 +245,14 @@
             <input type="radio" id="brushMod" name="brushMod" value="line" checked="checked" />画线
             <input type="radio" id="brushMod2" name="brushMod" value="rectangle" />画矩形
             </span>
-            <br><br><br>
+            <br>
+            <div id="viewportButtons">
+                <input type="button" value="←"/>
+                <input type="button" value="↑"/>
+                <input type="button" value="↓"/>
+                <input type="button" value="→"/>
+            </div>
+            <br>
             <select id="selectFloor"></select>
             <input type="button" value="保存地图" id='saveFloor'/>
             <!--  -->
@@ -346,10 +357,15 @@
             <img id="img-up">
             <p class='statusLabel' id='up'></p>
         </div>
-        <div class="status">
+        <div class="status" id='keyCol'>
             <span class='statusLabel' id='yellowKey' style="color:#FFCCAA"></span>
             <span class='statusLabel' id='blueKey' style="color:#AAAADD"></span>
             <span class='statusLabel' id='redKey' style="color:#FF8888"></span>
+        </div>
+        <div class="status" id='pzfCol'>
+            <span class='statusLabel' id='pickaxe' style="color: #BC6E27"></span>
+            <span class='statusLabel' id='bomb' style="color: #FA14B9"></span>
+            <span class='statusLabel' id='fly' style="color: #8DB600"></span>
         </div>
         <div class="status" id="debuffCol">
             <span class='statusLabel' id='poison' style="color: #AFFCA8;"></span>
@@ -370,36 +386,20 @@
     <div id="gif"></div>
     <div id="gif2"></div>
     <div id="curtain"></div>
-    <!-- <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas> -->
-    <!-- <canvas class='gameCanvas' id='event' width='416' height='416'></canvas> -->
-    <canvas class='gameCanvas' id='hero' width='416' height='416'></canvas>
-    <!-- <canvas class='gameCanvas' id='event2' width='416' height='416'></canvas> -->
-    <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
-    <canvas class='gameCanvas' id='animate' width='416' height='416'></canvas>
-    <canvas class='gameCanvas' id='weather' width='416' height='416'></canvas>
-    <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
-    <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
+    <div id="gameDraw">
+        <!-- <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas> -->
+        <!-- <canvas class='gameCanvas' id='event' width='416' height='416'></canvas> -->
+        <canvas class='gameCanvas' id='hero' width='416' height='416'></canvas>
+        <!-- <canvas class='gameCanvas' id='event2' width='416' height='416'></canvas> -->
+        <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='animate' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='weather' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='route' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
+    </div>
 </div>
 <!-- */</script> -->
-<script>
-    // 生成定位编号
-    (function () {
-        var colNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<td>' + i + '<div class="colBlock" style="left:' + (i * 32 + 1) + 'px;"></div></td>';
-            colNum += tpl;
-        }
-        arrColMark.innerHTML = '<tr>' + colNum + '</tr>';
-        mapColMark.innerHTML = '<tr>' + colNum + '</tr>';
-        var rowNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<tr><td>' + i + '<div class="rowBlock" style="top:' + (i * 32 + 1) + 'px;"></div></td></tr>';
-            rowNum += tpl;
-        }
-        arrRowMark.innerHTML = rowNum;
-        mapRowMark.innerHTML = rowNum;
-    })();
-</script>
 
 <!-- =========================================================== -->
 

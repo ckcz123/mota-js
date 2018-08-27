@@ -1,6 +1,6 @@
 # 附录: API列表
 
-?> 目前版本**v2.3.3**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.4**，上次更新时间：* {docsify-updated} *
 
 **这里只列出所有可能会被造塔者用到的常用API，更多的有关内容请在代码内进行查询。**
 
@@ -184,20 +184,27 @@ core.enemyExists(x, y, id, floorId)
 x和y为坐标；id为怪物ID，可为null表示任意怪物；floorId为楼层ID，可忽略表示当前楼层。
 
 
-core.getBlock(x, y, floorId, needEnable)
+core.getBlock(x, y, floorId, showDisable)
 获得某个点的当前图块信息。
 x和y为坐标；floorId为楼层ID，可忽略或null表示当前楼层。
-needEnable表示该点是否启用时才返回，其值不设置则默认为true。
+showDisable如果为true，则对于禁用的点和事件也会进行返回。
 如果该点不存在图块，则返回null。
 否则，返回值如下： {"index": xxx, "block": xxx}
 其中index为该点在该楼层blocks数组中的索引，block为该图块实际内容。
 
 
-core.getBlockId(x, y, floorId, needEnable)
+core.getBlockId(x, y, floorId, showDisable)
 获得某个点的图块ID。
 x和y为坐标；floorId为楼层ID，可忽略或null表示当前楼层。
-needEnable表示是否需要该点处于启用状态才返回，其值不设置则默认为true。
+showDisable如果为true，则对于禁用的点和事件也会进行返回。
 如果该点不存在图块，则返回null，否则返回该点的图块ID。
+
+
+core.getBlockCls(x, y, floorId, showDisable)
+获得某个点的图块cls。
+x和y为坐标；floorId为楼层ID，可忽略或null表示当前楼层。
+showDisable如果为true，则对于禁用的点和事件也会进行返回。
+如果该点不存在图块，则返回null，否则返回该点的图块cls。
 
 
 core.showBlock(x, y, floorId)
@@ -292,6 +299,14 @@ actions.js主要用来进行用户交互行为的处理。
 ========== core.control.XXX 和游戏控制相关的函数 ==========
 control.js主要用来进行游戏控制，比如行走控制、自动寻路、存读档等等游戏核心内容。
 
+core.control.setGameCanvasTranslate(canvasId, x, y)
+设置大地图的偏移量
+
+core.control.updateViewport()
+更新大地图的可见区域
+
+core.control.replay()
+回放下一个操作
 
 ========== core.enemys.XXX 和怪物相关的函数 ==========
 enemys.js主要用来进行怪物相关的内容，比如怪物的特殊属性，伤害和临界计算等。

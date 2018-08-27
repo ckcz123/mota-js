@@ -1,6 +1,6 @@
 # 元件说明
 
-?> 目前版本**v2.3.3**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.4**，上次更新时间：* {docsify-updated} *
 
 在本章中，将对样板里的各个元件进行说明。各个元件主要包括道具、门、怪物、楼梯等等。
 
@@ -43,7 +43,7 @@
 
 // 在该点的事件events中:
 "x,y": [
-    {"type": "openDoor", "loc": [x,y]} // 直接使用开门事件，坐标需写当前点坐标。
+    {"type": "openDoor"} // 直接使用开门事件，坐标可忽略表示当前点
 ]
 ```
 
@@ -64,38 +64,39 @@ yellowWall, blueWall, whiteWall, lava, star
 
 怪物可以有特殊属性，每个怪物可以有多个自定义属性。
 
-怪物的特殊属性所对应的数字（special）在`libs/enemys.js`中的`getSpecialText`中定义，请勿对已有的属性进行修改。
+怪物的特殊属性所对应的数字（special）在脚本编辑中的`getSpecials`中定义，请勿对已有的属性进行修改。
 
 ``` js
-enemys.prototype.getSpecialText = function (enemyId) {
-    if (enemyId == undefined) return "";
-    var enemy = this.enemys[enemyId];
-    var special = enemy.special;
-    var text = [];
-    if (this.hasSpecial(special, 1)) text.push("先攻");
-    if (this.hasSpecial(special, 2)) text.push("魔攻");
-    if (this.hasSpecial(special, 3)) text.push("坚固");
-    if (this.hasSpecial(special, 4)) text.push("2连击");
-    if (this.hasSpecial(special, 5)) text.push("3连击");
-    if (this.hasSpecial(special, 6)) text.push((enemy.n||4)+"连击");
-    if (this.hasSpecial(special, 7)) text.push("破甲");
-    if (this.hasSpecial(special, 8)) text.push("反击");
-    if (this.hasSpecial(special, 9)) text.push("净化");
-    if (this.hasSpecial(special, 10)) text.push("模仿");
-    if (this.hasSpecial(special, 11)) text.push("吸血");
-    if (this.hasSpecial(special, 12)) text.push("中毒");
-    if (this.hasSpecial(special, 13)) text.push("衰弱");
-    if (this.hasSpecial(special, 14)) text.push("诅咒");
-    if (this.hasSpecial(special, 15)) text.push("领域");
-    if (this.hasSpecial(special, 16)) text.push("夹击");
-    if (this.hasSpecial(special, 17)) text.push("仇恨");
-    if (this.hasSpecial(special, 18)) text.push("阻击");
-    if (this.hasSpecial(special, 19)) text.push("自爆");
-    if (this.hasSpecial(special, 20)) text.push("无敌");
-    if (this.hasSpecial(special, 21)) text.push("退化");
-    if (this.hasSpecial(special, 22)) text.push("固伤");
-    if (this.hasSpecial(special, 23)) text.push("重生");
-    return text.join("  ");
+function() {
+	// 获得怪物的特殊属性，每一行定义一个特殊属性。
+	// 分为三项，第一项为该特殊属性的数字，第二项为特殊属性的名字，第三项为特殊属性的描述
+	// 可以直接写字符串，也可以写个function将怪物传进去
+	return [
+		[1, "先攻", "怪物首先攻击"],
+		[2, "魔攻", "怪物无视勇士的防御"],
+		[3, "坚固", "勇士每回合最多只能对怪物造成1点伤害"],
+		[4, "2连击", "怪物每回合攻击2次"],
+		[5, "3连击", "怪物每回合攻击3次"],
+		[6, function(enemy) {return (enemy.n||4)+"连击";}, function(enemy) {return "怪物每回合攻击"+(enemy.n||4)+"次";}],
+		[7, "破甲", "战斗前，怪物附加角色防御的"+Math.floor(100*core.values.breakArmor||0)+"%作为伤害"],
+		[8, "反击", "战斗时，怪物每回合附加角色攻击的"+Math.floor(100*core.values.counterAttack||0)+"%作为伤害，无视角色防御"],
+		[9, "净化", "战斗前，怪物附加勇士魔防的"+core.values.purify+"倍作为伤害"],
+		[10, "模仿", "怪物的攻防和勇士攻防相等"],
+		[11, "吸血", function (enemy) {return "战斗前，怪物首先吸取角色的"+Math.floor(100*enemy.value||0)+"%生命作为伤害"+(enemy.add?"，并把伤害数值加到自身生命上":"");}],
+		[12, "中毒", "战斗后，勇士陷入中毒状态，每一步损失生命"+core.values.poisonDamage+"点"],
+		[13, "衰弱", "战斗后，勇士陷入衰弱状态，攻防暂时下降"+(core.values.weakValue>=1?core.values.weakValue+"点":parseInt(core.values.weakValue*100)+"%")],
+		[14, "诅咒", "战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验"],
+		[15, "领域", function (enemy) {return "经过怪物周围"+(enemy.range||1)+"格时自动减生命"+(enemy.value||0)+"点";}],
+		[16, "夹击", "经过两只相同的怪物中间，勇士生命值变成一半"],
+		[17, "仇恨", "战斗前，怪物附加之前积累的仇恨值作为伤害"+(core.flags.hatredDecrease?"；战斗后，释放一半的仇恨值":"")+"。（每杀死一个怪物获得"+(core.values.hatred||0)+"点仇恨值）"],
+		[18, "阻击", function (enemy) {return "经过怪物的十字领域时自动减生命"+(enemy.value||0)+"点，同时怪物后退一格";}],
+		[19, "自爆", "战斗后勇士的生命值变成1"],
+		[20, "无敌", "勇士无法打败怪物，除非拥有十字架"],
+		[21, "退化", function (enemy) {return "战斗后勇士永久下降"+(enemy.atkValue||0)+"点攻击和"+(enemy.defValue||0)+"点防御";}],
+		[22, "固伤", function (enemy) {return "战斗前，怪物对勇士造成"+(enemy.damage||0)+"点固定伤害，无视勇士魔防。";}],
+		[23, "重生", "怪物被击败后，角色转换楼层则怪物将再次出现"],
+		[24, "激光", function (enemy) {return "经过怪物同行或同列时自动减生命"+(enemy.value||0)+"点";}]
+	];
 }
 ```
 
@@ -138,11 +139,13 @@ N连击怪物的special是6，且我们可以为它定义n代表实际连击数�
 
 领域怪还可以设置`range`选项代表该领域怪的范围，不写则默认为1。
 
-阻击怪同样需要设置value，代表领域伤害的数值。如果勇士生命值扣减到0，则直接死亡触发lose事件。
+阻击怪同样需要设置value，代表阻击伤害的数值。如果勇士生命值扣减到0，则直接死亡触发lose事件。
 
 !> 阻击怪后退的地点不能有任何事件存在，即使是已经被禁用的自定义事件！
 
-请注意如果吸血、领域、阻击中任何两个同时存在，则value会冲突。**因此请勿将吸血、领域或阻击放置在同一个怪物身上。**
+激光怪同样需要设置value，代表激光伤害的数值。
+
+请注意如果吸血、领域、阻击中任何两个同时存在，则value会冲突。**因此请勿将吸血、领域、阻击或激光放置在同一个怪物身上。**
 
 退化怪需要设置'atkValue'和'defValue'表示退化的数值；也可以不设置默认为0。
 
@@ -175,6 +178,14 @@ floorId指定的是目标楼层的唯一标识符（ID）。
 可以指定time，指定后切换动画时长为指定的数值。
 
 **从2.1.1开始，楼层属性中提供了`upFloor`和`downFloor`两项。如果设置此项（比如`"upFloor": [2,3]`），则写stair:upFloor或者楼传器的落点将用此点来替换楼梯位置（即类似于RM中的上箭头）。**
+
+## 大地图
+
+从V2.4开始，H5魔塔开始支持大地图。
+
+大地图在创建时可以指定宽高，要求**宽和高都不得小于13，且宽高之积不超过1000**。
+
+大地图一旦创建成功则不得修改宽高数值。
 
 ## 动画和天气系统
 
@@ -271,8 +282,7 @@ HTML5魔塔一大亮点就是存在录像系统，可以很方便进行录像回
 - **回退：** 按A可以回退到上一个录像节点（录像播放过程中每50步存一个录像节点）。
 - **存档：** 按S可以在录像播放过程中进行存档。
 - **查看手册：** 按C可以在录像播放过程中查看怪物手册。
-
-上述操作在手机端均有工具栏的对应按钮可点击操作。
+- **浏览地图：** 按PgUp/PgDn可以在录像播放过程中浏览地图。
 
 如果录像出现问题，请加群539113091找小艾反馈Bug。
 

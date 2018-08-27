@@ -1570,10 +1570,12 @@ ui.prototype.drawMaps = function (index, x, y) {
     core.canvas.data.textAlign = 'left';
     core.setFont('data', '16px Arial');
 
-    var text = core.floors[floorId].title + " ["+(x-6)+","+(y-6)+"]";
+
+    var text = core.floors[floorId].title;
+    if (mw>13 || mh>13) text+=" ["+(x-6)+","+(y-6)+"]";
     var textX = 16, textY = 18, width = textX + core.canvas.data.measureText(text).width + 16, height = 42;
     core.fillRect('data', 5, 5, width, height, '#000');
-    core.setOpacity('data', 0.5);
+    core.setOpacity('data', 0.4);
     core.fillText('data', text, textX + 5, textY + 15, '#fff');
 
 }

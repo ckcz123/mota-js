@@ -105,7 +105,7 @@ var editArea = new Vue({
     data: {
         mapArr: '',
         errors: [ // 编号1,2,3,4
-            "格式错误！请使用正确格式(width*height数组，如不清楚，可先点击生成地图查看正确格式)",
+            "格式错误！请使用正确格式(请使用地图生成器进行生成，且需要和本地图宽高完全一致)",
             "当前有未定义ID（在地图区域显示红块），请修改ID或者到icons.js和maps.js中进行定义！",
             "ID越界（在地图区域显示红块），当前编辑器暂时支持编号小于400，请修改编号！",
             // "发生错误！",
@@ -138,6 +138,8 @@ var editArea = new Vue({
         },
         error: function () {
             // console.log(editArea.mapArr);
+            if (this.error>0)
+                printe(this.errors[this.error-1])
         }
     },
     methods: {

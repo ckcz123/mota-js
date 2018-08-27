@@ -163,7 +163,7 @@ editor.prototype.mapInit = function () {
     ec.clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
     document.getElementById('event2').getContext('2d').clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
     editor.map = [];
-    var sy=editor.currentFloorData.map.length,sy=editor.currentFloorData.map[0].length;
+    var sy=editor.currentFloorData.map.length,sx=editor.currentFloorData.map[0].length;
     for (var y = 0; y < sy; y++) {
         editor.map[y] = [];
         for (var x = 0; x < sx; x++) {

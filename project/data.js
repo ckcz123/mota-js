@@ -2,7 +2,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 {
 	"main" : {
 		"floorIds" : [ 
-			"sample0", "sample1", "sample2", "MT0"
+			"sample0", "sample1", "sample2", "sample3", "MT0"
 		],
 		"images" : [
 			"bg.jpg"
@@ -142,6 +142,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"enableExperience": false,
 		"enableLevelUp": false,
 		"enableKeys": true,
+		"enablePZF": false,
 		"enableDebuff": false,
 		"flyNearStair": true,
 		"pickaxeFourDirections": false,

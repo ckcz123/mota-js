@@ -18,6 +18,7 @@ HTML5魔塔是使用画布（canvas）来绘制，存在若干个图层，它们
 - animate：动画层；主要用来绘制动画，图块的淡入/淡出效果，图块的移动。showImage事件绘制的图片也是在这一层。
 - weather：天气层；主要用来绘制天气（雨/雪）
 - curtain：色调层；用来控制当前楼层的画面色调
+- route：路线层；主要用来绘制勇士的行走路线图
 - ui：UI层；用来绘制一切UI窗口，如剧情文本、怪物手册、楼传器、系统菜单等等
 - data：数据层；用来绘制一些顶层的或更新比较快的数据，如左上角的提示，战斗界面中数据的变化等等。
 
@@ -299,7 +300,7 @@ enemys.prototype.calDamage = function (monster, hero_hp, hero_atk, hero_def, her
 // 检查领域、夹击、阻击事件
 control.prototype.checkBlock = function () {
     var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
-    var damage = core.status.checkBlock.damage[13*x+y];
+    var damage = core.status.checkBlock.damage[x+core.bigmap.width*y];
     if (damage>0) {
         if (core.hasFlag("shield5")) damage = 0; // 如果存在神圣盾，则将伤害变成0
         core.status.hero.hp -= damage;

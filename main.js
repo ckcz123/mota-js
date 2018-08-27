@@ -65,7 +65,7 @@ function main() {
     };
     this.mode = 'play';
     this.loadList = [
-        'loader', 'control', 'utils', 'items', 'icons', 'maps', 'enemys', 'events', 'actions', 'data', 'ui', 'core'
+        'audio','loader', 'control', 'utils', 'items', 'icons', 'maps', 'enemys', 'events', 'actions', 'data', 'ui', 'core'
     ];
     this.pureData = [ 
         "data","enemys","icons","maps","items","functions"

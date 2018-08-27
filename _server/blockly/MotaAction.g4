@@ -905,15 +905,15 @@ return code;
 */;
 
 playBgm_s
-    :   '播放背景音乐' EvalString Newline
+    :   '播放背景音乐' EvalString '音量' Int '音调' Int Newline
     
 
 /* playBgm_s
 tooltip : playBgm: 播放背景音乐
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=playbgm%EF%BC%9A%E6%92%AD%E6%94%BE%E8%83%8C%E6%99%AF%E9%9F%B3%E4%B9%90
-default : ["bgm.mp3"]
+default : ["bgm.mp3",100,100]
 colour : this.soundColor
-var code = '{"type": "playBgm", "name": "'+EvalString_0+'"},\n';
+var code = '{"type": "playBgm", "name": "'+EvalString_0+'", "volume": "'+Int_0+'", "pitch": "'+Int_1+'"},\n';
 return code;
 */;
 
@@ -942,29 +942,28 @@ return code;
 */;
 
 playSound_s
-    :   '播放音效' EvalString Newline
+    :   '播放音效' EvalString  '音量' Int '音调' Int Newline
     
 
 /* playSound_s
 tooltip : playSound: 播放音效
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=playsound%EF%BC%9A%E6%92%AD%E6%94%BE%E9%9F%B3%E6%95%88
-default : ["item.mp3"]
+default : ["item.mp3",100,100]
 colour : this.soundColor
-var code = '{"type": "playSound", "name": "'+EvalString_0+'"},\n';
+var code = '{"type": "playSound", "name": "'+EvalString_0+'", "volume": "'+Int_0+'", "pitch": "'+Int_1+'"},\n';
 return code;
 */;
 
 setVolume_s
-    :   '设置音量' Int '渐变时间' Int? Newline
+    :   '淡出背景音乐 在' Int '毫秒内' Newline
     
 
 /* setVolume_s
-tooltip : setVolume: 设置音量
+tooltip : setVolume: 淡出背景音乐
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=setvolume%EF%BC%9A%E8%AE%BE%E7%BD%AE%E9%9F%B3%E9%87%8F
-default : [90, 500]
+default : [1000]
 colour : this.soundColor
-Int_1 = Int_1?(', "time": '+Int_1):""
-var code = '{"type": "setVolume", "value": '+Int_0+Int_1+'},\n';
+var code = '{"type": "setVolume", "value": '+Int_0+'},\n';
 return code;
 */;
 
@@ -1657,11 +1656,11 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "playSound":
       this.next = MotaActionBlocks['playSound_s'].xmlText([
-        data.name,this.next]);
+        data.name,data.volume,data.pitch,this.next]);
       break;
     case "playBgm":
       this.next = MotaActionBlocks['playBgm_s'].xmlText([
-        data.name,this.next]);
+        data.name,data.volume,data.pitch,this.next]);
       break
     case "pauseBgm":
       this.next = MotaActionBlocks['pauseBgm_s'].xmlText([

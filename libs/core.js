@@ -112,7 +112,7 @@ function core() {
             'cursorX': null,
             'cursorY': null,
             "moveDirectly": false,
-            'clickMoveDirectly': false,
+            'clickMoveDirectly': true,
         },
 
         // 按下键的时间：为了判定双击

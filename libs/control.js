@@ -295,7 +295,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
     // 保存的Index
     core.status.saveIndex = core.getLocalStorage('saveIndex2', 1);
 
-    core.status.automaticRoute.clickMoveDirectly = core.getLocalStorage('clickMoveDirectly', false);
+    core.status.automaticRoute.clickMoveDirectly = core.getLocalStorage('clickMoveDirectly', true);
 
     if (core.isset(values))
         core.values = core.clone(values);

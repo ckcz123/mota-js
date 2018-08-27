@@ -1,6 +1,6 @@
 # 附录: API列表
 
-?> 目前版本**v2.3.3**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.4**，上次更新时间：* {docsify-updated} *
 
 **这里只列出所有可能会被造塔者用到的常用API，更多的有关内容请在代码内进行查询。**
 
@@ -299,6 +299,14 @@ actions.js主要用来进行用户交互行为的处理。
 ========== core.control.XXX 和游戏控制相关的函数 ==========
 control.js主要用来进行游戏控制，比如行走控制、自动寻路、存读档等等游戏核心内容。
 
+core.control.setGameCanvasTranslate(canvasId, x, y)
+设置大地图的偏移量
+
+core.control.updateViewport()
+更新大地图的可见区域
+
+core.control.replay()
+回放下一个操作
 
 ========== core.enemys.XXX 和怪物相关的函数 ==========
 enemys.js主要用来进行怪物相关的内容，比如怪物的特殊属性，伤害和临界计算等。

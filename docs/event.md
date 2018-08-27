@@ -1,6 +1,6 @@
 # 事件
 
-?> 目前版本**v2.3.3**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.4**，上次更新时间：* {docsify-updated} *
 
 本章内将对样板所支持的事件进行介绍。
 
@@ -1687,11 +1687,15 @@ core.insertAction([
 
 游戏开始时将调用`events.js`中的`startGame`函数。
 
-它将显示`data.js`中的startText内容（可以修改成自己的），提供战斗动画开启选择，设置初始福利，并正式开始游戏。
+它将显示全塔属性中的startText内容（可以修改成自己的），提供战斗动画开启选择，设置初始福利，并正式开始游戏。
 
-我们可以修改`setInitData`函数来对于不同难度分别设置初始属性。
+全塔属性的startText只能使用纯文本类型，其他的事件均无效。
 
-其参数hard为以下三个字符串之一：`"Easy"`, `"Normal"`, `"Hard"`，分别对应三个难度。针对不同的难度，我们可以设置一些难度分歧。
+我们可以修改脚本编辑`setInitData`函数来对于不同难度分别设置初始属性。
+
+其参数hard分为对应全塔属性中levelChooseButtons中的第二项，分别对应不同的难度，并会在游戏中传输，在状态栏显示。
+
+针对不同的难度，我们可以设置一些难度分歧。
 
 ``` js
 ////// 不同难度分别设置初始属性 //////
@@ -1718,9 +1722,11 @@ core.insertAction([
 
 当获胜`{"type": "win"}`事件发生时，将调用`events.js`中的win事件。其显示一段恭喜文字，并重新开始游戏。
 
+可以指定norank表示该结局不计入榜单。
+
 ``` js
 ////// 游戏获胜事件 //////
-"win": function(reason) {
+"win": function(reason, norank) {
     core.ui.closePanel();
     var replaying = core.status.replay.replaying;
     core.stopReplay();
@@ -1730,7 +1736,7 @@ core.insertAction([
         core.drawText([
             "\t[恭喜通关]你的分数是${status:hp}。"
         ], function () {
-            core.events.gameOver(reason||'', replaying);
+            core.events.gameOver(reason||'', replaying, norank);
         })
     });
 }

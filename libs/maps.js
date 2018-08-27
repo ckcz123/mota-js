@@ -48,11 +48,11 @@ maps.prototype.initBlock = function (x, y, id) {
     if (id.length>2) {
         if (id.indexOf(":f")==id.length-2) {
             id = id.substring(0, id.length - 2);
-            disable = false;
+            disable = true;
         }
         else if (id.indexOf(":t")==id.length-2) {
             id = id.substring(0, id.length - 2);
-            disable = true;
+            disable = false;
         }
     }
     id=parseInt(id);

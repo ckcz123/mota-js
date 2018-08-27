@@ -342,7 +342,7 @@ return code;
 */;
 
 setValue_s
-    :   '变量设置' ':' '名称' idString_e '值' expression Newline
+    :   '数值操作' ':' '名称' idString_e '值' expression Newline
     
 
 /* setValue_s

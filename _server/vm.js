@@ -168,7 +168,7 @@ var editArea = new Vue({
             var formatArrStr = '';
             var that = this;
             clearTimeout(that.formatTimer);
-            var si=this.mapArr.length,sk=this.mapArr[0].length;
+            var si=editor.map.length,sk=editor.map[0].length;
             if (this.mapArr.split(/\D+/).join(' ').trim().split(' ').length != si*sk) return false;
             var arr = this.mapArr.replace(/\s+/g, '').split('],[');
 

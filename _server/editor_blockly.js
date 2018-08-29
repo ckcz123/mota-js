@@ -112,6 +112,8 @@ editor_blockly = function () {
       MotaActionBlocks['exit_s'].xmlText(),
       MotaActionBlocks['show_s'].xmlText(),
       MotaActionBlocks['hide_s'].xmlText(),
+      MotaActionBlocks['showFloorImg_s'].xmlText(),
+      MotaActionBlocks['hideFloorImg_s'].xmlText(),
       MotaActionBlocks['trigger_s'].xmlText(),
       MotaActionBlocks['move_s'].xmlText(),
       MotaActionBlocks['jump_s'].xmlText(),

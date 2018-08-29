@@ -361,7 +361,9 @@ maps.prototype.drawMap = function (mapName, callback) {
         }
         images.forEach(function (t) {
             var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
-            if (core.isset(dx) && core.isset(dy) && core.isset(core.material.images.images[p])) {
+            if (core.isset(dx) && core.isset(dy) &&
+                !core.hasFlag("floorimg_"+mapName+"_"+dx+"_"+dy) &&
+                core.isset(core.material.images.images[p])) {
                 var image = core.material.images.images[p];
                 if (!t[3]) {
                     if (/.*\.gif/i.test(p) && main.mode=='play') {
@@ -1077,6 +1079,27 @@ maps.prototype.drawAnimate = function (name, x, y, callback) {
         }
         draw(index++);
     }, 50);
+}
+
+maps.prototype.setFloorImage = function (type, loc, floorId, callback) {
+    if (type!='show') type='hide';
+    if (typeof loc[0] == 'number' && typeof loc[1] == 'number')
+        loc = [loc];
+    floorId = floorId||core.status.floorId;
+
+    if (loc.length==0) return;
+    loc.forEach(function (t) {
+        var x=t[0], y=t[1];
+        var flag = "floorimg_"+floorId+"_"+x+"_"+y;
+        core.setFlag(flag, type=='show'?false:true);
+    })
+
+    if (floorId==core.status.floorId) {
+        core.drawMap(floorId, callback);
+    }
+    else {
+        if (core.isset(callback)) callback();
+    }
 }
 
 maps.prototype.resetMap = function(floorId) {

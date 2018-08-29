@@ -250,9 +250,9 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
 }
 
 ////// 转换楼层结束的事件 //////
-events.prototype.afterChangeFloor = function (floorId) {
+events.prototype.afterChangeFloor = function (floorId, fromLoad) {
     if (main.mode!='play') return;
-    return this.eventdata.afterChangeFloor(floorId);
+    return this.eventdata.afterChangeFloor(floorId, fromLoad);
 }
 
 ////// 开始执行一系列自定义事件 //////
@@ -1203,7 +1203,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
                 var changed = function () {
                     core.unLockControl();
                     core.status.replay.animate=false;
-                    core.events.afterChangeFloor(floorId);
+                    core.events.afterChangeFloor(floorId, fromLoad);
                     if (core.isset(callback)) callback();
                 }
                 if (displayAnimate) {

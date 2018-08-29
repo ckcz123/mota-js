@@ -897,6 +897,18 @@ core.prototype.removeLocalStorage = function (key) {
     core.utils.removeLocalStorage(key);
 }
 
+core.prototype.setLocalForage = function (key, value, successCallback, errorCallback) {
+    core.utils.setLocalForage(key, value, successCallback, errorCallback);
+}
+
+core.prototype.getLocalForage = function (key, defaultValue, successCallback, errorCallback) {
+    core.utils.getLocalForage(key, defaultValue, successCallback, errorCallback);
+}
+
+core.prototype.removeLocalForage = function (key, successCallback, errorCallback) {
+    core.utils.removeLocalForage(key, successCallback, errorCallback);
+}
+
 ////// 深拷贝一个对象 //////
 core.prototype.clone = function (data) {
     return core.utils.clone(data);

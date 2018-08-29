@@ -124,6 +124,52 @@ utils.prototype.removeLocalStorage = function (key) {
     localStorage.removeItem(core.firstData.name+"_"+key);
 }
 
+utils.prototype.setLocalForage = function (key, value, successCallback, errorCallback) {
+    // Save to localforage
+    var compressed = LZString.compress(JSON.stringify(value));
+    localforage.setItem(core.firstData.name+"_"+key, compressed, function (err) {
+        if (core.isset(err)) {
+            if (core.isset(errorCallback)) errorCallback(err);
+        }
+        else if (core.isset(successCallback)) successCallback();
+    });
+}
+
+utils.prototype.getLocalForage = function (key, defaultValue, successCallback, errorCallback) {
+    localforage.getItem(core.firstData.name+"_"+key, function (err, value) {
+        if (core.isset(err)) {
+            if (core.isset(errorCallback)) errorCallback(err);
+        }
+        else {
+            if (core.isset(value)) {
+                var output = LZString.decompress(value);
+                if (core.isset(output) && output.length>0) {
+                    try {
+                        if (core.isset(successCallback))
+                            successCallback(JSON.parse(output));
+                        return;
+                    }
+                    catch (ee) {console.log(ee);}
+                }
+                if (core.isset(successCallback))
+                    successCallback(JSON.parse(value));
+                return;
+            }
+            if (core.isset(successCallback))
+                successCallback(defaultValue);
+        }
+    })
+}
+
+utils.prototype.removeLocalForage = function (key, successCallback, errorCallback) {
+    localforage.removeItem(core.firstData.name+"_"+key, function (err) {
+        if (core.isset(err)) {
+            if (core.isset(errorCallback)) errorCallback(err);
+        }
+        else if (core.isset(successCallback)) successCallback();
+    })
+}
+
 ////// 深拷贝一个对象 //////
 utils.prototype.clone = function (data) {
     if (!core.isset(data)) return data;

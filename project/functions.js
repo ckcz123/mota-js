@@ -80,8 +80,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	})
 },
 ////// 转换楼层结束的事件 //////
-"afterChangeFloor" : function (floorId) {
+"afterChangeFloor" : function (floorId, fromLoad) {
 	// 转换楼层结束的事件
+	// floorId是切换到的楼层；fromLoad若为true则代表是从读档行为造成的楼层切换
 	if (!core.hasFlag("visited_"+floorId)) {
 		core.insertAction(core.floors[floorId].firstArrive);
 		core.setFlag("visited_"+floorId, true);

@@ -2537,6 +2537,7 @@ control.prototype.playBgm = function (bgm) {
         }
         // 播放当前BGM
         core.material.bgms[bgm].volume = core.musicStatus.volume;
+        core.material.bgms[bgm].currentTime = 0;
         core.material.bgms[bgm].play();
         core.musicStatus.playingBgm = bgm;
         core.musicStatus.isPlaying = true;
@@ -2582,7 +2583,6 @@ control.prototype.resumeBgm = function () {
                 }
                 else
                     core.playBgm(core.bgms[0]);
-                core.musicStatus.isPlaying = true;
             }
         }
     }

@@ -2203,25 +2203,12 @@ control.prototype.doSL = function (id, type) {
             console.info(err);
             core.drawTip("存档失败，请将控制台的报错信息反馈给管理员。");
         })
-        /*
-        if (core.setLocalStorage("save"+id, core.saveData())) {
-            core.ui.closePanel();
-            core.drawTip('存档成功！');
-            if (id!="autoSave") {
-                core.status.saveIndex=id;
-                core.setLocalStorage('saveIndex2', core.status.saveIndex);
-            }
-        }
-        else {
-            core.drawTip('存储空间不足，请覆盖已有的存档或在菜单栏中进行清理');
-        }
-        */
         return;
     }
     else if (type=='load') {
         // var data = core.getLocalStorage(id=='autoSave'?id:"save"+id, null);
 
-        core.getLocalForage(id=='autoSave'?id:"save"+id, function(data) {
+        core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
             if (!core.isset(data)) {
                 core.drawTip("无效的存档");
                 return;
@@ -2250,6 +2237,7 @@ control.prototype.doSL = function (id, type) {
                 }
             });
         }, function(err) {
+            console.log(err);
             core.drawTip("无效的存档");
         })
 
@@ -2257,7 +2245,7 @@ control.prototype.doSL = function (id, type) {
     }
     else if (type == 'replayLoad') {
         // var data = core.getLocalStorage(id=='autoSave'?id:"save"+id, null);
-        core.getLocalForage(id=='autoSave'?id:"save"+id, function(data) {
+        core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
             if (!core.isset(data)) {
                 core.drawTip("无效的存档");
                 return;
@@ -2280,7 +2268,7 @@ control.prototype.doSL = function (id, type) {
                 core.drawTip("回退到存档节点");
             });
         }, function(err) {
-            console.info(err);
+            console.log(err);
             core.drawTip("无效的存档");
         })
     }
@@ -2442,9 +2430,10 @@ control.prototype.loadData = function (data, callback) {
 
 control.prototype.getSaves = function (index, callback) {
     if (core.isset(index)) {
-        core.getLocalForage("save"+index, function(data) {
+        core.getLocalForage("save"+index, null, function(data) {
             if (core.isset(callback)) callback(data);
         }, function(err) {
+            console.log(err);
             if (core.isset(callback))
                 callback(null);
         })
@@ -2457,11 +2446,11 @@ control.prototype.getSaves = function (index, callback) {
             if (core.isset(callback)) callback(saves);
             return;
         }
-        core.getLocalForage("save"+index, function (data) {
+        core.getLocalForage("save"+index, null, function (data) {
             saves.push(data);
             load(index+1, callback);
         }, function(err) {
-            // saves.push(null);
+            console.log(err);
             load(index+1, callback);
         })
     }

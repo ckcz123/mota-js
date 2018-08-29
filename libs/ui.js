@@ -1783,11 +1783,10 @@ ui.prototype.drawSLPanel = function(index, refresh) {
     };
 
     var drawSave = function (i) {
-
-        core.getLocalForage(i==0?"autoSave":"save"+(5*page+i), function(data) {
+        core.getLocalForage(i==0?"autoSave":"save"+(5*page+i), null, function(data) {
             draw(data, i);
         }, function(err) {
-            draw(null, i);
+            console.log(err);
         })
     }
 

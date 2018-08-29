@@ -135,7 +135,7 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
     });
 }
 
-utils.prototype.getLocalForage = function (key, successCallback, errorCallback) {
+utils.prototype.getLocalForage = function (key, defaultValue, successCallback, errorCallback) {
     localforage.getItem(core.firstData.name+"_"+key, function (err, value) {
         if (core.isset(err)) {
             if (core.isset(errorCallback)) errorCallback(err);
@@ -155,7 +155,8 @@ utils.prototype.getLocalForage = function (key, successCallback, errorCallback) 
                     successCallback(JSON.parse(value));
                 return;
             }
-            if (core.isset(errorCallback)) errorCallback("Value is null");
+            if (core.isset(successCallback))
+                successCallback(defaultValue);
         }
     })
 }

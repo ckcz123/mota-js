@@ -901,8 +901,8 @@ core.prototype.setLocalForage = function (key, value, successCallback, errorCall
     core.utils.setLocalForage(key, value, successCallback, errorCallback);
 }
 
-core.prototype.getLocalForage = function (key, successCallback, errorCallback) {
-    core.utils.getLocalForage(key, successCallback, errorCallback);
+core.prototype.getLocalForage = function (key, defaultValue, successCallback, errorCallback) {
+    core.utils.getLocalForage(key, defaultValue, successCallback, errorCallback);
 }
 
 core.prototype.removeLocalForage = function (key, successCallback, errorCallback) {

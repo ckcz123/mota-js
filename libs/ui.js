@@ -1721,7 +1721,7 @@ ui.prototype.drawToolbox = function(index) {
 }
 
 ////// 绘制存档/读档界面 //////
-ui.prototype.drawSLPanel = function(index) {
+ui.prototype.drawSLPanel = function(index, refresh) {
     if (!core.isset(index)) index=1;
     if (index<0) index=0;
 
@@ -1731,7 +1731,14 @@ ui.prototype.drawSLPanel = function(index) {
     if (offset>5) offset=5;
     index=10*page+offset;
 
+    var last_page = -1;
+    if (core.isset(core.status.event.data)) {
+        last_page = parseInt(core.status.event.data/10);
+    }
+
     core.status.event.data=index;
+    if (!core.isset(core.status.event.ui))
+        core.status.event.ui = [];
 
     core.clearMap('ui');
     core.setAlpha('ui', 0.85);
@@ -1745,14 +1752,15 @@ ui.prototype.drawSLPanel = function(index) {
     if (core.status.event.selection) strokeColor = '#FF6A6A';
 
     var name=core.status.event.id=='save'?"存档":core.status.event.id=='load'?"读档":core.status.event.id=='replayLoad'?"回放":"";
-    for (var i=0;i<6;i++) {
+
+    var draw = function (data, i) {
+        core.status.event.ui[i] = data;
         var id=5*page+i;
-        var data=core.getLocalStorage(i==0?"autoSave":"save"+id, null);
         if (i<3) {
             core.fillText('ui', i==0?"自动存档":name+id, (2*i+1)*u, 35, '#FFFFFF', "bold 17px Verdana");
             core.strokeRect('ui', (2*i+1)*u-size/2, 50, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
+                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 65+size, '#FFFFFF', '10px Verdana');
             }
             else {
@@ -1764,7 +1772,7 @@ ui.prototype.drawSLPanel = function(index) {
             core.fillText('ui', name+id, (2*i-5)*u, 230, '#FFFFFF', "bold 17px Verdana");
             core.strokeRect('ui', (2*i-5)*u-size/2, 245, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                this.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
+                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 260+size, '#FFFFFF', '10px Verdana');
             }
             else {
@@ -1772,7 +1780,28 @@ ui.prototype.drawSLPanel = function(index) {
                 core.fillText('ui', '空', (2*i-5)*u, 245+70, '#FFFFFF', 'bold 30px Verdana');
             }
         }
+    };
+
+    var drawSave = function (i) {
+
+        core.getLocalForage(i==0?"autoSave":"save"+(5*page+i), function(data) {
+            draw(data, i);
+        }, function(err) {
+            draw(null, i);
+        })
     }
+
+    if (page == last_page && !refresh) {
+        for (var i=0;i<6;i++) {
+            draw(core.status.event.ui[i]||null, i);
+        }
+    }
+    else {
+        for (var i=0;i<6;i++) {
+            drawSave(i);
+        }
+    }
+
     this.drawPagination(page+1, max_page);
 
     if (core.status.event.selection)

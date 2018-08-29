@@ -1427,8 +1427,12 @@ actions.prototype.clickSL = function(x,y) {
                 core.drawTip("无法删除自动存档！");
             }
             else {
-                core.removeLocalStorage("save"+id);
-                core.ui.drawSLPanel(index);
+                // core.removeLocalStorage("save"+id);
+                core.removeLocalForage("save"+id, function() {
+                    core.ui.drawSLPanel(index, true);
+                }, function() {
+                    core.drawTip("无法删除存档！");
+                })
             }
         }
         else {
@@ -1523,8 +1527,13 @@ actions.prototype.keyUpSL = function (keycode) {
             core.drawTip("无法删除自动存档！");
         }
         else {
-            core.removeLocalStorage("save"+(5*page+offset));
-            core.ui.drawSLPanel(index);
+            // core.removeLocalStorage("save"+(5*page+offset));
+            // core.ui.drawSLPanel(index);
+            core.removeLocalForage("save"+(5*page+offset), function() {
+                core.ui.drawSLPanel(index, true);
+            }, function() {
+                core.drawTip("无法删除存档！");
+            })
         }
     }
 }
@@ -1799,10 +1808,12 @@ actions.prototype.clickSyncSave = function (x,y) {
                         core.ui.drawConfirmBox("所有本地存档都将被覆盖，确认？", function () {
                             for (var i=1;i<=5*(main.savePages||30);i++) {
                                 if (i<=data.length) {
-                                    core.setLocalStorage("save"+i, data[i-1]);
+                                    // core.setLocalStorage("save"+i, data[i-1]);
+                                    core.setLocalForage("save"+i, data[i-1]);
                                 }
                                 else {
-                                    core.removeLocalStorage("save"+i);
+                                    // core.removeLocalStorage("save"+i);
+                                    core.removeLocalForage("save"+i);
                                 }
                             }
                             core.drawText("读取成功！\n你的本地所有存档均已被覆盖。");
@@ -1812,8 +1823,10 @@ actions.prototype.clickSyncSave = function (x,y) {
                         })
                     }
                     else {
-                        core.setLocalStorage("save"+core.status.saveIndex, data);
-                        core.drawText("同步成功！\n单存档已覆盖至存档"+core.status.saveIndex);
+                        // core.setLocalStorage("save"+core.status.saveIndex, data);
+                        core.setLocalForage("save"+core.status.saveIndex, data, function() {
+                            core.drawText("同步成功！\n单存档已覆盖至存档"+core.status.saveIndex);
+                        })
                     }
                 }, function () {
 
@@ -1931,6 +1944,7 @@ actions.prototype.clickLocalSaveSelect = function (x,y) {
 
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y - topIndex;
+        /*
         switch (selection) {
             case 0:
                 saves=[];
@@ -1947,15 +1961,21 @@ actions.prototype.clickLocalSaveSelect = function (x,y) {
             case 2:
                 break;
         }
-    }
-    if (core.isset(saves)) {
-        var content = {
-            "name": core.firstData.name,
-            "version": core.firstData.version,
-            "data": saves
+        */
+        if (selection<2) {
+            core.control.getSaves(selection==0?null:core.status.saveIndex, function(saves) {
+                if (core.isset(saves)) {
+                    var content = {
+                        "name": core.firstData.name,
+                        "version": core.firstData.version,
+                        "data": saves
+                    }
+                    core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5save", JSON.stringify(content));
+                }
+            })
         }
-        core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5save", JSON.stringify(content));
     }
+
     core.status.event.selection=2;
     core.ui.drawSyncSave();
 }
@@ -1997,15 +2017,18 @@ actions.prototype.clickStorageRemove = function (x, y) {
         var selection = y - topIndex;
         switch (selection) {
             case 0:
-                localStorage.clear();
-                core.drawText("\t[操作成功]你的所有存档已被清空。");
+                localforage.clear(function () {
+                    core.drawText("\t[操作成功]你的所有存档已被清空。");
+                });
                 break;
             case 1:
                 for (var i=1;i<=5*(main.savePages||30);i++) {
-                    core.removeLocalStorage("save"+i);
+                    // core.removeLocalStorage("save"+i);
+                    core.removeLocalForage("save"+i);
                 }
-                core.drawText("\t[操作成功]当前塔的存档已被清空。");
-                core.removeLocalStorage("autoSave");
+                core.removeLocalForage("autoSave", function() {
+                    core.drawText("\t[操作成功]当前塔的存档已被清空。");
+                });
                 break;
             case 2:
                 core.status.event.selection=5;

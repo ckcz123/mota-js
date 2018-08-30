@@ -1596,9 +1596,12 @@ actions.prototype.clickSwitchs = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 7:
-                window.open(core.firstData.name+".zip", "_blank");
+                window.open(core.platform.isPC?"editor.html":"editor-mobile.html", "_blank");
                 break;
             case 8:
+                window.open(core.firstData.name+".zip", "_blank");
+                break;
+            case 9:
                 core.status.event.selection=0;
                 core.ui.drawSettings();
                 break;

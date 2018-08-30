@@ -454,6 +454,8 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
         return;
     }
 
+    if (core.timeout.turnHeroTimeout!=null) return;
+
     // 单击瞬间移动
     if (core.status.automaticRoute.clickMoveDirectly && core.status.heroStop) {
         if (core.control.tryMoveDirectly(destX, destY))

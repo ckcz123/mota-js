@@ -800,6 +800,7 @@ ui.prototype.drawSwitchs = function() {
         "临界显伤： "+(core.flags.displayCritical ? "[ON]" : "[OFF]"),
         "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
         "单击瞬移： "+(core.status.automaticRoute.clickMoveDirectly ? "[ON]" : "[OFF]"),
+        "查看工程",
         "下载离线版本",
         "返回主菜单"
     ];
@@ -1250,8 +1251,7 @@ ui.prototype.drawCursor = function () {
 
 ////// 绘制怪物手册 //////
 ui.prototype.drawBook = function (index) {
-
-    var enemys = core.enemys.getCurrentEnemys(core.floorIds[core.status.event.selection]);
+    var enemys = core.enemys.getCurrentEnemys(core.floorIds[(core.status.event.selection||{}).index]);
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
 
     clearInterval(core.interval.tipAnimate);
@@ -1395,7 +1395,7 @@ ui.prototype.drawBook = function (index) {
 
 ////// 绘制怪物属性的详细信息 //////
 ui.prototype.drawBookDetail = function (index) {
-    var enemys = core.enemys.getCurrentEnemys(core.floorIds[core.status.event.selection]);
+    var enemys = core.enemys.getCurrentEnemys(core.floorIds[(core.status.event.selection||{}).index]);
     if (enemys.length==0) return;
     if (index<0) index=0;
     if (index>=enemys.length) index=enemys.length-1;
@@ -1842,7 +1842,9 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
     }
     images.forEach(function (t) {
         var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
-        if (core.isset(dx) && core.isset(dy) && core.isset(core.material.images.images[p])) {
+        if (core.isset(dx) && core.isset(dy) &&
+            !core.hasFlag("floorimg_"+floorId+"_"+dx+"_"+dy) &&
+            core.isset(core.material.images.images[p])) {
             var image = core.material.images.images[p];
             if (!t[3])
                 tempCanvas.drawImage(image, 32 * dx, 32 * dy, image.width, image.height);
@@ -1880,7 +1882,9 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
     // draw fg
     images.forEach(function (t) {
         var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
-        if (core.isset(dx) && core.isset(dy) && core.isset(core.material.images.images[p])) {
+        if (core.isset(dx) && core.isset(dy) &&
+            !core.hasFlag("floorimg_"+floorId+"_"+dx+"_"+dy) &&
+            core.isset(core.material.images.images[p])) {
             var image = core.material.images.images[p];
             if (t[3]==1)
                 tempCanvas.drawImage(image, 32*dx, 32*dy, image.width, image.height);

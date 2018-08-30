@@ -399,6 +399,26 @@ events.prototype.doAction = function() {
             }
             else this.doAction();
             break;
+        case "showFloorImg": // 显示贴图
+            if (!core.isset(data.loc))
+                data.loc = [x,y];
+            if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
+                && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
+                data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];
+            core.maps.setFloorImage("show", data.loc, data.floorId, function() {
+                core.events.doAction();
+            })
+            break;
+        case "hideFloorImg": // 隐藏贴图
+            if (!core.isset(data.loc))
+                data.loc = [x,y];
+            if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
+                && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
+                data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];
+            core.maps.setFloorImage("hide", data.loc, data.floorId, function() {
+                core.events.doAction();
+            })
+            break;
         case "setBlock": // 设置某图块
             {
                 if (core.isset(data.loc)) {

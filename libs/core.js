@@ -271,6 +271,7 @@ core.prototype.init = function (coreData, callback) {
     core.material.ground.src = "project/images/ground.png";
 
     core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
+    core.getLocalForage("test");
 
     core.loader.load(function () {
         console.log(core.material);

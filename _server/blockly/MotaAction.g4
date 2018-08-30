@@ -187,6 +187,8 @@ action
     |   setValue_s
     |   show_s
     |   hide_s
+    |   showFloorImg_s
+    |   hideFloorImg_s
     |   trigger_s
     |   revisit_s
     |   exit_s
@@ -414,6 +416,68 @@ if (EvalString_0 && EvalString_1) {
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
 var code = '{"type": "hide"'+floorstr+IdString_0+''+Int_0+'},\n';
+return code;
+*/;
+
+showFloorImg_s
+    :   '显示贴图' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
+
+
+/* showFloorImg_s
+tooltip : showFloorImg: 显示一个贴图，xy为左上角坐标，可用逗号分隔表示多个点
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=showFloorImg%ef%bc%9a%e6%98%be%e7%a4%ba%e8%b4%b4%e5%9b%be
+default : ["","",""]
+colour : this.eventColor
+var floorstr = '';
+if (EvalString_0 && EvalString_1) {
+  var pattern1 = /^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
+  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
+    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
+    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
+    EvalString_0=[EvalString_0,EvalString_1]
+  } else {
+    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
+    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    EvalString_0=EvalString_0.split(',');
+    EvalString_1=EvalString_1.split(',');
+    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  }
+  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+}
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+var code = '{"type": "showFloorImg"'+floorstr+IdString_0+'},\n';
+return code;
+*/;
+
+hideFloorImg_s
+    :   '隐藏贴图' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
+
+
+/* hideFloorImg_s
+tooltip : hideFloorImg: 隐藏一个贴图，xy为左上角坐标，可用逗号分隔表示多个点
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=hideFloorImg%ef%bc%9a%e9%9a%90%e8%97%8f%e8%b4%b4%e5%9b%be
+default : ["","",""]
+colour : this.eventColor
+var floorstr = '';
+if (EvalString_0 && EvalString_1) {
+  var pattern1 = /^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
+  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
+    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
+    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
+    EvalString_0=[EvalString_0,EvalString_1]
+  } else {
+    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
+    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    EvalString_0=EvalString_0.split(',');
+    EvalString_1=EvalString_1.split(',');
+    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  }
+  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+}
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+var code = '{"type": "hideFloorImg"'+floorstr+IdString_0+'},\n';
 return code;
 */;
 
@@ -1528,6 +1592,30 @@ ActionParser.prototype.parseAction = function() {
       })
       this.next = MotaActionBlocks['hide_s'].xmlText([
         x_str.join(','),y_str.join(','),data.floorId||'',data.time||0,this.next]);
+      break;
+    case "showFloorImg": // 显示贴图
+      data.loc=data.loc||[];
+      if (!(data.loc[0] instanceof Array))
+        data.loc = [data.loc];
+      var x_str=[],y_str=[];
+      data.loc.forEach(function (t) {
+        x_str.push(t[0]);
+        y_str.push(t[1]);
+      })
+      this.next = MotaActionBlocks['showFloorImg_s'].xmlText([
+        x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
+      break;
+    case "hideFloorImg": // 隐藏贴图
+      data.loc=data.loc||[];
+      if (!(data.loc[0] instanceof Array))
+        data.loc = [data.loc];
+      var x_str=[],y_str=[];
+      data.loc.forEach(function (t) {
+        x_str.push(t[0]);
+        y_str.push(t[1]);
+      })
+      this.next = MotaActionBlocks['hideFloorImg_s'].xmlText([
+        x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
       break;
     case "setBlock": // 设置图块
       data.loc=data.loc||['',''];

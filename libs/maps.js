@@ -164,9 +164,9 @@ maps.prototype.save = function(maps, floorId) {
     var mh = core.floors[floorId].height || 13;
 
     var blocks = [];
-    for (var x=0;x<mw;x++) {
+    for (var x=0;x<mh;x++) {
         blocks[x]=[];
-        for (var y=0;y<mh;y++) {
+        for (var y=0;y<mw;y++) {
             blocks[x].push(0);
         }
     }
@@ -215,9 +215,9 @@ maps.prototype.load = function (data, floorId) {
 maps.prototype.getMapArray = function (blockArray,width,height){
 
     var blocks = [];
-    for (var x=0;x<width;x++) {
+    for (var x=0;x<height;x++) {
         blocks[x]=[];
-        for (var y=0;y<height;y++) {
+        for (var y=0;y<width;y++) {
             blocks[x].push(0);
         }
     }

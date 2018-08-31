@@ -693,7 +693,7 @@ utils.prototype._export = function (floorIds) {
     // map
     var content = floorIds.length+"\n13 13\n\n";
     floorIds.forEach(function (floorId) {
-        var arr = core.maps.getMapArray(core.status.maps[floorId].blocks);
+        var arr = core.maps.getMapArray(core.status.maps[floorId].blocks, 13, 13);
         content += arr.map(function (x) {
             // check monster
             x.forEach(function (t) {

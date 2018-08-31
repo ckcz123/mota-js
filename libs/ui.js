@@ -1827,8 +1827,8 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
     var blockIcon = core.material.icons.terrains[groundId];
     var blockImage = core.material.images.terrains;
     // background
-    for (var i=0;i<mw;i++) {
-        for (var j=0;j<mh;j++) {
+    for (var j=0;j<mh;j++) {
+        for (var i=0;i<mw;i++) {
             tempCanvas.drawImage(blockImage, 0, blockIcon * 32, 32, 32, i * 32, j * 32, 32, 32);
         }
     }

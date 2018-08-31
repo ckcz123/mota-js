@@ -332,7 +332,7 @@ editor.prototype.changeFloor = function (floorId, callback) {
             return v.idnum || v || 0
         })
     });
-    core.changeFloor(floorId, null, core.firstData.hero.loc, null, function () {
+    core.changeFloor(floorId, null, {"x": 0, "y": 0, "direction": "up"}, null, function () {
         editor.drawMapBg();
         var mapArray = core.maps.save(core.status.maps, core.status.floorId);
         editor.map = mapArray.map(function (v) {

@@ -277,20 +277,20 @@ events.prototype.passNet = function (data) {
 core.status.hero.def += core.values.shield5 * ratio;
 core.setFlag("shield5", true); // 增加一个自定义Flag：已经拿到神圣盾
 ```
-2. 免疫吸血效果：在`enemys.js`的伤害计算中，编辑成如果存在神圣盾标记，吸血伤害为0。
+2. 免疫吸血效果：在脚本编辑的getDamageInfo中，编辑成如果存在神圣盾标记，吸血伤害为0。
 ``` js
-enemys.prototype.calDamage = function (monster, hero_hp, hero_atk, hero_def, hero_mdef) {
+function (enemy, hero_hp, hero_atk, hero_def, hero_mdef) {
 // ... 上略
     // 吸血
     if (this.hasSpecial(mon_special, 11)) {
-        var vampireDamage = hero_hp * monster.value;
+        var vampireDamage = hero_hp * enemy.value;
 
         // 如果有神圣盾免疫吸血等可以在这里写
         if (core.hasFlag("shield5")) vampireDamage = 0; // 存在神圣盾，吸血伤害为0
 
         vampireDamage = Math.floor(vampireDamage) || 0;
         // 加到自身
-        if (monster.add) // 如果加到自身
+        if (enemy.add) // 如果加到自身
             mon_hp += vampireDamage;
 
         initDamage += vampireDamage;
@@ -652,7 +652,7 @@ case 87: // W
 
 战斗效果内技能要改两个地方：战斗伤害计算，战后扣除魔力值。
 
-战斗伤害计算在`enenmys.js`的`getDamageInfo`函数，有需求直接修改这个函数即可。
+战斗伤害计算在脚本编辑的`getDamageInfo`函数，有需求直接修改这个函数即可。
 
 战后扣除魔力值则在脚本编辑的`afterBattle`中进行编辑即可。
 

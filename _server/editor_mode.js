@@ -441,7 +441,10 @@ editor_mode = function (editor) {
             selectFloor.onchange = function () {
                 editor_mode.onmode('nextChange');
                 editor_mode.onmode('floor');
+                core.bigmap.offsetX=0;
+                core.bigmap.offsetY=0;
                 editor.changeFloor(selectFloor.value);
+                editor.moveViewport(0,0);
             }
         });
 

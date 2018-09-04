@@ -238,8 +238,12 @@ core.prototype.init = function (coreData, callback) {
                 try {
                     core.getLocalForage("__test__", null, function(data) {
                         if (data!="__test__") {
-                            console.log("__test__ fail!");
+                            console.log("localForage unsupported!");
                             core.platform.useLocalForage=false;
+                        }
+                        else {
+                            console.log("localForage supported!")
+                            core.removeLocalForage("__test__");
                         }
                     }, function(e) {console.log(e); core.platform.useLocalForage=false;})
                 }

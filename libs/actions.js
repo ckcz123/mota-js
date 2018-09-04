@@ -1596,12 +1596,17 @@ actions.prototype.clickSwitchs = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 7:
-                window.open(core.platform.isPC?"editor.html":"editor-mobile.html", "_blank");
+                core.platform.useLocalForage=!core.platform.useLocalForage;
+                core.setLocalStorage('useLocalForage', core.platform.useLocalForage);
+                core.ui.drawSwitchs();
                 break;
             case 8:
-                window.open(core.firstData.name+".zip", "_blank");
+                window.open(core.platform.isPC?"editor.html":"editor-mobile.html", "_blank");
                 break;
             case 9:
+                window.open(core.firstData.name+".zip", "_blank");
+                break;
+            case 10:
                 core.status.event.selection=0;
                 core.ui.drawSettings();
                 break;
@@ -2020,9 +2025,15 @@ actions.prototype.clickStorageRemove = function (x, y) {
         var selection = y - topIndex;
         switch (selection) {
             case 0:
-                localforage.clear(function () {
+                if (core.platform.useLocalForage) {
+                    localforage.clear(function () {
+                        core.drawText("\t[操作成功]你的所有存档已被清空。");
+                    });
+                }
+                else {
+                    localStorage.clear();
                     core.drawText("\t[操作成功]你的所有存档已被清空。");
-                });
+                }
                 break;
             case 1:
                 for (var i=1;i<=5*(main.savePages||30);i++) {

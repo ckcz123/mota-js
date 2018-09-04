@@ -125,6 +125,13 @@ utils.prototype.removeLocalStorage = function (key) {
 }
 
 utils.prototype.setLocalForage = function (key, value, successCallback, errorCallback) {
+
+    if (!core.platform.useLocalForage) {
+        this.setLocalStorage(key, value);
+        if (core.isset(successCallback)) successCallback();
+        return;
+    }
+
     // Save to localforage
     var compressed = LZString.compress(JSON.stringify(value));
     localforage.setItem(core.firstData.name+"_"+key, compressed, function (err) {
@@ -136,6 +143,15 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
 }
 
 utils.prototype.getLocalForage = function (key, defaultValue, successCallback, errorCallback) {
+
+    if (!core.platform.useLocalForage) {
+        var value=this.getLocalStorage(key, defaultValue);
+        if (core.isset(successCallback)) {
+            successCallback(value);
+        }
+        return;
+    }
+
     localforage.getItem(core.firstData.name+"_"+key, function (err, value) {
         if (core.isset(err)) {
             if (core.isset(errorCallback)) errorCallback(err);
@@ -162,6 +178,13 @@ utils.prototype.getLocalForage = function (key, defaultValue, successCallback, e
 }
 
 utils.prototype.removeLocalForage = function (key, successCallback, errorCallback) {
+
+    if (!core.platform.useLocalForage) {
+        this.removeLocalStorage(key);
+        if (core.isset(successCallback)) successCallback();
+        return;
+    }
+
     localforage.removeItem(core.firstData.name+"_"+key, function (err) {
         if (core.isset(err)) {
             if (core.isset(errorCallback)) errorCallback(err);

@@ -793,13 +793,14 @@ ui.prototype.drawSwitchs = function() {
     core.status.event.id = 'switchs';
 
     var choices = [
-        "背景音乐："+(core.musicStatus.bgmStatus ? "[ON]" : "[OFF]"),
-        "背景音效："+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
+        "背景音乐： "+(core.musicStatus.bgmStatus ? "[ON]" : "[OFF]"),
+        "背景音效： "+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
         "战斗动画： "+(core.flags.battleAnimate ? "[ON]" : "[OFF]"),
         "怪物显伤： "+(core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
         "临界显伤： "+(core.flags.displayCritical ? "[ON]" : "[OFF]"),
         "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
         "单击瞬移： "+(core.status.automaticRoute.clickMoveDirectly ? "[ON]" : "[OFF]"),
+        "新版存档： "+(core.platform.useLocalForage ? "[ON]":"[OFF]"),
         "查看工程",
         "下载离线版本",
         "返回主菜单"

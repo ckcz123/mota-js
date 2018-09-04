@@ -60,6 +60,7 @@ function core() {
         'isQQ': false, // 是否是QQ
         'isChrome': false, // 是否是Chrome
         'supportCopy': false, // 是否支持复制到剪切板
+        'useLocalForage': true,
 
         'fileInput': null, // FileInput
         'fileReader': null, // 是否支持FileReader
@@ -230,6 +231,7 @@ core.prototype.init = function (coreData, callback) {
     core.platform.isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent);
     core.platform.isQQ = /QQ/i.test(navigator.userAgent);
     core.platform.isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+    core.platform.useLocalForage = core.getLocalStorage('useLocalForage', true);
 
     if (window.FileReader) {
         core.platform.fileReader = new FileReader();

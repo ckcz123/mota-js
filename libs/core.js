@@ -474,8 +474,8 @@ core.prototype.moveAction = function (callback) {
 }
 
 ////// 转向 //////
-core.prototype.turnHero = function() {
-    core.control.turnHero();
+core.prototype.turnHero = function(direction) {
+    core.control.turnHero(direction);
 }
 
 ////// 勇士能否前往某方向 //////

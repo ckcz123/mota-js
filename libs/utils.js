@@ -332,6 +332,8 @@ utils.prototype.encodeRoute = function (route) {
                 ans+="S"+t.substring(5);
             else if (t=='turn')
                 ans+='T';
+            else if (t.indexOf('turn:')==0)
+                ans+="t"+t.substring(5).substring(0,1).toUpperCase()+":";
             else if (t=='getNext')
                 ans+='G';
             else if (t.indexOf('input:')==0)
@@ -381,18 +383,23 @@ utils.prototype.decodeRoute = function (route) {
 
     while (index<route.length) {
         var c=route.charAt(index++);
-        var nxt=(c=='I'||c=='F'||c=='S'||c=='Q')?getString():getNumber();
+        var nxt=(c=='I'||c=='F'||c=='S'||c=='Q'||c=='t')?getString():getNumber();
+
+        var mp = {
+            "U": "up",
+            "D": "down",
+            "L": "left",
+            "R": "right"
+        }
 
         switch (c) {
-            case "U": for (var i=0;i<nxt;i++) ans.push("up"); break;
-            case "D": for (var i=0;i<nxt;i++) ans.push("down"); break;
-            case "L": for (var i=0;i<nxt;i++) ans.push("left"); break;
-            case "R": for (var i=0;i<nxt;i++) ans.push("right"); break;
+            case "U": case "D": case "L": case "R": for (var i=0;i<nxt;i++) ans.push(mp[c]); break;
             case "I": ans.push("item:"+nxt); break;
             case "F": ans.push("fly:"+nxt); break;
             case "C": ans.push("choices:"+nxt); break;
             case "S": ans.push("shop:"+nxt+":"+getNumber(true)); break;
             case "T": ans.push("turn"); break;
+            case "t": ans.push("turn:"+mp[nxt]); break;
             case "G": ans.push("getNext"); break;
             case "P": ans.push("input:"+nxt); break;
             case "Q": ans.push("input2:"+nxt); break;

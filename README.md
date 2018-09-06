@@ -25,8 +25,8 @@ HTML5 canvas制作的魔塔样板，支持全平台游戏！
 │ ├─ data.js         # 记录了一些初始化信息
 │ ├─ enemys.js       # 记录了怪物的信息，包括特殊属性、伤害计算公式、临界值计算等。
 │ ├─ events.js       # 处理事件的文件，所有自定义事件都会在此文件中进行处理
-│ ├─ icons.js        # 记录了图标信息
-│ ├─ items.js        # 道具的使用
+│ ├─ icons.js        # 图标信息，会被转发到project下
+│ ├─ items.js        # 道具信息，会被转发到project下
 │ ├─ loader.js       # 动态加载JS代码、图片、音效等
 │ ├─ maps.js         # 记录了地图信息，和地图绘制等操作
 │ ├─ ui.js           # UI绘制信息，主要负责绘制各个UI窗口。
@@ -43,12 +43,6 @@ HTML5 canvas制作的魔塔样板，支持全平台游戏！
 │ ├─ items.js        # 道具的定义，获得道具的效果
 │ └─ maps.js         # 地图和数字的对应关系
 ├── /常用工具/        # 一些常用工具，可以辅助造塔  
-│ ├─ RM动画导出器.exe      # 能从RMXP中导出动画，以供H5使用。 http://github.com/ckcz123/animate_export/
-│ ├─ JS代码压缩工具.exe    # 能对Javascript代码进行压缩和整合，从而减少IO请求量。 http://github.com/ckcz123/JSCompressor/
-│ ├─ 便捷PS工具.exe        # 能只用复制和粘贴来快速对素材进行PS操作。  http://github.com/ckcz123/ps/
-│ ├─ 地图生成器.exe        # 能从一张截图识别出来具体的数字数组，方便复刻已有的塔。 http://github.com/ckcz123/map_generator/
-│ └─ 伤害和临界值计算器.exe       # 一个能帮助计算怪物的伤害和临界值的小工具。 http://github.com/ckcz123/magic-tower-calculator/
-├── /启动服务(mac版).app/        # 启动服务的mac版本。  
 ├── editor.html      # 可视化地图编辑工具
 ├── editor-mobile.html      # 可视化地图编辑工具（手机版）
 ├── index.html       # 主程序，游戏的入口
@@ -64,6 +58,7 @@ HTML5 canvas制作的魔塔样板，支持全平台游戏！
 * [x] 大地图的支持
 * [x] 突破了5M的存档空间大小限制
 * [x] 事件：隐藏/显示贴图
+* [x] 事件：接收用户文本输入
 * [x] 同点多事件的颜色块绘制
 * [x] 录像播放时可以按PgUp/PgDn浏览地图
 * [x] 录像播放时对于瞬间移动绘制箭头
@@ -291,6 +286,15 @@ HTML5 canvas制作的魔塔样板，支持全平台游戏！
 ### 2017.12.9 V1.0
 
 * [x] 发布初版HTML5魔塔样板
+
+## 相关工具
+
+- [RM动画导出器](http://github.com/ckcz123/animate_export/)：能从RMXP中导出动画，以供H5使用。
+- [JS代码压缩工具](http://github.com/ckcz123/JSCompressor/)：能对Javascript代码进行压缩和整合，从而减少IO请求量。 
+- [便捷PS工具](http://github.com/ckcz123/ps/)：能只用复制和粘贴来快速对素材进行PS操作。  
+- [地图生成器](http://github.com/ckcz123/map_generator/)：能从一张截图识别出来具体的数字数组，方便复刻已有的塔。 
+- [怪物数据导出器](http://github.com/ckcz123/enemy_export/)：能从RMXP中带出怪物数据，以供H5使用。 
+- [伤害和临界值计算器](http://github.com/ckcz123/magic-tower-calculator/)：一个能帮助计算怪物的伤害和临界值的小工具。 
 
 ## 联系我们
 

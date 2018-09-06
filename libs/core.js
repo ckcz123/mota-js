@@ -113,7 +113,6 @@ function core() {
             'cursorX': null,
             'cursorY': null,
             "moveDirectly": false,
-            'clickMoveDirectly': true,
         },
 
         // 按下键的时间：为了判定双击
@@ -288,6 +287,8 @@ core.prototype.init = function (coreData, callback) {
     core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
     core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
+    core.flags.clickMoveDirectly = core.getLocalStorage('clickMoveDirectly',
+        !(core.isset(core.flags.clickMoveDirectly) && !core.flags.clickMoveDirectly));
 
     core.material.ground = new Image();
     core.material.ground.src = "project/images/ground.png";

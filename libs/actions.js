@@ -1591,8 +1591,8 @@ actions.prototype.clickSwitchs = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 6:
-                core.status.automaticRoute.clickMoveDirectly=!core.status.automaticRoute.clickMoveDirectly;
-                core.setLocalStorage('clickMoveDirectly', core.status.automaticRoute.clickMoveDirectly);
+                core.flags.clickMoveDirectly=!core.flags.clickMoveDirectly;
+                core.setLocalStorage('clickMoveDirectly', core.flags.clickMoveDirectly);
                 core.ui.drawSwitchs();
                 break;
             case 7:

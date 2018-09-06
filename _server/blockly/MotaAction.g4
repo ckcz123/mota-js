@@ -235,6 +235,7 @@ action
     |   break_s
     |   continue_s
     |   input_s
+    |   input2_s
     |   choices_s
     |   function_s
     |   pass_s
@@ -1057,15 +1058,28 @@ return code;
 */;
 
 input_s
-    :   '接受用户输入,提示' ':' EvalString Newline
+    :   '接受用户输入数字,提示' ':' EvalString Newline
     
 
 /* input_s
-tooltip : input：接受用户输入, 事件只能接受非负整数输入, 所有非法的输入将全部变成0
-helpUrl : https://ckcz123.github.io/mota-js/#/event?id=input%EF%BC%9A%E6%8E%A5%E5%8F%97%E7%94%A8%E6%88%B7%E8%BE%93%E5%85%A5
+tooltip : input：接受用户输入数字, 事件只能接受非负整数输入, 所有非法的输入将全部变成0
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=input%ef%bc%9a%e6%8e%a5%e5%8f%97%e7%94%a8%e6%88%b7%e8%be%93%e5%85%a5%e6%95%b0%e5%ad%97
 default : ["请输入一个数"]
 colour : this.dataColor
 var code = '{"type": "input", "text": "'+EvalString_0+'"},\n';
+return code;
+*/;
+
+input2_s
+    :   '接受用户输入文本,提示' ':' EvalString Newline
+
+
+/* input2_s
+tooltip : input2：接受用户输入文本, 允许用户输入任何形式的文本
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=input2%ef%bc%9a%e6%8e%a5%e5%8f%97%e7%94%a8%e6%88%b7%e8%be%93%e5%85%a5%e6%96%87%e6%9c%ac
+default : ["请输入文本"]
+colour : this.dataColor
+var code = '{"type": "input2", "text": "'+EvalString_0+'"},\n';
 return code;
 */;
 
@@ -1771,6 +1785,10 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "input":
       this.next = MotaActionBlocks['input_s'].xmlText([
+        data.text,this.next]);
+      break;
+    case "input2":
+      this.next = MotaActionBlocks['input2_s'].xmlText([
         data.text,this.next]);
       break;
     case "if": // 条件判断

@@ -214,6 +214,9 @@ maps.prototype.load = function (data, floorId) {
 ////// 将当前地图重新变成二维数组形式 //////
 maps.prototype.getMapArray = function (blockArray,width,height){
 
+    width=width||13;
+    height=height||13;
+
     var blocks = [];
     for (var x=0;x<height;x++) {
         blocks[x]=[];
@@ -222,7 +225,7 @@ maps.prototype.getMapArray = function (blockArray,width,height){
         }
     }
     blockArray.forEach(function (block) {
-        if (!block.disable)
+        if (!block.disable && block.x<width && block.y<height)
             blocks[block.y][block.x] = block.id;
     });
     return blocks;

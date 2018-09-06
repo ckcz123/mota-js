@@ -589,6 +589,12 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "checkbox",
                     "_bool": "bool",
                     "_data": "是否允许瞬间移动"
+                },
+                "clickMoveDirectly": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "是否默认开启单击瞬移，用户可在菜单栏手动开关"
                 }
             }
         }

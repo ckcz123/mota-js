@@ -60,6 +60,7 @@ function core() {
         'isQQ': false, // 是否是QQ
         'isChrome': false, // 是否是Chrome
         'supportCopy': false, // 是否支持复制到剪切板
+        'useLocalForage': true,
 
         'fileInput': null, // FileInput
         'fileReader': null, // 是否支持FileReader
@@ -112,7 +113,6 @@ function core() {
             'cursorX': null,
             'cursorY': null,
             "moveDirectly": false,
-            'clickMoveDirectly': true,
         },
 
         // 按下键的时间：为了判定双击
@@ -230,6 +230,27 @@ core.prototype.init = function (coreData, callback) {
     core.platform.isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent);
     core.platform.isQQ = /QQ/i.test(navigator.userAgent);
     core.platform.isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+    core.platform.useLocalForage = core.getLocalStorage('useLocalForage', true);
+    if (core.platform.useLocalForage) {
+        try {
+            core.setLocalForage("__test__", "__test__", function() {
+                try {
+                    core.getLocalForage("__test__", null, function(data) {
+                        if (data!="__test__") {
+                            console.log("localForage unsupported!");
+                            core.platform.useLocalForage=false;
+                        }
+                        else {
+                            console.log("localForage supported!")
+                            core.removeLocalForage("__test__");
+                        }
+                    }, function(e) {console.log(e); core.platform.useLocalForage=false;})
+                }
+                catch (e) {console.log(e); core.platform.useLocalForage=false;}
+            }, function(e) {console.log(e); core.platform.useLocalForage=false;})
+        }
+        catch (e) {console.log(e); core.platform.useLocalForage=false;}
+    }
 
     if (window.FileReader) {
         core.platform.fileReader = new FileReader();
@@ -266,12 +287,13 @@ core.prototype.init = function (coreData, callback) {
     core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
     core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
+    core.flags.clickMoveDirectly = core.getLocalStorage('clickMoveDirectly',
+        !(core.isset(core.flags.clickMoveDirectly) && !core.flags.clickMoveDirectly));
 
     core.material.ground = new Image();
     core.material.ground.src = "project/images/ground.png";
 
     core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
-    core.getLocalForage("test");
 
     core.loader.load(function () {
         console.log(core.material);
@@ -452,8 +474,8 @@ core.prototype.moveAction = function (callback) {
 }
 
 ////// 转向 //////
-core.prototype.turnHero = function() {
-    core.control.turnHero();
+core.prototype.turnHero = function(direction) {
+    core.control.turnHero(direction);
 }
 
 ////// 勇士能否前往某方向 //////

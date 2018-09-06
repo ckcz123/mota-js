@@ -333,6 +333,10 @@ editor.prototype.changeFloor = function (floorId, callback) {
         })
     });
     core.changeFloor(floorId, null, {"x": 0, "y": 0, "direction": "up"}, null, function () {
+        core.bigmap.offsetX=0;
+        core.bigmap.offsetY=0;
+        editor.moveViewport(0,0);
+
         editor.drawMapBg();
         var mapArray = core.maps.save(core.status.maps, core.status.floorId);
         editor.map = mapArray.map(function (v) {

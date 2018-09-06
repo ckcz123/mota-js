@@ -793,13 +793,14 @@ ui.prototype.drawSwitchs = function() {
     core.status.event.id = 'switchs';
 
     var choices = [
-        "背景音乐："+(core.musicStatus.bgmStatus ? "[ON]" : "[OFF]"),
-        "背景音效："+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
+        "背景音乐： "+(core.musicStatus.bgmStatus ? "[ON]" : "[OFF]"),
+        "背景音效： "+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
         "战斗动画： "+(core.flags.battleAnimate ? "[ON]" : "[OFF]"),
         "怪物显伤： "+(core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
         "临界显伤： "+(core.flags.displayCritical ? "[ON]" : "[OFF]"),
         "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
-        "单击瞬移： "+(core.status.automaticRoute.clickMoveDirectly ? "[ON]" : "[OFF]"),
+        "单击瞬移： "+(core.flags.clickMoveDirectly ? "[ON]" : "[OFF]"),
+        "新版存档： "+(core.platform.useLocalForage ? "[ON]":"[OFF]"),
         "查看工程",
         "下载离线版本",
         "返回主菜单"
@@ -1782,24 +1783,26 @@ ui.prototype.drawSLPanel = function(index, refresh) {
         }
     };
 
-    var drawSave = function (i) {
+    function loadSave(i, callback) {
+        if (i==6) {
+            callback();
+            return;
+        }
         core.getLocalForage(i==0?"autoSave":"save"+(5*page+i), null, function(data) {
-            draw(data, i);
-        }, function(err) {
-            console.log(err);
-        })
+            core.status.event.ui[i]=data;
+            loadSave(i+1, callback);
+        }, function(err) {console.log(err);});
     }
 
-    if (page == last_page && !refresh) {
-        for (var i=0;i<6;i++) {
-            draw(core.status.event.ui[i]||null, i);
-        }
+    function drawAll() {
+        for (var i=0;i<6;i++)
+            draw(core.status.event.ui[i], i);
     }
-    else {
-        for (var i=0;i<6;i++) {
-            drawSave(i);
-        }
+    if (refresh || page!=last_page) {
+        core.status.event.ui = [];
+        loadSave(0, drawAll);
     }
+    else drawAll();
 
     this.drawPagination(page+1, max_page);
 

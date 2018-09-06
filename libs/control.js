@@ -295,8 +295,6 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
     // 保存的Index
     core.status.saveIndex = core.getLocalStorage('saveIndex2', 1);
 
-    core.status.automaticRoute.clickMoveDirectly = core.getLocalStorage('clickMoveDirectly', true);
-
     if (core.isset(values))
         core.values = core.clone(values);
     else core.values = core.clone(core.data.values);
@@ -457,7 +455,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     if (core.timeout.turnHeroTimeout!=null) return;
 
     // 单击瞬间移动
-    if (core.status.automaticRoute.clickMoveDirectly && core.status.heroStop) {
+    if (core.flags.clickMoveDirectly && core.status.heroStop) {
         if (core.control.tryMoveDirectly(destX, destY))
             return;
     }
@@ -754,7 +752,14 @@ control.prototype.moveAction = function (callback) {
 }
 
 ////// 转向 //////
-control.prototype.turnHero = function() {
+control.prototype.turnHero = function(direction) {
+    if (core.isset(direction)) {
+        core.setHeroLoc('direction', direction);
+        core.drawHero();
+        core.clearMap('route');
+        core.status.route.push("turn:"+direction);
+        return;
+    }
     if (core.status.hero.loc.direction == 'up') core.status.hero.loc.direction = 'right';
     else if (core.status.hero.loc.direction == 'right') core.status.hero.loc.direction = 'down';
     else if (core.status.hero.loc.direction == 'down') core.status.hero.loc.direction = 'left';
@@ -2010,6 +2015,11 @@ control.prototype.replay = function () {
         core.replay();
         return;
     }
+    else if (action.indexOf("turn:")==0) {
+        core.turnHero(action.substring(5));
+        core.replay();
+        return;
+    }
     else if (action=='getNext') {
         if (core.flags.enableGentleClick && core.getBlock(core.nextX(), core.nextY())!=null) {
             var nextX = core.nextX(), nextY = core.nextY();
@@ -2182,7 +2192,10 @@ control.prototype.autosave = function (removeLast) {
     var x=null;
     if (removeLast)
         x=core.status.route.pop();
+    // 加入当前方向
+    core.status.route.push("turn:"+core.getHeroLoc('direction'));
     core.setLocalForage("autoSave", core.saveData())
+    core.status.route.pop();
     if (removeLast && core.isset(x))
         core.status.route.push(x);
 }

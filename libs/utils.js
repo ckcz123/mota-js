@@ -125,6 +125,13 @@ utils.prototype.removeLocalStorage = function (key) {
 }
 
 utils.prototype.setLocalForage = function (key, value, successCallback, errorCallback) {
+
+    if (!core.platform.useLocalForage) {
+        this.setLocalStorage(key, value);
+        if (core.isset(successCallback)) successCallback();
+        return;
+    }
+
     // Save to localforage
     var compressed = LZString.compress(JSON.stringify(value));
     localforage.setItem(core.firstData.name+"_"+key, compressed, function (err) {
@@ -136,6 +143,15 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
 }
 
 utils.prototype.getLocalForage = function (key, defaultValue, successCallback, errorCallback) {
+
+    if (!core.platform.useLocalForage) {
+        var value=this.getLocalStorage(key, defaultValue);
+        if (core.isset(successCallback)) {
+            successCallback(value);
+        }
+        return;
+    }
+
     localforage.getItem(core.firstData.name+"_"+key, function (err, value) {
         if (core.isset(err)) {
             if (core.isset(errorCallback)) errorCallback(err);
@@ -162,6 +178,13 @@ utils.prototype.getLocalForage = function (key, defaultValue, successCallback, e
 }
 
 utils.prototype.removeLocalForage = function (key, successCallback, errorCallback) {
+
+    if (!core.platform.useLocalForage) {
+        this.removeLocalStorage(key);
+        if (core.isset(successCallback)) successCallback();
+        return;
+    }
+
     localforage.removeItem(core.firstData.name+"_"+key, function (err) {
         if (core.isset(err)) {
             if (core.isset(errorCallback)) errorCallback(err);
@@ -309,10 +332,14 @@ utils.prototype.encodeRoute = function (route) {
                 ans+="S"+t.substring(5);
             else if (t=='turn')
                 ans+='T';
+            else if (t.indexOf('turn:')==0)
+                ans+="t"+t.substring(5).substring(0,1).toUpperCase()+":";
             else if (t=='getNext')
                 ans+='G';
             else if (t.indexOf('input:')==0)
                 ans+="P"+t.substring(6);
+            else if (t.indexOf('input2:')==0)
+                ans+="Q"+t.substring(7)+":";
             else if (t=='no')
                 ans+='N';
             else if (t.indexOf('move:')==0)
@@ -347,7 +374,7 @@ utils.prototype.decodeRoute = function (route) {
     }
     var getString = function () {
         var str="";
-        while (index<route.length && /\w/.test(route.charAt(index))) {
+        while (index<route.length && route.charAt(index)!=':') {
             str+=route.charAt(index++);
         }
         index++;
@@ -356,20 +383,26 @@ utils.prototype.decodeRoute = function (route) {
 
     while (index<route.length) {
         var c=route.charAt(index++);
-        var nxt=(c=='I'||c=='F'||c=='S')?getString():getNumber();
+        var nxt=(c=='I'||c=='F'||c=='S'||c=='Q'||c=='t')?getString():getNumber();
+
+        var mp = {
+            "U": "up",
+            "D": "down",
+            "L": "left",
+            "R": "right"
+        }
 
         switch (c) {
-            case "U": for (var i=0;i<nxt;i++) ans.push("up"); break;
-            case "D": for (var i=0;i<nxt;i++) ans.push("down"); break;
-            case "L": for (var i=0;i<nxt;i++) ans.push("left"); break;
-            case "R": for (var i=0;i<nxt;i++) ans.push("right"); break;
+            case "U": case "D": case "L": case "R": for (var i=0;i<nxt;i++) ans.push(mp[c]); break;
             case "I": ans.push("item:"+nxt); break;
             case "F": ans.push("fly:"+nxt); break;
             case "C": ans.push("choices:"+nxt); break;
             case "S": ans.push("shop:"+nxt+":"+getNumber(true)); break;
             case "T": ans.push("turn"); break;
+            case "t": ans.push("turn:"+mp[nxt]); break;
             case "G": ans.push("getNext"); break;
             case "P": ans.push("input:"+nxt); break;
+            case "Q": ans.push("input2:"+nxt); break;
             case "N": ans.push("no"); break;
             case "M": ++index; ans.push("move:"+nxt+":"+getNumber()); break;
             case "K": ans.push("key:"+nxt); break;
@@ -693,7 +726,7 @@ utils.prototype._export = function (floorIds) {
     // map
     var content = floorIds.length+"\n13 13\n\n";
     floorIds.forEach(function (floorId) {
-        var arr = core.maps.getMapArray(core.status.maps[floorId].blocks);
+        var arr = core.maps.getMapArray(core.status.maps[floorId].blocks, 13, 13);
         content += arr.map(function (x) {
             // check monster
             x.forEach(function (t) {

@@ -750,6 +750,32 @@ events.prototype.doAction = function() {
                 this.doAction();
             }
             break;
+        case "input2":
+            {
+                var value;
+                if (core.status.replay.replaying) {
+                    var action = core.status.replay.toReplay.shift();
+                    try {
+                        if (action.indexOf("input2:")!=0) throw new Error("Input2 Error. Current action: "+action);
+                        value = core.decodeBase64(action.substring(7));
+                    }
+                    catch (e) {
+                        console.log(e);
+                        core.stopReplay();
+                        core.drawTip("录像文件出错");
+                        return;
+                    }
+                }
+                else {
+                    core.interval.onDownInterval = 'tmp';
+                    value = prompt(core.replaceText(data.text));
+                    if (!core.isset(value)) value="";
+                }
+                core.status.route.push("input2:"+core.encodeBase64(value));
+                core.setFlag("input", value);
+                this.doAction();
+            }
+            break;
         case "if": // 条件判断
             if (core.calValue(data.condition))
                 core.events.insertAction(data["true"])

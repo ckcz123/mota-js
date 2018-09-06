@@ -336,6 +336,8 @@ utils.prototype.encodeRoute = function (route) {
                 ans+='G';
             else if (t.indexOf('input:')==0)
                 ans+="P"+t.substring(6);
+            else if (t.indexOf('input2:')==0)
+                ans+="Q"+t.substring(7)+":";
             else if (t=='no')
                 ans+='N';
             else if (t.indexOf('move:')==0)
@@ -370,7 +372,7 @@ utils.prototype.decodeRoute = function (route) {
     }
     var getString = function () {
         var str="";
-        while (index<route.length && /\w/.test(route.charAt(index))) {
+        while (index<route.length && route.charAt(index)!=':') {
             str+=route.charAt(index++);
         }
         index++;
@@ -379,7 +381,7 @@ utils.prototype.decodeRoute = function (route) {
 
     while (index<route.length) {
         var c=route.charAt(index++);
-        var nxt=(c=='I'||c=='F'||c=='S')?getString():getNumber();
+        var nxt=(c=='I'||c=='F'||c=='S'||c=='Q')?getString():getNumber();
 
         switch (c) {
             case "U": for (var i=0;i<nxt;i++) ans.push("up"); break;
@@ -393,6 +395,7 @@ utils.prototype.decodeRoute = function (route) {
             case "T": ans.push("turn"); break;
             case "G": ans.push("getNext"); break;
             case "P": ans.push("input:"+nxt); break;
+            case "Q": ans.push("input2:"+nxt); break;
             case "N": ans.push("no"); break;
             case "M": ++index; ans.push("move:"+nxt+":"+getNumber()); break;
             case "K": ans.push("key:"+nxt); break;

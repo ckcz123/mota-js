@@ -118,6 +118,7 @@ function main() {
             'speedDown': 20,
             'speedUp': 21,
             'rewind': 22,
+            'equipbox': 23,
         },
         'floor': document.getElementById('floor'),
         'lv': document.getElementById('lv'),
@@ -387,7 +388,7 @@ main.statusBar.image.book.onclick = function () {
         main.core.openBook(true);
 }
 
-////// 点击状态栏中的楼层传送器时 //////
+////// 点击状态栏中的楼层传送器/装备栏时 //////
 main.statusBar.image.fly.onclick = function () {
 
     if (core.isset(core.status.replay) && core.status.replay.replaying) {
@@ -395,8 +396,14 @@ main.statusBar.image.fly.onclick = function () {
         return;
     }
 
-    if (main.core.isPlaying())
-        main.core.useFly(true);
+    if (main.core.isPlaying()) {
+        if (!main.core.flags.equipboxBotton) {
+            main.core.useFly(true);
+        }
+        else {
+            main.core.openEquipbox(true)
+        }
+    }
 }
 
 ////// 点击状态栏中的工具箱时 //////

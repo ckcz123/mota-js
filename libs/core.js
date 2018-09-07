@@ -828,6 +828,11 @@ core.prototype.hasItem = function (itemId) {
     return core.items.hasItem(itemId);
 }
 
+////// 是否装备某件装备 //////
+core.prototype.hasEquipment = function (itemId) {
+    return core.items.hasEquipment(itemId);
+}
+
 ////// 设置某个物品的个数 //////
 core.prototype.setItem = function (itemId, itemNum) {
     core.items.setItem(itemId, itemNum);
@@ -846,6 +851,16 @@ core.prototype.useItem = function (itemId, callback) {
 ////// 能否使用某个物品 //////
 core.prototype.canUseItem = function (itemId) {
     return core.items.canUseItem(itemId);
+}
+
+////// 换上某件装备 //////
+core.prototype.loadEquip = function (equipId, callback) {
+    core.items.loadEquip(equipId,callback);
+}
+
+////// 卸下某件装备 //////
+core.prototype.unloadEquip = function (equipType, callback) {
+    core.items.unloadEquip(equipType,callback);
 }
 
 ////// 增加某个物品的个数 //////
@@ -1065,6 +1080,11 @@ core.prototype.openBook = function (need) {
 ////// 点击楼层传送器时的打开操作 //////
 core.prototype.useFly = function (need) {
     core.control.useFly(need);
+}
+
+////// 点击装备栏时的打开操作 //////
+core.prototype.openEquipbox = function (need) {
+    core.control.openEquipbox(need);
 }
 
 ////// 点击工具栏时的打开操作 //////

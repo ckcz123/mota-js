@@ -1957,6 +1957,26 @@ control.prototype.replay = function () {
             return;
         }
     }
+    else if (action.indexOf("unEquip:")==0) {
+        var equipId = action.substring(8);
+        setTimeout(function () {
+            core.ui.closePanel();
+            core.unloadEquip(equipId, function () {
+                core.replay();
+            });
+        }, 750 / Math.max(1, core.status.replay.speed));
+        return;
+    }
+    else if (action.indexOf("equip:")==0) {
+        var equipType = action.substring(6);
+        setTimeout(function () {
+            core.ui.closePanel();
+            core.loadEquip(equipType, function () {
+                core.replay();
+            });
+        }, 750 / Math.max(1, core.status.replay.speed));
+        return;
+    }
     else if (action.indexOf("fly:")==0) {
         var floorId=action.substring(4);
         var toIndex=core.status.hero.flyRange.indexOf(floorId);
@@ -2126,6 +2146,14 @@ control.prototype.useFly = function (need) {
     }
     core.useItem('fly');
     return;
+}
+
+////// 点击装备栏时的打开操作 //////
+control.prototype.openEquipbox = function (need) {
+    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (!core.checkStatus('equipbox', need))
+        return;
+    core.ui.drawEquipbox();
 }
 
 ////// 点击工具栏时的打开操作 //////
@@ -2650,7 +2678,9 @@ control.prototype.clearStatusBar = function() {
         core.statusBar[e].innerHTML = "&nbsp;";
     });
     core.statusBar.image.book.style.opacity = 0.3;
-    core.statusBar.image.fly.style.opacity = 0.3;
+    if (!core.flags.equipboxBotton) {
+        core.statusBar.image.fly.style.opacity = 0.3;
+    }
 }
 
 ////// 更新状态栏 //////
@@ -2726,8 +2756,14 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.image.book.src = core.statusBar.icons.book.src;
         core.statusBar.image.book.style.opacity = core.hasItem('book')?1:0.3;
 
-        core.statusBar.image.fly.src = core.statusBar.icons.fly.src;
-        core.statusBar.image.fly.style.opacity = core.hasItem('fly')?1:0.3;
+        if (!core.flags.equipboxBotton) {
+            core.statusBar.image.fly.src = core.statusBar.icons.fly.src;
+            core.statusBar.image.fly.style.opacity = core.hasItem('fly')?1:0.3;
+        }
+        else {
+            core.statusBar.image.fly.src = core.statusBar.icons.equipbox.src;
+            core.statusBar.image.fly.style.opacity = 1;
+        }
 
         core.statusBar.image.toolbox.src = core.statusBar.icons.toolbox.src;
 

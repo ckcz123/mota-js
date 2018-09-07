@@ -19,10 +19,11 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                                     "keys",
                                     "items",
                                     "constants",
-                                    "tools"
+                                    "tools",
+                                    "equips"
                                 ]
                             },
-                            "_data": "只能取keys(钥匙) items(宝石、血瓶) constants(永久物品) tools(消耗道具)"
+                            "_data": "只能取keys(钥匙) items(宝石、血瓶) constants(永久物品) tools(消耗道具) equip(装备)"
                         },
                         "name": {
                             "_leaf": true,
@@ -35,6 +36,39 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_type": "textarea",
                             "_string": true,
                             "_data": "道具在道具栏中显示的描述"
+                        },
+                        "equiptype": {
+                            "_leaf": true,
+                            "_type": "textarea",
+                            "_string": true,
+                            "_data": "装备的类别，与equipName按顺序对应"
+                        },
+                        "equipEffect": {
+                            "_leaf": false,
+                            "_type": "object",
+                            "_data": {
+                                "atk": {
+                                    "_leaf": true,
+                                    "_type": "textarea",
+                                    "_data": "装备增加的攻击数值"
+                                },
+                                "def": {
+                                    "_leaf": true,
+                                    "_type": "textarea",
+                                    "_data": "装备增加的防御数值"
+                                },
+                                "mdef": {
+                                    "_leaf": true,
+                                    "_type": "textarea",
+                                    "_data": "装备增加的魔防数值"
+                                },
+                            }
+                        },
+                        "animate": {
+                            "_leaf": false,
+                            "_type": "textarea",
+                            "_string": true,
+                            "_data": "装备的攻击动画，仅对equiptype为0的装备有效"
                         }
                     }
                 },

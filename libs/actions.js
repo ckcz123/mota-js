@@ -113,6 +113,10 @@ actions.prototype.keyDown = function(keyCode) {
             this.keyDownQuickShop(keyCode);
             return;
         }
+        if (core.status.event.id=='equipbox') {
+            this.keyDownEquipbox(keyCode);
+            return;
+        }
         if (core.status.event.id=='toolbox') {
             this.keyDownToolbox(keyCode);
             return;
@@ -226,6 +230,10 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
             this.keyUpToolbox(keyCode);
             return;
         }
+        if (core.status.event.id=='equipbox') {
+            this.keyUpEquipbox(keyCode);
+            return;
+        }
         if (core.status.event.id=='save' || core.status.event.id=='load' || core.status.event.id=='replayLoad') {
             this.keyUpSL(keyCode);
             return;
@@ -280,6 +288,10 @@ actions.prototype.keyUp = function(keyCode, fromReplay) {
         case 71: // G
             if (core.status.heroStop)
                 core.useFly(true);
+            break;
+        case 81: // Q
+            if (core.status.heroStop)
+                core.openEquipbox(true);
             break;
         case 88: // X
             if (core.status.heroStop)
@@ -584,6 +596,12 @@ actions.prototype.onclick = function (x, y, stepPostfix) {
         this.clickQuickShop(x,y);
         return;
     }
+
+    // 装备栏
+    if (core.status.event.id == 'equipbox') {
+        this.clickEquipbox(x,y);
+        return;
+    } 
 
     // 工具栏
     if (core.status.event.id == 'toolbox') {
@@ -1202,6 +1220,12 @@ actions.prototype.keyUpQuickShop = function (keycode) {
 
 ////// 工具栏界面时的点击操作 //////
 actions.prototype.clickToolbox = function(x,y) {
+    // 装备栏
+    if (x>=10 && x<=12 && y==0 && core.flags.equipment) {
+        core.ui.closePanel();
+        core.openEquipbox();
+        return;
+    }
     // 返回
     if (x>=10 && x<=12 && y==12) {
         core.ui.closePanel();
@@ -1368,6 +1392,169 @@ actions.prototype.keyUpToolbox = function (keycode) {
     }
     */
 
+}
+
+
+////// 装备栏界面时的点击操作 //////
+actions.prototype.clickEquipbox = function(x,y) {
+    // 道具栏
+    if (x>=10 && x<=12 && y==0) {
+        core.ui.closePanel();
+        core.openToolbox();
+        return;
+    }
+    // 返回
+    if (x>=10 && x<=12 && y==12) {
+        core.ui.closePanel();
+        return;
+    }
+
+    // 当前页面
+    var page = parseInt((core.status.event.selection%1000)/12)+1;
+
+    // 上一页
+    if ((x == 3 || x == 4) && y == 12) {
+        if (page>1) {
+            core.ui.drawEquipbox(core.status.event.selection-12);
+        }
+        return;
+    }
+    // 下一页
+    if ((x == 8 || x == 9) && y == 12) {
+        var lastPage = Math.ceil(Object.keys(core.status.hero.items.equips).length/12);
+        if (page<lastPage)
+            core.ui.drawEquipbox(1000+12*page);
+        return;
+    }
+
+    var index;
+    if (y<7) index=parseInt(x/4);
+    else index=parseInt(12*(page-1)+x/2);
+    if (y==4) index+=0;
+    else if (y==6) index+=3;
+    else if (y==9) index+=1000;
+    else if (y==11) index+=1006;
+    else index=-1;
+
+    if (index>=0)
+        this.clickEquipboxIndex(index);
+}
+
+////// 选择装备栏界面中某个Index后的操作 //////
+actions.prototype.clickEquipboxIndex = function(index) {
+    if (index<1000) {
+        if (index>=core.status.hero.equipment.length) return;
+        if (index==core.status.event.selection && core.status.hero.equipment[index] != "blank") {
+            core.unloadEquip(index);
+        }
+    }
+    else {
+        var equips = null;
+        equips = Object.keys(core.status.hero.items.equips).sort();
+        if (equips==null) return;
+        if (index>=equips.length+1000) return;
+        if (index==core.status.event.selection) {
+            var equipId = equips[index-1000];
+            core.loadEquip(equipId);
+            equips = Object.keys(core.status.hero.items.equips).sort();
+            if ( equips.length == 0)
+                index = core.status.hero.equipment.length-1;
+        }
+    } 
+    core.ui.drawEquipbox(index);
+}
+
+////// 装备栏界面时，按下某个键的操作 //////
+actions.prototype.keyDownEquipbox = function (keycode) {
+    if (!core.isset(core.status.event.data)) return;
+
+    var equipCapacity = core.status.hero.equipment.length;
+    var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
+    var index=core.status.event.selection;
+    var page=parseInt(index%1000/12), offset=12*page;
+
+    if (keycode==37) { // left
+        if ((index>0 && index<1000) || index>1000) {
+            this.clickEquipboxIndex(index-1);
+            return;
+        }
+        if (index==1000 && equipCapacity>0) {
+            this.clickEquipboxIndex(equipCapacity-1);
+            return;
+        }
+    }
+    if (keycode==38) { // up
+        if ((index>2 && index<1000)) {
+            this.clickEquipboxIndex(index-3);
+            return;
+        }
+        if (index>offset+1005) {
+            this.clickEquipboxIndex(index-6);
+            return;
+        }
+        if (index>=offset+1000 && index<=offset+1005) {
+            var swapIndex = Math.floor((index-offset-1000)/2);
+            if (equipCapacity<3)
+                this.clickEquipboxIndex(Math.min(swapIndex,equipCapacity-1))
+            else
+                this.clickEquipboxIndex(Math.min(swapIndex+3,equipCapacity-1))
+            return;
+        }
+    }
+    if (keycode==39) { // right
+        if ((index<equipCapacity-1) || (index>=1000 && index<ownEquipment.length+1000)) {
+            this.clickEquipboxIndex(index+1);
+            return;
+        }
+        if (index==equipCapacity-1 && ownEquipment.length>0) {
+            this.clickEquipboxIndex(1000);
+            return;
+        }
+    }
+    if (keycode==40) { // down
+        if (index>=offset+1000 && index<=offset+1005 && ownEquipment.length>offset+6) {
+            this.clickEquipboxIndex(Math.min(1000+ownEquipment.length-1, index+6));
+            return;
+        }
+        else {
+            var swapIndex = index*2+1;
+            if (equipCapacity<3) {
+                if (index<3 && ownEquipment.length>offset) {
+                    this.clickEquipboxIndex(1000+Math.min(ownEquipment.length-1, swapIndex));
+                    return;
+                }
+            }
+            else {
+                if (index<3) {
+                    this.clickEquipboxIndex(Math.min(equipCapacity-1, index+3));
+                    return;
+                }
+                else if (index>=3 && index<1000 && ownEquipment.length>offset) {
+                    this.clickEquipboxIndex(1000+Math.min(ownEquipment.length-1, swapIndex-6));
+                    return;
+                }
+            }
+        }
+    }
+}
+
+////// 装备栏界面时，放开某个键的操作 //////
+actions.prototype.keyUpEquipbox = function (keycode) {
+    if (keycode==84){
+        core.ui.closePanel();
+        core.openToolbox();
+        return;
+    }
+    if (keycode==81 || keycode==27 || keycode==88) {
+        core.ui.closePanel();
+        return;
+    }
+    if (!core.isset(core.status.event.data)) return;
+
+    if (keycode==13 || keycode==32 || keycode==67) {
+        this.clickEquipboxIndex(core.status.event.selection);
+        return;
+    }
 }
 
 ////// 存读档界面时的点击操作 //////

@@ -1057,9 +1057,10 @@ events.prototype.battle = function (id, x, y, force, callback) {
     }
     else {
 
-        if (core.flags.equipment && core.getFlag('sword', 'sword0')!='sword0') {
-            core.playSound('zone.mp3');
-            core.drawAnimate('sword', x, y);
+        if (core.flags.equipment) {
+            var equipId = core.status.hero.equipment[0];
+            if (core.isset(core.material.items[equipId].animate))
+                core.drawAnimate(core.material.items[equipId].animate, x, y);
         }
         else {
             core.playSound('attack.mp3');

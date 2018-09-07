@@ -1714,10 +1714,157 @@ ui.prototype.drawToolbox = function(index) {
         }
     }
 
-    // 退出
     this.drawPagination(page, totalPage);
     core.canvas.ui.textAlign = 'center';
+    // 道具栏
+    if (core.flags.equipment)
+    core.fillText('ui', '装备栏', 370, 19,'#DDDDDD', 'bold 15px Verdana');
     // core.fillText('ui', '删除道具', 370, 32,'#DDDDDD', 'bold 15px Verdana');
+    // 退出
+    core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px Verdana');
+}
+
+////// 绘制装备界面 //////
+ui.prototype.drawEquipbox = function(index) {
+
+    var equipEquipment = core.status.hero.equipment;
+    var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
+
+    if (!core.isset(index)) {
+        if (equipEquipment.length>0) index=0;
+        else if (ownEquipment.length>0) index=1000;
+        else index=0;
+    }
+
+    core.status.event.selection=index;
+
+    var selectId;
+    if (index<1000) {
+        if (index>=equipEquipment.length) index=Math.max(0, equipEquipment.length-1);
+        selectId = equipEquipment[index];
+    }
+    else {
+        if (index-1000>=ownEquipment.length) index=1000+Math.max(0, ownEquipment.length-1);
+        selectId = ownEquipment[index-1000];
+        if (!core.hasItem(selectId)) selectId=null;
+    }
+
+    var page = parseInt((index%1000)/12)+1;
+    var totalPage = Math.ceil(ownEquipment.length/12);
+
+    core.status.event.data=selectId;
+
+    core.clearMap('ui', 0, 0, 416, 416);
+    core.setAlpha('ui', 0.85);
+    core.fillRect('ui', 0, 0, 416, 416, '#000000');
+    core.setAlpha('ui', 1);
+    core.setFillStyle('ui', '#DDDDDD');
+    core.setStrokeStyle('ui', '#DDDDDD');
+    core.canvas.ui.lineWidth = 2;
+    core.canvas.ui.strokeWidth = 2;
+
+    var ydelta = 20;
+
+    // 画线
+    core.canvas.ui.beginPath();
+    core.canvas.ui.moveTo(0, 130-ydelta);
+    core.canvas.ui.lineTo(416, 130-ydelta);
+    core.canvas.ui.stroke();
+    core.canvas.ui.beginPath();
+    core.canvas.ui.moveTo(416,129-ydelta);
+    core.canvas.ui.lineTo(416,105-ydelta);
+    core.canvas.ui.lineTo(416-72,105-ydelta);
+    core.canvas.ui.lineTo(416-102,129-ydelta);
+    core.canvas.ui.fill();
+
+    core.canvas.ui.beginPath();
+    core.canvas.ui.moveTo(0, 290-ydelta);
+    core.canvas.ui.lineTo(416, 290-ydelta);
+    core.canvas.ui.stroke();
+    core.canvas.ui.beginPath();
+    core.canvas.ui.moveTo(416,289-ydelta);
+    core.canvas.ui.lineTo(416,265-ydelta);
+    core.canvas.ui.lineTo(416-72,265-ydelta);
+    core.canvas.ui.lineTo(416-102,289-ydelta);
+    core.canvas.ui.fill();
+
+    // 文字
+    core.canvas.ui.textAlign = 'right';
+    core.fillText('ui', "当前装备", 411, 124-ydelta, '#333333', "bold 16px Verdana");
+    core.fillText('ui', "拥有装备", 411, 284-ydelta);
+    
+    core.canvas.ui.textAlign = 'left';
+
+    // 描述
+    if (core.isset(selectId)) {
+        var equip=core.material.items[selectId];
+        if (equip.cls != "blank") {
+            core.fillText('ui', equip.name, 10, 32, '#FFD700', "bold 20px Verdana")
+
+            var text = equip.text||"该装备暂无描述。";
+            var lines = core.splitLines('ui', text, 406, '17px Verdana');
+
+            core.fillText('ui', lines[0], 10, 62, '#FFFFFF', '17px Verdana');
+
+            if (lines.length==1) {
+                if (index<1000) {
+                    core.fillText('ui', '<继续点击该装备即可卸下>', 10, 89, '#CCCCCC', '14px Verdana');
+                }
+                else {
+                    core.fillText('ui', '<继续点击该装备即可换上>', 10, 89, '#CCCCCC', '14px Verdana');
+                }
+            }
+            else {
+                var leftText = text.substring(lines[0].length);
+                core.fillText('ui', leftText, 10, 89, '#FFFFFF', '17px Verdana');
+            }
+        }
+    }
+
+    core.canvas.ui.textAlign = 'right';
+    var images = core.material.images.items;
+
+    // 当前装备
+    for (var i = 0 ; i < core.status.hero.equipment.length ; i++) {
+        var equipId = core.status.hero.equipment[i];
+        if (!core.isset(equipId)) break;
+        var icon = core.material.icons.items[equipId];
+        if (i<3) {
+            core.fillText('ui', main.equipName[i], 16*(8*i+1)+40, 144+32-ydelta, '#FFFFFF', "bold 16px Verdana");
+            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(8*i+5)+5, 144+5-ydelta, 32, 32)
+            if (index == i)
+                core.strokeRect('ui', 16*(8*i+5)+1, 144+1-ydelta, 40, 40, '#FFD700');
+        }
+        else {
+            core.fillText('ui', main.equipName[i], 16*(8*(i-3)+1)+40, 144+64+32-ydelta, '#FFFFFF', "bold 16px Verdana");
+            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(8*(i-3)+5)+5, 144+64+5-ydelta, 32, 32)
+            if (index == i)
+                core.strokeRect('ui', 16*(8*(i-3)+5)+1, 144+64+1-ydelta, 40, 40, '#FFD700');
+        }
+    }
+
+    // 现有装备 
+    for (var i=0;i<12;i++) {
+        var ownEquip=ownEquipment[12*(page-1)+i];
+        if (!core.isset(ownEquip)) break;
+        var icon=core.material.icons.items[ownEquip];
+        if (i<6) {
+            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*i+1)+5, 304+5-ydelta, 32, 32)
+            if (selectId == ownEquip)
+                core.strokeRect('ui', 16*(4*i+1)+1, 304+1-ydelta, 40, 40, '#FFD700');
+        }
+        else {
+            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*(i-6)+1)+5, 304+64+5-ydelta, 32, 32)
+            if (selectId == ownEquip)
+                core.strokeRect('ui', 16*(4*(i-6)+1)+1, 304+64+1-ydelta, 40, 40, '#FFD700');
+        }
+    }
+
+    this.drawPagination(page, totalPage);
+    // 道具栏
+    core.canvas.ui.textAlign = 'center';
+    core.fillText('ui', '道具栏', 370, 19,'#DDDDDD', 'bold 15px Verdana');
+    // 退出按钮
     core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px Verdana');
 }
 

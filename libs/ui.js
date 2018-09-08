@@ -529,7 +529,7 @@ ui.prototype.drawTextBox = function(content) {
         core.clearMap("ui", content_left, content_top - 18, validWidth,  top + height - content_top + 10);
         core.setAlpha('ui', textAttribute.background[3]);
         core.setFillStyle('ui', core.arrayToRGB(textAttribute.background));
-        core.fillRect("ui",  content_left, content_top - 18, validWidth,  top + height - content_top + 10);
+        core.fillRect("ui",  content_left, content_top - 18, validWidth,  top + height - content_top + 11);
 
         core.setAlpha('ui', textAttribute.text[3]);
         core.setFillStyle('ui', core.arrayToRGB(textAttribute.text));

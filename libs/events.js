@@ -1195,7 +1195,9 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
 
             // 更改BGM
             if (core.isset(core.floors[floorId].bgm)) {
-                core.playBgm(core.floors[floorId].bgm);
+                var bgm = core.floors[floorId].bgm;
+                if (bgm instanceof Array) bgm = bgm[0];
+                core.playBgm(bgm);
             }
 
             // 不存在事件时，更改画面色调

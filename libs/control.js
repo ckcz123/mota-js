@@ -2933,8 +2933,6 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             rules: {
                 width: (canvasWidth - SPACE*2) + unit,
                 height:(canvasWidth - SPACE*2) + unit,
-                top: (canvasTop + SPACE) + unit,
-                right: SPACE + unit,
             }
         },
         {
@@ -2942,8 +2940,6 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             rules: {
                 width: (canvasWidth - SPACE*2) + unit,
                 height:(canvasWidth - SPACE*2) + unit,
-                top: (canvasTop + SPACE) + unit,
-                right: SPACE + unit,
             }
         },
         {
@@ -2951,8 +2947,6 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             rules: {
                 width: (canvasWidth - SPACE*2) + unit,
                 height:(canvasWidth - SPACE*2) + unit,
-                top: (canvasTop + SPACE) + unit,
-                right: SPACE + unit,
             }
         },
         {

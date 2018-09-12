@@ -289,7 +289,7 @@ span#poison, span#weak, span#curse, span#pickaxe, span#bomb, span#fly {
 }
 
 #route {
-    z-index: 105;
+    z-index: 95;
 }
 
 #ui {

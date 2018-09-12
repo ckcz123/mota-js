@@ -340,20 +340,54 @@ maps.prototype.drawBlock = function (block, animate, dx, dy) {
     }
 }
 
+////// 背景/前景图块的绘制 //////
+maps.prototype.drawBgFgMap = function (floorId, canvas, name) {
+    var width = core.floors[floorId].width || 13;
+    var height = core.floors[floorId].height || 13;
+
+    var groundId = core.floors[floorId].defaultGround || "ground";
+    var blockIcon = core.material.icons.terrains[groundId];
+    var blockImage = core.material.images.terrains;
+
+    var getMapArray = function (name) {
+        var arr = core.floors[floorId][name+"map"] || [];
+        for (var x = 0; x < width; x++) {
+            for (var y = 0; y < height; y++) {
+                arr[y] = arr[y] || [];
+                if (core.hasFlag(name + "_" + floorId + "_" + x + "_" + y)) arr[y][x] = 0;
+                else arr[y][x] = core.getFlag(name + "v_" + floorId + "_" + x + "_" + y, arr[y][x] || 0);
+            }
+        }
+        return arr;
+    }
+    var arr = getMapArray(name);
+    for (var x = 0; x < width; x++) {
+        for (var y = 0; y < height; y++) {
+            if (name=='bg')
+                canvas.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
+            if (arr[y][x]>0) {
+                var block = core.maps.initBlock(x, y, arr[y][x]);
+                if (core.isset(block.event)) {
+                    var id = block.event.id, cls = block.event.cls;
+                    if (cls == 'autotile')
+                        core.drawAutotile(canvas, arr, block, 32, 0, 0);
+                    else
+                        canvas.drawImage(core.material.images[cls], 0, core.material.icons[cls][id] * 32, 32, 32, x * 32, y * 32, 32, 32);
+                }
+            }
+        }
+    }
+
+}
+
 ////// 绘制某张地图 //////
 maps.prototype.drawMap = function (mapName, callback) {
     core.clearMap('all');
     core.removeGlobalAnimate(null, null, true);
     var drawBg = function(){
-        var groundId = core.floors[mapName].defaultGround || "ground";
-        var blockIcon = core.material.icons.terrains[groundId];
-        var blockImage = core.material.images.terrains;
-        
-        for (var x = 0; x < core.bigmap.width; x++) {
-            for (var y = 0; y < core.bigmap.height; y++) {
-                core.canvas.bg.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
-            }
-        }
+
+        core.maps.drawBgFgMap(mapName, core.canvas.bg, "bg");
+        core.maps.drawBgFgMap(mapName, core.canvas.event2, "event2");
 
         var images = [];
         if (core.isset(core.floors[mapName].images)) {

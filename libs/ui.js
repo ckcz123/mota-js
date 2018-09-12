@@ -1826,15 +1826,9 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
     tempCanvas.canvas.height = tempHeight;
     tempCanvas.clearRect(0, 0, tempWidth, tempHeight);
 
-    var groundId = core.floors[floorId].defaultGround || "ground";
-    var blockIcon = core.material.icons.terrains[groundId];
-    var blockImage = core.material.images.terrains;
-    // background
-    for (var j=0;j<mh;j++) {
-        for (var i=0;i<mw;i++) {
-            tempCanvas.drawImage(blockImage, 0, blockIcon * 32, 32, 32, i * 32, j * 32, 32, 32);
-        }
-    }
+    // background map
+    core.maps.drawBgFgMap(floorId, tempCanvas, "bg");
+
     // background image
     var images = [];
     if (core.isset(core.floors[floorId].images)) {
@@ -1882,6 +1876,9 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
         var height = core.material.images.images[heroIcon].height/4;
         tempCanvas.drawImage(core.material.images.images[heroIcon], icon.stop * 32, icon.loc * height, 32, height, 32*heroLoc.x, 32*heroLoc.y+32-height, 32, height);
     }
+    // foreground map
+    core.maps.drawBgFgMap(floorId, tempCanvas, "event2");
+
     // draw fg
     images.forEach(function (t) {
         var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];

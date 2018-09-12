@@ -629,7 +629,7 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=changefloor%EF%BC%9A%E6%A
 default : ["MT1","0","0",null,500]
 colour : this.dataColor
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
-Int_0 = Int_0 ?(', "time": '+Int_0):'';
+Int_0 = (Int_0!=='')  ?(', "time": '+Int_0):'';
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
@@ -1474,8 +1474,10 @@ ActionParser.prototype.parse = function (obj,type) {
         obj.floorType=obj.floorId;
         delete obj.floorId;
       }
+      if (!this.isset(obj.time)) obj.time=500;
       return MotaActionBlocks['changeFloor_m'].xmlText([
-        obj.floorType||'floorId',obj.floorId,obj.stair||'loc',obj.loc[0],obj.loc[1],obj.direction,obj.time||0,!this.isset(obj.portalWithoutTrigger)
+        obj.floorType||'floorId',obj.floorId,obj.stair||'loc',obj.loc[0],obj.loc[1],obj.direction,
+        obj.time,!this.isset(obj.portalWithoutTrigger)
       ]);
 
     case 'point':

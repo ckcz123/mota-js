@@ -1574,19 +1574,19 @@ actions.prototype.clickSwitchs = function (x,y) {
                 break;
             case 3:
                 core.flags.displayEnemyDamage=!core.flags.displayEnemyDamage;
-                core.updateFg();
+                core.updateDamage();
                 core.setLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
                 core.ui.drawSwitchs();
                 break;
             case 4:
                 core.flags.displayCritical=!core.flags.displayCritical;
-                core.updateFg();
+                core.updateDamage();
                 core.setLocalStorage('critical', core.flags.displayCritical);
                 core.ui.drawSwitchs();
                 break;
             case 5:
                 core.flags.displayExtraDamage=!core.flags.displayExtraDamage;
-                core.updateFg();
+                core.updateDamage();
                 core.setLocalStorage('extraDamage', core.flags.displayExtraDamage);
                 core.ui.drawSwitchs();
                 break;

@@ -73,7 +73,7 @@ function core() {
         scale: 1.0,
     }
     this.bigmap = {
-        canvas: ["bg", "event", "event2", "fg", "route"],
+        canvas: ["bg", "event", "event2", "fg", "damage", "route"],
         offsetX: 0, // in pixel
         offsetY: 0,
         width: 13, // map width and height
@@ -743,6 +743,11 @@ core.prototype.setBlock = function (number, x, y, floorId) {
     core.maps.setBlock(number, x, y, floorId);
 }
 
+////// 改变图层块 //////
+core.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
+    core.maps.setBgFgBlock(name, number, x, y, floorId);
+}
+
 ////// 添加一个全局动画 //////
 core.prototype.addGlobalAnimate = function (block) {
     core.maps.addGlobalAnimate(block);
@@ -799,8 +804,8 @@ core.prototype.setFg = function(color, time, callback) {
 }
 
 ////// 更新全地图显伤 //////
-core.prototype.updateFg = function () {
-    core.control.updateFg();
+core.prototype.updateDamage = function () {
+    core.control.updateDamage();
 }
 
 ////// 测试是否拥有某个特殊属性 //////

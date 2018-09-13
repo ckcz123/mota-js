@@ -162,7 +162,7 @@ core.trigger(x, y)    [异步]
 
 core.clearMap(mapName)
 清空某个画布图层。
-mapName可为'bg', 'event', 'fg', 'event2', 'hero', 'animate', 'weather', 'ui', 'data', 'all'之一。
+mapName可为'bg', 'event', 'hero', 'event2', 'fg', 'damage', 'animate', 'weather', 'ui', 'data', 'all'之一。
 如果mapName为'all'，则为清空所有画布；否则只清空对应的画布。
 
 

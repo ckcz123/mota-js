@@ -187,12 +187,15 @@ action
     |   setValue_s
     |   show_s
     |   hide_s
-    |   showFloorImg_s
-    |   hideFloorImg_s
     |   trigger_s
     |   revisit_s
     |   exit_s
     |   setBlock_s
+    |   showFloorImg_s
+    |   hideFloorImg_s
+    |   showBgFgMap_s
+    |   hideBgFgMap_s
+    |   setBgFgBlock_s
     |   setHeroIcon_s
     |   update_s
     |   updateEnemys_s
@@ -420,6 +423,61 @@ var code = '{"type": "hide"'+floorstr+IdString_0+''+Int_0+'},\n';
 return code;
 */;
 
+trigger_s
+    :   '触发事件' 'x' PosString ',' 'y' PosString Newline
+    
+
+/* trigger_s
+tooltip : trigger: 立即触发另一个地点的事件
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=trigger%EF%BC%9A%E7%AB%8B%E5%8D%B3%E8%A7%A6%E5%8F%91%E5%8F%A6%E4%B8%80%E4%B8%AA%E5%9C%B0%E7%82%B9%E7%9A%84%E4%BA%8B%E4%BB%B6
+default : ["0","0"]
+colour : this.eventColor
+var code = '{"type": "trigger", "loc": ['+PosString_0+','+PosString_1+']},\n';
+return code;
+*/;
+
+revisit_s
+    :   '重启当前事件' Newline
+    
+
+/* revisit_s
+tooltip : revisit: 立即重启当前事件
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=revisit%EF%BC%9A%E7%AB%8B%E5%8D%B3%E9%87%8D%E5%90%AF%E5%BD%93%E5%89%8D%E4%BA%8B%E4%BB%B6
+colour : this.eventColor
+var code = '{"type": "revisit"},\n';
+return code;
+*/;
+
+exit_s
+    :   '立刻结束当前事件' Newline
+    
+
+/* exit_s
+tooltip : exit: 立刻结束当前事件
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=exit%EF%BC%9A%E7%AB%8B%E5%88%BB%E7%BB%93%E6%9D%9F%E5%BD%93%E5%89%8D%E4%BA%8B%E4%BB%B6
+colour : this.eventColor
+var code = '{"type": "exit"},\n';
+return code;
+*/;
+
+setBlock_s
+    :   '转变图块为' Int 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
+    
+
+/* setBlock_s
+tooltip : setBlock：设置某个图块,忽略坐标楼层则为当前事件
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=setblock%EF%BC%9A%E8%AE%BE%E7%BD%AE%E6%9F%90%E4%B8%AA%E5%9B%BE%E5%9D%97
+colour : this.dataColor
+default : [0,"","",""]
+var floorstr = '';
+if (PosString_0 && PosString_1) {
+    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+}
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+var code = '{"type": "setBlock", "number":'+Int_0+floorstr+IdString_0+'},\n';
+return code;
+*/;
+
 showFloorImg_s
     :   '显示贴图' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
 
@@ -482,58 +540,83 @@ var code = '{"type": "hideFloorImg"'+floorstr+IdString_0+'},\n';
 return code;
 */;
 
-trigger_s
-    :   '触发事件' 'x' PosString ',' 'y' PosString Newline
-    
+showBgFgMap_s
+    :   '显示图层块' Bg_Fg_List 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
 
-/* trigger_s
-tooltip : trigger: 立即触发另一个地点的事件
-helpUrl : https://ckcz123.github.io/mota-js/#/event?id=trigger%EF%BC%9A%E7%AB%8B%E5%8D%B3%E8%A7%A6%E5%8F%91%E5%8F%A6%E4%B8%80%E4%B8%AA%E5%9C%B0%E7%82%B9%E7%9A%84%E4%BA%8B%E4%BB%B6
-default : ["0","0"]
+
+/* showBgFgMap_s
+tooltip : showBgFgMap: 显示图层块，即背景图层/前景图层的某些图块，xy为左上角坐标，可用逗号分隔表示多个点
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=showFloorImg%ef%bc%9a%e6%98%be%e7%a4%ba%e8%b4%b4%e5%9b%be
+default : ["bg","","",""]
 colour : this.eventColor
-var code = '{"type": "trigger", "loc": ['+PosString_0+','+PosString_1+']},\n';
+var floorstr = '';
+if (EvalString_0 && EvalString_1) {
+  var pattern1 = /^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
+  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
+    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
+    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
+    EvalString_0=[EvalString_0,EvalString_1]
+  } else {
+    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
+    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    EvalString_0=EvalString_0.split(',');
+    EvalString_1=EvalString_1.split(',');
+    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  }
+  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+}
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+var code = '{"type": "showBgFgMap", "name": "' + Bg_Fg_List_0 + '"' +floorstr+IdString_0+'},\n';
 return code;
 */;
 
-revisit_s
-    :   '重启当前事件' Newline
-    
+hideBgFgMap_s
+    :   '隐藏图层块' Bg_Fg_List 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
 
-/* revisit_s
-tooltip : revisit: 立即重启当前事件
-helpUrl : https://ckcz123.github.io/mota-js/#/event?id=revisit%EF%BC%9A%E7%AB%8B%E5%8D%B3%E9%87%8D%E5%90%AF%E5%BD%93%E5%89%8D%E4%BA%8B%E4%BB%B6
+
+/* hideBgFgMap_s
+tooltip : hideBgFgMap: 隐藏图层块，即背景图层/前景图层的某些图块，xy为左上角坐标，可用逗号分隔表示多个点
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=hideFloorImg%ef%bc%9a%e9%9a%90%e8%97%8f%e8%b4%b4%e5%9b%be
+default : ["bg","","",""]
 colour : this.eventColor
-var code = '{"type": "revisit"},\n';
+var floorstr = '';
+if (EvalString_0 && EvalString_1) {
+  var pattern1 = /^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
+  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
+    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
+    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
+    EvalString_0=[EvalString_0,EvalString_1]
+  } else {
+    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
+    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    EvalString_0=EvalString_0.split(',');
+    EvalString_1=EvalString_1.split(',');
+    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  }
+  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+}
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+var code = '{"type": "hideBgFgMap", "name": "' + Bg_Fg_List_0 + '"' +floorstr+IdString_0+'},\n';
 return code;
 */;
 
-exit_s
-    :   '立刻结束当前事件' Newline
-    
+setBgFgBlock_s
+    :   '转变图层块' Bg_Fg_List '为' Int 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
 
-/* exit_s
-tooltip : exit: 立刻结束当前事件
-helpUrl : https://ckcz123.github.io/mota-js/#/event?id=exit%EF%BC%9A%E7%AB%8B%E5%88%BB%E7%BB%93%E6%9D%9F%E5%BD%93%E5%89%8D%E4%BA%8B%E4%BB%B6
-colour : this.eventColor
-var code = '{"type": "exit"},\n';
-return code;
-*/;
 
-setBlock_s
-    :   '转变图块为' Int 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
-    
-
-/* setBlock_s
-tooltip : setBlock：设置某个图块,忽略坐标楼层则为当前事件
+/* setBgFgBlock_s
+tooltip : setBgFgBlock：设置某个图层块,忽略坐标楼层则为当前点
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=setblock%EF%BC%9A%E8%AE%BE%E7%BD%AE%E6%9F%90%E4%B8%AA%E5%9B%BE%E5%9D%97
-colour : this.dataColor
-default : [0,"","",""]
+colour : this.eventColor
+default : ["bg",0,"","",""]
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var code = '{"type": "setBlock", "number":'+Int_0+floorstr+IdString_0+'},\n';
+var code = '{"type": "setBgFgBlock", "name": "' + Bg_Fg_List_0 + '", "number":'+Int_0+floorstr+IdString_0+'},\n';
 return code;
 */;
 
@@ -629,7 +712,7 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=changefloor%EF%BC%9A%E6%A
 default : ["MT1","0","0",null,500]
 colour : this.dataColor
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
-Int_0 = Int_0 ?(', "time": '+Int_0):'';
+Int_0 = (Int_0!=='')  ?(', "time": '+Int_0):'';
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
@@ -1355,6 +1438,11 @@ B_1_List
     :   '不改变'|'设为粗体'|'取消粗体'
     /*B_1_List ['null','true','false']*/;
 
+Bg_Fg_List
+    :   '背景层'|'前景层'
+    /*Bg_Fg_List ['bg','fg']*/;
+
+
 Bool:   'TRUE' 
     |   'FALSE'
     ;
@@ -1474,8 +1562,10 @@ ActionParser.prototype.parse = function (obj,type) {
         obj.floorType=obj.floorId;
         delete obj.floorId;
       }
+      if (!this.isset(obj.time)) obj.time=500;
       return MotaActionBlocks['changeFloor_m'].xmlText([
-        obj.floorType||'floorId',obj.floorId,obj.stair||'loc',obj.loc[0],obj.loc[1],obj.direction,obj.time||0,!this.isset(obj.portalWithoutTrigger)
+        obj.floorType||'floorId',obj.floorId,obj.stair||'loc',obj.loc[0],obj.loc[1],obj.direction,
+        obj.time,!this.isset(obj.portalWithoutTrigger)
       ]);
 
     case 'point':
@@ -1607,6 +1697,11 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['hide_s'].xmlText([
         x_str.join(','),y_str.join(','),data.floorId||'',data.time||0,this.next]);
       break;
+    case "setBlock": // 设置图块
+      data.loc=data.loc||['',''];
+      this.next = MotaActionBlocks['setBlock_s'].xmlText([
+        data.number||0,data.loc[0],data.loc[1],data.floorId||'',this.next]);
+      break;
     case "showFloorImg": // 显示贴图
       data.loc=data.loc||[];
       if (!(data.loc[0] instanceof Array))
@@ -1631,10 +1726,34 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['hideFloorImg_s'].xmlText([
         x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
       break;
-    case "setBlock": // 设置图块
+    case "showBgFgMap": // 显示图层块
+      data.loc=data.loc||[];
+      if (!(data.loc[0] instanceof Array))
+        data.loc = [data.loc];
+      var x_str=[],y_str=[];
+      data.loc.forEach(function (t) {
+        x_str.push(t[0]);
+        y_str.push(t[1]);
+      })
+      this.next = MotaActionBlocks['showBgFgMap_s'].xmlText([
+        data.name||'bg', x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
+      break;
+    case "hideBgFgMap": // 隐藏图层块
+      data.loc=data.loc||[];
+      if (!(data.loc[0] instanceof Array))
+        data.loc = [data.loc];
+      var x_str=[],y_str=[];
+      data.loc.forEach(function (t) {
+        x_str.push(t[0]);
+        y_str.push(t[1]);
+      })
+      this.next = MotaActionBlocks['hideBgFgMap_s'].xmlText([
+        data.name||'bg', x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
+      break;
+    case "setBgFgBlock": // 设置图块
       data.loc=data.loc||['',''];
-      this.next = MotaActionBlocks['setBlock_s'].xmlText([
-        data.number||0,data.loc[0],data.loc[1],data.floorId||'',this.next]);
+      this.next = MotaActionBlocks['setBgFgBlock_s'].xmlText([
+        data.name||"bg", data.number||0,data.loc[0],data.loc[1],data.floorId||'',this.next]);
       break;
     case "setHeroIcon": // 改变勇士
       this.next = MotaActionBlocks['setHeroIcon_s'].xmlText([

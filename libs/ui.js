@@ -529,7 +529,7 @@ ui.prototype.drawTextBox = function(content) {
         core.clearMap("ui", content_left, content_top - 18, validWidth,  top + height - content_top + 10);
         core.setAlpha('ui', textAttribute.background[3]);
         core.setFillStyle('ui', core.arrayToRGB(textAttribute.background));
-        core.fillRect("ui",  content_left, content_top - 18, validWidth,  top + height - content_top + 10);
+        core.fillRect("ui",  content_left, content_top - 18, validWidth,  top + height - content_top + 11);
 
         core.setAlpha('ui', textAttribute.text[3]);
         core.setFillStyle('ui', core.arrayToRGB(textAttribute.text));
@@ -1826,15 +1826,9 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
     tempCanvas.canvas.height = tempHeight;
     tempCanvas.clearRect(0, 0, tempWidth, tempHeight);
 
-    var groundId = core.floors[floorId].defaultGround || "ground";
-    var blockIcon = core.material.icons.terrains[groundId];
-    var blockImage = core.material.images.terrains;
-    // background
-    for (var j=0;j<mh;j++) {
-        for (var i=0;i<mw;i++) {
-            tempCanvas.drawImage(blockImage, 0, blockIcon * 32, 32, 32, i * 32, j * 32, 32, 32);
-        }
-    }
+    // background map
+    core.maps.drawBgFgMap(floorId, tempCanvas, "bg");
+
     // background image
     var images = [];
     if (core.isset(core.floors[floorId].images)) {
@@ -1882,6 +1876,9 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
         var height = core.material.images.images[heroIcon].height/4;
         tempCanvas.drawImage(core.material.images.images[heroIcon], icon.stop * 32, icon.loc * height, 32, height, 32*heroLoc.x, 32*heroLoc.y+32-height, 32, height);
     }
+    // foreground map
+    core.maps.drawBgFgMap(floorId, tempCanvas, "fg");
+
     // draw fg
     images.forEach(function (t) {
         var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];

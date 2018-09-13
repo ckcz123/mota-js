@@ -280,6 +280,10 @@ span#poison, span#weak, span#curse, span#pickaxe, span#bomb, span#fly {
     z-index: 60;
 }
 
+#damage {
+    z-index: 65;
+}
+
 #animate {
     z-index: 70;
 }
@@ -289,7 +293,7 @@ span#poison, span#weak, span#curse, span#pickaxe, span#bomb, span#fly {
 }
 
 #route {
-    z-index: 105;
+    z-index: 95;
 }
 
 #ui {

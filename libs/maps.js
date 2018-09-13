@@ -249,7 +249,7 @@ maps.prototype.canMoveHero = function(x,y,direction,floorId) {
 
     var nowBlock = core.getBlock(x,y,floorId);
     if (nowBlock!=null){
-        nowId = nowBlock.block.event.id;
+        var nowId = nowBlock.block.event.id;
         var nowIsArrow = nowId.slice(0, 5).toLowerCase() == 'arrow';
         if(nowIsArrow){
             var nowArrow = nowId.slice(5).toLowerCase();
@@ -267,7 +267,7 @@ maps.prototype.canMoveHero = function(x,y,direction,floorId) {
     var nx = x+scan[direction].x, ny = y+scan[direction].y;
     var nextBlock = core.getBlock(nx,ny);
     if (nextBlock!=null){
-        nextId = nextBlock.block.event.id;
+        var nextId = nextBlock.block.event.id;
         // 遇到单向箭头处理
         var isArrow = nextId.slice(0, 5).toLowerCase() == 'arrow';
         if(isArrow){
@@ -340,20 +340,54 @@ maps.prototype.drawBlock = function (block, animate, dx, dy) {
     }
 }
 
+////// 背景/前景图块的绘制 //////
+maps.prototype.drawBgFgMap = function (floorId, canvas, name) {
+    var width = core.floors[floorId].width || 13;
+    var height = core.floors[floorId].height || 13;
+
+    var groundId = core.floors[floorId].defaultGround || "ground";
+    var blockIcon = core.material.icons.terrains[groundId];
+    var blockImage = core.material.images.terrains;
+
+    var getMapArray = function (name) {
+        var arr = core.clone(core.floors[floorId][name+"map"] || []);
+        for (var x = 0; x < width; x++) {
+            for (var y = 0; y < height; y++) {
+                arr[y] = arr[y] || [];
+                if (core.hasFlag(name + "_" + floorId + "_" + x + "_" + y)) arr[y][x] = 0;
+                else arr[y][x] = core.getFlag(name + "v_" + floorId + "_" + x + "_" + y, arr[y][x] || 0);
+            }
+        }
+        return arr;
+    }
+    var arr = getMapArray(name);
+    for (var x = 0; x < width; x++) {
+        for (var y = 0; y < height; y++) {
+            if (name=='bg')
+                canvas.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
+            if (arr[y][x]>0) {
+                var block = core.maps.initBlock(x, y, arr[y][x]);
+                if (core.isset(block.event)) {
+                    var id = block.event.id, cls = block.event.cls;
+                    if (cls == 'autotile')
+                        core.drawAutotile(canvas, arr, block, 32, 0, 0);
+                    else
+                        canvas.drawImage(core.material.images[cls], 0, core.material.icons[cls][id] * 32, 32, 32, x * 32, y * 32, 32, 32);
+                }
+            }
+        }
+    }
+
+}
+
 ////// 绘制某张地图 //////
 maps.prototype.drawMap = function (mapName, callback) {
     core.clearMap('all');
     core.removeGlobalAnimate(null, null, true);
     var drawBg = function(){
-        var groundId = core.floors[mapName].defaultGround || "ground";
-        var blockIcon = core.material.icons.terrains[groundId];
-        var blockImage = core.material.images.terrains;
-        
-        for (var x = 0; x < core.bigmap.width; x++) {
-            for (var y = 0; y < core.bigmap.height; y++) {
-                core.canvas.bg.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
-            }
-        }
+
+        core.maps.drawBgFgMap(mapName, core.canvas.bg, "bg");
+        core.maps.drawBgFgMap(mapName, core.canvas.fg, "fg");
 
         var images = [];
         if (core.isset(core.floors[mapName].images)) {
@@ -385,9 +419,9 @@ maps.prototype.drawMap = function (mapName, callback) {
                     }
                 }
                 else if (t[3]==1)
-                    core.canvas.event2.drawImage(image, 32*dx, 32*dy, image.width, image.height);
+                    core.canvas.fg.drawImage(image, 32*dx, 32*dy, image.width, image.height);
                 else if (t[3]==2) {
-                    core.canvas.event2.drawImage(image, 0, 0, image.width, image.height-32,
+                    core.canvas.fg.drawImage(image, 0, 0, image.width, image.height-32,
                         32*dx, 32*dy, image.width, image.height-32);
                     core.canvas.bg.drawImage(image, 0, image.height-32, image.width, 32,
                         32*dx, 32*dy + image.height - 32, image.width, 32);
@@ -435,6 +469,7 @@ maps.prototype.drawMap = function (mapName, callback) {
             core.clearMap('bg');
             core.clearMap('event');
             core.clearMap('event2');
+            core.clearMap('fg');
             drawBg();
             drawEvent();
             core.setGlobalAnimate(core.values.animateSpeed);
@@ -957,6 +992,18 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     }
 }
 
+////// 改变图层块 //////
+maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
+    floorId = floorId || core.status.floorId;
+    if (!core.isset(number) || !core.isset(x) || !core.isset(y)) return;
+    if (x<0 || x>=core.bigmap.width || y<0 || y>=core.bigmap.height) return;
+    if (name!='bg' && name!='fg') return;
+
+    core.setFlag(name+"v_"+floorId+"_"+x+"_"+y, number);
+    if (floorId == core.status.floorId)
+        core.drawMap(floorId);
+}
+
 ////// 添加一个全局动画 //////
 maps.prototype.addGlobalAnimate = function (b) {
     if (main.mode=='editor' && main.editor.disableGlobalAnimate) return;
@@ -1094,6 +1141,28 @@ maps.prototype.setFloorImage = function (type, loc, floorId, callback) {
     loc.forEach(function (t) {
         var x=t[0], y=t[1];
         var flag = "floorimg_"+floorId+"_"+x+"_"+y;
+        core.setFlag(flag, type=='show'?false:true);
+    })
+
+    if (floorId==core.status.floorId) {
+        core.drawMap(floorId, callback);
+    }
+    else {
+        if (core.isset(callback)) callback();
+    }
+}
+
+maps.prototype.setBgFgMap = function (type, name, loc, floorId, callback) {
+    if (type!='show') type='hide';
+    if (name!='fg') name='bg';
+    if (typeof loc[0] == 'number' && typeof loc[1] == 'number')
+        loc = [loc];
+    floorId = floorId||core.status.floorId;
+
+    if (loc.length==0) return;
+    loc.forEach(function (t) {
+        var x=t[0], y=t[1];
+        var flag = name+"_"+floorId+"_"+x+"_"+y;
         core.setFlag(flag, type=='show'?false:true);
     })
 

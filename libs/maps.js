@@ -249,7 +249,7 @@ maps.prototype.canMoveHero = function(x,y,direction,floorId) {
 
     var nowBlock = core.getBlock(x,y,floorId);
     if (nowBlock!=null){
-        nowId = nowBlock.block.event.id;
+        var nowId = nowBlock.block.event.id;
         var nowIsArrow = nowId.slice(0, 5).toLowerCase() == 'arrow';
         if(nowIsArrow){
             var nowArrow = nowId.slice(5).toLowerCase();
@@ -267,7 +267,7 @@ maps.prototype.canMoveHero = function(x,y,direction,floorId) {
     var nx = x+scan[direction].x, ny = y+scan[direction].y;
     var nextBlock = core.getBlock(nx,ny);
     if (nextBlock!=null){
-        nextId = nextBlock.block.event.id;
+        var nextId = nextBlock.block.event.id;
         // 遇到单向箭头处理
         var isArrow = nextId.slice(0, 5).toLowerCase() == 'arrow';
         if(isArrow){
@@ -387,7 +387,7 @@ maps.prototype.drawMap = function (mapName, callback) {
     var drawBg = function(){
 
         core.maps.drawBgFgMap(mapName, core.canvas.bg, "bg");
-        core.maps.drawBgFgMap(mapName, core.canvas.event2, "event2");
+        core.maps.drawBgFgMap(mapName, core.canvas.fg, "fg");
 
         var images = [];
         if (core.isset(core.floors[mapName].images)) {
@@ -419,9 +419,9 @@ maps.prototype.drawMap = function (mapName, callback) {
                     }
                 }
                 else if (t[3]==1)
-                    core.canvas.event2.drawImage(image, 32*dx, 32*dy, image.width, image.height);
+                    core.canvas.fg.drawImage(image, 32*dx, 32*dy, image.width, image.height);
                 else if (t[3]==2) {
-                    core.canvas.event2.drawImage(image, 0, 0, image.width, image.height-32,
+                    core.canvas.fg.drawImage(image, 0, 0, image.width, image.height-32,
                         32*dx, 32*dy, image.width, image.height-32);
                     core.canvas.bg.drawImage(image, 0, image.height-32, image.width, 32,
                         32*dx, 32*dy + image.height - 32, image.width, 32);
@@ -469,6 +469,7 @@ maps.prototype.drawMap = function (mapName, callback) {
             core.clearMap('bg');
             core.clearMap('event');
             core.clearMap('event2');
+            core.clearMap('fg');
             drawBg();
             drawEvent();
             core.setGlobalAnimate(core.values.animateSpeed);

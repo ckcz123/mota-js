@@ -1877,7 +1877,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
         tempCanvas.drawImage(core.material.images.images[heroIcon], icon.stop * 32, icon.loc * height, 32, height, 32*heroLoc.x, 32*heroLoc.y+32-height, 32, height);
     }
     // foreground map
-    core.maps.drawBgFgMap(floorId, tempCanvas, "event2");
+    core.maps.drawBgFgMap(floorId, tempCanvas, "fg");
 
     // draw fg
     images.forEach(function (t) {

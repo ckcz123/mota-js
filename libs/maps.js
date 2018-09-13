@@ -433,6 +433,7 @@ maps.prototype.drawMap = function (mapName, callback) {
     if (main.mode=='editor'){
         main.editor.drawMapBg = function(){
             core.clearMap('bg');
+            core.clearMap('fg');
             drawBg();
         }
     } else {

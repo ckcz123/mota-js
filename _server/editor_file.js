@@ -106,8 +106,8 @@ editor_file = function (editor, callback) {
             });
         for (var ii in editor.currentFloorData)
             if (editor.currentFloorData.hasOwnProperty(ii)) {
-                if (ii == 'map')
-                    datastr = datastr.concat(['\n"', ii, '": [\n', formatMap(editor.currentFloorData[ii]), '\n],']);
+                if (['map','bgmap','fgmap'].indexOf(ii)!==-1)
+                    datastr = datastr.concat(['\n"', ii, '": [\n', formatMap(editor.currentFloorData[ii],ii!='map'), '\n],']);
                 else
                     datastr = datastr.concat(['\n"', ii, '": ', JSON.stringify(editor.currentFloorData[ii], null, 4), ',']);
             }
@@ -704,7 +704,13 @@ editor_file = function (editor, callback) {
         return true
     }
 
-    var formatMap = function (mapArr) {
+    var formatMap = function (mapArr,trySimplify) {
+        if(!mapArr || JSON.stringify(mapArr)==JSON.stringify([]))return '';
+        if(trySimplify){
+            //检查是否是全0二维数组
+            var jsoncheck=JSON.stringify(mapArr).replace(/\D/g,'');
+            if(jsoncheck==Array(jsoncheck.length+1).join('0'))return '';
+        }
         //把二维数组格式化
         var formatArrStr = '';
         var arr = JSON.stringify(mapArr).replace(/\s+/g, '').split('],[');

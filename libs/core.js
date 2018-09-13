@@ -743,6 +743,11 @@ core.prototype.setBlock = function (number, x, y, floorId) {
     core.maps.setBlock(number, x, y, floorId);
 }
 
+////// 改变图层块 //////
+core.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
+    core.maps.setBgFgBlock(name, number, x, y, floorId);
+}
+
 ////// 添加一个全局动画 //////
 core.prototype.addGlobalAnimate = function (block) {
     core.maps.addGlobalAnimate(block);

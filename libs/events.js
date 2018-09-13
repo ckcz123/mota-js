@@ -399,6 +399,16 @@ events.prototype.doAction = function() {
             }
             else this.doAction();
             break;
+        case "setBlock": // 设置某图块
+            {
+                if (core.isset(data.loc)) {
+                    x=core.calValue(data.loc[0]);
+                    y=core.calValue(data.loc[1]);
+                }
+                core.setBlock(data.number, x, y, data.floorId);
+                this.doAction();
+                break;
+            }
         case "showFloorImg": // 显示贴图
             if (!core.isset(data.loc))
                 data.loc = [x,y];
@@ -419,13 +429,33 @@ events.prototype.doAction = function() {
                 core.events.doAction();
             })
             break;
-        case "setBlock": // 设置某图块
+        case "showBgFgMap": // 显示图层块
+            if (!core.isset(data.loc))
+                data.loc = [x,y];
+            if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
+                && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
+                data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];
+            core.maps.setBgFgMap("show", data.name, data.loc, data.floorId, function() {
+                core.events.doAction();
+            })
+            break;
+        case "hideBgFgMap": // 隐藏图层块
+            if (!core.isset(data.loc))
+                data.loc = [x,y];
+            if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
+                && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
+                data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];
+            core.maps.setBgFgMap("hide", data.name, data.loc, data.floorId, function() {
+                core.events.doAction();
+            })
+            break;
+        case "setBgFgBlock": // 设置图层块
             {
                 if (core.isset(data.loc)) {
                     x=core.calValue(data.loc[0]);
                     y=core.calValue(data.loc[1]);
                 }
-                core.setBlock(data.number, x, y, data.floorId);
+                core.setBgFgBlock(data.name, data.number, x, y, data.floorId);
                 this.doAction();
                 break;
             }

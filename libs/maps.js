@@ -350,7 +350,7 @@ maps.prototype.drawBgFgMap = function (floorId, canvas, name) {
     var blockImage = core.material.images.terrains;
 
     var getMapArray = function (name) {
-        var arr = core.floors[floorId][name+"map"] || [];
+        var arr = core.clone(core.floors[floorId][name+"map"] || []);
         for (var x = 0; x < width; x++) {
             for (var y = 0; y < height; y++) {
                 arr[y] = arr[y] || [];
@@ -992,6 +992,18 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     }
 }
 
+////// 改变图层块 //////
+maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
+    floorId = floorId || core.status.floorId;
+    if (!core.isset(number) || !core.isset(x) || !core.isset(y)) return;
+    if (x<0 || x>=core.bigmap.width || y<0 || y>=core.bigmap.height) return;
+    if (name!='bg' && name!='fg') return;
+
+    core.setFlag(name+"v_"+floorId+"_"+x+"_"+y, number);
+    if (floorId == core.status.floorId)
+        core.drawMap(floorId);
+}
+
 ////// 添加一个全局动画 //////
 maps.prototype.addGlobalAnimate = function (b) {
     if (main.mode=='editor' && main.editor.disableGlobalAnimate) return;
@@ -1129,6 +1141,28 @@ maps.prototype.setFloorImage = function (type, loc, floorId, callback) {
     loc.forEach(function (t) {
         var x=t[0], y=t[1];
         var flag = "floorimg_"+floorId+"_"+x+"_"+y;
+        core.setFlag(flag, type=='show'?false:true);
+    })
+
+    if (floorId==core.status.floorId) {
+        core.drawMap(floorId, callback);
+    }
+    else {
+        if (core.isset(callback)) callback();
+    }
+}
+
+maps.prototype.setBgFgMap = function (type, name, loc, floorId, callback) {
+    if (type!='show') type='hide';
+    if (name!='fg') name='bg';
+    if (typeof loc[0] == 'number' && typeof loc[1] == 'number')
+        loc = [loc];
+    floorId = floorId||core.status.floorId;
+
+    if (loc.length==0) return;
+    loc.forEach(function (t) {
+        var x=t[0], y=t[1];
+        var flag = name+"_"+floorId+"_"+x+"_"+y;
         core.setFlag(flag, type=='show'?false:true);
     })
 

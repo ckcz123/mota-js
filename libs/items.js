@@ -98,7 +98,8 @@ items.prototype.hasItem = function (itemId) {
 
 ////// 是否装备某件装备 //////
 items.prototype.hasEquip = function (equipId) {
-    return core.status.hero.equipment.indexOf(equipId) != -1 ; 
+    var equiptype = core.material.items[equipId].equiptype;
+    return core.status.hero.equipment[equiptype] == equipId;
 }
 
 ////// 设置某个物品的个数 //////

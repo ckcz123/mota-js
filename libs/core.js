@@ -829,8 +829,8 @@ core.prototype.hasItem = function (itemId) {
 }
 
 ////// 是否装备某件装备 //////
-core.prototype.hasEquipment = function (itemId) {
-    return core.items.hasEquipment(itemId);
+core.prototype.hasEquip = function (equipId) {
+    return core.items.hasEquip(equipId);
 }
 
 ////// 设置某个物品的个数 //////
@@ -861,6 +861,11 @@ core.prototype.loadEquip = function (equipId, callback) {
 ////// 卸下某件装备 //////
 core.prototype.unloadEquip = function (equipType, callback) {
     core.items.unloadEquip(equipType,callback);
+}
+
+////// 比较某件装备与当前装备 //////
+core.prototype.compareEquipment = function (equipId, beComparedEquipId) {
+    return core.items.compareEquipment(equipId, beComparedEquipId);
 }
 
 ////// 增加某个物品的个数 //////

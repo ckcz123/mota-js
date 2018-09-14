@@ -1945,35 +1945,49 @@ control.prototype.replay = function () {
             var tools = Object.keys(core.status.hero.items.tools).sort();
             var constants = Object.keys(core.status.hero.items.constants).sort();
             var index;
-            if ((index=tools.indexOf(itemId))>=0 || (index=constants.indexOf(itemId)+1000)>=1000) {
-                core.ui.drawToolbox(index);
+            if ((index=tools.indexOf(itemId))>=0) {
+                core.status.event.data = {"toolsPage":Math.floor(index/12)+1, "constantsPage":1, "selectId":null}
+                index = index%12;
+            }
+            else if (index=constants.indexOf(itemId)>=0) {
+                core.status.event.data = {"toolsPage":1, "constantsPage":Math.floor(index/12)+1, "selectId":null}
+                index = index%12+12;    
+            }
+            else return;
+            core.ui.drawToolbox(index);
                 setTimeout(function () {
                     core.ui.closePanel();
                     core.useItem(itemId, function () {
                         core.replay();
                     });
                 }, 750 / Math.max(1, core.status.replay.speed));
-            }
             return;
         }
     }
     else if (action.indexOf("unEquip:")==0) {
-        var equipId = action.substring(8);
+        var unloadEquipId = action.substring(8);
+        var equipType = core.material.items[unloadEquipId].equipType;
+        core.ui.drawEquipbox(equipType);
         setTimeout(function () {
             core.ui.closePanel();
-            core.unloadEquip(equipId, function () {
+            core.unloadEquip(equipType, function () {
                 core.replay();
             });
         }, 750 / Math.max(1, core.status.replay.speed));
         return;
     }
     else if (action.indexOf("equip:")==0) {
-        var equipType = action.substring(6);
+        var equipId = action.substring(6);
+        var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
+        var index = ownEquipment.indexOf(equipId);
+        core.status.event.data = {"page":Math.floor(index/12)+1, "selectId":null}
+        index = index%12+12;
+        core.ui.drawEquipbox(index);
         setTimeout(function () {
             core.ui.closePanel();
-            core.loadEquip(equipType, function () {
+            core.loadEquip(equipId, function () {
                 core.replay();
-            });
+            }); 
         }, 750 / Math.max(1, core.status.replay.speed));
         return;
     }

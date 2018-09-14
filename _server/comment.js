@@ -91,14 +91,14 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "textarea",
                     "_string": true,
                     "_lint": true,
-                    "_data": "cls为tools或contants时的使用物品效果。"
+                    "_data": "cls为tools或constants时的使用物品效果。"
                 },
                 "canUseItemEffect": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_string": true,
                     "_lint": true,
-                    "_data": "cls为tools或contants时对当前能否使用该物品的判断。"
+                    "_data": "cls为tools或constants时对当前能否使用该物品的判断。"
                 }
             }
         },

@@ -97,9 +97,8 @@ items.prototype.hasItem = function (itemId) {
 }
 
 ////// 是否装备某件装备 //////
-items.prototype.hasEquipment = function (itemId) {
-    var equiptype = core.material.items[itemId].equiptype;
-    return core.status.hero.equipment[equiptype] == itemId; 
+items.prototype.hasEquip = function (equipId) {
+    return core.status.hero.equipment.indexOf(equipId) != -1 ; 
 }
 
 ////// 设置某个物品的个数 //////
@@ -151,27 +150,17 @@ items.prototype.addItem = function (itemId, itemNum) {
 items.prototype.loadEquip = function (equipId, callback) {
     
     core.playSound('equip.mp3');
-    
+
     var loadEquip = core.material.items[equipId];
     var loadEquipType = loadEquip.equipType;
     var unloadEquipId = core.status.hero.equipment[loadEquipType];
-    var unloadEquip = core.material.items[unloadEquipId];
-
-    // 处理能力值改变
-    if (core.isset(loadEquip.equipEffect.atk))
-        core.status.hero.atk += loadEquip.equipEffect.atk
-    if (core.isset(loadEquip.equipEffect.def))
-        core.status.hero.def += loadEquip.equipEffect.def
-    if (core.isset(loadEquip.equipEffect.mdef))
-        core.status.hero.mdef += loadEquip.equipEffect.mdef
-    if (unloadEquip.cls != "blank") {
-        if (core.isset(unloadEquip.equipEffect.atk))
-            core.status.hero.atk -= unloadEquip.equipEffect.atk
-        if (core.isset(unloadEquip.equipEffect.def))
-            core.status.hero.def -= unloadEquip.equipEffect.def
-        if (core.isset(unloadEquip.equipEffect.mdef))
-            core.status.hero.mdef -= unloadEquip.equipEffect.mdef
-    }
+    
+    // 比较能力值
+    var result = core.compareEquipment(equipId,unloadEquipId);
+    
+    core.status.hero.atk += result.atk;
+    core.status.hero.def += result.def;
+    core.status.hero.mdef += result.mdef;
 
     // 更新装备状态
     core.status.hero.equipment[loadEquipType] = equipId;
@@ -215,10 +204,29 @@ items.prototype.unloadEquip = function (equipType, callback) {
     core.updateStatusBar();
 
     // 记录路线
-    core.status.route.push("unEquip:"+equipType);
+    core.status.route.push("unEquip:"+unloadEquipId);
     
     // 装备更换完毕：增加卸下的装备
     core.addItem(unloadEquipId, 1);
 
     if (core.isset(callback)) callback();
+}
+
+items.prototype.compareEquipment = function (compareEquipId, beComparedEquipId) {
+    var compareEquip = core.material.items[compareEquipId];
+    var beComparedEquip = core.material.items[beComparedEquipId];
+    var compareAtk = 0, compareDef = 0, compareMdef = 0;
+    if (core.isset(compareEquip.equipEffect.atk))
+        compareAtk += compareEquip.equipEffect.atk;
+    if (core.isset(compareEquip.equipEffect.def))
+        compareDef += compareEquip.equipEffect.def;
+    if (core.isset(compareEquip.equipEffect.mdef))
+        compareMdef += compareEquip.equipEffect.mdef;
+    if (core.isset(beComparedEquip.equipEffect.atk))
+        compareAtk -= beComparedEquip.equipEffect.atk;
+    if (core.isset(beComparedEquip.equipEffect.def))
+        compareDef -= beComparedEquip.equipEffect.def;
+    if (core.isset(beComparedEquip.equipEffect.mdef))
+        compareMdef -= beComparedEquip.equipEffect.mdef;
+    return {"atk":compareAtk,"def":compareDef,"mdef":compareMdef};
 }

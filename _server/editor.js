@@ -178,13 +178,15 @@ editor.prototype.mapInit = function () {
     editor.currentFloorData.cannotMove = {};
 }
 editor.prototype.drawMapBg = function (img) {
-    return
-    var bgc = bg.getContext('2d');
+    return;
+
+    //legacy
     if (!core.isset(editor.bgY) || editor.bgY == 0) {
         editor.main.editor.drawMapBg();
         return;
     }
 
+    var bgc = bg.getContext('2d');
     for (var ii = 0; ii < 13; ii++)
         for (var jj = 0; jj < 13; jj++) {
             bgc.clearRect(ii * 32, jj * 32, 32, 32);
@@ -529,8 +531,12 @@ editor.prototype.listen = function () {
             currDrawData.info = JSON.parse(JSON.stringify(editor.info));
             reDo = null;
             // console.log(stepPostfix);
-            for (var ii = 0; ii < stepPostfix.length; ii++)
-                editor[editor.layerMod][stepPostfix[ii].y][stepPostfix[ii].x] = editor.info;
+            if (editor.layerMod!='map'  && editor.info.images && editor.info.images.indexOf('48')!==-1){
+                printe('前景/背景不支持48的图块');
+            } else {
+                for (var ii = 0; ii < stepPostfix.length; ii++)
+                    editor[editor.layerMod][stepPostfix[ii].y][stepPostfix[ii].x] = editor.info;
+            }
             // console.log(editor.map);
             editor.updateMap();
             holdingPath = 0;

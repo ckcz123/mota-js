@@ -351,11 +351,13 @@ maps.prototype.drawBgFgMap = function (floorId, canvas, name) {
 
     var getMapArray = function (name) {
         var arr = core.clone(core.floors[floorId][name+"map"] || []);
+        if(main.mode=='editor')arr = core.clone(editor[name+"map"])||arr;
         for (var x = 0; x < width; x++) {
             for (var y = 0; y < height; y++) {
                 arr[y] = arr[y] || [];
                 if (core.hasFlag(name + "_" + floorId + "_" + x + "_" + y)) arr[y][x] = 0;
                 else arr[y][x] = core.getFlag(name + "v_" + floorId + "_" + x + "_" + y, arr[y][x] || 0);
+                if(main.mode=='editor')arr[y][x]= arr[y][x].idnum || arr[y][x] || 0;
             }
         }
         return arr;

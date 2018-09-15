@@ -98,12 +98,16 @@ editor_file = function (editor, callback) {
             editor.currentFloorData.map = [];
             for (var i=0;i<height;i++) editor.currentFloorData.map.push(row);
         }
-        else
-            editor.currentFloorData.map = editor.map.map(function (v) {
-                return v.map(function (v) {
-                    return v.idnum || v || 0
-                })
-            });
+        else{
+            for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
+                var mapArray=editor[name].map(function (v) {
+                    return v.map(function (v) {
+                        return v.idnum || v || 0
+                    })
+                });
+                editor.currentFloorData[name]=mapArray;
+            }
+        }
         for (var ii in editor.currentFloorData)
             if (editor.currentFloorData.hasOwnProperty(ii)) {
                 if (['map','bgmap','fgmap'].indexOf(ii)!==-1)

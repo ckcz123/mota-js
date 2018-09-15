@@ -46,54 +46,100 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"name": "绿血瓶"
 		},
 		"sword1": {
-			"cls": "items",
+			"cls": "item",
 			"name": "铁剑",
-			"text": "一把很普通的铁剑"
+			"text": "一把很普通的铁剑",
+			"equip":{
+				"type": 0,
+				"atk": 10,
+				"animate": "sword"
+			}
 		},
 		"sword2": {
 			"cls": "items",
 			"name": "银剑",
-			"text": "一把很普通的银剑"
+			"text": "一把很普通的银剑",
+			"equip":{
+				"type": 0,
+				"atk": 20,
+				"animate": "sword"
+			}
 		},
 		"sword3": {
 			"cls": "items",
 			"name": "骑士剑",
-			"text": "一把很普通的骑士剑"
+			"text": "一把很普通的骑士剑",
+			"equip":{
+				"type": 0,
+				"atk": 40,
+				"animate": "sword"
+			}
 		},
 		"sword4": {
 			"cls": "items",
 			"name": "圣剑",
-			"text": "一把很普通的圣剑"
+			"text": "一把很普通的圣剑",
+			"equip":{
+				"type": 0,
+				"atk": 80,
+				"animate": "sword"
+			}
 		},
 		"sword5": {
 			"cls": "items",
 			"name": "神圣剑",
-			"text": "一把很普通的神圣剑"
+			"text": "一把很普通的神圣剑",
+			"equip":{
+				"type": 0,
+				"atk": 100,
+				"animate": "sword"
+			}
 		},
 		"shield1": {
 			"cls": "items",
 			"name": "铁盾",
-			"text": "一个很普通的铁盾"
+			"text": "一个很普通的铁盾",
+			"equip":{
+				"type": 1,
+				"def": 10
+			}
 		},
 		"shield2": {
 			"cls": "items",
 			"name": "银盾",
-			"text": "一个很普通的银盾"
+			"text": "一个很普通的银盾",
+			"equip":{
+				"type": 1,
+				"def": 20
+			}
 		},
 		"shield3": {
 			"cls": "items",
 			"name": "骑士盾",
-			"text": "一个很普通的骑士盾"
+			"text": "一个很普通的骑士盾",
+			"equip":{
+				"type": 1,
+				"def": 40
+			}
 		},
 		"shield4": {
 			"cls": "items",
 			"name": "圣盾",
-			"text": "一个很普通的圣盾"
+			"text": "一个很普通的圣盾",
+			"equip":{
+				"type": 1,
+				"def": 80
+			}
 		},
 		"shield5": {
 			"cls": "items",
 			"name": "神圣盾",
-			"text": "一个很普通的神圣盾"
+			"text": "一个很普通的神圣盾",
+			"equip":{
+				"type": 1,
+				"def": 100,
+				"mdef": 100
+			},
 		},
 		"superPotion": {
 			"cls": "items",
@@ -102,16 +148,6 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"moneyPocket": {
 			"cls": "items",
 			"name": "金钱袋"
-		},
-		"sword0": {
-			"cls": "constants",
-			"name": "空剑",
-			"text": "使用可脱掉当前装备的剑。"
-		},
-		"shield0": {
-			"cls": "constants",
-			"name": "空盾",
-			"text": "使用可脱掉当前装备的盾。"
 		},
 		"book": {
 			"cls": "constants",
@@ -232,7 +268,7 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"cls": "tools",
 			"name": "跳跃靴",
 			"text": "能跳跃到前方两格处"
-		}
+		},
 	},
 	"itemEffect": {
 		"redJewel": "core.status.hero.atk += core.values.redJewel * ratio",
@@ -243,16 +279,16 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"bluePotion": "core.status.hero.hp += core.values.bluePotion * ratio",
 		"yellowPotion": "core.status.hero.hp += core.values.yellowPotion * ratio",
 		"greenPotion": "core.status.hero.hp += core.values.greenPotion * ratio",
-		"sword1": "core.status.hero.atk += core.values.sword1",
-		"sword2": "core.status.hero.atk += core.values.sword2",
-		"sword3": "core.status.hero.atk += core.values.sword3",
-		"sword4": "core.status.hero.atk += core.values.sword4",
-		"sword5": "core.status.hero.atk += core.values.sword5",
-		"shield1": "core.status.hero.def += core.values.shield1",
-		"shield2": "core.status.hero.def += core.values.shield2",
-		"shield3": "core.status.hero.def += core.values.shield3",
-		"shield4": "core.status.hero.def += core.values.shield4",
-		"shield5": "core.status.hero.def += core.values.shield5",
+		"sword1": "core.status.hero.atk += 10",
+		"sword2": "core.status.hero.atk += 20",
+		"sword3": "core.status.hero.atk += 40",
+		"sword4": "core.status.hero.atk += 80",
+		"sword5": "core.status.hero.atk += 100",
+		"shield1": "core.status.hero.def += 10",
+		"shield2": "core.status.hero.def += 20",
+		"shield3": "core.status.hero.def += 40",
+		"shield4": "core.status.hero.def += 80",
+		"shield5": "core.status.hero.def += 100;core.status.hero.mdef += 100",
 		"bigKey": "core.status.hero.items.keys.yellowKey++;core.status.hero.items.keys.blueKey++;core.status.hero.items.keys.redKey++;",
 		"superPotion": "core.status.hero.hp *= 2",
 		"moneyPocket": "core.status.hero.money += core.values.moneyPocket"
@@ -266,16 +302,16 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"bluePotion": "'，生命+'+core.values.bluePotion * ratio",
 		"yellowPotion": "'，生命+'+core.values.yellowPotion * ratio",
 		"greenPotion": "'，生命+'+core.values.greenPotion * ratio",
-		"sword1": "'，攻击+'+core.values.sword1",
-		"sword2": "'，攻击+'+core.values.sword2",
-		"sword3": "'，攻击+'+core.values.sword3",
-		"sword4": "'，攻击+'+core.values.sword4",
-		"sword5": "'，攻击+'+core.values.sword5",
-		"shield1": "'，防御+'+core.values.shield1",
-		"shield2": "'，防御+'+core.values.shield2",
-		"shield3": "'，防御+'+core.values.shield3",
-		"shield4": "'，防御+'+core.values.shield4",
-		"shield5": "'，防御+'+core.values.shield5",
+		"sword1": "，攻击+10",
+		"sword2": "，攻击+20",
+		"sword3": "，攻击+40",
+		"sword4": "，攻击+80",
+		"sword5": "，攻击+100",
+		"shield1": "，防御+10",
+		"shield2": "，防御+20",
+		"shield3": "，防御+40",
+		"shield4": "，防御+80",
+		"shield5": "，防御+100，魔防+100",
 		"bigKey": "'，全钥匙+1'",
 		"superPotion": "'，生命值翻倍'",
 		"moneyPocket": "'，金币+'+core.values.moneyPocket"
@@ -297,18 +333,6 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"weakWine": "core.setFlag('weak', false);\ncore.status.hero.atk += core.getFlag('weakAtk', core.values.weakValue);\ncore.status.hero.def += core.getFlag('weakDef', core.values.weakValue);",
 		"curseWine": "core.setFlag('curse', false);",
 		"superWine": "core.setFlag('poison', false);\nif (core.hasFlag('weak')) {\n    core.setFlag('weak', false);\n    core.status.hero.atk += core.getFlag('weakAtk', core.values.weakValue);\n    core.status.hero.def += core.getFlag('weakDef', core.values.weakValue);\n}\ncore.setFlag('curse', false);",
-		"sword0": "core.plugin.useEquipment(itemId)",
-		"sword1": "core.plugin.useEquipment(itemId)",
-		"sword2": "core.plugin.useEquipment(itemId)",
-		"sword3": "core.plugin.useEquipment(itemId)",
-		"sword4": "core.plugin.useEquipment(itemId)",
-		"sword5": "core.plugin.useEquipment(itemId)",
-		"shield0": "core.plugin.useEquipment(itemId)",
-		"shield1": "core.plugin.useEquipment(itemId)",
-		"shield2": "core.plugin.useEquipment(itemId)",
-		"shield3": "core.plugin.useEquipment(itemId)",
-		"shield4": "core.plugin.useEquipment(itemId)",
-		"shield5": "core.plugin.useEquipment(itemId)",
 		"lifeWand": "core.insertAction([\n\t{\"type\": \"input\", \"text\": \"请输入生命魔杖使用次数：(0-${item:lifeWand})\"},\n\t{\"type\": \"if\", \"condition\": \"flag:input<=item:lifeWand\",\n\t\t\"true\": [\n\t\t\t{\"type\": \"setValue\", \"name\": \"item:lifeWand\", \"value\": \"item:lifeWand-flag:input\"},\n\t\t\t{\"type\": \"setValue\", \"name\": \"status:hp\", \"value\": \"status:hp+flag:input*100\"},\n\t\t\t\"成功使用${flag:input}次生命魔杖，恢复${flag:input*100}点生命。\"\n\t\t],\n\t\t\"false\": [\"输入不合法！\"]\n\t},\n]);\ncore.setItem('lifeWand', core.itemCount('lifeWand')+1);",
 		"jumpShoes": "core.insertAction({\"type\":\"jumpHero\",\"loc\":[core.nextX(2),core.nextY(2)]});"
 	},
@@ -329,19 +353,6 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"weakWine": "core.hasFlag('weak')",
 		"curseWine": "core.hasFlag('curse')",
 		"superWine": "core.hasFlag('poison') || core.hasFlag('weak') || core.hasFlag('curse')",
-		"sword0": "true",
-		"sword1": "true",
-		"sword2": "true",
-		"sword3": "true",
-		"sword4": "true",
-		"sword5": "true",
-		"shield0": "true",
-		"shield1": "true",
-		"shield2": "true",
-		"shield3": "true",
-		"shield4": "true",
-		"shiled5": "true",
-		"shield5": "true",
 		"lifeWand": "true",
 		"jumpShoes": "var nx=core.nextX(2),ny=core.nextY(2);nx>=0&&nx<core.bigmap.width&&ny>=0&&ny<core.bigmap.height&&core.getBlock(nx,ny)==null"
 	}

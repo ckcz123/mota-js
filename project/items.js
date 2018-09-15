@@ -49,94 +49,94 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"cls": "item",
 			"name": "铁剑",
 			"text": "一把很普通的铁剑",
-			"equipType": 0,
-			"equipEffect": {
-				"atk": 10
-			},
-			"animate": "sword"
+			"equip":{
+				"type": 0,
+				"atk": 10,
+				"animate": "sword"
+			}
 		},
 		"sword2": {
 			"cls": "items",
 			"name": "银剑",
 			"text": "一把很普通的银剑",
-			"equipType": 0,
-			"equipEffect": {
-				"atk": 20
-			},
-			"animate": "sword"
+			"equip":{
+				"type": 0,
+				"atk": 20,
+				"animate": "sword"
+			}
 		},
 		"sword3": {
 			"cls": "items",
 			"name": "骑士剑",
 			"text": "一把很普通的骑士剑",
-			"equipType": 0,
-			"equipEffect": {
-				"atk": 40
-			},
-			"animate": "sword"
+			"equip":{
+				"type": 0,
+				"atk": 40,
+				"animate": "sword"
+			}
 		},
 		"sword4": {
 			"cls": "items",
 			"name": "圣剑",
 			"text": "一把很普通的圣剑",
-			"equipType": 0,
-			"equipEffect": {
-				"atk": 80
-			},
-			"animate": "sword"
+			"equip":{
+				"type": 0,
+				"atk": 80,
+				"animate": "sword"
+			}
 		},
 		"sword5": {
 			"cls": "items",
 			"name": "神圣剑",
 			"text": "一把很普通的神圣剑",
-			"equipType": 0,
-			"equipEffect": {
-				"atk": 100
-			},
-			"animate": "sword"
+			"equip":{
+				"type": 0,
+				"atk": 100,
+				"animate": "sword"
+			}
 		},
 		"shield1": {
 			"cls": "items",
 			"name": "铁盾",
 			"text": "一个很普通的铁盾",
-			"equipType": 1,
-			"equipEffect": {
+			"equip":{
+				"type": 1,
 				"def": 10
-			},
+			}
 		},
 		"shield2": {
 			"cls": "items",
 			"name": "银盾",
 			"text": "一个很普通的银盾",
-			"equipType": 1,
-			"equipEffect": {
+			"equip":{
+				"type": 1,
 				"def": 20
-			},
+			}
 		},
 		"shield3": {
 			"cls": "items",
 			"name": "骑士盾",
 			"text": "一个很普通的骑士盾",
-			"equipType": 1,
-			"equipEffect": {
+			"equip":{
+				"type": 1,
 				"def": 40
-			},
+			}
 		},
 		"shield4": {
 			"cls": "items",
 			"name": "圣盾",
 			"text": "一个很普通的圣盾",
-			"equipType": 1,
-			"equipEffect": {
+			"equip":{
+				"type": 1,
 				"def": 80
-			},
+			}
 		},
 		"shield5": {
 			"cls": "items",
 			"name": "神圣盾",
 			"text": "一个很普通的神圣盾",
-			"equipType": 1,
-			"equipEffect": {
+			"equip":{
+				"type": 1,
 				"def": 100,
 				"mdef": 100
 			},
@@ -268,13 +268,6 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"cls": "tools",
 			"name": "跳跃靴",
 			"text": "能跳跃到前方两格处"
-		},
-		"blank": {
-			"cls": "blank",
-			"name": " ",
-			"text": " ",
-			"equipEffect": {},
-			"animate": "hand"
 		},
 	},
 	"itemEffect": {

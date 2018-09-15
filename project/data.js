@@ -73,8 +73,8 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"money": 100,
 			"experience": 0,
 			"equipment": [
-				"blank",
-				"blank"
+				null,
+				null
 			],
 			"items": {
 				"keys": {

@@ -1059,8 +1059,9 @@ events.prototype.battle = function (id, x, y, force, callback) {
 
         if (core.flags.equipment) {
             var equipId = core.status.hero.equipment[0];
-            if (core.isset(core.material.items[equipId].animate))
-                core.drawAnimate(core.material.items[equipId].animate, x, y);
+            if (core.isset(equipId))
+                if (core.isset(core.material.items[equipId].equip.animate))
+                    core.drawAnimate(core.material.items[equipId].equip.animate, x, y);
         }
         else {
             core.playSound('attack.mp3');

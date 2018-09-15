@@ -98,7 +98,7 @@ items.prototype.hasItem = function (itemId) {
 
 ////// 是否装备某件装备 //////
 items.prototype.hasEquip = function (equipId) {
-    var equiptype = core.material.items[equipId].equiptype;
+    var equiptype = core.material.items[equipId].equip.type;
     return core.status.hero.equipment[equiptype] == equipId;
 }
 
@@ -153,9 +153,9 @@ items.prototype.loadEquip = function (equipId, callback) {
     core.playSound('equip.mp3');
 
     var loadEquip = core.material.items[equipId];
-    var loadEquipType = loadEquip.equipType;
+    var loadEquipType = loadEquip.equip.type;
     var unloadEquipId = core.status.hero.equipment[loadEquipType];
-    
+
     // 比较能力值
     var result = core.compareEquipment(equipId,unloadEquipId);
     
@@ -165,7 +165,6 @@ items.prototype.loadEquip = function (equipId, callback) {
 
     // 更新装备状态
     core.status.hero.equipment[loadEquipType] = equipId;
-
     core.updateStatusBar();
 
     // 记录路线
@@ -177,7 +176,7 @@ items.prototype.loadEquip = function (equipId, callback) {
         delete core.status.hero.items["equips"][equipId];
     
     // 装备更换完毕：增加卸下的装备
-    if (unloadEquipId != "blank")
+    if (core.isset(unloadEquipId))
         core.addItem(unloadEquipId, 1);
 
     if (core.isset(callback)) callback();
@@ -192,15 +191,12 @@ items.prototype.unloadEquip = function (equipType, callback) {
     var unloadEquip = core.material.items[unloadEquipId];
 
     // 处理能力值改变
-    if (core.isset(unloadEquip.equipEffect.atk))
-        core.status.hero.atk -= unloadEquip.equipEffect.atk
-    if (core.isset(unloadEquip.equipEffect.def))
-        core.status.hero.def -= unloadEquip.equipEffect.def
-    if (core.isset(unloadEquip.equipEffect.mdef))
-        core.status.hero.mdef -= unloadEquip.equipEffect.mdef
+    core.status.hero.atk -= unloadEquip.equip.atk || 0;
+    core.status.hero.def -= unloadEquip.equip.def || 0;
+    core.status.hero.mdef -= unloadEquip.equip.mdef || 0;
 
     // 更新装备状态
-    core.status.hero.equipment[equipType] = "blank";
+    core.status.hero.equipment[equipType] = null;
 
     core.updateStatusBar();
 
@@ -214,20 +210,18 @@ items.prototype.unloadEquip = function (equipType, callback) {
 }
 
 items.prototype.compareEquipment = function (compareEquipId, beComparedEquipId) {
-    var compareEquip = core.material.items[compareEquipId];
-    var beComparedEquip = core.material.items[beComparedEquipId];
     var compareAtk = 0, compareDef = 0, compareMdef = 0;
-    if (core.isset(compareEquip.equipEffect.atk))
-        compareAtk += compareEquip.equipEffect.atk;
-    if (core.isset(compareEquip.equipEffect.def))
-        compareDef += compareEquip.equipEffect.def;
-    if (core.isset(compareEquip.equipEffect.mdef))
-        compareMdef += compareEquip.equipEffect.mdef;
-    if (core.isset(beComparedEquip.equipEffect.atk))
-        compareAtk -= beComparedEquip.equipEffect.atk;
-    if (core.isset(beComparedEquip.equipEffect.def))
-        compareDef -= beComparedEquip.equipEffect.def;
-    if (core.isset(beComparedEquip.equipEffect.mdef))
-        compareMdef -= beComparedEquip.equipEffect.mdef;
+    if (core.isset(compareEquipId)) {
+        var compareEquip = core.material.items[compareEquipId];
+        compareAtk += compareEquip.equip.atk || 0;
+        compareDef += compareEquip.equip.def || 0;
+        compareMdef += compareEquip.equip.mdef || 0;
+    }
+    if (core.isset(beComparedEquipId)) {
+        var beComparedEquip = core.material.items[beComparedEquipId];
+        compareAtk -= beComparedEquip.equip.atk || 0;
+        compareDef -= beComparedEquip.equip.def || 0;
+        compareMdef -= beComparedEquip.equip.mdef || 0;
+    }
     return {"atk":compareAtk,"def":compareDef,"mdef":compareMdef};
 }

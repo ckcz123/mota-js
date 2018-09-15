@@ -37,16 +37,15 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_string": true,
                             "_data": "道具在道具栏中显示的描述"
                         },
-                        "equiptype": {
-                            "_leaf": true,
-                            "_type": "textarea",
-                            "_string": true,
-                            "_data": "装备的类别，与equipName按顺序对应"
-                        },
-                        "equipEffect": {
+                        "equip": {
                             "_leaf": false,
                             "_type": "object",
                             "_data": {
+                                "type": {
+                                    "_leaf": true,
+                                    "_type": "textarea",
+                                    "_data": "装备的类别，与equipName按顺序对应"
+                                },
                                 "atk": {
                                     "_leaf": true,
                                     "_type": "textarea",
@@ -62,14 +61,14 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                                     "_type": "textarea",
                                     "_data": "装备增加的魔防数值"
                                 },
+                                "animate": {
+                                    "_leaf": true,
+                                    "_type": "textarea",
+                                    "_string": true,
+                                    "_data": "装备的攻击动画，仅对type为0的装备有效"
+                                }
                             }
-                        },
-                        "animate": {
-                            "_leaf": false,
-                            "_type": "textarea",
-                            "_string": true,
-                            "_data": "装备的攻击动画，仅对equiptype为0的装备有效"
-                        }
+                        }, 
                     }
                 },
                 "itemEffect": {

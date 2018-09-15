@@ -1745,7 +1745,7 @@ ui.prototype.drawEquipbox = function(index) {
         selectId = equipEquipment[index];
     }
     else {
-        if (index-12>=ownEquipment.length) index=12+Math.max(0, ownEquipment.length-1);
+        if (index+12*(page-2)>=ownEquipment.length) index=12+Math.max(0, ownEquipment.length%12-1);
         selectId = ownEquipment[index-12];
         if (!core.hasItem(selectId)) selectId=null;
     }
@@ -1792,75 +1792,65 @@ ui.prototype.drawEquipbox = function(index) {
     
     core.canvas.ui.textAlign = 'left';
 
+    console.log(equipEquipment[0]);
     // 描述
     if (core.isset(selectId)) {
         var equip=core.material.items[selectId];
-        if (equip.cls != "blank") {
-            core.fillText('ui', equip.name, 10, 32, '#FFD700', "bold 20px Verdana")
+        core.fillText('ui', equip.name, 10, 32, '#FFD700', "bold 20px Verdana")
 
-            var text = equip.text||"该装备暂无描述。";
-            var lines = core.splitLines('ui', text, 406, '17px Verdana');
+        var text = equip.text||"该装备暂无描述。";
+        var lines = core.splitLines('ui', text, 406, '17px Verdana');
 
-            core.fillText('ui', lines[0], 10, 62, '#FFFFFF', '17px Verdana'); 
-            
-            // 比较属性
-            if (lines.length==1) {
-                var compare;
-                if (index<12) compare = core.compareEquipment("blank", selectId);
-                else {
-                    compare = core.compareEquipment(selectId, equipEquipment[equip.equipType]);
-                }
-                // 绘制
-                var drawList; //= [['攻击',atk],['防御',def],['魔防',mdef]];var draw;
-                var drawPointer = 0;
-                var color;
-                /*for (var printer = 0; printer<drawList.length; printer++)
-                    if (compare[drawList[printer][1]]!=0) {
-                        if (compare[printer]>0)
-                            color = '#00FF00'
-                        else color = '#FF0000'
-                    draw = drawList[printer][0]+' '+core.status.hero[drawList[printer][1]]+'->'+(core.status.hero[drawList[printer][1]]+compare[drawList[printer][1]])+' ';
-                    drawPointer += draw.length;
-                    core.fillText('ui', draw, 10+drawPointer, 89, color, '14px Verdana');
-                    }*/
-                if (compare.atk!=0) {
-                    if (compare.atk>0) color = '#00FF00';
-                    else color = '#FF0000';
-                    drawList = '攻击 '+core.status.hero.atk+'->';
-                    core.fillText('ui', drawList, 10+drawPointer, 89, '#CCCCCC', 'bold 14px Verdana');
-                    drawPointer += core.canvas.ui.measureText(drawList).width;
-
-                    drawList = (core.status.hero.atk+compare.atk)+'  ';
-                    core.fillText('ui', drawList, 10+drawPointer, 89, color, 'bold 14px Verdana');
-                    drawPointer += core.canvas.ui.measureText(drawList).width;
-                }
-                if (compare.def!=0) {
-                    if (compare.def>0) color = '#00FF00';
-                    else color = '#FF0000';
-                    drawList = '防御 '+core.status.hero.atk+'->';
-                    core.fillText('ui', drawList, 10+drawPointer, 89, '#CCCCCC', 'bold 14px Verdana');
-                    drawPointer += core.canvas.ui.measureText(drawList).width;
-
-                    drawList = (core.status.hero.atk+compare.def)+'   ';
-                    core.fillText('ui', drawList, 10+drawPointer, 89, color, 'bold 14px Verdana');
-                    drawPointer += core.canvas.ui.measureText(drawList).width;
-                }
-                if (compare.mdef!=0) {
-                    if (compare.mdef>0) color = '#00FF00';
-                    else color = '#FF0000';
-                    drawList = '魔防 '+core.status.hero.atk+'->';
-                    core.fillText('ui', drawList, 10+drawPointer, 89, '#CCCCCC', 'bold 14px Verdana');
-                    drawPointer += core.canvas.ui.measureText(drawList).width;
-
-                    drawList = (core.status.hero.atk+compare.mdef)+'    ';
-                    core.fillText('ui', drawList, 10+drawPointer, 89, color, 'bold 14px Verdana');
-                    drawPointer += core.canvas.ui.measureText(drawList).width;
-                }
-            }
+        core.fillText('ui', lines[0], 10, 62, '#FFFFFF', '17px Verdana'); 
+        
+        // 比较属性
+        if (lines.length==1) {
+            var compare;
+            if (index<12) compare = core.compareEquipment(null, selectId);
             else {
-                var leftText = text.substring(lines[0].length);
-                core.fillText('ui', leftText, 10, 89, '#FFFFFF', '17px Verdana');
+                compare = core.compareEquipment(selectId, equipEquipment[equip.equip.type]);
             }
+            // 绘制
+            var drawList; //= [['攻击',atk],['防御',def],['魔防',mdef]];
+            var drawPointer = 0;
+            var color;
+            if (compare.atk!=0) {
+                if (compare.atk>0) color = '#00FF00';
+                else color = '#FF0000';
+                drawList = '攻击 '+core.status.hero.atk+'->';
+                core.fillText('ui', drawList, 10+drawPointer, 89, '#CCCCCC', 'bold 14px Verdana');
+                drawPointer += core.canvas.ui.measureText(drawList).width;
+
+                drawList = (core.status.hero.atk+compare.atk)+'  ';
+                core.fillText('ui', drawList, 10+drawPointer, 89, color, 'bold 14px Verdana');
+                drawPointer += core.canvas.ui.measureText(drawList).width;
+                }
+            if (compare.def!=0) {
+                if (compare.def>0) color = '#00FF00';
+                else color = '#FF0000';
+                drawList = '防御 '+core.status.hero.atk+'->';
+                core.fillText('ui', drawList, 10+drawPointer, 89, '#CCCCCC', 'bold 14px Verdana');
+                drawPointer += core.canvas.ui.measureText(drawList).width;
+
+                drawList = (core.status.hero.atk+compare.def)+'   ';
+                core.fillText('ui', drawList, 10+drawPointer, 89, color, 'bold 14px Verdana');
+                drawPointer += core.canvas.ui.measureText(drawList).width;
+            }
+            if (compare.mdef!=0) {
+                if (compare.mdef>0) color = '#00FF00';
+                else color = '#FF0000';
+                drawList = '魔防 '+core.status.hero.atk+'->';
+                core.fillText('ui', drawList, 10+drawPointer, 89, '#CCCCCC', 'bold 14px Verdana');
+                drawPointer += core.canvas.ui.measureText(drawList).width;
+
+                drawList = (core.status.hero.atk+compare.mdef)+'    ';
+                core.fillText('ui', drawList, 10+drawPointer, 89, color, 'bold 14px Verdana');
+                drawPointer += core.canvas.ui.measureText(drawList).width;
+            }
+        }
+        else {
+            var leftText = text.substring(lines[0].length);
+            core.fillText('ui', leftText, 10, 89, '#FFFFFF', '17px Verdana');
         }
     }
 
@@ -1870,20 +1860,13 @@ ui.prototype.drawEquipbox = function(index) {
     // 当前装备
     for (var i = 0 ; i < core.status.hero.equipment.length ; i++) {
         var equipId = core.status.hero.equipment[i];
-        if (!core.isset(equipId)) break;
-        var icon = core.material.icons.items[equipId];
-        if (i<3) {
-            core.fillText('ui', main.equipName[i], 16*(8*i+1)+40, 144+32-ydelta, '#FFFFFF', "bold 16px Verdana");
-            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(8*i+5)+5, 144+5-ydelta, 32, 32)
-            if (index == i)
-                core.strokeRect('ui', 16*(8*i+5)+1, 144+1-ydelta, 40, 40, '#FFD700');
+        if (core.isset(equipId)) {
+            var icon = core.material.icons.items[equipId];
+            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(8*(i%3)+5)+5, 144+Math.floor(i/3)*64+5-ydelta, 32, 32);
         }
-        else {
-            core.fillText('ui', main.equipName[i], 16*(8*(i-3)+1)+40, 144+64+32-ydelta, '#FFFFFF', "bold 16px Verdana");
-            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(8*(i-3)+5)+5, 144+64+5-ydelta, 32, 32)
-            if (index == i)
-                core.strokeRect('ui', 16*(8*(i-3)+5)+1, 144+64+1-ydelta, 40, 40, '#FFD700');
-        }
+        core.fillText('ui', main.equipName[i], 16*(8*(i%3)+1)+40, 144+Math.floor(i/3)*64+32-ydelta, '#FFFFFF', "bold 16px Verdana");
+        if (index == i)
+            core.strokeRect('ui', 16*(8*(i%3)+5)+1, 144+Math.floor(i/3)*64+1-ydelta, 40, 40, '#FFD700');
     }
 
     // 现有装备 

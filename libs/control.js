@@ -1953,7 +1953,6 @@ control.prototype.replay = function () {
                 core.status.event.data = {"toolsPage":1, "constantsPage":Math.floor(index/12)+1, "selectId":null}
                 index = index%12+12;    
             }
-            else return;
             core.ui.drawToolbox(index);
                 setTimeout(function () {
                     core.ui.closePanel();
@@ -1966,7 +1965,7 @@ control.prototype.replay = function () {
     }
     else if (action.indexOf("unEquip:")==0) {
         var unloadEquipId = action.substring(8);
-        var equipType = core.material.items[unloadEquipId].equipType;
+        var equipType = core.material.items[unloadEquipId].equip.type;
         core.ui.drawEquipbox(equipType);
         setTimeout(function () {
             core.ui.closePanel();

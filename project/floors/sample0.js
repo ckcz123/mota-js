@@ -203,7 +203,7 @@ main.floors.sample0=
         "在 data.js 的系统Flag中设置是否启用装备栏按钮。\n如果启用则装备栏按钮会替代楼传按钮。"
     ],
     "12,5": [
-        "装备的种类由全塔属性中的equipName决定,equiptype的值就是该类型在equipName中的顺序，例如默认情况下equiptype为0代表武器，同时只有euqiptype为0的装备的攻击动画生效"
+        "装备的种类由全塔属性中的equipName决定,type的值就是该类型在equipName中的位次，例如默认情况下equiptype为0代表武器，同时只有type为0的装备的animate属性生效"
     ]
 },
 "afterOpenDoor": {

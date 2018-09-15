@@ -1183,116 +1183,7 @@ control.prototype.updateFollowers = function () {
 
 ////// 更新领域、夹击、阻击的伤害地图 //////
 control.prototype.updateCheckBlock = function() {
-    core.status.checkBlock = {};
-    if (!core.isset(core.status.thisMap)) return;
-    var blocks = core.status.thisMap.blocks;
-
-    // Step1: 更新怪物地图
-    core.status.checkBlock.map = []; // 记录怪物地图
-    for (var n=0;n<blocks.length;n++) {
-        var block = blocks[n];
-        if (core.isset(block.event) && !block.disable && block.event.cls.indexOf('enemy')==0) {
-            var id = block.event.id, enemy = core.material.enemys[id];
-            if (core.isset(enemy)) {
-                core.status.checkBlock.map[block.x+core.bigmap.width*block.y]=id;
-            }
-        }
-        // 血网
-        if (core.isset(block.event) && !block.disable &&
-            block.event.id=='lavaNet' && block.event.trigger=='passNet' && !core.hasItem("shoes")) {
-            core.status.checkBlock.map[block.x+core.bigmap.width*block.y]="lavaNet";
-        }
-    }
-
-    // Step2: 更新领域、阻击伤害
-    core.status.checkBlock.damage = []; // 记录(x,y)点的伤害
-    for (var x=0;x<core.bigmap.width*core.bigmap.height;x++) core.status.checkBlock.damage[x]=0;
-
-    for (var x=0;x<core.bigmap.width;x++) {
-        for (var y=0;y<core.bigmap.height;y++) {
-            var id = core.status.checkBlock.map[x+core.bigmap.width*y];
-            if (core.isset(id)) {
-
-                if (id=="lavaNet") {
-                    core.status.checkBlock.damage[x+core.bigmap.width*y]+=core.values.lavaDamage||0;
-                    continue;
-                }
-
-                var enemy = core.material.enemys[id];
-                // 存在领域
-                if (core.enemys.hasSpecial(enemy.special, 15)) {
-                    var range = enemy.range || 1;
-                    var zoneSquare = false;
-                    if (core.isset(enemy.zoneSquare)) zoneSquare=enemy.zoneSquare;
-                    for (var dx=-range;dx<=range;dx++) {
-                        for (var dy=-range;dy<=range;dy++) {
-                            if (dx==0 && dy==0) continue;
-                            var nx=x+dx, ny=y+dy;
-                            if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height) continue;
-                            if (!zoneSquare && Math.abs(dx)+Math.abs(dy)>range) continue;
-                            core.status.checkBlock.damage[nx+ny*core.bigmap.width]+=enemy.value||0;
-                        }
-                    }
-                }
-                // 存在激光
-                if (core.enemys.hasSpecial(enemy.special, 24)) {
-                    for (var nx=0;nx<core.bigmap.width;nx++) {
-                        if (nx!=x) core.status.checkBlock.damage[nx+y*core.bigmap.width]+=enemy.value||0;
-                    }
-                    for (var ny=0;ny<core.bigmap.height;ny++) {
-                        if (ny!=y) core.status.checkBlock.damage[x+ny*core.bigmap.width]+=enemy.value||0;
-                    }
-                }
-                // 存在阻击
-                if (core.enemys.hasSpecial(enemy.special, 18)) {
-                    for (var dx=-1;dx<=1;dx++) {
-                        for (var dy=-1;dy<=1;dy++) {
-                            if (dx==0 && dy==0) continue;
-                            var nx=x+dx, ny=y+dy;
-                            if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height || Math.abs(dx)+Math.abs(dy)>1) continue;
-                            core.status.checkBlock.damage[nx+ny*core.bigmap.width]+=enemy.value||0;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
-    // Step3: 更新夹击点坐标，并将夹击伤害加入到damage中
-    core.status.checkBlock.betweenAttack = []; // 记录(x,y)点是否有夹击
-    for (var x=0;x<core.bigmap.width;x++) {
-        for (var y=0;y<core.bigmap.height;y++) {
-            var has=false;
-            if (x>0 && x<core.bigmap.width-1) {
-                var id1=core.status.checkBlock.map[x-1+core.bigmap.width*y],
-                    id2=core.status.checkBlock.map[x+1+core.bigmap.height*y];
-                if (core.isset(id1) && core.isset(id2) && id1==id2) {
-                    var enemy = core.material.enemys[id1];
-                    if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {
-                        has = true;
-                    }
-                }
-            }
-            if (y>0 && y<core.bigmap.height-1) {
-                var id1=core.status.checkBlock.map[x+core.bigmap.width*(y-1)],
-                    id2=core.status.checkBlock.map[x+core.bigmap.width*(y+1)];
-                if (core.isset(id1) && core.isset(id2) && id1==id2) {
-                    var enemy = core.material.enemys[id1];
-                    if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {
-                        has = true;
-                    }
-                }
-            }
-            // 存在夹击
-            if (has) {
-                core.status.checkBlock.betweenAttack[x+core.bigmap.width*y]=true;
-                var leftHp = core.status.hero.hp - core.status.checkBlock.damage[x+core.bigmap.width*y];
-                if (leftHp>1)
-                    core.status.checkBlock.damage[x+core.bigmap.width*y] += Math.floor((leftHp+(core.flags.betweenAttackCeil?0:1))/2);
-            }
-        }
-    }
+    return core.enemys.updateCheckBlock();
 }
 
 ////// 检查并执行领域、夹击、阻击事件 //////
@@ -1944,23 +1835,25 @@ control.prototype.replay = function () {
         if (core.canUseItem(itemId)) {
             var tools = Object.keys(core.status.hero.items.tools).sort();
             var constants = Object.keys(core.status.hero.items.constants).sort();
-            var index;
+            var index=-1;
             if ((index=tools.indexOf(itemId))>=0) {
-                core.status.event.data = {"toolsPage":Math.floor(index/12)+1, "constantsPage":1, "selectId":null}
+                core.status.event.data = {"toolsPage":Math.floor(index/12)+1, "constantsPage":1, "selectId":null};
                 index = index%12;
             }
             else if (index=constants.indexOf(itemId)>=0) {
-                core.status.event.data = {"toolsPage":1, "constantsPage":Math.floor(index/12)+1, "selectId":null}
+                core.status.event.data = {"toolsPage":1, "constantsPage":Math.floor(index/12)+1, "selectId":null};
                 index = index%12+12;    
             }
-            core.ui.drawToolbox(index);
+            if (index>=0) {
+                core.ui.drawToolbox(index);
                 setTimeout(function () {
                     core.ui.closePanel();
                     core.useItem(itemId, function () {
                         core.replay();
                     });
                 }, 750 / Math.max(1, core.status.replay.speed));
-            return;
+                return;
+            }
         }
     }
     else if (action.indexOf("unEquip:")==0) {
@@ -1979,16 +1872,18 @@ control.prototype.replay = function () {
         var equipId = action.substring(6);
         var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
         var index = ownEquipment.indexOf(equipId);
-        core.status.event.data = {"page":Math.floor(index/12)+1, "selectId":null}
-        index = index%12+12;
-        core.ui.drawEquipbox(index);
-        setTimeout(function () {
-            core.ui.closePanel();
-            core.loadEquip(equipId, function () {
-                core.replay();
-            }); 
-        }, 750 / Math.max(1, core.status.replay.speed));
-        return;
+        if (index>=0) {
+            core.status.event.data = {"page":Math.floor(index/12)+1, "selectId":null};
+            index = index%12+12;
+            core.ui.drawEquipbox(index);
+            setTimeout(function () {
+                core.ui.closePanel();
+                core.loadEquip(equipId, function () {
+                    core.replay();
+                });
+            }, 750 / Math.max(1, core.status.replay.speed));
+            return;
+        }
     }
     else if (action.indexOf("fly:")==0) {
         var floorId=action.substring(4);
@@ -2691,7 +2586,7 @@ control.prototype.clearStatusBar = function() {
         core.statusBar[e].innerHTML = "&nbsp;";
     });
     core.statusBar.image.book.style.opacity = 0.3;
-    if (!core.flags.equipboxBotton) {
+    if (!core.flags.equipboxButton) {
         core.statusBar.image.fly.style.opacity = 0.3;
     }
 }
@@ -2769,7 +2664,7 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.image.book.src = core.statusBar.icons.book.src;
         core.statusBar.image.book.style.opacity = core.hasItem('book')?1:0.3;
 
-        if (!core.flags.equipboxBotton) {
+        if (!core.flags.equipboxButton) {
             core.statusBar.image.fly.src = core.statusBar.icons.fly.src;
             core.statusBar.image.fly.style.opacity = core.hasItem('fly')?1:0.3;
         }

@@ -98,8 +98,12 @@ items.prototype.hasItem = function (itemId) {
 
 ////// 是否装备某件装备 //////
 items.prototype.hasEquip = function (equipId) {
+
+    if (!core.isset(equipId)) return null;
+    if (!core.isset((core.material.items[equipId]||{}).equip)) return null;
+
     var equiptype = core.material.items[equipId].equip.type;
-    return core.status.hero.equipment[equiptype] == equipId;
+    return equipId == (core.status.hero.equipment||[])[equiptype];
 }
 
 ////// 设置某个物品的个数 //////
@@ -149,10 +153,16 @@ items.prototype.addItem = function (itemId, itemNum) {
 
 ////// 换上 //////
 items.prototype.loadEquip = function (equipId, callback) {
-    
+
+    if (!core.isset(core.status.hero.equipment)) core.status.hero.equipment = [];
+
     core.playSound('equip.mp3');
 
     var loadEquip = core.material.items[equipId];
+    if (!core.isset(loadEquip)) {
+        if (core.isset(callback)) callback();
+        return;
+    }
     var loadEquipType = loadEquip.equip.type;
     var unloadEquipId = core.status.hero.equipment[loadEquipType];
 
@@ -171,23 +181,29 @@ items.prototype.loadEquip = function (equipId, callback) {
     core.status.route.push("equip:"+equipId);
 
     // 装备更换完毕：删除换上的装备
-    core.status.hero.items["equips"][equipId]--;
-    if (core.status.hero.items["equips"][equipId]==0)
-        delete core.status.hero.items["equips"][equipId];
+    core.removeItem(equipId);
     
     // 装备更换完毕：增加卸下的装备
     if (core.isset(unloadEquipId))
         core.addItem(unloadEquipId, 1);
+
+    core.log("已装备上"+loadEquip.name, core.material.icons.items[equipId]);
 
     if (core.isset(callback)) callback();
 }
 
 ////// 卸下 //////
 items.prototype.unloadEquip = function (equipType, callback) {
-    
+
+    if (!core.isset(core.status.hero.equipment)) core.status.hero.equipment = [];
+
     core.playSound('equip.mp3');
 
     var unloadEquipId = core.status.hero.equipment[equipType];
+    if (!core.isset(unloadEquipId)) {
+        if (core.isset(callback)) callback();
+        return;
+    }
     var unloadEquip = core.material.items[unloadEquipId];
 
     // 处理能力值改变
@@ -206,6 +222,8 @@ items.prototype.unloadEquip = function (equipType, callback) {
     // 装备更换完毕：增加卸下的装备
     core.addItem(unloadEquipId, 1);
 
+    core.drawTip("已卸下"+unloadEquip.name, core.material.icons.items[unloadEquipId]);
+
     if (core.isset(callback)) callback();
 }
 
@@ -213,15 +231,15 @@ items.prototype.compareEquipment = function (compareEquipId, beComparedEquipId) 
     var compareAtk = 0, compareDef = 0, compareMdef = 0;
     if (core.isset(compareEquipId)) {
         var compareEquip = core.material.items[compareEquipId];
-        compareAtk += compareEquip.equip.atk || 0;
-        compareDef += compareEquip.equip.def || 0;
-        compareMdef += compareEquip.equip.mdef || 0;
+        compareAtk += (compareEquip.equip||{}).atk || 0;
+        compareDef += (compareEquip.equip||{}).def || 0;
+        compareMdef += (compareEquip.equip||{}).mdef || 0;
     }
     if (core.isset(beComparedEquipId)) {
         var beComparedEquip = core.material.items[beComparedEquipId];
-        compareAtk -= beComparedEquip.equip.atk || 0;
-        compareDef -= beComparedEquip.equip.def || 0;
-        compareMdef -= beComparedEquip.equip.mdef || 0;
+        compareAtk -= (beComparedEquip.equip||{}).atk || 0;
+        compareDef -= (beComparedEquip.equip||{}).def || 0;
+        compareMdef -= (beComparedEquip.equip||{}).mdef || 0;
     }
     return {"atk":compareAtk,"def":compareDef,"mdef":compareMdef};
 }

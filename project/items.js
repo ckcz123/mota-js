@@ -45,8 +45,18 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"cls": "items",
 			"name": "绿血瓶"
 		},
+		"sword0": {
+			"cls": "items",
+			"name": "破旧的剑",
+			"text": "一把已经生锈的剑",
+			"equip": {
+				"type": 0,
+				"atk": 0,
+				"animate": "sword"
+			}
+		},
 		"sword1": {
-			"cls": "item",
+			"cls": "items",
 			"name": "铁剑",
 			"text": "一把很普通的铁剑",
 			"equip":{
@@ -93,6 +103,15 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 				"type": 0,
 				"atk": 100,
 				"animate": "sword"
+			}
+		},
+		"shield0": {
+			"cls": "items",
+			"name": "破旧的盾",
+			"text": "一个很破旧的铁盾",
+			"equip": {
+				"type": 1,
+				"def": 0
 			}
 		},
 		"shield1": {
@@ -279,11 +298,13 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"bluePotion": "core.status.hero.hp += core.values.bluePotion * ratio",
 		"yellowPotion": "core.status.hero.hp += core.values.yellowPotion * ratio",
 		"greenPotion": "core.status.hero.hp += core.values.greenPotion * ratio",
+		"sword0": "core.status.hero.atk += 0",
 		"sword1": "core.status.hero.atk += 10",
 		"sword2": "core.status.hero.atk += 20",
 		"sword3": "core.status.hero.atk += 40",
 		"sword4": "core.status.hero.atk += 80",
 		"sword5": "core.status.hero.atk += 100",
+		"shield0": "core.status.hero.def += 0",
 		"shield1": "core.status.hero.def += 10",
 		"shield2": "core.status.hero.def += 20",
 		"shield3": "core.status.hero.def += 40",
@@ -302,16 +323,18 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"bluePotion": "'，生命+'+core.values.bluePotion * ratio",
 		"yellowPotion": "'，生命+'+core.values.yellowPotion * ratio",
 		"greenPotion": "'，生命+'+core.values.greenPotion * ratio",
-		"sword1": "，攻击+10",
-		"sword2": "，攻击+20",
-		"sword3": "，攻击+40",
-		"sword4": "，攻击+80",
-		"sword5": "，攻击+100",
-		"shield1": "，防御+10",
-		"shield2": "，防御+20",
-		"shield3": "，防御+40",
-		"shield4": "，防御+80",
-		"shield5": "，防御+100，魔防+100",
+		"sword0": "'，攻击+0'",
+		"sword1": "'，攻击+10'",
+		"sword2": "'，攻击+20'",
+		"sword3": "'，攻击+40'",
+		"sword4": "'，攻击+80'",
+		"sword5": "'，攻击+100'",
+		"shield0": "'，防御+0'",
+		"shield1": "'，防御+10'",
+		"shield2": "'，防御+20'",
+		"shield3": "'，防御+40'",
+		"shield4": "'，防御+80'",
+		"shield5": "'，防御+100，魔防+100'",
 		"bigKey": "'，全钥匙+1'",
 		"superPotion": "'，生命值翻倍'",
 		"moneyPocket": "'，金币+'+core.values.moneyPocket"

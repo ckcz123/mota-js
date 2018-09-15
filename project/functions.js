@@ -16,7 +16,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.flags.snowFourDirections)
 		core.material.items.bomb.text = "可以将四周的熔岩变成平地";
 	// 是否启用装备栏
-	if (core.flags.equipboxBotton) {
+	if (core.flags.equipboxButton) {
 		core.statusBar.image.fly.src = core.statusBar.icons.equipbox.src;
 		core.flags.equipment = true;
 	}
@@ -221,9 +221,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 在这里增加其他的自定义事件需求
 	/*
 	if (enemyId=='xxx') {
-	    core.unshift(todo, [
-	        {"type": "...", ...},
-        ]);
+		core.unshift(todo, [
+			{"type": "...", ...},
+		]);
 	}
 	*/
 
@@ -264,6 +264,24 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	else {
 		core.clearContinueAutomaticRoute();
 	}
+	if (core.isset(callback)) callback();
+},
+////// 获得一个道具后触发的事件 //////
+"afterGetItem" : function(itemId,x,y,callback) {
+	// 获得一个道具后触发的事件
+
+	var todo = [];
+	if (core.isset(x) && core.isset(y)) {
+		var event = core.floors[core.status.floorId].afterGetItem[x+","+y];
+		if (core.isset(event)) {
+			core.unshift(todo, event);
+		}
+	}
+
+	if (todo.length>0) {
+		core.events.insertAction(todo,x,y);
+	}
+
 	if (core.isset(callback)) callback();
 },
 ////// 改变亮灯之后，可以触发的事件 //////
@@ -448,6 +466,125 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		"turn": turn,
 		"damage": damage
 	};
+},
+"updateCheckBlock": function () {
+	// 领域、夹击、阻击等的伤害值计算
+
+	core.status.checkBlock = {};
+	if (!core.isset(core.status.thisMap)) return;
+	var blocks = core.status.thisMap.blocks;
+
+	// Step1: 更新怪物地图
+	core.status.checkBlock.map = []; // 记录怪物地图
+	for (var n=0;n<blocks.length;n++) {
+		var block = blocks[n];
+		if (core.isset(block.event) && !block.disable && block.event.cls.indexOf('enemy')==0) {
+			var id = block.event.id, enemy = core.material.enemys[id];
+			if (core.isset(enemy)) {
+				core.status.checkBlock.map[block.x+core.bigmap.width*block.y]=id;
+			}
+		}
+		// 血网
+		if (core.isset(block.event) && !block.disable &&
+			block.event.id=='lavaNet' && block.event.trigger=='passNet' && !core.hasItem("shoes")) {
+			core.status.checkBlock.map[block.x+core.bigmap.width*block.y]="lavaNet";
+		}
+	}
+
+	// Step2: 更新领域、阻击伤害
+	core.status.checkBlock.damage = []; // 记录(x,y)点的伤害；(x,y)对应的值是 x+y*core.bigmap
+	for (var x=0;x<core.bigmap.width*core.bigmap.height;x++) core.status.checkBlock.damage[x]=0;
+
+	for (var x=0;x<core.bigmap.width;x++) {
+		for (var y=0;y<core.bigmap.height;y++) {
+			var id = core.status.checkBlock.map[x+core.bigmap.width*y];
+			if (core.isset(id)) {
+
+				if (id=="lavaNet") {
+					core.status.checkBlock.damage[x+core.bigmap.width*y]+=core.values.lavaDamage||0;
+					continue;
+				}
+
+				var enemy = core.material.enemys[id];
+				// 存在领域
+				// 如果要防止领域伤害，可以直接简单的将 flag:no_zone 设为true
+				if (core.enemys.hasSpecial(enemy.special, 15) && !core.hasFlag("no_zone")) {
+					var range = enemy.range || 1;
+					var zoneSquare = false;
+					if (core.isset(enemy.zoneSquare)) zoneSquare=enemy.zoneSquare;
+					for (var dx=-range;dx<=range;dx++) {
+						for (var dy=-range;dy<=range;dy++) {
+							if (dx==0 && dy==0) continue;
+							var nx=x+dx, ny=y+dy;
+							if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height) continue;
+							if (!zoneSquare && Math.abs(dx)+Math.abs(dy)>range) continue;
+							core.status.checkBlock.damage[nx+ny*core.bigmap.width]+=enemy.value||0;
+						}
+					}
+				}
+				// 存在激光
+				// 如果要防止激光伤害，可以直接简单的将 flag:no_laser 设为true
+				if (core.enemys.hasSpecial(enemy.special, 24) && !core.hasFlag("no_laser")) {
+					for (var nx=0;nx<core.bigmap.width;nx++) {
+						if (nx!=x) core.status.checkBlock.damage[nx+y*core.bigmap.width]+=enemy.value||0;
+					}
+					for (var ny=0;ny<core.bigmap.height;ny++) {
+						if (ny!=y) core.status.checkBlock.damage[x+ny*core.bigmap.width]+=enemy.value||0;
+					}
+				}
+				// 存在阻击
+				// 如果要防止阻击伤害，可以直接简单的将 flag:no_snipe 设为true
+				if (core.enemys.hasSpecial(enemy.special, 18) && !core.hasFlag("no_snipe")) {
+					for (var dx=-1;dx<=1;dx++) {
+						for (var dy=-1;dy<=1;dy++) {
+							if (dx==0 && dy==0) continue;
+							var nx=x+dx, ny=y+dy;
+							if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height || Math.abs(dx)+Math.abs(dy)>1) continue;
+							core.status.checkBlock.damage[nx+ny*core.bigmap.width]+=enemy.value||0;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Step3: 更新夹击点坐标，并将夹击伤害加入到damage中
+	core.status.checkBlock.betweenAttack = []; // 记录(x,y)点是否有夹击
+	// 如果要防止夹击伤害，可以简单的将 flag:no_betweenAttack 设为true
+	if (!core.hasFlag('no_betweenAttack')) {
+		for (var x=0;x<core.bigmap.width;x++) {
+			for (var y=0;y<core.bigmap.height;y++) {
+				var has=false;
+				if (x>0 && x<core.bigmap.width-1) {
+					var id1=core.status.checkBlock.map[x-1+core.bigmap.width*y],
+						id2=core.status.checkBlock.map[x+1+core.bigmap.height*y];
+					if (core.isset(id1) && core.isset(id2) && id1==id2) {
+						var enemy = core.material.enemys[id1];
+						if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {
+							has = true;
+						}
+					}
+				}
+				if (y>0 && y<core.bigmap.height-1) {
+					var id1=core.status.checkBlock.map[x+core.bigmap.width*(y-1)],
+						id2=core.status.checkBlock.map[x+core.bigmap.width*(y+1)];
+					if (core.isset(id1) && core.isset(id2) && id1==id2) {
+						var enemy = core.material.enemys[id1];
+						if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {
+							has = true;
+						}
+					}
+				}
+				// 计算夹击伤害
+				if (has) {
+					core.status.checkBlock.betweenAttack[x+core.bigmap.width*y]=true;
+					var leftHp = core.status.hero.hp - core.status.checkBlock.damage[x+core.bigmap.width*y];
+					if (leftHp>1)
+						core.status.checkBlock.damage[x+core.bigmap.width*y] += Math.floor((leftHp+(core.flags.betweenAttackCeil?0:1))/2);
+				}
+			}
+		}
+	}
 },
 "updateEnemys" : function () {
 	// 更新怪物数据，可以在这里对怪物属性和数据进行动态更新，详见文档——事件——怪物数据的动态修改

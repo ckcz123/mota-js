@@ -55,6 +55,12 @@ functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_lint": true,
                     "_data": "开一个门后触发的事件"
                 },
+                "afterGetItem": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "获得一个道具后触发的事件"
+                },
                 "afterChangeLight": {
                     "_leaf": true,
                     "_type": "textarea",
@@ -102,6 +108,12 @@ functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "textarea",
                     "_lint": true,
                     "_data": "获得战斗伤害信息（实际伤害计算函数）"
+                },
+                "updateCheckBlock": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "领域、阻击、夹击的伤害计算函数"
                 },
                 "updateEnemys": {
                     "_leaf": true,

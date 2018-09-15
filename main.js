@@ -397,7 +397,7 @@ main.statusBar.image.fly.onclick = function () {
     }
 
     if (main.core.isPlaying()) {
-        if (!main.core.flags.equipboxBotton) {
+        if (!main.core.flags.equipboxButton) {
             main.core.useFly(true);
         }
         else {

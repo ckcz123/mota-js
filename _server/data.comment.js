@@ -47,6 +47,11 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "textarea",
                     "_data": "难度选择:每个数组的第一个是其在标题界面显示的难度,第二个是在游戏内部传输的字符串,会显示在状态栏,修改此处后需要在project/functions中作相应更改"
                 },
+                "equipName": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_data": "装备位名称,为不超过6个的数组，此项的顺序与equiptype数值关联"
+                },
                 "statusLeftBackground": {
                     "_leaf": true,
                     "_type": "textarea",
@@ -144,6 +149,11 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_type": "textarea",
                             "_data": "初始经验"
                         },
+                        "equipment": {
+                            "_leaf": true,
+                            "_type": "textarea",
+                            "_data": "初始装备"
+                        },
                         "items": {
                             "_leaf": false,
                             "_type": "object",
@@ -162,6 +172,11 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                                     "_leaf": true,
                                     "_type": "textarea",
                                     "_data": "初始消耗道具个数，例如初始有两破可以写 {\"pickaxe\": 2}"
+                                }, 
+                                "equips": {
+                                    "_leaf": true,
+                                    "_type": "textarea",
+                                    "_data": "初始装备个数，例如初始送铁剑可以写 {\"sword1\": 1}"
                                 }
                             }
                         },
@@ -275,66 +290,6 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "textarea",
                     "_data": "绿血瓶加血数值"
-                },
-                "sword0": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_data": "空剑的攻击力，此项请保持为0"
-                },
-                "shield0": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_data": "空盾的防御力，此项请保持为0"
-                },
-                "sword1": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_data": "铁剑加攻数值"
-                },
-                "shield1": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_data": "铁盾加防数值"
-                },
-                "sword2": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_data": "银剑加攻数值"
-                },
-                "shield2": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_data": "银盾加防数值"
-                },
-                "sword3": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_data": "骑士剑加攻数值"
-                },
-                "shield3": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_data": "骑士盾加防数值"
-                },
-                "sword4": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_data": "圣剑加攻数值"
-                },
-                "shield4": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_data": "圣盾加防数值"
-                },
-                "sword5": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_data": "神圣剑加攻数值"
-                },
-                "shield5": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_data": "神圣盾加防数值"
                 },
                 "moneyPocket": {
                     "_leaf": true,
@@ -472,7 +427,13 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "checkbox",
                     "_bool": "bool",
-                    "_data": "剑和盾是否直接作为装备。如果此项为true，则作为装备，需要在道具栏使用，否则将直接加属性。"
+                    "_data": "剑和盾是否作为装备。如果此项为true，则作为装备，需要在装备栏使用，否则将直接加属性。"
+                },
+                "equipboxBotton": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "若此项为true则将状态栏中的楼层转换器按钮换为装备栏按钮，同时启用装备栏，无论equipment是否为true"
                 },
                 /*
                 "enableDeleteItem": {

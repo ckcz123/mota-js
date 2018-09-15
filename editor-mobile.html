@@ -211,6 +211,7 @@
             <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas>
             <canvas class='gameCanvas' id='event' width='416' height='416'></canvas>
             <canvas class='gameCanvas' id='event2' width='416' height='416'></canvas>
+            <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
             <canvas class='gameCanvas' id='efg' width='416' height='416'></canvas>
             <canvas class='egameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
         </div>
@@ -268,17 +269,22 @@
                     <option value="functions">脚本编辑</option>
                     <option value="appendpic">追加素材</option>
                 </select>
-                <select id="brushMod">
+                <select id="brushMod" style="clear:right">
                     <option value="line">画线</option>
                     <option value="rectangle">画矩形</option>
                 </select>
-                <div id="viewportButtons">
-                    <input type="button" value="←"/>
-                    <input type="button" value="↑"/>
-                    <input type="button" value="↓"/>
-                    <input type="button" value="→"/>
+                <select id="layerMod" style="float:left;margin-right:6px">
+                    <option value="fgmap">前景</option>
+                    <option value="map" selected="selected">事件</option>
+                    <option value="bgmap">背景</option>
+                </select>
+                <div id="viewportButtons" style="float:left">
+                    <input type="button" style="padding:1px 1px" value="←"/>
+                    <input type="button" style="padding:1px 6px" value="↑"/>
+                    <input type="button" style="padding:1px 6px" value="↓"/>
+                    <input type="button" style="padding:1px 1px" value="→"/>
                 </div>
-                <select id="selectFloor"></select>
+                <select id="selectFloor" style="clear:left"></select>
                 <input type="button" value="保存地图" id='saveFloor'/>
                 <span id='mobileeditdata' style="display:none">
                     <input type="button" value="编辑"/>
@@ -406,7 +412,7 @@
         <!-- <canvas class='gameCanvas' id='event' width='416' height='416'></canvas> -->
         <canvas class='gameCanvas' id='hero' width='416' height='416'></canvas>
         <!-- <canvas class='gameCanvas' id='event2' width='416' height='416'></canvas> -->
-        <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
+        <!-- <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas> -->
         <canvas class='gameCanvas' id='damage' width='416' height='416'></canvas>
         <canvas class='gameCanvas' id='animate' width='416' height='416'></canvas>
         <canvas class='gameCanvas' id='weather' width='416' height='416'></canvas>

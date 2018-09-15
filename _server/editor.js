@@ -2,6 +2,7 @@ function editor() {
     this.version = "2.0";
     this.material = {};
     this.brushMod = "line";//["line","rectangle"]
+    this.layerMod = "map";//["fgmap","map","bgmap"]
 }
 
 editor.prototype.init = function (callback) {
@@ -12,14 +13,7 @@ editor.prototype.init = function (callback) {
 
         editor.reset(function () {
             editor.drawMapBg();
-            var mapArray = core.maps.save(core.status.maps, core.status.floorId);
-            editor.map = mapArray.map(function (v) {
-                return v.map(function (v) {
-                    return editor.ids[[editor.indexs[parseInt(v)][0]]]
-                })
-            });
-            editor.currentFloorId = core.status.floorId;
-            editor.currentFloorData = core.floors[core.status.floorId];
+            editor.fetchMapFromCore();
             editor.updateMap();
             editor.buildMark();
             editor.drawEventBlock();
@@ -170,7 +164,11 @@ editor.prototype.mapInit = function () {
             editor.map[y][x] = 0;
         }
     }
+    editor.fgmap=JSON.parse(JSON.stringify(editor.map));
+    editor.bgmap=JSON.parse(JSON.stringify(editor.map));
     editor.currentFloorData.map = editor.map;
+    editor.currentFloorData.fgmap = editor.fgmap;
+    editor.currentFloorData.bgmap = editor.bgmap;
     editor.currentFloorData.firstArrive = [];
     editor.currentFloorData.events = {};
     editor.currentFloorData.changeFloor = {};
@@ -180,12 +178,15 @@ editor.prototype.mapInit = function () {
     editor.currentFloorData.cannotMove = {};
 }
 editor.prototype.drawMapBg = function (img) {
-    var bgc = bg.getContext('2d');
+    return;
+
+    //legacy
     if (!core.isset(editor.bgY) || editor.bgY == 0) {
         editor.main.editor.drawMapBg();
         return;
     }
 
+    var bgc = bg.getContext('2d');
     for (var ii = 0; ii < 13; ii++)
         for (var jj = 0; jj < 13; jj++) {
             bgc.clearRect(ii * 32, jj * 32, 32, 32);
@@ -256,6 +257,8 @@ editor.prototype.updateMap = function () {
     }
     // 绘制地图 start
     var eventCtx = document.getElementById('event').getContext("2d");
+    var fgCtx = document.getElementById('fg').getContext("2d");
+    var bgCtx = document.getElementById('bg').getContext("2d");
     for (var y = 0; y < editor.map.length; y++)
         for (var x = 0; x < editor.map[0].length; x++) {
             var tileInfo = editor.map[y][x];
@@ -263,6 +266,10 @@ editor.prototype.updateMap = function () {
                 addIndexToAutotileInfo(x, y);
                 drawAutotile(eventCtx, x, y, tileInfo);
             } else drawTile(eventCtx, x, y, tileInfo);
+            tileInfo = editor.fgmap[y][x];
+            drawTile(fgCtx, x, y, tileInfo);
+            tileInfo = editor.bgmap[y][x];
+            drawTile(bgCtx, x, y, tileInfo);
         }
     // 绘制地图 end
     
@@ -326,26 +333,45 @@ editor.prototype.buildMark = function(){
     }
 }
 
-editor.prototype.changeFloor = function (floorId, callback) {
-    editor.currentFloorData.map = editor.map.map(function (v) {
+editor.prototype.fetchMapFromCore = function(){
+    var mapArray = core.maps.save(core.status.maps, core.status.floorId);
+    editor.map = mapArray.map(function (v) {
         return v.map(function (v) {
-            return v.idnum || v || 0
+            return editor.ids[[editor.indexs[parseInt(v)][0]]]
         })
     });
+    editor.currentFloorId = core.status.floorId;
+    editor.currentFloorData = core.floors[core.status.floorId];
+    for(var ii=0,name;name=['bgmap','fgmap'][ii];ii++){
+        var mapArray = editor.currentFloorData[name];
+        if(!mapArray || JSON.stringify(mapArray)==JSON.stringify([])){//未设置或空数组
+            //与editor.map同形的全0
+            mapArray=eval('['+Array(editor.map.length+1).join('['+Array(editor.map[0].length+1).join('0,')+'],')+']');
+        }
+        editor[name]=mapArray.map(function (v) {
+            return v.map(function (v) {
+                return editor.ids[[editor.indexs[parseInt(v)][0]]]
+            })
+        });
+    }
+}
+
+editor.prototype.changeFloor = function (floorId, callback) {
+    for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
+        var mapArray=editor[name].map(function (v) {
+            return v.map(function (v) {
+                return v.idnum || v || 0
+            })
+        });
+        editor.currentFloorData[name]=mapArray;
+    }
     core.changeFloor(floorId, null, {"x": 0, "y": 0, "direction": "up"}, null, function () {
         core.bigmap.offsetX=0;
         core.bigmap.offsetY=0;
         editor.moveViewport(0,0);
 
         editor.drawMapBg();
-        var mapArray = core.maps.save(core.status.maps, core.status.floorId);
-        editor.map = mapArray.map(function (v) {
-            return v.map(function (v) {
-                return editor.ids[[editor.indexs[parseInt(v)][0]]]
-            })
-        });
-        editor.currentFloorId = core.status.floorId;
-        editor.currentFloorData = core.floors[core.status.floorId];
+        editor.fetchMapFromCore();
         editor.updateMap();
         editor_mode.floor();
         editor.drawEventBlock();
@@ -486,7 +512,7 @@ editor.prototype.listen = function () {
         holdingPath = 0;
         e.stopPropagation();
         if (stepPostfix && stepPostfix.length) {
-            preMapData = JSON.parse(JSON.stringify(editor.map));
+            preMapData = JSON.parse(JSON.stringify({map:editor.map,fgmap:editor.fgmap,bgmap:editor.bgmap}));
             if(editor.brushMod==='rectangle'){
                 var x0=stepPostfix[0].x;
                 var y0=stepPostfix[0].y;
@@ -505,8 +531,12 @@ editor.prototype.listen = function () {
             currDrawData.info = JSON.parse(JSON.stringify(editor.info));
             reDo = null;
             // console.log(stepPostfix);
-            for (var ii = 0; ii < stepPostfix.length; ii++)
-                editor.map[stepPostfix[ii].y][stepPostfix[ii].x] = editor.info;
+            if (editor.layerMod!='map'  && editor.info.images && editor.info.images.indexOf('48')!==-1){
+                printe('前景/背景不支持48的图块');
+            } else {
+                for (var ii = 0; ii < stepPostfix.length; ii++)
+                    editor[editor.layerMod][stepPostfix[ii].y][stepPostfix[ii].x] = editor.info;
+            }
             // console.log(editor.map);
             editor.updateMap();
             holdingPath = 0;
@@ -574,7 +604,9 @@ editor.prototype.listen = function () {
             e.preventDefault();
         //Ctrl+z 撤销上一步undo
         if (e.keyCode == 90 && e.ctrlKey && preMapData && currDrawData.pos.length && selectBox.isSelected) {
-            editor.map = JSON.parse(JSON.stringify(preMapData));
+            editor.map = JSON.parse(JSON.stringify(preMapData.map));
+            editor.fgmap = JSON.parse(JSON.stringify(preMapData.fgmap));
+            editor.bgmap = JSON.parse(JSON.stringify(preMapData.bgmap));
             editor.updateMap();
             reDo = JSON.parse(JSON.stringify(currDrawData));
             currDrawData = {pos: [], info: {}};
@@ -582,7 +614,7 @@ editor.prototype.listen = function () {
         }
         //Ctrl+y 重做一步redo
         if (e.keyCode == 89 && e.ctrlKey && reDo && reDo.pos.length && selectBox.isSelected) {
-            preMapData = JSON.parse(JSON.stringify(editor.map));
+            preMapData = JSON.parse(JSON.stringify({map:editor.map,fgmap:editor.fgmap,bgmap:editor.bgmap}));
             for (var j = 0; j < reDo.pos.length; j++)
                 editor.map[reDo.pos[j].y][reDo.pos[j].x] = JSON.parse(JSON.stringify(reDo.info));
 
@@ -863,6 +895,21 @@ editor.prototype.listen = function () {
     var brushMod2=document.getElementById('brushMod2');
     if(brushMod2)brushMod2.onchange=function(){
         editor.brushMod=brushMod2.value;
+    }
+
+    var layerMod=document.getElementById('layerMod');
+    layerMod.onchange=function(){
+        editor.layerMod=layerMod.value;
+    }
+
+    var layerMod2=document.getElementById('layerMod2');
+    if(layerMod2)layerMod2.onchange=function(){
+        editor.layerMod=layerMod2.value;
+    }
+
+    var layerMod3=document.getElementById('layerMod3');
+    if(layerMod3)layerMod3.onchange=function(){
+        editor.layerMod=layerMod3.value;
     }
 
 

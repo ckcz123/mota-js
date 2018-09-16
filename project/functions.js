@@ -1,8 +1,7 @@
 functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = 
 {
-"events":{
-////// 游戏开始前的一些初始化操作 //////
-"initGame": function() {
+    "events": {
+        "initGame": function() {
 	// 游戏开始前的一些初始化操作
 
 	// 根据flag来对道具进行修改
@@ -16,7 +15,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.flags.snowFourDirections)
 		core.material.items.bomb.text = "可以将四周的熔岩变成平地";
 	// 是否启用装备栏
-	if (core.flags.equipboxBotton) {
+	if (core.flags.equipboxButton) {
 		core.statusBar.image.fly.src = core.statusBar.icons.equipbox.src;
 		core.flags.equipment = true;
 	}
@@ -33,8 +32,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.material.items.shield5.cls = 'equips';
 	}
 },
-////// 不同难度分别设置初始属性 //////
-"setInitData":function (hard) {
+        "setInitData": function (hard) {
 	// 不同难度分别设置初始属性
 	if (hard=='Easy') { // 简单难度
 		core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
@@ -54,8 +52,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 	core.events.afterLoadData();
 },
-////// 游戏获胜事件 //////
-"win" : function(reason, norank) {
+        "win": function(reason, norank) {
 	// 游戏获胜事件 
 	core.ui.closePanel();
 	var replaying = core.status.replay.replaying;
@@ -74,8 +71,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		})
 	});
 },
-////// 游戏失败事件 //////
-"lose" : function(reason) {
+        "lose": function(reason) {
 	// 游戏失败事件
 	core.ui.closePanel();
 	var replaying = core.status.replay.replaying;
@@ -88,8 +84,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		});
 	})
 },
-////// 转换楼层结束的事件 //////
-"afterChangeFloor" : function (floorId, fromLoad) {
+        "afterChangeFloor": function (floorId, fromLoad) {
 	// 转换楼层结束的事件
 	// floorId是切换到的楼层；fromLoad若为true则代表是从读档行为造成的楼层切换
 	if (!core.hasFlag("visited_"+floorId)) {
@@ -97,8 +92,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.setFlag("visited_"+floorId, true);
 	}
 },
-////// 加点事件 //////
-"addPoint" : function (enemy) {
+        "addPoint": function (enemy) {
 	// 加点事件
 	var point = enemy.point;
 	if (!core.flags.enableAddPoint || !core.isset(point) || point<=0) return [];
@@ -120,8 +114,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		}
 	];
 },
-////// 战斗结束后触发的事件 //////
-"afterBattle" : function(enemyId,x,y,callback) {
+        "afterBattle": function(enemyId,x,y,callback) {
 	// 战斗结束后触发的事件
 
 	var enemy = core.material.enemys[enemyId];
@@ -221,9 +214,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 在这里增加其他的自定义事件需求
 	/*
 	if (enemyId=='xxx') {
-	    core.unshift(todo, [
-	        {"type": "...", ...},
-        ]);
+		core.unshift(todo, [
+			{"type": "...", ...},
+		]);
 	}
 	*/
 
@@ -242,8 +235,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.isset(callback)) callback();
 
 },
-////// 开一个门后触发的事件 //////
-"afterOpenDoor" : function(doorId,x,y,callback) {
+        "afterOpenDoor": function(doorId,x,y,callback) {
 	// 开一个门后触发的事件
 	
 	var todo = [];
@@ -266,13 +258,28 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 	if (core.isset(callback)) callback();
 },
-////// 改变亮灯之后，可以触发的事件 //////
-"afterChangeLight" : function(x,y) {
+        "afterGetItem": function(itemId,x,y,callback) {
+	// 获得一个道具后触发的事件
+
+	var todo = [];
+	if (core.isset(x) && core.isset(y)) {
+		var event = core.floors[core.status.floorId].afterGetItem[x+","+y];
+		if (core.isset(event)) {
+			core.unshift(todo, event);
+		}
+	}
+
+	if (todo.length>0) {
+		core.events.insertAction(todo,x,y);
+	}
+
+	if (core.isset(callback)) callback();
+},
+        "afterChangeLight": function(x,y) {
 	// 改变亮灯之后，可以触发的事件
 
 },
-////// 推箱子后的事件 //////
-"afterPushBox" : function () {
+        "afterPushBox": function () {
 	// 推箱子后的事件
 
 	var noBoxLeft = function () {
@@ -295,8 +302,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		*/
 	}
 },
-////// 使用炸弹/圣锤后的事件 //////
-"afterUseBomb" : function () {
+        "afterUseBomb": function () {
 	// 使用炸弹/圣锤后的事件
 
 	// 这是一个使用炸弹也能开门的例子
@@ -311,21 +317,19 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	*/
 
 },
-////// 即将存档前可以执行的操作 //////
-"beforeSaveData" : function(data) {
+        "beforeSaveData": function(data) {
 	// 即将存档前可以执行的操作
 
 },
-////// 读档事件后，载入事件前，可以执行的操作 //////
-"afterLoadData" : function(data) {
+        "afterLoadData": function(data) {
 	// 读档事件后，载入事件前，可以执行的操作
 	// 怪物数据的动态修改迁移到了“脚本编辑 - updateEnemys”中，详见文档说明
 
 	core.enemys.updateEnemys();
 }
-},
-"enemys": {
-"getSpecials" : function() {
+    },
+    "enemys": {
+        "getSpecials": function() {
 	// 获得怪物的特殊属性，每一行定义一个特殊属性。
 	// 分为三项，第一项为该特殊属性的数字，第二项为特殊属性的名字，第三项为特殊属性的描述
 	// 可以直接写字符串，也可以写个function将怪物传进去
@@ -356,7 +360,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		[24, "激光", function (enemy) {return "经过怪物同行或同列时自动减生命"+(enemy.value||0)+"点";}]
 	];
 },
-"getDamageInfo" : function (enemy, hero_hp, hero_atk, hero_def, hero_mdef) {
+        "getDamageInfo": function (enemy, hero_hp, hero_atk, hero_def, hero_mdef) {
 	// 获得战斗伤害信息（实际伤害计算函数）
 
 	// 怪物生命，怪物攻击、防御、特殊属性
@@ -449,7 +453,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		"damage": damage
 	};
 },
-"updateEnemys" : function () {
+        "updateEnemys": function () {
 	// 更新怪物数据，可以在这里对怪物属性和数据进行动态更新，详见文档——事件——怪物数据的动态修改
 	// 比如下面这个例子，如果flag:xxx为真，则将绿头怪的攻击设为100，金币设为20
 	/*
@@ -460,10 +464,180 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	*/
 	// 别忘了在事件中调用“更新怪物数据”事件！
 }
+    },
+    "control": {
+        "updateStatusBar": function () {
+	// 更新状态栏
+
+	// 检查等级
+	core.events.checkLvUp();
+
+	// 检查HP上限
+	if (core.flags.enableHPMax) {
+		core.setStatus('hp', Math.min(core.getStatus('hpmax'), core.getStatus('hp')));
+	}
+
+	// 更新领域、阻击、显伤
+	core.updateCheckBlock();
+
+	var lvName = core.getLvName();
+	core.statusBar.lv.innerHTML = lvName;
+	if (/^[+-]?\d+$/.test(lvName))
+		core.statusBar.lv.style.fontStyle = 'italic';
+	else core.statusBar.lv.style.fontStyle = 'normal';
+
+	var statusList = ['hpmax', 'hp', 'atk', 'def', 'mdef', 'money', 'experience'];
+	statusList.forEach(function (item) {
+		if (core.isset(core.status.hero[item]))
+			core.status.hero[item] = Math.floor(core.status.hero[item]);
+		core.statusBar[item].innerHTML = core.formatBigNumber(core.getStatus(item));
+	});
+
+	// 进阶
+	if (core.flags.enableLevelUp && core.status.hero.lv<core.firstData.levelUp.length) {
+		core.statusBar.up.innerHTML = core.firstData.levelUp[core.status.hero.lv].need || " ";
+	}
+	else core.statusBar.up.innerHTML = " ";
+
+	var keys = ['yellowKey', 'blueKey', 'redKey'];
+	keys.forEach(function (key) {
+		core.statusBar[key].innerHTML = core.setTwoDigits(core.status.hero.items.keys[key]);
+	})
+	if(core.flags.enableDebuff){
+		core.statusBar.poison.innerHTML = core.hasFlag('poison')?"毒":"";
+		core.statusBar.weak.innerHTML = core.hasFlag('weak')?"衰":"";
+		core.statusBar.curse.innerHTML = core.hasFlag('curse')?"咒":"";
+	}
+	if (core.flags.enablePZF) {
+		core.statusBar.pickaxe.innerHTML = "破"+core.itemCount('pickaxe');
+		core.statusBar.bomb.innerHTML = "炸"+core.itemCount('bomb');
+		core.statusBar.fly.innerHTML = "飞"+core.itemCount('centerFly');
+	}
+
+	core.statusBar.hard.innerHTML = core.status.hard;
 },
-"ui":{
-////// 绘制“关于”界面 //////
-"drawAbout" : function() {
+        "updateCheckBlock": function () {
+	// 领域、夹击、阻击等的伤害值计算
+
+	core.status.checkBlock = {};
+	if (!core.isset(core.status.thisMap)) return;
+	var blocks = core.status.thisMap.blocks;
+
+	// Step1: 更新怪物地图
+	core.status.checkBlock.map = []; // 记录怪物地图
+	for (var n=0;n<blocks.length;n++) {
+		var block = blocks[n];
+		if (core.isset(block.event) && !block.disable && block.event.cls.indexOf('enemy')==0) {
+			var id = block.event.id, enemy = core.material.enemys[id];
+			if (core.isset(enemy)) {
+				core.status.checkBlock.map[block.x+core.bigmap.width*block.y]=id;
+			}
+		}
+		// 血网
+		if (core.isset(block.event) && !block.disable &&
+			block.event.id=='lavaNet' && block.event.trigger=='passNet' && !core.hasItem("shoes")) {
+			core.status.checkBlock.map[block.x+core.bigmap.width*block.y]="lavaNet";
+		}
+	}
+
+	// Step2: 更新领域、阻击伤害
+	core.status.checkBlock.damage = []; // 记录(x,y)点的伤害；(x,y)对应的值是 x+y*core.bigmap
+	for (var x=0;x<core.bigmap.width*core.bigmap.height;x++) core.status.checkBlock.damage[x]=0;
+
+	for (var x=0;x<core.bigmap.width;x++) {
+		for (var y=0;y<core.bigmap.height;y++) {
+			var id = core.status.checkBlock.map[x+core.bigmap.width*y];
+			if (core.isset(id)) {
+
+				if (id=="lavaNet") {
+					core.status.checkBlock.damage[x+core.bigmap.width*y]+=core.values.lavaDamage||0;
+					continue;
+				}
+
+				var enemy = core.material.enemys[id];
+				// 存在领域
+				// 如果要防止领域伤害，可以直接简单的将 flag:no_zone 设为true
+				if (core.enemys.hasSpecial(enemy.special, 15) && !core.hasFlag("no_zone")) {
+					var range = enemy.range || 1;
+					var zoneSquare = false;
+					if (core.isset(enemy.zoneSquare)) zoneSquare=enemy.zoneSquare;
+					for (var dx=-range;dx<=range;dx++) {
+						for (var dy=-range;dy<=range;dy++) {
+							if (dx==0 && dy==0) continue;
+							var nx=x+dx, ny=y+dy;
+							if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height) continue;
+							if (!zoneSquare && Math.abs(dx)+Math.abs(dy)>range) continue;
+							core.status.checkBlock.damage[nx+ny*core.bigmap.width]+=enemy.value||0;
+						}
+					}
+				}
+				// 存在激光
+				// 如果要防止激光伤害，可以直接简单的将 flag:no_laser 设为true
+				if (core.enemys.hasSpecial(enemy.special, 24) && !core.hasFlag("no_laser")) {
+					for (var nx=0;nx<core.bigmap.width;nx++) {
+						if (nx!=x) core.status.checkBlock.damage[nx+y*core.bigmap.width]+=enemy.value||0;
+					}
+					for (var ny=0;ny<core.bigmap.height;ny++) {
+						if (ny!=y) core.status.checkBlock.damage[x+ny*core.bigmap.width]+=enemy.value||0;
+					}
+				}
+				// 存在阻击
+				// 如果要防止阻击伤害，可以直接简单的将 flag:no_snipe 设为true
+				if (core.enemys.hasSpecial(enemy.special, 18) && !core.hasFlag("no_snipe")) {
+					for (var dx=-1;dx<=1;dx++) {
+						for (var dy=-1;dy<=1;dy++) {
+							if (dx==0 && dy==0) continue;
+							var nx=x+dx, ny=y+dy;
+							if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height || Math.abs(dx)+Math.abs(dy)>1) continue;
+							core.status.checkBlock.damage[nx+ny*core.bigmap.width]+=enemy.value||0;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Step3: 更新夹击点坐标，并将夹击伤害加入到damage中
+	core.status.checkBlock.betweenAttack = []; // 记录(x,y)点是否有夹击
+	// 如果要防止夹击伤害，可以简单的将 flag:no_betweenAttack 设为true
+	if (!core.hasFlag('no_betweenAttack')) {
+		for (var x=0;x<core.bigmap.width;x++) {
+			for (var y=0;y<core.bigmap.height;y++) {
+				var has=false;
+				if (x>0 && x<core.bigmap.width-1) {
+					var id1=core.status.checkBlock.map[x-1+core.bigmap.width*y],
+						id2=core.status.checkBlock.map[x+1+core.bigmap.height*y];
+					if (core.isset(id1) && core.isset(id2) && id1==id2) {
+						var enemy = core.material.enemys[id1];
+						if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {
+							has = true;
+						}
+					}
+				}
+				if (y>0 && y<core.bigmap.height-1) {
+					var id1=core.status.checkBlock.map[x+core.bigmap.width*(y-1)],
+						id2=core.status.checkBlock.map[x+core.bigmap.width*(y+1)];
+					if (core.isset(id1) && core.isset(id2) && id1==id2) {
+						var enemy = core.material.enemys[id1];
+						if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {
+							has = true;
+						}
+					}
+				}
+				// 计算夹击伤害
+				if (has) {
+					core.status.checkBlock.betweenAttack[x+core.bigmap.width*y]=true;
+					var leftHp = core.status.hero.hp - core.status.checkBlock.damage[x+core.bigmap.width*y];
+					if (leftHp>1)
+						core.status.checkBlock.damage[x+core.bigmap.width*y] += Math.floor((leftHp+(core.flags.betweenAttackCeil?0:1))/2);
+				}
+			}
+		}
+	}
+}
+    },
+    "ui": {
+        "drawAbout": function() {
 	// 绘制“关于”界面
 	if (!core.isPlaying()) {
 		core.status.event = {'id': null, 'data': null};
@@ -490,9 +664,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112+32);
 	// TODO: 写自己的“关于”页面，每次增加32像素即可
 }
-},
-"plugins": {
-"plugin": function () {
+    },
+    "plugins": {
+        "plugin": function () {
 	////// 插件编写，可以在这里写自己额外需要执行的脚本 //////
 
 	// 在这里写的代码，在所有模块加载完毕后，游戏开始前会被执行
@@ -510,5 +684,5 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 可以在任何地方（如afterXXX或自定义脚本事件）调用函数，方法为  core.plugin.xxx();
 
 }
-}
+    }
 }

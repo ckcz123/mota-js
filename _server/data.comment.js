@@ -50,7 +50,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "equipName": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "装备位名称,为不超过6个的数组，此项的顺序与equiptype数值关联"
+                    "_data": "装备位名称，为不超过6个的数组，此项的顺序与equiptype数值关联；例如可写[\"武器\",\"防具\",\"首饰\"]等等。"
                 },
                 "statusLeftBackground": {
                     "_leaf": true,
@@ -152,7 +152,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         "equipment": {
                             "_leaf": true,
                             "_type": "textarea",
-                            "_data": "初始装备"
+                            "_data": "初始装上的装备，此处建议请直接留空数组"
                         },
                         "items": {
                             "_leaf": false,
@@ -429,11 +429,11 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "剑和盾是否作为装备。如果此项为true，则作为装备，需要在装备栏使用，否则将直接加属性。"
                 },
-                "equipboxBotton": {
+                "equipboxButton": {
                     "_leaf": true,
                     "_type": "checkbox",
                     "_bool": "bool",
-                    "_data": "若此项为true则将状态栏中的楼层转换器按钮换为装备栏按钮，同时启用装备栏，无论equipment是否为true"
+                    "_data": "若此项为true则将状态栏中的楼层转换器按钮换为装备栏按钮"
                 },
                 /*
                 "enableDeleteItem": {

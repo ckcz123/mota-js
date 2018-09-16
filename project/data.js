@@ -72,10 +72,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"mdef": 100,
 			"money": 100,
 			"experience": 0,
-			"equipment": [
-				null,
-				null
-			],
+			"equipment": [],
 			"items": {
 				"keys": {
 					"yellowKey": 0,
@@ -204,7 +201,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"snowFourDirections": false,
 		"bigKeyIsBox": false,
 		"equipment": true,
-		"equipboxBotton": false,
+		"equipboxButton": true,
 		"enableAddPoint": false,
 		"enableNegativeDamage": false,
 		"hatredDecrease": true,

@@ -44,28 +44,28 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                                 "type": {
                                     "_leaf": true,
                                     "_type": "textarea",
-                                    "_data": "装备的类别，与equipName按顺序对应"
+                                    "_data": "如果是装备，其类别，与equipName按顺序对应（从0开始）"
                                 },
                                 "atk": {
                                     "_leaf": true,
                                     "_type": "textarea",
-                                    "_data": "装备增加的攻击数值"
+                                    "_data": "如果是装备，其增加的攻击数值"
                                 },
                                 "def": {
                                     "_leaf": true,
                                     "_type": "textarea",
-                                    "_data": "装备增加的防御数值"
+                                    "_data": "如果是装备，其增加的防御数值"
                                 },
                                 "mdef": {
                                     "_leaf": true,
                                     "_type": "textarea",
-                                    "_data": "装备增加的魔防数值"
+                                    "_data": "如果是装备，其增加的魔防数值"
                                 },
                                 "animate": {
                                     "_leaf": true,
                                     "_type": "textarea",
                                     "_string": true,
-                                    "_data": "装备的攻击动画，仅对type为0的装备有效"
+                                    "_data": "如果是装备，其攻击动画，仅对type为0的装备有效"
                                 }
                             }
                         }, 

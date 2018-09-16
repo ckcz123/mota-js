@@ -988,12 +988,7 @@ events.prototype.getItem = function (itemId, itemNum, itemX, itemY, callback) {
     core.canvas.event.clearRect(itemX * 32, itemY * 32, 32, 32);
     core.updateStatusBar();
 
-    // 检查处理后的事件。
-    var event = core.floors[core.status.floorId].afterGetItem[itemX+","+itemY];
-    if (core.isset(event)) {
-        core.events.doEvents(event, itemX, itemY, callback);
-    }
-    else if (core.isset(callback)) callback();
+    this.eventdata.afterGetItem(itemId, itemX, itemY, callback);
 }
 
 ////// 开门 //////
@@ -1087,16 +1082,16 @@ events.prototype.battle = function (id, x, y, force, callback) {
     }
     else {
 
+        var nowEquipment = 'hand';
         if (core.flags.equipment) {
-            var equipId = core.status.hero.equipment[0];
-            if (core.isset(equipId))
-                if (core.isset(core.material.items[equipId].equip.animate))
-                    core.drawAnimate(core.material.items[equipId].equip.animate, x, y);
+            var equipId = (core.status.hero.equipment||[])[0];
+            if (core.isset(equipId) && core.isset(core.material.items[equipId])
+                    && core.isset(core.material.items[equipId].equip.animate))
+                nowEquipment = core.material.items[equipId].equip.animate;
         }
-        else {
-            core.playSound('attack.mp3');
-            core.drawAnimate('hand', x, y);
-        }
+
+        core.playSound('attack.mp3');
+        core.drawAnimate(nowEquipment, x, y);
 
         core.events.afterBattle(id, x, y, callback);
     }

@@ -55,6 +55,12 @@ functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_lint": true,
                     "_data": "开一个门后触发的事件"
                 },
+                "afterGetItem": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "获得一个道具后触发的事件"
+                },
                 "afterChangeLight": {
                     "_leaf": true,
                     "_type": "textarea",
@@ -109,6 +115,24 @@ functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_lint": true,
                     "_data": "更新怪物数据，可以在这里对怪物属性和数据进行动态更新"
                 }
+            }
+        },
+        "control": {
+            "_leaf": false,
+            "_type": "object",
+            "_data": {
+                "updateStatusBar": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "更新状态栏"
+                },
+                "updateCheckBlock": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "阻激夹域的伤害值计算"
+                },
             }
         },
         "ui": {

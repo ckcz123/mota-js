@@ -212,4 +212,10 @@ main.floors.sample0=
     ]
 },
 "cannotMove": {},
+"bgmap": [
+
+],
+"fgmap": [
+
+],
 }

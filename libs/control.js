@@ -9,7 +9,7 @@ function control() {
 }
 
 control.prototype.init = function () {
-
+    this.controldata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.control;
 }
 
 ////// 设置requestAnimationFrame //////
@@ -1183,7 +1183,7 @@ control.prototype.updateFollowers = function () {
 
 ////// 更新领域、夹击、阻击的伤害地图 //////
 control.prototype.updateCheckBlock = function() {
-    return core.enemys.updateCheckBlock();
+    return this.controldata.updateCheckBlock();
 }
 
 ////// 检查并执行领域、夹击、阻击事件 //////
@@ -2594,52 +2594,7 @@ control.prototype.clearStatusBar = function() {
 ////// 更新状态栏 //////
 control.prototype.updateStatusBar = function () {
 
-    // 检查等级
-    core.events.checkLvUp();
-
-    // 检查HP上限
-    if (core.flags.enableHPMax) {
-        core.setStatus('hp', Math.min(core.getStatus('hpmax'), core.getStatus('hp')));
-    }
-
-    // 更新领域、阻击、显伤
-    core.updateCheckBlock();
-
-    var lvName = core.getLvName();
-    core.statusBar.lv.innerHTML = lvName;
-    if (/^[+-]?\d+$/.test(lvName))
-        core.statusBar.lv.style.fontStyle = 'italic';
-    else core.statusBar.lv.style.fontStyle = 'normal';
-
-    var statusList = ['hpmax', 'hp', 'atk', 'def', 'mdef', 'money', 'experience'];
-    statusList.forEach(function (item) {
-        if (core.isset(core.status.hero[item]))
-            core.status.hero[item] = Math.floor(core.status.hero[item]);
-        core.statusBar[item].innerHTML = core.formatBigNumber(core.getStatus(item));
-    });
-
-    // 进阶
-    if (core.flags.enableLevelUp && core.status.hero.lv<core.firstData.levelUp.length) {
-        core.statusBar.up.innerHTML = core.firstData.levelUp[core.status.hero.lv].need || "&nbsp;";
-    }
-    else core.statusBar.up.innerHTML = "&nbsp;";
-
-    var keys = ['yellowKey', 'blueKey', 'redKey'];
-    keys.forEach(function (key) {
-        core.statusBar[key].innerHTML = core.setTwoDigits(core.status.hero.items.keys[key]);
-    })
-    if(core.flags.enableDebuff){
-        core.statusBar.poison.innerHTML = core.hasFlag('poison')?"毒":"";
-        core.statusBar.weak.innerHTML = core.hasFlag('weak')?"衰":"";
-        core.statusBar.curse.innerHTML = core.hasFlag('curse')?"咒":"";
-    }
-    if (core.flags.enablePZF) {
-        core.statusBar.pickaxe.innerHTML = "破"+core.itemCount('pickaxe');
-        core.statusBar.bomb.innerHTML = "炸"+core.itemCount('bomb');
-        core.statusBar.fly.innerHTML = "飞"+core.itemCount('centerFly');
-    }
-
-    core.statusBar.hard.innerHTML = core.status.hard;
+    this.controldata.updateStatusBar();
 
     // 回放
     if (core.status.replay.replaying) {

@@ -221,11 +221,6 @@ enemys.prototype.updateEnemys = function () {
     return this.enemydata.updateEnemys();
 }
 
-////// 计算领域、夹击、阻击的伤害值 //////
-enemys.prototype.updateCheckBlock = function () {
-    return this.eventdata.updateCheckBlock();
-}
-
 ////// 获得当前楼层的怪物列表 //////
 enemys.prototype.getCurrentEnemys = function (floorId) {
     floorId=floorId||core.status.floorId;

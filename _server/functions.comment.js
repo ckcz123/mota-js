@@ -109,18 +109,30 @@ functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_lint": true,
                     "_data": "获得战斗伤害信息（实际伤害计算函数）"
                 },
-                "updateCheckBlock": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_lint": true,
-                    "_data": "领域、阻击、夹击的伤害计算函数"
-                },
                 "updateEnemys": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
                     "_data": "更新怪物数据，可以在这里对怪物属性和数据进行动态更新"
                 }
+            }
+        },
+        "control": {
+            "_leaf": false,
+            "_type": "object",
+            "_data": {
+                "updateStatusBar": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "更新状态栏"
+                },
+                "updateCheckBlock": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "阻激夹域的伤害值计算"
+                },
             }
         },
         "ui": {

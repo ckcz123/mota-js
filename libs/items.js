@@ -112,7 +112,7 @@ items.prototype.getEquip = function (equipType) {
 
 ////// 设置某个物品的个数 //////
 items.prototype.setItem = function (itemId, itemNum) {
-    itemNum = itemNum || 1;
+    itemNum = itemNum || 0;
     var itemCls = core.material.items[itemId].cls;
     if (itemCls == 'items') return;
     if (!core.isset(core.status.hero.items[itemCls])) {

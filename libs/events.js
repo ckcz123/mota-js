@@ -356,6 +356,7 @@ events.prototype.doAction = function() {
             if (core.isset(data.time)) {
                 core.status.textAttribute.time=data.time;
             }
+            core.setFlag('textAttribute', core.status.textAttribute);
             core.events.doAction();
             break;
         case "tip":

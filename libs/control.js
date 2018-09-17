@@ -2368,7 +2368,7 @@ control.prototype.loadData = function (data, callback) {
         }
     }
 
-    core.status.textAttribute = core.getFlag('textAttribute') || core.status.textAttribute || core.initStatus.textAttribute;
+    core.status.textAttribute = core.getFlag('textAttribute', core.status.textAttribute);
 
     // load icons
     var icon = core.getFlag("heroIcon", "hero.png");

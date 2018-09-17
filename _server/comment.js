@@ -211,7 +211,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "pushBox"
                         ]
                     },
-                    "_data": "图块的默认触发器"
+                    "_data": "该图块的默认触发器"
                 },
                 "noPass": {
                     "_leaf": true,
@@ -223,7 +223,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             false
                         ]
                     },
-                    "_data": "图块默认可通行状态"
+                    "_data": "该图块是否不可通行；true代表不可通行，false代表可通行，null代表使用系统缺省值"
                 }
             }
         },

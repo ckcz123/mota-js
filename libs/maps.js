@@ -74,7 +74,7 @@ maps.prototype.addInfo = function (block) {
             block.event.trigger = 'getItem';
         }
         if (!core.isset(block.event.noPass)) {
-            if (block.event.cls.indexOf("enemy")==0 || block.event.cls.indexOf("npc")==0 || block.event.cls=='terrains') {
+            if (block.event.cls.indexOf("enemy")==0 || block.event.cls.indexOf("npc")==0 || block.event.cls=='terrains' || block.event.cls=='autotile') {
                 block.event.noPass = true;
             }
         }

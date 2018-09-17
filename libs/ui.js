@@ -282,9 +282,14 @@ ui.prototype.drawText = function (contents, callback) {
 }
 
 ////// 绘制一个对话框 //////
-ui.prototype.drawTextBox = function(content) {
+ui.prototype.drawTextBox = function(content, showAll) {
+
+    if (core.isset(core.status.event) && core.status.event.id=='action') {
+        core.status.event.ui = content;
+    }
 
     clearInterval(core.status.event.interval);
+    core.status.event.interval = null;
 
     // 获得name, image, icon
     var id=null, name=null, image=null, icon=null, iconHeight=32, animate=null;
@@ -541,7 +546,7 @@ ui.prototype.drawTextBox = function(content) {
 
     }
 
-    if (textAttribute.time<=0 || core.status.event.id!='action') {
+    if (showAll || textAttribute.time<=0 || core.status.event.id!='action') {
         drawContent(content);
     }
     else {
@@ -550,6 +555,7 @@ ui.prototype.drawTextBox = function(content) {
             drawContent(content.substring(0, ++index));
             if (index==content.length) {
                 clearInterval(core.status.event.interval);
+                core.status.event.interval = null;
             }
         }, textAttribute.time);
     }

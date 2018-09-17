@@ -280,6 +280,7 @@ events.prototype.doAction = function() {
     // 清空boxAnimate和UI层
     core.status.boxAnimateObjs = [];
     clearInterval(core.status.event.interval);
+    core.status.event.interval = null;
 
     core.clearMap('ui');
     core.setAlpha('ui', 1.0);
@@ -328,7 +329,7 @@ events.prototype.doAction = function() {
             if (core.status.replay.replaying)
                 core.events.doAction();
             else
-                core.ui.drawTextBox(data.text);
+                core.ui.drawTextBox(data.text, data.showAll);
             break;
         case "autoText":
             if (core.status.replay.replaying)

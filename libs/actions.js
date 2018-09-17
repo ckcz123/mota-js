@@ -1480,6 +1480,7 @@ actions.prototype.clickEquipboxIndex = function(index) {
         if (index>=(main.equipName||[]).length) return;
         if (index==core.status.event.selection && core.isset(core.status.hero.equipment[index])) {
             core.unloadEquip(index);
+            core.status.route.push("unEquip:"+index);
         }
     }
     else if (index>=12) {
@@ -1487,6 +1488,7 @@ actions.prototype.clickEquipboxIndex = function(index) {
         if (index==core.status.event.selection) {
             var equipId = equips[index-12 + (core.status.event.data.page-1)*12];
             core.loadEquip(equipId);
+            core.status.route.push("equip:"+equipId);
         }
     } 
     core.ui.drawEquipbox(index);

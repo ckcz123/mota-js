@@ -1860,6 +1860,7 @@ control.prototype.replay = function () {
         var equipType = parseInt(action.substring(8));
         if (core.isset(equipType)) {
             core.ui.drawEquipbox(equipType);
+            core.status.route.push(action);
             setTimeout(function () {
                 core.ui.closePanel();
                 core.unloadEquip(equipType, function () {
@@ -1874,6 +1875,7 @@ control.prototype.replay = function () {
         var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
         var index = ownEquipment.indexOf(equipId);
         if (index>=0) {
+            core.status.route.push(action);
             core.status.event.data = {"page":Math.floor(index/12)+1, "selectId":null};
             index = index%12+12;
             core.ui.drawEquipbox(index);
@@ -2639,8 +2641,6 @@ control.prototype.updateStatusBar = function () {
 
         core.statusBar.image.settings.src = core.statusBar.icons.settings.src;
     }
-
-    core.updateDamage();
 }
 
 ////// 屏幕分辨率改变后重新自适应 //////

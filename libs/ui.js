@@ -1804,7 +1804,8 @@ ui.prototype.drawEquipbox = function(index) {
     // 描述
     if (core.isset(selectId)) {
         var equip=core.material.items[selectId];
-        var equipType = (equip.equip||{}).type || 0;
+        if (!core.isset(equip.equip)) equip.equip = {"type": 0};
+        var equipType = equip.equip.type;
         core.fillText('ui', equip.name + "（" + (allEquips[equipType]||"未知部位") + "）", 10, 32, '#FFD700', "bold 20px Verdana")
 
         var text = equip.text||"该装备暂无描述。";

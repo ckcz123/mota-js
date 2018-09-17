@@ -308,25 +308,13 @@ function (enemy, hero_hp, hero_atk, hero_def, hero_mdef) {
     }
 // ... 下略
 ```
-3. 免疫领域、夹击、阻击效果：在`control.js`中，找到checkBlock函数，并编辑成如果有神圣盾标记，则将伤害变成0。
+3. 免疫领域、夹击、阻击效果：在2.4.1之后，可以直接将flag:no_zone设为true来免疫领域效果，其他几个同理。
 ``` js
-// 检查领域、夹击、阻击事件
-control.prototype.checkBlock = function () {
-    var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
-    var damage = core.status.checkBlock.damage[x+core.bigmap.width*y];
-    if (damage>0) {
-        if (core.hasFlag("shield5")) damage = 0; // 如果存在神圣盾，则将伤害变成0
-        core.status.hero.hp -= damage;
-
-        // 检查阻击事件
-        var snipe = [];
-        var scan = {
-            'up': {'x': 0, 'y': -1},
-            'left': {'x': -1, 'y': 0},
-            'down': {'x': 0, 'y': 1},
-            'right': {'x': 1, 'y': 0}
-        }
-// ... 下略
+// 同样写在道具的itemEffect中
+core.setFlag("no_zone", true); // 免疫领域
+core.setFlag("no_snipe", true); // 免疫阻击
+core.setFlag("no_laser", true);  // 免疫激光
+core.setFlag("no_betweenAttack", true); // 免疫夹击
 ```
 4. 如果有更高的需求，例如想让吸血效果变成一半，则还是在上面这些地方进行对应的修改即可。
 
@@ -375,6 +363,7 @@ control.prototype.useFly = function (need) {
 ```
 修改时，请先把`null`改成空字符串`""`，然后再双击进行编辑。
 
+<!--
 
 ## 自定义装备
 
@@ -448,6 +437,8 @@ this.useEquipment = function (itemId) { // 使用装备
 
 !> 必须对于每一个装备部位定义唯一一个不同的ID；脱掉装备（空装备）必须是该ID加数字0的形式，其他有效装备必须是
 该ID+正整数的形式，不然会出错！
+
+-->
 
 ## 自定义怪物属性
 

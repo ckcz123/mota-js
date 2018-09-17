@@ -477,21 +477,28 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.setStatus('hp', Math.min(core.getStatus('hpmax'), core.getStatus('hp')));
 	}
 
-	// 更新领域、阻击、显伤
-	core.updateCheckBlock();
-
+	// 设置等级奴名称
 	var lvName = core.getLvName();
 	core.statusBar.lv.innerHTML = lvName;
+	// 检测是不是纯数字；如果带中文等需要取消斜体（不然很难看的！）
 	if (/^[+-]?\d+$/.test(lvName))
 		core.statusBar.lv.style.fontStyle = 'italic';
 	else core.statusBar.lv.style.fontStyle = 'normal';
 
+	// 设置生命上限、生命值、攻防魔防金币和经验值
 	var statusList = ['hpmax', 'hp', 'atk', 'def', 'mdef', 'money', 'experience'];
 	statusList.forEach(function (item) {
+		// 向下取整
 		if (core.isset(core.status.hero[item]))
 			core.status.hero[item] = Math.floor(core.status.hero[item]);
+		// 大数据格式化
 		core.statusBar[item].innerHTML = core.formatBigNumber(core.getStatus(item));
 	});
+
+	// 可以在这里添加自己额外的状态栏信息，比如想攻击显示 +0.5 可以这么写：
+	// if (core.hasFlag('halfAtk')) core.statusBar.atk.innerHTML += "+0.5";
+
+	// 如果是自定义添加的状态栏，也需要在这里进行设置显示的数值
 
 	// 进阶
 	if (core.flags.enableLevelUp && core.status.hero.lv<core.firstData.levelUp.length) {
@@ -499,22 +506,31 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 	else core.statusBar.up.innerHTML = " ";
 
+	// 钥匙
 	var keys = ['yellowKey', 'blueKey', 'redKey'];
 	keys.forEach(function (key) {
 		core.statusBar[key].innerHTML = core.setTwoDigits(core.status.hero.items.keys[key]);
-	})
+	});
+	// 毒衰咒
 	if(core.flags.enableDebuff){
 		core.statusBar.poison.innerHTML = core.hasFlag('poison')?"毒":"";
 		core.statusBar.weak.innerHTML = core.hasFlag('weak')?"衰":"";
 		core.statusBar.curse.innerHTML = core.hasFlag('curse')?"咒":"";
 	}
+	// 破炸飞
 	if (core.flags.enablePZF) {
 		core.statusBar.pickaxe.innerHTML = "破"+core.itemCount('pickaxe');
 		core.statusBar.bomb.innerHTML = "炸"+core.itemCount('bomb');
 		core.statusBar.fly.innerHTML = "飞"+core.itemCount('centerFly');
 	}
 
+	// 难度
 	core.statusBar.hard.innerHTML = core.status.hard;
+
+	// 更新阻激夹域的伤害值
+	core.updateCheckBlock();
+	// 更新全地图显伤
+	core.updateDamage();
 },
         "updateCheckBlock": function () {
 	// 领域、夹击、阻击等的伤害值计算
@@ -549,6 +565,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			var id = core.status.checkBlock.map[x+core.bigmap.width*y];
 			if (core.isset(id)) {
 
+				// 如果是血网，直接加上伤害值
 				if (id=="lavaNet") {
 					core.status.checkBlock.damage[x+core.bigmap.width*y]+=core.values.lavaDamage||0;
 					continue;
@@ -558,14 +575,18 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				// 存在领域
 				// 如果要防止领域伤害，可以直接简单的将 flag:no_zone 设为true
 				if (core.enemys.hasSpecial(enemy.special, 15) && !core.hasFlag("no_zone")) {
+					// 领域范围，默认为1
 					var range = enemy.range || 1;
+					// 是否是九宫格领域
 					var zoneSquare = false;
 					if (core.isset(enemy.zoneSquare)) zoneSquare=enemy.zoneSquare;
+					// 在范围内进行搜索，增加领域伤害值
 					for (var dx=-range;dx<=range;dx++) {
 						for (var dy=-range;dy<=range;dy++) {
 							if (dx==0 && dy==0) continue;
 							var nx=x+dx, ny=y+dy;
 							if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height) continue;
+							// 如果是十字领域，则还需要满足 |dx|+|dy|<=range
 							if (!zoneSquare && Math.abs(dx)+Math.abs(dy)>range) continue;
 							core.status.checkBlock.damage[nx+ny*core.bigmap.width]+=enemy.value||0;
 						}
@@ -574,6 +595,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				// 存在激光
 				// 如果要防止激光伤害，可以直接简单的将 flag:no_laser 设为true
 				if (core.enemys.hasSpecial(enemy.special, 24) && !core.hasFlag("no_laser")) {
+					// 检查同行和同列，增加激光伤害值
 					for (var nx=0;nx<core.bigmap.width;nx++) {
 						if (nx!=x) core.status.checkBlock.damage[nx+y*core.bigmap.width]+=enemy.value||0;
 					}
@@ -603,7 +625,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (!core.hasFlag('no_betweenAttack')) {
 		for (var x=0;x<core.bigmap.width;x++) {
 			for (var y=0;y<core.bigmap.height;y++) {
+				// 该点是否存在夹击
 				var has=false;
+				// 检测左右是否存在相同的怪物，且拥有夹击属性
 				if (x>0 && x<core.bigmap.width-1) {
 					var id1=core.status.checkBlock.map[x-1+core.bigmap.width*y],
 						id2=core.status.checkBlock.map[x+1+core.bigmap.height*y];
@@ -614,6 +638,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 						}
 					}
 				}
+				// 检测上下是否存在相同的怪物，且拥有夹击属性
 				if (y>0 && y<core.bigmap.height-1) {
 					var id1=core.status.checkBlock.map[x+core.bigmap.width*(y-1)],
 						id2=core.status.checkBlock.map[x+core.bigmap.width*(y+1)];
@@ -627,7 +652,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				// 计算夹击伤害
 				if (has) {
 					core.status.checkBlock.betweenAttack[x+core.bigmap.width*y]=true;
+                    // 先扣除该点领域/阻击/激光造成的伤害，再算夹击
 					var leftHp = core.status.hero.hp - core.status.checkBlock.damage[x+core.bigmap.width*y];
+					// 1血不夹；core.flags.betweenAttackCeil控制向上还是向下
 					if (leftHp>1)
 						core.status.checkBlock.damage[x+core.bigmap.width*y] += Math.floor((leftHp+(core.flags.betweenAttackCeil?0:1))/2);
 				}
@@ -677,7 +704,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 在这里写所有需要自定义的函数
 	// 写法必须是 this.xxx = function (args) { ...
 	// 如果不写this的话，函数将无法被外部所访问
-	this.test  = function () {
+	this.test = function () {
 		console.log("插件函数执行测试");
 	}
 	

@@ -1857,16 +1857,17 @@ control.prototype.replay = function () {
         }
     }
     else if (action.indexOf("unEquip:")==0) {
-        var unloadEquipId = action.substring(8);
-        var equipType = core.material.items[unloadEquipId].equip.type;
-        core.ui.drawEquipbox(equipType);
-        setTimeout(function () {
-            core.ui.closePanel();
-            core.unloadEquip(equipType, function () {
-                core.replay();
-            });
-        }, 750 / Math.max(1, core.status.replay.speed));
-        return;
+        var equipType = parseInt(action.substring(8));
+        if (core.isset(equipType)) {
+            core.ui.drawEquipbox(equipType);
+            setTimeout(function () {
+                core.ui.closePanel();
+                core.unloadEquip(equipType, function () {
+                    core.replay();
+                });
+            }, 750 / Math.max(1, core.status.replay.speed));
+            return;
+        }
     }
     else if (action.indexOf("equip:")==0) {
         var equipId = action.substring(6);

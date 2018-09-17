@@ -4,7 +4,7 @@ editor_mode = function (editor) {
     function editor_mode() {
         this.ids = {
             'loc': 'left2',
-            'emenyitem': 'left3',
+            'enemyitem': 'left3',
             'floor': 'left4',
             'tower': 'left5',
             'functions': 'left8',
@@ -208,7 +208,7 @@ editor_mode = function (editor) {
                     editor.drawEventBlock();
                 });
                 break;
-            case 'emenyitem':
+            case 'enemyitem':
 
                 if (editor_mode.info.images == 'enemys' || editor_mode.info.images == 'enemy48') {
                     editor.file.editEnemy(editor_mode.info.id, actionList, function (objs_) {/*console.log(objs_);*/
@@ -310,7 +310,7 @@ editor_mode = function (editor) {
         if (Boolean(callback)) callback();
     }
 
-    editor_mode.prototype.emenyitem = function (callback) {
+    editor_mode.prototype.enemyitem = function (callback) {
         //editor.info=editor.ids[editor.indexs[201]];
         if (!core.isset(editor.info)) return;
 

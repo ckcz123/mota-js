@@ -87,7 +87,7 @@
             </div>
         </div>
     </div>
-    <div id="left3" class='leftTab' style="z-index:-1;opacity: 0;"><!-- emenyitem -->
+    <div id="left3" class='leftTab' style="z-index:-1;opacity: 0;"><!-- enemyitem -->
         <h3 class="leftTabHeader">图块属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>
         </h3>
         <div class="leftTabContent">
@@ -236,7 +236,7 @@
             <select id="editModeSelect">
                 <option value="map">地图编辑</option>
                 <option value="loc">地图选点</option>
-                <option value="emenyitem">图块属性</option>
+                <option value="enemyitem">图块属性</option>
                 <option value="floor">楼层属性</option>
                 <option value="tower">全塔属性</option>
                 <option value="functions">脚本编辑</option>
@@ -449,7 +449,7 @@ if (location.protocol.indexOf("http")!=0) {
             editor.pos = {x: 0, y: 0};
             editor.mode.loc();
             editor.info = editor.ids[editor.indexs[201]];
-            editor.mode.emenyitem();
+            editor.mode.enemyitem();
             editor.mode.floor();
             editor.mode.tower();
             editor.mode.functions();

@@ -1206,7 +1206,9 @@ ui.prototype.drawReplay = function () {
 
 ////// 绘制分页 //////
 ui.prototype.drawPagination = function (page, totalPage, top) {
-    if (totalPage <= 1) return;
+    // if (totalPage<page) totalPage=page;
+    if (totalPage<=1) return;
+    if (!core.isset(top)) top=12;
 
     core.setFont('ui', 'bold 15px Verdana');
     core.setFillStyle('ui', '#DDDDDD');
@@ -1583,7 +1585,7 @@ ui.prototype.drawMaps = function (index, x, y) {
 ////// 绘制道具栏 //////
 ui.prototype.drawToolbox = function(index) {
     // 设定eventdata
-    if (!core.isset(core.status.event.data))
+    if (!core.isset(core.status.event.data) || !core.isset(core.status.event.data.toolsPage) || !core.isset(core.status.event.data.constantsPage))
         core.status.event.data = {"toolsPage":1, "constantsPage":1, "selectId":null}
 
     // 获取物品列表
@@ -1687,22 +1689,24 @@ ui.prototype.drawToolbox = function(index) {
     for (var i=0;i<12;i++) {
         var tool=tools[12*(toolsPage-1)+i];
         if (!core.isset(tool)) break;
+        var yoffset = 144 + Math.floor(i/6)*54 + 5 - ydelta;
         var icon=core.material.icons.items[tool];
-        core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*(i%6)+1)+5, 144+Math.floor(i/6)*64+5-ydelta, 32, 32)
+        core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*(i%6)+1)+5, yoffset, 32, 32)
         // 个数
-        core.fillText('ui', core.itemCount(tool), 16*(4*(i%6)+1)+40, 144+Math.floor(i/6)*64+38-ydelta, '#FFFFFF', "bold 14px Verdana");
+        core.fillText('ui', core.itemCount(tool), 16*(4*(i%6)+1)+40, yoffset+33, '#FFFFFF', "bold 14px Verdana");
         if (selectId == tool)
-            core.strokeRect('ui', 16*(4*(i%6)+1)+1, 144+Math.floor(i/6)*64+1-ydelta, 40, 40, '#FFD700');
+            core.strokeRect('ui', 16*(4*(i%6)+1)+1, yoffset-4, 40, 40, '#FFD700');
     }
 
     // 永久道具
     for (var i=0;i<12;i++) {
         var constant=constants[12*(constantsPage-1)+i];
         if (!core.isset(constant)) break;
+        var yoffset = 304+Math.floor(i/6)*54+5-ydelta;
         var icon=core.material.icons.items[constant];
-        core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*(i%6)+1)+5, 304+Math.floor(i/6)*64+5-ydelta, 32, 32)
+        core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*(i%6)+1)+5, yoffset, 32, 32)
         if (selectId == constant)
-            core.strokeRect('ui', 16*(4*(i%6)+1)+1, 304+Math.floor(i/6)*64+1-ydelta, 40, 40, '#FFD700');
+            core.strokeRect('ui', 16*(4*(i%6)+1)+1, yoffset-4, 40, 40, '#FFD700');
     }
 
     // 分页
@@ -1713,7 +1717,7 @@ ui.prototype.drawToolbox = function(index) {
 
     // 装备栏
     if (core.flags.equipment)
-        core.fillText('ui', '装备栏', 370, 19,'#DDDDDD', 'bold 15px Verdana');
+        core.fillText('ui', '[装备栏]', 370, 25,'#DDDDDD', 'bold 15px Verdana');
     // core.fillText('ui', '删除道具', 370, 32,'#DDDDDD', 'bold 15px Verdana');
     // 退出
     core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px Verdana');
@@ -1722,8 +1726,13 @@ ui.prototype.drawToolbox = function(index) {
 ////// 绘制装备界面 //////
 ui.prototype.drawEquipbox = function(index) {
     // 设定eventdata
-    if (!core.isset(core.status.event.data))
-        core.status.event.data = {"page":1, "selectId":null}
+    if (!core.isset(core.status.event.data) || !core.isset(core.status.event.data.page))
+        core.status.event.data = {"page":1, "selectId":null};
+
+    var allEquips = main.equipName||[];
+    var equipLength = allEquips.length;
+
+    if (!core.isset(core.status.hero.equipment)) core.status.hero.equipment = [];
 
     var equipEquipment = core.status.hero.equipment;
     var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
@@ -1733,22 +1742,22 @@ ui.prototype.drawEquipbox = function(index) {
 
     // 处理index
     if (!core.isset(index)) {
-        if (equipEquipment.length>0) index=0;
+        if (equipLength>0 && core.isset(equipEquipment[0])) index=0;
         else if (ownEquipment.length>0) index=12;
         else index=0;
     }
-    core.status.event.selection=index;
-
-    var selectId;
+    if (index>=12 && ownEquipment.length==0) index = 0;
+    var selectId=null;
     if (index<12) {
-        if (index>=equipEquipment.length) index=Math.max(0, equipEquipment.length-1);
-        selectId = equipEquipment[index];
+        if (index >= equipLength) index=Math.max(0, equipLength - 1);
+        selectId = equipEquipment[index]||null;
     }
     else {
-        if (index+12*(page-2)>=ownEquipment.length) index=12+Math.max(0, ownEquipment.length%12-1);
-        selectId = ownEquipment[index-12];
+        if (page == totalPage) index = Math.min(index, (ownEquipment.length+11)%12+12);
+        selectId = ownEquipment[index-12 + (page-1)*12];
         if (!core.hasItem(selectId)) selectId=null;
     }
+    core.status.event.selection=index;
     core.status.event.data.selectId=selectId;
 
     core.clearMap('ui', 0, 0, 416, 416);
@@ -1792,16 +1801,16 @@ ui.prototype.drawEquipbox = function(index) {
     
     core.canvas.ui.textAlign = 'left';
 
-    console.log(equipEquipment[0]);
     // 描述
     if (core.isset(selectId)) {
         var equip=core.material.items[selectId];
-        core.fillText('ui', equip.name, 10, 32, '#FFD700', "bold 20px Verdana")
+        var equipType = (equip.equip||{}).type || 0;
+        core.fillText('ui', equip.name + "（" + (allEquips[equipType]||"未知部位") + "）", 10, 32, '#FFD700', "bold 20px Verdana")
 
         var text = equip.text||"该装备暂无描述。";
         var lines = core.splitLines('ui', text, 406, '17px Verdana');
 
-        core.fillText('ui', lines[0], 10, 62, '#FFFFFF', '17px Verdana'); 
+        core.fillText('ui', lines[0], 10, 62, '#FFFFFF', '17px Verdana');
         
         // 比较属性
         if (lines.length==1) {
@@ -1810,43 +1819,20 @@ ui.prototype.drawEquipbox = function(index) {
             else {
                 compare = core.compareEquipment(selectId, equipEquipment[equip.equip.type]);
             }
-            // 绘制
-            var drawList; //= [['攻击',atk],['防御',def],['魔防',mdef]];
-            var drawPointer = 0;
-            var color;
-            if (compare.atk!=0) {
-                if (compare.atk>0) color = '#00FF00';
-                else color = '#FF0000';
-                drawList = '攻击 '+core.status.hero.atk+'->';
-                core.fillText('ui', drawList, 10+drawPointer, 89, '#CCCCCC', 'bold 14px Verdana');
-                drawPointer += core.canvas.ui.measureText(drawList).width;
+            var drawOffset = 10;
 
-                drawList = (core.status.hero.atk+compare.atk)+'  ';
-                core.fillText('ui', drawList, 10+drawPointer, 89, color, 'bold 14px Verdana');
-                drawPointer += core.canvas.ui.measureText(drawList).width;
-                }
-            if (compare.def!=0) {
-                if (compare.def>0) color = '#00FF00';
-                else color = '#FF0000';
-                drawList = '防御 '+core.status.hero.atk+'->';
-                core.fillText('ui', drawList, 10+drawPointer, 89, '#CCCCCC', 'bold 14px Verdana');
-                drawPointer += core.canvas.ui.measureText(drawList).width;
-
-                drawList = (core.status.hero.atk+compare.def)+'   ';
-                core.fillText('ui', drawList, 10+drawPointer, 89, color, 'bold 14px Verdana');
-                drawPointer += core.canvas.ui.measureText(drawList).width;
-            }
-            if (compare.mdef!=0) {
-                if (compare.mdef>0) color = '#00FF00';
-                else color = '#FF0000';
-                drawList = '魔防 '+core.status.hero.atk+'->';
-                core.fillText('ui', drawList, 10+drawPointer, 89, '#CCCCCC', 'bold 14px Verdana');
-                drawPointer += core.canvas.ui.measureText(drawList).width;
-
-                drawList = (core.status.hero.atk+compare.mdef)+'    ';
-                core.fillText('ui', drawList, 10+drawPointer, 89, color, 'bold 14px Verdana');
-                drawPointer += core.canvas.ui.measureText(drawList).width;
-            }
+            [['攻击','atk'], ['防御','def'], ['魔防','mdef']].forEach(function (t) {
+                var title = t[0], name = t[1];
+                if (!core.isset(compare[name]) || compare[name]==0) return;
+                var color = '#00FF00';
+                if (compare[name]<0) color = '#FF0000';
+                var content = title + ' ' + core.getStatus(name) + '->';
+                core.fillText('ui', content, drawOffset, 89, '#CCCCCC', 'bold 14px Verdana');
+                drawOffset += core.canvas.ui.measureText(content).width;
+                var newValue = core.getStatus(name) + compare[name] + "";
+                core.fillText('ui', newValue, drawOffset, 89, color);
+                drawOffset += core.canvas.ui.measureText(newValue).width + 15;
+            })
         }
         else {
             var leftText = text.substring(lines[0].length);
@@ -1858,34 +1844,33 @@ ui.prototype.drawEquipbox = function(index) {
     var images = core.material.images.items;
 
     // 当前装备
-    for (var i = 0 ; i < core.status.hero.equipment.length ; i++) {
-        var equipId = core.status.hero.equipment[i];
+    for (var i = 0 ; i < equipLength ; i++) {
+        var equipId = equipEquipment[i] || null;
         if (core.isset(equipId)) {
             var icon = core.material.icons.items[equipId];
-            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(8*(i%3)+5)+5, 144+Math.floor(i/3)*64+5-ydelta, 32, 32);
+            core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(8*(i%3)+5)+5, 144+Math.floor(i/3)*54+5-ydelta, 32, 32);
         }
-        core.fillText('ui', main.equipName[i], 16*(8*(i%3)+1)+40, 144+Math.floor(i/3)*64+32-ydelta, '#FFFFFF', "bold 16px Verdana");
-        if (index == i)
-            core.strokeRect('ui', 16*(8*(i%3)+5)+1, 144+Math.floor(i/3)*64+1-ydelta, 40, 40, '#FFD700');
+        core.fillText('ui', allEquips[i]||"未知", 16*(8*(i%3)+1)+40, 144+Math.floor(i/3)*54+32-ydelta, '#FFFFFF', "bold 16px Verdana");
+        core.strokeRect('ui', 16*(8*(i%3)+5)+1, 144+Math.floor(i/3)*54+1-ydelta, 40, 40, index==i?'#FFD700':"#FFFFFF");
     }
 
     // 现有装备 
     for (var i=0;i<12;i++) {
         var ownEquip=ownEquipment[12*(page-1)+i];
-        if (!core.isset(ownEquip)) break;
+        if (!core.isset(ownEquip)) continue;
         var icon=core.material.icons.items[ownEquip];
-        core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*(i%6)+1)+5, 304+Math.floor(i/6)*64+5-ydelta, 32, 32)
+        core.canvas.ui.drawImage(images, 0, icon*32, 32, 32, 16*(4*(i%6)+1)+5, 304+Math.floor(i/6)*54+5-ydelta, 32, 32)
         // 个数
         if (core.itemCount(ownEquip)>1)
-            core.fillText('ui', core.itemCount(ownEquip), 16*(4*(i%6)+1)+40, 304+Math.floor(i/6)*64+38-ydelta, '#FFFFFF', "bold 14px Verdana");
+            core.fillText('ui', core.itemCount(ownEquip), 16*(4*(i%6)+1)+40, 304+Math.floor(i/6)*54+38-ydelta, '#FFFFFF', "bold 14px Verdana");
         if (selectId == ownEquip)
-            core.strokeRect('ui', 16*(4*(i%6)+1)+1, 304+Math.floor(i/6)*64+1-ydelta, 40, 40, '#FFD700');
+            core.strokeRect('ui', 16*(4*(i%6)+1)+1, 304+Math.floor(i/6)*54+1-ydelta, 40, 40, '#FFD700');
     }
 
     this.drawPagination(page, totalPage, 12);
     // 道具栏
     core.canvas.ui.textAlign = 'center';
-    core.fillText('ui', '道具栏', 370, 19,'#DDDDDD', 'bold 15px Verdana');
+    core.fillText('ui', '[道具栏]', 370, 25,'#DDDDDD', 'bold 15px Verdana');
     // 退出按钮
     core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px Verdana');
 }

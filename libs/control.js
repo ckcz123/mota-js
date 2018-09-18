@@ -187,8 +187,6 @@ control.prototype.showStartAnimate = function (callback) {
     core.dom.startButtonGroup.style.display = 'none';
     core.dom.startButtons.style.display = 'block';
     core.dom.levelChooseButtons.style.display = 'none';
-    core.dom.curtain.style.background = "#000000";
-    core.dom.curtain.style.opacity = 0;
     core.status.played = false;
     core.clearStatus();
     core.clearMap('all');
@@ -1451,8 +1449,9 @@ control.prototype.setFg = function(color, time, callback) {
 
     if (time==0) {
         // 直接变色
-        core.dom.curtain.style.background = core.arrayToRGB(color);
-        core.dom.curtain.style.opacity = color[3];
+        core.clearMap('curtain');
+        core.setAlpha('curtain', color[3]);
+        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGB(color));
         core.status.curtainColor = color;
         if (core.isset(callback)) callback();
         return;
@@ -1467,8 +1466,9 @@ control.prototype.setFg = function(color, time, callback) {
         var nowR = parseInt(fromColor[0]+(color[0]-fromColor[0])*step/25);
         var nowG = parseInt(fromColor[1]+(color[1]-fromColor[1])*step/25);
         var nowB = parseInt(fromColor[2]+(color[2]-fromColor[2])*step/25);
-        core.dom.curtain.style.background = core.arrayToRGB([nowR,nowG,nowB]);
-        core.dom.curtain.style.opacity = nowAlpha;
+        core.clearMap('curtain');
+        core.setAlpha('curtain', nowAlpha);
+        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGB([nowR,nowG,nowB]));
 
         if (step>=25) {
             clearInterval(changeAnimate);
@@ -1857,22 +1857,25 @@ control.prototype.replay = function () {
         }
     }
     else if (action.indexOf("unEquip:")==0) {
-        var unloadEquipId = action.substring(8);
-        var equipType = core.material.items[unloadEquipId].equip.type;
-        core.ui.drawEquipbox(equipType);
-        setTimeout(function () {
-            core.ui.closePanel();
-            core.unloadEquip(equipType, function () {
-                core.replay();
-            });
-        }, 750 / Math.max(1, core.status.replay.speed));
-        return;
+        var equipType = parseInt(action.substring(8));
+        if (core.isset(equipType)) {
+            core.ui.drawEquipbox(equipType);
+            core.status.route.push(action);
+            setTimeout(function () {
+                core.ui.closePanel();
+                core.unloadEquip(equipType, function () {
+                    core.replay();
+                });
+            }, 750 / Math.max(1, core.status.replay.speed));
+            return;
+        }
     }
     else if (action.indexOf("equip:")==0) {
         var equipId = action.substring(6);
         var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
         var index = ownEquipment.indexOf(equipId);
         if (index>=0) {
+            core.status.route.push(action);
             core.status.event.data = {"page":Math.floor(index/12)+1, "selectId":null};
             index = index%12+12;
             core.ui.drawEquipbox(index);
@@ -2365,6 +2368,8 @@ control.prototype.loadData = function (data, callback) {
         }
     }
 
+    core.status.textAttribute = core.getFlag('textAttribute', core.status.textAttribute);
+
     // load icons
     var icon = core.getFlag("heroIcon", "hero.png");
     if (core.isset(core.material.images.images[icon])) {
@@ -2638,8 +2643,6 @@ control.prototype.updateStatusBar = function () {
 
         core.statusBar.image.settings.src = core.statusBar.icons.settings.src;
     }
-
-    core.updateDamage();
 }
 
 ////// 屏幕分辨率改变后重新自适应 //////
@@ -2841,6 +2844,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 height:(canvasWidth - SPACE*2) + unit,
             }
         },
+        /*
         {
             id: 'curtain',
             rules: {
@@ -2848,6 +2852,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 height:(canvasWidth - SPACE*2) + unit,
             }
         },
+        */
         {
             id: 'gameDraw',
             rules: {

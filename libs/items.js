@@ -97,17 +97,23 @@ items.prototype.hasItem = function (itemId) {
 }
 
 ////// 是否装备某件装备 //////
-items.prototype.hasEquip = function (equipId) {
+items.prototype.hasEquip = function (itemId) {
 
-    if (!core.isset(equipId)) return null;
-    if (!core.isset((core.material.items[equipId]||{}).equip)) return null;
+    if (!core.isset(itemId)) return null;
+    if (!core.isset((core.material.items[itemId]||{}).equip)) return null;
 
-    var equiptype = core.material.items[equipId].equip.type;
-    return equipId == (core.status.hero.equipment||[])[equiptype];
+    return itemId == this.getEquip(core.material.items[itemId].equip.type);
+}
+
+////// 获得某个装备类型的当前装备 //////
+items.prototype.getEquip = function (equipType) {
+    return (core.status.hero.equipment||[])[equipType]||null;
 }
 
 ////// 设置某个物品的个数 //////
 items.prototype.setItem = function (itemId, itemNum) {
+    itemNum = itemNum || 0;
+    if (itemNum<=0) itemNum = 0;
     var itemCls = core.material.items[itemId].cls;
     if (itemCls == 'items') return;
     if (!core.isset(core.status.hero.items[itemCls])) {
@@ -120,11 +126,12 @@ items.prototype.setItem = function (itemId, itemNum) {
 }
 
 ////// 删除某个物品 //////
-items.prototype.removeItem = function (itemId) {
+items.prototype.removeItem = function (itemId, itemNum) {
+    itemNum = itemNum || 1;
     if (!core.hasItem(itemId)) return false;
     var itemCls = core.material.items[itemId].cls;
-    core.status.hero.items[itemCls][itemId]--;
-    if (itemCls!='keys' && core.status.hero.items[itemCls][itemId]==0) {
+    core.status.hero.items[itemCls][itemId]-=itemNum;
+    if (itemCls!='keys' && core.status.hero.items[itemCls][itemId]<=0) {
         delete core.status.hero.items[itemCls][itemId];
     }
     core.updateStatusBar();
@@ -178,7 +185,7 @@ items.prototype.loadEquip = function (equipId, callback) {
     core.updateStatusBar();
 
     // 记录路线
-    core.status.route.push("equip:"+equipId);
+    // core.status.route.push("equip:"+equipId);
 
     // 装备更换完毕：删除换上的装备
     core.removeItem(equipId);
@@ -187,7 +194,7 @@ items.prototype.loadEquip = function (equipId, callback) {
     if (core.isset(unloadEquipId))
         core.addItem(unloadEquipId, 1);
 
-    core.log("已装备上"+loadEquip.name, core.material.icons.items[equipId]);
+    core.drawTip("已装备上"+loadEquip.name, core.material.icons.items[equipId]);
 
     if (core.isset(callback)) callback();
 }
@@ -217,7 +224,7 @@ items.prototype.unloadEquip = function (equipType, callback) {
     core.updateStatusBar();
 
     // 记录路线
-    core.status.route.push("unEquip:"+unloadEquipId);
+    // core.status.route.push("unEquip:"+equipType);
     
     // 装备更换完毕：增加卸下的装备
     core.addItem(unloadEquipId, 1);

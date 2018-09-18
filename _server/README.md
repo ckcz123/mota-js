@@ -70,7 +70,7 @@ editor.file.editFunctions(["change","['events']['afterChangeLight']","function(x
 生成表格并绑定事件的函数
 ```javascript
 editor.mode.loc();
-editor.mode.emenyitem();
+editor.mode.enemyitem();
 editor.mode.floor();
 editor.mode.tower();
 editor.mode.functions();
@@ -83,7 +83,7 @@ editor.mode.onmode('save');//保存
 editor.mode.onmode('nextChange');//下次onmode时前端进行切换
 
 editor.mode.onmode('loc');
-editor.mode.onmode('emenyitem');
+editor.mode.onmode('enemyitem');
 editor.mode.onmode('floor');
 editor.mode.onmode('tower');
 editor.mode.onmode('functions');

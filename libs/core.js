@@ -834,8 +834,13 @@ core.prototype.hasItem = function (itemId) {
 }
 
 ////// 是否装备某件装备 //////
-core.prototype.hasEquip = function (equipId) {
-    return core.items.hasEquip(equipId);
+core.prototype.hasEquip = function (itemId) {
+    return core.items.hasEquip(itemId);
+}
+
+////// 获得某个装备类型的当前装备 /////
+core.prototype.getEquip = function (equipType) {
+    return core.items.getEquip(equipType);
 }
 
 ////// 设置某个物品的个数 //////
@@ -844,8 +849,8 @@ core.prototype.setItem = function (itemId, itemNum) {
 }
 
 ////// 删除某个物品 //////
-core.prototype.removeItem = function (itemId) {
-    return core.items.removeItem(itemId);
+core.prototype.removeItem = function (itemId, itemNum) {
+    return core.items.removeItem(itemId, itemNum);
 }
 
 ////// 使用某个物品 //////

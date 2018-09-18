@@ -1,6 +1,6 @@
 # 附录: API列表
 
-?> 目前版本**v2.4**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.4.1**，上次更新时间：* {docsify-updated} *
 
 **这里只列出所有可能会被造塔者用到的常用API，更多的有关内容请在代码内进行查询。**
 
@@ -72,8 +72,17 @@ core.setItem('pickaxe', 10)
 将破墙镐个数设置为10个。这里可以写任何道具的ID。
 
 
+core.addItem('pickaxe', 2)
+将破墙镐的个数增加2个，无任何特效。这里可以写任何道具的ID。
+
+
 core.getItem('pickaxe', 4)
-另勇士获得四个破墙镐。这里可以写任何道具的ID。
+令勇士获得4个破墙镐。这里可以写任何道具的ID。
+和addItem相比，使用getItem会播放获得道具的音效，也会在左上角绘制获得提示。
+
+
+core.removeItem('pickaxe', 3)
+删除3个破墙镐。第二项可忽略，默认值为1。
 
 
 core.itemCount('pickaxe')
@@ -82,6 +91,15 @@ core.itemCount('pickaxe')
 
 core.hasItem('pickaxe')
 返回当前是否存在某个道具。等价于 core.itemCount('pickaxe')>0 。
+
+
+core.getEquip(0)
+获得0号装备类型（武器）的当前装备的itemId。如果不存在则返回null。
+这里可以写任意装备类型，从0开始和全塔属性中的equipName一一对应。
+
+
+core.hasEquip('sword1')
+获得当前某个具体的装备是否处于正在被装备状态。
 
 
 core.setFlag('xyz', 2)
@@ -229,12 +247,12 @@ core.canUseItem(itemId)
 返回当前能否使用某个道具。
 
 
-core.addItem(itemId, number)
-将某个道具增加number个。
+core.loadEquip(itemId, callback)
+装备上某个装备。itemId为装备的ID，callback为成功或失败后的回调。
 
 
-core.removeItem(itemId)
-将某个道具个数-1；如果道具个数归0则从道具列表删除。
+core.unloadEquip(equipType, callback)
+卸下某个部位的装备。equipType为装备类型，从0开始；callback为成功或失败后的回调。
 
 
 core.getNextItem()
@@ -264,6 +282,11 @@ core.calValue(value)
 
 core.getLocalStorage(key, defaultValue)
 从localStorage中获得某个数据（已被parse）；如果对应的key不存在则返回defaultValue。
+
+
+core.getLocalForage(key, defaultValue, successCallback, errorCallback)
+从localForage中获得某个数据（已被parse），如果对应的key不存在则返回defaultValue。
+如果成功则通过successCallback回调，失败则通过errorCallback回调。
 
 
 core.clone(data)
@@ -397,6 +420,10 @@ core.events.setHeroIcon(name)
 
 ========== core.items.XXX 和道具相关的函数 ==========
 items.js将处理和道具相关的内容，比如道具的使用，获取和删除等等。
+
+
+core.items.compareEquipment(equipId1, equipId2)
+比较两个装备的属性变化值
 
 
 ========== core.loader.XXX 和游戏加载相关的函数 ==========

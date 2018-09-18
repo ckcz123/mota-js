@@ -23,7 +23,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                                     "equips"
                                 ]
                             },
-                            "_data": "只能取keys(钥匙) items(宝石、血瓶) constants(永久物品) tools(消耗道具) equip(装备)"
+                            "_data": "只能取keys(钥匙) items(宝石、血瓶) constants(永久物品) tools(消耗道具) equips(装备)"
                         },
                         "name": {
                             "_leaf": true,
@@ -38,36 +38,9 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_data": "道具在道具栏中显示的描述"
                         },
                         "equip": {
-                            "_leaf": false,
-                            "_type": "object",
-                            "_data": {
-                                "type": {
-                                    "_leaf": true,
-                                    "_type": "textarea",
-                                    "_data": "如果是装备，其类别，与equipName按顺序对应（从0开始）"
-                                },
-                                "atk": {
-                                    "_leaf": true,
-                                    "_type": "textarea",
-                                    "_data": "如果是装备，其增加的攻击数值"
-                                },
-                                "def": {
-                                    "_leaf": true,
-                                    "_type": "textarea",
-                                    "_data": "如果是装备，其增加的防御数值"
-                                },
-                                "mdef": {
-                                    "_leaf": true,
-                                    "_type": "textarea",
-                                    "_data": "如果是装备，其增加的魔防数值"
-                                },
-                                "animate": {
-                                    "_leaf": true,
-                                    "_type": "textarea",
-                                    "_string": true,
-                                    "_data": "如果是装备，其攻击动画，仅对type为0的装备有效"
-                                }
-                            }
+                            "_leaf": true,
+                            "_type": "textarea",
+                            "_data": "装备属性设置，仅对cls为equips有效。\n如果此项不为null，需要是一个对象，里面可含\"type\"，\"atk\"，\"def\"，\"mdef\"，\"animate\"五项，分别对应装备部位、攻防魔防和动画。\n具体详见文档（元件说明-装备）和已有的几个装备的写法。"
                         }, 
                     }
                 },
@@ -238,7 +211,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "pushBox"
                         ]
                     },
-                    "_data": "图块的默认触发器"
+                    "_data": "该图块的默认触发器"
                 },
                 "noPass": {
                     "_leaf": true,
@@ -250,7 +223,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             false
                         ]
                     },
-                    "_data": "图块默认可通行状态"
+                    "_data": "该图块是否不可通行；true代表不可通行，false代表可通行，null代表使用系统缺省值"
                 }
             }
         },

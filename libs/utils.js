@@ -325,7 +325,7 @@ utils.prototype.encodeRoute = function (route) {
             if (t.indexOf('item:')==0)
                 ans+="I"+t.substring(5)+":";
             else if (t.indexOf('unEquip:')==0)
-                ans+="u"+t.substring(8)+":";
+                ans+="u"+t.substring(8);
             else if (t.indexOf('equip:')==0)
                 ans+="e"+t.substring(6)+":";
             else if (t.indexOf('fly:')==0)
@@ -387,7 +387,7 @@ utils.prototype.decodeRoute = function (route) {
 
     while (index<route.length) {
         var c=route.charAt(index++);
-        var nxt=(c=='I'|| c=='u' || c=='e' ||c=='F'||c=='S'||c=='Q'||c=='t')?getString():getNumber();
+        var nxt=(c=='I'|| c=='e' ||c=='F'||c=='S'||c=='Q'||c=='t')?getString():getNumber();
 
         var mp = {
             "U": "up",

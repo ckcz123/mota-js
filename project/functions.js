@@ -1,7 +1,7 @@
 functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = 
 {
-    "events": {
-        "initGame": function() {
+	"events": {
+		"initGame": function() {
 	// 游戏开始前的一些初始化操作
 
 	// 根据flag来对道具进行修改
@@ -32,7 +32,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.material.items.shield5.cls = 'equips';
 	}
 },
-        "setInitData": function (hard) {
+		"setInitData": function (hard) {
 	// 不同难度分别设置初始属性
 	if (hard=='Easy') { // 简单难度
 		core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
@@ -52,7 +52,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 	core.events.afterLoadData();
 },
-        "win": function(reason, norank) {
+		"win": function(reason, norank) {
 	// 游戏获胜事件 
 	core.ui.closePanel();
 	var replaying = core.status.replay.replaying;
@@ -71,7 +71,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		})
 	});
 },
-        "lose": function(reason) {
+		"lose": function(reason) {
 	// 游戏失败事件
 	core.ui.closePanel();
 	var replaying = core.status.replay.replaying;
@@ -84,7 +84,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		});
 	})
 },
-        "afterChangeFloor": function (floorId, fromLoad) {
+		"afterChangeFloor": function (floorId, fromLoad) {
 	// 转换楼层结束的事件
 	// floorId是切换到的楼层；fromLoad若为true则代表是从读档行为造成的楼层切换
 	if (!core.hasFlag("visited_"+floorId)) {
@@ -92,7 +92,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.setFlag("visited_"+floorId, true);
 	}
 },
-        "addPoint": function (enemy) {
+		"addPoint": function (enemy) {
 	// 加点事件
 	var point = enemy.point;
 	if (!core.flags.enableAddPoint || !core.isset(point) || point<=0) return [];
@@ -114,7 +114,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		}
 	];
 },
-        "afterBattle": function(enemyId,x,y,callback) {
+		"afterBattle": function(enemyId,x,y,callback) {
 	// 战斗结束后触发的事件
 
 	var enemy = core.material.enemys[enemyId];
@@ -235,7 +235,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.isset(callback)) callback();
 
 },
-        "afterOpenDoor": function(doorId,x,y,callback) {
+		"afterOpenDoor": function(doorId,x,y,callback) {
 	// 开一个门后触发的事件
 	
 	var todo = [];
@@ -258,7 +258,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 	if (core.isset(callback)) callback();
 },
-        "afterGetItem": function(itemId,x,y,callback) {
+		"afterGetItem": function(itemId,x,y,callback) {
 	// 获得一个道具后触发的事件
 
 	var todo = [];
@@ -275,11 +275,11 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	if (core.isset(callback)) callback();
 },
-        "afterChangeLight": function(x,y) {
+		"afterChangeLight": function(x,y) {
 	// 改变亮灯之后，可以触发的事件
 
 },
-        "afterPushBox": function () {
+		"afterPushBox": function () {
 	// 推箱子后的事件
 
 	var noBoxLeft = function () {
@@ -302,7 +302,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		*/
 	}
 },
-        "afterUseBomb": function () {
+		"afterUseBomb": function () {
 	// 使用炸弹/圣锤后的事件
 
 	// 这是一个使用炸弹也能开门的例子
@@ -317,19 +317,19 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	*/
 
 },
-        "beforeSaveData": function(data) {
+		"beforeSaveData": function(data) {
 	// 即将存档前可以执行的操作
 
 },
-        "afterLoadData": function(data) {
+		"afterLoadData": function(data) {
 	// 读档事件后，载入事件前，可以执行的操作
 	// 怪物数据的动态修改迁移到了“脚本编辑 - updateEnemys”中，详见文档说明
 
 	core.enemys.updateEnemys();
 }
-    },
-    "enemys": {
-        "getSpecials": function() {
+	},
+	"enemys": {
+		"getSpecials": function() {
 	// 获得怪物的特殊属性，每一行定义一个特殊属性。
 	// 分为三项，第一项为该特殊属性的数字，第二项为特殊属性的名字，第三项为特殊属性的描述
 	// 可以直接写字符串，也可以写个function将怪物传进去
@@ -360,7 +360,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		[24, "激光", function (enemy) {return "经过怪物同行或同列时自动减生命"+(enemy.value||0)+"点";}]
 	];
 },
-        "getDamageInfo": function (enemy, hero_hp, hero_atk, hero_def, hero_mdef) {
+		"getDamageInfo": function (enemy, hero_hp, hero_atk, hero_def, hero_mdef) {
 	// 获得战斗伤害信息（实际伤害计算函数）
 
 	// 怪物生命，怪物攻击、防御、特殊属性
@@ -453,7 +453,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		"damage": damage
 	};
 },
-        "updateEnemys": function () {
+		"updateEnemys": function () {
 	// 更新怪物数据，可以在这里对怪物属性和数据进行动态更新，详见文档——事件——怪物数据的动态修改
 	// 比如下面这个例子，如果flag:xxx为真，则将绿头怪的攻击设为100，金币设为20
 	/*
@@ -464,9 +464,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	*/
 	// 别忘了在事件中调用“更新怪物数据”事件！
 }
-    },
-    "control": {
-        "updateStatusBar": function () {
+	},
+	"control": {
+		"updateStatusBar": function () {
 	// 更新状态栏
 
 	// 检查等级
@@ -477,21 +477,28 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.setStatus('hp', Math.min(core.getStatus('hpmax'), core.getStatus('hp')));
 	}
 
-	// 更新领域、阻击、显伤
-	core.updateCheckBlock();
-
+	// 设置等级奴名称
 	var lvName = core.getLvName();
 	core.statusBar.lv.innerHTML = lvName;
+	// 检测是不是纯数字；如果带中文等需要取消斜体（不然很难看的！）
 	if (/^[+-]?\d+$/.test(lvName))
 		core.statusBar.lv.style.fontStyle = 'italic';
 	else core.statusBar.lv.style.fontStyle = 'normal';
 
+	// 设置生命上限、生命值、攻防魔防金币和经验值
 	var statusList = ['hpmax', 'hp', 'atk', 'def', 'mdef', 'money', 'experience'];
 	statusList.forEach(function (item) {
+		// 向下取整
 		if (core.isset(core.status.hero[item]))
 			core.status.hero[item] = Math.floor(core.status.hero[item]);
+		// 大数据格式化
 		core.statusBar[item].innerHTML = core.formatBigNumber(core.getStatus(item));
 	});
+
+	// 可以在这里添加自己额外的状态栏信息，比如想攻击显示 +0.5 可以这么写：
+	// if (core.hasFlag('halfAtk')) core.statusBar.atk.innerHTML += "+0.5";
+
+	// 如果是自定义添加的状态栏，也需要在这里进行设置显示的数值
 
 	// 进阶
 	if (core.flags.enableLevelUp && core.status.hero.lv<core.firstData.levelUp.length) {
@@ -499,24 +506,33 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 	else core.statusBar.up.innerHTML = " ";
 
+	// 钥匙
 	var keys = ['yellowKey', 'blueKey', 'redKey'];
 	keys.forEach(function (key) {
 		core.statusBar[key].innerHTML = core.setTwoDigits(core.status.hero.items.keys[key]);
-	})
+	});
+	// 毒衰咒
 	if(core.flags.enableDebuff){
 		core.statusBar.poison.innerHTML = core.hasFlag('poison')?"毒":"";
 		core.statusBar.weak.innerHTML = core.hasFlag('weak')?"衰":"";
 		core.statusBar.curse.innerHTML = core.hasFlag('curse')?"咒":"";
 	}
+	// 破炸飞
 	if (core.flags.enablePZF) {
 		core.statusBar.pickaxe.innerHTML = "破"+core.itemCount('pickaxe');
 		core.statusBar.bomb.innerHTML = "炸"+core.itemCount('bomb');
 		core.statusBar.fly.innerHTML = "飞"+core.itemCount('centerFly');
 	}
 
+	// 难度
 	core.statusBar.hard.innerHTML = core.status.hard;
+
+	// 更新阻激夹域的伤害值
+	core.updateCheckBlock();
+	// 更新全地图显伤
+	core.updateDamage();
 },
-        "updateCheckBlock": function () {
+		"updateCheckBlock": function () {
 	// 领域、夹击、阻击等的伤害值计算
 
 	core.status.checkBlock = {};
@@ -549,6 +565,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			var id = core.status.checkBlock.map[x+core.bigmap.width*y];
 			if (core.isset(id)) {
 
+				// 如果是血网，直接加上伤害值
 				if (id=="lavaNet") {
 					core.status.checkBlock.damage[x+core.bigmap.width*y]+=core.values.lavaDamage||0;
 					continue;
@@ -558,14 +575,18 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				// 存在领域
 				// 如果要防止领域伤害，可以直接简单的将 flag:no_zone 设为true
 				if (core.enemys.hasSpecial(enemy.special, 15) && !core.hasFlag("no_zone")) {
+					// 领域范围，默认为1
 					var range = enemy.range || 1;
+					// 是否是九宫格领域
 					var zoneSquare = false;
 					if (core.isset(enemy.zoneSquare)) zoneSquare=enemy.zoneSquare;
+					// 在范围内进行搜索，增加领域伤害值
 					for (var dx=-range;dx<=range;dx++) {
 						for (var dy=-range;dy<=range;dy++) {
 							if (dx==0 && dy==0) continue;
 							var nx=x+dx, ny=y+dy;
 							if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height) continue;
+							// 如果是十字领域，则还需要满足 |dx|+|dy|<=range
 							if (!zoneSquare && Math.abs(dx)+Math.abs(dy)>range) continue;
 							core.status.checkBlock.damage[nx+ny*core.bigmap.width]+=enemy.value||0;
 						}
@@ -574,6 +595,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				// 存在激光
 				// 如果要防止激光伤害，可以直接简单的将 flag:no_laser 设为true
 				if (core.enemys.hasSpecial(enemy.special, 24) && !core.hasFlag("no_laser")) {
+					// 检查同行和同列，增加激光伤害值
 					for (var nx=0;nx<core.bigmap.width;nx++) {
 						if (nx!=x) core.status.checkBlock.damage[nx+y*core.bigmap.width]+=enemy.value||0;
 					}
@@ -603,7 +625,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (!core.hasFlag('no_betweenAttack')) {
 		for (var x=0;x<core.bigmap.width;x++) {
 			for (var y=0;y<core.bigmap.height;y++) {
+				// 该点是否存在夹击
 				var has=false;
+				// 检测左右是否存在相同的怪物，且拥有夹击属性
 				if (x>0 && x<core.bigmap.width-1) {
 					var id1=core.status.checkBlock.map[x-1+core.bigmap.width*y],
 						id2=core.status.checkBlock.map[x+1+core.bigmap.height*y];
@@ -614,6 +638,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 						}
 					}
 				}
+				// 检测上下是否存在相同的怪物，且拥有夹击属性
 				if (y>0 && y<core.bigmap.height-1) {
 					var id1=core.status.checkBlock.map[x+core.bigmap.width*(y-1)],
 						id2=core.status.checkBlock.map[x+core.bigmap.width*(y+1)];
@@ -627,7 +652,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				// 计算夹击伤害
 				if (has) {
 					core.status.checkBlock.betweenAttack[x+core.bigmap.width*y]=true;
+					// 先扣除该点领域/阻击/激光造成的伤害，再算夹击
 					var leftHp = core.status.hero.hp - core.status.checkBlock.damage[x+core.bigmap.width*y];
+					// 1血不夹；core.flags.betweenAttackCeil控制向上还是向下
 					if (leftHp>1)
 						core.status.checkBlock.damage[x+core.bigmap.width*y] += Math.floor((leftHp+(core.flags.betweenAttackCeil?0:1))/2);
 				}
@@ -635,9 +662,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		}
 	}
 }
-    },
-    "ui": {
-        "drawAbout": function() {
+	},
+	"ui": {
+		"drawAbout": function() {
 	// 绘制“关于”界面
 	if (!core.isPlaying()) {
 		core.status.event = {'id': null, 'data': null};
@@ -664,9 +691,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112+32);
 	// TODO: 写自己的“关于”页面，每次增加32像素即可
 }
-    },
-    "plugins": {
-        "plugin": function () {
+	},
+	"plugins": {
+		"plugin": function () {
 	////// 插件编写，可以在这里写自己额外需要执行的脚本 //////
 
 	// 在这里写的代码，在所有模块加载完毕后，游戏开始前会被执行
@@ -677,12 +704,76 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 在这里写所有需要自定义的函数
 	// 写法必须是 this.xxx = function (args) { ...
 	// 如果不写this的话，函数将无法被外部所访问
-	this.test  = function () {
+	this.test = function () {
 		console.log("插件函数执行测试");
+	};
+
+
+	// 绘制灯光/漆黑层效果。调用方式 core.plugin.drawLight(...)
+	// 【参数说明】
+	// color：可选，灯光以外部分的颜色，可以是一个四元数组，或者简单的一个0到1之间的数。忽略则默认为0.9。
+	//        如果是四元数组，则代表RGBA值，如 [255,255,0,0.2] 就代表 #FFFF00 且不透明度0.2
+	//        如果是一个数，则只是不透明度的值，RGB均为0，如 0.9 就代表 [0,0,0,0.9]
+	// lights：可选，一个数组，定义了每个独立的灯光。
+	//        其中每一项是三元组 [x,y,r] 或者四元组 [x,y,r,o]
+	//        x和y分别为该灯光的横纵坐标，r为该灯光的半径，o为该灯光中心的不透明度，可忽略默认为0。
+	// lightDec：可选，0到1之间，光从多少百分比才开始衰减（在此范围内保持全亮），不设置默认为0。
+	//        比如lightDec为0.5代表，每个灯光部分内圈50%的范围全亮，50%以后才开始快速衰减。
+	// 【调用样例】
+	// core.plugin.drawLight(); // 绘制一个0.9的全图不透明度，等价于更改画面色调为[0,0,0,0.9]。
+	// core.plugin.drawLight(0.95, [[25,11,46]]); // 全图不透明度0.95，其中在(25,11)点存在一个半径为46的灯光效果。
+	// core.plugin.drawLight([255,255,0,0.2], [[25,11,46,0.1]]); // 全图为不透明度0.2的黄色，其中在(25,11)点存在一个半径为46的灯光效果，灯光中心不透明度0.1。
+	// core.plugin.drawLight(0.9, [[25,11,46],[105,121,88],[301,221,106]]); // 存在三个灯光效果，分别是中心(25,11)半径46，中心(105,121)半径88，中心(301,221)半径106。
+	// core.plugin.drawLight([0,0,255,0.3], [[25,11,46],[105,121,88,0.2]], 0.4); // 存在两个灯光效果，它们在内圈40%范围内保持全亮，且40%后才开始衰减。
+	// 【注意事项】
+	// 此函数会和更改画面色调发生冲突，请只选择一个使用。
+	this.drawLight = function (color, lights, lightDec) {
+		// 清空色调层
+		var ctx = core.canvas.curtain;
+        ctx.mozImageSmoothingEnabled = false;
+        ctx.webkitImageSmoothingEnabled = false;
+        ctx.msImageSmoothingEnabled = false;
+        ctx.imageSmoothingEnabled = false;
+        core.clearMap('curtain');
+        core.setOpacity('curtain', 1);
+        core.setAlpha('curtain', 1);
+
+        // 绘制色调层，默认不透明度
+        if (!core.isset(color)) color = 0.9;
+        if (typeof color == "number") color = [0,0,0,color];
+		core.fillRect('curtain', 0, 0, 416, 416,
+			'rgba('+color[0]+','+color[1]+','+color[2]+','+core.clamp(color[3],0,1)+')');
+
+		// 绘制每个灯光效果
+		if (!core.isset(lights) || lights.length==0) return;
+		lightDec = core.clamp(lightDec, 0, 1);
+		lights.forEach(function (light) {
+			// 坐标，半径，中心不透明度
+			var x = light[0], y = light[1], r = light[2], o = 255 * (1 - core.clamp(light[3], 0, 1));
+			// 计算衰减距离
+			var decDistance = parseInt(r * lightDec), leftDistance = r - decDistance;
+			// 正方形区域的直径和左上角坐标
+			var d = r * 2, sx = x - r, sy = y - r;
+			// 获得正方形区域的颜色信息
+			var imageData = ctx.getImageData(sx, sy, d, d);
+			// 对每个像素点进行遍历
+			for (var i = 0; i < imageData.data.length; i+=4) {
+				// 当前点的坐标
+				var index = i / 4, cx = parseInt(index/d), cy = index%d;
+				// 当前点距离中心点的距离
+				var dx = r - cx, dy = r - cy, distance = Math.sqrt(dx*dx+dy*dy);
+				if (distance >= r) continue;
+				// 计算当前点的alpha值
+				var alpha = imageData.data[i+3] - (distance<decDistance?1:(r-distance)/leftDistance)*o;
+				imageData.data[i+3] = core.clamp(alpha, 0, 255);
+			}
+			ctx.putImageData(imageData, sx, sy);
+		});
 	}
-	
+
+
 	// 可以在任何地方（如afterXXX或自定义脚本事件）调用函数，方法为  core.plugin.xxx();
 
 }
-    }
+	}
 }

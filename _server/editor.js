@@ -709,8 +709,8 @@ editor.prototype.listen = function () {
                 }
                 tip.infos = JSON.parse(JSON.stringify(editor.info));
                 editor_mode.onmode('nextChange');
-                editor_mode.onmode('emenyitem');
-                //editor_mode.emenyitem();
+                editor_mode.onmode('enemyitem');
+                //editor_mode.enemyitem();
             }
         }
     }
@@ -779,7 +779,7 @@ editor.prototype.listen = function () {
         dataSelection.style.height = ysize - 6 + 'px';
         tip.infos = JSON.parse(JSON.stringify(editor.info));
         editor_mode.onmode('nextChange');
-        editor_mode.onmode('emenyitem');
+        editor_mode.onmode('enemyitem');
     }
 
     var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);

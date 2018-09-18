@@ -88,7 +88,7 @@
             </div>
         </div>
     </div>
-    <div id="left3" class='leftTab' style="z-index:-1;opacity: 0;"><!-- emenyitem -->
+    <div id="left3" class='leftTab' style="z-index:-1;opacity: 0;"><!-- enemyitem -->
         <h3 class="leftTabHeader">图块属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>
         </h3>
         <div class="leftTabContent">
@@ -264,7 +264,7 @@
                 <select id="editModeSelect">
                     <option value="map">地图编辑</option>
                     <option value="loc">地图选点</option>
-                    <option value="emenyitem">图块属性</option>
+                    <option value="enemyitem">图块属性</option>
                     <option value="floor">楼层属性</option>
                     <option value="tower">全塔属性</option>
                     <option value="functions">脚本编辑</option>
@@ -408,7 +408,6 @@
     <div id="gameDraw">
         <div id="gif"></div>
         <div id="gif2"></div>
-        <div id="curtain"></div>
         <!-- <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas> -->
         <!-- <canvas class='gameCanvas' id='event' width='416' height='416'></canvas> -->
         <canvas class='gameCanvas' id='hero' width='416' height='416'></canvas>
@@ -418,6 +417,7 @@
         <canvas class='gameCanvas' id='animate' width='416' height='416'></canvas>
         <canvas class='gameCanvas' id='weather' width='416' height='416'></canvas>
         <canvas class='gameCanvas' id='route' width='416' height='416'></canvas>
+        <canvas class='gameCanvas' id='curtain' width='416' height='416'></canvas>
         <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
         <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
     </div>
@@ -554,7 +554,7 @@ var editor_mobile_listen=function(){
             editor.pos = {x: 0, y: 0};
             editor.mode.loc();
             editor.info = editor.ids[editor.indexs[201]];
-            editor.mode.emenyitem();
+            editor.mode.enemyitem();
             editor.mode.floor();
             editor.mode.tower();
             editor.mode.functions();

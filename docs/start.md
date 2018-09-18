@@ -1,6 +1,6 @@
 # 快速上手
 
-?> 目前版本**v2.4**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.4.1**，上次更新时间：* {docsify-updated} *
 
 在这一节中，将详细介绍做一部塔的流程。现在，让我们来做一部单层塔！
 
@@ -201,6 +201,8 @@ HTML5的塔都是可以进行控制台调试的。
 - `core.getItem('pickaxe', 2)` 令勇士获得两个破墙镐。
 - `core.itemCount('pickaxe')` 返回勇士某个道具的个数。
 - `core.hasItem('pickaxe')` 返回勇士是否拥有某个道具。等价于`core.itemCount('pickaxe')!=0`。
+- `core.getEquip(0)` 返回0号装备类型（武器）的当前装备的itemId，不存在则返回null
+- `core.hasEquip('sword1')` 返回某个装备当前是否处于被装备状态
 - `core.setFlag('xxx', 1)` 设置某个flag/自定义变量的值。
 - `core.getFlag('xxx', 10)` 获得某个flag/自定义变量的值；如果该项不存在（未被定义），则返回第二个参数的值。
 - `core.hasFlag('xxx')` 返回是否存在某个变量且不为0。等价于`core.getFlag('xxx', 0)!=0`。
@@ -210,7 +212,6 @@ HTML5的塔都是可以进行控制台调试的。
 - `core.getBlock(3, 5, 'MT1')` 获得当前地图上某一个块的信息。第三个参数为floorId，可省略表示当前楼层。
 - `core.getBlockId(3, 5, 'MT1')` 获得当前地图上某一个点的图块ID。第三个参数为floorId，可省略表示当前楼层。
 - `core.resetMap()` 重置当前层地图。**当修改地图后再读档，修改的地图不会立刻生效，此时可以使用resetMap来重置当前楼层的地图。**
-- `localStorage` 获得所有的存档数据。可以用 `core.getLocalStorage('save1')` 来具体获得某个存档。
 - ……
 
 更多API和详细参数介绍可参见[API列表](api)。

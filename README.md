@@ -8,8 +8,9 @@ HTML5 canvas制作的魔塔样板，支持全平台游戏！
 * [List / HTML5魔塔游戏列表](https://h5mota.com/)
 * [Demo / 样板效果](https://ckcz123.com/games/template/)
 * [Docs / 使用文档说明](https://ckcz123.github.io/mota-js/)
+<!--
 * [Video / 视频教程](http://www.bilibili.com/video/av17608025/)
-
+-->
 ![样板](./docs/img/sample0.png)
 
 ## 目录结构
@@ -52,6 +53,19 @@ HTML5 canvas制作的魔塔样板，支持全平台游戏！
 ```
 
 ## 更新说明
+
+### 2018.9.18 V2.4.1
+
+* [x] 增加背景层和前景层的图块绘制，多层图块可叠加
+* [x] 背景层/前景层图块的显示、隐藏、修改等事件
+* [x] 专门的装备页面（Q键开启）；装备系统大改造
+* [x] 灯光和漆黑层效果，通过插件函数方式给出
+* [x] 将状态栏更新和阻激夹域的计算移动到脚本编辑中
+* [x] 增加控制免疫阻激夹域的flag:no_zone等
+* [x] 打字机效果时点击显示全部文字
+* [x] 修复更改画面色调的Bug
+* [x] 修复更改剧情文本属性后读档恢复原样的问题
+* [x] 部分细节优化
 
 ### 2018.8.28 V2.4
 
@@ -293,7 +307,7 @@ HTML5 canvas制作的魔塔样板，支持全平台游戏！
 - [JS代码压缩工具](http://github.com/ckcz123/JSCompressor/)：能对Javascript代码进行压缩和整合，从而减少IO请求量。 
 - [便捷PS工具](http://github.com/ckcz123/ps/)：能只用复制和粘贴来快速对素材进行PS操作。  
 - [地图生成器](http://github.com/ckcz123/map_generator/)：能从一张截图识别出来具体的数字数组，方便复刻已有的塔。 
-- [怪物数据导出器](http://github.com/ckcz123/enemy_export/)：能从RMXP中带出怪物数据，以供H5使用。 
+- [怪物数据导出器](http://github.com/ckcz123/enemy_export/)：能从RMXP中导出怪物数据，以供H5使用。
 - [伤害和临界值计算器](http://github.com/ckcz123/magic-tower-calculator/)：一个能帮助计算怪物的伤害和临界值的小工具。 
 
 ## 联系我们
@@ -320,5 +334,7 @@ HTML5魔塔交流群群号： `539113091`
 [@wadxm](https://github.com/wadxm) iOS平台的APP（因为苹果政策无法上架）和启动服务mac版的开发者。我们现在能在mac上制作魔塔得归功于他。
 
 [@fux4](https://github.com/fux4) 打通了RM和H5之间的障壁（从而使RM动画导出器和怪物数据导出器成为可能），同时也是部分新功能（如跳跃、跟随、画面震动）等的编写者。
+
+[@tocque](https://github.com/tocque) 装备栏的编写者。
 
 以及[百度贴吧魔塔吧](https://tieba.baidu.com/f?kw=%E9%AD%94%E5%A1%94)和H5魔塔交流群`539113091`内的诸位魔塔爱好者们对本样板的大力支持！

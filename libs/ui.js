@@ -567,6 +567,8 @@ ui.prototype.drawTextBox = function(content, showAll) {
 ////// 绘制一个选项界面 //////
 ui.prototype.drawChoices = function(content, choices) {
 
+    choices = choices || [];
+
     var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
 
     core.clearMap('ui');
@@ -577,7 +579,15 @@ ui.prototype.drawChoices = function(content, choices) {
 
     // Step 1: 计算长宽高
     var length = choices.length;
-    var left=85, width = 416-2*left; // 宽度
+
+    // 宽度计算：考虑选项的长度
+    var width = 416 - 2*85;
+    core.setFont('ui', "bold 17px Verdana");
+    for (var i = 0; i < choices.length; i++) {
+        width = Math.max(width, core.canvas.ui.measureText(core.replaceText(choices[i].text || choices[i])).width + 30);
+    }
+
+    var left=parseInt((416 - width) / 2); // 左边界
     // 高度
     var height = 32*(length+2), bottom = 208+height/2;
     if (length%2==0) bottom+=16;
@@ -693,8 +703,9 @@ ui.prototype.drawChoices = function(content, choices) {
             content_top = top+55;
             var title_offset = left+width/2;
             // 动画
+
             if (id=='hero' || core.isset(icon))
-                title_offset += 22;
+                title_offset += 12;
 
             if (id == 'hero') {
                 var heroHeight = core.material.icons.hero.height;
@@ -1872,7 +1883,7 @@ ui.prototype.drawEquipbox = function(index) {
         // 个数
         if (core.itemCount(ownEquip)>1)
             core.fillText('ui', core.itemCount(ownEquip), 16*(4*(i%6)+1)+40, 304+Math.floor(i/6)*54+38-ydelta, '#FFFFFF', "bold 14px Verdana");
-        if (selectId == ownEquip)
+        if (index>=12 && selectId == ownEquip)
             core.strokeRect('ui', 16*(4*(i%6)+1)+1, 304+Math.floor(i/6)*54+1-ydelta, 40, 40, '#FFD700');
     }
 

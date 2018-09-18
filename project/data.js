@@ -60,7 +60,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 	"firstData": {
 		"title": "魔塔样板",
 		"name": "template",
-		"version": "Ver 2.4",
+		"version": "Ver 2.4.1",
 		"floorId": "sample0",
 		"hero": {
 			"name": "阳光",
@@ -200,8 +200,8 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"bombFourDirections": false,
 		"snowFourDirections": false,
 		"bigKeyIsBox": false,
-		"equipment": true,
-		"equipboxButton": true,
+		"equipment": false,
+		"equipboxButton": false,
 		"enableAddPoint": false,
 		"enableNegativeDamage": false,
 		"hatredDecrease": true,

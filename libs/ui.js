@@ -18,6 +18,8 @@ ui.prototype.init = function () {
 ui.prototype.clearMap = function (map, x, y, width, height) {
     if (map == 'all') {
         for (var m in core.canvas) {
+            // 不擦除curtain层
+            if (m=='curtain') continue;
             core.canvas[m].clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
         }
         core.dom.gif.innerHTML = "";

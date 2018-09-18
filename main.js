@@ -42,7 +42,6 @@ function main() {
         'gameCanvas': document.getElementsByClassName('gameCanvas'),
         'gif': document.getElementById('gif'),
         'gif2': document.getElementById('gif2'),
-        'curtain': document.getElementById('curtain'),
         'gameDraw': document.getElementById('gameDraw'),
         'startButtons': document.getElementById('startButtons'),
         'playGame': document.getElementById('playGame'),

@@ -1236,15 +1236,17 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
                     var color = core.floors[floorId].color;
 
                     // 直接变色
-                    core.dom.curtain.style.background = core.arrayToRGB(color);
+                    core.clearMap('curtain');
                     if (core.isset(color[3]))
-                        core.dom.curtain.style.opacity = color[3];
-                    else core.dom.curtain.style.opacity=1;
+                        core.setAlpha('curtain', color[3]);
+                    else
+                        core.setAlpha('curtain', 1);
+                    core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGB(color));
                     core.status.curtainColor = color;
                 }
                 else {
-                    core.dom.curtain.style.background = "#000000";
-                    core.dom.curtain.style.opacity = 0;
+                    core.clearMap('curtain');
+                    core.setAlpha('curtain', 0);
                 }
             }
 

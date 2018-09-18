@@ -246,13 +246,6 @@ span#poison, span#weak, span#curse, span#pickaxe, span#bomb, span#fly {
     overflow: hidden;
 }
 
-#curtain {
-    z-index: 100;
-    position: absolute;
-    opacity: 0;
-    background: #000000;
-}
-
 #gameDraw {
     position: absolute;
     background: #000000;
@@ -294,6 +287,10 @@ span#poison, span#weak, span#curse, span#pickaxe, span#bomb, span#fly {
 
 #route {
     z-index: 95;
+}
+
+#curtain {
+    z-index: 100;
 }
 
 #ui {

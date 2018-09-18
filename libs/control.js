@@ -187,8 +187,6 @@ control.prototype.showStartAnimate = function (callback) {
     core.dom.startButtonGroup.style.display = 'none';
     core.dom.startButtons.style.display = 'block';
     core.dom.levelChooseButtons.style.display = 'none';
-    core.dom.curtain.style.background = "#000000";
-    core.dom.curtain.style.opacity = 0;
     core.status.played = false;
     core.clearStatus();
     core.clearMap('all');
@@ -1451,8 +1449,9 @@ control.prototype.setFg = function(color, time, callback) {
 
     if (time==0) {
         // 直接变色
-        core.dom.curtain.style.background = core.arrayToRGB(color);
-        core.dom.curtain.style.opacity = color[3];
+        core.clearMap('curtain');
+        core.setAlpha('curtain', color[3]);
+        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGB(color));
         core.status.curtainColor = color;
         if (core.isset(callback)) callback();
         return;
@@ -1467,8 +1466,9 @@ control.prototype.setFg = function(color, time, callback) {
         var nowR = parseInt(fromColor[0]+(color[0]-fromColor[0])*step/25);
         var nowG = parseInt(fromColor[1]+(color[1]-fromColor[1])*step/25);
         var nowB = parseInt(fromColor[2]+(color[2]-fromColor[2])*step/25);
-        core.dom.curtain.style.background = core.arrayToRGB([nowR,nowG,nowB]);
-        core.dom.curtain.style.opacity = nowAlpha;
+        core.clearMap('curtain');
+        core.setAlpha('curtain', nowAlpha);
+        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGB([nowR,nowG,nowB]));
 
         if (step>=25) {
             clearInterval(changeAnimate);
@@ -2844,6 +2844,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 height:(canvasWidth - SPACE*2) + unit,
             }
         },
+        /*
         {
             id: 'curtain',
             rules: {
@@ -2851,6 +2852,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 height:(canvasWidth - SPACE*2) + unit,
             }
         },
+        */
         {
             id: 'gameDraw',
             rules: {

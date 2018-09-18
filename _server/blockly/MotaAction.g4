@@ -816,13 +816,13 @@ return code;
 */;
 
 animate_s
-    :   '显示动画' IdString '位置' EvalString? Newline
+    :   '显示动画' IdString '位置' EvalString? '不等待绘制完毕' Bool Newline
     
 
 /* animate_s
 tooltip : animate：显示动画,位置填hero或者1,2形式的位置,或者不填代表当前事件点
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=animate%EF%BC%9A%E6%98%BE%E7%A4%BA%E5%8A%A8%E7%94%BB
-default : ["zone","hero"]
+default : ["zone","hero",false]
 colour : this.soundColor
 if (EvalString_0) {
   if(/^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-]*,flag:[0-9a-zA-Z_][0-9a-zA-Z_\-]*$/.test(EvalString_0)) {
@@ -835,7 +835,7 @@ if (EvalString_0) {
     throw new Error('此处只能填hero或者1,2形式的位置,或者不填代表当前事件点');
   }
 }
-var code = '{"type": "animate", "name": "'+IdString_0+'"'+EvalString_0+'},\n';
+var code = '{"type": "animate", "name": "'+IdString_0+'"'+EvalString_0+', "async": '+Bool_0+'},\n';
 return code;
 */;
 
@@ -1803,7 +1803,7 @@ ActionParser.prototype.parseAction = function() {
       var animate_loc = data.loc||'';
       if(animate_loc && animate_loc!=='hero')animate_loc = animate_loc[0]+','+animate_loc[1];
       this.next = MotaActionBlocks['animate_s'].xmlText([
-        data.name,animate_loc,this.next]);
+        data.name,animate_loc,data.async||0,this.next]);
       break;
     case "viberate": // 画面震动
       this.next = MotaActionBlocks['viberate_s'].xmlText([data.time||0, this.next]);

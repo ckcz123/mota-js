@@ -508,9 +508,15 @@ events.prototype.doAction = function() {
                     y=core.calValue(data.loc[1]);
                 }
             }
-            core.drawAnimate(data.name, x, y, function () {
+            if (data.async) {
+                core.drawAnimate(data.name, x, y);
                 core.events.doAction();
-            })
+            }
+            else {
+                core.drawAnimate(data.name, x, y, function () {
+                    core.events.doAction();
+                })
+            }
             break;
         case "move": // 移动事件
             if (core.isset(data.loc)) {

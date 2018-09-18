@@ -18,8 +18,8 @@ HTML5魔塔是使用画布（canvas）来绘制，存在若干个图层，它们
 - damage：显伤层；主要用来绘制怪物显伤和领域显伤
 - animate：动画层；主要用来绘制动画。showImage事件绘制的图片也是在这一层。
 - weather：天气层；主要用来绘制天气（雨/雪）
-- curtain：色调层；用来控制当前楼层的画面色调
 - route：路线层；主要用来绘制勇士的行走路线图，也用来绘制图块的淡入/淡出效果，图块的移动等。
+- curtain：色调层；用来控制当前楼层的画面色调
 - ui：UI层；用来绘制一切UI窗口，如剧情文本、怪物手册、楼传器、系统菜单等等
 - data：数据层；用来绘制一些顶层的或更新比较快的数据，如左上角的提示，战斗界面中数据的变化等等。
 
@@ -547,7 +547,7 @@ this.statusBar = {
     'mana': document.getElementById('mana'), // 显示内容（数据）的定义
 }
 ```
-6. 显示内容的设置。在control.js的updateStatusBar函数，可以对该状态栏显示内容进行设置，下面是几个例子。
+6. 显示内容的设置。在脚本编辑的updateStatusBar函数，可以对该状态栏显示内容进行设置，下面是几个例子。
 ``` js
 core.statusBar.mana.innerHTML = core.getFlag('mana', 0); // 设置其显示内容为flag:mana值。
 core.statusBar.mana.innerHTML = core.getFlag('mana', 0) + '/' + core.getFlag('manaMax', 0); // 显示内容将类似 "32/60" 这样。

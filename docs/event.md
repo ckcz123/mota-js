@@ -418,7 +418,7 @@ NPC对话事件结束后如果需要NPC消失也需要调用 `{"type": "hide"}`�
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    {"type": "trigger", "loc": [3, 6]}, // 立即触发loc位置的事件，当前剩下的事件全部不再执行
+    {"type": "trigger", "loc": [3,6]}, // 立即触发loc位置的事件，当前剩下的事件全部不再执行
     "执行trigger后，这段文字将不会再被显示"
 ]
 ```
@@ -435,7 +435,7 @@ revisit和trigger完全相同，只不过是立刻触发的还是本地点的事
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    {"type": "revisit"}, // 立即触发本事件，等价于{"type": "trigger", "loc": [x,y]}
+    {"type": "revisit"}, // 立即触发本事件，等价于 {"type": "trigger", "loc": [x,y]}
     "执行revisit后，这段文字将不会再被显示"
 ]
 ```

@@ -142,10 +142,6 @@ R
 录像回放的快捷键；这不是一个控制台命令，但是也把它放在这里供使用。
 录像回放在修改地图或新增数据后会很有用。
 
-
-localStorage
-获得所有的存档数据。可以用 core.getLocalStorage('save1') 来具体获得某个存档。
-
 ```
 
 !> 一些相对高级的命令，针对有一定脚本经验的人
@@ -489,6 +485,10 @@ Base64解密字符串
 
 core.utils.formatBigNumber(x)
 大数据的格式化
+
+
+core.utils.clamp(x, a, b)
+将x限制在[a,b]之间的范围内
 
 
 core.utils.arrayToRGB(color)

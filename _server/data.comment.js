@@ -47,7 +47,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "textarea",
                     "_range": "thiseval instanceof Array && thiseval.length>=1 && thiseval[0] instanceof Array && thiseval[0].length==2",
-                    "_data": "难度选择:每个数组的第一个是其在标题界面显示的难度,第二个是在游戏内部传输的字符串,会显示在状态栏,修改此处后需要在project/functions中作相应更改"
+                    "_data": "难度选择：每个数组的第一个是其在标题界面显示的难度，第二个是在游戏内部传输的字符串，会显示在状态栏，修改此处后需要在project/functions中作相应更改。\n如果需直接开始游戏将下面的startDirectly开关打开即可。"
                 },
                 "equipName": {
                     "_leaf": true,

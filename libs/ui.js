@@ -1388,6 +1388,8 @@ ui.prototype.drawBook = function (index) {
             damage = core.formatBigNumber(damage);
             if (core.enemys.hasSpecial(core.material.enemys[enemy.id], 19))
                 damage += "+";
+            if (core.enemys.hasSpecial(core.material.enemys[enemy.id], 21))
+                damage += "-";
         }
         if (core.material.enemys[enemy.id].notBomb)
             damage += "[b]";

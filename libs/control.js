@@ -1526,6 +1526,8 @@ control.prototype.updateDamage = function () {
                         damage = core.formatBigNumber(damage);
                         if (core.enemys.hasSpecial(core.material.enemys[id], 19))
                             damage += "+";
+                        if (core.enemys.hasSpecial(core.material.enemys[id], 21))
+                            damage += "-";
                     }
 
                     core.setFillStyle('damage', '#000000');

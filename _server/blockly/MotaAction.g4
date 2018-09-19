@@ -802,21 +802,22 @@ return code;
 */;
 
 viberate_s
-    :   '画面震动' '时间' Int Newline
+    :   '画面震动' '时间' Int '异步' Bool Newline
 
 
 /* viberate_s
 tooltip : viberate: 画面震动
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=viberate%ef%bc%9a%e7%94%bb%e9%9d%a2%e9%9c%87%e5%8a%a8
-default : [2000]
+default : [2000,false]
 colour : this.soundColor
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
-var code = '{"type": "viberate"' + Int_0 + '},\n';
+var async = Bool_0?', "async": true':''
+var code = '{"type": "viberate"' + Int_0 + async + '},\n';
 return code;
 */;
 
 animate_s
-    :   '显示动画' IdString '位置' EvalString? '不等待绘制完毕' Bool Newline
+    :   '显示动画' IdString '位置' EvalString? '异步' Bool Newline
     
 
 /* animate_s
@@ -835,7 +836,8 @@ if (EvalString_0) {
     throw new Error('此处只能填hero或者1,2形式的位置,或者不填代表当前事件点');
   }
 }
-var code = '{"type": "animate", "name": "'+IdString_0+'"'+EvalString_0+', "async": '+Bool_0+'},\n';
+var async = Bool_0?', "async": true':'';
+var code = '{"type": "animate", "name": "'+IdString_0+'"'+EvalString_0+async+'},\n';
 return code;
 */;
 
@@ -865,28 +867,30 @@ return code;
 */;
 
 animateImage_0_s
-    : '图片淡入' EvalString '起点像素位置' 'x' PosString 'y' PosString '动画时间' Int Newline
+    : '图片淡入' EvalString '起点像素位置' 'x' PosString 'y' PosString '动画时间' Int '异步' Bool Newline
     
 
 /* animateImage_0_s
 tooltip : animageImage：图片淡入
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=animateimage%EF%BC%9A%E5%9B%BE%E7%89%87%E6%B7%A1%E5%85%A5%E6%B7%A1%E5%87%BA
-default : ["bg.jpg","0","0",500]
+default : ["bg.jpg","0","0",500,false]
 colour : this.printColor
-var code = '{"type": "animateImage", "action": "show", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "time": '+Int_0+'},\n';
+var async = Bool_0?', "async": true':'';
+var code = '{"type": "animateImage", "action": "show", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "time": '+Int_0+async+'},\n';
 return code;
 */;
 
 animateImage_1_s
-    : '图片淡出' EvalString '起点像素位置' 'x' PosString 'y' PosString '动画时间' Int Newline
+    : '图片淡出' EvalString '起点像素位置' 'x' PosString 'y' PosString '动画时间' Int '异步' Bool Newline
     
 
 /* animateImage_1_s
 tooltip : animageImage：图片淡出
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=animateimage%EF%BC%9A%E5%9B%BE%E7%89%87%E6%B7%A1%E5%85%A5%E6%B7%A1%E5%87%BA
-default : ["bg.jpg","0","0",500]
+default : ["bg.jpg","0","0",500,false]
 colour : this.printColor
-var code = '{"type": "animateImage", "action": "hide", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "time": '+Int_0+'},\n';
+var async = Bool_0?', "async": true':'';
+var code = '{"type": "animateImage", "action": "hide", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "time": '+Int_0+async+'},\n';
 return code;
 */;
 
@@ -917,26 +921,27 @@ return code;
 
 moveImage_0_s
     :   '图片移动' EvalString '起点像素位置' 'x' PosString 'y' PosString BGNL
-        '终点像素位置' 'x' PosString 'y' PosString '移动时间' Int Newline
+        '终点像素位置' 'x' PosString 'y' PosString '移动时间' Int '异步' Bool Newline
     
 
 /* moveImage_0_s
 tooltip : moveImage：图片移动
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=moveimage%EF%BC%9A%E5%9B%BE%E7%89%87%E7%A7%BB%E5%8A%A8
-default : ["bg.jpg","0","0","0","0",500]
+default : ["bg.jpg","0","0","0","0",500,false]
 colour : this.printColor
-var code = '{"type": "moveImage", "name": "'+EvalString_0+'", "from": ['+PosString_0+','+PosString_1+'], "to": ['+PosString_2+','+PosString_3+'], "time": '+Int_0+'},\n';
+var async = Bool_0?', "async": true':'';
+var code = '{"type": "moveImage", "name": "'+EvalString_0+'", "from": ['+PosString_0+','+PosString_1+'], "to": ['+PosString_2+','+PosString_3+'], "time": '+Int_0+async+'},\n';
 return code;
 */;
 
 setFg_0_s
-    :   '更改画面色调' Number ',' Number ',' Number ',' Number '动画时间' Int? Newline
+    :   '更改画面色调' Number ',' Number ',' Number ',' Number '动画时间' Int? '异步' Bool Newline
     
 
 /* setFg_0_s
 tooltip : setFg: 更改画面色调,动画时间可不填
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=setfg%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
-default : [255,255,255,1,500]
+default : [255,255,255,1,500,false]
 colour : this.soundColor
 var limit = function(v,min,max) {
     if(v>max) return max;
@@ -948,21 +953,23 @@ Number_1 = limit(Number_1,0,255);
 Number_2 = limit(Number_2,0,255);
 Number_3 = limit(Number_3,0,1);
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
-var code = '{"type": "setFg", "color": ['+Number_0+','+Number_1+','+Number_2+','+Number_3+']'+Int_0 +'},\n';
+var async = Bool_0?', "async": true':'';
+var code = '{"type": "setFg", "color": ['+Number_0+','+Number_1+','+Number_2+','+Number_3+']'+Int_0 +async+'},\n';
 return code;
 */;
 
 setFg_1_s
-    :   '恢复画面色调' '动画时间' Int? Newline
+    :   '恢复画面色调' '动画时间' Int? '异步' Bool Newline
     
 
 /* setFg_1_s
 tooltip : setFg: 恢复画面色调,动画时间可不填
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=setfg%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
-default : [500]
+default : [500,false]
 colour : this.soundColor
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
-var code = '{"type": "setFg"'+Int_0 +'},\n';
+var async = Bool_0?', "async": true':'';
+var code = '{"type": "setFg"'+Int_0 +async+'},\n';
 return code;
 */;
 
@@ -1103,16 +1110,17 @@ return code;
 */;
 
 setVolume_s
-    :   '设置音量' Int '渐变时间' Int? Newline
+    :   '设置音量' Int '渐变时间' Int? '异步' Bool Newline
     
 
 /* setVolume_s
 tooltip : setVolume: 设置音量
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=setvolume%EF%BC%9A%E8%AE%BE%E7%BD%AE%E9%9F%B3%E9%87%8F
-default : [90, 500]
+default : [90, 500, false]
 colour : this.soundColor
 Int_1 = Int_1?(', "time": '+Int_1):""
-var code = '{"type": "setVolume", "value": '+Int_0+Int_1+'},\n';
+var async = Bool_0?', "async": true':'';
+var code = '{"type": "setVolume", "value": '+Int_0+Int_1+async+'},\n';
 return code;
 */;
 
@@ -1803,10 +1811,10 @@ ActionParser.prototype.parseAction = function() {
       var animate_loc = data.loc||'';
       if(animate_loc && animate_loc!=='hero')animate_loc = animate_loc[0]+','+animate_loc[1];
       this.next = MotaActionBlocks['animate_s'].xmlText([
-        data.name,animate_loc,data.async||0,this.next]);
+        data.name,animate_loc,data.async||false,this.next]);
       break;
     case "viberate": // 画面震动
-      this.next = MotaActionBlocks['viberate_s'].xmlText([data.time||0, this.next]);
+      this.next = MotaActionBlocks['viberate_s'].xmlText([data.time||0, data.async||false, this.next]);
       break;
     case "showImage": // 显示图片
       if(this.isset(data.name)){
@@ -1820,10 +1828,10 @@ ActionParser.prototype.parseAction = function() {
     case "animateImage": // 显示图片
       if(data.action == 'show'){
         this.next = MotaActionBlocks['animateImage_0_s'].xmlText([
-          data.name,data.loc[0],data.loc[1],data.time,this.next]);
+          data.name,data.loc[0],data.loc[1],data.time,data.async||false,this.next]);
       } else if (data.action == 'hide') {
         this.next = MotaActionBlocks['animateImage_1_s'].xmlText([
-          data.name,data.loc[0],data.loc[1],data.time,this.next]);
+          data.name,data.loc[0],data.loc[1],data.time,data.async||false,this.next]);
       }
       break;
     case "showGif": // 显示动图
@@ -1837,7 +1845,7 @@ ActionParser.prototype.parseAction = function() {
         break;
     case "moveImage": // 移动图片
       this.next = MotaActionBlocks['moveImage_0_s'].xmlText([
-        data.name, data.from[0], data.from[1], data.to[0], data.to[1], data.time, this.next
+        data.name, data.from[0], data.from[1], data.to[0], data.to[1], data.time, data.async||false, this.next
       ]);
       break;
     case "setFg": // 颜色渐变
@@ -1845,10 +1853,10 @@ ActionParser.prototype.parseAction = function() {
         var alpha = data.color[3];
         if (alpha==undefined || alpha==null) alpha=1;
         this.next = MotaActionBlocks['setFg_0_s'].xmlText([
-          data.color[0],data.color[1],data.color[2],alpha,data.time||0,this.next]);
+          data.color[0],data.color[1],data.color[2],alpha,data.time||0,data.async||false,this.next]);
       } else {
         this.next = MotaActionBlocks['setFg_1_s'].xmlText([
-          data.time||0,this.next]);
+          data.time||0,data.async||false,this.next]);
       }
       break;
     case "setWeather": // 更改天气
@@ -1894,7 +1902,7 @@ ActionParser.prototype.parseAction = function() {
       break
     case "setVolume":
       this.next = MotaActionBlocks['setVolume_s'].xmlText([
-        data.value, data.time, this.next]);
+        data.value, data.time, data.async||false, this.next]);
       break
     case "setValue":
       this.next = MotaActionBlocks['setValue_s'].xmlText([

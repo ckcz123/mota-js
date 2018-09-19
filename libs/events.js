@@ -594,9 +594,15 @@ events.prototype.doAction = function() {
             }
             else {
                 if (core.isset(data.loc) && core.isset(core.material.images.images[data.name]) && (data.action=="show" || data.action=="hide")) {
-                    core.events.animateImage(data.action, core.material.images.images[data.name], data.loc, data.time, function() {
-                        core.events.doAction();
-                    });
+                    if (data.async) {
+                        core.events.animateImage(data.action, core.material.images.images[data.name], data.loc, data.time);
+                        this.doAction();
+                    }
+                    else {
+                        core.events.animateImage(data.action, core.material.images.images[data.name], data.loc, data.time, function() {
+                            core.events.doAction();
+                        });
+                    }
                 }
                 else {
                     this.doAction();
@@ -625,9 +631,15 @@ events.prototype.doAction = function() {
             }
             else {
                 if (core.isset(data.from) && core.isset(data.to) && core.isset(core.material.images.images[data.name])) {
-                    core.events.moveImage(core.material.images.images[data.name], data.from, data.to, data.time, function() {
-                        core.events.doAction();
-                    });
+                    if (data.async) {
+                        core.events.moveImage(core.material.images.images[data.name], data.from, data.to, data.time);
+                        this.doAction();
+                    }
+                    else {
+                        core.events.moveImage(core.material.images.images[data.name], data.from, data.to, data.time, function() {
+                            core.events.doAction();
+                        });
+                    }
                 }
                 else {
                     this.doAction();
@@ -635,9 +647,15 @@ events.prototype.doAction = function() {
             }
             break;
         case "setFg": // 颜色渐变
-            core.setFg(data.color, data.time, function() {
-                core.events.doAction();
-            });
+            if (data.async) {
+                core.setFg(data.color, data.time);
+                this.doAction();
+            }
+            else {
+                core.setFg(data.color, data.time, function() {
+                    core.events.doAction();
+                });
+            }
             break;
         case "setWeather": // 更改天气
             core.setWeather(data.name, data.level);
@@ -722,9 +740,15 @@ events.prototype.doAction = function() {
             data.value = parseInt(data.value||0);
             if (data.value<0) data.value=0;
             if (data.value>100) data.value=100;
-            this.setVolume(data.value/100, data.time, function() {
-                core.doAction();
-            });
+            if (data.async) {
+                this.setVolume(data.value/100, data.time);
+                this.doAction();
+            }
+            else {
+                this.setVolume(data.value/100, data.time, function() {
+                    core.events.doAction();
+                });
+            }
             break;
         case "setValue":
             try {
@@ -896,9 +920,15 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "viberate":
-            core.events.vibrate(data.time, function () {
-                core.events.doAction();
-            })
+            if (data.async) {
+                core.events.vibrate(data.time);
+                this.doAction();
+            }
+            else {
+                core.events.vibrate(data.time, function () {
+                    core.events.doAction();
+                })
+            }
             break;
         case "sleep": // 等待多少毫秒
             if (core.status.replay.replaying)

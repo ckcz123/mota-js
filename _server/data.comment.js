@@ -10,6 +10,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "floorIds": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_range": "editor.mode.checkFloorIds(thiseval)",
                     "_data": "在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器、浏览地图和上/下楼器的顺序"
                 },
                 "images": {
@@ -45,11 +46,13 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "levelChoose": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "难度选择:每个数组的第一个是其在标题界面显示的难度,第二个是在游戏内部传输的字符串,会显示在状态栏,修改此处后需要在project/functions中作相应更改"
+                    "_range": "thiseval instanceof Array && thiseval.length>=1 && thiseval[0] instanceof Array && thiseval[0].length==2",
+                    "_data": "难度选择：每个数组的第一个是其在标题界面显示的难度，第二个是在游戏内部传输的字符串，会显示在状态栏，修改此处后需要在project/functions中作相应更改。\n如果需直接开始游戏将下面的startDirectly开关打开即可。"
                 },
                 "equipName": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_range": "(thiseval instanceof Array && thiseval.length<=6)||thiseval==null",
                     "_data": "装备位名称，为不超过6个的数组，此项的顺序与equiptype数值关联；例如可写[\"武器\",\"防具\",\"首饰\"]等等。"
                 },
                 "statusLeftBackground": {
@@ -97,6 +100,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "floorId": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_range": "data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.floorIds.indexOf(thiseval)!==-1",
                     "_data": "初始楼层的ID"
                 },
                 "hero": {
@@ -222,17 +226,20 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "event",
                     "_event": "firstArrive",
+                    "_range": "thiseval==null || thiseval instanceof Array",
                     "_data": "游戏开始前剧情。\n可以双击进入事件编辑器。\n如果无剧情直接留一个空数组即可。"
                 },
                 "shops": {
                     "_leaf": true,
                     "_type": "event",
                     "_event": "shop",
+                    "_range": "thiseval instanceof Array",
                     "_data": "全局商店，是一个数组，可以双击进入事件编辑器。"
                 },
                 "levelUp": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_range": "thiseval==null || thiseval instanceof Array",
                     "_data": "经验升级所需要的数值，是一个数组，可以双击进行编辑。 \n 第一项为初始等级，可以简单留空，也可以写name \n 每一个里面可以含有三个参数 need, name, effect \n need为所需要的经验数值，是一个正整数。请确保need所需的依次递增 \n name为该等级的名称，也可以省略代表使用系统默认值；本项将显示在状态栏中 \n effect为本次升级所执行的操作，可由若干项组成，由分号分开 \n 其中每一项写法和上面的商店完全相同，同样必须是X+=Y的形式，Y是一个表达式，同样可以使用status:xxx或item:xxx代表勇士的某项数值/道具个数"
                 }
             }

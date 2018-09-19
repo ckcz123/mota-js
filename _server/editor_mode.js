@@ -71,6 +71,7 @@ editor_mode = function (editor) {
                     if (key === '_data') continue;
                     if (cobj[key] instanceof Function) cobj[key] = cobj[key](args);
                 }
+                if (cobj._hide)continue;
                 if (cobj._leaf) {
                     var leafnode = editor_mode.objToTr_(obj, commentObj, field, cfield, vobj, cobj);
                     outstr.push(leafnode[0]);
@@ -647,6 +648,34 @@ editor_mode = function (editor) {
             editor_mode.onmode('nextChange');
             editor_mode.onmode(editModeSelect.value);
             if(editor.isMobile)editor.showdataarea(false);
+        }
+
+        editor_mode.checkFloorIds = function(thiseval){
+            var oldvalue = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.floorIds;
+            fs.readdir('project/floors',function(err, data){
+                if(err){
+                    printe(err);
+                    throw Error(err);
+                }
+                var newfiles=thiseval.map(function(v){return v+'.js'});
+                var notExist='';
+                for(var name,ii=0;name=newfiles[ii];ii++){
+                    if(data.indexOf(name)===-1)notExist=name;
+                }
+                if(notExist){
+                    var discard=confirm('文件'+notExist+'不存在, 保存会导致工程无法打开, 是否放弃更改');
+                    if(discard){
+                        editor.file.editTower([['change', "['main']['floorIds']", oldvalue]], function (objs_) {/*console.log(objs_);*/
+                            if (objs_.slice(-1)[0] != null) {
+                                printe(objs_.slice(-1)[0]);
+                                throw(objs_.slice(-1)[0])
+                            }
+                            ;printe('已放弃floorIds的修改');
+                        });
+                    }
+                }
+            });
+            return true
         }
 
         if (Boolean(callback)) callback();

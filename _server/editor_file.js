@@ -565,6 +565,8 @@ editor_file = function (editor, callback) {
                             delete(locObj[v]);
                         });
                         delete(locObj.map);
+                        delete(locObj.bgmap);
+                        delete(locObj.fgmap);
                         return locObj;
                     })(),
                     editor_file.comment._data.floors._data.floor,
@@ -584,6 +586,8 @@ editor_file = function (editor, callback) {
                         delete(locObj[v]);
                     });
                     delete(locObj.map);
+                    delete(locObj.bgmap);
+                    delete(locObj.fgmap);
                     return locObj;
                 })(),
                 editor_file.comment._data.floors._data.floor,

@@ -118,6 +118,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "special": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_range": "thiseval==null || thiseval instanceof Array || (thiseval==~~thiseval && thiseval>0)",
                     "_data": "特殊属性\n\n0:无,1:先攻,2:魔攻,3:坚固,4:2连击,\n5:3连击,6:n连击,7:破甲,8:反击,9:净化,\n10:模仿,11:吸血,12:中毒,13:衰弱,14:诅咒,\n15:领域,16:夹击,17:仇恨,18:阻击,19:自爆,\n20:无敌,21:退化,22:固伤,23:重生,24:激光\n\n多个属性例如用[1,4,11]表示先攻2连击吸血\n模仿怪的攻防设为0就好"
                 },
                 "value": {

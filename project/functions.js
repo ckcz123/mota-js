@@ -1,7 +1,7 @@
 functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = 
 {
-	"events": {
-		"initGame": function() {
+    "events": {
+        "initGame": function() {
 	// 游戏开始前的一些初始化操作
 
 	// 根据flag来对道具进行修改
@@ -32,7 +32,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.material.items.shield5.cls = 'equips';
 	}
 },
-		"setInitData": function (hard) {
+        "setInitData": function (hard) {
 	// 不同难度分别设置初始属性
 	if (hard=='Easy') { // 简单难度
 		core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
@@ -52,7 +52,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 	core.events.afterLoadData();
 },
-		"win": function(reason, norank) {
+        "win": function(reason, norank) {
 	// 游戏获胜事件 
 	core.ui.closePanel();
 	var replaying = core.status.replay.replaying;
@@ -71,7 +71,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		})
 	});
 },
-		"lose": function(reason) {
+        "lose": function(reason) {
 	// 游戏失败事件
 	core.ui.closePanel();
 	var replaying = core.status.replay.replaying;
@@ -84,7 +84,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		});
 	})
 },
-		"afterChangeFloor": function (floorId, fromLoad) {
+        "afterChangeFloor": function (floorId, fromLoad) {
 	// 转换楼层结束的事件
 	// floorId是切换到的楼层；fromLoad若为true则代表是从读档行为造成的楼层切换
 	if (!core.hasFlag("visited_"+floorId)) {
@@ -92,7 +92,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.setFlag("visited_"+floorId, true);
 	}
 },
-		"addPoint": function (enemy) {
+        "addPoint": function (enemy) {
 	// 加点事件
 	var point = enemy.point;
 	if (!core.flags.enableAddPoint || !core.isset(point) || point<=0) return [];
@@ -114,7 +114,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		}
 	];
 },
-		"afterBattle": function(enemyId,x,y,callback) {
+        "afterBattle": function(enemyId,x,y,callback) {
 	// 战斗结束后触发的事件
 
 	var enemy = core.material.enemys[enemyId];
@@ -235,7 +235,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.isset(callback)) callback();
 
 },
-		"afterOpenDoor": function(doorId,x,y,callback) {
+        "afterOpenDoor": function(doorId,x,y,callback) {
 	// 开一个门后触发的事件
 	
 	var todo = [];
@@ -258,7 +258,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 	if (core.isset(callback)) callback();
 },
-		"afterGetItem": function(itemId,x,y,callback) {
+        "afterGetItem": function(itemId,x,y,callback) {
 	// 获得一个道具后触发的事件
 
 	var todo = [];
@@ -275,11 +275,11 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	if (core.isset(callback)) callback();
 },
-		"afterChangeLight": function(x,y) {
+        "afterChangeLight": function(x,y) {
 	// 改变亮灯之后，可以触发的事件
 
 },
-		"afterPushBox": function () {
+        "afterPushBox": function () {
 	// 推箱子后的事件
 
 	var noBoxLeft = function () {
@@ -302,7 +302,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		*/
 	}
 },
-		"afterUseBomb": function () {
+        "afterUseBomb": function () {
 	// 使用炸弹/圣锤后的事件
 
 	// 这是一个使用炸弹也能开门的例子
@@ -317,19 +317,19 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	*/
 
 },
-		"beforeSaveData": function(data) {
+        "beforeSaveData": function(data) {
 	// 即将存档前可以执行的操作
 
 },
-		"afterLoadData": function(data) {
+        "afterLoadData": function(data) {
 	// 读档事件后，载入事件前，可以执行的操作
 	// 怪物数据的动态修改迁移到了“脚本编辑 - updateEnemys”中，详见文档说明
 
 	core.enemys.updateEnemys();
 }
-	},
-	"enemys": {
-		"getSpecials": function() {
+    },
+    "enemys": {
+        "getSpecials": function() {
 	// 获得怪物的特殊属性，每一行定义一个特殊属性。
 	// 分为三项，第一项为该特殊属性的数字，第二项为特殊属性的名字，第三项为特殊属性的描述
 	// 可以直接写字符串，也可以写个function将怪物传进去
@@ -360,7 +360,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		[24, "激光", function (enemy) {return "经过怪物同行或同列时自动减生命"+(enemy.value||0)+"点";}]
 	];
 },
-		"getDamageInfo": function (enemy, hero_hp, hero_atk, hero_def, hero_mdef) {
+        "getDamageInfo": function (enemy, hero_hp, hero_atk, hero_def, hero_mdef) {
 	// 获得战斗伤害信息（实际伤害计算函数）
 
 	// 怪物生命，怪物攻击、防御、特殊属性
@@ -453,7 +453,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		"damage": damage
 	};
 },
-		"updateEnemys": function () {
+        "updateEnemys": function () {
 	// 更新怪物数据，可以在这里对怪物属性和数据进行动态更新，详见文档——事件——怪物数据的动态修改
 	// 比如下面这个例子，如果flag:xxx为真，则将绿头怪的攻击设为100，金币设为20
 	/*
@@ -464,9 +464,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	*/
 	// 别忘了在事件中调用“更新怪物数据”事件！
 }
-	},
-	"control": {
-		"updateStatusBar": function () {
+    },
+    "control": {
+        "updateStatusBar": function () {
 	// 更新状态栏
 
 	// 检查等级
@@ -532,7 +532,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 更新全地图显伤
 	core.updateDamage();
 },
-		"updateCheckBlock": function () {
+        "updateCheckBlock": function () {
 	// 领域、夹击、阻击等的伤害值计算
 
 	core.status.checkBlock = {};
@@ -662,9 +662,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		}
 	}
 }
-	},
-	"ui": {
-		"drawAbout": function() {
+    },
+    "ui": {
+        "drawAbout": function() {
 	// 绘制“关于”界面
 	if (!core.isPlaying()) {
 		core.status.event = {'id': null, 'data': null};
@@ -691,9 +691,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112+32);
 	// TODO: 写自己的“关于”页面，每次增加32像素即可
 }
-	},
-	"plugins": {
-		"plugin": function () {
+    },
+    "plugins": {
+        "plugin": function () {
 	////// 插件编写，可以在这里写自己额外需要执行的脚本 //////
 
 	// 在这里写的代码，在所有模块加载完毕后，游戏开始前会被执行
@@ -730,17 +730,17 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	this.drawLight = function (color, lights, lightDec) {
 		// 清空色调层
 		var ctx = core.canvas.curtain;
-        ctx.mozImageSmoothingEnabled = false;
-        ctx.webkitImageSmoothingEnabled = false;
-        ctx.msImageSmoothingEnabled = false;
-        ctx.imageSmoothingEnabled = false;
-        core.clearMap('curtain');
-        core.setOpacity('curtain', 1);
-        core.setAlpha('curtain', 1);
+		ctx.mozImageSmoothingEnabled = false;
+		ctx.webkitImageSmoothingEnabled = false;
+		ctx.msImageSmoothingEnabled = false;
+		ctx.imageSmoothingEnabled = false;
+		core.clearMap('curtain');
+		core.setOpacity('curtain', 1);
+		core.setAlpha('curtain', 1);
 
-        // 绘制色调层，默认不透明度
-        if (!core.isset(color)) color = 0.9;
-        if (typeof color == "number") color = [0,0,0,color];
+		// 绘制色调层，默认不透明度
+		if (!core.isset(color)) color = 0.9;
+		if (typeof color == "number") color = [0,0,0,color];
 		core.fillRect('curtain', 0, 0, 416, 416,
 			'rgba('+color[0]+','+color[1]+','+color[2]+','+core.clamp(color[3],0,1)+')');
 
@@ -775,5 +775,5 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 可以在任何地方（如afterXXX或自定义脚本事件）调用函数，方法为  core.plugin.xxx();
 
 }
-	}
+    }
 }

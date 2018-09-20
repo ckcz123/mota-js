@@ -1790,7 +1790,7 @@ ActionParser.prototype.parseAction = function() {
     case "changeFloor": // 楼层转换
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['changeFloor_s'].xmlText([
-        data.floorId,data.loc[0],data.loc[1],data.direction,this.time||0,this.next]);
+        data.floorId,data.loc[0],data.loc[1],data.direction,data.time||0,this.next]);
       break;
     case "changePos": // 直接更换勇士位置, 不切换楼层
       if(this.isset(data.loc)){

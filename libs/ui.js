@@ -1459,7 +1459,7 @@ ui.prototype.drawBookDetail = function (index) {
     core.setAlpha('data', 0.9);
     core.fillRect('data', left, top, right, bottom, '#000000');
     core.setAlpha('data', 1);
-    core.strokeRect('data', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+    core.strokeRect('data', left - 1, top - 1, right + 1, bottom + 1, main.borderColor||"#FFFFFF", 2);
 
     // 名称
     core.canvas.data.textAlign = "left";

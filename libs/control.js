@@ -1954,7 +1954,7 @@ control.prototype.replay = function () {
         return;
     }
     else if (action=='getNext') {
-        if (core.flags.enableGentleClick && core.getBlock(core.nextX(), core.nextY())!=null) {
+        if (core.flags.enableGentleClick && core.canMoveHero() && core.getBlock(core.nextX(), core.nextY())!=null) {
             var nextX = core.nextX(), nextY = core.nextY();
             var block = core.getBlock(nextX, nextY);
             if (block!=null && block.block.event.trigger=='getItem') {

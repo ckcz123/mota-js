@@ -1003,6 +1003,7 @@ events.prototype.insertAction = function (action, x, y, callback) {
 ////// 获得面前的物品（轻按） //////
 events.prototype.getNextItem = function() {
     if (!core.status.heroStop || !core.flags.enableGentleClick) return;
+    if (!core.canMoveHero()) return;
     var nextX = core.nextX(), nextY = core.nextY();
     var block = core.getBlock(nextX, nextY);
     if (block==null) return;

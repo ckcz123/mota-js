@@ -310,11 +310,17 @@ maps.prototype.canMoveDirectly = function (destX,destY) {
     visited[fromX+core.bigmap.width*fromY]=0;
     queue.push(fromX+core.bigmap.width*fromY);
 
-    var directions = [[-1,0],[1,0],[0,1],[0,-1]];
+    var directions = {
+        "left": [-1,0],
+        "up": [0,-1],
+        "right": [1,0],
+        "down": [0,1]
+    }
     while (queue.length>0) {
         var now=queue.shift(), nowX=parseInt(now%core.bigmap.width), nowY=parseInt(now/core.bigmap.width);
 
         for (var dir in directions) {
+            if (!core.canMoveHero(nowX, nowY, dir)) continue;
             var nx=nowX+directions[dir][0], ny=nowY+directions[dir][1];
             if (nx<0||nx>=core.bigmap.width||ny<0||ny>=core.bigmap.height||visited[nx+core.bigmap.width*ny]||core.getBlock(nx,ny)!=null||core.status.checkBlock.damage[nx+core.bigmap.width*ny]>0) continue;
             visited[nx+core.bigmap.width*ny]=visited[nowX+core.bigmap.width*nowY]+1;

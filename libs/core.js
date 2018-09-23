@@ -885,7 +885,7 @@ core.prototype.addItem = function (itemId, itemNum) {
 
 ////// 获得面前的物品（轻按） //////
 core.prototype.getNextItem = function() {
-    core.events.getNextItem();
+    return core.events.getNextItem();
 }
 
 ////// 获得某个物品 //////

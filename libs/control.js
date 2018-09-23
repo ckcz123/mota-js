@@ -1954,15 +1954,9 @@ control.prototype.replay = function () {
         return;
     }
     else if (action=='getNext') {
-        if (core.flags.enableGentleClick && core.getBlock(core.nextX(), core.nextY())!=null) {
-            var nextX = core.nextX(), nextY = core.nextY();
-            var block = core.getBlock(nextX, nextY);
-            if (block!=null && block.block.event.trigger=='getItem') {
-                core.getItem(block.block.event.id, 1, nextX, nextY);
-                core.status.route.push("getNext");
-                core.replay();
-                return;
-            }
+        if (core.getNextItem()) {
+            core.replay();
+            return;
         }
     }
     else if (action.indexOf('move:')==0) {

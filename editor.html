@@ -262,21 +262,6 @@
             <br>
             <select id="selectFloor"></select>
             <input type="button" value="保存地图" id='saveFloor'/>
-            <!--  -->
-            <div id="bgSelect" v-cloak style="display:none">
-                <span>当前地板: </span>
-                <select v-model="selectedBg">
-                    <option disabled value="">请选择地板</option>
-                    <option v-for="bg in bgs" v-bind:value="bg">
-                        {{ bg }}
-                    </option>
-                </select>
-                <div class="selectpng">
-                    <input class='input' id='pin' v-model="imgname" placeholder="请输入自定义背景文件名"/>
-                    <input class='btn' type="button" value="确定" v-on:click="updatebg"/>
-                </div>
-            </div>
-            <!--  -->
         </div>
     </div>
     <div id="right">
@@ -446,19 +431,11 @@ if (location.protocol.indexOf("http")!=0) {
     main.useCompress = false;
     main.init('editor', function () {
         editor.init(function () {
-            editor.pos = {x: 0, y: 0};
-            editor.mode.loc();
-            editor.info = editor.ids[editor.indexs[201]];
-            editor.mode.enemyitem();
-            editor.mode.floor();
-            editor.mode.tower();
-            editor.mode.functions();
-            editor.mode.showMode('floor');
-            editor.mode.listen();
-            editor_multi = editor_multi();
-            editor_blockly = editor_blockly();
             editor.useCompress = useCompress;
             delete(useCompress);
+            editor.listen();
+            editor.mode.listen();
+            editor.mobile_listen();
         });
     });
 

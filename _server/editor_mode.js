@@ -200,7 +200,7 @@ editor_mode = function (editor) {
         switch (mode) {
             case 'loc':
 
-                editor.file.editLoc(editor_mode.pos.x, editor_mode.pos.y, actionList, function (objs_) {/*console.log(objs_);*/
+                editor.file.editLoc(editor_mode.pos.x, editor_mode.pos.y, actionList, function (objs_) {//console.log(objs_);
                     if (objs_.slice(-1)[0] != null) {
                         printe(objs_.slice(-1)[0]);
                         throw(objs_.slice(-1)[0])
@@ -212,7 +212,7 @@ editor_mode = function (editor) {
             case 'enemyitem':
 
                 if (editor_mode.info.images == 'enemys' || editor_mode.info.images == 'enemy48') {
-                    editor.file.editEnemy(editor_mode.info.id, actionList, function (objs_) {/*console.log(objs_);*/
+                    editor.file.editEnemy(editor_mode.info.id, actionList, function (objs_) {//console.log(objs_);
                         if (objs_.slice(-1)[0] != null) {
                             printe(objs_.slice(-1)[0]);
                             throw(objs_.slice(-1)[0])
@@ -220,7 +220,7 @@ editor_mode = function (editor) {
                         ;printf('修改成功')
                     });
                 } else if (editor_mode.info.images == 'items') {
-                    editor.file.editItem(editor_mode.info.id, actionList, function (objs_) {/*console.log(objs_);*/
+                    editor.file.editItem(editor_mode.info.id, actionList, function (objs_) {//console.log(objs_);
                         if (objs_.slice(-1)[0] != null) {
                             printe(objs_.slice(-1)[0]);
                             throw(objs_.slice(-1)[0])
@@ -228,7 +228,7 @@ editor_mode = function (editor) {
                         ;printf('修改成功')
                     });
                 } else {
-                    editor.file.editMapBlocksInfo(editor_mode.info.idnum, actionList, function (objs_) {/*console.log(objs_);*/
+                    editor.file.editMapBlocksInfo(editor_mode.info.idnum, actionList, function (objs_) {//console.log(objs_);
                         if (objs_.slice(-1)[0] != null) {
                             printe(objs_.slice(-1)[0]);
                             throw(objs_.slice(-1)[0])
@@ -239,7 +239,7 @@ editor_mode = function (editor) {
                 break;
             case 'floor':
 
-                editor.file.editFloor(actionList, function (objs_) {/*console.log(objs_);*/
+                editor.file.editFloor(actionList, function (objs_) {//console.log(objs_);
                     if (objs_.slice(-1)[0] != null) {
                         printe(objs_.slice(-1)[0]);
                         throw(objs_.slice(-1)[0])
@@ -249,7 +249,7 @@ editor_mode = function (editor) {
                 break;
             case 'tower':
 
-                editor.file.editTower(actionList, function (objs_) {/*console.log(objs_);*/
+                editor.file.editTower(actionList, function (objs_) {//console.log(objs_);
                     if (objs_.slice(-1)[0] != null) {
                         printe(objs_.slice(-1)[0]);
                         throw(objs_.slice(-1)[0])
@@ -259,7 +259,7 @@ editor_mode = function (editor) {
                 break;
             case 'functions':
 
-                editor.file.editFunctions(actionList, function (objs_) {/*console.log(objs_);*/
+                editor.file.editFunctions(actionList, function (objs_) {//console.log(objs_);
                     if (objs_.slice(-1)[0] != null) {
                         printe(objs_.slice(-1)[0]);
                         throw(objs_.slice(-1)[0])
@@ -301,7 +301,7 @@ editor_mode = function (editor) {
         var objs = [];
         editor.file.editLoc(editor_mode.pos.x, editor_mode.pos.y, [], function (objs_) {
             objs = objs_;
-            /*console.log(objs_)*/
+            //console.log(objs_)
         });
         //只查询不修改时,内部实现不是异步的,所以可以这么写
         var tableinfo = editor_mode.objToTable_(objs[0], objs[1]);
@@ -330,19 +330,19 @@ editor_mode = function (editor) {
         if (editor_mode.info.images == 'enemys' || editor_mode.info.images == 'enemy48') {
             editor.file.editEnemy(editor_mode.info.id, [], function (objs_) {
                 objs = objs_;
-                /*console.log(objs_)*/
+                //console.log(objs_)
             });
         } else if (editor_mode.info.images == 'items') {
             editor.file.editItem(editor_mode.info.id, [], function (objs_) {
                 objs = objs_;
-                /*console.log(objs_)*/
+                //console.log(objs_)
             });
         } else {
             /* document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML='';
             return; */
             editor.file.editMapBlocksInfo(editor_mode.info.idnum, [], function (objs_) {
                 objs = objs_;
-                /*console.log(objs_)*/
+                //console.log(objs_)
             });
         }
         //只查询不修改时,内部实现不是异步的,所以可以这么写
@@ -357,7 +357,7 @@ editor_mode = function (editor) {
         var objs = [];
         editor.file.editFloor([], function (objs_) {
             objs = objs_;
-            /*console.log(objs_)*/
+            //console.log(objs_)
         });
         //只查询不修改时,内部实现不是异步的,所以可以这么写
         var tableinfo = editor_mode.objToTable_(objs[0], objs[1]);
@@ -370,7 +370,7 @@ editor_mode = function (editor) {
         var objs = [];
         editor.file.editTower([], function (objs_) {
             objs = objs_;
-            /*console.log(objs_)*/
+            //console.log(objs_)
         });
         //只查询不修改时,内部实现不是异步的,所以可以这么写
         var tableinfo = editor_mode.objToTable_(objs[0], objs[1]);
@@ -383,7 +383,7 @@ editor_mode = function (editor) {
         var objs = [];
         editor.file.editFunctions([], function (objs_) {
             objs = objs_;
-            /*console.log(objs_)*/
+            //console.log(objs_)
         });
         //只查询不修改时,内部实现不是异步的,所以可以这么写
         var tableinfo = editor_mode.objToTable_(objs[0], objs[1]);
@@ -484,7 +484,7 @@ editor_mode = function (editor) {
                     throw(err)
                 }
                 core.floorIds.push(newFileName.value);
-                editor.file.editTower([['change', "['main']['floorIds']", core.floorIds]], function (objs_) {/*console.log(objs_);*/
+                editor.file.editTower([['change', "['main']['floorIds']", core.floorIds]], function (objs_) {//console.log(objs_);
                     if (objs_.slice(-1)[0] != null) {
                         printe(objs_.slice(-1)[0]);
                         throw(objs_.slice(-1)[0])
@@ -512,7 +512,7 @@ editor_mode = function (editor) {
             var value = selectAppend.value;
             var ysize = selectAppend.value.indexOf('48') === -1 ? 32 : 48;
             editor_mode.appendPic.imageName = value;
-            var img = editor.material.images[value];
+            var img = core.material.images[value];
             editor_mode.appendPic.toImg = img;
             var num = ~~img.width / 32;
             editor_mode.appendPic.num = num;
@@ -608,7 +608,7 @@ editor_mode = function (editor) {
         picClick.onclick = function (e) {
             var loc = eToLoc(e);
             var pos = locToPos(loc);
-            /*console.log(e,loc,pos);*/
+            //console.log(e,loc,pos);
             var num = editor_mode.appendPic.num;
             var ii = editor_mode.appendPic.index;
             if (ii + 1 >= num) editor_mode.appendPic.index = ii + 1 - num;
@@ -665,7 +665,7 @@ editor_mode = function (editor) {
                 if(notExist){
                     var discard=confirm('文件'+notExist+'不存在, 保存会导致工程无法打开, 是否放弃更改');
                     if(discard){
-                        editor.file.editTower([['change', "['main']['floorIds']", oldvalue]], function (objs_) {/*console.log(objs_);*/
+                        editor.file.editTower([['change', "['main']['floorIds']", oldvalue]], function (objs_) {//console.log(objs_);
                             if (objs_.slice(-1)[0] != null) {
                                 printe(objs_.slice(-1)[0]);
                                 throw(objs_.slice(-1)[0])

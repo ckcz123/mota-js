@@ -1,24 +1,48 @@
 function editor() {
     this.version = "2.0";
-    this.material = {};
     this.brushMod = "line";//["line","rectangle"]
     this.layerMod = "map";//["fgmap","map","bgmap"]
+    this.isMobile = false;
 }
+
+/* 
+editor.loc
+editor.pos
+editor.info
+始终是最后一次点击的结果
+注意editor.info可能因为点击其他地方而被清空
+*/
+
+/////////// 数据相关 ///////////
 
 editor.prototype.init = function (callback) {
     var afterCoreReset = function () {
 
         main.editor.disableGlobalAnimate = false;//允许GlobalAnimate
-        /* core.setHeroMoveTriggerInterval(); */
+        // core.setHeroMoveTriggerInterval(); 
 
-        editor.reset(function () {
-            editor.drawMapBg();
-            editor.fetchMapFromCore();
-            editor.updateMap();
-            editor.buildMark();
-            editor.drawEventBlock();
-            if (Boolean(callback)) callback();
-        });
+        editor.idsInit(core.maps, core.icons.icons); // 初始化图片素材信息
+        editor.drawInitData(core.icons.icons); // 初始化绘图
+
+        editor.drawMapBg();
+        editor.fetchMapFromCore();
+        editor.updateMap();
+        editor.buildMark();
+        editor.drawEventBlock();
+        
+        editor.pos = {x: 0, y: 0};
+        editor.mode.loc();
+        editor.info = editor.ids[editor.indexs[201]];
+        editor.mode.enemyitem();
+        editor.mode.floor();
+        editor.mode.tower();
+        editor.mode.functions();
+        editor.mode.showMode('floor');
+        
+        editor_multi = editor_multi();
+        editor_blockly = editor_blockly();
+        if (Boolean(callback)) callback();
+
     }
 
     var afterMainInit = function () {
@@ -44,8 +68,6 @@ editor.prototype.init = function (callback) {
             editor.file = editor_file;
             editor_mode = editor_mode(editor);
             editor.mode = editor_mode;
-            editor.material.images = core.material.images;
-            editor.listen(); // 开始监听事件
             core.resetStatus(core.firstData.hero, null, core.firstData.floorId, null, core.initStatus.maps);
             core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function () {
                 afterCoreReset();
@@ -54,12 +76,6 @@ editor.prototype.init = function (callback) {
         });
     }
     afterMainInit();
-}
-
-editor.prototype.reset = function (callback) {
-    editor.idsInit(core.maps, core.icons.icons); // 初始化图片素材信息
-    editor.drawInitData(core.icons.icons); // 初始化绘图
-    if (Boolean(callback)) callback();
 }
 
 editor.prototype.idsInit = function (maps, icons) {
@@ -91,9 +107,190 @@ editor.prototype.idsInit = function (maps, icons) {
     }
     editor.indexs[0] = [0];
 }
+
+editor.prototype.mapInit = function () {
+    var ec = document.getElementById('event').getContext('2d');
+    ec.clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
+    document.getElementById('event2').getContext('2d').clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
+    editor.map = [];
+    var sy=editor.currentFloorData.map.length,sx=editor.currentFloorData.map[0].length;
+    for (var y = 0; y < sy; y++) {
+        editor.map[y] = [];
+        for (var x = 0; x < sx; x++) {
+            editor.map[y][x] = 0;
+        }
+    }
+    editor.fgmap=JSON.parse(JSON.stringify(editor.map));
+    editor.bgmap=JSON.parse(JSON.stringify(editor.map));
+    editor.currentFloorData.map = editor.map;
+    editor.currentFloorData.fgmap = editor.fgmap;
+    editor.currentFloorData.bgmap = editor.bgmap;
+    editor.currentFloorData.firstArrive = [];
+    editor.currentFloorData.events = {};
+    editor.currentFloorData.changeFloor = {};
+    editor.currentFloorData.afterBattle = {};
+    editor.currentFloorData.afterGetItem = {};
+    editor.currentFloorData.afterOpenDoor = {};
+    editor.currentFloorData.cannotMove = {};
+}
+
+editor.prototype.fetchMapFromCore = function(){
+    var mapArray = core.maps.save(core.status.maps, core.status.floorId);
+    editor.map = mapArray.map(function (v) {
+        return v.map(function (v) {
+            return editor.ids[[editor.indexs[parseInt(v)][0]]]
+        })
+    });
+    editor.currentFloorId = core.status.floorId;
+    editor.currentFloorData = core.floors[core.status.floorId];
+    for(var ii=0,name;name=['bgmap','fgmap'][ii];ii++){
+        var mapArray = editor.currentFloorData[name];
+        if(!mapArray || JSON.stringify(mapArray)==JSON.stringify([])){//未设置或空数组
+            //与editor.map同形的全0
+            mapArray=eval('['+Array(editor.map.length+1).join('['+Array(editor.map[0].length+1).join('0,')+'],')+']');
+        }
+        editor[name]=mapArray.map(function (v) {
+            return v.map(function (v) {
+                return editor.ids[[editor.indexs[parseInt(v)][0]]]
+            })
+        });
+    }
+}
+
+editor.prototype.changeFloor = function (floorId, callback) {
+    for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
+        var mapArray=editor[name].map(function (v) {
+            return v.map(function (v) {
+                return v.idnum || v || 0
+            })
+        });
+        editor.currentFloorData[name]=mapArray;
+    }
+    core.changeFloor(floorId, null, {"x": 0, "y": 0, "direction": "up"}, null, function () {
+        core.bigmap.offsetX=0;
+        core.bigmap.offsetY=0;
+        editor.moveViewport(0,0);
+
+        editor.drawMapBg();
+        editor.fetchMapFromCore();
+        editor.updateMap();
+        editor_mode.floor();
+        editor.drawEventBlock();
+        if (core.isset(callback)) callback();
+    });
+}
+
+/////////// 游戏绘图相关 ///////////
+
+editor.prototype.drawMapBg = function (img) {
+    return;
+    //legacy
+    editor.main.editor.drawMapBg();
+}
+
+editor.prototype.drawEventBlock = function () {
+    var fg=document.getElementById('efg').getContext('2d');
+
+    fg.clearRect(0, 0, 416, 416);
+    for (var i=0;i<13;i++) {
+        for (var j=0;j<13;j++) {
+            var color=[];
+            var loc=(i+core.bigmap.offsetX/32)+","+(j+core.bigmap.offsetY/32);
+            if (core.isset(editor.currentFloorData.events[loc]))
+                color.push('#FF0000');
+            if (core.isset(editor.currentFloorData.changeFloor[loc]))
+                color.push('#00FF00');
+            if (core.isset(editor.currentFloorData.afterBattle[loc]))
+                color.push('#FFFF00');
+            if (core.isset(editor.currentFloorData.afterGetItem[loc]))
+                color.push('#00FFFF');
+            if (core.isset(editor.currentFloorData.afterOpenDoor[loc]))
+                color.push('#FF00FF');
+            if (core.isset(editor.currentFloorData.cannotMove[loc]))
+                color.push('#0000FF');
+            for(var kk=0,cc;cc=color[kk];kk++){
+                fg.fillStyle = cc;
+                fg.fillRect(32*i+8*kk, 32*j+32-8, 8, 8);
+            }
+        }
+    }
+}
+
+editor.prototype.updateMap = function () {
+    var blocks = main.editor.mapIntoBlocks(editor.map.map(function (v) {
+        return v.map(function (v) {
+            return v.idnum || v || 0
+        })
+    }), {'events': {}, 'changeFloor': {}}, editor.currentFloorId);
+    core.status.thisMap.blocks = blocks;
+    main.editor.updateMap();
+
+    var drawTile = function (ctx, x, y, tileInfo) { // 绘制一个普通块
+
+        //ctx.clearRect(x*32, y*32, 32, 32);
+        if (tileInfo == 0) return;
+
+        if (typeof(tileInfo) == typeof([][0]) || !hasOwnProp(tileInfo, 'idnum')) {//未定义块画红块
+            if (typeof(tileInfo) != typeof([][0]) && hasOwnProp(tileInfo, 'images')) {
+                ctx.drawImage(core.material.images[tileInfo.images], 0, tileInfo.y * 32, 32, 32, x * 32, y * 32, 32, 32);
+            }
+            ctx.strokeStyle = 'red';
+            var OFFSET = 2;
+            ctx.lineWidth = OFFSET;
+            ctx.strokeRect(x * 32 + OFFSET, y * 32 + OFFSET, 32 - OFFSET * 2, 32 - OFFSET * 2);
+            ctx.font = "30px Verdana";
+            ctx.textAlign = 'center'
+            ctx.fillStyle = 'red';
+            ctx.fillText("?", x * 32 + 16, y * 32 + 27);
+            return;
+        }
+        //ctx.drawImage(core.material.images[tileInfo.images], 0, tileInfo.y*32, 32, 32, x*32, y*32, 32, 32);
+    }
+    // 绘制地图 start
+    var eventCtx = document.getElementById('event').getContext("2d");
+    var fgCtx = document.getElementById('fg').getContext("2d");
+    var bgCtx = document.getElementById('bg').getContext("2d");
+    for (var y = 0; y < editor.map.length; y++)
+        for (var x = 0; x < editor.map[0].length; x++) {
+            var tileInfo = editor.map[y][x];
+            drawTile(eventCtx, x, y, tileInfo);
+            tileInfo = editor.fgmap[y][x];
+            drawTile(fgCtx, x, y, tileInfo);
+            tileInfo = editor.bgmap[y][x];
+            drawTile(bgCtx, x, y, tileInfo);
+        }
+    // 绘制地图 end
+    
+}
+
+editor.prototype.moveViewport=function(x,y){
+    core.bigmap.offsetX = core.clamp(core.bigmap.offsetX+32*x, 0, 32*core.bigmap.width-416);
+    core.bigmap.offsetY = core.clamp(core.bigmap.offsetY+32*y, 0, 32*core.bigmap.height-416);
+    core.control.updateViewport();
+    editor.buildMark();
+    editor.drawEventBlock();
+}
+
+/////////// 通用 ///////////
+
+editor.prototype.guid = function () {
+    return 'id_' + 'xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+editor.prototype.HTMLescape = function (str_) {
+    return String(str_).split('').map(function (v) {
+        return '&#' + v.charCodeAt(0) + ';'
+    }).join('');
+}
+
+/////////// 界面交互相关 ///////////
+
 editor.prototype.drawInitData = function (icons) {
     var ratio = 1;
-    var images = editor.material.images;
+    var images = core.material.images;
     var maxHeight = 700;
     var sumWidth = 0;
     editor.widthsX = {};
@@ -148,131 +345,8 @@ editor.prototype.drawInitData = function (icons) {
         dc.drawImage(images[img], nowx, 0)
         nowx += images[img].width;
     }
-    bgSelect.bgs = Object.keys(icons.terrains);
     //editor.drawMapBg();
     //editor.mapInit();
-}
-editor.prototype.mapInit = function () {
-    var ec = document.getElementById('event').getContext('2d');
-    ec.clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
-    document.getElementById('event2').getContext('2d').clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
-    editor.map = [];
-    var sy=editor.currentFloorData.map.length,sx=editor.currentFloorData.map[0].length;
-    for (var y = 0; y < sy; y++) {
-        editor.map[y] = [];
-        for (var x = 0; x < sx; x++) {
-            editor.map[y][x] = 0;
-        }
-    }
-    editor.fgmap=JSON.parse(JSON.stringify(editor.map));
-    editor.bgmap=JSON.parse(JSON.stringify(editor.map));
-    editor.currentFloorData.map = editor.map;
-    editor.currentFloorData.fgmap = editor.fgmap;
-    editor.currentFloorData.bgmap = editor.bgmap;
-    editor.currentFloorData.firstArrive = [];
-    editor.currentFloorData.events = {};
-    editor.currentFloorData.changeFloor = {};
-    editor.currentFloorData.afterBattle = {};
-    editor.currentFloorData.afterGetItem = {};
-    editor.currentFloorData.afterOpenDoor = {};
-    editor.currentFloorData.cannotMove = {};
-}
-editor.prototype.drawMapBg = function (img) {
-    return;
-
-    //legacy
-    if (!core.isset(editor.bgY) || editor.bgY == 0) {
-        editor.main.editor.drawMapBg();
-        return;
-    }
-
-    var bgc = bg.getContext('2d');
-    for (var ii = 0; ii < 13; ii++)
-        for (var jj = 0; jj < 13; jj++) {
-            bgc.clearRect(ii * 32, jj * 32, 32, 32);
-            bgc.drawImage(editor.material.images['terrains'], 0, 32 * (editor.bgY || 0), 32, 32, ii * 32, jj * 32, 32, 32);
-        }
-    if (img) {
-        bgc.drawImage(img, 0, 0, 416, 416);
-    }
-}
-
-editor.prototype.drawEventBlock = function () {
-    var fg=document.getElementById('efg').getContext('2d');
-
-    fg.clearRect(0, 0, 416, 416);
-    for (var i=0;i<13;i++) {
-        for (var j=0;j<13;j++) {
-            var color=[];
-            var loc=(i+core.bigmap.offsetX/32)+","+(j+core.bigmap.offsetY/32);
-            if (core.isset(editor.currentFloorData.events[loc]))
-                color.push('#FF0000');
-            if (core.isset(editor.currentFloorData.changeFloor[loc]))
-                color.push('#00FF00');
-            if (core.isset(editor.currentFloorData.afterBattle[loc]))
-                color.push('#FFFF00');
-            if (core.isset(editor.currentFloorData.afterGetItem[loc]))
-                color.push('#00FFFF');
-            if (core.isset(editor.currentFloorData.afterOpenDoor[loc]))
-                color.push('#FF00FF');
-            if (core.isset(editor.currentFloorData.cannotMove[loc]))
-                color.push('#0000FF');
-            for(var kk=0,cc;cc=color[kk];kk++){
-                fg.fillStyle = cc;
-                fg.fillRect(32*i+8*kk, 32*j+32-8, 8, 8);
-            }
-        }
-    }
-}
-
-editor.prototype.updateMap = function () {
-    var blocks = main.editor.mapIntoBlocks(editor.map.map(function (v) {
-        return v.map(function (v) {
-            return v.idnum || v || 0
-        })
-    }), {'events': {}, 'changeFloor': {}}, editor.currentFloorId);
-    core.status.thisMap.blocks = blocks;
-    main.editor.updateMap();
-
-    var drawTile = function (ctx, x, y, tileInfo) { // 绘制一个普通块
-
-        //ctx.clearRect(x*32, y*32, 32, 32);
-        if (tileInfo == 0) return;
-
-        if (typeof(tileInfo) == typeof([][0]) || !hasOwnProp(tileInfo, 'idnum')) {//未定义块画红块
-            if (typeof(tileInfo) != typeof([][0]) && hasOwnProp(tileInfo, 'images')) {
-                ctx.drawImage(editor.material.images[tileInfo.images], 0, tileInfo.y * 32, 32, 32, x * 32, y * 32, 32, 32);
-            }
-            ctx.strokeStyle = 'red';
-            var OFFSET = 2;
-            ctx.lineWidth = OFFSET;
-            ctx.strokeRect(x * 32 + OFFSET, y * 32 + OFFSET, 32 - OFFSET * 2, 32 - OFFSET * 2);
-            ctx.font = "30px Verdana";
-            ctx.textAlign = 'center'
-            ctx.fillStyle = 'red';
-            ctx.fillText("?", x * 32 + 16, y * 32 + 27);
-            return;
-        }
-        //ctx.drawImage(editor.material.images[tileInfo.images], 0, tileInfo.y*32, 32, 32, x*32, y*32, 32, 32);
-    }
-    // 绘制地图 start
-    var eventCtx = document.getElementById('event').getContext("2d");
-    var fgCtx = document.getElementById('fg').getContext("2d");
-    var bgCtx = document.getElementById('bg').getContext("2d");
-    for (var y = 0; y < editor.map.length; y++)
-        for (var x = 0; x < editor.map[0].length; x++) {
-            var tileInfo = editor.map[y][x];
-            if (false && isAutotile(tileInfo)) {
-                addIndexToAutotileInfo(x, y);
-                drawAutotile(eventCtx, x, y, tileInfo);
-            } else drawTile(eventCtx, x, y, tileInfo);
-            tileInfo = editor.fgmap[y][x];
-            drawTile(fgCtx, x, y, tileInfo);
-            tileInfo = editor.bgmap[y][x];
-            drawTile(bgCtx, x, y, tileInfo);
-        }
-    // 绘制地图 end
-    
 }
 
 editor.prototype.buildMark = function(){
@@ -333,66 +407,71 @@ editor.prototype.buildMark = function(){
     }
 }
 
-editor.prototype.fetchMapFromCore = function(){
-    var mapArray = core.maps.save(core.status.maps, core.status.floorId);
-    editor.map = mapArray.map(function (v) {
-        return v.map(function (v) {
-            return editor.ids[[editor.indexs[parseInt(v)][0]]]
-        })
-    });
-    editor.currentFloorId = core.status.floorId;
-    editor.currentFloorData = core.floors[core.status.floorId];
-    for(var ii=0,name;name=['bgmap','fgmap'][ii];ii++){
-        var mapArray = editor.currentFloorData[name];
-        if(!mapArray || JSON.stringify(mapArray)==JSON.stringify([])){//未设置或空数组
-            //与editor.map同形的全0
-            mapArray=eval('['+Array(editor.map.length+1).join('['+Array(editor.map[0].length+1).join('0,')+'],')+']');
-        }
-        editor[name]=mapArray.map(function (v) {
-            return v.map(function (v) {
-                return editor.ids[[editor.indexs[parseInt(v)][0]]]
-            })
-        });
-    }
-}
-
-editor.prototype.changeFloor = function (floorId, callback) {
-    for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
-        var mapArray=editor[name].map(function (v) {
-            return v.map(function (v) {
-                return v.idnum || v || 0
-            })
-        });
-        editor.currentFloorData[name]=mapArray;
-    }
-    core.changeFloor(floorId, null, {"x": 0, "y": 0, "direction": "up"}, null, function () {
-        core.bigmap.offsetX=0;
-        core.bigmap.offsetY=0;
-        editor.moveViewport(0,0);
-
-        editor.drawMapBg();
-        editor.fetchMapFromCore();
-        editor.updateMap();
-        editor_mode.floor();
-        editor.drawEventBlock();
-        if (core.isset(callback)) callback();
-    });
-}
-
-editor.prototype.guid = function () {
-    return 'id_' + 'xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-}
-
-editor.prototype.HTMLescape = function (str_) {
-    return String(str_).split('').map(function (v) {
-        return '&#' + v.charCodeAt(0) + ';'
-    }).join('');
-}
-
 editor.prototype.listen = function () {
+
+    document.body.onmousedown = function (e) {
+        //console.log(e);
+        var clickpath = [];
+        var getpath=function(e) {
+            var path = [];
+            var currentElem = e.target;
+            while (currentElem) {
+                path.push(currentElem);
+                currentElem = currentElem.parentElement;
+            }
+            if (path.indexOf(window) === -1 && path.indexOf(document) === -1)
+                path.push(document);
+            if (path.indexOf(window) === -1)
+                path.push(window);
+            return path;
+        }
+        getpath(e).forEach(function (node) {
+            if (!node.getAttribute) return;
+            var id_ = node.getAttribute('id');
+            if (id_) {
+                if (['left', 'left1', 'left2', 'left3', 'left4', 'left5', 'left8', 'mobileview'].indexOf(id_) !== -1) clickpath.push('edit');
+                clickpath.push(id_);
+            }
+        });
+    
+        var unselect=true;
+        for(var ii=0,thisId;thisId=['edit','tip','brushMod','brushMod2','layerMod','layerMod2','layerMod3','viewportButtons'][ii];ii++){
+            if (clickpath.indexOf(thisId) !== -1){
+                unselect=false;
+                break;
+            }
+        }
+        if (unselect) {
+            if (clickpath.indexOf('eui') === -1) {
+                if (selectBox.isSelected) {
+                    editor_mode.onmode('');
+                    editor.file.saveFloorFile(function (err) {
+                        if (err) {
+                            printe(err);
+                            throw(err)
+                        }
+                        ;printf('地图保存成功');
+                    });
+                }
+                selectBox.isSelected = false;
+                editor.info = {};
+            }
+        }
+        //editor.mode.onmode('');
+        if (e.button!=2 && !editor.isMobile){
+            editor.hideMidMenu();
+        }
+        if (clickpath.indexOf('down') !== -1 && editor.isMobile && clickpath.indexOf('midMenu') === -1){
+            editor.hideMidMenu();
+        }
+        if(clickpath.length>=2 && clickpath[0].indexOf('id_')===0){editor.lastClickId=clickpath[0]}
+    }
+
+    var iconLib=document.getElementById('iconLib');
+    iconLib.onmousedown = function (e) {
+        e.stopPropagation();
+    }
+
     var eui=document.getElementById('eui');
     var uc = eui.getContext('2d');
 
@@ -666,7 +745,7 @@ editor.prototype.listen = function () {
                 pos.y = ~~(loc.y / loc.ysize);
                 pos.x = editor.widthsX[spriter][1];
                 pos.images = editor.widthsX[spriter][0];
-                var autotiles = editor.material.images['autotile'];
+                var autotiles = core.material.images['autotile'];
                 if (pos.images == 'autotile') {
                     var imNames = Object.keys(autotiles);
                     if ((pos.y + 1) * ysize > editor.widthsX[spriter][3])
@@ -683,7 +762,7 @@ editor.prototype.listen = function () {
                     pos.y = ~~(editor.widthsX[spriter][3] / ysize) - 1;
 
                 selectBox.isSelected = true;
-                // console.log(pos,editor.material.images[pos.images].height)
+                // console.log(pos,core.material.images[pos.images].height)
                 dataSelection.style.left = pos.x * 32 + 'px';
                 dataSelection.style.top = pos.y * ysize + 'px';
                 dataSelection.style.height = ysize - 6 + 'px';
@@ -912,15 +991,6 @@ editor.prototype.listen = function () {
         editor.layerMod=layerMod3.value;
     }
 
-
-    editor.moveViewport=function(x,y){
-        core.bigmap.offsetX = core.clamp(core.bigmap.offsetX+32*x, 0, 32*core.bigmap.width-416);
-        core.bigmap.offsetY = core.clamp(core.bigmap.offsetY+32*y, 0, 32*core.bigmap.height-416);
-        core.control.updateViewport();
-        editor.buildMark();
-        editor.drawEventBlock();
-    }
-
     var viewportButtons=document.getElementById('viewportButtons');
     for(var ii=0,node;node=viewportButtons.children[ii];ii++){
         (function(x,y){
@@ -932,12 +1002,95 @@ editor.prototype.listen = function () {
 
 }//绑定事件
 
-/* 
-editor.loc
-editor.pos
-editor.info
-始终是最后一次点击的结果
-注意editor.info可能因为点击其他地方而被清空
-*/
+editor.prototype.mobile_listen=function(){
+    if(!editor.isMobile)return;
+
+    var mobileview=document.getElementById('mobileview');
+    var editModeSelect=document.getElementById('editModeSelect');
+    var mid=document.getElementById('mid');
+    var right=document.getElementById('right');
+    var mobileeditdata=document.getElementById('mobileeditdata');
+
+    
+    editor.showdataarea=function(callShowMode){
+        mid.style='z-index:-1;opacity: 0;';
+        right.style='z-index:-1;opacity: 0;';
+        mobileeditdata.style='';
+        if(callShowMode)editor.mode.showMode(editModeSelect.value);
+        editor.hideMidMenu();
+    }
+    mobileview.children[0].onclick=function(){
+        editor.showdataarea(true)
+    }
+    mobileview.children[1].onclick=function(){
+        mid.style='';
+        right.style='z-index:-1;opacity: 0;';
+        mobileeditdata.style='z-index:-1;opacity: 0;';
+        editor.lastClickId='';
+    }
+    mobileview.children[3].onclick=function(){
+        mid.style='z-index:-1;opacity: 0;';
+        right.style='';
+        mobileeditdata.style='z-index:-1;opacity: 0;';
+        editor.lastClickId='';
+    }
+
+
+    var gettrbyid=function(){
+        if(!editor.lastClickId)return false;
+        thisTr = document.getElementById(editor.lastClickId);
+        input = thisTr.children[2].children[0].children[0];
+        field = thisTr.children[0].getAttribute('title');
+        cobj = JSON.parse(thisTr.children[1].getAttribute('cobj'));
+        return [thisTr,input,field,cobj];
+    }
+    mobileeditdata.children[0].onclick=function(){
+        var info = gettrbyid()
+        if(!info)return;
+        info[1].ondblclick()
+    }
+    mobileeditdata.children[1].onclick=function(){
+        var info = gettrbyid()
+        if(!info)return;
+        printf(info[2])
+    }
+    mobileeditdata.children[2].onclick=function(){
+        var info = gettrbyid()
+        if(!info)return;
+        printf(info[0].children[1].getAttribute('title'))
+    }
+
+    //=====
+
+    document.body.ontouchstart=document.body.onmousedown;
+    document.body.onmousedown=null;
+
+
+    var eui=document.getElementById('eui');
+    eui.ontouchstart=eui.onmousedown
+    eui.onmousedown=null
+    eui.ontouchmove=eui.onmousemove
+    eui.onmousemove=null
+    eui.ontouchend=eui.onmouseup
+    eui.onmouseup=null
+
+
+    var chooseThis = document.getElementById('chooseThis');
+    chooseThis.ontouchstart=chooseThis.onmousedown
+    chooseThis.onmousedown=null
+    var chooseInRight = document.getElementById('chooseInRight');
+    chooseInRight.ontouchstart=chooseInRight.onmousedown
+    chooseInRight.onmousedown=null
+    var copyLoc = document.getElementById('copyLoc');
+    copyLoc.ontouchstart=copyLoc.onmousedown
+    copyLoc.onmousedown=null
+    var moveLoc = document.getElementById('moveLoc');
+    moveLoc.ontouchstart=moveLoc.onmousedown
+    moveLoc.onmousedown=null
+    var clearLoc = document.getElementById('clearLoc');
+    clearLoc.ontouchstart=clearLoc.onmousedown
+    clearLoc.onmousedown=null
+    
+}
 
 editor = new editor();

@@ -292,21 +292,6 @@
                     <input type="button" value="显示完整名称" style="display: none;"/>
                     <input type="button" value="显示完整注释"/>
                 </span>
-                <!--  -->
-                <div id="bgSelect" v-cloak style="display:none">
-                    <span>当前地板: </span>
-                    <select v-model="selectedBg">
-                        <option disabled value="">请选择地板</option>
-                        <option v-for="bg in bgs" v-bind:value="bg">
-                            {{ bg }}
-                        </option>
-                    </select>
-                    <div class="selectpng">
-                        <input class='input' id='pin' v-model="imgname" placeholder="请输入自定义背景文件名"/>
-                        <input class='btn' type="button" value="确定" v-on:click="updatebg"/>
-                    </div>
-                </div>
-                <!--  -->
             </div>
         </div>
     </div>
@@ -457,114 +442,17 @@ if (location.protocol.indexOf("http")!=0) {
 </script>
 <script src='_server/editor.js'></script>
 <script>
-editor.isMobile=true
-var editor_mobile_listen=function(){
-    var mobileview=document.getElementById('mobileview');
-    var editModeSelect=document.getElementById('editModeSelect');
-    var mid=document.getElementById('mid');
-    var right=document.getElementById('right');
-    var mobileeditdata=document.getElementById('mobileeditdata');
-
-    
-    editor.showdataarea=function(callShowMode){
-        mid.style='z-index:-1;opacity: 0;';
-        right.style='z-index:-1;opacity: 0;';
-        mobileeditdata.style='';
-        if(callShowMode)editor.mode.showMode(editModeSelect.value);
-        editor.hideMidMenu();
-    }
-    mobileview.children[0].onclick=function(){
-        editor.showdataarea(true)
-    }
-    mobileview.children[1].onclick=function(){
-        mid.style='';
-        right.style='z-index:-1;opacity: 0;';
-        mobileeditdata.style='z-index:-1;opacity: 0;';
-        editor.lastClickId='';
-    }
-    mobileview.children[3].onclick=function(){
-        mid.style='z-index:-1;opacity: 0;';
-        right.style='';
-        mobileeditdata.style='z-index:-1;opacity: 0;';
-        editor.lastClickId='';
-    }
-
-
-    var gettrbyid=function(){
-        if(!editor.lastClickId)return false;
-        thisTr = document.getElementById(editor.lastClickId);
-        input = thisTr.children[2].children[0].children[0];
-        field = thisTr.children[0].getAttribute('title');
-        cobj = JSON.parse(thisTr.children[1].getAttribute('cobj'));
-        return [thisTr,input,field,cobj];
-    }
-    mobileeditdata.children[0].onclick=function(){
-        var info = gettrbyid()
-        if(!info)return;
-        info[1].ondblclick()
-    }
-    mobileeditdata.children[1].onclick=function(){
-        var info = gettrbyid()
-        if(!info)return;
-        printf(info[2])
-    }
-    mobileeditdata.children[2].onclick=function(){
-        var info = gettrbyid()
-        if(!info)return;
-        printf(info[0].children[1].getAttribute('title'))
-    }
-
-    //=====
-
-    document.body.ontouchstart=document.body.onmousedown;
-    document.body.onmousedown=null;
-
-
-    var eui=document.getElementById('eui');
-    eui.ontouchstart=eui.onmousedown
-    eui.onmousedown=null
-    eui.ontouchmove=eui.onmousemove
-    eui.onmousemove=null
-    eui.ontouchend=eui.onmouseup
-    eui.onmouseup=null
-
-
-    var chooseThis = document.getElementById('chooseThis');
-    chooseThis.ontouchstart=chooseThis.onmousedown
-    chooseThis.onmousedown=null
-    var chooseInRight = document.getElementById('chooseInRight');
-    chooseInRight.ontouchstart=chooseInRight.onmousedown
-    chooseInRight.onmousedown=null
-    var copyLoc = document.getElementById('copyLoc');
-    copyLoc.ontouchstart=copyLoc.onmousedown
-    copyLoc.onmousedown=null
-    var moveLoc = document.getElementById('moveLoc');
-    moveLoc.ontouchstart=moveLoc.onmousedown
-    moveLoc.onmousedown=null
-    var clearLoc = document.getElementById('clearLoc');
-    clearLoc.ontouchstart=clearLoc.onmousedown
-    clearLoc.onmousedown=null
-    
-}
+    editor.isMobile=true;
 
     var useCompress = main.useCompress;
     main.useCompress = false;
     main.init('editor', function () {
         editor.init(function () {
-            editor.pos = {x: 0, y: 0};
-            editor.mode.loc();
-            editor.info = editor.ids[editor.indexs[201]];
-            editor.mode.enemyitem();
-            editor.mode.floor();
-            editor.mode.tower();
-            editor.mode.functions();
-            editor.mode.showMode('floor');
-            editor.mode.listen();
-            editor_multi = editor_multi();
-            editor_blockly = editor_blockly();
             editor.useCompress = useCompress;
             delete(useCompress);
-            editor_mobile_listen();
+            editor.listen();
+            editor.mode.listen();
+            editor.mobile_listen();
         });
     });
 

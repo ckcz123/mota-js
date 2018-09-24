@@ -1,64 +1,5 @@
 // vue 相关处理
-document.body.onmousedown = function (e) {
-    //console.log(e);
-    var clickpath = [];
-    var getpath=function(e) {
-        var path = [];
-        var currentElem = e.target;
-        while (currentElem) {
-            path.push(currentElem);
-            currentElem = currentElem.parentElement;
-        }
-        if (path.indexOf(window) === -1 && path.indexOf(document) === -1)
-            path.push(document);
-        if (path.indexOf(window) === -1)
-            path.push(window);
-        return path;
-    }
-    getpath(e).forEach(function (node) {
-        if (!node.getAttribute) return;
-        var id_ = node.getAttribute('id');
-        if (id_) {
-            if (['left', 'left1', 'left2', 'left3', 'left4', 'left5', 'left8', 'mobileview'].indexOf(id_) !== -1) clickpath.push('edit');
-            clickpath.push(id_);
-        }
-    });
 
-    var unselect=true;
-    for(var ii=0,thisId;thisId=['edit','tip','brushMod','brushMod2','layerMod','layerMod2','layerMod3','viewportButtons'][ii];ii++){
-        if (clickpath.indexOf(thisId) !== -1){
-            unselect=false;
-            break;
-        }
-    }
-    if (unselect) {
-        if (clickpath.indexOf('eui') === -1) {
-            if (selectBox.isSelected) {
-                editor_mode.onmode('');
-                editor.file.saveFloorFile(function (err) {
-                    if (err) {
-                        printe(err);
-                        throw(err)
-                    }
-                    ;printf('地图保存成功');
-                });
-            }
-            selectBox.isSelected = false;
-            editor.info = {};
-        }
-    }
-    //editor.mode.onmode('');
-    if (e.button!=2 && !editor.isMobile){
-        editor.hideMidMenu();
-    }
-    if (clickpath.indexOf('down') !== -1 && editor.isMobile && clickpath.indexOf('midMenu') === -1){
-        editor.hideMidMenu();
-    }
-    if(clickpath.length>=2 && clickpath[0].indexOf('id_')===0){editor.lastClickId=clickpath[0]}
-}
-iconLib.onmousedown = function (e) {
-    e.stopPropagation();
-}
 var exportMap = new Vue({
     el: '#exportMap',
     data: {
@@ -257,7 +198,7 @@ var deleteMap = new Vue({
             var index = core.floorIds.indexOf(editor.currentFloorId);
             if (index>=0) {
                 core.floorIds.splice(index,1);
-                editor.file.editTower([['change', "['main']['floorIds']", core.floorIds]], function (objs_) {/*console.log(objs_);*/
+                editor.file.editTower([['change', "['main']['floorIds']", core.floorIds]], function (objs_) {//console.log(objs_);
                     if (objs_.slice(-1)[0] != null) {
                         printe(objs_.slice(-1)[0]);
                         throw(objs_.slice(-1)[0])
@@ -373,35 +314,3 @@ var selectBox = new Vue({
     }
 })
 
-var bgSelect = new Vue({
-    el: '#bgSelect',
-    data: {
-        bgs: {},
-        selectedBg: 'ground',
-        imgname: ''
-    },
-    watch: {
-        selectedBg: function () {
-            editor.bgY = this.bgs.indexOf(this.selectedBg);
-            editor.drawMapBg();
-        }
-    },
-    methods: {
-        updatebg: function () {
-            tip.whichShow = 0;
-            var regx = /\S+\.(png|bmp|jpg|jpeg|gif)$/i;
-            if (regx.test(this.imgname)) {
-                var url = 'images/' + this.imgname;
-                editor.loadImg(url).then(function (img) {
-                    editor.drawMapBg(img);
-                    tip.whichShow = 10;
-                }).catch(function (err) {
-                    console.log(err);
-                    tip.whichShow = 9;
-                });
-            } else {
-                tip.whichShow = 9;
-            }
-        }
-    }
-})

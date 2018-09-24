@@ -1412,6 +1412,7 @@ ui.prototype.drawBook = function (index) {
     }
     core.drawBoxAnimate();
     this.drawPagination(page, totalPage, 12);
+    core.canvas.ui.textAlign = 'center';
     // 退出
     core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px Verdana');
 }
@@ -1981,6 +1982,7 @@ ui.prototype.drawSLPanel = function(index, refresh) {
     else drawAll();
 
     this.drawPagination(page+1, max_page, 12);
+    core.canvas.ui.textAlign = 'center';
     // 退出
     core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px Verdana');
 
@@ -2116,6 +2118,8 @@ ui.prototype.drawKeyBoard = function () {
         }
         offset+=32;
     });
+
+    core.canvas.ui.textAlign = 'center';
 
     core.fillText("ui", "返回游戏", 416-80, offset-3, '#FFFFFF', 'bold 15px Verdana');
 }

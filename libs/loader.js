@@ -51,6 +51,9 @@ loader.prototype.load = function (callback) {
                         if (img.width%32!=0 || img.height%32!=0) {
                             console.warn("警告！"+imgName+"的宽或高不是32的倍数！");
                         }
+                        if (img.width * img.height > 32*32*1000) {
+                            console.warn("警告！"+imgName+"上的图块素材个数大于1000！");
+                        }
                     }
 
                     core.loader.loadAnimates();

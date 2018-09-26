@@ -2039,6 +2039,12 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
             if (block.event.cls == 'autotile') {
                 core.drawAutotile(tempCanvas, mapArray, block, 32, 0, 0);
             }
+            else if (block.event.cls == 'tileset') {
+                var offset = core.icons.getTilesetOffset(block.event.id);
+                if (offset!=null) {
+                    tempCanvas.drawImage(core.material.images.tilesets[offset.image], 32*offset.x, 32*offset.y, 32, 32, 32*block.x, 32*block.y, 32, 32);
+                }
+            }
             else {
                 if (block.event.id!='none') {
                     var blockIcon = core.material.icons[block.event.cls][block.event.id];

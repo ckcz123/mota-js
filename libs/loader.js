@@ -39,10 +39,25 @@ loader.prototype.load = function (callback) {
             // 加载autotile
             core.material.images.autotile = {};
             core.loader.loadImages(Object.keys(core.material.icons.autotile), core.material.images.autotile, function () {
-                core.loader.loadAnimates();
-                core.loader.loadMusic();
-                if (core.isset(callback))
-                    callback();
+
+                // 加载tilesets
+                core.material.images.tilesets = {};
+                if (!core.isset(core.tilesets)) core.tilesets = [];
+                core.loader.loadImages(core.clone(core.tilesets), core.material.images.tilesets, function () {
+
+                    // 检查宽高是32倍数，如果出错在控制台报错
+                    for (var imgName in core.material.images.tilesets) {
+                        var img = core.material.images.tilesets[imgName];
+                        if (img.width%32!=0 || img.height%32!=0) {
+                            console.warn("警告！"+imgName+"的宽或高不是32的倍数！");
+                        }
+                    }
+
+                    core.loader.loadAnimates();
+                    core.loader.loadMusic();
+                    if (core.isset(callback))
+                        callback();
+                })
             })
         })
     })
@@ -63,7 +78,7 @@ loader.prototype.loadIcons = function () {
 }
 
 loader.prototype.loadImages = function (names, toSave, callback) {
-    if (names.length==0) {
+    if (!core.isset(names) || names.length==0) {
         if (core.isset(callback)) callback();
         return;
     }

@@ -191,7 +191,6 @@ core.prototype.init = function (coreData, callback) {
     document.title = core.firstData.title + " - HTML5魔塔";
     document.getElementById("startLogo").innerHTML = core.firstData.title;
     core.material.items = core.clone(core.items.getItems());
-    core.initStatus.maps = core.maps.initMaps(core.floorIds);
     core.material.enemys = core.clone(core.enemys.getEnemys());
     core.material.icons = core.icons.getIcons();
     core.material.events = core.events.getEvents();
@@ -299,6 +298,7 @@ core.prototype.init = function (coreData, callback) {
         console.log(core.material);
         // 设置勇士高度
         core.material.icons.hero.height = core.material.images.hero.height/4;
+        core.initStatus.maps = core.maps.initMaps(core.floorIds);
         core.setRequestAnimationFrame();
         core.showStartAnimate();
 

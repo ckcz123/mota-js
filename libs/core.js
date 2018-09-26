@@ -723,7 +723,12 @@ core.prototype.showBlock = function(x, y, floodId) {
     core.maps.showBlock(x,y,floodId);
 }
 
-////// 将某个块从启用变成禁用状态 //////
+////// 将某个块从启用变成禁用状态，但是并不删除它 //////
+core.prototype.hideBlock = function(x, y, floorId) {
+    core.maps.hideBlock(x,y,floorId);
+}
+
+////// 将某个块从启用变成禁用状态，并删除该块 //////
 core.prototype.removeBlock = function (x, y, floorId) {
     core.maps.removeBlock(x,y,floorId);
 }

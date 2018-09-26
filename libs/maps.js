@@ -1011,7 +1011,7 @@ maps.prototype.showBlock = function(x, y, floodId) {
 }
 
 ////// 只隐藏但不删除某块 //////
-maps.prototype.eraseBlock = function (x, y, floorId) {
+maps.prototype.hideBlock = function (x, y, floorId) {
     floorId = floorId || core.status.floorId;
 
     var block = core.getBlock(x,y,floorId,true);

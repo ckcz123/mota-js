@@ -393,7 +393,7 @@ events.prototype.doAction = function() {
                 data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];
             if (core.isset(data.time) && data.time>0 && (!core.isset(data.floorId) || data.floorId==core.status.floorId)) {
                 data.loc.forEach(function (t) {
-                    core.maps.eraseBlock(t[0],t[1],data.floorId);
+                    core.hideBlock(t[0],t[1],data.floorId);
                 })
                 core.animateBlock(data.loc,'hide',data.time, function () {
                     data.loc.forEach(function (t) {

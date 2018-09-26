@@ -81,7 +81,8 @@ editor.prototype.init = function (callback) {
 editor.prototype.idsInit = function (maps, icons) {
     editor.ids = [0];
     editor.indexs = [];
-    var MAX_NUM = 1000;
+    var MAX_NUM = Math.max.apply(null,Object.keys(maps_90f36752_8815_4be8_b32b_d7fad1d0542e));
+    editor.MAX_NUM=MAX_NUM;
     var getInfoById = function (id) {
         var block = maps.initBlock(0, 0, id);
         if (hasOwnProp(block, 'event')) {
@@ -89,7 +90,7 @@ editor.prototype.idsInit = function (maps, icons) {
         }
     }
     var point = 0;
-    for (var i = 0; i < MAX_NUM; i++) {
+    for (var i = 0; i <= MAX_NUM; i++) {
         var indexBlock = getInfoById(i);
         editor.indexs[i] = [];
         if (indexBlock) {
@@ -106,6 +107,21 @@ editor.prototype.idsInit = function (maps, icons) {
         }
     }
     editor.indexs[0] = [0];
+
+    var startOffset = core.icons.tilesetStartOffset;
+    for (var i in core.tilesets) {
+        var imgName = core.tilesets[i];
+        var img = core.material.images.tilesets[imgName];
+        var width = Math.floor(img.width/32), height = Math.floor(img.height/32);
+        for (var id=startOffset; id<startOffset+width*height;id++) {
+            var x = (id-startOffset)%width, y = parseInt((id-startOffset)/width);
+            var indexBlock = getInfoById(id);
+            editor.ids.push({'idnum': id, 'id': indexBlock.event.id, 'images': imgName, "x": x, "y": y, isTile: true});
+            point++;
+            editor.indexs[id]=[point];
+        }
+        startOffset += core.icons.tilesetStartOffset;
+    }
 }
 
 editor.prototype.mapInit = function () {
@@ -319,6 +335,14 @@ editor.prototype.drawInitData = function (icons) {
         sumWidth += images[img].width;
         maxHeight = Math.max(maxHeight, images[img].height);
     }
+    var tilesets = images.tilesets;
+    for (var ii in core.tilesets) {
+        var img = core.tilesets[ii];
+        editor.widthsX[img] = [img, sumWidth / 32, (sumWidth + tilesets[img].width) / 32, tilesets[img].height];
+        sumWidth += tilesets[img].width;
+        maxHeight = Math.max(maxHeight, tilesets[img].height);
+    }
+
     var fullWidth = ~~(sumWidth * ratio);
     var fullHeight = ~~(maxHeight * ratio);
 
@@ -340,10 +364,16 @@ editor.prototype.drawInitData = function (icons) {
                 dc.drawImage(autotiles[im], nowx, nowy);
                 nowy += autotiles[im].height;
             }
+            nowx += 3 * 32;
             continue;
         }
         dc.drawImage(images[img], nowx, 0)
         nowx += images[img].width;
+    }
+    for (var ii in core.tilesets) {
+        var img = core.tilesets[ii];
+        dc.drawImage(tilesets[img], nowx, 0)
+        nowx += tilesets[img].width;
     }
     //editor.drawMapBg();
     //editor.mapInit();
@@ -742,9 +772,9 @@ editor.prototype.listen = function () {
             if (pos.x >= editor.widthsX[spriter][1] && pos.x < editor.widthsX[spriter][2]) {
                 var ysize = spriter.indexOf('48') === -1 ? 32 : 48;
                 loc.ysize = ysize;
-                pos.y = ~~(loc.y / loc.ysize);
-                pos.x = editor.widthsX[spriter][1];
                 pos.images = editor.widthsX[spriter][0];
+                pos.y = ~~(loc.y / loc.ysize);
+                if(core.tilesets.indexOf(pos.images)==-1)pos.x = editor.widthsX[spriter][1];
                 var autotiles = core.material.images['autotile'];
                 if (pos.images == 'autotile') {
                     var imNames = Object.keys(autotiles);
@@ -773,13 +803,17 @@ editor.prototype.listen = function () {
                 } else {
                     if (hasOwnProp(autotiles, pos.images)) editor.info = {'images': pos.images, 'y': 0};
                     else if (pos.images == 'terrains') editor.info = {'images': pos.images, 'y': pos.y - 1};
+                    else if (core.tilesets.indexOf(pos.images)!=-1) editor.info = {'images': pos.images, 'y': pos.y, 'x': pos.x-editor.widthsX[spriter][1]};
                     else editor.info = {'images': pos.images, 'y': pos.y};
 
                     for (var ii = 0; ii < editor.ids.length; ii++) {
-                        if (( editor.info.images == editor.ids[ii].images
-                                && editor.info.y == editor.ids[ii].y )
+                        if ((core.tilesets.indexOf(pos.images)!=-1 && editor.info.images == editor.ids[ii].images
+                                && editor.info.y == editor.ids[ii].y && editor.info.x == editor.ids[ii].x)
                             || (hasOwnProp(autotiles, pos.images) && editor.info.images == editor.ids[ii].id
-                                && editor.info.y == editor.ids[ii].y)) {
+                            && editor.info.y == editor.ids[ii].y)
+                            || (core.tilesets.indexOf(pos.images)==-1 && editor.info.images == editor.ids[ii].images
+                                && editor.info.y == editor.ids[ii].y )
+                            ) {
 
                             editor.info = editor.ids[ii];
                             break;

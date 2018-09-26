@@ -1918,20 +1918,32 @@ ui.prototype.drawSLPanel = function(index, refresh) {
     if (!core.isset(core.status.event.ui))
         core.status.event.ui = [];
 
-    core.clearMap('ui');
-    core.setAlpha('ui', 0.85);
-    core.fillRect('ui', 0, 0, 416, 416, '#000000');
-    core.setAlpha('ui', 1);
-    core.canvas.ui.textAlign = 'center';
-
     var u=416/6, size=118;
 
     var strokeColor = '#FFD700';
     if (core.status.event.selection) strokeColor = '#FF6A6A';
 
-    var name=core.status.event.id=='save'?"存档":core.status.event.id=='load'?"读档":core.status.event.id=='replayLoad'?"回放":"";
+    var drawBg = function() {
+        core.clearMap('ui');
+        core.setAlpha('ui', 0.85);
+        core.fillRect('ui', 0, 0, 416, 416, '#000000');
+        core.setAlpha('ui', 1);
+
+        core.ui.drawPagination(page+1, max_page, 12);
+        core.canvas.ui.textAlign = 'center';
+        // 退出
+        core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px Verdana');
+
+        if (core.status.event.selection)
+            core.setFillStyle('ui', '#FF6A6A');
+        if (core.status.event.id=='save')
+            core.fillText('ui', '删除模式', 48, 403);
+        else
+            core.fillText('ui', '输入编号', 48, 403);
+    }
 
     var draw = function (data, i) {
+        var name=core.status.event.id=='save'?"存档":core.status.event.id=='load'?"读档":core.status.event.id=='replayLoad'?"回放":"";
         core.status.event.ui[i] = data;
         var id=5*page+i;
         if (i<3) {
@@ -1972,6 +1984,7 @@ ui.prototype.drawSLPanel = function(index, refresh) {
     }
 
     function drawAll() {
+        drawBg();
         for (var i=0;i<6;i++)
             draw(core.status.event.ui[i], i);
     }
@@ -1980,18 +1993,6 @@ ui.prototype.drawSLPanel = function(index, refresh) {
         loadSave(0, drawAll);
     }
     else drawAll();
-
-    this.drawPagination(page+1, max_page, 12);
-    core.canvas.ui.textAlign = 'center';
-    // 退出
-    core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px Verdana');
-
-    if (core.status.event.selection)
-        core.setFillStyle('ui', '#FF6A6A');
-    if (core.status.event.id=='save')
-        core.fillText('ui', '删除模式', 48, 403);
-    else
-        core.fillText('ui', '输入编号', 48, 403);
 }
 
 ////// 绘制一个缩略图 //////

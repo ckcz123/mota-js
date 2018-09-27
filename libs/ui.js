@@ -865,6 +865,12 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     var monster = core.material.enemys[monsterId];
     var mon_hp = monster.hp, mon_atk = monster.atk, mon_def = monster.def, mon_money=monster.money, mon_exp = monster.experience, mon_special=monster.special;
 
+    if (core.flags.equipPercentage) {
+        hero_atk = Math.floor(core.getFlag('equip_atk_buff',1)*hero_atk);
+        hero_def = Math.floor(core.getFlag('equip_def_buff',1)*hero_def);
+        hero_mdef = Math.floor(core.getFlag('equip_mdef_buff',1)*hero_mdef);
+    }
+
     var initDamage = 0; // 战前伤害
 
     // 吸血
@@ -1849,10 +1855,15 @@ ui.prototype.drawEquipbox = function(index) {
                 if (!core.isset(compare[name]) || compare[name]==0) return;
                 var color = '#00FF00';
                 if (compare[name]<0) color = '#FF0000';
-                var content = title + ' ' + core.getStatus(name) + '->';
+                var nowValue = core.getStatus(name), newValue = nowValue + compare[name];
+                if (core.flags.equipPercentage) {
+                    var nowBuff = core.getFlag('equip_'+name+"_buff",1), newBuff = nowBuff+compare[name]/100;
+                    nowValue = Math.floor(nowBuff*core.getStatus(name));
+                    newValue = Math.floor(newBuff*core.getStatus(name));
+                }
+                var content = title + ' ' + nowValue + '->';
                 core.fillText('ui', content, drawOffset, 89, '#CCCCCC', 'bold 14px Verdana');
                 drawOffset += core.canvas.ui.measureText(content).width;
-                var newValue = core.getStatus(name) + compare[name] + "";
                 core.fillText('ui', newValue, drawOffset, 89, color);
                 drawOffset += core.canvas.ui.measureText(newValue).width + 15;
             })

@@ -341,8 +341,8 @@ maps.prototype.canMoveDirectly = function (destX,destY) {
 }
 
 maps.prototype.drawBlock = function (block, animate, dx, dy) {
-    // none：空地；17：空气墙
-    if (block.event.id=='none' || block.id==17) return;
+    // none：空地
+    if (block.event.id=='none') return;
 
     var cls = block.event.cls, height = block.event.height || 32;
 
@@ -354,9 +354,14 @@ maps.prototype.drawBlock = function (block, animate, dx, dy) {
         image = core.material.images.tilesets[offset.image];
         x = offset.x;
         y = offset.y;
-        height = 32;
     }
     else if (cls == 'autotile') return;
+    // 空气墙的单独处理
+    else if (block.id==17) {
+        if (!core.isset(core.material.images.airwall)) return;
+        image = core.material.images.airwall;
+        x = y = 0;
+    }
     else {
         image = core.material.images[cls];
         x = (animate||0)%(block.event.animate||1);
@@ -400,7 +405,7 @@ maps.prototype.drawBgFgMap = function (floorId, canvas, name) {
         for (var y = 0; y < height; y++) {
             if (name=='bg')
                 canvas.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
-            if (arr[y][x]>0 && arr[y][x]!=17) {
+            if (arr[y][x]>0) {
                 var block = core.maps.initBlock(x, y, arr[y][x]);
                 if (core.isset(block.event)) {
                     var id = block.event.id, cls = block.event.cls;
@@ -409,7 +414,12 @@ maps.prototype.drawBgFgMap = function (floorId, canvas, name) {
                     else if (cls == 'tileset') {
                         var offset = core.icons.getTilesetOffset(id);
                         if (offset!=null) {
-                            canvas.drawImage(core.material.images.tilesets[offset.image], 32*offset.x, 32*offset.y, 32, 32, 32*block.x, 32*block.y, 32, 32);
+                            canvas.drawImage(core.material.images.tilesets[offset.image], 32*offset.x, 32*offset.y, 32, 32, 32*x, 32*y, 32, 32);
+                        }
+                    }
+                    else if (arr[y][x]==17) {
+                        if (core.isset(core.material.images.airwall)) {
+                            canvas.drawImage(core.material.images.airwall, 32*x, 32*y);
                         }
                     }
                     else
@@ -724,6 +734,11 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
         if (core.isset(callback)) callback();
         return;
     }
+    // 空气墙；忽略事件
+    else if (block.id==17) {
+        if (core.isset(callback)) callback();
+        return;
+    }
     else {
         image = core.material.images[block.event.cls];
         bx = 0;
@@ -848,6 +863,11 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
         if (core.isset(callback)) callback();
         return;
     }
+    // 空气墙；忽略事件
+    else if (block.id==17) {
+        if (core.isset(callback)) callback();
+        return;
+    }
     else {
         image = core.material.images[block.event.cls];
         bx = 0;
@@ -955,6 +975,8 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
         else if (block.event.cls == 'autotile') {
             return;
         }
+        // 空气墙，忽略事件
+        else if (block.id==17) return;
         else {
             image = core.material.images[block.event.cls];
             bx = 0;

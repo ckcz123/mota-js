@@ -508,8 +508,8 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 装备按比例增加属性
 	if (core.flags.equipPercentage) {
 		core.statusBar.atk.innerHTML = core.formatBigNumber(Math.floor(core.getFlag('equip_atk_buff',1)*core.getStatus('atk')));
-        core.statusBar.def.innerHTML = core.formatBigNumber(Math.floor(core.getFlag('equip_def_buff',1)*core.getStatus('def')));
-        core.statusBar.mdef.innerHTML = core.formatBigNumber(Math.floor(core.getFlag('equip_mdef_buff',1)*core.getStatus('mdef')));
+		core.statusBar.def.innerHTML = core.formatBigNumber(Math.floor(core.getFlag('equip_def_buff',1)*core.getStatus('def')));
+		core.statusBar.mdef.innerHTML = core.formatBigNumber(Math.floor(core.getFlag('equip_mdef_buff',1)*core.getStatus('mdef')));
 	}
 
 	// 可以在这里添加自己额外的状态栏信息，比如想攻击显示 +0.5 可以这么写：

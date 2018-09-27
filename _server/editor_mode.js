@@ -320,10 +320,18 @@ editor_mode = function (editor) {
         if (!core.isset(editor_mode.info.id)) {
             // document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML = '';
             document.getElementById('enemyItemTable').style.display = 'none';
+            document.getElementById('tilesetsDiv').style.display = 'none';
             document.getElementById('newIdIdnum').style.display = 'block';
             return;
         }
+        if (editor_mode.info.isTile) {
+            document.getElementById('enemyItemTable').style.display = 'none';
+            document.getElementById('tilesetsDiv').style.display = 'block';
+            document.getElementById('newIdIdnum').style.display = 'none';
+            return;
+        }
         document.getElementById('newIdIdnum').style.display = 'none';
+        document.getElementById('tilesetsDiv').style.display = 'none';
         document.getElementById('enemyItemTable').style.display = 'block';
 
         var objs = [];

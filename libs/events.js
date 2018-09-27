@@ -373,14 +373,14 @@ events.prototype.doAction = function() {
             if (core.isset(data.time) && data.time>0 && (!core.isset(data.floorId) || data.floorId==core.status.floorId)) {
                 core.animateBlock(data.loc,'show', data.time, function () {
                     data.loc.forEach(function (t) {
-                        core.showBlock(t[0],t[1],data.floorId)
+                        core.showBlock(t[0],t[1],data.floorId);
                     })
                     core.events.doAction();
                 });
             }
             else {
                 data.loc.forEach(function (t) {
-                    core.showBlock(t[0],t[1],data.floorId)
+                    core.showBlock(t[0],t[1],data.floorId);
                 })
                 this.doAction();
             }
@@ -391,15 +391,23 @@ events.prototype.doAction = function() {
             if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
                 && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
                 data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];
-            data.loc.forEach(function (t) {
-                core.removeBlock(t[0],t[1],data.floorId);
-            })
             if (core.isset(data.time) && data.time>0 && (!core.isset(data.floorId) || data.floorId==core.status.floorId)) {
+                data.loc.forEach(function (t) {
+                    core.hideBlock(t[0],t[1],data.floorId);
+                })
                 core.animateBlock(data.loc,'hide',data.time, function () {
+                    data.loc.forEach(function (t) {
+                        core.removeBlock(t[0],t[1],data.floorId)
+                    })
                     core.events.doAction();
                 });
             }
-            else this.doAction();
+            else {
+                data.loc.forEach(function (t) {
+                    core.removeBlock(t[0],t[1],data.floorId)
+                })
+                this.doAction();
+            }
             break;
         case "setBlock": // 设置某图块
             {

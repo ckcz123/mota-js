@@ -865,6 +865,12 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     var monster = core.material.enemys[monsterId];
     var mon_hp = monster.hp, mon_atk = monster.atk, mon_def = monster.def, mon_money=monster.money, mon_exp = monster.experience, mon_special=monster.special;
 
+    if (core.flags.equipPercentage) {
+        hero_atk = Math.floor(core.getFlag('equip_atk_buff',1)*hero_atk);
+        hero_def = Math.floor(core.getFlag('equip_def_buff',1)*hero_def);
+        hero_mdef = Math.floor(core.getFlag('equip_mdef_buff',1)*hero_mdef);
+    }
+
     var initDamage = 0; // 战前伤害
 
     // 吸血
@@ -1849,10 +1855,15 @@ ui.prototype.drawEquipbox = function(index) {
                 if (!core.isset(compare[name]) || compare[name]==0) return;
                 var color = '#00FF00';
                 if (compare[name]<0) color = '#FF0000';
-                var content = title + ' ' + core.getStatus(name) + '->';
+                var nowValue = core.getStatus(name), newValue = nowValue + compare[name];
+                if (core.flags.equipPercentage) {
+                    var nowBuff = core.getFlag('equip_'+name+"_buff",1), newBuff = nowBuff+compare[name]/100;
+                    nowValue = Math.floor(nowBuff*core.getStatus(name));
+                    newValue = Math.floor(newBuff*core.getStatus(name));
+                }
+                var content = title + ' ' + nowValue + '->';
                 core.fillText('ui', content, drawOffset, 89, '#CCCCCC', 'bold 14px Verdana');
                 drawOffset += core.canvas.ui.measureText(content).width;
-                var newValue = core.getStatus(name) + compare[name] + "";
                 core.fillText('ui', newValue, drawOffset, 89, color);
                 drawOffset += core.canvas.ui.measureText(newValue).width + 15;
             })
@@ -1918,20 +1929,32 @@ ui.prototype.drawSLPanel = function(index, refresh) {
     if (!core.isset(core.status.event.ui))
         core.status.event.ui = [];
 
-    core.clearMap('ui');
-    core.setAlpha('ui', 0.85);
-    core.fillRect('ui', 0, 0, 416, 416, '#000000');
-    core.setAlpha('ui', 1);
-    core.canvas.ui.textAlign = 'center';
-
     var u=416/6, size=118;
 
     var strokeColor = '#FFD700';
     if (core.status.event.selection) strokeColor = '#FF6A6A';
 
-    var name=core.status.event.id=='save'?"存档":core.status.event.id=='load'?"读档":core.status.event.id=='replayLoad'?"回放":"";
+    var drawBg = function() {
+        core.clearMap('ui');
+        core.setAlpha('ui', 0.85);
+        core.fillRect('ui', 0, 0, 416, 416, '#000000');
+        core.setAlpha('ui', 1);
+
+        core.ui.drawPagination(page+1, max_page, 12);
+        core.canvas.ui.textAlign = 'center';
+        // 退出
+        core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px Verdana');
+
+        if (core.status.event.selection)
+            core.setFillStyle('ui', '#FF6A6A');
+        if (core.status.event.id=='save')
+            core.fillText('ui', '删除模式', 48, 403);
+        else
+            core.fillText('ui', '输入编号', 48, 403);
+    }
 
     var draw = function (data, i) {
+        var name=core.status.event.id=='save'?"存档":core.status.event.id=='load'?"读档":core.status.event.id=='replayLoad'?"回放":"";
         core.status.event.ui[i] = data;
         var id=5*page+i;
         if (i<3) {
@@ -1972,6 +1995,7 @@ ui.prototype.drawSLPanel = function(index, refresh) {
     }
 
     function drawAll() {
+        drawBg();
         for (var i=0;i<6;i++)
             draw(core.status.event.ui[i], i);
     }
@@ -1980,18 +2004,6 @@ ui.prototype.drawSLPanel = function(index, refresh) {
         loadSave(0, drawAll);
     }
     else drawAll();
-
-    this.drawPagination(page+1, max_page, 12);
-    core.canvas.ui.textAlign = 'center';
-    // 退出
-    core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px Verdana');
-
-    if (core.status.event.selection)
-        core.setFillStyle('ui', '#FF6A6A');
-    if (core.status.event.id=='save')
-        core.fillText('ui', '删除模式', 48, 403);
-    else
-        core.fillText('ui', '输入编号', 48, 403);
 }
 
 ////// 绘制一个缩略图 //////
@@ -2037,6 +2049,12 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
         if (core.isset(block.event) && !block.disable) {
             if (block.event.cls == 'autotile') {
                 core.drawAutotile(tempCanvas, mapArray, block, 32, 0, 0);
+            }
+            else if (block.event.cls == 'tileset') {
+                var offset = core.icons.getTilesetOffset(block.event.id);
+                if (offset!=null) {
+                    tempCanvas.drawImage(core.material.images.tilesets[offset.image], 32*offset.x, 32*offset.y, 32, 32, 32*block.x, 32*block.y, 32, 32);
+                }
             }
             else {
                 if (block.event.id!='none') {

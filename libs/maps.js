@@ -60,6 +60,12 @@ maps.prototype.initBlock = function (x, y, id) {
     if (disable!=null) tmp.disable = disable;
 
     if (id in this.blocksInfo) tmp.event = JSON.parse(JSON.stringify(this.blocksInfo[id]));
+    else {
+        var tilesetOffset = core.icons.getTilesetOffset(id);
+        if (tilesetOffset != null) {
+            tmp.event = {"cls": "tileset", "id": "X"+id, "noPass": true};
+        }
+    }
 
     return tmp;
 }
@@ -333,16 +339,30 @@ maps.prototype.canMoveDirectly = function (destX,destY) {
 
 maps.prototype.drawBlock = function (block, animate, dx, dy) {
     var cls = block.event.cls, height = block.event.height || 32;
-    var blockIcon = core.material.icons[cls][block.event.id];
-    var blockImage = core.material.images[cls];
-    animate=(animate||0)%(block.event.animate||1);
+
+    var image, x, y;
+    if (cls == 'tileset') {
+        var offset = core.icons.getTilesetOffset(block.event.id);
+        if (offset == null) return;
+        image = core.material.images.tilesets[offset.image];
+        x = offset.x;
+        y = offset.y;
+        height = 32;
+    }
+    else if (cls == 'autotile') return;
+    else {
+        image = core.material.images[cls];
+        x = (animate||0)%(block.event.animate||1);
+        y = core.material.icons[cls][block.event.id];
+    }
     dx = dx || 0;
     dy = dy || 0;
+
     core.canvas.event.clearRect(block.x * 32 + dx, block.y * 32 + dy, 32, 32);
-    core.canvas.event.drawImage(blockImage, animate * 32, blockIcon * height + height-32, 32, 32, block.x * 32 + dx, block.y * 32 + dy, 32, 32);
+    core.canvas.event.drawImage(image, x * 32, y * height + height-32, 32, 32, block.x * 32 + dx, block.y * 32 + dy, 32, 32);
     if (height>32) {
         core.canvas.event2.clearRect(block.x * 32 + dx, block.y * 32 + 32 - height + dy, 32, height-32)
-        core.canvas.event2.drawImage(blockImage, animate * 32, blockIcon * height, 32, height-32, block.x * 32 + dx, block.y*32 + 32 - height + dy, 32, height-32);
+        core.canvas.event2.drawImage(image, x * 32, y * height, 32, height-32, block.x * 32 + dx, block.y*32 + 32 - height + dy, 32, height-32);
     }
 }
 
@@ -379,6 +399,12 @@ maps.prototype.drawBgFgMap = function (floorId, canvas, name) {
                     var id = block.event.id, cls = block.event.cls;
                     if (cls == 'autotile')
                         core.drawAutotile(canvas, arr, block, 32, 0, 0);
+                    else if (cls == 'tileset') {
+                        var offset = core.icons.getTilesetOffset(id);
+                        if (offset!=null) {
+                            canvas.drawImage(core.material.images.tilesets[offset.image], 32*offset.x, 32*offset.y, 32, 32, 32*block.x, 32*block.y, 32, 32);
+                        }
+                    }
                     else
                         canvas.drawImage(core.material.images[cls], 0, core.material.icons[cls][id] * 32, 32, 32, x * 32, y * 32, 32, 32);
                 }
@@ -390,6 +416,7 @@ maps.prototype.drawBgFgMap = function (floorId, canvas, name) {
 
 ////// 绘制某张地图 //////
 maps.prototype.drawMap = function (mapName, callback) {
+    mapName = mapName || core.status.floorId;
     core.clearMap('all');
     core.removeGlobalAnimate(null, null, true);
     var drawBg = function(){
@@ -465,11 +492,9 @@ maps.prototype.drawMap = function (mapName, callback) {
                 if (block.event.cls == 'autotile') {
                     core.drawAutotile(core.canvas.event, mapArray, block, 32, 0, 0);
                 }
-                else {
-                    if (block.event.id!='none') {
-                        core.drawBlock(block);
-                        core.addGlobalAnimate(block);
-                    }
+                else if (block.event.id!='none') {
+                    core.drawBlock(block);
+                    core.addGlobalAnimate(block);
                 }
             }
         }
@@ -675,13 +700,32 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
     core.setAlpha('ui', 1.0);
 
     block=block.block;
-    var blockIcon = core.material.icons[block.event.cls][block.event.id];
-    var blockImage = core.material.images[block.event.cls];
-    var height = block.event.height || 32;
+
+    var image, bx, by, height = block.event.height || 32;
+    if (block.event.cls == 'tileset') {
+        var offset = core.icons.getTilesetOffset(block.event.id);
+        if (offset==null) {
+            if (core.isset(callback)) callback();
+            return;
+        }
+        bx = offset.x;
+        by = offset.y;
+        image = core.material.images.tilesets[offset.image];
+    }
+    // 不支持autotile
+    else if (block.event.cls == 'autotile') {
+        if (core.isset(callback)) callback();
+        return;
+    }
+    else {
+        image = core.material.images[block.event.cls];
+        bx = 0;
+        by = core.material.icons[block.event.cls][block.event.id];
+    }
 
     var opacityVal = 1;
     core.setOpacity('route', opacityVal);
-    core.canvas.route.drawImage(blockImage, 0, blockIcon * height, 32, height, block.x * 32, block.y * 32 +32 - height, 32, height);
+    core.canvas.route.drawImage(image, bx * 32, by * height, 32, height, block.x * 32, block.y * 32 +32 - height, 32, height);
 
     // 要运行的轨迹：将steps展开
     var moveSteps=[];
@@ -721,6 +765,9 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
             animateTime = 0;
             if (animateCurrent>=animateValue) animateCurrent=0;
         }
+        if (block.event.cls=='tileset') {
+            animateCurrent = bx;
+        }
 
         // 已经移动完毕，消失
         if (moveSteps.length==0) {
@@ -728,7 +775,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
             else opacityVal -= 0.06;
             core.setOpacity('route', opacityVal);
             core.clearMap('route', nowX, nowY-height+32, 32, height);
-            core.canvas.route.drawImage(blockImage, animateCurrent * 32, blockIcon * height, 32, height, nowX, nowY-height+32, 32, height);
+            core.canvas.route.drawImage(image, animateCurrent * 32, by * height, 32, height, nowX, nowY-height+32, 32, height);
             if (opacityVal<=0) {
                 clearInterval(animate);
                 core.clearMap('route');
@@ -749,7 +796,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
             nowY+=scan[moveSteps[0]].y*2;
             core.clearMap('route', nowX-32, nowY-32, 96, 96);
             // 绘制
-            core.canvas.route.drawImage(blockImage, animateCurrent * 32, blockIcon * height, 32, height, nowX, nowY-height+32, 32, height);
+            core.canvas.route.drawImage(image, animateCurrent * 32, by * height, 32, height, nowX, nowY-height+32, 32, height);
             if (step==16) {
                 // 该移动完毕，继续
                 step=0;
@@ -778,13 +825,31 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
     core.setAlpha('ui', 1.0);
 
     block=block.block;
-    var blockIcon = core.material.icons[block.event.cls][block.event.id];
-    var blockImage = core.material.images[block.event.cls];
-    var height = block.event.height || 32;
+    var image, bx, by, height = block.event.height || 32;
+    if (block.event.cls == 'tileset') {
+        var offset = core.icons.getTilesetOffset(block.event.id);
+        if (offset==null) {
+            if (core.isset(callback)) callback();
+            return;
+        }
+        bx = offset.x;
+        by = offset.y;
+        image = core.material.images.tilesets[offset.image];
+    }
+    // 不支持autotile
+    else if (block.event.cls == 'autotile') {
+        if (core.isset(callback)) callback();
+        return;
+    }
+    else {
+        image = core.material.images[block.event.cls];
+        bx = 0;
+        by = core.material.icons[block.event.cls][block.event.id];
+    }
 
     var opacityVal = 1;
     core.setOpacity('route', opacityVal);
-    core.canvas.route.drawImage(blockImage, 0, blockIcon * height, 32, height, block.x * 32, block.y * 32 +32 - height, 32, height);
+    core.canvas.route.drawImage(image, bx*32, by * height, 32, height, block.x * 32, block.y * 32 +32 - height, 32, height);
 
     core.playSound('jump.mp3');
 
@@ -823,18 +888,21 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
             animateTime = 0;
             if (animateCurrent >= animateValue) animateCurrent = 0;
         }
+        if (block.event.cls=='tileset') {
+            animateCurrent = bx;
+        }
 
         if (jump_count>0) {
             core.clearMap('route', drawX(), drawY()-height+32, 32, height);
             updateJump();
-            core.canvas.route.drawImage(blockImage, animateCurrent * 32, blockIcon * height, 32, height, drawX(), drawY()-height+32, 32, height);
+            core.canvas.route.drawImage(image, animateCurrent * 32, by * height, 32, height, drawX(), drawY()-height+32, 32, height);
         }
         else {
             if (keep) opacityVal=0;
             else opacityVal -= 0.06;
             core.setOpacity('route', opacityVal);
             core.clearMap('route', drawX(), drawY()-height+32, 32, height);
-            core.canvas.route.drawImage(blockImage, animateCurrent * 32, blockIcon * height, 32, height, drawX(), drawY()-height+32, 32, height);
+            core.canvas.route.drawImage(image, animateCurrent * 32, by * height, 32, height, drawX(), drawY()-height+32, 32, height);
             if (opacityVal<=0) {
                 clearInterval(animate);
                 core.clearMap('route');
@@ -865,10 +933,29 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
         var block = core.getBlock(t[0],t[1],null,true);
         if (block==null) return;
         block=block.block;
+        var image, bx, by, height = block.event.height || 32;
+        if (block.event.cls == 'tileset') {
+            var offset = core.icons.getTilesetOffset(block.event.id);
+            if (offset==null) {
+                if (core.isset(callback)) callback();
+                return;
+            }
+            bx = offset.x;
+            by = offset.y;
+            image = core.material.images.tilesets[offset.image];
+        }
+        // 不支持autotile
+        else if (block.event.cls == 'autotile') {
+            return;
+        }
+        else {
+            image = core.material.images[block.event.cls];
+            bx = 0;
+            by = core.material.icons[block.event.cls][block.event.id];
+        }
         list.push({
-            'x': t[0], 'y': t[1], 'height': block.event.height||32,
-            'blockIcon': core.material.icons[block.event.cls][block.event.id],
-            'blockImage': core.material.images[block.event.cls]
+            'x': t[0], 'y': t[1], 'height': height,
+            'bx': bx, 'by': by, 'image': image
         })
     })
 
@@ -880,7 +967,7 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
     core.status.replay.animate=true;
     var draw = function () {
         list.forEach(function (t) {
-            core.canvas.route.drawImage(t.blockImage, 0, t.blockIcon*t.height, 32, t.height, t.x*32, t.y*32+32-t.height, 32, t.height);
+            core.canvas.route.drawImage(t.image, t.bx*32, t.by*t.height, 32, t.height, t.x*32, t.y*32+32-t.height, 32, t.height);
         })
     }
 
@@ -921,6 +1008,27 @@ maps.prototype.showBlock = function(x, y, floodId) {
         }
         core.updateStatusBar();
     }
+}
+
+////// 只隐藏但不删除某块 //////
+maps.prototype.hideBlock = function (x, y, floorId) {
+    floorId = floorId || core.status.floorId;
+
+    var block = core.getBlock(x,y,floorId,true);
+    if (block==null) return; // 不存在
+
+    // 删除动画，清除地图
+    if (floorId==core.status.floorId) {
+        core.removeGlobalAnimate(x, y);
+        core.canvas.event.clearRect(x * 32, y * 32, 32, 32);
+        var height = 32;
+        if (core.isset(block.block.event)) height=block.block.event.height||32;
+        if (height>32)
+            core.canvas.event2.clearRect(x * 32, y * 32 +32-height, 32, height-32);
+    }
+
+    block.disable = true;
+    core.updateStatusBar();
 }
 
 ////// 将某个块从启用变成禁用状态 //////

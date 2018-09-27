@@ -191,7 +191,6 @@ core.prototype.init = function (coreData, callback) {
     document.title = core.firstData.title + " - HTML5魔塔";
     document.getElementById("startLogo").innerHTML = core.firstData.title;
     core.material.items = core.clone(core.items.getItems());
-    core.initStatus.maps = core.maps.initMaps(core.floorIds);
     core.material.enemys = core.clone(core.enemys.getEnemys());
     core.material.icons = core.icons.getIcons();
     core.material.events = core.events.getEvents();
@@ -299,6 +298,7 @@ core.prototype.init = function (coreData, callback) {
         console.log(core.material);
         // 设置勇士高度
         core.material.icons.hero.height = core.material.images.hero.height/4;
+        core.initStatus.maps = core.maps.initMaps(core.floorIds);
         core.setRequestAnimationFrame();
         core.showStartAnimate();
 
@@ -723,7 +723,12 @@ core.prototype.showBlock = function(x, y, floodId) {
     core.maps.showBlock(x,y,floodId);
 }
 
-////// 将某个块从启用变成禁用状态 //////
+////// 将某个块从启用变成禁用状态，但是并不删除它 //////
+core.prototype.hideBlock = function(x, y, floorId) {
+    core.maps.hideBlock(x,y,floorId);
+}
+
+////// 将某个块从启用变成禁用状态，并删除该块 //////
 core.prototype.removeBlock = function (x, y, floorId) {
     core.maps.removeBlock(x,y,floorId);
 }

@@ -175,10 +175,17 @@ items.prototype.loadEquip = function (equipId, callback) {
 
     // 比较能力值
     var result = core.compareEquipment(equipId,unloadEquipId);
-    
-    core.status.hero.atk += result.atk;
-    core.status.hero.def += result.def;
-    core.status.hero.mdef += result.mdef;
+
+    if (core.flags.equipPercentage) {
+        core.setFlag('equip_atk_buff', core.getFlag('equip_atk_buff',1)+result.atk/100);
+        core.setFlag('equip_def_buff', core.getFlag('equip_def_buff',1)+result.def/100);
+        core.setFlag('equip_mdef_buff', core.getFlag('equip_mdef_buff',1)+result.mdef/100);
+    }
+    else {
+        core.status.hero.atk += result.atk;
+        core.status.hero.def += result.def;
+        core.status.hero.mdef += result.mdef;
+    }
 
     // 更新装备状态
     core.status.hero.equipment[loadEquipType] = equipId;
@@ -214,9 +221,16 @@ items.prototype.unloadEquip = function (equipType, callback) {
     var unloadEquip = core.material.items[unloadEquipId];
 
     // 处理能力值改变
-    core.status.hero.atk -= unloadEquip.equip.atk || 0;
-    core.status.hero.def -= unloadEquip.equip.def || 0;
-    core.status.hero.mdef -= unloadEquip.equip.mdef || 0;
+    if (core.flags.equipPercentage) {
+        core.setFlag('equip_atk_buff', core.getFlag('equip_atk_buff',1)-(unloadEquip.equip.atk||0)/100);
+        core.setFlag('equip_def_buff', core.getFlag('equip_def_buff',1)-(unloadEquip.equip.def||0)/100);
+        core.setFlag('equip_mdef_buff', core.getFlag('equip_mdef_buff',1)-(unloadEquip.equip.mdef||0)/100);
+    }
+    else {
+        core.status.hero.atk -= unloadEquip.equip.atk || 0;
+        core.status.hero.def -= unloadEquip.equip.def || 0;
+        core.status.hero.mdef -= unloadEquip.equip.mdef || 0;
+    }
 
     // 更新装备状态
     core.status.hero.equipment[equipType] = null;

@@ -11,6 +11,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"images": [
 			"bg.jpg"
 		],
+		"tilesets": [],
 		"animates": [
 			"hand",
 			"sword",
@@ -202,6 +203,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"bigKeyIsBox": false,
 		"equipment": false,
 		"equipboxButton": false,
+		"equipPercentage": false,
 		"enableAddPoint": false,
 		"enableNegativeDamage": false,
 		"hatredDecrease": true,

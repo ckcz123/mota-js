@@ -1,6 +1,6 @@
 function editor() {
     this.version = "2.0";
-    this.brushMod = "line";//["line","rectangle"]
+    this.brushMod = "line";//["line","rectangle","tileset"]
     this.layerMod = "map";//["fgmap","map","bgmap"]
     this.isMobile = false;
 }
@@ -468,7 +468,7 @@ editor.prototype.listen = function () {
         });
     
         var unselect=true;
-        for(var ii=0,thisId;thisId=['edit','tip','brushMod','brushMod2','layerMod','layerMod2','layerMod3','viewportButtons'][ii];ii++){
+        for(var ii=0,thisId;thisId=['edit','tip','brushMod','brushMod2','brushMod3','layerMod','layerMod2','layerMod3','viewportButtons'][ii];ii++){
             if (clickpath.indexOf(thisId) !== -1){
                 unselect=false;
                 break;
@@ -625,7 +625,7 @@ editor.prototype.listen = function () {
         e.stopPropagation();
         if (stepPostfix && stepPostfix.length) {
             preMapData = JSON.parse(JSON.stringify({map:editor.map,fgmap:editor.fgmap,bgmap:editor.bgmap}));
-            if(editor.brushMod==='rectangle'){
+            if(editor.brushMod!=='line'){
                 var x0=stepPostfix[0].x;
                 var y0=stepPostfix[0].y;
                 var x1=stepPostfix[stepPostfix.length-1].x;
@@ -633,8 +633,8 @@ editor.prototype.listen = function () {
                 if(x0>x1){x0^=x1;x1^=x0;x0^=x1;}//swap
                 if(y0>y1){y0^=y1;y1^=y0;y0^=y1;}//swap
                 stepPostfix=[];
-                for(var ii=x0;ii<=x1;ii++){
-                    for(var jj=y0;jj<=y1;jj++){
+                for(var jj=y0;jj<=y1;jj++){
+                    for(var ii=x0;ii<=x1;ii++){
                         stepPostfix.push({x:ii,y:jj})
                     }
                 }
@@ -646,8 +646,22 @@ editor.prototype.listen = function () {
             if (editor.layerMod!='map'  && editor.info.images && editor.info.images.indexOf('48')!==-1){
                 printe('前景/背景不支持48的图块');
             } else {
-                for (var ii = 0; ii < stepPostfix.length; ii++)
+                if(editor.brushMod==='tileset' && core.tilesets.indexOf(editor.info.images)!==-1){
+                    var imgWidth=~~(core.material.images.tilesets[editor.info.images].width/32);
+                    var x0=stepPostfix[0].x;
+                    var y0=stepPostfix[0].y;
+                    var idnum=editor.info.idnum;
+                    for (var ii = 0; ii < stepPostfix.length; ii++){
+                        if(stepPostfix[ii].y!=y0){
+                            y0++;
+                            idnum+=imgWidth;
+                        }
+                        editor[editor.layerMod][stepPostfix[ii].y][stepPostfix[ii].x] = editor.ids[editor.indexs[idnum+stepPostfix[ii].x-x0]];
+                    }
+                } else {
+                    for (var ii = 0; ii < stepPostfix.length; ii++)
                     editor[editor.layerMod][stepPostfix[ii].y][stepPostfix[ii].x] = editor.info;
+                }
             }
             // console.log(editor.map);
             editor.updateMap();
@@ -1011,6 +1025,11 @@ editor.prototype.listen = function () {
     var brushMod2=document.getElementById('brushMod2');
     if(brushMod2)brushMod2.onchange=function(){
         editor.brushMod=brushMod2.value;
+    }
+
+    var brushMod3=document.getElementById('brushMod3');
+    if(brushMod3)brushMod3.onchange=function(){
+        editor.brushMod=brushMod3.value;
     }
 
     var layerMod=document.getElementById('layerMod');

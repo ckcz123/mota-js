@@ -1180,6 +1180,35 @@ maps.prototype.drawBoxAnimate = function () {
     }
 }
 
+////// 绘制动画的某一帧 //////
+maps.prototype.drawAnimateFrame = function (animate, centerX, centerY, index) {
+    var frame = animate.frames[index];
+    var ratio = animate.ratio;
+    frame.forEach(function (t) {
+        var image = animate.images[t.index];
+        if (!core.isset(image)) return;
+        var realWidth = image.width * ratio * t.zoom / 100;
+        var realHeight = image.height * ratio * t.zoom / 100;
+        core.setAlpha('animate', t.opacity / 255);
+
+        var cx = centerX+t.x, cy=centerY+t.y;
+
+        if (!t.mirror && !t.angle) {
+            core.canvas.animate.drawImage(image, cx-realWidth/2 - core.bigmap.offsetX, cy-realHeight/2 - core.bigmap.offsetY, realWidth, realHeight);
+        }
+        else {
+            core.saveCanvas('animate');
+            core.canvas.animate.translate(cx,cy);
+            if (t.angle)
+                core.canvas.animate.rotate(-t.angle*Math.PI/180);
+            if (t.mirror)
+                core.canvas.animate.scale(-1,1);
+            core.canvas.animate.drawImage(image, -realWidth/2 - core.bigmap.offsetX, -realHeight/2 - core.bigmap.offsetY, realWidth, realHeight);
+            core.loadCanvas('animate');
+        }
+    })
+}
+
 ////// 绘制动画 //////
 maps.prototype.drawAnimate = function (name, x, y, callback) {
 
@@ -1195,49 +1224,22 @@ maps.prototype.drawAnimate = function (name, x, y, callback) {
         return;
     }
 
-    // 清空animate层
     clearInterval(core.interval.animateInterval);
-    core.clearMap('animate');
 
     // 开始绘制
-    var animate = core.material.animates[name];
-    var ratio = animate.ratio;
-    var centerX = 32*x+16, centerY = 32*y+16;
-    var index=0;
-
+    var animate = core.material.animates[name], centerX = 32*x+16, centerY = 32*y+16;
     // 播放音效
     core.playSound(animate.se);
 
-    var draw = function (index) {
-        core.clearMap('animate');
-
-        var frame = animate.frames[index];
-        frame.forEach(function (t) {
-            var image = animate.images[t.index];
-            if (!core.isset(image)) return;
-            var realWidth = image.width * ratio * t.zoom / 100;
-            var realHeight = image.height * ratio * t.zoom / 100;
-            core.setAlpha('animate', t.opacity / 255);
-
-            var cx = centerX+t.x, cy=centerY+t.y;
-
-            if (!t.mirror && !t.angle) {
-                core.canvas.animate.drawImage(image, cx-realWidth/2 - core.bigmap.offsetX, cy-realHeight/2 - core.bigmap.offsetY, realWidth, realHeight);
-            }
-            else {
-                core.saveCanvas('animate');
-                core.canvas.animate.translate(cx,cy);
-                if (t.angle)
-                    core.canvas.animate.rotate(-t.angle*Math.PI/180);
-                if (t.mirror)
-                    core.canvas.animate.scale(-1,1);
-                core.canvas.animate.drawImage(image, -realWidth/2 - core.bigmap.offsetX, -realHeight/2 - core.bigmap.offsetY, realWidth, realHeight);
-                core.loadCanvas('animate');
-            }
-        })
+    // 异步绘制：使用requestAnimationFrame进行绘制
+    if (!core.isset(callback)) {
+        core.status.animateObjs.push({"animate": animate, "centerX": centerX, "centerY": centerY, "index": 0});
+        return;
     }
 
-    draw(index++);
+    var index=0;
+    core.clearMap('animate');
+    core.maps.drawAnimateFrame(animate, centerX, centerY, index++);
 
     core.interval.animateInterval = setInterval(function (t) {
         if (index == animate.frames.length) {
@@ -1247,7 +1249,8 @@ maps.prototype.drawAnimate = function (name, x, y, callback) {
             if (core.isset(callback)) callback();
             return;
         }
-        draw(index++);
+        core.clearMap('animate');
+        core.maps.drawAnimateFrame(animate, centerX, centerY, index++);
     }, 50);
 }
 

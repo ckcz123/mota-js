@@ -31,6 +31,7 @@ function core() {
         'globalAnimate': false,
         'globalTime': null,
         'boxTime': null,
+        'animateTime': null,
         'moveTime': null,
         'speed': null,
         'weather': {
@@ -157,6 +158,7 @@ function core() {
         // 动画
         'globalAnimateObjs': [],
         'boxAnimateObjs': [],
+        'animateObjs': [],
     };
     this.status = {};
 }

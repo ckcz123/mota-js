@@ -802,7 +802,7 @@ return code;
 */;
 
 viberate_s
-    :   '画面震动' '时间' Int '异步' Bool Newline
+    :   '画面震动' '时间' Int '不等待执行完毕' Bool Newline
 
 
 /* viberate_s
@@ -817,7 +817,7 @@ return code;
 */;
 
 animate_s
-    :   '显示动画' IdString '位置' EvalString? '异步' Bool Newline
+    :   '显示动画' IdString '位置' EvalString? '不等待执行完毕' Bool Newline
     
 
 /* animate_s
@@ -867,7 +867,7 @@ return code;
 */;
 
 animateImage_0_s
-    : '图片淡入' EvalString '起点像素位置' 'x' PosString 'y' PosString '动画时间' Int '异步' Bool Newline
+    : '图片淡入' EvalString '起点像素位置' 'x' PosString 'y' PosString '动画时间' Int '不等待执行完毕' Bool Newline
     
 
 /* animateImage_0_s
@@ -881,7 +881,7 @@ return code;
 */;
 
 animateImage_1_s
-    : '图片淡出' EvalString '起点像素位置' 'x' PosString 'y' PosString '动画时间' Int '异步' Bool Newline
+    : '图片淡出' EvalString '起点像素位置' 'x' PosString 'y' PosString '动画时间' Int '不等待执行完毕' Bool Newline
     
 
 /* animateImage_1_s
@@ -921,7 +921,7 @@ return code;
 
 moveImage_0_s
     :   '图片移动' EvalString '起点像素位置' 'x' PosString 'y' PosString BGNL
-        '终点像素位置' 'x' PosString 'y' PosString '移动时间' Int '异步' Bool Newline
+        '终点像素位置' 'x' PosString 'y' PosString '移动时间' Int '不等待执行完毕' Bool Newline
     
 
 /* moveImage_0_s
@@ -935,7 +935,7 @@ return code;
 */;
 
 setFg_0_s
-    :   '更改画面色调' Number ',' Number ',' Number ',' Number '动画时间' Int? '异步' Bool Newline
+    :   '更改画面色调' Number ',' Number ',' Number ',' Number '动画时间' Int? '不等待执行完毕' Bool Newline
     
 
 /* setFg_0_s
@@ -959,7 +959,7 @@ return code;
 */;
 
 setFg_1_s
-    :   '恢复画面色调' '动画时间' Int? '异步' Bool Newline
+    :   '恢复画面色调' '动画时间' Int? '不等待执行完毕' Bool Newline
     
 
 /* setFg_1_s
@@ -1110,7 +1110,7 @@ return code;
 */;
 
 setVolume_s
-    :   '设置音量' Int '渐变时间' Int? '异步' Bool Newline
+    :   '设置音量' Int '渐变时间' Int? '不等待执行完毕' Bool Newline
     
 
 /* setVolume_s

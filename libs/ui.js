@@ -2057,7 +2057,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
                 }
             }
             else {
-                if (block.event.id!='none') {
+                if (block.event.id!='none' && block.id!=17) {
                     var blockIcon = core.material.icons[block.event.cls][block.event.id];
                     var blockImage = core.material.images[block.event.cls];
                     var height = block.event.height || 32;

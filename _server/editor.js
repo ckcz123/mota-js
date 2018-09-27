@@ -770,12 +770,12 @@ editor.prototype.listen = function () {
         info: {}
     };
     var reDo = null;
-    var shortcut = core.getLocalStorage('shortcut',{49: 0, 50: 0, 51: 0, 52: 0, 53: 0, 54: 0, 55: 0, 56: 0, 57: 0});
+    var shortcut = core.getLocalStorage('shortcut',{48: 0, 49: 0, 50: 0, 51: 0, 52: 0, 53: 0, 54: 0, 55: 0, 56: 0, 57: 0});
     document.body.onkeydown = function (e) {
         // 禁止快捷键的默认行为
-        if (e.ctrlKey && [89, 90, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
+        if (e.ctrlKey && [89, 90, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
             e.preventDefault();
-        if (e.altKey && [49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
+        if (e.altKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
             e.preventDefault();
         //Ctrl+z 撤销上一步undo
         if (e.keyCode == 90 && e.ctrlKey && preMapData && currDrawData.pos.length && selectBox.isSelected) {
@@ -820,12 +820,12 @@ editor.prototype.listen = function () {
                 editor.changeFloor(toId);
             }
         }
-        //ctrl + 1~9 切换到快捷图块
-        if (e.ctrlKey && [49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1){
+        //ctrl + 0~9 切换到快捷图块
+        if (e.ctrlKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1){
             editor.setSelectBoxFromInfo(JSON.parse(JSON.stringify(shortcut[e.keyCode]||0)));
         }
-        //alt + 1~9 改变快捷图块
-        if (e.altKey && [49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1){
+        //alt + 0~9 改变快捷图块
+        if (e.altKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1){
             var infoToSave = JSON.stringify(editor.info||0);
             if(infoToSave==JSON.stringify({}))return;
             shortcut[e.keyCode]=JSON.parse(infoToSave);

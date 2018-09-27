@@ -745,10 +745,14 @@ editor.prototype.listen = function () {
         info: {}
     };
     var reDo = null;
+    var shortcut = {49: 0, 50: 0, 51: 0, 52: 0, 53: 0, 54: 0, 55: 0, 56: 0, 57: 0};
     document.body.onkeydown = function (e) {
         // 禁止快捷键的默认行为
-        if (e.ctrlKey && ( e.keyCode == 90 || e.keyCode == 89 ))
+        if (e.ctrlKey && [89, 90, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
             e.preventDefault();
+        if (e.altKey && [49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
+            e.preventDefault();
+        console.log(e)
         //Ctrl+z 撤销上一步undo
         if (e.keyCode == 90 && e.ctrlKey && preMapData && currDrawData.pos.length && selectBox.isSelected) {
             editor.map = JSON.parse(JSON.stringify(preMapData.map));
@@ -791,6 +795,18 @@ editor.prototype.listen = function () {
                 document.getElementById('selectFloor').value = toId;
                 editor.changeFloor(toId);
             }
+        }
+        //ctrl + 1~9 切换到快捷图块
+        if (e.ctrlKey && [49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1){
+            editor.info = JSON.parse(JSON.stringify(shortcut[e.keyCode]||0));
+            selectBox.isSelected = true;
+            tip.infos = JSON.parse(JSON.stringify(editor.info));
+            editor_mode.onmode('nextChange');
+            editor_mode.onmode('enemyitem');
+        }
+        //alt + 1~9 改变快捷图块
+        if (e.altKey && [49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1){
+            shortcut[e.keyCode]=JSON.parse(JSON.stringify(editor.info||0));
         }
     }
 

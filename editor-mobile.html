@@ -451,6 +451,8 @@ if (location.protocol.indexOf("http")!=0) {
 
     var useCompress = main.useCompress;
     main.useCompress = false;
+    editor.airwallImg = new Image();
+    editor.airwallImg.src = './project/images/airwall.png';
     main.init('editor', function () {
         editor.init(function () {
             editor.useCompress = useCompress;

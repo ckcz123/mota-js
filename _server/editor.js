@@ -366,6 +366,18 @@ editor.prototype.drawInitData = function (icons) {
     for (var ii = 0; ii < imgNames.length; ii++) {
         var img = imgNames[ii];
         if (img == 'terrains') {
+            (function(image,dc,nowx){
+                if (image.complete) {
+                    dc.drawImage(image, nowx, 32);
+                    core.material.images.airwall = image;
+                    delete(editor.airwallImg);
+                } else image.onload = function () {
+                    dc.drawImage(image, nowx, 32);
+                    core.material.images.airwall = image;
+                    delete(editor.airwallImg);
+                    editor.updateMap();
+                }
+            })(editor.airwallImg,dc,nowx);
             dc.drawImage(images[img], nowx, 32*2);
             nowx += images[img].width;
             continue;

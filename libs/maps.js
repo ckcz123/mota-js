@@ -59,7 +59,10 @@ maps.prototype.initBlock = function (x, y, id) {
     var tmp = {'x': x, 'y': y, 'id': id};
     if (disable!=null) tmp.disable = disable;
 
-    if (id in this.blocksInfo) tmp.event = JSON.parse(JSON.stringify(this.blocksInfo[id]));
+    if (id==17) {
+        tmp.event = {"cls": "terrains", "id": "airwall", "noPass": true};
+    }
+    else if (id in this.blocksInfo) tmp.event = JSON.parse(JSON.stringify(this.blocksInfo[id]));
     else {
         var tilesetOffset = core.icons.getTilesetOffset(id);
         if (tilesetOffset != null) {
@@ -338,9 +341,13 @@ maps.prototype.canMoveDirectly = function (destX,destY) {
 }
 
 maps.prototype.drawBlock = function (block, animate, dx, dy) {
+    // none：空地；17：空气墙
+    if (block.event.id=='none' || block.id==17) return;
+
     var cls = block.event.cls, height = block.event.height || 32;
 
     var image, x, y;
+
     if (cls == 'tileset') {
         var offset = core.icons.getTilesetOffset(block.event.id);
         if (offset == null) return;
@@ -393,7 +400,7 @@ maps.prototype.drawBgFgMap = function (floorId, canvas, name) {
         for (var y = 0; y < height; y++) {
             if (name=='bg')
                 canvas.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
-            if (arr[y][x]>0) {
+            if (arr[y][x]>0 && arr[y][x]!=17) {
                 var block = core.maps.initBlock(x, y, arr[y][x]);
                 if (core.isset(block.event)) {
                     var id = block.event.id, cls = block.event.cls;
@@ -492,7 +499,7 @@ maps.prototype.drawMap = function (mapName, callback) {
                 if (block.event.cls == 'autotile') {
                     core.drawAutotile(core.canvas.event, mapArray, block, 32, 0, 0);
                 }
-                else if (block.event.id!='none') {
+                else {
                     core.drawBlock(block);
                     core.addGlobalAnimate(block);
                 }

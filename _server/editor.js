@@ -461,6 +461,31 @@ editor.prototype.buildMark = function(){
     }
 }
 
+editor.prototype.setSelectBoxFromInfo=function(thisevent){
+    var pos={x: 0, y: 0, images: "terrains"};
+    var ysize = 32;
+    if(thisevent==0){
+    } else if (thisevent.idnum==17){
+        pos.y=1;
+    } else {
+        pos.x=editor.widthsX[thisevent.images][1];
+        pos.y=thisevent.y;
+        if(thisevent.x)pos.x+=thisevent.x;
+        if(thisevent.images=='terrains')pos.y+=2;
+        ysize = thisevent.images.indexOf('48') === -1 ? 32 : 48;
+    }
+    var dataSelection = document.getElementById('dataSelection');
+    dataSelection.style.left = pos.x * 32 + 'px';
+    dataSelection.style.top = pos.y * ysize + 'px';
+    dataSelection.style.height = ysize - 6 + 'px';
+    setTimeout(function(){selectBox.isSelected = true;});
+    editor.info = JSON.parse(JSON.stringify(thisevent));
+    tip.infos = JSON.parse(JSON.stringify(thisevent));
+    editor.pos=pos;
+    editor_mode.onmode('nextChange');
+    editor_mode.onmode('enemyitem');
+}
+
 editor.prototype.listen = function () {
 
     document.body.onmousedown = function (e) {
@@ -745,14 +770,13 @@ editor.prototype.listen = function () {
         info: {}
     };
     var reDo = null;
-    var shortcut = {49: 0, 50: 0, 51: 0, 52: 0, 53: 0, 54: 0, 55: 0, 56: 0, 57: 0};
+    var shortcut = core.getLocalStorage('shortcut',{49: 0, 50: 0, 51: 0, 52: 0, 53: 0, 54: 0, 55: 0, 56: 0, 57: 0});
     document.body.onkeydown = function (e) {
         // 禁止快捷键的默认行为
         if (e.ctrlKey && [89, 90, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
             e.preventDefault();
         if (e.altKey && [49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
             e.preventDefault();
-        console.log(e)
         //Ctrl+z 撤销上一步undo
         if (e.keyCode == 90 && e.ctrlKey && preMapData && currDrawData.pos.length && selectBox.isSelected) {
             editor.map = JSON.parse(JSON.stringify(preMapData.map));
@@ -798,15 +822,15 @@ editor.prototype.listen = function () {
         }
         //ctrl + 1~9 切换到快捷图块
         if (e.ctrlKey && [49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1){
-            editor.info = JSON.parse(JSON.stringify(shortcut[e.keyCode]||0));
-            selectBox.isSelected = true;
-            tip.infos = JSON.parse(JSON.stringify(editor.info));
-            editor_mode.onmode('nextChange');
-            editor_mode.onmode('enemyitem');
+            editor.setSelectBoxFromInfo(JSON.parse(JSON.stringify(shortcut[e.keyCode]||0)));
         }
         //alt + 1~9 改变快捷图块
         if (e.altKey && [49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1){
-            shortcut[e.keyCode]=JSON.parse(JSON.stringify(editor.info||0));
+            var infoToSave = JSON.stringify(editor.info||0);
+            if(infoToSave==JSON.stringify({}))return;
+            shortcut[e.keyCode]=JSON.parse(infoToSave);
+            printf('已保存该快捷图块, ctrl + '+(e.keyCode-48)+' 使用.')
+            core.setLocalStorage('shortcut',shortcut);
         }
     }
 
@@ -927,32 +951,7 @@ editor.prototype.listen = function () {
         editor.hideMidMenu();
         e.stopPropagation();
         var thisevent = editor.map[editor.pos.y][editor.pos.x];
-        var pos={x: 0, y: 0, images: "terrains"};
-        var ysize = 32;
-        if(thisevent==0){
-            //选中清除块
-            editor.info = 0;
-            editor.pos=pos;
-        } else if (thisevent.idnum==17){
-            editor.info = editor.ids[editor.indexs[17]];
-            pos.y=1;
-            editor.pos=pos;
-        } else {
-            var ids=editor.indexs[thisevent.idnum];
-            ids=ids[0]?ids[0]:ids;
-            editor.info=editor.ids[ids];
-            pos.x=editor.widthsX[thisevent.images][1];
-            pos.y=editor.info.y;
-            if(thisevent.images=='terrains')pos.y+=2;
-            ysize = thisevent.images.indexOf('48') === -1 ? 32 : 48;
-        }
-        setTimeout(function(){selectBox.isSelected = true;});
-        dataSelection.style.left = pos.x * 32 + 'px';
-        dataSelection.style.top = pos.y * ysize + 'px';
-        dataSelection.style.height = ysize - 6 + 'px';
-        tip.infos = JSON.parse(JSON.stringify(editor.info));
-        editor_mode.onmode('nextChange');
-        editor_mode.onmode('enemyitem');
+        editor.setSelectBoxFromInfo(thisevent);
     }
 
     var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);

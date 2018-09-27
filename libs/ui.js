@@ -2056,13 +2056,16 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
                     tempCanvas.drawImage(core.material.images.tilesets[offset.image], 32*offset.x, 32*offset.y, 32, 32, 32*block.x, 32*block.y, 32, 32);
                 }
             }
-            else {
-                if (block.event.id!='none') {
-                    var blockIcon = core.material.icons[block.event.cls][block.event.id];
-                    var blockImage = core.material.images[block.event.cls];
-                    var height = block.event.height || 32;
-                    tempCanvas.drawImage(blockImage, 0, blockIcon * height, 32, height, 32*block.x, 32*block.y + 32 - height, 32, height);
+            else if (block.id==17) {
+                if (core.isset(core.material.images.airwall)) {
+                    tempCanvas.drawImage(core.material.images.airwall, 32*block.x, 32*block.y);
                 }
+            }
+            else if (block.event.id!='none') {
+                var blockIcon = core.material.icons[block.event.cls][block.event.id];
+                var blockImage = core.material.images[block.event.cls];
+                var height = block.event.height || 32;
+                tempCanvas.drawImage(blockImage, 0, blockIcon * height, 32, height, 32*block.x, 32*block.y + 32 - height, 32, height);
             }
         }
     }

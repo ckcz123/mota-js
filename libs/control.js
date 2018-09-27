@@ -56,6 +56,7 @@ control.prototype.setRequestAnimationFrame = function () {
 
         core.animateFrame.globalTime = core.animateFrame.globalTime||timestamp;
         core.animateFrame.boxTime = core.animateFrame.boxTime||timestamp;
+        core.animateFrame.animateTime = core.animateFrame.animateTime||timestamp;
         core.animateFrame.moveTime = core.animateFrame.moveTime||timestamp;
         core.animateFrame.weather.time = core.animateFrame.weather.time||timestamp;
 
@@ -86,6 +87,18 @@ control.prototype.setRequestAnimationFrame = function () {
         if (timestamp-core.animateFrame.boxTime>core.animateFrame.speed && core.isset(core.status.boxAnimateObjs) && core.status.boxAnimateObjs.length>0) {
             core.drawBoxAnimate();
             core.animateFrame.boxTime = timestamp;
+        }
+
+        // Animate
+        if (timestamp-core.animateFrame.animateTime>50 && core.isset(core.status.animateObjs) && core.status.animateObjs.length>0) {
+            core.clearMap('animate');
+            core.status.animateObjs = core.status.animateObjs.filter(function (obj) {
+                return obj.index < obj.animate.frames.length;
+            })
+            core.status.animateObjs.forEach(function (obj) {
+                core.maps.drawAnimateFrame(obj.animate, obj.centerX, obj.centerY, obj.index++);
+            })
+            core.animateFrame.animateTime = timestamp;
         }
 
         // Hero move

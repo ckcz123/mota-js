@@ -1,6 +1,6 @@
 function editor() {
     this.version = "2.0";
-    this.brushMod = "line";//["line","rectangle"]
+    this.brushMod = "line";//["line","rectangle","tileset"]
     this.layerMod = "map";//["fgmap","map","bgmap"]
     this.isMobile = false;
 }
@@ -97,6 +97,12 @@ editor.prototype.idsInit = function (maps, icons) {
             var id = indexBlock.event.id;
             var indexId = indexBlock.id;
             var allCls = Object.keys(icons);
+            if(i==17){
+                editor.ids.push({'idnum': 17, 'id': id, 'images': 'terrains'});
+                point++;
+                editor.indexs[i].push(point);
+                continue;
+            }
             for (var j = 0; j < allCls.length; j++) {
                 if (id in icons[allCls[j]]) {
                     editor.ids.push({'idnum': indexId, 'id': id, 'images': allCls[j], 'y': icons[allCls[j]][id]});
@@ -114,7 +120,10 @@ editor.prototype.idsInit = function (maps, icons) {
         var img = core.material.images.tilesets[imgName];
         var width = Math.floor(img.width/32), height = Math.floor(img.height/32);
         if(img.width%32 || img.height%32){
-            alert(imgName+'的长或宽不是32的整数倍, 请修改后刷新页面')
+            alert(imgName+'的长或宽不是32的整数倍, 请修改后刷新页面');
+        }
+        if(img.width*img.height > 32*32*1000){
+            alert(imgName+'上的图块数量超过了1000，请修改后刷新页面');
         }
         for (var id=startOffset; id<startOffset+width*height;id++) {
             var x = (id-startOffset)%width, y = parseInt((id-startOffset)/width);
@@ -329,9 +338,9 @@ editor.prototype.drawInitData = function (icons) {
             continue;
         }
         if (img == 'terrains') {
-            editor.widthsX[img] = [img, sumWidth / 32, (sumWidth + images[img].width) / 32, images[img].height + 32]
+            editor.widthsX[img] = [img, sumWidth / 32, (sumWidth + images[img].width) / 32, images[img].height + 32*2]
             sumWidth += images[img].width;
-            maxHeight = Math.max(maxHeight, images[img].height + 32);
+            maxHeight = Math.max(maxHeight, images[img].height + 32*2);
             continue;
         }
         editor.widthsX[img] = [img, sumWidth / 32, (sumWidth + images[img].width) / 32, images[img].height];
@@ -357,7 +366,19 @@ editor.prototype.drawInitData = function (icons) {
     for (var ii = 0; ii < imgNames.length; ii++) {
         var img = imgNames[ii];
         if (img == 'terrains') {
-            dc.drawImage(images[img], nowx, 32);
+            (function(image,dc,nowx){
+                if (image.complete) {
+                    dc.drawImage(image, nowx, 32);
+                    core.material.images.airwall = image;
+                    delete(editor.airwallImg);
+                } else image.onload = function () {
+                    dc.drawImage(image, nowx, 32);
+                    core.material.images.airwall = image;
+                    delete(editor.airwallImg);
+                    editor.updateMap();
+                }
+            })(editor.airwallImg,dc,nowx);
+            dc.drawImage(images[img], nowx, 32*2);
             nowx += images[img].width;
             continue;
         }
@@ -440,6 +461,31 @@ editor.prototype.buildMark = function(){
     }
 }
 
+editor.prototype.setSelectBoxFromInfo=function(thisevent){
+    var pos={x: 0, y: 0, images: "terrains"};
+    var ysize = 32;
+    if(thisevent==0){
+    } else if (thisevent.idnum==17){
+        pos.y=1;
+    } else {
+        pos.x=editor.widthsX[thisevent.images][1];
+        pos.y=thisevent.y;
+        if(thisevent.x)pos.x+=thisevent.x;
+        if(thisevent.images=='terrains')pos.y+=2;
+        ysize = thisevent.images.indexOf('48') === -1 ? 32 : 48;
+    }
+    var dataSelection = document.getElementById('dataSelection');
+    dataSelection.style.left = pos.x * 32 + 'px';
+    dataSelection.style.top = pos.y * ysize + 'px';
+    dataSelection.style.height = ysize - 6 + 'px';
+    setTimeout(function(){selectBox.isSelected = true;});
+    editor.info = JSON.parse(JSON.stringify(thisevent));
+    tip.infos = JSON.parse(JSON.stringify(thisevent));
+    editor.pos=pos;
+    editor_mode.onmode('nextChange');
+    editor_mode.onmode('enemyitem');
+}
+
 editor.prototype.listen = function () {
 
     document.body.onmousedown = function (e) {
@@ -468,7 +514,7 @@ editor.prototype.listen = function () {
         });
     
         var unselect=true;
-        for(var ii=0,thisId;thisId=['edit','tip','brushMod','brushMod2','layerMod','layerMod2','layerMod3','viewportButtons'][ii];ii++){
+        for(var ii=0,thisId;thisId=['edit','tip','brushMod','brushMod2','brushMod3','layerMod','layerMod2','layerMod3','viewportButtons'][ii];ii++){
             if (clickpath.indexOf(thisId) !== -1){
                 unselect=false;
                 break;
@@ -625,7 +671,7 @@ editor.prototype.listen = function () {
         e.stopPropagation();
         if (stepPostfix && stepPostfix.length) {
             preMapData = JSON.parse(JSON.stringify({map:editor.map,fgmap:editor.fgmap,bgmap:editor.bgmap}));
-            if(editor.brushMod==='rectangle'){
+            if(editor.brushMod!=='line'){
                 var x0=stepPostfix[0].x;
                 var y0=stepPostfix[0].y;
                 var x1=stepPostfix[stepPostfix.length-1].x;
@@ -633,8 +679,8 @@ editor.prototype.listen = function () {
                 if(x0>x1){x0^=x1;x1^=x0;x0^=x1;}//swap
                 if(y0>y1){y0^=y1;y1^=y0;y0^=y1;}//swap
                 stepPostfix=[];
-                for(var ii=x0;ii<=x1;ii++){
-                    for(var jj=y0;jj<=y1;jj++){
+                for(var jj=y0;jj<=y1;jj++){
+                    for(var ii=x0;ii<=x1;ii++){
                         stepPostfix.push({x:ii,y:jj})
                     }
                 }
@@ -646,8 +692,22 @@ editor.prototype.listen = function () {
             if (editor.layerMod!='map'  && editor.info.images && editor.info.images.indexOf('48')!==-1){
                 printe('前景/背景不支持48的图块');
             } else {
-                for (var ii = 0; ii < stepPostfix.length; ii++)
+                if(editor.brushMod==='tileset' && core.tilesets.indexOf(editor.info.images)!==-1){
+                    var imgWidth=~~(core.material.images.tilesets[editor.info.images].width/32);
+                    var x0=stepPostfix[0].x;
+                    var y0=stepPostfix[0].y;
+                    var idnum=editor.info.idnum;
+                    for (var ii = 0; ii < stepPostfix.length; ii++){
+                        if(stepPostfix[ii].y!=y0){
+                            y0++;
+                            idnum+=imgWidth;
+                        }
+                        editor[editor.layerMod][stepPostfix[ii].y][stepPostfix[ii].x] = editor.ids[editor.indexs[idnum+stepPostfix[ii].x-x0]];
+                    }
+                } else {
+                    for (var ii = 0; ii < stepPostfix.length; ii++)
                     editor[editor.layerMod][stepPostfix[ii].y][stepPostfix[ii].x] = editor.info;
+                }
             }
             // console.log(editor.map);
             editor.updateMap();
@@ -710,9 +770,12 @@ editor.prototype.listen = function () {
         info: {}
     };
     var reDo = null;
+    var shortcut = core.getLocalStorage('shortcut',{48: 0, 49: 0, 50: 0, 51: 0, 52: 0, 53: 0, 54: 0, 55: 0, 56: 0, 57: 0});
     document.body.onkeydown = function (e) {
         // 禁止快捷键的默认行为
-        if (e.ctrlKey && ( e.keyCode == 90 || e.keyCode == 89 ))
+        if (e.ctrlKey && [89, 90, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
+            e.preventDefault();
+        if (e.altKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
             e.preventDefault();
         //Ctrl+z 撤销上一步undo
         if (e.keyCode == 90 && e.ctrlKey && preMapData && currDrawData.pos.length && selectBox.isSelected) {
@@ -756,6 +819,18 @@ editor.prototype.listen = function () {
                 document.getElementById('selectFloor').value = toId;
                 editor.changeFloor(toId);
             }
+        }
+        //ctrl + 0~9 切换到快捷图块
+        if (e.ctrlKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1){
+            editor.setSelectBoxFromInfo(JSON.parse(JSON.stringify(shortcut[e.keyCode]||0)));
+        }
+        //alt + 0~9 改变快捷图块
+        if (e.altKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1){
+            var infoToSave = JSON.stringify(editor.info||0);
+            if(infoToSave==JSON.stringify({}))return;
+            shortcut[e.keyCode]=JSON.parse(infoToSave);
+            printf('已保存该快捷图块, ctrl + '+(e.keyCode-48)+' 使用.')
+            core.setLocalStorage('shortcut',shortcut);
         }
     }
 
@@ -803,9 +878,11 @@ editor.prototype.listen = function () {
                 if (pos.x == 0 && pos.y == 0) {
                     // editor.info={idnum:0, id:'empty','images':'清除块', 'y':0};
                     editor.info = 0;
+                } else if(pos.x == 0 && pos.y == 1){
+                    editor.info = editor.ids[editor.indexs[17]];
                 } else {
                     if (hasOwnProp(autotiles, pos.images)) editor.info = {'images': pos.images, 'y': 0};
-                    else if (pos.images == 'terrains') editor.info = {'images': pos.images, 'y': pos.y - 1};
+                    else if (pos.images == 'terrains') editor.info = {'images': pos.images, 'y': pos.y - 2};
                     else if (core.tilesets.indexOf(pos.images)!=-1) editor.info = {'images': pos.images, 'y': pos.y, 'x': pos.x-editor.widthsX[spriter][1]};
                     else editor.info = {'images': pos.images, 'y': pos.y};
 
@@ -874,28 +951,7 @@ editor.prototype.listen = function () {
         editor.hideMidMenu();
         e.stopPropagation();
         var thisevent = editor.map[editor.pos.y][editor.pos.x];
-        var pos={x: 0, y: 0, images: "terrains"};
-        var ysize = 32;
-        if(thisevent==0){
-            //选中清除块
-            editor.info = 0;
-            editor.pos=pos;
-        } else {
-            var ids=editor.indexs[thisevent.idnum];
-            ids=ids[0]?ids[0]:ids;
-            editor.info=editor.ids[ids];
-            pos.x=editor.widthsX[thisevent.images][1];
-            pos.y=editor.info.y;
-            if(thisevent.images=='terrains')pos.y++;
-            ysize = thisevent.images.indexOf('48') === -1 ? 32 : 48;
-        }
-        setTimeout(function(){selectBox.isSelected = true;});
-        dataSelection.style.left = pos.x * 32 + 'px';
-        dataSelection.style.top = pos.y * ysize + 'px';
-        dataSelection.style.height = ysize - 6 + 'px';
-        tip.infos = JSON.parse(JSON.stringify(editor.info));
-        editor_mode.onmode('nextChange');
-        editor_mode.onmode('enemyitem');
+        editor.setSelectBoxFromInfo(thisevent);
     }
 
     var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
@@ -1011,6 +1067,11 @@ editor.prototype.listen = function () {
     var brushMod2=document.getElementById('brushMod2');
     if(brushMod2)brushMod2.onchange=function(){
         editor.brushMod=brushMod2.value;
+    }
+
+    var brushMod3=document.getElementById('brushMod3');
+    if(brushMod3)brushMod3.onchange=function(){
+        editor.brushMod=brushMod3.value;
     }
 
     var layerMod=document.getElementById('layerMod');

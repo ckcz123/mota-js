@@ -97,6 +97,12 @@ editor.prototype.idsInit = function (maps, icons) {
             var id = indexBlock.event.id;
             var indexId = indexBlock.id;
             var allCls = Object.keys(icons);
+            if(i==17){
+                editor.ids.push({'idnum': 17, 'id': id, 'images': 'terrains'});
+                point++;
+                editor.indexs[i].push(point);
+                continue;
+            }
             for (var j = 0; j < allCls.length; j++) {
                 if (id in icons[allCls[j]]) {
                     editor.ids.push({'idnum': indexId, 'id': id, 'images': allCls[j], 'y': icons[allCls[j]][id]});
@@ -332,9 +338,9 @@ editor.prototype.drawInitData = function (icons) {
             continue;
         }
         if (img == 'terrains') {
-            editor.widthsX[img] = [img, sumWidth / 32, (sumWidth + images[img].width) / 32, images[img].height + 32]
+            editor.widthsX[img] = [img, sumWidth / 32, (sumWidth + images[img].width) / 32, images[img].height + 32*2]
             sumWidth += images[img].width;
-            maxHeight = Math.max(maxHeight, images[img].height + 32);
+            maxHeight = Math.max(maxHeight, images[img].height + 32*2);
             continue;
         }
         editor.widthsX[img] = [img, sumWidth / 32, (sumWidth + images[img].width) / 32, images[img].height];
@@ -360,7 +366,7 @@ editor.prototype.drawInitData = function (icons) {
     for (var ii = 0; ii < imgNames.length; ii++) {
         var img = imgNames[ii];
         if (img == 'terrains') {
-            dc.drawImage(images[img], nowx, 32);
+            dc.drawImage(images[img], nowx, 32*2);
             nowx += images[img].width;
             continue;
         }
@@ -820,9 +826,11 @@ editor.prototype.listen = function () {
                 if (pos.x == 0 && pos.y == 0) {
                     // editor.info={idnum:0, id:'empty','images':'清除块', 'y':0};
                     editor.info = 0;
+                } else if(pos.x == 0 && pos.y == 1){
+                    editor.info = editor.ids[editor.indexs[17]];
                 } else {
                     if (hasOwnProp(autotiles, pos.images)) editor.info = {'images': pos.images, 'y': 0};
-                    else if (pos.images == 'terrains') editor.info = {'images': pos.images, 'y': pos.y - 1};
+                    else if (pos.images == 'terrains') editor.info = {'images': pos.images, 'y': pos.y - 2};
                     else if (core.tilesets.indexOf(pos.images)!=-1) editor.info = {'images': pos.images, 'y': pos.y, 'x': pos.x-editor.widthsX[spriter][1]};
                     else editor.info = {'images': pos.images, 'y': pos.y};
 
@@ -897,13 +905,17 @@ editor.prototype.listen = function () {
             //选中清除块
             editor.info = 0;
             editor.pos=pos;
+        } else if (thisevent.idnum==17){
+            editor.info = editor.ids[editor.indexs[17]];
+            pos.y=1;
+            editor.pos=pos;
         } else {
             var ids=editor.indexs[thisevent.idnum];
             ids=ids[0]?ids[0]:ids;
             editor.info=editor.ids[ids];
             pos.x=editor.widthsX[thisevent.images][1];
             pos.y=editor.info.y;
-            if(thisevent.images=='terrains')pos.y++;
+            if(thisevent.images=='terrains')pos.y+=2;
             ysize = thisevent.images.indexOf('48') === -1 ? 32 : 48;
         }
         setTimeout(function(){selectBox.isSelected = true;});

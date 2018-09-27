@@ -315,7 +315,7 @@ editor_mode = function (editor) {
         //editor.info=editor.ids[editor.indexs[201]];
         if (!core.isset(editor.info)) return;
 
-        if (Object.keys(editor.info).length !== 0) editor_mode.info = editor.info;//避免editor.info被清空导致无法获得是物品还是怪物
+        if (Object.keys(editor.info).length !== 0 && editor.info.idnum!=17) editor_mode.info = editor.info;//避免editor.info被清空导致无法获得是物品还是怪物
 
         if (!core.isset(editor_mode.info.id)) {
             // document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML = '';

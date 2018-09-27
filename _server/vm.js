@@ -241,6 +241,7 @@ var tip = new Vue({
         isAutotile: false,
         isSelectedBlock: false,
         isClearBlock: false,
+        isAirwall: false,
         geneMapSuccess: false,
         timer: null,
         msgs: [ //分别编号1,2,3,4,5,6,7,8,9,10；奇数警告，偶数成功
@@ -264,12 +265,17 @@ var tip = new Vue({
         infos: {
             handler: function (val, oldval) {
                 this.isClearBlock = false;
+                this.isAirwall = false;
                 if (typeof(val) != 'undefined') {
                     if (val == 0) {
                         this.isClearBlock = true;
                         return;
                     }
                     if ('id' in val) {
+                        if (val.idnum == 17) {
+                            this.isAirwall = true;
+                            return;
+                        }
                         this.hasId = true;
                     } else {
                         this.hasId = false;

@@ -234,6 +234,7 @@
                 <div id="tip" v-cloak>
                     <div v-if="isSelectedBlock">
                         <p v-if="isClearBlock" class="infoText">当前选择为清除块，可擦除地图上块</p>
+                        <p v-if="isAirwall" class="infoText">当前选择为空气墙, 在编辑器中可视, 在游戏中隐藏的墙, 用来配合前景/背景的贴图</p>
                         <div v-else>
                             <p v-if="hasId">图块编号：<span class="infoText">{{ infos['idnum'] }}</span></p>
                             <p v-if="hasId">图块ID：<span class="infoText">{{ infos['id'] }}</span></p>
@@ -276,6 +277,7 @@
                 <select id="brushMod" style="clear:right">
                     <option value="line">画线</option>
                     <option value="rectangle">画矩形</option>
+                    <option value="tileset">tileset贴图</option>
                 </select>
                 <select id="layerMod" style="float:left;margin-right:3px">
                     <option value="bgmap">背景层</option>
@@ -449,6 +451,8 @@ if (location.protocol.indexOf("http")!=0) {
 
     var useCompress = main.useCompress;
     main.useCompress = false;
+    editor.airwallImg = new Image();
+    editor.airwallImg.src = './project/images/airwall.png';
     main.init('editor', function () {
         editor.init(function () {
             editor.useCompress = useCompress;

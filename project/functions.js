@@ -366,7 +366,17 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 怪物生命，怪物攻击、防御、特殊属性
 	var mon_hp = enemy.hp, mon_atk = enemy.atk, mon_def = enemy.def, mon_special = enemy.special;
 	// 勇士的负属性都按0计算
-	hero_hp=Math.max(0, hero_hp); hero_atk=Math.max(0, hero_atk); hero_def=Math.max(0, hero_def); hero_mdef=Math.max(0, hero_mdef);
+	hero_hp=Math.max(0, hero_hp);
+	hero_atk=Math.max(0, hero_atk);
+	hero_def=Math.max(0, hero_def);
+	hero_mdef=Math.max(0, hero_mdef);
+
+	// 装备按比例增加属性
+	if (core.flags.equipPercentage) {
+		hero_atk = Math.floor(core.getFlag('equip_atk_buff',1)*hero_atk);
+		hero_def = Math.floor(core.getFlag('equip_def_buff',1)*hero_def);
+		hero_mdef = Math.floor(core.getFlag('equip_mdef_buff',1)*hero_mdef);
+	}
 
 	// 如果是无敌属性，且勇士未持有十字架
 	if (this.hasSpecial(mon_special, 20) && !core.hasItem("cross"))
@@ -494,6 +504,13 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 大数据格式化
 		core.statusBar[item].innerHTML = core.formatBigNumber(core.getStatus(item));
 	});
+
+	// 装备按比例增加属性
+	if (core.flags.equipPercentage) {
+		core.statusBar.atk.innerHTML = core.formatBigNumber(Math.floor(core.getFlag('equip_atk_buff',1)*core.getStatus('atk')));
+		core.statusBar.def.innerHTML = core.formatBigNumber(Math.floor(core.getFlag('equip_def_buff',1)*core.getStatus('def')));
+		core.statusBar.mdef.innerHTML = core.formatBigNumber(Math.floor(core.getFlag('equip_mdef_buff',1)*core.getStatus('mdef')));
+	}
 
 	// 可以在这里添加自己额外的状态栏信息，比如想攻击显示 +0.5 可以这么写：
 	// if (core.hasFlag('halfAtk')) core.statusBar.atk.innerHTML += "+0.5";

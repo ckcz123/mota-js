@@ -129,7 +129,7 @@ enemys.prototype.getExtraDamage = function (enemy) {
 enemys.prototype.nextCriticals = function (enemy, number) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
 
-    var useTurn = !core.flags.useLoop; // 是否使用回合法计算临界值；如果要用循环法，则直接改为false。
+    var useTurn = !core.flags.useLoop;
 
     number = number||1;
 
@@ -161,6 +161,10 @@ enemys.prototype.nextCriticals = function (enemy, number) {
     if (useTurn) { // 回合数计算法
         for (var t = turn-1;t>=1;t--) {
             var nextAtk = Math.ceil(mon_hp/t) + mon_def;
+            // 装备提升比例的计算临界
+            if (core.flags.equipPercentage) {
+                nextAtk = Math.ceil(nextAtk / core.getFlag('equip_atk_buff', 1));
+            }
             if (nextAtk<=hero_atk) break;
             if (nextAtk!=pre) {
                 var nextInfo = this.getDamageInfo(enemy, core.status.hero.hp, nextAtk, core.status.hero.def, core.status.hero.mdef);
@@ -235,12 +239,19 @@ enemys.prototype.getCurrentEnemys = function (floorId) {
 
             var enemy = core.material.enemys[enemyId];
             var mon_hp = enemy.hp, mon_atk = enemy.atk, mon_def = enemy.def;
-            if (this.hasSpecial(enemy.special, 10)) {
-                mon_atk=core.status.hero.atk;
-                mon_def=core.status.hero.def;
+            var hero_atk = core.status.hero.atk, hero_def = core.status.hero.def, hero_mdef = core.status.hero.mdef;
+
+            if (core.flags.equipPercentage) {
+                hero_atk = Math.floor(core.getFlag('equip_atk_buff',1)*hero_atk);
+                hero_def = Math.floor(core.getFlag('equip_def_buff',1)*hero_def);
+                hero_mdef = Math.floor(core.getFlag('equip_mdef_buff',1)*hero_mdef);
             }
-            if (this.hasSpecial(enemy.special, 3) && mon_def < core.status.hero.atk - 1)
-                mon_def = core.status.hero.atk - 1;
+            if (this.hasSpecial(enemy.special, 10)) {
+                mon_atk=hero_atk;
+                mon_def=hero_def;
+            }
+            if (this.hasSpecial(enemy.special, 3) && mon_def < hero_atk - 1)
+                mon_def = hero_atk - 1;
 
             var specialText = core.enemys.getSpecialText(enemyId);
             if (specialText.length>=3) specialText = "多属性...";

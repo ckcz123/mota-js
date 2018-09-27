@@ -237,7 +237,6 @@ control.prototype.clearStatus = function() {
     }
     core.status = {};
     core.clearStatusBar();
-    core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
 }
 
 ////// 重置游戏状态和初始数据 //////
@@ -249,16 +248,8 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
         totalTime=core.status.hero.statistics.totalTime;
     }
 
-    // 停止各个Timeout和Interval
-    for (var i in core.timeout) {
-        clearTimeout(core.timeout[i]);
-        core.timeout[i] = null;
-    }
-    for (var i in core.interval) {
-        clearInterval(core.interval[i]);
-        core.interval[i] = null;
-    }
-    core.clearStatusBar();
+    // 清除游戏数据
+    core.clearStatus();
 
     // 初始化status
     core.status = core.clone(core.initStatus);

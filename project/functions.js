@@ -123,9 +123,8 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var equipAnimate = 'hand';
 	if (core.flags.equipment) {
 		var equipId = (core.status.hero.equipment||[])[0];
-		if (core.isset(equipId) && core.isset(core.material.items[equipId])
-				&& core.isset(core.material.items[equipId].equip.animate))
-		equipAnimate = core.material.items[equipId].equip.animate;
+		if (core.isset(core.material.items[equipId]) && core.isset(core.material.items[equipId].equip.animate))
+			equipAnimate = core.material.items[equipId].equip.animate;
 	}
 	core.playSound('attack.mp3');
 	core.drawAnimate(equipAnimate, x, y);

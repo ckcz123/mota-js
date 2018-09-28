@@ -1137,18 +1137,6 @@ events.prototype.battle = function (id, x, y, force, callback) {
         });
     }
     else {
-
-        var nowEquipment = 'hand';
-        if (core.flags.equipment) {
-            var equipId = (core.status.hero.equipment||[])[0];
-            if (core.isset(equipId) && core.isset(core.material.items[equipId])
-                    && core.isset(core.material.items[equipId].equip.animate))
-                nowEquipment = core.material.items[equipId].equip.animate;
-        }
-
-        core.playSound('attack.mp3');
-        core.drawAnimate(nowEquipment, x, y);
-
         core.events.afterBattle(id, x, y, callback);
     }
 }

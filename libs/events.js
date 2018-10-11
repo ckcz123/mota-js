@@ -1561,10 +1561,7 @@ events.prototype.disableQuickShop = function (shopId) {
 
 ////// 能否使用快捷商店 //////
 events.prototype.canUseQuickShop = function(shopId) {
-    if (core.isset(core.floors[core.status.floorId].canUseQuickShop) && !core.floors[core.status.floorId].canUseQuickShop)
-        return '当前不能使用快捷商店。';
-
-    return null;
+    return this.eventdata.canUseQuickShop(shopId);
 }
 
 ////// 设置角色行走图 //////

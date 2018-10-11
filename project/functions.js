@@ -336,6 +336,18 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 怪物数据的动态修改迁移到了“脚本编辑 - updateEnemys”中，详见文档说明
 
 	core.enemys.updateEnemys();
+},
+        "canUseQuickShop": function(shopId) {
+	// 当前能否使用某个快捷商店
+	// shopId：快捷商店ID
+	// 如果返回一个字符串，表示不能，字符串为不能使用的提示
+	// 返回null代表可以使用
+
+	// 检查当前楼层的canUseQuickShop选项是否为false
+	if (core.isset(core.floors[core.status.floorId].canUseQuickShop) && !core.floors[core.status.floorId].canUseQuickShop)
+		return '当前楼层不能使用快捷商店。';
+
+	return null;
 }
     },
     "enemys": {

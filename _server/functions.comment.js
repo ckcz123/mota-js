@@ -90,6 +90,12 @@ functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "textarea",
                     "_lint": true,
                     "_data": "读档事件后，载入事件前，可以执行的操作"
+                },
+                "canUseQuickShop": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "当前能否使用快捷商店"
                 }
             }
         },
@@ -144,7 +150,7 @@ functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "textarea",
                     "_lint": true,
                     "_data": "阻激夹域的伤害值计算"
-                },
+                }
             }
         },
         "ui": {

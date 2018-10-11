@@ -969,24 +969,15 @@ actions.prototype.clickFly = function(x,y) {
     if ((x==10 || x==11) && y==10) core.ui.drawFly(core.status.event.data-10);
     if ((x==10 || x==11) && y==4) core.ui.drawFly(core.status.event.data+10);
     if (x>=5 && x<=7 && y==12) core.ui.closePanel();
-    if (x>=0 && x<=9 && y>=3 && y<=11) {
-        var index=core.status.hero.flyRange.indexOf(core.status.floorId);
-        var stair=core.status.event.data<index?"upFloor":"downFloor";
-        if (core.status.event.data==index && core.floors[core.status.floorId].underGround)
-            stair = "upFloor";
-        var floorId=core.status.event.data;
-        var toFloor = core.status.hero.flyRange[floorId];
-        core.status.route.push("fly:"+toFloor);
-        core.ui.closePanel();
-        core.changeFloor(toFloor, stair);
-    }
+    if (x>=0 && x<=9 && y>=3 && y<=11)
+        core.control.flyTo(core.status.hero.flyRange[core.status.event.data]);
     return;
 }
 
 ////// 楼层传送器界面时，按下某个键的操作 //////
 actions.prototype.keyDownFly = function (keycode) {
     if (keycode==37) core.ui.drawFly(core.status.event.data-10);
-    else if ( keycode==38) core.ui.drawFly(core.status.event.data+1);
+    else if (keycode==38) core.ui.drawFly(core.status.event.data+1);
     else if (keycode==39) core.ui.drawFly(core.status.event.data+10);
     else if (keycode==40) core.ui.drawFly(core.status.event.data-1);
     return;
@@ -1030,14 +1021,14 @@ actions.prototype.clickViewMaps = function (x,y) {
         return;
     }
 
-    if(x>=2 && x<=10 && y<=4) {
+    if(y<=4 && (mh==13 || (x>=2 && x<=10))) {
         index++;
         while (index<core.floorIds.length && index!=now && core.floors[core.floorIds[index]].cannotViewMap)
             index++;
         if (index<core.floorIds.length)
             core.ui.drawMaps(index);
     }
-    else if (x>=2 && x<=10 && y>=8) {
+    else if (y>=8 && (mh==13 || (x>=2 && x<=10))) {
         index--;
         while (index>=0 && index!=now && core.floors[core.floorIds[index]].cannotViewMap)
             index--;
@@ -1231,7 +1222,7 @@ actions.prototype.keyUpQuickShop = function (keycode) {
 ////// 工具栏界面时的点击操作 //////
 actions.prototype.clickToolbox = function(x,y) {
     // 装备栏
-    if (x>=10 && x<=12 && y==0 && core.flags.equipment) {
+    if (x>=10 && x<=12 && y==0) {
         core.ui.closePanel();
         core.openEquipbox();
         return;
@@ -2067,6 +2058,10 @@ actions.prototype.clickSyncSave = function (x,y) {
                 });
                 break;
             case 4:
+                core.status.event.selection=0;
+                core.ui.drawReplay();
+                break;
+            case 5:
                 if (core.hasFlag('debug')) {
                     core.drawText("\t[系统提示]调试模式下无法下载录像");
                     break;
@@ -2078,11 +2073,11 @@ actions.prototype.clickSyncSave = function (x,y) {
                     'route': core.encodeRoute(core.status.route)
                 }));
                 break;
-            case 5:
+            case 6:
                 core.status.event.selection=0;
                 core.ui.drawStorageRemove();
                 break;
-            case 6:
+            case 7:
                 core.status.event.selection=3;
                 core.ui.drawSettings();
                 break;

@@ -227,6 +227,10 @@ span#poison, span#weak, span#curse, span#pickaxe, span#bomb, span#fly {
     font-size: 1em;
 }
 
+p#name {
+    font-style: normal;
+}
+
 .gameCanvas {
     position: absolute;
     box-sizing: border-box;

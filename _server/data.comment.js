@@ -351,6 +351,12 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "是否在状态栏显示当前楼层"
                 },
+                "enableName": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "是否在状态栏显示勇士名字"
+                },
                 "enableLv": {
                     "_leaf": true,
                     "_type": "checkbox",

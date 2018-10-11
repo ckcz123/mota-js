@@ -51,6 +51,7 @@ function main() {
         'data': document.getElementById('data'),
         'statusLabels': document.getElementsByClassName('statusLabel'),
         'floorCol': document.getElementById('floorCol'),
+        'nameCol': document.getElementById('nameCol'),
         'lvCol': document.getElementById('lvCol'),
         'hpmaxCol': document.getElementById('hpmaxCol'),
         'mdefCol': document.getElementById('mdefCol'),
@@ -76,6 +77,7 @@ function main() {
     this.statusBar = {
         'image': {
             'floor': document.getElementById('img-floor'),
+            'name': document.getElementById('img-name'),
             'lv': document.getElementById('img-lv'),
             'hpmax': document.getElementById('img-hpmax'),
             'hp': document.getElementById("img-hp"),
@@ -95,6 +97,7 @@ function main() {
         },
         'icons': {
             'floor': 0,
+            'name': null,
             'lv': 1,
             'hpmax': 2,
             'hp': 3,
@@ -120,6 +123,7 @@ function main() {
             'equipbox': 23,
         },
         'floor': document.getElementById('floor'),
+        'name': document.getElementById('name'),
         'lv': document.getElementById('lv'),
         'hpmax': document.getElementById('hpmax'),
         'hp': document.getElementById('hp'),
@@ -413,8 +417,22 @@ main.statusBar.image.toolbox.onclick = function () {
         return;
     }
 
+    if (main.core.isPlaying()) {
+        main.core.openToolbox(core.status.event.id != 'equipbox');
+    }
+}
+
+////// 双击状态栏中的工具箱时 //////
+main.statusBar.image.toolbox.ondblclick = function () {
+
+    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+        core.rewindReplay();
+        return;
+    }
+
     if (main.core.isPlaying())
-        main.core.openToolbox(true);
+        main.core.openEquipbox(true);
+
 }
 
 ////// 点击状态栏中的快捷商店时 //////

@@ -657,16 +657,21 @@ events.prototype.doAction = function() {
         case "setFg": // 颜色渐变
             if (data.async) {
                 core.setFg(data.color, data.time);
+                core.setFlag('color', data.color||null);
                 this.doAction();
             }
             else {
                 core.setFg(data.color, data.time, function() {
+                    core.setFlag('color', data.color||null);
                     core.events.doAction();
                 });
             }
             break;
         case "setWeather": // 更改天气
             core.setWeather(data.name, data.level);
+            if (core.isset(data.name))
+                core.setFlag('weather', [data.name, data.level]);
+            else core.setFlag('weather', null);
             this.doAction();
             break;
         case "openDoor": // 开一个门，包括暗墙
@@ -1120,7 +1125,7 @@ events.prototype.battle = function (id, x, y, force, callback) {
     core.stopAutomaticRoute();
 
     // 非强制战斗
-    if (!core.enemys.canBattle(id) && !force && !core.isset(core.status.event.id)) {
+    if (!core.enemys.canBattle(id, x, y) && !force && !core.isset(core.status.event.id)) {
         core.drawTip("你打不过此怪物！");
         core.clearContinueAutomaticRoute();
         return;
@@ -1272,29 +1277,32 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             }
 
             // 不存在事件时，更改画面色调
-            if (core.status.event.id == null) {
-                // 默认画面色调
-                if (core.isset(core.floors[floorId].color)) {
-                    var color = core.floors[floorId].color;
-
-                    // 直接变色
-                    core.clearMap('curtain');
-                    if (core.isset(color[3]))
-                        core.setAlpha('curtain', color[3]);
-                    else
-                        core.setAlpha('curtain', 1);
-                    core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGB(color));
-                    core.status.curtainColor = color;
-                }
-                else {
-                    core.clearMap('curtain');
-                    core.setAlpha('curtain', 0);
-                }
+            var color = core.getFlag('color', null);
+            if (!core.isset(color) && core.isset(core.floors[floorId].color)) {
+                color = core.floors[floorId].color;
+            }
+            if (core.isset(color)) {
+                // 直接变色
+                core.clearMap('curtain');
+                if (core.isset(color[3]))
+                    core.setAlpha('curtain', color[3]);
+                else
+                    core.setAlpha('curtain', 1);
+                core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGB(color));
+                core.status.curtainColor = color;
+            }
+            else {
+                core.clearMap('curtain');
+                core.setAlpha('curtain', 0);
             }
 
             // 更改天气
-            if (core.isset(core.floors[floorId].weather)) {
-                core.setWeather(core.floors[floorId].weather[0], core.floors[floorId].weather[1])
+            var weather = core.getFlag('weather', null);
+            if (!core.isset(weather) && core.isset(core.floors[floorId].weather)) {
+                weather = core.floors[floorId].weather;
+            }
+            if (core.isset(weather)) {
+                core.setWeather(weather[0], weather[1])
             }
             else core.setWeather();
 
@@ -1561,19 +1569,19 @@ events.prototype.disableQuickShop = function (shopId) {
 
 ////// 能否使用快捷商店 //////
 events.prototype.canUseQuickShop = function(shopId) {
-    if (core.isset(core.floors[core.status.floorId].canUseQuickShop) && !core.floors[core.status.floorId].canUseQuickShop)
-        return '当前不能使用快捷商店。';
-
-    return null;
+    return this.eventdata.canUseQuickShop(shopId);
 }
 
 ////// 设置角色行走图 //////
-events.prototype.setHeroIcon = function (name) {
+events.prototype.setHeroIcon = function (name, noDraw) {
     if (core.isset(core.material.images.images[name]) && core.material.images.images[name].width==128) {
         core.setFlag("heroIcon", name);
+        core.material.images.hero.onload = function () {
+            core.material.icons.hero.height = core.material.images.images[name].height/4;
+            core.control.updateHeroIcon(name);
+            if (!noDraw) core.drawHero();
+        }
         core.material.images.hero.src = core.material.images.images[name].src;
-        core.material.icons.hero.height = core.material.images.images[name].height/4;
-        core.drawHero();
     }
 }
 
@@ -1582,7 +1590,7 @@ events.prototype.checkLvUp = function () {
     if (!core.flags.enableLevelUp || !core.isset(core.firstData.levelUp)
         || core.status.hero.lv>=core.firstData.levelUp.length) return;
     // 计算下一个所需要的数值
-    var need=core.firstData.levelUp[core.status.hero.lv].need;
+    var need=(core.firstData.levelUp[core.status.hero.lv]||{}).need;
     if (!core.isset(need)) return;
     if (core.status.hero.experience>=need) {
         // 升级

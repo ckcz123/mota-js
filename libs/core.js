@@ -232,19 +232,23 @@ core.prototype.init = function (coreData, callback) {
     core.platform.isQQ = /QQ/i.test(navigator.userAgent);
     core.platform.isWeChat = /MicroMessenger/i.test(navigator.userAgent);
     core.platform.useLocalForage = core.getLocalStorage('useLocalForage', true);
+    if (core.platform.isIOS) core.platform.useLocalForage=false;
     if (core.platform.useLocalForage) {
         try {
-            core.setLocalForage("__test__", "__test__", function() {
+            core.setLocalForage("__test__", LZString.compress("__test__"), function() {
                 try {
                     core.getLocalForage("__test__", null, function(data) {
-                        if (data!="__test__") {
-                            console.log("localForage unsupported!");
-                            core.platform.useLocalForage=false;
+                        try {
+                            if (LZString.decompress(data)!="__test__") {
+                                console.log("localForage unsupported!");
+                                core.platform.useLocalForage=false;
+                            }
+                            else {
+                                console.log("localForage supported!")
+                                core.removeLocalForage("__test__");
+                            }
                         }
-                        else {
-                            console.log("localForage supported!")
-                            core.removeLocalForage("__test__");
-                        }
+                        catch (e) {console.log(e); core.platform.useLocalForage=false;}
                     }, function(e) {console.log(e); core.platform.useLocalForage=false;})
                 }
                 catch (e) {console.log(e); core.platform.useLocalForage=false;}
@@ -288,8 +292,7 @@ core.prototype.init = function (coreData, callback) {
     core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
     core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
-    core.flags.clickMoveDirectly = core.getLocalStorage('clickMoveDirectly',
-        !(core.isset(core.flags.clickMoveDirectly) && !core.flags.clickMoveDirectly));
+    core.flags.clickMoveDirectly = core.getLocalStorage('clickMoveDirectly', core.flags.clickMoveDirectly);
 
     core.material.ground = new Image();
     core.material.ground.src = "project/images/ground.png";
@@ -300,6 +303,9 @@ core.prototype.init = function (coreData, callback) {
         console.log(core.material);
         // 设置勇士高度
         core.material.icons.hero.height = core.material.images.hero.height/4;
+        // 行走图
+        core.control.updateHeroIcon();
+
         core.initStatus.maps = core.maps.initMaps(core.floorIds);
         core.setRequestAnimationFrame();
         core.showStartAnimate();
@@ -821,13 +827,13 @@ core.prototype.hasSpecial = function (special, test) {
 }
 
 ////// 判断能否战斗 //////
-core.prototype.canBattle = function(enemyId) {
-    return core.enemys.canBattle(enemyId);
+core.prototype.canBattle = function(enemyId, x, y, floorId) {
+    return core.enemys.canBattle(enemyId, x, y, floorId);
 }
 
 ////// 获得伤害数值 //////
-core.prototype.getDamage = function(enemy) {
-    return core.enemys.getDamage(enemy);
+core.prototype.getDamage = function(enemy, x, y, floorId) {
+    return core.enemys.getDamage(enemy, x, y, floorId);
 }
 
 ////// 获得某个物品的个数 //////

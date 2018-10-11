@@ -320,7 +320,7 @@ core.setFlag("shield5", true); // 增加一个自定义Flag：已经拿到神圣
 ```
 2. 免疫吸血效果：在脚本编辑的getDamageInfo中，编辑成如果存在神圣盾标记，吸血伤害为0。
 ``` js
-function (enemy, hero_hp, hero_atk, hero_def, hero_mdef) {
+function (enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId) {
 // ... 上略
     // 吸血
     if (this.hasSpecial(mon_special, 11)) {
@@ -501,7 +501,7 @@ case 87: // W
         // 请使用同步脚本，请勿执行任何异步代码，否则可能导致游戏过程或录像出现问题。
         core.insertAction([...]) // 例如，插入一段自定义事件并执行。
         
-        core.status.route.push("key:"+keyCode); // 录像的支持！这句话必须要加，不然录像回放会出错！
+        // core.status.route.push("key:"+keyCode); // 录像的支持，这句话加不加最好仔细进行测试
     }
     break;
 ```
@@ -509,7 +509,9 @@ case 87: // W
 
 在勇士处于停止的条件下，按下W键时，将执行你写的脚本代码。请只使用同步脚本而不要使用异步代码，不然可能导致游戏出现问题。
 
-`core.status.route.push("key:"+keyCode);` 这句话是对录像的支持，一定要加（这样录像播放时也会模拟该按键）。
+`core.status.route.push("key:"+keyCode);` 这句话是对录像的支持。
+
+**录像的支持可能比较诡异，在不同条件下都是不同的；因此加不加最好分开独立进行测试。**
 
 !> H5不支持组合快捷键，所以不存在`W+1`这种组合快捷键的说法！
 
@@ -560,8 +562,8 @@ this.myfunc = function(x) {
     <p class='statusLabel' id='mana'></p>
 </div>
 ```
-3. 在editor.html中的statusBar（305行起），仿照第二点同样添加；这一项如果不进行则会地图编辑器报错。
-4. 使用便捷PS工具，打开icons.png，新增一行并将魔力的图标P上去；记下其索引比如23（减速播放图标的下方）。
+3. 在editor.html中的statusBar（317行起），仿照第二点同样添加；这一项如果不进行则会地图编辑器报错。editor-mobile.html同理。
+4. 使用便捷PS工具，打开icons.png，新增一行并将魔力的图标P上去；记下其索引比如24（从0开始数）。
 5. 在main.js的this.statusBar中增加图片、图标和内容的定义。
 ``` js
 this.statusBar = {
@@ -571,7 +573,7 @@ this.statusBar = {
     },
     'icons': {
         // ...其他略
-        'mana': 23, // 图标的定义，这里对应的是icons.png中的索引
+        'mana': 24, // 图标的定义，这里对应的是icons.png中的索引
     },
     // ...其他略
     'mana': document.getElementById('mana'), // 显示内容（数据）的定义
@@ -583,7 +585,6 @@ core.statusBar.mana.innerHTML = core.getFlag('mana', 0); // 设置其显示内�
 core.statusBar.mana.innerHTML = core.getFlag('mana', 0) + '/' + core.getFlag('manaMax', 0); // 显示内容将类似 "32/60" 这样。
 core.statusBar.mana.style.fontStyle = 'normal'; // 这一行会取消斜体。如果是汉字（比如技能名）的话，斜体起来会非常难看，可以通过这一句取消。
 ```
-7. 在control.js的clearStatusBar函数，`statusList`里面也要增加mana项，这样清空状态栏时也会对其清空。
 
 ## 技能塔的支持
 

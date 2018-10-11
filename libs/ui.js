@@ -862,8 +862,11 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
     var hero_hp = core.getStatus('hp'), hero_atk = core.getStatus('atk'), hero_def = core.getStatus('def'),
         hero_mdef = core.getStatus('mdef');
-    var monster = core.material.enemys[monsterId];
-    var mon_hp = monster.hp, mon_atk = monster.atk, mon_def = monster.def, mon_money=monster.money, mon_exp = monster.experience, mon_special=monster.special;
+
+    hero_hp=Math.max(0, hero_hp);
+    hero_atk=Math.max(0, hero_atk);
+    hero_def=Math.max(0, hero_def);
+    hero_mdef=Math.max(0, hero_mdef);
 
     if (core.flags.equipPercentage) {
         hero_atk = Math.floor(core.getFlag('equip_atk_buff',1)*hero_atk);
@@ -871,30 +874,30 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
         hero_mdef = Math.floor(core.getFlag('equip_mdef_buff',1)*hero_mdef);
     }
 
+    var enemy = core.material.enemys[monsterId];
+    var enemyInfo = core.enemys.getEnemyInfo(enemy, hero_hp, hero_atk, hero_def, hero_mdef);
+    var mon_hp = enemyInfo.hp, mon_atk = enemyInfo.atk, mon_def = enemyInfo.def, mon_money=enemyInfo.money,
+        mon_exp = enemyInfo.experience, mon_special=enemyInfo.special;
+
     var initDamage = 0; // 战前伤害
 
     // 吸血
     if (core.enemys.hasSpecial(mon_special, 11)) {
-        var vampireDamage = hero_hp * monster.value;
+        var vampireDamage = hero_hp * enemy.value;
 
         // 如果有神圣盾免疫吸血等可以在这里写
 
-        vampireDamage = Math.floor(vampireDamage);
+        vampireDamage = Math.floor(vampireDamage) || 0;
         // 加到自身
-        if (monster.add) // 如果加到自身
+        if (enemy.add) // 如果加到自身
             mon_hp += vampireDamage;
 
         initDamage += vampireDamage;
     }
 
-    hero_hp -= core.enemys.getExtraDamage(monster);
+    hero_hp -= core.enemys.getExtraDamage(enemy);
 
-    if (core.enemys.hasSpecial(mon_special, 10)) { // 模仿
-        mon_atk=hero_atk;
-        mon_def=hero_def;
-    }
     if (core.enemys.hasSpecial(mon_special, 2)) hero_def=0; // 魔攻
-    if (core.enemys.hasSpecial(mon_special, 3) && mon_def<hero_atk) mon_def=hero_atk-1; // 坚固
 
     // 实际操作
     var turn = 0; // 0为勇士攻击
@@ -904,7 +907,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     var turns = 2;
     if (core.enemys.hasSpecial(mon_special, 4)) turns=3;
     if (core.enemys.hasSpecial(mon_special, 5)) turns=4;
-    if (core.enemys.hasSpecial(mon_special, 6)) turns=1+(monster.n||4);
+    if (core.enemys.hasSpecial(mon_special, 6)) turns=1+(enemy.n||4);
 
     // 初始伤害
     if (core.enemys.hasSpecial(mon_special, 7)) initDamage+=Math.floor(core.values.breakArmor * hero_def);
@@ -1158,7 +1161,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
             return;
         }
 
-    }, 500);
+    }, 400);
 }
 
 ////// 绘制等待界面 //////
@@ -1192,7 +1195,7 @@ ui.prototype.drawSyncSave = function () {
     core.status.event.id = 'syncSave';
 
     this.drawChoices(null, [
-        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "下载当前录像", "清空本地存档", "返回主菜单"
+        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "回放当前录像", "下载当前录像", "清空本地存档", "返回主菜单"
     ]);
 
 }
@@ -1744,8 +1747,8 @@ ui.prototype.drawToolbox = function(index) {
     core.canvas.ui.textAlign = 'center';
 
     // 装备栏
-    if (core.flags.equipment)
-        core.fillText('ui', '[装备栏]', 370, 25,'#DDDDDD', 'bold 15px Verdana');
+    // if (core.flags.equipment)
+    core.fillText('ui', '[装备栏]', 370, 25,'#DDDDDD', 'bold 15px Verdana');
     // core.fillText('ui', '删除道具', 370, 32,'#DDDDDD', 'bold 15px Verdana');
     // 退出
     core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px Verdana');
@@ -2156,21 +2159,15 @@ ui.prototype.drawStatistics = function () {
     // 5. 当前已走的步数；瞬间移动的步数，瞬间移动的次数（和少走的步数）；游戏时长
     // 6. 当前已恢复的生命值；当前总伤害、战斗伤害、阻激夹域血网伤害、中毒伤害。
 
+    var ids = this.uidata.drawStatistics();
+    var obj = {};
+    ids.forEach(function (e) {obj[e] = 0;})
 
     var total = {
         'monster': {
             'count': 0, 'money': 0, 'experience': 0, 'point': 0,
         },
-        'count': {
-            'yellowDoor': 0, 'blueDoor': 0, 'redDoor': 0, 'greenDoor': 0, 'steelDoor': 0,
-            'yellowKey': 0, 'blueKey': 0, 'redKey': 0, 'greenKey': 0, 'steelKey': 0,
-            'redJewel': 0, 'blueJewel': 0, 'greenJewel': 0, 'yellowJewel': 0,
-            'redPotion': 0, 'bluePotion': 0, 'greenPotion': 0, 'yellowPotion': 0, 'superPotion': 0,
-            'pickaxe': 0, 'bomb': 0, 'centerFly': 0,
-            'poisonWine': 0, 'weakWine': 0, 'curseWine': 0, 'superWine': 0,
-            'sword1': 0, 'sword2': 0, 'sword3': 0, 'sword4': 0, 'sword5': 0,
-            'shield1': 0, 'shield2': 0, 'shield3': 0, 'shield4': 0, 'shield5': 0,
-        },
+        'count': obj,
         'add': {
             'hp': 0, 'atk': 0, 'def': 0, 'mdef': 0
         }
@@ -2262,13 +2259,13 @@ ui.prototype.drawStatistics = function () {
         Object.keys(data.count).forEach(function (key) {
             var value=data.count[key];
             if (value>0) {
-                var name="";
+                var name=null;
                 if (key=='yellowDoor') name="黄门";
                 else if (key=='blueDoor') name="蓝门";
                 else if (key=='redDoor') name="红门";
                 else if (key=='greenDoor') name="绿门";
                 else if (key=='steelDoor') name="铁门";
-                else name=core.material.items[key].name;
+                else name=(core.material.items[key]||{}).name;
                 if (core.isset(name)) {
                     text+=name+value+"个；";
                 }

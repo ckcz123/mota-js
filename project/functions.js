@@ -590,7 +590,10 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.setStatus('hp', Math.min(core.getStatus('hpmax'), core.getStatus('hp')));
 	}
 
-	// 设置等级奴名称
+	// 设置勇士名字和图标
+	core.statusBar.name.innerHTML = core.getStatus('name');
+
+	// 设置等级名称
 	var lvName = core.getLvName();
 	core.statusBar.lv.innerHTML = lvName;
 	// 检测是不是纯数字；如果带中文等需要取消斜体（不然很难看的！）

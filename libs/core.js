@@ -292,8 +292,7 @@ core.prototype.init = function (coreData, callback) {
     core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
     core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
-    core.flags.clickMoveDirectly = core.getLocalStorage('clickMoveDirectly',
-        !(core.isset(core.flags.clickMoveDirectly) && !core.flags.clickMoveDirectly));
+    core.flags.clickMoveDirectly = core.getLocalStorage('clickMoveDirectly', core.flags.clickMoveDirectly);
 
     core.material.ground = new Image();
     core.material.ground.src = "project/images/ground.png";
@@ -304,6 +303,9 @@ core.prototype.init = function (coreData, callback) {
         console.log(core.material);
         // 设置勇士高度
         core.material.icons.hero.height = core.material.images.hero.height/4;
+        // 行走图
+        core.control.updateHeroIcon();
+
         core.initStatus.maps = core.maps.initMaps(core.floorIds);
         core.setRequestAnimationFrame();
         core.showStartAnimate();

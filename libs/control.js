@@ -250,6 +250,8 @@ control.prototype.clearStatus = function() {
     }
     core.status = {};
     core.clearStatusBar();
+    core.status.played = false;
+    core.events.setHeroIcon('hero.png', true);
 }
 
 ////// 重置游戏状态和初始数据 //////
@@ -266,7 +268,6 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
 
     // 初始化status
     core.status = core.clone(core.initStatus);
-    core.status.played = true;
     // 初始化maps
     core.status.floorId = floorId;
     core.status.maps = core.clone(maps);
@@ -275,6 +276,8 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
     core.material.items = core.clone(core.items.getItems());
     // 初始化人物属性
     core.status.hero = core.clone(hero);
+    // 初始化人物图标
+    core.events.setHeroIcon(core.getFlag('heroIcon', 'hero.png'), true);
     // 统计数据
     if (!core.isset(core.status.hero.statistics))
         core.status.hero.statistics = {
@@ -302,6 +305,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
     else core.values = core.clone(core.data.values);
 
     core.events.initGame();
+    core.status.played = true;
 }
 
 ////// 开始游戏 //////
@@ -1022,6 +1026,8 @@ control.prototype.updateViewport = function() {
 ////// 绘制勇士 //////
 control.prototype.drawHero = function (direction, x, y, status, offset) {
 
+    if (!core.isPlaying()) return;
+
     var scan = {
         'up': {'x': 0, 'y': -1},
         'left': {'x': -1, 'y': 0},
@@ -1197,20 +1203,22 @@ control.prototype.checkBlock = function () {
 
         // 检查阻击事件
         var snipe = [];
-        var scan = {
-            'up': {'x': 0, 'y': -1},
-            'left': {'x': -1, 'y': 0},
-            'down': {'x': 0, 'y': 1},
-            'right': {'x': 1, 'y': 0}
-        }
-        for (var direction in scan) {
-            var nx = x+scan[direction].x, ny=y+scan[direction].y;
-            if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height) continue;
-            var id=core.status.checkBlock.map[nx+core.bigmap.width*ny];
-            if (core.isset(id)) {
-                var enemy = core.material.enemys[id];
-                if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 18)) {
-                    snipe.push({'direction': direction, 'x': nx, 'y': ny});
+        if (!core.hasFlag("no_snipe")) {
+            var scan = {
+                'up': {'x': 0, 'y': -1},
+                'left': {'x': -1, 'y': 0},
+                'down': {'x': 0, 'y': 1},
+                'right': {'x': 1, 'y': 0}
+            }
+            for (var direction in scan) {
+                var nx = x+scan[direction].x, ny=y+scan[direction].y;
+                if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height) continue;
+                var id=core.status.checkBlock.map[nx+core.bigmap.width*ny];
+                if (core.isset(id)) {
+                    var enemy = core.material.enemys[id];
+                    if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 18)) {
+                        snipe.push({'direction': direction, 'x': nx, 'y': ny});
+                    }
                 }
             }
         }
@@ -2585,11 +2593,11 @@ control.prototype.playSound = function (sound) {
 
 ////// 清空状态栏 //////
 control.prototype.clearStatusBar = function() {
-    var statusList = ['floor', 'lv', 'hpmax', 'hp', 'atk', 'def', 'mdef', 'money', 'experience',
-        'up', 'yellowKey', 'blueKey', 'redKey', 'poison', 'weak', 'curse', 'hard'];
-    statusList.forEach(function (e) {
-        core.statusBar[e].innerHTML = "&nbsp;";
-    });
+
+    Object.keys(core.statusBar).forEach(function (e) {
+        if (core.isset(core.statusBar[e].innerHTML))
+            core.statusBar[e].innerHTML = "&nbsp;";
+    })
     core.statusBar.image.book.style.opacity = 0.3;
     if (!core.flags.equipboxButton) {
         core.statusBar.image.fly.style.opacity = 0.3;
@@ -2645,6 +2653,27 @@ control.prototype.updateStatusBar = function () {
     }
 }
 
+control.prototype.updateHeroIcon = function (name) {
+    name = name || "hero.png";
+    if (core.statusBar.icons.name == name) return;
+    core.statusBar.icons.name = name;
+
+    var image = core.material.images.hero;
+
+    var canvas = document.createElement("canvas");
+    var context = canvas.getContext("2d");
+    canvas.width = 32;
+    canvas.height = 32;
+    context.drawImage(image, 0, 0, 32, 32, 0, 0, 32, 32);
+    if (core.material.icons.hero.height>=48) {
+        context.lineWidth = 5;
+        context.strokeStyle = '#FFFFFF';
+        context.strokeRect(0, 0, 32, 32);
+    }
+    core.statusBar.image.name.src = canvas.toDataURL("image/png");
+
+}
+
 ////// 屏幕分辨率改变后重新自适应 //////
 control.prototype.resize = function(clientWidth, clientHeight) {
     if (main.mode=='editor')return;
@@ -2685,8 +2714,9 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     if (!core.flags.enableExperience) count--;
     if (!core.flags.enableLevelUp) count--;
     if (!core.flags.enableDebuff) count--;
-    if (core.isset(core.flags.enableKeys) && !core.flags.enableKeys) count--;
+    if (!core.flags.enableKeys) count--;
     if (!core.flags.enablePZF) count--;
+    if (!core.flags.enableName) count--;
 
     var statusLineHeight = BASE_LINEHEIGHT * 9 / count;
     var statusLineFontSize = DEFAULT_FONT_SIZE;
@@ -2938,6 +2968,12 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             id: 'floorCol',
             rules: {
                 display: core.flags.enableFloor ? 'block': 'none'
+            }
+        },
+        {
+            id: 'nameCol',
+            rules: {
+                display: core.flags.enableName ? 'block': 'none'
             }
         },
         {

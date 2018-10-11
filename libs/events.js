@@ -1568,12 +1568,15 @@ events.prototype.canUseQuickShop = function(shopId) {
 }
 
 ////// 设置角色行走图 //////
-events.prototype.setHeroIcon = function (name) {
+events.prototype.setHeroIcon = function (name, noDraw) {
     if (core.isset(core.material.images.images[name]) && core.material.images.images[name].width==128) {
         core.setFlag("heroIcon", name);
+        core.material.images.hero.onload = function () {
+            core.material.icons.hero.height = core.material.images.images[name].height/4;
+            core.control.updateHeroIcon(name);
+            if (!noDraw) core.drawHero();
+        }
         core.material.images.hero.src = core.material.images.images[name].src;
-        core.material.icons.hero.height = core.material.images.images[name].height/4;
-        core.drawHero();
     }
 }
 

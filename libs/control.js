@@ -2657,17 +2657,16 @@ control.prototype.updateHeroIcon = function (name) {
     core.statusBar.icons.name = name;
 
     var image = core.material.images.hero;
+    // 全身图
+    var height = core.material.icons.hero.height;
+    var ratio = 32 / height, width = 32 * ratio, left = 16-width/2;
 
     var canvas = document.createElement("canvas");
     var context = canvas.getContext("2d");
     canvas.width = 32;
     canvas.height = 32;
-    context.drawImage(image, 0, 0, 32, 32, 0, 0, 32, 32);
-    if (core.material.icons.hero.height>=48) {
-        context.lineWidth = 5;
-        context.strokeStyle = '#FFFFFF';
-        context.strokeRect(0, 0, 32, 32);
-    }
+    context.drawImage(image, 0, 0, 32, height, left, 0, width, 32);
+
     core.statusBar.image.name.src = canvas.toDataURL("image/png");
 
 }

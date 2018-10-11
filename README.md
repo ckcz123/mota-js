@@ -8,9 +8,7 @@ HTML5 canvas制作的魔塔样板，支持全平台游戏！
 * [List / HTML5魔塔游戏列表](https://h5mota.com/)
 * [Demo / 样板效果](https://ckcz123.com/games/template/)
 * [Docs / 使用文档说明](https://ckcz123.github.io/mota-js/)
-<!--
-* [Video / 视频教程](http://www.bilibili.com/video/av17608025/)
--->
+* [Video / 视频教程](https://www.bilibili.com/video/av32781473/)
 ![样板](./docs/img/sample0.png)
 
 ## 目录结构
@@ -43,13 +41,13 @@ HTML5 canvas制作的魔塔样板，支持全平台游戏！
 │ ├─ icons.js        # 素材和ID的对应关系定义
 │ ├─ items.js        # 道具的定义，获得道具的效果
 │ └─ maps.js         # 地图和数字的对应关系
-├── /常用工具/        # 一些常用工具，可以辅助造塔  
+├── /常用工具/        # 一些常用工具，可以辅助造塔；具体可参见下面的【相关工具】
 ├── editor.html      # 可视化地图编辑工具
 ├── editor-mobile.html      # 可视化地图编辑工具（手机版）
 ├── index.html       # 主程序，游戏的入口
 ├── main.js          # JS程序的入口，将动态对所需JS进行加载
 ├── style.css        # 游戏所需要用到的样式表
-└── 启动服务.exe      # 一个本地的HTTP服务器，也能支撑前端的一些POST请求从而能拓展JS的IO功能。 http://github.com/ckcz123/mota-js-server/
+└── 启动服务.exe      # 一个本地的HTTP服务器，也能支撑前端的一些POST请求从而能拓展JS的IO功能。
 ```
 
 ## 更新说明
@@ -315,6 +313,7 @@ HTML5 canvas制作的魔塔样板，支持全平台游戏！
 
 ## 相关工具
 
+- [启动服务](http://github.com/ckcz123/mota-js-server/)： 一个本地的HTTP服务器，也能支撑前端的一些POST请求从而能拓展JS的IO功能。 
 - [RM动画导出器](http://github.com/ckcz123/animate_export/)：能从RMXP中导出动画，以供H5使用。
 - [JS代码压缩工具](http://github.com/ckcz123/JSCompressor/)：能对Javascript代码进行压缩和整合，从而减少IO请求量。 
 - [便捷PS工具](http://github.com/ckcz123/ps/)：能只用复制和粘贴来快速对素材进行PS操作。  

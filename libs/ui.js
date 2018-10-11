@@ -1747,8 +1747,8 @@ ui.prototype.drawToolbox = function(index) {
     core.canvas.ui.textAlign = 'center';
 
     // 装备栏
-    if (core.flags.equipment)
-        core.fillText('ui', '[装备栏]', 370, 25,'#DDDDDD', 'bold 15px Verdana');
+    // if (core.flags.equipment)
+    core.fillText('ui', '[装备栏]', 370, 25,'#DDDDDD', 'bold 15px Verdana');
     // core.fillText('ui', '删除道具', 370, 32,'#DDDDDD', 'bold 15px Verdana');
     // 退出
     core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px Verdana');

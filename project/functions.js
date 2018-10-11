@@ -677,7 +677,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 
 	// Step2: 更新领域、阻击伤害
-	core.status.checkBlock.damage = []; // 记录(x,y)点的伤害；(x,y)对应的值是 x+y*core.bigmap
+	core.status.checkBlock.damage = []; // 记录(x,y)点的伤害；(x,y)对应的值是 x+core.bigmap.width*y
 	for (var x=0;x<core.bigmap.width*core.bigmap.height;x++) core.status.checkBlock.damage[x]=0;
 
 	for (var x=0;x<core.bigmap.width;x++) {

@@ -977,7 +977,7 @@ actions.prototype.clickFly = function(x,y) {
 ////// 楼层传送器界面时，按下某个键的操作 //////
 actions.prototype.keyDownFly = function (keycode) {
     if (keycode==37) core.ui.drawFly(core.status.event.data-10);
-    else if ( keycode==38) core.ui.drawFly(core.status.event.data+1);
+    else if (keycode==38) core.ui.drawFly(core.status.event.data+1);
     else if (keycode==39) core.ui.drawFly(core.status.event.data+10);
     else if (keycode==40) core.ui.drawFly(core.status.event.data-1);
     return;
@@ -1222,7 +1222,7 @@ actions.prototype.keyUpQuickShop = function (keycode) {
 ////// 工具栏界面时的点击操作 //////
 actions.prototype.clickToolbox = function(x,y) {
     // 装备栏
-    if (x>=10 && x<=12 && y==0 && core.flags.equipment) {
+    if (x>=10 && x<=12 && y==0) {
         core.ui.closePanel();
         core.openEquipbox();
         return;

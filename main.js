@@ -413,8 +413,22 @@ main.statusBar.image.toolbox.onclick = function () {
         return;
     }
 
+    if (main.core.isPlaying()) {
+        main.core.openToolbox(core.status.event.id != 'equipbox');
+    }
+}
+
+////// 双击状态栏中的工具箱时 //////
+main.statusBar.image.toolbox.ondblclick = function () {
+
+    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+        core.rewindReplay();
+        return;
+    }
+
     if (main.core.isPlaying())
-        main.core.openToolbox(true);
+        main.core.openEquipbox(true);
+
 }
 
 ////// 点击状态栏中的快捷商店时 //////

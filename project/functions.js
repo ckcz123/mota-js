@@ -344,7 +344,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 返回null代表可以使用
 
 	// 检查当前楼层的canUseQuickShop选项是否为false
-	if (core.isset(core.floors[core.status.floorId].canUseQuickShop) && !core.floors[core.status.floorId].canUseQuickShop)
+	if (core.floors[core.status.floorId].canUseQuickShop === false)
 		return '当前楼层不能使用快捷商店。';
 
 	return null;

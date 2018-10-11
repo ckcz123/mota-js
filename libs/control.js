@@ -1514,7 +1514,7 @@ control.prototype.updateDamage = function () {
                     // 判断显伤
                     var event = core.floors[core.status.floorId].events[x+","+y];
                     if (core.isset(event) && !(event instanceof Array)) {
-                        if (core.isset(event.displayDamage) && !event.displayDamage)
+                        if (event.displayDamage === false)
                             continue;
                     }
                 }
@@ -2441,9 +2441,7 @@ control.prototype.getStatus = function (statusName) {
 
 ////// 获得某个等级的名称 //////
 control.prototype.getLvName = function () {
-    if (!core.isset(core.firstData.levelUp) || core.status.hero.lv<=0
-        || core.status.hero.lv>core.firstData.levelUp.length) return core.status.hero.lv;
-    return core.firstData.levelUp[core.status.hero.lv-1].name || core.status.hero.lv;
+    return ((core.firstData.levelUp||[])[core.status.hero.lv-1]||{}).name || core.status.hero.lv;
 }
 
 ////// 设置某个自定义变量或flag //////

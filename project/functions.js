@@ -129,7 +129,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.playSound('attack.mp3');
 	core.drawAnimate(equipAnimate, x, y);
 
-	var damage = core.enemys.getDamage(enemyId);
+	var damage = core.enemys.getDamage(enemyId, x, y);
 	if (damage == null) damage = core.status.hero.hp+1;
 
 	// 扣减体力值
@@ -367,14 +367,86 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		[21, "退化", function (enemy) {return "战斗后勇士永久下降"+(enemy.atkValue||0)+"点攻击和"+(enemy.defValue||0)+"点防御";}],
 		[22, "固伤", function (enemy) {return "战斗前，怪物对勇士造成"+(enemy.damage||0)+"点固定伤害，无视勇士魔防。";}],
 		[23, "重生", "怪物被击败后，角色转换楼层则怪物将再次出现"],
-		[24, "激光", function (enemy) {return "经过怪物同行或同列时自动减生命"+(enemy.value||0)+"点";}]
+		[24, "激光", function (enemy) {return "经过怪物同行或同列时自动减生命"+(enemy.value||0)+"点";}],
+		[25, "光环", function (enemy) {return "同楼层所有怪物生命提升"+(enemy.value||0)+"%，攻击提升"+(enemy.atkValue||0)+"%，防御提升"+(enemy.defValue||0)+"%，"+(enemy.add?"可叠加":"不可叠加");}]
 	];
 },
-        "getDamageInfo": function (enemy, hero_hp, hero_atk, hero_def, hero_mdef) {
-	// 获得战斗伤害信息（实际伤害计算函数）
-
-	// 怪物生命，怪物攻击、防御、特殊属性
+        "getEnemyInfo": function (enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId) {
+	// 获得某个怪物变化后的数据；该函数将被伤害计算和怪物手册使用
+	// 例如：坚固、模仿、仿攻等等
+	// 
+	// 参数说明：
+	// enemy：该怪物信息
+	// hero_hp,hero_atk,hero_def,hero_mdef：勇士的生命攻防魔防数据
+	// x,y：该怪物的坐标（查看手册和强制战斗时为undefined）
+	// floorId：该怪物所在的楼层
+	// 后面三个参数主要是可以在光环等效果上可以适用（也可以按需制作部分范围光环效果）
+	floorId = floorId || core.status.floorId;
 	var mon_hp = enemy.hp, mon_atk = enemy.atk, mon_def = enemy.def, mon_special = enemy.special;
+	var mon_money = enemy.money, mon_experience = enemy.experience, mon_point = enemy.point;
+	// 模仿
+	if (this.hasSpecial(mon_special, 10)) {
+		mon_atk = hero_atk;
+		mon_def = hero_def;
+	}
+	// 坚固
+	if (this.hasSpecial(mon_special, 3) && mon_def < hero_atk - 1) {
+		mon_def = hero_atk - 1;
+	}
+	
+	// 光环效果
+	// 检查当前楼层所有光环怪物（数字25）
+	var hp_delta = 0, atk_delta = 0, def_delta = 0, cnt = 0;
+	// 遍历每个图块
+	core.status.maps[floorId].blocks.forEach(function (block) {
+		if (core.isset(block.event) && !block.disable) {
+			// 获得该图块的ID
+			var id = block.event.id, enemy = core.material.enemys[id];
+			// 检查是不是怪物，且是否拥有该特殊属性
+			if (core.isset(enemy) && core.hasSpecial(enemy.special, 25)) {
+				// 检查是否可叠加
+				if (enemy.add || cnt == 0) {
+					hp_delta += enemy.value || 0;
+					atk_delta += enemy.atkValue || 0;
+					def_delta += enemy.defValue || 0;
+					cnt++;
+				}
+			}
+		}
+	});
+	// 增加比例；如果要增加数值可以直接在这里修改
+	mon_hp *= (1+hp_delta/100);
+	mon_atk *= (1+atk_delta/100);
+	mon_def *= (1+def_delta/100);
+	
+	// TODO：可以在这里新增其他的怪物数据变化
+	// 比如仿攻（怪物攻击不低于勇士攻击）：
+	// if (this.hasSpecial(mon_special, 27) && mon_atk < hero_atk) {
+	//     mon_atk = hero_atk;
+	// }
+	// 也可以按需增加各种自定义内容（比如幻塔的魔杖效果等）
+	
+	return {
+		"hp": Math.floor(mon_hp),
+		"atk": Math.floor(mon_atk),
+		"def": Math.floor(mon_def),
+		"money": Math.floor(mon_money),
+		"experience": Math.floor(mon_experience),
+		"point": Math.floor(mon_point),
+		"special": mon_special
+	};
+},
+        "getDamageInfo": function (enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId) {
+	// 获得战斗伤害信息（实际伤害计算函数）
+	// 
+	// 参数说明：
+	// enemy：该怪物信息
+	// hero_hp,hero_atk,hero_def,hero_mdef：勇士的生命攻防魔防数据
+	// x,y：该怪物的坐标（查看手册和强制战斗时为undefined）
+	// floorId：该怪物所在的楼层
+	// 后面三个参数主要是可以在光环等效果上可以适用
+	floorId = floorId || core.status.floorId;	
+
 	// 勇士的负属性都按0计算
 	hero_hp=Math.max(0, hero_hp);
 	hero_atk=Math.max(0, hero_atk);
@@ -387,11 +459,16 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		hero_def = Math.floor(core.getFlag('equip_def_buff',1)*hero_def);
 		hero_mdef = Math.floor(core.getFlag('equip_mdef_buff',1)*hero_mdef);
 	}
+	
+	// 怪物的各项数据
+	// 对坚固模仿等处理扔到了脚本编辑-getEnemyInfo之中
+	var enemyInfo = core.enemys.getEnemyInfo(enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId);
+	var mon_hp = enemyInfo.hp, mon_atk = enemyInfo.atk, mon_def = enemyInfo.def, mon_special = enemyInfo.special;
 
 	// 如果是无敌属性，且勇士未持有十字架
 	if (this.hasSpecial(mon_special, 20) && !core.hasItem("cross"))
 		return null; // 不可战斗
-
+	
 	// 战前造成的额外伤害（可被魔防抵消）
 	var init_damage = 0;
 
@@ -409,15 +486,6 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 		init_damage += vampire_damage;
 	}
-
-	// 模仿
-	if (this.hasSpecial(mon_special, 10)) {
-		mon_atk = hero_atk;
-		mon_def = hero_def;
-	}
-	// 坚固
-	if (this.hasSpecial(mon_special, 3) && mon_def < hero_atk - 1)
-		mon_def = hero_atk - 1;
 
 	// 检查是否破防；否则直接返回不可战斗
 	if (hero_atk <= mon_def) return null;
@@ -657,7 +725,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				// 检测左右是否存在相同的怪物，且拥有夹击属性
 				if (x>0 && x<core.bigmap.width-1) {
 					var id1=core.status.checkBlock.map[x-1+core.bigmap.width*y],
-						id2=core.status.checkBlock.map[x+1+core.bigmap.height*y];
+						id2=core.status.checkBlock.map[x+1+core.bigmap.width*y];
 					if (core.isset(id1) && core.isset(id2) && id1==id2) {
 						var enemy = core.material.enemys[id1];
 						if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {

@@ -103,6 +103,12 @@ functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_lint": true,
                     "_data": "怪物特殊属性的定义（获得怪物的特殊属性）"
                 },
+                "getEnemyInfo": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "获得某个怪物的当前属性数据\n该函数主要是会被伤害计算和怪物手册等使用"
+                },
                 "getDamageInfo": {
                     "_leaf": true,
                     "_type": "textarea",

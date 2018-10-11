@@ -349,34 +349,36 @@ core.enemys.getSpecialHint(enemy, special)
 获得怪物某个（或全部）特殊属性的文字说明。
 
 
-core.enemys.canBattle(enemyId)
+core.enemys.canBattle(enemyId, x, y, floorId)
 返回当前能否战胜某个怪物。
+后面三个参数是怪物坐标和楼层。
 
 
-core.enemys.getDamage(enemyId)
+core.enemys.getDamage(enemyId, x, y, floorId)
 返回当前对某个怪物的战斗伤害。如果无法战斗，返回null。
+后面三个参数是怪物坐标和楼层。
 
 
 core.enemys.getExtraDamage(enemyId)
 返回某个怪物会对勇士造成的额外伤害（不可被魔防抵消），例如仇恨、固伤等等。
 
 
-core.enemys.nextCriticals(enemyId, number)
+core.enemys.nextCriticals(enemyId, number, x, y, floorId)
 返回一个列表，为接下来number（可忽略，默认为1）个该怪物的临界值和临界减伤。
 列表每一项类似 [x,y] 表示临界值为x，且临界减伤为y。
 如果无临界值，则返回空列表。
 
 
-core.enemys.getDefDamage(enemyId, k)
+core.enemys.getDefDamage(enemyId, k, x, y, floorId)
 获得k（可忽略，默认为1）防减伤值。
 
 
-core.enemys.getDamageInfo(enemy, hero_hp, hero_atk, hero_def, hero_mdef)
+core.enemys.getDamageInfo(enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId)
 获得实际战斗信息，比如伤害，回合数，每回合伤害等等。
 此函数是实际战斗过程的计算。
 
 
-core.enemys.calDamage(enemy, hero_hp, hero_atk, hero_def, hero_mdef)
+core.enemys.calDamage(enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId)
 获得在某个勇士属性下怪物伤害；实际返回的是上面getDamageInfo中伤害的数值。
 
 

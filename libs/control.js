@@ -1280,7 +1280,7 @@ control.prototype.snipe = function (snipes) {
         snipe.blockImage = core.material.images[cls];
         snipe.height = height;
 
-        var damage = core.enemys.getDamage(block.event.id);
+        var damage = core.enemys.getDamage(block.event.id, x, y);
         var color = '#000000';
 
         if (damage == null) {
@@ -1514,7 +1514,7 @@ control.prototype.updateDamage = function () {
                 var id = mapBlocks[b].event.id;
 
                 if (core.flags.displayEnemyDamage) {
-                    var damage = core.enemys.getDamage(id);
+                    var damage = core.enemys.getDamage(id, x, y);
                     var color = '#000000';
 
                     if (damage == null) {

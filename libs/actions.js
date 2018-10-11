@@ -1030,14 +1030,14 @@ actions.prototype.clickViewMaps = function (x,y) {
         return;
     }
 
-    if(x>=2 && x<=10 && y<=4) {
+    if(y<=4 && (mh==13 || (x>=2 && x<=10))) {
         index++;
         while (index<core.floorIds.length && index!=now && core.floors[core.floorIds[index]].cannotViewMap)
             index++;
         if (index<core.floorIds.length)
             core.ui.drawMaps(index);
     }
-    else if (x>=2 && x<=10 && y>=8) {
+    else if (y>=8 && (mh==13 || (x>=2 && x<=10))) {
         index--;
         while (index>=0 && index!=now && core.floors[core.floorIds[index]].cannotViewMap)
             index--;
@@ -2067,6 +2067,10 @@ actions.prototype.clickSyncSave = function (x,y) {
                 });
                 break;
             case 4:
+                core.status.event.selection=0;
+                core.ui.drawReplay();
+                break;
+            case 5:
                 if (core.hasFlag('debug')) {
                     core.drawText("\t[系统提示]调试模式下无法下载录像");
                     break;
@@ -2078,11 +2082,11 @@ actions.prototype.clickSyncSave = function (x,y) {
                     'route': core.encodeRoute(core.status.route)
                 }));
                 break;
-            case 5:
+            case 6:
                 core.status.event.selection=0;
                 core.ui.drawStorageRemove();
                 break;
-            case 6:
+            case 7:
                 core.status.event.selection=3;
                 core.ui.drawSettings();
                 break;

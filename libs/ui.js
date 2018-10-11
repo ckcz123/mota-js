@@ -862,8 +862,11 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
     var hero_hp = core.getStatus('hp'), hero_atk = core.getStatus('atk'), hero_def = core.getStatus('def'),
         hero_mdef = core.getStatus('mdef');
-    var monster = core.material.enemys[monsterId];
-    var mon_hp = monster.hp, mon_atk = monster.atk, mon_def = monster.def, mon_money=monster.money, mon_exp = monster.experience, mon_special=monster.special;
+
+    hero_hp=Math.max(0, hero_hp);
+    hero_atk=Math.max(0, hero_atk);
+    hero_def=Math.max(0, hero_def);
+    hero_mdef=Math.max(0, hero_mdef);
 
     if (core.flags.equipPercentage) {
         hero_atk = Math.floor(core.getFlag('equip_atk_buff',1)*hero_atk);
@@ -871,30 +874,30 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
         hero_mdef = Math.floor(core.getFlag('equip_mdef_buff',1)*hero_mdef);
     }
 
+    var enemy = core.material.enemys[monsterId];
+    var enemyInfo = core.enemys.getEnemyInfo(enemy, hero_hp, hero_atk, hero_def, hero_mdef);
+    var mon_hp = enemyInfo.hp, mon_atk = enemyInfo.atk, mon_def = enemyInfo.def, mon_money=enemyInfo.money,
+        mon_exp = enemyInfo.experience, mon_special=enemyInfo.special;
+
     var initDamage = 0; // 战前伤害
 
     // 吸血
     if (core.enemys.hasSpecial(mon_special, 11)) {
-        var vampireDamage = hero_hp * monster.value;
+        var vampireDamage = hero_hp * enemy.value;
 
         // 如果有神圣盾免疫吸血等可以在这里写
 
-        vampireDamage = Math.floor(vampireDamage);
+        vampireDamage = Math.floor(vampireDamage) || 0;
         // 加到自身
-        if (monster.add) // 如果加到自身
+        if (enemy.add) // 如果加到自身
             mon_hp += vampireDamage;
 
         initDamage += vampireDamage;
     }
 
-    hero_hp -= core.enemys.getExtraDamage(monster);
+    hero_hp -= core.enemys.getExtraDamage(enemy);
 
-    if (core.enemys.hasSpecial(mon_special, 10)) { // 模仿
-        mon_atk=hero_atk;
-        mon_def=hero_def;
-    }
     if (core.enemys.hasSpecial(mon_special, 2)) hero_def=0; // 魔攻
-    if (core.enemys.hasSpecial(mon_special, 3) && mon_def<hero_atk) mon_def=hero_atk-1; // 坚固
 
     // 实际操作
     var turn = 0; // 0为勇士攻击
@@ -904,7 +907,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     var turns = 2;
     if (core.enemys.hasSpecial(mon_special, 4)) turns=3;
     if (core.enemys.hasSpecial(mon_special, 5)) turns=4;
-    if (core.enemys.hasSpecial(mon_special, 6)) turns=1+(monster.n||4);
+    if (core.enemys.hasSpecial(mon_special, 6)) turns=1+(enemy.n||4);
 
     // 初始伤害
     if (core.enemys.hasSpecial(mon_special, 7)) initDamage+=Math.floor(core.values.breakArmor * hero_def);
@@ -1158,7 +1161,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
             return;
         }
 
-    }, 500);
+    }, 400);
 }
 
 ////// 绘制等待界面 //////
@@ -1192,7 +1195,7 @@ ui.prototype.drawSyncSave = function () {
     core.status.event.id = 'syncSave';
 
     this.drawChoices(null, [
-        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "下载当前录像", "清空本地存档", "返回主菜单"
+        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "回放当前录像", "下载当前录像", "清空本地存档", "返回主菜单"
     ]);
 
 }

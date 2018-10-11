@@ -320,7 +320,7 @@ core.setFlag("shield5", true); // 增加一个自定义Flag：已经拿到神圣
 ```
 2. 免疫吸血效果：在脚本编辑的getDamageInfo中，编辑成如果存在神圣盾标记，吸血伤害为0。
 ``` js
-function (enemy, hero_hp, hero_atk, hero_def, hero_mdef) {
+function (enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId) {
 // ... 上略
     // 吸血
     if (this.hasSpecial(mon_special, 11)) {

@@ -1120,7 +1120,7 @@ events.prototype.battle = function (id, x, y, force, callback) {
     core.stopAutomaticRoute();
 
     // 非强制战斗
-    if (!core.enemys.canBattle(id) && !force && !core.isset(core.status.event.id)) {
+    if (!core.enemys.canBattle(id, x, y) && !force && !core.isset(core.status.event.id)) {
         core.drawTip("你打不过此怪物！");
         core.clearContinueAutomaticRoute();
         return;

@@ -554,6 +554,31 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 }
     },
     "control": {
+        "flyTo": function (toId, callback) {
+	// 楼层传送器的使用，从当前楼层飞往toId
+	// 如果不能飞行请返回false
+
+	var fromId = core.status.floorId;
+	
+	// 检查能否飞行
+	if (!core.floors[fromId].canFlyTo || !core.floors[toId].canFlyTo) {
+		core.drawTip("无法飞往" + core.floors[toId].title +"！");
+		return false;
+	}
+	
+	// 获得两个楼层的索引，以决定是上楼梯还是下楼梯
+	var fromIndex = core.floorIds.indexOf(fromId), toIndex = core.floorIds.indexOf(toId);
+	var stair = fromIndex<=toIndex?"downFloor":"upFloor";
+	// 地下层：同层传送至上楼梯
+	if (fromIndex == toIndex && core.floorIds[fromId].underGround) stair = "upFloor";
+	// 记录录像
+	core.status.route.push("fly:"+toId);
+	// 传送
+	core.ui.closePanel();
+	core.changeFloor(toId, stair, null, null, callback);
+	
+	return true;
+},
         "updateStatusBar": function () {
 	// 更新状态栏
 
@@ -759,6 +784,21 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 }
     },
     "ui": {
+        "drawStatistics": function () {
+	// 浏览地图时参与的统计项目
+	
+	return [
+		'yellowDoor', 'blueDoor', 'redDoor', 'greenDoor', 'steelDoor',
+		'yellowKey', 'blueKey', 'redKey', 'greenKey', 'steelKey',
+		'redJewel', 'blueJewel', 'greenJewel', 'yellowJewel',
+		'redPotion', 'bluePotion', 'greenPotion', 'yellowPotion', 'superPotion',
+		'pickaxe', 'bomb', 'centerFly',
+		'poisonWine', 'weakWine', 'curseWine', 'superWine',
+		'sword1', 'sword2', 'sword3', 'sword4', 'sword5',
+		'shield1', 'shield2', 'shield3', 'shield4', 'shield5',
+		// 在这里可以增加新的ID来进行统计个数，只能增加道具ID
+	];
+},
         "drawAbout": function() {
 	// 绘制“关于”界面
 	if (!core.isPlaying()) {

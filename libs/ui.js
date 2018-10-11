@@ -2159,21 +2159,15 @@ ui.prototype.drawStatistics = function () {
     // 5. 当前已走的步数；瞬间移动的步数，瞬间移动的次数（和少走的步数）；游戏时长
     // 6. 当前已恢复的生命值；当前总伤害、战斗伤害、阻激夹域血网伤害、中毒伤害。
 
+    var ids = this.uidata.drawStatistics();
+    var obj = {};
+    ids.forEach(function (e) {obj[e] = 0;})
 
     var total = {
         'monster': {
             'count': 0, 'money': 0, 'experience': 0, 'point': 0,
         },
-        'count': {
-            'yellowDoor': 0, 'blueDoor': 0, 'redDoor': 0, 'greenDoor': 0, 'steelDoor': 0,
-            'yellowKey': 0, 'blueKey': 0, 'redKey': 0, 'greenKey': 0, 'steelKey': 0,
-            'redJewel': 0, 'blueJewel': 0, 'greenJewel': 0, 'yellowJewel': 0,
-            'redPotion': 0, 'bluePotion': 0, 'greenPotion': 0, 'yellowPotion': 0, 'superPotion': 0,
-            'pickaxe': 0, 'bomb': 0, 'centerFly': 0,
-            'poisonWine': 0, 'weakWine': 0, 'curseWine': 0, 'superWine': 0,
-            'sword1': 0, 'sword2': 0, 'sword3': 0, 'sword4': 0, 'sword5': 0,
-            'shield1': 0, 'shield2': 0, 'shield3': 0, 'shield4': 0, 'shield5': 0,
-        },
+        'count': obj,
         'add': {
             'hp': 0, 'atk': 0, 'def': 0, 'mdef': 0
         }
@@ -2265,13 +2259,13 @@ ui.prototype.drawStatistics = function () {
         Object.keys(data.count).forEach(function (key) {
             var value=data.count[key];
             if (value>0) {
-                var name="";
+                var name=null;
                 if (key=='yellowDoor') name="黄门";
                 else if (key=='blueDoor') name="蓝门";
                 else if (key=='redDoor') name="红门";
                 else if (key=='greenDoor') name="绿门";
                 else if (key=='steelDoor') name="铁门";
-                else name=core.material.items[key].name;
+                else name=(core.material.items[key]||{}).name;
                 if (core.isset(name)) {
                     text+=name+value+"个；";
                 }

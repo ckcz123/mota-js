@@ -1901,14 +1901,10 @@ control.prototype.replay = function () {
         if (core.hasItem('fly') && toIndex>=0 && nowIndex>=0) {
             core.ui.drawFly(toIndex);
             setTimeout(function () {
-                core.ui.closePanel();
-                var stair=toIndex<nowIndex?"upFloor":"downFloor";
-                if (toIndex==nowIndex && core.floors[core.status.floorId].underGround)
-                    stair = "upFloor";
-                core.status.route.push("fly:"+floorId);
-                core.changeFloor(floorId, stair, null, null, function () {
-                    core.replay();
-                });
+                if (!core.control.flyTo(floorId, function () {core.replay()})) {
+                    core.stopReplay();
+                    core.insertAction("录像文件出错");
+                }
             }, 750 / Math.max(1, core.status.replay.speed));
             return;
         }
@@ -2057,6 +2053,10 @@ control.prototype.useFly = function (need) {
     }
     core.useItem('fly');
     return;
+}
+
+control.prototype.flyTo = function (toId, callback) {
+    return this.controldata.flyTo(toId, callback);
 }
 
 ////// 点击装备栏时的打开操作 //////

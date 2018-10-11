@@ -127,6 +127,12 @@ functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             "_leaf": false,
             "_type": "object",
             "_data": {
+                "flyTo": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "使用楼层传送器飞到某层"
+                },
                 "updateStatusBar": {
                     "_leaf": true,
                     "_type": "textarea",
@@ -145,6 +151,12 @@ functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             "_leaf": false,
             "_type": "object",
             "_data": {
+                "drawStatistics": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "地图数据统计项的注册"
+                },
                 "drawAbout": {
                     "_leaf": true,
                     "_type": "textarea",

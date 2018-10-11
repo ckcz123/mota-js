@@ -969,17 +969,8 @@ actions.prototype.clickFly = function(x,y) {
     if ((x==10 || x==11) && y==10) core.ui.drawFly(core.status.event.data-10);
     if ((x==10 || x==11) && y==4) core.ui.drawFly(core.status.event.data+10);
     if (x>=5 && x<=7 && y==12) core.ui.closePanel();
-    if (x>=0 && x<=9 && y>=3 && y<=11) {
-        var index=core.status.hero.flyRange.indexOf(core.status.floorId);
-        var stair=core.status.event.data<index?"upFloor":"downFloor";
-        if (core.status.event.data==index && core.floors[core.status.floorId].underGround)
-            stair = "upFloor";
-        var floorId=core.status.event.data;
-        var toFloor = core.status.hero.flyRange[floorId];
-        core.status.route.push("fly:"+toFloor);
-        core.ui.closePanel();
-        core.changeFloor(toFloor, stair);
-    }
+    if (x>=0 && x<=9 && y>=3 && y<=11)
+        core.control.flyTo(core.status.hero.flyRange[core.status.event.data]);
     return;
 }
 

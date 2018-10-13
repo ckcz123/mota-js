@@ -2247,7 +2247,9 @@ actions.prototype.clickStorageRemove = function (x, y) {
         switch (selection) {
             case 0:
                 if (core.platform.useLocalForage) {
+                    core.ui.drawWaiting("正在清空，请稍后...");
                     localforage.clear(function () {
+                        core.ui.closePanel();
                         core.drawText("\t[操作成功]你的所有存档已被清空。");
                     });
                 }
@@ -2257,13 +2259,25 @@ actions.prototype.clickStorageRemove = function (x, y) {
                 }
                 break;
             case 1:
-                for (var i=1;i<=5*(main.savePages||30);i++) {
-                    // core.removeLocalStorage("save"+i);
-                    core.removeLocalForage("save"+i);
+                if (core.platform.useLocalForage) {
+                    core.ui.drawWaiting("正在清空，请稍后...");
+                    for (var i=1;i<=5*(main.savePages||30);i++) {
+                        // core.removeLocalStorage("save"+i);
+                        core.removeLocalForage("save"+i);
+                    }
+                    core.removeLocalForage("autoSave", function() {
+                        core.ui.closePanel();
+                        core.drawText("\t[操作成功]当前塔的存档已被清空。");
+                    });
                 }
-                core.removeLocalForage("autoSave", function() {
+                else {
+                    for (var i=1;i<=5*(main.savePages||30);i++) {
+                        // core.removeLocalStorage("save"+i);
+                        core.removeLocalStorage("save"+i);
+                    }
+                    core.removeLocalStorage("autoSave");
                     core.drawText("\t[操作成功]当前塔的存档已被清空。");
-                });
+                }
                 break;
             case 2:
                 core.status.event.selection=5;

@@ -175,6 +175,12 @@ functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             "_leaf": false,
             "_type": "object",
             "_data": {
+                "parallelDo": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "并行事件处理"
+                },
                 "plugin": {
                     "_leaf": true,
                     "_type": "textarea",

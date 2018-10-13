@@ -54,9 +54,6 @@ items.prototype.useItem = function (itemId, callback) {
     if (itemId in this.useItemEffect) {
         eval(this.useItemEffect[itemId]);
     }
-
-    core.updateStatusBar();
-
     // 记录路线
     if (itemId!='book' && itemId!='fly') {
         core.status.route.push("item:"+itemId);
@@ -67,6 +64,8 @@ items.prototype.useItem = function (itemId, callback) {
         core.status.hero.items[itemCls][itemId]--;
     if (core.status.hero.items[itemCls][itemId]==0)
         delete core.status.hero.items[itemCls][itemId];
+
+    core.updateStatusBar();
 
     if (core.isset(callback)) callback();
 }

@@ -305,13 +305,13 @@ return code;
 */;
 
 setText_s
-    :   '设置剧情文本的属性' '位置' SetTextPosition_List BGNL? '标题颜色' EvalString? '正文颜色' EvalString? '背景色' EvalString? BGNL? '粗体' B_1_List '打字间隔' EvalString? Newline
+    :   '设置剧情文本的属性' '位置' SetTextPosition_List BGNL? '标题颜色' EvalString? '正文颜色' EvalString? '背景色' EvalString? '粗体' B_1_List BGNL? '标题字体大小' EvalString? '正文字体大小' EvalString? '打字间隔' EvalString? Newline
     
 
 /* setText_s
 tooltip : setText：设置剧情文本的属性,颜色为RGB三元组或RGBA四元组,打字间隔为剧情文字添加的时间间隔,为整数或不填
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=settext%EF%BC%9A%E8%AE%BE%E7%BD%AE%E5%89%A7%E6%83%85%E6%96%87%E6%9C%AC%E7%9A%84%E5%B1%9E%E6%80%A7
-default : [null,"","","",null,'']
+default : [null,"","","",null,"","",'']
 SetTextPosition_List_0 =SetTextPosition_List_0==='null'?'': ', "position": "'+SetTextPosition_List_0+'"';
 var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
 if (EvalString_0) {
@@ -327,11 +327,19 @@ if (EvalString_2) {
   EvalString_2 = ', "background": ['+EvalString_2+']';
 }
 if (EvalString_3) {
-  if (!/^\d+$/.test(EvalString_3))throw new Error('打字时间间隔必须是整数或不填');
-  EvalString_3 = ', "time": '+EvalString_3;
+  if (!/^\d+$/.test(EvalString_3))throw new Error('字体大小必须是整数或不填');
+  EvalString_3 = ', "titlefont": '+EvalString_3;
+}
+if (EvalString_4) {
+  if (!/^\d+$/.test(EvalString_4))throw new Error('字体大小必须是整数或不填');
+  EvalString_4 = ', "textfont": '+EvalString_4;
+}
+if (EvalString_5) {
+  if (!/^\d+$/.test(EvalString_5))throw new Error('打字时间间隔必须是整数或不填');
+  EvalString_5 = ', "time": '+EvalString_5;
 }
 B_1_List_0 = ', "bold": '+B_1_List_0;
-var code = '{"type": "setText"'+SetTextPosition_List_0+EvalString_0+EvalString_1+EvalString_2+B_1_List_0+EvalString_3+'},\n';
+var code = '{"type": "setText"'+SetTextPosition_List_0+EvalString_0+EvalString_1+EvalString_2+B_1_List_0+EvalString_3+EvalString_4+EvalString_5+'},\n';
 return code;
 */;
 
@@ -1675,7 +1683,7 @@ ActionParser.prototype.parseAction = function() {
       data.text=setTextfunc(data.text);
       data.background=setTextfunc(data.background);
       this.next = MotaActionBlocks['setText_s'].xmlText([
-        data.position,data.title,data.text,data.background,data.bold,data.time,this.next]);
+        data.position,data.title,data.text,data.background,data.bold,data.titlefont,data.textfont,data.time,this.next]);
       break;
     case "tip":
       this.next = MotaActionBlocks['tip_s'].xmlText([

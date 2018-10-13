@@ -371,6 +371,9 @@ ui.prototype.drawTextBox = function(content, showAll) {
 
     var textAttribute = core.status.textAttribute || core.initStatus.textAttribute;
 
+    var titlefont = textAttribute.titlefont || 22;
+    var textfont = textAttribute.textfont || 16;
+
     var position = textAttribute.position, px=null, py=null, ydelta=iconHeight-32;
     if (content.indexOf("\b[")==0 || content.indexOf("\\b[")==0) {
         var index = content.indexOf("]");
@@ -416,11 +419,11 @@ ui.prototype.drawTextBox = function(content, showAll) {
     if (id=='hero' || core.isset(icon)) content_left=left+63;
 
     var validWidth = right-(content_left-left)-13;
-    var font = '16px Verdana';
+    var font = textfont + 'px Verdana';
     if (textAttribute.bold) font = "bold "+font;
     var contents = core.splitLines("ui", content, validWidth, font);
 
-    var height = 20 + 21*(contents.length+1) + (id=='hero'?core.material.icons.hero.height-10:core.isset(name)?iconHeight-10:0);
+    var height = 20 + (textfont+5)*(contents.length+1) + (id=='hero'?core.material.icons.hero.height-10:core.isset(name)?iconHeight-10:0);
 
 
     var xoffset = 6, yoffset = 22;
@@ -506,14 +509,14 @@ ui.prototype.drawTextBox = function(content, showAll) {
         if (id == 'hero') {
             var heroHeight=core.material.icons.hero.height;
             core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, heroHeight+2, borderColor, 2);
-            core.fillText('ui', name, content_left, top + 30, null, 'bold 22px Verdana');
+            core.fillText('ui', name, content_left, top + 30, null, 'bold '+titlefont+'px Verdana');
             core.clearMap('ui', left + 15, top + 40, 32, heroHeight);
             core.fillRect('ui', left + 15, top + 40, 32, heroHeight, background);
             var heroIcon = core.material.icons.hero['down'];
             core.canvas.ui.drawImage(core.material.images.hero, heroIcon.stop * 32, heroIcon.loc * heroHeight, 32, heroHeight, left+15, top+40, 32, heroHeight);
         }
         else {
-            core.fillText('ui', name, content_left, top + 30, null, 'bold 22px Verdana');
+            core.fillText('ui', name, content_left, top + 30, null, 'bold '+titlefont+'px Verdana');
             if (core.isset(icon)) {
 
                 core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, iconHeight + 2, borderColor, 2);
@@ -543,7 +546,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
         var contents = core.splitLines("ui", content, validWidth, font);
 
         for (var i=0;i<contents.length;i++) {
-            core.fillText('ui', contents[i], content_left, content_top + 21*i, null, font);
+            core.fillText('ui', contents[i], content_left, content_top + (textfont+5)*i, null, font);
         }
 
     }

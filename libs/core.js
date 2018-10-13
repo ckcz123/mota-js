@@ -148,6 +148,8 @@ function core() {
             "title": [255,215,0,1],
             "background": [0,0,0,0.85],
             "text": [255,255,255,1],
+            "titlefont": 22,
+            "textfont": 16,
             "bold": false,
             "time": 0,
         },
@@ -1063,6 +1065,11 @@ core.prototype.speedUpReplay = function () {
 ////// 减速播放 //////
 core.prototype.speedDownReplay = function () {
     core.control.speedDownReplay();
+}
+
+////// 设置播放速度 //////
+core.prototype.setReplaySpeed = function (speed) {
+    core.control.setReplaySpeed(speed);
 }
 
 ////// 回退播放 //////

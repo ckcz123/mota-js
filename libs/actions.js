@@ -51,6 +51,14 @@ actions.prototype.onkeyUp = function(e) {
             core.bookReplay();
         else if (e.keyCode==33||e.keyCode==34)
             core.viewMapReplay();
+        else if (e.keyCode>=49 && e.keyCode<=51)
+            core.setReplaySpeed(e.keyCode-48);
+        else if (e.keyCode==52)
+            core.setReplaySpeed(6);
+        else if (e.keyCode==53)
+            core.setReplaySpeed(12);
+        else if (e.keyCode==54)
+            core.setReplaySpeed(24);
         return;
     }
 
@@ -179,7 +187,7 @@ actions.prototype.keyDown = function(keyCode) {
 }
 
 ////// 根据放开键的code来执行一系列操作 //////
-actions.prototype.keyUp = function(keyCode, fromReplay) {
+actions.prototype.keyUp = function(keyCode) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying
         &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
 
@@ -677,9 +685,15 @@ actions.prototype.onclick = function (x, y, stepPostfix) {
 
 ////// 滑动鼠标滚轮时的操作 //////
 actions.prototype.onmousewheel = function (direct) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying
-        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
     // 向下滚动是 -1 ,向上是 1
+
+    if (core.isset(core.status.replay)&&core.status.replay.replaying
+        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') {
+        // 滚轮控制速度
+        if (direct==1) core.speedUpReplay();
+        if (direct==-1) core.speedDownReplay();
+        return;
+    }
 
     // 楼层飞行器
     if (core.status.lockControl && core.status.event.id == 'fly') {
@@ -2247,7 +2261,9 @@ actions.prototype.clickStorageRemove = function (x, y) {
         switch (selection) {
             case 0:
                 if (core.platform.useLocalForage) {
+                    core.ui.drawWaiting("正在清空，请稍后...");
                     localforage.clear(function () {
+                        core.ui.closePanel();
                         core.drawText("\t[操作成功]你的所有存档已被清空。");
                     });
                 }
@@ -2257,13 +2273,25 @@ actions.prototype.clickStorageRemove = function (x, y) {
                 }
                 break;
             case 1:
-                for (var i=1;i<=5*(main.savePages||30);i++) {
-                    // core.removeLocalStorage("save"+i);
-                    core.removeLocalForage("save"+i);
+                if (core.platform.useLocalForage) {
+                    core.ui.drawWaiting("正在清空，请稍后...");
+                    for (var i=1;i<=5*(main.savePages||30);i++) {
+                        // core.removeLocalStorage("save"+i);
+                        core.removeLocalForage("save"+i);
+                    }
+                    core.removeLocalForage("autoSave", function() {
+                        core.ui.closePanel();
+                        core.drawText("\t[操作成功]当前塔的存档已被清空。");
+                    });
                 }
-                core.removeLocalForage("autoSave", function() {
+                else {
+                    for (var i=1;i<=5*(main.savePages||30);i++) {
+                        // core.removeLocalStorage("save"+i);
+                        core.removeLocalStorage("save"+i);
+                    }
+                    core.removeLocalStorage("autoSave");
                     core.drawText("\t[操作成功]当前塔的存档已被清空。");
-                });
+                }
                 break;
             case 2:
                 core.status.event.selection=5;

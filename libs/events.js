@@ -345,18 +345,15 @@ events.prototype.doAction = function() {
             if (data.position=='up'||data.position=='down'||data.position=='center') {
                 core.status.textAttribute.position=data.position;
             }
+            ["bold", "titlefont", "textfont", "time"].forEach(function (t) {
+                if (core.isset(data[t])) core.status.textAttribute[t]=data[t];
+            });
             ["background", "title", "text"].forEach(function (t) {
                 if (core.isset(data[t]) && (data[t] instanceof Array) && data[t].length>=3) {
                     if (data[t].length==3) data[t].push(1);
                     core.status.textAttribute[t]=data[t];
                 }
-            })
-            if (core.isset(data.bold)) {
-                core.status.textAttribute.bold=data.bold;
-            }
-            if (core.isset(data.time)) {
-                core.status.textAttribute.time=data.time;
-            }
+            });
             core.setFlag('textAttribute', core.status.textAttribute);
             core.events.doAction();
             break;

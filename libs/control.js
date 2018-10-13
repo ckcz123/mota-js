@@ -186,6 +186,10 @@ control.prototype.setRequestAnimationFrame = function () {
             core.animateFrame.weather.time = timestamp;
 
         }
+
+        // 执行用户的并行事件处理内容
+        functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.parallelDo(timestamp);
+
         window.requestAnimationFrame(draw);
     }
     window.requestAnimationFrame(draw);

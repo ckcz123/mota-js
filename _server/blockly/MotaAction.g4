@@ -339,7 +339,7 @@ if (EvalString_5) {
   EvalString_5 = ', "time": '+EvalString_5;
 }
 B_1_List_0 = ', "bold": '+B_1_List_0;
-var code = '{"type": "setText"'+SetTextPosition_List_0+EvalString_0+EvalString_1+EvalString_2+EvalString_3+EvalString_4+B_1_List_0+EvalString_5+'},\n';
+var code = '{"type": "setText"'+SetTextPosition_List_0+EvalString_0+EvalString_1+EvalString_2+B_1_List_0+EvalString_3+EvalString_4+EvalString_5+'},\n';
 return code;
 */;
 

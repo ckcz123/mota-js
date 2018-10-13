@@ -673,6 +673,10 @@ control.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
     var toAdd = 1;
     if (core.status.replay.speed>3)
         toAdd = 2;
+    if (core.status.replay.speed>6)
+        toAdd = 4;
+    if (core.status.replay.speed>12)
+        toAdd = 8;
 
     core.interval.heroMoveInterval = window.setInterval(function () {
         core.status.heroMoving+=toAdd;
@@ -1492,7 +1496,7 @@ control.prototype.setFg = function(color, time, callback) {
             core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
-    }, time/25);
+    }, time/25/core.status.replay.speed);
 }
 
 ////// 更新全地图显伤 //////
@@ -1682,9 +1686,13 @@ control.prototype.resumeReplay = function () {
 control.prototype.speedUpReplay = function () {
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
-    var toAdd = core.status.replay.speed>=3?3:core.status.replay.speed>=2?2:1;
-    core.status.replay.speed = parseInt(10*core.status.replay.speed + toAdd)/10;
-    if (core.status.replay.speed>6.0) core.status.replay.speed=6.0;
+    if (core.status.replay.speed==12) core.status.replay.speed=24.0;
+    else if (core.status.replay.speed==6) core.status.replay.speed=12.0;
+    else if (core.status.replay.speed==3) core.status.replay.speed=6.0;
+    else if (core.status.replay.speed<3) {
+        var toAdd = core.status.replay.speed>=2?2:1;
+        core.status.replay.speed = parseInt(10*core.status.replay.speed + toAdd)/10;
+    }
     core.drawTip("x"+core.status.replay.speed+"倍");
 }
 
@@ -1692,8 +1700,13 @@ control.prototype.speedUpReplay = function () {
 control.prototype.speedDownReplay = function () {
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
-    var toAdd = core.status.replay.speed>3?3:core.status.replay.speed>2?2:1;
-    core.status.replay.speed = parseInt(10*core.status.replay.speed - toAdd)/10;
+    if (core.status.replay.speed==24) core.status.replay.speed=12.0;
+    else if (core.status.replay.speed==12) core.status.replay.speed=6.0;
+    else if (core.status.replay.speed==6) core.status.replay.speed=3.0;
+    else {
+        var toAdd = core.status.replay.speed>=2?2:1;
+        core.status.replay.speed = parseInt(10*core.status.replay.speed - toAdd)/10;
+    }
     if (core.status.replay.speed<0.3) core.status.replay.speed=0.3;
     core.drawTip("x"+core.status.replay.speed+"倍");
 }

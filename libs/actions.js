@@ -51,12 +51,14 @@ actions.prototype.onkeyUp = function(e) {
             core.bookReplay();
         else if (e.keyCode==33||e.keyCode==34)
             core.viewMapReplay();
-        else if ((e.keyCode>=49 && e.keyCode<=51) || e.keyCode==54) // 1,2,3,6
+        else if (e.keyCode>=49 && e.keyCode<=51)
             core.setReplaySpeed(e.keyCode-48);
         else if (e.keyCode==52)
-            core.setReplaySpeed(3.9);
+            core.setReplaySpeed(6);
         else if (e.keyCode==53)
-            core.setReplaySpeed(5.1);
+            core.setReplaySpeed(12);
+        else if (e.keyCode==54)
+            core.setReplaySpeed(24);
         return;
     }
 

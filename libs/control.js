@@ -1698,6 +1698,14 @@ control.prototype.speedDownReplay = function () {
     core.drawTip("x"+core.status.replay.speed+"倍");
 }
 
+////// 设置播放速度 //////
+control.prototype.setReplaySpeed = function (speed) {
+    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
+    if (!core.status.replay.replaying) return;
+    core.status.replay.speed = speed;
+    core.drawTip("x"+core.status.replay.speed+"倍");
+}
+
 ////// 停止播放 //////
 control.prototype.stopReplay = function () {
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;

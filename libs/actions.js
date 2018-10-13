@@ -51,6 +51,12 @@ actions.prototype.onkeyUp = function(e) {
             core.bookReplay();
         else if (e.keyCode==33||e.keyCode==34)
             core.viewMapReplay();
+        else if ((e.keyCode>=49 && e.keyCode<=51) || e.keyCode==54) // 1,2,3,6
+            core.setReplaySpeed(e.keyCode-48);
+        else if (e.keyCode==52)
+            core.setReplaySpeed(3.9);
+        else if (e.keyCode==53)
+            core.setReplaySpeed(5.1);
         return;
     }
 
@@ -179,7 +185,7 @@ actions.prototype.keyDown = function(keyCode) {
 }
 
 ////// 根据放开键的code来执行一系列操作 //////
-actions.prototype.keyUp = function(keyCode, fromReplay) {
+actions.prototype.keyUp = function(keyCode) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying
         &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
 
@@ -677,9 +683,15 @@ actions.prototype.onclick = function (x, y, stepPostfix) {
 
 ////// 滑动鼠标滚轮时的操作 //////
 actions.prototype.onmousewheel = function (direct) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying
-        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
     // 向下滚动是 -1 ,向上是 1
+
+    if (core.isset(core.status.replay)&&core.status.replay.replaying
+        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') {
+        // 滚轮控制速度
+        if (direct==1) core.speedUpReplay();
+        if (direct==-1) core.speedDownReplay();
+        return;
+    }
 
     // 楼层飞行器
     if (core.status.lockControl && core.status.event.id == 'fly') {

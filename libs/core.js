@@ -1065,6 +1065,11 @@ core.prototype.speedDownReplay = function () {
     core.control.speedDownReplay();
 }
 
+////// 设置播放速度 //////
+core.prototype.setReplaySpeed = function (speed) {
+    core.control.setReplaySpeed(speed);
+}
+
 ////// 回退播放 //////
 core.prototype.rewindReplay = function () {
     core.control.rewindReplay();

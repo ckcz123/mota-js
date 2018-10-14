@@ -262,8 +262,8 @@ editor_file = function (editor, callback) {
         var tempcallback = function (err) {
             templist.push(err);
             if (templist.length == 2) {
-                if (templist[0] != null || templist[1] != null || templist[2] != null)
-                    callback((templist[0] || '') + '\n' + (templist[1] || '') + '\n' + (templist[2] || ''));
+                if (templist[0] != null || templist[1] != null)
+                    callback((templist[0] || '') + '\n' + (templist[1] || ''));
                 //这里如果一个成功一个失败会出严重bug
                 else
                     callback(null);

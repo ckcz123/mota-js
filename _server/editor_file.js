@@ -248,6 +248,32 @@ editor_file = function (editor, callback) {
         else tempcallback(null);
     }
 
+    editor_file.registerAutotile = function (filename, callback) {
+        var idnum = 140;
+        while (editor.core.maps.blocksInfo[idnum]) idnum++;
+
+        var iconActions = [];
+        var mapActions = [];
+
+        iconActions.push(["add", "['autotile']['" + filename + "']", 0]);
+        mapActions.push(["add", "['" + idnum + "']", {'cls': 'autotile', 'id': filename, 'noPass': true}]);
+
+        var templist = [];
+        var tempcallback = function (err) {
+            templist.push(err);
+            if (templist.length == 2) {
+                if (templist[0] != null || templist[1] != null)
+                    callback((templist[0] || '') + '\n' + (templist[1] || ''));
+                //这里如果一个成功一个失败会出严重bug
+                else
+                    callback(null);
+            }
+        }
+
+        saveSetting('icons', iconActions, tempcallback);
+        saveSetting('maps', mapActions, tempcallback);
+    }
+
     editor_file.changeIdAndIdnum = function (id, idnum, info, callback) {
         if (!isset(callback)) {
             printe('未设置callback');

@@ -512,12 +512,26 @@ editor_mode = function (editor) {
 
         var selectAppend = document.getElementById('selectAppend');
         var selectAppend_str = [];
-        ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48"].forEach(function (image) {
+        ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"].forEach(function (image) {
             selectAppend_str.push(["<option value='", image, "'>", image, '</option>\n'].join(''));
         });
         selectAppend.innerHTML = selectAppend_str.join('');
         selectAppend.onchange = function () {
+
             var value = selectAppend.value;
+
+            if (value == 'autotile') {
+                editor_mode.appendPic.imageName = 'autotile';
+                for (var jj=0;jj<4;jj++) appendPicSelection.children[jj].style = 'display:none';
+                if (editor_mode.appendPic.img) {
+                    sprite.style.width = (sprite.width = editor_mode.appendPic.img.width) / ratio + 'px';
+                    sprite.style.height = (sprite.height = editor_mode.appendPic.img.height) / ratio + 'px';
+                    sprite.getContext('2d').clearRect(0, 0, sprite.width, sprite.height);
+                    sprite.getContext('2d').drawImage(editor_mode.appendPic.img, 0, 0);
+                }
+                return;
+            }
+
             var ysize = selectAppend.value.indexOf('48') === -1 ? 32 : 48;
             editor_mode.appendPic.imageName = value;
             var img = core.material.images[value];
@@ -545,13 +559,13 @@ editor_mode = function (editor) {
             var loadImage = function (content, callback) {
                 var image = new Image();
                 try {
+                    image.onload = function () {
+                        callback(image);
+                    }
                     image.src = content;
                     if (image.complete) {
                         callback(image);
                         return;
-                    }
-                    image.onload = function () {
-                        callback(image);
                     }
                 }
                 catch (e) {
@@ -563,11 +577,20 @@ editor_mode = function (editor) {
                     editor_mode.appendPic.img = image;
                     editor_mode.appendPic.width = image.width;
                     editor_mode.appendPic.height = image.height;
-                    var ysize = selectAppend.value.indexOf('48') === -1 ? 32 : 48;
-                    for (var ii = 0; ii < 3; ii++) {
-                        var newsprite = appendPicCanvas.children[ii];
-                        newsprite.style.width = (newsprite.width = Math.floor(image.width / 32) * 32) / ratio + 'px';
-                        newsprite.style.height = (newsprite.height = Math.floor(image.height / ysize) * ysize) / ratio + 'px';
+
+                    if (selectAppend.value == 'autotile') {
+                        sprite.style.width = (sprite.width = image.width) / ratio + 'px';
+                        sprite.style.height = (sprite.height = image.height) / ratio + 'px';
+                        sprite.getContext('2d').clearRect(0, 0, sprite.width, sprite.height);
+                        sprite.getContext('2d').drawImage(image, 0, 0);
+                    }
+                    else {
+                        var ysize = selectAppend.value.indexOf('48') === -1 ? 32 : 48;
+                        for (var ii = 0; ii < 3; ii++) {
+                            var newsprite = appendPicCanvas.children[ii];
+                            newsprite.style.width = (newsprite.width = Math.floor(image.width / 32) * 32) / ratio + 'px';
+                            newsprite.style.height = (newsprite.height = Math.floor(image.height / ysize) * ysize) / ratio + 'px';
+                        }
                     }
 
                     //画灰白相间的格子
@@ -631,6 +654,54 @@ editor_mode = function (editor) {
 
         var appendConfirm = document.getElementById('appendConfirm');
         appendConfirm.onclick = function () {
+
+            var confirmAutotile = function () {
+                if (sprite.width != 96 || sprite.height != 128) {
+                    printe("不合法的Autotile图片！");
+                    return;
+                }
+                var imgbase64 = sprite.toDataURL().split(',')[1];
+
+                // Step 1: List文件名
+                fs.readdir('./project/images', function (err, data) {
+                    if (err) {
+                        printe(err);
+                        throw(err);
+                    }
+
+                    // Step 2: 选择Autotile文件名
+                    var filename;
+                    for (var i=1;;++i) {
+                        filename = 'autotile'+i;
+                        if (data.indexOf(filename+".png")==-1) break;
+                    }
+
+                    // Step 3: 写入文件
+                    fs.writeFile('./project/images/'+filename+".png", imgbase64, 'base64', function (err, data) {
+                        if (err) {
+                            printe(err);
+                            throw(err);
+                        }
+                        // Step 4: 自动注册
+                        editor_file.registerAutotile(filename, function (err) {
+                            if (err) {
+                                printe(err);
+                                throw(err);
+                            }
+                            printe('自动元件'+filename+'注册成功,请F5刷新编辑器');
+                        })
+
+                    })
+
+                })
+
+            }
+
+            if (selectAppend.value == 'autotile') {
+                confirmAutotile();
+                return;
+            }
+
             var ysize = selectAppend.value.indexOf('48') === -1 ? 32 : 48;
             var sprited = sprite.getContext('2d');
             //sprited.drawImage(img, 0, 0);

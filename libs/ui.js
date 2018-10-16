@@ -1594,7 +1594,7 @@ ui.prototype.drawMaps = function (index, x, y) {
     if (y<6) y=6;
     if (y>mh-7) y=mh-7;
 
-    core.status.event.data = {"index": index, "x": x, "y": y};
+    core.status.event.data = {"index": index, "x": x, "y": y, "damage": (core.status.event.data||{"damage":false}).damage};
 
     clearTimeout(core.interval.tipAnimate);
     core.clearMap('ui');
@@ -2100,6 +2100,10 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
                     32*dx, 32*dy, image.width, image.height-32);
         }
     })
+
+    // draw damage
+    if (core.status.event.id=='viewMaps' && (core.status.event.data||{}).damage)
+        core.control.updateDamage(floorId, tempCanvas);
 
     // draw to canvas
     core.clearMap(canvas, x, y, size, size);

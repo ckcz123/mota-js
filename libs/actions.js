@@ -1018,6 +1018,12 @@ actions.prototype.clickViewMaps = function (x,y) {
     var cx = core.status.event.data.x, cy = core.status.event.data.y;
     var floorId = core.floorIds[index], mw = core.floors[floorId].width||13, mh = core.floors[floorId].height||13;
 
+    if (x==0 && y==0) {
+        core.status.event.data.damage = !core.status.event.data.damage;
+        core.ui.drawMaps(index, cx, cy);
+        return;
+    }
+
     if (x>=2 && x<=10 && y<=1 && mh>13) {
         core.ui.drawMaps(index, cx, cy-1);
         return;
@@ -1082,6 +1088,10 @@ actions.prototype.keyUpViewMaps = function (keycode) {
         core.clearMap('data');
         core.setOpacity('data', 1);
         core.ui.closePanel();
+    }
+    if (keycode==86) {
+        core.status.event.data.damage = !core.status.event.data.damage;
+        core.ui.drawMaps(core.status.event.data.index, core.status.event.data.x, core.status.event.data.y);
     }
     if (keycode==88 || (core.status.replay.replaying && keycode==67)) {
         if (core.isset(core.status.replay)&&core.status.replay.replaying) {

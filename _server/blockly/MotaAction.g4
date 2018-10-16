@@ -875,30 +875,32 @@ return code;
 */;
 
 animateImage_0_s
-    : '图片淡入' EvalString '起点像素位置' 'x' PosString 'y' PosString '动画时间' Int '不等待执行完毕' Bool Newline
+    : '图片淡入' EvalString '起点像素位置' 'x' PosString 'y' PosString '动画时间' Int '保留图片' Bool '不等待执行完毕' Bool Newline
     
 
 /* animateImage_0_s
 tooltip : animageImage：图片淡入
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=animateimage%EF%BC%9A%E5%9B%BE%E7%89%87%E6%B7%A1%E5%85%A5%E6%B7%A1%E5%87%BA
-default : ["bg.jpg","0","0",500,false]
+default : ["bg.jpg","0","0",500,true,false]
 colour : this.printColor
-var async = Bool_0?', "async": true':'';
-var code = '{"type": "animateImage", "action": "show", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "time": '+Int_0+async+'},\n';
+var keep = Bool_0?', "keep": true':'';
+var async = Bool_1?', "async": true':'';
+var code = '{"type": "animateImage", "action": "show", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "time": '+Int_0+keep+async+'},\n';
 return code;
 */;
 
 animateImage_1_s
-    : '图片淡出' EvalString '起点像素位置' 'x' PosString 'y' PosString '动画时间' Int '不等待执行完毕' Bool Newline
+    : '图片淡出' EvalString '起点像素位置' 'x' PosString 'y' PosString '动画时间' Int '清除图片' Bool '不等待执行完毕' Bool Newline
     
 
 /* animateImage_1_s
 tooltip : animageImage：图片淡出
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=animateimage%EF%BC%9A%E5%9B%BE%E7%89%87%E6%B7%A1%E5%85%A5%E6%B7%A1%E5%87%BA
-default : ["bg.jpg","0","0",500,false]
+default : ["bg.jpg","0","0",500,true,false]
 colour : this.printColor
-var async = Bool_0?', "async": true':'';
-var code = '{"type": "animateImage", "action": "hide", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "time": '+Int_0+async+'},\n';
+var keep = Bool_0?', "keep": true':'';
+var async = Bool_1?', "async": true':'';
+var code = '{"type": "animateImage", "action": "hide", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "time": '+Int_0+keep+async+'},\n';
 return code;
 */;
 
@@ -929,16 +931,17 @@ return code;
 
 moveImage_0_s
     :   '图片移动' EvalString '起点像素位置' 'x' PosString 'y' PosString BGNL
-        '终点像素位置' 'x' PosString 'y' PosString '移动时间' Int '不等待执行完毕' Bool Newline
+        '终点像素位置' 'x' PosString 'y' PosString '移动时间' Int '保留图片' Bool '不等待执行完毕' Bool Newline
     
 
 /* moveImage_0_s
 tooltip : moveImage：图片移动
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=moveimage%EF%BC%9A%E5%9B%BE%E7%89%87%E7%A7%BB%E5%8A%A8
-default : ["bg.jpg","0","0","0","0",500,false]
+default : ["bg.jpg","0","0","0","0",500,true,false]
 colour : this.printColor
-var async = Bool_0?', "async": true':'';
-var code = '{"type": "moveImage", "name": "'+EvalString_0+'", "from": ['+PosString_0+','+PosString_1+'], "to": ['+PosString_2+','+PosString_3+'], "time": '+Int_0+async+'},\n';
+var keep = Bool_0?', "keep": true':'';
+var async = Bool_1?', "async": true':'';
+var code = '{"type": "moveImage", "name": "'+EvalString_0+'", "from": ['+PosString_0+','+PosString_1+'], "to": ['+PosString_2+','+PosString_3+'], "time": '+Int_0+keep+async+'},\n';
 return code;
 */;
 
@@ -1836,10 +1839,10 @@ ActionParser.prototype.parseAction = function() {
     case "animateImage": // 显示图片
       if(data.action == 'show'){
         this.next = MotaActionBlocks['animateImage_0_s'].xmlText([
-          data.name,data.loc[0],data.loc[1],data.time,data.async||false,this.next]);
+          data.name,data.loc[0],data.loc[1],data.time,data.keep||false,data.async||false,this.next]);
       } else if (data.action == 'hide') {
         this.next = MotaActionBlocks['animateImage_1_s'].xmlText([
-          data.name,data.loc[0],data.loc[1],data.time,data.async||false,this.next]);
+          data.name,data.loc[0],data.loc[1],data.time,data.keep||false,data.async||false,this.next]);
       }
       break;
     case "showGif": // 显示动图
@@ -1853,7 +1856,7 @@ ActionParser.prototype.parseAction = function() {
         break;
     case "moveImage": // 移动图片
       this.next = MotaActionBlocks['moveImage_0_s'].xmlText([
-        data.name, data.from[0], data.from[1], data.to[0], data.to[1], data.time, data.async||false, this.next
+        data.name, data.from[0], data.from[1], data.to[0], data.to[1], data.time, data.keep||false, data.async||false, this.next
       ]);
       break;
     case "setFg": // 颜色渐变

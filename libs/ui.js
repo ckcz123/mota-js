@@ -1440,9 +1440,30 @@ ui.prototype.drawBookDetail = function (index) {
     var enemyId=enemy.id;
     var hints=core.enemys.getSpecialHint(core.material.enemys[enemyId]);
 
-
     if (hints.length==0)
         hints.push("该怪物无特殊属性。");
+
+    // 吸血怪的最低生命值
+    if (core.enemys.hasSpecial(core.material.enemys[enemyId].special, 11)) {
+        var damage = core.getDamage(enemyId);
+        if (damage != null) {
+            // 二分HP
+            var start = 1, end = 100 * damage;
+            var nowHp = core.status.hero.hp;
+            while (start<end) {
+                var mid = Math.floor((start+end)/2);
+                core.status.hero.hp = mid;
+                if (core.canBattle(enemyId)) end = mid;
+                else start = mid+1;
+            }
+            core.status.hero.hp = start;
+            if (core.canBattle(enemyId)) {
+                hints.push("");
+                hints.push("打死该怪物最低需要生命值："+core.formatBigNumber(start));
+            }
+            core.status.hero.hp = nowHp;
+        }
+    }
 
     hints.push("");
     var criticals = core.enemys.nextCriticals(enemyId, 10).map(function (v) {
@@ -1594,7 +1615,7 @@ ui.prototype.drawMaps = function (index, x, y) {
     if (y<6) y=6;
     if (y>mh-7) y=mh-7;
 
-    core.status.event.data = {"index": index, "x": x, "y": y};
+    core.status.event.data = {"index": index, "x": x, "y": y, "damage": (core.status.event.data||{"damage":false}).damage};
 
     clearTimeout(core.interval.tipAnimate);
     core.clearMap('ui');
@@ -2101,6 +2122,10 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
         }
     })
 
+    // draw damage
+    if (core.status.event.id=='viewMaps' && (core.status.event.data||{}).damage)
+        core.control.updateDamage(floorId, tempCanvas);
+
     // draw to canvas
     core.clearMap(canvas, x, y, size, size);
     if (!core.isset(centerX)) centerX=parseInt(mw/2);
@@ -2296,7 +2321,7 @@ ui.prototype.drawStatistics = function () {
         +"，总游戏时长"+formatTime(statistics.totalTime)
         +"。\n瞬间移动次数："+statistics.moveDirectly+"，共计少走"+statistics.ignoreSteps+"步。"
         +"\n\n总计通过血瓶恢复生命值为"+core.formatBigNumber(statistics.hp)+"点。\n\n"
-        +"总计受到的伤害为"+core.formatBigNumber(statistics.battleDamage+statistics.poisonDamage+statistics.extraDamage)
+        +"总计打死了"+statistics.battle+"个怪物，受到的伤害为"+core.formatBigNumber(statistics.battleDamage+statistics.poisonDamage+statistics.extraDamage)
         +"，其中战斗伤害"+core.formatBigNumber(statistics.battleDamage)+"点"
         +(core.flags.enableDebuff?("，中毒伤害"+core.formatBigNumber(statistics.poisonDamage)+"点"):"")
         +"，领域/夹击/阻击/血网伤害"+core.formatBigNumber(statistics.extraDamage)+"点。",
@@ -2323,9 +2348,10 @@ ui.prototype.drawHelp = function () {
         "[G] 打开/关闭楼层传送器\n" +
         "[A] 读取自动存档（回退）\n" +
         "[S/D] 打开/关闭存/读档页面\n" +
-        "[K] 打开/关闭快捷商店选择列表\n" +
+        "[K/V] 打开/关闭快捷商店选择列表\n" +
         "[T] 打开/关闭工具栏\n" +
         "[ESC] 打开/关闭系统菜单\n" +
+        "[B] 打开数据统计\n" +
         // "[E] 显示光标\n" +
         "[H] 打开帮助页面\n"+
         "[R] 回放\n"+

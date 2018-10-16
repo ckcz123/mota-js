@@ -132,8 +132,9 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
 
     // 清空图片和天气
     core.clearMap('animate');
-    core.dom.gif2.innerHTML = "";
+    core.clearMap('image');
     core.clearMap('weather')
+    core.dom.gif2.innerHTML = "";
     core.animateFrame.weather.type = null;
     core.animateFrame.weather.level = 0;
     core.animateFrame.weather.nodes = [];
@@ -587,10 +588,10 @@ events.prototype.doAction = function() {
             break;
         case "showImage": // 显示图片
             if (core.isset(data.loc) && core.isset(core.material.images.images[data.name])) {
-                core.canvas.animate.drawImage(core.material.images.images[data.name],
+                core.canvas.image.drawImage(core.material.images.images[data.name],
                     core.calValue(data.loc[0]), core.calValue(data.loc[1]));
             }
-            else core.clearMap('animate');
+            else core.clearMap('image');
             this.doAction();
             break;
         case "animateImage": // 淡入淡出图片
@@ -600,11 +601,11 @@ events.prototype.doAction = function() {
             else {
                 if (core.isset(data.loc) && core.isset(core.material.images.images[data.name]) && (data.action=="show" || data.action=="hide")) {
                     if (data.async) {
-                        core.events.animateImage(data.action, core.material.images.images[data.name], data.loc, data.time);
+                        core.events.animateImage(data.action, core.material.images.images[data.name], data.loc, data.time, data.keep);
                         this.doAction();
                     }
                     else {
-                        core.events.animateImage(data.action, core.material.images.images[data.name], data.loc, data.time, function() {
+                        core.events.animateImage(data.action, core.material.images.images[data.name], data.loc, data.time, data.keep, function() {
                             core.events.doAction();
                         });
                     }
@@ -637,11 +638,11 @@ events.prototype.doAction = function() {
             else {
                 if (core.isset(data.from) && core.isset(data.to) && core.isset(core.material.images.images[data.name])) {
                     if (data.async) {
-                        core.events.moveImage(core.material.images.images[data.name], data.from, data.to, data.time);
+                        core.events.moveImage(core.material.images.images[data.name], data.from, data.to, data.time, data.keep);
                         this.doAction();
                     }
                     else {
-                        core.events.moveImage(core.material.images.images[data.name], data.from, data.to, data.time, function() {
+                        core.events.moveImage(core.material.images.images[data.name], data.from, data.to, data.time, data.keep, function() {
                             core.events.doAction();
                         });
                     }
@@ -1355,7 +1356,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
 }
 
 ////// 图片淡入/淡出 //////
-events.prototype.animateImage = function (type, image, loc, time, callback) {
+events.prototype.animateImage = function (type, image, loc, time, keep, callback) {
     time = time||0;
     if ((type!='show' && type!='hide') || time<=0) {
         if (core.isset(callback)) callback();
@@ -1368,8 +1369,13 @@ events.prototype.animateImage = function (type, image, loc, time, callback) {
     var opacityVal = 0;
     if (type == 'hide') opacityVal = 1;
 
+    if (type == 'hide' && keep) {
+        core.clearMap('image');
+    }
+
     core.setOpacity('data', opacityVal);
-    core.canvas.data.drawImage(image, core.calValue(loc[0]), core.calValue(loc[1]));
+    var x = core.calValue(loc[0]), y = core.calValue(loc[1]);
+    core.canvas.data.drawImage(image, x, y);
     core.status.replay.animate=true;
     var animate = setInterval(function () {
         if (type=='show') opacityVal += 0.1;
@@ -1377,6 +1383,8 @@ events.prototype.animateImage = function (type, image, loc, time, callback) {
         core.setOpacity('data', opacityVal);
         if (opacityVal >=1 || opacityVal<=0) {
             clearInterval(animate);
+            if (type == 'show' && keep)
+                core.canvas.image.drawImage(image, x, y);
             core.clearMap('data');
             core.setOpacity('data', 1);
             core.status.replay.animate=false;
@@ -1386,11 +1394,13 @@ events.prototype.animateImage = function (type, image, loc, time, callback) {
 }
 
 ////// 移动图片 //////
-events.prototype.moveImage = function (image, from, to, time, callback) {
+events.prototype.moveImage = function (image, from, to, time, keep, callback) {
     time = time || 1000;
     clearInterval(core.interval.tipAnimate);
     core.setAlpha('data', 1);
     core.setOpacity('data', 1);
+
+    if (keep) core.clearMap('image');
 
     core.status.replay.animate=true;
     var fromX = core.calValue(from[0]), fromY = core.calValue(from[1]),
@@ -1411,6 +1421,7 @@ events.prototype.moveImage = function (image, from, to, time, callback) {
             clearInterval(animate);
             core.clearMap('data');
             core.status.replay.animate=false;
+            if (keep) core.canvas.data.drawImage(image, toX, toY);
             if (core.isset(callback)) callback();
         }
     }, time / 64);

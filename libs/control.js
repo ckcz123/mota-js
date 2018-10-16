@@ -288,6 +288,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
             'totalTime': totalTime,
             'currTime': 0,
             'hp': 0,
+            "battle": 0,
             'battleDamage': 0,
             'poisonDamage': 0,
             'extraDamage': 0,
@@ -1500,18 +1501,24 @@ control.prototype.setFg = function(color, time, callback) {
 }
 
 ////// 更新全地图显伤 //////
-control.prototype.updateDamage = function () {
+control.prototype.updateDamage = function (floorId, canvas) {
 
-    if (!core.isset(core.status.thisMap) || !core.isset(core.status.thisMap.blocks)) return;
+    if (!core.isset(floorId)) floorId = core.status.floorId;
+    if (!core.isset(canvas)) {
+        canvas = core.canvas.damage;
+        core.clearMap('damage');
+    }
+
+    // if (!core.isset(core.status.thisMap) || !core.isset(core.status.thisMap.blocks)) return;
     // 更新显伤
-    var mapBlocks = core.status.thisMap.blocks;
-    core.clearMap('damage');
+    var mapBlocks = core.status.maps[floorId].blocks;
     // 没有怪物手册
     if (!core.hasItem('book')) return;
-    core.setFont('damage', "bold 11px Arial");
+    canvas.font = "bold 11px Arial";
+
     var hero_hp = core.status.hero.hp;
     if (core.flags.displayEnemyDamage || core.flags.displayCritical) {
-        core.canvas.damage.textAlign = 'left';
+        canvas.textAlign = 'left';
         for (var b = 0; b < mapBlocks.length; b++) {
             var x = mapBlocks[b].x, y = mapBlocks[b].y;
             if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls.indexOf('enemy')==0
@@ -1520,7 +1527,7 @@ control.prototype.updateDamage = function () {
                 // 非系统默认的战斗事件（被覆盖）
                 if (mapBlocks[b].event.trigger != 'battle') {
                     // 判断显伤
-                    var event = core.floors[core.status.floorId].events[x+","+y];
+                    var event = core.floors[floorId].events[x+","+y];
                     if (core.isset(event) && !(event instanceof Array)) {
                         if (event.displayDamage === false)
                             continue;
@@ -1550,14 +1557,14 @@ control.prototype.updateDamage = function () {
                             damage += "-";
                     }
 
-                    core.setFillStyle('damage', '#000000');
-                    core.canvas.damage.fillText(damage, 32 * x + 2, 32 * (y + 1) - 2);
-                    core.canvas.damage.fillText(damage, 32 * x, 32 * (y + 1) - 2);
-                    core.canvas.damage.fillText(damage, 32 * x + 2, 32 * (y + 1));
-                    core.canvas.damage.fillText(damage, 32 * x, 32 * (y + 1));
+                    canvas.fillStyle = '#000000';
+                    canvas.fillText(damage, 32 * x + 2, 32 * (y + 1) - 2);
+                    canvas.fillText(damage, 32 * x, 32 * (y + 1) - 2);
+                    canvas.fillText(damage, 32 * x + 2, 32 * (y + 1));
+                    canvas.fillText(damage, 32 * x, 32 * (y + 1));
 
-                    core.setFillStyle('damage', color);
-                    core.canvas.damage.fillText(damage, 32 * x + 1, 32 * (y + 1) - 1);
+                    canvas.fillStyle = color;
+                    canvas.fillText(damage, 32 * x + 1, 32 * (y + 1) - 1);
                 }
 
                 // 临界显伤
@@ -1566,13 +1573,13 @@ control.prototype.updateDamage = function () {
                     if (critical.length>0) critical=critical[0];
                     critical = core.formatBigNumber(critical[0]);
                     if (critical == '???') critical = '?';
-                    core.setFillStyle('damage', '#000000');
-                    core.canvas.damage.fillText(critical, 32 * x + 2, 32 * (y + 1) - 2 - 10);
-                    core.canvas.damage.fillText(critical, 32 * x, 32 * (y + 1) - 2 - 10);
-                    core.canvas.damage.fillText(critical, 32 * x + 2, 32 * (y + 1) - 10);
-                    core.canvas.damage.fillText(critical, 32 * x, 32 * (y + 1) - 10);
-                    core.setFillStyle('damage', '#FFFFFF');
-                    core.canvas.damage.fillText(critical, 32 * x + 1, 32 * (y + 1) - 1 - 10);
+                    canvas.fillStyle = '#000000';
+                    canvas.fillText(critical, 32 * x + 2, 32 * (y + 1) - 2 - 10);
+                    canvas.fillText(critical, 32 * x, 32 * (y + 1) - 2 - 10);
+                    canvas.fillText(critical, 32 * x + 2, 32 * (y + 1) - 10);
+                    canvas.fillText(critical, 32 * x, 32 * (y + 1) - 10);
+                    canvas.fillStyle = '#FFFFFF';
+                    canvas.fillText(critical, 32 * x + 1, 32 * (y + 1) - 1 - 10);
                 }
 
             }
@@ -1580,22 +1587,40 @@ control.prototype.updateDamage = function () {
     }
     // 如果是领域&夹击
     if (core.flags.displayExtraDamage) {
-        core.canvas.damage.textAlign = 'center';
+        canvas.textAlign = 'center';
+
+        // 临时改变
+        var tempCheckBlock = null;
+        if (floorId != core.status.floorId) {
+            tempCheckBlock = core.clone(core.status.checkBlock);
+            core.status.thisMap = core.status.maps[floorId];
+            core.bigmap.width = core.floors[floorId].width || 13;
+            core.bigmap.height = core.floors[floorId].height || 13;
+            core.updateCheckBlock();
+        }
+
         for (var x=0;x<core.bigmap.width;x++) {
             for (var y=0;y<core.bigmap.height;y++) {
                 var damage = core.status.checkBlock.damage[x+core.bigmap.width*y];
                 if (damage>0) {
                     damage = core.formatBigNumber(damage);
-                    core.setFillStyle('damage', '#000000');
-                    core.canvas.damage.fillText(damage, 32 * x + 17, 32 * (y + 1) - 13);
-                    core.canvas.damage.fillText(damage, 32 * x + 15, 32 * (y + 1) - 15);
-                    core.canvas.damage.fillText(damage, 32 * x + 17, 32 * (y + 1) - 15);
-                    core.canvas.damage.fillText(damage, 32 * x + 15, 32 * (y + 1) - 13);
+                    canvas.fillStyle = '#000000';
+                    canvas.fillText(damage, 32 * x + 17, 32 * (y + 1) - 13);
+                    canvas.fillText(damage, 32 * x + 15, 32 * (y + 1) - 15);
+                    canvas.fillText(damage, 32 * x + 17, 32 * (y + 1) - 15);
+                    canvas.fillText(damage, 32 * x + 15, 32 * (y + 1) - 13);
 
-                    core.setFillStyle('damage', '#FF7F00');
-                    core.canvas.damage.fillText(damage, 32 * x + 16, 32 * (y + 1) - 14);
+                    canvas.fillStyle = '#FF7F00';
+                    canvas.fillText(damage, 32 * x + 16, 32 * (y + 1) - 14);
                 }
             }
+        }
+
+        if (floorId!=core.status.floorId) {
+            core.status.thisMap = core.status.maps[core.status.floorId];
+            core.status.checkBlock = tempCheckBlock;
+            core.bigmap.width = core.floors[core.status.floorId].width || 13;
+            core.bigmap.height = core.floors[core.status.floorId].height || 13;
         }
     }
 }

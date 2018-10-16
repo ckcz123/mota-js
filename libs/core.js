@@ -233,8 +233,7 @@ core.prototype.init = function (coreData, callback) {
     core.platform.isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent);
     core.platform.isQQ = /QQ/i.test(navigator.userAgent);
     core.platform.isWeChat = /MicroMessenger/i.test(navigator.userAgent);
-    core.platform.useLocalForage = core.getLocalStorage('useLocalForage', true);
-    if (core.platform.isIOS) core.platform.useLocalForage=false;
+    core.platform.useLocalForage = core.getLocalStorage('useLocalForage', !core.platform.isIOS);
     if (core.platform.useLocalForage) {
         try {
             core.setLocalForage("__test__", LZString.compress("__test__"), function() {

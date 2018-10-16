@@ -137,6 +137,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 记录
 	core.status.hero.statistics.battleDamage += damage;
+	core.status.hero.statistics.battle++;
 
 	if (core.status.hero.hp<=0) {
 		core.status.hero.hp=0;
@@ -366,7 +367,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		[8, "反击", "战斗时，怪物每回合附加角色攻击的"+Math.floor(100*core.values.counterAttack||0)+"%作为伤害，无视角色防御"],
 		[9, "净化", "战斗前，怪物附加勇士魔防的"+core.values.purify+"倍作为伤害"],
 		[10, "模仿", "怪物的攻防和勇士攻防相等"],
-		[11, "吸血", function (enemy) {return "战斗前，怪物首先吸取角色的"+Math.floor(100*enemy.value||0)+"%生命作为伤害"+(enemy.add?"，并把伤害数值加到自身生命上":"");}],
+		[11, "吸血", function (enemy) {return "战斗前，怪物首先吸取角色的"+Math.floor(100*enemy.value||0)+"%生命（约" + Math.floor((enemy.value||0)*core.getStatus('hp')) + "点）作为伤害"+(enemy.add?"，并把伤害数值加到自身生命上":"");}],
 		[12, "中毒", "战斗后，勇士陷入中毒状态，每一步损失生命"+core.values.poisonDamage+"点"],
 		[13, "衰弱", "战斗后，勇士陷入衰弱状态，攻防暂时下降"+(core.values.weakValue>=1?core.values.weakValue+"点":parseInt(core.values.weakValue*100)+"%")],
 		[14, "诅咒", "战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验"],

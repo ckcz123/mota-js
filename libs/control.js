@@ -288,6 +288,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
             'totalTime': totalTime,
             'currTime': 0,
             'hp': 0,
+            "battle": 0,
             'battleDamage': 0,
             'poisonDamage': 0,
             'extraDamage': 0,

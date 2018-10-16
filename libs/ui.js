@@ -1440,9 +1440,30 @@ ui.prototype.drawBookDetail = function (index) {
     var enemyId=enemy.id;
     var hints=core.enemys.getSpecialHint(core.material.enemys[enemyId]);
 
-
     if (hints.length==0)
         hints.push("该怪物无特殊属性。");
+
+    // 吸血怪的最低生命值
+    if (core.enemys.hasSpecial(core.material.enemys[enemyId].special, 11)) {
+        var damage = core.getDamage(enemyId);
+        if (damage != null) {
+            // 二分HP
+            var start = 1, end = 100 * damage;
+            var nowHp = core.status.hero.hp;
+            while (start<end) {
+                var mid = Math.floor((start+end)/2);
+                core.status.hero.hp = mid;
+                if (core.canBattle(enemyId)) end = mid;
+                else start = mid+1;
+            }
+            core.status.hero.hp = start;
+            if (core.canBattle(enemyId)) {
+                hints.push("");
+                hints.push("打死该怪物最低需要生命值："+core.formatBigNumber(start));
+            }
+            core.status.hero.hp = nowHp;
+        }
+    }
 
     hints.push("");
     var criticals = core.enemys.nextCriticals(enemyId, 10).map(function (v) {
@@ -2300,7 +2321,7 @@ ui.prototype.drawStatistics = function () {
         +"，总游戏时长"+formatTime(statistics.totalTime)
         +"。\n瞬间移动次数："+statistics.moveDirectly+"，共计少走"+statistics.ignoreSteps+"步。"
         +"\n\n总计通过血瓶恢复生命值为"+core.formatBigNumber(statistics.hp)+"点。\n\n"
-        +"总计受到的伤害为"+core.formatBigNumber(statistics.battleDamage+statistics.poisonDamage+statistics.extraDamage)
+        +"总计打死了"+statistics.battle+"个怪物，受到的伤害为"+core.formatBigNumber(statistics.battleDamage+statistics.poisonDamage+statistics.extraDamage)
         +"，其中战斗伤害"+core.formatBigNumber(statistics.battleDamage)+"点"
         +(core.flags.enableDebuff?("，中毒伤害"+core.formatBigNumber(statistics.poisonDamage)+"点"):"")
         +"，领域/夹击/阻击/血网伤害"+core.formatBigNumber(statistics.extraDamage)+"点。",

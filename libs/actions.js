@@ -309,6 +309,10 @@ actions.prototype.keyUp = function(keyCode) {
             if (core.status.heroStop)
                 core.doSL("autoSave", "load");
             break;
+        case 66: // B
+            if (core.status.heroStop)
+                core.ui.drawStatistics();
+            break;
         case 83: // S
             if (core.status.heroStop)
                 core.save(true);

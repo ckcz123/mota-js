@@ -132,8 +132,9 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
 
     // 清空图片和天气
     core.clearMap('animate');
-    core.dom.gif2.innerHTML = "";
+    core.clearMap('image');
     core.clearMap('weather')
+    core.dom.gif2.innerHTML = "";
     core.animateFrame.weather.type = null;
     core.animateFrame.weather.level = 0;
     core.animateFrame.weather.nodes = [];
@@ -587,10 +588,10 @@ events.prototype.doAction = function() {
             break;
         case "showImage": // 显示图片
             if (core.isset(data.loc) && core.isset(core.material.images.images[data.name])) {
-                core.canvas.animate.drawImage(core.material.images.images[data.name],
+                core.canvas.image.drawImage(core.material.images.images[data.name],
                     core.calValue(data.loc[0]), core.calValue(data.loc[1]));
             }
-            else core.clearMap('animate');
+            else core.clearMap('image');
             this.doAction();
             break;
         case "animateImage": // 淡入淡出图片
@@ -1369,7 +1370,7 @@ events.prototype.animateImage = function (type, image, loc, time, keep, callback
     if (type == 'hide') opacityVal = 1;
 
     if (type == 'hide' && keep) {
-        core.clearMap('animate');
+        core.clearMap('image');
     }
 
     core.setOpacity('data', opacityVal);
@@ -1383,7 +1384,7 @@ events.prototype.animateImage = function (type, image, loc, time, keep, callback
         if (opacityVal >=1 || opacityVal<=0) {
             clearInterval(animate);
             if (type == 'show' && keep)
-                core.canvas.animate.drawImage(image, x, y);
+                core.canvas.image.drawImage(image, x, y);
             core.clearMap('data');
             core.setOpacity('data', 1);
             core.status.replay.animate=false;
@@ -1399,7 +1400,7 @@ events.prototype.moveImage = function (image, from, to, time, keep, callback) {
     core.setAlpha('data', 1);
     core.setOpacity('data', 1);
 
-    if (keep) core.clearMap('animate');
+    if (keep) core.clearMap('image');
 
     core.status.replay.animate=true;
     var fromX = core.calValue(from[0]), fromY = core.calValue(from[1]),

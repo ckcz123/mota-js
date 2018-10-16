@@ -285,6 +285,10 @@ p#name {
     z-index: 70;
 }
 
+#image {
+    z-index: 75;
+}
+
 #weather {
     z-index: 80;
 }

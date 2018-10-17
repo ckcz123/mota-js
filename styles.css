@@ -285,10 +285,6 @@ p#name {
     z-index: 70;
 }
 
-#image {
-    z-index: 75;
-}
-
 #weather {
     z-index: 80;
 }
@@ -299,6 +295,10 @@ p#name {
 
 #curtain {
     z-index: 100;
+}
+
+#image {
+    z-index: 105;
 }
 
 #ui {

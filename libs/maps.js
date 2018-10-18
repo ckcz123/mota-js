@@ -10,12 +10,18 @@ maps.prototype.init = function() {
 ////// 加载某个楼层（从剧本或存档中） //////
 maps.prototype.loadFloor = function (floorId, map) {
     var floor = core.floors[floorId];
+
+    if (!core.isset(map)) map = floor.map;
+    if (map instanceof Array) {
+        map = {"map": map};
+    }
     var content = {};
-    content['floorId'] = floor.floorId;
-    content['name'] = floor.name;
-    content['title'] = floor.title;
-    content['canFlyTo'] = floor.canFlyTo;
-    if (!core.isset(map)) map=floor.map;
+    ["floorId", "title", "name", "canFlyTo", "canUseQuickShop", "cannotViewMap", "color", "weather",
+        "defaultGround", "images", "item_ratio", "upFloor", "bgm", "downFloor", "underGround"].forEach(function (e) {
+        if (core.isset(map[e])) content[e] = core.clone(map[e]);
+        else content[e] = core.clone(floor[e]);
+    });
+    map=map.map;
     var mapIntoBlocks = function(map,maps,floor,floorId){
         var blocks = [];
         var mw = core.floors[floorId].width || 13;
@@ -168,7 +174,7 @@ maps.prototype.save = function(maps, floorId) {
         return map;
     }
 
-    var thisFloor = maps[floorId];
+    var thisFloor = core.clone(maps[floorId]);
     var mw = core.floors[floorId].width || 13;
     var mh = core.floors[floorId].height || 13;
 
@@ -186,7 +192,9 @@ maps.prototype.save = function(maps, floorId) {
         }
         else blocks[block.y][block.x] = block.id;
     });
-    return blocks;
+    delete thisFloor.blocks;
+    thisFloor.map = blocks;
+    return main.mode == 'editor' ? blocks : thisFloor;
 }
 
 ////// 更改地图画布的尺寸
@@ -383,7 +391,7 @@ maps.prototype.drawBgFgMap = function (floorId, canvas, name) {
     var width = core.floors[floorId].width || 13;
     var height = core.floors[floorId].height || 13;
 
-    var groundId = core.floors[floorId].defaultGround || "ground";
+    var groundId = (core.status.maps||core.floors)[floorId].defaultGround || "ground";
     var blockIcon = core.material.icons.terrains[groundId];
     var blockImage = core.material.images.terrains;
 
@@ -442,8 +450,8 @@ maps.prototype.drawMap = function (mapName, callback) {
         core.maps.drawBgFgMap(mapName, core.canvas.fg, "fg");
 
         var images = [];
-        if (core.isset(core.floors[mapName].images)) {
-            images = core.floors[mapName].images;
+        if (core.isset(core.status.maps[mapName].images)) {
+            images = core.status.maps[mapName].images;
             if (typeof images == 'string') {
                 images = [[0, 0, images]];
             }

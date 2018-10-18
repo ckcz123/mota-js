@@ -185,6 +185,7 @@ action
     |   setText_s
     |   tip_s
     |   setValue_s
+    |   setFloor_s
     |   show_s
     |   hide_s
     |   trigger_s
@@ -366,6 +367,21 @@ colour : this.dataColor
 var code = '{"type": "setValue", "name": "'+idString_e_0+'", "value": "'+expression_0+'"},\n';
 return code;
 */;
+
+setFloor_s
+    :   '设置楼层属性' ':' Floor_Meta_List '楼层名' IdString? '值' EvalString Newline
+
+
+/* setFloor_s
+tooltip : setFloor：设置楼层属性；该楼层属性和编辑器中的楼层属性一一对应
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=setFloor%ef%bc%9a%e8%ae%be%e7%bd%ae%e6%a5%bc%e5%b1%82%e5%b1%9e%e6%80%a7
+default : ["title","","'字符串类型的值要加引号，其他类型则不用'"]
+colour : this.dataColor
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+var code = '{"type": "setFloor", "name": "'+Floor_Meta_List_0+'"'+IdString_0+', "value": "'+EvalString_0+'"},\n';
+return code;
+*/;
+
 
 show_s
     :   '显示事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' Int? Newline
@@ -1461,6 +1477,9 @@ Bg_Fg_List
     :   '背景层'|'前景层'
     /*Bg_Fg_List ['bg','fg']*/;
 
+Floor_Meta_List
+    :   '楼层中文名'|'状态栏名称'|'能否使用楼传'|'能否打开快捷商店'|'是否不可浏览地图'|'默认地面ID'|'楼层贴图'|'宝石血瓶效果'|'上楼点坐标'|'下楼点坐标'|'背景音乐'|'画面色调'|'天气和强度'|'是否地下层'
+    /*Floor_Meta_List ['title','name','canFlyTo', 'canUseQuickShop', 'cannotViewMap', 'defaultGround', 'images', 'item_ratio', 'upFloor', 'downFloor', 'bgm', 'color', 'weather', 'underGround']*/;
 
 Bool:   'TRUE' 
     |   'FALSE'
@@ -1920,6 +1939,10 @@ ActionParser.prototype.parseAction = function() {
         MotaActionBlocks['idString_e'].xmlText([data.name]),
         MotaActionBlocks['evalString_e'].xmlText([data.value]),
         this.next]);
+      break;
+    case "setFloor":
+      this.next = MotaActionBlocks['setFloor_s'].xmlText([
+        data.name, data.floorId||null, data.value, this.next]);
       break;
     case "input":
       this.next = MotaActionBlocks['input_s'].xmlText([

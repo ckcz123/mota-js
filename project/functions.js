@@ -345,7 +345,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 返回null代表可以使用
 
 	// 检查当前楼层的canUseQuickShop选项是否为false
-	if (core.floors[core.status.floorId].canUseQuickShop === false)
+	if (core.status.thisMap.canUseQuickShop === false)
 		return '当前楼层不能使用快捷商店。';
 
 	return null;
@@ -574,8 +574,8 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var fromId = core.status.floorId;
 	
 	// 检查能否飞行
-	if (!core.floors[fromId].canFlyTo || !core.floors[toId].canFlyTo) {
-		core.drawTip("无法飞往" + core.floors[toId].title +"！");
+	if (!core.status.maps[fromId].canFlyTo || !core.status.maps[toId].canFlyTo) {
+		core.drawTip("无法飞往" + core.status.maps[toId].title +"！");
 		return false;
 	}
 	
@@ -583,7 +583,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var fromIndex = core.floorIds.indexOf(fromId), toIndex = core.floorIds.indexOf(toId);
 	var stair = fromIndex<=toIndex?"downFloor":"upFloor";
 	// 地下层：同层传送至上楼梯
-	if (fromIndex == toIndex && core.floorIds[fromId].underGround) stair = "upFloor";
+	if (fromIndex == toIndex && core.status.maps[fromId].underGround) stair = "upFloor";
 	// 记录录像
 	core.status.route.push("fly:"+toId);
 	// 传送
@@ -602,6 +602,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.flags.enableHPMax) {
 		core.setStatus('hp', Math.min(core.getStatus('hpmax'), core.getStatus('hp')));
 	}
+
+	// 设置楼层名
+	core.events.setFloorName();
 
 	// 设置勇士名字和图标
 	core.statusBar.name.innerHTML = core.getStatus('name');

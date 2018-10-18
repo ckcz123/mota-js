@@ -87,6 +87,7 @@ editor_blockly = function () {
       MotaActionBlocks['setValue_s'].xmlText([
         MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
       ]),
+      MotaActionBlocks['setFloor_s'].xmlText(),
       MotaActionBlocks['input_s'].xmlText(),
       MotaActionBlocks['input2_s'].xmlText(),
       MotaActionBlocks['update_s'].xmlText(),

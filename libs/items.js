@@ -22,7 +22,7 @@ items.prototype.getItemEffect = function(itemId, itemNum) {
     var itemCls = core.material.items[itemId].cls;
     // 消耗品
     if (itemCls === 'items') {
-        var ratio = parseInt(core.floors[core.status.floorId].item_ratio) || 1;
+        var ratio = parseInt(core.status.thisMap.item_ratio) || 1;
         var curr_hp = core.status.hero.hp;
         if (itemId in this.itemEffect)eval(this.itemEffect[itemId]);
         core.status.hero.statistics.hp += core.status.hero.hp - curr_hp;
@@ -37,7 +37,7 @@ items.prototype.getItemEffectTip = function(itemId) {
     var itemCls = core.material.items[itemId].cls;
     // 消耗品
     if (itemCls === 'items') {
-        var ratio = parseInt(core.floors[core.status.floorId].item_ratio) || 1;
+        var ratio = parseInt(core.status.thisMap.item_ratio) || 1;
         if (itemId in this.itemEffectTip) return eval(this.itemEffectTip[itemId])||"";
     }
     return "";

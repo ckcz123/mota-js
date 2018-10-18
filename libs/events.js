@@ -793,6 +793,13 @@ events.prototype.doAction = function() {
                 this.doAction();
             }
             break;
+        case "setFloor":
+            {
+                core.status.maps[data.floorId||core.status.floorId][data.name] = core.calValue(data.value);
+                core.updateStatusBar();
+                this.doAction();
+                break;
+            }
         case "setHeroIcon":
             {
                 this.setHeroIcon(data.name);
@@ -1188,6 +1195,29 @@ events.prototype.trigger = function (x, y) {
     }
 }
 
+events.prototype.setFloorName = function (floorId) {
+    floorId = floorId || core.status.floorId;
+    // 根据文字判断是否斜体
+    var floorName = core.status.maps[floorId].name || "";
+    if (typeof floorName == 'number') floorName = ""+floorName;
+    if (!core.isset(floorName) || floorName=="") floorName="&nbsp;"
+    if (core.statusBar.floor.innerHTML == floorName) return;
+    core.statusBar.floor.innerHTML = floorName;
+    if (/^[+-]?\d+$/.test(floorName)) {
+        core.statusBar.floor.style.fontStyle = 'italic';
+        core.statusBar.floor.style.fontSize = '1.1em';
+    }
+    else {
+        core.statusBar.floor.style.fontStyle = 'normal';
+        if (floorName.length<=5)
+            core.statusBar.floor.style.fontSize = '1.1em';
+        else if (floorName.length==6)
+            core.statusBar.floor.style.fontSize = '0.9em';
+        else
+            core.statusBar.floor.style.fontSize = '0.7em';
+    }
+}
+
 ////// 楼层切换 //////
 events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback, fromLoad) {
 
@@ -1219,9 +1249,9 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
     if (core.isset(stair)) {
         if (!core.isset(heroLoc)) heroLoc={};
 
-        if (core.isset(core.floors[floorId][stair])) {
-            heroLoc.x = core.floors[floorId][stair][0];
-            heroLoc.y = core.floors[floorId][stair][1];
+        if (core.isset(core.status.maps[floorId][stair])) {
+            heroLoc.x = core.status.maps[floorId][stair][0];
+            heroLoc.y = core.status.maps[floorId][stair][1];
         }
         else {
             var blocks = core.status.maps[floorId].blocks;
@@ -1249,35 +1279,19 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
 
         var changing = function () {
 
-            // 根据文字判断是否斜体
-            var floorName = core.status.maps[floorId].name;
-            if (!core.isset(floorName) || floorName=="") floorName="&nbsp;"
-            core.statusBar.floor.innerHTML = floorName;
-            if (/^[+-]?\d+$/.test(floorName)) {
-                core.statusBar.floor.style.fontStyle = 'italic';
-                core.statusBar.floor.style.fontSize = '1.1em';
-            }
-            else {
-                core.statusBar.floor.style.fontStyle = 'normal';
-                if (floorName.length<=5)
-                    core.statusBar.floor.style.fontSize = '1.1em';
-                else if (floorName.length==6)
-                    core.statusBar.floor.style.fontSize = '0.9em';
-                else
-                    core.statusBar.floor.style.fontSize = '0.7em';
-            }
+            core.events.setFloorName(floorId);
 
             // 更改BGM
-            if (core.isset(core.floors[floorId].bgm)) {
-                var bgm = core.floors[floorId].bgm;
+            if (core.isset(core.status.maps[floorId].bgm)) {
+                var bgm = core.status.maps[floorId].bgm;
                 if (bgm instanceof Array) bgm = bgm[0];
                 core.playBgm(bgm);
             }
 
             // 不存在事件时，更改画面色调
             var color = core.getFlag('color', null);
-            if (!core.isset(color) && core.isset(core.floors[floorId].color)) {
-                color = core.floors[floorId].color;
+            if (!core.isset(color) && core.isset(core.status.maps[floorId].color)) {
+                color = core.status.maps[floorId].color;
             }
             if (core.isset(color)) {
                 // 直接变色
@@ -1296,8 +1310,8 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
 
             // 更改天气
             var weather = core.getFlag('weather', null);
-            if (!core.isset(weather) && core.isset(core.floors[floorId].weather)) {
-                weather = core.floors[floorId].weather;
+            if (!core.isset(weather) && core.isset(core.status.maps[floorId].weather)) {
+                weather = core.status.maps[floorId].weather;
             }
             if (core.isset(weather)) {
                 core.setWeather(weather[0], weather[1])

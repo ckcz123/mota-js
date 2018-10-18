@@ -359,6 +359,31 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 
 另外注意一点的是，如果hp被设置成了0或以下，将触发lose事件，直接死亡。
 
+### setFloor：设置楼层属性
+
+使用`{"type":"setFloor"}`可以设置某层楼的楼层属性。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "setFloor", "name": "title", "value": "'主塔 0 层'" } // 设置当前楼层的中文名为主塔0层
+    {"type": "setFloor", "name": "canFlyTo", "floorId": "MT2", "value": "false" } // 设置MT2层不可飞行
+    {"type": "setFloor", "name": "cannotViewMap", "floorId": "MT0", "value": "true" } // 设置MT0层不可被浏览地图
+    {"type": "setFloor", "name": "item_ratio", "value": "5" } // 设置当前楼层的宝石血瓶属性加成为5
+    {"type": "setFloor", "name": "images", "value": "[[0,0,'tree.png',2]]" } // 设置当前楼层的楼层贴图
+    {"type": "setFloor", "name": "upFloor", "value": "[2,3]" } // 设置当前楼层的上楼梯
+    {"type": "setFloor", "name": "bgm", "floorId": "MT10", "value": "'233.mp3'" } // 设置当前楼层的背景音乐
+]
+```
+
+name为必填项，代表要修改的楼层属性。其和楼层属性中一一对应，目前只能为`"title", "name", "canFlyTo", "canUseQuickShop", "cannotViewMap", "color", "weather",
+"defaultGround", "images", "item_ratio", "upFloor", "bgm", "downFloor", "underGround"`。
+
+floorId为可选项，代表要修改的楼层ID；可以省略代表当前楼层。
+
+value为必填项，代表要修改到的数值。其应该和楼层属性中的对应数值类型完全一致，对于字符串需要加单引号，其他类型（数字、true/false、数组）等则不需要引号。
+
+!> 如果修改到的是字符串类型，比如楼层中文名、状态栏名称、地面素材ID、背景音乐等，必须加引号，否则会报错。
+
 ### show：将一个禁用事件启用
 
 我们上面提到了，所有事件都必须靠其他事件驱动来完成，不存在当某个flag为true时自动执行的说法。那么，我们自然要有启用事件的写法。

@@ -1047,14 +1047,14 @@ actions.prototype.clickViewMaps = function (x,y) {
 
     if(y<=4 && (mh==13 || (x>=2 && x<=10))) {
         index++;
-        while (index<core.floorIds.length && index!=now && core.floors[core.floorIds[index]].cannotViewMap)
+        while (index<core.floorIds.length && index!=now && core.status.maps[core.floorIds[index]].cannotViewMap)
             index++;
         if (index<core.floorIds.length)
             core.ui.drawMaps(index);
     }
     else if (y>=8 && (mh==13 || (x>=2 && x<=10))) {
         index--;
-        while (index>=0 && index!=now && core.floors[core.floorIds[index]].cannotViewMap)
+        while (index>=0 && index!=now && core.status.maps[core.floorIds[index]].cannotViewMap)
             index--;
         if (index>=0)
             core.ui.drawMaps(index);

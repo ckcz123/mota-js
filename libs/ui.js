@@ -1628,7 +1628,7 @@ ui.prototype.drawMaps = function (index, x, y) {
     core.setFont('data', '16px Arial');
 
 
-    var text = core.floors[floorId].title;
+    var text = core.status.maps[floorId].title;
     if (mw>13 || mh>13) text+=" ["+(x-6)+","+(y-6)+"]";
     var textX = 16, textY = 18, width = textX + core.canvas.data.measureText(text).width + 16, height = 42;
     core.fillRect('data', 5, 5, width, height, '#000');
@@ -2050,8 +2050,8 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
 
     // background image
     var images = [];
-    if (core.isset(core.floors[floorId].images)) {
-        images = core.floors[floorId].images;
+    if (core.isset((core.status.maps||core.floors)[floorId].images)) {
+        images = (core.status.maps||core.floors)[floorId].images;
         if (typeof images == 'string') {
             images = [[0, 0, images]];
         }
@@ -2203,7 +2203,7 @@ ui.prototype.drawStatistics = function () {
     var current = core.clone(total);
 
     core.floorIds.forEach(function (floorId) {
-        var floor=core.floors[floorId];
+        var floor=core.status.maps[floorId];
         var blocks=core.status.maps[floorId].blocks;
         // 隐藏层不给看
         if (floor.cannotViewMap && floorId!=core.status.floorId) return;

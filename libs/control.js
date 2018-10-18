@@ -2590,8 +2590,8 @@ control.prototype.resumeBgm = function () {
         }
         else {
             if (core.bgms.length>0) {
-                if (core.isset(core.floors[core.status.floorId].bgm)) {
-                    core.playBgm(core.floors[core.status.floorId].bgm);
+                if (core.isset(core.status.thisMap.bgm)) {
+                    core.playBgm(core.status.thisMap.bgm);
                 }
                 else
                     core.playBgm(core.bgms[0]);

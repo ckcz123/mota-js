@@ -1219,9 +1219,9 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
     if (core.isset(stair)) {
         if (!core.isset(heroLoc)) heroLoc={};
 
-        if (core.isset(core.floors[floorId][stair])) {
-            heroLoc.x = core.floors[floorId][stair][0];
-            heroLoc.y = core.floors[floorId][stair][1];
+        if (core.isset(core.status.maps[floorId][stair])) {
+            heroLoc.x = core.status.maps[floorId][stair][0];
+            heroLoc.y = core.status.maps[floorId][stair][1];
         }
         else {
             var blocks = core.status.maps[floorId].blocks;
@@ -1268,16 +1268,16 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             }
 
             // 更改BGM
-            if (core.isset(core.floors[floorId].bgm)) {
-                var bgm = core.floors[floorId].bgm;
+            if (core.isset(core.status.maps[floorId].bgm)) {
+                var bgm = core.status.maps[floorId].bgm;
                 if (bgm instanceof Array) bgm = bgm[0];
                 core.playBgm(bgm);
             }
 
             // 不存在事件时，更改画面色调
             var color = core.getFlag('color', null);
-            if (!core.isset(color) && core.isset(core.floors[floorId].color)) {
-                color = core.floors[floorId].color;
+            if (!core.isset(color) && core.isset(core.status.maps[floorId].color)) {
+                color = core.status.maps[floorId].color;
             }
             if (core.isset(color)) {
                 // 直接变色
@@ -1296,8 +1296,8 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
 
             // 更改天气
             var weather = core.getFlag('weather', null);
-            if (!core.isset(weather) && core.isset(core.floors[floorId].weather)) {
-                weather = core.floors[floorId].weather;
+            if (!core.isset(weather) && core.isset(core.status.maps[floorId].weather)) {
+                weather = core.status.maps[floorId].weather;
             }
             if (core.isset(weather)) {
                 core.setWeather(weather[0], weather[1])

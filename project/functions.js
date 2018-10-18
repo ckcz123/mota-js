@@ -603,6 +603,9 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.setStatus('hp', Math.min(core.getStatus('hpmax'), core.getStatus('hp')));
 	}
 
+	// 设置楼层名
+	core.events.setFloorName();
+
 	// 设置勇士名字和图标
 	core.statusBar.name.innerHTML = core.getStatus('name');
 

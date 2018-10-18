@@ -16,9 +16,9 @@ maps.prototype.loadFloor = function (floorId, map) {
         map = {"map": map};
     }
     var content = {};
-    ["floorId", "title", "name", "canFlyTo", "canUseQuickShop", "cannotViewMap",
-        "defaultGround", "images", "item_ratio", "upFloor", "bgm", "downFloor"].forEach(function (e) {
-        if (core.isset(map) && core.isset(map[e])) content[e] = core.clone(map[e]);
+    ["floorId", "title", "name", "canFlyTo", "canUseQuickShop", "cannotViewMap", "color", "weather",
+        "defaultGround", "images", "item_ratio", "upFloor", "bgm", "downFloor", "underGround"].forEach(function (e) {
+        if (core.isset(map[e])) content[e] = core.clone(map[e]);
         else content[e] = core.clone(floor[e]);
     });
     map=map.map;
@@ -194,7 +194,7 @@ maps.prototype.save = function(maps, floorId) {
     });
     delete thisFloor.blocks;
     thisFloor.map = blocks;
-    return thisFloor;
+    return main.mode == 'editor' ? blocks : thisFloor;
 }
 
 ////// 更改地图画布的尺寸

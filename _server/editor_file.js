@@ -476,15 +476,24 @@ editor_file = function (editor, callback) {
         }
         ;
         if (isset(actionList) && actionList.length > 0) {
-            actionList.forEach(function (value) {
+            var tempmap=[];
+            for(var ii=0;ii<actionList.length;ii++){
+                var value=actionList[ii];
+                // 是tilesets 且未定义 且在这里是第一次定义
+                if(idnum>=editor.core.icons.tilesetStartOffset && !isset(editor.core.maps.blocksInfo[idnum]) && tempmap.indexOf(idnum)===-1){
+                    actionList.splice(ii,0,["add","['" + idnum + "']",{"cls": "tileset", "id": "X"+idnum, "noPass": true}]);
+                    ii++;
+                }
                 value[1] = "['" + idnum + "']" + value[1];
-            });
+            }
             saveSetting('maps', actionList, function (err) {
                 callback([
                     (function () {
-                        var locObj = Object.assign({}, editor.core.maps.blocksInfo[idnum]);
+                        var sourceobj=editor.core.maps.blocksInfo[idnum];
+                        if(!isset(sourceobj) && idnum>=editor.core.icons.tilesetStartOffset)sourceobj={"cls": "tileset", "id": "X"+idnum, "noPass": true}
+                        var locObj = Object.assign({}, sourceobj);
                         Object.keys(editor_file.comment._data.maps._data).forEach(function (v) {
-                            if (!isset(editor.core.maps.blocksInfo[idnum][v]))
+                            if (!isset(sourceobj[v]))
                                 locObj[v] = null;
                         });
                         locObj.idnum = idnum;
@@ -496,9 +505,11 @@ editor_file = function (editor, callback) {
         } else {
             callback([
                 (function () {
-                    var locObj = Object.assign({}, editor.core.maps.blocksInfo[idnum]);
+                    var sourceobj=editor.core.maps.blocksInfo[idnum];
+                    if(!isset(sourceobj) && idnum>=editor.core.icons.tilesetStartOffset)sourceobj={"cls": "tileset", "id": "X"+idnum, "noPass": true}
+                    var locObj = Object.assign({}, sourceobj);
                     Object.keys(editor_file.comment._data.maps._data).forEach(function (v) {
-                        if (!isset(editor.core.maps.blocksInfo[idnum][v]))
+                        if (!isset(sourceobj[v]))
                             locObj[v] = null;
                     });
                     locObj.idnum = idnum;

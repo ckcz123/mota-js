@@ -81,7 +81,12 @@ editor.prototype.init = function (callback) {
 editor.prototype.idsInit = function (maps, icons) {
     editor.ids = [0];
     editor.indexs = [];
-    var MAX_NUM = Math.max.apply(null,Object.keys(maps_90f36752_8815_4be8_b32b_d7fad1d0542e));
+    var MAX_NUM = 0;
+    var keys=Object.keys(maps_90f36752_8815_4be8_b32b_d7fad1d0542e);
+    for(var ii=0;ii<keys.length;ii++){
+        var v=~~keys[ii];
+        if(v>MAX_NUM && v<core.icons.tilesetStartOffset)MAX_NUM=v;
+    }
     editor.MAX_NUM=MAX_NUM;
     var getInfoById = function (id) {
         var block = maps.initBlock(0, 0, id);

@@ -482,6 +482,7 @@ editor_file = function (editor, callback) {
                 // 是tilesets 且未定义 且在这里是第一次定义
                 if(idnum>=editor.core.icons.tilesetStartOffset && !isset(editor.core.maps.blocksInfo[idnum]) && tempmap.indexOf(idnum)===-1){
                     actionList.splice(ii,0,["add","['" + idnum + "']",{"cls": "tileset", "id": "X"+idnum, "noPass": true}]);
+                    tempmap.push(idnum);
                     ii++;
                 }
                 value[1] = "['" + idnum + "']" + value[1];

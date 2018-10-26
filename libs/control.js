@@ -2412,7 +2412,7 @@ control.prototype.saveData = function() {
 
     var data = {
         'floorId': core.status.floorId,
-        'hero': core.clone(core.status.hero),
+        'hero': hero,
         'hard': core.status.hard,
         'maps': core.maps.save(core.status.maps),
         'route': core.encodeRoute(core.status.route),

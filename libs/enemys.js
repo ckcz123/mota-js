@@ -169,7 +169,7 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
             if (nextAtk!=pre) {
                 var nextInfo = this.getDamageInfo(enemy, core.status.hero.hp, nextAtk, core.status.hero.def, core.status.hero.mdef, x, y, floorId);
                 if (nextInfo==null) break;
-                list.push([nextAtk-hero_atk,info.damage-nextInfo.damage]);
+                list.push([nextAtk-hero_atk,Math.floor(info.damage-nextInfo.damage)]);
                 if (nextInfo.damage<=0 && !core.flags.enableNegativeDamage) break;
                 pre = nextAtk;
             }
@@ -184,7 +184,7 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
             if (nextInfo==null) break;
             if (pre>nextInfo.damage) {
                 pre = nextInfo.damage;
-                list.push([atk-hero_atk, info.damage-nextInfo.damage]);
+                list.push([atk-hero_atk, Math.floor(info.damage-nextInfo.damage)]);
                 if (nextInfo.damage<=0 && !core.flags.enableNegativeDamage) break;
                 if (list.length>=number) break;
             }

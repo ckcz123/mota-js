@@ -225,6 +225,17 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         ]
                     },
                     "_data": "该图块是否不可通行；true代表不可通行，false代表可通行，null代表使用系统缺省值"
+                },
+                "canBreak": {
+                    "_leaf": true,
+                    "_type": "select",
+                    "_select": {
+                        "values": [
+                            true,
+                            false
+                        ]
+                    },
+                    "_data": "该图块是否可被破炸；true代表可以，false代表不可以"
                 }
             }
         },

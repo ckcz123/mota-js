@@ -242,6 +242,11 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
                 core.restart();
             })
         }
+        else if (core.hasFlag('consoleOpened')) {
+            core.drawText("\t[系统提示]本存档开启过控制台，无法上传成绩", function () {
+                core.restart();
+            })
+        }
         else {
             confirmUpload();
         }
@@ -1420,10 +1425,11 @@ events.prototype.moveImage = function (image, from, to, time, keep, callback) {
     var fromX = core.calValue(from[0]), fromY = core.calValue(from[1]),
         toX = core.calValue(to[0]), toY = core.calValue(to[1]);
     var step = 0;
+    var per_time = 10, steps = parseInt(time / per_time);
     var drawImage = function () {
         core.clearMap('data');
-        var nowX = parseInt(fromX + (toX-fromX)*step/64);
-        var nowY = parseInt(fromY + (toY-fromY)*step/64);
+        var nowX = parseInt(fromX + (toX-fromX)*step/steps);
+        var nowY = parseInt(fromY + (toY-fromY)*step/steps);
         core.canvas.data.drawImage(image, nowX, nowY);
     }
 
@@ -1431,14 +1437,14 @@ events.prototype.moveImage = function (image, from, to, time, keep, callback) {
     var animate = setInterval(function () {
         step++;
         drawImage();
-        if (step>=64) {
+        if (step>=steps) {
             clearInterval(animate);
             core.clearMap('data');
             core.status.replay.animate=false;
             if (keep) core.canvas.data.drawImage(image, toX, toY);
             if (core.isset(callback)) callback();
         }
-    }, time / 64);
+    }, per_time);
 }
 
 ////// 淡入淡出音乐 //////

@@ -190,6 +190,11 @@ control.prototype.setRequestAnimationFrame = function () {
         // 执行用户的并行事件处理内容
         functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.parallelDo(timestamp);
 
+        // 检查控制台状态
+        if (core.utils.consoleOpened()) {
+            core.setFlag('consoleOpened', true);
+        }
+
         window.requestAnimationFrame(draw);
     }
     window.requestAnimationFrame(draw);
@@ -2213,7 +2218,12 @@ control.prototype.doSL = function (id, type) {
             }
         }, function(err) {
             console.info(err);
-            core.drawTip("存档失败，请将控制台的报错信息反馈给管理员。");
+            if (core.platform.useLocalForage) {
+                alert("存档失败，请将控制台的报错信息反馈给管理员。");
+            }
+            else {
+                alert("存档空间不足，请先使用垃圾存档清理工具进行清理！");
+            }
         })
         return;
     }
@@ -2222,7 +2232,11 @@ control.prototype.doSL = function (id, type) {
 
         core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
             if (!core.isset(data)) {
-                core.drawTip("无效的存档");
+                alert("无效的存档");
+                return;
+            }
+            if (core.isset(data.hashCode) && data.hashCode != core.utils.hashCode(data.hero)) {
+                alert("存档校验失败，请勿修改存档文件！");
                 return;
             }
             if (data.version != core.firstData.version) {
@@ -2250,7 +2264,7 @@ control.prototype.doSL = function (id, type) {
             });
         }, function(err) {
             console.log(err);
-            core.drawTip("无效的存档");
+            alert("无效的存档");
         })
 
         return;
@@ -2268,6 +2282,10 @@ control.prototype.doSL = function (id, type) {
             }
             if (data.hard != core.status.hard) {
                 core.drawTip("游戏难度不匹配！");
+                return;
+            }
+            if (core.isset(data.hashCode) && data.hashCode != core.utils.hashCode(data.hero)) {
+                alert("存档校验失败，请勿修改存档文件！");
                 return;
             }
             var route = core.subarray(core.status.route, core.decodeRoute(data.route));
@@ -2389,16 +2407,20 @@ control.prototype.syncLoad = function () {
 
 ////// 存档到本地 //////
 control.prototype.saveData = function() {
+    var hero = core.clone(core.status.hero);
+    var hashCode = core.utils.hashCode(hero);
+
     var data = {
         'floorId': core.status.floorId,
-        'hero': core.clone(core.status.hero),
+        'hero': hero,
         'hard': core.status.hard,
         'maps': core.maps.save(core.status.maps),
         'route': core.encodeRoute(core.status.route),
         'values': core.clone(core.values),
         'shops': {},
         'version': core.firstData.version,
-        "time": new Date().getTime()
+        "time": new Date().getTime(),
+        "hashCode": hashCode
     };
     // set shop times
     for (var shop in core.status.shops) {

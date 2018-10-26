@@ -3,9 +3,9 @@ maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
     ////////////////////////// 地形部分 //////////////////////////
 
     // 0-20 地形
-    '1':{'cls': 'terrains', 'id': 'yellowWall'}, // 黄墙
-    '2':{'cls': 'terrains', 'id': 'whiteWall'}, // 白墙
-    '3':{'cls': 'terrains', 'id': 'blueWall'}, // 蓝墙
+    '1':{'cls': 'terrains', 'id': 'yellowWall', 'canBreak': true}, // 黄墙
+    '2':{'cls': 'terrains', 'id': 'whiteWall', 'canBreak': true}, // 白墙
+    '3':{'cls': 'terrains', 'id': 'blueWall', 'canBreak': true}, // 蓝墙
     '4':{'cls': 'animates', 'id': 'star', 'noPass': true}, // 星空
     '5':{'cls': 'animates', 'id': 'lava', 'noPass': true}, // 岩浆
     '6':{'cls': 'terrains', 'id': 'ice'}, // 冰面

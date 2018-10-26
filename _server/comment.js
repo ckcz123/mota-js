@@ -230,7 +230,7 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "checkbox",
                     "_bool": "bool",
-                    "_data": "该图块是否可被破炸"
+                    "_data": "该图块是否可被破墙或地震"
                 }
             }
         },

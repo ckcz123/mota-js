@@ -242,6 +242,11 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
                 core.restart();
             })
         }
+        else if (core.hasFlag('consoleOpened')) {
+            core.drawText("\t[系统提示]本存档开启过控制台，无法上传成绩", function () {
+                core.restart();
+            })
+        }
         else {
             confirmUpload();
         }

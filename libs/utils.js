@@ -127,8 +127,12 @@ utils.prototype.removeLocalStorage = function (key) {
 utils.prototype.setLocalForage = function (key, value, successCallback, errorCallback) {
 
     if (!core.platform.useLocalForage) {
-        this.setLocalStorage(key, value);
-        if (core.isset(successCallback)) successCallback();
+        if (this.setLocalStorage(key, value)) {
+            if (core.isset(successCallback)) successCallback();
+        }
+        else {
+            if (core.isset(errorCallback)) errorCallback();
+        }
         return;
     }
 
@@ -720,6 +724,29 @@ utils.prototype.hide = function (obj, speed, callback) {
             }
         }
     }, speed);
+}
+
+utils.prototype.consoleOpened = function () {
+    var threshold = 160;
+    var widthThreshold = window.outerWidth - window.innerWidth > threshold;
+    var heightThreshold = window.outerHeight - window.innerHeight > threshold;
+    return !(heightThreshold && widthThreshold) &&
+        ((window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized)
+            || widthThreshold || heightThreshold);
+}
+
+utils.prototype.hashCode = function (obj) {
+    if (typeof obj == 'string') {
+        var hash = 0, i, chr;
+        if (obj.length === 0) return hash;
+        for (i = 0; i < obj.length; i++) {
+            chr   = obj.charCodeAt(i);
+            hash  = ((hash << 5) - hash) + chr;
+            hash |= 0;
+        }
+        return hash;
+    }
+    return this.hashCode(JSON.stringify(obj).split("").sort().join(""));
 }
 
 utils.prototype._export = function (floorIds) {

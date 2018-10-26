@@ -1989,7 +1989,7 @@ ui.prototype.drawSLPanel = function(index, refresh) {
             core.strokeRect('ui', (2*i+1)*u-size/2, 50, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
                 core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
-                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 65+size, '#FFFFFF', '10px Verdana');
+                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 65+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF', '10px Verdana');
             }
             else {
                 core.fillRect('ui', (2*i+1)*u-size/2, 50, size, size, '#333333', 2);
@@ -2001,7 +2001,7 @@ ui.prototype.drawSLPanel = function(index, refresh) {
             core.strokeRect('ui', (2*i-5)*u-size/2, 245, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
                 core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
-                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 260+size, '#FFFFFF', '10px Verdana');
+                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 260+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF', '10px Verdana');
             }
             else {
                 core.fillRect('ui', (2*i-5)*u-size/2, 245, size, size, '#333333', 2);

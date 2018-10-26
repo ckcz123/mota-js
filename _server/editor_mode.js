@@ -320,18 +320,11 @@ editor_mode = function (editor) {
         if (!core.isset(editor_mode.info.id)) {
             // document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML = '';
             document.getElementById('enemyItemTable').style.display = 'none';
-            document.getElementById('tilesetsDiv').style.display = 'none';
             document.getElementById('newIdIdnum').style.display = 'block';
             return;
         }
-        if (editor_mode.info.isTile) {
-            document.getElementById('enemyItemTable').style.display = 'none';
-            document.getElementById('tilesetsDiv').style.display = 'block';
-            document.getElementById('newIdIdnum').style.display = 'none';
-            return;
-        }
+
         document.getElementById('newIdIdnum').style.display = 'none';
-        document.getElementById('tilesetsDiv').style.display = 'none';
         document.getElementById('enemyItemTable').style.display = 'block';
 
         var objs = [];
@@ -506,9 +499,18 @@ editor_mode = function (editor) {
         var appendPicCanvas = document.getElementById('appendPicCanvas');
         var bg = appendPicCanvas.children[0];
         var source = appendPicCanvas.children[1];
+        var source_ctx=source.getContext('2d');
         var picClick = appendPicCanvas.children[2];
         var sprite = appendPicCanvas.children[3];
+        var sprite_ctx=sprite.getContext('2d');
         var appendPicSelection = document.getElementById('appendPicSelection');
+        
+        [source_ctx,sprite_ctx].forEach(function(ctx){
+            ctx.mozImageSmoothingEnabled = false;
+            ctx.webkitImageSmoothingEnabled = false;
+            ctx.msImageSmoothingEnabled = false;
+            ctx.imageSmoothingEnabled = false;
+        })
 
         var selectAppend = document.getElementById('selectAppend');
         var selectAppend_str = [];
@@ -526,8 +528,8 @@ editor_mode = function (editor) {
                 if (editor_mode.appendPic.img) {
                     sprite.style.width = (sprite.width = editor_mode.appendPic.img.width) / ratio + 'px';
                     sprite.style.height = (sprite.height = editor_mode.appendPic.img.height) / ratio + 'px';
-                    sprite.getContext('2d').clearRect(0, 0, sprite.width, sprite.height);
-                    sprite.getContext('2d').drawImage(editor_mode.appendPic.img, 0, 0);
+                    sprite_ctx.clearRect(0, 0, sprite.width, sprite.height);
+                    sprite_ctx.drawImage(editor_mode.appendPic.img, 0, 0);
                 }
                 return;
             }
@@ -550,7 +552,7 @@ editor_mode = function (editor) {
             }
             sprite.style.width = (sprite.width = img.width) / ratio + 'px';
             sprite.style.height = (sprite.height = img.height + ysize) / ratio + 'px';
-            sprite.getContext('2d').drawImage(img, 0, 0);
+            sprite_ctx.drawImage(img, 0, 0);
         }
         selectAppend.onchange();
 
@@ -581,8 +583,8 @@ editor_mode = function (editor) {
                     if (selectAppend.value == 'autotile') {
                         sprite.style.width = (sprite.width = image.width) / ratio + 'px';
                         sprite.style.height = (sprite.height = image.height) / ratio + 'px';
-                        sprite.getContext('2d').clearRect(0, 0, sprite.width, sprite.height);
-                        sprite.getContext('2d').drawImage(image, 0, 0);
+                        sprite_ctx.clearRect(0, 0, sprite.width, sprite.height);
+                        sprite_ctx.drawImage(image, 0, 0);
                     }
                     else {
                         var ysize = selectAppend.value.indexOf('48') === -1 ? 32 : 48;
@@ -608,7 +610,8 @@ editor_mode = function (editor) {
                     }
 
                     //把导入的图片画出
-                    source.getContext('2d').drawImage(image, 0, 0);
+                    source_ctx.drawImage(image, 0, 0);
+                    editor_mode.appendPic.sourceImageData=source_ctx.getImageData(0,0,image.width,image.height);
 
                     //重置临时变量
                     selectAppend.onchange();
@@ -616,6 +619,151 @@ editor_mode = function (editor) {
             }, null, 'img');
 
             return;
+        }
+
+        var changeColorInput=document.getElementById('changeColorInput')
+        changeColorInput.oninput=function(){
+            var delta=(~~changeColorInput.value)*30;
+            var imgData=editor_mode.appendPic.sourceImageData;
+            var nimgData=new ImageData(imgData.width,imgData.height);
+            // ImageData .data 形如一维数组,依次排着每个点的 R(0~255) G(0~255) B(0~255) A(0~255)
+            var getPixel=function(imgData, x, y) {
+                var offset = (x + y * imgData.width) * 4;
+                var r = imgData.data[offset+0];
+                var g = imgData.data[offset+1];
+                var b = imgData.data[offset+2];
+                var a = imgData.data[offset+3];
+                return [r,g,b,a];
+            }
+            var setPixel=function(imgData, x, y, rgba) {
+                var offset = (x + y * imgData.width) * 4;
+                imgData.data[offset+0]=rgba[0];
+                imgData.data[offset+1]=rgba[1];
+                imgData.data[offset+2]=rgba[2];
+                imgData.data[offset+3]=rgba[3];
+            }
+            var convert=function(rgba,delta){
+                var round=Math.round;
+                // rgbToHsl hue2rgb hslToRgb from https://github.com/carloscabo/colz.git
+                //--------------------------------------------
+                // The MIT License (MIT)
+                //
+                // Copyright (c) 2014 Carlos Cabo
+                //
+                // Permission is hereby granted, free of charge, to any person obtaining a copy
+                // of this software and associated documentation files (the "Software"), to deal
+                // in the Software without restriction, including without limitation the rights
+                // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+                // copies of the Software, and to permit persons to whom the Software is
+                // furnished to do so, subject to the following conditions:
+                //
+                // The above copyright notice and this permission notice shall be included in all
+                // copies or substantial portions of the Software.
+                //
+                // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+                // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+                // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+                // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+                // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+                // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+                // SOFTWARE.
+                //--------------------------------------------
+                // https://github.com/carloscabo/colz/blob/master/public/js/colz.class.js
+                var rgbToHsl = function (rgba) {
+                    var arg, r, g, b, h, s, l, d, max, min;
+                
+                    arg = rgba;
+                
+                    if (typeof arg[0] === 'number') {
+                      r = arg[0];
+                      g = arg[1];
+                      b = arg[2];
+                    } else {
+                      r = arg[0][0];
+                      g = arg[0][1];
+                      b = arg[0][2];
+                    }
+                
+                    r /= 255;
+                    g /= 255;
+                    b /= 255;
+                
+                    max = Math.max(r, g, b);
+                    min = Math.min(r, g, b);
+                    l = (max + min) / 2;
+                
+                    if (max === min) {
+                      h = s = 0; // achromatic
+                    } else {
+                      d = max - min;
+                      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                
+                      switch (max) {
+                      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                      case g: h = (b - r) / d + 2; break;
+                      case b: h = (r - g) / d + 4; break;
+                      }
+                
+                      h /= 6;
+                    }
+                
+                    //CARLOS
+                    h = round(h * 360);
+                    s = round(s * 100);
+                    l = round(l * 100);
+                
+                    return [h, s, l];
+                }
+                //
+                var hue2rgb = function (p, q, t) {
+                    if (t < 0) { t += 1; }
+                    if (t > 1) { t -= 1; }
+                    if (t < 1 / 6) { return p + (q - p) * 6 * t; }
+                    if (t < 1 / 2) { return q; }
+                    if (t < 2 / 3) { return p + (q - p) * (2 / 3 - t) * 6; }
+                    return p;
+                }
+                var hslToRgb = function (hsl) {
+                    var arg, r, g, b, h, s, l, q, p;
+                
+                    arg = hsl;
+                
+                    if (typeof arg[0] === 'number') {
+                      h = arg[0] / 360;
+                      s = arg[1] / 100;
+                      l = arg[2] / 100;
+                    } else {
+                      h = arg[0][0] / 360;
+                      s = arg[0][1] / 100;
+                      l = arg[0][2] / 100;
+                    }
+                
+                    if (s === 0) {
+                      r = g = b = l; // achromatic
+                    } else {
+                
+                      q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                      p = 2 * l - q;
+                      r = hue2rgb(p, q, h + 1 / 3);
+                      g = hue2rgb(p, q, h);
+                      b = hue2rgb(p, q, h - 1 / 3);
+                    }
+                    return [round(r * 255), round(g * 255), round(b * 255)];
+                }
+                //
+                var hsl=rgbToHsl(rgba)
+                hsl[0]=(hsl[0]+delta)%360
+                var nrgb=hslToRgb(hsl)
+                nrgb.push(rgba[3])
+                return nrgb
+            }
+            for(var x=0; x<imgData.width; x++){
+                for(var y=0 ; y<imgData.height; y++){
+                    setPixel(nimgData,x,y,convert(getPixel(imgData,x,y),delta))
+                }
+            }
+            source_ctx.clearRect(0, 0, imgData.width, imgData.height);
+            source_ctx.putImageData(nimgData, 0, 0);
         }
 
         var left1 = document.getElementById('left1');
@@ -660,7 +808,7 @@ editor_mode = function (editor) {
                     printe("不合法的Autotile图片！");
                     return;
                 }
-                var imgbase64 = sprite.toDataURL().split(',')[1];
+                var imgbase64 = source.toDataURL().split(',')[1];
 
                 // Step 1: List文件名
                 fs.readdir('./project/images', function (err, data) {
@@ -703,14 +851,11 @@ editor_mode = function (editor) {
             }
 
             var ysize = selectAppend.value.indexOf('48') === -1 ? 32 : 48;
-            var sprited = sprite.getContext('2d');
-            //sprited.drawImage(img, 0, 0);
             var height = editor_mode.appendPic.toImg.height;
-            var sourced = source.getContext('2d');
             for (var ii = 0, v; v = editor_mode.appendPic.selectPos[ii]; ii++) {
-                // var imgData = sourced.getImageData(v.x * 32, v.y * ysize, 32, ysize);
-                // sprited.putImageData(imgData, ii * 32, height);
-                sprited.drawImage(editor_mode.appendPic.img, v.x * 32, v.y * ysize, 32, ysize,  ii * 32, height,  32, ysize)
+                var imgData = source_ctx.getImageData(v.x * 32, v.y * ysize, 32, ysize);
+                sprite_ctx.putImageData(imgData, ii * 32, height);
+                // sprite_ctx.drawImage(editor_mode.appendPic.img, v.x * 32, v.y * ysize, 32, ysize,  ii * 32, height,  32, ysize)
             }
             var imgbase64 = sprite.toDataURL().split(',')[1];
             fs.writeFile('./project/images/' + editor_mode.appendPic.imageName + '.png', imgbase64, 'base64', function (err, data) {

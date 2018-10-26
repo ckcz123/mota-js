@@ -1443,6 +1443,43 @@ ui.prototype.drawBookDetail = function (index) {
     if (hints.length==0)
         hints.push("该怪物无特殊属性。");
 
+    // 模仿临界计算器
+    if (core.enemys.hasSpecial(core.material.enemys[enemyId].special, 10)) {
+        var hp = core.material.enemys[enemyId].hp;
+        var delta = core.status.hero.atk - core.status.hero.def;
+        if (delta<hp && hp<=10000 && hp>0) {
+            hints.push("");
+            hints.push("模仿临界计算器：（当前攻防差"+core.formatBigNumber(delta)+"）");
+            var arr = [];
+            (function () {
+                var last=0, start=0;
+                for (var i=1;i<hp;i++) {
+                    var now=parseInt((hp-1)/i);
+                    if (now!=last) {
+                        if (last!=0) {
+                            arr.push([start, last+"x"]);
+                        }
+                        last=now;
+                        start=i;
+                    }
+                }
+                if (last!=0) {
+                    arr.push([start,"1x"]);
+                    arr.push([hp,"0"]);
+                }
+            })();
+            var u = [];
+            arr.forEach(function (t) {
+                if (u.length < 20) u.push(t);
+                else if (Math.abs(t[0]-delta)<Math.abs(u[0][0]-delta)) {
+                    u.shift();
+                    u.push(t);
+                }
+            });
+            hints.push(JSON.stringify(u.map(function (v) {return v[0]+":"+v[1];})));
+        }
+    }
+
     // 吸血怪的最低生命值
     if (core.enemys.hasSpecial(core.material.enemys[enemyId].special, 11)) {
         var damage = core.getDamage(enemyId);

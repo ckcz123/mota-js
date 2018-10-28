@@ -684,18 +684,15 @@ events.prototype.doAction = function() {
                     y = core.calValue(data.loc[1]);
                 }
                 var floorId=data.floorId || core.status.floorId;
-                var block=core.getBlock(x, y, floorId);
-                if (block!=null) {
-                    if (floorId==core.status.floorId)
-                        core.openDoor(block.block.event.id, block.block.x, block.block.y, false, function() {
-                            core.events.doAction();
-                        })
-                    else {
-                        core.removeBlock(block.block.x,block.block.y,floorId);
-                        this.doAction();
-                    }
-                    break;
+                if (floorId==core.status.floorId)
+                    core.openDoor(null, x, y, false, function() {
+                        core.events.doAction();
+                    })
+                else {
+                    core.removeBlock(x, y, floorId);
+                    this.doAction();
                 }
+                break;
                 this.doAction();
                 break;
             }
@@ -1067,8 +1064,11 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
 
     if (core.interval.openDoorAnimate!=null) return;
 
+    if (!core.isset(id)) id = core.getBlockId(x, y);
+
     // 是否存在门
-    if (!core.terrainExists(x, y, id) && id!='lava' && id!='star') {
+    if (!core.terrainExists(x, y, id) || !(id.endsWith("Door") || id.endsWith("Wall"))
+        || !core.isset(core.material.icons.animates[id])) {
         if (core.isset(callback)) callback();
         return;
     }
@@ -1078,24 +1078,13 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
     }
 
     core.stopAutomaticRoute();
-    var speed=30;
-    var doorId = id;
-    if (doorId.length<4 || doorId.substring(doorId.length-4)!="Door") {
-        doorId=doorId+"Door";
-        speed=70;
-    }
-    // 不存在门
-    if (!core.isset(core.material.icons.animates[doorId])) {
-        if (core.isset(callback)) callback();
-        return;
-    }
+    var speed = id.endsWith("Wall")?70:30;
 
-    var key = id.replace("Door", "Key");
-    if (needKey && (key=="specialKey" || core.isset(core.material.items[key]))) {
+    if (needKey && id.endsWith("Door")) {
         var key = id.replace("Door", "Key");
         if (!core.hasItem(key)) {
             if (key != "specialKey")
-                core.drawTip("你没有" + core.material.items[key].name);
+                core.drawTip("你没有" + ((core.material.items[key]||{}).name||"钥匙"));
             else core.drawTip("无法开启此门");
             core.clearContinueAutomaticRoute();
             return;
@@ -1107,7 +1096,7 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
     // open
     core.playSound("door.mp3");
     var state = 0;
-    var door = core.material.icons.animates[doorId];
+    var door = core.material.icons.animates[id];
     core.status.replay.animate=true;
     core.removeGlobalAnimate(x,y);
     core.interval.openDoorAnimate = window.setInterval(function () {
@@ -1133,6 +1122,12 @@ events.prototype.battle = function (id, x, y, force, callback) {
     }
     core.stopHero();
     core.stopAutomaticRoute();
+
+    if (!core.isset(id)) id = core.getBlockId(x, y);
+    if (!core.isset(id)) {
+        if (core.isset(callback)) callback();
+        return;
+    }
 
     // 非强制战斗
     if (!core.enemys.canBattle(id, x, y) && !force && !core.isset(core.status.event.id)) {

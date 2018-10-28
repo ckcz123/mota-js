@@ -126,7 +126,7 @@ animate为该装备的攻击动画，仅对type为0时有效。具体可参见[�
 
 ``` text
 yellowDoor, blueDoor, redDoor, greenDoor, specialDoor, steelDoor,
-yellowWall, blueWall, whiteWall, lava, star
+yellowWall, blueWall, whiteWall
 ```
 
 ## 怪物

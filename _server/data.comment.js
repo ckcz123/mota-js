@@ -551,12 +551,6 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "寻路算法是否经过血瓶；如果该项为false，则寻路算法会自动尽量绕过血瓶"
                 },
-                "enableViewMaps": {
-                    "_leaf": true,
-                    "_type": "checkbox",
-                    "_bool": "bool",
-                    "_data": "是否支持在菜单栏中查看所有楼层的地图"
-                },
                 "portalWithoutTrigger": {
                     "_leaf": true,
                     "_type": "checkbox",
@@ -575,12 +569,6 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "是否允许瞬间移动"
                 },
-                "clickMoveDirectly": {
-                    "_leaf": true,
-                    "_type": "checkbox",
-                    "_bool": "bool",
-                    "_data": "是否默认开启单击瞬移，用户可在菜单栏手动开关"
-                }
             }
         }
     }

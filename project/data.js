@@ -219,10 +219,8 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"displayExtraDamage": true,
 		"enableGentleClick": true,
 		"potionWhileRouting": false,
-		"enableViewMaps": true,
 		"portalWithoutTrigger": true,
 		"canGoDeadZone": false,
 		"enableMoveDirectly": true,
-		"clickMoveDirectly": true
 	}
 }

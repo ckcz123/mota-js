@@ -357,12 +357,7 @@ actions.prototype.keyUp = function(keyCode) {
             break;
         case 33: case 34: // PAGEUP/PAGEDOWN
         if (core.status.heroStop) {
-            if (core.flags.enableViewMaps) {
-                core.ui.drawMaps();
-            }
-            else {
-                core.drawTip("本塔不允许浏览地图！");
-            }
+            core.ui.drawMaps();
         }
         break;
         case 37: // UP
@@ -1848,22 +1843,17 @@ actions.prototype.clickSwitchs = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 6:
-                core.flags.clickMoveDirectly=!core.flags.clickMoveDirectly;
-                core.setLocalStorage('clickMoveDirectly', core.flags.clickMoveDirectly);
-                core.ui.drawSwitchs();
-                break;
-            case 7:
                 core.platform.useLocalForage=!core.platform.useLocalForage;
                 core.setLocalStorage('useLocalForage', core.platform.useLocalForage);
                 core.ui.drawSwitchs();
                 break;
-            case 8:
+            case 7:
                 window.open(core.platform.isPC?"editor.html":"editor-mobile.html", "_blank");
                 break;
-            case 9:
+            case 8:
                 window.open(core.firstData.name+".zip", "_blank");
                 break;
-            case 10:
+            case 9:
                 core.status.event.selection=0;
                 core.ui.drawSettings();
                 break;
@@ -1916,17 +1906,7 @@ actions.prototype.clickSettings = function (x,y) {
                 core.ui.drawQuickShop();
                 break;
             case 2:
-                if (!core.flags.enableViewMaps) {
-                    core.drawTip("本塔不允许浏览地图！");
-                }
-                else {
-                    /*
-                    core.drawText("\t[系统提示]即将进入浏览地图模式。\n\n点击地图上半部分，或按[↑]键可查看前一张地图\n点击地图下半部分，或按[↓]键可查看后一张地图\n点击地图中间，或按[ESC]键可离开浏览地图模式\n此模式下可以打开怪物手册以查看某层楼的怪物属性", function () {
-                        core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
-                    })
-                    */
-                    core.ui.drawMaps();
-                }
+                core.ui.drawMaps();
                 break;
             case 3:
                 core.status.event.selection=0;

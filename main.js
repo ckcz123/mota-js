@@ -50,6 +50,7 @@ function main() {
         'levelChooseButtons': document.getElementById('levelChooseButtons'),
         'data': document.getElementById('data'),
         'statusLabels': document.getElementsByClassName('statusLabel'),
+        'statusTexts': document.getElementsByClassName('statusText'),
         'floorCol': document.getElementById('floorCol'),
         'nameCol': document.getElementById('nameCol'),
         'lvCol': document.getElementById('lvCol'),

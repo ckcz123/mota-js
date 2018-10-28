@@ -3020,10 +3020,14 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         },
         {
             className: 'statusLabels',
-            noid: 'hard',
             rules:{
                 marginLeft: margin + unit,
-                lineHeight: statusLabelsLH + unit,
+                lineHeight: statusLabelsLH + unit
+            }
+        },
+        {
+            className: 'statusTexts',
+            rules: {
                 color: main.statusBarColor||"white"
             }
         },

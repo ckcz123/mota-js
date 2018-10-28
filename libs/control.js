@@ -1317,6 +1317,12 @@ control.prototype.snipe = function (snipes) {
             else color = '#FF0000';
 
             damage = core.formatBigNumber(damage);
+            if (core.enemys.hasSpecial(core.material.enemys[block.event.id], 19))
+                damage += "+";
+            if (core.enemys.hasSpecial(core.material.enemys[block.event.id], 21))
+                damage += "-";
+            if (core.enemys.hasSpecial(core.material.enemys[block.event.id], 11))
+                damage += "^";
         }
 
         snipe.damage = damage;
@@ -1560,6 +1566,8 @@ control.prototype.updateDamage = function (floorId, canvas) {
                             damage += "+";
                         if (core.enemys.hasSpecial(core.material.enemys[id], 21))
                             damage += "-";
+                        if (core.enemys.hasSpecial(core.material.enemys[id], 11))
+                            damage += "^";
                     }
 
                     canvas.fillStyle = '#000000';

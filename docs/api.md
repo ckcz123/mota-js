@@ -162,11 +162,13 @@ core.nextY(n)
 
 core.openDoor(id, x, y, needKey, callback)    [异步]
 尝试开门操作。id为目标点的ID，x和y为坐标，needKey表示是否需要使用钥匙，callback为开门完毕后的回调函数。
+id可为null代表使用地图上的值。
 例如：core.openDoor('yellowDoor', 10, 3, false, function() {console.log("1")})
 
 
 core.battle(id, x, y, force, callback)    [异步]
 执行战斗事件。id为怪物的id，x和y为坐标，force为bool值表示是否是强制战斗，callback为战斗完毕后的回调函数。
+id可为null代表使用地图上的值。
 例如：core.battle('greenSlime', null, null, true)
 
 

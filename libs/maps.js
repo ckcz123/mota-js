@@ -306,7 +306,7 @@ maps.prototype.canMoveHero = function(x,y,direction,floorId) {
 ////// 能否瞬间移动 //////
 maps.prototype.canMoveDirectly = function (destX,destY) {
 
-    // 不可瞬间移动请返回0
+    // 不可瞬间移动请返回-1
     if (!core.flags.enableMoveDirectly) return -1;
 
     // 中毒状态：不能
@@ -315,7 +315,13 @@ maps.prototype.canMoveDirectly = function (destX,destY) {
     var fromX = core.getHeroLoc('x'), fromY = core.getHeroLoc('y');
     if (fromX==destX&&fromY==destY) return 0;
 
-    // 可以无视起点事件
+    // 大地图且会改变左上角坐标，不能
+    var sx = core.clamp(fromX-6,0,core.bigmap.width-13), sy = core.clamp(fromY-6,0,core.bigmap.height-13),
+        ex = core.clamp(destX-6,0,core.bigmap.width-13), ey = core.clamp(destY-6,0,core.bigmap.height-13);
+
+    if (!core.hasFlag('bigmapMoveDirectly') && (sx!=ex || sy!=ey)) return -1;
+
+    // 无视起点事件
     var nowBlockId = core.getBlockId(fromX, fromY);
     if ((nowBlockId!=null&&nowBlockId!='upFloor'&&nowBlockId!='downFloor'&&nowBlockId!='portal'
         &&nowBlockId!='upPortal'&&nowBlockId!='leftPortal'&&nowBlockId!='downPortal'&&nowBlockId!='rightPortal')

@@ -79,6 +79,26 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "textarea",
                     "_data": "边框颜色，包括游戏边界的边框和对话框边框等。"
+                },
+                "statusBarColor": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_data": "状态栏的文字颜色，默认是白色"
+                },
+                "hardLabelColor": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_data": "难度显示的颜色，默认是红色"
+                },
+                "floorChangingBackground": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_data": "楼层转换界面的背景样式；可以使用纯色（默认值black），也可以使用图片（参见状态栏的图片写法）"
+                },
+                "floorChangingTextColor": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_data": "楼层转换界面的文字颜色，默认是白色"
                 }
             }
         },
@@ -551,12 +571,6 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "寻路算法是否经过血瓶；如果该项为false，则寻路算法会自动尽量绕过血瓶"
                 },
-                "enableViewMaps": {
-                    "_leaf": true,
-                    "_type": "checkbox",
-                    "_bool": "bool",
-                    "_data": "是否支持在菜单栏中查看所有楼层的地图"
-                },
                 "portalWithoutTrigger": {
                     "_leaf": true,
                     "_type": "checkbox",
@@ -575,12 +589,6 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "是否允许瞬间移动"
                 },
-                "clickMoveDirectly": {
-                    "_leaf": true,
-                    "_type": "checkbox",
-                    "_bool": "bool",
-                    "_data": "是否默认开启单击瞬移，用户可在菜单栏手动开关"
-                }
             }
         }
     }

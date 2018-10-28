@@ -263,3 +263,46 @@ items.prototype.compareEquipment = function (compareEquipId, beComparedEquipId) 
     }
     return {"atk":compareAtk,"def":compareDef,"mdef":compareMdef};
 }
+
+////// 保存装备 //////
+items.prototype.quickSaveEquip = function (index) {
+    if (!core.isset(core.status.hero.equipment)) core.status.hero.equipment = [];
+    var saveEquips = core.getFlag("saveEquips", []);
+    saveEquips[index] = core.clone(core.status.hero.equipment);
+    core.setFlag("saveEquips", saveEquips);
+    core.drawTip("已保存"+index+"号套装");
+}
+
+////// 读取装备 //////
+items.prototype.quickLoadEquip = function (index) {
+    var current = core.getFlag("saveEquips", [])[index];
+    if (!core.isset(current)) {
+        core.drawTip(index+"号套装不存在");
+        return;
+    }
+    // 检查所有的装备
+    var equipSize = (main.equipName||[]).length;
+    for (var i=0;i<equipSize;i++) {
+        var v = current[i];
+        if (core.isset(v) && !core.hasItem(v) && !core.hasEquip(v)) {
+            core.drawTip("你当前没有"+((core.material.items[v]||{}).name||"未知装备")+"，无法换装");
+            return;
+        }
+    }
+    // 快速换装
+    if (!core.isset(core.status.hero.equipment)) core.status.hero.equipment = [];
+    for (var i=0;i<equipSize;i++) {
+        var now = core.status.hero.equipment[i]||null;
+        var to = current[i]||null;
+        if (now==to) continue;
+        if (to==null) {
+            this.unloadEquip(i);
+            core.status.route.push("unEquip:"+i);
+        }
+        else {
+            this.loadEquip(to);
+            core.status.route.push("equip:"+to);
+        }
+    }
+    core.drawTip("成功换上"+index+"号套装");
+}

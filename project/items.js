@@ -15,35 +15,43 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		},
 		"redJewel": {
 			"cls": "items",
-			"name": "红宝石"
+			"name": "红宝石",
+			"text": "'，攻击+'+core.values.redJewel"
 		},
 		"blueJewel": {
 			"cls": "items",
-			"name": "蓝宝石"
+			"name": "蓝宝石",
+			"text": "'，防御+'+core.values.blueJewel"
 		},
 		"greenJewel": {
 			"cls": "items",
-			"name": "绿宝石"
+			"name": "绿宝石",
+			"text": "'，魔防+'+core.values.greenJewel"
 		},
 		"yellowJewel": {
 			"cls": "items",
-			"name": "黄宝石"
+			"name": "黄宝石",
+			"text": "可以进行加点"
 		},
 		"redPotion": {
 			"cls": "items",
-			"name": "红血瓶"
+			"name": "红血瓶",
+			"text": "'，生命+'+core.values.redPotion"
 		},
 		"bluePotion": {
 			"cls": "items",
-			"name": "蓝血瓶"
+			"name": "蓝血瓶",
+			"text": "'，生命+'+core.values.bluePotion"
 		},
 		"yellowPotion": {
 			"cls": "items",
-			"name": "黄血瓶"
+			"name": "黄血瓶",
+			"text": "'生命+'+core.values.yellowPotion"
 		},
 		"greenPotion": {
 			"cls": "items",
-			"name": "绿血瓶"
+			"name": "绿血瓶",
+			"text": "'，生命+'+core.values.greenPotion"
 		},
 		"sword0": {
 			"cls": "items",
@@ -343,13 +351,13 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"book": "core.ui.drawBook(0);",
 		"fly": "core.ui.drawFly(core.status.hero.flyRange.indexOf(core.status.floorId));",
 		"earthquake": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n});",
-		"pickaxe": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n});",
+		"pickaxe": "core.playSound('pickaxe.mp3');\ncore.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n});",
 		"icePickaxe": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n});",
 		"snow": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n});",
 		"bigKey": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n});",
-		"bomb": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\tcore.events.afterUseBomb();\n});",
-		"hammer": "core.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\tcore.events.afterUseBomb();\n});",
-		"centerFly": "core.clearMap('hero');\ncore.setHeroLoc('x', (core.bigmap.width||13)-1-core.getHeroLoc('x'));\ncore.setHeroLoc('y', (core.bigmap.height||13)-1-core.getHeroLoc('y'));\ncore.drawHero();\ncore.drawTip(core.material.items[itemId].name + '使用成功');",
+		"bomb": "core.playSound('bomb.mp3');\ncore.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\tcore.events.afterUseBomb();\n});",
+		"hammer": "core.playSound('bomb.mp3');\ncore.removeBlockByIds(core.status.floorId, core.status.event.data);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\tcore.events.afterUseBomb();\n});",
+		"centerFly": "core.playSound('centerFly.mp3');\ncore.clearMap('hero');\ncore.setHeroLoc('x', (core.bigmap.width||13)-1-core.getHeroLoc('x'));\ncore.setHeroLoc('y', (core.bigmap.height||13)-1-core.getHeroLoc('y'));\ncore.drawHero();\ncore.drawTip(core.material.items[itemId].name + '使用成功');",
 		"upFly": "var loc = {'direction': core.status.hero.loc.direction, 'x': core.status.event.data.x, 'y': core.status.event.data.y};\ncore.changeFloor(core.status.event.data.id, null, loc, null, function (){\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\tcore.replay();\n});",
 		"downFly": "var loc = {'direction': core.status.hero.loc.direction, 'x': core.status.event.data.x, 'y': core.status.event.data.y};\ncore.changeFloor(core.status.event.data.id, null, loc, null, function (){\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\tcore.replay();\n});",
 		"poisonWine": "core.setFlag('poison', false);",
@@ -357,7 +365,15 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"curseWine": "core.setFlag('curse', false);",
 		"superWine": "core.setFlag('poison', false);\nif (core.hasFlag('weak')) {\n\tcore.setFlag('weak', false);\n\tcore.status.hero.atk += core.getFlag('weakAtk', core.values.weakValue);\n\tcore.status.hero.def += core.getFlag('weakDef', core.values.weakValue);\n}\ncore.setFlag('curse', false);",
 		"lifeWand": "core.insertAction([\n\t{\"type\": \"input\", \"text\": \"请输入生命魔杖使用次数：(0-${item:lifeWand})\"},\n\t{\"type\": \"if\", \"condition\": \"flag:input<=item:lifeWand\",\n\t\t\"true\": [\n\t\t\t{\"type\": \"setValue\", \"name\": \"item:lifeWand\", \"value\": \"item:lifeWand-flag:input\"},\n\t\t\t{\"type\": \"setValue\", \"name\": \"status:hp\", \"value\": \"status:hp+flag:input*100\"},\n\t\t\t\"成功使用${flag:input}次生命魔杖，恢复${flag:input*100}点生命。\"\n\t\t],\n\t\t\"false\": [\"输入不合法！\"]\n\t},\n]);\ncore.addItem('lifeWand', 1);",
-		"jumpShoes": "core.insertAction({\"type\":\"jumpHero\",\"loc\":[core.nextX(2),core.nextY(2)]});"
+		"jumpShoes": "core.insertAction({\"type\":\"jumpHero\",\"loc\":[core.nextX(2),core.nextY(2)]});",
+		"redPotion": "core.status.hero.hp += core.values.redPotion",
+		"bluePotion": "core.status.hero.hp += core.values.bluePotion",
+		"greenPotion": "core.status.hero.hp += core.values.greenPotion",
+		"yellowPotion": "core.status.hero.hp += core.values.yellowPotion",
+		"redJewel": "core.status.hero.atk += core.values.redJewel",
+		"blueJewel": "core.status.hero.def += core.values.blueJewel",
+		"greenJewel": "core.status.hero.mdef += core.values.greenJewel",
+		"yellowJewel": "core.insertAction([\n\t{\"type\": \"choices\", \"choices\": [\n\t\t{\"text\": \"攻击+1\", \"action\": [\n\t\t\t{\"type\": \"setValue\", \"name\": \"status:atk\", \"value\": \"status:atk+1\"}\n\t\t]},\n\t\t{\"text\": \"防御+2\", \"action\": [\n\t\t\t{\"type\": \"setValue\", \"name\": \"status:def\", \"value\": \"status:def+2\"}\n\t\t]},\n\t\t{\"text\": \"生命+200\", \"action\": [\n\t\t\t{\"type\": \"setValue\", \"name\": \"status:hp\", \"value\": \"status:hp+200\"}\n\t\t]},\n\t]}\n]);"
 	},
 	"canUseItemEffect": {
 		"book": "true",
@@ -377,6 +393,14 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"curseWine": "core.hasFlag('curse')",
 		"superWine": "core.hasFlag('poison') || core.hasFlag('weak') || core.hasFlag('curse')",
 		"lifeWand": "true",
-		"jumpShoes": "var nx=core.nextX(2),ny=core.nextY(2);nx>=0&&nx<core.bigmap.width&&ny>=0&&ny<core.bigmap.height&&core.getBlock(nx,ny)==null"
+		"jumpShoes": "var nx=core.nextX(2),ny=core.nextY(2);nx>=0&&nx<core.bigmap.width&&ny>=0&&ny<core.bigmap.height&&core.getBlock(nx,ny)==null",
+		"redPotion": "true",
+		"bluePotion": "true",
+		"greenPotion": "true",
+		"yellowPotion": "true",
+		"redJewel": "true",
+		"blueJewel": "true",
+		"greenJewel": "true",
+		"yellowJewel": "true"
 	}
 }

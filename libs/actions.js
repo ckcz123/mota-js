@@ -71,10 +71,10 @@ actions.prototype.onkeyUp = function(e) {
                 break;
             }
         }
-        this.keyUp(e.keyCode);
+        this.keyUp(e.keyCode, e.altKey);
     } else {
         if (e.keyCode==17) core.status.ctrlDown = false;
-        this.keyUp(e.keyCode);
+        this.keyUp(e.keyCode, e.altKey);
     }
 }
 
@@ -187,7 +187,7 @@ actions.prototype.keyDown = function(keyCode) {
 }
 
 ////// 根据放开键的code来执行一系列操作 //////
-actions.prototype.keyUp = function(keyCode) {
+actions.prototype.keyUp = function(keyCode, altKey) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying
         &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
 
@@ -239,7 +239,7 @@ actions.prototype.keyUp = function(keyCode) {
             return;
         }
         if (core.status.event.id=='equipbox') {
-            this.keyUpEquipbox(keyCode);
+            this.keyUpEquipbox(keyCode, altKey);
             return;
         }
         if (core.status.event.id=='save' || core.status.event.id=='load' || core.status.event.id=='replayLoad') {
@@ -287,6 +287,12 @@ actions.prototype.keyUp = function(keyCode) {
 
     if(!core.status.played)
         return;
+
+    // 0~9的AltKey
+    if (altKey && keyCode>=48 && keyCode<=57 && core.status.heroStop) {
+        core.items.quickLoadEquip(keyCode-48);
+        return;
+    }
 
     switch (keyCode) {
         case 27: // ESC
@@ -357,12 +363,7 @@ actions.prototype.keyUp = function(keyCode) {
             break;
         case 33: case 34: // PAGEUP/PAGEDOWN
         if (core.status.heroStop) {
-            if (core.flags.enableViewMaps) {
-                core.ui.drawMaps();
-            }
-            else {
-                core.drawTip("本塔不允许浏览地图！");
-            }
+            core.ui.drawMaps();
         }
         break;
         case 37: // UP
@@ -407,6 +408,18 @@ actions.prototype.keyUp = function(keyCode) {
         case 51: // 快捷键3: 飞
             if (core.status.heroStop && core.hasItem('centerFly')) {
                 core.events.useItem('centerFly');
+            }
+            break;
+        case 52: // 快捷键4：破冰/冰冻/地震/上下楼器/...
+            if (core.status.heroStop) {
+                var list = ["icePickaxe", "snow", "earthquake", "upFly", "downFly", "jumpShoes", "lifeWand", "poisonWine", "weakWine", "curseWine", "superWine"];
+                for (var i=0;i<list.length;i++) {
+                    var itemId = list[i];
+                    if (core.canUseItem(itemId)) {
+                        core.useItem(itemId);
+                        break;
+                    }
+                }
             }
             break;
 
@@ -1597,7 +1610,11 @@ actions.prototype.keyDownEquipbox = function (keycode) {
 }
 
 ////// 装备栏界面时，放开某个键的操作 //////
-actions.prototype.keyUpEquipbox = function (keycode) {
+actions.prototype.keyUpEquipbox = function (keycode, altKey) {
+    if (altKey && keycode>=48 && keycode<=57) {
+        core.items.quickSaveEquip(keycode-48);
+        return;
+    }
     if (keycode==84){
         core.ui.closePanel();
         core.openToolbox();
@@ -1836,13 +1853,12 @@ actions.prototype.clickSwitchs = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 6:
-                core.flags.clickMoveDirectly=!core.flags.clickMoveDirectly;
-                core.setLocalStorage('clickMoveDirectly', core.flags.clickMoveDirectly);
+                core.platform.useLocalForage=!core.platform.useLocalForage;
+                core.setLocalStorage('useLocalForage', core.platform.useLocalForage);
                 core.ui.drawSwitchs();
                 break;
             case 7:
-                core.platform.useLocalForage=!core.platform.useLocalForage;
-                core.setLocalStorage('useLocalForage', core.platform.useLocalForage);
+                core.setFlag('bigmapMoveDirectly', !core.getFlag('bigmapMoveDirectly', false));
                 core.ui.drawSwitchs();
                 break;
             case 8:
@@ -1904,17 +1920,7 @@ actions.prototype.clickSettings = function (x,y) {
                 core.ui.drawQuickShop();
                 break;
             case 2:
-                if (!core.flags.enableViewMaps) {
-                    core.drawTip("本塔不允许浏览地图！");
-                }
-                else {
-                    /*
-                    core.drawText("\t[系统提示]即将进入浏览地图模式。\n\n点击地图上半部分，或按[↑]键可查看前一张地图\n点击地图下半部分，或按[↓]键可查看后一张地图\n点击地图中间，或按[ESC]键可离开浏览地图模式\n此模式下可以打开怪物手册以查看某层楼的怪物属性", function () {
-                        core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
-                    })
-                    */
-                    core.ui.drawMaps();
-                }
+                core.ui.drawMaps();
                 break;
             case 3:
                 core.status.event.selection=0;
@@ -2375,6 +2381,9 @@ actions.prototype.clickReplay = function (x, y) {
                     break;
                 }
             case 2:
+                core.chooseReplayFile();
+                break;
+            case 3:
                 if (core.hasFlag('debug')) {
                     core.drawText("\t[系统提示]调试模式下无法下载录像");
                     break;
@@ -2387,7 +2396,7 @@ actions.prototype.clickReplay = function (x, y) {
                 }));
                 break;
                 break;
-            case 3:
+            case 4:
                 core.ui.closePanel();
                 break;
         }

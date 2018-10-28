@@ -27,7 +27,10 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"item.mp3",
 			"equip.mp3",
 			"zone.mp3",
-			"jump.mp3"
+			"jump.mp3",
+			"pickaxe.mp3",
+			"bomb.mp3",
+			"centerFly.mp3"
 		],
 		"startBackground": "bg.jpg",
 		"startLogoStyle": "color: black",
@@ -56,7 +59,11 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"statusLeftBackground": "url(project/images/ground.png) repeat",
 		"statusTopBackground": "url(project/images/ground.png) repeat",
 		"toolsBackground": "url(project/images/ground.png) repeat",
-		"borderColor": "white"
+		"borderColor": "white",
+		"statusBarColor": "white",
+		"hardLabelColor": "red",
+		"floorChangingBackground": "black",
+		"floorChangingTextColor": "white"
 	},
 	"firstData": {
 		"title": "魔塔样板",
@@ -219,10 +226,8 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"displayExtraDamage": true,
 		"enableGentleClick": true,
 		"potionWhileRouting": false,
-		"enableViewMaps": true,
 		"portalWithoutTrigger": true,
 		"canGoDeadZone": false,
-		"enableMoveDirectly": true,
-		"clickMoveDirectly": true
+		"enableMoveDirectly": true
 	}
 }

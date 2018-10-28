@@ -373,6 +373,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
 
     var titlefont = textAttribute.titlefont || 22;
     var textfont = textAttribute.textfont || 16;
+    var offset = textAttribute.offset || 0;
 
     var position = textAttribute.position, px=null, py=null, ydelta=iconHeight-32;
     if (content.indexOf("\b[")==0 || content.indexOf("\\b[")==0) {
@@ -434,7 +435,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
     }
     else if (position=='up') {
         if (px==null || py==null) {
-            top = 5;
+            top = 5 + offset;
         }
         else {
             top = 32 * py - height - ydelta - yoffset;
@@ -442,7 +443,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
     }
     else if (position=='down') {
         if (px==null || py==null) {
-            top = 416 - height - 5;
+            top = 416 - height - 5 - offset;
         }
         else {
             top = 32 * py + 32 + yoffset;
@@ -821,8 +822,8 @@ ui.prototype.drawSwitchs = function() {
         "怪物显伤： "+(core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
         "临界显伤： "+(core.flags.displayCritical ? "[ON]" : "[OFF]"),
         "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
-        "单击瞬移： "+(core.flags.clickMoveDirectly ? "[ON]" : "[OFF]"),
         "新版存档： "+(core.platform.useLocalForage ? "[ON]":"[OFF]"),
+        "大地图瞬移："+(core.hasFlag('bigmapMoveDirectly') ? "[ON]":"[OFF]"),
         "查看工程",
         "下载离线版本",
         "返回主菜单"
@@ -1231,7 +1232,7 @@ ui.prototype.drawReplay = function () {
     core.lockControl();
     core.status.event.id = 'replay';
     this.drawChoices(null, [
-        "从头回放录像", "从存档开始回放", "下载当前录像", "返回游戏"
+        "从头回放录像", "从存档开始回放", "选择录像文件", "下载当前录像", "返回游戏"
     ]);
 }
 
@@ -1769,6 +1770,11 @@ ui.prototype.drawToolbox = function(index) {
         core.fillText('ui', item.name, 10, 32, '#FFD700', "bold 20px Verdana")
 
         var text = item.text||"该道具暂无描述。";
+        try {
+            // 检查能否eval
+            text = eval(text);
+        } catch (e) {}
+
         var lines = core.splitLines('ui', text, 406, '17px Verdana');
 
         core.fillText('ui', lines[0], 10, 62, '#FFFFFF', '17px Verdana');
@@ -2232,9 +2238,24 @@ ui.prototype.drawStatistics = function () {
     // 5. 当前已走的步数；瞬间移动的步数，瞬间移动的次数（和少走的步数）；游戏时长
     // 6. 当前已恢复的生命值；当前总伤害、战斗伤害、阻激夹域血网伤害、中毒伤害。
 
-    var ids = this.uidata.drawStatistics();
+    var ori = this.uidata.drawStatistics();
+    var ids = ori.filter(function (e) {
+        return e.endsWith("Door") || core.isset(core.material.items[e]);
+    });
     var obj = {};
-    ids.forEach(function (e) {obj[e] = 0;})
+    var cls = {};
+    ids.forEach(function (e) {
+        if (e.endsWith("Door")) cls[e] = "doors";
+        else cls[e] = core.material.items[e].cls;
+        obj[e] = 0;
+    })
+    var order = ["doors", "keys", "items", "tools", "constants", "equips"];
+    ids.sort(function (a, b) {
+        var c1 = order.indexOf(cls[a]), c2 = order.indexOf(cls[b]);
+        if (c1==c2) return ori.indexOf(a)-ori.indexOf(b);
+        return c1-c2;
+    });
+    var ext = {};
 
     var total = {
         'monster': {
@@ -2278,7 +2299,7 @@ ui.prototype.drawStatistics = function () {
                 if (core.isset(total.count[id])) {
                     var hp=0, atk=0, def=0, mdef=0;
 
-                    if (core.isset(core.material.items[id]) && core.material.items[id].cls=='items' && id!='superPotion') {
+                    if (cls[id]=='items' && id!='superPotion') {
                         var ratio = floor.item_ratio||1;
                         if (core.isset(core.items.itemEffect[id])) {
                             eval(core.items.itemEffect[id]);
@@ -2289,21 +2310,23 @@ ui.prototype.drawStatistics = function () {
                         mdef = core.status.hero.mdef - temp.mdef;
                     }
                     else {
-                        if (id.indexOf('sword')==0 && core.isset(core.values[id])) {
-                            var x = core.values[id];
-                            if (typeof x == 'number') x = {'atk': x};
-                            atk += x.atk||0;
-                            def += x.def||0;
-                            mdef += x.mdef||0;
-                        }
-                        if (id.indexOf('shield')==0 && core.isset(core.values[id])) {
-                            var x = core.values[id];
-                            if (typeof x == 'number') x = {'def': x};
-                            atk += x.atk||0;
-                            def += x.def||0;
-                            mdef += x.mdef||0;
+                        // 装备
+                        if (id.indexOf('sword')==0 || id.indexOf('shield')==0) {
+                            var values = core.material.items[id].equip||{};
+                            atk = values.atk||0;
+                            def = values.def||0;
+                            mdef = values.mdef||0;
                         }
                     }
+
+                    if (id.indexOf('sword')==0 || id.indexOf('shield')==0) {
+                        var t = "";
+                        if (atk>0) t+=atk+"攻";
+                        if (def>0) t+=def+"防";
+                        if (mdef>0) t+=mdef+"魔防";
+                        if (t!="") ext[id]=t;
+                    }
+
                     core.status.hero = core.clone(temp);
                     total.count[id]++;
                     total.add.hp+=hp;
@@ -2328,22 +2351,33 @@ ui.prototype.drawStatistics = function () {
         if (core.flags.enableMoney) text+="，总金币数"+data.monster.money;
         if (core.flags.enableExperience) text+="，总经验数"+data.monster.experience;
         if (core.flags.enableAddPoint) text+="，总加点数"+data.monster.point;
-        text+="。\n\n";
-        Object.keys(data.count).forEach(function (key) {
-            var value=data.count[key];
-            if (value>0) {
-                var name=null;
-                if (key=='yellowDoor') name="黄门";
-                else if (key=='blueDoor') name="蓝门";
-                else if (key=='redDoor') name="红门";
-                else if (key=='greenDoor') name="绿门";
-                else if (key=='steelDoor') name="铁门";
-                else name=(core.material.items[key]||{}).name;
-                if (core.isset(name)) {
-                    text+=name+value+"个；";
-                }
+        text+="。\n";
+
+        var prev = "";
+        ids.forEach(function (key) {
+            var value = data.count[key];
+            if (value==0) return;
+            var c = cls[key];
+            if (c!=prev) {
+                if (prev != "") text += "。";
+                text += "\n";
             }
+            else
+                text += "，";
+            prev = c;
+            var name = null;
+            if (key=='yellowDoor') name="黄门";
+            else if (key=='blueDoor') name="蓝门";
+            else if (key=='redDoor') name="红门";
+            else if (key=='greenDoor') name="绿门";
+            else if (key=='steelDoor') name="铁门";
+            else name=core.material.items[key].name;
+            text+=name+value+"个";
+            if (core.isset(ext[key]))
+                text+="("+ext[key]+")";
         })
+
+        if (prev!="") text+="。";
         text+="\n\n";
         text+="共加生命值"+core.formatBigNumber(data.add.hp)+"点，攻击"
             +core.formatBigNumber(data.add.atk)+"点，防御"

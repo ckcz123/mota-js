@@ -99,6 +99,11 @@ maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
     '93':{'cls': 'animates', 'id': 'downPortal', 'noPass': false}, // 下箭头
     '94':{'cls': 'animates', 'id': 'rightPortal', 'noPass': false}, // 右箭头
 
+    // 101~120 其他的animates
+    '101':{'cls': 'animates', 'id': 'crystalUp'},
+    '102':{'cls': 'animates', 'id': 'crystalBottom'},
+    '103':{'cls': 'animates', 'id': 'fire'},
+    '104':{'cls': 'animates', 'id': 'switch'},
 
     ////////////////////////// NPC部分 //////////////////////////
 

@@ -471,7 +471,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     if (core.timeout.turnHeroTimeout!=null) return;
 
     // 单击瞬间移动
-    if (core.flags.clickMoveDirectly && core.status.heroStop) {
+    if (core.status.heroStop) {
         if (core.control.tryMoveDirectly(destX, destY))
             return;
     }
@@ -1658,25 +1658,37 @@ control.prototype.doEffect = function (effect) {
 ////// 开启debug模式 //////
 control.prototype.debug = function() {
     core.setFlag('debug', true);
-    core.insertAction(["\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n同时，录像将失效，也无法上传成绩。"]);
-    /*
-    core.setStatus('hp', 999999);
-    core.setStatus('atk', 10000);
-    core.setStatus('def', 10000);
-    core.setStatus('mdef', 10000);
-    core.setStatus('money', 10000);
-    core.setStatus('experience', 10000);
-    core.setItem('yellowKey', 50);
-    core.setItem('blueKey', 50);
-    core.setItem('redKey', 50);
-    core.setItem('book', 1);
-    core.setItem('fly', 1);
-    for (var i in core.status.maps)
-        if (core.status.maps[i].canFlyTo && core.status.hero.flyRange.indexOf(i)<0)
-            core.status.hero.flyRange.push(i);
-    core.updateStatusBar();
-    core.drawTip("作弊成功");
-    */
+    core.drawText("\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n同时，录像将失效，也无法上传成绩。");
+}
+
+////// 选择录像文件 //////
+control.prototype.chooseReplayFile = function () {
+    core.readFile(function (obj) {
+        if (obj.name!=core.firstData.name) {
+            alert("存档和游戏不一致！");
+            return;
+        }
+        if (core.isset(obj.version) && obj.version!=core.firstData.version) {
+            // alert("游戏版本不一致！");
+            if (!confirm("游戏版本不一致！\n你仍然想播放录像吗？"))
+                return;
+        }
+        if (!core.isset(obj.route) || !core.isset(obj.hard)) {
+            alert("无效的录像！");
+            return;
+        }
+
+        core.dom.startPanel.style.display = 'none';
+        core.resetStatus(core.firstData.hero, obj.hard, core.firstData.floorId, null, core.initStatus.maps);
+        core.setFlag('seed', obj.seed);
+        core.setFlag('rand', obj.seed);
+        core.events.setInitData(obj.hard);
+        core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
+            core.startReplay(core.decodeRoute(obj.route));
+        }, true);
+    }, function () {
+
+    })
 }
 
 ////// 开始播放 //////
@@ -2977,6 +2989,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 height: (gameGroupHeight - SPACE*2) + unit,
                 top: SPACE + unit,
                 right: SPACE + unit,
+                background: main.floorChangingBackground||"black",
+                color: main.floorChangingTextColor||"white"
             }
         },
         {
@@ -2992,7 +3006,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 borderLeft: statusBarBorder,
                 borderRight: borderRight,
                 fontSize: fontSize + unit,
-                background: statusBackground,
+                background: statusBackground
             }
         },
         {
@@ -3008,7 +3022,13 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             className: 'statusLabels',
             rules:{
                 marginLeft: margin + unit,
-                lineHeight: statusLabelsLH + unit,
+                lineHeight: statusLabelsLH + unit
+            }
+        },
+        {
+            className: 'statusTexts',
+            rules: {
+                color: main.statusBarColor||"white"
             }
         },
         {
@@ -3110,9 +3130,10 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         {
             id: 'hard',
             rules: {
-                lineHeight: toolsHeight + unit
+                lineHeight: toolsHeight + unit,
+                color: main.hardLabelColor||"red"
             }
-        }
+        },
     ]
     core.domRenderer();
 }
@@ -3133,8 +3154,11 @@ control.prototype.domRenderer = function(){
             if(styles[i].hasOwnProperty('className')){
                 var className = styles[i].className
                 for(var j=0; j<core.dom[className].length; j++)
-                    for(var k=0; k<rulesProp.length; k++)
-                        core.dom[className][j].style[rulesProp[k]] = rules[rulesProp[k]];
+                    for(var k=0; k<rulesProp.length; k++) {
+                        var one = core.dom[className][j];
+                        if (one.id !== styles[i].noid)
+                            one.style[rulesProp[k]] = rules[rulesProp[k]];
+                    }
             }
             if(styles[i].hasOwnProperty('id')){
                 var id = styles[i].id;

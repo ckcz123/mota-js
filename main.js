@@ -50,6 +50,7 @@ function main() {
         'levelChooseButtons': document.getElementById('levelChooseButtons'),
         'data': document.getElementById('data'),
         'statusLabels': document.getElementsByClassName('statusLabel'),
+        'statusTexts': document.getElementsByClassName('statusText'),
         'floorCol': document.getElementById('floorCol'),
         'nameCol': document.getElementById('nameCol'),
         'lvCol': document.getElementById('lvCol'),
@@ -531,32 +532,7 @@ main.dom.replayGame.onclick = function () {
         }
     }
 
-    core.readFile(function (obj) {
-        if (obj.name!=core.firstData.name) {
-            alert("存档和游戏不一致！");
-            return;
-        }
-        if (core.isset(obj.version) && obj.version!=core.firstData.version) {
-            // alert("游戏版本不一致！");
-            if (!confirm("游戏版本不一致！\n你仍然想播放录像吗？"))
-                return;
-        }
-        if (!core.isset(obj.route) || !core.isset(obj.hard)) {
-            alert("无效的录像！");
-            return;
-        }
-
-        core.dom.startPanel.style.display = 'none';
-        core.resetStatus(core.firstData.hero, obj.hard, core.firstData.floorId, null, core.initStatus.maps);
-        core.setFlag('seed', obj.seed);
-        core.setFlag('rand', obj.seed);
-        core.events.setInitData(obj.hard);
-        core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-            core.startReplay(core.decodeRoute(obj.route));
-        }, true);
-    }, function () {
-
-    })
+    core.chooseReplayFile();
 }
 
 

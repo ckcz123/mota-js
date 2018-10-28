@@ -145,6 +145,7 @@ function core() {
         },
         'textAttribute': {
             'position': "center",
+            "offset": 20,
             "title": [255,215,0,1],
             "background": [0,0,0,0.85],
             "text": [255,255,255,1],
@@ -293,7 +294,6 @@ core.prototype.init = function (coreData, callback) {
     core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
     core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
-    core.flags.clickMoveDirectly = core.getLocalStorage('clickMoveDirectly', core.flags.clickMoveDirectly);
 
     core.material.ground = new Image();
     core.material.ground.src = "project/images/ground.png";
@@ -388,8 +388,8 @@ core.prototype.keyDown = function(keyCode) {
 }
 
 ////// 根据放开键的code来执行一系列操作 //////
-core.prototype.keyUp = function(keyCode) {
-    return core.actions.keyUp(keyCode);
+core.prototype.keyUp = function(keyCode, altKey) {
+    return core.actions.keyUp(keyCode, altKey);
 }
 
 ////// 点击（触摸）事件按下时 //////
@@ -1029,6 +1029,11 @@ core.prototype.afterLoadData = function (data) {
 ////// 重置当前地图 //////
 core.prototype.resetMap = function(floorId) {
     core.maps.resetMap(floorId);
+}
+
+////// 选择录像文件 //////
+core.prototype.chooseReplayFile = function () {
+    core.control.chooseReplayFile();
 }
 
 ////// 开始播放 //////

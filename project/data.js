@@ -59,7 +59,11 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"statusLeftBackground": "url(project/images/ground.png) repeat",
 		"statusTopBackground": "url(project/images/ground.png) repeat",
 		"toolsBackground": "url(project/images/ground.png) repeat",
-		"borderColor": "white"
+		"borderColor": "white",
+		"statusBarColor": "white",
+		"hardLabelColor": "red",
+		"floorChangingBackground": "black",
+		"floorChangingTextColor": "white"
 	},
 	"firstData": {
 		"title": "魔塔样板",
@@ -224,6 +228,6 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"potionWhileRouting": false,
 		"portalWithoutTrigger": true,
 		"canGoDeadZone": false,
-		"enableMoveDirectly": true,
+		"enableMoveDirectly": true
 	}
 }

@@ -1687,7 +1687,7 @@ control.prototype.chooseReplayFile = function () {
             core.startReplay(core.decodeRoute(obj.route));
         }, true);
     }, function () {
-        
+
     })
 }
 
@@ -2989,6 +2989,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 height: (gameGroupHeight - SPACE*2) + unit,
                 top: SPACE + unit,
                 right: SPACE + unit,
+                background: main.floorChangingBackground||"black",
+                color: main.floorChangingTextColor||"white"
             }
         },
         {
@@ -3004,7 +3006,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 borderLeft: statusBarBorder,
                 borderRight: borderRight,
                 fontSize: fontSize + unit,
-                background: statusBackground,
+                background: statusBackground
             }
         },
         {
@@ -3018,9 +3020,11 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         },
         {
             className: 'statusLabels',
+            noid: 'hard',
             rules:{
                 marginLeft: margin + unit,
                 lineHeight: statusLabelsLH + unit,
+                color: main.statusBarColor||"white"
             }
         },
         {
@@ -3122,9 +3126,10 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         {
             id: 'hard',
             rules: {
-                lineHeight: toolsHeight + unit
+                lineHeight: toolsHeight + unit,
+                color: main.hardLabelColor||"red"
             }
-        }
+        },
     ]
     core.domRenderer();
 }
@@ -3145,8 +3150,11 @@ control.prototype.domRenderer = function(){
             if(styles[i].hasOwnProperty('className')){
                 var className = styles[i].className
                 for(var j=0; j<core.dom[className].length; j++)
-                    for(var k=0; k<rulesProp.length; k++)
-                        core.dom[className][j].style[rulesProp[k]] = rules[rulesProp[k]];
+                    for(var k=0; k<rulesProp.length; k++) {
+                        var one = core.dom[className][j];
+                        if (one.id !== styles[i].noid)
+                            one.style[rulesProp[k]] = rules[rulesProp[k]];
+                    }
             }
             if(styles[i].hasOwnProperty('id')){
                 var id = styles[i].id;

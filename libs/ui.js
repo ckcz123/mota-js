@@ -373,6 +373,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
 
     var titlefont = textAttribute.titlefont || 22;
     var textfont = textAttribute.textfont || 16;
+    var offset = textAttribute.offset || 0;
 
     var position = textAttribute.position, px=null, py=null, ydelta=iconHeight-32;
     if (content.indexOf("\b[")==0 || content.indexOf("\\b[")==0) {
@@ -434,7 +435,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
     }
     else if (position=='up') {
         if (px==null || py==null) {
-            top = 5;
+            top = 5 + offset;
         }
         else {
             top = 32 * py - height - ydelta - yoffset;
@@ -442,7 +443,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
     }
     else if (position=='down') {
         if (px==null || py==null) {
-            top = 416 - height - 5;
+            top = 416 - height - 5 - offset;
         }
         else {
             top = 32 * py + 32 + yoffset;

@@ -348,10 +348,7 @@ events.prototype.doAction = function() {
             }
             break;
         case "setText": // 设置文本状态
-            if (data.position=='up'||data.position=='down'||data.position=='center') {
-                core.status.textAttribute.position=data.position;
-            }
-            ["bold", "titlefont", "textfont", "time"].forEach(function (t) {
+            ["position", "offset", "bold", "titlefont", "textfont", "time"].forEach(function (t) {
                 if (core.isset(data[t])) core.status.textAttribute[t]=data[t];
             });
             ["background", "title", "text"].forEach(function (t) {

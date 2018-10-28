@@ -145,6 +145,7 @@ function core() {
         },
         'textAttribute': {
             'position': "center",
+            "offset": 20,
             "title": [255,215,0,1],
             "background": [0,0,0,0.85],
             "text": [255,255,255,1],

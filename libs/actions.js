@@ -71,10 +71,10 @@ actions.prototype.onkeyUp = function(e) {
                 break;
             }
         }
-        this.keyUp(e.keyCode);
+        this.keyUp(e.keyCode, e.altKey);
     } else {
         if (e.keyCode==17) core.status.ctrlDown = false;
-        this.keyUp(e.keyCode);
+        this.keyUp(e.keyCode, e.altKey);
     }
 }
 
@@ -187,7 +187,7 @@ actions.prototype.keyDown = function(keyCode) {
 }
 
 ////// 根据放开键的code来执行一系列操作 //////
-actions.prototype.keyUp = function(keyCode) {
+actions.prototype.keyUp = function(keyCode, altKey) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying
         &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
 
@@ -239,7 +239,7 @@ actions.prototype.keyUp = function(keyCode) {
             return;
         }
         if (core.status.event.id=='equipbox') {
-            this.keyUpEquipbox(keyCode);
+            this.keyUpEquipbox(keyCode, altKey);
             return;
         }
         if (core.status.event.id=='save' || core.status.event.id=='load' || core.status.event.id=='replayLoad') {
@@ -287,6 +287,12 @@ actions.prototype.keyUp = function(keyCode) {
 
     if(!core.status.played)
         return;
+
+    // 0~9的AltKey
+    if (altKey && keyCode>=48 && keyCode<=57 && core.status.heroStop) {
+        core.items.quickLoadEquip(keyCode-48);
+        return;
+    }
 
     switch (keyCode) {
         case 27: // ESC
@@ -1604,7 +1610,11 @@ actions.prototype.keyDownEquipbox = function (keycode) {
 }
 
 ////// 装备栏界面时，放开某个键的操作 //////
-actions.prototype.keyUpEquipbox = function (keycode) {
+actions.prototype.keyUpEquipbox = function (keycode, altKey) {
+    if (altKey && keycode>=48 && keycode<=57) {
+        core.items.quickSaveEquip(keycode-48);
+        return;
+    }
     if (keycode==84){
         core.ui.closePanel();
         core.openToolbox();

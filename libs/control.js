@@ -1658,25 +1658,37 @@ control.prototype.doEffect = function (effect) {
 ////// 开启debug模式 //////
 control.prototype.debug = function() {
     core.setFlag('debug', true);
-    core.insertAction(["\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n同时，录像将失效，也无法上传成绩。"]);
-    /*
-    core.setStatus('hp', 999999);
-    core.setStatus('atk', 10000);
-    core.setStatus('def', 10000);
-    core.setStatus('mdef', 10000);
-    core.setStatus('money', 10000);
-    core.setStatus('experience', 10000);
-    core.setItem('yellowKey', 50);
-    core.setItem('blueKey', 50);
-    core.setItem('redKey', 50);
-    core.setItem('book', 1);
-    core.setItem('fly', 1);
-    for (var i in core.status.maps)
-        if (core.status.maps[i].canFlyTo && core.status.hero.flyRange.indexOf(i)<0)
-            core.status.hero.flyRange.push(i);
-    core.updateStatusBar();
-    core.drawTip("作弊成功");
-    */
+    core.drawText("\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n同时，录像将失效，也无法上传成绩。");
+}
+
+////// 选择录像文件 //////
+control.prototype.chooseReplayFile = function () {
+    core.readFile(function (obj) {
+        if (obj.name!=core.firstData.name) {
+            alert("存档和游戏不一致！");
+            return;
+        }
+        if (core.isset(obj.version) && obj.version!=core.firstData.version) {
+            // alert("游戏版本不一致！");
+            if (!confirm("游戏版本不一致！\n你仍然想播放录像吗？"))
+                return;
+        }
+        if (!core.isset(obj.route) || !core.isset(obj.hard)) {
+            alert("无效的录像！");
+            return;
+        }
+
+        core.dom.startPanel.style.display = 'none';
+        core.resetStatus(core.firstData.hero, obj.hard, core.firstData.floorId, null, core.initStatus.maps);
+        core.setFlag('seed', obj.seed);
+        core.setFlag('rand', obj.seed);
+        core.events.setInitData(obj.hard);
+        core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
+            core.startReplay(core.decodeRoute(obj.route));
+        }, true);
+    }, function () {
+        
+    })
 }
 
 ////// 开始播放 //////

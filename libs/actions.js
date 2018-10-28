@@ -1848,12 +1848,16 @@ actions.prototype.clickSwitchs = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 7:
-                window.open(core.platform.isPC?"editor.html":"editor-mobile.html", "_blank");
+                core.setFlag('bigmapMoveDirectly', !core.getFlag('bigmapMoveDirectly', false));
+                core.ui.drawSwitchs();
                 break;
             case 8:
-                window.open(core.firstData.name+".zip", "_blank");
+                window.open(core.platform.isPC?"editor.html":"editor-mobile.html", "_blank");
                 break;
             case 9:
+                window.open(core.firstData.name+".zip", "_blank");
+                break;
+            case 10:
                 core.status.event.selection=0;
                 core.ui.drawSettings();
                 break;
@@ -2367,6 +2371,9 @@ actions.prototype.clickReplay = function (x, y) {
                     break;
                 }
             case 2:
+                core.chooseReplayFile();
+                break;
+            case 3:
                 if (core.hasFlag('debug')) {
                     core.drawText("\t[系统提示]调试模式下无法下载录像");
                     break;
@@ -2379,7 +2386,7 @@ actions.prototype.clickReplay = function (x, y) {
                 }));
                 break;
                 break;
-            case 3:
+            case 4:
                 core.ui.closePanel();
                 break;
         }

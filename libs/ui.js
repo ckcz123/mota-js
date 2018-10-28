@@ -822,6 +822,7 @@ ui.prototype.drawSwitchs = function() {
         "临界显伤： "+(core.flags.displayCritical ? "[ON]" : "[OFF]"),
         "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
         "新版存档： "+(core.platform.useLocalForage ? "[ON]":"[OFF]"),
+        "大地图瞬移："+(core.hasFlag('bigmapMoveDirectly') ? "[ON]":"[OFF]"),
         "查看工程",
         "下载离线版本",
         "返回主菜单"
@@ -1230,7 +1231,7 @@ ui.prototype.drawReplay = function () {
     core.lockControl();
     core.status.event.id = 'replay';
     this.drawChoices(null, [
-        "从头回放录像", "从存档开始回放", "下载当前录像", "返回游戏"
+        "从头回放录像", "从存档开始回放", "选择录像文件", "下载当前录像", "返回游戏"
     ]);
 }
 
@@ -1768,6 +1769,11 @@ ui.prototype.drawToolbox = function(index) {
         core.fillText('ui', item.name, 10, 32, '#FFD700', "bold 20px Verdana")
 
         var text = item.text||"该道具暂无描述。";
+        try {
+            // 检查能否eval
+            text = eval(text);
+        } catch (e) {}
+
         var lines = core.splitLines('ui', text, 406, '17px Verdana');
 
         core.fillText('ui', lines[0], 10, 62, '#FFFFFF', '17px Verdana');

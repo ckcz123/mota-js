@@ -316,10 +316,10 @@ maps.prototype.canMoveDirectly = function (destX,destY) {
     if (fromX==destX&&fromY==destY) return 0;
 
     // 大地图且会改变左上角坐标，不能
-    var sx = core.clamp(fromX-6,0,core.bigmap.width-13), sy = core.clamp(fromY-6,0,core.bigmap.width-13),
-        ex = core.clamp(destX-6,0,core.bigmap.height-13), ey = core.clamp(destY-6,0,core.bigmap.height-13);
+    var sx = core.clamp(fromX-6,0,core.bigmap.width-13), sy = core.clamp(fromY-6,0,core.bigmap.height-13),
+        ex = core.clamp(destX-6,0,core.bigmap.width-13), ey = core.clamp(destY-6,0,core.bigmap.height-13);
 
-    if (sx!=ex || sy!=ey) return -1;
+    if (!core.hasFlag('bigmapMoveDirectly') && (sx!=ex || sy!=ey)) return -1;
 
     // 无视起点事件
     var nowBlockId = core.getBlockId(fromX, fromY);

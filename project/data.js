@@ -27,7 +27,10 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"item.mp3",
 			"equip.mp3",
 			"zone.mp3",
-			"jump.mp3"
+			"jump.mp3",
+			"pickaxe.mp3",
+			"bomb.mp3",
+			"centerFly.mp3"
 		],
 		"startBackground": "bg.jpg",
 		"startLogoStyle": "color: black",

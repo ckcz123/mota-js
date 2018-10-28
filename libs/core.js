@@ -1030,6 +1030,11 @@ core.prototype.resetMap = function(floorId) {
     core.maps.resetMap(floorId);
 }
 
+////// 选择录像文件 //////
+core.prototype.chooseReplayFile = function () {
+    core.control.chooseReplayFile();
+}
+
 ////// 开始播放 //////
 core.prototype.startReplay = function (list) {
     core.control.startReplay(list);

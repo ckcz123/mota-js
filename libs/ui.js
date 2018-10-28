@@ -1402,6 +1402,8 @@ ui.prototype.drawBook = function (index) {
                 damage += "+";
             if (core.enemys.hasSpecial(core.material.enemys[enemy.id], 21))
                 damage += "-";
+            if (core.enemys.hasSpecial(core.material.enemys[enemy.id], 11))
+                damage += "^";
         }
         if (core.material.enemys[enemy.id].notBomb)
             damage += "[b]";
@@ -1436,16 +1438,16 @@ ui.prototype.drawBookDetail = function (index) {
     if (index<0) index=0;
     if (index>=enemys.length) index=enemys.length-1;
 
-    var enemy = enemys[index];
-    var enemyId=enemy.id;
-    var hints=core.enemys.getSpecialHint(core.material.enemys[enemyId]);
+    var enemyId=enemys[index].id;
+    var enemy = core.material.enemys[enemyId];
+    var hints=core.enemys.getSpecialHint(enemy);
 
     if (hints.length==0)
         hints.push("该怪物无特殊属性。");
 
     // 模仿临界计算器
-    if (core.enemys.hasSpecial(core.material.enemys[enemyId].special, 10)) {
-        var hp = core.material.enemys[enemyId].hp;
+    if (core.enemys.hasSpecial(enemy.special, 10)) {
+        var hp = enemy.hp;
         var delta = core.status.hero.atk - core.status.hero.def;
         if (delta<hp && hp<=10000 && hp>0) {
             hints.push("");
@@ -1481,7 +1483,7 @@ ui.prototype.drawBookDetail = function (index) {
     }
 
     // 吸血怪的最低生命值
-    if (core.enemys.hasSpecial(core.material.enemys[enemyId].special, 11)) {
+    if (core.enemys.hasSpecial(enemy.special, 11)) {
         var damage = core.getDamage(enemyId);
         if (damage != null) {
             // 二分HP
@@ -1500,6 +1502,12 @@ ui.prototype.drawBookDetail = function (index) {
             }
             core.status.hero.hp = nowHp;
         }
+    }
+
+    // 仇恨伤害
+    if (core.enemys.hasSpecial(enemy.special, 17)) {
+        hints.push("");
+        hints.push("当前仇恨伤害值："+core.getFlag('hatred', 0));
     }
 
     hints.push("");

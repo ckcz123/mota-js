@@ -409,6 +409,18 @@ actions.prototype.keyUp = function(keyCode) {
                 core.events.useItem('centerFly');
             }
             break;
+        case 52: // 快捷键4：破冰/冰冻/地震/上下楼器/...
+            if (core.status.heroStop) {
+                var list = ["icePickaxe", "snow", "earthquake", "upFly", "downFly", "jumpShoes", "lifeWand", "poisonWine", "weakWine", "curseWine", "superWine"];
+                for (var i=0;i<list.length;i++) {
+                    var itemId = list[i];
+                    if (core.canUseItem(itemId)) {
+                        core.useItem(itemId);
+                        break;
+                    }
+                }
+            }
+            break;
 
     }
 

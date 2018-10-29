@@ -422,6 +422,10 @@ actions.prototype.keyUp = function(keyCode, altKey) {
                 }
             }
             break;
+        case 118: // F7开启debug模式
+            if (core.status.heroStop)
+                core.debug();
+            break;
 
     }
 

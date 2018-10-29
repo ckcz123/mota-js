@@ -120,13 +120,12 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var enemy = core.material.enemys[enemyId];
 
 	// 播放战斗音效和动画
-	var equipAnimate = 'hand';
-	if (core.flags.equipment) {
-		var equipId = (core.status.hero.equipment||[])[0];
-		if (core.isset(core.material.items[equipId]) && core.isset(core.material.items[equipId].equip.animate))
-			equipAnimate = core.material.items[equipId].equip.animate;
-	}
-	core.playSound('attack.mp3');
+	var equipAnimate = 'hand', equipId = (core.status.hero.equipment||[])[0];
+	if (core.isset(equipId) && core.isset((core.material.items[equipId].equip||{}).animate))
+		equipAnimate = core.material.items[equipId].equip.animate;
+	// 检查equipAnimate是否存在SE，如果不存在则使用默认音效
+	if (!core.isset((core.material.animates[equipAnimate]||{}).se))
+		core.playSound('attack.mp3');
 	core.drawAnimate(equipAnimate, x, y);
 
 	var damage = core.enemys.getDamage(enemyId, x, y);

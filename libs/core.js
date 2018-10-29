@@ -92,6 +92,8 @@ function core() {
         'floorId': null,
         'thisMap': null,
         'maps': null,
+        'bgmaps': {},
+        'fgmaps': {},
         'checkBlock': {}, // 显伤伤害
 
         'lockControl': false,

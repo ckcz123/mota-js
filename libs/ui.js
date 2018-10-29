@@ -2420,15 +2420,28 @@ ui.prototype.drawAbout = function () {
 ////// 绘制“画图”界面 //////
 ui.prototype.drawPaint = function () {
 
+    console.log("drawPaint");
+
+    core.drawTip("打开绘图模式，现在可以任意在界面上绘图标记");
+
     core.lockControl();
     core.status.event.id = 'paint';
+    core.status.event.data = {"x": null, "y": null, "erase": false};
 
     core.clearMap('ui');
     core.clearMap('route');
 
+    core.setAlpha('route', 1);
+    core.setOpacity('route', 1);
+
     // 将已有的内容绘制到route上
-    core.utils.decodeCanvas(core.paint[core.status.floorId], 32*core.bigmap.width, 32*core.bigmap.height);
-    core.canvas.route.drawImage(core.bigmap.tempCanvas, 0, 0);
+    var value = core.paint[core.status.floorId];
+    if (core.isset(value) && typeof value == 'string') value = LZString.decompress(value).split(",");
+    core.utils.decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
+    core.canvas.route.drawImage(core.bigmap.tempCanvas.canvas, 0, 0);
+
+    core.setLineWidth('route', 3);
+    core.setStrokeStyle('route', '#FF0000');
 }
 
 ////// 绘制帮助页面 //////

@@ -368,7 +368,6 @@ actions.prototype.keyUp = function(keyCode, altKey) {
         case 77: // M
             if (core.status.heroStop) {
                 core.ui.drawPaint();
-                core.drawTip("打开画图模式");
             }
             break;
         case 37: // UP
@@ -443,9 +442,18 @@ actions.prototype.keyUp = function(keyCode, altKey) {
 }
 
 ////// 点击（触摸）事件按下时 //////
-actions.prototype.ondown = function (x ,y) {
+actions.prototype.ondown = function (loc) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying
         &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
+
+    // 画板
+    if (core.status.played && (core.status.event||{}).id=='paint') {
+        this.ondownPaint(loc.x, loc.y);
+        return;
+    }
+
+    var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
+
     if (!core.status.played || core.status.lockControl) {
         this.onclick(x, y, []);
         if (core.timeout.onDownTimeout==null) {
@@ -472,11 +480,18 @@ actions.prototype.ondown = function (x ,y) {
 }
 
 ////// 当在触摸屏上滑动时 //////
-actions.prototype.onmove = function (x ,y) {
+actions.prototype.onmove = function (loc) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying
         &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
-    // if (core.status.holdingPath==0){return;}
-    //core.status.mouseOutCheck =1;
+
+    // 画板
+    if (core.status.played && (core.status.event||{}).id=='paint') {
+        this.onmovePaint(loc.x, loc.y)
+        return;
+    }
+
+    var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
+
     var pos={'x':x,'y':y};
     var pos0=core.status.stepPostfix[core.status.stepPostfix.length-1];
     var directionDistance=[pos.y-pos0.y,pos0.x-pos.x,pos0.y-pos.y,pos.x-pos0.x];
@@ -497,9 +512,17 @@ actions.prototype.onmove = function (x ,y) {
 }
 
 ////// 当点击（触摸）事件放开时 //////
-actions.prototype.onup = function () {
+actions.prototype.onup = function (loc) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying
         &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
+
+    // 画板
+    if (core.status.played && (core.status.event||{}).id=='paint') {
+        this.onupPaint(loc.x, loc.y)
+        return;
+    }
+
+    var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
 
     clearTimeout(core.timeout.onDownTimeout);
     core.timeout.onDownTimeout = null;
@@ -1929,10 +1952,10 @@ actions.prototype.clickSettings = function (x,y) {
                 core.ui.drawQuickShop();
                 break;
             case 2:
-                core.ui.drawPaint();
+                core.ui.drawMaps();
                 break;
             case 3:
-                core.ui.drawMaps();
+                core.ui.drawPaint();
                 break;
             case 4:
                 core.status.event.selection=0;
@@ -2506,4 +2529,34 @@ actions.prototype.clickAbout = function () {
         core.ui.closePanel();
     else
         core.restart();
+}
+
+actions.prototype.ondownPaint = function (x, y) {
+    console.log("ondown: ("+x+","+y+")");
+
+    core.canvas.route.beginPath();
+    core.canvas.route.moveTo(x+core.bigmap.offsetX, y+core.bigmap.offsetY);
+    core.status.event.data.x = x;
+    core.status.event.data.y = y;
+}
+
+actions.prototype.onmovePaint = function (x, y) {
+    if (core.status.event.data.x==null) return;
+    var midx = (core.status.event.data.x+x)/2, midy = (core.status.event.data.y+y)/2;
+    core.canvas.route.quadraticCurveTo(midx, midy, x, y);
+    core.canvas.route.stroke();
+    core.status.event.data.x = x;
+    core.status.event.data.y = y;
+}
+
+actions.prototype.onupPaint = function (x,y) {
+    console.log("onup: ("+x+","+y+")");
+    var midx = (core.status.event.data.x+x)/2, midy = (core.status.event.data.y+y)/2;
+    core.canvas.route.quadraticCurveTo(midx, midy, x, y);
+    core.canvas.route.stroke();
+
+    core.status.event.data.x = null;
+    core.status.event.data.y = null;
+    // 保存
+    core.paint[core.status.floorId] = LZString.compress(core.utils.encodeCanvas(core.canvas.route).join(","));
 }

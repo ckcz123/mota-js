@@ -317,8 +317,7 @@ main.dom.data.onmousedown = function (e) {
         }
         var loc = main.core.getClickLoc(e.clientX, e.clientY);
         if (loc == null) return;
-        var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
-        main.core.ondown(x, y);
+        main.core.ondown(loc);
     } catch (ee) {}
 }
 
@@ -328,15 +327,17 @@ main.dom.data.onmousemove = function (e) {
         e.stopPropagation();
         var loc = main.core.getClickLoc(e.clientX, e.clientY);
         if (loc == null) return;
-        var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
-        main.core.onmove(x, y);
+        main.core.onmove(loc);
     }catch (ee) {}
 }
 
 ////// 鼠标放开时 //////
-main.dom.data.onmouseup = function () {
+main.dom.data.onmouseup = function (e) {
     try {
-        main.core.onup();
+        e.stopPropagation();
+        var loc = main.core.getClickLoc(e.clientX, e.clientY);
+        if (loc == null) return;
+        main.core.onup(loc);
     }catch (e) {}
 }
 
@@ -356,9 +357,7 @@ main.dom.data.ontouchstart = function (e) {
         e.preventDefault();
         var loc = main.core.getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
         if (loc == null) return;
-        var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
-        //main.core.onclick(x, y, []);
-        main.core.ondown(x, y);
+        main.core.ondown(loc);
     }catch (ee) {}
 }
 
@@ -368,15 +367,17 @@ main.dom.data.ontouchmove = function (e) {
         e.preventDefault();
         var loc = main.core.getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
         if (loc == null) return;
-        var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
-        main.core.onmove(x, y);
+        main.core.onmove(loc);
     }catch (ee) {}
 }
 
 ////// 手指离开触摸屏时 //////
 main.dom.data.ontouchend = function () {
     try {
-        main.core.onup();
+        e.preventDefault();
+        var loc = main.core.getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
+        if (loc == null) return;
+        main.core.onup(loc);
     } catch (e) {
     }
 }

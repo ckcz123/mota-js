@@ -146,10 +146,10 @@ maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
     ////////////////////////// 其他部分 //////////////////////////
 
     // 171-200 其他（单向箭头、灯、箱子等等）
-    '161':{'cls': 'terrains', 'id': 'arrowUp', 'noPass': false}, // 单向上箭头
-    '162':{'cls': 'terrains', 'id': 'arrowDown', 'noPass': false}, // 单向下箭头
-    '163':{'cls': 'terrains', 'id': 'arrowLeft', 'noPass': false}, // 单向左箭头
-    '164':{'cls': 'terrains', 'id': 'arrowRight', 'noPass': false}, // 单向右箭头
+    '161':{'cls': 'terrains', 'id': 'arrowUp', 'noPass': false, "cannotOut": ["left","right","down"], "cannotIn": ["down"]}, // 单向上箭头
+    '162':{'cls': 'terrains', 'id': 'arrowDown', 'noPass': false, "cannotOut": ["left","right","up"], "cannotIn": ["up"]}, // 单向下箭头
+    '163':{'cls': 'terrains', 'id': 'arrowLeft', 'noPass': false, "cannotOut": ["up","down","right"], "cannotIn": ["right"]}, // 单向左箭头
+    '164':{'cls': 'terrains', 'id': 'arrowRight', 'noPass': false, "cannotOut": ["up","down","left"], "cannotIn": ["left"]}, // 单向右箭头
     '165':{'cls': 'terrains', 'id': 'light', 'trigger': 'changeLight', 'noPass': false}, // 灯
     '166':{'cls': 'terrains', 'id': 'darkLight', 'noPass': true}, // 暗灯
     '167':{'cls': 'terrains', 'id': 'ski', 'trigger': 'ski', 'noPass': false}, // 滑冰

@@ -231,6 +231,18 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "checkbox",
                     "_bool": "bool",
                     "_data": "该图块是否可被破墙或地震"
+                },
+                "cannotOut": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_range": "thiseval==null||(thiseval instanceof Array)",
+                    "_data": "该图块的不可出方向\n可以在这里定义在该图块时不能前往哪个方向，可以达到悬崖之类的效果\n例如 [\"up\", \"left\"] 代表在该图块时不能往上和左走\n此值对背景层、事件层、前景层上的图块均有效"
+                },
+                "cannotIn": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_range": "thiseval==null||(thiseval instanceof Array)",
+                    "_data": "该图块的不可入方向\n可以在这里定义不能从哪个方向访问该图块，可以达到悬崖之类的效果\n例如 [\"down\", \"right\"] 代表不能从下或右访问此图块\n此值对背景层、事件层、前景层上的图块均有效"
                 }
             }
         },
@@ -385,7 +397,8 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         "cannotMove": {
                             "_leaf": true,
                             "_type": "textarea",
-                            "_data": "该点不可通行的方向 \n 可以在这里定义该点不能前往哪个方向，可以达到悬崖之类的效果\n例如 [\"up\", \"left\"], // 代表该点不能往上和左走"
+                            "_range": "thiseval==null||(thiseval instanceof Array)",
+                            "_data": "该点不可通行的方向 \n 可以在这里定义该点不能前往哪个方向，可以达到悬崖之类的效果\n例如 [\"up\", \"left\"] 代表该点不能往上和左走"
                         }
                     }
                 }

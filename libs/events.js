@@ -1020,13 +1020,8 @@ events.prototype.insertAction = function (action, x, y, callback) {
 ////// 获得面前的物品（轻按） //////
 events.prototype.getNextItem = function() {
     if (!core.status.heroStop || !core.flags.enableGentleClick) return false;
-    // 检查cannotMove
-    var x = core.getHeroLoc('x'), y=core.getHeroLoc('y'), direction=core.getHeroLoc('direction');
-    if (core.isset(core.floors[core.status.floorId].cannotMove)) {
-        var cannotMove = core.floors[core.status.floorId].cannotMove[x+","+y];
-        if (core.isset(cannotMove) && cannotMove instanceof Array && cannotMove.indexOf(direction)>=0)
-            return false;
-    }
+
+    if (!core.canMoveHero()) return false;
 
     var nextX = core.nextX(), nextY = core.nextY();
     var block = core.getBlock(nextX, nextY);

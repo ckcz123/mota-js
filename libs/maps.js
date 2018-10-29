@@ -264,17 +264,21 @@ maps.prototype.canMoveHero = function(x,y,direction,floorId) {
             return false;
     }
 
-    var nowBlock = core.getBlock(x,y,floorId);
-    if (nowBlock!=null){
-        var nowId = nowBlock.block.event.id;
-        var nowIsArrow = nowId.slice(0, 5).toLowerCase() == 'arrow';
-        if(nowIsArrow){
-            var nowArrow = nowId.slice(5).toLowerCase();
-            if (direction != nowArrow) {
-                return false;
-            }
-        }
+    var check = function (block, name) {
+        if (!core.isset(block)) return true;
+        if (block instanceof Array) return check((block[y]||[])[x], name);
+        if (typeof block == 'number') return check(core.maps.initBlock(0,0,block), name);
+        if (core.isset(block.block)) return check(block.block, name);
+        return ((block.event||{})[name]||[]).indexOf(direction)<0;
     }
+    var getNumber = function (floorId, name, x, y) {
+        return (core.maps.getBgFgMapArray(floorId, name)[y]||[])[x];
+    }
+
+    // 检查该点的cannotOut
+    if (!check(core.getBlock(x,y,floorId),"cannotOut") || !check(getNumber(floorId,"bg",x,y),"cannotOut") || !check(getNumber(floorId,"fg",x,y),"cannotOut"))
+        return false;
+
     var scan = {
         'up': {'x': 0, 'y': -1},
         'left': {'x': -1, 'y': 0},
@@ -282,18 +286,9 @@ maps.prototype.canMoveHero = function(x,y,direction,floorId) {
         'right': {'x': 1, 'y': 0}
     };
     var nx = x+scan[direction].x, ny = y+scan[direction].y;
-    var nextBlock = core.getBlock(nx,ny);
-    if (nextBlock!=null){
-        var nextId = nextBlock.block.event.id;
-        // 遇到单向箭头处理
-        var isArrow = nextId.slice(0, 5).toLowerCase() == 'arrow';
-        if(isArrow){
-            var nextArrow = nextId.slice(5).toLowerCase();
-            if ( (scan[direction].x + scan[nextArrow].x) == 0 && (scan[direction].y + scan[nextArrow].y) == 0 ) {
-                return false;
-            }
-        }
-    }
+    // 检查目标点的cannotIn
+    if (!check(core.getBlock(nx,ny,floorId),"cannotIn") || !check(getNumber(floorId,"bg",nx,ny),"cannotIn") || !check(getNumber(floorId,"fg",nx,ny),"cannotIn"))
+        return false;
 
     // 检查将死的领域
     if (floorId==core.status.floorId && core.status.hero.hp <= core.status.checkBlock.damage[nx+core.bigmap.width*ny]
@@ -392,8 +387,31 @@ maps.prototype.drawBlock = function (block, animate, dx, dy) {
     }
 }
 
+maps.prototype.getBgFgMapArray = function (floorId, name) {
+    floorId = floorId||core.status.floorId;
+    var width = core.floors[floorId].width || 13;
+    var height = core.floors[floorId].height || 13;
+
+    if (core.isset(core.status[name+"maps"][floorId]))
+        return core.status[name+"maps"][floorId];
+
+    var arr = core.clone(core.floors[floorId][name+"map"] || []);
+    if(main.mode=='editor')arr = core.clone(editor[name+"map"])||arr;
+    for (var x = 0; x < width; x++) {
+        for (var y = 0; y < height; y++) {
+            arr[y] = arr[y] || [];
+            if (core.hasFlag(name + "_" + floorId + "_" + x + "_" + y)) arr[y][x] = 0;
+            else arr[y][x] = core.getFlag(name + "v_" + floorId + "_" + x + "_" + y, arr[y][x] || 0);
+            if(main.mode=='editor')arr[y][x]= arr[y][x].idnum || arr[y][x] || 0;
+        }
+    }
+    core.status[name+"maps"][floorId] = core.clone(arr);
+    return arr;
+}
+
 ////// 背景/前景图块的绘制 //////
 maps.prototype.drawBgFgMap = function (floorId, canvas, name) {
+    floorId = floorId || core.status.floorId;
     var width = core.floors[floorId].width || 13;
     var height = core.floors[floorId].height || 13;
 
@@ -401,20 +419,10 @@ maps.prototype.drawBgFgMap = function (floorId, canvas, name) {
     var blockIcon = core.material.icons.terrains[groundId];
     var blockImage = core.material.images.terrains;
 
-    var getMapArray = function (name) {
-        var arr = core.clone(core.floors[floorId][name+"map"] || []);
-        if(main.mode=='editor')arr = core.clone(editor[name+"map"])||arr;
-        for (var x = 0; x < width; x++) {
-            for (var y = 0; y < height; y++) {
-                arr[y] = arr[y] || [];
-                if (core.hasFlag(name + "_" + floorId + "_" + x + "_" + y)) arr[y][x] = 0;
-                else arr[y][x] = core.getFlag(name + "v_" + floorId + "_" + x + "_" + y, arr[y][x] || 0);
-                if(main.mode=='editor')arr[y][x]= arr[y][x].idnum || arr[y][x] || 0;
-            }
-        }
-        return arr;
-    }
-    var arr = getMapArray(name);
+    if (!core.isset(core.status[name+"maps"]))
+        core.status[name+"maps"] = {};
+
+    var arr = this.getBgFgMapArray(floorId, name);
     for (var x = 0; x < width; x++) {
         for (var y = 0; y < height; y++) {
             if (name=='bg')
@@ -1163,6 +1171,8 @@ maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
     if (name!='bg' && name!='fg') return;
 
     core.setFlag(name+"v_"+floorId+"_"+x+"_"+y, number);
+    core.status[name+"maps"][floorId] = null;
+
     if (floorId == core.status.floorId)
         core.drawMap(floorId);
 }
@@ -1331,6 +1341,7 @@ maps.prototype.setBgFgMap = function (type, name, loc, floorId, callback) {
         var flag = name+"_"+floorId+"_"+x+"_"+y;
         core.setFlag(flag, type=='show'?false:true);
     })
+    core.status[name+"maps"][floorId]=null;
 
     if (floorId==core.status.floorId) {
         core.drawMap(floorId, callback);

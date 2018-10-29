@@ -630,17 +630,17 @@ core.statusBar.mana.style.fontStyle = 'normal'; // 这一行会取消斜体。�
 在脚本编辑-updateStatusBar中，可以对状态栏显示内容进行修改。
 
 ``` js
-	// 设置魔力值
-	if (core.flags.enableMana) {
-		// 也可以使用flag:manaMax来表示最大魔力值
-		// core.status.hero.mana = Math.max(core.status.hero.mana, core.getFlag('manaMax', 10));
-		// core.statusBar.mana.innerHTML = core.status.hero.mana + "/" + core.getFlag('manaMax', 10);
-	}
-	// 设置技能栏
-	if (core.flags.enableSkill) {
-		// 可以用flag:kill表示当前开启的技能类型，flag:skillName显示技能名；详见文档-个性化-技能塔的支持
-		core.statusBar.skill.innerHTML = core.getFlag('skillName', '无');
-	}
+// 设置魔力值
+if (core.flags.enableMana) {
+    // 也可以使用flag:manaMax来表示最大魔力值
+    // core.status.hero.mana = Math.max(core.status.hero.mana, core.getFlag('manaMax', 10));
+    // core.statusBar.mana.innerHTML = core.status.hero.mana + "/" + core.getFlag('manaMax', 10);
+}
+// 设置技能栏
+if (core.flags.enableSkill) {
+    // 可以用flag:skill表示当前开启的技能类型，flag:skillName显示技能名；详见文档-个性化-技能塔的支持
+    core.statusBar.skill.innerHTML = core.getFlag('skillName', '无');
+}
 ```
 
 ### 技能的触发

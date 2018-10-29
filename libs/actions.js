@@ -362,10 +362,15 @@ actions.prototype.keyUp = function(keyCode, altKey) {
             }
             break;
         case 33: case 34: // PAGEUP/PAGEDOWN
-        if (core.status.heroStop) {
-            core.ui.drawMaps();
-        }
-        break;
+            if (core.status.heroStop)
+                core.ui.drawMaps();
+            break;
+        case 77: // M
+            if (core.status.heroStop) {
+                core.ui.drawPaint();
+                core.drawTip("打开画图模式");
+            }
+            break;
         case 37: // UP
             break;
         case 38: // DOWN
@@ -1924,13 +1929,16 @@ actions.prototype.clickSettings = function (x,y) {
                 core.ui.drawQuickShop();
                 break;
             case 2:
-                core.ui.drawMaps();
+                core.ui.drawPaint();
                 break;
             case 3:
+                core.ui.drawMaps();
+                break;
+            case 4:
                 core.status.event.selection=0;
                 core.ui.drawSyncSave();
                 break;
-            case 4:
+            case 5:
                 core.status.event.selection=1;
                 core.ui.drawConfirmBox("你确定要返回标题页面吗？", function () {
                     core.ui.closePanel();
@@ -1940,65 +1948,16 @@ actions.prototype.clickSettings = function (x,y) {
                     core.ui.drawSettings();
                 });
                 break;
-            case 5:
-                core.ui.drawStatistics();
-                /*
-                core.ui.drawWaiting("正在拉取统计信息，请稍后...");
-
-                var formData = new FormData();
-                formData.append('type', 'statistics');
-                formData.append('name', core.firstData.name);
-                formData.append('version', core.firstData.version);
-
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", "/games/upload.php");
-
-                xhr.onload = function(e) {
-                    if (xhr.status==200) {
-                        var response = JSON.parse(xhr.response);
-                        if (response.code<0) {
-                            core.drawText("出错啦！\n无法拉取统计信息。\n错误原因："+response.msg);
-                        }
-                        else {
-                            var text="\t[本塔统计信息]";
-                            var toAdd=false;
-                            response.data.forEach(function (t) {
-                                if (toAdd) text+="\n\n";
-                                toAdd=true;
-                                if (t.hard!='') text+=t.hard+"难度： "
-                                text+="已有"+t.people+"人次游戏，"+t.score+"人次通关。";
-                                t.info.forEach(function(ending) {
-                                    if (ending.ending!='') {
-                                        text+="\n"+ending.ending+"： 已有"+ending.score+"人次通关。";
-                                    }
-                                    if (core.isset(ending.max) && ending.max>0) {
-                                        text+="\n当前MAX为"+ending.max+"，最早由 "+(ending.username||"匿名")+" 于"+core.formatDate(new Date(1000*ending.timestamp))+"打出。";
-                                    }
-                                })
-                            })
-                            core.drawText(text);
-                        }
-                    }
-                    else {
-                        core.drawText("出错啦！\n无法拉取统计信息。\n错误原因：HTTP "+xhr.status);
-                    }
-                };
-                xhr.ontimeout = function() {
-                    core.drawText("出错啦！\n无法拉取统计信息。\n错误原因：Timeout");
-                }
-                xhr.onerror = function() {
-                    core.drawText("出错啦！\n无法拉取统计信息。\n错误原因：XHR Error");
-                }
-                xhr.send(formData);
-                */
-                break;
             case 6:
-                core.ui.drawHelp();
+                core.ui.drawStatistics();
                 break;
             case 7:
-                core.ui.drawAbout();
+                core.ui.drawHelp();
                 break;
             case 8:
+                core.ui.drawAbout();
+                break;
+            case 9:
                 core.ui.closePanel();
                 break;
         }

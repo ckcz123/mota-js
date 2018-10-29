@@ -726,6 +726,58 @@ utils.prototype.hide = function (obj, speed, callback) {
     }, speed);
 }
 
+utils.prototype.encodeCanvas = function (ctx) {
+    var list = [];
+    var width = ctx.canvas.width, height = ctx.canvas.height;
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.webkitImageSmoothingEnabled = false;
+    ctx.msImageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = false;
+
+    var imgData = ctx.getImageData(0, 0, width, height);
+    for (var i=0;i<imgData.data.length;i+=4) {
+        list.push(Math.sign(imgData.data[i+3]));
+    }
+    // compress 01 to array
+    var prev = 0, cnt = 0, arr = [];
+    for (var i=0;i<list.length;i++) {
+        if (list[i]!=prev) {
+            arr.push(cnt);
+            prev=list[i];
+            cnt=0;
+        }
+        cnt++;
+    }
+    arr.push(cnt);
+    return arr;
+}
+
+////// 解析arr数组，并绘制到tempCanvas上 //////
+utils.prototype.decodeCanvas = function (arr, width, height) {
+    if (!core.isset(arr)) return null;
+    // to byte array
+    var curr = 0, list = [];
+    arr.forEach(function (x) {
+        for (var i=0;i<x;i++) list.push(curr);
+        curr = 1-curr;
+    })
+    // 使用tempCanvas
+    var tempCanvas = core.bigmap.tempCanvas;
+    tempCanvas.canvas.width=width;
+    tempCanvas.canvas.height=height;
+    tempCanvas.clearRect(0, 0, width, height);
+
+    var imgData = tempCanvas.getImageData(0, 0, width, height);
+    for (var i=0;i<imgData.data.length;i+=4) {
+        var index = i/4;
+        if (list[index]) {
+            imgData.data[i]=255;
+            imgData.data[i+3]=255;
+        }
+    }
+    tempCanvas.putImageData(imgData, 0, 0);
+}
+
 utils.prototype.consoleOpened = function () {
     var threshold = 160;
     var widthThreshold = window.outerWidth - window.innerWidth > threshold;

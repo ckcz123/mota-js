@@ -836,7 +836,7 @@ ui.prototype.drawSettings = function () {
     core.status.event.id = 'settings';
 
     this.drawChoices(null, [
-        "系统设置", "快捷商店", "浏览地图", "同步存档", "返回标题", "数据统计", "操作帮助", "关于本塔", "返回游戏"
+        "系统设置", "快捷商店", "浏览地图", "打开画板", "同步存档", "返回标题", "数据统计", "操作帮助", "关于本塔", "返回游戏"
     ]);
 }
 
@@ -2415,6 +2415,20 @@ ui.prototype.drawStatistics = function () {
 ////// 绘制“关于”界面 //////
 ui.prototype.drawAbout = function () {
     return this.uidata.drawAbout();
+}
+
+////// 绘制“画图”界面 //////
+ui.prototype.drawPaint = function () {
+
+    core.lockControl();
+    core.status.event.id = 'paint';
+
+    core.clearMap('ui');
+    core.clearMap('route');
+
+    // 将已有的内容绘制到route上
+    core.utils.decodeCanvas(core.paint[core.status.floorId], 32*core.bigmap.width, 32*core.bigmap.height);
+    core.canvas.route.drawImage(core.bigmap.tempCanvas, 0, 0);
 }
 
 ////// 绘制帮助页面 //////

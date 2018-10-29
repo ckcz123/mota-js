@@ -81,6 +81,7 @@ function core() {
         height: 13,
         tempCanvas: null, // A temp canvas for drawing
     }
+    this.paint = {}
     this.initStatus = {
         'played': false,
         'gameOver': false,

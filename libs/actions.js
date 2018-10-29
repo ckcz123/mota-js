@@ -282,6 +282,9 @@ actions.prototype.keyUp = function(keyCode, altKey) {
             this.keyUpCenterFly(keyCode);
             return;
         }
+        if (core.status.event.id=='paint') {
+            this.keyUpPaint(keyCode);
+        }
         return;
     }
 
@@ -1137,10 +1140,17 @@ actions.prototype.keyUpViewMaps = function (keycode) {
         core.clearMap('data');
         core.setOpacity('data', 1);
         core.ui.closePanel();
+        return;
     }
     if (keycode==86) {
         core.status.event.data.damage = !core.status.event.data.damage;
-        core.ui.drawMaps(core.status.event.data.index, core.status.event.data.x, core.status.event.data.y);
+        core.ui.drawMaps(core.status.event.data);
+        return;
+    }
+    if (keycode==77) {
+        core.status.event.data.paint = !core.status.event.data.paint;
+        core.ui.drawMaps(core.status.event.data);
+        return;
     }
     if (keycode==88 || (core.status.replay.replaying && keycode==67)) {
         if (core.isset(core.status.replay)&&core.status.replay.replaying) {
@@ -1148,6 +1158,7 @@ actions.prototype.keyUpViewMaps = function (keycode) {
         } else {
             core.openBook(false);
         }
+        return;
     }
     return;
 }
@@ -2531,17 +2542,28 @@ actions.prototype.clickAbout = function () {
         core.restart();
 }
 
-actions.prototype.ondownPaint = function (x, y) {
-    console.log("ondown: ("+x+","+y+")");
 
-    core.canvas.route.beginPath();
-    core.canvas.route.moveTo(x+core.bigmap.offsetX, y+core.bigmap.offsetY);
+////// 绘图相关 //////
+
+actions.prototype.ondownPaint = function (x, y) {
+    x+=core.bigmap.offsetX;
+    y+=core.bigmap.offsetY;
+    if (!core.status.event.data.erase) {
+        core.canvas.route.beginPath();
+        core.canvas.route.moveTo(x, y);
+    }
     core.status.event.data.x = x;
     core.status.event.data.y = y;
 }
 
 actions.prototype.onmovePaint = function (x, y) {
     if (core.status.event.data.x==null) return;
+    x+=core.bigmap.offsetX;
+    y+=core.bigmap.offsetY;
+    if (core.status.event.data.erase) {
+        core.clearMap('route', x-10, y-10, 20, 20);
+        return;
+    }
     var midx = (core.status.event.data.x+x)/2, midy = (core.status.event.data.y+y)/2;
     core.canvas.route.quadraticCurveTo(midx, midy, x, y);
     core.canvas.route.stroke();
@@ -2550,13 +2572,83 @@ actions.prototype.onmovePaint = function (x, y) {
 }
 
 actions.prototype.onupPaint = function (x,y) {
-    console.log("onup: ("+x+","+y+")");
-    var midx = (core.status.event.data.x+x)/2, midy = (core.status.event.data.y+y)/2;
-    core.canvas.route.quadraticCurveTo(midx, midy, x, y);
-    core.canvas.route.stroke();
+    x+=core.bigmap.offsetX;
+    y+=core.bigmap.offsetY;
+    if (core.status.event.data.erase) {
+        core.clearMap('route', x-5, y-5, 10, 10);
+    }
+    else if (core.status.event.data.x!=null) {
+        var midx = (core.status.event.data.x+x)/2, midy = (core.status.event.data.y+y)/2;
+        core.canvas.route.quadraticCurveTo(midx, midy, x, y);
+        core.canvas.route.stroke();
+    }
 
     core.status.event.data.x = null;
     core.status.event.data.y = null;
     // 保存
     core.paint[core.status.floorId] = LZString.compress(core.utils.encodeCanvas(core.canvas.route).join(","));
 }
+
+actions.prototype.setPaintMode = function (mode) {
+    if (mode == 'paint') core.status.event.data.erase = false;
+    else if (mode == 'erase') core.status.event.data.erase = true;
+    else return;
+
+    core.drawTip("进入"+(core.status.event.data.erase?"擦除":"绘图")+"模式");
+}
+
+actions.prototype.savePaint = function () {
+    var data = {};
+    for (var floorId in core.paint) {
+        if (core.isset(core.paint[floorId]))
+            data[floorId] = LZString.decompress(core.paint[floorId]);
+    }
+    core.download(core.firstData.name+".h5paint", JSON.stringify({
+        'name': core.firstData.name,
+        'paint': data
+    }));
+}
+
+actions.prototype.loadPaint = function () {
+    core.readFile(function (obj) {
+        if (obj.name!=core.firstData.name) {
+            alert("绘图文件和游戏不一致！");
+            return;
+        }
+        if (!core.isset(obj.paint)) {
+            alert("无效的绘图文件！");
+            return;
+        }
+        core.paint = {};
+        for (var floorId in obj.paint) {
+            if (core.isset(obj.paint[floorId]))
+                core.paint[floorId] = LZString.compress(obj.paint[floorId]);
+        }
+
+        core.clearMap('route');
+        var value = core.paint[core.status.floorId];
+        if (core.isset(value)) value = LZString.decompress(value).split(",");
+        core.utils.decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
+        core.canvas.route.drawImage(core.bigmap.tempCanvas.canvas, 0, 0);
+
+        core.drawTip("读取绘图文件成功");
+    })
+}
+
+actions.prototype.exitPaint = function () {
+    core.clearMap('route');
+    core.ui.closePanel();
+    core.statusBar.image.shop.style.opacity = 1;
+    core.statusBar.image.toolbox.style.opacity = 1;
+    core.updateStatusBar();
+    core.drawTip("退出绘图模式");
+}
+
+actions.prototype.keyUpPaint = function (keycode) {
+    if (keycode==27 || keycode==88 || keycode==77 || keycode==13 || keycode==32 || keycode==67) {
+        this.exitPaint();
+        return;
+    }
+}
+
+////// 绘图相关 END //////

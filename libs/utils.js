@@ -253,14 +253,14 @@ utils.prototype.cropImage = function (image, size) {
 ////// 格式化时间为字符串 //////
 utils.prototype.formatDate = function(date) {
     if (!core.isset(date)) return "";
-    return date.getFullYear()+"-"+core.setTwoDigits(date.getMonth()+1)+"-"+core.setTwoDigits(date.getDate())+" "
+    return ""+date.getFullYear()+"-"+core.setTwoDigits(date.getMonth()+1)+"-"+core.setTwoDigits(date.getDate())+" "
         +core.setTwoDigits(date.getHours())+":"+core.setTwoDigits(date.getMinutes())+":"+core.setTwoDigits(date.getSeconds());
 }
 
 ////// 格式化时间为最简字符串 //////
 utils.prototype.formatDate2 = function (date) {
     if (!core.isset(date)) return "";
-    return date.getFullYear()+core.setTwoDigits(date.getMonth()+1)+core.setTwoDigits(date.getDate())
+    return ""+date.getFullYear()+core.setTwoDigits(date.getMonth()+1)+core.setTwoDigits(date.getDate())
         +core.setTwoDigits(date.getHours())+core.setTwoDigits(date.getMinutes())+core.setTwoDigits(date.getSeconds());
 }
 
@@ -458,6 +458,26 @@ utils.prototype.decodeBase64 = function (str) {
     return decodeURIComponent(atob(str).split('').map(function(c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
+}
+
+////// 任意进制转换 //////
+utils.prototype.convertBase = function (str, fromBase, toBase) {
+    var map = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ~`!@#$%^&*()_-+={}[]\\|:;<>,.?/";
+    if (fromBase==toBase) return str;
+    var len = str.length, ans="";
+    var t = [];
+    for (var i=0;i<len;i++) t[i]=map.indexOf(str.charAt(i));
+    t[len]=0;
+    while (len>0) {
+        for (var i=len; i>=1; i--) {
+            t[i-1]+=t[i]%toBase*fromBase;
+            t[i]=parseInt(t[i]/toBase);
+        }
+        ans+=map.charAt(t[0]%toBase);
+        t[0]=parseInt(t[0]/toBase);
+        while (len>0 && t[len-1]==0) len--;
+    }
+    return ans;
 }
 
 utils.prototype.__init_seed = function () {

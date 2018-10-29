@@ -122,6 +122,11 @@ function main() {
             'speedUp': 21,
             'rewind': 22,
             'equipbox': 23,
+            'mana': 24,
+            'skill': 25,
+            'paint': 26,
+            'erase': 27,
+            'exit': 28,
         },
         'floor': document.getElementById('floor'),
         'name': document.getElementById('name'),
@@ -389,6 +394,11 @@ main.statusBar.image.book.onclick = function () {
         return;
     }
 
+    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
+        core.actions.setPaintMode('paint');
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.openBook(true);
 }
@@ -396,8 +406,24 @@ main.statusBar.image.book.onclick = function () {
 ////// 点击状态栏中的楼层传送器/装备栏时 //////
 main.statusBar.image.fly.onclick = function () {
 
+    // 播放录像时
     if (core.isset(core.status.replay) && core.status.replay.replaying) {
         core.stopReplay();
+        return;
+    }
+
+    // 绘图模式
+    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
+        core.actions.setPaintMode('erase');
+        return;
+    }
+
+    // 浏览地图时
+    if (main.core.isPlaying() && (core.status.event||{}).id=='viewMaps') {
+        if (core.isset(core.status.event.data)) {
+            core.status.event.data.paint = !core.status.event.data.paint;
+            core.ui.drawMaps(core.status.event.data);
+        }
         return;
     }
 
@@ -457,6 +483,11 @@ main.statusBar.image.save.onclick = function () {
         return;
     }
 
+    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
+        core.actions.savePaint();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.save(true);
 }
@@ -469,6 +500,11 @@ main.statusBar.image.load.onclick = function () {
         return;
     }
 
+    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
+        core.actions.loadPaint();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.load(true);
 }
@@ -478,6 +514,11 @@ main.statusBar.image.settings.onclick = function () {
 
     if (core.isset(core.status.replay) && core.status.replay.replaying) {
         core.saveReplay();
+        return;
+    }
+
+    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
+        core.actions.exitPaint();
         return;
     }
 

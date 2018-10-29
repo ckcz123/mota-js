@@ -617,7 +617,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	else core.statusBar.lv.style.fontStyle = 'normal';
 
 	// 设置生命上限、生命值、攻防魔防金币和经验值
-	var statusList = ['hpmax', 'hp', 'atk', 'def', 'mdef', 'money', 'experience'];
+	var statusList = ['hpmax', 'hp', 'mana', 'atk', 'def', 'mdef', 'money', 'experience'];
 	statusList.forEach(function (item) {
 		// 向下取整
 		if (core.isset(core.status.hero[item]))
@@ -631,6 +631,18 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.statusBar.atk.innerHTML = core.formatBigNumber(Math.floor(core.getFlag('equip_atk_buff',1)*core.getStatus('atk')));
 		core.statusBar.def.innerHTML = core.formatBigNumber(Math.floor(core.getFlag('equip_def_buff',1)*core.getStatus('def')));
 		core.statusBar.mdef.innerHTML = core.formatBigNumber(Math.floor(core.getFlag('equip_mdef_buff',1)*core.getStatus('mdef')));
+	}
+	
+	// 设置魔力值
+	if (core.flags.enableMana) {
+		// 也可以使用flag:manaMax来表示最大魔力值；详见文档-个性化-技能塔的支持
+		// core.status.hero.mana = Math.max(core.status.hero.mana, core.getFlag('manaMax', 10));
+		// core.statusBar.mana.innerHTML = core.status.hero.mana + "/" + core.getFlag('manaMax', 10);
+	}
+	// 设置技能栏
+	if (core.flags.enableSkill) {
+		// 可以用flag:kill表示当前开启的技能类型，flag:skillName显示技能名；详见文档-个性化-技能塔的支持
+		core.statusBar.skill.innerHTML = core.getFlag('skillName', '无');
 	}
 
 	// 可以在这里添加自己额外的状态栏信息，比如想攻击显示 +0.5 可以这么写：

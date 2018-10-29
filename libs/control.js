@@ -2807,6 +2807,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     if (!core.flags.enableKeys) count--;
     if (!core.flags.enablePZF) count--;
     if (!core.flags.enableName) count--;
+    if (!core.flags.enableMana) count--;
+    if (!core.flags.enableSkill) count--;
 
     var statusLineHeight = BASE_LINEHEIGHT * 9 / count;
     var statusLineFontSize = DEFAULT_FONT_SIZE;
@@ -3087,6 +3089,12 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             }
         },
         {
+            id: 'manaCol',
+            rules: {
+                display: core.flags.enableMana ? 'block': 'none'
+            }
+        },
+        {
             id: 'mdefCol',
             rules: {
                 display: core.flags.enableMDef ? 'block': 'none'
@@ -3108,6 +3116,12 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             id: 'upCol',
             rules: {
                 display: core.flags.enableLevelUp ? 'block': 'none'
+            }
+        },
+        {
+            id: 'skillCol',
+            rules: {
+                display: core.flags.enableSkill ? 'block': 'none'
             }
         },
         {

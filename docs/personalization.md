@@ -554,6 +554,8 @@ this.myfunc = function(x) {
 
 通过这种，将脚本和自定义事件混用的方式，可以达到和RM中公共事件类似的效果，即一个调用触发一系列事件。
 
+<!--
+
 ## 自定义状态栏（新增显示项）
 
 在V2.2以后，我们可以自定义状态栏背景图（全塔属性 - statusLeftBackground）等等。
@@ -594,56 +596,51 @@ core.statusBar.mana.innerHTML = core.getFlag('mana', 0) + '/' + core.getFlag('ma
 core.statusBar.mana.style.fontStyle = 'normal'; // 这一行会取消斜体。如果是汉字（比如技能名）的话，斜体起来会非常难看，可以通过这一句取消。
 ```
 
+-->
+
 ## 技能塔的支持
 
 其实，在HTML5上制作技能塔是完全可行的。
 
 要支持技能塔，可能需要如下几个方面：
 
-- 魔力（和上限）的定义添加
+- 魔力（和上限）的添加；技能的定义
 - 状态栏的显示
 - 技能的触发（按键与录像问题）
 - 技能的效果
 
-下面依次进行描述。
+从V2.5开始，魔力和技能的定义被内置到了样板中，因此十分方便。
 
-### 魔力的定义添加
+### 魔力的定义添加；技能的定义
 
-当我们定义了魔力的ID，比如`mana`后，要使用它，一般有两种方式：属性获取`status:mana`或者flag标记`flag:mana`。
+从V2.5开始，提供了status:mana选项，可以直接代表当前魔力值。
 
-如果要属性获取，则需要打开`data.js`文件，并在`hero`中添加定义。
+如果要启用，需要开启全塔属性的enableMana选项。
 
-通过这种方式定义的，可以通过`core.setStatus('mana', 0)`以及`core.getStatus('mana')`来设置或获取。
+如果需要魔力上限，则可以使用flag:manaMax来表示当前的魔力最大值。
 
-``` js
-'hero': {
-    // ... 上略
-    'mana': 0, // 增添mana定义，可以放在experience之后。同理可定义manaMax表示当前最大魔力值。
-}
-```
+同时，我们可以使用flag:skill表示当前开启的技能编号，flag:skillName表示当前开启的技能名称。
 
-如果要flag标记，则无需额外在任何地方进行定义。只需要在设置或取用的时候使用 `core.setFlag('mana', 0)` 或 `core.getFlag('mana', 0)` 即可。
-
-下面我都使用属性获取的方式来进行说明。
+如果flag:skill不为0，则代表当前处于某个技能开启状态，且状态栏显示flag:skillName值。伤害计算函数中只需要对flag:skill进行处理即可。
 
 ### 状态栏的显示
 
-首先我们需要额外新增一个状态栏；请参见[自定义状态栏（新增显示项）](#自定义状态栏（新增显示项）)。
+从V2.5开始，魔力值和技能名的状态栏项目已经被添加，可以直接使用。
 
-我们可以在魔力那一行显示当前值和最大值：
-
-``` js
-core.setStatus('mana', Math.min(core.getStatus('mana'), core.getStatus('manaMax'))); // 如果魔力存在上限，则不能超过其上限值
-core.statusBar.mana.innerHTML = core.getStatus('mana') + '/' + core.getStatus('manaMax', 0); // 显示比如 6/30 这样
-```
-
-如果我们还需要显示当前使用的技能名，也是可以的；定义一个ID为skill，然后按照上面的做法新增一行。
-
-请注意，如果是中文字符，需要取消斜体（不然会非常难看的）！
+在脚本编辑-updateStatusBar中，可以对状态栏显示内容进行修改。
 
 ``` js
-core.statusBar.skill.style.fontStyle = 'normal'; // 取消斜体显示
-core.statusBar.skill.innerHTML = core.getFlag('skillName', '无'); // 使用flag:skillName表示当前激活的技能名。
+	// 设置魔力值
+	if (core.flags.enableMana) {
+		// 也可以使用flag:manaMax来表示最大魔力值
+		// core.status.hero.mana = Math.max(core.status.hero.mana, core.getFlag('manaMax', 10));
+		// core.statusBar.mana.innerHTML = core.status.hero.mana + "/" + core.getFlag('manaMax', 10);
+	}
+	// 设置技能栏
+	if (core.flags.enableSkill) {
+		// 可以用flag:kill表示当前开启的技能类型，flag:skillName显示技能名；详见文档-个性化-技能塔的支持
+		core.statusBar.skill.innerHTML = core.getFlag('skillName', '无');
+	}
 ```
 
 ### 技能的触发
@@ -716,7 +713,7 @@ case 87: // W
 
 举个例子，我设置一个勇士的技能：二倍斩，开启技能消耗5点魔力，下一场战斗攻击力翻倍。
 
-那么，直接在`getDamageInfo`中进行判断：
+那么，直接在脚本编辑的`getDamageInfo`中进行判断：
 
 ``` js
 if (core.getFlag('skill', 0)==1) { // 开启了技能1
@@ -724,7 +721,7 @@ if (core.getFlag('skill', 0)==1) { // 开启了技能1
 }
 ```
 
-然后在脚本编辑的战后事件中进行魔力值的扣除：
+然后在脚本编辑的`afterBattle`中进行魔力值的扣除：
 
 ``` js
 if (core.getFlag('skill', 0)==1) { // 开启了技能1

@@ -638,7 +638,7 @@ if (core.flags.enableMana) {
 }
 // 设置技能栏
 if (core.flags.enableSkill) {
-    // 可以用flag:skill表示当前开启的技能类型，flag:skillName显示技能名；详见文档-个性化-技能塔的支持
+    // 可以用flag:skill表示当前开启的技能类型，flag:skillName显示技能名
     core.statusBar.skill.innerHTML = core.getFlag('skillName', '无');
 }
 ```

@@ -130,7 +130,8 @@ function main() {
             'skill': 25,
             'paint': 26,
             'erase': 27,
-            'exit': 28,
+            'delete': 28,
+            'exit': 29,
         },
         'floor': document.getElementById('floor'),
         'name': document.getElementById('name'),
@@ -448,6 +449,11 @@ main.statusBar.image.toolbox.onclick = function () {
 
     if (core.isset(core.status.replay) && core.status.replay.replaying) {
         core.rewindReplay();
+        return;
+    }
+
+    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
+        core.actions.clearPaint();
         return;
     }
 

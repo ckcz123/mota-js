@@ -2597,6 +2597,12 @@ actions.prototype.setPaintMode = function (mode) {
     core.drawTip("进入"+(core.status.event.data.erase?"擦除":"绘图")+"模式");
 }
 
+actions.prototype.clearPaint = function () {
+    core.clearMap('route');
+    core.paint[core.status.floorId] = null;
+    core.drawTip("已清空绘图内容");
+}
+
 actions.prototype.savePaint = function () {
     var data = {};
     for (var floorId in core.paint) {
@@ -2639,7 +2645,6 @@ actions.prototype.exitPaint = function () {
     core.clearMap('route');
     core.ui.closePanel();
     core.statusBar.image.shop.style.opacity = 1;
-    core.statusBar.image.toolbox.style.opacity = 1;
     core.updateStatusBar();
     core.drawTip("退出绘图模式");
 }

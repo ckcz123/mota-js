@@ -823,7 +823,7 @@ ui.prototype.drawSwitchs = function() {
         "临界显伤： "+(core.flags.displayCritical ? "[ON]" : "[OFF]"),
         "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
         "新版存档： "+(core.platform.useLocalForage ? "[ON]":"[OFF]"),
-        "大地图瞬移："+(core.hasFlag('bigmapMoveDirectly') ? "[ON]":"[OFF]"),
+        "单击瞬移： "+(core.getFlag('clickMove', true) ? "[ON]":"[OFF]"),
         "查看工程",
         "下载离线版本",
         "返回主菜单"

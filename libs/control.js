@@ -447,7 +447,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
 
     // 单击瞬间移动
     if (core.status.heroStop) {
-        if (core.control.tryMoveDirectly(destX, destY))
+        if (stepPostfix.length<=1 && core.getFlag('clickMove', true) && core.control.tryMoveDirectly(destX, destY))
             return;
     }
 

@@ -1760,7 +1760,7 @@ actions.prototype.clickSwitchs = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 7:
-                core.setFlag('bigmapMoveDirectly', !core.getFlag('bigmapMoveDirectly', false));
+                core.setFlag('clickMove', !core.getFlag('clickMove', true));
                 core.ui.drawSwitchs();
                 break;
             case 8:

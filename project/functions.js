@@ -708,8 +708,8 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			core.debug();
 			break;
 		case 87: // W：开启技能“二倍斩”
-			// 检测技能栏是否开启，是否拥有“二倍斩”这个技能道具
-			if (core.flags.enableSkill && core.hasItem('skill1')) {
+			// 检测是否拥有“二倍斩”这个技能道具
+			if (core.hasItem('skill1')) {
 				core.useItem('skill1');
 			}
 			break;

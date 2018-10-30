@@ -1532,6 +1532,8 @@ events.prototype.vibrate = function(time, callback) {
 events.prototype.openShop = function(shopId, needVisited) {
     var shop = core.status.shops[shopId];
     shop.times = shop.times || 0;
+    if (shop.commonTimes)
+        shop.times = core.getFlag('commonTimes', 0);
     shop.visited = shop.visited || false;
     if (needVisited && !shop.visited) {
         if (shop.times==0) core.drawTip("该商店尚未开启");

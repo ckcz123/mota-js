@@ -81,6 +81,7 @@ function core() {
         height: 13,
         tempCanvas: null, // A temp canvas for drawing
     }
+    this.paint = {}
     this.initStatus = {
         'played': false,
         'gameOver': false,
@@ -395,18 +396,18 @@ core.prototype.keyUp = function(keyCode, altKey) {
 }
 
 ////// 点击（触摸）事件按下时 //////
-core.prototype.ondown = function (x ,y) {
-    return core.actions.ondown(x,y);
+core.prototype.ondown = function (loc) {
+    return core.actions.ondown(loc);
 }
 
 ////// 当在触摸屏上滑动时 //////
-core.prototype.onmove = function (x ,y) {
-    return core.actions.onmove(x,y);
+core.prototype.onmove = function (loc) {
+    return core.actions.onmove(loc);
 }
 
 ////// 当点击（触摸）事件放开时 //////
-core.prototype.onup = function () {
-    return core.actions.onup();
+core.prototype.onup = function (loc) {
+    return core.actions.onup(loc);
 }
 
 ////// 获得点击事件相对左上角的坐标（0到12之间） //////

@@ -8,7 +8,7 @@ function actions() {
 }
 
 actions.prototype.init = function () {
-
+    this.actionsdata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.actions;
 }
 
 ////// 按下某个键时 //////
@@ -282,152 +282,16 @@ actions.prototype.keyUp = function(keyCode, altKey) {
             this.keyUpCenterFly(keyCode);
             return;
         }
+        if (core.status.event.id=='paint') {
+            this.keyUpPaint(keyCode);
+        }
         return;
     }
 
     if(!core.status.played)
         return;
 
-    // 0~9的AltKey
-    if (altKey && keyCode>=48 && keyCode<=57 && core.status.heroStop) {
-        core.items.quickLoadEquip(keyCode-48);
-        return;
-    }
-
-    switch (keyCode) {
-        case 27: // ESC
-            if (core.status.heroStop)
-                core.openSettings(true);
-            break;
-        case 71: // G
-            if (core.status.heroStop)
-                core.useFly(true);
-            break;
-        case 81: // Q
-            if (core.status.heroStop)
-                core.openEquipbox(true);
-            break;
-        case 88: // X
-            if (core.status.heroStop)
-                core.openBook(true);
-            break;
-        case 65: // A
-            if (core.status.heroStop)
-                core.doSL("autoSave", "load");
-            break;
-        case 66: // B
-            if (core.status.heroStop)
-                core.ui.drawStatistics();
-            break;
-        case 83: // S
-            if (core.status.heroStop)
-                core.save(true);
-            break;
-        case 68: // D
-            if (core.status.heroStop)
-                core.load(true);
-            break;
-        case 69: // E
-            if (core.status.heroStop)
-                core.ui.drawCursor();
-            break;
-        case 84: // T
-            if (core.status.heroStop)
-                core.openToolbox(true);
-            break;
-        case 90: // Z
-            if (core.status.heroStop)
-                core.turnHero();
-            break;
-        case 75: case 86: // K/V
-            if (core.status.heroStop)
-                core.openQuickShop(true);
-            break;
-        case 32: // SPACE
-            if (core.status.heroStop)
-                core.getNextItem();
-            break;
-        case 72: // H
-            if (core.status.heroStop)
-                core.ui.drawHelp();
-            break;
-        case 82: // R
-            if (core.status.heroStop) {
-                if (core.hasFlag('debug')) {
-                    core.drawText("\t[系统提示]调试模式下无法回放录像");
-                }
-                else {
-                    core.ui.drawReplay();
-                }
-            }
-            break;
-        case 33: case 34: // PAGEUP/PAGEDOWN
-        if (core.status.heroStop) {
-            core.ui.drawMaps();
-        }
-        break;
-        case 37: // UP
-            break;
-        case 38: // DOWN
-            break;
-        case 39: // RIGHT
-            break;
-        case 40: // DOWN
-            break;
-        case 49: // 快捷键1: 破
-            if (core.status.heroStop && core.hasItem('pickaxe')) {
-                if (core.canUseItem('pickaxe')) {
-                    core.useItem('pickaxe');
-                }
-                else {
-                    core.drawTip('当前不能使用破墙镐');
-                }
-            }
-            break;
-        case 50: // 快捷键2: 炸
-            if (core.status.heroStop) {
-                if (core.hasItem('bomb')) {
-                    if (core.canUseItem('bomb')) {
-                        core.useItem('bomb');
-                    }
-                    else {
-                        core.drawTip('当前不能使用炸弹');
-                    }
-                }
-                else if (core.hasItem('hammer')) {
-                    if (core.canUseItem('hammer')) {
-                        core.useItem('hammer');
-                    }
-                    else {
-                        core.drawTip('当前不能使用圣锤');
-                    }
-
-                }
-            }
-            break;
-        case 51: // 快捷键3: 飞
-            if (core.status.heroStop && core.hasItem('centerFly')) {
-                core.events.useItem('centerFly');
-            }
-            break;
-        case 52: // 快捷键4：破冰/冰冻/地震/上下楼器/...
-            if (core.status.heroStop) {
-                var list = ["icePickaxe", "snow", "earthquake", "upFly", "downFly", "jumpShoes", "lifeWand", "poisonWine", "weakWine", "curseWine", "superWine"];
-                for (var i=0;i<list.length;i++) {
-                    var itemId = list[i];
-                    if (core.canUseItem(itemId)) {
-                        core.useItem(itemId);
-                        break;
-                    }
-                }
-            }
-            break;
-        case 118: // F7开启debug模式
-            if (core.status.heroStop)
-                core.debug();
-            break;
-
-    }
+    this.actionsdata.onKeyUp(keyCode, altKey);
 
     if (core.isset(core.status.automaticRoute)&&core.status.automaticRoute.autoHeroMove) {
         core.stopAutomaticRoute();
@@ -438,9 +302,18 @@ actions.prototype.keyUp = function(keyCode, altKey) {
 }
 
 ////// 点击（触摸）事件按下时 //////
-actions.prototype.ondown = function (x ,y) {
+actions.prototype.ondown = function (loc) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying
         &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
+
+    // 画板
+    if (core.status.played && (core.status.event||{}).id=='paint') {
+        this.ondownPaint(loc.x, loc.y);
+        return;
+    }
+
+    var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
+
     if (!core.status.played || core.status.lockControl) {
         this.onclick(x, y, []);
         if (core.timeout.onDownTimeout==null) {
@@ -467,11 +340,18 @@ actions.prototype.ondown = function (x ,y) {
 }
 
 ////// 当在触摸屏上滑动时 //////
-actions.prototype.onmove = function (x ,y) {
+actions.prototype.onmove = function (loc) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying
         &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
-    // if (core.status.holdingPath==0){return;}
-    //core.status.mouseOutCheck =1;
+
+    // 画板
+    if (core.status.played && (core.status.event||{}).id=='paint') {
+        this.onmovePaint(loc.x, loc.y)
+        return;
+    }
+
+    var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
+
     var pos={'x':x,'y':y};
     var pos0=core.status.stepPostfix[core.status.stepPostfix.length-1];
     var directionDistance=[pos.y-pos0.y,pos0.x-pos.x,pos0.y-pos.y,pos.x-pos0.x];
@@ -492,9 +372,17 @@ actions.prototype.onmove = function (x ,y) {
 }
 
 ////// 当点击（触摸）事件放开时 //////
-actions.prototype.onup = function () {
+actions.prototype.onup = function (loc) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying
         &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
+
+    // 画板
+    if (core.status.played && (core.status.event||{}).id=='paint') {
+        this.onupPaint(loc.x, loc.y)
+        return;
+    }
+
+    var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
 
     clearTimeout(core.timeout.onDownTimeout);
     core.timeout.onDownTimeout = null;
@@ -1109,10 +997,17 @@ actions.prototype.keyUpViewMaps = function (keycode) {
         core.clearMap('data');
         core.setOpacity('data', 1);
         core.ui.closePanel();
+        return;
     }
     if (keycode==86) {
         core.status.event.data.damage = !core.status.event.data.damage;
-        core.ui.drawMaps(core.status.event.data.index, core.status.event.data.x, core.status.event.data.y);
+        core.ui.drawMaps(core.status.event.data);
+        return;
+    }
+    if (keycode==77) {
+        core.status.event.data.paint = !core.status.event.data.paint;
+        core.ui.drawMaps(core.status.event.data);
+        return;
     }
     if (keycode==88 || (core.status.replay.replaying && keycode==67)) {
         if (core.isset(core.status.replay)&&core.status.replay.replaying) {
@@ -1120,6 +1015,7 @@ actions.prototype.keyUpViewMaps = function (keycode) {
         } else {
             core.openBook(false);
         }
+        return;
     }
     return;
 }
@@ -1160,6 +1056,8 @@ actions.prototype.clickShop = function(x,y) {
             });
             core.updateStatusBar();
             shop.times++;
+            if (shop.commonTimes)
+                core.setFlag('commonTimes', shop.times);
             core.events.openShop(core.status.event.data.id);
         }
         // 离开
@@ -1927,10 +1825,13 @@ actions.prototype.clickSettings = function (x,y) {
                 core.ui.drawMaps();
                 break;
             case 3:
+                core.ui.drawPaint();
+                break;
+            case 4:
                 core.status.event.selection=0;
                 core.ui.drawSyncSave();
                 break;
-            case 4:
+            case 5:
                 core.status.event.selection=1;
                 core.ui.drawConfirmBox("你确定要返回标题页面吗？", function () {
                     core.ui.closePanel();
@@ -1940,65 +1841,16 @@ actions.prototype.clickSettings = function (x,y) {
                     core.ui.drawSettings();
                 });
                 break;
-            case 5:
-                core.ui.drawStatistics();
-                /*
-                core.ui.drawWaiting("正在拉取统计信息，请稍后...");
-
-                var formData = new FormData();
-                formData.append('type', 'statistics');
-                formData.append('name', core.firstData.name);
-                formData.append('version', core.firstData.version);
-
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", "/games/upload.php");
-
-                xhr.onload = function(e) {
-                    if (xhr.status==200) {
-                        var response = JSON.parse(xhr.response);
-                        if (response.code<0) {
-                            core.drawText("出错啦！\n无法拉取统计信息。\n错误原因："+response.msg);
-                        }
-                        else {
-                            var text="\t[本塔统计信息]";
-                            var toAdd=false;
-                            response.data.forEach(function (t) {
-                                if (toAdd) text+="\n\n";
-                                toAdd=true;
-                                if (t.hard!='') text+=t.hard+"难度： "
-                                text+="已有"+t.people+"人次游戏，"+t.score+"人次通关。";
-                                t.info.forEach(function(ending) {
-                                    if (ending.ending!='') {
-                                        text+="\n"+ending.ending+"： 已有"+ending.score+"人次通关。";
-                                    }
-                                    if (core.isset(ending.max) && ending.max>0) {
-                                        text+="\n当前MAX为"+ending.max+"，最早由 "+(ending.username||"匿名")+" 于"+core.formatDate(new Date(1000*ending.timestamp))+"打出。";
-                                    }
-                                })
-                            })
-                            core.drawText(text);
-                        }
-                    }
-                    else {
-                        core.drawText("出错啦！\n无法拉取统计信息。\n错误原因：HTTP "+xhr.status);
-                    }
-                };
-                xhr.ontimeout = function() {
-                    core.drawText("出错啦！\n无法拉取统计信息。\n错误原因：Timeout");
-                }
-                xhr.onerror = function() {
-                    core.drawText("出错啦！\n无法拉取统计信息。\n错误原因：XHR Error");
-                }
-                xhr.send(formData);
-                */
-                break;
             case 6:
-                core.ui.drawHelp();
+                core.ui.drawStatistics();
                 break;
             case 7:
-                core.ui.drawAbout();
+                core.ui.drawHelp();
                 break;
             case 8:
+                core.ui.drawAbout();
+                break;
+            case 9:
                 core.ui.closePanel();
                 break;
         }
@@ -2548,3 +2400,114 @@ actions.prototype.clickAbout = function () {
     else
         core.restart();
 }
+
+
+////// 绘图相关 //////
+
+actions.prototype.ondownPaint = function (x, y) {
+    x+=core.bigmap.offsetX;
+    y+=core.bigmap.offsetY;
+    if (!core.status.event.data.erase) {
+        core.canvas.route.beginPath();
+        core.canvas.route.moveTo(x, y);
+    }
+    core.status.event.data.x = x;
+    core.status.event.data.y = y;
+}
+
+actions.prototype.onmovePaint = function (x, y) {
+    if (core.status.event.data.x==null) return;
+    x+=core.bigmap.offsetX;
+    y+=core.bigmap.offsetY;
+    if (core.status.event.data.erase) {
+        core.clearMap('route', x-10, y-10, 20, 20);
+        return;
+    }
+    var midx = (core.status.event.data.x+x)/2, midy = (core.status.event.data.y+y)/2;
+    core.canvas.route.quadraticCurveTo(midx, midy, x, y);
+    core.canvas.route.stroke();
+    core.status.event.data.x = x;
+    core.status.event.data.y = y;
+}
+
+actions.prototype.onupPaint = function (x,y) {
+    x+=core.bigmap.offsetX;
+    y+=core.bigmap.offsetY;
+    if (core.status.event.data.erase) {
+        core.clearMap('route', x-5, y-5, 10, 10);
+    }
+    else if (core.status.event.data.x!=null) {
+        var midx = (core.status.event.data.x+x)/2, midy = (core.status.event.data.y+y)/2;
+        core.canvas.route.quadraticCurveTo(midx, midy, x, y);
+        core.canvas.route.stroke();
+    }
+
+    core.status.event.data.x = null;
+    core.status.event.data.y = null;
+    // 保存
+    core.paint[core.status.floorId] = LZString.compress(core.utils.encodeCanvas(core.canvas.route).join(","));
+}
+
+actions.prototype.setPaintMode = function (mode) {
+    if (mode == 'paint') core.status.event.data.erase = false;
+    else if (mode == 'erase') core.status.event.data.erase = true;
+    else return;
+
+    core.drawTip("进入"+(core.status.event.data.erase?"擦除":"绘图")+"模式");
+}
+
+actions.prototype.savePaint = function () {
+    var data = {};
+    for (var floorId in core.paint) {
+        if (core.isset(core.paint[floorId]))
+            data[floorId] = LZString.decompress(core.paint[floorId]);
+    }
+    core.download(core.firstData.name+".h5paint", JSON.stringify({
+        'name': core.firstData.name,
+        'paint': data
+    }));
+}
+
+actions.prototype.loadPaint = function () {
+    core.readFile(function (obj) {
+        if (obj.name!=core.firstData.name) {
+            alert("绘图文件和游戏不一致！");
+            return;
+        }
+        if (!core.isset(obj.paint)) {
+            alert("无效的绘图文件！");
+            return;
+        }
+        core.paint = {};
+        for (var floorId in obj.paint) {
+            if (core.isset(obj.paint[floorId]))
+                core.paint[floorId] = LZString.compress(obj.paint[floorId]);
+        }
+
+        core.clearMap('route');
+        var value = core.paint[core.status.floorId];
+        if (core.isset(value)) value = LZString.decompress(value).split(",");
+        core.utils.decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
+        core.canvas.route.drawImage(core.bigmap.tempCanvas.canvas, 0, 0);
+
+        core.drawTip("读取绘图文件成功");
+    })
+}
+
+actions.prototype.exitPaint = function () {
+    core.clearMap('route');
+    core.ui.closePanel();
+    core.statusBar.image.shop.style.opacity = 1;
+    core.statusBar.image.toolbox.style.opacity = 1;
+    core.updateStatusBar();
+    core.drawTip("退出绘图模式");
+}
+
+actions.prototype.keyUpPaint = function (keycode) {
+    if (keycode==27 || keycode==88 || keycode==77 || keycode==13 || keycode==32 || keycode==67) {
+        this.exitPaint();
+        return;
+    }
+}
+
+////// 绘图相关 END //////

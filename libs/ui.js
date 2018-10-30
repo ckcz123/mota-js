@@ -836,7 +836,7 @@ ui.prototype.drawSettings = function () {
     core.status.event.id = 'settings';
 
     this.drawChoices(null, [
-        "系统设置", "快捷商店", "浏览地图", "同步存档", "返回标题", "数据统计", "操作帮助", "关于本塔", "返回游戏"
+        "系统设置", "快捷商店", "浏览地图", "打开画板", "同步存档", "返回标题", "数据统计", "操作帮助", "关于本塔", "返回游戏"
     ]);
 }
 
@@ -1645,6 +1645,10 @@ ui.prototype.drawMaps = function (index, x, y) {
     core.clearMap('animate');
     core.setOpacity('animate', 1);
 
+    var damage = (core.status.event.data||{}).damage, paint =  (core.status.event.data||{}).paint;
+    if (core.isset(index.damage)) damage=index.damage;
+    if (core.isset(index.paint)) paint=index.paint;
+
     if (core.isset(index.index)) {
         x=index.x;
         y=index.y;
@@ -1661,18 +1665,26 @@ ui.prototype.drawMaps = function (index, x, y) {
     if (y<6) y=6;
     if (y>mh-7) y=mh-7;
 
-    core.status.event.data = {"index": index, "x": x, "y": y, "damage": (core.status.event.data||{"damage":false}).damage};
+    core.status.event.data = {"index": index, "x": x, "y": y, "damage": damage, "paint": paint};
 
     clearTimeout(core.interval.tipAnimate);
     core.clearMap('ui');
     core.setAlpha('ui', 1);
     this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 0, 0, 416, x, y);
 
+    // 绘图
+    if (core.status.event.data.paint) {
+        var offsetX = core.clamp(x-6, 0, mw-13), offsetY = core.clamp(y-6, 0, mh-13);
+        var value = core.paint[floorId];
+        if (core.isset(value)) value = LZString.decompress(value).split(",");
+        core.utils.decodeCanvas(value, 32*mw, 32*mh);
+        core.canvas.ui.drawImage(core.bigmap.tempCanvas.canvas, offsetX*32, offsetY*32, 416, 416, 0, 0, 416, 416);
+    }
+
     core.clearMap('data');
     core.setOpacity('data', 0.2);
     core.canvas.data.textAlign = 'left';
     core.setFont('data', '16px Arial');
-
 
     var text = core.status.maps[floorId].title;
     if (mw>13 || mh>13) text+=" ["+(x-6)+","+(y-6)+"]";
@@ -2417,28 +2429,64 @@ ui.prototype.drawAbout = function () {
     return this.uidata.drawAbout();
 }
 
+////// 绘制“画图”界面 //////
+ui.prototype.drawPaint = function () {
+
+    core.drawText(
+        "\t[进入绘图模式]你可以在此页面上任意进行绘图和标记操作。\nM键可以进入或退出此模式。\n\n"+
+        "绘图的内容会自动保存，且以页面为生命周期，和存读档无关，重新开始游戏或读档后绘制的内容仍有效，但刷新页面就会消失。\n"+
+        "你可以将绘制内容保存到文件，也可以从文件读取保存的绘制内容。\n"+
+        "浏览地图页面可以按楼传按钮或M键来开启/关闭该层的绘图显示。\n\n更多功能请详见文档-元件-绘图模式。",
+        function () {
+            core.drawTip("打开绘图模式，现在可以任意在界面上绘图标记");
+
+            core.lockControl();
+            core.status.event.id = 'paint';
+            core.status.event.data = {"x": null, "y": null, "erase": false};
+
+            core.clearMap('ui');
+            core.clearMap('route');
+
+            core.setAlpha('route', 1);
+            core.setOpacity('route', 1);
+
+            // 将已有的内容绘制到route上
+            var value = core.paint[core.status.floorId];
+            if (core.isset(value)) value = LZString.decompress(value).split(",");
+            core.utils.decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
+            core.canvas.route.drawImage(core.bigmap.tempCanvas.canvas, 0, 0);
+
+            core.setLineWidth('route', 3);
+            core.setStrokeStyle('route', '#FF0000');
+
+            core.statusBar.image.shop.style.opacity = 0;
+            core.statusBar.image.toolbox.style.opacity = 0;
+
+            core.statusBar.image.book.src = core.statusBar.icons.paint.src;
+            core.statusBar.image.fly.src = core.statusBar.icons.erase.src;
+            core.statusBar.image.settings.src = core.statusBar.icons.exit.src;
+            core.statusBar.image.book.style.opacity = 1;
+            core.statusBar.image.fly.style.opacity = 1;
+        }
+    );
+}
+
 ////// 绘制帮助页面 //////
 ui.prototype.drawHelp = function () {
     core.drawText([
         "\t[键盘快捷键列表]"+
-        "[CTRL] 跳过对话\n" +
-        "[Z] 转向\n" +
-        "[X] 打开/关闭怪物手册\n" +
-        "[G] 打开/关闭楼层传送器\n" +
-        "[A] 读取自动存档（回退）\n" +
+        "[CTRL] 跳过对话   [Z] 转向\n" +
+        "[X] 怪物手册   [G] 楼层传送\n" +
+        "[A] 读取自动存档   [S/D] 存读档页面\n" +
         "[S/D] 打开/关闭存/读档页面\n" +
-        "[K/V] 打开/关闭快捷商店选择列表\n" +
-        "[T] 打开/关闭工具栏\n" +
-        "[ESC] 打开/关闭系统菜单\n" +
-        "[B] 打开数据统计\n" +
-        // "[E] 显示光标\n" +
-        "[H] 打开帮助页面\n"+
-        "[R] 回放\n"+
-        "[SPACE] 轻按（仅在轻按开关打开时有效）\n" +
+        "[K/V] 快捷商店   [ESC] 系统菜单\n" +
+        "[T] 道具页面   [Q] 装备页面\n" +
+        "[B] 数据统计  [H] 帮助页面\n" +
+        "[R] 回放录像  [E] 显示光标\n" +
+        "[SPACE] 轻按   [M] 绘图模式\n" +
         "[PgUp/PgDn] 浏览地图\n"+
-        "[1] 快捷使用破墙镐\n" +
-        "[2] 快捷使用炸弹/圣锤\n" +
-        "[3] 快捷使用中心对称飞行器",
+        "[1~4] 快捷使用破炸飞和其他道具\n"+
+        "[Alt+0~9] 快捷换装",
         "\t[鼠标操作]"+
         "点状态栏中图标： 进行对应的操作\n"+
         "点任意块： 寻路并移动\n"+
@@ -2446,7 +2494,7 @@ ui.prototype.drawHelp = function () {
         "双击空地： 瞬间移动\n"+
         "单击勇士： 转向\n"+
         "双击勇士： 轻按（仅在轻按开关打开时有效）\n"+
-        "长按任意位置：跳过剧情对话或打开虚拟键盘\n"
+        "长按任意位置：跳过剧情对话或打开虚拟键盘"
     ]);
 }
 

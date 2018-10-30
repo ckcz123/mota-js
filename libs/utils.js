@@ -253,14 +253,14 @@ utils.prototype.cropImage = function (image, size) {
 ////// 格式化时间为字符串 //////
 utils.prototype.formatDate = function(date) {
     if (!core.isset(date)) return "";
-    return date.getFullYear()+"-"+core.setTwoDigits(date.getMonth()+1)+"-"+core.setTwoDigits(date.getDate())+" "
+    return ""+date.getFullYear()+"-"+core.setTwoDigits(date.getMonth()+1)+"-"+core.setTwoDigits(date.getDate())+" "
         +core.setTwoDigits(date.getHours())+":"+core.setTwoDigits(date.getMinutes())+":"+core.setTwoDigits(date.getSeconds());
 }
 
 ////// 格式化时间为最简字符串 //////
 utils.prototype.formatDate2 = function (date) {
     if (!core.isset(date)) return "";
-    return date.getFullYear()+core.setTwoDigits(date.getMonth()+1)+core.setTwoDigits(date.getDate())
+    return ""+date.getFullYear()+core.setTwoDigits(date.getMonth()+1)+core.setTwoDigits(date.getDate())
         +core.setTwoDigits(date.getHours())+core.setTwoDigits(date.getMinutes())+core.setTwoDigits(date.getSeconds());
 }
 
@@ -458,6 +458,26 @@ utils.prototype.decodeBase64 = function (str) {
     return decodeURIComponent(atob(str).split('').map(function(c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
+}
+
+////// 任意进制转换 //////
+utils.prototype.convertBase = function (str, fromBase, toBase) {
+    var map = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ~`!@#$%^&*()_-+={}[]\\|:;<>,.?/";
+    if (fromBase==toBase) return str;
+    var len = str.length, ans="";
+    var t = [];
+    for (var i=0;i<len;i++) t[i]=map.indexOf(str.charAt(i));
+    t[len]=0;
+    while (len>0) {
+        for (var i=len; i>=1; i--) {
+            t[i-1]+=t[i]%toBase*fromBase;
+            t[i]=parseInt(t[i]/toBase);
+        }
+        ans+=map.charAt(t[0]%toBase);
+        t[0]=parseInt(t[0]/toBase);
+        while (len>0 && t[len-1]==0) len--;
+    }
+    return ans;
 }
 
 utils.prototype.__init_seed = function () {
@@ -724,6 +744,58 @@ utils.prototype.hide = function (obj, speed, callback) {
             }
         }
     }, speed);
+}
+
+utils.prototype.encodeCanvas = function (ctx) {
+    var list = [];
+    var width = ctx.canvas.width, height = ctx.canvas.height;
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.webkitImageSmoothingEnabled = false;
+    ctx.msImageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = false;
+
+    var imgData = ctx.getImageData(0, 0, width, height);
+    for (var i=0;i<imgData.data.length;i+=4) {
+        list.push(Math.sign(imgData.data[i+3]));
+    }
+    // compress 01 to array
+    var prev = 0, cnt = 0, arr = [];
+    for (var i=0;i<list.length;i++) {
+        if (list[i]!=prev) {
+            arr.push(cnt);
+            prev=list[i];
+            cnt=0;
+        }
+        cnt++;
+    }
+    arr.push(cnt);
+    return arr;
+}
+
+////// 解析arr数组，并绘制到tempCanvas上 //////
+utils.prototype.decodeCanvas = function (arr, width, height) {
+    if (!core.isset(arr)) return null;
+    // to byte array
+    var curr = 0, list = [];
+    arr.forEach(function (x) {
+        for (var i=0;i<x;i++) list.push(curr);
+        curr = 1-curr;
+    })
+    // 使用tempCanvas
+    var tempCanvas = core.bigmap.tempCanvas;
+    tempCanvas.canvas.width=width;
+    tempCanvas.canvas.height=height;
+    tempCanvas.clearRect(0, 0, width, height);
+
+    var imgData = tempCanvas.getImageData(0, 0, width, height);
+    for (var i=0;i<imgData.data.length;i+=4) {
+        var index = i/4;
+        if (list[index]) {
+            imgData.data[i]=255;
+            imgData.data[i+3]=255;
+        }
+    }
+    tempCanvas.putImageData(imgData, 0, 0);
 }
 
 utils.prototype.consoleOpened = function () {

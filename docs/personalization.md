@@ -496,34 +496,28 @@ this.useEquipment = function (itemId) { // 使用装备
 
 如果需要绑定某个快捷键为处理一段事件，也是可行的。
 
-要修改按键，我们可以在`actions.js`的`keyUp`进行处理：
+要修改按键，我们可以在脚本编辑的`onKeyUp`进行处理：
 
-比如，我们设置一个快捷键进行绑定，比如`W`，其keycode是87。（有关每个键的keycode搜一下就能得到）
+比如，我们设置一个快捷键进行绑定，比如`Y`，其keycode是89。（有关每个键的keycode搜一下就能得到）
 
-然后在`actions.js`的`keyUp`函数的`switch`中进行处理。
+然后在脚本编辑的`onKeyUp`函数的`switch`中进行处理。
 
 ``` js
-case 87: // W
-    if (core.status.heroStop) { 
-        // ... 在这里写你要执行脚本
-        // 请使用同步脚本，请勿执行任何异步代码，否则可能导致游戏过程或录像出现问题。
-        core.insertAction([...]) // 例如，插入一段自定义事件并执行。
-        
-        // core.status.route.push("key:"+keyCode); // 录像的支持，这句话加不加最好仔细进行测试
+case 89: // 使用该按键的keyCode，比如Y键就是89
+    // 还可以再判定altKey是否被按下，即 if (altKey) { ...
+
+    // ... 在这里写你要执行脚本
+    // **强烈建议所有新增的自定义快捷键均能给个对应的道具可点击，以方便手机端的行为**
+    if (core.hasItem('...')) {
+        core.useItem('...');
     }
+
     break;
 ```
 
+强烈建议所有新增的自定义快捷键均给个对应的永久道具可点击，以方便手机端的行为。
 
-在勇士处于停止的条件下，按下W键时，将执行你写的脚本代码。请只使用同步脚本而不要使用异步代码，不然可能导致游戏出现问题。
-
-`core.status.route.push("key:"+keyCode);` 这句话是对录像的支持。
-
-**录像的支持可能比较诡异，在不同条件下都是不同的；因此加不加最好分开独立进行测试。**
-
-!> H5不支持组合快捷键，所以不存在`W+1`这种组合快捷键的说法！
-
-!> 手机端可以通过长按任何位置调出虚拟键盘，再进行按键，和键盘按键是等价的效果！
+可以使用altKey来判断Alt键是否被同时按下。
 
 ## 公共事件
 
@@ -553,6 +547,8 @@ this.myfunc = function(x) {
 然后比如我们在某个道具的使用效果 `useItemEffect` 中写 `core.plugin.myfunc(2)` 即可调用此公共事件（插件）。也可以在战后事件或自定义脚本等位置来写。
 
 通过这种，将脚本和自定义事件混用的方式，可以达到和RM中公共事件类似的效果，即一个调用触发一系列事件。
+
+<!--
 
 ## 自定义状态栏（新增显示项）
 
@@ -594,56 +590,51 @@ core.statusBar.mana.innerHTML = core.getFlag('mana', 0) + '/' + core.getFlag('ma
 core.statusBar.mana.style.fontStyle = 'normal'; // 这一行会取消斜体。如果是汉字（比如技能名）的话，斜体起来会非常难看，可以通过这一句取消。
 ```
 
+-->
+
 ## 技能塔的支持
 
 其实，在HTML5上制作技能塔是完全可行的。
 
 要支持技能塔，可能需要如下几个方面：
 
-- 魔力（和上限）的定义添加
+- 魔力（和上限）的添加；技能的定义
 - 状态栏的显示
 - 技能的触发（按键与录像问题）
 - 技能的效果
 
-下面依次进行描述。
+从V2.5开始，内置了"二倍斩"技能，可以仿照其制作自己的技能。
 
-### 魔力的定义添加
+### 魔力的定义添加；技能的定义
 
-当我们定义了魔力的ID，比如`mana`后，要使用它，一般有两种方式：属性获取`status:mana`或者flag标记`flag:mana`。
+从V2.5开始，提供了status:mana选项，可以直接代表当前魔力值。
 
-如果要属性获取，则需要打开`data.js`文件，并在`hero`中添加定义。
+如果要启用，需要开启全塔属性的enableMana选项。
 
-通过这种方式定义的，可以通过`core.setStatus('mana', 0)`以及`core.getStatus('mana')`来设置或获取。
+如果需要魔力上限，则可以使用flag:manaMax来表示当前的魔力最大值。
 
-``` js
-'hero': {
-    // ... 上略
-    'mana': 0, // 增添mana定义，可以放在experience之后。同理可定义manaMax表示当前最大魔力值。
-}
-```
+同时，我们可以使用flag:skill表示当前开启的技能编号，flag:skillName表示当前开启的技能名称。
 
-如果要flag标记，则无需额外在任何地方进行定义。只需要在设置或取用的时候使用 `core.setFlag('mana', 0)` 或 `core.getFlag('mana', 0)` 即可。
-
-下面我都使用属性获取的方式来进行说明。
+如果flag:skill不为0，则代表当前处于某个技能开启状态，且状态栏显示flag:skillName值。伤害计算函数中只需要对flag:skill进行处理即可。
 
 ### 状态栏的显示
 
-首先我们需要额外新增一个状态栏；请参见[自定义状态栏（新增显示项）](#自定义状态栏（新增显示项）)。
+从V2.5开始，魔力值和技能名的状态栏项目已经被添加，可以直接使用。
 
-我们可以在魔力那一行显示当前值和最大值：
-
-``` js
-core.setStatus('mana', Math.min(core.getStatus('mana'), core.getStatus('manaMax'))); // 如果魔力存在上限，则不能超过其上限值
-core.statusBar.mana.innerHTML = core.getStatus('mana') + '/' + core.getStatus('manaMax', 0); // 显示比如 6/30 这样
-```
-
-如果我们还需要显示当前使用的技能名，也是可以的；定义一个ID为skill，然后按照上面的做法新增一行。
-
-请注意，如果是中文字符，需要取消斜体（不然会非常难看的）！
+在脚本编辑-updateStatusBar中，可以对状态栏显示内容进行修改。
 
 ``` js
-core.statusBar.skill.style.fontStyle = 'normal'; // 取消斜体显示
-core.statusBar.skill.innerHTML = core.getFlag('skillName', '无'); // 使用flag:skillName表示当前激活的技能名。
+// 设置魔力值
+if (core.flags.enableMana) {
+    // 也可以使用flag:manaMax来表示最大魔力值
+    // core.status.hero.mana = Math.max(core.status.hero.mana, core.getFlag('manaMax', 10));
+    // core.statusBar.mana.innerHTML = core.status.hero.mana + "/" + core.getFlag('manaMax', 10);
+}
+// 设置技能栏
+if (core.flags.enableSkill) {
+    // 可以用flag:skill表示当前开启的技能类型，flag:skillName显示技能名
+    core.statusBar.skill.innerHTML = core.getFlag('skillName', '无');
+}
 ```
 
 ### 技能的触发
@@ -687,11 +678,10 @@ else { // 关闭技能
 下面是一个很简单的例子，当勇士按下W后，触发我们上面定义的二倍斩技能。
 
 ``` js
-case 87: // W
-    if (core.status.heroStop) {  // 当前停止状态；这个if需要加，不能在行走过程中触发不然容易出错。
-        if (core.hasItem('skill1')) {  // 判定该技能道具是否存在
-            core.useItem('skill1');  // 使用道具（该技能）
-        }
+case 87: // W：开启技能“二倍斩”
+    // 检测技能栏是否开启，是否拥有“二倍斩”这个技能道具
+    if (core.flags.enableSkill && core.hasItem('skill1')) {
+        core.useItem('skill1');
     }
     break;
 ```
@@ -716,7 +706,7 @@ case 87: // W
 
 举个例子，我设置一个勇士的技能：二倍斩，开启技能消耗5点魔力，下一场战斗攻击力翻倍。
 
-那么，直接在`getDamageInfo`中进行判断：
+那么，直接在脚本编辑的`getDamageInfo`中进行判断：
 
 ``` js
 if (core.getFlag('skill', 0)==1) { // 开启了技能1
@@ -724,15 +714,23 @@ if (core.getFlag('skill', 0)==1) { // 开启了技能1
 }
 ```
 
-然后在脚本编辑的战后事件中进行魔力值的扣除：
+然后在脚本编辑的`afterBattle`中进行魔力值的扣除：
 
 ``` js
-if (core.getFlag('skill', 0)==1) { // 开启了技能1
-    core.status.hero.mana -= 5; // 扣除5点魔力值
-    core.setFlag('skill', 0); // 自动关闭技能
+// 战后的技能处理，比如扣除魔力值
+if (core.flags.enableSkill) {
+    // 检测当前开启的技能类型
+    var skill = core.getFlag('skill', 0);
+    if (skill==1) { // 技能1：二倍斩
+        core.status.hero.mana-=5; // 扣除5点魔力值
+    }
+    // 关闭技能
+    core.setFlag('skill', 0);
     core.setFlag('skillName', '无');
 }
 ```
+
+!> 开启技能后，建议将全塔属性的useLoop置为true，即改用循环计算临界值，这样临界计算才不会出问题！
 
 &nbsp;
 

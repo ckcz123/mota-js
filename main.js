@@ -55,6 +55,7 @@ function main() {
         'nameCol': document.getElementById('nameCol'),
         'lvCol': document.getElementById('lvCol'),
         'hpmaxCol': document.getElementById('hpmaxCol'),
+        'manaCol': document.getElementById('manaCol'),
         'mdefCol': document.getElementById('mdefCol'),
         'moneyCol': document.getElementById('moneyCol'),
         'expCol': document.getElementById('expCol'),
@@ -62,6 +63,7 @@ function main() {
         'keyCol': document.getElementById('keyCol'),
         'pzfCol': document.getElementById('pzfCol'),
         'debuffCol': document.getElementById('debuffCol'),
+        'skillCol': document.getElementById('skillCol'),
         'hard': document.getElementById('hard'),
     };
     this.mode = 'play';
@@ -82,12 +84,14 @@ function main() {
             'lv': document.getElementById('img-lv'),
             'hpmax': document.getElementById('img-hpmax'),
             'hp': document.getElementById("img-hp"),
+            'mana': document.getElementById("img-mana"),
             'atk': document.getElementById("img-atk"),
             'def': document.getElementById("img-def"),
             'mdef': document.getElementById("img-mdef"),
             'money': document.getElementById("img-money"),
             'experience': document.getElementById("img-experience"),
             'up': document.getElementById("img-up"),
+            'skill': document.getElementById('img-skill'),
             'book': document.getElementById("img-book"),
             'fly': document.getElementById("img-fly"),
             'toolbox': document.getElementById("img-toolbox"),
@@ -122,18 +126,25 @@ function main() {
             'speedUp': 21,
             'rewind': 22,
             'equipbox': 23,
+            'mana': 24,
+            'skill': 25,
+            'paint': 26,
+            'erase': 27,
+            'exit': 28,
         },
         'floor': document.getElementById('floor'),
         'name': document.getElementById('name'),
         'lv': document.getElementById('lv'),
         'hpmax': document.getElementById('hpmax'),
         'hp': document.getElementById('hp'),
+        'mana': document.getElementById('mana'),
         'atk': document.getElementById('atk'),
         'def': document.getElementById("def"),
         'mdef': document.getElementById('mdef'),
         'money': document.getElementById("money"),
         'experience': document.getElementById("experience"),
         'up': document.getElementById('up'),
+        'skill': document.getElementById('skill'),
         'yellowKey': document.getElementById("yellowKey"),
         'blueKey': document.getElementById("blueKey"),
         'redKey': document.getElementById("redKey"),
@@ -317,8 +328,7 @@ main.dom.data.onmousedown = function (e) {
         }
         var loc = main.core.getClickLoc(e.clientX, e.clientY);
         if (loc == null) return;
-        var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
-        main.core.ondown(x, y);
+        main.core.ondown(loc);
     } catch (ee) {}
 }
 
@@ -328,15 +338,17 @@ main.dom.data.onmousemove = function (e) {
         e.stopPropagation();
         var loc = main.core.getClickLoc(e.clientX, e.clientY);
         if (loc == null) return;
-        var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
-        main.core.onmove(x, y);
+        main.core.onmove(loc);
     }catch (ee) {}
 }
 
 ////// 鼠标放开时 //////
-main.dom.data.onmouseup = function () {
+main.dom.data.onmouseup = function (e) {
     try {
-        main.core.onup();
+        e.stopPropagation();
+        var loc = main.core.getClickLoc(e.clientX, e.clientY);
+        if (loc == null) return;
+        main.core.onup(loc);
     }catch (e) {}
 }
 
@@ -356,9 +368,7 @@ main.dom.data.ontouchstart = function (e) {
         e.preventDefault();
         var loc = main.core.getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
         if (loc == null) return;
-        var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
-        //main.core.onclick(x, y, []);
-        main.core.ondown(x, y);
+        main.core.ondown(loc);
     }catch (ee) {}
 }
 
@@ -368,15 +378,17 @@ main.dom.data.ontouchmove = function (e) {
         e.preventDefault();
         var loc = main.core.getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
         if (loc == null) return;
-        var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
-        main.core.onmove(x, y);
+        main.core.onmove(loc);
     }catch (ee) {}
 }
 
 ////// 手指离开触摸屏时 //////
 main.dom.data.ontouchend = function () {
     try {
-        main.core.onup();
+        e.preventDefault();
+        var loc = main.core.getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
+        if (loc == null) return;
+        main.core.onup(loc);
     } catch (e) {
     }
 }
@@ -388,6 +400,11 @@ main.statusBar.image.book.onclick = function () {
         return;
     }
 
+    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
+        core.actions.setPaintMode('paint');
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.openBook(true);
 }
@@ -395,8 +412,24 @@ main.statusBar.image.book.onclick = function () {
 ////// 点击状态栏中的楼层传送器/装备栏时 //////
 main.statusBar.image.fly.onclick = function () {
 
+    // 播放录像时
     if (core.isset(core.status.replay) && core.status.replay.replaying) {
         core.stopReplay();
+        return;
+    }
+
+    // 绘图模式
+    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
+        core.actions.setPaintMode('erase');
+        return;
+    }
+
+    // 浏览地图时
+    if (main.core.isPlaying() && (core.status.event||{}).id=='viewMaps') {
+        if (core.isset(core.status.event.data)) {
+            core.status.event.data.paint = !core.status.event.data.paint;
+            core.ui.drawMaps(core.status.event.data);
+        }
         return;
     }
 
@@ -456,6 +489,11 @@ main.statusBar.image.save.onclick = function () {
         return;
     }
 
+    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
+        core.actions.savePaint();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.save(true);
 }
@@ -468,6 +506,11 @@ main.statusBar.image.load.onclick = function () {
         return;
     }
 
+    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
+        core.actions.loadPaint();
+        return;
+    }
+
     if (main.core.isPlaying())
         main.core.load(true);
 }
@@ -477,6 +520,11 @@ main.statusBar.image.settings.onclick = function () {
 
     if (core.isset(core.status.replay) && core.status.replay.replaying) {
         core.saveReplay();
+        return;
+    }
+
+    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
+        core.actions.exitPaint();
         return;
     }
 

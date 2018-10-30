@@ -153,6 +153,11 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_type": "textarea",
                             "_data": "初始生命值"
                         },
+                        "mana": {
+                            "_leaf": true,
+                            "_type": "textarea",
+                            "_data": "初始魔力值，只在enableMana开启时才有效"
+                        },
                         "atk": {
                             "_leaf": true,
                             "_type": "textarea",
@@ -389,6 +394,12 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "是否是否启用生命上限"
                 },
+                "enableMana": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "是否开启魔力值"
+                },
                 "enableMDef": {
                     "_leaf": true,
                     "_type": "checkbox",
@@ -430,6 +441,12 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "checkbox",
                     "_bool": "bool",
                     "_data": "是否涉及毒衰咒；如果此项为false则不会在状态栏中显示毒衰咒的debuff"
+                },
+                "enableSkill": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "是否启用技能栏"
                 },
                 "flyNearStair": {
                     "_leaf": true,

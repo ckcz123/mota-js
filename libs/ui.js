@@ -2331,7 +2331,7 @@ ui.prototype.drawStatistics = function () {
                     }
                     else {
                         // 装备
-                        if (id.indexOf('sword')==0 || id.indexOf('shield')==0) {
+                        if (cls[id]=='equips') {
                             var values = core.material.items[id].equip||{};
                             atk = values.atk||0;
                             def = values.def||0;
@@ -2339,7 +2339,7 @@ ui.prototype.drawStatistics = function () {
                         }
                     }
 
-                    if (id.indexOf('sword')==0 || id.indexOf('shield')==0) {
+                    if (id.indexOf('sword')==0 || id.indexOf('shield')==0 || cls[id]=='equips') {
                         var t = "";
                         if (atk>0) t+=atk+"攻";
                         if (def>0) t+=def+"防";

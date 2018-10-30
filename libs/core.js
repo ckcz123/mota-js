@@ -356,8 +356,8 @@ core.prototype.resetStatus = function(hero, hard, floorId, route, maps, values) 
 }
 
 ////// 开始游戏 //////
-core.prototype.startGame = function (hard, callback) {
-    core.control.startGame(hard, callback);
+core.prototype.startGame = function (hard, seed, route, callback) {
+    core.events.startGame(hard, seed, route, callback);
 }
 
 ////// 重新开始游戏；此函数将回到标题页面 //////

@@ -2216,15 +2216,8 @@ actions.prototype.clickReplay = function (x, y) {
             case 0:
                 {
                     core.ui.closePanel();
-                    var hard=core.status.hard, route=core.clone(core.status.route);
-                    var seed = core.getFlag('seed');
-                    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
-                    core.events.setInitData(hard);
-                    core.setFlag('seed', seed);
-                    core.setFlag('rand', seed);
-                    core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-                        core.startReplay(route);
-                    }, true);
+                    var hard=core.status.hard, seed = core.getFlag('seed');
+                    core.startGame(hard, seed, core.clone(core.status.route));
                     break;
                 }
             case 1:

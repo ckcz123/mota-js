@@ -236,7 +236,8 @@ icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1 =
             'moneyPocket': 46,
             'shoes': 47,
             'hammer': 48,
-            'jumpShoes': 49
+            'jumpShoes': 49,
+            'skill1': 30,
         },
         'autotile': { // 所有的Autotile列表；后面的index简单取0即可
             'autotile': 0,

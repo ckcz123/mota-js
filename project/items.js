@@ -295,6 +295,11 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"cls": "tools",
 			"name": "跳跃靴",
 			"text": "能跳跃到前方两格处"
+		},
+		"skill1": {
+			"cls": "constants",
+			"name": "技能：二倍斩",
+			"text": "可以打开或关闭主动技能二倍斩"
 		}
 	},
 	"itemEffect": {
@@ -373,7 +378,8 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"redJewel": "core.status.hero.atk += core.values.redJewel",
 		"blueJewel": "core.status.hero.def += core.values.blueJewel",
 		"greenJewel": "core.status.hero.mdef += core.values.greenJewel",
-		"yellowJewel": "core.insertAction([\n\t{\"type\": \"choices\", \"choices\": [\n\t\t{\"text\": \"攻击+1\", \"action\": [\n\t\t\t{\"type\": \"setValue\", \"name\": \"status:atk\", \"value\": \"status:atk+1\"}\n\t\t]},\n\t\t{\"text\": \"防御+2\", \"action\": [\n\t\t\t{\"type\": \"setValue\", \"name\": \"status:def\", \"value\": \"status:def+2\"}\n\t\t]},\n\t\t{\"text\": \"生命+200\", \"action\": [\n\t\t\t{\"type\": \"setValue\", \"name\": \"status:hp\", \"value\": \"status:hp+200\"}\n\t\t]},\n\t]}\n]);"
+		"yellowJewel": "core.insertAction([\n\t{\"type\": \"choices\", \"choices\": [\n\t\t{\"text\": \"攻击+1\", \"action\": [\n\t\t\t{\"type\": \"setValue\", \"name\": \"status:atk\", \"value\": \"status:atk+1\"}\n\t\t]},\n\t\t{\"text\": \"防御+2\", \"action\": [\n\t\t\t{\"type\": \"setValue\", \"name\": \"status:def\", \"value\": \"status:def+2\"}\n\t\t]},\n\t\t{\"text\": \"生命+200\", \"action\": [\n\t\t\t{\"type\": \"setValue\", \"name\": \"status:hp\", \"value\": \"status:hp+200\"}\n\t\t]},\n\t]}\n]);",
+		"skill1": "// 二倍斩的flag:skill为1\nif (core.getFlag('skill', 0)==0) { // 判断当前是否已经开了技能\n\tif (core.getStatus('mana')>=5) { // 这里要写当前能否开技能的条件判断，比如魔力值至少要多少\n\t\tcore.setFlag('skill', 1); // 开技能1\n\t\tcore.setFlag('skillName', '二倍斩'); // 设置技能名\n\t}\n\telse {\n\t\tcore.drawTip(\"魔力不足，无法开启技能\");\n\t}\n}\nelse { // 关闭技能\n\tcore.setFlag('skill', 0); // 关闭技能状态\n\tcore.setFlag('skillName', '无');\n}"
 	},
 	"canUseItemEffect": {
 		"book": "true",
@@ -401,6 +407,7 @@ items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"redJewel": "true",
 		"blueJewel": "true",
 		"greenJewel": "true",
-		"yellowJewel": "true"
+		"yellowJewel": "true",
+		"skill1": "true"
 	}
 }

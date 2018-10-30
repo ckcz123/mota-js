@@ -76,38 +76,83 @@ events.prototype.initGame = function () {
 }
 
 ////// 游戏开始事件 //////
-events.prototype.startGame = function (hard) {
+events.prototype.startGame = function (hard, seed, route, callback) {
 
     if (core.status.isStarting) return;
     core.status.isStarting = true;
 
-    core.hideStartAnimate(function() {
-        core.drawText(core.clone(core.firstData.startText), function() {
-            if (core.flags.showBattleAnimateConfirm) { // 是否提供“开启战斗动画”的选择项
+    var start = function () {
+        console.log('开始游戏');
+        core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
+
+        core.status.isStarting = true;
+
+        if (core.isset(seed)) {
+            core.setFlag('seed', seed);
+            core.setFlag('rand', seed);
+        }
+        else core.utils.__init_seed();
+
+        core.events.setInitData(hard);
+        core.clearMap('all');
+        core.clearStatusBar();
+
+        var post_start = function () {
+
+            core.status.isStarting = false;
+
+            core.changeFloor(core.status.floorId, null, core.status.hero.loc, null, function() {
+                if (core.isset(callback)) callback();
+            }, true);
+
+            setTimeout(function () {
+                // Upload
+                var formData = new FormData();
+                formData.append('type', 'people');
+                formData.append('name', core.firstData.name);
+                formData.append('version', core.firstData.version);
+                formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
+                formData.append('hard', core.encodeBase64(hard));
+                formData.append('hardCode', core.getFlag('hard', 0));
+                formData.append('base64', 1);
+
+                core.utils.http("POST", "/games/upload.php", formData);
+            })
+        }
+
+        core.insertAction(core.clone(core.firstData.startText), null, null, function() {
+            if (!core.status.replay.replaying && core.flags.showBattleAnimateConfirm) { // 是否提供“开启战斗动画”的选择项
                 core.status.event.selection = core.flags.battleAnimate ? 0 : 1;
                 core.ui.drawConfirmBox("你想开启战斗动画吗？\n之后可以在菜单栏中开启或关闭。\n（强烈建议新手开启此项）", function () {
-                    core.data.flags.battleAnimate = true;
                     core.flags.battleAnimate = true;
                     core.setLocalStorage('battleAnimate', true);
-                    core.startGame(hard);
-                    core.utils.__init_seed();
-                    core.events.setInitData(hard);
+                    post_start();
                 }, function () {
-                    core.data.flags.battleAnimate = false;
                     core.flags.battleAnimate = false;
                     core.setLocalStorage('battleAnimate', false);
-                    core.startGame(hard);
-                    core.utils.__init_seed();
-                    core.events.setInitData(hard);
+                    post_start();
                 });
             }
             else {
-                core.startGame(hard);
-                core.utils.__init_seed();
-                core.events.setInitData(hard);
+                post_start();
             }
         });
-    })
+
+        if (core.isset(route)) {
+            core.startReplay(route);
+        }
+
+    }
+
+    if (core.isset(route)) {
+        core.dom.startPanel.style.display = 'none';
+        start();
+    }
+    else {
+        core.hideStartAnimate(function() {
+            start();
+        })
+    }
 }
 
 ////// 不同难度分别设置初始属性 //////
@@ -589,11 +634,8 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "showImage": // 显示图片
-            if (core.isset(data.loc) && core.isset(core.material.images.images[data.name])) {
-                core.canvas.image.drawImage(core.material.images.images[data.name],
-                    core.calValue(data.loc[0]), core.calValue(data.loc[1]));
-            }
-            else core.clearMap('image');
+            if (!core.isset(data.loc)) data.loc=[];
+            core.events.showImage(data.name, data.loc[0], data.loc[1]);
             this.doAction();
             break;
         case "animateImage": // 淡入淡出图片
@@ -1361,6 +1403,14 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
     }, 25);
 }
 
+////// 绘制图片 //////
+events.prototype.showImage = function (name, x, y) {
+    if (core.isset(name) && core.isset(x) && core.isset(y) && core.isset(core.material.images.images[name])) {
+        core.canvas.image.drawImage(core.material.images.images[name], x, y);
+    }
+    else core.clearMap('image');
+}
+
 ////// 图片淡入/淡出 //////
 events.prototype.animateImage = function (type, image, loc, time, keep, callback) {
     time = time||0;
@@ -1532,6 +1582,8 @@ events.prototype.vibrate = function(time, callback) {
 events.prototype.openShop = function(shopId, needVisited) {
     var shop = core.status.shops[shopId];
     shop.times = shop.times || 0;
+    if (shop.commonTimes)
+        shop.times = core.getFlag('commonTimes', 0);
     shop.visited = shop.visited || false;
     if (needVisited && !shop.visited) {
         if (shop.times==0) core.drawTip("该商店尚未开启");

@@ -1587,6 +1587,7 @@ core.insertAction([
         "icon": "blueShop", // 商店图标，blueShop为蓝色商店，pinkShop为粉色商店
         "textInList": "1F金币商店", // 在快捷商店栏中显示的名称
         "use": "money", // 商店所要使用的。只能是"money"或"experience"。
+        "commonTimes": true, // 是否使用全局次数
         "need": "20+10*times*(times+1)",  // 商店需要的金币/经验数值；可以是一个表达式，以times作为参数计算。
         // 这里用到的times为该商店的已经的访问次数。首次访问该商店时times的值为0。
         // 上面的例子是50层商店的计算公式。你也可以写任意其他的计算公式，只要以times作为参数即可。
@@ -1634,6 +1635,7 @@ core.insertAction([
 - icon 为商店的图标，在icons.js的npcs中定义。如woman可代表一个商人。
 - textInList 为其在快捷商店栏中显示的名称，如"3楼金币商店"等
 - use 为消耗的类型，是金币（money）还是经验（experience）。
+- commonTimes 是否使用全局次数；如果为true则可以多个快捷商店共享相同的次数
 - need 是一个表达式，计算商店所需要用到的数值。
   - 可以将times作为参数，times为该商店已经访问过的次数，第一次访问时times是0。
   - 如果对于每个选项都需要不同的数值，这里设为"-1"；可参见下面经验商店的例子。
@@ -1872,8 +1874,6 @@ core.insertAction([
 游戏开始时将调用`events.js`中的`startGame`函数。
 
 它将显示全塔属性中的startText内容（可以修改成自己的），提供战斗动画开启选择，设置初始福利，并正式开始游戏。
-
-全塔属性的startText只能使用纯文本类型，其他的事件均无效。
 
 我们可以修改脚本编辑`setInitData`函数来对于不同难度分别设置初始属性。
 

@@ -202,6 +202,19 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 	// 增加仇恨值
 	core.setFlag('hatred', core.getFlag('hatred',0)+core.values.hatred);
+	
+	// 战后的技能处理，比如扣除魔力值
+	if (core.flags.enableSkill) {
+		// 检测当前开启的技能类型
+		var skill = core.getFlag('skill', 0);
+		if (skill==1) { // 技能1：二倍斩
+			core.status.hero.mana-=5; // 扣除5点魔力值
+		}
+		// 关闭技能
+		core.setFlag('skill', 0);
+		core.setFlag('skillName', '无');
+	}
+	
 	core.updateStatusBar();
 
 
@@ -476,6 +489,11 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 对坚固模仿等处理扔到了脚本编辑-getEnemyInfo之中
 	var enemyInfo = core.enemys.getEnemyInfo(enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId);
 	var mon_hp = enemyInfo.hp, mon_atk = enemyInfo.atk, mon_def = enemyInfo.def, mon_special = enemyInfo.special;
+	
+	// 技能的处理
+	if (core.getFlag('skill', 0)==1) { // 开启了技能1：二倍斩
+		hero_atk *= 2; // 计算时攻击力翻倍	
+	}
 
 	// 如果是无敌属性，且勇士未持有十字架
 	if (this.hasSpecial(mon_special, 20) && !core.hasItem("cross"))
@@ -563,6 +581,153 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 	*/
 	// 别忘了在事件中调用“更新怪物数据”事件！
+}
+    },
+    "actions": {
+        "onKeyUp": function (keyCode, altKey) {
+	// 键盘按键处理，可以在这里自定义快捷键列表
+	// keyCode：当前按键的keyCode（每个键的keyCode自行百度）
+	// altKey：Alt键是否被按下，为true代表同时按下了Alt键
+	// 可以在这里任意增加或编辑每个按键的行为
+	
+	// 如果处于正在行走状态，则不处理
+	if (!core.status.heroStop)
+		return;
+
+	// Alt+0~9，快捷换上套装
+	if (altKey && keyCode>=48 && keyCode<=57) {
+		core.items.quickLoadEquip(keyCode-48);
+		return;
+	}
+
+	// 根据keyCode值来执行对应操作
+	switch (keyCode) {
+		case 27: // ESC：打开菜单栏
+			core.openSettings(true);
+			break;
+		case 88: // X：使用怪物手册
+			core.openBook(true);
+			break;
+		case 71: // G：使用楼传器
+			core.useFly(true);
+			break;
+		case 65: // A：读取自动存档（回退）
+			core.doSL("autoSave", "load");
+			break;
+		case 83: // S：存档
+			core.save(true);
+			break;
+		case 68: // D：独挡
+			core.load(true);
+			break;
+		case 69: // E：打开光标
+			core.ui.drawCursor();
+			break;
+		case 84: // T：打开道具栏
+			core.openToolbox(true);
+			break;
+		case 81: // Q：打开装备栏
+			core.openEquipbox(true);
+			break;
+		case 90: // Z：转向
+			core.turnHero();
+			break;
+		case 75: case 86: // K/V：打开快捷商店列表
+			core.openQuickShop(true);
+			break;
+		case 32: // SPACE：轻按
+			core.getNextItem();
+			break;
+		case 82: // R：回放录像
+			if (core.hasFlag('debug')) {
+				core.drawText("\t[系统提示]调试模式下无法回放录像");
+			}
+			else {
+				core.ui.drawReplay();
+			}
+			break;
+		case 33: case 34: // PgUp/PgDn：浏览地图
+			core.ui.drawMaps();
+			break;
+		case 77: // M：绘图模式
+			core.ui.drawPaint();
+			break;
+		case 66: // B：打开数据统计
+			core.ui.drawStatistics();
+			break;
+		case 72: // H：打开帮助页面
+			core.ui.drawHelp();
+			break;
+		case 49: // 快捷键1: 破
+			if (core.hasItem('pickaxe')) {
+				if (core.canUseItem('pickaxe')) {
+					core.useItem('pickaxe');
+				}
+				else {
+					core.drawTip('当前不能使用破墙镐');
+				}
+			}
+			break;
+		case 50: // 快捷键2: 炸
+			if (core.hasItem('bomb')) {
+				if (core.canUseItem('bomb')) {
+					core.useItem('bomb');
+				}
+				else {
+					core.drawTip('当前不能使用炸弹');
+				}
+			}
+			else if (core.hasItem('hammer')) {
+				if (core.canUseItem('hammer')) {
+					core.useItem('hammer');
+				}
+				else {
+					core.drawTip('当前不能使用圣锤');
+				}
+
+			}
+			break;
+		case 51: // 快捷键3: 飞
+			if (core.hasItem('centerFly')) {
+				core.events.useItem('centerFly');
+			}
+			break;
+		case 52: // 快捷键4：破冰/冰冻/地震/上下楼器/... 其他道具依次判断
+			{
+				var list = ["icePickaxe", "snow", "earthquake", "upFly", "downFly", "jumpShoes", "lifeWand", "poisonWine", "weakWine", "curseWine", "superWine"];
+				for (var i=0;i<list.length;i++) {
+					var itemId = list[i];
+					if (core.canUseItem(itemId)) {
+						core.useItem(itemId);
+						break;
+					}
+				}
+			}
+			break;
+		case 118: // F7：开启debug模式
+			core.debug();
+			break;
+		case 87: // W：开启技能“二倍斩”
+			// 检测是否拥有“二倍斩”这个技能道具
+			if (core.hasItem('skill1')) {
+				core.useItem('skill1');
+			}
+			break;
+		// 在这里可以任意新增或编辑已有的快捷键内容
+		/*
+		case 0: // 使用该按键的keyCode
+			// 还可以再判定altKey是否被按下，即 if (altKey) { ...
+
+			// ... 在这里写你要执行脚本
+			// **强烈建议所有新增的自定义快捷键均能给个对应的道具可点击，以方便手机端的行为**
+			if (core.hasItem('...')) {
+				core.useItem('...');
+			}
+
+			break;
+		*/
+    }
+	
 }
     },
     "control": {

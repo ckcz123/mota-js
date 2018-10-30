@@ -257,7 +257,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "event",
                     "_event": "firstArrive",
                     "_range": "thiseval==null || thiseval instanceof Array",
-                    "_data": "游戏开始前剧情。\n可以双击进入事件编辑器。\n如果无剧情直接留一个空数组即可。"
+                    "_data": "游戏开始前剧情，可以执行任意自定义事件。\n双击进入事件编辑器。\n如果无剧情直接留一个空数组即可。"
                 },
                 "shops": {
                     "_leaf": true,

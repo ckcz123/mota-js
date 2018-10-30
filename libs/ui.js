@@ -2048,27 +2048,35 @@ ui.prototype.drawSLPanel = function(index, refresh) {
         core.status.event.ui[i] = data;
         var id=5*page+i;
         if (i<3) {
-            core.fillText('ui', i==0?"自动存档":name+id, (2*i+1)*u, 35, '#FFFFFF', "bold 17px Verdana");
-            core.strokeRect('ui', (2*i+1)*u-size/2, 50, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
+            core.fillText('ui', i==0?"自动存档":name+id, (2*i+1)*u, 30, '#FFFFFF', "bold 17px Verdana");
+            core.strokeRect('ui', (2*i+1)*u-size/2, 45, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
-                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 65+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF', '10px Verdana');
+                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 45, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
+                var v = core.formatBigNumber(data.hero.hp)+"/"+core.formatBigNumber(data.hero.atk)+"/"+core.formatBigNumber(data.hero.def);
+                var v2 = "/"+core.formatBigNumber(data.hero.mdef);
+                if (v.length+v2.length<=21) v+=v2;
+                core.fillText('ui', v, (2*i+1)*u, 60+size, '#FFD700', '10px Verdana');
+                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 73+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF');
             }
             else {
-                core.fillRect('ui', (2*i+1)*u-size/2, 50, size, size, '#333333', 2);
-                core.fillText('ui', '空', (2*i+1)*u, 117, '#FFFFFF', 'bold 30px Verdana');
+                core.fillRect('ui', (2*i+1)*u-size/2, 45, size, size, '#333333', 2);
+                core.fillText('ui', '空', (2*i+1)*u, 112, '#FFFFFF', 'bold 30px Verdana');
             }
         }
         else {
-            core.fillText('ui', name+id, (2*i-5)*u, 230, '#FFFFFF', "bold 17px Verdana");
-            core.strokeRect('ui', (2*i-5)*u-size/2, 245, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
+            core.fillText('ui', name+id, (2*i-5)*u, 218, '#FFFFFF', "bold 17px Verdana");
+            core.strokeRect('ui', (2*i-5)*u-size/2, 233, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
-                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 260+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF', '10px Verdana');
+                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 233, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
+                var v = core.formatBigNumber(data.hero.hp)+"/"+core.formatBigNumber(data.hero.atk)+"/"+core.formatBigNumber(data.hero.def);
+                var v2 = "/"+core.formatBigNumber(data.hero.mdef);
+                if (v.length+v2.length<=21) v+=v2;
+                core.fillText('ui', v, (2*i-5)*u, 248+size, '#FFD700', '10px Verdana');
+                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 261+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF', '10px Verdana');
             }
             else {
-                core.fillRect('ui', (2*i-5)*u-size/2, 245, size, size, '#333333', 2);
-                core.fillText('ui', '空', (2*i-5)*u, 245+70, '#FFFFFF', 'bold 30px Verdana');
+                core.fillRect('ui', (2*i-5)*u-size/2, 233, size, size, '#333333', 2);
+                core.fillText('ui', '空', (2*i-5)*u, 297, '#FFFFFF', 'bold 30px Verdana');
             }
         }
     };

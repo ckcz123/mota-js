@@ -1056,6 +1056,8 @@ actions.prototype.clickShop = function(x,y) {
             });
             core.updateStatusBar();
             shop.times++;
+            if (shop.commonTimes)
+                core.setFlag('commonTimes', shop.times);
             core.events.openShop(core.status.event.data.id);
         }
         // 离开

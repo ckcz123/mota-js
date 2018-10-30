@@ -496,34 +496,28 @@ this.useEquipment = function (itemId) { // 使用装备
 
 如果需要绑定某个快捷键为处理一段事件，也是可行的。
 
-要修改按键，我们可以在`actions.js`的`keyUp`进行处理：
+要修改按键，我们可以在脚本编辑的`onKeyUp`进行处理：
 
-比如，我们设置一个快捷键进行绑定，比如`W`，其keycode是87。（有关每个键的keycode搜一下就能得到）
+比如，我们设置一个快捷键进行绑定，比如`Y`，其keycode是89。（有关每个键的keycode搜一下就能得到）
 
-然后在`actions.js`的`keyUp`函数的`switch`中进行处理。
+然后在脚本编辑的`onKeyUp`函数的`switch`中进行处理。
 
 ``` js
-case 87: // W
-    if (core.status.heroStop) { 
-        // ... 在这里写你要执行脚本
-        // 请使用同步脚本，请勿执行任何异步代码，否则可能导致游戏过程或录像出现问题。
-        core.insertAction([...]) // 例如，插入一段自定义事件并执行。
-        
-        // core.status.route.push("key:"+keyCode); // 录像的支持，这句话加不加最好仔细进行测试
+case 89: // 使用该按键的keyCode，比如Y键就是89
+    // 还可以再判定altKey是否被按下，即 if (altKey) { ...
+
+    // ... 在这里写你要执行脚本
+    // **强烈建议所有新增的自定义快捷键均能给个对应的道具可点击，以方便手机端的行为**
+    if (core.hasItem('...')) {
+        core.useItem('...');
     }
+
     break;
 ```
 
+强烈建议所有新增的自定义快捷键均给个对应的永久道具可点击，以方便手机端的行为。
 
-在勇士处于停止的条件下，按下W键时，将执行你写的脚本代码。请只使用同步脚本而不要使用异步代码，不然可能导致游戏出现问题。
-
-`core.status.route.push("key:"+keyCode);` 这句话是对录像的支持。
-
-**录像的支持可能比较诡异，在不同条件下都是不同的；因此加不加最好分开独立进行测试。**
-
-!> H5不支持组合快捷键，所以不存在`W+1`这种组合快捷键的说法！
-
-!> 手机端可以通过长按任何位置调出虚拟键盘，再进行按键，和键盘按键是等价的效果！
+可以使用altKey来判断Alt键是否被同时按下。
 
 ## 公共事件
 
@@ -609,7 +603,7 @@ core.statusBar.mana.style.fontStyle = 'normal'; // 这一行会取消斜体。�
 - 技能的触发（按键与录像问题）
 - 技能的效果
 
-从V2.5开始，魔力和技能的定义被内置到了样板中，因此十分方便。
+从V2.5开始，内置了"二倍斩"技能，可以仿照其制作自己的技能。
 
 ### 魔力的定义添加；技能的定义
 
@@ -684,11 +678,10 @@ else { // 关闭技能
 下面是一个很简单的例子，当勇士按下W后，触发我们上面定义的二倍斩技能。
 
 ``` js
-case 87: // W
-    if (core.status.heroStop) {  // 当前停止状态；这个if需要加，不能在行走过程中触发不然容易出错。
-        if (core.hasItem('skill1')) {  // 判定该技能道具是否存在
-            core.useItem('skill1');  // 使用道具（该技能）
-        }
+case 87: // W：开启技能“二倍斩”
+    // 检测技能栏是否开启，是否拥有“二倍斩”这个技能道具
+    if (core.flags.enableSkill && core.hasItem('skill1')) {
+        core.useItem('skill1');
     }
     break;
 ```
@@ -724,9 +717,15 @@ if (core.getFlag('skill', 0)==1) { // 开启了技能1
 然后在脚本编辑的`afterBattle`中进行魔力值的扣除：
 
 ``` js
-if (core.getFlag('skill', 0)==1) { // 开启了技能1
-    core.status.hero.mana -= 5; // 扣除5点魔力值
-    core.setFlag('skill', 0); // 自动关闭技能
+// 战后的技能处理，比如扣除魔力值
+if (core.flags.enableSkill) {
+    // 检测当前开启的技能类型
+    var skill = core.getFlag('skill', 0);
+    if (skill==1) { // 技能1：二倍斩
+        core.status.hero.mana-=5; // 扣除5点魔力值
+    }
+    // 关闭技能
+    core.setFlag('skill', 0);
     core.setFlag('skillName', '无');
 }
 ```

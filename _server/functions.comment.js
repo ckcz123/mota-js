@@ -129,6 +129,18 @@ functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 }
             }
         },
+        "actions": {
+            "_leaf": false,
+            "_type": "object",
+            "_data": {
+                "onKeyUp": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "按键处理；可以在这里自定义快捷键，详见文档-个性化-自定义快捷键"
+                }
+            }
+        },
         "control": {
             "_leaf": false,
             "_type": "object",

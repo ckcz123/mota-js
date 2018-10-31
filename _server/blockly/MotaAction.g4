@@ -63,19 +63,20 @@ return code;
 */;
 
 shopsub
-    :   '商店 id' IdString '标题' EvalString '图标' IdString BGNL? Newline '快捷商店栏中名称' EvalString '共用times' Bool BGNL? Newline '使用' ShopUse_List '消耗' EvalString BGNL? Newline '显示文字' EvalString BGNL? Newline shopChoices+ BEND
+    :   '商店 id' IdString '标题' EvalString '图标' IdString BGNL? Newline '快捷商店栏中名称' EvalString '共用times' Bool BGNL? Newline '未开启状态则不显示在列表中' Bool BGNL? NewLine '使用' ShopUse_List '消耗' EvalString BGNL? Newline '显示文字' EvalString BGNL? Newline shopChoices+ BEND
     
 
 /* shopsub
 tooltip : 全局商店,消耗填-1表示每个选项的消耗不同,正数表示消耗数值
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=%e5%85%a8%e5%b1%80%e5%95%86%e5%ba%97
-default : ["shop1","贪婪之神","blueShop","1F金币商店",false,null,"20+10*times*(times+1)","勇敢的武士啊, 给我${need}金币就可以："]
+default : ["shop1","贪婪之神","blueShop","1F金币商店",false,false,null,"20+10*times*(times+1)","勇敢的武士啊, 给我${need}金币就可以："]
 var code = {
     'id': IdString_0,
     'name': EvalString_0,
     'icon': IdString_1,
     'textInList': EvalString_1,
     'commonTimes': Bool_0,
+    'mustEnable': Bool_1,
     'use': ShopUse_List_0,
     'need': EvalString_2,
     'text': EvalString_3,
@@ -182,6 +183,7 @@ return code;
 action
     :   text_0_s
     |   text_1_s
+    |   comment_s
     |   autoText_s
     |   setText_s
     |   tip_s
@@ -279,6 +281,19 @@ if(EvalString_1 && !(/^(up|down)(,hero)?(,([+-]?\d+),([+-]?\d+))?$/.test(EvalStr
 }
 EvalString_1 = EvalString_1 && ('\\b['+EvalString_1+']');
 var code =  '"'+title+EvalString_1+EvalString_2+'",\n';
+return code;
+*/;
+
+comment_s
+    :   '添加注释' ':' EvalString Newline
+
+
+/* comment_s
+tooltip : comment：添加一段会被游戏跳过的注释内容
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=comment%ef%bc%9a%e6%b7%bb%e5%8a%a0%e6%b3%a8%e9%87%8a
+default : ["可以在这里写添加任何注释内容"]
+colour : this.commentColor
+var code = '{"type": "comment", "text": "'+EvalString_0+'"},\n';
 return code;
 */;
 
@@ -1575,6 +1590,7 @@ this.evisitor.printColor=70;
 this.evisitor.dataColor=130;
 this.evisitor.eventColor=220;
 this.evisitor.soundColor=20;
+this.evisitor.commentColor=285;
 */
 
 /* Function_1
@@ -1639,7 +1655,7 @@ ActionParser.prototype.parse = function (obj,type) {
             choice.text,choice.need||'',text_effect,text_choices]);
         }
         return MotaActionBlocks['shopsub'].xmlText([
-          obj.id,obj.name,obj.icon,obj.textInList,obj.commonTimes,obj.use,obj.need,parser.EvalString(obj.text),text_choices,next
+          obj.id,obj.name,obj.icon,obj.textInList,obj.commonTimes,obj.mustEnable,obj.use,obj.need,parser.EvalString(obj.text),text_choices,next
         ]);
       }
       var next=null;
@@ -1703,6 +1719,9 @@ ActionParser.prototype.parseAction = function() {
       data.time=this.isset(data.time)?data.time:MotaActionBlocks['autoText_s'].fieldDefault[3];
       this.next = MotaActionBlocks['autoText_s'].xmlText([
         '','','',data.time,this.EvalString(data.text),this.next]);
+      break;
+    case "comment": // 注释
+      this.next = MotaActionBlocks['comment_s'].xmlText([data.text,this.next]);
       break;
     case "setText": // 设置剧情文本的属性
       var setTextfunc = function(a){return a?JSON.stringify(a).slice(1,-1):null;}

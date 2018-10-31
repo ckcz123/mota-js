@@ -164,6 +164,7 @@ function core() {
         // 动画
         'globalAnimateObjs': [],
         'boxAnimateObjs': [],
+        'autotileAnimateObjs': {},
         'animateObjs': [],
     };
     this.status = {};
@@ -331,8 +332,8 @@ core.prototype.setRequestAnimationFrame = function () {
 }
 
 ////// 显示游戏开始界面 //////
-core.prototype.showStartAnimate = function (callback) {
-    core.control.showStartAnimate(callback);
+core.prototype.showStartAnimate = function (noAnimate, callback) {
+    core.control.showStartAnimate(noAnimate, callback);
 }
 
 ////// 隐藏游戏开始界面 //////
@@ -356,8 +357,8 @@ core.prototype.resetStatus = function(hero, hard, floorId, route, maps, values) 
 }
 
 ////// 开始游戏 //////
-core.prototype.startGame = function (hard, callback) {
-    core.control.startGame(hard, callback);
+core.prototype.startGame = function (hard, seed, route, callback) {
+    core.events.startGame(hard, seed, route, callback);
 }
 
 ////// 重新开始游戏；此函数将回到标题页面 //////
@@ -661,8 +662,8 @@ core.prototype.drawMap = function (mapName, callback) {
 }
 
 ////// 绘制Autotile //////
-core.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top){
-    core.maps.drawAutotile(ctx, mapArr, block, size, left, top);
+core.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top, status){
+    core.maps.drawAutotile(ctx, mapArr, block, size, left, top, status);
 }
 
 ////// 某个点是否不可通行 //////

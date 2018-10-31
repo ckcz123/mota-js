@@ -56,6 +56,7 @@ editor_blockly = function () {
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),
       MotaActionBlocks['text_1_s'].xmlText(),
+      MotaActionBlocks['comment_s'].xmlText(),
       MotaActionFunctions.actionParser.parseList({"type": "choices", "text": "是否跳过剧情", "choices": [
         {"text": "是", "action": []},
         {"text": "否", "action": [
@@ -484,6 +485,7 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
             'text_0_s': 'EvalString_0',
             'text_1_s': 'EvalString_2',
             'autoText_s': 'EvalString_2',
+            'comment_s': 'EvalString_0',
             'choices_s': 'EvalString_0',
             'function_s': 'RawEvalString_0',
             'shopsub': 'EvalString_3',

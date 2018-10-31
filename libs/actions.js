@@ -1028,6 +1028,18 @@ actions.prototype.clickShop = function(x,y) {
         var topIndex = 6 - parseInt(choices.length / 2);
         if (y>=topIndex && y<topIndex+choices.length) {
 
+            // 检查能否使用快捷商店
+            var reason = core.events.canUseQuickShop(shop.id);
+            if (core.isset(reason)) {
+                core.drawText(reason);
+                return false;
+            }
+            if (!shop.visited) {
+                if (shop.times==0) core.drawTip("该商店尚未开启");
+                else core.drawTip("该商店已失效");
+                return;
+            }
+
             core.status.event.selection=y-topIndex;
 
             var money = core.getStatus('money'), experience = core.getStatus('experience');
@@ -1117,12 +1129,12 @@ actions.prototype.keyUpShop = function (keycode) {
 
 ////// 快捷商店界面时的点击操作 //////
 actions.prototype.clickQuickShop = function(x, y) {
-    var shopList = core.status.shops, keys = Object.keys(shopList);
+    var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {return shopList[shopId].visited || !shopList[shopId].mustEnable});
     if (x >= 5 && x <= 7) {
         var topIndex = 6 - parseInt(keys.length / 2);
         if (y>=topIndex && y<topIndex+keys.length) {
             var reason = core.events.canUseQuickShop(keys[y - topIndex]);
-            if (core.isset(reason)) {
+            if (!core.flags.enableDisabledShop && core.isset(reason)) {
                 core.drawText(reason);
                 return;
             }
@@ -1154,7 +1166,7 @@ actions.prototype.keyUpQuickShop = function (keycode) {
         core.ui.closePanel();
         return;
     }
-    var shopList = core.status.shops, keys = Object.keys(shopList);
+    var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {return shopList[shopId].visited || !shopList[shopId].mustEnable});
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt(keys.length / 2);
         this.clickQuickShop(6, topIndex+core.status.event.selection);
@@ -1554,7 +1566,7 @@ actions.prototype.clickSL = function(x,y) {
     if (x>=10 && x<=12 && y==12) {
         core.ui.closePanel();
         if (!core.isPlaying()) {
-            core.showStartAnimate();
+            core.showStartAnimate(true);
         }
         return;
     }
@@ -1666,7 +1678,7 @@ actions.prototype.keyUpSL = function (keycode) {
     if (keycode==27 || keycode==88 || (core.status.event.id == 'save' && keycode==83) || (core.status.event.id == 'load' && keycode==68)) {
         core.ui.closePanel();
         if (!core.isPlaying()) {
-            core.showStartAnimate();
+            core.showStartAnimate(true);
         }
         return;
     }
@@ -1760,7 +1772,7 @@ actions.prototype.clickSwitchs = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 7:
-                core.setFlag('bigmapMoveDirectly', !core.getFlag('bigmapMoveDirectly', false));
+                core.setFlag('clickMove', !core.getFlag('clickMove', true));
                 core.ui.drawSwitchs();
                 break;
             case 8:
@@ -2141,11 +2153,15 @@ actions.prototype.clickStorageRemove = function (x, y) {
                     localforage.clear(function () {
                         core.ui.closePanel();
                         core.drawText("\t[操作成功]你的所有存档已被清空。");
+                        core.status.saveIndex = 1;
+                        core.setLocalStorage('saveIndex2', 1);
                     });
                 }
                 else {
                     localStorage.clear();
                     core.drawText("\t[操作成功]你的所有存档已被清空。");
+                    core.status.saveIndex = 1;
+                    core.setLocalStorage('saveIndex2', 1);
                 }
                 break;
             case 1:
@@ -2158,6 +2174,8 @@ actions.prototype.clickStorageRemove = function (x, y) {
                     core.removeLocalForage("autoSave", function() {
                         core.ui.closePanel();
                         core.drawText("\t[操作成功]当前塔的存档已被清空。");
+                        core.status.saveIndex = 1;
+                        core.setLocalStorage('saveIndex2', 1);
                     });
                 }
                 else {
@@ -2167,6 +2185,8 @@ actions.prototype.clickStorageRemove = function (x, y) {
                     }
                     core.removeLocalStorage("autoSave");
                     core.drawText("\t[操作成功]当前塔的存档已被清空。");
+                    core.status.saveIndex = 1;
+                    core.setLocalStorage('saveIndex2', 1);
                 }
                 break;
             case 2:
@@ -2216,15 +2236,8 @@ actions.prototype.clickReplay = function (x, y) {
             case 0:
                 {
                     core.ui.closePanel();
-                    var hard=core.status.hard, route=core.clone(core.status.route);
-                    var seed = core.getFlag('seed');
-                    core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
-                    core.events.setInitData(hard);
-                    core.setFlag('seed', seed);
-                    core.setFlag('rand', seed);
-                    core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-                        core.startReplay(route);
-                    }, true);
+                    var hard=core.status.hard, seed = core.getFlag('seed');
+                    core.startGame(hard, seed, core.clone(core.status.route));
                     break;
                 }
             case 1:
@@ -2289,6 +2302,15 @@ actions.prototype.clickKeyBoard = function (x, y) {
     if (y==3 && x>=1 && x<=11) {
         core.ui.closePanel();
         core.keyUp(112+x-1); // F1-F12: 112-122
+    }
+    if (y==3 && x==12) {
+        var val = prompt();
+        if (val!=null) {
+            try {
+                eval(val);
+            }
+            catch (e) {}
+        }
     }
     if (y==4 && x>=1 && x<=10) {
         core.ui.closePanel();
@@ -2456,6 +2478,12 @@ actions.prototype.setPaintMode = function (mode) {
     core.drawTip("进入"+(core.status.event.data.erase?"擦除":"绘图")+"模式");
 }
 
+actions.prototype.clearPaint = function () {
+    core.clearMap('route');
+    core.paint[core.status.floorId] = null;
+    core.drawTip("已清空绘图内容");
+}
+
 actions.prototype.savePaint = function () {
     var data = {};
     for (var floorId in core.paint) {
@@ -2498,7 +2526,6 @@ actions.prototype.exitPaint = function () {
     core.clearMap('route');
     core.ui.closePanel();
     core.statusBar.image.shop.style.opacity = 1;
-    core.statusBar.image.toolbox.style.opacity = 1;
     core.updateStatusBar();
     core.drawTip("退出绘图模式");
 }

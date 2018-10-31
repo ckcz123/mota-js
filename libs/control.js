@@ -79,6 +79,13 @@ control.prototype.setRequestAnimationFrame = function () {
                     core.drawBlock(obj, obj.status);
                 }
 
+                if ((core.status.autotileAnimateObjs.blocks||[]).length>0) {
+                    core.status.autotileAnimateObjs.status++;
+                    core.status.autotileAnimateObjs.blocks.forEach(function (block) {
+                        core.drawAutotile(core.canvas.event, core.status.autotileAnimateObjs.map, block, 32, 0, 0, core.status.autotileAnimateObjs.status);
+                    })
+                }
+
                 core.animateFrame.globalTime = timestamp;
             }
         }
@@ -201,7 +208,7 @@ control.prototype.setRequestAnimationFrame = function () {
 }
 
 ////// 显示游戏开始界面 //////
-control.prototype.showStartAnimate = function (callback) {
+control.prototype.showStartAnimate = function (noAnimate, callback) {
     core.dom.startPanel.style.opacity=1;
     core.dom.startPanel.style.display="block";
     core.dom.startTop.style.opacity=1;
@@ -213,18 +220,27 @@ control.prototype.showStartAnimate = function (callback) {
     core.clearStatus();
     core.clearMap('all');
 
-    var opacityVal = 1;
-    var startAnimate = window.setInterval(function () {
-        opacityVal -= 0.03;
-        if (opacityVal < 0) {
-            clearInterval(startAnimate);
-            core.dom.startTop.style.display = 'none';
-            // core.playGame();
-            core.dom.startButtonGroup.style.display = 'block';
-            if (core.isset(callback)) callback();
-        }
-        core.dom.startTop.style.opacity = opacityVal;
-    }, 20);
+    if(noAnimate) {
+        core.dom.startTop.style.display = 'none';
+        // core.playGame();
+        core.dom.startButtonGroup.style.display = 'block';
+        if (core.isset(callback)) callback();
+    }
+    else {
+        var opacityVal = 1;
+        var startAnimate = window.setInterval(function () {
+            opacityVal -= 0.03;
+            if (opacityVal < 0) {
+                clearInterval(startAnimate);
+                core.dom.startTop.style.display = 'none';
+                // core.playGame();
+                core.dom.startButtonGroup.style.display = 'block';
+                if (core.isset(callback)) callback();
+            }
+            core.dom.startTop.style.opacity = opacityVal;
+        }, 20);
+    }
+
 }
 
 ////// 隐藏游戏开始界面 //////
@@ -318,35 +334,9 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
     core.status.played = true;
 }
 
-////// 开始游戏 //////
-control.prototype.startGame = function (hard, callback) {
-    console.log('开始游戏');
-
-    this.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
-
-    core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-        if (core.isset(callback)) callback();
-    }, true);
-
-    setTimeout(function () {
-        // Upload
-        var formData = new FormData();
-        formData.append('type', 'people');
-        formData.append('name', core.firstData.name);
-        formData.append('version', core.firstData.version);
-        formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
-        formData.append('hard', core.encodeBase64(hard));
-        formData.append('hardCode', core.getFlag('hard', 0));
-        formData.append('base64', 1);
-
-        core.utils.http("POST", "/games/upload.php", formData);
-    })
-
-}
-
 ////// 重新开始游戏；此函数将回到标题页面 //////
 control.prototype.restart = function() {
-    this.showStartAnimate();
+    this.showStartAnimate(true);
     if (core.bgms.length>0)
         core.playBgm(core.bgms[0]);
 }
@@ -473,7 +463,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
 
     // 单击瞬间移动
     if (core.status.heroStop) {
-        if (core.control.tryMoveDirectly(destX, destY))
+        if (stepPostfix.length<=1 && core.getFlag('clickMove', true) && core.control.tryMoveDirectly(destX, destY))
             return;
     }
 
@@ -1041,7 +1031,7 @@ control.prototype.updateViewport = function() {
 ////// 绘制勇士 //////
 control.prototype.drawHero = function (direction, x, y, status, offset) {
 
-    if (!core.isPlaying()) return;
+    if (!core.isPlaying() || core.status.isStarting) return;
 
     var scan = {
         'up': {'x': 0, 'y': -1},
@@ -1679,14 +1669,7 @@ control.prototype.chooseReplayFile = function () {
             return;
         }
 
-        core.dom.startPanel.style.display = 'none';
-        core.resetStatus(core.firstData.hero, obj.hard, core.firstData.floorId, null, core.initStatus.maps);
-        core.setFlag('seed', obj.seed);
-        core.setFlag('rand', obj.seed);
-        core.events.setInitData(obj.hard);
-        core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-            core.startReplay(core.decodeRoute(obj.route));
-        }, true);
+        core.startGame(obj.hard, obj.seed, core.decode(obj.route));
     }, function () {
 
     })
@@ -2263,15 +2246,7 @@ control.prototype.doSL = function (id, type) {
             if (data.version != core.firstData.version) {
                 // core.drawTip("存档版本不匹配");
                 if (confirm("存档版本不匹配！\n你想回放此存档的录像吗？\n可以随时停止录像播放以继续游戏。")) {
-                    core.dom.startPanel.style.display = 'none';
-                    var seed = data.hero.flags.seed;
-                    core.resetStatus(core.firstData.hero, data.hard, core.firstData.floorId, null, core.initStatus.maps);
-                    core.events.setInitData(data.hard);
-                    core.setFlag('seed', seed);
-                    core.setFlag('rand', seed);
-                    core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function() {
-                        core.startReplay(core.decodeRoute(data.route));
-                    }, true);
+                    core.startGame(data.hard, data.hero.flags.seed, core.decodeRoute(data.route));
                 }
                 return;
             }

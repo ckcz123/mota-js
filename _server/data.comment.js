@@ -257,7 +257,7 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "event",
                     "_event": "firstArrive",
                     "_range": "thiseval==null || thiseval instanceof Array",
-                    "_data": "游戏开始前剧情。\n可以双击进入事件编辑器。\n如果无剧情直接留一个空数组即可。"
+                    "_data": "游戏开始前剧情，可以执行任意自定义事件。\n双击进入事件编辑器。\n如果无剧情直接留一个空数组即可。"
                 },
                 "shops": {
                     "_leaf": true,
@@ -605,6 +605,12 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "checkbox",
                     "_bool": "bool",
                     "_data": "是否允许瞬间移动"
+                },
+                "enableDisabledShop": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "是否允许查看未开启状态的快捷商店内容；如果此项为真，则对于未开启状态的商店允许查看其内容（但不能购买）"
                 },
             }
         }

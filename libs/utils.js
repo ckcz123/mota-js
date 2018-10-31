@@ -20,6 +20,7 @@ utils.prototype.replaceText = function (text) {
 
 ////// 计算表达式的值 //////
 utils.prototype.calValue = function (value) {
+    if (!core.isset(value)) return value;
     if (typeof value == 'number') {
         return value;
     }

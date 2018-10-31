@@ -310,12 +310,6 @@ maps.prototype.canMoveDirectly = function (destX,destY) {
     var fromX = core.getHeroLoc('x'), fromY = core.getHeroLoc('y');
     if (fromX==destX&&fromY==destY) return 0;
 
-    // 大地图且会改变左上角坐标，不能
-    var sx = core.clamp(fromX-6,0,core.bigmap.width-13), sy = core.clamp(fromY-6,0,core.bigmap.height-13),
-        ex = core.clamp(destX-6,0,core.bigmap.width-13), ey = core.clamp(destY-6,0,core.bigmap.height-13);
-
-    if (!core.hasFlag('bigmapMoveDirectly') && (sx!=ex || sy!=ey)) return -1;
-
     // 无视起点事件
     var nowBlockId = core.getBlockId(fromX, fromY);
     if ((nowBlockId!=null&&nowBlockId!='upFloor'&&nowBlockId!='downFloor'&&nowBlockId!='portal'
@@ -458,6 +452,7 @@ maps.prototype.drawMap = function (mapName, callback) {
     mapName = mapName || core.status.floorId;
     core.clearMap('all');
     core.removeGlobalAnimate(null, null, true);
+
     var drawBg = function(){
 
         core.maps.drawBgFgMap(mapName, core.canvas.bg, "bg");
@@ -520,6 +515,8 @@ maps.prototype.drawMap = function (mapName, callback) {
     core.status.floorId = mapName;
     core.status.thisMap = core.status.maps[mapName];
     var drawEvent = function(){
+        core.status.autotileAnimateObjs = {"status": 0, "blocks": [], "map": null};
+
         var mapData = core.status.maps[core.status.floorId];
         var mapBlocks = mapData.blocks;
 
@@ -530,6 +527,7 @@ maps.prototype.drawMap = function (mapName, callback) {
             if (core.isset(block.event) && !block.disable) {
                 if (block.event.cls == 'autotile') {
                     core.drawAutotile(core.canvas.event, mapArray, block, 32, 0, 0);
+                    core.status.autotileAnimateObjs.blocks.push(core.clone(block));
                 }
                 else {
                     core.drawBlock(block);
@@ -537,6 +535,7 @@ maps.prototype.drawMap = function (mapName, callback) {
                 }
             }
         }
+        core.status.autotileAnimateObjs.map = core.clone(mapArray);
     }
 
     if (main.mode=='editor'){
@@ -561,7 +560,7 @@ maps.prototype.drawMap = function (mapName, callback) {
 }
 
 ////// 绘制Autotile //////
-maps.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top){
+maps.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top, status){
     var indexArrs = [ //16种组合的图块索引数组; // 将autotile分割成48块16*16的小块; 数组索引即对应各个小块
         //                                     +----+----+----+----+----+----+
         [10,  9,  4, 3 ],  //0   bin:0000      | 1  | 2  | 3  | 4  | 5  | 6  |
@@ -584,7 +583,9 @@ maps.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top){
 
     var drawBlockByIndex = function(ctx, dx, dy, autotileImg, index, size){ //index为autotile的图块索引1-48
         var sx = 16*((index-1)%6), sy = 16*(~~((index-1)/6));
-        ctx.drawImage(autotileImg, sx, sy, 16, 16, dx, dy, size/2, size/2);
+        status = status || 0;
+        status %= parseInt(autotileImg.width/96);
+        ctx.drawImage(autotileImg, sx + 96*status, sy, 16, 16, dx, dy, size/2, size/2);
     }
     var getAutotileAroundId = function(currId, x, y) {
         if(x<0 || y<0 || x>=mapArr[0].length || y>=mapArr.length) return 1;
@@ -1195,15 +1196,18 @@ maps.prototype.removeGlobalAnimate = function (x, y, all) {
 
     if (all) {
         core.status.globalAnimateObjs = [];
+        core.status.autotileAnimateObjs = {};
         return;
     }
 
-    for (var t = 0; t < core.status.globalAnimateObjs.length; t++) {
-        if (core.status.globalAnimateObjs[t].x == x && core.status.globalAnimateObjs[t].y == y) {
-            core.status.globalAnimateObjs.splice(t, 1);
-            return;
-        }
+    core.status.globalAnimateObjs = core.status.globalAnimateObjs.filter(function (block) {return block.x!=x || block.y!=y;});
+
+    // 检查Autotile
+    if (core.isset(core.status.autotileAnimateObjs.blocks)) {
+        core.status.autotileAnimateObjs.blocks = core.status.autotileAnimateObjs.blocks.filter(function (block) {return block.x!=x || block.y!=y;});
+        core.status.autotileAnimateObjs.map[y][x] = 0;
     }
+
 }
 
 ////// 设置全局动画的显示效果 //////
@@ -1219,6 +1223,9 @@ maps.prototype.syncGlobalAnimate = function () {
     core.status.globalAnimateObjs.forEach(function (t) {
         t.status=0;
     })
+    if (core.isset(core.status.autotileAnimateObjs.status)) {
+        core.status.autotileAnimateObjs.status = 0;
+    }
 }
 
 ////// 绘制UI层的box动画 //////

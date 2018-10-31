@@ -823,7 +823,7 @@ ui.prototype.drawSwitchs = function() {
         "临界显伤： "+(core.flags.displayCritical ? "[ON]" : "[OFF]"),
         "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
         "新版存档： "+(core.platform.useLocalForage ? "[ON]":"[OFF]"),
-        "大地图瞬移："+(core.hasFlag('bigmapMoveDirectly') ? "[ON]":"[OFF]"),
+        "单击瞬移： "+(core.getFlag('clickMove', true) ? "[ON]":"[OFF]"),
         "查看工程",
         "下载离线版本",
         "返回主菜单"
@@ -845,12 +845,9 @@ ui.prototype.drawQuickShop = function () {
 
     core.status.event.id = 'selectShop';
 
-    var shopList = core.status.shops, keys = Object.keys(shopList);
+    var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {return shopList[shopId].visited || !shopList[shopId].mustEnable});
+    var choices = keys.map(function (shopId) {return shopList[shopId].textInList});
 
-    var choices = [];
-    for (var i=0;i<keys.length;i++) {
-        choices.push(shopList[keys[i]].textInList);
-    }
     choices.push("返回游戏");
     this.drawChoices(null, choices);
 }
@@ -2048,27 +2045,35 @@ ui.prototype.drawSLPanel = function(index, refresh) {
         core.status.event.ui[i] = data;
         var id=5*page+i;
         if (i<3) {
-            core.fillText('ui', i==0?"自动存档":name+id, (2*i+1)*u, 35, '#FFFFFF', "bold 17px Verdana");
-            core.strokeRect('ui', (2*i+1)*u-size/2, 50, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
+            core.fillText('ui', i==0?"自动存档":name+id, (2*i+1)*u, 30, '#FFFFFF', "bold 17px Verdana");
+            core.strokeRect('ui', (2*i+1)*u-size/2, 45, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 50, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
-                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 65+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF', '10px Verdana');
+                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 45, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
+                var v = core.formatBigNumber(data.hero.hp)+"/"+core.formatBigNumber(data.hero.atk)+"/"+core.formatBigNumber(data.hero.def);
+                var v2 = "/"+core.formatBigNumber(data.hero.mdef);
+                if (v.length+v2.length<=21) v+=v2;
+                core.fillText('ui', v, (2*i+1)*u, 60+size, '#FFD700', '10px Verdana');
+                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 73+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF');
             }
             else {
-                core.fillRect('ui', (2*i+1)*u-size/2, 50, size, size, '#333333', 2);
-                core.fillText('ui', '空', (2*i+1)*u, 117, '#FFFFFF', 'bold 30px Verdana');
+                core.fillRect('ui', (2*i+1)*u-size/2, 45, size, size, '#333333', 2);
+                core.fillText('ui', '空', (2*i+1)*u, 112, '#FFFFFF', 'bold 30px Verdana');
             }
         }
         else {
-            core.fillText('ui', name+id, (2*i-5)*u, 230, '#FFFFFF', "bold 17px Verdana");
-            core.strokeRect('ui', (2*i-5)*u-size/2, 245, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
+            core.fillText('ui', name+id, (2*i-5)*u, 218, '#FFFFFF', "bold 17px Verdana");
+            core.strokeRect('ui', (2*i-5)*u-size/2, 233, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 245, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
-                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 260+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF', '10px Verdana');
+                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 233, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
+                var v = core.formatBigNumber(data.hero.hp)+"/"+core.formatBigNumber(data.hero.atk)+"/"+core.formatBigNumber(data.hero.def);
+                var v2 = "/"+core.formatBigNumber(data.hero.mdef);
+                if (v.length+v2.length<=21) v+=v2;
+                core.fillText('ui', v, (2*i-5)*u, 248+size, '#FFD700', '10px Verdana');
+                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 261+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF', '10px Verdana');
             }
             else {
-                core.fillRect('ui', (2*i-5)*u-size/2, 245, size, size, '#333333', 2);
-                core.fillText('ui', '空', (2*i-5)*u, 245+70, '#FFFFFF', 'bold 30px Verdana');
+                core.fillRect('ui', (2*i-5)*u-size/2, 233, size, size, '#333333', 2);
+                core.fillText('ui', '空', (2*i-5)*u, 297, '#FFFFFF', 'bold 30px Verdana');
             }
         }
     };
@@ -2323,7 +2328,7 @@ ui.prototype.drawStatistics = function () {
                     }
                     else {
                         // 装备
-                        if (id.indexOf('sword')==0 || id.indexOf('shield')==0) {
+                        if (cls[id]=='equips') {
                             var values = core.material.items[id].equip||{};
                             atk = values.atk||0;
                             def = values.def||0;
@@ -2331,7 +2336,7 @@ ui.prototype.drawStatistics = function () {
                         }
                     }
 
-                    if (id.indexOf('sword')==0 || id.indexOf('shield')==0) {
+                    if (id.indexOf('sword')==0 || id.indexOf('shield')==0 || cls[id]=='equips') {
                         var t = "";
                         if (atk>0) t+=atk+"攻";
                         if (def>0) t+=def+"防";
@@ -2460,10 +2465,10 @@ ui.prototype.drawPaint = function () {
             core.setStrokeStyle('route', '#FF0000');
 
             core.statusBar.image.shop.style.opacity = 0;
-            core.statusBar.image.toolbox.style.opacity = 0;
 
             core.statusBar.image.book.src = core.statusBar.icons.paint.src;
             core.statusBar.image.fly.src = core.statusBar.icons.erase.src;
+            core.statusBar.image.toolbox.src = core.statusBar.icons.delete.src;
             core.statusBar.image.settings.src = core.statusBar.icons.exit.src;
             core.statusBar.image.book.style.opacity = 1;
             core.statusBar.image.fly.style.opacity = 1;

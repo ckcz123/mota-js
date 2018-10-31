@@ -2291,6 +2291,15 @@ actions.prototype.clickKeyBoard = function (x, y) {
         core.ui.closePanel();
         core.keyUp(112+x-1); // F1-F12: 112-122
     }
+    if (y==3 && x==12) {
+        var val = prompt();
+        if (val!=null) {
+            try {
+                eval(val);
+            }
+            catch (e) {}
+        }
+    }
     if (y==4 && x>=1 && x<=10) {
         core.ui.closePanel();
         core.keyUp(x==10?48:48+x); // 1-9: 49-57; 0: 48

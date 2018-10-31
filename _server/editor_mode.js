@@ -804,8 +804,14 @@ editor_mode = function (editor) {
         appendConfirm.onclick = function () {
 
             var confirmAutotile = function () {
-                if (sprite.width % 96 !=0 || sprite.height != 128) {
-                    printe("不合法的Autotile图片！");
+                if (sprite.width != 96 || sprite.height != 128) {
+                    if (sprite.height==128 && sprite.width%96==0) {
+                        printe("这里只能导入单帧的自动元件，多帧的动画请先导入单帧自动元件再同名替换素材即可。");
+                    }
+                    else {
+                        printe("不合法的Autotile图片！");
+                    }
+
                     return;
                 }
                 var imgData = source_ctx.getImageData(0,0,sprite.width,sprite.height);

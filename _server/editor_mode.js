@@ -581,8 +581,11 @@ editor_mode = function (editor) {
                     editor_mode.appendPic.height = image.height;
 
                     if (selectAppend.value == 'autotile') {
-                        sprite.style.width = (sprite.width = image.width) / ratio + 'px';
-                        sprite.style.height = (sprite.height = image.height) / ratio + 'px';
+                        for (var ii = 0; ii < 3; ii++) {
+                            var newsprite = appendPicCanvas.children[ii];
+                            newsprite.style.width = (newsprite.width = image.width) / ratio + 'px';
+                            newsprite.style.height = (newsprite.height = image.height) / ratio + 'px';
+                        }
                         sprite_ctx.clearRect(0, 0, sprite.width, sprite.height);
                         sprite_ctx.drawImage(image, 0, 0);
                     }
@@ -804,11 +807,12 @@ editor_mode = function (editor) {
         appendConfirm.onclick = function () {
 
             var confirmAutotile = function () {
-                if (sprite.width % 96 !=0 || sprite.height != 128) {
+                var image = editor_mode.appendPic.img;
+                if (image.width % 96 !=0 || image.height != 128) {
                     printe("不合法的Autotile图片！");
                     return;
                 }
-                var imgData = source_ctx.getImageData(0,0,sprite.width,sprite.height);
+                var imgData = source_ctx.getImageData(0,0,image.width,image.height);
                 sprite_ctx.putImageData(imgData, 0, 0);
                 var imgbase64 = sprite.toDataURL().split(',')[1];
 

@@ -392,6 +392,9 @@ events.prototype.doAction = function() {
                 }, data.time || 3000);
             }
             break;
+        case "comment":
+            this.doAction();
+            break;
         case "setText": // 设置文本状态
             ["position", "offset", "bold", "titlefont", "textfont", "time"].forEach(function (t) {
                 if (core.isset(data[t])) core.status.textAttribute[t]=data[t];

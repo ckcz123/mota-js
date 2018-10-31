@@ -56,6 +56,7 @@ editor_blockly = function () {
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),
       MotaActionBlocks['text_1_s'].xmlText(),
+      MotaActionBlocks['comment_s'].xmlText(),
       MotaActionFunctions.actionParser.parseList({"type": "choices", "text": "是否跳过剧情", "choices": [
         {"text": "是", "action": []},
         {"text": "否", "action": [

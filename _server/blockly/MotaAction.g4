@@ -182,6 +182,7 @@ return code;
 action
     :   text_0_s
     |   text_1_s
+    |   comment_s
     |   autoText_s
     |   setText_s
     |   tip_s
@@ -279,6 +280,19 @@ if(EvalString_1 && !(/^(up|down)(,hero)?(,([+-]?\d+),([+-]?\d+))?$/.test(EvalStr
 }
 EvalString_1 = EvalString_1 && ('\\b['+EvalString_1+']');
 var code =  '"'+title+EvalString_1+EvalString_2+'",\n';
+return code;
+*/;
+
+comment_s
+    :   '添加注释' ':' EvalString Newline
+
+
+/* comment_s
+tooltip : text：显示一段文字（剧情）
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=comment%ef%bc%9a%e6%b7%bb%e5%8a%a0%e6%b3%a8%e9%87%8a
+default : ["可以在这里写添加任何注释内容"]
+colour : this.commentColor
+var code = '{"type": "comment", "text": "'+EvalString_0+'"},\n';
 return code;
 */;
 
@@ -1575,6 +1589,7 @@ this.evisitor.printColor=70;
 this.evisitor.dataColor=130;
 this.evisitor.eventColor=220;
 this.evisitor.soundColor=20;
+this.evisitor.commentColor=285;
 */
 
 /* Function_1
@@ -1703,6 +1718,9 @@ ActionParser.prototype.parseAction = function() {
       data.time=this.isset(data.time)?data.time:MotaActionBlocks['autoText_s'].fieldDefault[3];
       this.next = MotaActionBlocks['autoText_s'].xmlText([
         '','','',data.time,this.EvalString(data.text),this.next]);
+      break;
+    case "comment": // 注释
+      this.next = MotaActionBlocks['comment_s'].xmlText([data.text,this.next]);
       break;
     case "setText": // 设置剧情文本的属性
       var setTextfunc = function(a){return a?JSON.stringify(a).slice(1,-1):null;}

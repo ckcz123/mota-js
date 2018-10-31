@@ -808,7 +808,9 @@ editor_mode = function (editor) {
                     printe("不合法的Autotile图片！");
                     return;
                 }
-                var imgbase64 = source.toDataURL().split(',')[1];
+                var imgData = source_ctx.getImageData(0,0,sprite.width,sprite.height);
+                sprite_ctx.putImageData(imgData, 0, 0);
+                var imgbase64 = sprite.toDataURL().split(',')[1];
 
                 // Step 1: List文件名
                 fs.readdir('./project/images', function (err, data) {

@@ -1566,7 +1566,7 @@ actions.prototype.clickSL = function(x,y) {
     if (x>=10 && x<=12 && y==12) {
         core.ui.closePanel();
         if (!core.isPlaying()) {
-            core.showStartAnimate();
+            core.showStartAnimate(true);
         }
         return;
     }
@@ -1678,7 +1678,7 @@ actions.prototype.keyUpSL = function (keycode) {
     if (keycode==27 || keycode==88 || (core.status.event.id == 'save' && keycode==83) || (core.status.event.id == 'load' && keycode==68)) {
         core.ui.closePanel();
         if (!core.isPlaying()) {
-            core.showStartAnimate();
+            core.showStartAnimate(true);
         }
         return;
     }

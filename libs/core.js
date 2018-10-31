@@ -331,8 +331,8 @@ core.prototype.setRequestAnimationFrame = function () {
 }
 
 ////// 显示游戏开始界面 //////
-core.prototype.showStartAnimate = function (callback) {
-    core.control.showStartAnimate(callback);
+core.prototype.showStartAnimate = function (noAnimate, callback) {
+    core.control.showStartAnimate(noAnimate, callback);
 }
 
 ////// 隐藏游戏开始界面 //////

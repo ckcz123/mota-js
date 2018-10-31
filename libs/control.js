@@ -201,7 +201,7 @@ control.prototype.setRequestAnimationFrame = function () {
 }
 
 ////// 显示游戏开始界面 //////
-control.prototype.showStartAnimate = function (callback) {
+control.prototype.showStartAnimate = function (noAnimate, callback) {
     core.dom.startPanel.style.opacity=1;
     core.dom.startPanel.style.display="block";
     core.dom.startTop.style.opacity=1;
@@ -213,18 +213,27 @@ control.prototype.showStartAnimate = function (callback) {
     core.clearStatus();
     core.clearMap('all');
 
-    var opacityVal = 1;
-    var startAnimate = window.setInterval(function () {
-        opacityVal -= 0.03;
-        if (opacityVal < 0) {
-            clearInterval(startAnimate);
-            core.dom.startTop.style.display = 'none';
-            // core.playGame();
-            core.dom.startButtonGroup.style.display = 'block';
-            if (core.isset(callback)) callback();
-        }
-        core.dom.startTop.style.opacity = opacityVal;
-    }, 20);
+    if(noAnimate) {
+        core.dom.startTop.style.display = 'none';
+        // core.playGame();
+        core.dom.startButtonGroup.style.display = 'block';
+        if (core.isset(callback)) callback();
+    }
+    else {
+        var opacityVal = 1;
+        var startAnimate = window.setInterval(function () {
+            opacityVal -= 0.03;
+            if (opacityVal < 0) {
+                clearInterval(startAnimate);
+                core.dom.startTop.style.display = 'none';
+                // core.playGame();
+                core.dom.startButtonGroup.style.display = 'block';
+                if (core.isset(callback)) callback();
+            }
+            core.dom.startTop.style.opacity = opacityVal;
+        }, 20);
+    }
+
 }
 
 ////// 隐藏游戏开始界面 //////
@@ -320,7 +329,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
 
 ////// 重新开始游戏；此函数将回到标题页面 //////
 control.prototype.restart = function() {
-    this.showStartAnimate();
+    this.showStartAnimate(true);
     if (core.bgms.length>0)
         core.playBgm(core.bgms[0]);
 }

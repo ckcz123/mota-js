@@ -1200,12 +1200,14 @@ maps.prototype.removeGlobalAnimate = function (x, y, all) {
         return;
     }
 
-    for (var t = 0; t < core.status.globalAnimateObjs.length; t++) {
-        if (core.status.globalAnimateObjs[t].x == x && core.status.globalAnimateObjs[t].y == y) {
-            core.status.globalAnimateObjs.splice(t, 1);
-            return;
-        }
+    core.status.globalAnimateObjs = core.status.globalAnimateObjs.filter(function (block) {return block.x!=x || block.y!=y;});
+
+    // 检查Autotile
+    if (core.isset(core.status.autotileAnimateObjs.blocks)) {
+        core.status.autotileAnimateObjs.blocks = core.status.autotileAnimateObjs.blocks.filter(function (block) {return block.x!=x || block.y!=y;});
+        core.status.autotileAnimateObjs.map[y][x] = 0;
     }
+
 }
 
 ////// 设置全局动画的显示效果 //////

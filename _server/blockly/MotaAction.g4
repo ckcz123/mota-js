@@ -288,7 +288,7 @@ comment_s
 
 
 /* comment_s
-tooltip : text：显示一段文字（剧情）
+tooltip : comment：添加一段会被游戏跳过的注释内容
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=comment%ef%bc%9a%e6%b7%bb%e5%8a%a0%e6%b3%a8%e9%87%8a
 default : ["可以在这里写添加任何注释内容"]
 colour : this.commentColor

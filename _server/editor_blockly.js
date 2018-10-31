@@ -485,6 +485,7 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
             'text_0_s': 'EvalString_0',
             'text_1_s': 'EvalString_2',
             'autoText_s': 'EvalString_2',
+            'comment_s': 'EvalString_0',
             'choices_s': 'EvalString_0',
             'function_s': 'RawEvalString_0',
             'shopsub': 'EvalString_3',

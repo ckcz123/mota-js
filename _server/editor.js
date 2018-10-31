@@ -390,7 +390,7 @@ editor.prototype.drawInitData = function (icons) {
         if (img == 'autotile') {
             var autotiles = images[img];
             for (var im in autotiles) {
-                dc.drawImage(autotiles[im], nowx, nowy);
+                dc.drawImage(autotiles[im], 0, 0, 96, 128, nowx, nowy, 96, 128);
                 nowy += autotiles[im].height;
             }
             nowx += 3 * 32;

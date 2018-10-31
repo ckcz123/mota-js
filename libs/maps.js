@@ -452,6 +452,7 @@ maps.prototype.drawMap = function (mapName, callback) {
     mapName = mapName || core.status.floorId;
     core.clearMap('all');
     core.removeGlobalAnimate(null, null, true);
+
     var drawBg = function(){
 
         core.maps.drawBgFgMap(mapName, core.canvas.bg, "bg");
@@ -514,6 +515,8 @@ maps.prototype.drawMap = function (mapName, callback) {
     core.status.floorId = mapName;
     core.status.thisMap = core.status.maps[mapName];
     var drawEvent = function(){
+        core.status.autotileAnimateObjs = {"status": 0, "blocks": [], "map": null};
+
         var mapData = core.status.maps[core.status.floorId];
         var mapBlocks = mapData.blocks;
 
@@ -524,6 +527,7 @@ maps.prototype.drawMap = function (mapName, callback) {
             if (core.isset(block.event) && !block.disable) {
                 if (block.event.cls == 'autotile') {
                     core.drawAutotile(core.canvas.event, mapArray, block, 32, 0, 0);
+                    core.status.autotileAnimateObjs.blocks.push(core.clone(block));
                 }
                 else {
                     core.drawBlock(block);
@@ -531,6 +535,7 @@ maps.prototype.drawMap = function (mapName, callback) {
                 }
             }
         }
+        core.status.autotileAnimateObjs.map = core.clone(mapArray);
     }
 
     if (main.mode=='editor'){
@@ -555,7 +560,7 @@ maps.prototype.drawMap = function (mapName, callback) {
 }
 
 ////// 绘制Autotile //////
-maps.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top){
+maps.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top, status){
     var indexArrs = [ //16种组合的图块索引数组; // 将autotile分割成48块16*16的小块; 数组索引即对应各个小块
         //                                     +----+----+----+----+----+----+
         [10,  9,  4, 3 ],  //0   bin:0000      | 1  | 2  | 3  | 4  | 5  | 6  |
@@ -578,7 +583,9 @@ maps.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top){
 
     var drawBlockByIndex = function(ctx, dx, dy, autotileImg, index, size){ //index为autotile的图块索引1-48
         var sx = 16*((index-1)%6), sy = 16*(~~((index-1)/6));
-        ctx.drawImage(autotileImg, sx, sy, 16, 16, dx, dy, size/2, size/2);
+        status = status || 0;
+        status %= parseInt(autotileImg.width/96);
+        ctx.drawImage(autotileImg, sx + 96*status, sy, 16, 16, dx, dy, size/2, size/2);
     }
     var getAutotileAroundId = function(currId, x, y) {
         if(x<0 || y<0 || x>=mapArr[0].length || y>=mapArr.length) return 1;
@@ -1189,6 +1196,7 @@ maps.prototype.removeGlobalAnimate = function (x, y, all) {
 
     if (all) {
         core.status.globalAnimateObjs = [];
+        core.status.autotileAnimateObjs = {};
         return;
     }
 
@@ -1213,6 +1221,9 @@ maps.prototype.syncGlobalAnimate = function () {
     core.status.globalAnimateObjs.forEach(function (t) {
         t.status=0;
     })
+    if (core.isset(core.status.autotileAnimateObjs.status)) {
+        core.status.autotileAnimateObjs.status = 0;
+    }
 }
 
 ////// 绘制UI层的box动画 //////

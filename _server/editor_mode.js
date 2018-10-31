@@ -804,7 +804,7 @@ editor_mode = function (editor) {
         appendConfirm.onclick = function () {
 
             var confirmAutotile = function () {
-                if (sprite.width != 96 || sprite.height != 128) {
+                if (sprite.width % 96 !=0 || sprite.height != 128) {
                     printe("不合法的Autotile图片！");
                     return;
                 }

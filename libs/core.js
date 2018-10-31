@@ -164,6 +164,7 @@ function core() {
         // 动画
         'globalAnimateObjs': [],
         'boxAnimateObjs': [],
+        'autotileAnimateObjs': {},
         'animateObjs': [],
     };
     this.status = {};
@@ -661,8 +662,8 @@ core.prototype.drawMap = function (mapName, callback) {
 }
 
 ////// 绘制Autotile //////
-core.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top){
-    core.maps.drawAutotile(ctx, mapArr, block, size, left, top);
+core.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top, status){
+    core.maps.drawAutotile(ctx, mapArr, block, size, left, top, status);
 }
 
 ////// 某个点是否不可通行 //////

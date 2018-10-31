@@ -79,6 +79,13 @@ control.prototype.setRequestAnimationFrame = function () {
                     core.drawBlock(obj, obj.status);
                 }
 
+                if ((core.status.autotileAnimateObjs.blocks||[]).length>0) {
+                    core.status.autotileAnimateObjs.status++;
+                    core.status.autotileAnimateObjs.blocks.forEach(function (block) {
+                        core.drawAutotile(core.canvas.event, core.status.autotileAnimateObjs.map, block, 32, 0, 0, core.status.autotileAnimateObjs.status);
+                    })
+                }
+
                 core.animateFrame.globalTime = timestamp;
             }
         }

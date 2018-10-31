@@ -407,8 +407,8 @@ core.prototype.onmove = function (loc) {
 }
 
 ////// 当点击（触摸）事件放开时 //////
-core.prototype.onup = function (loc) {
-    return core.actions.onup(loc);
+core.prototype.onup = function () {
+    return core.actions.onup();
 }
 
 ////// 获得点击事件相对左上角的坐标（0到12之间） //////

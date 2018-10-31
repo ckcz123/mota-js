@@ -372,17 +372,9 @@ actions.prototype.onmove = function (loc) {
 }
 
 ////// 当点击（触摸）事件放开时 //////
-actions.prototype.onup = function (loc) {
+actions.prototype.onup = function () {
     if (core.isset(core.status.replay)&&core.status.replay.replaying
         &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
-
-    // 画板
-    if (core.status.played && (core.status.event||{}).id=='paint') {
-        this.onupPaint(loc.x, loc.y)
-        return;
-    }
-
-    var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
 
     clearTimeout(core.timeout.onDownTimeout);
     core.timeout.onDownTimeout = null;
@@ -2452,18 +2444,7 @@ actions.prototype.onmovePaint = function (x, y) {
     core.status.event.data.y = y;
 }
 
-actions.prototype.onupPaint = function (x,y) {
-    x+=core.bigmap.offsetX;
-    y+=core.bigmap.offsetY;
-    if (core.status.event.data.erase) {
-        core.clearMap('route', x-5, y-5, 10, 10);
-    }
-    else if (core.status.event.data.x!=null) {
-        var midx = (core.status.event.data.x+x)/2, midy = (core.status.event.data.y+y)/2;
-        core.canvas.route.quadraticCurveTo(midx, midy, x, y);
-        core.canvas.route.stroke();
-    }
-
+actions.prototype.onupPaint = function () {
     core.status.event.data.x = null;
     core.status.event.data.y = null;
     // 保存

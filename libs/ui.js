@@ -845,12 +845,9 @@ ui.prototype.drawQuickShop = function () {
 
     core.status.event.id = 'selectShop';
 
-    var shopList = core.status.shops, keys = Object.keys(shopList);
+    var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {return shopList[shopId].visited || !shopList[shopId].mustEnable});
+    var choices = keys.map(function (shopId) {return shopList[shopId].textInList});
 
-    var choices = [];
-    for (var i=0;i<keys.length;i++) {
-        choices.push(shopList[keys[i]].textInList);
-    }
     choices.push("返回游戏");
     this.drawChoices(null, choices);
 }

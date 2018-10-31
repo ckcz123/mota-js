@@ -63,19 +63,20 @@ return code;
 */;
 
 shopsub
-    :   '商店 id' IdString '标题' EvalString '图标' IdString BGNL? Newline '快捷商店栏中名称' EvalString '共用times' Bool BGNL? Newline '使用' ShopUse_List '消耗' EvalString BGNL? Newline '显示文字' EvalString BGNL? Newline shopChoices+ BEND
+    :   '商店 id' IdString '标题' EvalString '图标' IdString BGNL? Newline '快捷商店栏中名称' EvalString '共用times' Bool BGNL? Newline '未开启状态则不显示在列表中' Bool BGNL? NewLine '使用' ShopUse_List '消耗' EvalString BGNL? Newline '显示文字' EvalString BGNL? Newline shopChoices+ BEND
     
 
 /* shopsub
 tooltip : 全局商店,消耗填-1表示每个选项的消耗不同,正数表示消耗数值
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=%e5%85%a8%e5%b1%80%e5%95%86%e5%ba%97
-default : ["shop1","贪婪之神","blueShop","1F金币商店",false,null,"20+10*times*(times+1)","勇敢的武士啊, 给我${need}金币就可以："]
+default : ["shop1","贪婪之神","blueShop","1F金币商店",false,false,null,"20+10*times*(times+1)","勇敢的武士啊, 给我${need}金币就可以："]
 var code = {
     'id': IdString_0,
     'name': EvalString_0,
     'icon': IdString_1,
     'textInList': EvalString_1,
     'commonTimes': Bool_0,
+    'mustEnable': Bool_1,
     'use': ShopUse_List_0,
     'need': EvalString_2,
     'text': EvalString_3,
@@ -1654,7 +1655,7 @@ ActionParser.prototype.parse = function (obj,type) {
             choice.text,choice.need||'',text_effect,text_choices]);
         }
         return MotaActionBlocks['shopsub'].xmlText([
-          obj.id,obj.name,obj.icon,obj.textInList,obj.commonTimes,obj.use,obj.need,parser.EvalString(obj.text),text_choices,next
+          obj.id,obj.name,obj.icon,obj.textInList,obj.commonTimes,obj.mustEnable,obj.use,obj.need,parser.EvalString(obj.text),text_choices,next
         ]);
       }
       var next=null;

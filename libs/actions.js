@@ -1028,6 +1028,18 @@ actions.prototype.clickShop = function(x,y) {
         var topIndex = 6 - parseInt(choices.length / 2);
         if (y>=topIndex && y<topIndex+choices.length) {
 
+            // 检查能否使用快捷商店
+            var reason = core.events.canUseQuickShop(shop.id);
+            if (core.isset(reason)) {
+                core.drawText(reason);
+                return false;
+            }
+            if (!shop.visited) {
+                if (shop.times==0) core.drawTip("该商店尚未开启");
+                else core.drawTip("该商店已失效");
+                return;
+            }
+
             core.status.event.selection=y-topIndex;
 
             var money = core.getStatus('money'), experience = core.getStatus('experience');
@@ -1117,12 +1129,12 @@ actions.prototype.keyUpShop = function (keycode) {
 
 ////// 快捷商店界面时的点击操作 //////
 actions.prototype.clickQuickShop = function(x, y) {
-    var shopList = core.status.shops, keys = Object.keys(shopList);
+    var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {return shopList[shopId].visited || !shopList[shopId].mustEnable});
     if (x >= 5 && x <= 7) {
         var topIndex = 6 - parseInt(keys.length / 2);
         if (y>=topIndex && y<topIndex+keys.length) {
             var reason = core.events.canUseQuickShop(keys[y - topIndex]);
-            if (core.isset(reason)) {
+            if (!core.flags.enableDisabledShop && core.isset(reason)) {
                 core.drawText(reason);
                 return;
             }
@@ -1154,7 +1166,7 @@ actions.prototype.keyUpQuickShop = function (keycode) {
         core.ui.closePanel();
         return;
     }
-    var shopList = core.status.shops, keys = Object.keys(shopList);
+    var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {return shopList[shopId].visited || !shopList[shopId].mustEnable});
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt(keys.length / 2);
         this.clickQuickShop(6, topIndex+core.status.event.selection);

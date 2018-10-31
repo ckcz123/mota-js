@@ -231,6 +231,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"potionWhileRouting": false,
 		"portalWithoutTrigger": true,
 		"canGoDeadZone": false,
-		"enableMoveDirectly": true
+		"enableMoveDirectly": true,
+		"enableDisabledShop": true
 	}
 }

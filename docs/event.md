@@ -1600,6 +1600,7 @@ core.insertAction([
         "textInList": "1F金币商店", // 在快捷商店栏中显示的名称
         "use": "money", // 商店所要使用的。只能是"money"或"experience"。
         "commonTimes": true, // 是否使用全局次数
+        "mustEnable": true, // 如果未开启则不显示在状态栏中
         "need": "20+10*times*(times+1)",  // 商店需要的金币/经验数值；可以是一个表达式，以times作为参数计算。
         // 这里用到的times为该商店的已经的访问次数。首次访问该商店时times的值为0。
         // 上面的例子是50层商店的计算公式。你也可以写任意其他的计算公式，只要以times作为参数即可。
@@ -1648,6 +1649,7 @@ core.insertAction([
 - textInList 为其在快捷商店栏中显示的名称，如"3楼金币商店"等
 - use 为消耗的类型，是金币（money）还是经验（experience）。
 - commonTimes 是否使用全局次数；如果为true则可以多个快捷商店共享相同的次数
+- mustEnable 是否必须是只在开启状态才在列表显示；如果此项为true则未开启的快捷商店不予显示
 - need 是一个表达式，计算商店所需要用到的数值。
   - 可以将times作为参数，times为该商店已经访问过的次数，第一次访问时times是0。
   - 如果对于每个选项都需要不同的数值，这里设为"-1"；可参见下面经验商店的例子。

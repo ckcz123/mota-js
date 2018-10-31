@@ -1588,12 +1588,18 @@ events.prototype.openShop = function(shopId, needVisited) {
     if (shop.commonTimes)
         shop.times = core.getFlag('commonTimes', 0);
     shop.visited = shop.visited || false;
+
     if (needVisited && !shop.visited) {
-        if (shop.times==0) core.drawTip("该商店尚未开启");
-        else core.drawTip("该商店已失效");
-        return;
+        if (!core.flags.enableDisabledShop) {
+            if (shop.times==0) core.drawTip("该商店尚未开启");
+            else core.drawTip("该商店已失效");
+            return;
+        }
+        else {
+            core.drawTip("该商店尚未开启，只能浏览不可使用");
+        }
     }
-    shop.visited = true;
+    else shop.visited = true;
 
     var selection = core.status.event.selection;
     var actions = [];

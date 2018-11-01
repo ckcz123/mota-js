@@ -308,7 +308,7 @@ actions.prototype.ondown = function (loc) {
 
     // 画板
     if (core.status.played && (core.status.event||{}).id=='paint') {
-        this.ondownPaint(loc.x, loc.y);
+        this.ondownPaint(loc.x/core.domStyle.scale, loc.y/core.domStyle.scale);
         return;
     }
 
@@ -346,7 +346,7 @@ actions.prototype.onmove = function (loc) {
 
     // 画板
     if (core.status.played && (core.status.event||{}).id=='paint') {
-        this.onmovePaint(loc.x, loc.y)
+        this.onmovePaint(loc.x/core.domStyle.scale, loc.y/core.domStyle.scale)
         return;
     }
 

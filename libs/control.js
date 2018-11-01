@@ -335,8 +335,8 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
 }
 
 ////// 重新开始游戏；此函数将回到标题页面 //////
-control.prototype.restart = function() {
-    this.showStartAnimate(true);
+control.prototype.restart = function(noAnimate) {
+    this.showStartAnimate(noAnimate);
     if (core.bgms.length>0)
         core.playBgm(core.bgms[0]);
 }

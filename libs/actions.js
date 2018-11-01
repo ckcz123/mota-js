@@ -2418,7 +2418,7 @@ actions.prototype.clickAbout = function () {
     if (core.isPlaying())
         core.ui.closePanel();
     else
-        core.restart();
+        core.restart(true);
 }
 
 

@@ -376,6 +376,12 @@ actions.prototype.onup = function () {
     if (core.isset(core.status.replay)&&core.status.replay.replaying
         &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
 
+    // 画板
+    if (core.status.played && (core.status.event||{}).id=='paint') {
+        this.onupPaint()
+        return;
+    }
+
     clearTimeout(core.timeout.onDownTimeout);
     core.timeout.onDownTimeout = null;
     clearInterval(core.interval.onDownInterval);

@@ -130,7 +130,7 @@ function main() {
             'skill': 25,
             'paint': 26,
             'erase': 27,
-            'delete': 28,
+            'empty': 28,
             'exit': 29,
         },
         'floor': document.getElementById('floor'),

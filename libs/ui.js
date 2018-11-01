@@ -2468,7 +2468,7 @@ ui.prototype.drawPaint = function () {
 
             core.statusBar.image.book.src = core.statusBar.icons.paint.src;
             core.statusBar.image.fly.src = core.statusBar.icons.erase.src;
-            core.statusBar.image.toolbox.src = core.statusBar.icons.delete.src;
+            core.statusBar.image.toolbox.src = core.statusBar.icons.empty.src;
             core.statusBar.image.settings.src = core.statusBar.icons.exit.src;
             core.statusBar.image.book.style.opacity = 1;
             core.statusBar.image.fly.style.opacity = 1;

@@ -1669,7 +1669,7 @@ control.prototype.chooseReplayFile = function () {
             return;
         }
 
-        core.startGame(obj.hard, obj.seed, core.decode(obj.route));
+        core.startGame(obj.hard, obj.seed, core.decodeRoute(obj.route));
     }, function () {
 
     })

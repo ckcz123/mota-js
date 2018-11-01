@@ -308,7 +308,7 @@ actions.prototype.ondown = function (loc) {
 
     // 画板
     if (core.status.played && (core.status.event||{}).id=='paint') {
-        this.ondownPaint(loc.x, loc.y);
+        this.ondownPaint(loc.x/core.domStyle.scale, loc.y/core.domStyle.scale);
         return;
     }
 
@@ -346,7 +346,7 @@ actions.prototype.onmove = function (loc) {
 
     // 画板
     if (core.status.played && (core.status.event||{}).id=='paint') {
-        this.onmovePaint(loc.x, loc.y)
+        this.onmovePaint(loc.x/core.domStyle.scale, loc.y/core.domStyle.scale)
         return;
     }
 
@@ -375,6 +375,12 @@ actions.prototype.onmove = function (loc) {
 actions.prototype.onup = function () {
     if (core.isset(core.status.replay)&&core.status.replay.replaying
         &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
+
+    // 画板
+    if (core.status.played && (core.status.event||{}).id=='paint') {
+        this.onupPaint()
+        return;
+    }
 
     clearTimeout(core.timeout.onDownTimeout);
     core.timeout.onDownTimeout = null;
@@ -2412,7 +2418,7 @@ actions.prototype.clickAbout = function () {
     if (core.isPlaying())
         core.ui.closePanel();
     else
-        core.restart();
+        core.restart(true);
 }
 
 

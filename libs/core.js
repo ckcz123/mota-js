@@ -362,8 +362,8 @@ core.prototype.startGame = function (hard, seed, route, callback) {
 }
 
 ////// 重新开始游戏；此函数将回到标题页面 //////
-core.prototype.restart = function() {
-    core.control.restart();
+core.prototype.restart = function(noAnimate) {
+    core.control.restart(noAnimate);
 }
 
 /////////// 系统事件相关 END ///////////

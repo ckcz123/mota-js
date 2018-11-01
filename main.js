@@ -130,7 +130,7 @@ function main() {
             'skill': 25,
             'paint': 26,
             'erase': 27,
-            'delete': 28,
+            'empty': 28,
             'exit': 29,
         },
         'floor': document.getElementById('floor'),
@@ -381,8 +381,9 @@ main.dom.data.ontouchmove = function (e) {
 }
 
 ////// 手指离开触摸屏时 //////
-main.dom.data.ontouchend = function () {
+main.dom.data.ontouchend = function (e) {
     try {
+        e.preventDefault();
         main.core.onup();
     } catch (e) {
     }

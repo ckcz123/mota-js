@@ -381,8 +381,9 @@ main.dom.data.ontouchmove = function (e) {
 }
 
 ////// 手指离开触摸屏时 //////
-main.dom.data.ontouchend = function () {
+main.dom.data.ontouchend = function (e) {
     try {
+        e.preventDefault();
         main.core.onup();
     } catch (e) {
     }

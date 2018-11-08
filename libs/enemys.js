@@ -260,22 +260,17 @@ enemys.prototype.getCurrentEnemys = function (floorId) {
             var critical = this.nextCriticals(enemyId);
             if (critical.length>0) critical=critical[0];
 
-            enemys.push({
-                'id': enemyId,
-                'name': enemy.name,
-                'hp': enemyInfo.hp,
-                'atk': enemyInfo.atk,
-                'def': enemyInfo.def,
-                'money': enemyInfo.money||0,
-                'experience': enemyInfo.experience||0,
-                'point': enemyInfo.point||0, // 加点
-                'special': specialText,
-                'damage': this.getDamage(enemyId,null,null,floorId),
-                'critical': critical[0],
-                'criticalDamage': critical[1],
-                'defDamage': this.getDefDamage(enemyId,1,null,null,floorId)
-            });
-
+            var e = core.clone(enemy);
+            for (var x in enemyInfo) {
+                e[x] = enemyInfo[x];
+            }
+            e.id = enemyId;
+            e.specialText = specialText;
+            e.damage = this.getDamage(enemyId, null, null, floorId);
+            e.critical = critical[0];
+            e.criticalDamage = critical[1];
+            e.defDamage = this.getDefDamage(enemyId,1,null,null,floorId);
+            enemys.push(e);
             used[enemyId] = true;
         }
     }

@@ -1913,7 +1913,7 @@ control.prototype.replay = function () {
                 core.status.event.data = {"toolsPage":Math.floor(index/12)+1, "constantsPage":1, "selectId":null};
                 index = index%12;
             }
-            else if (index=constants.indexOf(itemId)>=0) {
+            else if ((index=constants.indexOf(itemId))>=0) {
                 core.status.event.data = {"toolsPage":1, "constantsPage":Math.floor(index/12)+1, "selectId":null};
                 index = index%12+12;    
             }

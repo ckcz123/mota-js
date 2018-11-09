@@ -1270,7 +1270,7 @@ choices_s
 
 /* choices_s
 tooltip : choices: 给用户提供选项
-helpUrl : https://ckcz123.github.io/mota-js/#/event?id=switch%EF%BC%9A%E5%A4%9A%E9%87%8D%E6%9D%A1%E4%BB%B6%E5%88%86%E6%AD%A7
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=choices%EF%BC%9A%E7%BB%99%E7%94%A8%E6%88%B7%E6%8F%90%E4%BE%9B%E9%80%89%E9%A1%B9
 default : ["","流浪者","woman"]
 var title='';
 if (EvalString_1==''){

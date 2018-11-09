@@ -909,15 +909,13 @@ events.prototype.doAction = function() {
             break;
         case "switch": // 条件选择
             var key = core.calValue(data.condition)
-            console.log(key);
             for (var i = 0; i < data.caseList.length; i++) {
-                console.log(core.calValue(data.caseList[i].case));
                 if (core.calValue(data.caseList[i].case) == key || core.calValue(data.caseList[i].case) == "default") {
                     core.events.insertAction(data.caseList[i].action);
-                    this.doAction();
                     break;
                 }
             }
+            this.doAction();
             break;
         case "choices": // 提供选项
             if (core.status.replay.replaying) {

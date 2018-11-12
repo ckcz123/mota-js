@@ -1238,7 +1238,7 @@ return code;
 */;
 
 switch_s
-    :   '多重分歧 条件判定' ':' expression BGNL? Newline switchCase_s+ BEND Newline
+    :   '多重分歧 条件判定' ':' expression BGNL? Newline switchCase+ BEND Newline
 
 
 /* switch_s
@@ -1247,16 +1247,16 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=switch%EF%BC%9A%E5%A4%9A%
 default : ["判别值"]
 colour : this.eventColor
 var code = ['{"type": "switch", "condition": "',expression_0,'", "caseList": [\n',
-    switchCase_s_0,
+    switchCase_0,
 '], },\n'].join('');
 return code;
 */;
 
-switchCase_s
+switchCase
     :   '如果是' expression '的场合' BGNL? Newline action+
 
 
-/* switchCase_s
+/* switchCase
 tooltip : 选项的选择
 helpUrl : https://ckcz123.github.io/mota-js/#/event?id=switch%EF%BC%9A%E5%A4%9A%E9%87%8D%E6%9D%A1%E4%BB%B6%E5%88%86%E6%AD%A7
 colour : this.subColor
@@ -2014,7 +2014,7 @@ ActionParser.prototype.parseAction = function() {
     case "switch": // 多重条件分歧
       var case_caseList = null;
       for(var ii=data.caseList.length-1,caseNow;caseNow=data.caseList[ii];ii--) {
-        case_caseList=MotaActionBlocks['switchCase_s'].xmlText([
+        case_caseList=MotaActionBlocks['switchCase'].xmlText([
           this.isset(caseNow.case)?MotaActionBlocks['evalString_e'].xmlText([caseNow.case]):"值",this.insertActionList(caseNow.action),case_caseList]);
       }
       this.next = MotaActionBlocks['switch_s'].xmlText([

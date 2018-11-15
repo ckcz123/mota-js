@@ -203,6 +203,7 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"enableMoney": true,
 		"enableExperience": false,
 		"enableLevelUp": false,
+		"levelUpLeftMode": false,
 		"enableKeys": true,
 		"enablePZF": false,
 		"enableDebuff": false,
@@ -233,6 +234,6 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"canGoDeadZone": false,
 		"enableMoveDirectly": true,
 		"enableDisabledShop": true,
-		"disableShopOnDamage": true
+		"disableShopOnDamage": false
 	}
 }

@@ -424,6 +424,12 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "是否允许等级提升（进阶）；如果上面enableExperience为false，则此项恒视为false"
                 },
+                "levelUpLeftMode": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "进阶使用扣除模式，即在状态栏显示距离下个等级所需要的经验值；只有enableExperience和enableLevelUp均开启时才有效。"
+                },
                 "enableKeys": {
                     "_leaf": true,
                     "_type": "checkbox",

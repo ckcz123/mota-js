@@ -2786,6 +2786,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     if (!core.flags.enableMoney) count--;
     if (!core.flags.enableExperience) count--;
     if (!core.flags.enableLevelUp) count--;
+    if (core.flags.levelUpLeftMode) count--;
     if (!core.flags.enableDebuff) count--;
     if (!core.flags.enableKeys) count--;
     if (!core.flags.enablePZF) count--;
@@ -3092,7 +3093,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         {
             id: 'expCol',
             rules: {
-                display: core.flags.enableExperience ? 'block': 'none'
+                display: core.flags.enableExperience && !core.flags.levelUpLeftMode ? 'block': 'none'
             }
         },
         {

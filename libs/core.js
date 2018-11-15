@@ -183,6 +183,8 @@ core.prototype.init = function (coreData, callback) {
 
     if (!core.flags.enableExperience)
         core.flags.enableLevelUp = false;
+    if (!core.flags.enableLevelUp)
+        core.flags.levelUpLeftMode = false;
     if (!core.flags.canOpenBattleAnimate) {
         core.flags.showBattleAnimateConfirm = false;
         core.flags.battleAnimate = false;

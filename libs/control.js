@@ -1245,6 +1245,14 @@ control.prototype.checkBlock = function () {
         if (damage>0) {
             core.playSound('zone.mp3');
             core.drawAnimate("zone", x, y);
+
+            // 禁用快捷商店
+            if (core.flags.disableShopOnDamage) {
+                for (var shopId in core.status.shops) {
+                    core.status.shops[shopId].visited = false;
+                }
+            }
+
         }
         core.status.hero.statistics.extraDamage += damage;
 

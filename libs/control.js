@@ -1245,6 +1245,14 @@ control.prototype.checkBlock = function () {
         if (damage>0) {
             core.playSound('zone.mp3');
             core.drawAnimate("zone", x, y);
+
+            // 禁用快捷商店
+            if (core.flags.disableShopOnDamage) {
+                for (var shopId in core.status.shops) {
+                    core.status.shops[shopId].visited = false;
+                }
+            }
+
         }
         core.status.hero.statistics.extraDamage += damage;
 
@@ -1913,7 +1921,7 @@ control.prototype.replay = function () {
                 core.status.event.data = {"toolsPage":Math.floor(index/12)+1, "constantsPage":1, "selectId":null};
                 index = index%12;
             }
-            else if (index=constants.indexOf(itemId)>=0) {
+            else if ((index=constants.indexOf(itemId))>=0) {
                 core.status.event.data = {"toolsPage":1, "constantsPage":Math.floor(index/12)+1, "selectId":null};
                 index = index%12+12;    
             }
@@ -2778,6 +2786,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     if (!core.flags.enableMoney) count--;
     if (!core.flags.enableExperience) count--;
     if (!core.flags.enableLevelUp) count--;
+    if (core.flags.levelUpLeftMode) count--;
     if (!core.flags.enableDebuff) count--;
     if (!core.flags.enableKeys) count--;
     if (!core.flags.enablePZF) count--;
@@ -3084,7 +3093,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         {
             id: 'expCol',
             rules: {
-                display: core.flags.enableExperience ? 'block': 'none'
+                display: core.flags.enableExperience && !core.flags.levelUpLeftMode ? 'block': 'none'
             }
         },
         {

@@ -111,7 +111,7 @@ editor_blockly = function () {
       MotaActionFunctions.actionParser.parseList({"type": "switch", "condition": "判别量", "caseList": [
         {"action": [{"type": "comment", "text": "当判别值是值的场合执行此事件"}]},
         {"action": []},
-        {"case": "'default'", "action": [{"type": "comment", "text": "当没有符合的值的场合执行此事件"}]},
+        {"case": "default", "action": [{"type": "comment", "text": "当没有符合的值的场合执行此事件"}]},
       ]}),
       MotaActionBlocks['while_s'].xmlText(),
       MotaActionBlocks['break_s'].xmlText(),

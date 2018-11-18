@@ -1519,7 +1519,9 @@ control.prototype.updateDamage = function (floorId, canvas) {
         core.clearMap('damage');
     }
 
-    // if (!core.isset(core.status.thisMap) || !core.isset(core.status.thisMap.blocks)) return;
+    // 正在开始游戏中
+    if (core.status.isStarting) return;
+
     // 更新显伤
     var mapBlocks = core.status.maps[floorId].blocks;
     // 没有怪物手册

@@ -1600,7 +1600,7 @@ control.prototype.updateDamage = function (floorId, canvas) {
         }
     }
     // 如果是领域&夹击
-    if (core.flags.displayExtraDamage) {
+    if (core.flags.displayExtraDamage && core.isset((core.status.checkBlock||{}).damage)) {
         canvas.textAlign = 'center';
 
         // 临时改变

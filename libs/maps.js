@@ -386,7 +386,7 @@ maps.prototype.getBgFgMapArray = function (floorId, name) {
     var width = core.floors[floorId].width || 13;
     var height = core.floors[floorId].height || 13;
 
-    if (core.isset(core.status[name+"maps"][floorId]))
+    if (main.mode!='editor' && core.isset(core.status[name+"maps"][floorId]))
         return core.status[name+"maps"][floorId];
 
     var arr = core.clone(core.floors[floorId][name+"map"] || []);

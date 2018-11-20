@@ -1642,8 +1642,10 @@ ui.prototype.drawMaps = function (index, x, y) {
     core.setOpacity('animate', 1);
 
     var damage = (core.status.event.data||{}).damage, paint =  (core.status.event.data||{}).paint;
+    var all = (core.status.event.data||{}).all;
     if (core.isset(index.damage)) damage=index.damage;
     if (core.isset(index.paint)) paint=index.paint;
+    if (core.isset(index.all)) all=index.all;
 
     if (core.isset(index.index)) {
         x=index.x;
@@ -1661,7 +1663,7 @@ ui.prototype.drawMaps = function (index, x, y) {
     if (y<6) y=6;
     if (y>mh-7) y=mh-7;
 
-    core.status.event.data = {"index": index, "x": x, "y": y, "damage": damage, "paint": paint};
+    core.status.event.data = {"index": index, "x": x, "y": y, "damage": damage, "paint": paint, "all": all};
 
     clearTimeout(core.interval.tipAnimate);
     core.clearMap('ui');
@@ -1683,7 +1685,7 @@ ui.prototype.drawMaps = function (index, x, y) {
     core.setFont('data', '16px Arial');
 
     var text = core.status.maps[floorId].title;
-    if (mw>13 || mh>13) text+=" ["+(x-6)+","+(y-6)+"]";
+    if (!all && (mw>13 || mh>13)) text+=" ["+(x-6)+","+(y-6)+"]";
     var textX = 16, textY = 18, width = textX + core.canvas.data.measureText(text).width + 16, height = 42;
     core.fillRect('data', 5, 5, width, height, '#000');
     core.setOpacity('data', 0.4);
@@ -2199,9 +2201,28 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
     if (!core.isset(centerX)) centerX=parseInt(mw/2);
     if (!core.isset(centerY)) centerY=parseInt(mh/2);
 
-    var offsetX = core.clamp(centerX-6, 0, mw-13), offsetY = core.clamp(centerY-6, 0, mh-13);
-    // offsetX~offsetX+12; offsetY~offsetY+12
-    core.canvas[canvas].drawImage(tempCanvas.canvas, offsetX*32, offsetY*32, 416, 416, x, y, size, size);
+    // 如果是浏览地图的全模式
+    if (core.status.event.id=='viewMaps' && (core.status.event.data||{}).all) {
+        if (tempWidth<=tempHeight) {
+            var realHeight = 416, realWidth = realHeight * tempWidth / tempHeight;
+            var side = (416 - realWidth) / 2;
+            core.fillRect(canvas, 0, 0, side, realHeight, '#000000');
+            core.fillRect(canvas, 416-side, 0, side, realHeight);
+            core.canvas[canvas].drawImage(tempCanvas.canvas, 0, 0, tempWidth, tempHeight, side, 0, realWidth, realHeight);
+        }
+        else {
+            var realWidth = 416, realHeight = realWidth * tempHeight / tempWidth;
+            var side = (416 - realHeight) / 2;
+            core.fillRect(canvas, 0, 0, realWidth, side, '#000000');
+            core.fillRect(canvas, 0, 416-side, realWidth, side);
+            core.canvas[canvas].drawImage(tempCanvas.canvas, 0, 0, tempWidth, tempHeight, 0, side, realWidth, realHeight);
+        }
+    }
+    else {
+        var offsetX = core.clamp(centerX-6, 0, mw-13), offsetY = core.clamp(centerY-6, 0, mh-13);
+        // offsetX~offsetX+12; offsetY~offsetY+12
+        core.canvas[canvas].drawImage(tempCanvas.canvas, offsetX*32, offsetY*32, 416, 416, x, y, size, size);
+    }
 }
 
 ui.prototype.drawKeyBoard = function () {

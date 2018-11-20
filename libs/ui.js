@@ -2124,6 +2124,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
         }
     }
     images.forEach(function (t) {
+        if (typeof t == 'string') t = [0,0,t];
         var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
         if (core.isset(dx) && core.isset(dy) &&
             !core.hasFlag("floorimg_"+floorId+"_"+dx+"_"+dy) &&

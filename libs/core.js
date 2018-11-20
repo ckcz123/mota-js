@@ -203,6 +203,11 @@ core.prototype.init = function (coreData, callback) {
     document.getElementById("startLogo").innerHTML = core.firstData.title;
     core.material.items = core.clone(core.items.getItems());
     core.material.enemys = core.clone(core.enemys.getEnemys());
+    if (main.mode == 'play') {
+        for (var enemyId in core.material.enemys) {
+            core.material.enemys[enemyId].id = enemyId;
+        }
+    }
     core.material.icons = core.icons.getIcons();
     core.material.events = core.events.getEvents();
 

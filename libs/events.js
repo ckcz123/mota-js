@@ -774,6 +774,15 @@ events.prototype.doAction = function() {
                 this.doAction();
                 break;
             }
+        case "insert":
+            {
+                var toX=core.calValue(data.loc[0]), toY=core.calValue(data.loc[1]);
+                var floorId = data.floorId || core.status.floorId;
+                var event = core.floors[floorId].events[toX+","+toY];
+                if (core.isset(event)) core.insertAction(event);
+                this.doAction();
+                break;
+            }
         case "playSound":
             if (!core.status.replay.replaying)
                 core.playSound(data.name);
@@ -910,7 +919,7 @@ events.prototype.doAction = function() {
         case "switch": // 条件选择
             var key = core.calValue(data.condition)
             for (var i = 0; i < data.caseList.length; i++) {
-                if (core.calValue(data.caseList[i].case) == key || core.calValue(data.caseList[i].case) == "default") {
+                if (data.caseList[i].case=="default" || core.calValue(data.caseList[i].case) == key) {
                     core.events.insertAction(data.caseList[i].action);
                     break;
                 }

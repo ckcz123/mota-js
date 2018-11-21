@@ -3,6 +3,30 @@ function editor() {
     this.brushMod = "line";//["line","rectangle","tileset"]
     this.layerMod = "map";//["fgmap","map","bgmap"]
     this.isMobile = false;
+
+    window.onerror = function (msg, url, lineNo, columnNo, error) {
+        var string = msg.toLowerCase();
+        var substring = "script error";
+        var message;
+        if (string.indexOf(substring) > -1){
+            message = 'Script Error: See Browser Console for Detail';
+        } else {
+            message = [
+                'Message: ' + msg,
+                'URL: ' + url,
+                'Line: ' + lineNo,
+                'Column: ' + columnNo,
+                'Error object: ' + JSON.stringify(error)
+            ].join(' - ');
+            // alert(message);
+        }
+        try {
+            printe(message)
+        } catch (e) {
+            alert(message);
+        }
+        return false;
+    };
 }
 
 /* 

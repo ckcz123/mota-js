@@ -409,18 +409,12 @@ maps.prototype.drawBgFgMap = function (floorId, canvas, name) {
     var width = core.floors[floorId].width || 13;
     var height = core.floors[floorId].height || 13;
 
-    var groundId = (core.status.maps||core.floors)[floorId].defaultGround || "ground";
-    var blockIcon = core.material.icons.terrains[groundId];
-    var blockImage = core.material.images.terrains;
-
     if (!core.isset(core.status[name+"maps"]))
         core.status[name+"maps"] = {};
 
     var arr = this.getBgFgMapArray(floorId, name);
     for (var x = 0; x < width; x++) {
         for (var y = 0; y < height; y++) {
-            if (name=='bg')
-                canvas.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
             if (arr[y][x]>0) {
                 var block = core.maps.initBlock(x, y, arr[y][x]);
                 if (core.isset(block.event)) {
@@ -454,9 +448,16 @@ maps.prototype.drawMap = function (mapName, callback) {
     core.removeGlobalAnimate(null, null, true);
 
     var drawBg = function(){
+        var width = core.floors[mapName].width || 13;
+        var height = core.floors[mapName].height || 13;
 
-        core.maps.drawBgFgMap(mapName, core.canvas.bg, "bg");
-        core.maps.drawBgFgMap(mapName, core.canvas.fg, "fg");
+        var groundId = (core.status.maps||core.floors)[mapName].defaultGround || "ground";
+        var blockIcon = core.material.icons.terrains[groundId];
+        for (var x = 0; x < width; x++) {
+            for (var y = 0; y < height; y++) {
+                core.canvas.bg.drawImage(core.material.images.terrains, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
+            }
+        }
 
         var images = [];
         if (core.isset(core.status.maps[mapName].images)) {
@@ -497,7 +498,10 @@ maps.prototype.drawMap = function (mapName, callback) {
                         32*dx, 32*dy + image.height - 32, image.width, 32);
                 }
             }
-        })
+        });
+
+        core.maps.drawBgFgMap(mapName, core.canvas.bg, "bg");
+        core.maps.drawBgFgMap(mapName, core.canvas.fg, "fg");
 
     }
     if (main.mode=='editor'){

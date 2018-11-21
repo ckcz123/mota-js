@@ -411,7 +411,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
     var validWidth = right-(content_left-left)-13;
     var font = textfont + 'px Verdana';
     if (textAttribute.bold) font = "bold "+font;
-    var realContent = content.replace(/(\v|\\v)(\[.*?])?/g, "");
+    var realContent = content.replace(/(\r|\\r)(\[.*?])?/g, "");
 
     var height = 20 + (textfont+5)*(core.splitLines("ui", realContent, validWidth, font).length+1)
         + (id=='hero'?core.material.icons.hero.height-10:core.isset(name)?iconHeight-10:0);
@@ -542,8 +542,8 @@ ui.prototype.drawTextBox = function(content, showAll) {
             if (char=='\\') index++;
             return drawNext();
         }
-        // \v, \\v
-        if (char == '\v' || (char=='\\' && content.charAt(index)=='v')) {
+        // \r, \\r
+        if (char == '\r' || (char=='\\' && content.charAt(index)=='r')) {
             if (char == '\\') index++;
             changed = true;
             // 检查是不是 []

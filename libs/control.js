@@ -2796,6 +2796,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     if (!core.flags.enableMana) count--;
     if (!core.flags.enableSkill) count--;
 
+    if (count>12) alert("当前状态栏数目大于12，请调整到不超过12以避免手机端出现显示问题。");
+
     var statusLineHeight = BASE_LINEHEIGHT * 9 / count;
     var statusLineFontSize = DEFAULT_FONT_SIZE;
     if (count>9) statusLineFontSize = statusLineFontSize * 9 / count;

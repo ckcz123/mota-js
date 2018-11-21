@@ -9,6 +9,10 @@ items.prototype.init = function () {
     this.itemEffectTip = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.itemEffectTip;
     this.useItemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.useItemEffect;
     this.canUseItemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canUseItemEffect;
+    if (!core.isset(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canEquip))
+        items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canEquip = {};
+    this.canEquip = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canEquip;
+
     //delete(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a);
 }
 
@@ -162,13 +166,21 @@ items.prototype.loadEquip = function (equipId, callback) {
 
     if (!core.isset(core.status.hero.equipment)) core.status.hero.equipment = [];
 
-    core.playSound('equip.mp3');
-
     var loadEquip = core.material.items[equipId];
     if (!core.isset(loadEquip)) {
         if (core.isset(callback)) callback();
         return;
     }
+
+    var can = this.canEquip[equipId];
+    if (core.isset(can) && !eval(can)) {
+        core.drawTip("当前不可换上"+loadEquip.name);
+        if (core.isset(callback)) callback();
+        return;
+    }
+
+    core.playSound('equip.mp3');
+
     var loadEquipType = loadEquip.equip.type;
     var unloadEquipId = core.status.hero.equipment[loadEquipType];
 
@@ -285,8 +297,18 @@ items.prototype.quickLoadEquip = function (index) {
     for (var i=0;i<equipSize;i++) {
         var v = current[i];
         if (core.isset(v) && !core.hasItem(v) && !core.hasEquip(v)) {
-            core.drawTip("你当前没有"+((core.material.items[v]||{}).name||"未知装备")+"，无法换装");
             return;
+        }
+        if (core.isset(v)) {
+            if (!core.hasItem(v) && !core.hasEquip(v)) {
+                core.drawTip("你当前没有"+((core.material.items[v]||{}).name||"未知装备")+"，无法换装");
+                return;
+            }
+            var can = this.canEquip[v];
+            if (core.isset(can) && !eval(can)) {
+                core.drawTip("当前不可换上"+((core.material.items[v]||{}).name||"未知装备"));
+                return;
+            }
         }
     }
     // 快速换装

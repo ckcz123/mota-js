@@ -13,7 +13,7 @@ utils.prototype.init = function () {
 
 ////// 将文字中的${和}（表达式）进行替换 //////
 utils.prototype.replaceText = function (text) {
-    return text.replace(/\${([^}]+)}/g, function (word, value) {
+    return text.replace(/\${(.*?)}/g, function (word, value) {
         return core.calValue(value);
     });
 }
@@ -486,8 +486,8 @@ utils.prototype.__init_seed = function () {
     rand = this.__next_rand(rand);
     rand = this.__next_rand(rand);
     rand = this.__next_rand(rand);
-    core.setFlag('seed', rand);
-    core.setFlag('rand', rand);
+    core.setFlag('__seed__', rand);
+    core.setFlag('__rand__', rand);
 }
 
 utils.prototype.__next_rand = function (_rand) {
@@ -497,9 +497,9 @@ utils.prototype.__next_rand = function (_rand) {
 }
 
 utils.prototype.rand = function (num) {
-    var rand = core.getFlag('rand');
+    var rand = core.getFlag('__rand__');
     rand = this.__next_rand(rand);
-    core.setFlag('rand', rand);
+    core.setFlag('__rand__', rand);
     var ans = rand/2147483647;
     if (core.isset(num) && num>0)
         return Math.floor(ans*num);

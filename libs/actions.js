@@ -767,6 +767,12 @@ actions.prototype.clickAction = function (x,y) {
 
 ////// 自定义事件时，按下某个键的操作 //////
 actions.prototype.keyDownAction = function (keycode) {
+    // 视为无效
+    var startTime = core.status.event.data.startTime||0;
+    if (startTime>0 && new Date().getTime()-startTime<250)
+        return;
+    core.status.event.data.startTime = 0;
+
     if (core.status.event.data.type=='choices') {
         var data = core.status.event.data.current;
         var choices = data.choices;
@@ -808,6 +814,15 @@ actions.prototype.keyUpAction = function (keycode) {
                 core.status.route.push("choices:"+core.status.event.selection);
                 core.insertAction(choices[core.status.event.selection].action);
                 core.doAction();
+            }
+            // 数字键快速选择
+            if (keycode>=49 && keycode<=57) {
+                var index = keycode-49;
+                if (index<choices.length) {
+                    core.status.route.push("choices:"+index);
+                    core.insertAction(choices[index].action);
+                    core.doAction();
+                }
             }
         }
     }
@@ -930,6 +945,16 @@ actions.prototype.clickViewMaps = function (x,y) {
         core.ui.drawMaps(index, cx, cy);
         return;
     }
+    if (x==0 && y==12) {
+        core.status.event.data.paint = !core.status.event.data.paint;
+        core.ui.drawMaps(index, cx, cy);
+        return;
+    }
+    if (x==12 && y==0) {
+        core.status.event.data.all = !core.status.event.data.all;
+        core.ui.drawMaps(index, cx, cy);
+        return;
+    }
 
     if (x>=2 && x<=10 && y<=1 && mh>13) {
         core.ui.drawMaps(index, cx, cy-1);
@@ -999,6 +1024,11 @@ actions.prototype.keyUpViewMaps = function (keycode) {
     }
     if (keycode==86) {
         core.status.event.data.damage = !core.status.event.data.damage;
+        core.ui.drawMaps(core.status.event.data);
+        return;
+    }
+    if (keycode==90) {
+        core.status.event.data.all = !core.status.event.data.all;
         core.ui.drawMaps(core.status.event.data);
         return;
     }
@@ -1122,6 +1152,14 @@ actions.prototype.keyUpShop = function (keycode) {
         var topIndex = 6 - parseInt(choices.length / 2);
         this.clickShop(6, topIndex+core.status.event.selection);
     }
+    // 数字键快速选择
+    if (keycode>=49 && keycode<=57) {
+        var index = keycode-49;
+        if (index<=choices.length) {
+            var topIndex = 6 - parseInt(choices.length / 2);
+            this.clickShop(6, topIndex+index);
+        }
+    }
     return;
 }
 
@@ -1168,6 +1206,13 @@ actions.prototype.keyUpQuickShop = function (keycode) {
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt(keys.length / 2);
         this.clickQuickShop(6, topIndex+core.status.event.selection);
+    }
+    if (keycode>=49 && keycode<=57) {
+        var index = keycode-49;
+        if (index<=keys.length) {
+            var topIndex = 6 - parseInt(keys.length / 2);
+            this.clickQuickShop(6, topIndex+index);
+        }
     }
     return;
 }
@@ -1811,6 +1856,14 @@ actions.prototype.keyUpSwitchs = function (keycode) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
         this.clickSwitchs(6, topIndex+core.status.event.selection);
     }
+    // 数字键快速选择
+    if (keycode>=49 && keycode<=57) {
+        var index = keycode-49;
+        if (index<choices.length) {
+            var topIndex = 6 - parseInt((choices.length - 1) / 2);
+            this.clickSwitchs(6, topIndex+index);
+        }
+    }
 }
 
 
@@ -1891,6 +1944,14 @@ actions.prototype.keyUpSettings = function (keycode) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
         this.clickSettings(6, topIndex+core.status.event.selection);
     }
+    // 数字键快速选择
+    if (keycode>=49 && keycode<=57) {
+        var index = keycode-49;
+        if (index<choices.length) {
+            var topIndex = 6 - parseInt((choices.length - 1) / 2);
+            this.clickSettings(6, topIndex+index);
+        }
+    }
 }
 
 ////// 同步存档界面时的点击操作 //////
@@ -1969,7 +2030,7 @@ actions.prototype.clickSyncSave = function (x,y) {
                 core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify({
                     'name': core.firstData.name,
                     'hard': core.status.hard,
-                    'seed': core.getFlag('seed'),
+                    'seed': core.getFlag('__seed__'),
                     'route': core.encodeRoute(core.status.route)
                 }));
                 break;
@@ -2010,6 +2071,14 @@ actions.prototype.keyUpSyncSave = function (keycode) {
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
         this.clickSyncSave(6, topIndex+core.status.event.selection);
+    }
+    // 数字键快速选择
+    if (keycode>=49 && keycode<=57) {
+        var index = keycode-49;
+        if (index<choices.length) {
+            var topIndex = 6 - parseInt((choices.length - 1) / 2);
+            this.clickSyncSave(6, topIndex+index);
+        }
     }
 }
 
@@ -2059,6 +2128,14 @@ actions.prototype.keyUpSyncSelect = function (keycode) {
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
         this.clickSyncSelect(6, topIndex+core.status.event.selection);
+    }
+    // 数字键快速选择
+    if (keycode>=49 && keycode<=57) {
+        var index = keycode-49;
+        if (index<choices.length) {
+            var topIndex = 6 - parseInt((choices.length - 1) / 2);
+            this.clickSyncSelect(6, topIndex+index);
+        }
     }
 }
 
@@ -2132,6 +2209,14 @@ actions.prototype.keyUpLocalSaveSelect = function (keycode) {
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
         this.clickLocalSaveSelect(6, topIndex+core.status.event.selection);
+    }
+    // 数字键快速选择
+    if (keycode>=49 && keycode<=57) {
+        var index = keycode-49;
+        if (index<choices.length) {
+            var topIndex = 6 - parseInt((choices.length - 1) / 2);
+            this.clickLocalSaveSelect(6, topIndex+index);
+        }
     }
 }
 
@@ -2219,6 +2304,14 @@ actions.prototype.keyUpStorageRemove = function (keycode) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
         this.clickStorageRemove(6, topIndex+core.status.event.selection);
     }
+    // 数字键快速选择
+    if (keycode>=49 && keycode<=57) {
+        var index = keycode-49;
+        if (index<choices.length) {
+            var topIndex = 6 - parseInt((choices.length - 1) / 2);
+            this.clickStorageRemove(6, topIndex+index);
+        }
+    }
 }
 
 ////// 回放选择界面时的点击操作 //////
@@ -2234,7 +2327,7 @@ actions.prototype.clickReplay = function (x, y) {
             case 0:
                 {
                     core.ui.closePanel();
-                    var hard=core.status.hard, seed = core.getFlag('seed');
+                    var hard=core.status.hard, seed = core.getFlag('__seed__');
                     core.startGame(hard, seed, core.clone(core.status.route));
                     break;
                 }
@@ -2258,7 +2351,7 @@ actions.prototype.clickReplay = function (x, y) {
                 core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify({
                     'name': core.firstData.name,
                     'hard': core.status.hard,
-                    'seed': core.getFlag('seed'),
+                    'seed': core.getFlag('__seed__'),
                     'route': core.encodeRoute(core.status.route)
                 }));
                 break;
@@ -2292,6 +2385,14 @@ actions.prototype.keyUpReplay = function (keycode) {
     if (keycode==13 || keycode==32 || keycode==67) {
         var topIndex = 6 - parseInt((choices.length - 1) / 2);
         this.clickReplay(6, topIndex+core.status.event.selection);
+    }
+    // 数字键快速选择
+    if (keycode>=49 && keycode<=57) {
+        var index = keycode-49;
+        if (index<choices.length) {
+            var topIndex = 6 - parseInt((choices.length - 1) / 2);
+            this.clickReplay(6, topIndex+index);
+        }
     }
 }
 

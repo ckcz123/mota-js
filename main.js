@@ -2,7 +2,7 @@ function main() {
 
     //------------------------ 用户修改内容 ------------------------//
 
-    this.version = "2.5"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+    this.version = "2.5.1"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
     this.useCompress = false; // 是否使用压缩文件
     // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
@@ -417,15 +417,6 @@ main.statusBar.image.fly.onclick = function () {
     // 绘图模式
     if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
         core.actions.setPaintMode('erase');
-        return;
-    }
-
-    // 浏览地图时
-    if (main.core.isPlaying() && (core.status.event||{}).id=='viewMaps') {
-        if (core.isset(core.status.event.data)) {
-            core.status.event.data.paint = !core.status.event.data.paint;
-            core.ui.drawMaps(core.status.event.data);
-        }
         return;
     }
 

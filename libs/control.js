@@ -1519,7 +1519,9 @@ control.prototype.updateDamage = function (floorId, canvas) {
         core.clearMap('damage');
     }
 
-    // if (!core.isset(core.status.thisMap) || !core.isset(core.status.thisMap.blocks)) return;
+    // 正在开始游戏中
+    if (core.status.isStarting) return;
+
     // 更新显伤
     var mapBlocks = core.status.maps[floorId].blocks;
     // 没有怪物手册
@@ -1598,7 +1600,7 @@ control.prototype.updateDamage = function (floorId, canvas) {
         }
     }
     // 如果是领域&夹击
-    if (core.flags.displayExtraDamage) {
+    if (core.flags.displayExtraDamage && core.isset((core.status.checkBlock||{}).damage)) {
         canvas.textAlign = 'center';
 
         // 临时改变
@@ -2254,7 +2256,7 @@ control.prototype.doSL = function (id, type) {
             if (data.version != core.firstData.version) {
                 // core.drawTip("存档版本不匹配");
                 if (confirm("存档版本不匹配！\n你想回放此存档的录像吗？\n可以随时停止录像播放以继续游戏。")) {
-                    core.startGame(data.hard, data.hero.flags.seed, core.decodeRoute(data.route));
+                    core.startGame(data.hard, data.hero.flags.__seed__, core.decodeRoute(data.route));
                 }
                 return;
             }
@@ -2293,7 +2295,7 @@ control.prototype.doSL = function (id, type) {
                 return;
             }
             var route = core.subarray(core.status.route, core.decodeRoute(data.route));
-            if (!core.isset(route) || data.hero.flags.seed!=core.getFlag('seed')) {
+            if (!core.isset(route) || data.hero.flags.__seed__!=core.getFlag('__seed__')) {
                 core.drawTip("无法从此存档回放录像");
                 return;
             }
@@ -2793,6 +2795,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     if (!core.flags.enableName) count--;
     if (!core.flags.enableMana) count--;
     if (!core.flags.enableSkill) count--;
+
+    if (count>12) alert("当前状态栏数目("+count+")大于12，请调整到不超过12以避免手机端出现显示问题。");
 
     var statusLineHeight = BASE_LINEHEIGHT * 9 / count;
     var statusLineFontSize = DEFAULT_FONT_SIZE;

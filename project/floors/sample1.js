@@ -594,7 +594,7 @@ main.floors.sample1=
                     ]
                 },
                 {
-                    "case": "'default'",
+                    "case": "default",
                     "action": [
                         {
                             "type": "comment",

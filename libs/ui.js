@@ -696,7 +696,7 @@ ui.prototype.drawChoices = function(content, choices) {
     // 选项
     core.canvas.ui.textAlign = "center";
     for (var i = 0; i < choices.length; i++) {
-        core.setFillStyle(choices[i].color || "#FFFFFF");
+        core.setFillStyle('ui', choices[i].color || "#FFFFFF");
         core.fillText('ui', core.replaceText(choices[i].text || choices[i]), 208, choice_top + 32 * i, null, "bold 17px Verdana");
     }
 

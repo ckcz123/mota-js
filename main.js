@@ -420,15 +420,6 @@ main.statusBar.image.fly.onclick = function () {
         return;
     }
 
-    // 浏览地图时
-    if (main.core.isPlaying() && (core.status.event||{}).id=='viewMaps') {
-        if (core.isset(core.status.event.data)) {
-            core.status.event.data.paint = !core.status.event.data.paint;
-            core.ui.drawMaps(core.status.event.data);
-        }
-        return;
-    }
-
     if (main.core.isPlaying()) {
         if (!main.core.flags.equipboxButton) {
             main.core.useFly(true);

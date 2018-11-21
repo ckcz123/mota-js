@@ -1571,6 +1571,13 @@ ui.prototype.drawMaps = function (index, x, y) {
         core.fillText('ui', "上移地图 [W]", 208, 38, '#FFD700', '20px Arial');
         core.fillText('ui', "下移地图 [S]", 208, 390);
 
+        core.strokeRect('ui', 2, 2, 28, 28);
+        core.fillText('ui', 'V', 16, 24);
+        core.strokeRect('ui', 2, 416-30, 28, 28);
+        core.fillText('ui', 'M', 16, 408);
+        core.strokeRect('ui', 416-30, 2, 28, 28);
+        core.fillText('ui', 'Z', 400, 24);
+
         var top = 150;
         core.fillText('ui', "左", 32, top);
         core.fillText('ui', "移", 32, top+32);
@@ -1588,6 +1595,7 @@ ui.prototype.drawMaps = function (index, x, y) {
 
         core.fillText('ui', "退出 [ESC / ENTER]", 208, 208+8);
         core.fillText('ui', "[X] 可查看怪物手册", 285, 208+40, null, '13px Arial');
+
         return;
     }
 

@@ -930,6 +930,11 @@ actions.prototype.clickViewMaps = function (x,y) {
         core.ui.drawMaps(index, cx, cy);
         return;
     }
+    if (x==0 && y==12) {
+        core.status.event.data.paint = !core.status.event.data.paint;
+        core.ui.drawMaps(index, cx, cy);
+        return;
+    }
     if (x==12 && y==0) {
         core.status.event.data.all = !core.status.event.data.all;
         core.ui.drawMaps(index, cx, cy);

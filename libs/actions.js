@@ -1979,7 +1979,7 @@ actions.prototype.clickSyncSave = function (x,y) {
                 core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify({
                     'name': core.firstData.name,
                     'hard': core.status.hard,
-                    'seed': core.getFlag('seed'),
+                    'seed': core.getFlag('__seed__'),
                     'route': core.encodeRoute(core.status.route)
                 }));
                 break;
@@ -2244,7 +2244,7 @@ actions.prototype.clickReplay = function (x, y) {
             case 0:
                 {
                     core.ui.closePanel();
-                    var hard=core.status.hard, seed = core.getFlag('seed');
+                    var hard=core.status.hard, seed = core.getFlag('__seed__');
                     core.startGame(hard, seed, core.clone(core.status.route));
                     break;
                 }
@@ -2268,7 +2268,7 @@ actions.prototype.clickReplay = function (x, y) {
                 core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify({
                     'name': core.firstData.name,
                     'hard': core.status.hard,
-                    'seed': core.getFlag('seed'),
+                    'seed': core.getFlag('__seed__'),
                     'route': core.encodeRoute(core.status.route)
                 }));
                 break;

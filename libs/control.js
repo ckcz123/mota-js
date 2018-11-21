@@ -2256,7 +2256,7 @@ control.prototype.doSL = function (id, type) {
             if (data.version != core.firstData.version) {
                 // core.drawTip("存档版本不匹配");
                 if (confirm("存档版本不匹配！\n你想回放此存档的录像吗？\n可以随时停止录像播放以继续游戏。")) {
-                    core.startGame(data.hard, data.hero.flags.seed, core.decodeRoute(data.route));
+                    core.startGame(data.hard, data.hero.flags.__seed__, core.decodeRoute(data.route));
                 }
                 return;
             }
@@ -2295,7 +2295,7 @@ control.prototype.doSL = function (id, type) {
                 return;
             }
             var route = core.subarray(core.status.route, core.decodeRoute(data.route));
-            if (!core.isset(route) || data.hero.flags.seed!=core.getFlag('seed')) {
+            if (!core.isset(route) || data.hero.flags.__seed__!=core.getFlag('__seed__')) {
                 core.drawTip("无法从此存档回放录像");
                 return;
             }

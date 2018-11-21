@@ -283,6 +283,64 @@ ui.prototype.drawText = function (contents, callback) {
     // core.drawTextBox(content);
 }
 
+ui.prototype.getTitleAndIcon = function (content) {
+    var id=null, name=null, image=null, icon=null, iconHeight=32, animate=null;
+
+    var getInfo = function (v) {
+        ["enemy48", "enemys", "npc48", "npcs"].forEach(function (x) {
+            if (core.isset(core.material.icons[x][v])) {
+                image = core.material.images[x];
+                icon = core.material.icons[x][v];
+                if (x.indexOf("48")>=0) {
+                    iconHeight = 48;
+                    animate = 4;
+                }
+                else {
+                    iconHeight = 32;
+                    animate = 2;
+                }
+            }
+        });
+    };
+
+    if (content.indexOf("\t[")==0 || content.indexOf("\\t[")==0) {
+        var index = content.indexOf("]");
+        if (index>=0) {
+            var str=content.substring(2, index);
+            if (content.indexOf("\\t[")==0) str=content.substring(3, index);
+            content=content.substring(index+1);
+            var ss=str.split(",");
+            if (ss.length==1) {
+                id=ss[0];
+                if (id=='hero') name = core.status.hero.name;
+                else if (core.isset(core.material.enemys[id])) {
+                    name = core.material.enemys[id].name;
+                    getInfo(id);
+                }
+                else {
+                    name=id;
+                    id='npc';
+                }
+            }
+            else {
+                name=ss[0];
+                id = 'npc';
+                if (ss[1]=='hero') id = 'hero';
+                else getInfo(ss[1]);
+            }
+        }
+    }
+    return {
+        "content": content,
+        "id": id,
+        "name": name,
+        "image": image,
+        "icon": icon,
+        "iconHeight": iconHeight,
+        "animate": animate
+    };
+}
+
 ////// 绘制一个对话框 //////
 ui.prototype.drawTextBox = function(content, showAll) {
 
@@ -294,78 +352,9 @@ ui.prototype.drawTextBox = function(content, showAll) {
     core.status.event.interval = null;
 
     // 获得name, image, icon
-    var id=null, name=null, image=null, icon=null, iconHeight=32, animate=null;
-    if (content.indexOf("\t[")==0 || content.indexOf("\\t[")==0) {
-        var index = content.indexOf("]");
-        if (index>=0) {
-            var str=content.substring(2, index);
-            if (content.indexOf("\\t[")==0) str=content.substring(3, index);
-            content=content.substring(index+1);
-            var ss=str.split(",");
-            if (ss.length==1) {
-                // id
-                id=ss[0];
-                if (id=='hero') {
-                    name = core.status.hero.name;
-                }
-                else {
-                    if (core.isset(core.material.enemys[id])) {
-                        name = core.material.enemys[id].name;
-
-                        if (core.isset(core.material.icons.enemy48[id])) {
-                            image = core.material.images.enemy48;
-                            icon = core.material.icons.enemy48[id];
-                            iconHeight = 48;
-                            animate=4;
-                        }
-                        else {
-                            image = core.material.images.enemys;
-                            icon = core.material.icons.enemys[id];
-                            iconHeight = 32;
-                            animate=2;
-                        }
-                    }
-                    else {
-                        name=id;
-                        id='npc';
-                        image=null;
-                        icon=null;
-                    }
-                }
-            }
-            else {
-                name=ss[0];
-                id = 'npc';
-                if (ss[1]=='hero') {
-                    id = 'hero';
-                }
-                else if (core.isset(core.material.icons.npc48[ss[1]])) {
-                    image = core.material.images.npc48;
-                    icon = core.material.icons.npc48[ss[1]];
-                    iconHeight = 48;
-                    animate=4;
-                }
-                else if (core.isset(core.material.icons.npcs[ss[1]])){
-                    image = core.material.images.npcs;
-                    icon = core.material.icons.npcs[ss[1]];
-                    iconHeight = 32;
-                    animate=2;
-                }
-                else if (core.isset(core.material.icons.enemy48[ss[1]])) {
-                    image = core.material.images.enemy48;
-                    icon = core.material.icons.enemy48[ss[1]];
-                    iconHeight = 48;
-                    animate=4;
-                }
-                else if (core.isset(core.material.icons.enemys[ss[1]])) {
-                    image = core.material.images.enemys;
-                    icon = core.material.icons.enemys[ss[1]];
-                    iconHeight = 32;
-                    animate=2;
-                }
-            }
-        }
-    }
+    var info = this.getTitleAndIcon(content);
+    content = info.content;
+    var id=info.id, name=info.name, image=info.image, icon=info.icon, iconHeight=info.iconHeight, animate=info.animate;
 
     // 获得位置信息
 
@@ -415,16 +404,17 @@ ui.prototype.drawTextBox = function(content, showAll) {
 
     // var contents = content.split('\n');
     // var contents = core.splitLines('ui', content, );
-    var left=10, right=416-2*left;
+    var left=7, right=416-2*left;
     var content_left = left + 25;
     if (id=='hero' || core.isset(icon)) content_left=left+63;
 
     var validWidth = right-(content_left-left)-13;
     var font = textfont + 'px Verdana';
     if (textAttribute.bold) font = "bold "+font;
-    var contents = core.splitLines("ui", content, validWidth, font);
+    var realContent = content.replace(/(\v|\\v)(\[.*?])?/g, "");
 
-    var height = 20 + (textfont+5)*(contents.length+1) + (id=='hero'?core.material.icons.hero.height-10:core.isset(name)?iconHeight-10:0);
+    var height = 20 + (textfont+5)*(core.splitLines("ui", realContent, validWidth, font).length+1)
+        + (id=='hero'?core.material.icons.hero.height-10:core.isset(name)?iconHeight-10:0);
 
 
     var xoffset = 6, yoffset = 22;
@@ -434,20 +424,16 @@ ui.prototype.drawTextBox = function(content, showAll) {
         top = parseInt((416 - height) / 2);
     }
     else if (position=='up') {
-        if (px==null || py==null) {
+        if (px==null || py==null)
             top = 5 + offset;
-        }
-        else {
+        else
             top = 32 * py - height - ydelta - yoffset;
-        }
     }
     else if (position=='down') {
-        if (px==null || py==null) {
+        if (px==null || py==null)
             top = 416 - height - 5 - offset;
-        }
-        else {
+        else
             top = 32 * py + 32 + yoffset;
-        }
     }
 
     // var left = 97, top = 64, right = 416 - 2 * left, bottom = 416 - 2 * top;
@@ -459,11 +445,10 @@ ui.prototype.drawTextBox = function(content, showAll) {
     core.setFillStyle('ui', core.arrayToRGB(textAttribute.background));
     core.setStrokeStyle('ui', borderColor);
 
-
     core.fillRect('ui', left, top, right, height);
     core.strokeRect('ui', left - 1, top - 1, right + 1, height + 1, borderColor, 2);
 
-    var xoffset = 9;
+    var xoffset = 10;
 
     // draw triangle
     if (position=='up' && core.isset(px) && core.isset(py)) {
@@ -534,32 +519,66 @@ ui.prototype.drawTextBox = function(content, showAll) {
         }
     }
 
+    var defaultColor = core.arrayToRGB(textAttribute.text);
+    var offsetx = content_left, offsety = content_top;
+    core.setFont('ui', font);
+    core.setAlpha('ui', textAttribute.text[3]);
+    core.setFillStyle('ui', defaultColor);
+    var index = 0, currcolor = defaultColor, changed = false;
 
-    var drawContent = function (content) {
-
-        core.clearMap("ui", content_left, content_top - 18, validWidth,  top + height - content_top + 10);
-        core.setAlpha('ui', textAttribute.background[3]);
-        core.setFillStyle('ui', core.arrayToRGB(textAttribute.background));
-        core.fillRect("ui",  content_left, content_top - 18, validWidth,  top + height - content_top + 11);
-
-        core.setAlpha('ui', textAttribute.text[3]);
-        core.setFillStyle('ui', core.arrayToRGB(textAttribute.text));
-        var contents = core.splitLines("ui", content, validWidth, font);
-
-        for (var i=0;i<contents.length;i++) {
-            core.fillText('ui', contents[i], content_left, content_top + (textfont+5)*i, null, font);
+    var drawNext = function () {
+        if (index >= content.length) return false;
+        if (changed) {
+            core.setFillStyle('ui', currcolor);
+            changed = false;
         }
 
-    }
+        // get next character
+        var char = content.charAt(index++);
+        // \n, \\n
+        if (char == '\n' || (char=='\\' && content.charAt(index)=='n')) {
+            offsetx = content_left;
+            offsety += textfont+5;
+            if (char=='\\') index++;
+            return drawNext();
+        }
+        // \v, \\v
+        if (char == '\v' || (char=='\\' && content.charAt(index)=='v')) {
+            if (char == '\\') index++;
+            changed = true;
+            // 检查是不是 []
+            var index2;
+            if (content.charAt(index) == '[' && ((index2=content.indexOf(']', index))>=0)) {
+                // 变色
+                var str = content.substring(index+1, index2);
+                if (str=="") currcolor = defaultColor;
+                else currcolor = str;
+                index = index2+1;
+            }
+            else currcolor = defaultColor;
+            return drawNext();
+        }
+        // 检查是不是自动换行
+        var charwidth = core.canvas.ui.measureText(char).width;
+        if (offsetx + charwidth > content_left + validWidth) {
+            index--;
+            offsetx = content_left;
+            offsety += textfont+5;
+            return drawNext();
+        }
+        // 输出
+        core.fillText('ui', char, offsetx, offsety);
+        offsetx += charwidth;
+        return true;
+    };
 
     if (showAll || textAttribute.time<=0 || core.status.event.id!='action') {
-        drawContent(content);
+        while (drawNext());
     }
     else {
-        var index=0;
         core.status.event.interval = setInterval(function () {
-            drawContent(content.substring(0, ++index));
-            if (index==content.length) {
+            changed = true;
+            if (!drawNext()) {
                 clearInterval(core.status.event.interval);
                 core.status.event.interval = null;
             }
@@ -604,82 +623,13 @@ ui.prototype.drawChoices = function(content, choices) {
 
     if (core.isset(content)) {
         // 获得name, image, icon
-        if (content.indexOf("\t[")==0 || content.indexOf("\\t[")==0) {
-            var index = content.indexOf("]");
-            if (index>=0) {
-                var str=content.substring(2, index);
-                if (content.indexOf("\\t[")==0) str=content.substring(3, index);
-                content=content.substring(index+1);
-                var ss=str.split(",");
-                if (ss.length==1) {
-                    // id
-                    id=ss[0];
-                    if (id=='hero') {
-                        name = core.status.hero.name;
-                    }
-                    else {
-                        if (core.isset(core.material.enemys[id])) {
-                            name = core.material.enemys[id].name;
-
-                            if (core.isset(core.material.icons.enemy48[id])) {
-                                image = core.material.images.enemy48;
-                                icon = core.material.icons.enemy48[id];
-                                iconHeight = 48;
-                                animate=4;
-                            }
-                            else {
-                                image = core.material.images.enemys;
-                                icon = core.material.icons.enemys[id];
-                                iconHeight = 32;
-                                animate=2;
-                            }
-                        }
-                        else {
-                            name=id;
-                            id='npc';
-                            image=null;
-                            icon=null;
-                        }
-                    }
-                }
-                else {
-                    name=ss[0];
-                    id = 'npc';
-                    if (ss[1]=='hero') {
-                        id = 'hero';
-                    }
-                    else if (core.isset(core.material.icons.npc48[ss[1]])) {
-                        image = core.material.images.npc48;
-                        icon = core.material.icons.npc48[ss[1]];
-                        iconHeight = 48;
-                        animate=4;
-                    }
-                    else if (core.isset(core.material.icons.npcs[ss[1]])){
-                        image = core.material.images.npcs;
-                        icon = core.material.icons.npcs[ss[1]];
-                        iconHeight = 32;
-                        animate=2;
-                    }
-                    else if (core.isset(core.material.icons.enemy48[ss[1]])) {
-                        image = core.material.images.enemy48;
-                        icon = core.material.icons.enemy48[ss[1]];
-                        iconHeight = 48;
-                        animate=4;
-                    }
-                    else if (core.isset(core.material.icons.enemys[ss[1]])) {
-                        image = core.material.images.enemys;
-                        icon = core.material.icons.enemys[ss[1]];
-                        iconHeight = 32;
-                        animate=2;
-                    }
-                }
-            }
-        }
-        content = core.replaceText(content);
-
+        // 获得name, image, icon
+        var info = this.getTitleAndIcon(content);
+        content = core.replaceText(info.content);
+        id=info.id; name=info.name; image=info.image;
+        icon=info.icon; iconHeight=info.iconHeight; animate=info.animate;
         if (id=='hero' || core.isset(icon))
             content_left = left+60;
-
         contents = core.splitLines('ui', content, width-(content_left-left)-10, 'bold 15px Verdana');
 
         // content部分高度
@@ -746,7 +696,8 @@ ui.prototype.drawChoices = function(content, choices) {
     // 选项
     core.canvas.ui.textAlign = "center";
     for (var i = 0; i < choices.length; i++) {
-        core.fillText('ui', core.replaceText(choices[i].text || choices[i]), 208, choice_top + 32 * i, "#FFFFFF", "bold 17px Verdana");
+        core.setFillStyle(choices[i].color || "#FFFFFF");
+        core.fillText('ui', core.replaceText(choices[i].text || choices[i]), 208, choice_top + 32 * i, null, "bold 17px Verdana");
     }
 
     if (choices.length>0) {

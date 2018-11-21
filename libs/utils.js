@@ -13,7 +13,7 @@ utils.prototype.init = function () {
 
 ////// 将文字中的${和}（表达式）进行替换 //////
 utils.prototype.replaceText = function (text) {
-    return text.replace(/\${([^}]+)}/g, function (word, value) {
+    return text.replace(/\${(.*?)}/g, function (word, value) {
         return core.calValue(value);
     });
 }

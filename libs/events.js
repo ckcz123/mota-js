@@ -1641,8 +1641,8 @@ events.prototype.openShop = function(shopId, needVisited) {
         var choice = shop.choices[i];
         var text = choice.text;
         if (core.isset(choice.need))
-            text += "（"+eval(choice.need)+use+"）"
-        choices.push(text);
+            text += "（"+eval(choice.need)+use+"）";
+        choices.push({"text": text, "color":shop.visited?null:"#999999"});
     }
     choices.push("离开");
     core.ui.drawChoices(content, choices);

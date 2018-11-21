@@ -421,7 +421,7 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
         var type = args.type;
         if (!type) return false;
         editor_blockly.id = id_;
-        codeAreaHL.setValue(input.value);
+        codeAreaHL.setValue(input.value.replace(/\\r/g,'\\\\r'));
         document.getElementById('entryType').value = type;
         editor_blockly.parse();
         editor_blockly.show();

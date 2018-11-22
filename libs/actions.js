@@ -1819,10 +1819,16 @@ actions.prototype.clickSwitchs = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 8:
-                window.open(core.platform.isPC?"editor.html":"editor-mobile.html", "_blank");
+                if (core.platform.isPC)
+                    window.open("editor.html", "_blank");
+                else
+                    window.location.href = "editor-mobile.html";
                 break;
             case 9:
-                window.open(core.firstData.name+".zip", "_blank");
+                if (core.platform.isPC)
+                    window.open(core.firstData.name+".zip");
+                else
+                    window.location.href = core.firstData.name+".zip";
                 break;
             case 10:
                 core.status.event.selection=0;

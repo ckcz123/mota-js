@@ -825,12 +825,19 @@ utils.prototype.decodeCanvas = function (arr, width, height) {
 }
 
 utils.prototype.consoleOpened = function () {
+    if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized)
+        return true;
+    var zoom = [1,1.1,1.25,1.5,1.75,2];
+    var ow = window.outerWidth, oh = window.outerHeight;
+    var iw = window.innerWidth, ih = window.innerHeight;
     var threshold = 160;
-    var widthThreshold = window.outerWidth - window.innerWidth > threshold;
-    var heightThreshold = window.outerHeight - window.innerHeight > threshold;
-    return !(heightThreshold && widthThreshold) &&
-        ((window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized)
-            || widthThreshold || heightThreshold);
+
+    for (var i in zoom) {
+        var cw = iw * zoom[i], ch = ih * zoom[i];
+        if (cw>ow-threshold && ch>oh-threshold) return false;
+        if (cw>ow-threshold || ch>oh-threshold) return true;
+    }
+    return false;
 }
 
 utils.prototype.hashCode = function (obj) {

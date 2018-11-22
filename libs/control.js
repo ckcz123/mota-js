@@ -1536,15 +1536,9 @@ control.prototype.updateDamage = function (floorId, canvas) {
             if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls.indexOf('enemy')==0
                 && !mapBlocks[b].disable) {
 
-                // 非系统默认的战斗事件（被覆盖）
-                if (mapBlocks[b].event.trigger != 'battle') {
-                    // 判断显伤
-                    var event = core.floors[floorId].events[x+","+y];
-                    if (core.isset(event) && !(event instanceof Array)) {
-                        if (event.displayDamage === false)
-                            continue;
-                    }
-                }
+                // 判定是否显伤
+                if (mapBlocks[b].event.displayDamage === false)
+                    continue;
 
                 var id = mapBlocks[b].event.id;
 

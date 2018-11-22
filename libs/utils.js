@@ -4,7 +4,7 @@ utils.js 工具类
  */
 
 function utils() {
-
+    this.init();
 }
 
 utils.prototype.init = function () {

@@ -928,19 +928,23 @@ editor_mode = function (editor) {
             }
 
             var ysize = selectAppend.value.indexOf('48') === -1 ? 32 : 48;
-            var height = editor_mode.appendPic.toImg.height;
             for (var ii = 0, v; v = editor_mode.appendPic.selectPos[ii]; ii++) {
-                var imgData = source_ctx.getImageData(v.x * 32, v.y * ysize, 32, ysize);
-                sprite_ctx.putImageData(imgData, ii * 32, height);
+                // var imgData = source_ctx.getImageData(v.x * 32, v.y * ysize, 32, ysize);
+                // sprite_ctx.putImageData(imgData, ii * 32, sprite.height - ysize);
                 // sprite_ctx.drawImage(editor_mode.appendPic.img, v.x * 32, v.y * ysize, 32, ysize,  ii * 32, height,  32, ysize)
+
+                sprite_ctx.drawImage(source_ctx.canvas, v.x*32, v.y*ysize, 32, ysize, 32*ii, sprite.height - ysize, 32, ysize);
             }
+            var dt = sprite_ctx.getImageData(0, 0, sprite.width, sprite.height);
             var imgbase64 = sprite.toDataURL().split(',')[1];
             fs.writeFile('./project/images/' + editor_mode.appendPic.imageName + '.png', imgbase64, 'base64', function (err, data) {
                 if (err) {
                     printe(err);
                     throw(err)
                 }
-                printe('追加素材成功,请F5刷新编辑器');
+                printe('追加素材成功，请F5刷新编辑器，或继续追加当前素材');
+                sprite.style.height = (sprite.height = (sprite.height+ysize)) + "px";
+                sprite_ctx.putImageData(dt, 0, 0);
             });
         }
 

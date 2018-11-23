@@ -123,27 +123,19 @@ maps.prototype.addEvent = function (block, x, y, event) {
     if (!core.isset(event.data))
         event.data = [];
 
-    // 覆盖noPass
-    if (core.isset(event.noPass))
-        block.event.noPass = event.noPass;
-
     // 覆盖enable
     if (!core.isset(block.disable) && core.isset(event.enable)) {
         block.disable=!event.enable;
     }
-    // 覆盖trigger
-    if (!core.isset(block.event.trigger)) {
-        if (core.isset(event.trigger)) block.event.trigger=event.trigger;
-        else block.event.trigger='action';
-    }
-    else if (core.isset(event.trigger) && event.trigger!='checkBlock') {
-        block.event.trigger=event.trigger;
-    }
-    // 覆盖其他属性
+    // 覆盖所有属性
     for (var key in event) {
-        if (key!="disable" && key!="trigger" && key!="noPass" && core.isset(event[key])) {
+        if (key!="enable" && core.isset(event[key])) {
             block.event[key]=core.clone(event[key]);
         }
+    }
+    // 给无trigger的增加trigger:action
+    if (!core.isset(block.event.trigger)) {
+        block.event.trigger = 'action';
     }
 }
 

@@ -1,6 +1,6 @@
 # 个性化
 
-?> 目前版本**v2.5**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.5.1**，上次更新时间：* {docsify-updated} *
 
 有时候只靠样板本身可能是不够的。我们需要一些个性化、自定义的素材，道具效果，怪物属性，等等。
 
@@ -521,6 +521,15 @@ case 89: // 使用该按键的keyCode，比如Y键就是89
 
 ## 公共事件
 
+从2.5.1开始，H5提供了`{"type":"insert"}`事件，完美支持了公共事件的写法。
+
+我们只需要将需要的公共事件放在某个角落的墙上（或者甚至单独弄一层专门摆放公共事件），并使用“插入事件”，即可进行调用。
+
+具体详见[插入另一个地点的事件](event#insert：插入另一个地点的事件)。
+
+当然，继续使用**插件**的写法也是可以的。具体参见“脚本编辑 - 插件编写”。
+
+<!--
 在RM中，存在公共事件的说法；也就是通过某个指令来调用一系列事件的触发。
 
 在H5中，我们可以使用“插件”的形式来达成这个效果。具体参见“脚本编辑 - 插件编写”。
@@ -547,50 +556,47 @@ this.myfunc = function(x) {
 然后比如我们在某个道具的使用效果 `useItemEffect` 中写 `core.plugin.myfunc(2)` 即可调用此公共事件（插件）。也可以在战后事件或自定义脚本等位置来写。
 
 通过这种，将脚本和自定义事件混用的方式，可以达到和RM中公共事件类似的效果，即一个调用触发一系列事件。
-
-<!--
-
+-->
 ## 自定义状态栏（新增显示项）
 
 在V2.2以后，我们可以自定义状态栏背景图（全塔属性 - statusLeftBackground）等等。
 
-但是，如果我们还想新增其他项目的显示，比如技能塔所需要的魔力值（气息），该怎么办？
+但是，如果我们还想新增其他项目的显示，比如攻速或者暴击，该怎么办？
 
 需要进行如下几个操作：
 
-1. 定义图标ID；比如魔力我就定义mana，气息可以简单的定义qixi；你也可以定义其他的ID，但是不能和已有的重复。这里以mana为例。
+1. 定义ID；比如攻速我就定义speed，暴击可以简单的定义baoji；你也可以定义其他的ID，但是不能和已有的重复。这里以speed为例。
 2. 在index.html的statusBar中（44行起），进行该状态栏项的定义。仿照其他几项，插在其应当显示的位置，注意替换掉相应的ID。
 ``` html
-<div class="status" id="manaCol">
-    <img id="img-mana">
-    <p class='statusLabel' id='mana'></p>
+<div class="status" id="speedCol">
+    <img id="img-speed">
+    <p class='statusLabel' id='speed'></p>
 </div>
 ```
-3. 在editor.html中的statusBar（317行起），仿照第二点同样添加；这一项如果不进行则会地图编辑器报错。editor-mobile.html同理。
-4. 使用便捷PS工具，打开icons.png，新增一行并将魔力的图标P上去；记下其索引比如24（从0开始数）。
+3. 在editor.html中的statusBar（323行起），仿照第二点同样添加；这一项如果不进行则会地图编辑器报错。editor-mobile.html同理。
+4. 使用便捷PS工具，打开icons.png，新增一行并将魔力的图标P上去；记下其索引比如30（从0开始数）。
 5. 在main.js的this.statusBar中增加图片、图标和内容的定义。
 ``` js
 this.statusBar = {
     'images': {
         // ...其他略
-        'mana': document.getElementById("img-mana"), // 图片的定义
+        'speed': document.getElementById("img-speed"), // 图片的定义
     },
     'icons': {
         // ...其他略
-        'mana': 24, // 图标的定义，这里对应的是icons.png中的索引
+        'speed': 24, // 图标的定义，这里对应的是icons.png中的索引
     },
     // ...其他略
-    'mana': document.getElementById('mana'), // 显示内容（数据）的定义
+    'speed': document.getElementById('speed'), // 显示内容（数据）的定义
 }
 ```
 6. 显示内容的设置。在脚本编辑的updateStatusBar函数，可以对该状态栏显示内容进行设置，下面是几个例子。
 ``` js
-core.statusBar.mana.innerHTML = core.getFlag('mana', 0); // 设置其显示内容为flag:mana值。
-core.statusBar.mana.innerHTML = core.getFlag('mana', 0) + '/' + core.getFlag('manaMax', 0); // 显示内容将类似 "32/60" 这样。
-core.statusBar.mana.style.fontStyle = 'normal'; // 这一行会取消斜体。如果是汉字（比如技能名）的话，斜体起来会非常难看，可以通过这一句取消。
+// 设置其显示内容为status:speed值；需要在project/data.js中firstData的hero那里新增初始值`"speed": 0`。
+core.statusBar.speed.innerHTML = core.getStatus('speed');
+// 设置其显示内容为flag:speed值，无需额外进行定义。
+core.statusBar.speed.innerHTML = core.getFlag('speed', 0);
 ```
-
--->
 
 ## 技能塔的支持
 

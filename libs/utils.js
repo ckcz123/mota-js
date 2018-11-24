@@ -4,16 +4,41 @@ utils.js 工具类
  */
 
 function utils() {
-
+    this.init();
 }
 
 utils.prototype.init = function () {
+    // 定义Object.assign
+    if (typeof Object.assign != "function") {
+        Object.assign = function(target, varArgs) { // .length of function is 2
+            if (target == null) { // TypeError if undefined or null
+                throw new TypeError('Cannot convert undefined or null to object');
+            }
+
+            var to = Object(target);
+
+            for (var index = 1; index < arguments.length; index++) {
+                var nextSource = arguments[index];
+
+                if (nextSource != null) { // Skip over if undefined or null
+                    for (var nextKey in nextSource) {
+                        // Avoid bugs when hasOwnProperty is shadowed
+                        if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+                            to[nextKey] = nextSource[nextKey];
+                        }
+                    }
+                }
+            }
+            return to;
+        };
+    }
+
 
 }
 
 ////// 将文字中的${和}（表达式）进行替换 //////
 utils.prototype.replaceText = function (text) {
-    return text.replace(/\${([^}]+)}/g, function (word, value) {
+    return text.replace(/\${(.*?)}/g, function (word, value) {
         return core.calValue(value);
     });
 }
@@ -486,8 +511,8 @@ utils.prototype.__init_seed = function () {
     rand = this.__next_rand(rand);
     rand = this.__next_rand(rand);
     rand = this.__next_rand(rand);
-    core.setFlag('seed', rand);
-    core.setFlag('rand', rand);
+    core.setFlag('__seed__', rand);
+    core.setFlag('__rand__', rand);
 }
 
 utils.prototype.__next_rand = function (_rand) {
@@ -497,9 +522,9 @@ utils.prototype.__next_rand = function (_rand) {
 }
 
 utils.prototype.rand = function (num) {
-    var rand = core.getFlag('rand');
+    var rand = core.getFlag('__rand__');
     rand = this.__next_rand(rand);
-    core.setFlag('rand', rand);
+    core.setFlag('__rand__', rand);
     var ans = rand/2147483647;
     if (core.isset(num) && num>0)
         return Math.floor(ans*num);
@@ -800,12 +825,12 @@ utils.prototype.decodeCanvas = function (arr, width, height) {
 }
 
 utils.prototype.consoleOpened = function () {
+    if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized)
+        return true;
     var threshold = 160;
-    var widthThreshold = window.outerWidth - window.innerWidth > threshold;
-    var heightThreshold = window.outerHeight - window.innerHeight > threshold;
-    return !(heightThreshold && widthThreshold) &&
-        ((window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized)
-            || widthThreshold || heightThreshold);
+    var zoom = Math.min(window.outerWidth/window.innerWidth, window.outerHeight/window.innerHeight);
+    return window.outerWidth - zoom*window.innerWidth > threshold
+        || window.outerHeight - zoom*window.innerHeight > threshold;
 }
 
 utils.prototype.hashCode = function (obj) {

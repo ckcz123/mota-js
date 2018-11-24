@@ -192,6 +192,7 @@ action
     |   show_s
     |   hide_s
     |   trigger_s
+    |   insert_s
     |   revisit_s
     |   exit_s
     |   setBlock_s
@@ -238,6 +239,7 @@ action
     |   win_s
     |   lose_s
     |   if_s
+    |   switch_s
     |   while_s
     |   break_s
     |   continue_s
@@ -477,6 +479,20 @@ helpUrl : https://ckcz123.github.io/mota-js/#/event?id=trigger%EF%BC%9A%E7%AB%8B
 default : ["0","0"]
 colour : this.eventColor
 var code = '{"type": "trigger", "loc": ['+PosString_0+','+PosString_1+']},\n';
+return code;
+*/;
+
+insert_s
+    :   '插入事件' 'x' PosString ',' 'y' PosString '楼层' IdString? Newline
+
+
+/* insert_s
+tooltip : insert: 立即插入另一个地点的事件执行，当前事件不会中断，事件坐标不会改变
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=insert%ef%bc%9a%e6%8f%92%e5%85%a5%e5%8f%a6%e4%b8%80%e4%b8%aa%e5%9c%b0%e7%82%b9%e7%9a%84%e4%ba%8b%e4%bb%b6
+default : ["0","0",""]
+colour : this.eventColor
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+var code = '{"type": "insert", "loc": ['+PosString_0+','+PosString_1+']'+IdString_0+'},\n';
 return code;
 */;
 
@@ -1236,6 +1252,33 @@ var code = ['{"type": "if", "condition": "',expression_0,'",\n',
 return code;
 */;
 
+switch_s
+    :   '多重分歧 条件判定' ':' expression BGNL? Newline switchCase+ BEND Newline
+
+
+/* switch_s
+tooltip : switch: 多重条件分歧
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=switch%EF%BC%9A%E5%A4%9A%E9%87%8D%E6%9D%A1%E4%BB%B6%E5%88%86%E6%AD%A7
+default : ["判别值"]
+colour : this.eventColor
+var code = ['{"type": "switch", "condition": "',expression_0,'", "caseList": [\n',
+    switchCase_0,
+'], },\n'].join('');
+return code;
+*/;
+
+switchCase
+    :   '如果是' expression '的场合' BGNL? Newline action+
+
+
+/* switchCase
+tooltip : 选项的选择
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=switch%EF%BC%9A%E5%A4%9A%E9%87%8D%E6%9D%A1%E4%BB%B6%E5%88%86%E6%AD%A7
+colour : this.subColor
+var code = '{"case": "'+expression_0+'", "action": [\n'+action_0+']},\n';
+return code;
+*/;
+
 choices_s
     :   '选项' ':' EvalString? BGNL? '标题' EvalString? '图像' IdString? BGNL? Newline choicesContext+ BEND Newline
 
@@ -1938,6 +1981,10 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['trigger_s'].xmlText([
         data.loc[0],data.loc[1],this.next]);
       break;
+    case "insert": // 强制插入另一个点的事件在当前事件列表执行，当前坐标和楼层不会改变
+      this.next = MotaActionBlocks['insert_s'].xmlText([
+        data.loc[0],data.loc[1],data.floorId||'',this.next]);
+      break;
     case "playSound":
       this.next = MotaActionBlocks['playSound_s'].xmlText([
         data.name,this.next]);
@@ -1982,6 +2029,15 @@ ActionParser.prototype.parseAction = function() {
         this.insertActionList(data["true"]),
         this.insertActionList(data["false"]),
         this.next]);
+      break;
+    case "switch": // 多重条件分歧
+      var case_caseList = null;
+      for(var ii=data.caseList.length-1,caseNow;caseNow=data.caseList[ii];ii--) {
+        case_caseList=MotaActionBlocks['switchCase'].xmlText([
+          this.isset(caseNow.case)?MotaActionBlocks['evalString_e'].xmlText([caseNow.case]):"值",this.insertActionList(caseNow.action),case_caseList]);
+      }
+      this.next = MotaActionBlocks['switch_s'].xmlText([
+        MotaActionBlocks['evalString_e'].xmlText([data.condition]),case_caseList,this.next]);
       break;
     case "choices": // 提供选项
       var text_choices = null;

@@ -3,6 +3,30 @@ function editor() {
     this.brushMod = "line";//["line","rectangle","tileset"]
     this.layerMod = "map";//["fgmap","map","bgmap"]
     this.isMobile = false;
+
+    window.onerror = function (msg, url, lineNo, columnNo, error) {
+        var string = msg.toLowerCase();
+        var substring = "script error";
+        var message;
+        if (string.indexOf(substring) > -1){
+            message = 'Script Error: See Browser Console for Detail';
+        } else {
+            message = [
+                'Message: ' + msg,
+                'URL: ' + url,
+                'Line: ' + lineNo,
+                'Column: ' + columnNo,
+                'Error object: ' + JSON.stringify(error)
+            ].join(' - ');
+            // alert(message);
+        }
+        try {
+            printe(message)
+        } catch (e) {
+            alert(message);
+        }
+        return false;
+    };
 }
 
 /* 
@@ -1079,19 +1103,33 @@ editor.prototype.listen = function () {
         editor.brushMod=brushMod3.value;
     }
 
+    var bgc = document.getElementById('bg'), fgc = document.getElementById('fg'),
+        evc = document.getElementById('event'), ev2c = document.getElementById('event2');
+
     var layerMod=document.getElementById('layerMod');
     layerMod.onchange=function(){
         editor.layerMod=layerMod.value;
+        [bgc,fgc,evc,ev2c].forEach(function (x) {
+            x.style.opacity = 1;
+        });
     }
 
     var layerMod2=document.getElementById('layerMod2');
     if(layerMod2)layerMod2.onchange=function(){
         editor.layerMod=layerMod2.value;
+        [fgc,evc,ev2c].forEach(function (x) {
+            x.style.opacity = 0.3;
+        });
+        bgc.style.opacity = 1;
     }
 
     var layerMod3=document.getElementById('layerMod3');
     if(layerMod3)layerMod3.onchange=function(){
         editor.layerMod=layerMod3.value;
+        [bgc,evc,ev2c].forEach(function (x) {
+            x.style.opacity = 0.3;
+        });
+        fgc.style.opacity = 1;
     }
 
     var viewportButtons=document.getElementById('viewportButtons');

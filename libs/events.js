@@ -88,8 +88,8 @@ events.prototype.startGame = function (hard, seed, route, callback) {
         core.status.isStarting = true;
 
         if (core.isset(seed)) {
-            core.setFlag('seed', seed);
-            core.setFlag('rand', seed);
+            core.setFlag('__seed__', seed);
+            core.setFlag('__rand__', seed);
         }
         else core.utils.__init_seed();
 
@@ -195,7 +195,7 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
                 'name': core.firstData.name,
                 'version': core.firstData.version,
                 'hard': core.status.hard,
-                'seed': core.getFlag('seed'),
+                'seed': core.getFlag('__seed__'),
                 'route': core.encodeRoute(core.status.route)
             }
             core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify(obj));
@@ -238,7 +238,7 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
             formData.append('experience', core.status.hero.experience);
             formData.append('steps', core.status.hero.steps);
             formData.append('norank', norank||0);
-            formData.append('seed', core.getFlag('seed'));
+            formData.append('seed', core.getFlag('__seed__'));
             formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime/1000));
             formData.append('route', core.encodeRoute(core.status.route));
             formData.append('base64', 1);
@@ -316,7 +316,7 @@ events.prototype.doEvents = function (list, x, y, callback) {
     core.status.event = {'id': 'action', 'data': {
         'list': [
             {"todo": core.clone(list), "total": core.clone(list), "condition": "false"}
-        ], 'x': x, 'y': y, 'callback': callback
+        ], 'x': x, 'y': y, 'callback': callback, 'startTime': new Date().getTime()
     }}
 
     // 停止勇士
@@ -702,12 +702,12 @@ events.prototype.doAction = function() {
         case "setFg": // 颜色渐变
             if (data.async) {
                 core.setFg(data.color, data.time);
-                core.setFlag('color', data.color||null);
+                core.setFlag('__color__', data.color||null);
                 this.doAction();
             }
             else {
                 core.setFg(data.color, data.time, function() {
-                    core.setFlag('color', data.color||null);
+                    core.setFlag('__color__', data.color||null);
                     core.events.doAction();
                 });
             }
@@ -715,8 +715,8 @@ events.prototype.doAction = function() {
         case "setWeather": // 更改天气
             core.setWeather(data.name, data.level);
             if (core.isset(data.name))
-                core.setFlag('weather', [data.name, data.level]);
-            else core.setFlag('weather', null);
+                core.setFlag('__weather__', [data.name, data.level]);
+            else core.setFlag('__weather__', null);
             this.doAction();
             break;
         case "openDoor": // 开一个门，包括暗墙
@@ -774,6 +774,15 @@ events.prototype.doAction = function() {
                 this.doAction();
                 break;
             }
+        case "insert":
+            {
+                var toX=core.calValue(data.loc[0]), toY=core.calValue(data.loc[1]);
+                var floorId = data.floorId || core.status.floorId;
+                var event = core.floors[floorId].events[toX+","+toY];
+                if (core.isset(event)) core.insertAction(event);
+                this.doAction();
+                break;
+            }
         case "playSound":
             if (!core.status.replay.replaying)
                 core.playSound(data.name);
@@ -810,7 +819,7 @@ events.prototype.doAction = function() {
                 var value=core.calValue(data.value);
                 // 属性
                 if (data.name.indexOf("status:")==0) {
-                    value=parseFloat(value);
+                    // value=parseFloat(value);
                     core.setStatus(data.name.substring(7), value);
                 }
                 // 道具
@@ -905,6 +914,16 @@ events.prototype.doAction = function() {
                 core.events.insertAction(data["true"])
             else
                 core.events.insertAction(data["false"])
+            this.doAction();
+            break;
+        case "switch": // 条件选择
+            var key = core.calValue(data.condition)
+            for (var i = 0; i < data.caseList.length; i++) {
+                if (data.caseList[i].case=="default" || core.calValue(data.caseList[i].case) == key) {
+                    core.events.insertAction(data.caseList[i].action);
+                    break;
+                }
+            }
             this.doAction();
             break;
         case "choices": // 提供选项
@@ -1326,7 +1345,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             }
 
             // 不存在事件时，更改画面色调
-            var color = core.getFlag('color', null);
+            var color = core.getFlag('__color__', null);
             if (!core.isset(color) && core.isset(core.status.maps[floorId].color)) {
                 color = core.status.maps[floorId].color;
             }
@@ -1346,7 +1365,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             }
 
             // 更改天气
-            var weather = core.getFlag('weather', null);
+            var weather = core.getFlag('__weather__', null);
             if (!core.isset(weather) && core.isset(core.status.maps[floorId].weather)) {
                 weather = core.status.maps[floorId].weather;
             }
@@ -1631,8 +1650,8 @@ events.prototype.openShop = function(shopId, needVisited) {
         var choice = shop.choices[i];
         var text = choice.text;
         if (core.isset(choice.need))
-            text += "（"+eval(choice.need)+use+"）"
-        choices.push(text);
+            text += "（"+eval(choice.need)+use+"）";
+        choices.push({"text": text, "color":shop.visited?null:"#999999"});
     }
     choices.push("离开");
     core.ui.drawChoices(content, choices);
@@ -1902,7 +1921,7 @@ events.prototype.uploadCurrent = function (username) {
     formData.append('money', core.status.hero.money);
     formData.append('experience', core.status.hero.experience);
     formData.append('steps', core.status.hero.steps);
-    formData.append('seed', core.getFlag('seed'));
+    formData.append('seed', core.getFlag('__seed__'));
     formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime/1000));
     formData.append('route', core.encodeRoute(core.status.route));
     formData.append('deler', 'current');

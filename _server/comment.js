@@ -49,28 +49,35 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "textarea",
                     "_string": true,
                     "_lint": true,
-                    "_data": "cls为items的即捡即用类物品的效果。"
+                    "_data": "即捡即用类物品的效果，仅对cls为items有效。"
                 },
                 "itemEffectTip": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_string": true,
                     "_lint": true,
-                    "_data": "cls为items的即捡即用类物品，在获得时左上角额外显示的文字。"
+                    "_data": "即捡即用类物品在获得时提示的文字，仅对cls为items有效。"
                 },
                 "useItemEffect": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_string": true,
                     "_lint": true,
-                    "_data": "cls为tools或constants时的使用物品效果。"
+                    "_data": "道具效果，仅对cls为tools或constants有效。"
                 },
                 "canUseItemEffect": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_string": true,
                     "_lint": true,
-                    "_data": "cls为tools或constants时对当前能否使用该物品的判断。"
+                    "_data": "当前能否使用该道具，仅对cls为tools或constants有效。"
+                },
+                "canEquip":{
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_string": true,
+                    "_lint": true,
+                    "_data": "当前能否装备某个装备，仅对cls为equips有效。\n与canUseItemEffect不同，这里null代表可以装备。"
                 }
             }
         },
@@ -119,54 +126,54 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "textarea",
                     "_range": "thiseval==null || thiseval instanceof Array || (thiseval==~~thiseval && thiseval>=0)",
-                    "_data": "特殊属性\n\n0:无,1:先攻,2:魔攻,3:坚固,4:2连击,\n5:3连击,6:n连击,7:破甲,8:反击,9:净化,\n10:模仿,11:吸血,12:中毒,13:衰弱,14:诅咒,\n15:领域,16:夹击,17:仇恨,18:阻击,19:自爆,\n20:无敌,21:退化,22:固伤,23:重生,24:激光\n\n多个属性例如用[1,4,11]表示先攻2连击吸血\n模仿怪的攻防设为0就好"
+                    "_data": "特殊属性\n\n0:无,1:先攻,2:魔攻,3:坚固,4:2连击,\n5:3连击,6:n连击,7:破甲,8:反击,9:净化,\n10:模仿,11:吸血,12:中毒,13:衰弱,14:诅咒,\n15:领域,16:夹击,17:仇恨,18:阻击,19:自爆,\n20:无敌,21:退化,22:固伤,23:重生,24:激光,25:光环\n\n多个属性例如用[1,4,11]表示先攻2连击吸血"
                 },
                 "value": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "特殊属性的数值\n领域怪需要加value表示领域伤害的数值\n吸血怪需要在后面添加value代表吸血比例"
+                    "_data": "特殊属性的数值\n如：领域/阻激/激光怪的伤害值；吸血怪的吸血比例；光环怪增加生命的比例"
                 },
                 "zoneSquare": {
                     "_leaf": true,
                     "_type": "checkbox",
                     "_bool": "bool",
-                    "_data": "领域怪zoneSquare代表是否九宫格伤害"
+                    "_data": "领域怪是否九宫格伤害"
                 },
                 "range": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_range": "(thiseval==~~thiseval && thiseval>0)||thiseval==null",
-                    "_data": "range可选，代表领域伤害的范围；不加默认为1"
+                    "_data": "领域伤害的范围；不加默认为1"
                 },
                 "notBomb": {
                     "_leaf": true,
                     "_type": "checkbox",
                     "_bool": "bool",
-                    "_data": "加入 \"notBomb\": true 代表该怪物不可被炸弹或圣锤炸掉"
+                    "_data": "该怪物不可被炸"
                 },
                 "n": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_range": "(thiseval==~~thiseval && thiseval>0)||thiseval==null",
-                    "_data": "多连击需要在后面指定n代表是几连击"
+                    "_data": "多连击的连击数"
                 },
                 "add": {
                     "_leaf": true,
                     "_type": "checkbox",
                     "_bool": "bool",
-                    "_data": "代表吸血后是否加到自身"
+                    "_data": "吸血后是否加到自身；光环是否叠加"
                 },
                 "atkValue": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_range": "thiseval==~~thiseval||thiseval==null",
-                    "_data": "退化时勇士下降的攻击力点数"
+                    "_data": "退化时勇士下降的攻击力点数；光环怪增加攻击的比例"
                 },
                 "defValue": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_range": "thiseval==~~thiseval||thiseval==null",
-                    "_data": "退化时勇士下降的防御力点数"
+                    "_data": "退化时勇士下降的防御力点数；光环怪增加防御的比例"
                 },
                 "damage": {
                     "_leaf": true,

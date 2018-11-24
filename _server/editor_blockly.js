@@ -108,6 +108,11 @@ editor_blockly = function () {
     ],
     '事件控制':[
       MotaActionBlocks['if_s'].xmlText(),
+      MotaActionFunctions.actionParser.parseList({"type": "switch", "condition": "判别值", "caseList": [
+        {"action": [{"type": "comment", "text": "当判别值是值的场合执行此事件"}]},
+        {"action": []},
+        {"case": "default", "action": [{"type": "comment", "text": "当没有符合的值的场合执行default事件"}]},
+      ]}),
       MotaActionBlocks['while_s'].xmlText(),
       MotaActionBlocks['break_s'].xmlText(),
       MotaActionBlocks['continue_s'].xmlText(),
@@ -121,6 +126,7 @@ editor_blockly = function () {
       MotaActionBlocks['hideBgFgMap_s'].xmlText(),
       MotaActionBlocks['setBgFgBlock_s'].xmlText(),
       MotaActionBlocks['trigger_s'].xmlText(),
+      MotaActionBlocks['insert_s'].xmlText(),
       MotaActionBlocks['move_s'].xmlText(),
       MotaActionBlocks['jump_s'].xmlText(),
       MotaActionBlocks['disableShop_s'].xmlText(),
@@ -415,7 +421,7 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
         var type = args.type;
         if (!type) return false;
         editor_blockly.id = id_;
-        codeAreaHL.setValue(input.value);
+        codeAreaHL.setValue(input.value.replace(/\\r/g,'\\\\r'));
         document.getElementById('entryType').value = type;
         editor_blockly.parse();
         editor_blockly.show();

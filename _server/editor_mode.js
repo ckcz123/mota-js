@@ -556,6 +556,90 @@ editor_mode = function (editor) {
         }
         selectAppend.onchange();
 
+        var getPixel=function(imgData, x, y) {
+            var offset = (x + y * imgData.width) * 4;
+            var r = imgData.data[offset+0];
+            var g = imgData.data[offset+1];
+            var b = imgData.data[offset+2];
+            var a = imgData.data[offset+3];
+            return [r,g,b,a];
+        }
+        var setPixel=function(imgData, x, y, rgba) {
+            var offset = (x + y * imgData.width) * 4;
+            imgData.data[offset+0]=rgba[0];
+            imgData.data[offset+1]=rgba[1];
+            imgData.data[offset+2]=rgba[2];
+            imgData.data[offset+3]=rgba[3];
+        }
+
+        var autoAdjust = function (image, callback) {
+            var changed = false;
+
+            // Step 1: 检测白底
+            var tempCanvas = document.createElement('canvas').getContext('2d');
+            tempCanvas.canvas.width = image.width;
+            tempCanvas.canvas.height = image.height;
+            tempCanvas.mozImageSmoothingEnabled = false;
+            tempCanvas.webkitImageSmoothingEnabled = false;
+            tempCanvas.msImageSmoothingEnabled = false;
+            tempCanvas.imageSmoothingEnabled = false;
+            tempCanvas.drawImage(image, 0, 0);
+            var imgData = tempCanvas.getImageData(0, 0, image.width, image.height);
+            var trans = 0, white = 0;
+            for (var i=0;i<image.width;i++) {
+                for (var j=0;j<image.height;j++) {
+                    var pixel = getPixel(imgData, i, j);
+                    if (pixel[3]==0) trans++;
+                    if (pixel[0]==255 && pixel[1]==255 && pixel[2]==255 && pixel[3]==255) white++;
+                }
+            }
+            if (white>trans*10 && confirm("看起来这张图片是以白色为底色，是否自动调整为透明底色？")) {
+                for (var i=0;i<image.width;i++) {
+                    for (var j=0;j<image.height;j++) {
+                        var pixel = getPixel(imgData, i, j);
+                        if (pixel[0]==255 && pixel[1]==255 && pixel[2]==255 && pixel[3]==255) {
+                            setPixel(imgData, i, j, [0,0,0,0]);
+                        }
+                    }
+                }
+                tempCanvas.clearRect(0, 0, image.width, image.height);
+                tempCanvas.putImageData(imgData, 0, 0);
+                changed = true;
+            }
+
+            // Step 2: 检测长宽比
+            var ysize = selectAppend.value.indexOf('48') === -1 ? 32 : 48;
+            if ((image.width%32!=0 || image.height%ysize!=0) && (image.width<=128 && image.height<=ysize*4)
+                && confirm("目标长宽不符合条件，是否自动进行调整？")) {
+                var ncanvas = document.createElement('canvas').getContext('2d');
+                ncanvas.canvas.width = 128;
+                ncanvas.canvas.height = 4*ysize;
+                ncanvas.mozImageSmoothingEnabled = false;
+                ncanvas.webkitImageSmoothingEnabled = false;
+                ncanvas.msImageSmoothingEnabled = false;
+                ncanvas.imageSmoothingEnabled = false;
+                var w = image.width / 4, h = image.height / 4;
+                for (var i=0;i<4;i++) {
+                    for (var j=0;j<4;j++) {
+                        ncanvas.drawImage(tempCanvas.canvas, i*w, j*h, w, h, i*32 + (32-w)/2, j*ysize + (ysize-h)/2, w, h);
+                    }
+                }
+                tempCanvas = ncanvas;
+                changed = true;
+            }
+
+            if (!changed) {
+                callback(image);
+            }
+            else {
+                var nimg = new Image();
+                nimg.onload = function () {
+                    callback(nimg);
+                };
+                nimg.src = tempCanvas.canvas.toDataURL();
+            }
+        }
+
         var selectFileBtn = document.getElementById('selectFileBtn');
         selectFileBtn.onclick = function () {
             var loadImage = function (content, callback) {
@@ -576,48 +660,50 @@ editor_mode = function (editor) {
             }
             core.readFile(function (content) {
                 loadImage(content, function (image) {
-                    editor_mode.appendPic.img = image;
-                    editor_mode.appendPic.width = image.width;
-                    editor_mode.appendPic.height = image.height;
+                    autoAdjust(image, function (image) {
+                        editor_mode.appendPic.img = image;
+                        editor_mode.appendPic.width = image.width;
+                        editor_mode.appendPic.height = image.height;
 
-                    if (selectAppend.value == 'autotile') {
-                        for (var ii = 0; ii < 3; ii++) {
-                            var newsprite = appendPicCanvas.children[ii];
-                            newsprite.style.width = (newsprite.width = image.width) / ratio + 'px';
-                            newsprite.style.height = (newsprite.height = image.height) / ratio + 'px';
+                        if (selectAppend.value == 'autotile') {
+                            for (var ii = 0; ii < 3; ii++) {
+                                var newsprite = appendPicCanvas.children[ii];
+                                newsprite.style.width = (newsprite.width = image.width) / ratio + 'px';
+                                newsprite.style.height = (newsprite.height = image.height) / ratio + 'px';
+                            }
+                            sprite_ctx.clearRect(0, 0, sprite.width, sprite.height);
+                            sprite_ctx.drawImage(image, 0, 0);
                         }
-                        sprite_ctx.clearRect(0, 0, sprite.width, sprite.height);
-                        sprite_ctx.drawImage(image, 0, 0);
-                    }
-                    else {
-                        var ysize = selectAppend.value.indexOf('48') === -1 ? 32 : 48;
-                        for (var ii = 0; ii < 3; ii++) {
-                            var newsprite = appendPicCanvas.children[ii];
-                            newsprite.style.width = (newsprite.width = Math.floor(image.width / 32) * 32) / ratio + 'px';
-                            newsprite.style.height = (newsprite.height = Math.floor(image.height / ysize) * ysize) / ratio + 'px';
+                        else {
+                            var ysize = selectAppend.value.indexOf('48') === -1 ? 32 : 48;
+                            for (var ii = 0; ii < 3; ii++) {
+                                var newsprite = appendPicCanvas.children[ii];
+                                newsprite.style.width = (newsprite.width = Math.floor(image.width / 32) * 32) / ratio + 'px';
+                                newsprite.style.height = (newsprite.height = Math.floor(image.height / ysize) * ysize) / ratio + 'px';
+                            }
                         }
-                    }
 
-                    //画灰白相间的格子
-                    var bgc = bg.getContext('2d');
-                    var colorA = ["#f8f8f8", "#cccccc"];
-                    var colorIndex;
-                    var sratio = 4;
-                    for (var ii = 0; ii < image.width / 32 * sratio; ii++) {
-                        colorIndex = 1 - ii % 2;
-                        for (var jj = 0; jj < image.height / 32 * sratio; jj++) {
-                            bgc.fillStyle = colorA[colorIndex];
-                            colorIndex = 1 - colorIndex;
-                            bgc.fillRect(ii * 32 / sratio, jj * 32 / sratio, 32 / sratio, 32 / sratio);
+                        //画灰白相间的格子
+                        var bgc = bg.getContext('2d');
+                        var colorA = ["#f8f8f8", "#cccccc"];
+                        var colorIndex;
+                        var sratio = 4;
+                        for (var ii = 0; ii < image.width / 32 * sratio; ii++) {
+                            colorIndex = 1 - ii % 2;
+                            for (var jj = 0; jj < image.height / 32 * sratio; jj++) {
+                                bgc.fillStyle = colorA[colorIndex];
+                                colorIndex = 1 - colorIndex;
+                                bgc.fillRect(ii * 32 / sratio, jj * 32 / sratio, 32 / sratio, 32 / sratio);
+                            }
                         }
-                    }
 
-                    //把导入的图片画出
-                    source_ctx.drawImage(image, 0, 0);
-                    editor_mode.appendPic.sourceImageData=source_ctx.getImageData(0,0,image.width,image.height);
+                        //把导入的图片画出
+                        source_ctx.drawImage(image, 0, 0);
+                        editor_mode.appendPic.sourceImageData=source_ctx.getImageData(0,0,image.width,image.height);
 
-                    //重置临时变量
-                    selectAppend.onchange();
+                        //重置临时变量
+                        selectAppend.onchange();
+                    });
                 });
             }, null, 'img');
 
@@ -630,21 +716,6 @@ editor_mode = function (editor) {
             var imgData=editor_mode.appendPic.sourceImageData;
             var nimgData=new ImageData(imgData.width,imgData.height);
             // ImageData .data 形如一维数组,依次排着每个点的 R(0~255) G(0~255) B(0~255) A(0~255)
-            var getPixel=function(imgData, x, y) {
-                var offset = (x + y * imgData.width) * 4;
-                var r = imgData.data[offset+0];
-                var g = imgData.data[offset+1];
-                var b = imgData.data[offset+2];
-                var a = imgData.data[offset+3];
-                return [r,g,b,a];
-            }
-            var setPixel=function(imgData, x, y, rgba) {
-                var offset = (x + y * imgData.width) * 4;
-                imgData.data[offset+0]=rgba[0];
-                imgData.data[offset+1]=rgba[1];
-                imgData.data[offset+2]=rgba[2];
-                imgData.data[offset+3]=rgba[3];
-            }
             var convert=function(rgba,delta){
                 var round=Math.round;
                 // rgbToHsl hue2rgb hslToRgb from https://github.com/carloscabo/colz.git
@@ -857,19 +928,23 @@ editor_mode = function (editor) {
             }
 
             var ysize = selectAppend.value.indexOf('48') === -1 ? 32 : 48;
-            var height = editor_mode.appendPic.toImg.height;
             for (var ii = 0, v; v = editor_mode.appendPic.selectPos[ii]; ii++) {
-                var imgData = source_ctx.getImageData(v.x * 32, v.y * ysize, 32, ysize);
-                sprite_ctx.putImageData(imgData, ii * 32, height);
+                // var imgData = source_ctx.getImageData(v.x * 32, v.y * ysize, 32, ysize);
+                // sprite_ctx.putImageData(imgData, ii * 32, sprite.height - ysize);
                 // sprite_ctx.drawImage(editor_mode.appendPic.img, v.x * 32, v.y * ysize, 32, ysize,  ii * 32, height,  32, ysize)
+
+                sprite_ctx.drawImage(source_ctx.canvas, v.x*32, v.y*ysize, 32, ysize, 32*ii, sprite.height - ysize, 32, ysize);
             }
+            var dt = sprite_ctx.getImageData(0, 0, sprite.width, sprite.height);
             var imgbase64 = sprite.toDataURL().split(',')[1];
             fs.writeFile('./project/images/' + editor_mode.appendPic.imageName + '.png', imgbase64, 'base64', function (err, data) {
                 if (err) {
                     printe(err);
                     throw(err)
                 }
-                printe('追加素材成功,请F5刷新编辑器');
+                printe('追加素材成功，请F5刷新编辑器，或继续追加当前素材');
+                sprite.style.height = (sprite.height = (sprite.height+ysize)) + "px";
+                sprite_ctx.putImageData(dt, 0, 0);
             });
         }
 

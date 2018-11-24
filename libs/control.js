@@ -1245,6 +1245,14 @@ control.prototype.checkBlock = function () {
         if (damage>0) {
             core.playSound('zone.mp3');
             core.drawAnimate("zone", x, y);
+
+            // 禁用快捷商店
+            if (core.flags.disableShopOnDamage) {
+                for (var shopId in core.status.shops) {
+                    core.status.shops[shopId].visited = false;
+                }
+            }
+
         }
         core.status.hero.statistics.extraDamage += damage;
 
@@ -1511,7 +1519,9 @@ control.prototype.updateDamage = function (floorId, canvas) {
         core.clearMap('damage');
     }
 
-    // if (!core.isset(core.status.thisMap) || !core.isset(core.status.thisMap.blocks)) return;
+    // 正在开始游戏中
+    if (core.status.isStarting) return;
+
     // 更新显伤
     var mapBlocks = core.status.maps[floorId].blocks;
     // 没有怪物手册
@@ -1526,15 +1536,9 @@ control.prototype.updateDamage = function (floorId, canvas) {
             if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls.indexOf('enemy')==0
                 && !mapBlocks[b].disable) {
 
-                // 非系统默认的战斗事件（被覆盖）
-                if (mapBlocks[b].event.trigger != 'battle') {
-                    // 判断显伤
-                    var event = core.floors[floorId].events[x+","+y];
-                    if (core.isset(event) && !(event instanceof Array)) {
-                        if (event.displayDamage === false)
-                            continue;
-                    }
-                }
+                // 判定是否显伤
+                if (mapBlocks[b].event.displayDamage === false)
+                    continue;
 
                 var id = mapBlocks[b].event.id;
 
@@ -1590,7 +1594,7 @@ control.prototype.updateDamage = function (floorId, canvas) {
         }
     }
     // 如果是领域&夹击
-    if (core.flags.displayExtraDamage) {
+    if (core.flags.displayExtraDamage && core.isset((core.status.checkBlock||{}).damage)) {
         canvas.textAlign = 'center';
 
         // 临时改变
@@ -1913,7 +1917,7 @@ control.prototype.replay = function () {
                 core.status.event.data = {"toolsPage":Math.floor(index/12)+1, "constantsPage":1, "selectId":null};
                 index = index%12;
             }
-            else if (index=constants.indexOf(itemId)>=0) {
+            else if ((index=constants.indexOf(itemId))>=0) {
                 core.status.event.data = {"toolsPage":1, "constantsPage":Math.floor(index/12)+1, "selectId":null};
                 index = index%12+12;    
             }
@@ -2246,7 +2250,7 @@ control.prototype.doSL = function (id, type) {
             if (data.version != core.firstData.version) {
                 // core.drawTip("存档版本不匹配");
                 if (confirm("存档版本不匹配！\n你想回放此存档的录像吗？\n可以随时停止录像播放以继续游戏。")) {
-                    core.startGame(data.hard, data.hero.flags.seed, core.decodeRoute(data.route));
+                    core.startGame(data.hard, data.hero.flags.__seed__, core.decodeRoute(data.route));
                 }
                 return;
             }
@@ -2285,7 +2289,7 @@ control.prototype.doSL = function (id, type) {
                 return;
             }
             var route = core.subarray(core.status.route, core.decodeRoute(data.route));
-            if (!core.isset(route) || data.hero.flags.seed!=core.getFlag('seed')) {
+            if (!core.isset(route) || data.hero.flags.__seed__!=core.getFlag('__seed__')) {
                 core.drawTip("无法从此存档回放录像");
                 return;
             }
@@ -2778,12 +2782,15 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     if (!core.flags.enableMoney) count--;
     if (!core.flags.enableExperience) count--;
     if (!core.flags.enableLevelUp) count--;
+    if (core.flags.levelUpLeftMode) count--;
     if (!core.flags.enableDebuff) count--;
     if (!core.flags.enableKeys) count--;
     if (!core.flags.enablePZF) count--;
     if (!core.flags.enableName) count--;
     if (!core.flags.enableMana) count--;
     if (!core.flags.enableSkill) count--;
+
+    if (count>12) alert("当前状态栏数目("+count+")大于12，请调整到不超过12以避免手机端出现显示问题。");
 
     var statusLineHeight = BASE_LINEHEIGHT * 9 / count;
     var statusLineFontSize = DEFAULT_FONT_SIZE;
@@ -3084,7 +3091,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         {
             id: 'expCol',
             rules: {
-                display: core.flags.enableExperience ? 'block': 'none'
+                display: core.flags.enableExperience && !core.flags.levelUpLeftMode ? 'block': 'none'
             }
         },
         {

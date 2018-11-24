@@ -123,27 +123,19 @@ maps.prototype.addEvent = function (block, x, y, event) {
     if (!core.isset(event.data))
         event.data = [];
 
-    // 覆盖noPass
-    if (core.isset(event.noPass))
-        block.event.noPass = event.noPass;
-
     // 覆盖enable
     if (!core.isset(block.disable) && core.isset(event.enable)) {
         block.disable=!event.enable;
     }
-    // 覆盖trigger
-    if (!core.isset(block.event.trigger)) {
-        if (core.isset(event.trigger)) block.event.trigger=event.trigger;
-        else block.event.trigger='action';
-    }
-    else if (core.isset(event.trigger) && event.trigger!='checkBlock') {
-        block.event.trigger=event.trigger;
-    }
-    // 覆盖其他属性
+    // 覆盖所有属性
     for (var key in event) {
-        if (key!="disable" && key!="trigger" && key!="noPass" && core.isset(event[key])) {
+        if (key!="enable" && core.isset(event[key])) {
             block.event[key]=core.clone(event[key]);
         }
+    }
+    // 给无trigger的增加trigger:action
+    if (!core.isset(block.event.trigger)) {
+        block.event.trigger = 'action';
     }
 }
 
@@ -386,7 +378,7 @@ maps.prototype.getBgFgMapArray = function (floorId, name) {
     var width = core.floors[floorId].width || 13;
     var height = core.floors[floorId].height || 13;
 
-    if (core.isset(core.status[name+"maps"][floorId]))
+    if (main.mode!='editor' && core.isset(core.status[name+"maps"][floorId]))
         return core.status[name+"maps"][floorId];
 
     var arr = core.clone(core.floors[floorId][name+"map"] || []);
@@ -409,18 +401,12 @@ maps.prototype.drawBgFgMap = function (floorId, canvas, name) {
     var width = core.floors[floorId].width || 13;
     var height = core.floors[floorId].height || 13;
 
-    var groundId = (core.status.maps||core.floors)[floorId].defaultGround || "ground";
-    var blockIcon = core.material.icons.terrains[groundId];
-    var blockImage = core.material.images.terrains;
-
     if (!core.isset(core.status[name+"maps"]))
         core.status[name+"maps"] = {};
 
     var arr = this.getBgFgMapArray(floorId, name);
     for (var x = 0; x < width; x++) {
         for (var y = 0; y < height; y++) {
-            if (name=='bg')
-                canvas.drawImage(blockImage, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
             if (arr[y][x]>0) {
                 var block = core.maps.initBlock(x, y, arr[y][x]);
                 if (core.isset(block.event)) {
@@ -454,9 +440,16 @@ maps.prototype.drawMap = function (mapName, callback) {
     core.removeGlobalAnimate(null, null, true);
 
     var drawBg = function(){
+        var width = core.floors[mapName].width || 13;
+        var height = core.floors[mapName].height || 13;
 
-        core.maps.drawBgFgMap(mapName, core.canvas.bg, "bg");
-        core.maps.drawBgFgMap(mapName, core.canvas.fg, "fg");
+        var groundId = (core.status.maps||core.floors)[mapName].defaultGround || "ground";
+        var blockIcon = core.material.icons.terrains[groundId];
+        for (var x = 0; x < width; x++) {
+            for (var y = 0; y < height; y++) {
+                core.canvas.bg.drawImage(core.material.images.terrains, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
+            }
+        }
 
         var images = [];
         if (core.isset(core.status.maps[mapName].images)) {
@@ -466,6 +459,7 @@ maps.prototype.drawMap = function (mapName, callback) {
             }
         }
         images.forEach(function (t) {
+            if (typeof t == 'string') t = [0,0,t];
             var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
             if (core.isset(dx) && core.isset(dy) &&
                 !core.hasFlag("floorimg_"+mapName+"_"+dx+"_"+dy) &&
@@ -496,7 +490,10 @@ maps.prototype.drawMap = function (mapName, callback) {
                         32*dx, 32*dy + image.height - 32, image.width, 32);
                 }
             }
-        })
+        });
+
+        core.maps.drawBgFgMap(mapName, core.canvas.bg, "bg");
+        core.maps.drawBgFgMap(mapName, core.canvas.fg, "fg");
 
     }
     if (main.mode=='editor'){

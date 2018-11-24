@@ -148,7 +148,7 @@ function core() {
         },
         'textAttribute': {
             'position': "center",
-            "offset": 20,
+            "offset": 0,
             "title": [255,215,0,1],
             "background": [0,0,0,0.85],
             "text": [255,255,255,1],
@@ -183,6 +183,8 @@ core.prototype.init = function (coreData, callback) {
 
     if (!core.flags.enableExperience)
         core.flags.enableLevelUp = false;
+    if (!core.flags.enableLevelUp)
+        core.flags.levelUpLeftMode = false;
     if (!core.flags.canOpenBattleAnimate) {
         core.flags.showBattleAnimateConfirm = false;
         core.flags.battleAnimate = false;
@@ -201,6 +203,11 @@ core.prototype.init = function (coreData, callback) {
     document.getElementById("startLogo").innerHTML = core.firstData.title;
     core.material.items = core.clone(core.items.getItems());
     core.material.enemys = core.clone(core.enemys.getEnemys());
+    if (main.mode == 'play') {
+        for (var enemyId in core.material.enemys) {
+            core.material.enemys[enemyId].id = enemyId;
+        }
+    }
     core.material.icons = core.icons.getIcons();
     core.material.events = core.events.getEvents();
 

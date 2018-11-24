@@ -37,6 +37,31 @@ var code = '{"type": "choices", "choices": [\n'+choicesContext_0+']}\n';
 return code;
 */;
 
+//升级 事件编辑器入口之一
+level_m
+    :   '等级提升' BGNL? Newline levelCase+ BEND
+    
+
+/* level_m
+tooltip : 升级事件
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=%e7%bb%8f%e9%aa%8c%e5%8d%87%e7%ba%a7%ef%bc%88%e8%bf%9b%e9%98%b6%2f%e5%a2%83%e7%95%8c%e5%a1%94%ef%bc%89
+var code = '[\n'+levelCase_0+']\n';
+return code;
+*/;
+
+levelCase
+    :   '需求' expression '称号' EvalString? BGNL? Newline action+
+
+
+/* levelCase
+tooltip : 升级设定
+helpUrl : https://ckcz123.github.io/mota-js/#/event?id=%e7%bb%8f%e9%aa%8c%e5%8d%87%e7%ba%a7%ef%bc%88%e8%bf%9b%e9%98%b6%2f%e5%a2%83%e7%95%8c%e5%a1%94%ef%bc%89
+default : [0,"",null]
+colour : this.subColor
+var code = '{"need": "'+expression_0+'", "title": "'+EvalString_0+'", "action": [\n'+action_0+']},\n';
+return code;
+*/;
+
 //商店 事件编辑器入口之一
 shop_m
     :   '全局商店列表' BGNL? Newline shoplist+
@@ -1678,6 +1703,15 @@ ActionParser.prototype.parse = function (obj,type) {
           choice.text,this.parseList(choice.action),text_choices]);
       }
       return MotaActionBlocks['point_m'].xmlText([text_choices]);
+
+    case 'level':
+      if(!obj)obj={};
+      var text_choices = null;
+      for(var ii=obj.length-1,choice;choice=obj[ii];ii--) {
+        text_choices=MotaActionBlocks['levelCase'].xmlText([
+          MotaActionBlocks['evalString_e'].xmlText([choice.need]),choice.title,this.parseList(choice.action),text_choices]);
+      }
+      return MotaActionBlocks['level_m'].xmlText([text_choices]);
 
     case 'shop':
       var buildsub = function(obj,parser,next){

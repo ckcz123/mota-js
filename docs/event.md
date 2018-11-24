@@ -1950,37 +1950,36 @@ core.insertAction([
 
 要经验升级，你需要先在`data.js`中的全局变量中启用。你需要将`enableExperience`启用经验，且`enableLevelUp`启用进阶。同时你也可以将`enableLv`置为true以在状态栏中显示当前等级（境界）。
 
-同时，你还需要在`data.js`中的`levelUp`来定义每一个进阶所需要的生命值，以及进阶时的效果。
+同时，你还需要在`data.js`中的`levelUp`来定义每一个进阶所需要的经验值，以及进阶时的效果。
 
 ``` js
 "levelUp": [ // 经验升级所需要的数值，是一个数组
-    {}, // 第一项为初始等级，可以简单留空，也可以写name
+    {"need": "0", "title": "", "action": []}, // 第一项为初始等级，仅title生效
 
-    // 每一个里面可以含有三个参数 need, name, effect
-    // need为所需要的经验数值，是一个正整数。请确保need所需的依次递增
-    // name为该等级的名称，也可以省略代表使用系统默认值；本项将显示在状态栏中
-    // effect为本次升级所执行的操作，可由若干项组成，由分号分开
-    // 其中每一项写法和上面的商店完全相同，同样必须是X+=Y的形式，Y是一个表达式，同样可以使用status:xxx或item:xxx代表勇士的某项数值/道具个数
-    {"need": 20, "name": "第二级", "effect": "status:hp+=2*(status:atk+status:def);status:atk+=10;status:def+=10"}, // 先将生命提升攻防和的2倍；再将攻击+10，防御+10
+    // 每一个里面可以含有三个参数 need, title, action
+    // need为所需要的经验数值，可以是个表达式。请确保need依次递增
+    // title为该等级的名称，也可以省略代表使用系统默认值；本项将显示在状态栏中
+    // action为本次升级所执行的操作，可由若干项组成
+    {"need": 20, "title": "第二级", "action": [
+		{"type": "setValue","name": "status:atk","value": "status:atk+10"}, // 攻击+10
+        {"type": "setValue","name": "status:def","value": "status:def+10"}  // 防御+10
+        ]
+    },
 
-    // effect也允许写一个function，代表本次升级将会执行的操作，比如可以显示一段提示文字，或者触发一个事件
-    {"need": 40, "effect": function () {
-        core.drawTip("恭喜升级！");
-        core.status.hero.hp *= 2;
-        core.status.hero.atk += 100;
-        core.status.hero.def += 100;
-    }},
+    // action也允许其他操作，比如可以显示一段提示文字，或者触发一个事件
+    {"need": 40, "effect": [
+        {"type": "tip", "text": "恭喜升级"}, 
+    ]
+    },
 
     // 依次往下写需要的数值即可
 ]
 ```
 
-`levelUp`是一个数组，里面分别定义了每个等级的信息。里面每一项是一个object，主要有三个参数`need`, `name`, `effect`
-- `need` 该等级所需要的经验值，是一个正整数。请确保数组中的need依次递增。
-- `name` 该等级的名称，比如“佣兵下级”等。该项可以忽略，以使用系统默认的等级。该项将显示在状态栏中。
-- `effect` 为本次等级执行的操作。它有两种写法：字符串，或函数。
-  - 如果`effect`为字符串，则和上面的全局商店的写法完全相同。可由分号分开，每一项为X+=Y的形式，X为你要修改的勇士属性/道具个数，Y为一个表达式。
-  - 如果`effect`为函数，则也允许写一个`function`，来代表本次升级将会执行的操作。
+`levelUp`是一个数组，里面分别定义了每个等级的信息。里面每一项有三个参数`need`, `title`, `effect`
+- `need` 该等级所需要的经验值，可以是个表达式。请确保数组中的need依次递增。
+- `title` 该等级的名称，比如“佣兵下级”等。该项可以忽略，以使用系统默认的等级。该项将显示在状态栏中。
+- `action` 为本次等级执行的操作。
 
 ## 开始，难度分歧，获胜与失败，多结局
 

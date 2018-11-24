@@ -2513,7 +2513,7 @@ control.prototype.getStatus = function (statusName) {
 
 ////// 获得某个等级的名称 //////
 control.prototype.getLvName = function () {
-    return ((core.firstData.levelUp||[])[core.status.hero.lv-1]||{}).name || core.status.hero.lv;
+    return ((core.firstData.levelUp||[])[core.status.hero.lv-1]||{}).title || core.status.hero.lv;
 }
 
 ////// 设置某个自定义变量或flag //////

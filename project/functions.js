@@ -817,7 +817,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 进阶
 	if (core.flags.enableLevelUp && core.status.hero.lv<core.firstData.levelUp.length) {
-		var need = core.firstData.levelUp[core.status.hero.lv].need;
+		var need = core.calValue(core.firstData.levelUp[core.status.hero.lv].need);
 		if (core.flags.levelUpLeftMode)
             core.statusBar.up.innerHTML = (need - core.getStatus('experience')) || " ";
 		else

@@ -1685,25 +1685,12 @@ events.prototype.checkLvUp = function () {
     if (!core.flags.enableLevelUp || !core.isset(core.firstData.levelUp)
         || core.status.hero.lv>=core.firstData.levelUp.length) return;
     // 计算下一个所需要的数值
-    var need=(core.firstData.levelUp[core.status.hero.lv]||{}).need;
+    var need=core.calValue((core.firstData.levelUp[core.status.hero.lv]||{}).need);
     if (!core.isset(need)) return;
     if (core.status.hero.experience>=need) {
         // 升级
         core.status.hero.lv++;
-        var effect = core.firstData.levelUp[core.status.hero.lv-1].effect;
-        if (typeof effect == "string") {
-            if (effect.indexOf("function")==0) {
-                eval("("+effect+")()");
-            }
-            else {
-                effect.split(";").forEach(function (t) {
-                    core.doEffect(t);
-                });
-            }
-        }
-        else if (effect instanceof Function) {
-            effect();
-        }
+        core.insertAction(core.firstData.levelUp[core.status.hero.lv-1].action);
         this.checkLvUp();
     }
 }

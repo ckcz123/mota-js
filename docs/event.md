@@ -1960,14 +1960,14 @@ core.insertAction([
     // need为所需要的经验数值，可以是个表达式。请确保need依次递增
     // title为该等级的名称，也可以省略代表使用系统默认值；本项将显示在状态栏中
     // action为本次升级所执行的操作，可由若干项组成
-    {"need": 20, "title": "第二级", "action": [
+    {"need": "20", "title": "第二级", "action": [
 		{"type": "setValue","name": "status:atk","value": "status:atk+10"}, // 攻击+10
         {"type": "setValue","name": "status:def","value": "status:def+10"}  // 防御+10
         ]
     },
 
     // action也允许其他操作，比如可以显示一段提示文字，或者触发一个事件
-    {"need": 40, "effect": [
+    {"need": "40", "effect": [
         {"type": "tip", "text": "恭喜升级"}, 
     ]
     },

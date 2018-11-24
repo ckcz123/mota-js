@@ -534,17 +534,17 @@ ui.prototype.drawTextBox = function(content, showAll) {
         }
 
         // get next character
-        var char = content.charAt(index++);
+        var ch = content.charAt(index++);
         // \n, \\n
-        if (char == '\n' || (char=='\\' && content.charAt(index)=='n')) {
+        if (ch == '\n' || (ch=='\\' && content.charAt(index)=='n')) {
             offsetx = content_left;
             offsety += textfont+5;
-            if (char=='\\') index++;
+            if (ch=='\\') index++;
             return drawNext();
         }
         // \r, \\r
-        if (char == '\r' || (char=='\\' && content.charAt(index)=='r')) {
-            if (char == '\\') index++;
+        if (ch == '\r' || (ch=='\\' && content.charAt(index)=='r')) {
+            if (ch == '\\') index++;
             changed = true;
             // 检查是不是 []
             var index2;
@@ -559,7 +559,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
             return drawNext();
         }
         // 检查是不是自动换行
-        var charwidth = core.canvas.ui.measureText(char).width;
+        var charwidth = core.canvas.ui.measureText(ch).width;
         if (offsetx + charwidth > content_left + validWidth) {
             index--;
             offsetx = content_left;
@@ -567,7 +567,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
             return drawNext();
         }
         // 输出
-        core.fillText('ui', char, offsetx, offsety);
+        core.fillText('ui', ch, offsetx, offsety);
         offsetx += charwidth;
         return true;
     };

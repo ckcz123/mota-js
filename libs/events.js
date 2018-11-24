@@ -919,7 +919,7 @@ events.prototype.doAction = function() {
         case "switch": // 条件选择
             var key = core.calValue(data.condition)
             for (var i = 0; i < data.caseList.length; i++) {
-                if (data.caseList[i].case=="default" || core.calValue(data.caseList[i].case) == key) {
+                if (data.caseList[i]["case"]=="default" || core.calValue(data.caseList[i]["case"]) == key) {
                     core.events.insertAction(data.caseList[i].action);
                     break;
                 }

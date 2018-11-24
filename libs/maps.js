@@ -89,7 +89,9 @@ maps.prototype.addInfo = function (block) {
             block.event.trigger = 'getItem';
         }
         if (!core.isset(block.event.noPass)) {
-            block.event.noPass = true;
+            if (block.event.cls != 'items') {
+                block.event.noPass = true;
+            }
         }
         if (!core.isset(block.event.animate)) {
             if (block.event.cls=='enemys' || block.event.cls=='npcs') {

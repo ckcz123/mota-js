@@ -462,7 +462,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     if (core.timeout.turnHeroTimeout!=null) return;
 
     // 单击瞬间移动
-    if (core.status.heroStop) {
+    if (core.status.heroStop && core.status.heroMoving==0) {
         if (stepPostfix.length<=1 && core.getFlag('clickMove', true) && core.control.tryMoveDirectly(destX, destY))
             return;
     }

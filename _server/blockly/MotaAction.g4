@@ -197,7 +197,7 @@ if (Floor_List_0!='floorId') toFloorId = Floor_List_0;
 var loc = ', "loc": ['+Number_0+', '+Number_1+']';
 if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
-Int_0 = Int_0 ?(', "time": '+Int_0):'';
+Int_0 = (Int_0!=='')  ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0 ?'':(', "portalWithoutTrigger": false');
 var code = '{"floorId": "'+toFloorId+'"'+loc+DirectionEx_List_0+Int_0+Bool_0+' }\n';
 return code;

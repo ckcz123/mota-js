@@ -25,11 +25,11 @@ main.floors.MT0=
         [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0]
     ],
     "firstArrive": [],
+    "parallelDo": "",
     "events": {},
     "changeFloor": {},
     "afterBattle": {},
     "afterGetItem": {},
     "afterOpenDoor": {},
     "cannotMove": {},
-    "upFloor": null,
 }

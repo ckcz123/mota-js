@@ -132,11 +132,10 @@ editor_file = function (editor, callback) {
         var currData=editor.currentFloorData;
         var saveStatus = document.getElementById('newMapStatus').checked;
 
-        var floorId = saveFilename;
         var title = saveStatus?currData.title:"新建楼层";
         var name = saveStatus?currData.name:"0";
-        if (/^mt\d+$/i.test(floorId)) {
-            name = floorId.substring(2);
+        if (/^mt\d+$/i.test(saveFilename)) {
+            name = saveFilename.substring(2);
             title = "主塔 "+name+" 层";
         }
         editor.currentFloorData = {
@@ -157,7 +156,7 @@ editor_file = function (editor, callback) {
             color: saveStatus?currData.color:null,
             weather: saveStatus?currData.weather:null,
             firstArrive: [],
-            parallelDo: null,
+            parallelDo: "",
             events: {},
             changeFloor: {},
             afterBattle: {},

@@ -28,7 +28,14 @@ items.prototype.getItemEffect = function(itemId, itemNum) {
     if (itemCls === 'items') {
         var ratio = parseInt(core.status.thisMap.item_ratio) || 1;
         var curr_hp = core.status.hero.hp;
-        if (itemId in this.itemEffect)eval(this.itemEffect[itemId]);
+        if (itemId in this.itemEffect) {
+            try {
+                eval(this.itemEffect[itemId]);
+            }
+            catch (e) {
+                console.log(e);
+            }
+        }
         core.status.hero.statistics.hp += core.status.hero.hp - curr_hp;
     }
     else {
@@ -42,7 +49,14 @@ items.prototype.getItemEffectTip = function(itemId) {
     // 消耗品
     if (itemCls === 'items') {
         var ratio = parseInt(core.status.thisMap.item_ratio) || 1;
-        if (itemId in this.itemEffectTip) return eval(this.itemEffectTip[itemId])||"";
+        if (itemId in this.itemEffectTip) {
+            try {
+                return eval(this.itemEffectTip[itemId])||"";
+            } catch (e) {
+                console.log(e);
+                return "";
+            }
+        }
     }
     return "";
 }

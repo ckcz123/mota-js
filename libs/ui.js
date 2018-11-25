@@ -2311,7 +2311,10 @@ ui.prototype.drawStatistics = function () {
                     if (cls[id]=='items' && id!='superPotion') {
                         var ratio = floor.item_ratio||1;
                         if (core.isset(core.items.itemEffect[id])) {
-                            eval(core.items.itemEffect[id]);
+                            try {
+                                eval(core.items.itemEffect[id]);
+                            }
+                            catch (e) {}
                         }
                         hp = core.status.hero.hp - temp.hp;
                         atk = core.status.hero.atk - temp.atk;

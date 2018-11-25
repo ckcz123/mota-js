@@ -1611,6 +1611,8 @@ core.insertAction([
 
 在脚本编辑里面提供了一个parallelDo函数，这个函数可以用来做并行处理内容。
 
+从V2.5.2开始，每层楼的楼层属性中也增加了一个parallelDo选项，可以在里面写任何脚本代码。该部分代码仅在人物在该楼层时才会被反复执行。
+
 ``` js
 "parallelDo": function (timestamp) {
 	// 并行事件处理，可以在这里写任何需要并行处理的脚本或事件
@@ -1619,6 +1621,15 @@ core.insertAction([
 
 	// 检查当前是否处于游戏开始状态
 	if (!core.isPlaying()) return;
+
+	// 执行当前楼层的并行事件处理
+	if (core.isset(core.status.floorId)) {
+		try {
+			eval(core.floors[core.status.floorId].parallelDo);
+		} catch (e) {
+			console.log(e);
+		}
+	}
 	
 	// 下面是一个并行事件开门的样例
 	/*
@@ -1643,6 +1654,22 @@ core.insertAction([
 如果要执行并行的自定义事件，请使用if+flag判断的形式，然后insertAction将自定义事件插入到事件列表中。
 
 !> 判定flag后千万别忘了将该flag清空！否则下次仍然会执行这段代码。
+
+每层楼的并行事件处理类似，只有角色在当前楼层时才会反复执行当前楼层中parallelDo部分的代码。
+
+下面是一个打怪开门的样例：（假设每打一个怪的战后事件把`flag:door`+1）
+
+``` js
+// 每层楼的并行事件处理代码样例
+if (core.getFlag("door",0)==2) {
+    // 将该flag清空
+    core.setFlag("door", 0);
+    // 开门，如果是当前层则无需写floorId
+    core.insertAction([
+        {"type":"openDoor", "loc":[0,0]}
+    ]);
+}
+```
 
 ## 加点事件
 

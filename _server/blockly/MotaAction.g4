@@ -1220,7 +1220,8 @@ win_s
 tooltip : win: 获得胜利, 该事件会显示获胜页面, 并重新游戏
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=win%EF%BC%9A%E8%8E%B7%E5%BE%97%E8%83%9C%E5%88%A9
 default : ["",false]
-var code = '{"type": "win", "reason": "'+EvalString_0+'", "norank": '+(Bool_0?1:0)+'},\n';
+Bool_0 = Bool_0?', "norank": 1':'';
+var code = '{"type": "win", "reason": "'+EvalString_0+Bool_0+'},\n';
 return code;
 */;
 

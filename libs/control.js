@@ -4,6 +4,8 @@ control.js：游戏主要逻辑控制
 寻路算法和人物行走也在此文件内
  */
 
+"use strict";
+
 function control() {
     this.init();
 }

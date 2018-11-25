@@ -2,6 +2,8 @@
  * 初始化 start
  */
 
+"use strict";
+
 function core() {
     this.material = {
         'animates': {},

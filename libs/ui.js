@@ -3,6 +3,9 @@
  * 包括：
  * 自动寻路、怪物手册、楼传器、存读档、菜单栏、NPC对话事件、等等
  */
+
+"use strict";
+
 function ui() {
     this.init();
 }

@@ -1,3 +1,5 @@
+"use strict";
+
 function items() {
     this.init();
 }

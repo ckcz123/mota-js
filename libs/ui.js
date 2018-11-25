@@ -1393,7 +1393,7 @@ ui.prototype.drawBookDetail = function (index) {
     if (index>=enemys.length) index=enemys.length-1;
 
     var enemy = enemys[index], enemyId = enemy.id;
-    var hints=core.enemys.getSpecialHint(enemy);
+    var hints=core.enemys.getSpecialHint(enemyId);
 
     if (hints.length==0)
         hints.push("该怪物无特殊属性。");

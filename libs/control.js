@@ -4,6 +4,8 @@ control.js：游戏主要逻辑控制
 寻路算法和人物行走也在此文件内
  */
 
+"use strict";
+
 function control() {
     this.init();
 }
@@ -462,7 +464,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     if (core.timeout.turnHeroTimeout!=null) return;
 
     // 单击瞬间移动
-    if (core.status.heroStop) {
+    if (core.status.heroStop && core.status.heroMoving==0) {
         if (stepPostfix.length<=1 && core.getFlag('clickMove', true) && core.control.tryMoveDirectly(destX, destY))
             return;
     }
@@ -2513,7 +2515,7 @@ control.prototype.getStatus = function (statusName) {
 
 ////// 获得某个等级的名称 //////
 control.prototype.getLvName = function () {
-    return ((core.firstData.levelUp||[])[core.status.hero.lv-1]||{}).name || core.status.hero.lv;
+    return ((core.firstData.levelUp||[])[core.status.hero.lv-1]||{}).title || core.status.hero.lv;
 }
 
 ////// 设置某个自定义变量或flag //////

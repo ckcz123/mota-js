@@ -307,6 +307,19 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_bool": "bool",
                             "_data": "该层是否不允许被浏览地图看到；如果勾上则浏览地图会跳过该层"
                         },
+                        "firstArrive": {
+                            "_leaf": true,
+                            "_type": "event",
+                            "_event": "firstArrive",
+                            "_data": "第一次到该楼层触发的事件，可以双击进入事件编辑器。"
+                        },
+                        "parallelDo": {
+                            "_leaf": true,
+                            "_type": "textarea",
+                            "_string": true,
+                            "_lint": true,
+                            "_data": "在该层楼时执行的并行事件处理。\n可以在这里写上任意需要自动执行的脚本，比如打怪自动开门等。\n详见文档-事件-并行事件处理。"
+                        },
                         "upFloor": {
                             "_leaf": true,
                             "_type": "textarea",
@@ -352,12 +365,6 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_type": "textarea",
                             "_range": "(thiseval==~~thiseval && thiseval>=0)||thiseval==null",
                             "_data": "每一层的宝石/血瓶效果，即获得宝石和血瓶时框内\"ratio\"的值。"
-                        },
-                        "firstArrive": {
-                            "_leaf": true,
-                            "_type": "event",
-                            "_event": "firstArrive",
-                            "_data": "第一次到该楼层触发的事件，可以双击进入事件编辑器。"
                         },
                         "underGround": {
                             "_leaf": true,

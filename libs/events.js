@@ -1,3 +1,5 @@
+"use strict";
+
 function events() {
     this.init();
 }
@@ -919,7 +921,7 @@ events.prototype.doAction = function() {
         case "switch": // 条件选择
             var key = core.calValue(data.condition)
             for (var i = 0; i < data.caseList.length; i++) {
-                if (data.caseList[i].case=="default" || core.calValue(data.caseList[i].case) == key) {
+                if (data.caseList[i]["case"]=="default" || core.calValue(data.caseList[i]["case"]) == key) {
                     core.events.insertAction(data.caseList[i].action);
                     break;
                 }
@@ -1685,25 +1687,12 @@ events.prototype.checkLvUp = function () {
     if (!core.flags.enableLevelUp || !core.isset(core.firstData.levelUp)
         || core.status.hero.lv>=core.firstData.levelUp.length) return;
     // 计算下一个所需要的数值
-    var need=(core.firstData.levelUp[core.status.hero.lv]||{}).need;
+    var need=core.calValue((core.firstData.levelUp[core.status.hero.lv]||{}).need);
     if (!core.isset(need)) return;
     if (core.status.hero.experience>=need) {
         // 升级
         core.status.hero.lv++;
-        var effect = core.firstData.levelUp[core.status.hero.lv-1].effect;
-        if (typeof effect == "string") {
-            if (effect.indexOf("function")==0) {
-                eval("("+effect+")()");
-            }
-            else {
-                effect.split(";").forEach(function (t) {
-                    core.doEffect(t);
-                });
-            }
-        }
-        else if (effect instanceof Function) {
-            effect();
-        }
+        core.insertAction(core.firstData.levelUp[core.status.hero.lv-1].action);
         this.checkLvUp();
     }
 }

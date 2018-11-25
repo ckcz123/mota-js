@@ -769,19 +769,7 @@ main.floors.sample1=
     ],
     "10,12": null
 },
-"afterGetItem": {
-    "10,12": null
-},
-"afterOpenDoor": {
-    "10,12": null
-},
-"cannotMove": {
-    "10,12": null
-},
-"bgmap": [
-
-],
-"fgmap": [
-
-],
+"afterGetItem": {},
+"afterOpenDoor": {},
+"cannotMove": {},
 }

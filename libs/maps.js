@@ -1,3 +1,5 @@
+"use strict";
+
 function maps() {
     this.init();
 }
@@ -89,7 +91,7 @@ maps.prototype.addInfo = function (block) {
             block.event.trigger = 'getItem';
         }
         if (!core.isset(block.event.noPass)) {
-            if (block.event.cls.indexOf("enemy")==0 || block.event.cls.indexOf("npc")==0 || block.event.cls=='terrains' || block.event.cls=='autotile') {
+            if (block.event.cls != 'items') {
                 block.event.noPass = true;
             }
         }

@@ -3,6 +3,9 @@
  * 包括：
  * 自动寻路、怪物手册、楼传器、存读档、菜单栏、NPC对话事件、等等
  */
+
+"use strict";
+
 function ui() {
     this.init();
 }
@@ -534,17 +537,17 @@ ui.prototype.drawTextBox = function(content, showAll) {
         }
 
         // get next character
-        var char = content.charAt(index++);
+        var ch = content.charAt(index++);
         // \n, \\n
-        if (char == '\n' || (char=='\\' && content.charAt(index)=='n')) {
+        if (ch == '\n' || (ch=='\\' && content.charAt(index)=='n')) {
             offsetx = content_left;
             offsety += textfont+5;
-            if (char=='\\') index++;
+            if (ch=='\\') index++;
             return drawNext();
         }
         // \r, \\r
-        if (char == '\r' || (char=='\\' && content.charAt(index)=='r')) {
-            if (char == '\\') index++;
+        if (ch == '\r' || (ch=='\\' && content.charAt(index)=='r')) {
+            if (ch == '\\') index++;
             changed = true;
             // 检查是不是 []
             var index2;
@@ -559,7 +562,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
             return drawNext();
         }
         // 检查是不是自动换行
-        var charwidth = core.canvas.ui.measureText(char).width;
+        var charwidth = core.canvas.ui.measureText(ch).width;
         if (offsetx + charwidth > content_left + validWidth) {
             index--;
             offsetx = content_left;
@@ -567,7 +570,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
             return drawNext();
         }
         // 输出
-        core.fillText('ui', char, offsetx, offsety);
+        core.fillText('ui', ch, offsetx, offsety);
         offsetx += charwidth;
         return true;
     };
@@ -1390,7 +1393,7 @@ ui.prototype.drawBookDetail = function (index) {
     if (index>=enemys.length) index=enemys.length-1;
 
     var enemy = enemys[index], enemyId = enemy.id;
-    var hints=core.enemys.getSpecialHint(enemy);
+    var hints=core.enemys.getSpecialHint(enemyId);
 
     if (hints.length==0)
         hints.push("该怪物无特殊属性。");
@@ -2311,7 +2314,10 @@ ui.prototype.drawStatistics = function () {
                     if (cls[id]=='items' && id!='superPotion') {
                         var ratio = floor.item_ratio||1;
                         if (core.isset(core.items.itemEffect[id])) {
-                            eval(core.items.itemEffect[id]);
+                            try {
+                                eval(core.items.itemEffect[id]);
+                            }
+                            catch (e) {}
                         }
                         hp = core.status.hero.hp - temp.hp;
                         atk = core.status.hero.atk - temp.atk;

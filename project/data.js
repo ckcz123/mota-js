@@ -162,15 +162,41 @@ data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			}
 		],
 		"levelUp": [
-			{},
 			{
-				"need": 20,
-				"name": "第二级",
-				"effect": "status:hp+=2*(status:atk+status:def);status:atk+=10;status:def+=10"
+				"need": "0",
+				"title": "",
+				"action": [
+					{
+						"type": "comment",
+						"text": "此处是初始等级，只需填写称号"
+					}
+				]
 			},
 			{
-				"need": 40,
-				"effect": "function () {\r\n\t\t\tcore.insertAction(\"恭喜升级！\");\r\n\t\t\tcore.status.hero.hp *= 2;\r\n\t\t\tcore.status.hero.atk += 100;\r\n\t\t\tcore.status.hero.def += 100;\r\n\t\t}"
+				"need": "20",
+				"title": "第二级",
+				"action": [
+					{
+						"type": "setValue",
+						"name": "status:atk",
+						"value": "status:atk+10"
+					},
+					{
+						"type": "setValue",
+						"name": "status:def",
+						"value": "status:def+10"
+					}
+				]
+			},
+			{
+				"need": "40",
+				"title": "",
+				"action": [
+					{
+						"type": "tip",
+						"text": "恭喜升级"
+					}
+				]
 			}
 		]
 	},

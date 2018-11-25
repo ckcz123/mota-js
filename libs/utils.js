@@ -3,6 +3,8 @@ utils.js 工具类
 
  */
 
+"use strict";
+
 function utils() {
     this.init();
 }

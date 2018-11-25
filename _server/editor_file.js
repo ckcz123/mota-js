@@ -131,10 +131,17 @@ editor_file = function (editor, callback) {
         };
         var currData=editor.currentFloorData;
         var saveStatus = document.getElementById('newMapStatus').checked;
+
+        var title = saveStatus?currData.title:"新建楼层";
+        var name = saveStatus?currData.name:"0";
+        if (/^mt\d+$/i.test(saveFilename)) {
+            name = saveFilename.substring(2);
+            title = "主塔 "+name+" 层";
+        }
         editor.currentFloorData = {
             floorId: saveFilename,
-            title: saveStatus?currData.title:"新建楼层",
-            name: saveStatus?currData.name:"0",
+            title: title,
+            name: name,
             width: parseInt(document.getElementById('newMapWidth').value),
             height: parseInt(document.getElementById('newMapHeight').value),
             canFlyTo: saveStatus?currData.canFlyTo:true,
@@ -149,6 +156,7 @@ editor_file = function (editor, callback) {
             color: saveStatus?currData.color:null,
             weather: saveStatus?currData.weather:null,
             firstArrive: [],
+            parallelDo: "",
             events: {},
             changeFloor: {},
             afterBattle: {},

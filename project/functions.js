@@ -87,9 +87,11 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
         "afterChangeFloor": function (floorId, fromLoad) {
 	// 转换楼层结束的事件
 	// floorId是切换到的楼层；fromLoad若为true则代表是从读档行为造成的楼层切换
-	if (!core.hasFlag("visited_"+floorId)) {
+	var visited = core.getFlag("__visited__", []);
+	if (visited.indexOf(floorId)===-1) {
 		core.insertAction(core.floors[floorId].firstArrive);
-		core.setFlag("visited_"+floorId, true);
+		visited.push(floorId);
+		core.setFlag("__visited__", visited);
 	}
 },
         "addPoint": function (enemy) {
@@ -817,7 +819,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 进阶
 	if (core.flags.enableLevelUp && core.status.hero.lv<core.firstData.levelUp.length) {
-		var need = core.firstData.levelUp[core.status.hero.lv].need;
+		var need = core.calValue(core.firstData.levelUp[core.status.hero.lv].need);
 		if (core.flags.levelUpLeftMode)
             core.statusBar.up.innerHTML = (need - core.getStatus('experience')) || " ";
 		else
@@ -1034,7 +1036,16 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 检查当前是否处于游戏开始状态
 	if (!core.isPlaying()) return;
-	
+
+	// 执行当前楼层的并行事件处理
+	if (core.isset(core.status.floorId)) {
+		try {
+			eval(core.floors[core.status.floorId].parallelDo);
+		} catch (e) {
+			console.log(e);
+        }
+	}
+
 	// 下面是一个并行事件开门的样例
 	/*
 	// 如果某个flag为真
@@ -1048,7 +1059,8 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 也可以写任意其他的脚本代码
 	}
 	 */
-	
+
+
 },
         "plugin": function () {
 	////// 插件编写，可以在这里写自己额外需要执行的脚本 //////

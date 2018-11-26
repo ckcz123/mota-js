@@ -1,4 +1,4 @@
-functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = 
+var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 {
     "events": {
         "initGame": function() {

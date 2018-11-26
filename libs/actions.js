@@ -1890,8 +1890,7 @@ actions.prototype.clickSettings = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 1:
-                core.status.event.selection=0;
-                core.ui.drawQuickShop();
+                core.ui.drawKeyBoard();
                 break;
             case 2:
                 core.ui.drawMaps();

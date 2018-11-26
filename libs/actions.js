@@ -1823,8 +1823,9 @@ actions.prototype.clickSwitchs = function (x,y) {
             case 8:
                 if (core.platform.isPC)
                     window.open("editor.html", "_blank");
-                else
+                else if (confirm("即将离开本塔，跳转至本塔工程页面，确认？")) {
                     window.location.href = "editor-mobile.html";
+                }
                 break;
             case 9:
                 if (core.platform.isPC)
@@ -1910,7 +1911,7 @@ actions.prototype.clickSettings = function (x,y) {
                     window.open("/score.php?name="+core.firstData.name+"&num=10", "_blank");
                 }
                 else {
-                    if (confirm("即将离开本塔，跳转至该塔评论页面，确认？")) {
+                    if (confirm("即将离开本塔，跳转至本塔评论页面，确认？")) {
                         window.location.href = "/score.php?name="+core.firstData.name+"&num=10";
                     }
                 }

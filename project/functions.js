@@ -669,6 +669,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				core.ui.closePanel();
 			});
 			break;
+		case 79: // O：查看工程
+			window.open(core.platform.isPC?"editor.html":"editor-mobile.html", "_blank");
+			break;
 		case 80: // P：查看评论
 			window.open("/score.php?name="+core.firstData.name+"&num=10", "_blank");
             break;

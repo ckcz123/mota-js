@@ -660,6 +660,18 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		case 72: // H：打开帮助页面
 			core.ui.drawHelp();
 			break;
+		case 78: // N：重新开始
+			core.status.event.selection=1;
+			core.ui.drawConfirmBox("你确定要返回标题页面吗？", function () {
+				core.ui.closePanel();
+				core.restart();
+			}, function () {
+				core.ui.closePanel();
+			});
+			break;
+		case 80: // P：查看评论
+			window.open("/score.php?name="+core.firstData.name+"&num=10", "_blank");
+            break;
 		case 49: // 快捷键1: 破
 			if (core.hasItem('pickaxe')) {
 				if (core.canUseItem('pickaxe')) {

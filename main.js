@@ -323,10 +323,6 @@ main.dom.body.onselectstart = function () {
 main.dom.data.onmousedown = function (e) {
     try {
         e.stopPropagation();
-        if(e.button==1){// 把鼠标中键绑定为ESC
-            core.keyUp(27);
-            return;
-        }
         var loc = main.core.getClickLoc(e.clientX, e.clientY);
         if (loc == null) return;
         main.core.ondown(loc);

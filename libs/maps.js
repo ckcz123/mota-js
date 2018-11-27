@@ -730,7 +730,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
     }
     var id = block.block.id;
 
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
 
     // 需要删除该块
     core.removeBlock(x,y);
@@ -829,7 +829,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
                     core.setBlock(id, nowX/32, nowY/32);
                     core.showBlock(nowX/32, nowY/32);
                 }
-                core.status.replay.animate=false;
+                // core.status.replay.animate=false;
                 if (core.isset(callback)) callback();
             }
         }
@@ -861,7 +861,7 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
     }
     var id = block.block.id;
 
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
 
     // 需要删除该块
     core.removeBlock(sx,sy);
@@ -960,7 +960,7 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
                     core.setBlock(id, ex, ey);
                     core.showBlock(ex, ey);
                 }
-                core.status.replay.animate=false;
+                // core.status.replay.animate=false;
                 if (core.isset(callback)) callback();
             }
         }
@@ -1015,7 +1015,7 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
         return;
     }
 
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
     var draw = function () {
         list.forEach(function (t) {
             core.canvas.route.drawImage(t.image, t.bx*32, t.by*t.height, 32, t.height, t.x*32, t.y*32+32-t.height, 32, t.height);
@@ -1036,7 +1036,7 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
             clearInterval(animate);
             core.clearMap('route');
             core.setOpacity('route', 1);
-            core.status.replay.animate=false;
+            // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
     }, time / 10 / core.status.replay.speed);

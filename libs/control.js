@@ -865,14 +865,14 @@ control.prototype.eventMoveHero = function(steps, time, callback) {
         'right': {'x': 1, 'y': 0}
     };
 
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
 
     var animate=window.setInterval(function() {
         var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
         if (moveSteps.length==0) {
             clearInterval(animate);
             core.drawHero(null, x, y);
-            core.status.replay.animate=false;
+            // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
         else {
@@ -905,7 +905,7 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
     time = time || 500;
     core.clearMap('ui');
     core.setAlpha('ui', 1.0);
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
 
     core.playSound('jump.mp3');
 
@@ -955,7 +955,7 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
             core.setHeroLoc('x', ex);
             core.setHeroLoc('y', ey);
             core.drawHero();
-            core.status.replay.animate=false;
+            // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
 
@@ -1491,7 +1491,7 @@ control.prototype.setFg = function(color, time, callback) {
     }
 
     var step=0;
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
     var changeAnimate = setInterval(function() {
         step++;
 
@@ -1506,7 +1506,7 @@ control.prototype.setFg = function(color, time, callback) {
         if (step>=25) {
             clearInterval(changeAnimate);
             core.status.curtainColor = color;
-            core.status.replay.animate=false;
+            // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
     }, time/25/core.status.replay.speed);

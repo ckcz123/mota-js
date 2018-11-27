@@ -1456,7 +1456,7 @@ events.prototype.animateImage = function (type, image, loc, time, keep, callback
     core.setOpacity('data', opacityVal);
     var x = core.calValue(loc[0]), y = core.calValue(loc[1]);
     core.canvas.data.drawImage(image, x, y);
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
     var animate = setInterval(function () {
         if (type=='show') opacityVal += 0.1;
         else opacityVal -= 0.1;
@@ -1467,7 +1467,7 @@ events.prototype.animateImage = function (type, image, loc, time, keep, callback
                 core.canvas.image.drawImage(image, x, y);
             core.clearMap('data');
             core.setOpacity('data', 1);
-            core.status.replay.animate=false;
+            // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
     }, time / 10);
@@ -1482,7 +1482,7 @@ events.prototype.moveImage = function (image, from, to, time, keep, callback) {
 
     if (keep) core.clearMap('image');
 
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
     var fromX = core.calValue(from[0]), fromY = core.calValue(from[1]),
         toX = core.calValue(to[0]), toY = core.calValue(to[1]);
     var step = 0;
@@ -1501,8 +1501,8 @@ events.prototype.moveImage = function (image, from, to, time, keep, callback) {
         if (step>=steps) {
             clearInterval(animate);
             core.clearMap('data');
-            core.status.replay.animate=false;
-            if (keep) core.canvas.data.drawImage(image, toX, toY);
+            // core.status.replay.animate=false;
+            if (keep) core.canvas.image.drawImage(image, toX, toY);
             if (core.isset(callback)) callback();
         }
     }, per_time);
@@ -1524,7 +1524,7 @@ events.prototype.setVolume = function (value, time, callback) {
         if (core.isset(callback)) callback();
         return;
     }
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
     var currVolume = core.musicStatus.volume;
     var step = 0;
     var fade = setInterval(function () {
@@ -1533,7 +1533,7 @@ events.prototype.setVolume = function (value, time, callback) {
         set(nowVolume);
         if (step>=32) {
             clearInterval(fade);
-            core.status.replay.animate=false;
+            // core.status.replay.animate=false;
             if (core.isset(callback))
                 callback();
         }
@@ -1548,7 +1548,7 @@ events.prototype.vibrate = function(time, callback) {
         return;
     }
 
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
 
     var addGameCanvasTranslate=function(x,y){
         for(var ii=0,canvas;canvas=core.dom.gameCanvas[ii];ii++){
@@ -1596,7 +1596,7 @@ events.prototype.vibrate = function(time, callback) {
         addGameCanvasTranslate(shake, 0);
         if(shake_duration===0) {
             clearInterval(animate);
-            core.status.replay.animate=false;
+            // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
     }, 50/3);

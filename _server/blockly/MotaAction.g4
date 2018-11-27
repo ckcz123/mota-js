@@ -331,7 +331,7 @@ autoText_s
 /* autoText_s
 tooltip : autoText：自动剧情文本,用户无法跳过自动剧情文本,大段剧情文本请添加“是否跳过剧情”的提示
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=autotext%EF%BC%9A%E8%87%AA%E5%8A%A8%E5%89%A7%E6%83%85%E6%96%87%E6%9C%AC
-default : ["小妖精","fairy","",3000,"双击方块进入多行编辑\\n自动剧情文本\\n自动剧情文本\\n自动剧情文本"]
+default : ["小妖精","fairy","",3000,"用户无法跳过自动剧情文本，大段剧情文本请添加“是否跳过剧情”的提示"]
 var title='';
 if (EvalString_0==''){
     if (IdString_0=='')title='';

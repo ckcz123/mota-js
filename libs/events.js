@@ -1480,27 +1480,31 @@ events.prototype.moveImage = function (image, from, to, time, keep, callback) {
     core.setAlpha('data', 1);
     core.setOpacity('data', 1);
 
-    if (keep) core.clearMap('image');
+    var width = image.width, height = image.height;
 
     // core.status.replay.animate=true;
     var fromX = core.calValue(from[0]), fromY = core.calValue(from[1]),
         toX = core.calValue(to[0]), toY = core.calValue(to[1]);
-    var step = 0;
+
+    if (keep) core.clearMap('image', fromX, fromY, width, height);
+
+    var step = 0, preX = fromX, preY = fromY;
     var per_time = 10, steps = parseInt(time / per_time);
     var drawImage = function () {
-        core.clearMap('data');
-        var nowX = parseInt(fromX + (toX-fromX)*step/steps);
-        var nowY = parseInt(fromY + (toY-fromY)*step/steps);
-        core.canvas.data.drawImage(image, nowX, nowY);
+        preX = parseInt(fromX + (toX-fromX)*step/steps);
+        preY = parseInt(fromY + (toY-fromY)*step/steps);
+        core.canvas.data.drawImage(image, preX, preY);
     }
 
     drawImage();
     var animate = setInterval(function () {
+        core.clearMap('data', preX, preY, width, height);
         step++;
-        drawImage();
-        if (step>=steps) {
+        if (step <= steps)
+            drawImage();
+        else {
             clearInterval(animate);
-            core.clearMap('data');
+            // score.clearMap('data');
             // core.status.replay.animate=false;
             if (keep) core.canvas.image.drawImage(image, toX, toY);
             if (core.isset(callback)) callback();

@@ -92,6 +92,12 @@ comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_string": true,
                     "_data": "名称"
                 },
+                "displayIdInBook": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_string": true,
+                    "_data": "在怪物手册中映射到的怪物ID。如果此项不为null，则在怪物手册中，将用目标ID来替换该怪物原本的ID。\n此项应被运用在同一个怪物的多朝向上。\n例如，如果想定义同一个怪物的向下和向左的行走图，则需要建立两个属性完全相同的怪物。\n但是这样会导致在怪物手册中同时存在向下和向左的两种怪物的显示。\n可以将朝向左的怪物的displayIdInBook项指定为朝向下的怪物ID，这样在怪物手册中则会归一化，只显示一个。"
+                },
                 "hp": {
                     "_leaf": true,
                     "_type": "textarea",

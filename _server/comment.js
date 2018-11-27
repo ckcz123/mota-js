@@ -341,7 +341,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_leaf": true,
                             "_type": "textarea",
                             "_range": "thiseval==null||((thiseval instanceof Array) && thiseval.length==2)",
-                            "_data": "该层上楼点，如[2,3]。\n如果此项不为null，则楼层转换时的stair:downFloor，以及楼传器的落点会被替换成该点而不是该层的下楼梯。"
+                            "_data": "该层下楼点，如[2,3]。\n如果此项不为null，则楼层转换时的stair:downFloor，以及楼传器的落点会被替换成该点而不是该层的下楼梯。"
                         },
                         "defaultGround": {
                             "_leaf": true,

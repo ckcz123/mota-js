@@ -49,6 +49,24 @@ maps.prototype.loadFloor = function (floorId, map) {
     return content;
 }
 
+////// 从ID获得数字 //////
+maps.prototype.getNumberById = function (id) {
+    for (var number in this.blocksInfo) {
+        if ((this.blocksInfo[number]||{}).id == id)
+            return parseInt(number)||0;
+    }
+    // tilesets
+    if (/^X\d+$/.test(id)) {
+        var info = core.icons.getTilesetOffset(id);
+        if (info!=null) return parseInt(id.substring(1));
+    }
+        return parseInt(id.substring(1));
+    // 特殊ID
+    if (id == 'none') return 0;
+    if (id == 'airwall') return 17;
+    return 0;
+}
+
 ////// 数字和ID的对应关系 //////
 maps.prototype.initBlock = function (x, y, id) {
     var disable=null;
@@ -741,6 +759,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
     block=block.block;
 
     var image, bx, by, height = block.event.height || 32;
+    var faceIds = {};
     if (block.event.cls == 'tileset') {
         var offset = core.icons.getTilesetOffset(block.event.id);
         if (offset==null) {
@@ -765,6 +784,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
         image = core.material.images[block.event.cls];
         bx = 0;
         by = core.material.icons[block.event.cls][block.event.id];
+        faceIds = block.event.faceIds||{};
     }
 
     var opacityVal = 1;
@@ -835,9 +855,20 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
         }
         else {
             // 移动中
+            var direction = moveSteps[0];
+            if (step == 0) {
+                // 根据faceIds修改朝向
+                var currid = faceIds[direction];
+                if (core.isset(currid)) {
+                    var tby = core.material.icons[block.event.cls][currid];
+                    if (core.isset(tby))
+                        by = tby;
+                }
+            }
+
             step++;
-            nowX+=scan[moveSteps[0]].x*2;
-            nowY+=scan[moveSteps[0]].y*2;
+            nowX+=scan[direction].x*2;
+            nowY+=scan[direction].y*2;
             core.clearMap('route', nowX-32, nowY-32, 96, 96);
             // 绘制
             core.canvas.route.drawImage(image, animateCurrent * 32, by * height, 32, height, nowX, nowY-height+32, 32, height);

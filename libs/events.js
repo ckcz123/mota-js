@@ -60,7 +60,18 @@ events.prototype.init = function () {
                 callback();
         },
         'action': function (data, core, callback) {
-            core.events.insertAction(data.event.data, data.x, data.y, callback);
+            var ev = core.clone(data.event.data), ex = data.x, ey = data.y;
+            // 检查是否需要改变朝向
+            if (ex == core.nextX() && ey == core.nextY()) {
+                var dir = {"up":"down","down":"up","left":"right","right":"left"}[core.getHeroLoc('direction')];
+                var id = data.event.id, toId = (data.event.faceIds||{})[dir];
+                if (core.isset(toId) && id!=toId) {
+                    var number = core.maps.getNumberById(toId);
+                    if (number>0)
+                        core.setBlock(number, ex, ey);
+                }
+            }
+            core.events.insertAction(ev, ex, ey, callback);
         }
     }
 }

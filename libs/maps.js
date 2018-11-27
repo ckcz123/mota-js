@@ -60,7 +60,6 @@ maps.prototype.getNumberById = function (id) {
         var info = core.icons.getTilesetOffset(id);
         if (info!=null) return parseInt(id.substring(1));
     }
-        return parseInt(id.substring(1));
     // 特殊ID
     if (id == 'none') return 0;
     if (id == 'airwall') return 17;

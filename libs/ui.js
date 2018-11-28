@@ -344,6 +344,54 @@ ui.prototype.getTitleAndIcon = function (content) {
     };
 }
 
+// 绘制选择光标
+ui.prototype.drawWindowSelector = function(x,y,w,h) {
+	var srcImage = core.material.images.images['winskin.png'];
+    var dstImage = core.canvas.ui;
+
+    // back
+    dstImage.drawImage(srcImage,130,66,28,28,x+2,y+2,w-4,h-4);
+    // corner
+    dstImage.drawImage(srcImage,128,64,2,2,x,y,2,2);
+    dstImage.drawImage(srcImage,158,64,2,2,x+w-2,y,2,2);
+    dstImage.drawImage(srcImage,128,94,2,2,x,y+h-2,2,2);
+    dstImage.drawImage(srcImage,158,94,2,2,x+w-2,y+h-2,2,2);
+    // border
+    dstImage.drawImage(srcImage,130,64,28,2,x+2,y,w-4,2);
+    dstImage.drawImage(srcImage,130,94,28,2,x+2,y+h-2,w-4,2);
+    dstImage.drawImage(srcImage,128,66,2,28,x,y+2,2,h-4);
+    dstImage.drawImage(srcImage,158,66,2,28,x+w-2,y+2,2,h-4);
+}
+
+// 绘制皮肤
+ui.prototype.drawWindowSkin = function(x,y,w,h,direction,px,py) {
+	// 仿RM窗口皮肤 ↓
+    var srcImage = core.material.images.images['winskin.png'];
+    var dstImage = core.canvas.ui;
+
+    // back
+    dstImage.drawImage(srcImage,0,0,128,128,x+1,y+1,w-2,h-2);
+    // corner
+    dstImage.drawImage(srcImage,128,0,16,16,x,y,16,16);
+    dstImage.drawImage(srcImage,176,0,16,16,x+w-16,y,16,16);
+    dstImage.drawImage(srcImage,128,48,16,16,x,y+h-16,16,16);
+    dstImage.drawImage(srcImage,176,48,16,16,x+w-16,y+h-16,16,16);
+    // border
+    dstImage.drawImage(srcImage,144,0,32,16,x+16,y,w-32,16);
+    dstImage.drawImage(srcImage,144,48,32,16,x+16,y+h-16,w-32,16);
+    dstImage.drawImage(srcImage,128,16,16,32,x,y+16,16,h-32);
+    dstImage.drawImage(srcImage,176,16,16,32,x+w-16,y+16,16,h-32);
+    // arrow
+    if(core.isset(px) && core.isset(py)){
+    	if(direction == 'up'){
+    		dstImage.drawImage(srcImage,128,96,32,32,px,y+h-3,32,32);
+    	}else if(direction == 'down') {
+    		dstImage.drawImage(srcImage,160,96,32,32,px,y-29,32,32);
+    	}
+    }
+    // 仿RM窗口皮肤 ↑
+}
+
 ////// 绘制一个对话框 //////
 ui.prototype.drawTextBox = function(content, showAll) {
 
@@ -439,49 +487,54 @@ ui.prototype.drawTextBox = function(content, showAll) {
             top = 32 * py + 32 + yoffset;
     }
 
+    var width = right - left;
+
+    core.setAlpha('ui', 0.85);
+    this.drawWindowSkin(left,top,width,height,position,px*32,py*32);
+    core.setAlpha('ui', 1);
+
     // var left = 97, top = 64, right = 416 - 2 * left, bottom = 416 - 2 * top;
     //core.setAlpha('ui', 0.85);
 
     var borderColor = main.borderColor||"#FFFFFF";
 
-    core.setAlpha('ui', textAttribute.background[3]);
-    core.setFillStyle('ui', core.arrayToRGB(textAttribute.background));
-    core.setStrokeStyle('ui', borderColor);
+    // core.setFillStyle('ui', core.arrayToRGB(textAttribute.background));
+    // core.setStrokeStyle('ui', borderColor);
 
-    core.fillRect('ui', left, top, right, height);
-    core.strokeRect('ui', left - 1, top - 1, right + 1, height + 1, borderColor, 2);
+    // core.fillRect('ui', left, top, right, height);
+    // core.strokeRect('ui', left - 1, top - 1, right + 1, height + 1, borderColor, 2);
 
-    var xoffset = 10;
+    // var xoffset = 10;
 
-    // draw triangle
-    if (position=='up' && core.isset(px) && core.isset(py)) {
-        core.canvas.ui.clearRect(32*px+xoffset, top+height-1, 32-2*xoffset, 2);
-        core.canvas.ui.beginPath();
-        core.canvas.ui.moveTo(32*px+xoffset-1, top+height-1);
-        core.canvas.ui.lineTo(32*px+16, top+height+yoffset-2);
-        core.canvas.ui.lineTo(32*px+32-xoffset+1, top+height-1);
-        core.canvas.ui.moveTo(32*px+xoffset-1, top+height-1);
-        core.canvas.ui.closePath();
-        core.canvas.ui.fill();
-        // core.canvas.ui.stroke();
-        // core.drawLine('ui', 32*px+4+1, top+height+1, 32*px + 28-1, top+height+1, core.arrayToRGB(textAttribute.background), 3);
-        core.drawLine('ui', 32*px+xoffset, top+height, 32*px+16, top+height+yoffset-2);
-        core.drawLine('ui', 32*px+32-xoffset, top+height, 32*px+16, top+height+yoffset-2);
-    }
-    if (position=='down' && core.isset(px) && core.isset(py)) {
-        core.canvas.ui.clearRect(32*px+xoffset, top-2, 32-2*xoffset, 3);
-        core.canvas.ui.beginPath();
-        core.canvas.ui.moveTo(32*px+xoffset-1, top+1);
-        core.canvas.ui.lineTo(32*px+16-1, top-yoffset+2);
-        core.canvas.ui.lineTo(32*px+32-xoffset-1, top+1);
-        core.canvas.ui.moveTo(32*px+xoffset-1, top+1);
-        core.canvas.ui.closePath();
-        core.canvas.ui.fill();
-        // core.canvas.ui.stroke();
-        // core.drawLine('ui', 32*px+4+1, top+height+1, 32*px + 28-1, top+height+1, core.arrayToRGB(textAttribute.background), 3);
-        core.drawLine('ui', 32*px+xoffset, top, 32*px+16, top-yoffset+2);
-        core.drawLine('ui', 32*px+32-xoffset, top, 32*px+16, top-yoffset+2);
-    }
+    // // draw triangle
+    // if (position=='up' && core.isset(px) && core.isset(py)) {
+    //     core.canvas.ui.clearRect(32*px+xoffset, top+height-1, 32-2*xoffset, 2);
+    //     core.canvas.ui.beginPath();
+    //     core.canvas.ui.moveTo(32*px+xoffset-1, top+height-1);
+    //     core.canvas.ui.lineTo(32*px+16, top+height+yoffset-2);
+    //     core.canvas.ui.lineTo(32*px+32-xoffset+1, top+height-1);
+    //     core.canvas.ui.moveTo(32*px+xoffset-1, top+height-1);
+    //     core.canvas.ui.closePath();
+    //     core.canvas.ui.fill();
+    //     // core.canvas.ui.stroke();
+    //     // core.drawLine('ui', 32*px+4+1, top+height+1, 32*px + 28-1, top+height+1, core.arrayToRGB(textAttribute.background), 3);
+    //     core.drawLine('ui', 32*px+xoffset, top+height, 32*px+16, top+height+yoffset-2);
+    //     core.drawLine('ui', 32*px+32-xoffset, top+height, 32*px+16, top+height+yoffset-2);
+    // }
+    // if (position=='down' && core.isset(px) && core.isset(py)) {
+    //     core.canvas.ui.clearRect(32*px+xoffset, top-2, 32-2*xoffset, 3);
+    //     core.canvas.ui.beginPath();
+    //     core.canvas.ui.moveTo(32*px+xoffset-1, top+1);
+    //     core.canvas.ui.lineTo(32*px+16-1, top-yoffset+2);
+    //     core.canvas.ui.lineTo(32*px+32-xoffset-1, top+1);
+    //     core.canvas.ui.moveTo(32*px+xoffset-1, top+1);
+    //     core.canvas.ui.closePath();
+    //     core.canvas.ui.fill();
+    //     // core.canvas.ui.stroke();
+    //     // core.drawLine('ui', 32*px+4+1, top+height+1, 32*px + 28-1, top+height+1, core.arrayToRGB(textAttribute.background), 3);
+    //     core.drawLine('ui', 32*px+xoffset, top, 32*px+16, top-yoffset+2);
+    //     core.drawLine('ui', 32*px+32-xoffset, top, 32*px+16, top-yoffset+2);
+    // }
 
 
     // 名称
@@ -646,8 +699,12 @@ ui.prototype.drawChoices = function(content, choices) {
 
     var borderColor = main.borderColor||"#FFFFFF";
 
-    core.fillRect('ui', left, top, width, height, background);
-    core.strokeRect('ui', left - 1, top - 1, width + 1, height + 1, borderColor, 2);
+    core.setAlpha('ui', 0.85);
+    this.drawWindowSkin(left,top,width,height);
+    core.setAlpha('ui', 1);
+
+    // core.fillRect('ui', left, top, width, height, background);
+    // core.strokeRect('ui', left - 1, top - 1, width + 1, height + 1, borderColor, 2);
 
     // 如果有内容
     if (core.isset(contents)) {
@@ -708,7 +765,8 @@ ui.prototype.drawChoices = function(content, choices) {
         while (core.status.event.selection<0) core.status.event.selection+=choices.length;
         while (core.status.event.selection>=choices.length) core.status.event.selection-=choices.length;
         var len = core.canvas.ui.measureText(core.replaceText(choices[core.status.event.selection].text || choices[core.status.event.selection])).width;
-        core.strokeRect('ui', 208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28, "#FFD700", 2);
+        // core.strokeRect('ui', 208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28, "#FFD700", 2);
+        this.drawWindowSelector(208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28);
     }
     return;
 }

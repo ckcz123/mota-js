@@ -29,7 +29,6 @@ function core() {
         'onDownInterval': null,
     }
     this.animateFrame = {
-        'background': null,
         'globalAnimate': false,
         'globalTime': null,
         'boxTime': null,
@@ -309,6 +308,9 @@ core.prototype.init = function (coreData, callback) {
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
 
     core.material.ground = new Image();
+    core.material.ground.onload = function () {
+        core.material.groundPattern = core.canvas.ui.createPattern(core.material.ground, "repeat");
+    }
     core.material.ground.src = "project/images/ground.png";
 
     core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');

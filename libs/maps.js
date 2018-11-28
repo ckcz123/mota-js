@@ -1263,7 +1263,7 @@ maps.prototype.drawBoxAnimate = function () {
         var obj = core.status.boxAnimateObjs[a];
         obj.status = ((obj.status||0)+1)%obj.animate;
         core.clearMap('ui', obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight);
-        core.fillRect('ui', obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight, core.animateFrame.background);
+        core.fillRect('ui', obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight, core.material.groundPattern);
         core.canvas.ui.drawImage(obj.image, obj.status * 32, obj.pos,
             32, obj.height, obj.x, obj.y, 32, obj.height);
     }

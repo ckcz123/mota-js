@@ -417,6 +417,12 @@ events.prototype.doAction = function() {
                     if (data[t].length==3) data[t].push(1);
                     core.status.textAttribute[t]=data[t];
                 }
+                if (t=='background' && core.isset(data[t])) {
+                    var img = core.material.images.images[data[t]];
+                    if (core.isset(img) && img.width==192 && img.height==128) {
+                        core.status.textAttribute[t]=data[t];
+                    }
+                }
             });
             core.setFlag('textAttribute', core.status.textAttribute);
             core.events.doAction();

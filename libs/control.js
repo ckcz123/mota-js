@@ -45,7 +45,6 @@ control.prototype.setRequestAnimationFrame = function () {
     }());
 
     core.animateFrame.speed = core.values.animateSpeed;
-    core.animateFrame.background = core.canvas.ui.createPattern(core.material.ground, "repeat");
 
     var scan = {
         'up': {'x': 0, 'y': -1},

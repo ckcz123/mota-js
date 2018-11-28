@@ -345,51 +345,54 @@ ui.prototype.getTitleAndIcon = function (content) {
 }
 
 // 绘制选择光标
-ui.prototype.drawWindowSelector = function(x,y,w,h) {
-	var srcImage = core.material.images.images['winskin.png'];
-    var dstImage = core.canvas.ui;
+ui.prototype.drawWindowSelector = function(background,canvas,x,y,w,h) {
+    var dstImage = core.canvas[canvas];
 
     // back
-    dstImage.drawImage(srcImage,130,66,28,28,x+2,y+2,w-4,h-4);
+    dstImage.drawImage(background,130,66,28,28,x+2,y+2,w-4,h-4);
     // corner
-    dstImage.drawImage(srcImage,128,64,2,2,x,y,2,2);
-    dstImage.drawImage(srcImage,158,64,2,2,x+w-2,y,2,2);
-    dstImage.drawImage(srcImage,128,94,2,2,x,y+h-2,2,2);
-    dstImage.drawImage(srcImage,158,94,2,2,x+w-2,y+h-2,2,2);
+    dstImage.drawImage(background,128,64,2,2,x,y,2,2);
+    dstImage.drawImage(background,158,64,2,2,x+w-2,y,2,2);
+    dstImage.drawImage(background,128,94,2,2,x,y+h-2,2,2);
+    dstImage.drawImage(background,158,94,2,2,x+w-2,y+h-2,2,2);
     // border
-    dstImage.drawImage(srcImage,130,64,28,2,x+2,y,w-4,2);
-    dstImage.drawImage(srcImage,130,94,28,2,x+2,y+h-2,w-4,2);
-    dstImage.drawImage(srcImage,128,66,2,28,x,y+2,2,h-4);
-    dstImage.drawImage(srcImage,158,66,2,28,x+w-2,y+2,2,h-4);
+    dstImage.drawImage(background,130,64,28,2,x+2,y,w-4,2);
+    dstImage.drawImage(background,130,94,28,2,x+2,y+h-2,w-4,2);
+    dstImage.drawImage(background,128,66,2,28,x,y+2,2,h-4);
+    dstImage.drawImage(background,158,66,2,28,x+w-2,y+2,2,h-4);
 }
 
 // 绘制皮肤
-ui.prototype.drawWindowSkin = function(x,y,w,h,direction,px,py) {
+ui.prototype.drawWindowSkin = function(background,canvas,x,y,w,h,direction,px,py) {
 	// 仿RM窗口皮肤 ↓
-    var srcImage = core.material.images.images['winskin.png'];
-    var dstImage = core.canvas.ui;
+    var dstImage = core.canvas[canvas];
 
     // back
-    dstImage.drawImage(srcImage,0,0,128,128,x+1,y+1,w-2,h-2);
+    dstImage.drawImage(background,0,0,128,128,x+1,y+1,w-2,h-2);
     // corner
-    dstImage.drawImage(srcImage,128,0,16,16,x,y,16,16);
-    dstImage.drawImage(srcImage,176,0,16,16,x+w-16,y,16,16);
-    dstImage.drawImage(srcImage,128,48,16,16,x,y+h-16,16,16);
-    dstImage.drawImage(srcImage,176,48,16,16,x+w-16,y+h-16,16,16);
+    dstImage.drawImage(background,128,0,16,16,x,y,16,16);
+    dstImage.drawImage(background,176,0,16,16,x+w-16,y,16,16);
+    dstImage.drawImage(background,128,48,16,16,x,y+h-16,16,16);
+    dstImage.drawImage(background,176,48,16,16,x+w-16,y+h-16,16,16);
     // border
-    dstImage.drawImage(srcImage,144,0,32,16,x+16,y,w-32,16);
-    dstImage.drawImage(srcImage,144,48,32,16,x+16,y+h-16,w-32,16);
-    dstImage.drawImage(srcImage,128,16,16,32,x,y+16,16,h-32);
-    dstImage.drawImage(srcImage,176,16,16,32,x+w-16,y+16,16,h-32);
+    dstImage.drawImage(background,144,0,32,16,x+16,y,w-32,16);
+    dstImage.drawImage(background,144,48,32,16,x+16,y+h-16,w-32,16);
+    dstImage.drawImage(background,128,16,16,32,x,y+16,16,h-32);
+    dstImage.drawImage(background,176,16,16,32,x+w-16,y+16,16,h-32);
     // arrow
     if(core.isset(px) && core.isset(py)){
     	if(direction == 'up'){
-    		dstImage.drawImage(srcImage,128,96,32,32,px,y+h-3,32,32);
+    		dstImage.drawImage(background,128,96,32,32,px,y+h-3,32,32);
     	}else if(direction == 'down') {
-    		dstImage.drawImage(srcImage,160,96,32,32,px,y-29,32,32);
+    		dstImage.drawImage(background,160,96,32,32,px,y-29,32,32);
     	}
     }
     // 仿RM窗口皮肤 ↑
+}
+
+// 绘制纯色的背景框
+ui.prototype.drawPureBackground = function (background,canvas,borderColor,x,y,w,h,direction,px,py) {
+
 }
 
 ////// 绘制一个对话框 //////
@@ -414,6 +417,14 @@ ui.prototype.drawTextBox = function(content, showAll) {
     var titlefont = textAttribute.titlefont || 22;
     var textfont = textAttribute.textfont || 16;
     var offset = textAttribute.offset || 0;
+
+    var background = core.status.textAttribute.background;
+    var isWindowSkin = false;
+    if (typeof background == 'string') {
+        background = core.material.images.images[background];
+        if (core.isset(background) && background.width==192 && background.height==128) isWindowSkin = true;
+        else background = core.initStatus.textAttribute.background;
+    }
 
     var position = textAttribute.position, px=null, py=null, ydelta=iconHeight-32;
     if (content.indexOf("\b[")==0 || content.indexOf("\\b[")==0) {
@@ -449,13 +460,10 @@ ui.prototype.drawTextBox = function(content, showAll) {
 
     content = core.replaceText(content);
 
-    var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
     core.status.boxAnimateObjs = [];
     core.clearMap('ui');
 
-    // var contents = content.split('\n');
-    // var contents = core.splitLines('ui', content, );
-    var left=7, right=416-2*left;
+    var left=7, right=416-2*left, width = right-left;
     var content_left = left + 25;
     if (id=='hero' || core.isset(icon)) content_left=left+63;
 
@@ -553,7 +561,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
             core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, heroHeight+2, borderColor, 2);
             core.fillText('ui', name, content_left, top + 30, null, 'bold '+titlefont+'px Verdana');
             core.clearMap('ui', left + 15, top + 40, 32, heroHeight);
-            core.fillRect('ui', left + 15, top + 40, 32, heroHeight, background);
+            core.fillRect('ui', left + 15, top + 40, 32, heroHeight, core.material.groundPattern);
             var heroIcon = core.material.icons.hero['down'];
             core.canvas.ui.drawImage(core.material.images.hero, heroIcon.stop * 32, heroIcon.loc * heroHeight, 32, heroHeight, left+15, top+40, 32, heroHeight);
         }
@@ -648,11 +656,14 @@ ui.prototype.drawChoices = function(content, choices) {
 
     choices = choices || [];
 
-    var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
-
-    core.clearMap('ui');
-    core.setAlpha('ui', 1);
-    core.setFillStyle('ui', background);
+    var background = core.status.textAttribute.background;
+    var isWindowSkin = false;
+    if (typeof background == 'string') {
+        background = core.material.images.images[background];
+        if (core.isset(background) && background.width==192 && background.height==128) isWindowSkin = true;
+        else background = core.initStatus.textAttribute.background;
+    }
+    var borderColor = main.borderColor || "#FFFFFF";
 
     core.status.event.ui = {"text": content, "choices": choices};
 
@@ -697,14 +708,17 @@ ui.prototype.drawChoices = function(content, choices) {
     }
     var top = bottom-height;
 
-    var borderColor = main.borderColor||"#FFFFFF";
-
-    core.setAlpha('ui', 0.85);
-    this.drawWindowSkin(left,top,width,height);
+    core.clearMap('ui');
+    if (isWindowSkin) {
+        core.setAlpha('ui', 0.85);
+        this.drawWindowSkin(background,'ui',left,top,width,height);
+    }
+    else {
+        core.setAlpha('ui', background[3]);
+        core.fillRect('ui', left, top, width, height, core.arrayToRGB(background));
+        core.strokeRect('ui', left - 1, top - 1, width + 1, height + 1, borderColor, 2);
+    }
     core.setAlpha('ui', 1);
-
-    // core.fillRect('ui', left, top, width, height, background);
-    // core.strokeRect('ui', left - 1, top - 1, width + 1, height + 1, borderColor, 2);
 
     // 如果有内容
     if (core.isset(contents)) {
@@ -726,7 +740,7 @@ ui.prototype.drawChoices = function(content, choices) {
                 core.strokeRect('ui', left + 15 - 1, top + 30 - 1, 34, heroHeight+2, '#DDDDDD', 2);
                 core.fillText('ui', name, title_offset, top + 27, '#FFD700', 'bold 19px Verdana');
                 core.clearMap('ui', left + 15, top + 30, 32, heroHeight);
-                core.fillRect('ui', left + 15, top + 30, 32, heroHeight, background);
+                core.fillRect('ui', left + 15, top + 30, 32, heroHeight, core.material.groundPattern);
                 var heroIcon = core.material.icons.hero['down'];
                 core.canvas.ui.drawImage(core.material.images.hero, heroIcon.stop * 32, heroIcon.loc *heroHeight, 32, heroHeight, left+15, top+30, 32, heroHeight);
             }
@@ -765,8 +779,10 @@ ui.prototype.drawChoices = function(content, choices) {
         while (core.status.event.selection<0) core.status.event.selection+=choices.length;
         while (core.status.event.selection>=choices.length) core.status.event.selection-=choices.length;
         var len = core.canvas.ui.measureText(core.replaceText(choices[core.status.event.selection].text || choices[core.status.event.selection])).width;
-        // core.strokeRect('ui', 208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28, "#FFD700", 2);
-        this.drawWindowSelector(208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28);
+        if (isWindowSkin)
+            this.drawWindowSelector(background, 'ui' ,208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28);
+        else
+            core.strokeRect('ui', 208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28, "#FFD700", 2);
     }
     return;
 }
@@ -782,10 +798,9 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     if (!core.isset(core.status.event.selection) || core.status.event.selection>1) core.status.event.selection=1;
     if (core.status.event.selection<0) core.status.event.selection=0;
 
-    var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
     core.clearMap('ui');
     core.setAlpha('ui', 1);
-    core.setFillStyle('ui', background);
+    core.setFillStyle('ui', core.material.groundPattern);
     core.setFont('ui', "bold 19px Verdana");
 
     var contents = text.split('\n');
@@ -802,7 +817,7 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     var borderColor = main.borderColor||"#FFFFFF";
 
     if (core.isPlaying())
-        core.fillRect('ui', left, top, right, bottom, background);
+        core.fillRect('ui', left, top, right, bottom, core.material.groundPattern);
     if (core.isPlaying())
         core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, borderColor, 2);
     core.canvas.ui.textAlign = "center";
@@ -935,13 +950,9 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
     var specialTexts = core.enemys.getSpecialText(monsterId);
 
-    var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
-
     core.clearMap('ui');
     var left=10, right=416-2*left;
 
-
-    // var lines = core.flags.enableExperience?5:4;
     var lines = 3;
     if (core.flags.enableMDef || core.flags.enableMoney || core.flags.enableExperience) lines=4;
     if (core.flags.enableMoney && core.flags.enableExperience) lines=5;
@@ -992,7 +1003,7 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
     // 图标
     core.clearMap('ui', left + margin, top + margin, boxWidth, heroHeight+boxWidth-32);
-    core.fillRect('ui', left + margin, top + margin, boxWidth, heroHeight+boxWidth-32, background);
+    core.fillRect('ui', left + margin, top + margin, boxWidth, heroHeight+boxWidth-32, core.material.groundPattern);
     var heroIcon = core.material.icons.hero['down'];
     core.canvas.ui.drawImage(core.material.images.hero, heroIcon.stop * 32, heroIcon.loc *heroHeight, 32, heroHeight, left+margin+(boxWidth-32)/2, top+margin+(boxWidth-32)/2, 32, heroHeight);
     // 怪物的
@@ -1185,10 +1196,9 @@ ui.prototype.drawWaiting = function(text) {
     core.lockControl();
     core.status.event.id = 'waiting';
 
-    var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
     core.clearMap('ui');
     core.setAlpha('ui', 1);
-    core.setFillStyle('ui', background);
+    core.setFillStyle('ui', core.material.groundPattern);
 
     core.setFont('ui', 'bold 17px Verdana');
     var text_length = core.canvas.ui.measureText(text).width;
@@ -1196,7 +1206,7 @@ ui.prototype.drawWaiting = function(text) {
     var right = Math.max(text_length+50, 220);
     var left = 208-parseInt(right/2), top = 208 - 32 - 16, bottom = 416 - 2 * top;
 
-    core.fillRect('ui', left, top, right, bottom, background);
+    core.fillRect('ui', left, top, right, bottom);
     core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
 
     core.canvas.ui.textAlign = "center";
@@ -1295,7 +1305,6 @@ ui.prototype.drawCursor = function () {
 ////// 绘制怪物手册 //////
 ui.prototype.drawBook = function (index) {
     var enemys = core.enemys.getCurrentEnemys(core.floorIds[(core.status.event.selection||{}).index]);
-    var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
 
     clearInterval(core.interval.tipAnimate);
     core.clearMap('data');
@@ -1303,7 +1312,7 @@ ui.prototype.drawBook = function (index) {
 
     core.clearMap('ui');
     core.setAlpha('ui', 1);
-    core.setFillStyle('ui', background);
+    core.setFillStyle('ui', core.material.groundPattern);
     core.fillRect('ui', 0, 0, 416, 416);
 
     core.setAlpha('ui', 0.6);
@@ -2264,8 +2273,7 @@ ui.prototype.drawKeyBoard = function () {
     core.clearMap('ui');
 
     var left = 16, top = 48, right = 416 - 2 * left, bottom = 416 - 2 * top;
-    var background = core.canvas.ui.createPattern(core.material.ground, "repeat");
-    core.fillRect('ui', left, top, right, bottom, background);
+    core.fillRect('ui', left, top, right, bottom, core.material.groundPattern);
     core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
 
     core.canvas.ui.textAlign = "center";

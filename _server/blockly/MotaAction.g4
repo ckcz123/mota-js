@@ -371,8 +371,15 @@ if (EvalString_2) {
   EvalString_2 = ', "text": ['+EvalString_2+']';
 }
 if (EvalString_3) {
-  if (!colorRe.test(EvalString_3))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  EvalString_3 = ', "background": ['+EvalString_3+']';
+  if (colorRe.test(EvalString_3)) {
+    EvalString_3 = ', "background": ['+EvalString_3+']';
+  }
+  else if (/^\w+\.png$/.test(EvalString_3)) {
+    EvalString_3 = ', "background": "'+EvalString_3+'"';
+  }
+  else {
+    throw new Error('背景格式错误,必须是形如0~255,0~255,0~255,0~1的颜色，或一个WindowSkin的png图片名称');
+  }
 }
 if (EvalString_4) {
   if (!/^\d+$/.test(EvalString_4))throw new Error('字体大小必须是整数或不填');
@@ -1805,7 +1812,8 @@ ActionParser.prototype.parseAction = function() {
       var setTextfunc = function(a){return a?JSON.stringify(a).slice(1,-1):null;}
       data.title=setTextfunc(data.title);
       data.text=setTextfunc(data.text);
-      data.background=setTextfunc(data.background);
+      if (!/^\w+\.png$/.test(data.background))
+        data.background=setTextfunc(data.background);
       this.next = MotaActionBlocks['setText_s'].xmlText([
         data.position,data.offset,data.title,data.text,data.background,data.bold,data.titlefont,data.textfont,data.time,this.next]);
       break;

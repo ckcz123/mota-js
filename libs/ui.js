@@ -473,7 +473,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
     var content_left = left + 25;
     if (id=='hero' || core.isset(icon)) content_left=left+63;
 
-    var validWidth = right-(content_left-left)-13;
+    var validWidth = right-content_left - 10;
     var font = textfont + 'px Verdana';
     if (textAttribute.bold) font = "bold "+font;
     var realContent = content.replace(/(\r|\\r)(\[.*?])?/g, "");

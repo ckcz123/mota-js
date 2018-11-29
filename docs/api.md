@@ -1,6 +1,6 @@
 # 附录: API列表
 
-?> 目前版本**v2.5.1**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.5.2**，上次更新时间：* {docsify-updated} *
 
 **这里只列出所有可能会被造塔者用到的常用API，更多的有关内容请在代码内进行查询。**
 
@@ -439,6 +439,10 @@ loader.js将主要用来进行资源的加载，比如加载音乐、图片、�
 maps.js主要用来进行地图相关的的操作。包括绘制地图，获取地图上的点等等。
 
 
+core.maps.getNumberById(id)
+根据ID来获得对应的数字。如果该ID不存在对应的数字则返回0。
+
+
 core.maps.canMoveHero(x,y,direction,floorId)
 判断能否前往某个方向。x,y为坐标，可忽略为当前点；direction为方向，可忽略为当前方向。
 floorId为楼层ID，可忽略为当前楼层。
@@ -502,6 +506,10 @@ core.utils.clamp(x, a, b)
 
 core.utils.arrayToRGB(color)
 将形如[255,0,0]之类的数组转成#FF0000这样的RGB形式。
+
+
+core.utils.arrayToRGBA(color)
+将形如[255,0,0,1]之类的数组转成rgba(255,0,0,1)这样的RGBA形式。
 
 
 core.utils.encodeRoute(list)

@@ -331,7 +331,7 @@ autoText_s
 /* autoText_s
 tooltip : autoText：自动剧情文本,用户无法跳过自动剧情文本,大段剧情文本请添加“是否跳过剧情”的提示
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=autotext%EF%BC%9A%E8%87%AA%E5%8A%A8%E5%89%A7%E6%83%85%E6%96%87%E6%9C%AC
-default : ["小妖精","fairy","",3000,"双击方块进入多行编辑\\n自动剧情文本\\n自动剧情文本\\n自动剧情文本"]
+default : ["小妖精","fairy","",3000,"用户无法跳过自动剧情文本，大段剧情文本请添加“是否跳过剧情”的提示"]
 var title='';
 if (EvalString_0==''){
     if (IdString_0=='')title='';
@@ -371,8 +371,15 @@ if (EvalString_2) {
   EvalString_2 = ', "text": ['+EvalString_2+']';
 }
 if (EvalString_3) {
-  if (!colorRe.test(EvalString_3))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  EvalString_3 = ', "background": ['+EvalString_3+']';
+  if (colorRe.test(EvalString_3)) {
+    EvalString_3 = ', "background": ['+EvalString_3+']';
+  }
+  else if (/^\w+\.png$/.test(EvalString_3)) {
+    EvalString_3 = ', "background": "'+EvalString_3+'"';
+  }
+  else {
+    throw new Error('背景格式错误,必须是形如0~255,0~255,0~255,0~1的颜色，或一个WindowSkin的png图片名称');
+  }
 }
 if (EvalString_4) {
   if (!/^\d+$/.test(EvalString_4))throw new Error('字体大小必须是整数或不填');
@@ -1805,7 +1812,8 @@ ActionParser.prototype.parseAction = function() {
       var setTextfunc = function(a){return a?JSON.stringify(a).slice(1,-1):null;}
       data.title=setTextfunc(data.title);
       data.text=setTextfunc(data.text);
-      data.background=setTextfunc(data.background);
+      if (!/^\w+\.png$/.test(data.background))
+        data.background=setTextfunc(data.background);
       this.next = MotaActionBlocks['setText_s'].xmlText([
         data.position,data.offset,data.title,data.text,data.background,data.bold,data.titlefont,data.textfont,data.time,this.next]);
       break;

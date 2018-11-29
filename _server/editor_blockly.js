@@ -58,13 +58,7 @@ editor_blockly = function () {
       MotaActionBlocks['text_0_s'].xmlText(),
       MotaActionBlocks['text_1_s'].xmlText(),
       MotaActionBlocks['comment_s'].xmlText(),
-      MotaActionFunctions.actionParser.parseList({"type": "choices", "text": "是否跳过剧情", "choices": [
-        {"text": "是", "action": []},
-        {"text": "否", "action": [
-          {"type": "autoText", "text": "\\t[小妖精,fairy]双击方块进入多行编辑\\n用户无法跳过自动剧情文本,大段剧情文本请添加“是否跳过剧情”的提示\\n自动剧情文本\\n自动剧情文本\\n自动剧情文本", "time" :3000},
-          {"type": "autoText", "text": "(可以右键方块后点复制)", "time" :3000},
-        ]},
-      ]}),
+      MotaActionBlocks['autoText_s'].xmlText(),
       MotaActionBlocks['setText_s'].xmlText(),
       MotaActionBlocks['showImage_0_s'].xmlText(),
       MotaActionBlocks['animateImage_0_s'].xmlText(),

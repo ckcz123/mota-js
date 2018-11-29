@@ -1823,8 +1823,9 @@ actions.prototype.clickSwitchs = function (x,y) {
             case 8:
                 if (core.platform.isPC)
                     window.open("editor.html", "_blank");
-                else
+                else if (confirm("即将离开本塔，跳转至本塔工程页面，确认？")) {
                     window.location.href = "editor-mobile.html";
+                }
                 break;
             case 9:
                 if (core.platform.isPC)
@@ -1889,8 +1890,7 @@ actions.prototype.clickSettings = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 1:
-                core.status.event.selection=0;
-                core.ui.drawQuickShop();
+                core.ui.drawKeyBoard();
                 break;
             case 2:
                 core.ui.drawMaps();
@@ -1903,6 +1903,25 @@ actions.prototype.clickSettings = function (x,y) {
                 core.ui.drawSyncSave();
                 break;
             case 5:
+                core.ui.drawStatistics();
+                break;
+            case 6:
+                if (core.platform.isPC) {
+                    window.open("/score.php?name="+core.firstData.name+"&num=10", "_blank");
+                }
+                else {
+                    if (confirm("即将离开本塔，跳转至本塔评论页面，确认？")) {
+                        window.location.href = "/score.php?name="+core.firstData.name+"&num=10";
+                    }
+                }
+                break;
+            case 7:
+                core.ui.drawHelp();
+                break;
+            case 8:
+                core.ui.drawAbout();
+                break;
+            case 9:
                 core.status.event.selection=1;
                 core.ui.drawConfirmBox("你确定要返回标题页面吗？", function () {
                     core.ui.closePanel();
@@ -1912,16 +1931,7 @@ actions.prototype.clickSettings = function (x,y) {
                     core.ui.drawSettings();
                 });
                 break;
-            case 6:
-                core.ui.drawStatistics();
-                break;
-            case 7:
-                core.ui.drawHelp();
-                break;
-            case 8:
-                core.ui.drawAbout();
-                break;
-            case 9:
+            case 10:
                 core.ui.closePanel();
                 break;
         }

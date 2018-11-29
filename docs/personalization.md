@@ -1,6 +1,6 @@
 # 个性化
 
-?> 目前版本**v2.5.1**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.5.2**，上次更新时间：* {docsify-updated} *
 
 有时候只靠样板本身可能是不够的。我们需要一些个性化、自定义的素材，道具效果，怪物属性，等等。
 
@@ -817,8 +817,6 @@ if (core.flags.enableSkill) {
     ```
 3. 在脚本编辑 - setInitData中加上`core.plugin.initHeros()`来初始化新勇士。（写在`core.events.afterLoadData()`后，反大括号之前。）
 4. 如果需要切换角色（包括事件、道具或者快捷键等），可以直接调用自定义JS脚本：`core.plugin.changeHero();`进行切换。也可以指定参数调用`core.plugin.changeHero(1)`来切换到某个具体的勇士上。
-
-!> 如果道具不共用，需要在初始定义那里写 `'items': {"keys": {"yellowKey": 0, "blueKey": 0, "redKey": 0}, "tools": {}, "constants": {}}`
 
 ## 根据难度分歧来自定义地图
 

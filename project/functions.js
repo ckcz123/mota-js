@@ -1,4 +1,4 @@
-functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = 
+var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 {
     "events": {
         "initGame": function() {
@@ -660,6 +660,21 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		case 72: // H：打开帮助页面
 			core.ui.drawHelp();
 			break;
+		case 78: // N：重新开始
+			core.status.event.selection=1;
+			core.ui.drawConfirmBox("你确定要返回标题页面吗？", function () {
+				core.ui.closePanel();
+				core.restart();
+			}, function () {
+				core.ui.closePanel();
+			});
+			break;
+		case 79: // O：查看工程
+			window.open(core.platform.isPC?"editor.html":"editor-mobile.html", "_blank");
+			break;
+		case 80: // P：查看评论
+			window.open("/score.php?name="+core.firstData.name+"&num=10", "_blank");
+            break;
 		case 49: // 快捷键1: 破
 			if (core.hasItem('pickaxe')) {
 				if (core.canUseItem('pickaxe')) {
@@ -1110,8 +1125,7 @@ functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 绘制色调层，默认不透明度
 		if (!core.isset(color)) color = 0.9;
 		if (typeof color == "number") color = [0,0,0,color];
-		core.fillRect('curtain', 0, 0, 416, 416,
-			'rgba('+color[0]+','+color[1]+','+color[2]+','+core.clamp(color[3],0,1)+')');
+		core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA(color));
 
 		// 绘制每个灯光效果
 		if (!core.isset(lights) || lights.length==0) return;

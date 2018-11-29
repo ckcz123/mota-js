@@ -49,6 +49,23 @@ maps.prototype.loadFloor = function (floorId, map) {
     return content;
 }
 
+////// 从ID获得数字 //////
+maps.prototype.getNumberById = function (id) {
+    for (var number in this.blocksInfo) {
+        if ((this.blocksInfo[number]||{}).id == id)
+            return parseInt(number)||0;
+    }
+    // tilesets
+    if (/^X\d+$/.test(id)) {
+        var info = core.icons.getTilesetOffset(id);
+        if (info!=null) return parseInt(id.substring(1));
+    }
+    // 特殊ID
+    if (id == 'none') return 0;
+    if (id == 'airwall') return 17;
+    return 0;
+}
+
 ////// 数字和ID的对应关系 //////
 maps.prototype.initBlock = function (x, y, id) {
     var disable=null;
@@ -730,7 +747,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
     }
     var id = block.block.id;
 
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
 
     // 需要删除该块
     core.removeBlock(x,y);
@@ -741,6 +758,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
     block=block.block;
 
     var image, bx, by, height = block.event.height || 32;
+    var faceIds = {};
     if (block.event.cls == 'tileset') {
         var offset = core.icons.getTilesetOffset(block.event.id);
         if (offset==null) {
@@ -765,6 +783,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
         image = core.material.images[block.event.cls];
         bx = 0;
         by = core.material.icons[block.event.cls][block.event.id];
+        faceIds = block.event.faceIds||{};
     }
 
     var opacityVal = 1;
@@ -829,15 +848,26 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
                     core.setBlock(id, nowX/32, nowY/32);
                     core.showBlock(nowX/32, nowY/32);
                 }
-                core.status.replay.animate=false;
+                // core.status.replay.animate=false;
                 if (core.isset(callback)) callback();
             }
         }
         else {
             // 移动中
+            var direction = moveSteps[0];
+            if (step == 0) {
+                // 根据faceIds修改朝向
+                var currid = faceIds[direction];
+                if (core.isset(currid)) {
+                    var tby = core.material.icons[block.event.cls][currid];
+                    if (core.isset(tby))
+                        by = tby;
+                }
+            }
+
             step++;
-            nowX+=scan[moveSteps[0]].x*2;
-            nowY+=scan[moveSteps[0]].y*2;
+            nowX+=scan[direction].x*2;
+            nowY+=scan[direction].y*2;
             core.clearMap('route', nowX-32, nowY-32, 96, 96);
             // 绘制
             core.canvas.route.drawImage(image, animateCurrent * 32, by * height, 32, height, nowX, nowY-height+32, 32, height);
@@ -861,7 +891,7 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
     }
     var id = block.block.id;
 
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
 
     // 需要删除该块
     core.removeBlock(sx,sy);
@@ -960,7 +990,7 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
                     core.setBlock(id, ex, ey);
                     core.showBlock(ex, ey);
                 }
-                core.status.replay.animate=false;
+                // core.status.replay.animate=false;
                 if (core.isset(callback)) callback();
             }
         }
@@ -1015,7 +1045,7 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
         return;
     }
 
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
     var draw = function () {
         list.forEach(function (t) {
             core.canvas.route.drawImage(t.image, t.bx*32, t.by*t.height, 32, t.height, t.x*32, t.y*32+32-t.height, 32, t.height);
@@ -1036,7 +1066,7 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
             clearInterval(animate);
             core.clearMap('route');
             core.setOpacity('route', 1);
-            core.status.replay.animate=false;
+            // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
     }, time / 10 / core.status.replay.speed);
@@ -1233,7 +1263,7 @@ maps.prototype.drawBoxAnimate = function () {
         var obj = core.status.boxAnimateObjs[a];
         obj.status = ((obj.status||0)+1)%obj.animate;
         core.clearMap('ui', obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight);
-        core.fillRect('ui', obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight, core.animateFrame.background);
+        core.fillRect('ui', obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight, core.material.groundPattern);
         core.canvas.ui.drawImage(obj.image, obj.status * 32, obj.pos,
             32, obj.height, obj.x, obj.y, 32, obj.height);
     }

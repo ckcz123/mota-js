@@ -45,7 +45,6 @@ control.prototype.setRequestAnimationFrame = function () {
     }());
 
     core.animateFrame.speed = core.values.animateSpeed;
-    core.animateFrame.background = core.canvas.ui.createPattern(core.material.ground, "repeat");
 
     var scan = {
         'up': {'x': 0, 'y': -1},
@@ -865,14 +864,14 @@ control.prototype.eventMoveHero = function(steps, time, callback) {
         'right': {'x': 1, 'y': 0}
     };
 
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
 
     var animate=window.setInterval(function() {
         var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
         if (moveSteps.length==0) {
             clearInterval(animate);
             core.drawHero(null, x, y);
-            core.status.replay.animate=false;
+            // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
         else {
@@ -905,7 +904,7 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
     time = time || 500;
     core.clearMap('ui');
     core.setAlpha('ui', 1.0);
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
 
     core.playSound('jump.mp3');
 
@@ -955,7 +954,7 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
             core.setHeroLoc('x', ex);
             core.setHeroLoc('y', ey);
             core.drawHero();
-            core.status.replay.animate=false;
+            // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
 
@@ -1483,30 +1482,28 @@ control.prototype.setFg = function(color, time, callback) {
     if (time==0) {
         // 直接变色
         core.clearMap('curtain');
-        core.setAlpha('curtain', color[3]);
-        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGB(color));
+        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA(color));
         core.status.curtainColor = color;
         if (core.isset(callback)) callback();
         return;
     }
 
     var step=0;
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
     var changeAnimate = setInterval(function() {
         step++;
 
-        var nowAlpha = fromColor[3]+(color[3]-fromColor[3])*step/25;
+        var nowA = fromColor[3]+(color[3]-fromColor[3])*step/25;
         var nowR = parseInt(fromColor[0]+(color[0]-fromColor[0])*step/25);
         var nowG = parseInt(fromColor[1]+(color[1]-fromColor[1])*step/25);
         var nowB = parseInt(fromColor[2]+(color[2]-fromColor[2])*step/25);
         core.clearMap('curtain');
-        core.setAlpha('curtain', nowAlpha);
-        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGB([nowR,nowG,nowB]));
+        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA([nowR,nowG,nowB,nowA]));
 
         if (step>=25) {
             clearInterval(changeAnimate);
             core.status.curtainColor = color;
-            core.status.replay.animate=false;
+            // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
     }, time/25/core.status.replay.speed);
@@ -1912,26 +1909,35 @@ control.prototype.replay = function () {
     else if (action.indexOf("item:")==0) {
         var itemId = action.substring(5);
         if (core.canUseItem(itemId)) {
-            var tools = Object.keys(core.status.hero.items.tools).sort();
-            var constants = Object.keys(core.status.hero.items.constants).sort();
-            var index=-1;
-            if ((index=tools.indexOf(itemId))>=0) {
-                core.status.event.data = {"toolsPage":Math.floor(index/12)+1, "constantsPage":1, "selectId":null};
-                index = index%12;
-            }
-            else if ((index=constants.indexOf(itemId))>=0) {
-                core.status.event.data = {"toolsPage":1, "constantsPage":Math.floor(index/12)+1, "selectId":null};
-                index = index%12+12;    
-            }
-            if (index>=0) {
-                core.ui.drawToolbox(index);
-                setTimeout(function () {
-                    core.ui.closePanel();
-                    core.useItem(itemId, function () {
-                        core.replay();
-                    });
-                }, 750 / Math.max(1, core.status.replay.speed));
+            // 是否绘制道具栏
+            if (core.material.items[itemId].hideInReplay) {
+                core.useItem(itemId, function () {
+                    core.replay();
+                });
                 return;
+            }
+            else {
+                var tools = Object.keys(core.status.hero.items.tools).sort();
+                var constants = Object.keys(core.status.hero.items.constants).sort();
+                var index=-1;
+                if ((index=tools.indexOf(itemId))>=0) {
+                    core.status.event.data = {"toolsPage":Math.floor(index/12)+1, "constantsPage":1, "selectId":null};
+                    index = index%12;
+                }
+                else if ((index=constants.indexOf(itemId))>=0) {
+                    core.status.event.data = {"toolsPage":1, "constantsPage":Math.floor(index/12)+1, "selectId":null};
+                    index = index%12+12;
+                }
+                if (index>=0) {
+                    core.ui.drawToolbox(index);
+                    setTimeout(function () {
+                        core.ui.closePanel();
+                        core.useItem(itemId, function () {
+                            core.replay();
+                        });
+                    }, 750 / Math.max(1, core.status.replay.speed));
+                    return;
+                }
             }
         }
     }

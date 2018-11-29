@@ -1,4 +1,4 @@
-data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = 
+var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
 {
     "_leaf": false,
     "_type": "object",
@@ -225,8 +225,16 @@ data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_data": {
                                 "direction": {
                                     "_leaf": true,
-                                    "_type": "textarea",
-                                    "_data": "勇士初始方向"
+                                    "_type": "select",
+                                    "_data": "勇士初始方向",
+                                    "_select": {
+                                        "values": [
+                                            "up",
+                                            "down",
+                                            "left",
+                                            "right"
+                                        ]
+                                    },
                                 },
                                 "x": {
                                     "_leaf": true,

@@ -60,7 +60,18 @@ events.prototype.init = function () {
                 callback();
         },
         'action': function (data, core, callback) {
-            core.events.insertAction(data.event.data, data.x, data.y, callback);
+            var ev = core.clone(data.event.data), ex = data.x, ey = data.y;
+            // 检查是否需要改变朝向
+            if (ex == core.nextX() && ey == core.nextY()) {
+                var dir = {"up":"down","down":"up","left":"right","right":"left"}[core.getHeroLoc('direction')];
+                var id = data.event.id, toId = (data.event.faceIds||{})[dir];
+                if (core.isset(toId) && id!=toId) {
+                    var number = core.maps.getNumberById(toId);
+                    if (number>0)
+                        core.setBlock(number, ex, ey);
+                }
+            }
+            core.events.insertAction(ev, ex, ey, callback);
         }
     }
 }
@@ -405,6 +416,12 @@ events.prototype.doAction = function() {
                 if (core.isset(data[t]) && (data[t] instanceof Array) && data[t].length>=3) {
                     if (data[t].length==3) data[t].push(1);
                     core.status.textAttribute[t]=data[t];
+                }
+                if (t=='background' && core.isset(data[t])) {
+                    var img = core.material.images.images[data[t]];
+                    if (core.isset(img) && img.width==192 && img.height==128) {
+                        core.status.textAttribute[t]=data[t];
+                    }
                 }
             });
             core.setFlag('textAttribute', core.status.textAttribute);
@@ -1354,11 +1371,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             if (core.isset(color)) {
                 // 直接变色
                 core.clearMap('curtain');
-                if (core.isset(color[3]))
-                    core.setAlpha('curtain', color[3]);
-                else
-                    core.setAlpha('curtain', 1);
-                core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGB(color));
+                core.fillRect('curtain',0,0,416,core.arrayToRGBA(color));
                 core.status.curtainColor = color;
             }
             else {
@@ -1456,7 +1469,7 @@ events.prototype.animateImage = function (type, image, loc, time, keep, callback
     core.setOpacity('data', opacityVal);
     var x = core.calValue(loc[0]), y = core.calValue(loc[1]);
     core.canvas.data.drawImage(image, x, y);
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
     var animate = setInterval(function () {
         if (type=='show') opacityVal += 0.1;
         else opacityVal -= 0.1;
@@ -1467,7 +1480,7 @@ events.prototype.animateImage = function (type, image, loc, time, keep, callback
                 core.canvas.image.drawImage(image, x, y);
             core.clearMap('data');
             core.setOpacity('data', 1);
-            core.status.replay.animate=false;
+            // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
     }, time / 10);
@@ -1480,29 +1493,33 @@ events.prototype.moveImage = function (image, from, to, time, keep, callback) {
     core.setAlpha('data', 1);
     core.setOpacity('data', 1);
 
-    if (keep) core.clearMap('image');
+    var width = image.width, height = image.height;
 
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
     var fromX = core.calValue(from[0]), fromY = core.calValue(from[1]),
         toX = core.calValue(to[0]), toY = core.calValue(to[1]);
-    var step = 0;
+
+    if (keep) core.clearMap('image', fromX, fromY, width, height);
+
+    var step = 0, preX = fromX, preY = fromY;
     var per_time = 10, steps = parseInt(time / per_time);
     var drawImage = function () {
-        core.clearMap('data');
-        var nowX = parseInt(fromX + (toX-fromX)*step/steps);
-        var nowY = parseInt(fromY + (toY-fromY)*step/steps);
-        core.canvas.data.drawImage(image, nowX, nowY);
+        preX = parseInt(fromX + (toX-fromX)*step/steps);
+        preY = parseInt(fromY + (toY-fromY)*step/steps);
+        core.canvas.data.drawImage(image, preX, preY);
     }
 
     drawImage();
     var animate = setInterval(function () {
+        core.clearMap('data', preX, preY, width, height);
         step++;
-        drawImage();
-        if (step>=steps) {
+        if (step <= steps)
+            drawImage();
+        else {
             clearInterval(animate);
-            core.clearMap('data');
-            core.status.replay.animate=false;
-            if (keep) core.canvas.data.drawImage(image, toX, toY);
+            // score.clearMap('data');
+            // core.status.replay.animate=false;
+            if (keep) core.canvas.image.drawImage(image, toX, toY);
             if (core.isset(callback)) callback();
         }
     }, per_time);
@@ -1524,7 +1541,7 @@ events.prototype.setVolume = function (value, time, callback) {
         if (core.isset(callback)) callback();
         return;
     }
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
     var currVolume = core.musicStatus.volume;
     var step = 0;
     var fade = setInterval(function () {
@@ -1533,7 +1550,7 @@ events.prototype.setVolume = function (value, time, callback) {
         set(nowVolume);
         if (step>=32) {
             clearInterval(fade);
-            core.status.replay.animate=false;
+            // core.status.replay.animate=false;
             if (core.isset(callback))
                 callback();
         }
@@ -1548,7 +1565,7 @@ events.prototype.vibrate = function(time, callback) {
         return;
     }
 
-    core.status.replay.animate=true;
+    // core.status.replay.animate=true;
 
     var addGameCanvasTranslate=function(x,y){
         for(var ii=0,canvas;canvas=core.dom.gameCanvas[ii];ii++){
@@ -1596,7 +1613,7 @@ events.prototype.vibrate = function(time, callback) {
         addGameCanvasTranslate(shake, 0);
         if(shake_duration===0) {
             clearInterval(animate);
-            core.status.replay.animate=false;
+            // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
     }, 50/3);

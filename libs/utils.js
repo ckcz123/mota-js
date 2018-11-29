@@ -327,10 +327,16 @@ utils.prototype.formatBigNumber = function (x) {
 
 ////// 数组转RGB //////
 utils.prototype.arrayToRGB = function (color) {
-    var nowR = parseInt(color[0])||0, nowG = parseInt(color[1])||0, nowB = parseInt(color[2])||0;
-    if (nowR<0) nowR=0; if (nowB<0) nowB=0;if (nowG<0) nowG=0;
-    if (nowR>255) nowR=255; if (nowB>255) nowB=255; if (nowG>255) nowG=255;
+    var nowR = this.clamp(parseInt(color[0]),0,255), nowG = this.clamp(parseInt(color[1]),0,255),
+        nowB = this.clamp(parseInt(color[2]),0,255);
     return "#"+((1<<24)+(nowR<<16)+(nowG<<8)+nowB).toString(16).slice(1);
+}
+
+utils.prototype.arrayToRGBA = function (color) {
+    if (!this.isset(color[3])) color[3]=1;
+    var nowR = this.clamp(parseInt(color[0]),0,255), nowG = this.clamp(parseInt(color[1]),0,255),
+        nowB = this.clamp(parseInt(color[2]),0,255), nowA = this.clamp(parseFloat(color[3]),0,1);
+    return "rgba("+nowR+","+nowG+","+nowB+","+nowA+")";
 }
 
 ////// 加密路线 //////

@@ -1,4 +1,4 @@
-icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1 = 
+var icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1 =
 {
         'hero': {
             'down': {'loc': 0, 'stop': 0, 'leftFoot': 1, 'rightFoot': 3},

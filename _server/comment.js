@@ -41,7 +41,13 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_leaf": true,
                             "_type": "textarea",
                             "_data": "装备属性设置，仅对cls为equips有效。\n如果此项不为null，需要是一个对象，里面可含\"type\"，\"atk\"，\"def\"，\"mdef\"，\"animate\"五项，分别对应装备部位、攻防魔防和动画。\n具体详见文档（元件说明-装备）和已有的几个装备的写法。"
-                        }, 
+                        },
+                        "hideInReplay": {
+                            "_leaf": true,
+                            "_type": "checkbox",
+                            "_bool": "bool",
+                            "_data": "是否回放时绘制道具栏。\n如果此项为true，则在回放录像时使用本道具将不会绘制道具栏页面，而是直接使用。\n此项建议在会频繁连续多次使用的道具开启（如开启技能，或者《镜子》那样的镜像切换等等）"
+                        }
                     }
                 },
                 "itemEffect": {

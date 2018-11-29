@@ -1909,26 +1909,35 @@ control.prototype.replay = function () {
     else if (action.indexOf("item:")==0) {
         var itemId = action.substring(5);
         if (core.canUseItem(itemId)) {
-            var tools = Object.keys(core.status.hero.items.tools).sort();
-            var constants = Object.keys(core.status.hero.items.constants).sort();
-            var index=-1;
-            if ((index=tools.indexOf(itemId))>=0) {
-                core.status.event.data = {"toolsPage":Math.floor(index/12)+1, "constantsPage":1, "selectId":null};
-                index = index%12;
-            }
-            else if ((index=constants.indexOf(itemId))>=0) {
-                core.status.event.data = {"toolsPage":1, "constantsPage":Math.floor(index/12)+1, "selectId":null};
-                index = index%12+12;    
-            }
-            if (index>=0) {
-                core.ui.drawToolbox(index);
-                setTimeout(function () {
-                    core.ui.closePanel();
-                    core.useItem(itemId, function () {
-                        core.replay();
-                    });
-                }, 750 / Math.max(1, core.status.replay.speed));
+            // 是否绘制道具栏
+            if (core.material.items[itemId].hideInReplay) {
+                core.useItem(itemId, function () {
+                    core.replay();
+                });
                 return;
+            }
+            else {
+                var tools = Object.keys(core.status.hero.items.tools).sort();
+                var constants = Object.keys(core.status.hero.items.constants).sort();
+                var index=-1;
+                if ((index=tools.indexOf(itemId))>=0) {
+                    core.status.event.data = {"toolsPage":Math.floor(index/12)+1, "constantsPage":1, "selectId":null};
+                    index = index%12;
+                }
+                else if ((index=constants.indexOf(itemId))>=0) {
+                    core.status.event.data = {"toolsPage":1, "constantsPage":Math.floor(index/12)+1, "selectId":null};
+                    index = index%12+12;
+                }
+                if (index>=0) {
+                    core.ui.drawToolbox(index);
+                    setTimeout(function () {
+                        core.ui.closePanel();
+                        core.useItem(itemId, function () {
+                            core.replay();
+                        });
+                    }, 750 / Math.max(1, core.status.replay.speed));
+                    return;
+                }
             }
         }
     }

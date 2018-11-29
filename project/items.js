@@ -184,7 +184,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"fly": {
 			"cls": "constants",
 			"name": "楼层传送器",
-			"text": "可以自由往来去过的楼层"
+			"text": "可以自由往来去过的楼层",
+			"hideInReplay": true
 		},
 		"coin": {
 			"cls": "constants",
@@ -299,7 +300,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"skill1": {
 			"cls": "constants",
 			"name": "技能：二倍斩",
-			"text": "可以打开或关闭主动技能二倍斩"
+			"text": "可以打开或关闭主动技能二倍斩",
+            "hideInReplay": true
 		}
 	},
 	"itemEffect": {

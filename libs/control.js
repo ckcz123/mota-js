@@ -1482,8 +1482,7 @@ control.prototype.setFg = function(color, time, callback) {
     if (time==0) {
         // 直接变色
         core.clearMap('curtain');
-        core.setAlpha('curtain', color[3]);
-        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGB(color));
+        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA(color));
         core.status.curtainColor = color;
         if (core.isset(callback)) callback();
         return;
@@ -1494,13 +1493,12 @@ control.prototype.setFg = function(color, time, callback) {
     var changeAnimate = setInterval(function() {
         step++;
 
-        var nowAlpha = fromColor[3]+(color[3]-fromColor[3])*step/25;
+        var nowA = fromColor[3]+(color[3]-fromColor[3])*step/25;
         var nowR = parseInt(fromColor[0]+(color[0]-fromColor[0])*step/25);
         var nowG = parseInt(fromColor[1]+(color[1]-fromColor[1])*step/25);
         var nowB = parseInt(fromColor[2]+(color[2]-fromColor[2])*step/25);
         core.clearMap('curtain');
-        core.setAlpha('curtain', nowAlpha);
-        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGB([nowR,nowG,nowB]));
+        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA([nowR,nowG,nowB,nowA]));
 
         if (step>=25) {
             clearInterval(changeAnimate);

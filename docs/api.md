@@ -508,6 +508,10 @@ core.utils.arrayToRGB(color)
 将形如[255,0,0]之类的数组转成#FF0000这样的RGB形式。
 
 
+core.utils.arrayToRGBA(color)
+将形如[255,0,0,1]之类的数组转成rgba(255,0,0,1)这样的RGBA形式。
+
+
 core.utils.encodeRoute(list)
 压缩加密路线。可以使用core.encodeRoute(core.status.route)来压缩当前路线。
 

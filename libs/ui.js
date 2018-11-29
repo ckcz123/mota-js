@@ -410,14 +410,11 @@ ui.prototype.drawTextBox = function(content, showAll) {
     content = info.content;
     var id=info.id, name=info.name, image=info.image, icon=info.icon, iconHeight=info.iconHeight, animate=info.animate;
 
-    // 获得位置信息
-
+    // 获得颜色的盒子等信息
     var textAttribute = core.status.textAttribute || core.initStatus.textAttribute;
-
     var titlefont = textAttribute.titlefont || 22;
     var textfont = textAttribute.textfont || 16;
     var offset = textAttribute.offset || 0;
-
     var background = core.status.textAttribute.background;
     var isWindowSkin = false;
     if (typeof background == 'string') {
@@ -425,7 +422,15 @@ ui.prototype.drawTextBox = function(content, showAll) {
         if (core.isset(background) && background.width==192 && background.height==128) isWindowSkin = true;
         else background = core.initStatus.textAttribute.background;
     }
+    if (!isWindowSkin) background = core.arrayToRGBA(background);
 
+    background = core.material.images.images["winskin.png"];
+
+    var titleColor = core.arrayToRGBA(textAttribute.title);
+    var textColor = core.arrayToRGBA(textAttribute.text);
+    var borderColor = main.borderColor||"#FFFFFF";
+
+    // 获得位置信息
     var position = textAttribute.position, px=null, py=null, ydelta=iconHeight-32;
     if (content.indexOf("\b[")==0 || content.indexOf("\\b[")==0) {
         var index = content.indexOf("]");
@@ -441,6 +446,9 @@ ui.prototype.drawTextBox = function(content, showAll) {
                 if (core.status.event.id=='action') {
                     px = core.status.event.data.x;
                     py = core.status.event.data.y;
+                }
+                else {
+                    px = null; py=null;
                 }
 
                 if (ss.length>=2) {
@@ -463,7 +471,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
     core.status.boxAnimateObjs = [];
     core.clearMap('ui');
 
-    var left=7, right=416-2*left, width = right-left;
+    var left=7, right=416-left, width = right-left;
     var content_left = left + 25;
     if (id=='hero' || core.isset(icon)) content_left=left+63;
 
@@ -475,8 +483,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
     var height = 20 + (textfont+5)*(core.splitLines("ui", realContent, validWidth, font).length+1)
         + (id=='hero'?core.material.icons.hero.height-10:core.isset(name)?iconHeight-10:0);
 
-
-    var xoffset = 6, yoffset = 22;
+    var xoffset = 6, yoffset = 16;
 
     var top;
     if (position=='center') {
@@ -495,16 +502,13 @@ ui.prototype.drawTextBox = function(content, showAll) {
             top = 32 * py + 32 + yoffset;
     }
 
-    var width = right - left;
-
     core.setAlpha('ui', 0.85);
-    this.drawWindowSkin(left,top,width,height,position,px*32,py*32);
+    this.drawWindowSkin(background,'ui',left,top,width,height,position,px==null?null:px*32,py==null?null:py*32);
     core.setAlpha('ui', 1);
 
     // var left = 97, top = 64, right = 416 - 2 * left, bottom = 416 - 2 * top;
     //core.setAlpha('ui', 0.85);
 
-    var borderColor = main.borderColor||"#FFFFFF";
 
     // core.setFillStyle('ui', core.arrayToRGB(textAttribute.background));
     // core.setStrokeStyle('ui', borderColor);
@@ -552,9 +556,8 @@ ui.prototype.drawTextBox = function(content, showAll) {
     if (core.isset(id)) {
 
         content_top = top+57;
-        core.setAlpha('ui', textAttribute.title[3]);
-        core.setFillStyle('ui', core.arrayToRGB(textAttribute.title));
-        core.setStrokeStyle('ui', core.arrayToRGB(textAttribute.title));
+        core.setFillStyle('ui', core.arrayToRGBA(textAttribute.title));
+        core.setStrokeStyle('ui', core.arrayToRGBA(textAttribute.title));
 
         if (id == 'hero') {
             var heroHeight=core.material.icons.hero.height;
@@ -583,10 +586,9 @@ ui.prototype.drawTextBox = function(content, showAll) {
         }
     }
 
-    var defaultColor = core.arrayToRGB(textAttribute.text);
+    var defaultColor = core.arrayToRGBA(textAttribute.text);
     var offsetx = content_left, offsety = content_top;
     core.setFont('ui', font);
-    core.setAlpha('ui', textAttribute.text[3]);
     core.setFillStyle('ui', defaultColor);
     var index = 0, currcolor = defaultColor, changed = false;
 
@@ -663,7 +665,10 @@ ui.prototype.drawChoices = function(content, choices) {
         if (core.isset(background) && background.width==192 && background.height==128) isWindowSkin = true;
         else background = core.initStatus.textAttribute.background;
     }
+    if (!isWindowSkin) background = core.arrayToRGBA(background);
     var borderColor = main.borderColor || "#FFFFFF";
+    var textColor = core.arrayToRGBA(core.status.textAttribute.text);
+    var titleColor = core.arrayToRGBA(core.status.textAttribute.title);
 
     core.status.event.ui = {"text": content, "choices": choices};
 
@@ -714,8 +719,7 @@ ui.prototype.drawChoices = function(content, choices) {
         this.drawWindowSkin(background,'ui',left,top,width,height);
     }
     else {
-        core.setAlpha('ui', background[3]);
-        core.fillRect('ui', left, top, width, height, core.arrayToRGB(background));
+        core.fillRect('ui', left, top, width, height, background);
         core.strokeRect('ui', left - 1, top - 1, width + 1, height + 1, borderColor, 2);
     }
     core.setAlpha('ui', 1);
@@ -738,14 +742,14 @@ ui.prototype.drawChoices = function(content, choices) {
             if (id == 'hero') {
                 var heroHeight = core.material.icons.hero.height;
                 core.strokeRect('ui', left + 15 - 1, top + 30 - 1, 34, heroHeight+2, '#DDDDDD', 2);
-                core.fillText('ui', name, title_offset, top + 27, '#FFD700', 'bold 19px Verdana');
+                core.fillText('ui', name, title_offset, top + 27, titleColor, 'bold 19px Verdana');
                 core.clearMap('ui', left + 15, top + 30, 32, heroHeight);
                 core.fillRect('ui', left + 15, top + 30, 32, heroHeight, core.material.groundPattern);
                 var heroIcon = core.material.icons.hero['down'];
                 core.canvas.ui.drawImage(core.material.images.hero, heroIcon.stop * 32, heroIcon.loc *heroHeight, 32, heroHeight, left+15, top+30, 32, heroHeight);
             }
             else {
-                core.fillText('ui', name, title_offset, top + 27, '#FFD700', 'bold 19px Verdana');
+                core.fillText('ui', name, title_offset, top + 27, titleColor, 'bold 19px Verdana');
                 if (core.isset(icon)) {
                     core.strokeRect('ui', left + 15 - 1, top + 30 - 1, 34, iconHeight + 2, '#DDDDDD', 2);
                     core.status.boxAnimateObjs = [];
@@ -762,7 +766,7 @@ ui.prototype.drawChoices = function(content, choices) {
 
         core.canvas.ui.textAlign = "left";
         for (var i=0;i<contents.length;i++) {
-            core.fillText('ui', contents[i], content_left, content_top, '#FFFFFF', 'bold 15px Verdana');
+            core.fillText('ui', contents[i], content_left, content_top, textColor, 'bold 15px Verdana');
             content_top+=20;
         }
     }
@@ -770,7 +774,7 @@ ui.prototype.drawChoices = function(content, choices) {
     // 选项
     core.canvas.ui.textAlign = "center";
     for (var i = 0; i < choices.length; i++) {
-        core.setFillStyle('ui', choices[i].color || "#FFFFFF");
+        core.setFillStyle('ui', choices[i].color || textColor);
         core.fillText('ui', core.replaceText(choices[i].text || choices[i]), 208, choice_top + 32 * i, null, "bold 17px Verdana");
     }
 

@@ -1371,11 +1371,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             if (core.isset(color)) {
                 // 直接变色
                 core.clearMap('curtain');
-                if (core.isset(color[3]))
-                    core.setAlpha('curtain', color[3]);
-                else
-                    core.setAlpha('curtain', 1);
-                core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGB(color));
+                core.fillRect('curtain',0,0,416,core.arrayToRGBA(color));
                 core.status.curtainColor = color;
             }
             else {

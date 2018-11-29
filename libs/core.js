@@ -1026,6 +1026,12 @@ core.prototype.arrayToRGB = function (color) {
     return core.utils.arrayToRGB(color);
 }
 
+////// 数组转RGBA //////
+core.prototype.arrayToRGBA = function (color) {
+    return core.utils.arrayToRGBA(color);
+}
+
+
 ////// 作弊 //////
 core.prototype.debug = function() {
     core.control.debug();

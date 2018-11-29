@@ -1125,8 +1125,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 绘制色调层，默认不透明度
 		if (!core.isset(color)) color = 0.9;
 		if (typeof color == "number") color = [0,0,0,color];
-		core.fillRect('curtain', 0, 0, 416, 416,
-			'rgba('+color[0]+','+color[1]+','+color[2]+','+core.clamp(color[3],0,1)+')');
+		core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA(color));
 
 		// 绘制每个灯光效果
 		if (!core.isset(lights) || lights.length==0) return;

@@ -576,11 +576,10 @@ ui.prototype.drawTextBox = function(content, showAll) {
         }
     }
 
-    var defaultColor = core.arrayToRGBA(textAttribute.text);
     var offsetx = content_left, offsety = content_top;
     core.setFont('ui', font);
-    core.setFillStyle('ui', defaultColor);
-    var index = 0, currcolor = defaultColor, changed = false;
+    core.setFillStyle('ui', textColor);
+    var index = 0, currcolor = textColor, changed = false;
 
     var drawNext = function () {
         if (index >= content.length) return false;
@@ -607,11 +606,11 @@ ui.prototype.drawTextBox = function(content, showAll) {
             if (content.charAt(index) == '[' && ((index2=content.indexOf(']', index))>=0)) {
                 // 变色
                 var str = content.substring(index+1, index2);
-                if (str=="") currcolor = defaultColor;
+                if (str=="") currcolor = textColor;
                 else currcolor = str;
                 index = index2+1;
             }
-            else currcolor = defaultColor;
+            else currcolor = textColor;
             return drawNext();
         }
         // 检查是不是自动换行

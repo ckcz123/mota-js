@@ -422,13 +422,11 @@ ui.prototype.drawTextBox = function(content, showAll) {
         if (core.isset(background) && background.width==192 && background.height==128) isWindowSkin = true;
         else background = core.initStatus.textAttribute.background;
     }
-    if (!isWindowSkin) background = core.arrayToRGBA(background);
-
-    background = core.material.images.images["winskin.png"];
 
     var titleColor = core.arrayToRGBA(textAttribute.title);
     var textColor = core.arrayToRGBA(textAttribute.text);
     var borderColor = main.borderColor||"#FFFFFF";
+    var alpha = isWindowSkin?0.85:background[3];
 
     // 获得位置信息
     var position = textAttribute.position, px=null, py=null, ydelta=iconHeight-32;
@@ -483,7 +481,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
     var height = 20 + (textfont+5)*(core.splitLines("ui", realContent, validWidth, font).length+1)
         + (id=='hero'?core.material.icons.hero.height-10:core.isset(name)?iconHeight-10:0);
 
-    var xoffset = 6, yoffset = 16;
+    var xoffset = 11, yoffset = 16;
 
     var top;
     if (position=='center') {
@@ -501,54 +499,43 @@ ui.prototype.drawTextBox = function(content, showAll) {
         else
             top = 32 * py + 32 + yoffset;
     }
+    var bottom = top + height;
 
-    core.setAlpha('ui', 0.85);
-    this.drawWindowSkin(background,'ui',left,top,width,height,position,px==null?null:px*32,py==null?null:py*32);
-    core.setAlpha('ui', 1);
-
-    // var left = 97, top = 64, right = 416 - 2 * left, bottom = 416 - 2 * top;
-    //core.setAlpha('ui', 0.85);
-
-
-    // core.setFillStyle('ui', core.arrayToRGB(textAttribute.background));
-    // core.setStrokeStyle('ui', borderColor);
-
-    // core.fillRect('ui', left, top, right, height);
-    // core.strokeRect('ui', left - 1, top - 1, right + 1, height + 1, borderColor, 2);
-
-    // var xoffset = 10;
-
-    // // draw triangle
-    // if (position=='up' && core.isset(px) && core.isset(py)) {
-    //     core.canvas.ui.clearRect(32*px+xoffset, top+height-1, 32-2*xoffset, 2);
-    //     core.canvas.ui.beginPath();
-    //     core.canvas.ui.moveTo(32*px+xoffset-1, top+height-1);
-    //     core.canvas.ui.lineTo(32*px+16, top+height+yoffset-2);
-    //     core.canvas.ui.lineTo(32*px+32-xoffset+1, top+height-1);
-    //     core.canvas.ui.moveTo(32*px+xoffset-1, top+height-1);
-    //     core.canvas.ui.closePath();
-    //     core.canvas.ui.fill();
-    //     // core.canvas.ui.stroke();
-    //     // core.drawLine('ui', 32*px+4+1, top+height+1, 32*px + 28-1, top+height+1, core.arrayToRGB(textAttribute.background), 3);
-    //     core.drawLine('ui', 32*px+xoffset, top+height, 32*px+16, top+height+yoffset-2);
-    //     core.drawLine('ui', 32*px+32-xoffset, top+height, 32*px+16, top+height+yoffset-2);
-    // }
-    // if (position=='down' && core.isset(px) && core.isset(py)) {
-    //     core.canvas.ui.clearRect(32*px+xoffset, top-2, 32-2*xoffset, 3);
-    //     core.canvas.ui.beginPath();
-    //     core.canvas.ui.moveTo(32*px+xoffset-1, top+1);
-    //     core.canvas.ui.lineTo(32*px+16-1, top-yoffset+2);
-    //     core.canvas.ui.lineTo(32*px+32-xoffset-1, top+1);
-    //     core.canvas.ui.moveTo(32*px+xoffset-1, top+1);
-    //     core.canvas.ui.closePath();
-    //     core.canvas.ui.fill();
-    //     // core.canvas.ui.stroke();
-    //     // core.drawLine('ui', 32*px+4+1, top+height+1, 32*px + 28-1, top+height+1, core.arrayToRGB(textAttribute.background), 3);
-    //     core.drawLine('ui', 32*px+xoffset, top, 32*px+16, top-yoffset+2);
-    //     core.drawLine('ui', 32*px+32-xoffset, top, 32*px+16, top-yoffset+2);
-    // }
-
-
+    if (isWindowSkin) {
+        core.setAlpha('ui', alpha);
+        this.drawWindowSkin(background,'ui',left,top,width,height,position,px==null?null:px*32,py==null?null:py*32);
+        core.setAlpha('ui', 1);
+    }
+    else {
+        yoffset -= 4;
+        core.setAlpha('ui', alpha);
+        core.setStrokeStyle('ui', borderColor);
+        core.setFillStyle('ui', core.arrayToRGB(background));
+        core.setLineWidth('ui', 2);
+        // 绘制
+        var canvas = core.canvas.ui;
+        canvas.beginPath();
+        canvas.moveTo(left,top);
+        // 上边缘
+        if (position=='down' && core.isset(px) && core.isset(py)) {
+            canvas.lineTo(32*px+xoffset, top);
+            canvas.lineTo(32*px+16, top-yoffset);
+            canvas.lineTo(32*(px+1)-xoffset, top);
+        }
+        canvas.lineTo(right, top);
+        canvas.lineTo(right, bottom);
+        // 下边缘
+        if (position=='up' && core.isset(px) && core.isset(py)) {
+            canvas.lineTo(32*(px+1)-xoffset, bottom);
+            canvas.lineTo(32*px+16, bottom+yoffset);
+            canvas.lineTo(32*px+xoffset, bottom);
+        }
+        canvas.lineTo(left, bottom);
+        canvas.closePath();
+        canvas.fill();
+        canvas.stroke();
+        core.setAlpha('ui', 1);
+    }
     // 名称
     core.canvas.ui.textAlign = "left";
 
@@ -556,12 +543,14 @@ ui.prototype.drawTextBox = function(content, showAll) {
     if (core.isset(id)) {
 
         content_top = top+57;
-        core.setFillStyle('ui', core.arrayToRGBA(textAttribute.title));
-        core.setStrokeStyle('ui', core.arrayToRGBA(textAttribute.title));
+        core.setFillStyle('ui', titleColor);
+        core.setStrokeStyle('ui', titleColor);
 
         if (id == 'hero') {
             var heroHeight=core.material.icons.hero.height;
-            core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, heroHeight+2, borderColor, 2);
+            core.setAlpha('ui', alpha);
+            core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, heroHeight+2, null, 2);
+            core.setAlpha('ui', 1);
             core.fillText('ui', name, content_left, top + 30, null, 'bold '+titlefont+'px Verdana');
             core.clearMap('ui', left + 15, top + 40, 32, heroHeight);
             core.fillRect('ui', left + 15, top + 40, 32, heroHeight, core.material.groundPattern);
@@ -571,8 +560,9 @@ ui.prototype.drawTextBox = function(content, showAll) {
         else {
             core.fillText('ui', name, content_left, top + 30, null, 'bold '+titlefont+'px Verdana');
             if (core.isset(icon)) {
-
-                core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, iconHeight + 2, borderColor, 2);
+                core.setAlpha('ui', alpha);
+                core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, iconHeight + 2, null, 2);
+                core.setAlpha('ui', 1);
                 core.status.boxAnimateObjs = [];
                 core.status.boxAnimateObjs.push({
                     'bgx': left + 15, 'bgy': top + 40, 'bgWidth': 32, 'bgHeight': iconHeight,

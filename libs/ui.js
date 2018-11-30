@@ -329,6 +329,9 @@ ui.prototype.getTitleAndIcon = function (content) {
                 name=ss[0];
                 id = 'npc';
                 if (ss[1]=='hero') id = 'hero';
+                else if (/^\w+\.png$/.test(ss[1])) {
+                    image = core.material.images.images[ss[1]];
+                }
                 else getInfo(ss[1]);
             }
         }
@@ -388,11 +391,6 @@ ui.prototype.drawWindowSkin = function(background,canvas,x,y,w,h,direction,px,py
     	}
     }
     // 仿RM窗口皮肤 ↑
-}
-
-// 绘制纯色的背景框
-ui.prototype.drawPureBackground = function (background,canvas,borderColor,x,y,w,h,direction,px,py) {
-
 }
 
 ////// 绘制一个对话框 //////
@@ -472,14 +470,19 @@ ui.prototype.drawTextBox = function(content, showAll) {
     var left=7, right=416-left, width = right-left;
     var content_left = left + 25;
     if (id=='hero' || core.isset(icon)) content_left=left+63;
+    else if (core.isset(image)) content_left = left + 90;
 
-    var validWidth = right-content_left - 10;
+    var validWidth = right-content_left - 12;
     var font = textfont + 'px Verdana';
     if (textAttribute.bold) font = "bold "+font;
     var realContent = content.replace(/(\r|\\r)(\[.*?])?/g, "");
 
     var height = 20 + (textfont+5)*(core.splitLines("ui", realContent, validWidth, font).length+1)
         + (id=='hero'?core.material.icons.hero.height-10:core.isset(name)?iconHeight-10:0);
+    if (core.isset(image) && !core.isset(icon)) {
+        height -= 12;
+        height = Math.max(height, 90);
+    }
 
     var xoffset = 11, yoffset = 16;
 
@@ -572,6 +575,9 @@ ui.prototype.drawTextBox = function(content, showAll) {
                 });
 
                 core.drawBoxAnimate();
+            }
+            else if (core.isset(image)) {
+                core.canvas.ui.drawImage(image, 0, 0, image.width, image.height, left+10, top+10, 70, 70);
             }
         }
     }

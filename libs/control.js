@@ -832,11 +832,7 @@ control.prototype.moveHero = function (direction, callback) {
 
 /////// 使用事件让勇士移动。这个函数将不会触发任何事件 //////
 control.prototype.eventMoveHero = function(steps, time, callback) {
-
     time = time || 100;
-
-    core.clearMap('ui');
-    core.setAlpha('ui', 1.0);
 
     // 要运行的轨迹：将steps展开
     var moveSteps=[];
@@ -864,14 +860,11 @@ control.prototype.eventMoveHero = function(steps, time, callback) {
         'right': {'x': 1, 'y': 0}
     };
 
-    // core.status.replay.animate=true;
-
     var animate=window.setInterval(function() {
         var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
         if (moveSteps.length==0) {
             clearInterval(animate);
             core.drawHero(null, x, y);
-            // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
         else {
@@ -902,9 +895,6 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
     if (!core.isset(ey)) ey=sy;
 
     time = time || 500;
-    core.clearMap('ui');
-    core.setAlpha('ui', 1.0);
-    // core.status.replay.animate=true;
 
     core.playSound('jump.mp3');
 
@@ -954,7 +944,6 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
             core.setHeroLoc('x', ex);
             core.setHeroLoc('y', ey);
             core.drawHero();
-            // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
 

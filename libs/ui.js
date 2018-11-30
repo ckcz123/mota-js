@@ -469,8 +469,8 @@ ui.prototype.drawTextBox = function(content, showAll) {
 
     var left=7, right=416-left, width = right-left;
     var content_left = left + 25;
-    if (id=='hero' || core.isset(icon)) content_left=left+63;
-    else if (core.isset(image)) content_left = left + 90;
+    if (id=='hero' || core.isset(icon)) content_left = left + 62; // 行走图：15+32+15
+    else if (core.isset(image)) content_left = left + 90; // 大头像：10+70+10
 
     var validWidth = right-content_left - 12;
     var font = textfont + 'px Verdana';

@@ -398,6 +398,34 @@ ui.prototype.drawWindowSkin = function(background,canvas,x,y,w,h,direction,px,py
     // 仿RM窗口皮肤 ↑
 }
 
+// 计算有效文本框的宽度
+ui.prototype.calTextBoxWidth = function (canvas, content, min_width, max_width) {
+    // 无限长度自动换行
+    var allLines = core.splitLines(canvas, content);
+
+    // 如果不存在手动换行，则二分自动换行
+    if (allLines.length == 1) {
+        var prefer_lines = 3;
+        var start = Math.floor(min_width), end = Math.floor(max_width);
+        while (start < end) {
+            var mid = Math.floor((start+end)/2);
+            if (core.splitLines(canvas, content, mid).length < prefer_lines)
+                end = mid;
+            else
+                start = mid + 1;
+        }
+        return mid;
+    }
+    // 存在手动换行：以最长的为准
+    else {
+        var w = 0;
+        allLines.forEach(function (t) {
+            w = Math.max(w, core.canvas[canvas].measureText(t).width);
+        });
+        return core.clamp(w, min_width, max_width);
+    }
+}
+
 ////// 绘制一个对话框 //////
 ui.prototype.drawTextBox = function(content, showAll) {
 
@@ -472,16 +500,27 @@ ui.prototype.drawTextBox = function(content, showAll) {
     core.status.boxAnimateObjs = [];
     core.clearMap('ui');
 
-    var left=7, right=416-left, width = right-left;
-    var content_left = left + 25;
-    if (id=='hero' || core.isset(icon)) content_left = left + 62; // 行走图：15+32+15
-    else if (core.isset(image)) content_left = left + 90; // 大头像：10+70+10
-
-    var validWidth = right-content_left - 12;
     var font = textfont + 'px Verdana';
     if (textAttribute.bold) font = "bold "+font;
     var realContent = content.replace(/(\r|\\r)(\[.*?])?/g, "");
 
+    var leftSpace = 25, rightSpace = 12;
+    if (id=='hero' || core.isset(icon)) leftSpace =  62; // 行走图：15+32+15
+    else if (core.isset(image)) leftSpace = 90; // 大头像：10+70+10
+    var left = 7, right = 416 - left, width = right - left, validWidth = width - leftSpace - rightSpace;
+
+    // 对话框效果：改为动态计算
+    if (core.isset(px) && core.isset(py)) {
+        var min_width = 160, max_width = validWidth;
+        core.setFont('ui', font);
+        validWidth = this.calTextBoxWidth('ui', realContent, min_width, max_width);
+        width = validWidth + leftSpace + rightSpace;
+        // left必须在7~416-7-width区间内，以保证left>=7，right<=416-7
+        left = core.clamp(32*px+16-width/2, 7, 416-7-width);
+        right = left + width;
+    }
+
+    var content_left = left + leftSpace;
     var height = 30 + (textfont+5)*core.splitLines("ui", realContent, validWidth, font).length;
     if (core.isset(name)) height += titlefont + 5;
     if (id == 'hero')

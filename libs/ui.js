@@ -477,12 +477,14 @@ ui.prototype.drawTextBox = function(content, showAll) {
     if (textAttribute.bold) font = "bold "+font;
     var realContent = content.replace(/(\r|\\r)(\[.*?])?/g, "");
 
-    var height = 20 + (textfont+5)*(core.splitLines("ui", realContent, validWidth, font).length+1)
-        + (id=='hero'?core.material.icons.hero.height-10:core.isset(name)?iconHeight-10:0);
-    if (core.isset(image) && !core.isset(icon)) {
-        height -= 12;
+    var height = 30 + (textfont+5)*core.splitLines("ui", realContent, validWidth, font).length;
+    if (core.isset(name)) height += titlefont + 5;
+    if (id == 'hero')
+        height = Math.max(height, core.material.icons.hero.height+50);
+    else if (core.isset(icon))
+        height = Math.max(height, iconHeight+50);
+    if (core.isset(image) && !core.isset(icon))
         height = Math.max(height, 90);
-    }
 
     var xoffset = 11, yoffset = 16;
 
@@ -542,10 +544,10 @@ ui.prototype.drawTextBox = function(content, showAll) {
     // 名称
     core.canvas.ui.textAlign = "left";
 
-    var content_top = top + 35;
+    var content_top = top + 15 + textfont;
     if (core.isset(id)) {
 
-        content_top = top+57;
+        content_top += (titlefont + 5);
         core.setFillStyle('ui', titleColor);
         core.setStrokeStyle('ui', titleColor);
 
@@ -554,17 +556,17 @@ ui.prototype.drawTextBox = function(content, showAll) {
             core.setAlpha('ui', alpha);
             core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, heroHeight+2, null, 2);
             core.setAlpha('ui', 1);
-            core.fillText('ui', name, content_left, top + 30, null, 'bold '+titlefont+'px Verdana');
+            core.fillText('ui', name, content_left, top + 8 + titlefont, null, 'bold '+titlefont+'px Verdana');
             core.clearMap('ui', left + 15, top + 40, 32, heroHeight);
             core.fillRect('ui', left + 15, top + 40, 32, heroHeight, core.material.groundPattern);
             var heroIcon = core.material.icons.hero['down'];
             core.canvas.ui.drawImage(core.material.images.hero, heroIcon.stop * 32, heroIcon.loc * heroHeight, 32, heroHeight, left+15, top+40, 32, heroHeight);
         }
         else {
-            core.fillText('ui', name, content_left, top + 30, null, 'bold '+titlefont+'px Verdana');
+            core.fillText('ui', name, content_left, top + 8 + titlefont,  null, 'bold '+titlefont+'px Verdana');
             if (core.isset(icon)) {
                 core.setAlpha('ui', alpha);
-                core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, iconHeight + 2, null, 2);
+                core.strokeRect('ui', left + 15 - 1, top + 40-1, 34, iconHeight + 2, null, 2);
                 core.setAlpha('ui', 1);
                 core.status.boxAnimateObjs = [];
                 core.status.boxAnimateObjs.push({

@@ -1084,45 +1084,48 @@ return code;
 */;
 
 move_s
-    :   '移动事件' 'x' PosString? ',' 'y' PosString? '动画时间' Int? '不消失' Bool BGNL? StepString Newline
+    :   '移动事件' 'x' PosString? ',' 'y' PosString? '动画时间' Int? '不消失' Bool '不等待执行完毕' Bool BGNL? StepString Newline
     
 
 /* move_s
 tooltip : move: 让某个NPC/怪物移动,位置可不填代表当前事件
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=move%EF%BC%9A%E8%AE%A9%E6%9F%90%E4%B8%AAnpc%E6%80%AA%E7%89%A9%E7%A7%BB%E5%8A%A8
-default : ["","",500,false,"上右3下2左上左2"]
+default : ["","",500,false,false,"上右3下2左上左2"]
 colour : this.eventColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
-var code = '{"type": "move"'+floorstr+''+Int_0+', "steps": '+JSON.stringify(StepString_0)+', "keep": '+Bool_0+'},\n';
+Bool_0 = Bool_0?', "keep": true':'';
+Bool_1 = Bool_1?', "async": true':'';
+var code = '{"type": "move"'+floorstr+Int_0+Bool_0+Bool_1+', "steps": '+JSON.stringify(StepString_0)+'},\n';
 return code;
 */;
 
 moveHero_s
-    :   '移动勇士' '动画时间' Int? BGNL? StepString Newline
+    :   '移动勇士' '动画时间' Int? '不等待执行完毕' Bool BGNL? StepString Newline
     
 
 /* moveHero_s
 tooltip : moveHero：移动勇士,用这种方式移动勇士的过程中将无视一切地形, 无视一切事件, 中毒状态也不会扣血
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=movehero%EF%BC%9A%E7%A7%BB%E5%8A%A8%E5%8B%87%E5%A3%AB
-default : [500,"上右3下2左上左2"]
+default : [500,false,"上右3下2左上左2"]
 colour : this.dataColor
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
-var code = '{"type": "moveHero"'+Int_0+', "steps": '+JSON.stringify(StepString_0)+'},\n';
+Bool_0 = Bool_0?', "async": true':'';
+var code = '{"type": "moveHero"'+Int_0+Bool_0+', "steps": '+JSON.stringify(StepString_0)+'},\n';
 return code;
 */;
 
 jump_s
-    :   '跳跃事件' '起始 x' PosString? ',' 'y' PosString? '终止 x' PosString? ',' 'y' PosString? '动画时间' Int? '不消失' Bool Newline
+    :   '跳跃事件' '起始 x' PosString? ',' 'y' PosString? '终止 x' PosString? ',' 'y' PosString? '动画时间' Int? '不消失' Bool '不等待执行完毕' Bool Newline
 
 
 /* jump_s
 tooltip : jump: 让某个NPC/怪物跳跃
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=jump%EF%BC%9A%E8%AE%A9%E6%9F%90%E4%B8%AANPC%2F%E6%80%AA%E7%89%A9%E8%B7%B3%E8%B7%83
-default : ["","","","",500,true]
+default : ["","","","",500,true,false]
 colour : this.eventColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
@@ -1132,25 +1135,28 @@ if (PosString_2 && PosString_3) {
     floorstr += ', "to": ['+PosString_2+','+PosString_3+']';
 }
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
-var code = '{"type": "jump"'+floorstr+''+Int_0+', "keep": '+Bool_0+'},\n';
+Bool_0 = Bool_0?', "keep": true':'';
+Bool_1 = Bool_1?', "async": true':'';
+var code = '{"type": "jump"'+floorstr+''+Int_0+Bool_0+Bool_1+'},\n';
 return code;
 */;
 
 jumpHero_s
-    :   '跳跃勇士' 'x' PosString? ',' 'y' PosString? '动画时间' Int? Newline
+    :   '跳跃勇士' 'x' PosString? ',' 'y' PosString? '动画时间' Int? '不等待执行完毕' Bool Newline
 
 
 /* jumpHero_s
 tooltip : jumpHero: 跳跃勇士
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=jumpHero%EF%BC%9A%E8%B7%B3%E8%B7%83%E5%8B%87%E5%A3%AB
-default : ["","",500]
+default : ["","",500,false]
 colour : this.dataColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
-var code = '{"type": "jumpHero"'+floorstr+Int_0+'},\n';
+Bool_0 = Bool_0?', "async": true':'';
+var code = '{"type": "jumpHero"'+floorstr+Int_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -1910,22 +1916,22 @@ ActionParser.prototype.parseAction = function() {
     case "move": // 移动事件
       data.loc=data.loc||['',''];
       this.next = MotaActionBlocks['move_s'].xmlText([
-        data.loc[0],data.loc[1],data.time||0,data.keep,this.StepString(data.steps),this.next]);
+        data.loc[0],data.loc[1],data.time||0,data.keep||false,data.async||false,this.StepString(data.steps),this.next]);
       break;
     case "moveHero":
       this.next = MotaActionBlocks['moveHero_s'].xmlText([
-        data.time||0,this.StepString(data.steps),this.next]);
+        data.time||0,data.async||false,this.StepString(data.steps),this.next]);
       break;
     case "jump": // 跳跃事件
       data.from=data.from||['',''];
       data.to=data.to||['',''];
       this.next = MotaActionBlocks['jump_s'].xmlText([
-        data.from[0],data.from[1],data.to[0],data.to[1],data.time||0,data.keep,this.next]);
+        data.from[0],data.from[1],data.to[0],data.to[1],data.time||0,data.keep||false,data.async||false,this.next]);
       break;
     case "jumpHero": // 跳跃勇士
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['jumpHero_s'].xmlText([
-        data.loc[0],data.loc[1],data.time||0,this.next]);
+        data.loc[0],data.loc[1],data.time||0,data.async||false,this.next]);
       break;
     case "changeFloor": // 楼层转换
       data.loc=data.loc||['','']

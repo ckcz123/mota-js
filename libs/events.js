@@ -598,14 +598,26 @@ events.prototype.doAction = function() {
                 x=core.calValue(data.loc[0]);
                 y=core.calValue(data.loc[1]);
             }
-            core.moveBlock(x,y,data.steps,data.time,data.keep,function() {
-                core.events.doAction();
-            })
+            if (data.async) {
+                core.moveBlock(x,y,data.steps,data.time,data.keep);
+                this.doAction();
+            }
+            else {
+                core.moveBlock(x,y,data.steps,data.time,data.keep,function() {
+                    core.events.doAction();
+                })
+            }
             break;
         case "moveHero":
-            core.eventMoveHero(data.steps,data.time,function() {
-                core.events.doAction();
-            });
+            if (data.async) {
+                core.eventMoveHero(data.steps, data.time);
+                this.doAction();
+            }
+            else {
+                core.eventMoveHero(data.steps,data.time,function() {
+                    core.events.doAction();
+                });
+            }
             break;
         case "jump": // 跳跃事件
             {
@@ -618,9 +630,15 @@ events.prototype.doAction = function() {
                     ex=core.calValue(data.to[0]);
                     ey=core.calValue(data.to[1]);
                 }
-                core.jumpBlock(sx,sy,ex,ey,data.time,data.keep,function() {
-                    core.events.doAction();
-                });
+                if (data.async) {
+                    core.jumpBlock(sx,sy,ex,ey,data.time,data.keep);
+                    this.doAction();
+                }
+                else {
+                    core.jumpBlock(sx,sy,ex,ey,data.time,data.keep,function() {
+                        core.events.doAction();
+                    });
+                }
                 break;
             }
         case "jumpHero":
@@ -630,9 +648,15 @@ events.prototype.doAction = function() {
                     ex=core.calValue(data.loc[0]);
                     ey=core.calValue(data.loc[1]);
                 }
-                core.jumpHero(ex,ey,data.time,function() {
-                    core.events.doAction();
-                });
+                if (data.async) {
+                    core.jumpHero(ex,ey,data.time);
+                    this.doAction();
+                }
+                else {
+                    core.jumpHero(ex,ey,data.time,function() {
+                        core.events.doAction();
+                    });
+                }
                 break;
             }
         case "changeFloor": // 楼层转换

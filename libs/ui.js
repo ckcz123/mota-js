@@ -314,21 +314,29 @@ ui.prototype.getTitleAndIcon = function (content) {
             content=content.substring(index+1);
             var ss=str.split(",");
             if (ss.length==1) {
-                id=ss[0];
-                if (id=='hero') name = core.status.hero.name;
-                else if (core.isset(core.material.enemys[id])) {
-                    name = core.material.enemys[id].name;
-                    getInfo(id);
+                if (/^[-\w.]+\.png$/.test(ss[0])) {
+                    image = core.material.images.images[ss[0]];
                 }
                 else {
-                    name=id;
-                    id='npc';
+                    id=ss[0];
+                    if (id=='hero') name = core.status.hero.name;
+                    else if (core.isset(core.material.enemys[id])) {
+                        name = core.material.enemys[id].name;
+                        getInfo(id);
+                    }
+                    else {
+                        name=id;
+                        id='npc';
+                    }
                 }
             }
             else {
                 name=ss[0];
                 id = 'npc';
                 if (ss[1]=='hero') id = 'hero';
+                else if (/^[-\w.]+\.png$/.test(ss[1])) {
+                    image = core.material.images.images[ss[1]];
+                }
                 else getInfo(ss[1]);
             }
         }
@@ -390,9 +398,32 @@ ui.prototype.drawWindowSkin = function(background,canvas,x,y,w,h,direction,px,py
     // 仿RM窗口皮肤 ↑
 }
 
-// 绘制纯色的背景框
-ui.prototype.drawPureBackground = function (background,canvas,borderColor,x,y,w,h,direction,px,py) {
+// 计算有效文本框的宽度
+ui.prototype.calTextBoxWidth = function (canvas, content, min_width, max_width) {
+    // 无限长度自动换行
+    var allLines = core.splitLines(canvas, content);
 
+    // 如果不存在手动换行，则二分自动换行
+    if (allLines.length == 1) {
+        var prefer_lines = 3;
+        var start = Math.floor(min_width), end = Math.floor(max_width);
+        while (start < end) {
+            var mid = Math.floor((start+end)/2);
+            if (core.splitLines(canvas, content, mid).length < prefer_lines)
+                end = mid;
+            else
+                start = mid + 1;
+        }
+        return mid;
+    }
+    // 存在手动换行：以最长的为准
+    else {
+        var w = 0;
+        allLines.forEach(function (t) {
+            w = Math.max(w, core.canvas[canvas].measureText(t).width);
+        });
+        return core.clamp(w, min_width, max_width);
+    }
 }
 
 ////// 绘制一个对话框 //////
@@ -469,17 +500,36 @@ ui.prototype.drawTextBox = function(content, showAll) {
     core.status.boxAnimateObjs = [];
     core.clearMap('ui');
 
-    var left=7, right=416-left, width = right-left;
-    var content_left = left + 25;
-    if (id=='hero' || core.isset(icon)) content_left=left+63;
-
-    var validWidth = right-content_left - 10;
     var font = textfont + 'px Verdana';
     if (textAttribute.bold) font = "bold "+font;
     var realContent = content.replace(/(\r|\\r)(\[.*?])?/g, "");
 
-    var height = 20 + (textfont+5)*(core.splitLines("ui", realContent, validWidth, font).length+1)
-        + (id=='hero'?core.material.icons.hero.height-10:core.isset(name)?iconHeight-10:0);
+    var leftSpace = 25, rightSpace = 12;
+    if (core.isset(px) && core.isset(py)) leftSpace = 20;
+    if (id=='hero' || core.isset(icon)) leftSpace =  62; // 行走图：15+32+15
+    else if (core.isset(image)) leftSpace = 90; // 大头像：10+70+10
+    var left = 7, right = 416 - left, width = right - left, validWidth = width - leftSpace - rightSpace;
+
+    // 对话框效果：改为动态计算
+    if (core.isset(px) && core.isset(py)) {
+        var min_width = 220 - leftSpace, max_width = validWidth;
+        core.setFont('ui', font);
+        validWidth = this.calTextBoxWidth('ui', realContent, min_width, max_width);
+        width = validWidth + leftSpace + rightSpace;
+        // left必须在7~416-7-width区间内，以保证left>=7，right<=416-7
+        left = core.clamp(32*px+16-width/2, 7, 416-7-width);
+        right = left + width;
+    }
+
+    var content_left = left + leftSpace;
+    var height = 30 + (textfont+5)*core.splitLines("ui", realContent, validWidth, font).length;
+    if (core.isset(name)) height += titlefont + 5;
+    if (id == 'hero')
+        height = Math.max(height, core.material.icons.hero.height+50);
+    else if (core.isset(icon))
+        height = Math.max(height, iconHeight+50);
+    else if (core.isset(image))
+        height = Math.max(height, 90);
 
     var xoffset = 11, yoffset = 16;
 
@@ -539,10 +589,10 @@ ui.prototype.drawTextBox = function(content, showAll) {
     // 名称
     core.canvas.ui.textAlign = "left";
 
-    var content_top = top + 35;
+    var content_top = top + 15 + textfont;
     if (core.isset(id)) {
 
-        content_top = top+57;
+        content_top += (titlefont + 5);
         core.setFillStyle('ui', titleColor);
         core.setStrokeStyle('ui', titleColor);
 
@@ -551,17 +601,17 @@ ui.prototype.drawTextBox = function(content, showAll) {
             core.setAlpha('ui', alpha);
             core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, heroHeight+2, null, 2);
             core.setAlpha('ui', 1);
-            core.fillText('ui', name, content_left, top + 30, null, 'bold '+titlefont+'px Verdana');
+            core.fillText('ui', name, content_left, top + 8 + titlefont, null, 'bold '+titlefont+'px Verdana');
             core.clearMap('ui', left + 15, top + 40, 32, heroHeight);
             core.fillRect('ui', left + 15, top + 40, 32, heroHeight, core.material.groundPattern);
             var heroIcon = core.material.icons.hero['down'];
             core.canvas.ui.drawImage(core.material.images.hero, heroIcon.stop * 32, heroIcon.loc * heroHeight, 32, heroHeight, left+15, top+40, 32, heroHeight);
         }
         else {
-            core.fillText('ui', name, content_left, top + 30, null, 'bold '+titlefont+'px Verdana');
+            core.fillText('ui', name, content_left, top + 8 + titlefont,  null, 'bold '+titlefont+'px Verdana');
             if (core.isset(icon)) {
                 core.setAlpha('ui', alpha);
-                core.strokeRect('ui', left + 15 - 1, top + 40 - 1, 34, iconHeight + 2, null, 2);
+                core.strokeRect('ui', left + 15 - 1, top + 40-1, 34, iconHeight + 2, null, 2);
                 core.setAlpha('ui', 1);
                 core.status.boxAnimateObjs = [];
                 core.status.boxAnimateObjs.push({
@@ -570,10 +620,12 @@ ui.prototype.drawTextBox = function(content, showAll) {
                     'image': image,
                     'pos': icon*iconHeight
                 });
-
                 core.drawBoxAnimate();
             }
         }
+    }
+    if (core.isset(image) && !core.isset(icon)) {
+        core.canvas.ui.drawImage(image, 0, 0, image.width, image.height, left+10, top+10, 70, 70);
     }
 
     var offsetx = content_left, offsety = content_top;

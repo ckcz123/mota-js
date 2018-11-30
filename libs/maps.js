@@ -738,8 +738,6 @@ maps.prototype.getBlockCls = function (x, y, floorId, showDisable) {
 maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
     time = time || 500;
 
-    core.clearMap('route');
-
     var block = core.getBlock(x,y);
     if (block==null) {// 不存在
         if (core.isset(callback)) callback();
@@ -747,13 +745,8 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
     }
     var id = block.block.id;
 
-    // core.status.replay.animate=true;
-
     // 需要删除该块
     core.removeBlock(x,y);
-
-    core.clearMap('ui');
-    core.setAlpha('ui', 1.0);
 
     block=block.block;
 
@@ -786,8 +779,8 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
         faceIds = block.event.faceIds||{};
     }
 
-    var opacityVal = 1;
-    core.setOpacity('route', opacityVal);
+    var alpha = 1;
+    core.setAlpha('route', alpha);
     core.canvas.route.drawImage(image, bx * 32, by * height, 32, height, block.x * 32, block.y * 32 +32 - height, 32, height);
 
     // 要运行的轨迹：将steps展开
@@ -834,15 +827,11 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
 
         // 已经移动完毕，消失
         if (moveSteps.length==0) {
-            if (keep) opacityVal=0;
-            else opacityVal -= 0.06;
-            core.setOpacity('route', opacityVal);
+            if (keep) alpha=0;
+            else alpha -= 0.06;
             core.clearMap('route', nowX, nowY-height+32, 32, height);
-            core.canvas.route.drawImage(image, animateCurrent * 32, by * height, 32, height, nowX, nowY-height+32, 32, height);
-            if (opacityVal<=0) {
+            if (alpha<=0) {
                 clearInterval(animate);
-                core.clearMap('route');
-                core.setOpacity('route', 1);
                 // 不消失
                 if (keep) {
                     core.setBlock(id, nowX/32, nowY/32);
@@ -850,6 +839,11 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
                 }
                 // core.status.replay.animate=false;
                 if (core.isset(callback)) callback();
+            }
+            else {
+                core.setAlpha('route', alpha);
+                core.canvas.route.drawImage(image, animateCurrent * 32, by * height, 32, height, nowX, nowY-height+32, 32, height);
+                core.setAlpha('route', 1);
             }
         }
         else {
@@ -865,10 +859,10 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
                 }
             }
 
+            core.clearMap('route', nowX, nowY-height+32, 32, height);
             step++;
             nowX+=scan[direction].x*2;
             nowY+=scan[direction].y*2;
-            core.clearMap('route', nowX-32, nowY-32, 96, 96);
             // 绘制
             core.canvas.route.drawImage(image, animateCurrent * 32, by * height, 32, height, nowX, nowY-height+32, 32, height);
             if (step==16) {
@@ -883,7 +877,6 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
 ////// 显示跳跃某块的动画，达到{"type":"jump"}的效果 //////
 maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
     time = time || 500;
-    core.clearMap('route');
     var block = core.getBlock(sx,sy);
     if (block==null) {
         if (core.isset(callback)) callback();
@@ -891,12 +884,8 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
     }
     var id = block.block.id;
 
-    // core.status.replay.animate=true;
-
     // 需要删除该块
     core.removeBlock(sx,sy);
-    core.clearMap('ui');
-    core.setAlpha('ui', 1.0);
 
     block=block.block;
     var image, bx, by, height = block.event.height || 32;
@@ -926,8 +915,8 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
         by = core.material.icons[block.event.cls][block.event.id];
     }
 
-    var opacityVal = 1;
-    core.setOpacity('route', opacityVal);
+    var alpha = 1;
+    core.setAlpha('route', alpha);
     core.canvas.route.drawImage(image, bx*32, by * height, 32, height, block.x * 32, block.y * 32 +32 - height, 32, height);
 
     core.playSound('jump.mp3');
@@ -977,12 +966,10 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
             core.canvas.route.drawImage(image, animateCurrent * 32, by * height, 32, height, drawX(), drawY()-height+32, 32, height);
         }
         else {
-            if (keep) opacityVal=0;
-            else opacityVal -= 0.06;
-            core.setOpacity('route', opacityVal);
+            if (keep) alpha=0;
+            else alpha -= 0.06;
             core.clearMap('route', drawX(), drawY()-height+32, 32, height);
-            core.canvas.route.drawImage(image, animateCurrent * 32, by * height, 32, height, drawX(), drawY()-height+32, 32, height);
-            if (opacityVal<=0) {
+            if (alpha<=0) {
                 clearInterval(animate);
                 core.clearMap('route');
                 core.setOpacity('route', 1);
@@ -990,8 +977,12 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
                     core.setBlock(id, ex, ey);
                     core.showBlock(ex, ey);
                 }
-                // core.status.replay.animate=false;
                 if (core.isset(callback)) callback();
+            }
+            else {
+                core.setAlpha('route', alpha);
+                core.canvas.route.drawImage(image, animateCurrent * 32, by * height, 32, height, drawX(), drawY()-height+32, 32, height);
+                core.setAlpha('route', 1);
             }
         }
 

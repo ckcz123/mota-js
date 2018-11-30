@@ -314,7 +314,7 @@ ui.prototype.getTitleAndIcon = function (content) {
             content=content.substring(index+1);
             var ss=str.split(",");
             if (ss.length==1) {
-                if (/^\w+\.png$/.test(ss[0])) {
+                if (/^[-\w.]+\.png$/.test(ss[0])) {
                     image = core.material.images.images[ss[0]];
                 }
                 else {
@@ -334,7 +334,7 @@ ui.prototype.getTitleAndIcon = function (content) {
                 name=ss[0];
                 id = 'npc';
                 if (ss[1]=='hero') id = 'hero';
-                else if (/^\w+\.png$/.test(ss[1])) {
+                else if (/^[-\w.]+\.png$/.test(ss[1])) {
                     image = core.material.images.images[ss[1]];
                 }
                 else getInfo(ss[1]);
@@ -505,13 +505,14 @@ ui.prototype.drawTextBox = function(content, showAll) {
     var realContent = content.replace(/(\r|\\r)(\[.*?])?/g, "");
 
     var leftSpace = 25, rightSpace = 12;
+    if (core.isset(px) && core.isset(py)) leftSpace = 20;
     if (id=='hero' || core.isset(icon)) leftSpace =  62; // 行走图：15+32+15
     else if (core.isset(image)) leftSpace = 90; // 大头像：10+70+10
     var left = 7, right = 416 - left, width = right - left, validWidth = width - leftSpace - rightSpace;
 
     // 对话框效果：改为动态计算
     if (core.isset(px) && core.isset(py)) {
-        var min_width = 160, max_width = validWidth;
+        var min_width = 220 - leftSpace, max_width = validWidth;
         core.setFont('ui', font);
         validWidth = this.calTextBoxWidth('ui', realContent, min_width, max_width);
         width = validWidth + leftSpace + rightSpace;

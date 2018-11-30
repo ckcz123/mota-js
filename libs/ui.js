@@ -314,15 +314,20 @@ ui.prototype.getTitleAndIcon = function (content) {
             content=content.substring(index+1);
             var ss=str.split(",");
             if (ss.length==1) {
-                id=ss[0];
-                if (id=='hero') name = core.status.hero.name;
-                else if (core.isset(core.material.enemys[id])) {
-                    name = core.material.enemys[id].name;
-                    getInfo(id);
+                if (/^\w+\.png$/.test(ss[0])) {
+                    image = core.material.images.images[ss[0]];
                 }
                 else {
-                    name=id;
-                    id='npc';
+                    id=ss[0];
+                    if (id=='hero') name = core.status.hero.name;
+                    else if (core.isset(core.material.enemys[id])) {
+                        name = core.material.enemys[id].name;
+                        getInfo(id);
+                    }
+                    else {
+                        name=id;
+                        id='npc';
+                    }
                 }
             }
             else {
@@ -483,7 +488,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
         height = Math.max(height, core.material.icons.hero.height+50);
     else if (core.isset(icon))
         height = Math.max(height, iconHeight+50);
-    if (core.isset(image) && !core.isset(icon))
+    else if (core.isset(image))
         height = Math.max(height, 90);
 
     var xoffset = 11, yoffset = 16;
@@ -575,13 +580,12 @@ ui.prototype.drawTextBox = function(content, showAll) {
                     'image': image,
                     'pos': icon*iconHeight
                 });
-
                 core.drawBoxAnimate();
             }
-            else if (core.isset(image)) {
-                core.canvas.ui.drawImage(image, 0, 0, image.width, image.height, left+10, top+10, 70, 70);
-            }
         }
+    }
+    if (core.isset(image) && !core.isset(icon)) {
+        core.canvas.ui.drawImage(image, 0, 0, image.width, image.height, left+10, top+10, 70, 70);
     }
 
     var offsetx = content_left, offsety = content_top;

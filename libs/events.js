@@ -1414,13 +1414,10 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             if (core.isset(color)) {
                 // 直接变色
                 core.clearMap('curtain');
-                core.fillRect('curtain',0,0,416,core.arrayToRGBA(color));
+                core.fillRect('curtain',0,0,416,416,core.arrayToRGBA(color));
                 core.status.curtainColor = color;
             }
-            else {
-                core.clearMap('curtain');
-                core.setAlpha('curtain', 0);
-            }
+            else core.clearMap('curtain');
 
             // 更改天气
             var weather = core.getFlag('__weather__', null);

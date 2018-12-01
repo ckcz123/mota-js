@@ -123,24 +123,25 @@ control.prototype.setRequestAnimationFrame = function () {
 
         // weather
         if (core.isPlaying() && timestamp-core.animateFrame.weather.time>30) {
+
+            var ox = core.bigmap.offsetX, oy = core.bigmap.offsetY;
+
             if (core.animateFrame.weather.type == 'rain' && core.animateFrame.weather.level > 0) {
-
                 core.clearMap('weather');
-
                 core.canvas.weather.strokeStyle = 'rgba(174,194,224,0.8)';
                 core.canvas.weather.lineWidth = 1;
                 core.canvas.weather.lineCap = 'round';
 
                 core.animateFrame.weather.nodes.forEach(function (p) {
                     core.canvas.weather.beginPath();
-                    core.canvas.weather.moveTo(p.x, p.y);
-                    core.canvas.weather.lineTo(p.x + p.l * p.xs, p.y + p.l * p.ys);
+                    core.canvas.weather.moveTo(p.x-ox, p.y-oy);
+                    core.canvas.weather.lineTo(p.x + p.l * p.xs - ox, p.y + p.l * p.ys - oy);
                     core.canvas.weather.stroke();
 
                     p.x += p.xs;
                     p.y += p.ys;
-                    if (p.x > 416 || p.y > 416) {
-                        p.x = Math.random() * 416;
+                    if (p.x > core.bigmap.width*32 || p.y > core.bigmap.height*32) {
+                        p.x = Math.random() * core.bigmap.width*32;
                         p.y = -10;
                     }
 
@@ -162,26 +163,26 @@ control.prototype.setRequestAnimationFrame = function () {
 
                 var angle = core.animateFrame.weather.data;
                 core.animateFrame.weather.nodes.forEach(function (p) {
-                    core.canvas.weather.moveTo(p.x, p.y);
-                    core.canvas.weather.arc(p.x, p.y, p.r, 0, Math.PI * 2, true);
+                    core.canvas.weather.moveTo(p.x - ox, p.y - oy);
+                    core.canvas.weather.arc(p.x - ox, p.y - oy, p.r, 0, Math.PI * 2, true);
 
                     // update
                     p.x += Math.sin(angle) * 2;
                     p.y += Math.cos(angle + p.d) + 1 + p.r / 2;
 
-                    if (p.x > 416 + 5 || p.x < -5 || p.y > 416) {
+                    if (p.x > core.bigmap.width*32 + 5 || p.x < -5 || p.y > core.bigmap.height*32) {
                         if (Math.random() > 1 / 3) {
-                            p.x = Math.random() * 416;
+                            p.x = Math.random() * core.bigmap.width*32;
                             p.y = -10;
                         }
                         else {
                             if (Math.sin(angle) > 0) {
                                 p.x = -5;
-                                p.y = Math.random() * 416;
+                                p.y = Math.random() * core.bigmap.height*32;
                             }
                             else {
-                                p.x = 416 + 5;
-                                p.y = Math.random() * 416;
+                                p.x = core.bigmap.width*32 + 5;
+                                p.y = Math.random() * core.bigmap.height*32;
                             }
                         }
                     }
@@ -1412,14 +1413,14 @@ control.prototype.setWeather = function (type, level) {
     level = parseInt(level);
 
     // 当前天气：则忽略
-    if (type==core.animateFrame.weather.type &&
-        (!core.isset(level) || 20*level==core.animateFrame.weather.level)) {
+    if (type==core.animateFrame.weather.type && !core.isset(level)) {
         return;
     }
 
     if (!core.isset(level)) level=5;
     if (level<1) level=1; if (level>10) level=10;
-    level *= 20;
+    level *= parseInt(20*core.bigmap.width*core.bigmap.height/169);
+    // 计算当前的宽高
 
     core.clearMap('weather')
     core.animateFrame.weather.type = type;
@@ -1430,8 +1431,8 @@ control.prototype.setWeather = function (type, level) {
     if (type == 'rain') {
         for (var a=0;a<level;a++) {
             core.animateFrame.weather.nodes.push({
-                'x': Math.random()*416,
-                'y': Math.random()*416,
+                'x': Math.random()*core.bigmap.width*32,
+                'y': Math.random()*core.bigmap.height*32,
                 'l': Math.random() * 2.5,
                 'xs': -4 + Math.random() * 4 + 2,
                 'ys': Math.random() * 10 + 10
@@ -1441,10 +1442,10 @@ control.prototype.setWeather = function (type, level) {
     else if (type=='snow') {
         for (var a=0;a<level;a++) {
             core.animateFrame.weather.nodes.push({
-                'x': Math.random()*416,
-                'y': Math.random()*416,
+                'x': Math.random()*core.bigmap.width*32,
+                'y': Math.random()*core.bigmap.height*32,
                 'r': Math.random() * 5 + 1,
-                'd': Math.random() * level,
+                'd': Math.random() * Math.min(level, 200),
             })
         }
     }

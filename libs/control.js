@@ -1467,10 +1467,8 @@ control.prototype.setFg = function(color, time, callback) {
 
     if (!core.isset(color))
         color = [0,0,0,0];
-    if (color.length==3)
-        color.push(1);
-    if (color[3]<0) color[3]=0;
-    if (color[3]>1) color[3]=1;
+    if (!core.isset(color[3])) color[3] = 1;
+    color[3] = core.clamp(color[3],0,1);
 
     if (time==0) {
         // 直接变色
@@ -2524,6 +2522,7 @@ control.prototype.getLvName = function () {
 
 ////// 设置某个自定义变量或flag //////
 control.prototype.setFlag = function(flag, value) {
+    if (!core.isset(value)) return this.removeFlag(flag);
     if (!core.isset(core.status.hero)) return;
     core.status.hero.flags[flag]=value;
 }

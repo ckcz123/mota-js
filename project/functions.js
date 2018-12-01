@@ -1121,8 +1121,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		ctx.msImageSmoothingEnabled = false;
 		ctx.imageSmoothingEnabled = false;
 		core.clearMap('curtain');
-		core.setOpacity('curtain', 1);
-		core.setAlpha('curtain', 1);
 
 		// 绘制色调层，默认不透明度
 		if (!core.isset(color)) color = 0.9;

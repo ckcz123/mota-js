@@ -214,6 +214,8 @@ action
     |   tip_s
     |   setValue_s
     |   setFloor_s
+    |   setGlobalAttribute_s
+    |   setGlobalValue_s
     |   show_s
     |   hide_s
     |   trigger_s
@@ -433,6 +435,34 @@ default : ["title","","'字符串类型的值要加引号，其他类型则不�
 colour : this.dataColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "setFloor", "name": "'+Floor_Meta_List_0+'"'+IdString_0+', "value": "'+EvalString_0+'"},\n';
+return code;
+*/;
+
+
+setGlobalAttribute_s
+    :   '设置全局属性' ':' Global_Attribute_List '值' EvalString Newline
+
+
+/* setGlobalAttribute_s
+tooltip : setGlobalAttribute：设置全局属性
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=setFloor%ef%bc%9a%e8%ae%be%e7%bd%ae%e6%a5%bc%e5%b1%82%e5%b1%9e%e6%80%a7
+default : ["font","Verdana"]
+colour : this.dataColor
+var code = '{"type": "setGlobalAttribute", "name": "'+Global_Attribute_List_0+'", "value": "'+EvalString_0+'"},\n';
+return code;
+*/;
+
+
+setGlobalValue_s
+    :   '设置全局数值' ':' Global_Value_List '值' EvalString Newline
+
+
+/* setGlobalValue_s
+tooltip : setGlobalValue：设置全局属性
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=setFloor%ef%bc%9a%e8%ae%be%e7%bd%ae%e6%a5%bc%e5%b1%82%e5%b1%9e%e6%80%a7
+default : ["lavaDamage","100"]
+colour : this.dataColor
+var code = '{"type": "setGlobalValue", "name": "'+Global_Value_List_0+'", "value": '+EvalString_0+'},\n';
 return code;
 */;
 
@@ -1583,6 +1613,14 @@ Floor_Meta_List
     :   '楼层中文名'|'状态栏名称'|'能否使用楼传'|'能否打开快捷商店'|'是否不可浏览地图'|'默认地面ID'|'楼层贴图'|'宝石血瓶效果'|'上楼点坐标'|'下楼点坐标'|'背景音乐'|'画面色调'|'天气和强度'|'是否地下层'
     /*Floor_Meta_List ['title','name','canFlyTo', 'canUseQuickShop', 'cannotViewMap', 'defaultGround', 'images', 'item_ratio', 'upFloor', 'downFloor', 'bgm', 'color', 'weather', 'underGround']*/;
 
+Global_Attribute_List
+    :   '全局字体'|'横屏左侧状态栏背景'|'竖屏上方状态栏背景'|'竖屏下方道具栏背景'|'边框颜色'|'状态栏文字色'|'难度显示文字色'|'楼层转换背景'|'楼层转换文字色'
+    /*Global_Attribute_List ['font','statusLeftBackground','statusTopBackground', 'toolsBackground', 'borderColor', 'statusBarColor', 'hardLabelColor', 'floorChangingBackground', 'floorChangingTextColor']*/;
+
+Global_Value_List
+    :   '血网伤害'|'中毒伤害'|'衰弱效果'|'红宝石效果'|'蓝宝石效果'|'绿宝石效果'|'红血瓶效果'|'蓝血瓶效果'|'黄血瓶效果'|'绿血瓶效果'|'破甲比例'|'反击比例'|'净化比例'|'仇恨增加值'|'最大合法HP'|'动画时间'
+    /*Global_Value_List ['lavaDamage','poisonDamage','weakValue', 'redJewel', 'blueJewel', 'greenJewel', 'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'breakArmor', 'counterAttack', 'purify', 'hatred', 'maxValidHp', 'animateSpeed']*/;
+
 Bool:   'TRUE' 
     |   'FALSE'
     ;
@@ -2063,6 +2101,14 @@ ActionParser.prototype.parseAction = function() {
     case "setFloor":
       this.next = MotaActionBlocks['setFloor_s'].xmlText([
         data.name, data.floorId||null, data.value, this.next]);
+      break;
+    case "setGlobalAttribute":
+      this.next = MotaActionBlocks['setGlobalAttribute_s'].xmlText([
+        data.name, data.value, this.next]);
+      break;
+    case "setGlobalValue":
+      this.next = MotaActionBlocks['setGlobalValue_s'].xmlText([
+        data.name, data.value, this.next]);
       break;
     case "input":
       this.next = MotaActionBlocks['input_s'].xmlText([

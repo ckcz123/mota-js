@@ -1313,7 +1313,7 @@ ui.prototype.drawPagination = function (page, totalPage, top) {
     if (totalPage<=1) return;
     if (!core.isset(top)) top=12;
 
-    var globalFont = core.status.globalAttribute.font;
+    var globalFont = (core.status.globalAttribute||core.initStatus.globalAttribute).font;
     core.setFont('ui', 'bold 15px '+globalFont);
     core.setFillStyle('ui', '#DDDDDD');
 
@@ -2107,7 +2107,7 @@ ui.prototype.drawSLPanel = function(index, refresh) {
 
     var strokeColor = '#FFD700';
     if (core.status.event.selection) strokeColor = '#FF6A6A';
-    var globalFont = core.status.globalAttribute.font;
+    var globalFont = (core.status.globalAttribute||core.initStatus.globalAttribute).font;
 
     var drawBg = function() {
         core.clearMap('ui');

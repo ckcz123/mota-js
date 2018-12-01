@@ -327,7 +327,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"shield5": "core.status.hero.def += 100;core.status.hero.mdef += 100",
 		"bigKey": "core.status.hero.items.keys.yellowKey++;core.status.hero.items.keys.blueKey++;core.status.hero.items.keys.redKey++;",
 		"superPotion": "core.status.hero.hp *= 2",
-		"moneyPocket": "core.status.hero.money += core.values.moneyPocket"
+		"moneyPocket": "core.status.hero.money += 500"
 	},
 	"itemEffectTip": {
 		"redJewel": "'，攻击+'+core.values.redJewel * ratio",
@@ -352,7 +352,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"shield5": "'，防御+100，魔防+100'",
 		"bigKey": "'，全钥匙+1'",
 		"superPotion": "'，生命值翻倍'",
-		"moneyPocket": "'，金币+'+core.values.moneyPocket"
+		"moneyPocket": "'，金币+500'"
 	},
 	"useItemEffect": {
 		"book": "core.ui.drawBook(0);",

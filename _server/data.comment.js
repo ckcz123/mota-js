@@ -353,11 +353,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "textarea",
                     "_data": "绿血瓶加血数值"
                 },
-                "moneyPocket": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_data": "金钱袋加金币的数值"
-                },
                 "breakArmor": {
                     "_leaf": true,
                     "_type": "textarea",

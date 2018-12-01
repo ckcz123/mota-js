@@ -890,12 +890,20 @@ events.prototype.doAction = function() {
             }
             break;
         case "setFloor":
-            {
-                core.status.maps[data.floorId||core.status.floorId][data.name] = core.calValue(data.value);
-                core.updateStatusBar();
-                this.doAction();
-                break;
-            }
+            core.status.maps[data.floorId||core.status.floorId][data.name] = core.calValue(data.value);
+            core.updateStatusBar();
+            this.doAction();
+            break;
+        case "setGlobalAttribute":
+            core.status.globalAttribute[data.name] = data.value;
+            core.control.updateGlobalAttribute(data.name);
+            core.setFlag('globalAttribute', core.status.globalAttribute);
+            this.doAction();
+            break;
+        case "setGlobalValue":
+            core.values[data.name] = data.value;
+            this.doAction();
+            break;
         case "setHeroIcon":
             {
                 this.setHeroIcon(data.name);

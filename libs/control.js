@@ -2447,6 +2447,11 @@ control.prototype.loadData = function (data, callback) {
     }
 
     core.status.textAttribute = core.getFlag('textAttribute', core.status.textAttribute);
+    var toAttribute = core.getFlag('globalAttribute', core.status.globalAttribute);
+    if (core.utils.hashCode(toAttribute) != core.utils.hashCode(core.status.globalAttribute)) {
+        core.status.globalAttribute = toAttribute;
+        core.control.updateGlobalAttribute(Object.keys(toAttribute));
+    }
 
     // load icons
     var icon = core.getFlag("heroIcon", "hero.png");
@@ -2685,7 +2690,7 @@ control.prototype.updateStatusBar = function () {
 
     // 回放
     if (core.status.replay.replaying) {
-        core.statusBar.image.book.src = core.status.replay.pausing?core.statusBar.icons.play.src:core.statusBar.icons.pause.src;
+        core.statusBar.image.book.src = core.status.replay.pausing ? core.statusBar.icons.play.src : core.statusBar.icons.pause.src;
         core.statusBar.image.book.style.opacity = 1;
 
         core.statusBar.image.fly.src = core.statusBar.icons.stop.src;
@@ -2704,11 +2709,11 @@ control.prototype.updateStatusBar = function () {
     }
     else {
         core.statusBar.image.book.src = core.statusBar.icons.book.src;
-        core.statusBar.image.book.style.opacity = core.hasItem('book')?1:0.3;
+        core.statusBar.image.book.style.opacity = core.hasItem('book') ? 1 : 0.3;
 
         if (!core.flags.equipboxButton) {
             core.statusBar.image.fly.src = core.statusBar.icons.fly.src;
-            core.statusBar.image.fly.style.opacity = core.hasItem('fly')?1:0.3;
+            core.statusBar.image.fly.style.opacity = core.hasItem('fly') ? 1 : 0.3;
         }
         else {
             core.statusBar.image.fly.src = core.statusBar.icons.equipbox.src;
@@ -2745,6 +2750,64 @@ control.prototype.updateHeroIcon = function (name) {
 
     core.statusBar.image.name.src = canvas.toDataURL("image/png");
 
+}
+
+control.prototype.updateGlobalAttribute = function (name) {
+    if (!core.isset(name)) return;
+    if (name instanceof Array) {
+        name.forEach(function (t) {
+            core.control.updateGlobalAttribute(t);
+        });
+        return;
+    }
+    var attribute = core.status.globalAttribute || core.initStatus.globalAttribute;
+    if (!core.isset(attribute)) return;
+    switch (name) {
+        case 'statusLeftBackground':
+            if (core.domStyle.screenMode == 'horizontal' || core.domStyle.screenMode == 'bigScreen') {
+                core.dom.statusBar.style.background = attribute[name];
+            }
+            break;
+        case 'statusTopBackground':
+            if (core.domStyle.screenMode == 'vertical') {
+                core.dom.statusBar.style.background = attribute[name];
+            }
+            break;
+        case 'toolsBackground':
+            if (core.domStyle.screenMode == 'vertical') {
+                core.dom.toolBar.style.background = attribute[name];
+            }
+            break;
+        case 'borderColor':
+            {
+                var border = '3px ' + attribute[name] + ' solid';
+                var isVertical = core.domStyle.screenMode == 'vertical';
+                core.dom.statusBar.style.borderTop = border;
+                core.dom.statusBar.style.borderLeft = border;
+                core.dom.statusBar.style.borderRight = isVertical?'':border;
+                core.dom.gameDraw.style.border = border;
+                core.dom.toolBar.style.borderBottom = border;
+                core.dom.toolBar.style.borderLeft = border;
+                core.dom.toolBar.style.borderRight = isVertical?'':border;
+                break;
+            }
+        case 'statusBarColor':
+            {
+                var texts = core.dom.statusTexts;
+                for (var i=0;i<texts.length;i++)
+                    texts[i].style.color = attribute[name];
+                break;
+            }
+        case 'hardLabelColor':
+            core.dom.hard.style.color = attribute[name];
+            break;
+        case 'floorChangingBackground':
+            core.dom.floorMsgGroup.style.background = attribute[name];
+            break;
+        case 'floorChangingTextColor':
+            core.dom.floorMsgGroup.style.color = attribute[name];
+            break;
+    }
 }
 
 ////// 屏幕分辨率改变后重新自适应 //////
@@ -3156,9 +3219,7 @@ control.prototype.domRenderer = function(){
                 var className = styles[i].className
                 for(var j=0; j<core.dom[className].length; j++)
                     for(var k=0; k<rulesProp.length; k++) {
-                        var one = core.dom[className][j];
-                        if (one.id !== styles[i].noid)
-                            one.style[rulesProp[k]] = rules[rulesProp[k]];
+                        core.dom[className][j].style[rulesProp[k]] = rules[rulesProp[k]];
                     }
             }
             if(styles[i].hasOwnProperty('id')){

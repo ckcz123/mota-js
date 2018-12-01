@@ -414,6 +414,37 @@ value为必填项，代表要修改到的数值。其应该和楼层属性中的
 
 !> 如果修改到的是字符串类型，比如楼层中文名、状态栏名称、地面素材ID、背景音乐等，必须加引号，否则会报错。
 
+### setGlobalAttribute：设置一个全局属性
+
+使用`{"type":"setGlobalAttribute"}`可以设置一个全局属性。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+  {"type": "setGlobalAttribute", "name": "font", "value": "Verdana"}, // 设置字体为Verdana
+]
+```
+
+name必填项，代表要修改的全局属性。目前只能为`"font", "statusLeftBackground", "statusTopBackground", "toolsBackground", 
+"borderColor", "statusBarColor", "hardLabelColor", "floorChangingBackground", "floorChangingTextColor"`。
+
+value为必填项，代表要修改到的结果。此项无需再手动加单引号。
+
+### setGlobalValue：设置一个全局数值
+
+使用`{"type":"setGlobalValue"}`可以设置一个全局数值。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+  {"type": "setGlobalValue", "name": "lavaDamage", "value": 200}, // 设置血网伤害为200
+]
+```
+
+name必填项，代表要修改的全局数值，其和全塔属性中的values一一对应。目前只能为`"lavaDamage", "poisonDamage", "weakValue", "redJewel", 
+"blueJewel", "greenJewel", "redPotion", "bluePotion", "yellowPotion", "greenPotion", "breakArmor", "counterAttack",
+"purify", "hatred", "maxValidHp", "animateSpeed"`。
+
+value为必填项，代表要修改到的结果。该项必须是个数值。
+
 ### show：将一个禁用事件启用
 
 我们上面提到了，所有事件都必须靠其他事件驱动来完成，不存在当某个flag为true时自动执行的说法。那么，我们自然要有启用事件的写法。
@@ -675,6 +706,16 @@ name是可选的，代表目标行走图的文件名。
 ### update：立刻更新状态栏和地图显伤
 
 如果你需要刷新状态栏和地图显伤，只需要简单地调用 `{"type": "update"}` 即可。
+
+### hideStatusBar：隐藏状态栏
+
+使用`{"type": "hideStatusBar"}`可以隐藏状态栏。读档或重新开始游戏时，状态栏会重新显示。
+
+隐藏状态栏的状态下，将无法点击工具栏里面的按钮（如存读档怪物手册等）。建议仅在事件中使用，事件结束前显示。
+
+### showStatusBar：显示状态栏
+
+使用`{"type": "showStatusBar"}`会重新显示状态栏。
 
 ### updateEnemys：更新怪物数据
 

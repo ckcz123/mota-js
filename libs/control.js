@@ -293,6 +293,9 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
     // 清除游戏数据
     core.clearStatus();
 
+    // 显示状态栏
+    core.control.triggerStatusBar("show");
+
     // 初始化status
     core.status = core.clone(core.initStatus);
     // 初始化maps
@@ -2729,6 +2732,26 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.image.load.src = core.statusBar.icons.load.src;
 
         core.statusBar.image.settings.src = core.statusBar.icons.settings.src;
+    }
+}
+
+control.prototype.triggerStatusBar = function (name) {
+    if (name!='hide') name='show';
+    var statusItems = core.dom.status;
+    var toolItems = core.dom.tools;
+    if (name == 'hide') {
+        for (var i = 0; i < statusItems.length; ++i)
+            statusItems[i].style.opacity = 0;
+        for (var i = 0; i < toolItems.length; ++i)
+            toolItems[i].style.display = 'none';
+    }
+    else {
+        for (var i = 0; i < statusItems.length; ++i)
+            statusItems[i].style.opacity = 1;
+        for (var i = 0; i < toolItems.length; ++i)
+            toolItems[i].style.display = 'block';
+        if (core.domStyle.screenMode != 'vertical')
+            core.statusBar.image.shop.style.display = 'none';
     }
 }
 

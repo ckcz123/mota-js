@@ -98,8 +98,6 @@ events.prototype.startGame = function (hard, seed, route, callback) {
         console.log('开始游戏');
         core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
 
-        core.status.isStarting = true;
-
         if (core.isset(seed)) {
             core.setFlag('__seed__', seed);
             core.setFlag('__rand__', seed);
@@ -1044,6 +1042,14 @@ events.prototype.doAction = function() {
             }
         case "update":
             core.updateStatusBar();
+            this.doAction();
+            break;
+        case "showStatusBar":
+            core.control.triggerStatusBar("show");
+            this.doAction();
+            break;
+        case "hideStatusBar":
+            core.control.triggerStatusBar("hide");
             this.doAction();
             break;
         case "updateEnemys":

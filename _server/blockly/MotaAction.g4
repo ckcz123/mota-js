@@ -230,6 +230,8 @@ action
     |   setBgFgBlock_s
     |   setHeroIcon_s
     |   update_s
+    |   showStatusBar_s
+    |   hideStatusBar_s
     |   updateEnemys_s
     |   sleep_s
     |   wait_s
@@ -445,7 +447,7 @@ setGlobalAttribute_s
 
 /* setGlobalAttribute_s
 tooltip : setGlobalAttribute：设置全局属性
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=setFloor%ef%bc%9a%e8%ae%be%e7%bd%ae%e6%a5%bc%e5%b1%82%e5%b1%9e%e6%80%a7
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=setGlobalAttribute%ef%bc%9a%e8%ae%be%e7%bd%ae%e4%b8%80%e4%b8%aa%e5%85%a8%e5%b1%80%e5%b1%9e%e6%80%a7
 default : ["font","Verdana"]
 colour : this.dataColor
 var code = '{"type": "setGlobalAttribute", "name": "'+Global_Attribute_List_0+'", "value": "'+EvalString_0+'"},\n';
@@ -459,7 +461,7 @@ setGlobalValue_s
 
 /* setGlobalValue_s
 tooltip : setGlobalValue：设置全局属性
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=setFloor%ef%bc%9a%e8%ae%be%e7%bd%ae%e6%a5%bc%e5%b1%82%e5%b1%9e%e6%80%a7
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=setGlobalValue%ef%bc%9a%e8%ae%be%e7%bd%ae%e4%b8%80%e4%b8%aa%e5%85%a8%e5%b1%80%e6%95%b0%e5%80%bc
 default : ["lavaDamage","100"]
 colour : this.dataColor
 var code = '{"type": "setGlobalValue", "name": "'+Global_Value_List_0+'", "value": '+EvalString_0+'},\n';
@@ -765,6 +767,30 @@ tooltip : update: 立刻更新状态栏和地图显伤
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=update%EF%BC%9A%E7%AB%8B%E5%88%BB%E6%9B%B4%E6%96%B0%E7%8A%B6%E6%80%81%E6%A0%8F%E5%92%8C%E5%9C%B0%E5%9B%BE%E6%98%BE%E4%BC%A4
 colour : this.dataColor
 var code = '{"type": "update"},\n';
+return code;
+*/;
+
+showStatusBar_s
+    :   '显示状态栏' Newline
+
+
+/* showStatusBar_s
+tooltip : showStatusBar: 显示状态栏
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=showStatusBar%ef%bc%9a%e6%98%be%e7%a4%ba%e7%8a%b6%e6%80%81%e6%a0%8f
+colour : this.soundColor
+var code = '{"type": "showStatusBar"},\n';
+return code;
+*/;
+
+hideStatusBar_s
+    :   '隐藏状态栏' Newline
+
+
+/* hideStatusBar_s
+tooltip : hideStatusBar: 隐藏状态栏
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=hideStatusBar%ef%bc%9a%e9%9a%90%e8%97%8f%e7%8a%b6%e6%80%81%e6%a0%8f
+colour : this.soundColor
+var code = '{"type": "hideStatusBar"},\n';
 return code;
 */;
 
@@ -2173,6 +2199,14 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "update":
       this.next = MotaActionBlocks['update_s'].xmlText([
+        this.next]);
+      break;
+    case "showStatusBar":
+      this.next = MotaActionBlocks['showStatusBar_s'].xmlText([
+        this.next]);
+      break;
+    case "hideStatusBar":
+      this.next = MotaActionBlocks['hideStatusBar_s'].xmlText([
         this.next]);
       break;
     case "updateEnemys":

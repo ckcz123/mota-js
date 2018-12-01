@@ -64,7 +64,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"statusBarColor": "white",
 		"hardLabelColor": "red",
 		"floorChangingBackground": "black",
-		"floorChangingTextColor": "white"
+		"floorChangingTextColor": "white",
+		"font": "Verdana"
 	},
 	"firstData": {
 		"title": "魔塔样板",

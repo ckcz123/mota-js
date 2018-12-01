@@ -158,6 +158,17 @@ function core() {
             "bold": false,
             "time": 0,
         },
+        "globalAttribute": {
+            "statusLeftBackground": main.statusLeftBackground || "url(project/images/ground.png) repeat",
+            "statusTopBackground": main.statusTopBackground || "url(project/images/ground.png) repeat",
+            "toolsBackground": main.toolsBackground || "url(project/images/ground.png) repeat",
+            "borderColor": main.borderColor || "white",
+            "statusBarColor": main.statusBarColor || "white",
+            "hardLabelColor": main.hardLabelColor || "red",
+            "floorChangingBackground": main.floorChangingBackground || "black",
+            "floorChangingTextColor": main.floorChangingTextColor || "white",
+            "font": main.font || "Verdana"
+        },
         'curtainColor': null,
         'openingDoor': null,
         'isSkiing': false,

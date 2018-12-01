@@ -2802,7 +2802,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
 
     var shopDisplay;
 
-    var borderColor = main.borderColor||"white";
+    var borderColor = (core.status.globalAttribute||core.initStatus.globalAttribute).borderColor;
 
     statusBarBorder = '3px '+borderColor+' solid';
     toolBarBorder = '3px '+borderColor+' solid';
@@ -2845,14 +2845,14 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             statusHeight = scale*BASE_LINEHEIGHT * .8;
             statusLabelsLH = .8 * BASE_LINEHEIGHT *scale;
             statusMaxWidth = scale * DEFAULT_BAR_WIDTH * .95;
-            statusBackground = main.statusTopBackground;
+            statusBackground = (core.status.globalAttribute||core.initStatus.globalAttribute).statusTopBackground;
             toolBarHeight = tempBotBarH;
 
             toolBarTop = statusBarHeight + canvasWidth;
             toolBarBorder = '3px '+borderColor+' solid';
             toolsHeight = scale * BASE_LINEHEIGHT;
             toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH * .4;
-            toolsBackground = main.toolsBackground;
+            toolsBackground = (core.status.globalAttribute||core.initStatus.globalAttribute).toolsBackground;
             borderRight = '3px '+borderColor+' solid';
 
             margin = scale * SPACE * 2;
@@ -2869,7 +2869,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH * scale;
             statusBarHeight = gameGroupHeight - SPACE;
             statusBarBorder = '3px '+borderColor+' solid';
-            statusBackground = main.statusLeftBackground;
+            statusBackground = (core.status.globalAttribute||core.initStatus.globalAttribute).statusLeftBackground;
 
             statusHeight = scale*statusLineHeight * .8;
             statusLabelsLH = .8 * statusLineHeight *scale;
@@ -2901,7 +2901,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
 
         toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH;
         // statusBarHeight = statusLineHeight * count + SPACE * 2; //一共有9行
-        statusBackground = main.statusLeftBackground;
+        statusBackground = (core.status.globalAttribute||core.initStatus.globalAttribute).statusLeftBackground;
         statusBarHeight = gameGroupHeight - SPACE;
 
         statusHeight = statusLineHeight * .8;
@@ -2978,8 +2978,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 height: (gameGroupHeight - SPACE*2) + unit,
                 top: SPACE + unit,
                 right: SPACE + unit,
-                background: main.floorChangingBackground||"black",
-                color: main.floorChangingTextColor||"white"
+                background: (core.status.globalAttribute||core.initStatus.globalAttribute).floorChangingBackground,
+                color: (core.status.globalAttribute||core.initStatus.globalAttribute).floorChangingTextColor
             }
         },
         {
@@ -3017,7 +3017,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         {
             className: 'statusTexts',
             rules: {
-                color: main.statusBarColor||"white"
+                color: (core.status.globalAttribute||core.initStatus.globalAttribute).statusBarColor
             }
         },
         {
@@ -3132,7 +3132,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             id: 'hard',
             rules: {
                 lineHeight: toolsHeight + unit,
-                color: main.hardLabelColor||"red"
+                color: (core.status.globalAttribute||core.initStatus.globalAttribute).hardLabelColor
             }
         },
     ]

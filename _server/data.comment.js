@@ -41,11 +41,13 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "startBackground": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_string": true,
                     "_data": "标题界面的背景，建议使用jpg格式以压缩背景图空间"
                 },
                 "startLogoStyle": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_string": true,
                     "_data": "标题样式：可以改变颜色，也可以写\"display: none\"来隐藏标题"
                 },
                 "levelChoose": {
@@ -63,42 +65,56 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "statusLeftBackground": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_string": true,
                     "_data": "横屏时左侧状态栏的背景样式，可以定义背景图、平铺方式等。\n具体请网上搜索\"css background\"了解写法。\n如果弄一张图片作为背景图，推荐写法：\n\"url(project/images/XXX.png) 0 0/100% 100% no-repeat\"\n图片最好进行一些压缩等操作节省流量。"
                 },
                 "statusTopBackground": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_string": true,
                     "_data": "竖屏时上方状态栏的背景样式，可以定义背景图、平铺方式等。\n具体请网上搜索\"css background\"了解写法。\n如果弄一张图片作为背景图，推荐写法：\n\"url(project/images/XXX.png) 0 0/100% 100% no-repeat\"\n图片最好进行一些压缩等操作节省流量。"
                 },
                 "toolsBackground": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_string": true,
                     "_data": "竖屏时下方道具栏的背景样式，可以定义背景图、平铺方式等。\n具体请网上搜索\"css background\"了解写法。\n如果弄一张图片作为背景图，推荐写法：\n\"url(project/images/XXX.png) 0 0/100% 100% no-repeat\"\n图片最好进行一些压缩等操作节省流量。"
                 },
                 "borderColor": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_string": true,
                     "_data": "边框颜色，包括游戏边界的边框和对话框边框等。"
                 },
                 "statusBarColor": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_string": true,
                     "_data": "状态栏的文字颜色，默认是白色"
                 },
                 "hardLabelColor": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_string": true,
                     "_data": "难度显示的颜色，默认是红色"
                 },
                 "floorChangingBackground": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_string": true,
                     "_data": "楼层转换界面的背景样式；可以使用纯色（默认值black），也可以使用图片（参见状态栏的图片写法）"
                 },
                 "floorChangingTextColor": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_string": true,
                     "_data": "楼层转换界面的文字颜色，默认是白色"
+                },
+                "font": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_string": true,
+                    "_data": "游戏中使用的字体，默认是Verdana"
                 }
             }
         },
@@ -336,11 +352,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "textarea",
                     "_data": "绿血瓶加血数值"
-                },
-                "moneyPocket": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_data": "金钱袋加金币的数值"
                 },
                 "breakArmor": {
                     "_leaf": true,

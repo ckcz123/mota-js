@@ -214,6 +214,8 @@ action
     |   tip_s
     |   setValue_s
     |   setFloor_s
+    |   setGlobalAttribute_s
+    |   setGlobalValue_s
     |   show_s
     |   hide_s
     |   trigger_s
@@ -228,6 +230,8 @@ action
     |   setBgFgBlock_s
     |   setHeroIcon_s
     |   update_s
+    |   showStatusBar_s
+    |   hideStatusBar_s
     |   updateEnemys_s
     |   sleep_s
     |   wait_s
@@ -433,6 +437,34 @@ default : ["title","","'字符串类型的值要加引号，其他类型则不�
 colour : this.dataColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "setFloor", "name": "'+Floor_Meta_List_0+'"'+IdString_0+', "value": "'+EvalString_0+'"},\n';
+return code;
+*/;
+
+
+setGlobalAttribute_s
+    :   '设置全局属性' ':' Global_Attribute_List '值' EvalString Newline
+
+
+/* setGlobalAttribute_s
+tooltip : setGlobalAttribute：设置全局属性
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=setGlobalAttribute%ef%bc%9a%e8%ae%be%e7%bd%ae%e4%b8%80%e4%b8%aa%e5%85%a8%e5%b1%80%e5%b1%9e%e6%80%a7
+default : ["font","Verdana"]
+colour : this.dataColor
+var code = '{"type": "setGlobalAttribute", "name": "'+Global_Attribute_List_0+'", "value": "'+EvalString_0+'"},\n';
+return code;
+*/;
+
+
+setGlobalValue_s
+    :   '设置全局数值' ':' Global_Value_List '值' EvalString Newline
+
+
+/* setGlobalValue_s
+tooltip : setGlobalValue：设置全局属性
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=setGlobalValue%ef%bc%9a%e8%ae%be%e7%bd%ae%e4%b8%80%e4%b8%aa%e5%85%a8%e5%b1%80%e6%95%b0%e5%80%bc
+default : ["lavaDamage","100"]
+colour : this.dataColor
+var code = '{"type": "setGlobalValue", "name": "'+Global_Value_List_0+'", "value": '+EvalString_0+'},\n';
 return code;
 */;
 
@@ -735,6 +767,30 @@ tooltip : update: 立刻更新状态栏和地图显伤
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=update%EF%BC%9A%E7%AB%8B%E5%88%BB%E6%9B%B4%E6%96%B0%E7%8A%B6%E6%80%81%E6%A0%8F%E5%92%8C%E5%9C%B0%E5%9B%BE%E6%98%BE%E4%BC%A4
 colour : this.dataColor
 var code = '{"type": "update"},\n';
+return code;
+*/;
+
+showStatusBar_s
+    :   '显示状态栏' Newline
+
+
+/* showStatusBar_s
+tooltip : showStatusBar: 显示状态栏
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=showStatusBar%ef%bc%9a%e6%98%be%e7%a4%ba%e7%8a%b6%e6%80%81%e6%a0%8f
+colour : this.soundColor
+var code = '{"type": "showStatusBar"},\n';
+return code;
+*/;
+
+hideStatusBar_s
+    :   '隐藏状态栏' Newline
+
+
+/* hideStatusBar_s
+tooltip : hideStatusBar: 隐藏状态栏
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=hideStatusBar%ef%bc%9a%e9%9a%90%e8%97%8f%e7%8a%b6%e6%80%81%e6%a0%8f
+colour : this.soundColor
+var code = '{"type": "hideStatusBar"},\n';
 return code;
 */;
 
@@ -1583,6 +1639,14 @@ Floor_Meta_List
     :   '楼层中文名'|'状态栏名称'|'能否使用楼传'|'能否打开快捷商店'|'是否不可浏览地图'|'默认地面ID'|'楼层贴图'|'宝石血瓶效果'|'上楼点坐标'|'下楼点坐标'|'背景音乐'|'画面色调'|'天气和强度'|'是否地下层'
     /*Floor_Meta_List ['title','name','canFlyTo', 'canUseQuickShop', 'cannotViewMap', 'defaultGround', 'images', 'item_ratio', 'upFloor', 'downFloor', 'bgm', 'color', 'weather', 'underGround']*/;
 
+Global_Attribute_List
+    :   '全局字体'|'横屏左侧状态栏背景'|'竖屏上方状态栏背景'|'竖屏下方道具栏背景'|'边框颜色'|'状态栏文字色'|'难度显示文字色'|'楼层转换背景'|'楼层转换文字色'
+    /*Global_Attribute_List ['font','statusLeftBackground','statusTopBackground', 'toolsBackground', 'borderColor', 'statusBarColor', 'hardLabelColor', 'floorChangingBackground', 'floorChangingTextColor']*/;
+
+Global_Value_List
+    :   '血网伤害'|'中毒伤害'|'衰弱效果'|'红宝石效果'|'蓝宝石效果'|'绿宝石效果'|'红血瓶效果'|'蓝血瓶效果'|'黄血瓶效果'|'绿血瓶效果'|'破甲比例'|'反击比例'|'净化比例'|'仇恨增加值'|'最大合法HP'|'动画时间'
+    /*Global_Value_List ['lavaDamage','poisonDamage','weakValue', 'redJewel', 'blueJewel', 'greenJewel', 'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'breakArmor', 'counterAttack', 'purify', 'hatred', 'maxValidHp', 'animateSpeed']*/;
+
 Bool:   'TRUE' 
     |   'FALSE'
     ;
@@ -2064,6 +2128,14 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['setFloor_s'].xmlText([
         data.name, data.floorId||null, data.value, this.next]);
       break;
+    case "setGlobalAttribute":
+      this.next = MotaActionBlocks['setGlobalAttribute_s'].xmlText([
+        data.name, data.value, this.next]);
+      break;
+    case "setGlobalValue":
+      this.next = MotaActionBlocks['setGlobalValue_s'].xmlText([
+        data.name, data.value, this.next]);
+      break;
     case "input":
       this.next = MotaActionBlocks['input_s'].xmlText([
         data.text,this.next]);
@@ -2127,6 +2199,14 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "update":
       this.next = MotaActionBlocks['update_s'].xmlText([
+        this.next]);
+      break;
+    case "showStatusBar":
+      this.next = MotaActionBlocks['showStatusBar_s'].xmlText([
+        this.next]);
+      break;
+    case "hideStatusBar":
+      this.next = MotaActionBlocks['hideStatusBar_s'].xmlText([
         this.next]);
       break;
     case "updateEnemys":

@@ -335,6 +335,7 @@ function (enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId) {
         var vampireDamage = hero_hp * enemy.value;
 
         // 如果有神圣盾免疫吸血等可以在这里写
+        // 也可以用hasItem或hasEquip来判断装备
         if (core.hasFlag("shield5")) vampireDamage = 0; // 存在神圣盾，吸血伤害为0
 
         vampireDamage = Math.floor(vampireDamage) || 0;
@@ -348,11 +349,13 @@ function (enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId) {
 ```
 3. 免疫领域、夹击、阻击效果：在2.4.1之后，可以直接将flag:no_zone设为true来免疫领域效果，其他几个同理。
 ``` js
-// 同样写在道具的itemEffect中
-core.setFlag("no_zone", true); // 免疫领域
-core.setFlag("no_snipe", true); // 免疫阻击
-core.setFlag("no_laser", true);  // 免疫激光
-core.setFlag("no_betweenAttack", true); // 免疫夹击
+// 写在获得道具后事件
+[
+    {"type": "setValue", "name": "no_zone", "value": "true"}, // 免疫领域
+    {"type": "setValue", "name": "no_snipe", "value": "true"}, // 免疫阻击
+    {"type": "setValue", "name": "no_laser", "value": "true"}, // 免疫激光
+    {"type": "setValue", "name": "no_betweenAttack", "value": "true"}, // 免疫夹击
+]
 ```
 4. 如果有更高的需求，例如想让吸血效果变成一半，则还是在上面这些地方进行对应的修改即可。
 

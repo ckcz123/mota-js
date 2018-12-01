@@ -158,6 +158,17 @@ function core() {
             "bold": false,
             "time": 0,
         },
+        "globalAttribute": {
+            "statusLeftBackground": main.statusLeftBackground || "url(project/images/ground.png) repeat",
+            "statusTopBackground": main.statusTopBackground || "url(project/images/ground.png) repeat",
+            "toolsBackground": main.toolsBackground || "url(project/images/ground.png) repeat",
+            "borderColor": main.borderColor || "white",
+            "statusBarColor": main.statusBarColor || "white",
+            "hardLabelColor": main.hardLabelColor || "red",
+            "floorChangingBackground": main.floorChangingBackground || "black",
+            "floorChangingTextColor": main.floorChangingTextColor || "white",
+            "font": main.font || "Verdana"
+        },
         'curtainColor': null,
         'openingDoor': null,
         'isSkiing': false,
@@ -1247,6 +1258,12 @@ core.prototype.hasFlag = function(flag) {
     return core.control.hasFlag(flag);
 }
 
+////// 删除某个自定义变量或flag //////
+core.prototype.removeFlag = function(flag) {
+    core.control.removeFlag(flag);
+}
+
+////// 执行下一个自定义事件 //////
 core.prototype.doAction = function() {
     core.events.doAction();
 }

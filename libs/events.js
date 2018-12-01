@@ -759,7 +759,7 @@ events.prototype.doAction = function() {
             core.setWeather(data.name, data.level);
             if (core.isset(data.name))
                 core.setFlag('__weather__', [data.name, data.level]);
-            else core.setFlag('__weather__', null);
+            else core.removeFlag('__weather__');
             this.doAction();
             break;
         case "openDoor": // 开一个门，包括暗墙
@@ -890,12 +890,20 @@ events.prototype.doAction = function() {
             }
             break;
         case "setFloor":
-            {
-                core.status.maps[data.floorId||core.status.floorId][data.name] = core.calValue(data.value);
-                core.updateStatusBar();
-                this.doAction();
-                break;
-            }
+            core.status.maps[data.floorId||core.status.floorId][data.name] = core.calValue(data.value);
+            core.updateStatusBar();
+            this.doAction();
+            break;
+        case "setGlobalAttribute":
+            core.status.globalAttribute[data.name] = data.value;
+            core.control.updateGlobalAttribute(data.name);
+            core.setFlag('globalAttribute', core.status.globalAttribute);
+            this.doAction();
+            break;
+        case "setGlobalValue":
+            core.values[data.name] = data.value;
+            this.doAction();
+            break;
         case "setHeroIcon":
             {
                 this.setHeroIcon(data.name);
@@ -1036,6 +1044,14 @@ events.prototype.doAction = function() {
             }
         case "update":
             core.updateStatusBar();
+            this.doAction();
+            break;
+        case "showStatusBar":
+            core.control.triggerStatusBar("show");
+            this.doAction();
+            break;
+        case "hideStatusBar":
+            core.control.triggerStatusBar("hide");
             this.doAction();
             break;
         case "updateEnemys":
@@ -1380,6 +1396,9 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
 
             core.events.setFloorName(floorId);
 
+            // 重置画布尺寸
+            core.maps.resizeMap(floorId);
+
             // 更改BGM
             if (core.isset(core.status.maps[floorId].bgm)) {
                 var bgm = core.status.maps[floorId].bgm;
@@ -1425,8 +1444,6 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
                     }
                 })
             }
-            // 重置画布尺寸
-            core.maps.resizeMap(floorId);
             // 画地图
             core.drawMap(floorId, function () {
                 if (core.isset(heroLoc.direction))

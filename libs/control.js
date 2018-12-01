@@ -123,24 +123,25 @@ control.prototype.setRequestAnimationFrame = function () {
 
         // weather
         if (core.isPlaying() && timestamp-core.animateFrame.weather.time>30) {
+
+            var ox = core.bigmap.offsetX, oy = core.bigmap.offsetY;
+
             if (core.animateFrame.weather.type == 'rain' && core.animateFrame.weather.level > 0) {
-
                 core.clearMap('weather');
-
                 core.canvas.weather.strokeStyle = 'rgba(174,194,224,0.8)';
                 core.canvas.weather.lineWidth = 1;
                 core.canvas.weather.lineCap = 'round';
 
                 core.animateFrame.weather.nodes.forEach(function (p) {
                     core.canvas.weather.beginPath();
-                    core.canvas.weather.moveTo(p.x, p.y);
-                    core.canvas.weather.lineTo(p.x + p.l * p.xs, p.y + p.l * p.ys);
+                    core.canvas.weather.moveTo(p.x-ox, p.y-oy);
+                    core.canvas.weather.lineTo(p.x + p.l * p.xs - ox, p.y + p.l * p.ys - oy);
                     core.canvas.weather.stroke();
 
                     p.x += p.xs;
                     p.y += p.ys;
-                    if (p.x > 416 || p.y > 416) {
-                        p.x = Math.random() * 416;
+                    if (p.x > core.bigmap.width*32 || p.y > core.bigmap.height*32) {
+                        p.x = Math.random() * core.bigmap.width*32;
                         p.y = -10;
                     }
 
@@ -162,26 +163,26 @@ control.prototype.setRequestAnimationFrame = function () {
 
                 var angle = core.animateFrame.weather.data;
                 core.animateFrame.weather.nodes.forEach(function (p) {
-                    core.canvas.weather.moveTo(p.x, p.y);
-                    core.canvas.weather.arc(p.x, p.y, p.r, 0, Math.PI * 2, true);
+                    core.canvas.weather.moveTo(p.x - ox, p.y - oy);
+                    core.canvas.weather.arc(p.x - ox, p.y - oy, p.r, 0, Math.PI * 2, true);
 
                     // update
                     p.x += Math.sin(angle) * 2;
                     p.y += Math.cos(angle + p.d) + 1 + p.r / 2;
 
-                    if (p.x > 416 + 5 || p.x < -5 || p.y > 416) {
+                    if (p.x > core.bigmap.width*32 + 5 || p.x < -5 || p.y > core.bigmap.height*32) {
                         if (Math.random() > 1 / 3) {
-                            p.x = Math.random() * 416;
+                            p.x = Math.random() * core.bigmap.width*32;
                             p.y = -10;
                         }
                         else {
                             if (Math.sin(angle) > 0) {
                                 p.x = -5;
-                                p.y = Math.random() * 416;
+                                p.y = Math.random() * core.bigmap.height*32;
                             }
                             else {
-                                p.x = 416 + 5;
-                                p.y = Math.random() * 416;
+                                p.x = core.bigmap.width*32 + 5;
+                                p.y = Math.random() * core.bigmap.height*32;
                             }
                         }
                     }
@@ -291,6 +292,9 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
 
     // 清除游戏数据
     core.clearStatus();
+
+    // 显示状态栏
+    core.control.triggerStatusBar("show");
 
     // 初始化status
     core.status = core.clone(core.initStatus);
@@ -1412,14 +1416,14 @@ control.prototype.setWeather = function (type, level) {
     level = parseInt(level);
 
     // 当前天气：则忽略
-    if (type==core.animateFrame.weather.type &&
-        (!core.isset(level) || 20*level==core.animateFrame.weather.level)) {
+    if (type==core.animateFrame.weather.type && !core.isset(level)) {
         return;
     }
 
     if (!core.isset(level)) level=5;
     if (level<1) level=1; if (level>10) level=10;
-    level *= 20;
+    level *= parseInt(20*core.bigmap.width*core.bigmap.height/169);
+    // 计算当前的宽高
 
     core.clearMap('weather')
     core.animateFrame.weather.type = type;
@@ -1430,8 +1434,8 @@ control.prototype.setWeather = function (type, level) {
     if (type == 'rain') {
         for (var a=0;a<level;a++) {
             core.animateFrame.weather.nodes.push({
-                'x': Math.random()*416,
-                'y': Math.random()*416,
+                'x': Math.random()*core.bigmap.width*32,
+                'y': Math.random()*core.bigmap.height*32,
                 'l': Math.random() * 2.5,
                 'xs': -4 + Math.random() * 4 + 2,
                 'ys': Math.random() * 10 + 10
@@ -1441,10 +1445,10 @@ control.prototype.setWeather = function (type, level) {
     else if (type=='snow') {
         for (var a=0;a<level;a++) {
             core.animateFrame.weather.nodes.push({
-                'x': Math.random()*416,
-                'y': Math.random()*416,
+                'x': Math.random()*core.bigmap.width*32,
+                'y': Math.random()*core.bigmap.height*32,
                 'r': Math.random() * 5 + 1,
-                'd': Math.random() * level,
+                'd': Math.random() * Math.min(level, 200),
             })
         }
     }
@@ -2446,6 +2450,11 @@ control.prototype.loadData = function (data, callback) {
     }
 
     core.status.textAttribute = core.getFlag('textAttribute', core.status.textAttribute);
+    var toAttribute = core.getFlag('globalAttribute', core.status.globalAttribute);
+    if (core.utils.hashCode(toAttribute) != core.utils.hashCode(core.status.globalAttribute)) {
+        core.status.globalAttribute = toAttribute;
+        core.control.updateGlobalAttribute(Object.keys(toAttribute));
+    }
 
     // load icons
     var icon = core.getFlag("heroIcon", "hero.png");
@@ -2531,6 +2540,12 @@ control.prototype.getFlag = function(flag, defaultValue) {
 control.prototype.hasFlag = function(flag) {
     if (core.getFlag(flag)) return true;
     return false;
+}
+
+////// 删除某个自定义变量或flag //////
+control.prototype.removeFlag = function(flag) {
+    if (!core.isset(core.status.hero)) return;
+    delete core.status.hero.flags[flag];
 }
 
 ////// 锁定状态栏，常常用于事件处理 //////
@@ -2678,7 +2693,7 @@ control.prototype.updateStatusBar = function () {
 
     // 回放
     if (core.status.replay.replaying) {
-        core.statusBar.image.book.src = core.status.replay.pausing?core.statusBar.icons.play.src:core.statusBar.icons.pause.src;
+        core.statusBar.image.book.src = core.status.replay.pausing ? core.statusBar.icons.play.src : core.statusBar.icons.pause.src;
         core.statusBar.image.book.style.opacity = 1;
 
         core.statusBar.image.fly.src = core.statusBar.icons.stop.src;
@@ -2697,11 +2712,11 @@ control.prototype.updateStatusBar = function () {
     }
     else {
         core.statusBar.image.book.src = core.statusBar.icons.book.src;
-        core.statusBar.image.book.style.opacity = core.hasItem('book')?1:0.3;
+        core.statusBar.image.book.style.opacity = core.hasItem('book') ? 1 : 0.3;
 
         if (!core.flags.equipboxButton) {
             core.statusBar.image.fly.src = core.statusBar.icons.fly.src;
-            core.statusBar.image.fly.style.opacity = core.hasItem('fly')?1:0.3;
+            core.statusBar.image.fly.style.opacity = core.hasItem('fly') ? 1 : 0.3;
         }
         else {
             core.statusBar.image.fly.src = core.statusBar.icons.equipbox.src;
@@ -2717,6 +2732,26 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.image.load.src = core.statusBar.icons.load.src;
 
         core.statusBar.image.settings.src = core.statusBar.icons.settings.src;
+    }
+}
+
+control.prototype.triggerStatusBar = function (name) {
+    if (name!='hide') name='show';
+    var statusItems = core.dom.status;
+    var toolItems = core.dom.tools;
+    if (name == 'hide') {
+        for (var i = 0; i < statusItems.length; ++i)
+            statusItems[i].style.opacity = 0;
+        for (var i = 0; i < toolItems.length; ++i)
+            toolItems[i].style.display = 'none';
+    }
+    else {
+        for (var i = 0; i < statusItems.length; ++i)
+            statusItems[i].style.opacity = 1;
+        for (var i = 0; i < toolItems.length; ++i)
+            toolItems[i].style.display = 'block';
+        if (core.domStyle.screenMode != 'vertical')
+            core.statusBar.image.shop.style.display = 'none';
     }
 }
 
@@ -2738,6 +2773,64 @@ control.prototype.updateHeroIcon = function (name) {
 
     core.statusBar.image.name.src = canvas.toDataURL("image/png");
 
+}
+
+control.prototype.updateGlobalAttribute = function (name) {
+    if (!core.isset(name)) return;
+    if (name instanceof Array) {
+        name.forEach(function (t) {
+            core.control.updateGlobalAttribute(t);
+        });
+        return;
+    }
+    var attribute = core.status.globalAttribute || core.initStatus.globalAttribute;
+    if (!core.isset(attribute)) return;
+    switch (name) {
+        case 'statusLeftBackground':
+            if (core.domStyle.screenMode == 'horizontal' || core.domStyle.screenMode == 'bigScreen') {
+                core.dom.statusBar.style.background = attribute[name];
+            }
+            break;
+        case 'statusTopBackground':
+            if (core.domStyle.screenMode == 'vertical') {
+                core.dom.statusBar.style.background = attribute[name];
+            }
+            break;
+        case 'toolsBackground':
+            if (core.domStyle.screenMode == 'vertical') {
+                core.dom.toolBar.style.background = attribute[name];
+            }
+            break;
+        case 'borderColor':
+            {
+                var border = '3px ' + attribute[name] + ' solid';
+                var isVertical = core.domStyle.screenMode == 'vertical';
+                core.dom.statusBar.style.borderTop = border;
+                core.dom.statusBar.style.borderLeft = border;
+                core.dom.statusBar.style.borderRight = isVertical?'':border;
+                core.dom.gameDraw.style.border = border;
+                core.dom.toolBar.style.borderBottom = border;
+                core.dom.toolBar.style.borderLeft = border;
+                core.dom.toolBar.style.borderRight = isVertical?'':border;
+                break;
+            }
+        case 'statusBarColor':
+            {
+                var texts = core.dom.statusTexts;
+                for (var i=0;i<texts.length;i++)
+                    texts[i].style.color = attribute[name];
+                break;
+            }
+        case 'hardLabelColor':
+            core.dom.hard.style.color = attribute[name];
+            break;
+        case 'floorChangingBackground':
+            core.dom.floorMsgGroup.style.background = attribute[name];
+            break;
+        case 'floorChangingTextColor':
+            core.dom.floorMsgGroup.style.color = attribute[name];
+            break;
+    }
 }
 
 ////// 屏幕分辨率改变后重新自适应 //////
@@ -2795,7 +2888,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
 
     var shopDisplay;
 
-    var borderColor = main.borderColor||"white";
+    var borderColor = (core.status.globalAttribute||core.initStatus.globalAttribute).borderColor;
 
     statusBarBorder = '3px '+borderColor+' solid';
     toolBarBorder = '3px '+borderColor+' solid';
@@ -2838,14 +2931,14 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             statusHeight = scale*BASE_LINEHEIGHT * .8;
             statusLabelsLH = .8 * BASE_LINEHEIGHT *scale;
             statusMaxWidth = scale * DEFAULT_BAR_WIDTH * .95;
-            statusBackground = main.statusTopBackground;
+            statusBackground = (core.status.globalAttribute||core.initStatus.globalAttribute).statusTopBackground;
             toolBarHeight = tempBotBarH;
 
             toolBarTop = statusBarHeight + canvasWidth;
             toolBarBorder = '3px '+borderColor+' solid';
             toolsHeight = scale * BASE_LINEHEIGHT;
             toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH * .4;
-            toolsBackground = main.toolsBackground;
+            toolsBackground = (core.status.globalAttribute||core.initStatus.globalAttribute).toolsBackground;
             borderRight = '3px '+borderColor+' solid';
 
             margin = scale * SPACE * 2;
@@ -2862,7 +2955,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH * scale;
             statusBarHeight = gameGroupHeight - SPACE;
             statusBarBorder = '3px '+borderColor+' solid';
-            statusBackground = main.statusLeftBackground;
+            statusBackground = (core.status.globalAttribute||core.initStatus.globalAttribute).statusLeftBackground;
 
             statusHeight = scale*statusLineHeight * .8;
             statusLabelsLH = .8 * statusLineHeight *scale;
@@ -2894,7 +2987,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
 
         toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH;
         // statusBarHeight = statusLineHeight * count + SPACE * 2; //一共有9行
-        statusBackground = main.statusLeftBackground;
+        statusBackground = (core.status.globalAttribute||core.initStatus.globalAttribute).statusLeftBackground;
         statusBarHeight = gameGroupHeight - SPACE;
 
         statusHeight = statusLineHeight * .8;
@@ -2971,8 +3064,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 height: (gameGroupHeight - SPACE*2) + unit,
                 top: SPACE + unit,
                 right: SPACE + unit,
-                background: main.floorChangingBackground||"black",
-                color: main.floorChangingTextColor||"white"
+                background: (core.status.globalAttribute||core.initStatus.globalAttribute).floorChangingBackground,
+                color: (core.status.globalAttribute||core.initStatus.globalAttribute).floorChangingTextColor
             }
         },
         {
@@ -3010,7 +3103,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         {
             className: 'statusTexts',
             rules: {
-                color: main.statusBarColor||"white"
+                color: (core.status.globalAttribute||core.initStatus.globalAttribute).statusBarColor
             }
         },
         {
@@ -3125,7 +3218,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             id: 'hard',
             rules: {
                 lineHeight: toolsHeight + unit,
-                color: main.hardLabelColor||"red"
+                color: (core.status.globalAttribute||core.initStatus.globalAttribute).hardLabelColor
             }
         },
     ]
@@ -3149,9 +3242,7 @@ control.prototype.domRenderer = function(){
                 var className = styles[i].className
                 for(var j=0; j<core.dom[className].length; j++)
                     for(var k=0; k<rulesProp.length; k++) {
-                        var one = core.dom[className][j];
-                        if (one.id !== styles[i].noid)
-                            one.style[rulesProp[k]] = rules[rulesProp[k]];
+                        core.dom[className][j].style[rulesProp[k]] = rules[rulesProp[k]];
                     }
             }
             if(styles[i].hasOwnProperty('id')){

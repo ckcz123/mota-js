@@ -509,6 +509,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		var vampire_damage = hero_hp * enemy.value;
 
 		// 如果有神圣盾免疫吸血等可以在这里写
+		// 也可以用hasItem和hasEquip来判定装备
 		// if (core.hasFlag('shield5')) vampire_damage = 0;
 
 		vampire_damage = Math.floor(vampire_damage) || 0;
@@ -1036,8 +1037,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 名称
 	core.canvas.ui.textAlign = "left";
-	core.fillText('ui', "HTML5 魔塔样板", text_start, top+35, "#FFD700", "bold 22px Verdana");
-	core.fillText('ui', "版本： "+core.firstData.version, text_start, top + 80, "#FFFFFF", "bold 17px Verdana");
+	var globalFont = (core.status.globalAttribute||core.initStatus.globalAttribute).font;
+	core.fillText('ui', "HTML5 魔塔样板", text_start, top+35, "#FFD700", "bold 22px "+globalFont);
+	core.fillText('ui', "版本： "+core.firstData.version, text_start, top + 80, "#FFFFFF", "bold 17px "+globalFont);
 	core.fillText('ui', "作者： 艾之葵", text_start, top + 112);
 	core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112+32);
 	// TODO: 写自己的“关于”页面，每次增加32像素即可
@@ -1066,7 +1068,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 如果某个flag为真
 	if (core.hasFlag("xxx")) {
 		// 千万别忘了将该flag清空！否则下次仍然会执行这段代码。
-		core.setFlag("xxx", false);
+		core.removeFlag("xxx");
 		// 使用insertAction来插入若干自定义事件执行
 		core.insertAction([
 			{"type":"openDoor", "loc":[0,0], "floorId": "MT0"}

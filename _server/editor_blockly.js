@@ -84,6 +84,8 @@ editor_blockly = function () {
         MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
       ]),
       MotaActionBlocks['setFloor_s'].xmlText(),
+      MotaActionBlocks['setGlobalAttribute_s'].xmlText(),
+      MotaActionBlocks['setGlobalValue_s'].xmlText(),
       MotaActionBlocks['input_s'].xmlText(),
       MotaActionBlocks['input2_s'].xmlText(),
       MotaActionBlocks['update_s'].xmlText(),
@@ -131,6 +133,8 @@ editor_blockly = function () {
       MotaActionBlocks['wait_s'].xmlText(),
       MotaActionBlocks['viberate_s'].xmlText(),
       MotaActionBlocks['animate_s'].xmlText(),
+      MotaActionBlocks['showStatusBar_s'].xmlText(),
+      MotaActionBlocks['hideStatusBar_s'].xmlText(),
       MotaActionBlocks['setFg_0_s'].xmlText(),
       MotaActionBlocks['setFg_1_s'].xmlText(),
       MotaActionBlocks['setWeather_s'].xmlText(),

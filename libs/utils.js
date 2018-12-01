@@ -648,7 +648,12 @@ utils.prototype.download = function (filename, content) {
 
     // Step 1: 如果是iOS平台，直接不支持
     if (core.platform.isIOS) {
-        alert("iOS平台下不支持下载操作！");
+        if (core.copy(content)) {
+            alert("iOS平台下不支持直接下载文件！\n所有应下载内容已经复制到您的剪切板，请自行创建空白文件并粘贴。");
+        }
+        else {
+            alert("iOS平台下不支持下载操作！");
+        }
         return;
     }
 
@@ -671,7 +676,6 @@ utils.prototype.download = function (filename, content) {
         var blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
         var href = window.URL.createObjectURL(blob);
         var opened=window.open(href, "_blank");
-        // if (!opened) window.location.href=href;
         window.URL.revokeObjectURL(href);
         return;
     }

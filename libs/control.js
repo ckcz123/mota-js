@@ -221,6 +221,7 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
     core.status.played = false;
     core.clearStatus();
     core.clearMap('all');
+    core.clearMap('curtain');
 
     if (core.flags.startUsingCanvas) {
         core.dom.startTop.style.display = 'none';
@@ -1033,7 +1034,7 @@ control.prototype.updateViewport = function() {
 ////// 绘制勇士 //////
 control.prototype.drawHero = function (direction, x, y, status, offset) {
 
-    if (!core.isPlaying() || core.status.isStarting) return;
+    if (!core.isPlaying()) return;
 
     var scan = {
         'up': {'x': 0, 'y': -1},
@@ -1510,15 +1511,12 @@ control.prototype.setFg = function(color, time, callback) {
 
 ////// 更新全地图显伤 //////
 control.prototype.updateDamage = function (floorId, canvas) {
-
-    if (!core.isset(floorId)) floorId = core.status.floorId;
+    floorId = floorId || core.status.floorId;
+    if (!core.isset(floorId)) return;
     if (!core.isset(canvas)) {
         canvas = core.canvas.damage;
         core.clearMap('damage');
     }
-
-    // 正在开始游戏中
-    if (core.status.isStarting) return;
 
     // 更新显伤
     var mapBlocks = core.status.maps[floorId].blocks;
@@ -1673,7 +1671,6 @@ control.prototype.chooseReplayFile = function () {
         }
 
         if (core.flags.startUsingCanvas) {
-            core.status.isStarting = false;
             core.startGame('', obj.seed, core.decodeRoute(obj.route));
         }
         else {

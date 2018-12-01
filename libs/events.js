@@ -91,14 +91,12 @@ events.prototype.initGame = function () {
 ////// 游戏开始事件 //////
 events.prototype.startGame = function (hard, seed, route, callback) {
 
-    if (core.status.isStarting) return;
-    core.status.isStarting = true;
-
     var start = function () {
         console.log('开始游戏');
-        core.resetStatus(core.firstData.hero, hard, core.firstData.floorId, null, core.initStatus.maps);
-
-        core.status.isStarting = true;
+        core.resetStatus(core.firstData.hero, hard, null, null, core.initStatus.maps);
+        var nowLoc = core.clone(core.getHeroLoc());
+        core.setHeroLoc('x', -1);
+        core.setHeroLoc('y', -1);
 
         if (core.isset(seed)) {
             core.setFlag('__seed__', seed);
@@ -106,19 +104,15 @@ events.prototype.startGame = function (hard, seed, route, callback) {
         }
         else core.utils.__init_seed();
 
-        if (!core.flags.startUsingCanvas)
-            core.events.setInitData(hard);
-
         core.clearMap('all');
+        core.clearMap('curtain');
         core.clearStatusBar();
 
         var post_start = function () {
 
-            core.status.isStarting = false;
-
             core.control.triggerStatusBar('show');
 
-            core.changeFloor(core.status.floorId, null, core.status.hero.loc, null, function() {
+            core.changeFloor(core.firstData.floorId, null, nowLoc, null, function() {
                 if (core.isset(callback)) callback();
             }, true);
 
@@ -164,6 +158,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
             });
         }
         else {
+            core.events.setInitData(hard);
             real_start();
         }
 
@@ -1334,6 +1329,7 @@ events.prototype.trigger = function (x, y) {
 
 events.prototype.setFloorName = function (floorId) {
     floorId = floorId || core.status.floorId;
+    if (!core.isset(floorId)) return;
     // 根据文字判断是否斜体
     var floorName = core.status.maps[floorId].name || "";
     if (typeof floorName == 'number') floorName = ""+floorName;
@@ -1358,7 +1354,11 @@ events.prototype.setFloorName = function (floorId) {
 ////// 楼层切换 //////
 events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback, fromLoad) {
 
-    if (!core.isset(floorId)) floorId = core.status.floorId;
+    floorId = floorId || core.status.floorId;
+    if (!core.isset(floorId)) {
+        if (core.isset(callback)) callback();
+        return;
+    }
 
     if (floorId == ':before') {
         var index=core.floorIds.indexOf(core.status.floorId);

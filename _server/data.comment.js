@@ -281,7 +281,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "event",
                     "_event": "firstArrive",
                     "_range": "thiseval==null || thiseval instanceof Array",
-                    "_data": "使用画布绘制开始菜单。可以在这里自定义需要的标题界面等内容。"
+                    "_data": "标题界面事件化，可以使用事件流的形式来绘制开始界面等。\n需要开启startUsingCanvas这个开关。\n详见文档-个性化-标题界面事件化。"
                 },
                 "startText": {
                     "_leaf": true,

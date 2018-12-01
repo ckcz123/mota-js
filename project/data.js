@@ -105,6 +105,10 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		},
 		"startCanvas": [
 			{
+				"type": "comment",
+				"text": "在这里可以用事件来自定义绘制标题界面的背景图等"
+			},
+			{
 				"type": "showImage",
 				"name": "bg.jpg",
 				"loc": [
@@ -113,11 +117,23 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				]
 			},
 			{
+				"type": "comment",
+				"text": "给用户提供选择项，这里简单的使用了choices事件"
+			},
+			{
+				"type": "comment",
+				"text": "也可以贴按钮图然后使用循环处理+等待操作来完成"
+			},
+			{
 				"type": "choices",
 				"choices": [
 					{
 						"text": "开始游戏",
 						"action": [
+							{
+								"type": "comment",
+								"text": "检查bgm状态，下同"
+							},
 							{
 								"type": "function",
 								"function": "function(){\ncore.control.checkBgm()\n}"
@@ -127,19 +143,31 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 								"condition": "core.flags.startDirectly",
 								"true": [
 									{
+										"type": "comment",
+										"text": "直接开始游戏，设置初始化数据"
+									},
+									{
 										"type": "function",
 										"function": "function(){\ncore.events.setInitData('')\n}"
 									}
 								],
 								"false": [
 									{
+										"type": "comment",
+										"text": "动态生成难度选择项"
+									},
+									{
 										"type": "function",
-										"function": "function(){\n// 动态生成难度选择项\nvar choices = [];\nmain.levelChoose.forEach(function (one) {\n\tchoices.push({\"text\": one[0], \"action\": [\n\t\t{\"type\": \"function\", \"function\": \"function() { core.status.hard = '\"+one[1]+\"'; core.events.setInitData('\"+one[1]+\"'); }\"}\n\t]});\n})\ncore.insertAction({\"type\": \"choices\", \"choices\": choices});\n}"
+										"function": "function(){\nvar choices = [];\nmain.levelChoose.forEach(function (one) {\n\tchoices.push({\"text\": one[0], \"action\": [\n\t\t{\"type\": \"function\", \"function\": \"function() { core.status.hard = '\"+one[1]+\"'; core.events.setInitData('\"+one[1]+\"'); }\"}\n\t]});\n})\ncore.insertAction({\"type\": \"choices\", \"choices\": choices});\n}"
 									}
 								]
 							},
 							{
 								"type": "showImage"
+							},
+							{
+								"type": "comment",
+								"text": "成功选择难度"
 							}
 						]
 					},
@@ -154,8 +182,16 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 								"type": "showImage"
 							},
 							{
+								"type": "comment",
+								"text": "这段代码会结束事件，打开读档页面，读取存档或重新开始"
+							},
+							{
 								"type": "function",
-								"function": "function(){\ncore.insertAction([{\"type\": \"exit\"}], null, null, function() {\n\tcore.status.played = false;\n\tcore.status.isStarting = false;\n\tcore.load();\n})\n}"
+								"function": "function(){\ncore.insertAction([{\"type\": \"exit\"}], null, null, function() {\n\tcore.status.played = false;\n\tcore.load();\n})\n}"
+							},
+							{
+								"type": "comment",
+								"text": "不管读档有没有成功，都会重新开始，这个地方不会被执行到"
 							}
 						]
 					},
@@ -167,12 +203,24 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 								"function": "function(){\ncore.control.checkBgm()\n}"
 							},
 							{
+								"type": "comment",
+								"text": "这段代码会结束事件，选择录像文件，播放录像或重新开始"
+							},
+							{
 								"type": "function",
 								"function": "function(){\ncore.insertAction([{\"type\": \"exit\"}], null, null, function() {\n\tcore.restart();\n\tcore.chooseReplayFile();\n})\n}"
+							},
+							{
+								"type": "comment",
+								"text": "不管录像有没有成功，都会重新开始，这个地方不会被执行到"
 							}
 						]
 					}
 				]
+			},
+			{
+				"type": "comment",
+				"text": "接下来会执行startText中的事件"
 			}
 		],
 		"startText": [
@@ -320,7 +368,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"hatredDecrease": true,
 		"betweenAttackCeil": false,
 		"useLoop": false,
-		"startUsingCanvas": true,
+		"startUsingCanvas": false,
 		"startDirectly": false,
 		"canOpenBattleAnimate": true,
 		"showBattleAnimateConfirm": false,

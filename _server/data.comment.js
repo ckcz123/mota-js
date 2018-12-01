@@ -276,6 +276,13 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         }
                     }
                 },
+                "startCanvas": {
+                    "_leaf": true,
+                    "_type": "event",
+                    "_event": "firstArrive",
+                    "_range": "thiseval==null || thiseval instanceof Array",
+                    "_data": "使用画布绘制开始菜单。可以在这里自定义需要的标题界面等内容。"
+                },
                 "startText": {
                     "_leaf": true,
                     "_type": "event",
@@ -559,6 +566,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "checkbox",
                     "_bool": "bool",
                     "_data": "是否循环计算临界；如果此项为true则使用循环法（而不是回合数计算法）来算临界"
+                },
+                "startUsingCanvas": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "是否开始菜单canvas化；如果此项为true，则将使用canvas来绘制开始菜单"
                 },
                 "startDirectly": {
                     "_leaf": true,

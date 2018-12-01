@@ -1,4 +1,4 @@
-var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
+var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d = 
 {
 	"main": {
 		"floorIds": [
@@ -103,6 +103,78 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"flags": {},
 			"steps": 0
 		},
+		"startCanvas": [
+			{
+				"type": "showImage",
+				"name": "bg.jpg",
+				"loc": [
+					0,
+					0
+				]
+			},
+			{
+				"type": "choices",
+				"choices": [
+					{
+						"text": "开始游戏",
+						"action": [
+							{
+								"type": "function",
+								"function": "function(){\ncore.control.checkBgm()\n}"
+							},
+							{
+								"type": "if",
+								"condition": "core.flags.startDirectly",
+								"true": [
+									{
+										"type": "function",
+										"function": "function(){\ncore.events.setInitData('')\n}"
+									}
+								],
+								"false": [
+									{
+										"type": "function",
+										"function": "function(){\n// 动态生成难度选择项\nvar choices = [];\nmain.levelChoose.forEach(function (one) {\n\tchoices.push({\"text\": one[0], \"action\": [\n\t\t{\"type\": \"function\", \"function\": \"function() { core.status.hard = '\"+one[1]+\"'; core.events.setInitData('\"+one[1]+\"'); }\"}\n\t]});\n})\ncore.insertAction({\"type\": \"choices\", \"choices\": choices});\n}"
+									}
+								]
+							},
+							{
+								"type": "showImage"
+							}
+						]
+					},
+					{
+						"text": "读取存档",
+						"action": [
+							{
+								"type": "function",
+								"function": "function(){\ncore.control.checkBgm()\n}"
+							},
+							{
+								"type": "showImage"
+							},
+							{
+								"type": "function",
+								"function": "function(){\ncore.insertAction([{\"type\": \"exit\"}], null, null, function() {\n\tcore.status.played = false;\n\tcore.status.isStarting = false;\n\tcore.load();\n})\n}"
+							}
+						]
+					},
+					{
+						"text": "回放录像",
+						"action": [
+							{
+								"type": "function",
+								"function": "function(){\ncore.control.checkBgm()\n}"
+							},
+							{
+								"type": "function",
+								"function": "function(){\ncore.insertAction([{\"type\": \"exit\"}], null, null, function() {\n\tcore.restart();\n\tcore.chooseReplayFile();\n})\n}"
+							}
+						]
+					}
+				]
+			}
+		],
 		"startText": [
 			"Hi，欢迎来到 HTML5 魔塔样板！\n\n本样板由艾之葵制作，可以让你在不会写任何代码\n的情况下也能做出属于自己的H5魔塔！",
 			"这里游戏开始时的剧情。\n定义在data.js的startText处。\n\n你可以在这里写上自己的内容。",
@@ -248,6 +320,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"hatredDecrease": true,
 		"betweenAttackCeil": false,
 		"useLoop": false,
+		"startUsingCanvas": true,
 		"startDirectly": false,
 		"canOpenBattleAnimate": true,
 		"showBattleAnimateConfirm": false,

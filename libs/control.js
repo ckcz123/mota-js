@@ -222,6 +222,14 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
     core.clearStatus();
     core.clearMap('all');
 
+    if (core.flags.startUsingCanvas) {
+        core.dom.startTop.style.display = 'none';
+        core.dom.startButtonGroup.style.display = 'block';
+        core.events.startGame('');
+        if (core.isset(callback)) callback();
+        return;
+    }
+
     if(noAnimate) {
         core.dom.startTop.style.display = 'none';
         // core.playGame();
@@ -1655,15 +1663,22 @@ control.prototype.chooseReplayFile = function () {
         }
         if (core.isset(obj.version) && obj.version!=core.firstData.version) {
             // alert("游戏版本不一致！");
-            if (!confirm("游戏版本不一致！\n你仍然想播放录像吗？"))
+            if (!confirm("游戏版本不一致！\n你仍然想播放录像吗？")) {
                 return;
+            }
         }
-        if (!core.isset(obj.route) || !core.isset(obj.hard)) {
+        if (!core.isset(obj.route)) {
             alert("无效的录像！");
             return;
         }
 
-        core.startGame(obj.hard, obj.seed, core.decodeRoute(obj.route));
+        if (core.flags.startUsingCanvas) {
+            core.status.isStarting = false;
+            core.startGame('', obj.seed, core.decodeRoute(obj.route));
+        }
+        else {
+            core.startGame(obj.hard, obj.seed, core.decodeRoute(obj.route));
+        }
     }, function () {
 
     })
@@ -2669,6 +2684,16 @@ control.prototype.playSound = function (sound) {
     catch (eee) {
         console.log("无法播放SE "+sound);
         console.log(eee);
+    }
+}
+
+control.prototype.checkBgm = function() {
+    if (core.musicStatus.startDirectly && core.musicStatus.bgmStatus) {
+        if (core.musicStatus.playingBgm==null
+            || core.material.bgms[core.musicStatus.playingBgm].paused) {
+            core.musicStatus.playingBgm=null;
+            core.playBgm(core.bgms[0]);
+        }
     }
 }
 

@@ -106,13 +106,17 @@ events.prototype.startGame = function (hard, seed, route, callback) {
         }
         else core.utils.__init_seed();
 
-        core.events.setInitData(hard);
+        if (!core.flags.startUsingCanvas)
+            core.events.setInitData(hard);
+
         core.clearMap('all');
         core.clearStatusBar();
 
         var post_start = function () {
 
             core.status.isStarting = false;
+
+            core.control.triggerStatusBar('show');
 
             core.changeFloor(core.status.floorId, null, core.status.hero.loc, null, function() {
                 if (core.isset(callback)) callback();
@@ -125,7 +129,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
                 formData.append('name', core.firstData.name);
                 formData.append('version', core.firstData.version);
                 formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
-                formData.append('hard', core.encodeBase64(hard));
+                formData.append('hard', core.encodeBase64(core.status.hard));
                 formData.append('hardCode', core.getFlag('hard', 0));
                 formData.append('base64', 1);
 
@@ -133,28 +137,46 @@ events.prototype.startGame = function (hard, seed, route, callback) {
             })
         }
 
-        core.insertAction(core.clone(core.firstData.startText), null, null, function() {
-            if (!core.status.replay.replaying && core.flags.showBattleAnimateConfirm) { // 是否提供“开启战斗动画”的选择项
-                core.status.event.selection = core.flags.battleAnimate ? 0 : 1;
-                core.ui.drawConfirmBox("你想开启战斗动画吗？\n之后可以在菜单栏中开启或关闭。\n（强烈建议新手开启此项）", function () {
-                    core.flags.battleAnimate = true;
-                    core.setLocalStorage('battleAnimate', true);
+        var real_start = function () {
+            core.insertAction(core.clone(core.firstData.startText), null, null, function() {
+                if (!core.flags.startUsingCanvas && !core.status.replay.replaying && core.flags.showBattleAnimateConfirm) { // 是否提供“开启战斗动画”的选择项
+                    core.status.event.selection = core.flags.battleAnimate ? 0 : 1;
+                    core.ui.drawConfirmBox("你想开启战斗动画吗？\n之后可以在菜单栏中开启或关闭。\n（强烈建议新手开启此项）", function () {
+                        core.flags.battleAnimate = true;
+                        core.setLocalStorage('battleAnimate', true);
+                        post_start();
+                    }, function () {
+                        core.flags.battleAnimate = false;
+                        core.setLocalStorage('battleAnimate', false);
+                        post_start();
+                    });
+                }
+                else {
                     post_start();
-                }, function () {
-                    core.flags.battleAnimate = false;
-                    core.setLocalStorage('battleAnimate', false);
-                    post_start();
-                });
-            }
-            else {
-                post_start();
-            }
-        });
+                }
+            });
+        }
+
+        if (core.flags.startUsingCanvas) {
+            core.control.triggerStatusBar('hide');
+            core.insertAction(core.clone(core.firstData.startCanvas), null, null, function() {
+                real_start();
+            });
+        }
+        else {
+            real_start();
+        }
 
         if (core.isset(route)) {
             core.startReplay(route);
         }
 
+    }
+
+    if (core.flags.startUsingCanvas) {
+        core.dom.startPanel.style.display = 'none';
+        start();
+        return;
     }
 
     if (core.isset(route)) {

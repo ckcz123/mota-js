@@ -1653,7 +1653,7 @@ core.insertAction([
 	// 如果某个flag为真
 	if (core.hasFlag("xxx")) {
 		// 千万别忘了将该flag清空！否则下次仍然会执行这段代码。
-		core.setFlag("xxx", false);
+		core.removeFlag("xxx");
 		// 使用insertAction来插入若干自定义事件执行
 		core.insertAction([
 			{"type":"openDoor", "loc":[0,0], "floorId": "MT0"}
@@ -1680,7 +1680,7 @@ core.insertAction([
 // 每层楼的并行事件处理代码样例
 if (core.getFlag("door",0)==2) {
     // 将该flag清空
-    core.setFlag("door", 0);
+    core.removeFlag("door");
     // 开门，如果是当前层则无需写floorId
     core.insertAction([
         {"type":"openDoor", "loc":[0,0]}

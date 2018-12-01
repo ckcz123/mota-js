@@ -2533,6 +2533,12 @@ control.prototype.hasFlag = function(flag) {
     return false;
 }
 
+////// 删除某个自定义变量或flag //////
+control.prototype.removeFlag = function(flag) {
+    if (!core.isset(core.status.hero)) return;
+    delete core.status.hero.flags[flag];
+}
+
 ////// 锁定状态栏，常常用于事件处理 //////
 control.prototype.lockControl = function () {
     core.status.lockControl = true;

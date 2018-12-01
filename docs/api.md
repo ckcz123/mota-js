@@ -115,6 +115,10 @@ core.hasFlag('xyz')
 返回是否存在某个变量且不为0。等价于 core.getFlag('xyz', 0)!=0 。
 
 
+core.removeFlag('xyz')
+删除某个flag/变量。
+
+
 core.insertAction(list, x, y, callback)
 插入并执行一段自定义事件。在这里你可以写任意的自定义事件列表，有关详细写法请参见文档-事件。
 x和y如果设置则覆盖"当前事件点"的坐标，callback如果设置则覆盖事件执行完毕后的回调函数。

@@ -219,6 +219,7 @@ HTML5的塔都是可以进行控制台调试的。
 - `core.setFlag('xxx', 1)` 设置某个flag/自定义变量的值。
 - `core.getFlag('xxx', 10)` 获得某个flag/自定义变量的值；如果该项不存在（未被定义），则返回第二个参数的值。
 - `core.hasFlag('xxx')` 返回是否存在某个变量且不为0。等价于`core.getFlag('xxx', 0)!=0`。
+- `core.removeFlag('xxx')` 删除某个flag/自定义变量
 - `core.insertAction(list)` 执行一段自定义事件。比如 `core.insertAction(["剧情文本"])` 将执行一个剧情文本显示事件。
 - `core.changeFloor('MT2', 'downFloor')` 立刻执行楼层切换到MT2层的下楼点位置。
 - `core.changeFloor('MT5', null, {'x': 4, 'y': 7})` 立刻切换楼层到MT5层的(4,7)点。

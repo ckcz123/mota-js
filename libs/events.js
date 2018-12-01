@@ -759,7 +759,7 @@ events.prototype.doAction = function() {
             core.setWeather(data.name, data.level);
             if (core.isset(data.name))
                 core.setFlag('__weather__', [data.name, data.level]);
-            else core.setFlag('__weather__', null);
+            else core.removeFlag('__weather__');
             this.doAction();
             break;
         case "openDoor": // 开一个门，包括暗墙

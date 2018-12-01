@@ -1247,6 +1247,12 @@ core.prototype.hasFlag = function(flag) {
     return core.control.hasFlag(flag);
 }
 
+////// 删除某个自定义变量或flag //////
+core.prototype.removeFlag = function(flag) {
+    core.control.removeFlag(flag);
+}
+
+////// 执行下一个自定义事件 //////
 core.prototype.doAction = function() {
     core.events.doAction();
 }

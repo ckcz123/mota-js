@@ -177,7 +177,7 @@ function core() {
         // 动画
         'globalAnimateObjs': [],
         'boxAnimateObjs': [],
-        'autotileAnimateObjs': {},
+        'autotileAnimateObjs': {"status": 0, "blocks": [], "map": null, "bgmap": null, "fgmap": null},
         'animateObjs': [],
     };
     this.status = {};

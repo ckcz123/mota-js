@@ -11,6 +11,7 @@ function editor() {
         if (string.indexOf(substring) > -1){
             message = 'Script Error: See Browser Console for Detail';
         } else {
+            if (url) url = url.substring(url.lastIndexOf('/')+1);
             message = [
                 'Message: ' + msg,
                 'URL: ' + url,

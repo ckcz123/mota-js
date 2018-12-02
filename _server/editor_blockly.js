@@ -131,7 +131,8 @@ editor_blockly = function () {
     '特效/声音':[
       MotaActionBlocks['sleep_s'].xmlText(),
       MotaActionBlocks['wait_s'].xmlText(),
-      MotaActionBlocks['viberate_s'].xmlText(),
+      MotaActionBlocks['waitAsync_s'].xmlText(),
+      MotaActionBlocks['vibrate_s'].xmlText(),
       MotaActionBlocks['animate_s'].xmlText(),
       MotaActionBlocks['showStatusBar_s'].xmlText(),
       MotaActionBlocks['hideStatusBar_s'].xmlText(),

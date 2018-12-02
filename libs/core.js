@@ -41,7 +41,8 @@ function core() {
             'level': 0,
             'nodes': [],
             'data': null,
-        }
+        },
+        "asyncId": {}
     }
     this.musicStatus = {
         'audioContext': null, // WebAudioContext

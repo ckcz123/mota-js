@@ -235,6 +235,7 @@ action
     |   updateEnemys_s
     |   sleep_s
     |   wait_s
+    |   waitAsync_s
     |   battle_s
     |   openDoor_s
     |   changeFloor_s
@@ -245,7 +246,7 @@ action
     |   follow_s
     |   unfollow_s
     |   animate_s
-    |   viberate_s
+    |   vibrate_s
     |   showImage_0_s
     |   showImage_1_s
     |   animateImage_0_s
@@ -819,6 +820,7 @@ var code = '{"type": "sleep", "time": '+Int_0+'},\n';
 return code;
 */;
 
+
 battle_s
     :   '强制战斗' IdString Newline
     
@@ -949,18 +951,18 @@ var code = '{"type": "unfollow"' + EvalString_0 + '},\n';
 return code;
 */;
 
-viberate_s
+vibrate_s
     :   '画面震动' '时间' Int '不等待执行完毕' Bool Newline
 
 
-/* viberate_s
-tooltip : viberate: 画面震动
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=viberate%ef%bc%9a%e7%94%bb%e9%9d%a2%e9%9c%87%e5%8a%a8
+/* vibrate_s
+tooltip : vibrate: 画面震动
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=vibrate%ef%bc%9a%e7%94%bb%e9%9d%a2%e9%9c%87%e5%8a%a8
 default : [2000,false]
 colour : this.soundColor
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
 var async = Bool_0?', "async": true':''
-var code = '{"type": "viberate"' + Int_0 + async + '},\n';
+var code = '{"type": "vibrate"' + Int_0 + async + '},\n';
 return code;
 */;
 
@@ -1458,6 +1460,20 @@ colour : this.soundColor
 var code = '{"type": "wait"},\n';
 return code;
 */;
+
+
+waitAsync_s
+    :   '等待所有异步事件执行完毕'
+
+
+/* waitAsync_s
+tooltip : waitAsync: 等待所有异步事件执行完毕
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=waitAsync%ef%bc%9a%e7%ad%89%e5%be%85%e6%89%80%e6%9c%89%e5%bc%82%e6%ad%a5%e4%ba%8b%e4%bb%b6%e6%89%a7%e8%a1%8c%e5%ae%8c%e6%af%95
+colour : this.soundColor
+var code = '{"type": "waitAsync"},\n';
+return code;
+*/;
+
 
 function_s
     :   '自定义JS脚本' BGNL? Newline RawEvalString Newline BEND Newline
@@ -2023,8 +2039,8 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['animate_s'].xmlText([
         data.name,animate_loc,data.async||false,this.next]);
       break;
-    case "viberate": // 画面震动
-      this.next = MotaActionBlocks['viberate_s'].xmlText([data.time||0, data.async||false, this.next]);
+    case "vibrate": // 画面震动
+      this.next = MotaActionBlocks['vibrate_s'].xmlText([data.time||0, data.async||false, this.next]);
       break;
     case "showImage": // 显示图片
       if(this.isset(data.name)){
@@ -2219,6 +2235,10 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "wait": // 等待用户操作
       this.next = MotaActionBlocks['wait_s'].xmlText([
+        this.next]);
+      break;
+    case "waitAsync": // 等待所有异步事件执行完毕
+      this.next = MotaActionBlocks['waitAsync_s'].xmlText([
         this.next]);
       break;
     case "revisit": // 立刻重新执行该事件

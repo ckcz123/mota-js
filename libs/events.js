@@ -1059,7 +1059,7 @@ events.prototype.doAction = function() {
             core.updateStatusBar();
             this.doAction();
             break;
-        case "viberate":
+        case "vibrate":
             if (data.async) {
                 core.events.vibrate(data.time);
                 this.doAction();
@@ -1102,6 +1102,16 @@ events.prototype.doAction = function() {
                 }
             }
             break;
+        case "waitAsync": // 等待所有异步事件执行完毕
+            {
+                var test = window.setInterval(function () {
+                    if (Object.keys(core.animateFrame.asyncId)==0) {
+                        clearInterval(test);
+                        core.events.doAction();
+                    }
+                }, 50);
+                break;
+            }
         case "revisit": // 立刻重新执行该事件
             {
                 var block=core.getBlock(x,y); // 重新获得事件
@@ -1513,6 +1523,7 @@ events.prototype.animateImage = function (type, image, loc, time, keep, callback
         else opacityVal -= 0.1;
         core.setOpacity('data', opacityVal);
         if (opacityVal >=1 || opacityVal<=0) {
+            delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             if (type == 'show' && keep)
                 core.canvas.image.drawImage(image, x, y);
@@ -1522,6 +1533,8 @@ events.prototype.animateImage = function (type, image, loc, time, keep, callback
             if (core.isset(callback)) callback();
         }
     }, time / 10);
+
+    core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 移动图片 //////
@@ -1554,13 +1567,14 @@ events.prototype.moveImage = function (image, from, to, time, keep, callback) {
         if (step <= steps)
             drawImage();
         else {
+            delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
-            // score.clearMap('data');
-            // core.status.replay.animate=false;
             if (keep) core.canvas.image.drawImage(image, toX, toY);
             if (core.isset(callback)) callback();
         }
     }, per_time);
+
+    core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 淡入淡出音乐 //////
@@ -1587,12 +1601,15 @@ events.prototype.setVolume = function (value, time, callback) {
         var nowVolume = currVolume+(value-currVolume)*step/32;
         set(nowVolume);
         if (step>=32) {
+            delete core.animateFrame.asyncId[fade];
             clearInterval(fade);
             // core.status.replay.animate=false;
             if (core.isset(callback))
                 callback();
         }
     }, time / 32);
+
+    core.animateFrame.asyncId[fade] = true;
 }
 
 ////// 画面震动 //////
@@ -1650,11 +1667,14 @@ events.prototype.vibrate = function(time, callback) {
         update();
         addGameCanvasTranslate(shake, 0);
         if(shake_duration===0) {
+            delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
     }, 50/3);
+
+    core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 打开一个全局商店 //////

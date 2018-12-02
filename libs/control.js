@@ -867,6 +867,7 @@ control.prototype.eventMoveHero = function(steps, time, callback) {
     var animate=window.setInterval(function() {
         var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
         if (moveSteps.length==0) {
+            delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             core.drawHero(null, x, y);
             if (core.isset(callback)) callback();
@@ -889,7 +890,9 @@ control.prototype.eventMoveHero = function(steps, time, callback) {
                 moveSteps.shift();
             }
         }
-    }, time / 8 / core.status.replay.speed)
+    }, time / 8 / core.status.replay.speed);
+
+    core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 勇士跳跃事件 //////
@@ -944,6 +947,7 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
                 nowx - core.bigmap.offsetX, nowy + 32-height - core.bigmap.offsetY, 32, height);
         }
         else {
+            delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             core.setHeroLoc('x', ex);
             core.setHeroLoc('y', ey);
@@ -953,8 +957,7 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
 
     }, time / 16 / core.status.replay.speed);
 
-
-
+    core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 每移动一格后执行的事件 //////
@@ -1492,12 +1495,15 @@ control.prototype.setFg = function(color, time, callback) {
         core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA([nowR,nowG,nowB,nowA]));
 
         if (step>=25) {
+            delete core.animateFrame.asyncId[changeAnimate];
             clearInterval(changeAnimate);
             core.status.curtainColor = color;
             // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
     }, time/25/core.status.replay.speed);
+
+    core.animateFrame.asyncId[changeAnimate] = true;
 }
 
 ////// 更新全地图显伤 //////

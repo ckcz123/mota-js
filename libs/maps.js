@@ -831,6 +831,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
             else alpha -= 0.06;
             core.clearMap('route', nowX, nowY-height+32, 32, height);
             if (alpha<=0) {
+                delete core.animateFrame.asyncId[animate];
                 clearInterval(animate);
                 // 不消失
                 if (keep) {
@@ -872,6 +873,9 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
             }
         }
     }, time / 16 / core.status.replay.speed);
+
+    core.animateFrame.asyncId[animate] = true;
+
 }
 
 ////// 显示跳跃某块的动画，达到{"type":"jump"}的效果 //////
@@ -970,6 +974,7 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
             else alpha -= 0.06;
             core.clearMap('route', drawX(), drawY()-height+32, 32, height);
             if (alpha<=0) {
+                delete core.animateFrame.asyncId[animate];
                 clearInterval(animate);
                 core.clearMap('route');
                 core.setOpacity('route', 1);
@@ -987,6 +992,8 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
         }
 
     }, time / 16 / core.status.replay.speed);
+
+    core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 显示/隐藏某个块时的动画效果 //////

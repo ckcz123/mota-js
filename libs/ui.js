@@ -519,8 +519,12 @@ ui.prototype.drawTextBox = function(content, showAll) {
         width = validWidth + leftSpace + rightSpace;
         // left必须在7~416-7-width区间内，以保证left>=7，right<=416-7
         left = core.clamp(32*px+16-width/2, 7, 416-7-width);
+
+        left -= core.bigmap.offsetX;
+
         right = left + width;
     }
+
 
     var content_left = left + leftSpace;
     var height = 30 + (textfont+5)*core.splitLines("ui", realContent, validWidth, font).length;
@@ -541,20 +545,24 @@ ui.prototype.drawTextBox = function(content, showAll) {
     else if (position=='up') {
         if (px==null || py==null)
             top = 5 + offset;
-        else
+        else {
             top = 32 * py - height - ydelta - yoffset;
+            top -= core.bigmap.offsetY;
+        }
     }
     else if (position=='down') {
         if (px==null || py==null)
             top = 416 - height - 5 - offset;
-        else
+        else {
             top = 32 * py + 32 + yoffset;
+            top -= core.bigmap.offsetY;
+        }
     }
     var bottom = top + height;
 
     if (isWindowSkin) {
         core.setAlpha('ui', alpha);
-        this.drawWindowSkin(background,'ui',left,top,width,height,position,px==null?null:px*32,py==null?null:py*32);
+        this.drawWindowSkin(background,'ui',left,top,width,height,position,px==null?null:px*32-core.bigmap.offsetX,py==null?null:py*32-core.bigmap.offsetY);
         core.setAlpha('ui', 1);
     }
     else {
@@ -569,17 +577,17 @@ ui.prototype.drawTextBox = function(content, showAll) {
         canvas.moveTo(left,top);
         // 上边缘
         if (position=='down' && core.isset(px) && core.isset(py)) {
-            canvas.lineTo(32*px+xoffset, top);
-            canvas.lineTo(32*px+16, top-yoffset);
-            canvas.lineTo(32*(px+1)-xoffset, top);
+            canvas.lineTo(32*px+xoffset - core.bigmap.offsetX, top);
+            canvas.lineTo(32*px+16 - core.bigmap.offsetX, top-yoffset);
+            canvas.lineTo(32*(px+1)-xoffset - core.bigmap.offsetX, top);
         }
         canvas.lineTo(right, top);
         canvas.lineTo(right, bottom);
         // 下边缘
         if (position=='up' && core.isset(px) && core.isset(py)) {
-            canvas.lineTo(32*(px+1)-xoffset, bottom);
-            canvas.lineTo(32*px+16, bottom+yoffset);
-            canvas.lineTo(32*px+xoffset, bottom);
+            canvas.lineTo(32*(px+1)-xoffset - core.bigmap.offsetX, bottom);
+            canvas.lineTo(32*px+16 - core.bigmap.offsetX, bottom+yoffset);
+            canvas.lineTo(32*px+xoffset - core.bigmap.offsetX, bottom);
         }
         canvas.lineTo(left, bottom);
         canvas.closePath();

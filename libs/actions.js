@@ -166,6 +166,9 @@ actions.prototype.keyDown = function(keyCode) {
         if (core.status.event.id=='replay') {
             this.keyDownReplay(keyCode);
         }
+        if (core.status.event.id=='gameInfo') {
+            this.keyDownGameInfo(keyCode);
+        }
         return;
     }
     if(!core.status.played) {
@@ -278,6 +281,10 @@ actions.prototype.keyUp = function(keyCode, altKey) {
         }
         if (core.status.event.id=='replay') {
             this.keyUpReplay(keyCode);
+            return;
+        }
+        if (core.status.event.id=='gameInfo') {
+            this.keyUpGameInfo(keyCode);
             return;
         }
         if (core.status.event.id=='centerFly') {
@@ -588,6 +595,10 @@ actions.prototype.onclick = function (x, y, stepPostfix) {
     if (core.status.event.id == 'replay') {
         this.clickReplay(x,y);
         return;
+    }
+
+    if (core.status.event.id=='gameInfo') {
+        this.clickGameInfo(x,y);
     }
 
 }
@@ -1903,25 +1914,10 @@ actions.prototype.clickSettings = function (x,y) {
                 core.ui.drawSyncSave();
                 break;
             case 5:
-                core.ui.drawStatistics();
+                core.status.event.selection=0;
+                core.ui.drawGameInfo();
                 break;
             case 6:
-                if (core.platform.isPC) {
-                    window.open("/score.php?name="+core.firstData.name+"&num=10", "_blank");
-                }
-                else {
-                    if (confirm("即将离开本塔，跳转至本塔评论页面，确认？")) {
-                        window.location.href = "/score.php?name="+core.firstData.name+"&num=10";
-                    }
-                }
-                break;
-            case 7:
-                core.ui.drawHelp();
-                break;
-            case 8:
-                core.ui.drawAbout();
-                break;
-            case 9:
                 core.status.event.selection=1;
                 core.ui.drawConfirmBox("你确定要返回标题页面吗？", function () {
                     core.ui.closePanel();
@@ -1931,7 +1927,7 @@ actions.prototype.clickSettings = function (x,y) {
                     core.ui.drawSettings();
                 });
                 break;
-            case 10:
+            case 7:
                 core.ui.closePanel();
                 break;
         }
@@ -2057,7 +2053,7 @@ actions.prototype.clickSyncSave = function (x,y) {
                 core.ui.drawStorageRemove();
                 break;
             case 7:
-                core.status.event.selection=3;
+                core.status.event.selection=4;
                 core.ui.drawSettings();
                 break;
 
@@ -2291,7 +2287,7 @@ actions.prototype.clickStorageRemove = function (x, y) {
                 }
                 break;
             case 2:
-                core.status.event.selection=5;
+                core.status.event.selection=6;
                 core.ui.drawSyncSave();
                 break;
         }
@@ -2410,6 +2406,77 @@ actions.prototype.keyUpReplay = function (keycode) {
         if (index<choices.length) {
             var topIndex = 6 - parseInt((choices.length - 1) / 2);
             this.clickReplay(6, topIndex+index);
+        }
+    }
+}
+
+
+////// 游戏信息界面时的点击操作 //////
+actions.prototype.clickGameInfo = function (x, y) {
+    if (x<5 || x>7) return;
+    var choices = core.status.event.ui.choices;
+
+    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+
+    if (y>=topIndex && y<topIndex+choices.length) {
+        var selection = y - topIndex;
+        switch (selection) {
+            case 0:
+                core.ui.drawStatistics();
+                break;
+            case 1:
+                if (core.platform.isPC) {
+                    window.open("/score.php?name="+core.firstData.name+"&num=10", "_blank");
+                }
+                else {
+                    if (confirm("即将离开本塔，跳转至本塔评论页面，确认？")) {
+                        window.location.href = "/score.php?name="+core.firstData.name+"&num=10";
+                    }
+                }
+                break;
+            case 2:
+                core.ui.drawHelp();
+                break;
+            case 3:
+                core.ui.drawAbout();
+                break;
+            case 4:
+                core.status.event.selection=5;
+                core.ui.drawSettings();
+                break;
+        }
+    }
+}
+
+////// 游戏信息界面时，按下某个键的操作 //////
+actions.prototype.keyDownGameInfo = function (keycode) {
+    if (keycode==38) {
+        core.status.event.selection--;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+    if (keycode==40) {
+        core.status.event.selection++;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+}
+
+////// 游戏信息界面时，放开某个键的操作 //////
+actions.prototype.keyUpGameInfo = function (keycode) {
+    if (keycode==27 || keycode==88) {
+        core.ui.closePanel();
+        return;
+    }
+    var choices = core.status.event.ui.choices;
+    if (keycode==13 || keycode==32 || keycode==67) {
+        var topIndex = 6 - parseInt((choices.length - 1) / 2);
+        this.clickGameInfo(6, topIndex+core.status.event.selection);
+    }
+    // 数字键快速选择
+    if (keycode>=49 && keycode<=57) {
+        var index = keycode-49;
+        if (index<choices.length) {
+            var topIndex = 6 - parseInt((choices.length - 1) / 2);
+            this.clickGameInfo(6, topIndex+index);
         }
     }
 }

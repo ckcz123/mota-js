@@ -919,7 +919,7 @@ ui.prototype.drawSettings = function () {
     core.status.event.id = 'settings';
 
     this.drawChoices(null, [
-        "系统设置", "虚拟键盘", "浏览地图", "绘图模式", "同步存档", "数据统计", "查看评论", "操作帮助", "关于本塔", "返回标题", "返回游戏"
+        "系统设置", "虚拟键盘", "浏览地图", "绘图模式", "同步存档", "游戏信息", "返回标题", "返回游戏"
     ]);
 }
 
@@ -1312,6 +1312,13 @@ ui.prototype.drawReplay = function () {
     core.status.event.id = 'replay';
     this.drawChoices(null, [
         "从头回放录像", "从存档开始回放", "选择录像文件", "下载当前录像", "返回游戏"
+    ]);
+}
+
+ui.prototype.drawGameInfo = function () {
+    core.status.event.id = 'gameInfo';
+    this.drawChoices(null, [
+        "数据统计", "查看评论", "操作帮助", "关于本塔", "返回上级菜单"
     ]);
 }
 

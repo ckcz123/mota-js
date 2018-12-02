@@ -183,6 +183,7 @@ editor.prototype.mapInit = function () {
     editor.currentFloorData.fgmap = editor.fgmap;
     editor.currentFloorData.bgmap = editor.bgmap;
     editor.currentFloorData.firstArrive = [];
+    editor.currentFloorData.eachArrive = [];
     editor.currentFloorData.events = {};
     editor.currentFloorData.changeFloor = {};
     editor.currentFloorData.afterBattle = {};

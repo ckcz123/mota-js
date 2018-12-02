@@ -183,6 +183,18 @@ var code = '[\n'+action_0+']\n';
 return code;
 */;
 
+//eachArrive 事件编辑器入口之一
+eachArrive_m
+    :   '每次到达楼层' BGNL? Newline action+ BEND
+
+
+/* eachArrive_m
+tooltip : 每次到达楼层
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=%e7%b3%bb%e7%bb%9f%e5%bc%95%e5%8f%91%e7%9a%84%e8%87%aa%e5%ae%9a%e4%b9%89%e4%ba%8b%e4%bb%b6
+var code = '[\n'+action_0+']\n';
+return code;
+*/;
+
 //changeFloor 事件编辑器入口之一
 changeFloor_m
     :   '楼梯, 传送门' BGNL? Newline Floor_List IdString? Stair_List 'x' Number ',' 'y' Number '朝向' DirectionEx_List '动画时间' Int? '允许穿透' Bool BEND

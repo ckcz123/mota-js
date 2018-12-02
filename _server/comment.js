@@ -330,6 +330,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_event": "firstArrive",
                             "_data": "第一次到该楼层触发的事件，可以双击进入事件编辑器。"
                         },
+                        "eachArrive": {
+                            "_leaf": true,
+                            "_type": "event",
+                            "_event": "eachArrive",
+                            "_data": "每次到该楼层触发的事件，可以双击进入事件编辑器；该事件会比firstArrive先执行。"
+                        },
                         "parallelDo": {
                             "_leaf": true,
                             "_type": "textarea",

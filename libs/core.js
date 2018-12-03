@@ -74,6 +74,8 @@ function core() {
     this.domStyle = {
         styles: [],
         scale: 1.0,
+        toolbarBtn: false,
+        showStatusBar: true,
     }
     this.bigmap = {
         canvas: ["bg", "event", "event2", "fg", "damage", "route"],

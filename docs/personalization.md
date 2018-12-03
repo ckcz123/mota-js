@@ -594,7 +594,7 @@ this.myfunc = function(x) {
 </div>
 ```
 3. 在editor.html中的statusBar（323行起），仿照第二点同样添加；这一项如果不进行则会地图编辑器报错。editor-mobile.html同理。
-4. 使用便捷PS工具，打开icons.png，新增一行并将魔力的图标P上去；记下其索引比如30（从0开始数）。
+4. 使用便捷PS工具，打开icons.png，新增一行并将魔力的图标P上去；记下其索引比如37（从0开始数）。
 5. 在main.js的this.statusBar中增加图片、图标和内容的定义。
 ``` js
 this.statusBar = {

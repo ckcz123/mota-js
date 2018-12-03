@@ -91,6 +91,9 @@ events.prototype.initGame = function () {
 ////// 游戏开始事件 //////
 events.prototype.startGame = function (hard, seed, route, callback) {
 
+    main.dom.levelChooseButtons.style.display='none';
+    main.dom.startButtonGroup.style.display='none';
+
     var start = function () {
         console.log('开始游戏');
         core.resetStatus(core.firstData.hero, hard, null, null, core.initStatus.maps);

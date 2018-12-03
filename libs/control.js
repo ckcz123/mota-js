@@ -2778,7 +2778,8 @@ control.prototype.triggerStatusBar = function (name) {
     if (name!='hide') name='show';
     var statusItems = core.dom.status;
     var toolItems = core.dom.tools;
-    if (name == 'hide') {
+    core.domStyle.showStatusBar = name == 'show';
+    if (!core.domStyle.showStatusBar) {
         for (var i = 0; i < statusItems.length; ++i)
             statusItems[i].style.opacity = 0;
         for (var i = 0; i < toolItems.length; ++i)
@@ -2787,10 +2788,7 @@ control.prototype.triggerStatusBar = function (name) {
     else {
         for (var i = 0; i < statusItems.length; ++i)
             statusItems[i].style.opacity = 1;
-        for (var i = 0; i < toolItems.length; ++i)
-            toolItems[i].style.display = 'block';
-        if (core.domStyle.screenMode != 'vertical')
-            core.statusBar.image.shop.style.display = 'none';
+        this.setToolbarButton(false);
     }
 }
 
@@ -2872,6 +2870,33 @@ control.prototype.updateGlobalAttribute = function (name) {
     }
 }
 
+////// 改变工具栏为按钮1-7 //////
+control.prototype.setToolbarButton = function (useButton) {
+    if (!core.domStyle.showStatusBar) return;
+
+    if (!core.isset(useButton)) useButton = core.domStyle.toolbarBtn;
+    if (core.domStyle.screenMode != 'vertical') useButton = false;
+
+    core.domStyle.toolbarBtn = useButton;
+    if (useButton) {
+        ["book","fly","toolbox","shop","save","load","settings"].forEach(function (t) {
+            core.statusBar.image[t].style.display = 'none';
+        });
+        ["btn1","btn2","btn3","btn4","btn5","btn6","btn7"].forEach(function (t) {
+            core.statusBar.image[t].style.display = 'block';
+        })
+    }
+    else {
+        ["btn1","btn2","btn3","btn4","btn5","btn6","btn7"].forEach(function (t) {
+            core.statusBar.image[t].style.display = 'none';
+        });
+        ["book","fly","toolbox","shop","save","load","settings"].forEach(function (t) {
+            core.statusBar.image[t].style.display = 'block';
+        });
+        core.statusBar.image.shop.style.display = core.domStyle.screenMode != 'vertical' ? "none":"block";
+    }
+}
+
 ////// 屏幕分辨率改变后重新自适应 //////
 control.prototype.resize = function(clientWidth, clientHeight) {
     if (main.mode=='editor')return;
@@ -2933,6 +2958,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     toolBarBorder = '3px '+borderColor+' solid';
     var zoom = (ADAPT_WIDTH - width) / 4.22;
     var aScale = 1 - zoom / 100;
+
+    core.domStyle.toolbarBtn = false;
 
     // 移动端
     if (width < CHANGE_WIDTH) {
@@ -3172,7 +3199,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         {
             imgId: 'shop',
             rules:{
-                display: shopDisplay
+                display: shopDisplay && core.domStyle.showStatusBar
             }
         },
         {
@@ -3262,6 +3289,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         },
     ]
     core.domRenderer();
+    this.setToolbarButton();
 }
 
 ////// 渲染DOM //////

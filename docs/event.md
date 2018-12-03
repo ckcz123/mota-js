@@ -2124,7 +2124,7 @@ if (core.getFlag("door",0)==2) {
     core.stopReplay();
     core.waitHeroToStop(function() {
         core.removeGlobalAnimate(0,0,true);
-        core.clearMap('all'); // 清空全地图
+        core.clearMap('all'); core.clearMap('curtain'); // 清空全地图
         core.drawText([
             "\t[恭喜通关]你的分数是${status:hp}。"
         ], function () {

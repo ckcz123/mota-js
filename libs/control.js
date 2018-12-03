@@ -465,7 +465,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
                     core.control.tryMoveDirectly(destX, destY);
                 }
                 core.status.automaticRoute.moveDirectly = false;
-            }, 100);
+            }, core.values.moveSpeed || 100);
         }
         return;
     }
@@ -714,7 +714,7 @@ control.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
             core.status.heroMoving = 0;
             if (core.isset(callback)) callback();
         }
-    }, 12.5 * toAdd / core.status.replay.speed);
+    }, (core.values.moveSpeed||100) / 8 * toAdd / core.status.replay.speed);
 }
 
 ////// 实际每一步的行走过程 //////
@@ -857,7 +857,7 @@ control.prototype.moveHero = function (direction, callback) {
 
 /////// 使用事件让勇士移动。这个函数将不会触发任何事件 //////
 control.prototype.eventMoveHero = function(steps, time, callback) {
-    time = time || 100;
+    time = time || core.values.moveSpeed || 100;
 
     // 要运行的轨迹：将steps展开
     var moveSteps=[];

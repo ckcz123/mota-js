@@ -441,7 +441,7 @@ value为必填项，代表要修改到的结果。此项无需再手动加单引
 
 name必填项，代表要修改的全局数值，其和全塔属性中的values一一对应。目前只能为`"lavaDamage", "poisonDamage", "weakValue", "redJewel", 
 "blueJewel", "greenJewel", "redPotion", "bluePotion", "yellowPotion", "greenPotion", "breakArmor", "counterAttack",
-"purify", "hatred", "maxValidHp", "animateSpeed"`。
+"purify", "hatred", "moveSpeed", "animateSpeed"`。
 
 value为必填项，代表要修改到的结果。该项必须是个数值。
 

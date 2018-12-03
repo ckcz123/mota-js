@@ -307,12 +307,7 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
     }
     else {
 
-        if (core.isset(core.values.maxValidHp) && core.status.hero.hp>core.values.maxValidHp) {
-            core.drawText("作弊可耻！", function () {
-                core.restart();
-            });
-        }
-        else if (core.hasFlag('debug')) {
+        if (core.hasFlag('debug')) {
             core.drawText("\t[系统提示]调试模式下无法上传成绩", function () {
                 core.restart();
             })

@@ -2789,6 +2789,7 @@ control.prototype.triggerStatusBar = function (name) {
         for (var i = 0; i < statusItems.length; ++i)
             statusItems[i].style.opacity = 1;
         this.setToolbarButton(false);
+        core.dom.tools.hard.style.display = 'block';
     }
 }
 

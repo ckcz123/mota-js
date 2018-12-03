@@ -483,13 +483,13 @@ return code;
 
 
 show_s
-    :   '显示事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' Int? Newline
+    :   '显示事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' Int? '不等待执行完毕' Bool? Newline
     
 
 /* show_s
 tooltip : show: 将禁用事件启用,楼层和动画时间可不填,xy可用逗号分隔表示多个点
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=show%EF%BC%9A%E5%B0%86%E4%B8%80%E4%B8%AA%E7%A6%81%E7%94%A8%E4%BA%8B%E4%BB%B6%E5%90%AF%E7%94%A8
-default : ["","","",500]
+default : ["","","",500,false]
 colour : this.eventColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
@@ -510,18 +510,19 @@ if (EvalString_0 && EvalString_1) {
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
-var code = '{"type": "show"'+floorstr+IdString_0+''+Int_0+'},\n';
+Bool_0 = Bool_0 ?', "async": true':'';
+var code = '{"type": "show"'+floorstr+IdString_0+''+Int_0+Bool_0+'},\n';
 return code;
 */;
 
 hide_s
-    :   '隐藏事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' Int? Newline
+    :   '隐藏事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' Int? '不等待执行完毕' Bool? Newline
     
 
 /* hide_s
 tooltip : hide: 将一个启用事件禁用,所有参数均可不填,代表禁用事件自身,xy可用逗号分隔表示多个点
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=hide%EF%BC%9A%E5%B0%86%E4%B8%80%E4%B8%AA%E5%90%AF%E7%94%A8%E4%BA%8B%E4%BB%B6%E7%A6%81%E7%94%A8
-default : ["","","",500]
+default : ["","","",500,false]
 colour : this.eventColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
@@ -542,7 +543,8 @@ if (EvalString_0 && EvalString_1) {
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
-var code = '{"type": "hide"'+floorstr+IdString_0+''+Int_0+'},\n';
+Bool_0 = Bool_0 ?', "async": true':'';
+var code = '{"type": "hide"'+floorstr+IdString_0+''+Int_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -1929,7 +1931,7 @@ ActionParser.prototype.parseAction = function() {
         y_str.push(t[1]);
       })
       this.next = MotaActionBlocks['show_s'].xmlText([
-        x_str.join(','),y_str.join(','),data.floorId||'',data.time||0,this.next]);
+        x_str.join(','),y_str.join(','),data.floorId||'',data.time||0,data.async||false,this.next]);
       break;
     case "hide": // 消失
       data.loc=data.loc||[];
@@ -1941,7 +1943,7 @@ ActionParser.prototype.parseAction = function() {
         y_str.push(t[1]);
       })
       this.next = MotaActionBlocks['hide_s'].xmlText([
-        x_str.join(','),y_str.join(','),data.floorId||'',data.time||0,this.next]);
+        x_str.join(','),y_str.join(','),data.floorId||'',data.time||0,data.async||false,this.next]);
       break;
     case "setBlock": // 设置图块
       data.loc=data.loc||['',''];

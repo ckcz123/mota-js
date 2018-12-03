@@ -1032,8 +1032,6 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
 maps.prototype.animateBlock = function (loc,type,time,callback) {
     if (type!='hide') type='show';
 
-    core.clearMap('route');
-
     if (typeof loc[0] == 'number' && typeof loc[1] == 'number')
         loc = [loc];
 
@@ -1076,30 +1074,50 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
     }
 
     // core.status.replay.animate=true;
+    var clear = function () {
+        list.forEach(function (t) {
+            core.clearMap('route', t.x*32, t.y*32+32-t.height, 32, t.height);
+        })
+    }
     var draw = function () {
         list.forEach(function (t) {
             core.canvas.route.drawImage(t.image, t.bx*32, t.by*t.height, 32, t.height, t.x*32, t.y*32+32-t.height, 32, t.height);
         })
     }
 
-    var opacityVal = 0;
-    if (type=='hide') opacityVal=1;
+    var alpha = 0;
+    if (type=='hide') alpha=1;
 
-    core.setOpacity('route', opacityVal);
+    core.setAlpha('route', alpha);
     draw();
 
     var animate = window.setInterval(function () {
-        if (type=='show') opacityVal += 0.1;
-        else opacityVal -= 0.1;
-        core.setOpacity('route', opacityVal);
-        if (opacityVal >=1 || opacityVal<=0) {
+        if (type=='show') alpha += 0.1;
+        else alpha -= 0.1;
+        clear();
+        if (alpha >=1 || alpha<=0) {
+            delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
-            core.clearMap('route');
-            core.setOpacity('route', 1);
-            // core.status.replay.animate=false;
+            core.setAlpha('curtain', 1);
+            if (type == 'show') {
+                loc.forEach(function (t) {
+                    core.showBlock(t[0],t[1],data.floorId);
+                });
+            }
+            else {
+                loc.forEach(function (t) {
+                    core.removeBlock(t[0],t[1],data.floorId);
+                });
+            }
             if (core.isset(callback)) callback();
         }
+        else {
+            core.setAlpha('route', alpha);
+            draw();
+        }
     }, time / 10 / core.status.replay.speed);
+
+    core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 将某个块从禁用变成启用状态 //////

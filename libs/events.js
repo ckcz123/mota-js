@@ -450,12 +450,15 @@ events.prototype.doAction = function() {
                     && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
                 data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];
             if (core.isset(data.time) && data.time>0 && (!core.isset(data.floorId) || data.floorId==core.status.floorId)) {
-                core.animateBlock(data.loc,'show', data.time, function () {
-                    data.loc.forEach(function (t) {
-                        core.showBlock(t[0],t[1],data.floorId);
-                    })
-                    core.events.doAction();
-                });
+                if (data.async) {
+                    core.animateBlock(data.loc, 'show', data.time);
+                    this.doAction();
+                }
+                else {
+                    core.animateBlock(data.loc,'show', data.time, function () {
+                        core.events.doAction();
+                    });
+                }
             }
             else {
                 data.loc.forEach(function (t) {
@@ -473,13 +476,16 @@ events.prototype.doAction = function() {
             if (core.isset(data.time) && data.time>0 && (!core.isset(data.floorId) || data.floorId==core.status.floorId)) {
                 data.loc.forEach(function (t) {
                     core.hideBlock(t[0],t[1],data.floorId);
-                })
-                core.animateBlock(data.loc,'hide',data.time, function () {
-                    data.loc.forEach(function (t) {
-                        core.removeBlock(t[0],t[1],data.floorId)
-                    })
-                    core.events.doAction();
                 });
+                if (data.async) {
+                    core.animateBlock(data.loc, 'hide', data.time);
+                    this.doAction();
+                }
+                else {
+                    core.animateBlock(data.loc,'hide', data.time, function () {
+                        core.events.doAction();
+                    });
+                }
             }
             else {
                 data.loc.forEach(function (t) {

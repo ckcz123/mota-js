@@ -500,6 +500,20 @@ ui.prototype.drawTextBox = function(content, showAll) {
     core.status.boxAnimateObjs = [];
     core.clearMap('ui');
 
+    // drawImage
+    content = content.replace(/(\f|\\f)\[(.*?)]/g, function (text, sympol, str) {
+        var ss = str.split(",");
+        if (ss.length!=3 && ss.length!=5) return "";
+        var img = core.material.images.images[ss[0]];
+        if (!core.isset(img)) return "";
+        // 绘制
+        if (ss.length==3)
+            core.canvas.ui.drawImage(img, parseFloat(ss[1]), parseFloat(ss[2]));
+        else
+            core.canvas.ui.drawImage(img, 0, 0, img.width, img.height, parseFloat(ss[1]), parseFloat(ss[2]), parseFloat(ss[3]), parseFloat(ss[4]));
+        return "";
+    });
+
     var globalFont = core.status.globalAttribute.font;
     var font = textfont + 'px '+globalFont;
     if (textAttribute.bold) font = "bold "+font;

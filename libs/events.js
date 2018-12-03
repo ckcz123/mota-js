@@ -1531,32 +1531,36 @@ events.prototype.animateImage = function (type, image, loc, time, keep, callback
     }
 
     clearInterval(core.interval.tipAnimate);
-    core.setAlpha('data', 1);
 
-    var opacityVal = 0;
-    if (type == 'hide') opacityVal = 1;
+    var alpha = 0;
+    if (type == 'hide') alpha = 1;
+
+    var x = core.calValue(loc[0]), y = core.calValue(loc[1]);
 
     if (type == 'hide' && keep) {
-        core.clearMap('image');
+        core.clearMap('image', x, y, image.width, image.height);
     }
-
-    core.setOpacity('data', opacityVal);
-    var x = core.calValue(loc[0]), y = core.calValue(loc[1]);
+    core.setAlpha('data', alpha);
     core.canvas.data.drawImage(image, x, y);
+    core.setAlpha('data', 1);
+
     // core.status.replay.animate=true;
     var animate = setInterval(function () {
-        if (type=='show') opacityVal += 0.1;
-        else opacityVal -= 0.1;
-        core.setOpacity('data', opacityVal);
-        if (opacityVal >=1 || opacityVal<=0) {
+        if (type=='show') alpha += 0.1;
+        else alpha -= 0.1;
+        core.clearMap('data', x, y, image.width, image.height);
+        if (alpha >=1 || alpha<=0) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             if (type == 'show' && keep)
                 core.canvas.image.drawImage(image, x, y);
-            core.clearMap('data');
-            core.setOpacity('data', 1);
-            // core.status.replay.animate=false;
+            core.setAlpha('data', 1);
             if (core.isset(callback)) callback();
+        }
+        else {
+            core.setAlpha('data', alpha);
+            core.canvas.data.drawImage(image, x, y);
+            core.setAlpha('data', 1);
         }
     }, time / 10);
 
@@ -1568,7 +1572,6 @@ events.prototype.moveImage = function (image, from, to, time, keep, callback) {
     time = time || 1000;
     clearInterval(core.interval.tipAnimate);
     core.setAlpha('data', 1);
-    core.setOpacity('data', 1);
 
     var width = image.width, height = image.height;
 

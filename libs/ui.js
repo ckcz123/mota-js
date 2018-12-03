@@ -144,7 +144,7 @@ ui.prototype.setAlpha = function (map, alpha) {
     else core.canvas[map].globalAlpha = alpha;
 }
 
-////// 设置某个canvas的透明度 //////
+////// 设置某个canvas的透明度；尽量不要使用本函数，而是全部换成setAlpha实现 //////
 ui.prototype.setOpacity = function (map, opacity) {
     if (map == 'all') {
         for (var m in core.canvas) {
@@ -186,10 +186,9 @@ ui.prototype.closePanel = function () {
 
 ////// 左上角绘制一段提示 //////
 ui.prototype.drawTip = function (text, itemIcon) {
-    var textX, textY, width, height, hide = false, opacityVal = 0;
+    var textX, textY, width, height, hide = false, alpha = 0;
     clearInterval(core.interval.tipAnimate);
     core.setFont('data', "16px Arial");
-    core.setOpacity('data', 0);
     core.canvas.data.textAlign = 'left';
     if (!core.isset(itemIcon)) {
         textX = 16;
@@ -205,22 +204,22 @@ ui.prototype.drawTip = function (text, itemIcon) {
     }
     core.interval.tipAnimate = window.setInterval(function () {
         if (hide) {
-            opacityVal -= 0.1;
+            alpha -= 0.1;
         }
         else {
-            opacityVal += 0.1;
+            alpha += 0.1;
         }
-        core.setOpacity('data', opacityVal);
-        core.clearMap('data', 5, 5, 400, height);
+        core.clearMap('data', 5, 5, 416, height);
+        core.setAlpha('data', alpha);
         core.fillRect('data', 5, 5, width, height, '#000');
         if (core.isset(itemIcon)) {
             core.canvas.data.drawImage(core.material.images.items, 0, itemIcon * 32, 32, 32, 10, 8, 32, 32);
         }
         core.fillText('data', text, textX + 5, textY + 15, '#fff');
-        if (opacityVal > 0.6 || opacityVal < 0) {
+        core.setAlpha('data', 1);
+        if (alpha > 0.6 || alpha < 0) {
             if (hide) {
-                core.clearMap('data', 5, 5, 400, height);
-                core.setOpacity('data', 1);
+                core.clearMap('data', 5, 5, 416, height);
                 clearInterval(core.interval.tipAnimate);
                 return;
             }
@@ -231,8 +230,7 @@ ui.prototype.drawTip = function (text, itemIcon) {
                         core.timeout.getItemTipTimeout = null;
                     }, 750);
                 }
-                opacityVal = 0.6;
-                core.setOpacity('data', opacityVal);
+                alpha = 0.6;
             }
         }
     }, 30);
@@ -1032,16 +1030,13 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
     var top = (416-height)/2, bottom = height;
 
-    // var left = 97, top = 64, right = 416 - 2 * left, bottom = 416 - 2 * top;
-    core.setAlpha('ui', 0.85);
-    core.fillRect('ui', left, top, right, bottom, '#000000');
+    core.fillRect('ui', left, top, right, bottom, 'rgba(0,0,0,0.85)');
     core.setAlpha('ui', 1);
     core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
     core.clearMap('data');
 
     clearInterval(core.interval.tipAnimate);
     core.setAlpha('data', 1);
-    core.setOpacity('data', 1);
     core.status.boxAnimateObjs = [];
     var globalFont = core.status.globalAttribute.font;
 
@@ -1388,7 +1383,6 @@ ui.prototype.drawBook = function (index) {
 
     clearInterval(core.interval.tipAnimate);
     core.clearMap('data');
-    core.setOpacity('data', 1);
 
     core.clearMap('ui');
     core.setAlpha('ui', 1);
@@ -1624,7 +1618,6 @@ ui.prototype.drawBookDetail = function (index) {
     clearInterval(core.interval.tipAnimate);
 
     core.clearMap('data');
-    core.setOpacity('data', 1);
 
     var left=10, right=416-2*left;
     var content_left = left + 25;
@@ -1710,8 +1703,7 @@ ui.prototype.drawMaps = function (index, x, y) {
         core.setAlpha('ui', 1);
 
         core.clearMap('animate');
-        core.setOpacity('animate', 0.4);
-        core.fillRect('animate', 0, 0, 416, 416, '#000000');
+        core.fillRect('animate', 0, 0, 416, 416, 'rgba(0,0,0,0.4)');
 
         core.strokeRect('ui', 66, 2, 284, 60, "#FFD700", 4);
         core.strokeRect('ui', 2, 66, 60, 284);
@@ -1752,7 +1744,6 @@ ui.prototype.drawMaps = function (index, x, y) {
     }
 
     core.clearMap('animate');
-    core.setOpacity('animate', 1);
 
     var damage = (core.status.event.data||{}).damage, paint =  (core.status.event.data||{}).paint;
     var all = (core.status.event.data||{}).all;
@@ -1793,17 +1784,14 @@ ui.prototype.drawMaps = function (index, x, y) {
     }
 
     core.clearMap('data');
-    core.setOpacity('data', 0.2);
     core.canvas.data.textAlign = 'left';
     core.setFont('data', '16px Arial');
 
     var text = core.status.maps[floorId].title;
     if (!all && (mw>13 || mh>13)) text+=" ["+(x-6)+","+(y-6)+"]";
     var textX = 16, textY = 18, width = textX + core.canvas.data.measureText(text).width + 16, height = 42;
-    core.fillRect('data', 5, 5, width, height, '#000');
-    core.setOpacity('data', 0.4);
-    core.fillText('data', text, textX + 5, textY + 15, '#fff');
-
+    core.fillRect('data', 5, 5, width, height, 'rgba(0,0,0,0.4)');
+    core.fillText('data', text, textX + 5, textY + 15, 'rgba(255,255,255,0.6)');
 }
 
 ////// 绘制道具栏 //////
@@ -2603,7 +2591,6 @@ ui.prototype.drawPaint = function () {
             core.clearMap('route');
 
             core.setAlpha('route', 1);
-            core.setOpacity('route', 1);
 
             // 将已有的内容绘制到route上
             var value = core.paint[core.status.floorId];

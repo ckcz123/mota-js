@@ -1002,7 +1002,6 @@ actions.prototype.clickViewMaps = function (x,y) {
     }
     else if (x>=2 && x<=10 && y>=5 && y<=7) {
         core.clearMap('data');
-        core.setOpacity('data', 1);
         core.ui.closePanel();
     }
 }
@@ -1031,7 +1030,6 @@ actions.prototype.keyUpViewMaps = function (keycode) {
 
     if (keycode==27 || keycode==13 || keycode==32 || (!core.status.replay.replaying && keycode==67)) {
         core.clearMap('data');
-        core.setOpacity('data', 1);
         core.ui.closePanel();
         return;
     }

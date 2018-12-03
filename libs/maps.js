@@ -870,7 +870,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
                     core.setBlock(id, nowX/32, nowY/32);
                     core.showBlock(nowX/32, nowY/32);
                 }
-                // core.status.replay.animate=false;
+                core.setAlpha('route',1);
                 if (core.isset(callback)) callback();
             }
             else {
@@ -1009,7 +1009,7 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
                 delete core.animateFrame.asyncId[animate];
                 clearInterval(animate);
                 core.clearMap('route');
-                core.setOpacity('route', 1);
+                core.setAlpha('route', 1);
                 if (keep) {
                     core.setBlock(id, ex, ey);
                     core.showBlock(ex, ey);
@@ -1351,6 +1351,7 @@ maps.prototype.drawAnimateFrame = function (animate, centerX, centerY, index) {
             core.canvas.animate.drawImage(image, -realWidth/2 - core.bigmap.offsetX, -realHeight/2 - core.bigmap.offsetY, realWidth, realHeight);
             core.loadCanvas('animate');
         }
+        core.setAlpha('animate', 1);
     })
 }
 

@@ -1098,7 +1098,7 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
         if (alpha >=1 || alpha<=0) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
-            core.setAlpha('curtain', 1);
+            core.setAlpha('route', 1);
             if (type == 'show') {
                 loc.forEach(function (t) {
                     core.showBlock(t[0],t[1],data.floorId);

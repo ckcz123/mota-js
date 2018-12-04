@@ -87,7 +87,7 @@ items.prototype.useItem = function (itemId, callback) {
     // 道具使用完毕：删除
     if (itemCls=='tools')
         core.status.hero.items[itemCls][itemId]--;
-    if (core.status.hero.items[itemCls][itemId]==0)
+    if (core.status.hero.items[itemCls][itemId]<=0)
         delete core.status.hero.items[itemCls][itemId];
 
     core.updateStatusBar();
@@ -117,7 +117,7 @@ items.prototype.itemCount = function (itemId) {
     if (!core.isset(itemId) || !core.isset(core.material.items[itemId])) return 0;
     var itemCls = core.material.items[itemId].cls;
     if (itemCls=="items") return 0;
-    return core.isset(core.status.hero.items[itemCls][itemId]) ? core.status.hero.items[itemCls][itemId] : 0;
+    return core.status.hero.items[itemCls][itemId]||0;
 }
 
 ////// 是否存在某个物品 //////
@@ -148,9 +148,11 @@ items.prototype.setItem = function (itemId, itemNum) {
         core.status.hero.items[itemCls] = {};
     }
     core.status.hero.items[itemCls][itemId] = itemNum;
-    if (itemCls!='keys' && itemNum<=0) {
-        delete core.status.hero.items[itemCls][itemId];
+    if (core.status.hero.items[itemCls][itemId] <= 0) {
+        if (itemCls!='keys') delete core.status.hero.items[itemCls][itemId];
+        else core.status.hero.items[itemCls][itemId] = 0;
     }
+    core.updateStatusBar();
 }
 
 ////// 删除某个物品 //////
@@ -159,8 +161,9 @@ items.prototype.removeItem = function (itemId, itemNum) {
     if (!core.hasItem(itemId)) return false;
     var itemCls = core.material.items[itemId].cls;
     core.status.hero.items[itemCls][itemId]-=itemNum;
-    if (itemCls!='keys' && core.status.hero.items[itemCls][itemId]<=0) {
-        delete core.status.hero.items[itemCls][itemId];
+    if (core.status.hero.items[itemCls][itemId] <= 0) {
+        if (itemCls!='keys') delete core.status.hero.items[itemCls][itemId];
+        else core.status.hero.items[itemCls][itemId] = 0;
     }
     core.updateStatusBar();
     return true;
@@ -168,7 +171,7 @@ items.prototype.removeItem = function (itemId, itemNum) {
 
 ////// 增加某个物品的个数 //////
 items.prototype.addItem = function (itemId, itemNum) {
-    itemNum=itemNum||1;
+    itemNum = itemNum || 1;
     var itemData = core.material.items[itemId];
     var itemCls = itemData.cls;
     if (itemCls == 'items') return;
@@ -180,9 +183,14 @@ items.prototype.addItem = function (itemId, itemNum) {
         core.status.hero.items[itemCls][itemId] = 0;
     }
     core.status.hero.items[itemCls][itemId] += itemNum;
+    if (core.status.hero.items[itemCls][itemId] <= 0) {
+        if (itemCls!='keys') delete core.status.hero.items[itemCls][itemId];
+        else core.status.hero.items[itemCls][itemId] = 0;
+    }
     // 永久道具只能有一个
     if (itemCls == 'constants' && core.status.hero.items[itemCls][itemId]>1)
         core.status.hero.items[itemCls][itemId] = 1;
+    core.updateStatusBar();
 }
 
 

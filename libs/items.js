@@ -199,8 +199,8 @@ items.prototype.loadEquip = function (equipId, callback) {
 
     if (!core.isset(core.status.hero.equipment)) core.status.hero.equipment = [];
 
-    var loadEquip = core.material.items[equipId];
-    if (!core.isset(loadEquip)) {
+    var loadEquip = core.material.items[equipId]||{};
+    if (!core.isset(loadEquip.equip)) {
         if (core.isset(callback)) callback();
         return;
     }
@@ -223,11 +223,21 @@ items.prototype.loadEquip = function (equipId, callback) {
 
     var loadEquipType = loadEquip.equip.type;
     var unloadEquipId = core.status.hero.equipment[loadEquipType];
+    var unloadEquip = core.material.items[unloadEquipId] || {};
+
+    // ------ 如果当前装备和目标装备的模式不同（一个百分比一个数值），则需要先脱再穿 ------ //
+    if (core.isset(unloadEquip.equip) && (unloadEquip.equip.percentage||false) != (loadEquip.equip.percentage||false)) {
+        this.unloadEquip(loadEquipType);
+        this.loadEquip(equipId);
+        if (core.isset(callback)) callback();
+        return;
+    }
+    // 下面保证了两者的模式是相同的
 
     // 比较能力值
     var result = core.compareEquipment(equipId,unloadEquipId);
 
-    if (core.flags.equipPercentage) {
+    if (loadEquip.equip.percentage) {
         core.setFlag('equip_atk_buff', core.getFlag('equip_atk_buff',1)+result.atk/100);
         core.setFlag('equip_def_buff', core.getFlag('equip_def_buff',1)+result.def/100);
         core.setFlag('equip_mdef_buff', core.getFlag('equip_mdef_buff',1)+result.mdef/100);
@@ -241,9 +251,6 @@ items.prototype.loadEquip = function (equipId, callback) {
     // 更新装备状态
     core.status.hero.equipment[loadEquipType] = equipId;
     core.updateStatusBar();
-
-    // 记录路线
-    // core.status.route.push("equip:"+equipId);
 
     // 装备更换完毕：删除换上的装备
     core.removeItem(equipId);
@@ -269,10 +276,10 @@ items.prototype.unloadEquip = function (equipType, callback) {
         if (core.isset(callback)) callback();
         return;
     }
-    var unloadEquip = core.material.items[unloadEquipId];
+    var unloadEquip = core.material.items[unloadEquipId] || {};
 
     // 处理能力值改变
-    if (core.flags.equipPercentage) {
+    if (unloadEquip.equip.percentage) {
         core.setFlag('equip_atk_buff', core.getFlag('equip_atk_buff',1)-(unloadEquip.equip.atk||0)/100);
         core.setFlag('equip_def_buff', core.getFlag('equip_def_buff',1)-(unloadEquip.equip.def||0)/100);
         core.setFlag('equip_mdef_buff', core.getFlag('equip_mdef_buff',1)-(unloadEquip.equip.mdef||0)/100);
@@ -287,9 +294,6 @@ items.prototype.unloadEquip = function (equipType, callback) {
     core.status.hero.equipment[equipType] = null;
 
     core.updateStatusBar();
-
-    // 记录路线
-    // core.status.route.push("unEquip:"+equipType);
     
     // 装备更换完毕：增加卸下的装备
     core.addItem(unloadEquipId, 1);

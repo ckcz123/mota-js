@@ -966,11 +966,9 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
     hero_def=Math.max(0, hero_def);
     hero_mdef=Math.max(0, hero_mdef);
 
-    if (core.flags.equipPercentage) {
-        hero_atk = Math.floor(core.getFlag('equip_atk_buff',1)*hero_atk);
-        hero_def = Math.floor(core.getFlag('equip_def_buff',1)*hero_def);
-        hero_mdef = Math.floor(core.getFlag('equip_mdef_buff',1)*hero_mdef);
-    }
+    hero_atk = Math.floor(core.getFlag('equip_atk_buff',1)*hero_atk);
+    hero_def = Math.floor(core.getFlag('equip_def_buff',1)*hero_def);
+    hero_mdef = Math.floor(core.getFlag('equip_mdef_buff',1)*hero_mdef);
 
     var enemy = core.material.enemys[monsterId];
     var enemyInfo = core.enemys.getEnemyInfo(enemy, hero_hp, hero_atk, hero_def, hero_mdef);
@@ -2034,30 +2032,41 @@ ui.prototype.drawEquipbox = function(index) {
         
         // 比较属性
         if (lines.length==1) {
-            var compare;
+            var compare, differentMode = false;
             if (index<12) compare = core.compareEquipment(null, selectId);
             else {
-                compare = core.compareEquipment(selectId, equipEquipment[equip.equip.type]);
-            }
-            var drawOffset = 10;
-
-            [['攻击','atk'], ['防御','def'], ['魔防','mdef']].forEach(function (t) {
-                var title = t[0], name = t[1];
-                if (!core.isset(compare[name]) || compare[name]==0) return;
-                var color = '#00FF00';
-                if (compare[name]<0) color = '#FF0000';
-                var nowValue = core.getStatus(name), newValue = nowValue + compare[name];
-                if (core.flags.equipPercentage) {
-                    var nowBuff = core.getFlag('equip_'+name+"_buff",1), newBuff = nowBuff+compare[name]/100;
-                    nowValue = Math.floor(nowBuff*core.getStatus(name));
-                    newValue = Math.floor(newBuff*core.getStatus(name));
+                var last = core.material.items[equipEquipment[equipType]]||{};
+                // 检查是不是数值模式和比例模式之间的切换
+                if (core.isset(last.equip) && (last.equip.percentage||false) != (equip.equip.percentage||false)) {
+                    differentMode = true;
                 }
-                var content = title + ' ' + nowValue + '->';
-                core.fillText('ui', content, drawOffset, 89, '#CCCCCC', 'bold 14px '+globalFont);
-                drawOffset += core.canvas.ui.measureText(content).width;
-                core.fillText('ui', newValue, drawOffset, 89, color);
-                drawOffset += core.canvas.ui.measureText(newValue).width + 15;
-            })
+                else {
+                    compare = core.compareEquipment(selectId, equipEquipment[equipType]);
+                }
+            }
+            if (differentMode) {
+                core.fillText('ui', '<数值和比例模式之间的切换不显示属性变化>', 10, 89, '#CCCCCC', '14px '+globalFont);
+            }
+            else {
+                var drawOffset = 10;
+                [['攻击','atk'], ['防御','def'], ['魔防','mdef']].forEach(function (t) {
+                    var title = t[0], name = t[1];
+                    if (!core.isset(compare[name]) || compare[name]==0) return;
+                    var color = '#00FF00';
+                    if (compare[name]<0) color = '#FF0000';
+                    var nowValue = core.getStatus(name), newValue = nowValue + compare[name];
+                    if (equip.equip.percentage) {
+                        var nowBuff = core.getFlag('equip_'+name+"_buff",1), newBuff = nowBuff+compare[name]/100;
+                        nowValue = Math.floor(nowBuff*core.getStatus(name));
+                        newValue = Math.floor(newBuff*core.getStatus(name));
+                    }
+                    var content = title + ' ' + nowValue + '->';
+                    core.fillText('ui', content, drawOffset, 89, '#CCCCCC', 'bold 14px '+globalFont);
+                    drawOffset += core.canvas.ui.measureText(content).width;
+                    core.fillText('ui', newValue, drawOffset, 89, color);
+                    drawOffset += core.canvas.ui.measureText(newValue).width + 15;
+                })
+            }
         }
         else {
             var leftText = text.substring(lines[0].length);

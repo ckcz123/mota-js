@@ -522,20 +522,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "状态栏的装备按钮。若此项为true则将状态栏中的楼层转换器按钮换为装备栏按钮"
                 },
-                "equipPercentage": {
-                    "_leaf": true,
-                    "_type": "checkbox",
-                    "_bool": "bool",
-                    "_data": "装备增加百分比属性。如果此项为true，则装备属性全部按照百分比进行计算，比如\"atk\": 20意味着攻击增加20%。\n如果多个装备百分比增加同一个属性的，按加算处理。（即一个10%一个20%总共是30%而不是32%）"
-                },
-                /*
-                "enableDeleteItem": {
-                    "_leaf": true,
-                    "_type": "checkbox",
-                    "_bool": "bool",
-                    "_data": "是否允许删除（丢弃）道具"
-                },
-                */
                 "enableAddPoint": {
                     "_leaf": true,
                     "_type": "checkbox",

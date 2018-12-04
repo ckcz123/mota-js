@@ -901,7 +901,11 @@ editor_file = function (editor, callback) {
         }
         if (file == 'floors') {
             actionList.forEach(function (value) {
-                eval("editor.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
+                // 检测null/undefined
+                if (core.isset(value[2]))
+                    eval("editor.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
+                else
+                    eval("delete editor.currentFloorData"+value[1]);
             });
             editor_file.saveFloorFile(callback);
             return;

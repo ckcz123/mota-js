@@ -1009,6 +1009,7 @@ editor.prototype.listen = function () {
         editor.updateMap();
         fields.forEach(function(v){
             editor.currentFloorData[v][now.x+','+now.y]=editor.currentFloorData[v][last.x+','+last.y]
+            if (!core.isset(editor.currentFloorData[v][now.x+','+now.y])) delete editor.currentFloorData[v][now.x+','+now.y];
         })
         editor.file.saveFloorFile(function (err) {
             if (err) {
@@ -1053,8 +1054,10 @@ editor.prototype.listen = function () {
 
         fields.forEach(function(v){
             var temp_atsfcytaf=editor.currentFloorData[v][now.x+','+now.y];
-            editor.currentFloorData[v][now.x+','+now.y]=editor.currentFloorData[v][last.x+','+last.y];
-            editor.currentFloorData[v][last.x+','+last.y]=temp_atsfcytaf
+            if (!core.isset(editor.currentFloorData[v][last.x+','+last.y])) delete editor.currentFloorData[v][now.x+','+now.y];
+            else editor.currentFloorData[v][now.x+','+now.y]=editor.currentFloorData[v][last.x+','+last.y];
+            if (!core.isset(temp_atsfcytaf)) delete editor.currentFloorData[v][last.x+','+last.y];
+            else editor.currentFloorData[v][last.x+','+last.y]=temp_atsfcytaf
         })
         editor.file.saveFloorFile(function (err) {
             if (err) {
@@ -1078,7 +1081,7 @@ editor.prototype.listen = function () {
         editor.map[now.y][now.x]=editor.info;
         editor.updateMap();
         fields.forEach(function(v){
-            editor.currentFloorData[v][now.x+','+now.y]=null;
+            delete editor.currentFloorData[v][now.x+','+now.y];
         })
         editor.file.saveFloorFile(function (err) {
             if (err) {

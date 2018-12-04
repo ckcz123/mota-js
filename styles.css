@@ -220,6 +220,7 @@ p#hard {
     font: bold normal 1.1em "Arial Black";
     text-align: center;
     margin: 0 6px 6px 0;
+    word-break: keep-all;
 }
 
 span#poison, span#weak, span#curse, span#pickaxe, span#bomb, span#fly {

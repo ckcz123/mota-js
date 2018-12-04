@@ -344,7 +344,7 @@ events.prototype.doEvents = function (list, x, y, callback) {
     core.status.event = {'id': 'action', 'data': {
         'list': [
             {"todo": core.clone(list), "total": core.clone(list), "condition": "false"}
-        ], 'x': x, 'y': y, 'callback': callback, 'startTime': new Date().getTime()
+        ], 'x': x, 'y': y, 'callback': callback
     }}
 
     // 停止勇士

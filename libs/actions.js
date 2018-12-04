@@ -780,12 +780,6 @@ actions.prototype.clickAction = function (x,y) {
 
 ////// 自定义事件时，按下某个键的操作 //////
 actions.prototype.keyDownAction = function (keycode) {
-    // 视为无效
-    var startTime = core.status.event.data.startTime||0;
-    if (startTime>0 && new Date().getTime()-startTime<250)
-        return;
-    core.status.event.data.startTime = 0;
-
     if (core.status.event.data.type=='choices') {
         var data = core.status.event.data.current;
         var choices = data.choices;

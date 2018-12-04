@@ -70,7 +70,7 @@ control.prototype.setRequestAnimationFrame = function () {
         }
 
         // Global Animate
-        if (core.animateFrame.globalAnimate && core.isPlaying()) {
+        if (core.animateFrame.globalAnimate && core.isPlaying() && core.isset(core.status.floorId)) {
 
             if (timestamp-core.animateFrame.globalTime>core.animateFrame.speed && core.isset(core.status.globalAnimateObjs)) {
 
@@ -81,9 +81,21 @@ control.prototype.setRequestAnimationFrame = function () {
                 }
 
                 if ((core.status.autotileAnimateObjs.blocks||[]).length>0) {
+                    var groundId = (core.status.maps||core.floors)[core.status.floorId].defaultGround || "ground";
+                    var blockIcon = core.material.icons.terrains[groundId];
                     core.status.autotileAnimateObjs.status++;
                     core.status.autotileAnimateObjs.blocks.forEach(function (block) {
-                        core.drawAutotile(core.canvas.event, core.status.autotileAnimateObjs.map, block, 32, 0, 0, core.status.autotileAnimateObjs.status);
+                        var cv = core.isset(block.name)?core.canvas[block.name]:core.canvas.event;
+                        cv.clearRect(block.x * 32, block.y * 32, 32, 32);
+                        if (core.isset(block.name)) {
+                            if (block.name == 'bg') {
+                                core.canvas.bg.drawImage(core.material.images.terrains, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+                            }
+                            core.drawAutotile(cv, core.status.autotileAnimateObjs[block.name+"map"], block, 32, 0, 0, core.status.autotileAnimateObjs.status);
+                        }
+                        else {
+                            core.drawAutotile(cv, core.status.autotileAnimateObjs.map, block, 32, 0, 0, core.status.autotileAnimateObjs.status);
+                        }
                     })
                 }
 
@@ -221,6 +233,15 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
     core.status.played = false;
     core.clearStatus();
     core.clearMap('all');
+    core.clearMap('curtain');
+
+    if (core.flags.startUsingCanvas) {
+        core.dom.startTop.style.display = 'none';
+        core.dom.startButtonGroup.style.display = 'block';
+        core.events.startGame('');
+        if (core.isset(callback)) callback();
+        return;
+    }
 
     if(noAnimate) {
         core.dom.startTop.style.display = 'none';
@@ -444,7 +465,7 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
                     core.control.tryMoveDirectly(destX, destY);
                 }
                 core.status.automaticRoute.moveDirectly = false;
-            }, 100);
+            }, core.values.moveSpeed || 100);
         }
         return;
     }
@@ -693,7 +714,7 @@ control.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
             core.status.heroMoving = 0;
             if (core.isset(callback)) callback();
         }
-    }, 12.5 * toAdd / core.status.replay.speed);
+    }, (core.values.moveSpeed||100) / 8 * toAdd / core.status.replay.speed);
 }
 
 ////// 实际每一步的行走过程 //////
@@ -836,7 +857,7 @@ control.prototype.moveHero = function (direction, callback) {
 
 /////// 使用事件让勇士移动。这个函数将不会触发任何事件 //////
 control.prototype.eventMoveHero = function(steps, time, callback) {
-    time = time || 100;
+    time = time || core.values.moveSpeed || 100;
 
     // 要运行的轨迹：将steps展开
     var moveSteps=[];
@@ -867,6 +888,7 @@ control.prototype.eventMoveHero = function(steps, time, callback) {
     var animate=window.setInterval(function() {
         var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
         if (moveSteps.length==0) {
+            delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             core.drawHero(null, x, y);
             if (core.isset(callback)) callback();
@@ -889,7 +911,9 @@ control.prototype.eventMoveHero = function(steps, time, callback) {
                 moveSteps.shift();
             }
         }
-    }, time / 8 / core.status.replay.speed)
+    }, time / 8 / core.status.replay.speed);
+
+    core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 勇士跳跃事件 //////
@@ -944,6 +968,7 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
                 nowx - core.bigmap.offsetX, nowy + 32-height - core.bigmap.offsetY, 32, height);
         }
         else {
+            delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             core.setHeroLoc('x', ex);
             core.setHeroLoc('y', ey);
@@ -953,8 +978,7 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
 
     }, time / 16 / core.status.replay.speed);
 
-
-
+    core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 每移动一格后执行的事件 //////
@@ -1025,7 +1049,7 @@ control.prototype.updateViewport = function() {
 ////// 绘制勇士 //////
 control.prototype.drawHero = function (direction, x, y, status, offset) {
 
-    if (!core.isPlaying() || core.status.isStarting) return;
+    if (!core.isPlaying()) return;
 
     var scan = {
         'up': {'x': 0, 'y': -1},
@@ -1492,25 +1516,25 @@ control.prototype.setFg = function(color, time, callback) {
         core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA([nowR,nowG,nowB,nowA]));
 
         if (step>=25) {
+            delete core.animateFrame.asyncId[changeAnimate];
             clearInterval(changeAnimate);
             core.status.curtainColor = color;
             // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
     }, time/25/core.status.replay.speed);
+
+    core.animateFrame.asyncId[changeAnimate] = true;
 }
 
 ////// 更新全地图显伤 //////
 control.prototype.updateDamage = function (floorId, canvas) {
-
-    if (!core.isset(floorId)) floorId = core.status.floorId;
+    floorId = floorId || core.status.floorId;
+    if (!core.isset(floorId)) return;
     if (!core.isset(canvas)) {
         canvas = core.canvas.damage;
         core.clearMap('damage');
     }
-
-    // 正在开始游戏中
-    if (core.status.isStarting) return;
 
     // 更新显伤
     var mapBlocks = core.status.maps[floorId].blocks;
@@ -1655,15 +1679,21 @@ control.prototype.chooseReplayFile = function () {
         }
         if (core.isset(obj.version) && obj.version!=core.firstData.version) {
             // alert("游戏版本不一致！");
-            if (!confirm("游戏版本不一致！\n你仍然想播放录像吗？"))
+            if (!confirm("游戏版本不一致！\n你仍然想播放录像吗？")) {
                 return;
+            }
         }
-        if (!core.isset(obj.route) || !core.isset(obj.hard)) {
+        if (!core.isset(obj.route)) {
             alert("无效的录像！");
             return;
         }
 
-        core.startGame(obj.hard, obj.seed, core.decodeRoute(obj.route));
+        if (core.flags.startUsingCanvas) {
+            core.startGame('', obj.seed, core.decodeRoute(obj.route));
+        }
+        else {
+            core.startGame(obj.hard, obj.seed, core.decodeRoute(obj.route));
+        }
     }, function () {
 
     })
@@ -2672,6 +2702,16 @@ control.prototype.playSound = function (sound) {
     }
 }
 
+control.prototype.checkBgm = function() {
+    if (core.musicStatus.startDirectly && core.musicStatus.bgmStatus) {
+        if (core.musicStatus.playingBgm==null
+            || core.material.bgms[core.musicStatus.playingBgm].paused) {
+            core.musicStatus.playingBgm=null;
+            core.playBgm(core.bgms[0]);
+        }
+    }
+}
+
 ////// 清空状态栏 //////
 control.prototype.clearStatusBar = function() {
 
@@ -2738,7 +2778,8 @@ control.prototype.triggerStatusBar = function (name) {
     if (name!='hide') name='show';
     var statusItems = core.dom.status;
     var toolItems = core.dom.tools;
-    if (name == 'hide') {
+    core.domStyle.showStatusBar = name == 'show';
+    if (!core.domStyle.showStatusBar) {
         for (var i = 0; i < statusItems.length; ++i)
             statusItems[i].style.opacity = 0;
         for (var i = 0; i < toolItems.length; ++i)
@@ -2747,10 +2788,8 @@ control.prototype.triggerStatusBar = function (name) {
     else {
         for (var i = 0; i < statusItems.length; ++i)
             statusItems[i].style.opacity = 1;
-        for (var i = 0; i < toolItems.length; ++i)
-            toolItems[i].style.display = 'block';
-        if (core.domStyle.screenMode != 'vertical')
-            core.statusBar.image.shop.style.display = 'none';
+        this.setToolbarButton(false);
+        core.dom.tools.hard.style.display = 'block';
     }
 }
 
@@ -2832,6 +2871,33 @@ control.prototype.updateGlobalAttribute = function (name) {
     }
 }
 
+////// 改变工具栏为按钮1-7 //////
+control.prototype.setToolbarButton = function (useButton) {
+    if (!core.domStyle.showStatusBar) return;
+
+    if (!core.isset(useButton)) useButton = core.domStyle.toolbarBtn;
+    if (core.domStyle.screenMode != 'vertical') useButton = false;
+
+    core.domStyle.toolbarBtn = useButton;
+    if (useButton) {
+        ["book","fly","toolbox","shop","save","load","settings"].forEach(function (t) {
+            core.statusBar.image[t].style.display = 'none';
+        });
+        ["btn1","btn2","btn3","btn4","btn5","btn6","btn7"].forEach(function (t) {
+            core.statusBar.image[t].style.display = 'block';
+        })
+    }
+    else {
+        ["btn1","btn2","btn3","btn4","btn5","btn6","btn7"].forEach(function (t) {
+            core.statusBar.image[t].style.display = 'none';
+        });
+        ["book","fly","toolbox","shop","save","load","settings"].forEach(function (t) {
+            core.statusBar.image[t].style.display = 'block';
+        });
+        core.statusBar.image.shop.style.display = core.domStyle.screenMode != 'vertical' ? "none":"block";
+    }
+}
+
 ////// 屏幕分辨率改变后重新自适应 //////
 control.prototype.resize = function(clientWidth, clientHeight) {
     if (main.mode=='editor')return;
@@ -2893,6 +2959,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     toolBarBorder = '3px '+borderColor+' solid';
     var zoom = (ADAPT_WIDTH - width) / 4.22;
     var aScale = 1 - zoom / 100;
+
+    core.domStyle.toolbarBtn = false;
 
     // 移动端
     if (width < CHANGE_WIDTH) {
@@ -3132,7 +3200,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         {
             imgId: 'shop',
             rules:{
-                display: shopDisplay
+                display: shopDisplay && core.domStyle.showStatusBar
             }
         },
         {
@@ -3222,6 +3290,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         },
     ]
     core.domRenderer();
+    this.setToolbarButton();
 }
 
 ////// 渲染DOM //////

@@ -144,7 +144,7 @@ ui.prototype.setAlpha = function (map, alpha) {
     else core.canvas[map].globalAlpha = alpha;
 }
 
-////// 设置某个canvas的透明度 //////
+////// 设置某个canvas的透明度；尽量不要使用本函数，而是全部换成setAlpha实现 //////
 ui.prototype.setOpacity = function (map, opacity) {
     if (map == 'all') {
         for (var m in core.canvas) {
@@ -186,10 +186,9 @@ ui.prototype.closePanel = function () {
 
 ////// 左上角绘制一段提示 //////
 ui.prototype.drawTip = function (text, itemIcon) {
-    var textX, textY, width, height, hide = false, opacityVal = 0;
+    var textX, textY, width, height, hide = false, alpha = 0;
     clearInterval(core.interval.tipAnimate);
     core.setFont('data', "16px Arial");
-    core.setOpacity('data', 0);
     core.canvas.data.textAlign = 'left';
     if (!core.isset(itemIcon)) {
         textX = 16;
@@ -205,22 +204,22 @@ ui.prototype.drawTip = function (text, itemIcon) {
     }
     core.interval.tipAnimate = window.setInterval(function () {
         if (hide) {
-            opacityVal -= 0.1;
+            alpha -= 0.1;
         }
         else {
-            opacityVal += 0.1;
+            alpha += 0.1;
         }
-        core.setOpacity('data', opacityVal);
-        core.clearMap('data', 5, 5, 400, height);
+        core.clearMap('data', 5, 5, 416, height);
+        core.setAlpha('data', alpha);
         core.fillRect('data', 5, 5, width, height, '#000');
         if (core.isset(itemIcon)) {
             core.canvas.data.drawImage(core.material.images.items, 0, itemIcon * 32, 32, 32, 10, 8, 32, 32);
         }
         core.fillText('data', text, textX + 5, textY + 15, '#fff');
-        if (opacityVal > 0.6 || opacityVal < 0) {
+        core.setAlpha('data', 1);
+        if (alpha > 0.6 || alpha < 0) {
             if (hide) {
-                core.clearMap('data', 5, 5, 400, height);
-                core.setOpacity('data', 1);
+                core.clearMap('data', 5, 5, 416, height);
                 clearInterval(core.interval.tipAnimate);
                 return;
             }
@@ -231,8 +230,7 @@ ui.prototype.drawTip = function (text, itemIcon) {
                         core.timeout.getItemTipTimeout = null;
                     }, 750);
                 }
-                opacityVal = 0.6;
-                core.setOpacity('data', opacityVal);
+                alpha = 0.6;
             }
         }
     }, 30);
@@ -500,6 +498,20 @@ ui.prototype.drawTextBox = function(content, showAll) {
     core.status.boxAnimateObjs = [];
     core.clearMap('ui');
 
+    // drawImage
+    content = content.replace(/(\f|\\f)\[(.*?)]/g, function (text, sympol, str) {
+        var ss = str.split(",");
+        if (ss.length!=3 && ss.length!=5) return "";
+        var img = core.material.images.images[ss[0]];
+        if (!core.isset(img)) return "";
+        // 绘制
+        if (ss.length==3)
+            core.canvas.ui.drawImage(img, parseFloat(ss[1]), parseFloat(ss[2]));
+        else
+            core.canvas.ui.drawImage(img, 0, 0, img.width, img.height, parseFloat(ss[1]), parseFloat(ss[2]), parseFloat(ss[3]), parseFloat(ss[4]));
+        return "";
+    });
+
     var globalFont = core.status.globalAttribute.font;
     var font = textfont + 'px '+globalFont;
     if (textAttribute.bold) font = "bold "+font;
@@ -519,8 +531,12 @@ ui.prototype.drawTextBox = function(content, showAll) {
         width = validWidth + leftSpace + rightSpace;
         // left必须在7~416-7-width区间内，以保证left>=7，right<=416-7
         left = core.clamp(32*px+16-width/2, 7, 416-7-width);
+
+        left -= core.bigmap.offsetX;
+
         right = left + width;
     }
+
 
     var content_left = left + leftSpace;
     var height = 30 + (textfont+5)*core.splitLines("ui", realContent, validWidth, font).length;
@@ -541,20 +557,24 @@ ui.prototype.drawTextBox = function(content, showAll) {
     else if (position=='up') {
         if (px==null || py==null)
             top = 5 + offset;
-        else
+        else {
             top = 32 * py - height - ydelta - yoffset;
+            top -= core.bigmap.offsetY;
+        }
     }
     else if (position=='down') {
         if (px==null || py==null)
             top = 416 - height - 5 - offset;
-        else
+        else {
             top = 32 * py + 32 + yoffset;
+            top -= core.bigmap.offsetY;
+        }
     }
     var bottom = top + height;
 
     if (isWindowSkin) {
         core.setAlpha('ui', alpha);
-        this.drawWindowSkin(background,'ui',left,top,width,height,position,px==null?null:px*32,py==null?null:py*32);
+        this.drawWindowSkin(background,'ui',left,top,width,height,position,px==null?null:px*32-core.bigmap.offsetX,py==null?null:py*32-core.bigmap.offsetY);
         core.setAlpha('ui', 1);
     }
     else {
@@ -569,17 +589,17 @@ ui.prototype.drawTextBox = function(content, showAll) {
         canvas.moveTo(left,top);
         // 上边缘
         if (position=='down' && core.isset(px) && core.isset(py)) {
-            canvas.lineTo(32*px+xoffset, top);
-            canvas.lineTo(32*px+16, top-yoffset);
-            canvas.lineTo(32*(px+1)-xoffset, top);
+            canvas.lineTo(32*px+xoffset - core.bigmap.offsetX, top);
+            canvas.lineTo(32*px+16 - core.bigmap.offsetX, top-yoffset);
+            canvas.lineTo(32*(px+1)-xoffset - core.bigmap.offsetX, top);
         }
         canvas.lineTo(right, top);
         canvas.lineTo(right, bottom);
         // 下边缘
         if (position=='up' && core.isset(px) && core.isset(py)) {
-            canvas.lineTo(32*(px+1)-xoffset, bottom);
-            canvas.lineTo(32*px+16, bottom+yoffset);
-            canvas.lineTo(32*px+xoffset, bottom);
+            canvas.lineTo(32*(px+1)-xoffset - core.bigmap.offsetX, bottom);
+            canvas.lineTo(32*px+16 - core.bigmap.offsetX, bottom+yoffset);
+            canvas.lineTo(32*px+xoffset - core.bigmap.offsetX, bottom);
         }
         canvas.lineTo(left, bottom);
         canvas.closePath();
@@ -911,7 +931,7 @@ ui.prototype.drawSettings = function () {
     core.status.event.id = 'settings';
 
     this.drawChoices(null, [
-        "系统设置", "虚拟键盘", "浏览地图", "绘图模式", "同步存档", "数据统计", "查看评论", "操作帮助", "关于本塔", "返回标题", "返回游戏"
+        "系统设置", "虚拟键盘", "浏览地图", "绘图模式", "同步存档", "游戏信息", "返回标题", "返回游戏"
     ]);
 }
 
@@ -1010,16 +1030,13 @@ ui.prototype.drawBattleAnimate = function(monsterId, callback) {
 
     var top = (416-height)/2, bottom = height;
 
-    // var left = 97, top = 64, right = 416 - 2 * left, bottom = 416 - 2 * top;
-    core.setAlpha('ui', 0.85);
-    core.fillRect('ui', left, top, right, bottom, '#000000');
+    core.fillRect('ui', left, top, right, bottom, 'rgba(0,0,0,0.85)');
     core.setAlpha('ui', 1);
     core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
     core.clearMap('data');
 
     clearInterval(core.interval.tipAnimate);
     core.setAlpha('data', 1);
-    core.setOpacity('data', 1);
     core.status.boxAnimateObjs = [];
     var globalFont = core.status.globalAttribute.font;
 
@@ -1307,6 +1324,13 @@ ui.prototype.drawReplay = function () {
     ]);
 }
 
+ui.prototype.drawGameInfo = function () {
+    core.status.event.id = 'gameInfo';
+    this.drawChoices(null, [
+        "数据统计", "查看评论", "操作帮助", "关于本塔", "返回上级菜单"
+    ]);
+}
+
 ////// 绘制分页 //////
 ui.prototype.drawPagination = function (page, totalPage, top) {
     // if (totalPage<page) totalPage=page;
@@ -1359,7 +1383,6 @@ ui.prototype.drawBook = function (index) {
 
     clearInterval(core.interval.tipAnimate);
     core.clearMap('data');
-    core.setOpacity('data', 1);
 
     core.clearMap('ui');
     core.setAlpha('ui', 1);
@@ -1595,7 +1618,6 @@ ui.prototype.drawBookDetail = function (index) {
     clearInterval(core.interval.tipAnimate);
 
     core.clearMap('data');
-    core.setOpacity('data', 1);
 
     var left=10, right=416-2*left;
     var content_left = left + 25;
@@ -1681,8 +1703,7 @@ ui.prototype.drawMaps = function (index, x, y) {
         core.setAlpha('ui', 1);
 
         core.clearMap('animate');
-        core.setOpacity('animate', 0.4);
-        core.fillRect('animate', 0, 0, 416, 416, '#000000');
+        core.fillRect('animate', 0, 0, 416, 416, 'rgba(0,0,0,0.4)');
 
         core.strokeRect('ui', 66, 2, 284, 60, "#FFD700", 4);
         core.strokeRect('ui', 2, 66, 60, 284);
@@ -1723,7 +1744,6 @@ ui.prototype.drawMaps = function (index, x, y) {
     }
 
     core.clearMap('animate');
-    core.setOpacity('animate', 1);
 
     var damage = (core.status.event.data||{}).damage, paint =  (core.status.event.data||{}).paint;
     var all = (core.status.event.data||{}).all;
@@ -1764,17 +1784,14 @@ ui.prototype.drawMaps = function (index, x, y) {
     }
 
     core.clearMap('data');
-    core.setOpacity('data', 0.2);
     core.canvas.data.textAlign = 'left';
     core.setFont('data', '16px Arial');
 
     var text = core.status.maps[floorId].title;
     if (!all && (mw>13 || mh>13)) text+=" ["+(x-6)+","+(y-6)+"]";
     var textX = 16, textY = 18, width = textX + core.canvas.data.measureText(text).width + 16, height = 42;
-    core.fillRect('data', 5, 5, width, height, '#000');
-    core.setOpacity('data', 0.4);
-    core.fillText('data', text, textX + 5, textY + 15, '#fff');
-
+    core.fillRect('data', 5, 5, width, height, 'rgba(0,0,0,0.4)');
+    core.fillText('data', text, textX + 5, textY + 15, 'rgba(255,255,255,0.6)');
 }
 
 ////// 绘制道具栏 //////
@@ -2574,7 +2591,6 @@ ui.prototype.drawPaint = function () {
             core.clearMap('route');
 
             core.setAlpha('route', 1);
-            core.setOpacity('route', 1);
 
             // 将已有的内容绘制到route上
             var value = core.paint[core.status.floorId];

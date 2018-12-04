@@ -276,6 +276,13 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         }
                     }
                 },
+                "startCanvas": {
+                    "_leaf": true,
+                    "_type": "event",
+                    "_event": "firstArrive",
+                    "_range": "thiseval==null || thiseval instanceof Array",
+                    "_data": "标题界面事件化，可以使用事件流的形式来绘制开始界面等。\n需要开启startUsingCanvas这个开关。\n详见文档-个性化-标题界面事件化。"
+                },
                 "startText": {
                     "_leaf": true,
                     "_type": "event",
@@ -373,11 +380,10 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "textarea",
                     "_data": "仇恨属性中，每杀死一个怪物获得的仇恨值"
                 },
-                "maxValidHp": {
+                "moveSpeed": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_range": "thiseval==null||thiseval>0",
-                    "_data": "最大合法生命值；如果此项不为null且用户通关血量超过本值，则视为作弊，不上传成绩"
+                    "_data": "行走速度，即勇士每走一格的时间，一般100比较合适"
                 },
                 "animateSpeed": {
                     "_leaf": true,
@@ -559,6 +565,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "checkbox",
                     "_bool": "bool",
                     "_data": "是否循环计算临界；如果此项为true则使用循环法（而不是回合数计算法）来算临界"
+                },
+                "startUsingCanvas": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "是否开始菜单canvas化；如果此项为true，则将使用canvas来绘制开始菜单"
                 },
                 "startDirectly": {
                     "_leaf": true,

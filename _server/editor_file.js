@@ -156,6 +156,7 @@ editor_file = function (editor, callback) {
             color: saveStatus?currData.color:null,
             weather: saveStatus?currData.weather:null,
             firstArrive: [],
+            eachArrive: [],
             parallelDo: "",
             events: {},
             changeFloor: {},

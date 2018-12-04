@@ -52,6 +52,7 @@ editor_blockly = function () {
       MotaActionBlocks['afterGetItem_m'].xmlText(),
       MotaActionBlocks['afterOpenDoor_m'].xmlText(),
       MotaActionBlocks['firstArrive_m'].xmlText(),
+      MotaActionBlocks['eachArrive_m'].xmlText(),
       MotaActionBlocks['level_m'].xmlText(),
     ],
     '显示文字':[
@@ -131,7 +132,8 @@ editor_blockly = function () {
     '特效/声音':[
       MotaActionBlocks['sleep_s'].xmlText(),
       MotaActionBlocks['wait_s'].xmlText(),
-      MotaActionBlocks['viberate_s'].xmlText(),
+      MotaActionBlocks['waitAsync_s'].xmlText(),
+      MotaActionBlocks['vibrate_s'].xmlText(),
       MotaActionBlocks['animate_s'].xmlText(),
       MotaActionBlocks['showStatusBar_s'].xmlText(),
       MotaActionBlocks['hideStatusBar_s'].xmlText(),
@@ -420,7 +422,7 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
         var type = args.type;
         if (!type) return false;
         editor_blockly.id = id_;
-        codeAreaHL.setValue(input.value.replace(/\\r/g,'\\\\r'));
+        codeAreaHL.setValue(input.value.replace(/\\r/g,'\\\\r').replace(/\\f/,'\\\\f'));
         document.getElementById('entryType').value = type;
         editor_blockly.parse();
         editor_blockly.show();

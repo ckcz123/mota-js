@@ -11,6 +11,7 @@ function editor() {
         if (string.indexOf(substring) > -1){
             message = 'Script Error: See Browser Console for Detail';
         } else {
+            if (url) url = url.substring(url.lastIndexOf('/')+1);
             message = [
                 'Message: ' + msg,
                 'URL: ' + url,
@@ -183,6 +184,7 @@ editor.prototype.mapInit = function () {
     editor.currentFloorData.fgmap = editor.fgmap;
     editor.currentFloorData.bgmap = editor.bgmap;
     editor.currentFloorData.firstArrive = [];
+    editor.currentFloorData.eachArrive = [];
     editor.currentFloorData.events = {};
     editor.currentFloorData.changeFloor = {};
     editor.currentFloorData.afterBattle = {};

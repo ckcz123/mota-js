@@ -183,6 +183,18 @@ var code = '[\n'+action_0+']\n';
 return code;
 */;
 
+//eachArrive 事件编辑器入口之一
+eachArrive_m
+    :   '每次到达楼层' BGNL? Newline action+ BEND
+
+
+/* eachArrive_m
+tooltip : 每次到达楼层
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=%e7%b3%bb%e7%bb%9f%e5%bc%95%e5%8f%91%e7%9a%84%e8%87%aa%e5%ae%9a%e4%b9%89%e4%ba%8b%e4%bb%b6
+var code = '[\n'+action_0+']\n';
+return code;
+*/;
+
 //changeFloor 事件编辑器入口之一
 changeFloor_m
     :   '楼梯, 传送门' BGNL? Newline Floor_List IdString? Stair_List 'x' Number ',' 'y' Number '朝向' DirectionEx_List '动画时间' Int? '允许穿透' Bool BEND
@@ -235,6 +247,7 @@ action
     |   updateEnemys_s
     |   sleep_s
     |   wait_s
+    |   waitAsync_s
     |   battle_s
     |   openDoor_s
     |   changeFloor_s
@@ -245,7 +258,7 @@ action
     |   follow_s
     |   unfollow_s
     |   animate_s
-    |   viberate_s
+    |   vibrate_s
     |   showImage_0_s
     |   showImage_1_s
     |   animateImage_0_s
@@ -470,13 +483,13 @@ return code;
 
 
 show_s
-    :   '显示事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' Int? Newline
+    :   '显示事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' Int? '不等待执行完毕' Bool? Newline
     
 
 /* show_s
 tooltip : show: 将禁用事件启用,楼层和动画时间可不填,xy可用逗号分隔表示多个点
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=show%EF%BC%9A%E5%B0%86%E4%B8%80%E4%B8%AA%E7%A6%81%E7%94%A8%E4%BA%8B%E4%BB%B6%E5%90%AF%E7%94%A8
-default : ["","","",500]
+default : ["","","",500,false]
 colour : this.eventColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
@@ -497,18 +510,19 @@ if (EvalString_0 && EvalString_1) {
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
-var code = '{"type": "show"'+floorstr+IdString_0+''+Int_0+'},\n';
+Bool_0 = Bool_0 ?', "async": true':'';
+var code = '{"type": "show"'+floorstr+IdString_0+''+Int_0+Bool_0+'},\n';
 return code;
 */;
 
 hide_s
-    :   '隐藏事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' Int? Newline
+    :   '隐藏事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' Int? '不等待执行完毕' Bool? Newline
     
 
 /* hide_s
 tooltip : hide: 将一个启用事件禁用,所有参数均可不填,代表禁用事件自身,xy可用逗号分隔表示多个点
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=hide%EF%BC%9A%E5%B0%86%E4%B8%80%E4%B8%AA%E5%90%AF%E7%94%A8%E4%BA%8B%E4%BB%B6%E7%A6%81%E7%94%A8
-default : ["","","",500]
+default : ["","","",500,false]
 colour : this.eventColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
@@ -529,7 +543,8 @@ if (EvalString_0 && EvalString_1) {
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
-var code = '{"type": "hide"'+floorstr+IdString_0+''+Int_0+'},\n';
+Bool_0 = Bool_0 ?', "async": true':'';
+var code = '{"type": "hide"'+floorstr+IdString_0+''+Int_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -819,6 +834,7 @@ var code = '{"type": "sleep", "time": '+Int_0+'},\n';
 return code;
 */;
 
+
 battle_s
     :   '强制战斗' IdString Newline
     
@@ -949,18 +965,18 @@ var code = '{"type": "unfollow"' + EvalString_0 + '},\n';
 return code;
 */;
 
-viberate_s
+vibrate_s
     :   '画面震动' '时间' Int '不等待执行完毕' Bool Newline
 
 
-/* viberate_s
-tooltip : viberate: 画面震动
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=viberate%ef%bc%9a%e7%94%bb%e9%9d%a2%e9%9c%87%e5%8a%a8
+/* vibrate_s
+tooltip : vibrate: 画面震动
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=vibrate%ef%bc%9a%e7%94%bb%e9%9d%a2%e9%9c%87%e5%8a%a8
 default : [2000,false]
 colour : this.soundColor
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
 var async = Bool_0?', "async": true':''
-var code = '{"type": "viberate"' + Int_0 + async + '},\n';
+var code = '{"type": "vibrate"' + Int_0 + async + '},\n';
 return code;
 */;
 
@@ -1459,6 +1475,20 @@ var code = '{"type": "wait"},\n';
 return code;
 */;
 
+
+waitAsync_s
+    :   '等待所有异步事件执行完毕'
+
+
+/* waitAsync_s
+tooltip : waitAsync: 等待所有异步事件执行完毕
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=waitAsync%ef%bc%9a%e7%ad%89%e5%be%85%e6%89%80%e6%9c%89%e5%bc%82%e6%ad%a5%e4%ba%8b%e4%bb%b6%e6%89%a7%e8%a1%8c%e5%ae%8c%e6%af%95
+colour : this.soundColor
+var code = '{"type": "waitAsync"},\n';
+return code;
+*/;
+
+
 function_s
     :   '自定义JS脚本' BGNL? Newline RawEvalString Newline BEND Newline
     
@@ -1644,8 +1674,8 @@ Global_Attribute_List
     /*Global_Attribute_List ['font','statusLeftBackground','statusTopBackground', 'toolsBackground', 'borderColor', 'statusBarColor', 'hardLabelColor', 'floorChangingBackground', 'floorChangingTextColor']*/;
 
 Global_Value_List
-    :   '血网伤害'|'中毒伤害'|'衰弱效果'|'红宝石效果'|'蓝宝石效果'|'绿宝石效果'|'红血瓶效果'|'蓝血瓶效果'|'黄血瓶效果'|'绿血瓶效果'|'破甲比例'|'反击比例'|'净化比例'|'仇恨增加值'|'最大合法HP'|'动画时间'
-    /*Global_Value_List ['lavaDamage','poisonDamage','weakValue', 'redJewel', 'blueJewel', 'greenJewel', 'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'breakArmor', 'counterAttack', 'purify', 'hatred', 'maxValidHp', 'animateSpeed']*/;
+    :   '血网伤害'|'中毒伤害'|'衰弱效果'|'红宝石效果'|'蓝宝石效果'|'绿宝石效果'|'红血瓶效果'|'蓝血瓶效果'|'黄血瓶效果'|'绿血瓶效果'|'破甲比例'|'反击比例'|'净化比例'|'仇恨增加值'|'行走速度'|'动画时间'
+    /*Global_Value_List ['lavaDamage','poisonDamage','weakValue', 'redJewel', 'blueJewel', 'greenJewel', 'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'breakArmor', 'counterAttack', 'purify', 'hatred', 'moveSpeed', 'animateSpeed']*/;
 
 Bool:   'TRUE' 
     |   'FALSE'
@@ -1901,7 +1931,7 @@ ActionParser.prototype.parseAction = function() {
         y_str.push(t[1]);
       })
       this.next = MotaActionBlocks['show_s'].xmlText([
-        x_str.join(','),y_str.join(','),data.floorId||'',data.time||0,this.next]);
+        x_str.join(','),y_str.join(','),data.floorId||'',data.time||0,data.async||false,this.next]);
       break;
     case "hide": // 消失
       data.loc=data.loc||[];
@@ -1913,7 +1943,7 @@ ActionParser.prototype.parseAction = function() {
         y_str.push(t[1]);
       })
       this.next = MotaActionBlocks['hide_s'].xmlText([
-        x_str.join(','),y_str.join(','),data.floorId||'',data.time||0,this.next]);
+        x_str.join(','),y_str.join(','),data.floorId||'',data.time||0,data.async||false,this.next]);
       break;
     case "setBlock": // 设置图块
       data.loc=data.loc||['',''];
@@ -2023,8 +2053,8 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['animate_s'].xmlText([
         data.name,animate_loc,data.async||false,this.next]);
       break;
-    case "viberate": // 画面震动
-      this.next = MotaActionBlocks['viberate_s'].xmlText([data.time||0, data.async||false, this.next]);
+    case "vibrate": // 画面震动
+      this.next = MotaActionBlocks['vibrate_s'].xmlText([data.time||0, data.async||false, this.next]);
       break;
     case "showImage": // 显示图片
       if(this.isset(data.name)){
@@ -2219,6 +2249,10 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "wait": // 等待用户操作
       this.next = MotaActionBlocks['wait_s'].xmlText([
+        this.next]);
+      break;
+    case "waitAsync": // 等待所有异步事件执行完毕
+      this.next = MotaActionBlocks['waitAsync_s'].xmlText([
         this.next]);
       break;
     case "revisit": // 立刻重新执行该事件

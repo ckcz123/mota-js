@@ -41,7 +41,8 @@ function core() {
             'level': 0,
             'nodes': [],
             'data': null,
-        }
+        },
+        "asyncId": {}
     }
     this.musicStatus = {
         'audioContext': null, // WebAudioContext
@@ -73,6 +74,8 @@ function core() {
     this.domStyle = {
         styles: [],
         scale: 1.0,
+        toolbarBtn: false,
+        showStatusBar: true,
     }
     this.bigmap = {
         canvas: ["bg", "event", "event2", "fg", "damage", "route"],
@@ -176,7 +179,7 @@ function core() {
         // 动画
         'globalAnimateObjs': [],
         'boxAnimateObjs': [],
-        'autotileAnimateObjs': {},
+        'autotileAnimateObjs': {"status": 0, "blocks": [], "map": null, "bgmap": null, "fgmap": null},
         'animateObjs': [],
     };
     this.status = {};

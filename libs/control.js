@@ -350,7 +350,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
     if (core.isset(route))
         core.status.route = route;
     // 保存的Index
-    core.status.saveIndex = core.getLocalStorage('saveIndex2', 1);
+    core.status.saveIndex = core.getLocalStorage('saveIndex', 1);
 
     if (core.isset(values))
         core.values = core.clone(values);
@@ -2199,7 +2199,7 @@ control.prototype.save = function(need) {
 control.prototype.load = function (need) {
     if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
 
-    var saveIndex = core.getLocalStorage('saveIndex2', 1);
+    var saveIndex = core.getLocalStorage('saveIndex', 1);
     var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
 
     // 游戏开始前读档
@@ -2251,7 +2251,7 @@ control.prototype.doSL = function (id, type) {
             core.drawTip('存档成功！');
             if (id!="autoSave") {
                 core.status.saveIndex=id;
-                core.setLocalStorage('saveIndex2', core.status.saveIndex);
+                core.setLocalStorage('saveIndex', core.status.saveIndex);
             }
         }, function(err) {
             console.info(err);
@@ -2288,7 +2288,7 @@ control.prototype.doSL = function (id, type) {
                 core.drawTip("读档成功");
                 if (id!="autoSave") {
                     core.status.saveIndex=id;
-                    core.setLocalStorage('saveIndex2', core.status.saveIndex);
+                    core.setLocalStorage('saveIndex', core.status.saveIndex);
                 }
             });
         }, function(err) {

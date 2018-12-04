@@ -72,7 +72,12 @@ items.prototype.useItem = function (itemId, callback) {
     var itemCls = core.material.items[itemId].cls;
 
     if (itemId in this.useItemEffect) {
-        eval(this.useItemEffect[itemId]);
+        try {
+            eval(this.useItemEffect[itemId]);
+        }
+        catch (e) {
+            console.log(e);
+        }
     }
     // 记录路线
     if (itemId!='book' && itemId!='fly') {
@@ -96,7 +101,12 @@ items.prototype.canUseItem = function (itemId) {
     if (!core.hasItem(itemId)) return false;
 
     if (itemId in this.canUseItemEffect) {
-        return eval(this.canUseItemEffect[itemId]);
+        try {
+            return eval(this.canUseItemEffect[itemId]);
+        }
+        catch (e) {
+            console.log(e);
+        }
     }
 
     return false;
@@ -121,7 +131,7 @@ items.prototype.hasEquip = function (itemId) {
     if (!core.isset(itemId)) return null;
     if (!core.isset((core.material.items[itemId]||{}).equip)) return null;
 
-    return itemId == this.getEquip(core.material.items[itemId].equip.type);
+    return this.getEquip(core.material.items[itemId].equip.type) == itemId;
 }
 
 ////// 获得某个装备类型的当前装备 //////
@@ -132,14 +142,13 @@ items.prototype.getEquip = function (equipType) {
 ////// 设置某个物品的个数 //////
 items.prototype.setItem = function (itemId, itemNum) {
     itemNum = itemNum || 0;
-    if (itemNum<=0) itemNum = 0;
     var itemCls = core.material.items[itemId].cls;
     if (itemCls == 'items') return;
     if (!core.isset(core.status.hero.items[itemCls])) {
         core.status.hero.items[itemCls] = {};
     }
     core.status.hero.items[itemCls][itemId] = itemNum;
-    if (itemCls!='keys' && itemNum==0) {
+    if (itemCls!='keys' && itemNum<=0) {
         delete core.status.hero.items[itemCls][itemId];
     }
 }
@@ -189,10 +198,17 @@ items.prototype.loadEquip = function (equipId, callback) {
     }
 
     var can = this.canEquip[equipId];
-    if (core.isset(can) && !eval(can)) {
-        core.drawTip("当前不可换上"+loadEquip.name);
-        if (core.isset(callback)) callback();
-        return;
+    if (core.isset(can)) {
+        try {
+            if (!eval(can)) {
+                core.drawTip("当前不可换上"+loadEquip.name);
+                if (core.isset(callback)) callback();
+                return;
+            }
+        }
+        catch (e) {
+            console.log(e);
+        }
     }
 
     core.playSound('equip.mp3');

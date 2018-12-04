@@ -2243,14 +2243,14 @@ actions.prototype.clickStorageRemove = function (x, y) {
                         core.ui.closePanel();
                         core.drawText("\t[操作成功]你的所有存档已被清空。");
                         core.status.saveIndex = 1;
-                        core.setLocalStorage('saveIndex2', 1);
+                        core.removeLocalStorage('saveIndex');
                     });
                 }
                 else {
                     localStorage.clear();
                     core.drawText("\t[操作成功]你的所有存档已被清空。");
                     core.status.saveIndex = 1;
-                    core.setLocalStorage('saveIndex2', 1);
+                    core.removeLocalStorage('saveIndex');
                 }
                 break;
             case 1:
@@ -2264,7 +2264,7 @@ actions.prototype.clickStorageRemove = function (x, y) {
                         core.ui.closePanel();
                         core.drawText("\t[操作成功]当前塔的存档已被清空。");
                         core.status.saveIndex = 1;
-                        core.setLocalStorage('saveIndex2', 1);
+                        core.removeLocalStorage('saveIndex');
                     });
                 }
                 else {
@@ -2275,7 +2275,7 @@ actions.prototype.clickStorageRemove = function (x, y) {
                     core.removeLocalStorage("autoSave");
                     core.drawText("\t[操作成功]当前塔的存档已被清空。");
                     core.status.saveIndex = 1;
-                    core.setLocalStorage('saveIndex2', 1);
+                    core.removeLocalStorage('saveIndex');
                 }
                 break;
             case 2:

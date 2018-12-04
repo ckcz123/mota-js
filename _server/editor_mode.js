@@ -206,7 +206,7 @@ editor_mode = function (editor) {
                         throw(objs_.slice(-1)[0])
                     }
                     ;printf('修改成功');
-                    editor.drawEventBlock();
+                    editor.drawPosSelection();
                 });
                 break;
             case 'enemyitem':
@@ -286,6 +286,8 @@ editor_mode = function (editor) {
             editor_mode.dom[name].style = 'z-index:-1;opacity: 0;';
         }
         editor_mode.dom[mode].style = '';
+        // clear
+        editor.drawEventBlock();
         if (editor_mode[mode]) editor_mode[mode]();
         document.getElementById('editModeSelect').value = mode;
         var tips = tip_in_showMode;
@@ -307,7 +309,7 @@ editor_mode = function (editor) {
         var tableinfo = editor_mode.objToTable_(objs[0], objs[1]);
         document.getElementById('table_3d846fc4_7644_44d1_aa04_433d266a73df').innerHTML = tableinfo.HTML;
         tableinfo.listen(tableinfo.guids);
-
+        editor.drawPosSelection();
         if (Boolean(callback)) callback();
     }
 

@@ -677,7 +677,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			break;
 		case 80: // P：查看评论
 			window.open("/score.php?name="+core.firstData.name+"&num=10", "_blank");
-            break;
+			break;
 		case 49: // 快捷键1: 破
 			if (core.hasItem('pickaxe')) {
 				if (core.canUseItem('pickaxe')) {
@@ -834,9 +834,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.flags.enableLevelUp && core.status.hero.lv<core.firstData.levelUp.length) {
 		var need = core.calValue(core.firstData.levelUp[core.status.hero.lv].need);
 		if (core.flags.levelUpLeftMode)
-            core.statusBar.up.innerHTML = (need - core.getStatus('experience')) || " ";
+			core.statusBar.up.innerHTML = (need - core.getStatus('experience')) || " ";
 		else
-            core.statusBar.up.innerHTML = need || " ";
+			core.statusBar.up.innerHTML = need || " ";
 	}
 	else core.statusBar.up.innerHTML = " ";
 
@@ -1057,7 +1057,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			eval(core.floors[core.status.floorId].parallelDo);
 		} catch (e) {
 			console.log(e);
-        }
+		}
 	}
 
 	// 下面是一个并行事件开门的样例

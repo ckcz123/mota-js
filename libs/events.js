@@ -1053,14 +1053,19 @@ events.prototype.doAction = function() {
         case "function":
             {
                 var func = data["function"];
-                if (core.isset(func)) {
-                    if ((typeof func == "string") && func.indexOf("function")==0) {
-                        eval('('+func+')()');
+                try {
+                    if (core.isset(func)) {
+                        if ((typeof func == "string") && func.indexOf("function")==0) {
+                            eval('('+func+')()');
+                        }
+                        else if (func instanceof Function)
+                            func();
                     }
-                    else if (func instanceof Function)
-                        func();
+                } catch (e) {
+                    console.log(e);
                 }
-                this.doAction();
+                if (!data.async)
+                    this.doAction();
                 break;
             }
         case "update":

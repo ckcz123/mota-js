@@ -1490,15 +1490,16 @@ return code;
 
 
 function_s
-    :   '自定义JS脚本' BGNL? Newline RawEvalString Newline BEND Newline
+    :   '自定义JS脚本' '不自动执行下一个事件' Bool BGNL? Newline RawEvalString Newline BEND Newline
     
 
 /* function_s
 tooltip : 可双击多行编辑，请勿使用异步代码。常见API参见文档附录。
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=function%EF%BC%9A%E8%87%AA%E5%AE%9A%E4%B9%89js%E8%84%9A%E6%9C%AC
-default : ["alert(core.getStatus(\"atk\"));"]
+default : [false,"alert(core.getStatus(\"atk\"));"]
 colour : this.dataColor
-var code = '{"type": "function", "function": "function(){\\n'+JSON.stringify(RawEvalString_0).slice(1,-1).split('\\\\n').join('\\n')+'\\n}"},\n';
+Bool_0 = Bool_0?', "async": true':'';
+var code = '{"type": "function"'+Bool_0+', "function": "function(){\\n'+JSON.stringify(RawEvalString_0).slice(1,-1).split('\\\\n').join('\\n')+'\\n}"},\n';
 return code;
 */;
 
@@ -2225,7 +2226,7 @@ ActionParser.prototype.parseAction = function() {
       var func = data["function"];
       func=func.split('{').slice(1).join('{').split('}').slice(0,-1).join('}').trim().split('\n').join('\\n');
       this.next = MotaActionBlocks['function_s'].xmlText([
-        func,this.next]);
+        data.async||false,func,this.next]);
       break;
     case "update":
       this.next = MotaActionBlocks['update_s'].xmlText([

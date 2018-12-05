@@ -59,6 +59,7 @@ control.prototype.setRequestAnimationFrame = function () {
         core.animateFrame.boxTime = core.animateFrame.boxTime||timestamp;
         core.animateFrame.animateTime = core.animateFrame.animateTime||timestamp;
         core.animateFrame.moveTime = core.animateFrame.moveTime||timestamp;
+        core.animateFrame.lastLegTime = core.animateFrame.lastLegTime||timestamp;
         core.animateFrame.weather.time = core.animateFrame.weather.time||timestamp;
 
         // move time
@@ -122,15 +123,23 @@ control.prototype.setRequestAnimationFrame = function () {
         }
 
         // Hero move
-        if (timestamp-core.animateFrame.moveTime>16 && core.isset(core.status.heroMoving) && core.status.heroMoving>0) {
+        if (core.isPlaying() && core.status.heroMoving>0) {
             var x=core.getHeroLoc('x'), y=core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
+
+            // 200ms换腿？
+            if (timestamp - core.animateFrame.moveTime > (core.values.moveSpeed||100)) {
+                core.animateFrame.leftLeg = !core.animateFrame.leftLeg;
+                core.animateFrame.moveTime = timestamp;
+            }
+            core.drawHero(direction, x, y, core.animateFrame.leftLeg?'leftFoot':'rightFoot', 4*core.status.heroMoving);
+            /*
             if (core.status.heroMoving<=4) {
                 core.drawHero(direction, x, y, 'leftFoot', 4*core.status.heroMoving);
             }
             else if (core.status.heroMoving<=8) {
                 core.drawHero(direction, x, y, 'rightFoot', 4*core.status.heroMoving);
             }
-            core.animateFrame.moveTime = timestamp;
+            */
         }
 
         // weather

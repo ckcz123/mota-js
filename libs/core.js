@@ -34,6 +34,8 @@ function core() {
         'boxTime': null,
         'animateTime': null,
         'moveTime': null,
+        'lastLegTime': null,
+        'leftLeg': true,
         'speed': null,
         'weather': {
             'time': null,

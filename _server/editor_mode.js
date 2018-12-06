@@ -665,10 +665,6 @@ editor_mode = function (editor) {
                         callback(image);
                     }
                     image.src = content;
-                    if (image.complete) {
-                        callback(image);
-                        return;
-                    }
                 }
                 catch (e) {
                     printe(e);

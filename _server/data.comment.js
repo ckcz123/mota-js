@@ -564,6 +564,18 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面"
                 },
+                "statusCanvas": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "是否状态栏canvas化，即手动自定义绘制状态栏。\n如果此项开启，则可在脚本编辑的drawStatusBar中自定义绘制菜单栏。"
+                },
+                "statusCanvasRowsOnMobile": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_range": "thiseval==null || (thiseval>0 && thiseval<=4)",
+                    "_data": "竖屏模式下，顶端状态栏canvas化后的行数。\n此项将决定竖屏的状态栏高度，如果设置则不小于1且不大于4。\n仅在statusCanvas开启时才有效"
+                },
                 "canOpenBattleAnimate": {
                     "_leaf": true,
                     "_type": "checkbox",

@@ -998,6 +998,28 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 }
     },
     "ui": {
+        "drawStatusBar": function () {
+	// 如果是非状态栏canvas化，直接返回
+	if (!core.flags.statusCanvas) return;
+	var canvas = core.dom.statusCanvas, ctx = canvas.getContext('2d');
+	// 清空状态栏
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	// 如果是隐藏状态栏模式，直接返回
+	if (!core.domStyle.showStatusBar) return;
+	
+	// 动态计算要绘制的项目
+	var toDraw = core.control.needDraw();
+	console.log(toDraw);
+	
+	// 开始绘制；横竖屏分别绘制
+	if (core.domStyle.screenMode != 'vertical') {
+		console.log("横屏");
+	}
+	else {
+		console.log("竖屏");
+	}
+	
+},
         "drawStatistics": function () {
 	// 浏览地图时参与的统计项目
 	

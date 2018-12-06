@@ -2907,6 +2907,36 @@ control.prototype.setToolbarButton = function (useButton) {
     }
 }
 
+control.prototype.needDraw = function(id) {
+    if (!core.isset(id)) {
+        var toDraw = [], status = core.dom.status;
+        for (var i = 0; i<status.length; ++i) {
+            var dom = core.dom.status[i], idCol = dom.id;
+            if (idCol.indexOf("Col")!=idCol.length-3) continue;
+            var id = idCol.substring(0, idCol.length-3);
+            if (!this.needDraw(id)) continue;
+            toDraw.push(id);
+        }
+        return toDraw;
+    }
+    switch (id) {
+        case 'floor': return core.flags.enableFloor;
+        case 'name': return core.flags.enableName;
+        case 'lv': return core.flags.enableLv;
+        case 'hpmax': return core.flags.enableHPMax;
+        case 'mana': return core.flags.enableMana;
+        case 'mdef': return core.flags.enableMDef;
+        case 'money': return core.flags.enableMoney;
+        case 'experience': return core.flags.enableExperience && !core.flags.levelUpLeftMode;
+        case 'up': return core.flags.enableLevelUp;
+        case 'skill': return core.flags.enableSkill;
+        case 'key': return core.flags.enableKeys;
+        case 'pzf': return core.flags.enablePZF;
+        case 'debuff': return core.flags.enableDebuff;
+        default: return true;
+    }
+}
+
 ////// 屏幕分辨率改变后重新自适应 //////
 control.prototype.resize = function(clientWidth, clientHeight) {
     if (main.mode=='editor')return;
@@ -2936,25 +2966,16 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         statusWidth, statusHeight, statusMaxWidth,statusLabelsLH,
         toolBarWidth, toolBarHeight, toolBarTop, toolBarBorder,
         toolsWidth, toolsHeight,toolsMargin,toolsPMaxwidth,
-        fontSize, toolbarFontSize, margin, statusBackground, toolsBackground;
+        fontSize, toolbarFontSize, margin, statusBackground, toolsBackground,
+        statusCanvasWidth, statusCanvasHeight;
 
-    var count = core.dom.statusBar.children.length;
-    if (!core.flags.enableFloor) count--;
-    if (!core.flags.enableLv) count--;
-    if (!core.flags.enableHPMax) count--;
-    if (!core.flags.enableMDef) count--;
-    if (!core.flags.enableMoney) count--;
-    if (!core.flags.enableExperience) count--;
-    if (!core.flags.enableLevelUp) count--;
-    if (core.flags.levelUpLeftMode) count--;
-    if (!core.flags.enableDebuff) count--;
-    if (!core.flags.enableKeys) count--;
-    if (!core.flags.enablePZF) count--;
-    if (!core.flags.enableName) count--;
-    if (!core.flags.enableMana) count--;
-    if (!core.flags.enableSkill) count--;
+    var toDraw = this.needDraw();
+    var count = toDraw.length;
+    var statusCanvas = core.flags.statusCanvas, statusCanvasRows = core.flags.statusCanvasRowsOnMobile || 3;
 
-    if (count>12) alert("当前状态栏数目("+count+")大于12，请调整到不超过12以避免手机端出现显示问题。");
+    if (!statusCanvas && count>12) alert("当前状态栏数目("+count+")大于12，请调整到不超过12以避免手机端出现显示问题。");
+    var col = Math.ceil(count / 3);
+    if (statusCanvas) col = statusCanvasRows;
 
     var statusLineHeight = BASE_LINEHEIGHT * 9 / count;
     var statusLineFontSize = DEFAULT_FONT_SIZE;
@@ -2988,9 +3009,6 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             core.domStyle.screenMode = 'vertical';
             //显示快捷商店图标
             shopDisplay = 'block';
-            //判断应该显示几行
-            // var col = core.flags.enableMDef || core.flags.enableExperience || core.flags.enableDebuff ? 3 : 2;
-            var col = parseInt((count-1)/3)+1;
 
             var tempTopBarH = scale * (BASE_LINEHEIGHT * col + SPACE * 2) + 6;
             var tempBotBarH = scale * (BASE_LINEHEIGHT + SPACE * 4) + 6;
@@ -2998,6 +3016,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             gameGroupHeight = tempWidth + tempTopBarH + tempBotBarH;
 
             gameGroupWidth = tempWidth
+            statusCanvasWidth = canvasWidth;
+            statusCanvasHeight = tempTopBarH;
             canvasTop = tempTopBarH;
             // canvasLeft = 0;
             toolBarWidth = statusBarWidth = canvasWidth;
@@ -3031,6 +3051,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH * scale;
             statusBarHeight = gameGroupHeight - SPACE;
             statusBarBorder = '3px '+borderColor+' solid';
+            statusCanvasWidth = toolBarWidth + SPACE;
+            statusCanvasHeight = statusBarHeight;
             statusBackground = (core.status.globalAttribute||core.initStatus.globalAttribute).statusLeftBackground;
 
             statusHeight = scale*statusLineHeight * .8;
@@ -3065,6 +3087,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         // statusBarHeight = statusLineHeight * count + SPACE * 2; //一共有9行
         statusBackground = (core.status.globalAttribute||core.initStatus.globalAttribute).statusLeftBackground;
         statusBarHeight = gameGroupHeight - SPACE;
+        statusCanvasWidth = toolBarWidth + SPACE;
+        statusCanvasHeight = statusBarHeight;
 
         statusHeight = statusLineHeight * .8;
         statusLabelsLH = .8 * statusLineHeight;
@@ -3101,6 +3125,14 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             }
         },
         {
+            id: 'statusCanvas',
+            rules: {
+                width: (statusCanvasWidth - SPACE*2) + unit,
+                height: (statusCanvasHeight - SPACE) + unit,
+                display: statusCanvas?'block':'none'
+            }
+        },
+        {
             id: 'gif',
             rules: {
                 width: (canvasWidth - SPACE*2) + unit,
@@ -3114,15 +3146,6 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 height:(canvasWidth - SPACE*2) + unit,
             }
         },
-        /*
-        {
-            id: 'curtain',
-            rules: {
-                width: (canvasWidth - SPACE*2) + unit,
-                height:(canvasWidth - SPACE*2) + unit,
-            }
-        },
-        */
         {
             id: 'gameDraw',
             rules: {
@@ -3166,7 +3189,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 width: '100%',
                 maxWidth: statusMaxWidth + unit,
                 height: statusHeight + unit,
-                margin: margin/2 + unit
+                margin: margin/2 + unit,
+                display: !statusCanvas?'block':'none'
             }
         },
         {
@@ -3213,84 +3237,6 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             }
         },
         {
-            id: 'floorCol',
-            rules: {
-                display: core.flags.enableFloor ? 'block': 'none'
-            }
-        },
-        {
-            id: 'nameCol',
-            rules: {
-                display: core.flags.enableName ? 'block': 'none'
-            }
-        },
-        {
-            id: 'lvCol',
-            rules: {
-                display: core.flags.enableLv ? 'block': 'none'
-            }
-        },
-        {
-            id: 'hpmaxCol',
-            rules: {
-                display: core.flags.enableHPMax ? 'block': 'none'
-            }
-        },
-        {
-            id: 'manaCol',
-            rules: {
-                display: core.flags.enableMana ? 'block': 'none'
-            }
-        },
-        {
-            id: 'mdefCol',
-            rules: {
-                display: core.flags.enableMDef ? 'block': 'none'
-            }
-        },
-        {
-            id: 'moneyCol',
-            rules: {
-                display: core.flags.enableMoney ? 'block': 'none'
-            }
-        },
-        {
-            id: 'expCol',
-            rules: {
-                display: core.flags.enableExperience && !core.flags.levelUpLeftMode ? 'block': 'none'
-            }
-        },
-        {
-            id: 'upCol',
-            rules: {
-                display: core.flags.enableLevelUp ? 'block': 'none'
-            }
-        },
-        {
-            id: 'skillCol',
-            rules: {
-                display: core.flags.enableSkill ? 'block': 'none'
-            }
-        },
-        {
-            id: 'keyCol',
-            rules: {
-                display: !core.isset(core.flags.enableKeys)||core.flags.enableKeys?'block':'none'
-            }
-        },
-        {
-            id: 'pzfCol',
-            rules: {
-                display: core.flags.enablePZF?'block':'none'
-            }
-        },
-        {
-            'id': 'debuffCol',
-            rules: {
-                display: core.flags.enableDebuff ? 'block': 'none'
-            }
-        },
-        {
             id: 'hard',
             rules: {
                 lineHeight: toolsHeight + unit,
@@ -3298,8 +3244,27 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             }
         },
     ]
+    for (var i = 0; i < core.dom.status.length; ++i) {
+        var id = core.dom.status[i].id;
+        core.domStyle.styles.push({
+            id: id,
+            rules: {
+                display: toDraw.indexOf(id.substring(0, id.length-3))>=0 && !statusCanvas ? "block": "none"
+            }
+        });
+    }
+
     core.domRenderer();
     this.setToolbarButton();
+
+    if (core.domStyle.screenMode == 'vertical') {
+        core.dom.statusCanvas.width = 416;
+        core.dom.statusCanvas.height = col * BASE_LINEHEIGHT + SPACE + 6;
+    }
+    else {
+        core.dom.statusCanvas.width = 129;
+        core.dom.statusCanvas.height = 416;
+    }
 }
 
 ////// 渲染DOM //////

@@ -171,6 +171,8 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 
     }
 
+    if (main.mode!='play') return;
+
     if (core.flags.startUsingCanvas) {
         core.dom.startPanel.style.display = 'none';
         start();

@@ -388,7 +388,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "animateSpeed": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "动画时间，一般300比较合适"
+                    "_data": "全局动画时间，即怪物振动频率，一般300比较合适"
                 }
             }
         },

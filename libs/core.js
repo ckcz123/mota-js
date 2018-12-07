@@ -43,6 +43,7 @@ function core() {
             'level': 0,
             'nodes': [],
             'data': null,
+            'fog': null,
         },
         "asyncId": {}
     }
@@ -328,6 +329,9 @@ core.prototype.init = function (coreData, callback) {
         core.material.groundPattern = core.canvas.ui.createPattern(core.material.ground, "repeat");
     }
     core.material.ground.src = "project/images/ground.png";
+
+    core.animateFrame.weather.fog = new Image();
+    core.animateFrame.weather.fog.src = "project/images/fog.png";
 
     core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
 

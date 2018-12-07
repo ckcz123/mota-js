@@ -213,6 +213,37 @@ control.prototype.setRequestAnimationFrame = function () {
                 core.canvas.weather.fill();
 
             }
+            else if (core.animateFrame.weather.type == 'fog' && core.animateFrame.weather.level > 0) {
+                core.clearMap('weather');
+                if (core.animateFrame.weather.fog) {
+                    var w = 416, h = 416;
+                    core.setAlpha('weather', 0.5);
+                    core.animateFrame.weather.nodes.forEach(function (p) {
+                        core.canvas.weather.drawImage(core.animateFrame.weather.fog, p.x - ox, p.y - oy, w, h);
+
+                        p.x += p.xs;
+                        p.y += p.ys;
+                        if (p.x > core.bigmap.width*32 - w/2) {
+                            p.x = core.bigmap.width*32 - w/2 - 1;
+                            p.xs = -p.xs;
+                        }
+                        if (p.x < -w/2) {
+                            p.x = -w/2+1;
+                            p.xs = -p.xs;
+                        }
+                        if (p.y > core.bigmap.height*32 - h/2) {
+                            p.y = core.bigmap.height*32 - h/2 - 1;
+                            p.ys = -p.ys;
+                        }
+                        if (p.y < -h/2) {
+                            p.y = -h/2+1;
+                            p.ys = -p.ys;
+                        }
+                    })
+                    core.setAlpha('weather',1);
+                }
+
+            }
             core.animateFrame.weather.time = timestamp;
 
         }
@@ -1438,7 +1469,7 @@ control.prototype.snipe = function (snipes) {
 control.prototype.setWeather = function (type, level) {
 
     // 非雨雪
-    if (type!='rain' && type!='snow') {
+    if (type!='rain' && type!='snow' && type!='fog') {
         core.clearMap('weather')
         core.animateFrame.weather.type = null;
         core.animateFrame.weather.level = 0;
@@ -1483,6 +1514,18 @@ control.prototype.setWeather = function (type, level) {
                 'r': Math.random() * 5 + 1,
                 'd': Math.random() * Math.min(level, 200),
             })
+        }
+    }
+    else if (type=='fog') {
+        if (core.animateFrame.weather.fog) {
+            for (var a=0;a<level/10;a++) {
+                core.animateFrame.weather.nodes.push({
+                    'x': Math.random()*core.bigmap.width*32 - 208,
+                    'y': Math.random()*core.bigmap.height*32 - 208,
+                    'xs': Math.random() * 4 - 2,
+                    'ys': Math.random() * 4 - 2
+                })
+            }
         }
     }
 }

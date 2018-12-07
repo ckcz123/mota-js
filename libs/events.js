@@ -1396,6 +1396,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
         if (index<core.floorIds.length-1) floorId = core.floorIds[index+1];
         else floorId=core.status.floorId;
     }
+    if (main.mode!='play') time = 0;
     if (!core.isset(time)) time = core.values.floorChangeTime;
     if (!core.isset(time)) time = 800;
 

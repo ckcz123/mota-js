@@ -757,9 +757,8 @@ utils.prototype.show = function (obj, speed, callback) {
 
 ////// 动画使某对象消失 //////
 utils.prototype.hide = function (obj, speed, callback) {
-    obj.style.display = 'none';
     if (!core.isset(speed) || main.mode!='play'){
-        obj.style.opacity = 0;
+        obj.style.display = 'none';
         if (core.isset(callback)) callback();
         return;
     }

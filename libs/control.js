@@ -2877,31 +2877,30 @@ control.prototype.updateGlobalAttribute = function (name) {
     if (!core.isset(attribute)) return;
     switch (name) {
         case 'statusLeftBackground':
-            if (core.domStyle.screenMode == 'horizontal' || core.domStyle.screenMode == 'bigScreen') {
+            if (!core.domStyle.isVertical) {
                 core.dom.statusBar.style.background = attribute[name];
             }
             break;
         case 'statusTopBackground':
-            if (core.domStyle.screenMode == 'vertical') {
+            if (core.domStyle.isVertical) {
                 core.dom.statusBar.style.background = attribute[name];
             }
             break;
         case 'toolsBackground':
-            if (core.domStyle.screenMode == 'vertical') {
+            if (core.domStyle.isVertical) {
                 core.dom.toolBar.style.background = attribute[name];
             }
             break;
         case 'borderColor':
             {
                 var border = '3px ' + attribute[name] + ' solid';
-                var isVertical = core.domStyle.screenMode == 'vertical';
                 core.dom.statusBar.style.borderTop = border;
                 core.dom.statusBar.style.borderLeft = border;
-                core.dom.statusBar.style.borderRight = isVertical?'':border;
+                core.dom.statusBar.style.borderRight = core.domStyle.isVertical?'':border;
                 core.dom.gameDraw.style.border = border;
                 core.dom.toolBar.style.borderBottom = border;
                 core.dom.toolBar.style.borderLeft = border;
-                core.dom.toolBar.style.borderRight = isVertical?'':border;
+                core.dom.toolBar.style.borderRight = core.domStyle.isVertical?'':border;
                 break;
             }
         case 'statusBarColor':
@@ -2928,7 +2927,7 @@ control.prototype.setToolbarButton = function (useButton) {
     if (!core.domStyle.showStatusBar) return;
 
     if (!core.isset(useButton)) useButton = core.domStyle.toolbarBtn;
-    if (core.domStyle.screenMode != 'vertical') useButton = false;
+    if (!core.domStyle.isVertical) useButton = false;
 
     core.domStyle.toolbarBtn = useButton;
     if (useButton) {
@@ -2946,7 +2945,7 @@ control.prototype.setToolbarButton = function (useButton) {
         ["book","fly","toolbox","shop","save","load","settings"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'block';
         });
-        core.statusBar.image.shop.style.display = core.domStyle.screenMode != 'vertical' ? "none":"block";
+        core.statusBar.image.shop.style.display = core.domStyle.isVertical ? "block":"none";
     }
 }
 
@@ -3050,6 +3049,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         var tempWidth = DEFAULT_CANVAS_WIDTH * scale;
         if(!isHorizontal){ //竖屏
             core.domStyle.screenMode = 'vertical';
+            core.domStyle.isVertical = true;
             //显示快捷商店图标
             shopDisplay = 'block';
 
@@ -3086,6 +3086,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             toolbarFontSize = DEFAULT_FONT_SIZE * scale;
         }else { //横屏
             core.domStyle.screenMode = 'horizontal';
+            core.domStyle.isVertical = false;
             shopDisplay = 'none';
             gameGroupWidth = tempWidth + DEFAULT_BAR_WIDTH * scale;
             gameGroupHeight = tempWidth;
@@ -3118,6 +3119,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     }else { //大屏设备 pc端
         core.domStyle.scale = 1;
         core.domStyle.screenMode = 'bigScreen';
+        core.domStyle.isVertical = false;
         shopDisplay = 'none';
 
         gameGroupWidth = DEFAULT_CANVAS_WIDTH + DEFAULT_BAR_WIDTH;
@@ -3300,7 +3302,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     core.domRenderer();
     this.setToolbarButton();
 
-    if (core.domStyle.screenMode == 'vertical') {
+    if (core.domStyle.isVertical) {
         core.dom.statusCanvas.width = 416;
         core.dom.statusCanvas.height = col * BASE_LINEHEIGHT + SPACE + 6;
     }
@@ -3308,6 +3310,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         core.dom.statusCanvas.width = 129;
         core.dom.statusCanvas.height = 416;
     }
+    this.updateStatusBar();
 }
 
 ////// 渲染DOM //////

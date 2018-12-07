@@ -238,7 +238,7 @@ loader.prototype.loadMusic = function () {
                     console.log(ee);
                     core.material.sounds[t] = null;
                 }
-            }, function () {
+            }, function (e) {
                 console.log(e);
                 core.material.sounds[t] = null;
             }, null, 'arraybuffer');

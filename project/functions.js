@@ -724,6 +724,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				}
 			}
 			break;
+		case 55: // 快捷键7：绑定为轻按，方便手机版操作
+			core.getNextItem();
+			break;
 		case 118: // F7：开启debug模式
 			core.debug();
 			break;

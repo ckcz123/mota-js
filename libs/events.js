@@ -1396,10 +1396,11 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
         if (index<core.floorIds.length-1) floorId = core.floorIds[index+1];
         else floorId=core.status.floorId;
     }
+    if (!core.isset(time)) time = core.values.floorChangeTime;
+    if (!core.isset(time)) time = 800;
 
-    var displayAnimate=(!core.isset(time) || time>=100) && !core.status.replay.replaying;
+    var displayAnimate = time>=100 && !core.status.replay.replaying;
 
-    time = time || 800;
     time /= 20;
     core.lockControl();
     core.stopHero();

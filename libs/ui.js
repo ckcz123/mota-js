@@ -403,6 +403,9 @@ ui.prototype.calTextBoxWidth = function (canvas, content, min_width, max_width) 
 
     // 如果不存在手动换行，则二分自动换行
     if (allLines.length == 1) {
+        var w = core.canvas[canvas].measureText(allLines[0]).width;
+        return core.clamp(w / 2.4, min_width, max_width);
+        /*
         var prefer_lines = 3;
         var start = Math.floor(min_width), end = Math.floor(max_width);
         while (start < end) {
@@ -413,6 +416,7 @@ ui.prototype.calTextBoxWidth = function (canvas, content, min_width, max_width) 
                 start = mid + 1;
         }
         return mid;
+        */
     }
     // 存在手动换行：以最长的为准
     else {

@@ -587,19 +587,33 @@ editor_mode = function (editor) {
             tempCanvas.imageSmoothingEnabled = false;
             tempCanvas.drawImage(image, 0, 0);
             var imgData = tempCanvas.getImageData(0, 0, image.width, image.height);
-            var trans = 0, white = 0;
+            var trans = 0, white = 0, black=0;
             for (var i=0;i<image.width;i++) {
                 for (var j=0;j<image.height;j++) {
                     var pixel = getPixel(imgData, i, j);
                     if (pixel[3]==0) trans++;
                     if (pixel[0]==255 && pixel[1]==255 && pixel[2]==255 && pixel[3]==255) white++;
+                    if (pixel[0]==0 && pixel[1]==0 && pixel[2]==0 && pixel[3]==255) black++;
                 }
             }
-            if (white>trans*10 && confirm("看起来这张图片是以白色为底色，是否自动调整为透明底色？")) {
+            if (white>black && white>trans*10 && confirm("看起来这张图片是以纯白为底色，是否自动调整为透明底色？")) {
                 for (var i=0;i<image.width;i++) {
                     for (var j=0;j<image.height;j++) {
                         var pixel = getPixel(imgData, i, j);
                         if (pixel[0]==255 && pixel[1]==255 && pixel[2]==255 && pixel[3]==255) {
+                            setPixel(imgData, i, j, [0,0,0,0]);
+                        }
+                    }
+                }
+                tempCanvas.clearRect(0, 0, image.width, image.height);
+                tempCanvas.putImageData(imgData, 0, 0);
+                changed = true;
+            }
+            if (black>white && black>trans*10 && confirm("看起来这张图片是以纯黑为底色，是否自动调整为透明底色？")) {
+                for (var i=0;i<image.width;i++) {
+                    for (var j=0;j<image.height;j++) {
+                        var pixel = getPixel(imgData, i, j);
+                        if (pixel[0]==0 && pixel[1]==0 && pixel[2]==0 && pixel[3]==255) {
                             setPixel(imgData, i, j, [0,0,0,0]);
                         }
                     }
@@ -651,10 +665,6 @@ editor_mode = function (editor) {
                         callback(image);
                     }
                     image.src = content;
-                    if (image.complete) {
-                        callback(image);
-                        return;
-                    }
                 }
                 catch (e) {
                     printe(e);

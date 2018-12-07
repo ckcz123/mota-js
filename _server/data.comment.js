@@ -389,6 +389,11 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "textarea",
                     "_data": "全局动画时间，即怪物振动频率，一般300比较合适"
+                },
+                "floorChangeTime": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_data": "默认楼层切换时间"
                 }
             }
         },

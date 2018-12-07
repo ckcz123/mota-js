@@ -1651,8 +1651,8 @@ Arithmetic_List
     ;
 
 Weather_List
-    :   '无'|'雨'|'雪'
-    /*Weather_List ['','rain','snow']*/;
+    :   '无'|'雨'|'雪'|'雾'
+    /*Weather_List ['','rain','snow','fog']*/;
 
 B_0_List
     :   '不改变'|'不可通行'|'可以通行'
@@ -1675,8 +1675,8 @@ Global_Attribute_List
     /*Global_Attribute_List ['font','statusLeftBackground','statusTopBackground', 'toolsBackground', 'borderColor', 'statusBarColor', 'hardLabelColor', 'floorChangingBackground', 'floorChangingTextColor']*/;
 
 Global_Value_List
-    :   '血网伤害'|'中毒伤害'|'衰弱效果'|'红宝石效果'|'蓝宝石效果'|'绿宝石效果'|'红血瓶效果'|'蓝血瓶效果'|'黄血瓶效果'|'绿血瓶效果'|'破甲比例'|'反击比例'|'净化比例'|'仇恨增加值'|'行走速度'|'动画时间'
-    /*Global_Value_List ['lavaDamage','poisonDamage','weakValue', 'redJewel', 'blueJewel', 'greenJewel', 'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'breakArmor', 'counterAttack', 'purify', 'hatred', 'moveSpeed', 'animateSpeed']*/;
+    :   '血网伤害'|'中毒伤害'|'衰弱效果'|'红宝石效果'|'蓝宝石效果'|'绿宝石效果'|'红血瓶效果'|'蓝血瓶效果'|'黄血瓶效果'|'绿血瓶效果'|'破甲比例'|'反击比例'|'净化比例'|'仇恨增加值'|'行走速度'|'动画时间'|'楼层切换时间'
+    /*Global_Value_List ['lavaDamage','poisonDamage','weakValue', 'redJewel', 'blueJewel', 'greenJewel', 'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'breakArmor', 'counterAttack', 'purify', 'hatred', 'moveSpeed', 'animateSpeed', 'floorChangeTime']*/;
 
 Bool:   'TRUE' 
     |   'FALSE'
@@ -1904,7 +1904,7 @@ ActionParser.prototype.parseAction = function() {
     case "autoText": // 自动剧情文本
       data.time=this.isset(data.time)?data.time:MotaActionBlocks['autoText_s'].fieldDefault[3];
       this.next = MotaActionBlocks['autoText_s'].xmlText([
-        '','','',data.time,this.EvalString(data.text),this.next]);
+        '','','',data.time||0,this.EvalString(data.text),this.next]);
       break;
     case "comment": // 注释
       this.next = MotaActionBlocks['comment_s'].xmlText([data.text,this.next]);
@@ -1916,7 +1916,7 @@ ActionParser.prototype.parseAction = function() {
       if (!/^\w+\.png$/.test(data.background))
         data.background=setTextfunc(data.background);
       this.next = MotaActionBlocks['setText_s'].xmlText([
-        data.position,data.offset,data.title,data.text,data.background,data.bold,data.titlefont,data.textfont,data.time,this.next]);
+        data.position,data.offset,data.title,data.text,data.background,data.bold,data.titlefont,data.textfont,data.time||0,this.next]);
       break;
     case "tip":
       this.next = MotaActionBlocks['tip_s'].xmlText([
@@ -2069,10 +2069,10 @@ ActionParser.prototype.parseAction = function() {
     case "animateImage": // 显示图片
       if(data.action == 'show'){
         this.next = MotaActionBlocks['animateImage_0_s'].xmlText([
-          data.name,data.loc[0],data.loc[1],data.time,data.keep||false,data.async||false,this.next]);
+          data.name,data.loc[0],data.loc[1],data.time||0,data.keep||false,data.async||false,this.next]);
       } else if (data.action == 'hide') {
         this.next = MotaActionBlocks['animateImage_1_s'].xmlText([
-          data.name,data.loc[0],data.loc[1],data.time,data.keep||false,data.async||false,this.next]);
+          data.name,data.loc[0],data.loc[1],data.time||0,data.keep||false,data.async||false,this.next]);
       }
       break;
     case "showGif": // 显示动图
@@ -2086,7 +2086,7 @@ ActionParser.prototype.parseAction = function() {
         break;
     case "moveImage": // 移动图片
       this.next = MotaActionBlocks['moveImage_0_s'].xmlText([
-        data.name, data.from[0], data.from[1], data.to[0], data.to[1], data.time, data.keep||false, data.async||false, this.next
+        data.name, data.from[0], data.from[1], data.to[0], data.to[1], data.time||0, data.keep||false, data.async||false, this.next
       ]);
       break;
     case "setFg": // 颜色渐变
@@ -2147,7 +2147,7 @@ ActionParser.prototype.parseAction = function() {
       break
     case "setVolume":
       this.next = MotaActionBlocks['setVolume_s'].xmlText([
-        data.value, data.time, data.async||false, this.next]);
+        data.value, data.time||0, data.async||false, this.next]);
       break
     case "setValue":
       this.next = MotaActionBlocks['setValue_s'].xmlText([
@@ -2246,7 +2246,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "sleep": // 等待多少毫秒
       this.next = MotaActionBlocks['sleep_s'].xmlText([
-        data.time,this.next]);
+        data.time||0,this.next]);
       break;
     case "wait": // 等待用户操作
       this.next = MotaActionBlocks['wait_s'].xmlText([

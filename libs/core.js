@@ -43,6 +43,7 @@ function core() {
             'level': 0,
             'nodes': [],
             'data': null,
+            'fog': null,
         },
         "asyncId": {}
     }
@@ -328,6 +329,9 @@ core.prototype.init = function (coreData, callback) {
         core.material.groundPattern = core.canvas.ui.createPattern(core.material.ground, "repeat");
     }
     core.material.ground.src = "project/images/ground.png";
+
+    core.animateFrame.weather.fog = new Image();
+    core.animateFrame.weather.fog.src = "project/images/fog.png";
 
     core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
 
@@ -759,8 +763,8 @@ core.prototype.animateBlock = function (loc,type,time,callback) {
 }
 
 ////// 将某个块从禁用变成启用状态 //////
-core.prototype.showBlock = function(x, y, floodId) {
-    core.maps.showBlock(x,y,floodId);
+core.prototype.showBlock = function(x, y, floorId) {
+    core.maps.showBlock(x,y,floorId);
 }
 
 ////// 将某个块从启用变成禁用状态，但是并不删除它 //////

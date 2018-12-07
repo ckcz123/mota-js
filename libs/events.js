@@ -918,6 +918,11 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "setGlobalAttribute":
+            if (typeof data.value == 'string') {
+                if ((data.value.charAt(0)=='"' && data.value.charAt(data.value.length-1)=='"')
+                    || (data.value.charAt(0)=="'" && data.value.charAt(data.value.length-1)=="'"))
+                    data.value = data.value.substring(1, data.value.length-1);
+            }
             core.status.globalAttribute[data.name] = data.value;
             core.control.updateGlobalAttribute(data.name);
             core.setFlag('globalAttribute', core.status.globalAttribute);

@@ -338,7 +338,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"purify": 3,
 		"hatred": 2,
 		"moveSpeed": 100,
-		"animateSpeed": 300
+		"animateSpeed": 300,
+		"floorChangeTime": 800,
 	},
 	"flags": {
 		"enableFloor": true,

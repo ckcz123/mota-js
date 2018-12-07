@@ -197,7 +197,12 @@ editor.prototype.fetchMapFromCore = function(){
     var mapArray = core.maps.save(core.status.maps, core.status.floorId);
     editor.map = mapArray.map(function (v) {
         return v.map(function (v) {
-            return editor.ids[[editor.indexs[parseInt(v)][0]]]
+            var x = parseInt(v), y = editor.indexs[x];
+            if (!core.isset(y)) {
+                printe("素材数字"+x+"未定义。是不是忘了注册，或者接档时没有覆盖icons.js和maps.js？");
+                y = [0];
+            }
+            return editor.ids[y[0]]
         })
     });
     editor.currentFloorId = core.status.floorId;
@@ -210,7 +215,12 @@ editor.prototype.fetchMapFromCore = function(){
         }
         editor[name]=mapArray.map(function (v) {
             return v.map(function (v) {
-                return editor.ids[[editor.indexs[parseInt(v)][0]]]
+                var x = parseInt(v), y = editor.indexs[x];
+                if (!core.isset(y)) {
+                    printe("素材数字"+x+"未定义。是不是忘了注册，或者接档时没有覆盖icons.js和maps.js？");
+                    y = [0];
+                }
+                return editor.ids[y[0]]
             })
         });
     }

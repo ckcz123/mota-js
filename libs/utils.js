@@ -735,14 +735,10 @@ utils.prototype.copy = function (data) {
 
 ////// 动画显示某对象 //////
 utils.prototype.show = function (obj, speed, callback) {
-    if (!core.isset(speed)) {
-        obj.style.display = 'block';
-        return;
-    }
     obj.style.display = 'block';
-    if (main.mode!='play'){
+    if (!core.isset(speed) && main.mode!='play') {
         obj.style.opacity = 1;
-        if (core.isset(callback)) {callback();}
+        if (core.isset(callback)) callback();
         return;
     }
     obj.style.opacity = 0;
@@ -761,15 +757,13 @@ utils.prototype.show = function (obj, speed, callback) {
 
 ////// 动画使某对象消失 //////
 utils.prototype.hide = function (obj, speed, callback) {
-    if (!core.isset(speed)) {
-        obj.style.display = 'none';
+    obj.style.display = 'none';
+    if (!core.isset(speed) || main.mode!='play'){
+        obj.style.opacity = 0;
+        if (core.isset(callback)) callback();
         return;
     }
-    if (main.mode!='play'){
-        obj.style.display = 'none';
-        if (core.isset(callback)) {callback();}
-        return;
-    }
+    obj.style.opacity = 1;
     var opacityVal = 1;
     var hideAnimate = window.setInterval(function () {
         opacityVal -= 0.03;

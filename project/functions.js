@@ -184,8 +184,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			core.status.hero.def -= core.values.weakValue;
 		}
 		else { // <1：扣比例
-			core.setFlag("equip_atk_buff", core.getFlag("equip_atk_buff", 1) + core.values.weakValue - 1);
-			core.setFlag("equip_def_buff", core.getFlag("equip_def_buff", 1) + core.values.weakValue - 1);
+			core.setFlag("equip_atk_buff", core.getFlag("equip_atk_buff", 1) - core.values.weakValue);
+			core.setFlag("equip_def_buff", core.getFlag("equip_def_buff", 1) - core.values.weakValue);
 		}
 	}
 	// 诅咒

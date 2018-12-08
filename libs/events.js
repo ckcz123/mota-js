@@ -1889,8 +1889,8 @@ events.prototype.passNet = function (data) {
             core.status.hero.def -= core.values.weakValue;
         }
         else { // <1：扣比例
-            core.setFlag("equip_atk_buff", core.getFlag("equip_atk_buff", 1) + core.values.weakValue - 1);
-            core.setFlag("equip_def_buff", core.getFlag("equip_def_buff", 1) + core.values.weakValue - 1);
+            core.setFlag("equip_atk_buff", core.getFlag("equip_atk_buff", 1) - core.values.weakValue);
+            core.setFlag("equip_def_buff", core.getFlag("equip_def_buff", 1) - core.values.weakValue);
         }
     }
     if (data.event.id=='curseNet') { // 咒网

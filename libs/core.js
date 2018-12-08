@@ -331,6 +331,9 @@ core.prototype.init = function (coreData, callback) {
     core.material.ground.src = "project/images/ground.png";
 
     core.animateFrame.weather.fog = new Image();
+    core.animateFrame.weather.fog.onerror = function () {
+        core.animateFrame.weather.fog = null;
+    }
     core.animateFrame.weather.fog.src = "project/images/fog.png";
 
     core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');

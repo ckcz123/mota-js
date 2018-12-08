@@ -106,14 +106,10 @@ loader.prototype.loadImage = function (imgName, callback) {
         if (name.indexOf(".")<0)
             name=name+".png";
         var image = new Image();
-        image.src = 'project/images/' + name + "?v=" + main.version;
-        if (image.complete) {
-            callback(imgName, image);
-            return;
-        }
         image.onload = function () {
             callback(imgName, image);
         }
+        image.src = 'project/images/' + name + "?v=" + main.version;
     }
     catch (e) {
         console.log(e);

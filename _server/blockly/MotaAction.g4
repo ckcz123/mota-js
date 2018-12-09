@@ -222,6 +222,7 @@ action
     |   text_1_s
     |   comment_s
     |   autoText_s
+    |   scrollText_s
     |   setText_s
     |   tip_s
     |   setValue_s
@@ -362,6 +363,19 @@ if(EvalString_1 && !(/^(up|down)(,hero)?(,([+-]?\d+),([+-]?\d+))?$/.test(EvalStr
 }
 EvalString_1 = EvalString_1 && ('\\b['+EvalString_1+']');
 var code =  '{"type": "autoText", "text": "'+title+EvalString_1+EvalString_2+'", "time" :'+Int_0+'},\n';
+return code;
+*/;
+
+scrollText_s
+    :   '滚动剧情文本:' '时间' Int '不等待执行完毕' Bool? BGNL? EvalString Newline
+
+
+/* scrollText_s
+tooltip : scrollText：滚动剧情文本，将从下到上进行滚动显示。
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=scrollText%ef%bc%9a%e6%bb%9a%e5%8a%a8%e5%89%a7%e6%83%85%e6%96%87%e6%9c%ac
+default : [5000,false,"时间是总时间，可以使用setText事件来控制字体、颜色、大小、偏移量等"]
+Bool_0 = Bool_0?', "async": true':'';
+var code =  '{"type": "scrollText", "text": "'+EvalString_0+'"'+Bool_0+', "time" :'+Int_0+'},\n';
 return code;
 */;
 
@@ -1906,8 +1920,12 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['autoText_s'].xmlText([
         '','','',data.time||0,this.EvalString(data.text),this.next]);
       break;
+    case "scrollText":
+      this.next = MotaActionBlocks['scrollText_s'].xmlText([
+        data.time, data.async||false, this.EvalString(data.text), this.next]);
+        break;
     case "comment": // 注释
-      this.next = MotaActionBlocks['comment_s'].xmlText([data.text,this.next]);
+      this.next = MotaActionBlocks['comment_s'].xmlText([this.EvalString(data.text),this.next]);
       break;
     case "setText": // 设置剧情文本的属性
       var setTextfunc = function(a){return a?JSON.stringify(a).slice(1,-1):null;}

@@ -721,6 +721,62 @@ ui.prototype.drawTextBox = function(content, showAll) {
 
 }
 
+////// 绘制滚动字幕 //////
+ui.prototype.drawScrollText = function (content, time, callback) {
+
+    content = content || "";
+    time = time || 5000;
+
+    clearInterval(core.status.event.interval);
+    core.status.event.interval = null;
+
+    // 获得颜色的盒子等信息
+    var textAttribute = core.status.textAttribute || core.initStatus.textAttribute;
+    var textfont = textAttribute.textfont || 16;
+    var offset = textAttribute.offset || 15;
+    var textColor = core.arrayToRGBA(textAttribute.text);
+
+    var font = textfont+"px "+core.status.globalAttribute.font;
+    if (textAttribute.bold) font = "bold "+font;
+    var contents = core.splitLines('ui', content), lines = contents.length;
+
+    // 计算总高度，按1.2倍行距计算
+    var width = 416, height = textfont * 1.4 * lines;
+    var tempCanvas = core.bigmap.tempCanvas;
+    tempCanvas.canvas.width = width;
+    tempCanvas.canvas.height = height;
+    tempCanvas.clearRect(0, 0, width, height);
+    tempCanvas.font = font;
+    tempCanvas.fillStyle = textColor;
+
+    // 全部绘制
+    var currH = textfont;
+    for (var i = 0; i < lines; ++i) {
+        var text = contents[i];
+        tempCanvas.fillText(text, offset, currH);
+        currH += 1.4 * textfont;
+    }
+
+    // 开始绘制到UI上
+    core.clearMap('ui');
+    var per_pixel = 1, per_time = time * per_pixel / (416+height);
+    var currH = 416;
+    core.canvas.ui.drawImage(tempCanvas.canvas, 0, currH);
+    var animate = setInterval(function () {
+        core.clearMap('ui');
+        currH -= per_pixel;
+        if (currH < -height) {
+            delete core.animateFrame.asyncId[animate];
+            clearInterval(animate);
+            if (core.isset(callback)) callback();
+            return;
+        }
+        core.canvas.ui.drawImage(tempCanvas.canvas, 0, currH);
+    }, per_time);
+
+    core.animateFrame.asyncId[animate] = true;
+}
+
 ////// 绘制一个选项界面 //////
 ui.prototype.drawChoices = function(content, choices) {
 

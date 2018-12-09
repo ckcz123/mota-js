@@ -422,6 +422,23 @@ events.prototype.doAction = function() {
                 }, data.time || 3000);
             }
             break;
+        case "scrollText": // 滚动剧情文本
+            if (core.status.replay.replaying)
+                core.events.doAction();
+            else {
+                var content = core.replaceText(data.text);
+                var time = data.time || 5000;
+                if (data.async) {
+                    core.ui.drawScrollText(content, time);
+                    core.events.doAction();
+                }
+                else {
+                    core.ui.drawScrollText(content, time, function() {
+                        core.events.doAction();
+                    });
+                }
+            }
+            break;
         case "comment":
             this.doAction();
             break;

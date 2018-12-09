@@ -2686,7 +2686,7 @@ control.prototype.pauseBgm = function () {
         core.musicStatus.isPlaying = false;
     }
     catch (e) {
-        console.log("无法暂停BGM "+bgm);
+        console.log("无法暂停BGM");
         console.log(e);
     }
 }
@@ -2714,7 +2714,7 @@ control.prototype.resumeBgm = function () {
         }
     }
     catch (e) {
-        console.log("无法恢复BGM "+bgm);
+        console.log("无法恢复BGM");
         console.log(e);
     }
 }
@@ -3310,7 +3310,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         core.dom.statusCanvas.width = 129;
         core.dom.statusCanvas.height = 416;
     }
-    this.updateStatusBar();
+    if (core.isPlaying())
+        core.updateStatusBar();
 }
 
 ////// 渲染DOM //////

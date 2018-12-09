@@ -1884,13 +1884,14 @@ events.prototype.passNet = function (data) {
     if (data.event.id=='weakNet') { // 衰网
         if (core.hasFlag('weak')) return;
         core.setFlag('weak', true);
-        var weakValue = core.values.weakValue;
-        var weakAtk = weakValue>=1?weakValue:Math.floor(weakValue*core.status.hero.atk);
-        var weakDef = weakValue>=1?weakValue:Math.floor(weakValue*core.status.hero.def);
-        core.setFlag('weakAtk', weakAtk);
-        core.setFlag('weakDef', weakDef);
-        core.status.hero.atk-=weakAtk;
-        core.status.hero.def-=weakDef;
+        if (core.values.weakValue>=1) { // >=1：直接扣数值
+            core.status.hero.atk -= core.values.weakValue;
+            core.status.hero.def -= core.values.weakValue;
+        }
+        else { // <1：扣比例
+            core.setFlag("equip_atk_buff", core.getFlag("equip_atk_buff", 1) - core.values.weakValue);
+            core.setFlag("equip_def_buff", core.getFlag("equip_def_buff", 1) - core.values.weakValue);
+        }
     }
     if (data.event.id=='curseNet') { // 咒网
         if (core.hasFlag('curse')) return;

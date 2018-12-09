@@ -55,16 +55,20 @@ function main() {
         'nameCol': document.getElementById('nameCol'),
         'lvCol': document.getElementById('lvCol'),
         'hpmaxCol': document.getElementById('hpmaxCol'),
+        'hpCol': document.getElementById('hpCol'),
         'manaCol': document.getElementById('manaCol'),
+        'atkCol': document.getElementById('atkCol'),
+        'defCol': document.getElementById('defCol'),
         'mdefCol': document.getElementById('mdefCol'),
         'moneyCol': document.getElementById('moneyCol'),
-        'expCol': document.getElementById('expCol'),
+        'experienceCol': document.getElementById('experienceCol'),
         'upCol': document.getElementById('upCol'),
         'keyCol': document.getElementById('keyCol'),
         'pzfCol': document.getElementById('pzfCol'),
         'debuffCol': document.getElementById('debuffCol'),
         'skillCol': document.getElementById('skillCol'),
         'hard': document.getElementById('hard'),
+        'statusCanvas': document.getElementById('statusCanvas')
     };
     this.mode = 'play';
     this.loadList = [

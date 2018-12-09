@@ -169,6 +169,12 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             "_leaf": false,
             "_type": "object",
             "_data": {
+                "drawStatusBar": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "自定义绘制状态栏。\n当状态栏canvas化开启时，可以在这里对状态栏进行自定义绘制。\n仅当statusCanvas开启时有效。"
+                },
                 "drawStatistics": {
                     "_leaf": true,
                     "_type": "textarea",

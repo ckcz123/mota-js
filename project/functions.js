@@ -864,6 +864,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 难度
 	core.statusBar.hard.innerHTML = core.status.hard;
+	// 状态栏绘制
+	core.drawStatusBar();
 
 	// 更新阻激夹域的伤害值
 	core.updateCheckBlock();
@@ -1002,6 +1004,66 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 }
     },
     "ui": {
+        "drawStatusBar": function () {
+	// 如果是非状态栏canvas化，直接返回
+	if (!core.flags.statusCanvas) return;
+	var canvas = core.dom.statusCanvas, ctx = canvas.getContext('2d');
+	// 清空状态栏
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	// 如果是隐藏状态栏模式，直接返回
+	if (!core.domStyle.showStatusBar) return;
+	
+	// 作为样板，只绘制楼层、生命、攻击、防御、魔防、金币、钥匙这七个内容
+	// 需要其他的请自行进行修改；横竖屏都需要进行适配绘制。
+	// （可以使用Chrome浏览器开控制台来模拟手机上的竖屏模式的显示效果，具体方式自行百度）
+	// 横屏模式下的画布大小是 129*416
+	// 竖屏模式下的画布大小是 416*(32*rows+9) 其中rows为状态栏行数，即全塔属性中statusCanvasRowsOnMobile值
+	// 可以使用 core.domStyle.isVertical 来判定当前是否是竖屏模式
+	
+	ctx.fillStyle = core.status.globalAttribute.statusBarColor || core.initStatus.globalAttribute.statusBarColor;
+	ctx.font = 'italic bold 18px Verdana';
+	
+	// 距离左侧边框6像素，上侧边框9像素，行距约为39像素
+	var leftOffset = 6, topOffset = 9, lineHeight = 39;
+	if (core.domStyle.isVertical) { // 竖屏模式，行高32像素
+		leftOffset = 6; topOffset = 6; lineHeight = 32;
+	}
+	
+	var toDraw = ["floor", "hp", "atk", "def", "mdef", "money"];
+	for (var index = 0; index < toDraw.length; index++) {
+		// 绘制下一个数据
+		var name = toDraw[index];
+		// 图片大小25x25
+		ctx.drawImage(core.statusBar.icons[name], leftOffset, topOffset, 25, 25);
+		// 文字内容
+		var text = (core.statusBar[name]||{}).innerText || " ";
+		// 斜体判定：如果不是纯数字，斜体会非常难看，需要取消
+		if (!/^\d*$/.test(text)) ctx.font = 'bold 18px Verdana';
+		// 绘制文字
+		ctx.fillText(text, leftOffset + 36, topOffset + 20);
+		ctx.font = 'italic bold 18px Verdana';
+		// 计算下一个绘制的坐标
+		if (core.domStyle.isVertical) {
+			// 竖屏模式
+			if (index % 3 != 2) leftOffset += 131;
+			else {
+				leftOffset = 6;
+				topOffset += lineHeight;
+			}
+		}
+		else {
+			// 横屏模式
+			topOffset += lineHeight;
+		}
+	}
+	// 绘制三色钥匙
+	ctx.fillStyle = '#FFCCAA';
+	ctx.fillText(core.statusBar.yellowKey.innerText, leftOffset + 5, topOffset + 20);
+	ctx.fillStyle = '#AAAADD';
+	ctx.fillText(core.statusBar.blueKey.innerText, leftOffset + 40, topOffset + 20);
+	ctx.fillStyle = '#FF8888';
+	ctx.fillText(core.statusBar.redKey.innerText, leftOffset + 75, topOffset + 20);
+},
         "drawStatistics": function () {
 	// 浏览地图时参与的统计项目
 	

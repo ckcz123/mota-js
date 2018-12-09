@@ -77,6 +77,8 @@ function core() {
     this.domStyle = {
         styles: [],
         scale: 1.0,
+        screenMode: null,
+        isVertical: false,
         toolbarBtn: false,
         showStatusBar: true,
     }
@@ -1387,6 +1389,11 @@ core.prototype.clearStatusBar = function() {
 ////// 更新状态栏 //////
 core.prototype.updateStatusBar = function () {
     core.control.updateStatusBar();
+}
+
+////// 绘制状态栏 //////
+core.prototype.drawStatusBar = function () {
+    core.ui.drawStatusBar();
 }
 
 ////// 屏幕分辨率改变后重新自适应 //////

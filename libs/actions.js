@@ -432,16 +432,13 @@ actions.prototype.getClickLoc = function (x, y) {
     var size = 32;
     size = size * core.domStyle.scale;
 
-    switch (core.domStyle.screenMode) {// 这里的3是指statusBar和游戏画布之间的白线宽度
-        case 'vertical':
-            statusBar.x = 0;
-            statusBar.y = core.dom.statusBar.offsetHeight + 3;
-            break;
-        case 'horizontal':
-        case 'bigScreen':
-            statusBar.x = core.dom.statusBar.offsetWidth + 3;
-            statusBar.y = 0;
-            break;
+    if (core.domStyle.isVertical) {
+        statusBar.x = 0;
+        statusBar.y = core.dom.statusBar.offsetHeight + 3;
+    }
+    else {
+        statusBar.x = core.dom.statusBar.offsetWidth + 3;
+        statusBar.y = 0;
     }
 
     var left = core.dom.gameGroup.offsetLeft + statusBar.x;

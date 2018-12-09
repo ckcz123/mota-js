@@ -2394,6 +2394,12 @@ ui.prototype.drawKeyBoard = function () {
     core.fillText("ui", "返回游戏", 416-80, offset-3, '#FFFFFF', 'bold 15px '+globalFont);
 }
 
+////// 绘制状态栏 /////
+ui.prototype.drawStatusBar = function () {
+    if (this.uidata.drawStatusBar)
+        this.uidata.drawStatusBar();
+}
+
 ////// 绘制“数据统计”界面 //////
 ui.prototype.drawStatistics = function () {
 

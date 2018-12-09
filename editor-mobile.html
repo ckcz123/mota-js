@@ -353,7 +353,7 @@
             <img id="img-hpmax">
             <p class='statusLabel statusText' id='hpmax'></p>
         </div>
-        <div class="status">
+        <div class="status" id='hpCol'>
             <img id="img-hp">
             <p class='statusLabel statusText' id='hp'></p>
         </div>
@@ -361,11 +361,11 @@
             <img id="img-mana">
             <p class='statusLabel statusText' id='mana'></p>
         </div>
-        <div class="status">
+        <div class="status" id='atkCol'>
             <img id="img-atk">
             <p class='statusLabel statusText' id='atk'></p>
         </div>
-        <div class="status">
+        <div class="status" id='defCol'>
             <img id="img-def">
             <p class='statusLabel statusText' id='def'></p>
         </div>
@@ -377,7 +377,7 @@
             <img id="img-money">
             <p class='statusLabel statusText' id='money'></p>
         </div>
-        <div class="status" id="expCol">
+        <div class="status" id="experienceCol">
             <img id="img-experience">
             <p class='statusLabel statusText' id='experience'></p>
         </div>
@@ -404,6 +404,9 @@
             <span class='statusLabel' id='weak' style="color: #FECCD0;"></span>
             <span class='statusLabel' id='curse' style="color: #C2F4E7;"></span>
         </div>
+
+        <!-- 状态栏canvas化 -->
+        <canvas id="statusCanvas"></canvas>
     </div>
     <div id="toolBar" class="clearfix">
         <img class="tools" id='img-book'>

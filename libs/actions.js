@@ -197,7 +197,7 @@ actions.prototype.keyUp = function(keyCode, altKey, fromReplay) {
         &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
 
     if (core.status.lockControl) {
-        core.status.holdingKeys = [];g
+        core.status.holdingKeys = [];
         // 全键盘操作部分
         if (core.status.event.id == 'text' && (keyCode==13 || keyCode==32 || keyCode==67)) {
             core.drawText();

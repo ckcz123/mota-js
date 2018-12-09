@@ -428,8 +428,8 @@ core.prototype.keyDown = function(keyCode) {
 }
 
 ////// 根据放开键的code来执行一系列操作 //////
-core.prototype.keyUp = function(keyCode, altKey) {
-    return core.actions.keyUp(keyCode, altKey);
+core.prototype.keyUp = function(keyCode, altKey, fromReplay) {
+    return core.actions.keyUp(keyCode, altKey, fromReplay);
 }
 
 ////// 点击（触摸）事件按下时 //////

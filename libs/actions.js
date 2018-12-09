@@ -192,12 +192,12 @@ actions.prototype.keyDown = function(keyCode) {
 }
 
 ////// 根据放开键的code来执行一系列操作 //////
-actions.prototype.keyUp = function(keyCode, altKey) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying
+actions.prototype.keyUp = function(keyCode, altKey, fromReplay) {
+    if (!fromReplay && core.isset(core.status.replay)&&core.status.replay.replaying
         &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
 
     if (core.status.lockControl) {
-        core.status.holdingKeys = [];
+        core.status.holdingKeys = [];g
         // 全键盘操作部分
         if (core.status.event.id == 'text' && (keyCode==13 || keyCode==32 || keyCode==67)) {
             core.drawText();

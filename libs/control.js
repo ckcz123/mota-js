@@ -2130,7 +2130,7 @@ control.prototype.replay = function () {
         }
     }
     else if (action.indexOf('key:')==0) {
-        core.actions.keyUp(parseInt(action.substring(4)), true);
+        core.actions.keyUp(parseInt(action.substring(4)), false, true);
         core.replay();
         return;
     }

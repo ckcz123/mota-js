@@ -10,15 +10,15 @@ HTML5魔塔是使用画布（canvas）来绘制，存在若干个图层，它们
 
 所有图层从低往高依次如下：（加[B]的代表该层是大地图）
 
-- bg[B]：背景层；绘制背景图层素材bgmap，和背景贴图
-- event[B]：事件层；所有事件（道具、墙壁、NPC、怪物等）都绘制在这一层进行处理
+- bg**[B]**：背景层；绘制背景图层素材bgmap，和背景贴图
+- event**[B]**：事件层；所有事件（道具、墙壁、NPC、怪物等）都绘制在这一层进行处理
 - hero：勇士层；主要用来绘制勇士
-- event2[B]：事件2层；本层主要用来绘制48x32的图片素材的上半部分（避免和勇士错位）
-- fg[B]：前景层；绘制前景图层素材fgmap，和前景贴图
-- damage[B]：显伤层；主要用来绘制怪物显伤和领域显伤
+- event2**[B]**：事件2层；本层主要用来绘制48x32的图片素材的上半部分（避免和勇士错位）
+- fg**[B]**：前景层；绘制前景图层素材fgmap，和前景贴图
+- damage**[B]**：显伤层；主要用来绘制怪物显伤和领域显伤
 - animate：动画层；主要用来绘制动画。
 - weather：天气层；主要用来绘制天气（雨/雪/雾）
-- route[B]：路线层；主要用来绘制勇士的行走路线图，也用来绘制图块的淡入/淡出效果，图块的移动等。
+- route**[B]**：路线层；主要用来绘制勇士的行走路线图，也用来绘制图块的淡入/淡出效果，图块的移动等。
 - curtain：色调层；用来控制当前楼层的画面色调
 - image：图片层；主要用来绘制显示图片；该层之所以在curtain层上是为了可以在全黑时贴大头像图
 - ui：UI层；用来绘制一切UI窗口，如剧情文本、怪物手册、楼传器、系统菜单等等
@@ -351,10 +351,11 @@ function (enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId) {
 ``` js
 // 写在获得道具后事件
 [
-    {"type": "setValue", "name": "no_zone", "value": "true"}, // 免疫领域
-    {"type": "setValue", "name": "no_snipe", "value": "true"}, // 免疫阻击
-    {"type": "setValue", "name": "no_laser", "value": "true"}, // 免疫激光
-    {"type": "setValue", "name": "no_betweenAttack", "value": "true"}, // 免疫夹击
+    // 设置不同的flag可以分别无视对应的阻激夹域效果
+    {"type": "setValue", "name": "flag:no_zone", "value": "true"}, // 免疫领域
+    {"type": "setValue", "name": "flag:no_snipe", "value": "true"}, // 免疫阻击
+    {"type": "setValue", "name": "flag:no_laser", "value": "true"}, // 免疫激光
+    {"type": "setValue", "name": "flag:no_betweenAttack", "value": "true"}, // 免疫夹击
 ]
 ```
 4. 如果有更高的需求，例如想让吸血效果变成一半，则还是在上面这些地方进行对应的修改即可。
@@ -620,7 +621,7 @@ this.statusBar = {
     },
     'icons': {
         // ...其他略
-        'speed': 24, // 图标的定义，这里对应的是icons.png中的索引
+        'speed': 37, // 图标的定义，这里对应的是icons.png中的索引
     },
     // ...其他略
     'speed': document.getElementById('speed'), // 显示内容（数据）的定义

@@ -1822,14 +1822,15 @@ events.prototype.checkLvUp = function () {
     if (!core.flags.enableLevelUp || !core.isset(core.firstData.levelUp)
         || core.status.hero.lv>=core.firstData.levelUp.length) return;
     // 计算下一个所需要的数值
-    var need=core.calValue((core.firstData.levelUp[core.status.hero.lv]||{}).need);
+    var next = (core.firstData.levelUp[core.status.hero.lv]||{});
+    var need = core.calValue(next.need);
     if (!core.isset(need)) return;
     if (core.status.hero.experience>=need) {
         // 升级
         core.status.hero.lv++;
-        core.insertAction(core.firstData.levelUp[core.status.hero.lv-1].action, null, null, function() {
-            core.events.checkLvUp();
-        });
+        if (next.clear) core.status.hero.experience -= need;
+        core.insertAction(next.action);
+        this.checkLvUp();
     }
 }
 

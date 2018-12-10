@@ -1827,8 +1827,9 @@ events.prototype.checkLvUp = function () {
     if (core.status.hero.experience>=need) {
         // 升级
         core.status.hero.lv++;
-        core.insertAction(core.firstData.levelUp[core.status.hero.lv-1].action);
-        this.checkLvUp();
+        core.insertAction(core.firstData.levelUp[core.status.hero.lv-1].action, null, null, function() {
+            core.events.checkLvUp();
+        });
     }
 }
 

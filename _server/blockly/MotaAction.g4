@@ -1131,7 +1131,7 @@ var limit = function(v,min,max) {
     return v;
 }
 Number_0 = limit(Number_0,0,255);
-Number_1 = limit(Number_1,0,255);A
+Number_1 = limit(Number_1,0,255);
 Number_2 = limit(Number_2,0,255);
 Number_3 = limit(Number_3,0,1);
 Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';

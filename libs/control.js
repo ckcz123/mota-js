@@ -2896,11 +2896,11 @@ control.prototype.updateGlobalAttribute = function (name) {
                 var border = '3px ' + attribute[name] + ' solid';
                 core.dom.statusBar.style.borderTop = border;
                 core.dom.statusBar.style.borderLeft = border;
-                core.dom.statusBar.style.borderRight = core.domStyle.isVertical?'':border;
+                core.dom.statusBar.style.borderRight = core.domStyle.isVertical?border:'';
                 core.dom.gameDraw.style.border = border;
                 core.dom.toolBar.style.borderBottom = border;
                 core.dom.toolBar.style.borderLeft = border;
-                core.dom.toolBar.style.borderRight = core.domStyle.isVertical?'':border;
+                core.dom.toolBar.style.borderRight = core.domStyle.isVertical?border:'';
                 break;
             }
         case 'statusBarColor':

@@ -397,6 +397,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
     else core.values = core.clone(core.data.values);
 
     core.events.initGame();
+    this.updateGlobalAttribute(Object.keys(core.status.globalAttribute));
     core.status.played = true;
 }
 

@@ -117,7 +117,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 
             core.changeFloor(core.firstData.floorId, null, nowLoc, null, function() {
                 if (core.isset(callback)) callback();
-            }, true);
+            });
 
             setTimeout(function () {
                 // Upload

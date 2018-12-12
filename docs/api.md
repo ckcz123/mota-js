@@ -504,7 +504,7 @@ core.utils.decodeBase64(str)
 Base64解密字符串
 
 
-core.utils.formatBigNumber(x)
+core.utils.formatBigNumber(x, onMap)
 大数据的格式化
 
 

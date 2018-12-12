@@ -1374,7 +1374,7 @@ control.prototype.snipe = function (snipes) {
             else if (damage < core.status.hero.hp) color = '#FF7F00';
             else color = '#FF0000';
 
-            damage = core.formatBigNumber(damage);
+            damage = core.formatBigNumber(damage, true);
             if (core.enemys.hasSpecial(core.material.enemys[block.event.id], 19))
                 damage += "+";
             if (core.enemys.hasSpecial(core.material.enemys[block.event.id], 21))
@@ -1623,7 +1623,7 @@ control.prototype.updateDamage = function (floorId, canvas) {
                         else if (damage < hero_hp * 2 / 3) color = '#FFFF00';
                         else if (damage < hero_hp) color = '#FF7F00';
                         else color = '#FF0000';
-                        damage = core.formatBigNumber(damage);
+                        damage = core.formatBigNumber(damage, true);
                         if (core.enemys.hasSpecial(core.material.enemys[id], 19))
                             damage += "+";
                         if (core.enemys.hasSpecial(core.material.enemys[id], 21))
@@ -1646,7 +1646,7 @@ control.prototype.updateDamage = function (floorId, canvas) {
                 if (core.flags.displayCritical) {
                     var critical = core.enemys.nextCriticals(id);
                     if (critical.length>0) critical=critical[0];
-                    critical = core.formatBigNumber(critical[0]);
+                    critical = core.formatBigNumber(critical[0], true);
                     if (critical == '???') critical = '?';
                     canvas.fillStyle = '#000000';
                     canvas.fillText(critical, 32 * x + 2, 32 * (y + 1) - 2 - 10);
@@ -1678,7 +1678,7 @@ control.prototype.updateDamage = function (floorId, canvas) {
             for (var y=0;y<core.bigmap.height;y++) {
                 var damage = core.status.checkBlock.damage[x+core.bigmap.width*y];
                 if (damage>0) {
-                    damage = core.formatBigNumber(damage);
+                    damage = core.formatBigNumber(damage, true);
                     canvas.fillStyle = '#000000';
                     canvas.fillText(damage, 32 * x + 17, 32 * (y + 1) - 13);
                     canvas.fillText(damage, 32 * x + 15, 32 * (y + 1) - 15);

@@ -1037,8 +1037,8 @@ core.prototype.formatDate2 = function (date) {
 }
 
 ////// 格式化大数 //////
-core.prototype.formatBigNumber = function (x) {
-    return core.utils.formatBigNumber(x);
+core.prototype.formatBigNumber = function (x, onMap) {
+    return core.utils.formatBigNumber(x, onMap);
 }
 
 ////// 两位数显示 //////

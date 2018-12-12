@@ -1575,10 +1575,11 @@ events.prototype.animateImage = function (type, image, loc, time, keep, callback
     core.canvas.data.drawImage(image, x, y);
     core.setAlpha('data', 1);
 
-    // core.status.replay.animate=true;
+    var per_time = 10, steps = parseInt(time / per_time), delta = 1 / steps;
+
     var animate = setInterval(function () {
-        if (type=='show') alpha += 0.1;
-        else alpha -= 0.1;
+        if (type=='show') alpha += delta;
+        else alpha -= delta;
         core.clearMap('data', x, y, image.width, image.height);
         if (alpha >=1 || alpha<=0) {
             delete core.animateFrame.asyncId[animate];
@@ -1593,7 +1594,7 @@ events.prototype.animateImage = function (type, image, loc, time, keep, callback
             core.canvas.data.drawImage(image, x, y);
             core.setAlpha('data', 1);
         }
-    }, time / 10);
+    }, per_time);
 
     core.animateFrame.asyncId[animate] = true;
 }
@@ -1653,21 +1654,20 @@ events.prototype.setVolume = function (value, time, callback) {
         if (core.isset(callback)) callback();
         return;
     }
-    // core.status.replay.animate=true;
+
     var currVolume = core.musicStatus.volume;
-    var step = 0;
+    var per_time = 10, step = 0, steps = parseInt(time / per_time);
     var fade = setInterval(function () {
         step++;
-        var nowVolume = currVolume+(value-currVolume)*step/32;
+        var nowVolume = currVolume+(value-currVolume)*step/steps;
         set(nowVolume);
-        if (step>=32) {
+        if (step>=steps) {
             delete core.animateFrame.asyncId[fade];
             clearInterval(fade);
-            // core.status.replay.animate=false;
             if (core.isset(callback))
                 callback();
         }
-    }, time / 32);
+    }, per_time);
 
     core.animateFrame.asyncId[fade] = true;
 }

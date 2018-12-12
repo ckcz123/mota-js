@@ -1091,9 +1091,10 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
     core.setAlpha('route', alpha);
     draw();
 
-    var animate = window.setInterval(function () {
-        if (type=='show') alpha += 0.1;
-        else alpha -= 0.1;
+    var per_time = 10, steps = parseInt(time / per_time), delta = 1 / steps;
+    var animate = setInterval(function () {
+        if (type=='show') alpha += delta;
+        else alpha -= delta;
         clear();
         if (alpha >=1 || alpha<=0) {
             delete core.animateFrame.asyncId[animate];
@@ -1115,7 +1116,7 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
             core.setAlpha('route', alpha);
             draw();
         }
-    }, time / 10 / core.status.replay.speed);
+    }, per_time);
 
     core.animateFrame.asyncId[animate] = true;
 }

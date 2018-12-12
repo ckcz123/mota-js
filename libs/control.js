@@ -354,9 +354,6 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
     // 清除游戏数据
     core.clearStatus();
 
-    // 显示状态栏
-    core.control.triggerStatusBar("show");
-
     // 初始化status
     core.status = core.clone(core.initStatus);
     // 初始化maps
@@ -398,6 +395,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
 
     core.events.initGame();
     this.updateGlobalAttribute(Object.keys(core.status.globalAttribute));
+    this.triggerStatusBar(core.getFlag('hideStatusBar', false)?'hide':'show');
     core.status.played = true;
 }
 
@@ -1556,15 +1554,15 @@ control.prototype.setFg = function(color, time, callback) {
         return;
     }
 
-    var step=0;
-    // core.status.replay.animate=true;
+    var per_time = 10, step=0, steps = parseInt(time / per_time);
+
     var changeAnimate = setInterval(function() {
         step++;
 
-        var nowA = fromColor[3]+(color[3]-fromColor[3])*step/25;
-        var nowR = parseInt(fromColor[0]+(color[0]-fromColor[0])*step/25);
-        var nowG = parseInt(fromColor[1]+(color[1]-fromColor[1])*step/25);
-        var nowB = parseInt(fromColor[2]+(color[2]-fromColor[2])*step/25);
+        var nowA = fromColor[3]+(color[3]-fromColor[3])*step/steps;
+        var nowR = parseInt(fromColor[0]+(color[0]-fromColor[0])*step/steps);
+        var nowG = parseInt(fromColor[1]+(color[1]-fromColor[1])*step/steps);
+        var nowB = parseInt(fromColor[2]+(color[2]-fromColor[2])*step/steps);
         core.clearMap('curtain');
         core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA([nowR,nowG,nowB,nowA]));
 
@@ -1575,7 +1573,7 @@ control.prototype.setFg = function(color, time, callback) {
             // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
-    }, time/25/core.status.replay.speed);
+    }, per_time);
 
     core.animateFrame.asyncId[changeAnimate] = true;
 }
@@ -2832,6 +2830,7 @@ control.prototype.triggerStatusBar = function (name) {
     var statusItems = core.dom.status;
     var toolItems = core.dom.tools;
     core.domStyle.showStatusBar = name == 'show';
+    core.setFlag('hideStatusBar', core.domStyle.showStatusBar?null:true);
     if (!core.domStyle.showStatusBar) {
         for (var i = 0; i < statusItems.length; ++i)
             statusItems[i].style.opacity = 0;

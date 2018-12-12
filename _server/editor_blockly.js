@@ -276,7 +276,6 @@ var workspace = Blockly.inject(blocklyDiv,{
 });
 
 editor_blockly.searchBlockCategoryCallback = function(workspace) {
-  //var colourList = ['#4286f4', '#ef0447'];
   var xmlList = [];
   if (Blockly.Blocks['colour_picker']) {
     for (var i = 0; i < editor_blockly.lastUsedType.length; i++) {
@@ -314,9 +313,6 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
 
   var doubleClickCheck=[[0,'abc']];
   function omitedcheckUpdateFunction(event) {
-    console.log(event)
-    console.log(event.type)
-    
   if(event.type==='ui'||event.type==='move'){
     editor_blockly.addIntoLastUsedType(event.blockId);
   }

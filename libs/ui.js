@@ -995,8 +995,6 @@ ui.prototype.drawSwitchs = function() {
         "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
         "新版存档： "+(core.platform.useLocalForage ? "[ON]":"[OFF]"),
         "单击瞬移： "+(core.getFlag('clickMove', true) ? "[ON]":"[OFF]"),
-        "查看工程",
-        "下载离线版本",
         "返回主菜单"
     ];
     this.drawChoices(null, choices);
@@ -1401,7 +1399,7 @@ ui.prototype.drawReplay = function () {
 ui.prototype.drawGameInfo = function () {
     core.status.event.id = 'gameInfo';
     this.drawChoices(null, [
-        "数据统计", "查看评论", "操作帮助", "关于本塔", "返回上级菜单"
+        "数据统计", "查看工程", "查看评论", "操作帮助", "关于本塔","下载离线版本", "返回主菜单"
     ]);
 }
 

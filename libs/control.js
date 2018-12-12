@@ -1566,7 +1566,7 @@ control.prototype.setFg = function(color, time, callback) {
         core.clearMap('curtain');
         core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA([nowR,nowG,nowB,nowA]));
 
-        if (step>=25) {
+        if (step>=steps) {
             delete core.animateFrame.asyncId[changeAnimate];
             clearInterval(changeAnimate);
             core.status.curtainColor = color;

@@ -277,14 +277,12 @@ var workspace = Blockly.inject(blocklyDiv,{
 
 editor_blockly.searchBlockCategoryCallback = function(workspace) {
   var xmlList = [];
-  if (Blockly.Blocks['colour_picker']) {
-    for (var i = 0; i < editor_blockly.lastUsedType.length; i++) {
-      var blockText = '<xml>' +
-          MotaActionBlocks[editor_blockly.lastUsedType[i]].xmlText() +
-          '</xml>';
-      var block = Blockly.Xml.textToDom(blockText).firstChild;
-      xmlList.push(block);
-    }
+  for (var i = 0; i < editor_blockly.lastUsedType.length; i++) {
+    var blockText = '<xml>' +
+        MotaActionBlocks[editor_blockly.lastUsedType[i]].xmlText() +
+        '</xml>';
+    var block = Blockly.Xml.textToDom(blockText).firstChild;
+    xmlList.push(block);
   }
   return xmlList;
 };

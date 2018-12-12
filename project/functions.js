@@ -87,15 +87,18 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
         "afterChangeFloor": function (floorId, fromLoad) {
 	// 转换楼层结束的事件
 	// floorId是切换到的楼层；fromLoad若为true则代表是从读档行为造成的楼层切换
+
+	// 每次抵达楼层时执行的事件
+	if (!fromLoad) {
+		core.insertAction(core.floors[floorId].eachArrive);
+	}
+
+	// 首次抵达楼层时执行的事件（后插入，先执行）
 	var visited = core.getFlag("__visited__", []);
 	if (visited.indexOf(floorId)===-1) {
 		core.insertAction(core.floors[floorId].firstArrive);
 		visited.push(floorId);
 		core.setFlag("__visited__", visited);
-	}
-	// 每次抵达楼层时执行的事件
-	if (!fromLoad) {
-		core.insertAction(core.floors[floorId].eachArrive);
 	}
 },
         "addPoint": function (enemy) {

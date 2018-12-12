@@ -476,7 +476,7 @@ maps.prototype.drawBgFgMap = function (floorId, canvas, name, animate) {
             }
         }
     }
-    core.status.autotileAnimateObjs[name+"map"] = core.clone(arr);
+    if (animate) core.status.autotileAnimateObjs[name+"map"] = core.clone(arr);
 }
 
 ////// 绘制某张地图 //////
@@ -1091,9 +1091,10 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
     core.setAlpha('route', alpha);
     draw();
 
-    var animate = window.setInterval(function () {
-        if (type=='show') alpha += 0.1;
-        else alpha -= 0.1;
+    var per_time = 10, steps = parseInt(time / per_time), delta = 1 / steps;
+    var animate = setInterval(function () {
+        if (type=='show') alpha += delta;
+        else alpha -= delta;
         clear();
         if (alpha >=1 || alpha<=0) {
             delete core.animateFrame.asyncId[animate];
@@ -1115,7 +1116,7 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
             core.setAlpha('route', alpha);
             draw();
         }
-    }, time / 10 / core.status.replay.speed);
+    }, per_time);
 
     core.animateFrame.asyncId[animate] = true;
 }
@@ -1449,13 +1450,12 @@ maps.prototype.setBgFgMap = function (type, name, loc, floorId, callback) {
 maps.prototype.resetMap = function(floorId) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
-    core.status.maps[floorId] = this.loadFloor(floorId);
-    if (floorId==core.status.floorId) {
-        this.drawMap(floorId, function () {
-            core.drawTip("地图重置成功");
-        })
-    }
-    else {
-        core.drawTip(floorId+"地图重置成功");
-    }
+    if (typeof floorId == 'string') floorId = [floorId];
+    var needRefresh = false;
+    floorId.forEach(function (t) {
+        core.status.maps[t] = core.maps.loadFloor(t);
+        if (t == core.status.floorId) needRefresh = true;
+    });
+    if (needRefresh) this.drawMap(core.status.floorId);
+    core.drawTip("地图重置成功");
 }

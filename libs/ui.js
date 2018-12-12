@@ -2225,8 +2225,8 @@ ui.prototype.drawSLPanel = function(index, refresh) {
             core.strokeRect('ui', (2*i+1)*u-size/2, 45, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
                 core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 45, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
-                var v = core.formatBigNumber(data.hero.hp)+"/"+core.formatBigNumber(data.hero.atk)+"/"+core.formatBigNumber(data.hero.def);
-                var v2 = "/"+core.formatBigNumber(data.hero.mdef);
+                var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
+                var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
                 if (v.length+v2.length<=21) v+=v2;
                 core.fillText('ui', v, (2*i+1)*u, 60+size, '#FFD700', '10px '+globalFont);
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 73+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF');
@@ -2241,8 +2241,8 @@ ui.prototype.drawSLPanel = function(index, refresh) {
             core.strokeRect('ui', (2*i-5)*u-size/2, 233, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
                 core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 233, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
-                var v = core.formatBigNumber(data.hero.hp)+"/"+core.formatBigNumber(data.hero.atk)+"/"+core.formatBigNumber(data.hero.def);
-                var v2 = "/"+core.formatBigNumber(data.hero.mdef);
+                var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
+                var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
                 if (v.length+v2.length<=21) v+=v2;
                 core.fillText('ui', v, (2*i-5)*u, 248+size, '#FFD700', '10px '+globalFont);
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 261+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF', '10px '+globalFont);

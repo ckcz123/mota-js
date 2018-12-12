@@ -297,14 +297,14 @@ utils.prototype.setTwoDigits = function (x) {
     return parseInt(x)<10?"0"+x:x;
 }
 
-utils.prototype.formatBigNumber = function (x) {
+utils.prototype.formatBigNumber = function (x, onMap) {
     x = Math.floor(parseFloat(x));
     if (!core.isset(x)) return '???';
 
     var c = x<0?"-":"";
     x = Math.abs(x);
 
-    if (x<=999999) return c + x;
+    if (x<=99999 || (!onMap && x<=999999)) return c + x;
 
     var all = [
         {"val": 1e20, "c": "g"},
@@ -316,9 +316,17 @@ utils.prototype.formatBigNumber = function (x) {
 
     for (var i=0;i<all.length;i++) {
         var one = all[i];
-        if (x>=10*one.val) {
-            var v = x/one.val;
-            return c + v.toFixed(Math.max(0, Math.floor(4-Math.log10(v+1)))) + one.c;
+        if (onMap) {
+            if (x>=one.val) {
+                var v = x/one.val;
+                return c + v.toFixed(Math.max(0, Math.floor(3-Math.log10(v+1)))) + one.c;
+            }
+        }
+        else {
+            if (x>=10*one.val) {
+                var v = x/one.val;
+                return c + v.toFixed(Math.max(0, Math.floor(4-Math.log10(v+1)))) + one.c;
+            }
         }
     }
 

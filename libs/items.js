@@ -91,6 +91,7 @@ items.prototype.useItem = function (itemId, callback) {
         delete core.status.hero.items[itemCls][itemId];
 
     core.updateStatusBar();
+    core.status.event.data = null;
 
     if (core.isset(callback)) callback();
 }
@@ -100,16 +101,18 @@ items.prototype.canUseItem = function (itemId) {
     // 没有道具
     if (!core.hasItem(itemId)) return false;
 
+    var able = false;
     if (itemId in this.canUseItemEffect) {
         try {
-            return eval(this.canUseItemEffect[itemId]);
+            able = eval(this.canUseItemEffect[itemId]);
         }
         catch (e) {
             console.log(e);
         }
     }
+    if (!able) core.status.event.data = null;
 
-    return false;
+    return able;
 }
 
 ////// 获得某个物品的个数 //////

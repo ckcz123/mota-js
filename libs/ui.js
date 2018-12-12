@@ -927,9 +927,17 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     if (!core.isset(core.status.event.selection) || core.status.event.selection>1) core.status.event.selection=1;
     if (core.status.event.selection<0) core.status.event.selection=0;
 
-    core.clearMap('ui');
-    core.setAlpha('ui', 1);
-    core.setFillStyle('ui', core.material.groundPattern);
+    var background = core.status.textAttribute.background;
+    var isWindowSkin = false;
+    if (typeof background == 'string') {
+        background = core.material.images.images[background];
+        if (core.isset(background) && background.width==192 && background.height==128) isWindowSkin = true;
+        else background = core.initStatus.textAttribute.background;
+    }
+    if (!isWindowSkin) background = core.arrayToRGBA(background);
+    var borderColor = core.status.globalAttribute.borderColor;
+    var textColor = core.arrayToRGBA(core.status.textAttribute.text);
+
     var globalFont = core.status.globalAttribute.font;
     core.setFont('ui', "bold 19px "+globalFont);
 
@@ -942,29 +950,35 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
 
     var left = Math.min(208 - 40 - parseInt(max_length / 2), 100);
     var top = 140 - (lines-1)*30;
-    var right = 416 - 2 * left, bottom = 416 - 140 - top;
+    var right = 416 - left, bottom = 416 - 140, width = right - left, height = bottom - top;
 
-    var borderColor = core.status.globalAttribute.borderColor;
+    core.clearMap('ui');
+    if (isWindowSkin) {
+        core.setAlpha('ui', 0.85);
+        this.drawWindowSkin(background,'ui',left,top,width,height);
+    }
+    else {
+        core.fillRect('ui', left, top, width, height, background);
+        core.strokeRect('ui', left - 1, top - 1, width + 1, height + 1, borderColor, 2);
+    }
+    core.setAlpha('ui', 1);
 
-    if (core.isPlaying())
-        core.fillRect('ui', left, top, right, bottom, core.material.groundPattern);
-    if (core.isPlaying())
-        core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, borderColor, 2);
     core.canvas.ui.textAlign = "center";
     for (var i in contents) {
-        core.fillText('ui', contents[i], 208, top + 50 + i*30, "#FFFFFF");
+        core.fillText('ui', contents[i], 208, top + 50 + i*30, textColor);
     }
 
-    core.fillText('ui', "确定", 208 - 38, top + bottom - 35, "#FFFFFF", "bold 17px "+globalFont);
-    core.fillText('ui', "取消", 208 + 38, top + bottom - 35);
+    core.fillText('ui', "确定", 208 - 38, bottom - 35, null, "bold 17px "+globalFont);
+    core.fillText('ui', "取消", 208 + 38, bottom - 35);
 
     var len=core.canvas.ui.measureText("确定").width;
-    if (core.status.event.selection==0) {
-        core.strokeRect('ui', 208-38-parseInt(len/2)-5, top+bottom-35-20, len+10, 28, "#FFD700", 2);
-    }
-    if (core.status.event.selection==1) {
-        core.strokeRect('ui', 208+38-parseInt(len/2)-5, top+bottom-35-20, len+10, 28, "#FFD700", 2);
-    }
+
+    var strokeLeft = 208 + (76*core.status.event.selection-38) - parseInt(len/2) - 5;
+
+    if (isWindowSkin)
+        this.drawWindowSelector(background, 'ui', strokeLeft, bottom-35-20, len+10, 28);
+    else
+        core.strokeRect('ui', strokeLeft, bottom-35-20, len+10, 28, "#FFD700", 2);
 
 }
 

@@ -277,9 +277,10 @@ var workspace = Blockly.inject(blocklyDiv,{
 
 editor_blockly.searchBlockCategoryCallback = function(workspace) {
   var xmlList = [];
-  for (var i = 0; i < editor_blockly.lastUsedType.length; i++) {
+  var labels = editor_blockly.searchBlock();
+  for (var i = 0; i < labels.length; i++) {
     var blockText = '<xml>' +
-        MotaActionBlocks[editor_blockly.lastUsedType[i]].xmlText() +
+        MotaActionBlocks[labels[i]].xmlText() +
         '</xml>';
     var block = Blockly.Xml.textToDom(blockText).firstChild;
     block.setAttribute("gap", 5);
@@ -310,8 +311,8 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
   workspace.setScale(workspace.scale);
 }
 
-  var doubleClickCheck=[[0,'abc']];
-  function omitedcheckUpdateFunction(event) {
+var doubleClickCheck=[[0,'abc']];
+function omitedcheckUpdateFunction(event) {
   if(event.type==='move'){
     editor_blockly.addIntoLastUsedType(event.blockId);
   }
@@ -563,6 +564,60 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
         if (editor_blockly.lastUsedType.length >= editor_blockly.lastUsedTypeNum)
             editor_blockly.lastUsedType.pop();
         editor_blockly.lastUsedType.unshift(blockType);
+    }
+
+    // Index from 1 - 9
+    editor_blockly.openToolbox = function(index) {
+        var element = document.getElementById(':'+index);
+        if (element == null || element.getAttribute("aria-selected")=="true") return;
+        element.click();
+    }
+    editor_blockly.reopenToolbox = function(index) {
+        var element = document.getElementById(':'+index);
+        if (element == null) return;
+        if (element.getAttribute("aria-selected")=="true") element.click();
+        element.click();
+    }
+
+    editor_blockly.closeToolbox = function() {
+        for (var i=1; i<=10; i++) {
+            var element = document.getElementById(':'+i);
+            if (element && element.getAttribute("aria-selected")=="true") {
+                element.click();
+                return;
+            }
+        }
+    }
+
+    var searchInput = document.getElementById("blockSearch");
+    searchInput.onfocus = function () {
+        editor_blockly.reopenToolbox(9);
+    }
+
+    searchInput.oninput = function () {
+        editor_blockly.reopenToolbox(9);
+    }
+
+    editor_blockly.searchBlock = function (value) {
+        if (value == null) value = searchInput.value;
+        value = value.toLowerCase();
+        if (value == '') return editor_blockly.lastUsedType;
+        var results = [];
+        for (var name in MotaActionBlocks) {
+            if (typeof name !== 'string' || name.indexOf("_s") !== name.length-2) continue;
+            var block = MotaActionBlocks[name];
+            if(block && block.json) {
+                if ((block.json.type||"").toLowerCase().indexOf(value)>=0
+                    || (block.json.message0||"").toLowerCase().indexOf(value)>=0
+                    || (block.json.tooltip||"").toLowerCase().indexOf(value)>=0) {
+                    results.push(name);
+                    if (results.length>=editor_blockly.lastUsedTypeNum)
+                        break;
+                }
+            }
+        }
+
+        return results.length == 0 ? editor_blockly.lastUsedType : results;
     }
 
     return editor_blockly;

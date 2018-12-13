@@ -526,9 +526,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		init_damage += vampire_damage;
 	}
 
-	// 检查是否破防；否则直接返回不可战斗
-	if (hero_atk <= mon_def) return null;
-
 	// 每回合怪物对勇士造成的战斗伤害
 	var per_damage = mon_atk - hero_def;
 	// 魔攻：战斗伤害就是怪物攻击力
@@ -558,6 +555,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 勇士每回合对怪物造成的伤害
 	var hero_per_damage = hero_atk - mon_def;
+
+	// 如果没有破防，则不可战斗
+	if (hero_per_damage <= 0) return null;
+
 	// 勇士的攻击回合数；为怪物生命除以每回合伤害向上取整
 	var turn = Math.ceil(mon_hp / hero_per_damage);
 	// 最终伤害：初始伤害 + 怪物对勇士造成的伤害 + 反击伤害

@@ -813,6 +813,12 @@ utils.prototype.encodeCanvas = function (ctx) {
 
 ////// 解析arr数组，并绘制到tempCanvas上 //////
 utils.prototype.decodeCanvas = function (arr, width, height) {
+    // 清空tempCanvas
+    var tempCanvas = core.bigmap.tempCanvas;
+    tempCanvas.canvas.width=width;
+    tempCanvas.canvas.height=height;
+    tempCanvas.clearRect(0, 0, width, height);
+
     if (!core.isset(arr)) return null;
     // to byte array
     var curr = 0, list = [];
@@ -820,11 +826,6 @@ utils.prototype.decodeCanvas = function (arr, width, height) {
         for (var i=0;i<x;i++) list.push(curr);
         curr = 1-curr;
     })
-    // 使用tempCanvas
-    var tempCanvas = core.bigmap.tempCanvas;
-    tempCanvas.canvas.width=width;
-    tempCanvas.canvas.height=height;
-    tempCanvas.clearRect(0, 0, width, height);
 
     var imgData = tempCanvas.getImageData(0, 0, width, height);
     for (var i=0;i<imgData.data.length;i+=4) {
@@ -840,6 +841,7 @@ utils.prototype.decodeCanvas = function (arr, width, height) {
 utils.prototype.consoleOpened = function () {
     if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized)
         return true;
+    if (!core.platform.isPC) return false;
     var threshold = 160;
     var zoom = Math.min(window.outerWidth/window.innerWidth, window.outerHeight/window.innerHeight);
     return window.outerWidth - zoom*window.innerWidth > threshold

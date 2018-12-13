@@ -1040,8 +1040,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		ctx.drawImage(core.statusBar.icons[name], leftOffset, topOffset, 25, 25);
 		// 文字内容
 		var text = (core.statusBar[name]||{}).innerText || " ";
-		// 斜体判定：如果不是纯数字，斜体会非常难看，需要取消
-		if (!/^\d*$/.test(text)) ctx.font = 'bold 18px Verdana';
+		// 斜体判定：如果不是纯数字和字母，斜体会非常难看，需要取消
+		if (!/^[-+_.a-zA-Z0-9]*$/.test(text)) ctx.font = 'bold 18px Verdana';
 		// 绘制文字
 		ctx.fillText(text, leftOffset + 36, topOffset + 20);
 		ctx.font = 'italic bold 18px Verdana';

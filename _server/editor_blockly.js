@@ -282,6 +282,7 @@ editor_blockly.searchBlockCategoryCallback = function(workspace) {
         MotaActionBlocks[editor_blockly.lastUsedType[i]].xmlText() +
         '</xml>';
     var block = Blockly.Xml.textToDom(blockText).firstChild;
+    block.setAttribute("gap", 5);
     xmlList.push(block);
   }
   return xmlList;
@@ -311,7 +312,7 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
 
   var doubleClickCheck=[[0,'abc']];
   function omitedcheckUpdateFunction(event) {
-  if(event.type==='ui'||event.type==='move'){
+  if(event.type==='move'){
     editor_blockly.addIntoLastUsedType(event.blockId);
   }
   if(event.type==='ui'){
@@ -535,18 +536,18 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
     }
 
     editor_blockly.lastUsedType=['comment_s']//初始空着比较难看
-    editor_blockly.lastUsedTypeNum=15
+    editor_blockly.lastUsedTypeNum=15;
 
-    editor_blockly.addIntoLastUsedType=function(blockId){
+    editor_blockly.addIntoLastUsedType=function(blockId) {
         var b = editor_blockly.workspace.getBlockById(blockId);
         if(!b)return;
         var blockType = b.type;
-        if(!blockType || ['pass_s','emptyshop'].indexOf(blockType)!==-1)return;
-        if(editor_blockly.lastUsedType.indexOf(blockType)!==-1){
-            editor_blockly.lastUsedType.splice(editor_blockly.lastUsedType.indexOf(blockType),1)
-        }
-        editor_blockly.lastUsedType.unshift(blockType)
-        editor_blockly.lastUsedType=editor_blockly.lastUsedType.slice(0,editor_blockly.lastUsedTypeNum)
+        if(!blockType || blockType.indexOf("_s")!==blockType.length-2 || blockType==='pass_s')return;
+        console.log(b);
+        editor_blockly.lastUsedType = editor_blockly.lastUsedType.filter(function (v) {return v!==blockType;});
+        if (editor_blockly.lastUsedType.length >= editor_blockly.lastUsedTypeNum)
+            editor_blockly.lastUsedType.pop();
+        editor_blockly.lastUsedType.unshift(blockType);
     }
 
     return editor_blockly;

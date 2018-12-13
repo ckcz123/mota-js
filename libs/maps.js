@@ -146,9 +146,13 @@ maps.prototype.addEvent = function (block, x, y, event) {
     if (!core.isset(block.disable) && core.isset(event.enable)) {
         block.disable=!event.enable;
     }
+    // 覆盖animate
+    if (event.animate === false) {
+        block.event.animate = 1;
+    }
     // 覆盖所有属性
     for (var key in event) {
-        if (key!="enable" && core.isset(event[key])) {
+        if (key!="enable" && key!="animate" && core.isset(event[key])) {
             block.event[key]=core.clone(event[key]);
         }
     }

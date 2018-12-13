@@ -1645,7 +1645,7 @@ ui.prototype.drawBookDetail = function (index) {
                     u.push(t);
                 }
             });
-            hints.push(JSON.stringify(u.map(function (v) {return v[0]+":"+v[1];})));
+            hints.push(JSON.stringify(u.map(function (v) {return core.formatBigNumber(v[0])+":"+core.formatBigNumber(v[1]);})));
         }
     }
 
@@ -1679,7 +1679,7 @@ ui.prototype.drawBookDetail = function (index) {
 
     hints.push("");
     var criticals = core.enemys.nextCriticals(enemyId, 10).map(function (v) {
-        return v[0]+":"+v[1];
+        return core.formatBigNumber(v[0])+":"+core.formatBigNumber(v[1]);
     });
     while (criticals[0]=='0:0') criticals.shift();
     hints.push("临界表："+JSON.stringify(criticals))

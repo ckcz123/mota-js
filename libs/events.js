@@ -1548,7 +1548,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
 ////// 绘制图片 //////
 events.prototype.showImage = function (name, x, y) {
     if (core.isset(name) && core.isset(x) && core.isset(y) && core.isset(core.material.images.images[name])) {
-        core.canvas.image.drawImage(core.material.images.images[name], x, y);
+        core.canvas.image.drawImage(core.material.images.images[name], core.calValue(x), core.calValue(y));
     }
     else core.clearMap('image');
 }

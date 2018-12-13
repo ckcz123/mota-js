@@ -431,8 +431,8 @@ core.prototype.keyDown = function(keyCode) {
 }
 
 ////// 根据放开键的code来执行一系列操作 //////
-core.prototype.keyUp = function(keyCode, altKey) {
-    return core.actions.keyUp(keyCode, altKey);
+core.prototype.keyUp = function(keyCode, altKey, fromReplay) {
+    return core.actions.keyUp(keyCode, altKey, fromReplay);
 }
 
 ////// 点击（触摸）事件按下时 //////
@@ -1065,8 +1065,8 @@ core.prototype.formatDate2 = function (date) {
 }
 
 ////// 格式化大数 //////
-core.prototype.formatBigNumber = function (x) {
-    return core.utils.formatBigNumber(x);
+core.prototype.formatBigNumber = function (x, onMap) {
+    return core.utils.formatBigNumber(x, onMap);
 }
 
 ////// 两位数显示 //////

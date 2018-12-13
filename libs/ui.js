@@ -955,6 +955,18 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
 
     core.clearLastEvent();
     core.setFillStyle('ui', core.material.groundPattern);
+
+    var background = core.status.textAttribute.background;
+    var isWindowSkin = false;
+    if (typeof background == 'string') {
+        background = core.material.images.images[background];
+        if (core.isset(background) && background.width==192 && background.height==128) isWindowSkin = true;
+        else background = core.initStatus.textAttribute.background;
+    }
+    if (!isWindowSkin) background = core.arrayToRGBA(background);
+    var borderColor = core.status.globalAttribute.borderColor;
+    var textColor = core.arrayToRGBA(core.status.textAttribute.text);
+
     var globalFont = core.status.globalAttribute.font;
     core.setFont('ui', "bold 19px "+globalFont);
 
@@ -967,29 +979,35 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
 
     var left = Math.min(208 - 40 - parseInt(max_length / 2), 100);
     var top = 140 - (lines-1)*30;
-    var right = 416 - 2 * left, bottom = 416 - 140 - top;
+    var right = 416 - left, bottom = 416 - 140, width = right - left, height = bottom - top;
 
-    var borderColor = core.status.globalAttribute.borderColor;
+    core.clearMap('ui');
+    if (isWindowSkin) {
+        core.setAlpha('ui', 0.85);
+        this.drawWindowSkin(background,'ui',left,top,width,height);
+    }
+    else {
+        core.fillRect('ui', left, top, width, height, background);
+        core.strokeRect('ui', left - 1, top - 1, width + 1, height + 1, borderColor, 2);
+    }
+    core.setAlpha('ui', 1);
 
-    if (core.isPlaying())
-        core.fillRect('ui', left, top, right, bottom, core.material.groundPattern);
-    if (core.isPlaying())
-        core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, borderColor, 2);
     core.canvas.ui.textAlign = "center";
     for (var i in contents) {
-        core.fillText('ui', contents[i], 208, top + 50 + i*30, "#FFFFFF");
+        core.fillText('ui', contents[i], 208, top + 50 + i*30, textColor);
     }
 
-    core.fillText('ui', "确定", 208 - 38, top + bottom - 35, "#FFFFFF", "bold 17px "+globalFont);
-    core.fillText('ui', "取消", 208 + 38, top + bottom - 35);
+    core.fillText('ui', "确定", 208 - 38, bottom - 35, null, "bold 17px "+globalFont);
+    core.fillText('ui', "取消", 208 + 38, bottom - 35);
 
     var len=core.canvas.ui.measureText("确定").width;
-    if (core.status.event.selection==0) {
-        core.strokeRect('ui', 208-38-parseInt(len/2)-5, top+bottom-35-20, len+10, 28, "#FFD700", 2);
-    }
-    if (core.status.event.selection==1) {
-        core.strokeRect('ui', 208+38-parseInt(len/2)-5, top+bottom-35-20, len+10, 28, "#FFD700", 2);
-    }
+
+    var strokeLeft = 208 + (76*core.status.event.selection-38) - parseInt(len/2) - 5;
+
+    if (isWindowSkin)
+        this.drawWindowSelector(background, 'ui', strokeLeft, bottom-35-20, len+10, 28);
+    else
+        core.strokeRect('ui', strokeLeft, bottom-35-20, len+10, 28, "#FFD700", 2);
 
 }
 
@@ -1006,8 +1024,6 @@ ui.prototype.drawSwitchs = function() {
         "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
         "新版存档： "+(core.platform.useLocalForage ? "[ON]":"[OFF]"),
         "单击瞬移： "+(core.getFlag('clickMove', true) ? "[ON]":"[OFF]"),
-        "查看工程",
-        "下载离线版本",
         "返回主菜单"
     ];
     this.drawChoices(null, choices);
@@ -1411,7 +1427,7 @@ ui.prototype.drawReplay = function () {
 ui.prototype.drawGameInfo = function () {
     core.status.event.id = 'gameInfo';
     this.drawChoices(null, [
-        "数据统计", "查看评论", "操作帮助", "关于本塔", "返回上级菜单"
+        "数据统计", "查看工程", "查看评论", "操作帮助", "关于本塔","下载离线版本", "返回主菜单"
     ]);
 }
 
@@ -1656,7 +1672,7 @@ ui.prototype.drawBookDetail = function (index) {
                     u.push(t);
                 }
             });
-            hints.push(JSON.stringify(u.map(function (v) {return v[0]+":"+v[1];})));
+            hints.push(JSON.stringify(u.map(function (v) {return core.formatBigNumber(v[0])+":"+core.formatBigNumber(v[1]);})));
         }
     }
 
@@ -1690,7 +1706,7 @@ ui.prototype.drawBookDetail = function (index) {
 
     hints.push("");
     var criticals = core.enemys.nextCriticals(enemyId, 10).map(function (v) {
-        return v[0]+":"+v[1];
+        return core.formatBigNumber(v[0])+":"+core.formatBigNumber(v[1]);
     });
     while (criticals[0]=='0:0') criticals.shift();
     hints.push("临界表："+JSON.stringify(criticals))
@@ -2247,8 +2263,8 @@ ui.prototype.drawSLPanel = function(index, refresh) {
             core.strokeRect('ui', (2*i+1)*u-size/2, 45, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
                 core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 45, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
-                var v = core.formatBigNumber(data.hero.hp)+"/"+core.formatBigNumber(data.hero.atk)+"/"+core.formatBigNumber(data.hero.def);
-                var v2 = "/"+core.formatBigNumber(data.hero.mdef);
+                var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
+                var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
                 if (v.length+v2.length<=21) v+=v2;
                 core.fillText('ui', v, (2*i+1)*u, 60+size, '#FFD700', '10px '+globalFont);
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 73+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF');
@@ -2263,8 +2279,8 @@ ui.prototype.drawSLPanel = function(index, refresh) {
             core.strokeRect('ui', (2*i-5)*u-size/2, 233, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
                 core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 233, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
-                var v = core.formatBigNumber(data.hero.hp)+"/"+core.formatBigNumber(data.hero.atk)+"/"+core.formatBigNumber(data.hero.def);
-                var v2 = "/"+core.formatBigNumber(data.hero.mdef);
+                var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
+                var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
                 if (v.length+v2.length<=21) v+=v2;
                 core.fillText('ui', v, (2*i-5)*u, 248+size, '#FFD700', '10px '+globalFont);
                 core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 261+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF', '10px '+globalFont);

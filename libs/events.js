@@ -117,7 +117,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 
             core.changeFloor(core.firstData.floorId, null, nowLoc, null, function() {
                 if (core.isset(callback)) callback();
-            }, true);
+            });
 
             setTimeout(function () {
                 // Upload
@@ -1723,21 +1723,20 @@ events.prototype.setVolume = function (value, time, callback) {
         if (core.isset(callback)) callback();
         return;
     }
-    // core.status.replay.animate=true;
+
     var currVolume = core.musicStatus.volume;
-    var step = 0;
+    var per_time = 10, step = 0, steps = parseInt(time / per_time);
     var fade = setInterval(function () {
         step++;
-        var nowVolume = currVolume+(value-currVolume)*step/32;
+        var nowVolume = currVolume+(value-currVolume)*step/steps;
         set(nowVolume);
-        if (step>=32) {
+        if (step>=steps) {
             delete core.animateFrame.asyncId[fade];
             clearInterval(fade);
-            // core.status.replay.animate=false;
             if (core.isset(callback))
                 callback();
         }
-    }, time / 32);
+    }, per_time);
 
     core.animateFrame.asyncId[fade] = true;
 }
@@ -1892,12 +1891,14 @@ events.prototype.checkLvUp = function () {
     if (!core.flags.enableLevelUp || !core.isset(core.firstData.levelUp)
         || core.status.hero.lv>=core.firstData.levelUp.length) return;
     // 计算下一个所需要的数值
-    var need=core.calValue((core.firstData.levelUp[core.status.hero.lv]||{}).need);
+    var next = (core.firstData.levelUp[core.status.hero.lv]||{});
+    var need = core.calValue(next.need);
     if (!core.isset(need)) return;
     if (core.status.hero.experience>=need) {
         // 升级
         core.status.hero.lv++;
-        core.insertAction(core.firstData.levelUp[core.status.hero.lv-1].action);
+        if (next.clear) core.status.hero.experience -= need;
+        core.insertAction(next.action);
         this.checkLvUp();
     }
 }

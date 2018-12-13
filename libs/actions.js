@@ -192,8 +192,8 @@ actions.prototype.keyDown = function(keyCode) {
 }
 
 ////// 根据放开键的code来执行一系列操作 //////
-actions.prototype.keyUp = function(keyCode, altKey) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying
+actions.prototype.keyUp = function(keyCode, altKey, fromReplay) {
+    if (!fromReplay && core.isset(core.status.replay)&&core.status.replay.replaying
         &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
 
     if (core.status.lockControl) {
@@ -1821,19 +1821,6 @@ actions.prototype.clickSwitchs = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 8:
-                if (core.platform.isPC)
-                    window.open("editor.html", "_blank");
-                else if (confirm("即将离开本塔，跳转至本塔工程页面，确认？")) {
-                    window.location.href = "editor-mobile.html";
-                }
-                break;
-            case 9:
-                if (core.platform.isPC)
-                    window.open(core.firstData.name+".zip");
-                else
-                    window.location.href = core.firstData.name+".zip";
-                break;
-            case 10:
                 core.status.event.selection=0;
                 core.ui.drawSettings();
                 break;
@@ -2416,6 +2403,13 @@ actions.prototype.clickGameInfo = function (x, y) {
                 core.ui.drawStatistics();
                 break;
             case 1:
+                if (core.platform.isPC)
+                    window.open("editor.html", "_blank");
+                else if (confirm("即将离开本塔，跳转至本塔工程页面，确认？")) {
+                    window.location.href = "editor-mobile.html";
+                }
+                break;
+            case 2:
                 if (core.platform.isPC) {
                     window.open("/score.php?name="+core.firstData.name+"&num=10", "_blank");
                 }
@@ -2425,13 +2419,19 @@ actions.prototype.clickGameInfo = function (x, y) {
                     }
                 }
                 break;
-            case 2:
+            case 3:
                 core.ui.drawHelp();
                 break;
-            case 3:
+            case 4:
                 core.ui.drawAbout();
                 break;
-            case 4:
+            case 5:
+                if (core.platform.isPC)
+                    window.open(core.firstData.name+".zip");
+                else
+                    window.location.href = core.firstData.name+".zip";
+                break;
+            case 6:
                 core.status.event.selection=5;
                 core.ui.drawSettings();
                 break;

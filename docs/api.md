@@ -1,6 +1,6 @@
 # 附录: API列表
 
-?> 目前版本**v2.5.2**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.5.3**，上次更新时间：* {docsify-updated} *
 
 **这里只列出所有可能会被造塔者用到的常用API，更多的有关内容请在代码内进行查询。**
 
@@ -135,11 +135,15 @@ core.changeFloor('MT5', null, {'x': 3, 'y': 6}, 0) 无动画切换到MT5层的(3
 
 
 core.resetMap()
-重置当前楼层地图。
+重置当前楼层地图和楼层属性。
 当我们修改某一层地图后，进游戏读档，会发现修改的内容并没有被更新上去。
 这是因为，H5的存档是会存下来每一个楼层的地图的，读档会从档里面获得地图信息。
 此时，如果我们在某一层地图执行 core.resetMap() ，则可以立刻从剧本中读取并重置当前楼层地图。
 已经被修改过的内容也会相应出现。
+此函数参数有三种形式：
+ - 不加任何参数，表示重置当前层：core.resetMap()
+ - 加上一个floorId，表示重置某一层：core.resetMap("MT1")
+ - 使用一个数组，表示重置若干层：core.resetMap(["MT1", "MT2", "MT3"])
 
 
 R
@@ -500,7 +504,7 @@ core.utils.decodeBase64(str)
 Base64解密字符串
 
 
-core.utils.formatBigNumber(x)
+core.utils.formatBigNumber(x, onMap)
 大数据的格式化
 
 

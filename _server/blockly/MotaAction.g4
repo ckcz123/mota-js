@@ -5,22 +5,23 @@ grammar MotaAction;
 
 //事件 事件编辑器入口之一
 event_m
-    :   '事件' BGNL? Newline '覆盖触发器' Bool '启用' Bool '通行状态' B_0_List '显伤' Bool BGNL? Newline action+ BEND
+    :   '事件' BGNL? Newline '覆盖触发器' Bool '启用' Bool '通行状态' B_0_List '动画' Bool '显伤' Bool BGNL? Newline action+ BEND
     
 
 /* event_m
 tooltip : 编辑魔塔的事件
 helpUrl : https://h5mota.com/games/template/docs/#/event
-default : [false,null,null,null]
+default : [false,null,null,null,null]
 B_0_List_0=eval(B_0_List_0);
 var code = {
     'trigger': Bool_0?'action':null,
     'enable': Bool_1,
     'noPass': B_0_List_0,
-    'displayDamage': Bool_2,
+    'animate': Bool_2,
+    'displayDamage': Bool_3,
     'data': 'data_asdfefw'
 }
-if (!Bool_0 && Bool_1 && (B_0_List_0===null) && Bool_2) code = 'data_asdfefw';
+if (!Bool_0 && Bool_1 && (B_0_List_0===null) && Bool_2 && Bool_3) code = 'data_asdfefw';
 code=JSON.stringify(code,null,2).split('"data_asdfefw"').join('[\n'+action_0+']\n');
 return code;
 */;
@@ -50,15 +51,16 @@ return code;
 */;
 
 levelCase
-    :   '需求' expression '称号' EvalString? BGNL? Newline action+
+    :   '需求' expression '称号' EvalString? '是否扣除经验' Bool BGNL? Newline action+
 
 
 /* levelCase
 tooltip : 升级设定
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=%e7%bb%8f%e9%aa%8c%e5%8d%87%e7%ba%a7%ef%bc%88%e8%bf%9b%e9%98%b6%2f%e5%a2%83%e7%95%8c%e5%a1%94%ef%bc%89
-default : [0,"",null]
+default : [0,"",false,null]
 colour : this.subColor
-var code = '{"need": "'+expression_0+'", "title": "'+EvalString_0+'", "action": [\n'+action_0+']},\n';
+Bool_0 = Bool_0?', "clear": true':'';
+var code = '{"need": "'+expression_0+'", "title": "'+EvalString_0+'"'+Bool_0+', "action": [\n'+action_0+']},\n';
 return code;
 */;
 
@@ -522,7 +524,7 @@ if (EvalString_0 && EvalString_1) {
   floorstr = ', "loc": ['+EvalString_0.join(',')+']';
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-Int_0 = Int_0 ?(', "time": '+Int_0):'';
+Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0 ?', "async": true':'';
 var code = '{"type": "show"'+floorstr+IdString_0+''+Int_0+Bool_0+'},\n';
 return code;
@@ -555,7 +557,7 @@ if (EvalString_0 && EvalString_1) {
   floorstr = ', "loc": ['+EvalString_0.join(',')+']';
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-Int_0 = Int_0 ?(', "time": '+Int_0):'';
+Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0 ?', "async": true':'';
 var code = '{"type": "hide"'+floorstr+IdString_0+''+Int_0+Bool_0+'},\n';
 return code;
@@ -1126,7 +1128,7 @@ Number_0 = limit(Number_0,0,255);
 Number_1 = limit(Number_1,0,255);
 Number_2 = limit(Number_2,0,255);
 Number_3 = limit(Number_3,0,1);
-Int_0 = Int_0 ?(', "time": '+Int_0):'';
+Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
 var async = Bool_0?', "async": true':'';
 var code = '{"type": "setFg", "color": ['+Number_0+','+Number_1+','+Number_2+','+Number_3+']'+Int_0 +async+'},\n';
 return code;
@@ -1141,7 +1143,7 @@ tooltip : setFg: 恢复画面色调,动画时间可不填
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=setfg%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
 default : [500,false]
 colour : this.soundColor
-Int_0 = Int_0 ?(', "time": '+Int_0):'';
+Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
 var async = Bool_0?', "async": true':'';
 var code = '{"type": "setFg"'+Int_0 +async+'},\n';
 return code;
@@ -1175,7 +1177,7 @@ var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
-Int_0 = Int_0 ?(', "time": '+Int_0):'';
+Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0?', "keep": true':'';
 Bool_1 = Bool_1?', "async": true':'';
 var code = '{"type": "move"'+floorstr+Int_0+Bool_0+Bool_1+', "steps": '+JSON.stringify(StepString_0)+'},\n';
@@ -1191,7 +1193,7 @@ tooltip : moveHero：移动勇士,用这种方式移动勇士的过程中将无�
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=movehero%EF%BC%9A%E7%A7%BB%E5%8A%A8%E5%8B%87%E5%A3%AB
 default : [500,false,"上右3下2左上左2"]
 colour : this.dataColor
-Int_0 = Int_0 ?(', "time": '+Int_0):'';
+Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0?', "async": true':'';
 var code = '{"type": "moveHero"'+Int_0+Bool_0+', "steps": '+JSON.stringify(StepString_0)+'},\n';
 return code;
@@ -1213,7 +1215,7 @@ if (PosString_0 && PosString_1) {
 if (PosString_2 && PosString_3) {
     floorstr += ', "to": ['+PosString_2+','+PosString_3+']';
 }
-Int_0 = Int_0 ?(', "time": '+Int_0):'';
+Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0?', "keep": true':'';
 Bool_1 = Bool_1?', "async": true':'';
 var code = '{"type": "jump"'+floorstr+''+Int_0+Bool_0+Bool_1+'},\n';
@@ -1233,7 +1235,7 @@ var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
-Int_0 = Int_0 ?(', "time": '+Int_0):'';
+Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0?', "async": true':'';
 var code = '{"type": "jumpHero"'+floorstr+Int_0+Bool_0+'},\n';
 return code;
@@ -1298,7 +1300,7 @@ tooltip : setVolume: 设置音量
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=setvolume%EF%BC%9A%E8%AE%BE%E7%BD%AE%E9%9F%B3%E9%87%8F
 default : [90, 500, false]
 colour : this.soundColor
-Int_1 = Int_1?(', "time": '+Int_1):""
+Int_1 = Int_1!==''?(', "time": '+Int_1):""
 var async = Bool_0?', "async": true':'';
 var code = '{"type": "setVolume", "value": '+Int_0+Int_1+async+'},\n';
 return code;
@@ -1795,7 +1797,7 @@ ActionParser.prototype.parse = function (obj,type) {
       if(typeof(obj)===typeof('')) obj={'data':[obj]};
       if(obj instanceof Array) obj={'data':obj};
       return MotaActionBlocks['event_m'].xmlText([
-        obj.trigger==='action',obj.enable,obj.noPass,obj.displayDamage,this.parseList(obj.data)
+        obj.trigger==='action',obj.enable,obj.noPass,obj.animate,obj.displayDamage,this.parseList(obj.data)
       ]);
     
     case 'changeFloor':
@@ -1825,7 +1827,7 @@ ActionParser.prototype.parse = function (obj,type) {
       var text_choices = null;
       for(var ii=obj.length-1,choice;choice=obj[ii];ii--) {
         text_choices=MotaActionBlocks['levelCase'].xmlText([
-          MotaActionBlocks['evalString_e'].xmlText([choice.need]),choice.title,this.parseList(choice.action),text_choices]);
+          MotaActionBlocks['evalString_e'].xmlText([choice.need]),choice.title,choice.clear||false,this.parseList(choice.action),text_choices]);
       }
       return MotaActionBlocks['level_m'].xmlText([text_choices]);
 
@@ -1909,9 +1911,8 @@ ActionParser.prototype.parseAction = function() {
         this.EvalString(data.text),this.next]);
       break;
     case "autoText": // 自动剧情文本
-      data.time=this.isset(data.time)?data.time:MotaActionBlocks['autoText_s'].fieldDefault[3];
       this.next = MotaActionBlocks['autoText_s'].xmlText([
-        '','','',data.time||0,this.EvalString(data.text),this.next]);
+        '','','',data.time,this.EvalString(data.text),this.next]);
       break;
     case "scrollText":
       this.next = MotaActionBlocks['scrollText_s'].xmlText([

@@ -235,6 +235,7 @@ editor.prototype.changeFloor = function (floorId, callback) {
         });
         editor.currentFloorData[name]=mapArray;
     }
+    editor.preMapData = null;
     core.changeFloor(floorId, null, {"x": 0, "y": 0, "direction": "up"}, null, function () {
         core.bigmap.offsetX=0;
         core.bigmap.offsetY=0;
@@ -294,11 +295,18 @@ editor.prototype.drawPosSelection = function () {
 }
 
 editor.prototype.updateMap = function () {
+    var evs = {};
+    if (editor.currentFloorData && editor.currentFloorData.events) {
+        for (var loc in editor.currentFloorData.events) {
+            if (editor.currentFloorData.events[loc].animate == false)
+                evs[loc] = {"animate": false};
+        }
+    }
     var blocks = main.editor.mapIntoBlocks(editor.map.map(function (v) {
         return v.map(function (v) {
             return v.idnum || v || 0
         })
-    }), {'events': {}, 'changeFloor': {}}, editor.currentFloorId);
+    }), {'events': evs, 'changeFloor': {}}, editor.currentFloorId);
     core.status.thisMap.blocks = blocks;
     main.editor.updateMap();
 
@@ -728,7 +736,7 @@ editor.prototype.listen = function () {
         holdingPath = 0;
         e.stopPropagation();
         if (stepPostfix && stepPostfix.length) {
-            preMapData = JSON.parse(JSON.stringify({map:editor.map,fgmap:editor.fgmap,bgmap:editor.bgmap}));
+            editor.preMapData = JSON.parse(JSON.stringify({map:editor.map,fgmap:editor.fgmap,bgmap:editor.bgmap}));
             if(editor.brushMod!=='line'){
                 var x0=stepPostfix[0].x;
                 var y0=stepPostfix[0].y;
@@ -822,7 +830,7 @@ editor.prototype.listen = function () {
         }
     }
 
-    var preMapData = {};
+    editor.preMapData = null;
     var currDrawData = {
         pos: [],
         info: {}
@@ -836,18 +844,18 @@ editor.prototype.listen = function () {
         if (e.altKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
             e.preventDefault();
         //Ctrl+z 撤销上一步undo
-        if (e.keyCode == 90 && e.ctrlKey && preMapData && currDrawData.pos.length && selectBox.isSelected) {
-            editor.map = JSON.parse(JSON.stringify(preMapData.map));
-            editor.fgmap = JSON.parse(JSON.stringify(preMapData.fgmap));
-            editor.bgmap = JSON.parse(JSON.stringify(preMapData.bgmap));
+        if (e.keyCode == 90 && e.ctrlKey && editor.preMapData && currDrawData.pos.length && selectBox.isSelected) {
+            editor.map = JSON.parse(JSON.stringify(editor.preMapData.map));
+            editor.fgmap = JSON.parse(JSON.stringify(editor.preMapData.fgmap));
+            editor.bgmap = JSON.parse(JSON.stringify(editor.preMapData.bgmap));
             editor.updateMap();
             reDo = JSON.parse(JSON.stringify(currDrawData));
             currDrawData = {pos: [], info: {}};
-            preMapData = null;
+            editor.preMapData = null;
         }
         //Ctrl+y 重做一步redo
         if (e.keyCode == 89 && e.ctrlKey && reDo && reDo.pos.length && selectBox.isSelected) {
-            preMapData = JSON.parse(JSON.stringify({map:editor.map,fgmap:editor.fgmap,bgmap:editor.bgmap}));
+            editor.preMapData = JSON.parse(JSON.stringify({map:editor.map,fgmap:editor.fgmap,bgmap:editor.bgmap}));
             for (var j = 0; j < reDo.pos.length; j++)
                 editor.map[reDo.pos[j].y][reDo.pos[j].x] = JSON.parse(JSON.stringify(reDo.info));
 
@@ -1027,7 +1035,7 @@ editor.prototype.listen = function () {
     copyLoc.onmousedown = function(e){
         editor.hideMidMenu();
         e.stopPropagation();
-        preMapData = null;
+        editor.preMapData = null;
         reDo = null;
         editor_mode.onmode('');
         var now = editor.pos;
@@ -1060,7 +1068,7 @@ editor.prototype.listen = function () {
     moveLoc.onmousedown = function(e){
         editor.hideMidMenu();
         e.stopPropagation();
-        preMapData = null;
+        editor.preMapData = null;
         reDo = null;
         var thisevent = editor.map[editor.pos.y][editor.pos.x];
         if(thisevent==0){
@@ -1106,7 +1114,7 @@ editor.prototype.listen = function () {
     clearLoc.onmousedown = function(e){
         editor.hideMidMenu();
         e.stopPropagation();
-        preMapData = null;
+        editor.preMapData = null;
         reDo = null;
         editor.info = 0;
         editor_mode.onmode('');

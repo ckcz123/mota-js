@@ -297,14 +297,14 @@ utils.prototype.setTwoDigits = function (x) {
     return parseInt(x)<10?"0"+x:x;
 }
 
-utils.prototype.formatBigNumber = function (x) {
+utils.prototype.formatBigNumber = function (x, onMap) {
     x = Math.floor(parseFloat(x));
     if (!core.isset(x)) return '???';
 
     var c = x<0?"-":"";
     x = Math.abs(x);
 
-    if (x<=999999) return c + x;
+    if (x<=99999 || (!onMap && x<=999999)) return c + x;
 
     var all = [
         {"val": 1e20, "c": "g"},
@@ -316,9 +316,17 @@ utils.prototype.formatBigNumber = function (x) {
 
     for (var i=0;i<all.length;i++) {
         var one = all[i];
-        if (x>=10*one.val) {
-            var v = x/one.val;
-            return c + v.toFixed(Math.max(0, Math.floor(4-Math.log10(v+1)))) + one.c;
+        if (onMap) {
+            if (x>=one.val) {
+                var v = x/one.val;
+                return c + v.toFixed(Math.max(0, Math.floor(3-Math.log10(v+1)))) + one.c;
+            }
+        }
+        else {
+            if (x>=10*one.val) {
+                var v = x/one.val;
+                return c + v.toFixed(Math.max(0, Math.floor(4-Math.log10(v+1)))) + one.c;
+            }
         }
     }
 
@@ -805,6 +813,12 @@ utils.prototype.encodeCanvas = function (ctx) {
 
 ////// 解析arr数组，并绘制到tempCanvas上 //////
 utils.prototype.decodeCanvas = function (arr, width, height) {
+    // 清空tempCanvas
+    var tempCanvas = core.bigmap.tempCanvas;
+    tempCanvas.canvas.width=width;
+    tempCanvas.canvas.height=height;
+    tempCanvas.clearRect(0, 0, width, height);
+
     if (!core.isset(arr)) return null;
     // to byte array
     var curr = 0, list = [];
@@ -812,11 +826,6 @@ utils.prototype.decodeCanvas = function (arr, width, height) {
         for (var i=0;i<x;i++) list.push(curr);
         curr = 1-curr;
     })
-    // 使用tempCanvas
-    var tempCanvas = core.bigmap.tempCanvas;
-    tempCanvas.canvas.width=width;
-    tempCanvas.canvas.height=height;
-    tempCanvas.clearRect(0, 0, width, height);
 
     var imgData = tempCanvas.getImageData(0, 0, width, height);
     for (var i=0;i<imgData.data.length;i+=4) {
@@ -832,6 +841,7 @@ utils.prototype.decodeCanvas = function (arr, width, height) {
 utils.prototype.consoleOpened = function () {
     if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized)
         return true;
+    if (!core.platform.isPC) return false;
     var threshold = 160;
     var zoom = Math.min(window.outerWidth/window.innerWidth, window.outerHeight/window.innerHeight);
     return window.outerWidth - zoom*window.innerWidth > threshold

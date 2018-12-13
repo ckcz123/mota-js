@@ -57,6 +57,7 @@ control.prototype.setRequestAnimationFrame = function () {
 
         core.animateFrame.globalTime = core.animateFrame.globalTime||timestamp;
         core.animateFrame.boxTime = core.animateFrame.boxTime||timestamp;
+        core.animateFrame.selectorTime = core.animateFrame.selectorTime||timestamp;
         core.animateFrame.animateTime = core.animateFrame.animateTime||timestamp;
         core.animateFrame.moveTime = core.animateFrame.moveTime||timestamp;
         core.animateFrame.lastLegTime = core.animateFrame.lastLegTime||timestamp;
@@ -108,6 +109,19 @@ control.prototype.setRequestAnimationFrame = function () {
         if (timestamp-core.animateFrame.boxTime>core.animateFrame.speed && core.isset(core.status.boxAnimateObjs) && core.status.boxAnimateObjs.length>0) {
             core.drawBoxAnimate();
             core.animateFrame.boxTime = timestamp;
+        }
+
+        // selectorTime
+        if (timestamp-core.animateFrame.selectorTime>20 && core.isset(core.dymCanvas.selector)) {
+            var opac = parseFloat(core.dymCanvas.selector.canvas.style.opacity);
+            if (core.getFlag("seleUp", true))
+                opac += 0.02;
+            else
+                opac -= 0.02;
+            if (opac > 0.9 || opac < 0.6)
+                core.setFlag("seleUp", !core.getFlag("seleUp", true))
+            core.setOpacity("selector", opac);
+            core.animateFrame.selectorTime = timestamp;
         }
 
         // Animate
@@ -3356,5 +3370,12 @@ control.prototype.domRenderer = function(){
             core.canvas[cn].canvas.style.height = core.bigmap.height*32*core.domStyle.scale + "px";
         });
     }
-
+    // 动态canvas
+    for (var i = 0; i < core.dymCanvas._list.length; i++) {
+        var spirit = core.dymCanvas._list[i];
+        core.dymCanvas[spirit.id].canvas.style.width = core.dymCanvas[spirit.id].canvas.width * core.domStyle.scale + "px";
+        core.dymCanvas[spirit.id].canvas.style.height = core.dymCanvas[spirit.id].canvas.height * core.domStyle.scale + "px";
+        core.dymCanvas[spirit.id].canvas.style.left = spirit.style.left * core.domStyle.scale + "px";
+        core.dymCanvas[spirit.id].canvas.style.top = spirit.style.top * core.domStyle.scale + "px"
+    }
 }

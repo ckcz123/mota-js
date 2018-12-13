@@ -1893,9 +1893,11 @@ actions.prototype.clickSettings = function (x,y) {
                 core.ui.drawKeyBoard();
                 break;
             case 2:
+                core.clearLastEvent();
                 core.ui.drawMaps();
                 break;
             case 3:
+                core.clearLastEvent();
                 core.ui.drawPaint();
                 break;
             case 4:

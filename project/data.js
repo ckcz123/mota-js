@@ -110,11 +110,16 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			},
 			{
 				"type": "showImage",
-				"name": "bg.jpg",
+				"code": 1,
+				"image": "bg.jpg",
 				"loc": [
 					0,
 					0
-				]
+				],
+				"dw": 100,
+				"dh": 100,
+				"opacity": 100,
+				"time": 0
 			},
 			{
 				"type": "comment",
@@ -163,7 +168,9 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 								]
 							},
 							{
-								"type": "showImage"
+								"type": "hideImage",
+								"code": 1,
+								"time": 0
 							},
 							{
 								"type": "comment",
@@ -179,7 +186,9 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 								"function": "function(){\ncore.control.checkBgm()\n}"
 							},
 							{
-								"type": "showImage"
+								"type": "hideImage",
+								"code": 1,
+								"time": 0
 							},
 							{
 								"type": "comment",
@@ -201,6 +210,11 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 							{
 								"type": "function",
 								"function": "function(){\ncore.control.checkBgm()\n}"
+							},
+							{
+								"type": "hideImage",
+								"code": 1,
+								"time": 0
 							},
 							{
 								"type": "comment",
@@ -339,7 +353,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"hatred": 2,
 		"moveSpeed": 100,
 		"animateSpeed": 300,
-		"floorChangeTime": 800,
+		"floorChangeTime": 800
 	},
 	"flags": {
 		"enableFloor": true,

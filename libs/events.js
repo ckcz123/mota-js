@@ -363,8 +363,7 @@ events.prototype.doAction = function() {
     clearInterval(core.status.event.interval);
     core.status.event.interval = null;
 
-    core.clearMap('ui');
-    core.setAlpha('ui', 1.0);
+    core.clearLastEvent();
 
     // 事件处理完毕
     if (core.status.event.data.list.length==0) {
@@ -720,29 +719,50 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "showImage": // 显示图片
-            if (!core.isset(data.loc)) data.loc=[];
-            core.events.showImage(data.name, data.loc[0], data.loc[1]);
-            this.doAction();
-            break;
-        case "animateImage": // 淡入淡出图片
-            if (core.status.replay.replaying) { // 正在播放录像
+            if (!core.isset(data.loc)) data.loc=[0, 0];
+            if (core.status.replay.replaying) {
+                data.time = 0;
+            }
+            var image = core.material.images.images[data.image];
+            if (data.async || data.time == 0) {
+                core.events.showImage(data.code, image, data.loc[0], data.loc[1], data.dw, data.dh, data.opacity, data.time);
                 this.doAction();
             }
             else {
-                if (core.isset(data.loc) && core.isset(core.material.images.images[data.name]) && (data.action=="show" || data.action=="hide")) {
-                    if (data.async) {
-                        core.events.animateImage(data.action, core.material.images.images[data.name], data.loc, data.time, data.keep);
-                        this.doAction();
-                    }
-                    else {
-                        core.events.animateImage(data.action, core.material.images.images[data.name], data.loc, data.time, data.keep, function() {
-                            core.events.doAction();
-                        });
-                    }
-                }
-                else {
-                    this.doAction();
-                }
+                core.events.showImage(data.code, image, data.loc[0], data.loc[1], data.dw, data.dh, data.opacity, data.time, function () {
+                    core.events.doAction();
+                });
+            }
+            break;
+        case "showTextImage": // 显示图片化文本
+            if (!core.isset(data.loc)) data.loc=[0, 0];
+            if (core.status.replay.replaying) {
+                data.time = 0;
+            }
+            var content = core.replaceText(data.text);
+            var image = core.events.textImage(content);
+            if (data.async || data.time == 0) {
+                core.events.showImage(data.code, image, data.loc[0], data.loc[1], 100, 100, data.opacity, data.time);
+                this.doAction();
+            }
+            else {
+                core.events.showImage(data.code, image, data.loc[0], data.loc[1], 100, 100, data.opacity, data.time, function() {
+                    core.events.doAction();
+                });
+            }
+            break;
+        case "hideImage": // 隐藏图片
+            if (core.status.replay.replaying) {
+                data.time = 0;
+            }
+            if (data.async || data.time == 0) {
+                core.events.hideImage(data.code, data.time);
+                this.doAction();
+            }
+            else {
+                core.events.hideImage(data.code, data.time, function () {
+                    core.events.doAction();
+                });
             }
             break;
         case "showGif": // 显示动图
@@ -761,24 +781,19 @@ events.prototype.doAction = function() {
             }
             this.doAction();
             break;
-        case "moveImage": // 图片移动
+        case "animateImage": // 图片移动
             if (core.status.replay.replaying) { // 正在播放录像
                 this.doAction();
             }
             else {
-                if (core.isset(data.from) && core.isset(data.to) && core.isset(core.material.images.images[data.name])) {
-                    if (data.async) {
-                        core.events.moveImage(core.material.images.images[data.name], data.from, data.to, data.time, data.keep);
-                        this.doAction();
-                    }
-                    else {
-                        core.events.moveImage(core.material.images.images[data.name], data.from, data.to, data.time, data.keep, function() {
-                            core.events.doAction();
-                        });
-                    }
+                if (data.async) {
+                    core.events.animateImage(data.code, data.to, data.opacity, data.time);
+                    this.doAction();
                 }
                 else {
-                    this.doAction();
+                    core.events.animateImage(data.code, data.to, data.opacity, data.time, function() {
+                        core.events.doAction();
+                    });
                 }
             }
             break;
@@ -1545,91 +1560,146 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
     }, 25);
 }
 
-////// 绘制图片 //////
-events.prototype.showImage = function (name, x, y) {
-    if (core.isset(name) && core.isset(x) && core.isset(y) && core.isset(core.material.images.images[name])) {
-        core.canvas.image.drawImage(core.material.images.images[name], x, y);
+////// 显示图片 //////
+events.prototype.showImage = function (code, image, x, y, dw, dh, opacityVal, time, callback) {
+    dw /= 100, dh /= 100, opacityVal /= 100; 
+    var zIndex = code + 100;
+    var name = "image"+ zIndex;
+    if (core.findCanvas(name) != -1) {
+        core.relocateCanvas(name, x, y);
+        core.resizeCanvas(name, image.width * dw, image.height * dh);
+        core.dymCanvas[name].style.zIndex = zIndex;
     }
-    else core.clearMap('image');
+    else
+        core.createCanvas(name, x, y, image.width * dw, image.height * dh, zIndex);
+    core.dymCanvas[name].drawImage(image, 0, 0, image.width * dw, image.height * dh);
+    if (time == 0)
+        core.setOpacity(name, opacityVal);
+    else {
+        clearInterval(core.interval.tipAnimate);
+        var opac = 0;
+        core.setOpacity(name, 0);
+        var animate = setInterval(function () {
+            opac += opacityVal/20;
+            core.setOpacity(name, opac);
+            if (opac >= opacityVal) {
+                delete core.animateFrame.asyncId[animate];
+                clearInterval(animate);
+                core.setOpacity(name, opacityVal);
+                if (core.isset(callback)) callback();
+            }
+        }, time/20);
+
+        core.animateFrame.asyncId[animate] = true;
+    }
 }
 
-////// 图片淡入/淡出 //////
-events.prototype.animateImage = function (type, image, loc, time, keep, callback) {
-    time = time||0;
-    if ((type!='show' && type!='hide') || time<=0) {
-        if (core.isset(callback)) callback();
+////// 隐藏图片 //////
+events.prototype.hideImage = function (code, time, callback) {
+    var name = "image"+ (code+100);
+    if (!core.isset(core.dymCanvas[name])) {
+        console.log(code+"号图片不存在")
         return;
     }
+    if (time == 0)
+        core.deleteCanvas(name);
+    else {
+        clearInterval(core.interval.tipAnimate);
+        var opacityVal = parseFloat(core.dymCanvas[name].canvas.style.opacity);
+        var opac = opacityVal;
+        var animate = setInterval(function () {
+            opac -= opacityVal/20;
+            core.setOpacity(name, opac);
+            if (opac < 0) {
+                delete core.animateFrame.asyncId[animate];
+                clearInterval(animate);
+                core.deleteCanvas(name);
+                if (core.isset(callback)) callback();
+            }
+        }, time/20);
 
-    clearInterval(core.interval.tipAnimate);
-
-    var alpha = 0;
-    if (type == 'hide') alpha = 1;
-
-    var x = core.calValue(loc[0]), y = core.calValue(loc[1]);
-
-    if (type == 'hide' && keep) {
-        core.clearMap('image', x, y, image.width, image.height);
+        core.animateFrame.asyncId[animate] = true;
     }
-    core.setAlpha('data', alpha);
-    core.canvas.data.drawImage(image, x, y);
-    core.setAlpha('data', 1);
+}
 
-    // core.status.replay.animate=true;
-    var animate = setInterval(function () {
-        if (type=='show') alpha += 0.1;
-        else alpha -= 0.1;
-        core.clearMap('data', x, y, image.width, image.height);
-        if (alpha >=1 || alpha<=0) {
-            delete core.animateFrame.asyncId[animate];
-            clearInterval(animate);
-            if (type == 'show' && keep)
-                core.canvas.image.drawImage(image, x, y);
-            core.setAlpha('data', 1);
-            if (core.isset(callback)) callback();
-        }
-        else {
-            core.setAlpha('data', alpha);
-            core.canvas.data.drawImage(image, x, y);
-            core.setAlpha('data', 1);
-        }
-    }, time / 10);
+////// 文本图片化 //////
+events.prototype.textImage = function (content) {
+    content = content || "";
 
-    core.animateFrame.asyncId[animate] = true;
+    // 获得颜色的盒子等信息
+    var textAttribute = core.status.textAttribute || core.initStatus.textAttribute;
+    var textfont = textAttribute.textfont || 16;
+    var offset = textAttribute.offset || 15;
+    var textColor = core.arrayToRGBA(textAttribute.text);
+
+    var font = textfont+"px "+core.status.globalAttribute.font;
+    if (textAttribute.bold) font = "bold "+font;
+    var contents = core.splitLines('ui', content), lines = contents.length;
+
+    // 计算总高度，按1.2倍行距计算
+    var width = 416, height = textfont * 1.4 * lines;
+    var tempCanvas = core.bigmap.tempCanvas;
+    tempCanvas.canvas.width = width;
+    tempCanvas.canvas.height = height;
+    tempCanvas.clearRect(0, 0, width, height);
+    tempCanvas.font = font;
+    tempCanvas.fillStyle = textColor;
+
+    // 全部绘制
+    var currH = textfont;
+    for (var i = 0; i < lines; ++i) {
+        var text = contents[i];
+        tempCanvas.fillText(text, offset, currH);
+        currH += 1.4 * textfont;
+    }
+    
+    return tempCanvas.canvas;
 }
 
 ////// 移动图片 //////
-events.prototype.moveImage = function (image, from, to, time, keep, callback) {
+events.prototype.animateImage = function (code, to, opacityVal, time, callback) {
     time = time || 1000;
     clearInterval(core.interval.tipAnimate);
-    core.setAlpha('data', 1);
-
-    var width = image.width, height = image.height;
 
     // core.status.replay.animate=true;
-    var fromX = core.calValue(from[0]), fromY = core.calValue(from[1]),
-        toX = core.calValue(to[0]), toY = core.calValue(to[1]);
+    var name = "image"+ (code+100), index = core.findCanvas(name);
+    if (index == -1) {
+        console.log(code+"号图片不存在")
+        return;
+    }
+    var fromX = core.dymCanvas._list[index].style.left,
+        fromY = core.dymCanvas._list[index].style.top,
+        preX = fromX, preY = fromY;
+    if (core.isset(to))
+        var toX = core.calValue(to[0]), toY = core.calValue(to[1]);
+    else
+        var toX = fromX, toY = fromY;
 
-    if (keep) core.clearMap('image', fromX, fromY, width, height);
-
-    var step = 0, preX = fromX, preY = fromY;
+    var step = 0;
     var per_time = 10, steps = parseInt(time / per_time);
-    var drawImage = function () {
+    var preOpac = parseFloat(core.dymCanvas[name].canvas.style.opacity), opacStep;
+    if (core.isset(opacityVal)) {
+        opacityVal /= 100;
+        opacStep = (opacityVal - preOpac) / steps;
+    }
+    else
+        opacStep = 0;
+    
+    var moveStep = function () {
+        preOpac += opacStep;
+        core.setOpacity(name, preOpac);
         preX = parseInt(fromX + (toX-fromX)*step/steps);
         preY = parseInt(fromY + (toY-fromY)*step/steps);
-        core.canvas.data.drawImage(image, preX, preY);
+        core.relocateCanvas(name, preX, preY);
     }
-
-    drawImage();
     var animate = setInterval(function () {
-        core.clearMap('data', preX, preY, width, height);
         step++;
-        if (step <= steps)
-            drawImage();
-        else {
+        moveStep();
+        if (step > steps) {
+            if (core.isset(opacityVal))
+                core.setOpacity(name, opacityVal);
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
-            if (keep) core.canvas.image.drawImage(image, toX, toY);
             if (core.isset(callback)) callback();
         }
     }, per_time);

@@ -313,7 +313,7 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
 
 var doubleClickCheck=[[0,'abc']];
 function omitedcheckUpdateFunction(event) {
-  if(event.type==='move'){
+  if(event.type==='create'){
     editor_blockly.addIntoLastUsedType(event.blockId);
   }
   if(event.type==='ui'){
@@ -559,27 +559,32 @@ function omitedcheckUpdateFunction(event) {
         if(!b)return;
         var blockType = b.type;
         if(!blockType || blockType.indexOf("_s")!==blockType.length-2 || blockType==='pass_s')return;
-        console.log(b);
         editor_blockly.lastUsedType = editor_blockly.lastUsedType.filter(function (v) {return v!==blockType;});
         if (editor_blockly.lastUsedType.length >= editor_blockly.lastUsedTypeNum)
             editor_blockly.lastUsedType.pop();
         editor_blockly.lastUsedType.unshift(blockType);
+
+        document.getElementById("searchBlock").value='';
     }
 
     // Index from 1 - 9
     editor_blockly.openToolbox = function(index) {
-        var element = document.getElementById(':'+index);
-        if (element == null || element.getAttribute("aria-selected")=="true") return;
-        element.click();
+        // var element = document.getElementById(':'+index);
+        // if (element == null || element.getAttribute("aria-selected")=="true") return;
+        // element.click();
+        editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index-1]);
     }
     editor_blockly.reopenToolbox = function(index) {
-        var element = document.getElementById(':'+index);
-        if (element == null) return;
-        if (element.getAttribute("aria-selected")=="true") element.click();
-        element.click();
+        // var element = document.getElementById(':'+index);
+        // if (element == null) return;
+        // if (element.getAttribute("aria-selected")=="true") element.click();
+        // element.click();
+        editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index-1]);
+        editor_blockly.workspace.getFlyout_().show(editor_blockly.workspace.toolbox_.tree_.children_[index-1].blocks);
     }
 
     editor_blockly.closeToolbox = function() {
+        /*
         for (var i=1; i<=10; i++) {
             var element = document.getElementById(':'+i);
             if (element && element.getAttribute("aria-selected")=="true") {
@@ -587,9 +592,11 @@ function omitedcheckUpdateFunction(event) {
                 return;
             }
         }
+        */
+        editor_blockly.workspace.toolbox_.clearSelection();
     }
 
-    var searchInput = document.getElementById("blockSearch");
+    var searchInput = document.getElementById("searchBlock");
     searchInput.onfocus = function () {
         editor_blockly.reopenToolbox(9);
     }

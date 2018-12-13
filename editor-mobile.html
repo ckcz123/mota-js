@@ -179,6 +179,11 @@
                 <button onclick="editor_blockly.confirm()">确认</button>
                 <button onclick="editor_blockly.parse()">解析</button>
                 <button onclick="editor_blockly.cancel()">取消</button>
+                <!-- 手机端放不下，因此不显示搜索框 -->
+                <div style="display: none">
+                    <div class="searchLogo"></div>
+                    <input type="text" id="searchBlock" placeholder="搜索图块"/>
+                </div>
                 <xml id="toolbox" style="display:none">
                 </xml>
             </h3>

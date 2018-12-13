@@ -4,12 +4,13 @@ editor_blockly = function () {
 
     initscript = String.raw`
 (function(){
-  var getCategory = function(name){
+  var getCategory = function(name,custom){
     for(var node of document.getElementById('toolbox').children) {
       if(node.getAttribute('name')==name) return node;
     }
     var node = document.createElement('category');
     node.setAttribute('name',name);
+    if(custom)node.setAttribute('custom',custom);
     document.getElementById('toolbox').appendChild(node);
     return node;
   }
@@ -243,15 +244,19 @@ editor_blockly = function () {
           }
         ]
       },'event'),
-
     ],
+    '最近使用':[
+      '<label text="此处只是占位符,实际定义在editor_blockly.searchBlockCategoryCallback中"></label>',
+    ]
   }
   var toolboxgap = '<sep gap="5"></sep>'
   //xml_text = MotaActionFunctions.actionParser.parse(obj,type||'event')
   //MotaActionBlocks['idString_e'].xmlText()
 
   for (var name in toolboxObj){
-    getCategory(name).innerHTML = toolboxObj[name].join(toolboxgap);
+    var custom = null;
+    if(name=='最近使用')custom='searchBlockCategory';
+    getCategory(name,custom).innerHTML = toolboxObj[name].join(toolboxgap);
   }
 
 var blocklyArea = document.getElementById('blocklyArea');
@@ -269,6 +274,21 @@ var workspace = Blockly.inject(blocklyDiv,{
   },
   trashcan: false,
 });
+
+editor_blockly.searchBlockCategoryCallback = function(workspace) {
+  var xmlList = [];
+  for (var i = 0; i < editor_blockly.lastUsedType.length; i++) {
+    var blockText = '<xml>' +
+        MotaActionBlocks[editor_blockly.lastUsedType[i]].xmlText() +
+        '</xml>';
+    var block = Blockly.Xml.textToDom(blockText).firstChild;
+    xmlList.push(block);
+  }
+  return xmlList;
+};
+
+workspace.registerToolboxCategoryCallback(
+  'searchBlockCategory', editor_blockly.searchBlockCategoryCallback);
  
 var onresize = function(e) {
   blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
@@ -291,6 +311,9 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
 
   var doubleClickCheck=[[0,'abc']];
   function omitedcheckUpdateFunction(event) {
+  if(event.type==='ui'||event.type==='move'){
+    editor_blockly.addIntoLastUsedType(event.blockId);
+  }
   if(event.type==='ui'){
     var newClick = [new Date().getTime(),event.blockId];
     var lastClick = doubleClickCheck.shift();
@@ -509,6 +532,21 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
                 b.setFieldValue(newvalue.split('\n').join('\\n'), f);
             });
         }
+    }
+
+    editor_blockly.lastUsedType=['comment_s']//初始空着比较难看
+    editor_blockly.lastUsedTypeNum=15
+
+    editor_blockly.addIntoLastUsedType=function(blockId){
+        var b = editor_blockly.workspace.getBlockById(blockId);
+        if(!b)return;
+        var blockType = b.type;
+        if(!blockType || ['pass_s','emptyshop'].indexOf(blockType)!==-1)return;
+        if(editor_blockly.lastUsedType.indexOf(blockType)!==-1){
+            editor_blockly.lastUsedType.splice(editor_blockly.lastUsedType.indexOf(blockType),1)
+        }
+        editor_blockly.lastUsedType.unshift(blockType)
+        editor_blockly.lastUsedType=editor_blockly.lastUsedType.slice(0,editor_blockly.lastUsedTypeNum)
     }
 
     return editor_blockly;

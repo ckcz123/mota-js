@@ -554,7 +554,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		init_damage += Math.floor(core.values.purify * hero_mdef);
 
 	// 勇士每回合对怪物造成的伤害
-	var hero_per_damage = hero_atk - mon_def;
+	var hero_per_damage = Math.max(hero_atk - mon_def, 0);
 
 	// 如果没有破防，则不可战斗
 	if (hero_per_damage <= 0) return null;

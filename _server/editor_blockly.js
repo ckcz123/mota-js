@@ -245,7 +245,7 @@ editor_blockly = function () {
         ]
       },'event'),
     ],
-    '最近使用':[
+    '最近使用事件':[
       '<label text="此处只是占位符,实际定义在editor_blockly.searchBlockCategoryCallback中"></label>',
     ]
   }
@@ -255,7 +255,7 @@ editor_blockly = function () {
 
   for (var name in toolboxObj){
     var custom = null;
-    if(name=='最近使用')custom='searchBlockCategory';
+    if(name=='最近使用事件')custom='searchBlockCategory';
     getCategory(name,custom).innerHTML = toolboxObj[name].join(toolboxgap);
   }
 
@@ -535,7 +535,22 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
         }
     }
 
-    editor_blockly.lastUsedType=['comment_s']//初始空着比较难看
+    editor_blockly.lastUsedType=[
+        'text_0_s',
+        'comment_s',
+        'show_s',
+        'hide_s',
+        'setValue_s',
+        'if_s',
+        'battle_s',
+        'openDoor_s',
+        'choices_s',
+        'setText_s',
+        'exit_s',
+        'revisit_s',
+        'sleep_s',
+        'setBlock_s'
+    ]; // 最常用的15个图块
     editor_blockly.lastUsedTypeNum=15;
 
     editor_blockly.addIntoLastUsedType=function(blockId) {

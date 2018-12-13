@@ -295,11 +295,18 @@ editor.prototype.drawPosSelection = function () {
 }
 
 editor.prototype.updateMap = function () {
+    var evs = {};
+    if (editor.currentFloorData && editor.currentFloorData.events) {
+        for (var loc in editor.currentFloorData.events) {
+            if (editor.currentFloorData.events[loc].animate == false)
+                evs[loc] = {"animate": false};
+        }
+    }
     var blocks = main.editor.mapIntoBlocks(editor.map.map(function (v) {
         return v.map(function (v) {
             return v.idnum || v || 0
         })
-    }), {'events': {}, 'changeFloor': {}}, editor.currentFloorId);
+    }), {'events': evs, 'changeFloor': {}}, editor.currentFloorId);
     core.status.thisMap.blocks = blocks;
     main.editor.updateMap();
 

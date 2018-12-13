@@ -939,48 +939,58 @@ loc可忽略，如果忽略则显示为事件当前点。
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    {"type": "showImage", "name": "bg.jpg", "loc": [231,297]}, // 在(231,297)显示bg.jpg
-    {"type": "showImage", "name": "1.png", "loc": [109,167]}, // 在(109,167)显示1.png
-    {"type": "showImage"} // 如果不指定name则清除所有图片。
+    {"type": "showImage", "code": 1, "image": "bg.jpg", "loc": [231,297], "dw": 100, "dy" : 100, "opacity": 100, "time" : 0}, // 在(231,297)显示bg.jpg
+    {"type": "showImage", "code": 12, "image": "1.png", "loc": [209,267], "dw": 100, "dy" : 100, "opacity": 50, "time" : 1000}, // 在(209,267)渐变显示1.png，渐变时间为1000毫秒，完成时透明度为0.5，这张图片将遮盖上一张
+    {"type": "showImage", "code": 8, "image": "hero.png", "loc": [349,367], "dw": 50, "dy" : 50, "opacity": 100, "time" : 0}, // 在(209,267)渐变显示hero.png,大小为原图片的一半，渐变时间为1000毫秒,这张图片将被上一张遮盖
 ]
 ```
 
-name为图片名。**请确保图片在data.js中的images中被定义过。**
+code为图片编号，如果两张图片重叠，编号较大的显示在上。建议编号取1~50之间的数。
+
+image为图片名。**请确保图片在data.js中的images中被定义过。**
 
 loc为图片左上角坐标，以像素为单位进行计算。
 
-如果不指定name则清除所有显示的图片。
+dw和dh为图片的横向、纵向放大率，默认值为100，即不进行缩放。
 
-调用show/hide/move/animate等几个事件同样会清除所有显示的图片。
+opacity为图片透明度,默认值为100，即不透明。
 
-### animateImage：图片淡入淡出
+time为渐变时间，默认值为0，即不渐变直接显示。
 
-我们还可以使用 `{"type": "animateImage"}` 来造成显示图片的淡入淡出效果。
+### showTextImage：显示图片
+
+我们可以使用 `{"type": "showTextImage"}` 以图片的方式显示文本。
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    {"type": "animateImage", "action": "show", "name": "bg.jpg", "loc": [231,297], "time": 500, "keep": true}, // 在(231,297)淡入bg.jpg，动画时间500ms
-    {"type": "animateImage", "action": "hide", "name": "1.png", "loc": [109,167], "time": 300, "async": true}, // 在(109,167)淡出1.png，动画时间300ms，异步执行
+    {"type": "showTextImage", "code": 1, "text": "第一排\n第二排\n\n空行后的一排", "loc": [231,297], "opacity": 1, "time" : 0}, // 在(231,297)显示"第一排\n第二排\n\n空行后的一排"
 ]
 ```
 
-action为淡入还是淡出，`show`为淡入，`hide`会淡出。
+code为图片编号，如果两张图片重叠，编号较大的显示在上。建议编号取1~50之间的数。
 
-name为图片名。**请确保图片在data.js中的images中被定义过。**
+text为要显示的文本。默认行宽为416。
 
 loc为图片左上角坐标，以像素为单位进行计算。
 
-time为淡入淡出的时间，如果是0则忽略此项。
+opacity为图片透明度。
 
-keep可选，如果为true则在淡入图片后立刻调用showImage以保留图片，在淡出图片前先清除再动画。
+time为渐变时间，默认值为0，即不渐变直接显示。
 
-async可选，如果为true则会异步执行（即不等待当前事件执行完毕，立刻执行下一个事件）。
+### hideImage：清除图片
 
-如果多张图片的淡入淡出可以采用以下方式（仅供参考）：
+我们可以使用 `{"type": "hideImage"}` 来清除一张图片。
 
-假设我现在已经有了`1.jpg`显示在屏幕上：
-- 淡入显示`2.png`：调用`animateImage`淡入图片，然后立刻调用`showImage`显示图片。
-- 淡出`1.png`：清除所有图片，`showImage`显示`2.png`，然后调用`animateImage`淡出`1.jpg`
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "hideImage", "code": 1, "time" : 0}, // 使1号图片消失
+    {"type": "hideImage", "code": 12, "time" : 1000}, // 使12号图片渐变消失，时间为1000毫秒
+]
+```
+
+time为渐变时间，默认值为0，即不渐变直接消除。
+
+code为显示图片时输入的图片编号。
 
 ### showGif：显示动图
 
@@ -999,25 +1009,26 @@ loc为动图左上角坐标，以像素为单位进行计算。
 
 如果不指定name则清除所有显示的动图。
 
-### moveImage：图片移动
+### animateImage：图片移动
 
-我们可以使用 `{"type": "moveImage"}` 来造成图片移动效果。
+我们可以使用 `{"type": "animateImage"}` 来造成图片移动，淡入淡出等效果。
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    {"type": "moveImage", "name": "bg.jpg", "from": [231,297], "to": [22,333], "time": 500, "keep": true, "async": true},
+    {"type": "animateImage", "code": 1, "to": [22,333], "opacity": 1, "time": 1000},
+    // 将1号图片移动到(22,333)，动画时间为1000ms
+    {"type": "animateImage", "code": 12, "opacity": 0.5, "time": 500}, // 将二号图片的透明度变为0.5，动画时间500ms
+    {"type": "animateImage", "code": 1, "to": [109,167], "opacity": 0, "time": 300, "async": true}, // 将1号图片移动到(109,167)，透明度设为0（不可见），动画时间300ms，异步执行
 ]
 ```
 
-name为图片名。**请确保图片在data.js中的images中被定义过。**
+image为图片名。**请确保图片在data.js中的images中被定义过。**
 
-from为起点图片左上角坐标，以像素为单位进行计算。
+to为终点图片左上角坐标，以像素为单位进行计算，不填写则视为当前图片位置。
 
-to为终点图片左上角坐标，以像素为单位进行计算。
+opacity为完成时图片透明度，移动过程中逐渐变化。
 
 time为总移动的时间。
-
-keep可选，如果为true则在移动结束后立刻调用showImage以保留图片。
 
 async可选，如果为true则会异步执行（即不等待当前事件执行完毕，立刻执行下一个事件）。
 

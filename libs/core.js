@@ -188,6 +188,9 @@ function core() {
         'animateObjs': [],
     };
     this.status = {};
+    this.dymCanvas = {
+        "_list": []
+    };
 }
 
 /////////// 系统事件相关 ///////////
@@ -688,6 +691,31 @@ core.prototype.setFillStyle = function (map, style) {
     core.ui.setFillStyle(map, style);
 }
 
+////// canvas创建 //////
+core.prototype.createCanvas = function (name, x, y, width, height, z) {
+    core.ui.createCanvas(name, x, y, width, height, z);
+}
+
+////// canvas查找 //////
+core.prototype.findCanvas = function (name) {
+    return core.ui.findCanvas(name);
+}
+
+////// canvas重定位 //////
+core.prototype.relocateCanvas = function (name, x, y) {
+    core.ui.relocateCanvas(name, x, y);
+}
+
+////// canvas重置 //////
+core.prototype.resizeCanvas = function (name, width, height) {
+    core.ui.resizeCanvas(name, width, height);
+}
+
+////// canvas删除 //////
+core.prototype.deleteCanvas = function (name) {
+    core.ui.deleteCanvas(name);
+}
+
 core.prototype.drawBlock = function (block, animate, dx, dy) {
     core.maps.drawBlock(block, animate, dx, dy);
 }
@@ -1090,6 +1118,11 @@ core.prototype.startReplay = function (list) {
 ////// 关闭UI窗口 //////
 core.prototype.closePanel = function () {
     core.ui.closePanel();
+}
+
+////// 一般清除事件 //////
+core.prototype.clearLastEvent = function () {
+    core.ui.clearLastEvent();
 }
 
 ////// 更改播放状态 //////

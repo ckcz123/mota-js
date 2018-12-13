@@ -151,7 +151,14 @@ ui.prototype.setOpacity = function (map, opacity) {
             core.canvas[m].canvas.style.opacity = opacity;
         }
     }
-    else core.canvas[map].canvas.style.opacity = opacity;
+    else if (core.isset(core.canvas[map])) {
+        core.canvas[map].canvas.style.opacity = opacity;
+    }
+    else if (core.isset(core.dymCanvas[map])) {
+        core.dymCanvas[map].canvas.style.opacity = opacity;
+    }
+    else
+        console.log("未找到"+map);
 }
 
 ////// 设置某个canvas的绘制属性（如颜色等） //////
@@ -161,9 +168,14 @@ ui.prototype.setFillStyle = function (map, style) {
             core.canvas[m].fillStyle = style;
         }
     }
-    else {
+    else if (core.isset(core.canvas[map])) {
         core.canvas[map].fillStyle = style;
     }
+    else if (core.isset(core.dymCanvas[map])) {
+        core.dymCanvas[map].fillStyle = style;
+}
+    else
+        console.log("未找到"+map);
 }
 
 
@@ -174,14 +186,21 @@ ui.prototype.setFillStyle = function (map, style) {
 ui.prototype.closePanel = function () {
     core.status.boxAnimateObjs = [];
     clearInterval(core.status.event.interval);
-    core.clearMap('ui');
-    core.setAlpha('ui', 1.0);
+    core.clearLastEvent();
     core.unLockControl();
     core.status.event.data = null;
     core.status.event.id = null;
     core.status.event.selection = null;
     core.status.event.ui = null;
     core.status.event.interval = null;
+}
+
+////// 一般清除事件 //////
+ui.prototype.clearLastEvent = function () {
+    if (core.isset(core.dymCanvas.selector))
+        core.deleteCanvas("selector");
+    core.clearMap('ui');
+    core.setAlpha('ui', 1);
 }
 
 ////// 左上角绘制一段提示 //////
@@ -351,21 +370,28 @@ ui.prototype.getTitleAndIcon = function (content) {
 }
 
 // 绘制选择光标
-ui.prototype.drawWindowSelector = function(background,canvas,x,y,w,h) {
-    var dstImage = core.canvas[canvas];
-
+ui.prototype.drawWindowSelector = function(background,x,y,w,h) {
+    if (core.isset(core.dymCanvas.selector)) {
+        core.relocateCanvas("selector", x, y);
+        core.resizeCanvas("selector", w, h);
+    }
+    else {
+        core.ui.createCanvas("selector", x, y, w, h, 165);
+    }
+    core.setOpacity("selector", 0.8);
+    var dstImage = core.dymCanvas.selector;
     // back
-    dstImage.drawImage(background,130,66,28,28,x+2,y+2,w-4,h-4);
+    dstImage.drawImage(background, 130, 66, 28, 28,  2,  2,w-4,h-4);
     // corner
-    dstImage.drawImage(background,128,64,2,2,x,y,2,2);
-    dstImage.drawImage(background,158,64,2,2,x+w-2,y,2,2);
-    dstImage.drawImage(background,128,94,2,2,x,y+h-2,2,2);
-    dstImage.drawImage(background,158,94,2,2,x+w-2,y+h-2,2,2);
+    dstImage.drawImage(background, 128, 64,  2,  2,  0,  0,  2,  2);
+    dstImage.drawImage(background, 158, 64,  2,  2,w-2,  0,  2,  2);
+    dstImage.drawImage(background, 128, 94,  2,  2,  0,h-2,  2,  2);
+    dstImage.drawImage(background, 158, 94,  2,  2,w-2,h-2,  2,  2);
     // border
-    dstImage.drawImage(background,130,64,28,2,x+2,y,w-4,2);
-    dstImage.drawImage(background,130,94,28,2,x+2,y+h-2,w-4,2);
-    dstImage.drawImage(background,128,66,2,28,x,y+2,2,h-4);
-    dstImage.drawImage(background,158,66,2,28,x+w-2,y+2,2,h-4);
+    dstImage.drawImage(background, 130, 64, 28,  2,  2,  0,w-4,  2);
+    dstImage.drawImage(background, 130, 94, 28,  2,  2,h-2,w-4,  2);
+    dstImage.drawImage(background, 128, 66,  2, 28,  0,  2,  2,h-4);
+    dstImage.drawImage(background, 158, 66,  2, 28,w-2,  2,  2,h-4);
 }
 
 // 绘制皮肤
@@ -502,7 +528,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
     content = core.replaceText(content);
 
     core.status.boxAnimateObjs = [];
-    core.clearMap('ui');
+    core.clearLastEvent();
 
     // drawImage
     content = content.replace(/(\f|\\f)\[(.*?)]/g, function (text, sympol, str) {
@@ -909,7 +935,7 @@ ui.prototype.drawChoices = function(content, choices) {
         while (core.status.event.selection>=choices.length) core.status.event.selection-=choices.length;
         var len = core.canvas.ui.measureText(core.replaceText(choices[core.status.event.selection].text || choices[core.status.event.selection])).width;
         if (isWindowSkin)
-            this.drawWindowSelector(background, 'ui' ,208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28);
+            this.drawWindowSelector(background, 208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28);
         else
             core.strokeRect('ui', 208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28, "#FFD700", 2);
     }
@@ -926,6 +952,9 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
 
     if (!core.isset(core.status.event.selection) || core.status.event.selection>1) core.status.event.selection=1;
     if (core.status.event.selection<0) core.status.event.selection=0;
+
+    core.clearLastEvent();
+    core.setFillStyle('ui', core.material.groundPattern);
 
     var background = core.status.textAttribute.background;
     var isWindowSkin = false;
@@ -1334,8 +1363,7 @@ ui.prototype.drawWaiting = function(text) {
     core.lockControl();
     core.status.event.id = 'waiting';
 
-    core.clearMap('ui');
-    core.setAlpha('ui', 1);
+    core.clearLastEvent();
     core.setFillStyle('ui', core.material.groundPattern);
 
     var globalFont = core.status.globalAttribute.font;
@@ -1456,8 +1484,7 @@ ui.prototype.drawBook = function (index) {
     clearInterval(core.interval.tipAnimate);
     core.clearMap('data');
 
-    core.clearMap('ui');
-    core.setAlpha('ui', 1);
+    core.clearLastEvent();
     core.setFillStyle('ui', core.material.groundPattern);
     core.fillRect('ui', 0, 0, 416, 416);
 
@@ -1771,8 +1798,7 @@ ui.prototype.drawMaps = function (index, x, y) {
 
     if (!core.isset(index)) {
         core.status.event.data = null;
-        core.clearMap('ui');
-        core.setAlpha('ui', 1);
+        core.clearLastEvent();
 
         core.clearMap('animate');
         core.fillRect('animate', 0, 0, 416, 416, 'rgba(0,0,0,0.4)');
@@ -2426,7 +2452,7 @@ ui.prototype.drawKeyBoard = function () {
     core.lockControl();
     core.status.event.id = 'keyBoard';
 
-    core.clearMap('ui');
+    core.clearLastEvent();
 
     var left = 16, top = 48, right = 416 - 2 * left, bottom = 416 - 2 * top;
     core.fillRect('ui', left, top, right, bottom, core.material.groundPattern);
@@ -2676,7 +2702,7 @@ ui.prototype.drawPaint = function () {
             core.status.event.id = 'paint';
             core.status.event.data = {"x": null, "y": null, "erase": false};
 
-            core.clearMap('ui');
+            core.clearLastEvent();
             core.clearMap('route');
 
             core.setAlpha('route', 1);
@@ -2730,3 +2756,75 @@ ui.prototype.drawHelp = function () {
     ]);
 }
 
+////// 动态canvas //////
+
+////// canvas创建 //////
+ui.prototype.createCanvas = function (name, x, y, width, height, z) {
+    var newCanvas = document.createElement("CANVAS");
+    newCanvas.id = name;
+    newCanvas.style.display = 'block';
+    newCanvas.width = width;
+    newCanvas.height = height;
+    newCanvas.style.width = width * core.domStyle.scale + 'px';
+    newCanvas.style.height = height * core.domStyle.scale + 'px';
+    newCanvas.style.left = x * core.domStyle.scale + 'px';
+    newCanvas.style.top = y * core.domStyle.scale + 'px';
+    newCanvas.style.zIndex = z;
+    newCanvas.style.position = 'absolute';
+    core.dymCanvas[name] = newCanvas.getContext('2d');
+    core.dom.dymCanvas.appendChild(newCanvas);
+    core.dymCanvas._list.push({
+        "id": name,
+        "style": {
+            "left": x,
+            "top": y,
+        }
+    });
+}
+
+////// canvas查找 //////
+ui.prototype.findCanvas = function (name) {
+    var index = 0;
+    while (index < core.dymCanvas._list.length && core.dymCanvas._list[index].id != name) index++;
+    if (index == core.dymCanvas._list.length) {
+        return -1;
+    }
+    return index;
+}
+
+////// canvas重定位 //////
+ui.prototype.relocateCanvas = function (name, x, y) {
+    var index = core.findCanvas(name);
+    if (core.isset(x)) {
+        core.dymCanvas[name].canvas.style.left = x * core.domStyle.scale + 'px';
+        core.dymCanvas._list[index].style.left = x;
+    }
+    if (core.isset(y)) {
+        core.dymCanvas[name].canvas.style.top = y * core.domStyle.scale + 'px';
+        core.dymCanvas._list[index].style.top = y;
+    }
+}
+
+////// canvas重置 //////
+ui.prototype.resizeCanvas = function (name, width, height) {
+    var dstCanvas = core.dymCanvas[name].canvas;
+    if (core.isset(width)) {
+        dstCanvas.width = width;
+        dstCanvas.style.width = width * core.domStyle.scale + 'px';
+    }
+    if (core.isset(height)) {
+        dstCanvas.height = height;
+        dstCanvas.style.height = height * core.domStyle.scale + 'px';
+    }
+}
+////// canvas删除 //////
+ui.prototype.deleteCanvas = function (name) {
+    var index = core.findCanvas(name);
+    if (index == -1) {
+        console.error("未找到"+name);
+    }
+    var obj = core.dom.dymCanvas.removeChild(core.dom.dymCanvas.childNodes[index]);
+    obj = null;
+    core.dymCanvas[name] = null;
+    core.dymCanvas._list.splice(index,1);
+}

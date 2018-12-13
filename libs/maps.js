@@ -815,10 +815,10 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
         faceIds = block.event.faceIds||{};
     }
 
-    var alpha = 1;
-    core.setAlpha('route', alpha);
-    core.canvas.route.drawImage(image, bx * 32, by * height, 32, height, block.x * 32, block.y * 32 +32 - height, 32, height);
-
+    var alpha = 1, name = 'move'+x+'_'+y;
+    core.createCanvas(name, block.x, block.y * 32 +32 - height, 32, height, 45);
+    core.dymCanvas[name].textAlign = 'left';
+    core.dymCanvas[name].drawImage(image, bx * 32, by * height, 32, height, 0, 0, 32, height);
     // 要运行的轨迹：将steps展开
     var moveSteps=[];
     steps.forEach(function (e) {
@@ -865,22 +865,23 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
         if (moveSteps.length==0) {
             if (keep) alpha=0;
             else alpha -= 0.06;
-            core.clearMap('route', nowX, nowY-height+32, 32, height);
             if (alpha<=0) {
                 delete core.animateFrame.asyncId[animate];
                 clearInterval(animate);
+                core.deleteCanvas(name);
                 // 不消失
                 if (keep) {
                     core.setBlock(id, nowX/32, nowY/32);
                     core.showBlock(nowX/32, nowY/32);
                 }
-                core.setAlpha('route',1);
+                else {
+                    if (block.event.cls == 'enemys' || block.event.cls == 'enemy48')
+                        core.clearMap('damage', nowX, nowY, 32, 32);
+                }
                 if (core.isset(callback)) callback();
             }
             else {
-                core.setAlpha('route', alpha);
-                core.canvas.route.drawImage(image, animateCurrent * 32, by * height, 32, height, nowX, nowY-height+32, 32, height);
-                core.setAlpha('route', 1);
+                core.dymCanvas[name].canvas.style.opacity = alpha;
             }
         }
         else {
@@ -896,12 +897,49 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
                 }
             }
 
-            core.clearMap('route', nowX, nowY-height+32, 32, height);
             step++;
             nowX+=scan[direction].x*2;
             nowY+=scan[direction].y*2;
-            // 绘制
-            core.canvas.route.drawImage(image, animateCurrent * 32, by * height, 32, height, nowX, nowY-height+32, 32, height);
+            // 移动
+            core.relocateCanvas(name, nowX, nowY-height+32);
+            core.dymCanvas[name].drawImage(image, animateCurrent * 32, by * height, 32, height, 0, 0, 32, height);
+            // 显伤绘制
+            if ((block.event.cls == 'enemys' || block.event.cls == 'enemy48') && core.hasItem('book')) {
+                // 鉴于移动过程中可能的主角状态改变，每次重新计算
+                var damage = core.enemys.getDamage(block.event.id, x, y);
+                var color = '#000000';
+
+                if (damage == null) {
+                    damage = "???";
+                    color = '#FF0000';
+                }
+                else {
+                    if (damage <= 0) color = '#00FF00';
+                    else if (damage < core.status.hero.hp / 3) color = '#FFFFFF';
+                    else if (damage < core.status.hero.hp * 2 / 3) color = '#FFFF00';
+                    else if (damage < core.status.hero.hp) color = '#FF7F00';
+                    else color = '#FF0000';
+
+                    damage = core.formatBigNumber(damage);
+                    if (core.enemys.hasSpecial(core.material.enemys[block.event.id], 19))
+                        damage += "+";
+                    if (core.enemys.hasSpecial(core.material.enemys[block.event.id], 21))
+                        damage += "-";
+                    if (core.enemys.hasSpecial(core.material.enemys[block.event.id], 11))
+                        damage += "^";
+                }
+                // 清空上一次
+                core.clearMap('damage', nowX-2*scan[direction].x, nowY-2*scan[direction].y, 32, 32);
+                
+                core.setFillStyle('damage', '#000000');
+                core.canvas.damage.fillText(damage, nowX + 5, nowY + 30);
+                core.canvas.damage.fillText(damage, nowX + 3, nowY + 30);
+                core.canvas.damage.fillText(damage, nowX + 5, nowY + 32);
+                core.canvas.damage.fillText(damage, nowX + 3, nowY + 32);
+
+                core.setFillStyle('damage', color);
+                core.canvas.damage.fillText(damage, nowX + 4, nowY + 31);
+            }
             if (step==16) {
                 // 该移动完毕，继续
                 step=0;

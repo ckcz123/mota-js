@@ -962,7 +962,6 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     if (core.status.event.selection<0) core.status.event.selection=0;
 
     core.clearLastEvent();
-    core.setFillStyle('ui', core.material.groundPattern);
 
     var background = core.status.textAttribute.background;
     var isWindowSkin = false;
@@ -1013,7 +1012,7 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     var strokeLeft = 208 + (76*core.status.event.selection-38) - parseInt(len/2) - 5;
 
     if (isWindowSkin)
-        this.drawWindowSelector(background, 'ui', strokeLeft, bottom-35-20, len+10, 28);
+        this.drawWindowSelector(background, strokeLeft, bottom-35-20, len+10, 28);
     else
         core.strokeRect('ui', strokeLeft, bottom-35-20, len+10, 28, "#FFD700", 2);
 
@@ -2764,7 +2763,7 @@ ui.prototype.drawHelp = function () {
 
 ////// canvas创建 //////
 ui.prototype.createCanvas = function (name, x, y, width, height, z) {
-    var newCanvas = document.createElement("CANVAS");
+    var newCanvas = document.createElement("canvas");
     newCanvas.id = name;
     newCanvas.style.display = 'block';
     newCanvas.width = width;
@@ -2788,17 +2787,17 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
 
 ////// canvas查找 //////
 ui.prototype.findCanvas = function (name) {
-    var index = 0;
-    while (index < core.dymCanvas._list.length && core.dymCanvas._list[index].id != name) index++;
-    if (index == core.dymCanvas._list.length) {
-        return -1;
+    for (var index = 0; index < core.dymCanvas._list.length; index++) {
+        if (core.dymCanvas._list[index].id == name)
+            return index;
     }
-    return index;
+    return -1;
 }
 
 ////// canvas重定位 //////
 ui.prototype.relocateCanvas = function (name, x, y) {
     var index = core.findCanvas(name);
+    if (index < 0) return;
     if (core.isset(x)) {
         core.dymCanvas[name].canvas.style.left = x * core.domStyle.scale + 'px';
         core.dymCanvas._list[index].style.left = x;
@@ -2824,11 +2823,8 @@ ui.prototype.resizeCanvas = function (name, width, height) {
 ////// canvas删除 //////
 ui.prototype.deleteCanvas = function (name) {
     var index = core.findCanvas(name);
-    if (index == -1) {
-        console.error("未找到"+name);
-    }
-    var obj = core.dom.dymCanvas.removeChild(core.dom.dymCanvas.childNodes[index]);
-    obj = null;
+    if (index == -1) return;
+    core.dom.dymCanvas.removeChild(core.dom.dymCanvas.childNodes[index]);
     core.dymCanvas[name] = null;
     core.dymCanvas._list.splice(index,1);
 }

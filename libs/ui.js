@@ -562,13 +562,9 @@ ui.prototype.drawTextBox = function(content, showAll) {
         validWidth = this.calTextBoxWidth('ui', realContent, min_width, max_width);
         width = validWidth + leftSpace + rightSpace;
         // left必须在7~416-7-width区间内，以保证left>=7，right<=416-7
-        left = core.clamp(32*px+16-width/2, 7, 416-7-width);
-
-        left -= core.bigmap.offsetX;
-
+        left = core.clamp(32*px+16-width/2-core.bigmap.offsetX, 7, 416-7-width);
         right = left + width;
     }
-
 
     var content_left = left + leftSpace;
     var height = 30 + (textfont+5)*core.splitLines("ui", realContent, validWidth, font).length;

@@ -298,7 +298,7 @@ editor.prototype.updateMap = function () {
     var evs = {};
     if (editor.currentFloorData && editor.currentFloorData.events) {
         for (var loc in editor.currentFloorData.events) {
-            if (editor.currentFloorData.events[loc].animate == false)
+            if ((editor.currentFloorData.events[loc]||{}).animate == false)
                 evs[loc] = {"animate": false};
         }
     }

@@ -658,6 +658,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "checkbox",
                     "_bool": "bool",
                     "_data": "是否在经过领域/夹击/路障等伤害后禁用快捷商店。"
+                },
+                "checkConsole": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "是否检查控制台的开启情况。"
                 }
             }
         }

@@ -1203,6 +1203,8 @@ events.prototype.doAction = function() {
 
 ////// 往当前事件列表之前添加一个或多个事件 //////
 events.prototype.insertAction = function (action, x, y, callback) {
+    if (core.hasFlag("__statistics__")) return;
+
     if (core.status.event.id != 'action') {
         this.doEvents(action, x, y, callback);
     }

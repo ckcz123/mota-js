@@ -2566,6 +2566,8 @@ ui.prototype.drawStatistics = function () {
 
                 var temp = core.clone(core.status.hero);
 
+                core.setFlag("__statistics__", true);
+
                 if (core.isset(total.count[id])) {
                     var hp=0, atk=0, def=0, mdef=0;
 
@@ -2573,6 +2575,7 @@ ui.prototype.drawStatistics = function () {
                         var ratio = floor.item_ratio||1;
                         if (core.isset(core.items.itemEffect[id])) {
                             try {
+                                // 需要检查是否是测试状态...
                                 eval(core.items.itemEffect[id]);
                             }
                             catch (e) {}
@@ -2673,7 +2676,8 @@ ui.prototype.drawStatistics = function () {
         +"，总游戏时长"+formatTime(statistics.totalTime)
         +"。\n瞬间移动次数："+statistics.moveDirectly+"，共计少走"+statistics.ignoreSteps+"步。"
         +"\n\n总计通过血瓶恢复生命值为"+core.formatBigNumber(statistics.hp)+"点。\n\n"
-        +"总计打死了"+statistics.battle+"个怪物，受到的伤害为"+core.formatBigNumber(statistics.battleDamage+statistics.poisonDamage+statistics.extraDamage)
+        +"总计打死了"+statistics.battle+"个怪物，得到了"+core.formatBigNumber(statistics.money)+"金币，"+core.formatBigNumber(statistics.experience)+"点经验。\n\n"
+        +"受到的总伤害为"+core.formatBigNumber(statistics.battleDamage+statistics.poisonDamage+statistics.extraDamage)
         +"，其中战斗伤害"+core.formatBigNumber(statistics.battleDamage)+"点"
         +(core.flags.enableDebuff?("，中毒伤害"+core.formatBigNumber(statistics.poisonDamage)+"点"):"")
         +"，领域/夹击/阻击/血网伤害"+core.formatBigNumber(statistics.extraDamage)+"点。",

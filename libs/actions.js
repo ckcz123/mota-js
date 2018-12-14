@@ -655,6 +655,13 @@ actions.prototype.longClick = function (x, y, fromEvent) {
             core.doAction();
             return true;
         }
+        // 长按楼传器的箭头可以快速翻页
+        if (core.status.event.id=='fly') {
+            if ((x==10 || x==11) && (y==5 || y==9)) {
+                this.clickFly(x, y);
+                return true;
+            }
+        }
     }
     else if (!fromEvent) {
         core.waitHeroToStop(function () {

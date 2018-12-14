@@ -158,9 +158,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.hasItem('coin')) money *= 2;
 	if (core.hasFlag('curse')) money=0;
 	core.status.hero.money += money;
+	core.status.hero.statistics.money += money;
 	var experience =enemy.experience;
 	if (core.hasFlag('curse')) experience=0;
 	core.status.hero.experience += experience;
+	core.status.hero.statistics.experience += experience;
 	var hint = "打败 " + enemy.name;
 	if (core.flags.enableMoney)
 		hint += "，金币+" + money;
@@ -1004,6 +1006,22 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				}
 			}
 		}
+	}
+},
+        "moveOneStep": function () {
+	// 勇士每走一步后执行的操作
+	core.status.hero.steps++;
+	// 中毒状态：扣血
+	if (core.hasFlag('poison')) {
+		core.status.hero.statistics.poisonDamage += core.values.poisonDamage;
+		core.status.hero.hp -= core.values.poisonDamage;
+		if (core.status.hero.hp<=0) {
+			core.status.hero.hp=0;
+			core.updateStatusBar();
+			core.events.lose();
+			return;
+		}
+		core.updateStatusBar();
 	}
 }
     },

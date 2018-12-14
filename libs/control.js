@@ -387,6 +387,8 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
             'currTime': 0,
             'hp': 0,
             "battle": 0,
+            'money': 0,
+            'experience': 0,
             'battleDamage': 0,
             'poisonDamage': 0,
             'extraDamage': 0,
@@ -1036,19 +1038,7 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
 
 ////// 每移动一格后执行的事件 //////
 control.prototype.moveOneStep = function() {
-    core.status.hero.steps++;
-    // 中毒状态
-    if (core.hasFlag('poison')) {
-        core.status.hero.statistics.poisonDamage += core.values.poisonDamage;
-        core.status.hero.hp -= core.values.poisonDamage;
-        if (core.status.hero.hp<=0) {
-            core.status.hero.hp=0;
-            core.updateStatusBar();
-            core.events.lose();
-            return;
-        }
-        core.updateStatusBar();
-    }
+    return this.controldata.moveOneStep();
 }
 
 ////// 停止勇士的一切行动，等待勇士行动结束后，再执行callback //////

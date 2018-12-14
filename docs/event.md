@@ -441,7 +441,7 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 ]
 ```
 
-name为必填项，代表要修改的楼层属性。其和楼层属性中一一对应，目前只能为`"title", "name", "canFlyTo", "canUseQuickShop", "cannotViewMap", "color", "weather",
+name为必填项，代表要修改的楼层属性。其和楼层属性中一一对应，目前只能为`"title", "name", "canFlyTo", "canUseQuickShop", "cannotViewMap", "cannotMoveDirectly", "color", "weather",
 "defaultGround", "images", "item_ratio", "upFloor", "bgm", "downFloor", "underGround"`。
 
 floorId为可选项，代表要修改的楼层ID；可以省略代表当前楼层。

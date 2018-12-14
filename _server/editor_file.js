@@ -147,6 +147,7 @@ editor_file = function (editor, callback) {
             canFlyTo: saveStatus?currData.canFlyTo:true,
             canUseQuickShop: saveStatus?currData.canUseQuickShop:true,
             cannotViewMap: saveStatus?currData.cannotViewMap:false,
+            cannotMoveDirectly: saveStatus?currData.cannotMoveDirectly:false,
             images: [],
             item_ratio: saveStatus?currData.item_ratio:1,
             defaultGround: saveStatus?currData.defaultGround:"ground",

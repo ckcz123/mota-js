@@ -18,7 +18,7 @@ maps.prototype.loadFloor = function (floorId, map) {
         map = {"map": map};
     }
     var content = {};
-    ["floorId", "title", "name", "canFlyTo", "canUseQuickShop", "cannotViewMap", "color", "weather",
+    ["floorId", "title", "name", "canFlyTo", "canUseQuickShop", "cannotViewMap", "cannotMoveDirectly", "color", "weather",
         "defaultGround", "images", "item_ratio", "upFloor", "bgm", "downFloor", "underGround"].forEach(function (e) {
         if (core.isset(map[e])) content[e] = core.clone(map[e]);
         else content[e] = core.clone(floor[e]);
@@ -320,6 +320,9 @@ maps.prototype.canMoveDirectly = function (destX,destY) {
 
     // 不可瞬间移动请返回-1
     if (!core.flags.enableMoveDirectly) return -1;
+
+    // 检查该楼层是否不可瞬间移动
+    if (core.status.thisMap.cannotMoveDirectly) return -1;
 
     // 中毒状态：不能
     if (core.hasFlag('poison')) return -1;

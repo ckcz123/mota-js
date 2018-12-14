@@ -66,7 +66,7 @@ editor_blockly = function () {
       MotaActionBlocks['showImage_s'].xmlText(),
       MotaActionBlocks['hideImage_s'].xmlText(),
       MotaActionBlocks['showTextImage_s'].xmlText(),
-      MotaActionBlocks['animateImage_s'].xmlText(),
+      MotaActionBlocks['moveImage_s'].xmlText(),
       MotaActionBlocks['showGif_0_s'].xmlText(),
       MotaActionBlocks['showGif_1_s'].xmlText(),
       MotaActionBlocks['tip_s'].xmlText(),
@@ -432,7 +432,7 @@ function omitedcheckUpdateFunction(event) {
         MotaActionFunctions.parse(
             eval('obj=' + codeAreaHL.getValue().replace(/[<>&]/g, function (c) {
                 return {'<': '&lt;', '>': '&gt;', '&': '&amp;'}[c];
-            })),
+            }).replace(/\\r/g, '\\\\r').replace(/\\f/g, '\\\\f')),
             document.getElementById('entryType').value
         );
     }
@@ -447,7 +447,7 @@ function omitedcheckUpdateFunction(event) {
         var type = args.type;
         if (!type) return false;
         editor_blockly.id = id_;
-        codeAreaHL.setValue(input.value.replace(/\\r/g,'\\\\r').replace(/\\f/,'\\\\f'));
+        codeAreaHL.setValue(input.value);
         document.getElementById('entryType').value = type;
         editor_blockly.parse();
         editor_blockly.show();
@@ -520,6 +520,7 @@ function omitedcheckUpdateFunction(event) {
             'scrollText_s': 'EvalString_0',
             'comment_s': 'EvalString_0',
             'choices_s': 'EvalString_0',
+            'showTextImage_s': 'EvalString_0',
             'function_s': 'RawEvalString_0',
             'shopsub': 'EvalString_3',
         }

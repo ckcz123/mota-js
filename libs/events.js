@@ -212,8 +212,7 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
 
     // 清空图片和天气
     core.clearMap('animate');
-    core.clearMap('image');
-    core.clearMap('weather')
+    core.clearMap('weather');
     core.dom.gif2.innerHTML = "";
     core.animateFrame.weather.type = null;
     core.animateFrame.weather.level = 0;
@@ -724,6 +723,10 @@ events.prototype.doAction = function() {
                 data.time = 0;
             }
             var image = core.material.images.images[data.image];
+            if (!core.isset(image)) {
+                this.doAction();
+                break;
+            }
             if (data.async || data.time == 0) {
                 core.events.showImage(data.code, image, data.loc[0], data.loc[1], data.dw, data.dh, data.opacity, data.time);
                 this.doAction();
@@ -781,17 +784,17 @@ events.prototype.doAction = function() {
             }
             this.doAction();
             break;
-        case "animateImage": // 图片移动
+        case "moveImage": // 图片移动
             if (core.status.replay.replaying) { // 正在播放录像
                 this.doAction();
             }
             else {
                 if (data.async) {
-                    core.events.animateImage(data.code, data.to, data.opacity, data.time);
+                    core.events.moveImage(data.code, data.to, data.opacity, data.time);
                     this.doAction();
                 }
                 else {
-                    core.events.animateImage(data.code, data.to, data.opacity, data.time, function() {
+                    core.events.moveImage(data.code, data.to, data.opacity, data.time, function() {
                         core.events.doAction();
                     });
                 }
@@ -1558,8 +1561,12 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
 
 ////// 显示图片 //////
 events.prototype.showImage = function (code, image, x, y, dw, dh, opacityVal, time, callback) {
-    dw /= 100, dh /= 100, opacityVal /= 100; 
+    dw /= 100;
+    dh /= 100;
+    x = core.calValue(x) || 0;
+    y = core.calValue(y) || 0;
     var zIndex = code + 100;
+    time = time || 0;
     var name = "image"+ zIndex;
     if (core.findCanvas(name) != -1) {
         core.relocateCanvas(name, x, y);
@@ -1568,23 +1575,24 @@ events.prototype.showImage = function (code, image, x, y, dw, dh, opacityVal, ti
     }
     else
         core.createCanvas(name, x, y, image.width * dw, image.height * dh, zIndex);
+
     core.dymCanvas[name].drawImage(image, 0, 0, image.width * dw, image.height * dh);
     if (time == 0)
         core.setOpacity(name, opacityVal);
     else {
-        clearInterval(core.interval.tipAnimate);
-        var opac = 0;
+        var per_time = 10, steps = parseInt(time / per_time), per_add = opacityVal / steps;
+        var opacity = 0;
         core.setOpacity(name, 0);
         var animate = setInterval(function () {
-            opac += opacityVal/20;
-            core.setOpacity(name, opac);
-            if (opac >= opacityVal) {
+            opacity += per_add;
+            core.setOpacity(name, opacity);
+            if (opacity >= opacityVal) {
                 delete core.animateFrame.asyncId[animate];
                 clearInterval(animate);
                 core.setOpacity(name, opacityVal);
                 if (core.isset(callback)) callback();
             }
-        }, time/20);
+        }, per_time);
 
         core.animateFrame.asyncId[animate] = true;
     }
@@ -1592,27 +1600,28 @@ events.prototype.showImage = function (code, image, x, y, dw, dh, opacityVal, ti
 
 ////// 隐藏图片 //////
 events.prototype.hideImage = function (code, time, callback) {
+    time = time || 0;
     var name = "image"+ (code+100);
     if (!core.isset(core.dymCanvas[name])) {
         console.log(code+"号图片不存在")
+        if (core.isset(callback)) callback();
         return;
     }
     if (time == 0)
         core.deleteCanvas(name);
     else {
-        clearInterval(core.interval.tipAnimate);
         var opacityVal = parseFloat(core.dymCanvas[name].canvas.style.opacity);
-        var opac = opacityVal;
+        var per_time = 10, steps = parseInt(time / per_time), per_add = opacityVal / steps;
         var animate = setInterval(function () {
-            opac -= opacityVal/20;
-            core.setOpacity(name, opac);
-            if (opac < 0) {
+            opacityVal -= per_add;
+            core.setOpacity(name, opacityVal);
+            if (opacityVal < 0) {
                 delete core.animateFrame.asyncId[animate];
                 clearInterval(animate);
                 core.deleteCanvas(name);
                 if (core.isset(callback)) callback();
             }
-        }, time/20);
+        }, per_time);
 
         core.animateFrame.asyncId[animate] = true;
     }
@@ -1632,7 +1641,7 @@ events.prototype.textImage = function (content) {
     if (textAttribute.bold) font = "bold "+font;
     var contents = core.splitLines('ui', content), lines = contents.length;
 
-    // 计算总高度，按1.2倍行距计算
+    // 计算总高度，按1.4倍行距计算
     var width = 416, height = textfont * 1.4 * lines;
     var tempCanvas = core.bigmap.tempCanvas;
     tempCanvas.canvas.width = width;
@@ -1653,29 +1662,29 @@ events.prototype.textImage = function (content) {
 }
 
 ////// 移动图片 //////
-events.prototype.animateImage = function (code, to, opacityVal, time, callback) {
+events.prototype.moveImage = function (code, to, opacityVal, time, callback) {
     time = time || 1000;
-    clearInterval(core.interval.tipAnimate);
 
-    // core.status.replay.animate=true;
     var name = "image"+ (code+100), index = core.findCanvas(name);
     if (index == -1) {
         console.log(code+"号图片不存在")
+        if (core.isset(callback)) callback();
         return;
     }
     var fromX = core.dymCanvas._list[index].style.left,
         fromY = core.dymCanvas._list[index].style.top,
-        preX = fromX, preY = fromY;
-    if (core.isset(to))
-        var toX = core.calValue(to[0]), toY = core.calValue(to[1]);
-    else
-        var toX = fromX, toY = fromY;
+        preX = fromX, preY = fromY, toX = fromX, toY = fromY;
+
+    if (core.isset(to)) {
+        toX = core.calValue(to[0]) || toX;
+        toY = core.calValue(to[1]) || toY;
+    }
 
     var step = 0;
     var per_time = 10, steps = parseInt(time / per_time);
     var preOpac = parseFloat(core.dymCanvas[name].canvas.style.opacity), opacStep;
     if (core.isset(opacityVal)) {
-        opacityVal /= 100;
+        opacityVal = core.calValue(opacityVal);
         opacStep = (opacityVal - preOpac) / steps;
     }
     else

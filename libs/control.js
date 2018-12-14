@@ -113,14 +113,14 @@ control.prototype.setRequestAnimationFrame = function () {
 
         // selectorTime
         if (timestamp-core.animateFrame.selectorTime>20 && core.isset(core.dymCanvas.selector)) {
-            var opac = parseFloat(core.dymCanvas.selector.canvas.style.opacity);
-            if (core.getFlag("seleUp", true))
-                opac += 0.02;
+            var opacity = parseFloat(core.dymCanvas.selector.canvas.style.opacity);
+            if (core.animateFrame.selectorUp)
+                opacity += 0.02;
             else
-                opac -= 0.02;
-            if (opac > 0.9 || opac < 0.6)
-                core.setFlag("seleUp", !core.getFlag("seleUp", true))
-            core.setOpacity("selector", opac);
+                opacity -= 0.02;
+            if (opacity > 0.95 || opacity < 0.55)
+                core.animateFrame.selectorUp = !core.animateFrame.selectorUp;
+            core.setOpacity("selector", opacity);
             core.animateFrame.selectorTime = timestamp;
         }
 
@@ -129,10 +129,10 @@ control.prototype.setRequestAnimationFrame = function () {
             core.clearMap('animate');
             core.status.animateObjs = core.status.animateObjs.filter(function (obj) {
                 return obj.index < obj.animate.frames.length;
-            })
+            });
             core.status.animateObjs.forEach(function (obj) {
                 core.maps.drawAnimateFrame(obj.animate, obj.centerX, obj.centerY, obj.index++);
-            })
+            });
             core.animateFrame.animateTime = timestamp;
         }
 
@@ -1372,28 +1372,8 @@ control.prototype.snipe = function (snipes) {
         snipe.blockImage = core.material.images[cls];
         snipe.height = height;
 
-        var damage = core.enemys.getDamage(block.event.id, x, y);
-        var color = '#000000';
-
-        if (damage == null) {
-            damage = "???";
-            color = '#FF0000';
-        }
-        else {
-            if (damage <= 0) color = '#00FF00';
-            else if (damage < core.status.hero.hp / 3) color = '#FFFFFF';
-            else if (damage < core.status.hero.hp * 2 / 3) color = '#FFFF00';
-            else if (damage < core.status.hero.hp) color = '#FF7F00';
-            else color = '#FF0000';
-
-            damage = core.formatBigNumber(damage, true);
-            if (core.enemys.hasSpecial(core.material.enemys[block.event.id], 19))
-                damage += "+";
-            if (core.enemys.hasSpecial(core.material.enemys[block.event.id], 21))
-                damage += "-";
-            if (core.enemys.hasSpecial(core.material.enemys[block.event.id], 11))
-                damage += "^";
-        }
+        var damageString = core.enemys.getDamageString(block.event.id, x, y);
+        var damage = damageString.damage, color = damageString.color;
 
         snipe.damage = damage;
         snipe.color = color;
@@ -1454,14 +1434,7 @@ control.prototype.snipe = function (snipes) {
 
                     if (core.hasItem('book')) {
                         // drawDamage
-                        core.setFillStyle('damage', '#000000');
-                        core.canvas.damage.fillText(snipe.damage, nowX + 2, nowY + 30);
-                        core.canvas.damage.fillText(snipe.damage, nowX, nowY + 30);
-                        core.canvas.damage.fillText(snipe.damage, nowX + 2, nowY + 32);
-                        core.canvas.damage.fillText(snipe.damage, nowX, nowY + 32);
-
-                        core.setFillStyle('damage', snipe.color);
-                        core.canvas.damage.fillText(snipe.damage, nowX + 1, nowY + 31);
+                        core.fillBoldText(core.canvas.damage, snipe.damage, snipe.color, nowX+1, nowY+31);
                     }
 
                 })
@@ -1622,36 +1595,9 @@ control.prototype.updateDamage = function (floorId, canvas) {
                 var id = mapBlocks[b].event.id;
 
                 if (core.flags.displayEnemyDamage) {
-                    var damage = core.enemys.getDamage(id, x, y);
-                    var color = '#000000';
-
-                    if (damage == null) {
-                        damage = "???";
-                        color = '#FF0000';
-                    }
-                    else {
-                        if (damage <= 0) color = '#00FF00';
-                        else if (damage < hero_hp / 3) color = '#FFFFFF';
-                        else if (damage < hero_hp * 2 / 3) color = '#FFFF00';
-                        else if (damage < hero_hp) color = '#FF7F00';
-                        else color = '#FF0000';
-                        damage = core.formatBigNumber(damage, true);
-                        if (core.enemys.hasSpecial(core.material.enemys[id], 19))
-                            damage += "+";
-                        if (core.enemys.hasSpecial(core.material.enemys[id], 21))
-                            damage += "-";
-                        if (core.enemys.hasSpecial(core.material.enemys[id], 11))
-                            damage += "^";
-                    }
-
-                    canvas.fillStyle = '#000000';
-                    canvas.fillText(damage, 32 * x + 2, 32 * (y + 1) - 2);
-                    canvas.fillText(damage, 32 * x, 32 * (y + 1) - 2);
-                    canvas.fillText(damage, 32 * x + 2, 32 * (y + 1));
-                    canvas.fillText(damage, 32 * x, 32 * (y + 1));
-
-                    canvas.fillStyle = color;
-                    canvas.fillText(damage, 32 * x + 1, 32 * (y + 1) - 1);
+                    var damageString = core.enemys.getDamageString(id, x, y);
+                    var damage = damageString.damage, color = damageString.color;
+                    core.fillBoldText(canvas, damage, color, 32*x+1, 32*(y+1)-1);
                 }
 
                 // 临界显伤
@@ -1660,13 +1606,7 @@ control.prototype.updateDamage = function (floorId, canvas) {
                     if (critical.length>0) critical=critical[0];
                     critical = core.formatBigNumber(critical[0], true);
                     if (critical == '???') critical = '?';
-                    canvas.fillStyle = '#000000';
-                    canvas.fillText(critical, 32 * x + 2, 32 * (y + 1) - 2 - 10);
-                    canvas.fillText(critical, 32 * x, 32 * (y + 1) - 2 - 10);
-                    canvas.fillText(critical, 32 * x + 2, 32 * (y + 1) - 10);
-                    canvas.fillText(critical, 32 * x, 32 * (y + 1) - 10);
-                    canvas.fillStyle = '#FFFFFF';
-                    canvas.fillText(critical, 32 * x + 1, 32 * (y + 1) - 1 - 10);
+                    core.fillBoldText(canvas, critical, '#FFFFFF', 32*x+1, 32*(y+1)-11);
                 }
 
             }
@@ -1691,14 +1631,7 @@ control.prototype.updateDamage = function (floorId, canvas) {
                 var damage = core.status.checkBlock.damage[x+core.bigmap.width*y];
                 if (damage>0) {
                     damage = core.formatBigNumber(damage, true);
-                    canvas.fillStyle = '#000000';
-                    canvas.fillText(damage, 32 * x + 17, 32 * (y + 1) - 13);
-                    canvas.fillText(damage, 32 * x + 15, 32 * (y + 1) - 15);
-                    canvas.fillText(damage, 32 * x + 17, 32 * (y + 1) - 15);
-                    canvas.fillText(damage, 32 * x + 15, 32 * (y + 1) - 13);
-
-                    canvas.fillStyle = '#FF7F00';
-                    canvas.fillText(damage, 32 * x + 16, 32 * (y + 1) - 14);
+                    core.fillBoldText(canvas, damage, "#FF7F00", 32*x+16, 32*(y+1)-14);
                 }
             }
         }

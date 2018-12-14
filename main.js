@@ -70,7 +70,6 @@ function main() {
         'hard': document.getElementById('hard'),
         'statusCanvas': document.getElementById('statusCanvas'),
         'dymCanvas': document.getElementById('dymCanvas'),
-        'dym': document.getElementsByClassName('dym'),
     };
     this.mode = 'play';
     this.loadList = [

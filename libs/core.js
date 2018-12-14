@@ -32,6 +32,8 @@ function core() {
         'globalAnimate': false,
         'globalTime': null,
         'boxTime': null,
+        'selectorTime': null,
+        'selectorUp': true,
         'animateTime': null,
         'moveTime': null,
         'lastLegTime': null,
@@ -888,6 +890,10 @@ core.prototype.setFg = function(color, time, callback) {
 ////// 更新全地图显伤 //////
 core.prototype.updateDamage = function () {
     core.control.updateDamage();
+}
+
+core.prototype.fillBoldText = function (canvas, text, color, x, y, font) {
+    core.ui.fillBoldText(canvas, text, color, x, y, font);
 }
 
 ////// 测试是否拥有某个特殊属性 //////

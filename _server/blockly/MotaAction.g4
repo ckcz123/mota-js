@@ -265,7 +265,7 @@ action
     |   showImage_s
     |   hideImage_s
     |   showTextImage_s
-    |   animateImage_s
+    |   moveImage_s
     |   showGif_0_s
     |   showGif_1_s
     |   setFg_0_s
@@ -1021,34 +1021,34 @@ return code;
 */;
 
 showImage_s
-    :   '显示图片' '图片编号' Int '图片' EvalString '起点像素位置' 'x' PosString 'y' PosString BGNL
-        '放大率 : x' Int '% y' Int '% 透明度' Int '时间' Int '不等待执行完毕' Bool Newline
+    :   '显示图片' '图片编号' Int '图片' EvalString '起点像素位置' 'x' PosString 'y' PosString BGNL?
+        '放大率 : x' Int '% y' Int '% 不透明度' Number '时间' Int '不等待执行完毕' Bool Newline
     
 
 /* showImage_s
 tooltip : showImage：显示图片
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=showimage%EF%BC%9A%E6%98%BE%E7%A4%BA%E5%9B%BE%E7%89%87
-default : [1,"bg.jpg","0","0",100,100,100,0,false]
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=showImage%ef%bc%9a%e6%98%be%e7%a4%ba%e5%9b%be%e7%89%87
+default : [1,"bg.jpg","0","0",100,100,1,0,false]
 colour : this.printColor
-if(Int_3<0 || Int_3>100) throw new Error('透明度的值在0~100之间');
+if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "showImage", "code": '+Int_0+', "image": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "dw": '+Int_1+', "dh": '+Int_2+', "opacity": '+Int_3+', "time": '+Int_4+async+'},\n';
+var code = '{"type": "showImage", "code": '+Int_0+', "image": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "dw": '+Int_1+', "dh": '+Int_2+', "opacity": '+Number_0+', "time": '+Int_3+async+'},\n';
 return code;
 */;
 
 showTextImage_s
-    :   '显示图片化文本' '图片编号' Int '文本' EvalString BGNL
-        '起点像素位置' 'x' PosString 'y' PosString '透明度' Int '时间' Int '不等待执行完毕' Bool Newline
+    :   '显示图片化文本' '文本内容' EvalString BGNL?
+        '图片编号' Int '起点像素位置' 'x' PosString 'y' PosString '不透明度' Number '时间' Int '不等待执行完毕' Bool Newline
     
 
 /* showTextImage_s
 tooltip : showTextImage：显示图片化文本
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=showimage%EF%BC%9A%E6%98%BE%E7%A4%BA%E5%9B%BE%E7%89%87
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=showTextImage%ef%bc%9a%e6%98%be%e7%a4%ba%e6%96%87%e6%9c%ac%e5%8c%96%e5%9b%be%e7%89%87
 colour : this.printColor
-default : [1,"可以使用setText事件来控制字体、颜色、大小、偏移量等","0","0",100,0,false]
-if(Int_1<0 || Int_1>100) throw new Error('透明度的值在0~100之间');
+default : ["可以使用setText事件来控制字体、颜色、大小、偏移量等",1,"0","0",1,0,false]
+if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "showTextImage", "code": '+Int_0+', "text": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "opacity": '+Int_1+', "time": '+Int_2+async+'},\n';
+var code = '{"type": "showTextImage", "code": '+Int_0+', "text": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "opacity": '+Number_0+', "time": '+Int_1+async+'},\n';
 return code;
 */;
 
@@ -1058,9 +1058,10 @@ hideImage_s
 
 /* hideImage_s
 tooltip : hideImage：清除图片
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=showimage%EF%BC%9A%E6%98%BE%E7%A4%BA%E5%9B%BE%E7%89%87
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=hideImage%ef%bc%9a%e6%b8%85%e9%99%a4%e5%9b%be%e7%89%87
 colour : this.printColor
 default : [1,0,false]
+if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
 var async = Bool_0?', "async": true':'';
 var code = '{"type": "hideImage", "code": '+Int_0+', "time": '+Int_1+async+'},\n';
 return code;
@@ -1091,22 +1092,23 @@ var code = '{"type": "showGif"},\n';
 return code;
 */;
 
-animateImage_s
-    :   '图片移动' '编号' Int '终点像素位置' 'x' PosString? 'y' PosString? BGNL
-        '透明度' PosString? '移动时间' Int '不等待执行完毕' Bool Newline
+moveImage_s
+    :   '图片移动' '图片编号' Int '终点像素位置' 'x' PosString? 'y' PosString? BGNL?
+        '不透明度' EvalString? '移动时间' Int '不等待执行完毕' Bool Newline
     
 
-/* animateImage_s
-tooltip : animateImage：图片移动
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=moveimage%EF%BC%9A%E5%9B%BE%E7%89%87%E7%A7%BB%E5%8A%A8
-default : [1,"0","0",100,500,false]
+/* moveImage_s
+tooltip : moveImage：图片移动
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=moveImage%ef%bc%9a%e5%9b%be%e7%89%87%e7%a7%bb%e5%8a%a8
+default : [1,'','','',500,false]
 colour : this.printColor
+if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
 var toloc = '';
 if (PosString_0 && PosString_1)
-  toloc = ', "to": ['+PosString_0+','+PosString_1+']'
-PosString_2 = (PosString_2) ? (', "opacity": '+PosString_2):'';
+  toloc = ', "to": ['+PosString_0+','+PosString_1+']';
+EvalString_0 = (EvalString_0!=='') ? (', "opacity": '+EvalString_0):'';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "animateImage", "code": '+Int_0+toloc+PosString_2+',"time": '+Int_1+async+'},\n';
+var code = '{"type": "moveImage", "code": '+Int_0+toloc+EvalString_0+',"time": '+Int_1+async+'},\n';
 return code;
 */;
 
@@ -2070,19 +2072,22 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['vibrate_s'].xmlText([data.time||0, data.async||false, this.next]);
       break;
     case "showImage": // 显示图片
+      data.loc=data.loc||['','']
       this.next = MotaActionBlocks['showImage_s'].xmlText([
-        data.code,data.image,data.loc[0],data.loc[1],data.dw||100,data.dw||100,data.opacity||100,data.time||0,data.async||false,this.next]);
+        data.code,data.image,data.loc[0],data.loc[1],data.dw,data.dh,data.opacity,data.time||0,data.async||false,this.next]);
       break;
     case "hideImage": // 清除图片
       this.next = MotaActionBlocks['hideImage_s'].xmlText([
         data.code,data.time||0,data.async||false,this.next]);
       break;
     case "showTextImage": // 显示图片化文本
+      data.loc=data.loc||['','']
       this.next = MotaActionBlocks['showTextImage_s'].xmlText([
-        data.code,this.EvalString(data.text),data.loc[0],data.loc[1],data.opacity||100,data.time||0,data.async||false,this.next]);
+        this.EvalString(data.text),data.code,data.loc[0],data.loc[1],data.opacity,data.time||0,data.async||false,this.next]);
       break;
-    case "animateImage": // 移动图片
-      this.next = MotaActionBlocks['animateImage_s'].xmlText([
+    case "moveImage": // 移动图片
+      data.to=data.to||['','']
+      this.next = MotaActionBlocks['moveImage_s'].xmlText([
         data.code, data.to[0], data.to[1], data.opacity, data.time||0, data.async||false, this.next]);
       break;
     case "showGif": // 显示动图
@@ -2341,7 +2346,7 @@ MotaActionFunctions.IdString_pre = function(IdString){
 
 MotaActionFunctions.PosString_pre = function(PosString){
   if (!PosString || /^-?\d+$/.test(PosString)) return PosString;
-  if (!(/^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ - :之外的字符,或者是没有以flag: 开头');
+  if (!(/^flag:[0-9a-zA-Z_][0-9a-zA-Z_:]*$/.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ :之外的字符,或者是没有以flag: 开头');
   return '"'+PosString+'"';
 }
 

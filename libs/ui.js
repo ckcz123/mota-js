@@ -43,6 +43,18 @@ ui.prototype.fillText = function (map, text, x, y, style, font) {
     core.canvas[map].fillText(text, x, y);
 }
 
+////// 在某个canvas上绘制粗体 //////
+ui.prototype.fillBoldText = function (canvas, text, color, x, y, font) {
+    if (core.isset(font)) canvas.font = font;
+    canvas.fillStyle = '#000000';
+    canvas.fillText(text, x-1, y-1);
+    canvas.fillText(text, x-1, y+1);
+    canvas.fillText(text, x+1, y-1);
+    canvas.fillText(text, x+1, y+1);
+    canvas.fillStyle = color;
+    canvas.fillText(text, x, y);
+}
+
 ////// 在某个canvas上绘制一个矩形 //////
 ui.prototype.fillRect = function (map, x, y, width, height, style) {
     if (core.isset(style)) {
@@ -762,7 +774,7 @@ ui.prototype.drawScrollText = function (content, time, callback) {
     if (textAttribute.bold) font = "bold "+font;
     var contents = core.splitLines('ui', content), lines = contents.length;
 
-    // 计算总高度，按1.2倍行距计算
+    // 计算总高度，按1.4倍行距计算
     var width = 416, height = textfont * 1.4 * lines;
     var tempCanvas = core.bigmap.tempCanvas;
     tempCanvas.canvas.width = width;
@@ -1477,9 +1489,6 @@ ui.prototype.drawCursor = function () {
 ui.prototype.drawBook = function (index) {
     var enemys = core.enemys.getCurrentEnemys(core.floorIds[(core.status.event.selection||{}).index]);
 
-    clearInterval(core.interval.tipAnimate);
-    core.clearMap('data');
-
     core.clearLastEvent();
     core.setFillStyle('ui', core.material.groundPattern);
     core.fillRect('ui', 0, 0, 416, 416);
@@ -1577,8 +1586,8 @@ ui.prototype.drawBook = function (index) {
         if (line_cnt==2) damageOffset=361;
 
         core.canvas.ui.textAlign = "center";
-        var damage = enemy.damage;
 
+        var damage = enemy.damage;
         var color = '#FFFF00';
         if (damage == null) {
             damage = '无法战斗';
@@ -1598,7 +1607,6 @@ ui.prototype.drawBook = function (index) {
         }
         if (enemy.notBomb)
             damage += "[b]";
-
         core.fillText('ui', damage, damageOffset, 62 * i + 50, color, 'bold 13px '+globalFont);
 
         core.canvas.ui.textAlign = "left";

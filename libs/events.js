@@ -1136,13 +1136,9 @@ events.prototype.doAction = function() {
             }
             break;
         case "sleep": // 等待多少毫秒
-            if (core.status.replay.replaying)
+            setTimeout(function() {
                 core.events.doAction();
-            else {
-                setTimeout(function () {
-                    core.events.doAction();
-                }, data.time);
-            }
+            }, core.status.replay.replaying?20:data.time);
             break;
         case "wait":
             if (core.status.replay.replaying) {

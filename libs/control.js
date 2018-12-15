@@ -411,7 +411,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
 
     core.events.initGame();
     this.updateGlobalAttribute(Object.keys(core.status.globalAttribute));
-    this.triggerStatusBar(core.getFlag('hideStatusBar', false)?'hide':'show');
+    this.triggerStatusBar(core.getFlag('hideStatusBar', false)?'hide':'show', core.getFlag("showToolbox"));
     core.status.played = true;
 }
 
@@ -2214,17 +2214,23 @@ control.prototype.openSettings = function (need) {
 
 ////// 自动存档 //////
 control.prototype.autosave = function (removeLast) {
-    if (core.status.event.id!=null)
-        return;
+    var addLast = true;
+    if (core.status.event.id!=null) {
+        // 检查是否是强制自动存档
+        if (core.status.event.id=='action' && core.hasFlag("forceSave")) addLast = false;
+        else return;
+    }
     var x=null;
     if (removeLast)
         x=core.status.route.pop();
-    // 加入当前方向
-    core.status.route.push("turn:"+core.getHeroLoc('direction'));
-    core.setLocalForage("autoSave", core.saveData())
-    core.status.route.pop();
+    if (addLast)
+        core.status.route.push("turn:"+core.getHeroLoc('direction'));
+    core.setLocalForage("autoSave", core.saveData());
+    if (addLast)
+        core.status.route.pop();
     if (removeLast && core.isset(x))
         core.status.route.push(x);
+    core.removeFlag("forceSave");
 }
 
 ////// 实际进行存读档事件 //////
@@ -2762,17 +2768,20 @@ control.prototype.updateStatusBar = function () {
     }
 }
 
-control.prototype.triggerStatusBar = function (name) {
+control.prototype.triggerStatusBar = function (name, showToolbox) {
     if (name!='hide') name='show';
     var statusItems = core.dom.status;
     var toolItems = core.dom.tools;
     core.domStyle.showStatusBar = name == 'show';
     core.setFlag('hideStatusBar', core.domStyle.showStatusBar?null:true);
+    core.setFlag('showToolbox', showToolbox);
     if (!core.domStyle.showStatusBar) {
         for (var i = 0; i < statusItems.length; ++i)
             statusItems[i].style.opacity = 0;
-        for (var i = 0; i < toolItems.length; ++i)
-            toolItems[i].style.display = 'none';
+        if (!core.domStyle.isVertical || !showToolbox) {
+            for (var i = 0; i < toolItems.length; ++i)
+                toolItems[i].style.display = 'none';
+        }
     }
     else {
         for (var i = 0; i < statusItems.length; ++i)
@@ -2861,7 +2870,16 @@ control.prototype.updateGlobalAttribute = function (name) {
 
 ////// 改变工具栏为按钮1-7 //////
 control.prototype.setToolbarButton = function (useButton) {
-    if (!core.domStyle.showStatusBar) return;
+    if (!core.domStyle.showStatusBar) {
+        // 隐藏状态栏时检查竖屏
+        if (!core.domStyle.isVertical) {
+            for (var i = 0; i < core.dom.tools.length; ++i)
+                core.dom.tools[i].style.display = 'none';
+            return;
+        }
+        if (!core.hasFlag('showToolbox')) return;
+        else core.dom.tools.hard.style.display = 'block';
+    }
 
     if (!core.isset(useButton)) useButton = core.domStyle.toolbarBtn;
     if (!core.domStyle.isVertical) useButton = false;

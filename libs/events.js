@@ -1119,7 +1119,7 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "hideStatusBar":
-            core.control.triggerStatusBar("hide");
+            core.control.triggerStatusBar("hide", data.toolbox);
             this.doAction();
             break;
         case "updateEnemys":

@@ -813,14 +813,16 @@ return code;
 */;
 
 hideStatusBar_s
-    :   '隐藏状态栏' Newline
+    :   '隐藏状态栏' '不隐藏竖屏工具栏' Bool Newline
 
 
 /* hideStatusBar_s
 tooltip : hideStatusBar: 隐藏状态栏
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=hideStatusBar%ef%bc%9a%e9%9a%90%e8%97%8f%e7%8a%b6%e6%80%81%e6%a0%8f
 colour : this.soundColor
-var code = '{"type": "hideStatusBar"},\n';
+default : [false]
+Bool_0 = Bool_0?', "toolbox": true':'';
+var code = '{"type": "hideStatusBar"'+Bool_0+'},\n';
 return code;
 */;
 
@@ -2248,7 +2250,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "hideStatusBar":
       this.next = MotaActionBlocks['hideStatusBar_s'].xmlText([
-        this.next]);
+        this.toolbox||false,this.next]);
       break;
     case "updateEnemys":
       this.next = MotaActionBlocks['updateEnemys_s'].xmlText([

@@ -2493,8 +2493,7 @@ ui.prototype.drawKeyBoard = function () {
 
 ////// 绘制状态栏 /////
 ui.prototype.drawStatusBar = function () {
-    if (this.uidata.drawStatusBar)
-        this.uidata.drawStatusBar();
+    this.uidata.drawStatusBar();
 }
 
 ////// 绘制“数据统计”界面 //////

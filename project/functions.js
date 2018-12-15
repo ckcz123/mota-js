@@ -89,7 +89,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// floorId是切换到的楼层；fromLoad若为true则代表是从读档行为造成的楼层切换
 
 	// 每次抵达楼层时执行的事件
-	if (!fromLoad) {
+	if (!fromLoad || core.hasFlag("forceSave")) {
 		core.insertAction(core.floors[floorId].eachArrive);
 	}
 

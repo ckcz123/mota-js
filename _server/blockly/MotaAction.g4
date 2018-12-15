@@ -2250,7 +2250,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "hideStatusBar":
       this.next = MotaActionBlocks['hideStatusBar_s'].xmlText([
-        this.toolbox||false,this.next]);
+        data.toolbox||false,this.next]);
       break;
     case "updateEnemys":
       this.next = MotaActionBlocks['updateEnemys_s'].xmlText([

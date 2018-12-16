@@ -1028,6 +1028,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		}
 		core.updateStatusBar();
 	}
+	// 备注：瞬间移动不会执行该函数。如果要控制能否瞬间移动有三种方法：
+	// 1. 将全塔属性中的cannotMoveDirectly这个开关勾上，即可在全塔中全程禁止使用瞬移。
+	// 2, 将楼层属性中的cannotMoveDirectly这个开关勾上，即禁止在该层楼使用瞬移。
+	// 3. 将flag:cannotMoveDirectly置为true，即可使用flag控制在某段剧情范围内禁止瞬移。
+
 }
     },
     "ui": {
@@ -1201,21 +1206,20 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// core.plugin.drawLight([255,255,0,0.2], [[25,11,46,0.1]]); // 全图为不透明度0.2的黄色，其中在(25,11)点存在一个半径为46的灯光效果，灯光中心不透明度0.1。
 	// core.plugin.drawLight(0.9, [[25,11,46],[105,121,88],[301,221,106]]); // 存在三个灯光效果，分别是中心(25,11)半径46，中心(105,121)半径88，中心(301,221)半径106。
 	// core.plugin.drawLight([0,0,255,0.3], [[25,11,46],[105,121,88,0.2]], 0.4); // 存在两个灯光效果，它们在内圈40%范围内保持全亮，且40%后才开始衰减。
-	// 【注意事项】
-	// 此函数会和更改画面色调发生冲突，请只选择一个使用。
 	this.drawLight = function (color, lights, lightDec) {
-		// 清空色调层
+		// 清空色调层；也可以修改成其它层比如animate层，或者用自己创建的canvas
 		var ctx = core.canvas.curtain;
 		ctx.mozImageSmoothingEnabled = false;
 		ctx.webkitImageSmoothingEnabled = false;
 		ctx.msImageSmoothingEnabled = false;
 		ctx.imageSmoothingEnabled = false;
-		core.clearMap('curtain');
+		ctx.clearRect(0, 0, 416, 416);
 
 		// 绘制色调层，默认不透明度
 		if (!core.isset(color)) color = 0.9;
 		if (typeof color == "number") color = [0,0,0,color];
-		core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA(color));
+		ctx.fillStyle = core.arrayToRGBA(color);
+		ctx.fillRect(0, 0, 416, 416);
 
 		// 绘制每个灯光效果
 		if (!core.isset(lights) || lights.length==0) return;

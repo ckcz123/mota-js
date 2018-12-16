@@ -855,38 +855,31 @@ if (core.flags.enableSkill) {
 3. 在脚本编辑 - setInitData中加上`core.plugin.initHeros()`来初始化新勇士。（写在`core.events.afterLoadData()`后，反大括号之前。）
 4. 如果需要切换角色（包括事件、道具或者快捷键等），可以直接调用自定义JS脚本：`core.plugin.changeHero();`进行切换。也可以指定参数调用`core.plugin.changeHero(1)`来切换到某个具体的勇士上。
 
-## 根据难度分歧来自定义地图
+## 系统使用的flag变量
 
-遗憾的是，所有地图数据必须在剧本的map中指定，换句话说，我们无法在游戏进行中动态修改地图，比如为简单难度增加一个血瓶。
+众所周知，自定义flag变量都可以任意定义并取用（未定义直接取用的flag默认值为0）。
 
-幸运的是，我们可以采用如下方式进行难度分歧，为用户简单难度下增加额外的血瓶或宝石。
+下面是一些可能会被系统设置或取用的flag变量：
 
-``` js
-"firstArrive": [ // 第一次到该楼层触发的事件
-    {"type": "if", "condition": "flag:hard!=3", // 判断是否困难难度
-        "true": [ // 不为困难，则为普通或简单难度
-            {"type": "show", "loc": [3,6]} // 显示血瓶
-            {"type": "if", "condition": "flag:hard==1", // 判断是否是简单难度
-                "true": [
-                    {"type": "show", "loc": [3,7]} // 简单难度则显示宝石
-                ],
-                "false": [] // 普通难度则只显示血瓶
-            },
-        ],
-        "false": [] // 困难难度，不进行任何操作
-  },
-],
-"events": {
-  "3,6": {"enable": false} // 比如[3,6]点是一个血瓶，初始不可见
-  "3,7": {"enable": false} // 比如[3,7]点是一个宝石，初始不可见
-}
-```
-
-如上所示，我们在地图上设置一个额外的血瓶和宝石，并初始时设为禁用状态。
-
-当第一次到达该楼层时，进行一次判断；如果不为困难难度，则将血瓶显示出来；再判断是否为简单难度，如果是则再把宝石显示出来。
-
-通过对`flag:hard`进行判断的方式，我们也可以达成“对于不同的难度有着不同的地图效果”。
+- **`flag:hard`**: 当前的难度标志；此flag变量在setInitData中被定义，可以直接取用来判定当前难度分歧。上传成绩时将根据此flag来对不同难度进行排序。
+- **`flag:posion`**, **`flag:weak`**, **`flag:curse`**: 中毒、衰弱、诅咒状态。
+- **`flag:no_zone`**, **`flag:no_snipe`**, **`flag:no_laser`**, **`flag:no_betweenAttack`**: 是否分别免疫领域、阻击、激光、夹击效果。
+- **`flag:hatred`**: 当前的仇恨数值。
+- **`flag:commonTimes`**: 全局商店共用次数时的访问次数。
+- **`flag:input`**: 接受用户输入的事件后，存放用户输入的结果。
+- **`flag:type`**, **`flag:keycode`**, **`flag:x`**, **`flag:y`**: 等待用户操作后，用户的操作类型，按键keycode或点击坐标。
+- **`flag:skill`**, **`flag:skillName`**: 开启的技能编号和技能名。
+- **`flag:heroIcon`**: 当前的勇士行走图名称。
+- **`flag:saveEquips`**: 快速换装时保存的套装。
+- **`flag:__visited__`**: 当前访问过的楼层。
+- **`flag:equip_atk_buff`**, **`flag:equip_def_buff`**, **`flag:equip_mdef_buff`**: 当前攻防魔防的实际计算比例加成。
+- **`flag:forceSave`**: 是否允许事件中强制自动存档。如果将此项置为true并调用core.autosave()即可在事件中强制自动存档，读档时会自动执行该楼层的`eachArrive`事件。
+- **`flag:__color__`**, **`flag:__weather__`**, **`flag:__volume__`**: 当前的画面色调、天气和音量。
+- **`flag:textAttribute`**, **`flag:globalAttribute`**: 当前的剧情文本属性，当前的全局属性。
+- **`flag:cannotMoveDirectly`**, **`flag:clickMove`**: 当前是否不允许瞬间移动，当前用户是否开启了单击瞬移。
+- **`flag:hideStatusBar`**, **`flag:showToolbox`**: 是否隐藏状态栏，是否显示工具栏。
+- **`flag:debug`**, **`flag:consoleOpened`**: 当前是否开启了调试模式，是否开启了控制台。
+- **`flag:__seed__`**, **`flag:__rand__`**: 伪随机数生成种子和当前的状态
 
 ==========================================================================================
 

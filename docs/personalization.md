@@ -779,6 +779,65 @@ if (core.flags.enableSkill) {
 
 通过上述这几种方式，我们就能成功的让H5支持技能啦！
 
+## 成就系统
+
+我们还可以给HTML5魔塔增加成就系统。注意到成就是和游戏相关，因此需要使用getLocalStorage而不是getFlag判定。
+
+可将下面的代码粘贴到脚本编辑 - 插件编写中。
+
+``` js
+// 所有成就项的定义
+this.achievements = [
+    // 每行一个，分别定义flag、名称、描述、是否存在提示、成就点数
+    {"flag": "a1", "name": "成就1", "text": "成就1的达成描述", "hint": false, "point": 1},
+    // 可以继续往后新增其他的。
+];
+
+// 达成成就；如 core.plugin.achieve("a1") 即达成a1对应的成就
+this.achieve = function (flag) {
+    // 获得已达成的成就；如果跟存档而不是跟游戏则改成getFlag
+    var achieved = core.getLocalStorage("achievements", []);
+    var point = core.getLocalStorage("achievePoint", 0);
+    // 已经获得该成就
+    if (achieved.indexOf(flag)>=0) return;
+    // 尝试达成成就；找到对应的成就项
+    this.achievements.forEach(function (one) {
+        if (one.flag == flag) {
+            // 执行达成成就的操作；也可以自行在上面加上达成成就后的事件
+            core.insertAction("\t[达成成就："+one.name+"]"+one.text);
+            point += one.point || 0;
+        }
+    });
+    achieved.push(flag);
+    // 存入localStorage中；如果跟存档走则使用setFlag
+    core.setLocalStorage("achievements", achieved);
+    core.setLocalStorage("achievePoint", point);
+}
+
+// 获得所有成就说明；这里简单使用两个insertAction，你也可以修改成自己的实现
+// 简单一点的可以使用insertAction+剧情文本；稍微复杂一点的可以使用图片化文本等；更复杂的可以自绘UI。
+this.getAchievements = function () {
+    var achieved = core.getLocalStorage("achievements", []);
+    var yes = [], no = [];
+    // 对所有成就进行遍历
+    this.achievements.forEach(function (one) {
+        // 检测是否达成
+        if (achieved.indexOf(one.flag)>=0) {
+            yes.push(one.name+"："+one.text);
+        }
+        else {
+            no.push(one.name+"："+(one.hint?one.text:"达成条件请自行探索"));
+        }
+    });
+    core.insertAction([
+        "\t[已达成的成就]"+(yes.length==0?"暂无":yes.join("\n")),
+        "\t[尚未达成的成就]"+(no.length==0?"暂无":no.join("\n"))
+    ]);
+}
+```
+
+
+
 ## 多角色的支持
 
 其实，我们的样板还能支持多角色的制作。比如《黑·白·间》之类的塔也是完全可以刻的。
@@ -787,7 +846,7 @@ if (core.flags.enableSkill) {
 
 1. 每个角色弄一张行走图。相关信息参见[自定义事件：setHeroIcon](event#setHeroIcon：更改角色行走图)。
 2. [覆盖楼传事件](#覆盖楼传事件)，这样可以通过点工具栏的楼层传送按钮来切换角色。当然你也完全可以自己写一个道具，或[自定义快捷键](#自定义快捷键)来进行绑定。
-3. 将下述代码直接贴入脚本编辑 - 插件编写中。（写在`var _useEquipment = ...`之前。）
+3. 将下述代码直接贴入脚本编辑 - 插件编写中。
     ``` js
     // 所有需要保存的内容；这些保存的内容不会多角色共用，在切换时会进行恢复。
     // 你也可以自行新增或删除，比如不共用金币则可以加上"money"的初始化，不共用道具则可以加上"items"的初始化，

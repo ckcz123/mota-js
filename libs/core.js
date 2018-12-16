@@ -999,18 +999,18 @@ core.prototype.drawText = function (contents, callback) {
 /////////// 系统机制 ///////////
 
 ////// 将文字中的${和}（表达式）进行替换 //////
-core.prototype.replaceText = function (text) {
-    return core.utils.replaceText(text);
+core.prototype.replaceText = function (text, need, times) {
+    return core.utils.replaceText(text, need, times);
 }
 
 ////// 计算表达式的值 //////
-core.prototype.calValue = function (value) {
-    return core.utils.calValue(value);
+core.prototype.calValue = function (value, need, times) {
+    return core.utils.calValue(value, need, times);
 }
 
 ////// 执行一个表达式的effect操作 //////
-core.prototype.doEffect = function (expression) {
-    core.control.doEffect(expression);
+core.prototype.doEffect = function (expression, need, times) {
+    core.control.doEffect(expression, need, times);
 }
 
 ////// 字符串自动换行的分割 //////

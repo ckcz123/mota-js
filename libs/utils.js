@@ -39,14 +39,14 @@ utils.prototype.init = function () {
 }
 
 ////// 将文字中的${和}（表达式）进行替换 //////
-utils.prototype.replaceText = function (text) {
+utils.prototype.replaceText = function (text, need, times) {
     return text.replace(/\${(.*?)}/g, function (word, value) {
-        return core.calValue(value);
+        return core.calValue(value, need, times);
     });
 }
 
 ////// 计算表达式的值 //////
-utils.prototype.calValue = function (value) {
+utils.prototype.calValue = function (value, need, times) {
     if (!core.isset(value)) return value;
     if (typeof value == 'number') {
         return value;

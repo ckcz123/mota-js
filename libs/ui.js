@@ -1371,20 +1371,38 @@ ui.prototype.drawWaiting = function(text) {
     core.status.event.id = 'waiting';
 
     core.clearLastEvent();
-    core.setFillStyle('ui', core.material.groundPattern);
+
+    var background = core.status.textAttribute.background;
+    var isWindowSkin = false;
+    if (typeof background == 'string') {
+        background = core.material.images.images[background];
+        if (core.isset(background) && background.width==192 && background.height==128) isWindowSkin = true;
+        else background = core.initStatus.textAttribute.background;
+    }
+    if (!isWindowSkin) background = core.arrayToRGBA(background);
+    var borderColor = core.status.globalAttribute.borderColor;
+    var textColor = core.arrayToRGBA(core.status.textAttribute.text);
 
     var globalFont = core.status.globalAttribute.font;
-    core.setFont('ui', 'bold 17px '+globalFont);
+    core.setFont('ui', "bold 19px "+globalFont);
     var text_length = core.canvas.ui.measureText(text).width;
 
     var right = Math.max(text_length+50, 220);
     var left = 208-parseInt(right/2), top = 208 - 32 - 16, bottom = 416 - 2 * top;
 
-    core.fillRect('ui', left, top, right, bottom);
-    core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+    core.clearMap('ui');
+    if (isWindowSkin) {
+        core.setAlpha('ui', 0.85);
+        this.drawWindowSkin(background,'ui',left,top,right,bottom);
+    }
+    else {
+        core.fillRect('ui', left, top, right, bottom, background);
+        core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, borderColor, 2);
+    }
+    core.setAlpha('ui', 1);
 
     core.canvas.ui.textAlign = "center";
-    core.fillText('ui', text, 208, top + 56, '#FFFFFF');
+    core.fillText('ui', text, 208, top + 56, textColor);
 
 }
 

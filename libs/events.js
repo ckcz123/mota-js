@@ -1849,20 +1849,18 @@ events.prototype.openShop = function(shopId, needVisited) {
 
     // 拼词
     var content = "\t["+shop.name+","+shop.icon+"]";
-    var times = shop.times, need=eval(shop.need);
+    var times = shop.times, need=core.calValue(shop.need, null, times);
 
-    content = content + shop.text.replace(/\${([^}]+)}/g, function (word, value) {
-        return eval(value);
-    });
+    content += core.replaceText(shop.text, need, times);
 
     var use = shop.use=='experience'?'经验':'金币';
 
     var choices = [];
     for (var i=0;i<shop.choices.length;i++) {
         var choice = shop.choices[i];
-        var text = choice.text;
+        var text = core.replaceText(choice.text, need, times);
         if (core.isset(choice.need))
-            text += "（"+eval(choice.need)+use+"）";
+            text += "（"+core.calValue(choice.need, null, times)+use+"）";
         choices.push({"text": text, "color":shop.visited?null:"#999999"});
     }
     choices.push("离开");
@@ -1894,19 +1892,28 @@ events.prototype.setHeroIcon = function (name, noDraw) {
 
 ////// 检查升级事件 //////
 events.prototype.checkLvUp = function () {
-    if (!core.flags.enableLevelUp || !core.isset(core.firstData.levelUp)
-        || core.status.hero.lv>=core.firstData.levelUp.length) return;
-    // 计算下一个所需要的数值
-    var next = (core.firstData.levelUp[core.status.hero.lv]||{});
-    var need = core.calValue(next.need);
-    if (!core.isset(need)) return;
-    if (core.status.hero.experience>=need) {
-        // 升级
-        core.status.hero.lv++;
-        if (next.clear) core.status.hero.experience -= need;
-        core.insertAction(next.action);
-        this.checkLvUp();
+    var check = function () {
+        if (!core.flags.enableLevelUp || !core.isset(core.firstData.levelUp)
+            || core.status.hero.lv>=core.firstData.levelUp.length) return null;
+        // 计算下一个所需要的数值
+        var next = (core.firstData.levelUp[core.status.hero.lv]||{});
+        var need = core.calValue(next.need);
+        if (!core.isset(need)) return null;
+        if (core.status.hero.experience>=need) {
+            // 升级
+            core.status.hero.lv++;
+            if (next.clear) core.status.hero.experience -= need;
+            return next.action||[];
+        }
+        return null;
     }
+    var actions = [];
+    while (true) {
+        var next = check();
+        if (next == null) break;
+        actions = actions.concat(next);
+    }
+    if (actions.length>0) core.insertAction(actions);
 }
 
 ////// 尝试使用道具 //////

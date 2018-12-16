@@ -1639,11 +1639,11 @@ control.prototype.updateDamage = function (floorId, canvas) {
 }
 
 ////// 执行一个表达式的effect操作 //////
-control.prototype.doEffect = function (effect) {
+control.prototype.doEffect = function (effect, need, times) {
     effect.split(";").forEach(function (expression) {
         var arr = expression.split("+=");
         if (arr.length!=2) return;
-        var name=arr[0], value=core.calValue(arr[1]);
+        var name=arr[0], value=core.calValue(arr[1], need, times);
         if (name.indexOf("status:")==0) {
             var status=name.substring(7);
             core.setStatus(status, core.getStatus(status)+value);
@@ -1651,6 +1651,10 @@ control.prototype.doEffect = function (effect) {
         else if (name.indexOf("item:")==0) {
             var itemId=name.substring(5);
             core.setItem(itemId, core.itemCount(itemId)+value);
+        }
+        else if (name.indexOf("flag:")==0) {
+            var flag=name.substring(5);
+            core.setFlag(flag, core.getFlag(flag, 0)+value);
         }
     });
 }

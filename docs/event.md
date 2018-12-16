@@ -1869,8 +1869,8 @@ if (core.getFlag("door",0)==2) {
             {"text": "攻击+4", "effect": "status:atk+=4"},
             {"text": "防御+4", "effect": "status:def+=4"},
             {"text": "魔防+10", "effect": "status:mdef+=10"}
-            // effect只能对status和item进行操作，不能修改flag值。
-            // 必须是X+=Y的形式，其中Y可以是一个表达式，以status:xxx或item:xxx为参数
+            // effect可以对status，item和flag进行操作。
+            // 必须是X+=Y的形式，其中Y可以是一个表达式，以status:xxx, item:xxx或flag:xxx为参数
             // 其他effect样例：
             // "item:yellowKey+=1" 黄钥匙+1
             // "item:pickaxe+=3" 破墙镐+3
@@ -1912,7 +1912,7 @@ if (core.getFlag("door",0)==2) {
 - text 为商店所说的话。可以用${need}表示需要的数值。
 - choices 为商店的各个选项，是一个list，每一项是一个选项
   - text为显示文字。请注意这里不支持 ${} 的表达式计算。
-  - effect 为该选项的效果；effect只能对status或items进行操作，且必须是 `status:xxx+=yyy` 或 `item:xxx+=yyy`的形式。即中间必须是+=符号。
+  - effect 为该选项的效果；effect必须是 `status:xxx+=yyy`, `item:xxx+=yyy`或`flag:xxx+=yyy`的形式。即中间必须是+=符号。
   - 如有多个effect（例如升级全属性提升），使用分号分开，参见经验商店的写法。
 
 像这样定义了全局商店后，即可在快捷栏中看到。

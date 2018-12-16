@@ -278,6 +278,8 @@ action
     |   playBgm_s
     |   pauseBgm_s
     |   resumeBgm_s
+    |   loadBgm_s
+    |   freeBgm_s
     |   playSound_s
     |   setVolume_s
     |   win_s
@@ -1282,6 +1284,32 @@ var code = '{"type": "resumeBgm"},\n';
 return code;
 */;
 
+loadBgm_s
+    :   '预加载背景音乐' EvalString Newline
+
+
+/* loadBgm_s
+tooltip : loadBgm: 预加载某个背景音乐，之后可以直接播放
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=playbgm%EF%BC%9A%E6%92%AD%E6%94%BE%E8%83%8C%E6%99%AF%E9%9F%B3%E4%B9%90
+default : ["bgm.mp3"]
+colour : this.soundColor
+var code = '{"type": "loadBgm", "name": "'+EvalString_0+'"},\n';
+return code;
+*/;
+
+freeBgm_s
+    :   '释放背景音乐的缓存' EvalString Newline
+
+
+/* freeBgm_s
+tooltip : freeBgm: 释放背景音乐的缓存
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=playbgm%EF%BC%9A%E6%92%AD%E6%94%BE%E8%83%8C%E6%99%AF%E9%9F%B3%E4%B9%90
+default : ["bgm.mp3"]
+colour : this.soundColor
+var code = '{"type": "freeBgm", "name": "'+EvalString_0+'"},\n';
+return code;
+*/;
+
 playSound_s
     :   '播放音效' EvalString Newline
     
@@ -2156,6 +2184,14 @@ ActionParser.prototype.parseAction = function() {
     case "resumeBgm":
       this.next = MotaActionBlocks['resumeBgm_s'].xmlText([
         this.next]);
+      break
+    case "loadBgm":
+      this.next = MotaActionBlocks['loadBgm_s'].xmlText([
+        data.name,this.next]);
+      break
+    case "freeBgm":
+      this.next = MotaActionBlocks['freeBgm_s'].xmlText([
+        data.name,this.next]);
       break
     case "setVolume":
       this.next = MotaActionBlocks['setVolume_s'].xmlText([

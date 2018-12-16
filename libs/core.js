@@ -58,6 +58,8 @@ function core() {
         'isPlaying': false,
         'gainNode': null,
         'volume': 1.0, // 音量
+        'cachedBgms': [], // 缓存BGM内容
+        'cachedBgmCount': 4, // 缓存的bgm数量
     }
     this.platform = {
         'isOnline': true, // 是否http
@@ -1403,6 +1405,16 @@ core.prototype.pauseBgm = function () {
 ////// 恢复背景音乐的播放 //////
 core.prototype.resumeBgm = function () {
     core.control.resumeBgm();
+}
+
+////// 预加载一个背景音乐 //////
+core.prototype.loadBgm = function (bgm) {
+    core.loader.loadBgm(bgm);
+}
+
+////// 手动释放一个背景音乐的缓存 //////
+core.prototype.freeBgm = function (bgm) {
+    core.loader.freeBgm(bgm);
 }
 
 ////// 播放音频 //////

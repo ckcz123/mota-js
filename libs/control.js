@@ -2606,6 +2606,8 @@ control.prototype.playBgm = function (bgm) {
     }
 
     try {
+        // 缓存BGM
+        core.loader.loadBgm(bgm);
         // 如果当前正在播放，且和本BGM相同，直接忽略
         if (core.musicStatus.playingBgm == bgm && core.musicStatus.isPlaying) {
             return;

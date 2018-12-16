@@ -901,6 +901,14 @@ events.prototype.doAction = function() {
             core.resumeBgm();
             this.doAction();
             break
+        case "loadBgm":
+            core.loadBgm(data.name);
+            this.doAction();
+            break;
+        case "freeBgm":
+            core.freeBgm(data.name);
+            this.doAction();
+            break;
         case "setVolume":
             data.value = core.clamp(parseInt(data.value)/100, 0, 1);
             core.setFlag("__volume__", data.value);

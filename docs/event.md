@@ -1217,6 +1217,20 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 
 使用`{"type": "resumeBgm"}`可以恢复背景音乐的播放。
 
+### loadBgm：预加载一个背景音乐
+
+使用loadBgm可以预加载一个背景音乐。
+
+使用方法：`{"type": "loadBgm", "name": "bgm.mp3"}`
+
+有关BGM播放的详细说明参见[背景音乐](element#背景音乐)
+
+### freeBgm：释放一个背景音乐的缓存
+
+使用freeBgm可以预加载一个背景音乐。
+
+使用方法：`{"type": "freeBgm", "name": "bgm.mp3"}`
+
 ### playSound：播放音效
 
 使用playSound可以立刻播放一个音效。

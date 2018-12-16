@@ -275,6 +275,9 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
     core.clearMap('all');
     core.clearMap('curtain');
 
+    // 重置音量
+    core.events.setVolume(1, 0);
+
     if (core.flags.startUsingCanvas) {
         core.dom.startTop.style.display = 'none';
         core.dom.startButtonGroup.style.display = 'block';
@@ -2534,6 +2537,9 @@ control.prototype.loadData = function (data, callback) {
         core.status.globalAttribute = toAttribute;
         core.control.updateGlobalAttribute(Object.keys(toAttribute));
     }
+
+    // 重置音量
+    core.events.setVolume(core.getFlag("__volume__", 1), 0);
 
     // load icons
     var icon = core.getFlag("heroIcon", "hero.png");

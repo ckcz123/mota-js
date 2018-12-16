@@ -324,6 +324,9 @@ maps.prototype.canMoveDirectly = function (destX,destY) {
     // 检查该楼层是否不可瞬间移动
     if (core.status.thisMap.cannotMoveDirectly) return -1;
 
+    // flag:cannotMoveDirectly为true：不能
+    if (core.hasFlag('cannotMoveDirectly')) return -1;
+
     // 中毒状态：不能
     if (core.hasFlag('poison')) return -1;
 

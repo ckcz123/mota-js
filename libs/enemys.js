@@ -211,7 +211,7 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
     }
     else { // 暴力for循环法
         pre = info.damage;
-        var per_add = Math.ceil(hero_atk / 5000);
+        var per_add = Math.ceil(hero_atk / (core.flags.loopStep||5000));
         if (per_add<0) per_add = 1;
         for (var atk=hero_atk+per_add;atk<=mon_hp+mon_def;atk+=per_add) {
             var nextInfo = this.getDamageInfo(enemy, core.status.hero.hp, atk, core.status.hero.def, core.status.hero.mdef, x, y, floorId);

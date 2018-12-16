@@ -430,8 +430,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (this.hasSpecial(mon_special, 3) && mon_def < hero_atk - 1) {
 		mon_def = hero_atk - 1;
 	}
-	
-	// 光环效果
+
+	// V2.5.3备注：
+	// 这一部分是检查光环代码的，需要对整个地图上的图块进行遍历，可能会造成不必要的性能的损耗，尤其是循环计算临界会变得非常慢。
+	// 因此默认注释掉此段代码以加快游戏运行速度。
+	// 如果游戏中有光环怪物存在，取消注释（或按需根据floorId加判定）即可。
+	/*
 	// 检查当前楼层所有光环怪物（数字25）
 	var hp_delta = 0, atk_delta = 0, def_delta = 0, cnt = 0;
 	// 遍历每个图块
@@ -455,6 +459,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	mon_hp *= (1+hp_delta/100);
 	mon_atk *= (1+atk_delta/100);
 	mon_def *= (1+def_delta/100);
+	*/
 	
 	// TODO：可以在这里新增其他的怪物数据变化
 	// 比如仿攻（怪物攻击不低于勇士攻击）：

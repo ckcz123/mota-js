@@ -902,15 +902,14 @@ events.prototype.doAction = function() {
             this.doAction();
             break
         case "setVolume":
-            data.value = parseInt(data.value||0);
-            if (data.value<0) data.value=0;
-            if (data.value>100) data.value=100;
+            data.value = core.clamp(parseInt(data.value)/100, 0, 1);
+            core.setFlag("__volume__", data.value);
             if (data.async) {
-                this.setVolume(data.value/100, data.time);
+                this.setVolume(data.value, data.time);
                 this.doAction();
             }
             else {
-                this.setVolume(data.value/100, data.time, function() {
+                this.setVolume(data.value, data.time, function() {
                     core.events.doAction();
                 });
             }

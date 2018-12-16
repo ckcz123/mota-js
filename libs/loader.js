@@ -272,12 +272,19 @@ loader.prototype.freeBgm = function (name) {
 
 loader.prototype.loadBgm = function (name) {
     if (!core.isset(core.material.bgms[name])) return;
-    // 预加载BGM
-    core.material.bgms[name].load();
-    // 移动到缓存最前方
-    core.musicStatus.cachedBgms = core.musicStatus.cachedBgms.filter(function (t) {return t!=name; });
-    core.musicStatus.cachedBgms.unshift(name);
-    if (core.musicStatus.cachedBgms.length > core.musicStatus.cachedBgmCount) {
-        this.freeBgm(core.musicStatus.cachedBgms.pop());
+    // 是否已经预加载过
+    var index = core.musicStatus.cachedBgms.indexOf(name);
+    if (index>=0) {
+        core.musicStatus.cachedBgms.splice(index, 1);
     }
+    else {
+        // 预加载BGM
+        core.material.bgms[name].load();
+        // 清理尾巴
+        if (core.musicStatus.cachedBgms.length == core.musicStatus.cachedBgmCount) {
+            this.freeBgm(core.musicStatus.cachedBgms.pop());
+        }
+    }
+    // 移动到缓存最前方
+    core.musicStatus.cachedBgms.unshift(name);
 }

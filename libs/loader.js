@@ -106,14 +106,10 @@ loader.prototype.loadImage = function (imgName, callback) {
         if (name.indexOf(".")<0)
             name=name+".png";
         var image = new Image();
-        image.src = 'project/images/' + name + "?v=" + main.version;
-        if (image.complete) {
-            callback(imgName, image);
-            return;
-        }
         image.onload = function () {
             callback(imgName, image);
         }
+        image.src = 'project/images/' + name + "?v=" + main.version;
     }
     catch (e) {
         console.log(e);
@@ -212,12 +208,7 @@ loader.prototype.loadMusic = function () {
             }
         }
         else {
-            var music = new Audio();
-            music.preload = 'none';
-            if (main.bgmRemote) music.src = main.bgmRemoteRoot+core.firstData.name+'/'+t;
-            else music.src = 'project/sounds/'+t;
-            music.loop = 'loop';
-            core.material.bgms[t] = music;
+            core.loader.loadOneMusic(t);
         }
     });
 
@@ -238,7 +229,7 @@ loader.prototype.loadMusic = function () {
                     console.log(ee);
                     core.material.sounds[t] = null;
                 }
-            }, function () {
+            }, function (e) {
                 console.log(e);
                 core.material.sounds[t] = null;
             }, null, 'arraybuffer');
@@ -254,4 +245,46 @@ loader.prototype.loadMusic = function () {
     // 直接开始播放
     if (core.musicStatus.startDirectly && core.bgms.length>0)
         core.playBgm(core.bgms[0]);
+}
+
+loader.prototype.loadOneMusic = function (name) {
+    var music = new Audio();
+    music.preload = 'none';
+    if (main.bgmRemote) music.src = main.bgmRemoteRoot+core.firstData.name+'/'+name;
+    else music.src = 'project/sounds/'+name;
+    music.loop = 'loop';
+    core.material.bgms[name] = music;
+}
+
+loader.prototype.freeBgm = function (name) {
+    if (!core.isset(core.material.bgms[name])) return;
+    // 从cachedBgms中删除
+    core.musicStatus.cachedBgms = core.musicStatus.cachedBgms.filter(function (t) {return t!=name; });
+    // 清掉缓存
+    core.material.bgms[name].removeAttribute("src");
+    core.material.bgms[name].load();
+    core.material.bgms[name] = null;
+    // 三秒后重新加载
+    setTimeout(function () {
+        core.loader.loadOneMusic(name);
+    }, 3000);
+}
+
+loader.prototype.loadBgm = function (name) {
+    if (!core.isset(core.material.bgms[name])) return;
+    // 是否已经预加载过
+    var index = core.musicStatus.cachedBgms.indexOf(name);
+    if (index>=0) {
+        core.musicStatus.cachedBgms.splice(index, 1);
+    }
+    else {
+        // 预加载BGM
+        core.material.bgms[name].load();
+        // 清理尾巴
+        if (core.musicStatus.cachedBgms.length == core.musicStatus.cachedBgmCount) {
+            this.freeBgm(core.musicStatus.cachedBgms.pop());
+        }
+    }
+    // 移动到缓存最前方
+    core.musicStatus.cachedBgms.unshift(name);
 }

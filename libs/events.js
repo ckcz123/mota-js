@@ -9,7 +9,11 @@ events.prototype.init = function () {
     this.eventdata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.events;
     this.events = {
         'battle': function (data, core, callback) {
-            //core.autosave(true);
+            // 正在执行自定义事件：不允许战斗
+            if (core.status.event.id == 'action') {
+                if (core.isset(callback)) callback();
+                return;
+            }
             core.battle(data.event.id, data.x, data.y);
             if (core.isset(callback))
                 callback();
@@ -20,13 +24,22 @@ events.prototype.init = function () {
                 callback();
         },
         'openDoor': function (data, core, callback) {
-            //core.autosave(true);
+            // 正在执行自定义事件：不允许开门
+            if (core.status.event.id == 'action') {
+                if (core.isset(callback)) callback();
+                return;
+            }
             core.openDoor(data.event.id, data.x, data.y, true, function () {
                 if (core.isset(callback)) callback();
                 core.replay();
             });
         },
         'changeFloor': function (data, core, callback) {
+            // 正在执行自定义事件：不允许切换楼层
+            if (core.status.event.id == 'action') {
+                if (core.isset(callback)) callback();
+                return;
+            }
             var heroLoc = {};
             if (core.isset(data.event.data.loc))
                 heroLoc = {'x': data.event.data.loc[0], 'y': data.event.data.loc[1]};
@@ -109,6 +122,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 
         core.clearMap('all');
         core.clearMap('curtain');
+        core.deleteAllCanvas();
         core.clearStatusBar();
 
         var post_start = function () {
@@ -117,7 +131,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 
             core.changeFloor(core.firstData.floorId, null, nowLoc, null, function() {
                 if (core.isset(callback)) callback();
-            }, true);
+            });
 
             setTimeout(function () {
                 // Upload
@@ -171,6 +185,8 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 
     }
 
+    if (main.mode!='play') return;
+
     if (core.flags.startUsingCanvas) {
         core.dom.startPanel.style.display = 'none';
         start();
@@ -210,8 +226,7 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
 
     // 清空图片和天气
     core.clearMap('animate');
-    core.clearMap('image');
-    core.clearMap('weather')
+    core.clearMap('weather');
     core.dom.gif2.innerHTML = "";
     core.animateFrame.weather.type = null;
     core.animateFrame.weather.level = 0;
@@ -344,7 +359,7 @@ events.prototype.doEvents = function (list, x, y, callback) {
     core.status.event = {'id': 'action', 'data': {
         'list': [
             {"todo": core.clone(list), "total": core.clone(list), "condition": "false"}
-        ], 'x': x, 'y': y, 'callback': callback, 'startTime': new Date().getTime()
+        ], 'x': x, 'y': y, 'callback': callback
     }}
 
     // 停止勇士
@@ -361,8 +376,7 @@ events.prototype.doAction = function() {
     clearInterval(core.status.event.interval);
     core.status.event.interval = null;
 
-    core.clearMap('ui');
-    core.setAlpha('ui', 1.0);
+    core.clearLastEvent();
 
     // 事件处理完毕
     if (core.status.event.data.list.length==0) {
@@ -418,6 +432,23 @@ events.prototype.doAction = function() {
                 setTimeout(function () {
                     core.events.doAction();
                 }, data.time || 3000);
+            }
+            break;
+        case "scrollText": // 滚动剧情文本
+            if (core.status.replay.replaying)
+                core.events.doAction();
+            else {
+                var content = core.replaceText(data.text);
+                var time = data.time || 5000;
+                if (data.async) {
+                    core.ui.drawScrollText(content, time);
+                    core.events.doAction();
+                }
+                else {
+                    core.ui.drawScrollText(content, time, function() {
+                        core.events.doAction();
+                    });
+                }
             }
             break;
         case "comment":
@@ -701,29 +732,54 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "showImage": // 显示图片
-            if (!core.isset(data.loc)) data.loc=[];
-            core.events.showImage(data.name, data.loc[0], data.loc[1]);
-            this.doAction();
-            break;
-        case "animateImage": // 淡入淡出图片
-            if (core.status.replay.replaying) { // 正在播放录像
+            if (!core.isset(data.loc)) data.loc=[0, 0];
+            if (core.status.replay.replaying) {
+                data.time = 0;
+            }
+            var image = core.material.images.images[data.image];
+            if (!core.isset(image)) {
+                this.doAction();
+                break;
+            }
+            if (data.async || data.time == 0) {
+                core.events.showImage(data.code, image, data.loc[0], data.loc[1], data.dw, data.dh, data.opacity, data.time);
                 this.doAction();
             }
             else {
-                if (core.isset(data.loc) && core.isset(core.material.images.images[data.name]) && (data.action=="show" || data.action=="hide")) {
-                    if (data.async) {
-                        core.events.animateImage(data.action, core.material.images.images[data.name], data.loc, data.time, data.keep);
-                        this.doAction();
-                    }
-                    else {
-                        core.events.animateImage(data.action, core.material.images.images[data.name], data.loc, data.time, data.keep, function() {
-                            core.events.doAction();
-                        });
-                    }
-                }
-                else {
-                    this.doAction();
-                }
+                core.events.showImage(data.code, image, data.loc[0], data.loc[1], data.dw, data.dh, data.opacity, data.time, function () {
+                    core.events.doAction();
+                });
+            }
+            break;
+        case "showTextImage": // 显示图片化文本
+            if (!core.isset(data.loc)) data.loc=[0, 0];
+            if (core.status.replay.replaying) {
+                data.time = 0;
+            }
+            var content = core.replaceText(data.text);
+            var image = core.events.textImage(content);
+            if (data.async || data.time == 0) {
+                core.events.showImage(data.code, image, data.loc[0], data.loc[1], 100, 100, data.opacity, data.time);
+                this.doAction();
+            }
+            else {
+                core.events.showImage(data.code, image, data.loc[0], data.loc[1], 100, 100, data.opacity, data.time, function() {
+                    core.events.doAction();
+                });
+            }
+            break;
+        case "hideImage": // 隐藏图片
+            if (core.status.replay.replaying) {
+                data.time = 0;
+            }
+            if (data.async || data.time == 0) {
+                core.events.hideImage(data.code, data.time);
+                this.doAction();
+            }
+            else {
+                core.events.hideImage(data.code, data.time, function () {
+                    core.events.doAction();
+                });
             }
             break;
         case "showGif": // 显示动图
@@ -747,19 +803,14 @@ events.prototype.doAction = function() {
                 this.doAction();
             }
             else {
-                if (core.isset(data.from) && core.isset(data.to) && core.isset(core.material.images.images[data.name])) {
-                    if (data.async) {
-                        core.events.moveImage(core.material.images.images[data.name], data.from, data.to, data.time, data.keep);
-                        this.doAction();
-                    }
-                    else {
-                        core.events.moveImage(core.material.images.images[data.name], data.from, data.to, data.time, data.keep, function() {
-                            core.events.doAction();
-                        });
-                    }
+                if (data.async) {
+                    core.events.moveImage(data.code, data.to, data.opacity, data.time);
+                    this.doAction();
                 }
                 else {
-                    this.doAction();
+                    core.events.moveImage(data.code, data.to, data.opacity, data.time, function() {
+                        core.events.doAction();
+                    });
                 }
             }
             break;
@@ -864,16 +915,23 @@ events.prototype.doAction = function() {
             core.resumeBgm();
             this.doAction();
             break
+        case "loadBgm":
+            core.loadBgm(data.name);
+            this.doAction();
+            break;
+        case "freeBgm":
+            core.freeBgm(data.name);
+            this.doAction();
+            break;
         case "setVolume":
-            data.value = parseInt(data.value||0);
-            if (data.value<0) data.value=0;
-            if (data.value>100) data.value=100;
+            data.value = core.clamp(parseInt(data.value)/100, 0, 1);
+            core.setFlag("__volume__", data.value);
             if (data.async) {
-                this.setVolume(data.value/100, data.time);
+                this.setVolume(data.value, data.time);
                 this.doAction();
             }
             else {
-                this.setVolume(data.value/100, data.time, function() {
+                this.setVolume(data.value, data.time, function() {
                     core.events.doAction();
                 });
             }
@@ -916,6 +974,11 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "setGlobalAttribute":
+            if (typeof data.value == 'string') {
+                if ((data.value.charAt(0)=='"' && data.value.charAt(data.value.length-1)=='"')
+                    || (data.value.charAt(0)=="'" && data.value.charAt(data.value.length-1)=="'"))
+                    data.value = data.value.substring(1, data.value.length-1);
+            }
             core.status.globalAttribute[data.name] = data.value;
             core.control.updateGlobalAttribute(data.name);
             core.setFlag('globalAttribute', core.status.globalAttribute);
@@ -1053,14 +1116,19 @@ events.prototype.doAction = function() {
         case "function":
             {
                 var func = data["function"];
-                if (core.isset(func)) {
-                    if ((typeof func == "string") && func.indexOf("function")==0) {
-                        eval('('+func+')()');
+                try {
+                    if (core.isset(func)) {
+                        if ((typeof func == "string") && func.indexOf("function")==0) {
+                            eval('('+func+')()');
+                        }
+                        else if (func instanceof Function)
+                            func();
                     }
-                    else if (func instanceof Function)
-                        func();
+                } catch (e) {
+                    console.log(e);
                 }
-                this.doAction();
+                if (!data.async)
+                    this.doAction();
                 break;
             }
         case "update":
@@ -1072,7 +1140,7 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "hideStatusBar":
-            core.control.triggerStatusBar("hide");
+            core.control.triggerStatusBar("hide", data.toolbox);
             this.doAction();
             break;
         case "updateEnemys":
@@ -1092,13 +1160,9 @@ events.prototype.doAction = function() {
             }
             break;
         case "sleep": // 等待多少毫秒
-            if (core.status.replay.replaying)
+            setTimeout(function() {
                 core.events.doAction();
-            else {
-                setTimeout(function () {
-                    core.events.doAction();
-                }, data.time);
-            }
+            }, core.status.replay.replaying?20:data.time);
             break;
         case "wait":
             if (core.status.replay.replaying) {
@@ -1160,6 +1224,8 @@ events.prototype.doAction = function() {
 
 ////// 往当前事件列表之前添加一个或多个事件 //////
 events.prototype.insertAction = function (action, x, y, callback) {
+    if (core.hasFlag("__statistics__")) return;
+
     if (core.status.event.id != 'action') {
         this.doEvents(action, x, y, callback);
     }
@@ -1384,10 +1450,12 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
         if (index<core.floorIds.length-1) floorId = core.floorIds[index+1];
         else floorId=core.status.floorId;
     }
+    if (main.mode!='play') time = 0;
+    if (!core.isset(time)) time = core.values.floorChangeTime;
+    if (!core.isset(time)) time = 800;
 
-    var displayAnimate=(!core.isset(time) || time>=100) && !core.status.replay.replaying;
+    var displayAnimate = time>=100 && !core.status.replay.replaying;
 
-    time = time || 800;
     time /= 20;
     core.lockControl();
     core.stopHero();
@@ -1514,91 +1582,150 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
     }, 25);
 }
 
-////// 绘制图片 //////
-events.prototype.showImage = function (name, x, y) {
-    if (core.isset(name) && core.isset(x) && core.isset(y) && core.isset(core.material.images.images[name])) {
-        core.canvas.image.drawImage(core.material.images.images[name], x, y);
+////// 显示图片 //////
+events.prototype.showImage = function (code, image, x, y, dw, dh, opacityVal, time, callback) {
+    dw /= 100;
+    dh /= 100;
+    x = core.calValue(x) || 0;
+    y = core.calValue(y) || 0;
+    var zIndex = code + 100;
+    time = time || 0;
+    var name = "image"+ zIndex;
+    if (core.findCanvas(name) != -1) {
+        core.relocateCanvas(name, x, y);
+        core.resizeCanvas(name, image.width * dw, image.height * dh);
+        core.dymCanvas[name].style.zIndex = zIndex;
     }
-    else core.clearMap('image');
+    else
+        core.createCanvas(name, x, y, image.width * dw, image.height * dh, zIndex);
+
+    core.dymCanvas[name].drawImage(image, 0, 0, image.width * dw, image.height * dh);
+    if (time == 0)
+        core.setOpacity(name, opacityVal);
+    else {
+        var per_time = 10, steps = parseInt(time / per_time), per_add = opacityVal / steps;
+        var opacity = 0;
+        core.setOpacity(name, 0);
+        var animate = setInterval(function () {
+            opacity += per_add;
+            core.setOpacity(name, opacity);
+            if (opacity >= opacityVal) {
+                delete core.animateFrame.asyncId[animate];
+                clearInterval(animate);
+                core.setOpacity(name, opacityVal);
+                if (core.isset(callback)) callback();
+            }
+        }, per_time);
+
+        core.animateFrame.asyncId[animate] = true;
+    }
 }
 
-////// 图片淡入/淡出 //////
-events.prototype.animateImage = function (type, image, loc, time, keep, callback) {
-    time = time||0;
-    if ((type!='show' && type!='hide') || time<=0) {
+////// 隐藏图片 //////
+events.prototype.hideImage = function (code, time, callback) {
+    time = time || 0;
+    var name = "image"+ (code+100);
+    if (!core.isset(core.dymCanvas[name])) {
+        console.log(code+"号图片不存在")
         if (core.isset(callback)) callback();
         return;
     }
+    if (time == 0)
+        core.deleteCanvas(name);
+    else {
+        var opacityVal = parseFloat(core.dymCanvas[name].canvas.style.opacity);
+        var per_time = 10, steps = parseInt(time / per_time), per_add = opacityVal / steps;
+        var animate = setInterval(function () {
+            opacityVal -= per_add;
+            core.setOpacity(name, opacityVal);
+            if (opacityVal < 0) {
+                delete core.animateFrame.asyncId[animate];
+                clearInterval(animate);
+                core.deleteCanvas(name);
+                if (core.isset(callback)) callback();
+            }
+        }, per_time);
 
-    clearInterval(core.interval.tipAnimate);
-
-    var alpha = 0;
-    if (type == 'hide') alpha = 1;
-
-    var x = core.calValue(loc[0]), y = core.calValue(loc[1]);
-
-    if (type == 'hide' && keep) {
-        core.clearMap('image', x, y, image.width, image.height);
+        core.animateFrame.asyncId[animate] = true;
     }
-    core.setAlpha('data', alpha);
-    core.canvas.data.drawImage(image, x, y);
-    core.setAlpha('data', 1);
+}
 
-    // core.status.replay.animate=true;
-    var animate = setInterval(function () {
-        if (type=='show') alpha += 0.1;
-        else alpha -= 0.1;
-        core.clearMap('data', x, y, image.width, image.height);
-        if (alpha >=1 || alpha<=0) {
-            delete core.animateFrame.asyncId[animate];
-            clearInterval(animate);
-            if (type == 'show' && keep)
-                core.canvas.image.drawImage(image, x, y);
-            core.setAlpha('data', 1);
-            if (core.isset(callback)) callback();
-        }
-        else {
-            core.setAlpha('data', alpha);
-            core.canvas.data.drawImage(image, x, y);
-            core.setAlpha('data', 1);
-        }
-    }, time / 10);
+////// 文本图片化 //////
+events.prototype.textImage = function (content) {
+    content = content || "";
 
-    core.animateFrame.asyncId[animate] = true;
+    // 获得颜色的盒子等信息
+    var textAttribute = core.status.textAttribute || core.initStatus.textAttribute;
+    var textfont = textAttribute.textfont || 16;
+    var offset = textAttribute.offset || 15;
+    var textColor = core.arrayToRGBA(textAttribute.text);
+
+    var font = textfont+"px "+core.status.globalAttribute.font;
+    if (textAttribute.bold) font = "bold "+font;
+    var contents = core.splitLines('ui', content), lines = contents.length;
+
+    // 计算总高度，按1.4倍行距计算
+    var width = 416, height = textfont * 1.4 * lines;
+    var tempCanvas = core.bigmap.tempCanvas;
+    tempCanvas.canvas.width = width;
+    tempCanvas.canvas.height = height;
+    tempCanvas.clearRect(0, 0, width, height);
+    tempCanvas.font = font;
+    tempCanvas.fillStyle = textColor;
+
+    // 全部绘制
+    var currH = textfont;
+    for (var i = 0; i < lines; ++i) {
+        var text = contents[i];
+        tempCanvas.fillText(text, offset, currH);
+        currH += 1.4 * textfont;
+    }
+    
+    return tempCanvas.canvas;
 }
 
 ////// 移动图片 //////
-events.prototype.moveImage = function (image, from, to, time, keep, callback) {
+events.prototype.moveImage = function (code, to, opacityVal, time, callback) {
     time = time || 1000;
-    clearInterval(core.interval.tipAnimate);
-    core.setAlpha('data', 1);
 
-    var width = image.width, height = image.height;
+    var name = "image"+ (code+100), index = core.findCanvas(name);
+    if (index == -1) {
+        console.log(code+"号图片不存在")
+        if (core.isset(callback)) callback();
+        return;
+    }
+    var fromX = core.dymCanvas._list[index].style.left,
+        fromY = core.dymCanvas._list[index].style.top,
+        preX = fromX, preY = fromY, toX = fromX, toY = fromY;
 
-    // core.status.replay.animate=true;
-    var fromX = core.calValue(from[0]), fromY = core.calValue(from[1]),
-        toX = core.calValue(to[0]), toY = core.calValue(to[1]);
-
-    if (keep) core.clearMap('image', fromX, fromY, width, height);
-
-    var step = 0, preX = fromX, preY = fromY;
-    var per_time = 10, steps = parseInt(time / per_time);
-    var drawImage = function () {
-        preX = parseInt(fromX + (toX-fromX)*step/steps);
-        preY = parseInt(fromY + (toY-fromY)*step/steps);
-        core.canvas.data.drawImage(image, preX, preY);
+    if (core.isset(to)) {
+        toX = core.calValue(to[0]) || toX;
+        toY = core.calValue(to[1]) || toY;
     }
 
-    drawImage();
+    var step = 0;
+    var per_time = 10, steps = parseInt(time / per_time);
+    var preOpac = parseFloat(core.dymCanvas[name].canvas.style.opacity), opacStep = 0;
+    if (core.isset(opacityVal)) {
+        opacityVal = core.calValue(opacityVal);
+        opacStep = (opacityVal - preOpac) / steps;
+    }
+    
+    var moveStep = function () {
+        preOpac += opacStep;
+        core.setOpacity(name, preOpac);
+        preX = parseInt(fromX + (toX-fromX)*step/steps);
+        preY = parseInt(fromY + (toY-fromY)*step/steps);
+        core.relocateCanvas(name, preX, preY);
+    }
     var animate = setInterval(function () {
-        core.clearMap('data', preX, preY, width, height);
         step++;
-        if (step <= steps)
-            drawImage();
-        else {
+        moveStep();
+        if (step > steps) {
+            if (core.isset(opacityVal))
+                core.setOpacity(name, opacityVal);
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
-            if (keep) core.canvas.image.drawImage(image, toX, toY);
             if (core.isset(callback)) callback();
         }
     }, per_time);
@@ -1622,21 +1749,20 @@ events.prototype.setVolume = function (value, time, callback) {
         if (core.isset(callback)) callback();
         return;
     }
-    // core.status.replay.animate=true;
+
     var currVolume = core.musicStatus.volume;
-    var step = 0;
+    var per_time = 10, step = 0, steps = parseInt(time / per_time);
     var fade = setInterval(function () {
         step++;
-        var nowVolume = currVolume+(value-currVolume)*step/32;
+        var nowVolume = currVolume+(value-currVolume)*step/steps;
         set(nowVolume);
-        if (step>=32) {
+        if (step>=steps) {
             delete core.animateFrame.asyncId[fade];
             clearInterval(fade);
-            // core.status.replay.animate=false;
             if (core.isset(callback))
                 callback();
         }
-    }, time / 32);
+    }, per_time);
 
     core.animateFrame.asyncId[fade] = true;
 }
@@ -1743,20 +1869,18 @@ events.prototype.openShop = function(shopId, needVisited) {
 
     // 拼词
     var content = "\t["+shop.name+","+shop.icon+"]";
-    var times = shop.times, need=eval(shop.need);
+    var times = shop.times, need=core.calValue(shop.need, null, times);
 
-    content = content + shop.text.replace(/\${([^}]+)}/g, function (word, value) {
-        return eval(value);
-    });
+    content += core.replaceText(shop.text, need, times);
 
     var use = shop.use=='experience'?'经验':'金币';
 
     var choices = [];
     for (var i=0;i<shop.choices.length;i++) {
         var choice = shop.choices[i];
-        var text = choice.text;
+        var text = core.replaceText(choice.text, need, times);
         if (core.isset(choice.need))
-            text += "（"+eval(choice.need)+use+"）";
+            text += "（"+core.calValue(choice.need, null, times)+use+"）";
         choices.push({"text": text, "color":shop.visited?null:"#999999"});
     }
     choices.push("离开");
@@ -1788,17 +1912,28 @@ events.prototype.setHeroIcon = function (name, noDraw) {
 
 ////// 检查升级事件 //////
 events.prototype.checkLvUp = function () {
-    if (!core.flags.enableLevelUp || !core.isset(core.firstData.levelUp)
-        || core.status.hero.lv>=core.firstData.levelUp.length) return;
-    // 计算下一个所需要的数值
-    var need=core.calValue((core.firstData.levelUp[core.status.hero.lv]||{}).need);
-    if (!core.isset(need)) return;
-    if (core.status.hero.experience>=need) {
-        // 升级
-        core.status.hero.lv++;
-        core.insertAction(core.firstData.levelUp[core.status.hero.lv-1].action);
-        this.checkLvUp();
+    var check = function () {
+        if (!core.flags.enableLevelUp || !core.isset(core.firstData.levelUp)
+            || core.status.hero.lv>=core.firstData.levelUp.length) return null;
+        // 计算下一个所需要的数值
+        var next = (core.firstData.levelUp[core.status.hero.lv]||{});
+        var need = core.calValue(next.need);
+        if (!core.isset(need)) return null;
+        if (core.status.hero.experience>=need) {
+            // 升级
+            core.status.hero.lv++;
+            if (next.clear) core.status.hero.experience -= need;
+            return next.action||[];
+        }
+        return null;
     }
+    var actions = [];
+    while (true) {
+        var next = check();
+        if (next == null) break;
+        actions = actions.concat(next);
+    }
+    if (actions.length>0) core.insertAction(actions);
 }
 
 ////// 尝试使用道具 //////
@@ -1870,13 +2005,14 @@ events.prototype.passNet = function (data) {
     if (data.event.id=='weakNet') { // 衰网
         if (core.hasFlag('weak')) return;
         core.setFlag('weak', true);
-        var weakValue = core.values.weakValue;
-        var weakAtk = weakValue>=1?weakValue:Math.floor(weakValue*core.status.hero.atk);
-        var weakDef = weakValue>=1?weakValue:Math.floor(weakValue*core.status.hero.def);
-        core.setFlag('weakAtk', weakAtk);
-        core.setFlag('weakDef', weakDef);
-        core.status.hero.atk-=weakAtk;
-        core.status.hero.def-=weakDef;
+        if (core.values.weakValue>=1) { // >=1：直接扣数值
+            core.status.hero.atk -= core.values.weakValue;
+            core.status.hero.def -= core.values.weakValue;
+        }
+        else { // <1：扣比例
+            core.setFlag("equip_atk_buff", core.getFlag("equip_atk_buff", 1) - core.values.weakValue);
+            core.setFlag("equip_def_buff", core.getFlag("equip_def_buff", 1) - core.values.weakValue);
+        }
     }
     if (data.event.id=='curseNet') { // 咒网
         if (core.hasFlag('curse')) return;

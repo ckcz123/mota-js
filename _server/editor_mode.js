@@ -206,7 +206,7 @@ editor_mode = function (editor) {
                         throw(objs_.slice(-1)[0])
                     }
                     ;printf('修改成功');
-                    editor.drawEventBlock();
+                    editor.drawPosSelection();
                 });
                 break;
             case 'enemyitem':
@@ -286,6 +286,8 @@ editor_mode = function (editor) {
             editor_mode.dom[name].style = 'z-index:-1;opacity: 0;';
         }
         editor_mode.dom[mode].style = '';
+        // clear
+        editor.drawEventBlock();
         if (editor_mode[mode]) editor_mode[mode]();
         document.getElementById('editModeSelect').value = mode;
         var tips = tip_in_showMode;
@@ -307,7 +309,7 @@ editor_mode = function (editor) {
         var tableinfo = editor_mode.objToTable_(objs[0], objs[1]);
         document.getElementById('table_3d846fc4_7644_44d1_aa04_433d266a73df').innerHTML = tableinfo.HTML;
         tableinfo.listen(tableinfo.guids);
-
+        editor.drawPosSelection();
         if (Boolean(callback)) callback();
     }
 
@@ -585,19 +587,33 @@ editor_mode = function (editor) {
             tempCanvas.imageSmoothingEnabled = false;
             tempCanvas.drawImage(image, 0, 0);
             var imgData = tempCanvas.getImageData(0, 0, image.width, image.height);
-            var trans = 0, white = 0;
+            var trans = 0, white = 0, black=0;
             for (var i=0;i<image.width;i++) {
                 for (var j=0;j<image.height;j++) {
                     var pixel = getPixel(imgData, i, j);
                     if (pixel[3]==0) trans++;
                     if (pixel[0]==255 && pixel[1]==255 && pixel[2]==255 && pixel[3]==255) white++;
+                    if (pixel[0]==0 && pixel[1]==0 && pixel[2]==0 && pixel[3]==255) black++;
                 }
             }
-            if (white>trans*10 && confirm("看起来这张图片是以白色为底色，是否自动调整为透明底色？")) {
+            if (white>black && white>trans*10 && confirm("看起来这张图片是以纯白为底色，是否自动调整为透明底色？")) {
                 for (var i=0;i<image.width;i++) {
                     for (var j=0;j<image.height;j++) {
                         var pixel = getPixel(imgData, i, j);
                         if (pixel[0]==255 && pixel[1]==255 && pixel[2]==255 && pixel[3]==255) {
+                            setPixel(imgData, i, j, [0,0,0,0]);
+                        }
+                    }
+                }
+                tempCanvas.clearRect(0, 0, image.width, image.height);
+                tempCanvas.putImageData(imgData, 0, 0);
+                changed = true;
+            }
+            if (black>white && black>trans*10 && confirm("看起来这张图片是以纯黑为底色，是否自动调整为透明底色？")) {
+                for (var i=0;i<image.width;i++) {
+                    for (var j=0;j<image.height;j++) {
+                        var pixel = getPixel(imgData, i, j);
+                        if (pixel[0]==0 && pixel[1]==0 && pixel[2]==0 && pixel[3]==255) {
                             setPixel(imgData, i, j, [0,0,0,0]);
                         }
                     }
@@ -649,10 +665,6 @@ editor_mode = function (editor) {
                         callback(image);
                     }
                     image.src = content;
-                    if (image.complete) {
-                        callback(image);
-                        return;
-                    }
                 }
                 catch (e) {
                     printe(e);

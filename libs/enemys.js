@@ -127,6 +127,38 @@ enemys.prototype.getExtraDamage = function (enemy) {
     return extra_damage;
 }
 
+enemys.prototype.getDamageString = function (enemy, x, y) {
+    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
+    var damage = core.enemys.getDamage(enemy, x, y);
+
+    var color = '#000000';
+
+    if (damage == null) {
+        damage = "???";
+        color = '#FF0000';
+    }
+    else {
+        if (damage <= 0) color = '#00FF00';
+        else if (damage < core.status.hero.hp / 3) color = '#FFFFFF';
+        else if (damage < core.status.hero.hp * 2 / 3) color = '#FFFF00';
+        else if (damage < core.status.hero.hp) color = '#FF7F00';
+        else color = '#FF0000';
+
+        damage = core.formatBigNumber(damage, true);
+        if (core.enemys.hasSpecial(enemy, 19))
+            damage += "+";
+        if (core.enemys.hasSpecial(enemy, 21))
+            damage += "-";
+        if (core.enemys.hasSpecial(enemy, 11))
+            damage += "^";
+    }
+
+    return {
+        "damage": damage,
+        "color": color
+    };
+}
+
 ////// 接下来N个临界值和临界减伤计算 //////
 enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
@@ -164,9 +196,7 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
         for (var t = turn-1;t>=1;t--) {
             var nextAtk = Math.ceil(mon_hp/t) + mon_def;
             // 装备提升比例的计算临界
-            if (core.flags.equipPercentage) {
-                nextAtk = Math.ceil(nextAtk / core.getFlag('equip_atk_buff', 1));
-            }
+            nextAtk = Math.ceil(nextAtk / core.getFlag('equip_atk_buff', 1));
             if (nextAtk<=hero_atk) break;
             if (nextAtk!=pre) {
                 var nextInfo = this.getDamageInfo(enemy, core.status.hero.hp, nextAtk, core.status.hero.def, core.status.hero.mdef, x, y, floorId);
@@ -181,7 +211,9 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
     }
     else { // 暴力for循环法
         pre = info.damage;
-        for (var atk=hero_atk+1;atk<=mon_hp+mon_def;atk++) {
+        var per_add = Math.ceil(hero_atk / (core.flags.loopStep||5000));
+        if (per_add<0) per_add = 1;
+        for (var atk=hero_atk+per_add;atk<=mon_hp+mon_def;atk+=per_add) {
             var nextInfo = this.getDamageInfo(enemy, core.status.hero.hp, atk, core.status.hero.def, core.status.hero.mdef, x, y, floorId);
             if (nextInfo==null) break;
             if (pre>nextInfo.damage) {
@@ -257,11 +289,10 @@ enemys.prototype.getCurrentEnemys = function (floorId) {
             var mon_hp = enemy.hp, mon_atk = enemy.atk, mon_def = enemy.def;
             var hero_atk = core.status.hero.atk, hero_def = core.status.hero.def, hero_mdef = core.status.hero.mdef;
 
-            if (core.flags.equipPercentage) {
-                hero_atk = Math.floor(core.getFlag('equip_atk_buff',1)*hero_atk);
-                hero_def = Math.floor(core.getFlag('equip_def_buff',1)*hero_def);
-                hero_mdef = Math.floor(core.getFlag('equip_mdef_buff',1)*hero_mdef);
-            }
+            hero_atk = Math.floor(core.getFlag('equip_atk_buff',1)*hero_atk);
+            hero_def = Math.floor(core.getFlag('equip_def_buff',1)*hero_def);
+            hero_mdef = Math.floor(core.getFlag('equip_mdef_buff',1)*hero_mdef);
+
             var enemyInfo = this.getEnemyInfo(enemy, core.status.hero.hp, hero_atk, hero_def, hero_mdef, null, null, floorId);
 
             var specialText = core.enemys.getSpecialText(enemyId);

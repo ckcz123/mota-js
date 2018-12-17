@@ -39,14 +39,14 @@ utils.prototype.init = function () {
 }
 
 ////// 将文字中的${和}（表达式）进行替换 //////
-utils.prototype.replaceText = function (text) {
+utils.prototype.replaceText = function (text, need, times) {
     return text.replace(/\${(.*?)}/g, function (word, value) {
-        return core.calValue(value);
+        return core.calValue(value, need, times);
     });
 }
 
 ////// 计算表达式的值 //////
-utils.prototype.calValue = function (value) {
+utils.prototype.calValue = function (value, need, times) {
     if (!core.isset(value)) return value;
     if (typeof value == 'number') {
         return value;
@@ -297,14 +297,14 @@ utils.prototype.setTwoDigits = function (x) {
     return parseInt(x)<10?"0"+x:x;
 }
 
-utils.prototype.formatBigNumber = function (x) {
+utils.prototype.formatBigNumber = function (x, onMap) {
     x = Math.floor(parseFloat(x));
     if (!core.isset(x)) return '???';
 
     var c = x<0?"-":"";
     x = Math.abs(x);
 
-    if (x<=999999) return c + x;
+    if (x<=99999 || (!onMap && x<=999999)) return c + x;
 
     var all = [
         {"val": 1e20, "c": "g"},
@@ -316,9 +316,17 @@ utils.prototype.formatBigNumber = function (x) {
 
     for (var i=0;i<all.length;i++) {
         var one = all[i];
-        if (x>=10*one.val) {
-            var v = x/one.val;
-            return c + v.toFixed(Math.max(0, Math.floor(4-Math.log10(v+1)))) + one.c;
+        if (onMap) {
+            if (x>=one.val) {
+                var v = x/one.val;
+                return c + v.toFixed(Math.max(0, Math.floor(3-Math.log10(v+1)))) + one.c;
+            }
+        }
+        else {
+            if (x>=10*one.val) {
+                var v = x/one.val;
+                return c + v.toFixed(Math.max(0, Math.floor(4-Math.log10(v+1)))) + one.c;
+            }
         }
     }
 
@@ -735,14 +743,10 @@ utils.prototype.copy = function (data) {
 
 ////// 动画显示某对象 //////
 utils.prototype.show = function (obj, speed, callback) {
-    if (!core.isset(speed)) {
-        obj.style.display = 'block';
-        return;
-    }
     obj.style.display = 'block';
-    if (main.mode!='play'){
+    if (!core.isset(speed) && main.mode!='play') {
         obj.style.opacity = 1;
-        if (core.isset(callback)) {callback();}
+        if (core.isset(callback)) callback();
         return;
     }
     obj.style.opacity = 0;
@@ -761,15 +765,12 @@ utils.prototype.show = function (obj, speed, callback) {
 
 ////// 动画使某对象消失 //////
 utils.prototype.hide = function (obj, speed, callback) {
-    if (!core.isset(speed)) {
+    if (!core.isset(speed) || main.mode!='play'){
         obj.style.display = 'none';
+        if (core.isset(callback)) callback();
         return;
     }
-    if (main.mode!='play'){
-        obj.style.display = 'none';
-        if (core.isset(callback)) {callback();}
-        return;
-    }
+    obj.style.opacity = 1;
     var opacityVal = 1;
     var hideAnimate = window.setInterval(function () {
         opacityVal -= 0.03;
@@ -812,6 +813,12 @@ utils.prototype.encodeCanvas = function (ctx) {
 
 ////// 解析arr数组，并绘制到tempCanvas上 //////
 utils.prototype.decodeCanvas = function (arr, width, height) {
+    // 清空tempCanvas
+    var tempCanvas = core.bigmap.tempCanvas;
+    tempCanvas.canvas.width=width;
+    tempCanvas.canvas.height=height;
+    tempCanvas.clearRect(0, 0, width, height);
+
     if (!core.isset(arr)) return null;
     // to byte array
     var curr = 0, list = [];
@@ -819,11 +826,6 @@ utils.prototype.decodeCanvas = function (arr, width, height) {
         for (var i=0;i<x;i++) list.push(curr);
         curr = 1-curr;
     })
-    // 使用tempCanvas
-    var tempCanvas = core.bigmap.tempCanvas;
-    tempCanvas.canvas.width=width;
-    tempCanvas.canvas.height=height;
-    tempCanvas.clearRect(0, 0, width, height);
 
     var imgData = tempCanvas.getImageData(0, 0, width, height);
     for (var i=0;i<imgData.data.length;i+=4) {
@@ -837,6 +839,7 @@ utils.prototype.decodeCanvas = function (arr, width, height) {
 }
 
 utils.prototype.consoleOpened = function () {
+    if (!core.flags.checkConsole) return false;
     if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized)
         return true;
     var threshold = 160;

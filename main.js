@@ -2,7 +2,7 @@ function main() {
 
     //------------------------ 用户修改内容 ------------------------//
 
-    this.version = "2.5.2"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+    this.version = "2.5.3"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
     this.useCompress = false; // 是否使用压缩文件
     // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
@@ -55,16 +55,20 @@ function main() {
         'nameCol': document.getElementById('nameCol'),
         'lvCol': document.getElementById('lvCol'),
         'hpmaxCol': document.getElementById('hpmaxCol'),
+        'hpCol': document.getElementById('hpCol'),
         'manaCol': document.getElementById('manaCol'),
+        'atkCol': document.getElementById('atkCol'),
+        'defCol': document.getElementById('defCol'),
         'mdefCol': document.getElementById('mdefCol'),
         'moneyCol': document.getElementById('moneyCol'),
-        'expCol': document.getElementById('expCol'),
+        'experienceCol': document.getElementById('experienceCol'),
         'upCol': document.getElementById('upCol'),
         'keyCol': document.getElementById('keyCol'),
         'pzfCol': document.getElementById('pzfCol'),
         'debuffCol': document.getElementById('debuffCol'),
         'skillCol': document.getElementById('skillCol'),
         'hard': document.getElementById('hard'),
+        'statusCanvas': document.getElementById('statusCanvas'),
     };
     this.mode = 'play';
     this.loadList = [

@@ -197,7 +197,12 @@ editor.prototype.fetchMapFromCore = function(){
     var mapArray = core.maps.save(core.status.maps, core.status.floorId);
     editor.map = mapArray.map(function (v) {
         return v.map(function (v) {
-            return editor.ids[[editor.indexs[parseInt(v)][0]]]
+            var x = parseInt(v), y = editor.indexs[x];
+            if (!core.isset(y)) {
+                printe("素材数字"+x+"未定义。是不是忘了注册，或者接档时没有覆盖icons.js和maps.js？");
+                y = [0];
+            }
+            return editor.ids[y[0]]
         })
     });
     editor.currentFloorId = core.status.floorId;
@@ -210,7 +215,12 @@ editor.prototype.fetchMapFromCore = function(){
         }
         editor[name]=mapArray.map(function (v) {
             return v.map(function (v) {
-                return editor.ids[[editor.indexs[parseInt(v)][0]]]
+                var x = parseInt(v), y = editor.indexs[x];
+                if (!core.isset(y)) {
+                    printe("素材数字"+x+"未定义。是不是忘了注册，或者接档时没有覆盖icons.js和maps.js？");
+                    y = [0];
+                }
+                return editor.ids[y[0]]
             })
         });
     }
@@ -225,6 +235,7 @@ editor.prototype.changeFloor = function (floorId, callback) {
         });
         editor.currentFloorData[name]=mapArray;
     }
+    editor.preMapData = null;
     core.changeFloor(floorId, null, {"x": 0, "y": 0, "direction": "up"}, null, function () {
         core.bigmap.offsetX=0;
         core.bigmap.offsetY=0;
@@ -275,12 +286,27 @@ editor.prototype.drawEventBlock = function () {
     }
 }
 
+editor.prototype.drawPosSelection = function () {
+    this.drawEventBlock();
+    var fg=document.getElementById('efg').getContext('2d');
+    fg.strokeStyle = 'rgba(255,255,255,0.7)';
+    fg.lineWidth = 4;
+    fg.strokeRect(32*editor.pos.x - core.bigmap.offsetX + 4, 32*editor.pos.y - core.bigmap.offsetY + 4, 24, 24);
+}
+
 editor.prototype.updateMap = function () {
+    var evs = {};
+    if (editor.currentFloorData && editor.currentFloorData.events) {
+        for (var loc in editor.currentFloorData.events) {
+            if ((editor.currentFloorData.events[loc]||{}).animate == false)
+                evs[loc] = {"animate": false};
+        }
+    }
     var blocks = main.editor.mapIntoBlocks(editor.map.map(function (v) {
         return v.map(function (v) {
             return v.idnum || v || 0
         })
-    }), {'events': {}, 'changeFloor': {}}, editor.currentFloorId);
+    }), {'events': evs, 'changeFloor': {}}, editor.currentFloorId);
     core.status.thisMap.blocks = blocks;
     main.editor.updateMap();
 
@@ -327,7 +353,7 @@ editor.prototype.moveViewport=function(x,y){
     core.bigmap.offsetY = core.clamp(core.bigmap.offsetY+32*y, 0, 32*core.bigmap.height-416);
     core.control.updateViewport();
     editor.buildMark();
-    editor.drawEventBlock();
+    editor.drawPosSelection();
 }
 
 /////////// 通用 ///////////
@@ -631,6 +657,15 @@ editor.prototype.listen = function () {
 
     eui.oncontextmenu=function(e){e.preventDefault()}
 
+    eui.ondblclick = function(e) {
+        // 双击地图可以选中素材
+        var loc = eToLoc(e);
+        var pos = locToPos(loc,true);
+        var thisevent = editor.map[pos.y][pos.x];
+        editor.setSelectBoxFromInfo(thisevent);
+        return;
+    }
+
     eui.onmousedown = function (e) {
         if (e.button==2){
             var loc = eToLoc(e);
@@ -701,7 +736,7 @@ editor.prototype.listen = function () {
         holdingPath = 0;
         e.stopPropagation();
         if (stepPostfix && stepPostfix.length) {
-            preMapData = JSON.parse(JSON.stringify({map:editor.map,fgmap:editor.fgmap,bgmap:editor.bgmap}));
+            editor.preMapData = JSON.parse(JSON.stringify({map:editor.map,fgmap:editor.fgmap,bgmap:editor.bgmap}));
             if(editor.brushMod!=='line'){
                 var x0=stepPostfix[0].x;
                 var y0=stepPostfix[0].y;
@@ -795,7 +830,7 @@ editor.prototype.listen = function () {
         }
     }
 
-    var preMapData = {};
+    editor.preMapData = null;
     var currDrawData = {
         pos: [],
         info: {}
@@ -809,18 +844,18 @@ editor.prototype.listen = function () {
         if (e.altKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
             e.preventDefault();
         //Ctrl+z 撤销上一步undo
-        if (e.keyCode == 90 && e.ctrlKey && preMapData && currDrawData.pos.length && selectBox.isSelected) {
-            editor.map = JSON.parse(JSON.stringify(preMapData.map));
-            editor.fgmap = JSON.parse(JSON.stringify(preMapData.fgmap));
-            editor.bgmap = JSON.parse(JSON.stringify(preMapData.bgmap));
+        if (e.keyCode == 90 && e.ctrlKey && editor.preMapData && currDrawData.pos.length && selectBox.isSelected) {
+            editor.map = JSON.parse(JSON.stringify(editor.preMapData.map));
+            editor.fgmap = JSON.parse(JSON.stringify(editor.preMapData.fgmap));
+            editor.bgmap = JSON.parse(JSON.stringify(editor.preMapData.bgmap));
             editor.updateMap();
             reDo = JSON.parse(JSON.stringify(currDrawData));
             currDrawData = {pos: [], info: {}};
-            preMapData = null;
+            editor.preMapData = null;
         }
         //Ctrl+y 重做一步redo
         if (e.keyCode == 89 && e.ctrlKey && reDo && reDo.pos.length && selectBox.isSelected) {
-            preMapData = JSON.parse(JSON.stringify({map:editor.map,fgmap:editor.fgmap,bgmap:editor.bgmap}));
+            editor.preMapData = JSON.parse(JSON.stringify({map:editor.map,fgmap:editor.fgmap,bgmap:editor.bgmap}));
             for (var j = 0; j < reDo.pos.length; j++)
                 editor.map[reDo.pos[j].y][reDo.pos[j].x] = JSON.parse(JSON.stringify(reDo.info));
 
@@ -863,6 +898,15 @@ editor.prototype.listen = function () {
             printf('已保存该快捷图块, ctrl + '+(e.keyCode-48)+' 使用.')
             core.setLocalStorage('shortcut',shortcut);
         }
+        // wasd平移大地图
+        if (e.keyCode==87)
+            editor.moveViewport(0,-1)
+        else if (e.keyCode==65)
+            editor.moveViewport(-1,0)
+        else if (e.keyCode==83)
+            editor.moveViewport(0,1);
+        else if (e.keyCode==68)
+            editor.moveViewport(1,0);
     }
 
     var dataSelection = document.getElementById('dataSelection');
@@ -991,7 +1035,7 @@ editor.prototype.listen = function () {
     copyLoc.onmousedown = function(e){
         editor.hideMidMenu();
         e.stopPropagation();
-        preMapData = null;
+        editor.preMapData = null;
         reDo = null;
         editor_mode.onmode('');
         var now = editor.pos;
@@ -1016,7 +1060,7 @@ editor.prototype.listen = function () {
                 throw(err)
             }
             ;printf('复制事件成功');
-            editor.drawEventBlock();
+            editor.drawPosSelection();
         });
     }
 
@@ -1024,7 +1068,7 @@ editor.prototype.listen = function () {
     moveLoc.onmousedown = function(e){
         editor.hideMidMenu();
         e.stopPropagation();
-        preMapData = null;
+        editor.preMapData = null;
         reDo = null;
         var thisevent = editor.map[editor.pos.y][editor.pos.x];
         if(thisevent==0){
@@ -1054,7 +1098,7 @@ editor.prototype.listen = function () {
         fields.forEach(function(v){
             var temp_atsfcytaf=editor.currentFloorData[v][now.x+','+now.y];
             editor.currentFloorData[v][now.x+','+now.y]=editor.currentFloorData[v][last.x+','+last.y];
-            editor.currentFloorData[v][last.x+','+last.y]=temp_atsfcytaf
+            editor.currentFloorData[v][last.x+','+last.y]=temp_atsfcytaf;
         })
         editor.file.saveFloorFile(function (err) {
             if (err) {
@@ -1062,7 +1106,7 @@ editor.prototype.listen = function () {
                 throw(err)
             }
             ;printf('两位置的事件已互换');
-            editor.drawEventBlock();
+            editor.drawPosSelection();
         });
     }
 
@@ -1070,7 +1114,7 @@ editor.prototype.listen = function () {
     clearLoc.onmousedown = function(e){
         editor.hideMidMenu();
         e.stopPropagation();
-        preMapData = null;
+        editor.preMapData = null;
         reDo = null;
         editor.info = 0;
         editor_mode.onmode('');
@@ -1078,7 +1122,7 @@ editor.prototype.listen = function () {
         editor.map[now.y][now.x]=editor.info;
         editor.updateMap();
         fields.forEach(function(v){
-            editor.currentFloorData[v][now.x+','+now.y]=null;
+            delete editor.currentFloorData[v][now.x+','+now.y];
         })
         editor.file.saveFloorFile(function (err) {
             if (err) {
@@ -1086,7 +1130,7 @@ editor.prototype.listen = function () {
                 throw(err)
             }
             ;printf('清空此点及事件成功');
-            editor.drawEventBlock();
+            editor.drawPosSelection();
         });
     }
 

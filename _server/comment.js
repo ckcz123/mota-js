@@ -261,7 +261,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "textarea",
                     "_range": "thiseval==null||(thiseval instanceof Array)",
-                    "_data": "该图块的不可入方向\n可以在这里定义不能从哪个方向访问该图块，可以达到悬崖之类的效果\n例如 [\"down\", \"right\"] 代表不能从下或右访问此图块\n此值对背景层、事件层、前景层上的图块均有效"
+                    "_data": "该图块的不可入方向\n可以在这里定义不能朝哪个方向进入该图块，可以达到悬崖之类的效果\n例如 [\"down\"] 代表不能从该图块的上方点朝向下进入此图块\n此值对背景层、事件层、前景层上的图块均有效"
                 },
                 "faceIds": {
                     "_leaf": true,
@@ -324,6 +324,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_bool": "bool",
                             "_data": "该层是否不允许被浏览地图看到；如果勾上则浏览地图会跳过该层"
                         },
+                        "cannotMoveDirectly": {
+                            "_leaf": true,
+                            "_type": "checkbox",
+                            "_bool": "bool",
+                            "_data": "该层是否不允许瞬间移动；如果勾上则不可在此层进行瞬移"
+                        },
                         "firstArrive": {
                             "_leaf": true,
                             "_type": "event",
@@ -334,7 +340,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_leaf": true,
                             "_type": "event",
                             "_event": "eachArrive",
-                            "_data": "每次到该楼层触发的事件，可以双击进入事件编辑器；该事件会比firstArrive先执行。"
+                            "_data": "每次到该楼层触发的事件，可以双击进入事件编辑器；该事件会在firstArrive执行后再执行。"
                         },
                         "parallelDo": {
                             "_leaf": true,
@@ -376,7 +382,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         "weather": {
                             "_leaf": true,
                             "_type": "textarea",
-                            "_data": "该层的默认天气。本项可忽略表示晴天，如果写则第一项为\"rain\"或\"snow\"代表雨雪，第二项为1-10之间的数代表强度。\n如[\"rain\", 8]代表8级雨天。"
+                            "_data": "该层的默认天气。本项可忽略表示晴天，如果写则第一项为\"rain\"，\"snow\"或\"fog\"代表雨雪雾，第二项为1-10之间的数代表强度。\n如[\"rain\", 8]代表8级雨天。"
                         },
                         "bgm": {
                             "_leaf": true,

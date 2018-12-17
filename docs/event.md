@@ -1,6 +1,6 @@
 # 事件
 
-?> 目前版本**v2.5.2**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.5.3**，上次更新时间：* {docsify-updated} *
 
 本章内将对样板所支持的事件进行介绍。
 
@@ -316,15 +316,35 @@ time为可选项，代表该自动文本的时间。可以不指定，不指定�
 
 !> 由于用户无法跳过自动剧情文本，因此对于大段剧情文本请自行添加“是否跳过剧情”的提示，否则可能会非常不友好。
 
+### scrollText：滚动剧情文本
+
+使用`{"type": "scrollText"}`可以使用滚动剧情文本，即将一段文字从屏幕最下方滚动到屏幕最上方。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "scrollText", "text": "第一排\n第二牌\n\n空行后的一排", "time": 5000, "async": true},
+]
+```
+
+text为正文文本内容。可以使用`${ }`来计算表达式的值，且使用`\n`手动换行。系统不会对滚动剧情文本进行自动换行。
+
+time为可选项，代表总的滚动时间。默认为5000毫秒。
+
+async可选，如果为true则会异步执行（即不等待当前事件执行完毕，立刻执行下一个事件）。
+
+可以使用下面的[设置剧情文本的属性](event#setText：设置剧情文本的属性)来对文字颜色、文字大小、粗体、距离左边的偏移量进行设置。
+
+!> 滚动剧情文本会绘制在UI层（和对话框冲突）！如果是异步处理请注意不要和对话框混用。
+
 ### setText：设置剧情文本的属性
 
 使用`{"type": "setText"}`可以设置剧情文本的各项属性。
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    {"type": "setText", "title": [255,0,0], "text": [255,255,0], "background": [0,0,255,0.3]},
-    {"type": "setText", "position": "up", "bold": true, "titlefont": 26, "textfont": 17, "time": 70},
-    "这段话将显示在上方，标题为红色，正文为黄色粗体，背景为透明度0.3的蓝色，标题26px，正文17px，70毫秒速度打字机效果",
+    {"type": "setText", "title": [255,0,0], "text": [255,255,0], "background": [0,0,255,0.3], "time": 70},
+    {"type": "setText", "position": "up", "offset": 15, "bold": true, "titlefont": 26, "textfont": 17},
+    "这段话将显示在上方（距离顶端15像素），标题为红色，正文为黄色粗体，背景为透明度0.3的蓝色，标题26px，正文17px，70毫秒速度打字机效果",
     {"type": "setText", "background": "winskin.png"} // 还可以一张使用WindowSkin作为皮肤。
 ]
 ```
@@ -338,6 +358,8 @@ background为可选项，如果设置可为一个RGB三元组或RGBA四元组，
 V2.5.2以后，background也可以为一个WindowSkin的文件名。详见[剧情文本控制与界面皮肤](element#剧情文本控制与界面皮肤)。
 
 position为可选项，表示设置文字显示位置。只能为up（上），center（中）和down（下）三者。 默认值： `center`
+
+offset为可选项，如果设置则为代表距离如果显示位置是上/下的话，距离顶端/底端的像素值。也作为滚动剧情文本时距离左边的像素值。
 
 bold为可选项，如果设置则为true或false，表示正文是否使用粗体。 默认值：`false`
 
@@ -419,7 +441,7 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 ]
 ```
 
-name为必填项，代表要修改的楼层属性。其和楼层属性中一一对应，目前只能为`"title", "name", "canFlyTo", "canUseQuickShop", "cannotViewMap", "color", "weather",
+name为必填项，代表要修改的楼层属性。其和楼层属性中一一对应，目前只能为`"title", "name", "canFlyTo", "canUseQuickShop", "cannotViewMap", "cannotMoveDirectly", "color", "weather",
 "defaultGround", "images", "item_ratio", "upFloor", "bgm", "downFloor", "underGround"`。
 
 floorId为可选项，代表要修改的楼层ID；可以省略代表当前楼层。
@@ -728,7 +750,7 @@ name是可选的，代表目标行走图的文件名。
 
 使用`{"type": "hideStatusBar"}`可以隐藏状态栏。读档或重新开始游戏时，状态栏会重新显示。
 
-隐藏状态栏的状态下，将无法点击工具栏里面的按钮（如存读档怪物手册等）。建议仅在事件中使用，事件结束前显示。
+可以添加`"toolbox": true`来不隐藏竖屏模式下的工具栏。
 
 ### showStatusBar：显示状态栏
 
@@ -901,7 +923,7 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 ]
 ```
 
-name为动画名，**请确保动画在main.js中的this.animates中被定义过。**
+name为动画名，**请确保动画在全塔属性中的animates中被定义过。**
 
 loc为动画的位置，可以是`[x,y]`表示在(x,y)点显示，也可以是字符串`"hero"`表示在勇士点显示。
 
@@ -917,48 +939,66 @@ loc可忽略，如果忽略则显示为事件当前点。
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    {"type": "showImage", "name": "bg.jpg", "loc": [231,297]}, // 在(231,297)显示bg.jpg
-    {"type": "showImage", "name": "1.png", "loc": [109,167]}, // 在(109,167)显示1.png
-    {"type": "showImage"} // 如果不指定name则清除所有图片。
+    {"type": "showImage", "code": 1, "image": "bg.jpg", "loc": [231,297], "dw": 100, "dy" : 100, "opacity": 1, "time" : 0}, // 在(231,297)显示bg.jpg
+    {"type": "showImage", "code": 12, "image": "1.png", "loc": [209,267], "dw": 100, "dy" : 100, "opacity": 0.5, "time" : 1000}, // 在(209,267)渐变显示1.png，渐变时间为1000毫秒，完成时不透明度为0.5，这张图片将遮盖上一张
+    {"type": "showImage", "code": 8, "image": "hero.png", "loc": [349,367], "dw": 50, "dy" : 50, "opacity": 1, "time" : 500, "async": true}, // 在(209,267)渐变显示hero.png，大小为原图片的一半，渐变时间为500毫秒，异步执行；这张图片将被上一张遮盖
 ]
 ```
 
-name为图片名。**请确保图片在data.js中的images中被定义过。**
+code为图片编号，如果两张图片重叠，编号较大会覆盖编号较小的。该值需要在1~50之间。
+
+image为图片名。**请确保图片在全塔属性中的images中被定义过。**
 
 loc为图片左上角坐标，以像素为单位进行计算。
 
-如果不指定name则清除所有显示的图片。
+dw和dh为图片的横向、纵向放大率，默认值为100，即不进行缩放。
 
-调用show/hide/move/animate等几个事件同样会清除所有显示的图片。
+opacity为图片不透明度，在0~1之间，默认值为1，即不透明。
 
-### animateImage：图片淡入淡出
-
-我们还可以使用 `{"type": "animateImage"}` 来造成显示图片的淡入淡出效果。
-
-``` js
-"x,y": [ // 实际执行的事件列表
-    {"type": "animateImage", "action": "show", "name": "bg.jpg", "loc": [231,297], "time": 500, "keep": true}, // 在(231,297)淡入bg.jpg，动画时间500ms
-    {"type": "animateImage", "action": "hide", "name": "1.png", "loc": [109,167], "time": 300, "async": true}, // 在(109,167)淡出1.png，动画时间300ms，异步执行
-]
-```
-
-action为淡入还是淡出，`show`为淡入，`hide`会淡出。
-
-name为图片名。**请确保图片在data.js中的images中被定义过。**
-
-loc为图片左上角坐标，以像素为单位进行计算。
-
-time为淡入淡出的时间，如果是0则忽略此项。
-
-keep可选，如果为true则在淡入图片后立刻调用showImage以保留图片，在淡出图片前先清除再动画。
+time为渐变时间，默认值为0，即不渐变直接显示。
 
 async可选，如果为true则会异步执行（即不等待当前事件执行完毕，立刻执行下一个事件）。
 
-如果多张图片的淡入淡出可以采用以下方式（仅供参考）：
+### showTextImage：显示文本化图片
 
-假设我现在已经有了`1.jpg`显示在屏幕上：
-- 淡入显示`2.png`：调用`animateImage`淡入图片，然后立刻调用`showImage`显示图片。
-- 淡出`1.png`：清除所有图片，`showImage`显示`2.png`，然后调用`animateImage`淡出`1.jpg`
+我们可以使用 `{"type": "showTextImage"}` 以图片的方式显示文本。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "showTextImage", "code": 1, "text": "第一排\n第二排\n\n空行后的一排", "loc": [231,297], "opacity": 1, "time" : 0}, // 在(231,297)显示"第一排\n第二排\n\n空行后的一排"
+]
+```
+
+code为图片编号，如果两张图片重叠，编号较大会覆盖编号较小的。该值需要在1~50之间。
+
+text为要显示的文本。默认行宽为416。
+
+loc为图片左上角坐标，以像素为单位进行计算。
+
+opacity为图片不透明度，在0~1之间，默认值为1，即不透明。
+
+time为渐变时间，默认值为0，即不渐变直接显示。
+
+async可选，如果为true则会异步执行（即不等待当前事件执行完毕，立刻执行下一个事件）。
+
+文本通过图片的方式显示后，即视为一张正常图片，可以被清除或者移动。
+
+### hideImage：清除图片
+
+我们可以使用 `{"type": "hideImage"}` 来清除一张图片。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "hideImage", "code": 1, "time" : 0}, // 使1号图片消失
+    {"type": "hideImage", "code": 12, "time" : 1000}, // 使12号图片渐变消失，时间为1000毫秒
+]
+```
+
+time为渐变时间，默认值为0，即不渐变直接消除。
+
+code为显示图片时输入的图片编号。
+
+async可选，如果为true则会异步执行（即不等待当前事件执行完毕，立刻执行下一个事件）。
 
 ### showGif：显示动图
 
@@ -971,7 +1011,7 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 ]
 ```
 
-name为图片名。**请确保图片在data.js中的images中被定义过。**
+name为图片名。**请确保图片在全塔属性中的images中被定义过。**
 
 loc为动图左上角坐标，以像素为单位进行计算。
 
@@ -979,23 +1019,23 @@ loc为动图左上角坐标，以像素为单位进行计算。
 
 ### moveImage：图片移动
 
-我们可以使用 `{"type": "moveImage"}` 来造成图片移动效果。
+我们可以使用 `{"type": "moveImage"}` 来造成图片移动，淡入淡出等效果。
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    {"type": "moveImage", "name": "bg.jpg", "from": [231,297], "to": [22,333], "time": 500, "keep": true, "async": true},
+    {"type": "moveImage", "code": 1, "to": [22,333], "opacity": 1, "time": 1000}, // 将1号图片移动到(22,333)，动画时间为1000ms
+    {"type": "moveImage", "code": 12, "opacity": 0.5, "time": 500}, // 将二号图片的透明度变为0.5，动画时间500ms
+    {"type": "moveImage", "code": 1, "to": [109,167], "opacity": 0, "time": 300, "async": true}, // 将1号图片移动到(109,167)，透明度设为0（不可见），动画时间300ms，异步执行
 ]
 ```
 
-name为图片名。**请确保图片在data.js中的images中被定义过。**
+code为图片编号。该值需要在1~50之间。
 
-from为起点图片左上角坐标，以像素为单位进行计算。
+to为终点图片左上角坐标，以像素为单位进行计算，不填写则视为当前图片位置。
 
-to为终点图片左上角坐标，以像素为单位进行计算。
+opacity为完成时图片不透明度，移动过程中逐渐变化。在0~1之间。
 
 time为总移动的时间。
-
-keep可选，如果为true则在移动结束后立刻调用showImage以保留图片。
 
 async可选，如果为true则会异步执行（即不等待当前事件执行完毕，立刻执行下一个事件）。
 
@@ -1034,6 +1074,8 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 ```
 
 name为天气选项。目前只支持`rain`和`snow`，即雨天和雪天。
+
+从V2.5.3开始，也支持雾天`fog`。
 
 level为天气的强度等级，在1-10之间。1级为最弱，10级为最强。
 
@@ -1174,6 +1216,20 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 ### resumeBgm：恢复背景音乐
 
 使用`{"type": "resumeBgm"}`可以恢复背景音乐的播放。
+
+### loadBgm：预加载一个背景音乐
+
+使用loadBgm可以预加载一个背景音乐。
+
+使用方法：`{"type": "loadBgm", "name": "bgm.mp3"}`
+
+有关BGM播放的详细说明参见[背景音乐](element#背景音乐)
+
+### freeBgm：释放一个背景音乐的缓存
+
+使用freeBgm可以预加载一个背景音乐。
+
+使用方法：`{"type": "freeBgm", "name": "bgm.mp3"}`
 
 ### playSound：播放音效
 
@@ -1610,6 +1666,8 @@ core.insertAction([
 // 请勿直接调用 core.changeFloor(toFloor, ...)，这个代码是异步的，会导致事件处理和录像出问题！
 ```
 
+!> 从V2.5.3开始，提供了一个"不自动执行下一个事件"的选项（`"async": true`）。如果设置了此项，那么在该部分代码执行完毕后，不会立刻执行下一个事件。你需要在脚本中手动调用`core.events.doAction()`来执行下一个事件。可以通过此项来实现一些异步的代码，即在异步函数的回调中再执行下一个事件。使用此选项请谨慎，最好向开发者寻求咨询。
+
 ## 同一个点的多事件处理
 
 我们可以发现，就目前而且，每个点的事件是和该点进行绑定，并以该点坐标作为唯一索引来查询。
@@ -1825,8 +1883,8 @@ if (core.getFlag("door",0)==2) {
             {"text": "攻击+4", "effect": "status:atk+=4"},
             {"text": "防御+4", "effect": "status:def+=4"},
             {"text": "魔防+10", "effect": "status:mdef+=10"}
-            // effect只能对status和item进行操作，不能修改flag值。
-            // 必须是X+=Y的形式，其中Y可以是一个表达式，以status:xxx或item:xxx为参数
+            // effect可以对status，item和flag进行操作。
+            // 必须是X+=Y的形式，其中Y可以是一个表达式，以status:xxx, item:xxx或flag:xxx为参数
             // 其他effect样例：
             // "item:yellowKey+=1" 黄钥匙+1
             // "item:pickaxe+=3" 破墙镐+3
@@ -1868,7 +1926,7 @@ if (core.getFlag("door",0)==2) {
 - text 为商店所说的话。可以用${need}表示需要的数值。
 - choices 为商店的各个选项，是一个list，每一项是一个选项
   - text为显示文字。请注意这里不支持 ${} 的表达式计算。
-  - effect 为该选项的效果；effect只能对status或items进行操作，且必须是 `status:xxx+=yyy` 或 `item:xxx+=yyy`的形式。即中间必须是+=符号。
+  - effect 为该选项的效果；effect必须是 `status:xxx+=yyy`, `item:xxx+=yyy`或`flag:xxx+=yyy`的形式。即中间必须是+=符号。
   - 如有多个effect（例如升级全属性提升），使用分号分开，参见经验商店的写法。
 
 像这样定义了全局商店后，即可在快捷栏中看到。
@@ -2142,6 +2200,7 @@ if (core.getFlag("door",0)==2) {
     core.waitHeroToStop(function() {
         core.removeGlobalAnimate(0,0,true);
         core.clearMap('all'); core.clearMap('curtain'); // 清空全地图
+        core.deleteAllCanvas();
         core.drawText([
             "\t[恭喜通关]你的分数是${status:hp}。"
         ], function () {

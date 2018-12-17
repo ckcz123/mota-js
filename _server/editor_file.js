@@ -147,6 +147,7 @@ editor_file = function (editor, callback) {
             canFlyTo: saveStatus?currData.canFlyTo:true,
             canUseQuickShop: saveStatus?currData.canUseQuickShop:true,
             cannotViewMap: saveStatus?currData.cannotViewMap:false,
+            cannotMoveDirectly: saveStatus?currData.cannotMoveDirectly:false,
             images: [],
             item_ratio: saveStatus?currData.item_ratio:1,
             defaultGround: saveStatus?currData.defaultGround:"ground",
@@ -901,7 +902,11 @@ editor_file = function (editor, callback) {
         }
         if (file == 'floors') {
             actionList.forEach(function (value) {
-                eval("editor.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
+                // 检测null/undefined
+                if (core.isset(value[2]))
+                    eval("editor.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
+                else
+                    eval("delete editor.currentFloorData"+value[1]);
             });
             editor_file.saveFloorFile(callback);
             return;

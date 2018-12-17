@@ -388,7 +388,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "animateSpeed": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "动画时间，一般300比较合适"
+                    "_data": "全局动画时间，即怪物振动频率，一般300比较合适"
+                },
+                "floorChangeTime": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_data": "默认楼层切换时间"
                 }
             }
         },
@@ -522,20 +527,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "状态栏的装备按钮。若此项为true则将状态栏中的楼层转换器按钮换为装备栏按钮"
                 },
-                "equipPercentage": {
-                    "_leaf": true,
-                    "_type": "checkbox",
-                    "_bool": "bool",
-                    "_data": "装备增加百分比属性。如果此项为true，则装备属性全部按照百分比进行计算，比如\"atk\": 20意味着攻击增加20%。\n如果多个装备百分比增加同一个属性的，按加算处理。（即一个10%一个20%总共是30%而不是32%）"
-                },
-                /*
-                "enableDeleteItem": {
-                    "_leaf": true,
-                    "_type": "checkbox",
-                    "_bool": "bool",
-                    "_data": "是否允许删除（丢弃）道具"
-                },
-                */
                 "enableAddPoint": {
                     "_leaf": true,
                     "_type": "checkbox",
@@ -566,6 +557,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "是否循环计算临界；如果此项为true则使用循环法（而不是回合数计算法）来算临界"
                 },
+                "loopStep": {
+                    "_leaf": true,
+                    "_type": "textbox",
+                    "_range": "thiseval==null || thiseval>0",
+                    "_data": "循环计算临界时，每次攻击增加量为原始攻击的多少分之一。\n例如，5000就代表循环中每次攻击增加量是原始攻击的1/5000（向上取整）。\n默认值5000。"
+                },
                 "startUsingCanvas": {
                     "_leaf": true,
                     "_type": "checkbox",
@@ -577,6 +574,18 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "checkbox",
                     "_bool": "bool",
                     "_data": "点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面"
+                },
+                "statusCanvas": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "是否状态栏canvas化，即手动自定义绘制状态栏。\n如果此项开启，则可在脚本编辑的drawStatusBar中自定义绘制菜单栏。"
+                },
+                "statusCanvasRowsOnMobile": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_range": "thiseval==null || (thiseval>0 && thiseval<=4)",
+                    "_data": "竖屏模式下，顶端状态栏canvas化后的行数。\n此项将决定竖屏的状态栏高度，如果设置则不小于1且不大于4。\n仅在statusCanvas开启时才有效"
                 },
                 "canOpenBattleAnimate": {
                     "_leaf": true,
@@ -655,6 +664,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "checkbox",
                     "_bool": "bool",
                     "_data": "是否在经过领域/夹击/路障等伤害后禁用快捷商店。"
+                },
+                "checkConsole": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "是否检查控制台的开启情况。"
                 }
             }
         }

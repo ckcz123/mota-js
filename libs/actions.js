@@ -192,8 +192,8 @@ actions.prototype.keyDown = function(keyCode) {
 }
 
 ////// 根据放开键的code来执行一系列操作 //////
-actions.prototype.keyUp = function(keyCode, altKey) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying
+actions.prototype.keyUp = function(keyCode, altKey, fromReplay) {
+    if (!fromReplay && core.isset(core.status.replay)&&core.status.replay.replaying
         &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
 
     if (core.status.lockControl) {
@@ -432,16 +432,13 @@ actions.prototype.getClickLoc = function (x, y) {
     var size = 32;
     size = size * core.domStyle.scale;
 
-    switch (core.domStyle.screenMode) {// 这里的3是指statusBar和游戏画布之间的白线宽度
-        case 'vertical':
-            statusBar.x = 0;
-            statusBar.y = core.dom.statusBar.offsetHeight + 3;
-            break;
-        case 'horizontal':
-        case 'bigScreen':
-            statusBar.x = core.dom.statusBar.offsetWidth + 3;
-            statusBar.y = 0;
-            break;
+    if (core.domStyle.isVertical) {
+        statusBar.x = 0;
+        statusBar.y = core.dom.statusBar.offsetHeight + 3;
+    }
+    else {
+        statusBar.x = core.dom.statusBar.offsetWidth + 3;
+        statusBar.y = 0;
     }
 
     var left = core.dom.gameGroup.offsetLeft + statusBar.x;
@@ -658,6 +655,13 @@ actions.prototype.longClick = function (x, y, fromEvent) {
             core.doAction();
             return true;
         }
+        // 长按楼传器的箭头可以快速翻页
+        if (core.status.event.id=='fly') {
+            if ((x==10 || x==11) && (y==5 || y==9)) {
+                this.clickFly(x, y);
+                return true;
+            }
+        }
     }
     else if (!fromEvent) {
         core.waitHeroToStop(function () {
@@ -780,12 +784,6 @@ actions.prototype.clickAction = function (x,y) {
 
 ////// 自定义事件时，按下某个键的操作 //////
 actions.prototype.keyDownAction = function (keycode) {
-    // 视为无效
-    var startTime = core.status.event.data.startTime||0;
-    if (startTime>0 && new Date().getTime()-startTime<250)
-        return;
-    core.status.event.data.startTime = 0;
-
     if (core.status.event.data.type=='choices') {
         var data = core.status.event.data.current;
         var choices = data.choices;
@@ -1082,13 +1080,13 @@ actions.prototype.clickShop = function(x,y) {
             core.status.event.selection=y-topIndex;
 
             var money = core.getStatus('money'), experience = core.getStatus('experience');
-            var times = shop.times, need = eval(shop.need);
+            var times = shop.times, need = core.calValue(shop.need, null, times);
             var use = shop.use;
             var use_text = use=='money'?"金币":"经验";
 
             var choice = choices[y-topIndex];
             if (core.isset(choice.need))
-                need = eval(choice.need);
+                need = core.calValue(choice.need, null, times);
 
             if (need > eval(use)) {
                 core.drawTip("你的"+use_text+"不足");
@@ -1103,7 +1101,7 @@ actions.prototype.clickShop = function(x,y) {
 
             // 更新属性
             choice.effect.split(";").forEach(function (t) {
-                core.doEffect(t);
+                core.doEffect(t, need, times);
             });
             core.updateStatusBar();
             shop.times++;
@@ -1830,19 +1828,6 @@ actions.prototype.clickSwitchs = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 8:
-                if (core.platform.isPC)
-                    window.open("editor.html", "_blank");
-                else if (confirm("即将离开本塔，跳转至本塔工程页面，确认？")) {
-                    window.location.href = "editor-mobile.html";
-                }
-                break;
-            case 9:
-                if (core.platform.isPC)
-                    window.open(core.firstData.name+".zip");
-                else
-                    window.location.href = core.firstData.name+".zip";
-                break;
-            case 10:
                 core.status.event.selection=0;
                 core.ui.drawSettings();
                 break;
@@ -1902,9 +1887,11 @@ actions.prototype.clickSettings = function (x,y) {
                 core.ui.drawKeyBoard();
                 break;
             case 2:
+                core.clearLastEvent();
                 core.ui.drawMaps();
                 break;
             case 3:
+                core.clearLastEvent();
                 core.ui.drawPaint();
                 break;
             case 4:
@@ -2249,14 +2236,14 @@ actions.prototype.clickStorageRemove = function (x, y) {
                         core.ui.closePanel();
                         core.drawText("\t[操作成功]你的所有存档已被清空。");
                         core.status.saveIndex = 1;
-                        core.setLocalStorage('saveIndex2', 1);
+                        core.removeLocalStorage('saveIndex');
                     });
                 }
                 else {
                     localStorage.clear();
                     core.drawText("\t[操作成功]你的所有存档已被清空。");
                     core.status.saveIndex = 1;
-                    core.setLocalStorage('saveIndex2', 1);
+                    core.removeLocalStorage('saveIndex');
                 }
                 break;
             case 1:
@@ -2270,7 +2257,7 @@ actions.prototype.clickStorageRemove = function (x, y) {
                         core.ui.closePanel();
                         core.drawText("\t[操作成功]当前塔的存档已被清空。");
                         core.status.saveIndex = 1;
-                        core.setLocalStorage('saveIndex2', 1);
+                        core.removeLocalStorage('saveIndex');
                     });
                 }
                 else {
@@ -2281,7 +2268,7 @@ actions.prototype.clickStorageRemove = function (x, y) {
                     core.removeLocalStorage("autoSave");
                     core.drawText("\t[操作成功]当前塔的存档已被清空。");
                     core.status.saveIndex = 1;
-                    core.setLocalStorage('saveIndex2', 1);
+                    core.removeLocalStorage('saveIndex');
                 }
                 break;
             case 2:
@@ -2423,6 +2410,13 @@ actions.prototype.clickGameInfo = function (x, y) {
                 core.ui.drawStatistics();
                 break;
             case 1:
+                if (core.platform.isPC)
+                    window.open("editor.html", "_blank");
+                else if (confirm("即将离开本塔，跳转至本塔工程页面，确认？")) {
+                    window.location.href = "editor-mobile.html";
+                }
+                break;
+            case 2:
                 if (core.platform.isPC) {
                     window.open("/score.php?name="+core.firstData.name+"&num=10", "_blank");
                 }
@@ -2432,13 +2426,19 @@ actions.prototype.clickGameInfo = function (x, y) {
                     }
                 }
                 break;
-            case 2:
+            case 3:
                 core.ui.drawHelp();
                 break;
-            case 3:
+            case 4:
                 core.ui.drawAbout();
                 break;
-            case 4:
+            case 5:
+                if (core.platform.isPC)
+                    window.open(core.firstData.name+".zip");
+                else
+                    window.location.href = core.firstData.name+".zip";
+                break;
+            case 6:
                 core.status.event.selection=5;
                 core.ui.drawSettings();
                 break;

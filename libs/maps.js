@@ -838,7 +838,15 @@ maps.prototype.__initBlockCanvas = function (block, height, x, y) {
         damageCanvas = "blockDamage"+x+"_"+y;
         core.createCanvas(damageCanvas, 0, 0, 32, 32, 65);
         core.dymCanvas[damageCanvas].textAlign = 'left';
+        core.dymCanvas[damageCanvas].font = "bold 11px Arial";
         core.fillBoldText(core.dymCanvas[damageCanvas], damage, damageColor, 1, 31);
+        if (core.flags.displayCritical) {
+            var critical = core.enemys.nextCriticals(block.event.id);
+            if (critical.length>0) critical=critical[0];
+            critical = core.formatBigNumber(critical[0], true);
+            if (critical == '???') critical = '?';
+            core.fillBoldText(core.dymCanvas[damageCanvas], critical, '#FFFFFF', 1, 21);
+        }
     }
     return {
         "headCanvas": headCanvas,

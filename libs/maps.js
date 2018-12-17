@@ -474,9 +474,9 @@ maps.prototype.drawBgFgMap = function (floorId, canvas, name, animate) {
 }
 
 ////// 绘制某张地图 //////
-maps.prototype.drawMap = function (mapName, callback) {
-    mapName = mapName || core.status.floorId;
-    if (!core.isset(mapName)) {
+maps.prototype.drawMap = function (floorId, callback) {
+    floorId = floorId || core.status.floorId;
+    if (!core.isset(floorId)) {
         if (core.isset(callback))
             callback();
         return;
@@ -485,10 +485,10 @@ maps.prototype.drawMap = function (mapName, callback) {
     core.removeGlobalAnimate(null, null, true);
 
     var drawBg = function(){
-        var width = core.floors[mapName].width || 13;
-        var height = core.floors[mapName].height || 13;
+        var width = core.floors[floorId].width || 13;
+        var height = core.floors[floorId].height || 13;
 
-        var groundId = (core.status.maps||core.floors)[mapName].defaultGround || "ground";
+        var groundId = (core.status.maps||core.floors)[floorId].defaultGround || "ground";
         var blockIcon = core.material.icons.terrains[groundId];
         for (var x = 0; x < width; x++) {
             for (var y = 0; y < height; y++) {
@@ -497,8 +497,8 @@ maps.prototype.drawMap = function (mapName, callback) {
         }
 
         var images = [];
-        if (core.isset(core.status.maps[mapName].images)) {
-            images = core.status.maps[mapName].images;
+        if (core.isset(core.status.maps[floorId].images)) {
+            images = core.status.maps[floorId].images;
             if (typeof images == 'string') {
                 images = [[0, 0, images]];
             }
@@ -507,7 +507,7 @@ maps.prototype.drawMap = function (mapName, callback) {
             if (typeof t == 'string') t = [0,0,t];
             var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
             if (core.isset(dx) && core.isset(dy) &&
-                !core.hasFlag("floorimg_"+mapName+"_"+dx+"_"+dy) &&
+                !core.hasFlag("floorimg_"+floorId+"_"+dx+"_"+dy) &&
                 core.isset(core.material.images.images[p])) {
                 var image = core.material.images.images[p];
                 if (!t[3]) {
@@ -537,8 +537,8 @@ maps.prototype.drawMap = function (mapName, callback) {
             }
         });
 
-        core.maps.drawBgFgMap(mapName, core.canvas.bg, "bg", true);
-        core.maps.drawBgFgMap(mapName, core.canvas.fg, "fg", true);
+        core.maps.drawBgFgMap(floorId, core.canvas.bg, "bg", true);
+        core.maps.drawBgFgMap(floorId, core.canvas.fg, "fg", true);
 
     }
     if (main.mode=='editor'){
@@ -554,8 +554,8 @@ maps.prototype.drawMap = function (mapName, callback) {
         drawBg();
     }
 
-    core.status.floorId = mapName;
-    core.status.thisMap = core.status.maps[mapName];
+    core.status.floorId = floorId;
+    core.status.thisMap = core.status.maps[floorId];
     var drawEvent = function(){
 
         var mapData = core.status.maps[core.status.floorId];

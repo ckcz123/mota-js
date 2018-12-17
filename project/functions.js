@@ -423,12 +423,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var mon_hp = enemy.hp, mon_atk = enemy.atk, mon_def = enemy.def, mon_special = enemy.special;
 	var mon_money = enemy.money, mon_experience = enemy.experience, mon_point = enemy.point;
 	// 模仿
-	if (this.hasSpecial(mon_special, 10)) {
+	if (core.hasSpecial(mon_special, 10)) {
 		mon_atk = hero_atk;
 		mon_def = hero_def;
 	}
 	// 坚固
-	if (this.hasSpecial(mon_special, 3) && mon_def < hero_atk - 1) {
+	if (core.hasSpecial(mon_special, 3) && mon_def < hero_atk - 1) {
 		mon_def = hero_atk - 1;
 	}
 
@@ -464,7 +464,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	
 	// TODO：可以在这里新增其他的怪物数据变化
 	// 比如仿攻（怪物攻击不低于勇士攻击）：
-	// if (this.hasSpecial(mon_special, 27) && mon_atk < hero_atk) {
+	// if (core.hasSpecial(mon_special, 27) && mon_atk < hero_atk) {
 	//     mon_atk = hero_atk;
 	// }
 	// 也可以按需增加各种自定义内容（比如幻塔的魔杖效果等）
@@ -512,14 +512,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 
 	// 如果是无敌属性，且勇士未持有十字架
-	if (this.hasSpecial(mon_special, 20) && !core.hasItem("cross"))
+	if (core.hasSpecial(mon_special, 20) && !core.hasItem("cross"))
 		return null; // 不可战斗
 	
 	// 战前造成的额外伤害（可被魔防抵消）
 	var init_damage = 0;
 
 	// 吸血
-	if (this.hasSpecial(mon_special, 11)) {
+	if (core.hasSpecial(mon_special, 11)) {
 		var vampire_damage = hero_hp * enemy.value;
 
 		// 如果有神圣盾免疫吸血等可以在这里写
@@ -537,28 +537,28 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 每回合怪物对勇士造成的战斗伤害
 	var per_damage = mon_atk - hero_def;
 	// 魔攻：战斗伤害就是怪物攻击力
-	if (this.hasSpecial(mon_special, 2)) per_damage = mon_atk;
+	if (core.hasSpecial(mon_special, 2)) per_damage = mon_atk;
 	// 战斗伤害不能为负值
 	if (per_damage < 0) per_damage = 0;
 
 	// 2连击 & 3连击 & N连击
-	if (this.hasSpecial(mon_special, 4)) per_damage *= 2;
-	if (this.hasSpecial(mon_special, 5)) per_damage *= 3;
-	if (this.hasSpecial(mon_special, 6)) per_damage *= (enemy.n||4);
+	if (core.hasSpecial(mon_special, 4)) per_damage *= 2;
+	if (core.hasSpecial(mon_special, 5)) per_damage *= 3;
+	if (core.hasSpecial(mon_special, 6)) per_damage *= (enemy.n||4);
 
 	// 每回合的反击伤害；反击是按照勇士的攻击次数来计算回合
 	var counterDamage = 0;
-	if (this.hasSpecial(mon_special, 8)) counterDamage += Math.floor(core.values.counterAttack * hero_atk);
+	if (core.hasSpecial(mon_special, 8)) counterDamage += Math.floor(core.values.counterAttack * hero_atk);
 
 	// 先攻
-	if (this.hasSpecial(mon_special, 1)) init_damage += per_damage;
+	if (core.hasSpecial(mon_special, 1)) init_damage += per_damage;
 
 	// 破甲
-	if (this.hasSpecial(mon_special, 7))
+	if (core.hasSpecial(mon_special, 7))
 		init_damage += Math.floor(core.values.breakArmor * hero_def);
 
 	// 净化
-	if (this.hasSpecial(mon_special, 9))
+	if (core.hasSpecial(mon_special, 9))
 		init_damage += Math.floor(core.values.purify * hero_mdef);
 
 	// 勇士每回合对怪物造成的伤害

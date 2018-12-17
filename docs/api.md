@@ -184,12 +184,6 @@ core.trigger(x, y)    [异步]
 触发某个地点的事件。
 
 
-core.clearMap(mapName)
-清空某个画布图层。
-mapName可为'bg', 'event', 'hero', 'event2', 'fg', 'damage', 'animate', 'weather', 'ui', 'data', 'all'之一。
-如果mapName为'all'，则为清空所有画布；否则只清空对应的画布。
-
-
 core.drawBlock(block)
 重绘某个图块。block应为core.status.thisMap.blocks中的一项。
 
@@ -473,6 +467,16 @@ core.maps.removeBlockByIds(floorId, ids)
 ui.js主要用来进行UI窗口的绘制，比如对话框、怪物手册、楼传器、存读档界面等等。
 
 
+core.ui.getContextByName(name)
+根据画布名找到一个画布的context；支持系统画布和自定义画布。如果不存在画布返回null。
+
+
+core.clearMap(name)
+清空某个画布图层。
+name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名。
+如果name也可以是'all'，若为all则为清空除色调层外的所有系统画布。
+
+
 core.ui.fillText(name, text, x, y, style, font)
 在某个画布上绘制一段文字。
 name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名。（下同）
@@ -543,15 +547,10 @@ core.ui.deleteAllCanvas()
 清空所有的自定义画布。
 
 
-
 core.ui.drawThumbnail(floorId, canvas, blocks, x, y, size, heroLoc, heroIcon)
 绘制一个缩略图，比如楼传器界面，存读档界面等情况。
 floorId为目标楼层ID，canvas为要绘制到的图层，blocks为要绘制的所有图块。
 x,y为该图层开始绘制的起始点坐标，size为每一格的像素，heroLoc为勇士坐标，heroIcon为勇士图标。
-
-
-
-
 
 
 ========== core.utils.XXX 工具类的辅助函数 ==========

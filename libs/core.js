@@ -738,8 +738,8 @@ core.prototype.drawBlock = function (block, animate, dx, dy) {
 }
 
 ////// 绘制某张地图 //////
-core.prototype.drawMap = function (mapName, callback) {
-    core.maps.drawMap(mapName, callback);
+core.prototype.drawMap = function (floorId, callback) {
+    core.maps.drawMap(floorId, callback);
 }
 
 ////// 绘制Autotile //////

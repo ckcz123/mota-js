@@ -1290,7 +1290,7 @@ loadBgm_s
 
 /* loadBgm_s
 tooltip : loadBgm: 预加载某个背景音乐，之后可以直接播放
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=playbgm%EF%BC%9A%E6%92%AD%E6%94%BE%E8%83%8C%E6%99%AF%E9%9F%B3%E4%B9%90
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=loadBgm%ef%bc%9a%e9%a2%84%e5%8a%a0%e8%bd%bd%e4%b8%80%e4%b8%aa%e8%83%8c%e6%99%af%e9%9f%b3%e4%b9%90
 default : ["bgm.mp3"]
 colour : this.soundColor
 var code = '{"type": "loadBgm", "name": "'+EvalString_0+'"},\n';
@@ -1303,7 +1303,7 @@ freeBgm_s
 
 /* freeBgm_s
 tooltip : freeBgm: 释放背景音乐的缓存
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=playbgm%EF%BC%9A%E6%92%AD%E6%94%BE%E8%83%8C%E6%99%AF%E9%9F%B3%E4%B9%90
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=freeBgm%ef%bc%9a%e9%87%8a%e6%94%be%e4%b8%80%e4%b8%aa%e8%83%8c%e6%99%af%e9%9f%b3%e4%b9%90%e7%9a%84%e7%bc%93%e5%ad%98
 default : ["bgm.mp3"]
 colour : this.soundColor
 var code = '{"type": "freeBgm", "name": "'+EvalString_0+'"},\n';

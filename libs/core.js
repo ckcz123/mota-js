@@ -720,6 +720,10 @@ core.prototype.deleteCanvas = function (name) {
     core.ui.deleteCanvas(name);
 }
 
+core.prototype.deleteAllCanvas = function () {
+    core.ui.deleteAllCanvas();
+}
+
 core.prototype.drawBlock = function (block, animate, dx, dy) {
     core.maps.drawBlock(block, animate, dx, dy);
 }

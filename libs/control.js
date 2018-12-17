@@ -1340,108 +1340,13 @@ control.prototype.checkBlock = function () {
 
 ////// 阻击事件（动画效果） //////
 control.prototype.snipe = function (snipes) {
-
-    var scan = {
-        'up': {'x': 0, 'y': -1},
-        'left': {'x': -1, 'y': 0},
-        'down': {'x': 0, 'y': 1},
-        'right': {'x': 1, 'y': 0}
-    };
-
-    snipes.forEach(function (snipe) {
-        var x=snipe.x, y=snipe.y, direction = snipe.direction;
-        snipe.nx = x+scan[snipe.direction].x;
-        snipe.ny = y+scan[snipe.direction].y;
-
-        core.removeGlobalAnimate(x, y);
-
-        var block = core.getBlock(x,y).block;
-
-        var cls = block.event.cls;
-        var height = block.event.height || 32;
-
-        snipe.animate = block.event.animate || 1;
-        snipe.blockIcon = core.material.icons[cls][block.event.id];
-        snipe.blockImage = core.material.images[cls];
-        snipe.height = height;
-
-        var damageString = core.enemys.getDamageString(block.event.id, x, y);
-        var damage = damageString.damage, color = damageString.color;
-
-        snipe.damage = damage;
-        snipe.color = color;
-        snipe.block = core.clone(block);
-
-    })
-
-    var finishSnipe = function () {
-        snipes.forEach(function (t) {
-            core.removeBlock(t.x, t.y);
-            var nBlock = core.clone(t.block);
-            nBlock.x = t.nx; nBlock.y = t.ny;
-            core.status.thisMap.blocks.push(nBlock);
-            core.drawBlock(nBlock);
-            core.addGlobalAnimate(nBlock);
-        });
-        core.syncGlobalAnimate();
-        core.updateStatusBar();
-        return;
-    }
-
-    if (core.status.replay.replaying) {
-        finishSnipe();
-    }
-    else {
-        core.waitHeroToStop(function() {
-
-            core.lockControl();
-
-            var time = 500, step = 0;
-
-            var animateCurrent = 0;
-            var animateTime = 0;
-
-            core.canvas.damage.textAlign = 'left';
-
-            var animate=window.setInterval(function() {
-
-                step++;
-                animateTime += time / 16;
-                if (animateTime >= core.values.animateSpeed) {
-                    animateCurrent++;
-                    animateTime = 0;
-                }
-
-                snipes.forEach(function (snipe) {
-                    var x=snipe.x, y=snipe.y, direction = snipe.direction;
-
-                    var dx = scan[direction].x*2*step, dy = scan[direction].y*2*step;
-                    var nowX = 32*x+dx, nowY = 32*y+dy;
-
-                    // 清空上一次
-                    core.clearMap('damage', nowX-2*scan[direction].x, nowY-2*scan[direction].y, 32, 32);
-                    core.canvas.event.clearRect(nowX-2*scan[direction].x, nowY-2*scan[direction].y, 32, 32);
-                    core.canvas.event2.clearRect(nowX-2*scan[direction].x, nowY-2*scan[direction].y-32, 32, 32)
-
-                    core.drawBlock(snipe.block, animateCurrent, dx, dy);
-
-                    if (core.hasItem('book')) {
-                        // drawDamage
-                        core.fillBoldText(core.canvas.damage, snipe.damage, snipe.color, nowX+1, nowY+31);
-                    }
-
-                })
-
-                if (step==16) { // 移动完毕
-                    clearInterval(animate);
-                    finishSnipe();
-                    // 不存在自定义事件
-                    if (core.status.event.id==null)
-                        core.unLockControl();
-                }
-            }, time/16);
-        });
-    }
+    // 阻击改成moveBlock事件完成
+    var actions = [];
+    snipes.forEach(function (t) {
+        actions.push({"type": "move", "loc": [t.x, t.y], "steps": [t.direction], "time": 500, "keep": true, "async": true});
+    });
+    actions.push({"type": "waitAsync"});
+    core.insertAction(actions);
 }
 
 ////// 更改天气效果 //////

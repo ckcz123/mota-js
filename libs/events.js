@@ -9,7 +9,11 @@ events.prototype.init = function () {
     this.eventdata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.events;
     this.events = {
         'battle': function (data, core, callback) {
-            //core.autosave(true);
+            // 正在执行自定义事件：不允许战斗
+            if (core.status.event.id == 'action') {
+                if (core.isset(callback)) callback();
+                return;
+            }
             core.battle(data.event.id, data.x, data.y);
             if (core.isset(callback))
                 callback();
@@ -20,13 +24,22 @@ events.prototype.init = function () {
                 callback();
         },
         'openDoor': function (data, core, callback) {
-            //core.autosave(true);
+            // 正在执行自定义事件：不允许开门
+            if (core.status.event.id == 'action') {
+                if (core.isset(callback)) callback();
+                return;
+            }
             core.openDoor(data.event.id, data.x, data.y, true, function () {
                 if (core.isset(callback)) callback();
                 core.replay();
             });
         },
         'changeFloor': function (data, core, callback) {
+            // 正在执行自定义事件：不允许切换楼层
+            if (core.status.event.id == 'action') {
+                if (core.isset(callback)) callback();
+                return;
+            }
             var heroLoc = {};
             if (core.isset(data.event.data.loc))
                 heroLoc = {'x': data.event.data.loc[0], 'y': data.event.data.loc[1]};
@@ -1691,13 +1704,11 @@ events.prototype.moveImage = function (code, to, opacityVal, time, callback) {
 
     var step = 0;
     var per_time = 10, steps = parseInt(time / per_time);
-    var preOpac = parseFloat(core.dymCanvas[name].canvas.style.opacity), opacStep;
+    var preOpac = parseFloat(core.dymCanvas[name].canvas.style.opacity), opacStep = 0;
     if (core.isset(opacityVal)) {
         opacityVal = core.calValue(opacityVal);
         opacStep = (opacityVal - preOpac) / steps;
     }
-    else
-        opacStep = 0;
     
     var moveStep = function () {
         preOpac += opacStep;

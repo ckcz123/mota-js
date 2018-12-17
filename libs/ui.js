@@ -2796,7 +2796,6 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
     newCanvas.style.zIndex = z;
     newCanvas.style.position = 'absolute';
     core.dymCanvas[name] = newCanvas.getContext('2d');
-    core.dom.dymCanvas.appendChild(newCanvas);
     core.dymCanvas._list.push({
         "id": name,
         "style": {
@@ -2804,10 +2803,12 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
             "top": y,
         }
     });
+    core.dom.gameDraw.appendChild(newCanvas);
 }
 
 ////// canvas查找 //////
 ui.prototype.findCanvas = function (name) {
+    if (!core.isset(name)) return -1;
     for (var index = 0; index < core.dymCanvas._list.length; index++) {
         if (core.dymCanvas._list[index].id == name)
             return index;
@@ -2817,6 +2818,7 @@ ui.prototype.findCanvas = function (name) {
 
 ////// canvas重定位 //////
 ui.prototype.relocateCanvas = function (name, x, y) {
+    if (!core.isset(name)) return;
     var index = core.findCanvas(name);
     if (index < 0) return;
     if (core.isset(x)) {
@@ -2831,6 +2833,7 @@ ui.prototype.relocateCanvas = function (name, x, y) {
 
 ////// canvas重置 //////
 ui.prototype.resizeCanvas = function (name, width, height) {
+    if (!core.isset(name)) return;
     var dstCanvas = core.dymCanvas[name].canvas;
     if (core.isset(width)) {
         dstCanvas.width = width;
@@ -2843,9 +2846,19 @@ ui.prototype.resizeCanvas = function (name, width, height) {
 }
 ////// canvas删除 //////
 ui.prototype.deleteCanvas = function (name) {
+    if (!core.isset(name)) return;
     var index = core.findCanvas(name);
     if (index == -1) return;
-    core.dom.dymCanvas.removeChild(core.dom.dymCanvas.childNodes[index]);
-    core.dymCanvas[name] = null;
+    core.dom.gameDraw.removeChild(core.dymCanvas[name].canvas);
+    delete core.dymCanvas[name];
     core.dymCanvas._list.splice(index,1);
+}
+
+////// 删除所有动态canvas //////
+ui.prototype.deleteAllCanvas = function () {
+    core.dymCanvas._list.forEach(function (t) {
+        core.dom.gameDraw.removeChild(core.dymCanvas[t.id].canvas);
+        delete core.dymCanvas[t.id];
+    });
+    core.dymCanvas._list = [];
 }

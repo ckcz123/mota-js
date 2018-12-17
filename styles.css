@@ -306,10 +306,6 @@ p#name {
     z-index: 170;
 }
 
-#dymCanvas {
-    position: absolute;
-}
-
 .clearfix:before,
 .clearfix:after {
    content: ".";

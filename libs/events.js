@@ -122,6 +122,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 
         core.clearMap('all');
         core.clearMap('curtain');
+        core.deleteAllCanvas();
         core.clearStatusBar();
 
         var post_start = function () {

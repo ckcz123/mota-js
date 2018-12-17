@@ -288,6 +288,7 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
     core.clearStatus();
     core.clearMap('all');
     core.clearMap('curtain');
+    core.deleteAllCanvas();
 
     // 重置音量
     core.events.setVolume(1, 0);
@@ -355,6 +356,7 @@ control.prototype.clearStatus = function() {
     }
     core.status = {};
     core.clearStatusBar();
+    core.deleteAllCanvas();
     core.status.played = false;
     core.events.setHeroIcon('hero.png', true);
 }

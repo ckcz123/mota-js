@@ -631,68 +631,77 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback, 
 }
 
 ////// 清除地图 //////
-core.prototype.clearMap = function (map, x, y, width, height) {
-    core.ui.clearMap(map, x, y, width, height);
+core.prototype.clearMap = function (name, x, y, width, height) {
+    core.ui.clearMap(name, x, y, width, height);
 }
 
 ////// 在某个canvas上绘制一段文字 //////
-core.prototype.fillText = function (map, text, x, y, style, font) {
-    core.ui.fillText(map, text, x, y, style, font);
+core.prototype.fillText = function (name, text, x, y, style, font) {
+    core.ui.fillText(name, text, x, y, style, font);
+}
+
+////// 在某个canvas上绘制一段描边文字 //////
+core.prototype.fillBoldText = function (canvas, text, style, x, y, font) {
+    core.ui.fillBoldText(canvas, text, style , x, y, font);
 }
 
 ////// 在某个canvas上绘制一个矩形 //////
-core.prototype.fillRect = function (map, x, y, width, height, style) {
-    core.ui.fillRect(map, x, y, width, height, style)
+core.prototype.fillRect = function (name, x, y, width, height, style) {
+    core.ui.fillRect(name, x, y, width, height, style)
 }
 
 ////// 在某个canvas上绘制一个矩形的边框 //////
-core.prototype.strokeRect = function (map, x, y, width, height, style, lineWidth) {
-    core.ui.strokeRect(map, x, y, width, height, style, lineWidth)
+core.prototype.strokeRect = function (name, x, y, width, height, style, lineWidth) {
+    core.ui.strokeRect(name, x, y, width, height, style, lineWidth)
 }
 
 ////// 在某个canvas上绘制一条线 //////
-core.prototype.drawLine = function (map, x1, y1, x2, y2, style, lineWidth) {
-    core.ui.drawLine(map, x1, y1, x2, y2, style, lineWidth);
+core.prototype.drawLine = function (name, x1, y1, x2, y2, style, lineWidth) {
+    core.ui.drawLine(name, x1, y1, x2, y2, style, lineWidth);
+}
+
+////// 在某个canvas上绘制一个箭头 //////
+core.prototype.drawArrow = function (name, x1, y1, x2, y2, style, lineWidth) {
+    core.ui.drawArrow(name, x1, y1, x2, y2, style, lineWidth);
 }
 
 ////// 设置某个canvas的文字字体 //////
-core.prototype.setFont = function (map, font) {
-    core.ui.setFont(map, font);
+core.prototype.setFont = function (name, font) {
+    core.ui.setFont(name, font);
 }
 
 ////// 设置某个canvas的线宽度 //////
-core.prototype.setLineWidth = function (map, lineWidth) {
-    core.ui.setLineWidth(map, lineWidth);
+core.prototype.setLineWidth = function (name, lineWidth) {
+    core.ui.setLineWidth(name, lineWidth);
 }
 
 ////// 保存某个canvas状态 //////
-core.prototype.saveCanvas = function (map) {
-    core.ui.saveCanvas(map);
+core.prototype.saveCanvas = function (name) {
+    core.ui.saveCanvas(name);
 }
 
 ////// 加载某个canvas状态 //////
-core.prototype.loadCanvas = function (map) {
-    core.ui.loadCanvas(map);
+core.prototype.loadCanvas = function (name) {
+    core.ui.loadCanvas(name);
 }
-
-////// 设置某个canvas边框属性 //////
-core.prototype.setStrokeStyle = function (map, style) {
-    core.ui.setStrokeStyle(map, style);
-}
-
 ////// 设置某个canvas的alpha值 //////
-core.prototype.setAlpha = function (map, alpha) {
-    core.ui.setAlpha(map, alpha);
+core.prototype.setAlpha = function (name, alpha) {
+    core.ui.setAlpha(name, alpha);
 }
 
 ////// 设置某个canvas的透明度 //////
-core.prototype.setOpacity = function (map, opacity) {
-    core.ui.setOpacity(map, opacity);
+core.prototype.setOpacity = function (name, opacity) {
+    core.ui.setOpacity(name, opacity);
 }
 
 ////// 设置某个canvas的绘制属性（如颜色等） //////
-core.prototype.setFillStyle = function (map, style) {
-    core.ui.setFillStyle(map, style);
+core.prototype.setFillStyle = function (name, style) {
+    core.ui.setFillStyle(name, style);
+}
+
+////// 设置某个canvas的边框属性 //////
+core.prototype.setStrokeStyle = function (name, style) {
+    core.ui.setStrokeStyle(name, style);
 }
 
 ////// canvas创建 //////
@@ -719,7 +728,7 @@ core.prototype.resizeCanvas = function (name, width, height) {
 core.prototype.deleteCanvas = function (name) {
     core.ui.deleteCanvas(name);
 }
-
+////// 删除所有canvas //////
 core.prototype.deleteAllCanvas = function () {
     core.ui.deleteAllCanvas();
 }
@@ -896,10 +905,6 @@ core.prototype.setFg = function(color, time, callback) {
 ////// 更新全地图显伤 //////
 core.prototype.updateDamage = function () {
     core.control.updateDamage();
-}
-
-core.prototype.fillBoldText = function (canvas, text, color, x, y, font) {
-    core.ui.fillBoldText(canvas, text, color, x, y, font);
 }
 
 ////// 测试是否拥有某个特殊属性 //////

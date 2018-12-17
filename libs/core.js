@@ -322,7 +322,7 @@ core.prototype.init = function (coreData, callback) {
     core.musicStatus.bgmStatus = core.getLocalStorage('bgmStatus', true);
     if (!core.musicStatus.startDirectly) // 如果当前网络环境不允许
         core.musicStatus.bgmStatus = false;
-    core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
+    // core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
 
     core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
     core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);

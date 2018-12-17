@@ -2782,11 +2782,19 @@ control.prototype.updateStatusBar = function () {
 
 control.prototype.triggerStatusBar = function (name, showToolbox) {
     if (name!='hide') name='show';
+
+    // 如果是隐藏 -> 显示工具栏，则先显示
+    if (name == 'hide' && showToolbox && !core.domStyle.showStatusBar && !core.hasFlag("showToolbox")) {
+        this.triggerStatusBar("show");
+        this.triggerStatusBar("hide", showToolbox);
+        return;
+    }
+
     var statusItems = core.dom.status;
     var toolItems = core.dom.tools;
     core.domStyle.showStatusBar = name == 'show';
     core.setFlag('hideStatusBar', core.domStyle.showStatusBar?null:true);
-    core.setFlag('showToolbox', showToolbox);
+    core.setFlag('showToolbox', showToolbox?true:null);
     if (!core.domStyle.showStatusBar) {
         for (var i = 0; i < statusItems.length; ++i)
             statusItems[i].style.opacity = 0;

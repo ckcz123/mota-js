@@ -1591,13 +1591,7 @@ events.prototype.showImage = function (code, image, x, y, dw, dh, opacityVal, ti
     var zIndex = code + 100;
     time = time || 0;
     var name = "image"+ zIndex;
-    if (core.findCanvas(name) != -1) {
-        core.relocateCanvas(name, x, y);
-        core.resizeCanvas(name, image.width * dw, image.height * dh);
-        core.dymCanvas[name].style.zIndex = zIndex;
-    }
-    else
-        core.createCanvas(name, x, y, image.width * dw, image.height * dh, zIndex);
+    core.createCanvas(name, x, y, image.width * dw, image.height * dh, zIndex);
 
     core.dymCanvas[name].drawImage(image, 0, 0, image.width * dw, image.height * dh);
     if (time == 0)

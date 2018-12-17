@@ -63,13 +63,12 @@ editor_blockly = function () {
       MotaActionBlocks['autoText_s'].xmlText(),
       MotaActionBlocks['scrollText_s'].xmlText(),
       MotaActionBlocks['setText_s'].xmlText(),
-      MotaActionBlocks['showImage_0_s'].xmlText(),
-      MotaActionBlocks['animateImage_0_s'].xmlText(),
-      MotaActionBlocks['animateImage_1_s'].xmlText(),
-      MotaActionBlocks['showImage_1_s'].xmlText(),
+      MotaActionBlocks['showImage_s'].xmlText(),
+      MotaActionBlocks['hideImage_s'].xmlText(),
+      MotaActionBlocks['showTextImage_s'].xmlText(),
+      MotaActionBlocks['moveImage_s'].xmlText(),
       MotaActionBlocks['showGif_0_s'].xmlText(),
       MotaActionBlocks['showGif_1_s'].xmlText(),
-      MotaActionBlocks['moveImage_0_s'].xmlText(),
       MotaActionBlocks['tip_s'].xmlText(),
       MotaActionBlocks['win_s'].xmlText(),
       MotaActionBlocks['lose_s'].xmlText(),
@@ -145,6 +144,8 @@ editor_blockly = function () {
       MotaActionBlocks['playBgm_s'].xmlText(),
       MotaActionBlocks['pauseBgm_s'].xmlText(),
       MotaActionBlocks['resumeBgm_s'].xmlText(),
+      MotaActionBlocks['loadBgm_s'].xmlText(),
+      MotaActionBlocks['freeBgm_s'].xmlText(),
       MotaActionBlocks['playSound_s'].xmlText(),
       MotaActionBlocks['setVolume_s'].xmlText(),
     ],
@@ -433,7 +434,7 @@ function omitedcheckUpdateFunction(event) {
         MotaActionFunctions.parse(
             eval('obj=' + codeAreaHL.getValue().replace(/[<>&]/g, function (c) {
                 return {'<': '&lt;', '>': '&gt;', '&': '&amp;'}[c];
-            })),
+            }).replace(/\\r/g, '\\\\r').replace(/\\f/g, '\\\\f')),
             document.getElementById('entryType').value
         );
     }
@@ -448,7 +449,7 @@ function omitedcheckUpdateFunction(event) {
         var type = args.type;
         if (!type) return false;
         editor_blockly.id = id_;
-        codeAreaHL.setValue(input.value.replace(/\\r/g,'\\\\r').replace(/\\f/,'\\\\f'));
+        codeAreaHL.setValue(input.value);
         document.getElementById('entryType').value = type;
         editor_blockly.parse();
         editor_blockly.show();
@@ -521,6 +522,7 @@ function omitedcheckUpdateFunction(event) {
             'scrollText_s': 'EvalString_0',
             'comment_s': 'EvalString_0',
             'choices_s': 'EvalString_0',
+            'showTextImage_s': 'EvalString_0',
             'function_s': 'RawEvalString_0',
             'shopsub': 'EvalString_3',
         }

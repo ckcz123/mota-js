@@ -17,9 +17,17 @@ ui.prototype.init = function () {
 
 ////////////////// 地图设置
 
+ui.prototype.getContextByName = function (name) {
+    if (core.isset(core.canvas[name]))
+        return core.canvas[name];
+    if (core.isset(core.dymCanvas[name]))
+        return core.dymCanvas[name];
+    return null;
+}
+
 ////// 清除地图 //////
-ui.prototype.clearMap = function (map, x, y, width, height) {
-    if (map == 'all') {
+ui.prototype.clearMap = function (name, x, y, width, height) {
+    if (name == 'all') {
         for (var m in core.canvas) {
             // 不擦除curtain层
             if (m=='curtain') continue;
@@ -28,144 +36,144 @@ ui.prototype.clearMap = function (map, x, y, width, height) {
         core.dom.gif.innerHTML = "";
     }
     else {
-        core.canvas[map].clearRect(x||0, y||0, width||core.bigmap.width*32, height||core.bigmap.height*32);
+        var ctx = this.getContextByName(name);
+        if (ctx) ctx.clearRect(x||0, y||0, width||ctx.canvas.width, height||ctx.canvas.height);
     }
 }
 
 ////// 在某个canvas上绘制一段文字 //////
-ui.prototype.fillText = function (map, text, x, y, style, font) {
+ui.prototype.fillText = function (name, text, x, y, style, font) {
     if (core.isset(style)) {
-        core.setFillStyle(map, style);
+        core.setFillStyle(name, style);
     }
     if (core.isset(font)) {
-        core.setFont(map, font);
+        core.setFont(name, font);
     }
-    core.canvas[map].fillText(text, x, y);
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.fillText(text, x, y);
+}
+
+////// 在某个canvas上绘制粗体 //////
+ui.prototype.fillBoldText = function (canvas, text, style, x, y, font) {
+    if (core.isset(font)) canvas.font = font;
+    canvas.fillStyle = '#000000';
+    canvas.fillText(text, x-1, y-1);
+    canvas.fillText(text, x-1, y+1);
+    canvas.fillText(text, x+1, y-1);
+    canvas.fillText(text, x+1, y+1);
+    canvas.fillStyle = style;
+    canvas.fillText(text, x, y);
 }
 
 ////// 在某个canvas上绘制一个矩形 //////
-ui.prototype.fillRect = function (map, x, y, width, height, style) {
+ui.prototype.fillRect = function (name, x, y, width, height, style) {
     if (core.isset(style)) {
-        core.setFillStyle(map, style);
+        core.setFillStyle(name, style);
     }
-    core.canvas[map].fillRect(x, y, width, height);
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.fillRect(x, y, width, height);
 }
 
 ////// 在某个canvas上绘制一个矩形的边框 //////
-ui.prototype.strokeRect = function (map, x, y, width, height, style, lineWidth) {
+ui.prototype.strokeRect = function (name, x, y, width, height, style, lineWidth) {
     if (core.isset(style)) {
-        core.setStrokeStyle(map, style);
+        core.setStrokeStyle(name, style);
     }
     if (core.isset(lineWidth)) {
-        core.setLineWidth(map, lineWidth);
+        core.setLineWidth(name, lineWidth);
     }
-    core.canvas[map].strokeRect(x, y, width, height);
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.strokeRect(x, y, width, height);
 }
 
 ////// 在某个canvas上绘制一条线 //////
-ui.prototype.drawLine = function (map, x1, y1, x2, y2, style, lineWidth) {
+ui.prototype.drawLine = function (name, x1, y1, x2, y2, style, lineWidth) {
     if (core.isset(style)) {
-        core.setStrokeStyle(map, style);
+        core.setStrokeStyle(name, style);
     }
     if (core.isset(lineWidth)) {
-        core.setLineWidth(map, lineWidth);
+        core.setLineWidth(name, lineWidth);
     }
-    core.canvas[map].beginPath();
-    core.canvas[map].moveTo(x1, y1);
-    core.canvas[map].lineTo(x2, y2);
-    core.canvas[map].stroke();
+    var ctx = this.getContextByName(name);
+    if (ctx) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+    }
 }
 
 ////// 在某个canvas上绘制一个箭头 //////
-ui.prototype.drawArrow = function (map, x1, y1, x2, y2, style, lineWidth) {
+ui.prototype.drawArrow = function (name, x1, y1, x2, y2, style, lineWidth) {
     if (x1==x2 && y1==y2) return;
     if (core.isset(style)) {
-        core.setStrokeStyle(map, style);
+        core.setStrokeStyle(name, style);
     }
     if (core.isset(lineWidth)) {
-        core.setLineWidth(map, lineWidth);
+        core.setLineWidth(name, lineWidth);
     }
-    var head = 10;
-    var dx = x2-x1, dy=y2-y1;
-    var angle = Math.atan2(dy,dx);
-    core.canvas[map].beginPath();
-    core.canvas[map].moveTo(x1,y1);
-    core.canvas[map].lineTo(x2, y2);
-    core.canvas[map].lineTo(x2-head*Math.cos(angle-Math.PI/6),y2-head*Math.sin(angle-Math.PI/6));
-    core.canvas[map].moveTo(x2, y2);
-    core.canvas[map].lineTo(x2-head*Math.cos(angle+Math.PI/6),y2-head*Math.sin(angle+Math.PI/6));
-    core.canvas[map].stroke();
+    var ctx = this.getContextByName(name);
+    if (ctx) {
+        var head = 10;
+        var dx = x2-x1, dy=y2-y1;
+        var angle = Math.atan2(dy,dx);
+        ctx.beginPath();
+        ctx.moveTo(x1,y1);
+        ctx.lineTo(x2, y2);
+        ctx.lineTo(x2-head*Math.cos(angle-Math.PI/6),y2-head*Math.sin(angle-Math.PI/6));
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2-head*Math.cos(angle+Math.PI/6),y2-head*Math.sin(angle+Math.PI/6));
+        ctx.stroke();
+    }
 }
 
 ////// 设置某个canvas的文字字体 //////
-ui.prototype.setFont = function (map, font) {
-    core.canvas[map].font = font;
+ui.prototype.setFont = function (name, font) {
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.font = font;
 }
 
 ////// 设置某个canvas的线宽度 //////
-ui.prototype.setLineWidth = function (map, lineWidth) {
-    if (map == 'all') {
-        for (var m in core.canvas) {
-            core.canvas[m].lineWidth = lineWidth;
-        }
-    }
-    core.canvas[map].lineWidth = lineWidth;
+ui.prototype.setLineWidth = function (name, lineWidth) {
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.lineWidth = lineWidth;
 }
 
 ////// 保存某个canvas状态 //////
-ui.prototype.saveCanvas = function (map) {
-    core.canvas[map].save();
+ui.prototype.saveCanvas = function (name) {
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.save();
 }
 
 ////// 加载某个canvas状态 //////
-ui.prototype.loadCanvas = function (map) {
-    core.canvas[map].restore();
-}
-
-////// 设置某个canvas边框属性 //////
-ui.prototype.setStrokeStyle = function (map, style) {
-    if (map == 'all') {
-        for (var m in core.canvas) {
-            core.canvas[m].strokeStyle = style;
-        }
-    }
-    else {
-        core.canvas[map].strokeStyle = style;
-    }
+ui.prototype.loadCanvas = function (name) {
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.restore();
 }
 
 ////// 设置某个canvas的alpha值 //////
-ui.prototype.setAlpha = function (map, alpha) {
-    if (map == 'all') {
-        for (var m in core.canvas) {
-            core.canvas[m].globalAlpha = alpha;
-        }
-    }
-    else core.canvas[map].globalAlpha = alpha;
+ui.prototype.setAlpha = function (name, alpha) {
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.globalAlpha = alpha;
 }
 
 ////// 设置某个canvas的透明度；尽量不要使用本函数，而是全部换成setAlpha实现 //////
-ui.prototype.setOpacity = function (map, opacity) {
-    if (map == 'all') {
-        for (var m in core.canvas) {
-            core.canvas[m].canvas.style.opacity = opacity;
-        }
-    }
-    else core.canvas[map].canvas.style.opacity = opacity;
+ui.prototype.setOpacity = function (name, opacity) {
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.canvas.style.opacity = opacity;
 }
 
 ////// 设置某个canvas的绘制属性（如颜色等） //////
-ui.prototype.setFillStyle = function (map, style) {
-    if (map == 'all') {
-        for (var m in core.canvas) {
-            core.canvas[m].fillStyle = style;
-        }
-    }
-    else {
-        core.canvas[map].fillStyle = style;
-    }
+ui.prototype.setFillStyle = function (name, style) {
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.fillStyle = style;
 }
 
+////// 设置某个canvas边框属性 //////
+ui.prototype.setStrokeStyle = function (name, style) {
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.strokeStyle = style;
+}
 
 
 ///////////////// UI绘制
@@ -174,14 +182,21 @@ ui.prototype.setFillStyle = function (map, style) {
 ui.prototype.closePanel = function () {
     core.status.boxAnimateObjs = [];
     clearInterval(core.status.event.interval);
-    core.clearMap('ui');
-    core.setAlpha('ui', 1.0);
+    core.clearLastEvent();
     core.unLockControl();
     core.status.event.data = null;
     core.status.event.id = null;
     core.status.event.selection = null;
     core.status.event.ui = null;
     core.status.event.interval = null;
+}
+
+////// 一般清除事件 //////
+ui.prototype.clearLastEvent = function () {
+    if (core.isset(core.dymCanvas.selector))
+        core.deleteCanvas("selector");
+    core.clearMap('ui');
+    core.setAlpha('ui', 1);
 }
 
 ////// 左上角绘制一段提示 //////
@@ -351,21 +366,28 @@ ui.prototype.getTitleAndIcon = function (content) {
 }
 
 // 绘制选择光标
-ui.prototype.drawWindowSelector = function(background,canvas,x,y,w,h) {
-    var dstImage = core.canvas[canvas];
-
+ui.prototype.drawWindowSelector = function(background,x,y,w,h) {
+    if (core.isset(core.dymCanvas.selector)) {
+        core.relocateCanvas("selector", x, y);
+        core.resizeCanvas("selector", w, h);
+    }
+    else {
+        core.ui.createCanvas("selector", x, y, w, h, 165);
+    }
+    core.setOpacity("selector", 0.8);
+    var dstImage = core.dymCanvas.selector;
     // back
-    dstImage.drawImage(background,130,66,28,28,x+2,y+2,w-4,h-4);
+    dstImage.drawImage(background, 130, 66, 28, 28,  2,  2,w-4,h-4);
     // corner
-    dstImage.drawImage(background,128,64,2,2,x,y,2,2);
-    dstImage.drawImage(background,158,64,2,2,x+w-2,y,2,2);
-    dstImage.drawImage(background,128,94,2,2,x,y+h-2,2,2);
-    dstImage.drawImage(background,158,94,2,2,x+w-2,y+h-2,2,2);
+    dstImage.drawImage(background, 128, 64,  2,  2,  0,  0,  2,  2);
+    dstImage.drawImage(background, 158, 64,  2,  2,w-2,  0,  2,  2);
+    dstImage.drawImage(background, 128, 94,  2,  2,  0,h-2,  2,  2);
+    dstImage.drawImage(background, 158, 94,  2,  2,w-2,h-2,  2,  2);
     // border
-    dstImage.drawImage(background,130,64,28,2,x+2,y,w-4,2);
-    dstImage.drawImage(background,130,94,28,2,x+2,y+h-2,w-4,2);
-    dstImage.drawImage(background,128,66,2,28,x,y+2,2,h-4);
-    dstImage.drawImage(background,158,66,2,28,x+w-2,y+2,2,h-4);
+    dstImage.drawImage(background, 130, 64, 28,  2,  2,  0,w-4,  2);
+    dstImage.drawImage(background, 130, 94, 28,  2,  2,h-2,w-4,  2);
+    dstImage.drawImage(background, 128, 66,  2, 28,  0,  2,  2,h-4);
+    dstImage.drawImage(background, 158, 66,  2, 28,w-2,  2,  2,h-4);
 }
 
 // 绘制皮肤
@@ -502,7 +524,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
     content = core.replaceText(content);
 
     core.status.boxAnimateObjs = [];
-    core.clearMap('ui');
+    core.clearLastEvent();
 
     // drawImage
     content = content.replace(/(\f|\\f)\[(.*?)]/g, function (text, sympol, str) {
@@ -536,13 +558,9 @@ ui.prototype.drawTextBox = function(content, showAll) {
         validWidth = this.calTextBoxWidth('ui', realContent, min_width, max_width);
         width = validWidth + leftSpace + rightSpace;
         // left必须在7~416-7-width区间内，以保证left>=7，right<=416-7
-        left = core.clamp(32*px+16-width/2, 7, 416-7-width);
-
-        left -= core.bigmap.offsetX;
-
+        left = core.clamp(32*px+16-width/2-core.bigmap.offsetX, 7, 416-7-width);
         right = left + width;
     }
-
 
     var content_left = left + leftSpace;
     var height = 30 + (textfont+5)*core.splitLines("ui", realContent, validWidth, font).length;
@@ -740,7 +758,7 @@ ui.prototype.drawScrollText = function (content, time, callback) {
     if (textAttribute.bold) font = "bold "+font;
     var contents = core.splitLines('ui', content), lines = contents.length;
 
-    // 计算总高度，按1.2倍行距计算
+    // 计算总高度，按1.4倍行距计算
     var width = 416, height = textfont * 1.4 * lines;
     var tempCanvas = core.bigmap.tempCanvas;
     tempCanvas.canvas.width = width;
@@ -909,7 +927,7 @@ ui.prototype.drawChoices = function(content, choices) {
         while (core.status.event.selection>=choices.length) core.status.event.selection-=choices.length;
         var len = core.canvas.ui.measureText(core.replaceText(choices[core.status.event.selection].text || choices[core.status.event.selection])).width;
         if (isWindowSkin)
-            this.drawWindowSelector(background, 'ui' ,208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28);
+            this.drawWindowSelector(background, 208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28);
         else
             core.strokeRect('ui', 208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28, "#FFD700", 2);
     }
@@ -926,6 +944,8 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
 
     if (!core.isset(core.status.event.selection) || core.status.event.selection>1) core.status.event.selection=1;
     if (core.status.event.selection<0) core.status.event.selection=0;
+
+    core.clearLastEvent();
 
     var background = core.status.textAttribute.background;
     var isWindowSkin = false;
@@ -976,7 +996,7 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     var strokeLeft = 208 + (76*core.status.event.selection-38) - parseInt(len/2) - 5;
 
     if (isWindowSkin)
-        this.drawWindowSelector(background, 'ui', strokeLeft, bottom-35-20, len+10, 28);
+        this.drawWindowSelector(background, strokeLeft, bottom-35-20, len+10, 28);
     else
         core.strokeRect('ui', strokeLeft, bottom-35-20, len+10, 28, "#FFD700", 2);
 
@@ -1334,22 +1354,39 @@ ui.prototype.drawWaiting = function(text) {
     core.lockControl();
     core.status.event.id = 'waiting';
 
-    core.clearMap('ui');
-    core.setAlpha('ui', 1);
-    core.setFillStyle('ui', core.material.groundPattern);
+    core.clearLastEvent();
+
+    var background = core.status.textAttribute.background;
+    var isWindowSkin = false;
+    if (typeof background == 'string') {
+        background = core.material.images.images[background];
+        if (core.isset(background) && background.width==192 && background.height==128) isWindowSkin = true;
+        else background = core.initStatus.textAttribute.background;
+    }
+    if (!isWindowSkin) background = core.arrayToRGBA(background);
+    var borderColor = core.status.globalAttribute.borderColor;
+    var textColor = core.arrayToRGBA(core.status.textAttribute.text);
 
     var globalFont = core.status.globalAttribute.font;
-    core.setFont('ui', 'bold 17px '+globalFont);
+    core.setFont('ui', "bold 19px "+globalFont);
     var text_length = core.canvas.ui.measureText(text).width;
 
     var right = Math.max(text_length+50, 220);
     var left = 208-parseInt(right/2), top = 208 - 32 - 16, bottom = 416 - 2 * top;
 
-    core.fillRect('ui', left, top, right, bottom);
-    core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+    core.clearMap('ui');
+    if (isWindowSkin) {
+        core.setAlpha('ui', 0.85);
+        this.drawWindowSkin(background,'ui',left,top,right,bottom);
+    }
+    else {
+        core.fillRect('ui', left, top, right, bottom, background);
+        core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, borderColor, 2);
+    }
+    core.setAlpha('ui', 1);
 
     core.canvas.ui.textAlign = "center";
-    core.fillText('ui', text, 208, top + 56, '#FFFFFF');
+    core.fillText('ui', text, 208, top + 56, textColor);
 
 }
 
@@ -1453,11 +1490,7 @@ ui.prototype.drawCursor = function () {
 ui.prototype.drawBook = function (index) {
     var enemys = core.enemys.getCurrentEnemys(core.floorIds[(core.status.event.selection||{}).index]);
 
-    clearInterval(core.interval.tipAnimate);
-    core.clearMap('data');
-
-    core.clearMap('ui');
-    core.setAlpha('ui', 1);
+    core.clearLastEvent();
     core.setFillStyle('ui', core.material.groundPattern);
     core.fillRect('ui', 0, 0, 416, 416);
 
@@ -1554,8 +1587,8 @@ ui.prototype.drawBook = function (index) {
         if (line_cnt==2) damageOffset=361;
 
         core.canvas.ui.textAlign = "center";
-        var damage = enemy.damage;
 
+        var damage = enemy.damage;
         var color = '#FFFF00';
         if (damage == null) {
             damage = '无法战斗';
@@ -1575,7 +1608,6 @@ ui.prototype.drawBook = function (index) {
         }
         if (enemy.notBomb)
             damage += "[b]";
-
         core.fillText('ui', damage, damageOffset, 62 * i + 50, color, 'bold 13px '+globalFont);
 
         core.canvas.ui.textAlign = "left";
@@ -1771,8 +1803,7 @@ ui.prototype.drawMaps = function (index, x, y) {
 
     if (!core.isset(index)) {
         core.status.event.data = null;
-        core.clearMap('ui');
-        core.setAlpha('ui', 1);
+        core.clearLastEvent();
 
         core.clearMap('animate');
         core.fillRect('animate', 0, 0, 416, 416, 'rgba(0,0,0,0.4)');
@@ -2426,7 +2457,7 @@ ui.prototype.drawKeyBoard = function () {
     core.lockControl();
     core.status.event.id = 'keyBoard';
 
-    core.clearMap('ui');
+    core.clearLastEvent();
 
     var left = 16, top = 48, right = 416 - 2 * left, bottom = 416 - 2 * top;
     core.fillRect('ui', left, top, right, bottom, core.material.groundPattern);
@@ -2464,8 +2495,7 @@ ui.prototype.drawKeyBoard = function () {
 
 ////// 绘制状态栏 /////
 ui.prototype.drawStatusBar = function () {
-    if (this.uidata.drawStatusBar)
-        this.uidata.drawStatusBar();
+    this.uidata.drawStatusBar();
 }
 
 ////// 绘制“数据统计”界面 //////
@@ -2537,6 +2567,8 @@ ui.prototype.drawStatistics = function () {
 
                 var temp = core.clone(core.status.hero);
 
+                core.setFlag("__statistics__", true);
+
                 if (core.isset(total.count[id])) {
                     var hp=0, atk=0, def=0, mdef=0;
 
@@ -2544,6 +2576,7 @@ ui.prototype.drawStatistics = function () {
                         var ratio = floor.item_ratio||1;
                         if (core.isset(core.items.itemEffect[id])) {
                             try {
+                                // 需要检查是否是测试状态...
                                 eval(core.items.itemEffect[id]);
                             }
                             catch (e) {}
@@ -2644,7 +2677,8 @@ ui.prototype.drawStatistics = function () {
         +"，总游戏时长"+formatTime(statistics.totalTime)
         +"。\n瞬间移动次数："+statistics.moveDirectly+"，共计少走"+statistics.ignoreSteps+"步。"
         +"\n\n总计通过血瓶恢复生命值为"+core.formatBigNumber(statistics.hp)+"点。\n\n"
-        +"总计打死了"+statistics.battle+"个怪物，受到的伤害为"+core.formatBigNumber(statistics.battleDamage+statistics.poisonDamage+statistics.extraDamage)
+        +"总计打死了"+statistics.battle+"个怪物，得到了"+core.formatBigNumber(statistics.money)+"金币，"+core.formatBigNumber(statistics.experience)+"点经验。\n\n"
+        +"受到的总伤害为"+core.formatBigNumber(statistics.battleDamage+statistics.poisonDamage+statistics.extraDamage)
         +"，其中战斗伤害"+core.formatBigNumber(statistics.battleDamage)+"点"
         +(core.flags.enableDebuff?("，中毒伤害"+core.formatBigNumber(statistics.poisonDamage)+"点"):"")
         +"，领域/夹击/阻击/血网伤害"+core.formatBigNumber(statistics.extraDamage)+"点。",
@@ -2676,7 +2710,7 @@ ui.prototype.drawPaint = function () {
             core.status.event.id = 'paint';
             core.status.event.data = {"x": null, "y": null, "erase": false};
 
-            core.clearMap('ui');
+            core.clearLastEvent();
             core.clearMap('route');
 
             core.setAlpha('route', 1);
@@ -2730,3 +2764,93 @@ ui.prototype.drawHelp = function () {
     ]);
 }
 
+////// 动态canvas //////
+
+////// canvas创建 //////
+ui.prototype.createCanvas = function (name, x, y, width, height, z) {
+    // 如果画布已存在则直接调用
+    var cv = this.findCanvas(name);
+    if (cv!=-1) {
+        this.relocateCanvas(name, x, y);
+        this.resizeCanvas(name, width, height);
+        core.dymCanvas[name].canvas.style.zIndex = z;
+        return;
+    }
+    var newCanvas = document.createElement("canvas");
+    newCanvas.id = name;
+    newCanvas.style.display = 'block';
+    newCanvas.width = width;
+    newCanvas.height = height;
+    newCanvas.style.width = width * core.domStyle.scale + 'px';
+    newCanvas.style.height = height * core.domStyle.scale + 'px';
+    newCanvas.style.left = x * core.domStyle.scale + 'px';
+    newCanvas.style.top = y * core.domStyle.scale + 'px';
+    newCanvas.style.zIndex = z;
+    newCanvas.style.position = 'absolute';
+    core.dymCanvas[name] = newCanvas.getContext('2d');
+    core.dymCanvas._list.push({
+        "id": name,
+        "style": {
+            "left": x,
+            "top": y,
+        }
+    });
+    core.dom.gameDraw.appendChild(newCanvas);
+}
+
+////// canvas查找 //////
+ui.prototype.findCanvas = function (name) {
+    if (!core.isset(name)) return -1;
+    for (var index = 0; index < core.dymCanvas._list.length; index++) {
+        if (core.dymCanvas._list[index].id == name)
+            return index;
+    }
+    return -1;
+}
+
+////// canvas重定位 //////
+ui.prototype.relocateCanvas = function (name, x, y) {
+    if (!core.isset(name)) return;
+    var index = core.findCanvas(name);
+    if (index < 0) return;
+    if (core.isset(x)) {
+        core.dymCanvas[name].canvas.style.left = x * core.domStyle.scale + 'px';
+        core.dymCanvas._list[index].style.left = x;
+    }
+    if (core.isset(y)) {
+        core.dymCanvas[name].canvas.style.top = y * core.domStyle.scale + 'px';
+        core.dymCanvas._list[index].style.top = y;
+    }
+}
+
+////// canvas重置 //////
+ui.prototype.resizeCanvas = function (name, width, height) {
+    if (!core.isset(name)) return;
+    var dstCanvas = core.dymCanvas[name].canvas;
+    if (core.isset(width)) {
+        dstCanvas.width = width;
+        dstCanvas.style.width = width * core.domStyle.scale + 'px';
+    }
+    if (core.isset(height)) {
+        dstCanvas.height = height;
+        dstCanvas.style.height = height * core.domStyle.scale + 'px';
+    }
+}
+////// canvas删除 //////
+ui.prototype.deleteCanvas = function (name) {
+    if (!core.isset(name)) return;
+    var index = core.findCanvas(name);
+    if (index == -1) return;
+    core.dom.gameDraw.removeChild(core.dymCanvas[name].canvas);
+    delete core.dymCanvas[name];
+    core.dymCanvas._list.splice(index,1);
+}
+
+////// 删除所有动态canvas //////
+ui.prototype.deleteAllCanvas = function () {
+    core.dymCanvas._list.forEach(function (t) {
+        core.dom.gameDraw.removeChild(core.dymCanvas[t.id].canvas);
+        delete core.dymCanvas[t.id];
+    });
+    core.dymCanvas._list = [];
+}

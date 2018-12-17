@@ -32,6 +32,8 @@ function core() {
         'globalAnimate': false,
         'globalTime': null,
         'boxTime': null,
+        'selectorTime': null,
+        'selectorUp': true,
         'animateTime': null,
         'moveTime': null,
         'lastLegTime': null,
@@ -56,6 +58,8 @@ function core() {
         'isPlaying': false,
         'gainNode': null,
         'volume': 1.0, // 音量
+        'cachedBgms': [], // 缓存BGM内容
+        'cachedBgmCount': 4, // 缓存的bgm数量
     }
     this.platform = {
         'isOnline': true, // 是否http
@@ -188,6 +192,9 @@ function core() {
         'animateObjs': [],
     };
     this.status = {};
+    this.dymCanvas = {
+        "_list": []
+    };
 }
 
 /////////// 系统事件相关 ///////////
@@ -315,7 +322,7 @@ core.prototype.init = function (coreData, callback) {
     core.musicStatus.bgmStatus = core.getLocalStorage('bgmStatus', true);
     if (!core.musicStatus.startDirectly) // 如果当前网络环境不允许
         core.musicStatus.bgmStatus = false;
-    core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
+    // core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
 
     core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
     core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
@@ -624,68 +631,106 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback, 
 }
 
 ////// 清除地图 //////
-core.prototype.clearMap = function (map, x, y, width, height) {
-    core.ui.clearMap(map, x, y, width, height);
+core.prototype.clearMap = function (name, x, y, width, height) {
+    core.ui.clearMap(name, x, y, width, height);
 }
 
 ////// 在某个canvas上绘制一段文字 //////
-core.prototype.fillText = function (map, text, x, y, style, font) {
-    core.ui.fillText(map, text, x, y, style, font);
+core.prototype.fillText = function (name, text, x, y, style, font) {
+    core.ui.fillText(name, text, x, y, style, font);
+}
+
+////// 在某个canvas上绘制一段描边文字 //////
+core.prototype.fillBoldText = function (canvas, text, style, x, y, font) {
+    core.ui.fillBoldText(canvas, text, style , x, y, font);
 }
 
 ////// 在某个canvas上绘制一个矩形 //////
-core.prototype.fillRect = function (map, x, y, width, height, style) {
-    core.ui.fillRect(map, x, y, width, height, style)
+core.prototype.fillRect = function (name, x, y, width, height, style) {
+    core.ui.fillRect(name, x, y, width, height, style)
 }
 
 ////// 在某个canvas上绘制一个矩形的边框 //////
-core.prototype.strokeRect = function (map, x, y, width, height, style, lineWidth) {
-    core.ui.strokeRect(map, x, y, width, height, style, lineWidth)
+core.prototype.strokeRect = function (name, x, y, width, height, style, lineWidth) {
+    core.ui.strokeRect(name, x, y, width, height, style, lineWidth)
 }
 
 ////// 在某个canvas上绘制一条线 //////
-core.prototype.drawLine = function (map, x1, y1, x2, y2, style, lineWidth) {
-    core.ui.drawLine(map, x1, y1, x2, y2, style, lineWidth);
+core.prototype.drawLine = function (name, x1, y1, x2, y2, style, lineWidth) {
+    core.ui.drawLine(name, x1, y1, x2, y2, style, lineWidth);
+}
+
+////// 在某个canvas上绘制一个箭头 //////
+core.prototype.drawArrow = function (name, x1, y1, x2, y2, style, lineWidth) {
+    core.ui.drawArrow(name, x1, y1, x2, y2, style, lineWidth);
 }
 
 ////// 设置某个canvas的文字字体 //////
-core.prototype.setFont = function (map, font) {
-    core.ui.setFont(map, font);
+core.prototype.setFont = function (name, font) {
+    core.ui.setFont(name, font);
 }
 
 ////// 设置某个canvas的线宽度 //////
-core.prototype.setLineWidth = function (map, lineWidth) {
-    core.ui.setLineWidth(map, lineWidth);
+core.prototype.setLineWidth = function (name, lineWidth) {
+    core.ui.setLineWidth(name, lineWidth);
 }
 
 ////// 保存某个canvas状态 //////
-core.prototype.saveCanvas = function (map) {
-    core.ui.saveCanvas(map);
+core.prototype.saveCanvas = function (name) {
+    core.ui.saveCanvas(name);
 }
 
 ////// 加载某个canvas状态 //////
-core.prototype.loadCanvas = function (map) {
-    core.ui.loadCanvas(map);
+core.prototype.loadCanvas = function (name) {
+    core.ui.loadCanvas(name);
 }
-
-////// 设置某个canvas边框属性 //////
-core.prototype.setStrokeStyle = function (map, style) {
-    core.ui.setStrokeStyle(map, style);
-}
-
 ////// 设置某个canvas的alpha值 //////
-core.prototype.setAlpha = function (map, alpha) {
-    core.ui.setAlpha(map, alpha);
+core.prototype.setAlpha = function (name, alpha) {
+    core.ui.setAlpha(name, alpha);
 }
 
 ////// 设置某个canvas的透明度 //////
-core.prototype.setOpacity = function (map, opacity) {
-    core.ui.setOpacity(map, opacity);
+core.prototype.setOpacity = function (name, opacity) {
+    core.ui.setOpacity(name, opacity);
 }
 
 ////// 设置某个canvas的绘制属性（如颜色等） //////
-core.prototype.setFillStyle = function (map, style) {
-    core.ui.setFillStyle(map, style);
+core.prototype.setFillStyle = function (name, style) {
+    core.ui.setFillStyle(name, style);
+}
+
+////// 设置某个canvas的边框属性 //////
+core.prototype.setStrokeStyle = function (name, style) {
+    core.ui.setStrokeStyle(name, style);
+}
+
+////// canvas创建 //////
+core.prototype.createCanvas = function (name, x, y, width, height, z) {
+    core.ui.createCanvas(name, x, y, width, height, z);
+}
+
+////// canvas查找 //////
+core.prototype.findCanvas = function (name) {
+    return core.ui.findCanvas(name);
+}
+
+////// canvas重定位 //////
+core.prototype.relocateCanvas = function (name, x, y) {
+    core.ui.relocateCanvas(name, x, y);
+}
+
+////// canvas重置 //////
+core.prototype.resizeCanvas = function (name, width, height) {
+    core.ui.resizeCanvas(name, width, height);
+}
+
+////// canvas删除 //////
+core.prototype.deleteCanvas = function (name) {
+    core.ui.deleteCanvas(name);
+}
+////// 删除所有canvas //////
+core.prototype.deleteAllCanvas = function () {
+    core.ui.deleteAllCanvas();
 }
 
 core.prototype.drawBlock = function (block, animate, dx, dy) {
@@ -693,8 +738,8 @@ core.prototype.drawBlock = function (block, animate, dx, dy) {
 }
 
 ////// 绘制某张地图 //////
-core.prototype.drawMap = function (mapName, callback) {
-    core.maps.drawMap(mapName, callback);
+core.prototype.drawMap = function (floorId, callback) {
+    core.maps.drawMap(floorId, callback);
 }
 
 ////// 绘制Autotile //////
@@ -965,18 +1010,18 @@ core.prototype.drawText = function (contents, callback) {
 /////////// 系统机制 ///////////
 
 ////// 将文字中的${和}（表达式）进行替换 //////
-core.prototype.replaceText = function (text) {
-    return core.utils.replaceText(text);
+core.prototype.replaceText = function (text, need, times) {
+    return core.utils.replaceText(text, need, times);
 }
 
 ////// 计算表达式的值 //////
-core.prototype.calValue = function (value) {
-    return core.utils.calValue(value);
+core.prototype.calValue = function (value, need, times) {
+    return core.utils.calValue(value, need, times);
 }
 
 ////// 执行一个表达式的effect操作 //////
-core.prototype.doEffect = function (expression) {
-    core.control.doEffect(expression);
+core.prototype.doEffect = function (expression, need, times) {
+    core.control.doEffect(expression, need, times);
 }
 
 ////// 字符串自动换行的分割 //////
@@ -1090,6 +1135,11 @@ core.prototype.startReplay = function (list) {
 ////// 关闭UI窗口 //////
 core.prototype.closePanel = function () {
     core.ui.closePanel();
+}
+
+////// 一般清除事件 //////
+core.prototype.clearLastEvent = function () {
+    core.ui.clearLastEvent();
 }
 
 ////// 更改播放状态 //////
@@ -1364,6 +1414,16 @@ core.prototype.pauseBgm = function () {
 ////// 恢复背景音乐的播放 //////
 core.prototype.resumeBgm = function () {
     core.control.resumeBgm();
+}
+
+////// 预加载一个背景音乐 //////
+core.prototype.loadBgm = function (bgm) {
+    core.loader.loadBgm(bgm);
+}
+
+////// 手动释放一个背景音乐的缓存 //////
+core.prototype.freeBgm = function (bgm) {
+    core.loader.freeBgm(bgm);
 }
 
 ////// 播放音频 //////

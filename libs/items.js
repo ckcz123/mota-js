@@ -91,7 +91,7 @@ items.prototype.useItem = function (itemId, callback) {
         delete core.status.hero.items[itemCls][itemId];
 
     core.updateStatusBar();
-    core.status.event.data = null;
+    if (!core.isset(core.status.event.id)) core.status.event.data = null;
 
     if (core.isset(callback)) callback();
 }

@@ -57,6 +57,7 @@ control.prototype.setRequestAnimationFrame = function () {
 
         core.animateFrame.globalTime = core.animateFrame.globalTime||timestamp;
         core.animateFrame.boxTime = core.animateFrame.boxTime||timestamp;
+        core.animateFrame.selectorTime = core.animateFrame.selectorTime||timestamp;
         core.animateFrame.animateTime = core.animateFrame.animateTime||timestamp;
         core.animateFrame.moveTime = core.animateFrame.moveTime||timestamp;
         core.animateFrame.lastLegTime = core.animateFrame.lastLegTime||timestamp;
@@ -110,15 +111,28 @@ control.prototype.setRequestAnimationFrame = function () {
             core.animateFrame.boxTime = timestamp;
         }
 
+        // selectorTime
+        if (timestamp-core.animateFrame.selectorTime>20 && core.isset(core.dymCanvas.selector)) {
+            var opacity = parseFloat(core.dymCanvas.selector.canvas.style.opacity);
+            if (core.animateFrame.selectorUp)
+                opacity += 0.02;
+            else
+                opacity -= 0.02;
+            if (opacity > 0.95 || opacity < 0.55)
+                core.animateFrame.selectorUp = !core.animateFrame.selectorUp;
+            core.setOpacity("selector", opacity);
+            core.animateFrame.selectorTime = timestamp;
+        }
+
         // Animate
         if (timestamp-core.animateFrame.animateTime>50 && core.isset(core.status.animateObjs) && core.status.animateObjs.length>0) {
             core.clearMap('animate');
             core.status.animateObjs = core.status.animateObjs.filter(function (obj) {
                 return obj.index < obj.animate.frames.length;
-            })
+            });
             core.status.animateObjs.forEach(function (obj) {
                 core.maps.drawAnimateFrame(obj.animate, obj.centerX, obj.centerY, obj.index++);
-            })
+            });
             core.animateFrame.animateTime = timestamp;
         }
 
@@ -274,6 +288,7 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
     core.clearStatus();
     core.clearMap('all');
     core.clearMap('curtain');
+    core.deleteAllCanvas();
 
     // 重置音量
     core.events.setVolume(1, 0);
@@ -341,6 +356,7 @@ control.prototype.clearStatus = function() {
     }
     core.status = {};
     core.clearStatusBar();
+    core.deleteAllCanvas();
     core.status.played = false;
     core.events.setHeroIcon('hero.png', true);
 }
@@ -376,6 +392,8 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
             'currTime': 0,
             'hp': 0,
             "battle": 0,
+            'money': 0,
+            'experience': 0,
             'battleDamage': 0,
             'poisonDamage': 0,
             'extraDamage': 0,
@@ -398,7 +416,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
 
     core.events.initGame();
     this.updateGlobalAttribute(Object.keys(core.status.globalAttribute));
-    this.triggerStatusBar(core.getFlag('hideStatusBar', false)?'hide':'show');
+    this.triggerStatusBar(core.getFlag('hideStatusBar', false)?'hide':'show', core.getFlag("showToolbox"));
     core.status.played = true;
 }
 
@@ -1025,19 +1043,7 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
 
 ////// 每移动一格后执行的事件 //////
 control.prototype.moveOneStep = function() {
-    core.status.hero.steps++;
-    // 中毒状态
-    if (core.hasFlag('poison')) {
-        core.status.hero.statistics.poisonDamage += core.values.poisonDamage;
-        core.status.hero.hp -= core.values.poisonDamage;
-        if (core.status.hero.hp<=0) {
-            core.status.hero.hp=0;
-            core.updateStatusBar();
-            core.events.lose();
-            return;
-        }
-        core.updateStatusBar();
-    }
+    return this.controldata.moveOneStep();
 }
 
 ////// 停止勇士的一切行动，等待勇士行动结束后，再执行callback //////
@@ -1336,135 +1342,13 @@ control.prototype.checkBlock = function () {
 
 ////// 阻击事件（动画效果） //////
 control.prototype.snipe = function (snipes) {
-
-    var scan = {
-        'up': {'x': 0, 'y': -1},
-        'left': {'x': -1, 'y': 0},
-        'down': {'x': 0, 'y': 1},
-        'right': {'x': 1, 'y': 0}
-    };
-
-    snipes.forEach(function (snipe) {
-        var x=snipe.x, y=snipe.y, direction = snipe.direction;
-        snipe.nx = x+scan[snipe.direction].x;
-        snipe.ny = y+scan[snipe.direction].y;
-
-        core.removeGlobalAnimate(x, y);
-
-        var block = core.getBlock(x,y).block;
-
-        var cls = block.event.cls;
-        var height = block.event.height || 32;
-
-        snipe.animate = block.event.animate || 1;
-        snipe.blockIcon = core.material.icons[cls][block.event.id];
-        snipe.blockImage = core.material.images[cls];
-        snipe.height = height;
-
-        var damage = core.enemys.getDamage(block.event.id, x, y);
-        var color = '#000000';
-
-        if (damage == null) {
-            damage = "???";
-            color = '#FF0000';
-        }
-        else {
-            if (damage <= 0) color = '#00FF00';
-            else if (damage < core.status.hero.hp / 3) color = '#FFFFFF';
-            else if (damage < core.status.hero.hp * 2 / 3) color = '#FFFF00';
-            else if (damage < core.status.hero.hp) color = '#FF7F00';
-            else color = '#FF0000';
-
-            damage = core.formatBigNumber(damage, true);
-            if (core.enemys.hasSpecial(core.material.enemys[block.event.id], 19))
-                damage += "+";
-            if (core.enemys.hasSpecial(core.material.enemys[block.event.id], 21))
-                damage += "-";
-            if (core.enemys.hasSpecial(core.material.enemys[block.event.id], 11))
-                damage += "^";
-        }
-
-        snipe.damage = damage;
-        snipe.color = color;
-        snipe.block = core.clone(block);
-
-    })
-
-    var finishSnipe = function () {
-        snipes.forEach(function (t) {
-            core.removeBlock(t.x, t.y);
-            var nBlock = core.clone(t.block);
-            nBlock.x = t.nx; nBlock.y = t.ny;
-            core.status.thisMap.blocks.push(nBlock);
-            core.drawBlock(nBlock);
-            core.addGlobalAnimate(nBlock);
-        });
-        core.syncGlobalAnimate();
-        core.updateStatusBar();
-        return;
-    }
-
-    if (core.status.replay.replaying) {
-        finishSnipe();
-    }
-    else {
-        core.waitHeroToStop(function() {
-
-            core.lockControl();
-
-            var time = 500, step = 0;
-
-            var animateCurrent = 0;
-            var animateTime = 0;
-
-            core.canvas.damage.textAlign = 'left';
-
-            var animate=window.setInterval(function() {
-
-                step++;
-                animateTime += time / 16;
-                if (animateTime >= core.values.animateSpeed) {
-                    animateCurrent++;
-                    animateTime = 0;
-                }
-
-                snipes.forEach(function (snipe) {
-                    var x=snipe.x, y=snipe.y, direction = snipe.direction;
-
-                    var dx = scan[direction].x*2*step, dy = scan[direction].y*2*step;
-                    var nowX = 32*x+dx, nowY = 32*y+dy;
-
-                    // 清空上一次
-                    core.clearMap('damage', nowX-2*scan[direction].x, nowY-2*scan[direction].y, 32, 32);
-                    core.canvas.event.clearRect(nowX-2*scan[direction].x, nowY-2*scan[direction].y, 32, 32);
-                    core.canvas.event2.clearRect(nowX-2*scan[direction].x, nowY-2*scan[direction].y-32, 32, 32)
-
-                    core.drawBlock(snipe.block, animateCurrent, dx, dy);
-
-                    if (core.hasItem('book')) {
-                        // drawDamage
-                        core.setFillStyle('damage', '#000000');
-                        core.canvas.damage.fillText(snipe.damage, nowX + 2, nowY + 30);
-                        core.canvas.damage.fillText(snipe.damage, nowX, nowY + 30);
-                        core.canvas.damage.fillText(snipe.damage, nowX + 2, nowY + 32);
-                        core.canvas.damage.fillText(snipe.damage, nowX, nowY + 32);
-
-                        core.setFillStyle('damage', snipe.color);
-                        core.canvas.damage.fillText(snipe.damage, nowX + 1, nowY + 31);
-                    }
-
-                })
-
-                if (step==16) { // 移动完毕
-                    clearInterval(animate);
-                    finishSnipe();
-                    // 不存在自定义事件
-                    if (core.status.event.id==null)
-                        core.unLockControl();
-                }
-            }, time/16);
-        });
-    }
+    // 阻击改成moveBlock事件完成
+    var actions = [];
+    snipes.forEach(function (t) {
+        actions.push({"type": "move", "loc": [t.x, t.y], "steps": [t.direction], "time": 500, "keep": true, "async": true});
+    });
+    actions.push({"type": "waitAsync"});
+    core.insertAction(actions);
 }
 
 ////// 更改天气效果 //////
@@ -1611,36 +1495,9 @@ control.prototype.updateDamage = function (floorId, canvas) {
                 var id = mapBlocks[b].event.id;
 
                 if (core.flags.displayEnemyDamage) {
-                    var damage = core.enemys.getDamage(id, x, y);
-                    var color = '#000000';
-
-                    if (damage == null) {
-                        damage = "???";
-                        color = '#FF0000';
-                    }
-                    else {
-                        if (damage <= 0) color = '#00FF00';
-                        else if (damage < hero_hp / 3) color = '#FFFFFF';
-                        else if (damage < hero_hp * 2 / 3) color = '#FFFF00';
-                        else if (damage < hero_hp) color = '#FF7F00';
-                        else color = '#FF0000';
-                        damage = core.formatBigNumber(damage, true);
-                        if (core.enemys.hasSpecial(core.material.enemys[id], 19))
-                            damage += "+";
-                        if (core.enemys.hasSpecial(core.material.enemys[id], 21))
-                            damage += "-";
-                        if (core.enemys.hasSpecial(core.material.enemys[id], 11))
-                            damage += "^";
-                    }
-
-                    canvas.fillStyle = '#000000';
-                    canvas.fillText(damage, 32 * x + 2, 32 * (y + 1) - 2);
-                    canvas.fillText(damage, 32 * x, 32 * (y + 1) - 2);
-                    canvas.fillText(damage, 32 * x + 2, 32 * (y + 1));
-                    canvas.fillText(damage, 32 * x, 32 * (y + 1));
-
-                    canvas.fillStyle = color;
-                    canvas.fillText(damage, 32 * x + 1, 32 * (y + 1) - 1);
+                    var damageString = core.enemys.getDamageString(id, x, y);
+                    var damage = damageString.damage, color = damageString.color;
+                    core.fillBoldText(canvas, damage, color, 32*x+1, 32*(y+1)-1);
                 }
 
                 // 临界显伤
@@ -1649,13 +1506,7 @@ control.prototype.updateDamage = function (floorId, canvas) {
                     if (critical.length>0) critical=critical[0];
                     critical = core.formatBigNumber(critical[0], true);
                     if (critical == '???') critical = '?';
-                    canvas.fillStyle = '#000000';
-                    canvas.fillText(critical, 32 * x + 2, 32 * (y + 1) - 2 - 10);
-                    canvas.fillText(critical, 32 * x, 32 * (y + 1) - 2 - 10);
-                    canvas.fillText(critical, 32 * x + 2, 32 * (y + 1) - 10);
-                    canvas.fillText(critical, 32 * x, 32 * (y + 1) - 10);
-                    canvas.fillStyle = '#FFFFFF';
-                    canvas.fillText(critical, 32 * x + 1, 32 * (y + 1) - 1 - 10);
+                    core.fillBoldText(canvas, critical, '#FFFFFF', 32*x+1, 32*(y+1)-11);
                 }
 
             }
@@ -1680,14 +1531,7 @@ control.prototype.updateDamage = function (floorId, canvas) {
                 var damage = core.status.checkBlock.damage[x+core.bigmap.width*y];
                 if (damage>0) {
                     damage = core.formatBigNumber(damage, true);
-                    canvas.fillStyle = '#000000';
-                    canvas.fillText(damage, 32 * x + 17, 32 * (y + 1) - 13);
-                    canvas.fillText(damage, 32 * x + 15, 32 * (y + 1) - 15);
-                    canvas.fillText(damage, 32 * x + 17, 32 * (y + 1) - 15);
-                    canvas.fillText(damage, 32 * x + 15, 32 * (y + 1) - 13);
-
-                    canvas.fillStyle = '#FF7F00';
-                    canvas.fillText(damage, 32 * x + 16, 32 * (y + 1) - 14);
+                    core.fillBoldText(canvas, damage, "#FF7F00", 32*x+16, 32*(y+1)-14);
                 }
             }
         }
@@ -1702,11 +1546,11 @@ control.prototype.updateDamage = function (floorId, canvas) {
 }
 
 ////// 执行一个表达式的effect操作 //////
-control.prototype.doEffect = function (effect) {
+control.prototype.doEffect = function (effect, need, times) {
     effect.split(";").forEach(function (expression) {
         var arr = expression.split("+=");
         if (arr.length!=2) return;
-        var name=arr[0], value=core.calValue(arr[1]);
+        var name=arr[0], value=core.calValue(arr[1], need, times);
         if (name.indexOf("status:")==0) {
             var status=name.substring(7);
             core.setStatus(status, core.getStatus(status)+value);
@@ -1714,6 +1558,10 @@ control.prototype.doEffect = function (effect) {
         else if (name.indexOf("item:")==0) {
             var itemId=name.substring(5);
             core.setItem(itemId, core.itemCount(itemId)+value);
+        }
+        else if (name.indexOf("flag:")==0) {
+            var flag=name.substring(5);
+            core.setFlag(flag, core.getFlag(flag, 0)+value);
         }
     });
 }
@@ -2280,17 +2128,23 @@ control.prototype.openSettings = function (need) {
 
 ////// 自动存档 //////
 control.prototype.autosave = function (removeLast) {
-    if (core.status.event.id!=null)
-        return;
+    var addLast = true;
+    if (core.status.event.id!=null) {
+        // 检查是否是强制自动存档
+        if (core.status.event.id=='action' && core.hasFlag("forceSave")) addLast = false;
+        else return;
+    }
     var x=null;
     if (removeLast)
         x=core.status.route.pop();
-    // 加入当前方向
-    core.status.route.push("turn:"+core.getHeroLoc('direction'));
-    core.setLocalForage("autoSave", core.saveData())
-    core.status.route.pop();
+    if (addLast)
+        core.status.route.push("turn:"+core.getHeroLoc('direction'));
+    core.setLocalForage("autoSave", core.saveData());
+    if (addLast)
+        core.status.route.pop();
     if (removeLast && core.isset(x))
         core.status.route.push(x);
+    core.removeFlag("forceSave");
 }
 
 ////// 实际进行存读档事件 //////
@@ -2659,6 +2513,8 @@ control.prototype.playBgm = function (bgm) {
     }
 
     try {
+        // 缓存BGM
+        core.loader.loadBgm(bgm);
         // 如果当前正在播放，且和本BGM相同，直接忽略
         if (core.musicStatus.playingBgm == bgm && core.musicStatus.isPlaying) {
             return;
@@ -2831,17 +2687,28 @@ control.prototype.updateStatusBar = function () {
     }
 }
 
-control.prototype.triggerStatusBar = function (name) {
+control.prototype.triggerStatusBar = function (name, showToolbox) {
     if (name!='hide') name='show';
+
+    // 如果是隐藏 -> 显示工具栏，则先显示
+    if (name == 'hide' && showToolbox && !core.domStyle.showStatusBar && !core.hasFlag("showToolbox")) {
+        this.triggerStatusBar("show");
+        this.triggerStatusBar("hide", showToolbox);
+        return;
+    }
+
     var statusItems = core.dom.status;
     var toolItems = core.dom.tools;
     core.domStyle.showStatusBar = name == 'show';
     core.setFlag('hideStatusBar', core.domStyle.showStatusBar?null:true);
+    core.setFlag('showToolbox', showToolbox?true:null);
     if (!core.domStyle.showStatusBar) {
         for (var i = 0; i < statusItems.length; ++i)
             statusItems[i].style.opacity = 0;
-        for (var i = 0; i < toolItems.length; ++i)
-            toolItems[i].style.display = 'none';
+        if (!core.domStyle.isVertical || !showToolbox) {
+            for (var i = 0; i < toolItems.length; ++i)
+                toolItems[i].style.display = 'none';
+        }
     }
     else {
         for (var i = 0; i < statusItems.length; ++i)
@@ -2930,7 +2797,16 @@ control.prototype.updateGlobalAttribute = function (name) {
 
 ////// 改变工具栏为按钮1-7 //////
 control.prototype.setToolbarButton = function (useButton) {
-    if (!core.domStyle.showStatusBar) return;
+    if (!core.domStyle.showStatusBar) {
+        // 隐藏状态栏时检查竖屏
+        if (!core.domStyle.isVertical) {
+            for (var i = 0; i < core.dom.tools.length; ++i)
+                core.dom.tools[i].style.display = 'none';
+            return;
+        }
+        if (!core.hasFlag('showToolbox')) return;
+        else core.dom.tools.hard.style.display = 'block';
+    }
 
     if (!core.isset(useButton)) useButton = core.domStyle.toolbarBtn;
     if (!core.domStyle.isVertical) useButton = false;
@@ -3362,5 +3238,12 @@ control.prototype.domRenderer = function(){
             core.canvas[cn].canvas.style.height = core.bigmap.height*32*core.domStyle.scale + "px";
         });
     }
-
+    // 动态canvas
+    for (var i = 0; i < core.dymCanvas._list.length; i++) {
+        var spirit = core.dymCanvas._list[i];
+        core.dymCanvas[spirit.id].canvas.style.width = core.dymCanvas[spirit.id].canvas.width * core.domStyle.scale + "px";
+        core.dymCanvas[spirit.id].canvas.style.height = core.dymCanvas[spirit.id].canvas.height * core.domStyle.scale + "px";
+        core.dymCanvas[spirit.id].canvas.style.left = spirit.style.left * core.domStyle.scale + "px";
+        core.dymCanvas[spirit.id].canvas.style.top = spirit.style.top * core.domStyle.scale + "px"
+    }
 }

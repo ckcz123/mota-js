@@ -184,12 +184,6 @@ core.trigger(x, y)    [异步]
 触发某个地点的事件。
 
 
-core.clearMap(mapName)
-清空某个画布图层。
-mapName可为'bg', 'event', 'hero', 'event2', 'fg', 'damage', 'animate', 'weather', 'ui', 'data', 'all'之一。
-如果mapName为'all'，则为清空所有画布；否则只清空对应的画布。
-
-
 core.drawBlock(block)
 重绘某个图块。block应为core.status.thisMap.blocks中的一项。
 
@@ -471,6 +465,86 @@ core.maps.removeBlockByIds(floorId, ids)
 
 ========== core.ui.XXX 和对话框绘制相关的函数 ==========
 ui.js主要用来进行UI窗口的绘制，比如对话框、怪物手册、楼传器、存读档界面等等。
+
+
+core.ui.getContextByName(name)
+根据画布名找到一个画布的context；支持系统画布和自定义画布。如果不存在画布返回null。
+
+
+core.clearMap(name)
+清空某个画布图层。
+name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名。
+如果name也可以是'all'，若为all则为清空除色调层外的所有系统画布。
+
+
+core.ui.fillText(name, text, x, y, style, font)
+在某个画布上绘制一段文字。
+name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名。（下同）
+text为要绘制的文本，x,y为要绘制的坐标，style可选为绘制的样式，font可选为绘制的字体。
+
+
+core.ui.fillBoldText(canvas, text, style, x, y, font)
+在某个画布上绘制一个描黑边的文字。
+canvas为要绘制的画布的context，text为文本，style为颜色样式，x,y坐标，font可选为要绘制的字体。
+
+
+core.ui.fillRect(name, x, y, width, height, style)
+绘制一个矩形。style可选为绘制样式。
+
+
+core.ui.strokeRect(name, x, y, width, height, style)
+绘制一个矩形的边框。
+
+
+core.ui.drawLine(name, x1, y1, x2, y2, style, lineWidth)
+绘制一条线。lineWidth可选为线宽。
+
+
+core.ui.drawArrow(name, x1, y1, x2, y2, style, lineWidth)
+绘制一个箭头。
+
+
+core.ui.setFont(name, font) / core.ui.setLineWidth(name, lineWidth)
+设置一个画布的字体/线宽。
+
+
+core.ui.setAlpha(name, font) / core.ui.setOpacity(name, font)
+设置一个画布的绘制不透明度和画布本身的不透明度。
+两者区别如下：
+ - setAlpha是设置"接下来绘制的内容的不透明度"，不会对已经绘制的内容产生影响。比如setAlpha('ui', 0.5)则会在接下来的绘制中使用0.5的不透明度。
+ - setOpacity是设置"画布本身的不透明度"，已经绘制的内容也会产生影响。比如我已经在UI层绘制了一段文字，再setOpacity则也会看起来变得透明。
+尽量不要对系统画布使用setOpacity（因为会对已经绘制的内容产生影响），自定义创建的画布则不受此限制。
+
+
+core.ui.setFillStyle(name, style) / core.ui.setStrokeStype(name, style)
+设置一个画布的填充样式/描边样式。
+
+
+core.ui.createCanvas(name, x, y, width, height, zIndex)
+动态创建一个画布。name为要创建的画布名，如果已存在则会直接取用当前存在的。
+x,y为创建的画布相对窗口左上角的像素坐标，width,height为创建的长宽。
+zIndex为创建的纵向高度（关系到画布之间的覆盖），z值高的将覆盖z值低的；系统画布的z值可在个性化中查看。
+创建一个画布后，可以通过 core.dymCanvas[name] 进行调用。
+
+
+core.ui.findCanvas(name)
+寻找一个自定义画布的索引；如果存在该画布则返回对应的索引，不存在画布则返回-1。
+
+
+core.ui.relocateCanvas(name, x, y)
+重新定位一个自定义画布。
+
+
+core.ui.resizeCanvas(name, x, y)
+重新设置一个自定义画布的大小。
+
+
+core.ui.deleteCanvas(name)
+删除一个自定义画布。
+
+
+core.ui.deleteAllCanvas()
+清空所有的自定义画布。
 
 
 core.ui.drawThumbnail(floorId, canvas, blocks, x, y, size, heroLoc, heroIcon)

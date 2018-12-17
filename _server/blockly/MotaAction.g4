@@ -262,13 +262,12 @@ action
     |   unfollow_s
     |   animate_s
     |   vibrate_s
-    |   showImage_0_s
-    |   showImage_1_s
-    |   animateImage_0_s
-    |   animateImage_1_s
+    |   showImage_s
+    |   hideImage_s
+    |   showTextImage_s
+    |   moveImage_s
     |   showGif_0_s
     |   showGif_1_s
-    |   moveImage_0_s
     |   setFg_0_s
     |   setFg_1_s
     |   setWeather_s
@@ -279,6 +278,8 @@ action
     |   playBgm_s
     |   pauseBgm_s
     |   resumeBgm_s
+    |   loadBgm_s
+    |   freeBgm_s
     |   playSound_s
     |   setVolume_s
     |   win_s
@@ -814,14 +815,16 @@ return code;
 */;
 
 hideStatusBar_s
-    :   '隐藏状态栏' Newline
+    :   '隐藏状态栏' '不隐藏竖屏工具栏' Bool Newline
 
 
 /* hideStatusBar_s
 tooltip : hideStatusBar: 隐藏状态栏
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=hideStatusBar%ef%bc%9a%e9%9a%90%e8%97%8f%e7%8a%b6%e6%80%81%e6%a0%8f
 colour : this.soundColor
-var code = '{"type": "hideStatusBar"},\n';
+default : [false]
+Bool_0 = Bool_0?', "toolbox": true':'';
+var code = '{"type": "hideStatusBar"'+Bool_0+'},\n';
 return code;
 */;
 
@@ -1021,58 +1024,50 @@ var code = '{"type": "animate", "name": "'+IdString_0+'"'+EvalString_0+async+'},
 return code;
 */;
 
-showImage_0_s
-    :   '显示图片' EvalString '起点像素位置' 'x' PosString 'y' PosString Newline
+showImage_s
+    :   '显示图片' '图片编号' Int '图片' EvalString '起点像素位置' 'x' PosString 'y' PosString BGNL?
+        '放大率 : x' Int '% y' Int '% 不透明度' Number '时间' Int '不等待执行完毕' Bool Newline
     
 
-/* showImage_0_s
+/* showImage_s
 tooltip : showImage：显示图片
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=showimage%EF%BC%9A%E6%98%BE%E7%A4%BA%E5%9B%BE%E7%89%87
-default : ["bg.jpg","0","0"]
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=showImage%ef%bc%9a%e6%98%be%e7%a4%ba%e5%9b%be%e7%89%87
+default : [1,"bg.jpg","0","0",100,100,1,0,false]
 colour : this.printColor
-var code = '{"type": "showImage", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+']},\n';
+if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
+var async = Bool_0?', "async": true':'';
+var code = '{"type": "showImage", "code": '+Int_0+', "image": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "dw": '+Int_1+', "dh": '+Int_2+', "opacity": '+Number_0+', "time": '+Int_3+async+'},\n';
 return code;
 */;
 
-showImage_1_s
-    :   '清除所有图片' Newline
+showTextImage_s
+    :   '显示图片化文本' '文本内容' EvalString BGNL?
+        '图片编号' Int '起点像素位置' 'x' PosString 'y' PosString '不透明度' Number '时间' Int '不等待执行完毕' Bool Newline
     
 
-/* showImage_1_s
-tooltip : showImage：清除所有显示的图片
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=showimage%EF%BC%9A%E6%98%BE%E7%A4%BA%E5%9B%BE%E7%89%87
+/* showTextImage_s
+tooltip : showTextImage：显示图片化文本
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=showTextImage%ef%bc%9a%e6%98%be%e7%a4%ba%e6%96%87%e6%9c%ac%e5%8c%96%e5%9b%be%e7%89%87
 colour : this.printColor
-var code = '{"type": "showImage"},\n';
+default : ["可以使用setText事件来控制字体、颜色、大小、偏移量等",1,"0","0",1,0,false]
+if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
+var async = Bool_0?', "async": true':'';
+var code = '{"type": "showTextImage", "code": '+Int_0+', "text": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "opacity": '+Number_0+', "time": '+Int_1+async+'},\n';
 return code;
 */;
 
-animateImage_0_s
-    : '图片淡入' EvalString '起点像素位置' 'x' PosString 'y' PosString '动画时间' Int '保留图片' Bool '不等待执行完毕' Bool Newline
+hideImage_s
+    :   '清除图片' '图片编号' Int '时间' Int '不等待执行完毕' Bool Newline
     
 
-/* animateImage_0_s
-tooltip : animageImage：图片淡入
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=animateimage%EF%BC%9A%E5%9B%BE%E7%89%87%E6%B7%A1%E5%85%A5%E6%B7%A1%E5%87%BA
-default : ["bg.jpg","0","0",500,true,false]
+/* hideImage_s
+tooltip : hideImage：清除图片
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=hideImage%ef%bc%9a%e6%b8%85%e9%99%a4%e5%9b%be%e7%89%87
 colour : this.printColor
-var keep = Bool_0?', "keep": true':'';
-var async = Bool_1?', "async": true':'';
-var code = '{"type": "animateImage", "action": "show", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "time": '+Int_0+keep+async+'},\n';
-return code;
-*/;
-
-animateImage_1_s
-    : '图片淡出' EvalString '起点像素位置' 'x' PosString 'y' PosString '动画时间' Int '清除图片' Bool '不等待执行完毕' Bool Newline
-    
-
-/* animateImage_1_s
-tooltip : animageImage：图片淡出
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=animateimage%EF%BC%9A%E5%9B%BE%E7%89%87%E6%B7%A1%E5%85%A5%E6%B7%A1%E5%87%BA
-default : ["bg.jpg","0","0",500,true,false]
-colour : this.printColor
-var keep = Bool_0?', "keep": true':'';
-var async = Bool_1?', "async": true':'';
-var code = '{"type": "animateImage", "action": "hide", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "time": '+Int_0+keep+async+'},\n';
+default : [1,0,false]
+if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
+var async = Bool_0?', "async": true':'';
+var code = '{"type": "hideImage", "code": '+Int_0+', "time": '+Int_1+async+'},\n';
 return code;
 */;
 
@@ -1101,19 +1096,23 @@ var code = '{"type": "showGif"},\n';
 return code;
 */;
 
-moveImage_0_s
-    :   '图片移动' EvalString '起点像素位置' 'x' PosString 'y' PosString BGNL
-        '终点像素位置' 'x' PosString 'y' PosString '移动时间' Int '保留图片' Bool '不等待执行完毕' Bool Newline
+moveImage_s
+    :   '图片移动' '图片编号' Int '终点像素位置' 'x' PosString? 'y' PosString? BGNL?
+        '不透明度' EvalString? '移动时间' Int '不等待执行完毕' Bool Newline
     
 
-/* moveImage_0_s
+/* moveImage_s
 tooltip : moveImage：图片移动
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=moveimage%EF%BC%9A%E5%9B%BE%E7%89%87%E7%A7%BB%E5%8A%A8
-default : ["bg.jpg","0","0","0","0",500,true,false]
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=moveImage%ef%bc%9a%e5%9b%be%e7%89%87%e7%a7%bb%e5%8a%a8
+default : [1,'','','',500,false]
 colour : this.printColor
-var keep = Bool_0?', "keep": true':'';
-var async = Bool_1?', "async": true':'';
-var code = '{"type": "moveImage", "name": "'+EvalString_0+'", "from": ['+PosString_0+','+PosString_1+'], "to": ['+PosString_2+','+PosString_3+'], "time": '+Int_0+keep+async+'},\n';
+if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
+var toloc = '';
+if (PosString_0 && PosString_1)
+  toloc = ', "to": ['+PosString_0+','+PosString_1+']';
+EvalString_0 = (EvalString_0!=='') ? (', "opacity": '+EvalString_0):'';
+var async = Bool_0?', "async": true':'';
+var code = '{"type": "moveImage", "code": '+Int_0+toloc+EvalString_0+',"time": '+Int_1+async+'},\n';
 return code;
 */;
 
@@ -1282,6 +1281,32 @@ tooltip : resumeBgm: 恢复背景音乐
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=resumebgm%EF%BC%9A%E6%81%A2%E5%A4%8D%E8%83%8C%E6%99%AF%E9%9F%B3%E4%B9%90
 colour : this.soundColor
 var code = '{"type": "resumeBgm"},\n';
+return code;
+*/;
+
+loadBgm_s
+    :   '预加载背景音乐' EvalString Newline
+
+
+/* loadBgm_s
+tooltip : loadBgm: 预加载某个背景音乐，之后可以直接播放
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=loadBgm%ef%bc%9a%e9%a2%84%e5%8a%a0%e8%bd%bd%e4%b8%80%e4%b8%aa%e8%83%8c%e6%99%af%e9%9f%b3%e4%b9%90
+default : ["bgm.mp3"]
+colour : this.soundColor
+var code = '{"type": "loadBgm", "name": "'+EvalString_0+'"},\n';
+return code;
+*/;
+
+freeBgm_s
+    :   '释放背景音乐的缓存' EvalString Newline
+
+
+/* freeBgm_s
+tooltip : freeBgm: 释放背景音乐的缓存
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=freeBgm%ef%bc%9a%e9%87%8a%e6%94%be%e4%b8%80%e4%b8%aa%e8%83%8c%e6%99%af%e9%9f%b3%e4%b9%90%e7%9a%84%e7%bc%93%e5%ad%98
+default : ["bgm.mp3"]
+colour : this.soundColor
+var code = '{"type": "freeBgm", "name": "'+EvalString_0+'"},\n';
 return code;
 */;
 
@@ -2077,22 +2102,23 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['vibrate_s'].xmlText([data.time||0, data.async||false, this.next]);
       break;
     case "showImage": // 显示图片
-      if(this.isset(data.name)){
-        this.next = MotaActionBlocks['showImage_0_s'].xmlText([
-          data.name,data.loc[0],data.loc[1],this.next]);
-      } else {
-        this.next = MotaActionBlocks['showImage_1_s'].xmlText([
-          this.next]);
-      }
+      data.loc=data.loc||['','']
+      this.next = MotaActionBlocks['showImage_s'].xmlText([
+        data.code,data.image,data.loc[0],data.loc[1],data.dw,data.dh,data.opacity,data.time||0,data.async||false,this.next]);
       break;
-    case "animateImage": // 显示图片
-      if(data.action == 'show'){
-        this.next = MotaActionBlocks['animateImage_0_s'].xmlText([
-          data.name,data.loc[0],data.loc[1],data.time||0,data.keep||false,data.async||false,this.next]);
-      } else if (data.action == 'hide') {
-        this.next = MotaActionBlocks['animateImage_1_s'].xmlText([
-          data.name,data.loc[0],data.loc[1],data.time||0,data.keep||false,data.async||false,this.next]);
-      }
+    case "hideImage": // 清除图片
+      this.next = MotaActionBlocks['hideImage_s'].xmlText([
+        data.code,data.time||0,data.async||false,this.next]);
+      break;
+    case "showTextImage": // 显示图片化文本
+      data.loc=data.loc||['','']
+      this.next = MotaActionBlocks['showTextImage_s'].xmlText([
+        this.EvalString(data.text),data.code,data.loc[0],data.loc[1],data.opacity,data.time||0,data.async||false,this.next]);
+      break;
+    case "moveImage": // 移动图片
+      data.to=data.to||['','']
+      this.next = MotaActionBlocks['moveImage_s'].xmlText([
+        data.code, data.to[0], data.to[1], data.opacity, data.time||0, data.async||false, this.next]);
       break;
     case "showGif": // 显示动图
       if(this.isset(data.name)){
@@ -2103,11 +2129,6 @@ ActionParser.prototype.parseAction = function() {
             this.next]);
         }
         break;
-    case "moveImage": // 移动图片
-      this.next = MotaActionBlocks['moveImage_0_s'].xmlText([
-        data.name, data.from[0], data.from[1], data.to[0], data.to[1], data.time||0, data.keep||false, data.async||false, this.next
-      ]);
-      break;
     case "setFg": // 颜色渐变
       if(this.isset(data.color)){
         var alpha = data.color[3];
@@ -2163,6 +2184,14 @@ ActionParser.prototype.parseAction = function() {
     case "resumeBgm":
       this.next = MotaActionBlocks['resumeBgm_s'].xmlText([
         this.next]);
+      break
+    case "loadBgm":
+      this.next = MotaActionBlocks['loadBgm_s'].xmlText([
+        data.name,this.next]);
+      break
+    case "freeBgm":
+      this.next = MotaActionBlocks['freeBgm_s'].xmlText([
+        data.name,this.next]);
       break
     case "setVolume":
       this.next = MotaActionBlocks['setVolume_s'].xmlText([
@@ -2257,7 +2286,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "hideStatusBar":
       this.next = MotaActionBlocks['hideStatusBar_s'].xmlText([
-        this.next]);
+        data.toolbox||false,this.next]);
       break;
     case "updateEnemys":
       this.next = MotaActionBlocks['updateEnemys_s'].xmlText([
@@ -2355,7 +2384,7 @@ MotaActionFunctions.IdString_pre = function(IdString){
 
 MotaActionFunctions.PosString_pre = function(PosString){
   if (!PosString || /^-?\d+$/.test(PosString)) return PosString;
-  if (!(/^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ - :之外的字符,或者是没有以flag: 开头');
+  if (!(/^flag:[0-9a-zA-Z_][0-9a-zA-Z_:]*$/.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ :之外的字符,或者是没有以flag: 开头');
   return '"'+PosString+'"';
 }
 

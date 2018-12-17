@@ -655,6 +655,13 @@ actions.prototype.longClick = function (x, y, fromEvent) {
             core.doAction();
             return true;
         }
+        // 长按楼传器的箭头可以快速翻页
+        if (core.status.event.id=='fly') {
+            if ((x==10 || x==11) && (y==5 || y==9)) {
+                this.clickFly(x, y);
+                return true;
+            }
+        }
     }
     else if (!fromEvent) {
         core.waitHeroToStop(function () {
@@ -1073,13 +1080,13 @@ actions.prototype.clickShop = function(x,y) {
             core.status.event.selection=y-topIndex;
 
             var money = core.getStatus('money'), experience = core.getStatus('experience');
-            var times = shop.times, need = eval(shop.need);
+            var times = shop.times, need = core.calValue(shop.need, null, times);
             var use = shop.use;
             var use_text = use=='money'?"金币":"经验";
 
             var choice = choices[y-topIndex];
             if (core.isset(choice.need))
-                need = eval(choice.need);
+                need = core.calValue(choice.need, null, times);
 
             if (need > eval(use)) {
                 core.drawTip("你的"+use_text+"不足");
@@ -1094,7 +1101,7 @@ actions.prototype.clickShop = function(x,y) {
 
             // 更新属性
             choice.effect.split(";").forEach(function (t) {
-                core.doEffect(t);
+                core.doEffect(t, need, times);
             });
             core.updateStatusBar();
             shop.times++;
@@ -1880,9 +1887,11 @@ actions.prototype.clickSettings = function (x,y) {
                 core.ui.drawKeyBoard();
                 break;
             case 2:
+                core.clearLastEvent();
                 core.ui.drawMaps();
                 break;
             case 3:
+                core.clearLastEvent();
                 core.ui.drawPaint();
                 break;
             case 4:

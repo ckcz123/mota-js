@@ -162,6 +162,12 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "textarea",
                     "_lint": true,
                     "_data": "阻激夹域的伤害值计算"
+                },
+                "moveOneStep": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "勇士每走一步的操作"
                 }
             }
         },

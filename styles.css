@@ -21,7 +21,7 @@
     position: fixed;
     top: 10px;
     left: 10px;
-    z-index: 320;
+    z-index: 370;
 }
 
 #startPanel {
@@ -32,7 +32,7 @@
     left: 0;
     background-color: #fff;
     overflow: hidden;
-    z-index: 250;
+    z-index: 300;
 }
 
 #startTop {
@@ -42,7 +42,7 @@
     top: 0;
     left: 0;
     background-color: #000;
-    z-index: 300;
+    z-index: 350;
 }
 
 #startTopProgressBar {
@@ -77,12 +77,12 @@
     height: 100%;
     width: auto;
     transform:translate(-50%,-50%);
-    z-index: 210;
+    z-index: 260;
 }
 
 #startLogo {
     position: absolute;
-    z-index: 240;
+    z-index: 290;
     left: 0;
     right: 0;
     margin-left: auto;
@@ -95,7 +95,7 @@
 
 #startTitle {
     position: absolute;
-    z-index: 230;
+    z-index: 280;
 }
 
 #startButtonGroup {
@@ -106,7 +106,7 @@
     background-color: #000;
     opacity: 0.85;
     display: none;
-    z-index: 260;
+    z-index: 310;
     bottom: 0;
     margin-bottom: 7%;
 }
@@ -142,7 +142,7 @@
     display: none;
     color: #fff;
     background-color: #000;
-    z-index: 180;
+    z-index: 230;
 }
 
 #logoLabel {
@@ -170,7 +170,7 @@
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     background: url(project/images/ground.png) repeat;
-    z-index: 135;
+    z-index: 185;
     display: none;
 }
 #statusBar .status{
@@ -200,7 +200,7 @@
 #toolBar {
     position: absolute;
     background: url(project/images/ground.png) repeat;
-    z-index: 160;
+    z-index: 210;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -255,7 +255,7 @@ p#name {
     position: absolute;
     background: #000000;
     overflow: hidden;
-    z-index: 135;
+    z-index: 185;
 }
 
 #bg {
@@ -298,16 +298,12 @@ p#name {
     z-index: 100;
 }
 
-#image {
-    z-index: 105;
-}
-
 #ui {
-    z-index: 110;
+    z-index: 160;
 }
 
 #data {
-    z-index: 120;
+    z-index: 170;
 }
 
 .clearfix:before,

@@ -750,7 +750,7 @@ name是可选的，代表目标行走图的文件名。
 
 使用`{"type": "hideStatusBar"}`可以隐藏状态栏。读档或重新开始游戏时，状态栏会重新显示。
 
-隐藏状态栏的状态下，将无法点击工具栏里面的按钮（如存读档怪物手册等）。建议仅在事件中使用，事件结束前显示。
+可以添加`"toolbox": true`来不隐藏竖屏模式下的工具栏。
 
 ### showStatusBar：显示状态栏
 
@@ -923,7 +923,7 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 ]
 ```
 
-name为动画名，**请确保动画在main.js中的this.animates中被定义过。**
+name为动画名，**请确保动画在全塔属性中的animates中被定义过。**
 
 loc为动画的位置，可以是`[x,y]`表示在(x,y)点显示，也可以是字符串`"hero"`表示在勇士点显示。
 
@@ -939,48 +939,66 @@ loc可忽略，如果忽略则显示为事件当前点。
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    {"type": "showImage", "name": "bg.jpg", "loc": [231,297]}, // 在(231,297)显示bg.jpg
-    {"type": "showImage", "name": "1.png", "loc": [109,167]}, // 在(109,167)显示1.png
-    {"type": "showImage"} // 如果不指定name则清除所有图片。
+    {"type": "showImage", "code": 1, "image": "bg.jpg", "loc": [231,297], "dw": 100, "dy" : 100, "opacity": 1, "time" : 0}, // 在(231,297)显示bg.jpg
+    {"type": "showImage", "code": 12, "image": "1.png", "loc": [209,267], "dw": 100, "dy" : 100, "opacity": 0.5, "time" : 1000}, // 在(209,267)渐变显示1.png，渐变时间为1000毫秒，完成时不透明度为0.5，这张图片将遮盖上一张
+    {"type": "showImage", "code": 8, "image": "hero.png", "loc": [349,367], "dw": 50, "dy" : 50, "opacity": 1, "time" : 500, "async": true}, // 在(209,267)渐变显示hero.png，大小为原图片的一半，渐变时间为500毫秒，异步执行；这张图片将被上一张遮盖
 ]
 ```
 
-name为图片名。**请确保图片在data.js中的images中被定义过。**
+code为图片编号，如果两张图片重叠，编号较大会覆盖编号较小的。该值需要在1~50之间。
+
+image为图片名。**请确保图片在全塔属性中的images中被定义过。**
 
 loc为图片左上角坐标，以像素为单位进行计算。
 
-如果不指定name则清除所有显示的图片。
+dw和dh为图片的横向、纵向放大率，默认值为100，即不进行缩放。
 
-调用show/hide/move/animate等几个事件同样会清除所有显示的图片。
+opacity为图片不透明度，在0~1之间，默认值为1，即不透明。
 
-### animateImage：图片淡入淡出
-
-我们还可以使用 `{"type": "animateImage"}` 来造成显示图片的淡入淡出效果。
-
-``` js
-"x,y": [ // 实际执行的事件列表
-    {"type": "animateImage", "action": "show", "name": "bg.jpg", "loc": [231,297], "time": 500, "keep": true}, // 在(231,297)淡入bg.jpg，动画时间500ms
-    {"type": "animateImage", "action": "hide", "name": "1.png", "loc": [109,167], "time": 300, "async": true}, // 在(109,167)淡出1.png，动画时间300ms，异步执行
-]
-```
-
-action为淡入还是淡出，`show`为淡入，`hide`会淡出。
-
-name为图片名。**请确保图片在data.js中的images中被定义过。**
-
-loc为图片左上角坐标，以像素为单位进行计算。
-
-time为淡入淡出的时间，如果是0则忽略此项。
-
-keep可选，如果为true则在淡入图片后立刻调用showImage以保留图片，在淡出图片前先清除再动画。
+time为渐变时间，默认值为0，即不渐变直接显示。
 
 async可选，如果为true则会异步执行（即不等待当前事件执行完毕，立刻执行下一个事件）。
 
-如果多张图片的淡入淡出可以采用以下方式（仅供参考）：
+### showTextImage：显示文本化图片
 
-假设我现在已经有了`1.jpg`显示在屏幕上：
-- 淡入显示`2.png`：调用`animateImage`淡入图片，然后立刻调用`showImage`显示图片。
-- 淡出`1.png`：清除所有图片，`showImage`显示`2.png`，然后调用`animateImage`淡出`1.jpg`
+我们可以使用 `{"type": "showTextImage"}` 以图片的方式显示文本。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "showTextImage", "code": 1, "text": "第一排\n第二排\n\n空行后的一排", "loc": [231,297], "opacity": 1, "time" : 0}, // 在(231,297)显示"第一排\n第二排\n\n空行后的一排"
+]
+```
+
+code为图片编号，如果两张图片重叠，编号较大会覆盖编号较小的。该值需要在1~50之间。
+
+text为要显示的文本。默认行宽为416。
+
+loc为图片左上角坐标，以像素为单位进行计算。
+
+opacity为图片不透明度，在0~1之间，默认值为1，即不透明。
+
+time为渐变时间，默认值为0，即不渐变直接显示。
+
+async可选，如果为true则会异步执行（即不等待当前事件执行完毕，立刻执行下一个事件）。
+
+文本通过图片的方式显示后，即视为一张正常图片，可以被清除或者移动。
+
+### hideImage：清除图片
+
+我们可以使用 `{"type": "hideImage"}` 来清除一张图片。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "hideImage", "code": 1, "time" : 0}, // 使1号图片消失
+    {"type": "hideImage", "code": 12, "time" : 1000}, // 使12号图片渐变消失，时间为1000毫秒
+]
+```
+
+time为渐变时间，默认值为0，即不渐变直接消除。
+
+code为显示图片时输入的图片编号。
+
+async可选，如果为true则会异步执行（即不等待当前事件执行完毕，立刻执行下一个事件）。
 
 ### showGif：显示动图
 
@@ -993,7 +1011,7 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 ]
 ```
 
-name为图片名。**请确保图片在data.js中的images中被定义过。**
+name为图片名。**请确保图片在全塔属性中的images中被定义过。**
 
 loc为动图左上角坐标，以像素为单位进行计算。
 
@@ -1001,23 +1019,23 @@ loc为动图左上角坐标，以像素为单位进行计算。
 
 ### moveImage：图片移动
 
-我们可以使用 `{"type": "moveImage"}` 来造成图片移动效果。
+我们可以使用 `{"type": "moveImage"}` 来造成图片移动，淡入淡出等效果。
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    {"type": "moveImage", "name": "bg.jpg", "from": [231,297], "to": [22,333], "time": 500, "keep": true, "async": true},
+    {"type": "moveImage", "code": 1, "to": [22,333], "opacity": 1, "time": 1000}, // 将1号图片移动到(22,333)，动画时间为1000ms
+    {"type": "moveImage", "code": 12, "opacity": 0.5, "time": 500}, // 将二号图片的透明度变为0.5，动画时间500ms
+    {"type": "moveImage", "code": 1, "to": [109,167], "opacity": 0, "time": 300, "async": true}, // 将1号图片移动到(109,167)，透明度设为0（不可见），动画时间300ms，异步执行
 ]
 ```
 
-name为图片名。**请确保图片在data.js中的images中被定义过。**
+code为图片编号。该值需要在1~50之间。
 
-from为起点图片左上角坐标，以像素为单位进行计算。
+to为终点图片左上角坐标，以像素为单位进行计算，不填写则视为当前图片位置。
 
-to为终点图片左上角坐标，以像素为单位进行计算。
+opacity为完成时图片不透明度，移动过程中逐渐变化。在0~1之间。
 
 time为总移动的时间。
-
-keep可选，如果为true则在移动结束后立刻调用showImage以保留图片。
 
 async可选，如果为true则会异步执行（即不等待当前事件执行完毕，立刻执行下一个事件）。
 
@@ -1198,6 +1216,20 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 ### resumeBgm：恢复背景音乐
 
 使用`{"type": "resumeBgm"}`可以恢复背景音乐的播放。
+
+### loadBgm：预加载一个背景音乐
+
+使用loadBgm可以预加载一个背景音乐。
+
+使用方法：`{"type": "loadBgm", "name": "bgm.mp3"}`
+
+有关BGM播放的详细说明参见[背景音乐](element#背景音乐)
+
+### freeBgm：释放一个背景音乐的缓存
+
+使用freeBgm可以预加载一个背景音乐。
+
+使用方法：`{"type": "freeBgm", "name": "bgm.mp3"}`
 
 ### playSound：播放音效
 
@@ -1851,8 +1883,8 @@ if (core.getFlag("door",0)==2) {
             {"text": "攻击+4", "effect": "status:atk+=4"},
             {"text": "防御+4", "effect": "status:def+=4"},
             {"text": "魔防+10", "effect": "status:mdef+=10"}
-            // effect只能对status和item进行操作，不能修改flag值。
-            // 必须是X+=Y的形式，其中Y可以是一个表达式，以status:xxx或item:xxx为参数
+            // effect可以对status，item和flag进行操作。
+            // 必须是X+=Y的形式，其中Y可以是一个表达式，以status:xxx, item:xxx或flag:xxx为参数
             // 其他effect样例：
             // "item:yellowKey+=1" 黄钥匙+1
             // "item:pickaxe+=3" 破墙镐+3
@@ -1894,7 +1926,7 @@ if (core.getFlag("door",0)==2) {
 - text 为商店所说的话。可以用${need}表示需要的数值。
 - choices 为商店的各个选项，是一个list，每一项是一个选项
   - text为显示文字。请注意这里不支持 ${} 的表达式计算。
-  - effect 为该选项的效果；effect只能对status或items进行操作，且必须是 `status:xxx+=yyy` 或 `item:xxx+=yyy`的形式。即中间必须是+=符号。
+  - effect 为该选项的效果；effect必须是 `status:xxx+=yyy`, `item:xxx+=yyy`或`flag:xxx+=yyy`的形式。即中间必须是+=符号。
   - 如有多个effect（例如升级全属性提升），使用分号分开，参见经验商店的写法。
 
 像这样定义了全局商店后，即可在快捷栏中看到。
@@ -2168,6 +2200,7 @@ if (core.getFlag("door",0)==2) {
     core.waitHeroToStop(function() {
         core.removeGlobalAnimate(0,0,true);
         core.clearMap('all'); core.clearMap('curtain'); // 清空全地图
+        core.deleteAllCanvas();
         core.drawText([
             "\t[恭喜通关]你的分数是${status:hp}。"
         ], function () {

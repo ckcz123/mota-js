@@ -39,14 +39,14 @@ utils.prototype.init = function () {
 }
 
 ////// 将文字中的${和}（表达式）进行替换 //////
-utils.prototype.replaceText = function (text) {
+utils.prototype.replaceText = function (text, need, times) {
     return text.replace(/\${(.*?)}/g, function (word, value) {
-        return core.calValue(value);
+        return core.calValue(value, need, times);
     });
 }
 
 ////// 计算表达式的值 //////
-utils.prototype.calValue = function (value) {
+utils.prototype.calValue = function (value, need, times) {
     if (!core.isset(value)) return value;
     if (typeof value == 'number') {
         return value;
@@ -839,9 +839,9 @@ utils.prototype.decodeCanvas = function (arr, width, height) {
 }
 
 utils.prototype.consoleOpened = function () {
+    if (!core.flags.checkConsole) return false;
     if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized)
         return true;
-    if (!core.platform.isPC) return false;
     var threshold = 160;
     var zoom = Math.min(window.outerWidth/window.innerWidth, window.outerHeight/window.innerHeight);
     return window.outerWidth - zoom*window.innerWidth > threshold

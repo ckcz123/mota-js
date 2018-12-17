@@ -127,6 +127,38 @@ enemys.prototype.getExtraDamage = function (enemy) {
     return extra_damage;
 }
 
+enemys.prototype.getDamageString = function (enemy, x, y) {
+    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
+    var damage = core.enemys.getDamage(enemy, x, y);
+
+    var color = '#000000';
+
+    if (damage == null) {
+        damage = "???";
+        color = '#FF0000';
+    }
+    else {
+        if (damage <= 0) color = '#00FF00';
+        else if (damage < core.status.hero.hp / 3) color = '#FFFFFF';
+        else if (damage < core.status.hero.hp * 2 / 3) color = '#FFFF00';
+        else if (damage < core.status.hero.hp) color = '#FF7F00';
+        else color = '#FF0000';
+
+        damage = core.formatBigNumber(damage, true);
+        if (core.enemys.hasSpecial(enemy, 19))
+            damage += "+";
+        if (core.enemys.hasSpecial(enemy, 21))
+            damage += "-";
+        if (core.enemys.hasSpecial(enemy, 11))
+            damage += "^";
+    }
+
+    return {
+        "damage": damage,
+        "color": color
+    };
+}
+
 ////// 接下来N个临界值和临界减伤计算 //////
 enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];

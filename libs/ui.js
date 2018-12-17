@@ -383,6 +383,7 @@ ui.prototype.getTitleAndIcon = function (content) {
 
 // 绘制选择光标
 ui.prototype.drawWindowSelector = function(background,x,y,w,h) {
+    w = Math.round(w), h = Math.round(h);
     if (core.isset(core.dymCanvas.selector)) {
         core.relocateCanvas("selector", x, y);
         core.resizeCanvas("selector", w, h);
@@ -410,19 +411,30 @@ ui.prototype.drawWindowSelector = function(background,x,y,w,h) {
 ui.prototype.drawWindowSkin = function(background,canvas,x,y,w,h,direction,px,py) {
 	// 仿RM窗口皮肤 ↓
     var dstImage = core.canvas[canvas];
+    var dx = 0, dy = 0;
+    // 绘制背景
+    dstImage.drawImage(background, 0, 0, 128, 128, x+2, y+2, w-4, h-4);
+    // 绘制边框
+    // 上方
+    dstImage.drawImage(background, 128, 0,     16,     16,      x,      y,     16,     16);
+    for (dx = 0; dx < w - 64; dx += 32) {
+    dstImage.drawImage(background, 144, 0,     32,     16,x+dx+16,      y,     32,     16);
+    dstImage.drawImage(background, 144,48,     32,     16,x+dx+16, y+h-16,     32,     16);
+    }
+    dstImage.drawImage(background, 144, 0,w-dx-32,     16,x+dx+16,      y,w-dx-32,     16);
+    dstImage.drawImage(background, 144,48,w-dx-32,     16,x+dx+16, y+h-16,w-dx-32,     16);
+    dstImage.drawImage(background, 176, 0,     16,     16, x+w-16,      y,     16,     16);
+    // 左右
+    for (dy = 0; dy < h - 64; dy += 32) {
+    dstImage.drawImage(background, 128,16,     16,     32,      x,y+dy+16,     16,     32);
+    dstImage.drawImage(background, 176,16,     16,     32, x+w-16,y+dy+16,     16,     32);
+    }
+    dstImage.drawImage(background, 128,16,     16,h-dy-32,      x,y+dy+16,     16,h-dy-32);
+    dstImage.drawImage(background, 176,16,     16,h-dy-32, x+w-16,y+dy+16,     16,h-dy-32);
+    // 下方
+    dstImage.drawImage(background, 128,48,     16,     16,      x, y+h-16,     16,     16);
+    dstImage.drawImage(background, 176,48,     16,     16, x+w-16, y+h-16,     16,     16);
 
-    // back
-    dstImage.drawImage(background,0,0,128,128,x+1,y+1,w-2,h-2);
-    // corner
-    dstImage.drawImage(background,128,0,16,16,x,y,16,16);
-    dstImage.drawImage(background,176,0,16,16,x+w-16,y,16,16);
-    dstImage.drawImage(background,128,48,16,16,x,y+h-16,16,16);
-    dstImage.drawImage(background,176,48,16,16,x+w-16,y+h-16,16,16);
-    // border
-    dstImage.drawImage(background,144,0,32,16,x+16,y,w-32,16);
-    dstImage.drawImage(background,144,48,32,16,x+16,y+h-16,w-32,16);
-    dstImage.drawImage(background,128,16,16,32,x,y+16,16,h-32);
-    dstImage.drawImage(background,176,16,16,32,x+w-16,y+16,16,h-32);
     // arrow
     if(core.isset(px) && core.isset(py)){
     	if(direction == 'up'){

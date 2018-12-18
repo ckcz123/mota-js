@@ -166,21 +166,22 @@ control.prototype.setRequestAnimationFrame = function () {
         }
 
         // weather
-        if (core.isPlaying() && timestamp-core.animateFrame.weather.time>30) {
+        if (core.isPlaying() && timestamp-core.animateFrame.weather.time>30 && core.isset(core.dymCanvas.weather)) {
+            var ctx = core.dymCanvas.weather;
 
             var ox = core.bigmap.offsetX, oy = core.bigmap.offsetY;
 
             if (core.animateFrame.weather.type == 'rain' && core.animateFrame.weather.level > 0) {
                 core.clearMap('weather');
-                core.canvas.weather.strokeStyle = 'rgba(174,194,224,0.8)';
-                core.canvas.weather.lineWidth = 1;
-                core.canvas.weather.lineCap = 'round';
+                ctx.strokeStyle = 'rgba(174,194,224,0.8)';
+                ctx.lineWidth = 1;
+                ctx.lineCap = 'round';
 
                 core.animateFrame.weather.nodes.forEach(function (p) {
-                    core.canvas.weather.beginPath();
-                    core.canvas.weather.moveTo(p.x-ox, p.y-oy);
-                    core.canvas.weather.lineTo(p.x + p.l * p.xs - ox, p.y + p.l * p.ys - oy);
-                    core.canvas.weather.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(p.x-ox, p.y-oy);
+                    ctx.lineTo(p.x + p.l * p.xs - ox, p.y + p.l * p.ys - oy);
+                    ctx.stroke();
 
                     p.x += p.xs;
                     p.y += p.ys;
@@ -191,15 +192,14 @@ control.prototype.setRequestAnimationFrame = function () {
 
                 })
 
-                core.canvas.weather.fill();
+                ctx.fill();
 
             }
             else if (core.animateFrame.weather.type == 'snow' && core.animateFrame.weather.level > 0) {
 
                 core.clearMap('weather');
-
-                core.canvas.weather.fillStyle = "rgba(255, 255, 255, 0.8)";
-                core.canvas.weather.beginPath();
+                ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+                ctx.beginPath();
 
                 if (!core.isset(core.animateFrame.weather.data))
                     core.animateFrame.weather.data = 0;
@@ -207,8 +207,8 @@ control.prototype.setRequestAnimationFrame = function () {
 
                 var angle = core.animateFrame.weather.data;
                 core.animateFrame.weather.nodes.forEach(function (p) {
-                    core.canvas.weather.moveTo(p.x - ox, p.y - oy);
-                    core.canvas.weather.arc(p.x - ox, p.y - oy, p.r, 0, Math.PI * 2, true);
+                    ctx.moveTo(p.x - ox, p.y - oy);
+                    ctx.arc(p.x - ox, p.y - oy, p.r, 0, Math.PI * 2, true);
 
                     // update
                     p.x += Math.sin(angle) * 2;
@@ -233,7 +233,7 @@ control.prototype.setRequestAnimationFrame = function () {
 
                 })
 
-                core.canvas.weather.fill();
+                ctx.fill();
 
             }
             else if (core.animateFrame.weather.type == 'fog' && core.animateFrame.weather.level > 0) {
@@ -242,7 +242,7 @@ control.prototype.setRequestAnimationFrame = function () {
                     var w = 416, h = 416;
                     core.setAlpha('weather', 0.5);
                     core.animateFrame.weather.nodes.forEach(function (p) {
-                        core.canvas.weather.drawImage(core.animateFrame.weather.fog, p.x - ox, p.y - oy, w, h);
+                        ctx.drawImage(core.animateFrame.weather.fog, p.x - ox, p.y - oy, w, h);
 
                         p.x += p.xs;
                         p.y += p.ys;
@@ -1364,7 +1364,8 @@ control.prototype.setWeather = function (type, level) {
 
     // 非雨雪
     if (type!='rain' && type!='snow' && type!='fog') {
-        core.clearMap('weather')
+        // core.clearMap('weather');
+        core.deleteCanvas('weather')
         core.animateFrame.weather.type = null;
         core.animateFrame.weather.level = 0;
         core.animateFrame.weather.nodes = [];
@@ -1383,10 +1384,9 @@ control.prototype.setWeather = function (type, level) {
     level *= parseInt(20*core.bigmap.width*core.bigmap.height/169);
     // 计算当前的宽高
 
-    core.clearMap('weather')
+    core.createCanvas('weather', 0, 0, 416, 416, 80);
     core.animateFrame.weather.type = type;
     core.animateFrame.weather.level = level;
-
     core.animateFrame.weather.nodes = [];
 
     if (type == 'rain') {

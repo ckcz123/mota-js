@@ -287,7 +287,6 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
     core.status.played = false;
     core.clearStatus();
     core.clearMap('all');
-    core.clearMap('curtain');
     core.deleteAllCanvas();
 
     // 重置音量

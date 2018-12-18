@@ -121,7 +121,6 @@ events.prototype.startGame = function (hard, seed, route, callback) {
         else core.utils.__init_seed();
 
         core.clearMap('all');
-        core.clearMap('curtain');
         core.deleteAllCanvas();
         core.clearStatusBar();
 
@@ -1464,7 +1463,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
     core.status.replay.animate=true;
     core.dom.floorNameLabel.innerHTML = core.status.maps[floorId].title;
     if (!core.isset(stair) && !core.isset(heroLoc))
-        heroLoc = core.status.hero.loc;
+        heroLoc = core.clone(core.status.hero.loc);
     if (core.isset(stair)) {
         if (!core.isset(heroLoc)) heroLoc={};
 
@@ -1487,6 +1486,8 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             heroLoc.y=core.status.hero.loc.y;
         }
     }
+    if (!core.isset(heroLoc.direction)) heroLoc.direction = core.status.hero.loc.direction;
+
     if (core.status.maps[floorId].canFlyTo && core.status.hero.flyRange.indexOf(floorId)<0) {
         core.status.hero.flyRange.push(floorId);
         core.status.hero.flyRange.sort(function (a, b) {
@@ -1498,14 +1499,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
 
         var changing = function () {
 
-            core.events.eventdata.changingFloor(floorId, fromLoad);
-
-            if (core.isset(heroLoc.direction))
-                core.setHeroLoc('direction', heroLoc.direction);
-            core.setHeroLoc('x', heroLoc.x);
-            core.setHeroLoc('y', heroLoc.y);
-            core.clearMap('hero');
-            core.drawHero();
+            core.events.eventdata.changingFloor(floorId, heroLoc, fromLoad);
 
             var changed = function () {
                 core.unLockControl();

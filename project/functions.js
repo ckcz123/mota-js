@@ -59,8 +59,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.stopReplay();
 	core.waitHeroToStop(function() {
 		core.removeGlobalAnimate(0,0,true);
-		core.clearMap('all'); core.clearMap('curtain'); // 清空全地图
-		core.deleteAllCanvas();
+		core.clearMap('all'); // 清空全地图
+		core.deleteAllCanvas(); // 删除所有创建的画布
 		// 请注意：
 		// 成绩统计时是按照hp进行上传并排名，因此光在这里改${status:hp}是无效的
 		// 如需按照其他的的分数统计方式，请先将hp设置为你的得分
@@ -85,9 +85,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		});
 	})
 },
-        "changingFloor": function (floorId, fromLoad) {
+        "changingFloor": function (floorId, heroLoc, fromLoad) {
 	// 正在切换楼层过程中执行的操作；此函数的执行时间是“屏幕完全变黑“的那一刻
-	// floorId为要切换到的楼层ID；fromLoad表示是否是从读档造成的切换
+	// floorId为要切换到的楼层ID；heroLoc表示勇士切换到的位置；fromLoad表示是否是从读档造成的切换
 
 	// ---------- 此时还没有进行切换，当前floorId还是原来的 ---------- //
 	var currentId = core.status.floorId || null; // 获得当前的floorId，可能为null
@@ -96,10 +96,23 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	//     core.deleteAllCanvas();
 	// }
 	
-	// 设置新楼层名
-	core.events.setFloorName(floorId);
 	// 重置画布尺寸
 	core.maps.resizeMap(floorId);
+	// 检查重生怪并重置
+	if (!fromLoad) {
+		core.status.maps[floorId].blocks.forEach(function(block) {
+			if (block.disable && core.isset(block.event) && block.event.cls.indexOf('enemy')==0 &&
+					core.enemys.hasSpecial(core.material.enemys[block.event.id].special, 23)) {
+				block.disable = false;
+			}
+		});
+	}
+	// 设置勇士的位置
+	core.status.hero.loc = heroLoc;
+
+	// ---------- 重绘新地图；这一步将会设置core.status.floorId ---------- //
+	core.drawMap(floorId);
+	
 	// 切换楼层BGM
 	if (core.isset(core.status.maps[floorId].bgm)) {
 		var bgm = core.status.maps[floorId].bgm;
@@ -111,11 +124,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (!core.isset(color) && core.isset(core.status.maps[floorId].color))
 		color = core.status.maps[floorId].color;
 	if (core.isset(color)) {
-		core.clearMap('curtain');
 		core.fillRect('curtain',0,0,416,416,core.arrayToRGBA(color));
 		core.status.curtainColor = color;
 	}
-	else core.clearMap('curtain');
 	// 更改天气
 	var weather = core.getFlag('__weather__', null);
 	if (!core.isset(weather) && core.isset(core.status.maps[floorId].weather))
@@ -123,22 +134,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.isset(weather))
 		core.setWeather(weather[0], weather[1]);
 	else core.setWeather();
-	// 清除动图
-	core.dom.gif.innerHTML = '';
-	
-	// 检查重生怪并重置
-	if (!fromLoad) {
-		core.status.maps[floorId].blocks.forEach(function(block) {
-			if (block.disable && core.isset(block.event) && block.event.cls.indexOf('enemy')==0 &&
-					core.enemys.hasSpecial(core.material.enemys[block.event.id].special, 23)) {
-				block.disable = false;
-			}
-		});
-	}
-	
-	// ---------- 绘制地图；这一步将会设置core.status.floorId ---------- //
-	core.drawMap(floorId);
-	
+
+	// ...可以新增一些其他内容，比如创建个画布在右上角显示什么内容等等
+
 },
         "afterChangeFloor": function (floorId, fromLoad) {
 	// 转换楼层结束的事件；此函数会在整个楼层切换完全结束后再执行
@@ -1169,14 +1167,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 },
         "drawAbout": function() {
 	// 绘制“关于”界面
-	if (!core.isPlaying()) {
-		core.status.event = {'id': null, 'data': null};
-		core.dom.startPanel.style.display = 'none';
-	}
-	core.lockControl();
+	core.ui.closePanel();
 	core.status.event.id = 'about';
 
-	core.clearLastEvent();
 	var left = 48, top = 36, right = 416 - 2 * left, bottom = 416 - 2 * top;
 
 	core.setAlpha('ui', 0.85);

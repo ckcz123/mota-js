@@ -17,179 +17,162 @@ ui.prototype.init = function () {
 
 ////////////////// 地图设置
 
+ui.prototype.getContextByName = function (name) {
+    if (core.isset(core.canvas[name]))
+        return core.canvas[name];
+    if (core.isset(core.dymCanvas[name]))
+        return core.dymCanvas[name];
+    return null;
+}
+
 ////// 清除地图 //////
-ui.prototype.clearMap = function (map, x, y, width, height) {
-    if (map == 'all') {
+ui.prototype.clearMap = function (name, x, y, width, height) {
+    if (name == 'all') {
         for (var m in core.canvas) {
-            // 不擦除curtain层
-            if (m=='curtain') continue;
             core.canvas[m].clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
         }
         core.dom.gif.innerHTML = "";
+        core.removeGlobalAnimate(0,0,true);
     }
     else {
-        core.canvas[map].clearRect(x||0, y||0, width||core.bigmap.width*32, height||core.bigmap.height*32);
+        var ctx = this.getContextByName(name);
+        if (ctx) ctx.clearRect(x||0, y||0, width||ctx.canvas.width, height||ctx.canvas.height);
     }
 }
 
 ////// 在某个canvas上绘制一段文字 //////
-ui.prototype.fillText = function (map, text, x, y, style, font) {
+ui.prototype.fillText = function (name, text, x, y, style, font) {
     if (core.isset(style)) {
-        core.setFillStyle(map, style);
+        core.setFillStyle(name, style);
     }
     if (core.isset(font)) {
-        core.setFont(map, font);
+        core.setFont(name, font);
     }
-    core.canvas[map].fillText(text, x, y);
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.fillText(text, x, y);
 }
 
 ////// 在某个canvas上绘制粗体 //////
-ui.prototype.fillBoldText = function (canvas, text, color, x, y, font) {
+ui.prototype.fillBoldText = function (canvas, text, style, x, y, font) {
     if (core.isset(font)) canvas.font = font;
     canvas.fillStyle = '#000000';
     canvas.fillText(text, x-1, y-1);
     canvas.fillText(text, x-1, y+1);
     canvas.fillText(text, x+1, y-1);
     canvas.fillText(text, x+1, y+1);
-    canvas.fillStyle = color;
+    canvas.fillStyle = style;
     canvas.fillText(text, x, y);
 }
 
 ////// 在某个canvas上绘制一个矩形 //////
-ui.prototype.fillRect = function (map, x, y, width, height, style) {
+ui.prototype.fillRect = function (name, x, y, width, height, style) {
     if (core.isset(style)) {
-        core.setFillStyle(map, style);
+        core.setFillStyle(name, style);
     }
-    core.canvas[map].fillRect(x, y, width, height);
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.fillRect(x, y, width, height);
 }
 
 ////// 在某个canvas上绘制一个矩形的边框 //////
-ui.prototype.strokeRect = function (map, x, y, width, height, style, lineWidth) {
+ui.prototype.strokeRect = function (name, x, y, width, height, style, lineWidth) {
     if (core.isset(style)) {
-        core.setStrokeStyle(map, style);
+        core.setStrokeStyle(name, style);
     }
     if (core.isset(lineWidth)) {
-        core.setLineWidth(map, lineWidth);
+        core.setLineWidth(name, lineWidth);
     }
-    core.canvas[map].strokeRect(x, y, width, height);
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.strokeRect(x, y, width, height);
 }
 
 ////// 在某个canvas上绘制一条线 //////
-ui.prototype.drawLine = function (map, x1, y1, x2, y2, style, lineWidth) {
+ui.prototype.drawLine = function (name, x1, y1, x2, y2, style, lineWidth) {
     if (core.isset(style)) {
-        core.setStrokeStyle(map, style);
+        core.setStrokeStyle(name, style);
     }
     if (core.isset(lineWidth)) {
-        core.setLineWidth(map, lineWidth);
+        core.setLineWidth(name, lineWidth);
     }
-    core.canvas[map].beginPath();
-    core.canvas[map].moveTo(x1, y1);
-    core.canvas[map].lineTo(x2, y2);
-    core.canvas[map].stroke();
+    var ctx = this.getContextByName(name);
+    if (ctx) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+    }
 }
 
 ////// 在某个canvas上绘制一个箭头 //////
-ui.prototype.drawArrow = function (map, x1, y1, x2, y2, style, lineWidth) {
+ui.prototype.drawArrow = function (name, x1, y1, x2, y2, style, lineWidth) {
     if (x1==x2 && y1==y2) return;
     if (core.isset(style)) {
-        core.setStrokeStyle(map, style);
+        core.setStrokeStyle(name, style);
     }
     if (core.isset(lineWidth)) {
-        core.setLineWidth(map, lineWidth);
+        core.setLineWidth(name, lineWidth);
     }
-    var head = 10;
-    var dx = x2-x1, dy=y2-y1;
-    var angle = Math.atan2(dy,dx);
-    core.canvas[map].beginPath();
-    core.canvas[map].moveTo(x1,y1);
-    core.canvas[map].lineTo(x2, y2);
-    core.canvas[map].lineTo(x2-head*Math.cos(angle-Math.PI/6),y2-head*Math.sin(angle-Math.PI/6));
-    core.canvas[map].moveTo(x2, y2);
-    core.canvas[map].lineTo(x2-head*Math.cos(angle+Math.PI/6),y2-head*Math.sin(angle+Math.PI/6));
-    core.canvas[map].stroke();
+    var ctx = this.getContextByName(name);
+    if (ctx) {
+        var head = 10;
+        var dx = x2-x1, dy=y2-y1;
+        var angle = Math.atan2(dy,dx);
+        ctx.beginPath();
+        ctx.moveTo(x1,y1);
+        ctx.lineTo(x2, y2);
+        ctx.lineTo(x2-head*Math.cos(angle-Math.PI/6),y2-head*Math.sin(angle-Math.PI/6));
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2-head*Math.cos(angle+Math.PI/6),y2-head*Math.sin(angle+Math.PI/6));
+        ctx.stroke();
+    }
 }
 
 ////// 设置某个canvas的文字字体 //////
-ui.prototype.setFont = function (map, font) {
-    core.canvas[map].font = font;
+ui.prototype.setFont = function (name, font) {
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.font = font;
 }
 
 ////// 设置某个canvas的线宽度 //////
-ui.prototype.setLineWidth = function (map, lineWidth) {
-    if (map == 'all') {
-        for (var m in core.canvas) {
-            core.canvas[m].lineWidth = lineWidth;
-        }
-    }
-    core.canvas[map].lineWidth = lineWidth;
+ui.prototype.setLineWidth = function (name, lineWidth) {
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.lineWidth = lineWidth;
 }
 
 ////// 保存某个canvas状态 //////
-ui.prototype.saveCanvas = function (map) {
-    core.canvas[map].save();
+ui.prototype.saveCanvas = function (name) {
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.save();
 }
 
 ////// 加载某个canvas状态 //////
-ui.prototype.loadCanvas = function (map) {
-    core.canvas[map].restore();
-}
-
-////// 设置某个canvas边框属性 //////
-ui.prototype.setStrokeStyle = function (map, style) {
-    if (map == 'all') {
-        for (var m in core.canvas) {
-            core.canvas[m].strokeStyle = style;
-        }
-    }
-    else {
-        core.canvas[map].strokeStyle = style;
-    }
+ui.prototype.loadCanvas = function (name) {
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.restore();
 }
 
 ////// 设置某个canvas的alpha值 //////
-ui.prototype.setAlpha = function (map, alpha) {
-    if (map == 'all') {
-        for (var m in core.canvas) {
-            core.canvas[m].globalAlpha = alpha;
-        }
-    }
-    else core.canvas[map].globalAlpha = alpha;
+ui.prototype.setAlpha = function (name, alpha) {
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.globalAlpha = alpha;
 }
 
 ////// 设置某个canvas的透明度；尽量不要使用本函数，而是全部换成setAlpha实现 //////
-ui.prototype.setOpacity = function (map, opacity) {
-    if (map == 'all') {
-        for (var m in core.canvas) {
-            core.canvas[m].canvas.style.opacity = opacity;
-        }
-    }
-    else if (core.isset(core.canvas[map])) {
-        core.canvas[map].canvas.style.opacity = opacity;
-    }
-    else if (core.isset(core.dymCanvas[map])) {
-        core.dymCanvas[map].canvas.style.opacity = opacity;
-    }
-    else
-        console.log("未找到"+map);
+ui.prototype.setOpacity = function (name, opacity) {
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.canvas.style.opacity = opacity;
 }
 
 ////// 设置某个canvas的绘制属性（如颜色等） //////
-ui.prototype.setFillStyle = function (map, style) {
-    if (map == 'all') {
-        for (var m in core.canvas) {
-            core.canvas[m].fillStyle = style;
-        }
-    }
-    else if (core.isset(core.canvas[map])) {
-        core.canvas[map].fillStyle = style;
-    }
-    else if (core.isset(core.dymCanvas[map])) {
-        core.dymCanvas[map].fillStyle = style;
-}
-    else
-        console.log("未找到"+map);
+ui.prototype.setFillStyle = function (name, style) {
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.fillStyle = style;
 }
 
+////// 设置某个canvas边框属性 //////
+ui.prototype.setStrokeStyle = function (name, style) {
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.strokeStyle = style;
+}
 
 
 ///////////////// UI绘制
@@ -1833,8 +1816,7 @@ ui.prototype.drawMaps = function (index, x, y) {
         core.status.event.data = null;
         core.clearLastEvent();
 
-        core.clearMap('animate');
-        core.fillRect('animate', 0, 0, 416, 416, 'rgba(0,0,0,0.4)');
+        core.fillRect('ui', 0, 0, 416, 416, 'rgba(0,0,0,0.4)');
 
         core.strokeRect('ui', 66, 2, 284, 60, "#FFD700", 4);
         core.strokeRect('ui', 2, 66, 60, 284);
@@ -1874,8 +1856,6 @@ ui.prototype.drawMaps = function (index, x, y) {
         return;
     }
 
-    core.clearMap('animate');
-
     var damage = (core.status.event.data||{}).damage, paint =  (core.status.event.data||{}).paint;
     var all = (core.status.event.data||{}).all;
     if (core.isset(index.damage)) damage=index.damage;
@@ -1901,8 +1881,7 @@ ui.prototype.drawMaps = function (index, x, y) {
     core.status.event.data = {"index": index, "x": x, "y": y, "damage": damage, "paint": paint, "all": all};
 
     clearTimeout(core.interval.tipAnimate);
-    core.clearMap('ui');
-    core.setAlpha('ui', 1);
+    core.clearLastEvent();
     this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 0, 0, 416, x, y);
 
     // 绘图
@@ -2739,18 +2718,16 @@ ui.prototype.drawPaint = function () {
             core.status.event.data = {"x": null, "y": null, "erase": false};
 
             core.clearLastEvent();
-            core.clearMap('route');
-
-            core.setAlpha('route', 1);
+            core.createCanvas('paint', -core.bigmap.offsetX, -core.bigmap.offsetY, 32*core.bigmap.width, 32*core.bigmap.height, 95);
 
             // 将已有的内容绘制到route上
             var value = core.paint[core.status.floorId];
             if (core.isset(value)) value = LZString.decompress(value).split(",");
             core.utils.decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
-            core.canvas.route.drawImage(core.bigmap.tempCanvas.canvas, 0, 0);
+            core.dymCanvas.paint.drawImage(core.bigmap.tempCanvas.canvas, 0, 0);
 
-            core.setLineWidth('route', 3);
-            core.setStrokeStyle('route', '#FF0000');
+            core.setLineWidth('paint', 3);
+            core.setStrokeStyle('paint', '#FF0000');
 
             core.statusBar.image.shop.style.opacity = 0;
 
@@ -2796,6 +2773,14 @@ ui.prototype.drawHelp = function () {
 
 ////// canvas创建 //////
 ui.prototype.createCanvas = function (name, x, y, width, height, z) {
+    // 如果画布已存在则直接调用
+    var cv = this.findCanvas(name);
+    if (cv!=-1) {
+        this.relocateCanvas(name, x, y);
+        this.resizeCanvas(name, width, height);
+        core.dymCanvas[name].canvas.style.zIndex = z;
+        return;
+    }
     var newCanvas = document.createElement("canvas");
     newCanvas.id = name;
     newCanvas.style.display = 'block';

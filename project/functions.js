@@ -58,8 +58,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var replaying = core.status.replay.replaying;
 	core.stopReplay();
 	core.waitHeroToStop(function() {
-		core.removeGlobalAnimate(0,0,true);
-		core.clearMap('all'); core.clearMap('curtain'); // 清空全地图
+		core.clearMap('all'); // 清空全地图
+		core.deleteAllCanvas(); // 删除所有创建的画布
+		core.dom.gif2.innerHTML = "";
 		// 请注意：
 		// 成绩统计时是按照hp进行上传并排名，因此光在这里改${status:hp}是无效的
 		// 如需按照其他的的分数统计方式，请先将hp设置为你的得分
@@ -84,8 +85,61 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		});
 	})
 },
+        "changingFloor": function (floorId, heroLoc, fromLoad) {
+	// 正在切换楼层过程中执行的操作；此函数的执行时间是“屏幕完全变黑“的那一刻
+	// floorId为要切换到的楼层ID；heroLoc表示勇士切换到的位置；fromLoad表示是否是从读档造成的切换
+
+	// ---------- 此时还没有进行切换，当前floorId还是原来的 ---------- //
+	var currentId = core.status.floorId || null; // 获得当前的floorId，可能为null
+	// 可以对currentId进行判定，比如删除某些自定义图层等
+	// if (currentId == 'MT0') {
+	//     core.deleteAllCanvas();
+	// }
+	
+	// 重置画布尺寸
+	core.maps.resizeMap(floorId);
+	// 检查重生怪并重置
+	if (!fromLoad) {
+		core.status.maps[floorId].blocks.forEach(function(block) {
+			if (block.disable && core.isset(block.event) && block.event.cls.indexOf('enemy')==0 &&
+					core.enemys.hasSpecial(core.material.enemys[block.event.id].special, 23)) {
+				block.disable = false;
+			}
+		});
+	}
+	// 设置勇士的位置
+	core.status.hero.loc = heroLoc;
+
+	// ---------- 重绘新地图；这一步将会设置core.status.floorId ---------- //
+	core.drawMap(floorId);
+	
+	// 切换楼层BGM
+	if (core.isset(core.status.maps[floorId].bgm)) {
+		var bgm = core.status.maps[floorId].bgm;
+		if (bgm instanceof Array) bgm = bgm[0];
+		core.playBgm(bgm);
+	}
+	// 更改画面色调
+	var color = core.getFlag('__color__', null);
+	if (!core.isset(color) && core.isset(core.status.maps[floorId].color))
+		color = core.status.maps[floorId].color;
+	if (core.isset(color)) {
+		core.fillRect('curtain',0,0,416,416,core.arrayToRGBA(color));
+		core.status.curtainColor = color;
+	}
+	// 更改天气
+	var weather = core.getFlag('__weather__', null);
+	if (!core.isset(weather) && core.isset(core.status.maps[floorId].weather))
+		weather = core.status.maps[floorId].weather;
+	if (core.isset(weather))
+		core.setWeather(weather[0], weather[1]);
+	else core.setWeather();
+
+	// ...可以新增一些其他内容，比如创建个画布在右上角显示什么内容等等
+
+},
         "afterChangeFloor": function (floorId, fromLoad) {
-	// 转换楼层结束的事件
+	// 转换楼层结束的事件；此函数会在整个楼层切换完全结束后再执行
 	// floorId是切换到的楼层；fromLoad若为true则代表是从读档行为造成的楼层切换
 
 	// 每次抵达楼层时执行的事件
@@ -422,12 +476,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var mon_hp = enemy.hp, mon_atk = enemy.atk, mon_def = enemy.def, mon_special = enemy.special;
 	var mon_money = enemy.money, mon_experience = enemy.experience, mon_point = enemy.point;
 	// 模仿
-	if (this.hasSpecial(mon_special, 10)) {
+	if (core.hasSpecial(mon_special, 10)) {
 		mon_atk = hero_atk;
 		mon_def = hero_def;
 	}
 	// 坚固
-	if (this.hasSpecial(mon_special, 3) && mon_def < hero_atk - 1) {
+	if (core.hasSpecial(mon_special, 3) && mon_def < hero_atk - 1) {
 		mon_def = hero_atk - 1;
 	}
 
@@ -463,7 +517,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	
 	// TODO：可以在这里新增其他的怪物数据变化
 	// 比如仿攻（怪物攻击不低于勇士攻击）：
-	// if (this.hasSpecial(mon_special, 27) && mon_atk < hero_atk) {
+	// if (core.hasSpecial(mon_special, 27) && mon_atk < hero_atk) {
 	//     mon_atk = hero_atk;
 	// }
 	// 也可以按需增加各种自定义内容（比如幻塔的魔杖效果等）
@@ -511,14 +565,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 
 	// 如果是无敌属性，且勇士未持有十字架
-	if (this.hasSpecial(mon_special, 20) && !core.hasItem("cross"))
+	if (core.hasSpecial(mon_special, 20) && !core.hasItem("cross"))
 		return null; // 不可战斗
 	
 	// 战前造成的额外伤害（可被魔防抵消）
 	var init_damage = 0;
 
 	// 吸血
-	if (this.hasSpecial(mon_special, 11)) {
+	if (core.hasSpecial(mon_special, 11)) {
 		var vampire_damage = hero_hp * enemy.value;
 
 		// 如果有神圣盾免疫吸血等可以在这里写
@@ -536,28 +590,28 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 每回合怪物对勇士造成的战斗伤害
 	var per_damage = mon_atk - hero_def;
 	// 魔攻：战斗伤害就是怪物攻击力
-	if (this.hasSpecial(mon_special, 2)) per_damage = mon_atk;
+	if (core.hasSpecial(mon_special, 2)) per_damage = mon_atk;
 	// 战斗伤害不能为负值
 	if (per_damage < 0) per_damage = 0;
 
 	// 2连击 & 3连击 & N连击
-	if (this.hasSpecial(mon_special, 4)) per_damage *= 2;
-	if (this.hasSpecial(mon_special, 5)) per_damage *= 3;
-	if (this.hasSpecial(mon_special, 6)) per_damage *= (enemy.n||4);
+	if (core.hasSpecial(mon_special, 4)) per_damage *= 2;
+	if (core.hasSpecial(mon_special, 5)) per_damage *= 3;
+	if (core.hasSpecial(mon_special, 6)) per_damage *= (enemy.n||4);
 
 	// 每回合的反击伤害；反击是按照勇士的攻击次数来计算回合
 	var counterDamage = 0;
-	if (this.hasSpecial(mon_special, 8)) counterDamage += Math.floor(core.values.counterAttack * hero_atk);
+	if (core.hasSpecial(mon_special, 8)) counterDamage += Math.floor(core.values.counterAttack * hero_atk);
 
 	// 先攻
-	if (this.hasSpecial(mon_special, 1)) init_damage += per_damage;
+	if (core.hasSpecial(mon_special, 1)) init_damage += per_damage;
 
 	// 破甲
-	if (this.hasSpecial(mon_special, 7))
+	if (core.hasSpecial(mon_special, 7))
 		init_damage += Math.floor(core.values.breakArmor * hero_def);
 
 	// 净化
-	if (this.hasSpecial(mon_special, 9))
+	if (core.hasSpecial(mon_special, 9))
 		init_damage += Math.floor(core.values.purify * hero_mdef);
 
 	// 勇士每回合对怪物造成的伤害
@@ -1113,14 +1167,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 },
         "drawAbout": function() {
 	// 绘制“关于”界面
-	if (!core.isPlaying()) {
-		core.status.event = {'id': null, 'data': null};
-		core.dom.startPanel.style.display = 'none';
-	}
-	core.lockControl();
+	core.ui.closePanel();
 	core.status.event.id = 'about';
 
-	core.clearMap('ui');
 	var left = 48, top = 36, right = 416 - 2 * left, bottom = 416 - 2 * top;
 
 	core.setAlpha('ui', 0.85);
@@ -1207,8 +1256,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// core.plugin.drawLight(0.9, [[25,11,46],[105,121,88],[301,221,106]]); // 存在三个灯光效果，分别是中心(25,11)半径46，中心(105,121)半径88，中心(301,221)半径106。
 	// core.plugin.drawLight([0,0,255,0.3], [[25,11,46],[105,121,88,0.2]], 0.4); // 存在两个灯光效果，它们在内圈40%范围内保持全亮，且40%后才开始衰减。
 	this.drawLight = function (color, lights, lightDec) {
-		// 清空色调层；也可以修改成其它层比如animate层，或者用自己创建的canvas
-		var ctx = core.canvas.curtain;
+		// 清空色调层；也可以修改成其它层比如animate/weather层，或者用自己创建的canvas
+		var canvasName = 'curtain';
+		var ctx = core.getContextByName(canvasName);
+		if (ctx == null) return;
+
 		ctx.mozImageSmoothingEnabled = false;
 		ctx.webkitImageSmoothingEnabled = false;
 		ctx.msImageSmoothingEnabled = false;

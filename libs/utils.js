@@ -7,6 +7,12 @@ utils.js 工具类
 
 function utils() {
     this.init();
+    this.scan = {
+        'up': {'x': 0, 'y': -1},
+        'left': {'x': -1, 'y': 0},
+        'down': {'x': 0, 'y': 1},
+        'right': {'x': 1, 'y': 0}
+    };
 }
 
 utils.prototype.init = function () {

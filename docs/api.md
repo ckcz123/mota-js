@@ -474,7 +474,7 @@ core.ui.getContextByName(name)
 core.clearMap(name)
 清空某个画布图层。
 name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名。
-如果name也可以是'all'，若为all则为清空除色调层外的所有系统画布。
+如果name也可以是'all'，若为all则为清空所有系统画布。
 
 
 core.ui.fillText(name, text, x, y, style, font)

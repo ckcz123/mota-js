@@ -29,11 +29,10 @@ ui.prototype.getContextByName = function (name) {
 ui.prototype.clearMap = function (name, x, y, width, height) {
     if (name == 'all') {
         for (var m in core.canvas) {
-            // 不擦除curtain层
-            if (m=='curtain') continue;
             core.canvas[m].clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
         }
         core.dom.gif.innerHTML = "";
+        core.removeGlobalAnimate(0,0,true);
     }
     else {
         var ctx = this.getContextByName(name);
@@ -1817,8 +1816,7 @@ ui.prototype.drawMaps = function (index, x, y) {
         core.status.event.data = null;
         core.clearLastEvent();
 
-        core.clearMap('animate');
-        core.fillRect('animate', 0, 0, 416, 416, 'rgba(0,0,0,0.4)');
+        core.fillRect('ui', 0, 0, 416, 416, 'rgba(0,0,0,0.4)');
 
         core.strokeRect('ui', 66, 2, 284, 60, "#FFD700", 4);
         core.strokeRect('ui', 2, 66, 60, 284);
@@ -1858,8 +1856,6 @@ ui.prototype.drawMaps = function (index, x, y) {
         return;
     }
 
-    core.clearMap('animate');
-
     var damage = (core.status.event.data||{}).damage, paint =  (core.status.event.data||{}).paint;
     var all = (core.status.event.data||{}).all;
     if (core.isset(index.damage)) damage=index.damage;
@@ -1885,8 +1881,7 @@ ui.prototype.drawMaps = function (index, x, y) {
     core.status.event.data = {"index": index, "x": x, "y": y, "damage": damage, "paint": paint, "all": all};
 
     clearTimeout(core.interval.tipAnimate);
-    core.clearMap('ui');
-    core.setAlpha('ui', 1);
+    core.clearLastEvent();
     this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 0, 0, 416, x, y);
 
     // 绘图
@@ -2723,18 +2718,16 @@ ui.prototype.drawPaint = function () {
             core.status.event.data = {"x": null, "y": null, "erase": false};
 
             core.clearLastEvent();
-            core.clearMap('route');
-
-            core.setAlpha('route', 1);
+            core.createCanvas('paint', -core.bigmap.offsetX, -core.bigmap.offsetY, 32*core.bigmap.width, 32*core.bigmap.height, 95);
 
             // 将已有的内容绘制到route上
             var value = core.paint[core.status.floorId];
             if (core.isset(value)) value = LZString.decompress(value).split(",");
             core.utils.decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
-            core.canvas.route.drawImage(core.bigmap.tempCanvas.canvas, 0, 0);
+            core.dymCanvas.paint.drawImage(core.bigmap.tempCanvas.canvas, 0, 0);
 
-            core.setLineWidth('route', 3);
-            core.setStrokeStyle('route', '#FF0000');
+            core.setLineWidth('paint', 3);
+            core.setStrokeStyle('paint', '#FF0000');
 
             core.statusBar.image.shop.style.opacity = 0;
 

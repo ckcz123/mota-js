@@ -121,7 +121,6 @@ events.prototype.startGame = function (hard, seed, route, callback) {
         else core.utils.__init_seed();
 
         core.clearMap('all');
-        core.clearMap('curtain');
         core.deleteAllCanvas();
         core.clearStatusBar();
 
@@ -224,14 +223,10 @@ events.prototype.lose = function (reason) {
 ////// 游戏结束 //////
 events.prototype.gameOver = function (ending, fromReplay, norank) {
 
-    // 清空图片和天气
-    core.clearMap('animate');
-    core.clearMap('weather');
+    core.clearMap('all');
+    core.deleteAllCanvas();
     core.dom.gif2.innerHTML = "";
-    core.animateFrame.weather.type = null;
-    core.animateFrame.weather.level = 0;
-    core.animateFrame.weather.nodes = [];
-    core.setFg(null, 0);
+    core.setWeather();
     core.ui.closePanel();
 
     // 下载录像
@@ -1464,7 +1459,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
     core.status.replay.animate=true;
     core.dom.floorNameLabel.innerHTML = core.status.maps[floorId].title;
     if (!core.isset(stair) && !core.isset(heroLoc))
-        heroLoc = core.status.hero.loc;
+        heroLoc = core.clone(core.status.hero.loc);
     if (core.isset(stair)) {
         if (!core.isset(heroLoc)) heroLoc={};
 
@@ -1487,6 +1482,8 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
             heroLoc.y=core.status.hero.loc.y;
         }
     }
+    if (!core.isset(heroLoc.direction)) heroLoc.direction = core.status.hero.loc.direction;
+
     if (core.status.maps[floorId].canFlyTo && core.status.hero.flyRange.indexOf(floorId)<0) {
         core.status.hero.flyRange.push(floorId);
         core.status.hero.flyRange.sort(function (a, b) {
@@ -1498,77 +1495,23 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
 
         var changing = function () {
 
-            core.events.setFloorName(floorId);
+            core.events.eventdata.changingFloor(floorId, heroLoc, fromLoad);
 
-            // 重置画布尺寸
-            core.maps.resizeMap(floorId);
-
-            // 更改BGM
-            if (core.isset(core.status.maps[floorId].bgm)) {
-                var bgm = core.status.maps[floorId].bgm;
-                if (bgm instanceof Array) bgm = bgm[0];
-                core.playBgm(bgm);
+            var changed = function () {
+                core.unLockControl();
+                core.status.replay.animate=false;
+                core.events.afterChangeFloor(floorId, fromLoad);
+                if (core.isset(callback)) callback();
             }
-
-            // 不存在事件时，更改画面色调
-            var color = core.getFlag('__color__', null);
-            if (!core.isset(color) && core.isset(core.status.maps[floorId].color)) {
-                color = core.status.maps[floorId].color;
-            }
-            if (core.isset(color)) {
-                // 直接变色
-                core.clearMap('curtain');
-                core.fillRect('curtain',0,0,416,416,core.arrayToRGBA(color));
-                core.status.curtainColor = color;
-            }
-            else core.clearMap('curtain');
-
-            // 更改天气
-            var weather = core.getFlag('__weather__', null);
-            if (!core.isset(weather) && core.isset(core.status.maps[floorId].weather)) {
-                weather = core.status.maps[floorId].weather;
-            }
-            if (core.isset(weather)) {
-                core.setWeather(weather[0], weather[1])
-            }
-            else core.setWeather();
-
-            // 清除gif
-            core.dom.gif.innerHTML = "";
-
-            // 检查重生
-            if (!core.isset(fromLoad)) {
-                core.status.maps[floorId].blocks.forEach(function(block) {
-                    if (block.disable && core.isset(block.event) && block.event.cls.indexOf('enemy')==0
-                        && core.enemys.hasSpecial(core.material.enemys[block.event.id].special, 23)) {
-                        block.disable = false;
-                    }
-                })
-            }
-            // 画地图
-            core.drawMap(floorId, function () {
-                if (core.isset(heroLoc.direction))
-                    core.setHeroLoc('direction', heroLoc.direction);
-                core.setHeroLoc('x', heroLoc.x);
-                core.setHeroLoc('y', heroLoc.y);
-                core.clearMap('hero');
-                core.drawHero();
-
-                var changed = function () {
-                    core.unLockControl();
-                    core.status.replay.animate=false;
-                    core.events.afterChangeFloor(floorId, fromLoad);
-                    if (core.isset(callback)) callback();
-                }
-                if (displayAnimate) {
-                    core.hide(core.dom.floorMsgGroup, time/4, function () {
-                        changed();
-                    });
-                }
-                else {
+            if (displayAnimate) {
+                core.hide(core.dom.floorMsgGroup, time/4, function () {
                     changed();
-                }
-            });
+                });
+            }
+            else {
+                changed();
+            }
+
         }
         core.playSound('floor.mp3');
         if (displayAnimate) {
@@ -1591,13 +1534,7 @@ events.prototype.showImage = function (code, image, x, y, dw, dh, opacityVal, ti
     var zIndex = code + 100;
     time = time || 0;
     var name = "image"+ zIndex;
-    if (core.findCanvas(name) != -1) {
-        core.relocateCanvas(name, x, y);
-        core.resizeCanvas(name, image.width * dw, image.height * dh);
-        core.dymCanvas[name].style.zIndex = zIndex;
-    }
-    else
-        core.createCanvas(name, x, y, image.width * dw, image.height * dh, zIndex);
+    core.createCanvas(name, x, y, image.width * dw, image.height * dh, zIndex);
 
     core.dymCanvas[name].drawImage(image, 0, 0, image.width * dw, image.height * dh);
     if (time == 0)
@@ -2066,14 +2003,7 @@ events.prototype.pushBox = function (data) {
     if (data.event.id!='box' && data.event.id!='boxed') return;
 
     // 判断还能否前进，看看是否存在事件
-    var scan = {
-        'up': {'x': 0, 'y': -1},
-        'left': {'x': -1, 'y': 0},
-        'down': {'x': 0, 'y': 1},
-        'right': {'x': 1, 'y': 0}
-    };
-
-    var direction = core.getHeroLoc('direction'), nx=data.x+scan[direction].x, ny=data.y+scan[direction].y;
+    var direction = core.getHeroLoc('direction'), nx=data.x+core.utils.scan[direction].x, ny=data.y+core.utils.scan[direction].y;
 
     if (nx<0||nx>=core.bigmap.width||ny<0||ny>=core.bigmap.height) return;
 

@@ -296,13 +296,7 @@ maps.prototype.canMoveHero = function(x,y,direction,floorId) {
     if (!check(core.getBlock(x,y,floorId),"cannotOut") || !check(getNumber(floorId,"bg",x,y),"cannotOut") || !check(getNumber(floorId,"fg",x,y),"cannotOut"))
         return false;
 
-    var scan = {
-        'up': {'x': 0, 'y': -1},
-        'left': {'x': -1, 'y': 0},
-        'down': {'x': 0, 'y': 1},
-        'right': {'x': 1, 'y': 0}
-    };
-    var nx = x+scan[direction].x, ny = y+scan[direction].y;
+    var nx = x+core.utils.scan[direction].x, ny = y+core.utils.scan[direction].y;
     // 检查目标点的cannotIn
     if (!check(core.getBlock(nx,ny,floorId),"cannotIn") || !check(getNumber(floorId,"bg",nx,ny),"cannotIn") || !check(getNumber(floorId,"fg",nx,ny),"cannotIn"))
         return false;
@@ -482,7 +476,6 @@ maps.prototype.drawMap = function (floorId, callback) {
         return;
     }
     core.clearMap('all');
-    core.removeGlobalAnimate(null, null, true);
 
     var drawBg = function(){
         var width = core.floors[floorId].width || 13;
@@ -896,12 +889,6 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
     });
 
     var nowX=32*x, nowY=32*y, step=0;
-    var scan = {
-        'up': {'x': 0, 'y': -1},
-        'left': {'x': -1, 'y': 0},
-        'down': {'x': 0, 'y': 1},
-        'right': {'x': 1, 'y': 0}
-    };
 
     var animateValue = block.event.animate || 1, animateCurrent = isTileset?bx:0, animateTime = 0;
     var blockCanvas = this.__initBlockCanvas(block, height, x, y);
@@ -954,8 +941,8 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
                 }
             }
             step++;
-            nowX+=scan[direction].x*2;
-            nowY+=scan[direction].y*2;
+            nowX+=core.utils.scan[direction].x*2;
+            nowY+=core.utils.scan[direction].y*2;
             // 移动
             core.maps.__moveBlockCanvas(image, animateCurrent, by, height, nowX, nowY, opacity, headCanvas, bodyCanvas, damageCanvas);
             if (step==16) {
@@ -1377,34 +1364,22 @@ maps.prototype.drawAnimate = function (name, x, y, callback) {
         return;
     }
 
-    clearInterval(core.interval.animateInterval);
-
     // 开始绘制
     var animate = core.material.animates[name], centerX = 32*x+16, centerY = 32*y+16;
     // 播放音效
     core.playSound(animate.se);
 
-    // 异步绘制：使用requestAnimationFrame进行绘制
-    if (!core.isset(callback)) {
-        core.status.animateObjs.push({"animate": animate, "centerX": centerX, "centerY": centerY, "index": 0});
-        return;
-    }
+    var animateId = parseInt(Math.random() * 100000000);
+    core.status.animateObjs.push({
+        "animate": animate,
+        "centerX": centerX,
+        "centerY": centerY,
+        "index": 0,
+        "id": animateId,
+        "callback": callback
+    });
 
-    var index=0;
-    core.clearMap('animate');
-    core.maps.drawAnimateFrame(animate, centerX, centerY, index++);
-
-    core.interval.animateInterval = setInterval(function (t) {
-        if (index == animate.frames.length) {
-            clearInterval(core.interval.animateInterval);
-            core.clearMap('animate');
-            core.setAlpha('animate', 1);
-            if (core.isset(callback)) callback();
-            return;
-        }
-        core.clearMap('animate');
-        core.maps.drawAnimateFrame(animate, centerX, centerY, index++);
-    }, 50);
+    core.animateFrame.asyncId[animateId] = true;
 }
 
 maps.prototype.setFloorImage = function (type, loc, floorId, callback) {

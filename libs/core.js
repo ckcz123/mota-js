@@ -25,7 +25,6 @@ function core() {
         'heroMoveInterval': null,
         "tipAnimate": null,
         'openDoorAnimate': null,
-        'animateInterval': null,
         'onDownInterval': null,
     }
     this.animateFrame = {
@@ -87,7 +86,7 @@ function core() {
         showStatusBar: true,
     }
     this.bigmap = {
-        canvas: ["bg", "event", "event2", "fg", "damage", "route"],
+        canvas: ["bg", "event", "event2", "fg", "damage"],
         offsetX: 0, // in pixel
         offsetY: 0,
         width: 13, // map width and height
@@ -124,6 +123,8 @@ function core() {
             'destStep': 0,
             'destX': null,
             'destY': null,
+            'offsetX': null,
+            'offsetY': null,
             'autoStepRoutes': [],
             'moveStepBeforeStop': [],
             'lastDirection': null,
@@ -628,6 +629,11 @@ core.prototype.trigger = function (x, y) {
 ////// 楼层切换 //////
 core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback, fromLoad) {
     core.events.changeFloor(floorId, stair, heroLoc, time, callback, fromLoad);
+}
+
+////// 从名字获得画布 //////
+core.prototype.getContextByName = function (name) {
+    return core.ui.getContextByName(name);
 }
 
 ////// 清除地图 //////

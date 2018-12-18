@@ -86,7 +86,7 @@ function core() {
         showStatusBar: true,
     }
     this.bigmap = {
-        canvas: ["bg", "event", "event2", "fg", "damage", "route"],
+        canvas: ["bg", "event", "event2", "fg", "damage"],
         offsetX: 0, // in pixel
         offsetY: 0,
         width: 13, // map width and height
@@ -123,6 +123,8 @@ function core() {
             'destStep': 0,
             'destX': null,
             'destY': null,
+            'offsetX': null,
+            'offsetY': null,
             'autoStepRoutes': [],
             'moveStepBeforeStop': [],
             'lastDirection': null,

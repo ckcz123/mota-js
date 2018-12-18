@@ -286,14 +286,6 @@ p#name {
     z-index: 70;
 }
 
-#weather {
-    z-index: 80;
-}
-
-#route {
-    z-index: 95;
-}
-
 #curtain {
     z-index: 100;
 }

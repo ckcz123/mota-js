@@ -2003,14 +2003,7 @@ events.prototype.pushBox = function (data) {
     if (data.event.id!='box' && data.event.id!='boxed') return;
 
     // 判断还能否前进，看看是否存在事件
-    var scan = {
-        'up': {'x': 0, 'y': -1},
-        'left': {'x': -1, 'y': 0},
-        'down': {'x': 0, 'y': 1},
-        'right': {'x': 1, 'y': 0}
-    };
-
-    var direction = core.getHeroLoc('direction'), nx=data.x+scan[direction].x, ny=data.y+scan[direction].y;
+    var direction = core.getHeroLoc('direction'), nx=data.x+core.utils.scan[direction].x, ny=data.y+core.utils.scan[direction].y;
 
     if (nx<0||nx>=core.bigmap.width||ny<0||ny>=core.bigmap.height) return;
 

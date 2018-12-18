@@ -2718,18 +2718,16 @@ ui.prototype.drawPaint = function () {
             core.status.event.data = {"x": null, "y": null, "erase": false};
 
             core.clearLastEvent();
-            core.clearMap('route');
-
-            core.setAlpha('route', 1);
+            core.createCanvas('paint', -core.bigmap.offsetX, -core.bigmap.offsetY, 32*core.bigmap.width, 32*core.bigmap.height, 95);
 
             // 将已有的内容绘制到route上
             var value = core.paint[core.status.floorId];
             if (core.isset(value)) value = LZString.decompress(value).split(",");
             core.utils.decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
-            core.canvas.route.drawImage(core.bigmap.tempCanvas.canvas, 0, 0);
+            core.dymCanvas.paint.drawImage(core.bigmap.tempCanvas.canvas, 0, 0);
 
-            core.setLineWidth('route', 3);
-            core.setStrokeStyle('route', '#FF0000');
+            core.setLineWidth('paint', 3);
+            core.setStrokeStyle('paint', '#FF0000');
 
             core.statusBar.image.shop.style.opacity = 0;
 

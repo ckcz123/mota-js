@@ -341,7 +341,7 @@ actions.prototype.ondown = function (loc) {
     }
 
     core.status.downTime = new Date();
-    core.clearMap('route');
+    core.deleteCanvas('route');
     var pos={'x':x,'y':y}
     core.status.stepPostfix=[];
     core.status.stepPostfix.push(pos);
@@ -409,8 +409,7 @@ actions.prototype.onup = function () {
         var posy=core.status.stepPostfix[0].y;
         core.status.stepPostfix=[];
         if (!core.status.lockControl) {
-            core.clearMap('route');
-            core.canvas.route.restore();
+            core.clearMap('ui');
         }
 
         // 长按
@@ -2612,8 +2611,8 @@ actions.prototype.ondownPaint = function (x, y) {
     x+=core.bigmap.offsetX;
     y+=core.bigmap.offsetY;
     if (!core.status.event.data.erase) {
-        core.canvas.route.beginPath();
-        core.canvas.route.moveTo(x, y);
+        core.dymCanvas.paint.beginPath();
+        core.dymCanvas.paint.moveTo(x, y);
     }
     core.status.event.data.x = x;
     core.status.event.data.y = y;
@@ -2624,12 +2623,12 @@ actions.prototype.onmovePaint = function (x, y) {
     x+=core.bigmap.offsetX;
     y+=core.bigmap.offsetY;
     if (core.status.event.data.erase) {
-        core.clearMap('route', x-10, y-10, 20, 20);
+        core.clearMap('paint', x-10, y-10, 20, 20);
         return;
     }
     var midx = (core.status.event.data.x+x)/2, midy = (core.status.event.data.y+y)/2;
-    core.canvas.route.quadraticCurveTo(midx, midy, x, y);
-    core.canvas.route.stroke();
+    core.dymCanvas.paint.quadraticCurveTo(midx, midy, x, y);
+    core.dymCanvas.paint.stroke();
     core.status.event.data.x = x;
     core.status.event.data.y = y;
 }
@@ -2638,7 +2637,7 @@ actions.prototype.onupPaint = function () {
     core.status.event.data.x = null;
     core.status.event.data.y = null;
     // 保存
-    core.paint[core.status.floorId] = LZString.compress(core.utils.encodeCanvas(core.canvas.route).join(","));
+    core.paint[core.status.floorId] = LZString.compress(core.utils.encodeCanvas(core.dymCanvas.paint).join(","));
 }
 
 actions.prototype.setPaintMode = function (mode) {
@@ -2650,8 +2649,8 @@ actions.prototype.setPaintMode = function (mode) {
 }
 
 actions.prototype.clearPaint = function () {
-    core.clearMap('route');
-    core.paint[core.status.floorId] = null;
+    core.clearMap('paint');
+    delete core.paint[core.status.floorId];
     core.drawTip("已清空绘图内容");
 }
 
@@ -2683,18 +2682,18 @@ actions.prototype.loadPaint = function () {
                 core.paint[floorId] = LZString.compress(obj.paint[floorId]);
         }
 
-        core.clearMap('route');
+        core.clearMap('paint');
         var value = core.paint[core.status.floorId];
         if (core.isset(value)) value = LZString.decompress(value).split(",");
         core.utils.decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
-        core.canvas.route.drawImage(core.bigmap.tempCanvas.canvas, 0, 0);
+        core.canvas.paint.drawImage(core.bigmap.tempCanvas.canvas, 0, 0);
 
         core.drawTip("读取绘图文件成功");
     })
 }
 
 actions.prototype.exitPaint = function () {
-    core.clearMap('route');
+    core.deleteCanvas('paint');
     core.ui.closePanel();
     core.statusBar.image.shop.style.opacity = 1;
     core.updateStatusBar();

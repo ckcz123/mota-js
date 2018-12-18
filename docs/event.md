@@ -2198,7 +2198,6 @@ if (core.getFlag("door",0)==2) {
     var replaying = core.status.replay.replaying;
     core.stopReplay();
     core.waitHeroToStop(function() {
-        core.removeGlobalAnimate(0,0,true);
         core.clearMap('all'); // 清空全地图
         core.deleteAllCanvas();
         core.drawText([

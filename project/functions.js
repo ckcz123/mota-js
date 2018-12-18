@@ -58,9 +58,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var replaying = core.status.replay.replaying;
 	core.stopReplay();
 	core.waitHeroToStop(function() {
-		core.removeGlobalAnimate(0,0,true);
 		core.clearMap('all'); // 清空全地图
 		core.deleteAllCanvas(); // 删除所有创建的画布
+		core.dom.gif2.innerHTML = "";
 		// 请注意：
 		// 成绩统计时是按照hp进行上传并排名，因此光在这里改${status:hp}是无效的
 		// 如需按照其他的的分数统计方式，请先将hp设置为你的得分

@@ -482,7 +482,6 @@ maps.prototype.drawMap = function (floorId, callback) {
         return;
     }
     core.clearMap('all');
-    core.removeGlobalAnimate(null, null, true);
 
     var drawBg = function(){
         var width = core.floors[floorId].width || 13;

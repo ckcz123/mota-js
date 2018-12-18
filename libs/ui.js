@@ -32,6 +32,7 @@ ui.prototype.clearMap = function (name, x, y, width, height) {
             core.canvas[m].clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
         }
         core.dom.gif.innerHTML = "";
+        core.removeGlobalAnimate(0,0,true);
     }
     else {
         var ctx = this.getContextByName(name);

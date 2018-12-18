@@ -223,14 +223,10 @@ events.prototype.lose = function (reason) {
 ////// 游戏结束 //////
 events.prototype.gameOver = function (ending, fromReplay, norank) {
 
-    // 清空图片和天气
-    core.clearMap('animate');
-    core.clearMap('weather');
+    core.clearMap('all');
+    core.deleteAllCanvas();
     core.dom.gif2.innerHTML = "";
-    core.animateFrame.weather.type = null;
-    core.animateFrame.weather.level = 0;
-    core.animateFrame.weather.nodes = [];
-    core.setFg(null, 0);
+    core.setWeather();
     core.ui.closePanel();
 
     // 下载录像

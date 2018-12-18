@@ -1258,7 +1258,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	this.drawLight = function (color, lights, lightDec) {
 		// 清空色调层；也可以修改成其它层比如animate/weather层，或者用自己创建的canvas
 		var canvasName = 'curtain';
-		var ctx = core.ui.getContextByName(canvasName);
+		var ctx = core.getContextByName(canvasName);
 		if (ctx == null) return;
 
 		ctx.mozImageSmoothingEnabled = false;

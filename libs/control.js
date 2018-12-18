@@ -127,12 +127,21 @@ control.prototype.setRequestAnimationFrame = function () {
         // Animate
         if (timestamp-core.animateFrame.animateTime>50 && core.isset(core.status.animateObjs) && core.status.animateObjs.length>0) {
             core.clearMap('animate');
-            core.status.animateObjs = core.status.animateObjs.filter(function (obj) {
-                return obj.index < obj.animate.frames.length;
-            });
-            core.status.animateObjs.forEach(function (obj) {
-                core.maps.drawAnimateFrame(obj.animate, obj.centerX, obj.centerY, obj.index++);
-            });
+            // 更新帧
+            var animateObjs = [];
+            for (var i=0;i<core.status.animateObjs.length;i++) {
+                var obj = core.status.animateObjs[i];
+                if (obj.index == obj.animate.frames.length) {
+                    // 绘制完毕
+                    if (core.isset(obj.callback)) obj.callback();
+                    delete core.animateFrame.asyncId[obj.id];
+                }
+                else {
+                    core.maps.drawAnimateFrame(obj.animate, obj.centerX, obj.centerY, obj.index++);
+                    animateObjs.push(obj);
+                }
+            }
+            core.status.animateObjs = animateObjs;
             core.animateFrame.animateTime = timestamp;
         }
 

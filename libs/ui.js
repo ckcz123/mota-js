@@ -1816,8 +1816,7 @@ ui.prototype.drawMaps = function (index, x, y) {
         core.status.event.data = null;
         core.clearLastEvent();
 
-        core.clearMap('animate');
-        core.fillRect('animate', 0, 0, 416, 416, 'rgba(0,0,0,0.4)');
+        core.fillRect('ui', 0, 0, 416, 416, 'rgba(0,0,0,0.4)');
 
         core.strokeRect('ui', 66, 2, 284, 60, "#FFD700", 4);
         core.strokeRect('ui', 2, 66, 60, 284);
@@ -1857,8 +1856,6 @@ ui.prototype.drawMaps = function (index, x, y) {
         return;
     }
 
-    core.clearMap('animate');
-
     var damage = (core.status.event.data||{}).damage, paint =  (core.status.event.data||{}).paint;
     var all = (core.status.event.data||{}).all;
     if (core.isset(index.damage)) damage=index.damage;
@@ -1884,8 +1881,7 @@ ui.prototype.drawMaps = function (index, x, y) {
     core.status.event.data = {"index": index, "x": x, "y": y, "damage": damage, "paint": paint, "all": all};
 
     clearTimeout(core.interval.tipAnimate);
-    core.clearMap('ui');
-    core.setAlpha('ui', 1);
+    core.clearLastEvent();
     this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 0, 0, 416, x, y);
 
     // 绘图

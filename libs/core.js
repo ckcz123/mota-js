@@ -25,7 +25,6 @@ function core() {
         'heroMoveInterval': null,
         "tipAnimate": null,
         'openDoorAnimate': null,
-        'animateInterval': null,
         'onDownInterval': null,
     }
     this.animateFrame = {
@@ -628,6 +627,11 @@ core.prototype.trigger = function (x, y) {
 ////// 楼层切换 //////
 core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback, fromLoad) {
     core.events.changeFloor(floorId, stair, heroLoc, time, callback, fromLoad);
+}
+
+////// 从名字获得画布 //////
+core.prototype.getContextByName = function (name) {
+    return core.ui.getContextByName(name);
 }
 
 ////// 清除地图 //////

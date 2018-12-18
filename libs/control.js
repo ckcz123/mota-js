@@ -133,8 +133,14 @@ control.prototype.setRequestAnimationFrame = function () {
                 var obj = core.status.animateObjs[i];
                 if (obj.index == obj.animate.frames.length) {
                     // 绘制完毕
-                    if (core.isset(obj.callback)) obj.callback();
                     delete core.animateFrame.asyncId[obj.id];
+                    // 异步执行回调...
+                    (function(callback) {
+                        setTimeout(function() {
+                            if (core.isset(callback))
+                                callback();
+                        });
+                    })(obj.callback);
                 }
                 else {
                     core.maps.drawAnimateFrame(obj.animate, obj.centerX, obj.centerY, obj.index++);

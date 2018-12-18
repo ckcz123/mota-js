@@ -903,9 +903,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.flags.enableLevelUp && core.status.hero.lv<core.firstData.levelUp.length) {
 		var need = core.calValue(core.firstData.levelUp[core.status.hero.lv].need);
 		if (core.flags.levelUpLeftMode)
-			core.statusBar.up.innerHTML = (need - core.getStatus('experience')) || " ";
+			core.statusBar.up.innerHTML = core.formatBigNumber(need - core.getStatus('experience')) || " ";
 		else
-			core.statusBar.up.innerHTML = need || " ";
+			core.statusBar.up.innerHTML = core.formatBigNumber(need) || " ";
 	}
 	else core.statusBar.up.innerHTML = " ";
 

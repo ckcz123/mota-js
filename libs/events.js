@@ -1498,77 +1498,30 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
 
         var changing = function () {
 
-            core.events.setFloorName(floorId);
+            core.events.eventdata.changingFloor(floorId, fromLoad);
 
-            // 重置画布尺寸
-            core.maps.resizeMap(floorId);
+            if (core.isset(heroLoc.direction))
+                core.setHeroLoc('direction', heroLoc.direction);
+            core.setHeroLoc('x', heroLoc.x);
+            core.setHeroLoc('y', heroLoc.y);
+            core.clearMap('hero');
+            core.drawHero();
 
-            // 更改BGM
-            if (core.isset(core.status.maps[floorId].bgm)) {
-                var bgm = core.status.maps[floorId].bgm;
-                if (bgm instanceof Array) bgm = bgm[0];
-                core.playBgm(bgm);
+            var changed = function () {
+                core.unLockControl();
+                core.status.replay.animate=false;
+                core.events.afterChangeFloor(floorId, fromLoad);
+                if (core.isset(callback)) callback();
             }
-
-            // 不存在事件时，更改画面色调
-            var color = core.getFlag('__color__', null);
-            if (!core.isset(color) && core.isset(core.status.maps[floorId].color)) {
-                color = core.status.maps[floorId].color;
-            }
-            if (core.isset(color)) {
-                // 直接变色
-                core.clearMap('curtain');
-                core.fillRect('curtain',0,0,416,416,core.arrayToRGBA(color));
-                core.status.curtainColor = color;
-            }
-            else core.clearMap('curtain');
-
-            // 更改天气
-            var weather = core.getFlag('__weather__', null);
-            if (!core.isset(weather) && core.isset(core.status.maps[floorId].weather)) {
-                weather = core.status.maps[floorId].weather;
-            }
-            if (core.isset(weather)) {
-                core.setWeather(weather[0], weather[1])
-            }
-            else core.setWeather();
-
-            // 清除gif
-            core.dom.gif.innerHTML = "";
-
-            // 检查重生
-            if (!core.isset(fromLoad)) {
-                core.status.maps[floorId].blocks.forEach(function(block) {
-                    if (block.disable && core.isset(block.event) && block.event.cls.indexOf('enemy')==0
-                        && core.enemys.hasSpecial(core.material.enemys[block.event.id].special, 23)) {
-                        block.disable = false;
-                    }
-                })
-            }
-            // 画地图
-            core.drawMap(floorId, function () {
-                if (core.isset(heroLoc.direction))
-                    core.setHeroLoc('direction', heroLoc.direction);
-                core.setHeroLoc('x', heroLoc.x);
-                core.setHeroLoc('y', heroLoc.y);
-                core.clearMap('hero');
-                core.drawHero();
-
-                var changed = function () {
-                    core.unLockControl();
-                    core.status.replay.animate=false;
-                    core.events.afterChangeFloor(floorId, fromLoad);
-                    if (core.isset(callback)) callback();
-                }
-                if (displayAnimate) {
-                    core.hide(core.dom.floorMsgGroup, time/4, function () {
-                        changed();
-                    });
-                }
-                else {
+            if (displayAnimate) {
+                core.hide(core.dom.floorMsgGroup, time/4, function () {
                     changed();
-                }
-            });
+                });
+            }
+            else {
+                changed();
+            }
+
         }
         core.playSound('floor.mp3');
         if (displayAnimate) {

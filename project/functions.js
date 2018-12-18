@@ -85,8 +85,63 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		});
 	})
 },
+        "changingFloor": function (floorId, fromLoad) {
+	// 正在切换楼层过程中执行的操作；此函数的执行时间是“屏幕完全变黑“的那一刻
+	// floorId为要切换到的楼层ID；fromLoad表示是否是从读档造成的切换
+
+	// ---------- 此时还没有进行切换，当前floorId还是原来的 ---------- //
+	var currentId = core.status.floorId || null; // 获得当前的floorId，可能为null
+	// 可以对currentId进行判定，比如删除某些自定义图层等
+	// if (currentId == 'MT0') {
+	//     core.deleteAllCanvas();
+	// }
+	
+	// 设置新楼层名
+	core.events.setFloorName(floorId);
+	// 重置画布尺寸
+	core.maps.resizeMap(floorId);
+	// 切换楼层BGM
+	if (core.isset(core.status.maps[floorId].bgm)) {
+		var bgm = core.status.maps[floorId].bgm;
+		if (bgm instanceof Array) bgm = bgm[0];
+		core.playBgm(bgm);
+	}
+	// 更改画面色调
+	var color = core.getFlag('__color__', null);
+	if (!core.isset(color) && core.isset(core.status.maps[floorId].color))
+		color = core.status.maps[floorId].color;
+	if (core.isset(color)) {
+		core.clearMap('curtain');
+		core.fillRect('curtain',0,0,416,416,core.arrayToRGBA(color));
+		core.status.curtainColor = color;
+	}
+	else core.clearMap('curtain');
+	// 更改天气
+	var weather = core.getFlag('__weather__', null);
+	if (!core.isset(weather) && core.isset(core.status.maps[floorId].weather))
+		weather = core.status.maps[floorId].weather;
+	if (core.isset(weather))
+		core.setWeather(weather[0], weather[1]);
+	else core.setWeather();
+	// 清除动图
+	core.dom.gif.innerHTML = '';
+	
+	// 检查重生怪并重置
+	if (!fromLoad) {
+		core.status.maps[floorId].blocks.forEach(function(block) {
+			if (block.disable && core.isset(block.event) && block.event.cls.indexOf('enemy')==0 &&
+					core.enemys.hasSpecial(core.material.enemys[block.event.id].special, 23)) {
+				block.disable = false;
+			}
+		});
+	}
+	
+	// ---------- 绘制地图；这一步将会设置core.status.floorId ---------- //
+	core.drawMap(floorId);
+	
+},
         "afterChangeFloor": function (floorId, fromLoad) {
-	// 转换楼层结束的事件
+	// 转换楼层结束的事件；此函数会在整个楼层切换完全结束后再执行
 	// floorId是切换到的楼层；fromLoad若为true则代表是从读档行为造成的楼层切换
 
 	// 每次抵达楼层时执行的事件

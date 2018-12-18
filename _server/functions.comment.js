@@ -31,11 +31,17 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_lint": true,
                     "_data": "游戏失败事件"
                 },
+                "changingFloor": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "正在切换楼层过程中的操作\n此函数的执行时间是在切换楼层过程中屏幕完全变黑的一刻"
+                },
                 "afterChangeFloor": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "转换楼层结束的事件"
+                    "_data": "转换楼层结束的事件\n此函数会在整个楼层切换完全结束后执行"
                 },
                 "addPoint": {
                     "_leaf": true,

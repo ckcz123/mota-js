@@ -688,7 +688,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		case 83: // S：存档
 			core.save(true);
 			break;
-		case 68: // D：独挡
+		case 68: // D：读档
 			core.load(true);
 			break;
 		case 69: // E：打开光标

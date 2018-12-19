@@ -84,7 +84,7 @@ control.prototype.setRequestAnimationFrame = function () {
                         cv.clearRect(block.x * 32, block.y * 32, 32, 32);
                         if (core.isset(block.name)) {
                             if (block.name == 'bg') {
-                                core.canvas.bg.drawImage(core.material.images.terrains, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+                                core.drawImage('bg', core.material.images.terrains, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
                             }
                             core.drawAutotile(cv, core.status.autotileAnimateObjs[block.name+"map"], block, 32, 0, 0, core.status.autotileAnimateObjs.status);
                         }
@@ -963,7 +963,7 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
             core.bigmap.offsetX = core.clamp(nowx - 32*6, 0, 32*core.bigmap.width-416);
             core.bigmap.offsetY = core.clamp(nowy - 32*6, 0, 32*core.bigmap.height-416);
             core.control.updateViewport();
-            core.canvas.hero.drawImage(core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height,
+            core.drawImage('hero', core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height,
                 nowx - core.bigmap.offsetX, nowy + 32-height - core.bigmap.offsetY, 32, height);
         }
         else {
@@ -1055,7 +1055,7 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
 
     core.clearAutomaticRouteNode(x+dx, y+dy);
 
-    core.canvas.hero.clearRect(x * 32 - core.bigmap.offsetX - 32, y * 32 - core.bigmap.offsetY - 32, 96, 96);
+    core.clearMap('hero', x * 32 - core.bigmap.offsetX - 32, y * 32 - core.bigmap.offsetY - 32, 96, 96);
 
     var heroIconArr = core.material.icons.hero;
     var drawObjs = [];
@@ -1074,7 +1074,7 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
     if (core.isset(core.status.hero.followers)) {
         var index=1;
         core.status.hero.followers.forEach(function (t) {
-            core.canvas.hero.clearRect(32*t.x-core.bigmap.offsetX-32, 32*t.y-core.bigmap.offsetY-32, 96, 96);
+            core.clearMap('hero', 32*t.x-core.bigmap.offsetX-32, 32*t.y-core.bigmap.offsetY-32, 96, 96);
             if (core.isset(core.material.images.images[t.img])) {
                 drawObjs.push({
                     "img": core.material.images.images[t.img],
@@ -1094,7 +1094,7 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
     });
 
     drawObjs.forEach(function (block) {
-        core.canvas.hero.drawImage(block.img, block.heroIcon[block.status]*32,
+        core.drawImage('hero', block.img, block.heroIcon[block.status]*32,
             block.heroIcon.loc * block.height, 32, block.height,
             block.posx, block.posy+32-block.height, 32, block.height);
     });

@@ -710,6 +710,21 @@ core.prototype.setStrokeStyle = function (name, style) {
     core.ui.setStrokeStyle(name, style);
 }
 
+////// 设置某个canvas的对齐 //////
+core.prototype.setTextAlign = function (name, align) {
+    core.ui.setTextAlign(name, align);
+}
+
+////// 计算某段文字的宽度 //////
+core.prototype.calWidth = function (name, text, font) {
+    return core.ui.calWidth(name, text, font);
+}
+
+////// 绘制一张图片 //////
+core.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
+    core.ui.drawImage(name, image, x, y, w, h, x1, y1, w1, h1);
+}
+
 ////// canvas创建 //////
 core.prototype.createCanvas = function (name, x, y, width, height, z) {
     return core.ui.createCanvas(name, x, y, width, height, z);

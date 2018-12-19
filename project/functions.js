@@ -1180,7 +1180,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var text_start = left + 24;
 
 	// 名称
-	core.canvas.ui.textAlign = "left";
+	core.setTextAlign('ui', 'left');
 	var globalFont = (core.status.globalAttribute||core.initStatus.globalAttribute).font;
 	core.fillText('ui', "HTML5 魔塔样板", text_start, top+35, "#FFD700", "bold 22px "+globalFont);
 	core.fillText('ui', "版本： "+core.firstData.version, text_start, top + 80, "#FFFFFF", "bold 17px "+globalFont);

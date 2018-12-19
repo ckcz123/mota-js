@@ -1259,7 +1259,7 @@ events.prototype.getItem = function (itemId, itemNum, itemX, itemY, callback) {
     if (itemNum > 1) text += "x" + itemNum;
     if (itemCls === 'items') text += core.items.getItemEffectTip(itemId);
     core.drawTip(text, core.material.icons.items[itemId]);
-    core.canvas.event.clearRect(itemX * 32, itemY * 32, 32, 32);
+    core.clearMap('event', itemX * 32, itemY * 32, 32, 32);
     core.updateStatusBar();
 
     this.eventdata.afterGetItem(itemId, itemX, itemY, callback);
@@ -1315,8 +1315,8 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
             core.events.afterOpenDoor(id,x,y,callback);
             return;
         }
-        core.canvas.event.clearRect(32 * x, 32 * y, 32, 32);
-        core.canvas.event.drawImage(core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
+        core.clearMap('event', 32 * x, 32 * y, 32, 32);
+        core.drawImage('event', core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
     }, speed / core.status.replay.speed)
 }
 

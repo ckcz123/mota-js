@@ -324,7 +324,7 @@ editor.prototype.updateMap = function () {
             ctx.lineWidth = OFFSET;
             ctx.strokeRect(x * 32 + OFFSET, y * 32 + OFFSET, 32 - OFFSET * 2, 32 - OFFSET * 2);
             ctx.font = "30px Verdana";
-            ctx.textAlign = 'center'
+            ctx.textAlign = 'center';
             ctx.fillStyle = 'red';
             ctx.fillText("?", x * 32 + 16, y * 32 + 27);
             return;

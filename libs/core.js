@@ -712,7 +712,7 @@ core.prototype.setStrokeStyle = function (name, style) {
 
 ////// canvas创建 //////
 core.prototype.createCanvas = function (name, x, y, width, height, z) {
-    core.ui.createCanvas(name, x, y, width, height, z);
+    return core.ui.createCanvas(name, x, y, width, height, z);
 }
 
 ////// canvas查找 //////
@@ -722,12 +722,12 @@ core.prototype.findCanvas = function (name) {
 
 ////// canvas重定位 //////
 core.prototype.relocateCanvas = function (name, x, y) {
-    core.ui.relocateCanvas(name, x, y);
+    return core.ui.relocateCanvas(name, x, y);
 }
 
 ////// canvas重置 //////
 core.prototype.resizeCanvas = function (name, width, height) {
-    core.ui.resizeCanvas(name, width, height);
+    return core.ui.resizeCanvas(name, width, height);
 }
 
 ////// canvas删除 //////

@@ -524,7 +524,7 @@ core.ui.createCanvas(name, x, y, width, height, zIndex)
 动态创建一个画布。name为要创建的画布名，如果已存在则会直接取用当前存在的。
 x,y为创建的画布相对窗口左上角的像素坐标，width,height为创建的长宽。
 zIndex为创建的纵向高度（关系到画布之间的覆盖），z值高的将覆盖z值低的；系统画布的z值可在个性化中查看。
-创建一个画布后，可以通过 core.dymCanvas[name] 进行调用。
+返回创建的画布的context，也可以通过core.dymCanvas[name]调用。
 
 
 core.ui.findCanvas(name)

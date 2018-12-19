@@ -575,10 +575,9 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
         sx = Math.min(sx, t.x * 32); dx = Math.max(dx, t.x * 32);
         sy = Math.min(sy, t.y * 32); dy = Math.max(dy, t.y * 32);
     });
-    core.createCanvas('route', sx-core.bigmap.offsetX, sy-core.bigmap.offsetY, dx-sx+32, dy-sy+32, 95);
     core.status.automaticRoute.offsetX = sx;
     core.status.automaticRoute.offsetY = sy;
-    var ctx = core.dymCanvas['route'];
+    var ctx = core.createCanvas('route', sx-core.bigmap.offsetX, sy-core.bigmap.offsetY, dx-sx+32, dy-sy+32, 95);
     ctx.fillStyle = '#bfbfbf';
     ctx.strokeStyle = '#bfbfbf';
     ctx.lineWidth = 8;
@@ -601,13 +600,13 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     var step = 0, currStep = null;
     moveStep.forEach(function (t) {
         var dir = t.direction;
-        if (currStep == null || currStep == dir) {
-            step++; currStep = dir;
-        }
+        if (currStep == null || currStep == dir)
+            step++;
         else {
             core.status.automaticRoute.autoStepRoutes.push({'direction': currStep, 'step': step});
-            step = 1; currStep = dir;
+            step = 1; 
         }
+        currStep = dir;
     });
     core.status.automaticRoute.autoStepRoutes.push({'direction': currStep, 'step': step});
 

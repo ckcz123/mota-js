@@ -1533,9 +1533,9 @@ events.prototype.showImage = function (code, image, x, y, dw, dh, opacityVal, ti
     var zIndex = code + 100;
     time = time || 0;
     var name = "image"+ zIndex;
-    core.createCanvas(name, x, y, image.width * dw, image.height * dh, zIndex);
+    var ctx = core.createCanvas(name, x, y, image.width * dw, image.height * dh, zIndex);
 
-    core.dymCanvas[name].drawImage(image, 0, 0, image.width * dw, image.height * dh);
+    ctx.drawImage(image, 0, 0, image.width * dw, image.height * dh);
     if (time == 0)
         core.setOpacity(name, opacityVal);
     else {

@@ -34,7 +34,7 @@ HTML5魔塔是使用画布（canvas）来绘制，存在若干个图层，它们
 
 例如：`core.createCanvas('test', 10, 20, 100, 200, 74)` 创建了一个名为test的画布，其左上角相对窗口的像素坐标为(10,20)，宽100高200，纵向高度74（在动画层和天气层之间）。
 
-可以通过 `core.dymCanvas[name]` 来获得该画布的context；例如 `core.dymCanvas.test` 就是我们上面创建的画布的context，然后进行操作。
+该函数会返回画布的context，也可以通过 `core.dymCanvas[name]` 来获得；例如 `core.dymCanvas.test` 就是我们上面创建的画布的context，然后进行操作。
 
 也可以简单的使用`core.fillText()`, `core.fillRect()`, `core.strokeRect()`等等对画布进行任意绘制。
 

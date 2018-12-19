@@ -2809,7 +2809,8 @@ ui.prototype.findCanvas = function (name) {
 
 ////// canvas重定位 //////
 ui.prototype.relocateCanvas = function (name, x, y) {
-    if (this.findCanvas(name)<0) return null;
+    var index = this.findCanvas(name);
+    if (index<0) return null;
     if (core.isset(x)) {
         core.dymCanvas[name].canvas.style.left = x * core.domStyle.scale + 'px';
         core.dymCanvas._list[index].style.left = x;
@@ -2837,7 +2838,8 @@ ui.prototype.resizeCanvas = function (name, width, height) {
 }
 ////// canvas删除 //////
 ui.prototype.deleteCanvas = function (name) {
-    if (this.findCanvas(name)<0) return null;
+    var index = this.findCanvas(name);
+    if (index<0) return null;
     core.dom.gameDraw.removeChild(core.dymCanvas[name].canvas);
     delete core.dymCanvas[name];
     core.dymCanvas._list.splice(index,1);

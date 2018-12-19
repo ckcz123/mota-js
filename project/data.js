@@ -118,7 +118,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				],
 				"dw": 100,
 				"dh": 100,
-				"opacity": 100,
+				"opacity": 1,
 				"time": 0
 			},
 			{

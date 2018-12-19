@@ -595,6 +595,8 @@ ui.prototype.drawTextBox = function(content, showAll) {
     // 对话框效果：改为动态计算
     if (core.isset(px) && core.isset(py)) {
         var min_width = 220 - leftSpace, max_width = validWidth;
+        // 无行走图或头像，则可以适当缩小min_width
+        if (leftSpace == 20) min_width = 160;
         core.setFont('ui', font);
         validWidth = this.calTextBoxWidth('ui', realContent, min_width, max_width);
         width = validWidth + leftSpace + rightSpace;

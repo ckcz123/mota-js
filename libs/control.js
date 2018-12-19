@@ -2016,9 +2016,12 @@ control.prototype.load = function (need) {
 
     // 游戏开始前读档
     if (!core.isPlaying()) {
+        core.dom.startPanel.style.display = 'none';
+        core.clearStatus();
+        core.clearMap('all');
+        core.deleteAllCanvas();
         core.status.event = {'id': 'load', 'data': null};
         core.status.lockControl = true;
-        core.dom.startPanel.style.display = 'none';
         core.ui.drawSLPanel(10*page+offset);
         return;
     }

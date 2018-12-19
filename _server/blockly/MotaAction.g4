@@ -1960,7 +1960,7 @@ ActionParser.prototype.parseAction = function() {
       if (!/^\w+\.png$/.test(data.background))
         data.background=setTextfunc(data.background);
       this.next = MotaActionBlocks['setText_s'].xmlText([
-        data.position,data.offset,data.title,data.text,data.background,data.bold,data.titlefont,data.textfont,data.time||0,this.next]);
+        data.position,data.offset,data.title,data.text,data.background,data.bold,data.titlefont,data.textfont,data.time,this.next]);
       break;
     case "tip":
       this.next = MotaActionBlocks['tip_s'].xmlText([

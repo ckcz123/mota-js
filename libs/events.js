@@ -838,14 +838,13 @@ events.prototype.doAction = function() {
                 var floorId=data.floorId || core.status.floorId;
                 if (floorId==core.status.floorId)
                     core.openDoor(null, x, y, false, function() {
+                        core.lockControl();
                         core.events.doAction();
                     })
                 else {
                     core.removeBlock(x, y, floorId);
                     this.doAction();
                 }
-                break;
-                this.doAction();
                 break;
             }
         case "openShop": // 打开一个全局商店
@@ -1268,9 +1267,6 @@ events.prototype.getItem = function (itemId, itemNum, itemX, itemY, callback) {
 
 ////// 开门 //////
 events.prototype.openDoor = function (id, x, y, needKey, callback) {
-
-    if (core.interval.openDoorAnimate!=null) return;
-
     if (!core.isset(id)) id = core.getBlockId(x, y);
 
     // 是否存在门
@@ -1284,7 +1280,6 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
         if (core.status.automaticRoute.moveStepBeforeStop.length>=1)core.status.automaticRoute.moveStepBeforeStop[0].step-=core.status.automaticRoute.movedStep;
     }
 
-    core.stopAutomaticRoute();
     var speed = id.endsWith("Wall")?70:30;
 
     if (needKey && id.endsWith("Door")) {
@@ -1304,14 +1299,18 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
     core.playSound("door.mp3");
     var state = 0;
     var door = core.material.icons.animates[id];
+
+    core.lockControl();
+    core.stopHero();
+    core.stopAutomaticRoute();
     core.status.replay.animate=true;
     core.removeGlobalAnimate(x,y);
-    core.interval.openDoorAnimate = window.setInterval(function () {
+    var animate = window.setInterval(function () {
         state++;
         if (state == 4) {
-            clearInterval(core.interval.openDoorAnimate);
-            core.interval.openDoorAnimate=null;
+            clearInterval(animate);
             core.removeBlock(x, y);
+            core.unLockControl();
             core.status.replay.animate=false;
             core.events.afterOpenDoor(id,x,y,callback);
             return;

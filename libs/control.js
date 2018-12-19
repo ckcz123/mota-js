@@ -740,7 +740,6 @@ control.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
 
 ////// 实际每一步的行走过程 //////
 control.prototype.moveAction = function (callback) {
-    if (core.interval.openDoorAnimate!=null) return; // 开门判断
     if (core.status.heroMoving>0) return;
     var direction = core.getHeroLoc('direction');
     var x = core.getHeroLoc('x');

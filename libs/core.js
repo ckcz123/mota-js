@@ -24,7 +24,6 @@ function core() {
     this.interval = {
         'heroMoveInterval': null,
         "tipAnimate": null,
-        'openDoorAnimate': null,
         'onDownInterval': null,
     }
     this.animateFrame = {
@@ -357,13 +356,14 @@ core.prototype.init = function (coreData, callback) {
 
         core.initStatus.maps = core.maps.initMaps(core.floorIds);
         core.setRequestAnimationFrame();
-        core.showStartAnimate();
 
         if (main.mode=='play')
             core.events.initGame();
 
         if (core.isset(functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins))
             core.plugin = new functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.plugin();
+
+        core.showStartAnimate();
 
         if (core.isset(callback)) callback();
 

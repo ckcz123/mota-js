@@ -822,6 +822,17 @@ events.prototype.doAction = function() {
                 });
             }
             break;
+        case "screenFlash": // 画面闪烁
+            if (data.async) {
+                core.screenFlash(data.color, data.intensity, data.time);
+                this.doAction();
+            }
+            else {
+                core.screenFlash(data.color, data.intensity, data.time, function() {
+                    core.events.doAction();
+                });
+            }
+            break;
         case "setWeather": // 更改天气
             core.setWeather(data.name, data.level);
             if (core.isset(data.name))
@@ -844,8 +855,6 @@ events.prototype.doAction = function() {
                     core.removeBlock(x, y, floorId);
                     this.doAction();
                 }
-                break;
-                this.doAction();
                 break;
             }
         case "openShop": // 打开一个全局商店

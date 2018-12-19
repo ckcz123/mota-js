@@ -140,6 +140,7 @@ editor_blockly = function () {
       MotaActionBlocks['hideStatusBar_s'].xmlText(),
       MotaActionBlocks['setFg_0_s'].xmlText(),
       MotaActionBlocks['setFg_1_s'].xmlText(),
+      MotaActionBlocks['screenFlash_s'].xmlText(),
       MotaActionBlocks['setWeather_s'].xmlText(),
       MotaActionBlocks['playBgm_s'].xmlText(),
       MotaActionBlocks['pauseBgm_s'].xmlText(),

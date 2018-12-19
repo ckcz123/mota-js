@@ -1337,7 +1337,7 @@ control.prototype.setFg = function(color, time, callback) {
         core.status.curtainColor = [0,0,0,0];
     }
 
-    var fromColor = core.status.curtainColor;
+    var nowColor = core.status.curtainColor;
 
     if (!core.isset(color))
         color = [0,0,0,0];
@@ -1353,19 +1353,20 @@ control.prototype.setFg = function(color, time, callback) {
         return;
     }
 
-    var per_time = 10, step=0, steps = parseInt(time / per_time);
+    var per_time = 10, step = parseInt(time / per_time);
 
     var changeAnimate = setInterval(function() {
-        step++;
-
-        var nowA = fromColor[3]+(color[3]-fromColor[3])*step/steps;
-        var nowR = parseInt(fromColor[0]+(color[0]-fromColor[0])*step/steps);
-        var nowG = parseInt(fromColor[1]+(color[1]-fromColor[1])*step/steps);
-        var nowB = parseInt(fromColor[2]+(color[2]-fromColor[2])*step/steps);
+        nowColor = [
+            parseInt(nowColor[0]*(step-1)+color[0])/step,
+            parseInt(nowColor[1]*(step-1)+color[1])/step,
+            parseInt(nowColor[2]*(step-1)+color[2])/step,
+            (nowColor[3]*(step-1)+color[3])/step,
+        ];
         core.clearMap('curtain');
-        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA([nowR,nowG,nowB,nowA]));
+        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA(nowColor));
+        step--;
 
-        if (step>=steps) {
+        if (step <= 0) {
             delete core.animateFrame.asyncId[changeAnimate];
             clearInterval(changeAnimate);
             core.status.curtainColor = color;

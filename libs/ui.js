@@ -2769,6 +2769,28 @@ ui.prototype.drawHelp = function () {
     ]);
 }
 
+////// 画面闪烁 //////
+ui.prototype.screenFlash = function (color, intensity, time, callback) {
+    core.ui.createCanvas("screenFlash", 0, 0, 416, 416, 155);
+    core.dymCanvas.screenFlash.fillStyle = core.arrayToRGB(color);
+    core.dymCanvas.screenFlash.fillRect(0, 0, 416, 416);
+    core.dymCanvas.screenFlash.canvas.style.opacity = intensity / 100;
+    var per_time = 10, step =  parseInt(time/per_time);
+    var changeAnimate = setInterval(function(){
+        core.dymCanvas.screenFlash.canvas.style.opacity *= (step-1)/step;
+        step--;
+        if (step <= 0) {
+            clearInterval(changeAnimate);
+            core.ui.deleteCanvas("screenFlash");
+            delete core.animateFrame.asyncId[changeAnimate];
+            // core.status.replay.animate=false;
+            if (core.isset(callback)) callback();
+        }
+    }, per_time);
+    
+    core.animateFrame.asyncId[changeAnimate] = true;
+}
+
 ////// 动态canvas //////
 
 ////// canvas创建 //////

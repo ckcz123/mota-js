@@ -824,11 +824,11 @@ events.prototype.doAction = function() {
             break;
         case "screenFlash": // 画面闪烁
             if (data.async) {
-                core.screenFlash(data.color, data.intensity, data.time);
+                core.screenFlash(data.color, data.time, data.times);
                 this.doAction();
             }
             else {
-                core.screenFlash(data.color, data.intensity, data.time, function() {
+                core.screenFlash(data.color, data.time, data.times, function() {
                     core.events.doAction();
                 });
             }

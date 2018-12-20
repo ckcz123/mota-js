@@ -2770,25 +2770,19 @@ ui.prototype.drawHelp = function () {
 }
 
 ////// 画面闪烁 //////
-ui.prototype.screenFlash = function (color, intensity, time, callback) {
-    core.ui.createCanvas("screenFlash", 0, 0, 416, 416, 155);
-    core.dymCanvas.screenFlash.fillStyle = core.arrayToRGB(color);
-    core.dymCanvas.screenFlash.fillRect(0, 0, 416, 416);
-    core.dymCanvas.screenFlash.canvas.style.opacity = intensity / 100;
-    var per_time = 10, step =  parseInt(time/per_time);
-    var changeAnimate = setInterval(function(){
-        core.dymCanvas.screenFlash.canvas.style.opacity *= (step-1)/step;
-        step--;
-        if (step <= 0) {
-            clearInterval(changeAnimate);
-            core.ui.deleteCanvas("screenFlash");
-            delete core.animateFrame.asyncId[changeAnimate];
-            // core.status.replay.animate=false;
-            if (core.isset(callback)) callback();
-        }
-    }, per_time);
-    
-    core.animateFrame.asyncId[changeAnimate] = true;
+ui.prototype.screenFlash = function (color, time, times, callback) {
+    times = times || 1;
+    time = time/3;
+    var nowColor = core.clone(core.status.curtainColor);
+    core.setFg(color, time, function() {
+        core.setFg(nowColor, time * 2, function() {
+            if (times > 1)
+                core.screenFlash(color, time * 3, times - 1, callback);
+            else {
+                if (core.isset(callback)) callback();
+            }
+        });
+    });
 }
 
 ////// 动态canvas //////

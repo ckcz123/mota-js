@@ -909,8 +909,8 @@ core.prototype.setFg = function(color, time, callback) {
 }
 
 ////// 画面闪烁 //////
-core.prototype.screenFlash = function (color, intensity, time, callback) {
-    core.ui.screenFlash(color, intensity, time, callback);
+core.prototype.screenFlash = function (color, time, times, callback) {
+    core.ui.screenFlash(color, time, times, callback);
 }
 
 ////// 更新全地图显伤 //////

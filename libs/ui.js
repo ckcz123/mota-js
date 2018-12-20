@@ -17,11 +17,16 @@ ui.prototype.init = function () {
 
 ////////////////// 地图设置
 
-ui.prototype.getContextByName = function (name) {
-    if (core.isset(core.canvas[name]))
-        return core.canvas[name];
-    if (core.isset(core.dymCanvas[name]))
-        return core.dymCanvas[name];
+ui.prototype.getContextByName = function (canvas) {
+    if (typeof canvas == 'string') {
+        if (core.isset(core.canvas[canvas]))
+            canvas = core.canvas[canvas];
+        else if (core.isset(core.dymCanvas[canvas]))
+            canvas = core.dymCanvas[canvas];
+    }
+    if (core.isset(canvas) && core.isset(canvas.canvas)) {
+        return canvas;
+    }
     return null;
 }
 
@@ -53,18 +58,17 @@ ui.prototype.fillText = function (name, text, x, y, style, font) {
 }
 
 ////// 在某个canvas上绘制粗体 //////
-ui.prototype.fillBoldText = function (canvas, text, style, x, y, font) {
-    if (typeof canvas == "string")
-        canvas = this.getContextByName(canvas);
-    if (!core.isset(canvas)) return;
-    if (core.isset(font)) canvas.font = font;
-    canvas.fillStyle = '#000000';
-    canvas.fillText(text, x-1, y-1);
-    canvas.fillText(text, x-1, y+1);
-    canvas.fillText(text, x+1, y-1);
-    canvas.fillText(text, x+1, y+1);
-    canvas.fillStyle = style;
-    canvas.fillText(text, x, y);
+ui.prototype.fillBoldText = function (name, text, style, x, y, font) {
+    var ctx = this.getContextByName(name);
+    if (!ctx) return;
+    if (core.isset(font)) ctx.font = font;
+    ctx.fillStyle = '#000000';
+    ctx.fillText(text, x-1, y-1);
+    ctx.fillText(text, x-1, y+1);
+    ctx.fillText(text, x+1, y-1);
+    ctx.fillText(text, x+1, y+1);
+    ctx.fillStyle = style;
+    ctx.fillText(text, x, y);
 }
 
 ////// 在某个canvas上绘制一个矩形 //////
@@ -97,12 +101,11 @@ ui.prototype.drawLine = function (name, x1, y1, x2, y2, style, lineWidth) {
         core.setLineWidth(name, lineWidth);
     }
     var ctx = this.getContextByName(name);
-    if (ctx) {
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-    }
+    if (!ctx) return;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
 }
 
 ////// 在某个canvas上绘制一个箭头 //////
@@ -115,18 +118,17 @@ ui.prototype.drawArrow = function (name, x1, y1, x2, y2, style, lineWidth) {
         core.setLineWidth(name, lineWidth);
     }
     var ctx = this.getContextByName(name);
-    if (ctx) {
-        var head = 10;
-        var dx = x2-x1, dy=y2-y1;
-        var angle = Math.atan2(dy,dx);
-        ctx.beginPath();
-        ctx.moveTo(x1,y1);
-        ctx.lineTo(x2, y2);
-        ctx.lineTo(x2-head*Math.cos(angle-Math.PI/6),y2-head*Math.sin(angle-Math.PI/6));
-        ctx.moveTo(x2, y2);
-        ctx.lineTo(x2-head*Math.cos(angle+Math.PI/6),y2-head*Math.sin(angle+Math.PI/6));
-        ctx.stroke();
-    }
+    if (!ctx) return;
+    var head = 10;
+    var dx = x2-x1, dy=y2-y1;
+    var angle = Math.atan2(dy,dx);
+    ctx.beginPath();
+    ctx.moveTo(x1,y1);
+    ctx.lineTo(x2, y2);
+    ctx.lineTo(x2-head*Math.cos(angle-Math.PI/6),y2-head*Math.sin(angle-Math.PI/6));
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2-head*Math.cos(angle+Math.PI/6),y2-head*Math.sin(angle+Math.PI/6));
+    ctx.stroke();
 }
 
 ////// 设置某个canvas的文字字体 //////
@@ -2555,6 +2557,11 @@ ui.prototype.drawKeyBoard = function () {
     });
 
     core.fillText("ui", "返回游戏", 416-80, offset-3, '#FFFFFF', 'bold 15px '+globalFont);
+
+    if (isWindowSkin)
+        this.drawWindowSelector(background, 300, offset - 22, 72, 27);
+    else
+        core.strokeRect('ui', 300, offset - 22, 72, 27, "#FFD700", 2);
 }
 
 ////// 绘制状态栏 /////

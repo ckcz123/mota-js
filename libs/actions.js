@@ -251,6 +251,10 @@ actions.prototype.keyUp = function(keyCode, altKey, fromReplay) {
             this.keyUpSL(keyCode);
             return;
         }
+        if (core.status.event.id == 'keyBoard') {
+            this.keyUpKeyBoard(keyCode);
+            return;
+        }
         if (core.status.event.id=='switchs') {
             this.keyUpSwitchs(keyCode);
             return;
@@ -2544,6 +2548,14 @@ actions.prototype.clickKeyBoard = function (x, y) {
     }
     if (y==10 && x>=9 && x<=11)
         core.ui.closePanel();
+}
+
+////// “虚拟键盘”界面时的点击操作 //////
+actions.prototype.keyUpKeyBoard = function (keycode) {
+    if (keycode==27 || keycode==88 || keycode==13 || keycode==32 || keycode==67) {
+        core.ui.closePanel();
+        return;
+    }
 }
 
 ////// 光标界面时的点击操作 //////

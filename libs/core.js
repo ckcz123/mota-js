@@ -630,8 +630,8 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback, 
 }
 
 ////// 从名字获得画布 //////
-core.prototype.getContextByName = function (name) {
-    return core.ui.getContextByName(name);
+core.prototype.getContextByName = function (canvas) {
+    return core.ui.getContextByName(canvas);
 }
 
 ////// 清除地图 //////
@@ -645,8 +645,8 @@ core.prototype.fillText = function (name, text, x, y, style, font) {
 }
 
 ////// 在某个canvas上绘制一段描边文字 //////
-core.prototype.fillBoldText = function (canvas, text, style, x, y, font) {
-    core.ui.fillBoldText(canvas, text, style , x, y, font);
+core.prototype.fillBoldText = function (name, text, style, x, y, font) {
+    core.ui.fillBoldText(name, text, style , x, y, font);
 }
 
 ////// 在某个canvas上绘制一个矩形 //////

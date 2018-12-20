@@ -516,15 +516,32 @@ core.ui.setAlpha(name, font) / core.ui.setOpacity(name, font)
 尽量不要对系统画布使用setOpacity（因为会对已经绘制的内容产生影响），自定义创建的画布则不受此限制。
 
 
-core.ui.setFillStyle(name, style) / core.ui.setStrokeStype(name, style)
+core.ui.setFillStyle(name, style) / core.ui.setStrokeStyle(name, style)
 设置一个画布的填充样式/描边样式。
+
+
+core.ui.setTextAlign(name, align)
+设置一个画布的文字对齐模式。
+
+
+core.ui.calWidth(name, text, font)
+计算一段文字在画布上的绘制宽度
+font可选，如果存在则会先设置该画布上的字体。
+
+
+core.ui.drawImage(name, image, x, y, w, h, x1, y1, w1, h1)
+在一个画布上绘制图片。
+name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名。
+image为要绘制的图片，可以是一个全塔属性中定义的图片名（会从images中去获取），图片本身，或者一个画布。
+后面的8个坐标参数与canvas的drawImage的八个参数完全相同。
+请查看 http://www.w3school.com.cn/html5/canvas_drawimage.asp 了解更多。
 
 
 core.ui.createCanvas(name, x, y, width, height, zIndex)
 动态创建一个画布。name为要创建的画布名，如果已存在则会直接取用当前存在的。
 x,y为创建的画布相对窗口左上角的像素坐标，width,height为创建的长宽。
 zIndex为创建的纵向高度（关系到画布之间的覆盖），z值高的将覆盖z值低的；系统画布的z值可在个性化中查看。
-创建一个画布后，可以通过 core.dymCanvas[name] 进行调用。
+返回创建的画布的context，也可以通过core.dymCanvas[name]调用。
 
 
 core.ui.findCanvas(name)

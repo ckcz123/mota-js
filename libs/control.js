@@ -84,7 +84,7 @@ control.prototype.setRequestAnimationFrame = function () {
                         cv.clearRect(block.x * 32, block.y * 32, 32, 32);
                         if (core.isset(block.name)) {
                             if (block.name == 'bg') {
-                                core.canvas.bg.drawImage(core.material.images.terrains, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+                                core.drawImage('bg', core.material.images.terrains, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
                             }
                             core.drawAutotile(cv, core.status.autotileAnimateObjs[block.name+"map"], block, 32, 0, 0, core.status.autotileAnimateObjs.status);
                         }
@@ -575,10 +575,9 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
         sx = Math.min(sx, t.x * 32); dx = Math.max(dx, t.x * 32);
         sy = Math.min(sy, t.y * 32); dy = Math.max(dy, t.y * 32);
     });
-    core.createCanvas('route', sx-core.bigmap.offsetX, sy-core.bigmap.offsetY, dx-sx+32, dy-sy+32, 95);
     core.status.automaticRoute.offsetX = sx;
     core.status.automaticRoute.offsetY = sy;
-    var ctx = core.dymCanvas['route'];
+    var ctx = core.createCanvas('route', sx-core.bigmap.offsetX, sy-core.bigmap.offsetY, dx-sx+32, dy-sy+32, 95);
     ctx.fillStyle = '#bfbfbf';
     ctx.strokeStyle = '#bfbfbf';
     ctx.lineWidth = 8;
@@ -601,13 +600,13 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     var step = 0, currStep = null;
     moveStep.forEach(function (t) {
         var dir = t.direction;
-        if (currStep == null || currStep == dir) {
-            step++; currStep = dir;
-        }
+        if (currStep == null || currStep == dir)
+            step++;
         else {
             core.status.automaticRoute.autoStepRoutes.push({'direction': currStep, 'step': step});
-            step = 1; currStep = dir;
+            step = 1; 
         }
+        currStep = dir;
     });
     core.status.automaticRoute.autoStepRoutes.push({'direction': currStep, 'step': step});
 
@@ -740,7 +739,6 @@ control.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
 
 ////// 实际每一步的行走过程 //////
 control.prototype.moveAction = function (callback) {
-    if (core.interval.openDoorAnimate!=null) return; // 开门判断
     if (core.status.heroMoving>0) return;
     var direction = core.getHeroLoc('direction');
     var x = core.getHeroLoc('x');
@@ -965,7 +963,7 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
             core.bigmap.offsetX = core.clamp(nowx - 32*6, 0, 32*core.bigmap.width-416);
             core.bigmap.offsetY = core.clamp(nowy - 32*6, 0, 32*core.bigmap.height-416);
             core.control.updateViewport();
-            core.canvas.hero.drawImage(core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height,
+            core.drawImage('hero', core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height,
                 nowx - core.bigmap.offsetX, nowy + 32-height - core.bigmap.offsetY, 32, height);
         }
         else {
@@ -1057,7 +1055,7 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
 
     core.clearAutomaticRouteNode(x+dx, y+dy);
 
-    core.canvas.hero.clearRect(x * 32 - core.bigmap.offsetX - 32, y * 32 - core.bigmap.offsetY - 32, 96, 96);
+    core.clearMap('hero', x * 32 - core.bigmap.offsetX - 32, y * 32 - core.bigmap.offsetY - 32, 96, 96);
 
     var heroIconArr = core.material.icons.hero;
     var drawObjs = [];
@@ -1076,7 +1074,7 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
     if (core.isset(core.status.hero.followers)) {
         var index=1;
         core.status.hero.followers.forEach(function (t) {
-            core.canvas.hero.clearRect(32*t.x-core.bigmap.offsetX-32, 32*t.y-core.bigmap.offsetY-32, 96, 96);
+            core.clearMap('hero', 32*t.x-core.bigmap.offsetX-32, 32*t.y-core.bigmap.offsetY-32, 96, 96);
             if (core.isset(core.material.images.images[t.img])) {
                 drawObjs.push({
                     "img": core.material.images.images[t.img],
@@ -1096,7 +1094,7 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
     });
 
     drawObjs.forEach(function (block) {
-        core.canvas.hero.drawImage(block.img, block.heroIcon[block.status]*32,
+        core.drawImage('hero', block.img, block.heroIcon[block.status]*32,
             block.heroIcon.loc * block.height, 32, block.height,
             block.posx, block.posy+32-block.height, 32, block.height);
     });
@@ -2018,9 +2016,12 @@ control.prototype.load = function (need) {
 
     // 游戏开始前读档
     if (!core.isPlaying()) {
+        core.dom.startPanel.style.display = 'none';
+        core.clearStatus();
+        core.clearMap('all');
+        core.deleteAllCanvas();
         core.status.event = {'id': 'load', 'data': null};
         core.status.lockControl = true;
-        core.dom.startPanel.style.display = 'none';
         core.ui.drawSLPanel(10*page+offset);
         return;
     }

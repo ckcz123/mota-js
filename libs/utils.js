@@ -84,7 +84,7 @@ utils.prototype.splitLines = function(canvas, text, maxLength, font) {
         }
         else {
             var toAdd = text.substring(last, i+1);
-            var width = core.canvas[canvas].measureText(toAdd).width;
+            var width = core.calWidth(canvas, toAdd);
             if (core.isset(maxLength) && width>maxLength) {
                 contents.push(text.substring(last, i));
                 last=i;

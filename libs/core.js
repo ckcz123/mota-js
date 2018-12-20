@@ -24,7 +24,6 @@ function core() {
     this.interval = {
         'heroMoveInterval': null,
         "tipAnimate": null,
-        'openDoorAnimate': null,
         'onDownInterval': null,
     }
     this.animateFrame = {
@@ -357,13 +356,14 @@ core.prototype.init = function (coreData, callback) {
 
         core.initStatus.maps = core.maps.initMaps(core.floorIds);
         core.setRequestAnimationFrame();
-        core.showStartAnimate();
 
         if (main.mode=='play')
             core.events.initGame();
 
         if (core.isset(functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins))
             core.plugin = new functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.plugin();
+
+        core.showStartAnimate();
 
         if (core.isset(callback)) callback();
 
@@ -710,9 +710,24 @@ core.prototype.setStrokeStyle = function (name, style) {
     core.ui.setStrokeStyle(name, style);
 }
 
+////// 设置某个canvas的对齐 //////
+core.prototype.setTextAlign = function (name, align) {
+    core.ui.setTextAlign(name, align);
+}
+
+////// 计算某段文字的宽度 //////
+core.prototype.calWidth = function (name, text, font) {
+    return core.ui.calWidth(name, text, font);
+}
+
+////// 绘制一张图片 //////
+core.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
+    core.ui.drawImage(name, image, x, y, w, h, x1, y1, w1, h1);
+}
+
 ////// canvas创建 //////
 core.prototype.createCanvas = function (name, x, y, width, height, z) {
-    core.ui.createCanvas(name, x, y, width, height, z);
+    return core.ui.createCanvas(name, x, y, width, height, z);
 }
 
 ////// canvas查找 //////
@@ -722,12 +737,12 @@ core.prototype.findCanvas = function (name) {
 
 ////// canvas重定位 //////
 core.prototype.relocateCanvas = function (name, x, y) {
-    core.ui.relocateCanvas(name, x, y);
+    return core.ui.relocateCanvas(name, x, y);
 }
 
 ////// canvas重置 //////
 core.prototype.resizeCanvas = function (name, width, height) {
-    core.ui.resizeCanvas(name, width, height);
+    return core.ui.resizeCanvas(name, width, height);
 }
 
 ////// canvas删除 //////

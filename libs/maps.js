@@ -379,17 +379,17 @@ maps.prototype.drawBlock = function (block, animate, dx, dy) {
         if (block.name == 'bg') {
             var groundId = (core.status.maps||core.floors)[core.status.floorId].defaultGround || "ground";
             var blockIcon = core.material.icons.terrains[groundId];
-            core.canvas.bg.drawImage(core.material.images.terrains, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+            core.drawImage('bg', core.material.images.terrains, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
         }
         core.canvas[block.name].drawImage(image, x * 32, y * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
         return;
     }
 
-    core.canvas.event.clearRect(block.x * 32 + dx, block.y * 32 + dy, 32, 32);
-    core.canvas.event.drawImage(image, x * 32, y * height + height-32, 32, 32, block.x * 32 + dx, block.y * 32 + dy, 32, 32);
+    core.clearMap('event', block.x * 32 + dx, block.y * 32 + dy, 32, 32);
+    core.drawImage('event', image, x * 32, y * height + height-32, 32, 32, block.x * 32 + dx, block.y * 32 + dy, 32, 32);
     if (height>32) {
-        core.canvas.event2.clearRect(block.x * 32 + dx, block.y * 32 + 32 - height + dy, 32, height-32)
-        core.canvas.event2.drawImage(image, x * 32, y * height, 32, height-32, block.x * 32 + dx, block.y*32 + 32 - height + dy, 32, height-32);
+        core.clearMap('event2', block.x * 32 + dx, block.y * 32 + 32 - height + dy, 32, height-32)
+        core.drawImage('event2', image, x * 32, y * height, 32, height-32, block.x * 32 + dx, block.y*32 + 32 - height + dy, 32, height-32);
     }
 }
 
@@ -485,7 +485,7 @@ maps.prototype.drawMap = function (floorId, callback) {
         var blockIcon = core.material.icons.terrains[groundId];
         for (var x = 0; x < width; x++) {
             for (var y = 0; y < height; y++) {
-                core.canvas.bg.drawImage(core.material.images.terrains, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
+                core.drawImage('bg', core.material.images.terrains, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
             }
         }
 
@@ -507,24 +507,24 @@ maps.prototype.drawMap = function (floorId, callback) {
                     if (/.*\.gif/i.test(p) && main.mode=='play') {
                         core.dom.gif.innerHTML = "";
                         var gif = new Image();
-                        gif.src = core.material.images.images[p].src;
+                        gif.src = image.src;
                         gif.style.position = 'absolute';
                         gif.style.left = (32*dx*core.domStyle.scale)+"px";
                         gif.style.top = (32*dy*core.domStyle.scale)+"px";
-                        gif.style.width = core.material.images.images[p].width*core.domStyle.scale+"px";
-                        gif.style.height = core.material.images.images[p].height*core.domStyle.scale+"px";
+                        gif.style.width = image.width*core.domStyle.scale+"px";
+                        gif.style.height = image.height*core.domStyle.scale+"px";
                         core.dom.gif.appendChild(gif);
                     }
                     else {
-                        core.canvas.bg.drawImage(image, 32*dx, 32*dy, image.width, image.height);
+                        core.drawImage('bg', image, 32*dx, 32*dy, image.width, image.height);
                     }
                 }
                 else if (t[3]==1)
-                    core.canvas.fg.drawImage(image, 32*dx, 32*dy, image.width, image.height);
+                    core.drawImage('fg', image, 32*dx, 32*dy, image.width, image.height);
                 else if (t[3]==2) {
-                    core.canvas.fg.drawImage(image, 0, 0, image.width, image.height-32,
+                    core.drawImage('fg', image, 0, 0, image.width, image.height-32,
                         32*dx, 32*dy, image.width, image.height-32);
-                    core.canvas.bg.drawImage(image, 0, image.height-32, image.width, 32,
+                    core.drawImage('bg', image, 0, image.height-32, image.width, 32,
                         32*dx, 32*dy + image.height - 32, image.width, 32);
                 }
             }
@@ -829,16 +829,16 @@ maps.prototype.__initBlockCanvas = function (block, height, x, y) {
     }
     if (damage != null) {
         damageCanvas = "blockDamage"+x+"_"+y;
-        core.createCanvas(damageCanvas, 0, 0, 32, 32, 65);
-        core.dymCanvas[damageCanvas].textAlign = 'left';
-        core.dymCanvas[damageCanvas].font = "bold 11px Arial";
-        core.fillBoldText(core.dymCanvas[damageCanvas], damage, damageColor, 1, 31);
+        var ctx = core.createCanvas(damageCanvas, 0, 0, 32, 32, 65);
+        ctx.textAlign = 'left';
+        ctx.font = "bold 11px Arial";
+        core.fillBoldText(ctx, damage, damageColor, 1, 31);
         if (core.flags.displayCritical) {
             var critical = core.enemys.nextCriticals(block.event.id);
             if (critical.length>0) critical=critical[0];
             critical = core.formatBigNumber(critical[0], true);
             if (critical == '???') critical = '?';
-            core.fillBoldText(core.dymCanvas[damageCanvas], critical, '#FFFFFF', 1, 21);
+            core.fillBoldText(ctx, critical, '#FFFFFF', 1, 21);
         }
     }
     return {
@@ -1145,11 +1145,11 @@ maps.prototype.hideBlock = function (x, y, floorId) {
     // 删除动画，清除地图
     if (floorId==core.status.floorId) {
         core.removeGlobalAnimate(x, y);
-        core.canvas.event.clearRect(x * 32, y * 32, 32, 32);
+        core.clearMap('event', x * 32, y * 32, 32, 32);
         var height = 32;
         if (core.isset(block.block.event)) height=block.block.event.height||32;
         if (height>32)
-            core.canvas.event2.clearRect(x * 32, y * 32 +32-height, 32, height-32);
+            core.clearMap('event2', x * 32, y * 32 +32-height, 32, height-32);
     }
 
     block.disable = true;
@@ -1169,11 +1169,11 @@ maps.prototype.removeBlock = function (x, y, floorId) {
     // 删除动画，清除地图
     if (floorId==core.status.floorId) {
         core.removeGlobalAnimate(x, y);
-        core.canvas.event.clearRect(x * 32, y * 32, 32, 32);
+        core.clearMap('event', x * 32, y * 32, 32, 32);
         var height = 32;
         if (core.isset(block.block.event)) height=block.block.event.height||32;
         if (height>32)
-            core.canvas.event2.clearRect(x * 32, y * 32 +32-height, 32, height-32);
+            core.clearMap('event2', x * 32, y * 32 +32-height, 32, height-32);
     }
 
     // 删除Index
@@ -1314,7 +1314,7 @@ maps.prototype.drawBoxAnimate = function () {
         obj.status = ((obj.status||0)+1)%obj.animate;
         core.clearMap('ui', obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight);
         core.fillRect('ui', obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight, core.material.groundPattern);
-        core.canvas.ui.drawImage(obj.image, obj.status * 32, obj.pos,
+        core.drawImage('ui', obj.image, obj.status * 32, obj.pos,
             32, obj.height, obj.x, obj.y, 32, obj.height);
     }
 }
@@ -1333,7 +1333,7 @@ maps.prototype.drawAnimateFrame = function (animate, centerX, centerY, index) {
         var cx = centerX+t.x, cy=centerY+t.y;
 
         if (!t.mirror && !t.angle) {
-            core.canvas.animate.drawImage(image, cx-realWidth/2 - core.bigmap.offsetX, cy-realHeight/2 - core.bigmap.offsetY, realWidth, realHeight);
+            core.drawImage('animate', image, cx-realWidth/2 - core.bigmap.offsetX, cy-realHeight/2 - core.bigmap.offsetY, realWidth, realHeight);
         }
         else {
             core.saveCanvas('animate');
@@ -1342,7 +1342,7 @@ maps.prototype.drawAnimateFrame = function (animate, centerX, centerY, index) {
                 core.canvas.animate.rotate(-t.angle*Math.PI/180);
             if (t.mirror)
                 core.canvas.animate.scale(-1,1);
-            core.canvas.animate.drawImage(image, -realWidth/2 - core.bigmap.offsetX, -realHeight/2 - core.bigmap.offsetY, realWidth, realHeight);
+            core.drawImage('animate', image, -realWidth/2 - core.bigmap.offsetX, -realHeight/2 - core.bigmap.offsetY, realWidth, realHeight);
             core.loadCanvas('animate');
         }
         core.setAlpha('animate', 1);

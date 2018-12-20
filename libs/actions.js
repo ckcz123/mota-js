@@ -2686,7 +2686,7 @@ actions.prototype.loadPaint = function () {
         var value = core.paint[core.status.floorId];
         if (core.isset(value)) value = LZString.decompress(value).split(",");
         core.utils.decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
-        core.canvas.paint.drawImage(core.bigmap.tempCanvas.canvas, 0, 0);
+        core.drawImage('paint', core.bigmap.tempCanvas.canvas, 0, 0);
 
         core.drawTip("读取绘图文件成功");
     })

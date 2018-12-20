@@ -838,6 +838,11 @@ editor.prototype.listen = function () {
     var reDo = null;
     var shortcut = core.getLocalStorage('shortcut',{48: 0, 49: 0, 50: 0, 51: 0, 52: 0, 53: 0, 54: 0, 55: 0, 56: 0, 57: 0});
     document.body.onkeydown = function (e) {
+
+        // 如果是开启事件/脚本编辑器状态，则忽略
+        if (editor_multi.id!="" || editor_blockly.id!="")
+            return;
+
         // 禁止快捷键的默认行为
         if (e.ctrlKey && [89, 90, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
             e.preventDefault();
@@ -898,15 +903,18 @@ editor.prototype.listen = function () {
             printf('已保存该快捷图块, ctrl + '+(e.keyCode-48)+' 使用.')
             core.setLocalStorage('shortcut',shortcut);
         }
-        // wasd平移大地图
-        if (e.keyCode==87)
-            editor.moveViewport(0,-1)
-        else if (e.keyCode==65)
-            editor.moveViewport(-1,0)
-        else if (e.keyCode==83)
-            editor.moveViewport(0,1);
-        else if (e.keyCode==68)
-            editor.moveViewport(1,0);
+        var focusElement = document.activeElement;
+        if (!focusElement || focusElement.tagName.toLowerCase()=='body') {
+            // wasd平移大地图
+            if (e.keyCode==87)
+                editor.moveViewport(0,-1)
+            else if (e.keyCode==65)
+                editor.moveViewport(-1,0)
+            else if (e.keyCode==83)
+                editor.moveViewport(0,1);
+            else if (e.keyCode==68)
+                editor.moveViewport(1,0);
+        }
     }
 
     var dataSelection = document.getElementById('dataSelection');

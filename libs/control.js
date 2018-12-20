@@ -76,15 +76,13 @@ control.prototype.setRequestAnimationFrame = function () {
                 }
 
                 if ((core.status.autotileAnimateObjs.blocks||[]).length>0) {
-                    var groundId = (core.status.maps||core.floors)[core.status.floorId].defaultGround || "ground";
-                    var blockIcon = core.material.icons.terrains[groundId];
                     core.status.autotileAnimateObjs.status++;
                     core.status.autotileAnimateObjs.blocks.forEach(function (block) {
                         var cv = core.isset(block.name)?core.canvas[block.name]:core.canvas.event;
                         cv.clearRect(block.x * 32, block.y * 32, 32, 32);
                         if (core.isset(block.name)) {
                             if (block.name == 'bg') {
-                                core.drawImage('bg', core.material.images.terrains, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+                                core.drawImage('bg', core.material.groundCanvas.canvas, block.x * 32, block.y * 32);
                             }
                             core.drawAutotile(cv, core.status.autotileAnimateObjs[block.name+"map"], block, 32, 0, 0, core.status.autotileAnimateObjs.status);
                         }

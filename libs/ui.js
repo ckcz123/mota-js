@@ -54,6 +54,9 @@ ui.prototype.fillText = function (name, text, x, y, style, font) {
 
 ////// 在某个canvas上绘制粗体 //////
 ui.prototype.fillBoldText = function (canvas, text, style, x, y, font) {
+    if (typeof canvas == "string")
+        canvas = this.getContextByName(canvas);
+    if (!core.isset(canvas)) return;
     if (core.isset(font)) canvas.font = font;
     canvas.fillStyle = '#000000';
     canvas.fillText(text, x-1, y-1);
@@ -200,14 +203,17 @@ ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
     }
 
     // 只能接受2, 4, 8个参数
-    if (core.isset(x) && core.isset(y) && core.isset(w) && core.isset(h) && core.isset(x1) && core.isset(y1) && core.isset(w1) && core.isset(h1)) {
-        ctx.drawImage(image, x, y, w, h, x1, y1, w1, h1);
-    }
-    else if (core.isset(x) && core.isset(y) && core.isset(w) && core.isset(h)) {
-        ctx.drawImage(image, x, y, w, h);
-    }
-    else if (core.isset(x) && core.isset(y)) {
+    if (core.isset(x) && core.isset(y)) {
+        if (core.isset(w) && core.isset(h)) {
+            if (core.isset(x1) && core.isset(y1) && core.isset(w1) && core.isset(h1)) {
+                ctx.drawImage(image, x, y, w, h, x1, y1, w1, h1);
+                return;
+            }
+            ctx.drawImage(image, x, y, w, h);
+            return;
+        }
         ctx.drawImage(image, x, y);
+        return;
     }
 }
 
@@ -424,13 +430,12 @@ ui.prototype.drawWindowSkin = function(background,canvas,x,y,w,h,direction,px,py
 	// 仿RM窗口皮肤 ↓
     var dstImage = core.getContextByName(canvas);
     if (!dstImage) return;
-    var dx = 0, dy = 0;
     // 绘制背景
     dstImage.drawImage(background, 0, 0, 128, 128, x+2, y+2, w-4, h-4);
     // 绘制边框
     // 上方
     dstImage.drawImage(background, 128, 0,     16,     16,      x,      y,     16,     16);
-    for (dx = 0; dx < w - 64; dx += 32) {
+    for (var dx = 0; dx < w - 64; dx += 32) {
     dstImage.drawImage(background, 144, 0,     32,     16,x+dx+16,      y,     32,     16);
     dstImage.drawImage(background, 144,48,     32,     16,x+dx+16, y+h-16,     32,     16);
     }
@@ -438,7 +443,7 @@ ui.prototype.drawWindowSkin = function(background,canvas,x,y,w,h,direction,px,py
     dstImage.drawImage(background, 144,48,w-dx-32,     16,x+dx+16, y+h-16,w-dx-32,     16);
     dstImage.drawImage(background, 176, 0,     16,     16, x+w-16,      y,     16,     16);
     // 左右
-    for (dy = 0; dy < h - 64; dy += 32) {
+    for (var dy = 0; dy < h - 64; dy += 32) {
     dstImage.drawImage(background, 128,16,     16,     32,      x,y+dy+16,     16,     32);
     dstImage.drawImage(background, 176,16,     16,     32, x+w-16,y+dy+16,     16,     32);
     }
@@ -2499,16 +2504,37 @@ ui.prototype.drawKeyBoard = function () {
 
     core.clearLastEvent();
 
-    var left = 16, top = 48, right = 416 - 2 * left, bottom = 416 - 2 * top;
-    core.fillRect('ui', left, top, right, bottom, core.material.groundPattern);
-    core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+    var left = 16, top = 48, width = 416 - 2 * left, height = 416 - 2 * top;
+
+    var background = core.status.textAttribute.background;
+    var isWindowSkin = false;
+    if (typeof background == 'string') {
+        background = core.material.images.images[background];
+        if (core.isset(background) && background.width==192 && background.height==128) isWindowSkin = true;
+        else background = core.initStatus.textAttribute.background;
+    }
+    if (!isWindowSkin) background = core.arrayToRGBA(background);
+    var borderColor = core.status.globalAttribute.borderColor;
+    var titleColor = core.arrayToRGBA(core.status.textAttribute.title);
+    var textColor = core.arrayToRGBA(core.status.textAttribute.text);
+
+    core.clearMap('ui');
+    if (isWindowSkin) {
+        core.setAlpha('ui', 0.85);
+        this.drawWindowSkin(background,'ui',left,top,width,height);
+    }
+    else {
+        core.fillRect('ui', left, top, width, height, background);
+        core.strokeRect('ui', left - 1, top - 1, width + 1, height + 1, borderColor, 2);
+    }
+    core.setAlpha('ui', 1);
 
     core.setTextAlign('ui', 'center');
     var globalFont = core.status.globalAttribute.font;
-    core.fillText('ui', "虚拟键盘", 208, top+35, "#FFD700", "bold 22px "+globalFont);
+    core.fillText('ui', "虚拟键盘", 208, top+35, titleColor, "bold 22px "+globalFont);
 
     core.setFont('ui', '17px '+globalFont);
-    core.setFillStyle('ui', '#FFFFFF');
+    core.setFillStyle('ui', textColor);
     var offset = 128-9;
 
     var lines = [
@@ -2519,7 +2545,7 @@ ui.prototype.drawKeyBoard = function () {
         ["Z","X","C","V","B","N","M"],
         ["-","=","[","]","\\",";","'",",",".","/","`"],
         ["ES","TA","CA","SH","CT","AL","SP","BS","EN","DE"]
-    ]
+    ];
 
     lines.forEach(function (line) {
         for (var i=0;i<line.length;i++) {
@@ -2527,8 +2553,6 @@ ui.prototype.drawKeyBoard = function () {
         }
         offset+=32;
     });
-
-    core.setTextAlign('ui', 'center');
 
     core.fillText("ui", "返回游戏", 416-80, offset-3, '#FFFFFF', 'bold 15px '+globalFont);
 }

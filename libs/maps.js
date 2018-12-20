@@ -377,9 +377,7 @@ maps.prototype.drawBlock = function (block, animate, dx, dy) {
     if (core.isset(block.name)) {
         core.canvas[block.name].clearRect(block.x * 32, block.y * 32, 32, 32);
         if (block.name == 'bg') {
-            var groundId = (core.status.maps||core.floors)[core.status.floorId].defaultGround || "ground";
-            var blockIcon = core.material.icons.terrains[groundId];
-            core.drawImage('bg', core.material.images.terrains, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+            core.drawImage('bg', core.material.groundCanvas.canvas, block.x * 32, block.y * 32);
         }
         core.canvas[block.name].drawImage(image, x * 32, y * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
         return;
@@ -477,18 +475,22 @@ maps.prototype.drawMap = function (floorId, callback) {
     }
     core.clearMap('all');
 
+    var groundId = (core.status.maps||core.floors)[floorId].defaultGround || "ground";
+    core.material.groundCanvas.clearRect(0, 0, 32, 32);
+    core.material.groundCanvas.drawImage(core.material.images.terrains, 0, 32*core.material.icons.terrains[groundId], 32, 32, 0, 0, 32, 32);
+    core.material.groundPattern = core.material.groundCanvas.createPattern(core.material.groundCanvas.canvas, 'repeat');
+
     var drawBg = function(){
         var width = core.floors[floorId].width || 13;
         var height = core.floors[floorId].height || 13;
 
-        var groundId = (core.status.maps||core.floors)[floorId].defaultGround || "ground";
-        var blockIcon = core.material.icons.terrains[groundId];
         for (var x = 0; x < width; x++) {
             for (var y = 0; y < height; y++) {
-                core.drawImage('bg', core.material.images.terrains, 0, blockIcon * 32, 32, 32, x * 32, y * 32, 32, 32);
+                core.drawImage('bg', core.material.groundCanvas.canvas, 32*x, 32*y);
             }
         }
 
+        // 获得image
         var images = [];
         if (core.isset(core.status.maps[floorId].images)) {
             images = core.status.maps[floorId].images;

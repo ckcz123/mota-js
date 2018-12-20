@@ -333,11 +333,9 @@ core.prototype.init = function (coreData, callback) {
     core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
 
-    core.material.ground = new Image();
-    core.material.ground.onload = function () {
-        core.material.groundPattern = core.canvas.ui.createPattern(core.material.ground, "repeat");
-    }
-    core.material.ground.src = "project/images/ground.png";
+    core.material.groundCanvas = document.createElement('canvas').getContext('2d');
+    core.material.groundCanvas.canvas.width = core.material.groundCanvas.canvas.height = 32;
+    core.material.groundPattern = core.material.groundCanvas.createPattern(core.material.groundCanvas.canvas, 'repeat');
 
     core.animateFrame.weather.fog = new Image();
     core.animateFrame.weather.fog.onerror = function () {

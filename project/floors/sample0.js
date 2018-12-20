@@ -27,7 +27,8 @@ main.floors.sample0=
 "firstArrive": [
     {
         "type": "setText",
-        "background": "winskin.png"
+        "background": "winskin.png",
+        "time": 0
     },
     "\t[样板提示]首次到达某层可以触发 firstArrive 事件，该事件可类似于RMXP中的“自动执行脚本”。\n\n本事件支持一切的事件类型，常常用来触发对话，例如：",
     "\t[hero]\b[up,hero]我是谁？我从哪来？我又要到哪去？",

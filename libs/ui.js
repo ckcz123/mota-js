@@ -2833,6 +2833,22 @@ ui.prototype.drawHelp = function () {
     ]);
 }
 
+////// 画面闪烁 //////
+ui.prototype.screenFlash = function (color, time, times, callback) {
+    times = times || 1;
+    time = time/3;
+    var nowColor = core.clone(core.status.curtainColor);
+    core.setFg(color, time, function() {
+        core.setFg(nowColor, time * 2, function() {
+            if (times > 1)
+                core.screenFlash(color, time * 3, times - 1, callback);
+            else {
+                if (core.isset(callback)) callback();
+            }
+        });
+    });
+}
+
 ////// 动态canvas //////
 
 ////// canvas创建 //////

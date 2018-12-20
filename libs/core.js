@@ -921,6 +921,11 @@ core.prototype.setFg = function(color, time, callback) {
     core.control.setFg(color, time, callback);
 }
 
+////// 画面闪烁 //////
+core.prototype.screenFlash = function (color, time, times, callback) {
+    core.ui.screenFlash(color, time, times, callback);
+}
+
 ////// 更新全地图显伤 //////
 core.prototype.updateDamage = function () {
     core.control.updateDamage();

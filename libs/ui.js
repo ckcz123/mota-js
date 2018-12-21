@@ -2611,7 +2611,7 @@ ui.prototype.drawStatistics = function () {
     var current = core.clone(total);
 
     core.floorIds.forEach(function (floorId) {
-        var floor=core.status.maps[floorId];
+        var floor=core.status.maps[floorId]||core.floors[floorId];
         var blocks=core.status.maps[floorId].blocks;
         // 隐藏层不给看
         if (floor.cannotViewMap && floorId!=core.status.floorId) return;
@@ -2636,14 +2636,12 @@ ui.prototype.drawStatistics = function () {
             else {
                 var id = event.id;
 
-                var temp = core.clone(core.status.hero);
-
-                core.setFlag("__statistics__", true);
-
                 if (core.isset(total.count[id])) {
                     var hp=0, atk=0, def=0, mdef=0;
 
                     if (cls[id]=='items' && id!='superPotion') {
+                        var temp = core.clone(core.status.hero);
+                        core.setFlag("__statistics__", true);
                         var ratio = floor.item_ratio||1;
                         if (core.isset(core.items.itemEffect[id])) {
                             try {
@@ -2656,6 +2654,7 @@ ui.prototype.drawStatistics = function () {
                         atk = core.status.hero.atk - temp.atk;
                         def = core.status.hero.def - temp.def;
                         mdef = core.status.hero.mdef - temp.mdef;
+                        core.status.hero = temp;
                     }
                     else {
                         // 装备
@@ -2688,8 +2687,6 @@ ui.prototype.drawStatistics = function () {
                         current.add.mdef+=mdef;
                     }
                 }
-
-                core.status.hero = temp;
             }
         })
     })

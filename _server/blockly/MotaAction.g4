@@ -270,6 +270,7 @@ action
     |   showGif_1_s
     |   setFg_0_s
     |   setFg_1_s
+    |   screenFlash_s
     |   setWeather_s
     |   move_s
     |   moveHero_s
@@ -1152,6 +1153,29 @@ colour : this.soundColor
 Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
 var async = Bool_0?', "async": true':'';
 var code = '{"type": "setFg"'+Int_0 +async+'},\n';
+return code;
+*/;
+
+screenFlash_s
+    :   '画面闪烁' Number ',' Number ',' Number '强度' Number '单次时间' Int '执行次数' Int? '不等待执行完毕' Bool Newline
+
+/* screenFlash_s
+tooltip : screenFlash: 画面闪烁,动画时间可不填
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=screenFlash%EF%BC%9A%E7%94%BB%E9%9D%A2%E9%97%AA%E7%83%81
+default : [255,255,255,1,500,1,false]
+colour : this.soundColor
+var limit = function(v,min,max) {
+    if(v>max) return max;
+    if(v<min) return min;
+    return v;
+}
+Number_0 = limit(Number_0,0,255);
+Number_1 = limit(Number_1,0,255);
+Number_2 = limit(Number_2,0,255);
+Number_3 = limit(Number_3,0,1);
+Int_1 = Int_1!=='' ?(', "times": '+Int_1):'';
+var async = Bool_0?', "async": true':'';
+var code = '{"type": "screenFlash", "color": ['+Number_0+','+Number_1+','+Number_2+','+Number_3+'], "time": '+Int_0 +Int_1+async+'},\n';
 return code;
 */;
 
@@ -2139,6 +2163,10 @@ ActionParser.prototype.parseAction = function() {
         this.next = MotaActionBlocks['setFg_1_s'].xmlText([
           data.time||0,data.async||false,this.next]);
       }
+      break;
+    case "screenFlash": // 画面闪烁
+        this.next = MotaActionBlocks['screenFlash_s'].xmlText([
+          data.color[0],data.color[1],data.color[2],data.color[3]||1,data.time||500,data.times||1,data.async||false,this.next]);
       break;
     case "setWeather": // 更改天气
       this.next = MotaActionBlocks['setWeather_s'].xmlText([

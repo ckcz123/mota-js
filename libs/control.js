@@ -76,15 +76,13 @@ control.prototype.setRequestAnimationFrame = function () {
                 }
 
                 if ((core.status.autotileAnimateObjs.blocks||[]).length>0) {
-                    var groundId = (core.status.maps||core.floors)[core.status.floorId].defaultGround || "ground";
-                    var blockIcon = core.material.icons.terrains[groundId];
                     core.status.autotileAnimateObjs.status++;
                     core.status.autotileAnimateObjs.blocks.forEach(function (block) {
                         var cv = core.isset(block.name)?core.canvas[block.name]:core.canvas.event;
                         cv.clearRect(block.x * 32, block.y * 32, 32, 32);
                         if (core.isset(block.name)) {
                             if (block.name == 'bg') {
-                                core.drawImage('bg', core.material.images.terrains, 0, blockIcon * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+                                core.drawImage('bg', core.material.groundCanvas.canvas, block.x * 32, block.y * 32);
                             }
                             core.drawAutotile(cv, core.status.autotileAnimateObjs[block.name+"map"], block, 32, 0, 0, core.status.autotileAnimateObjs.status);
                         }
@@ -1335,7 +1333,7 @@ control.prototype.setFg = function(color, time, callback) {
         core.status.curtainColor = [0,0,0,0];
     }
 
-    var fromColor = core.status.curtainColor;
+    var nowColor = core.status.curtainColor;
 
     if (!core.isset(color))
         color = [0,0,0,0];
@@ -1351,19 +1349,20 @@ control.prototype.setFg = function(color, time, callback) {
         return;
     }
 
-    var per_time = 10, step=0, steps = parseInt(time / per_time);
+    var per_time = 10, step = parseInt(time / per_time);
 
     var changeAnimate = setInterval(function() {
-        step++;
-
-        var nowA = fromColor[3]+(color[3]-fromColor[3])*step/steps;
-        var nowR = parseInt(fromColor[0]+(color[0]-fromColor[0])*step/steps);
-        var nowG = parseInt(fromColor[1]+(color[1]-fromColor[1])*step/steps);
-        var nowB = parseInt(fromColor[2]+(color[2]-fromColor[2])*step/steps);
+        nowColor = [
+            parseInt(nowColor[0]*(step-1)+color[0])/step,
+            parseInt(nowColor[1]*(step-1)+color[1])/step,
+            parseInt(nowColor[2]*(step-1)+color[2])/step,
+            (nowColor[3]*(step-1)+color[3])/step,
+        ];
         core.clearMap('curtain');
-        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA([nowR,nowG,nowB,nowA]));
+        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA(nowColor));
+        step--;
 
-        if (step>=steps) {
+        if (step <= 0) {
             delete core.animateFrame.asyncId[changeAnimate];
             clearInterval(changeAnimate);
             core.status.curtainColor = color;
@@ -1373,6 +1372,22 @@ control.prototype.setFg = function(color, time, callback) {
     }, per_time);
 
     core.animateFrame.asyncId[changeAnimate] = true;
+}
+
+////// 画面闪烁 //////
+control.prototype.screenFlash = function (color, time, times, callback) {
+    times = times || 1;
+    time = time/3;
+    var nowColor = core.clone(core.status.curtainColor);
+    core.setFg(color, time, function() {
+        core.setFg(nowColor, time * 2, function() {
+            if (times > 1)
+                core.screenFlash(color, time * 3, times - 1, callback);
+            else {
+                if (core.isset(callback)) callback();
+            }
+        });
+    });
 }
 
 ////// 更新全地图显伤 //////
@@ -2077,10 +2092,10 @@ control.prototype.doSL = function (id, type) {
         }, function(err) {
             console.info(err);
             if (core.platform.useLocalForage) {
-                alert("存档失败，请将控制台的报错信息反馈给管理员。");
+                alert("存档失败，错误信息：\n"+err);
             }
             else {
-                alert("存档空间不足，请先使用垃圾存档清理工具进行清理！");
+                alert("存档失败，错误信息：\n"+err+"\n建议使用垃圾存档清理工具进行清理！");
             }
         })
         return;
@@ -2094,7 +2109,9 @@ control.prototype.doSL = function (id, type) {
                 return;
             }
             if (core.isset(data.hashCode) && data.hashCode != core.utils.hashCode(data.hero)) {
-                alert("存档校验失败，请勿修改存档文件！");
+                if (confirm("存档校验失败，请勿修改存档文件！\n你想回放此存档的录像吗？")) {
+                    core.startGame(data.hard, data.hero.flags.__seed__, core.decodeRoute(data.route));
+                }
                 return;
             }
             if (data.version != core.firstData.version) {

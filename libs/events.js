@@ -822,6 +822,17 @@ events.prototype.doAction = function() {
                 });
             }
             break;
+        case "screenFlash": // 画面闪烁
+            if (data.async) {
+                core.screenFlash(data.color, data.time, data.times);
+                this.doAction();
+            }
+            else {
+                core.screenFlash(data.color, data.time, data.times, function() {
+                    core.events.doAction();
+                });
+            }
+            break;
         case "setWeather": // 更改天气
             core.setWeather(data.name, data.level);
             if (core.isset(data.name))

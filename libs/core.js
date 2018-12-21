@@ -333,17 +333,21 @@ core.prototype.init = function (coreData, callback) {
     core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
 
-    core.material.ground = new Image();
-    core.material.ground.onload = function () {
-        core.material.groundPattern = core.canvas.ui.createPattern(core.material.ground, "repeat");
-    }
-    core.material.ground.src = "project/images/ground.png";
+    core.material.groundCanvas = document.createElement('canvas').getContext('2d');
+    core.material.groundCanvas.canvas.width = core.material.groundCanvas.canvas.height = 32;
+    core.material.groundPattern = core.material.groundCanvas.createPattern(core.material.groundCanvas.canvas, 'repeat');
 
     core.animateFrame.weather.fog = new Image();
     core.animateFrame.weather.fog.onerror = function () {
         core.animateFrame.weather.fog = null;
     }
     core.animateFrame.weather.fog.src = "project/images/fog.png";
+
+    core.material.images.keyboard = new Image();
+    core.material.images.keyboard.onerror  = function () {
+        core.material.images.keyboard = null;
+    }
+    core.material.images.keyboard.src = "project/images/keyboard.png";
 
     core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
 
@@ -632,8 +636,8 @@ core.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback, 
 }
 
 ////// 从名字获得画布 //////
-core.prototype.getContextByName = function (name) {
-    return core.ui.getContextByName(name);
+core.prototype.getContextByName = function (canvas) {
+    return core.ui.getContextByName(canvas);
 }
 
 ////// 清除地图 //////
@@ -647,8 +651,8 @@ core.prototype.fillText = function (name, text, x, y, style, font) {
 }
 
 ////// 在某个canvas上绘制一段描边文字 //////
-core.prototype.fillBoldText = function (canvas, text, style, x, y, font) {
-    core.ui.fillBoldText(canvas, text, style , x, y, font);
+core.prototype.fillBoldText = function (name, text, style, x, y, font) {
+    core.ui.fillBoldText(name, text, style , x, y, font);
 }
 
 ////// 在某个canvas上绘制一个矩形 //////
@@ -921,6 +925,11 @@ core.prototype.setWeather = function (type, level) {
 ////// 更改画面色调 //////
 core.prototype.setFg = function(color, time, callback) {
     core.control.setFg(color, time, callback);
+}
+
+////// 画面闪烁 //////
+core.prototype.screenFlash = function (color, time, times, callback) {
+    core.control.screenFlash(color, time, times, callback);
 }
 
 ////// 更新全地图显伤 //////

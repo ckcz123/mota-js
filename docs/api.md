@@ -467,25 +467,24 @@ core.maps.removeBlockByIds(floorId, ids)
 ui.js主要用来进行UI窗口的绘制，比如对话框、怪物手册、楼传器、存读档界面等等。
 
 
-core.ui.getContextByName(name)
+core.ui.getContextByName(canvas)
 根据画布名找到一个画布的context；支持系统画布和自定义画布。如果不存在画布返回null。
+也可以传画布的context自身，则返回自己。
 
 
 core.clearMap(name)
 清空某个画布图层。
-name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名。
+name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名；还可以直接传画布的context本身。（下同）
 如果name也可以是'all'，若为all则为清空所有系统画布。
 
 
 core.ui.fillText(name, text, x, y, style, font)
 在某个画布上绘制一段文字。
-name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名。（下同）
-text为要绘制的文本，x,y为要绘制的坐标，style可选为绘制的样式，font可选为绘制的字体。
+text为要绘制的文本，x,y为要绘制的坐标，style可选为绘制的样式，font可选为绘制的字体。（下同）
 
 
-core.ui.fillBoldText(canvas, text, style, x, y, font)
+core.ui.fillBoldText(name, text, style, x, y, font)
 在某个画布上绘制一个描黑边的文字。
-canvas为要绘制的画布的context，text为文本，style为颜色样式，x,y坐标，font可选为要绘制的字体。
 
 
 core.ui.fillRect(name, x, y, width, height, style)
@@ -531,7 +530,7 @@ font可选，如果存在则会先设置该画布上的字体。
 
 core.ui.drawImage(name, image, x, y, w, h, x1, y1, w1, h1)
 在一个画布上绘制图片。
-name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名。
+name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名；还可以直接传画布的context本身。
 image为要绘制的图片，可以是一个全塔属性中定义的图片名（会从images中去获取），图片本身，或者一个画布。
 后面的8个坐标参数与canvas的drawImage的八个参数完全相同。
 请查看 http://www.w3school.com.cn/html5/canvas_drawimage.asp 了解更多。

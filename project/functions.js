@@ -703,7 +703,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		case 90: // Z：转向
 			core.turnHero();
 			break;
-		case 75: case 86: // K/V：打开快捷商店列表
+		case 86: // V：打开快捷商店列表
 			core.openQuickShop(true);
 			break;
 		case 32: // SPACE：轻按
@@ -741,7 +741,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		case 79: // O：查看工程
 			window.open(core.platform.isPC?"editor.html":"editor-mobile.html", "_blank");
 			break;
-		case 80: // P：查看评论
+		case 80: // P：游戏主页
 			window.open("/score.php?name="+core.firstData.name+"&num=10", "_blank");
 			break;
 		case 49: // 快捷键1: 破

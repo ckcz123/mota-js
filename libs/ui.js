@@ -17,11 +17,16 @@ ui.prototype.init = function () {
 
 ////////////////// 地图设置
 
-ui.prototype.getContextByName = function (name) {
-    if (core.isset(core.canvas[name]))
-        return core.canvas[name];
-    if (core.isset(core.dymCanvas[name]))
-        return core.dymCanvas[name];
+ui.prototype.getContextByName = function (canvas) {
+    if (typeof canvas == 'string') {
+        if (core.isset(core.canvas[canvas]))
+            canvas = core.canvas[canvas];
+        else if (core.isset(core.dymCanvas[canvas]))
+            canvas = core.dymCanvas[canvas];
+    }
+    if (core.isset(canvas) && core.isset(canvas.canvas)) {
+        return canvas;
+    }
     return null;
 }
 
@@ -53,15 +58,17 @@ ui.prototype.fillText = function (name, text, x, y, style, font) {
 }
 
 ////// 在某个canvas上绘制粗体 //////
-ui.prototype.fillBoldText = function (canvas, text, style, x, y, font) {
-    if (core.isset(font)) canvas.font = font;
-    canvas.fillStyle = '#000000';
-    canvas.fillText(text, x-1, y-1);
-    canvas.fillText(text, x-1, y+1);
-    canvas.fillText(text, x+1, y-1);
-    canvas.fillText(text, x+1, y+1);
-    canvas.fillStyle = style;
-    canvas.fillText(text, x, y);
+ui.prototype.fillBoldText = function (name, text, style, x, y, font) {
+    var ctx = this.getContextByName(name);
+    if (!ctx) return;
+    if (core.isset(font)) ctx.font = font;
+    ctx.fillStyle = '#000000';
+    ctx.fillText(text, x-1, y-1);
+    ctx.fillText(text, x-1, y+1);
+    ctx.fillText(text, x+1, y-1);
+    ctx.fillText(text, x+1, y+1);
+    ctx.fillStyle = style;
+    ctx.fillText(text, x, y);
 }
 
 ////// 在某个canvas上绘制一个矩形 //////
@@ -94,12 +101,11 @@ ui.prototype.drawLine = function (name, x1, y1, x2, y2, style, lineWidth) {
         core.setLineWidth(name, lineWidth);
     }
     var ctx = this.getContextByName(name);
-    if (ctx) {
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-    }
+    if (!ctx) return;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
 }
 
 ////// 在某个canvas上绘制一个箭头 //////
@@ -112,18 +118,17 @@ ui.prototype.drawArrow = function (name, x1, y1, x2, y2, style, lineWidth) {
         core.setLineWidth(name, lineWidth);
     }
     var ctx = this.getContextByName(name);
-    if (ctx) {
-        var head = 10;
-        var dx = x2-x1, dy=y2-y1;
-        var angle = Math.atan2(dy,dx);
-        ctx.beginPath();
-        ctx.moveTo(x1,y1);
-        ctx.lineTo(x2, y2);
-        ctx.lineTo(x2-head*Math.cos(angle-Math.PI/6),y2-head*Math.sin(angle-Math.PI/6));
-        ctx.moveTo(x2, y2);
-        ctx.lineTo(x2-head*Math.cos(angle+Math.PI/6),y2-head*Math.sin(angle+Math.PI/6));
-        ctx.stroke();
-    }
+    if (!ctx) return;
+    var head = 10;
+    var dx = x2-x1, dy=y2-y1;
+    var angle = Math.atan2(dy,dx);
+    ctx.beginPath();
+    ctx.moveTo(x1,y1);
+    ctx.lineTo(x2, y2);
+    ctx.lineTo(x2-head*Math.cos(angle-Math.PI/6),y2-head*Math.sin(angle-Math.PI/6));
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2-head*Math.cos(angle+Math.PI/6),y2-head*Math.sin(angle+Math.PI/6));
+    ctx.stroke();
 }
 
 ////// 设置某个canvas的文字字体 //////
@@ -200,14 +205,17 @@ ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
     }
 
     // 只能接受2, 4, 8个参数
-    if (core.isset(x) && core.isset(y) && core.isset(w) && core.isset(h) && core.isset(x1) && core.isset(y1) && core.isset(w1) && core.isset(h1)) {
-        ctx.drawImage(image, x, y, w, h, x1, y1, w1, h1);
-    }
-    else if (core.isset(x) && core.isset(y) && core.isset(w) && core.isset(h)) {
-        ctx.drawImage(image, x, y, w, h);
-    }
-    else if (core.isset(x) && core.isset(y)) {
+    if (core.isset(x) && core.isset(y)) {
+        if (core.isset(w) && core.isset(h)) {
+            if (core.isset(x1) && core.isset(y1) && core.isset(w1) && core.isset(h1)) {
+                ctx.drawImage(image, x, y, w, h, x1, y1, w1, h1);
+                return;
+            }
+            ctx.drawImage(image, x, y, w, h);
+            return;
+        }
         ctx.drawImage(image, x, y);
+        return;
     }
 }
 
@@ -424,13 +432,12 @@ ui.prototype.drawWindowSkin = function(background,canvas,x,y,w,h,direction,px,py
 	// 仿RM窗口皮肤 ↓
     var dstImage = core.getContextByName(canvas);
     if (!dstImage) return;
-    var dx = 0, dy = 0;
     // 绘制背景
     dstImage.drawImage(background, 0, 0, 128, 128, x+2, y+2, w-4, h-4);
     // 绘制边框
     // 上方
     dstImage.drawImage(background, 128, 0,     16,     16,      x,      y,     16,     16);
-    for (dx = 0; dx < w - 64; dx += 32) {
+    for (var dx = 0; dx < w - 64; dx += 32) {
     dstImage.drawImage(background, 144, 0,     32,     16,x+dx+16,      y,     32,     16);
     dstImage.drawImage(background, 144,48,     32,     16,x+dx+16, y+h-16,     32,     16);
     }
@@ -438,7 +445,7 @@ ui.prototype.drawWindowSkin = function(background,canvas,x,y,w,h,direction,px,py
     dstImage.drawImage(background, 144,48,w-dx-32,     16,x+dx+16, y+h-16,w-dx-32,     16);
     dstImage.drawImage(background, 176, 0,     16,     16, x+w-16,      y,     16,     16);
     // 左右
-    for (dy = 0; dy < h - 64; dy += 32) {
+    for (var dy = 0; dy < h - 64; dy += 32) {
     dstImage.drawImage(background, 128,16,     16,     32,      x,y+dy+16,     16,     32);
     dstImage.drawImage(background, 176,16,     16,     32, x+w-16,y+dy+16,     16,     32);
     }
@@ -1478,7 +1485,7 @@ ui.prototype.drawReplay = function () {
 ui.prototype.drawGameInfo = function () {
     core.status.event.id = 'gameInfo';
     this.drawChoices(null, [
-        "数据统计", "查看工程", "查看评论", "操作帮助", "关于本塔","下载离线版本", "返回主菜单"
+        "数据统计", "查看工程", "游戏主页", "操作帮助", "关于本塔","下载离线版本", "返回主菜单"
     ]);
 }
 
@@ -2499,16 +2506,37 @@ ui.prototype.drawKeyBoard = function () {
 
     core.clearLastEvent();
 
-    var left = 16, top = 48, right = 416 - 2 * left, bottom = 416 - 2 * top;
-    core.fillRect('ui', left, top, right, bottom, core.material.groundPattern);
-    core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, '#FFFFFF', 2);
+    var left = 16, top = 48, width = 416 - 2 * left, height = 416 - 2 * top;
+
+    var background = core.status.textAttribute.background;
+    var isWindowSkin = false;
+    if (typeof background == 'string') {
+        background = core.material.images.images[background];
+        if (core.isset(background) && background.width==192 && background.height==128) isWindowSkin = true;
+        else background = core.initStatus.textAttribute.background;
+    }
+    if (!isWindowSkin) background = core.arrayToRGBA(background);
+    var borderColor = core.status.globalAttribute.borderColor;
+    var titleColor = core.arrayToRGBA(core.status.textAttribute.title);
+    var textColor = core.arrayToRGBA(core.status.textAttribute.text);
+
+    core.clearMap('ui');
+    if (isWindowSkin) {
+        core.setAlpha('ui', 0.85);
+        this.drawWindowSkin(background,'ui',left,top,width,height);
+    }
+    else {
+        core.fillRect('ui', left, top, width, height, background);
+        core.strokeRect('ui', left - 1, top - 1, width + 1, height + 1, borderColor, 2);
+    }
+    core.setAlpha('ui', 1);
 
     core.setTextAlign('ui', 'center');
     var globalFont = core.status.globalAttribute.font;
-    core.fillText('ui', "虚拟键盘", 208, top+35, "#FFD700", "bold 22px "+globalFont);
+    core.fillText('ui', "虚拟键盘", 208, top+35, titleColor, "bold 22px "+globalFont);
 
     core.setFont('ui', '17px '+globalFont);
-    core.setFillStyle('ui', '#FFFFFF');
+    core.setFillStyle('ui', textColor);
     var offset = 128-9;
 
     var lines = [
@@ -2519,7 +2547,7 @@ ui.prototype.drawKeyBoard = function () {
         ["Z","X","C","V","B","N","M"],
         ["-","=","[","]","\\",";","'",",",".","/","`"],
         ["ES","TA","CA","SH","CT","AL","SP","BS","EN","DE"]
-    ]
+    ];
 
     lines.forEach(function (line) {
         for (var i=0;i<line.length;i++) {
@@ -2528,9 +2556,12 @@ ui.prototype.drawKeyBoard = function () {
         offset+=32;
     });
 
-    core.setTextAlign('ui', 'center');
-
     core.fillText("ui", "返回游戏", 416-80, offset-3, '#FFFFFF', 'bold 15px '+globalFont);
+
+    if (isWindowSkin)
+        this.drawWindowSelector(background, 300, offset - 22, 72, 27);
+    else
+        core.strokeRect('ui', 300, offset - 22, 72, 27, "#FFD700", 2);
 }
 
 ////// 绘制状态栏 /////
@@ -2580,7 +2611,7 @@ ui.prototype.drawStatistics = function () {
     var current = core.clone(total);
 
     core.floorIds.forEach(function (floorId) {
-        var floor=core.status.maps[floorId];
+        var floor=core.status.maps[floorId]||core.floors[floorId];
         var blocks=core.status.maps[floorId].blocks;
         // 隐藏层不给看
         if (floor.cannotViewMap && floorId!=core.status.floorId) return;
@@ -2605,14 +2636,12 @@ ui.prototype.drawStatistics = function () {
             else {
                 var id = event.id;
 
-                var temp = core.clone(core.status.hero);
-
-                core.setFlag("__statistics__", true);
-
                 if (core.isset(total.count[id])) {
                     var hp=0, atk=0, def=0, mdef=0;
 
                     if (cls[id]=='items' && id!='superPotion') {
+                        var temp = core.clone(core.status.hero);
+                        core.setFlag("__statistics__", true);
                         var ratio = floor.item_ratio||1;
                         if (core.isset(core.items.itemEffect[id])) {
                             try {
@@ -2625,6 +2654,7 @@ ui.prototype.drawStatistics = function () {
                         atk = core.status.hero.atk - temp.atk;
                         def = core.status.hero.def - temp.def;
                         mdef = core.status.hero.mdef - temp.mdef;
+                        core.status.hero = temp;
                     }
                     else {
                         // 装备
@@ -2644,7 +2674,6 @@ ui.prototype.drawStatistics = function () {
                         if (t!="") ext[id]=t;
                     }
 
-                    core.status.hero = core.clone(temp);
                     total.count[id]++;
                     total.add.hp+=hp;
                     total.add.atk+=atk;
@@ -2776,30 +2805,39 @@ ui.prototype.drawPaint = function () {
 
 ////// 绘制帮助页面 //////
 ui.prototype.drawHelp = function () {
-    core.drawText([
-        "\t[键盘快捷键列表]"+
-        "[CTRL] 跳过对话   [Z] 转向\n" +
-        "[X] 怪物手册   [G] 楼层传送\n" +
-        "[A] 读取自动存档   [S/D] 存读档页面\n" +
-        "[K/V] 快捷商店   [ESC] 系统菜单\n" +
-        "[T] 道具页面   [Q] 装备页面\n" +
-        "[B] 数据统计   [H] 帮助页面\n" +
-        "[R] 回放录像   [E] 显示光标\n" +
-        "[SPACE] 轻按   [M] 绘图模式\n" +
-        "[N] 返回标题页面   [P] 查看评论区\n" +
-        "[O] 查看工程   [F7] 打开debug穿墙模式\n" +
-        "[PgUp/PgDn] 浏览地图\n"+
-        "[1~4] 快捷使用破炸飞和其他道具\n"+
-        "[Alt+0~9] 快捷换装",
-        "\t[鼠标操作]"+
-        "点状态栏中图标： 进行对应的操作\n"+
-        "点任意块： 寻路并移动\n"+
-        "点任意块并拖动： 指定寻路路线\n"+
-        "双击空地： 瞬间移动\n"+
-        "单击勇士： 转向\n"+
-        "双击勇士： 轻按（仅在轻按开关打开时有效）\n"+
-        "长按任意位置：跳过剧情对话或打开虚拟键盘"
-    ]);
+    core.clearLastEvent();
+    if (core.material.images.keyboard) {
+        core.status.event.id = 'help';
+        core.lockControl();
+        core.setAlpha('ui', 1);
+        core.drawImage('ui', core.material.images.keyboard, 0, 0);
+    }
+    else {
+        core.drawText([
+            "\t[键盘快捷键列表]"+
+            "[CTRL] 跳过对话   [Z] 转向\n" +
+            "[X] 怪物手册   [G] 楼层传送\n" +
+            "[A] 读取自动存档   [S/D] 存读档页面\n" +
+            "[V] 快捷商店   [ESC] 系统菜单\n" +
+            "[T] 道具页面   [Q] 装备页面\n" +
+            "[B] 数据统计   [H] 帮助页面\n" +
+            "[R] 回放录像   [E] 显示光标\n" +
+            "[SPACE] 轻按   [M] 绘图模式\n" +
+            "[N] 返回标题页面   [P] 游戏主页\n" +
+            "[O] 查看工程   [F7] 打开debug穿墙模式\n" +
+            "[PgUp/PgDn] 浏览地图\n"+
+            "[1~4] 快捷使用破炸飞和其他道具\n"+
+            "[Alt+0~9] 快捷换装",
+            "\t[鼠标操作]"+
+            "点状态栏中图标： 进行对应的操作\n"+
+            "点任意块： 寻路并移动\n"+
+            "点任意块并拖动： 指定寻路路线\n"+
+            "双击空地： 瞬间移动\n"+
+            "单击勇士： 转向\n"+
+            "双击勇士： 轻按（仅在轻按开关打开时有效）\n"+
+            "长按任意位置：跳过剧情对话或打开虚拟键盘"
+        ]);
+    }
 }
 
 ////// 动态canvas //////

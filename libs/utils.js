@@ -436,17 +436,16 @@ utils.prototype.decodeRoute = function (route) {
         index++;
         return str;
     }
+    var mp = {
+        "U": "up",
+        "D": "down",
+        "L": "left",
+        "R": "right"
+    }
 
     while (index<route.length) {
         var c=route.charAt(index++);
         var nxt=(c=='I'|| c=='e' ||c=='F'||c=='S'||c=='Q'||c=='t')?getString():getNumber();
-
-        var mp = {
-            "U": "up",
-            "D": "down",
-            "L": "left",
-            "R": "right"
-        }
 
         switch (c) {
             case "U": case "D": case "L": case "R": for (var i=0;i<nxt;i++) ans.push(mp[c]); break;
@@ -639,6 +638,7 @@ utils.prototype.readFileContent = function (content) {
     }
     catch (e) {
         console.log(e);
+        alert(e);
     }
     alert("不是有效的JSON文件！");
 

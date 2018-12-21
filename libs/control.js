@@ -2076,10 +2076,10 @@ control.prototype.doSL = function (id, type) {
         }, function(err) {
             console.info(err);
             if (core.platform.useLocalForage) {
-                alert("存档失败，请将控制台的报错信息反馈给管理员。");
+                alert("存档失败，错误信息：\n"+err);
             }
             else {
-                alert("存档空间不足，请先使用垃圾存档清理工具进行清理！");
+                alert("存档失败，错误信息：\n"+err+"\n建议使用垃圾存档清理工具进行清理！");
             }
         })
         return;
@@ -2093,7 +2093,9 @@ control.prototype.doSL = function (id, type) {
                 return;
             }
             if (core.isset(data.hashCode) && data.hashCode != core.utils.hashCode(data.hero)) {
-                alert("存档校验失败，请勿修改存档文件！");
+                if (confirm("存档校验失败，请勿修改存档文件！\n你想回放此存档的录像吗？")) {
+                    core.startGame(data.hard, data.hero.flags.__seed__, core.decodeRoute(data.route));
+                }
                 return;
             }
             if (data.version != core.firstData.version) {

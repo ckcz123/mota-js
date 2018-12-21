@@ -1485,7 +1485,7 @@ ui.prototype.drawReplay = function () {
 ui.prototype.drawGameInfo = function () {
     core.status.event.id = 'gameInfo';
     this.drawChoices(null, [
-        "数据统计", "查看工程", "查看评论", "操作帮助", "关于本塔","下载离线版本", "返回主菜单"
+        "数据统计", "查看工程", "游戏主页", "操作帮助", "关于本塔","下载离线版本", "返回主菜单"
     ]);
 }
 
@@ -2805,46 +2805,39 @@ ui.prototype.drawPaint = function () {
 
 ////// 绘制帮助页面 //////
 ui.prototype.drawHelp = function () {
-    core.drawText([
-        "\t[键盘快捷键列表]"+
-        "[CTRL] 跳过对话   [Z] 转向\n" +
-        "[X] 怪物手册   [G] 楼层传送\n" +
-        "[A] 读取自动存档   [S/D] 存读档页面\n" +
-        "[K/V] 快捷商店   [ESC] 系统菜单\n" +
-        "[T] 道具页面   [Q] 装备页面\n" +
-        "[B] 数据统计   [H] 帮助页面\n" +
-        "[R] 回放录像   [E] 显示光标\n" +
-        "[SPACE] 轻按   [M] 绘图模式\n" +
-        "[N] 返回标题页面   [P] 查看评论区\n" +
-        "[O] 查看工程   [F7] 打开debug穿墙模式\n" +
-        "[PgUp/PgDn] 浏览地图\n"+
-        "[1~4] 快捷使用破炸飞和其他道具\n"+
-        "[Alt+0~9] 快捷换装",
-        "\t[鼠标操作]"+
-        "点状态栏中图标： 进行对应的操作\n"+
-        "点任意块： 寻路并移动\n"+
-        "点任意块并拖动： 指定寻路路线\n"+
-        "双击空地： 瞬间移动\n"+
-        "单击勇士： 转向\n"+
-        "双击勇士： 轻按（仅在轻按开关打开时有效）\n"+
-        "长按任意位置：跳过剧情对话或打开虚拟键盘"
-    ]);
-}
-
-////// 画面闪烁 //////
-ui.prototype.screenFlash = function (color, time, times, callback) {
-    times = times || 1;
-    time = time/3;
-    var nowColor = core.clone(core.status.curtainColor);
-    core.setFg(color, time, function() {
-        core.setFg(nowColor, time * 2, function() {
-            if (times > 1)
-                core.screenFlash(color, time * 3, times - 1, callback);
-            else {
-                if (core.isset(callback)) callback();
-            }
-        });
-    });
+    core.clearLastEvent();
+    if (core.material.images.keyboard) {
+        core.status.event.id = 'help';
+        core.lockControl();
+        core.setAlpha('ui', 1);
+        core.drawImage('ui', core.material.images.keyboard, 0, 0);
+    }
+    else {
+        core.drawText([
+            "\t[键盘快捷键列表]"+
+            "[CTRL] 跳过对话   [Z] 转向\n" +
+            "[X] 怪物手册   [G] 楼层传送\n" +
+            "[A] 读取自动存档   [S/D] 存读档页面\n" +
+            "[V] 快捷商店   [ESC] 系统菜单\n" +
+            "[T] 道具页面   [Q] 装备页面\n" +
+            "[B] 数据统计   [H] 帮助页面\n" +
+            "[R] 回放录像   [E] 显示光标\n" +
+            "[SPACE] 轻按   [M] 绘图模式\n" +
+            "[N] 返回标题页面   [P] 游戏主页\n" +
+            "[O] 查看工程   [F7] 打开debug穿墙模式\n" +
+            "[PgUp/PgDn] 浏览地图\n"+
+            "[1~4] 快捷使用破炸飞和其他道具\n"+
+            "[Alt+0~9] 快捷换装",
+            "\t[鼠标操作]"+
+            "点状态栏中图标： 进行对应的操作\n"+
+            "点任意块： 寻路并移动\n"+
+            "点任意块并拖动： 指定寻路路线\n"+
+            "双击空地： 瞬间移动\n"+
+            "单击勇士： 转向\n"+
+            "双击勇士： 轻按（仅在轻按开关打开时有效）\n"+
+            "长按任意位置：跳过剧情对话或打开虚拟键盘"
+        ]);
+    }
 }
 
 ////// 动态canvas //////

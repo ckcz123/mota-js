@@ -196,10 +196,14 @@ actions.prototype.keyUp = function(keyCode, altKey, fromReplay) {
     if (!fromReplay && core.isset(core.status.replay)&&core.status.replay.replaying
         &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
 
+    var ok = function (keycode) {
+        return keycode==27 || keycode==88 || keycode==13 || keycode==32 || keycode==67;
+    }
+
     if (core.status.lockControl) {
         core.status.holdingKeys = [];
         // 全键盘操作部分
-        if (core.status.event.id == 'text' && (keyCode==13 || keyCode==32 || keyCode==67)) {
+        if (core.status.event.id == 'text' && ok(keyCode)) {
             core.drawText();
             return;
         }
@@ -211,15 +215,19 @@ actions.prototype.keyUp = function(keyCode, altKey, fromReplay) {
             this.keyUpAction(keyCode);
             return;
         }
-        if (core.status.event.id=='about' && (keyCode==13 || keyCode==32 || keyCode==67)) {
+        if (core.status.event.id=='about' && ok(keyCode)) {
             this.clickAbout();
+            return;
+        }
+        if (core.status.event.id=='help' && ok(keyCode)) {
+            core.ui.closePanel();
             return;
         }
         if (core.status.event.id=='book') {
             this.keyUpBook(keyCode);
             return;
         }
-        if (core.status.event.id=='book-detail' && (keyCode==13 || keyCode==32 || keyCode==67)) {
+        if (core.status.event.id=='book-detail' && ok(keyCode)) {
             this.clickBookDetail();
             return;
         }
@@ -251,8 +259,8 @@ actions.prototype.keyUp = function(keyCode, altKey, fromReplay) {
             this.keyUpSL(keyCode);
             return;
         }
-        if (core.status.event.id == 'keyBoard') {
-            this.keyUpKeyBoard(keyCode);
+        if (core.status.event.id == 'keyBoard' && ok(keyCode)) {
+            core.ui.closePanel();
             return;
         }
         if (core.status.event.id=='switchs') {
@@ -553,6 +561,11 @@ actions.prototype.onclick = function (x, y, stepPostfix) {
     // 关于
     if (core.status.event.id == 'about') {
         this.clickAbout(x,y);
+        return;
+    }
+    
+    if (core.status.event.id == 'help') {
+        this.clickHelp(x,y);
         return;
     }
 
@@ -2550,14 +2563,6 @@ actions.prototype.clickKeyBoard = function (x, y) {
         core.ui.closePanel();
 }
 
-////// “虚拟键盘”界面时的点击操作 //////
-actions.prototype.keyUpKeyBoard = function (keycode) {
-    if (keycode==27 || keycode==88 || keycode==13 || keycode==32 || keycode==67) {
-        core.ui.closePanel();
-        return;
-    }
-}
-
 ////// 光标界面时的点击操作 //////
 actions.prototype.clickCursor = function (x,y) {
 
@@ -2616,6 +2621,10 @@ actions.prototype.clickAbout = function () {
         core.restart(true);
 }
 
+////// “帮助”界面时的点击操作 //////
+actions.prototype.clickHelp = function () {
+    core.ui.closePanel();
+}
 
 ////// 绘图相关 //////
 

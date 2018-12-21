@@ -343,6 +343,12 @@ core.prototype.init = function (coreData, callback) {
     }
     core.animateFrame.weather.fog.src = "project/images/fog.png";
 
+    core.material.images.keyboard = new Image();
+    core.material.images.keyboard.onerror  = function () {
+        core.material.images.keyboard = null;
+    }
+    core.material.images.keyboard.src = "project/images/keyboard.png";
+
     core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
 
     core.loader.load(function () {
@@ -923,7 +929,7 @@ core.prototype.setFg = function(color, time, callback) {
 
 ////// 画面闪烁 //////
 core.prototype.screenFlash = function (color, time, times, callback) {
-    core.ui.screenFlash(color, time, times, callback);
+    core.control.screenFlash(color, time, times, callback);
 }
 
 ////// 更新全地图显伤 //////

@@ -2675,7 +2675,6 @@ ui.prototype.drawStatistics = function () {
                         if (t!="") ext[id]=t;
                     }
 
-                    core.status.hero = core.clone(temp);
                     total.count[id]++;
                     total.add.hp+=hp;
                     total.add.atk+=atk;
@@ -2689,6 +2688,8 @@ ui.prototype.drawStatistics = function () {
                         current.add.mdef+=mdef;
                     }
                 }
+
+                core.status.hero = temp;
             }
         })
     })

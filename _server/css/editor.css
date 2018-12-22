@@ -24,8 +24,8 @@ body {
 
 #colorPanel {
     position: absolute;
-    left: 110px;
-    top: 36px;
+    left: 130px;
+    top: 30px;
     width: 168px;
     height: 205px;
     z-index: 240;

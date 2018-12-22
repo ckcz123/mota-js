@@ -181,9 +181,9 @@
                 <div style="position: relative; display: inline-block; margin-left: 10px">
                     <div class="searchLogo"></div>
                     <input type="text" id="searchBlock" placeholder="搜索图块"/>
-                    <button id = "colorSwitch" class="cpPanel" onclick="doHide()">颜色选择器</button>
+                    <button id = "colorSwitch" class="cpPanel" onclick="doHide()" style="margin-left:5px">颜色选择器</button>
                     <div id="colorPanel" class="cpPanel" style="display: none">
-                        <input class="color" id="colorPicker" value="162, 63, 3, 0.5"/>
+                        <input class="color" id="colorPicker" value="255,215,0,1"/>
                         <button onclick="copyColor()">复制</button>
                     </div>
                 </div>
@@ -500,37 +500,8 @@ if (location.protocol.indexOf("http")!=0) {
 <script src="_server/CodeMirror/jshint.min.js"></script>
 <script src="_server/CodeMirror/codeMirror.plugin.min.js"></script>
 <!-- colorPicker -->
-<script type="text/javascript" src="_server/colorPicker/colors.js"></script>
-<script type="text/javascript" src="_server/colorPicker/colorPicker.data.js"></script>
-<script type="text/javascript" src="_server/colorPicker/colorPicker.js"></script>
+<script type="text/javascript" src="_server/colorPicker/color.all.min.js"></script>
 <script type="text/javascript" src="_server/colorPicker/jsColor.js"></script>
-<script type="text/javascript">
-	var colors = jsColorPicker('input.color', {
-			customBG: '#222',
-			readOnly: false,
-			// patch: false,
-			init: function(elm, colors) { // colors is a different instance (not connected to colorPicker)
-				elm.style.backgroundColor = elm.value;
-				elm.style.color = colors.rgbaMixCustom.luminance > 0.22 ? '#222' : '#ddd';
-			},
-            appendTo: document.getElementById("colorPanel"),
-            size: 1,
-        });
-    function doHide() {
-          var oDiv = document.getElementById("colorPanel");
-          if (oDiv.style.display == "none"){
-            oDiv.style.display = "inline-block";
-          } else {
-            oDiv.style.display = "none";
-          }
-        }
-    function copyColor() {
-        var colorPicker = document.getElementById("colorPicker");
-        colorPicker.select();
-        document.execCommand("Copy");
-        doHide();
-    }
-</script>
 
 </body>
 </html>

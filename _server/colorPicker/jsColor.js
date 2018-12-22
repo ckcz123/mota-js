@@ -8,8 +8,8 @@
 					HSL = colors.RND.hsl,
 					AHEX = options.isIE8 ? (colors.alpha < 0.16 ? '0' : '') +
 						(Math.round(colors.alpha * 100)).toString(16).toUpperCase() + colors.HEX : '',
-					RGBInnerText = RGB.r + ', ' + RGB.g + ', ' + RGB.b,
-					RGBAText = RGBInnerText + ', ' + colors.alpha,
+					RGBInnerText = RGB.r + ',' + RGB.g + ',' + RGB.b,
+					RGBAText = RGBInnerText + ',' + colors.alpha,
 					isAlpha = colors.alpha !== 1 && !options.isIE8,
 					colorMode = input.getAttribute('data-colorMode');
 
@@ -26,7 +26,10 @@
 				}
 			},
 			extractValue = function(elm) {
-				return "rgba("+elm.value+")" || "rgba("+elm.getAttribute('value')+")" || elm.style.backgroundColor || 'rgba(0, 0, 0, 1)';
+				var val = elm.value || elm.getAttribute('value') || elm.style.backgroundColor || "0,0,0,1";
+				if (/^[0-9 ]+,[0-9 ]+,[0-9 ]+,[0-9. ]+$/.test(val)) return "rgba("+val+")";
+                if (/^[0-9 ]+,[0-9 ]+,[0-9 ]+$/.test(val)) return "rgba("+val+",1)";
+				return null;
 			},
 			actionCallback = function(event, action) {
 				var options = this,
@@ -99,7 +102,7 @@
 
 						options.color = extractValue(elm); // brings color to default on reset
 						//检查颜色合法性
-						if (options.color == options.color.match(/rgba\([0-9 ]+,[0-9 ]+,[0-9 ]+,[0-9. ]+\)/)[0]) {
+						if (options.color != null && options.color == options.color.match(/rgba\([0-9 ]+,[0-9 ]+,[0-9 ]+,[0-9. ]+\)/)[0]) {
 							var chec = options.color.match(/[0-9.]+/g);
 							if (chec.length != 4)
 								return;
@@ -256,3 +259,30 @@
 		}
 	};
 })(this);
+
+// Added
+var colors = jsColorPicker('input.color', {
+    customBG: '#222',
+    readOnly: false,
+    // patch: false,
+    init: function(elm, colors) { // colors is a different instance (not connected to colorPicker)
+        elm.style.backgroundColor = elm.value;
+        elm.style.color = colors.rgbaMixCustom.luminance > 0.22 ? '#222' : '#ddd';
+    },
+    appendTo: document.getElementById("colorPanel"),
+    size: 1,
+});
+function doHide() {
+    var oDiv = document.getElementById("colorPanel");
+    if (oDiv.style.display == "none"){
+        oDiv.style.display = "inline-block";
+    } else {
+        oDiv.style.display = "none";
+    }
+}
+function copyColor() {
+    var colorPicker = document.getElementById("colorPicker");
+    colorPicker.select();
+    document.execCommand("Copy");
+    doHide();
+}

@@ -555,13 +555,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "checkbox",
                     "_bool": "bool",
-                    "_data": "是否循环计算临界；如果此项为true则使用循环法（而不是回合数计算法）来算临界"
-                },
-                "loopStep": {
-                    "_leaf": true,
-                    "_type": "textbox",
-                    "_range": "thiseval==null || thiseval>0",
-                    "_data": "循环计算临界时，每次攻击增加量为原始攻击的多少分之一。\n例如，5000就代表循环中每次攻击增加量是原始攻击的1/5000（向上取整）。\n默认值5000。"
+                    "_data": "是否循环计算临界；如果此项为true则使用循环法（而不是回合数计算法）来算临界\n从V2.5.3开始，对于大数据的循环法将改为使用二分法进行计算"
                 },
                 "startUsingCanvas": {
                     "_leaf": true,

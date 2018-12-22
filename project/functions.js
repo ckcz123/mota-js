@@ -703,7 +703,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		case 90: // Z：转向
 			core.turnHero();
 			break;
-		case 86: // V：打开快捷商店列表
+		case 75: case 86: // V：打开快捷商店列表
 			core.openQuickShop(true);
 			break;
 		case 32: // SPACE：轻按

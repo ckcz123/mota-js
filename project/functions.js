@@ -632,14 +632,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		damage=Math.max(0, damage);
 
 	return {
-		"mon_hp": mon_hp,
-		"mon_atk": mon_atk,
-		"mon_def": mon_def,
-		"init_damage": init_damage,
-		"per_damage": per_damage,
-		"hero_per_damage": hero_per_damage,
-		"turn": turn,
-		"damage": damage
+		"mon_hp": Math.floor(mon_hp),
+		"mon_atk": Math.floor(mon_atk),
+		"mon_def": Math.floor(mon_def),
+		"init_damage": Math.floor(init_damage),
+		"per_damage": Math.floor(per_damage),
+		"hero_per_damage": Math.floor(hero_per_damage),
+		"turn": Math.floor(turn),
+		"damage": Math.floor(damage)
 	};
 },
         "updateEnemys": function () {
@@ -703,7 +703,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		case 90: // Z：转向
 			core.turnHero();
 			break;
-		case 86: // V：打开快捷商店列表
+		case 75: case 86: // V：打开快捷商店列表
 			core.openQuickShop(true);
 			break;
 		case 32: // SPACE：轻按

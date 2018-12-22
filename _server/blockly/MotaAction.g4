@@ -1118,26 +1118,19 @@ return code;
 */;
 
 setFg_0_s
-    :   '更改画面色调' Number ',' Number ',' Number ',' Number '动画时间' Int? '不等待执行完毕' Bool Newline
+    :   '更改画面色调' EvalString '动画时间' Int? '不等待执行完毕' Bool Newline
     
 
 /* setFg_0_s
 tooltip : setFg: 更改画面色调,动画时间可不填
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=setfg%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
-default : [255,255,255,1,500,false]
+default : ["255,255,255,1",500,false]
 colour : this.soundColor
-var limit = function(v,min,max) {
-    if(v>max) return max;
-    if(v<min) return min;
-    return v;
-}
-Number_0 = limit(Number_0,0,255);
-Number_1 = limit(Number_1,0,255);
-Number_2 = limit(Number_2,0,255);
-Number_3 = limit(Number_3,0,1);
+var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
+if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
 Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "setFg", "color": ['+Number_0+','+Number_1+','+Number_2+','+Number_3+']'+Int_0 +async+'},\n';
+var code = '{"type": "setFg", "color": ['+EvalString_0+']'+Int_0 +async+'},\n';
 return code;
 */;
 
@@ -1157,25 +1150,18 @@ return code;
 */;
 
 screenFlash_s
-    :   '画面闪烁' Number ',' Number ',' Number '强度' Number '单次时间' Int '执行次数' Int? '不等待执行完毕' Bool Newline
+    :   '画面闪烁' EvalString '单次时间' Int '执行次数' Int? '不等待执行完毕' Bool Newline
 
 /* screenFlash_s
 tooltip : screenFlash: 画面闪烁,动画时间可不填
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=screenFlash%EF%BC%9A%E7%94%BB%E9%9D%A2%E9%97%AA%E7%83%81
-default : [255,255,255,1,500,1,false]
+default : ["255,255,255,1",500,1,false]
 colour : this.soundColor
-var limit = function(v,min,max) {
-    if(v>max) return max;
-    if(v<min) return min;
-    return v;
-}
-Number_0 = limit(Number_0,0,255);
-Number_1 = limit(Number_1,0,255);
-Number_2 = limit(Number_2,0,255);
-Number_3 = limit(Number_3,0,1);
+var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
+if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
 Int_1 = Int_1!=='' ?(', "times": '+Int_1):'';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "screenFlash", "color": ['+Number_0+','+Number_1+','+Number_2+','+Number_3+'], "time": '+Int_0 +Int_1+async+'},\n';
+var code = '{"type": "screenFlash", "color": ['+EvalString_0+'], "time": '+Int_0 +Int_1+async+'},\n';
 return code;
 */;
 
@@ -2155,10 +2141,8 @@ ActionParser.prototype.parseAction = function() {
         break;
     case "setFg": // 颜色渐变
       if(this.isset(data.color)){
-        var alpha = data.color[3];
-        if (alpha==undefined || alpha==null) alpha=1;
         this.next = MotaActionBlocks['setFg_0_s'].xmlText([
-          data.color[0],data.color[1],data.color[2],alpha,data.time||0,data.async||false,this.next]);
+          data.color,data.time||0,data.async||false,this.next]);
       } else {
         this.next = MotaActionBlocks['setFg_1_s'].xmlText([
           data.time||0,data.async||false,this.next]);
@@ -2166,7 +2150,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "screenFlash": // 画面闪烁
         this.next = MotaActionBlocks['screenFlash_s'].xmlText([
-          data.color[0],data.color[1],data.color[2],data.color[3]||1,data.time||500,data.times||1,data.async||false,this.next]);
+          data.color,data.time||500,data.times||1,data.async||false,this.next]);
       break;
     case "setWeather": // 更改天气
       this.next = MotaActionBlocks['setWeather_s'].xmlText([

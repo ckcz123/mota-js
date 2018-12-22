@@ -210,16 +210,45 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
         }
     }
     else { // 暴力for循环法
+
+        // V2.5.3以后，大数据改为二分法进行计算
+        var LOOP_MAX_VALUE = 1;
         pre = info.damage;
-        var per_add = Math.ceil(hero_atk / (core.flags.loopStep||5000));
-        if (per_add<0) per_add = 1;
-        for (var atk=hero_atk+per_add;atk<=mon_hp+mon_def;atk+=per_add) {
-            var nextInfo = this.getDamageInfo(enemy, core.status.hero.hp, atk, core.status.hero.def, core.status.hero.mdef, x, y, floorId);
-            if (nextInfo==null) break;
-            if (pre>nextInfo.damage) {
-                pre = nextInfo.damage;
-                list.push([atk-hero_atk, Math.floor(info.damage-nextInfo.damage)]);
-                if (nextInfo.damage<=0 && !core.flags.enableNegativeDamage) break;
+        if (hero_atk <= LOOP_MAX_VALUE) { // 循环法
+            for (var atk=hero_atk+1;atk<=mon_hp+mon_def;atk++) {
+                var nextInfo = this.getDamageInfo(enemy, core.status.hero.hp, atk, core.status.hero.def, core.status.hero.mdef, x, y, floorId);
+                if (nextInfo==null) break;
+                if (pre>nextInfo.damage) {
+                    pre = nextInfo.damage;
+                    list.push([atk-hero_atk, info.damage-nextInfo.damage]);
+                    if (nextInfo.damage<=0 && !core.flags.enableNegativeDamage) break;
+                    if (list.length>=number) break;
+                }
+            }
+        }
+        else { // 二分法算临界
+            var calNext = function (currAtk, maxAtk) {
+                var start = Math.floor(currAtk), end = Math.floor(maxAtk);
+                if (start>end) return null;
+
+                while (start<end) {
+                    var mid = Math.floor((start+end)/2);
+                    var nextInfo = core.enemys.getDamageInfo(enemy, core.status.hero.hp, mid, core.status.hero.def, core.status.hero.mdef, x, y, floorId);
+                    if (nextInfo == null) return null;
+                    if (pre>nextInfo.damage) end = mid;
+                    else start = mid+1;
+                }
+                var nextInfo = core.enemys.getDamageInfo(enemy, core.status.hero.hp, start, core.status.hero.def, core.status.hero.mdef, x, y, floorId);
+                return nextInfo==null||nextInfo.damage>=pre?null:[start,nextInfo.damage];
+            }
+            var currAtk = hero_atk;
+            while (true) {
+                var next = calNext(currAtk+1, mon_hp+mon_def, pre);
+                if (next == null) break;
+                currAtk = next[0];
+                pre = next[1];
+                list.push([currAtk-hero_atk, info.damage-pre]);
+                if (pre<=0 && !core.flags.enableNegativeDamage) break;
                 if (list.length>=number) break;
             }
         }

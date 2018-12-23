@@ -2154,7 +2154,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "setWeather": // 更改天气
       this.next = MotaActionBlocks['setWeather_s'].xmlText([
-        data.name||'无',data.level||1,this.next]);
+        data.name,data.level||1,this.next]);
       break;
     case "openDoor": // 开一个门, 包括暗墙
       data.loc=data.loc||['','']

@@ -3173,7 +3173,7 @@ control.prototype.domRenderer = function(){
         var ctx = core.dymCanvas[name], canvas = ctx.canvas;
         canvas.style.width = canvas.width * core.domStyle.scale + "px";
         canvas.style.height = canvas.height * core.domStyle.scale + "px";
-        canvas.style.left = parseFloat(canvas.getAttribute("_left")) * core.domStyle + "px";
-        canvas.style.top = parseFloat(canvas.getAttribute("_top")) * core.domStyle + "px";
+        canvas.style.left = parseFloat(canvas.getAttribute("_left")) * core.domStyle.scale + "px";
+        canvas.style.top = parseFloat(canvas.getAttribute("_top")) * core.domStyle.scale + "px";
     }
 }

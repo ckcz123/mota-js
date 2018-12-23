@@ -543,10 +543,6 @@ zIndex为创建的纵向高度（关系到画布之间的覆盖），z值高的�
 返回创建的画布的context，也可以通过core.dymCanvas[name]调用。
 
 
-core.ui.findCanvas(name)
-寻找一个自定义画布的索引；如果存在该画布则返回对应的索引，不存在画布则返回-1。
-
-
 core.ui.relocateCanvas(name, x, y)
 重新定位一个自定义画布。
 

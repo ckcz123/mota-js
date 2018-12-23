@@ -3169,11 +3169,11 @@ control.prototype.domRenderer = function(){
         });
     }
     // 动态canvas
-    for (var i = 0; i < core.dymCanvas._list.length; i++) {
-        var spirit = core.dymCanvas._list[i];
-        core.dymCanvas[spirit.id].canvas.style.width = core.dymCanvas[spirit.id].canvas.width * core.domStyle.scale + "px";
-        core.dymCanvas[spirit.id].canvas.style.height = core.dymCanvas[spirit.id].canvas.height * core.domStyle.scale + "px";
-        core.dymCanvas[spirit.id].canvas.style.left = spirit.style.left * core.domStyle.scale + "px";
-        core.dymCanvas[spirit.id].canvas.style.top = spirit.style.top * core.domStyle.scale + "px"
+    for (var name in core.dymCanvas) {
+        var ctx = core.dymCanvas[name], canvas = ctx.canvas;
+        canvas.style.width = canvas.width * core.domStyle.scale + "px";
+        canvas.style.height = canvas.height * core.domStyle.scale + "px";
+        canvas.style.left = parseFloat(canvas.getAttribute("_left")) * core.domStyle + "px";
+        canvas.style.top = parseFloat(canvas.getAttribute("_top")) * core.domStyle + "px";
     }
 }

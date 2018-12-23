@@ -1573,7 +1573,6 @@ events.prototype.hideImage = function (code, time, callback) {
     time = time || 0;
     var name = "image"+ (code+100);
     if (!core.isset(core.dymCanvas[name])) {
-        console.log(code+"号图片不存在")
         if (core.isset(callback)) callback();
         return;
     }
@@ -1635,19 +1634,20 @@ events.prototype.textImage = function (content) {
 events.prototype.moveImage = function (code, to, opacityVal, time, callback) {
     time = time || 1000;
 
-    var name = "image"+ (code+100), index = core.findCanvas(name);
-    if (index == -1) {
-        console.log(code+"号图片不存在")
+    var name = "image"+ (code+100);
+    if (!core.isset(core.dymCanvas[name])) {
         if (core.isset(callback)) callback();
         return;
     }
-    var fromX = core.dymCanvas._list[index].style.left,
-        fromY = core.dymCanvas._list[index].style.top,
+    var fromX = parseFloat(core.dymCanvas[name].canvas.getAttribute("_left")),
+        fromY = parseFloat(core.dymCanvas[name].canvas.getAttribute("_top")),
         preX = fromX, preY = fromY, toX = fromX, toY = fromY;
 
     if (core.isset(to)) {
-        toX = core.calValue(to[0]) || toX;
-        toY = core.calValue(to[1]) || toY;
+        toX = core.calValue(to[0]);
+        toY = core.calValue(to[1]);
+        if (!core.isset(toX)) toX = fromX;
+        if (!core.isset(toY)) toY = fromY;
     }
 
     var step = 0;

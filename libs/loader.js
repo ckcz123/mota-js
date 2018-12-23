@@ -272,6 +272,8 @@ loader.prototype.freeBgm = function (name) {
 
 loader.prototype.loadBgm = function (name) {
     if (!core.isset(core.material.bgms[name])) return;
+    // 如果没开启音乐，则不预加载
+    if (!core.musicStatus.bgmStatus) return;
     // 是否已经预加载过
     var index = core.musicStatus.cachedBgms.indexOf(name);
     if (index>=0) {

@@ -2845,8 +2845,7 @@ ui.prototype.drawHelp = function () {
 ////// canvas创建 //////
 ui.prototype.createCanvas = function (name, x, y, width, height, z) {
     // 如果画布已存在则直接调用
-    var cv = this.findCanvas(name);
-    if (cv!=-1) {
+    if (core.isset(core.dymCanvas[name])) {
         this.relocateCanvas(name, x, y);
         this.resizeCanvas(name, width, height);
         core.dymCanvas[name].canvas.style.zIndex = z;
@@ -2857,6 +2856,8 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
     newCanvas.style.display = 'block';
     newCanvas.width = width;
     newCanvas.height = height;
+    newCanvas.setAttribute("_left", x);
+    newCanvas.setAttribute("_top", y);
     newCanvas.style.width = width * core.domStyle.scale + 'px';
     newCanvas.style.height = height * core.domStyle.scale + 'px';
     newCanvas.style.left = x * core.domStyle.scale + 'px';
@@ -2864,70 +2865,50 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
     newCanvas.style.zIndex = z;
     newCanvas.style.position = 'absolute';
     core.dymCanvas[name] = newCanvas.getContext('2d');
-    core.dymCanvas._list.push({
-        "id": name,
-        "style": {
-            "left": x,
-            "top": y,
-        }
-    });
     core.dom.gameDraw.appendChild(newCanvas);
     return core.dymCanvas[name];
 }
 
-////// canvas查找 //////
-ui.prototype.findCanvas = function (name) {
-    if (!core.isset(name)) return -1;
-    for (var index = 0; index < core.dymCanvas._list.length; index++) {
-        if (core.dymCanvas._list[index].id == name)
-            return index;
-    }
-    return -1;
-}
-
 ////// canvas重定位 //////
 ui.prototype.relocateCanvas = function (name, x, y) {
-    var index = this.findCanvas(name);
-    if (index<0) return null;
+    var ctx = core.dymCanvas[name];
+    if (!core.isset(ctx)) return null;
     if (core.isset(x)) {
-        core.dymCanvas[name].canvas.style.left = x * core.domStyle.scale + 'px';
-        core.dymCanvas._list[index].style.left = x;
+        ctx.canvas.style.left = x * core.domStyle.scale + 'px';
+        ctx.canvas.setAttribute("_left", x);
     }
     if (core.isset(y)) {
-        core.dymCanvas[name].canvas.style.top = y * core.domStyle.scale + 'px';
-        core.dymCanvas._list[index].style.top = y;
+        ctx.canvas.style.top = y * core.domStyle.scale + 'px';
+        ctx.canvas.setAttribute("_top", y);
     }
-    return core.dymCanvas[name];
+    return ctx;
 }
 
 ////// canvas重置 //////
 ui.prototype.resizeCanvas = function (name, width, height) {
-    if (this.findCanvas(name)<0) return null;
-    var dstCanvas = core.dymCanvas[name].canvas;
+    var ctx = core.dymCanvas[name];
+    if (!core.isset(ctx)) return null;
     if (core.isset(width)) {
-        dstCanvas.width = width;
-        dstCanvas.style.width = width * core.domStyle.scale + 'px';
+        ctx.canvas.width = width;
+        ctx.canvas.style.width = width * core.domStyle.scale + 'px';
     }
     if (core.isset(height)) {
-        dstCanvas.height = height;
-        dstCanvas.style.height = height * core.domStyle.scale + 'px';
+        ctx.canvas.height = height;
+        ctx.canvas.style.height = height * core.domStyle.scale + 'px';
     }
-    return core.dymCanvas[name];
+    return ctx;
 }
 ////// canvas删除 //////
 ui.prototype.deleteCanvas = function (name) {
-    var index = this.findCanvas(name);
-    if (index<0) return null;
+    if (!core.isset(core.dymCanvas[name])) return null;
     core.dom.gameDraw.removeChild(core.dymCanvas[name].canvas);
     delete core.dymCanvas[name];
-    core.dymCanvas._list.splice(index,1);
 }
 
 ////// 删除所有动态canvas //////
 ui.prototype.deleteAllCanvas = function () {
-    core.dymCanvas._list.forEach(function (t) {
-        core.dom.gameDraw.removeChild(core.dymCanvas[t.id].canvas);
-        delete core.dymCanvas[t.id];
+    Object.keys(core.dymCanvas).forEach(function (name) {
+        core.dom.gameDraw.removeChild(core.dymCanvas[name].canvas);
+        delete core.dymCanvas[name];
     });
-    core.dymCanvas._list = [];
 }

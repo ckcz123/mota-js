@@ -192,9 +192,7 @@ function core() {
         'animateObjs': [],
     };
     this.status = {};
-    this.dymCanvas = {
-        "_list": []
-    };
+    this.dymCanvas = {};
 }
 
 /////////// 系统事件相关 ///////////
@@ -732,11 +730,6 @@ core.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
 ////// canvas创建 //////
 core.prototype.createCanvas = function (name, x, y, width, height, z) {
     return core.ui.createCanvas(name, x, y, width, height, z);
-}
-
-////// canvas查找 //////
-core.prototype.findCanvas = function (name) {
-    return core.ui.findCanvas(name);
 }
 
 ////// canvas重定位 //////

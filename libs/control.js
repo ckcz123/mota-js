@@ -1240,7 +1240,7 @@ control.prototype.checkBlock = function () {
             var x=t.x, y=t.y, direction = t.direction;
             var nx = x+core.utils.scan[direction].x, ny=y+core.utils.scan[direction].y;
 
-            return nx>=0 && nx<core.bigmap.width && ny>=0 && ny<core.bigmap.height && core.getBlock(nx, ny, null, true)==null;
+            return nx>=0 && nx<core.bigmap.width && ny>=0 && ny<core.bigmap.height && core.getBlock(nx, ny)==null;
         });
         core.updateStatusBar();
         if (snipe.length>0)

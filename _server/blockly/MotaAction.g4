@@ -1176,7 +1176,7 @@ default : [null,1]
 colour : this.soundColor
 if(Int_0<1 || Int_0>10) throw new Error('天气的强度等级, 在1-10之间');
 var code = '{"type": "setWeather", "name": "'+Weather_List_0+'", "level": '+Int_0+'},\n';
-if(Weather_List_0==='')code = '{"type": "setWeather"},\n';
+if(Weather_List_0===''||Weather_List_0==='null'||Weather_List_0==null)code = '{"type": "setWeather"},\n';
 return code;
 */;
 
@@ -1703,7 +1703,7 @@ Arithmetic_List
 
 Weather_List
     :   '无'|'雨'|'雪'|'雾'
-    /*Weather_List ['','rain','snow','fog']*/;
+    /*Weather_List ['null','rain','snow','fog']*/;
 
 B_0_List
     :   '不改变'|'不可通行'|'可以通行'
@@ -2154,7 +2154,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "setWeather": // 更改天气
       this.next = MotaActionBlocks['setWeather_s'].xmlText([
-        data.name||'无',data.level||1,this.next]);
+        data.name,data.level||1,this.next]);
       break;
     case "openDoor": // 开一个门, 包括暗墙
       data.loc=data.loc||['','']

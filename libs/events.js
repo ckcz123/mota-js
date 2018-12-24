@@ -835,7 +835,7 @@ events.prototype.doAction = function() {
             break;
         case "setWeather": // 更改天气
             core.setWeather(data.name, data.level);
-            if (core.isset(data.name))
+            if (data.name=='rain' || data.name=='snow' || data.name=='fog')
                 core.setFlag('__weather__', [data.name, data.level]);
             else core.removeFlag('__weather__');
             this.doAction();

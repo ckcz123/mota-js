@@ -1240,7 +1240,7 @@ control.prototype.checkBlock = function () {
             var x=t.x, y=t.y, direction = t.direction;
             var nx = x+core.utils.scan[direction].x, ny=y+core.utils.scan[direction].y;
 
-            return nx>=0 && nx<core.bigmap.width && ny>=0 && ny<core.bigmap.height && core.getBlock(nx, ny, null, true)==null;
+            return nx>=0 && nx<core.bigmap.width && ny>=0 && ny<core.bigmap.height && core.getBlock(nx, ny)==null;
         });
         core.updateStatusBar();
         if (snipe.length>0)
@@ -1528,6 +1528,7 @@ control.prototype.chooseReplayFile = function () {
 
 ////// 开始播放 //////
 control.prototype.startReplay = function (list) {
+    if (!core.isPlaying()) return;
     core.status.replay.replaying=true;
     core.status.replay.pausing=false;
     core.status.replay.speed=1.0;
@@ -1543,6 +1544,7 @@ control.prototype.startReplay = function (list) {
 
 ////// 更改播放状态 //////
 control.prototype.triggerReplay = function () {
+    if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (core.status.replay.pausing) this.resumeReplay();
     else this.pauseReplay();
@@ -1550,6 +1552,7 @@ control.prototype.triggerReplay = function () {
 
 ////// 暂停播放 //////
 control.prototype.pauseReplay = function () {
+    if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.pausing = true;
@@ -1559,6 +1562,7 @@ control.prototype.pauseReplay = function () {
 
 ////// 恢复播放 //////
 control.prototype.resumeReplay = function () {
+    if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.pausing = false;
@@ -1569,6 +1573,7 @@ control.prototype.resumeReplay = function () {
 
 ////// 加速播放 //////
 control.prototype.speedUpReplay = function () {
+    if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     if (core.status.replay.speed==12) core.status.replay.speed=24.0;
@@ -1583,6 +1588,7 @@ control.prototype.speedUpReplay = function () {
 
 ////// 减速播放 //////
 control.prototype.speedDownReplay = function () {
+    if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     if (core.status.replay.speed==24) core.status.replay.speed=12.0;
@@ -1598,6 +1604,7 @@ control.prototype.speedDownReplay = function () {
 
 ////// 设置播放速度 //////
 control.prototype.setReplaySpeed = function (speed) {
+    if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.speed = speed;
@@ -1606,6 +1613,7 @@ control.prototype.setReplaySpeed = function (speed) {
 
 ////// 停止播放 //////
 control.prototype.stopReplay = function () {
+    if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     core.status.replay.toReplay = [];
@@ -1621,6 +1629,7 @@ control.prototype.stopReplay = function () {
 
 ////// 回退 //////
 control.prototype.rewindReplay = function () {
+    if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     if (!core.status.replay.pausing) {
@@ -1656,6 +1665,7 @@ control.prototype.rewindReplay = function () {
 
 ////// 回放时存档 //////
 control.prototype.saveReplay = function () {
+    if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (!core.status.replay.replaying) return;
     if (!core.status.replay.pausing) {
@@ -1677,6 +1687,7 @@ control.prototype.saveReplay = function () {
 
 ////// 回放时查看怪物手册 //////
 control.prototype.bookReplay = function () {
+    if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0) return;
     if (!core.status.replay.replaying) return;
     if (!core.status.replay.pausing) {
@@ -1702,6 +1713,7 @@ control.prototype.bookReplay = function () {
 
 ////// 回放录像时浏览地图 //////
 control.prototype.viewMapReplay = function () {
+    if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
 
     if (!core.status.replay.replaying) return;
@@ -1721,6 +1733,7 @@ control.prototype.viewMapReplay = function () {
 
 ////// 回放 //////
 control.prototype.replay = function () {
+    if (!core.isPlaying()) return;
 
     if (!core.status.replay.replaying) return; // 没有回放
     if (core.status.replay.pausing) return; // 暂停状态

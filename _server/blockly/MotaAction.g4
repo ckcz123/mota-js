@@ -2232,7 +2232,8 @@ ActionParser.prototype.parseAction = function() {
       break
     case "setValue":
       this.next = MotaActionBlocks['setValue_s'].xmlText([
-        MotaActionBlocks['idString_e'].xmlText([data.name]),
+        // MotaActionBlocks['idString_e'].xmlText([data.name]),
+        this.tryToUseEvFlag_e('idString_e', [data.name]),
         MotaActionBlocks['evalString_e'].xmlText([data.value]),
         this.next]);
       break;
@@ -2258,7 +2259,8 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "if": // 条件判断
       this.next = MotaActionBlocks['if_s'].xmlText([
-        MotaActionBlocks['evalString_e'].xmlText([data.condition]),
+        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
+        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
         this.insertActionList(data["true"]),
         this.insertActionList(data["false"]),
         this.next]);
@@ -2270,7 +2272,9 @@ ActionParser.prototype.parseAction = function() {
           this.isset(caseNow.case)?MotaActionBlocks['evalString_e'].xmlText([caseNow.case]):"值",this.insertActionList(caseNow.action),case_caseList]);
       }
       this.next = MotaActionBlocks['switch_s'].xmlText([
-        MotaActionBlocks['evalString_e'].xmlText([data.condition]),case_caseList,this.next]);
+        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
+        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+        case_caseList,this.next]);
       break;
     case "choices": // 提供选项
       var text_choices = null;
@@ -2283,7 +2287,8 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "while": // 循环处理
       this.next = MotaActionBlocks['while_s'].xmlText([
-        MotaActionBlocks['evalString_e'].xmlText([data.condition]),
+        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
+        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
         this.insertActionList(data["data"]),
         this.next]);
       break;
@@ -2391,6 +2396,15 @@ ActionParser.prototype.StepString = function(steplist) {
 
 ActionParser.prototype.EvalString = function(EvalString) {
   return EvalString.split('\b').join('\\b').split('\t').join('\\t').split('\n').join('\\n');
+}
+
+ActionParser.prototype.tryToUseEvFlag_e = function(defaultType, args, isShadow, comment) {
+  var match=/switch:([A-Z])/.exec(args[0])
+  if(match){
+    args[0]=match[1]
+    return MotaActionBlocks['evFlag_e'].xmlText(args, isShadow, comment);
+  }
+  return MotaActionBlocks[defaultType||'evalString_e'].xmlText(args, isShadow, comment);
 }
 
 MotaActionFunctions.actionParser = new ActionParser();

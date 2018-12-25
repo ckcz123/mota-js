@@ -1571,6 +1571,7 @@ expression
     |   negate_e
     |   bool_e
     |   idString_e
+    |   evFlag_e
     |   evalString_e
     
 
@@ -1642,6 +1643,7 @@ colour : this.idstring_eColor
 default : [null,"自定义flag"]
 //todo 将其output改成'idString_e'
 var code = Id_List_0+':'+IdText_0;
+if (Id_List_0 === 'flag0') code = "flag:__"+IdText_0+"__";
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
@@ -1656,6 +1658,19 @@ colour : this.idstring_eColor
 var code = FixedId_List_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
+
+
+evFlag_e
+    :   '独立开关' Letter_List
+
+
+/* evFlag_e
+colour : this.idstring_eColor
+default : ["A"]
+var code = "flag:__"+Letter_List_0+"__";
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
 
 evalString_e
     :   EvalString
@@ -1735,6 +1750,11 @@ Bool:   'TRUE'
 
 Int :   '0' | [1-9][0-9]* ; // no leading zeros
 
+Letter_List
+    :  'A'|'B'|'C'|'D'|'E'|'F'|'G'|'H'|'I'|'J'|'K'|'L'|'M'|'N'|'O'|'P'|'Q'|'R'|'S'|'T'|'U'|'V'|'W'|'X'|'Y'|'Z'
+    /*Letter_List ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']*/;
+
+
 Number
     :   '-'? Int '.' Int EXP?   // 1.35, 1.35E-9, 0.3, -4.5
     |   '-'? Int EXP            // 1e10 -3e4
@@ -1763,8 +1783,8 @@ FixedId_List
     /*FixedId_List ['status:hp','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:experience']*/;
 
 Id_List
-    :   '变量' | '状态' | '物品'
-    /*Id_List ['flag','status','item']*/;
+    :   '变量' | '状态' | '物品' | '独立开关'
+    /*Id_List ['flag','status','item', 'flag0']*/;
 
 //转blockly后不保留需要加"
 EvalString

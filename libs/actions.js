@@ -1096,13 +1096,13 @@ actions.prototype.clickShop = function(x,y) {
             core.status.event.selection=y-topIndex;
 
             var money = core.getStatus('money'), experience = core.getStatus('experience');
-            var times = shop.times, need = core.calValue(shop.need, null, times);
+            var times = shop.times, need = core.calValue(shop.need, null, null, times);
             var use = shop.use;
             var use_text = use=='money'?"金币":"经验";
 
             var choice = choices[y-topIndex];
             if (core.isset(choice.need))
-                need = core.calValue(choice.need, null, times);
+                need = core.calValue(choice.need, null, null, times);
 
             if (need > eval(use)) {
                 core.drawTip("你的"+use_text+"不足");

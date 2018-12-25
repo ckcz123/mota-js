@@ -383,9 +383,12 @@ events.prototype.doAction = function() {
         return;
     }
 
+    var x=core.status.event.data.x, y=core.status.event.data.y;
+    var prefix = [core.status.floorId||"f", x||"x", y||"y"].join("@");
+
     var current = core.status.event.data.list[0];
     if (current.todo.length == 0) { // current list is empty
-        if (core.calValue(current.condition)) { // check condition
+        if (core.calValue(current.condition, prefix)) { // check condition
             current.todo = core.clone(current.total);
         }
         else {
@@ -396,8 +399,6 @@ events.prototype.doAction = function() {
     }
     var data = current.todo.shift();
     core.status.event.data.current = data;
-
-    var x=core.status.event.data.x, y=core.status.event.data.y;
 
     // 不同种类的事件
 
@@ -477,7 +478,7 @@ events.prototype.doAction = function() {
                 data.loc = [x,y];
             if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
                     && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
-                data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];
+                data.loc = [[core.calValue(data.loc[0], prefix), core.calValue(data.loc[1], prefix)]];
             if (core.isset(data.time) && data.time>0 && (!core.isset(data.floorId) || data.floorId==core.status.floorId)) {
                 if (data.async) {
                     core.animateBlock(data.loc, 'show', data.time);
@@ -501,7 +502,7 @@ events.prototype.doAction = function() {
                 data.loc = [x,y];
             if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
                 && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
-                data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];
+                data.loc = [[core.calValue(data.loc[0], prefix), core.calValue(data.loc[1], prefix)]];
             if (core.isset(data.time) && data.time>0 && (!core.isset(data.floorId) || data.floorId==core.status.floorId)) {
                 data.loc.forEach(function (t) {
                     core.hideBlock(t[0],t[1],data.floorId);
@@ -526,8 +527,8 @@ events.prototype.doAction = function() {
         case "setBlock": // 设置某图块
             {
                 if (core.isset(data.loc)) {
-                    x=core.calValue(data.loc[0]);
-                    y=core.calValue(data.loc[1]);
+                    x=core.calValue(data.loc[0], prefix);
+                    y=core.calValue(data.loc[1], prefix);
                 }
                 core.setBlock(data.number, x, y, data.floorId);
                 this.doAction();
@@ -538,7 +539,7 @@ events.prototype.doAction = function() {
                 data.loc = [x,y];
             if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
                 && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
-                data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];
+                data.loc = [[core.calValue(data.loc[0], prefix), core.calValue(data.loc[1], prefix)]];
             core.maps.setFloorImage("show", data.loc, data.floorId, function() {
                 core.events.doAction();
             })
@@ -548,7 +549,7 @@ events.prototype.doAction = function() {
                 data.loc = [x,y];
             if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
                 && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
-                data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];
+                data.loc = [[core.calValue(data.loc[0], prefix), core.calValue(data.loc[1], prefix)]];
             core.maps.setFloorImage("hide", data.loc, data.floorId, function() {
                 core.events.doAction();
             })
@@ -558,7 +559,7 @@ events.prototype.doAction = function() {
                 data.loc = [x,y];
             if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
                 && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
-                data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];
+                data.loc = [[core.calValue(data.loc[0], prefix), core.calValue(data.loc[1], prefix)]];
             core.maps.setBgFgMap("show", data.name, data.loc, data.floorId, function() {
                 core.events.doAction();
             })
@@ -568,7 +569,7 @@ events.prototype.doAction = function() {
                 data.loc = [x,y];
             if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
                 && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
-                data.loc = [[core.calValue(data.loc[0]), core.calValue(data.loc[1])]];
+                data.loc = [[core.calValue(data.loc[0], prefix), core.calValue(data.loc[1], prefix)]];
             core.maps.setBgFgMap("hide", data.name, data.loc, data.floorId, function() {
                 core.events.doAction();
             })
@@ -576,8 +577,8 @@ events.prototype.doAction = function() {
         case "setBgFgBlock": // 设置图层块
             {
                 if (core.isset(data.loc)) {
-                    x=core.calValue(data.loc[0]);
-                    y=core.calValue(data.loc[1]);
+                    x=core.calValue(data.loc[0], prefix);
+                    y=core.calValue(data.loc[1], prefix);
                 }
                 core.setBgFgBlock(data.name, data.number, x, y, data.floorId);
                 this.doAction();
@@ -626,8 +627,8 @@ events.prototype.doAction = function() {
                     y=core.getHeroLoc('y');
                 }
                 else if (data.loc instanceof Array) {
-                    x=core.calValue(data.loc[0]);
-                    y=core.calValue(data.loc[1]);
+                    x=core.calValue(data.loc[0], prefix);
+                    y=core.calValue(data.loc[1], prefix);
                 }
             }
             if (data.async) {
@@ -642,8 +643,8 @@ events.prototype.doAction = function() {
             break;
         case "move": // 移动事件
             if (core.isset(data.loc)) {
-                x=core.calValue(data.loc[0]);
-                y=core.calValue(data.loc[1]);
+                x=core.calValue(data.loc[0], prefix);
+                y=core.calValue(data.loc[1], prefix);
             }
             if (data.async) {
                 core.moveBlock(x,y,data.steps,data.time,data.keep);
@@ -670,12 +671,12 @@ events.prototype.doAction = function() {
             {
                 var sx=x, sy=y, ex=x,ey=y;
                 if (core.isset(data.from)) {
-                    sx=core.calValue(data.from[0]);
-                    sy=core.calValue(data.from[1]);
+                    sx=core.calValue(data.from[0], prefix);
+                    sy=core.calValue(data.from[1], prefix);
                 }
                 if (core.isset(data.to)) {
-                    ex=core.calValue(data.to[0]);
-                    ey=core.calValue(data.to[1]);
+                    ex=core.calValue(data.to[0], prefix);
+                    ey=core.calValue(data.to[1], prefix);
                 }
                 if (data.async) {
                     core.jumpBlock(sx,sy,ex,ey,data.time,data.keep);
@@ -692,8 +693,8 @@ events.prototype.doAction = function() {
             {
                 var ex=core.status.hero.loc.x, ey=core.status.hero.loc.y;
                 if (core.isset(data.loc)) {
-                    ex=core.calValue(data.loc[0]);
-                    ey=core.calValue(data.loc[1]);
+                    ex=core.calValue(data.loc[0], prefix);
+                    ey=core.calValue(data.loc[1], prefix);
                 }
                 if (data.async) {
                     core.jumpHero(ex,ey,data.time);
@@ -708,7 +709,7 @@ events.prototype.doAction = function() {
             }
         case "changeFloor": // 楼层转换
             {
-                var heroLoc = {"x": core.calValue(data.loc[0]), "y": core.calValue(data.loc[1])};
+                var heroLoc = {"x": core.calValue(data.loc[0], prefix), "y": core.calValue(data.loc[1], prefix)};
                 if (core.isset(data.direction)) heroLoc.direction=data.direction;
                 core.changeFloor(data.floorId||core.status.floorId, null, heroLoc, data.time, function() {
                     core.lockControl();
@@ -719,8 +720,8 @@ events.prototype.doAction = function() {
         case "changePos": // 直接更换勇士位置，不切换楼层
             core.clearMap('hero');
             if (core.isset(data.loc)) {
-                core.setHeroLoc('x', core.calValue(data.loc[0]));
-                core.setHeroLoc('y', core.calValue(data.loc[1]));
+                core.setHeroLoc('x', core.calValue(data.loc[0], prefix));
+                core.setHeroLoc('y', core.calValue(data.loc[1], prefix));
             }
             if (core.isset(data.direction)) core.setHeroLoc('direction', data.direction);
             core.drawHero();
@@ -782,8 +783,8 @@ events.prototype.doAction = function() {
                 var gif = new Image();
                 gif.src = core.material.images.images[data.name].src;
                 gif.style.position = 'absolute';
-                gif.style.left = (core.calValue(data.loc[0])*core.domStyle.scale)+"px";
-                gif.style.top = (core.calValue(data.loc[1])*core.domStyle.scale)+"px";
+                gif.style.left = (core.calValue(data.loc[0], prefix)*core.domStyle.scale)+"px";
+                gif.style.top = (core.calValue(data.loc[1], prefix)*core.domStyle.scale)+"px";
                 gif.style.width = core.material.images.images[data.name].width*core.domStyle.scale+"px";
                 gif.style.height = core.material.images.images[data.name].height*core.domStyle.scale+"px";
                 core.dom.gif2.appendChild(gif);
@@ -843,8 +844,8 @@ events.prototype.doAction = function() {
         case "openDoor": // 开一个门，包括暗墙
             {
                 if (core.isset(data.loc)) {
-                    x = core.calValue(data.loc[0]);
-                    y = core.calValue(data.loc[1]);
+                    x = core.calValue(data.loc[0], prefix);
+                    y = core.calValue(data.loc[1], prefix);
                 }
                 var floorId=data.floorId || core.status.floorId;
                 if (floorId==core.status.floorId)
@@ -878,7 +879,7 @@ events.prototype.doAction = function() {
             break;
         case "trigger": // 触发另一个事件；当前事件会被立刻结束。需要另一个地点的事件是有效的
             {
-                var toX=core.calValue(data.loc[0]), toY=core.calValue(data.loc[1]);
+                var toX=core.calValue(data.loc[0], prefix), toY=core.calValue(data.loc[1], prefix);
                 var block=core.getBlock(toX, toY);
                 if (block!=null) {
                     block = block.block;
@@ -896,7 +897,7 @@ events.prototype.doAction = function() {
             }
         case "insert":
             {
-                var toX=core.calValue(data.loc[0]), toY=core.calValue(data.loc[1]);
+                var toX=core.calValue(data.loc[0], prefix), toY=core.calValue(data.loc[1], prefix);
                 var floorId = data.floorId || core.status.floorId;
                 var event = core.floors[floorId].events[toX+","+toY];
                 if (core.isset(event)) core.insertAction(event);
@@ -943,11 +944,16 @@ events.prototype.doAction = function() {
             break;
         case "setValue":
             try {
-                var value=core.calValue(data.value);
+                var value=core.calValue(data.value, prefix);
                 // 属性
                 if (data.name.indexOf("status:")==0) {
-                    // value=parseFloat(value);
                     core.setStatus(data.name.substring(7), value);
+                    if (core.status.hero.hp<=0) {
+                        core.status.hero.hp=0;
+                        core.updateStatusBar();
+                        core.events.lose();
+                        break;
+                    }
                 }
                 // 道具
                 if (data.name.indexOf("item:")==0) {
@@ -959,22 +965,17 @@ events.prototype.doAction = function() {
                 }
                 // flag
                 if (data.name.indexOf("flag:")==0) {
-                    core.setFlag(data.name.substring(5), value);
+                    var flag = data.name.substring(5);
+                    if (/^__[A-Z]__$/.test(flag)) flag = (prefix||"")+flag;
+                    core.setFlag(flag, value);
                 }
             }
             catch (e) {console.log(e)}
-            if (core.status.hero.hp<=0) {
-                core.status.hero.hp=0;
-                core.updateStatusBar();
-                core.events.lose();
-            }
-            else {
-                core.updateStatusBar();
-                this.doAction();
-            }
+            core.updateStatusBar();
+            this.doAction();
             break;
         case "setFloor":
-            core.status.maps[data.floorId||core.status.floorId][data.name] = core.calValue(data.value);
+            core.status.maps[data.floorId||core.status.floorId][data.name] = core.calValue(data.value, prefix);
             core.updateStatusBar();
             this.doAction();
             break;
@@ -1050,16 +1051,16 @@ events.prototype.doAction = function() {
             }
             break;
         case "if": // 条件判断
-            if (core.calValue(data.condition))
+            if (core.calValue(data.condition, prefix))
                 core.events.insertAction(data["true"])
             else
                 core.events.insertAction(data["false"])
             this.doAction();
             break;
         case "switch": // 条件选择
-            var key = core.calValue(data.condition)
+            var key = core.calValue(data.condition, prefix)
             for (var i = 0; i < data.caseList.length; i++) {
-                if (data.caseList[i]["case"]=="default" || core.calValue(data.caseList[i]["case"]) == key) {
+                if (data.caseList[i]["case"]=="default" || core.calValue(data.caseList[i]["case"], prefix) == key) {
                     core.events.insertAction(data.caseList[i].action);
                     break;
                 }
@@ -1092,7 +1093,7 @@ events.prototype.doAction = function() {
             core.ui.drawChoices(data.text, data.choices);
             break;
         case "while":
-            if (core.calValue(data.condition)) {
+            if (core.calValue(data.condition, prefix)) {
                 core.unshift(core.status.event.data.list,
                     {"todo": core.clone(data.data), "total": core.clone(data.data), "condition": data.condition}
                 );
@@ -1104,7 +1105,7 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "continue":
-            if (core.calValue(core.status.event.data.list[0].condition)) {
+            if (core.calValue(core.status.event.data.list[0].condition, prefix)) {
                 core.status.event.data.list[0].todo = core.clone(core.status.event.data.list[0].total);
             }
             else {
@@ -1815,7 +1816,7 @@ events.prototype.openShop = function(shopId, needVisited) {
 
     // 拼词
     var content = "\t["+shop.name+","+shop.icon+"]";
-    var times = shop.times, need=core.calValue(shop.need, null, times);
+    var times = shop.times, need=core.calValue(shop.need, null, null, times);
 
     content += core.replaceText(shop.text, need, times);
 
@@ -1826,7 +1827,7 @@ events.prototype.openShop = function(shopId, needVisited) {
         var choice = shop.choices[i];
         var text = core.replaceText(choice.text, need, times);
         if (core.isset(choice.need))
-            text += "（"+core.calValue(choice.need, null, times)+use+"）";
+            text += "（"+core.calValue(choice.need, null, null, times)+use+"）";
         choices.push({"text": text, "color":shop.visited?null:"#999999"});
     }
     choices.push("离开");

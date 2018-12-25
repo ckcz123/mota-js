@@ -1475,7 +1475,7 @@ control.prototype.doEffect = function (effect, need, times) {
     effect.split(";").forEach(function (expression) {
         var arr = expression.split("+=");
         if (arr.length!=2) return;
-        var name=arr[0], value=core.calValue(arr[1], need, times);
+        var name=arr[0], value=core.calValue(arr[1], null, need, times);
         if (name.indexOf("status:")==0) {
             var status=name.substring(7);
             core.setStatus(status, core.getStatus(status)+value);

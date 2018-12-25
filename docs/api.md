@@ -281,7 +281,7 @@ core.replaceText(text)
 将一段文字中的${}进行计算并替换。
 
 
-core.calValue(value)
+core.calValue(value, prefix, need, times)
 计算表达式的实际值。这个函数可以传入status:atk等这样的参数。
 
 

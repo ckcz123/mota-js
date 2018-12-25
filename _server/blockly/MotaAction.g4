@@ -1643,7 +1643,6 @@ colour : this.idstring_eColor
 default : [null,"自定义flag"]
 //todo 将其output改成'idString_e'
 var code = Id_List_0+':'+IdText_0;
-if (Id_List_0 === 'flag0') code = "flag:__"+IdText_0+"__";
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
@@ -1667,7 +1666,7 @@ evFlag_e
 /* evFlag_e
 colour : this.idstring_eColor
 default : ["A"]
-var code = "flag:__"+Letter_List_0+"__";
+var code = "switch:"+Letter_List_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
@@ -1784,7 +1783,7 @@ FixedId_List
 
 Id_List
     :   '变量' | '状态' | '物品' | '独立开关'
-    /*Id_List ['flag','status','item', 'flag0']*/;
+    /*Id_List ['flag','status','item', 'switch']*/;
 
 //转blockly后不保留需要加"
 EvalString
@@ -2399,7 +2398,7 @@ ActionParser.prototype.EvalString = function(EvalString) {
 }
 
 ActionParser.prototype.tryToUseEvFlag_e = function(defaultType, args, isShadow, comment) {
-  var match=/switch:([A-Z])/.exec(args[0])
+  var match=/switch:([A-F])/.exec(args[0])
   if(match){
     args[0]=match[1]
     return MotaActionBlocks['evFlag_e'].xmlText(args, isShadow, comment);

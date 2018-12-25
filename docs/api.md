@@ -330,8 +330,14 @@ control.js主要用来进行游戏控制，比如行走控制、自动寻路、�
 core.control.setGameCanvasTranslate(canvasId, x, y)
 设置大地图的偏移量
 
+
 core.control.updateViewport()
 更新大地图的可见区域
+
+
+core.control.gatherFollowers()
+立刻聚集所有的跟随者
+
 
 core.control.replay()
 回放下一个操作
@@ -461,6 +467,14 @@ core.maps.removeBlockById(index, floorId)
 
 core.maps.removeBlockByIds(floorId, ids)
 根据索引删除或禁用若干块。
+
+
+core.maps.drawAnimate(name, x, y, callback)
+播放一段动画，name为动画名（需在全塔属性注册），x和y为坐标（0-12之间），callback可选，为播放完毕的回调函数。
+播放过程是异步的，如需等待播放完毕请使用insertAction插入一条type:waitAsync事件。
+此函数将随机返回一个数字id。将 "stopAnimate_"+id 这个flag置为true则可以立刻停止该动画的播放，如：
+var id = core.maps.drawAnimate("zone", 3, 3);
+core.setFlag("stopAnimate_"+id, true); // 立刻停止动画的播放
 
 
 ========== core.ui.XXX 和对话框绘制相关的函数 ==========

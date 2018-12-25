@@ -892,7 +892,7 @@ core.prototype.drawBoxAnimate = function () {
 
 ////// 绘制动画 //////
 core.prototype.drawAnimate = function (name, x, y, callback) {
-    core.maps.drawAnimate(name, x, y, callback);
+    return core.maps.drawAnimate(name, x, y, callback);
 }
 
 ////// 更新领域、夹击、阻击的伤害地图 //////

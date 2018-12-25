@@ -1038,8 +1038,8 @@ core.prototype.replaceText = function (text, need, times) {
 }
 
 ////// 计算表达式的值 //////
-core.prototype.calValue = function (value, need, times) {
-    return core.utils.calValue(value, need, times);
+core.prototype.calValue = function (value, prefix, need, times) {
+    return core.utils.calValue(value, prefix, need, times);
 }
 
 ////// 执行一个表达式的effect操作 //////

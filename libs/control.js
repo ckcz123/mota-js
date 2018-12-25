@@ -1475,7 +1475,7 @@ control.prototype.doEffect = function (effect, need, times) {
     effect.split(";").forEach(function (expression) {
         var arr = expression.split("+=");
         if (arr.length!=2) return;
-        var name=arr[0], value=core.calValue(arr[1], need, times);
+        var name=arr[0], value=core.calValue(arr[1], null, need, times);
         if (name.indexOf("status:")==0) {
             var status=name.substring(7);
             core.setStatus(status, core.getStatus(status)+value);
@@ -2121,7 +2121,7 @@ control.prototype.doSL = function (id, type) {
                 alert("无效的存档");
                 return;
             }
-            if (core.isset(data.hashCode) && data.hashCode != core.utils.hashCode(data.hero)) {
+            if (core.flags.checkConsole && core.isset(data.hashCode) && data.hashCode != core.utils.hashCode(data.hero)) {
                 if (confirm("存档校验失败，请勿修改存档文件！\n你想回放此存档的录像吗？")) {
                     core.startGame(data.hard, data.hero.flags.__seed__, core.decodeRoute(data.route));
                 }

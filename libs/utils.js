@@ -47,12 +47,12 @@ utils.prototype.init = function () {
 ////// 将文字中的${和}（表达式）进行替换 //////
 utils.prototype.replaceText = function (text, need, times) {
     return text.replace(/\${(.*?)}/g, function (word, value) {
-        return core.calValue(value, need, times);
+        return core.calValue(value, null, need, times);
     });
 }
 
 ////// 计算表达式的值 //////
-utils.prototype.calValue = function (value, need, times) {
+utils.prototype.calValue = function (value, prefix, need, times) {
     if (!core.isset(value)) return value;
     if (typeof value == 'number') {
         return value;
@@ -62,7 +62,10 @@ utils.prototype.calValue = function (value, need, times) {
     }
     value=value.replace(/status:([\w\d_]+)/g, "core.getStatus('$1')");
     value=value.replace(/item:([\w\d_]+)/g, "core.itemCount('$1')");
-    value=value.replace(/flag:([\w\d_]+)/g, "core.getFlag('$1', 0)");
+    value=value.replace(/flag:([\w\d_]+)/g, function (word, value) {
+        if (/^__[A-Z]__$/.test(value)) value = (prefix||"")+value;
+        return core.getFlag(value, 0);
+    });
     return eval(value);
 }
 

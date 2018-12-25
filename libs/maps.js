@@ -375,11 +375,11 @@ maps.prototype.drawBlock = function (block, animate, dx, dy) {
     dy = dy || 0;
 
     if (core.isset(block.name)) {
-        core.canvas[block.name].clearRect(block.x * 32, block.y * 32, 32, 32);
+        core.clearMap(block.name, block.x * 32, block.y * 32, 32, 32);
         if (block.name == 'bg') {
             core.drawImage('bg', core.material.groundCanvas.canvas, block.x * 32, block.y * 32);
         }
-        core.canvas[block.name].drawImage(image, x * 32, y * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+        core.drawImage(block.name, image, x * 32, y * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
         return;
     }
 

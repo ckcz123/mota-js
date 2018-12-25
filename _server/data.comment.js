@@ -140,7 +140,10 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 },
                 "floorId": {
                     "_leaf": true,
-                    "_type": "textarea",
+                    "_type": "select",
+                    "_select": {
+                        "values": data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.floorIds
+                    },
                     "_range": "data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.floorIds.indexOf(thiseval)!==-1",
                     "_data": "初始楼层的ID"
                 },

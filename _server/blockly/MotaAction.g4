@@ -1643,7 +1643,6 @@ colour : this.idstring_eColor
 default : [null,"自定义flag"]
 //todo 将其output改成'idString_e'
 var code = Id_List_0+':'+IdText_0;
-if (Id_List_0 === 'flag0') code = "flag:__"+IdText_0+"__";
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
@@ -1667,7 +1666,7 @@ evFlag_e
 /* evFlag_e
 colour : this.idstring_eColor
 default : ["A"]
-var code = "flag:__"+Letter_List_0+"__";
+var code = "switch:"+Letter_List_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
@@ -1784,7 +1783,7 @@ FixedId_List
 
 Id_List
     :   '变量' | '状态' | '物品' | '独立开关'
-    /*Id_List ['flag','status','item', 'flag0']*/;
+    /*Id_List ['flag','status','item', 'switch']*/;
 
 //转blockly后不保留需要加"
 EvalString
@@ -2232,7 +2231,8 @@ ActionParser.prototype.parseAction = function() {
       break
     case "setValue":
       this.next = MotaActionBlocks['setValue_s'].xmlText([
-        MotaActionBlocks['idString_e'].xmlText([data.name]),
+        // MotaActionBlocks['idString_e'].xmlText([data.name]),
+        this.tryToUseEvFlag_e('idString_e', [data.name]),
         MotaActionBlocks['evalString_e'].xmlText([data.value]),
         this.next]);
       break;
@@ -2258,7 +2258,8 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "if": // 条件判断
       this.next = MotaActionBlocks['if_s'].xmlText([
-        MotaActionBlocks['evalString_e'].xmlText([data.condition]),
+        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
+        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
         this.insertActionList(data["true"]),
         this.insertActionList(data["false"]),
         this.next]);
@@ -2270,7 +2271,9 @@ ActionParser.prototype.parseAction = function() {
           this.isset(caseNow.case)?MotaActionBlocks['evalString_e'].xmlText([caseNow.case]):"值",this.insertActionList(caseNow.action),case_caseList]);
       }
       this.next = MotaActionBlocks['switch_s'].xmlText([
-        MotaActionBlocks['evalString_e'].xmlText([data.condition]),case_caseList,this.next]);
+        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
+        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+        case_caseList,this.next]);
       break;
     case "choices": // 提供选项
       var text_choices = null;
@@ -2283,7 +2286,8 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "while": // 循环处理
       this.next = MotaActionBlocks['while_s'].xmlText([
-        MotaActionBlocks['evalString_e'].xmlText([data.condition]),
+        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
+        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
         this.insertActionList(data["data"]),
         this.next]);
       break;
@@ -2391,6 +2395,15 @@ ActionParser.prototype.StepString = function(steplist) {
 
 ActionParser.prototype.EvalString = function(EvalString) {
   return EvalString.split('\b').join('\\b').split('\t').join('\\t').split('\n').join('\\n');
+}
+
+ActionParser.prototype.tryToUseEvFlag_e = function(defaultType, args, isShadow, comment) {
+  var match=/^switch:([A-F])$/.exec(args[0])
+  if(match){
+    args[0]=match[1]
+    return MotaActionBlocks['evFlag_e'].xmlText(args, isShadow, comment);
+  }
+  return MotaActionBlocks[defaultType||'evalString_e'].xmlText(args, isShadow, comment);
 }
 
 MotaActionFunctions.actionParser = new ActionParser();

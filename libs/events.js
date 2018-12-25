@@ -965,9 +965,11 @@ events.prototype.doAction = function() {
                 }
                 // flag
                 if (data.name.indexOf("flag:")==0) {
-                    var flag = data.name.substring(5);
-                    if (/^__[A-Z]__$/.test(flag)) flag = (prefix||"")+flag;
-                    core.setFlag(flag, value);
+                    core.setFlag(data.name.substring(5), value);
+                }
+                // switch
+                if (data.name.indexOf("switch:")==0) {
+                    core.setFlag((prefix||"global")+"@"+data.name.substring(7), value);
                 }
             }
             catch (e) {console.log(e)}

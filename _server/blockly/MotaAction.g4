@@ -2398,7 +2398,7 @@ ActionParser.prototype.EvalString = function(EvalString) {
 }
 
 ActionParser.prototype.tryToUseEvFlag_e = function(defaultType, args, isShadow, comment) {
-  var match=/switch:([A-F])/.exec(args[0])
+  var match=/^switch:([A-F])$/.exec(args[0])
   if(match){
     args[0]=match[1]
     return MotaActionBlocks['evFlag_e'].xmlText(args, isShadow, comment);

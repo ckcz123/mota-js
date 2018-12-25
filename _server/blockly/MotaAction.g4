@@ -1751,8 +1751,8 @@ Bool:   'TRUE'
 Int :   '0' | [1-9][0-9]* ; // no leading zeros
 
 Letter_List
-    :  'A'|'B'|'C'|'D'|'E'|'F'|'G'|'H'|'I'|'J'|'K'|'L'|'M'|'N'|'O'|'P'|'Q'|'R'|'S'|'T'|'U'|'V'|'W'|'X'|'Y'|'Z'
-    /*Letter_List ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']*/;
+    :  'A'|'B'|'C'|'D'|'E'|'F'
+    /*Letter_List ['A','B','C','D','E','F']*/;
 
 
 Number

@@ -109,6 +109,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 	// 设置勇士的位置
 	core.status.hero.loc = heroLoc;
+	core.control.gatherFollowers();
 
 	// ---------- 重绘新地图；这一步将会设置core.status.floorId ---------- //
 	core.drawMap(floorId);

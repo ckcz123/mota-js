@@ -127,6 +127,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.fillRect('curtain',0,0,416,416,core.arrayToRGBA(color));
 		core.status.curtainColor = color;
 	}
+	else {
+		core.clearMap('curtain');
+		core.status.curtainColor = null;
+	}
 	// 更改天气
 	var weather = core.getFlag('__weather__', null);
 	if (!core.isset(weather) && core.isset(core.status.maps[floorId].weather))

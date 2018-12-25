@@ -587,6 +587,8 @@ maps.prototype.drawMap = function (floorId, callback) {
         }
     } else {
         drawEvent();
+        if (core.isset(core.status.curtainColor))
+            core.fillRect('curtain',0,0,416,416,core.arrayToRGBA(core.status.curtainColor));
         core.setGlobalAnimate(core.values.animateSpeed);
         core.drawHero();
         core.updateStatusBar();

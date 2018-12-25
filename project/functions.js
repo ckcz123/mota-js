@@ -123,13 +123,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var color = core.getFlag('__color__', null);
 	if (!core.isset(color) && core.isset(core.status.maps[floorId].color))
 		color = core.status.maps[floorId].color;
+	core.clearMap('curtain');
+	core.status.curtainColor = color;
 	if (core.isset(color)) {
 		core.fillRect('curtain',0,0,416,416,core.arrayToRGBA(color));
-		core.status.curtainColor = color;
-	}
-	else {
-		core.clearMap('curtain');
-		core.status.curtainColor = null;
 	}
 	// 更改天气
 	var weather = core.getFlag('__weather__', null);

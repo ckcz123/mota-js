@@ -349,6 +349,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 },
         "afterGetItem": function(itemId,x,y,callback) {
 	// 获得一个道具后触发的事件
+	core.playSound('item.mp3');
 
 	var todo = [];
 	if (core.isset(x) && core.isset(y)) {

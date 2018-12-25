@@ -1166,6 +1166,20 @@ editor.prototype.listen = function () {
         [bgc,fgc,evc,ev2c].forEach(function (x) {
             x.style.opacity = 1;
         });
+
+        // 手机端....
+        if (editor.isMobile) {
+            if (layerMod.value == 'bgmap') {
+                [fgc,evc,ev2c].forEach(function (x) {
+                    x.style.opacity = 0.3;
+                });
+            }
+            if (layerMod.value == 'fgmap') {
+                [bgc,evc,ev2c].forEach(function (x) {
+                    x.style.opacity = 0.3;
+                });
+            }
+        }
     }
 
     var layerMod2=document.getElementById('layerMod2');

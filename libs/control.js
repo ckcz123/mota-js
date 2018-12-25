@@ -2634,7 +2634,7 @@ control.prototype.triggerStatusBar = function (name, showToolbox) {
     if (name!='hide') name='show';
 
     // 如果是隐藏 -> 显示工具栏，则先显示
-    if (name == 'hide' && showToolbox && !core.domStyle.showStatusBar && !core.hasFlag("showToolbox")) {
+    if (name == 'hide' && !core.domStyle.showStatusBar) {
         this.triggerStatusBar("show");
         this.triggerStatusBar("hide", showToolbox);
         return;

@@ -480,7 +480,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "checkbox",
                     "_bool": "bool",
-                    "_data": "是否涉及毒衰咒；如果此项为false则不会在状态栏中显示毒衰咒的debuff"
+                    "_data": "是否在状态栏显示毒衰咒"
                 },
                 "enableSkill": {
                     "_leaf": true,

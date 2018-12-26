@@ -419,7 +419,13 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
         core.values = core.clone(values);
     else core.values = core.clone(core.data.values);
 
+    core.flags = core.clone(core.data.flags);
+    var systemFlags = core.getFlag("globalFlags", {});
+    for (var key in systemFlags)
+        core.flags[key] = systemFlags[key];
+
     core.events.initGame();
+    core.resize();
     this.updateGlobalAttribute(Object.keys(core.status.globalAttribute));
     this.triggerStatusBar(core.getFlag('hideStatusBar', false)?'hide':'show', core.getFlag("showToolbox"));
     core.status.played = true;
@@ -2812,6 +2818,9 @@ control.prototype.needDraw = function(id) {
 ////// 屏幕分辨率改变后重新自适应 //////
 control.prototype.resize = function(clientWidth, clientHeight) {
     if (main.mode=='editor')return;
+
+    clientWidth = clientWidth || main.dom.body.clientWidth;
+    clientHeight = clientHeight || main.dom.body.clientHeight;
 
     // 默认画布大小
     var DEFAULT_CANVAS_WIDTH = 422;

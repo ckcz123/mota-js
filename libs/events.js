@@ -996,6 +996,16 @@ events.prototype.doAction = function() {
             core.values[data.name] = data.value;
             this.doAction();
             break;
+        case "setGlobalFlag":
+            {
+                var flags = core.getFlag("globalFlags", {});
+                flags[data.name] = data.value;
+                core.flags[data.name] = data.value;
+                core.setFlag("globalFlags", flags);
+                core.resize();
+                this.doAction();
+                break;
+            }
         case "setHeroIcon":
             {
                 this.setHeroIcon(data.name);

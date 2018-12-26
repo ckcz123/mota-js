@@ -231,6 +231,7 @@ action
     |   setFloor_s
     |   setGlobalAttribute_s
     |   setGlobalValue_s
+    |   setGlobalFlag_s
     |   show_s
     |   hide_s
     |   trigger_s
@@ -496,6 +497,20 @@ helpUrl : https://h5mota.com/games/template/docs/#/event?id=setGlobalValue%ef%bc
 default : ["lavaDamage","100"]
 colour : this.dataColor
 var code = '{"type": "setGlobalValue", "name": "'+Global_Value_List_0+'", "value": '+EvalString_0+'},\n';
+return code;
+*/;
+
+
+setGlobalFlag_s
+    :   '设置系统开关' ':' Global_Flag_List Bool Newline
+
+
+/* setGlobalFlag_s
+tooltip : setGlobalFlag：设置系统开关
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=setGlobalValue%ef%bc%9a%e8%ae%be%e7%bd%ae%e4%b8%80%e4%b8%aa%e5%85%a8%e5%b1%80%e6%95%b0%e5%80%bc
+default : ["enableFloor","true"]
+colour : this.dataColor
+var code = '{"type": "setGlobalFlag", "name": "'+Global_Flag_List_0+'", "value": '+Bool_0+'},\n';
 return code;
 */;
 
@@ -1743,6 +1758,10 @@ Global_Value_List
     :   '血网伤害'|'中毒伤害'|'衰弱效果'|'红宝石效果'|'蓝宝石效果'|'绿宝石效果'|'红血瓶效果'|'蓝血瓶效果'|'黄血瓶效果'|'绿血瓶效果'|'破甲比例'|'反击比例'|'净化比例'|'仇恨增加值'|'行走速度'|'动画时间'|'楼层切换时间'
     /*Global_Value_List ['lavaDamage','poisonDamage','weakValue', 'redJewel', 'blueJewel', 'greenJewel', 'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'breakArmor', 'counterAttack', 'purify', 'hatred', 'moveSpeed', 'animateSpeed', 'floorChangeTime']*/;
 
+Global_Flag_List
+    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示魔力值'|'显示魔防值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'开启加点'|'开启负伤'|'循环计算临界'|'允许轻按'|'允许走到将死领域'|'允许瞬间移动'|'阻激夹域后禁用快捷商店'
+    /*Global_Flag_List ['enableFloor','enableName','enableLv', 'enableHPMax', 'enableMana', 'enableMDef', 'enableMoney', 'enableExperience', 'enableLevelUp', 'levelUpLeftMode', 'enableKeys', 'enablePZF', 'enableDebuff', 'enableSkill', 'flyNearStair', 'enableAddPoint', 'enableNegativeDamage', 'useLoop', 'enableGentleClick', 'canGoDeadZone', 'enableMoveDirectly', 'disableShopOnDamage']*/;
+
 Bool:   'TRUE' 
     |   'FALSE'
     ;
@@ -2246,6 +2265,10 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "setGlobalValue":
       this.next = MotaActionBlocks['setGlobalValue_s'].xmlText([
+        data.name, data.value, this.next]);
+      break;
+    case "setGlobalFlag":
+      this.next = MotaActionBlocks['setGlobalFlag_s'].xmlText([
         data.name, data.value, this.next]);
       break;
     case "input":

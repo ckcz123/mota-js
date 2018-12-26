@@ -431,13 +431,13 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    {"type": "setFloor", "name": "title", "value": "'主塔 0 层'" } // 设置当前楼层的中文名为主塔0层
+    {"type": "setFloor", "name": "title", "value": ""主塔 0 层"" } // 设置当前楼层的中文名为主塔0层
     {"type": "setFloor", "name": "canFlyTo", "floorId": "MT2", "value": "false" } // 设置MT2层不可飞行
     {"type": "setFloor", "name": "cannotViewMap", "floorId": "MT0", "value": "true" } // 设置MT0层不可被浏览地图
     {"type": "setFloor", "name": "item_ratio", "value": "5" } // 设置当前楼层的宝石血瓶属性加成为5
-    {"type": "setFloor", "name": "images", "value": "[[0,0,'tree.png',2]]" } // 设置当前楼层的楼层贴图
+    {"type": "setFloor", "name": "images", "value": "[[0,0,"tree.png",2]]" } // 设置当前楼层的楼层贴图
     {"type": "setFloor", "name": "upFloor", "value": "[2,3]" } // 设置当前楼层的上楼梯
-    {"type": "setFloor", "name": "bgm", "floorId": "MT10", "value": "'233.mp3'" } // 设置当前楼层的背景音乐
+    {"type": "setFloor", "name": "bgm", "floorId": "MT10", "value": ""233.mp3"" } // 设置当前楼层的背景音乐
 ]
 ```
 
@@ -480,6 +480,23 @@ name必填项，代表要修改的全局数值，其和全塔属性中的values�
 "purify", "hatred", "moveSpeed", "animateSpeed"`。
 
 value为必填项，代表要修改到的结果。该项必须是个数值。
+
+### setGlobalFlag：设置一个系统开关
+
+使用`{"type":"setGlobalFlag"}`可以设置一个系统开关。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+  {"type": "setGlobalFlag", "name": "enableMDef", "value": false}, // 不在状态栏显示魔防值
+]
+```
+
+name必填项，代表要修改的系统开关，其是全塔属性中的flags中的一部分。目前只能为`"enableFloor", "enableName", "enableLv",
+"enableHPMax", "enableMana", "enableMDef", "enableMoney", "enableExperience", "enableLevelUp", "levelUpLeftMode",
+"enableKeys", "enablePZF", "enableDebuff", "enableSkill", "flyNearStair", "enableAddPoint", "enableNegativeDamage",
+"useLoop", "enableGentleClick", "canGoDeadZone", "enableMoveDirectly", "disableShopOnDamage"`。
+
+value为必填项，只能为true或false，代表要修改到的结果。
 
 ### show：将一个禁用事件启用
 
@@ -730,7 +747,7 @@ loc为可选的，表示要更改地图块的坐标。如果忽略此项，则�
 "x,y": [ // 实际执行的事件列表
     {"type": "setHeroIcon", "name": "hero2.png"}, // 将勇士行走图改成hero2.png；必须在全塔属性的images中被定义过。
     {"type": "setHeroIcon"}, // 如果不加name则恢复最初默认状态
-    {"type": "setValue", "name": "status:name", "value": "'可绒'"}, // 修改勇士名；请注意value必须加单引号。
+    {"type": "setValue", "name": "status:name", "value": ""可绒""}, // 修改勇士名；请注意value必须加单引号。
 ]
 ```
 
@@ -2041,7 +2058,7 @@ if (core.getFlag("door",0)==2) {
 ////// 使用炸弹/圣锤后的事件 //////
 "afterUseBomb": function () {
     // 这是一个使用炸弹也能开门的例子
-    if (core.status.floorId=='xxx' && core.terrainExists(x0,y0,'specialDoor') // 某个楼层，该机关门存在
+    if (core.status.floorId=="xxx" && core.terrainExists(x0,y0,"specialDoor") // 某个楼层，该机关门存在
         && !core.enemyExists(x1,y1) && !core.enemyExists(x2,y2)) // 且守门的怪物都不存在
     {
         core.insertAction([ // 插入事件
@@ -2077,7 +2094,7 @@ if (core.getFlag("door",0)==2) {
         // 地图上是否还存在未推到的箱子，如果不存在则返回true，存在则返回false
         for (var i=0;i<core.status.thisMap.blocks.length;i++) {
             var block=core.status.thisMap.blocks[i];
-            if (core.isset(block.event) && block.event.id=='box') return false;
+            if (core.isset(block.event) && block.event.id=="box") return false;
         }
         return true;
     }
@@ -2085,7 +2102,7 @@ if (core.getFlag("door",0)==2) {
     if (noBoxLeft()) {
         // 可以通过if语句来进行开门操作
         /*
-        if (core.status.floorId=='xxx') { // 在某个楼层
+        if (core.status.floorId=="xxx") { // 在某个楼层
             core.insertAction([ // 插入一条事件
                 {"type": "openDoor", "loc": [x,y]} // 开门
             ])
@@ -2111,7 +2128,7 @@ if (core.getFlag("door",0)==2) {
 	// 推荐写变化后的具体数值，以免多次变化导致冲突
 	/*
 	// 如果flag:xxx为真；你也可以写其他判断语句比如core.hasItem(...)等等
-	if (core.hasFlag('xxx')) { 
+	if (core.hasFlag("xxx")) { 
 		core.material.enemys.greenSlime.atk = 100;
 		core.material.enemys.redSlime.money = 20;
 	}
@@ -2203,18 +2220,18 @@ if (core.getFlag("door",0)==2) {
 ``` js
 ////// 不同难度分别设置初始属性 //////
 "setInitData": function (hard) {
-    if (hard=='Easy') { // 简单难度
-        core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
+    if (hard=="Easy") { // 简单难度
+        core.setFlag("hard", 1); // 可以用flag:hard来获得当前难度
         // 可以在此设置一些初始福利，比如设置初始生命值可以调用：
         // core.setStatus("hp", 10000);
         // 赠送一把黄钥匙可以调用
         // core.setItem("yellowKey", 1);
     }
-    if (hard=='Normal') { // 普通难度
-        core.setFlag('hard', 2); // 可以用flag:hard来获得当前难度
+    if (hard=="Normal") { // 普通难度
+        core.setFlag("hard", 2); // 可以用flag:hard来获得当前难度
     }
-    if (hard=='Hard') { // 困难难度
-        core.setFlag('hard', 3); // 可以用flag:hard来获得当前难度
+    if (hard=="Hard") { // 困难难度
+        core.setFlag("hard", 3); // 可以用flag:hard来获得当前难度
     }
 }
 ```
@@ -2234,12 +2251,12 @@ if (core.getFlag("door",0)==2) {
     var replaying = core.status.replay.replaying;
     core.stopReplay();
     core.waitHeroToStop(function() {
-        core.clearMap('all'); // 清空全地图
+        core.clearMap("all"); // 清空全地图
         core.deleteAllCanvas();
         core.drawText([
             "\t[恭喜通关]你的分数是${status:hp}。"
         ], function () {
-            core.events.gameOver(reason||'', replaying, norank);
+            core.events.gameOver(reason||"", replaying, norank);
         })
     });
 }

@@ -122,10 +122,9 @@ control.prototype.setRequestAnimationFrame = function () {
             var animateObjs = [];
             for (var i=0;i<core.status.animateObjs.length;i++) {
                 var obj = core.status.animateObjs[i];
-                if (obj.index == obj.animate.frames.length || core.hasFlag("stopAnimate_"+obj.id)) {
+                if (obj.index == obj.animate.frames.length) {
                     // 绘制完毕
                     delete core.animateFrame.asyncId[obj.id];
-                    core.removeFlag("stopAnimate_"+obj.id);
                     // 异步执行回调...
                     (function(callback) {
                         setTimeout(function() {

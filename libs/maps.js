@@ -1387,6 +1387,29 @@ maps.prototype.drawAnimate = function (name, x, y, callback) {
     return animateId;
 }
 
+////// 停止动画 //////
+maps.prototype.stopAnimate = function (id, doCallback) {
+    for (var i=0;i<core.status.animateObjs.length;i++) {
+        var obj = core.status.animateObjs[i];
+        if (obj.id == id) {
+            delete core.animateFrame.asyncId[obj.id];
+            if (doCallback) {
+                (function(callback) {
+                    setTimeout(function() {
+                        if (core.isset(callback))
+                            callback();
+                    });
+                })(obj.callback);
+            }
+        }
+        core.status.animateObjs.splice(i, 1);
+        if (core.status.animateObjs.length == 0) {
+            core.clearMap('animate');
+        }
+        break;
+    }
+}
+
 maps.prototype.setFloorImage = function (type, loc, floorId, callback) {
     if (type!='show') type='hide';
     if (typeof loc[0] == 'number' && typeof loc[1] == 'number')

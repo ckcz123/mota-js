@@ -476,9 +476,12 @@ core.maps.removeBlockByIds(floorId, ids)
 core.maps.drawAnimate(name, x, y, callback)
 播放一段动画，name为动画名（需在全塔属性注册），x和y为坐标（0-12之间），callback可选，为播放完毕的回调函数。
 播放过程是异步的，如需等待播放完毕请使用insertAction插入一条type:waitAsync事件。
-此函数将随机返回一个数字id。将 "stopAnimate_"+id 这个flag置为true则可以立刻停止该动画的播放，如：
-var id = core.maps.drawAnimate("zone", 3, 3);
-core.setFlag("stopAnimate_"+id, true); // 立刻停止动画的播放
+此函数将随机返回一个数字id，为此异步动画的唯一标识符。
+
+
+core.maps.stopAnimate(id, doCallback)
+立刻停止一个异步动画。
+id为该动画的唯一标识符（由drawAnimate函数返回），doCallback可选，若为true则会执行该动画所绑定的回调函数。
 
 
 ========== core.ui.XXX 和对话框绘制相关的函数 ==========

@@ -900,6 +900,11 @@ core.prototype.drawAnimate = function (name, x, y, callback) {
     return core.maps.drawAnimate(name, x, y, callback);
 }
 
+////// 停止动画 //////
+core.prototype.stopAnimate = function (id, doCallback) {
+    return core.maps.stopAnimate(id, doCallback);
+}
+
 ////// 更新领域、夹击、阻击的伤害地图 //////
 core.prototype.updateCheckBlock = function() {
     core.control.updateCheckBlock();

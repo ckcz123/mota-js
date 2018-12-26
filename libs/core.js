@@ -602,6 +602,11 @@ core.prototype.nextY = function (n) {
     return core.control.nextY(n);
 }
 
+////// 某个点是否在勇士旁边 //////
+core.prototype.nearHero = function (x, y) {
+    return core.control.nearHero(x, y);
+}
+
 /////////// 自动行走 & 行走控制 END ///////////
 
 

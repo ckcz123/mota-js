@@ -1125,6 +1125,11 @@ control.prototype.nextY = function (n) {
     return core.getHeroLoc('y')+core.utils.scan[core.getHeroLoc('direction')].y*(n||1);
 }
 
+////// 某个点是否在勇士旁边 //////
+control.prototype.nearHero = function (x, y) {
+    return Math.abs(x-core.getHeroLoc('x'))+Math.abs(y-core.getHeroLoc('y'))<=1;
+}
+
 ////// 聚集跟随者 //////
 control.prototype.gatherFollowers = function () {
     if (!core.isset(core.status.hero.followers) || core.status.hero.followers.length==0) return;

@@ -168,6 +168,10 @@ core.nextY(n)
 获得勇士面向的第n个位置的y坐标，n可以省略默认为1（即正前方）
 
 
+core.nearHero(x, y)
+判断某个点是否和勇士的距离不超过1。
+
+
 core.openDoor(id, x, y, needKey, callback)    [异步]
 尝试开门操作。id为目标点的ID，x和y为坐标，needKey表示是否需要使用钥匙，callback为开门完毕后的回调函数。
 id可为null代表使用地图上的值。

@@ -698,6 +698,14 @@ actions.prototype.keyDownCtrl = function () {
         core.doAction();
         return;
     }
+    if (core.status.event.id=='action' && core.status.event.data.type=='sleep'
+            && !core.status.event.data.current.noSkip) {
+        if (core.isset(core.timeout.sleepTimeout)) {
+            clearTimeout(core.timeout.sleepTimeout);
+            core.timeout.sleepTimeout = null;
+            core.events.doAction();
+        }
+    }
 }
 
 //////

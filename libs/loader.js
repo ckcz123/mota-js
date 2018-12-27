@@ -264,6 +264,9 @@ loader.prototype.freeBgm = function (name) {
     core.material.bgms[name].removeAttribute("src");
     core.material.bgms[name].load();
     core.material.bgms[name] = null;
+    if (name == core.musicStatus.playingBgm) {
+        core.musicStatus.playingBgm = null;
+    }
     // 三秒后重新加载
     setTimeout(function () {
         core.loader.loadOneMusic(name);

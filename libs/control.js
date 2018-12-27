@@ -419,7 +419,13 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
         core.values = core.clone(values);
     else core.values = core.clone(core.data.values);
 
+    core.flags = core.clone(core.data.flags);
+    var systemFlags = core.getFlag("globalFlags", {});
+    for (var key in systemFlags)
+        core.flags[key] = systemFlags[key];
+
     core.events.initGame();
+    core.resize();
     this.updateGlobalAttribute(Object.keys(core.status.globalAttribute));
     this.triggerStatusBar(core.getFlag('hideStatusBar', false)?'hide':'show', core.getFlag("showToolbox"));
     core.status.played = true;
@@ -1122,6 +1128,11 @@ control.prototype.nextX = function(n) {
 ////// 获得勇士面对位置的y坐标 //////
 control.prototype.nextY = function (n) {
     return core.getHeroLoc('y')+core.utils.scan[core.getHeroLoc('direction')].y*(n||1);
+}
+
+////// 某个点是否在勇士旁边 //////
+control.prototype.nearHero = function (x, y) {
+    return Math.abs(x-core.getHeroLoc('x'))+Math.abs(y-core.getHeroLoc('y'))<=1;
 }
 
 ////// 聚集跟随者 //////
@@ -2634,7 +2645,7 @@ control.prototype.triggerStatusBar = function (name, showToolbox) {
     if (name!='hide') name='show';
 
     // 如果是隐藏 -> 显示工具栏，则先显示
-    if (name == 'hide' && showToolbox && !core.domStyle.showStatusBar && !core.hasFlag("showToolbox")) {
+    if (name == 'hide' && !core.domStyle.showStatusBar) {
         this.triggerStatusBar("show");
         this.triggerStatusBar("hide", showToolbox);
         return;
@@ -2807,6 +2818,9 @@ control.prototype.needDraw = function(id) {
 ////// 屏幕分辨率改变后重新自适应 //////
 control.prototype.resize = function(clientWidth, clientHeight) {
     if (main.mode=='editor')return;
+
+    clientWidth = clientWidth || main.dom.body.clientWidth;
+    clientHeight = clientHeight || main.dom.body.clientHeight;
 
     // 默认画布大小
     var DEFAULT_CANVAS_WIDTH = 422;

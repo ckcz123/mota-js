@@ -231,6 +231,7 @@ action
     |   setFloor_s
     |   setGlobalAttribute_s
     |   setGlobalValue_s
+    |   setGlobalFlag_s
     |   show_s
     |   hide_s
     |   trigger_s
@@ -496,6 +497,20 @@ helpUrl : https://h5mota.com/games/template/docs/#/event?id=setGlobalValue%ef%bc
 default : ["lavaDamage","100"]
 colour : this.dataColor
 var code = '{"type": "setGlobalValue", "name": "'+Global_Value_List_0+'", "value": '+EvalString_0+'},\n';
+return code;
+*/;
+
+
+setGlobalFlag_s
+    :   '设置系统开关' ':' Global_Flag_List Bool Newline
+
+
+/* setGlobalFlag_s
+tooltip : setGlobalFlag：设置系统开关
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=setGlobalFlag%ef%bc%9a%e8%ae%be%e7%bd%ae%e4%b8%80%e4%b8%aa%e7%b3%bb%e7%bb%9f%e5%bc%80%e5%85%b3
+default : ["enableFloor","true"]
+colour : this.dataColor
+var code = '{"type": "setGlobalFlag", "name": "'+Global_Flag_List_0+'", "value": '+Bool_0+'},\n';
 return code;
 */;
 
@@ -842,15 +857,16 @@ return code;
 */;
 
 sleep_s
-    :   '等待' Int '毫秒' Newline
+    :   '等待' Int '毫秒' '不可被Ctrl跳过' Bool Newline
     
 
 /* sleep_s
 tooltip : sleep: 等待多少毫秒
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=sleep%EF%BC%9A%E7%AD%89%E5%BE%85%E5%A4%9A%E5%B0%91%E6%AF%AB%E7%A7%92
-default : [500]
+default : [500, false]
 colour : this.soundColor
-var code = '{"type": "sleep", "time": '+Int_0+'},\n';
+Bool_0 = Bool_0?', "noSkip": true':'';
+var code = '{"type": "sleep", "time": '+Int_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -1643,7 +1659,6 @@ colour : this.idstring_eColor
 default : [null,"自定义flag"]
 //todo 将其output改成'idString_e'
 var code = Id_List_0+':'+IdText_0;
-if (Id_List_0 === 'flag0') code = "flag:__"+IdText_0+"__";
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
@@ -1667,7 +1682,7 @@ evFlag_e
 /* evFlag_e
 colour : this.idstring_eColor
 default : ["A"]
-var code = "flag:__"+Letter_List_0+"__";
+var code = "switch:"+Letter_List_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
@@ -1744,6 +1759,11 @@ Global_Value_List
     :   '血网伤害'|'中毒伤害'|'衰弱效果'|'红宝石效果'|'蓝宝石效果'|'绿宝石效果'|'红血瓶效果'|'蓝血瓶效果'|'黄血瓶效果'|'绿血瓶效果'|'破甲比例'|'反击比例'|'净化比例'|'仇恨增加值'|'行走速度'|'动画时间'|'楼层切换时间'
     /*Global_Value_List ['lavaDamage','poisonDamage','weakValue', 'redJewel', 'blueJewel', 'greenJewel', 'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'breakArmor', 'counterAttack', 'purify', 'hatred', 'moveSpeed', 'animateSpeed', 'floorChangeTime']*/;
 
+
+Global_Flag_List
+    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示魔力值'|'显示魔防值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'开启加点'|'开启负伤'|'循环计算临界'|'允许轻按'|'允许走到将死领域'|'允许瞬间移动'|'阻激夹域后禁用快捷商店'
+    /*Global_Flag_List ['enableFloor','enableName','enableLv', 'enableHPMax', 'enableMana', 'enableMDef', 'enableMoney', 'enableExperience', 'enableLevelUp', 'levelUpLeftMode', 'enableKeys', 'enablePZF', 'enableDebuff', 'enableSkill', 'flyNearStair', 'enableAddPoint', 'enableNegativeDamage', 'useLoop', 'enableGentleClick', 'canGoDeadZone', 'enableMoveDirectly', 'disableShopOnDamage']*/;
+
 Colour
     :   'sdeirughvuiyasdeb'+ //为了被识别为复杂词法规则
     ;
@@ -1759,8 +1779,8 @@ Bool:   'TRUE'
 Int :   '0' | [1-9][0-9]* ; // no leading zeros
 
 Letter_List
-    :  'A'|'B'|'C'|'D'|'E'|'F'|'G'|'H'|'I'|'J'|'K'|'L'|'M'|'N'|'O'|'P'|'Q'|'R'|'S'|'T'|'U'|'V'|'W'|'X'|'Y'|'Z'
-    /*Letter_List ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']*/;
+    :  'A'|'B'|'C'|'D'|'E'|'F'
+    /*Letter_List ['A','B','C','D','E','F']*/;
 
 
 Number
@@ -1792,7 +1812,7 @@ FixedId_List
 
 Id_List
     :   '变量' | '状态' | '物品' | '独立开关'
-    /*Id_List ['flag','status','item', 'flag0']*/;
+    /*Id_List ['flag','status','item', 'switch']*/;
 
 //转blockly后不保留需要加"
 EvalString
@@ -1853,6 +1873,7 @@ this.evisitor.commentColor=285;
 delete(this.block('negate_e').inputsInline);
 this.block('idString_1_e').output='idString_e';
 this.block('idString_2_e').output='idString_e';
+this.block('evFlag_e').output='idString_e';
 */
 
 /* Functions
@@ -2239,7 +2260,8 @@ ActionParser.prototype.parseAction = function() {
       break
     case "setValue":
       this.next = MotaActionBlocks['setValue_s'].xmlText([
-        MotaActionBlocks['idString_e'].xmlText([data.name]),
+        // MotaActionBlocks['idString_e'].xmlText([data.name]),
+        this.tryToUseEvFlag_e('idString_e', [data.name]),
         MotaActionBlocks['evalString_e'].xmlText([data.value]),
         this.next]);
       break;
@@ -2255,6 +2277,10 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['setGlobalValue_s'].xmlText([
         data.name, data.value, this.next]);
       break;
+    case "setGlobalFlag":
+      this.next = MotaActionBlocks['setGlobalFlag_s'].xmlText([
+        data.name, data.value, this.next]);
+      break;
     case "input":
       this.next = MotaActionBlocks['input_s'].xmlText([
         data.text,this.next]);
@@ -2265,7 +2291,8 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "if": // 条件判断
       this.next = MotaActionBlocks['if_s'].xmlText([
-        MotaActionBlocks['evalString_e'].xmlText([data.condition]),
+        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
+        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
         this.insertActionList(data["true"]),
         this.insertActionList(data["false"]),
         this.next]);
@@ -2277,7 +2304,9 @@ ActionParser.prototype.parseAction = function() {
           this.isset(caseNow.case)?MotaActionBlocks['evalString_e'].xmlText([caseNow.case]):"值",this.insertActionList(caseNow.action),case_caseList]);
       }
       this.next = MotaActionBlocks['switch_s'].xmlText([
-        MotaActionBlocks['evalString_e'].xmlText([data.condition]),case_caseList,this.next]);
+        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
+        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+        case_caseList,this.next]);
       break;
     case "choices": // 提供选项
       var text_choices = null;
@@ -2290,7 +2319,8 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "while": // 循环处理
       this.next = MotaActionBlocks['while_s'].xmlText([
-        MotaActionBlocks['evalString_e'].xmlText([data.condition]),
+        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
+        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
         this.insertActionList(data["data"]),
         this.next]);
       break;
@@ -2334,7 +2364,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "sleep": // 等待多少毫秒
       this.next = MotaActionBlocks['sleep_s'].xmlText([
-        data.time||0,this.next]);
+        data.time||0,data.noSkip||false,this.next]);
       break;
     case "wait": // 等待用户操作
       this.next = MotaActionBlocks['wait_s'].xmlText([
@@ -2398,6 +2428,15 @@ ActionParser.prototype.StepString = function(steplist) {
 
 ActionParser.prototype.EvalString = function(EvalString) {
   return EvalString.split('\b').join('\\b').split('\t').join('\\t').split('\n').join('\\n');
+}
+
+ActionParser.prototype.tryToUseEvFlag_e = function(defaultType, args, isShadow, comment) {
+  var match=/^switch:([A-F])$/.exec(args[0])
+  if(match){
+    args[0]=match[1]
+    return MotaActionBlocks['evFlag_e'].xmlText(args, isShadow, comment);
+  }
+  return MotaActionBlocks[defaultType||'evalString_e'].xmlText(args, isShadow, comment);
 }
 
 MotaActionFunctions.actionParser = new ActionParser();

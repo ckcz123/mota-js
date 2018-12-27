@@ -481,6 +481,23 @@ name必填项，代表要修改的全局数值，其和全塔属性中的values�
 
 value为必填项，代表要修改到的结果。该项必须是个数值。
 
+### setGlobalFlag：设置一个系统开关
+
+使用`{"type":"setGlobalFlag"}`可以设置一个系统开关。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+  {"type": "setGlobalFlag", "name": "enableMDef", "value": false}, // 不在状态栏显示魔防值
+]
+```
+
+name必填项，代表要修改的系统开关，其是全塔属性中的flags中的一部分。目前只能为`"enableFloor", "enableName", "enableLv",
+"enableHPMax", "enableMana", "enableMDef", "enableMoney", "enableExperience", "enableLevelUp", "levelUpLeftMode",
+"enableKeys", "enablePZF", "enableDebuff", "enableSkill", "flyNearStair", "enableAddPoint", "enableNegativeDamage",
+"useLoop", "enableGentleClick", "canGoDeadZone", "enableMoveDirectly", "disableShopOnDamage"`。
+
+value为必填项，只能为true或false，代表要修改到的结果。
+
 ### show：将一个禁用事件启用
 
 我们上面提到了，所有事件都必须靠其他事件驱动来完成，不存在当某个flag为true时自动执行的说法。那么，我们自然要有启用事件的写法。
@@ -1693,12 +1710,12 @@ core.insertAction([
 
 从V2.5.3开始，针对每个事件都提供了独立开关。
 
-独立开关的写法是`flag:__A__`, `flag:__B__`直到`flag:__Z__`，共计26个。
+独立开关的写法是`switch:A`, `switch:A`直到`switch:Z`，共计26个；不过样板中的值块默认只提供前6个。
 
-独立开关算是特殊的flag，它在事件中使用时会和事件的楼层及坐标进行绑定；换句话说每个事件对应的`flag:__A__`都是不同的。
+独立开关算是特殊的flag，它在事件中使用时会和事件的楼层及坐标进行绑定；换句话说每个事件对应的`switch:A`都是不同的。
 
-事实上，在某个楼层某个点的事件的独立开关对应的系统flag为`floorId@x@y__X__`，
-比如在`MT0`层的`[2,5]`点事件，对应的`flag:__B__`独立开关，实际会被映射到`flag:MT0@2@5__B__`。
+事实上，在某个楼层某个点的事件的独立开关A对应的系统flag为`floorId@x@y@A`，
+比如在`MT0`层的`[2,5]`点事件，对应的`switch:B`独立开关，实际会被映射到`flag:MT0@2@5@B`。
 
 如果在事件外想访问某个事件的独立开关也需要通过上面这个方式。
 
@@ -2206,9 +2223,9 @@ if (core.getFlag("door",0)==2) {
     if (hard=='Easy') { // 简单难度
         core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
         // 可以在此设置一些初始福利，比如设置初始生命值可以调用：
-        // core.setStatus("hp", 10000);
+        // core.setStatus('hp', 10000);
         // 赠送一把黄钥匙可以调用
-        // core.setItem("yellowKey", 1);
+        // core.setItem('yellowKey', 1);
     }
     if (hard=='Normal') { // 普通难度
         core.setFlag('hard', 2); // 可以用flag:hard来获得当前难度

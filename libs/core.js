@@ -20,6 +20,7 @@ function core() {
         'getItemTipTimeout': null,
         'turnHeroTimeout': null,
         'onDownTimeout': null,
+        'sleepTimeout': null,
     }
     this.interval = {
         'heroMoveInterval': null,
@@ -602,6 +603,11 @@ core.prototype.nextY = function (n) {
     return core.control.nextY(n);
 }
 
+////// 某个点是否在勇士旁边 //////
+core.prototype.nearHero = function (x, y) {
+    return core.control.nearHero(x, y);
+}
+
 /////////// 自动行走 & 行走控制 END ///////////
 
 
@@ -892,7 +898,12 @@ core.prototype.drawBoxAnimate = function () {
 
 ////// 绘制动画 //////
 core.prototype.drawAnimate = function (name, x, y, callback) {
-    core.maps.drawAnimate(name, x, y, callback);
+    return core.maps.drawAnimate(name, x, y, callback);
+}
+
+////// 停止动画 //////
+core.prototype.stopAnimate = function (id, doCallback) {
+    return core.maps.stopAnimate(id, doCallback);
 }
 
 ////// 更新领域、夹击、阻击的伤害地图 //////

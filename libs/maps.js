@@ -587,6 +587,8 @@ maps.prototype.drawMap = function (floorId, callback) {
         }
     } else {
         drawEvent();
+        if (core.isset(core.status.curtainColor))
+            core.fillRect('curtain',0,0,416,416,core.arrayToRGBA(core.status.curtainColor));
         core.setGlobalAnimate(core.values.animateSpeed);
         core.drawHero();
         core.updateStatusBar();
@@ -1357,13 +1359,13 @@ maps.prototype.drawAnimate = function (name, x, y, callback) {
     // 正在播放录像：不显示动画
     if (core.isset(core.status.replay) && core.status.replay.replaying) {
         if (core.isset(callback)) callback();
-        return;
+        return -1;
     }
 
     // 检测动画是否存在
     if (!core.isset(core.material.animates[name]) || !core.isset(x) || !core.isset(y)) {
         if (core.isset(callback)) callback();
-        return;
+        return -1;
     }
 
     // 开始绘制
@@ -1382,6 +1384,30 @@ maps.prototype.drawAnimate = function (name, x, y, callback) {
     });
 
     core.animateFrame.asyncId[animateId] = true;
+    return animateId;
+}
+
+////// 停止动画 //////
+maps.prototype.stopAnimate = function (id, doCallback) {
+    for (var i=0;i<core.status.animateObjs.length;i++) {
+        var obj = core.status.animateObjs[i];
+        if (obj.id == id) {
+            delete core.animateFrame.asyncId[obj.id];
+            if (doCallback) {
+                (function(callback) {
+                    setTimeout(function() {
+                        if (core.isset(callback))
+                            callback();
+                    });
+                })(obj.callback);
+            }
+        }
+        core.status.animateObjs.splice(i, 1);
+        if (core.status.animateObjs.length == 0) {
+            core.clearMap('animate');
+        }
+        break;
+    }
 }
 
 maps.prototype.setFloorImage = function (type, loc, floorId, callback) {

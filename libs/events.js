@@ -965,9 +965,11 @@ events.prototype.doAction = function() {
                 }
                 // flag
                 if (data.name.indexOf("flag:")==0) {
-                    var flag = data.name.substring(5);
-                    if (/^__[A-Z]__$/.test(flag)) flag = (prefix||"")+flag;
-                    core.setFlag(flag, value);
+                    core.setFlag(data.name.substring(5), value);
+                }
+                // switch
+                if (data.name.indexOf("switch:")==0) {
+                    core.setFlag((prefix||"global")+"@"+data.name.substring(7), value);
                 }
             }
             catch (e) {console.log(e)}
@@ -994,6 +996,16 @@ events.prototype.doAction = function() {
             core.values[data.name] = data.value;
             this.doAction();
             break;
+        case "setGlobalFlag":
+            {
+                var flags = core.getFlag("globalFlags", {});
+                flags[data.name] = data.value;
+                core.flags[data.name] = data.value;
+                core.setFlag("globalFlags", flags);
+                core.resize();
+                this.doAction();
+                break;
+            }
         case "setHeroIcon":
             {
                 this.setHeroIcon(data.name);
@@ -1166,7 +1178,8 @@ events.prototype.doAction = function() {
             }
             break;
         case "sleep": // 等待多少毫秒
-            setTimeout(function() {
+            core.timeout.sleepTimeout = setTimeout(function() {
+                core.timeout.sleepTimeout = null;
                 core.events.doAction();
             }, core.status.replay.replaying?20:data.time);
             break;
@@ -1270,7 +1283,6 @@ events.prototype.getItem = function (itemId, itemNum, itemX, itemY, callback) {
     if (itemNum > 1) text += "x" + itemNum;
     if (itemCls === 'items') text += core.items.getItemEffectTip(itemId);
     core.drawTip(text, core.material.icons.items[itemId]);
-    core.clearMap('event', itemX * 32, itemY * 32, 32, 32);
     core.updateStatusBar();
 
     this.eventdata.afterGetItem(itemId, itemX, itemY, callback);

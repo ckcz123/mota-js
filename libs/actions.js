@@ -700,11 +700,12 @@ actions.prototype.keyDownCtrl = function () {
     }
     if (core.status.event.id=='action' && core.status.event.data.type=='sleep'
             && !core.status.event.data.current.noSkip) {
-        if (core.isset(core.timeout.sleepTimeout)) {
+        if (core.isset(core.timeout.sleepTimeout) && Object.keys(core.animateFrame.asyncId).length==0) {
             clearTimeout(core.timeout.sleepTimeout);
             core.timeout.sleepTimeout = null;
             core.events.doAction();
         }
+        return;
     }
 }
 

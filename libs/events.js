@@ -1209,7 +1209,7 @@ events.prototype.doAction = function() {
         case "waitAsync": // 等待所有异步事件执行完毕
             {
                 var test = window.setInterval(function () {
-                    if (Object.keys(core.animateFrame.asyncId)==0) {
+                    if (Object.keys(core.animateFrame.asyncId).length==0) {
                         clearInterval(test);
                         core.events.doAction();
                     }

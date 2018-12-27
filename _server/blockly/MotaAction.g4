@@ -857,15 +857,16 @@ return code;
 */;
 
 sleep_s
-    :   '等待' Int '毫秒' Newline
+    :   '等待' Int '毫秒' '不可被Ctrl跳过' Bool Newline
     
 
 /* sleep_s
 tooltip : sleep: 等待多少毫秒
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=sleep%EF%BC%9A%E7%AD%89%E5%BE%85%E5%A4%9A%E5%B0%91%E6%AF%AB%E7%A7%92
-default : [500]
+default : [500, false]
 colour : this.soundColor
-var code = '{"type": "sleep", "time": '+Int_0+'},\n';
+Bool_0 = Bool_0?', "noSkip": true':'';
+var code = '{"type": "sleep", "time": '+Int_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -2354,7 +2355,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "sleep": // 等待多少毫秒
       this.next = MotaActionBlocks['sleep_s'].xmlText([
-        data.time||0,this.next]);
+        data.time||0,data.noSkip||false,this.next]);
       break;
     case "wait": // 等待用户操作
       this.next = MotaActionBlocks['wait_s'].xmlText([

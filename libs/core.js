@@ -20,6 +20,7 @@ function core() {
         'getItemTipTimeout': null,
         'turnHeroTimeout': null,
         'onDownTimeout': null,
+        'sleepTimeout': null,
     }
     this.interval = {
         'heroMoveInterval': null,

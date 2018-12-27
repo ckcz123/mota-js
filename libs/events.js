@@ -1178,7 +1178,8 @@ events.prototype.doAction = function() {
             }
             break;
         case "sleep": // 等待多少毫秒
-            setTimeout(function() {
+            core.timeout.sleepTimeout = setTimeout(function() {
+                core.timeout.sleepTimeout = null;
                 core.events.doAction();
             }, core.status.replay.replaying?20:data.time);
             break;

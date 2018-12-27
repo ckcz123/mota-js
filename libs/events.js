@@ -922,7 +922,8 @@ events.prototype.doAction = function() {
             this.doAction();
             break
         case "loadBgm":
-            core.loadBgm(data.name);
+            if (core.platform.isPC)
+                core.loadBgm(data.name);
             this.doAction();
             break;
         case "freeBgm":

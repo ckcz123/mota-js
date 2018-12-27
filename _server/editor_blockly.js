@@ -365,6 +365,54 @@ function omitedcheckUpdateFunction(event) {
   MotaActionFunctions.workspace = function(){
     return editor_blockly.workspace;
   }
+
+  // 因为在editor_blockly.parse里已经HTML转义过一次了,所以这里要覆盖掉以避免在注释中出现&lt;等
+  MotaActionFunctions.xmlText = function (ruleName,inputs,isShadow,comment) {
+    var rule = MotaActionBlocks[ruleName];
+    var blocktext = isShadow?'shadow':'block';
+    var xmlText = [];
+    xmlText.push('<'+blocktext+' type="'+ruleName+'">');
+    if(!inputs)inputs=[];
+    for (var ii=0,inputType;inputType=rule.argsType[ii];ii++) {
+      var input = inputs[ii];
+      var _input = '';
+      var noinput = (input===null || input===undefined);
+      if(noinput && inputType==='field') continue;
+      if(noinput) input = '';
+      if(inputType!=='field') {
+        var subList = false;
+        var subrulename = rule.args[ii];
+        subrulename=subrulename.split('_').slice(0,-1).join('_');
+        var subrule = MotaActionBlocks[subrulename];
+        if (subrule instanceof Array) {
+          subrulename=subrule[subrule.length-1];
+          subrule = MotaActionBlocks[subrulename];
+          subList = true;
+        }
+        _input = subrule.xmlText([],true);
+        if(noinput && !subList && !isShadow) {
+          //无输入的默认行为是: 如果语句块的备选方块只有一个,直接代入方块
+          input = subrule.xmlText();
+        }
+      }
+      xmlText.push('<'+inputType+' name="'+rule.args[ii]+'">');
+      xmlText.push(_input+input);
+      xmlText.push('</'+inputType+'>');
+    }
+    if(comment){
+      xmlText.push('<comment>');
+      xmlText.push(comment);
+      xmlText.push('</comment>');
+    }
+    var next = inputs[rule.args.length];
+    if (next) {//next
+      xmlText.push('<next>');
+      xmlText.push(next);
+      xmlText.push('</next>');
+    }
+    xmlText.push('</'+blocktext+'>');
+    return xmlText.join('');
+  }
 })();
 `;
 

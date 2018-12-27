@@ -385,13 +385,13 @@ return code;
 */;
 
 setText_s
-    :   '设置剧情文本的属性' '位置' SetTextPosition_List '偏移像素' EvalString? BGNL? '标题颜色' EvalString? '正文颜色' EvalString? '背景色' EvalString? '粗体' B_1_List BGNL? '标题字体大小' EvalString? '正文字体大小' EvalString? '打字间隔' EvalString? Newline
+    :   '设置剧情文本的属性' '位置' SetTextPosition_List '偏移像素' EvalString? BGNL? '标题颜色' EvalString? Colour '正文颜色' EvalString? Colour '背景色' EvalString? Colour BGNL? '粗体' B_1_List '标题字体大小' EvalString? '正文字体大小' EvalString? '打字间隔' EvalString? Newline
     
 
 /* setText_s
 tooltip : setText：设置剧情文本的属性,颜色为RGB三元组或RGBA四元组,打字间隔为剧情文字添加的时间间隔,为整数或不填
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=settext%EF%BC%9A%E8%AE%BE%E7%BD%AE%E5%89%A7%E6%83%85%E6%96%87%E6%9C%AC%E7%9A%84%E5%B1%9E%E6%80%A7
-default : [null,"","","","",null,"","",""]
+default : [null,"","",null,"",null,"",null,null,"","",""]
 SetTextPosition_List_0 =SetTextPosition_List_0==='null'?'': ', "position": "'+SetTextPosition_List_0+'"';
 var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
 if (EvalString_0) {
@@ -1134,13 +1134,13 @@ return code;
 */;
 
 setFg_0_s
-    :   '更改画面色调' EvalString '动画时间' Int? '不等待执行完毕' Bool Newline
+    :   '更改画面色调' EvalString Colour '动画时间' Int? '不等待执行完毕' Bool Newline
     
 
 /* setFg_0_s
 tooltip : setFg: 更改画面色调,动画时间可不填
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=setfg%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
-default : ["255,255,255,1",500,false]
+default : ["255,255,255,1",'rgba(255,255,255,1)',500,false]
 colour : this.soundColor
 var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
 if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
@@ -1166,12 +1166,12 @@ return code;
 */;
 
 screenFlash_s
-    :   '画面闪烁' EvalString '单次时间' Int '执行次数' Int? '不等待执行完毕' Bool Newline
+    :   '画面闪烁' EvalString Colour '单次时间' Int '执行次数' Int? '不等待执行完毕' Bool Newline
 
 /* screenFlash_s
 tooltip : screenFlash: 画面闪烁,动画时间可不填
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=screenFlash%EF%BC%9A%E7%94%BB%E9%9D%A2%E9%97%AA%E7%83%81
-default : ["255,255,255,1",500,1,false]
+default : ["255,255,255,1",'rgba(255,255,255,1)',500,1,false]
 colour : this.soundColor
 var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
 if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
@@ -1759,9 +1759,18 @@ Global_Value_List
     :   '血网伤害'|'中毒伤害'|'衰弱效果'|'红宝石效果'|'蓝宝石效果'|'绿宝石效果'|'红血瓶效果'|'蓝血瓶效果'|'黄血瓶效果'|'绿血瓶效果'|'破甲比例'|'反击比例'|'净化比例'|'仇恨增加值'|'行走速度'|'动画时间'|'楼层切换时间'
     /*Global_Value_List ['lavaDamage','poisonDamage','weakValue', 'redJewel', 'blueJewel', 'greenJewel', 'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'breakArmor', 'counterAttack', 'purify', 'hatred', 'moveSpeed', 'animateSpeed', 'floorChangeTime']*/;
 
+
 Global_Flag_List
     :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示魔力值'|'显示魔防值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'开启加点'|'开启负伤'|'循环计算临界'|'允许轻按'|'允许走到将死领域'|'允许瞬间移动'|'阻激夹域后禁用快捷商店'
     /*Global_Flag_List ['enableFloor','enableName','enableLv', 'enableHPMax', 'enableMana', 'enableMDef', 'enableMoney', 'enableExperience', 'enableLevelUp', 'levelUpLeftMode', 'enableKeys', 'enablePZF', 'enableDebuff', 'enableSkill', 'flyNearStair', 'enableAddPoint', 'enableNegativeDamage', 'useLoop', 'enableGentleClick', 'canGoDeadZone', 'enableMoveDirectly', 'disableShopOnDamage']*/;
+
+Colour
+    :   'sdeirughvuiyasdeb'+ //为了被识别为复杂词法规则
+    ;
+
+Angle
+    :   'sdeirughvuiyasdeb'+ //为了被识别为复杂词法规则
+    ;
 
 Bool:   'TRUE' 
     |   'FALSE'
@@ -2001,7 +2010,7 @@ ActionParser.prototype.parseAction = function() {
         data.time, data.async||false, this.EvalString(data.text), this.next]);
         break;
     case "comment": // 注释
-      this.next = MotaActionBlocks['comment_s'].xmlText([this.EvalString(data.text),this.next]);
+      this.next = MotaActionBlocks['comment_s'].xmlText([this.EvalString(data.text),this.next],null,data.text);
       break;
     case "setText": // 设置剧情文本的属性
       var setTextfunc = function(a){return a?JSON.stringify(a).slice(1,-1):null;}
@@ -2010,7 +2019,7 @@ ActionParser.prototype.parseAction = function() {
       if (!/^\w+\.png$/.test(data.background))
         data.background=setTextfunc(data.background);
       this.next = MotaActionBlocks['setText_s'].xmlText([
-        data.position,data.offset,data.title,data.text,data.background,data.bold,data.titlefont,data.textfont,data.time,this.next]);
+        data.position,data.offset,data.title,`rgba(${data.title})`,data.text,`rgba(${data.text})`,data.background,`rgba(${data.background})`,data.bold,data.titlefont,data.textfont,data.time,this.next]);
       break;
     case "tip":
       this.next = MotaActionBlocks['tip_s'].xmlText([
@@ -2182,7 +2191,7 @@ ActionParser.prototype.parseAction = function() {
     case "setFg": // 颜色渐变
       if(this.isset(data.color)){
         this.next = MotaActionBlocks['setFg_0_s'].xmlText([
-          data.color,data.time||0,data.async||false,this.next]);
+          data.color,`rgba(${data.color})`,data.time||0,data.async||false,this.next]);
       } else {
         this.next = MotaActionBlocks['setFg_1_s'].xmlText([
           data.time||0,data.async||false,this.next]);
@@ -2190,7 +2199,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "screenFlash": // 画面闪烁
         this.next = MotaActionBlocks['screenFlash_s'].xmlText([
-          data.color,data.time||500,data.times||1,data.async||false,this.next]);
+          data.color,`rgba(${data.color})`,data.time||500,data.times||1,data.async||false,this.next]);
       break;
     case "setWeather": // 更改天气
       this.next = MotaActionBlocks['setWeather_s'].xmlText([

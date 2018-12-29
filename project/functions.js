@@ -147,6 +147,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 如果是读档，则进行检查
 	if (fromLoad) {
 		core.events.recoverEvents(core.getFlag("__events__"));
+		core.removeFlag("__events__");
 	}
 	else {
 		// 每次抵达楼层执行的事件

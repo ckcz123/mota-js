@@ -2061,10 +2061,6 @@ control.prototype.save = function(need) {
 control.prototype.load = function (need) {
     if (core.isReplaying()) return;
 
-    if (core.status.event.id == 'load' && core.events.recoverEvents(core.status.event.interval)) {
-        return;
-    }
-
     var saveIndex = core.saves.saveIndex;
     var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
 
@@ -2077,6 +2073,10 @@ control.prototype.load = function (need) {
         core.status.event = {'id': 'load', 'data': null};
         core.status.lockControl = true;
         core.ui.drawSLPanel(10*page+offset);
+        return;
+    }
+
+    if (core.status.event.id == 'load' && core.events.recoverEvents(core.status.event.interval)) {
         return;
     }
 

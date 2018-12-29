@@ -855,6 +855,7 @@ maps.prototype.__initBlockCanvas = function (block, height, x, y) {
 ////// 显示移动某块的动画，达到{“type”:”move”}的效果 //////
 maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
     time = time || 500;
+    var floorId = core.status.floorId;
 
     var block = core.getBlock(x,y);
     if (block==null) {// 不存在
@@ -893,6 +894,11 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
     });
 
     var nowX=32*x, nowY=32*y, step=0;
+    var destX=x, destY=y;
+    moveSteps.forEach(function (t) {
+        destX += core.utils.scan[t].x;
+        destY += core.utils.scan[t].y;
+    });
 
     var animateValue = block.event.animate || 1, animateCurrent = isTileset?bx:0, animateTime = 0;
     var blockCanvas = this.__initBlockCanvas(block, height, x, y);
@@ -912,8 +918,8 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
         if (isTileset) animateCurrent = bx;
 
         // 已经移动完毕，消失
-        if (moveSteps.length==0) {
-            if (keep) opacity=0;
+        if (moveSteps.length==0 || floorId != core.status.floorId) {
+            if (keep || floorId!=core.status.floorId) opacity=0;
             else opacity -= 0.06;
             if (opacity<=0) {
                 delete core.animateFrame.asyncId[animate];
@@ -923,8 +929,9 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
                 core.deleteCanvas(damageCanvas);
                 // 不消失
                 if (keep) {
-                    core.setBlock(id, nowX/32, nowY/32);
-                    core.showBlock(nowX/32, nowY/32);
+                    core.setBlock(id, destX, destY, floorId);
+                    if (floorId == core.status.floorId)
+                        core.showBlock(destX, destY);
                 }
                 if (core.isset(callback)) callback();
             }
@@ -964,6 +971,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
 ////// 显示跳跃某块的动画，达到{"type":"jump"}的效果 //////
 maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
     time = time || 500;
+    var floorId = core.status.floorId;
     var block = core.getBlock(sx,sy);
     if (block==null) {
         if (core.isset(callback)) callback();
@@ -1016,12 +1024,12 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
 
     var animate=window.setInterval(function() {
 
-        if (jump_count>0) {
+        if (jump_count>0 && floorId == core.status.floorId) {
             updateJump();
             core.maps.__moveBlockCanvas(image, bx, by, height, drawX(), drawY(), opacity, headCanvas, bodyCanvas, damageCanvas);
         }
         else {
-            if (keep) opacity=0;
+            if (keep || floorId != core.status.floorId) opacity=0;
             else opacity -= 0.06;
             if (opacity<=0) {
                 delete core.animateFrame.asyncId[animate];
@@ -1030,8 +1038,9 @@ maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
                 core.deleteCanvas(bodyCanvas);
                 core.deleteCanvas(damageCanvas);
                 if (keep) {
-                    core.setBlock(id, ex, ey);
-                    core.showBlock(ex, ey);
+                    core.setBlock(id, ex, ey, floorId);
+                    if (floorId == core.status.floorId)
+                        core.showBlock(ex, ey);
                 }
                 if (core.isset(callback)) callback();
             }
@@ -1240,9 +1249,10 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
         else {
             originBlock.block.id = number;
             originBlock.block.event = block.event;
+            block = originBlock.block;
         }
-        if (floorId==core.status.floorId) {
-            core.drawMap(floorId);
+        if (floorId==core.status.floorId && !block.disable) {
+            core.drawBlock(block);
         }
     }
 }

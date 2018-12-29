@@ -407,7 +407,7 @@ main.dom.data.ontouchend = function (e) {
 main.statusBar.image.book.onclick = function (e) {
     e.stopPropagation();
 
-    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+    if (core.isReplaying()) {
         core.triggerReplay();
         return;
     }
@@ -426,7 +426,7 @@ main.statusBar.image.fly.onclick = function (e) {
     e.stopPropagation();
 
     // 播放录像时
-    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+    if (core.isReplaying()) {
         core.stopReplay();
         return;
     }
@@ -451,7 +451,7 @@ main.statusBar.image.fly.onclick = function (e) {
 main.statusBar.image.toolbox.onclick = function (e) {
     e.stopPropagation();
 
-    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+    if (core.isReplaying()) {
         core.rewindReplay();
         return;
     }
@@ -470,7 +470,7 @@ main.statusBar.image.toolbox.onclick = function (e) {
 main.statusBar.image.toolbox.ondblclick = function (e) {
     e.stopPropagation();
 
-    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+    if (core.isReplaying()) {
         core.rewindReplay();
         return;
     }
@@ -484,7 +484,7 @@ main.statusBar.image.toolbox.ondblclick = function (e) {
 main.statusBar.image.shop.onclick = function (e) {
     e.stopPropagation();
 
-    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+    if (core.isReplaying()) {
         core.bookReplay();
         return;
     }
@@ -497,7 +497,7 @@ main.statusBar.image.shop.onclick = function (e) {
 main.statusBar.image.save.onclick = function (e) {
     e.stopPropagation();
 
-    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+    if (core.isReplaying()) {
         core.speedDownReplay();
         return;
     }
@@ -515,7 +515,7 @@ main.statusBar.image.save.onclick = function (e) {
 main.statusBar.image.load.onclick = function (e) {
     e.stopPropagation();
 
-    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+    if (core.isReplaying()) {
         core.speedUpReplay();
         return;
     }
@@ -533,7 +533,7 @@ main.statusBar.image.load.onclick = function (e) {
 main.statusBar.image.settings.onclick = function (e) {
     e.stopPropagation();
 
-    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+    if (core.isReplaying()) {
         core.saveReplay();
         return;
     }
@@ -549,7 +549,7 @@ main.statusBar.image.settings.onclick = function (e) {
 
 ////// 点击工具栏时 //////
 main.dom.toolBar.onclick = function () {
-    if (core.isset(core.status.replay) && core.status.replay.replaying)
+    if (core.isReplaying())
         return;
     main.core.control.setToolbarButton(!core.domStyle.toolbarBtn);
 }

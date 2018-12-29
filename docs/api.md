@@ -188,6 +188,10 @@ core.trigger(x, y)    [异步]
 触发某个地点的事件。
 
 
+core.isReplaying()
+当前是否正在录像播放中
+
+
 core.drawBlock(block)
 重绘某个图块。block应为core.status.thisMap.blocks中的一项。
 
@@ -345,6 +349,7 @@ core.control.gatherFollowers()
 
 core.control.replay()
 回放下一个操作
+
 
 ========== core.enemys.XXX 和怪物相关的函数 ==========
 enemys.js主要用来进行怪物相关的内容，比如怪物的特殊属性，伤害和临界计算等。

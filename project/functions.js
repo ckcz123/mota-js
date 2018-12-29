@@ -55,7 +55,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
         "win": function(reason, norank) {
 	// 游戏获胜事件 
 	core.ui.closePanel();
-	var replaying = core.status.replay.replaying;
+	var replaying = core.isReplaying();
 	core.stopReplay();
 	core.waitHeroToStop(function() {
 		core.clearMap('all'); // 清空全地图
@@ -75,7 +75,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
         "lose": function(reason) {
 	// 游戏失败事件
 	core.ui.closePanel();
-	var replaying = core.status.replay.replaying;
+	var replaying = core.isReplaying();
 	core.stopReplay();
 	core.waitHeroToStop(function() {
 		core.drawText([

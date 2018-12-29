@@ -1236,6 +1236,11 @@ core.prototype.replay = function () {
     core.control.replay();
 }
 
+////// 是否正在回放录像 //////
+core.prototype.isReplaying = function () {
+    return core.control.isReplaying();
+}
+
 ////// 判断当前能否进入某个事件 //////
 core.prototype.checkStatus = function (name, need, item) {
     return core.control.checkStatus(name, need, item);

@@ -299,7 +299,7 @@ ui.prototype.drawText = function (contents, callback) {
     if (core.isset(contents)) {
 
         // 合并
-        if ((core.isset(core.status.event)&&core.status.event.id=='action') || (core.isset(core.status.replay)&&core.status.replay.replaying)) {
+        if ((core.isset(core.status.event)&&core.status.event.id=='action') || core.isReplaying()) {
             core.insertAction(contents,null,null,callback);
             return;
         }

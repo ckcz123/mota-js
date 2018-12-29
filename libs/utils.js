@@ -558,7 +558,7 @@ utils.prototype.rand2 = function (num) {
     num = num||2147483648;
 
     var value;
-    if (core.status.replay.replaying) {
+    if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
         if (action.indexOf("random:")==0 ) {
             value=parseInt(action.substring(7));

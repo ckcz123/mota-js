@@ -1357,7 +1357,7 @@ maps.prototype.drawAnimateFrame = function (animate, centerX, centerY, index) {
 maps.prototype.drawAnimate = function (name, x, y, callback) {
 
     // 正在播放录像：不显示动画
-    if (core.isset(core.status.replay) && core.status.replay.replaying) {
+    if (core.isReplaying()) {
         if (core.isset(callback)) callback();
         return -1;
     }

@@ -13,10 +13,16 @@ actions.prototype.init = function () {
     this.actionsdata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.actions;
 }
 
+actions.prototype.checkReplaying = function () {
+    if (core.isReplaying()&&core.status.event.id!='save'
+        &&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps')
+        return true;
+    return false;
+}
+
 ////// 按下某个键时 //////
 actions.prototype.onkeyDown = function (e) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying
-        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
+    if (this.checkReplaying()) return;
     if (!core.isset(core.status.holdingKeys))core.status.holdingKeys=[];
     var isArrow={37:true,38:true,39:true,40:true}[e.keyCode]
     if(isArrow && !core.status.lockControl){
@@ -35,8 +41,7 @@ actions.prototype.onkeyDown = function (e) {
 
 ////// 放开某个键时 //////
 actions.prototype.onkeyUp = function(e) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying
-        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') {
+    if (this.checkReplaying()) {
         if (e.keyCode==27) // ESCAPE
             core.stopReplay();
         else if (e.keyCode==90) // Z
@@ -82,7 +87,7 @@ actions.prototype.onkeyUp = function(e) {
 
 ////// 按住某个键时 //////
 actions.prototype.pressKey = function (keyCode) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying&&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0) return;
+    if (this.checkReplaying()) return;
     if (keyCode === core.status.holdingKeys.slice(-1)[0]) {
         this.keyDown(keyCode);
         window.setTimeout(function(){core.pressKey(keyCode);},30);
@@ -91,8 +96,7 @@ actions.prototype.pressKey = function (keyCode) {
 
 ////// 根据按下键的code来执行一系列操作 //////
 actions.prototype.keyDown = function(keyCode) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying
-        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
+    if (this.checkReplaying()) return;
     if (core.status.lockControl) {
         // Ctrl跳过对话
         if (keyCode==17) {
@@ -193,8 +197,7 @@ actions.prototype.keyDown = function(keyCode) {
 
 ////// 根据放开键的code来执行一系列操作 //////
 actions.prototype.keyUp = function(keyCode, altKey, fromReplay) {
-    if (!fromReplay && core.isset(core.status.replay)&&core.status.replay.replaying
-        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
+    if (!fromReplay && this.checkReplaying()) return;
 
     var ok = function (keycode) {
         return keycode==27 || keycode==88 || keycode==13 || keycode==32 || keycode==67;
@@ -324,8 +327,7 @@ actions.prototype.keyUp = function(keyCode, altKey, fromReplay) {
 
 ////// 点击（触摸）事件按下时 //////
 actions.prototype.ondown = function (loc) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying
-        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
+    if (this.checkReplaying()) return;
 
     // 画板
     if (core.status.played && (core.status.event||{}).id=='paint') {
@@ -362,8 +364,7 @@ actions.prototype.ondown = function (loc) {
 
 ////// 当在触摸屏上滑动时 //////
 actions.prototype.onmove = function (loc) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying
-        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
+    if (this.checkReplaying()) return;
 
     // 画板
     if (core.status.played && (core.status.event||{}).id=='paint') {
@@ -394,8 +395,7 @@ actions.prototype.onmove = function (loc) {
 
 ////// 当点击（触摸）事件放开时 //////
 actions.prototype.onup = function () {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying
-        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
+    if (this.checkReplaying()) return;
 
     // 画板
     if (core.status.played && (core.status.event||{}).id=='paint') {
@@ -460,8 +460,7 @@ actions.prototype.getClickLoc = function (x, y) {
 
 ////// 具体点击屏幕上(x,y)点时，执行的操作 //////
 actions.prototype.onclick = function (x, y, stepPostfix) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying
-        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') return;
+    if (this.checkReplaying()) return;
     // console.log("Click: (" + x + "," + y + ")");
 
     stepPostfix=stepPostfix||[];
@@ -620,8 +619,7 @@ actions.prototype.onclick = function (x, y, stepPostfix) {
 actions.prototype.onmousewheel = function (direct) {
     // 向下滚动是 -1 ,向上是 1
 
-    if (core.isset(core.status.replay)&&core.status.replay.replaying
-        &&core.status.event.id!='save'&&(core.status.event.id||"").indexOf('book')!=0&&core.status.event.id!='viewMaps') {
+    if (this.checkReplaying()) {
         // 滚轮控制速度
         if (direct==1) core.speedUpReplay();
         if (direct==-1) core.speedDownReplay();
@@ -675,6 +673,16 @@ actions.prototype.longClick = function (x, y, fromEvent) {
         if (core.status.event.id=='fly') {
             if ((x==10 || x==11) && (y==5 || y==9)) {
                 this.clickFly(x, y);
+                return true;
+            }
+        }
+        // 长按可以跳过等待事件
+        if (core.status.event.id=='action' && core.status.event.data.type=='sleep'
+            && !core.status.event.data.current.noSkip) {
+            if (core.isset(core.timeout.sleepTimeout) && Object.keys(core.animateFrame.asyncId).length==0) {
+                clearTimeout(core.timeout.sleepTimeout);
+                core.timeout.sleepTimeout = null;
+                core.events.doAction();
                 return true;
             }
         }
@@ -1051,7 +1059,7 @@ actions.prototype.keyUpViewMaps = function (keycode) {
         return;
     }
 
-    if (keycode==27 || keycode==13 || keycode==32 || (!core.status.replay.replaying && keycode==67)) {
+    if (keycode==27 || keycode==13 || keycode==32 || (!core.isReplaying() && keycode==67)) {
         core.clearMap('data');
         core.ui.closePanel();
         return;
@@ -1071,8 +1079,8 @@ actions.prototype.keyUpViewMaps = function (keycode) {
         core.ui.drawMaps(core.status.event.data);
         return;
     }
-    if (keycode==88 || (core.status.replay.replaying && keycode==67)) {
-        if (core.isset(core.status.replay)&&core.status.replay.replaying) {
+    if (keycode==88 || (core.isReplaying() && keycode==67)) {
+        if (core.isReplaying()) {
             core.bookReplay();
         } else {
             core.openBook(false);

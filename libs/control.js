@@ -1565,7 +1565,7 @@ control.prototype.triggerReplay = function () {
 control.prototype.pauseReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     core.status.replay.pausing = true;
     core.updateStatusBar();
     core.drawTip("暂停播放");
@@ -1575,7 +1575,7 @@ control.prototype.pauseReplay = function () {
 control.prototype.resumeReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     core.status.replay.pausing = false;
     core.updateStatusBar();
     core.drawTip("恢复播放");
@@ -1586,7 +1586,7 @@ control.prototype.resumeReplay = function () {
 control.prototype.speedUpReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     if (core.status.replay.speed==12) core.status.replay.speed=24.0;
     else if (core.status.replay.speed==6) core.status.replay.speed=12.0;
     else if (core.status.replay.speed==3) core.status.replay.speed=6.0;
@@ -1601,7 +1601,7 @@ control.prototype.speedUpReplay = function () {
 control.prototype.speedDownReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     if (core.status.replay.speed==24) core.status.replay.speed=12.0;
     else if (core.status.replay.speed==12) core.status.replay.speed=6.0;
     else if (core.status.replay.speed==6) core.status.replay.speed=3.0;
@@ -1617,7 +1617,7 @@ control.prototype.speedDownReplay = function () {
 control.prototype.setReplaySpeed = function (speed) {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     core.status.replay.speed = speed;
     core.drawTip("x"+core.status.replay.speed+"倍");
 }
@@ -1626,7 +1626,7 @@ control.prototype.setReplaySpeed = function (speed) {
 control.prototype.stopReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     core.status.replay.toReplay = [];
     core.status.replay.totalList = [];
     core.status.replay.replaying=false;
@@ -1642,7 +1642,7 @@ control.prototype.stopReplay = function () {
 control.prototype.rewindReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
         return;
@@ -1678,7 +1678,7 @@ control.prototype.rewindReplay = function () {
 control.prototype.saveReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
         return;
@@ -1700,7 +1700,7 @@ control.prototype.saveReplay = function () {
 control.prototype.bookReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0) return;
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
         return;
@@ -1727,7 +1727,7 @@ control.prototype.viewMapReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
 
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
         return;
@@ -1746,7 +1746,7 @@ control.prototype.viewMapReplay = function () {
 control.prototype.replay = function () {
     if (!core.isPlaying()) return;
 
-    if (!core.status.replay.replaying) return; // 没有回放
+    if (!core.isReplaying()) return; // 没有回放
     if (core.status.replay.pausing) return; // 暂停状态
     if (core.status.replay.animate) return; // 正在某段动画中
 
@@ -1939,6 +1939,10 @@ control.prototype.replay = function () {
 
 }
 
+control.prototype.isReplaying = function () {
+    return (core.status.replay||{}).replaying;
+}
+
 ////// 判断当前能否进入某个事件 //////
 control.prototype.checkStatus = function (name, need, item) {
     if (need && core.status.event.id == name) {
@@ -1963,7 +1967,7 @@ control.prototype.checkStatus = function (name, need, item) {
 
 ////// 点击怪物手册时的打开操作 //////
 control.prototype.openBook = function (need) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isReplaying()) return;
 
     // 当前是book，且从“浏览地图”打开
     if (core.status.event.id == 'book' && core.isset(core.status.event.selection)) {
@@ -1985,7 +1989,7 @@ control.prototype.openBook = function (need) {
 
 ////// 点击楼层传送器时的打开操作 //////
 control.prototype.useFly = function (need) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isReplaying()) return;
     if (!core.checkStatus('fly', need, true))
         return;
     if (core.flags.flyNearStair && !core.nearStair()) {
@@ -2012,7 +2016,7 @@ control.prototype.flyTo = function (toId, callback) {
 
 ////// 点击装备栏时的打开操作 //////
 control.prototype.openEquipbox = function (need) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isReplaying()) return;
     if (!core.checkStatus('equipbox', need))
         return;
     core.ui.drawEquipbox();
@@ -2020,7 +2024,7 @@ control.prototype.openEquipbox = function (need) {
 
 ////// 点击工具栏时的打开操作 //////
 control.prototype.openToolbox = function (need) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isReplaying()) return;
     if (!core.checkStatus('toolbox', need))
         return;
     core.ui.drawToolbox();
@@ -2028,7 +2032,7 @@ control.prototype.openToolbox = function (need) {
 
 ////// 点击快捷商店按钮时的打开操作 //////
 control.prototype.openQuickShop = function (need) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isReplaying()) return;
     if (!core.checkStatus('selectShop', need))
         return;
     core.ui.drawQuickShop();
@@ -2036,7 +2040,7 @@ control.prototype.openQuickShop = function (need) {
 
 ////// 点击保存按钮时的打开操作 //////
 control.prototype.save = function(need) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isReplaying()) return;
     if (!core.checkStatus('save', need))
         return;
 
@@ -2048,7 +2052,7 @@ control.prototype.save = function(need) {
 
 ////// 点击读取按钮时的打开操作 //////
 control.prototype.load = function (need) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isReplaying()) return;
 
     var saveIndex = core.getLocalStorage('saveIndex', 1);
     var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
@@ -2072,7 +2076,7 @@ control.prototype.load = function (need) {
 
 ////// 点击设置按钮时的操作 //////
 control.prototype.openSettings = function (need) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isReplaying()) return;
     if (!core.checkStatus('settings', need))
         return;
     core.ui.drawSettings();
@@ -2598,7 +2602,7 @@ control.prototype.updateStatusBar = function () {
     this.controldata.updateStatusBar();
 
     // 回放
-    if (core.status.replay.replaying) {
+    if (core.isReplaying()) {
         core.statusBar.image.book.src = core.status.replay.pausing ? core.statusBar.icons.play.src : core.statusBar.icons.pause.src;
         core.statusBar.image.book.style.opacity = 1;
 

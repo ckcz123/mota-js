@@ -1140,8 +1140,6 @@ events.prototype.doAction = function() {
                         if ((typeof func == "string") && func.indexOf("function")==0) {
                             eval('('+func+')()');
                         }
-                        else if (func instanceof Function)
-                            func();
                     }
                 } catch (e) {
                     console.log(e);

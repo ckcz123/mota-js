@@ -2506,11 +2506,13 @@ control.prototype.playBgm = function (bgm) {
     // 音频不存在
     if (!core.isset(core.material.bgms[bgm])) return;
 
+    /*
     // 延迟播放
     if (core.material.bgms[bgm] == 'loading') {
         core.material.bgms[bgm] = 'starting';
         return;
     }
+    */
 
     try {
         // 缓存BGM

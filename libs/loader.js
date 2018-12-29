@@ -174,7 +174,8 @@ loader.prototype.loadAnimates = function () {
 loader.prototype.loadMusic = function () {
 
     core.bgms.forEach(function (t) {
-
+        core.loader.loadOneMusic(t);
+        /*
         // 判断是不是mid
         if (/^.*\.mid$/i.test(t)) {
 
@@ -210,6 +211,7 @@ loader.prototype.loadMusic = function () {
         else {
             core.loader.loadOneMusic(t);
         }
+        */
     });
 
     core.sounds.forEach(function (t) {

@@ -1854,6 +1854,9 @@ actions.prototype.clickSwitchs = function (x,y) {
             case 6:
                 core.platform.useLocalForage=!core.platform.useLocalForage;
                 core.setLocalStorage('useLocalForage', core.platform.useLocalForage);
+                core.control.getSaveIndexes(function (indexes) {
+                    core.saves.ids = indexes;
+                });
                 core.ui.drawSwitchs();
                 break;
             case 7:
@@ -2026,12 +2029,11 @@ actions.prototype.clickSyncSave = function (x,y) {
                         core.ui.drawConfirmBox("所有本地存档都将被覆盖，确认？", function () {
                             for (var i=1;i<=5*(main.savePages||30);i++) {
                                 if (i<=data.length) {
-                                    // core.setLocalStorage("save"+i, data[i-1]);
                                     core.setLocalForage("save"+i, data[i-1]);
                                 }
                                 else {
-                                    // core.removeLocalStorage("save"+i);
-                                    core.removeLocalForage("save"+i);
+                                    if (core.saves.ids[i])
+                                        core.removeLocalForage("save"+i);
                                 }
                             }
                             core.drawText("读取成功！\n你的本地所有存档均已被覆盖。");

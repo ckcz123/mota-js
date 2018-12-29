@@ -129,6 +129,10 @@ utils.prototype.setLocalStorage = function(key, value) {
             localStorage.setItem(core.firstData.name + "_" + key, str);
         }
         localStorage.removeItem("__tmp__");
+
+        if (key == 'autoSave') core.saves.ids[0] = true;
+        else if (/^save\d+$/.test(key)) core.saves.ids[parseInt(key.substring(4))] = true;
+
         return true;
     }
     catch (e) {
@@ -162,6 +166,8 @@ utils.prototype.getLocalStorage = function(key, defaultValue) {
 ////// 移除本地存储 //////
 utils.prototype.removeLocalStorage = function (key) {
     localStorage.removeItem(core.firstData.name+"_"+key);
+    if (key == 'autoSave') delete core.saves.ids[0];
+    else if (/^save\d+$/.test(key)) delete core.saves.ids[parseInt(key.substring(4))];
 }
 
 utils.prototype.setLocalForage = function (key, value, successCallback, errorCallback) {
@@ -187,7 +193,11 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
         if (core.isset(err)) {
             if (core.isset(errorCallback)) errorCallback(err);
         }
-        else if (core.isset(successCallback)) successCallback();
+        else {
+            if (key == 'autoSave') core.saves.ids[0] = true;
+            else if (/^save\d+$/.test(key)) core.saves.ids[parseInt(key.substring(4))] = true;
+            if (core.isset(successCallback)) successCallback();
+        }
     });
 }
 
@@ -238,7 +248,11 @@ utils.prototype.removeLocalForage = function (key, successCallback, errorCallbac
         if (core.isset(err)) {
             if (core.isset(errorCallback)) errorCallback(err);
         }
-        else if (core.isset(successCallback)) successCallback();
+        else {
+            if (key == 'autoSave') delete core.saves.ids[0];
+            else if (/^save\d+$/.test(key)) delete core.saves.ids[parseInt(key.substring(4))];
+            if (core.isset(successCallback)) successCallback();
+        }
     })
 }
 

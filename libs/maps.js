@@ -1253,6 +1253,11 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
         }
         if (floorId==core.status.floorId && !block.disable) {
             core.drawBlock(block);
+            if (originBlock == null) {
+                core.addGlobalAnimate(block);
+                core.syncGlobalAnimate();
+            }
+            core.updateStatusBar();
         }
     }
 }

@@ -2254,8 +2254,6 @@ control.prototype.syncLoad = function () {
             case 0:
                 // 成功
                 var data=JSON.parse(response.msg);
-                // console.log(data);
-
                 if (data instanceof Array) {
                     core.status.event.selection=1;
                     core.ui.drawConfirmBox("所有本地存档都将被覆盖，确认？", function () {
@@ -2265,8 +2263,8 @@ control.prototype.syncLoad = function () {
                                 core.setLocalForage("save"+i, data[i-1]);
                             }
                             else {
-                                // core.removeLocalStorage("save"+i);
-                                core.removeLocalForage("save"+i);
+                                if (core.saves.ids[i])
+                                    core.removeLocalForage("save"+i);
                             }
                         }
                         core.drawText("同步成功！\n你的本地所有存档均已被覆盖。");
@@ -2277,7 +2275,6 @@ control.prototype.syncLoad = function () {
                 }
                 else {
                     // 只覆盖单存档
-                    // core.setLocalStorage("save"+core.saves.saveIndex, data);
                     core.setLocalForage("save"+core.saves.saveIndex, data, function() {
                         core.drawText("同步成功！\n单存档已覆盖至存档"+core.saves.saveIndex);
                     });
@@ -2377,7 +2374,7 @@ control.prototype.getSaves = function (index, callback) {
         return;
     }
 
-    var ids = Object.keys(core.saves.ids).sort(), number = ids.length;
+    var ids = Object.keys(core.saves.ids).sort(function(a,b) {return a-b;}), number = ids.length;
     // 不计0
     var saves = [];
 
@@ -2422,6 +2419,11 @@ control.prototype.getSaveIndexes = function (callback) {
             callback(indexes);
         })
     }
+}
+
+////// 判断某个存档位是否存在存档 //////
+control.prototype.hasSave = function (index) {
+    return core.saves.ids[index]||false;
 }
 
 ////// 设置勇士属性 //////

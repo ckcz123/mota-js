@@ -1340,6 +1340,11 @@ core.prototype.http = function (type, url, formData, success, error, mimeType, r
     core.utils.http(type, url, formData, success, error, mimeType, responseType)
 }
 
+////// 判断某个存档位是否存在存档 //////
+core.prototype.hasSave = function (index) {
+    return core.control.hasSave(index);
+}
+
 ////// 设置勇士属性 //////
 core.prototype.setStatus = function (statusName, statusVal) {
     core.control.setStatus(statusName, statusVal);

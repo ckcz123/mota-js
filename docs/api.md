@@ -302,6 +302,11 @@ core.getLocalForage(key, defaultValue, successCallback, errorCallback)
 如果成功则通过successCallback回调，失败则通过errorCallback回调。
 
 
+core.hasSave(index)
+判定当前某个存档位是否存在存档，返回true/false。
+index为存档编号，0代表自动存档，大于0则为正常的存档位。
+
+
 core.clone(data)
 深拷贝某个对象。
 

@@ -1967,13 +1967,7 @@ control.prototype.checkStatus = function (name, need, item) {
 control.prototype.openBook = function (need) {
     if (core.isReplaying()) return;
 
-    if (core.status.event.id == 'book' && core.isset(core.status.event.interval)) {
-        var data = core.status.event.interval;
-        core.ui.closePanel();
-        core.lockControl();
-        core.status.event.id = 'action';
-        core.status.event.data = data;
-        core.doAction();
+    if (core.status.event.id == 'book' && core.events.recoverEvents(core.status.event.interval)) {
         return;
     }
 
@@ -2050,13 +2044,7 @@ control.prototype.openQuickShop = function (need) {
 control.prototype.save = function(need) {
     if (core.isReplaying()) return;
 
-    if (core.status.event.id == 'save' && core.isset(core.status.event.interval)) {
-        var data = core.status.event.interval;
-        core.ui.closePanel();
-        core.lockControl();
-        core.status.event.id = 'action';
-        core.status.event.data = data;
-        core.doAction();
+    if (core.status.event.id == 'save' && core.events.recoverEvents(core.status.event.interval)) {
         return;
     }
 
@@ -2073,13 +2061,7 @@ control.prototype.save = function(need) {
 control.prototype.load = function (need) {
     if (core.isReplaying()) return;
 
-    if (core.status.event.id == 'load' && core.isset(core.status.event.interval)) {
-        var data = core.status.event.interval;
-        core.ui.closePanel();
-        core.lockControl();
-        core.status.event.id = 'action';
-        core.status.event.data = data;
-        core.doAction();
+    if (core.status.event.id == 'load' && core.events.recoverEvents(core.status.event.interval)) {
         return;
     }
 
@@ -2140,14 +2122,8 @@ control.prototype.doSL = function (id, type) {
                 core.saves.saveIndex=id;
                 core.setLocalStorage('saveIndex', core.saves.saveIndex);
             }
-            if (core.status.event.interval != null) {
-                var data = core.status.event.interval;
-                core.ui.closePanel();
-                core.lockControl();
-                core.status.event.id = 'action';
-                core.status.event.data = data;
+            if (core.events.recoverEvents(core.status.event.interval)) {
                 core.drawTip("存档成功！");
-                core.doAction();
                 return;
             }
             core.ui.closePanel();

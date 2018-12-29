@@ -146,16 +146,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 如果是读档，则进行检查
 	if (fromLoad) {
-		var data = core.getFlag("__events__");
-		if (core.isset(data)) {
-			// 是事件中的存档... 恢复现场
-			core.lockControl();
-			core.status.event.id = 'action';
-			core.status.event.data = data;
-			setTimeout(function () {
-				core.doAction();
-			}, 30);
-		}
+		core.events.recoverEvents(core.getFlag("__events__"));
 	}
 	else {
 		// 每次抵达楼层执行的事件

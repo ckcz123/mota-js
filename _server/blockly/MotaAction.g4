@@ -1565,7 +1565,7 @@ callBook_s
 
 /* callBook_s
 tooltip : callBook: 呼出怪物手册；返回游戏后将继续执行后面的事件
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=waitAsync%ef%bc%9a%e7%ad%89%e5%be%85%e6%89%80%e6%9c%89%e5%bc%82%e6%ad%a5%e4%ba%8b%e4%bb%b6%e6%89%a7%e8%a1%8c%e5%ae%8c%e6%af%95
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=callBook%ef%bc%9a%e5%91%bc%e5%87%ba%e6%80%aa%e7%89%a9%e6%89%8b%e5%86%8c
 colour : this.soundColor
 var code = '{"type": "callBook"},\n';
 return code;
@@ -1578,7 +1578,7 @@ callSave_s
 
 /* callSave_s
 tooltip : callSave: 呼出存档页面；之后读此档将执行eachArrive
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=waitAsync%ef%bc%9a%e7%ad%89%e5%be%85%e6%89%80%e6%9c%89%e5%bc%82%e6%ad%a5%e4%ba%8b%e4%bb%b6%e6%89%a7%e8%a1%8c%e5%ae%8c%e6%af%95
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=callSave%ef%bc%9a%e5%91%bc%e5%87%ba%e5%ad%98%e6%a1%a3%e7%95%8c%e9%9d%a2
 colour : this.soundColor
 var code = '{"type": "callSave"},\n';
 return code;
@@ -1591,7 +1591,7 @@ callLoad_s
 
 /* callLoad_s
 tooltip : callLoad: 呼出存档页面；返回游戏后将继续执行后面的事件
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=waitAsync%ef%bc%9a%e7%ad%89%e5%be%85%e6%89%80%e6%9c%89%e5%bc%82%e6%ad%a5%e4%ba%8b%e4%bb%b6%e6%89%a7%e8%a1%8c%e5%ae%8c%e6%af%95
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=callLoad%ef%bc%9a%e5%91%bc%e5%87%ba%e8%af%bb%e6%a1%a3%e7%95%8c%e9%9d%a2
 colour : this.soundColor
 var code = '{"type": "callLoad"},\n';
 return code;

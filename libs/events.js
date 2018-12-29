@@ -1291,6 +1291,21 @@ events.prototype.insertAction = function (action, x, y, callback) {
     }
 }
 
+////// 恢复一个事件 //////
+events.prototype.recoverEvents = function (data) {
+    if (core.isset(data)) {
+        core.ui.closePanel();
+        core.lockControl();
+        core.status.event.id = 'action';
+        core.status.event.data = data;
+        setTimeout(function () {
+            core.doAction();
+        }, 30);
+        return true;
+    }
+    return false;
+}
+
 ////// 获得面前的物品（轻按） //////
 events.prototype.getNextItem = function() {
     if (!core.status.heroStop || !core.flags.enableGentleClick) return false;

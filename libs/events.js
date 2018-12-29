@@ -1188,10 +1188,21 @@ events.prototype.doAction = function() {
                 if (code.indexOf("input:")==0) {
                     var value = parseInt(code.substring(6));
                     core.status.route.push("input:"+value);
-                    if (value>=10000) {
+                    if (value>=1000000) {
                         core.setFlag('type', 1);
-                        core.setFlag('x', parseInt((value-10000)/100));
-                        core.setFlag('y', value%100);
+                        var px = parseInt((value-1000000)/1000), py = value%1000;
+                        core.setFlag('px', px);
+                        core.setFlag('py', py);
+                        core.setFlag('x', parseInt(px/32));
+                        core.setFlag('y', parseInt(py/32));
+                    }
+                    else if (value>=10000) {
+                        core.setFlag('type', 1);
+                        var x = parseInt((value-10000)/100), y = value%100;
+                        core.setFlag('px', 32*x+16);
+                        core.setFlag('py', 32*y+16);
+                        core.setFlag('x', x);
+                        core.setFlag('y', y);
                     }
                     else {
                         core.setFlag('type', 0);

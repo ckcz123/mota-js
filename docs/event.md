@@ -1647,7 +1647,7 @@ choices为一个数组，其中每一项都是一个选项列表。
 
 当用户执行操作后：
 - 如果是键盘的按键操作，则会将flag:type置为0，并且把flag:keycode置为刚刚按键的keycode。
-- 如果是屏幕的点击操作，则会将flag:type置为1，并且设置flag:x和flag:y为刚刚的点击坐标。
+- 如果是屏幕的点击操作，则会将flag:type置为1，并且设置flag:x和flag:y为刚刚的点击坐标（0-12之间），flag:px和flag:py置为刚刚的像素坐标（0-415之间）。
 
 下面是一个while事件和wait合并使用的例子，这个例子将不断接收用户的点击或按键行为，并输出该信息。
 如果用户按下了ESC或者点击了屏幕正中心，则退出循环。
@@ -1667,7 +1667,7 @@ choices为一个数组，其中每一项都是一个选项列表。
                     }
                 ],
                 "false": [ // flag:type==1，鼠标点击
-                    "你当前点击屏幕了，坐标是[${flag:x},${flag:y}]",
+                    "你当前点击屏幕了，位置坐标是[${flag:x},${flag:y}]，像素坐标是[${flag:px},${flag:py}]",
                     {"type": "if", "condition": "flag:x==6 && flag:y==6", // 点击(6,6)
                         "true": [{"type": "break"}], // 跳出循环
                         "false": []

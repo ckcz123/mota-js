@@ -329,16 +329,29 @@ actions.prototype.keyUp = function(keyCode, altKey, fromReplay) {
 actions.prototype.ondown = function (loc) {
     if (this.checkReplaying()) return;
 
+    var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
+    var px = parseInt(loc.x/core.domStyle.scale), py = parseInt(loc.y/core.domStyle.scale);
+
     // 画板
     if (core.status.played && (core.status.event||{}).id=='paint') {
-        this.ondownPaint(loc.x/core.domStyle.scale, loc.y/core.domStyle.scale);
+        this.ondownPaint(px, py);
         return;
     }
 
-    var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
-
     if (!core.status.played || core.status.lockControl) {
-        this.onclick(x, y, []);
+
+        if (!this.checkReplaying() && core.status.event.id=='action' && core.status.event.data.type=='wait') {
+            core.setFlag('type', 1);
+            core.setFlag('x', x);
+            core.setFlag('y', y);
+            core.setFlag('px', px);
+            core.setFlag('py', py);
+            core.status.route.push("input:"+(1000000+1000*px+py));
+            core.doAction();
+        }
+        else {
+            this.onclick(x, y, []);
+        }
         if (core.timeout.onDownTimeout==null) {
             core.timeout.onDownTimeout = setTimeout(function () {
                 if (core.interval.onDownInterval == null) {
@@ -789,6 +802,7 @@ actions.prototype.clickAction = function (x,y) {
         core.doAction();
         return;
     }
+    /*
     if (core.status.event.data.type=='wait') {
         core.setFlag('type', 1);
         core.setFlag('x', x);
@@ -797,6 +811,7 @@ actions.prototype.clickAction = function (x,y) {
         core.doAction();
         return;
     }
+    */
 
     if (core.status.event.data.type=='choices') {
         // 选项

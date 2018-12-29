@@ -951,7 +951,7 @@ this.getAchievements = function () {
 - **`flag:hatred`**: 当前的仇恨数值。
 - **`flag:commonTimes`**: 全局商店共用次数时的访问次数。
 - **`flag:input`**: 接受用户输入的事件后，存放用户输入的结果。
-- **`flag:type`**, **`flag:keycode`**, **`flag:x`**, **`flag:y`**: 等待用户操作后，用户的操作类型，按键keycode或点击坐标。
+- **`flag:type`**, **`flag:keycode`**, **`flag:x`**, **`flag:y`**, **`flag:px`**, **`flag:py`**: 等待用户操作后，用户的操作类型，按键keycode或点击/像素坐标。
 - **`flag:skill`**, **`flag:skillName`**: 开启的技能编号和技能名。
 - **`flag:heroIcon`**: 当前的勇士行走图名称。
 - **`flag:saveEquips`**: 快速换装时保存的套装。

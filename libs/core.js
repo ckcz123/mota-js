@@ -93,7 +93,11 @@ function core() {
         height: 13,
         tempCanvas: null, // A temp canvas for drawing
     }
-    this.paint = {}
+    this.paint = {};
+    this.saves = {
+        "saveIndex": null,
+        "ids": {}
+    }
     this.initStatus = {
         'played': false,
         'gameOver': false,
@@ -151,7 +155,6 @@ function core() {
         },
 
         // event事件
-        'saveIndex': null,
         'shops': {},
         'event': {
             'id': null,
@@ -349,6 +352,12 @@ core.prototype.init = function (coreData, callback) {
     core.material.images.keyboard.src = "project/images/keyboard.png";
 
     core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
+
+    ////// 记录所有的存档编号！！！ //////
+    core.saves.saveIndex = core.getLocalStorage('saveIndex', 1);
+    core.control.getSaveIndexes(function (indexes) {
+        core.saves.ids = indexes;
+    });
 
     core.loader.load(function () {
         console.log(core.material);

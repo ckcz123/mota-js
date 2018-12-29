@@ -2041,9 +2041,9 @@ actions.prototype.clickSyncSave = function (x,y) {
                         })
                     }
                     else {
-                        // core.setLocalStorage("save"+core.status.saveIndex, data);
-                        core.setLocalForage("save"+core.status.saveIndex, data, function() {
-                            core.drawText("同步成功！\n单存档已覆盖至存档"+core.status.saveIndex);
+                        // core.setLocalStorage("save"+core.saves.saveIndex, data);
+                        core.setLocalForage("save"+core.saves.saveIndex, data, function() {
+                            core.drawText("同步成功！\n单存档已覆盖至存档"+core.saves.saveIndex);
                         })
                     }
                 }, function () {
@@ -2178,30 +2178,10 @@ actions.prototype.clickLocalSaveSelect = function (x,y) {
 
     var topIndex = 6 - parseInt((choices.length - 1) / 2);
 
-    var saves=null;
-
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y - topIndex;
-        /*
-        switch (selection) {
-            case 0:
-                saves=[];
-                for (var i=1;i<=5*(main.savePages||30);i++) {
-                    var data = core.getLocalStorage("save"+i, null);
-                    if (core.isset(data)) {
-                        saves.push(data);
-                    }
-                }
-                break;
-            case 1:
-                saves=core.getLocalStorage("save"+core.status.saveIndex, null);
-                break;
-            case 2:
-                break;
-        }
-        */
         if (selection<2) {
-            core.control.getSaves(selection==0?null:core.status.saveIndex, function(saves) {
+            core.control.getSaves(selection==0?null:core.saves.saveIndex, function(saves) {
                 if (core.isset(saves)) {
                     var content = {
                         "name": core.firstData.name,
@@ -2268,39 +2248,39 @@ actions.prototype.clickStorageRemove = function (x, y) {
                     localforage.clear(function () {
                         core.ui.closePanel();
                         core.drawText("\t[操作成功]你的所有存档已被清空。");
-                        core.status.saveIndex = 1;
+                        core.saves.saveIndex = 1;
                         core.removeLocalStorage('saveIndex');
                     });
                 }
                 else {
                     localStorage.clear();
                     core.drawText("\t[操作成功]你的所有存档已被清空。");
-                    core.status.saveIndex = 1;
+                    core.saves.saveIndex = 1;
                     core.removeLocalStorage('saveIndex');
                 }
                 break;
             case 1:
                 if (core.platform.useLocalForage) {
                     core.ui.drawWaiting("正在清空，请稍后...");
-                    for (var i=1;i<=5*(main.savePages||30);i++) {
-                        // core.removeLocalStorage("save"+i);
-                        core.removeLocalForage("save"+i);
-                    }
+                    Object.keys(core.saves.ids).forEach(function (v) {
+                        if (v!=0)
+                            core.removeLocalForage("save"+v);
+                    });
                     core.removeLocalForage("autoSave", function() {
                         core.ui.closePanel();
                         core.drawText("\t[操作成功]当前塔的存档已被清空。");
-                        core.status.saveIndex = 1;
+                        core.saves.saveIndex = 1;
                         core.removeLocalStorage('saveIndex');
                     });
                 }
                 else {
-                    for (var i=1;i<=5*(main.savePages||30);i++) {
-                        // core.removeLocalStorage("save"+i);
-                        core.removeLocalStorage("save"+i);
-                    }
+                    Object.keys(core.saves.ids).forEach(function (v) {
+                        if (v!=0)
+                            core.removeLocalStorage("save"+v);
+                    });
                     core.removeLocalStorage("autoSave");
                     core.drawText("\t[操作成功]当前塔的存档已被清空。");
-                    core.status.saveIndex = 1;
+                    core.saves.saveIndex = 1;
                     core.removeLocalStorage('saveIndex');
                 }
                 break;
@@ -2367,7 +2347,7 @@ actions.prototype.clickReplay = function (x, y) {
                 {
                     core.status.event.id = 'replayLoad';
                     core.status.event.selection = null;
-                    var saveIndex = core.status.saveIndex;
+                    var saveIndex = core.saves.saveIndex;
                     var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
                     core.ui.drawSLPanel(10*page+offset);
                     break;

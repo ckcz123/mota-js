@@ -111,6 +111,11 @@ utils.prototype.unshift = function (a,b) {
 ////// 设置本地存储 //////
 utils.prototype.setLocalStorage = function(key, value) {
     try {
+        if (!core.isset(value)) {
+            this.removeLocalStorage(key);
+            return;
+        }
+
         var str = JSON.stringify(value);
         var compressed = LZString.compress(str);
 
@@ -168,6 +173,11 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
         else {
             if (core.isset(errorCallback)) errorCallback();
         }
+        return;
+    }
+
+    if (!core.isset(value)) {
+        this.removeLocalForage(key);
         return;
     }
 

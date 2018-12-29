@@ -412,8 +412,6 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
     // 初始化路线
     if (core.isset(route))
         core.status.route = route;
-    // 保存的Index
-    core.status.saveIndex = core.getLocalStorage('saveIndex', 1);
 
     if (core.isset(values))
         core.values = core.clone(values);
@@ -1690,7 +1688,7 @@ control.prototype.saveReplay = function () {
 
     core.lockControl();
     core.status.event.id='save';
-    var saveIndex = core.status.saveIndex;
+    var saveIndex = core.saves.saveIndex;
     var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
 
     core.ui.drawSLPanel(10*page+offset);
@@ -2044,7 +2042,7 @@ control.prototype.save = function(need) {
     if (!core.checkStatus('save', need))
         return;
 
-    var saveIndex = core.status.saveIndex;
+    var saveIndex = core.saves.saveIndex;
     var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
 
     core.ui.drawSLPanel(10*page+offset);
@@ -2054,7 +2052,7 @@ control.prototype.save = function(need) {
 control.prototype.load = function (need) {
     if (core.isReplaying()) return;
 
-    var saveIndex = core.getLocalStorage('saveIndex', 1);
+    var saveIndex = core.saves.saveIndex;
     var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
 
     // 游戏开始前读档
@@ -2114,8 +2112,8 @@ control.prototype.doSL = function (id, type) {
             core.ui.closePanel();
             core.drawTip('存档成功！');
             if (id!="autoSave") {
-                core.status.saveIndex=id;
-                core.setLocalStorage('saveIndex', core.status.saveIndex);
+                core.saves.saveIndex=id;
+                core.setLocalStorage('saveIndex', core.saves.saveIndex);
             }
         }, function(err) {
             console.info(err);
@@ -2153,8 +2151,8 @@ control.prototype.doSL = function (id, type) {
             core.loadData(data, function() {
                 core.drawTip("读档成功");
                 if (id!="autoSave") {
-                    core.status.saveIndex=id;
-                    core.setLocalStorage('saveIndex', core.status.saveIndex);
+                    core.saves.saveIndex=id;
+                    core.setLocalStorage('saveIndex', core.saves.saveIndex);
                 }
             });
         }, function(err) {
@@ -2202,7 +2200,7 @@ control.prototype.doSL = function (id, type) {
 ////// 同步存档到服务器 //////
 control.prototype.syncSave = function (type) {
     core.ui.drawWaiting("正在同步，请稍后...");
-    core.control.getSaves(type=='all'?null:core.status.saveIndex, function (saves) {
+    core.control.getSaves(type=='all'?null:core.saves.saveIndex, function (saves) {
         if (!core.isset(saves)) {
             core.drawText("没有要同步的存档");
             return;
@@ -2220,7 +2218,7 @@ control.prototype.syncSave = function (type) {
                 core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+response.msg);
             }
             else {
-                core.drawText((type=='all'?"所有存档":"存档"+core.status.saveIndex)+"同步成功！\n\n您的存档编号： "
+                core.drawText((type=='all'?"所有存档":"存档"+core.saves.saveIndex)+"同步成功！\n\n您的存档编号： "
                     +response.code+"\n您的存档密码： "+response.msg
                     +"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。")
             }
@@ -2279,9 +2277,9 @@ control.prototype.syncLoad = function () {
                 }
                 else {
                     // 只覆盖单存档
-                    // core.setLocalStorage("save"+core.status.saveIndex, data);
-                    core.setLocalForage("save"+core.status.saveIndex, data, function() {
-                        core.drawText("同步成功！\n单存档已覆盖至存档"+core.status.saveIndex);
+                    // core.setLocalStorage("save"+core.saves.saveIndex, data);
+                    core.setLocalForage("save"+core.saves.saveIndex, data, function() {
+                        core.drawText("同步成功！\n单存档已覆盖至存档"+core.saves.saveIndex);
                     });
                 }
                 break;
@@ -2378,14 +2376,17 @@ control.prototype.getSaves = function (index, callback) {
         })
         return;
     }
-    var number = 5*(main.savePages||30);
+
+    var ids = Object.keys(core.saves.ids).sort(), number = ids.length;
+    // 不计0
     var saves = [];
+
     var load = function (index, callback) {
-        if (index > number) {
+        if (index >= number) {
             if (core.isset(callback)) callback(saves);
             return;
         }
-        core.getLocalForage("save"+index, null, function (data) {
+        core.getLocalForage("save"+ids[index], null, function (data) {
             saves.push(data);
             load(index+1, callback);
         }, function(err) {
@@ -2394,6 +2395,33 @@ control.prototype.getSaves = function (index, callback) {
         })
     }
     load(1, callback);
+}
+
+////// 获得所有存在存档的存档位 //////
+control.prototype.getSaveIndexes = function (callback) {
+    var indexes = {};
+
+    var getIndex = function (name) {
+        var e = new RegExp('^'+core.firstData.name+"_(save\\d+|autoSave)$").exec(name);
+        if (e!=null) {
+            if (e[1]=='autoSave') indexes[0]=true;
+            else indexes[parseInt(e[1].substring(4))] = true;
+        }
+    };
+
+    if (!core.platform.useLocalForage) {
+        Object.keys(localStorage).forEach(function (key) {
+            getIndex(key);
+        });
+        callback(indexes);
+    }
+    else {
+        localforage.iterate(function (value, key, n) {
+            getIndex(key)
+        }, function () {
+            callback(indexes);
+        })
+    }
 }
 
 ////// 设置勇士属性 //////

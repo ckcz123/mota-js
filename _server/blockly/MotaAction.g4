@@ -294,6 +294,9 @@ action
     |   input_s
     |   input2_s
     |   choices_s
+    |   callBook_s
+    |   callSave_s
+    |   callLoad_s
     |   function_s
     |   pass_s
     ;
@@ -1556,6 +1559,45 @@ return code;
 */;
 
 
+callBook_s
+    :   '呼出怪物手册'
+
+
+/* callBook_s
+tooltip : callBook: 呼出怪物手册；返回游戏后将继续执行后面的事件
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=waitAsync%ef%bc%9a%e7%ad%89%e5%be%85%e6%89%80%e6%9c%89%e5%bc%82%e6%ad%a5%e4%ba%8b%e4%bb%b6%e6%89%a7%e8%a1%8c%e5%ae%8c%e6%af%95
+colour : this.soundColor
+var code = '{"type": "callBook"},\n';
+return code;
+*/;
+
+
+callSave_s
+    :   '呼出存档页面'
+
+
+/* callSave_s
+tooltip : callSave: 呼出存档页面；之后读此档将执行eachArrive
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=waitAsync%ef%bc%9a%e7%ad%89%e5%be%85%e6%89%80%e6%9c%89%e5%bc%82%e6%ad%a5%e4%ba%8b%e4%bb%b6%e6%89%a7%e8%a1%8c%e5%ae%8c%e6%af%95
+colour : this.soundColor
+var code = '{"type": "callSave"},\n';
+return code;
+*/;
+
+
+callLoad_s
+    :   '呼出读档页面'
+
+
+/* callLoad_s
+tooltip : callLoad: 呼出存档页面；返回游戏后将继续执行后面的事件
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=waitAsync%ef%bc%9a%e7%ad%89%e5%be%85%e6%89%80%e6%9c%89%e5%bc%82%e6%ad%a5%e4%ba%8b%e4%bb%b6%e6%89%a7%e8%a1%8c%e5%ae%8c%e6%af%95
+colour : this.soundColor
+var code = '{"type": "callLoad"},\n';
+return code;
+*/;
+
+
 function_s
     :   '自定义JS脚本' '不自动执行下一个事件' Bool BGNL? Newline RawEvalString Newline BEND Newline
     
@@ -2376,6 +2418,18 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "revisit": // 立刻重新执行该事件
       this.next = MotaActionBlocks['revisit_s'].xmlText([
+        this.next]);
+      break;
+    case "callBook": // 呼出怪物手册
+      this.next = MotaActionBlocks['callBook_s'].xmlText([
+        this.next]);
+      break;
+    case "callSave": // 呼出存档界面
+      this.next = MotaActionBlocks['callSave_s'].xmlText([
+        this.next]);
+      break;
+    case "callLoad": // 呼出读档界面
+      this.next = MotaActionBlocks['callLoad_s'].xmlText([
         this.next]);
       break;
     case "exit": // 立刻结束事件

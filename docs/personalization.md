@@ -957,7 +957,6 @@ this.getAchievements = function () {
 - **`flag:saveEquips`**: 快速换装时保存的套装。
 - **`flag:__visited__`**: 当前访问过的楼层。
 - **`flag:equip_atk_buff`**, **`flag:equip_def_buff`**, **`flag:equip_mdef_buff`**: 当前攻防魔防的实际计算比例加成。
-- **`flag:forceSave`**: 是否允许事件中强制自动存档。如果将此项置为true并调用core.autosave()即可在事件中强制自动存档，读档时会自动执行该楼层的`eachArrive`事件。
 - **`flag:__color__`**, **`flag:__weather__`**, **`flag:__volume__`**: 当前的画面色调、天气和音量。
 - **`flag:textAttribute`**, **`flag:globalAttribute`**, **`flag:globalFlags`**: 当前的剧情文本属性，当前的全局属性，当前的全局开关。
 - **`flag:cannotMoveDirectly`**, **`flag:clickMove`**: 当前是否不允许瞬间移动，当前用户是否开启了单击瞬移。

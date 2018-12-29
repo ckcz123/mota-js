@@ -144,17 +144,30 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 转换楼层结束的事件；此函数会在整个楼层切换完全结束后再执行
 	// floorId是切换到的楼层；fromLoad若为true则代表是从读档行为造成的楼层切换
 
-	// 每次抵达楼层时执行的事件
-	if (!fromLoad || core.hasFlag("forceSave")) {
-		core.insertAction(core.floors[floorId].eachArrive);
+	// 如果是读档，则进行检查
+	if (fromLoad) {
+		var data = core.getFlag("__events__");
+		if (core.isset(data)) {
+			// 是事件中的存档... 恢复现场
+			core.lockControl();
+			core.status.event.id = 'action';
+			core.status.event.data = data;
+			setTimeout(function () {
+				core.doAction();
+			}, 30);
+		}
 	}
+	else {
+		// 每次抵达楼层执行的事件
+		core.insertAction(core.floors[floorId].eachArrive);
 
-	// 首次抵达楼层时执行的事件（后插入，先执行）
-	var visited = core.getFlag("__visited__", []);
-	if (visited.indexOf(floorId)===-1) {
-		core.insertAction(core.floors[floorId].firstArrive);
-		visited.push(floorId);
-		core.setFlag("__visited__", visited);
+		// 首次抵达楼层时执行的事件（后插入，先执行）
+		var visited = core.getFlag("__visited__", []);
+		if (visited.indexOf(floorId)===-1) {
+			core.insertAction(core.floors[floorId].firstArrive);
+			visited.push(floorId);
+			core.setFlag("__visited__", visited);
+		}
 	}
 },
         "addPoint": function (enemy) {

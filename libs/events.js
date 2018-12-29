@@ -1231,6 +1231,40 @@ events.prototype.doAction = function() {
                 this.doAction();
                 break;
             }
+        case "callBook": // 呼出怪物手册
+            if (core.isReplaying() || !core.hasItem('book')) {
+                this.doAction();
+            }
+            else {
+                var e = core.clone(core.status.event.data);
+                core.ui.closePanel();
+                core.openBook();
+                core.status.event.interval = e;
+            }
+            break;
+        case "callSave": // 呼出存档页面
+            if (core.isReplaying() || core.hasFlag("__events__")) {
+                core.removeFlag("__events__");
+                this.doAction();
+            }
+            else {
+                var e = core.clone(core.status.event.data);
+                core.ui.closePanel();
+                core.save();
+                core.status.event.interval = e;
+            }
+            break;
+        case "callLoad": // 呼出读档页面
+            if (core.isReplaying()) {
+                this.doAction();
+            }
+            else {
+                var e = core.clone(core.status.event.data);
+                core.ui.closePanel();
+                core.load();
+                core.status.event.interval = e;
+            }
+            break;
         case "exit": // 立刻结束事件
             core.status.event.data.list = [];
             core.events.doAction();

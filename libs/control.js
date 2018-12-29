@@ -1967,17 +1967,27 @@ control.prototype.checkStatus = function (name, need, item) {
 control.prototype.openBook = function (need) {
     if (core.isReplaying()) return;
 
+    if (core.status.event.id == 'book' && core.isset(core.status.event.interval)) {
+        var data = core.status.event.interval;
+        core.ui.closePanel();
+        core.lockControl();
+        core.status.event.id = 'action';
+        core.status.event.data = data;
+        core.doAction();
+        return;
+    }
+
     // 当前是book，且从“浏览地图”打开
-    if (core.status.event.id == 'book' && core.isset(core.status.event.selection)) {
+    if (core.status.event.id == 'book' && core.isset(core.status.event.ui)) {
         core.status.boxAnimateObjs = [];
-        core.ui.drawMaps(core.status.event.selection);
+        core.ui.drawMaps(core.status.event.ui);
         return;
     }
 
     // 从“浏览地图”页面打开
     if (core.status.event.id=='viewMaps') {
         need=false;
-        core.status.event.selection = core.status.event.data;
+        core.status.event.ui = core.status.event.data;
     }
 
     if (!core.checkStatus('book', need, true))
@@ -2039,6 +2049,17 @@ control.prototype.openQuickShop = function (need) {
 ////// 点击保存按钮时的打开操作 //////
 control.prototype.save = function(need) {
     if (core.isReplaying()) return;
+
+    if (core.status.event.id == 'save' && core.isset(core.status.event.interval)) {
+        var data = core.status.event.interval;
+        core.ui.closePanel();
+        core.lockControl();
+        core.status.event.id = 'action';
+        core.status.event.data = data;
+        core.doAction();
+        return;
+    }
+
     if (!core.checkStatus('save', need))
         return;
 
@@ -2051,6 +2072,16 @@ control.prototype.save = function(need) {
 ////// 点击读取按钮时的打开操作 //////
 control.prototype.load = function (need) {
     if (core.isReplaying()) return;
+
+    if (core.status.event.id == 'load' && core.isset(core.status.event.interval)) {
+        var data = core.status.event.interval;
+        core.ui.closePanel();
+        core.lockControl();
+        core.status.event.id = 'action';
+        core.status.event.data = data;
+        core.doAction();
+        return;
+    }
 
     var saveIndex = core.saves.saveIndex;
     var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
@@ -2082,23 +2113,15 @@ control.prototype.openSettings = function (need) {
 
 ////// 自动存档 //////
 control.prototype.autosave = function (removeLast) {
-    var addLast = true;
-    if (core.status.event.id!=null) {
-        // 检查是否是强制自动存档
-        if (core.status.event.id=='action' && core.hasFlag("forceSave")) addLast = false;
-        else return;
-    }
+    if (core.status.event.id!=null) return;
     var x=null;
     if (removeLast)
         x=core.status.route.pop();
-    if (addLast)
-        core.status.route.push("turn:"+core.getHeroLoc('direction'));
+    core.status.route.push("turn:"+core.getHeroLoc('direction'));
     core.setLocalForage("autoSave", core.saveData());
-    if (addLast)
-        core.status.route.pop();
+    core.status.route.pop();
     if (removeLast && core.isset(x))
         core.status.route.push(x);
-    core.removeFlag("forceSave");
 }
 
 ////// 实际进行存读档事件 //////
@@ -2108,13 +2131,27 @@ control.prototype.doSL = function (id, type) {
             core.drawTip('不能覆盖自动存档！');
             return;
         }
+        // 事件中的存档
+        if (core.status.event.interval != null) {
+            core.setFlag("__events__", core.status.event.interval);
+        }
         core.setLocalForage("save"+id, core.saveData(), function() {
-            core.ui.closePanel();
-            core.drawTip('存档成功！');
             if (id!="autoSave") {
                 core.saves.saveIndex=id;
                 core.setLocalStorage('saveIndex', core.saves.saveIndex);
             }
+            if (core.status.event.interval != null) {
+                var data = core.status.event.interval;
+                core.ui.closePanel();
+                core.lockControl();
+                core.status.event.id = 'action';
+                core.status.event.data = data;
+                core.drawTip("存档成功！");
+                core.doAction();
+                return;
+            }
+            core.ui.closePanel();
+            core.drawTip('存档成功！');
         }, function(err) {
             console.info(err);
             if (core.platform.useLocalForage) {
@@ -2123,12 +2160,11 @@ control.prototype.doSL = function (id, type) {
             else {
                 alert("存档失败，错误信息：\n"+err+"\n建议使用垃圾存档清理工具进行清理！");
             }
-        })
+        });
+        core.removeFlag("__events__");
         return;
     }
     else if (type=='load') {
-        // var data = core.getLocalStorage(id=='autoSave'?id:"save"+id, null);
-
         core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
             if (!core.isset(data)) {
                 alert("无效的存档");

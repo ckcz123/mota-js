@@ -886,12 +886,19 @@ actions.prototype.clickBook = function(x,y) {
     }
     // 返回
     if (x>=10 && x<=12 && y==12) {
-        if (core.status.event.selection==null)
+        if (core.status.event.interval != null) {
+            var data = core.status.event.interval;
             core.ui.closePanel();
-        else {
-            core.status.boxAnimateObjs = [];
-            core.ui.drawMaps(core.status.event.selection);
+            core.lockControl();
+            core.status.event.id = 'action';
+            core.status.event.data = data;
+            core.doAction();
         }
+        else if (core.status.event.ui != null) {
+            core.status.boxAnimateObjs = [];
+            core.ui.drawMaps(core.status.event.ui);
+        }
+        else core.ui.closePanel();
         return;
     }
     // 怪物信息
@@ -919,12 +926,19 @@ actions.prototype.keyDownBook = function (keycode) {
 ////// 怪物手册界面时，放开某个键的操作 //////
 actions.prototype.keyUpBook = function (keycode) {
     if (keycode==27 || keycode==88) {
-        if (core.status.event.selection==null)
+        if (core.status.event.interval != null) {
+            var data = core.status.event.interval;
             core.ui.closePanel();
-        else {
-            core.status.boxAnimateObjs = [];
-            core.ui.drawMaps(core.status.event.selection);
+            core.lockControl();
+            core.status.event.id = 'action';
+            core.status.event.data = data;
+            core.doAction();
         }
+        else if (core.status.event.ui != null) {
+            core.status.boxAnimateObjs = [];
+            core.ui.drawMaps(core.status.event.ui);
+        }
+        else core.ui.closePanel();
         return;
     }
     if (keycode==13 || keycode==32 || keycode==67) {
@@ -1649,6 +1663,15 @@ actions.prototype.clickSL = function(x,y) {
     }
     // 返回
     if (x>=10 && x<=12 && y==12) {
+        if (core.status.event.interval != null) {
+            var data = core.status.event.interval;
+            core.ui.closePanel();
+            core.lockControl();
+            core.status.event.id = 'action';
+            core.status.event.data = data;
+            core.doAction();
+            return;
+        }
         core.ui.closePanel();
         if (!core.isPlaying()) {
             core.showStartAnimate(true);
@@ -1761,6 +1784,15 @@ actions.prototype.keyUpSL = function (keycode) {
     var page = parseInt(index/10), offset=index%10;
 
     if (keycode==27 || keycode==88 || (core.status.event.id == 'save' && keycode==83) || (core.status.event.id == 'load' && keycode==68)) {
+        if (core.status.event.interval != null) {
+            var data = core.status.event.interval;
+            core.ui.closePanel();
+            core.lockControl();
+            core.status.event.id = 'action';
+            core.status.event.data = data;
+            core.doAction();
+            return;
+        }
         core.ui.closePanel();
         if (!core.isPlaying()) {
             core.showStartAnimate(true);

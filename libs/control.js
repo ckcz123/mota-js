@@ -377,6 +377,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
 
     // 清除游戏数据
     core.clearStatus();
+    core.status.played = true;
 
     // 初始化status
     core.status = core.clone(core.initStatus);
@@ -426,7 +427,6 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
     core.resize();
     this.updateGlobalAttribute(Object.keys(core.status.globalAttribute));
     this.triggerStatusBar(core.getFlag('hideStatusBar', false)?'hide':'show', core.getFlag("showToolbox"));
-    core.status.played = true;
 }
 
 ////// 重新开始游戏；此函数将回到标题页面 //////

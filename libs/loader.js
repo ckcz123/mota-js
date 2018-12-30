@@ -40,6 +40,10 @@ loader.prototype.load = function (callback) {
             // 加载autotile
             core.material.images.autotile = {};
             core.loader.loadImages(Object.keys(core.material.icons.autotile), core.material.images.autotile, function () {
+                
+                setTimeout(function () {
+                    core.maps.makeAutotileEdges();
+                });
 
                 // 加载tilesets
                 core.material.images.tilesets = {};

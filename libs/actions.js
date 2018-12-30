@@ -387,22 +387,24 @@ actions.prototype.onmove = function (loc) {
 
     var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
 
-    var pos={'x':x,'y':y};
-    var pos0=core.status.stepPostfix[core.status.stepPostfix.length-1];
-    var directionDistance=[pos.y-pos0.y,pos0.x-pos.x,pos0.y-pos.y,pos.x-pos0.x];
-    var max=0,index=4;
-    for(var ii=0;ii<4;ii++){
-        if(directionDistance[ii]>max){
-            index=ii;
-            max=directionDistance[ii];
+    if ((core.status.stepPostfix||[]).length>0) {
+        var pos={'x':x,'y':y};
+        var pos0=core.status.stepPostfix[core.status.stepPostfix.length-1];
+        var directionDistance=[pos.y-pos0.y,pos0.x-pos.x,pos0.y-pos.y,pos.x-pos0.x];
+        var max=0,index=4;
+        for(var ii=0;ii<4;ii++){
+            if(directionDistance[ii]>max){
+                index=ii;
+                max=directionDistance[ii];
+            }
         }
-    }
-    pos=[{'x':0,'y':1},{'x':-1,'y':0},{'x':0,'y':-1},{'x':1,'y':0},false][index]
-    if(pos){
-        pos.x+=pos0.x;
-        pos.y+=pos0.y;
-        core.status.stepPostfix.push(pos);
-        core.fillPosWithPoint(pos);
+        pos=[{'x':0,'y':1},{'x':-1,'y':0},{'x':0,'y':-1},{'x':1,'y':0},false][index]
+        if(pos){
+            pos.x+=pos0.x;
+            pos.y+=pos0.y;
+            core.status.stepPostfix.push(pos);
+            core.fillPosWithPoint(pos);
+        }
     }
 }
 
@@ -422,7 +424,7 @@ actions.prototype.onup = function () {
     core.interval.onDownInterval = null;
 
     // core.status.holdingPath=0;
-    if(core.status.stepPostfix.length>0){
+    if ((core.status.stepPostfix||[]).length>0) {
         var stepPostfix = [];
         var direction={'0':{'1':'down','-1':'up'},'-1':{'0':'left'},'1':{'0':'right'}};
         for(var ii=1;ii<core.status.stepPostfix.length;ii++){

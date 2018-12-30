@@ -377,10 +377,10 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
 
     // 清除游戏数据
     core.clearStatus();
-    core.status.played = true;
 
     // 初始化status
     core.status = core.clone(core.initStatus);
+    core.status.played = true;
     // 初始化maps
     core.status.floorId = floorId;
     core.status.maps = core.clone(maps);

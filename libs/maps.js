@@ -627,7 +627,7 @@ maps.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top, stat
     }
     var getAutotileAroundId = function(currId, x, y) {
         if(x<0 || y<0 || x>=mapArr[0].length || y>=mapArr.length) return 1;
-        else return mapArr[y][x]==currId ? 1:0;
+        else return core.material.autotileEdges[currId].indexOf(mapArr[y][x])>=0;
     }
     var checkAround = function(x, y){ // 得到周围四个32*32块（周围每块都包含当前块的1/4，不清楚的话画下图你就明白）的数组索引
         var currId = mapArr[y][x];
@@ -679,6 +679,35 @@ maps.prototype.drawAutotile = function(ctx, mapArr, block, size, left, top, stat
         var dx = x*size + size/2*(i%2), dy = y*size + size/2*(~~(i/2));
         drawBlockByIndex(ctx, dx+left, dy+top, core.material.images['autotile'][block.event.id], index, size);
     }
+}
+
+////// 为autotile判定边界 ////// 
+maps.prototype.makeAutotileEdges = function () {
+    var autotileIds = Object.keys(core.material.images.autotile);
+    core.material.autotileEdges = {};
+
+    var canvas = document.createElement("canvas"), ctx = canvas.getContext('2d');
+    canvas.width = canvas.height = 32;
+
+    autotileIds.forEach(function (t) {
+        var n = core.maps.getNumberById(t);
+        core.material.autotileEdges[n] = [n];
+
+        ctx.clearRect(0,0,32,32);
+        ctx.drawImage(core.material.images.autotile[t], 0, 0, 32, 32, 0, 0, 32, 32);
+        var data = canvas.toDataURL("image/png");
+
+        autotileIds.forEach(function (t2) {
+            if (t==t2) return;
+            var n2 = core.maps.getNumberById(t2);
+
+            ctx.clearRect(0,0,32,32);
+            ctx.drawImage(core.material.images.autotile[t2], 32, 0, 32, 32, 0, 0, 32, 32);
+            if (data == canvas.toDataURL("image/png")) {
+                core.material.autotileEdges[n].push(n2);
+            }
+        });
+    });
 }
 
 ////// 某个点是否不可通行 //////

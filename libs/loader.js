@@ -39,7 +39,13 @@ loader.prototype.load = function (callback) {
         core.loader.loadImages(images, core.material.images.images, function () {
             // 加载autotile
             core.material.images.autotile = {};
-            core.loader.loadImages(Object.keys(core.material.icons.autotile), core.material.images.autotile, function () {
+            var keys = Object.keys(core.material.icons.autotile);
+            var autotiles = {};
+            core.loader.loadImages(keys, autotiles, function () {
+
+                keys.forEach(function (v) {
+                    core.material.images.autotile[v] = autotiles[v];
+                });
                 
                 setTimeout(function () {
                     core.maps.makeAutotileEdges();

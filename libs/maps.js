@@ -688,6 +688,10 @@ maps.prototype.makeAutotileEdges = function () {
 
     var canvas = document.createElement("canvas"), ctx = canvas.getContext('2d');
     canvas.width = canvas.height = 32;
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.webkitImageSmoothingEnabled = false;
+    ctx.msImageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = false;
 
     autotileIds.forEach(function (t) {
         var n = core.maps.getNumberById(t);

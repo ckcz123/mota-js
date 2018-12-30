@@ -151,7 +151,9 @@ utils.prototype.getLocalStorage = function(key, defaultValue) {
                 try {
                     return JSON.parse(output);
                 }
-                catch (ee) {}
+                catch (ee) {
+                    // Ignore, use default value
+                }
             }
             return JSON.parse(value);
         }

@@ -2603,6 +2603,7 @@ control.prototype.playSound = function (sound) {
                     source.noteOn(0);
                 }
                 catch (ee) {
+                    console.log(ee);
                 }
             }
         }

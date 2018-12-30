@@ -136,6 +136,7 @@ loader.prototype.loadAnimates = function () {
                             image.src = t2;
                             data.images.push(image);
                         } catch (e) {
+                            console.log(e);
                             data.images.push(null);
                         }
                     }

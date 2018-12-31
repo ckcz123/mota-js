@@ -1268,7 +1268,7 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
     if (!core.isset(number) || !core.isset(x) || !core.isset(y)) return;
-    if (x<0 || x>=core.bigmap.width || y<0 || y>=core.bigmap.height) return;
+    if (x<0 || x>=(core.floors[floorId].width||13) || y<0 || y>=(core.floors[floorId].height||13)) return;
 
     var originBlock=core.getBlock(x,y,floorId,true);
     var block = core.maps.initBlock(x,y,number);
@@ -1276,6 +1276,15 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     core.maps.addEvent(block,x,y,core.floors[floorId].events[x+","+y]);
     core.maps.addChangeFloor(block,x,y,core.floors[floorId].changeFloor[x+","+y]);
     if (core.isset(block.event)) {
+        if (floorId == core.status.floorId) {
+            core.removeGlobalAnimate(x, y);
+            core.clearMap('event', x * 32, y * 32, 32, 32);
+            if (originBlock != null) {
+                var height = (originBlock.block.event||{}).height||32;
+                if (height>32)
+                    core.clearMap('event2', x * 32, y * 32 +32-height, 32, height-32);
+            }
+        }
         if (originBlock==null) {
             core.status.maps[floorId].blocks.push(block);
         }
@@ -1286,10 +1295,8 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
         }
         if (floorId==core.status.floorId && !block.disable) {
             core.drawBlock(block);
-            if (originBlock == null) {
-                core.addGlobalAnimate(block);
-                core.syncGlobalAnimate();
-            }
+            core.addGlobalAnimate(block);
+            core.syncGlobalAnimate();
             core.updateStatusBar();
         }
     }
@@ -1300,7 +1307,7 @@ maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
     if (!core.isset(number) || !core.isset(x) || !core.isset(y)) return;
-    if (x<0 || x>=core.bigmap.width || y<0 || y>=core.bigmap.height) return;
+    if (x<0 || x>=(core.floors[floorId].width||13) || y<0 || y>=(core.floors[floorId].height||13)) return;
     if (name!='bg' && name!='fg') return;
 
     core.setFlag(name+"v_"+floorId+"_"+x+"_"+y, number);

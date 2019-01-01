@@ -119,6 +119,10 @@
         throw 'Type Error in fs.writeFile';
     }
 
+    fs.writeMultiFiles = function (filenames, datastrs, callback) {
+        postsomething('name='+filenames.join(';')+'&value='+datastrs.join(';'), '/writeMultiFiles', callback);
+    }
+
     fs.readdir = function (path, callback) {
         //callback:function(err, data)
         //path:支持"/"做分隔符,不以"/"结尾

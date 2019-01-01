@@ -497,6 +497,71 @@ editor_mode = function (editor) {
             });
         }
 
+        var newMaps = document.getElementById('newMaps');
+        var newFloors = document.getElementById('newFloors');
+        newMaps.onclick = function () {
+            if (newFloors.style.display == 'none') newFloors.style.display = 'block';
+            else newFloors.style.display = 'none';
+        }
+
+        var createNewMaps = document.getElementById('createNewMaps');
+        createNewMaps.onclick = function () {
+            var floorIds = document.getElementById('newFloorIds').value;
+            if (!floorIds) return;
+            var from = parseInt(document.getElementById('newMapsFrom').value),
+                to = parseInt(document.getElementById('newMapsTo').value);
+            if (!core.isset(from) || !core.isset(to) || from>to || from<0 || to<0) {
+                printe("请输入有效的起始和终止楼层");
+                return;
+            }
+            if (to-from >= 100) {
+                printe("一次最多创建99个楼层");
+                return;
+            }
+            var floorIdList = [];
+            for (var i = from; i<=to; i++) {
+                var floorId = floorIds.replace(/\${(.*?)}/g, function (word, value) {
+                    return eval(value);
+                });
+                if (core.floorIds.indexOf(floorId)>=0) {
+                    printe("要创建的楼层 "+floorId+" 已存在！");
+                    return;
+                }
+                if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(floorId)) {
+                    printe("楼层名 "+floorId+" 不合法！请使用字母、数字、下划线，且不能以数字开头！");
+                    return;
+                }
+                if (floorIdList.indexOf(floorId)>=0) {
+                    printe("尝试重复创建楼层 "+floorId+" ！");
+                    return;
+                }
+                floorIdList.push(floorId);
+            }
+
+            var width = parseInt(document.getElementById('newMapsWidth').value);
+            var height = parseInt(document.getElementById('newMapsHeight').value);
+            if (!core.isset(width) || !core.isset(height) || width<13 || height<13 || width*height>1000) {
+                printe("新建地图的宽高都不得小于13，且宽高之积不能超过1000");
+                return;
+            }
+            editor_mode.onmode('');
+            
+            editor.file.saveNewFiles(floorIdList, from, to, function (err) {
+                if (err) {
+                    printe(err);
+                    throw(err)
+                }
+                core.floorIds = core.floorIds.concat(floorIdList);
+                editor.file.editTower([['change', "['main']['floorIds']", core.floorIds]], function (objs_) {//console.log(objs_);
+                    if (objs_.slice(-1)[0] != null) {
+                        printe(objs_.slice(-1)[0]);
+                        throw(objs_.slice(-1)[0])
+                    }
+                    ;printe('批量创建 '+floorIdList[0]+'~'+floorIdList[floorIdList.length-1]+' 成功,请F5刷新编辑器生效');
+                });
+            });
+        }
+
         var ratio = 1;
         var appendPicCanvas = document.getElementById('appendPicCanvas');
         var bg = appendPicCanvas.children[0];

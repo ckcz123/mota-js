@@ -58,7 +58,7 @@ body {
 #editArea {
     position: absolute;
     width: 100%;
-    height: 70%;
+    height: 400px;
     left: 0;
     top: 0;
     /* padding: 10px 5px; */
@@ -68,7 +68,7 @@ body {
 #pout {
     display: block;
     width: 410px;
-    height: 100%;
+    height: 380px;
     box-sizing: border-box;
     margin-left: 22px;
     margin-top: 23px;
@@ -84,9 +84,28 @@ body {
 #editTip {
     position: absolute;
     width: 100%;
-    margin-bottom: 120px;
-    bottom: 0;
     left: 10px;
+    top: 430px;
+}
+
+#editBtns {
+    position: absolute;
+    width: 100%;
+    left: 10px;
+    top: 465px;
+}
+
+#newMaps {
+    position: absolute;
+    left: 10px;
+    top: 505px;
+}
+
+#newFloors {
+    position: absolute;
+    width: 100%;
+    left: 10px;
+    top: 530px;
 }
 
 #editArea p {

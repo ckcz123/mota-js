@@ -34,6 +34,12 @@
             console.log(d);
         })
     }, 4000);
+    setTimeout(function () {
+        fs.writeMultiFiles(['_test.txt','_test_multi.txt'], ['abc=','abe='], function (e, d) {
+            console.log(e);
+            console.log(d);
+        })
+    }, 5000);
 
 
 </script>

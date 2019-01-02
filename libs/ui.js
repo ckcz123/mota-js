@@ -227,6 +227,7 @@ ui.prototype.closePanel = function () {
     core.status.boxAnimateObjs = [];
     clearInterval(core.status.event.interval);
     core.clearLastEvent();
+    core.maps.generateGroundPattern();
     core.unLockControl();
     core.status.event.data = null;
     core.status.event.id = null;
@@ -1537,9 +1538,14 @@ ui.prototype.drawCursor = function () {
 
 ////// 绘制怪物手册 //////
 ui.prototype.drawBook = function (index) {
-    var enemys = core.enemys.getCurrentEnemys(core.floorIds[(core.status.event.selection||{}).index]);
-
+    var floorId = core.floorIds[(core.status.event.ui||{}).index] || core.status.floorId;
+    var enemys = core.enemys.getCurrentEnemys(floorId);
+    
     core.clearLastEvent();
+
+    // 生成groundPattern
+    core.maps.generateGroundPattern(floorId);
+
     core.setFillStyle('ui', core.material.groundPattern);
     core.fillRect('ui', 0, 0, 416, 416);
 

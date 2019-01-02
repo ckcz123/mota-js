@@ -514,7 +514,7 @@ core.ui.fillText(name, text, x, y, style, font)
 text为要绘制的文本，x,y为要绘制的坐标，style可选为绘制的样式，font可选为绘制的字体。（下同）
 
 
-core.ui.fillBoldText(name, text, style, x, y, font)
+core.ui.fillBoldText(name, text, x, y, style, font)
 在某个画布上绘制一个描黑边的文字。
 
 

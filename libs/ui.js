@@ -58,10 +58,11 @@ ui.prototype.fillText = function (name, text, x, y, style, font) {
 }
 
 ////// 在某个canvas上绘制粗体 //////
-ui.prototype.fillBoldText = function (name, text, style, x, y, font) {
+ui.prototype.fillBoldText = function (name, text, x, y, style, font) {
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     if (core.isset(font)) ctx.font = font;
+    if (!core.isset(style)) style = ctx.fillStyle;
     ctx.fillStyle = '#000000';
     ctx.fillText(text, x-1, y-1);
     ctx.fillText(text, x-1, y+1);

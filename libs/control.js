@@ -1431,7 +1431,7 @@ control.prototype.updateDamage = function (floorId, canvas) {
                 if (core.flags.displayEnemyDamage) {
                     var damageString = core.enemys.getDamageString(id, x, y);
                     var damage = damageString.damage, color = damageString.color;
-                    core.fillBoldText(canvas, damage, color, 32*x+1, 32*(y+1)-1);
+                    core.fillBoldText(canvas, damage, 32*x+1, 32*(y+1)-1, color);
                 }
 
                 // 临界显伤
@@ -1440,7 +1440,7 @@ control.prototype.updateDamage = function (floorId, canvas) {
                     if (critical.length>0) critical=critical[0];
                     critical = core.formatBigNumber(critical[0], true);
                     if (critical == '???') critical = '?';
-                    core.fillBoldText(canvas, critical, '#FFFFFF', 32*x+1, 32*(y+1)-11);
+                    core.fillBoldText(canvas, critical, 32*x+1, 32*(y+1)-11, '#FFFFFF');
                 }
 
             }
@@ -1465,7 +1465,7 @@ control.prototype.updateDamage = function (floorId, canvas) {
                 var damage = core.status.checkBlock.damage[x+core.bigmap.width*y];
                 if (damage>0) {
                     damage = core.formatBigNumber(damage, true);
-                    core.fillBoldText(canvas, damage, "#FF7F00", 32*x+16, 32*(y+1)-14);
+                    core.fillBoldText(canvas, damage, 32*x+16, 32*(y+1)-14, '#FF7F00');
                 }
             }
         }

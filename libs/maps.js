@@ -869,13 +869,13 @@ maps.prototype.__initBlockCanvas = function (block, height, x, y) {
         var ctx = core.createCanvas(damageCanvas, 0, 0, 32, 32, 65);
         ctx.textAlign = 'left';
         ctx.font = "bold 11px Arial";
-        core.fillBoldText(ctx, damage, damageColor, 1, 31);
+        core.fillBoldText(ctx, damage, 1, 31, damageColor);
         if (core.flags.displayCritical) {
             var critical = core.enemys.nextCriticals(block.event.id);
             if (critical.length>0) critical=critical[0];
             critical = core.formatBigNumber(critical[0], true);
             if (critical == '???') critical = '?';
-            core.fillBoldText(ctx, critical, '#FFFFFF', 1, 21);
+            core.fillBoldText(ctx, critical, 1, 21, '#FFFFFF');
         }
     }
     return {

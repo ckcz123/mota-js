@@ -664,8 +664,8 @@ core.prototype.fillText = function (name, text, x, y, style, font) {
 }
 
 ////// 在某个canvas上绘制一段描边文字 //////
-core.prototype.fillBoldText = function (name, text, style, x, y, font) {
-    core.ui.fillBoldText(name, text, style , x, y, font);
+core.prototype.fillBoldText = function (name, text, x, y, style, font) {
+    core.ui.fillBoldText(name, text, x, y, style, font);
 }
 
 ////// 在某个canvas上绘制一个矩形 //////

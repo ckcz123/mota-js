@@ -202,6 +202,10 @@
                     <div class="searchLogo"></div>
                     <input type="text" id="searchBlock" placeholder="搜索图块"/>
                 </div>
+                <div id="colorPanel" class="cpPanel" style="display: none">
+                    <input class="color" id="colorPicker" value="255,215,0,1"/>
+                    <button onclick="confirmColor()">确定</button>
+                </div>
                 <xml id="toolbox" style="display:none">
                 </xml>
             </h3>
@@ -337,6 +341,7 @@
 <!-- <script>/* -->
 <div id='gameGroup' style='display:none'>
     <p id='mainTips'>请稍后...</p>
+    <img id='musicBtn'>
     <div id='startPanel'>
         <div id='startTop'>
             <div id='startTopProgressBar'>
@@ -436,7 +441,7 @@
         <img class="tools" id='img-book'>
         <img class="tools" id='img-fly'>
         <img class="tools" id='img-toolbox'>
-        <img class="tools" id='img-shop'>
+        <img class="tools" id='img-keyboard'>
         <img class="tools" id='img-save'>
         <img class="tools" id='img-load'>
         <img class="tools" id='img-settings'>
@@ -530,6 +535,9 @@ if (location.protocol.indexOf("http")!=0) {
 <script src="_server/CodeMirror/codeMirror.bundle.min.js"></script>
 <script src="_server/CodeMirror/jshint.min.js"></script>
 <script src="_server/CodeMirror/codeMirror.plugin.min.js"></script>
+<!-- colorPicker -->
+<script type="text/javascript" src="_server/colorPicker/color.all.min.js"></script>
+<script type="text/javascript" src="_server/colorPicker/jsColor.js"></script>
 
 </body>
 </html>

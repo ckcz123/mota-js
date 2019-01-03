@@ -196,10 +196,10 @@
                 <div style="position: relative; display: inline-block; margin-left: 10px">
                     <div class="searchLogo"></div>
                     <input type="text" id="searchBlock" placeholder="搜索图块"/>
-                    <button id = "colorSwitch" class="cpPanel" onclick="doHide()" style="margin-left:5px">颜色选择器</button>
+                    <button id = "colorSwitch" class="cpPanel" onclick="openColorFromButton()" style="margin-left:5px">颜色选择器</button>
                     <div id="colorPanel" class="cpPanel" style="display: none">
                         <input class="color" id="colorPicker" value="255,215,0,1"/>
-                        <button onclick="copyColor()">复制</button>
+                        <button onclick="confirmColor()">确定</button>
                     </div>
                 </div>
                 <xml id="toolbox" style="display:none">
@@ -324,6 +324,7 @@
 <!-- <script>/* -->
 <div id='gameGroup' style='display:none'>
     <p id='mainTips'>请稍后...</p>
+    <img id='musicBtn'>
     <div id='startPanel'>
         <div id='startTop'>
             <div id='startTopProgressBar'>
@@ -423,7 +424,7 @@
         <img class="tools" id='img-book'>
         <img class="tools" id='img-fly'>
         <img class="tools" id='img-toolbox'>
-        <img class="tools" id='img-shop'>
+        <img class="tools" id='img-keyboard'>
         <img class="tools" id='img-save'>
         <img class="tools" id='img-load'>
         <img class="tools" id='img-settings'>

@@ -118,8 +118,8 @@
                             }
                             colorPickers.current = colorPickers[index];
                         }
-                    }
-                    focusListener = function(e) {
+                    },
+                    createListener = function(e) {
                         elm = document.getElementById("colorPicker");
                         var input = elm,
                             position = window.ColorPicker.getOrigin(input),
@@ -154,7 +154,7 @@
                             }
                         }, 10);
                     },
-                    mousDownListener = function(e) {
+                    hideListener = function(e) {
                         var colorPicker = colorPickers.current,
                             colorPickerUI = (colorPicker ? colorPicker.nodes.colorPicker : undefined),
                             animationSpeed = colorPicker ? colorPicker.color.options.animationSpeed : 0,
@@ -180,15 +180,8 @@
                             colorPickerUI.parentNode.style.display = 'none';
                         }
                     };
-                button = document.getElementById("colorSwitch");
-                button[onOff]('click', focusListener);
                 elm[onOff]('input', inputListener);
-
-                if (!colorPickers.evt || off) {
-                    colorPickers.evt = true; // prevent new eventListener for window
-
-                    window[onOff]('mousedown', mousDownListener);
-                }
+                window.jsColorPicker.create = createListener;
             },
             // this is a way to prevent data binding on HTMLElements
             colorPickers = window.jsColorPicker.colorPickers || [],
@@ -272,19 +265,42 @@ var colors = jsColorPicker('input.color', {
     appendTo: document.getElementById("colorPanel"),
     size: 1,
 });
-function doHide() {
-    var oDiv = document.getElementById("colorPanel");
-    if (oDiv.style.display == "none"){
-        oDiv.style.display = "inline-block";
-    } else {
-        oDiv.style.display = "none";
-    }
+
+function openColorFromButton() {
+    delete window.jsColorPicker.confirm;
+    triggerColorPicker('414px', '53px');
 }
-function copyColor() {
+
+function confirmColor() {
     var colorPicker = document.getElementById("colorPicker");
-    colorPicker.select();
-    document.execCommand("Copy");
-    doHide();
+    if (window.jsColorPicker.confirm) { /* 存在块 */
+        // 检测需要是合法数值
+        var val = colorPicker.value;
+        if (/^[0-9 ]+,[0-9 ]+,[0-9 ]+,[0-9. ]+$/.test(val)) val = "rgba("+val+")";
+        else if (/^[0-9 ]+,[0-9 ]+,[0-9 ]+$/.test(val)) val = "rgba("+val+",1)";
+        else val = null;
+        if (val) window.jsColorPicker.confirm(val);
+    }
+    else {
+        colorPicker.select();
+        document.execCommand("Copy");
+    }
+
+    triggerColorPicker();
+}
+
+function triggerColorPicker(left, top) {
+    var colorPanel = document.getElementById('colorPanel');
+    if (colorPanel.style.display=='none' && left && top) {
+        colorPanel.style.display = "inline-block";
+        colorPanel.style.left = left;
+        colorPanel.style.top = top;
+        window.jsColorPicker.create();
+    }
+    else {
+        colorPanel.style.display = 'none';
+        delete window.jsColorPicker.confirm;
+    }
 }
 
 Blockly.FieldColour.prototype.createWidget_ = function() {
@@ -304,16 +320,9 @@ Blockly.FieldColour.prototype.createWidget_ = function() {
     var targetf=args[args.indexOf(self.name)-1]
 
     var getValue=function(){
-        return self.getValue() // css颜色
+        // return self.getValue() // css颜色
+        return pb.getFieldValue(targetf);
         // 也可以用 pb.getFieldValue(targetf) 获得颜色块左边的域的内容
-    }
-
-    var getPosition=function(){
-        return [
-            Blockly.WidgetDiv.DIV.style.left,
-            Blockly.WidgetDiv.DIV.style.top,
-            Blockly.WidgetDiv.DIV.style.zIndex
-        ] // 画在这个位置刚好是颜色块下面
     }
 
     var setValue=function(newValue){ // css颜色
@@ -324,21 +333,12 @@ Blockly.FieldColour.prototype.createWidget_ = function() {
         pb.setFieldValue(rgbatext, targetf) // 放在颜色块左边的域中
     }
 
-    // 没看出来这个插件要怎么通过 getValue getPosition setValue 绑定
-
-    // 创建一个 input[type=color] 来选颜色
-
-    var a = document.createElement('input');
-    a.setAttribute('type','color')
-    a.setAttribute('value',getValue())
-    a.oninput=function(){
-        setValue(a.value)
-    }
-    a.dispatchEvent(new MouseEvent("click", {
-        "view": window,
-        "bubbles": true,
-        "cancelable": false
-    }));
+    setTimeout(function () {
+        document.getElementById("colorPicker").value = getValue();
+        window.jsColorPicker.confirm = setValue;
+        // 设置位置
+        triggerColorPicker(Blockly.WidgetDiv.DIV.style.left, Blockly.WidgetDiv.DIV.style.top);
+    });
 
     return picker;
 };

@@ -319,7 +319,7 @@ window.onresize = function () {
 ////// 在界面上按下某按键时 //////
 main.dom.body.onkeydown = function(e) {
     try {
-        if (main.core.isPlaying() || main.core.status.lockControl)
+        if (main.core && (main.core.isPlaying() || main.core.status.lockControl))
             main.core.onkeyDown(e);
     } catch (ee) { console.log(ee); }
 }
@@ -327,7 +327,7 @@ main.dom.body.onkeydown = function(e) {
 ////// 在界面上放开某按键时 //////
 main.dom.body.onkeyup = function(e) {
     try {
-        if (main.core.isPlaying() || main.core.status.lockControl)
+        if (main.core && (main.core.isPlaying() || main.core.status.lockControl))
             main.core.onkeyUp(e);
     } catch (ee) { console.log(ee); }
 }
@@ -616,6 +616,12 @@ main.dom.replayGame.onclick = function () {
     main.core.chooseReplayFile();
 }
 
+main.dom.musicBtn.onclick = function () {
+    try {
+        if (main.core)
+            main.core.triggerBgm();
+    } catch (e) {console.log(e);}
+}
 
 }//listen end
 

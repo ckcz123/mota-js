@@ -24,6 +24,15 @@
     z-index: 370;
 }
 
+#musicBtn {
+    position: fixed;
+    bottom: 3px;
+    right: 3px;
+    cursor: pointer;
+    z-index: 400;
+    display: none;
+}
+
 #startPanel {
     width: 100%;
     height: 100%;

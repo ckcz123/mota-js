@@ -1835,13 +1835,7 @@ actions.prototype.clickSwitchs = function (x,y) {
         var selection = y-topIndex;
         switch (selection) {
             case 0:
-                core.musicStatus.bgmStatus = !core.musicStatus.bgmStatus;
-                if (core.musicStatus.bgmStatus)
-                    core.resumeBgm();
-                else {
-                    core.pauseBgm();
-                }
-                core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
+                core.triggerBgm();
                 core.ui.drawSwitchs();
                 break;
             case 1:

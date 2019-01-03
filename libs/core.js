@@ -1454,6 +1454,11 @@ core.prototype.resumeBgm = function () {
     core.control.resumeBgm();
 }
 
+////// 更改背景音乐的状态 //////
+core.prototype.triggerBgm = function () {
+    core.control.triggerBgm();
+}
+
 ////// 预加载一个背景音乐 //////
 core.prototype.loadBgm = function (bgm) {
     core.loader.loadBgm(bgm);

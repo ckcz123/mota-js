@@ -2513,6 +2513,7 @@ control.prototype.playBgm = function (bgm) {
         }
         return;
     }
+    this.setMusicBtn();
 
     /*
     // 延迟播放
@@ -2558,6 +2559,8 @@ control.prototype.pauseBgm = function () {
         console.log("无法暂停BGM");
         console.log(e);
     }
+    this.setMusicBtn();
+
 }
 
 ////// 恢复背景音乐的播放 //////
@@ -2572,6 +2575,27 @@ control.prototype.resumeBgm = function () {
         console.log("无法恢复BGM");
         console.log(e);
     }
+    this.setMusicBtn();
+}
+
+control.prototype.setMusicBtn = function () {
+    if (core.musicStatus.bgmStatus)
+        core.dom.musicBtn.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAMAAADzN3VRAAABWVBMVEX///9iYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmL///8AAAC5ubn+/v6xsbEtLS0MDAxmZmZoaGhvb2/c3Nzd3d38/Pz9/f0oKCgpKSl0dHR1dXW6urrb29v7+/v09PTv7+/39/cgICACAgImJibh4eGFhYWGhoaHh4eOjo5paWm7u7vDw8PMzMwyMjI7OztAQEDe3t5FRUVMTEzj4+Pl5eXm5ubp6enr6+tcXFzi4uL19fVeXl74+PgjIyNkZGQGBgaSkpKYmJiampqenp4DAwMwMDBnZ2cICAivr68eHh63t7cLCwsSEhLw8PBhYWEUFBQVFRXNzc3Pz8/Z2dna2toaGhqkpKSlpaWpqamrq6tFOUNAAAAAc3RSTlMAAwQFBhUWGxwkJSYyO0dISVBRUmpvj5CSk5SVoaOlpqiysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyA0IuUgAAAVdJREFUeF5NkVVbw0AQRTcQrLR4IIEGcidJoaUuQHF3d3d3+P/CkuxCzss8nG++mbnDBJXhNt2CpbeFK1kQpSEKidlc8S9qdATRa6UIdQMoxEpDA0Ov3wUAPfW+qLWACydNv9zMrzkJwPK6FB3oHyOfXfuNxvoBQ+GmBYinhHB77TmiVBxoYUw1AYcEq332AS8OYKosAuTT0nza9uU2USYPRJgGxEiSOFywJ3mNARozgBJJzkfLvfu8JgGDWcC9FEsjWzR+y80gYDEAA8QZ3N6kmP1Fs3fEASB7pob7Hh+Wz5L0ci17Or05J7bH6B6dZv05XWK3rG+myV05Ert592Qo55sPuoIr7hEZHHtieIPWy0RU9DLwc3Mnck/vi8/E8XNrDWQtEVnL/ySKMrv0jPwPp870fprcyYifmiEmqGpHkI5q9ofSFIUk2qiwIGpEMyxYhhZRRcMPz89RJ2s9W8wAAAAASUVORK5CYII=";
+    else
+        core.dom.musicBtn.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAMAAADzN3VRAAABYlBMVEX///9iYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmL////8/PwAAABmZmZoaGihoaGioqKxsbG5ubnb29vc3Nzd3d3h4eHi4uL9/f3+/v4tLS1nZ2d0dHSUlJSenp66uroMDAz7+/spKSkoKCgUFBRpaWkVFRVvb291dXU7OzuVlZWYmJhkZGQgICAjIyOkpKQCAgK3t7cGBgbv7++pqamrq6seHh4mJiZhYWGamprp6enr6+saGhpeXl7j4+Pl5eXm5uZKSkrw8PD09PT19fW7u7vDw8PMzMwICAgwMDAyMjILCwtAQECGhoaHh4eBgYGFhYUSEhJXV1dZWVlcXFyOjo6SkpLNzc339/fPz8/Z2dna2tqTk5OlpaWxOPeTAAAAdnRSTlMAAwQFBhUWGxwkJSYyO0dISVBRUmpvj5CSk5SVoaOlpqiysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyNuo+uwAAAWJJREFUeF5NkmV34zAQReUm7WbTuJBNunY3bvXGDjNTkZkZlpn5/9eR5FPfbzr3jGb0RkwRiMQMDm7EIgHmRxtLwMOaHHoQjwz4MUKeCM8AWMrmd7u7f/aXAMyOShHiQD1n04DtN5e5FMBFlSauIsm585dKi4CpuSYKJIv1tBDVmvOSqJgEoowFLSBHaQh10XHWiCgHWEGmAw2blPrvOK/KRJUGoLM4kCVSKrWz7HwgoiwQZyaQJ0+9PvxV23BNATAZB25IqX9b3+jTW9fcApwB6NLgUD5NY3mPXnwmFwBezff1ztzRFzTp94FXMy36HDuCa2RafdnnmZqtL818Gl9/qNnEeyrUk2aTPiKj3qMyWBVi/YSuWq5qiwxkbtX3vYWzdz/l8M0k8ERlvViiB1Ygslb7SbVtJezncj+Cx5bYaeGuonZqhZlieAp+no74/s5EAh6JcY35Cepxk4ObcT3IJPe/1lKsDpFCFQAAAABJRU5ErkJggg==";
+}
+
+////// 更改背景音乐的播放 //////
+control.prototype.triggerBgm = function () {
+    if (main.mode!='play')return;
+
+    core.musicStatus.bgmStatus = !core.musicStatus.bgmStatus;
+    if (core.musicStatus.bgmStatus)
+        this.resumeBgm();
+    else {
+        this.pauseBgm();
+    }
+    core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
 }
 
 ////// 播放音频 //////
@@ -2611,12 +2635,11 @@ control.prototype.playSound = function (sound) {
 }
 
 control.prototype.checkBgm = function() {
-    core.playBgm(main.startBgm);
+    core.playBgm(core.musicStatus.playingBgm || main.startBgm);
 }
 
 ////// 清空状态栏 //////
 control.prototype.clearStatusBar = function() {
-
     Object.keys(core.statusBar).forEach(function (e) {
         if (core.isset(core.statusBar[e].innerHTML))
             core.statusBar[e].innerHTML = "&nbsp;";
@@ -2883,7 +2906,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         toolBarWidth, toolBarHeight, toolBarTop, toolBarBorder,
         toolsWidth, toolsHeight,toolsMargin,toolsPMaxwidth,
         fontSize, toolbarFontSize, margin, statusBackground, toolsBackground,
-        statusCanvasWidth, statusCanvasHeight;
+        statusCanvasWidth, statusCanvasHeight, musicBtnBottom, musicBtnRight;
 
     var toDraw = this.needDraw();
     var count = toDraw.length;
@@ -2958,6 +2981,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             toolsMargin = scale * SPACE * 4;
             fontSize = DEFAULT_FONT_SIZE * scale;
             toolbarFontSize = DEFAULT_FONT_SIZE * scale;
+            musicBtnRight = 3;
+            musicBtnBottom = 3;
         }else { //横屏
             core.domStyle.screenMode = 'horizontal';
             core.domStyle.isVertical = false;
@@ -2988,6 +3013,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
 
             margin = scale * SPACE * 2;
             toolsMargin = 2 * SPACE * scale;
+            musicBtnRight = 3;
+            musicBtnBottom = 3;
         }
 
     }else { //大屏设备 pc端
@@ -3023,6 +3050,9 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         toolsPMaxwidth = DEFAULT_BAR_WIDTH * .9;
         margin = SPACE * 2;
         toolsMargin = 2 * SPACE;
+
+        musicBtnRight = (clientWidth-gameGroupWidth)/2;
+        musicBtnBottom = (clientHeight-gameGroupHeight)/2 - 27;
     }
 
     var unit = 'px'
@@ -3162,6 +3192,14 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 color: (core.status.globalAttribute||core.initStatus.globalAttribute).hardLabelColor
             }
         },
+        {
+            id: 'musicBtn',
+            rules: {
+                display: 'block',
+                right: musicBtnRight + unit,
+                bottom: musicBtnBottom + unit
+            }
+        }
     ]
     for (var i = 0; i < core.dom.status.length; ++i) {
         var id = core.dom.status[i].id;
@@ -3184,6 +3222,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         core.dom.statusCanvas.width = 129;
         core.dom.statusCanvas.height = 416;
     }
+    this.setMusicBtn();
     if (core.isPlaying())
         core.updateStatusBar();
 }

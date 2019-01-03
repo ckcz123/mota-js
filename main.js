@@ -99,7 +99,7 @@ function main() {
             'book': document.getElementById("img-book"),
             'fly': document.getElementById("img-fly"),
             'toolbox': document.getElementById("img-toolbox"),
-            'shop': document.getElementById("img-shop"),
+            'keyboard': document.getElementById("img-keyboard"),
             'save': document.getElementById("img-save"),
             'load': document.getElementById("img-load"),
             'settings': document.getElementById("img-settings"),
@@ -126,7 +126,7 @@ function main() {
             'book': 10,
             'fly': 11,
             'toolbox': 12,
-            'shop': 13,
+            'keyboard': 13,
             'save': 14,
             'load': 15,
             'settings': 16,
@@ -481,8 +481,8 @@ main.statusBar.image.toolbox.ondblclick = function (e) {
 
 }
 
-////// 点击状态栏中的快捷商店时 //////
-main.statusBar.image.shop.onclick = function (e) {
+////// 点击状态栏中的虚拟键盘时 //////
+main.statusBar.image.keyboard.onclick = function (e) {
     e.stopPropagation();
 
     if (core.isReplaying()) {
@@ -491,7 +491,7 @@ main.statusBar.image.shop.onclick = function (e) {
     }
 
     if (main.core.isPlaying())
-        main.core.openQuickShop(true);
+        main.core.openKeyBoard(true);
 }
 
 ////// 点击状态栏中的存档按钮时 //////

@@ -1265,6 +1265,10 @@ core.prototype.openQuickShop = function (need) {
     core.control.openQuickShop(need);
 }
 
+core.prototype.openKeyBoard = function (need) {
+    core.control.openKeyBoard(need);
+}
+
 ////// 点击保存按钮时的打开操作 //////
 core.prototype.save = function(need) {
     core.control.save(need);

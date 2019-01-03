@@ -2735,7 +2735,7 @@ actions.prototype.loadPaint = function () {
 actions.prototype.exitPaint = function () {
     core.deleteCanvas('paint');
     core.ui.closePanel();
-    core.statusBar.image.shop.style.opacity = 1;
+    core.statusBar.image.keyboard.style.opacity = 1;
     core.updateStatusBar();
     core.drawTip("退出绘图模式");
 }

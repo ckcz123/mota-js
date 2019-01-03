@@ -2039,6 +2039,13 @@ control.prototype.openQuickShop = function (need) {
     core.ui.drawQuickShop();
 }
 
+control.prototype.openKeyBoard = function (need) {
+    if (core.isReplaying()) return;
+    if (!core.checkStatus('keyBoard', need))
+        return;
+    core.ui.drawKeyBoard();
+}
+
 ////// 点击保存按钮时的打开操作 //////
 control.prototype.save = function(need) {
     if (core.isReplaying()) return;
@@ -2665,7 +2672,7 @@ control.prototype.updateStatusBar = function () {
 
         core.statusBar.image.toolbox.src = core.statusBar.icons.rewind.src;
 
-        core.statusBar.image.shop.src = core.statusBar.icons.book.src;
+        core.statusBar.image.keyboard.src = core.statusBar.icons.book.src;
 
         core.statusBar.image.save.src = core.statusBar.icons.speedDown.src;
 
@@ -2689,7 +2696,7 @@ control.prototype.updateStatusBar = function () {
 
         core.statusBar.image.toolbox.src = core.statusBar.icons.toolbox.src;
 
-        core.statusBar.image.shop.src = core.statusBar.icons.shop.src;
+        core.statusBar.image.keyboard.src = core.statusBar.icons.keyboard.src;
 
         core.statusBar.image.save.src = core.statusBar.icons.save.src;
 
@@ -2825,7 +2832,7 @@ control.prototype.setToolbarButton = function (useButton) {
 
     core.domStyle.toolbarBtn = useButton;
     if (useButton) {
-        ["book","fly","toolbox","shop","save","load","settings"].forEach(function (t) {
+        ["book","fly","toolbox","keyboard","save","load","settings"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'none';
         });
         ["btn1","btn2","btn3","btn4","btn5","btn6","btn7"].forEach(function (t) {
@@ -2836,10 +2843,10 @@ control.prototype.setToolbarButton = function (useButton) {
         ["btn1","btn2","btn3","btn4","btn5","btn6","btn7"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'none';
         });
-        ["book","fly","toolbox","shop","save","load","settings"].forEach(function (t) {
+        ["book","fly","toolbox","keyboard","save","load","settings"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'block';
         });
-        core.statusBar.image.shop.style.display = core.domStyle.isVertical ? "block":"none";
+        core.statusBar.image.keyboard.style.display = core.domStyle.isVertical ? "block":"none";
     }
 }
 
@@ -2920,8 +2927,6 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     var statusLineFontSize = DEFAULT_FONT_SIZE;
     if (count>9) statusLineFontSize = statusLineFontSize * 9 / count;
 
-    var shopDisplay;
-
     var borderColor = (core.status.globalAttribute||core.initStatus.globalAttribute).borderColor;
 
     statusBarBorder = '3px '+borderColor+' solid';
@@ -2947,8 +2952,6 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         if(!isHorizontal){ //竖屏
             core.domStyle.screenMode = 'vertical';
             core.domStyle.isVertical = true;
-            //显示快捷商店图标
-            shopDisplay = 'block';
 
             var tempTopBarH = scale * (BASE_LINEHEIGHT * col + SPACE * 2) + 6;
             var tempBotBarH = scale * (BASE_LINEHEIGHT + SPACE * 4) + 6;
@@ -2986,7 +2989,6 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         }else { //横屏
             core.domStyle.screenMode = 'horizontal';
             core.domStyle.isVertical = false;
-            shopDisplay = 'none';
             gameGroupWidth = tempWidth + DEFAULT_BAR_WIDTH * scale;
             gameGroupHeight = tempWidth;
             canvasTop = 0;
@@ -3021,7 +3023,6 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         core.domStyle.scale = 1;
         core.domStyle.screenMode = 'bigScreen';
         core.domStyle.isVertical = false;
-        shopDisplay = 'none';
 
         gameGroupWidth = DEFAULT_CANVAS_WIDTH + DEFAULT_BAR_WIDTH;
         gameGroupHeight = DEFAULT_CANVAS_WIDTH;
@@ -3180,9 +3181,9 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             }
         },
         {
-            imgId: 'shop',
+            imgId: 'keyboard',
             rules:{
-                display: shopDisplay && core.domStyle.showStatusBar
+                display: core.domStyle.isVertical && core.domStyle.showStatusBar
             }
         },
         {

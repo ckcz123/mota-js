@@ -29,7 +29,7 @@ main.dom.data.ontouchend // 手指离开触摸屏时
 main.statusBar.image.book.onclick // 点击状态栏中的怪物手册时
 main.statusBar.image.fly.onclick // 点击状态栏中的楼层传送器时
 main.statusBar.image.toolbox.onclick // 点击状态栏中的工具箱时
-main.statusBar.image.shop.onclick // 点击状态栏中的快捷商店时
+main.statusBar.image.keyboard.onclick // 点击状态栏中的快捷商店时
 main.statusBar.image.save.onclick // 点击状态栏中的存档按钮时
 main.statusBar.image.load.onclick // 点击状态栏中的读档按钮时
 main.statusBar.image.settings.onclick // 点击状态栏中的系统菜单时

@@ -50,11 +50,9 @@ function core() {
     }
     this.musicStatus = {
         'audioContext': null, // WebAudioContext
-        'startDirectly': false, // 是否直接播放（加载）音乐
         'bgmStatus': false, // 是否播放BGM
         'soundStatus': true, // 是否播放SE
         'playingBgm': null, // 正在播放的BGM
-        'isPlaying': false,
         'gainNode': null,
         'volume': 1.0, // 音量
         'cachedBgms': [], // 缓存BGM内容
@@ -310,24 +308,11 @@ core.prototype.init = function (coreData, callback) {
         }
     }
 
-    if (core.platform.isPC) {
-        // 如果是PC端直接加载
-        core.musicStatus.startDirectly = true;
-    }
-    else {
-        var connection = navigator.connection;
-        if (core.isset(connection) && connection.type=='wifi')
-            core.musicStatus.startDirectly = true;
-    }
-
     // 先从存储中读取BGM状态
     core.musicStatus.bgmStatus = core.getLocalStorage('bgmStatus', true);
-    if (!core.musicStatus.startDirectly) // 如果当前网络环境不允许
+    if (!core.platform.isPC && (navigator.connection||{}).type!='wifi')
         core.musicStatus.bgmStatus = false;
-    // core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
-
     core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
-    core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
 
     // switchs
     core.flags.battleAnimate = core.getLocalStorage('battleAnimate', core.flags.battleAnimate);

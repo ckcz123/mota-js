@@ -1840,7 +1840,6 @@ actions.prototype.clickSwitchs = function (x,y) {
                     core.resumeBgm();
                 else {
                     core.pauseBgm();
-                    core.musicStatus.playingBgm = null;
                 }
                 core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
                 core.ui.drawSwitchs();

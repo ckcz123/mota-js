@@ -912,7 +912,8 @@ events.prototype.doAction = function() {
         case "playBgm":
             core.playBgm(data.name);
             this.doAction();
-            break
+            break;
+        /*
         case "pauseBgm":
             core.pauseBgm();
             this.doAction();
@@ -921,6 +922,7 @@ events.prototype.doAction = function() {
             core.resumeBgm();
             this.doAction();
             break
+            */
         case "loadBgm":
             if (core.platform.isPC)
                 core.loadBgm(data.name);

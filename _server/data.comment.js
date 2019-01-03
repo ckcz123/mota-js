@@ -31,7 +31,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "bgms": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_data": "在此存放所有的bgm，和文件名一致。第一项为默认播放项 \n音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好"
+                    "_data": "在此存放所有的bgm，和文件名一致。 \n音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好"
                 },
                 "sounds": {
                     "_leaf": true,
@@ -61,6 +61,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "textarea",
                     "_range": "(thiseval instanceof Array && thiseval.length<=6)||thiseval==null",
                     "_data": "装备位名称，为不超过6个的数组，此项的顺序与equiptype数值关联；例如可写[\"武器\",\"防具\",\"首饰\"]等等。"
+                },
+                "startBgm": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_string": true,
+                    "_data": "在标题界面应该播放的bgm内容"
                 },
                 "statusLeftBackground": {
                     "_leaf": true,

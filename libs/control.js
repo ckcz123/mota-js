@@ -432,8 +432,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
 ////// 重新开始游戏；此函数将回到标题页面 //////
 control.prototype.restart = function(noAnimate) {
     this.showStartAnimate(noAnimate);
-    if (core.bgms.length>0)
-        core.playBgm(core.bgms[0]);
+    core.playBgm(main.startBgm);
 }
 
 
@@ -2501,10 +2500,19 @@ control.prototype.unLockControl = function () {
 ////// 播放背景音乐 //////
 control.prototype.playBgm = function (bgm) {
     if (main.mode!='play')return;
-    // 如果不允许播放
-    if (!core.musicStatus.bgmStatus) return;
     // 音频不存在
     if (!core.isset(core.material.bgms[bgm])) return;
+    // 如果不允许播放
+    if (!core.musicStatus.bgmStatus) {
+        try {
+            core.musicStatus.playingBgm = bgm;
+            core.material.bgms[bgm].pause();
+        }
+        catch (e) {
+            console.log(e);
+        }
+        return;
+    }
 
     /*
     // 延迟播放
@@ -2518,11 +2526,11 @@ control.prototype.playBgm = function (bgm) {
         // 缓存BGM
         core.loader.loadBgm(bgm);
         // 如果当前正在播放，且和本BGM相同，直接忽略
-        if (core.musicStatus.playingBgm == bgm && core.musicStatus.isPlaying) {
+        if (core.musicStatus.playingBgm == bgm && !core.material.bgms[core.musicStatus.playingBgm].paused) {
             return;
         }
         // 如果正在播放中，暂停
-        if (core.isset(core.musicStatus.playingBgm) && core.musicStatus.isPlaying) {
+        if (core.isset(core.musicStatus.playingBgm)) {
             core.material.bgms[core.musicStatus.playingBgm].pause();
         }
         // 播放当前BGM
@@ -2530,7 +2538,6 @@ control.prototype.playBgm = function (bgm) {
         core.material.bgms[bgm].currentTime = 0;
         core.material.bgms[bgm].play();
         core.musicStatus.playingBgm = bgm;
-        core.musicStatus.isPlaying = true;
     }
     catch (e) {
         console.log("无法播放BGM "+bgm);
@@ -2546,7 +2553,6 @@ control.prototype.pauseBgm = function () {
         if (core.isset(core.musicStatus.playingBgm)) {
             core.material.bgms[core.musicStatus.playingBgm].pause();
         }
-        core.musicStatus.isPlaying = false;
     }
     catch (e) {
         console.log("无法暂停BGM");
@@ -2557,24 +2563,10 @@ control.prototype.pauseBgm = function () {
 ////// 恢复背景音乐的播放 //////
 control.prototype.resumeBgm = function () {
     if (main.mode!='play')return;
-    // 如果不允许播放
-    if (!core.musicStatus.bgmStatus) return;
 
     // 恢复BGM
     try {
-        if (core.isset(core.musicStatus.playingBgm)) {
-            core.material.bgms[core.musicStatus.playingBgm].play();
-            core.musicStatus.isPlaying = true;
-        }
-        else {
-            if (core.bgms.length>0) {
-                if (core.isset(core.status.thisMap.bgm)) {
-                    core.playBgm(core.status.thisMap.bgm);
-                }
-                else
-                    core.playBgm(core.bgms[0]);
-            }
-        }
+        core.playBgm(core.musicStatus.playingBgm);
     }
     catch (e) {
         console.log("无法恢复BGM");
@@ -2619,13 +2611,7 @@ control.prototype.playSound = function (sound) {
 }
 
 control.prototype.checkBgm = function() {
-    if (core.musicStatus.startDirectly && core.musicStatus.bgmStatus) {
-        if (core.musicStatus.playingBgm==null
-            || core.material.bgms[core.musicStatus.playingBgm].paused) {
-            core.musicStatus.playingBgm=null;
-            core.playBgm(core.bgms[0]);
-        }
-    }
+    core.playBgm(main.startBgm);
 }
 
 ////// 清空状态栏 //////

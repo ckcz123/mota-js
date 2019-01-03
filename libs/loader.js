@@ -256,8 +256,7 @@ loader.prototype.loadMusic = function () {
     });
 
     // 直接开始播放
-    if (core.musicStatus.startDirectly && core.bgms.length>0)
-        core.playBgm(core.bgms[0]);
+    core.playBgm(main.startBgm);
 }
 
 loader.prototype.loadOneMusic = function (name) {

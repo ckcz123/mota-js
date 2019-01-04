@@ -314,7 +314,8 @@ Blockly.FieldColour.prototype.createWidget_ = function() {
 
     Blockly.WidgetDiv.hide();
 
-    self=this;
+    // console.log('here')
+    var self=this;
     var pb=self.sourceBlock_
     var args = MotaActionBlocks[pb.type].args
     var targetf=args[args.indexOf(self.name)-1]
@@ -341,4 +342,54 @@ Blockly.FieldColour.prototype.createWidget_ = function() {
     });
 
     return picker;
+};
+
+Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
+  Blockly.WidgetDiv.show(this, this.sourceBlock_.RTL, this.widgetDispose_());
+  var div = Blockly.WidgetDiv.DIV;
+  // Create the input.
+  var htmlInput =
+      goog.dom.createDom(goog.dom.TagName.INPUT, 'blocklyHtmlInput');
+  htmlInput.setAttribute('spellcheck', this.spellcheck_);
+  var fontSize =
+      (Blockly.FieldTextInput.FONTSIZE * this.workspace_.scale) + 'pt';
+  div.style.fontSize = fontSize;
+  htmlInput.style.fontSize = fontSize;
+
+  Blockly.FieldTextInput.htmlInput_ = htmlInput;
+  div.appendChild(htmlInput);
+
+  htmlInput.value = htmlInput.defaultValue = this.text_;
+  htmlInput.oldValue_ = null;
+  this.validate_();
+  this.resizeEditor_();
+  if (!quietInput) {
+    htmlInput.focus();
+    htmlInput.select();
+  }
+
+  // console.log('here')
+  var self=this;
+  var pb=self.sourceBlock_
+  var args = MotaActionBlocks[pb.type].args
+  var targetf=args[args.indexOf(self.name)+1]
+
+  if(targetf && targetf.slice(0,7)==='Colour_'){
+    var inputDom = htmlInput;
+    // var getValue=function(){ // 获得自己的字符串
+    //     return pb.getFieldValue(self.name);
+    // }
+    var setValue = function(newValue){ // 设置右边颜色块的css颜色
+        pb.setFieldValue(newValue, targetf)
+    }
+    // 给inputDom绑事件
+    inputDom.oninput=function(){
+        var value=inputDom.value
+        if(/[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?/.test(value)){
+            setValue('rgba('+value+')')
+        }
+    }
+  }
+
+  this.bindEvents_(htmlInput);
 };

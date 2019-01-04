@@ -459,7 +459,7 @@ div.row .rowtd .rowtext{
 
 #colorPanel {
     position: fixed;
-    width: 168px;
+    width: max-content;
     height: 205px;
     z-index: 240;
     padding: 4px 6px;

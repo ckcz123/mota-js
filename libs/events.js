@@ -301,7 +301,7 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
                 doUpload("");
             }
             else {
-                doUpload(prompt("请输入你的ID："));
+                doUpload(prompt("请输入你的ID：", core.getCookie('id')));
             }
         }, function () {
             if (main.isCompetition)

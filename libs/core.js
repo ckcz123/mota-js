@@ -1403,6 +1403,10 @@ core.prototype.clamp = function (x, a, b) {
     return core.utils.clamp(x, a, b);
 }
 
+core.prototype.getCookie = function (name) {
+    return core.utils.getCookie(name);
+}
+
 ////// Base64加密 //////
 core.prototype.encodeBase64 = function (str) {
     return core.utils.encodeBase64(str);

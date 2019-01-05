@@ -520,6 +520,11 @@ utils.prototype.clamp = function (x, a, b) {
     return Math.min(Math.max(x||0, min), max);
 }
 
+utils.prototype.getCookie = function (name) {
+    var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+	return match?match[2]:null;
+}
+
 ////// Base64加密 //////
 utils.prototype.encodeBase64 = function (str) {
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {

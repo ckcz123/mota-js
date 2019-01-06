@@ -1781,8 +1781,8 @@ control.prototype.replay = function () {
 
     core.status.replay.steps++;
     if (core.status.replay.steps%50==0) {
-        //if (core.status.replay.save.length == 30)
-        //    core.status.replay.save.shift();
+        if (core.status.replay.save.length == 30)
+            core.status.replay.save.shift();
         core.status.replay.save.push({"data": core.saveData(), "replay": {
             "totalList": core.clone(core.status.replay.totalList),
             "toReplay": core.clone(core.status.replay.toReplay),

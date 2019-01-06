@@ -68,6 +68,7 @@ function core() {
         'isChrome': false, // 是否是Chrome
         'supportCopy': false, // 是否支持复制到剪切板
         'useLocalForage': true,
+        'extendKeyboard': false,
 
         'fileInput': null, // FileInput
         'fileReader': null, // 是否支持FileReader
@@ -296,6 +297,8 @@ core.prototype.init = function (coreData, callback) {
         }
         catch (e) {console.log(e); core.platform.useLocalForage=false;}
     }
+
+    core.platform.extendKeyboard = core.getLocalStorage("extendKeyboard", false);
 
     if (window.FileReader) {
         core.platform.fileReader = new FileReader();

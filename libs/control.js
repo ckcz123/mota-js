@@ -271,6 +271,20 @@ control.prototype.setRequestAnimationFrame = function () {
         // 执行用户的并行事件处理内容
         functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.parallelDo(timestamp);
 
+        if (core.isPlaying()) {
+            // 执行插件中的每帧函数
+            var renderFrameFuncs = core.plugin.__renderFrameFuncs || [];
+            renderFrameFuncs.forEach(function (t) {
+                try {
+                    if (core.plugin[t])
+                        core.plugin[t](timestamp);
+                }
+                catch (e) {
+                    console.log(e);
+                }
+            });
+        }
+
         // 检查控制台状态
         if (core.utils.consoleOpened()) {
             core.setFlag('consoleOpened', true);
@@ -2829,6 +2843,7 @@ control.prototype.setToolbarButton = function (useButton) {
 
     if (!core.isset(useButton)) useButton = core.domStyle.toolbarBtn;
     if (!core.domStyle.isVertical) useButton = false;
+    if (!core.platform.extendKeyboard) useButton = false;
 
     core.domStyle.toolbarBtn = useButton;
     if (useButton) {

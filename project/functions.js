@@ -1238,6 +1238,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	console.log("插件编写测试");
 	// 可以写一些其他的被直接执行的代码
 
+	// 每帧会执行的函数列表
+	this.__renderFrameFuncs = [];
 
 	// 在这里写所有需要自定义的函数
 	// 写法必须是 this.xxx = function (args) { ...

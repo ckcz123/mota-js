@@ -1067,6 +1067,7 @@ ui.prototype.drawSwitchs = function() {
         "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
         "新版存档： "+(core.platform.useLocalForage ? "[ON]":"[OFF]"),
         "单击瞬移： "+(core.getFlag('clickMove', true) ? "[ON]":"[OFF]"),
+        "拓展键盘： "+(core.platform.extendKeyboard ? "[ON]":"[OFF]"),
         "返回主菜单"
     ];
     this.drawChoices(null, choices);

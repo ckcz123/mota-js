@@ -55,7 +55,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
         "win": function(reason, norank) {
 	// 游戏获胜事件 
 	core.ui.closePanel();
-	var replaying = core.status.replay.replaying;
+	var replaying = core.isReplaying();
 	core.stopReplay();
 	core.waitHeroToStop(function() {
 		core.clearMap('all'); // 清空全地图
@@ -75,7 +75,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
         "lose": function(reason) {
 	// 游戏失败事件
 	core.ui.closePanel();
-	var replaying = core.status.replay.replaying;
+	var replaying = core.isReplaying();
 	core.stopReplay();
 	core.waitHeroToStop(function() {
 		core.drawText([
@@ -109,6 +109,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 	// 设置勇士的位置
 	core.status.hero.loc = heroLoc;
+	core.control.gatherFollowers();
 
 	// ---------- 重绘新地图；这一步将会设置core.status.floorId ---------- //
 	core.drawMap(floorId);
@@ -123,9 +124,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var color = core.getFlag('__color__', null);
 	if (!core.isset(color) && core.isset(core.status.maps[floorId].color))
 		color = core.status.maps[floorId].color;
+	core.clearMap('curtain');
+	core.status.curtainColor = color;
 	if (core.isset(color)) {
 		core.fillRect('curtain',0,0,416,416,core.arrayToRGBA(color));
-		core.status.curtainColor = color;
 	}
 	// 更改天气
 	var weather = core.getFlag('__weather__', null);
@@ -142,17 +144,22 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 转换楼层结束的事件；此函数会在整个楼层切换完全结束后再执行
 	// floorId是切换到的楼层；fromLoad若为true则代表是从读档行为造成的楼层切换
 
-	// 每次抵达楼层时执行的事件
-	if (!fromLoad || core.hasFlag("forceSave")) {
-		core.insertAction(core.floors[floorId].eachArrive);
+	// 如果是读档，则进行检查
+	if (fromLoad) {
+		core.events.recoverEvents(core.getFlag("__events__"));
+		core.removeFlag("__events__");
 	}
+	else {
+		// 每次抵达楼层执行的事件
+		core.insertAction(core.floors[floorId].eachArrive);
 
-	// 首次抵达楼层时执行的事件（后插入，先执行）
-	var visited = core.getFlag("__visited__", []);
-	if (visited.indexOf(floorId)===-1) {
-		core.insertAction(core.floors[floorId].firstArrive);
-		visited.push(floorId);
-		core.setFlag("__visited__", visited);
+		// 首次抵达楼层时执行的事件（后插入，先执行）
+		var visited = core.getFlag("__visited__", []);
+		if (visited.indexOf(floorId)===-1) {
+			core.insertAction(core.floors[floorId].firstArrive);
+			visited.push(floorId);
+			core.setFlag("__visited__", visited);
+		}
 	}
 },
         "addPoint": function (enemy) {
@@ -1184,7 +1191,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.setTextAlign('ui', 'left');
 	var globalFont = (core.status.globalAttribute||core.initStatus.globalAttribute).font;
 	core.fillText('ui', "HTML5 魔塔样板", text_start, top+35, "#FFD700", "bold 22px "+globalFont);
-	core.fillText('ui', "版本： "+core.firstData.version, text_start, top + 80, "#FFFFFF", "bold 17px "+globalFont);
+	core.fillText('ui', "版本： "+main.__VERSION__, text_start, top + 80, "#FFFFFF", "bold 17px "+globalFont);
 	core.fillText('ui', "作者： 艾之葵", text_start, top + 112);
 	core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112+32);
 	// TODO: 写自己的“关于”页面，每次增加32像素即可
@@ -1230,7 +1237,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 在这里写的代码，在所有模块加载完毕后，游戏开始前会被执行
 	console.log("插件编写测试");
 	// 可以写一些其他的被直接执行的代码
-
 
 	// 在这里写所有需要自定义的函数
 	// 写法必须是 this.xxx = function (args) { ...

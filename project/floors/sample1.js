@@ -772,4 +772,10 @@ main.floors.sample1=
 "afterGetItem": {},
 "afterOpenDoor": {},
 "cannotMove": {},
+"bgmap": [
+
+],
+"fgmap": [
+
+],
 }

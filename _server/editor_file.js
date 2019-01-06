@@ -174,6 +174,82 @@ editor_file = function (editor, callback) {
         editor.currentFloorId = saveFilename;
         editor_file.saveFloorFile(callback);
     }
+    editor_file.saveNewFiles = function (floorIdList, from, to, callback) {
+        if (!isset(callback)) {
+            printe('未设置callback');
+            throw('未设置callback')
+        };
+        var currData=editor.currentFloorData;
+        var saveStatus = document.getElementById('newMapsStatus').checked;
+
+        var calValue = function (text, i) {
+            return text.replace(/\${(.*?)}/g, function (word, value) {
+                return eval(value);
+            });
+        }
+
+        var width = parseInt(document.getElementById('newMapsWidth').value);
+        var height = parseInt(document.getElementById('newMapsHeight').value);
+
+        var row = [], map = [];
+        for (var i=0;i<width;i++) row.push(0);
+        for (var i=0;i<height;i++) map.push(row);
+
+        var filenames = floorIdList.map(function (v) {return "project/floors/"+v+".js";});
+        var datas = [];
+        for (var i=from;i<=to;i++) {
+            var datastr = ['main.floors.', floorIdList[i-from], '=\n{'];
+            var data = {
+                floorId: floorIdList[i-from],
+                title: calValue(document.getElementById('newFloorTitles').value, i),
+                name: calValue(document.getElementById('newFloorNames').value, i),
+                width: width,
+                height: height,
+                map: map,
+                canFlyTo: saveStatus?currData.canFlyTo:true,
+                canUseQuickShop: saveStatus?currData.canUseQuickShop:true,
+                cannotViewMap: saveStatus?currData.cannotViewMap:false,
+                cannotMoveDirectly: saveStatus?currData.cannotMoveDirectly:false,
+                images: [],
+                item_ratio: saveStatus?currData.item_ratio:1,
+                defaultGround: saveStatus?currData.defaultGround:"ground",
+                bgm: saveStatus?currData.bgm:null,
+                upFloor: null,
+                downFloor: null,
+                color: saveStatus?currData.color:null,
+                weather: saveStatus?currData.weather:null,
+                firstArrive: [],
+                eachArrive: [],
+                parallelDo: "",
+                events: {},
+                changeFloor: {},
+                afterBattle: {},
+                afterGetItem: {},
+                afterOpenDoor: {},
+                cannotMove: {}
+            };
+            Object.keys(data).forEach(function (t) {
+                if (!core.isset(data[t]))
+                    delete data[t];
+                else {
+                    if (t=='map') {
+                        datastr = datastr.concat(['\n"', t, '": [\n', formatMap(data[t]), '\n],']);
+                    }
+                    else {
+                        datastr = datastr.concat(['\n"', t, '": ', JSON.stringify(data[t], null, 4), ',']);
+                    }
+                }
+            });
+            datastr = datastr.concat(['\n}']);
+            datastr = datastr.join('');
+            datas.push(encode(datastr));
+        }
+        alertWhenCompress();
+        fs.writeMultiFiles(filenames, datas, function (err, data) {
+            callback(err);
+        });
+    }
+
     //callback(err:String)
 
     ////////////////////////////////////////////////////////////////////

@@ -57,6 +57,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"武器",
 			"盾牌"
 		],
+		"startBgm": "bgm.mp3",
 		"statusLeftBackground": "url(project/images/ground.png) repeat",
 		"statusTopBackground": "url(project/images/ground.png) repeat",
 		"toolsBackground": "url(project/images/ground.png) repeat",
@@ -70,7 +71,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 	"firstData": {
 		"title": "魔塔样板",
 		"name": "template",
-		"version": "Ver 2.5.3",
+		"version": "Ver 2.5.4",
 		"floorId": "sample0",
 		"hero": {
 			"name": "阳光",
@@ -109,6 +110,10 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"text": "在这里可以用事件来自定义绘制标题界面的背景图等"
 			},
 			{
+				"type": "comment",
+				"text": "也可以直接切换到其他楼层（比如某个开始剧情楼层）进行操作。"
+			},
+			{
 				"type": "showImage",
 				"code": 1,
 				"image": "bg.jpg",
@@ -122,111 +127,108 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"time": 0
 			},
 			{
-				"type": "comment",
-				"text": "给用户提供选择项，这里简单的使用了choices事件"
-			},
-			{
-				"type": "comment",
-				"text": "也可以贴按钮图然后使用循环处理+等待操作来完成"
-			},
-			{
-				"type": "choices",
-				"choices": [
+				"type": "while",
+				"condition": "1",
+				"data": [
 					{
-						"text": "开始游戏",
-						"action": [
+						"type": "comment",
+						"text": "给用户提供选择项，这里简单的使用了choices事件"
+					},
+					{
+						"type": "comment",
+						"text": "也可以贴按钮图然后使用等待操作来完成"
+					},
+					{
+						"type": "choices",
+						"choices": [
 							{
-								"type": "comment",
-								"text": "检查bgm状态，下同"
-							},
-							{
-								"type": "function",
-								"function": "function(){\ncore.control.checkBgm()\n}"
-							},
-							{
-								"type": "if",
-								"condition": "core.flags.startDirectly",
-								"true": [
+								"text": "开始游戏",
+								"action": [
 									{
 										"type": "comment",
-										"text": "直接开始游戏，设置初始化数据"
+										"text": "检查bgm状态，下同"
 									},
 									{
 										"type": "function",
-										"function": "function(){\ncore.events.setInitData('')\n}"
-									}
-								],
-								"false": [
-									{
-										"type": "comment",
-										"text": "动态生成难度选择项"
+										"function": "function(){\ncore.control.checkBgm()\n}"
 									},
 									{
-										"type": "function",
-										"function": "function(){\nvar choices = [];\nmain.levelChoose.forEach(function (one) {\n\tchoices.push({\"text\": one[0], \"action\": [\n\t\t{\"type\": \"function\", \"function\": \"function() { core.status.hard = '\"+one[1]+\"'; core.events.setInitData('\"+one[1]+\"'); }\"}\n\t]});\n})\ncore.insertAction({\"type\": \"choices\", \"choices\": choices});\n}"
+										"type": "if",
+										"condition": "core.flags.startDirectly",
+										"true": [
+											{
+												"type": "comment",
+												"text": "直接开始游戏，设置初始化数据"
+											},
+											{
+												"type": "function",
+												"function": "function(){\ncore.events.setInitData('')\n}"
+											}
+										],
+										"false": [
+											{
+												"type": "comment",
+												"text": "动态生成难度选择项"
+											},
+											{
+												"type": "function",
+												"function": "function(){\nvar choices = [];\nmain.levelChoose.forEach(function (one) {\n\tchoices.push({\"text\": one[0], \"action\": [\n\t\t{\"type\": \"function\", \"function\": \"function() { core.status.hard = '\"+one[1]+\"'; core.events.setInitData('\"+one[1]+\"'); }\"}\n\t]});\n})\ncore.insertAction({\"type\": \"choices\", \"choices\": choices});\n}"
+											}
+										]
+									},
+									{
+										"type": "hideImage",
+										"code": 1,
+										"time": 0
+									},
+									{
+										"type": "comment",
+										"text": "成功选择难度"
+									},
+									{
+										"type": "break"
 									}
 								]
 							},
 							{
-								"type": "hideImage",
-								"code": 1,
-								"time": 0
+								"text": "读取存档",
+								"action": [
+									{
+										"type": "function",
+										"function": "function(){\ncore.control.checkBgm()\n}"
+									},
+									{
+										"type": "comment",
+										"text": "简单的使用“呼出读档界面”来处理"
+									},
+									{
+										"type": "callLoad"
+									}
+								]
 							},
 							{
-								"type": "comment",
-								"text": "成功选择难度"
-							}
-						]
-					},
-					{
-						"text": "读取存档",
-						"action": [
-							{
-								"type": "function",
-								"function": "function(){\ncore.control.checkBgm()\n}"
-							},
-							{
-								"type": "hideImage",
-								"code": 1,
-								"time": 0
-							},
-							{
-								"type": "comment",
-								"text": "这段代码会结束事件，打开读档页面，读取存档或重新开始"
-							},
-							{
-								"type": "function",
-								"function": "function(){\ncore.insertAction([{\"type\": \"exit\"}], null, null, function() {\n\tcore.status.played = false;\n\tcore.load();\n})\n}"
-							},
-							{
-								"type": "comment",
-								"text": "不管读档有没有成功，都会重新开始，这个地方不会被执行到"
-							}
-						]
-					},
-					{
-						"text": "回放录像",
-						"action": [
-							{
-								"type": "function",
-								"function": "function(){\ncore.control.checkBgm()\n}"
-							},
-							{
-								"type": "hideImage",
-								"code": 1,
-								"time": 0
-							},
-							{
-								"type": "comment",
-								"text": "这段代码会结束事件，选择录像文件，播放录像或重新开始"
-							},
-							{
-								"type": "function",
-								"function": "function(){\ncore.insertAction([{\"type\": \"exit\"}], null, null, function() {\n\tcore.restart();\n\tcore.chooseReplayFile();\n})\n}"
-							},
-							{
-								"type": "comment",
-								"text": "不管录像有没有成功，都会重新开始，这个地方不会被执行到"
+								"text": "回放录像",
+								"action": [
+									{
+										"type": "function",
+										"function": "function(){\ncore.control.checkBgm()\n}"
+									},
+									{
+										"type": "comment",
+										"text": "这段代码会弹框选择录像文件"
+									},
+									{
+										"type": "if",
+										"condition": "!core.isReplaying()",
+										"true": [
+											{
+												"type": "function",
+												"function": "function(){\ncore.chooseReplayFile()\n}"
+											}
+										],
+										"false": []
+									}
+								]
 							}
 						]
 					}

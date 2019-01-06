@@ -31,20 +31,35 @@
                 <input type="checkbox" id='newMapStatus' checked='checked' style='vertical-align: bottom'/>
                 <span style='vertical-align: bottom; margin-left: -4px'>保留楼层属性</span>
             </div>
-            <div style="position: absolute;left: 10px;bottom:0; margin-bottom: 90px">
+            <div id="editBtns">
                 <input type="button" value="导出地图" id="exportMap" v-on:click="exportMap"/>
                 <input type="button" value="复制地图" id="copyMap" v-on:click="copyMap"/>
                 <input type="button" value="清除地图" id='clearMap' v-on:click="clearMap"/>
                 <input type="button" value="删除地图" id="deleteMap" v-on:click="deleteMap"/>
             </div>
+            <input type="button" value="批量创建空白地图 ↓" id='newMaps'/>
+            <div id='newFloors' style='display:none'>
+                <span style="vertical-align: bottom">楼层ID格式: </span>
+                <input id='newFloorIds' style="width: 70px" value='MT${i}'/>
+                <span style="vertical-align: bottom">地图中文名格式: </span>
+                <input id='newFloorTitles' style="width: 100px" value='主塔 ${i} 层'/>
+                <br/>
+                <span style="vertical-align: bottom">状态栏名称: </span>
+                <input id='newFloorNames' style="width: 70px" value='${i}'/>
+                <span style="vertical-align: bottom">宽</span>
+                <input id='newMapsWidth' value="13" style="width: 20px"/>
+                <span style="vertical-align: bottom">高</span>
+                <input id='newMapsHeight' value="13" style="width: 20px"/>
+                <input type="checkbox" id='newMapsStatus' checked='checked' style='vertical-align: bottom'/>
+                <span style='vertical-align: bottom; margin-left: -4px'>保留楼层属性</span>
+                <br/>
+                <span style="vertical-align: bottom">从 i=</span>
+                <input id='newMapsFrom' value="1" style="width: 20px"/>
+                <span style="vertical-align: bottom">到</span>
+                <input id='newMapsTo' value="5" style="width: 20px"/>
+                <input type="button" value="确认创建" id='createNewMaps'>
+            </div>
         </div>
-        <div id="objDataEditor">
-
-        </div>
-        <div id="eventEditor">
-
-        </div>
-
     </div>
     <div id="left1" class='leftTab' style="z-index:-1;opacity: 0;"><!-- appendpic -->
         <h3 class="leftTabHeader">追加素材</h3>
@@ -181,10 +196,10 @@
                 <div style="position: relative; display: inline-block; margin-left: 10px">
                     <div class="searchLogo"></div>
                     <input type="text" id="searchBlock" placeholder="搜索图块"/>
-                    <button id = "colorSwitch" class="cpPanel" onclick="doHide()" style="margin-left:5px">颜色选择器</button>
+                    <button id = "colorSwitch" class="cpPanel" onclick="openColorFromButton()" style="margin-left:5px">颜色选择器</button>
                     <div id="colorPanel" class="cpPanel" style="display: none">
                         <input class="color" id="colorPicker" value="255,215,0,1"/>
-                        <button onclick="copyColor()">复制</button>
+                        <button onclick="confirmColor()">确定</button>
                     </div>
                 </div>
                 <xml id="toolbox" style="display:none">
@@ -297,6 +312,7 @@
     </div>
     <div id="menuDiv">
         <div id="midMenu" style="display:none">
+            <div id='addFloorEvent' class="menuitem" style="display:none"><div class="menuitem-content">添加上下楼事件</div></div>
             <div id='chooseThis' class="menuitem"><div class="menuitem-content">选中此点</div></div>
             <div id='chooseInRight' class="menuitem"><div class="menuitem-content">在素材区选中此图块</div></div>
             <div id='copyLoc' class="menuitem"><div class="menuitem-content">复制此事件</div></div>
@@ -308,6 +324,7 @@
 <!-- <script>/* -->
 <div id='gameGroup' style='display:none'>
     <p id='mainTips'>请稍后...</p>
+    <img id='musicBtn'>
     <div id='startPanel'>
         <div id='startTop'>
             <div id='startTopProgressBar'>
@@ -407,7 +424,7 @@
         <img class="tools" id='img-book'>
         <img class="tools" id='img-fly'>
         <img class="tools" id='img-toolbox'>
-        <img class="tools" id='img-shop'>
+        <img class="tools" id='img-keyboard'>
         <img class="tools" id='img-save'>
         <img class="tools" id='img-load'>
         <img class="tools" id='img-settings'>

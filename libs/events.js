@@ -149,7 +149,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 
         var real_start = function () {
             core.insertAction(core.clone(core.firstData.startText), null, null, function() {
-                if (!core.flags.startUsingCanvas && !core.status.replay.replaying && core.flags.showBattleAnimateConfirm) { // 是否提供“开启战斗动画”的选择项
+                if (!core.flags.startUsingCanvas && !core.isReplaying() && core.flags.showBattleAnimateConfirm) { // 是否提供“开启战斗动画”的选择项
                     core.status.event.selection = core.flags.battleAnimate ? 0 : 1;
                     core.ui.drawConfirmBox("你想开启战斗动画吗？\n之后可以在菜单栏中开启或关闭。\n（强烈建议新手开启此项）", function () {
                         core.flags.battleAnimate = true;
@@ -301,7 +301,7 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
                 doUpload("");
             }
             else {
-                doUpload(prompt("请输入你的ID："));
+                doUpload(prompt("请输入你的ID：", core.getCookie('id')));
             }
         }, function () {
             if (main.isCompetition)
@@ -406,7 +406,7 @@ events.prototype.doAction = function() {
     if (typeof data == "string") {
         core.status.event.data.type='text';
         // 如果是正在回放中，不显示
-        if (core.status.replay.replaying)
+        if (core.isReplaying())
             core.events.doAction();
         else
             core.ui.drawTextBox(data);
@@ -415,13 +415,13 @@ events.prototype.doAction = function() {
     core.status.event.data.type=data.type;
     switch (data.type) {
         case "text": // 文字/对话
-            if (core.status.replay.replaying)
+            if (core.isReplaying())
                 core.events.doAction();
             else
                 core.ui.drawTextBox(data.text, data.showAll);
             break;
         case "autoText":
-            if (core.status.replay.replaying)
+            if (core.isReplaying())
                 core.events.doAction();
             else {
                 core.ui.drawTextBox(data.text);
@@ -431,7 +431,7 @@ events.prototype.doAction = function() {
             }
             break;
         case "scrollText": // 滚动剧情文本
-            if (core.status.replay.replaying)
+            if (core.isReplaying())
                 core.events.doAction();
             else {
                 var content = core.replaceText(data.text);
@@ -729,7 +729,7 @@ events.prototype.doAction = function() {
             break;
         case "showImage": // 显示图片
             if (!core.isset(data.loc)) data.loc=[0, 0];
-            if (core.status.replay.replaying) {
+            if (core.isReplaying()) {
                 data.time = 0;
             }
             var image = core.material.images.images[data.image];
@@ -749,7 +749,7 @@ events.prototype.doAction = function() {
             break;
         case "showTextImage": // 显示图片化文本
             if (!core.isset(data.loc)) data.loc=[0, 0];
-            if (core.status.replay.replaying) {
+            if (core.isReplaying()) {
                 data.time = 0;
             }
             var content = core.replaceText(data.text);
@@ -765,7 +765,7 @@ events.prototype.doAction = function() {
             }
             break;
         case "hideImage": // 隐藏图片
-            if (core.status.replay.replaying) {
+            if (core.isReplaying()) {
                 data.time = 0;
             }
             if (data.async || data.time == 0) {
@@ -795,7 +795,7 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "moveImage": // 图片移动
-            if (core.status.replay.replaying) { // 正在播放录像
+            if (core.isReplaying()) { // 正在播放录像
                 this.doAction();
             }
             else {
@@ -860,7 +860,7 @@ events.prototype.doAction = function() {
                 break;
             }
         case "openShop": // 打开一个全局商店
-            if (core.status.replay.replaying) { // 正在播放录像，简单将visited置为true
+            if (core.isReplaying()) { // 正在播放录像，简单将visited置为true
                 core.status.shops[data.id].visited=true;
                 core.status.event.data.list = [];
                 this.doAction();
@@ -905,14 +905,15 @@ events.prototype.doAction = function() {
                 break;
             }
         case "playSound":
-            if (!core.status.replay.replaying)
+            if (!core.isReplaying())
                 core.playSound(data.name);
             this.doAction();
             break;
         case "playBgm":
             core.playBgm(data.name);
             this.doAction();
-            break
+            break;
+        /*
         case "pauseBgm":
             core.pauseBgm();
             this.doAction();
@@ -921,8 +922,10 @@ events.prototype.doAction = function() {
             core.resumeBgm();
             this.doAction();
             break
+            */
         case "loadBgm":
-            core.loadBgm(data.name);
+            if (core.platform.isPC)
+                core.loadBgm(data.name);
             this.doAction();
             break;
         case "freeBgm":
@@ -965,9 +968,11 @@ events.prototype.doAction = function() {
                 }
                 // flag
                 if (data.name.indexOf("flag:")==0) {
-                    var flag = data.name.substring(5);
-                    if (/^__[A-Z]__$/.test(flag)) flag = (prefix||"")+flag;
-                    core.setFlag(flag, value);
+                    core.setFlag(data.name.substring(5), value);
+                }
+                // switch
+                if (data.name.indexOf("switch:")==0) {
+                    core.setFlag((prefix||"global")+"@"+data.name.substring(7), value);
                 }
             }
             catch (e) {console.log(e)}
@@ -994,6 +999,16 @@ events.prototype.doAction = function() {
             core.values[data.name] = data.value;
             this.doAction();
             break;
+        case "setGlobalFlag":
+            {
+                var flags = core.getFlag("globalFlags", {});
+                flags[data.name] = data.value;
+                core.flags[data.name] = data.value;
+                core.setFlag("globalFlags", flags);
+                core.resize();
+                this.doAction();
+                break;
+            }
         case "setHeroIcon":
             {
                 this.setHeroIcon(data.name);
@@ -1003,7 +1018,7 @@ events.prototype.doAction = function() {
         case "input":
             {
                 var value;
-                if (core.status.replay.replaying) {
+                if (core.isReplaying()) {
                     var action = core.status.replay.toReplay.shift();
                     if (action.indexOf("input:")==0 ) {
                         value=parseInt(action.substring(6));
@@ -1027,7 +1042,7 @@ events.prototype.doAction = function() {
         case "input2":
             {
                 var value;
-                if (core.status.replay.replaying) {
+                if (core.isReplaying()) {
                     var action = core.status.replay.toReplay.shift();
                     try {
                         if (action.indexOf("input2:")!=0) throw new Error("Input2 Error. Current action: "+action);
@@ -1068,7 +1083,7 @@ events.prototype.doAction = function() {
             this.doAction();
             break;
         case "choices": // 提供选项
-            if (core.status.replay.replaying) {
+            if (core.isReplaying()) {
                 if (core.status.replay.toReplay.length==0) { // 回放完毕
                     core.status.replay.replaying=false;
                     core.drawTip("录像回放完毕");
@@ -1127,8 +1142,6 @@ events.prototype.doAction = function() {
                         if ((typeof func == "string") && func.indexOf("function")==0) {
                             eval('('+func+')()');
                         }
-                        else if (func instanceof Function)
-                            func();
                     }
                 } catch (e) {
                     console.log(e);
@@ -1166,20 +1179,32 @@ events.prototype.doAction = function() {
             }
             break;
         case "sleep": // 等待多少毫秒
-            setTimeout(function() {
+            core.timeout.sleepTimeout = setTimeout(function() {
+                core.timeout.sleepTimeout = null;
                 core.events.doAction();
-            }, core.status.replay.replaying?20:data.time);
+            }, core.isReplaying()?20:data.time);
             break;
         case "wait":
-            if (core.status.replay.replaying) {
+            if (core.isReplaying()) {
                 var code = core.status.replay.toReplay.shift();
                 if (code.indexOf("input:")==0) {
                     var value = parseInt(code.substring(6));
                     core.status.route.push("input:"+value);
-                    if (value>=10000) {
+                    if (value>=1000000) {
                         core.setFlag('type', 1);
-                        core.setFlag('x', parseInt((value-10000)/100));
-                        core.setFlag('y', value%100);
+                        var px = parseInt((value-1000000)/1000), py = value%1000;
+                        core.setFlag('px', px);
+                        core.setFlag('py', py);
+                        core.setFlag('x', parseInt(px/32));
+                        core.setFlag('y', parseInt(py/32));
+                    }
+                    else if (value>=10000) {
+                        core.setFlag('type', 1);
+                        var x = parseInt((value-10000)/100), y = value%100;
+                        core.setFlag('px', 32*x+16);
+                        core.setFlag('py', 32*y+16);
+                        core.setFlag('x', x);
+                        core.setFlag('y', y);
                     }
                     else {
                         core.setFlag('type', 0);
@@ -1196,7 +1221,7 @@ events.prototype.doAction = function() {
         case "waitAsync": // 等待所有异步事件执行完毕
             {
                 var test = window.setInterval(function () {
-                    if (Object.keys(core.animateFrame.asyncId)==0) {
+                    if (Object.keys(core.animateFrame.asyncId).length==0) {
                         clearInterval(test);
                         core.events.doAction();
                     }
@@ -1217,6 +1242,40 @@ events.prototype.doAction = function() {
                 this.doAction();
                 break;
             }
+        case "callBook": // 呼出怪物手册
+            if (core.isReplaying() || !core.hasItem('book')) {
+                this.doAction();
+            }
+            else {
+                var e = core.clone(core.status.event.data);
+                core.ui.closePanel();
+                core.openBook();
+                core.status.event.interval = e;
+            }
+            break;
+        case "callSave": // 呼出存档页面
+            if (core.isReplaying() || core.hasFlag("__events__")) {
+                core.removeFlag("__events__");
+                this.doAction();
+            }
+            else {
+                var e = core.clone(core.status.event.data);
+                core.ui.closePanel();
+                core.save();
+                core.status.event.interval = e;
+            }
+            break;
+        case "callLoad": // 呼出读档页面
+            if (core.isReplaying()) {
+                this.doAction();
+            }
+            else {
+                var e = core.clone(core.status.event.data);
+                core.ui.closePanel();
+                core.load();
+                core.status.event.interval = e;
+            }
+            break;
         case "exit": // 立刻结束事件
             core.status.event.data.list = [];
             core.events.doAction();
@@ -1241,6 +1300,21 @@ events.prototype.insertAction = function (action, x, y, callback) {
         if (core.isset(y)) core.status.event.data.y=y;
         if (core.isset(callback)) core.status.event.data.callback=callback;
     }
+}
+
+////// 恢复一个事件 //////
+events.prototype.recoverEvents = function (data) {
+    if (core.isset(data)) {
+        core.ui.closePanel();
+        core.lockControl();
+        core.status.event.id = 'action';
+        core.status.event.data = data;
+        setTimeout(function () {
+            core.doAction();
+        }, 30);
+        return true;
+    }
+    return false;
 }
 
 ////// 获得面前的物品（轻按） //////
@@ -1270,7 +1344,6 @@ events.prototype.getItem = function (itemId, itemNum, itemX, itemY, callback) {
     if (itemNum > 1) text += "x" + itemNum;
     if (itemCls === 'items') text += core.items.getItemEffectTip(itemId);
     core.drawTip(text, core.material.icons.items[itemId]);
-    core.clearMap('event', itemX * 32, itemY * 32, 32, 32);
     core.updateStatusBar();
 
     this.eventdata.afterGetItem(itemId, itemX, itemY, callback);
@@ -1356,7 +1429,7 @@ events.prototype.battle = function (id, x, y, force, callback) {
     if (!core.isset(core.status.event.id)) // 自动存档
         core.autosave(true);
 
-    if (core.flags.battleAnimate&&!core.status.replay.replaying) {
+    if (core.flags.battleAnimate&&!core.isReplaying()) {
         core.waitHeroToStop(function() {
             core.ui.drawBattleAnimate(id, function() {
                 core.events.afterBattle(id, x, y, callback);
@@ -1390,7 +1463,7 @@ events.prototype.trigger = function (x, y) {
                     if (core.isset(mapBlocks[b].event.data) && core.isset(mapBlocks[b].event.data.portalWithoutTrigger))
                         canCross=mapBlocks[b].event.data.portalWithoutTrigger;
                     if (canCross) {
-                        if (core.status.replay.replaying) {
+                        if (core.isReplaying()) {
                             if (core.status.replay.toReplay[0]=='no') {
                                 core.status.replay.toReplay.shift();
                                 core.status.route.push("no");
@@ -1459,7 +1532,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
     if (!core.isset(time)) time = core.values.floorChangeTime;
     if (!core.isset(time)) time = 800;
 
-    var displayAnimate = time>=100 && !core.status.replay.replaying;
+    var displayAnimate = time>=100 && !core.isReplaying();
 
     time /= 20;
     core.lockControl();
@@ -1717,7 +1790,7 @@ events.prototype.setVolume = function (value, time, callback) {
 ////// 画面震动 //////
 events.prototype.vibrate = function(time, callback) {
 
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) {
+    if (core.isReplaying()) {
         if (core.isset(callback)) callback();
         return;
     }

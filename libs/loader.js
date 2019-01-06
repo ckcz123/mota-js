@@ -39,7 +39,17 @@ loader.prototype.load = function (callback) {
         core.loader.loadImages(images, core.material.images.images, function () {
             // 加载autotile
             core.material.images.autotile = {};
-            core.loader.loadImages(Object.keys(core.material.icons.autotile), core.material.images.autotile, function () {
+            var keys = Object.keys(core.material.icons.autotile);
+            var autotiles = {};
+            core.loader.loadImages(keys, autotiles, function () {
+
+                keys.forEach(function (v) {
+                    core.material.images.autotile[v] = autotiles[v];
+                });
+                
+                setTimeout(function () {
+                    core.maps.makeAutotileEdges();
+                });
 
                 // 加载tilesets
                 core.material.images.tilesets = {};
@@ -136,6 +146,7 @@ loader.prototype.loadAnimates = function () {
                             image.src = t2;
                             data.images.push(image);
                         } catch (e) {
+                            console.log(e);
                             data.images.push(null);
                         }
                     }
@@ -174,7 +185,8 @@ loader.prototype.loadAnimates = function () {
 loader.prototype.loadMusic = function () {
 
     core.bgms.forEach(function (t) {
-
+        core.loader.loadOneMusic(t);
+        /*
         // 判断是不是mid
         if (/^.*\.mid$/i.test(t)) {
 
@@ -210,6 +222,7 @@ loader.prototype.loadMusic = function () {
         else {
             core.loader.loadOneMusic(t);
         }
+        */
     });
 
     core.sounds.forEach(function (t) {
@@ -243,8 +256,7 @@ loader.prototype.loadMusic = function () {
     });
 
     // 直接开始播放
-    if (core.musicStatus.startDirectly && core.bgms.length>0)
-        core.playBgm(core.bgms[0]);
+    core.playBgm(main.startBgm);
 }
 
 loader.prototype.loadOneMusic = function (name) {
@@ -264,6 +276,9 @@ loader.prototype.freeBgm = function (name) {
     core.material.bgms[name].removeAttribute("src");
     core.material.bgms[name].load();
     core.material.bgms[name] = null;
+    if (name == core.musicStatus.playingBgm) {
+        core.musicStatus.playingBgm = null;
+    }
     // 三秒后重新加载
     setTimeout(function () {
         core.loader.loadOneMusic(name);

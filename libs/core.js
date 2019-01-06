@@ -20,6 +20,7 @@ function core() {
         'getItemTipTimeout': null,
         'turnHeroTimeout': null,
         'onDownTimeout': null,
+        'sleepTimeout': null,
     }
     this.interval = {
         'heroMoveInterval': null,
@@ -49,11 +50,9 @@ function core() {
     }
     this.musicStatus = {
         'audioContext': null, // WebAudioContext
-        'startDirectly': false, // 是否直接播放（加载）音乐
         'bgmStatus': false, // 是否播放BGM
         'soundStatus': true, // 是否播放SE
         'playingBgm': null, // 正在播放的BGM
-        'isPlaying': false,
         'gainNode': null,
         'volume': 1.0, // 音量
         'cachedBgms': [], // 缓存BGM内容
@@ -69,6 +68,7 @@ function core() {
         'isChrome': false, // 是否是Chrome
         'supportCopy': false, // 是否支持复制到剪切板
         'useLocalForage': true,
+        'extendKeyboard': false,
 
         'fileInput': null, // FileInput
         'fileReader': null, // 是否支持FileReader
@@ -92,7 +92,16 @@ function core() {
         height: 13,
         tempCanvas: null, // A temp canvas for drawing
     }
-    this.paint = {}
+    this.paint = {};
+    this.saves = {
+        "saveIndex": null,
+        "ids": {},
+        "autosave": {
+            "data": null,
+            "time": null,
+            "updated": false,
+        }
+    }
     this.initStatus = {
         'played': false,
         'gameOver': false,
@@ -150,7 +159,6 @@ function core() {
         },
 
         // event事件
-        'saveIndex': null,
         'shops': {},
         'event': {
             'id': null,
@@ -295,6 +303,8 @@ core.prototype.init = function (coreData, callback) {
         catch (e) {console.log(e); core.platform.useLocalForage=false;}
     }
 
+    core.platform.extendKeyboard = core.getLocalStorage("extendKeyboard", false);
+
     if (window.FileReader) {
         core.platform.fileReader = new FileReader();
         core.platform.fileReader.onload = function () {
@@ -306,24 +316,11 @@ core.prototype.init = function (coreData, callback) {
         }
     }
 
-    if (core.platform.isPC) {
-        // 如果是PC端直接加载
-        core.musicStatus.startDirectly = true;
-    }
-    else {
-        var connection = navigator.connection;
-        if (core.isset(connection) && connection.type=='wifi')
-            core.musicStatus.startDirectly = true;
-    }
-
     // 先从存储中读取BGM状态
     core.musicStatus.bgmStatus = core.getLocalStorage('bgmStatus', true);
-    if (!core.musicStatus.startDirectly) // 如果当前网络环境不允许
+    if (!core.platform.isPC && (navigator.connection||{}).type!='wifi')
         core.musicStatus.bgmStatus = false;
-    // core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
-
     core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
-    core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
 
     // switchs
     core.flags.battleAnimate = core.getLocalStorage('battleAnimate', core.flags.battleAnimate);
@@ -349,6 +346,12 @@ core.prototype.init = function (coreData, callback) {
 
     core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
 
+    ////// 记录所有的存档编号！！！ //////
+    core.saves.saveIndex = core.getLocalStorage('saveIndex', 1);
+    core.control.getSaveIndexes(function (indexes) {
+        core.saves.ids = indexes;
+    });
+
     core.loader.load(function () {
         console.log(core.material);
         // 设置勇士高度
@@ -362,8 +365,13 @@ core.prototype.init = function (coreData, callback) {
         if (main.mode=='play')
             core.events.initGame();
 
-        if (core.isset(functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins))
-            core.plugin = new functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.plugin();
+        if (core.isset(functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins)) {
+            core.plugin = new function () {
+                this.__renderFrameFuncs = [];
+            };
+            core.plugin.__init__ = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.plugin;
+            core.plugin.__init__();
+        }
 
         core.showStartAnimate();
 
@@ -602,6 +610,11 @@ core.prototype.nextY = function (n) {
     return core.control.nextY(n);
 }
 
+////// 某个点是否在勇士旁边 //////
+core.prototype.nearHero = function (x, y) {
+    return core.control.nearHero(x, y);
+}
+
 /////////// 自动行走 & 行走控制 END ///////////
 
 
@@ -649,8 +662,8 @@ core.prototype.fillText = function (name, text, x, y, style, font) {
 }
 
 ////// 在某个canvas上绘制一段描边文字 //////
-core.prototype.fillBoldText = function (name, text, style, x, y, font) {
-    core.ui.fillBoldText(name, text, style , x, y, font);
+core.prototype.fillBoldText = function (name, text, x, y, style, font) {
+    core.ui.fillBoldText(name, text, x, y, style, font);
 }
 
 ////// 在某个canvas上绘制一个矩形 //////
@@ -892,7 +905,12 @@ core.prototype.drawBoxAnimate = function () {
 
 ////// 绘制动画 //////
 core.prototype.drawAnimate = function (name, x, y, callback) {
-    core.maps.drawAnimate(name, x, y, callback);
+    return core.maps.drawAnimate(name, x, y, callback);
+}
+
+////// 停止动画 //////
+core.prototype.stopAnimate = function (id, doCallback) {
+    return core.maps.stopAnimate(id, doCallback);
 }
 
 ////// 更新领域、夹击、阻击的伤害地图 //////
@@ -1225,6 +1243,11 @@ core.prototype.replay = function () {
     core.control.replay();
 }
 
+////// 是否正在回放录像 //////
+core.prototype.isReplaying = function () {
+    return core.control.isReplaying();
+}
+
 ////// 判断当前能否进入某个事件 //////
 core.prototype.checkStatus = function (name, need, item) {
     return core.control.checkStatus(name, need, item);
@@ -1253,6 +1276,10 @@ core.prototype.openToolbox = function (need) {
 ////// 点击快捷商店按钮时的打开操作 //////
 core.prototype.openQuickShop = function (need) {
     core.control.openQuickShop(need);
+}
+
+core.prototype.openKeyBoard = function (need) {
+    core.control.openKeyBoard(need);
 }
 
 ////// 点击保存按钮时的打开操作 //////
@@ -1313,6 +1340,11 @@ core.prototype.decodeRoute = function (route) {
 ////// 发送HTTP //////
 core.prototype.http = function (type, url, formData, success, error, mimeType, responseType) {
     core.utils.http(type, url, formData, success, error, mimeType, responseType)
+}
+
+////// 判断某个存档位是否存在存档 //////
+core.prototype.hasSave = function (index) {
+    return core.control.hasSave(index);
 }
 
 ////// 设置勇士属性 //////
@@ -1384,6 +1416,10 @@ core.prototype.clamp = function (x, a, b) {
     return core.utils.clamp(x, a, b);
 }
 
+core.prototype.getCookie = function (name) {
+    return core.utils.getCookie(name);
+}
+
 ////// Base64加密 //////
 core.prototype.encodeBase64 = function (str) {
     return core.utils.encodeBase64(str);
@@ -1437,6 +1473,11 @@ core.prototype.pauseBgm = function () {
 ////// 恢复背景音乐的播放 //////
 core.prototype.resumeBgm = function () {
     core.control.resumeBgm();
+}
+
+////// 更改背景音乐的状态 //////
+core.prototype.triggerBgm = function () {
+    core.control.triggerBgm();
 }
 
 ////// 预加载一个背景音乐 //////

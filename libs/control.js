@@ -55,6 +55,7 @@ control.prototype.setRequestAnimationFrame = function () {
         core.animateFrame.moveTime = core.animateFrame.moveTime||timestamp;
         core.animateFrame.lastLegTime = core.animateFrame.lastLegTime||timestamp;
         core.animateFrame.weather.time = core.animateFrame.weather.time||timestamp;
+        core.saves.autosave.time = core.saves.autosave.time||timestamp;
 
         // move time
         if (core.isPlaying() && core.isset(core.status) && core.isset(core.status.hero)
@@ -100,6 +101,12 @@ control.prototype.setRequestAnimationFrame = function () {
         if (timestamp-core.animateFrame.boxTime>core.animateFrame.speed && core.isset(core.status.boxAnimateObjs) && core.status.boxAnimateObjs.length>0) {
             core.drawBoxAnimate();
             core.animateFrame.boxTime = timestamp;
+        }
+
+        // AutosaveTime
+        if (timestamp - core.saves.autosave.time > 5000 && core.isPlaying()) {
+            core.control.checkAutosave();
+            core.saves.autosave.time = timestamp;
         }
 
         // selectorTime
@@ -271,6 +278,25 @@ control.prototype.setRequestAnimationFrame = function () {
         // 执行用户的并行事件处理内容
         functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.parallelDo(timestamp);
 
+        if (core.isPlaying()) {
+            // 执行插件中的每帧函数
+            var renderFrameFuncs = core.plugin.__renderFrameFuncs || [];
+            renderFrameFuncs.forEach(function (t) {
+                try {
+                    if (t instanceof Function) {
+                        t(timestamp);
+                    }
+                    else if (typeof t == 'string') {
+                        if (core.plugin[t])
+                            core.plugin[t](timestamp);
+                    }
+                }
+                catch (e) {
+                    console.log(e);
+                }
+            });
+        }
+
         // 检查控制台状态
         if (core.utils.consoleOpened()) {
             core.setFlag('consoleOpened', true);
@@ -380,6 +406,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
 
     // 初始化status
     core.status = core.clone(core.initStatus);
+    core.status.played = true;
     // 初始化maps
     core.status.floorId = floorId;
     core.status.maps = core.clone(maps);
@@ -412,24 +439,26 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
     // 初始化路线
     if (core.isset(route))
         core.status.route = route;
-    // 保存的Index
-    core.status.saveIndex = core.getLocalStorage('saveIndex', 1);
 
     if (core.isset(values))
         core.values = core.clone(values);
     else core.values = core.clone(core.data.values);
 
+    core.flags = core.clone(core.data.flags);
+    var systemFlags = core.getFlag("globalFlags", {});
+    for (var key in systemFlags)
+        core.flags[key] = systemFlags[key];
+
     core.events.initGame();
+    core.resize();
     this.updateGlobalAttribute(Object.keys(core.status.globalAttribute));
     this.triggerStatusBar(core.getFlag('hideStatusBar', false)?'hide':'show', core.getFlag("showToolbox"));
-    core.status.played = true;
 }
 
 ////// 重新开始游戏；此函数将回到标题页面 //////
 control.prototype.restart = function(noAnimate) {
     this.showStartAnimate(noAnimate);
-    if (core.bgms.length>0)
-        core.playBgm(core.bgms[0]);
+    core.playBgm(main.startBgm);
 }
 
 
@@ -1124,6 +1153,11 @@ control.prototype.nextY = function (n) {
     return core.getHeroLoc('y')+core.utils.scan[core.getHeroLoc('direction')].y*(n||1);
 }
 
+////// 某个点是否在勇士旁边 //////
+control.prototype.nearHero = function (x, y) {
+    return Math.abs(x-core.getHeroLoc('x'))+Math.abs(y-core.getHeroLoc('y'))<=1;
+}
+
 ////// 聚集跟随者 //////
 control.prototype.gatherFollowers = function () {
     if (!core.isset(core.status.hero.followers) || core.status.hero.followers.length==0) return;
@@ -1422,7 +1456,7 @@ control.prototype.updateDamage = function (floorId, canvas) {
                 if (core.flags.displayEnemyDamage) {
                     var damageString = core.enemys.getDamageString(id, x, y);
                     var damage = damageString.damage, color = damageString.color;
-                    core.fillBoldText(canvas, damage, color, 32*x+1, 32*(y+1)-1);
+                    core.fillBoldText(canvas, damage, 32*x+1, 32*(y+1)-1, color);
                 }
 
                 // 临界显伤
@@ -1431,7 +1465,7 @@ control.prototype.updateDamage = function (floorId, canvas) {
                     if (critical.length>0) critical=critical[0];
                     critical = core.formatBigNumber(critical[0], true);
                     if (critical == '???') critical = '?';
-                    core.fillBoldText(canvas, critical, '#FFFFFF', 32*x+1, 32*(y+1)-11);
+                    core.fillBoldText(canvas, critical, 32*x+1, 32*(y+1)-11, '#FFFFFF');
                 }
 
             }
@@ -1456,7 +1490,7 @@ control.prototype.updateDamage = function (floorId, canvas) {
                 var damage = core.status.checkBlock.damage[x+core.bigmap.width*y];
                 if (damage>0) {
                     damage = core.formatBigNumber(damage, true);
-                    core.fillBoldText(canvas, damage, "#FF7F00", 32*x+16, 32*(y+1)-14);
+                    core.fillBoldText(canvas, damage, 32*x+16, 32*(y+1)-14, '#FF7F00');
                 }
             }
         }
@@ -1554,7 +1588,7 @@ control.prototype.triggerReplay = function () {
 control.prototype.pauseReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     core.status.replay.pausing = true;
     core.updateStatusBar();
     core.drawTip("暂停播放");
@@ -1564,7 +1598,7 @@ control.prototype.pauseReplay = function () {
 control.prototype.resumeReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     core.status.replay.pausing = false;
     core.updateStatusBar();
     core.drawTip("恢复播放");
@@ -1575,7 +1609,7 @@ control.prototype.resumeReplay = function () {
 control.prototype.speedUpReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     if (core.status.replay.speed==12) core.status.replay.speed=24.0;
     else if (core.status.replay.speed==6) core.status.replay.speed=12.0;
     else if (core.status.replay.speed==3) core.status.replay.speed=6.0;
@@ -1590,7 +1624,7 @@ control.prototype.speedUpReplay = function () {
 control.prototype.speedDownReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     if (core.status.replay.speed==24) core.status.replay.speed=12.0;
     else if (core.status.replay.speed==12) core.status.replay.speed=6.0;
     else if (core.status.replay.speed==6) core.status.replay.speed=3.0;
@@ -1606,7 +1640,7 @@ control.prototype.speedDownReplay = function () {
 control.prototype.setReplaySpeed = function (speed) {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     core.status.replay.speed = speed;
     core.drawTip("x"+core.status.replay.speed+"倍");
 }
@@ -1615,7 +1649,7 @@ control.prototype.setReplaySpeed = function (speed) {
 control.prototype.stopReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     core.status.replay.toReplay = [];
     core.status.replay.totalList = [];
     core.status.replay.replaying=false;
@@ -1631,7 +1665,7 @@ control.prototype.stopReplay = function () {
 control.prototype.rewindReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
         return;
@@ -1667,7 +1701,7 @@ control.prototype.rewindReplay = function () {
 control.prototype.saveReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
         return;
@@ -1679,7 +1713,7 @@ control.prototype.saveReplay = function () {
 
     core.lockControl();
     core.status.event.id='save';
-    var saveIndex = core.status.saveIndex;
+    var saveIndex = core.saves.saveIndex;
     var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
 
     core.ui.drawSLPanel(10*page+offset);
@@ -1689,7 +1723,7 @@ control.prototype.saveReplay = function () {
 control.prototype.bookReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0) return;
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
         return;
@@ -1716,7 +1750,7 @@ control.prototype.viewMapReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
 
-    if (!core.status.replay.replaying) return;
+    if (!core.isReplaying()) return;
     if (!core.status.replay.pausing) {
         core.drawTip("请先暂停录像");
         return;
@@ -1735,7 +1769,7 @@ control.prototype.viewMapReplay = function () {
 control.prototype.replay = function () {
     if (!core.isPlaying()) return;
 
-    if (!core.status.replay.replaying) return; // 没有回放
+    if (!core.isReplaying()) return; // 没有回放
     if (core.status.replay.pausing) return; // 暂停状态
     if (core.status.replay.animate) return; // 正在某段动画中
 
@@ -1928,6 +1962,10 @@ control.prototype.replay = function () {
 
 }
 
+control.prototype.isReplaying = function () {
+    return (core.status.replay||{}).replaying;
+}
+
 ////// 判断当前能否进入某个事件 //////
 control.prototype.checkStatus = function (name, need, item) {
     if (need && core.status.event.id == name) {
@@ -1952,19 +1990,23 @@ control.prototype.checkStatus = function (name, need, item) {
 
 ////// 点击怪物手册时的打开操作 //////
 control.prototype.openBook = function (need) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isReplaying()) return;
+
+    if (core.status.event.id == 'book' && core.events.recoverEvents(core.status.event.interval)) {
+        return;
+    }
 
     // 当前是book，且从“浏览地图”打开
-    if (core.status.event.id == 'book' && core.isset(core.status.event.selection)) {
+    if (core.status.event.id == 'book' && core.isset(core.status.event.ui)) {
         core.status.boxAnimateObjs = [];
-        core.ui.drawMaps(core.status.event.selection);
+        core.ui.drawMaps(core.status.event.ui);
         return;
     }
 
     // 从“浏览地图”页面打开
     if (core.status.event.id=='viewMaps') {
         need=false;
-        core.status.event.selection = core.status.event.data;
+        core.status.event.ui = core.status.event.data;
     }
 
     if (!core.checkStatus('book', need, true))
@@ -1974,7 +2016,7 @@ control.prototype.openBook = function (need) {
 
 ////// 点击楼层传送器时的打开操作 //////
 control.prototype.useFly = function (need) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isReplaying()) return;
     if (!core.checkStatus('fly', need, true))
         return;
     if (core.flags.flyNearStair && !core.nearStair()) {
@@ -2001,7 +2043,7 @@ control.prototype.flyTo = function (toId, callback) {
 
 ////// 点击装备栏时的打开操作 //////
 control.prototype.openEquipbox = function (need) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isReplaying()) return;
     if (!core.checkStatus('equipbox', need))
         return;
     core.ui.drawEquipbox();
@@ -2009,7 +2051,7 @@ control.prototype.openEquipbox = function (need) {
 
 ////// 点击工具栏时的打开操作 //////
 control.prototype.openToolbox = function (need) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isReplaying()) return;
     if (!core.checkStatus('toolbox', need))
         return;
     core.ui.drawToolbox();
@@ -2017,19 +2059,31 @@ control.prototype.openToolbox = function (need) {
 
 ////// 点击快捷商店按钮时的打开操作 //////
 control.prototype.openQuickShop = function (need) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isReplaying()) return;
     if (!core.checkStatus('selectShop', need))
         return;
     core.ui.drawQuickShop();
 }
 
+control.prototype.openKeyBoard = function (need) {
+    if (core.isReplaying()) return;
+    if (!core.checkStatus('keyBoard', need))
+        return;
+    core.ui.drawKeyBoard();
+}
+
 ////// 点击保存按钮时的打开操作 //////
 control.prototype.save = function(need) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isReplaying()) return;
+
+    if (core.status.event.id == 'save' && core.events.recoverEvents(core.status.event.interval)) {
+        return;
+    }
+
     if (!core.checkStatus('save', need))
         return;
 
-    var saveIndex = core.status.saveIndex;
+    var saveIndex = core.saves.saveIndex;
     var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
 
     core.ui.drawSLPanel(10*page+offset);
@@ -2037,9 +2091,9 @@ control.prototype.save = function(need) {
 
 ////// 点击读取按钮时的打开操作 //////
 control.prototype.load = function (need) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isReplaying()) return;
 
-    var saveIndex = core.getLocalStorage('saveIndex', 1);
+    var saveIndex = core.saves.saveIndex;
     var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
 
     // 游戏开始前读档
@@ -2054,6 +2108,10 @@ control.prototype.load = function (need) {
         return;
     }
 
+    if (core.status.event.id == 'load' && core.events.recoverEvents(core.status.event.interval)) {
+        return;
+    }
+
     if (!core.checkStatus('load', need))
         return;
     core.ui.drawSLPanel(10*page+offset);
@@ -2061,7 +2119,7 @@ control.prototype.load = function (need) {
 
 ////// 点击设置按钮时的操作 //////
 control.prototype.openSettings = function (need) {
-    if (core.isset(core.status.replay)&&core.status.replay.replaying) return;
+    if (core.isReplaying()) return;
     if (!core.checkStatus('settings', need))
         return;
     core.ui.drawSettings();
@@ -2069,23 +2127,27 @@ control.prototype.openSettings = function (need) {
 
 ////// 自动存档 //////
 control.prototype.autosave = function (removeLast) {
-    var addLast = true;
-    if (core.status.event.id!=null) {
-        // 检查是否是强制自动存档
-        if (core.status.event.id=='action' && core.hasFlag("forceSave")) addLast = false;
-        else return;
-    }
+    if (core.status.event.id!=null) return;
     var x=null;
     if (removeLast)
         x=core.status.route.pop();
-    if (addLast)
-        core.status.route.push("turn:"+core.getHeroLoc('direction'));
-    core.setLocalForage("autoSave", core.saveData());
-    if (addLast)
-        core.status.route.pop();
+    core.status.route.push("turn:"+core.getHeroLoc('direction'));
+    // core.setLocalForage("autoSave", core.saveData());
+    // ----- Add to autosaveData
+    core.saves.autosave.data = core.saveData();
+    core.saves.autosave.updated = true;
+    core.saves.ids[0] = true;
+    // ----- Updated every 5s
+    core.status.route.pop();
     if (removeLast && core.isset(x))
         core.status.route.push(x);
-    core.removeFlag("forceSave");
+}
+
+/////// 实际进行自动存档 //////
+control.prototype.checkAutosave = function () {
+    if (core.saves.autosave.data == null || !core.saves.autosave.updated) return;
+    core.saves.autosave.updated = false;
+    core.setLocalForage("autoSave", core.saves.autosave.data);
 }
 
 ////// 实际进行存读档事件 //////
@@ -2095,13 +2157,21 @@ control.prototype.doSL = function (id, type) {
             core.drawTip('不能覆盖自动存档！');
             return;
         }
+        // 事件中的存档
+        if (core.status.event.interval != null) {
+            core.setFlag("__events__", core.status.event.interval);
+        }
         core.setLocalForage("save"+id, core.saveData(), function() {
+            if (id!="autoSave") {
+                core.saves.saveIndex=id;
+                core.setLocalStorage('saveIndex', core.saves.saveIndex);
+            }
+            if (core.events.recoverEvents(core.status.event.interval)) {
+                core.drawTip("存档成功！");
+                return;
+            }
             core.ui.closePanel();
             core.drawTip('存档成功！');
-            if (id!="autoSave") {
-                core.status.saveIndex=id;
-                core.setLocalStorage('saveIndex', core.status.saveIndex);
-            }
         }, function(err) {
             console.info(err);
             if (core.platform.useLocalForage) {
@@ -2110,13 +2180,12 @@ control.prototype.doSL = function (id, type) {
             else {
                 alert("存档失败，错误信息：\n"+err+"\n建议使用垃圾存档清理工具进行清理！");
             }
-        })
+        });
+        core.removeFlag("__events__");
         return;
     }
     else if (type=='load') {
-        // var data = core.getLocalStorage(id=='autoSave'?id:"save"+id, null);
-
-        core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
+        var afterGet = function (data) {
             if (!core.isset(data)) {
                 alert("无效的存档");
                 return;
@@ -2138,20 +2207,27 @@ control.prototype.doSL = function (id, type) {
             core.loadData(data, function() {
                 core.drawTip("读档成功");
                 if (id!="autoSave") {
-                    core.status.saveIndex=id;
-                    core.setLocalStorage('saveIndex', core.status.saveIndex);
+                    core.saves.saveIndex=id;
+                    core.setLocalStorage('saveIndex', core.saves.saveIndex);
                 }
             });
-        }, function(err) {
-            console.log(err);
-            alert("无效的存档");
-        })
-
+        }
+        if (id == 'autoSave' && core.saves.autosave.data != null) {
+            afterGet(core.saves.autosave.data);
+        }
+        else {
+            core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
+                if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
+                afterGet(data);
+            }, function(err) {
+                console.log(err);
+                alert("无效的存档");
+            })
+        }
         return;
     }
     else if (type == 'replayLoad') {
-        // var data = core.getLocalStorage(id=='autoSave'?id:"save"+id, null);
-        core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
+        var afterGet = function (data) {
             if (!core.isset(data)) {
                 core.drawTip("无效的存档");
                 return;
@@ -2177,17 +2253,26 @@ control.prototype.doSL = function (id, type) {
                 core.startReplay(route);
                 core.drawTip("回退到存档节点");
             });
-        }, function(err) {
-            console.log(err);
-            core.drawTip("无效的存档");
-        })
+        }
+        if (id == 'autoSave' && core.saves.autosave.data != null) {
+            afterGet(core.saves.autosave.data);
+        }
+        else {
+            core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
+                if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
+                afterGet(data);
+            }, function(err) {
+                console.log(err);
+                alert("无效的存档");
+            })
+        }
     }
 }
 
 ////// 同步存档到服务器 //////
 control.prototype.syncSave = function (type) {
     core.ui.drawWaiting("正在同步，请稍后...");
-    core.control.getSaves(type=='all'?null:core.status.saveIndex, function (saves) {
+    core.control.getSaves(type=='all'?null:core.saves.saveIndex, function (saves) {
         if (!core.isset(saves)) {
             core.drawText("没有要同步的存档");
             return;
@@ -2205,7 +2290,7 @@ control.prototype.syncSave = function (type) {
                 core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+response.msg);
             }
             else {
-                core.drawText((type=='all'?"所有存档":"存档"+core.status.saveIndex)+"同步成功！\n\n您的存档编号： "
+                core.drawText((type=='all'?"所有存档":"存档"+core.saves.saveIndex)+"同步成功！\n\n您的存档编号： "
                     +response.code+"\n您的存档密码： "+response.msg
                     +"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。")
             }
@@ -2241,8 +2326,6 @@ control.prototype.syncLoad = function () {
             case 0:
                 // 成功
                 var data=JSON.parse(response.msg);
-                // console.log(data);
-
                 if (data instanceof Array) {
                     core.status.event.selection=1;
                     core.ui.drawConfirmBox("所有本地存档都将被覆盖，确认？", function () {
@@ -2252,8 +2335,8 @@ control.prototype.syncLoad = function () {
                                 core.setLocalForage("save"+i, data[i-1]);
                             }
                             else {
-                                // core.removeLocalStorage("save"+i);
-                                core.removeLocalForage("save"+i);
+                                if (core.saves.ids[i])
+                                    core.removeLocalForage("save"+i);
                             }
                         }
                         core.drawText("同步成功！\n你的本地所有存档均已被覆盖。");
@@ -2264,9 +2347,8 @@ control.prototype.syncLoad = function () {
                 }
                 else {
                     // 只覆盖单存档
-                    // core.setLocalStorage("save"+core.status.saveIndex, data);
-                    core.setLocalForage("save"+core.status.saveIndex, data, function() {
-                        core.drawText("同步成功！\n单存档已覆盖至存档"+core.status.saveIndex);
+                    core.setLocalForage("save"+core.saves.saveIndex, data, function() {
+                        core.drawText("同步成功！\n单存档已覆盖至存档"+core.saves.saveIndex);
                     });
                 }
                 break;
@@ -2363,14 +2445,17 @@ control.prototype.getSaves = function (index, callback) {
         })
         return;
     }
-    var number = 5*(main.savePages||30);
+
+    var ids = Object.keys(core.saves.ids).sort(function(a,b) {return a-b;}), number = ids.length;
+    // 不计0
     var saves = [];
+
     var load = function (index, callback) {
-        if (index > number) {
+        if (index >= number) {
             if (core.isset(callback)) callback(saves);
             return;
         }
-        core.getLocalForage("save"+index, null, function (data) {
+        core.getLocalForage("save"+ids[index], null, function (data) {
             saves.push(data);
             load(index+1, callback);
         }, function(err) {
@@ -2379,6 +2464,38 @@ control.prototype.getSaves = function (index, callback) {
         })
     }
     load(1, callback);
+}
+
+////// 获得所有存在存档的存档位 //////
+control.prototype.getSaveIndexes = function (callback) {
+    var indexes = {};
+
+    var getIndex = function (name) {
+        var e = new RegExp('^'+core.firstData.name+"_(save\\d+|autoSave)$").exec(name);
+        if (e!=null) {
+            if (e[1]=='autoSave') indexes[0]=true;
+            else indexes[parseInt(e[1].substring(4))] = true;
+        }
+    };
+
+    if (!core.platform.useLocalForage) {
+        Object.keys(localStorage).forEach(function (key) {
+            getIndex(key);
+        });
+        callback(indexes);
+    }
+    else {
+        localforage.iterate(function (value, key, n) {
+            getIndex(key)
+        }, function () {
+            callback(indexes);
+        })
+    }
+}
+
+////// 判断某个存档位是否存在存档 //////
+control.prototype.hasSave = function (index) {
+    return core.saves.ids[index]||false;
 }
 
 ////// 设置勇士属性 //////
@@ -2444,26 +2561,38 @@ control.prototype.unLockControl = function () {
 ////// 播放背景音乐 //////
 control.prototype.playBgm = function (bgm) {
     if (main.mode!='play')return;
-    // 如果不允许播放
-    if (!core.musicStatus.bgmStatus) return;
     // 音频不存在
     if (!core.isset(core.material.bgms[bgm])) return;
+    // 如果不允许播放
+    if (!core.musicStatus.bgmStatus) {
+        try {
+            core.musicStatus.playingBgm = bgm;
+            core.material.bgms[bgm].pause();
+        }
+        catch (e) {
+            console.log(e);
+        }
+        return;
+    }
+    this.setMusicBtn();
 
+    /*
     // 延迟播放
     if (core.material.bgms[bgm] == 'loading') {
         core.material.bgms[bgm] = 'starting';
         return;
     }
+    */
 
     try {
         // 缓存BGM
         core.loader.loadBgm(bgm);
         // 如果当前正在播放，且和本BGM相同，直接忽略
-        if (core.musicStatus.playingBgm == bgm && core.musicStatus.isPlaying) {
+        if (core.musicStatus.playingBgm == bgm && !core.material.bgms[core.musicStatus.playingBgm].paused) {
             return;
         }
         // 如果正在播放中，暂停
-        if (core.isset(core.musicStatus.playingBgm) && core.musicStatus.isPlaying) {
+        if (core.isset(core.musicStatus.playingBgm)) {
             core.material.bgms[core.musicStatus.playingBgm].pause();
         }
         // 播放当前BGM
@@ -2471,7 +2600,6 @@ control.prototype.playBgm = function (bgm) {
         core.material.bgms[bgm].currentTime = 0;
         core.material.bgms[bgm].play();
         core.musicStatus.playingBgm = bgm;
-        core.musicStatus.isPlaying = true;
     }
     catch (e) {
         console.log("无法播放BGM "+bgm);
@@ -2487,40 +2615,48 @@ control.prototype.pauseBgm = function () {
         if (core.isset(core.musicStatus.playingBgm)) {
             core.material.bgms[core.musicStatus.playingBgm].pause();
         }
-        core.musicStatus.isPlaying = false;
     }
     catch (e) {
         console.log("无法暂停BGM");
         console.log(e);
     }
+    this.setMusicBtn();
+
 }
 
 ////// 恢复背景音乐的播放 //////
 control.prototype.resumeBgm = function () {
     if (main.mode!='play')return;
-    // 如果不允许播放
-    if (!core.musicStatus.bgmStatus) return;
 
     // 恢复BGM
     try {
-        if (core.isset(core.musicStatus.playingBgm)) {
-            core.material.bgms[core.musicStatus.playingBgm].play();
-            core.musicStatus.isPlaying = true;
-        }
-        else {
-            if (core.bgms.length>0) {
-                if (core.isset(core.status.thisMap.bgm)) {
-                    core.playBgm(core.status.thisMap.bgm);
-                }
-                else
-                    core.playBgm(core.bgms[0]);
-            }
-        }
+        core.playBgm(core.musicStatus.playingBgm);
     }
     catch (e) {
         console.log("无法恢复BGM");
         console.log(e);
     }
+    this.setMusicBtn();
+}
+
+control.prototype.setMusicBtn = function () {
+    if (core.musicStatus.bgmStatus)
+        core.dom.musicBtn.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAMAAADzN3VRAAABWVBMVEX///9iYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmL///8AAAC5ubn+/v6xsbEtLS0MDAxmZmZoaGhvb2/c3Nzd3d38/Pz9/f0oKCgpKSl0dHR1dXW6urrb29v7+/v09PTv7+/39/cgICACAgImJibh4eGFhYWGhoaHh4eOjo5paWm7u7vDw8PMzMwyMjI7OztAQEDe3t5FRUVMTEzj4+Pl5eXm5ubp6enr6+tcXFzi4uL19fVeXl74+PgjIyNkZGQGBgaSkpKYmJiampqenp4DAwMwMDBnZ2cICAivr68eHh63t7cLCwsSEhLw8PBhYWEUFBQVFRXNzc3Pz8/Z2dna2toaGhqkpKSlpaWpqamrq6tFOUNAAAAAc3RSTlMAAwQFBhUWGxwkJSYyO0dISVBRUmpvj5CSk5SVoaOlpqiysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyA0IuUgAAAVdJREFUeF5NkVVbw0AQRTcQrLR4IIEGcidJoaUuQHF3d3d3+P/CkuxCzss8nG++mbnDBJXhNt2CpbeFK1kQpSEKidlc8S9qdATRa6UIdQMoxEpDA0Ov3wUAPfW+qLWACydNv9zMrzkJwPK6FB3oHyOfXfuNxvoBQ+GmBYinhHB77TmiVBxoYUw1AYcEq332AS8OYKosAuTT0nza9uU2USYPRJgGxEiSOFywJ3mNARozgBJJzkfLvfu8JgGDWcC9FEsjWzR+y80gYDEAA8QZ3N6kmP1Fs3fEASB7pob7Hh+Wz5L0ci17Or05J7bH6B6dZv05XWK3rG+myV05Ert592Qo55sPuoIr7hEZHHtieIPWy0RU9DLwc3Mnck/vi8/E8XNrDWQtEVnL/ySKMrv0jPwPp870fprcyYifmiEmqGpHkI5q9ofSFIUk2qiwIGpEMyxYhhZRRcMPz89RJ2s9W8wAAAAASUVORK5CYII=";
+    else
+        core.dom.musicBtn.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAMAAADzN3VRAAABYlBMVEX///9iYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmL////8/PwAAABmZmZoaGihoaGioqKxsbG5ubnb29vc3Nzd3d3h4eHi4uL9/f3+/v4tLS1nZ2d0dHSUlJSenp66uroMDAz7+/spKSkoKCgUFBRpaWkVFRVvb291dXU7OzuVlZWYmJhkZGQgICAjIyOkpKQCAgK3t7cGBgbv7++pqamrq6seHh4mJiZhYWGamprp6enr6+saGhpeXl7j4+Pl5eXm5uZKSkrw8PD09PT19fW7u7vDw8PMzMwICAgwMDAyMjILCwtAQECGhoaHh4eBgYGFhYUSEhJXV1dZWVlcXFyOjo6SkpLNzc339/fPz8/Z2dna2tqTk5OlpaWxOPeTAAAAdnRSTlMAAwQFBhUWGxwkJSYyO0dISVBRUmpvj5CSk5SVoaOlpqiysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyNuo+uwAAAWJJREFUeF5NkmV34zAQReUm7WbTuJBNunY3bvXGDjNTkZkZlpn5/9eR5FPfbzr3jGb0RkwRiMQMDm7EIgHmRxtLwMOaHHoQjwz4MUKeCM8AWMrmd7u7f/aXAMyOShHiQD1n04DtN5e5FMBFlSauIsm585dKi4CpuSYKJIv1tBDVmvOSqJgEoowFLSBHaQh10XHWiCgHWEGmAw2blPrvOK/KRJUGoLM4kCVSKrWz7HwgoiwQZyaQJ0+9PvxV23BNATAZB25IqX9b3+jTW9fcApwB6NLgUD5NY3mPXnwmFwBezff1ztzRFzTp94FXMy36HDuCa2RafdnnmZqtL818Gl9/qNnEeyrUk2aTPiKj3qMyWBVi/YSuWq5qiwxkbtX3vYWzdz/l8M0k8ERlvViiB1Ygslb7SbVtJezncj+Cx5bYaeGuonZqhZlieAp+no74/s5EAh6JcY35Cepxk4ObcT3IJPe/1lKsDpFCFQAAAABJRU5ErkJggg==";
+}
+
+////// 更改背景音乐的播放 //////
+control.prototype.triggerBgm = function () {
+    if (main.mode!='play')return;
+
+    core.musicStatus.bgmStatus = !core.musicStatus.bgmStatus;
+    if (core.musicStatus.bgmStatus)
+        this.resumeBgm();
+    else {
+        this.pauseBgm();
+    }
+    core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
 }
 
 ////// 播放音频 //////
@@ -2544,6 +2680,7 @@ control.prototype.playSound = function (sound) {
                     source.noteOn(0);
                 }
                 catch (ee) {
+                    console.log(ee);
                 }
             }
         }
@@ -2559,18 +2696,11 @@ control.prototype.playSound = function (sound) {
 }
 
 control.prototype.checkBgm = function() {
-    if (core.musicStatus.startDirectly && core.musicStatus.bgmStatus) {
-        if (core.musicStatus.playingBgm==null
-            || core.material.bgms[core.musicStatus.playingBgm].paused) {
-            core.musicStatus.playingBgm=null;
-            core.playBgm(core.bgms[0]);
-        }
-    }
+    core.playBgm(core.musicStatus.playingBgm || main.startBgm);
 }
 
 ////// 清空状态栏 //////
 control.prototype.clearStatusBar = function() {
-
     Object.keys(core.statusBar).forEach(function (e) {
         if (core.isset(core.statusBar[e].innerHTML))
             core.statusBar[e].innerHTML = "&nbsp;";
@@ -2587,7 +2717,7 @@ control.prototype.updateStatusBar = function () {
     this.controldata.updateStatusBar();
 
     // 回放
-    if (core.status.replay.replaying) {
+    if (core.isReplaying()) {
         core.statusBar.image.book.src = core.status.replay.pausing ? core.statusBar.icons.play.src : core.statusBar.icons.pause.src;
         core.statusBar.image.book.style.opacity = 1;
 
@@ -2596,7 +2726,7 @@ control.prototype.updateStatusBar = function () {
 
         core.statusBar.image.toolbox.src = core.statusBar.icons.rewind.src;
 
-        core.statusBar.image.shop.src = core.statusBar.icons.book.src;
+        core.statusBar.image.keyboard.src = core.statusBar.icons.book.src;
 
         core.statusBar.image.save.src = core.statusBar.icons.speedDown.src;
 
@@ -2620,7 +2750,7 @@ control.prototype.updateStatusBar = function () {
 
         core.statusBar.image.toolbox.src = core.statusBar.icons.toolbox.src;
 
-        core.statusBar.image.shop.src = core.statusBar.icons.shop.src;
+        core.statusBar.image.keyboard.src = core.statusBar.icons.keyboard.src;
 
         core.statusBar.image.save.src = core.statusBar.icons.save.src;
 
@@ -2634,7 +2764,7 @@ control.prototype.triggerStatusBar = function (name, showToolbox) {
     if (name!='hide') name='show';
 
     // 如果是隐藏 -> 显示工具栏，则先显示
-    if (name == 'hide' && showToolbox && !core.domStyle.showStatusBar && !core.hasFlag("showToolbox")) {
+    if (name == 'hide' && !core.domStyle.showStatusBar) {
         this.triggerStatusBar("show");
         this.triggerStatusBar("hide", showToolbox);
         return;
@@ -2753,10 +2883,11 @@ control.prototype.setToolbarButton = function (useButton) {
 
     if (!core.isset(useButton)) useButton = core.domStyle.toolbarBtn;
     if (!core.domStyle.isVertical) useButton = false;
+    if (!core.platform.extendKeyboard) useButton = false;
 
     core.domStyle.toolbarBtn = useButton;
     if (useButton) {
-        ["book","fly","toolbox","shop","save","load","settings"].forEach(function (t) {
+        ["book","fly","toolbox","keyboard","save","load","settings"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'none';
         });
         ["btn1","btn2","btn3","btn4","btn5","btn6","btn7"].forEach(function (t) {
@@ -2767,10 +2898,10 @@ control.prototype.setToolbarButton = function (useButton) {
         ["btn1","btn2","btn3","btn4","btn5","btn6","btn7"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'none';
         });
-        ["book","fly","toolbox","shop","save","load","settings"].forEach(function (t) {
+        ["book","fly","toolbox","keyboard","save","load","settings"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'block';
         });
-        core.statusBar.image.shop.style.display = core.domStyle.isVertical ? "block":"none";
+        core.statusBar.image.keyboard.style.display = core.domStyle.isVertical ? "block":"none";
     }
 }
 
@@ -2808,6 +2939,9 @@ control.prototype.needDraw = function(id) {
 control.prototype.resize = function(clientWidth, clientHeight) {
     if (main.mode=='editor')return;
 
+    clientWidth = clientWidth || main.dom.body.clientWidth;
+    clientHeight = clientHeight || main.dom.body.clientHeight;
+
     // 默认画布大小
     var DEFAULT_CANVAS_WIDTH = 422;
     // 默认边栏宽度
@@ -2834,7 +2968,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         toolBarWidth, toolBarHeight, toolBarTop, toolBarBorder,
         toolsWidth, toolsHeight,toolsMargin,toolsPMaxwidth,
         fontSize, toolbarFontSize, margin, statusBackground, toolsBackground,
-        statusCanvasWidth, statusCanvasHeight;
+        statusCanvasWidth, statusCanvasHeight, musicBtnBottom, musicBtnRight;
 
     var toDraw = this.needDraw();
     var count = toDraw.length;
@@ -2847,8 +2981,6 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     var statusLineHeight = BASE_LINEHEIGHT * 9 / count;
     var statusLineFontSize = DEFAULT_FONT_SIZE;
     if (count>9) statusLineFontSize = statusLineFontSize * 9 / count;
-
-    var shopDisplay;
 
     var borderColor = (core.status.globalAttribute||core.initStatus.globalAttribute).borderColor;
 
@@ -2875,8 +3007,6 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         if(!isHorizontal){ //竖屏
             core.domStyle.screenMode = 'vertical';
             core.domStyle.isVertical = true;
-            //显示快捷商店图标
-            shopDisplay = 'block';
 
             var tempTopBarH = scale * (BASE_LINEHEIGHT * col + SPACE * 2) + 6;
             var tempBotBarH = scale * (BASE_LINEHEIGHT + SPACE * 4) + 6;
@@ -2909,10 +3039,11 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             toolsMargin = scale * SPACE * 4;
             fontSize = DEFAULT_FONT_SIZE * scale;
             toolbarFontSize = DEFAULT_FONT_SIZE * scale;
+            musicBtnRight = 3;
+            musicBtnBottom = 3;
         }else { //横屏
             core.domStyle.screenMode = 'horizontal';
             core.domStyle.isVertical = false;
-            shopDisplay = 'none';
             gameGroupWidth = tempWidth + DEFAULT_BAR_WIDTH * scale;
             gameGroupHeight = tempWidth;
             canvasTop = 0;
@@ -2939,13 +3070,14 @@ control.prototype.resize = function(clientWidth, clientHeight) {
 
             margin = scale * SPACE * 2;
             toolsMargin = 2 * SPACE * scale;
+            musicBtnRight = 3;
+            musicBtnBottom = 3;
         }
 
     }else { //大屏设备 pc端
         core.domStyle.scale = 1;
         core.domStyle.screenMode = 'bigScreen';
         core.domStyle.isVertical = false;
-        shopDisplay = 'none';
 
         gameGroupWidth = DEFAULT_CANVAS_WIDTH + DEFAULT_BAR_WIDTH;
         gameGroupHeight = DEFAULT_CANVAS_WIDTH;
@@ -2974,6 +3106,9 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         toolsPMaxwidth = DEFAULT_BAR_WIDTH * .9;
         margin = SPACE * 2;
         toolsMargin = 2 * SPACE;
+
+        musicBtnRight = (clientWidth-gameGroupWidth)/2;
+        musicBtnBottom = (clientHeight-gameGroupHeight)/2 - 27;
     }
 
     var unit = 'px'
@@ -3101,9 +3236,9 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             }
         },
         {
-            imgId: 'shop',
+            imgId: 'keyboard',
             rules:{
-                display: shopDisplay && core.domStyle.showStatusBar
+                display: core.domStyle.isVertical && core.domStyle.showStatusBar
             }
         },
         {
@@ -3113,6 +3248,14 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 color: (core.status.globalAttribute||core.initStatus.globalAttribute).hardLabelColor
             }
         },
+        {
+            id: 'musicBtn',
+            rules: {
+                display: 'block',
+                right: musicBtnRight + unit,
+                bottom: musicBtnBottom + unit
+            }
+        }
     ]
     for (var i = 0; i < core.dom.status.length; ++i) {
         var id = core.dom.status[i].id;
@@ -3135,6 +3278,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         core.dom.statusCanvas.width = 129;
         core.dom.statusCanvas.height = 416;
     }
+    this.setMusicBtn();
     if (core.isPlaying())
         core.updateStatusBar();
 }

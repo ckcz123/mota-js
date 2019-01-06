@@ -58,10 +58,11 @@ ui.prototype.fillText = function (name, text, x, y, style, font) {
 }
 
 ////// 在某个canvas上绘制粗体 //////
-ui.prototype.fillBoldText = function (name, text, style, x, y, font) {
+ui.prototype.fillBoldText = function (name, text, x, y, style, font) {
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     if (core.isset(font)) ctx.font = font;
+    if (!core.isset(style)) style = ctx.fillStyle;
     ctx.fillStyle = '#000000';
     ctx.fillText(text, x-1, y-1);
     ctx.fillText(text, x-1, y+1);
@@ -226,6 +227,7 @@ ui.prototype.closePanel = function () {
     core.status.boxAnimateObjs = [];
     clearInterval(core.status.event.interval);
     core.clearLastEvent();
+    core.maps.generateGroundPattern();
     core.unLockControl();
     core.status.event.data = null;
     core.status.event.id = null;
@@ -299,7 +301,7 @@ ui.prototype.drawText = function (contents, callback) {
     if (core.isset(contents)) {
 
         // 合并
-        if ((core.isset(core.status.event)&&core.status.event.id=='action') || (core.isset(core.status.replay)&&core.status.replay.replaying)) {
+        if ((core.isset(core.status.event)&&core.status.event.id=='action') || core.isReplaying()) {
             core.insertAction(contents,null,null,callback);
             return;
         }
@@ -1065,6 +1067,7 @@ ui.prototype.drawSwitchs = function() {
         "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
         "新版存档： "+(core.platform.useLocalForage ? "[ON]":"[OFF]"),
         "单击瞬移： "+(core.getFlag('clickMove', true) ? "[ON]":"[OFF]"),
+        "拓展键盘： "+(core.platform.extendKeyboard ? "[ON]":"[OFF]"),
         "返回主菜单"
     ];
     this.drawChoices(null, choices);
@@ -1536,9 +1539,14 @@ ui.prototype.drawCursor = function () {
 
 ////// 绘制怪物手册 //////
 ui.prototype.drawBook = function (index) {
-    var enemys = core.enemys.getCurrentEnemys(core.floorIds[(core.status.event.selection||{}).index]);
-
+    var floorId = core.floorIds[(core.status.event.ui||{}).index] || core.status.floorId;
+    var enemys = core.enemys.getCurrentEnemys(floorId);
+    
     core.clearLastEvent();
+
+    // 生成groundPattern
+    core.maps.generateGroundPattern(floorId);
+
     core.setFillStyle('ui', core.material.groundPattern);
     core.fillRect('ui', 0, 0, 416, 416);
 
@@ -1681,7 +1689,9 @@ ui.prototype.drawBook = function (index) {
 
 ////// 绘制怪物属性的详细信息 //////
 ui.prototype.drawBookDetail = function (index) {
-    var enemys = core.enemys.getCurrentEnemys(core.floorIds[(core.status.event.selection||{}).index]);
+    var floorId = core.floorIds[(core.status.event.ui||{}).index] || core.status.floorId;
+    var enemys = core.enemys.getCurrentEnemys(floorId);
+
     if (enemys.length==0) return;
     if (index<0) index=0;
     if (index>=enemys.length) index=enemys.length-1;
@@ -2346,10 +2356,26 @@ ui.prototype.drawSLPanel = function(index, refresh) {
             callback();
             return;
         }
-        core.getLocalForage(i==0?"autoSave":"save"+(5*page+i), null, function(data) {
-            core.status.event.ui[i]=data;
-            loadSave(i+1, callback);
-        }, function(err) {console.log(err);});
+
+        if (i==0) {
+            if (core.saves.autosave.data!=null) {
+                core.status.event.ui[i] = core.saves.autosave.data;
+                loadSave(1, callback);
+            }
+            else {
+                core.getLocalForage("autoSave", null, function(data) {
+                    core.saves.autosave.data = data;
+                    core.status.event.ui[i]=data;
+                    loadSave(i+1, callback);
+                }, function(err) {console.log(err);});
+            }
+        }
+        else {
+            core.getLocalForage("save"+(5*page+i), null, function(data) {
+                core.status.event.ui[i]=data;
+                loadSave(i+1, callback);
+            }, function(err) {console.log(err);});
+        }
     }
 
     function drawAll() {
@@ -2791,7 +2817,7 @@ ui.prototype.drawPaint = function () {
             core.setLineWidth('paint', 3);
             core.setStrokeStyle('paint', '#FF0000');
 
-            core.statusBar.image.shop.style.opacity = 0;
+            core.statusBar.image.keyboard.style.opacity = 0;
 
             core.statusBar.image.book.src = core.statusBar.icons.paint.src;
             core.statusBar.image.fly.src = core.statusBar.icons.erase.src;

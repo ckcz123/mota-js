@@ -35,16 +35,46 @@ editor_mode = function (editor) {
     }
 
 /////////////////////////////////////////////////////////////////////////////
+    /**
+     * 把来自数据文件的obj和来自*comment.js的commentObj组装成表格
+     * commentObj在无视['_data']的意义下与obj同形
+     * 即: commentObj['_data']['a']['_data']['b'] 与 obj['a']['b'] 是对应的
+     *     在此意义下, 两者的结构是一致的
+     *     在commentObj没有被定义的obj的分支, 会取defaultcobj作为默认值
+     * 因此在深度优先遍历时,维护 
+     *     field="['a']['b']"
+     *     cfield="['_data']['a']['_data']['b']"
+     *     vobj=obj['a']['b']
+     *     cobj=commentObj['_data']['a']['_data']['b']
+     * cobj
+     *     cobj = Object.assign({}, defaultcobj, pcobj['_data'][ii])
+     *     每一项若未定义,就从defaultcobj中取
+     *     当其是函数不是具体值时,把args = {field: field, cfield: cfield, vobj: vobj, cobj: cobj}代入算出该值
+     * 得到的叶节点的<tr>结构如下
+     *     tr>td[title=field]
+     *       >td[title=comment,cobj=cobj:json]
+     *       >td>div>input[value=thiseval]
+     * 返回结果
+     *     返回一个对象, 假设被命名为tableinfo
+     *     在把一个 table 的 innerHTML 赋值为 tableinfo.HTML 后
+     *     再调 tableinfo.listen(tableinfo.guids) 进行绑定事件
+     * @param {Object} obj 
+     * @param {Object} commentObj 
+     * @returns {{"HTML":String,"guids":String[],"listen":Function}}
+     */
     editor_mode.prototype.objToTable_ = function (obj, commentObj) {
+        // 表格抬头
         var outstr = ["\n<tr><td>条目</td><td>注释</td><td>值</td></tr>\n"];
         var guids = [];
         var defaultcobj = {
+            // 默认是文本域
             _type: 'textarea',
             _data: '',
             _string: function (args) {//object~[field,cfield,vobj,cobj]
                 var thiseval = args.vobj;
                 return (typeof(thiseval) === typeof('')) && thiseval[0] === '"';
             },
+            // 默认情况下 非对象和数组的视为叶节点
             _leaf: function (args) {//object~[field,cfield,vobj,cobj]
                 var thiseval = args.vobj;
                 if (thiseval == null || thiseval == undefined) return true;//null,undefined
@@ -53,6 +83,13 @@ editor_mode = function (editor) {
                 return false;
             },
         }
+        /**
+         * 深度优先遍历, p*即为父节点的四个属性
+         * @param {String} pfield 
+         * @param {String} pcfield 
+         * @param {Object} pvobj 
+         * @param {Object} pcobj 
+         */
         var recursionParse = function (pfield, pcfield, pvobj, pcobj) {
             for (var ii in pvobj) {
                 var field = pfield + "['" + ii + "']";
@@ -60,28 +97,34 @@ editor_mode = function (editor) {
                 var vobj = pvobj[ii];
                 var cobj = null;
                 if (pcobj && pcobj['_data'] && pcobj['_data'][ii]) {
+                    // cobj存在时直接取
                     cobj = Object.assign({}, defaultcobj, pcobj['_data'][ii]);
                 } else {
+                    // 当其函数时代入参数算出cobj, 不存在时只取defaultcobj
                     if (pcobj && (pcobj['_data'] instanceof Function)) cobj = Object.assign({}, defaultcobj, pcobj['_data'](ii));
                     else cobj = Object.assign({}, defaultcobj);
                 }
                 var args = {field: field, cfield: cfield, vobj: vobj, cobj: cobj}
-                if (cobj._leaf instanceof Function) cobj._leaf = cobj._leaf(args);
+                // 当cobj的参数为函数时,代入args算出值
                 for (var key in cobj) {
                     if (key === '_data') continue;
                     if (cobj[key] instanceof Function) cobj[key] = cobj[key](args);
                 }
+                // 标记为_hide的属性不展示
                 if (cobj._hide)continue;
-                if (cobj._leaf) {
+                if (!cobj._leaf) {
+                    // 不是叶节点时, 插入展开的标记并继续遍历, 此处可以改成按钮用来添加新项或折叠等
+                    outstr.push(["<tr><td>----</td><td>----</td><td>", field, "</td></tr>\n"].join(''));
+                    recursionParse(field, cfield, vobj, cobj);
+                } else {
+                    // 是叶节点时, 调objToTr_渲染<tr>
                     var leafnode = editor_mode.objToTr_(obj, commentObj, field, cfield, vobj, cobj);
                     outstr.push(leafnode[0]);
                     guids.push(leafnode[1]);
-                } else {
-                    outstr.push(["<tr><td>----</td><td>----</td><td>", field, "</td></tr>\n"].join(''));
-                    recursionParse(field, cfield, vobj, cobj);
                 }
             }
         }
+        // 开始遍历
         recursionParse("", "", obj, commentObj);
         var checkRange = function (evalstr, thiseval) {
             if (evalstr) {
@@ -90,6 +133,7 @@ editor_mode = function (editor) {
             return true;
         }
         var listen = function (guids) {
+            // 每个叶节点的事件绑定
             guids.forEach(function (guid) {
                 // tr>td[title=field]
                 //   >td[title=comment,cobj=cobj:json]
@@ -138,21 +182,38 @@ editor_mode = function (editor) {
         return {"HTML": outstr.join(''), "guids": guids, "listen": listen};
     }
 
+    /**
+     * 返回叶节点<tr>形如
+     * tr>td[title=field]
+     *   >td[title=comment,cobj=cobj:json]
+     *   >td>div>input[value=thiseval]
+     * 参数意义在 objToTable_ 中已解释
+     * @param {Object} obj 
+     * @param {Object} commentObj 
+     * @param {String} field 
+     * @param {String} cfield 
+     * @param {Object} vobj 
+     * @param {Object} cobj 
+     */
     editor_mode.prototype.objToTr_ = function (obj, commentObj, field, cfield, vobj, cobj) {
         var guid = editor.guid();
         var thiseval = vobj;
         var comment = cobj._data;
 
         var charlength = 10;
-
+        // "['a']['b']" => "b"
         var shortField = field.split("']").slice(-2)[0].split("['").slice(-1)[0];
+        // 把长度超过 charlength 的字符改成 固定长度+...的形式
         shortField = (shortField.length < charlength ? shortField : shortField.slice(0, charlength) + '...');
 
+        // 完整的内容转义后供悬停查看
         var commentHTMLescape = editor.HTMLescape(comment);
+        // 把长度超过 charlength 的字符改成 固定长度+...的形式
         var shortCommentHTMLescape = (comment.length < charlength ? commentHTMLescape : editor.HTMLescape(comment.slice(0, charlength)) + '...');
-
+        
         var cobjstr = Object.assign({}, cobj);
         delete cobjstr._data;
+        // 把cobj塞到第二个td的[cobj]中, 方便绑定事件时取
         cobjstr = editor.HTMLescape(JSON.stringify(cobjstr));
 
         var outstr = ['<tr id="', guid, '"><td title="', field, '">', shortField, '</td>',
@@ -493,6 +554,71 @@ editor_mode = function (editor) {
                         throw(objs_.slice(-1)[0])
                     }
                     ;printe('新建成功,请F5刷新编辑器生效');
+                });
+            });
+        }
+
+        var newMaps = document.getElementById('newMaps');
+        var newFloors = document.getElementById('newFloors');
+        newMaps.onclick = function () {
+            if (newFloors.style.display == 'none') newFloors.style.display = 'block';
+            else newFloors.style.display = 'none';
+        }
+
+        var createNewMaps = document.getElementById('createNewMaps');
+        createNewMaps.onclick = function () {
+            var floorIds = document.getElementById('newFloorIds').value;
+            if (!floorIds) return;
+            var from = parseInt(document.getElementById('newMapsFrom').value),
+                to = parseInt(document.getElementById('newMapsTo').value);
+            if (!core.isset(from) || !core.isset(to) || from>to || from<0 || to<0) {
+                printe("请输入有效的起始和终止楼层");
+                return;
+            }
+            if (to-from >= 100) {
+                printe("一次最多创建99个楼层");
+                return;
+            }
+            var floorIdList = [];
+            for (var i = from; i<=to; i++) {
+                var floorId = floorIds.replace(/\${(.*?)}/g, function (word, value) {
+                    return eval(value);
+                });
+                if (core.floorIds.indexOf(floorId)>=0) {
+                    printe("要创建的楼层 "+floorId+" 已存在！");
+                    return;
+                }
+                if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(floorId)) {
+                    printe("楼层名 "+floorId+" 不合法！请使用字母、数字、下划线，且不能以数字开头！");
+                    return;
+                }
+                if (floorIdList.indexOf(floorId)>=0) {
+                    printe("尝试重复创建楼层 "+floorId+" ！");
+                    return;
+                }
+                floorIdList.push(floorId);
+            }
+
+            var width = parseInt(document.getElementById('newMapsWidth').value);
+            var height = parseInt(document.getElementById('newMapsHeight').value);
+            if (!core.isset(width) || !core.isset(height) || width<13 || height<13 || width*height>1000) {
+                printe("新建地图的宽高都不得小于13，且宽高之积不能超过1000");
+                return;
+            }
+            editor_mode.onmode('');
+            
+            editor.file.saveNewFiles(floorIdList, from, to, function (err) {
+                if (err) {
+                    printe(err);
+                    throw(err)
+                }
+                core.floorIds = core.floorIds.concat(floorIdList);
+                editor.file.editTower([['change', "['main']['floorIds']", core.floorIds]], function (objs_) {//console.log(objs_);
+                    if (objs_.slice(-1)[0] != null) {
+                        printe(objs_.slice(-1)[0]);
+                        throw(objs_.slice(-1)[0])
+                    }
+                    ;printe('批量创建 '+floorIdList[0]+'~'+floorIdList[floorIdList.length-1]+' 成功,请F5刷新编辑器生效');
                 });
             });
         }

@@ -23,13 +23,12 @@ body {
 }
 
 #colorPanel {
-    position: absolute;
-    left: 130px;
-    top: 30px;
-    width: 168px;
+    position: fixed;
+    width: max-content;
     height: 205px;
     z-index: 240;
     padding: 4px 6px;
+    margin-top: 6px;
     background-color: #F5F5F5;
     box-sizing: border-box;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
@@ -58,7 +57,7 @@ body {
 #editArea {
     position: absolute;
     width: 100%;
-    height: 70%;
+    height: 400px;
     left: 0;
     top: 0;
     /* padding: 10px 5px; */
@@ -68,7 +67,7 @@ body {
 #pout {
     display: block;
     width: 410px;
-    height: 100%;
+    height: 380px;
     box-sizing: border-box;
     margin-left: 22px;
     margin-top: 23px;
@@ -84,9 +83,28 @@ body {
 #editTip {
     position: absolute;
     width: 100%;
-    margin-bottom: 120px;
-    bottom: 0;
     left: 10px;
+    top: 430px;
+}
+
+#editBtns {
+    position: absolute;
+    width: 100%;
+    left: 10px;
+    top: 465px;
+}
+
+#newMaps {
+    position: absolute;
+    left: 10px;
+    top: 505px;
+}
+
+#newFloors {
+    position: absolute;
+    width: 100%;
+    left: 10px;
+    top: 530px;
 }
 
 #editArea p {

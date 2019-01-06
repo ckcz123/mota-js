@@ -45,6 +45,7 @@ body {
     top: 0;
     /* padding: 10px 5px; */
     box-sizing: border-box;
+    display: none;
 }
 
 #pout {
@@ -72,10 +73,37 @@ body {
     font-size: 14px;
 }
 
+#editTip {
+    position: absolute;
+    width: 95vw;
+    left: 4vw;
+    top: 4vw;
+}
+
 #editTip .btn {
     float: right;
     margin-right: 20px;
     margin-top: 5px;
+}
+
+#editBtns {
+    position: absolute;
+    width: 95vw;
+    left: 4vw;
+    top: 20vw;
+}
+
+#newMaps {
+    position: absolute;
+    left: 4vw;
+    top: 35vw;
+}
+
+#newFloors {
+    position: absolute;
+    width: 95vw;
+    left: 4vw;
+    top: 43vw;
 }
 
 #mid {
@@ -279,6 +307,7 @@ div.col .coltd {
     width: 95vw;
     height: 16px;
     font-size: 13px;
+    display: none;
 }
 
 #mapColMark {
@@ -334,6 +363,7 @@ div.row .rowtd .rowtext{
     width: 4vw;
     height: 62vw;
     font-size: 12px;
+    display: none;
 }
 
 #mapRowMark {
@@ -425,4 +455,22 @@ div.row .rowtd .rowtext{
     top:100vw;
     bottom: 0;
     width: 100vw;
+}
+
+#colorPanel {
+    position: fixed;
+    width: max-content;
+    height: 205px;
+    z-index: 240;
+    padding: 4px 6px;
+    margin-top: 6px;
+    background-color: #F5F5F5;
+    box-sizing: border-box;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
+}
+
+#colorPicker {
+    margin: 2px 0;
+    border-radius: 3px;
+    width: 90px;
 }

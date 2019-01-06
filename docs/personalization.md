@@ -951,15 +951,15 @@ this.getAchievements = function () {
 - **`flag:hatred`**: 当前的仇恨数值。
 - **`flag:commonTimes`**: 全局商店共用次数时的访问次数。
 - **`flag:input`**: 接受用户输入的事件后，存放用户输入的结果。
-- **`flag:type`**, **`flag:keycode`**, **`flag:x`**, **`flag:y`**: 等待用户操作后，用户的操作类型，按键keycode或点击坐标。
+- **`flag:type`**, **`flag:keycode`**, **`flag:x`**, **`flag:y`**, **`flag:px`**, **`flag:py`**: 等待用户操作后，用户的操作类型，按键keycode或点击/像素坐标。
 - **`flag:skill`**, **`flag:skillName`**: 开启的技能编号和技能名。
 - **`flag:heroIcon`**: 当前的勇士行走图名称。
 - **`flag:saveEquips`**: 快速换装时保存的套装。
 - **`flag:__visited__`**: 当前访问过的楼层。
 - **`flag:equip_atk_buff`**, **`flag:equip_def_buff`**, **`flag:equip_mdef_buff`**: 当前攻防魔防的实际计算比例加成。
-- **`flag:forceSave`**: 是否允许事件中强制自动存档。如果将此项置为true并调用core.autosave()即可在事件中强制自动存档，读档时会自动执行该楼层的`eachArrive`事件。
 - **`flag:__color__`**, **`flag:__weather__`**, **`flag:__volume__`**: 当前的画面色调、天气和音量。
-- **`flag:textAttribute`**, **`flag:globalAttribute`**: 当前的剧情文本属性，当前的全局属性。
+- **`flag:__events__`**: 当前保存的事件列表，读档时会恢复（适用于在事件中存档）
+- **`flag:textAttribute`**, **`flag:globalAttribute`**, **`flag:globalFlags`**: 当前的剧情文本属性，当前的全局属性，当前的全局开关。
 - **`flag:cannotMoveDirectly`**, **`flag:clickMove`**: 当前是否不允许瞬间移动，当前用户是否开启了单击瞬移。
 - **`flag:hideStatusBar`**, **`flag:showToolbox`**: 是否隐藏状态栏，是否显示工具栏。
 - **`flag:debug`**, **`flag:consoleOpened`**: 当前是否开启了调试模式，是否开启了控制台。

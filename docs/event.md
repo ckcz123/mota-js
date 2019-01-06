@@ -481,6 +481,23 @@ name必填项，代表要修改的全局数值，其和全塔属性中的values�
 
 value为必填项，代表要修改到的结果。该项必须是个数值。
 
+### setGlobalFlag：设置一个系统开关
+
+使用`{"type":"setGlobalFlag"}`可以设置一个系统开关。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+  {"type": "setGlobalFlag", "name": "enableMDef", "value": false}, // 不在状态栏显示魔防值
+]
+```
+
+name必填项，代表要修改的系统开关，其是全塔属性中的flags中的一部分。目前只能为`"enableFloor", "enableName", "enableLv",
+"enableHPMax", "enableMana", "enableMDef", "enableMoney", "enableExperience", "enableLevelUp", "levelUpLeftMode",
+"enableKeys", "enablePZF", "enableDebuff", "enableSkill", "flyNearStair", "enableAddPoint", "enableNegativeDamage",
+"useLoop", "enableGentleClick", "canGoDeadZone", "enableMoveDirectly", "disableShopOnDamage"`。
+
+value为必填项，只能为true或false，代表要修改到的结果。
+
 ### show：将一个禁用事件启用
 
 我们上面提到了，所有事件都必须靠其他事件驱动来完成，不存在当某个flag为true时自动执行的说法。那么，我们自然要有启用事件的写法。
@@ -771,9 +788,14 @@ name是可选的，代表目标行走图的文件名。
 ``` js
 "x,y": [ // 实际执行的事件列表
     {"type": "sleep", "time": 1000}, // 等待1000ms
-    "等待1000ms后才开始执行这个事件"
+    "等待1000ms后才开始执行这个事件",
+    {"type": "sleep", "time": 2000, "noSkip": true}, // 等待2000毫秒，且不可被跳过
 ]
 ```
+
+默认的等待事件可以被Ctrl跳过，下面两种情况下不可呗跳过：
+ - 加上`"noSkip": true`后
+ - 当前存在尚未执行完毕的异步事件。
 
 ### battle：强制战斗
 
@@ -1234,9 +1256,13 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 
 使用`{"type": "pauseBgm"}`可以暂停背景音乐的播放。
 
+**从V2.5.4开始不再支持此事件，请通过设置音量来达到此效果。**
+
 ### resumeBgm：恢复背景音乐
 
 使用`{"type": "resumeBgm"}`可以恢复背景音乐的播放。
+
+**从V2.5.4开始不再支持此事件，请通过设置音量来达到此效果。**
 
 ### loadBgm：预加载一个背景音乐
 
@@ -1285,6 +1311,24 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 `{"type": "lose", "reason": "xxx"}` 将会直接调用`events.js`中的lose函数，并将reason作为参数传入。
 
 该事件会显示失败页面，并重新开始游戏。
+
+### callBook：呼出怪物手册
+
+`{"type": "callBook"}` 可以呼出怪物手册，玩家可以自由查看当前楼层怪物数据和详细信息。
+
+返回游戏后将继续执行后面的事件。没有怪物手册或在录像播放中，则会跳过本事件。
+
+### callSave：呼出存档界面
+
+`{"type": "callSave"}` 可以呼出存档页面并允许玩家存一次档。
+
+在玩家进行一次存档，或者直接点返回游戏后，将接着执行后面的事件。录像播放将会跳过本事件。
+
+### callLoad：呼出读档界面
+
+`{"type": "callLoad"}` 可以呼出读档页面并允许玩家进行读档。
+
+如果玩家没有进行读档而是直接返回游戏，则会继续执行后面的事件。录像播放将会跳过本事件。
 
 ### input：接受用户输入数字
 
@@ -1607,7 +1651,7 @@ choices为一个数组，其中每一项都是一个选项列表。
 
 当用户执行操作后：
 - 如果是键盘的按键操作，则会将flag:type置为0，并且把flag:keycode置为刚刚按键的keycode。
-- 如果是屏幕的点击操作，则会将flag:type置为1，并且设置flag:x和flag:y为刚刚的点击坐标。
+- 如果是屏幕的点击操作，则会将flag:type置为1，并且设置flag:x和flag:y为刚刚的点击坐标（0-12之间），flag:px和flag:py置为刚刚的像素坐标（0-415之间）。
 
 下面是一个while事件和wait合并使用的例子，这个例子将不断接收用户的点击或按键行为，并输出该信息。
 如果用户按下了ESC或者点击了屏幕正中心，则退出循环。
@@ -1627,7 +1671,7 @@ choices为一个数组，其中每一项都是一个选项列表。
                     }
                 ],
                 "false": [ // flag:type==1，鼠标点击
-                    "你当前点击屏幕了，坐标是[${flag:x},${flag:y}]",
+                    "你当前点击屏幕了，位置坐标是[${flag:x},${flag:y}]，像素坐标是[${flag:px},${flag:py}]",
                     {"type": "if", "condition": "flag:x==6 && flag:y==6", // 点击(6,6)
                         "true": [{"type": "break"}], // 跳出循环
                         "false": []
@@ -1693,12 +1737,12 @@ core.insertAction([
 
 从V2.5.3开始，针对每个事件都提供了独立开关。
 
-独立开关的写法是`flag:__A__`, `flag:__B__`直到`flag:__Z__`，共计26个。
+独立开关的写法是`switch:A`, `switch:A`直到`switch:Z`，共计26个；不过样板中的值块默认只提供前6个。
 
-独立开关算是特殊的flag，它在事件中使用时会和事件的楼层及坐标进行绑定；换句话说每个事件对应的`flag:__A__`都是不同的。
+独立开关算是特殊的flag，它在事件中使用时会和事件的楼层及坐标进行绑定；换句话说每个事件对应的`switch:A`都是不同的。
 
-事实上，在某个楼层某个点的事件的独立开关对应的系统flag为`floorId@x@y__X__`，
-比如在`MT0`层的`[2,5]`点事件，对应的`flag:__B__`独立开关，实际会被映射到`flag:MT0@2@5__B__`。
+事实上，在某个楼层某个点的事件的独立开关A对应的系统flag为`floorId@x@y@A`，
+比如在`MT0`层的`[2,5]`点事件，对应的`switch:B`独立开关，实际会被映射到`flag:MT0@2@5@B`。
 
 如果在事件外想访问某个事件的独立开关也需要通过上面这个方式。
 
@@ -2206,9 +2250,9 @@ if (core.getFlag("door",0)==2) {
     if (hard=='Easy') { // 简单难度
         core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
         // 可以在此设置一些初始福利，比如设置初始生命值可以调用：
-        // core.setStatus("hp", 10000);
+        // core.setStatus('hp', 10000);
         // 赠送一把黄钥匙可以调用
-        // core.setItem("yellowKey", 1);
+        // core.setItem('yellowKey', 1);
     }
     if (hard=='Normal') { // 普通难度
         core.setFlag('hard', 2); // 可以用flag:hard来获得当前难度
@@ -2231,7 +2275,7 @@ if (core.getFlag("door",0)==2) {
 ////// 游戏获胜事件 //////
 "win": function(reason, norank) {
     core.ui.closePanel();
-    var replaying = core.status.replay.replaying;
+    var replaying = core.isReplaying();
     core.stopReplay();
     core.waitHeroToStop(function() {
         core.clearMap('all'); // 清空全地图
@@ -2255,7 +2299,7 @@ if (core.getFlag("door",0)==2) {
 ////// 游戏失败事件 //////
 "lose": function(reason) {
     core.ui.closePanel();
-    var replaying = core.status.replay.replaying;
+    var replaying = core.isReplaying();
     core.stopReplay();
     core.waitHeroToStop(function() {
         core.drawText([

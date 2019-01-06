@@ -62,10 +62,8 @@ utils.prototype.calValue = function (value, prefix, need, times) {
     }
     value=value.replace(/status:([\w\d_]+)/g, "core.getStatus('$1')");
     value=value.replace(/item:([\w\d_]+)/g, "core.itemCount('$1')");
-    value=value.replace(/flag:([\w\d_]+)/g, function (word, value) {
-        if (/^__[A-Z]__$/.test(value)) value = (prefix||"")+value;
-        return core.getFlag(value, 0);
-    });
+    value=value.replace(/flag:([\w\d_]+)/g, "core.getFlag('$1', 0)");
+    value=value.replace(/switch:([\w\d_]+)/g, "core.getFlag('"+(prefix||"global")+"@$1', 0)");
     return eval(value);
 }
 
@@ -113,6 +111,11 @@ utils.prototype.unshift = function (a,b) {
 ////// 设置本地存储 //////
 utils.prototype.setLocalStorage = function(key, value) {
     try {
+        if (!core.isset(value)) {
+            this.removeLocalStorage(key);
+            return;
+        }
+
         var str = JSON.stringify(value);
         var compressed = LZString.compress(str);
 
@@ -126,6 +129,10 @@ utils.prototype.setLocalStorage = function(key, value) {
             localStorage.setItem(core.firstData.name + "_" + key, str);
         }
         localStorage.removeItem("__tmp__");
+
+        if (key == 'autoSave') core.saves.ids[0] = true;
+        else if (/^save\d+$/.test(key)) core.saves.ids[parseInt(key.substring(4))] = true;
+
         return true;
     }
     catch (e) {
@@ -144,7 +151,9 @@ utils.prototype.getLocalStorage = function(key, defaultValue) {
                 try {
                     return JSON.parse(output);
                 }
-                catch (ee) {}
+                catch (ee) {
+                    // Ignore, use default value
+                }
             }
             return JSON.parse(value);
         }
@@ -159,6 +168,8 @@ utils.prototype.getLocalStorage = function(key, defaultValue) {
 ////// 移除本地存储 //////
 utils.prototype.removeLocalStorage = function (key) {
     localStorage.removeItem(core.firstData.name+"_"+key);
+    if (key == 'autoSave') delete core.saves.ids[0];
+    else if (/^save\d+$/.test(key)) delete core.saves.ids[parseInt(key.substring(4))];
 }
 
 utils.prototype.setLocalForage = function (key, value, successCallback, errorCallback) {
@@ -173,13 +184,22 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
         return;
     }
 
+    if (!core.isset(value)) {
+        this.removeLocalForage(key);
+        return;
+    }
+
     // Save to localforage
     var compressed = LZString.compress(JSON.stringify(value));
     localforage.setItem(core.firstData.name+"_"+key, compressed, function (err) {
         if (core.isset(err)) {
             if (core.isset(errorCallback)) errorCallback(err);
         }
-        else if (core.isset(successCallback)) successCallback();
+        else {
+            if (key == 'autoSave') core.saves.ids[0] = true;
+            else if (/^save\d+$/.test(key)) core.saves.ids[parseInt(key.substring(4))] = true;
+            if (core.isset(successCallback)) successCallback();
+        }
     });
 }
 
@@ -230,7 +250,11 @@ utils.prototype.removeLocalForage = function (key, successCallback, errorCallbac
         if (core.isset(err)) {
             if (core.isset(errorCallback)) errorCallback(err);
         }
-        else if (core.isset(successCallback)) successCallback();
+        else {
+            if (key == 'autoSave') delete core.saves.ids[0];
+            else if (/^save\d+$/.test(key)) delete core.saves.ids[parseInt(key.substring(4))];
+            if (core.isset(successCallback)) successCallback();
+        }
     })
 }
 
@@ -496,6 +520,11 @@ utils.prototype.clamp = function (x, a, b) {
     return Math.min(Math.max(x||0, min), max);
 }
 
+utils.prototype.getCookie = function (name) {
+    var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+	return match?match[2]:null;
+}
+
 ////// Base64加密 //////
 utils.prototype.encodeBase64 = function (str) {
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
@@ -560,7 +589,7 @@ utils.prototype.rand2 = function (num) {
     num = num||2147483648;
 
     var value;
-    if (core.status.replay.replaying) {
+    if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
         if (action.indexOf("random:")==0 ) {
             value=parseInt(action.substring(7));

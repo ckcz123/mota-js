@@ -168,6 +168,10 @@ core.nextY(n)
 获得勇士面向的第n个位置的y坐标，n可以省略默认为1（即正前方）
 
 
+core.nearHero(x, y)
+判断某个点是否和勇士的距离不超过1。
+
+
 core.openDoor(id, x, y, needKey, callback)    [异步]
 尝试开门操作。id为目标点的ID，x和y为坐标，needKey表示是否需要使用钥匙，callback为开门完毕后的回调函数。
 id可为null代表使用地图上的值。
@@ -182,6 +186,10 @@ id可为null代表使用地图上的值。
 
 core.trigger(x, y)    [异步]
 触发某个地点的事件。
+
+
+core.isReplaying()
+当前是否正在录像播放中
 
 
 core.drawBlock(block)
@@ -294,6 +302,11 @@ core.getLocalForage(key, defaultValue, successCallback, errorCallback)
 如果成功则通过successCallback回调，失败则通过errorCallback回调。
 
 
+core.hasSave(index)
+判定当前某个存档位是否存在存档，返回true/false。
+index为存档编号，0代表自动存档，大于0则为正常的存档位。
+
+
 core.clone(data)
 深拷贝某个对象。
 
@@ -330,11 +343,18 @@ control.js主要用来进行游戏控制，比如行走控制、自动寻路、�
 core.control.setGameCanvasTranslate(canvasId, x, y)
 设置大地图的偏移量
 
+
 core.control.updateViewport()
 更新大地图的可见区域
 
+
+core.control.gatherFollowers()
+立刻聚集所有的跟随者
+
+
 core.control.replay()
 回放下一个操作
+
 
 ========== core.enemys.XXX 和怪物相关的函数 ==========
 enemys.js主要用来进行怪物相关的内容，比如怪物的特殊属性，伤害和临界计算等。
@@ -463,6 +483,17 @@ core.maps.removeBlockByIds(floorId, ids)
 根据索引删除或禁用若干块。
 
 
+core.maps.drawAnimate(name, x, y, callback)
+播放一段动画，name为动画名（需在全塔属性注册），x和y为坐标（0-12之间），callback可选，为播放完毕的回调函数。
+播放过程是异步的，如需等待播放完毕请使用insertAction插入一条type:waitAsync事件。
+此函数将随机返回一个数字id，为此异步动画的唯一标识符。
+
+
+core.maps.stopAnimate(id, doCallback)
+立刻停止一个异步动画。
+id为该动画的唯一标识符（由drawAnimate函数返回），doCallback可选，若为true则会执行该动画所绑定的回调函数。
+
+
 ========== core.ui.XXX 和对话框绘制相关的函数 ==========
 ui.js主要用来进行UI窗口的绘制，比如对话框、怪物手册、楼传器、存读档界面等等。
 
@@ -483,7 +514,7 @@ core.ui.fillText(name, text, x, y, style, font)
 text为要绘制的文本，x,y为要绘制的坐标，style可选为绘制的样式，font可选为绘制的字体。（下同）
 
 
-core.ui.fillBoldText(name, text, style, x, y, font)
+core.ui.fillBoldText(name, text, x, y, style, font)
 在某个画布上绘制一个描黑边的文字。
 
 

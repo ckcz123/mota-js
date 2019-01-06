@@ -1001,6 +1001,19 @@ editor.prototype.listen = function () {
         var locStr='('+editor.lastRightButtonPos[1].x+','+editor.lastRightButtonPos[1].y+')';
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+
+        // 检测是否是上下楼
+        var thisevent = editor.map[editor.pos.y][editor.pos.x];
+        if (thisevent.id=='upFloor') {
+            addFloorEvent.style.display='block';
+            addFloorEvent.children[0].innerHTML='绑定上楼事件';
+        }
+        else if (thisevent.id=='downFloor') {
+            addFloorEvent.style.display='block';
+            addFloorEvent.children[0].innerHTML='绑定下楼事件';
+        }
+        else addFloorEvent.style.display='none';
+
         chooseThis.children[0].innerHTML='选中此点'+'('+editor.pos.x+','+editor.pos.y+')'
         copyLoc.children[0].innerHTML='复制事件'+locStr+'到此处';
         moveLoc.children[0].innerHTML='交换事件'+locStr+'与此事件的位置';
@@ -1014,6 +1027,28 @@ editor.prototype.listen = function () {
         } else {
             midMenu.style='display:none';
         }
+    }
+
+    var addFloorEvent = document.getElementById('addFloorEvent');
+    addFloorEvent.onmousedown = function(e) {
+        editor.hideMidMenu();
+        e.stopPropagation();
+        var thisevent = editor.map[editor.pos.y][editor.pos.x];
+        if (thisevent.id=='upFloor') {
+            editor.currentFloorData.changeFloor[editor.pos.x+","+editor.pos.y] = {"floorId": ":next", "stair": "downFloor"};
+        }
+        else if (thisevent.id=='downFloor') {
+            editor.currentFloorData.changeFloor[editor.pos.x+","+editor.pos.y] = {"floorId": ":before", "stair": "upFloor"};
+        }
+        editor.file.saveFloorFile(function (err) {
+            if (err) {
+                printe(err);
+                throw(err)
+            }
+            ;printf('添加楼梯事件成功');
+            editor.drawPosSelection();
+            editor_mode.showMode('loc');
+        });
     }
 
     var chooseThis = document.getElementById('chooseThis');

@@ -361,7 +361,9 @@ core.prototype.init = function (coreData, callback) {
             core.events.initGame();
 
         if (core.isset(functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins)) {
-            core.plugin = new function () {};
+            core.plugin = new function () {
+                this.__renderFrameFuncs = [];
+            };
             core.plugin.__init__ = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.plugin;
             core.plugin.__init__();
         }

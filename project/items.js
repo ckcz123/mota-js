@@ -302,6 +302,10 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"name": "技能：二倍斩",
 			"text": "可以打开或关闭主动技能二倍斩",
 			"hideInReplay": true
+		},
+		"I73": {
+			"cls": "items",
+			"name": "新物品"
 		}
 	},
 	"itemEffect": {

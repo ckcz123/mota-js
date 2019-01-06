@@ -2294,6 +2294,8 @@ actions.prototype.clickStorageRemove = function (x, y) {
                             core.removeLocalForage("save"+v);
                     });
                     core.removeLocalForage("autoSave", function() {
+                        core.saves.autosave.data = null;
+                        core.saves.autosave.updated = false;
                         core.ui.closePanel();
                         core.drawText("\t[操作成功]当前塔的存档已被清空。");
                         core.saves.saveIndex = 1;
@@ -2306,6 +2308,8 @@ actions.prototype.clickStorageRemove = function (x, y) {
                             core.removeLocalStorage("save"+v);
                     });
                     core.removeLocalStorage("autoSave");
+                    core.saves.autosave.data = null;
+                    core.saves.autosave.updated = false;
                     core.drawText("\t[操作成功]当前塔的存档已被清空。");
                     core.saves.saveIndex = 1;
                     core.removeLocalStorage('saveIndex');

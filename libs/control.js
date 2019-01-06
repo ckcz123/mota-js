@@ -55,6 +55,7 @@ control.prototype.setRequestAnimationFrame = function () {
         core.animateFrame.moveTime = core.animateFrame.moveTime||timestamp;
         core.animateFrame.lastLegTime = core.animateFrame.lastLegTime||timestamp;
         core.animateFrame.weather.time = core.animateFrame.weather.time||timestamp;
+        core.saves.autosave.time = core.saves.autosave.time||timestamp;
 
         // move time
         if (core.isPlaying() && core.isset(core.status) && core.isset(core.status.hero)
@@ -100,6 +101,12 @@ control.prototype.setRequestAnimationFrame = function () {
         if (timestamp-core.animateFrame.boxTime>core.animateFrame.speed && core.isset(core.status.boxAnimateObjs) && core.status.boxAnimateObjs.length>0) {
             core.drawBoxAnimate();
             core.animateFrame.boxTime = timestamp;
+        }
+
+        // AutosaveTime
+        if (timestamp - core.saves.autosave.time > 5000 && core.isPlaying()) {
+            core.control.checkAutosave();
+            core.saves.autosave.time = timestamp;
         }
 
         // selectorTime
@@ -2125,10 +2132,22 @@ control.prototype.autosave = function (removeLast) {
     if (removeLast)
         x=core.status.route.pop();
     core.status.route.push("turn:"+core.getHeroLoc('direction'));
-    core.setLocalForage("autoSave", core.saveData());
+    // core.setLocalForage("autoSave", core.saveData());
+    // ----- Add to autosaveData
+    core.saves.autosave.data = core.saveData();
+    core.saves.autosave.updated = true;
+    core.saves.ids[0] = true;
+    // ----- Updated every 5s
     core.status.route.pop();
     if (removeLast && core.isset(x))
         core.status.route.push(x);
+}
+
+/////// 实际进行自动存档 //////
+control.prototype.checkAutosave = function () {
+    if (core.saves.autosave.data == null || !core.saves.autosave.updated) return;
+    core.saves.autosave.updated = false;
+    core.setLocalForage("autoSave", core.saves.autosave.data);
 }
 
 ////// 实际进行存读档事件 //////
@@ -2166,7 +2185,7 @@ control.prototype.doSL = function (id, type) {
         return;
     }
     else if (type=='load') {
-        core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
+        var afterGet = function (data) {
             if (!core.isset(data)) {
                 alert("无效的存档");
                 return;
@@ -2192,16 +2211,23 @@ control.prototype.doSL = function (id, type) {
                     core.setLocalStorage('saveIndex', core.saves.saveIndex);
                 }
             });
-        }, function(err) {
-            console.log(err);
-            alert("无效的存档");
-        })
-
+        }
+        if (id == 'autoSave' && core.saves.autosave.data != null) {
+            afterGet(core.saves.autosave.data);
+        }
+        else {
+            core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
+                if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
+                afterGet(data);
+            }, function(err) {
+                console.log(err);
+                alert("无效的存档");
+            })
+        }
         return;
     }
     else if (type == 'replayLoad') {
-        // var data = core.getLocalStorage(id=='autoSave'?id:"save"+id, null);
-        core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
+        var afterGet = function (data) {
             if (!core.isset(data)) {
                 core.drawTip("无效的存档");
                 return;
@@ -2227,10 +2253,19 @@ control.prototype.doSL = function (id, type) {
                 core.startReplay(route);
                 core.drawTip("回退到存档节点");
             });
-        }, function(err) {
-            console.log(err);
-            core.drawTip("无效的存档");
-        })
+        }
+        if (id == 'autoSave' && core.saves.autosave.data != null) {
+            afterGet(core.saves.autosave.data);
+        }
+        else {
+            core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
+                if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
+                afterGet(data);
+            }, function(err) {
+                console.log(err);
+                alert("无效的存档");
+            })
+        }
     }
 }
 

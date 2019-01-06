@@ -626,6 +626,12 @@ main.dom.musicBtn.onclick = function () {
     } catch (e) {console.log(e);}
 }
 
+window.onblur = function () {
+    if (main.core && main.core.control) {
+        main.core.control.checkAutosave();
+    }
+}
+
 }//listen end
 
 var main = new main();

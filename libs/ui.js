@@ -2356,10 +2356,26 @@ ui.prototype.drawSLPanel = function(index, refresh) {
             callback();
             return;
         }
-        core.getLocalForage(i==0?"autoSave":"save"+(5*page+i), null, function(data) {
-            core.status.event.ui[i]=data;
-            loadSave(i+1, callback);
-        }, function(err) {console.log(err);});
+
+        if (i==0) {
+            if (core.saves.autosave.data!=null) {
+                core.status.event.ui[i] = core.saves.autosave.data;
+                loadSave(1, callback);
+            }
+            else {
+                core.getLocalForage("autoSave", null, function(data) {
+                    core.saves.autosave.data = data;
+                    core.status.event.ui[i]=data;
+                    loadSave(i+1, callback);
+                }, function(err) {console.log(err);});
+            }
+        }
+        else {
+            core.getLocalForage("save"+(5*page+i), null, function(data) {
+                core.status.event.ui[i]=data;
+                loadSave(i+1, callback);
+            }, function(err) {console.log(err);});
+        }
     }
 
     function drawAll() {

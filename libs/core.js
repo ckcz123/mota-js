@@ -95,7 +95,12 @@ function core() {
     this.paint = {};
     this.saves = {
         "saveIndex": null,
-        "ids": {}
+        "ids": {},
+        "autosave": {
+            "data": null,
+            "time": null,
+            "updated": false,
+        }
     }
     this.initStatus = {
         'played': false,

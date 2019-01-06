@@ -276,8 +276,13 @@ control.prototype.setRequestAnimationFrame = function () {
             var renderFrameFuncs = core.plugin.__renderFrameFuncs || [];
             renderFrameFuncs.forEach(function (t) {
                 try {
-                    if (core.plugin[t])
-                        core.plugin[t](timestamp);
+                    if (t instanceof Function) {
+                        t(timestamp);
+                    }
+                    else if (typeof t == 'string') {
+                        if (core.plugin[t])
+                            core.plugin[t](timestamp);
+                    }
                 }
                 catch (e) {
                     console.log(e);

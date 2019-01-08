@@ -29,17 +29,16 @@ function core() {
     }
     this.animateFrame = {
         'globalAnimate': false,
-        'globalTime': null,
-        'boxTime': null,
-        'selectorTime': null,
+        'globalTime': 0,
+        'selectorTime': 0,
         'selectorUp': true,
-        'animateTime': null,
-        'moveTime': null,
-        'lastLegTime': null,
+        'animateTime': 0,
+        'moveTime': 0,
+        'lastLegTime': 0,
         'leftLeg': true,
         'speed': null,
         'weather': {
-            'time': null,
+            'time': 0,
             'type': null,
             'level': 0,
             'nodes': [],
@@ -98,7 +97,7 @@ function core() {
         "ids": {},
         "autosave": {
             "data": null,
-            "time": null,
+            "time": 0,
             "updated": false,
         }
     }
@@ -196,7 +195,8 @@ function core() {
         // 动画
         'globalAnimateObjs': [],
         'boxAnimateObjs': [],
-        'autotileAnimateObjs': {"status": 0, "blocks": [], "map": null, "bgmap": null, "fgmap": null},
+        'autotileAnimateObjs': {"blocks": [], "map": null, "bgmap": null, "fgmap": null},
+        "globalAnimateStatus": 0,
         'animateObjs': [],
     };
     this.status = {};
@@ -883,6 +883,10 @@ core.prototype.addGlobalAnimate = function (block) {
     core.maps.addGlobalAnimate(block);
 }
 
+core.prototype.addAutotileGlobalAnimate = function (block) {
+    core.maps.addAutotileGlobalAnimate(block);
+}
+
 ////// 删除一个或所有全局动画 //////
 core.prototype.removeGlobalAnimate = function (x, y, all) {
     core.maps.removeGlobalAnimate(x, y, all);
@@ -891,11 +895,6 @@ core.prototype.removeGlobalAnimate = function (x, y, all) {
 ////// 设置全局动画的显示效果 //////
 core.prototype.setGlobalAnimate = function (speed) {
     core.maps.setGlobalAnimate(speed);
-}
-
-////// 同步所有的全局动画效果 //////
-core.prototype.syncGlobalAnimate = function () {
-    core.maps.syncGlobalAnimate();
 }
 
 ////// 绘制UI层的box动画 //////

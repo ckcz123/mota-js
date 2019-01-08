@@ -48,15 +48,6 @@ control.prototype.setRequestAnimationFrame = function () {
 
     var draw = function(timestamp) {
 
-        core.animateFrame.globalTime = core.animateFrame.globalTime||timestamp;
-        core.animateFrame.boxTime = core.animateFrame.boxTime||timestamp;
-        core.animateFrame.selectorTime = core.animateFrame.selectorTime||timestamp;
-        core.animateFrame.animateTime = core.animateFrame.animateTime||timestamp;
-        core.animateFrame.moveTime = core.animateFrame.moveTime||timestamp;
-        core.animateFrame.lastLegTime = core.animateFrame.lastLegTime||timestamp;
-        core.animateFrame.weather.time = core.animateFrame.weather.time||timestamp;
-        core.saves.autosave.time = core.saves.autosave.time||timestamp;
-
         // move time
         if (core.isPlaying() && core.isset(core.status) && core.isset(core.status.hero)
             && core.isset(core.status.hero.statistics)) {
@@ -66,41 +57,35 @@ control.prototype.setRequestAnimationFrame = function () {
         }
 
         // Global Animate
-        if (core.animateFrame.globalAnimate && core.isPlaying() && core.isset(core.status.floorId)) {
+        if (timestamp - core.animateFrame.globalTime > core.animateFrame.speed && core.isPlaying()) {
+            
+            core.status.globalAnimateStatus++;
 
-            if (timestamp-core.animateFrame.globalTime>core.animateFrame.speed && core.isset(core.status.globalAnimateObjs)) {
+            if (core.animateFrame.globalAnimate && core.isset(core.status.floorId)) {
+                // Global Animate
+                core.status.globalAnimateObjs.forEach(function (block) {
+                    core.drawBlock(block, core.status.globalAnimateStatus % (block.event.animate||1));
+                });
 
-                for (var a = 0; a < core.status.globalAnimateObjs.length; a++) {
-                    var obj = core.status.globalAnimateObjs[a];
-                    obj.status = (obj.status+1)%(obj.event.animate||1);
-                    core.drawBlock(obj, obj.status);
-                }
-
-                if ((core.status.autotileAnimateObjs.blocks||[]).length>0) {
-                    core.status.autotileAnimateObjs.status++;
-                    core.status.autotileAnimateObjs.blocks.forEach(function (block) {
-                        var cv = core.isset(block.name)?core.canvas[block.name]:core.canvas.event;
-                        cv.clearRect(block.x * 32, block.y * 32, 32, 32);
-                        if (core.isset(block.name)) {
-                            if (block.name == 'bg') {
-                                core.drawImage('bg', core.material.groundCanvas.canvas, block.x * 32, block.y * 32);
-                            }
-                            core.drawAutotile(cv, core.status.autotileAnimateObjs[block.name+"map"], block, 32, 0, 0, core.status.autotileAnimateObjs.status);
+                // Global Autotile Animate
+                core.status.autotileAnimateObjs.blocks.forEach(function (block) {
+                    var cv = core.isset(block.name)?core.canvas[block.name]:core.canvas.event;
+                    cv.clearRect(block.x * 32, block.y * 32, 32, 32);
+                    if (core.isset(block.name)) {
+                        if (block.name == 'bg') {
+                            core.drawImage('bg', core.material.groundCanvas.canvas, block.x * 32, block.y * 32);
                         }
-                        else {
-                            core.drawAutotile(cv, core.status.autotileAnimateObjs.map, block, 32, 0, 0, core.status.autotileAnimateObjs.status);
-                        }
-                    })
-                }
-
-                core.animateFrame.globalTime = timestamp;
+                        core.drawAutotile(cv, core.status.autotileAnimateObjs[block.name+"map"], block, 32, 0, 0, core.status.globalAnimateStatus);
+                    }
+                    else {
+                        core.drawAutotile(cv, core.status.autotileAnimateObjs.map, block, 32, 0, 0, core.status.globalAnimateStatus);
+                    }
+                });
             }
-        }
 
-        // Box
-        if (timestamp-core.animateFrame.boxTime>core.animateFrame.speed && core.isset(core.status.boxAnimateObjs) && core.status.boxAnimateObjs.length>0) {
+            // Box animate
             core.drawBoxAnimate();
-            core.animateFrame.boxTime = timestamp;
+            core.animateFrame.globalTime = timestamp;
         }
 
         // AutosaveTime

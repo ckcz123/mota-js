@@ -36,7 +36,6 @@ function core() {
         'moveTime': 0,
         'lastLegTime': 0,
         'leftLeg': true,
-        'speed': null,
         'weather': {
             'time': 0,
             'type': null,

@@ -44,8 +44,6 @@ control.prototype.setRequestAnimationFrame = function () {
         }
     }());
 
-    core.animateFrame.speed = core.values.animateSpeed;
-
     var draw = function(timestamp) {
 
         // move time
@@ -57,7 +55,7 @@ control.prototype.setRequestAnimationFrame = function () {
         }
 
         // Global Animate
-        if (timestamp - core.animateFrame.globalTime > core.animateFrame.speed && core.isPlaying()) {
+        if (timestamp - core.animateFrame.globalTime > core.values.animateSpeed && core.isPlaying()) {
             
             core.status.globalAnimateStatus++;
 

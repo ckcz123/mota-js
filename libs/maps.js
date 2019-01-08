@@ -1364,7 +1364,6 @@ maps.prototype.removeGlobalAnimate = function (x, y, all, name) {
 maps.prototype.setGlobalAnimate = function (speed) {
     if (main.mode=='editor' && main.editor.disableGlobalAnimate) return;
     core.status.globalAnimateStatus = 0;
-    core.animateFrame.speed = speed;
     core.animateFrame.globalAnimate = true;
 }
 

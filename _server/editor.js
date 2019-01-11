@@ -62,7 +62,7 @@ editor.prototype.init = function (callback) {
         editor.mode.floor();
         editor.mode.tower();
         editor.mode.functions();
-        editor.mode.showMode('floor');
+        editor.mode.showMode('tower');
         
         editor_multi = editor_multi();
         editor_blockly = editor_blockly();

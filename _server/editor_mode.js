@@ -91,7 +91,17 @@ editor_mode = function (editor) {
          * @param {Object} pcobj 
          */
         var recursionParse = function (pfield, pcfield, pvobj, pcobj) {
-            for (var ii in pvobj) {
+            var keysForTableOrder={};
+            var voidMark={};
+            if (pcobj && pcobj['_data']){
+                for (var ii in pcobj['_data']) keysForTableOrder[ii]=voidMark;
+            }
+            keysForTableOrder=Object.assign(keysForTableOrder,pvobj)
+            for (var ii in keysForTableOrder) {
+                if(keysForTableOrder[ii]===voidMark){
+                    alert('comment和data不匹配,请把工程打包发至 HTML5造塔技术交流群 959329661')
+                    throw Error('comment和data不匹配,请把工程打包发至 HTML5造塔技术交流群 959329661')
+                }
                 var field = pfield + "['" + ii + "']";
                 var cfield = pcfield + "['_data']['" + ii + "']";
                 var vobj = pvobj[ii];

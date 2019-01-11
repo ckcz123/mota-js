@@ -2196,7 +2196,7 @@ control.prototype.doSL = function (id, type) {
             });
         }
         if (id == 'autoSave' && core.saves.autosave.data != null) {
-            afterGet(core.saves.autosave.data);
+            afterGet(core.clone(core.saves.autosave.data));
         }
         else {
             core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
@@ -2238,7 +2238,7 @@ control.prototype.doSL = function (id, type) {
             });
         }
         if (id == 'autoSave' && core.saves.autosave.data != null) {
-            afterGet(core.saves.autosave.data);
+            afterGet(core.clone(core.saves.autosave.data));
         }
         else {
             core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {

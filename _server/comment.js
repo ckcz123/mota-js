@@ -386,7 +386,10 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         },
                         "bgm": {
                             "_leaf": true,
-                            "_type": "textarea",
+                            "_type": "select",
+                            "_select": {
+                                "values": [null].concat(Object.keys(editor.core.material.bgms))
+                            },
                             "_data": "到达该层后默认播放的BGM。本项可忽略，或者为一个定义过的背景音乐如\"bgm.mp3\"。"
                         },
                         "item_ratio": {

@@ -304,6 +304,8 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
     core.clearMap('all');
     core.deleteAllCanvas();
 
+    core.dom.musicBtn.style.display = 'block';
+
     // 重置音量
     core.events.setVolume(1, 0);
 
@@ -436,6 +438,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
     core.resize();
     this.updateGlobalAttribute(Object.keys(core.status.globalAttribute));
     this.triggerStatusBar(core.getFlag('hideStatusBar', false)?'hide':'show', core.getFlag("showToolbox"));
+    core.dom.musicBtn.style.display = 'none';
 }
 
 ////// 重新开始游戏；此函数将回到标题页面 //////

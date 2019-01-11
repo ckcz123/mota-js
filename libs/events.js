@@ -127,6 +127,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
         var post_start = function () {
 
             core.control.triggerStatusBar('show');
+            core.dom.musicBtn.style.display = 'none';
 
             core.changeFloor(core.firstData.floorId, null, nowLoc, null, function() {
                 if (core.isset(callback)) callback();
@@ -169,6 +170,8 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 
         if (core.flags.startUsingCanvas) {
             core.control.triggerStatusBar('hide');
+            core.dom.musicBtn.style.display = 'block';
+            
             core.insertAction(core.clone(core.firstData.startCanvas), null, null, function() {
                 real_start();
             });

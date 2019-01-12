@@ -91,17 +91,9 @@ editor_mode = function (editor) {
          * @param {Object} pcobj 
          */
         var recursionParse = function (pfield, pcfield, pvobj, pcobj) {
-            var keysForTableOrder={};
-            var voidMark={};
-            if (pcobj && pcobj['_data']){
-                for (var ii in pcobj['_data']) keysForTableOrder[ii]=voidMark;
-            }
-            keysForTableOrder=Object.assign(keysForTableOrder,pvobj)
-            for (var ii in keysForTableOrder) {
-                if(keysForTableOrder[ii]===voidMark){
-                    alert('comment和data不匹配,请把工程打包发至 HTML5造塔技术交流群 959329661')
-                    throw Error('comment和data不匹配,请把工程打包发至 HTML5造塔技术交流群 959329661')
-                }
+            // 1. 按照pcobj排序生成
+            // 2. 对每个pvobj且不在pcobj的，再添加到最后
+            var generate = function (ii) {
                 var field = pfield + "['" + ii + "']";
                 var cfield = pcfield + "['_data']['" + ii + "']";
                 var vobj = pvobj[ii];
@@ -121,7 +113,7 @@ editor_mode = function (editor) {
                     if (cobj[key] instanceof Function) cobj[key] = cobj[key](args);
                 }
                 // 标记为_hide的属性不展示
-                if (cobj._hide)continue;
+                if (cobj._hide) return;
                 if (!cobj._leaf) {
                     // 不是叶节点时, 插入展开的标记并继续遍历, 此处可以改成按钮用来添加新项或折叠等
                     outstr.push(["<tr><td>----</td><td>----</td><td>", field, "</td></tr>\n"].join(''));
@@ -132,6 +124,18 @@ editor_mode = function (editor) {
                     outstr.push(leafnode[0]);
                     guids.push(leafnode[1]);
                 }
+            } 
+
+            var done = {};
+            if (pcobj && pcobj['_data']) {
+                for (var ii in pcobj['_data']) {
+                    generate(ii);
+                    done[ii] = true;
+                }
+            }
+            for (var ii in pvobj) {
+                if (done[ii]) continue;
+                generate(ii);
             }
         }
         // 开始遍历
@@ -235,6 +239,7 @@ editor_mode = function (editor) {
 
     editor_mode.prototype.objToTd_ = function (obj, commentObj, field, cfield, vobj, cobj) {
         var thiseval = vobj;
+        if (thiseval === undefined) thiseval = null;
         if (cobj._select) {
             var values = cobj._select.values;
             var outstr = ['<select>\n', "<option value='", JSON.stringify(thiseval), "'>", JSON.stringify(thiseval), '</option>\n'];

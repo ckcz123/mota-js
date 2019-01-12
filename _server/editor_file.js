@@ -765,7 +765,7 @@ editor_file = function (editor, callback) {
                         if (isset(editor.main[v]))
                             locObj.main[v] = data_obj.main[v];
                         else
-                            locObj[v] = null;
+                            locObj.main[v] = null;
                     });
                     return locObj;
                 })(),

@@ -109,7 +109,7 @@ editor_mode = function (editor) {
                         console.error('comment和data不匹配,请在群 HTML5造塔技术交流群 959329661 内反馈')
                         id_815975ad_ee6f_4684_aac7_397b7e392702=1;
                     }
-                    continue;
+                    pvobj[ii]=null;
                 }
                 var field = pfield + "['" + ii + "']";
                 var cfield = pcfield + "['_data']['" + ii + "']";
@@ -278,7 +278,7 @@ editor_mode = function (editor) {
     editor_mode.prototype.objToTr_ = function (obj, commentObj, field, cfield, vobj, cobj) {
         var guid = editor.guid();
         var thiseval = vobj;
-        var comment = cobj._data;
+        var comment = String(cobj._data);
 
         var charlength = 10;
         // "['a']['b']" => "b"
@@ -305,7 +305,6 @@ editor_mode = function (editor) {
 
     editor_mode.prototype.objToTd_ = function (obj, commentObj, field, cfield, vobj, cobj) {
         var thiseval = vobj;
-        if (thiseval === undefined) thiseval = null;
         if (cobj._select) {
             var values = cobj._select.values;
             var outstr = ['<select>\n', "<option value='", JSON.stringify(thiseval), "'>", JSON.stringify(thiseval), '</option>\n'];

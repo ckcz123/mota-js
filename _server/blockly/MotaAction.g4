@@ -2205,7 +2205,7 @@ ActionParser.prototype.parseAction = function() {
     case "showImage": // 显示图片
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['showImage_s'].xmlText([
-        data.code,data.image,data.loc[0],data.loc[1],data.dw,data.dh,data.opacity,data.time||0,data.async||false,this.next]);
+        data.code,data.image||data.name,data.loc[0],data.loc[1],data.dw,data.dh,data.opacity,data.time||0,data.async||false,this.next]);
       break;
     case "hideImage": // 清除图片
       this.next = MotaActionBlocks['hideImage_s'].xmlText([
@@ -2435,6 +2435,8 @@ ActionParser.prototype.parseAction = function() {
     case "exit": // 立刻结束事件
       this.next = MotaActionBlocks['exit_s'].xmlText([
         this.next]);
+      break;
+    case "animateImage":  // 兼容 animateImage
       break;
     default:
       throw new Error("[警告]出错啦！\n"+data.type+" 事件不被支持...");

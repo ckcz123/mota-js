@@ -1,14 +1,14 @@
 var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
 {
-    "_leaf": false,
+    
     "_type": "object",
     "_data": {
         "items": {
-            "_leaf": false,
+            
             "_type": "object",
             "_data": {
                 "items": {
-                    "_leaf": false,
+                    
                     "_type": "object",
                     "_data": {
                         "cls": {
@@ -89,7 +89,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
         },
         "items_template" : {'cls': 'items', 'name': '新物品'},
         "enemys": {
-            "_leaf": false,
+            
             "_type": "object",
             "_data": {
                 "name": {
@@ -197,7 +197,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
         },
         "enemys_template" : {'name': '新敌人', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'point': 0, 'special': 0},
         "maps": {
-            "_leaf": false,
+            
             "_type": "object",
             "_data": {
                 "id": {
@@ -271,11 +271,11 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             }
         },
         "floors": {
-            "_leaf": false,
+            
             "_type": "object",
             "_data": {
                 "floor": {
-                    "_leaf": false,
+                    
                     "_type": "object",
                     "_data": {
                         "floorId": {
@@ -407,7 +407,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     }
                 },
                 "loc": {
-                    "_leaf": false,
+                    
                     "_type": "object",
                     "_data": {
                         "events": {

@@ -1,10 +1,10 @@
 var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
 {
-    "_leaf": false,
+    
     "_type": "object",
     "_data": {
         "main": {
-            "_leaf": false,
+            
             "_type": "object",
             "_data": {
                 "floorIds": {
@@ -125,7 +125,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             }
         },
         "firstData": {
-            "_leaf": false,
+            
             "_type": "object",
             "_data": {
                 "title": {
@@ -154,7 +154,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_data": "初始楼层的ID"
                 },
                 "hero": {
-                    "_leaf": false,
+                    
                     "_type": "object",
                     "_data": {
                         "name": {
@@ -214,7 +214,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_data": "初始装上的装备，此处建议请直接留空数组"
                         },
                         "items": {
-                            "_leaf": false,
+                            
                             "_type": "object",
                             "_data": {
                                 "keys": {
@@ -245,7 +245,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_data": "初始可飞的楼层；一般留空数组即可"
                         },
                         "loc": {
-                            "_leaf": false,
+                            
                             "_type": "object",
                             "_data": {
                                 "direction": {
@@ -316,7 +316,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             }
         },
         "values": {
-            "_leaf": false,
+            
             "_type": "object",
             "_data": {
                 "lavaDamage": {
@@ -407,7 +407,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             }
         },
         "flags": {
-            "_leaf": false,
+            
             "_type": "object",
             "_data": {
                 "enableFloor": {

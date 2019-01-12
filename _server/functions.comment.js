@@ -1,10 +1,10 @@
 var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
 {
-    "_leaf": false,
+    
     "_type": "object",
     "_data": {
         "events": {
-            "_leaf": false,
+            
             "_type": "object",
             "_data": {
                 "initGame": {
@@ -106,7 +106,7 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             }
         },
         "enemys": {
-            "_leaf": false,
+            
             "_type": "object",
             "_data": {
                 "getSpecials": {
@@ -136,7 +136,7 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             }
         },
         "actions": {
-            "_leaf": false,
+            
             "_type": "object",
             "_data": {
                 "onKeyUp": {
@@ -148,7 +148,7 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             }
         },
         "control": {
-            "_leaf": false,
+            
             "_type": "object",
             "_data": {
                 "flyTo": {
@@ -178,7 +178,7 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             }
         },
         "ui": {
-            "_leaf": false,
+            
             "_type": "object",
             "_data": {
                 "drawStatusBar": {
@@ -202,7 +202,7 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             }
         },
         "plugins": {
-            "_leaf": false,
+            
             "_type": "object",
             "_data": {
                 "parallelDo": {

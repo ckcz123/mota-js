@@ -417,7 +417,46 @@ editor.prototype.drawInitData = function (icons) {
 
     if (fullWidth > edata.width) edata.style.width = (edata.width = fullWidth) / ratio + 'px';
     edata.style.height = (edata.height = fullHeight) / ratio + 'px';
-    var dc = edata.getContext('2d');
+    iconImages.style.width = (iconImages.width = fullWidth) / ratio + 'px';
+    iconImages.style.height = (iconImages.height = fullHeight) / ratio + 'px';
+    var dc = {drawImage:function(){
+        var image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight;
+        var a=Array.from(arguments)
+        if(arguments.length==3){
+            // [image, dx, dy]=arguments
+            // [sx, sy, sWidth, sHeight, dWidth, dHeight]=[0,0,image.width,image.height,image.width,image.height]
+            image=a[0]
+            a=[a[0],0,0,image.width,image.height,a[1],a[2],image.width,image.height]
+        }
+        if(arguments.length==5){
+            // [image, dx, dy, dWidth, dHeight]=arguments
+            // [sx, sy, sWidth, sHeight]=[0,0,image.width,image.height]
+            image=a[0]
+            a=[a[0],0,0,image.width,image.height,a[1],a[2],a[3],a[4]]
+        }
+        if(arguments.length==9){
+            // [image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight]=arguments
+        }
+        image=a[0];
+        sx=a[1];
+        sy=a[2];
+        sWidth=a[3];
+        sHeight=a[4];
+        dx=a[5];
+        dy=a[6];
+        dWidth=a[7];
+        dHeight=a[8];
+        //放弃对 dWidth, dHeight 的支持, 始终画一样大的
+        var dimg=new Image()
+        dimg.src = image.src;
+        dimg.style.clip=['rect(',sy,'px,',sx+sWidth,'px,',sy+sHeight,'px,',sx,'px)'].join('')
+        dimg.style.top=dy-sy+'px'
+        dimg.style.left=dx-sx+'px'
+        dimg.width=image.width/ratio
+        dimg.height=image.height/ratio
+        iconImages.appendChild(dimg)
+    }}
+    // var dc = edata.getContext('2d');
     var nowx = 0;
     var nowy = 0;
     for (var ii = 0; ii < imgNames.length; ii++) {

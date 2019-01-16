@@ -416,14 +416,7 @@ control.prototype.useFly = function (need) {
     else core.drawTip("当前无法使用"+core.material.items.fly.name);
 }
 ```
-2. 让录像记下楼传的使用。在items.js的useItem函数中找到记录路线的那几行，修改为：
-``` js
-    // 记录路线
-    if (itemId!='book') {  // 把 `&& itemId!='fly'` 给删除
-        core.status.route.push("item:"+itemId);
-    }
-```
-3. 修改楼传的使用事件。和其他永久道具一样，在地图编辑器的图块属性中修改楼传的useItemEffect和canUseItemEffect两个内容。例如：
+2. 修改楼传的使用事件。和其他永久道具一样，在地图编辑器的图块属性中修改楼传的useItemEffect和canUseItemEffect两个内容。例如：
 ``` js
 "useItemEffect": "core.insertAction([...])" // 执行某段自定义事件，或者其他脚本
 "canUseItemEffect": "true" // 任何时候可用

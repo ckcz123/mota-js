@@ -64,7 +64,7 @@ items.prototype.getItemEffectTip = function(itemId) {
 }
 
 ////// 使用道具 //////
-items.prototype.useItem = function (itemId, callback) {
+items.prototype.useItem = function (itemId, noRoute, callback) {
     if (!this.canUseItem(itemId)) {
         if (core.isset(callback)) callback();
         return;
@@ -80,7 +80,7 @@ items.prototype.useItem = function (itemId, callback) {
         }
     }
     // 记录路线
-    if (itemId!='book' && itemId!='fly') {
+    if (!noRoute) {
         core.status.route.push("item:"+itemId);
     }
 
@@ -91,7 +91,10 @@ items.prototype.useItem = function (itemId, callback) {
         delete core.status.hero.items[itemCls][itemId];
 
     core.updateStatusBar();
-    if (!core.isset(core.status.event.id)) core.status.event.data = null;
+    if (!core.isset(core.status.event.id)) {
+        core.status.event.data = null;
+        core.status.event.ui = null;
+    }
 
     if (core.isset(callback)) callback();
 }

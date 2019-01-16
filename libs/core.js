@@ -992,8 +992,8 @@ core.prototype.removeItem = function (itemId, itemNum) {
 }
 
 ////// 使用某个物品 //////
-core.prototype.useItem = function (itemId, callback) {
-    core.items.useItem(itemId, callback);
+core.prototype.useItem = function (itemId, noRoute, callback) {
+    core.items.useItem(itemId, noRoute, callback);
 }
 
 ////// 能否使用某个物品 //////

@@ -862,6 +862,18 @@ events.prototype.doAction = function() {
                 }
                 break;
             }
+        case "useItem": // 使用道具
+            // 考虑到可能覆盖楼传事件的问题，这里不对fly进行检查。
+            if (data.id!='book' && core.canUseItem(data.id)) {
+                core.useItem(data.id, true, function() {
+                    core.events.doAction();
+                });
+            }
+            else {
+                core.drawTip("当前无法使用"+((core.material.items[data.id]||{}).name||"未知道具"));
+                this.doAction();
+            }
+            break;
         case "openShop": // 打开一个全局商店
             if (core.isReplaying()) { // 正在播放录像，简单将visited置为true
                 core.status.shops[data.id].visited=true;

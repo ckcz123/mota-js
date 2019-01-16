@@ -252,8 +252,9 @@ core.setBlock(number, x, y, floorId)
 改变图块。number为要改变到的图块数字，x和y为坐标，floorId为楼层ID，可忽略表示当前楼层。
 
 
-core.useItem(itemId, callback)
-尝试使用某个道具。itemId为道具ID，callback为成功或失败后的回调。
+core.useItem(itemId, noRoute, callback)
+尝试使用某个道具。itemId为道具ID，noRoute如果为真则该道具的使用不计入录像。
+callback为成功或失败后的回调。
 
 
 core.canUseItem(itemId)

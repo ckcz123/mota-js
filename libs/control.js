@@ -1728,7 +1728,7 @@ control.prototype.bookReplay = function () {
 
     core.lockControl();
     core.status.event.id='book';
-    core.useItem('book');
+    core.useItem('book', true);
 }
 
 ////// 回放录像时浏览地图 //////
@@ -1792,7 +1792,7 @@ control.prototype.replay = function () {
         if (core.canUseItem(itemId)) {
             // 是否绘制道具栏
             if (core.material.items[itemId].hideInReplay) {
-                core.useItem(itemId, function () {
+                core.useItem(itemId, false, function () {
                     core.replay();
                 });
                 return;
@@ -1813,7 +1813,7 @@ control.prototype.replay = function () {
                     core.ui.drawToolbox(index);
                     setTimeout(function () {
                         core.ui.closePanel();
-                        core.useItem(itemId, function () {
+                        core.useItem(itemId, false, function () {
                             core.replay();
                         });
                     }, 750 / Math.max(1, core.status.replay.speed));
@@ -1997,7 +1997,7 @@ control.prototype.openBook = function (need) {
 
     if (!core.checkStatus('book', need, true))
         return;
-    core.useItem('book');
+    core.useItem('book', true);
 }
 
 ////// 点击楼层传送器时的打开操作 //////
@@ -2019,7 +2019,7 @@ control.prototype.useFly = function (need) {
         core.status.event.id = null;
         return;
     }
-    core.useItem('fly');
+    core.useItem('fly', true);
     return;
 }
 

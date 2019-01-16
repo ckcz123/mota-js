@@ -257,6 +257,7 @@ action
     |   changeFloor_s
     |   changePos_0_s
     |   changePos_1_s
+    |   useItem_s
     |   openShop_s
     |   disableShop_s
     |   follow_s
@@ -948,6 +949,19 @@ helpUrl : https://h5mota.com/games/template/docs/#/event?id=changepos%EF%BC%9A%E
 colour : this.dataColor
 default : [null]
 var code = '{"type": "changePos", "direction": "'+Direction_List_0+'"},\n';
+return code;
+*/;
+
+useItem_s
+    :   '使用道具' IdString Newline
+
+
+/* useItem_s
+tooltip : useItem: 使用道具
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=useItem%ef%bc%9a%e4%bd%bf%e7%94%a8%e9%81%93%e5%85%b7
+colour : this.dataColor
+default : ["pickaxe"]
+var code = '{"type": "useItem", "id": "'+IdString_0+'"},\n';
 return code;
 */;
 
@@ -2251,6 +2265,10 @@ ActionParser.prototype.parseAction = function() {
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['openDoor_s'].xmlText([
         data.loc[0],data.loc[1],data.floorId||'',this.next]);
+      break;
+    case "useItem": // 使用道具
+      this.next = MotaActionBlocks['useItem_s'].xmlText([
+        data.id,this.next]);
       break;
     case "openShop": // 打开一个全局商店
       this.next = MotaActionBlocks['openShop_s'].xmlText([

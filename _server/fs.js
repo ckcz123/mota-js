@@ -56,7 +56,7 @@
                 callback(null, data);
             }
         }, function (e) {
-            console.log(e);
+            main.log(e);
             callback(e+"：请检查启动服务是否处于正常运行状态。");
         }, "text/plain; charset=x-user-defined");
     }

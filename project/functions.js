@@ -1211,7 +1211,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		try {
 			eval(core.floors[core.status.floorId].parallelDo);
 		} catch (e) {
-			console.log(e);
+			main.log(e);
 		}
 	}
 

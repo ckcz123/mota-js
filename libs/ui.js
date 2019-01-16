@@ -2367,14 +2367,14 @@ ui.prototype.drawSLPanel = function(index, refresh) {
                     core.saves.autosave.data = data;
                     core.status.event.ui[i]=data;
                     loadSave(i+1, callback);
-                }, function(err) {console.log(err);});
+                }, function(err) {main.log(err);});
             }
         }
         else {
             core.getLocalForage("save"+(5*page+i), null, function(data) {
                 core.status.event.ui[i]=data;
                 loadSave(i+1, callback);
-            }, function(err) {console.log(err);});
+            }, function(err) {main.log(err);});
         }
     }
 

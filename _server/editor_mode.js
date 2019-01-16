@@ -229,7 +229,10 @@ editor_mode = function (editor) {
                 var addfunc=function(){
                     editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
                     // 1.输入id
-                    var newid=prompt('请输入新项的id','newid');
+                    var newid=prompt('请输入新项的id');
+                    if (newid == null || newid.length==0) {
+                        return;
+                    }
                     // 2.检查id是否符合规范或与已有id重复
                     if (!/^[a-zA-Z0-9_]+$/.test(newid)){
                         printe('id不符合规范, 请使用大小写字母数字下划线来构成');
@@ -1205,11 +1208,11 @@ editor_mode = function (editor) {
         editor_mode.changeDoubleClickModeByButton=function(mode){
             ({
                 delete:function(){
-                    printf('下一次双击表格的项删除, 编辑后刷新浏览器生效 (正常模式下双击是用事件编辑器或文本编辑器编辑)');
+                    printf('下一次双击表格的项删除, 编辑后刷新浏览器生效 (正常模式下双击是用事件或文本编辑器编辑)；切换下拉菜单可取消。');
                     editor_mode.doubleClickMode=mode;
                 },
                 add:function(){
-                    printf('下一次双击表格的项, 在同级添加新项, 编辑后刷新浏览器生效 (正常模式下双击是用事件编辑器或文本编辑器编辑)');
+                    printf('下一次双击表格的项, 在同级添加新项, 编辑后刷新浏览器生效 (正常模式下双击是用事件或文本编辑器编辑)；切换下拉菜单可取消。');
                     editor_mode.doubleClickMode=mode;
                 }
             }[mode])();

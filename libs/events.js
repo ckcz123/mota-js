@@ -978,7 +978,7 @@ events.prototype.doAction = function() {
                     core.setFlag((prefix||"global")+"@"+data.name.substring(7), value);
                 }
             }
-            catch (e) {console.log(e)}
+            catch (e) {main.log(e)}
             core.updateStatusBar();
             this.doAction();
             break;
@@ -1052,7 +1052,7 @@ events.prototype.doAction = function() {
                         value = core.decodeBase64(action.substring(7));
                     }
                     catch (e) {
-                        console.log(e);
+                        main.log(e);
                         core.stopReplay();
                         core.drawTip("录像文件出错");
                         return;
@@ -1147,7 +1147,7 @@ events.prototype.doAction = function() {
                         }
                     }
                 } catch (e) {
-                    console.log(e);
+                    main.log(e);
                 }
                 if (!data.async)
                     this.doAction();

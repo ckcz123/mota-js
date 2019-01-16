@@ -293,13 +293,13 @@ core.prototype.init = function (coreData, callback) {
                                 core.removeLocalForage("__test__");
                             }
                         }
-                        catch (e) {console.log(e); core.platform.useLocalForage=false;}
-                    }, function(e) {console.log(e); core.platform.useLocalForage=false;})
+                        catch (e) {main.log(e); core.platform.useLocalForage=false;}
+                    }, function(e) {main.log(e); core.platform.useLocalForage=false;})
                 }
-                catch (e) {console.log(e); core.platform.useLocalForage=false;}
-            }, function(e) {console.log(e); core.platform.useLocalForage=false;})
+                catch (e) {main.log(e); core.platform.useLocalForage=false;}
+            }, function(e) {main.log(e); core.platform.useLocalForage=false;})
         }
-        catch (e) {console.log(e); core.platform.useLocalForage=false;}
+        catch (e) {main.log(e); core.platform.useLocalForage=false;}
     }
 
     core.platform.extendKeyboard = core.getLocalStorage("extendKeyboard", false);

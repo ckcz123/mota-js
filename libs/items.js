@@ -35,7 +35,7 @@ items.prototype.getItemEffect = function(itemId, itemNum) {
                 eval(this.itemEffect[itemId]);
             }
             catch (e) {
-                console.log(e);
+                main.log(e);
             }
         }
         core.status.hero.statistics.hp += core.status.hero.hp - curr_hp;
@@ -55,7 +55,7 @@ items.prototype.getItemEffectTip = function(itemId) {
             try {
                 return eval(this.itemEffectTip[itemId])||"";
             } catch (e) {
-                console.log(e);
+                main.log(e);
                 return "";
             }
         }
@@ -76,7 +76,7 @@ items.prototype.useItem = function (itemId, callback) {
             eval(this.useItemEffect[itemId]);
         }
         catch (e) {
-            console.log(e);
+            main.log(e);
         }
     }
     // 记录路线
@@ -107,7 +107,7 @@ items.prototype.canUseItem = function (itemId) {
             able = eval(this.canUseItemEffect[itemId]);
         }
         catch (e) {
-            console.log(e);
+            main.log(e);
         }
     }
     if (!able) core.status.event.data = null;
@@ -218,7 +218,7 @@ items.prototype.loadEquip = function (equipId, callback) {
             }
         }
         catch (e) {
-            console.log(e);
+            main.log(e);
         }
     }
 

@@ -275,7 +275,7 @@ control.prototype.setRequestAnimationFrame = function () {
                     }
                 }
                 catch (e) {
-                    console.log(e);
+                    main.log(e);
                 }
             });
         }
@@ -2206,7 +2206,7 @@ control.prototype.doSL = function (id, type) {
                 if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
                 afterGet(data);
             }, function(err) {
-                console.log(err);
+                main.log(err);
                 alert("无效的存档");
             })
         }
@@ -2248,7 +2248,7 @@ control.prototype.doSL = function (id, type) {
                 if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
                 afterGet(data);
             }, function(err) {
-                console.log(err);
+                main.log(err);
                 alert("无效的存档");
             })
         }
@@ -2425,7 +2425,7 @@ control.prototype.getSaves = function (index, callback) {
         core.getLocalForage("save"+index, null, function(data) {
             if (core.isset(callback)) callback(data);
         }, function(err) {
-            console.log(err);
+            main.log(err);
             if (core.isset(callback))
                 callback(null);
         })
@@ -2445,7 +2445,7 @@ control.prototype.getSaves = function (index, callback) {
             saves.push(data);
             load(index+1, callback);
         }, function(err) {
-            console.log(err);
+            main.log(err);
             load(index+1, callback);
         })
     }
@@ -2556,7 +2556,7 @@ control.prototype.playBgm = function (bgm) {
             core.material.bgms[bgm].pause();
         }
         catch (e) {
-            console.log(e);
+            main.log(e);
         }
         return;
     }
@@ -2589,7 +2589,7 @@ control.prototype.playBgm = function (bgm) {
     }
     catch (e) {
         console.log("无法播放BGM "+bgm);
-        console.log(e);
+        main.log(e);
         core.musicStatus.playingBgm = null;
     }
 }
@@ -2604,7 +2604,7 @@ control.prototype.pauseBgm = function () {
     }
     catch (e) {
         console.log("无法暂停BGM");
-        console.log(e);
+        main.log(e);
     }
     this.setMusicBtn();
 
@@ -2620,7 +2620,7 @@ control.prototype.resumeBgm = function () {
     }
     catch (e) {
         console.log("无法恢复BGM");
-        console.log(e);
+        main.log(e);
     }
     this.setMusicBtn();
 }
@@ -2666,7 +2666,7 @@ control.prototype.playSound = function (sound) {
                     source.noteOn(0);
                 }
                 catch (ee) {
-                    console.log(ee);
+                    main.log(ee);
                 }
             }
         }
@@ -2677,7 +2677,7 @@ control.prototype.playSound = function (sound) {
     }
     catch (eee) {
         console.log("无法播放SE "+sound);
-        console.log(eee);
+        main.log(eee);
     }
 }
 

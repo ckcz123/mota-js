@@ -1851,7 +1851,7 @@ core.insertAction([
 		try {
 			eval(core.floors[core.status.floorId].parallelDo);
 		} catch (e) {
-			console.log(e);
+			main.log(e);
 		}
 	}
 	

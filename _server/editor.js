@@ -415,8 +415,10 @@ editor.prototype.drawInitData = function (icons) {
     var fullWidth = ~~(sumWidth * ratio);
     var fullHeight = ~~(maxHeight * ratio);
 
+    /*
     if (fullWidth > edata.width) edata.style.width = (edata.width = fullWidth) / ratio + 'px';
     edata.style.height = (edata.height = fullHeight) / ratio + 'px';
+    */
     iconImages.style.width = (iconImages.width = fullWidth) / ratio + 'px';
     iconImages.style.height = (iconImages.height = fullHeight) / ratio + 'px';
     var dc = {drawImage:function(){
@@ -644,6 +646,7 @@ editor.prototype.listen = function () {
 
     var iconLib=document.getElementById('iconLib');
     iconLib.onmousedown = function (e) {
+        console.log("iconLib: ("+e.clientX+","+e.clientY+")");
         e.stopPropagation();
     }
 
@@ -957,7 +960,7 @@ editor.prototype.listen = function () {
     }
 
     var dataSelection = document.getElementById('dataSelection');
-    edata.onmousedown = function (e) {
+    iconLib.onmousedown = function (e) {
         e.stopPropagation();
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;

@@ -238,13 +238,6 @@ body {
     overflow: auto;
 }
 
-#edata{
-    position: absolute;
-    z-index:0;
-    left: 0;
-    top: 0;
-}
-
 #iconImages {
     z-index: 0;
     overflow: hidden;

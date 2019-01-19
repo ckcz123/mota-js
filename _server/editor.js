@@ -423,7 +423,7 @@ editor.prototype.drawInitData = function (icons) {
     iconImages.style.height = (iconImages.height = fullHeight) / ratio + 'px';
     var dc = {drawImage:function(){
         var image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight;
-        var a=Array.from(arguments)
+        var a=Array.prototype.slice.call(arguments)
         if(arguments.length==3){
             // [image, dx, dy]=arguments
             // [sx, sy, sWidth, sHeight, dWidth, dHeight]=[0,0,image.width,image.height,image.width,image.height]
@@ -703,8 +703,7 @@ editor.prototype.listen = function () {
         // 双击地图可以选中素材
         var loc = eToLoc(e);
         var pos = locToPos(loc,true);
-        var thisevent = editor.map[pos.y][pos.x];
-        editor.setSelectBoxFromInfo(thisevent);
+        editor.setSelectBoxFromInfo(editor[editor.layerMod][pos.y][pos.x]);
         return;
     }
 
@@ -1110,7 +1109,7 @@ editor.prototype.listen = function () {
     chooseInRight.onmousedown = function(e){
         editor.hideMidMenu();
         e.stopPropagation();
-        var thisevent = editor.map[editor.pos.y][editor.pos.x];
+        var thisevent = editor[editor.layerMod][editor.pos.y][editor.pos.x];
         editor.setSelectBoxFromInfo(thisevent);
     }
 

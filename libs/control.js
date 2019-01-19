@@ -1425,9 +1425,9 @@ control.prototype.updateDamage = function (floorId, canvas) {
     if (!core.hasItem('book')) return;
     canvas.font = "bold 11px Arial";
 
-    var hero_hp = core.status.hero.hp;
     if (core.flags.displayEnemyDamage || core.flags.displayCritical) {
         canvas.textAlign = 'left';
+
         for (var b = 0; b < mapBlocks.length; b++) {
             var x = mapBlocks[b].x, y = mapBlocks[b].y;
             if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls.indexOf('enemy')==0
@@ -1440,14 +1440,14 @@ control.prototype.updateDamage = function (floorId, canvas) {
                 var id = mapBlocks[b].event.id;
 
                 if (core.flags.displayEnemyDamage) {
-                    var damageString = core.enemys.getDamageString(id, x, y);
+                    var damageString = core.enemys.getDamageString(id, x, y, floorId);
                     var damage = damageString.damage, color = damageString.color;
                     core.fillBoldText(canvas, damage, 32*x+1, 32*(y+1)-1, color);
                 }
 
                 // 临界显伤
                 if (core.flags.displayCritical) {
-                    var critical = core.enemys.nextCriticals(id);
+                    var critical = core.enemys.nextCriticals(id, 1, x, y, floorId);
                     if (critical.length>0) critical=critical[0];
                     critical = core.formatBigNumber(critical[0], true);
                     if (critical == '???') critical = '?';

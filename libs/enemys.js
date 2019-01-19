@@ -127,9 +127,9 @@ enemys.prototype.getExtraDamage = function (enemy) {
     return extra_damage;
 }
 
-enemys.prototype.getDamageString = function (enemy, x, y) {
+enemys.prototype.getDamageString = function (enemy, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    var damage = core.enemys.getDamage(enemy, x, y);
+    var damage = core.enemys.getDamage(enemy, x, y, floorId);
 
     var color = '#000000';
 
@@ -328,7 +328,7 @@ enemys.prototype.getCurrentEnemys = function (floorId) {
             if (specialText.length>=3) specialText = "多属性...";
             else specialText = specialText.join("  ");
 
-            var critical = this.nextCriticals(enemyId);
+            var critical = this.nextCriticals(enemyId, 1, null, null, floorId);
             if (critical.length>0) critical=critical[0];
 
             var e = core.clone(enemy);

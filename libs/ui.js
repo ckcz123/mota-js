@@ -228,6 +228,7 @@ ui.prototype.closePanel = function () {
     clearInterval(core.status.event.interval);
     core.clearLastEvent();
     core.maps.generateGroundPattern();
+    core.updateStatusBar();
     core.unLockControl();
     core.status.event.data = null;
     core.status.event.id = null;
@@ -1543,6 +1544,7 @@ ui.prototype.drawBook = function (index) {
     var enemys = core.enemys.getCurrentEnemys(floorId);
     
     core.clearLastEvent();
+    core.clearMap('data');
 
     // 生成groundPattern
     core.maps.generateGroundPattern(floorId);
@@ -1768,7 +1770,7 @@ ui.prototype.drawBookDetail = function (index) {
     }
 
     hints.push("");
-    var criticals = core.enemys.nextCriticals(enemyId, 10).map(function (v) {
+    var criticals = core.enemys.nextCriticals(enemyId, 10, null, null, floorId).map(function (v) {
         return core.formatBigNumber(v[0])+":"+core.formatBigNumber(v[1]);
     });
     while (criticals[0]=='0:0') criticals.shift();
@@ -1929,6 +1931,7 @@ ui.prototype.drawMaps = function (index, x, y) {
 
     clearTimeout(core.interval.tipAnimate);
     core.clearLastEvent();
+    core.status.checkBlock.buff = {};
     this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 0, 0, 416, x, y);
 
     // 绘图

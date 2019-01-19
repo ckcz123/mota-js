@@ -492,36 +492,51 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.hasSpecial(mon_special, 3) && mon_def < hero_atk - 1) {
 		mon_def = hero_atk - 1;
 	}
-
-	// V2.5.3备注：
-	// 这一部分是检查光环代码的，需要对整个地图上的图块进行遍历，可能会造成不必要的性能的损耗，尤其是循环计算临界会变得非常慢。
-	// 因此默认注释掉此段代码以加快游戏运行速度。
-	// 如果游戏中有光环怪物存在，取消注释（或按需根据floorId加判定）即可。
-	/*
+	
+	// 光环检查
+	// 从V2.5.4开始，对光环效果增加缓存，以解决多次重复计算的问题，从而大幅提升运行效率。
 	// 检查当前楼层所有光环怪物（数字25）
-	var hp_delta = 0, atk_delta = 0, def_delta = 0, cnt = 0;
-	// 遍历每个图块
-	core.status.maps[floorId].blocks.forEach(function (block) {
-		if (core.isset(block.event) && !block.disable) {
-			// 获得该图块的ID
-			var id = block.event.id, enemy = core.material.enemys[id];
-			// 检查是不是怪物，且是否拥有该特殊属性
-			if (core.isset(enemy) && core.hasSpecial(enemy.special, 25)) {
-				// 检查是否可叠加
-				if (enemy.add || cnt == 0) {
-					hp_delta += enemy.value || 0;
-					atk_delta += enemy.atkValue || 0;
-					def_delta += enemy.defValue || 0;
-					cnt++;
+	var hp_buff = 0, atk_buff = 0, def_buff = 0, cnt = 0;
+	// 检查光环缓存
+	if (!core.isset(core.status.checkBlock.buff)) core.status.checkBlock.buff = {};
+	var index = core.isset(x) && core.isset(y) ? (x+","+y) : "floor";
+	var cache = core.status.checkBlock.buff[index];
+	if (!core.isset(cache)) {
+		// 没有该点的缓存，则遍历每个图块
+		core.status.maps[floorId].blocks.forEach(function (block) {
+			if (core.isset(block.event) && !block.disable) {
+				// 获得该图块的ID
+				var id = block.event.id, enemy = core.material.enemys[id];
+				// 检查是不是怪物，且是否拥有该特殊属性
+				if (core.isset(enemy) && core.hasSpecial(enemy.special, 25)) {
+					// 检查是否可叠加
+					if (enemy.add || cnt == 0) {
+						hp_buff += enemy.value || 0;
+						atk_buff += enemy.atkValue || 0;
+						def_buff += enemy.defValue || 0;
+						cnt++;
+					}
 				}
 			}
-		}
-	});
+		});
+		
+		// TODO：如果有其他类型光环怪物在这里仿照添加检查，hp_buff, atk_buff和def_buff即可。
+		
+		// 放入缓存中
+		core.status.checkBlock.buff[index] = {"hp_buff": hp_buff, "atk_buff": atk_buff, "def_buff": def_buff};
+	}
+	else {
+		// 直接使用缓存数据
+		hp_buff = cache.hp_buff;
+		atk_buff = cache.atk_buff;
+		def_buff = cache.def_buff;
+	}
+	
 	// 增加比例；如果要增加数值可以直接在这里修改
-	mon_hp *= (1+hp_delta/100);
-	mon_atk *= (1+atk_delta/100);
-	mon_def *= (1+def_delta/100);
-	*/
+	mon_hp *= (1+hp_buff/100);
+	mon_atk *= (1+atk_buff/100);
+	mon_def *= (1+def_buff/100);
+	
 	
 	// TODO：可以在这里新增其他的怪物数据变化
 	// 比如仿攻（怪物攻击不低于勇士攻击）：

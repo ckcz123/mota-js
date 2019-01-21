@@ -928,11 +928,11 @@ events.prototype.doAction = function() {
             core.playBgm(data.name);
             this.doAction();
             break;
-        /*
         case "pauseBgm":
             core.pauseBgm();
             this.doAction();
             break
+        /*
         case "resumeBgm":
             core.resumeBgm();
             this.doAction();

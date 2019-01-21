@@ -2608,6 +2608,7 @@ control.prototype.pauseBgm = function () {
     try {
         if (core.isset(core.musicStatus.playingBgm)) {
             core.material.bgms[core.musicStatus.playingBgm].pause();
+            core.musicStatus.playingBgm = null;
         }
     }
     catch (e) {
@@ -2615,7 +2616,6 @@ control.prototype.pauseBgm = function () {
         main.log(e);
     }
     this.setMusicBtn();
-
 }
 
 ////// 恢复背景音乐的播放 //////

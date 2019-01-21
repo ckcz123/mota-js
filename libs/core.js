@@ -177,6 +177,7 @@ function core() {
             "time": 0,
         },
         "globalAttribute": {
+            'equipName': main.equipName || [],
             "statusLeftBackground": main.statusLeftBackground || "url(project/images/ground.png) repeat",
             "statusTopBackground": main.statusTopBackground || "url(project/images/ground.png) repeat",
             "toolsBackground": main.toolsBackground || "url(project/images/ground.png) repeat",

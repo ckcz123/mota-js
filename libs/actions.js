@@ -1539,7 +1539,7 @@ actions.prototype.clickEquipbox = function(x,y) {
 ////// 选择装备栏界面中某个Index后的操作 //////
 actions.prototype.clickEquipboxIndex = function(index) {
     if (index<6) {
-        if (index>=(main.equipName||[]).length) return;
+        if (index>=core.status.globalAttribute.equipName.length) return;
         if (index==core.status.event.selection && core.isset(core.status.hero.equipment[index])) {
             core.unloadEquip(index);
             core.status.route.push("unEquip:"+index);
@@ -1560,7 +1560,7 @@ actions.prototype.clickEquipboxIndex = function(index) {
 actions.prototype.keyDownEquipbox = function (keycode) {
     if (!core.isset(core.status.event.data)) return;
 
-    var equipCapacity = (main.equipName||[]).length;
+    var equipCapacity = core.status.globalAttribute.equipName.length;
     var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
     var index = core.status.event.selection;
     var page = core.status.event.data.page;

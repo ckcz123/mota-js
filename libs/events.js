@@ -1004,6 +1004,9 @@ events.prototype.doAction = function() {
                 if ((data.value.charAt(0)=='"' && data.value.charAt(data.value.length-1)=='"')
                     || (data.value.charAt(0)=="'" && data.value.charAt(data.value.length-1)=="'"))
                     data.value = data.value.substring(1, data.value.length-1);
+                // --- 检查 []
+                if (data.value.charAt(0) == '[' && data.value.charAt(data.value.length-1)==']')
+                    data.value = eval(data.value);
             }
             core.status.globalAttribute[data.name] = data.value;
             core.control.updateGlobalAttribute(data.name);

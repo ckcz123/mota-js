@@ -2494,6 +2494,7 @@ control.prototype.hasSave = function (index) {
 
 ////// 设置勇士属性 //////
 control.prototype.setStatus = function (statusName, statusVal) {
+    if (!core.isset(core.status.hero)) return;
     if (statusName == 'exp') statusName = 'experience';
     if (core.isset(core.status.hero.loc[statusName]))
         core.status.hero.loc[statusName] = statusVal;
@@ -2503,6 +2504,7 @@ control.prototype.setStatus = function (statusName, statusVal) {
 
 ////// 获得勇士属性 //////
 control.prototype.getStatus = function (statusName) {
+    if (!core.isset(core.status.hero)) return null;
     // support status:x
     if (core.isset(core.status.hero.loc[statusName]))
         return core.status.hero.loc[statusName];
@@ -2512,6 +2514,7 @@ control.prototype.getStatus = function (statusName) {
 
 ////// 获得某个等级的名称 //////
 control.prototype.getLvName = function () {
+    if (!core.isset(core.status.hero)) return null;
     return ((core.firstData.levelUp||[])[core.status.hero.lv-1]||{}).title || core.status.hero.lv;
 }
 
@@ -2708,7 +2711,8 @@ control.prototype.clearStatusBar = function() {
 ////// 更新状态栏 //////
 control.prototype.updateStatusBar = function () {
 
-    this.controldata.updateStatusBar();
+    if (core.isPlaying())
+        this.controldata.updateStatusBar();
 
     // 回放
     if (core.isReplaying()) {

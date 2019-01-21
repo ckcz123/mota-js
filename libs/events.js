@@ -127,6 +127,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
         var post_start = function () {
 
             core.control.triggerStatusBar('show');
+            core.dom.musicBtn.style.display = 'none';
 
             core.changeFloor(core.firstData.floorId, null, nowLoc, null, function() {
                 if (core.isset(callback)) callback();
@@ -169,6 +170,8 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 
         if (core.flags.startUsingCanvas) {
             core.control.triggerStatusBar('hide');
+            core.dom.musicBtn.style.display = 'block';
+            
             core.insertAction(core.clone(core.firstData.startCanvas), null, null, function() {
                 real_start();
             });
@@ -301,7 +304,7 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
                 doUpload("");
             }
             else {
-                doUpload(prompt("请输入你的ID：", core.getCookie('id')));
+                doUpload(prompt("请输入你的ID：", core.getCookie('id')||""));
             }
         }, function () {
             if (main.isCompetition)
@@ -859,6 +862,18 @@ events.prototype.doAction = function() {
                 }
                 break;
             }
+        case "useItem": // 使用道具
+            // 考虑到可能覆盖楼传事件的问题，这里不对fly进行检查。
+            if (data.id!='book' && core.canUseItem(data.id)) {
+                core.useItem(data.id, true, function() {
+                    core.events.doAction();
+                });
+            }
+            else {
+                core.drawTip("当前无法使用"+((core.material.items[data.id]||{}).name||"未知道具"));
+                this.doAction();
+            }
+            break;
         case "openShop": // 打开一个全局商店
             if (core.isReplaying()) { // 正在播放录像，简单将visited置为true
                 core.status.shops[data.id].visited=true;
@@ -913,11 +928,11 @@ events.prototype.doAction = function() {
             core.playBgm(data.name);
             this.doAction();
             break;
-        /*
         case "pauseBgm":
             core.pauseBgm();
             this.doAction();
             break
+        /*
         case "resumeBgm":
             core.resumeBgm();
             this.doAction();
@@ -975,7 +990,7 @@ events.prototype.doAction = function() {
                     core.setFlag((prefix||"global")+"@"+data.name.substring(7), value);
                 }
             }
-            catch (e) {console.log(e)}
+            catch (e) {main.log(e)}
             core.updateStatusBar();
             this.doAction();
             break;
@@ -989,6 +1004,9 @@ events.prototype.doAction = function() {
                 if ((data.value.charAt(0)=='"' && data.value.charAt(data.value.length-1)=='"')
                     || (data.value.charAt(0)=="'" && data.value.charAt(data.value.length-1)=="'"))
                     data.value = data.value.substring(1, data.value.length-1);
+                // --- 检查 []
+                if (data.value.charAt(0) == '[' && data.value.charAt(data.value.length-1)==']')
+                    data.value = eval(data.value);
             }
             core.status.globalAttribute[data.name] = data.value;
             core.control.updateGlobalAttribute(data.name);
@@ -1049,7 +1067,7 @@ events.prototype.doAction = function() {
                         value = core.decodeBase64(action.substring(7));
                     }
                     catch (e) {
-                        console.log(e);
+                        main.log(e);
                         core.stopReplay();
                         core.drawTip("录像文件出错");
                         return;
@@ -1144,7 +1162,7 @@ events.prototype.doAction = function() {
                         }
                     }
                 } catch (e) {
-                    console.log(e);
+                    main.log(e);
                 }
                 if (!data.async)
                     this.doAction();

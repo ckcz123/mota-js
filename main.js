@@ -149,7 +149,8 @@ function main() {
             'btn4': 33,
             'btn5': 34,
             'btn6': 35,
-            'btn7': 36
+            'btn7': 36,
+            'shop': 37
         },
         'floor': document.getElementById('floor'),
         'name': document.getElementById('name'),
@@ -309,6 +310,17 @@ main.prototype.setMainTipsText = function (text) {
     main.dom.mainTips.innerHTML = text;
 }
 
+main.prototype.log = function (e) {
+    if (e) {
+        if (main.core && main.core.platform && !main.core.platform.isPC) {
+            console.log((e.stack || e.toString()).replace("\n", " --- "));
+        }
+        else {
+            console.log(e);
+        }
+    }
+}
+
 
 main.prototype.listen = function () {
 
@@ -316,7 +328,7 @@ main.prototype.listen = function () {
 window.onresize = function () {
     try {
         main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
-    }catch (e) { console.log(e); }
+    }catch (e) { main.log(e); }
 }
 
 ////// 在界面上按下某按键时 //////
@@ -324,7 +336,7 @@ main.dom.body.onkeydown = function(e) {
     try {
         if (main.core && (main.core.isPlaying() || main.core.status.lockControl))
             main.core.onkeyDown(e);
-    } catch (ee) { console.log(ee); }
+    } catch (ee) { main.log(ee); }
 }
 
 ////// 在界面上放开某按键时 //////
@@ -332,7 +344,7 @@ main.dom.body.onkeyup = function(e) {
     try {
         if (main.core && (main.core.isPlaying() || main.core.status.lockControl))
             main.core.onkeyUp(e);
-    } catch (ee) { console.log(ee); }
+    } catch (ee) { main.log(ee); }
 }
 
 ////// 开始选择时 //////
@@ -347,7 +359,7 @@ main.dom.data.onmousedown = function (e) {
         var loc = main.core.getClickLoc(e.clientX, e.clientY);
         if (loc == null) return;
         main.core.ondown(loc);
-    } catch (ee) { console.log(ee); }
+    } catch (ee) { main.log(ee); }
 }
 
 ////// 鼠标移动时 //////
@@ -357,14 +369,14 @@ main.dom.data.onmousemove = function (e) {
         var loc = main.core.getClickLoc(e.clientX, e.clientY);
         if (loc == null) return;
         main.core.onmove(loc);
-    }catch (ee) { console.log(ee); }
+    }catch (ee) { main.log(ee); }
 }
 
 ////// 鼠标放开时 //////
 main.dom.data.onmouseup = function () {
     try {
         main.core.onup();
-    }catch (e) { console.log(e); }
+    }catch (e) { main.log(e); }
 }
 
 ////// 鼠标滑轮滚动时 //////
@@ -374,7 +386,7 @@ main.dom.data.onmousewheel = function(e) {
             main.core.onmousewheel(Math.sign(e.wheelDelta))
         else if (e.detail)
             main.core.onmousewheel(Math.sign(e.detail));
-    } catch (ee) { console.log(ee); }
+    } catch (ee) { main.log(ee); }
 }
 
 ////// 手指在触摸屏开始触摸时 //////
@@ -384,7 +396,7 @@ main.dom.data.ontouchstart = function (e) {
         var loc = main.core.getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
         if (loc == null) return;
         main.core.ondown(loc);
-    }catch (ee) { console.log(ee); }
+    }catch (ee) { main.log(ee); }
 }
 
 ////// 手指在触摸屏上移动时 //////
@@ -394,7 +406,7 @@ main.dom.data.ontouchmove = function (e) {
         var loc = main.core.getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
         if (loc == null) return;
         main.core.onmove(loc);
-    }catch (ee) { console.log(ee); }
+    }catch (ee) { main.log(ee); }
 }
 
 ////// 手指离开触摸屏时 //////
@@ -403,7 +415,7 @@ main.dom.data.ontouchend = function (e) {
         e.preventDefault();
         main.core.onup();
     } catch (e) {
-        console.log(e); 
+        main.log(e);
     }
 }
 
@@ -623,7 +635,7 @@ main.dom.musicBtn.onclick = function () {
     try {
         if (main.core)
             main.core.triggerBgm();
-    } catch (e) {console.log(e);}
+    } catch (e) {main.log(e);}
 }
 
 window.onblur = function () {

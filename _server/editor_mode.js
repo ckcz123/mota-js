@@ -18,6 +18,7 @@ editor_mode = function (editor) {
         this.mode = '';
         this.info = {};
         this.appendPic = {};
+        this.doubleClickMode='change';
     }
 
     editor_mode.prototype.init = function (callback) {
@@ -91,7 +92,25 @@ editor_mode = function (editor) {
          * @param {Object} pcobj 
          */
         var recursionParse = function (pfield, pcfield, pvobj, pcobj) {
-            for (var ii in pvobj) {
+            var keysForTableOrder={};
+            var voidMark={};
+            // 1. 按照pcobj排序生成
+            if (pcobj && pcobj['_data']){
+                for (var ii in pcobj['_data']) keysForTableOrder[ii]=voidMark;
+            }
+            // 2. 对每个pvobj且不在pcobj的，再添加到最后
+            keysForTableOrder=Object.assign(keysForTableOrder,pvobj)
+            for (var ii in keysForTableOrder) {
+                // 3. 对于pcobj有但是pvobj中没有的, 弹出提示, (正常情况下editor_file会补全成null)
+                //    事实上能执行到这一步工程没崩掉打不开,就继续吧..
+                if(keysForTableOrder[ii]===voidMark){
+                    if(typeof id_815975ad_ee6f_4684_aac7_397b7e392702==="undefined"){
+                        alert('comment和data不匹配,请在群 HTML5造塔技术交流群 959329661 内反馈')
+                        console.error('comment和data不匹配,请在群 HTML5造塔技术交流群 959329661 内反馈')
+                        id_815975ad_ee6f_4684_aac7_397b7e392702=1;
+                    }
+                    pvobj[ii]=null;
+                }
                 var field = pfield + "['" + ii + "']";
                 var cfield = pcfield + "['_data']['" + ii + "']";
                 var vobj = pvobj[ii];
@@ -122,13 +141,19 @@ editor_mode = function (editor) {
                     outstr.push(leafnode[0]);
                     guids.push(leafnode[1]);
                 }
-            }
+            } 
         }
         // 开始遍历
         recursionParse("", "", obj, commentObj);
-        var checkRange = function (evalstr, thiseval) {
-            if (evalstr) {
-                return eval(evalstr);
+        var checkRange = function (cobj, thiseval) {
+            if (cobj._range) {
+                return eval(cobj._range);
+            }
+            if (cobj._select) {
+                return cobj._select.values.indexOf(thiseval)!==-1;
+            }
+            if (cobj._bool) {
+                return [true,false].indexOf(thiseval)!==-1;
             }
             return true;
         }
@@ -142,12 +167,12 @@ editor_mode = function (editor) {
                 var input = thisTr.children[2].children[0].children[0];
                 var field = thisTr.children[0].getAttribute('title');
                 var cobj = JSON.parse(thisTr.children[1].getAttribute('cobj'));
+                var modeNode = thisTr.parentNode;
+                while (!editor_mode._ids.hasOwnProperty(modeNode.getAttribute('id'))) {
+                    modeNode = modeNode.parentNode;
+                }
                 input.onchange = function () {
-                    var node = thisTr.parentNode;
-                    while (!editor_mode._ids.hasOwnProperty(node.getAttribute('id'))) {
-                        node = node.parentNode;
-                    }
-                    editor_mode.onmode(editor_mode._ids[node.getAttribute('id')]);
+                    editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
                     var thiseval = null;
                     if (input.checked != null) input.value = input.checked;
                     try {
@@ -156,16 +181,31 @@ editor_mode = function (editor) {
                         printe(field + ' : ' + ee);
                         throw ee;
                     }
-                    if (checkRange(cobj._range, thiseval)) {
+                    if (checkRange(cobj, thiseval)) {
                         editor_mode.addAction(['change', field, thiseval]);
-                        editor_mode.onmode('save');//自动保存
+                        editor_mode.onmode('save');//自动保存 删掉此行的话点保存按钮才会保存
                     } else {
                         printe(field + ' : 输入的值不合要求,请鼠标放置在注释上查看说明');
                     }
                 }
+                // 双击表格时
+                //    正常编辑: 尝试用事件编辑器或多行文本编辑器打开
+                //    添加: 在该项的同一级创建一个内容为null新的项, 刷新后生效并可以继续编辑
+                //    删除: 删除该项, 刷新后生效
+                // 在点击按钮 添加/删除 后,下一次双击将被视为 添加/删除
                 var dblclickfunc=function () {
-                    if (cobj._type === 'event') editor_blockly.import(guid, {type: cobj._event});
-                    if (cobj._type === 'textarea') editor_multi.import(guid, {lint: cobj._lint, string: cobj._string});
+                    if(editor_mode.doubleClickMode==='change'){
+                        if (cobj._type === 'event') editor_blockly.import(guid, {type: cobj._event});
+                        if (cobj._type === 'textarea') editor_multi.import(guid, {lint: cobj._lint, string: cobj._string});
+                    }
+                    if(editor_mode.doubleClickMode==='add'){
+                        editor_mode.doubleClickMode='change';
+                        addfunc()
+                    }
+                    if(editor_mode.doubleClickMode==='delete'){
+                        editor_mode.doubleClickMode='change';
+                        deletefunc()
+                    }
                 }
                 input.ondblclick = dblclickfunc
                 var doubleClickCheck=[0];
@@ -176,6 +216,49 @@ editor_mode = function (editor) {
                     if(newClick-lastClick<500){
                         dblclickfunc()
                     }
+                }
+                var deletefunc=function(){
+                    editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
+                    if (checkRange(cobj, null)) {
+                        editor_mode.addAction(['delete', field, undefined]);
+                        editor_mode.onmode('save');//自动保存 删掉此行的话点保存按钮才会保存
+                    } else {
+                        printe(field + ' : 该值不允许为null,无法删除');
+                    }
+                }
+                var addfunc=function(){
+                    editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
+                    // 1.输入id
+                    var newid=prompt('请输入新项的id');
+                    if (newid == null || newid.length==0) {
+                        return;
+                    }
+                    // 2.检查id是否符合规范或与已有id重复
+                    if (!/^[a-zA-Z0-9_]+$/.test(newid)){
+                        printe('id不符合规范, 请使用大小写字母数字下划线来构成');
+                        return;
+                    }
+                    var conflict=true;
+                    var basefield=field.replace(/\[[^\[]*\]$/,'');
+                    if (basefield==="['main']"){
+                        printe("全塔属性 ~ ['main'] 不允许添加新值");
+                        return;
+                    }
+                    try {
+                        var baseobj=eval('obj'+basefield);
+                        conflict=newid in baseobj;
+                    } catch (ee) {
+                        // 理论上这里不会发生错误
+                        printe(ee);
+                        throw ee;
+                    }
+                    if (conflict){
+                        printe('id已存在, 请直接修改该项的值');
+                        return;
+                    }
+                    // 3.添加 
+                    editor_mode.addAction(['add',basefield+"['"+newid+"']",null]);
+                    editor_mode.onmode('save');//自动保存 删掉此行的话点保存按钮才会保存
                 }
             });
         }
@@ -198,7 +281,7 @@ editor_mode = function (editor) {
     editor_mode.prototype.objToTr_ = function (obj, commentObj, field, cfield, vobj, cobj) {
         var guid = editor.guid();
         var thiseval = vobj;
-        var comment = cobj._data;
+        var comment = String(cobj._data);
 
         var charlength = 10;
         // "['a']['b']" => "b"
@@ -347,6 +430,7 @@ editor_mode = function (editor) {
             editor_mode.dom[name].style = 'z-index:-1;opacity: 0;';
         }
         editor_mode.dom[mode].style = '';
+        editor_mode.doubleClickMode='change';
         // clear
         editor.drawEventBlock();
         if (editor_mode[mode]) editor_mode[mode]();
@@ -1119,6 +1203,19 @@ editor_mode = function (editor) {
                 }
             });
             return true
+        }
+
+        editor_mode.changeDoubleClickModeByButton=function(mode){
+            ({
+                delete:function(){
+                    printf('下一次双击表格的项删除, 编辑后刷新浏览器生效 (正常模式下双击是用事件或文本编辑器编辑)；切换下拉菜单可取消。');
+                    editor_mode.doubleClickMode=mode;
+                },
+                add:function(){
+                    printf('下一次双击表格的项, 在同级添加新项, 编辑后刷新浏览器生效 (正常模式下双击是用事件或文本编辑器编辑)；切换下拉菜单可取消。');
+                    editor_mode.doubleClickMode=mode;
+                }
+            }[mode])();
         }
 
         if (Boolean(callback)) callback();

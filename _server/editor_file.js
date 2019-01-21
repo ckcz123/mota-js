@@ -82,7 +82,7 @@ editor_file = function (editor, callback) {
           callback('未选中文件或无数据');
         } */
         var filename = 'project/floors/' + editor.currentFloorId + '.js';
-        var datastr = ['main.floors.', editor.currentFloorId, '=\n{'];
+        var datastr = ['main.floors.', editor.currentFloorId, '=\n'];
         if (editor.currentFloorData.map == 'new') {
             /*
             editor.currentFloorData.map = editor.map.map(function (v) {
@@ -108,14 +108,18 @@ editor_file = function (editor, callback) {
                 editor.currentFloorData[name]=mapArray;
             }
         }
-        for (var ii in editor.currentFloorData)
-            if (editor.currentFloorData.hasOwnProperty(ii)) {
-                if (['map','bgmap','fgmap'].indexOf(ii)!==-1)
-                    datastr = datastr.concat(['\n"', ii, '": [\n', formatMap(editor.currentFloorData[ii],ii!='map'), '\n],']);
-                else
-                    datastr = datastr.concat(['\n"', ii, '": ', JSON.stringify(editor.currentFloorData[ii], null, 4), ',']);
-            }
-        datastr = datastr.concat(['\n}']);
+        // format 更改实现方式以支持undefined删除
+        var tempJsonObj=Object.assign({},editor.currentFloorData);
+        var tempMap=[['map',editor.guid()],['bgmap',editor.guid()],['fgmap',editor.guid()]];
+        tempMap.forEach(function(v){
+            v[2]=tempJsonObj[v[0]];
+            tempJsonObj[v[0]]=v[1];
+        });
+        var tempJson=JSON.stringify(tempJsonObj, null, 4);
+        tempMap.forEach(function(v){
+            tempJson=tempJson.replace('"'+v[1]+'"','[\n'+ formatMap(v[2],v[0]!='map')+ '\n]')
+        });
+        datastr = datastr.concat([tempJson]);
         datastr = datastr.join('');
         alertWhenCompress();
         fs.writeFile(filename, encode(datastr), 'base64', function (err, data) {
@@ -626,7 +630,7 @@ editor_file = function (editor, callback) {
             actionList.forEach(function (value) {
                 value[1] = value[1] + "['" + x + "," + y + "']";
             });
-            saveSetting('floors', actionList, function (err) {
+            saveSetting('floorloc', actionList, function (err) {
                 callback([
                     (function () {
                         var locObj = {};
@@ -745,7 +749,7 @@ editor_file = function (editor, callback) {
                             if (isset(editor.main[v]))
                                 locObj.main[v] = data_obj.main[v];
                             else
-                                locObj[v] = null;
+                                locObj.main[v] = null;
                         });
                         return locObj;
                     })(),
@@ -761,7 +765,7 @@ editor_file = function (editor, callback) {
                         if (isset(editor.main[v]))
                             locObj.main[v] = data_obj.main[v];
                         else
-                            locObj[v] = null;
+                            locObj.main[v] = null;
                     });
                     return locObj;
                 })(),
@@ -976,13 +980,18 @@ editor_file = function (editor, callback) {
             });
             return;
         }
-        if (file == 'floors') {
+        if (file == 'floorloc') {
             actionList.forEach(function (value) {
                 // 检测null/undefined
-                if (core.isset(value[2]))
-                    eval("editor.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
-                else
-                    eval("delete editor.currentFloorData"+value[1]);
+                if (!core.isset(value[2]))value[2]=undefined;
+                eval("editor.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
+            });
+            editor_file.saveFloorFile(callback);
+            return;
+        }
+        if (file == 'floors') {
+            actionList.forEach(function (value) {
+                eval("editor.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
             });
             editor_file.saveFloorFile(callback);
             return;

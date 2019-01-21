@@ -29,17 +29,15 @@ function core() {
     }
     this.animateFrame = {
         'globalAnimate': false,
-        'globalTime': null,
-        'boxTime': null,
-        'selectorTime': null,
+        'globalTime': 0,
+        'selectorTime': 0,
         'selectorUp': true,
-        'animateTime': null,
-        'moveTime': null,
-        'lastLegTime': null,
+        'animateTime': 0,
+        'moveTime': 0,
+        'lastLegTime': 0,
         'leftLeg': true,
-        'speed': null,
         'weather': {
-            'time': null,
+            'time': 0,
             'type': null,
             'level': 0,
             'nodes': [],
@@ -98,7 +96,7 @@ function core() {
         "ids": {},
         "autosave": {
             "data": null,
-            "time": null,
+            "time": 0,
             "updated": false,
         }
     }
@@ -179,6 +177,7 @@ function core() {
             "time": 0,
         },
         "globalAttribute": {
+            'equipName': main.equipName || [],
             "statusLeftBackground": main.statusLeftBackground || "url(project/images/ground.png) repeat",
             "statusTopBackground": main.statusTopBackground || "url(project/images/ground.png) repeat",
             "toolsBackground": main.toolsBackground || "url(project/images/ground.png) repeat",
@@ -196,7 +195,8 @@ function core() {
         // 动画
         'globalAnimateObjs': [],
         'boxAnimateObjs': [],
-        'autotileAnimateObjs': {"status": 0, "blocks": [], "map": null, "bgmap": null, "fgmap": null},
+        'autotileAnimateObjs': {"blocks": [], "map": null, "bgmap": null, "fgmap": null},
+        "globalAnimateStatus": 0,
         'animateObjs': [],
     };
     this.status = {};
@@ -236,11 +236,6 @@ core.prototype.init = function (coreData, callback) {
     document.getElementById("startLogo").innerHTML = core.firstData.title;
     core.material.items = core.clone(core.items.getItems());
     core.material.enemys = core.clone(core.enemys.getEnemys());
-    if (main.mode == 'play') {
-        for (var enemyId in core.material.enemys) {
-            core.material.enemys[enemyId].id = enemyId;
-        }
-    }
     core.material.icons = core.icons.getIcons();
     core.material.events = core.events.getEvents();
 
@@ -294,13 +289,13 @@ core.prototype.init = function (coreData, callback) {
                                 core.removeLocalForage("__test__");
                             }
                         }
-                        catch (e) {console.log(e); core.platform.useLocalForage=false;}
-                    }, function(e) {console.log(e); core.platform.useLocalForage=false;})
+                        catch (e) {main.log(e); core.platform.useLocalForage=false;}
+                    }, function(e) {main.log(e); core.platform.useLocalForage=false;})
                 }
-                catch (e) {console.log(e); core.platform.useLocalForage=false;}
-            }, function(e) {console.log(e); core.platform.useLocalForage=false;})
+                catch (e) {main.log(e); core.platform.useLocalForage=false;}
+            }, function(e) {main.log(e); core.platform.useLocalForage=false;})
         }
-        catch (e) {console.log(e); core.platform.useLocalForage=false;}
+        catch (e) {main.log(e); core.platform.useLocalForage=false;}
     }
 
     core.platform.extendKeyboard = core.getLocalStorage("extendKeyboard", false);
@@ -883,6 +878,10 @@ core.prototype.addGlobalAnimate = function (block) {
     core.maps.addGlobalAnimate(block);
 }
 
+core.prototype.addAutotileGlobalAnimate = function (block) {
+    core.maps.addAutotileGlobalAnimate(block);
+}
+
 ////// 删除一个或所有全局动画 //////
 core.prototype.removeGlobalAnimate = function (x, y, all) {
     core.maps.removeGlobalAnimate(x, y, all);
@@ -891,11 +890,6 @@ core.prototype.removeGlobalAnimate = function (x, y, all) {
 ////// 设置全局动画的显示效果 //////
 core.prototype.setGlobalAnimate = function (speed) {
     core.maps.setGlobalAnimate(speed);
-}
-
-////// 同步所有的全局动画效果 //////
-core.prototype.syncGlobalAnimate = function () {
-    core.maps.syncGlobalAnimate();
 }
 
 ////// 绘制UI层的box动画 //////
@@ -994,8 +988,8 @@ core.prototype.removeItem = function (itemId, itemNum) {
 }
 
 ////// 使用某个物品 //////
-core.prototype.useItem = function (itemId, callback) {
-    core.items.useItem(itemId, callback);
+core.prototype.useItem = function (itemId, noRoute, callback) {
+    core.items.useItem(itemId, noRoute, callback);
 }
 
 ////// 能否使用某个物品 //////

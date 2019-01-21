@@ -88,6 +88,8 @@ loader.prototype.loadIcons = function () {
                     core.statusBar.image[key].src = core.statusBar.icons[key].src;
             }
         }
+        core.statusBar.image.keyboard.src =
+            core.platform.extendKeyboard ? core.statusBar.icons.keyboard.src : core.statusBar.icons.shop.src;
     });
 }
 
@@ -122,7 +124,7 @@ loader.prototype.loadImage = function (imgName, callback) {
         image.src = 'project/images/' + name + "?v=" + main.version;
     }
     catch (e) {
-        console.log(e);
+        main.log(e);
     }
 }
 
@@ -146,7 +148,7 @@ loader.prototype.loadAnimates = function () {
                             image.src = t2;
                             data.images.push(image);
                         } catch (e) {
-                            console.log(e);
+                            main.log(e);
                             data.images.push(null);
                         }
                     }
@@ -171,11 +173,11 @@ loader.prototype.loadAnimates = function () {
                 core.material.animates[t] = data;
             }
             catch (e) {
-                console.log(e);
+                main.log(e);
                 core.material.animates[t] = null;
             }
         }, function (e) {
-            console.log(e);
+            main.log(e);
             core.material.animates[t] = null;
         }, "text/plain; charset=x-user-defined")
     })
@@ -206,11 +208,11 @@ loader.prototype.loadMusic = function () {
                             core.playBgm(t);
                     }
                     catch (e) {
-                        console.log(e);
+                        main.log(e);
                         core.material.bgms[t] = null;
                     }
                 }, function (e) {
-                    console.log(e);
+                    main.log(e);
                     core.material.bgms[t] = null;
                 }, "text/plain; charset=x-user-defined")
 
@@ -234,16 +236,16 @@ loader.prototype.loadMusic = function () {
                     core.musicStatus.audioContext.decodeAudioData(data, function (buffer) {
                         core.material.sounds[t] = buffer;
                     }, function (e) {
-                        console.log(e);
+                        main.log(e);
                         core.material.sounds[t] = null;
                     })
                 }
                 catch (ee) {
-                    console.log(ee);
+                    main.log(ee);
                     core.material.sounds[t] = null;
                 }
             }, function (e) {
-                console.log(e);
+                main.log(e);
                 core.material.sounds[t] = null;
             }, null, 'arraybuffer');
         }

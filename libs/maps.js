@@ -436,7 +436,7 @@ maps.prototype.drawBgFgMap = function (floorId, canvas, name, animate) {
                     if (cls == 'autotile') {
                         core.drawAutotile(canvas, arr, block, 32, 0, 0);
                         if (animate)
-                            core.status.autotileAnimateObjs.blocks.push(core.clone(block));
+                            core.addAutotileGlobalAnimate(block);
                     }
                     else if (cls == 'tileset') {
                         var offset = core.icons.getTilesetOffset(id);
@@ -571,7 +571,7 @@ maps.prototype.drawMap = function (floorId, callback) {
             if (core.isset(block.event) && !block.disable) {
                 if (block.event.cls == 'autotile') {
                     core.drawAutotile(core.canvas.event, mapArray, block, 32, 0, 0);
-                    core.status.autotileAnimateObjs.blocks.push(core.clone(block));
+                    core.addAutotileGlobalAnimate(block);
                 }
                 else {
                     core.drawBlock(block);
@@ -1182,7 +1182,6 @@ maps.prototype.showBlock = function(x, y, floorId) {
         if (floorId == core.status.floorId && core.isset(block.event)) {
             core.drawBlock(block);
             core.addGlobalAnimate(block);
-            core.syncGlobalAnimate();
         }
         core.updateStatusBar();
     }
@@ -1304,7 +1303,6 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
         if (floorId==core.status.floorId && !block.disable) {
             core.drawBlock(block);
             core.addGlobalAnimate(block);
-            core.syncGlobalAnimate();
             core.updateStatusBar();
         }
     }
@@ -1329,11 +1327,16 @@ maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
 maps.prototype.addGlobalAnimate = function (b) {
     if (main.mode=='editor' && main.editor.disableGlobalAnimate) return;
     if (!core.isset(b.event) || !core.isset(b.event.animate) || b.event.animate==1) return;
+    core.status.globalAnimateObjs.push(b);
+}
 
-    var block = core.clone(b);
-    block.status = 0;
-
-    core.status.globalAnimateObjs.push(block);
+////// 添加一个Autotile全局动画 //////
+maps.prototype.addAutotileGlobalAnimate = function (b) {
+    if (main.mode=='editor' && main.editor.disableGlobalAnimate) return;
+    if (!core.isset(b.event) || b.event.cls!='autotile') return;
+    var id = b.event.id, img = core.material.images.autotile[id];
+    if (!core.isset(img) || img.width==96) return;
+    core.status.autotileAnimateObjs.blocks.push(b);
 }
 
 ////// 删除一个或所有全局动画 //////
@@ -1341,8 +1344,9 @@ maps.prototype.removeGlobalAnimate = function (x, y, all, name) {
     if (main.mode=='editor' && main.editor.disableGlobalAnimate) return;
 
     if (all) {
+        core.status.globalAnimateStatus = 0;
         core.status.globalAnimateObjs = [];
-        core.status.autotileAnimateObjs = {"status": 0, "blocks": [], "map": null, "bgmap": null, "fgmap": null};
+        core.status.autotileAnimateObjs = {"blocks": [], "map": null, "bgmap": null, "fgmap": null};
         return;
     }
 
@@ -1359,31 +1363,18 @@ maps.prototype.removeGlobalAnimate = function (x, y, all, name) {
 ////// 设置全局动画的显示效果 //////
 maps.prototype.setGlobalAnimate = function (speed) {
     if (main.mode=='editor' && main.editor.disableGlobalAnimate) return;
-    core.syncGlobalAnimate();
-    core.animateFrame.speed = speed;
+    core.status.globalAnimateStatus = 0;
     core.animateFrame.globalAnimate = true;
-}
-
-////// 同步所有的全局动画效果 //////
-maps.prototype.syncGlobalAnimate = function () {
-    core.status.globalAnimateObjs.forEach(function (t) {
-        t.status=0;
-    })
-    if (core.isset(core.status.autotileAnimateObjs.status)) {
-        core.status.autotileAnimateObjs.status = 0;
-    }
 }
 
 ////// 绘制UI层的box动画 //////
 maps.prototype.drawBoxAnimate = function () {
-    for (var a = 0; a < core.status.boxAnimateObjs.length; a++) {
-        var obj = core.status.boxAnimateObjs[a];
-        obj.status = ((obj.status||0)+1)%obj.animate;
+    core.status.boxAnimateObjs.forEach(function (obj) {
         core.clearMap('ui', obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight);
         core.fillRect('ui', obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight, core.material.groundPattern);
-        core.drawImage('ui', obj.image, obj.status * 32, obj.pos,
+        core.drawImage('ui', obj.image, core.status.globalAnimateStatus % obj.animate * 32, obj.pos,
             32, obj.height, obj.x, obj.y, 32, obj.height);
-    }
+    });
 }
 
 ////// 绘制动画的某一帧 //////

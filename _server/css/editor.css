@@ -254,6 +254,15 @@ body {
     overflow: auto;
 }
 
+#iconImages {
+    z-index: 0;
+    overflow: hidden;
+}
+
+#iconImages img {
+    position: absolute;
+}
+
 .egameCanvas {
     position: absolute;
 }

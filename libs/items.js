@@ -35,7 +35,7 @@ items.prototype.getItemEffect = function(itemId, itemNum) {
                 eval(this.itemEffect[itemId]);
             }
             catch (e) {
-                console.log(e);
+                main.log(e);
             }
         }
         core.status.hero.statistics.hp += core.status.hero.hp - curr_hp;
@@ -55,7 +55,7 @@ items.prototype.getItemEffectTip = function(itemId) {
             try {
                 return eval(this.itemEffectTip[itemId])||"";
             } catch (e) {
-                console.log(e);
+                main.log(e);
                 return "";
             }
         }
@@ -64,7 +64,7 @@ items.prototype.getItemEffectTip = function(itemId) {
 }
 
 ////// 使用道具 //////
-items.prototype.useItem = function (itemId, callback) {
+items.prototype.useItem = function (itemId, noRoute, callback) {
     if (!this.canUseItem(itemId)) {
         if (core.isset(callback)) callback();
         return;
@@ -76,11 +76,11 @@ items.prototype.useItem = function (itemId, callback) {
             eval(this.useItemEffect[itemId]);
         }
         catch (e) {
-            console.log(e);
+            main.log(e);
         }
     }
     // 记录路线
-    if (itemId!='book' && itemId!='fly') {
+    if (!noRoute) {
         core.status.route.push("item:"+itemId);
     }
 
@@ -91,7 +91,10 @@ items.prototype.useItem = function (itemId, callback) {
         delete core.status.hero.items[itemCls][itemId];
 
     core.updateStatusBar();
-    if (!core.isset(core.status.event.id)) core.status.event.data = null;
+    if (!core.isset(core.status.event.id)) {
+        core.status.event.data = null;
+        core.status.event.ui = null;
+    }
 
     if (core.isset(callback)) callback();
 }
@@ -107,7 +110,7 @@ items.prototype.canUseItem = function (itemId) {
             able = eval(this.canUseItemEffect[itemId]);
         }
         catch (e) {
-            console.log(e);
+            main.log(e);
         }
     }
     if (!able) core.status.event.data = null;
@@ -117,6 +120,7 @@ items.prototype.canUseItem = function (itemId) {
 
 ////// 获得某个物品的个数 //////
 items.prototype.itemCount = function (itemId) {
+    if (!core.isset(core.status.hero)) return 0;
     if (!core.isset(itemId) || !core.isset(core.material.items[itemId])) return 0;
     var itemCls = core.material.items[itemId].cls;
     if (itemCls=="items") return 0;
@@ -125,25 +129,31 @@ items.prototype.itemCount = function (itemId) {
 
 ////// 是否存在某个物品 //////
 items.prototype.hasItem = function (itemId) {
-    return core.itemCount(itemId) > 0;
+    return this.itemCount(itemId) > 0;
 }
 
 ////// 是否装备某件装备 //////
 items.prototype.hasEquip = function (itemId) {
+    if (!core.isset(core.status.hero)) return null;
 
     if (!core.isset(itemId)) return null;
     if (!core.isset((core.material.items[itemId]||{}).equip)) return null;
 
-    return this.getEquip(core.material.items[itemId].equip.type) == itemId;
+    for (var i in core.status.hero.equipment||[])
+        if (core.status.hero.equipment[i] == itemId)
+            return true;
+    return false
 }
 
 ////// 获得某个装备类型的当前装备 //////
 items.prototype.getEquip = function (equipType) {
+    if (!core.isset(core.status.hero)) return null;
     return (core.status.hero.equipment||[])[equipType]||null;
 }
 
 ////// 设置某个物品的个数 //////
 items.prototype.setItem = function (itemId, itemNum) {
+    if (!core.isset(core.status.hero)) return null;
     itemNum = itemNum || 0;
     var itemCls = core.material.items[itemId].cls;
     if (itemCls == 'items') return;
@@ -160,6 +170,7 @@ items.prototype.setItem = function (itemId, itemNum) {
 
 ////// 删除某个物品 //////
 items.prototype.removeItem = function (itemId, itemNum) {
+    if (!core.isset(core.status.hero)) return null;
     itemNum = itemNum || 1;
     if (!core.hasItem(itemId)) return false;
     var itemCls = core.material.items[itemId].cls;
@@ -174,6 +185,7 @@ items.prototype.removeItem = function (itemId, itemNum) {
 
 ////// 增加某个物品的个数 //////
 items.prototype.addItem = function (itemId, itemNum) {
+    if (!core.isset(core.status.hero)) return null;
     itemNum = itemNum || 1;
     var itemData = core.material.items[itemId];
     var itemCls = itemData.cls;
@@ -196,9 +208,19 @@ items.prototype.addItem = function (itemId, itemNum) {
     core.updateStatusBar();
 }
 
+items.prototype.getEquipTypeByName = function (name) {
+    var names = core.status.globalAttribute.equipName;
+    for (var i = 0; i < names.length; ++i) {
+        if (names[i] === name && !core.isset((core.status.hero.equipment||[])[i])) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 ////// 换上 //////
 items.prototype.loadEquip = function (equipId, callback) {
+    if (!core.isset(core.status.hero)) return null;
 
     if (!core.isset(core.status.hero.equipment)) core.status.hero.equipment = [];
 
@@ -218,13 +240,23 @@ items.prototype.loadEquip = function (equipId, callback) {
             }
         }
         catch (e) {
-            console.log(e);
+            main.log(e);
         }
     }
 
     core.playSound('equip.mp3');
 
     var loadEquipType = loadEquip.equip.type;
+
+    // ------ 判定多重装备 ------
+    if (typeof loadEquipType === 'string') {
+        loadEquipType = this.getEquipTypeByName(loadEquipType);
+        if (loadEquipType < 0) {
+            core.drawTip("当前没有"+loadEquip.equip.type+"的空位！");
+            return;
+        }
+    }
+
     var unloadEquipId = core.status.hero.equipment[loadEquipType];
     var unloadEquip = core.material.items[unloadEquipId] || {};
 
@@ -269,6 +301,7 @@ items.prototype.loadEquip = function (equipId, callback) {
 
 ////// 卸下 //////
 items.prototype.unloadEquip = function (equipType, callback) {
+    if (!core.isset(core.status.hero)) return null;
 
     if (!core.isset(core.status.hero.equipment)) core.status.hero.equipment = [];
 
@@ -340,7 +373,7 @@ items.prototype.quickLoadEquip = function (index) {
         return;
     }
     // 检查所有的装备
-    var equipSize = (main.equipName||[]).length;
+    var equipSize = core.status.globalAttribute.equipName.length;
     for (var i=0;i<equipSize;i++) {
         var v = current[i];
         if (core.isset(v) && !core.hasItem(v) && !core.hasEquip(v)) {
@@ -361,14 +394,15 @@ items.prototype.quickLoadEquip = function (index) {
     // 快速换装
     if (!core.isset(core.status.hero.equipment)) core.status.hero.equipment = [];
     for (var i=0;i<equipSize;i++) {
-        var now = core.status.hero.equipment[i]||null;
-        var to = current[i]||null;
-        if (now==to) continue;
-        if (to==null) {
+        var now = core.status.hero.equipment[i] || null;
+        if (now != null) {
             this.unloadEquip(i);
-            core.status.route.push("unEquip:"+i);
+            core.status.route.push("unEquip:" + i);
         }
-        else {
+    }
+    for (var i=0;i<equipSize;i++) {
+        var to = current[i]||null;
+        if (to!=null) {
             this.loadEquip(to);
             core.status.route.push("equip:"+to);
         }

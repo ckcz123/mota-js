@@ -330,7 +330,7 @@ Blockly.FieldColour.prototype.createWidget_ = function() {
         self.setValue(newValue)
         var c=new Colors();
         c.setColor(newValue)
-        var rgbatext=`${c.colors.webSmart.r},${c.colors.webSmart.g},${c.colors.webSmart.b},${c.colors.alpha}` // 转成r,g,b,a文本
+        var rgbatext = [c.colors.webSmart.r,c.colors.webSmart.g,c.colors.webSmart.b,c.colors.alpha].join(",");
         pb.setFieldValue(rgbatext, targetf) // 放在颜色块左边的域中
     }
 

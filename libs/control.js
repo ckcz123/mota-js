@@ -44,18 +44,7 @@ control.prototype.setRequestAnimationFrame = function () {
         }
     }());
 
-    core.animateFrame.speed = core.values.animateSpeed;
-
     var draw = function(timestamp) {
-
-        core.animateFrame.globalTime = core.animateFrame.globalTime||timestamp;
-        core.animateFrame.boxTime = core.animateFrame.boxTime||timestamp;
-        core.animateFrame.selectorTime = core.animateFrame.selectorTime||timestamp;
-        core.animateFrame.animateTime = core.animateFrame.animateTime||timestamp;
-        core.animateFrame.moveTime = core.animateFrame.moveTime||timestamp;
-        core.animateFrame.lastLegTime = core.animateFrame.lastLegTime||timestamp;
-        core.animateFrame.weather.time = core.animateFrame.weather.time||timestamp;
-        core.saves.autosave.time = core.saves.autosave.time||timestamp;
 
         // move time
         if (core.isPlaying() && core.isset(core.status) && core.isset(core.status.hero)
@@ -66,41 +55,35 @@ control.prototype.setRequestAnimationFrame = function () {
         }
 
         // Global Animate
-        if (core.animateFrame.globalAnimate && core.isPlaying() && core.isset(core.status.floorId)) {
+        if (timestamp - core.animateFrame.globalTime > core.values.animateSpeed && core.isPlaying()) {
+            
+            core.status.globalAnimateStatus++;
 
-            if (timestamp-core.animateFrame.globalTime>core.animateFrame.speed && core.isset(core.status.globalAnimateObjs)) {
+            if (core.animateFrame.globalAnimate && core.isset(core.status.floorId)) {
+                // Global Animate
+                core.status.globalAnimateObjs.forEach(function (block) {
+                    core.drawBlock(block, core.status.globalAnimateStatus % (block.event.animate||1));
+                });
 
-                for (var a = 0; a < core.status.globalAnimateObjs.length; a++) {
-                    var obj = core.status.globalAnimateObjs[a];
-                    obj.status = (obj.status+1)%(obj.event.animate||1);
-                    core.drawBlock(obj, obj.status);
-                }
-
-                if ((core.status.autotileAnimateObjs.blocks||[]).length>0) {
-                    core.status.autotileAnimateObjs.status++;
-                    core.status.autotileAnimateObjs.blocks.forEach(function (block) {
-                        var cv = core.isset(block.name)?core.canvas[block.name]:core.canvas.event;
-                        cv.clearRect(block.x * 32, block.y * 32, 32, 32);
-                        if (core.isset(block.name)) {
-                            if (block.name == 'bg') {
-                                core.drawImage('bg', core.material.groundCanvas.canvas, block.x * 32, block.y * 32);
-                            }
-                            core.drawAutotile(cv, core.status.autotileAnimateObjs[block.name+"map"], block, 32, 0, 0, core.status.autotileAnimateObjs.status);
+                // Global Autotile Animate
+                core.status.autotileAnimateObjs.blocks.forEach(function (block) {
+                    var cv = core.isset(block.name)?core.canvas[block.name]:core.canvas.event;
+                    cv.clearRect(block.x * 32, block.y * 32, 32, 32);
+                    if (core.isset(block.name)) {
+                        if (block.name == 'bg') {
+                            core.drawImage('bg', core.material.groundCanvas.canvas, block.x * 32, block.y * 32);
                         }
-                        else {
-                            core.drawAutotile(cv, core.status.autotileAnimateObjs.map, block, 32, 0, 0, core.status.autotileAnimateObjs.status);
-                        }
-                    })
-                }
-
-                core.animateFrame.globalTime = timestamp;
+                        core.drawAutotile(cv, core.status.autotileAnimateObjs[block.name+"map"], block, 32, 0, 0, core.status.globalAnimateStatus);
+                    }
+                    else {
+                        core.drawAutotile(cv, core.status.autotileAnimateObjs.map, block, 32, 0, 0, core.status.globalAnimateStatus);
+                    }
+                });
             }
-        }
 
-        // Box
-        if (timestamp-core.animateFrame.boxTime>core.animateFrame.speed && core.isset(core.status.boxAnimateObjs) && core.status.boxAnimateObjs.length>0) {
+            // Box animate
             core.drawBoxAnimate();
-            core.animateFrame.boxTime = timestamp;
+            core.animateFrame.globalTime = timestamp;
         }
 
         // AutosaveTime
@@ -292,7 +275,7 @@ control.prototype.setRequestAnimationFrame = function () {
                     }
                 }
                 catch (e) {
-                    console.log(e);
+                    main.log(e);
                 }
             });
         }
@@ -320,6 +303,8 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
     core.clearStatus();
     core.clearMap('all');
     core.deleteAllCanvas();
+
+    core.dom.musicBtn.style.display = 'block';
 
     // 重置音量
     core.events.setVolume(1, 0);
@@ -453,6 +438,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
     core.resize();
     this.updateGlobalAttribute(Object.keys(core.status.globalAttribute));
     this.triggerStatusBar(core.getFlag('hideStatusBar', false)?'hide':'show', core.getFlag("showToolbox"));
+    core.dom.musicBtn.style.display = 'none';
 }
 
 ////// 重新开始游戏；此函数将回到标题页面 //////
@@ -1439,9 +1425,9 @@ control.prototype.updateDamage = function (floorId, canvas) {
     if (!core.hasItem('book')) return;
     canvas.font = "bold 11px Arial";
 
-    var hero_hp = core.status.hero.hp;
     if (core.flags.displayEnemyDamage || core.flags.displayCritical) {
         canvas.textAlign = 'left';
+
         for (var b = 0; b < mapBlocks.length; b++) {
             var x = mapBlocks[b].x, y = mapBlocks[b].y;
             if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls.indexOf('enemy')==0
@@ -1454,14 +1440,14 @@ control.prototype.updateDamage = function (floorId, canvas) {
                 var id = mapBlocks[b].event.id;
 
                 if (core.flags.displayEnemyDamage) {
-                    var damageString = core.enemys.getDamageString(id, x, y);
+                    var damageString = core.enemys.getDamageString(id, x, y, floorId);
                     var damage = damageString.damage, color = damageString.color;
                     core.fillBoldText(canvas, damage, 32*x+1, 32*(y+1)-1, color);
                 }
 
                 // 临界显伤
                 if (core.flags.displayCritical) {
-                    var critical = core.enemys.nextCriticals(id);
+                    var critical = core.enemys.nextCriticals(id, 1, x, y, floorId);
                     if (critical.length>0) critical=critical[0];
                     critical = core.formatBigNumber(critical[0], true);
                     if (critical == '???') critical = '?';
@@ -1742,7 +1728,7 @@ control.prototype.bookReplay = function () {
 
     core.lockControl();
     core.status.event.id='book';
-    core.useItem('book');
+    core.useItem('book', true);
 }
 
 ////// 回放录像时浏览地图 //////
@@ -1781,8 +1767,8 @@ control.prototype.replay = function () {
 
     core.status.replay.steps++;
     if (core.status.replay.steps%50==0) {
-        //if (core.status.replay.save.length == 30)
-        //    core.status.replay.save.shift();
+        if (core.status.replay.save.length == 30)
+            core.status.replay.save.shift();
         core.status.replay.save.push({"data": core.saveData(), "replay": {
             "totalList": core.clone(core.status.replay.totalList),
             "toReplay": core.clone(core.status.replay.toReplay),
@@ -1806,7 +1792,7 @@ control.prototype.replay = function () {
         if (core.canUseItem(itemId)) {
             // 是否绘制道具栏
             if (core.material.items[itemId].hideInReplay) {
-                core.useItem(itemId, function () {
+                core.useItem(itemId, false, function () {
                     core.replay();
                 });
                 return;
@@ -1827,7 +1813,7 @@ control.prototype.replay = function () {
                     core.ui.drawToolbox(index);
                     setTimeout(function () {
                         core.ui.closePanel();
-                        core.useItem(itemId, function () {
+                        core.useItem(itemId, false, function () {
                             core.replay();
                         });
                     }, 750 / Math.max(1, core.status.replay.speed));
@@ -2011,7 +1997,7 @@ control.prototype.openBook = function (need) {
 
     if (!core.checkStatus('book', need, true))
         return;
-    core.useItem('book');
+    core.useItem('book', true);
 }
 
 ////// 点击楼层传送器时的打开操作 //////
@@ -2033,7 +2019,7 @@ control.prototype.useFly = function (need) {
         core.status.event.id = null;
         return;
     }
-    core.useItem('fly');
+    core.useItem('fly', true);
     return;
 }
 
@@ -2067,9 +2053,17 @@ control.prototype.openQuickShop = function (need) {
 
 control.prototype.openKeyBoard = function (need) {
     if (core.isReplaying()) return;
-    if (!core.checkStatus('keyBoard', need))
-        return;
-    core.ui.drawKeyBoard();
+
+    if (core.platform.extendKeyboard) {
+        if (!core.checkStatus('keyBoard', need))
+            return;
+        core.ui.drawKeyBoard();
+    }
+    else {
+        if (!core.checkStatus('selectShop', need))
+            return;
+        core.ui.drawQuickShop();
+    }
 }
 
 ////// 点击保存按钮时的打开操作 //////
@@ -2213,14 +2207,14 @@ control.prototype.doSL = function (id, type) {
             });
         }
         if (id == 'autoSave' && core.saves.autosave.data != null) {
-            afterGet(core.saves.autosave.data);
+            afterGet(core.clone(core.saves.autosave.data));
         }
         else {
             core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
                 if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
                 afterGet(data);
             }, function(err) {
-                console.log(err);
+                main.log(err);
                 alert("无效的存档");
             })
         }
@@ -2255,14 +2249,14 @@ control.prototype.doSL = function (id, type) {
             });
         }
         if (id == 'autoSave' && core.saves.autosave.data != null) {
-            afterGet(core.saves.autosave.data);
+            afterGet(core.clone(core.saves.autosave.data));
         }
         else {
             core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
                 if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
                 afterGet(data);
             }, function(err) {
-                console.log(err);
+                main.log(err);
                 alert("无效的存档");
             })
         }
@@ -2439,7 +2433,7 @@ control.prototype.getSaves = function (index, callback) {
         core.getLocalForage("save"+index, null, function(data) {
             if (core.isset(callback)) callback(data);
         }, function(err) {
-            console.log(err);
+            main.log(err);
             if (core.isset(callback))
                 callback(null);
         })
@@ -2459,7 +2453,7 @@ control.prototype.getSaves = function (index, callback) {
             saves.push(data);
             load(index+1, callback);
         }, function(err) {
-            console.log(err);
+            main.log(err);
             load(index+1, callback);
         })
     }
@@ -2500,6 +2494,7 @@ control.prototype.hasSave = function (index) {
 
 ////// 设置勇士属性 //////
 control.prototype.setStatus = function (statusName, statusVal) {
+    if (!core.isset(core.status.hero)) return;
     if (statusName == 'exp') statusName = 'experience';
     if (core.isset(core.status.hero.loc[statusName]))
         core.status.hero.loc[statusName] = statusVal;
@@ -2509,6 +2504,7 @@ control.prototype.setStatus = function (statusName, statusVal) {
 
 ////// 获得勇士属性 //////
 control.prototype.getStatus = function (statusName) {
+    if (!core.isset(core.status.hero)) return null;
     // support status:x
     if (core.isset(core.status.hero.loc[statusName]))
         return core.status.hero.loc[statusName];
@@ -2518,6 +2514,7 @@ control.prototype.getStatus = function (statusName) {
 
 ////// 获得某个等级的名称 //////
 control.prototype.getLvName = function () {
+    if (!core.isset(core.status.hero)) return null;
     return ((core.firstData.levelUp||[])[core.status.hero.lv-1]||{}).title || core.status.hero.lv;
 }
 
@@ -2570,7 +2567,7 @@ control.prototype.playBgm = function (bgm) {
             core.material.bgms[bgm].pause();
         }
         catch (e) {
-            console.log(e);
+            main.log(e);
         }
         return;
     }
@@ -2603,7 +2600,7 @@ control.prototype.playBgm = function (bgm) {
     }
     catch (e) {
         console.log("无法播放BGM "+bgm);
-        console.log(e);
+        main.log(e);
         core.musicStatus.playingBgm = null;
     }
 }
@@ -2614,14 +2611,14 @@ control.prototype.pauseBgm = function () {
     try {
         if (core.isset(core.musicStatus.playingBgm)) {
             core.material.bgms[core.musicStatus.playingBgm].pause();
+            core.musicStatus.playingBgm = null;
         }
     }
     catch (e) {
         console.log("无法暂停BGM");
-        console.log(e);
+        main.log(e);
     }
     this.setMusicBtn();
-
 }
 
 ////// 恢复背景音乐的播放 //////
@@ -2634,7 +2631,7 @@ control.prototype.resumeBgm = function () {
     }
     catch (e) {
         console.log("无法恢复BGM");
-        console.log(e);
+        main.log(e);
     }
     this.setMusicBtn();
 }
@@ -2680,7 +2677,7 @@ control.prototype.playSound = function (sound) {
                     source.noteOn(0);
                 }
                 catch (ee) {
-                    console.log(ee);
+                    main.log(ee);
                 }
             }
         }
@@ -2691,7 +2688,7 @@ control.prototype.playSound = function (sound) {
     }
     catch (eee) {
         console.log("无法播放SE "+sound);
-        console.log(eee);
+        main.log(eee);
     }
 }
 
@@ -2714,7 +2711,8 @@ control.prototype.clearStatusBar = function() {
 ////// 更新状态栏 //////
 control.prototype.updateStatusBar = function () {
 
-    this.controldata.updateStatusBar();
+    if (core.isPlaying())
+        this.controldata.updateStatusBar();
 
     // 回放
     if (core.isReplaying()) {
@@ -2750,7 +2748,8 @@ control.prototype.updateStatusBar = function () {
 
         core.statusBar.image.toolbox.src = core.statusBar.icons.toolbox.src;
 
-        core.statusBar.image.keyboard.src = core.statusBar.icons.keyboard.src;
+        core.statusBar.image.keyboard.src =
+            core.platform.extendKeyboard ? core.statusBar.icons.keyboard.src : core.statusBar.icons.shop.src;
 
         core.statusBar.image.save.src = core.statusBar.icons.save.src;
 

@@ -8,7 +8,12 @@ function enemys() {
 enemys.prototype.init = function () {
     this.enemys = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80;
     this.enemydata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.enemys;
-    if (main.mode=='play') this.enemydata.hasSpecial = function (a, b) {return core.enemys.hasSpecial(a, b)};
+    if (main.mode=='play') {
+        this.enemydata.hasSpecial = function (a, b) {return core.enemys.hasSpecial(a, b)};
+        for (var enemyId in this.enemys) {
+            this.enemys[enemyId].id = enemyId;
+        }
+    }
 }
 
 ////// 获得一个或所有怪物数据 //////
@@ -127,9 +132,9 @@ enemys.prototype.getExtraDamage = function (enemy) {
     return extra_damage;
 }
 
-enemys.prototype.getDamageString = function (enemy, x, y) {
+enemys.prototype.getDamageString = function (enemy, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    var damage = core.enemys.getDamage(enemy, x, y);
+    var damage = core.enemys.getDamage(enemy, x, y, floorId);
 
     var color = '#000000';
 
@@ -185,6 +190,11 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
         return [];
     }
 
+    // getDamageInfo直接返回数字
+    if (typeof info == 'number') {
+        return [[0,0]];
+    }
+
     if (info.damage<=0 && !core.flags.enableNegativeDamage) {
         return [[0,0]];
     }
@@ -200,7 +210,7 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
             if (nextAtk<=hero_atk) break;
             if (nextAtk!=pre) {
                 var nextInfo = this.getDamageInfo(enemy, core.status.hero.hp, nextAtk, core.status.hero.def, core.status.hero.mdef, x, y, floorId);
-                if (nextInfo==null) break;
+                if (nextInfo==null || (typeof nextInfo == 'number')) break;
                 list.push([nextAtk-hero_atk,Math.floor(info.damage-nextInfo.damage)]);
                 if (nextInfo.damage<=0 && !core.flags.enableNegativeDamage) break;
                 pre = nextAtk;
@@ -217,7 +227,7 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
         if (hero_atk <= LOOP_MAX_VALUE) { // 循环法
             for (var atk=hero_atk+1;atk<=mon_hp+mon_def;atk++) {
                 var nextInfo = this.getDamageInfo(enemy, core.status.hero.hp, atk, core.status.hero.def, core.status.hero.mdef, x, y, floorId);
-                if (nextInfo==null) break;
+                if (nextInfo==null || (typeof nextInfo == 'number')) break;
                 if (pre>nextInfo.damage) {
                     pre = nextInfo.damage;
                     list.push([atk-hero_atk, info.damage-nextInfo.damage]);
@@ -234,12 +244,12 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
                 while (start<end) {
                     var mid = Math.floor((start+end)/2);
                     var nextInfo = core.enemys.getDamageInfo(enemy, core.status.hero.hp, mid, core.status.hero.def, core.status.hero.mdef, x, y, floorId);
-                    if (nextInfo == null) return null;
+                    if (nextInfo == null || (typeof nextInfo == 'number')) return null;
                     if (pre>nextInfo.damage) end = mid;
                     else start = mid+1;
                 }
                 var nextInfo = core.enemys.getDamageInfo(enemy, core.status.hero.hp, start, core.status.hero.def, core.status.hero.mdef, x, y, floorId);
-                return nextInfo==null||nextInfo.damage>=pre?null:[start,nextInfo.damage];
+                return nextInfo==null||(typeof nextInfo == 'number')||nextInfo.damage>=pre?null:[start,nextInfo.damage];
             }
             var currAtk = hero_atk;
             while (true) {
@@ -285,6 +295,7 @@ enemys.prototype.calDamage = function (enemy, hero_hp, hero_atk, hero_def, hero_
 
     var info = this.getDamageInfo(enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId);
     if (info == null) return null;
+    if (typeof info == 'number') return info;
     return info.damage;
 }
 
@@ -328,7 +339,7 @@ enemys.prototype.getCurrentEnemys = function (floorId) {
             if (specialText.length>=3) specialText = "多属性...";
             else specialText = specialText.join("  ");
 
-            var critical = this.nextCriticals(enemyId);
+            var critical = this.nextCriticals(enemyId, 1, null, null, floorId);
             if (critical.length>0) critical=critical[0];
 
             var e = core.clone(enemy);

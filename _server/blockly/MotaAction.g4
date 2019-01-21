@@ -257,6 +257,7 @@ action
     |   changeFloor_s
     |   changePos_0_s
     |   changePos_1_s
+    |   useItem_s
     |   openShop_s
     |   disableShop_s
     |   follow_s
@@ -948,6 +949,19 @@ helpUrl : https://h5mota.com/games/template/docs/#/event?id=changepos%EF%BC%9A%E
 colour : this.dataColor
 default : [null]
 var code = '{"type": "changePos", "direction": "'+Direction_List_0+'"},\n';
+return code;
+*/;
+
+useItem_s
+    :   '使用道具' IdString Newline
+
+
+/* useItem_s
+tooltip : useItem: 使用道具
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=useItem%ef%bc%9a%e4%bd%bf%e7%94%a8%e9%81%93%e5%85%b7
+colour : this.dataColor
+default : ["pickaxe"]
+var code = '{"type": "useItem", "id": "'+IdString_0+'"},\n';
 return code;
 */;
 
@@ -1794,8 +1808,8 @@ Floor_Meta_List
     /*Floor_Meta_List ['title','name','canFlyTo', 'canUseQuickShop', 'cannotViewMap', 'cannotMoveDirectly', 'defaultGround', 'images', 'item_ratio', 'upFloor', 'downFloor', 'bgm', 'color', 'weather', 'underGround']*/;
 
 Global_Attribute_List
-    :   '全局字体'|'横屏左侧状态栏背景'|'竖屏上方状态栏背景'|'竖屏下方道具栏背景'|'边框颜色'|'状态栏文字色'|'难度显示文字色'|'楼层转换背景'|'楼层转换文字色'
-    /*Global_Attribute_List ['font','statusLeftBackground','statusTopBackground', 'toolsBackground', 'borderColor', 'statusBarColor', 'hardLabelColor', 'floorChangingBackground', 'floorChangingTextColor']*/;
+    :   '全局字体'|'横屏左侧状态栏背景'|'竖屏上方状态栏背景'|'竖屏下方道具栏背景'|'边框颜色'|'状态栏文字色'|'难度显示文字色'|'楼层转换背景'|'楼层转换文字色'|'装备列表'
+    /*Global_Attribute_List ['font','statusLeftBackground','statusTopBackground', 'toolsBackground', 'borderColor', 'statusBarColor', 'hardLabelColor', 'floorChangingBackground', 'floorChangingTextColor', 'equipName']*/;
 
 Global_Value_List
     :   '血网伤害'|'中毒伤害'|'衰弱效果'|'红宝石效果'|'蓝宝石效果'|'绿宝石效果'|'红血瓶效果'|'蓝血瓶效果'|'黄血瓶效果'|'绿血瓶效果'|'破甲比例'|'反击比例'|'净化比例'|'仇恨增加值'|'行走速度'|'动画时间'|'楼层切换时间'
@@ -2205,7 +2219,7 @@ ActionParser.prototype.parseAction = function() {
     case "showImage": // 显示图片
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['showImage_s'].xmlText([
-        data.code,data.image,data.loc[0],data.loc[1],data.dw,data.dh,data.opacity,data.time||0,data.async||false,this.next]);
+        data.code,data.image||data.name,data.loc[0],data.loc[1],data.dw,data.dh,data.opacity,data.time||0,data.async||false,this.next]);
       break;
     case "hideImage": // 清除图片
       this.next = MotaActionBlocks['hideImage_s'].xmlText([
@@ -2251,6 +2265,10 @@ ActionParser.prototype.parseAction = function() {
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['openDoor_s'].xmlText([
         data.loc[0],data.loc[1],data.floorId||'',this.next]);
+      break;
+    case "useItem": // 使用道具
+      this.next = MotaActionBlocks['useItem_s'].xmlText([
+        data.id,this.next]);
       break;
     case "openShop": // 打开一个全局商店
       this.next = MotaActionBlocks['openShop_s'].xmlText([
@@ -2435,6 +2453,8 @@ ActionParser.prototype.parseAction = function() {
     case "exit": // 立刻结束事件
       this.next = MotaActionBlocks['exit_s'].xmlText([
         this.next]);
+      break;
+    case "animateImage":  // 兼容 animateImage
       break;
     default:
       throw new Error("[警告]出错啦！\n"+data.type+" 事件不被支持...");

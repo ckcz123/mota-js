@@ -882,6 +882,24 @@ time为可选的，指定的话将作为楼层切换动画的时间。
 ]
 ```
 
+### useItem：使用道具
+
+调用`{"type": "useItem"}`可以使用一个道具。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "changePos", "id": "pickaxe"}, // 尝试使用破
+    {"type": "changePos", "id": "bomb"}, // 尝试使用炸
+    {"type": "changePos", "id": "centerFly"} // 尝试使用飞
+]
+```
+
+使用道具事件会消耗对应的道具。
+
+如果当前不可使用该道具（如没有，或者达不到使用条件），则会进行提示并跳过本事件。
+
+不可使用“怪物手册”（请使用【呼出怪物手册】事件）或楼层传送器（如果[覆盖楼传事件](personalization#覆盖楼传事件)则可忽视本项）。
+
 ### openShop：打开一个全局商店
 
 使用openShop可以打开一个全局商店。有关全局商店的说明可参见[全局商店](#全局商店)。
@@ -1255,15 +1273,13 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 ### pauseBgm：暂停背景音乐
 
 使用`{"type": "pauseBgm"}`可以暂停背景音乐的播放。
-
-**从V2.5.4开始不再支持此事件，请通过设置音量来达到此效果。**
-
+<!--
 ### resumeBgm：恢复背景音乐
 
 使用`{"type": "resumeBgm"}`可以恢复背景音乐的播放。
 
 **从V2.5.4开始不再支持此事件，请通过设置音量来达到此效果。**
-
+-->
 ### loadBgm：预加载一个背景音乐
 
 使用loadBgm可以预加载一个背景音乐。
@@ -1851,7 +1867,7 @@ core.insertAction([
 		try {
 			eval(core.floors[core.status.floorId].parallelDo);
 		} catch (e) {
-			console.log(e);
+			main.log(e);
 		}
 	}
 	

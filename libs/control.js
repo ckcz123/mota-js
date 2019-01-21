@@ -2053,9 +2053,17 @@ control.prototype.openQuickShop = function (need) {
 
 control.prototype.openKeyBoard = function (need) {
     if (core.isReplaying()) return;
-    if (!core.checkStatus('keyBoard', need))
-        return;
-    core.ui.drawKeyBoard();
+
+    if (core.platform.extendKeyboard) {
+        if (!core.checkStatus('keyBoard', need))
+            return;
+        core.ui.drawKeyBoard();
+    }
+    else {
+        if (!core.checkStatus('selectShop', need))
+            return;
+        core.ui.drawQuickShop();
+    }
 }
 
 ////// 点击保存按钮时的打开操作 //////
@@ -2736,7 +2744,8 @@ control.prototype.updateStatusBar = function () {
 
         core.statusBar.image.toolbox.src = core.statusBar.icons.toolbox.src;
 
-        core.statusBar.image.keyboard.src = core.statusBar.icons.keyboard.src;
+        core.statusBar.image.keyboard.src =
+            core.platform.extendKeyboard ? core.statusBar.icons.keyboard.src : core.statusBar.icons.shop.src;
 
         core.statusBar.image.save.src = core.statusBar.icons.save.src;
 

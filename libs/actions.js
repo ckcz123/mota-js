@@ -1886,6 +1886,7 @@ actions.prototype.clickSwitchs = function (x,y) {
             case 8:
                 core.platform.extendKeyboard = !core.platform.extendKeyboard;
                 core.setLocalStorage('extendKeyboard', core.platform.extendKeyboard);
+                core.updateStatusBar();
                 core.ui.drawSwitchs();
                 break;
             case 9:

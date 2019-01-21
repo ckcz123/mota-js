@@ -293,8 +293,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 事件的处理
 	var todo = [];
-	// 如果不为阻击，且该点存在，且有事件
-	if (!core.enemys.hasSpecial(special, 18) && core.isset(x) && core.isset(y)) {
+	// 如果该点存在，且有事件 -- V2.5.4 以后阻击怪也可以有战后事件了
+	if (core.isset(x) && core.isset(y)) {
 		var event = core.floors[core.status.floorId].afterBattle[x+","+y];
 		if (core.isset(event)) {
 			// 插入事件
@@ -1263,63 +1263,57 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 绘制灯光/漆黑层效果。调用方式 core.plugin.drawLight(...)
 	// 【参数说明】
-	// color：可选，灯光以外部分的颜色，可以是一个四元数组，或者简单的一个0到1之间的数。忽略则默认为0.9。
-	//        如果是四元数组，则代表RGBA值，如 [255,255,0,0.2] 就代表 #FFFF00 且不透明度0.2
-	//        如果是一个数，则只是不透明度的值，RGB均为0，如 0.9 就代表 [0,0,0,0.9]
+	// name：必填，要绘制到的画布名；可以是一个系统画布，或者是个自定义画布；如果不存在则创建
+	// color：可选，只能是一个0~1之间的数，为不透明度的值。不填则默认为0.9。
 	// lights：可选，一个数组，定义了每个独立的灯光。
-	//        其中每一项是三元组 [x,y,r] 或者四元组 [x,y,r,o]
-	//        x和y分别为该灯光的横纵坐标，r为该灯光的半径，o为该灯光中心的不透明度，可忽略默认为0。
+	//        其中每一项是三元组 [x,y,r] x和y分别为该灯光的横纵坐标，r为该灯光的半径。
 	// lightDec：可选，0到1之间，光从多少百分比才开始衰减（在此范围内保持全亮），不设置默认为0。
 	//        比如lightDec为0.5代表，每个灯光部分内圈50%的范围全亮，50%以后才开始快速衰减。
 	// 【调用样例】
-	// core.plugin.drawLight(); // 绘制一个0.9的全图不透明度，等价于更改画面色调为[0,0,0,0.9]。
-	// core.plugin.drawLight(0.95, [[25,11,46]]); // 全图不透明度0.95，其中在(25,11)点存在一个半径为46的灯光效果。
-	// core.plugin.drawLight([255,255,0,0.2], [[25,11,46,0.1]]); // 全图为不透明度0.2的黄色，其中在(25,11)点存在一个半径为46的灯光效果，灯光中心不透明度0.1。
-	// core.plugin.drawLight(0.9, [[25,11,46],[105,121,88],[301,221,106]]); // 存在三个灯光效果，分别是中心(25,11)半径46，中心(105,121)半径88，中心(301,221)半径106。
-	// core.plugin.drawLight([0,0,255,0.3], [[25,11,46],[105,121,88,0.2]], 0.4); // 存在两个灯光效果，它们在内圈40%范围内保持全亮，且40%后才开始衰减。
-	this.drawLight = function (color, lights, lightDec) {
+	// core.plugin.drawLight('curtain'); // 在curtain层绘制全图不透明度0.9，等价于更改画面色调为[0,0,0,0.9]。
+	// core.plugin.drawLight('ui', 0.95, [[25,11,46]]); // 在ui层绘制全图不透明度0.95，其中在(25,11)点存在一个半径为46的灯光效果。
+	// core.plugin.drawLight('test', 0.2, [[25,11,46,0.1]]); // 创建一个test图层，不透明度0.2，其中在(25,11)点存在一个半径为46的灯光效果，灯光中心不透明度0.1。
+	// core.plugin.drawLight('test2', 0.9, [[25,11,46],[105,121,88],[301,221,106]]); // 创建test2图层，且存在三个灯光效果，分别是中心(25,11)半径46，中心(105,121)半径88，中心(301,221)半径106。
+	// core.plugin.drawLight('xxx', 0.3, [[25,11,46],[105,121,88,0.2]], 0.4); // 存在两个灯光效果，它们在内圈40%范围内保持全亮，且40%后才开始衰减。
+	this.drawLight = function (name, color, lights, lightDec) {
 		// 清空色调层；也可以修改成其它层比如animate/weather层，或者用自己创建的canvas
-		var canvasName = 'curtain';
-		var ctx = core.getContextByName(canvasName);
-		if (ctx == null) return;
-
+		var ctx = core.getContextByName(name);
+		if (ctx == null) {
+			if (typeof name == 'string')
+				ctx = core.createCanvas(name, 0, 0, 416, 416, 98);
+			else return;
+		}
+		
 		ctx.mozImageSmoothingEnabled = false;
 		ctx.webkitImageSmoothingEnabled = false;
 		ctx.msImageSmoothingEnabled = false;
 		ctx.imageSmoothingEnabled = false;
-		ctx.clearRect(0, 0, 416, 416);
-
+		
+		core.clearMap(name);
 		// 绘制色调层，默认不透明度
 		if (!core.isset(color)) color = 0.9;
-		if (typeof color == "number") color = [0,0,0,color];
-		ctx.fillStyle = core.arrayToRGBA(color);
-		ctx.fillRect(0, 0, 416, 416);
+		ctx.fillStyle = "rgba(0,0,0,"+color+")";
+		ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+		
+		lightDec = core.clamp(lightDec, 0, 1);
 
 		// 绘制每个灯光效果
-		if (!core.isset(lights) || lights.length==0) return;
-		lightDec = core.clamp(lightDec, 0, 1);
+		ctx.globalCompositeOperation = 'destination-out';
 		lights.forEach(function (light) {
 			// 坐标，半径，中心不透明度
-			var x = light[0], y = light[1], r = light[2], o = 255 * (1 - core.clamp(light[3], 0, 1));
+			var x = light[0], y = light[1], r = light[2];
 			// 计算衰减距离
-			var decDistance = parseInt(r * lightDec), leftDistance = r - decDistance;
+			var decDistance = parseInt(r * lightDec);
 			// 正方形区域的直径和左上角坐标
-			var d = r * 2, sx = x - r, sy = y - r;
-			// 获得正方形区域的颜色信息
-			var imageData = ctx.getImageData(sx, sy, d, d);
-			// 对每个像素点进行遍历
-			for (var i = 0; i < imageData.data.length; i+=4) {
-				// 当前点的坐标
-				var index = i / 4, cx = parseInt(index/d), cy = index%d;
-				// 当前点距离中心点的距离
-				var dx = r - cx, dy = r - cy, distance = Math.sqrt(dx*dx+dy*dy);
-				if (distance >= r) continue;
-				// 计算当前点的alpha值
-				var alpha = imageData.data[i+3] - (distance<decDistance?1:(r-distance)/leftDistance)*o;
-				imageData.data[i+3] = core.clamp(alpha, 0, 255);
-			}
-			ctx.putImageData(imageData, sx, sy);
+			var grd=ctx.createRadialGradient(x,y,decDistance,x,y,r);
+			grd.addColorStop(0, "rgba(0,0,0,1)");
+			grd.addColorStop(1, "rgba(0,0,0,0)");
+			ctx.beginPath();
+			ctx.fillStyle=grd;
+			ctx.arc(x,y,r,0,2*Math.PI);
+			ctx.fill();
 		});
+		ctx.globalCompositeOperation = 'source-over';
 	}
 
 

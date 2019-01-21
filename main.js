@@ -149,7 +149,8 @@ function main() {
             'btn4': 33,
             'btn5': 34,
             'btn6': 35,
-            'btn7': 36
+            'btn7': 36,
+            'shop': 37
         },
         'floor': document.getElementById('floor'),
         'name': document.getElementById('name'),

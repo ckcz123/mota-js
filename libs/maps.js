@@ -247,8 +247,8 @@ maps.prototype.load = function (data, floorId) {
 ////// 将当前地图重新变成二维数组形式 //////
 maps.prototype.getMapArray = function (blockArray,width,height){
 
-    width=width||13;
-    height=height||13;
+    width=width||15;
+    height=height||15;
 
     var blocks = [];
     for (var x=0;x<height;x++) {
@@ -1275,7 +1275,7 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
     if (!core.isset(number) || !core.isset(x) || !core.isset(y)) return;
-    if (x<0 || x>=(core.floors[floorId].width||13) || y<0 || y>=(core.floors[floorId].height||13)) return;
+    if (x<0 || x>=(core.floors[floorId].width||15) || y<0 || y>=(core.floors[floorId].height||15)) return;
 
     var originBlock=core.getBlock(x,y,floorId,true);
     var block = core.maps.initBlock(x,y,number);
@@ -1313,7 +1313,7 @@ maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
     if (!core.isset(number) || !core.isset(x) || !core.isset(y)) return;
-    if (x<0 || x>=(core.floors[floorId].width||13) || y<0 || y>=(core.floors[floorId].height||13)) return;
+    if (x<0 || x>=(core.floors[floorId].width||15) || y<0 || y>=(core.floors[floorId].height||15)) return;
     if (name!='bg' && name!='fg') return;
 
     core.setFlag(name+"v_"+floorId+"_"+x+"_"+y, number);

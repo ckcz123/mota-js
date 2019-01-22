@@ -231,7 +231,7 @@ control.prototype.setRequestAnimationFrame = function () {
             else if (core.animateFrame.weather.type == 'fog' && core.animateFrame.weather.level > 0) {
                 core.clearMap('weather');
                 if (core.animateFrame.weather.fog) {
-                    var w = 416, h = 416;
+                    var w = 480, h = 480;
                     core.setAlpha('weather', 0.5);
                     core.animateFrame.weather.nodes.forEach(function (p) {
                         ctx.drawImage(core.animateFrame.weather.fog, p.x - ox, p.y - oy, w, h);
@@ -975,8 +975,8 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
             core.clearMap('hero', drawX()-core.bigmap.offsetX, drawY()-height+32-core.bigmap.offsetY, 32, height);
             updateJump();
             var nowx = drawX(), nowy = drawY();
-            core.bigmap.offsetX = core.clamp(nowx - 32*6, 0, 32*core.bigmap.width-416);
-            core.bigmap.offsetY = core.clamp(nowy - 32*6, 0, 32*core.bigmap.height-416);
+            core.bigmap.offsetX = core.clamp(nowx - 32*7, 0, 32*core.bigmap.width-480);
+            core.bigmap.offsetY = core.clamp(nowy - 32*7, 0, 32*core.bigmap.height-480);
             core.control.updateViewport();
             core.drawImage('hero', core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height,
                 nowx - core.bigmap.offsetX, nowy + 32-height - core.bigmap.offsetY, 32, height);
@@ -1034,10 +1034,10 @@ control.prototype.setGameCanvasTranslate = function(canvas,x,y){
     c.style.OTransform='translate('+x+'px,'+y+'px)';
     c.style.MozTransform='translate('+x+'px,'+y+'px)';
     if(main.mode==='editor' && editor.isMobile){
-        c.style.transform='translate('+(x/416*96)+'vw,'+(y/416*96)+'vw)';
-        c.style.webkitTransform='translate('+(x/416*96)+'vw,'+(y/416*96)+'vw)';
-        c.style.OTransform='translate('+(x/416*96)+'vw,'+(y/416*96)+'vw)';
-        c.style.MozTransform='translate('+(x/416*96)+'vw,'+(y/416*96)+'vw)';
+        c.style.transform='translate('+(x/480*96)+'vw,'+(y/480*96)+'vw)';
+        c.style.webkitTransform='translate('+(x/480*96)+'vw,'+(y/480*96)+'vw)';
+        c.style.OTransform='translate('+(x/480*96)+'vw,'+(y/480*96)+'vw)';
+        c.style.MozTransform='translate('+(x/480*96)+'vw,'+(y/480*96)+'vw)';
     }
 };
 
@@ -1065,8 +1065,8 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
     var offsetY = way.y*offset;
     var dx=offsetX==0?0:offsetX/Math.abs(offsetX), dy=offsetY==0?0:offsetY/Math.abs(offsetY);
 
-    core.bigmap.offsetX = core.clamp((x - 6) * 32 + offsetX, 0, 32*core.bigmap.width-416);
-    core.bigmap.offsetY = core.clamp((y - 6) * 32 + offsetY, 0, 32*core.bigmap.height-416);
+    core.bigmap.offsetX = core.clamp((x - 7) * 32 + offsetX, 0, 32*core.bigmap.width-480);
+    core.bigmap.offsetY = core.clamp((y - 7) * 32 + offsetY, 0, 32*core.bigmap.height-480);
 
     core.clearAutomaticRouteNode(x+dx, y+dy);
 
@@ -1306,7 +1306,7 @@ control.prototype.setWeather = function (type, level) {
     level *= parseInt(20*core.bigmap.width*core.bigmap.height/169);
     // 计算当前的宽高
 
-    core.createCanvas('weather', 0, 0, 416, 416, 80);
+    core.createCanvas('weather', 0, 0, 480, 480, 80);
     core.animateFrame.weather.type = type;
     core.animateFrame.weather.level = level;
     core.animateFrame.weather.nodes = [];
@@ -1365,7 +1365,7 @@ control.prototype.setFg = function(color, time, callback) {
     if (time==0) {
         // 直接变色
         core.clearMap('curtain');
-        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA(color));
+        core.fillRect('curtain', 0, 0, 480, 480, core.arrayToRGBA(color));
         core.status.curtainColor = color;
         if (core.isset(callback)) callback();
         return;
@@ -1381,7 +1381,7 @@ control.prototype.setFg = function(color, time, callback) {
             (nowColor[3]*(step-1)+color[3])/step,
         ];
         core.clearMap('curtain');
-        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA(nowColor));
+        core.fillRect('curtain', 0, 0, 480, 480, core.arrayToRGBA(nowColor));
         step--;
 
         if (step <= 0) {
@@ -2946,9 +2946,9 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     clientHeight = clientHeight || main.dom.body.clientHeight;
 
     // 默认画布大小
-    var DEFAULT_CANVAS_WIDTH = 422;
+    var DEFAULT_CANVAS_WIDTH = 480+6;
     // 默认边栏宽度
-    var DEFAULT_BAR_WIDTH = 132;
+    var DEFAULT_BAR_WIDTH = 149+3;
 
     var BASE_LINEHEIGHT = 32;
     var SPACE = 3;
@@ -2989,7 +2989,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
 
     statusBarBorder = '3px '+borderColor+' solid';
     toolBarBorder = '3px '+borderColor+' solid';
-    var zoom = (ADAPT_WIDTH - width) / 4.22;
+    var zoom = (ADAPT_WIDTH - width) / (DEFAULT_CANVAS_WIDTH/100);
     var aScale = 1 - zoom / 100;
 
     core.domStyle.toolbarBtn = false;
@@ -3274,12 +3274,12 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     this.setToolbarButton();
 
     if (core.domStyle.isVertical) {
-        core.dom.statusCanvas.width = 416;
+        core.dom.statusCanvas.width = 480;
         core.dom.statusCanvas.height = col * BASE_LINEHEIGHT + SPACE + 6;
     }
     else {
-        core.dom.statusCanvas.width = 129;
-        core.dom.statusCanvas.height = 416;
+        core.dom.statusCanvas.width = 149;
+        core.dom.statusCanvas.height = 480;
     }
     this.setMusicBtn();
     if (core.isPlaying())

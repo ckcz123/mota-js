@@ -1919,7 +1919,7 @@ ui.prototype.drawMaps = function (index, x, y) {
 
     if (index<0) index=0;
     if (index>=core.floorIds.length) index=core.floorIds.length-1;
-    var floorId = core.floorIds[index], mw = core.floors[floorId].width||13, mh = core.floors[floorId].height||13;
+    var floorId = core.floorIds[index], mw = core.floors[floorId].width||15, mh = core.floors[floorId].height||15;
     if (!core.isset(x)) x = parseInt(mw/2);
     if (!core.isset(y)) y = parseInt(mh/2);
     if (x<6) x=6;

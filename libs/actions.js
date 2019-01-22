@@ -650,8 +650,8 @@ actions.prototype.onmousewheel = function (direct) {
 
     // 怪物手册
     if (core.status.lockControl && core.status.event.id == 'book') {
-        if (direct==1) core.ui.drawBook(core.status.event.data - 6);
-        if (direct==-1) core.ui.drawBook(core.status.event.data + 6);
+        if (direct==1) core.ui.drawBook(core.status.event.data - 7);
+        if (direct==-1) core.ui.drawBook(core.status.event.data + 7);
         return;
     }
 
@@ -664,8 +664,8 @@ actions.prototype.onmousewheel = function (direct) {
 
     // 浏览地图
     if (core.status.lockControl && core.status.event.id == 'viewMaps') {
-        if (direct==1) this.clickViewMaps(6,3);
-        if (direct==-1) this.clickViewMaps(6,9);
+        if (direct==1) this.clickViewMaps(7,4);
+        if (direct==-1) this.clickViewMaps(7,10);
         return;
     }
 }
@@ -760,9 +760,9 @@ actions.prototype.keyUpCenterFly = function (keycode) {
 
 ////// 点击确认框时 //////
 actions.prototype.clickConfirmBox = function (x,y) {
-    if ((x == 4 || x == 5) && y == 7 && core.isset(core.status.event.data.yes))
+    if ((x == 5 || x == 6) && y == 8 && core.isset(core.status.event.data.yes))
         core.status.event.data.yes();
-    if ((x == 7 || x == 8) && y == 7 && core.isset(core.status.event.data.no))
+    if ((x == 8 || x == 9) && y == 8 && core.isset(core.status.event.data.no))
         core.status.event.data.no();
 }
 
@@ -820,8 +820,8 @@ actions.prototype.clickAction = function (x,y) {
         var data = core.status.event.data.current;
         var choices = data.choices;
         if (choices.length==0) return;
-        if (x >= 5 && x <= 7) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
+        if (x >= 5 && x <= 9) {
+            var topIndex = 7 - parseInt((choices.length - 1) / 2);
             if (y>=topIndex && y<topIndex+choices.length) {
                 // 选择
                 core.status.route.push("choices:"+(y-topIndex));
@@ -892,17 +892,17 @@ actions.prototype.keyUpAction = function (keycode) {
 ////// 怪物手册界面的点击操作 //////
 actions.prototype.clickBook = function(x,y) {
     // 上一页
-    if ((x == 3 || x == 4) && y == 12) {
-        core.ui.drawBook(core.status.event.data - 6);
+    if ((x == 4 || x == 5) && y == 14) {
+        core.ui.drawBook(core.status.event.data - 7);
         return;
     }
     // 下一页
-    if ((x == 8 || x == 9) && y == 12) {
-        core.ui.drawBook(core.status.event.data + 6);
+    if ((x == 9 || x == 10) && y == 14) {
+        core.ui.drawBook(core.status.event.data + 7);
         return;
     }
     // 返回
-    if (x>=10 && x<=12 && y==12) {
+    if (x>=12 && x<=14 && y==14) {
         if (core.events.recoverEvents(core.status.event.interval)) {
             return;
         }
@@ -915,9 +915,9 @@ actions.prototype.clickBook = function(x,y) {
     }
     // 怪物信息
     var data = core.status.event.data;
-    if (core.isset(data) && y<12) {
-        var page=parseInt(data/6);
-        var index=6*page+parseInt(y/2);
+    if (core.isset(data) && y<14) {
+        var page=parseInt(data/7);
+        var index=7*page+parseInt(y/2);
         core.ui.drawBook(index);
         core.ui.drawBookDetail(index);
     }
@@ -926,12 +926,12 @@ actions.prototype.clickBook = function(x,y) {
 
 ////// 怪物手册界面时，按下某个键的操作 //////
 actions.prototype.keyDownBook = function (keycode) {
-    if (keycode==37) core.ui.drawBook(core.status.event.data-6);
+    if (keycode==37) core.ui.drawBook(core.status.event.data-7);
     if (keycode==38) core.ui.drawBook(core.status.event.data-1);
-    if (keycode==39) core.ui.drawBook(core.status.event.data+6);
+    if (keycode==39) core.ui.drawBook(core.status.event.data+7);
     if (keycode==40) core.ui.drawBook(core.status.event.data+1);
-    if (keycode==33) core.ui.drawBook(core.status.event.data-6);
-    if (keycode==34) core.ui.drawBook(core.status.event.data+6);
+    if (keycode==33) core.ui.drawBook(core.status.event.data-7);
+    if (keycode==34) core.ui.drawBook(core.status.event.data+7);
     return;
 }
 
@@ -951,7 +951,7 @@ actions.prototype.keyUpBook = function (keycode) {
     if (keycode==13 || keycode==32 || keycode==67) {
         var data=core.status.event.data;
         if (core.isset(data)) {
-            this.clickBook(6, 2*(data%6));
+            this.clickBook(7, 2*(data%7));
         }
         return;
     }
@@ -1115,8 +1115,8 @@ actions.prototype.keyUpViewMaps = function (keycode) {
 actions.prototype.clickShop = function(x,y) {
     var shop = core.status.event.data.shop;
     var choices = shop.choices;
-    if (x >= 5 && x <= 7) {
-        var topIndex = 6 - parseInt(choices.length / 2);
+    if (x >= 5 && x <= 9) {
+        var topIndex = 7 - parseInt(choices.length / 2);
         if (y>=topIndex && y<topIndex+choices.length) {
 
             // 检查能否使用快捷商店
@@ -1212,15 +1212,15 @@ actions.prototype.keyUpShop = function (keycode) {
     var shop = core.status.event.data.shop;
     var choices = shop.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt(choices.length / 2);
-        this.clickShop(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt(choices.length / 2);
+        this.clickShop(7, topIndex+core.status.event.selection);
     }
     // 数字键快速选择
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<=choices.length) {
-            var topIndex = 6 - parseInt(choices.length / 2);
-            this.clickShop(6, topIndex+index);
+            var topIndex = 7 - parseInt(choices.length / 2);
+            this.clickShop(7, topIndex+index);
         }
     }
     return;
@@ -1229,8 +1229,8 @@ actions.prototype.keyUpShop = function (keycode) {
 ////// 快捷商店界面时的点击操作 //////
 actions.prototype.clickQuickShop = function(x, y) {
     var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {return shopList[shopId].visited || !shopList[shopId].mustEnable});
-    if (x >= 5 && x <= 7) {
-        var topIndex = 6 - parseInt(keys.length / 2);
+    if (x >= 5 && x <= 9) {
+        var topIndex = 7 - parseInt(keys.length / 2);
         if (y>=topIndex && y<topIndex+keys.length) {
             var reason = core.events.canUseQuickShop(keys[y - topIndex]);
             if (!core.flags.enableDisabledShop && core.isset(reason)) {
@@ -1267,14 +1267,14 @@ actions.prototype.keyUpQuickShop = function (keycode) {
     }
     var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {return shopList[shopId].visited || !shopList[shopId].mustEnable});
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt(keys.length / 2);
-        this.clickQuickShop(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt(keys.length / 2);
+        this.clickQuickShop(7, topIndex+core.status.event.selection);
     }
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<=keys.length) {
-            var topIndex = 6 - parseInt(keys.length / 2);
-            this.clickQuickShop(6, topIndex+index);
+            var topIndex = 7 - parseInt(keys.length / 2);
+            this.clickQuickShop(7, topIndex+index);
         }
     }
     return;
@@ -1828,9 +1828,9 @@ actions.prototype.keyUpSL = function (keycode) {
 
 ////// 系统设置界面时的点击操作 //////
 actions.prototype.clickSwitchs = function (x,y) {
-    if (x<5 || x>7) return;
+    if (x<5 || x>9) return;
     var choices = core.status.event.ui.choices;
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = 7 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y-topIndex;
         switch (selection) {
@@ -1918,15 +1918,15 @@ actions.prototype.keyUpSwitchs = function (keycode) {
     }
     var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt((choices.length - 1) / 2);
-        this.clickSwitchs(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt((choices.length - 1) / 2);
+        this.clickSwitchs(7, topIndex+core.status.event.selection);
     }
     // 数字键快速选择
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<choices.length) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
-            this.clickSwitchs(6, topIndex+index);
+            var topIndex = 7 - parseInt((choices.length - 1) / 2);
+            this.clickSwitchs(7, topIndex+index);
         }
     }
 }
@@ -1934,9 +1934,9 @@ actions.prototype.keyUpSwitchs = function (keycode) {
 
 ////// 系统菜单栏界面时的点击事件 //////
 actions.prototype.clickSettings = function (x,y) {
-    if (x<5 || x>7) return;
+    if (x<5 || x>9) return;
     var choices = core.status.event.ui.choices;
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = 7 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y-topIndex;
 
@@ -2002,24 +2002,24 @@ actions.prototype.keyUpSettings = function (keycode) {
     }
     var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt((choices.length - 1) / 2);
-        this.clickSettings(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt((choices.length - 1) / 2);
+        this.clickSettings(7, topIndex+core.status.event.selection);
     }
     // 数字键快速选择
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<choices.length) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
-            this.clickSettings(6, topIndex+index);
+            var topIndex = 7 - parseInt((choices.length - 1) / 2);
+            this.clickSettings(7, topIndex+index);
         }
     }
 }
 
 ////// 同步存档界面时的点击操作 //////
 actions.prototype.clickSyncSave = function (x,y) {
-    if (x<5 || x>7) return;
+    if (x<5 || x>9) return;
     var choices = core.status.event.ui.choices;
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = 7 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y-topIndex;
         switch (selection) {
@@ -2129,25 +2129,25 @@ actions.prototype.keyUpSyncSave = function (keycode) {
     }
     var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt((choices.length - 1) / 2);
-        this.clickSyncSave(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt((choices.length - 1) / 2);
+        this.clickSyncSave(7, topIndex+core.status.event.selection);
     }
     // 数字键快速选择
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<choices.length) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
-            this.clickSyncSave(6, topIndex+index);
+            var topIndex = 7 - parseInt((choices.length - 1) / 2);
+            this.clickSyncSave(7, topIndex+index);
         }
     }
 }
 
 ////// 同步存档选择界面时的点击操作 //////
 actions.prototype.clickSyncSelect = function (x, y) {
-    if (x<5 || x>7) return;
+    if (x<5 || x>9) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = 7 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y - topIndex;
         switch (selection) {
@@ -2186,25 +2186,25 @@ actions.prototype.keyUpSyncSelect = function (keycode) {
     }
     var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt((choices.length - 1) / 2);
-        this.clickSyncSelect(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt((choices.length - 1) / 2);
+        this.clickSyncSelect(7, topIndex+core.status.event.selection);
     }
     // 数字键快速选择
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<choices.length) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
-            this.clickSyncSelect(6, topIndex+index);
+            var topIndex = 7 - parseInt((choices.length - 1) / 2);
+            this.clickSyncSelect(7, topIndex+index);
         }
     }
 }
 
 ////// 存档下载界面时的点击操作 //////
 actions.prototype.clickLocalSaveSelect = function (x,y) {
-    if (x<5 || x>7) return;
+    if (x<5 || x>9) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = 7 - parseInt((choices.length - 1) / 2);
 
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y - topIndex;
@@ -2247,25 +2247,25 @@ actions.prototype.keyUpLocalSaveSelect = function (keycode) {
     }
     var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt((choices.length - 1) / 2);
-        this.clickLocalSaveSelect(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt((choices.length - 1) / 2);
+        this.clickLocalSaveSelect(7, topIndex+core.status.event.selection);
     }
     // 数字键快速选择
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<choices.length) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
-            this.clickLocalSaveSelect(6, topIndex+index);
+            var topIndex = 7 - parseInt((choices.length - 1) / 2);
+            this.clickLocalSaveSelect(7, topIndex+index);
         }
     }
 }
 
 ////// 存档删除界面时的点击操作 //////
 actions.prototype.clickStorageRemove = function (x, y) {
-    if (x<5 || x>7) return;
+    if (x<5 || x>9) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = 7 - parseInt((choices.length - 1) / 2);
 
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y - topIndex;
@@ -2345,25 +2345,25 @@ actions.prototype.keyUpStorageRemove = function (keycode) {
     }
     var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt((choices.length - 1) / 2);
-        this.clickStorageRemove(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt((choices.length - 1) / 2);
+        this.clickStorageRemove(7, topIndex+core.status.event.selection);
     }
     // 数字键快速选择
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<choices.length) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
-            this.clickStorageRemove(6, topIndex+index);
+            var topIndex = 7 - parseInt((choices.length - 1) / 2);
+            this.clickStorageRemove(7, topIndex+index);
         }
     }
 }
 
 ////// 回放选择界面时的点击操作 //////
 actions.prototype.clickReplay = function (x, y) {
-    if (x<5 || x>7) return;
+    if (x<5 || x>9) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = 7 - parseInt((choices.length - 1) / 2);
 
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y - topIndex;
@@ -2427,15 +2427,15 @@ actions.prototype.keyUpReplay = function (keycode) {
     }
     var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt((choices.length - 1) / 2);
-        this.clickReplay(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt((choices.length - 1) / 2);
+        this.clickReplay(7, topIndex+core.status.event.selection);
     }
     // 数字键快速选择
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<choices.length) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
-            this.clickReplay(6, topIndex+index);
+            var topIndex = 7 - parseInt((choices.length - 1) / 2);
+            this.clickReplay(7, topIndex+index);
         }
     }
 }
@@ -2443,10 +2443,10 @@ actions.prototype.keyUpReplay = function (keycode) {
 
 ////// 游戏信息界面时的点击操作 //////
 actions.prototype.clickGameInfo = function (x, y) {
-    if (x<5 || x>7) return;
+    if (x<5 || x>9) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = 7 - parseInt((choices.length - 1) / 2);
 
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y - topIndex;
@@ -2511,26 +2511,26 @@ actions.prototype.keyUpGameInfo = function (keycode) {
     }
     var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt((choices.length - 1) / 2);
-        this.clickGameInfo(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt((choices.length - 1) / 2);
+        this.clickGameInfo(7, topIndex+core.status.event.selection);
     }
     // 数字键快速选择
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<choices.length) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
-            this.clickGameInfo(6, topIndex+index);
+            var topIndex = 7 - parseInt((choices.length - 1) / 2);
+            this.clickGameInfo(7, topIndex+index);
         }
     }
 }
 
 ////// “虚拟键盘”界面时的点击操作 //////
 actions.prototype.clickKeyBoard = function (x, y) {
-    if (y==3 && x>=1 && x<=11) {
+    if (y==4 && x>=2 && x<=12) {
         core.ui.closePanel();
         core.keyUp(112+x-1); // F1-F12: 112-122
     }
-    if (y==3 && x==12) {
+    if (y==4 && x==13) {
         var val = prompt();
         if (val!=null) {
             try {
@@ -2539,9 +2539,9 @@ actions.prototype.clickKeyBoard = function (x, y) {
             catch (e) {}
         }
     }
-    if (y==4 && x>=1 && x<=10) {
+    if (y==5 && x>=2 && x<=11) {
         core.ui.closePanel();
-        core.keyUp(x==10?48:48+x); // 1-9: 49-57; 0: 48
+        core.keyUp(x==11?48:48+x); // 1-9: 49-57; 0: 48
     }
     // 字母
     var lines = [
@@ -2549,46 +2549,46 @@ actions.prototype.clickKeyBoard = function (x, y) {
         ["A","S","D","F","G","H","J","K","L"],
         ["Z","X","C","V","B","N","M"],
     ];
-    if (y==5 && x>=1 && x<=10) {
+    if (y==6 && x>=2 && x<=11) {
         core.ui.closePanel();
-        core.keyUp(lines[0][x-1].charCodeAt(0));
+        core.keyUp(lines[0][x-2].charCodeAt(0));
     }
-    if (y==6 && x>=1 && x<=9) {
+    if (y==7 && x>=2 && x<=10) {
         core.ui.closePanel();
-        core.keyUp(lines[1][x-1].charCodeAt(0));
+        core.keyUp(lines[1][x-2].charCodeAt(0));
     }
-    if (y==7 && x>=1 && x<=7) {
+    if (y==8 && x>=2 && x<=8) {
         core.ui.closePanel();
-        core.keyUp(lines[2][x-1].charCodeAt(0));
+        core.keyUp(lines[2][x-2].charCodeAt(0));
     }
-    if (y==8 && x>=1 && x<=11) {
+    if (y==9 && x>=2 && x<=12) {
         core.ui.closePanel();
-        if (x==1) core.keyUp(189); // -
-        if (x==2) core.keyUp(187); // =
-        if (x==3) core.keyUp(219); // [
-        if (x==4) core.keyUp(221); // ]
-        if (x==5) core.keyUp(220); // \
-        if (x==6) core.keyUp(186); // ;
-        if (x==7) core.keyUp(222); // '
-        if (x==8) core.keyUp(188); // ,
-        if (x==9) core.keyUp(190); // .
-        if (x==10) core.keyUp(191); // /
-        if (x==11) core.keyUp(192); // `
+        if (x==2) core.keyUp(189); // -
+        if (x==3) core.keyUp(187); // =
+        if (x==4) core.keyUp(219); // [
+        if (x==5) core.keyUp(221); // ]
+        if (x==6) core.keyUp(220); // \
+        if (x==7) core.keyUp(186); // ;
+        if (x==8) core.keyUp(222); // '
+        if (x==9) core.keyUp(188); // ,
+        if (x==10) core.keyUp(190); // .
+        if (x==11) core.keyUp(191); // /
+        if (x==12) core.keyUp(192); // `
     }
-    if (y==9 && x>=1 && x<=10) {
+    if (y==10 && x>=2 && x<=11) {
         core.ui.closePanel();
-        if (x==1) core.keyUp(27); // ESC
-        if (x==2) core.keyUp(9); // TAB
-        if (x==3) core.keyUp(20); // CAPS
-        if (x==4) core.keyUp(16); // SHIFT
-        if (x==5) core.keyUp(17); // CTRL
-        if (x==6) core.keyUp(18); // ALT
-        if (x==7) core.keyUp(32); // SPACE
-        if (x==8) core.keyUp(8); // BACKSPACE
-        if (x==9) core.keyUp(13); // ENTER
-        if (x==10) core.keyUp(46); // DEL
+        if (x==2) core.keyUp(27); // ESC
+        if (x==3) core.keyUp(9); // TAB
+        if (x==4) core.keyUp(20); // CAPS
+        if (x==5) core.keyUp(16); // SHIFT
+        if (x==6) core.keyUp(17); // CTRL
+        if (x==7) core.keyUp(18); // ALT
+        if (x==8) core.keyUp(32); // SPACE
+        if (x==9) core.keyUp(8); // BACKSPACE
+        if (x==10) core.keyUp(13); // ENTER
+        if (x==11) core.keyUp(46); // DEL
     }
-    if (y==10 && x>=9 && x<=11)
+    if (y==11 && x>=10 && x<=12)
         core.ui.closePanel();
 }
 

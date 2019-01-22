@@ -98,8 +98,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"flyRange": [],
 			"loc": {
 				"direction": "up",
-				"x": 6,
-				"y": 10
+				"x": 7,
+				"y": 11
 			},
 			"flags": {},
 			"steps": 0

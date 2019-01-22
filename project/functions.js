@@ -1177,15 +1177,16 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 浏览地图时参与的统计项目
 	
 	return [
-		'yellowDoor', 'blueDoor', 'redDoor', 'greenDoor', 'steelDoor',
-		'yellowKey', 'blueKey', 'redKey', 'greenKey', 'steelKey',
-		'redJewel', 'blueJewel', 'greenJewel', 'yellowJewel',
-		'redPotion', 'bluePotion', 'greenPotion', 'yellowPotion', 'superPotion',
-		'pickaxe', 'bomb', 'centerFly',
-		'poisonWine', 'weakWine', 'curseWine', 'superWine',
-		'sword1', 'sword2', 'sword3', 'sword4', 'sword5',
-		'shield1', 'shield2', 'shield3', 'shield4', 'shield5',
-		// 在这里可以增加新的ID来进行统计个数，只能增加道具ID
+        'yellowDoor', 'blueDoor', 'redDoor', 'greenDoor', 'steelDoor',
+        'yellowKey', 'blueKey', 'redKey', 'greenKey', 'steelKey',
+        'redJewel', 'blueJewel', 'greenJewel', 'yellowJewel',
+        'redPotion', 'bluePotion', 'greenPotion', 'yellowPotion', 'superPotion',
+        'pickaxe', 'bomb', 'centerFly', 'icePickaxe', 'snow',
+        'earthquake', 'upFly', 'downFly', 'jumpShoes', 'lifeWand',
+        'poisonWine', 'weakWine', 'curseWine', 'superWine',
+        'sword1', 'sword2', 'sword3', 'sword4', 'sword5',
+        'shield1', 'shield2', 'shield3', 'shield4', 'shield5',
+        // 在这里可以增加新的ID来进行统计个数，只能增加道具ID
 	];
 },
         "drawAbout": function() {

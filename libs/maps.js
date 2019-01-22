@@ -26,8 +26,8 @@ maps.prototype.loadFloor = function (floorId, map) {
     map=map.map;
     var mapIntoBlocks = function(map,maps,floor,floorId){
         var blocks = [];
-        var mw = core.floors[floorId].width || 13;
-        var mh = core.floors[floorId].height || 13;
+        var mw = core.floors[floorId].width || 15;
+        var mh = core.floors[floorId].height || 15;
         for (var i = 0; i < mh; i++) {
             for (var j = 0; j < mw; j++) {
                 var block = maps.initBlock(j, i, (map[i]||[])[j]||0);
@@ -190,8 +190,8 @@ maps.prototype.save = function(maps, floorId) {
     }
 
     var thisFloor = core.clone(maps[floorId]);
-    var mw = core.floors[floorId].width || 13;
-    var mh = core.floors[floorId].height || 13;
+    var mw = core.floors[floorId].width || 15;
+    var mh = core.floors[floorId].height || 15;
 
     var blocks = [];
     for (var x=0;x<mh;x++) {
@@ -216,8 +216,8 @@ maps.prototype.save = function(maps, floorId) {
 maps.prototype.resizeMap = function(floorId) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
-    core.bigmap.width = core.floors[floorId].width || 13;
-    core.bigmap.height = core.floors[floorId].height || 13;
+    core.bigmap.width = core.floors[floorId].width || 15;
+    core.bigmap.height = core.floors[floorId].height || 15;
     var cwidth = core.bigmap.width * 32;
     var cheight = core.bigmap.height * 32;
     core.bigmap.canvas.forEach(function(cn){
@@ -394,8 +394,8 @@ maps.prototype.drawBlock = function (block, animate, dx, dy) {
 maps.prototype.getBgFgMapArray = function (floorId, name) {
     floorId = floorId||core.status.floorId;
     if (!core.isset(floorId)) return [];
-    var width = core.floors[floorId].width || 13;
-    var height = core.floors[floorId].height || 13;
+    var width = core.floors[floorId].width || 15;
+    var height = core.floors[floorId].height || 15;
 
     if (main.mode!='editor' && core.isset(core.status[name+"maps"][floorId]))
         return core.status[name+"maps"][floorId];
@@ -418,8 +418,8 @@ maps.prototype.getBgFgMapArray = function (floorId, name) {
 maps.prototype.drawBgFgMap = function (floorId, canvas, name, animate) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
-    var width = core.floors[floorId].width || 13;
-    var height = core.floors[floorId].height || 13;
+    var width = core.floors[floorId].width || 15;
+    var height = core.floors[floorId].height || 15;
 
     if (!core.isset(core.status[name+"maps"]))
         core.status[name+"maps"] = {};
@@ -489,8 +489,8 @@ maps.prototype.drawMap = function (floorId, callback) {
     this.generateGroundPattern(floorId);
 
     var drawBg = function(){
-        var width = core.floors[floorId].width || 13;
-        var height = core.floors[floorId].height || 13;
+        var width = core.floors[floorId].width || 15;
+        var height = core.floors[floorId].height || 15;
 
         for (var x = 0; x < width; x++) {
             for (var y = 0; y < height; y++) {

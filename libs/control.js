@@ -44,12 +44,17 @@ control.prototype.setRequestAnimationFrame = function () {
         }
     }());
 
+    core.animateFrame.totalTime = Math.max(core.animateFrame.totalTime, core.getLocalStorage('totalTime', 0));
+
     var draw = function(timestamp) {
+
+        core.animateFrame.totalTime += timestamp - core.animateFrame.totalTimeStart;
+        core.animateFrame.totalTimeStart = timestamp;
 
         // move time
         if (core.isPlaying() && core.isset(core.status) && core.isset(core.status.hero)
             && core.isset(core.status.hero.statistics)) {
-            core.status.hero.statistics.totalTime += timestamp-(core.status.hero.statistics.start||timestamp);
+            core.status.hero.statistics.totalTime = core.animateFrame.totalTime;
             core.status.hero.statistics.currTime += timestamp-(core.status.hero.statistics.start||timestamp);
             core.status.hero.statistics.start=timestamp;
         }
@@ -380,11 +385,7 @@ control.prototype.clearStatus = function() {
 ////// 重置游戏状态和初始数据 //////
 control.prototype.resetStatus = function(hero, hard, floorId, route, maps, values) {
 
-    var totalTime=0;
-    if (core.isset(core.status) && core.isset(core.status.hero)
-        && core.isset(core.status.hero.statistics) && core.isset(route)) {
-        totalTime=core.status.hero.statistics.totalTime;
-    }
+    var totalTime = core.animateFrame.totalTime;
 
     // 清除游戏数据
     core.clearStatus();
@@ -417,7 +418,8 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
             'moveDirectly': 0,
             'ignoreSteps': 0,
         }
-    core.status.hero.statistics.totalTime = Math.max(core.status.hero.statistics.totalTime, totalTime);
+    core.status.hero.statistics.totalTime = core.animateFrame.totalTime =
+        Math.max(core.status.hero.statistics.totalTime, core.animateFrame.totalTime);
     core.status.hero.statistics.start = null;
 
     core.status.hard = hard;
@@ -2139,6 +2141,8 @@ control.prototype.autosave = function (removeLast) {
 
 /////// 实际进行自动存档 //////
 control.prototype.checkAutosave = function () {
+    core.setLocalStorage('totalTime', core.animateFrame.totalTime);
+
     if (core.saves.autosave.data == null || !core.saves.autosave.updated) return;
     core.saves.autosave.updated = false;
     core.setLocalForage("autoSave", core.saves.autosave.data);

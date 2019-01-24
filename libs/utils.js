@@ -236,9 +236,12 @@ utils.prototype.getLocalForage = function (key, defaultValue, successCallback, e
                     }
                     catch (ee) {main.log(ee);}
                 }
-                if (core.isset(successCallback))
-                    successCallback(JSON.parse(value));
-                return;
+                try {
+                    if (core.isset(successCallback))
+                        successCallback(JSON.parse(value));
+                    return;
+                }
+                catch (ee) {main.log(ee);}
             }
             if (core.isset(successCallback))
                 successCallback(defaultValue);

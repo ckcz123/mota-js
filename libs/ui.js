@@ -270,7 +270,7 @@ ui.prototype.drawTip = function (text, itemIcon) {
         else {
             alpha += 0.1;
         }
-        core.clearMap('data', 5, 5, 416, height);
+        core.clearMap('data', 5, 5, 480, height);
         core.setAlpha('data', alpha);
         core.fillRect('data', 5, 5, width, height, '#000');
         if (core.isset(itemIcon)) {
@@ -280,7 +280,7 @@ ui.prototype.drawTip = function (text, itemIcon) {
         core.setAlpha('data', 1);
         if (alpha > 0.6 || alpha < 0) {
             if (hide) {
-                core.clearMap('data', 5, 5, 416, height);
+                core.clearMap('data', 5, 5, 480, height);
                 clearInterval(core.interval.tipAnimate);
                 return;
             }
@@ -610,7 +610,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
         core.setFont('ui', font);
         validWidth = this.calTextBoxWidth('ui', realContent, min_width, max_width);
         width = validWidth + leftSpace + rightSpace;
-        // left必须在10~480-10-width区间内，以保证left>=10，right<=416-10
+        // left必须在10~480-10-width区间内，以保证left>=10，right<=480-10
         left = core.clamp(32*px+16-width/2-core.bigmap.offsetX, 10, 480-10-width);
         right = left + width;
     }
@@ -1119,7 +1119,7 @@ ui.prototype.drawWaiting = function(text) {
     var text_length = core.calWidth('ui', text, "bold 19px "+globalFont);
 
     var right = Math.max(text_length+50, 220);
-    var left = 208-parseInt(right/2), top = 208 - 32 - 16, bottom = 416 - 2 * top;
+    var left = 240-parseInt(right/2), top = 240 - 32 - 16, bottom = 480 - 2 * top;
 
     core.clearMap('ui');
     if (isWindowSkin) {
@@ -1133,7 +1133,7 @@ ui.prototype.drawWaiting = function(text) {
     core.setAlpha('ui', 1);
 
     core.setTextAlign('ui', 'center');
-    core.fillText('ui', text, 208, top + 56, textColor);
+    core.fillText('ui', text, 240, top + 56, textColor);
 
 }
 
@@ -1214,11 +1214,11 @@ ui.prototype.drawCursor = function () {
     if (!core.isset(core.status.automaticRoute.cursorX))
         core.status.automaticRoute.cursorX=core.getHeroLoc('x');
     if (core.status.automaticRoute.cursorX<0) core.status.automaticRoute.cursorX=0;
-    if (core.status.automaticRoute.cursorX>12) core.status.automaticRoute.cursorX=12;
+    if (core.status.automaticRoute.cursorX>14) core.status.automaticRoute.cursorX=14;
     if (!core.isset(core.status.automaticRoute.cursorY))
         core.status.automaticRoute.cursorY=core.getHeroLoc('y');
     if (core.status.automaticRoute.cursorY<0) core.status.automaticRoute.cursorY=0;
-    if (core.status.automaticRoute.cursorY>12) core.status.automaticRoute.cursorY=12;
+    if (core.status.automaticRoute.cursorY>14) core.status.automaticRoute.cursorY=14;
 
     core.status.event.id = 'cursor';
     core.lockControl();
@@ -1487,7 +1487,6 @@ ui.prototype.drawBookDetail = function (index) {
     var height = 480 - 10 - Math.min(480-24*(contents.length+1)-65, 310);
     var top = (480-height)/2, bottom = height;
 
-    // var left = 97, top = 64, right = 416 - 2 * left, bottom = 416 - 2 * top;
     core.setAlpha('data', 0.9);
     core.fillRect('data', left, top, right, bottom, '#000000');
     core.setAlpha('data', 1);
@@ -1806,12 +1805,12 @@ ui.prototype.drawEquipbox = function(index) {
     var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
 
     var page = core.status.event.data.page;
-    var totalPage = Math.ceil(ownEquipment.length/12);
+    var totalPage = Math.ceil(ownEquipment.length/14);
 
     // 处理index
     if (!core.isset(index)) {
         if (equipLength>0 && core.isset(equipEquipment[0])) index=0;
-        else if (ownEquipment.length>0) index=12;
+        else if (ownEquipment.length>0) index=14;
         else index=0;
     }
     if (index>=14 && ownEquipment.length==0) index = 0;
@@ -1896,7 +1895,7 @@ ui.prototype.drawEquipbox = function(index) {
         if (curr < 130+64-ydelta) {
             // 比较属性
             var compare, differentMode = null;
-            if (index<12) compare = core.compareEquipment(null, selectId);
+            if (index<14) compare = core.compareEquipment(null, selectId);
             else {
                 if (equipType<0) {
                     differentMode = '<当前没有该装备的空位，请先卸下装备>';
@@ -2221,13 +2220,12 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
             var realWidth = 480, realHeight = realWidth * tempHeight / tempWidth;
             var side = (480 - realHeight) / 2;
             core.fillRect(canvas, 0, 0, realWidth, side, '#000000');
-            core.fillRect(canvas, 0, 416-side, realWidth, side);
+            core.fillRect(canvas, 0, 480-side, realWidth, side);
             ctx.drawImage(tempCanvas.canvas, 0, 0, tempWidth, tempHeight, 0, side, realWidth, realHeight);
         }
     }
     else {
         var offsetX = core.clamp(centerX-7, 0, mw-15), offsetY = core.clamp(centerY-7, 0, mh-15);
-        // offsetX~offsetX+12; offsetY~offsetY+12
         ctx.drawImage(tempCanvas.canvas, offsetX*32, offsetY*32, 480, 480, x, y, size, size);
     }
 }
@@ -2288,7 +2286,7 @@ ui.prototype.drawKeyBoard = function () {
         offset+=32;
     });
 
-    core.fillText("ui", "返回游戏", 416+32-80, offset-3, '#FFFFFF', 'bold 15px '+globalFont);
+    core.fillText("ui", "返回游戏", 448+-80, offset-3, '#FFFFFF', 'bold 15px '+globalFont);
 
     if (isWindowSkin)
         this.drawWindowSelector(background, 300+32, offset - 22, 72, 27);

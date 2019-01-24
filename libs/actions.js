@@ -1659,17 +1659,17 @@ actions.prototype.clickSL = function(x,y) {
     var page = parseInt(index/10), offset=index%10;
 
     // 上一页
-    if ((x == 3 || x == 4) && y == 12) {
+    if ((x == 4 || x == 5) && y == 14) {
         core.ui.drawSLPanel(10*(page-1)+offset);
         return;
     }
     // 下一页
-    if ((x == 8 || x == 9) && y == 12) {
+    if ((x == 9 || x == 10) && y == 14) {
         core.ui.drawSLPanel(10*(page+1)+offset);
         return;
     }
     // 返回
-    if (x>=10 && x<=12 && y==12) {
+    if (x>=12 && x<=14 && y==14) {
         if (core.events.recoverEvents(core.status.event.interval)) {
             return;
         }
@@ -1680,7 +1680,7 @@ actions.prototype.clickSL = function(x,y) {
         return;
     }
     // 删除
-    if (x>=0 && x<=2 && y==12) {
+    if (x>=0 && x<=2 && y==14) {
 
         if (core.status.event.id=='save') {
             core.status.event.selection=!core.status.event.selection;
@@ -1696,15 +1696,15 @@ actions.prototype.clickSL = function(x,y) {
     }
 
     var id=null;
-    if (y>=1 && y<=4) {
-        if (x>=1 && x<=3) id = "autoSave";
-        if (x>=5 && x<=7) id = 5*page+1;
-        if (x>=9 && x<=11) id = 5*page+2;
+    if (y>=2 && y<=5) {
+        if (x>=0 && x<=4) id = "autoSave";
+        if (x>=5 && x<=9) id = 5*page+1;
+        if (x>=10 && x<=14) id = 5*page+2;
     }
-    if (y>=7 && y<=10) {
-        if (x>=1 && x<=3) id = 5*page+3;
-        if (x>=5 && x<=7) id = 5*page+4;
-        if (x>=9 && x<=11) id = 5*page+5;
+    if (y>=8 && y<=12) {
+        if (x>=0 && x<=4) id = 5*page+3;
+        if (x>=5 && x<=9) id = 5*page+4;
+        if (x>=10 && x<=14) id = 5*page+5;
     }
     if (id!=null) {
         if (core.status.event.selection)  {

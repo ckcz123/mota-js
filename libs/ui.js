@@ -2303,7 +2303,7 @@ ui.prototype.drawSLPanel = function(index, refresh) {
     if (!core.isset(core.status.event.ui))
         core.status.event.ui = [];
 
-    var u=416/6, size=118;
+    var u=480/6, size=138;
 
     var strokeColor = '#FFD700';
     if (core.status.event.selection) strokeColor = '#FF6A6A';
@@ -2312,20 +2312,20 @@ ui.prototype.drawSLPanel = function(index, refresh) {
     var drawBg = function() {
         core.clearMap('ui');
         core.setAlpha('ui', 0.85);
-        core.fillRect('ui', 0, 0, 416, 416, '#000000');
+        core.fillRect('ui', 0, 0, 480, 480, '#000000');
         core.setAlpha('ui', 1);
 
-        core.ui.drawPagination(page+1, max_page, 12);
+        core.ui.drawPagination(page+1, max_page);
         core.setTextAlign('ui', 'center');
         // 退出
-        core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px '+globalFont);
+        core.fillText('ui', '返回游戏', 370+59, 403+64,'#DDDDDD', 'bold 15px '+globalFont);
 
         if (core.status.event.selection)
             core.setFillStyle('ui', '#FF6A6A');
         if (core.status.event.id=='save')
-            core.fillText('ui', '删除模式', 48, 403);
+            core.fillText('ui', '删除模式', 48, 403+64);
         else
-            core.fillText('ui', '输入编号', 48, 403);
+            core.fillText('ui', '输入编号', 48, 403+64);
     }
 
     var draw = function (data, i) {
@@ -2333,35 +2333,35 @@ ui.prototype.drawSLPanel = function(index, refresh) {
         core.status.event.ui[i] = data;
         var id=5*page+i;
         if (i<3) {
-            core.fillText('ui', i==0?"自动存档":name+id, (2*i+1)*u, 30, '#FFFFFF', "bold 17px "+globalFont);
-            core.strokeRect('ui', (2*i+1)*u-size/2, 45, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
+            core.fillText('ui', i==0?"自动存档":name+id, (2*i+1)*u, 38, '#FFFFFF', "bold 17px "+globalFont);
+            core.strokeRect('ui', (2*i+1)*u-size/2, 55, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 45, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
+                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 55, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
                 var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
                 var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
-                if (v.length+v2.length<=21) v+=v2;
-                core.fillText('ui', v, (2*i+1)*u, 60+size, '#FFD700', '10px '+globalFont);
-                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 73+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF');
+                if (v.length+v2.length<=31) v+=v2;
+                core.fillText('ui', v, (2*i+1)*u, 73+size, '#FFD700', '10px '+globalFont);
+                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 88+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF');
             }
             else {
-                core.fillRect('ui', (2*i+1)*u-size/2, 45, size, size, '#333333', 2);
-                core.fillText('ui', '空', (2*i+1)*u, 112, '#FFFFFF', 'bold 30px '+globalFont);
+                core.fillRect('ui', (2*i+1)*u-size/2, 55, size, size, '#333333', 2);
+                core.fillText('ui', '空', (2*i+1)*u, 135, '#FFFFFF', 'bold 30px '+globalFont);
             }
         }
         else {
-            core.fillText('ui', name+id, (2*i-5)*u, 218, '#FFFFFF', "bold 17px "+globalFont);
-            core.strokeRect('ui', (2*i-5)*u-size/2, 233, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
+            core.fillText('ui', name+id, (2*i-5)*u, 253, '#FFFFFF', "bold 17px "+globalFont);
+            core.strokeRect('ui', (2*i-5)*u-size/2, 270, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 233, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
+                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 270, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
                 var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
                 var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
-                if (v.length+v2.length<=21) v+=v2;
-                core.fillText('ui', v, (2*i-5)*u, 248+size, '#FFD700', '10px '+globalFont);
-                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 261+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF', '10px '+globalFont);
+                if (v.length+v2.length<=31) v+=v2;
+                core.fillText('ui', v, (2*i-5)*u, 288+size, '#FFD700', '10px '+globalFont);
+                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 303+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF', '10px '+globalFont);
             }
             else {
-                core.fillRect('ui', (2*i-5)*u-size/2, 233, size, size, '#333333', 2);
-                core.fillText('ui', '空', (2*i-5)*u, 297, '#FFFFFF', 'bold 30px '+globalFont);
+                core.fillRect('ui', (2*i-5)*u-size/2, 270, size, size, '#333333', 2);
+                core.fillText('ui', '空', (2*i-5)*u, 350, '#FFFFFF', 'bold 30px '+globalFont);
             }
         }
     };

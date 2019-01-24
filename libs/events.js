@@ -150,21 +150,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 
         var real_start = function () {
             core.insertAction(core.clone(core.firstData.startText), null, null, function() {
-                if (!core.flags.startUsingCanvas && !core.isReplaying() && core.flags.showBattleAnimateConfirm) { // 是否提供“开启战斗动画”的选择项
-                    core.status.event.selection = core.flags.battleAnimate ? 0 : 1;
-                    core.ui.drawConfirmBox("你想开启战斗动画吗？\n之后可以在菜单栏中开启或关闭。\n（强烈建议新手开启此项）", function () {
-                        core.flags.battleAnimate = true;
-                        core.setLocalStorage('battleAnimate', true);
-                        post_start();
-                    }, function () {
-                        core.flags.battleAnimate = false;
-                        core.setLocalStorage('battleAnimate', false);
-                        post_start();
-                    });
-                }
-                else {
-                    post_start();
-                }
+                post_start();
             });
         }
 
@@ -1447,16 +1433,7 @@ events.prototype.battle = function (id, x, y, force, callback) {
     if (!core.isset(core.status.event.id)) // 自动存档
         core.autosave(true);
 
-    if (core.flags.battleAnimate&&!core.isReplaying()) {
-        core.waitHeroToStop(function() {
-            core.ui.drawBattleAnimate(id, function() {
-                core.events.afterBattle(id, x, y, callback);
-            });
-        });
-    }
-    else {
-        core.events.afterBattle(id, x, y, callback);
-    }
+    core.events.afterBattle(id, x, y, callback);
 }
 
 ////// 触发(x,y)点的事件 //////

@@ -590,24 +590,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_range": "thiseval==null || (thiseval>0 && thiseval<=4)",
                     "_data": "竖屏模式下，顶端状态栏canvas化后的行数。\n此项将决定竖屏的状态栏高度，如果设置则不小于1且不大于4。\n仅在statusCanvas开启时才有效"
                 },
-                "canOpenBattleAnimate": {
-                    "_leaf": true,
-                    "_type": "checkbox",
-                    "_bool": "bool",
-                    "_data": "是否允许用户开启战斗过程；如果此项为false，则下面两项均强制视为false"
-                },
-                "showBattleAnimateConfirm": {
-                    "_leaf": true,
-                    "_type": "checkbox",
-                    "_bool": "bool",
-                    "_data": "是否在游戏开始时提供“是否开启战斗动画”的选项"
-                },
-                "battleAnimate": {
-                    "_leaf": true,
-                    "_type": "checkbox",
-                    "_bool": "bool",
-                    "_data": "是否默认显示战斗动画；用户可以手动在菜单栏中开关"
-                },
                 "displayEnemyDamage": {
                     "_leaf": true,
                     "_type": "checkbox",

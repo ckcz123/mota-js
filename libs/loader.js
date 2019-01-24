@@ -88,8 +88,6 @@ loader.prototype.loadIcons = function () {
                     core.statusBar.image[key].src = core.statusBar.icons[key].src;
             }
         }
-        core.statusBar.image.keyboard.src =
-            core.platform.extendKeyboard ? core.statusBar.icons.keyboard.src : core.statusBar.icons.shop.src;
     });
 }
 

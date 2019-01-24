@@ -1125,17 +1125,17 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 作为样板，只绘制楼层、生命、攻击、防御、魔防、金币、钥匙这七个内容
 	// 需要其他的请自行进行修改；横竖屏都需要进行适配绘制。
 	// （可以使用Chrome浏览器开控制台来模拟手机上的竖屏模式的显示效果，具体方式自行百度）
-	// 横屏模式下的画布大小是 129*416
-	// 竖屏模式下的画布大小是 416*(32*rows+9) 其中rows为状态栏行数，即全塔属性中statusCanvasRowsOnMobile值
+	// 横屏模式下的画布大小是 149*480
+	// 竖屏模式下的画布大小是 480*(32*rows+9) 其中rows为状态栏行数，即全塔属性中statusCanvasRowsOnMobile值
 	// 可以使用 core.domStyle.isVertical 来判定当前是否是竖屏模式
 	
 	ctx.fillStyle = core.status.globalAttribute.statusBarColor || core.initStatus.globalAttribute.statusBarColor;
 	ctx.font = 'italic bold 18px Verdana';
 	
-	// 距离左侧边框6像素，上侧边框9像素，行距约为39像素
-	var leftOffset = 6, topOffset = 9, lineHeight = 39;
+	// 距离左侧边框10像素，上侧边框9像素，行距约为42像素
+	var leftOffset = 10, topOffset = 9, lineHeight = 42;
 	if (core.domStyle.isVertical) { // 竖屏模式，行高32像素
-		leftOffset = 6; topOffset = 6; lineHeight = 32;
+		leftOffset = 10; topOffset = 6; lineHeight = 32;
 	}
 	
 	var toDraw = ["floor", "hp", "atk", "def", "mdef", "money"];
@@ -1154,9 +1154,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 计算下一个绘制的坐标
 		if (core.domStyle.isVertical) {
 			// 竖屏模式
-			if (index % 3 != 2) leftOffset += 131;
+			if (index % 3 != 2) leftOffset += 150;
 			else {
-				leftOffset = 6;
+				leftOffset = 10;
 				topOffset += lineHeight;
 			}
 		}

@@ -51,6 +51,7 @@ function main() {
         'data': document.getElementById('data'),
         'statusLabels': document.getElementsByClassName('statusLabel'),
         'statusTexts': document.getElementsByClassName('statusText'),
+        'noMarginLeft': document.getElementsByClassName('noMarginLeft'),
         'floorCol': document.getElementById('floorCol'),
         'nameCol': document.getElementById('nameCol'),
         'lvCol': document.getElementById('lvCol'),
@@ -100,6 +101,7 @@ function main() {
             'fly': document.getElementById("img-fly"),
             'toolbox': document.getElementById("img-toolbox"),
             'keyboard': document.getElementById("img-keyboard"),
+            'shop': document.getElementById('img-shop'),
             'save': document.getElementById("img-save"),
             'load': document.getElementById("img-load"),
             'settings': document.getElementById("img-settings"),
@@ -109,7 +111,8 @@ function main() {
             'btn4': document.getElementById("img-btn4"),
             'btn5': document.getElementById("img-btn5"),
             'btn6': document.getElementById("img-btn6"),
-            'btn7': document.getElementById("img-btn7")
+            'btn7': document.getElementById("img-btn7"),
+            'btn8': document.getElementById("img-btn8"),
         },
         'icons': {
             'floor': 0,
@@ -127,30 +130,31 @@ function main() {
             'fly': 11,
             'toolbox': 12,
             'keyboard': 13,
-            'save': 14,
-            'load': 15,
-            'settings': 16,
-            'play': 17,
-            'pause': 18,
-            'stop': 19,
-            'speedDown': 20,
-            'speedUp': 21,
-            'rewind': 22,
-            'equipbox': 23,
-            'mana': 24,
-            'skill': 25,
-            'paint': 26,
-            'erase': 27,
-            'empty': 28,
-            'exit': 29,
-            'btn1': 30,
-            'btn2': 31,
-            'btn3': 32,
-            'btn4': 33,
-            'btn5': 34,
-            'btn6': 35,
-            'btn7': 36,
-            'shop': 37
+            'shop': 14,
+            'save': 15,
+            'load': 16,
+            'settings': 17,
+            'play': 18,
+            'pause': 19,
+            'stop': 20,
+            'speedDown': 21,
+            'speedUp': 22,
+            'rewind': 23,
+            'equipbox': 24,
+            'mana': 25,
+            'skill': 26,
+            'paint': 27,
+            'erase': 28,
+            'empty': 29,
+            'exit': 30,
+            'btn1': 31,
+            'btn2': 32,
+            'btn3': 33,
+            'btn4': 34,
+            'btn5': 35,
+            'btn6': 36,
+            'btn7': 37,
+            'btn8': 38
         },
         'floor': document.getElementById('floor'),
         'name': document.getElementById('name'),
@@ -509,6 +513,14 @@ main.statusBar.image.keyboard.onclick = function (e) {
         main.core.openKeyBoard(true);
 }
 
+////// 点击状态栏中的虚拟键盘时 //////
+main.statusBar.image.shop.onclick = function (e) {
+    e.stopPropagation();
+
+    if (main.core.isPlaying())
+        main.core.openQuickShop(true);
+}
+
 ////// 点击状态栏中的存档按钮时 //////
 main.statusBar.image.save.onclick = function (e) {
     e.stopPropagation();
@@ -604,6 +616,11 @@ main.statusBar.image.btn6.onclick = function (e) {
 main.statusBar.image.btn7.onclick = function (e) {
     e.stopPropagation();
     main.core.onkeyUp({"keyCode": 55});
+};
+
+main.statusBar.image.btn8.onclick = function (e) {
+    e.stopPropagation();
+    main.core.onkeyUp({"keyCode": 56});
 };
 
 ////// 点击“开始游戏”时 //////

@@ -2056,16 +2056,9 @@ control.prototype.openQuickShop = function (need) {
 control.prototype.openKeyBoard = function (need) {
     if (core.isReplaying()) return;
 
-    if (core.platform.extendKeyboard) {
-        if (!core.checkStatus('keyBoard', need))
-            return;
-        core.ui.drawKeyBoard();
-    }
-    else {
-        if (!core.checkStatus('selectShop', need))
-            return;
-        core.ui.drawQuickShop();
-    }
+    if (!core.checkStatus('keyBoard', need))
+        return;
+    core.ui.drawKeyBoard();
 }
 
 ////// 点击保存按钮时的打开操作 //////
@@ -2729,6 +2722,7 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.image.toolbox.src = core.statusBar.icons.rewind.src;
 
         core.statusBar.image.keyboard.src = core.statusBar.icons.book.src;
+        core.statusBar.image.shop.style.opacity = 0;
 
         core.statusBar.image.save.src = core.statusBar.icons.speedDown.src;
 
@@ -2752,8 +2746,8 @@ control.prototype.updateStatusBar = function () {
 
         core.statusBar.image.toolbox.src = core.statusBar.icons.toolbox.src;
 
-        core.statusBar.image.keyboard.src =
-            core.platform.extendKeyboard ? core.statusBar.icons.keyboard.src : core.statusBar.icons.shop.src;
+        core.statusBar.image.keyboard.src = core.statusBar.icons.keyboard.src;
+        core.statusBar.image.shop.style.opacity = 1;
 
         core.statusBar.image.save.src = core.statusBar.icons.save.src;
 
@@ -2890,21 +2884,22 @@ control.prototype.setToolbarButton = function (useButton) {
 
     core.domStyle.toolbarBtn = useButton;
     if (useButton) {
-        ["book","fly","toolbox","keyboard","save","load","settings"].forEach(function (t) {
+        ["book","fly","toolbox","keyboard","shop","save","load","settings"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'none';
         });
-        ["btn1","btn2","btn3","btn4","btn5","btn6","btn7"].forEach(function (t) {
+        ["btn1","btn2","btn3","btn4","btn5","btn6","btn7","btn8"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'block';
         })
     }
     else {
-        ["btn1","btn2","btn3","btn4","btn5","btn6","btn7"].forEach(function (t) {
+        ["btn1","btn2","btn3","btn4","btn5","btn6","btn7","btn8"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'none';
         });
-        ["book","fly","toolbox","keyboard","save","load","settings"].forEach(function (t) {
+        ["book","fly","toolbox","save","load","settings"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'block';
         });
-        core.statusBar.image.keyboard.style.display = core.domStyle.isVertical ? "block":"none";
+        core.statusBar.image.keyboard.style.display =
+            core.statusBar.image.shop.style.display = core.domStyle.isVertical ? "block":"none";
     }
 }
 
@@ -2971,7 +2966,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         toolBarWidth, toolBarHeight, toolBarTop, toolBarBorder,
         toolsWidth, toolsHeight,toolsMargin,toolsPMaxwidth,
         fontSize, toolbarFontSize, margin, statusBackground, toolsBackground,
-        statusCanvasWidth, statusCanvasHeight, musicBtnBottom, musicBtnRight;
+        statusCanvasWidth, statusCanvasHeight, musicBtnBottom, musicBtnRight,
+        hardWidth, statusMarginLeft;
 
     var toDraw = this.needDraw();
     var count = toDraw.length;
@@ -2981,9 +2977,9 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     var col = Math.ceil(count / 3);
     if (statusCanvas) col = statusCanvasRows;
 
-    var statusLineHeight = BASE_LINEHEIGHT * 9 / count;
+    var statusLineHeight = Math.min(BASE_LINEHEIGHT * 12 / count, BASE_LINEHEIGHT * 1.5);
     var statusLineFontSize = DEFAULT_FONT_SIZE;
-    if (count>9) statusLineFontSize = statusLineFontSize * 9 / count;
+    // if (count>9) statusLineFontSize = statusLineFontSize * 9 / count;
 
     var borderColor = (core.status.globalAttribute||core.initStatus.globalAttribute).borderColor;
 
@@ -3039,6 +3035,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             borderRight = '3px '+borderColor+' solid';
 
             margin = scale * SPACE * 2;
+            statusMarginLeft = margin;
             toolsMargin = scale * SPACE * 4;
             fontSize = DEFAULT_FONT_SIZE * scale;
             toolbarFontSize = DEFAULT_FONT_SIZE * scale;
@@ -3060,7 +3057,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
 
             statusHeight = scale*statusLineHeight * .8;
             statusLabelsLH = .8 * statusLineHeight *scale;
-            toolBarTop = scale*statusLineHeight * count + SPACE * 2;
+            toolBarTop = (DEFAULT_CANVAS_WIDTH - 135) * scale;
             toolBarHeight = canvasWidth - toolBarTop;
             toolBarBorder = '3px '+borderColor+' solid';
             toolsHeight = scale * BASE_LINEHEIGHT;
@@ -3072,7 +3069,10 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH;
 
             margin = scale * SPACE * 2;
-            toolsMargin = 2 * SPACE * scale;
+            toolsMargin = (DEFAULT_BAR_WIDTH * scale - 3*SPACE - 3 * toolsHeight)/4;
+            hardWidth = DEFAULT_BAR_WIDTH * scale - 3*SPACE - 2*toolsMargin;
+            statusMarginLeft = toolsMargin;
+
             musicBtnRight = 3;
             musicBtnBottom = 3;
         }
@@ -3097,7 +3097,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
 
         statusHeight = statusLineHeight * .8;
         statusLabelsLH = .8 * statusLineHeight;
-        toolBarTop = statusLineHeight * count + SPACE * 2;
+        // toolBarTop = statusLineHeight * count + SPACE * 2;
+        toolBarTop = DEFAULT_CANVAS_WIDTH - 135;
         toolBarHeight = DEFAULT_CANVAS_WIDTH - toolBarTop;
         toolsBackground = 'transparent';
 
@@ -3107,8 +3108,10 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         toolbarFontSize = DEFAULT_FONT_SIZE;
         statusMaxWidth = DEFAULT_BAR_WIDTH;
         toolsPMaxwidth = DEFAULT_BAR_WIDTH * .9;
-        margin = SPACE * 2;
-        toolsMargin = 2 * SPACE;
+        margin = 2 * SPACE;
+        toolsMargin = (DEFAULT_BAR_WIDTH - 3*SPACE - 3 * toolsHeight)/4;
+        hardWidth = DEFAULT_BAR_WIDTH - 3*SPACE - 2*toolsMargin;
+        statusMarginLeft = toolsMargin;
 
         musicBtnRight = (clientWidth-gameGroupWidth)/2;
         musicBtnBottom = (clientHeight-gameGroupHeight)/2 - 27;
@@ -3198,7 +3201,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 maxWidth: statusMaxWidth + unit,
                 height: statusHeight + unit,
                 margin: margin/2 + unit,
-                display: !statusCanvas?'block':'none'
+                display: !statusCanvas?'block':'none',
+                marginLeft: statusMarginLeft + unit,
             }
         },
         {
@@ -3245,10 +3249,18 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             }
         },
         {
+            imgId: 'shop',
+            rules:{
+                display: core.domStyle.isVertical && core.domStyle.showStatusBar
+            }
+        },
+        {
             id: 'hard',
             rules: {
                 lineHeight: toolsHeight + unit,
-                color: (core.status.globalAttribute||core.initStatus.globalAttribute).hardLabelColor
+                color: (core.status.globalAttribute||core.initStatus.globalAttribute).hardLabelColor,
+                width: hardWidth + unit,
+                maxWidth: hardWidth+unit
             }
         },
         {
@@ -3257,6 +3269,12 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 display: 'block',
                 right: musicBtnRight + unit,
                 bottom: musicBtnBottom + unit
+            }
+        },
+        {
+            className: 'noMarginLeft',
+            rules: {
+                marginLeft: 0
             }
         }
     ]

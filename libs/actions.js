@@ -476,7 +476,7 @@ actions.prototype.getClickLoc = function (x, y) {
 ////// 具体点击屏幕上(x,y)点时，执行的操作 //////
 actions.prototype.onclick = function (x, y, stepPostfix) {
     if (this.checkReplaying()) return;
-    console.log("Click: (" + x + "," + y + ")");
+    // console.log("Click: (" + x + "," + y + ")");
 
     stepPostfix=stepPostfix||[];
 
@@ -2711,6 +2711,7 @@ actions.prototype.exitPaint = function () {
     core.deleteCanvas('paint');
     core.ui.closePanel();
     core.statusBar.image.keyboard.style.opacity = 1;
+    core.statusBar.image.shop.style.opacity = 1;
     core.updateStatusBar();
     core.drawTip("退出绘图模式");
 }

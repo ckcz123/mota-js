@@ -476,7 +476,7 @@ actions.prototype.getClickLoc = function (x, y) {
 ////// 具体点击屏幕上(x,y)点时，执行的操作 //////
 actions.prototype.onclick = function (x, y, stepPostfix) {
     if (this.checkReplaying()) return;
-    // console.log("Click: (" + x + "," + y + ")");
+    console.log("Click: (" + x + "," + y + ")");
 
     stepPostfix=stepPostfix||[];
 
@@ -965,12 +965,12 @@ actions.prototype.clickBookDetail = function () {
 
 ////// 楼层传送器界面时的点击操作 //////
 actions.prototype.clickFly = function(x,y) {
-    if ((x==10 || x==11) && y==9) core.ui.drawFly(core.status.event.data-1);
-    if ((x==10 || x==11) && y==5) core.ui.drawFly(core.status.event.data+1);
-    if ((x==10 || x==11) && y==10) core.ui.drawFly(core.status.event.data-10);
-    if ((x==10 || x==11) && y==4) core.ui.drawFly(core.status.event.data+10);
-    if (x>=5 && x<=7 && y==12) core.ui.closePanel();
-    if (x>=0 && x<=9 && y>=3 && y<=11)
+    if ((x==12 || x==13) && y==10) core.ui.drawFly(core.status.event.data-1);
+    if ((x==12 || x==13) && y==6) core.ui.drawFly(core.status.event.data+1);
+    if ((x==12 || x==13) && y==11) core.ui.drawFly(core.status.event.data-10);
+    if ((x==12 || x==13) && y==5) core.ui.drawFly(core.status.event.data+10);
+    if (x>=6 && x<=8 && y==14) core.ui.closePanel();
+    if (x>=0 && x<=10 && y>=3 && y<=13)
         core.control.flyTo(core.status.hero.flyRange[core.status.event.data]);
     return;
 }
@@ -989,7 +989,7 @@ actions.prototype.keyUpFly = function (keycode) {
     if (keycode==71 || keycode==27 || keycode==88)
         core.ui.closePanel();
     if (keycode==13 || keycode==32 || keycode==67)
-        this.clickFly(5,5);
+        this.clickFly(6,6);
     return;
 }
 

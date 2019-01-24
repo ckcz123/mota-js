@@ -1602,25 +1602,25 @@ ui.prototype.drawBook = function (index) {
         core.setTextAlign('ui', 'center');
 
         if (enemy.specialText=='') {
-            core.fillText('ui', enemy.name, 115, 62 * i + 47, '#DDDDDD', 'bold 17px '+globalFont);
+            core.fillText('ui', enemy.name, 125, 62 * i + 47, '#DDDDDD', 'bold 17px '+globalFont);
         }
         else {
-            core.fillText('ui', enemy.name, 115, 62 * i + 40, '#DDDDDD', 'bold 17px '+globalFont);
-            core.fillText('ui', enemy.specialText, 115, 62 * i + 62, '#FF6A6A', 'bold 15px '+globalFont);
+            core.fillText('ui', enemy.name, 125, 62 * i + 40, '#DDDDDD', 'bold 17px '+globalFont);
+            core.fillText('ui', enemy.specialText, 125, 62 * i + 62, '#FF6A6A', 'bold 15px '+globalFont);
         }
         core.setTextAlign('ui', 'left');
-        core.fillText('ui', '生命', 165, 62 * i + 32, '#DDDDDD', '13px '+globalFont);
-        core.fillText('ui', core.formatBigNumber(enemy.hp||0), 195, 62 * i + 32, '#DDDDDD', 'bold 13px '+globalFont);
-        core.fillText('ui', '攻击', 275, 62 * i + 32, '#DDDDDD', '13px '+globalFont);
-        core.fillText('ui', core.formatBigNumber(enemy.atk||0), 305, 62 * i + 32, '#DDDDDD', 'bold 13px '+globalFont);
+        core.fillText('ui', '生命', 185, 62 * i + 32, '#DDDDDD', '13px '+globalFont);
+        core.fillText('ui', core.formatBigNumber(enemy.hp||0), 215, 62 * i + 32, '#DDDDDD', 'bold 13px '+globalFont);
+        core.fillText('ui', '攻击', 285, 62 * i + 32, '#DDDDDD', '13px '+globalFont);
+        core.fillText('ui', core.formatBigNumber(enemy.atk||0), 315, 62 * i + 32, '#DDDDDD', 'bold 13px '+globalFont);
         core.fillText('ui', '防御', 375, 62 * i + 32, '#DDDDDD', '13px '+globalFont);
         core.fillText('ui', core.formatBigNumber(enemy.def||0), 405, 62 * i + 32, '#DDDDDD', 'bold 13px '+globalFont);
 
-        var expOffset = 165, line_cnt=0;
+        var expOffset = 185, line_cnt=0;
         if (core.flags.enableMoney) {
             core.fillText('ui', '金币', expOffset, 62 * i + 50, '#DDDDDD', '13px '+globalFont);
             core.fillText('ui', core.formatBigNumber(enemy.money||0), expOffset + 30, 62 * i + 50, '#DDDDDD', 'bold 13px '+globalFont);
-            expOffset = 275;
+            expOffset = 285;
             line_cnt++;
         }
 
@@ -1629,7 +1629,7 @@ ui.prototype.drawBook = function (index) {
             core.setTextAlign('ui', 'left');
             core.fillText('ui', '加点', expOffset, 62 * i + 50, '#DDDDDD', '13px '+globalFont);
             core.fillText('ui', core.formatBigNumber(enemy.point||0), expOffset + 30, 62 * i + 50, '#DDDDDD', 'bold 13px '+globalFont);
-            expOffset = 275;
+            expOffset = 285;
             line_cnt++;
         }
 
@@ -1670,10 +1670,10 @@ ui.prototype.drawBook = function (index) {
 
         core.setTextAlign('ui', 'left');
 
-        core.fillText('ui', '临界', 165, 62 * i + 68, '#DDDDDD', '13px '+globalFont);
-        core.fillText('ui', core.formatBigNumber(enemy.critical||0), 195, 62 * i + 68, '#DDDDDD', 'bold 13px '+globalFont);
-        core.fillText('ui', '减伤', 275, 62 * i + 68, '#DDDDDD', '13px '+globalFont);
-        core.fillText('ui', core.formatBigNumber(enemy.criticalDamage||0), 305, 62 * i + 68, '#DDDDDD', 'bold 13px '+globalFont);
+        core.fillText('ui', '临界', 185, 62 * i + 68, '#DDDDDD', '13px '+globalFont);
+        core.fillText('ui', core.formatBigNumber(enemy.critical||0), 215, 62 * i + 68, '#DDDDDD', 'bold 13px '+globalFont);
+        core.fillText('ui', '减伤', 285, 62 * i + 68, '#DDDDDD', '13px '+globalFont);
+        core.fillText('ui', core.formatBigNumber(enemy.criticalDamage||0), 315, 62 * i + 68, '#DDDDDD', 'bold 13px '+globalFont);
         core.fillText('ui', '1防', 375, 62 * i + 68, '#DDDDDD', '13px '+globalFont);
         core.fillText('ui', core.formatBigNumber(enemy.defDamage||0), 405, 62 * i + 68, '#DDDDDD', 'bold 13px '+globalFont);
 
@@ -1835,25 +1835,25 @@ ui.prototype.drawFly = function(page) {
 
     core.clearMap('ui');
     core.setAlpha('ui', 0.85);
-    core.fillRect('ui', 0, 0, 416, 416, '#000000');
+    core.fillRect('ui', 0, 0, 480, 480, '#000000');
     core.setAlpha('ui', 1);
     core.setTextAlign('ui', 'center');
-    var globalFont = core.status.globalAttribute.font
-    core.fillText('ui', '楼层跳跃', 208, 60, '#FFFFFF', "bold 28px "+globalFont);
-    core.fillText('ui', '返回游戏', 208, 403, '#FFFFFF', "bold 15px "+globalFont)
-    core.fillText('ui', title, 356, 247, '#FFFFFF', "bold 19px "+globalFont);
+    var globalFont = core.status.globalAttribute.font;
+    core.fillText('ui', '楼层跳跃', 240, 60, '#FFFFFF', "bold 28px "+globalFont);
+    core.fillText('ui', '返回游戏', 240, 403+64, '#FFFFFF', "bold 15px "+globalFont)
+    core.fillText('ui', title, 420, 279, '#FFFFFF', "bold 19px "+globalFont);
     if (page<core.status.hero.flyRange.length-1) {
-        core.fillText('ui', '▲', 356, 247 - 64, '#FFFFFF', "17px "+globalFont);
-        core.fillText('ui', '▲', 356, 247 - 96, '#FFFFFF', "17px "+globalFont);
-        core.fillText('ui', '▲', 356, 247 - 96 - 7, '#FFFFFF', "17px "+globalFont);
+        core.fillText('ui', '▲', 420, 279 - 64, '#FFFFFF', "17px "+globalFont);
+        core.fillText('ui', '▲', 420, 279 - 96, '#FFFFFF', "17px "+globalFont);
+        core.fillText('ui', '▲', 420, 279 - 96 - 7, '#FFFFFF', "17px "+globalFont);
     }
     if (page>0) {
-        core.fillText('ui', '▼', 356, 247 + 64, '#FFFFFF', "17px "+globalFont);
-        core.fillText('ui', '▼', 356, 247 + 96, '#FFFFFF', "17px "+globalFont);
-        core.fillText('ui', '▼', 356, 247 + 96 + 7, '#FFFFFF', "17px "+globalFont);
+        core.fillText('ui', '▼', 420, 279 + 64, '#FFFFFF', "17px "+globalFont);
+        core.fillText('ui', '▼', 420, 279 + 96, '#FFFFFF', "17px "+globalFont);
+        core.fillText('ui', '▼', 420, 279 + 96 + 7, '#FFFFFF', "17px "+globalFont);
     }
-    core.strokeRect('ui', 20, 100, 273, 273, '#FFFFFF', 2);
-    this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 20, 100, 273);
+    core.strokeRect('ui', 20, 100, 273+64, 273+64, '#FFFFFF', 2);
+    this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 20, 100, 273+64);
 }
 
 ////// 绘制浏览地图界面 //////

@@ -620,8 +620,8 @@ editor_mode = function (editor) {
             }
             var width = parseInt(document.getElementById('newMapWidth').value);
             var height = parseInt(document.getElementById('newMapHeight').value);
-            if (!core.isset(width) || !core.isset(height) || width<13 || height<13 || width*height>1000) {
-                printe("新建地图的宽高都不得小于13，且宽高之积不能超过1000");
+            if (!core.isset(width) || !core.isset(height) || width<15 || height<15 || width*height>1000) {
+                printe("新建地图的宽高都不得小于15，且宽高之积不能超过1000");
                 return;
             }
 
@@ -685,8 +685,8 @@ editor_mode = function (editor) {
 
             var width = parseInt(document.getElementById('newMapsWidth').value);
             var height = parseInt(document.getElementById('newMapsHeight').value);
-            if (!core.isset(width) || !core.isset(height) || width<13 || height<13 || width*height>1000) {
-                printe("新建地图的宽高都不得小于13，且宽高之积不能超过1000");
+            if (!core.isset(width) || !core.isset(height) || width<15 || height<15 || width*height>1000) {
+                printe("新建地图的宽高都不得小于15，且宽高之积不能超过1000");
                 return;
             }
             editor_mode.onmode('');

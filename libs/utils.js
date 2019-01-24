@@ -159,11 +159,12 @@ utils.prototype.getLocalStorage = function(key, defaultValue) {
                 try {
                     return JSON.parse(output);
                 }
-                catch (ee) {
-                    // Ignore, use default value
-                }
+                catch (ee) {}
             }
-            return JSON.parse(value);
+            try {
+                return JSON.parse(value);
+            }
+            catch (ee) {}
         }
         return defaultValue;
     }
@@ -236,9 +237,13 @@ utils.prototype.getLocalForage = function (key, defaultValue, successCallback, e
                     }
                     catch (ee) {main.log(ee);}
                 }
-                if (core.isset(successCallback))
-                    successCallback(JSON.parse(value));
-                return;
+                if (core.isset(successCallback)) {
+                    try {
+                        successCallback(JSON.parse(value));
+                        return;
+                    }
+                    catch (ee) {main.log(ee);}
+                }
             }
             if (core.isset(successCallback))
                 successCallback(defaultValue);
@@ -680,7 +685,7 @@ utils.prototype.readFileContent = function (content) {
         main.log(e);
         alert(e);
     }
-    alert("不是有效的JSON文件！");
+    // alert("不是有效的JSON文件！");
 
     if (core.isset(core.platform.errorCallback))
         core.platform.errorCallback();
@@ -916,9 +921,9 @@ utils.prototype._export = function (floorIds) {
     var monsterMap = {};
 
     // map
-    var content = floorIds.length+"\n13 13\n\n";
+    var content = floorIds.length+"\n15 15\n\n";
     floorIds.forEach(function (floorId) {
-        var arr = core.maps.getMapArray(core.status.maps[floorId].blocks, 13, 13);
+        var arr = core.maps.getMapArray(core.status.maps[floorId].blocks);
         content += arr.map(function (x) {
             // check monster
             x.forEach(function (t) {

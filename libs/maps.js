@@ -226,8 +226,8 @@ maps.prototype.resizeMap = function(floorId) {
         core.canvas[cn].canvas.style.width = cwidth*core.domStyle.scale + "px";
         core.canvas[cn].canvas.style.height = cheight*core.domStyle.scale + "px";
         if(main.mode==='editor' && editor.isMobile){
-            core.canvas[cn].canvas.style.width = core.bigmap.width*32/416*96 + "vw";
-            core.canvas[cn].canvas.style.height = core.bigmap.height*32/416*96 + "vw";
+            core.canvas[cn].canvas.style.width = core.bigmap.width*32/480*96 + "vw";
+            core.canvas[cn].canvas.style.height = core.bigmap.height*32/480*96 + "vw";
         }
     });
 }
@@ -596,7 +596,7 @@ maps.prototype.drawMap = function (floorId, callback) {
     } else {
         drawEvent();
         if (core.isset(core.status.curtainColor))
-            core.fillRect('curtain',0,0,416,416,core.arrayToRGBA(core.status.curtainColor));
+            core.fillRect('curtain',0,0,480,480,core.arrayToRGBA(core.status.curtainColor));
         core.setGlobalAnimate(core.values.animateSpeed);
         core.drawHero();
         core.updateStatusBar();

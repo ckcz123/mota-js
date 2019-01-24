@@ -2836,6 +2836,7 @@ ui.prototype.drawPaint = function () {
             core.setStrokeStyle('paint', '#FF0000');
 
             core.statusBar.image.keyboard.style.opacity = 0;
+            core.statusBar.image.shop.style.opacity = 0;
 
             core.statusBar.image.book.src = core.statusBar.icons.paint.src;
             core.statusBar.image.fly.src = core.statusBar.icons.erase.src;

@@ -2056,16 +2056,9 @@ control.prototype.openQuickShop = function (need) {
 control.prototype.openKeyBoard = function (need) {
     if (core.isReplaying()) return;
 
-    if (core.platform.extendKeyboard) {
-        if (!core.checkStatus('keyBoard', need))
-            return;
-        core.ui.drawKeyBoard();
-    }
-    else {
-        if (!core.checkStatus('selectShop', need))
-            return;
-        core.ui.drawQuickShop();
-    }
+    if (!core.checkStatus('keyBoard', need))
+        return;
+    core.ui.drawKeyBoard();
 }
 
 ////// 点击保存按钮时的打开操作 //////
@@ -2729,6 +2722,7 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.image.toolbox.src = core.statusBar.icons.rewind.src;
 
         core.statusBar.image.keyboard.src = core.statusBar.icons.book.src;
+        core.statusBar.image.shop.style.opacity = 0;
 
         core.statusBar.image.save.src = core.statusBar.icons.speedDown.src;
 
@@ -2752,8 +2746,8 @@ control.prototype.updateStatusBar = function () {
 
         core.statusBar.image.toolbox.src = core.statusBar.icons.toolbox.src;
 
-        core.statusBar.image.keyboard.src =
-            core.platform.extendKeyboard ? core.statusBar.icons.keyboard.src : core.statusBar.icons.shop.src;
+        core.statusBar.image.keyboard.src = core.statusBar.icons.keyboard.src;
+        core.statusBar.image.shop.style.opacity = 1;
 
         core.statusBar.image.save.src = core.statusBar.icons.save.src;
 
@@ -2890,21 +2884,23 @@ control.prototype.setToolbarButton = function (useButton) {
 
     core.domStyle.toolbarBtn = useButton;
     if (useButton) {
-        ["book","fly","toolbox","keyboard","save","load","settings"].forEach(function (t) {
+        ["book","fly","toolbox","keyboard","shop","save","load","settings"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'none';
         });
-        ["btn1","btn2","btn3","btn4","btn5","btn6","btn7"].forEach(function (t) {
+        ["btn1","btn2","btn3","btn4","btn5","btn6","btn7","btn8"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'block';
         })
     }
     else {
-        ["btn1","btn2","btn3","btn4","btn5","btn6","btn7"].forEach(function (t) {
+        ["btn1","btn2","btn3","btn4","btn5","btn6","btn7","btn8"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'none';
         });
-        ["book","fly","toolbox","keyboard","save","load","settings"].forEach(function (t) {
+        ["book","fly","toolbox","save","load","settings"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'block';
         });
-        core.statusBar.image.keyboard.style.display = core.domStyle.isVertical ? "block":"none";
+        core.statusBar.image.keyboard.style.display
+            = core.statusBar.image.shop.style.display
+            = core.domStyle.isVertical ? "block":"none";
     }
 }
 
@@ -3033,13 +3029,13 @@ control.prototype.resize = function(clientWidth, clientHeight) {
 
             toolBarTop = statusBarHeight + canvasWidth;
             toolBarBorder = '3px '+borderColor+' solid';
-            toolsHeight = scale * BASE_LINEHEIGHT;
+            toolsHeight = scale * BASE_LINEHEIGHT * 0.95;
             toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH * .4;
             toolsBackground = (core.status.globalAttribute||core.initStatus.globalAttribute).toolsBackground;
             borderRight = '3px '+borderColor+' solid';
 
             margin = scale * SPACE * 2;
-            toolsMargin = scale * SPACE * 4;
+            toolsMargin = scale * SPACE * 3;
             fontSize = DEFAULT_FONT_SIZE * scale;
             toolbarFontSize = DEFAULT_FONT_SIZE * scale;
             musicBtnRight = 3;

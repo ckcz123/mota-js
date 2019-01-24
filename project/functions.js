@@ -127,7 +127,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.clearMap('curtain');
 	core.status.curtainColor = color;
 	if (core.isset(color)) {
-		core.fillRect('curtain',0,0,416,416,core.arrayToRGBA(color));
+		core.fillRect('curtain',0,0,480,480,core.arrayToRGBA(color));
 	}
 	// 更改天气
 	var weather = core.getFlag('__weather__', null);
@@ -1192,9 +1192,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
         "drawAbout": function() {
 	// 绘制“关于”界面
 	core.ui.closePanel();
+	core.lockControl();
 	core.status.event.id = 'about';
 
-	var left = 48, top = 36, right = 416 - 2 * left, bottom = 416 - 2 * top;
+	var left = 52, top = 68, right = 480 - 2 * left, bottom = 480 - 2 * top;
 
 	core.setAlpha('ui', 0.85);
 	core.fillRect('ui', left, top, right, bottom, '#000000');
@@ -1281,7 +1282,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		var ctx = core.getContextByName(name);
 		if (ctx == null) {
 			if (typeof name == 'string')
-				ctx = core.createCanvas(name, 0, 0, 416, 416, 98);
+				ctx = core.createCanvas(name, 0, 0, 480, 480, 98);
 			else return;
 		}
 		

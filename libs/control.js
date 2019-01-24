@@ -44,12 +44,17 @@ control.prototype.setRequestAnimationFrame = function () {
         }
     }());
 
+    core.animateFrame.totalTime = Math.max(core.animateFrame.totalTime, core.getLocalStorage('totalTime', 0));
+
     var draw = function(timestamp) {
+
+        core.animateFrame.totalTime += timestamp - core.animateFrame.totalTimeStart;
+        core.animateFrame.totalTimeStart = timestamp;
 
         // move time
         if (core.isPlaying() && core.isset(core.status) && core.isset(core.status.hero)
             && core.isset(core.status.hero.statistics)) {
-            core.status.hero.statistics.totalTime += timestamp-(core.status.hero.statistics.start||timestamp);
+            core.status.hero.statistics.totalTime = core.animateFrame.totalTime;
             core.status.hero.statistics.currTime += timestamp-(core.status.hero.statistics.start||timestamp);
             core.status.hero.statistics.start=timestamp;
         }
@@ -380,11 +385,7 @@ control.prototype.clearStatus = function() {
 ////// 重置游戏状态和初始数据 //////
 control.prototype.resetStatus = function(hero, hard, floorId, route, maps, values) {
 
-    var totalTime=0;
-    if (core.isset(core.status) && core.isset(core.status.hero)
-        && core.isset(core.status.hero.statistics) && core.isset(route)) {
-        totalTime=core.status.hero.statistics.totalTime;
-    }
+    var totalTime = core.animateFrame.totalTime;
 
     // 清除游戏数据
     core.clearStatus();
@@ -417,7 +418,8 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
             'moveDirectly': 0,
             'ignoreSteps': 0,
         }
-    core.status.hero.statistics.totalTime = Math.max(core.status.hero.statistics.totalTime, totalTime);
+    core.status.hero.statistics.totalTime = core.animateFrame.totalTime =
+        Math.max(core.status.hero.statistics.totalTime, core.animateFrame.totalTime);
     core.status.hero.statistics.start = null;
 
     core.status.hard = hard;
@@ -2054,16 +2056,9 @@ control.prototype.openQuickShop = function (need) {
 control.prototype.openKeyBoard = function (need) {
     if (core.isReplaying()) return;
 
-    if (core.platform.extendKeyboard) {
-        if (!core.checkStatus('keyBoard', need))
-            return;
-        core.ui.drawKeyBoard();
-    }
-    else {
-        if (!core.checkStatus('selectShop', need))
-            return;
-        core.ui.drawQuickShop();
-    }
+    if (!core.checkStatus('keyBoard', need))
+        return;
+    core.ui.drawKeyBoard();
 }
 
 ////// 点击保存按钮时的打开操作 //////
@@ -2139,6 +2134,8 @@ control.prototype.autosave = function (removeLast) {
 
 /////// 实际进行自动存档 //////
 control.prototype.checkAutosave = function () {
+    core.setLocalStorage('totalTime', core.animateFrame.totalTime);
+
     if (core.saves.autosave.data == null || !core.saves.autosave.updated) return;
     core.saves.autosave.updated = false;
     core.setLocalForage("autoSave", core.saves.autosave.data);
@@ -2725,6 +2722,7 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.image.toolbox.src = core.statusBar.icons.rewind.src;
 
         core.statusBar.image.keyboard.src = core.statusBar.icons.book.src;
+        core.statusBar.image.shop.style.opacity = 0;
 
         core.statusBar.image.save.src = core.statusBar.icons.speedDown.src;
 
@@ -2748,8 +2746,8 @@ control.prototype.updateStatusBar = function () {
 
         core.statusBar.image.toolbox.src = core.statusBar.icons.toolbox.src;
 
-        core.statusBar.image.keyboard.src =
-            core.platform.extendKeyboard ? core.statusBar.icons.keyboard.src : core.statusBar.icons.shop.src;
+        core.statusBar.image.keyboard.src = core.statusBar.icons.keyboard.src;
+        core.statusBar.image.shop.style.opacity = 1;
 
         core.statusBar.image.save.src = core.statusBar.icons.save.src;
 
@@ -2886,21 +2884,23 @@ control.prototype.setToolbarButton = function (useButton) {
 
     core.domStyle.toolbarBtn = useButton;
     if (useButton) {
-        ["book","fly","toolbox","keyboard","save","load","settings"].forEach(function (t) {
+        ["book","fly","toolbox","keyboard","shop","save","load","settings"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'none';
         });
-        ["btn1","btn2","btn3","btn4","btn5","btn6","btn7"].forEach(function (t) {
+        ["btn1","btn2","btn3","btn4","btn5","btn6","btn7","btn8"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'block';
         })
     }
     else {
-        ["btn1","btn2","btn3","btn4","btn5","btn6","btn7"].forEach(function (t) {
+        ["btn1","btn2","btn3","btn4","btn5","btn6","btn7","btn8"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'none';
         });
-        ["book","fly","toolbox","keyboard","save","load","settings"].forEach(function (t) {
+        ["book","fly","toolbox","save","load","settings"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'block';
         });
-        core.statusBar.image.keyboard.style.display = core.domStyle.isVertical ? "block":"none";
+        core.statusBar.image.keyboard.style.display
+            = core.statusBar.image.shop.style.display
+            = core.domStyle.isVertical ? "block":"none";
     }
 }
 
@@ -3029,13 +3029,13 @@ control.prototype.resize = function(clientWidth, clientHeight) {
 
             toolBarTop = statusBarHeight + canvasWidth;
             toolBarBorder = '3px '+borderColor+' solid';
-            toolsHeight = scale * BASE_LINEHEIGHT;
+            toolsHeight = scale * BASE_LINEHEIGHT * 0.95;
             toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH * .4;
             toolsBackground = (core.status.globalAttribute||core.initStatus.globalAttribute).toolsBackground;
             borderRight = '3px '+borderColor+' solid';
 
             margin = scale * SPACE * 2;
-            toolsMargin = scale * SPACE * 4;
+            toolsMargin = scale * SPACE * 3;
             fontSize = DEFAULT_FONT_SIZE * scale;
             toolbarFontSize = DEFAULT_FONT_SIZE * scale;
             musicBtnRight = 3;

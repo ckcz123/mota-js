@@ -28,6 +28,8 @@ function core() {
         'onDownInterval': null,
     }
     this.animateFrame = {
+        'totalTime': 0,
+        'totalTimeStart': 0,
         'globalAnimate': false,
         'globalTime': 0,
         'selectorTime': 0,

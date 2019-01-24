@@ -1005,54 +1005,54 @@ actions.prototype.clickViewMaps = function (x,y) {
     var cx = core.status.event.data.x, cy = core.status.event.data.y;
     var floorId = core.floorIds[index], mw = core.floors[floorId].width||15, mh = core.floors[floorId].height||15;
 
-    if (x==0 && y==0) {
+    if (x<=1 && y<=1) {
         core.status.event.data.damage = !core.status.event.data.damage;
         core.ui.drawMaps(index, cx, cy);
         return;
     }
-    if (x==0 && y==12) {
+    if (x<=1 && y>=13) {
         core.status.event.data.paint = !core.status.event.data.paint;
         core.ui.drawMaps(index, cx, cy);
         return;
     }
-    if (x==12 && y==0) {
+    if (x>=13 && y<=1) {
         core.status.event.data.all = !core.status.event.data.all;
         core.ui.drawMaps(index, cx, cy);
         return;
     }
 
-    if (x>=2 && x<=10 && y<=1 && mh>13) {
+    if (x>=3 && x<=11 && y<=2 && mh>15) {
         core.ui.drawMaps(index, cx, cy-1);
         return;
     }
-    if (x>=2 && x<=10 && y>=11 && mh>13) {
+    if (x>=3 && x<=11 && y>=12 && mh>15) {
         core.ui.drawMaps(index, cx, cy+1);
         return;
     }
-    if (x<=1 && y>=2 && y<=10) {
+    if (x<=2 && y>=3 && y<=11) {
         core.ui.drawMaps(index, cx-1, cy);
         return;
     }
-    if (x>=11 && y>=2 && y<=10) {
+    if (x>=12 && y>=3 && y<=11) {
         core.ui.drawMaps(index, cx+1, cy);
         return;
     }
 
-    if(y<=4 && (mh==13 || (x>=2 && x<=10))) {
+    if(y<=5 && (mh==15 || (x>=3 && x<=11))) {
         index++;
         while (index<core.floorIds.length && index!=now && core.status.maps[core.floorIds[index]].cannotViewMap)
             index++;
         if (index<core.floorIds.length)
             core.ui.drawMaps(index);
     }
-    else if (y>=8 && (mh==13 || (x>=2 && x<=10))) {
+    else if (y>=9 && (mh==15 || (x>=3 && x<=11))) {
         index--;
         while (index>=0 && index!=now && core.status.maps[core.floorIds[index]].cannotViewMap)
             index--;
         if (index>=0)
             core.ui.drawMaps(index);
     }
-    else if (x>=2 && x<=10 && y>=5 && y<=7) {
+    else if (x>=3 && x<=11 && y>=6 && y<=8) {
         core.clearMap('data');
         core.ui.closePanel();
     }
@@ -1064,12 +1064,12 @@ actions.prototype.keyDownViewMaps = function (keycode) {
 
     var floorId = core.floorIds[core.status.event.data.index], mh = core.floors[floorId].height||15;
 
-    if (keycode==38||keycode==33) this.clickViewMaps(6, 3);
-    if (keycode==40||keycode==34) this.clickViewMaps(6, 9);
-    if (keycode==87 && mh>13) this.clickViewMaps(6,0);
-    if (keycode==65) this.clickViewMaps(0,6);
-    if (keycode==83 && mh>13) this.clickViewMaps(6,12);
-    if (keycode==68) this.clickViewMaps(12,6);
+    if (keycode==38||keycode==33) this.clickViewMaps(7, 4);
+    if (keycode==40||keycode==34) this.clickViewMaps(7, 11);
+    if (keycode==87 && mh>15) this.clickViewMaps(7,1);
+    if (keycode==65) this.clickViewMaps(1,7);
+    if (keycode==83 && mh>15) this.clickViewMaps(7,13);
+    if (keycode==68) this.clickViewMaps(13,7);
     return;
 }
 

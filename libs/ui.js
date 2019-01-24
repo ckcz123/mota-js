@@ -1865,42 +1865,42 @@ ui.prototype.drawMaps = function (index, x, y) {
         core.status.event.data = null;
         core.clearLastEvent();
 
-        core.fillRect('ui', 0, 0, 416, 416, 'rgba(0,0,0,0.4)');
+        core.fillRect('ui', 0, 0, 480, 480, 'rgba(0,0,0,0.4)');
 
-        core.strokeRect('ui', 66, 2, 284, 60, "#FFD700", 4);
-        core.strokeRect('ui', 2, 66, 60, 284);
-        core.strokeRect('ui', 66, 416-62, 284, 60);
-        core.strokeRect('ui', 416-62, 66, 60, 284);
-        core.strokeRect('ui', 66, 66, 284, 92);
-        core.strokeRect('ui', 66, 32*8+2, 284, 92);
+        core.strokeRect('ui', 98, 2, 284, 92, "#FFD700", 4); // up OK
+        core.strokeRect('ui', 2, 98, 92, 284); // left ok
+        core.strokeRect('ui', 98, 480-94, 284, 92); // down ok
+        core.strokeRect('ui', 480-94, 98, 92, 284); // right ok
+        core.strokeRect('ui', 98, 98, 284, 92); // next ok
+        core.strokeRect('ui', 98, 480-6*32+2, 284, 92); // prev
         core.setTextAlign('ui', 'center');
-        core.fillText('ui', "上移地图 [W]", 208, 38, '#FFD700', '20px Arial');
-        core.fillText('ui', "下移地图 [S]", 208, 390);
+        core.fillText('ui', "上移地图 [W]", 240, 48+8, '#FFD700', '20px Arial');
+        core.fillText('ui', "下移地图 [S]", 240, 480-48+8);
 
-        core.strokeRect('ui', 2, 2, 28, 28);
-        core.fillText('ui', 'V', 16, 24);
-        core.strokeRect('ui', 2, 416-30, 28, 28);
-        core.fillText('ui', 'M', 16, 408);
-        core.strokeRect('ui', 416-30, 2, 28, 28);
-        core.fillText('ui', 'Z', 400, 24);
+        core.strokeRect('ui', 2, 2, 60, 60);
+        core.fillText('ui', 'V', 32, 40);
+        core.strokeRect('ui', 2, 480-62, 60, 60);
+        core.fillText('ui', 'M', 32, 456);
+        core.strokeRect('ui', 480-62, 2, 60, 60);
+        core.fillText('ui', 'Z', 448, 40);
 
-        var top = 150;
-        core.fillText('ui', "左", 32, top);
-        core.fillText('ui', "移", 32, top+32);
-        core.fillText('ui', "地", 32, top+32*2);
-        core.fillText('ui', "图", 32, top+32*3);
-        core.fillText('ui', "[A]", 32, top+32*4);
-        core.fillText('ui', "右", 384, top);
-        core.fillText('ui', "移", 384, top+32);
-        core.fillText('ui', "地", 384, top+32*2);
-        core.fillText('ui', "图", 384, top+32*3);
-        core.fillText('ui', "[D]", 384, top+32*4);
+        var top = 182;
+        core.fillText('ui', "左", 48, top);
+        core.fillText('ui', "移", 48, top+32);
+        core.fillText('ui', "地", 48, top+32*2);
+        core.fillText('ui', "图", 48, top+32*3);
+        core.fillText('ui', "[A]", 48, top+32*4);
+        core.fillText('ui', "右", 432, top);
+        core.fillText('ui', "移", 432, top+32);
+        core.fillText('ui', "地", 432, top+32*2);
+        core.fillText('ui', "图", 432, top+32*3);
+        core.fillText('ui', "[D]", 432, top+32*4);
 
-        core.fillText('ui', "前张地图 [▲ / PGUP]", 208, 64+54);
-        core.fillText('ui', "后张地图 [▼ / PGDN]", 208, 32*8+54);
+        core.fillText('ui', "前张地图 [▲ / PGUP]", 240, 3*32+48+8);
+        core.fillText('ui', "后张地图 [▼ / PGDN]", 240, 480-3*32-48+8);
 
-        core.fillText('ui', "退出 [ESC / ENTER]", 208, 208+8);
-        core.fillText('ui', "[X] 可查看怪物手册", 285, 208+40, null, '13px Arial');
+        core.fillText('ui', "退出 [ESC / ENTER]", 240, 240+8);
+        core.fillText('ui', "[X] 可查看怪物手册", 285+32, 240+38, null, '13px Arial');
 
         return;
     }
@@ -1922,25 +1922,23 @@ ui.prototype.drawMaps = function (index, x, y) {
     var floorId = core.floorIds[index], mw = core.floors[floorId].width||15, mh = core.floors[floorId].height||15;
     if (!core.isset(x)) x = parseInt(mw/2);
     if (!core.isset(y)) y = parseInt(mh/2);
-    if (x<6) x=6;
-    if (x>mw-7) x=mw-7;
-    if (y<6) y=6;
-    if (y>mh-7) y=mh-7;
+    x = core.clamp(x, 7, mw - 8);
+    y = core.clamp(y, 7, mh - 8);
 
     core.status.event.data = {"index": index, "x": x, "y": y, "damage": damage, "paint": paint, "all": all};
 
     clearTimeout(core.interval.tipAnimate);
     core.clearLastEvent();
     core.status.checkBlock.buff = {};
-    this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 0, 0, 416, x, y);
+    this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 0, 0, 480, x, y);
 
     // 绘图
     if (core.status.event.data.paint) {
-        var offsetX = core.clamp(x-6, 0, mw-13), offsetY = core.clamp(y-6, 0, mh-13);
+        var offsetX = core.clamp(x-7, 0, mw-15), offsetY = core.clamp(y-7, 0, mh-15);
         var value = core.paint[floorId];
         if (core.isset(value)) value = LZString.decompress(value).split(",");
         core.utils.decodeCanvas(value, 32*mw, 32*mh);
-        core.drawImage('ui', core.bigmap.tempCanvas.canvas, offsetX*32, offsetY*32, 416, 416, 0, 0, 416, 416);
+        core.drawImage('ui', core.bigmap.tempCanvas.canvas, offsetX*32, offsetY*32, 480, 480, 0, 0, 480, 480);
     }
 
     core.clearMap('data');
@@ -1948,7 +1946,7 @@ ui.prototype.drawMaps = function (index, x, y) {
     core.setFont('data', '16px Arial');
 
     var text = core.status.maps[floorId].title;
-    if (!all && (mw>13 || mh>13)) text+=" ["+(x-6)+","+(y-6)+"]";
+    if (!all && (mw>15 || mh>15)) text+=" ["+(x-7)+","+(y-7)+"]";
     var textX = 16, textY = 18, width = textX + core.calWidth('data', text) + 16, height = 42;
     core.fillRect('data', 5, 5, width, height, 'rgba(0,0,0,0.4)');
     core.fillText('data', text, textX + 5, textY + 15, 'rgba(255,255,255,0.6)');
@@ -2520,24 +2518,24 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
     // 如果是浏览地图的全模式
     if (core.status.event.id=='viewMaps' && (core.status.event.data||{}).all) {
         if (tempWidth<=tempHeight) {
-            var realHeight = 416, realWidth = realHeight * tempWidth / tempHeight;
-            var side = (416 - realWidth) / 2;
+            var realHeight = 480, realWidth = realHeight * tempWidth / tempHeight;
+            var side = (480 - realWidth) / 2;
             core.fillRect(canvas, 0, 0, side, realHeight, '#000000');
-            core.fillRect(canvas, 416-side, 0, side, realHeight);
+            core.fillRect(canvas, 480-side, 0, side, realHeight);
             ctx.drawImage(tempCanvas.canvas, 0, 0, tempWidth, tempHeight, side, 0, realWidth, realHeight);
         }
         else {
-            var realWidth = 416, realHeight = realWidth * tempHeight / tempWidth;
-            var side = (416 - realHeight) / 2;
+            var realWidth = 480, realHeight = realWidth * tempHeight / tempWidth;
+            var side = (480 - realHeight) / 2;
             core.fillRect(canvas, 0, 0, realWidth, side, '#000000');
             core.fillRect(canvas, 0, 416-side, realWidth, side);
             ctx.drawImage(tempCanvas.canvas, 0, 0, tempWidth, tempHeight, 0, side, realWidth, realHeight);
         }
     }
     else {
-        var offsetX = core.clamp(centerX-6, 0, mw-13), offsetY = core.clamp(centerY-6, 0, mh-13);
+        var offsetX = core.clamp(centerX-7, 0, mw-15), offsetY = core.clamp(centerY-7, 0, mh-15);
         // offsetX~offsetX+12; offsetY~offsetY+12
-        ctx.drawImage(tempCanvas.canvas, offsetX*32, offsetY*32, 416, 416, x, y, size, size);
+        ctx.drawImage(tempCanvas.canvas, offsetX*32, offsetY*32, 480, 480, x, y, size, size);
     }
 }
 

@@ -8,8 +8,8 @@ main.floors.sample1=
 "defaultGround": "grass",
 "images": [
     [
-        0,
-        0,
+        1,
+        1,
         "bg.jpg",
         false
     ]

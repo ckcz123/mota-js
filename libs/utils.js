@@ -226,25 +226,22 @@ utils.prototype.getLocalForage = function (key, defaultValue, successCallback, e
             if (core.isset(errorCallback)) errorCallback(err);
         }
         else {
+            if (!core.isset(successCallback)) return;
             if (core.isset(value)) {
-                var output = LZString.decompress(value);
-                if (core.isset(output) && output.length>0) {
-                    try {
-                        if (core.isset(successCallback))
-                            successCallback(JSON.parse(output));
-                        return;
-                    }
-                    catch (ee) {main.log(ee);}
-                }
                 try {
-                    if (core.isset(successCallback))
-                        successCallback(JSON.parse(value));
+                    var output = LZString.decompress(value);
+                    if (core.isset(output) && output.length>0) {
+                        try {
+                            successCallback(JSON.parse(output));
+                            return;
+                        } catch (ee) {main.log(ee);}
+                    }
+                    successCallback(JSON.parse(value));
                     return;
                 }
-                catch (ee) {main.log(ee);}
+                catch (e) {main.log(e);}
             }
-            if (core.isset(successCallback))
-                successCallback(defaultValue);
+            successCallback(defaultValue);
         }
     })
 }

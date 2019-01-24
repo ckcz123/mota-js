@@ -1236,7 +1236,7 @@ ui.prototype.drawCursor = function () {
 ui.prototype.drawBook = function (index) {
     var floorId = core.floorIds[(core.status.event.ui||{}).index] || core.status.floorId;
     var enemys = core.enemys.getCurrentEnemys(floorId);
-    
+
     core.clearLastEvent();
     core.clearMap('data');
 
@@ -1659,13 +1659,13 @@ ui.prototype.drawToolbox = function(index) {
     // 处理页数
     var toolsPage = core.status.event.data.toolsPage;
     var constantsPage = core.status.event.data.constantsPage;
-    var toolsTotalPage = Math.ceil(tools.length/12);
-    var constantsTotalPage = Math.ceil(constants.length/12);
+    var toolsTotalPage = Math.ceil(tools.length/14);
+    var constantsTotalPage = Math.ceil(constants.length/14);
 
     // 处理index
     if (!core.isset(index)) {
         if (tools.length>0) index=0;
-        else if (constants.length>0) index=12;
+        else if (constants.length>0) index=14;
         else index=0;
     }
     core.status.event.selection=index;
@@ -1673,13 +1673,13 @@ ui.prototype.drawToolbox = function(index) {
     // 确认选择对象
     var select;
     var selectId;
-    if (index<12) {
-        select = index + (toolsPage-1)*12;
+    if (index<14) {
+        select = index + (toolsPage-1)*14;
         if (select>=tools.length) select=Math.max(0, tools.length-1);
         selectId = tools[select];
     }
     else {
-        select = index%12 + (constantsPage-1)*12;
+        select = index%14 + (constantsPage-1)*14;
         if (select>=constants.length) select=Math.max(0, constants.length-1);
         selectId = constants[select];
     }
@@ -1689,7 +1689,7 @@ ui.prototype.drawToolbox = function(index) {
     // 绘制
     core.clearMap('ui');
     core.setAlpha('ui', 0.85);
-    core.fillRect('ui', 0, 0, 416, 416, '#000000');
+    core.fillRect('ui', 0, 0, 480, 480, '#000000');
     core.setAlpha('ui', 1);
     core.setFillStyle('ui', '#DDDDDD');
     core.setStrokeStyle('ui', '#DDDDDD');
@@ -1700,32 +1700,32 @@ ui.prototype.drawToolbox = function(index) {
 
     // 画线
     core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(0, 130-ydelta);
-    core.canvas.ui.lineTo(416, 130-ydelta);
+    core.canvas.ui.moveTo(0, 130+64-ydelta);
+    core.canvas.ui.lineTo(480, 130+64-ydelta);
     core.canvas.ui.stroke();
     core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(416,129-ydelta);
-    core.canvas.ui.lineTo(416,105-ydelta);
-    core.canvas.ui.lineTo(416-72,105-ydelta);
-    core.canvas.ui.lineTo(416-102,129-ydelta);
+    core.canvas.ui.moveTo(480,129+64-ydelta);
+    core.canvas.ui.lineTo(480,105+64-ydelta);
+    core.canvas.ui.lineTo(480-72,105+64-ydelta);
+    core.canvas.ui.lineTo(480-102,129+64-ydelta);
     core.canvas.ui.fill();
 
     core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(0, 290-ydelta);
-    core.canvas.ui.lineTo(416, 290-ydelta);
+    core.canvas.ui.moveTo(0, 290+64-ydelta);
+    core.canvas.ui.lineTo(480, 290+64-ydelta);
     core.canvas.ui.stroke();
     core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(416,289-ydelta);
-    core.canvas.ui.lineTo(416,265-ydelta);
-    core.canvas.ui.lineTo(416-72,265-ydelta);
-    core.canvas.ui.lineTo(416-102,289-ydelta);
+    core.canvas.ui.moveTo(480,289+64-ydelta);
+    core.canvas.ui.lineTo(480,265+64-ydelta);
+    core.canvas.ui.lineTo(480-72,265+64-ydelta);
+    core.canvas.ui.lineTo(480-102,289+64-ydelta);
     core.canvas.ui.fill();
 
     // 文字
     core.setTextAlign('ui', 'right');
     var globalFont = core.status.globalAttribute.font;
-    core.fillText('ui', "消耗道具", 411, 124-ydelta, '#333333', "bold 16px "+globalFont);
-    core.fillText('ui', "永久道具", 411, 284-ydelta);
+    core.fillText('ui', "消耗道具", 411+64, 124+64-ydelta, '#333333', "bold 16px "+globalFont);
+    core.fillText('ui', "永久道具", 411+64, 284+64-ydelta);
 
     core.setTextAlign('ui', 'left');
     // 描述
@@ -1735,20 +1735,19 @@ ui.prototype.drawToolbox = function(index) {
 
         var text = item.text||"该道具暂无描述。";
         try {
-            // 检查能否eval
-            text = eval(text);
+            text = core.replaceText(text);
         } catch (e) {}
 
-        var lines = core.splitLines('ui', text, 406, '17px '+globalFont);
+        var lines = core.splitLines('ui', text, 465, '17px '+globalFont);
 
-        core.fillText('ui', lines[0], 10, 62, '#FFFFFF', '17px '+globalFont);
-
-        if (lines.length==1) {
-            core.fillText('ui', '<继续点击该道具即可进行使用>', 10, 89, '#CCCCCC', '14px '+globalFont);
+        var curr = 62, line_height = 25;
+        for (var i=0;i<lines.length;++i) {
+            core.fillText('ui', lines[i], 10, curr, '#FFFFFF', '17px '+globalFont);
+            curr += line_height;
+            if (curr>=130+64-ydelta) break;
         }
-        else {
-            var leftText = text.substring(lines[0].length);
-            core.fillText('ui', leftText, 10, 89, '#FFFFFF', '17px '+globalFont);
+        if (curr < 130+64-ydelta) {
+            core.fillText('ui', '<继续点击该道具即可进行使用>', 10, curr, '#CCCCCC', '14px '+globalFont);
         }
     }
 
@@ -1756,41 +1755,40 @@ ui.prototype.drawToolbox = function(index) {
     var images = core.material.images.items;
 
     // 消耗道具
-    for (var i=0;i<12;i++) {
-        var tool=tools[12*(toolsPage-1)+i];
+    for (var i=0;i<14;i++) {
+        var tool=tools[14*(toolsPage-1)+i];
         if (!core.isset(tool)) break;
-        var yoffset = 144 + Math.floor(i/6)*54 + 5 - ydelta;
+        var yoffset = 144+64 + Math.floor(i/7)*54 + 5 - ydelta;
         var icon=core.material.icons.items[tool];
-        core.drawImage('ui', images, 0, icon*32, 32, 32, 16*(4*(i%6)+1)+5, yoffset, 32, 32)
+        core.drawImage('ui', images, 0, icon*32, 32, 32, 16*(4*(i%7)+1)+5, yoffset, 32, 32)
         // 个数
-        core.fillText('ui', core.itemCount(tool), 16*(4*(i%6)+1)+40, yoffset+33, '#FFFFFF', "bold 14px "+globalFont);
+        core.fillText('ui', core.itemCount(tool), 16*(4*(i%7)+1)+40, yoffset+33, '#FFFFFF', "bold 14px "+globalFont);
         if (selectId == tool)
-            core.strokeRect('ui', 16*(4*(i%6)+1)+1, yoffset-4, 40, 40, '#FFD700');
+            core.strokeRect('ui', 16*(4*(i%7)+1)+1, yoffset-4, 40, 40, '#FFD700');
     }
 
     // 永久道具
-    for (var i=0;i<12;i++) {
-        var constant=constants[12*(constantsPage-1)+i];
+    for (var i=0;i<14;i++) {
+        var constant=constants[14*(constantsPage-1)+i];
         if (!core.isset(constant)) break;
-        var yoffset = 304+Math.floor(i/6)*54+5-ydelta;
+        var yoffset = 304+64+Math.floor(i/7)*54+5-ydelta;
         var icon=core.material.icons.items[constant];
-        core.drawImage('ui', images, 0, icon*32, 32, 32, 16*(4*(i%6)+1)+5, yoffset, 32, 32)
+        core.drawImage('ui', images, 0, icon*32, 32, 32, 16*(4*(i%7)+1)+5, yoffset, 32, 32)
         if (selectId == constant)
-            core.strokeRect('ui', 16*(4*(i%6)+1)+1, yoffset-4, 40, 40, '#FFD700');
+            core.strokeRect('ui', 16*(4*(i%7)+1)+1, yoffset-4, 40, 40, '#FFD700');
     }
 
     // 分页
-    this.drawPagination(toolsPage, toolsTotalPage, 7);
-    this.drawPagination(constantsPage, constantsTotalPage, 12);
+    this.drawPagination(toolsPage, toolsTotalPage, 9);
+    this.drawPagination(constantsPage, constantsTotalPage);
 
     core.setTextAlign('ui', 'center');
 
     // 装备栏
     // if (core.flags.equipment)
-    core.fillText('ui', '[装备栏]', 370, 25,'#DDDDDD', 'bold 15px '+globalFont);
-    // core.fillText('ui', '删除道具', 370, 32,'#DDDDDD', 'bold 15px '+globalFont);
+    core.fillText('ui', '[装备栏]', 370+59, 25,'#DDDDDD', 'bold 15px '+globalFont);
     // 退出
-    core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px '+globalFont);
+    core.fillText('ui', '返回游戏', 370+59, 403+64,'#DDDDDD', 'bold 15px '+globalFont);
 }
 
 ////// 绘制装备界面 //////
@@ -1806,7 +1804,7 @@ ui.prototype.drawEquipbox = function(index) {
 
     var equipEquipment = core.status.hero.equipment;
     var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
-    
+
     var page = core.status.event.data.page;
     var totalPage = Math.ceil(ownEquipment.length/12);
 
@@ -1816,23 +1814,23 @@ ui.prototype.drawEquipbox = function(index) {
         else if (ownEquipment.length>0) index=12;
         else index=0;
     }
-    if (index>=12 && ownEquipment.length==0) index = 0;
+    if (index>=14 && ownEquipment.length==0) index = 0;
     var selectId=null;
-    if (index<12) {
+    if (index<14) {
         if (index >= equipLength) index=Math.max(0, equipLength - 1);
         selectId = equipEquipment[index]||null;
     }
     else {
-        if (page == totalPage) index = Math.min(index, (ownEquipment.length+11)%12+12);
-        selectId = ownEquipment[index-12 + (page-1)*12];
+        if (page == totalPage) index = Math.min(index, (ownEquipment.length+13)%14+14);
+        selectId = ownEquipment[index-14 + (page-1)*14];
         if (!core.hasItem(selectId)) selectId=null;
     }
     core.status.event.selection=index;
     core.status.event.data.selectId=selectId;
 
-    core.clearMap('ui', 0, 0, 416, 416);
+    core.clearMap('ui', 0, 0, 480, 480);
     core.setAlpha('ui', 0.85);
-    core.fillRect('ui', 0, 0, 416, 416, '#000000');
+    core.fillRect('ui', 0, 0, 480, 480, '#000000');
     core.setAlpha('ui', 1);
     core.setFillStyle('ui', '#DDDDDD');
     core.setStrokeStyle('ui', '#DDDDDD');
@@ -1843,33 +1841,33 @@ ui.prototype.drawEquipbox = function(index) {
 
     // 画线
     core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(0, 130-ydelta);
-    core.canvas.ui.lineTo(416, 130-ydelta);
+    core.canvas.ui.moveTo(0, 130+64-ydelta);
+    core.canvas.ui.lineTo(480, 130+64-ydelta);
     core.canvas.ui.stroke();
     core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(416,129-ydelta);
-    core.canvas.ui.lineTo(416,105-ydelta);
-    core.canvas.ui.lineTo(416-72,105-ydelta);
-    core.canvas.ui.lineTo(416-102,129-ydelta);
+    core.canvas.ui.moveTo(480,129+64-ydelta);
+    core.canvas.ui.lineTo(480,105+64-ydelta);
+    core.canvas.ui.lineTo(480-72,105+64-ydelta);
+    core.canvas.ui.lineTo(480-102,129+64-ydelta);
     core.canvas.ui.fill();
 
     core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(0, 290-ydelta);
-    core.canvas.ui.lineTo(416, 290-ydelta);
+    core.canvas.ui.moveTo(0, 290+64-ydelta);
+    core.canvas.ui.lineTo(480, 290+64-ydelta);
     core.canvas.ui.stroke();
     core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(416,289-ydelta);
-    core.canvas.ui.lineTo(416,265-ydelta);
-    core.canvas.ui.lineTo(416-72,265-ydelta);
-    core.canvas.ui.lineTo(416-102,289-ydelta);
+    core.canvas.ui.moveTo(480,289+64-ydelta);
+    core.canvas.ui.lineTo(480,265+64-ydelta);
+    core.canvas.ui.lineTo(480-72,265+64-ydelta);
+    core.canvas.ui.lineTo(480-102,289+64-ydelta);
     core.canvas.ui.fill();
 
     // 文字
     core.setTextAlign('ui', 'right');
     var globalFont = core.status.globalAttribute.font;
-    core.fillText('ui', "当前装备", 411, 124-ydelta, '#333333', "bold 16px "+globalFont);
-    core.fillText('ui', "拥有装备", 411, 284-ydelta);
-    
+    core.fillText('ui', "当前装备", 411+64, 124+64-ydelta, '#333333', "bold 16px "+globalFont);
+    core.fillText('ui', "拥有装备", 411+64, 284+64-ydelta);
+
     core.setTextAlign('ui', 'left');
 
     // 描述
@@ -1887,12 +1885,16 @@ ui.prototype.drawEquipbox = function(index) {
         core.fillText('ui', equip.name + "（" + equipString + "）", 10, 32, '#FFD700', "bold 20px "+globalFont)
 
         var text = equip.text||"该装备暂无描述。";
-        var lines = core.splitLines('ui', text, 406, '17px '+globalFont);
+        var lines = core.splitLines('ui', text, 465, '17px '+globalFont);
 
-        core.fillText('ui', lines[0], 10, 62, '#FFFFFF', '17px '+globalFont);
-        
-        // 比较属性
-        if (lines.length==1) {
+        var curr = 62, line_height = 25;
+        for (var i=0;i<lines.length;++i) {
+            core.fillText('ui', lines[i], 10, curr, '#FFFFFF', '17px '+globalFont);
+            curr += line_height;
+            if (curr>=130+64-ydelta) break;
+        }
+        if (curr < 130+64-ydelta) {
+            // 比较属性
             var compare, differentMode = null;
             if (index<12) compare = core.compareEquipment(null, selectId);
             else {
@@ -1911,7 +1913,7 @@ ui.prototype.drawEquipbox = function(index) {
                 }
             }
             if (differentMode != null) {
-                core.fillText('ui', differentMode, 10, 89, '#CCCCCC', '14px '+globalFont);
+                core.fillText('ui', differentMode, 10, curr, '#CCCCCC', '14px '+globalFont);
             }
             else {
                 var drawOffset = 10;
@@ -1927,16 +1929,12 @@ ui.prototype.drawEquipbox = function(index) {
                         newValue = Math.floor(newBuff*core.getStatus(name));
                     }
                     var content = title + ' ' + nowValue + '->';
-                    core.fillText('ui', content, drawOffset, 89, '#CCCCCC', 'bold 14px '+globalFont);
+                    core.fillText('ui', content, drawOffset, curr, '#CCCCCC', 'bold 14px '+globalFont);
                     drawOffset += core.calWidth('ui', content);
-                    core.fillText('ui', newValue, drawOffset, 89, color);
+                    core.fillText('ui', newValue, drawOffset, curr, color);
                     drawOffset += core.calWidth('ui', newValue) + 15;
                 })
             }
-        }
-        else {
-            var leftText = text.substring(lines[0].length);
-            core.fillText('ui', leftText, 10, 89, '#FFFFFF', '17px '+globalFont);
         }
     }
 
@@ -1946,33 +1944,34 @@ ui.prototype.drawEquipbox = function(index) {
     // 当前装备
     for (var i = 0 ; i < equipLength ; i++) {
         var equipId = equipEquipment[i] || null;
+        var offsetx = 14*(8*(i%4)+5)+5, offsety = 144+64+Math.floor(i/4)*55+5-ydelta;
         if (core.isset(equipId)) {
             var icon = core.material.icons.items[equipId];
-            core.drawImage('ui', images, 0, icon*32, 32, 32, 16*(8*(i%3)+5)+5, 144+Math.floor(i/3)*54+5-ydelta, 32, 32);
+            core.drawImage('ui', images, 0, icon*32, 32, 32, offsetx, offsety, 32, 32);
         }
-        core.fillText('ui', allEquips[i]||"未知", 16*(8*(i%3)+1)+40, 144+Math.floor(i/3)*54+32-ydelta, '#FFFFFF', "bold 16px "+globalFont);
-        core.strokeRect('ui', 16*(8*(i%3)+5)+1, 144+Math.floor(i/3)*54+1-ydelta, 40, 40, index==i?'#FFD700':"#FFFFFF");
+        core.fillText('ui', allEquips[i]||"未知", offsetx - 20, offsety+25, '#FFFFFF', "bold 16px "+globalFont);
+        core.strokeRect('ui', offsetx-4, offsety-4, 40, 40, index==i?'#FFD700':"#FFFFFF");
     }
 
-    // 现有装备 
-    for (var i=0;i<12;i++) {
-        var ownEquip=ownEquipment[12*(page-1)+i];
+    // 现有装备
+    for (var i=0;i<14;i++) {
+        var ownEquip=ownEquipment[14*(page-1)+i];
         if (!core.isset(ownEquip)) continue;
         var icon=core.material.icons.items[ownEquip];
-        core.drawImage('ui', images, 0, icon*32, 32, 32, 16*(4*(i%6)+1)+5, 304+Math.floor(i/6)*54+5-ydelta, 32, 32)
+        core.drawImage('ui', images, 0, icon*32, 32, 32, 16*(4*(i%7)+1)+5, 304+64+Math.floor(i/7)*54+5-ydelta, 32, 32)
         // 个数
         if (core.itemCount(ownEquip)>1)
-            core.fillText('ui', core.itemCount(ownEquip), 16*(4*(i%6)+1)+40, 304+Math.floor(i/6)*54+38-ydelta, '#FFFFFF', "bold 14px "+globalFont);
-        if (index>=12 && selectId == ownEquip)
-            core.strokeRect('ui', 16*(4*(i%6)+1)+1, 304+Math.floor(i/6)*54+1-ydelta, 40, 40, '#FFD700');
+            core.fillText('ui', core.itemCount(ownEquip), 16*(4*(i%7)+1)+40, 304+64+Math.floor(i/7)*54+38-ydelta, '#FFFFFF', "bold 14px "+globalFont);
+        if (index>=14 && selectId == ownEquip)
+            core.strokeRect('ui', 16*(4*(i%7)+1)+1, 304+64+Math.floor(i/7)*54+1-ydelta, 40, 40, '#FFD700');
     }
 
-    this.drawPagination(page, totalPage, 12);
+    this.drawPagination(page, totalPage);
     // 道具栏
     core.setTextAlign('ui', 'center');
-    core.fillText('ui', '[道具栏]', 370, 25,'#DDDDDD', 'bold 15px '+globalFont);
+    core.fillText('ui', '[道具栏]', 370+59, 25,'#DDDDDD', 'bold 15px '+globalFont);
     // 退出按钮
-    core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px '+globalFont);
+    core.fillText('ui', '返回游戏', 370+59, 403+64,'#DDDDDD', 'bold 15px '+globalFont);
 }
 
 ////// 绘制存档/读档界面 //////
@@ -2202,7 +2201,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
         core.control.updateDamage(floorId, tempCanvas);
 
     var ctx = core.getContextByName(canvas);
-    if (ctx == null) return;    
+    if (ctx == null) return;
 
     // draw to canvas
     core.clearMap(canvas, x, y, size, size);

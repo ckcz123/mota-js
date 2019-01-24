@@ -1283,59 +1283,46 @@ actions.prototype.keyUpQuickShop = function (keycode) {
 ////// 工具栏界面时的点击操作 //////
 actions.prototype.clickToolbox = function(x,y) {
     // 装备栏
-    if (x>=10 && x<=12 && y==0) {
+    if (x>=12 && x<=14 && y==0) {
         core.ui.closePanel();
         core.openEquipbox();
         return;
     }
     // 返回
-    if (x>=10 && x<=12 && y==12) {
+    if (x>=12 && x<=14 && y==14) {
         core.ui.closePanel();
         return;
     }
-    /*
-    if (x>=10 && x<=12 && y<=1) {
-        if (!core.isset(core.status.event.data)) return;
-        if (!core.flags.enableDeleteItem) {
-            core.drawTip("不支持删除道具！");
-            return;
-        }
-        core.removeItem(core.status.event.data);
-        core.status.event.data = null;
-        core.ui.drawToolbox();
-        return;
-    }
-    */
     var toolsPage = core.status.event.data.toolsPage;
     var constantsPage = core.status.event.data.constantsPage;
     // 上一页
-    if (x == 3 || x == 4) {
-        if (y == 7 && toolsPage>1) {
+    if (x == 4 || x == 5) {
+        if (y == 9 && toolsPage>1) {
             core.status.event.data.toolsPage--;
             core.ui.drawToolbox(core.status.event.selection);
         }
-        if (y == 12 && constantsPage>1) {
+        if (y == 14 && constantsPage>1) {
             core.status.event.data.toolsPage--;
             core.ui.drawToolbox(core.status.event.selection);
         }
     }
     // 下一页
-    if (x == 8 || x == 9) {
-        if (y == 7 && toolsPage<Math.ceil(Object.keys(core.status.hero.items.tools).length/12)) {
+    if (x == 9 || x == 10) {
+        if (y == 9 && toolsPage<Math.ceil(Object.keys(core.status.hero.items.tools).length/14)) {
             core.status.event.data.toolsPage++;
             core.ui.drawToolbox(core.status.event.selection);
         }
-        if (y == 12 && constantsPage<Math.ceil(Object.keys(core.status.hero.items.constants).length/12)) {
+        if (y == 14 && constantsPage<Math.ceil(Object.keys(core.status.hero.items.constants).length/14)) {
             core.status.event.data.constantsPage++;
             core.ui.drawToolbox(core.status.event.selection);
         }
     }
 
     var index=parseInt(x/2);;
-    if (y==4) index+=0;
-    else if (y==6) index+=6;
-    else if (y==9) index+=12;
-    else if (y==11) index+=18;
+    if (y==6) index+=0;
+    else if (y==8) index+=7;
+    else if (y==11) index+=14;
+    else if (y==13) index+=21;
     else index =-1;
 
     if (index>=0)
@@ -1346,12 +1333,12 @@ actions.prototype.clickToolbox = function(x,y) {
 actions.prototype.clickToolboxIndex = function(index) {
     var items = null;
     var select;
-    if (index<12) {
-        select = index + 12 * (core.status.event.data.toolsPage-1);
+    if (index<14) {
+        select = index + 14 * (core.status.event.data.toolsPage-1);
         items = Object.keys(core.status.hero.items.tools).sort();
     }
     else {
-        select = index%12 + 12 * (core.status.event.data.constantsPage-1);
+        select = index%14 + 14 * (core.status.event.data.constantsPage-1);
         items = Object.keys(core.status.hero.items.constants).sort();
     }
     if (items==null) return;
@@ -1374,28 +1361,28 @@ actions.prototype.keyDownToolbox = function (keycode) {
     var index = core.status.event.selection;
     var toolsPage = core.status.event.data.toolsPage;
     var constantsPage = core.status.event.data.constantsPage;
-    var toolsTotalPage = Math.ceil(tools.length/12);
-    var constantsTotalPage = Math.ceil(constants.length/12);
-    var toolsLastIndex = toolsPage<toolsTotalPage?11:(tools.length+11)%12;
-    var constantsLastIndex = 12+(constantsPage<constantsTotalPage?11:(constants.length+11)%12);
+    var toolsTotalPage = Math.ceil(tools.length/14);
+    var constantsTotalPage = Math.ceil(constants.length/14);
+    var toolsLastIndex = toolsPage<toolsTotalPage?13:(tools.length+13)%14;
+    var constantsLastIndex = 14+(constantsPage<constantsTotalPage?13:(constants.length+13)%14);
 
     if (keycode==37) { // left
         if (index==0) { // 处理向前翻页
             if (toolsPage > 1) {
                 core.status.event.data.toolsPage--;
-                index = 11;
+                index = 13;
             }
             else return; // 第一页不向前翻
         }
-        else if (index==12) {
+        else if (index==14) {
             if (constantsPage == 1) {
                 if (toolsTotalPage==0) return;
                 core.status.event.data.toolsPage = toolsTotalPage;
-                index = (tools.length+11)%12;
+                index = (tools.length+13)%14;
             }
             else {
                 core.status.event.data.constantsPage--;
-                index = 23;
+                index = 27;
             }
         }
         else index -= 1 ;
@@ -1403,29 +1390,29 @@ actions.prototype.keyDownToolbox = function (keycode) {
         return;
     }
     if (keycode==38) { // up
-        if (index>=12&&index<=17) { // 进入tools
+        if (index>=14&&index<=20) { // 进入tools
             if (toolsTotalPage==0) return;
-            if (toolsLastIndex>=6) index = Math.min(toolsLastIndex, index-6);
-            else index = Math.min(toolsLastIndex, index-12);
+            if (toolsLastIndex>=7) index = Math.min(toolsLastIndex, index-7);
+            else index = Math.min(toolsLastIndex, index-14);
         }
-        else if (index<6) return; // 第一行没有向上
-        else index -= 6;
+        else if (index<7) return; // 第一行没有向上
+        else index -= 7;
         this.clickToolboxIndex(index);
         return;
     }
     if (keycode==39) { // right
-        if (toolsPage<toolsTotalPage && index==11) {
+        if (toolsPage<toolsTotalPage && index==13) {
             core.status.event.data.toolsPage++;
             index = 0;
         }
-        else if (constantsPage<constantsTotalPage && index==23) {
+        else if (constantsPage<constantsTotalPage && index==27) {
             core.status.event.data.constantsPage++;
-            index = 12;
+            index = 14;
         }
         else if (index == toolsLastIndex) {
             if (constantsTotalPage==0) return;
             core.status.event.data.constantsPage = 1;
-            index = 12;
+            index = 14;
         }
         else if(index==constantsLastIndex) // 一个物品无操作
             return;
@@ -1435,16 +1422,16 @@ actions.prototype.keyDownToolbox = function (keycode) {
     }
     if (keycode==40) { // down
         var nextIndex = null;
-        if (index<=5) {
-            if (toolsLastIndex > 5) nextIndex = Math.min(toolsLastIndex, index + 6);
-            else index+=6;
+        if (index<=6) {
+            if (toolsLastIndex > 6) nextIndex = Math.min(toolsLastIndex, index + 7);
+            else index+=7;
         }
-        if (nextIndex==null && index<=11) {
+        if (nextIndex==null && index<=13) {
             if (constantsTotalPage == 0) return;
-            nextIndex = Math.min(index+6, constantsLastIndex);
+            nextIndex = Math.min(index+7, constantsLastIndex);
         }
-        if (nextIndex==null && index<=17) {
-            if (constantsLastIndex > 17) nextIndex = Math.min(constantsLastIndex, index+6);
+        if (nextIndex==null && index<=20) {
+            if (constantsLastIndex > 20) nextIndex = Math.min(constantsLastIndex, index+7);
         }
         if (nextIndex!=null) {
             this.clickToolboxIndex(nextIndex);
@@ -1470,34 +1457,19 @@ actions.prototype.keyUpToolbox = function (keycode) {
         this.clickToolboxIndex(core.status.event.selection);
         return;
     }
-
-    /*
-    if (keycode==46) { // delete
-        if (!core.isset(core.status.event.data)) return;
-        if (!core.flags.enableDeleteItem) {
-            core.drawTip("不支持删除道具！");
-            return;
-        }
-        core.removeItem(core.status.event.data);
-        core.status.event.data = null;
-        core.ui.drawToolbox();
-        return;
-    }
-    */
-
 }
 
 
 ////// 装备栏界面时的点击操作 //////
 actions.prototype.clickEquipbox = function(x,y) {
     // 道具栏
-    if (x>=10 && x<=12 && y==0) {
+    if (x>=12 && x<=14 && y==0) {
         core.ui.closePanel();
         core.openToolbox();
         return;
     }
     // 返回
-    if (x>=10 && x<=12 && y==12) {
+    if (x>=12 && x<=14 && y==14) {
         core.ui.closePanel();
         return;
     }
@@ -1506,7 +1478,7 @@ actions.prototype.clickEquipbox = function(x,y) {
     var page = core.status.event.data.page;
 
     // 上一页
-    if ((x == 3 || x == 4) && y == 12) {
+    if ((x == 4 || x == 5) && y == 14) {
         if (page>1) {
             core.status.event.data.page--;
             core.ui.drawEquipbox(core.status.event.selection);
@@ -1514,8 +1486,8 @@ actions.prototype.clickEquipbox = function(x,y) {
         return;
     }
     // 下一页
-    if ((x == 8 || x == 9) && y == 12) {
-        var lastPage = Math.ceil(Object.keys(core.status.hero.items.equips).length/12);
+    if ((x == 9 || x == 10) && y == 14) {
+        var lastPage = Math.ceil(Object.keys(core.status.hero.items.equips).length/14);
         if (page<lastPage) {
             core.status.event.data.page++;
             core.ui.drawEquipbox(core.status.event.selection);
@@ -1523,32 +1495,35 @@ actions.prototype.clickEquipbox = function(x,y) {
         return;
     }
 
-    var index=parseInt(x/2);
-    if (y==4) index+=0;
-    else if (y==6) index+=6;
-    else if (y==9) index+=12;
-    else if (y==11) index+=18;
-    else index=-1;
+    var index = -1;
+    if (y==6 || y==8) {
+        if (x==2 || x==3) index = (y-6)*2 + 0;
+        if (x==5 || x==6) index = (y-6)*2 + 1;
+        if (x==9 || x==10) index = (y-6)*2 + 2;
+        if (x==13) index = (y-6)*2 + 3;
+    }
+    else if (y==11 || y==13) {
+        index = parseInt(x/2) + 14 + (y-11)/2*7;
+    }
 
     if (index>=0) {
-        if (index<12) index = parseInt(index/2);
         this.clickEquipboxIndex(index);
     }
 }
 
 ////// 选择装备栏界面中某个Index后的操作 //////
 actions.prototype.clickEquipboxIndex = function(index) {
-    if (index<6) {
+    if (index<8) {
         if (index>=core.status.globalAttribute.equipName.length) return;
         if (index==core.status.event.selection && core.isset(core.status.hero.equipment[index])) {
             core.unloadEquip(index);
             core.status.route.push("unEquip:"+index);
         }
     }
-    else if (index>=12) {
+    else if (index>=14) {
         var equips = Object.keys(core.status.hero.items.equips||{}).sort();
         if (index==core.status.event.selection) {
-            var equipId = equips[index-12 + (core.status.event.data.page-1)*12];
+            var equipId = equips[index-14 + (core.status.event.data.page-1)*14];
             core.loadEquip(equipId);
             core.status.route.push("equip:"+equipId);
         }
@@ -1564,15 +1539,15 @@ actions.prototype.keyDownEquipbox = function (keycode) {
     var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
     var index = core.status.event.selection;
     var page = core.status.event.data.page;
-    var totalPage = Math.ceil(ownEquipment.length/12);
-    var totalLastIndex = 12+(page<totalPage?11:(ownEquipment.length+11)%12);
+    var totalPage = Math.ceil(ownEquipment.length/14);
+    var totalLastIndex = 14+(page<totalPage?13:(ownEquipment.length+13)%14);
 
     if (keycode==37) { // left
         if (index==0) return;
-        if (index==12) {
+        if (index==14) {
             if (page > 1) {
                 core.status.event.data.page--;
-                index = 23;
+                index = 27;
             }
             else if (page == 1)
                 index = equipCapacity - 1;
@@ -1583,25 +1558,25 @@ actions.prototype.keyDownEquipbox = function (keycode) {
         return;
     }
     if (keycode==38) { // up
-        if (index<3) return;
-        else if (index<6) index -= 3;
-        else if (index < 18) {
-            index = parseInt((index-12)/2);
-            if (equipCapacity>3) index = Math.min(equipCapacity-1, index + 3);
+        if (index<4) return;
+        else if (index<8) index -= 4;
+        else if (index < 21) {
+            index = parseInt((index-14)/2);
+            if (equipCapacity>4) index = Math.min(equipCapacity-1, index + 4);
             else index = Math.min(equipCapacity-1, index);
         }
-        else index -= 6;
+        else index -= 7;
         this.clickEquipboxIndex(index);
         return;
     }
     if (keycode==39) { // right
-        if (page<totalPage && index==23) {
+        if (page<totalPage && index==27) {
             core.status.event.data.page++;
-            index = 12;
+            index = 14;
         }
         else if (index==equipCapacity-1) {
             if (totalPage==0) return;
-            index = 12;
+            index = 14;
         }
         else if (index==totalLastIndex)
             return;
@@ -1610,19 +1585,19 @@ actions.prototype.keyDownEquipbox = function (keycode) {
         return;
     }
     if (keycode==40) { // down
-        if (index<3) {
-            if (equipCapacity>3) index = Math.min(index+3, equipCapacity-1);
+        if (index<4) {
+            if (equipCapacity>4) index = Math.min(index+4, equipCapacity-1);
             else {
                 if (totalPage == 0) return;
-                index = Math.min(2*index+1+12, totalLastIndex);
+                index = Math.min(2*index+1+14, totalLastIndex);
             }
         }
-        else if (index < 6) {
+        else if (index < 8) {
             if (totalPage == 0) return;
-            index = Math.min(2*(index-3)+1+12, totalLastIndex);
+            index = Math.min(2*(index-4)+1+14, totalLastIndex);
         }
-        else if (index < 18)
-            index = Math.min(index+6, totalLastIndex);
+        else if (index < 21)
+            index = Math.min(index+7, totalLastIndex);
         else return;
         this.clickEquipboxIndex(index);
         return;

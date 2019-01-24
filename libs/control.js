@@ -1804,12 +1804,12 @@ control.prototype.replay = function () {
                 var constants = Object.keys(core.status.hero.items.constants).sort();
                 var index=-1;
                 if ((index=tools.indexOf(itemId))>=0) {
-                    core.status.event.data = {"toolsPage":Math.floor(index/12)+1, "constantsPage":1, "selectId":null};
-                    index = index%12;
+                    core.status.event.data = {"toolsPage":Math.floor(index/14)+1, "constantsPage":1, "selectId":null};
+                    index = index%14;
                 }
                 else if ((index=constants.indexOf(itemId))>=0) {
-                    core.status.event.data = {"toolsPage":1, "constantsPage":Math.floor(index/12)+1, "selectId":null};
-                    index = index%12+12;
+                    core.status.event.data = {"toolsPage":1, "constantsPage":Math.floor(index/14)+1, "selectId":null};
+                    index = index%14+14;
                 }
                 if (index>=0) {
                     core.ui.drawToolbox(index);
@@ -1844,8 +1844,8 @@ control.prototype.replay = function () {
         var index = ownEquipment.indexOf(equipId);
         if (index>=0) {
             core.status.route.push(action);
-            core.status.event.data = {"page":Math.floor(index/12)+1, "selectId":null};
-            index = index%12+12;
+            core.status.event.data = {"page":Math.floor(index/14)+1, "selectId":null};
+            index = index%14+14;
             core.ui.drawEquipbox(index);
             setTimeout(function () {
                 core.ui.closePanel();

@@ -1200,7 +1200,7 @@ events.prototype.doAction = function() {
             core.timeout.sleepTimeout = setTimeout(function() {
                 core.timeout.sleepTimeout = null;
                 core.events.doAction();
-            }, core.isReplaying()?20:data.time);
+            }, core.isReplaying()?Math.min(data.time, 20):data.time);
             break;
         case "wait":
             if (core.isReplaying()) {

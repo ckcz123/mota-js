@@ -373,6 +373,9 @@ editor_mode = function (editor) {
             case 'functions':
                 editor.file.editFunctions(actionList, cb);
                 break;
+            case 'commonevent':
+                editor.file.editCommonEvent(actionList, cb);
+                break;
             default:
                 break;
         }
@@ -498,6 +501,19 @@ editor_mode = function (editor) {
         //只查询不修改时,内部实现不是异步的,所以可以这么写
         var tableinfo = editor_mode.objToTable_(objs[0], objs[1]);
         document.getElementById('table_e260a2be_5690_476a_b04e_dacddede78b3').innerHTML = tableinfo.HTML;
+        tableinfo.listen(tableinfo.guids);
+        if (Boolean(callback)) callback();
+    }
+
+    editor_mode.prototype.commonevent = function (callback) {
+        var objs = [];
+        editor.file.editCommonEvent([], function (objs_) {
+            objs = objs_;
+            //console.log(objs_)
+        });
+        //只查询不修改时,内部实现不是异步的,所以可以这么写
+        var tableinfo = editor_mode.objToTable_(objs[0], objs[1]);
+        document.getElementById('table_b7bf0124_99fd_4af8_ae2f_0017f04a7c7d').innerHTML = tableinfo.HTML;
         tableinfo.listen(tableinfo.guids);
         if (Boolean(callback)) callback();
     }

@@ -341,75 +341,37 @@ editor_mode = function (editor) {
     editor_mode.prototype.doActionList = function (mode, actionList) {
         if (actionList.length == 0) return;
         printf('修改中...');
+        var cb=function(objs_){
+            if (objs_.slice(-1)[0] != null) {
+                printe(objs_.slice(-1)[0]);
+                throw(objs_.slice(-1)[0])
+            }
+            ;printf('修改成功');
+        }
         switch (mode) {
             case 'loc':
-
-                editor.file.editLoc(editor_mode.pos.x, editor_mode.pos.y, actionList, function (objs_) {//console.log(objs_);
-                    if (objs_.slice(-1)[0] != null) {
-                        printe(objs_.slice(-1)[0]);
-                        throw(objs_.slice(-1)[0])
-                    }
-                    ;printf('修改成功');
+                editor.file.editLoc(editor_mode.pos.x, editor_mode.pos.y, actionList, function (objs_) {
+                    cb();
                     editor.drawPosSelection();
                 });
                 break;
             case 'enemyitem':
-
                 if (editor_mode.info.images == 'enemys' || editor_mode.info.images == 'enemy48') {
-                    editor.file.editEnemy(editor_mode.info.id, actionList, function (objs_) {//console.log(objs_);
-                        if (objs_.slice(-1)[0] != null) {
-                            printe(objs_.slice(-1)[0]);
-                            throw(objs_.slice(-1)[0])
-                        }
-                        ;printf('修改成功')
-                    });
+                    editor.file.editEnemy(editor_mode.info.id, actionList, cb);
                 } else if (editor_mode.info.images == 'items') {
-                    editor.file.editItem(editor_mode.info.id, actionList, function (objs_) {//console.log(objs_);
-                        if (objs_.slice(-1)[0] != null) {
-                            printe(objs_.slice(-1)[0]);
-                            throw(objs_.slice(-1)[0])
-                        }
-                        ;printf('修改成功')
-                    });
+                    editor.file.editItem(editor_mode.info.id, actionList, cb);
                 } else {
-                    editor.file.editMapBlocksInfo(editor_mode.info.idnum, actionList, function (objs_) {//console.log(objs_);
-                        if (objs_.slice(-1)[0] != null) {
-                            printe(objs_.slice(-1)[0]);
-                            throw(objs_.slice(-1)[0])
-                        }
-                        ;printf('修改成功');
-                    });
+                    editor.file.editMapBlocksInfo(editor_mode.info.idnum, actionList, cb);
                 }
                 break;
             case 'floor':
-
-                editor.file.editFloor(actionList, function (objs_) {//console.log(objs_);
-                    if (objs_.slice(-1)[0] != null) {
-                        printe(objs_.slice(-1)[0]);
-                        throw(objs_.slice(-1)[0])
-                    }
-                    ;printf('修改成功');
-                });
+                editor.file.editFloor(actionList, cb);
                 break;
             case 'tower':
-
-                editor.file.editTower(actionList, function (objs_) {//console.log(objs_);
-                    if (objs_.slice(-1)[0] != null) {
-                        printe(objs_.slice(-1)[0]);
-                        throw(objs_.slice(-1)[0])
-                    }
-                    ;printf('修改成功')
-                });
+                editor.file.editTower(actionList, cb);
                 break;
             case 'functions':
-
-                editor.file.editFunctions(actionList, function (objs_) {//console.log(objs_);
-                    if (objs_.slice(-1)[0] != null) {
-                        printe(objs_.slice(-1)[0]);
-                        throw(objs_.slice(-1)[0])
-                    }
-                    ;printf('修改成功')
-                });
+                editor.file.editFunctions(actionList, cb);
                 break;
             default:
                 break;

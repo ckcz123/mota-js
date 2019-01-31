@@ -23,17 +23,6 @@ editor_blockly = function () {
         {"type": "hide", "time": 500},
       ],'event'),
       MotaActionBlocks['changeFloor_m'].xmlText(),
-      //MotaActionFunctions.actionParser.parse({"type": "choices", "choices": [
-      //  {"text": "攻击+\${point}", "action": [
-      //    {"type": "setValue", "name": "status:atk", "value": "status:atk+\${point}"},
-      //  ]},
-      //  {"text": "防御+\${2*point}", "action": [
-      //    {"type": "setValue", "name": "status:def", "value": "status:def+\${2*point}"},
-      //  ]},
-      //  {"text": "生命+\${200*point}", "action": [
-      //    {"type": "setValue", "name": "status:hp", "value": "status:hp+\${200*point}"},
-      //  ]},
-      //]},'point'),
       MotaActionFunctions.actionParser.parse([{
         "id": "moneyShop1",
         "name": "贪婪之神", 
@@ -55,6 +44,7 @@ editor_blockly = function () {
       MotaActionBlocks['firstArrive_m'].xmlText(),
       MotaActionBlocks['eachArrive_m'].xmlText(),
       MotaActionBlocks['level_m'].xmlText(),
+      MotaActionBlocks['commonEvent_m'].xmlText(),
     ],
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),

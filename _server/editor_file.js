@@ -816,6 +816,39 @@ editor_file = function (editor, callback) {
 
     ////////////////////////////////////////////////////////////////////
 
+    editor_file.editCommonEvent = function (actionList, callback) {
+        /*actionList:[
+          ["change","['test']",['123']],
+        ]
+        为[]时只查询不修改
+        */
+        var data_obj = events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent;
+        if (!isset(callback)) {
+            printe('未设置callback');
+            throw('未设置callback')
+        }
+        ;
+        if (isset(actionList) && actionList.length > 0) {
+            actionList.forEach(function (value) {
+                value[1] = "['commonEvent']" + value[1];
+            });
+            saveSetting('events', actionList, function (err) {
+                callback([
+                    Object.assign({},data_obj),
+                    editor_file.eventsComment._data.commonEvent,
+                    err]);
+            });
+        } else {
+            callback([
+                Object.assign({},data_obj),
+                editor_file.eventsComment._data.commonEvent,
+                null]);
+        }
+    }
+    //callback([obj,commentObj,err:String])
+
+    ////////////////////////////////////////////////////////////////////
+
     var isset = function (val) {
         if (val == undefined || val == null) {
             return false;
@@ -977,6 +1010,17 @@ editor_file = function (editor, callback) {
                 eval("editor.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
             });
             editor_file.saveFloorFile(callback);
+            return;
+        }
+        if (file == 'events') {
+            actionList.forEach(function (value) {
+                eval("events_c12a15a8_c380_4b28_8144_256cba95f760" + value[1] + '=' + JSON.stringify(value[2]));
+            });
+            var datastr = 'var events_c12a15a8_c380_4b28_8144_256cba95f760 = \n';
+            datastr += JSON.stringify(events_c12a15a8_c380_4b28_8144_256cba95f760, null, '\t');
+            fs.writeFile('project/events.js', encode(datastr), 'base64', function (err, data) {
+                callback(err);
+            });
             return;
         }
         callback('出错了,要设置的文件名不识别');

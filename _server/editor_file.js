@@ -50,25 +50,7 @@ editor_file = function (editor, callback) {
             throw('未设置callback')
         }
         ;
-        /* var fs = editor.fs;
-        fs.readFile('project/floors/'+filename+'.js','utf-8',function(err, data){
-          if (err!=null){callback(err);return;}
-          data=data.split('=');
-          data=[data[0],data.slice(1).join('=')];
-          var varnameId = data[0].split('.').slice(-1)[0].trim();
-          var filenameId = filename.split('/').slice(-1)[0].split('\\').slice(-1)[0];
-          eval('b3917d1d_71c2_41f2_a8aa_481b215ffb99='+data[1]);
-          var floorData = b3917d1d_71c2_41f2_a8aa_481b215ffb99;
-          delete(b3917d1d_71c2_41f2_a8aa_481b215ffb99);
-          var floorId = floorData.floorId;
-          if (varnameId!=filenameId || filenameId!=floorId){
-            callback('文件名,第一行的变量名以及floorId不一致');
-            return;
-          }
-          editor.currentFloorId = floorId;
-          editor.currentFloorData = floorData;
-          callback(null)
-        }); */
+        
         editor.currentFloorId = editor.core.status.floorId;
         editor.currentFloorData = editor.core.floors[editor.currentFloorId];
     }
@@ -1000,34 +982,6 @@ editor_file = function (editor, callback) {
         callback('出错了,要设置的文件名不识别');
     }
 
-    /*
-    $select({\"values\":[\"keys\",\"items\",\"constants\",\"tools\"]})$end
-    $range(thiseval==~~thiseval &&thiseval>0)$end
-    $leaf(true)$end
-    $select({\"values\":[true]})$end
-    $select({\"values\":[false]})$end
-    $select({\"values\":[true,false]})$end
-
-    */
-
-    /*
-    所有注释中的特殊指令
-    $range(evalstr:thiseval)$end
-      限制取值范围,要求修改后的eval(evalstr)为true
-    $leaf(evalstr:thiseval)$end
-      强制指定为叶节点,如果eval(evalstr)为true
-
-    //以下几个中选一个 [
-    $select(evalstr)$end
-      渲染成<select>,选项为数组eval(evalstr)['values']
-    $input(evalstr)$end
-      渲染成<input>
-    $textarea(evalstr)$end
-      渲染成<textarea>
-    默认选项为$textarea()$end
-    // ]
-
-    */
     return editor_file;
 }
 //editor_file = editor_file(editor);

@@ -7,6 +7,7 @@ editor_file = function (editor, callback) {
         'comment': 'comment',
         'data.comment': 'dataComment',
         'functions.comment': 'functionsComment',
+        'events.comment': 'eventsComment',
     }
     for (var key in commentjs) {
         (function (key) {

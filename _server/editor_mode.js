@@ -351,7 +351,7 @@ editor_mode = function (editor) {
         switch (mode) {
             case 'loc':
                 editor.file.editLoc(editor_mode.pos.x, editor_mode.pos.y, actionList, function (objs_) {
-                    cb();
+                    cb(objs_);
                     editor.drawPosSelection();
                 });
                 break;

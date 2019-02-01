@@ -521,6 +521,14 @@ main.statusBar.image.shop.onclick = function (e) {
         main.core.openQuickShop(true);
 }
 
+////// 点击金币时也可以开启虚拟键盘 //////
+main.statusBar.image.money.onclick = function (e) {
+    e.stopPropagation();
+
+    if (main.core.isPlaying())
+        main.core.openQuickShop(true);
+}
+
 ////// 点击状态栏中的存档按钮时 //////
 main.statusBar.image.save.onclick = function (e) {
     e.stopPropagation();

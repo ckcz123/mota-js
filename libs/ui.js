@@ -1734,6 +1734,7 @@ ui.prototype.drawToolbox = function(index) {
 
         var text = item.text||"该道具暂无描述。";
         try {
+            // 检查能否eval
             text = core.replaceText(text);
         } catch (e) {}
 
@@ -1884,6 +1885,9 @@ ui.prototype.drawEquipbox = function(index) {
         core.fillText('ui', equip.name + "（" + equipString + "）", 10, 32, '#FFD700', "bold 20px "+globalFont)
 
         var text = equip.text||"该装备暂无描述。";
+        try {
+            text = core.replaceText(text);
+        } catch (e) {}
         var lines = core.splitLines('ui', text, 465, '17px '+globalFont);
 
         var curr = 62, line_height = 25;

@@ -2898,8 +2898,9 @@ control.prototype.setToolbarButton = function (useButton) {
         ["book","fly","toolbox","save","load","settings"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'block';
         });
-        core.statusBar.image.keyboard.style.display =
-            core.statusBar.image.shop.style.display = core.domStyle.isVertical ? "block":"none";
+        core.statusBar.image.keyboard.style.display
+            = core.statusBar.image.shop.style.display
+            = core.domStyle.isVertical ? "block":"none";
     }
 }
 
@@ -3029,7 +3030,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
 
             toolBarTop = statusBarHeight + canvasWidth;
             toolBarBorder = '3px '+borderColor+' solid';
-            toolsHeight = scale * BASE_LINEHEIGHT;
+            toolsHeight = scale * BASE_LINEHEIGHT * 0.95;
             toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH * .4;
             toolsBackground = (core.status.globalAttribute||core.initStatus.globalAttribute).toolsBackground;
             borderRight = '3px '+borderColor+' solid';
@@ -3037,6 +3038,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             margin = scale * SPACE * 2;
             statusMarginLeft = margin;
             toolsMargin = scale * SPACE * 4;
+
             fontSize = DEFAULT_FONT_SIZE * scale;
             toolbarFontSize = DEFAULT_FONT_SIZE * scale;
             musicBtnRight = 3;

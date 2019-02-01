@@ -901,7 +901,11 @@ events.prototype.doAction = function() {
                 var toX=core.calValue(data.loc[0], prefix), toY=core.calValue(data.loc[1], prefix);
                 var floorId = data.floorId || core.status.floorId;
                 var event = core.floors[floorId].events[toX+","+toY];
-                if (core.isset(event)) core.insertAction(event);
+                if (core.isset(event)) {
+                    if (core.isset(event.data)) event = event.data;
+                    if (typeof event == 'string' || event instanceof Array || core.isset(event.type))
+                        core.insertAction(event);
+                }
                 this.doAction();
                 break;
             }
@@ -1186,7 +1190,7 @@ events.prototype.doAction = function() {
             core.timeout.sleepTimeout = setTimeout(function() {
                 core.timeout.sleepTimeout = null;
                 core.events.doAction();
-            }, core.isReplaying()?Math.min(20, data.time):data.time);
+            }, core.isReplaying()?Math.min(data.time, 20):data.time);
             break;
         case "wait":
             if (core.isReplaying()) {

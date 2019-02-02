@@ -76,7 +76,7 @@ function main() {
         'loader', 'control', 'utils', 'items', 'icons', 'maps', 'enemys', 'events', 'actions', 'data', 'ui', 'core'
     ];
     this.pureData = [ 
-        'data', 'enemys', 'icons', 'maps', 'items', 'functions'
+        'data', 'enemys', 'icons', 'maps', 'items', 'functions', 'events'
     ];
     this.materials = [
         'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains', 'enemy48', 'npc48'

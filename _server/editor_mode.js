@@ -11,6 +11,8 @@ editor_mode = function (editor) {
 
             'map': 'left',
             'appendpic': 'left1',
+
+            'commonevent': 'left9',
         }
         this._ids = {}
         this.dom = {}

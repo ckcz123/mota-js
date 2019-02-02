@@ -1071,6 +1071,11 @@ core.prototype.unshift = function (a,b) {
     return core.utils.unshift(a,b);
 }
 
+////// 向某个数组后插入另一个数组或元素 //////
+core.prototype.push = function (a,b) {
+    return core.utils.push(a,b);
+}
+
 ////// 设置本地存储 //////
 core.prototype.setLocalStorage = function(key, value) {
     return core.utils.setLocalStorage(key, value);
@@ -1386,6 +1391,11 @@ core.prototype.doAction = function() {
 ////// 往当前事件列表之前插入一系列事件 //////
 core.prototype.insertAction = function (list, x, y, callback) {
     core.events.insertAction(list, x, y, callback);
+}
+
+////// 获得一个公共事件内容 //////
+core.prototype.getCommonEvent = function (name) {
+    return core.events.getCommonEvent(name);
 }
 
 ////// 锁定状态栏，常常用于事件处理 //////

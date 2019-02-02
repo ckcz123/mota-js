@@ -1416,6 +1416,7 @@ control.prototype.screenFlash = function (color, time, times, callback) {
 control.prototype.updateDamage = function (floorId, canvas) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
+    if (core.status.gameOver) return;
     if (!core.isset(canvas)) {
         canvas = core.canvas.damage;
         core.clearMap('damage');

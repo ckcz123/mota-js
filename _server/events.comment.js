@@ -8,19 +8,19 @@ var events_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             "_type": "object",
             "_data": function (key) {
                 var obj = {
-                    "addPoint": {
+                    "加点事件": {
                         "_leaf": true,
                         "_type": "event",
                         "_range": "thiseval instanceof Array",
                         "_event": "commonEvent",
-                        "_data": "加点事件，可以双击进入事件编辑器"
+                        "_data": "打败怪物后进行加点"
                     },
-                    "test": {
+                    "毒衰咒处理": {
                         "_leaf": true,
                         "_type": "event",
                         "_range": "thiseval instanceof Array",
                         "_event": "commonEvent",
-                        "_data": "测试事件, events.comment.js中标记了_range不能为null, 所以应该无法删除"
+                        "_data": "对毒衰咒效果进行的处理"
                     },
                 }
                 if (obj[key]) return obj[key];

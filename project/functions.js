@@ -168,21 +168,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (!core.flags.enableAddPoint || !core.isset(point) || point<=0) return [];
 
 	// 加点，返回一个choices事件
-	return [
-		{"type": "choices",
-			"choices": [
-				{"text": "攻击+"+(1*point), "action": [
-					{"type": "setValue", "name": "status:atk", "value": "status:atk+"+(1*point)}
-				]},
-				{"text": "防御+"+(2*point), "action": [
-					{"type": "setValue", "name": "status:def", "value": "status:def+"+(2*point)}
-				]},
-				{"text": "生命+"+(200*point), "action": [
-					{"type": "setValue", "name": "status:hp", "value": "status:hp+"+(200*point)}
-				]},
-			]
-		}
-	];
+	// ----- 从V2.5.4开始，移动到“公共事件-加点事件”中
+	core.setFlag('point', point); // 设置flag:point
+	return core.getCommonEvent('加点事件');
 },
         "afterBattle": function(enemyId,x,y,callback) {
 	// 战斗结束后触发的事件
@@ -236,27 +224,24 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.removeBlock(x, y);
 	}
 
-	// 毒衰咒的处理
+	// 事件的处理
+	var todo = [];
+
 	var special = enemy.special;
 	// 中毒
-	if (core.enemys.hasSpecial(special, 12) && !core.hasFlag('poison')) {
-		core.setFlag('poison', true);
+	if (core.enemys.hasSpecial(special, 12)) {
+		core.push(todo, [{"type": "setValue", "name": "flag:debuff", "value": "'poison'"}]);
+		core.push(todo, [{"type": "insert", "name": "毒衰咒处理"}]);
 	}
 	// 衰弱
-	if (core.enemys.hasSpecial(special, 13) && !core.hasFlag('weak')) {
-		core.setFlag('weak', true);
-		if (core.values.weakValue>=1) { // >=1：直接扣数值
-			core.status.hero.atk -= core.values.weakValue;
-			core.status.hero.def -= core.values.weakValue;
-		}
-		else { // <1：扣比例
-			core.setFlag("equip_atk_buff", core.getFlag("equip_atk_buff", 1) - core.values.weakValue);
-			core.setFlag("equip_def_buff", core.getFlag("equip_def_buff", 1) - core.values.weakValue);
-		}
+	if (core.enemys.hasSpecial(special, 13)) {
+		core.push(todo, [{"type": "setValue", "name": "flag:debuff", "value": "'weak'"}]);
+		core.push(todo, [{"type": "insert", "name": "毒衰咒处理"}]);
 	}
 	// 诅咒
-	if (core.enemys.hasSpecial(special, 14) && !core.hasFlag('curse')) {
-		core.setFlag('curse', true);
+	if (core.enemys.hasSpecial(special, 14)) {
+		core.push(todo, [{"type": "setValue", "name": "flag:debuff", "value": "'curse'"}]);
+		core.push(todo, [{"type": "insert", "name": "毒衰咒处理"}]);
 	}
 	// 仇恨属性：减半
 	if (core.flags.hatredDecrease && core.enemys.hasSpecial(special, 17)) {
@@ -287,30 +272,24 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.setFlag('skill', 0);
 		core.setFlag('skillName', '无');
 	}
-	
 	core.updateStatusBar();
 
-
-	// 事件的处理
-	var todo = [];
-	// 如果该点存在，且有事件 -- V2.5.4 以后阻击怪也可以有战后事件了
-	if (core.isset(x) && core.isset(y)) {
-		var event = core.floors[core.status.floorId].afterBattle[x+","+y];
-		if (core.isset(event)) {
-			// 插入事件
-			core.unshift(todo, event);
-		}
-	}
 	// 如果有加点
 	var point = core.material.enemys[enemyId].point;
-	if (core.isset(point) && point>0) {
-		core.unshift(todo, core.events.addPoint(core.material.enemys[enemyId]));
+	if (core.flags.enableAddPoint && core.isset(point) && point>0) {
+		core.push(todo, [{"type": "setValue", "name": "flag:point", "value": point}]);
+		core.push(todo, [{"type": "insert", "name": "加点事件"}]);
+	}
+
+	// 如果该点存在，且有事件 -- V2.5.4 以后阻击怪也可以有战后事件了
+	if (core.isset(x) && core.isset(y)) {
+		core.push(todo, core.floors[core.status.floorId].afterBattle[x+","+y]);
 	}
 
 	// 在这里增加其他的自定义事件需求
 	/*
 	if (enemyId=='xxx') {
-		core.unshift(todo, [
+		core.push(todo, [
 			{"type": "...", ...},
 		]);
 	}
@@ -1182,7 +1161,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		'redJewel', 'blueJewel', 'greenJewel', 'yellowJewel',
 		'redPotion', 'bluePotion', 'greenPotion', 'yellowPotion', 'superPotion',
 		'pickaxe', 'bomb', 'centerFly', 'icePickaxe', 'snow',
-        'earthquake', 'upFly', 'downFly', 'jumpShoes', 'lifeWand',
+		'earthquake', 'upFly', 'downFly', 'jumpShoes', 'lifeWand',
 		'poisonWine', 'weakWine', 'curseWine', 'superWine',
 		'sword1', 'sword2', 'sword3', 'sword4', 'sword5',
 		'shield1', 'shield2', 'shield3', 'shield4', 'shield5',

@@ -225,21 +225,29 @@ editor_mode = function (editor) {
                         editor_mode.addAction(['delete', field, undefined]);
                         editor_mode.onmode('save');//自动保存 删掉此行的话点保存按钮才会保存
                     } else {
-                        printe(field + ' : 该值不允许为null,无法删除');
+                        printe(field + ' : 该值不允许为null，无法删除');
                     }
                 }
                 var addfunc=function(){
                     editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
+
+                    var mode = document.getElementById('editModeSelect').value;
+
                     // 1.输入id
-                    var newid=prompt('请输入新项的id');
+                    var newid=prompt('请输入新项的ID（仅公共事件支持中文ID）');
                     if (newid == null || newid.length==0) {
                         return;
                     }
-                    // 2.检查id是否符合规范或与已有id重复
-                    if (!/^[a-zA-Z0-9_]+$/.test(newid)){
-                        printe('id不符合规范, 请使用大小写字母数字下划线来构成');
-                        return;
+
+                    // 检查commentEvents
+                    if (mode !== 'commonevent') {
+                        // 2.检查id是否符合规范或与已有id重复
+                        if (!/^[a-zA-Z0-9_]+$/.test(newid)){
+                            printe('id不符合规范, 请使用大小写字母数字下划线来构成');
+                            return;
+                        }
                     }
+
                     var conflict=true;
                     var basefield=field.replace(/\[[^\[]*\]$/,'');
                     if (basefield==="['main']"){
@@ -1188,11 +1196,11 @@ editor_mode = function (editor) {
         editor_mode.changeDoubleClickModeByButton=function(mode){
             ({
                 delete:function(){
-                    printf('下一次双击表格的项删除, 编辑后刷新浏览器生效 (正常模式下双击是用事件或文本编辑器编辑)；切换下拉菜单可取消。');
+                    printf('下一次双击表格的项删除，切换下拉菜单可取消；编辑后需刷新浏览器生效。');
                     editor_mode.doubleClickMode=mode;
                 },
                 add:function(){
-                    printf('下一次双击表格的项, 在同级添加新项, 编辑后刷新浏览器生效 (正常模式下双击是用事件或文本编辑器编辑)；切换下拉菜单可取消。');
+                    printf('下一次双击表格的项则在同级添加新项，切换下拉菜单可取消；编辑后需刷新浏览器生效。');
                     editor_mode.doubleClickMode=mode;
                 }
             }[mode])();

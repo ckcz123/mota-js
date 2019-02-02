@@ -117,7 +117,8 @@ editor_blockly = function () {
       MotaActionBlocks['hideBgFgMap_s'].xmlText(),
       MotaActionBlocks['setBgFgBlock_s'].xmlText(),
       MotaActionBlocks['trigger_s'].xmlText(),
-      MotaActionBlocks['insert_s'].xmlText(),
+      MotaActionBlocks['insert_1_s'].xmlText(),
+      MotaActionBlocks['insert_2_s'].xmlText(),
       MotaActionBlocks['move_s'].xmlText(),
       MotaActionBlocks['jump_s'].xmlText(),
       MotaActionBlocks['disableShop_s'].xmlText(),
@@ -597,7 +598,8 @@ function omitedcheckUpdateFunction(event) {
         'exit_s',
         'revisit_s',
         'sleep_s',
-        'setBlock_s'
+        'setBlock_s',
+        'insert_1_s'
     ]; // 最常用的15个图块
     editor_blockly.lastUsedTypeNum=15;
 

@@ -563,6 +563,9 @@ ui.prototype.drawTextBox = function(content, showAll) {
                         py=core.getHeroLoc('y');
                         ydelta = core.material.icons.hero.height-32;
                     }
+                    else if (ss[1] == 'null') {
+                        px = py = null;
+                    }
                     else if (ss.length>=3) {
                         px=parseInt(ss[1]);
                         py=parseInt(ss[2]);

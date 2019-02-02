@@ -124,6 +124,9 @@ core.insertAction(list, x, y, callback)
 x和y如果设置则覆盖"当前事件点"的坐标，callback如果设置则覆盖事件执行完毕后的回调函数。
 例如： core.insertAction(["楼层切换", {"type":"changeFloor", "floorId": "MT3"}])
 将依次显示剧情文本，并执行一个楼层切换的自定义事件。
+--------
+从V2.5.4开始提出了“公共事件”的说法，这里也可以插入一个公共事件名。
+例如：core.insertAction("毒衰咒处理") 将插入公共事件“毒衰咒处理”。
 
 
 core.changeFloor(floorId, stair, heroLoc, time, callback)    [异步]
@@ -430,6 +433,10 @@ core.events.doAction()
 执行下一个事件。此函数中将对所有自定义事件类型分别处理。
 
 
+core.events.getCommonEvent(name)
+根据名称获得一个公共事件；如果不存在对应的公共事件则返回null。
+
+
 core.events.openShop(shopId, needVisited)    [异步]
 打开一个全局商店。needVisited表示是否需要该商店已被打开过。
 
@@ -608,6 +615,10 @@ canvas为图层，text为要自动换行的内容，maxLength为每行最长像�
 
 core.utils.cropImage(image, size)
 纵向对图片进行切分（裁剪）。
+
+
+core.utils.push(a,b)
+向某个数组后插入另一个数组或元素
 
 
 core.utils.unshift(a, b)

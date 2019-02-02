@@ -236,7 +236,8 @@ action
     |   show_s
     |   hide_s
     |   trigger_s
-    |   insert_s
+    |   insert_1_s
+    |   insert_2_s
     |   revisit_s
     |   exit_s
     |   setBlock_s
@@ -599,13 +600,26 @@ var code = '{"type": "trigger", "loc": ['+PosString_0+','+PosString_1+']},\n';
 return code;
 */;
 
-insert_s
+insert_1_s
+    :   '插入公共事件' EvalString Newline
+
+
+/* insert_1_s
+tooltip : insert: 插入公共事件并执行
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=insert%ef%bc%9a%e6%8f%92%e5%85%a5%e5%85%ac%e5%85%b1%e4%ba%8b%e4%bb%b6%e6%88%96%e5%8f%a6%e4%b8%80%e4%b8%aa%e5%9c%b0%e7%82%b9%e7%9a%84%e4%ba%8b%e4%bb%b6%e5%b9%b6%e6%89%a7%e8%a1%8c
+default : ["加点事件"]
+colour : this.eventColor
+var code = '{"type": "insert", "name": "'+EvalString_0+'"},\n';
+return code;
+*/;
+
+insert_2_s
     :   '插入事件' 'x' PosString ',' 'y' PosString '楼层' IdString? Newline
 
 
-/* insert_s
+/* insert_2_s
 tooltip : insert: 立即插入另一个地点的事件执行，当前事件不会中断，事件坐标不会改变
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=insert%ef%bc%9a%e6%8f%92%e5%85%a5%e5%8f%a6%e4%b8%80%e4%b8%aa%e5%9c%b0%e7%82%b9%e7%9a%84%e4%ba%8b%e4%bb%b6
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=insert%ef%bc%9a%e6%8f%92%e5%85%a5%e5%85%ac%e5%85%b1%e4%ba%8b%e4%bb%b6%e6%88%96%e5%8f%a6%e4%b8%80%e4%b8%aa%e5%9c%b0%e7%82%b9%e7%9a%84%e4%ba%8b%e4%bb%b6%e5%b9%b6%e6%89%a7%e8%a1%8c
 default : ["0","0",""]
 colour : this.eventColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
@@ -2279,8 +2293,14 @@ ActionParser.prototype.parseAction = function() {
         data.loc[0],data.loc[1],this.next]);
       break;
     case "insert": // 强制插入另一个点的事件在当前事件列表执行，当前坐标和楼层不会改变
-      this.next = MotaActionBlocks['insert_s'].xmlText([
-        data.loc[0],data.loc[1],data.floorId||'',this.next]);
+      if (this.isset(data.name)) {
+        this.next = MotaActionBlocks['insert_1_s'].xmlText([
+          data.name, this.next]);
+      }
+      else {
+        this.next = MotaActionBlocks['insert_2_s'].xmlText([
+          data.loc[0],data.loc[1],data.floorId||'',this.next]);
+      }
       break;
     case "playSound":
       this.next = MotaActionBlocks['playSound_s'].xmlText([

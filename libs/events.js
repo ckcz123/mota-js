@@ -7,6 +7,7 @@ function events() {
 ////// 初始化 //////
 events.prototype.init = function () {
     this.eventdata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.events;
+    this.commonEvent = events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent;
     this.events = {
         'battle': function (data, core, callback) {
             // 正在执行自定义事件：不允许战斗
@@ -911,7 +912,14 @@ events.prototype.doAction = function() {
                 break;
             }
         case "insert":
-            {
+            if (core.isset(data.name)) {
+                // ----- 公共事件
+                var commonEvent = this.getCommonEvent(data.name);
+                if (core.isset(commonEvent)) {
+                    core.insertAction(commonEvent);
+                }
+            }
+            else {
                 var toX=core.calValue(data.loc[0], prefix), toY=core.calValue(data.loc[1], prefix);
                 var floorId = data.floorId || core.status.floorId;
                 var event = core.floors[floorId].events[toX+","+toY];
@@ -920,9 +928,9 @@ events.prototype.doAction = function() {
                     if (typeof event == 'string' || event instanceof Array || core.isset(event.type))
                         core.insertAction(event);
                 }
-                this.doAction();
-                break;
             }
+            this.doAction();
+            break;
         case "playSound":
             if (!core.isReplaying())
                 core.playSound(data.name);
@@ -1313,6 +1321,13 @@ events.prototype.doAction = function() {
 events.prototype.insertAction = function (action, x, y, callback) {
     if (core.hasFlag("__statistics__")) return;
 
+    // ------ 判定commonEvent
+    var commonEvent = this.getCommonEvent(action);
+    if (core.isset(commonEvent) && commonEvent instanceof Array) {
+        action = commonEvent;
+    }
+    if (!core.isset(action)) return;
+
     if (core.status.event.id != 'action') {
         this.doEvents(action, x, y, callback);
     }
@@ -1337,6 +1352,12 @@ events.prototype.recoverEvents = function (data) {
         return true;
     }
     return false;
+}
+
+////// 获得一个公共事件 //////
+events.prototype.getCommonEvent = function (name) {
+    if (!core.isset(name) || !(typeof name === 'string')) return null;
+    return this.commonEvent[name] || null;
 }
 
 ////// 获得面前的物品（轻按） //////
@@ -2041,24 +2062,16 @@ events.prototype.passNet = function (data) {
         // core.drawTip('经过血网，生命-'+core.values.lavaDamage);
     }
     if (data.event.id=='poisonNet') { // 毒网
-        if (core.hasFlag('poison')) return;
-        core.setFlag('poison', true);
+        core.setFlag('debuff', 'poison');
+        core.insertAction('毒衰咒处理');
     }
-    if (data.event.id=='weakNet') { // 衰网
-        if (core.hasFlag('weak')) return;
-        core.setFlag('weak', true);
-        if (core.values.weakValue>=1) { // >=1：直接扣数值
-            core.status.hero.atk -= core.values.weakValue;
-            core.status.hero.def -= core.values.weakValue;
-        }
-        else { // <1：扣比例
-            core.setFlag("equip_atk_buff", core.getFlag("equip_atk_buff", 1) - core.values.weakValue);
-            core.setFlag("equip_def_buff", core.getFlag("equip_def_buff", 1) - core.values.weakValue);
-        }
+    else if (data.event.id=='weakNet') { // 衰网
+        core.setFlag('debuff', 'weak');
+        core.insertAction('毒衰咒处理');
     }
-    if (data.event.id=='curseNet') { // 咒网
-        if (core.hasFlag('curse')) return;
-        core.setFlag('curse', true);
+    else if (data.event.id=='curseNet') { // 咒网
+        core.setFlag('debuff', 'curse');
+        core.insertAction('毒衰咒处理');
     }
     core.updateStatusBar();
 }

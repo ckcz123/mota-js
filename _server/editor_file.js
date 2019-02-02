@@ -7,6 +7,7 @@ editor_file = function (editor, callback) {
         'comment': 'comment',
         'data.comment': 'dataComment',
         'functions.comment': 'functionsComment',
+        'events.comment': 'eventsComment',
     }
     for (var key in commentjs) {
         (function (key) {
@@ -49,25 +50,7 @@ editor_file = function (editor, callback) {
             throw('未设置callback')
         }
         ;
-        /* var fs = editor.fs;
-        fs.readFile('project/floors/'+filename+'.js','utf-8',function(err, data){
-          if (err!=null){callback(err);return;}
-          data=data.split('=');
-          data=[data[0],data.slice(1).join('=')];
-          var varnameId = data[0].split('.').slice(-1)[0].trim();
-          var filenameId = filename.split('/').slice(-1)[0].split('\\').slice(-1)[0];
-          eval('b3917d1d_71c2_41f2_a8aa_481b215ffb99='+data[1]);
-          var floorData = b3917d1d_71c2_41f2_a8aa_481b215ffb99;
-          delete(b3917d1d_71c2_41f2_a8aa_481b215ffb99);
-          var floorId = floorData.floorId;
-          if (varnameId!=filenameId || filenameId!=floorId){
-            callback('文件名,第一行的变量名以及floorId不一致');
-            return;
-          }
-          editor.currentFloorId = floorId;
-          editor.currentFloorData = floorData;
-          callback(null)
-        }); */
+        
         editor.currentFloorId = editor.core.status.floorId;
         editor.currentFloorData = editor.core.floors[editor.currentFloorId];
     }
@@ -833,6 +816,39 @@ editor_file = function (editor, callback) {
 
     ////////////////////////////////////////////////////////////////////
 
+    editor_file.editCommonEvent = function (actionList, callback) {
+        /*actionList:[
+          ["change","['test']",['123']],
+        ]
+        为[]时只查询不修改
+        */
+        var data_obj = events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent;
+        if (!isset(callback)) {
+            printe('未设置callback');
+            throw('未设置callback')
+        }
+        ;
+        if (isset(actionList) && actionList.length > 0) {
+            actionList.forEach(function (value) {
+                value[1] = "['commonEvent']" + value[1];
+            });
+            saveSetting('events', actionList, function (err) {
+                callback([
+                    Object.assign({},data_obj),
+                    editor_file.eventsComment._data.commonEvent,
+                    err]);
+            });
+        } else {
+            callback([
+                Object.assign({},data_obj),
+                editor_file.eventsComment._data.commonEvent,
+                null]);
+        }
+    }
+    //callback([obj,commentObj,err:String])
+
+    ////////////////////////////////////////////////////////////////////
+
     var isset = function (val) {
         if (val == undefined || val == null) {
             return false;
@@ -996,37 +1012,20 @@ editor_file = function (editor, callback) {
             editor_file.saveFloorFile(callback);
             return;
         }
+        if (file == 'events') {
+            actionList.forEach(function (value) {
+                eval("events_c12a15a8_c380_4b28_8144_256cba95f760" + value[1] + '=' + JSON.stringify(value[2]));
+            });
+            var datastr = 'var events_c12a15a8_c380_4b28_8144_256cba95f760 = \n';
+            datastr += JSON.stringify(events_c12a15a8_c380_4b28_8144_256cba95f760, null, '\t');
+            fs.writeFile('project/events.js', encode(datastr), 'base64', function (err, data) {
+                callback(err);
+            });
+            return;
+        }
         callback('出错了,要设置的文件名不识别');
     }
 
-    /*
-    $select({\"values\":[\"keys\",\"items\",\"constants\",\"tools\"]})$end
-    $range(thiseval==~~thiseval &&thiseval>0)$end
-    $leaf(true)$end
-    $select({\"values\":[true]})$end
-    $select({\"values\":[false]})$end
-    $select({\"values\":[true,false]})$end
-
-    */
-
-    /*
-    所有注释中的特殊指令
-    $range(evalstr:thiseval)$end
-      限制取值范围,要求修改后的eval(evalstr)为true
-    $leaf(evalstr:thiseval)$end
-      强制指定为叶节点,如果eval(evalstr)为true
-
-    //以下几个中选一个 [
-    $select(evalstr)$end
-      渲染成<select>,选项为数组eval(evalstr)['values']
-    $input(evalstr)$end
-      渲染成<input>
-    $textarea(evalstr)$end
-      渲染成<textarea>
-    默认选项为$textarea()$end
-    // ]
-
-    */
     return editor_file;
 }
 //editor_file = editor_file(editor);

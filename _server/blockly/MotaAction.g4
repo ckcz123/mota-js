@@ -26,17 +26,6 @@ code=JSON.stringify(code,null,2).split('"data_asdfefw"').join('[\n'+action_0+']\
 return code;
 */;
 
-//加点 事件编辑器入口之一
-point_m
-    :   '加点' BGNL? Newline choicesContext+ BEND
-    
-
-/* point_m
-tooltip : 加点事件
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=%e5%8a%a0%e7%82%b9%e4%ba%8b%e4%bb%b6
-var code = '{"type": "choices", "choices": [\n'+choicesContext_0+']}\n';
-return code;
-*/;
 
 //升级 事件编辑器入口之一
 level_m
@@ -214,6 +203,18 @@ DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_
 Int_0 = (Int_0!=='')  ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0 ?'':(', "portalWithoutTrigger": false');
 var code = '{"floorId": "'+toFloorId+'"'+loc+DirectionEx_List_0+Int_0+Bool_0+' }\n';
+return code;
+*/;
+
+//commonEvent 事件编辑器入口之一
+commonEvent_m
+    :   '公共事件' BGNL? Newline action+ BEND
+
+
+/* commonEvent_m
+tooltip : 公共事件
+helpUrl : https://h5mota.com/games/template/docs/#/event
+var code = '[\n'+action_0+']\n';
 return code;
 */;
 
@@ -1959,15 +1960,6 @@ ActionParser.prototype.parse = function (obj,type) {
         obj.floorType||'floorId',obj.floorId,obj.stair||'loc',obj.loc[0],obj.loc[1],obj.direction,
         obj.time,!this.isset(obj.portalWithoutTrigger)
       ]);
-
-    case 'point':
-      if(!obj)obj={};
-      var text_choices = null;
-      for(var ii=obj.choices.length-1,choice;choice=obj.choices[ii];ii--) {
-        text_choices=MotaActionBlocks['choicesContext'].xmlText([
-          choice.text,this.parseList(choice.action),text_choices]);
-      }
-      return MotaActionBlocks['point_m'].xmlText([text_choices]);
 
     case 'level':
       if(!obj)obj={};

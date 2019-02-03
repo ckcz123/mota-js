@@ -853,7 +853,7 @@ events.prototype.doAction = function() {
                 }
                 var floorId=data.floorId || core.status.floorId;
                 if (floorId==core.status.floorId)
-                    core.openDoor(null, x, y, false, function() {
+                    core.openDoor(null, x, y, data.needKey, function() {
                         core.lockControl();
                         core.events.doAction();
                     })
@@ -1459,6 +1459,7 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
                 core.drawTip("你没有" + ((core.material.items[key]||{}).name||"钥匙"));
             else core.drawTip("无法开启此门");
             core.clearContinueAutomaticRoute();
+            if (core.isset(callback)) callback();
             return;
         }
         core.autosave(true);

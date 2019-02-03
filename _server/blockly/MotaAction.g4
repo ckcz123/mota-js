@@ -905,20 +905,21 @@ return code;
 */;
 
 openDoor_s
-    :   '开门' 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
+    :   '开门' 'x' PosString? ',' 'y' PosString? '楼层' IdString? '需要钥匙' Bool? Newline
     
 
 /* openDoor_s
 tooltip : openDoor: 开门,楼层可不填表示当前层
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=opendoor%EF%BC%9A%E5%BC%80%E9%97%A8
-default : ["","",""]
+default : ["","","",false]
 colour : this.dataColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
-var code = '{"type": "openDoor"'+floorstr+IdString_0+'},\n';
+Bool_0 = Bool_0 ? ', "needKey": true' : '';
+var code = '{"type": "openDoor"'+floorstr+IdString_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -2283,7 +2284,7 @@ ActionParser.prototype.parseAction = function() {
     case "openDoor": // 开一个门, 包括暗墙
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['openDoor_s'].xmlText([
-        data.loc[0],data.loc[1],data.floorId||'',this.next]);
+        data.loc[0],data.loc[1],data.floorId||'',data.needKey||false,this.next]);
       break;
     case "useItem": // 使用道具
       this.next = MotaActionBlocks['useItem_s'].xmlText([

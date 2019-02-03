@@ -2667,7 +2667,6 @@ control.prototype.playSound = function (sound) {
             var source = core.musicStatus.audioContext.createBufferSource();
             source.buffer = core.material.sounds[sound];
             source.connect(core.musicStatus.gainNode);
-            source.loop = true;
             var id = parseInt(Math.random()*10000000);
             source.onended = function () {
                 delete core.musicStatus.playingSounds[id];
@@ -2694,6 +2693,23 @@ control.prototype.playSound = function (sound) {
     catch (eee) {
         console.log("无法播放SE "+sound);
         main.log(eee);
+    }
+}
+
+control.prototype.stopSound = function () {
+    for (var i in core.musicStatus.playingSounds) {
+        var source = core.musicStatus.playingSounds[i];
+        try {
+            source.stop();
+        }
+        catch (e) {
+            try {
+                source.noteOff(0);
+            }
+            catch (e) {
+                main.log(e);
+            }
+        }
     }
 }
 

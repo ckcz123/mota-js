@@ -1502,6 +1502,11 @@ core.prototype.playSound = function (sound) {
     core.control.playSound(sound);
 }
 
+////// 停止所有音效 //////
+core.prototype.stopSound = function () {
+    core.control.stopSound();
+}
+
 ////// 动画显示某对象 //////
 core.prototype.show = function (obj, speed, callback) {
     core.utils.show(obj, speed, callback);

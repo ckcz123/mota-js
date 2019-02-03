@@ -899,13 +899,53 @@ events.prototype.doAction = function() {
                 var block=core.getBlock(toX, toY);
                 if (block!=null) {
                     block = block.block;
-                    if (core.isset(block.event) && block.event.trigger=='action') {
-                        // 触发
-                        core.status.event.data.list = [
-                            {"todo": core.clone(block.event.data), "total": core.clone(block.event.data), "condition": "false"}
-                        ];
+                    if (core.isset(block.event)) {
                         core.status.event.data.x=block.x;
                         core.status.event.data.y=block.y;
+                        core.status.event.data.list = [
+                            {"todo": [], "total": [], "condition": "false"}
+                        ];
+                        switch (block.event.trigger) {
+                            case "action":
+                                core.status.event.data.list = [
+                                    {"todo": core.clone(block.event.data), "total": core.clone(block.event.data), "condition": "false"}
+                                ];
+                                break;
+                            case "battle":
+                                core.events.battle(block.event.id, block.x, block.y, true, function () {
+                                    core.doAction();
+                                });
+                                return;
+                            case "openDoor":
+                                core.openDoor(block.event.id, block.x, block.y, true, function () {
+                                    core.lockControl();
+                                    core.doAction();
+                                });
+                                return;
+                            case "changeFloor":
+                                {
+                                    var heroLoc = {};
+                                    if (core.isset(block.event.data.loc))
+                                        heroLoc = {'x': block.event.data.loc[0], 'y': block.event.data.loc[1]};
+                                    if (core.isset(block.event.data.direction))
+                                        heroLoc.direction = block.event.data.direction;
+                                    core.changeFloor(block.event.data.floorId, block.event.data.stair,
+                                        heroLoc, block.event.data.time, function () {
+                                            core.lockControl();
+                                            core.doAction();
+                                        });
+                                }
+                                return;
+                            case "getItem":
+                                core.getItem(block.event.id, 1, block.x, block.y);
+                                break;
+                            case "passNet":
+                                this.passNet(block);
+                                break;
+                            case "changeLight":
+                                this.changeLight(block.x, block.y);
+                                break;
+                        }
                     }
                 }
                 this.doAction();
@@ -1469,6 +1509,7 @@ events.prototype.battle = function (id, x, y, force, callback) {
     if (!core.enemys.canBattle(id, x, y) && !force && !core.isset(core.status.event.id)) {
         core.drawTip("你打不过此怪物！");
         core.clearContinueAutomaticRoute();
+        if (core.isset(callback)) callback();
         return;
     }
 

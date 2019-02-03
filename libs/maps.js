@@ -364,15 +364,20 @@ maps.prototype.drawBlock = function (block, animate, dx, dy) {
     // none：空地
     if (block.event.id=='none') return;
 
-    var cls = block.event.cls;
+    dx = dx || 0;
+    dy = dy || 0;
+
+    // --- 在界面外的动画不绘制
+    if ((animate||0)>1 && (block.event.animate||0)>1 &&
+        (block.x * 32 + dx < core.bigmap.offsetX - 64 || block.x * 32 + dx > core.bigmap.offsetX + 416 + 32
+            || block.y * 32 + dy < core.bigmap.offsetY - 64 || block.y * 32 + dy > core.bigmap.offsetY + 416 + 32 + 16)) {
+        return;
+    }
 
     var blockInfo = this.__getBlockInfo(block);
     if (blockInfo == null) return;
     var image = blockInfo.image, x = blockInfo.bx, y = blockInfo.by, height = blockInfo.height;
     if (!blockInfo.isTileset) x = (animate||0)%(block.event.animate||1);
-
-    dx = dx || 0;
-    dy = dy || 0;
 
     if (core.isset(block.name)) {
         core.clearMap(block.name, block.x * 32, block.y * 32, 32, 32);

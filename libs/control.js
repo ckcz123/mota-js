@@ -2667,6 +2667,11 @@ control.prototype.playSound = function (sound) {
             var source = core.musicStatus.audioContext.createBufferSource();
             source.buffer = core.material.sounds[sound];
             source.connect(core.musicStatus.gainNode);
+            source.loop = true;
+            var id = parseInt(Math.random()*10000000);
+            source.onended = function () {
+                delete core.musicStatus.playingSounds[id];
+            }
             try {
                 source.start(0);
             }
@@ -2676,8 +2681,10 @@ control.prototype.playSound = function (sound) {
                 }
                 catch (ee) {
                     main.log(ee);
+                    return;
                 }
             }
+            core.musicStatus.playingSounds[id] = source;
         }
         else {
             core.material.sounds[sound].volume = core.musicStatus.volume;

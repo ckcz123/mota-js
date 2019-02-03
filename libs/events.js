@@ -959,6 +959,22 @@ events.prototype.doAction = function() {
             core.freeBgm(data.name);
             this.doAction();
             break;
+        case "stopSound":
+            for (var i in core.musicStatus.playingSounds) {
+                var source = core.musicStatus.playingSounds[i];
+                try {
+                    source.stop();
+                }
+                catch (e) {
+                    try {
+                        source.noteOff(0);
+                    }
+                    catch (e) {
+                        main.log(e);
+                    }
+                }
+            }
+            break;
         case "setVolume":
             data.value = core.clamp(parseInt(data.value)/100, 0, 1);
             core.setFlag("__volume__", data.value);

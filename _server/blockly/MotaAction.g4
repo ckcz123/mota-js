@@ -286,6 +286,7 @@ action
     |   loadBgm_s
     |   freeBgm_s
     |   playSound_s
+    |   stopSound_s
     |   setVolume_s
     |   win_s
     |   lose_s
@@ -1381,6 +1382,18 @@ var code = '{"type": "playSound", "name": "'+EvalString_0+'"},\n';
 return code;
 */;
 
+stopSound_s
+    :   '停止所有音效' Newline
+
+
+/* stopSound_s
+tooltip : stopSound: 停止所有音效
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=stopSound%ef%bc%9a%e5%81%9c%e6%ad%a2%e6%89%80%e6%9c%89%e9%9f%b3%e6%95%88
+colour : this.soundColor
+var code = '{"type": "stopSound"},\n';
+return code;
+*/;
+
 setVolume_s
     :   '设置音量' Int '渐变时间' Int? '不等待执行完毕' Bool Newline
     
@@ -2325,6 +2338,10 @@ ActionParser.prototype.parseAction = function() {
     case "freeBgm":
       this.next = MotaActionBlocks['freeBgm_s'].xmlText([
         data.name,this.next]);
+      break
+    case "stopSound":
+      this.next = MotaActionBlocks['stopSound_s'].xmlText([
+        this.next]);
       break
     case "setVolume":
       this.next = MotaActionBlocks['setVolume_s'].xmlText([

@@ -54,6 +54,7 @@ function core() {
         'soundStatus': true, // 是否播放SE
         'playingBgm': null, // 正在播放的BGM
         'gainNode': null,
+        'playingSounds': {}, // 正在播放的SE
         'volume': 1.0, // 音量
         'cachedBgms': [], // 缓存BGM内容
         'cachedBgmCount': 4, // 缓存的bgm数量

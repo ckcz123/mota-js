@@ -1306,6 +1306,12 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 
 值得注意的是，如果是额外添加进文件的音效，则需在main.js中this.sounds里加载它。
 
+### stopSound：停止所有音效
+
+使用`{"type": "stopSound"}`可以停止所有音效。
+
+这在人物对话音效时很有用。
+
 ### setVolume：设置音量
 
 使用setVolume可以设置音量大小。

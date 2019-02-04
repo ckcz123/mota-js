@@ -9,38 +9,22 @@ events.prototype.init = function () {
     this.eventdata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.events;
     this.commonEvent = events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent;
     this.events = {
-        'battle': function (data, core, callback) {
-            // 正在执行自定义事件：不允许战斗
-            if (core.status.event.id == 'action') {
-                if (core.isset(callback)) callback();
-                return;
-            }
+        'battle': function (data, callback) {
             core.battle(data.event.id, data.x, data.y);
             if (core.isset(callback))
                 callback();
         },
-        'getItem': function (data, core, callback) {
+        'getItem': function (data, callback) {
             core.getItem(data.event.id, 1, data.x, data.y);
             if (core.isset(callback))
                 callback();
         },
-        'openDoor': function (data, core, callback) {
-            // 正在执行自定义事件：不允许开门
-            if (core.status.event.id == 'action') {
-                if (core.isset(callback)) callback();
-                return;
-            }
+        'openDoor': function (data, callback) {
             core.openDoor(data.event.id, data.x, data.y, true, function () {
                 if (core.isset(callback)) callback();
-                core.replay();
             });
         },
-        'changeFloor': function (data, core, callback) {
-            // 正在执行自定义事件：不允许切换楼层
-            if (core.status.event.id == 'action') {
-                if (core.isset(callback)) callback();
-                return;
-            }
+        'changeFloor': function (data, callback) {
             var heroLoc = {};
             if (core.isset(data.event.data.loc))
                 heroLoc = {'x': data.event.data.loc[0], 'y': data.event.data.loc[1]};
@@ -50,30 +34,29 @@ events.prototype.init = function () {
             core.changeFloor(data.event.data.floorId, data.event.data.stair,
                 heroLoc, data.event.data.time, function () {
                     if (core.isset(callback)) callback();
-                    core.replay();
                 });
         },
-        'passNet': function (data, core, callback) {
+        'passNet': function (data, callback) {
             core.events.passNet(data);
             if (core.isset(callback))
                 callback();
         },
-        "changeLight": function (data, core, callback) {
+        "changeLight": function (data, callback) {
             core.events.changeLight(data.x, data.y);
             if (core.isset(callback))
                 callback();
         },
-        "ski": function (data, core, callback) {
+        "ski": function (data, callback) {
             core.events.ski();
             if (core.isset(callback))
                 callback();
         },
-        "pushBox": function (data, core, callback) {
+        "pushBox": function (data, callback) {
             core.events.pushBox(data);
             if (core.isset(callback))
                 callback();
         },
-        'action': function (data, core, callback) {
+        'action': function (data, callback) {
             var ev = core.clone(data.event.data), ex = data.x, ey = data.y;
             // 检查是否需要改变朝向
             if (ex == core.nextX() && ey == core.nextY()) {
@@ -904,52 +887,23 @@ events.prototype.doAction = function() {
                 var block=core.getBlock(toX, toY);
                 if (block!=null) {
                     block = block.block;
-                    if (core.isset(block.event)) {
+                    if (core.isset(block.event) && core.isset(block.event.trigger)) {
                         core.status.event.data.x=block.x;
                         core.status.event.data.y=block.y;
                         core.status.event.data.list = [
                             {"todo": [], "total": [], "condition": "false"}
                         ];
-                        switch (block.event.trigger) {
-                            case "action":
-                                core.status.event.data.list = [
-                                    {"todo": core.clone(block.event.data), "total": core.clone(block.event.data), "condition": "false"}
-                                ];
-                                break;
-                            case "battle":
-                                core.events.battle(block.event.id, block.x, block.y, true, function () {
-                                    core.doAction();
-                                });
-                                return;
-                            case "openDoor":
-                                core.openDoor(block.event.id, block.x, block.y, true, function () {
-                                    core.lockControl();
-                                    core.doAction();
-                                });
-                                return;
-                            case "changeFloor":
-                                {
-                                    var heroLoc = {};
-                                    if (core.isset(block.event.data.loc))
-                                        heroLoc = {'x': block.event.data.loc[0], 'y': block.event.data.loc[1]};
-                                    if (core.isset(block.event.data.direction))
-                                        heroLoc.direction = block.event.data.direction;
-                                    core.changeFloor(block.event.data.floorId, block.event.data.stair,
-                                        heroLoc, block.event.data.time, function () {
-                                            core.lockControl();
-                                            core.doAction();
-                                        });
-                                }
-                                return;
-                            case "getItem":
-                                core.getItem(block.event.id, 1, block.x, block.y);
-                                break;
-                            case "passNet":
-                                this.passNet(block);
-                                break;
-                            case "changeLight":
-                                this.changeLight(block.x, block.y);
-                                break;
+                        if (block.event.trigger == 'action') {
+                            core.status.event.data.list = [
+                                {"todo": core.clone(block.event.data), "total": core.clone(block.event.data), "condition": "false"}
+                            ];
+                        }
+                        else {
+                            core.material.events[block.event.trigger](block, function () {
+                                core.lockControl();
+                                core.doAction();
+                            });
+                            return;
                         }
                     }
                 }
@@ -1536,44 +1490,44 @@ events.prototype.battle = function (id, x, y, force, callback) {
 
 ////// 触发(x,y)点的事件 //////
 events.prototype.trigger = function (x, y) {
+
+    if (core.status.event.id == 'action') return;
+
     core.status.isSkiing = false;
-    var mapBlocks = core.status.thisMap.blocks;
-    var noPass;
-    for (var b = 0; b < mapBlocks.length; b++) {
-        if (mapBlocks[b].x == x && mapBlocks[b].y == y && !mapBlocks[b].disable) { // 启用事件
-            noPass = mapBlocks[b].event && mapBlocks[b].event.noPass;
+    var block = core.getBlock(x, y);
+    if (block != null) {
+        block = block.block;
+        if (core.isset(block.event) && core.isset(block.event.trigger)) {
+            var noPass = block.event.noPass, trigger = block.event.trigger;
             if (noPass) {
                 core.clearAutomaticRouteNode(x, y);
             }
-            if (core.isset(mapBlocks[b].event) && core.isset(mapBlocks[b].event.trigger)) {
-                var trigger = mapBlocks[b].event.trigger;
+            if (trigger == 'ski') core.status.isSkiing = true;
 
-                if (trigger == 'ski') core.status.isSkiing = true;
-
-                // 转换楼层能否穿透
-                if (trigger=='changeFloor' && !noPass) {
-                    var canCross = core.flags.portalWithoutTrigger;
-                    if (core.isset(mapBlocks[b].event.data) && core.isset(mapBlocks[b].event.data.portalWithoutTrigger))
-                        canCross=mapBlocks[b].event.data.portalWithoutTrigger;
-                    if (canCross) {
-                        if (core.isReplaying()) {
-                            if (core.status.replay.toReplay[0]=='no') {
-                                core.status.replay.toReplay.shift();
-                                core.status.route.push("no");
-                                continue;
-                            }
-                        }
-                        else if (core.status.automaticRoute.autoHeroMove || core.status.automaticRoute.autoStep<core.status.automaticRoute.autoStepRoutes.length) {
+            // 转换楼层能否穿透
+            if (trigger=='changeFloor' && !noPass) {
+                var canCross = core.flags.portalWithoutTrigger;
+                if (core.isset(block.event.data) && core.isset(block.event.data.portalWithoutTrigger))
+                    canCross=block.event.data.portalWithoutTrigger;
+                if (canCross) {
+                    if (core.isReplaying()) {
+                        if (core.status.replay.toReplay[0]=='no') {
+                            core.status.replay.toReplay.shift();
                             core.status.route.push("no");
-                            continue;
+                            return;
                         }
                     }
+                    else if (core.status.automaticRoute.autoHeroMove || core.status.automaticRoute.autoStep<core.status.automaticRoute.autoStepRoutes.length) {
+                        core.status.route.push("no");
+                        return;
+                    }
                 }
-                core.status.automaticRoute.moveDirectly = false;
-                core.material.events[trigger](mapBlocks[b], core, function (data) {
-
-                });
             }
+            core.status.automaticRoute.moveDirectly = false;
+            core.material.events[trigger](block, function () {
+                if (trigger == 'openDoor' || trigger == 'changeFloor')
+                    core.replay();
+            });
         }
     }
 }

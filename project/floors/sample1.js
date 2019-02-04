@@ -11,7 +11,7 @@ main.floors.sample1=
         0,
         0,
         "bg.jpg",
-        false
+        0
     ]
 ],
 "weather": [

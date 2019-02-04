@@ -801,7 +801,7 @@ setBgFgBlock_s
 /* setBgFgBlock_s
 tooltip : setBgFgBlock：设置某个图层块,忽略坐标楼层则为当前点
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=setblock%EF%BC%9A%E8%AE%BE%E7%BD%AE%E6%9F%90%E4%B8%AA%E5%9B%BE%E5%9D%97
-colour : this.eventColor
+colour : this.dataColor
 default : ["bg",0,"","",""]
 var floorstr = '';
 if (PosString_0 && PosString_1) {

@@ -481,6 +481,61 @@ maps.prototype.generateGroundPattern = function (floorId) {
     // core.material.groundPattern = '#000000';
 }
 
+maps.prototype.drawFloorImages = function (floorId, images, animate) {
+    var redraw = core.isset(animate);
+    if (!redraw) {
+        core.status.floorAnimateObjs = core.clone(images);
+    }
+
+    animate = animate || 0;
+    images.forEach(function (t) {
+        if (typeof t == 'string') t = [0,0,t];
+        var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2], frame = core.clamp(parseInt(t[4]), 1, 8);
+        if (redraw && frame == 1) return; // 不重绘
+
+        if (core.isset(dx) && core.isset(dy) &&
+            !core.hasFlag("floorimg_"+floorId+"_"+dx+"_"+dy) &&
+            core.isset(core.material.images.images[p])) {
+            var image = core.material.images.images[p];
+            var width = parseInt(image.width / frame), height = image.height;
+            var offsetX = animate%frame*width;
+
+            if (!t[3]) {
+                if (/.*\.gif/i.test(p) && main.mode=='play') {
+
+                    if (redraw) return; // 忽略gif
+
+                    core.dom.gif.innerHTML = "";
+                    var gif = new Image();
+                    gif.src = image.src;
+                    gif.style.position = 'absolute';
+                    gif.style.left = (dx*core.domStyle.scale)+"px";
+                    gif.style.top = (dy*core.domStyle.scale)+"px";
+                    gif.style.width = image.width*core.domStyle.scale+"px";
+                    gif.style.height = image.height*core.domStyle.scale+"px";
+                    core.dom.gif.appendChild(gif);
+                }
+                else {
+                    if (redraw) core.clearMap('bg', dx, dy, width, height);
+                    core.drawImage('bg', image, offsetX, 0, width, height, dx, dy, width, height);
+                }
+            }
+            else if (t[3]==1) {
+                if (redraw) core.clearMap('fg', dx, dy, width, height);
+                core.drawImage('fg', image, offsetX, 0, width, height, dx, dy, width, height);
+            }
+            else if (t[3]==2) {
+                if (redraw) {
+                    core.clearMap('bg', dx, dy + height - 32, width, 32);
+                    core.clearMap('fg', dx, dy, width, height-32);
+                }
+                core.drawImage('bg', image, offsetX, height-32, width, 32, dx, dy + height - 32, width, 32);
+                core.drawImage('fg', image, offsetX, 0, width, height-32, dx, dy, width, height-32);
+            }
+        }
+    });
+}
+
 ////// 绘制某张地图 //////
 maps.prototype.drawMap = function (floorId, callback) {
     floorId = floorId || core.status.floorId;
@@ -511,41 +566,15 @@ maps.prototype.drawMap = function (floorId, callback) {
                 images = [[0, 0, images]];
             }
         }
-        images.forEach(function (t) {
-            if (typeof t == 'string') t = [0,0,t];
-            var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
-            if (core.isset(dx) && core.isset(dy) &&
-                !core.hasFlag("floorimg_"+floorId+"_"+dx+"_"+dy) &&
-                core.isset(core.material.images.images[p])) {
-                var image = core.material.images.images[p];
-                if (!t[3]) {
-                    if (/.*\.gif/i.test(p) && main.mode=='play') {
-                        core.dom.gif.innerHTML = "";
-                        var gif = new Image();
-                        gif.src = image.src;
-                        gif.style.position = 'absolute';
-                        gif.style.left = (32*dx*core.domStyle.scale)+"px";
-                        gif.style.top = (32*dy*core.domStyle.scale)+"px";
-                        gif.style.width = image.width*core.domStyle.scale+"px";
-                        gif.style.height = image.height*core.domStyle.scale+"px";
-                        core.dom.gif.appendChild(gif);
-                    }
-                    else {
-                        core.drawImage('bg', image, 32*dx, 32*dy, image.width, image.height);
-                    }
-                }
-                else if (t[3]==1)
-                    core.drawImage('fg', image, 32*dx, 32*dy, image.width, image.height);
-                else if (t[3]==2) {
-                    core.drawImage('fg', image, 0, 0, image.width, image.height-32,
-                        32*dx, 32*dy, image.width, image.height-32);
-                    core.drawImage('bg', image, 0, image.height-32, image.width, 32,
-                        32*dx, 32*dy + image.height - 32, image.width, 32);
-                }
-            }
-        });
 
+        // ----- 可以调整这三行的顺序来修改覆盖关系；同层画布上，后绘制的覆盖先绘制的
+        // ----- ui.js的drawThumbnail函数也需要对应进行修改。
+
+        // 绘制楼层贴图
+        core.maps.drawFloorImages(floorId, images);
+        // 绘制背景层图块
         core.maps.drawBgFgMap(floorId, core.canvas.bg, "bg", true);
+        // 绘制前景层图块
         core.maps.drawBgFgMap(floorId, core.canvas.fg, "fg", true);
 
     }
@@ -1352,6 +1381,7 @@ maps.prototype.removeGlobalAnimate = function (x, y, all, name) {
         core.status.globalAnimateStatus = 0;
         core.status.globalAnimateObjs = [];
         core.status.autotileAnimateObjs = {"blocks": [], "map": null, "bgmap": null, "fgmap": null};
+        core.status.floorAnimateObjs = [];
         return;
     }
 

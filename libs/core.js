@@ -197,6 +197,7 @@ function core() {
 
         // 动画
         'globalAnimateObjs': [],
+        'floorAnimateObjs': [],
         'boxAnimateObjs': [],
         'autotileAnimateObjs': {"blocks": [], "map": null, "bgmap": null, "fgmap": null},
         "globalAnimateStatus": 0,

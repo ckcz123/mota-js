@@ -70,6 +70,9 @@ control.prototype.setRequestAnimationFrame = function () {
                     core.drawBlock(block, core.status.globalAnimateStatus % (block.event.animate||1));
                 });
 
+                // Global floor images
+                core.maps.drawFloorImages(core.status.floorId, core.status.floorAnimateObjs||[], core.status.globalAnimateStatus);
+
                 // Global Autotile Animate
                 core.status.autotileAnimateObjs.blocks.forEach(function (block) {
                     // ------ 界面外的动画不绘制

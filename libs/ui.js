@@ -2423,6 +2423,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
     tempCanvas.canvas.height = tempHeight;
     tempCanvas.clearRect(0, 0, tempWidth, tempHeight);
 
+    // -------- 1. 绘制地板
     var groundId = (core.status.maps||core.floors)[floorId].defaultGround || "ground";
     var blockIcon = core.material.icons.terrains[groundId];
     for (var i = 0; i < mw; i++) {
@@ -2431,7 +2432,6 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
         }
     }
 
-    // background image
     var images = [];
     if (core.isset((core.status.maps||core.floors)[floorId].images)) {
         images = (core.status.maps||core.floors)[floorId].images;
@@ -2439,25 +2439,27 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
             images = [[0, 0, images]];
         }
     }
+
+    // -------- 2. 绘制背景贴图
     images.forEach(function (t) {
         if (typeof t == 'string') t = [0,0,t];
-        var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
+        var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2], frame = core.clamp(parseInt(t[4]), 1, 8);
         if (core.isset(dx) && core.isset(dy) &&
             !core.hasFlag("floorimg_"+floorId+"_"+dx+"_"+dy) &&
             core.isset(core.material.images.images[p])) {
             var image = core.material.images.images[p];
+            var width = image.width / frame, height = image.height;
             if (!t[3])
-                tempCanvas.drawImage(image, 32 * dx, 32 * dy, image.width, image.height);
+                tempCanvas.drawImage(image, 0, 0, width, height, dx, dy, width, height);
             else if (t[3]==2)
-                tempCanvas.drawImage(image, 0, image.height-32, image.width, 32,
-                    32 * dx, 32 * dy + image.height - 32, image.width, 32);
+                tempCanvas.drawImage(image, 0, height-32, width, 32, dx, dy + height - 32, width, 32);
         }
     })
 
-    // background map
+    // -------- 3. 绘制背景图块
     core.maps.drawBgFgMap(floorId, tempCanvas, "bg");
 
-    // draw block
+    // -------- 4. 绘制事件层
     var mapArray = core.maps.getMapArray(blocks,mw,mh);
     for (var b in blocks) {
         var block = blocks[b];
@@ -2484,7 +2486,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
             }
         }
     }
-    // draw hero
+    // -------- 5. 绘制勇士
     if (core.isset(heroLoc)) {
         if (!core.isset(core.material.images.images[heroIcon]))
             heroIcon = "hero.png";
@@ -2493,25 +2495,25 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
         tempCanvas.drawImage(core.material.images.images[heroIcon], icon.stop * 32, icon.loc * height, 32, height, 32*heroLoc.x, 32*heroLoc.y+32-height, 32, height);
     }
 
-    // draw fg
+    // -------- 6. 绘制前景贴图
     images.forEach(function (t) {
-        var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2];
+        var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2], frame = core.clamp(parseInt(t[3]), 1, 8);
         if (core.isset(dx) && core.isset(dy) &&
             !core.hasFlag("floorimg_"+floorId+"_"+dx+"_"+dy) &&
             core.isset(core.material.images.images[p])) {
             var image = core.material.images.images[p];
+            var width = image.width / frame, height = image.height;
             if (t[3]==1)
-                tempCanvas.drawImage(image, 32*dx, 32*dy, image.width, image.height);
+                tempCanvas.drawImage(image, 0, 0, width, height, dx, dy, width, height);
             else if (t[3]==2)
-                tempCanvas.drawImage(image, 0, 0, image.width, image.height-32,
-                    32*dx, 32*dy, image.width, image.height-32);
+                tempCanvas.drawImage(image, 0, 0, width, height-32, dx, dy, width, height-32);
         }
     })
 
-    // foreground map
+    // -------- 7. 绘制前景图块
     core.maps.drawBgFgMap(floorId, tempCanvas, "fg");
 
-    // draw damage
+    // -------- 8. 绘制显伤
     if (core.status.event.id=='viewMaps' && (core.status.event.data||{}).damage)
         core.control.updateDamage(floorId, tempCanvas);
 

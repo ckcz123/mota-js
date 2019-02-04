@@ -11,6 +11,8 @@ editor_mode = function (editor) {
 
             'map': 'left',
             'appendpic': 'left1',
+
+            'commonevent': 'left9',
         }
         this._ids = {}
         this.dom = {}
@@ -223,21 +225,29 @@ editor_mode = function (editor) {
                         editor_mode.addAction(['delete', field, undefined]);
                         editor_mode.onmode('save');//自动保存 删掉此行的话点保存按钮才会保存
                     } else {
-                        printe(field + ' : 该值不允许为null,无法删除');
+                        printe(field + ' : 该值不允许为null，无法删除');
                     }
                 }
                 var addfunc=function(){
                     editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
+
+                    var mode = document.getElementById('editModeSelect').value;
+
                     // 1.输入id
-                    var newid=prompt('请输入新项的id');
+                    var newid=prompt('请输入新项的ID（仅公共事件支持中文ID）');
                     if (newid == null || newid.length==0) {
                         return;
                     }
-                    // 2.检查id是否符合规范或与已有id重复
-                    if (!/^[a-zA-Z0-9_]+$/.test(newid)){
-                        printe('id不符合规范, 请使用大小写字母数字下划线来构成');
-                        return;
+
+                    // 检查commentEvents
+                    if (mode !== 'commonevent') {
+                        // 2.检查id是否符合规范或与已有id重复
+                        if (!/^[a-zA-Z0-9_]+$/.test(newid)){
+                            printe('id不符合规范, 请使用大小写字母数字下划线来构成');
+                            return;
+                        }
                     }
+
                     var conflict=true;
                     var basefield=field.replace(/\[[^\[]*\]$/,'');
                     if (basefield==="['main']"){
@@ -341,75 +351,40 @@ editor_mode = function (editor) {
     editor_mode.prototype.doActionList = function (mode, actionList) {
         if (actionList.length == 0) return;
         printf('修改中...');
+        var cb=function(objs_){
+            if (objs_.slice(-1)[0] != null) {
+                printe(objs_.slice(-1)[0]);
+                throw(objs_.slice(-1)[0])
+            }
+            ;printf('修改成功');
+        }
         switch (mode) {
             case 'loc':
-
-                editor.file.editLoc(editor_mode.pos.x, editor_mode.pos.y, actionList, function (objs_) {//console.log(objs_);
-                    if (objs_.slice(-1)[0] != null) {
-                        printe(objs_.slice(-1)[0]);
-                        throw(objs_.slice(-1)[0])
-                    }
-                    ;printf('修改成功');
+                editor.file.editLoc(editor_mode.pos.x, editor_mode.pos.y, actionList, function (objs_) {
+                    cb(objs_);
                     editor.drawPosSelection();
                 });
                 break;
             case 'enemyitem':
-
                 if (editor_mode.info.images == 'enemys' || editor_mode.info.images == 'enemy48') {
-                    editor.file.editEnemy(editor_mode.info.id, actionList, function (objs_) {//console.log(objs_);
-                        if (objs_.slice(-1)[0] != null) {
-                            printe(objs_.slice(-1)[0]);
-                            throw(objs_.slice(-1)[0])
-                        }
-                        ;printf('修改成功')
-                    });
+                    editor.file.editEnemy(editor_mode.info.id, actionList, cb);
                 } else if (editor_mode.info.images == 'items') {
-                    editor.file.editItem(editor_mode.info.id, actionList, function (objs_) {//console.log(objs_);
-                        if (objs_.slice(-1)[0] != null) {
-                            printe(objs_.slice(-1)[0]);
-                            throw(objs_.slice(-1)[0])
-                        }
-                        ;printf('修改成功')
-                    });
+                    editor.file.editItem(editor_mode.info.id, actionList, cb);
                 } else {
-                    editor.file.editMapBlocksInfo(editor_mode.info.idnum, actionList, function (objs_) {//console.log(objs_);
-                        if (objs_.slice(-1)[0] != null) {
-                            printe(objs_.slice(-1)[0]);
-                            throw(objs_.slice(-1)[0])
-                        }
-                        ;printf('修改成功');
-                    });
+                    editor.file.editMapBlocksInfo(editor_mode.info.idnum, actionList, cb);
                 }
                 break;
             case 'floor':
-
-                editor.file.editFloor(actionList, function (objs_) {//console.log(objs_);
-                    if (objs_.slice(-1)[0] != null) {
-                        printe(objs_.slice(-1)[0]);
-                        throw(objs_.slice(-1)[0])
-                    }
-                    ;printf('修改成功');
-                });
+                editor.file.editFloor(actionList, cb);
                 break;
             case 'tower':
-
-                editor.file.editTower(actionList, function (objs_) {//console.log(objs_);
-                    if (objs_.slice(-1)[0] != null) {
-                        printe(objs_.slice(-1)[0]);
-                        throw(objs_.slice(-1)[0])
-                    }
-                    ;printf('修改成功')
-                });
+                editor.file.editTower(actionList, cb);
                 break;
             case 'functions':
-
-                editor.file.editFunctions(actionList, function (objs_) {//console.log(objs_);
-                    if (objs_.slice(-1)[0] != null) {
-                        printe(objs_.slice(-1)[0]);
-                        throw(objs_.slice(-1)[0])
-                    }
-                    ;printf('修改成功')
-                });
+                editor.file.editFunctions(actionList, cb);
+                break;
+            case 'commonevent':
+                editor.file.editCommonEvent(actionList, cb);
                 break;
             default:
                 break;
@@ -536,6 +511,19 @@ editor_mode = function (editor) {
         //只查询不修改时,内部实现不是异步的,所以可以这么写
         var tableinfo = editor_mode.objToTable_(objs[0], objs[1]);
         document.getElementById('table_e260a2be_5690_476a_b04e_dacddede78b3').innerHTML = tableinfo.HTML;
+        tableinfo.listen(tableinfo.guids);
+        if (Boolean(callback)) callback();
+    }
+
+    editor_mode.prototype.commonevent = function (callback) {
+        var objs = [];
+        editor.file.editCommonEvent([], function (objs_) {
+            objs = objs_;
+            //console.log(objs_)
+        });
+        //只查询不修改时,内部实现不是异步的,所以可以这么写
+        var tableinfo = editor_mode.objToTable_(objs[0], objs[1]);
+        document.getElementById('table_b7bf0124_99fd_4af8_ae2f_0017f04a7c7d').innerHTML = tableinfo.HTML;
         tableinfo.listen(tableinfo.guids);
         if (Boolean(callback)) callback();
     }
@@ -1208,11 +1196,11 @@ editor_mode = function (editor) {
         editor_mode.changeDoubleClickModeByButton=function(mode){
             ({
                 delete:function(){
-                    printf('下一次双击表格的项删除, 编辑后刷新浏览器生效 (正常模式下双击是用事件或文本编辑器编辑)；切换下拉菜单可取消。');
+                    printf('下一次双击表格的项删除，切换下拉菜单可取消；编辑后需刷新浏览器生效。');
                     editor_mode.doubleClickMode=mode;
                 },
                 add:function(){
-                    printf('下一次双击表格的项, 在同级添加新项, 编辑后刷新浏览器生效 (正常模式下双击是用事件或文本编辑器编辑)；切换下拉菜单可取消。');
+                    printf('下一次双击表格的项则在同级添加新项，切换下拉菜单可取消；编辑后需刷新浏览器生效。');
                     editor_mode.doubleClickMode=mode;
                 }
             }[mode])();

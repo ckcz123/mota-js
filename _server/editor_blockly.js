@@ -23,17 +23,6 @@ editor_blockly = function () {
         {"type": "hide", "time": 500},
       ],'event'),
       MotaActionBlocks['changeFloor_m'].xmlText(),
-      //MotaActionFunctions.actionParser.parse({"type": "choices", "choices": [
-      //  {"text": "攻击+\${point}", "action": [
-      //    {"type": "setValue", "name": "status:atk", "value": "status:atk+\${point}"},
-      //  ]},
-      //  {"text": "防御+\${2*point}", "action": [
-      //    {"type": "setValue", "name": "status:def", "value": "status:def+\${2*point}"},
-      //  ]},
-      //  {"text": "生命+\${200*point}", "action": [
-      //    {"type": "setValue", "name": "status:hp", "value": "status:hp+\${200*point}"},
-      //  ]},
-      //]},'point'),
       MotaActionFunctions.actionParser.parse([{
         "id": "moneyShop1",
         "name": "贪婪之神", 
@@ -55,6 +44,7 @@ editor_blockly = function () {
       MotaActionBlocks['firstArrive_m'].xmlText(),
       MotaActionBlocks['eachArrive_m'].xmlText(),
       MotaActionBlocks['level_m'].xmlText(),
+      MotaActionBlocks['commonEvent_m'].xmlText(),
     ],
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),
@@ -103,6 +93,7 @@ editor_blockly = function () {
       MotaActionBlocks['useItem_s'].xmlText(),
       MotaActionBlocks['openShop_s'].xmlText(),
       MotaActionBlocks['setBlock_s'].xmlText(),
+      MotaActionBlocks['setBgFgBlock_s'].xmlText(),
       MotaActionBlocks['setHeroIcon_s'].xmlText(),
       MotaActionBlocks['follow_s'].xmlText(),
       MotaActionBlocks['unfollow_s'].xmlText(),
@@ -125,9 +116,9 @@ editor_blockly = function () {
       MotaActionBlocks['hideFloorImg_s'].xmlText(),
       MotaActionBlocks['showBgFgMap_s'].xmlText(),
       MotaActionBlocks['hideBgFgMap_s'].xmlText(),
-      MotaActionBlocks['setBgFgBlock_s'].xmlText(),
       MotaActionBlocks['trigger_s'].xmlText(),
-      MotaActionBlocks['insert_s'].xmlText(),
+      MotaActionBlocks['insert_1_s'].xmlText(),
+      MotaActionBlocks['insert_2_s'].xmlText(),
       MotaActionBlocks['move_s'].xmlText(),
       MotaActionBlocks['jump_s'].xmlText(),
       MotaActionBlocks['disableShop_s'].xmlText(),
@@ -150,6 +141,7 @@ editor_blockly = function () {
       MotaActionBlocks['loadBgm_s'].xmlText(),
       MotaActionBlocks['freeBgm_s'].xmlText(),
       MotaActionBlocks['playSound_s'].xmlText(),
+      MotaActionBlocks['stopSound_s'].xmlText(),
       MotaActionBlocks['setVolume_s'].xmlText(),
       MotaActionBlocks['callBook_s'].xmlText(),
       MotaActionBlocks['callSave_s'].xmlText(),
@@ -607,7 +599,8 @@ function omitedcheckUpdateFunction(event) {
         'exit_s',
         'revisit_s',
         'sleep_s',
-        'setBlock_s'
+        'setBlock_s',
+        'insert_1_s'
     ]; // 最常用的15个图块
     editor_blockly.lastUsedTypeNum=15;
 

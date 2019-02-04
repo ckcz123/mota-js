@@ -26,17 +26,6 @@ code=JSON.stringify(code,null,2).split('"data_asdfefw"').join('[\n'+action_0+']\
 return code;
 */;
 
-//加点 事件编辑器入口之一
-point_m
-    :   '加点' BGNL? Newline choicesContext+ BEND
-    
-
-/* point_m
-tooltip : 加点事件
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=%e5%8a%a0%e7%82%b9%e4%ba%8b%e4%bb%b6
-var code = '{"type": "choices", "choices": [\n'+choicesContext_0+']}\n';
-return code;
-*/;
 
 //升级 事件编辑器入口之一
 level_m
@@ -217,6 +206,18 @@ var code = '{"floorId": "'+toFloorId+'"'+loc+DirectionEx_List_0+Int_0+Bool_0+' }
 return code;
 */;
 
+//commonEvent 事件编辑器入口之一
+commonEvent_m
+    :   '公共事件' BGNL? Newline action+ BEND
+
+
+/* commonEvent_m
+tooltip : 公共事件
+helpUrl : https://h5mota.com/games/template/docs/#/event
+var code = '[\n'+action_0+']\n';
+return code;
+*/;
+
 //为了避免关键字冲突,全部加了_s
 //动作
 action
@@ -235,7 +236,8 @@ action
     |   show_s
     |   hide_s
     |   trigger_s
-    |   insert_s
+    |   insert_1_s
+    |   insert_2_s
     |   revisit_s
     |   exit_s
     |   setBlock_s
@@ -284,6 +286,7 @@ action
     |   loadBgm_s
     |   freeBgm_s
     |   playSound_s
+    |   stopSound_s
     |   setVolume_s
     |   win_s
     |   lose_s
@@ -598,13 +601,26 @@ var code = '{"type": "trigger", "loc": ['+PosString_0+','+PosString_1+']},\n';
 return code;
 */;
 
-insert_s
+insert_1_s
+    :   '插入公共事件' EvalString Newline
+
+
+/* insert_1_s
+tooltip : insert: 插入公共事件并执行
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=insert%ef%bc%9a%e6%8f%92%e5%85%a5%e5%85%ac%e5%85%b1%e4%ba%8b%e4%bb%b6%e6%88%96%e5%8f%a6%e4%b8%80%e4%b8%aa%e5%9c%b0%e7%82%b9%e7%9a%84%e4%ba%8b%e4%bb%b6%e5%b9%b6%e6%89%a7%e8%a1%8c
+default : ["加点事件"]
+colour : this.eventColor
+var code = '{"type": "insert", "name": "'+EvalString_0+'"},\n';
+return code;
+*/;
+
+insert_2_s
     :   '插入事件' 'x' PosString ',' 'y' PosString '楼层' IdString? Newline
 
 
-/* insert_s
+/* insert_2_s
 tooltip : insert: 立即插入另一个地点的事件执行，当前事件不会中断，事件坐标不会改变
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=insert%ef%bc%9a%e6%8f%92%e5%85%a5%e5%8f%a6%e4%b8%80%e4%b8%aa%e5%9c%b0%e7%82%b9%e7%9a%84%e4%ba%8b%e4%bb%b6
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=insert%ef%bc%9a%e6%8f%92%e5%85%a5%e5%85%ac%e5%85%b1%e4%ba%8b%e4%bb%b6%e6%88%96%e5%8f%a6%e4%b8%80%e4%b8%aa%e5%9c%b0%e7%82%b9%e7%9a%84%e4%ba%8b%e4%bb%b6%e5%b9%b6%e6%89%a7%e8%a1%8c
 default : ["0","0",""]
 colour : this.eventColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
@@ -785,7 +801,7 @@ setBgFgBlock_s
 /* setBgFgBlock_s
 tooltip : setBgFgBlock：设置某个图层块,忽略坐标楼层则为当前点
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=setblock%EF%BC%9A%E8%AE%BE%E7%BD%AE%E6%9F%90%E4%B8%AA%E5%9B%BE%E5%9D%97
-colour : this.eventColor
+colour : this.dataColor
 default : ["bg",0,"","",""]
 var floorstr = '';
 if (PosString_0 && PosString_1) {
@@ -889,20 +905,21 @@ return code;
 */;
 
 openDoor_s
-    :   '开门' 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
+    :   '开门' 'x' PosString? ',' 'y' PosString? '楼层' IdString? '需要钥匙' Bool? Newline
     
 
 /* openDoor_s
 tooltip : openDoor: 开门,楼层可不填表示当前层
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=opendoor%EF%BC%9A%E5%BC%80%E9%97%A8
-default : ["","",""]
+default : ["","","",false]
 colour : this.dataColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
-var code = '{"type": "openDoor"'+floorstr+IdString_0+'},\n';
+Bool_0 = Bool_0 ? ', "needKey": true' : '';
+var code = '{"type": "openDoor"'+floorstr+IdString_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -1363,6 +1380,18 @@ helpUrl : https://h5mota.com/games/template/docs/#/event?id=playsound%EF%BC%9A%E
 default : ["item.mp3"]
 colour : this.soundColor
 var code = '{"type": "playSound", "name": "'+EvalString_0+'"},\n';
+return code;
+*/;
+
+stopSound_s
+    :   '停止所有音效' Newline
+
+
+/* stopSound_s
+tooltip : stopSound: 停止所有音效
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=stopSound%ef%bc%9a%e5%81%9c%e6%ad%a2%e6%89%80%e6%9c%89%e9%9f%b3%e6%95%88
+colour : this.soundColor
+var code = '{"type": "stopSound"},\n';
 return code;
 */;
 
@@ -1960,15 +1989,6 @@ ActionParser.prototype.parse = function (obj,type) {
         obj.time,!this.isset(obj.portalWithoutTrigger)
       ]);
 
-    case 'point':
-      if(!obj)obj={};
-      var text_choices = null;
-      for(var ii=obj.choices.length-1,choice;choice=obj.choices[ii];ii--) {
-        text_choices=MotaActionBlocks['choicesContext'].xmlText([
-          choice.text,this.parseList(choice.action),text_choices]);
-      }
-      return MotaActionBlocks['point_m'].xmlText([text_choices]);
-
     case 'level':
       if(!obj)obj={};
       var text_choices = null;
@@ -2264,7 +2284,7 @@ ActionParser.prototype.parseAction = function() {
     case "openDoor": // 开一个门, 包括暗墙
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['openDoor_s'].xmlText([
-        data.loc[0],data.loc[1],data.floorId||'',this.next]);
+        data.loc[0],data.loc[1],data.floorId||'',data.needKey||false,this.next]);
       break;
     case "useItem": // 使用道具
       this.next = MotaActionBlocks['useItem_s'].xmlText([
@@ -2287,8 +2307,14 @@ ActionParser.prototype.parseAction = function() {
         data.loc[0],data.loc[1],this.next]);
       break;
     case "insert": // 强制插入另一个点的事件在当前事件列表执行，当前坐标和楼层不会改变
-      this.next = MotaActionBlocks['insert_s'].xmlText([
-        data.loc[0],data.loc[1],data.floorId||'',this.next]);
+      if (this.isset(data.name)) {
+        this.next = MotaActionBlocks['insert_1_s'].xmlText([
+          data.name, this.next]);
+      }
+      else {
+        this.next = MotaActionBlocks['insert_2_s'].xmlText([
+          data.loc[0],data.loc[1],data.floorId||'',this.next]);
+      }
       break;
     case "playSound":
       this.next = MotaActionBlocks['playSound_s'].xmlText([
@@ -2313,6 +2339,10 @@ ActionParser.prototype.parseAction = function() {
     case "freeBgm":
       this.next = MotaActionBlocks['freeBgm_s'].xmlText([
         data.name,this.next]);
+      break
+    case "stopSound":
+      this.next = MotaActionBlocks['stopSound_s'].xmlText([
+        this.next]);
       break
     case "setVolume":
       this.next = MotaActionBlocks['setVolume_s'].xmlText([

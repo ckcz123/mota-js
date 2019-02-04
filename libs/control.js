@@ -70,8 +70,17 @@ control.prototype.setRequestAnimationFrame = function () {
                     core.drawBlock(block, core.status.globalAnimateStatus % (block.event.animate||1));
                 });
 
+                // Global floor images
+                core.maps.drawFloorImages(core.status.floorId, core.status.floorAnimateObjs||[], core.status.globalAnimateStatus);
+
                 // Global Autotile Animate
                 core.status.autotileAnimateObjs.blocks.forEach(function (block) {
+                    // ------ 界面外的动画不绘制
+                    if (block.x * 32 < core.bigmap.offsetX - 64 || block.x * 32 > core.bigmap.offsetX + 416 + 32
+                            || block.y * 32 < core.bigmap.offsetY - 64 || block.y * 32 > core.bigmap.offsetY + 416 + 32 + 16) {
+                        return;
+                    }
+
                     var cv = core.isset(block.name)?core.canvas[block.name]:core.canvas.event;
                     cv.clearRect(block.x * 32, block.y * 32, 32, 32);
                     if (core.isset(block.name)) {
@@ -1416,6 +1425,7 @@ control.prototype.screenFlash = function (color, time, times, callback) {
 control.prototype.updateDamage = function (floorId, canvas) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
+    if (core.status.gameOver) return;
     if (!core.isset(canvas)) {
         canvas = core.canvas.damage;
         core.clearMap('damage');
@@ -2666,6 +2676,10 @@ control.prototype.playSound = function (sound) {
             var source = core.musicStatus.audioContext.createBufferSource();
             source.buffer = core.material.sounds[sound];
             source.connect(core.musicStatus.gainNode);
+            var id = parseInt(Math.random()*10000000);
+            source.onended = function () {
+                delete core.musicStatus.playingSounds[id];
+            }
             try {
                 source.start(0);
             }
@@ -2675,8 +2689,10 @@ control.prototype.playSound = function (sound) {
                 }
                 catch (ee) {
                     main.log(ee);
+                    return;
                 }
             }
+            core.musicStatus.playingSounds[id] = source;
         }
         else {
             core.material.sounds[sound].volume = core.musicStatus.volume;
@@ -2686,6 +2702,23 @@ control.prototype.playSound = function (sound) {
     catch (eee) {
         console.log("无法播放SE "+sound);
         main.log(eee);
+    }
+}
+
+control.prototype.stopSound = function () {
+    for (var i in core.musicStatus.playingSounds) {
+        var source = core.musicStatus.playingSounds[i];
+        try {
+            source.stop();
+        }
+        catch (e) {
+            try {
+                source.noteOff(0);
+            }
+            catch (e) {
+                main.log(e);
+            }
+        }
     }
 }
 

@@ -181,7 +181,6 @@
                 <select id="entryType" disabled="disabled" style="display: none">
                     <option value="event">event</option>
                     <option value="changeFloor">changeFloor</option>
-                    <option value="point">point</option>
                     <option value="level">level</option>
                     <option value="shop">shop</option>
                     <option value="afterBattle">afterBattle</option>
@@ -189,6 +188,7 @@
                     <option value="afterOpenDoor">afterOpenDoor</option>
                     <option value="firstArrive">firstArrive</option>
                     <option value="eachArrive">eachArrive</option>
+                    <option value="commonEvent">commonEvent</option>
                 </select>
                 <button onclick="editor_blockly.confirm()">确认</button>
                 <button onclick="editor_blockly.parse()">解析</button>
@@ -238,6 +238,23 @@
             </div>
         </div>
     </div>
+    <div id="left9" class='leftTab' style="z-index:-1;opacity: 0;"><!-- commonevent -->
+        <h3 class="leftTabHeader">公共事件&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('add')">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>
+        </h3>
+        <div class="leftTabContent">
+            <div class='etable'>
+                <table>
+                    <tbody id='table_b7bf0124_99fd_4af8_ae2f_0017f04a7c7d'>
+                    <tr>
+                        <td>条目</td>
+                        <td>注释</td>
+                        <td>值</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     <div id="mid">
         <table class="col" id='mapColMark'></table>
         <table class="row" id='mapRowMark'></table>
@@ -277,6 +294,7 @@
                 <option value="tower">全塔属性</option>
                 <option value="functions">脚本编辑</option>
                 <option value="appendpic">追加素材</option>
+                <option value="commonevent">公共事件</option>
             </select>
             <br/>
             <span style="font-size: 12px;">

@@ -54,6 +54,7 @@ function core() {
         'soundStatus': true, // 是否播放SE
         'playingBgm': null, // 正在播放的BGM
         'gainNode': null,
+        'playingSounds': {}, // 正在播放的SE
         'volume': 1.0, // 音量
         'cachedBgms': [], // 缓存BGM内容
         'cachedBgmCount': 4, // 缓存的bgm数量
@@ -196,6 +197,7 @@ function core() {
 
         // 动画
         'globalAnimateObjs': [],
+        'floorAnimateObjs': [],
         'boxAnimateObjs': [],
         'autotileAnimateObjs': {"blocks": [], "map": null, "bgmap": null, "fgmap": null},
         "globalAnimateStatus": 0,
@@ -1071,6 +1073,11 @@ core.prototype.unshift = function (a,b) {
     return core.utils.unshift(a,b);
 }
 
+////// 向某个数组后插入另一个数组或元素 //////
+core.prototype.push = function (a,b) {
+    return core.utils.push(a,b);
+}
+
 ////// 设置本地存储 //////
 core.prototype.setLocalStorage = function(key, value) {
     return core.utils.setLocalStorage(key, value);
@@ -1388,6 +1395,11 @@ core.prototype.insertAction = function (list, x, y, callback) {
     core.events.insertAction(list, x, y, callback);
 }
 
+////// 获得一个公共事件内容 //////
+core.prototype.getCommonEvent = function (name) {
+    return core.events.getCommonEvent(name);
+}
+
 ////// 锁定状态栏，常常用于事件处理 //////
 core.prototype.lockControl = function () {
     core.control.lockControl();
@@ -1489,6 +1501,11 @@ core.prototype.freeBgm = function (bgm) {
 ////// 播放音频 //////
 core.prototype.playSound = function (sound) {
     core.control.playSound(sound);
+}
+
+////// 停止所有音效 //////
+core.prototype.stopSound = function () {
+    core.control.stopSound();
 }
 
 ////// 动画显示某对象 //////

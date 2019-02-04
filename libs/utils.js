@@ -62,17 +62,17 @@ utils.prototype.replaceText = function (text, need, times) {
 ////// 计算表达式的值 //////
 utils.prototype.calValue = function (value, prefix, need, times) {
     if (!core.isset(value)) return value;
-    if (typeof value == 'number') {
-        return value;
+    if (typeof value === 'string') {
+        value=value.replace(/status:([\w\d_]+)/g, "core.getStatus('$1')");
+        value=value.replace(/item:([\w\d_]+)/g, "core.itemCount('$1')");
+        value=value.replace(/flag:([\w\d_]+)/g, "core.getFlag('$1', 0)");
+        value=value.replace(/switch:([\w\d_]+)/g, "core.getFlag('"+(prefix||"global")+"@$1', 0)");
+        return eval(value);
     }
     if (value instanceof Function) {
         return value();
     }
-    value=value.replace(/status:([\w\d_]+)/g, "core.getStatus('$1')");
-    value=value.replace(/item:([\w\d_]+)/g, "core.itemCount('$1')");
-    value=value.replace(/flag:([\w\d_]+)/g, "core.getFlag('$1', 0)");
-    value=value.replace(/switch:([\w\d_]+)/g, "core.getFlag('"+(prefix||"global")+"@$1', 0)");
-    return eval(value);
+    return value;
 }
 
 ////// 字符串自动换行的分割 //////
@@ -113,6 +113,18 @@ utils.prototype.unshift = function (a,b) {
         });
     }
     else a.unshift(b);
+    return a;
+}
+
+////// 向某个数组后插入另一个数组或元素 //////
+utils.prototype.push = function (a,b) {
+    if (!(a instanceof Array) || !core.isset(b)) return;
+    if (b instanceof Array) {
+        core.clone(b).forEach(function (e) {
+            a.push(e);
+        });
+    }
+    else a.push(b);
     return a;
 }
 

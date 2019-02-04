@@ -75,7 +75,7 @@ function main() {
         'loader', 'control', 'utils', 'items', 'icons', 'maps', 'enemys', 'events', 'actions', 'data', 'ui', 'core'
     ];
     this.pureData = [ 
-        'data', 'enemys', 'icons', 'maps', 'items', 'functions'
+        'data', 'enemys', 'icons', 'maps', 'items', 'functions', 'events'
     ];
     this.materials = [
         'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains', 'enemy48', 'npc48'
@@ -183,7 +183,7 @@ function main() {
     this.canvas = {};
 
     this.__VERSION__ = "2.5.4";
-    this.__VERSION_CODE__ = 20;
+    this.__VERSION_CODE__ = 24;
 }
 
 main.prototype.init = function (mode, callback) {
@@ -514,6 +514,14 @@ main.statusBar.image.keyboard.onclick = function (e) {
 
 ////// 点击状态栏中的快捷商店键盘时 //////
 main.statusBar.image.shop.onclick = function (e) {
+    e.stopPropagation();
+
+    if (main.core.isPlaying())
+        main.core.openQuickShop(true);
+}
+
+////// 点击金币时也可以开启虚拟键盘 //////
+main.statusBar.image.money.onclick = function (e) {
     e.stopPropagation();
 
     if (main.core.isPlaying())

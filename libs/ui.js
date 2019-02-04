@@ -2497,7 +2497,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
 
     // -------- 6. 绘制前景贴图
     images.forEach(function (t) {
-        var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2], frame = core.clamp(parseInt(t[3]), 1, 8);
+        var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2], frame = core.clamp(parseInt(t[4]), 1, 8);
         if (core.isset(dx) && core.isset(dy) &&
             !core.hasFlag("floorimg_"+floorId+"_"+dx+"_"+dy) &&
             core.isset(core.material.images.images[p])) {

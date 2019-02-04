@@ -233,6 +233,11 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
     core.setWeather();
     core.ui.closePanel();
 
+    if (main.isCompetition && core.isset(ending)) {
+        if (ending == "") ending = "恭喜通关";
+        ending += "[比赛]";
+    }
+
     // 下载录像
     var confirmDownload = function () {
 

@@ -37,20 +37,12 @@
       // },
 
        // load sidebar from _sidebar.md
-      loadSidebar: '_sidebar.md',
+      loadSidebar: 'sidebar.md',
       subMaxLevel: 2,
       autoHeader: true,
       auto2top: true,
       mergeNavbar: true,
       formatUpdated: '{YYYY}-{MM}-{DD} {HH}:{mm}:{ss}',
-    }
-    if (navigator.serviceWorker) {
-        navigator.serviceWorker.getRegistrations()
-            .then(function(registrations) {
-                for(let registration of registrations) {
-                    registration.unregister();
-                }
-            });
     }
   </script>
   <script src="https://cdn.bootcss.com/docsify/4.5.5/docsify.min.js"></script>

@@ -376,7 +376,7 @@ events.prototype.doAction = function() {
     }
 
     var x=core.status.event.data.x, y=core.status.event.data.y;
-    var prefix = [core.status.floorId||"f", x||"x", y||"y"].join("@");
+    var prefix = [core.status.floorId||"f", core.isset(x)?x:"x", core.isset(y)?y:"y"].join("@");
 
     var current = core.status.event.data.list[0];
     if (current.todo.length == 0) { // current list is empty

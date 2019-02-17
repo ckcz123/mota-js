@@ -934,6 +934,8 @@ utils.prototype.hashCode = function (obj) {
 }
 
 utils.prototype.same = function (a, b) {
+    if (!core.isset(a) && !core.isset(b)) return true;
+    if (!core.isset(a) || !core.isset(b)) return false;
     if (a === b) return true;
     if (a instanceof Array && b instanceof Array) {
         if (a.length != b.length) return false;

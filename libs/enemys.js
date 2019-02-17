@@ -184,8 +184,8 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
     var info = this.getDamageInfo(enemy, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef, x, y, floorId);
 
     if (info == null) {
-        if (core.status.hero.atk<=enemy.def) {
-            return [[enemy.def+1-core.status.hero.atk,'?']];
+        if (core.status.hero.atk<=info.def) {
+            return [[info.def+1-core.status.hero.atk,'?']];
         }
         return [];
     }
@@ -200,7 +200,7 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
     }
 
     var list = [], pre = null;
-    var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = enemy.def, turn = info.turn;
+    var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = info.def, turn = info.turn;
 
     if (useTurn) { // 回合数计算法
         for (var t = turn-1;t>=1;t--) {

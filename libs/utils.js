@@ -405,6 +405,11 @@ utils.prototype.encodeRoute = function (route) {
     var ans="";
     var lastMove = "", cnt=0;
 
+    var id2number = function (id) {
+        var number = core.maps.getNumberById(id);
+        return number==0?id:number;
+    }
+
     route.forEach(function (t) {
         if (t=='up' || t=='down' || t=='left' || t=='right') {
             if (t!=lastMove && cnt>0) {
@@ -422,11 +427,11 @@ utils.prototype.encodeRoute = function (route) {
                 cnt=0;
             }
             if (t.indexOf('item:')==0)
-                ans+="I"+t.substring(5)+":";
+                ans+="I"+id2number(t.substring(5))+":";
             else if (t.indexOf('unEquip:')==0)
                 ans+="u"+t.substring(8);
             else if (t.indexOf('equip:')==0)
-                ans+="e"+t.substring(6)+":";
+                ans+="e"+id2number(t.substring(6))+":";
             else if (t.indexOf('fly:')==0)
                 ans+="F"+t.substring(4)+":";
             else if (t.indexOf('choices:')==0)
@@ -490,15 +495,23 @@ utils.prototype.decodeRoute = function (route) {
         "R": "right"
     }
 
+    var number2id = function (nxt) {
+        if (/^\d+$/.test(nxt)) {
+            var info = core.maps.blocksInfo[nxt];
+            if (core.isset(info)) return info.id;
+        }
+        return nxt;
+    }
+
     while (index<route.length) {
         var c=route.charAt(index++);
         var nxt=(c=='I'|| c=='e' ||c=='F'||c=='S'||c=='Q'||c=='t')?getString():getNumber();
 
         switch (c) {
             case "U": case "D": case "L": case "R": for (var i=0;i<nxt;i++) ans.push(mp[c]); break;
-            case "I": ans.push("item:"+nxt); break;
+            case "I":ans.push("item:"+number2id(nxt)); break;
             case "u": ans.push("unEquip:"+nxt); break;
-            case "e": ans.push("equip:"+nxt); break;
+            case "e": ans.push("equip:"+number2id(nxt)); break;
             case "F": ans.push("fly:"+nxt); break;
             case "C": ans.push("choices:"+nxt); break;
             case "S": ans.push("shop:"+nxt+":"+getNumber(true)); break;
@@ -918,6 +931,27 @@ utils.prototype.hashCode = function (obj) {
         return hash;
     }
     return this.hashCode(JSON.stringify(obj).split("").sort().join(""));
+}
+
+utils.prototype.same = function (a, b) {
+    if (a === b) return true;
+    if (a instanceof Array && b instanceof Array) {
+        if (a.length != b.length) return false;
+        for (var i = 0; i < a.length; i++) {
+            if (!this.same(a[i], b[i])) return false;
+        }
+        return true;
+    }
+    if (a instanceof Object && b instanceof Object) {
+        for (var i in a) {
+            if (!this.same(a[i], b[i])) return false;
+        }
+        for (var i in b) {
+            if (!this.same(a[i], b[i])) return false;
+        }
+        return true;
+    }
+    return false;
 }
 
 utils.prototype._export = function (floorIds) {

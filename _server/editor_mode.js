@@ -583,7 +583,7 @@ editor_mode = function (editor) {
         });
 
         var saveFloor = document.getElementById('saveFloor');
-        saveFloor.onclick = function () {
+        editor_mode.saveFloor = function () {
             editor_mode.onmode('');
             editor.file.saveFloorFile(function (err) {
                 if (err) {
@@ -593,6 +593,7 @@ editor_mode = function (editor) {
                 ;printf('保存成功');
             });
         }
+        saveFloor.onclick = editor_mode.saveFloor;
 
         var newMap = document.getElementById('newMap');
         var newFileName = document.getElementById('newFileName');

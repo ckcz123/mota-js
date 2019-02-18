@@ -891,7 +891,7 @@ editor.prototype.listen = function () {
                 editor_blockly.confirm(); // 保存事件编辑器
             }
             else {
-                editor_mode.onmode('');
+                editor_mode.saveFloor();
             }
             return;
         }

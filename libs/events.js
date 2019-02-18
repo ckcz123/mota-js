@@ -221,6 +221,27 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
         ending += "[比赛]";
     }
 
+    var askRate = function () {
+        if (!core.isset(ending)) {
+            core.restart();
+            return;
+        }
+
+        core.ui.closePanel();
+        core.ui.drawConfirmBox("恭喜通关本塔，你想进行评分吗？", function () {
+            if (core.platform.isPC) {
+                window.open("/score.php?name="+core.firstData.name+"&num=10", "_blank");
+                core.restart();
+            }
+            else {
+                window.location.href = "/score.php?name="+core.firstData.name+"&num=10";
+            }
+        }, function () {
+            core.restart();
+        });
+
+    }
+
     // 下载录像
     var confirmDownload = function () {
 
@@ -234,9 +255,11 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
                 'route': core.encodeRoute(core.status.route)
             }
             core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify(obj));
-            core.restart();
+            // core.restart();
+            askRate();
         }, function () {
-            core.restart();
+            // core.restart();
+            askRate();
         })
 
     }
@@ -376,7 +399,7 @@ events.prototype.doAction = function() {
     }
 
     var x=core.status.event.data.x, y=core.status.event.data.y;
-    var prefix = [core.status.floorId||"f", x||"x", y||"y"].join("@");
+    var prefix = [core.status.floorId||"f", core.isset(x)?x:"x", core.isset(y)?y:"y"].join("@");
 
     var current = core.status.event.data.list[0];
     if (current.todo.length == 0) { // current list is empty
@@ -2155,12 +2178,19 @@ events.prototype.pushBox = function (data) {
     core.updateStatusBar();
 
     core.status.replay.animate = true;
-    core.moveHero(direction, function() {
-        core.status.replay.animate = false;
-        core.status.route.pop();
-        core.events.afterPushBox();
-        core.replay();
-    });
+    core.lockControl();
+    setTimeout(function () {
+        core.moveHero(direction, function() {
+            core.status.replay.animate = false;
+            core.status.route.pop();
+            core.events.afterPushBox();
+            // 可能有阻击...
+            if (core.status.event.id == null) {
+                core.unLockControl();
+                core.replay();
+            }
+        });
+    })
 
 }
 

@@ -200,7 +200,7 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
     }
 
     var list = [], pre = null;
-    var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = enemy.def, turn = info.turn;
+    var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = info.mon_def, turn = info.turn;
 
     if (useTurn) { // 回合数计算法
         for (var t = turn-1;t>=1;t--) {

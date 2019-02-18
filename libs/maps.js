@@ -23,7 +23,7 @@ maps.prototype.loadFloor = function (floorId, map) {
         if (core.isset(map[e])) content[e] = core.clone(map[e]);
         else content[e] = core.clone(floor[e]);
     });
-    map=map.map;
+    map=this.decompressMap(map.map, floorId);
     var mapIntoBlocks = function(map,maps,floor,floorId){
         var blocks = [];
         var mw = core.floors[floorId].width || 13;
@@ -178,18 +178,59 @@ maps.prototype.initMaps = function (floorIds) {
     return maps;
 }
 
+////// 压缩地图
+maps.prototype.compressMap = function (mapArr, floorId) {
+    if (core.utils.same(mapArr, core.floors[floorId].map)) return null;
+
+    var mw = core.floors[floorId].width || 13;
+    var mh = core.floors[floorId].height || 13;
+    for (var x=0;x<mh;x++) {
+        if (core.utils.same(mapArr[x], core.floors[floorId].map[x]||[])) {
+            // 没有改变的行直接删掉记成0
+            mapArr[x] = 0;
+        }
+        else {
+            for (var y=0;y<mw;y++) {
+                if (mapArr[x][y] === (core.floors[floorId].map[x]||[])[y]) {
+                    // 没有改变的数据记成-1
+                    mapArr[x][y] = -1;
+                }
+            }
+        }
+    }
+    return mapArr;
+}
+
+////// 解压缩地图
+maps.prototype.decompressMap = function (mapArr, floorId) {
+    if (!core.isset(mapArr)) return core.clone(core.floors[floorId].map);
+
+    var mw = core.floors[floorId].width || 13;
+    var mh = core.floors[floorId].height || 13;
+    for (var x=0;x<mh;x++) {
+        if (mapArr[x] === 0) {
+            mapArr[x] = core.clone(core.floors[floorId].map[x]);
+        }
+        else {
+            for (var y=0;y<mw;y++) {
+                if (mapArr[x][y] === -1) {
+                    mapArr[x][y] = core.floors[floorId].map[x][y];
+                }
+            }
+        }
+    }
+    return mapArr;
+}
+
 ////// 将当前地图重新变成数字，以便于存档 //////
 maps.prototype.save = function(maps, floorId) {
     if (!core.isset(floorId)) {
         var map = {};
         for (var id in maps) {
             map[id] = this.save(maps, id);
-            // map.push(this.save(maps, id));
         }
         return map;
     }
-
-    var thisFloor = core.clone(maps[floorId]);
     var mw = core.floors[floorId].width || 13;
     var mh = core.floors[floorId].height || 13;
 
@@ -200,16 +241,27 @@ maps.prototype.save = function(maps, floorId) {
             blocks[x].push(0);
         }
     }
-    thisFloor.blocks.forEach(function (block) {
+    maps[floorId].blocks.forEach(function (block) {
         if (core.isset(block.disable)) {
             if (!block.disable) blocks[block.y][block.x] = block.id+":t";
             else blocks[block.y][block.x] = block.id+":f";
         }
         else blocks[block.y][block.x] = block.id;
     });
-    delete thisFloor.blocks;
-    thisFloor.map = blocks;
-    return main.mode == 'editor' ? blocks : thisFloor;
+    if (main.mode == 'editor') return blocks;
+
+    var thisFloor = {};
+    for (var name in maps[floorId]) {
+        if (name != 'blocks') {
+            var floorData = core.floors[floorId][name];
+            if (!core.utils.same(maps[floorId][name], floorData)) {
+                thisFloor[name] = core.clone(maps[floorId][name]);
+            }
+        }
+    }
+    var map = this.compressMap(blocks, floorId);
+    if (map != null) thisFloor.map = map;
+    return thisFloor;
 }
 
 ////// 更改地图画布的尺寸
@@ -967,6 +1019,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
             }
         }
     });
+    moveSteps = moveSteps.filter(function (t) { return ['up','down','left','right'].indexOf(t)>=0;});
 
     var nowX=32*x, nowY=32*y, step=0;
     var destX=x, destY=y;

@@ -1257,7 +1257,7 @@ moveHero_s
 /* moveHero_s
 tooltip : moveHero：移动勇士,用这种方式移动勇士的过程中将无视一切地形, 无视一切事件, 中毒状态也不会扣血
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=movehero%EF%BC%9A%E7%A7%BB%E5%8A%A8%E5%8B%87%E5%A3%AB
-default : [500,false,"上右3下2左上左2"]
+default : [500,false,"上右3下2后4左前2"]
 colour : this.dataColor
 Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0?', "async": true':'';
@@ -1846,8 +1846,8 @@ Global_Value_List
 
 
 Global_Flag_List
-    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示魔力值'|'显示魔防值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'开启加点'|'开启负伤'|'循环计算临界'|'允许轻按'|'允许走到将死领域'|'允许瞬间移动'|'阻激夹域后禁用快捷商店'
-    /*Global_Flag_List ['enableFloor','enableName','enableLv', 'enableHPMax', 'enableMana', 'enableMDef', 'enableMoney', 'enableExperience', 'enableLevelUp', 'levelUpLeftMode', 'enableKeys', 'enablePZF', 'enableDebuff', 'enableSkill', 'flyNearStair', 'enableAddPoint', 'enableNegativeDamage', 'useLoop', 'enableGentleClick', 'canGoDeadZone', 'enableMoveDirectly', 'disableShopOnDamage']*/;
+    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示魔力值'|'显示魔防值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'开启加点'|'开启负伤'|'仇恨怪战后扣减一半'|'夹击是否上整'|'循环计算临界'|'允许轻按'|'寻路算法不绕血瓶'|'允许走到将死领域'|'允许瞬间移动'|'允许查看禁用商店'|'阻激夹域后禁用快捷商店'|'检查控制台'
+    /*Global_Flag_List ['enableFloor','enableName','enableLv', 'enableHPMax', 'enableMana', 'enableMDef', 'enableMoney', 'enableExperience', 'enableLevelUp', 'levelUpLeftMode', 'enableKeys', 'enablePZF', 'enableDebuff', 'enableSkill', 'flyNearStair', 'enableAddPoint', 'enableNegativeDamage', 'hatredDecrease', 'betweenAttackCeil', 'useLoop', 'enableGentleClick', 'potionWhileRouting', 'canGoDeadZone', 'enableMoveDirectly', 'enableDisabledShop', 'disableShopOnDamage', 'checkConsole']*/;
 
 Colour
     :   'sdeirughvuiyasdeb'+ //为了被识别为复杂词法规则
@@ -2516,7 +2516,9 @@ ActionParser.prototype.StepString = function(steplist) {
     'up': '上',
     'down': '下',
     'left': '左',
-    'right': '右'
+    'right': '右',
+    'forward': '前',
+    'backward': '后'
   }
   var StepString = [];
   for(var ii=0,obj;obj=steplist[ii];ii++) {
@@ -2573,7 +2575,7 @@ MotaActionFunctions.PosString_pre = function(PosString){
 
 MotaActionFunctions.StepString_pre = function(StepString){
   //StepString='上右3下2左上左2'
-  var route = StepString.replace(/上/g,'U').replace(/下/g,'D').replace(/左/g,'L').replace(/右/g,'R');
+  var route = StepString.replace(/上/g,'U').replace(/下/g,'D').replace(/左/g,'L').replace(/右/g,'R').replace(/前/g,'F').replace(/后/g,'B');
 
   //copyed from core.js
   var ans=[], index=0;
@@ -2602,6 +2604,8 @@ MotaActionFunctions.StepString_pre = function(StepString){
       case "D": for (var i=0;i<number;i++) ans.push("down"); break;
       case "L": for (var i=0;i<number;i++) ans.push("left"); break;
       case "R": for (var i=0;i<number;i++) ans.push("right"); break;
+      case "F": for (var i=0;i<number;i++) ans.push("forward"); break;
+      case "B": for (var i=0;i<number;i++) ans.push("backward"); break;
     }
   }
   return ans;

@@ -220,6 +220,7 @@
     <div id="left7" style="z-index:-1;opacity: 0;"><!-- 多行文本编辑器 -->
         <button onclick="editor_multi.confirm()">确认</button>
         <button onclick="editor_multi.cancel()">取消</button>
+        <button onclick="editor_multi.format()">格式化</button>
         <input type="checkbox" onclick="editor_multi.toggerLint()" id="lintCheckbox"
                style="vertical-align: bottom;margin-left:6px"/>
         <span style="vertical-align: bottom; margin-left: -3px">语法检查</span>
@@ -548,12 +549,15 @@ if (location.protocol.indexOf("http")!=0) {
 <script src='_server/editor_multi.js'></script>
 <!-- blockly -->
 <script src="_server/blockly/Converter.bundle.min.js"></script>
-<script src="_server/blockly/blockly_compressed.min.js"></script>
-<script src="_server/blockly/blockly_config.min.js"></script>
+<script src="_server/blockly/blockly_compressed.js"></script>
+<script src="_server/blockly/blocks_compressed.js"></script>
+<script src="_server/blockly/javascript_compressed.js"></script>
+<script src="_server/blockly/zh-hans.js"></script>
 <script src='_server/editor_blockly.js'></script>
 <!-- codemirror -->
 <script src="_server/CodeMirror/codeMirror.bundle.min.js"></script>
 <script src="_server/CodeMirror/jshint.min.js"></script>
+<script src="_server/CodeMirror/beautify.min.js"></script>
 <script src="_server/CodeMirror/codeMirror.plugin.min.js"></script>
 <!-- colorPicker -->
 <script type="text/javascript" src="_server/colorPicker/color.all.min.js"></script>

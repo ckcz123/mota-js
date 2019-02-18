@@ -304,14 +304,6 @@ function triggerColorPicker(left, top) {
 }
 
 Blockly.FieldColour.prototype.createWidget_ = function() {
-    // Create the palette using Closure.
-    var picker = new goog.ui.ColorPicker();
-    picker.setSize(this.columns_ || Blockly.FieldColour.COLUMNS);
-    picker.setColors(this.colours_ || Blockly.FieldColour.COLOURS);
-    var div = Blockly.WidgetDiv.DIV;
-    picker.render(div);
-    picker.setSelectedColor(this.getValue());
-
     Blockly.WidgetDiv.hide();
 
     // console.log('here')
@@ -341,7 +333,7 @@ Blockly.FieldColour.prototype.createWidget_ = function() {
         triggerColorPicker(Blockly.WidgetDiv.DIV.style.left, Blockly.WidgetDiv.DIV.style.top);
     });
 
-    return picker;
+    return document.createElement('table');
 };
 
 Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {

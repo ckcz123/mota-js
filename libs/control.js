@@ -906,6 +906,8 @@ control.prototype.eventMoveHero = function(steps, time, callback) {
         }
     });
 
+    moveSteps = moveSteps.filter(function (t) { return ['up','down','left','right','forward','backward'].indexOf(t)>=0;});
+
     var step=0;
 
     var animate=window.setInterval(function() {
@@ -918,18 +920,23 @@ control.prototype.eventMoveHero = function(steps, time, callback) {
         }
         else {
             var direction = moveSteps[0];
+
+            // ------ 前进/后退
+            var o = direction == 'backward' ? -1 : 1;
+            if (direction == 'forward' || direction == 'backward') direction = core.getHeroLoc('direction');
+
             core.setHeroLoc('direction', direction);
             step++;
             if (step <= 4) {
-                core.drawHero(direction, x, y, 'leftFoot', 4 * step);
+                core.drawHero(direction, x, y, 'leftFoot', 4 * o * step);
             }
             else if (step <= 8) {
-                core.drawHero(direction, x, y, 'rightFoot', 4 * step);
+                core.drawHero(direction, x, y, 'rightFoot', 4 * o * step);
             }
             if (step == 8) {
                 step = 0;
-                core.setHeroLoc('x', x + core.utils.scan[direction].x, true);
-                core.setHeroLoc('y', y + core.utils.scan[direction].y, true);
+                core.setHeroLoc('x', x + o * core.utils.scan[direction].x, true);
+                core.setHeroLoc('y', y + o * core.utils.scan[direction].y, true);
                 core.control.updateFollowers();
                 moveSteps.shift();
             }
@@ -2413,7 +2420,8 @@ control.prototype.loadData = function (data, callback) {
 
     core.status.textAttribute = core.getFlag('textAttribute', core.status.textAttribute);
     var toAttribute = core.getFlag('globalAttribute', core.status.globalAttribute);
-    if (core.utils.hashCode(toAttribute) != core.utils.hashCode(core.status.globalAttribute)) {
+    // if (core.utils.hashCode(toAttribute) != core.utils.hashCode(core.status.globalAttribute)) {
+    if (!core.same(toAttribute, core.status.globalAttribute)) {
         core.status.globalAttribute = toAttribute;
         core.control.updateGlobalAttribute(Object.keys(toAttribute));
     }
@@ -2447,12 +2455,14 @@ control.prototype.getSaves = function (index, callback) {
         return;
     }
 
-    var ids = Object.keys(core.saves.ids).sort(function(a,b) {return a-b;}), number = ids.length;
+    var ids = Object.keys(core.saves.ids).filter(function(x){return x!=0;})
+        .sort(function(a,b) {return a-b;}), number = ids.length;
+
     // 不计0
     var saves = [];
 
     var load = function (index, callback) {
-        if (index >= number) {
+        if (index > number) {
             if (core.isset(callback)) callback(saves);
             return;
         }
@@ -2464,7 +2474,7 @@ control.prototype.getSaves = function (index, callback) {
             load(index+1, callback);
         })
     }
-    load(1, callback);
+    load(0, callback);
 }
 
 ////// 获得所有存在存档的存档位 //////

@@ -906,6 +906,8 @@ control.prototype.eventMoveHero = function(steps, time, callback) {
         }
     });
 
+    moveSteps = moveSteps.filter(function (t) { return ['up','down','left','right','forward','backward'].indexOf(t)>=0;});
+
     var step=0;
 
     var animate=window.setInterval(function() {
@@ -918,18 +920,23 @@ control.prototype.eventMoveHero = function(steps, time, callback) {
         }
         else {
             var direction = moveSteps[0];
+
+            // ------ 前进/后退
+            var o = direction == 'backward' ? -1 : 1;
+            if (direction == 'forward' || direction == 'backward') direction = core.getHeroLoc('direction');
+
             core.setHeroLoc('direction', direction);
             step++;
             if (step <= 4) {
-                core.drawHero(direction, x, y, 'leftFoot', 4 * step);
+                core.drawHero(direction, x, y, 'leftFoot', 4 * o * step);
             }
             else if (step <= 8) {
-                core.drawHero(direction, x, y, 'rightFoot', 4 * step);
+                core.drawHero(direction, x, y, 'rightFoot', 4 * o * step);
             }
             if (step == 8) {
                 step = 0;
-                core.setHeroLoc('x', x + core.utils.scan[direction].x, true);
-                core.setHeroLoc('y', y + core.utils.scan[direction].y, true);
+                core.setHeroLoc('x', x + o * core.utils.scan[direction].x, true);
+                core.setHeroLoc('y', y + o * core.utils.scan[direction].y, true);
                 core.control.updateFollowers();
                 moveSteps.shift();
             }

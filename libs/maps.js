@@ -1019,6 +1019,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
             }
         }
     });
+    moveSteps = moveSteps.filter(function (t) { return ['up','down','left','right'].indexOf(t)>=0;});
 
     var nowX=32*x, nowY=32*y, step=0;
     var destX=x, destY=y;

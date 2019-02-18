@@ -1420,6 +1420,10 @@ core.prototype.subarray = function (a, b) {
     return core.utils.subarray(a, b);
 }
 
+core.prototype.same = function (a, b) {
+    return core.utils.same(a, b);
+}
+
 core.prototype.clamp = function (x, a, b) {
     return core.utils.clamp(x, a, b);
 }

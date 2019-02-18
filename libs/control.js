@@ -2420,7 +2420,8 @@ control.prototype.loadData = function (data, callback) {
 
     core.status.textAttribute = core.getFlag('textAttribute', core.status.textAttribute);
     var toAttribute = core.getFlag('globalAttribute', core.status.globalAttribute);
-    if (core.utils.hashCode(toAttribute) != core.utils.hashCode(core.status.globalAttribute)) {
+    // if (core.utils.hashCode(toAttribute) != core.utils.hashCode(core.status.globalAttribute)) {
+    if (!core.same(toAttribute, core.status.globalAttribute)) {
         core.status.globalAttribute = toAttribute;
         core.control.updateGlobalAttribute(Object.keys(toAttribute));
     }

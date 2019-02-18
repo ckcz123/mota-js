@@ -881,6 +881,21 @@ editor.prototype.listen = function () {
     var shortcut = core.getLocalStorage('shortcut',{48: 0, 49: 0, 50: 0, 51: 0, 52: 0, 53: 0, 54: 0, 55: 0, 56: 0, 57: 0});
     document.body.onkeydown = function (e) {
 
+        // 监听Ctrl+S保存
+        if (e.ctrlKey && e.keyCode == 83) {
+            e.preventDefault();
+            if (editor_multi.id != "") {
+                editor_multi.confirm(); // 保存脚本编辑器
+            }
+            else if (editor_blockly.id != "") {
+                editor_blockly.confirm(); // 保存事件编辑器
+            }
+            else {
+                editor_mode.onmode('');
+            }
+            return;
+        }
+
         // 如果是开启事件/脚本编辑器状态，则忽略
         if (editor_multi.id!="" || editor_blockly.id!="")
             return;
@@ -910,6 +925,7 @@ editor.prototype.listen = function () {
             currDrawData = JSON.parse(JSON.stringify(reDo));
             reDo = null;
         }
+
         // PGUP和PGDOWN切换楼层
         if (e.keyCode==33) {
             e.preventDefault();

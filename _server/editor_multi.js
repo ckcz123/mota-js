@@ -1,3 +1,5 @@
+
+
 editor_multi = function () {
 
     var editor_multi = {};
@@ -18,6 +20,8 @@ editor_multi = function () {
         autoCloseBrackets: true,
         highlightSelectionMatches: {showToken: /\w/, annotateScrollbar: true}
     });
+
+    editor_multi.codeEditor = codeEditor;
 
     codeEditor.on("keyup", function (cm, event) {
         if (codeEditor.getOption("autocomplete") && !event.ctrlKey && (
@@ -58,6 +62,18 @@ editor_multi = function () {
     editor_multi.indent = function (field) {
         if (typeof(editor) !== typeof(undefined) && editor && editor.mode && editor.mode.indent) return editor.mode.indent(field);
         return '\t';
+    }
+
+    editor_multi.format = function () {
+        if (!editor_multi.lintAutocomplete) {
+            alert("只有代码才能进行格式化操作！");
+            return;
+        }
+        codeEditor.setValue(js_beautify(codeEditor.getValue(), {
+            brace_style: "collapse-preserve-inline",
+            indent_with_tabs: true,
+            jslint_happy: true
+        }));
     }
 
     editor_multi.import = function (id_, args) {

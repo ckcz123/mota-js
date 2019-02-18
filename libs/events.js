@@ -2178,12 +2178,19 @@ events.prototype.pushBox = function (data) {
     core.updateStatusBar();
 
     core.status.replay.animate = true;
-    core.moveHero(direction, function() {
-        core.status.replay.animate = false;
-        core.status.route.pop();
-        core.events.afterPushBox();
-        core.replay();
-    });
+    core.lockControl();
+    setTimeout(function () {
+        core.moveHero(direction, function() {
+            core.status.replay.animate = false;
+            core.status.route.pop();
+            core.events.afterPushBox();
+            // 可能有阻击...
+            if (core.status.event.id == null) {
+                core.unLockControl();
+                core.replay();
+            }
+        });
+    })
 
 }
 

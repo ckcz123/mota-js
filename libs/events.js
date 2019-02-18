@@ -221,6 +221,27 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
         ending += "[比赛]";
     }
 
+    var askRate = function () {
+        if (!core.isset(ending)) {
+            core.restart();
+            return;
+        }
+
+        core.ui.closePanel();
+        core.ui.drawConfirmBox("恭喜通关本塔，你想进行评分吗？", function () {
+            if (core.platform.isPC) {
+                window.open("/score.php?name="+core.firstData.name+"&num=10", "_blank");
+                core.restart();
+            }
+            else {
+                window.location.href = "/score.php?name="+core.firstData.name+"&num=10";
+            }
+        }, function () {
+            core.restart();
+        });
+
+    }
+
     // 下载录像
     var confirmDownload = function () {
 
@@ -234,9 +255,11 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
                 'route': core.encodeRoute(core.status.route)
             }
             core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify(obj));
-            core.restart();
+            // core.restart();
+            askRate();
         }, function () {
-            core.restart();
+            // core.restart();
+            askRate();
         })
 
     }

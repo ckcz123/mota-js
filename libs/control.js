@@ -2447,12 +2447,14 @@ control.prototype.getSaves = function (index, callback) {
         return;
     }
 
-    var ids = Object.keys(core.saves.ids).sort(function(a,b) {return a-b;}), number = ids.length;
+    var ids = Object.keys(core.saves.ids).filter(function(x){return x!=0;})
+        .sort(function(a,b) {return a-b;}), number = ids.length;
+
     // 不计0
     var saves = [];
 
     var load = function (index, callback) {
-        if (index >= number) {
+        if (index > number) {
             if (core.isset(callback)) callback(saves);
             return;
         }
@@ -2464,7 +2466,7 @@ control.prototype.getSaves = function (index, callback) {
             load(index+1, callback);
         })
     }
-    load(1, callback);
+    load(0, callback);
 }
 
 ////// 获得所有存在存档的存档位 //////

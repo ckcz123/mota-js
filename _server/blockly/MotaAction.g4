@@ -1528,15 +1528,22 @@ return code;
 */;
 
 choicesContext
-    :   '子选项' EvalString BGNL? Newline action+
+    :   '子选项' EvalString '颜色' EvalString? Colour BGNL? Newline action+
 
 
 /* choicesContext
 tooltip : 选项的选择
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=choices%EF%BC%9A%E7%BB%99%E7%94%A8%E6%88%B7%E6%8F%90%E4%BE%9B%E9%80%89%E9%A1%B9
-default : ["提示文字:红钥匙"]
+default : ["提示文字:红钥匙",""]
 colour : this.subColor
-var code = '{"text": "'+EvalString_0+'", "action": [\n'+action_0+']},\n';
+if (EvalString_1) {
+  var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
+  if (colorRe.test(EvalString_1))
+      EvalString_1 = ', "color": ['+EvalString_1+']';
+  else
+      EvalString_1 = ', "color": "'+EvalString_1+'"';
+}
+var code = '{"text": "'+EvalString_0+'"'+EvalString_1+', "action": [\n'+action_0+']},\n';
 return code;
 */;
 
@@ -2095,7 +2102,9 @@ ActionParser.prototype.parseAction = function() {
       if (!/^\w+\.png$/.test(data.background))
         data.background=setTextfunc(data.background);
       this.next = MotaActionBlocks['setText_s'].xmlText([
-        data.position,data.offset,data.title,`rgba(${data.title})`,data.text,`rgba(${data.text})`,data.background,`rgba(${data.background})`,data.bold,data.titlefont,data.textfont,data.time,this.next]);
+        data.position,data.offset,data.title,'rgba('+data.title+')',
+        data.text,'rgba('+data.text+')',data.background,'rgba('+data.background+')',
+        data.bold,data.titlefont,data.textfont,data.time,this.next]);
       break;
     case "tip":
       this.next = MotaActionBlocks['tip_s'].xmlText([
@@ -2267,7 +2276,7 @@ ActionParser.prototype.parseAction = function() {
     case "setFg": // 颜色渐变
       if(this.isset(data.color)){
         this.next = MotaActionBlocks['setFg_0_s'].xmlText([
-          data.color,`rgba(${data.color})`,data.time||0,data.async||false,this.next]);
+          data.color,'rgba('+data.color+')',data.time||0,data.async||false,this.next]);
       } else {
         this.next = MotaActionBlocks['setFg_1_s'].xmlText([
           data.time||0,data.async||false,this.next]);
@@ -2275,7 +2284,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "screenFlash": // 画面闪烁
         this.next = MotaActionBlocks['screenFlash_s'].xmlText([
-          data.color,`rgba(${data.color})`,data.time||500,data.times||1,data.async||false,this.next]);
+          data.color,'rgba('+data.color+')',data.time||500,data.times||1,data.async||false,this.next]);
       break;
     case "setWeather": // 更改天气
       this.next = MotaActionBlocks['setWeather_s'].xmlText([
@@ -2402,7 +2411,7 @@ ActionParser.prototype.parseAction = function() {
       var text_choices = null;
       for(var ii=data.choices.length-1,choice;choice=data.choices[ii];ii--) {
         text_choices=MotaActionBlocks['choicesContext'].xmlText([
-          choice.text,this.insertActionList(choice.action),text_choices]);
+          choice.text,choice.color,'rgba('+choice.color+')',this.insertActionList(choice.action),text_choices]);
       }
       this.next = MotaActionBlocks['choices_s'].xmlText([
         this.isset(data.text)?this.EvalString(data.text):null,'','',text_choices,this.next]);

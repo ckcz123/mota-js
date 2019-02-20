@@ -503,6 +503,73 @@ ui.prototype.calTextBoxWidth = function (canvas, content, min_width, max_width) 
     }
 }
 
+ui.prototype.__drawText = function (canvas, content, content_left, content_top, valid_width,
+                                    color, per_height, time) {
+
+    var offsetx = content_left, offsety = content_top;
+    core.setFillStyle(canvas, color);
+    var index = 0, currcolor = color, changed = false;
+
+    var drawNext = function () {
+        if (index >= content.length) return false;
+        if (changed) {
+            core.setFillStyle(canvas, currcolor);
+            changed = false;
+        }
+
+        // get next character
+        var ch = content.charAt(index++);
+        // \n, \\n
+        if (ch == '\n' || (ch=='\\' && content.charAt(index)=='n')) {
+            offsetx = content_left;
+            offsety += per_height;
+            if (ch=='\\') index++;
+            return drawNext();
+        }
+        // \r, \\r
+        if (ch == '\r' || (ch=='\\' && content.charAt(index)=='r')) {
+            if (ch == '\\') index++;
+            changed = true;
+            // 检查是不是 []
+            var index2;
+            if (content.charAt(index) == '[' && ((index2=content.indexOf(']', index))>=0)) {
+                // 变色
+                var str = content.substring(index+1, index2);
+                if (str=="") currcolor = color;
+                else currcolor = str;
+                index = index2+1;
+            }
+            else currcolor = color;
+            return drawNext();
+        }
+        // 检查是不是自动换行
+        if (core.isset(valid_width)) {
+            var charwidth = core.calWidth(canvas, ch);
+            if (offsetx + charwidth > content_left + valid_width) {
+                index--;
+                offsetx = content_left;
+                offsety += per_height;
+                return drawNext();
+            }
+        }
+        // 输出
+        core.fillText(canvas, ch, offsetx, offsety);
+        offsetx += charwidth;
+        return true;
+    };
+
+    if (!core.isset(time) || time<=0) while (drawNext());
+    else {
+        core.status.event.interval = setInterval(function () {
+            changed = true;
+            if (!drawNext()) {
+                clearInterval(core.status.event.interval);
+                core.status.event.interval = null;
+            }
+        }, time);
+    }
+}
+
 ////// 绘制一个对话框 //////
 ui.prototype.drawTextBox = function(content, showAll) {
 
@@ -729,69 +796,10 @@ ui.prototype.drawTextBox = function(content, showAll) {
         core.drawImage('ui', image, 0, 0, image.width, image.height, left+10, top+10, 70, 70);
     }
 
-    var offsetx = content_left, offsety = content_top;
     core.setFont('ui', font);
-    core.setFillStyle('ui', textColor);
-    var index = 0, currcolor = textColor, changed = false;
 
-    var drawNext = function () {
-        if (index >= content.length) return false;
-        if (changed) {
-            core.setFillStyle('ui', currcolor);
-            changed = false;
-        }
-
-        // get next character
-        var ch = content.charAt(index++);
-        // \n, \\n
-        if (ch == '\n' || (ch=='\\' && content.charAt(index)=='n')) {
-            offsetx = content_left;
-            offsety += textfont+5;
-            if (ch=='\\') index++;
-            return drawNext();
-        }
-        // \r, \\r
-        if (ch == '\r' || (ch=='\\' && content.charAt(index)=='r')) {
-            if (ch == '\\') index++;
-            changed = true;
-            // 检查是不是 []
-            var index2;
-            if (content.charAt(index) == '[' && ((index2=content.indexOf(']', index))>=0)) {
-                // 变色
-                var str = content.substring(index+1, index2);
-                if (str=="") currcolor = textColor;
-                else currcolor = str;
-                index = index2+1;
-            }
-            else currcolor = textColor;
-            return drawNext();
-        }
-        // 检查是不是自动换行
-        var charwidth = core.calWidth('ui', ch);
-        if (offsetx + charwidth > content_left + validWidth) {
-            index--;
-            offsetx = content_left;
-            offsety += textfont+5;
-            return drawNext();
-        }
-        // 输出
-        core.fillText('ui', ch, offsetx, offsety);
-        offsetx += charwidth;
-        return true;
-    };
-
-    if (showAll || textAttribute.time<=0 || core.status.event.id!='action') {
-        while (drawNext());
-    }
-    else {
-        core.status.event.interval = setInterval(function () {
-            changed = true;
-            if (!drawNext()) {
-                clearInterval(core.status.event.interval);
-                core.status.event.interval = null;
-            }
-        }, textAttribute.time);
-    }
+    this.__drawText('ui', content, content_left, content_top, validWidth, textColor, textfont + 5,
+        (showAll || textAttribute.time<=0 || core.status.event.id!='action')?0:textAttribute.time);
 
 }
 
@@ -812,7 +820,8 @@ ui.prototype.drawScrollText = function (content, time, callback) {
 
     var font = textfont+"px "+core.status.globalAttribute.font;
     if (textAttribute.bold) font = "bold "+font;
-    var contents = core.splitLines('ui', content), lines = contents.length;
+    var realContent = content.replace(/(\r|\\r)(\[.*?])?/g, "");
+    var contents = core.splitLines('ui', realContent), lines = contents.length;
 
     // 计算总高度，按1.4倍行距计算
     var width = 416, height = textfont * 1.4 * lines;
@@ -821,15 +830,8 @@ ui.prototype.drawScrollText = function (content, time, callback) {
     tempCanvas.canvas.height = height;
     tempCanvas.clearRect(0, 0, width, height);
     tempCanvas.font = font;
-    tempCanvas.fillStyle = textColor;
 
-    // 全部绘制
-    var currH = textfont;
-    for (var i = 0; i < lines; ++i) {
-        var text = contents[i];
-        tempCanvas.fillText(text, offset, currH);
-        currH += 1.4 * textfont;
-    }
+    this.__drawText(tempCanvas, content, 0, textfont, null, textColor, 1.4*textfont, 0);
 
     // 开始绘制到UI上
     core.clearMap('ui');
@@ -891,17 +893,19 @@ ui.prototype.drawChoices = function(content, choices) {
 
     var contents = null;
     var content_left = left + 15;
+    var validWidth = width-(content_left-left)-10;
 
     if (core.isset(content)) {
         // 获得name, image, icon
-        // 获得name, image, icon
         var info = this.getTitleAndIcon(content);
         content = core.replaceText(info.content);
+        var realContent = content.replace(/(\r|\\r)(\[.*?])?/g, "");
         id=info.id; name=info.name; image=info.image;
         icon=info.icon; iconHeight=info.iconHeight; animate=info.animate;
         if (id=='hero' || core.isset(icon))
             content_left = left+60;
-        contents = core.splitLines('ui', content, width-(content_left-left)-10, 'bold 15px '+globalFont);
+        validWidth = width-(content_left-left)-10
+        contents = core.splitLines('ui', realContent, validWidth, 'bold 15px '+globalFont);
 
         // content部分高度
         var cheight=0;
@@ -964,16 +968,16 @@ ui.prototype.drawChoices = function(content, choices) {
         }
 
         core.setTextAlign('ui', 'left');
-        for (var i=0;i<contents.length;i++) {
-            core.fillText('ui', contents[i], content_left, content_top, textColor, 'bold 15px '+globalFont);
-            content_top+=20;
-        }
+        core.setFont('ui', 'bold 15px '+globalFont);
+        this.__drawText('ui', content, content_left, content_top, validWidth, textColor, 20, 0);
     }
 
     // 选项
     core.setTextAlign('ui', 'center');
     for (var i = 0; i < choices.length; i++) {
-        core.setFillStyle('ui', choices[i].color || textColor);
+        var color = choices[i].color || textColor;
+        if (color instanceof Array) color = core.arrayToRGBA(color);
+        core.setFillStyle('ui', color);
         core.fillText('ui', core.replaceText(choices[i].text || choices[i]), 208, choice_top + 32 * i, null, "bold 17px "+globalFont);
     }
 

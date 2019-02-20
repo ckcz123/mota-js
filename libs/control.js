@@ -2151,6 +2151,9 @@ control.prototype.autosave = function (removeLast) {
 
 /////// 实际进行自动存档 //////
 control.prototype.checkAutosave = function () {
+
+    if (!core.animateFrame || !core.saves || !core.saves.autosave) return;
+
     core.setLocalStorage('totalTime', core.animateFrame.totalTime);
 
     if (core.saves.autosave.data == null || !core.saves.autosave.updated) return;
@@ -2765,7 +2768,8 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.image.toolbox.src = core.statusBar.icons.rewind.src;
 
         core.statusBar.image.keyboard.src = core.statusBar.icons.book.src;
-        core.statusBar.image.shop.style.opacity = 0;
+
+        core.statusBar.image.shop.src = core.statusBar.icons.floor.src;
 
         core.statusBar.image.save.src = core.statusBar.icons.speedDown.src;
 
@@ -2790,7 +2794,8 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.image.toolbox.src = core.statusBar.icons.toolbox.src;
 
         core.statusBar.image.keyboard.src = core.statusBar.icons.keyboard.src;
-        core.statusBar.image.shop.style.opacity = 1;
+
+        core.statusBar.image.shop.src = core.statusBar.icons.shop.src;
 
         core.statusBar.image.save.src = core.statusBar.icons.save.src;
 

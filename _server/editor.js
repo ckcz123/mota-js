@@ -797,25 +797,21 @@ editor.prototype.listen = function () {
             currDrawData.info = JSON.parse(JSON.stringify(editor.info));
             reDo = null;
             // console.log(stepPostfix);
-            if (editor.layerMod!='map'  && editor.info.images && editor.info.images.indexOf('48')!==-1){
-                printe('前景/背景不支持48的图块');
-            } else {
-                if(editor.brushMod==='tileset' && core.tilesets.indexOf(editor.info.images)!==-1){
-                    var imgWidth=~~(core.material.images.tilesets[editor.info.images].width/32);
-                    var x0=stepPostfix[0].x;
-                    var y0=stepPostfix[0].y;
-                    var idnum=editor.info.idnum;
-                    for (var ii = 0; ii < stepPostfix.length; ii++){
-                        if(stepPostfix[ii].y!=y0){
-                            y0++;
-                            idnum+=imgWidth;
-                        }
-                        editor[editor.layerMod][stepPostfix[ii].y][stepPostfix[ii].x] = editor.ids[editor.indexs[idnum+stepPostfix[ii].x-x0]];
+            if(editor.brushMod==='tileset' && core.tilesets.indexOf(editor.info.images)!==-1){
+                var imgWidth=~~(core.material.images.tilesets[editor.info.images].width/32);
+                var x0=stepPostfix[0].x;
+                var y0=stepPostfix[0].y;
+                var idnum=editor.info.idnum;
+                for (var ii = 0; ii < stepPostfix.length; ii++){
+                    if(stepPostfix[ii].y!=y0){
+                        y0++;
+                        idnum+=imgWidth;
                     }
-                } else {
-                    for (var ii = 0; ii < stepPostfix.length; ii++)
-                    editor[editor.layerMod][stepPostfix[ii].y][stepPostfix[ii].x] = editor.info;
+                    editor[editor.layerMod][stepPostfix[ii].y][stepPostfix[ii].x] = editor.ids[editor.indexs[idnum+stepPostfix[ii].x-x0]];
                 }
+            } else {
+                for (var ii = 0; ii < stepPostfix.length; ii++)
+                editor[editor.layerMod][stepPostfix[ii].y][stepPostfix[ii].x] = editor.info;
             }
             // console.log(editor.map);
             editor.updateMap();

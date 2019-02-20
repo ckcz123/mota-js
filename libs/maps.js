@@ -432,11 +432,16 @@ maps.prototype.drawBlock = function (block, animate, dx, dy) {
     if (!blockInfo.isTileset) x = (animate||0)%(block.event.animate||1);
 
     if (core.isset(block.name)) {
-        core.clearMap(block.name, block.x * 32, block.y * 32, 32, 32);
+        core.clearMap(block.name, block.x * 32, block.y * 32 + 32 - height, 32, height);
         if (block.name == 'bg') {
+            if (height>32) {
+                core.clearMap(block.name, block.x * 32, block.y * 32 - 32, 32, 32);
+                core.drawImage('bg', core.material.groundCanvas.canvas, block.x * 32, block.y * 32 - 32);
+            }
             core.drawImage('bg', core.material.groundCanvas.canvas, block.x * 32, block.y * 32);
         }
-        core.drawImage(block.name, image, x * 32, y * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+        core.drawImage(block.name, image, x * 32, y * height, 32, height,
+            block.x * 32, block.y * 32 + 32 - height, 32, height);
         return;
     }
 

@@ -2369,6 +2369,7 @@ control.prototype.syncLoad = function () {
                                     core.removeLocalForage("save"+i);
                             }
                         }
+                        core.ui.closePanel();
                         core.drawText("同步成功！\n你的本地所有存档均已被覆盖。");
                     }, function () {
                         core.status.event.selection=0;

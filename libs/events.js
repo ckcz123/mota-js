@@ -278,7 +278,7 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
         var doUpload = function(username) {
             var hp = core.status.hero.hp;
             if (username==undefined) hp = 1;
-
+            core.ui.closePanel();
             // upload
             var formData = new FormData();
             formData.append('type', 'score');

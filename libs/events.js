@@ -109,6 +109,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
         core.clearStatusBar();
 
         var post_start = function () {
+            core.ui.closePanel();
 
             core.control.triggerStatusBar('show');
             core.dom.musicBtn.style.display = 'none';

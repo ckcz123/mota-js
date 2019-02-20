@@ -1654,7 +1654,7 @@ control.prototype.setReplaySpeed = function (speed) {
 control.prototype.stopReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.isReplaying()) return;
+    // if (!core.isReplaying()) return;
     core.status.replay.toReplay = [];
     core.status.replay.totalList = [];
     core.status.replay.replaying=false;
@@ -1962,8 +1962,27 @@ control.prototype.replay = function () {
         return;
     }
 
-    core.stopReplay();
-    core.insertAction("录像文件出错");
+    // core.stopReplay();
+    // core.insertAction("录像文件出错");
+
+    core.status.replay.replaying = false;
+    main.log("录像文件出错，当前操作："+action+
+        "\n接下来10个操作是："+core.status.replay.toReplay.slice(0, 10).toString());
+    core.ui.drawConfirmBox("录像文件出错，你想回到上个节点吗？", function () {
+        core.ui.closePanel();
+        if (core.status.replay.save.length > 0) {
+            core.status.replay.replaying = true;
+            core.status.replay.pausing = true;
+            core.rewindReplay();
+        }
+        else {
+            core.drawTip("无法回到上一个节点");
+            core.stopReplay();
+        }
+    }, function () {
+        core.ui.closePanel();
+        core.stopReplay();
+    });
 
 }
 

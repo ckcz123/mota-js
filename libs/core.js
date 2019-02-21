@@ -53,6 +53,7 @@ function core() {
         'bgmStatus': false, // 是否播放BGM
         'soundStatus': true, // 是否播放SE
         'playingBgm': null, // 正在播放的BGM
+        'lastBgm': null, // 上次播放的bgm
         'gainNode': null,
         'playingSounds': {}, // 正在播放的SE
         'volume': 1.0, // 音量

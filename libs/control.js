@@ -2604,6 +2604,7 @@ control.prototype.playBgm = function (bgm) {
     if (!core.musicStatus.bgmStatus) {
         try {
             core.musicStatus.playingBgm = bgm;
+            core.musicStatus.lastBgm = bgm;
             core.material.bgms[bgm].pause();
         }
         catch (e) {
@@ -2637,6 +2638,7 @@ control.prototype.playBgm = function (bgm) {
         core.material.bgms[bgm].currentTime = 0;
         core.material.bgms[bgm].play();
         core.musicStatus.playingBgm = bgm;
+        core.musicStatus.lastBgm = bgm;
     }
     catch (e) {
         console.log("无法播放BGM "+bgm);
@@ -2667,7 +2669,7 @@ control.prototype.resumeBgm = function () {
 
     // 恢复BGM
     try {
-        core.playBgm(core.musicStatus.playingBgm);
+        core.playBgm(core.musicStatus.playingBgm || core.musicStatus.lastBgm);
     }
     catch (e) {
         console.log("无法恢复BGM");

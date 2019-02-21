@@ -137,7 +137,7 @@ editor_blockly = function () {
       MotaActionBlocks['setWeather_s'].xmlText(),
       MotaActionBlocks['playBgm_s'].xmlText(),
       MotaActionBlocks['pauseBgm_s'].xmlText(),
-      // MotaActionBlocks['resumeBgm_s'].xmlText(),
+      MotaActionBlocks['resumeBgm_s'].xmlText(),
       MotaActionBlocks['loadBgm_s'].xmlText(),
       MotaActionBlocks['freeBgm_s'].xmlText(),
       MotaActionBlocks['playSound_s'].xmlText(),

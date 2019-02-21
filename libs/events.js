@@ -967,12 +967,10 @@ events.prototype.doAction = function() {
             core.pauseBgm();
             this.doAction();
             break
-        /*
         case "resumeBgm":
             core.resumeBgm();
             this.doAction();
             break
-            */
         case "loadBgm":
             if (core.platform.isPC)
                 core.loadBgm(data.name);

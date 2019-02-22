@@ -316,7 +316,7 @@ main.prototype.setMainTipsText = function (text) {
 main.prototype.log = function (e) {
     if (e) {
         if (main.core && main.core.platform && !main.core.platform.isPC) {
-            console.log((e.stack || e.toString()).replace("\n", " --- "));
+            console.log((e.stack || e.toString()));
         }
         else {
             console.log(e);

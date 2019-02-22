@@ -505,6 +505,7 @@ ui.prototype.calTextBoxWidth = function (canvas, content, min_width, max_width) 
 
 ui.prototype.__drawText = function (canvas, content, content_left, content_top, valid_width,
                                     color, per_height, time) {
+    core.setTextAlign(canvas, 'left');
 
     var offsetx = content_left, offsety = content_top;
     core.setFillStyle(canvas, color);
@@ -543,14 +544,12 @@ ui.prototype.__drawText = function (canvas, content, content_left, content_top, 
             return drawNext();
         }
         // 检查是不是自动换行
-        if (core.isset(valid_width)) {
-            var charwidth = core.calWidth(canvas, ch);
-            if (offsetx + charwidth > content_left + valid_width) {
-                index--;
-                offsetx = content_left;
-                offsety += per_height;
-                return drawNext();
-            }
+        var charwidth = core.calWidth(canvas, ch);
+        if (core.isset(valid_width) && offsetx + charwidth > content_left + valid_width) {
+            index--;
+            offsetx = content_left;
+            offsety += per_height;
+            return drawNext();
         }
         // 输出
         core.fillText(canvas, ch, offsetx, offsety);
@@ -831,7 +830,7 @@ ui.prototype.drawScrollText = function (content, time, callback) {
     tempCanvas.clearRect(0, 0, width, height);
     tempCanvas.font = font;
 
-    this.__drawText(tempCanvas, content, 0, textfont, null, textColor, 1.4*textfont, 0);
+    this.__drawText(tempCanvas, content, offset, textfont, null, textColor, 1.4*textfont, 0);
 
     // 开始绘制到UI上
     core.clearMap('ui');
@@ -967,7 +966,6 @@ ui.prototype.drawChoices = function(content, choices) {
             }
         }
 
-        core.setTextAlign('ui', 'left');
         core.setFont('ui', 'bold 15px '+globalFont);
         this.__drawText('ui', content, content_left, content_top, validWidth, textColor, 20, 0);
     }

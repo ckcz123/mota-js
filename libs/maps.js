@@ -208,7 +208,7 @@ maps.prototype.decompressMap = function (mapArr, floorId) {
     var mw = core.floors[floorId].width || 13;
     var mh = core.floors[floorId].height || 13;
     for (var x=0;x<mh;x++) {
-        var floorMap = core.floors.map[x] || [];
+        var floorMap = core.floors[floorId].map[x] || [];
         if (mapArr[x] === 0) {
             mapArr[x] = floorMap;
         }

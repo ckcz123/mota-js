@@ -864,11 +864,15 @@ events.prototype.doAction = function() {
                     y = core.calValue(data.loc[1], prefix);
                 }
                 var floorId=data.floorId || core.status.floorId;
-                if (floorId==core.status.floorId)
-                    core.openDoor(null, x, y, data.needKey, function() {
+                if (floorId==core.status.floorId) {
+                    var _callback = function () {
                         core.lockControl();
                         core.events.doAction();
-                    })
+                    }
+                    if (!core.openDoor(null, x, y, data.needKey, _callback)) {
+                        _callback();
+                    }
+                }
                 else {
                     core.removeBlock(x, y, floorId);
                     this.doAction();
@@ -1423,8 +1427,7 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
     // 是否存在门
     if (!core.terrainExists(x, y, id) || !(id.endsWith("Door") || id.endsWith("Wall"))
         || !core.isset(core.material.icons.animates[id])) {
-        if (core.isset(callback)) callback();
-        return;
+        return false;
     }
     if (core.status.automaticRoute.moveStepBeforeStop.length==0) {
         core.status.automaticRoute.moveStepBeforeStop=core.status.automaticRoute.autoStepRoutes.slice(core.status.automaticRoute.autoStep-1,core.status.automaticRoute.autoStepRoutes.length);
@@ -1440,8 +1443,7 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
                 core.drawTip("你没有" + ((core.material.items[key]||{}).name||"钥匙"));
             else core.drawTip("无法开启此门");
             core.clearContinueAutomaticRoute();
-            if (core.isset(callback)) callback();
-            return;
+            return false;
         }
         core.autosave(true);
         core.removeItem(key);
@@ -1469,7 +1471,9 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
         }
         core.clearMap('event', 32 * x, 32 * y, 32, 32);
         core.drawImage('event', core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
-    }, speed / core.status.replay.speed)
+    }, speed / core.status.replay.speed);
+
+    return true;
 }
 
 ////// 战斗 //////

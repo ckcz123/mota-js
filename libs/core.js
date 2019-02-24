@@ -623,7 +623,7 @@ core.prototype.nearHero = function (x, y) {
 
 ////// 开门 //////
 core.prototype.openDoor = function (id, x, y, needKey, callback) {
-    core.events.openDoor(id, x, y, needKey, callback);
+    return core.events.openDoor(id, x, y, needKey, callback);
 }
 
 ////// 战斗 //////

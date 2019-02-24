@@ -176,6 +176,7 @@ core.openDoor(id, x, y, needKey, callback)    [异步]
 尝试开门操作。id为目标点的ID，x和y为坐标，needKey表示是否需要使用钥匙，callback为开门完毕后的回调函数。
 id可为null代表使用地图上的值。
 例如：core.openDoor('yellowDoor', 10, 3, false, function() {console.log("1")})
+此函数返回true代表成功开门，并将执行callback回调；返回false代表无法开门，且不会执行回调函数。
 
 
 core.battle(id, x, y, force, callback)    [异步]

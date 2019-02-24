@@ -208,13 +208,14 @@ maps.prototype.decompressMap = function (mapArr, floorId) {
     var mw = core.floors[floorId].width || 13;
     var mh = core.floors[floorId].height || 13;
     for (var x=0;x<mh;x++) {
+        var floorMap = core.floors.map[x] || [];
         if (mapArr[x] === 0) {
-            mapArr[x] = core.clone(core.floors[floorId].map[x]);
+            mapArr[x] = floorMap;
         }
         else {
             for (var y=0;y<mw;y++) {
                 if (mapArr[x][y] === -1) {
-                    mapArr[x][y] = core.floors[floorId].map[x][y];
+                    mapArr[x][y] = floorMap[y] || 0;
                 }
             }
         }

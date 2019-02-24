@@ -1814,7 +1814,7 @@ events.prototype.moveImage = function (code, to, opacityVal, time, callback) {
     var animate = setInterval(function () {
         step++;
         moveStep();
-        if (step > steps) {
+        if (step == steps) {
             if (core.isset(opacityVal))
                 core.setOpacity(name, opacityVal);
             delete core.animateFrame.asyncId[animate];

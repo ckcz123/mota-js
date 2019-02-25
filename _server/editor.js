@@ -153,8 +153,8 @@ editor.prototype.idsInit = function (maps, icons) {
         if(img.width%32 || img.height%32){
             alert(imgName+'的长或宽不是32的整数倍, 请修改后刷新页面');
         }
-        if(img.width*img.height > 32*32*1000){
-            alert(imgName+'上的图块数量超过了1000，请修改后刷新页面');
+        if(img.width*img.height > 32*32*3000){
+            alert(imgName+'上的图块数量超过了3000，请修改后刷新页面');
         }
         for (var id=startOffset; id<startOffset+width*height;id++) {
             var x = (id-startOffset)%width, y = parseInt((id-startOffset)/width);

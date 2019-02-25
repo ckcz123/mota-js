@@ -2050,7 +2050,7 @@ events.prototype.useItem = function(itemId) {
         core.ui.drawThumbnail(core.status.floorId, 'ui', core.status.thisMap.blocks, 0, 0, 416, toX, toY, core.status.hero.loc, core.getFlag('heroIcon', "hero.png"));
         var offsetX = core.clamp(toX-6, 0, core.bigmap.width-13), offsetY = core.clamp(toY-6, 0, core.bigmap.height-13);
         core.fillRect('ui',(toX-offsetX)*32,(toY-offsetY)*32,32,32,fillstyle);
-        core.status.event.data = {"x": toX, "y": toY, "poxX": toX-offsetX, "posY": toY-offsetY};
+        core.status.event.data = {"x": toX, "y": toY, "posX": toX-offsetX, "posY": toY-offsetY};
         core.drawTip("请确认当前中心对称飞行器的位置");
         return;
     }

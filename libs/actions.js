@@ -734,6 +734,7 @@ actions.prototype.keyDownCtrl = function () {
 
 //////
 actions.prototype.clickCenterFly = function(x, y) {
+    core.ui.closePanel();
     if (x==core.status.event.data.poxX && y==core.status.event.data.posY) {
         if (core.canUseItem('centerFly')) {
             core.useItem('centerFly');
@@ -742,10 +743,10 @@ actions.prototype.clickCenterFly = function(x, y) {
             core.drawTip('当前不能使用中心对称飞行器');
         }
     }
-    core.ui.closePanel();
 }
 
 actions.prototype.keyUpCenterFly = function (keycode) {
+    core.ui.closePanel();
     if (keycode==51 ||  keycode==13 || keycode==32 || keycode==67) {
         if (core.canUseItem('centerFly')) {
             core.useItem('centerFly');
@@ -754,7 +755,6 @@ actions.prototype.keyUpCenterFly = function (keycode) {
             core.drawTip('当前不能使用中心对称飞行器');
         }
     }
-    core.ui.closePanel();
 }
 
 

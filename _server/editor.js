@@ -645,12 +645,6 @@ editor.prototype.listen = function () {
         if(clickpath.length>=2 && clickpath[0].indexOf('id_')===0){editor.lastClickId=clickpath[0]}
     }
 
-    var iconLib=document.getElementById('iconLib');
-    iconLib.onmousedown = function (e) {
-        console.log("iconLib: ("+e.clientX+","+e.clientY+")");
-        e.stopPropagation();
-    }
-
     var eui=document.getElementById('eui');
     var uc = eui.getContext('2d');
 
@@ -971,9 +965,38 @@ editor.prototype.listen = function () {
         }
     }
 
+    var getScrollBarHeight = function () {
+        var outer = document.createElement("div");
+        outer.style.visibility = "hidden";
+        outer.style.width = "100px";
+        outer.style.msOverflowStyle = "scrollbar"; // needed for WinJS apps
+
+        document.body.appendChild(outer);
+
+        var widthNoScroll = outer.offsetWidth;
+        // force scrollbars
+        outer.style.overflow = "scroll";
+
+        // add innerdiv
+        var inner = document.createElement("div");
+        inner.style.width = "100%";
+        outer.appendChild(inner);
+
+        var widthWithScroll = inner.offsetWidth;
+
+        // remove divs
+        outer.parentNode.removeChild(outer);
+
+        return widthNoScroll - widthWithScroll;
+    }
+    var scrollBarHeight = getScrollBarHeight();
+    console.log(scrollBarHeight);
+
     var dataSelection = document.getElementById('dataSelection');
+    var iconLib=document.getElementById('iconLib');
     iconLib.onmousedown = function (e) {
         e.stopPropagation();
+        if (!editor.isMobile && e.clientY>=(635 - 5 - scrollBarHeight)) return;
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
         var loc = {

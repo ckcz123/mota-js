@@ -734,7 +734,9 @@ actions.prototype.keyDownCtrl = function () {
 
 //////
 actions.prototype.clickCenterFly = function(x, y) {
-    if (x==core.status.event.data.poxX && y==core.status.event.data.posY) {
+    var posX = core.status.event.data.posX, posY = core.status.event.data.posY;
+    core.ui.closePanel();
+    if (x==posX&& y==posY) {
         if (core.canUseItem('centerFly')) {
             core.useItem('centerFly');
         }
@@ -742,10 +744,10 @@ actions.prototype.clickCenterFly = function(x, y) {
             core.drawTip('当前不能使用中心对称飞行器');
         }
     }
-    core.ui.closePanel();
 }
 
 actions.prototype.keyUpCenterFly = function (keycode) {
+    core.ui.closePanel();
     if (keycode==51 ||  keycode==13 || keycode==32 || keycode==67) {
         if (core.canUseItem('centerFly')) {
             core.useItem('centerFly');
@@ -754,7 +756,6 @@ actions.prototype.keyUpCenterFly = function (keycode) {
             core.drawTip('当前不能使用中心对称飞行器');
         }
     }
-    core.ui.closePanel();
 }
 
 
@@ -2062,6 +2063,7 @@ actions.prototype.clickSyncSave = function (x,y) {
                                         core.removeLocalForage("save"+i);
                                 }
                             }
+                            core.ui.closePanel();
                             core.drawText("读取成功！\n你的本地所有存档均已被覆盖。");
                         }, function () {
                             core.status.event.selection=0;

@@ -316,7 +316,7 @@ main.prototype.setMainTipsText = function (text) {
 main.prototype.log = function (e) {
     if (e) {
         if (main.core && main.core.platform && !main.core.platform.isPC) {
-            console.log((e.stack || e.toString()).replace("\n", " --- "));
+            console.log((e.stack || e.toString()));
         }
         else {
             console.log(e);
@@ -490,7 +490,6 @@ main.statusBar.image.toolbox.ondblclick = function (e) {
     e.stopPropagation();
 
     if (core.isReplaying()) {
-        core.rewindReplay();
         return;
     }
 
@@ -515,6 +514,11 @@ main.statusBar.image.keyboard.onclick = function (e) {
 ////// 点击状态栏中的快捷商店键盘时 //////
 main.statusBar.image.shop.onclick = function (e) {
     e.stopPropagation();
+
+    if (core.isReplaying()) {
+        core.viewMapReplay();
+        return;
+    }
 
     if (main.core.isPlaying())
         main.core.openQuickShop(true);
@@ -664,7 +668,9 @@ main.dom.musicBtn.onclick = function () {
 
 window.onblur = function () {
     if (main.core && main.core.control) {
-        main.core.control.checkAutosave();
+        try {
+            main.core.control.checkAutosave();
+        } catch (e) {main.log(e);}
     }
 }
 

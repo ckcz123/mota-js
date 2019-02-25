@@ -1654,7 +1654,7 @@ control.prototype.setReplaySpeed = function (speed) {
 control.prototype.stopReplay = function () {
     if (!core.isPlaying()) return;
     if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.isReplaying()) return;
+    // if (!core.isReplaying()) return;
     core.status.replay.toReplay = [];
     core.status.replay.totalList = [];
     core.status.replay.replaying=false;
@@ -1962,8 +1962,27 @@ control.prototype.replay = function () {
         return;
     }
 
-    core.stopReplay();
-    core.insertAction("录像文件出错");
+    // core.stopReplay();
+    // core.insertAction("录像文件出错");
+
+    core.status.replay.replaying = false;
+    main.log("录像文件出错，当前操作："+action+
+        "\n接下来10个操作是："+core.status.replay.toReplay.slice(0, 10).toString());
+    core.ui.drawConfirmBox("录像文件出错，你想回到上个节点吗？", function () {
+        core.ui.closePanel();
+        if (core.status.replay.save.length > 0) {
+            core.status.replay.replaying = true;
+            core.status.replay.pausing = true;
+            core.rewindReplay();
+        }
+        else {
+            core.drawTip("无法回到上一个节点");
+            core.stopReplay();
+        }
+    }, function () {
+        core.ui.closePanel();
+        core.stopReplay();
+    });
 
 }
 
@@ -2151,6 +2170,9 @@ control.prototype.autosave = function (removeLast) {
 
 /////// 实际进行自动存档 //////
 control.prototype.checkAutosave = function () {
+
+    if (!core.animateFrame || !core.saves || !core.saves.autosave) return;
+
     core.setLocalStorage('totalTime', core.animateFrame.totalTime);
 
     if (core.saves.autosave.data == null || !core.saves.autosave.updated) return;
@@ -2347,6 +2369,7 @@ control.prototype.syncLoad = function () {
                                     core.removeLocalForage("save"+i);
                             }
                         }
+                        core.ui.closePanel();
                         core.drawText("同步成功！\n你的本地所有存档均已被覆盖。");
                     }, function () {
                         core.status.event.selection=0;
@@ -2581,6 +2604,7 @@ control.prototype.playBgm = function (bgm) {
     if (!core.musicStatus.bgmStatus) {
         try {
             core.musicStatus.playingBgm = bgm;
+            core.musicStatus.lastBgm = bgm;
             core.material.bgms[bgm].pause();
         }
         catch (e) {
@@ -2614,6 +2638,7 @@ control.prototype.playBgm = function (bgm) {
         core.material.bgms[bgm].currentTime = 0;
         core.material.bgms[bgm].play();
         core.musicStatus.playingBgm = bgm;
+        core.musicStatus.lastBgm = bgm;
     }
     catch (e) {
         console.log("无法播放BGM "+bgm);
@@ -2644,7 +2669,7 @@ control.prototype.resumeBgm = function () {
 
     // 恢复BGM
     try {
-        core.playBgm(core.musicStatus.playingBgm);
+        core.playBgm(core.musicStatus.playingBgm || core.musicStatus.lastBgm);
     }
     catch (e) {
         console.log("无法恢复BGM");
@@ -2765,7 +2790,8 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.image.toolbox.src = core.statusBar.icons.rewind.src;
 
         core.statusBar.image.keyboard.src = core.statusBar.icons.book.src;
-        core.statusBar.image.shop.style.opacity = 0;
+
+        core.statusBar.image.shop.src = core.statusBar.icons.floor.src;
 
         core.statusBar.image.save.src = core.statusBar.icons.speedDown.src;
 
@@ -2790,7 +2816,8 @@ control.prototype.updateStatusBar = function () {
         core.statusBar.image.toolbox.src = core.statusBar.icons.toolbox.src;
 
         core.statusBar.image.keyboard.src = core.statusBar.icons.keyboard.src;
-        core.statusBar.image.shop.style.opacity = 1;
+
+        core.statusBar.image.shop.src = core.statusBar.icons.shop.src;
 
         core.statusBar.image.save.src = core.statusBar.icons.save.src;
 

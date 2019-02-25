@@ -462,13 +462,23 @@ utils.prototype.encodeRoute = function (route) {
         ans+=lastMove.substring(0,1).toUpperCase();
         if (cnt>1) ans+=cnt;
     }
-    return ans;
+    // return ans;
+    // 压缩
+    return LZString.compressToBase64(ans);
 }
 
 ////// 解密路线 //////
 utils.prototype.decodeRoute = function (route) {
 
     if (!core.isset(route)) return route;
+
+    // 解压缩
+    try {
+        var v = LZString.decompressFromBase64(route);
+        if (core.isset(v) && /^[a-zA-Z0-9+\/=:]+$/.test(v)) {
+            route = v;
+        }
+    } catch (e) {}
 
     var ans=[], index=0;
 

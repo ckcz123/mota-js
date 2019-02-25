@@ -178,20 +178,42 @@ maps.prototype.initMaps = function (floorIds) {
     return maps;
 }
 
+maps.prototype.__initFloorMap = function (floorId) {
+    var map = core.clone(core.floors[floorId].map);
+
+    var mw = core.floors[floorId].width || 13;
+    var mh = core.floors[floorId].height || 13;
+
+    for (var x=0;x<mh;x++) {
+        if (!core.isset(map[x])) map[x] = [];
+        for (var y=0;y<mw;y++) {
+            if (!core.isset(map[x][y])) map[x][y]=0;
+            // check "disable"
+            var event = core.floors[floorId].events[y+","+x];
+            if (core.isset(event) && event.enable === false && main.mode == 'play') {
+                map[x][y] += ":f";
+            }
+        }
+    }
+
+    return map;
+}
+
 ////// 压缩地图
 maps.prototype.compressMap = function (mapArr, floorId) {
-    if (core.utils.same(mapArr, core.floors[floorId].map)) return null;
+    var floorMap = this.__initFloorMap(floorId);
+    if (core.utils.same(mapArr, floorMap)) return null;
 
     var mw = core.floors[floorId].width || 13;
     var mh = core.floors[floorId].height || 13;
     for (var x=0;x<mh;x++) {
-        if (core.utils.same(mapArr[x], core.floors[floorId].map[x]||[])) {
+        if (core.utils.same(mapArr[x], floorMap[x])) {
             // 没有改变的行直接删掉记成0
             mapArr[x] = 0;
         }
         else {
             for (var y=0;y<mw;y++) {
-                if (mapArr[x][y] === (core.floors[floorId].map[x]||[])[y]) {
+                if (mapArr[x][y] === floorMap[x][y]) {
                     // 没有改变的数据记成-1
                     mapArr[x][y] = -1;
                 }
@@ -203,18 +225,19 @@ maps.prototype.compressMap = function (mapArr, floorId) {
 
 ////// 解压缩地图
 maps.prototype.decompressMap = function (mapArr, floorId) {
-    if (!core.isset(mapArr)) return core.clone(core.floors[floorId].map);
+    var floorMap = this.__initFloorMap(floorId);
+    if (!core.isset(mapArr)) return floorMap;
 
     var mw = core.floors[floorId].width || 13;
     var mh = core.floors[floorId].height || 13;
     for (var x=0;x<mh;x++) {
         if (mapArr[x] === 0) {
-            mapArr[x] = core.clone(core.floors[floorId].map[x]);
+            mapArr[x] = floorMap[x];
         }
         else {
             for (var y=0;y<mw;y++) {
                 if (mapArr[x][y] === -1) {
-                    mapArr[x][y] = core.floors[floorId].map[x][y];
+                    mapArr[x][y] = floorMap[x][y];
                 }
             }
         }
@@ -432,11 +455,16 @@ maps.prototype.drawBlock = function (block, animate, dx, dy) {
     if (!blockInfo.isTileset) x = (animate||0)%(block.event.animate||1);
 
     if (core.isset(block.name)) {
-        core.clearMap(block.name, block.x * 32, block.y * 32, 32, 32);
+        core.clearMap(block.name, block.x * 32, block.y * 32 + 32 - height, 32, height);
         if (block.name == 'bg') {
+            if (height>32) {
+                core.clearMap(block.name, block.x * 32, block.y * 32 - 32, 32, 32);
+                core.drawImage('bg', core.material.groundCanvas.canvas, block.x * 32, block.y * 32 - 32);
+            }
             core.drawImage('bg', core.material.groundCanvas.canvas, block.x * 32, block.y * 32);
         }
-        core.drawImage(block.name, image, x * 32, y * 32, 32, 32, block.x * 32, block.y * 32, 32, 32);
+        core.drawImage(block.name, image, x * 32, y * height, 32, height,
+            block.x * 32, block.y * 32 + 32 - height, 32, height);
         return;
     }
 

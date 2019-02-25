@@ -53,6 +53,7 @@ function core() {
         'bgmStatus': false, // 是否播放BGM
         'soundStatus': true, // 是否播放SE
         'playingBgm': null, // 正在播放的BGM
+        'lastBgm': null, // 上次播放的bgm
         'gainNode': null,
         'playingSounds': {}, // 正在播放的SE
         'volume': 1.0, // 音量
@@ -622,7 +623,7 @@ core.prototype.nearHero = function (x, y) {
 
 ////// 开门 //////
 core.prototype.openDoor = function (id, x, y, needKey, callback) {
-    core.events.openDoor(id, x, y, needKey, callback);
+    return core.events.openDoor(id, x, y, needKey, callback);
 }
 
 ////// 战斗 //////

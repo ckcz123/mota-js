@@ -184,8 +184,9 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
     var info = this.getDamageInfo(enemy, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef, x, y, floorId);
 
     if (info == null) {
-        if (core.status.hero.atk<=enemy.def) {
-            return [[enemy.def+1-core.status.hero.atk,'?']];
+        info = this.getEnemyInfo(enemy, core.status.hero.hp, core.status.hero.atk, core.status.hero.def, core.status.hero.mdef, x, y, floorId);
+        if (core.status.hero.atk<=info.def) {
+            return [[info.def+1-core.status.hero.atk,'?']];
         }
         return [];
     }

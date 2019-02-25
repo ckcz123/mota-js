@@ -64,9 +64,9 @@ editor_blockly = function () {
       MotaActionBlocks['lose_s'].xmlText(),
       MotaActionBlocks['choices_s'].xmlText([
         '选择剑或者盾','流浪者','man',MotaActionBlocks['choicesContext'].xmlText([
-          '剑',MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [3,3]}]),
+          '剑','',null,MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [3,3]}]),
           MotaActionBlocks['choicesContext'].xmlText([
-            '盾',MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [9,3]}]),
+            '盾','',null,MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [9,3]}]),
           ])
         ])
       ]),
@@ -137,7 +137,7 @@ editor_blockly = function () {
       MotaActionBlocks['setWeather_s'].xmlText(),
       MotaActionBlocks['playBgm_s'].xmlText(),
       MotaActionBlocks['pauseBgm_s'].xmlText(),
-      // MotaActionBlocks['resumeBgm_s'].xmlText(),
+      MotaActionBlocks['resumeBgm_s'].xmlText(),
       MotaActionBlocks['loadBgm_s'].xmlText(),
       MotaActionBlocks['freeBgm_s'].xmlText(),
       MotaActionBlocks['playSound_s'].xmlText(),
@@ -175,7 +175,7 @@ editor_blockly = function () {
       MotaActionFunctions.actionParser.parse([
         {"type": "choices", "text": "\t[老人,man]少年，你需要钥匙吗？\n我这里有大把的！",
         "choices": [
-            {"text": "黄钥匙（\${9+flag:shop_times}金币）", "action": [
+            {"text": "黄钥匙（\${9+flag:shop_times}金币）", "color": [255,255,0,1], "action": [
                 {"type": "if", "condition": "status:money>=9+flag:shop_times",
                     "true": [
                         {"type": "setValue", "name": "status:money", "value": "status:money-(9+flag:shop_times)"},
@@ -187,7 +187,7 @@ editor_blockly = function () {
                     ]
                 }
             ]},
-            {"text": "蓝钥匙（\${18+2*flag:shop_times}金币）", "action": [
+            {"text": "蓝钥匙（\${18+2*flag:shop_times}金币）", "color": [0,0,255,1], "action": [
             ]},
             {"text": "离开", "action": [
                 {"type": "exit"}

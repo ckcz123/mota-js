@@ -153,8 +153,8 @@ editor.prototype.idsInit = function (maps, icons) {
         if(img.width%32 || img.height%32){
             alert(imgName+'的长或宽不是32的整数倍, 请修改后刷新页面');
         }
-        if(img.width*img.height > 32*32*1000){
-            alert(imgName+'上的图块数量超过了1000，请修改后刷新页面');
+        if(img.width*img.height > 32*32*3000){
+            alert(imgName+'上的图块数量超过了3000，请修改后刷新页面');
         }
         for (var id=startOffset; id<startOffset+width*height;id++) {
             var x = (id-startOffset)%width, y = parseInt((id-startOffset)/width);
@@ -645,12 +645,6 @@ editor.prototype.listen = function () {
         if(clickpath.length>=2 && clickpath[0].indexOf('id_')===0){editor.lastClickId=clickpath[0]}
     }
 
-    var iconLib=document.getElementById('iconLib');
-    iconLib.onmousedown = function (e) {
-        console.log("iconLib: ("+e.clientX+","+e.clientY+")");
-        e.stopPropagation();
-    }
-
     var eui=document.getElementById('eui');
     var uc = eui.getContext('2d');
 
@@ -797,25 +791,21 @@ editor.prototype.listen = function () {
             currDrawData.info = JSON.parse(JSON.stringify(editor.info));
             reDo = null;
             // console.log(stepPostfix);
-            if (editor.layerMod!='map'  && editor.info.images && editor.info.images.indexOf('48')!==-1){
-                printe('前景/背景不支持48的图块');
-            } else {
-                if(editor.brushMod==='tileset' && core.tilesets.indexOf(editor.info.images)!==-1){
-                    var imgWidth=~~(core.material.images.tilesets[editor.info.images].width/32);
-                    var x0=stepPostfix[0].x;
-                    var y0=stepPostfix[0].y;
-                    var idnum=editor.info.idnum;
-                    for (var ii = 0; ii < stepPostfix.length; ii++){
-                        if(stepPostfix[ii].y!=y0){
-                            y0++;
-                            idnum+=imgWidth;
-                        }
-                        editor[editor.layerMod][stepPostfix[ii].y][stepPostfix[ii].x] = editor.ids[editor.indexs[idnum+stepPostfix[ii].x-x0]];
+            if(editor.brushMod==='tileset' && core.tilesets.indexOf(editor.info.images)!==-1){
+                var imgWidth=~~(core.material.images.tilesets[editor.info.images].width/32);
+                var x0=stepPostfix[0].x;
+                var y0=stepPostfix[0].y;
+                var idnum=editor.info.idnum;
+                for (var ii = 0; ii < stepPostfix.length; ii++){
+                    if(stepPostfix[ii].y!=y0){
+                        y0++;
+                        idnum+=imgWidth;
                     }
-                } else {
-                    for (var ii = 0; ii < stepPostfix.length; ii++)
-                    editor[editor.layerMod][stepPostfix[ii].y][stepPostfix[ii].x] = editor.info;
+                    editor[editor.layerMod][stepPostfix[ii].y][stepPostfix[ii].x] = editor.ids[editor.indexs[idnum+stepPostfix[ii].x-x0]];
                 }
+            } else {
+                for (var ii = 0; ii < stepPostfix.length; ii++)
+                editor[editor.layerMod][stepPostfix[ii].y][stepPostfix[ii].x] = editor.info;
             }
             // console.log(editor.map);
             editor.updateMap();
@@ -975,9 +965,38 @@ editor.prototype.listen = function () {
         }
     }
 
+    var getScrollBarHeight = function () {
+        var outer = document.createElement("div");
+        outer.style.visibility = "hidden";
+        outer.style.width = "100px";
+        outer.style.msOverflowStyle = "scrollbar"; // needed for WinJS apps
+
+        document.body.appendChild(outer);
+
+        var widthNoScroll = outer.offsetWidth;
+        // force scrollbars
+        outer.style.overflow = "scroll";
+
+        // add innerdiv
+        var inner = document.createElement("div");
+        inner.style.width = "100%";
+        outer.appendChild(inner);
+
+        var widthWithScroll = inner.offsetWidth;
+
+        // remove divs
+        outer.parentNode.removeChild(outer);
+
+        return widthNoScroll - widthWithScroll;
+    }
+    var scrollBarHeight = getScrollBarHeight();
+    console.log(scrollBarHeight);
+
     var dataSelection = document.getElementById('dataSelection');
+    var iconLib=document.getElementById('iconLib');
     iconLib.onmousedown = function (e) {
         e.stopPropagation();
+        if (!editor.isMobile && e.clientY>=(635 - 5 - scrollBarHeight)) return;
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
         var loc = {

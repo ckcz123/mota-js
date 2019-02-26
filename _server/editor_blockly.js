@@ -339,7 +339,7 @@ function omitedcheckUpdateFunction(event) {
     }
   }
   try {
-    var code = Blockly.JavaScript.workspaceToCode(workspace);
+    var code = Blockly.JavaScript.workspaceToCode(workspace).replace(/\\i/g, '\\\\i');
     codeAreaHL.setValue(code);
   } catch (error) {
     codeAreaHL.setValue(String(error));
@@ -481,7 +481,8 @@ function omitedcheckUpdateFunction(event) {
         MotaActionFunctions.parse(
             eval('obj=' + codeAreaHL.getValue().replace(/[<>&]/g, function (c) {
                 return {'<': '&lt;', '>': '&gt;', '&': '&amp;'}[c];
-            }).replace(/\\r/g, '\\\\r').replace(/\\f/g, '\\\\f')),
+            }).replace(/\\r/g, '\\\\r').replace(/\\f/g, '\\\\f')
+                .replace(/\\i/,'\\\\i')),
             document.getElementById('entryType').value
         );
     }
@@ -555,6 +556,7 @@ function omitedcheckUpdateFunction(event) {
             return;
         }
         var code = Blockly.JavaScript.workspaceToCode(editor_blockly.workspace);
+        code = code.replace(/\\i/g, '\\\\i');
         eval('var obj=' + code);
         setvalue(JSON.stringify(obj));
     }

@@ -64,17 +64,23 @@ editor_multi = function () {
         return '\t';
     }
 
-    editor_multi.format = function () {
-        if (!editor_multi.lintAutocomplete) {
-            alert("只有代码才能进行格式化操作！");
-            return;
-        }
+    var _format = function () {
+        if (!editor_multi.lintAutocomplete) return;
         codeEditor.setValue(js_beautify(codeEditor.getValue(), {
             brace_style: "collapse-preserve-inline",
             indent_with_tabs: true,
             jslint_happy: true
         }));
     }
+
+    editor_multi.format = function () {
+        if (!editor_multi.lintAutocomplete) {
+            alert("只有代码才能进行格式化操作！");
+            return;
+        }
+        _format();
+    }
+
 
     editor_multi.import = function (id_, args) {
         var thisTr = document.getElementById(id_);
@@ -122,6 +128,8 @@ editor_multi = function () {
             editor_multi.id = '';
             return;
         }
+        // ----- 自动格式化
+        _format();
         if (editor_multi.id === 'callFromBlockly') {
             editor_multi.id = '';
             editor_multi.multiLineDone();

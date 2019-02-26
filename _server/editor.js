@@ -1230,16 +1230,15 @@ editor.prototype.listen = function () {
         });
     }
 
-    var clearLoc = document.getElementById('clearLoc');
-    clearLoc.onmousedown = function(e){
+    var _clearPoint = function (clearPoint) {
         editor.hideMidMenu();
-        e.stopPropagation();
         editor.preMapData = null;
         reDo = null;
         editor.info = 0;
         editor_mode.onmode('');
         var now = editor.pos;
-        editor.map[now.y][now.x]=editor.info;
+        if (clearPoint)
+            editor.map[now.y][now.x]=editor.info;
         editor.updateMap();
         fields.forEach(function(v){
             delete editor.currentFloorData[v][now.x+','+now.y];
@@ -1249,9 +1248,21 @@ editor.prototype.listen = function () {
                 printe(err);
                 throw(err)
             }
-            ;printf('清空此点及事件成功');
+            ;printf(clearPoint?'清空该点和事件成功':'只清空该点事件成功');
             editor.drawPosSelection();
         });
+    }
+
+    var clearEvent = document.getElementById('clearEvent');
+    clearEvent.onmousedown = function (e) {
+        e.stopPropagation();
+        _clearPoint(false);
+    }
+
+    var clearLoc = document.getElementById('clearLoc');
+    clearLoc.onmousedown = function(e){
+        e.stopPropagation();
+        _clearPoint(true);
     }
 
     var brushMod=document.getElementById('brushMod');

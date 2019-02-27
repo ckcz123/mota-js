@@ -1001,8 +1001,11 @@ events.prototype.doAction = function() {
             }
             break;
         case "setValue":
+        case "setValue2":
             try {
                 var value=core.calValue(data.value, prefix);
+                if (data.type == 'setValue2')
+                    value += core.calValue(data.name, prefix);
                 // 属性
                 if (data.name.indexOf("status:")==0) {
                     core.setStatus(data.name.substring(7), value);

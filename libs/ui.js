@@ -503,8 +503,25 @@ ui.prototype.calTextBoxWidth = function (canvas, content, min_width, max_width) 
     }
 }
 
+ui.prototype.__getIconInfo = function (id) {
+    var image = null, icon = null;
+    ["terrains","animates","items","npcs","enemys"].forEach(function (v) {
+        if (core.isset(core.material.icons[v][id])) {
+            image = core.material.images[v];
+            icon = core.material.icons[v][id];
+        }
+    });
+    if (image == null) {
+        if (id in core.statusBar.icons) {
+            image = core.statusBar.icons[id];
+            icon = 0;
+        }
+    }
+    return [image,icon];
+}
+
 ui.prototype.__drawText = function (canvas, content, content_left, content_top, valid_width,
-                                    color, per_height, time) {
+                                    color, per_height, text_font, time) {
     core.setTextAlign(canvas, 'left');
 
     var offsetx = content_left, offsety = content_top;
@@ -542,6 +559,29 @@ ui.prototype.__drawText = function (canvas, content, content_left, content_top, 
             }
             else currcolor = color;
             return drawNext();
+        }
+        // \\i 绘制图标
+        if (ch == '\\' && content.charAt(index)=='i') {
+            // 绘制图标
+            var index2;
+            if (content.charAt(index+1) == '[' && ((index2=content.indexOf(']', index+1))>=0)) {
+                var str = content.substring(index+2, index2);
+                // --- 获得图标
+                var iconInfo = core.ui.__getIconInfo(str), image = iconInfo[0], icon = iconInfo[1];
+                if (image != null) {
+                    if (core.isset(valid_width) && offsetx + text_font + 6 > content_left + valid_width) {
+                        index --;
+                        offsetx = content_left;
+                        offsety += per_height;
+                        return drawNext();
+                    }
+                    // --- 绘制
+                    core.drawImage(canvas, image, 0, 32*icon, 32, 32, offsetx + 2, offsety - text_font + 1, text_font+2, text_font+2);
+                    offsetx += text_font + 6;
+                    index = index2+1;
+                    return true;
+                }
+            }
         }
         // 检查是不是自动换行
         var charwidth = core.calWidth(canvas, ch);
@@ -663,7 +703,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
     var globalFont = core.status.globalAttribute.font;
     var font = textfont + 'px '+globalFont;
     if (textAttribute.bold) font = "bold "+font;
-    var realContent = content.replace(/(\r|\\r)(\[.*?])?/g, "");
+    var realContent = content.replace(/(\r|\\r)(\[.*?])?/g, "").replace(/(\\i)(\[.*?])?/g, "啊1");
 
     var leftSpace = 25, rightSpace = 12;
     if (core.isset(px) && core.isset(py)) leftSpace = 20;
@@ -797,7 +837,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
 
     core.setFont('ui', font);
 
-    this.__drawText('ui', content, content_left, content_top, validWidth, textColor, textfont + 5,
+    this.__drawText('ui', content, content_left, content_top, validWidth, textColor, textfont + 5, textfont,
         (showAll || textAttribute.time<=0 || core.status.event.id!='action')?0:textAttribute.time);
 
 }
@@ -819,7 +859,7 @@ ui.prototype.drawScrollText = function (content, time, callback) {
 
     var font = textfont+"px "+core.status.globalAttribute.font;
     if (textAttribute.bold) font = "bold "+font;
-    var realContent = content.replace(/(\r|\\r)(\[.*?])?/g, "");
+    var realContent = content.replace(/(\r|\\r)(\[.*?])?/g, "").replace(/(\\i)(\[.*?])?/g, "啊1");
     var contents = core.splitLines('ui', realContent), lines = contents.length;
 
     // 计算总高度，按1.4倍行距计算
@@ -830,7 +870,7 @@ ui.prototype.drawScrollText = function (content, time, callback) {
     tempCanvas.clearRect(0, 0, width, height);
     tempCanvas.font = font;
 
-    this.__drawText(tempCanvas, content, offset, textfont, null, textColor, 1.4*textfont, 0);
+    this.__drawText(tempCanvas, content, offset, textfont, null, textColor, 1.4*textfont, textfont, 0);
 
     // 开始绘制到UI上
     core.clearMap('ui');
@@ -854,8 +894,7 @@ ui.prototype.drawScrollText = function (content, time, callback) {
 
 ////// 绘制一个选项界面 //////
 ui.prototype.drawChoices = function(content, choices) {
-
-    choices = choices || [];
+    choices = core.clone(choices || []);
 
     var background = core.status.textAttribute.background;
     var isWindowSkin = false;
@@ -879,7 +918,12 @@ ui.prototype.drawChoices = function(content, choices) {
     var globalFont = core.status.globalAttribute.font;
     core.setFont('ui', "bold 17px "+globalFont);
     for (var i = 0; i < choices.length; i++) {
-        width = Math.max(width, core.calWidth('ui', core.replaceText(choices[i].text || choices[i]))+30);
+        if (typeof choices[i] === 'string')
+            choices[i] = {"text": choices[i]};
+        choices[i].text = core.replaceText(choices[i].text);
+        choices[i].width = core.calWidth('ui', core.replaceText(choices[i].text));
+        if (core.isset(choices[i].icon)) choices[i].width += 28;
+        width = Math.max(width, choices[i].width+30);
     }
 
     var left=parseInt((416 - width) / 2); // 左边界
@@ -898,7 +942,7 @@ ui.prototype.drawChoices = function(content, choices) {
         // 获得name, image, icon
         var info = this.getTitleAndIcon(content);
         content = core.replaceText(info.content);
-        var realContent = content.replace(/(\r|\\r)(\[.*?])?/g, "");
+        var realContent = content.replace(/(\r|\\r)(\[.*?])?/g, "").replace(/(\\i)(\[.*?])?/g, "啊1");
         id=info.id; name=info.name; image=info.image;
         icon=info.icon; iconHeight=info.iconHeight; animate=info.animate;
         if (id=='hero' || core.isset(icon))
@@ -967,7 +1011,7 @@ ui.prototype.drawChoices = function(content, choices) {
         }
 
         core.setFont('ui', 'bold 15px '+globalFont);
-        this.__drawText('ui', content, content_left, content_top, validWidth, textColor, 20, 0);
+        this.__drawText('ui', content, content_left, content_top, validWidth, textColor, 20, 15, 0);
     }
 
     // 选项
@@ -976,14 +1020,23 @@ ui.prototype.drawChoices = function(content, choices) {
         var color = choices[i].color || textColor;
         if (color instanceof Array) color = core.arrayToRGBA(color);
         core.setFillStyle('ui', color);
-        core.fillText('ui', core.replaceText(choices[i].text || choices[i]), 208, choice_top + 32 * i, null, "bold 17px "+globalFont);
+        var offset = 208;
+        if (core.isset(choices[i].icon)) {
+            var iconInfo = this.__getIconInfo(choices[i].icon), image = iconInfo[0], icon = iconInfo[1];
+            if (image != null) {
+                core.drawImage('ui', image, 0, 32*icon, 32, 32,
+                    208 - choices[i].width/2, choice_top + 32*i - 17, 22, 22);
+                offset += 14;
+            }
+        }
+        core.fillText('ui', choices[i].text, offset, choice_top + 32 * i, null, "bold 17px "+globalFont);
     }
 
     if (choices.length>0) {
         if (!core.isset(core.status.event.selection)) core.status.event.selection=0;
         while (core.status.event.selection<0) core.status.event.selection+=choices.length;
         while (core.status.event.selection>=choices.length) core.status.event.selection-=choices.length;
-        var len = core.calWidth('ui', core.replaceText(choices[core.status.event.selection].text || choices[core.status.event.selection]));
+        var len = choices[core.status.event.selection].width;
         if (isWindowSkin)
             this.drawWindowSelector(background, 208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28);
         else

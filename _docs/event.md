@@ -267,6 +267,21 @@
 ]
 ```
 
+从V2.5.5以后，也可以使用`\\i[...]`来在对话框中绘制一个图标。
+
+这里可以使用一个合法ID（32x48图块除外），或使用一个系统图标（`core.statusBar.icons`中的内容）。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    "\t[勇士]\b[up,hero]这是一个飞行器\\i[fly]，这是一个破墙镐\\i[pickaxe]",
+    "\t[hero]也可以使用系统图标，比如这是存档\\i[save]，这是工具栏\\i[toolbox]",
+]
+```
+
+**可以在控制台中输入`core.statusBar.icons`以查看所有的系统图标定义。**
+
+!> 注意，在事件块中，允许只写一个反斜杠`\i`，系统会自动转义成`\\i`；但是在脚本中必须两个反斜杠都写上！
+
 另外值得一提的是，我们是可以在文字中计算一个表达式的值的。只需要将表达式用 `${ }`整个括起来就可以。
 
 ``` js
@@ -424,6 +439,23 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 ```
 
 另外注意一点的是，如果hp被设置成了0或以下，将触发lose事件，直接死亡。
+
+### setValue2：增减勇士的某个属性、道具个数，或某个变量/Flag的值
+
+和`{"type": "setValue"}`的写法完全相同，不过此项是可以直接将值加减到原始数值上。
+
+即下面的写法是等价的：
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "setValue", "name": "status:atk", "value": "status:atk+10" } // 攻击提高10点
+    {"type": "setValue2", "name": "status:atk", "value": "10" } // 和上面写法等价
+    {"type": "setValue", "name": "item:yellowKey", "value": "item:yellowKey-3" } // 黄钥匙个数-3
+    {"type": "setValue2", "name": "item:yellowKey", "value": "-3" } // 和上面写法等价
+    {"type": "setValue", "name": "flag:door2", "value": "flag:door2+1" } // 将变量door值+1
+    {"type": "setValue2", "name": "flag:door2", "value": "01" } // 和上面写法等价
+]
+```
 
 ### setFloor：设置楼层属性
 

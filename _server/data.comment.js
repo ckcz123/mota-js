@@ -16,26 +16,31 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "images": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_range": "editor.mode.checkUnique(thiseval)",
                     "_data": "在此存放所有可能使用的图片（tilesets除外） \n图片可以被作为背景图（的一部分），也可以直接用自定义事件进行显示。 \n 图片名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好 \n 建议对于较大的图片，在网上使用在线的“图片压缩工具(http://compresspng.com/zh/)”来进行压缩，以节省流量 \n 依次向后添加"
                 },
                 "tilesets": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_range": "editor.mode.checkUnique(thiseval)",
                     "_data": "在此存放额外素材的图片名, \n可以自定导入任意张素材图片，无需PS，无需注册，即可直接在游戏中使用 \n 形式如[\"1.png\", \"2.png\"] ,将需要的素材图片放在images目录下 \n 素材的宽高必须都是32的倍数，且图片上的总图块数不超过1000（即最多有1000个32*32的图块在该图片上）"
                 },
                 "animates": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_range": "editor.mode.checkUnique(thiseval)",
                     "_data": "在此存放所有可能使用的动画，必须是animate格式，在这里不写后缀名 \n动画必须放在animates目录下；文件名不能使用中文，不能带空格或特殊字符 \n \"jianji\", \"thunder\" \n 根据需求自行添加"
                 },
                 "bgms": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_range": "editor.mode.checkUnique(thiseval)",
                     "_data": "在此存放所有的bgm，和文件名一致。 \n音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好"
                 },
                 "sounds": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_range": "editor.mode.checkUnique(thiseval)",
                     "_data": "在此存放所有的SE，和文件名一致 \n音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好"
                 },
                 "startBackground": {
@@ -131,17 +136,20 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "title": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_string": true,
                     "_data": "游戏名，将显示在标题页面以及切换楼层的界面中"
                 },
                 "name": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_string": true,
                     "_range": "/^[a-zA-Z0-9_]{1,30}$/.test(thiseval)",
                     "_data": "游戏的唯一英文标识符。由英文、数字、下划线组成，不能超过30个字符。\n此项必须修改，其将直接影响到存档的定位！"
                 },
                 "version": {
                     "_leaf": true,
                     "_type": "textarea",
+                    "_string": true,
                     "_data": "当前游戏版本；版本不一致的存档不能通用。"
                 },
                 "floorId": {
@@ -160,6 +168,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         "name": {
                             "_leaf": true,
                             "_type": "textarea",
+                            "_string": true,
                             "_data": "勇士名；可以改成喜欢的"
                         },
                         "lv": {
@@ -211,6 +220,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         "equipment": {
                             "_leaf": true,
                             "_type": "textarea",
+                            "_range": "thiseval instanceof Array",
                             "_data": "初始装上的装备，此处建议请直接留空数组"
                         },
                         "items": {
@@ -220,21 +230,25 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                                 "keys": {
                                     "_leaf": true,
                                     "_type": "textarea",
+                                    "_range": "thiseval instanceof Object && !(thiseval instanceof Array)",
                                     "_data": "初始三种钥匙个数"
                                 },
                                 "constants": {
                                     "_leaf": true,
                                     "_type": "textarea",
+                                    "_range": "thiseval instanceof Object && !(thiseval instanceof Array)",
                                     "_data": "初始永久道具个数，例如初始送手册可以写 {\"book\": 1}"
                                 },
                                 "tools": {
                                     "_leaf": true,
                                     "_type": "textarea",
+                                    "_range": "thiseval instanceof Object && !(thiseval instanceof Array)",
                                     "_data": "初始消耗道具个数，例如初始有两破可以写 {\"pickaxe\": 2}"
                                 }, 
                                 "equips": {
                                     "_leaf": true,
                                     "_type": "textarea",
+                                    "_range": "thiseval instanceof Object && !(thiseval instanceof Array)",
                                     "_data": "初始装备个数，例如初始送铁剑可以写 {\"sword1\": 1}"
                                 }
                             }
@@ -242,6 +256,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         "flyRange": {
                             "_leaf": true,
                             "_type": "textarea",
+                            "_range": "thiseval instanceof Array",
                             "_data": "初始可飞的楼层；一般留空数组即可"
                         },
                         "loc": {
@@ -276,6 +291,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         "flags": {
                             "_leaf": true,
                             "_type": "textarea",
+                            "_range": "thiseval instanceof Object && !(thiseval instanceof Array)",
                             "_data": "游戏过程中的变量或flags"
                         },
                         "steps": {

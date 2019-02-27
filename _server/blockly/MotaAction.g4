@@ -229,6 +229,7 @@ action
     |   setText_s
     |   tip_s
     |   setValue_s
+    |   setValue2_s
     |   setFloor_s
     |   setGlobalAttribute_s
     |   setGlobalValue_s
@@ -462,6 +463,18 @@ tooltip : setValue：设置勇士的某个属性、道具个数, 或某个变量
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=setvalue%EF%BC%9A%E8%AE%BE%E7%BD%AE%E5%8B%87%E5%A3%AB%E7%9A%84%E6%9F%90%E4%B8%AA%E5%B1%9E%E6%80%A7%E3%80%81%E9%81%93%E5%85%B7%E4%B8%AA%E6%95%B0%EF%BC%8C%E6%88%96%E6%9F%90%E4%B8%AA%E5%8F%98%E9%87%8Fflag%E7%9A%84%E5%80%BC
 colour : this.dataColor
 var code = '{"type": "setValue", "name": "'+idString_e_0+'", "value": "'+expression_0+'"},\n';
+return code;
+*/;
+
+setValue2_s
+    :   '数值增减' ':' '名称' idString_e '+=' expression Newline
+
+
+/* setValue2_s
+tooltip : setValue2：增减勇士的某个属性、道具个数, 或某个变量/Flag的值
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=setValue2%ef%bc%9a%e5%a2%9e%e5%87%8f%e5%8b%87%e5%a3%ab%e7%9a%84%e6%9f%90%e4%b8%aa%e5%b1%9e%e6%80%a7%e3%80%81%e9%81%93%e5%85%b7%e4%b8%aa%e6%95%b0%ef%bc%8c%e6%88%96%e6%9f%90%e4%b8%aa%e5%8f%98%e9%87%8f%2fFlag%e7%9a%84%e5%80%bc
+colour : this.dataColor
+var code = '{"type": "setValue2", "name": "'+idString_e_0+'", "value": "'+expression_0+'"},\n';
 return code;
 */;
 
@@ -1528,13 +1541,13 @@ return code;
 */;
 
 choicesContext
-    :   '子选项' EvalString '颜色' EvalString? Colour BGNL? Newline action+
+    :   '子选项' EvalString '图标' IdString? '颜色' EvalString? Colour BGNL? Newline action+
 
 
 /* choicesContext
 tooltip : 选项的选择
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=choices%EF%BC%9A%E7%BB%99%E7%94%A8%E6%88%B7%E6%8F%90%E4%BE%9B%E9%80%89%E9%A1%B9
-default : ["提示文字:红钥匙",""]
+default : ["提示文字:红钥匙","",""]
 colour : this.subColor
 if (EvalString_1) {
   var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
@@ -1543,7 +1556,8 @@ if (EvalString_1) {
   else
       EvalString_1 = ', "color": "'+EvalString_1+'"';
 }
-var code = '{"text": "'+EvalString_0+'"'+EvalString_1+', "action": [\n'+action_0+']},\n';
+IdString_0 = IdString_0?(', "icon": "'+IdString_0+'"'):'';
+var code = '{"text": "'+EvalString_0+'"'+IdString_0+EvalString_1+', "action": [\n'+action_0+']},\n';
 return code;
 */;
 
@@ -2364,6 +2378,13 @@ ActionParser.prototype.parseAction = function() {
         MotaActionBlocks['evalString_e'].xmlText([data.value]),
         this.next]);
       break;
+    case "setValue2":
+      this.next = MotaActionBlocks['setValue2_s'].xmlText([
+        // MotaActionBlocks['idString_e'].xmlText([data.name]),
+        this.tryToUseEvFlag_e('idString_e', [data.name]),
+        MotaActionBlocks['evalString_e'].xmlText([data.value]),
+        this.next]);
+      break;
     case "setFloor":
       this.next = MotaActionBlocks['setFloor_s'].xmlText([
         data.name, data.floorId||null, data.value, this.next]);
@@ -2411,7 +2432,7 @@ ActionParser.prototype.parseAction = function() {
       var text_choices = null;
       for(var ii=data.choices.length-1,choice;choice=data.choices[ii];ii--) {
         text_choices=MotaActionBlocks['choicesContext'].xmlText([
-          choice.text,choice.color,'rgba('+choice.color+')',this.insertActionList(choice.action),text_choices]);
+          choice.text,choice.icon,choice.color,'rgba('+choice.color+')',this.insertActionList(choice.action),text_choices]);
       }
       this.next = MotaActionBlocks['choices_s'].xmlText([
         this.isset(data.text)?this.EvalString(data.text):null,'','',text_choices,this.next]);

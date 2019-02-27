@@ -1166,7 +1166,21 @@ editor_mode = function (editor) {
             if(editor.isMobile)editor.showdataarea(false);
         }
 
+        editor_mode.checkUnique = function (thiseval) {
+            if (!(thiseval instanceof Array)) return false;
+            var map = {};
+            for (var i = 0; i<thiseval.length; ++i) {
+                if (map[thiseval[i]]) {
+                    alert("警告：存在重复定义！");
+                    return false;
+                }
+                map[thiseval[i]] = true;
+            }
+            return true;
+        }
+
         editor_mode.checkFloorIds = function(thiseval){
+            if (!editor_mode.checkUnique(thiseval)) return false;
             var oldvalue = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.floorIds;
             fs.readdir('project/floors',function(err, data){
                 if(err){
@@ -1186,7 +1200,7 @@ editor_mode = function (editor) {
                                 printe(objs_.slice(-1)[0]);
                                 throw(objs_.slice(-1)[0])
                             }
-                            ;printe('已放弃floorIds的修改');
+                            ;printe('已放弃floorIds的修改，请F5进行刷新');
                         });
                     }
                 }

@@ -503,6 +503,23 @@ ui.prototype.calTextBoxWidth = function (canvas, content, min_width, max_width) 
     }
 }
 
+ui.prototype.__getIconInfo = function (id) {
+    var image = null, icon = null;
+    ["terrains","animates","items","npcs","enemys"].forEach(function (v) {
+        if (core.isset(core.material.icons[v][id])) {
+            image = core.material.images[v];
+            icon = core.material.icons[v][id];
+        }
+    });
+    if (image == null) {
+        if (id in core.statusBar.icons) {
+            image = core.statusBar.icons[id];
+            icon = 0;
+        }
+    }
+    return [image,icon];
+}
+
 ui.prototype.__drawText = function (canvas, content, content_left, content_top, valid_width,
                                     color, per_height, text_font, time) {
     core.setTextAlign(canvas, 'left');
@@ -550,19 +567,7 @@ ui.prototype.__drawText = function (canvas, content, content_left, content_top, 
             if (content.charAt(index+1) == '[' && ((index2=content.indexOf(']', index+1))>=0)) {
                 var str = content.substring(index+2, index2);
                 // --- 获得图标
-                var image = null, icon = null;
-                ["terrains","animates","items","npcs","enemys"].forEach(function (v) {
-                    if (core.isset(core.material.icons[v][str])) {
-                        image = core.material.images[v];
-                        icon = core.material.icons[v][str];
-                    }
-                });
-                if (image == null) {
-                    if (str in core.statusBar.icons) {
-                        image = core.statusBar.icons[str];
-                        icon = 0;
-                    }
-                }
+                var iconInfo = core.ui.__getIconInfo(str), image = iconInfo[0], icon = iconInfo[1];
                 if (image != null) {
                     if (core.isset(valid_width) && offsetx + text_font + 6 > content_left + valid_width) {
                         index --;
@@ -889,8 +894,7 @@ ui.prototype.drawScrollText = function (content, time, callback) {
 
 ////// 绘制一个选项界面 //////
 ui.prototype.drawChoices = function(content, choices) {
-
-    choices = choices || [];
+    choices = core.clone(choices || []);
 
     var background = core.status.textAttribute.background;
     var isWindowSkin = false;
@@ -914,7 +918,12 @@ ui.prototype.drawChoices = function(content, choices) {
     var globalFont = core.status.globalAttribute.font;
     core.setFont('ui', "bold 17px "+globalFont);
     for (var i = 0; i < choices.length; i++) {
-        width = Math.max(width, core.calWidth('ui', core.replaceText(choices[i].text || choices[i]))+30);
+        if (typeof choices[i] === 'string')
+            choices[i] = {"text": choices[i]};
+        choices[i].text = core.replaceText(choices[i].text);
+        choices[i].width = core.calWidth('ui', core.replaceText(choices[i].text));
+        if (core.isset(choices[i].icon)) choices[i].width += 28;
+        width = Math.max(width, choices[i].width+30);
     }
 
     var left=parseInt((416 - width) / 2); // 左边界
@@ -1011,14 +1020,23 @@ ui.prototype.drawChoices = function(content, choices) {
         var color = choices[i].color || textColor;
         if (color instanceof Array) color = core.arrayToRGBA(color);
         core.setFillStyle('ui', color);
-        core.fillText('ui', core.replaceText(choices[i].text || choices[i]), 208, choice_top + 32 * i, null, "bold 17px "+globalFont);
+        var offset = 208;
+        if (core.isset(choices[i].icon)) {
+            var iconInfo = this.__getIconInfo(choices[i].icon), image = iconInfo[0], icon = iconInfo[1];
+            if (image != null) {
+                core.drawImage('ui', image, 0, 32*icon, 32, 32,
+                    208 - choices[i].width/2, choice_top + 32*i - 17, 22, 22);
+                offset += 14;
+            }
+        }
+        core.fillText('ui', choices[i].text, offset, choice_top + 32 * i, null, "bold 17px "+globalFont);
     }
 
     if (choices.length>0) {
         if (!core.isset(core.status.event.selection)) core.status.event.selection=0;
         while (core.status.event.selection<0) core.status.event.selection+=choices.length;
         while (core.status.event.selection>=choices.length) core.status.event.selection-=choices.length;
-        var len = core.calWidth('ui', core.replaceText(choices[core.status.event.selection].text || choices[core.status.event.selection]));
+        var len = choices[core.status.event.selection].width;
         if (isWindowSkin)
             this.drawWindowSelector(background, 208-len/2-5, choice_top + 32 * core.status.event.selection - 20, len+10, 28);
         else

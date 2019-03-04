@@ -684,7 +684,7 @@ control.prototype.automaticRoute = function (destX, destY) {
             }
             deepAdd+=core.status.checkBlock.damage[nid]*10;
             // 绕过捕捉
-            if (core.status.checkBlock.ambush[nid])
+            if ((core.status.checkBlock.ambush||[])[nid])
                 deepAdd += 10000;
 
             if (nx == destX && ny == destY) {
@@ -1288,7 +1288,7 @@ control.prototype.checkBlock = function () {
             core.snipe(snipe);
     }
     // 检查捕捉
-    var ambush = core.status.checkBlock.ambush[x+core.bigmap.width*y];
+    var ambush = (core.status.checkBlock.ambush||[])[x+core.bigmap.width*y];
     if (core.isset(ambush)) {
         // 捕捉效果
         var actions = [];

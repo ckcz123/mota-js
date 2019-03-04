@@ -427,7 +427,7 @@ maps.prototype.canMoveDirectly = function (destX,destY) {
             if (!core.canMoveHero(nowX, nowY, dir)) continue;
             var nx=nowX+directions[dir][0], ny=nowY+directions[dir][1];
             if (nx<0||nx>=core.bigmap.width||ny<0||ny>=core.bigmap.height||visited[nx+core.bigmap.width*ny]||core.getBlock(nx,ny)!=null
-                ||core.status.checkBlock.damage[nx+core.bigmap.width*ny]>0||core.status.checkBlock.ambush[nx+core.bigmap.width*ny]) continue;
+                ||core.status.checkBlock.damage[nx+core.bigmap.width*ny]>0||(core.status.checkBlock.ambush||[])[nx+core.bigmap.width*ny]) continue;
             visited[nx+core.bigmap.width*ny]=visited[nowX+core.bigmap.width*nowY]+1;
             if (nx==destX&&ny==destY) return visited[nx+core.bigmap.width*ny];
             queue.push(nx+core.bigmap.width*ny);

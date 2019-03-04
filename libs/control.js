@@ -683,6 +683,9 @@ control.prototype.automaticRoute = function (destX, destY) {
                 if  (nextBlock.block.event.trigger == 'changeFloor') deepAdd+=10;
             }
             deepAdd+=core.status.checkBlock.damage[nid]*10;
+            // 绕过捕捉
+            if (core.status.checkBlock.ambush[nid])
+                deepAdd += 10000;
 
             if (nx == destX && ny == destY) {
                 route[nid] = direction;
@@ -1284,6 +1287,21 @@ control.prototype.checkBlock = function () {
         if (snipe.length>0)
             core.snipe(snipe);
     }
+    // 检查捕捉
+    var ambush = core.status.checkBlock.ambush[x+core.bigmap.width*y];
+    if (core.isset(ambush)) {
+        // 捕捉效果
+        var actions = [];
+        ambush.forEach(function (t) {
+            actions.push({"type": "move", "loc": [t[0],t[1]], "steps": [t[3]], "time": 500, "keep": false, "async":true});
+        });
+        actions.push({"type": "waitAsync"});
+        // 强制战斗
+        ambush.forEach(function (t) {
+            actions.push({"type": "battle", "id": t[2]});
+        })
+        core.insertAction(actions);
+    }
 }
 
 ////// 阻击事件（动画效果） //////
@@ -1493,9 +1511,14 @@ control.prototype.updateDamage = function (floorId, canvas) {
         for (var x=0;x<core.bigmap.width;x++) {
             for (var y=0;y<core.bigmap.height;y++) {
                 var damage = core.status.checkBlock.damage[x+core.bigmap.width*y];
-                if (damage>0) {
+                if (damage>0) { // 该点伤害
                     damage = core.formatBigNumber(damage, true);
                     core.fillBoldText(canvas, damage, 32*x+16, 32*(y+1)-14, '#FF7F00');
+                }
+                else { // 检查捕捉
+                    if ((core.status.checkBlock.ambush||[])[x+core.bigmap.width*y]) {
+                        core.fillBoldText(canvas, '!', 32*x+16, 32*(y+1)-14, '#FF7F00');
+                    }
                 }
             }
         }

@@ -1505,6 +1505,26 @@ events.prototype.battle = function (id, x, y, force, callback) {
     if (!core.isset(core.status.event.id)) // 自动存档
         core.autosave(true);
 
+    // ------ 支援技能 ------//
+    if (core.isset(x) && core.isset(y)) {
+        var index = x + "," + y, buff = (core.status.checkBlock.buff || {})[index] || {},
+            guards = buff.guards || [];
+        if (guards.length>0) {
+            core.setFlag("__guards__"+x+"_"+y, guards);
+            var actions = [];
+            guards.forEach(function (g) {
+                core.push(actions, {"type": "jump", "from": [g[0],g[1]], "to": [x, y],
+                    "time": 300, "keep": false, "async": true});
+            })
+            core.push(actions, [
+                {"type": "waitAsync"},
+                {"type": "trigger", "loc": [x,y]}
+            ]);
+            core.insertAction(actions);
+            return;
+        }
+    }
+
     if (core.flags.battleAnimate&&!core.isReplaying()) {
         core.waitHeroToStop(function() {
             core.ui.drawBattleAnimate(id, function() {

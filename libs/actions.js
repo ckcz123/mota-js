@@ -2679,7 +2679,7 @@ actions.prototype.onupPaint = function () {
     core.status.event.data.x = null;
     core.status.event.data.y = null;
     // 保存
-    core.paint[core.status.floorId] = LZString.compress(core.utils.encodeCanvas(core.dymCanvas.paint).join(","));
+    core.paint[core.status.floorId] = lzw_encode(core.utils.encodeCanvas(core.dymCanvas.paint).join(","));
 }
 
 actions.prototype.setPaintMode = function (mode) {
@@ -2700,7 +2700,7 @@ actions.prototype.savePaint = function () {
     var data = {};
     for (var floorId in core.paint) {
         if (core.isset(core.paint[floorId]))
-            data[floorId] = LZString.decompress(core.paint[floorId]);
+            data[floorId] = lzw_decode(core.paint[floorId]);
     }
     core.download(core.firstData.name+".h5paint", JSON.stringify({
         'name': core.firstData.name,
@@ -2721,12 +2721,12 @@ actions.prototype.loadPaint = function () {
         core.paint = {};
         for (var floorId in obj.paint) {
             if (core.isset(obj.paint[floorId]))
-                core.paint[floorId] = LZString.compress(obj.paint[floorId]);
+                core.paint[floorId] = lzw_encode(obj.paint[floorId]);
         }
 
         core.clearMap('paint');
         var value = core.paint[core.status.floorId];
-        if (core.isset(value)) value = LZString.decompress(value).split(",");
+        if (core.isset(value)) value = lzw_decode(value).split(",");
         core.utils.decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
         core.drawImage('paint', core.bigmap.tempCanvas.canvas, 0, 0);
 

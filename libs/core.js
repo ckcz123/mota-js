@@ -276,11 +276,11 @@ core.prototype.init = function (coreData, callback) {
     core.platform.useLocalForage = core.getLocalStorage('useLocalForage', !core.platform.isIOS);
     if (core.platform.useLocalForage) {
         try {
-            core.setLocalForage("__test__", LZString.compress("__test__"), function() {
+            core.setLocalForage("__test__", lzw_encode("__test__"), function() {
                 try {
                     core.getLocalForage("__test__", null, function(data) {
                         try {
-                            if (LZString.decompress(data)!="__test__") {
+                            if (lzw_decode(data)!="__test__") {
                                 console.log("localForage unsupported!");
                                 core.platform.useLocalForage=false;
                             }

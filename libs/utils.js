@@ -136,12 +136,14 @@ utils.prototype.setLocalStorage = function(key, value) {
             return;
         }
 
-        var str = JSON.stringify(value);
-        var compressed = LZString.compress(str);
+        var str = JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function(chr) {
+            return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
+        });
+        var compressed = lzw_encode(str);
 
         // test if we can save to localStorage
         localStorage.setItem("__tmp__", compressed);
-        if (LZString.decompress(localStorage.getItem("__tmp__"))==str) {
+        if (lzw_decode(localStorage.getItem("__tmp__"))==str) {
             localStorage.setItem(core.firstData.name + "_" + key, compressed);
         }
         else {
@@ -166,7 +168,7 @@ utils.prototype.getLocalStorage = function(key, defaultValue) {
     try {
         var value = localStorage.getItem(core.firstData.name+"_"+key);
         if (core.isset(value)) {
-            var output = LZString.decompress(value);
+            var output = lzw_decode(value);
             if (core.isset(output) && output.length>0) {
                 try {
                     return JSON.parse(output);
@@ -210,7 +212,9 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
     }
 
     // Save to localforage
-    var compressed = LZString.compress(JSON.stringify(value));
+    var compressed = lzw_encode(JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function(chr) {
+        return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
+    }));
     localforage.setItem(core.firstData.name+"_"+key, compressed, function (err) {
         if (core.isset(err)) {
             if (core.isset(errorCallback)) errorCallback(err);
@@ -241,7 +245,7 @@ utils.prototype.getLocalForage = function (key, defaultValue, successCallback, e
             if (!core.isset(successCallback)) return;
             if (core.isset(value)) {
                 try {
-                    var output = LZString.decompress(value);
+                    var output = lzw_decode(value);
                     if (core.isset(output) && output.length>0) {
                         try {
                             successCallback(JSON.parse(output));
@@ -1042,4 +1046,58 @@ utils.prototype.http = function (type, url, formData, success, error, mimeType, 
     if (core.isset(formData))
         xhr.send(formData);
     else xhr.send();
+}
+
+// LZW-compress
+// https://gist.github.com/revolunet/843889
+function lzw_encode(s) {
+    var dict = {};
+    var data = (s + "").split("");
+    var out = [];
+    var currChar;
+    var phrase = data[0];
+    var code = 256;
+    for (var i=1; i<data.length; i++) {
+        currChar=data[i];
+        if (dict[phrase + currChar] != null) {
+            phrase += currChar;
+        }
+        else {
+            out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
+            dict[phrase + currChar] = code;
+            code++;
+            phrase=currChar;
+        }
+    }
+    out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
+    for (var i=0; i<out.length; i++) {
+        out[i] = String.fromCharCode(out[i]);
+    }
+    return out.join("");
+}
+
+// Decompress an LZW-encoded string
+function lzw_decode(s) {
+    var dict = {};
+    var data = (s + "").split("");
+    var currChar = data[0];
+    var oldPhrase = currChar;
+    var out = [currChar];
+    var code = 256;
+    var phrase;
+    for (var i=1; i<data.length; i++) {
+        var currCode = data[i].charCodeAt(0);
+        if (currCode < 256) {
+            phrase = data[i];
+        }
+        else {
+            phrase = dict[currCode] ? dict[currCode] : (oldPhrase + currChar);
+        }
+        out.push(phrase);
+        currChar = phrase.charAt(0);
+        dict[code] = oldPhrase + currChar;
+        code++;
+        oldPhrase = phrase;
+    }
+    return out.join("");
 }

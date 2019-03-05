@@ -1690,7 +1690,7 @@ ui.prototype.drawMaps = function (index, x, y) {
     if (core.status.event.data.paint) {
         var offsetX = core.clamp(x-6, 0, mw-13), offsetY = core.clamp(y-6, 0, mh-13);
         var value = core.paint[floorId];
-        if (core.isset(value)) value = LZString.decompress(value).split(",");
+        if (core.isset(value)) value = lzw_decode(value).split(",");
         core.utils.decodeCanvas(value, 32*mw, 32*mh);
         core.drawImage('ui', core.bigmap.tempCanvas.canvas, offsetX*32, offsetY*32, 416, 416, 0, 0, 416, 416);
     }
@@ -2582,7 +2582,7 @@ ui.prototype.drawPaint = function () {
 
             // 将已有的内容绘制到route上
             var value = core.paint[core.status.floorId];
-            if (core.isset(value)) value = LZString.decompress(value).split(",");
+            if (core.isset(value)) value = lzw_decode(value).split(",");
             core.utils.decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
             core.drawImage('paint', core.bigmap.tempCanvas.canvas, 0, 0);
 

@@ -351,7 +351,6 @@ core.ui.drawConfirmBox // 绘制一个确认/取消的警告页面
 core.ui.drawSwitchs // 绘制系统设置界面
 core.ui.drawSettings // 绘制系统菜单栏
 core.ui.drawQuickShop // 绘制快捷商店选择栏
-core.ui.drawBattleAnimate // 绘制战斗动画
 core.ui.drawWaiting // 绘制等待界面
 core.ui.drawSyncSave // 绘制存档同步界面
 core.ui.drawPagination // 绘制分页

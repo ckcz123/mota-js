@@ -223,11 +223,6 @@ core.prototype.init = function (coreData, callback) {
         core.flags.enableLevelUp = false;
     if (!core.flags.enableLevelUp)
         core.flags.levelUpLeftMode = false;
-    if (!core.flags.canOpenBattleAnimate) {
-        core.flags.showBattleAnimateConfirm = false;
-        core.flags.battleAnimate = false;
-        core.setLocalStorage('battleAnimate', false);
-    }
 
     if (core.isset(core.firstData.shops)) {
         core.firstData.shops.forEach(function (t) {
@@ -323,7 +318,6 @@ core.prototype.init = function (coreData, callback) {
     core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
 
     // switchs
-    core.flags.battleAnimate = core.getLocalStorage('battleAnimate', core.flags.battleAnimate);
     core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
     core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);

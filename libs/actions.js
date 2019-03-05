@@ -1845,34 +1845,24 @@ actions.prototype.clickSwitchs = function (x,y) {
                 core.ui.drawSwitchs();
                 break;
             case 2:
-                if (!core.flags.canOpenBattleAnimate) {
-                    core.drawTip("本塔不能开启战斗动画！");
-                }
-                else {
-                    core.flags.battleAnimate=!core.flags.battleAnimate;
-                    core.setLocalStorage('battleAnimate', core.flags.battleAnimate);
-                    core.ui.drawSwitchs();
-                }
-                break;
-            case 3:
                 core.flags.displayEnemyDamage=!core.flags.displayEnemyDamage;
                 core.updateDamage();
                 core.setLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
                 core.ui.drawSwitchs();
                 break;
-            case 4:
+            case 3:
                 core.flags.displayCritical=!core.flags.displayCritical;
                 core.updateDamage();
                 core.setLocalStorage('critical', core.flags.displayCritical);
                 core.ui.drawSwitchs();
                 break;
-            case 5:
+            case 4:
                 core.flags.displayExtraDamage=!core.flags.displayExtraDamage;
                 core.updateDamage();
                 core.setLocalStorage('extraDamage', core.flags.displayExtraDamage);
                 core.ui.drawSwitchs();
                 break;
-            case 6:
+            case 5:
                 core.platform.useLocalForage=!core.platform.useLocalForage;
                 core.setLocalStorage('useLocalForage', core.platform.useLocalForage);
                 core.control.getSaveIndexes(function (indexes) {
@@ -1880,17 +1870,17 @@ actions.prototype.clickSwitchs = function (x,y) {
                 });
                 core.ui.drawSwitchs();
                 break;
-            case 7:
+            case 6:
                 core.setFlag('clickMove', !core.getFlag('clickMove', true));
                 core.ui.drawSwitchs();
                 break;
-            case 8:
+            case 7:
                 core.platform.extendKeyboard = !core.platform.extendKeyboard;
                 core.setLocalStorage('extendKeyboard', core.platform.extendKeyboard);
                 core.updateStatusBar();
                 core.ui.drawSwitchs();
                 break;
-            case 9:
+            case 8:
                 core.status.event.selection=0;
                 core.ui.drawSettings();
                 break;

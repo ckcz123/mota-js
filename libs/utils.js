@@ -163,28 +163,30 @@ utils.prototype.setLocalStorage = function(key, value) {
     }
 }
 
+utils.prototype.decompress = function (value) {
+    try {
+        var output = lzw_decode(value);
+        if (core.isset(output) && output.length > 0)
+            return JSON.parse(output);
+    }
+    catch (e) {}
+    try {
+        var output = LZString.decompress(value);
+        if (core.isset(output) && output.length > 0)
+            return JSON.parse(output);
+    }
+    catch (e) {}
+    try {
+        return JSON.parse(value);
+    }
+    catch (e) {main.log(e);}
+    return null;
+}
+
 ////// 获得本地存储 //////
 utils.prototype.getLocalStorage = function(key, defaultValue) {
-    try {
-        var value = localStorage.getItem(core.firstData.name+"_"+key);
-        if (core.isset(value)) {
-            var output = lzw_decode(value);
-            if (core.isset(output) && output.length>0) {
-                try {
-                    return JSON.parse(output);
-                }
-                catch (ee) {
-                    // Ignore, use default value
-                }
-            }
-            return JSON.parse(value);
-        }
-        return defaultValue;
-    }
-    catch (e) {
-        main.log(e);
-        return defaultValue;
-    }
+    var res = this.decompress(localStorage.getItem(core.firstData.name+"_"+key));
+    return res==null?defaultValue:res;
 }
 
 ////// 移除本地存储 //////
@@ -244,18 +246,9 @@ utils.prototype.getLocalForage = function (key, defaultValue, successCallback, e
         else {
             if (!core.isset(successCallback)) return;
             if (core.isset(value)) {
-                try {
-                    var output = lzw_decode(value);
-                    if (core.isset(output) && output.length>0) {
-                        try {
-                            successCallback(JSON.parse(output));
-                            return;
-                        } catch (ee) {main.log(ee);}
-                    }
-                    successCallback(JSON.parse(value));
-                    return;
-                }
-                catch (e) {main.log(e);}
+                var res = core.utils.decompress(value);
+                successCallback(res==null?defaultValue:res);
+                return;
             }
             successCallback(defaultValue);
         }

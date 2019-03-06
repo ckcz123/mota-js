@@ -1493,8 +1493,8 @@ events.prototype.battle = function (id, x, y, force, callback) {
 
     // ------ 支援技能 ------//
     if (core.isset(x) && core.isset(y)) {
-        var index = x + "," + y, buff = (core.status.checkBlock.buff || {})[index] || {},
-            guards = buff.guards || [];
+        var index = x + "," + y, cache = (core.status.checkBlock.cache || {})[index] || {},
+            guards = cache.guards || [];
         if (guards.length>0) {
             core.setFlag("__guards__"+x+"_"+y, guards);
             var actions = [];

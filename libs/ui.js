@@ -1683,7 +1683,7 @@ ui.prototype.drawMaps = function (index, x, y) {
 
     clearTimeout(core.interval.tipAnimate);
     core.clearLastEvent();
-    core.status.checkBlock.buff = {};
+    core.status.checkBlock.cache = {};
     this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 0, 0, 416, x, y);
 
     // 绘图

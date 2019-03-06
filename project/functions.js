@@ -499,9 +499,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// ------ 支援 ------
 	var guards = [];
 	// 检查光环缓存
-	if (!core.isset(core.status.checkBlock.buff)) core.status.checkBlock.buff = {};
+	if (!core.isset(core.status.checkBlock.cache)) core.status.checkBlock.cache = {};
 	var index = core.isset(x) && core.isset(y) ? (x + "," + y) : "floor";
-	var cache = core.status.checkBlock.buff[index];
+	var cache = core.status.checkBlock.cache[index];
 	if (!core.isset(cache)) {
 		// 没有该点的缓存，则遍历每个图块
 		core.status.maps[floorId].blocks.forEach(function (block) {
@@ -533,7 +533,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		});
 
 		// 放入缓存中
-		core.status.checkBlock.buff[index] = { "hp_buff": hp_buff, "atk_buff": atk_buff, "def_buff": def_buff, "guards": guards };
+		core.status.checkBlock.cache[index] = { "hp_buff": hp_buff, "atk_buff": atk_buff, "def_buff": def_buff, "guards": guards };
 	} else {
 		// 直接使用缓存数据
 		hp_buff = cache.hp_buff;

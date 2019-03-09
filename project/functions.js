@@ -1103,6 +1103,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					for (var dir in core.utils.scan) {
 						var nx = x + core.utils.scan[dir].x,
 							ny = y + core.utils.scan[dir].y;
+						if (nx < 0 || nx >= core.bigmap.width || ny < 0 || ny >= core.bigmap.height) continue;
 						if (!core.isset(core.status.checkBlock.ambush[nx + ny * core.bigmap.width]))
 							core.status.checkBlock.ambush[nx + ny * core.bigmap.width] = [];
 						core.status.checkBlock.ambush[nx + ny * core.bigmap.width].push([x, y, id, dir]);

@@ -407,7 +407,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
     core.status.maps = core.clone(maps);
     // 初始化怪物
     core.material.enemys = core.clone(core.enemys.getEnemys());
-    core.material.items = core.clone(core.items.getItems());
+    core.material.items = core.items.getItems();
     // 初始化人物属性
     core.status.hero = core.clone(hero);
     // 初始化人物图标

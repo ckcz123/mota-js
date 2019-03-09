@@ -236,7 +236,7 @@ core.prototype.init = function (coreData, callback) {
     core.dom.logoLabel.innerHTML = core.firstData.title;
     document.title = core.firstData.title + " - HTML5魔塔";
     document.getElementById("startLogo").innerHTML = core.firstData.title;
-    core.material.items = core.clone(core.items.getItems());
+    core.material.items = core.items.getItems();
     core.material.enemys = core.clone(core.enemys.getEnemys());
     core.material.icons = core.icons.getIcons();
     core.material.events = core.events.getEvents();
@@ -402,7 +402,7 @@ core.prototype._forwardFunc = function (name, funcname) {
         main.log("Error in forwarding "+funcname+" from "+name+"!");
         return;
     }
-    var parameterInfo = /^\s*function\s*[\w_$]*\(([\w_,$ \n]*)\)\s*\{/.exec(core[name][funcname].toString());
+    var parameterInfo = /^\s*function\s*[\w_$]*\(([\w_,$\s]*)\)\s*\{/.exec(core[name][funcname].toString());
     var parameters = (parameterInfo==null?"":parameterInfo[1]).replace(/\s*/g, '').replace(/,/g, ', ');
     // core[funcname] = new Function(parameters, "return core."+name+"."+funcname+"("+parameters+");");
     eval("core."+funcname+" = function ("+parameters+") {\n\treturn core."+name+"."+funcname+"("+parameters+");\n}");

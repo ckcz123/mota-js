@@ -6,10 +6,10 @@ actions.js：用户交互的事件的处理
 "use strict";
 
 function actions() {
-    this.init();
+    this._init();
 }
 
-actions.prototype.init = function () {
+actions.prototype._init = function () {
     this.actionsdata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.actions;
     this.actions = {};
     // --- onkeyDown注册
@@ -66,10 +66,10 @@ actions.prototype.init = function () {
  * 返回：如果func返回true，则不会再继续执行其他的交互函数；否则会继续执行其他的交互函数。
  */
 actions.prototype.registerAction = function (action, name, func, priority) {
-    if (!core.isset(name) || !core.isset(func) || !(func instanceof Function))
+    if (!name || !func || !(func instanceof Function))
         return;
     priority = priority || 0;
-    if (!core.isset(this.actions[action])) {
+    if (!this.actions[action]) {
         this.actions[action] = [];
     }
     this.unregisterAction(action, name);
@@ -83,7 +83,7 @@ actions.prototype.registerAction = function (action, name, func, priority) {
 
 ////// 注销一个用户交互行为 //////
 actions.prototype.unregisterAction = function (action, name) {
-    if (!core.isset(this.actions[action])) return;
+    if (!this.actions[action]) return;
     this.actions[action] = this.actions[action].filter(function (x) { return x.name != name; });
 }
 
@@ -1261,7 +1261,7 @@ actions.prototype._clickToolboxIndex = function(index) {
     if (select>=items.length) return;
     var itemId=items[select];
     if (itemId==core.status.event.data.selectId) {
-        core.events.useItem(itemId);
+        core.events.tryUseItem(itemId);
     }
     else {
         core.ui.drawToolbox(index);

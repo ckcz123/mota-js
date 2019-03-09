@@ -1,10 +1,10 @@
 "use strict";
 
 function maps() {
-    this.init();
+    this._init();
 }
 
-maps.prototype.init = function() {
+maps.prototype._init = function() {
     this.blocksInfo = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
     //delete(maps_90f36752_8815_4be8_b32b_d7fad1d0542e);
 }
@@ -246,11 +246,11 @@ maps.prototype.decompressMap = function (mapArr, floorId) {
 }
 
 ////// 将当前地图重新变成数字，以便于存档 //////
-maps.prototype.save = function(maps, floorId) {
+maps.prototype.saveMap = function(maps, floorId) {
     if (!core.isset(floorId)) {
         var map = {};
         for (var id in maps) {
-            map[id] = this.save(maps, id);
+            map[id] = this.saveMap(maps, id);
         }
         return map;
     }
@@ -308,7 +308,7 @@ maps.prototype.resizeMap = function(floorId) {
 }
 
 ////// 将存档中的地图信息重新读取出来 //////
-maps.prototype.load = function (data, floorId) {
+maps.prototype.loadMap = function (data, floorId) {
     if (!core.isset(floorId)) {
         var map = {};
         core.floorIds.forEach(function (id) {

@@ -7,11 +7,11 @@
 "use strict";
 
 function ui() {
-    this.init();
+    this._init();
 }
 
 // 初始化UI
-ui.prototype.init = function () {
+ui.prototype._init = function () {
     this.uidata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.ui;
 }
 
@@ -2091,7 +2091,7 @@ ui.prototype.drawSLPanel = function(index, refresh) {
             core.fillText('ui', i==0?"自动存档":name+id, (2*i+1)*u, 30, '#FFFFFF', "bold 17px "+globalFont);
             core.strokeRect('ui', (2*i+1)*u-size/2, 45, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 45, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
+                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.loadMap(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 45, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
                 var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
                 var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
                 if (v.length+v2.length<=21) v+=v2;
@@ -2107,7 +2107,7 @@ ui.prototype.drawSLPanel = function(index, refresh) {
             core.fillText('ui', name+id, (2*i-5)*u, 218, '#FFFFFF', "bold 17px "+globalFont);
             core.strokeRect('ui', (2*i-5)*u-size/2, 233, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.load(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 233, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
+                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.loadMap(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 233, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
                 var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
                 var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
                 if (v.length+v2.length<=21) v+=v2;

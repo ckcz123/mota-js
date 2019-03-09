@@ -7,10 +7,10 @@ control.js：游戏主要逻辑控制
 "use strict";
 
 function control() {
-    this.init();
+    this._init();
 }
 
-control.prototype.init = function () {
+control.prototype._init = function () {
     this.controldata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.control;
 }
 
@@ -2430,7 +2430,7 @@ control.prototype.saveData = function() {
         'floorId': core.status.floorId,
         'hero': hero,
         'hard': core.status.hard,
-        'maps': core.maps.save(core.status.maps),
+        'maps': core.maps.saveMap(core.status.maps),
         'route': core.encodeRoute(core.status.route),
         'values': core.clone(core.values),
         'shops': {},
@@ -2453,7 +2453,7 @@ control.prototype.saveData = function() {
 ////// 从本地读档 //////
 control.prototype.loadData = function (data, callback) {
 
-    core.resetStatus(data.hero, data.hard, data.floorId, core.decodeRoute(data.route), core.maps.load(data.maps),
+    core.resetStatus(data.hero, data.hard, data.floorId, core.decodeRoute(data.route), core.maps.loadMap(data.maps),
         data.values);
 
     // load shop times

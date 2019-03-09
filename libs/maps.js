@@ -26,8 +26,8 @@ maps.prototype.loadFloor = function (floorId, map) {
     map=this.decompressMap(map.map, floorId);
     var mapIntoBlocks = function(map,maps,floor,floorId){
         var blocks = [];
-        var mw = core.floors[floorId].width || 13;
-        var mh = core.floors[floorId].height || 13;
+        var mw = core.floors[floorId].width || 15;
+        var mh = core.floors[floorId].height || 15;
         for (var i = 0; i < mh; i++) {
             for (var j = 0; j < mw; j++) {
                 var block = maps.initBlock(j, i, (map[i]||[])[j]||0);
@@ -181,8 +181,8 @@ maps.prototype.initMaps = function (floorIds) {
 maps.prototype.__initFloorMap = function (floorId) {
     var map = core.clone(core.floors[floorId].map);
 
-    var mw = core.floors[floorId].width || 13;
-    var mh = core.floors[floorId].height || 13;
+    var mw = core.floors[floorId].width || 15;
+    var mh = core.floors[floorId].height || 15;
 
     for (var x=0;x<mh;x++) {
         if (!core.isset(map[x])) map[x] = [];
@@ -204,8 +204,8 @@ maps.prototype.compressMap = function (mapArr, floorId) {
     var floorMap = this.__initFloorMap(floorId);
     if (core.utils.same(mapArr, floorMap)) return null;
 
-    var mw = core.floors[floorId].width || 13;
-    var mh = core.floors[floorId].height || 13;
+    var mw = core.floors[floorId].width || 15;
+    var mh = core.floors[floorId].height || 15;
     for (var x=0;x<mh;x++) {
         if (core.utils.same(mapArr[x], floorMap[x])) {
             // 没有改变的行直接删掉记成0
@@ -228,8 +228,8 @@ maps.prototype.decompressMap = function (mapArr, floorId) {
     var floorMap = this.__initFloorMap(floorId);
     if (!core.isset(mapArr)) return floorMap;
 
-    var mw = core.floors[floorId].width || 13;
-    var mh = core.floors[floorId].height || 13;
+    var mw = core.floors[floorId].width || 15;
+    var mh = core.floors[floorId].height || 15;
     for (var x=0;x<mh;x++) {
         if (mapArr[x] === 0) {
             mapArr[x] = floorMap[x];
@@ -254,8 +254,8 @@ maps.prototype.save = function(maps, floorId) {
         }
         return map;
     }
-    var mw = core.floors[floorId].width || 13;
-    var mh = core.floors[floorId].height || 13;
+    var mw = core.floors[floorId].width || 15;
+    var mh = core.floors[floorId].height || 15;
 
     var blocks = [];
     for (var x=0;x<mh;x++) {
@@ -291,8 +291,8 @@ maps.prototype.save = function(maps, floorId) {
 maps.prototype.resizeMap = function(floorId) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
-    core.bigmap.width = core.floors[floorId].width || 13;
-    core.bigmap.height = core.floors[floorId].height || 13;
+    core.bigmap.width = core.floors[floorId].width || 15;
+    core.bigmap.height = core.floors[floorId].height || 15;
     var cwidth = core.bigmap.width * 32;
     var cheight = core.bigmap.height * 32;
     core.bigmap.canvas.forEach(function(cn){
@@ -301,8 +301,8 @@ maps.prototype.resizeMap = function(floorId) {
         core.canvas[cn].canvas.style.width = cwidth*core.domStyle.scale + "px";
         core.canvas[cn].canvas.style.height = cheight*core.domStyle.scale + "px";
         if(main.mode==='editor' && editor.isMobile){
-            core.canvas[cn].canvas.style.width = core.bigmap.width*32/416*96 + "vw";
-            core.canvas[cn].canvas.style.height = core.bigmap.height*32/416*96 + "vw";
+            core.canvas[cn].canvas.style.width = core.bigmap.width*32/480*96 + "vw";
+            core.canvas[cn].canvas.style.height = core.bigmap.height*32/480*96 + "vw";
         }
     });
 }
@@ -322,8 +322,8 @@ maps.prototype.load = function (data, floorId) {
 ////// 将当前地图重新变成二维数组形式 //////
 maps.prototype.getMapArray = function (blockArray,width,height){
 
-    width=width||13;
-    height=height||13;
+    width=width||15;
+    height=height||15;
 
     var blocks = [];
     for (var x=0;x<height;x++) {
@@ -445,8 +445,8 @@ maps.prototype.drawBlock = function (block, animate, dx, dy) {
 
     // --- 在界面外的动画不绘制
     if ((animate||0)>1 && (block.event.animate||0)>1 &&
-        (block.x * 32 + dx < core.bigmap.offsetX - 64 || block.x * 32 + dx > core.bigmap.offsetX + 416 + 32
-            || block.y * 32 + dy < core.bigmap.offsetY - 64 || block.y * 32 + dy > core.bigmap.offsetY + 416 + 32 + 16)) {
+        (block.x * 32 + dx < core.bigmap.offsetX - 64 || block.x * 32 + dx > core.bigmap.offsetX + 480 + 32
+            || block.y * 32 + dy < core.bigmap.offsetY - 64 || block.y * 32 + dy > core.bigmap.offsetY + 480 + 32 + 16)) {
         return;
     }
 
@@ -480,8 +480,8 @@ maps.prototype.drawBlock = function (block, animate, dx, dy) {
 maps.prototype.getBgFgMapArray = function (floorId, name) {
     floorId = floorId||core.status.floorId;
     if (!core.isset(floorId)) return [];
-    var width = core.floors[floorId].width || 13;
-    var height = core.floors[floorId].height || 13;
+    var width = core.floors[floorId].width || 15;
+    var height = core.floors[floorId].height || 15;
 
     if (main.mode!='editor' && core.isset(core.status[name+"maps"][floorId]))
         return core.status[name+"maps"][floorId];
@@ -504,8 +504,8 @@ maps.prototype.getBgFgMapArray = function (floorId, name) {
 maps.prototype.drawBgFgMap = function (floorId, canvas, name, animate) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
-    var width = core.floors[floorId].width || 13;
-    var height = core.floors[floorId].height || 13;
+    var width = core.floors[floorId].width || 15;
+    var height = core.floors[floorId].height || 15;
 
     if (!core.isset(core.status[name+"maps"]))
         core.status[name+"maps"] = {};
@@ -630,8 +630,8 @@ maps.prototype.drawMap = function (floorId, callback) {
     this.generateGroundPattern(floorId);
 
     var drawBg = function(){
-        var width = core.floors[floorId].width || 13;
-        var height = core.floors[floorId].height || 13;
+        var width = core.floors[floorId].width || 15;
+        var height = core.floors[floorId].height || 15;
 
         for (var x = 0; x < width; x++) {
             for (var y = 0; y < height; y++) {
@@ -711,7 +711,7 @@ maps.prototype.drawMap = function (floorId, callback) {
     } else {
         drawEvent();
         if (core.isset(core.status.curtainColor))
-            core.fillRect('curtain',0,0,416,416,core.arrayToRGBA(core.status.curtainColor));
+            core.fillRect('curtain',0,0,480,480,core.arrayToRGBA(core.status.curtainColor));
         core.setGlobalAnimate(core.values.animateSpeed);
         core.drawHero();
         core.updateStatusBar();
@@ -1391,7 +1391,7 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
     if (!core.isset(number) || !core.isset(x) || !core.isset(y)) return;
-    if (x<0 || x>=(core.floors[floorId].width||13) || y<0 || y>=(core.floors[floorId].height||13)) return;
+    if (x<0 || x>=(core.floors[floorId].width||15) || y<0 || y>=(core.floors[floorId].height||15)) return;
 
     var originBlock=core.getBlock(x,y,floorId,true);
     var block = core.maps.initBlock(x,y,number);
@@ -1429,7 +1429,7 @@ maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
     if (!core.isset(number) || !core.isset(x) || !core.isset(y)) return;
-    if (x<0 || x>=(core.floors[floorId].width||13) || y<0 || y>=(core.floors[floorId].height||13)) return;
+    if (x<0 || x>=(core.floors[floorId].width||15) || y<0 || y>=(core.floors[floorId].height||15)) return;
     if (name!='bg' && name!='fg') return;
 
     core.setFlag(name+"v_"+floorId+"_"+x+"_"+y, number);

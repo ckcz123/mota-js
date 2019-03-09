@@ -25,9 +25,9 @@
                 <input type="button" value="新建空白地图" id='newMap'/>
                 <input id='newFileName' placeholder="新楼层id" style="width: 70px"/>
                 <span style="vertical-align: bottom">宽</span>
-                <input id='newMapWidth' value="13" style="width: 20px"/>
+                <input id='newMapWidth' value="15" style="width: 20px"/>
                 <span style="vertical-align: bottom">高</span>
-                <input id='newMapHeight' value="13" style="width: 20px"/>
+                <input id='newMapHeight' value="15" style="width: 20px"/>
                 <input type="checkbox" id='newMapStatus' checked='checked' style='vertical-align: bottom'/>
                 <span style='vertical-align: bottom; margin-left: -4px'>保留楼层属性</span>
             </div>
@@ -47,9 +47,9 @@
                 <span style="vertical-align: bottom">状态栏名称: </span>
                 <input id='newFloorNames' style="width: 70px" value='${i}'/>
                 <span style="vertical-align: bottom">宽</span>
-                <input id='newMapsWidth' value="13" style="width: 20px"/>
+                <input id='newMapsWidth' value="15" style="width: 20px"/>
                 <span style="vertical-align: bottom">高</span>
-                <input id='newMapsHeight' value="13" style="width: 20px"/>
+                <input id='newMapsHeight' value="15" style="width: 20px"/>
                 <input type="checkbox" id='newMapsStatus' checked='checked' style='vertical-align: bottom'/>
                 <span style='vertical-align: bottom; margin-left: -4px'>保留楼层属性</span>
                 <br/>
@@ -260,12 +260,12 @@
         <table class="col" id='mapColMark'></table>
         <table class="row" id='mapRowMark'></table>
         <div class="map" id="mapEdit">
-            <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas>
-            <canvas class='gameCanvas' id='event' width='416' height='416'></canvas>
-            <canvas class='gameCanvas' id='event2' width='416' height='416'></canvas>
-            <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
-            <canvas class='gameCanvas' id='efg' width='416' height='416'></canvas>
-            <canvas class='egameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
+            <canvas class='gameCanvas' id='bg' width='480' height='480'></canvas>
+            <canvas class='gameCanvas' id='event' width='480' height='480'></canvas>
+            <canvas class='gameCanvas' id='event2' width='480' height='480'></canvas>
+            <canvas class='gameCanvas' id='fg' width='480' height='480'></canvas>
+            <canvas class='gameCanvas' id='efg' width='480' height='480'></canvas>
+            <canvas class='egameCanvas' id='eui' width='480' height='480' style='z-index:100'></canvas>
         </div>
         <div class="tools">
             <div id="tip" v-cloak>
@@ -462,16 +462,16 @@
     <div id="gameDraw">
         <div id="gif"></div>
         <div id="gif2"></div>
-        <!-- <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas> -->
-        <!-- <canvas class='gameCanvas' id='event' width='416' height='416'></canvas> -->
-        <canvas class='gameCanvas' id='hero' width='416' height='416'></canvas>
-        <!-- <canvas class='gameCanvas' id='event2' width='416' height='416'></canvas> -->
-        <!-- <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas> -->
-        <canvas class='gameCanvas' id='damage' width='416' height='416'></canvas>
-        <canvas class='gameCanvas' id='animate' width='416' height='416'></canvas>
-        <canvas class='gameCanvas' id='curtain' width='416' height='416'></canvas>
-        <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
-        <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
+        <!-- <canvas class='gameCanvas' id='bg' width='480' height='480'></canvas> -->
+        <!-- <canvas class='gameCanvas' id='event' width='480' height='480'></canvas> -->
+        <canvas class='gameCanvas' id='hero' width='480' height='480'></canvas>
+        <!-- <canvas class='gameCanvas' id='event2' width='480' height='480'></canvas> -->
+        <!-- <canvas class='gameCanvas' id='fg' width='480' height='480'></canvas> -->
+        <canvas class='gameCanvas' id='damage' width='480' height='480'></canvas>
+        <canvas class='gameCanvas' id='animate' width='480' height='480'></canvas>
+        <canvas class='gameCanvas' id='curtain' width='480' height='480'></canvas>
+        <canvas class='gameCanvas' id='ui' width='480' height='480'></canvas>
+        <canvas class='gameCanvas' id='data' width='480' height='480'>此浏览器不支持HTML5</canvas>
     </div>
 </div>
 <!-- */</script> -->

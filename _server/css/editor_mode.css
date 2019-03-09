@@ -7,7 +7,7 @@
 .leftTab {
     overflow: auto;
     position: absolute;
-    height: 630px;
+    height: 655px;
 }
 
 .leftTab > * {

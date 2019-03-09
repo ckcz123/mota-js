@@ -1757,7 +1757,7 @@ events.prototype.textImage = function (content) {
     var contents = core.splitLines('ui', content), lines = contents.length;
 
     // 计算总高度，按1.4倍行距计算
-    var width = 416, height = textfont * 1.4 * lines;
+    var width = 480, height = textfont * 1.4 * lines;
     var tempCanvas = core.bigmap.tempCanvas;
     tempCanvas.canvas.width = width;
     tempCanvas.canvas.height = height;
@@ -2047,8 +2047,8 @@ events.prototype.useItem = function(itemId) {
         var fillstyle = 'rgba(255,0,0,0.5)';
         if (core.canUseItem('centerFly')) fillstyle = 'rgba(0,255,0,0.5)';
         var toX = core.bigmap.width-1 - core.getHeroLoc('x'), toY = core.bigmap.height-1-core.getHeroLoc('y');
-        core.ui.drawThumbnail(core.status.floorId, 'ui', core.status.thisMap.blocks, 0, 0, 416, toX, toY, core.status.hero.loc, core.getFlag('heroIcon', "hero.png"));
-        var offsetX = core.clamp(toX-6, 0, core.bigmap.width-13), offsetY = core.clamp(toY-6, 0, core.bigmap.height-13);
+        core.ui.drawThumbnail(core.status.floorId, 'ui', core.status.thisMap.blocks, 0, 0, 480, toX, toY, core.status.hero.loc, core.getFlag('heroIcon', "hero.png"));
+        var offsetX = core.clamp(toX-7, 0, core.bigmap.width-15), offsetY = core.clamp(toY-7, 0, core.bigmap.height-15);
         core.fillRect('ui',(toX-offsetX)*32,(toY-offsetY)*32,32,32,fillstyle);
         core.status.event.data = {"x": toX, "y": toY, "posX": toX-offsetX, "posY": toY-offsetY};
         core.drawTip("请确认当前中心对称飞行器的位置");

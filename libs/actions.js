@@ -481,7 +481,7 @@ actions.prototype.onclick = function (x, y, stepPostfix) {
     stepPostfix=stepPostfix||[];
 
     // 非游戏屏幕内
-    if (x<0 || y<0 || x>12 || y>12) return;
+    if (x<0 || y<0 || x>14 || y>14) return;
 
     // 寻路
     if (!core.status.lockControl) {
@@ -650,8 +650,8 @@ actions.prototype.onmousewheel = function (direct) {
 
     // 怪物手册
     if (core.status.lockControl && core.status.event.id == 'book') {
-        if (direct==1) core.ui.drawBook(core.status.event.data - 6);
-        if (direct==-1) core.ui.drawBook(core.status.event.data + 6);
+        if (direct==1) core.ui.drawBook(core.status.event.data - 7);
+        if (direct==-1) core.ui.drawBook(core.status.event.data + 7);
         return;
     }
 
@@ -664,8 +664,8 @@ actions.prototype.onmousewheel = function (direct) {
 
     // 浏览地图
     if (core.status.lockControl && core.status.event.id == 'viewMaps') {
-        if (direct==1) this.clickViewMaps(6,3);
-        if (direct==-1) this.clickViewMaps(6,9);
+        if (direct==1) this.clickViewMaps(7,4);
+        if (direct==-1) this.clickViewMaps(7,10);
         return;
     }
 }
@@ -761,9 +761,9 @@ actions.prototype.keyUpCenterFly = function (keycode) {
 
 ////// 点击确认框时 //////
 actions.prototype.clickConfirmBox = function (x,y) {
-    if ((x == 4 || x == 5) && y == 7 && core.isset(core.status.event.data.yes))
+    if ((x == 5 || x == 6) && y == 8 && core.isset(core.status.event.data.yes))
         core.status.event.data.yes();
-    if ((x == 7 || x == 8) && y == 7 && core.isset(core.status.event.data.no))
+    if ((x == 8 || x == 9) && y == 8 && core.isset(core.status.event.data.no))
         core.status.event.data.no();
 }
 
@@ -821,8 +821,8 @@ actions.prototype.clickAction = function (x,y) {
         var data = core.status.event.data.current;
         var choices = data.choices;
         if (choices.length==0) return;
-        if (x >= 5 && x <= 7) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
+        if (x >= 5 && x <= 9) {
+            var topIndex = 7 - parseInt((choices.length - 1) / 2);
             if (y>=topIndex && y<topIndex+choices.length) {
                 // 选择
                 core.status.route.push("choices:"+(y-topIndex));
@@ -893,17 +893,17 @@ actions.prototype.keyUpAction = function (keycode) {
 ////// 怪物手册界面的点击操作 //////
 actions.prototype.clickBook = function(x,y) {
     // 上一页
-    if ((x == 3 || x == 4) && y == 12) {
-        core.ui.drawBook(core.status.event.data - 6);
+    if ((x == 4 || x == 5) && y == 14) {
+        core.ui.drawBook(core.status.event.data - 7);
         return;
     }
     // 下一页
-    if ((x == 8 || x == 9) && y == 12) {
-        core.ui.drawBook(core.status.event.data + 6);
+    if ((x == 9 || x == 10) && y == 14) {
+        core.ui.drawBook(core.status.event.data + 7);
         return;
     }
     // 返回
-    if (x>=10 && x<=12 && y==12) {
+    if (x>=12 && x<=14 && y==14) {
         if (core.events.recoverEvents(core.status.event.interval)) {
             return;
         }
@@ -916,9 +916,9 @@ actions.prototype.clickBook = function(x,y) {
     }
     // 怪物信息
     var data = core.status.event.data;
-    if (core.isset(data) && y<12) {
-        var page=parseInt(data/6);
-        var index=6*page+parseInt(y/2);
+    if (core.isset(data) && y<14) {
+        var page=parseInt(data/7);
+        var index=7*page+parseInt(y/2);
         core.ui.drawBook(index);
         core.ui.drawBookDetail(index);
     }
@@ -927,12 +927,12 @@ actions.prototype.clickBook = function(x,y) {
 
 ////// 怪物手册界面时，按下某个键的操作 //////
 actions.prototype.keyDownBook = function (keycode) {
-    if (keycode==37) core.ui.drawBook(core.status.event.data-6);
+    if (keycode==37) core.ui.drawBook(core.status.event.data-7);
     if (keycode==38) core.ui.drawBook(core.status.event.data-1);
-    if (keycode==39) core.ui.drawBook(core.status.event.data+6);
+    if (keycode==39) core.ui.drawBook(core.status.event.data+7);
     if (keycode==40) core.ui.drawBook(core.status.event.data+1);
-    if (keycode==33) core.ui.drawBook(core.status.event.data-6);
-    if (keycode==34) core.ui.drawBook(core.status.event.data+6);
+    if (keycode==33) core.ui.drawBook(core.status.event.data-7);
+    if (keycode==34) core.ui.drawBook(core.status.event.data+7);
     return;
 }
 
@@ -952,7 +952,7 @@ actions.prototype.keyUpBook = function (keycode) {
     if (keycode==13 || keycode==32 || keycode==67) {
         var data=core.status.event.data;
         if (core.isset(data)) {
-            this.clickBook(6, 2*(data%6));
+            this.clickBook(7, 2*(data%7));
         }
         return;
     }
@@ -966,12 +966,12 @@ actions.prototype.clickBookDetail = function () {
 
 ////// 楼层传送器界面时的点击操作 //////
 actions.prototype.clickFly = function(x,y) {
-    if ((x==10 || x==11) && y==9) core.ui.drawFly(core.status.event.data-1);
-    if ((x==10 || x==11) && y==5) core.ui.drawFly(core.status.event.data+1);
-    if ((x==10 || x==11) && y==10) core.ui.drawFly(core.status.event.data-10);
-    if ((x==10 || x==11) && y==4) core.ui.drawFly(core.status.event.data+10);
-    if (x>=5 && x<=7 && y==12) core.ui.closePanel();
-    if (x>=0 && x<=9 && y>=3 && y<=11)
+    if ((x==12 || x==13) && y==10) core.ui.drawFly(core.status.event.data-1);
+    if ((x==12 || x==13) && y==6) core.ui.drawFly(core.status.event.data+1);
+    if ((x==12 || x==13) && y==11) core.ui.drawFly(core.status.event.data-10);
+    if ((x==12 || x==13) && y==5) core.ui.drawFly(core.status.event.data+10);
+    if (x>=6 && x<=8 && y==14) core.ui.closePanel();
+    if (x>=0 && x<=10 && y>=3 && y<=13)
         core.control.flyTo(core.status.hero.flyRange[core.status.event.data]);
     return;
 }
@@ -990,7 +990,7 @@ actions.prototype.keyUpFly = function (keycode) {
     if (keycode==71 || keycode==27 || keycode==88)
         core.ui.closePanel();
     if (keycode==13 || keycode==32 || keycode==67)
-        this.clickFly(5,5);
+        this.clickFly(6,6);
     return;
 }
 
@@ -1004,56 +1004,56 @@ actions.prototype.clickViewMaps = function (x,y) {
     var now = core.floorIds.indexOf(core.status.floorId);
     var index = core.status.event.data.index;
     var cx = core.status.event.data.x, cy = core.status.event.data.y;
-    var floorId = core.floorIds[index], mw = core.floors[floorId].width||13, mh = core.floors[floorId].height||13;
+    var floorId = core.floorIds[index], mw = core.floors[floorId].width||15, mh = core.floors[floorId].height||15;
 
-    if (x==0 && y==0) {
+    if (x<=1 && y<=1) {
         core.status.event.data.damage = !core.status.event.data.damage;
         core.ui.drawMaps(index, cx, cy);
         return;
     }
-    if (x==0 && y==12) {
+    if (x<=1 && y>=13) {
         core.status.event.data.paint = !core.status.event.data.paint;
         core.ui.drawMaps(index, cx, cy);
         return;
     }
-    if (x==12 && y==0) {
+    if (x>=13 && y<=1) {
         core.status.event.data.all = !core.status.event.data.all;
         core.ui.drawMaps(index, cx, cy);
         return;
     }
 
-    if (x>=2 && x<=10 && y<=1 && mh>13) {
+    if (x>=3 && x<=11 && y<=2 && mh>15) {
         core.ui.drawMaps(index, cx, cy-1);
         return;
     }
-    if (x>=2 && x<=10 && y>=11 && mh>13) {
+    if (x>=3 && x<=11 && y>=12 && mh>15) {
         core.ui.drawMaps(index, cx, cy+1);
         return;
     }
-    if (x<=1 && y>=2 && y<=10) {
+    if (x<=2 && y>=3 && y<=11) {
         core.ui.drawMaps(index, cx-1, cy);
         return;
     }
-    if (x>=11 && y>=2 && y<=10) {
+    if (x>=12 && y>=3 && y<=11) {
         core.ui.drawMaps(index, cx+1, cy);
         return;
     }
 
-    if(y<=4 && (mh==13 || (x>=2 && x<=10))) {
+    if(y<=5 && (mh==15 || (x>=3 && x<=11))) {
         index++;
         while (index<core.floorIds.length && index!=now && core.status.maps[core.floorIds[index]].cannotViewMap)
             index++;
         if (index<core.floorIds.length)
             core.ui.drawMaps(index);
     }
-    else if (y>=8 && (mh==13 || (x>=2 && x<=10))) {
+    else if (y>=9 && (mh==15 || (x>=3 && x<=11))) {
         index--;
         while (index>=0 && index!=now && core.status.maps[core.floorIds[index]].cannotViewMap)
             index--;
         if (index>=0)
             core.ui.drawMaps(index);
     }
-    else if (x>=2 && x<=10 && y>=5 && y<=7) {
+    else if (x>=3 && x<=11 && y>=6 && y<=8) {
         core.clearMap('data');
         core.ui.closePanel();
     }
@@ -1063,14 +1063,14 @@ actions.prototype.clickViewMaps = function (x,y) {
 actions.prototype.keyDownViewMaps = function (keycode) {
     if (!core.isset(core.status.event.data)) return;
 
-    var floorId = core.floorIds[core.status.event.data.index], mh = core.floors[floorId].height||13;
+    var floorId = core.floorIds[core.status.event.data.index], mh = core.floors[floorId].height||15;
 
-    if (keycode==38||keycode==33) this.clickViewMaps(6, 3);
-    if (keycode==40||keycode==34) this.clickViewMaps(6, 9);
-    if (keycode==87 && mh>13) this.clickViewMaps(6,0);
-    if (keycode==65) this.clickViewMaps(0,6);
-    if (keycode==83 && mh>13) this.clickViewMaps(6,12);
-    if (keycode==68) this.clickViewMaps(12,6);
+    if (keycode==38||keycode==33) this.clickViewMaps(7, 4);
+    if (keycode==40||keycode==34) this.clickViewMaps(7, 11);
+    if (keycode==87 && mh>15) this.clickViewMaps(7,1);
+    if (keycode==65) this.clickViewMaps(1,7);
+    if (keycode==83 && mh>15) this.clickViewMaps(7,13);
+    if (keycode==68) this.clickViewMaps(13,7);
     return;
 }
 
@@ -1116,8 +1116,8 @@ actions.prototype.keyUpViewMaps = function (keycode) {
 actions.prototype.clickShop = function(x,y) {
     var shop = core.status.event.data.shop;
     var choices = shop.choices;
-    if (x >= 5 && x <= 7) {
-        var topIndex = 6 - parseInt(choices.length / 2);
+    if (x >= 5 && x <= 9) {
+        var topIndex = 7 - parseInt(choices.length / 2);
         if (y>=topIndex && y<topIndex+choices.length) {
 
             // 检查能否使用快捷商店
@@ -1213,15 +1213,15 @@ actions.prototype.keyUpShop = function (keycode) {
     var shop = core.status.event.data.shop;
     var choices = shop.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt(choices.length / 2);
-        this.clickShop(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt(choices.length / 2);
+        this.clickShop(7, topIndex+core.status.event.selection);
     }
     // 数字键快速选择
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<=choices.length) {
-            var topIndex = 6 - parseInt(choices.length / 2);
-            this.clickShop(6, topIndex+index);
+            var topIndex = 7 - parseInt(choices.length / 2);
+            this.clickShop(7, topIndex+index);
         }
     }
     return;
@@ -1230,8 +1230,8 @@ actions.prototype.keyUpShop = function (keycode) {
 ////// 快捷商店界面时的点击操作 //////
 actions.prototype.clickQuickShop = function(x, y) {
     var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {return shopList[shopId].visited || !shopList[shopId].mustEnable});
-    if (x >= 5 && x <= 7) {
-        var topIndex = 6 - parseInt(keys.length / 2);
+    if (x >= 5 && x <= 9) {
+        var topIndex = 7 - parseInt(keys.length / 2);
         if (y>=topIndex && y<topIndex+keys.length) {
             var reason = core.events.canUseQuickShop(keys[y - topIndex]);
             if (!core.flags.enableDisabledShop && core.isset(reason)) {
@@ -1268,14 +1268,14 @@ actions.prototype.keyUpQuickShop = function (keycode) {
     }
     var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {return shopList[shopId].visited || !shopList[shopId].mustEnable});
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt(keys.length / 2);
-        this.clickQuickShop(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt(keys.length / 2);
+        this.clickQuickShop(7, topIndex+core.status.event.selection);
     }
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<=keys.length) {
-            var topIndex = 6 - parseInt(keys.length / 2);
-            this.clickQuickShop(6, topIndex+index);
+            var topIndex = 7 - parseInt(keys.length / 2);
+            this.clickQuickShop(7, topIndex+index);
         }
     }
     return;
@@ -1284,59 +1284,46 @@ actions.prototype.keyUpQuickShop = function (keycode) {
 ////// 工具栏界面时的点击操作 //////
 actions.prototype.clickToolbox = function(x,y) {
     // 装备栏
-    if (x>=10 && x<=12 && y==0) {
+    if (x>=12 && x<=14 && y==0) {
         core.ui.closePanel();
         core.openEquipbox();
         return;
     }
     // 返回
-    if (x>=10 && x<=12 && y==12) {
+    if (x>=12 && x<=14 && y==14) {
         core.ui.closePanel();
         return;
     }
-    /*
-    if (x>=10 && x<=12 && y<=1) {
-        if (!core.isset(core.status.event.data)) return;
-        if (!core.flags.enableDeleteItem) {
-            core.drawTip("不支持删除道具！");
-            return;
-        }
-        core.removeItem(core.status.event.data);
-        core.status.event.data = null;
-        core.ui.drawToolbox();
-        return;
-    }
-    */
     var toolsPage = core.status.event.data.toolsPage;
     var constantsPage = core.status.event.data.constantsPage;
     // 上一页
-    if (x == 3 || x == 4) {
-        if (y == 7 && toolsPage>1) {
+    if (x == 4 || x == 5) {
+        if (y == 9 && toolsPage>1) {
             core.status.event.data.toolsPage--;
             core.ui.drawToolbox(core.status.event.selection);
         }
-        if (y == 12 && constantsPage>1) {
+        if (y == 14 && constantsPage>1) {
             core.status.event.data.toolsPage--;
             core.ui.drawToolbox(core.status.event.selection);
         }
     }
     // 下一页
-    if (x == 8 || x == 9) {
-        if (y == 7 && toolsPage<Math.ceil(Object.keys(core.status.hero.items.tools).length/12)) {
+    if (x == 9 || x == 10) {
+        if (y == 9 && toolsPage<Math.ceil(Object.keys(core.status.hero.items.tools).length/14)) {
             core.status.event.data.toolsPage++;
             core.ui.drawToolbox(core.status.event.selection);
         }
-        if (y == 12 && constantsPage<Math.ceil(Object.keys(core.status.hero.items.constants).length/12)) {
+        if (y == 14 && constantsPage<Math.ceil(Object.keys(core.status.hero.items.constants).length/14)) {
             core.status.event.data.constantsPage++;
             core.ui.drawToolbox(core.status.event.selection);
         }
     }
 
     var index=parseInt(x/2);;
-    if (y==4) index+=0;
-    else if (y==6) index+=6;
-    else if (y==9) index+=12;
-    else if (y==11) index+=18;
+    if (y==6) index+=0;
+    else if (y==8) index+=7;
+    else if (y==11) index+=14;
+    else if (y==13) index+=21;
     else index =-1;
 
     if (index>=0)
@@ -1347,12 +1334,12 @@ actions.prototype.clickToolbox = function(x,y) {
 actions.prototype.clickToolboxIndex = function(index) {
     var items = null;
     var select;
-    if (index<12) {
-        select = index + 12 * (core.status.event.data.toolsPage-1);
+    if (index<14) {
+        select = index + 14 * (core.status.event.data.toolsPage-1);
         items = Object.keys(core.status.hero.items.tools).sort();
     }
     else {
-        select = index%12 + 12 * (core.status.event.data.constantsPage-1);
+        select = index%14 + 14 * (core.status.event.data.constantsPage-1);
         items = Object.keys(core.status.hero.items.constants).sort();
     }
     if (items==null) return;
@@ -1375,28 +1362,28 @@ actions.prototype.keyDownToolbox = function (keycode) {
     var index = core.status.event.selection;
     var toolsPage = core.status.event.data.toolsPage;
     var constantsPage = core.status.event.data.constantsPage;
-    var toolsTotalPage = Math.ceil(tools.length/12);
-    var constantsTotalPage = Math.ceil(constants.length/12);
-    var toolsLastIndex = toolsPage<toolsTotalPage?11:(tools.length+11)%12;
-    var constantsLastIndex = 12+(constantsPage<constantsTotalPage?11:(constants.length+11)%12);
+    var toolsTotalPage = Math.ceil(tools.length/14);
+    var constantsTotalPage = Math.ceil(constants.length/14);
+    var toolsLastIndex = toolsPage<toolsTotalPage?13:(tools.length+13)%14;
+    var constantsLastIndex = 14+(constantsPage<constantsTotalPage?13:(constants.length+13)%14);
 
     if (keycode==37) { // left
         if (index==0) { // 处理向前翻页
             if (toolsPage > 1) {
                 core.status.event.data.toolsPage--;
-                index = 11;
+                index = 13;
             }
             else return; // 第一页不向前翻
         }
-        else if (index==12) {
+        else if (index==14) {
             if (constantsPage == 1) {
                 if (toolsTotalPage==0) return;
                 core.status.event.data.toolsPage = toolsTotalPage;
-                index = (tools.length+11)%12;
+                index = (tools.length+13)%14;
             }
             else {
                 core.status.event.data.constantsPage--;
-                index = 23;
+                index = 27;
             }
         }
         else index -= 1 ;
@@ -1404,29 +1391,29 @@ actions.prototype.keyDownToolbox = function (keycode) {
         return;
     }
     if (keycode==38) { // up
-        if (index>=12&&index<=17) { // 进入tools
+        if (index>=14&&index<=20) { // 进入tools
             if (toolsTotalPage==0) return;
-            if (toolsLastIndex>=6) index = Math.min(toolsLastIndex, index-6);
-            else index = Math.min(toolsLastIndex, index-12);
+            if (toolsLastIndex>=7) index = Math.min(toolsLastIndex, index-7);
+            else index = Math.min(toolsLastIndex, index-14);
         }
-        else if (index<6) return; // 第一行没有向上
-        else index -= 6;
+        else if (index<7) return; // 第一行没有向上
+        else index -= 7;
         this.clickToolboxIndex(index);
         return;
     }
     if (keycode==39) { // right
-        if (toolsPage<toolsTotalPage && index==11) {
+        if (toolsPage<toolsTotalPage && index==13) {
             core.status.event.data.toolsPage++;
             index = 0;
         }
-        else if (constantsPage<constantsTotalPage && index==23) {
+        else if (constantsPage<constantsTotalPage && index==27) {
             core.status.event.data.constantsPage++;
-            index = 12;
+            index = 14;
         }
         else if (index == toolsLastIndex) {
             if (constantsTotalPage==0) return;
             core.status.event.data.constantsPage = 1;
-            index = 12;
+            index = 14;
         }
         else if(index==constantsLastIndex) // 一个物品无操作
             return;
@@ -1436,16 +1423,16 @@ actions.prototype.keyDownToolbox = function (keycode) {
     }
     if (keycode==40) { // down
         var nextIndex = null;
-        if (index<=5) {
-            if (toolsLastIndex > 5) nextIndex = Math.min(toolsLastIndex, index + 6);
-            else index+=6;
+        if (index<=6) {
+            if (toolsLastIndex > 6) nextIndex = Math.min(toolsLastIndex, index + 7);
+            else index+=7;
         }
-        if (nextIndex==null && index<=11) {
+        if (nextIndex==null && index<=13) {
             if (constantsTotalPage == 0) return;
-            nextIndex = Math.min(index+6, constantsLastIndex);
+            nextIndex = Math.min(index+7, constantsLastIndex);
         }
-        if (nextIndex==null && index<=17) {
-            if (constantsLastIndex > 17) nextIndex = Math.min(constantsLastIndex, index+6);
+        if (nextIndex==null && index<=20) {
+            if (constantsLastIndex > 20) nextIndex = Math.min(constantsLastIndex, index+7);
         }
         if (nextIndex!=null) {
             this.clickToolboxIndex(nextIndex);
@@ -1471,34 +1458,19 @@ actions.prototype.keyUpToolbox = function (keycode) {
         this.clickToolboxIndex(core.status.event.selection);
         return;
     }
-
-    /*
-    if (keycode==46) { // delete
-        if (!core.isset(core.status.event.data)) return;
-        if (!core.flags.enableDeleteItem) {
-            core.drawTip("不支持删除道具！");
-            return;
-        }
-        core.removeItem(core.status.event.data);
-        core.status.event.data = null;
-        core.ui.drawToolbox();
-        return;
-    }
-    */
-
 }
 
 
 ////// 装备栏界面时的点击操作 //////
 actions.prototype.clickEquipbox = function(x,y) {
     // 道具栏
-    if (x>=10 && x<=12 && y==0) {
+    if (x>=12 && x<=14 && y==0) {
         core.ui.closePanel();
         core.openToolbox();
         return;
     }
     // 返回
-    if (x>=10 && x<=12 && y==12) {
+    if (x>=12 && x<=14 && y==14) {
         core.ui.closePanel();
         return;
     }
@@ -1507,7 +1479,7 @@ actions.prototype.clickEquipbox = function(x,y) {
     var page = core.status.event.data.page;
 
     // 上一页
-    if ((x == 3 || x == 4) && y == 12) {
+    if ((x == 4 || x == 5) && y == 14) {
         if (page>1) {
             core.status.event.data.page--;
             core.ui.drawEquipbox(core.status.event.selection);
@@ -1515,8 +1487,8 @@ actions.prototype.clickEquipbox = function(x,y) {
         return;
     }
     // 下一页
-    if ((x == 8 || x == 9) && y == 12) {
-        var lastPage = Math.ceil(Object.keys(core.status.hero.items.equips).length/12);
+    if ((x == 9 || x == 10) && y == 14) {
+        var lastPage = Math.ceil(Object.keys(core.status.hero.items.equips).length/14);
         if (page<lastPage) {
             core.status.event.data.page++;
             core.ui.drawEquipbox(core.status.event.selection);
@@ -1524,32 +1496,35 @@ actions.prototype.clickEquipbox = function(x,y) {
         return;
     }
 
-    var index=parseInt(x/2);
-    if (y==4) index+=0;
-    else if (y==6) index+=6;
-    else if (y==9) index+=12;
-    else if (y==11) index+=18;
-    else index=-1;
+    var index = -1;
+    if (y==6 || y==8) {
+        if (x==2 || x==3) index = (y-6)*2 + 0;
+        if (x==5 || x==6) index = (y-6)*2 + 1;
+        if (x==9 || x==10) index = (y-6)*2 + 2;
+        if (x==13) index = (y-6)*2 + 3;
+    }
+    else if (y==11 || y==13) {
+        index = parseInt(x/2) + 14 + (y-11)/2*7;
+    }
 
     if (index>=0) {
-        if (index<12) index = parseInt(index/2);
         this.clickEquipboxIndex(index);
     }
 }
 
 ////// 选择装备栏界面中某个Index后的操作 //////
 actions.prototype.clickEquipboxIndex = function(index) {
-    if (index<6) {
+    if (index<8) {
         if (index>=core.status.globalAttribute.equipName.length) return;
         if (index==core.status.event.selection && core.isset(core.status.hero.equipment[index])) {
             core.unloadEquip(index);
             core.status.route.push("unEquip:"+index);
         }
     }
-    else if (index>=12) {
+    else if (index>=14) {
         var equips = Object.keys(core.status.hero.items.equips||{}).sort();
         if (index==core.status.event.selection) {
-            var equipId = equips[index-12 + (core.status.event.data.page-1)*12];
+            var equipId = equips[index-14 + (core.status.event.data.page-1)*14];
             core.loadEquip(equipId);
             core.status.route.push("equip:"+equipId);
         }
@@ -1565,15 +1540,15 @@ actions.prototype.keyDownEquipbox = function (keycode) {
     var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
     var index = core.status.event.selection;
     var page = core.status.event.data.page;
-    var totalPage = Math.ceil(ownEquipment.length/12);
-    var totalLastIndex = 12+(page<totalPage?11:(ownEquipment.length+11)%12);
+    var totalPage = Math.ceil(ownEquipment.length/14);
+    var totalLastIndex = 14+(page<totalPage?13:(ownEquipment.length+13)%14);
 
     if (keycode==37) { // left
         if (index==0) return;
-        if (index==12) {
+        if (index==14) {
             if (page > 1) {
                 core.status.event.data.page--;
-                index = 23;
+                index = 27;
             }
             else if (page == 1)
                 index = equipCapacity - 1;
@@ -1584,25 +1559,25 @@ actions.prototype.keyDownEquipbox = function (keycode) {
         return;
     }
     if (keycode==38) { // up
-        if (index<3) return;
-        else if (index<6) index -= 3;
-        else if (index < 18) {
-            index = parseInt((index-12)/2);
-            if (equipCapacity>3) index = Math.min(equipCapacity-1, index + 3);
+        if (index<4) return;
+        else if (index<8) index -= 4;
+        else if (index < 21) {
+            index = parseInt((index-14)/2);
+            if (equipCapacity>4) index = Math.min(equipCapacity-1, index + 4);
             else index = Math.min(equipCapacity-1, index);
         }
-        else index -= 6;
+        else index -= 7;
         this.clickEquipboxIndex(index);
         return;
     }
     if (keycode==39) { // right
-        if (page<totalPage && index==23) {
+        if (page<totalPage && index==27) {
             core.status.event.data.page++;
-            index = 12;
+            index = 14;
         }
         else if (index==equipCapacity-1) {
             if (totalPage==0) return;
-            index = 12;
+            index = 14;
         }
         else if (index==totalLastIndex)
             return;
@@ -1611,19 +1586,19 @@ actions.prototype.keyDownEquipbox = function (keycode) {
         return;
     }
     if (keycode==40) { // down
-        if (index<3) {
-            if (equipCapacity>3) index = Math.min(index+3, equipCapacity-1);
+        if (index<4) {
+            if (equipCapacity>4) index = Math.min(index+4, equipCapacity-1);
             else {
                 if (totalPage == 0) return;
-                index = Math.min(2*index+1+12, totalLastIndex);
+                index = Math.min(2*index+1+14, totalLastIndex);
             }
         }
-        else if (index < 6) {
+        else if (index < 8) {
             if (totalPage == 0) return;
-            index = Math.min(2*(index-3)+1+12, totalLastIndex);
+            index = Math.min(2*(index-4)+1+14, totalLastIndex);
         }
-        else if (index < 18)
-            index = Math.min(index+6, totalLastIndex);
+        else if (index < 21)
+            index = Math.min(index+7, totalLastIndex);
         else return;
         this.clickEquipboxIndex(index);
         return;
@@ -1660,17 +1635,17 @@ actions.prototype.clickSL = function(x,y) {
     var page = parseInt(index/10), offset=index%10;
 
     // 上一页
-    if ((x == 3 || x == 4) && y == 12) {
+    if ((x == 4 || x == 5) && y == 14) {
         core.ui.drawSLPanel(10*(page-1)+offset);
         return;
     }
     // 下一页
-    if ((x == 8 || x == 9) && y == 12) {
+    if ((x == 9 || x == 10) && y == 14) {
         core.ui.drawSLPanel(10*(page+1)+offset);
         return;
     }
     // 返回
-    if (x>=10 && x<=12 && y==12) {
+    if (x>=12 && x<=14 && y==14) {
         if (core.events.recoverEvents(core.status.event.interval)) {
             return;
         }
@@ -1681,7 +1656,7 @@ actions.prototype.clickSL = function(x,y) {
         return;
     }
     // 删除
-    if (x>=0 && x<=2 && y==12) {
+    if (x>=0 && x<=2 && y==14) {
 
         if (core.status.event.id=='save') {
             core.status.event.selection=!core.status.event.selection;
@@ -1697,15 +1672,15 @@ actions.prototype.clickSL = function(x,y) {
     }
 
     var id=null;
-    if (y>=1 && y<=4) {
-        if (x>=1 && x<=3) id = "autoSave";
-        if (x>=5 && x<=7) id = 5*page+1;
-        if (x>=9 && x<=11) id = 5*page+2;
+    if (y>=2 && y<=5) {
+        if (x>=0 && x<=4) id = "autoSave";
+        if (x>=5 && x<=9) id = 5*page+1;
+        if (x>=10 && x<=14) id = 5*page+2;
     }
-    if (y>=7 && y<=10) {
-        if (x>=1 && x<=3) id = 5*page+3;
-        if (x>=5 && x<=7) id = 5*page+4;
-        if (x>=9 && x<=11) id = 5*page+5;
+    if (y>=8 && y<=12) {
+        if (x>=0 && x<=4) id = 5*page+3;
+        if (x>=5 && x<=9) id = 5*page+4;
+        if (x>=10 && x<=14) id = 5*page+5;
     }
     if (id!=null) {
         if (core.status.event.selection)  {
@@ -1829,9 +1804,9 @@ actions.prototype.keyUpSL = function (keycode) {
 
 ////// 系统设置界面时的点击操作 //////
 actions.prototype.clickSwitchs = function (x,y) {
-    if (x<5 || x>7) return;
+    if (x<5 || x>9) return;
     var choices = core.status.event.ui.choices;
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = 7 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y-topIndex;
         switch (selection) {
@@ -1909,15 +1884,15 @@ actions.prototype.keyUpSwitchs = function (keycode) {
     }
     var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt((choices.length - 1) / 2);
-        this.clickSwitchs(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt((choices.length - 1) / 2);
+        this.clickSwitchs(7, topIndex+core.status.event.selection);
     }
     // 数字键快速选择
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<choices.length) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
-            this.clickSwitchs(6, topIndex+index);
+            var topIndex = 7 - parseInt((choices.length - 1) / 2);
+            this.clickSwitchs(7, topIndex+index);
         }
     }
 }
@@ -1925,9 +1900,9 @@ actions.prototype.keyUpSwitchs = function (keycode) {
 
 ////// 系统菜单栏界面时的点击事件 //////
 actions.prototype.clickSettings = function (x,y) {
-    if (x<5 || x>7) return;
+    if (x<5 || x>9) return;
     var choices = core.status.event.ui.choices;
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = 7 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y-topIndex;
 
@@ -1993,24 +1968,24 @@ actions.prototype.keyUpSettings = function (keycode) {
     }
     var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt((choices.length - 1) / 2);
-        this.clickSettings(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt((choices.length - 1) / 2);
+        this.clickSettings(7, topIndex+core.status.event.selection);
     }
     // 数字键快速选择
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<choices.length) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
-            this.clickSettings(6, topIndex+index);
+            var topIndex = 7 - parseInt((choices.length - 1) / 2);
+            this.clickSettings(7, topIndex+index);
         }
     }
 }
 
 ////// 同步存档界面时的点击操作 //////
 actions.prototype.clickSyncSave = function (x,y) {
-    if (x<5 || x>7) return;
+    if (x<5 || x>9) return;
     var choices = core.status.event.ui.choices;
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = 7 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y-topIndex;
         switch (selection) {
@@ -2121,25 +2096,25 @@ actions.prototype.keyUpSyncSave = function (keycode) {
     }
     var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt((choices.length - 1) / 2);
-        this.clickSyncSave(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt((choices.length - 1) / 2);
+        this.clickSyncSave(7, topIndex+core.status.event.selection);
     }
     // 数字键快速选择
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<choices.length) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
-            this.clickSyncSave(6, topIndex+index);
+            var topIndex = 7 - parseInt((choices.length - 1) / 2);
+            this.clickSyncSave(7, topIndex+index);
         }
     }
 }
 
 ////// 同步存档选择界面时的点击操作 //////
 actions.prototype.clickSyncSelect = function (x, y) {
-    if (x<5 || x>7) return;
+    if (x<5 || x>9) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = 7 - parseInt((choices.length - 1) / 2);
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y - topIndex;
         switch (selection) {
@@ -2178,25 +2153,25 @@ actions.prototype.keyUpSyncSelect = function (keycode) {
     }
     var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt((choices.length - 1) / 2);
-        this.clickSyncSelect(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt((choices.length - 1) / 2);
+        this.clickSyncSelect(7, topIndex+core.status.event.selection);
     }
     // 数字键快速选择
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<choices.length) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
-            this.clickSyncSelect(6, topIndex+index);
+            var topIndex = 7 - parseInt((choices.length - 1) / 2);
+            this.clickSyncSelect(7, topIndex+index);
         }
     }
 }
 
 ////// 存档下载界面时的点击操作 //////
 actions.prototype.clickLocalSaveSelect = function (x,y) {
-    if (x<5 || x>7) return;
+    if (x<5 || x>9) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = 7 - parseInt((choices.length - 1) / 2);
 
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y - topIndex;
@@ -2239,25 +2214,25 @@ actions.prototype.keyUpLocalSaveSelect = function (keycode) {
     }
     var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt((choices.length - 1) / 2);
-        this.clickLocalSaveSelect(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt((choices.length - 1) / 2);
+        this.clickLocalSaveSelect(7, topIndex+core.status.event.selection);
     }
     // 数字键快速选择
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<choices.length) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
-            this.clickLocalSaveSelect(6, topIndex+index);
+            var topIndex = 7 - parseInt((choices.length - 1) / 2);
+            this.clickLocalSaveSelect(7, topIndex+index);
         }
     }
 }
 
 ////// 存档删除界面时的点击操作 //////
 actions.prototype.clickStorageRemove = function (x, y) {
-    if (x<5 || x>7) return;
+    if (x<5 || x>9) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = 7 - parseInt((choices.length - 1) / 2);
 
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y - topIndex;
@@ -2337,25 +2312,25 @@ actions.prototype.keyUpStorageRemove = function (keycode) {
     }
     var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt((choices.length - 1) / 2);
-        this.clickStorageRemove(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt((choices.length - 1) / 2);
+        this.clickStorageRemove(7, topIndex+core.status.event.selection);
     }
     // 数字键快速选择
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<choices.length) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
-            this.clickStorageRemove(6, topIndex+index);
+            var topIndex = 7 - parseInt((choices.length - 1) / 2);
+            this.clickStorageRemove(7, topIndex+index);
         }
     }
 }
 
 ////// 回放选择界面时的点击操作 //////
 actions.prototype.clickReplay = function (x, y) {
-    if (x<5 || x>7) return;
+    if (x<5 || x>9) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = 7 - parseInt((choices.length - 1) / 2);
 
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y - topIndex;
@@ -2419,15 +2394,15 @@ actions.prototype.keyUpReplay = function (keycode) {
     }
     var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt((choices.length - 1) / 2);
-        this.clickReplay(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt((choices.length - 1) / 2);
+        this.clickReplay(7, topIndex+core.status.event.selection);
     }
     // 数字键快速选择
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<choices.length) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
-            this.clickReplay(6, topIndex+index);
+            var topIndex = 7 - parseInt((choices.length - 1) / 2);
+            this.clickReplay(7, topIndex+index);
         }
     }
 }
@@ -2435,10 +2410,10 @@ actions.prototype.keyUpReplay = function (keycode) {
 
 ////// 游戏信息界面时的点击操作 //////
 actions.prototype.clickGameInfo = function (x, y) {
-    if (x<5 || x>7) return;
+    if (x<5 || x>9) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = 7 - parseInt((choices.length - 1) / 2);
 
     if (y>=topIndex && y<topIndex+choices.length) {
         var selection = y - topIndex;
@@ -2503,26 +2478,26 @@ actions.prototype.keyUpGameInfo = function (keycode) {
     }
     var choices = core.status.event.ui.choices;
     if (keycode==13 || keycode==32 || keycode==67) {
-        var topIndex = 6 - parseInt((choices.length - 1) / 2);
-        this.clickGameInfo(6, topIndex+core.status.event.selection);
+        var topIndex = 7 - parseInt((choices.length - 1) / 2);
+        this.clickGameInfo(7, topIndex+core.status.event.selection);
     }
     // 数字键快速选择
     if (keycode>=49 && keycode<=57) {
         var index = keycode-49;
         if (index<choices.length) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
-            this.clickGameInfo(6, topIndex+index);
+            var topIndex = 7 - parseInt((choices.length - 1) / 2);
+            this.clickGameInfo(7, topIndex+index);
         }
     }
 }
 
 ////// “虚拟键盘”界面时的点击操作 //////
 actions.prototype.clickKeyBoard = function (x, y) {
-    if (y==3 && x>=1 && x<=11) {
+    if (y==4 && x>=2 && x<=12) {
         core.ui.closePanel();
         core.keyUp(112+x-1); // F1-F12: 112-122
     }
-    if (y==3 && x==12) {
+    if (y==4 && x==13) {
         var val = prompt();
         if (val!=null) {
             try {
@@ -2531,9 +2506,9 @@ actions.prototype.clickKeyBoard = function (x, y) {
             catch (e) {}
         }
     }
-    if (y==4 && x>=1 && x<=10) {
+    if (y==5 && x>=2 && x<=11) {
         core.ui.closePanel();
-        core.keyUp(x==10?48:48+x); // 1-9: 49-57; 0: 48
+        core.keyUp(x==11?48:48+x); // 1-9: 49-57; 0: 48
     }
     // 字母
     var lines = [
@@ -2541,46 +2516,46 @@ actions.prototype.clickKeyBoard = function (x, y) {
         ["A","S","D","F","G","H","J","K","L"],
         ["Z","X","C","V","B","N","M"],
     ];
-    if (y==5 && x>=1 && x<=10) {
+    if (y==6 && x>=2 && x<=11) {
         core.ui.closePanel();
-        core.keyUp(lines[0][x-1].charCodeAt(0));
+        core.keyUp(lines[0][x-2].charCodeAt(0));
     }
-    if (y==6 && x>=1 && x<=9) {
+    if (y==7 && x>=2 && x<=10) {
         core.ui.closePanel();
-        core.keyUp(lines[1][x-1].charCodeAt(0));
+        core.keyUp(lines[1][x-2].charCodeAt(0));
     }
-    if (y==7 && x>=1 && x<=7) {
+    if (y==8 && x>=2 && x<=8) {
         core.ui.closePanel();
-        core.keyUp(lines[2][x-1].charCodeAt(0));
+        core.keyUp(lines[2][x-2].charCodeAt(0));
     }
-    if (y==8 && x>=1 && x<=11) {
+    if (y==9 && x>=2 && x<=12) {
         core.ui.closePanel();
-        if (x==1) core.keyUp(189); // -
-        if (x==2) core.keyUp(187); // =
-        if (x==3) core.keyUp(219); // [
-        if (x==4) core.keyUp(221); // ]
-        if (x==5) core.keyUp(220); // \
-        if (x==6) core.keyUp(186); // ;
-        if (x==7) core.keyUp(222); // '
-        if (x==8) core.keyUp(188); // ,
-        if (x==9) core.keyUp(190); // .
-        if (x==10) core.keyUp(191); // /
-        if (x==11) core.keyUp(192); // `
+        if (x==2) core.keyUp(189); // -
+        if (x==3) core.keyUp(187); // =
+        if (x==4) core.keyUp(219); // [
+        if (x==5) core.keyUp(221); // ]
+        if (x==6) core.keyUp(220); // \
+        if (x==7) core.keyUp(186); // ;
+        if (x==8) core.keyUp(222); // '
+        if (x==9) core.keyUp(188); // ,
+        if (x==10) core.keyUp(190); // .
+        if (x==11) core.keyUp(191); // /
+        if (x==12) core.keyUp(192); // `
     }
-    if (y==9 && x>=1 && x<=10) {
+    if (y==10 && x>=2 && x<=11) {
         core.ui.closePanel();
-        if (x==1) core.keyUp(27); // ESC
-        if (x==2) core.keyUp(9); // TAB
-        if (x==3) core.keyUp(20); // CAPS
-        if (x==4) core.keyUp(16); // SHIFT
-        if (x==5) core.keyUp(17); // CTRL
-        if (x==6) core.keyUp(18); // ALT
-        if (x==7) core.keyUp(32); // SPACE
-        if (x==8) core.keyUp(8); // BACKSPACE
-        if (x==9) core.keyUp(13); // ENTER
-        if (x==10) core.keyUp(46); // DEL
+        if (x==2) core.keyUp(27); // ESC
+        if (x==3) core.keyUp(9); // TAB
+        if (x==4) core.keyUp(20); // CAPS
+        if (x==5) core.keyUp(16); // SHIFT
+        if (x==6) core.keyUp(17); // CTRL
+        if (x==7) core.keyUp(18); // ALT
+        if (x==8) core.keyUp(32); // SPACE
+        if (x==9) core.keyUp(8); // BACKSPACE
+        if (x==10) core.keyUp(13); // ENTER
+        if (x==11) core.keyUp(46); // DEL
     }
-    if (y==10 && x>=9 && x<=11)
+    if (y==11 && x>=10 && x<=12)
         core.ui.closePanel();
 }
 

@@ -64,8 +64,8 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                 "equipName": {
                     "_leaf": true,
                     "_type": "textarea",
-                    "_range": "(thiseval instanceof Array && thiseval.length<=6)||thiseval==null",
-                    "_data": "装备位名称，为不超过6个的数组，此项的顺序与equiptype数值关联；例如可写[\"武器\",\"防具\",\"首饰\"]等等。"
+                    "_range": "(thiseval instanceof Array && thiseval.length<=8)||thiseval==null",
+                    "_data": "装备位名称，为不超过8个的数组，此项的顺序与equiptype数值关联；例如可写[\"武器\",\"防具\",\"首饰\"]等等。"
                 },
                 "startBgm": {
                     "_leaf": true,

@@ -262,9 +262,9 @@ editor.prototype.drawMapBg = function (img) {
 editor.prototype.drawEventBlock = function () {
     var fg=document.getElementById('efg').getContext('2d');
 
-    fg.clearRect(0, 0, 416, 416);
-    for (var i=0;i<13;i++) {
-        for (var j=0;j<13;j++) {
+    fg.clearRect(0, 0, 480, 480);
+    for (var i=0;i<15;i++) {
+        for (var j=0;j<15;j++) {
             var color=[];
             var loc=(i+core.bigmap.offsetX/32)+","+(j+core.bigmap.offsetY/32);
             if (core.isset(editor.currentFloorData.events[loc]))
@@ -350,8 +350,8 @@ editor.prototype.updateMap = function () {
 }
 
 editor.prototype.moveViewport=function(x,y){
-    core.bigmap.offsetX = core.clamp(core.bigmap.offsetX+32*x, 0, 32*core.bigmap.width-416);
-    core.bigmap.offsetY = core.clamp(core.bigmap.offsetY+32*y, 0, 32*core.bigmap.height-416);
+    core.bigmap.offsetX = core.clamp(core.bigmap.offsetX+32*x, 0, 32*core.bigmap.width-480);
+    core.bigmap.offsetY = core.clamp(core.bigmap.offsetY+32*y, 0, 32*core.bigmap.height-480);
     core.control.updateViewport();
     editor.buildMark();
     editor.drawPosSelection();
@@ -510,14 +510,14 @@ editor.prototype.buildMark = function(){
     var mapRowMark=document.getElementById('mapRowMark');
     var buildMark = function (offsetX,offsetY) {
         var colNum = ' ';
-        for (var i = 0; i < 13; i++) {
+        for (var i = 0; i < 15; i++) {
             var tpl = '<td>' + (i+offsetX) + '<div class="colBlock" style="left:' + (i * 32 + 1) + 'px;"></div></td>';
             colNum += tpl;
         }
         arrColMark.innerHTML = '<tr>' + colNum + '</tr>';
         mapColMark.innerHTML = '<tr>' + colNum + '</tr>';
         var rowNum = ' ';
-        for (var i = 0; i < 13; i++) {
+        for (var i = 0; i < 15; i++) {
             var tpl = '<tr><td>' + (i+offsetY) + '<div class="rowBlock" style="top:' + (i * 32 + 1) + 'px;"></div></td></tr>';
             rowNum += tpl;
         }
@@ -526,29 +526,29 @@ editor.prototype.buildMark = function(){
     }
     var buildMark_mobile = function (offsetX,offsetY) {
         var colNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="colBlock" style="left:' + (i * 96/13 ) + 'vw;"></div></td>';
+        for (var i = 0; i < 15; i++) {
+            var tpl = '<td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="colBlock" style="left:' + (i * 96/15 ) + 'vw;"></div></td>';
             colNum += tpl;
         }
         arrColMark.innerHTML = '<tr>' + colNum + '</tr>';
         //mapColMark.innerHTML = '<tr>' + colNum + '</tr>';
         var rowNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<tr><td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="rowBlock" style="top:' + (i * 96/13 ) + 'vw;"></div></td></tr>';
+        for (var i = 0; i < 15; i++) {
+            var tpl = '<tr><td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="rowBlock" style="top:' + (i * 96/15 ) + 'vw;"></div></td></tr>';
             rowNum += tpl;
         }
         arrRowMark.innerHTML = rowNum;
         //mapRowMark.innerHTML = rowNum;
         //=====
         var colNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<div class="coltd" style="left:' + (i * 96/13 ) + 'vw;"><div class="coltext">' + (' '+(i+offsetX)).slice(-2).replace(' ','&nbsp;') + '</div><div class="colBlock"></div></div>';
+        for (var i = 0; i < 15; i++) {
+            var tpl = '<div class="coltd" style="left:' + (i * 96/15 ) + 'vw;"><div class="coltext">' + (' '+(i+offsetX)).slice(-2).replace(' ','&nbsp;') + '</div><div class="colBlock"></div></div>';
             colNum += tpl;
         }
         mapColMark.innerHTML = '<div class="coltr">' + colNum + '</div>';
         var rowNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<div class="rowtr"><div class="rowtd"  style="top:' + (i * 96/13 ) + 'vw;"><div class="rowtext">' + (' '+(i+offsetY)).slice(-2).replace(' ','&nbsp;') + '</div><div class="rowBlock"></div></div></div>';
+        for (var i = 0; i < 15; i++) {
+            var tpl = '<div class="rowtr"><div class="rowtd"  style="top:' + (i * 96/15 ) + 'vw;"><div class="rowtext">' + (' '+(i+offsetY)).slice(-2).replace(' ','&nbsp;') + '</div><div class="rowBlock"></div></div></div>';
             rowNum += tpl;
         }
         mapRowMark.innerHTML = rowNum;
@@ -661,7 +661,7 @@ editor.prototype.listen = function () {
         editor.loc = {
             'x': scrollLeft + xx - mid.offsetLeft - mapEdit.offsetLeft,
             'y': scrollTop + yy - mid.offsetTop - mapEdit.offsetTop,
-            'size': editor.isMobile?(32*innerWidth*0.96/416):32
+            'size': editor.isMobile?(32*innerWidth*0.96/480):32
         };
         return editor.loc;
     }//返回可用的组件内坐标
@@ -689,7 +689,7 @@ editor.prototype.listen = function () {
         }
         holdingPath = 0;
         stepPostfix = [];
-        uc.clearRect(0, 0, 416, 416);
+        uc.clearRect(0, 0, 480, 480);
     }//用于鼠标移出canvas时的自动清除状态
 
     eui.oncontextmenu=function(e){e.preventDefault()}
@@ -725,7 +725,7 @@ editor.prototype.listen = function () {
         mouseOutCheck = 2;
         setTimeout(clear1);
         e.stopPropagation();
-        uc.clearRect(0, 0, 416, 416);
+        uc.clearRect(0, 0, 480, 480);
         var loc = eToLoc(e);
         var pos = locToPos(loc,true);
         stepPostfix = [];
@@ -811,7 +811,7 @@ editor.prototype.listen = function () {
             editor.updateMap();
             holdingPath = 0;
             stepPostfix = [];
-            uc.clearRect(0, 0, 416, 416);
+            uc.clearRect(0, 0, 480, 480);
         }
     }
 
@@ -996,7 +996,7 @@ editor.prototype.listen = function () {
     var iconLib=document.getElementById('iconLib');
     iconLib.onmousedown = function (e) {
         e.stopPropagation();
-        if (!editor.isMobile && e.clientY>=(635 - 5 - scrollBarHeight)) return;
+        if (!editor.isMobile && e.clientY>=(655 - scrollBarHeight)) return;
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
         var loc = {

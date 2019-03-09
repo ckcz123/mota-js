@@ -90,8 +90,8 @@ function core() {
         canvas: ["bg", "event", "event2", "fg", "damage"],
         offsetX: 0, // in pixel
         offsetY: 0,
-        width: 13, // map width and height
-        height: 13,
+        width: 15, // map width and height
+        height: 15,
         tempCanvas: null, // A temp canvas for drawing
     }
     this.paint = {};
@@ -459,7 +459,7 @@ core.prototype.onup = function () {
     return core.actions.onup();
 }
 
-////// 获得点击事件相对左上角的坐标（0到12之间） //////
+////// 获得点击事件相对左上角的坐标（0到14之间） //////
 core.prototype.getClickLoc = function (x, y) {
     return core.actions.getClickLoc(x,y);
 }

@@ -20,29 +20,31 @@ main.floors.sample3=
 "bgm": "bgm.mp3",
 "item_ratio": 1,
 "map": [
-    [  5,  5,  5,  5,  5,  5, 87,  5,  5,  5,  5,  5,  5],
-    [  5,  4,  4,  4,  4,  1,  0,  1,  4,  4,  4,  4,  5],
-    [  5,  4,  4,  4,  4,  1, 85,  1,  4,  4,  4,  4,  5],
-    [  5,  4,  4,  4,247,  1,247,  1,247,  4,  4,  4,  5],
-    [  5,  4,  4,  4,  1,247,247,247,  1,  4,  4,  4,  5],
-    [  5,  4,  4,  4,  1,247, 30,247,  1,  4,  4,  4,  5],
-    [  5,  4,  4,  4,247,  1,124,  1,247,  4,  4,  4,  5],
-    [  5,  4,  4,  4,  4,  1,123,  1,  4,  4,  4,  4,  5],
-    [  5,  4,  4,  4,  4,  1,  0,  1,  4,  4,  4,  4,  5],
-    [  5,  4,  4,  4,  4,  1,  0,  1,  4,  4,  4,  4,  5],
-    [  5,  4,  4,  4,  4,  4,  0,  4,  4,  4,  4,  4,  5],
-    [  5,  4,  4,  4,  4,  4, 85,  4,  4,  4,  4,  4,  5],
-    [  5,  5,  5,  5,  5,  5, 88,  5,  5,  5,  5,  5,  5]
+    [  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5],
+    [  5,  4,  4,  4,  4,  4,  1, 87,  1,  4,  4,  4,  4,  4,  5],
+    [  5,  4,  4,  4,  4,  4,  1,  0,  1,  4,  4,  4,  4,  4,  5],
+    [  5,  4,  4,  4,  4,  4,  1, 85,  1,  4,  4,  4,  4,  4,  5],
+    [  5,  4,  4,  4,  4,247,  1,247,  1,247,  4,  4,  4,  4,  5],
+    [  5,  4,  4,  4,  4,  1,247,247,247,  1,  4,  4,  4,  4,  5],
+    [  5,  4,  4,  4,  4,  1,247, 30,247,  1,  4,  4,  4,  4,  5],
+    [  5,  4,  4,  4,  4,247,  1,124,  1,247,  4,  4,  4,  4,  5],
+    [  5,  4,  4,  4,  4,  4,  1,123,  1,  4,  4,  4,  4,  4,  5],
+    [  5,  4,  4,  4,  4,  4,  1,  0,  1,  4,  4,  4,  4,  4,  5],
+    [  5,  4,  4,  4,  4,  4,  1,  0,  1,  4,  4,  4,  4,  4,  5],
+    [  5,  4,  4,  4,  4,  4,  1,  0,  1,  4,  4,  4,  4,  4,  5],
+    [  5,  4,  4,  4,  4,  4,  4, 85,  4,  4,  4,  4,  4,  4,  5],
+    [  5,  4,  4,  4,  4,  4,  4, 88,  4,  4,  4,  4,  4,  4,  5],
+    [  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5]
 ],
 "firstArrive": [
     "\t[实战！]本楼将尝试复刻《宿命的旋律》40F剧情。"
 ],
 "events": {
-    "6,11": {
+    "7,12": {
         "enable": false,
         "data": []
     },
-    "6,10": [
+    "7,11": [
         {
             "type": "playSound",
             "name": "door.mp3"
@@ -50,8 +52,8 @@ main.floors.sample3=
         {
             "type": "show",
             "loc": [
-                6,
-                11
+                7,
+                12
             ]
         },
         {
@@ -60,12 +62,12 @@ main.floors.sample3=
         {
             "type": "trigger",
             "loc": [
-                6,
-                7
+                7,
+                8
             ]
         }
     ],
-    "6,7": [
+    "7,8": [
         {
             "type": "playSound",
             "name": "item.mp3"
@@ -104,8 +106,8 @@ main.floors.sample3=
         {
             "type": "show",
             "loc": [
-                6,
-                4
+                7,
+                5
             ],
             "time": 1000
         },
@@ -367,27 +369,27 @@ main.floors.sample3=
             "type": "update"
         }
     ],
-    "6,4": {
-        "enable": false,
-        "data": []
-    },
-    "5,4": {
-        "enable": false,
-        "data": []
-    },
-    "7,4": {
-        "enable": false,
-        "data": []
-    },
-    "5,5": {
-        "enable": false,
-        "data": []
-    },
     "7,5": {
         "enable": false,
         "data": []
     },
-    "6,3": {
+    "6,5": {
+        "enable": false,
+        "data": []
+    },
+    "8,5": {
+        "enable": false,
+        "data": []
+    },
+    "6,6": {
+        "enable": false,
+        "data": []
+    },
+    "8,6": {
+        "enable": false,
+        "data": []
+    },
+    "7,4": {
         "trigger": "action",
         "enable": false,
         "data": [
@@ -405,20 +407,20 @@ main.floors.sample3=
                 "type": "show",
                 "loc": [
                     [
-                        4,
-                        3
+                        5,
+                        4
                     ],
                     [
-                        4,
-                        6
+                        5,
+                        7
                     ],
                     [
-                        8,
-                        6
+                        9,
+                        7
                     ],
                     [
-                        8,
-                        3
+                        9,
+                        4
                     ]
                 ],
                 "time": 500
@@ -432,32 +434,32 @@ main.floors.sample3=
                 "type": "animate",
                 "name": "yongchang",
                 "loc": [
-                    4,
-                    3
+                    5,
+                    4
                 ]
             },
             {
                 "type": "animate",
                 "name": "yongchang",
                 "loc": [
-                    4,
-                    6
+                    5,
+                    7
                 ]
             },
             {
                 "type": "animate",
                 "name": "yongchang",
                 "loc": [
-                    8,
-                    6
+                    9,
+                    7
                 ]
             },
             {
                 "type": "animate",
                 "name": "yongchang",
                 "loc": [
-                    8,
-                    3
+                    9,
+                    4
                 ]
             },
             {
@@ -491,8 +493,8 @@ main.floors.sample3=
             {
                 "type": "show",
                 "loc": [
-                    6,
-                    6
+                    7,
+                    7
                 ],
                 "time": 1000
             },
@@ -503,37 +505,37 @@ main.floors.sample3=
             {
                 "type": "trigger",
                 "loc": [
-                    6,
-                    6
+                    7,
+                    7
                 ]
             }
         ]
     },
-    "4,3": {
+    "5,4": {
         "trigger": "action",
         "displayDamage": false,
         "enable": false,
         "data": []
     },
-    "8,3": {
+    "9,4": {
         "trigger": "action",
         "displayDamage": false,
         "enable": false,
         "data": []
     },
-    "4,6": {
+    "5,7": {
         "trigger": "action",
         "displayDamage": false,
         "enable": false,
         "data": []
     },
-    "8,6": {
+    "9,7": {
         "trigger": "action",
         "displayDamage": false,
         "enable": false,
         "data": []
     },
-    "6,6": {
+    "7,7": {
         "enable": false,
         "data": [
             {
@@ -640,32 +642,32 @@ main.floors.sample3=
                 "type": "animate",
                 "name": "yongchang",
                 "loc": [
-                    4,
-                    3
+                    5,
+                    4
                 ]
             },
             {
                 "type": "animate",
                 "name": "yongchang",
                 "loc": [
-                    4,
-                    6
+                    5,
+                    7
                 ]
             },
             {
                 "type": "animate",
                 "name": "yongchang",
                 "loc": [
-                    8,
-                    6
+                    9,
+                    7
                 ]
             },
             {
                 "type": "animate",
                 "name": "yongchang",
                 "loc": [
-                    8,
-                    3
+                    9,
+                    4
                 ]
             },
             {
@@ -676,8 +678,8 @@ main.floors.sample3=
                 "type": "animate",
                 "name": "thunder",
                 "loc": [
-                    6,
-                    6
+                    7,
+                    7
                 ]
             },
             {
@@ -777,44 +779,44 @@ main.floors.sample3=
             {
                 "type": "hide",
                 "loc": [
-                    6,
-                    3
+                    7,
+                    4
                 ]
             },
             {
                 "type": "hide",
                 "loc": [
-                    4,
-                    3
+                    5,
+                    4
                 ]
             },
             {
                 "type": "hide",
                 "loc": [
-                    4,
-                    6
+                    5,
+                    7
                 ]
             },
             {
                 "type": "hide",
                 "loc": [
-                    8,
-                    6
+                    9,
+                    7
                 ]
             },
             {
                 "type": "hide",
                 "loc": [
-                    8,
-                    3
+                    9,
+                    4
                 ]
             },
             {
                 "type": "changeFloor",
                 "floorId": "sample3",
                 "loc": [
-                    6,
-                    6
+                    7,
+                    7
                 ],
                 "direction": "up",
                 "time": 1000
@@ -822,8 +824,8 @@ main.floors.sample3=
             {
                 "type": "show",
                 "loc": [
-                    6,
-                    5
+                    7,
+                    6
                 ]
             },
             {
@@ -877,8 +879,8 @@ main.floors.sample3=
             {
                 "type": "hide",
                 "loc": [
-                    6,
-                    5
+                    7,
+                    6
                 ]
             },
             {
@@ -889,42 +891,42 @@ main.floors.sample3=
             {
                 "type": "openDoor",
                 "loc": [
-                    6,
-                    2
+                    7,
+                    3
                 ]
             },
             {
                 "type": "openDoor",
                 "loc": [
-                    6,
-                    11
+                    7,
+                    12
                 ]
             }
         ]
     },
-    "6,5": {
+    "7,6": {
         "enable": false,
         "data": []
     }
 },
 "changeFloor": {
-    "6,0": {
+    "7,1": {
         "floorId": "sample3",
         "stair": "upFloor"
     },
-    "6,12": {
+    "7,13": {
         "floorId": "sample2",
         "stair": "upFloor"
     }
 },
 "afterBattle": {
-    "6,4": [
+    "7,5": [
         "\t[blackMagician]天真！你以为这样就能战胜我吗？",
         {
             "type": "show",
             "loc": [
-                7,
-                5
+                8,
+                6
             ],
             "time": 500
         },
@@ -932,26 +934,12 @@ main.floors.sample3=
             "type": "update"
         }
     ],
-    "7,5": [
+    "8,6": [
         "\t[blackMagician]你打败的不过是我众多分身中的其中一个而已。",
         {
             "type": "show",
             "loc": [
-                5,
-                4
-            ],
-            "time": 500
-        },
-        {
-            "type": "update"
-        }
-    ],
-    "5,4": [
-        "\t[blackMagician]你的身体已经伤痕累累了，可我还留有着九成多的魔力。",
-        {
-            "type": "show",
-            "loc": [
-                5,
+                6,
                 5
             ],
             "time": 500
@@ -960,13 +948,13 @@ main.floors.sample3=
             "type": "update"
         }
     ],
-    "5,5": [
-        "\t[blackMagician]顽固的家伙！放弃抵抗吧！",
+    "6,5": [
+        "\t[blackMagician]你的身体已经伤痕累累了，可我还留有着九成多的魔力。",
         {
             "type": "show",
             "loc": [
-                7,
-                4
+                6,
+                6
             ],
             "time": 500
         },
@@ -974,21 +962,35 @@ main.floors.sample3=
             "type": "update"
         }
     ],
-    "7,4": [
+    "6,6": [
+        "\t[blackMagician]顽固的家伙！放弃抵抗吧！",
+        {
+            "type": "show",
+            "loc": [
+                8,
+                5
+            ],
+            "time": 500
+        },
+        {
+            "type": "update"
+        }
+    ],
+    "8,5": [
         "\t[blackMagician]哈哈哈哈！我的灵魂远比你想象的强大！\n我即是永恒！",
         {
             "type": "show",
             "loc": [
-                6,
-                3
+                7,
+                4
             ],
             "time": 500
         },
         {
             "type": "trigger",
             "loc": [
-                6,
-                3
+                7,
+                4
             ]
         }
     ]

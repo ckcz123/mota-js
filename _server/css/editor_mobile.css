@@ -332,14 +332,14 @@ div.col .coltd {
 #mapColMark .coltd,
 #mapColMark .coltd .coltext {
     position: absolute;
-    width: 7.15vw;
+    width: 6.4vw;
     height: 4vw;
     line-height: 4vw;
     padding: 0;
     border-bottom-width: 0px;
     border-top-width: 0px;
-    border-left-width: 0.117307vw;
-    border-right-width: 0.117307vw;
+    border-left-width: 0vw;
+    border-right-width: 0vw;
 }
 
 #mapColMark .coltd:hover .colBlock {
@@ -347,7 +347,7 @@ div.col .coltd {
     top: 4vw;
     left:0;
     height: 96vw;
-    width: 7.384615vw;
+    width: 6.4vw;
     z-index: 100;
     background-color: rgba(38, 166, 154, .5);
 }
@@ -390,20 +390,20 @@ div.row .rowtd .rowtext{
 
 #mapRowMark .rowtd,
 #mapRowMark .rowtd .rowtext{
-    height: 7.15vw;
-    line-height: 7.15vw;
+    height: 6.2vw;
+    line-height: 6.2vw;
     padding: 0;
     border-left-width: 0px;
     border-right-width: 0px;
-    border-top-width: 0.117307vw;
-    border-bottom-width: 0.117397vw;
+    border-top-width: 0.1vw;
+    border-bottom-width: 0.1vw;
 }
 
 #mapRowMark .rowtd:hover .rowBlock {
     position: absolute;
     left: 4vw;
     top: 0;
-    height: 7.384615vw;
+    height: 6.4vw;
     width: 96vw;
     z-index: 100;
     background-color: rgba(76, 34, 27, .5);

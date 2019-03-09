@@ -76,8 +76,8 @@ control.prototype.setRequestAnimationFrame = function () {
                 // Global Autotile Animate
                 core.status.autotileAnimateObjs.blocks.forEach(function (block) {
                     // ------ 界面外的动画不绘制
-                    if (block.x * 32 < core.bigmap.offsetX - 64 || block.x * 32 > core.bigmap.offsetX + 416 + 32
-                            || block.y * 32 < core.bigmap.offsetY - 64 || block.y * 32 > core.bigmap.offsetY + 416 + 32 + 16) {
+                    if (block.x * 32 < core.bigmap.offsetX - 64 || block.x * 32 > core.bigmap.offsetX + 480 + 32
+                            || block.y * 32 < core.bigmap.offsetY - 64 || block.y * 32 > core.bigmap.offsetY + 480 + 32 + 16) {
                         return;
                     }
 
@@ -240,7 +240,7 @@ control.prototype.setRequestAnimationFrame = function () {
             else if (core.animateFrame.weather.type == 'fog' && core.animateFrame.weather.level > 0) {
                 core.clearMap('weather');
                 if (core.animateFrame.weather.fog) {
-                    var w = 416, h = 416;
+                    var w = 480, h = 480;
                     core.setAlpha('weather', 0.5);
                     core.animateFrame.weather.nodes.forEach(function (p) {
                         ctx.drawImage(core.animateFrame.weather.fog, p.x - ox, p.y - oy, w, h);
@@ -994,8 +994,8 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
             core.clearMap('hero', drawX()-core.bigmap.offsetX, drawY()-height+32-core.bigmap.offsetY, 32, height);
             updateJump();
             var nowx = drawX(), nowy = drawY();
-            core.bigmap.offsetX = core.clamp(nowx - 32*6, 0, 32*core.bigmap.width-416);
-            core.bigmap.offsetY = core.clamp(nowy - 32*6, 0, 32*core.bigmap.height-416);
+            core.bigmap.offsetX = core.clamp(nowx - 32*7, 0, 32*core.bigmap.width-480);
+            core.bigmap.offsetY = core.clamp(nowy - 32*7, 0, 32*core.bigmap.height-480);
             core.control.updateViewport();
             core.drawImage('hero', core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height,
                 nowx - core.bigmap.offsetX, nowy + 32-height - core.bigmap.offsetY, 32, height);
@@ -1053,10 +1053,10 @@ control.prototype.setGameCanvasTranslate = function(canvas,x,y){
     c.style.OTransform='translate('+x+'px,'+y+'px)';
     c.style.MozTransform='translate('+x+'px,'+y+'px)';
     if(main.mode==='editor' && editor.isMobile){
-        c.style.transform='translate('+(x/416*96)+'vw,'+(y/416*96)+'vw)';
-        c.style.webkitTransform='translate('+(x/416*96)+'vw,'+(y/416*96)+'vw)';
-        c.style.OTransform='translate('+(x/416*96)+'vw,'+(y/416*96)+'vw)';
-        c.style.MozTransform='translate('+(x/416*96)+'vw,'+(y/416*96)+'vw)';
+        c.style.transform='translate('+(x/480*96)+'vw,'+(y/480*96)+'vw)';
+        c.style.webkitTransform='translate('+(x/480*96)+'vw,'+(y/480*96)+'vw)';
+        c.style.OTransform='translate('+(x/480*96)+'vw,'+(y/480*96)+'vw)';
+        c.style.MozTransform='translate('+(x/480*96)+'vw,'+(y/480*96)+'vw)';
     }
 };
 
@@ -1084,8 +1084,8 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
     var offsetY = way.y*offset;
     var dx=offsetX==0?0:offsetX/Math.abs(offsetX), dy=offsetY==0?0:offsetY/Math.abs(offsetY);
 
-    core.bigmap.offsetX = core.clamp((x - 6) * 32 + offsetX, 0, 32*core.bigmap.width-416);
-    core.bigmap.offsetY = core.clamp((y - 6) * 32 + offsetY, 0, 32*core.bigmap.height-416);
+    core.bigmap.offsetX = core.clamp((x - 7) * 32 + offsetX, 0, 32*core.bigmap.width-480);
+    core.bigmap.offsetY = core.clamp((y - 7) * 32 + offsetY, 0, 32*core.bigmap.height-480);
 
     core.clearAutomaticRouteNode(x+dx, y+dy);
 
@@ -1340,7 +1340,7 @@ control.prototype.setWeather = function (type, level) {
     level *= parseInt(20*core.bigmap.width*core.bigmap.height/169);
     // 计算当前的宽高
 
-    core.createCanvas('weather', 0, 0, 416, 416, 80);
+    core.createCanvas('weather', 0, 0, 480, 480, 80);
     core.animateFrame.weather.type = type;
     core.animateFrame.weather.level = level;
     core.animateFrame.weather.nodes = [];
@@ -1399,7 +1399,7 @@ control.prototype.setFg = function(color, time, callback) {
     if (time==0) {
         // 直接变色
         core.clearMap('curtain');
-        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA(color));
+        core.fillRect('curtain', 0, 0, 480, 480, core.arrayToRGBA(color));
         core.status.curtainColor = color;
         if (core.isset(callback)) callback();
         return;
@@ -1415,7 +1415,7 @@ control.prototype.setFg = function(color, time, callback) {
             (nowColor[3]*(step-1)+color[3])/step,
         ];
         core.clearMap('curtain');
-        core.fillRect('curtain', 0, 0, 416, 416, core.arrayToRGBA(nowColor));
+        core.fillRect('curtain', 0, 0, 480, 480, core.arrayToRGBA(nowColor));
         step--;
 
         if (step <= 0) {
@@ -1503,8 +1503,8 @@ control.prototype.updateDamage = function (floorId, canvas) {
         if (floorId != core.status.floorId) {
             tempCheckBlock = core.clone(core.status.checkBlock);
             core.status.thisMap = core.status.maps[floorId];
-            core.bigmap.width = core.floors[floorId].width || 13;
-            core.bigmap.height = core.floors[floorId].height || 13;
+            core.bigmap.width = core.floors[floorId].width || 15;
+            core.bigmap.height = core.floors[floorId].height || 15;
             core.updateCheckBlock();
         }
 
@@ -1526,8 +1526,8 @@ control.prototype.updateDamage = function (floorId, canvas) {
         if (floorId!=core.status.floorId) {
             core.status.thisMap = core.status.maps[core.status.floorId];
             core.status.checkBlock = tempCheckBlock;
-            core.bigmap.width = core.floors[core.status.floorId].width || 13;
-            core.bigmap.height = core.floors[core.status.floorId].height || 13;
+            core.bigmap.width = core.floors[core.status.floorId].width || 15;
+            core.bigmap.height = core.floors[core.status.floorId].height || 15;
         }
     }
 }
@@ -1844,12 +1844,12 @@ control.prototype.replay = function () {
                 var constants = Object.keys(core.status.hero.items.constants).sort();
                 var index=-1;
                 if ((index=tools.indexOf(itemId))>=0) {
-                    core.status.event.data = {"toolsPage":Math.floor(index/12)+1, "constantsPage":1, "selectId":null};
-                    index = index%12;
+                    core.status.event.data = {"toolsPage":Math.floor(index/14)+1, "constantsPage":1, "selectId":null};
+                    index = index%14;
                 }
                 else if ((index=constants.indexOf(itemId))>=0) {
-                    core.status.event.data = {"toolsPage":1, "constantsPage":Math.floor(index/12)+1, "selectId":null};
-                    index = index%12+12;
+                    core.status.event.data = {"toolsPage":1, "constantsPage":Math.floor(index/14)+1, "selectId":null};
+                    index = index%14+14;
                 }
                 if (index>=0) {
                     core.ui.drawToolbox(index);
@@ -1884,8 +1884,8 @@ control.prototype.replay = function () {
         var index = ownEquipment.indexOf(equipId);
         if (index>=0) {
             core.status.route.push(action);
-            core.status.event.data = {"page":Math.floor(index/12)+1, "selectId":null};
-            index = index%12+12;
+            core.status.event.data = {"page":Math.floor(index/14)+1, "selectId":null};
+            index = index%14+14;
             core.ui.drawEquipbox(index);
             setTimeout(function () {
                 core.ui.closePanel();
@@ -1919,13 +1919,13 @@ control.prototype.replay = function () {
             var shop=core.status.shops[shopId];
             if (core.isset(shop) && shop.visited) { // 商店可用
                 var choices = shop.choices;
-                var topIndex = 6 - parseInt(choices.length / 2);
+                var topIndex = 7 - parseInt(choices.length / 2);
 
                 core.status.event.selection = parseInt(selections.shift());
 
                 core.events.openShop(shopId, false);
                 var shopInterval = setInterval(function () {
-                    if (!core.actions.clickShop(6, topIndex+core.status.event.selection)) {
+                    if (!core.actions.clickShop(7, topIndex+core.status.event.selection)) {
                         clearInterval(shopInterval);
                         core.stopReplay();
                         core.drawTip("录像文件出错");
@@ -3035,9 +3035,9 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     clientHeight = clientHeight || main.dom.body.clientHeight;
 
     // 默认画布大小
-    var DEFAULT_CANVAS_WIDTH = 422;
+    var DEFAULT_CANVAS_WIDTH = 480+6;
     // 默认边栏宽度
-    var DEFAULT_BAR_WIDTH = 132;
+    var DEFAULT_BAR_WIDTH = 149+3;
 
     var BASE_LINEHEIGHT = 32;
     var SPACE = 3;
@@ -3060,7 +3060,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         toolBarWidth, toolBarHeight, toolBarTop, toolBarBorder,
         toolsWidth, toolsHeight,toolsMargin,toolsPMaxwidth,
         fontSize, toolbarFontSize, margin, statusBackground, toolsBackground,
-        statusCanvasWidth, statusCanvasHeight, musicBtnBottom, musicBtnRight;
+        statusCanvasWidth, statusCanvasHeight, musicBtnBottom, musicBtnRight,
+        hardWidth, statusMarginLeft;
 
     var toDraw = this.needDraw();
     var count = toDraw.length;
@@ -3070,15 +3071,15 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     var col = Math.ceil(count / 3);
     if (statusCanvas) col = statusCanvasRows;
 
-    var statusLineHeight = BASE_LINEHEIGHT * 9 / count;
+    var statusLineHeight = BASE_LINEHEIGHT * 10 / count;
     var statusLineFontSize = DEFAULT_FONT_SIZE;
-    if (count>9) statusLineFontSize = statusLineFontSize * 9 / count;
+    if (count>10) statusLineFontSize = statusLineFontSize * 10 / count;
 
     var borderColor = (core.status.globalAttribute||core.initStatus.globalAttribute).borderColor;
 
     statusBarBorder = '3px '+borderColor+' solid';
     toolBarBorder = '3px '+borderColor+' solid';
-    var zoom = (ADAPT_WIDTH - width) / 4.22;
+    var zoom = (ADAPT_WIDTH - width) / (DEFAULT_CANVAS_WIDTH/100);
     var aScale = 1 - zoom / 100;
 
     core.domStyle.toolbarBtn = false;
@@ -3122,13 +3123,15 @@ control.prototype.resize = function(clientWidth, clientHeight) {
 
             toolBarTop = statusBarHeight + canvasWidth;
             toolBarBorder = '3px '+borderColor+' solid';
-            toolsHeight = scale * BASE_LINEHEIGHT * 0.95;
+            toolsHeight = scale * BASE_LINEHEIGHT;
             toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH * .4;
             toolsBackground = (core.status.globalAttribute||core.initStatus.globalAttribute).toolsBackground;
             borderRight = '3px '+borderColor+' solid';
 
             margin = scale * SPACE * 2;
-            toolsMargin = scale * SPACE * 3;
+            statusMarginLeft = margin;
+            toolsMargin = scale * SPACE * 4;
+
             fontSize = DEFAULT_FONT_SIZE * scale;
             toolbarFontSize = DEFAULT_FONT_SIZE * scale;
             musicBtnRight = 3;
@@ -3149,7 +3152,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
 
             statusHeight = scale*statusLineHeight * .8;
             statusLabelsLH = .8 * statusLineHeight *scale;
-            toolBarTop = scale*statusLineHeight * count + SPACE * 2;
+            toolBarTop = (DEFAULT_CANVAS_WIDTH - 135) * scale;
             toolBarHeight = canvasWidth - toolBarTop;
             toolBarBorder = '3px '+borderColor+' solid';
             toolsHeight = scale * BASE_LINEHEIGHT;
@@ -3161,7 +3164,10 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH;
 
             margin = scale * SPACE * 2;
-            toolsMargin = 2 * SPACE * scale;
+            toolsMargin = (DEFAULT_BAR_WIDTH * scale - 3*SPACE - 3 * toolsHeight)/4;
+            hardWidth = DEFAULT_BAR_WIDTH * scale - 3*SPACE - 2*toolsMargin;
+            statusMarginLeft = toolsMargin;
+
             musicBtnRight = 3;
             musicBtnBottom = 3;
         }
@@ -3186,7 +3192,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
 
         statusHeight = statusLineHeight * .8;
         statusLabelsLH = .8 * statusLineHeight;
-        toolBarTop = statusLineHeight * count + SPACE * 2;
+        // toolBarTop = statusLineHeight * count + SPACE * 2;
+        toolBarTop = DEFAULT_CANVAS_WIDTH - 135;
         toolBarHeight = DEFAULT_CANVAS_WIDTH - toolBarTop;
         toolsBackground = 'transparent';
 
@@ -3196,8 +3203,10 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         toolbarFontSize = DEFAULT_FONT_SIZE;
         statusMaxWidth = DEFAULT_BAR_WIDTH;
         toolsPMaxwidth = DEFAULT_BAR_WIDTH * .9;
-        margin = SPACE * 2;
-        toolsMargin = 2 * SPACE;
+        margin = 2 * SPACE;
+        toolsMargin = (DEFAULT_BAR_WIDTH - 3*SPACE - 3 * toolsHeight)/4;
+        hardWidth = DEFAULT_BAR_WIDTH - 3*SPACE - 2*toolsMargin;
+        statusMarginLeft = toolsMargin;
 
         musicBtnRight = (clientWidth-gameGroupWidth)/2;
         musicBtnBottom = (clientHeight-gameGroupHeight)/2 - 27;
@@ -3287,7 +3296,8 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 maxWidth: statusMaxWidth + unit,
                 height: statusHeight + unit,
                 margin: margin/2 + unit,
-                display: !statusCanvas?'block':'none'
+                display: !statusCanvas?'block':'none',
+                marginLeft: statusMarginLeft + unit,
             }
         },
         {
@@ -3334,10 +3344,18 @@ control.prototype.resize = function(clientWidth, clientHeight) {
             }
         },
         {
+            imgId: 'shop',
+            rules:{
+                display: core.domStyle.isVertical && core.domStyle.showStatusBar
+            }
+        },
+        {
             id: 'hard',
             rules: {
                 lineHeight: toolsHeight + unit,
-                color: (core.status.globalAttribute||core.initStatus.globalAttribute).hardLabelColor
+                color: (core.status.globalAttribute||core.initStatus.globalAttribute).hardLabelColor,
+                width: hardWidth + unit,
+                maxWidth: hardWidth+unit
             }
         },
         {
@@ -3346,6 +3364,12 @@ control.prototype.resize = function(clientWidth, clientHeight) {
                 display: 'block',
                 right: musicBtnRight + unit,
                 bottom: musicBtnBottom + unit
+            }
+        },
+        {
+            className: 'noMarginLeft',
+            rules: {
+                marginLeft: 0
             }
         }
     ]
@@ -3363,12 +3387,12 @@ control.prototype.resize = function(clientWidth, clientHeight) {
     this.setToolbarButton();
 
     if (core.domStyle.isVertical) {
-        core.dom.statusCanvas.width = 416;
+        core.dom.statusCanvas.width = 480;
         core.dom.statusCanvas.height = col * BASE_LINEHEIGHT + SPACE + 6;
     }
     else {
-        core.dom.statusCanvas.width = 129;
-        core.dom.statusCanvas.height = 416;
+        core.dom.statusCanvas.width = 149;
+        core.dom.statusCanvas.height = 480;
     }
     this.setMusicBtn();
     if (core.isPlaying())

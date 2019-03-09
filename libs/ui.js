@@ -1985,7 +1985,7 @@ ui.prototype.drawEquipbox = function(index) {
                     if (compare[name]<0) color = '#FF0000';
                     var nowValue = core.getStatus(name), newValue = nowValue + compare[name];
                     if (equip.equip.percentage) {
-                        var nowBuff = core.getFlag('equip_'+name+"_buff",1), newBuff = nowBuff+compare[name]/100;
+                        var nowBuff = core.getFlag('__'+name+"_buff__", 1), newBuff = nowBuff+compare[name]/100;
                         nowValue = Math.floor(nowBuff*core.getStatus(name));
                         newValue = Math.floor(newBuff*core.getStatus(name));
                     }

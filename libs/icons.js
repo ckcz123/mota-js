@@ -13,7 +13,16 @@ icons.prototype._init = function () {
 }
 
 icons.prototype.getIcons = function () {
-    return this.icons;
+    return core.clone(this.icons);
+}
+
+////// 根据道具ID获得其cls //////
+icons.prototype.getClsFromId = function (id) {
+    for (var cls in core.material.icons) {
+        if (cls != 'hero' && id in core.material.icons[cls])
+            return cls;
+    }
+    return null;
 }
 
 ////// 根据图块数字或ID获得所在的tileset和坐标信息 //////

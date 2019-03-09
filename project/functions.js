@@ -34,22 +34,28 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 },
         "setInitData": function (hard) {
 	// 不同难度分别设置初始属性
-	if (hard=='Easy') { // 简单难度
+	if (hard == 'Easy') { // 简单难度
 		core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
 		// 可以在此设置一些初始福利，比如设置初始生命值可以调用：
 		// core.setStatus("hp", 10000);
 		// 赠送一把黄钥匙可以调用
 		// core.setItem("yellowKey", 1);
 	}
-	if (hard=='Normal') { // 普通难度
+	if (hard == 'Normal') { // 普通难度
 		core.setFlag('hard', 2); // 可以用flag:hard来获得当前难度
 	}
-	if (hard=='Hard') { // 困难难度
+	if (hard == 'Hard') { // 困难难度
 		core.setFlag('hard', 3); // 可以用flag:hard来获得当前难度
 	}
-	if (hard=='Hell') { // 噩梦难度
+	if (hard == 'Hell') { // 噩梦难度
 		core.setFlag('hard', 4); // 可以用flag:hard来获得当前难度
 	}
+
+	// 设置三围的初始增幅属性（均为1）
+	["atk", "def", "mdef"].forEach(function (name) {
+		core.setFlag("__" + name + "_buff__", 1);
+	});
+
 	core.events.afterLoadData();
 },
         "win": function(reason, norank) {
@@ -461,7 +467,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		[27, "捕捉", "当走到怪物周围十字时会强制进行战斗。"]
 	];
 },
-        "getEnemyInfo": function (enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId) {
+        "getEnemyInfo": function (enemy, hero, x, y, floorId) {
 	// 获得某个怪物变化后的数据；该函数将被伤害计算和怪物手册使用
 	// 例如：坚固、模仿、仿攻等等
 	// 
@@ -472,6 +478,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// floorId：该怪物所在的楼层
 	// 后面三个参数主要是可以在光环等效果上可以适用（也可以按需制作部分范围光环效果）
 	floorId = floorId || core.status.floorId;
+	var hero_hp = core.getRealStatusOrDefault(hero, 'hp'),
+		hero_atk = core.getRealStatusOrDefault(hero, 'atk'),
+		hero_def = core.getRealStatusOrDefault(hero, 'def'),
+		hero_mdef = core.getRealStatusOrDefault(hero, 'mdef');
+
 	var mon_hp = enemy.hp,
 		mon_atk = enemy.atk,
 		mon_def = enemy.def,
@@ -566,18 +577,22 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		"guards": guards, // 返回支援情况
 	};
 },
-        "getDamageInfo": function (enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId) {
+        "getDamageInfo": function (enemy, hero, x, y, floorId) {
 	// 获得战斗伤害信息（实际伤害计算函数）
 	// 
 	// 参数说明：
 	// enemy：该怪物信息
-	// hero_hp,hero_atk,hero_def,hero_mdef：勇士的生命攻防魔防数据
+	// hero：勇士的当前数据；如果对应项不存在则会从core.status.hero中取。
 	// x,y：该怪物的坐标（查看手册和强制战斗时为undefined）
 	// floorId：该怪物所在的楼层
 	// 后面三个参数主要是可以在光环等效果上可以适用
 	floorId = floorId || core.status.floorId;
 
-	var origin_hero_hp = hero_hp,
+	var hero_hp = core.getRealStatusOrDefault(hero, 'hp'),
+		hero_atk = core.getRealStatusOrDefault(hero, 'atk'),
+		hero_def = core.getRealStatusOrDefault(hero, 'def'),
+		hero_mdef = core.getRealStatusOrDefault(hero, 'mdef'),
+		origin_hero_hp = hero_hp,
 		origin_hero_atk = hero_atk,
 		origin_hero_def = hero_def;
 
@@ -587,14 +602,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	hero_def = Math.max(0, hero_def);
 	hero_mdef = Math.max(0, hero_mdef);
 
-	// 计算装备按比例增加属性后的数值
-	hero_atk = Math.floor(core.getFlag('equip_atk_buff', 1) * hero_atk);
-	hero_def = Math.floor(core.getFlag('equip_def_buff', 1) * hero_def);
-	hero_mdef = Math.floor(core.getFlag('equip_mdef_buff', 1) * hero_mdef);
-
 	// 怪物的各项数据
 	// 对坚固模仿等处理扔到了脚本编辑-getEnemyInfo之中
-	var enemyInfo = core.enemys.getEnemyInfo(enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId);
+	var enemyInfo = core.enemys.getEnemyInfo(enemy, hero, x, y, floorId);
 	var mon_hp = enemyInfo.hp,
 		mon_atk = enemyInfo.atk,
 		mon_def = enemyInfo.def,
@@ -949,12 +959,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 向下取整
 		if (core.isset(core.status.hero[item]))
 			core.status.hero[item] = Math.floor(core.status.hero[item]);
-		// 装备按比例增加属性
-		var value = Math.floor(core.getStatus(item)*core.getFlag('equip_'+item+'_buff',1));
 		// 大数据格式化；
-		core.statusBar[item].innerHTML = core.formatBigNumber(value);
+		core.statusBar[item].innerHTML = core.formatBigNumber(core.getRealStatus(item));
 	});
-	
+
 	// 设置魔力值
 	if (core.flags.enableMana) {
 		// 也可以使用flag:manaMax来表示最大魔力值；详见文档-个性化-技能塔的支持
@@ -973,14 +981,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 如果是自定义添加的状态栏，也需要在这里进行设置显示的数值
 
 	// 进阶
-	if (core.flags.enableLevelUp && core.status.hero.lv<core.firstData.levelUp.length) {
+	if (core.flags.enableLevelUp && core.status.hero.lv < core.firstData.levelUp.length) {
 		var need = core.calValue(core.firstData.levelUp[core.status.hero.lv].need);
 		if (core.flags.levelUpLeftMode)
 			core.statusBar.up.innerHTML = core.formatBigNumber(need - core.getStatus('experience')) || " ";
 		else
 			core.statusBar.up.innerHTML = core.formatBigNumber(need) || " ";
-	}
-	else core.statusBar.up.innerHTML = " ";
+	} else core.statusBar.up.innerHTML = " ";
 
 	// 钥匙
 	var keys = ['yellowKey', 'blueKey', 'redKey'];
@@ -988,16 +995,16 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.statusBar[key].innerHTML = core.setTwoDigits(core.status.hero.items.keys[key]);
 	});
 	// 毒衰咒
-	if(core.flags.enableDebuff){
-		core.statusBar.poison.innerHTML = core.hasFlag('poison')?"毒":"";
-		core.statusBar.weak.innerHTML = core.hasFlag('weak')?"衰":"";
-		core.statusBar.curse.innerHTML = core.hasFlag('curse')?"咒":"";
+	if (core.flags.enableDebuff) {
+		core.statusBar.poison.innerHTML = core.hasFlag('poison') ? "毒" : "";
+		core.statusBar.weak.innerHTML = core.hasFlag('weak') ? "衰" : "";
+		core.statusBar.curse.innerHTML = core.hasFlag('curse') ? "咒" : "";
 	}
 	// 破炸飞
 	if (core.flags.enablePZF) {
-		core.statusBar.pickaxe.innerHTML = "破"+core.itemCount('pickaxe');
-		core.statusBar.bomb.innerHTML = "炸"+core.itemCount('bomb');
-		core.statusBar.fly.innerHTML = "飞"+core.itemCount('centerFly');
+		core.statusBar.pickaxe.innerHTML = "破" + core.itemCount('pickaxe');
+		core.statusBar.bomb.innerHTML = "炸" + core.itemCount('bomb');
+		core.statusBar.fly.innerHTML = "飞" + core.itemCount('centerFly');
 	}
 
 	// 难度

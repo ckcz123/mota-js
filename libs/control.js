@@ -406,7 +406,7 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
     core.status.floorId = floorId;
     core.status.maps = core.clone(maps);
     // 初始化怪物
-    core.material.enemys = core.clone(core.enemys.getEnemys());
+    core.material.enemys = core.enemys.getEnemys();
     core.material.items = core.items.getItems();
     // 初始化人物属性
     core.status.hero = core.clone(hero);
@@ -2566,13 +2566,27 @@ control.prototype.setStatus = function (statusName, statusVal) {
 }
 
 ////// 获得勇士属性 //////
-control.prototype.getStatus = function (statusName) {
+control.prototype.getStatus = function (name) {
     if (!core.isset(core.status.hero)) return null;
     // support status:x
-    if (core.isset(core.status.hero.loc[statusName]))
-        return core.status.hero.loc[statusName];
-    if (statusName == 'exp') statusName = 'experience';
-    return core.status.hero[statusName];
+    if (core.isset(core.status.hero.loc[name]))
+        return core.status.hero.loc[name];
+    if (name == 'exp') name = 'experience';
+    return core.status.hero[name];
+}
+
+control.prototype.getStatusOrDefault = function (status, name) {
+    if (core.isset(status) && name in status)
+        return status[name];
+    return this.getStatus(name);
+}
+
+control.prototype.getRealStatus = function (name) {
+    return this.getRealStatusOrDefault(null, name);
+}
+
+control.prototype.getRealStatusOrDefault = function (status, name) {
+    return this.getStatusOrDefault(status, name) * core.getFlag('__'+name+'_buff__', 1);
 }
 
 ////// 获得某个等级的名称 //////
@@ -2606,6 +2620,12 @@ control.prototype.hasFlag = function(flag) {
 control.prototype.removeFlag = function(flag) {
     if (!core.isset(core.status.hero)) return;
     delete core.status.hero.flags[flag];
+}
+
+////// 增加某个flag数值 //////
+control.prototype.addFlag = function(flag, delta) {
+    if (!core.isset(core.status.hero)) return;
+    core.setFlag(flag, core.getFlag(flag, 0) + delta);
 }
 
 ////// 锁定状态栏，常常用于事件处理 //////

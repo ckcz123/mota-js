@@ -1,17 +1,17 @@
 "use strict";
 
 function items() {
-    this.init();
+    this._init();
 }
 
 ////// 初始化 //////
-items.prototype.init = function () {
+items.prototype._init = function () {
     this.items = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.items;
     this.itemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.itemEffect;
     this.itemEffectTip = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.itemEffectTip;
     this.useItemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.useItemEffect;
     this.canUseItemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canUseItemEffect;
-    if (!core.isset(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canEquip))
+    if (!items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canEquip)
         items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canEquip = {};
     this.canEquip = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canEquip;
 

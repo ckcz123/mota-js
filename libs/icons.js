@@ -1,10 +1,10 @@
 "use strict";
 
 function icons() {
-    this.init();
+    this._init();
 }
 
-icons.prototype.init = function () {
+icons.prototype._init = function () {
     this.icons = icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1;
     //delete(icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1);
 

@@ -1,11 +1,11 @@
 "use strict";
 
 function enemys() {
-    this.init();
+    this._init();
 }
 
 ////// 初始化 //////
-enemys.prototype.init = function () {
+enemys.prototype._init = function () {
     this.enemys = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80;
     this.enemydata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.enemys;
     if (main.mode=='play') {

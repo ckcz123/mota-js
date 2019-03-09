@@ -6,7 +6,7 @@ utils.js 工具类
 "use strict";
 
 function utils() {
-    this.init();
+    this._init();
     this.scan = {
         'up': {'x': 0, 'y': -1},
         'left': {'x': -1, 'y': 0},
@@ -15,7 +15,7 @@ function utils() {
     };
 }
 
-utils.prototype.init = function () {
+utils.prototype._init = function () {
     // 定义Object.assign
     if (typeof Object.assign != "function") {
         Object.assign = function(target, varArgs) { // .length of function is 2

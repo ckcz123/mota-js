@@ -5,10 +5,10 @@ loader.js：负责对资源的加载
 "use strict";
 
 function loader() {
-    this.init();
+    this._init();
 }
 
-loader.prototype.init = function () {
+loader.prototype._init = function () {
 
 }
 
@@ -22,7 +22,7 @@ loader.prototype.setStartLoadTipText = function (text) {
     core.dom.startTopLoadTips.innerHTML = text;
 }
 
-loader.prototype.load = function (callback) {
+loader.prototype._load = function (callback) {
 
     // 加载icons
     core.loader.loadIcons();

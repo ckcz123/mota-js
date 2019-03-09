@@ -1,11 +1,11 @@
 "use strict";
 
 function events() {
-    this.init();
+    this._init();
 }
 
 ////// 初始化 //////
-events.prototype.init = function () {
+events.prototype._init = function () {
     this.eventdata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.events;
     this.commonEvent = events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent;
     this.events = {
@@ -2088,7 +2088,7 @@ events.prototype.checkLvUp = function () {
 }
 
 ////// 尝试使用道具 //////
-events.prototype.useItem = function(itemId) {
+events.prototype.tryUseItem = function(itemId) {
     core.ui.closePanel();
 
     if (itemId=='book') {

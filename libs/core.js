@@ -237,7 +237,7 @@ core.prototype.init = function (coreData, callback) {
     document.title = core.firstData.title + " - HTML5魔塔";
     document.getElementById("startLogo").innerHTML = core.firstData.title;
     core.material.items = core.items.getItems();
-    core.material.enemys = core.clone(core.enemys.getEnemys());
+    core.material.enemys = core.enemys.getEnemys();
     core.material.icons = core.icons.getIcons();
     core.material.events = core.events.getEvents();
 

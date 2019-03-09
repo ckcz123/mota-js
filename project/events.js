@@ -102,14 +102,14 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 												"text": ">=1：直接扣数值"
 											},
 											{
-												"type": "setValue",
+												"type": "setValue2",
 												"name": "status:atk",
-												"value": "status:atk-core.values.weakValue"
+												"value": "-core.values.weakValue"
 											},
 											{
-												"type": "setValue",
+												"type": "setValue2",
 												"name": "status:def",
-												"value": "status:def-core.values.weakValue"
+												"value": "-core.values.weakValue"
 											}
 										],
 										"false": [
@@ -118,14 +118,14 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 												"text": "<1：扣比例"
 											},
 											{
-												"type": "setValue",
-												"name": "flag:equip_atk_buff",
-												"value": "core.getFlag('equip_atk_buff',1)-core.values.weakValue"
+												"type": "setValue2",
+												"name": "flag:__atk_buff__",
+												"value": "-core.values.weakValue"
 											},
 											{
-												"type": "setValue",
-												"name": "flag:equip_def_buff",
-												"value": "core.getFlag('equip_def_buff',1)-core.values.weakValue"
+												"type": "setValue2",
+												"name": "flag:__def_buff__",
+												"value": "-core.values.weakValue"
 											}
 										]
 									}

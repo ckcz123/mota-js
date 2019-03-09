@@ -265,14 +265,12 @@ items.prototype._loadEquipEffect = function (equipId, unloadEquipId, isPercentag
     var result = core.compareEquipment(equipId, unloadEquipId);
 
     if (isPercentage) {
-        core.setFlag('equip_atk_buff', core.getFlag('equip_atk_buff',1)+result.atk/100);
-        core.setFlag('equip_def_buff', core.getFlag('equip_def_buff',1)+result.def/100);
-        core.setFlag('equip_mdef_buff', core.getFlag('equip_mdef_buff',1)+result.mdef/100);
+        for (var v in result)
+            core.addFlag('__'+v+'_buff__', result[v]/100);
     }
     else {
-        core.status.hero.atk += result.atk;
-        core.status.hero.def += result.def;
-        core.status.hero.mdef += result.mdef;
+        for (var v in result)
+            core.status.hero[v] += result[v];
     }
 }
 

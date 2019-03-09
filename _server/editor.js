@@ -195,7 +195,7 @@ editor.prototype.mapInit = function () {
 }
 
 editor.prototype.fetchMapFromCore = function(){
-    var mapArray = core.maps.save(core.status.maps, core.status.floorId);
+    var mapArray = core.maps.saveMap(core.status.maps, core.status.floorId);
     editor.map = mapArray.map(function (v) {
         return v.map(function (v) {
             var x = parseInt(v), y = editor.indexs[x];

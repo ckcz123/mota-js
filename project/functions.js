@@ -1257,6 +1257,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
         "drawAbout": function() {
 	// 绘制“关于”界面
 	core.ui.closePanel();
+	core.lockControl();
 	core.status.event.id = 'about';
 
 	var left = 48, top = 36, right = 416 - 2 * left, bottom = 416 - 2 * top;

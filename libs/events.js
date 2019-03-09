@@ -1980,6 +1980,64 @@ events.prototype.openShop = function(shopId, needVisited) {
     core.ui.drawChoices(content, choices);
 }
 
+events.prototype._useShop = function (shop, index) {
+    // 检查能否使用快捷商店
+    var reason = core.events.canUseQuickShop(shop.id);
+    if (core.isset(reason)) {
+        core.drawText(reason);
+        return false;
+    }
+    if (!shop.visited) {
+        if (shop.times==0) core.drawTip("该商店尚未开启");
+        else core.drawTip("该商店已失效");
+        return false;
+    }
+
+    var money = core.getStatus('money'), experience = core.getStatus('experience');
+    var times = shop.times, need = core.calValue(shop.need, null, null, times);
+    var use = shop.use;
+    var use_text = use=='money'?"金币":"经验";
+
+    var choice = shop.choices[index];
+    if (core.isset(choice.need))
+        need = core.calValue(choice.need, null, null, times);
+
+    if (need > eval(use)) {
+        core.drawTip("你的"+use_text+"不足");
+        return false;
+    }
+
+    core.status.event.selection = index;
+    core.status.event.data.actions.push(index);
+
+    eval(use+'-='+need);
+    core.setStatus('money', money);
+    core.setStatus('experience', experience);
+
+    // 更新属性
+    choice.effect.split(";").forEach(function (t) {
+        core.doEffect(t, need, times);
+    });
+    core.updateStatusBar();
+    shop.times++;
+    if (shop.commonTimes)
+        core.setFlag('commonTimes', shop.times);
+    core.events.openShop(shop.id);
+    return true;
+}
+
+events.prototype._exitShop = function () {
+    if (core.status.event.data.actions.length>0) {
+        core.status.route.push("shop:"+core.status.event.data.id+":"+core.status.event.data.actions.join(""));
+    }
+    core.status.event.data.actions = [];
+    core.status.boxAnimateObjs = [];
+    if (core.status.event.data.fromList)
+        core.ui.drawQuickShop();
+    else
+        core.ui.closePanel();
+}
+
 ////// 禁用一个全局商店 //////
 events.prototype.disableQuickShop = function (shopId) {
     core.status.shops[shopId].visited = false;

@@ -2,8 +2,8 @@
 
 function maps() {
     this._init();
-    this.DEFAULT_WIDTH = 13;
-    this.DEFAULT_HEIGHT = 13;
+    this.DEFAULT_WIDTH = 15;
+    this.DEFAULT_HEIGHT = 15;
     this.DEFAULT_PIXEL_WIDTH = this.DEFAULT_WIDTH * 32;
     this.DEFAULT_PIXEL_HEIGHT = this.DEFAULT_HEIGHT * 32;
 }

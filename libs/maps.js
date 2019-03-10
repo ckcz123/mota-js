@@ -2,11 +2,26 @@
 
 function maps() {
     this._init();
+    this.DEFAULT_WIDTH = 13;
+    this.DEFAULT_HEIGHT = 13;
+    this.DEFAULT_PIXEL_WIDTH = this.DEFAULT_WIDTH * 32;
+    this.DEFAULT_PIXEL_HEIGHT = this.DEFAULT_HEIGHT * 32;
 }
 
 maps.prototype._init = function() {
     this.blocksInfo = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
     //delete(maps_90f36752_8815_4be8_b32b_d7fad1d0542e);
+}
+
+maps.prototype._setFloorSize = function (floorId) {
+    if (!core.isset(floorId)) {
+        core.floorIds.forEach(function (floorId) {
+            core.maps._setFloorSize(floorId);
+        });
+        return;
+    }
+    core.floors[floorId].width = core.floors[floorId].width || this.DEFAULT_WIDTH;
+    core.floors[floorId].height = core.floors[floorId].height || this.DEFAULT_HEIGHT;
 }
 
 ////// 加载某个楼层（从剧本或存档中） //////
@@ -26,8 +41,8 @@ maps.prototype.loadFloor = function (floorId, map) {
     map=this.decompressMap(map.map, floorId);
     var mapIntoBlocks = function(map,maps,floor,floorId){
         var blocks = [];
-        var mw = core.floors[floorId].width || 15;
-        var mh = core.floors[floorId].height || 15;
+        var mw = core.floors[floorId].width;
+        var mh = core.floors[floorId].height;
         for (var i = 0; i < mh; i++) {
             for (var j = 0; j < mw; j++) {
                 var block = maps.initBlock(j, i, (map[i]||[])[j]||0);
@@ -189,8 +204,8 @@ maps.prototype.initMaps = function (floorIds) {
 maps.prototype.__initFloorMap = function (floorId) {
     var map = core.clone(core.floors[floorId].map);
 
-    var mw = core.floors[floorId].width || 15;
-    var mh = core.floors[floorId].height || 15;
+    var mw = core.floors[floorId].width;
+    var mh = core.floors[floorId].height;
 
     for (var x=0;x<mh;x++) {
         if (!core.isset(map[x])) map[x] = [];
@@ -212,8 +227,8 @@ maps.prototype.compressMap = function (mapArr, floorId) {
     var floorMap = this.__initFloorMap(floorId);
     if (core.utils.same(mapArr, floorMap)) return null;
 
-    var mw = core.floors[floorId].width || 15;
-    var mh = core.floors[floorId].height || 15;
+    var mw = core.floors[floorId].width;
+    var mh = core.floors[floorId].height;
     for (var x=0;x<mh;x++) {
         if (core.utils.same(mapArr[x], floorMap[x])) {
             // 没有改变的行直接删掉记成0
@@ -236,8 +251,8 @@ maps.prototype.decompressMap = function (mapArr, floorId) {
     var floorMap = this.__initFloorMap(floorId);
     if (!core.isset(mapArr)) return floorMap;
 
-    var mw = core.floors[floorId].width || 15;
-    var mh = core.floors[floorId].height || 15;
+    var mw = core.floors[floorId].width;
+    var mh = core.floors[floorId].height;
     for (var x=0;x<mh;x++) {
         if (mapArr[x] === 0) {
             mapArr[x] = floorMap[x];
@@ -262,8 +277,8 @@ maps.prototype.saveMap = function(maps, floorId) {
         }
         return map;
     }
-    var mw = core.floors[floorId].width || 15;
-    var mh = core.floors[floorId].height || 15;
+    var mw = core.floors[floorId].width;
+    var mh = core.floors[floorId].height;
 
     var blocks = [];
     for (var x=0;x<mh;x++) {
@@ -299,8 +314,8 @@ maps.prototype.saveMap = function(maps, floorId) {
 maps.prototype.resizeMap = function(floorId) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
-    core.bigmap.width = core.floors[floorId].width || 15;
-    core.bigmap.height = core.floors[floorId].height || 15;
+    core.bigmap.width = core.floors[floorId].width;
+    core.bigmap.height = core.floors[floorId].height;
     var cwidth = core.bigmap.width * 32;
     var cheight = core.bigmap.height * 32;
     core.bigmap.canvas.forEach(function(cn){
@@ -330,8 +345,8 @@ maps.prototype.loadMap = function (data, floorId) {
 ////// 将当前地图重新变成二维数组形式 //////
 maps.prototype.getMapArray = function (blockArray,width,height){
 
-    width=width||15;
-    height=height||15;
+    width=width||this.DEFAULT_WIDTH;
+    height=height||this.DEFAULT_HEIGHT;
 
     var blocks = [];
     for (var x=0;x<height;x++) {
@@ -488,8 +503,8 @@ maps.prototype.drawBlock = function (block, animate, dx, dy) {
 maps.prototype.getBgFgMapArray = function (floorId, name) {
     floorId = floorId||core.status.floorId;
     if (!core.isset(floorId)) return [];
-    var width = core.floors[floorId].width || 15;
-    var height = core.floors[floorId].height || 15;
+    var width = core.floors[floorId].width;
+    var height = core.floors[floorId].height;
 
     if (main.mode!='editor' && core.isset(core.status[name+"maps"][floorId]))
         return core.status[name+"maps"][floorId];
@@ -512,8 +527,8 @@ maps.prototype.getBgFgMapArray = function (floorId, name) {
 maps.prototype.drawBgFgMap = function (floorId, canvas, name, animate) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
-    var width = core.floors[floorId].width || 15;
-    var height = core.floors[floorId].height || 15;
+    var width = core.floors[floorId].width;
+    var height = core.floors[floorId].height;
 
     if (!core.isset(core.status[name+"maps"]))
         core.status[name+"maps"] = {};
@@ -638,8 +653,8 @@ maps.prototype.drawMap = function (floorId, callback) {
     this.generateGroundPattern(floorId);
 
     var drawBg = function(){
-        var width = core.floors[floorId].width || 15;
-        var height = core.floors[floorId].height || 15;
+        var width = core.floors[floorId].width;
+        var height = core.floors[floorId].height;
 
         for (var x = 0; x < width; x++) {
             for (var y = 0; y < height; y++) {
@@ -1399,7 +1414,7 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
     if (!core.isset(number) || !core.isset(x) || !core.isset(y)) return;
-    if (x<0 || x>=(core.floors[floorId].width||15) || y<0 || y>=(core.floors[floorId].height||15)) return;
+    if (x<0 || x>=core.floors[floorId].width || y<0 || y>=core.floors[floorId].height) return;
 
     var originBlock=core.getBlock(x,y,floorId,true);
     var block = core.maps.initBlock(x,y,number);
@@ -1437,7 +1452,7 @@ maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
     if (!core.isset(number) || !core.isset(x) || !core.isset(y)) return;
-    if (x<0 || x>=(core.floors[floorId].width||15) || y<0 || y>=(core.floors[floorId].height||15)) return;
+    if (x<0 || x>=core.floors[floorId].width || y<0 || y>=core.floors[floorId].height) return;
     if (name!='bg' && name!='fg') return;
 
     core.setFlag(name+"v_"+floorId+"_"+x+"_"+y, number);

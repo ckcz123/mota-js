@@ -1503,8 +1503,8 @@ control.prototype.updateDamage = function (floorId, canvas) {
         if (floorId != core.status.floorId) {
             tempCheckBlock = core.clone(core.status.checkBlock);
             core.status.thisMap = core.status.maps[floorId];
-            core.bigmap.width = core.floors[floorId].width || 15;
-            core.bigmap.height = core.floors[floorId].height || 15;
+            core.bigmap.width = core.floors[floorId].width;
+            core.bigmap.height = core.floors[floorId].height;
             core.updateCheckBlock();
         }
 
@@ -1526,8 +1526,8 @@ control.prototype.updateDamage = function (floorId, canvas) {
         if (floorId!=core.status.floorId) {
             core.status.thisMap = core.status.maps[core.status.floorId];
             core.status.checkBlock = tempCheckBlock;
-            core.bigmap.width = core.floors[core.status.floorId].width || 15;
-            core.bigmap.height = core.floors[core.status.floorId].height || 15;
+            core.bigmap.width = core.floors[core.status.floorId].width;
+            core.bigmap.height = core.floors[core.status.floorId].height;
         }
     }
 }

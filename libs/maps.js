@@ -24,6 +24,8 @@ maps.prototype._setFloorSize = function (floorId) {
     core.floors[floorId].height = core.floors[floorId].height || this.DEFAULT_HEIGHT;
 }
 
+// ------ 加载与存档读档 ------ //
+
 ////// 加载某个楼层（从剧本或存档中） //////
 maps.prototype.loadFloor = function (floorId, map) {
     var floor = core.floors[floorId];
@@ -39,29 +41,27 @@ maps.prototype.loadFloor = function (floorId, map) {
         else content[e] = core.clone(floor[e]);
     });
     map=this.decompressMap(map.map, floorId);
-    var mapIntoBlocks = function(map,maps,floor,floorId){
-        var blocks = [];
-        var mw = core.floors[floorId].width;
-        var mh = core.floors[floorId].height;
-        for (var i = 0; i < mh; i++) {
-            for (var j = 0; j < mw; j++) {
-                var block = maps.initBlock(j, i, (map[i]||[])[j]||0);
-                maps.addInfo(block);
-                maps.addEvent(block,j,i,floor.events[j+","+i])
-                maps.addChangeFloor(block,j,i,floor.changeFloor[j+","+i]);
-                if (core.isset(block.event)) blocks.push(block);
-            }
-        }
-        return blocks;
-    }
     if (main.mode=='editor'){
         main.editor.mapIntoBlocks = function(map,floor,floorId){
-            return mapIntoBlocks(map,core.maps,floor,floorId);
+            return core.maps._mapIntoBlocks(map,floor,floorId);
         }
     }
     // 事件处理
-    content['blocks'] = mapIntoBlocks(map,this,floor,floorId);
+    content['blocks'] = this._mapIntoBlocks(map,floor,floorId);
     return content;
+}
+
+maps.prototype._mapIntoBlocks = function (map,floor,floorId){
+    var blocks = [];
+    var mw = core.floors[floorId].width;
+    var mh = core.floors[floorId].height;
+    for (var i = 0; i < mh; i++) {
+        for (var j = 0; j < mw; j++) {
+            var block = this.initBlock(j, i, (map[i]||[])[j], true, floor);
+            if (core.isset(block.event)) blocks.push(block);
+        }
+    }
+    return blocks;
 }
 
 ////// 从ID获得数字 //////
@@ -72,8 +72,7 @@ maps.prototype.getNumberById = function (id) {
     }
     // tilesets
     if (/^X\d+$/.test(id)) {
-        var info = core.icons.getTilesetOffset(id);
-        if (info!=null) return parseInt(id.substring(1));
+        if (core.icons.getTilesetOffset(id)) return parseInt(id.substring(1));
     }
     // 特殊ID
     if (id == 'none') return 0;
@@ -82,48 +81,27 @@ maps.prototype.getNumberById = function (id) {
 }
 
 ////// 数字和ID的对应关系 //////
-maps.prototype.initBlock = function (x, y, id) {
+maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     var disable=null;
-    id = ""+id;
-    if (id.length>2) {
-        if (id.indexOf(":f")==id.length-2) {
-            id = id.substring(0, id.length - 2);
-            disable = true;
-        }
-        else if (id.indexOf(":t")==id.length-2) {
-            id = id.substring(0, id.length - 2);
-            disable = false;
-        }
-    }
+    id = ""+(id||0);
+    if (id.endsWith(":f")) disable = true;
+    if (id.endsWith(":t")) disable = false;
     id=parseInt(id);
-    var tmp = {'x': x, 'y': y, 'id': id};
-    if (disable!=null) tmp.disable = disable;
+    var block = {'x': x, 'y': y, 'id': id};
+    if (disable!=null) block.disable = disable;
 
-    if (id==17) {
-        tmp.event = {"cls": "terrains", "id": "airwall", "noPass": true};
-    }
-    else if (id in this.blocksInfo) tmp.event = JSON.parse(JSON.stringify(this.blocksInfo[id]));
-    else {
-        var tilesetOffset = core.icons.getTilesetOffset(id);
-        if (tilesetOffset != null) {
-            tmp.event = {"cls": "tileset", "id": "X"+id, "noPass": true};
-        }
-    }
+    if (id==17) block.event = {"cls": "terrains", "id": "airwall", "noPass": true};
+    else if (id in this.blocksInfo) block.event = JSON.parse(JSON.stringify(this.blocksInfo[id]));
+    else if (core.icons.getTilesetOffset(id)) block.event = {"cls": "tileset", "id": "X"+id, "noPass": true};
 
-    return tmp;
-}
-
-maps.prototype._getAnimateFrames = function (cls, useOriginValue) {
-    if (cls=='enemys' || cls=='npcs') {
-        return 2;
+    if (addInfo) this.addInfo(block);
+    if (eventFloor) {
+        this.addEvent(block, x, y, (eventFloor.events||{})[x+","+y]);
+        var changeFloor = (eventFloor.changeFloor||{})[x+","+y];
+        if (changeFloor) this.addEvent(block, x, y, {"trigger": "changeFloor", "data": changeFloor});
     }
-    if (cls == 'animates' || cls == 'enemy48') {
-        return 4;
-    }
-    if (cls == 'npc48') {
-        return useOriginValue? 4 : 1;
-    }
-    return 1;
+    if (main.mode == 'editor') delete block.disable;
+    return block;
 }
 
 ////// 添加一些信息到block上 //////
@@ -141,7 +119,7 @@ maps.prototype.addInfo = function (block) {
             }
         }
         if (!core.isset(block.event.animate)) {
-            block.event.animate = this._getAnimateFrames(block.event.cls, false);
+            block.event.animate = core.icons._getAnimateFrames(block.event.cls, false);
         }
         block.event.height = 32;
         if (block.event.cls == 'enemy48' || block.event.cls == 'npc48')
@@ -185,12 +163,6 @@ maps.prototype.addEvent = function (block, x, y, event) {
     }
 }
 
-////// 向该楼层添加剧本的楼层转换事件 //////
-maps.prototype.addChangeFloor = function (block, x, y, event, ground) {
-    if (!core.isset(event)) return;
-    this.addEvent(block, x, y, {"trigger": "changeFloor", "data": event}, ground);
-}
-
 ////// 初始化所有地图 //////
 maps.prototype.initMaps = function (floorIds) {
     var maps = {};
@@ -201,7 +173,7 @@ maps.prototype.initMaps = function (floorIds) {
     return maps;
 }
 
-maps.prototype.__initFloorMap = function (floorId) {
+maps.prototype._initFloorMap = function (floorId) {
     var map = core.clone(core.floors[floorId].map);
 
     var mw = core.floors[floorId].width;
@@ -224,7 +196,7 @@ maps.prototype.__initFloorMap = function (floorId) {
 
 ////// 压缩地图
 maps.prototype.compressMap = function (mapArr, floorId) {
-    var floorMap = this.__initFloorMap(floorId);
+    var floorMap = this._initFloorMap(floorId);
     if (core.utils.same(mapArr, floorMap)) return null;
 
     var mw = core.floors[floorId].width;
@@ -248,7 +220,7 @@ maps.prototype.compressMap = function (mapArr, floorId) {
 
 ////// 解压缩地图
 maps.prototype.decompressMap = function (mapArr, floorId) {
-    var floorMap = this.__initFloorMap(floorId);
+    var floorMap = this._initFloorMap(floorId);
     if (!core.isset(mapArr)) return floorMap;
 
     var mw = core.floors[floorId].width;
@@ -269,44 +241,35 @@ maps.prototype.decompressMap = function (mapArr, floorId) {
 }
 
 ////// 将当前地图重新变成数字，以便于存档 //////
-maps.prototype.saveMap = function(maps, floorId) {
+maps.prototype.saveMap = function(floorId) {
+    var maps = core.status.maps;
     if (!core.isset(floorId)) {
         var map = {};
         for (var id in maps) {
-            map[id] = this.saveMap(maps, id);
+            map[id] = this.saveMap(id);
         }
         return map;
     }
-    var mw = core.floors[floorId].width;
-    var mh = core.floors[floorId].height;
-
-    var blocks = [];
-    for (var x=0;x<mh;x++) {
-        blocks[x]=[];
-        for (var y=0;y<mw;y++) {
-            blocks[x].push(0);
-        }
-    }
-    maps[floorId].blocks.forEach(function (block) {
-        if (core.isset(block.disable)) {
-            if (!block.disable) blocks[block.y][block.x] = block.id+":t";
-            else blocks[block.y][block.x] = block.id+":f";
-        }
-        else blocks[block.y][block.x] = block.id;
-    });
+    var map = maps[floorId], floor = core.floors[floorId];
+    var blocks = this.getMapArray(map.blocks, floor.width, floor.height, true);
     if (main.mode == 'editor') return blocks;
 
+    var thisFloor = this._compressFloorData(map, floor);
+    var mapArr = this.compressMap(blocks, floorId);
+    if (mapArr != null) thisFloor.map = mapArr;
+    return thisFloor;
+}
+
+maps.prototype._compressFloorData = function (map, floor) {
     var thisFloor = {};
-    for (var name in maps[floorId]) {
+    for (var name in map) {
         if (name != 'blocks') {
-            var floorData = core.floors[floorId][name];
-            if (!core.utils.same(maps[floorId][name], floorData)) {
-                thisFloor[name] = core.clone(maps[floorId][name]);
+            var floorData = floor[name];
+            if (!core.utils.same(map[name], floorData)) {
+                thisFloor[name] = core.clone(map[name]);
             }
         }
     }
-    var map = this.compressMap(blocks, floorId);
-    if (map != null) thisFloor.map = map;
     return thisFloor;
 }
 
@@ -324,8 +287,8 @@ maps.prototype.resizeMap = function(floorId) {
         core.canvas[cn].canvas.style.width = cwidth*core.domStyle.scale + "px";
         core.canvas[cn].canvas.style.height = cheight*core.domStyle.scale + "px";
         if(main.mode==='editor' && editor.isMobile){
-            core.canvas[cn].canvas.style.width = core.bigmap.width*32/416*96 + "vw";
-            core.canvas[cn].canvas.style.height = core.bigmap.height*32/416*96 + "vw";
+            core.canvas[cn].canvas.style.width = core.bigmap.width*32/core.maps.DEFAULT_PIXEL_WIDTH*96 + "vw";
+            core.canvas[cn].canvas.style.height = core.bigmap.height*32/core.maps.DEFAULT_PIXEL_HEIGHT*96 + "vw";
         }
     });
 }
@@ -343,121 +306,197 @@ maps.prototype.loadMap = function (data, floorId) {
 }
 
 ////// 将当前地图重新变成二维数组形式 //////
-maps.prototype.getMapArray = function (blockArray,width,height){
-
-    width=width||this.DEFAULT_WIDTH;
-    height=height||this.DEFAULT_HEIGHT;
+maps.prototype.getMapArray = function (blockArray, width, height, checkDisable) {
+    if (typeof blockArray == 'string') {
+        var floorId = blockArray;
+        blockArray = core.status.maps[floorId].blocks;
+        width = core.floors[floorId].width;
+        height = core.floors[floorId].height;
+    }
 
     var blocks = [];
-    for (var x=0;x<height;x++) {
-        blocks[x]=[];
-        for (var y=0;y<width;y++) {
-            blocks[x].push(0);
-        }
-    }
+    var allzero = [];
+    for (var y = 0; y < width; y++) allzero.push(0);
+    for (var x = 0; x < height; x++) blocks.push(core.clone(allzero));
+
     blockArray.forEach(function (block) {
-        if (!block.disable && block.x<width && block.y<height)
-            blocks[block.y][block.x] = block.id;
+        var x = block.x, y = block.y;
+        if (block.disable) {
+            if (checkDisable) blocks[y][x] = block.id+":f";
+        }
+        else {
+            blocks[y][x] = block.id;
+            if (checkDisable && block.disable === false)
+                blocks[y][x] = block.id+":t";
+        }
     });
     return blocks;
 }
 
-
-
-////// 勇士能否前往某方向 //////
-maps.prototype.canMoveHero = function(x,y,direction,floorId) {
-    if (!core.isset(x)) x=core.getHeroLoc('x');
-    if (!core.isset(y)) y=core.getHeroLoc('y');
-    if (!core.isset(direction)) direction=core.getHeroLoc('direction');
+maps.prototype.getMapBlocksObj = function (floorId, showDisable) {
     floorId = floorId || core.status.floorId;
-    if (!core.isset(floorId)) return false;
+    var obj = {};
+    core.status.maps[floorId].blocks.forEach(function (block) {
+        if (!block.disable || showDisable)
+            obj[block.x+","+block.y] = block;
+    });
+    return obj;
+}
 
-    // 检查当前块的cannotMove
-    if (core.isset(core.floors[floorId].cannotMove)) {
-        var cannotMove = core.floors[floorId].cannotMove[x+","+y];
-        if (core.isset(cannotMove) && cannotMove instanceof Array && cannotMove.indexOf(direction)>=0)
-            return false;
+// ------ 地图处理 ------ //
+
+// ------ canMoveHero & canMoveDirectly ------ //
+
+////// 生成全图的当前可移动信息 //////
+maps.prototype._canMoveHero_generateArray = function (floorId, x, y) {
+    floorId = floorId || core.status.floorId;
+    if (!core.isset(floorId)) return null;
+    var width = core.floors[floorId].width, height = core.floors[floorId].height;
+    var bgArray = this.getBgFgMapArray(floorId, "bg"),
+        fgArray = this.getBgFgMapArray(floorId, "fg"),
+        eventArray = this.getMapArray(floorId);
+
+    var generate = function (x, y) {
+        return ["left", "down", "up", "right"].filter(function (direction) {
+            return core.maps._canMoveHero_checkPoint(x, y, direction, floorId, {
+                bgArray: bgArray, fgArray: fgArray, eventArray: eventArray
+            });
+        });
     }
 
-    var check = function (block, name) {
-        if (!core.isset(block)) return true;
-        if (block instanceof Array) return check((block[y]||[])[x], name);
-        if (typeof block == 'number') return check(core.maps.initBlock(0,0,block), name);
-        if (core.isset(block.block)) return check(block.block, name);
-        return ((block.event||{})[name]||[]).indexOf(direction)<0;
+    if (core.isset(x) && core.isset(y)) return generate(x, y);
+    var array = [];
+    for (var x = 0; x < width; x++) {
+        array[x] = [];
+        for (var y = 0; y < height; y++) {
+            array[x][y] = generate(x, y);
+        }
     }
-    var getNumber = function (floorId, name, x, y) {
-        return (core.maps.getBgFgMapArray(floorId, name)[y]||[])[x];
-    }
+    return array;
+}
 
-    // 检查该点的cannotOut
-    if (!check(core.getBlock(x,y,floorId),"cannotOut") || !check(getNumber(floorId,"bg",x,y),"cannotOut") || !check(getNumber(floorId,"fg",x,y),"cannotOut"))
+maps.prototype._canMoveHero_checkPoint = function (x, y, direction, floorId, extraData) {
+    // 1. 检查该点 cannotMove
+    if (core.inArray((core.floors[floorId].cannotMove || {})[x + "," + y], direction))
         return false;
 
-    var nx = x+core.utils.scan[direction].x, ny = y+core.utils.scan[direction].y;
-    // 检查目标点的cannotIn
-    if (!check(core.getBlock(nx,ny,floorId),"cannotIn") || !check(getNumber(floorId,"bg",nx,ny),"cannotIn") || !check(getNumber(floorId,"fg",nx,ny),"cannotIn"))
+    var nx = x + core.utils.scan[direction].x, ny = y + core.utils.scan[direction].y;
+    if (nx < 0 || ny < 0 || nx >= core.floors[floorId].width || ny >= core.floors[floorId].width)
         return false;
 
-    // 检查将死的领域
-    if (floorId==core.status.floorId && core.status.hero.hp <= core.status.checkBlock.damage[nx+core.bigmap.width*ny]
-        && !core.flags.canGoDeadZone && core.getBlock(nx, ny)==null)
+    // 2. 检查该点素材的 cannotOut 和下一个点的 cannotIn
+    if (this._canMoveHero_checkCannotInOut([
+            extraData.bgArray[y][x], extraData.fgArray[y][x], extraData.eventArray[y][x]
+        ], "cannotOut", direction))
+        return false;
+    if (this._canMoveHero_checkCannotInOut([
+            extraData.bgArray[ny][nx], extraData.fgArray[ny][nx], extraData.eventArray[ny][nx]
+        ], "cannotIn", direction))
+        return false;
+
+    // 3. 检查是否能进将死的领域
+    if (floorId == core.status.floorId
+        && core.status.hero.hp <= core.status.checkBlock.damage[nx + core.bigmap.width * ny]
+        && !core.flags.canGoDeadZone && extraData.eventArray[ny][nx] == 0)
         return false;
 
     return true;
 }
 
+maps.prototype._canMoveHero_checkCannotInOut = function (number, name, direction) {
+    if (number instanceof Array) {
+        for (var x in number) {
+            if (this._canMoveHero_checkCannotInOut(number[x], name, direction))
+                return true;
+        }
+        return false;
+    }
+    return core.inArray((this.initBlock(0, 0, number).event||{})[name], direction);
+}
+
+////// 勇士能否前往某方向 //////
+maps.prototype.canMoveHero = function(x,y,direction,floorId) {
+    if (!core.isset(x)) x = core.getHeroLoc('x');
+    if (!core.isset(y)) y = core.getHeroLoc('y');
+    if (!core.isset(direction)) direction = core.getHeroLoc('direction');
+    return core.inArray(this._canMoveHero_generateArray(floorId, x, y), direction);
+}
+
 ////// 能否瞬间移动 //////
 maps.prototype.canMoveDirectly = function (destX,destY) {
-
-    // 不可瞬间移动请返回-1
-    if (!core.flags.enableMoveDirectly) return -1;
-
-    // 检查该楼层是否不可瞬间移动
-    if (core.status.thisMap.cannotMoveDirectly) return -1;
-
-    // flag:cannotMoveDirectly为true：不能
-    if (core.hasFlag('cannotMoveDirectly')) return -1;
-
-    // 中毒状态：不能
-    if (core.hasFlag('poison')) return -1;
+    if (!this._canMoveDirectly_checkGlobal()) return -1;
 
     var fromX = core.getHeroLoc('x'), fromY = core.getHeroLoc('y');
     if (fromX==destX&&fromY==destY) return 0;
+    // 检查起点事件
+    if (!this._canMoveDirectly_checkStartPoint(fromX, fromY)) return -1;
 
-    // 无视起点事件
-    var nowBlockId = core.getBlockId(fromX, fromY);
-    if ((nowBlockId!=null&&nowBlockId!='upFloor'&&nowBlockId!='downFloor'&&nowBlockId!='portal'
-        &&nowBlockId!='upPortal'&&nowBlockId!='leftPortal'&&nowBlockId!='downPortal'&&nowBlockId!='rightPortal')
-        ||core.status.checkBlock.damage[fromX+core.bigmap.width*fromY]>0)
-        return -1;
+    return this._canMoveDirectly_bfs(fromX, fromY, destX, destY);
+}
 
-    // BFS
-    var visited=[], queue=[];
-    visited[fromX+core.bigmap.width*fromY]=0;
-    queue.push(fromX+core.bigmap.width*fromY);
+maps.prototype._canMoveDirectly_checkGlobal = function () {
+    // 检查全塔是否禁止瞬间移动
+    if (!core.flags.enableMoveDirectly) return false;
+    // 检查该楼层是否不可瞬间移动
+    if (core.status.thisMap.cannotMoveDirectly) return false;
+    // flag:cannotMoveDirectly为true：不能
+    if (core.hasFlag('cannotMoveDirectly')) return false;
+    // 中毒状态：不能
+    if (core.hasFlag('poison')) return false;
 
-    var directions = {
-        "left": [-1,0],
-        "up": [0,-1],
-        "right": [1,0],
-        "down": [0,1]
+    return true;
+}
+
+maps.prototype._canMoveDirectly_checkStartPoint = function (sx, sy) {
+    if (core.status.checkBlock.damage[sx+core.bigmap.width*sy]>0) return false;
+    var id = core.getBlockId(sx, sy);
+    if (id != null) {
+        // 楼梯或者传送点才能无视
+        if (["upFloor","downFloor","portal","upPortal","downPortal","leftPortal","rightPortal"].indexOf(id)>=0)
+            return true;
+        return false;
     }
-    while (queue.length>0) {
-        var now=queue.shift(), nowX=parseInt(now%core.bigmap.width), nowY=parseInt(now/core.bigmap.width);
+    return true;
+}
 
-        for (var dir in directions) {
-            if (!core.canMoveHero(nowX, nowY, dir)) continue;
-            var nx=nowX+directions[dir][0], ny=nowY+directions[dir][1];
-            if (nx<0||nx>=core.bigmap.width||ny<0||ny>=core.bigmap.height||visited[nx+core.bigmap.width*ny]||core.getBlock(nx,ny)!=null
-                ||core.status.checkBlock.damage[nx+core.bigmap.width*ny]>0||(core.status.checkBlock.ambush||[])[nx+core.bigmap.width*ny]) continue;
-            visited[nx+core.bigmap.width*ny]=visited[nowX+core.bigmap.width*nowY]+1;
-            if (nx==destX&&ny==destY) return visited[nx+core.bigmap.width*ny];
-            queue.push(nx+core.bigmap.width*ny);
+maps.prototype._canMoveDirectly_bfs = function (sx, sy, ex, ey) {
+    var canMoveArray = this._canMoveHero_generateArray();
+    var blocksObj = this.getMapBlocksObj(core.status.floorId);
+
+    var visited=[], queue=[];
+    visited[sx+","+sy]=0;
+    queue.push(sx+","+sy);
+
+    while (queue.length>0) {
+        var now=queue.shift().split(","), x=parseInt(now[0]), y=parseInt(now[1]);
+        for (var direction in core.utils.scan) {
+            if (!core.inArray(canMoveArray[x][y], direction)) continue;
+            var nx=x+core.utils.scan[direction].x, ny=y+core.utils.scan[direction].y, nindex = nx+","+ny;
+            if (visited[nindex]) continue;
+            if (!this._canMoveDirectly_checkNextPoint(blocksObj, nx, ny)) continue;
+            visited[nindex] = visited[now]+1;
+            if (nx == ex && ny == ey) return visited[nindex];
+            queue.push(nindex);
         }
     }
+
     return -1;
 }
+
+// 判定下一个点能否瞬移
+maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
+    var index = x + "," + y;
+    // 该点是否有事件
+    if (blocksObj[index]) return false;
+    // 是否存在阻激夹域伤害
+    if (core.status.checkBlock.damage[x+core.bigmap.width*y]>0) return false;
+    // 是否存在捕捉
+    if (core.status.checkBlock.ambush[x+core.bigmap.width*y]) return false;
+
+    return true;
+}
+
+// -------- canMoveHero & canMoveHeroDirectly END -------- //
 
 maps.prototype.drawBlock = function (block, animate, dx, dy) {
     // none：空地
@@ -1080,7 +1119,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
         destY += core.utils.scan[t].y;
     });
 
-    var animateValue = this._getAnimateFrames(block.event.cls, true), animateCurrent = isTileset?bx:0, animateTime = 0;
+    var animateValue = core.icons._getAnimateFrames(block.event.cls, true), animateCurrent = isTileset?bx:0, animateTime = 0;
     var blockCanvas = this.__initBlockCanvas(block, height, x, y);
     var headCanvas = blockCanvas.headCanvas, bodyCanvas = blockCanvas.bodyCanvas, damageCanvas = blockCanvas.damageCanvas;
     var opacity = 1;
@@ -1417,10 +1456,7 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     if (x<0 || x>=core.floors[floorId].width || y<0 || y>=core.floors[floorId].height) return;
 
     var originBlock=core.getBlock(x,y,floorId,true);
-    var block = core.maps.initBlock(x,y,number);
-    core.maps.addInfo(block);
-    core.maps.addEvent(block,x,y,core.floors[floorId].events[x+","+y]);
-    core.maps.addChangeFloor(block,x,y,core.floors[floorId].changeFloor[x+","+y]);
+    var block = core.maps.initBlock(x,y,number,true,core.floors[floorId]);
     if (core.isset(block.event)) {
         if (floorId == core.status.floorId) {
             core.removeGlobalAnimate(x, y);

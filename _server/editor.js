@@ -195,7 +195,7 @@ editor.prototype.mapInit = function () {
 }
 
 editor.prototype.fetchMapFromCore = function(){
-    var mapArray = core.maps.saveMap(core.status.maps, core.status.floorId);
+    var mapArray = core.maps.saveMap(core.status.floorId);
     editor.map = mapArray.map(function (v) {
         return v.map(function (v) {
             var x = parseInt(v), y = editor.indexs[x];
@@ -296,18 +296,17 @@ editor.prototype.drawPosSelection = function () {
 }
 
 editor.prototype.updateMap = function () {
-    var evs = {};
-    if (editor.currentFloorData && editor.currentFloorData.events) {
-        for (var loc in editor.currentFloorData.events) {
-            if ((editor.currentFloorData.events[loc]||{}).animate == false)
-                evs[loc] = {"animate": false};
-        }
-    }
     var blocks = main.editor.mapIntoBlocks(editor.map.map(function (v) {
         return v.map(function (v) {
-            return v.idnum || v || 0
-        })
-    }), {'events': evs, 'changeFloor': {}}, editor.currentFloorId);
+            try {
+                return v.idnum || v || 0
+            }
+            catch (e) {
+                console.log("Unable to read idnum from "+v);
+                return 0;
+            }
+        });
+    }), {'events': editor.currentFloorData.events}, editor.currentFloorId);
     core.status.thisMap.blocks = blocks;
     main.editor.updateMap();
 
@@ -990,7 +989,6 @@ editor.prototype.listen = function () {
         return widthNoScroll - widthWithScroll;
     }
     var scrollBarHeight = getScrollBarHeight();
-    console.log(scrollBarHeight);
 
     var dataSelection = document.getElementById('dataSelection');
     var iconLib=document.getElementById('iconLib');

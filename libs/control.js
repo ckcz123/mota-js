@@ -527,9 +527,10 @@ control.prototype.moveDirectly = function (destX, destY) {
 control.prototype.tryMoveDirectly = function (destX, destY) {
     if (Math.abs(core.getHeroLoc('x')-destX)+Math.abs(core.getHeroLoc('y')-destY)<=1)
         return false;
+    var canMoveArray = core.maps._canMoveHero_generateArray();
     var testMove = function (dx, dy, dir) {
         if (dx<0 || dx>=core.bigmap.width|| dy<0 || dy>=core.bigmap.height) return false;
-        if (core.isset(dir) && !core.canMoveHero(dx,dy,dir)) return false;
+        if (core.isset(dir) && !core.inArray(canMoveArray[dx][dy],dir)) return false;
         if (core.control.moveDirectly(dx, dy)) {
             if (core.isset(dir)) core.moveHero(dir, function() {});
             return true;
@@ -651,6 +652,8 @@ control.prototype.automaticRoute = function (destX, destY) {
     }});
     var ans = [];
 
+    var canMoveArray = core.maps._canMoveHero_generateArray();
+
     route[startX + fw * startY] = '';
     queue.queue({depth: 0, x: startX, y: startY});
     while (queue.length!=0) {
@@ -658,7 +661,7 @@ control.prototype.automaticRoute = function (destX, destY) {
         var deep = curr.depth, nowX = curr.x, nowY = curr.y;
 
         for (var direction in core.utils.scan) {
-            if (!core.canMoveHero(nowX, nowY, direction))
+            if (!core.inArray(canMoveArray[nowX][nowY], direction))
                 continue;
 
             var nx = nowX + core.utils.scan[direction].x;
@@ -2430,7 +2433,7 @@ control.prototype.saveData = function() {
         'floorId': core.status.floorId,
         'hero': hero,
         'hard': core.status.hard,
-        'maps': core.maps.saveMap(core.status.maps),
+        'maps': core.maps.saveMap(),
         'route': core.encodeRoute(core.status.route),
         'values': core.clone(core.values),
         'shops': {},

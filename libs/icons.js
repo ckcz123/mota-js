@@ -25,6 +25,19 @@ icons.prototype.getClsFromId = function (id) {
     return null;
 }
 
+icons.prototype._getAnimateFrames = function (cls, useOriginValue) {
+    if (cls=='enemys' || cls=='npcs') {
+        return 2;
+    }
+    if (cls == 'animates' || cls == 'enemy48') {
+        return 4;
+    }
+    if (cls == 'npc48') {
+        return useOriginValue? 4 : 1;
+    }
+    return 1;
+}
+
 ////// 根据图块数字或ID获得所在的tileset和坐标信息 //////
 icons.prototype.getTilesetOffset = function (id) {
 

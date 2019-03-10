@@ -556,6 +556,10 @@ utils.prototype.subarray = function (a, b) {
     return na;
 }
 
+utils.prototype.inArray = function (array, element) {
+    return this.isset(array) && (array instanceof Array) && array.indexOf(element)>=0;
+}
+
 utils.prototype.clamp = function (x, a, b) {
     var min=Math.min(a, b), max=Math.max(a, b);
     return Math.min(Math.max(x||0, min), max);

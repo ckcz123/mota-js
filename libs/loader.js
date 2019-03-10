@@ -254,6 +254,11 @@ loader.prototype.freeBgm = function (name) {
     }, 3000);
 }
 
+loader.prototype._preloadBgm = function (bgm) {
+    bgm.volume = 0;
+    bgm.play();
+}
+
 loader.prototype.loadBgm = function (name) {
     if (!core.isset(core.material.bgms[name])) return;
     // 如果没开启音乐，则不预加载
@@ -265,7 +270,8 @@ loader.prototype.loadBgm = function (name) {
     }
     else {
         // 预加载BGM
-        core.material.bgms[name].load();
+        this._preloadBgm(core.material.bgms[name]);
+        // core.material.bgms[name].load();
         // 清理尾巴
         if (core.musicStatus.cachedBgms.length == core.musicStatus.cachedBgmCount) {
             this.freeBgm(core.musicStatus.cachedBgms.pop());

@@ -64,6 +64,7 @@ items.prototype.getItemEffectTip = function(itemId) {
 items.prototype._useItemEffect = function (itemId) {
     if (itemId in this.useItemEffect) {
         try {
+            var ratio = parseInt(core.status.thisMap.item_ratio) || 1;
             eval(this.useItemEffect[itemId]);
         }
         catch (e) {
@@ -171,7 +172,7 @@ items.prototype.setItem = function (itemId, itemNum) {
 ////// 删除某个物品 //////
 items.prototype.removeItem = function (itemId, itemNum) {
     if (!core.isset(core.status.hero)) return null;
-    itemNum = itemNum || 1;
+    if (!core.isset(itemNum)) itemNum = 1;
     if (!core.hasItem(itemId)) return false;
     var itemCls = core.material.items[itemId].cls;
     core.status.hero.items[itemCls][itemId]-=itemNum;
@@ -186,7 +187,7 @@ items.prototype.removeItem = function (itemId, itemNum) {
 ////// 增加某个物品的个数 //////
 items.prototype.addItem = function (itemId, itemNum) {
     if (!core.isset(core.status.hero)) return null;
-    itemNum = itemNum || 1;
+    if (!core.isset(itemNum)) itemNum = 1;
     var itemData = core.material.items[itemId];
     var itemCls = itemData.cls;
     if (itemCls == 'items') return;

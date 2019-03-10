@@ -349,20 +349,18 @@ ui.prototype.getTitleAndIcon = function (content) {
     var id=null, name=null, image=null, icon=null, iconHeight=32, animate=null;
 
     var getInfo = function (v) {
-        ["enemy48", "enemys", "npc48", "npcs"].forEach(function (x) {
-            if (core.isset(core.material.icons[x][v])) {
-                image = core.material.images[x];
-                icon = core.material.icons[x][v];
-                if (x.indexOf("48")>=0) {
-                    iconHeight = 48;
-                    animate = 4;
-                }
-                else {
-                    iconHeight = 32;
-                    animate = 2;
-                }
+        var number = core.maps.getNumberById(v);
+        if (number>0) {
+            var block = core.maps.initBlock(0,0,number);
+            core.maps.addInfo(block);
+            if (core.isset(block.event)) {
+                var cls = block.event.cls;
+                image = core.material.images[cls];
+                icon = core.material.icons[cls][v];
+                iconHeight = block.event.height;
+                animate = block.event.animate;
             }
-        });
+        }
     };
 
     if (content.indexOf("\t[")==0 || content.indexOf("\\t[")==0) {

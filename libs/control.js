@@ -2639,7 +2639,7 @@ control.prototype.unLockControl = function () {
 }
 
 ////// 播放背景音乐 //////
-control.prototype.playBgm = function (bgm) {
+control.prototype.playBgm = function (bgm, startTime) {
     if (main.mode!='play')return;
     // 音频不存在
     if (!core.isset(core.material.bgms[bgm])) return;
@@ -2657,14 +2657,6 @@ control.prototype.playBgm = function (bgm) {
     }
     this.setMusicBtn();
 
-    /*
-    // 延迟播放
-    if (core.material.bgms[bgm] == 'loading') {
-        core.material.bgms[bgm] = 'starting';
-        return;
-    }
-    */
-
     try {
         // 缓存BGM
         core.loader.loadBgm(bgm);
@@ -2678,7 +2670,7 @@ control.prototype.playBgm = function (bgm) {
         }
         // 播放当前BGM
         core.material.bgms[bgm].volume = core.musicStatus.volume;
-        core.material.bgms[bgm].currentTime = 0;
+        core.material.bgms[bgm].currentTime = startTime || 0;
         core.material.bgms[bgm].play();
         core.musicStatus.playingBgm = bgm;
         core.musicStatus.lastBgm = bgm;

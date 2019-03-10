@@ -263,6 +263,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_range": "thiseval==null||(thiseval instanceof Array)",
                     "_data": "该图块的不可入方向\n可以在这里定义不能朝哪个方向进入该图块，可以达到悬崖之类的效果\n例如 [\"down\"] 代表不能从该图块的上方点朝向下进入此图块\n此值对背景层、事件层、前景层上的图块均有效"
                 },
+                "animate": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_range": "thiseval==~~thiseval||thiseval==null",
+                    "_data": "该图块的全局动画帧数。\n如果此项为null，则对于除了npc48外，使用素材默认帧数；npc48默认是1帧（即静止）。"
+                },
                 "faceIds": {
                     "_leaf": true,
                     "_type": "textarea",

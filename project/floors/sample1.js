@@ -739,16 +739,6 @@ main.floors.sample1=
             {
                 "type": "revisit"
             }
-        ],
-        "5,5": [
-            {
-                "floorId": "sample2",
-                "stair": "downFloor",
-                "direction": "up"
-            },
-            {
-                "type": "revisit"
-            }
         ]
     },
     "changeFloor": {
@@ -818,5 +808,7 @@ main.floors.sample1=
 ],
     "fgmap": [
 
-]
+],
+    "width": 15,
+    "height": 15
 }

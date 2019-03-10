@@ -98,6 +98,19 @@ maps.prototype.initBlock = function (x, y, id) {
     return tmp;
 }
 
+maps.prototype._getAnimateFrames = function (cls, useOriginValue) {
+    if (cls=='enemys' || cls=='npcs') {
+        return 2;
+    }
+    if (cls == 'animates' || cls == 'enemy48') {
+        return 4;
+    }
+    if (cls == 'npc48') {
+        return useOriginValue? 4 : 1;
+    }
+    return 1;
+}
+
 ////// 添加一些信息到block上 //////
 maps.prototype.addInfo = function (block) {
     if (core.isset(block.event)) {
@@ -113,12 +126,7 @@ maps.prototype.addInfo = function (block) {
             }
         }
         if (!core.isset(block.event.animate)) {
-            if (block.event.cls=='enemys' || block.event.cls=='npcs') {
-                block.event.animate = 2;
-            }
-            if (block.event.cls == 'animates' || block.event.cls == 'enemy48' || block.event.cls == 'npc48') {
-                block.event.animate = 4;
-            }
+            block.event.animate = this._getAnimateFrames(block.event.cls, false);
         }
         block.event.height = 32;
         if (block.event.cls == 'enemy48' || block.event.cls == 'npc48')
@@ -1057,7 +1065,7 @@ maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
         destY += core.utils.scan[t].y;
     });
 
-    var animateValue = block.event.animate || 1, animateCurrent = isTileset?bx:0, animateTime = 0;
+    var animateValue = this._getAnimateFrames(block.event.cls, true), animateCurrent = isTileset?bx:0, animateTime = 0;
     var blockCanvas = this.__initBlockCanvas(block, height, x, y);
     var headCanvas = blockCanvas.headCanvas, bodyCanvas = blockCanvas.bodyCanvas, damageCanvas = blockCanvas.damageCanvas;
     var opacity = 1;

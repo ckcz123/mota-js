@@ -232,6 +232,8 @@ core.prototype.init = function (coreData, callback) {
         })
     }
 
+    core.maps._setFloorSize();
+
     core.dom.versionLabel.innerHTML = core.firstData.version;
     core.dom.logoLabel.innerHTML = core.firstData.title;
     document.title = core.firstData.title + " - HTML5魔塔";

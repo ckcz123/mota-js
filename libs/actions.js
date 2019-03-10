@@ -1028,7 +1028,7 @@ actions.prototype._clickViewMaps = function (x,y) {
     var now = core.floorIds.indexOf(core.status.floorId);
     var index = core.status.event.data.index;
     var cx = core.status.event.data.x, cy = core.status.event.data.y;
-    var floorId = core.floorIds[index], mw = core.floors[floorId].width||13, mh = core.floors[floorId].height||13;
+    var floorId = core.floorIds[index], mw = core.floors[floorId].width, mh = core.floors[floorId].height;
 
     if (x==0 && y==0) {
         core.status.event.data.damage = !core.status.event.data.damage;
@@ -1087,7 +1087,7 @@ actions.prototype._clickViewMaps = function (x,y) {
 actions.prototype._keyDownViewMaps = function (keycode) {
     if (!core.isset(core.status.event.data)) return;
 
-    var floorId = core.floorIds[core.status.event.data.index], mh = core.floors[floorId].height||13;
+    var floorId = core.floorIds[core.status.event.data.index], mh = core.floors[floorId].height;
 
     if (keycode==38||keycode==33) this._clickViewMaps(6, 3);
     if (keycode==40||keycode==34) this._clickViewMaps(6, 9);

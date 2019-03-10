@@ -1669,7 +1669,7 @@ ui.prototype.drawMaps = function (index, x, y) {
 
     if (index<0) index=0;
     if (index>=core.floorIds.length) index=core.floorIds.length-1;
-    var floorId = core.floorIds[index], mw = core.floors[floorId].width||13, mh = core.floors[floorId].height||13;
+    var floorId = core.floorIds[index], mw = core.floors[floorId].width, mh = core.floors[floorId].height;
     if (!core.isset(x)) x = parseInt(mw/2);
     if (!core.isset(y)) y = parseInt(mh/2);
     if (x<6) x=6;
@@ -2161,8 +2161,8 @@ ui.prototype.drawSLPanel = function(index, refresh) {
 ////// 绘制一个缩略图 //////
 ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, centerX, centerY, heroLoc, heroIcon) {
 
-    var mw = core.floors[floorId].width || 13;
-    var mh = core.floors[floorId].height || 13;
+    var mw = core.floors[floorId].width;
+    var mh = core.floors[floorId].height;
     // 绘制到tempCanvas上面
     var tempCanvas = core.bigmap.tempCanvas;
     var tempWidth = mw*32, tempHeight = mh*32;

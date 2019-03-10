@@ -71,7 +71,8 @@ control.prototype.setRequestAnimationFrame = function () {
                 });
 
                 // Global floor images
-                core.maps.drawFloorImages(core.status.floorId, core.status.floorAnimateObjs||[], core.status.globalAnimateStatus);
+                core.maps.drawFloorImages(core.status.floorId, core.canvas.bg, 'bg', core.status.floorAnimateObjs||[], core.status.globalAnimateStatus);
+                core.maps.drawFloorImages(core.status.floorId, core.canvas.fg, 'fg', core.status.floorAnimateObjs||[], core.status.globalAnimateStatus);
 
                 // Global Autotile Animate
                 core.status.autotileAnimateObjs.blocks.forEach(function (block) {

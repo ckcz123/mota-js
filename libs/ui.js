@@ -351,8 +351,7 @@ ui.prototype.getTitleAndIcon = function (content) {
     var getInfo = function (v) {
         var number = core.maps.getNumberById(v);
         if (number>0) {
-            var block = core.maps.initBlock(0,0,number);
-            core.maps.addInfo(block);
+            var block = core.maps.initBlock(0,0,number,true);
             if (core.isset(block.event)) {
                 var cls = block.event.cls;
                 image = core.material.images[cls];
@@ -2189,7 +2188,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
         if (typeof t == 'string') t = [0,0,t];
         var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2], frame = core.clamp(parseInt(t[4]), 1, 8);
         if (core.isset(dx) && core.isset(dy) &&
-            !core.hasFlag("floorimg_"+floorId+"_"+dx+"_"+dy) &&
+            !core.hasFlag("floorimg_"+floorId+"@"+dx+"@"+dy) &&
             core.isset(core.material.images.images[p])) {
             var image = core.material.images.images[p];
             var width = image.width / frame, height = image.height;
@@ -2243,7 +2242,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
     images.forEach(function (t) {
         var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2], frame = core.clamp(parseInt(t[4]), 1, 8);
         if (core.isset(dx) && core.isset(dy) &&
-            !core.hasFlag("floorimg_"+floorId+"_"+dx+"_"+dy) &&
+            !core.hasFlag("floorimg_"+floorId+"@"+dx+"@"+dy) &&
             core.isset(core.material.images.images[p])) {
             var image = core.material.images.images[p];
             var width = image.width / frame, height = image.height;

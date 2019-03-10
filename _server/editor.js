@@ -49,7 +49,6 @@ editor.prototype.init = function (callback) {
         editor.idsInit(core.maps, core.icons.icons); // 初始化图片素材信息
         editor.drawInitData(core.icons.icons); // 初始化绘图
 
-        editor.drawMapBg();
         editor.fetchMapFromCore();
         editor.updateMap();
         editor.buildMark();
@@ -242,7 +241,6 @@ editor.prototype.changeFloor = function (floorId, callback) {
         core.bigmap.offsetY=0;
         editor.moveViewport(0,0);
 
-        editor.drawMapBg();
         editor.fetchMapFromCore();
         editor.updateMap();
         editor_mode.floor();
@@ -252,12 +250,6 @@ editor.prototype.changeFloor = function (floorId, callback) {
 }
 
 /////////// 游戏绘图相关 ///////////
-
-editor.prototype.drawMapBg = function (img) {
-    return;
-    //legacy
-    editor.main.editor.drawMapBg();
-}
 
 editor.prototype.drawEventBlock = function () {
     var fg=document.getElementById('efg').getContext('2d');
@@ -296,7 +288,7 @@ editor.prototype.drawPosSelection = function () {
 }
 
 editor.prototype.updateMap = function () {
-    var blocks = main.editor.mapIntoBlocks(editor.map.map(function (v) {
+    var blocks =  core.maps._mapIntoBlocks(editor.map.map(function (v) {
         return v.map(function (v) {
             try {
                 return v.idnum || v || 0
@@ -308,7 +300,18 @@ editor.prototype.updateMap = function () {
         });
     }), {'events': editor.currentFloorData.events}, editor.currentFloorId);
     core.status.thisMap.blocks = blocks;
-    main.editor.updateMap();
+
+    var updateMap = function () {
+        core.removeGlobalAnimate(null, null, true);
+        core.clearMap('bg');
+        core.clearMap('event');
+        core.clearMap('event2');
+        core.clearMap('fg');
+        core.maps._drawMap_drawBgFg();
+        core.maps._drawMap_drawEvent();
+        core.setGlobalAnimate(core.values.animateSpeed);
+    }
+    updateMap();
 
     var drawTile = function (ctx, x, y, tileInfo) { // 绘制一个普通块
 
@@ -497,7 +500,6 @@ editor.prototype.drawInitData = function (icons) {
         dc.drawImage(tilesets[img], nowx, 0)
         nowx += tilesets[img].width;
     }
-    //editor.drawMapBg();
     //editor.mapInit();
 }
 

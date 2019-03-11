@@ -6,7 +6,7 @@ utils.js 工具类
 "use strict";
 
 function utils() {
-    this.init();
+    this._init();
     this.scan = {
         'up': {'x': 0, 'y': -1},
         'left': {'x': -1, 'y': 0},
@@ -15,7 +15,7 @@ function utils() {
     };
 }
 
-utils.prototype.init = function () {
+utils.prototype._init = function () {
     // 定义Object.assign
     if (typeof Object.assign != "function") {
         Object.assign = function(target, varArgs) { // .length of function is 2
@@ -136,12 +136,14 @@ utils.prototype.setLocalStorage = function(key, value) {
             return;
         }
 
-        var str = JSON.stringify(value);
-        var compressed = LZString.compress(str);
+        var str = JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function(chr) {
+            return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
+        });
+        var compressed = lzw_encode(str);
 
         // test if we can save to localStorage
         localStorage.setItem("__tmp__", compressed);
-        if (LZString.decompress(localStorage.getItem("__tmp__"))==str) {
+        if (lzw_decode(localStorage.getItem("__tmp__"))==str) {
             localStorage.setItem(core.firstData.name + "_" + key, compressed);
         }
         else {
@@ -161,28 +163,30 @@ utils.prototype.setLocalStorage = function(key, value) {
     }
 }
 
+utils.prototype.decompress = function (value) {
+    try {
+        var output = lzw_decode(value);
+        if (core.isset(output) && output.length > 0)
+            return JSON.parse(output);
+    }
+    catch (e) {}
+    try {
+        var output = LZString.decompress(value);
+        if (core.isset(output) && output.length > 0)
+            return JSON.parse(output);
+    }
+    catch (e) {}
+    try {
+        return JSON.parse(value);
+    }
+    catch (e) {main.log(e);}
+    return null;
+}
+
 ////// 获得本地存储 //////
 utils.prototype.getLocalStorage = function(key, defaultValue) {
-    try {
-        var value = localStorage.getItem(core.firstData.name+"_"+key);
-        if (core.isset(value)) {
-            var output = LZString.decompress(value);
-            if (core.isset(output) && output.length>0) {
-                try {
-                    return JSON.parse(output);
-                }
-                catch (ee) {
-                    // Ignore, use default value
-                }
-            }
-            return JSON.parse(value);
-        }
-        return defaultValue;
-    }
-    catch (e) {
-        main.log(e);
-        return defaultValue;
-    }
+    var res = this.decompress(localStorage.getItem(core.firstData.name+"_"+key));
+    return res==null?defaultValue:res;
 }
 
 ////// 移除本地存储 //////
@@ -210,7 +214,9 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
     }
 
     // Save to localforage
-    var compressed = LZString.compress(JSON.stringify(value));
+    var compressed = lzw_encode(JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function(chr) {
+        return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
+    }));
     localforage.setItem(core.firstData.name+"_"+key, compressed, function (err) {
         if (core.isset(err)) {
             if (core.isset(errorCallback)) errorCallback(err);
@@ -240,18 +246,9 @@ utils.prototype.getLocalForage = function (key, defaultValue, successCallback, e
         else {
             if (!core.isset(successCallback)) return;
             if (core.isset(value)) {
-                try {
-                    var output = LZString.decompress(value);
-                    if (core.isset(output) && output.length>0) {
-                        try {
-                            successCallback(JSON.parse(output));
-                            return;
-                        } catch (ee) {main.log(ee);}
-                    }
-                    successCallback(JSON.parse(value));
-                    return;
-                }
-                catch (e) {main.log(e);}
+                var res = core.utils.decompress(value);
+                successCallback(res==null?defaultValue:res);
+                return;
             }
             successCallback(defaultValue);
         }
@@ -400,15 +397,48 @@ utils.prototype.arrayToRGBA = function (color) {
     return "rgba("+nowR+","+nowG+","+nowB+","+nowA+")";
 }
 
+utils.prototype._encodeRoute_id2number = function (id) {
+    var number = core.maps.getNumberById(id);
+    return number==0?id:number;
+}
+
+utils.prototype._encodeRoute_encodeOne = function (t) {
+    if (t.indexOf('item:')==0)
+        return "I"+this._encodeRoute_id2number(t.substring(5))+":";
+    else if (t.indexOf('unEquip:')==0)
+        return "u"+t.substring(8);
+    else if (t.indexOf('equip:')==0)
+        return "e"+this._encodeRoute_id2number(t.substring(6))+":";
+    else if (t.indexOf('fly:')==0)
+        return "F"+t.substring(4)+":";
+    else if (t.indexOf('choices:')==0)
+        return "C"+t.substring(8);
+    else if (t.indexOf('shop:')==0)
+        return "S"+t.substring(5);
+    else if (t=='turn')
+        return 'T';
+    else if (t.indexOf('turn:')==0)
+        return "t"+t.substring(5).substring(0,1).toUpperCase()+":";
+    else if (t=='getNext')
+        return 'G';
+    else if (t.indexOf('input:')==0)
+        return "P"+t.substring(6);
+    else if (t.indexOf('input2:')==0)
+        return "Q"+t.substring(7)+":";
+    else if (t=='no')
+        return 'N';
+    else if (t.indexOf('move:')==0)
+        return "M"+t.substring(5);
+    else if (t.indexOf('key:')==0)
+        return 'K'+t.substring(4);
+    else if (t.indexOf('random:')==0)
+        return 'X'+t.substring(7);
+    return '';
+}
+
 ////// 加密路线 //////
 utils.prototype.encodeRoute = function (route) {
-    var ans="";
-    var lastMove = "", cnt=0;
-
-    var id2number = function (id) {
-        var number = core.maps.getNumberById(id);
-        return number==0?id:number;
-    }
+    var ans="", lastMove = "", cnt=0;
 
     route.forEach(function (t) {
         if (t=='up' || t=='down' || t=='left' || t=='right') {
@@ -426,117 +456,85 @@ utils.prototype.encodeRoute = function (route) {
                 if (cnt>1) ans+=cnt;
                 cnt=0;
             }
-            if (t.indexOf('item:')==0)
-                ans+="I"+id2number(t.substring(5))+":";
-            else if (t.indexOf('unEquip:')==0)
-                ans+="u"+t.substring(8);
-            else if (t.indexOf('equip:')==0)
-                ans+="e"+id2number(t.substring(6))+":";
-            else if (t.indexOf('fly:')==0)
-                ans+="F"+t.substring(4)+":";
-            else if (t.indexOf('choices:')==0)
-                ans+="C"+t.substring(8);
-            else if (t.indexOf('shop:')==0)
-                ans+="S"+t.substring(5);
-            else if (t=='turn')
-                ans+='T';
-            else if (t.indexOf('turn:')==0)
-                ans+="t"+t.substring(5).substring(0,1).toUpperCase()+":";
-            else if (t=='getNext')
-                ans+='G';
-            else if (t.indexOf('input:')==0)
-                ans+="P"+t.substring(6);
-            else if (t.indexOf('input2:')==0)
-                ans+="Q"+t.substring(7)+":";
-            else if (t=='no')
-                ans+='N';
-            else if (t.indexOf('move:')==0)
-                ans+="M"+t.substring(5);
-            else if (t.indexOf('key:')==0)
-                ans+='K'+t.substring(4);
-            else if (t.indexOf('random:')==0)
-                ans+='X'+t.substring(7);
+            ans += core.utils._encodeRoute_encodeOne(t);
         }
     });
     if (cnt>0) {
         ans+=lastMove.substring(0,1).toUpperCase();
         if (cnt>1) ans+=cnt;
     }
-    // return ans;
-    // 压缩
     return LZString.compressToBase64(ans);
+}
+
+utils.prototype._decodeRoute_getNumber = function (decodeObj, noparse) {
+    var num="";
+    while (decodeObj.index<decodeObj.route.length && !isNaN(decodeObj.route.charAt(decodeObj.index))) {
+        num+=decodeObj.route.charAt(decodeObj.index++);
+    }
+    if (num.length==0) num="1";
+    return core.isset(noparse)?num:parseInt(num);
+}
+
+utils.prototype._decodeRoute_getString = function (decodeObj) {
+    var str="";
+    while (decodeObj.index<decodeObj.route.length && decodeObj.route.charAt(decodeObj.index)!=':') {
+        str+=decodeObj.route.charAt(decodeObj.index++);
+    }
+    decodeObj.index++;
+    return str;
+}
+
+utils.prototype._decodeRoute_number2id = function (number) {
+    if (/^\d+$/.test(number)) {
+        var info = core.maps.blocksInfo[number];
+        if (core.isset(info)) return info.id;
+    }
+    return number;
+}
+
+utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
+    var nxt=(c=='I'|| c=='e' ||c=='F'||c=='S'||c=='Q'||c=='t')?
+        this._decodeRoute_getString(decodeObj):this._decodeRoute_getNumber(decodeObj);
+
+    var mp = {"U": "up", "D": "down", "L": "left", "R": "right"};
+
+    switch (c) {
+        case "U": case "D": case "L": case "R": for (var i=0;i<nxt;i++) decodeObj.ans.push(mp[c]); break;
+        case "I": decodeObj.ans.push("item:"+this._decodeRoute_number2id(nxt)); break;
+        case "u": decodeObj.ans.push("unEquip:"+nxt); break;
+        case "e": decodeObj.ans.push("equip:"+this._decodeRoute_number2id(nxt)); break;
+        case "F": decodeObj.ans.push("fly:"+nxt); break;
+        case "C": decodeObj.ans.push("choices:"+nxt); break;
+        case "S": decodeObj.ans.push("shop:"+nxt+":"+this._decodeRoute_getNumber(decodeObj, true)); break;
+        case "T": decodeObj.ans.push("turn"); break;
+        case "t": decodeObj.ans.push("turn:"+mp[nxt]); break;
+        case "G": decodeObj.ans.push("getNext"); break;
+        case "P": decodeObj.ans.push("input:"+nxt); break;
+        case "Q": decodeObj.ans.push("input2:"+nxt); break;
+        case "N": decodeObj.ans.push("no"); break;
+        case "M": ++decodeObj.index; decodeObj.ans.push("move:"+nxt+":"+this._decodeRoute_getNumber(decodeObj)); break;
+        case "K": decodeObj.ans.push("key:"+nxt); break;
+        case "X": decodeObj.ans.push("random:"+nxt); break;
+    }
 }
 
 ////// 解密路线 //////
 utils.prototype.decodeRoute = function (route) {
-
     if (!core.isset(route)) return route;
 
     // 解压缩
     try {
         var v = LZString.decompressFromBase64(route);
-        if (core.isset(v) && /^[a-zA-Z0-9+\/=:]+$/.test(v)) {
+        if (core.isset(v) && /^[a-zA-Z0-9+\/=:]*$/.test(v)) {
             route = v;
         }
     } catch (e) {}
 
-    var ans=[], index=0;
-
-    var getNumber = function (noparse) {
-        var num="";
-        while (index<route.length && !isNaN(route.charAt(index))) {
-            num+=route.charAt(index++);
-        }
-        if (num.length==0) num="1";
-        return core.isset(noparse)?num:parseInt(num);
+    var decodeObj = {route: route, index: 0, ans: []};
+    while (decodeObj.index < decodeObj.route.length) {
+        this._decodeRoute_decodeOne(decodeObj, decodeObj.route.charAt(decodeObj.index++));
     }
-    var getString = function () {
-        var str="";
-        while (index<route.length && route.charAt(index)!=':') {
-            str+=route.charAt(index++);
-        }
-        index++;
-        return str;
-    }
-    var mp = {
-        "U": "up",
-        "D": "down",
-        "L": "left",
-        "R": "right"
-    }
-
-    var number2id = function (nxt) {
-        if (/^\d+$/.test(nxt)) {
-            var info = core.maps.blocksInfo[nxt];
-            if (core.isset(info)) return info.id;
-        }
-        return nxt;
-    }
-
-    while (index<route.length) {
-        var c=route.charAt(index++);
-        var nxt=(c=='I'|| c=='e' ||c=='F'||c=='S'||c=='Q'||c=='t')?getString():getNumber();
-
-        switch (c) {
-            case "U": case "D": case "L": case "R": for (var i=0;i<nxt;i++) ans.push(mp[c]); break;
-            case "I":ans.push("item:"+number2id(nxt)); break;
-            case "u": ans.push("unEquip:"+nxt); break;
-            case "e": ans.push("equip:"+number2id(nxt)); break;
-            case "F": ans.push("fly:"+nxt); break;
-            case "C": ans.push("choices:"+nxt); break;
-            case "S": ans.push("shop:"+nxt+":"+getNumber(true)); break;
-            case "T": ans.push("turn"); break;
-            case "t": ans.push("turn:"+mp[nxt]); break;
-            case "G": ans.push("getNext"); break;
-            case "P": ans.push("input:"+nxt); break;
-            case "Q": ans.push("input2:"+nxt); break;
-            case "N": ans.push("no"); break;
-            case "M": ++index; ans.push("move:"+nxt+":"+getNumber()); break;
-            case "K": ans.push("key:"+nxt); break;
-            case "X": ans.push("random:"+nxt); break;
-        }
-    }
-    return ans;
+    return decodeObj.ans;
 }
 
 ////// 判断某对象是否不为undefined也不会null //////
@@ -556,6 +554,10 @@ utils.prototype.subarray = function (a, b) {
         if (na.shift() != nb.shift()) return null;
     }
     return na;
+}
+
+utils.prototype.inArray = function (array, element) {
+    return this.isset(array) && (array instanceof Array) && array.indexOf(element)>=0;
 }
 
 utils.prototype.clamp = function (x, a, b) {
@@ -1042,4 +1044,58 @@ utils.prototype.http = function (type, url, formData, success, error, mimeType, 
     if (core.isset(formData))
         xhr.send(formData);
     else xhr.send();
+}
+
+// LZW-compress
+// https://gist.github.com/revolunet/843889
+function lzw_encode(s) {
+    var dict = {};
+    var data = (s + "").split("");
+    var out = [];
+    var currChar;
+    var phrase = data[0];
+    var code = 256;
+    for (var i=1; i<data.length; i++) {
+        currChar=data[i];
+        if (dict[phrase + currChar] != null) {
+            phrase += currChar;
+        }
+        else {
+            out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
+            dict[phrase + currChar] = code;
+            code++;
+            phrase=currChar;
+        }
+    }
+    out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
+    for (var i=0; i<out.length; i++) {
+        out[i] = String.fromCharCode(out[i]);
+    }
+    return out.join("");
+}
+
+// Decompress an LZW-encoded string
+function lzw_decode(s) {
+    var dict = {};
+    var data = (s + "").split("");
+    var currChar = data[0];
+    var oldPhrase = currChar;
+    var out = [currChar];
+    var code = 256;
+    var phrase;
+    for (var i=1; i<data.length; i++) {
+        var currCode = data[i].charCodeAt(0);
+        if (currCode < 256) {
+            phrase = data[i];
+        }
+        else {
+            phrase = dict[currCode] ? dict[currCode] : (oldPhrase + currChar);
+        }
+        out.push(phrase);
+        currChar = phrase.charAt(0);
+        dict[code] = oldPhrase + currChar;
+        code++;
+        oldPhrase = phrase;
+    }
+    return out.join("");
 }

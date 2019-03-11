@@ -195,7 +195,7 @@ main.prototype.init = function (mode, callback) {
         if (mode === 'editor')main.editor = {'disableGlobalAnimate':true};
     }
 
-    main.loaderJs('project', main.pureData, function(){
+    main.loadJs('project', main.pureData, function(){
         var mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
         for(var ii in mainData)main[ii]=mainData[ii];
         
@@ -213,7 +213,7 @@ main.prototype.init = function (mode, callback) {
             main.dom.levelChooseButtons.appendChild(span);
         });
         
-        main.loaderJs('libs', main.loadList, function () {
+        main.loadJs('libs', main.loadList, function () {
             main.core = core;
 
             for (i = 0; i < main.loadList.length; i++) {
@@ -222,7 +222,7 @@ main.prototype.init = function (mode, callback) {
                 main.core[name] = new (eval(name))();
             }
 
-            main.loaderFloors(function() {
+            main.loadFloors(function() {
                 var coreData = {};
                 ["dom", "statusBar", "canvas", "images", "tilesets", "materials",
                 "animates", "bgms", "sounds", "floorIds", "floors"].forEach(function (t) {
@@ -236,7 +236,7 @@ main.prototype.init = function (mode, callback) {
 }
 
 ////// 动态加载所有核心JS文件 //////
-main.prototype.loaderJs = function (dir, loadList, callback) {
+main.prototype.loadJs = function (dir, loadList, callback) {
 
     // 加载js
     main.setMainTipsText('正在加载核心js文件...')
@@ -272,7 +272,7 @@ main.prototype.loadMod = function (dir, modName, callback) {
 }
 
 ////// 动态加载所有楼层（剧本） //////
-main.prototype.loaderFloors = function (callback) {
+main.prototype.loadFloors = function (callback) {
 
     // 加载js
     main.setMainTipsText('正在加载楼层文件...')

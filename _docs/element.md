@@ -187,13 +187,6 @@ function() {
 
 多属性可采用数组的写法，比如`'special': [1,3]`视为同时拥有先攻和坚固属性；`'special': [5,10,14,18]`视为拥有3连击、魔防、诅咒、阻击四个属性。
 
-本塔支持战斗动画，在`data.js`中存在三个全局选项：`canOpenBattleAnimate`, `showBattleAnimateConfirm`, `battleAnimate`。
-
-- `canOpenBattleAnimate`代表是否允许用户开启战斗动画。如果你添加了一些自定义属性，且不想修改战斗界面的UI，则可以将其关闭。
-- `showBattleAnimateConfirm`代表是否在游戏开始时给用户提供开启动画的选项。对于一些偏向于萌新的塔，可以开启此项。
-- `battleAnimate`代表是否默认开启战斗动画。此项会被用户存储的设置给覆盖。
-- 如果`canOpenBattleAnimate`为false，则后面两个也强制为false。
-
 怪物可以负伤，在`data.js`的全局变量`enableNegativeDamage`中指定。
 
 下面的`getSpecialHint`函数则给定了每个特殊属性的详细描述。这个描述将在怪物手册中看到。

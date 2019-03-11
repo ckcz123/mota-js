@@ -1,11 +1,11 @@
 "use strict";
 
 function events() {
-    this.init();
+    this._init();
 }
 
 ////// 初始化 //////
-events.prototype.init = function () {
+events.prototype._init = function () {
     this.eventdata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.events;
     this.commonEvent = events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent;
     this.events = {
@@ -135,21 +135,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 
         var real_start = function () {
             core.insertAction(core.clone(core.firstData.startText), null, null, function() {
-                if (!core.flags.startUsingCanvas && !core.isReplaying() && core.flags.showBattleAnimateConfirm) { // 是否提供“开启战斗动画”的选择项
-                    core.status.event.selection = core.flags.battleAnimate ? 0 : 1;
-                    core.ui.drawConfirmBox("你想开启战斗动画吗？\n之后可以在菜单栏中开启或关闭。\n（强烈建议新手开启此项）", function () {
-                        core.flags.battleAnimate = true;
-                        core.setLocalStorage('battleAnimate', true);
-                        post_start();
-                    }, function () {
-                        core.flags.battleAnimate = false;
-                        core.setLocalStorage('battleAnimate', false);
-                        post_start();
-                    });
-                }
-                else {
-                    post_start();
-                }
+                post_start();
             });
         }
 
@@ -976,8 +962,7 @@ events.prototype.doAction = function() {
             this.doAction();
             break
         case "loadBgm":
-            if (core.platform.isPC)
-                core.loadBgm(data.name);
+            core.loadBgm(data.name);
             this.doAction();
             break;
         case "freeBgm":
@@ -1505,16 +1490,27 @@ events.prototype.battle = function (id, x, y, force, callback) {
     if (!core.isset(core.status.event.id)) // 自动存档
         core.autosave(true);
 
-    if (core.flags.battleAnimate&&!core.isReplaying()) {
-        core.waitHeroToStop(function() {
-            core.ui.drawBattleAnimate(id, function() {
-                core.events.afterBattle(id, x, y, callback);
-            });
-        });
+    // ------ 支援技能 ------//
+    if (core.isset(x) && core.isset(y)) {
+        var index = x + "," + y, cache = (core.status.checkBlock.cache || {})[index] || {},
+            guards = cache.guards || [];
+        if (guards.length>0) {
+            core.setFlag("__guards__"+x+"_"+y, guards);
+            var actions = [];
+            guards.forEach(function (g) {
+                core.push(actions, {"type": "jump", "from": [g[0],g[1]], "to": [x, y],
+                    "time": 300, "keep": false, "async": true});
+            })
+            core.push(actions, [
+                {"type": "waitAsync"},
+                {"type": "trigger", "loc": [x,y]}
+            ]);
+            core.insertAction(actions);
+            return;
+        }
     }
-    else {
-        core.events.afterBattle(id, x, y, callback);
-    }
+
+    core.events.afterBattle(id, x, y, callback);
 }
 
 ////// 触发(x,y)点的事件 //////
@@ -1983,6 +1979,64 @@ events.prototype.openShop = function(shopId, needVisited) {
     core.ui.drawChoices(content, choices);
 }
 
+events.prototype._useShop = function (shop, index) {
+    // 检查能否使用快捷商店
+    var reason = core.events.canUseQuickShop(shop.id);
+    if (core.isset(reason)) {
+        core.drawText(reason);
+        return false;
+    }
+    if (!shop.visited) {
+        if (shop.times==0) core.drawTip("该商店尚未开启");
+        else core.drawTip("该商店已失效");
+        return false;
+    }
+
+    var money = core.getStatus('money'), experience = core.getStatus('experience');
+    var times = shop.times, need = core.calValue(shop.need, null, null, times);
+    var use = shop.use;
+    var use_text = use=='money'?"金币":"经验";
+
+    var choice = shop.choices[index];
+    if (core.isset(choice.need))
+        need = core.calValue(choice.need, null, null, times);
+
+    if (need > eval(use)) {
+        core.drawTip("你的"+use_text+"不足");
+        return false;
+    }
+
+    core.status.event.selection = index;
+    core.status.event.data.actions.push(index);
+
+    eval(use+'-='+need);
+    core.setStatus('money', money);
+    core.setStatus('experience', experience);
+
+    // 更新属性
+    choice.effect.split(";").forEach(function (t) {
+        core.doEffect(t, need, times);
+    });
+    core.updateStatusBar();
+    shop.times++;
+    if (shop.commonTimes)
+        core.setFlag('commonTimes', shop.times);
+    core.events.openShop(shop.id);
+    return true;
+}
+
+events.prototype._exitShop = function () {
+    if (core.status.event.data.actions.length>0) {
+        core.status.route.push("shop:"+core.status.event.data.id+":"+core.status.event.data.actions.join(""));
+    }
+    core.status.event.data.actions = [];
+    core.status.boxAnimateObjs = [];
+    if (core.status.event.data.fromList)
+        core.ui.drawQuickShop();
+    else
+        core.ui.closePanel();
+}
+
 ////// 禁用一个全局商店 //////
 events.prototype.disableQuickShop = function (shopId) {
     core.status.shops[shopId].visited = false;
@@ -2033,7 +2087,7 @@ events.prototype.checkLvUp = function () {
 }
 
 ////// 尝试使用道具 //////
-events.prototype.useItem = function(itemId) {
+events.prototype.tryUseItem = function(itemId) {
     core.ui.closePanel();
 
     if (itemId=='book') {

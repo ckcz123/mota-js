@@ -512,7 +512,7 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
         case "P": decodeObj.ans.push("input:"+nxt); break;
         case "Q": decodeObj.ans.push("input2:"+nxt); break;
         case "N": decodeObj.ans.push("no"); break;
-        case "M": ++decodeObj.index; ans.push("move:"+nxt+":"+this._decodeRoute_getNumber(decodeObj)); break;
+        case "M": ++decodeObj.index; decodeObj.ans.push("move:"+nxt+":"+this._decodeRoute_getNumber(decodeObj)); break;
         case "K": decodeObj.ans.push("key:"+nxt); break;
         case "X": decodeObj.ans.push("random:"+nxt); break;
     }

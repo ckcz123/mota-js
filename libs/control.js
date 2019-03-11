@@ -1821,6 +1821,11 @@ control.prototype.replay = function () {
 
     var action=core.status.replay.toReplay.shift();
 
+    if (action == 'input2:===') {
+        core.replay();
+        return;
+    }
+
     if (action=='up' || action=='down' || action=='left' || action=='right') {
         core.moveHero(action, function () {
             setTimeout(function() {

@@ -525,7 +525,7 @@ utils.prototype.decodeRoute = function (route) {
     // 解压缩
     try {
         var v = LZString.decompressFromBase64(route);
-        if (core.isset(v) && /^[a-zA-Z0-9+\/=:]+$/.test(v)) {
+        if (core.isset(v) && /^[a-zA-Z0-9+\/=:]*$/.test(v)) {
             route = v;
         }
     } catch (e) {}

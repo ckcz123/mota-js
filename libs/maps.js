@@ -1377,7 +1377,7 @@ maps.prototype.hideBlock = function (x, y, floorId) {
             core.clearMap('event2', x * 32, y * 32 +32-height, 32, height-32);
     }
 
-    block.disable = true;
+    block.block.disable = true;
     core.updateStatusBar();
 }
 

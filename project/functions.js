@@ -745,7 +745,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 可以在这里任意增加或编辑每个按键的行为
 	
 	// 如果处于正在行走状态，则不处理
-	if (!core.status.heroStop)
+	if (!core.status.heroStop || core.status.heroMoving > 0)
 		return;
 
 	// Alt+0~9，快捷换上套装

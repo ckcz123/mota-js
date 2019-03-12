@@ -427,10 +427,12 @@ function (enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId) {
 ``` js
 ////// 点击楼层传送器时的打开操作 //////
 control.prototype.useFly = function (need) {
-    if (!core.status.heroStop) {
+    if (!core.status.heroStop || core.status.heroMoving > 0) {
         core.drawTip("请先停止勇士行动");
         return;
     }
+    if (core.status.lockControl || core.status.event.id != null) return;
+    
     if (core.canUseItem('fly')) core.useItem('fly');
     else core.drawTip("当前无法使用"+core.material.items.fly.name);
 }

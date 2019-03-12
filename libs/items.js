@@ -320,6 +320,7 @@ items.prototype.loadEquip = function (equipId, callback) {
     var type = this.getEquipTypeById(equipId);
     if (type < 0) {
         core.drawTip("当前没有"+loadEquip.equip.type+"的空位！");
+        if (core.isset(callback)) callback();
         return;
     }
 

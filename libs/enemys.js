@@ -25,11 +25,11 @@ enemys.prototype.hasSpecial = function (special, test) {
     if (!core.isset(special)) return false;
 
     if (special instanceof Array) {
-        return special.indexOf(test)>=0;
+        return special.indexOf(test) >= 0;
     }
 
     if (typeof special == 'number') {
-        return special!=0 && (special%100==test||this.hasSpecial(parseInt(special/100), test));
+        return special === test;
     }
 
     if (typeof special == 'string') {

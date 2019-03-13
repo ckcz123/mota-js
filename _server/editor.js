@@ -43,9 +43,6 @@ editor.info
 editor.prototype.init = function (callback) {
     var afterCoreReset = function () {
 
-        main.editor.disableGlobalAnimate = false;//允许GlobalAnimate
-        // core.setHeroMoveTriggerInterval(); 
-
         editor.idsInit(core.maps, core.icons.icons); // 初始化图片素材信息
         editor.drawInitData(core.icons.icons); // 初始化绘图
 
@@ -302,7 +299,7 @@ editor.prototype.updateMap = function () {
     core.status.thisMap.blocks = blocks;
 
     var updateMap = function () {
-        core.removeGlobalAnimate(null, null, true);
+        core.removeGlobalAnimate();
         core.clearMap('bg');
         core.clearMap('event');
         core.clearMap('event2');

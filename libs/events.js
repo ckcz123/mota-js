@@ -542,7 +542,7 @@ events.prototype.doAction = function() {
             if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
                 && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
                 data.loc = [[core.calValue(data.loc[0], prefix), core.calValue(data.loc[1], prefix)]];
-            core.maps.setFloorImage("show", data.loc, data.floorId, function() {
+            core.maps.showFloorImage(data.loc, data.floorId, function() {
                 core.events.doAction();
             })
             break;
@@ -552,7 +552,7 @@ events.prototype.doAction = function() {
             if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
                 && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
                 data.loc = [[core.calValue(data.loc[0], prefix), core.calValue(data.loc[1], prefix)]];
-            core.maps.setFloorImage("hide", data.loc, data.floorId, function() {
+            core.maps.hideFloorImage(data.loc, data.floorId, function() {
                 core.events.doAction();
             })
             break;
@@ -562,7 +562,7 @@ events.prototype.doAction = function() {
             if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
                 && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
                 data.loc = [[core.calValue(data.loc[0], prefix), core.calValue(data.loc[1], prefix)]];
-            core.maps.setBgFgMap("show", data.name, data.loc, data.floorId, function() {
+            core.maps.showBgFgMap(data.name, data.loc, data.floorId, function() {
                 core.events.doAction();
             })
             break;
@@ -572,7 +572,7 @@ events.prototype.doAction = function() {
             if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
                 && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
                 data.loc = [[core.calValue(data.loc[0], prefix), core.calValue(data.loc[1], prefix)]];
-            core.maps.setBgFgMap("hide", data.name, data.loc, data.floorId, function() {
+            core.maps.hideBgFgMap(data.name, data.loc, data.floorId, function() {
                 core.events.doAction();
             })
             break;

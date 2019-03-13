@@ -73,7 +73,7 @@ loader.prototype._loadAutotiles = function (callback) {
         });
 
         setTimeout(function () {
-            core.maps.makeAutotileEdges();
+            core.maps._makeAutotileEdges();
         });
 
         callback();

@@ -37,7 +37,7 @@ ui.prototype.clearMap = function (name, x, y, width, height) {
             core.canvas[m].clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
         }
         core.dom.gif.innerHTML = "";
-        core.removeGlobalAnimate(0,0,true);
+        core.removeGlobalAnimate();
     }
     else {
         var ctx = this.getContextByName(name);
@@ -2188,7 +2188,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
         if (typeof t == 'string') t = [0,0,t];
         var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2], frame = core.clamp(parseInt(t[4]), 1, 8);
         if (core.isset(dx) && core.isset(dy) &&
-            !core.hasFlag("floorimg_"+floorId+"@"+dx+"@"+dy) &&
+            !core.hasFlag("__floorImg__"+floorId+"_"+dx+"_"+dy) &&
             core.isset(core.material.images.images[p])) {
             var image = core.material.images.images[p];
             var width = image.width / frame, height = image.height;
@@ -2242,7 +2242,7 @@ ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, cente
     images.forEach(function (t) {
         var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2], frame = core.clamp(parseInt(t[4]), 1, 8);
         if (core.isset(dx) && core.isset(dy) &&
-            !core.hasFlag("floorimg_"+floorId+"@"+dx+"@"+dy) &&
+            !core.hasFlag("__floorImg__"+floorId+"_"+dx+"_"+dy) &&
             core.isset(core.material.images.images[p])) {
             var image = core.material.images.images[p];
             var width = image.width / frame, height = image.height;

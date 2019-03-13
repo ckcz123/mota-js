@@ -570,6 +570,26 @@ utils.prototype.getCookie = function (name) {
 	return match?match[2]:null;
 }
 
+utils.prototype.expandMoveSteps = function (steps) {
+    var moveSteps=[];
+    steps.forEach(function (e) {
+        if (typeof e=="string") {
+            moveSteps.push(e);
+        }
+        else {
+            if (!core.isset(e.value)) {
+                moveSteps.push(e.direction)
+            }
+            else {
+                for (var i=0;i<e.value;i++) {
+                    moveSteps.push(e.direction);
+                }
+            }
+        }
+    });
+    return moveSteps;
+}
+
 ////// Base64加密 //////
 utils.prototype.encodeBase64 = function (str) {
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {

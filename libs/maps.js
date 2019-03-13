@@ -24,7 +24,7 @@ maps.prototype._setFloorSize = function (floorId) {
     core.floors[floorId].height = core.floors[floorId].height || this.DEFAULT_HEIGHT;
 }
 
-// ------ 加载与存档读档 ------ //
+// ------ 加载地图与地图的存档读档（压缩与解压缩） ------ //
 
 ////// 加载某个楼层（从剧本或存档中） //////
 maps.prototype.loadFloor = function (floorId, map) {
@@ -267,6 +267,18 @@ maps.prototype._compressFloorData = function (map, floor) {
     return thisFloor;
 }
 
+////// 将存档中的地图信息重新读取出来 //////
+maps.prototype.loadMap = function (data, floorId) {
+    if (!core.isset(floorId)) {
+        var map = {};
+        core.floorIds.forEach(function (id) {
+            map[id] = core.maps.loadFloor(id, data[id]);
+        })
+        return map;
+    }
+    return this.loadFloor(floorId, data[floorId]);
+}
+
 ////// 更改地图画布的尺寸
 maps.prototype.resizeMap = function(floorId) {
     floorId = floorId || core.status.floorId;
@@ -285,18 +297,6 @@ maps.prototype.resizeMap = function(floorId) {
             core.canvas[cn].canvas.style.height = core.bigmap.height*32/core.maps.DEFAULT_PIXEL_HEIGHT*96 + "vw";
         }
     });
-}
-
-////// 将存档中的地图信息重新读取出来 //////
-maps.prototype.loadMap = function (data, floorId) {
-    if (!core.isset(floorId)) {
-        var map = {};
-        core.floorIds.forEach(function (id) {
-            map[id] = core.maps.loadFloor(id, data[id]);
-        })
-        return map;
-    }
-    return this.loadFloor(floorId, data[floorId]);
 }
 
 ////// 将当前地图重新变成二维数组形式 //////
@@ -364,9 +364,7 @@ maps.prototype.getBgFgMapArray = function (name, floorId) {
     return arr;
 }
 
-// ------ 地图处理 ------ //
-
-// ------ canMoveHero & canMoveDirectly ------ //
+// ------ 当前能否朝某方向移动，能否瞬间移动 ------ //
 
 ////// 生成全图的当前可移动信息 //////
 maps.prototype.generateMovableArray = function (floorId, x, y) {
@@ -516,7 +514,7 @@ maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
     return true;
 }
 
-// -------- Draw block, map, autotile, ... -------- //
+// -------- 绘制地图，各层图块，楼层贴图，Autotile -------- //
 
 ////// 绘制一个图块 //////
 maps.prototype.drawBlock = function (block, animate, dx, dy) {
@@ -672,7 +670,6 @@ maps.prototype.drawMap = function (floorId, callback) {
         core.fillRect('curtain', 0, 0, this.DEFAULT_PIXEL_WIDTH, this.DEFAULT_PIXEL_HEIGHT,
             core.arrayToRGBA(core.status.curtainColor));
     }
-    core.setGlobalAnimate(core.values.animateSpeed);
     core.drawHero();
     core.updateStatusBar();
     if (core.isset(callback))
@@ -690,12 +687,11 @@ maps.prototype._drawMap_drawEvent = function (floorId) {
         if (core.isset(block.event) && !block.disable) {
             if (block.event.cls == 'autotile') {
                 core.drawAutotile(core.canvas.event, mapArray, block, 32, 0, 0);
-                core.addAutotileGlobalAnimate(block);
             }
             else {
                 core.drawBlock(block);
-                core.addGlobalAnimate(block);
             }
+            core.addGlobalAnimate(block);
         }
     }
     core.status.autotileAnimateObjs.map = core.clone(mapArray);
@@ -773,7 +769,7 @@ maps.prototype.drawBgFgMap = function (floorId, ctx, name, onMap) {
 maps.prototype._drawBgFgMap_drawBlockInfo = function (ctx, block, blockInfo, arr, onMap) {
     if (blockInfo.cls == 'autotile') { // Autotile单独处理
         this.drawAutotile(ctx, arr, block, 32, 0, 0);
-        if (onMap) core.addAutotileGlobalAnimate(block);
+        if (onMap) this.addGlobalAnimate(block);
         return;
     }
     if (!onMap) {
@@ -908,7 +904,7 @@ maps.prototype._makeAutotileEdges = function () {
     });
 }
 
-// -------- xxxExists, get & set block ... -------- //
+// -------- 获得某个点的图块信息 -------- //
 
 ////// 某个点是否不可通行 //////
 maps.prototype.noPass = function (x, y, floorId) {
@@ -992,7 +988,8 @@ maps.prototype.getBlockInfo = function (block) {
         block = this.initBlock(0, 0, block, true);
     }
     if (!core.isset(block.event)) return null;
-    var id = block.event.id, cls = block.event.cls, image = null, posX = 0, posY = 0,
+    var number = block.id, id = block.event.id, cls = block.event.cls,
+        image = null, posX = 0, posY = 0,
         height = block.event.height || 32, faceIds = {};
 
     if (id == 'none') return null;
@@ -1016,8 +1013,10 @@ maps.prototype.getBlockInfo = function (block) {
         faceIds = block.event.faceIds||{};
     }
 
-    return {id:id, cls:cls, image:image, posX:posX, posY:posY, height:height, faceIds:faceIds};
+    return {number:number, id:id, cls:cls, image:image, posX:posX, posY:posY, height:height, faceIds:faceIds};
 }
+
+// -------- 启用/禁用图块，楼层贴图 -------- //
 
 ////// 将某个块从禁用变成启用状态 //////
 maps.prototype.showBlock = function(x, y, floorId) {
@@ -1257,51 +1256,32 @@ maps.prototype.resetMap = function(floorId) {
     core.drawTip("地图重置成功");
 }
 
-// -------- moveBlock, Animate ... -------- //
+// -------- 移动/跳跃图块，图块的淡入淡出 -------- //
 
-maps.prototype.__moveBlockCanvas = function (image, bx, by, height, nowX, nowY, opacity, headCanvas, bodyCanvas, damageCanvas) {
-    // 重绘block & 重定位
-    if (headCanvas != null) {
-        core.dymCanvas[headCanvas].clearRect(0, 0, 32, height);
-        core.dymCanvas[headCanvas].drawImage(image, bx * 32, by * height, 32, height - 32, 0, 0, 32, height - 32);
-        core.relocateCanvas(headCanvas, nowX - core.bigmap.offsetX, nowY+32-height - core.bigmap.offsetY);
-        core.setOpacity(headCanvas, opacity);
+////// 初始化独立的block canvas //////
+maps.prototype._initDetachedBlock = function (blockInfo, x, y, displayDamage) {
+    var headCanvas = null, bodyCanvas = '__body_'+x+"_"+y, damageCanvas = null;
+    // head
+    if (blockInfo.height > 32) {
+        headCanvas = "__head_"+x+"_"+y;
+        core.createCanvas(headCanvas, 0, 0, 32, blockInfo.height - 32, 55);
     }
-    if (bodyCanvas != null) {
-        core.dymCanvas[bodyCanvas].clearRect(0, 0, 32, 32);
-        core.dymCanvas[bodyCanvas].drawImage(image, bx * 32, by * height + height - 32, 32, 32, 0, 0, 32, 32);
-        core.relocateCanvas(bodyCanvas, nowX - core.bigmap.offsetX, nowY - core.bigmap.offsetY);
-        core.setOpacity(bodyCanvas, opacity);
-    }
-    if (damageCanvas != null) {
-        core.relocateCanvas(damageCanvas, nowX - core.bigmap.offsetX, nowY - core.bigmap.offsetY);
-        core.setOpacity(damageCanvas, opacity);
-    }
-}
-
-maps.prototype.__initBlockCanvas = function (block, height, x, y) {
-    var headCanvas = null, bodyCanvas = 'block'+x+"_"+y, damageCanvas = null;
-
+    // body
     core.createCanvas(bodyCanvas, 0, 0, 32, 32, 35);
-    if (height > 32) {
-        headCanvas = "blockHead"+x+"_"+y;
-        core.createCanvas(headCanvas, 0, 0, 32, height - 32, 55);
-    }
-    // 显伤
+    // damage
     var damage = null, damageColor = null;
-    if ((block.event.cls == 'enemys' || block.event.cls == 'enemy48') && core.hasItem('book')
-        && block.event.displayDamage !== false) {
-        var damageString = core.enemys.getDamageString(block.event.id, x, y);
+    if (blockInfo.cls.indexOf('enemy')==0 && core.hasItem('book') && displayDamage) {
+        var damageString = core.enemys.getDamageString(blockInfo.id, x, y);
         damage = damageString.damage; damageColor = damageString.color;
     }
     if (damage != null) {
-        damageCanvas = "blockDamage"+x+"_"+y;
+        damageCanvas = "__damage_"+x+"_"+y;
         var ctx = core.createCanvas(damageCanvas, 0, 0, 32, 32, 65);
         ctx.textAlign = 'left';
         ctx.font = "bold 11px Arial";
         core.fillBoldText(ctx, damage, 1, 31, damageColor);
         if (core.flags.displayCritical) {
-            var critical = core.enemys.nextCriticals(block.event.id);
+            var critical = core.enemys.nextCriticals(blockInfo.id);
             if (critical.length>0) critical=critical[0];
             critical = core.formatBigNumber(critical[0], true);
             if (critical == '???') critical = '?';
@@ -1315,216 +1295,215 @@ maps.prototype.__initBlockCanvas = function (block, height, x, y) {
     }
 }
 
+////// 移动独立的block canvas //////
+maps.prototype._moveDetachedBlock = function (blockInfo, nowX, nowY, opacity, canvases) {
+    var height = blockInfo.height, posX = blockInfo.posX, posY = blockInfo.posY, image = blockInfo.image;
+    var headCanvas = canvases.headCanvas, bodyCanvas = canvases.bodyCanvas, damageCanvas = canvases.damageCanvas;
+    if (headCanvas) {
+        core.dymCanvas[headCanvas].clearRect(0, 0, 32, height);
+        core.dymCanvas[headCanvas].drawImage(image, posX * 32, posY * height, 32, height - 32, 0, 0, 32, height - 32);
+        core.relocateCanvas(headCanvas, nowX - core.bigmap.offsetX, nowY + 32 - height - core.bigmap.offsetY);
+        core.setOpacity(headCanvas, opacity);
+    }
+    if (bodyCanvas) {
+        core.dymCanvas[bodyCanvas].clearRect(0, 0, 32, 32);
+        core.dymCanvas[bodyCanvas].drawImage(image, posX * 32, posY * height + height - 32, 32, 32, 0, 0, 32, 32);
+        core.relocateCanvas(bodyCanvas, nowX - core.bigmap.offsetX, nowY - core.bigmap.offsetY);
+        core.setOpacity(bodyCanvas, opacity);
+    }
+    if (damageCanvas) {
+        core.relocateCanvas(damageCanvas, nowX - core.bigmap.offsetX, nowY - core.bigmap.offsetY);
+        core.setOpacity(damageCanvas, opacity);
+    }
+}
+
+////// 删除独立的block canvas //////
+maps.prototype._deleteDetachedBlock = function (canvases) {
+    core.deleteCanvas(canvases.headCanvas);
+    core.deleteCanvas(canvases.bodyCanvas);
+    core.deleteCanvas(canvases.damageCanvas);
+}
+
+maps.prototype._getAndRemoveBlock = function (x, y) {
+    var block = core.getBlock(x,y);
+    if (block==null) return null;
+    block=block.block;
+    var blockInfo = this.getBlockInfo(block);
+    if (blockInfo == null) return;
+    core.removeBlock(x,y);
+    return [block, blockInfo];
+}
+
 ////// 显示移动某块的动画，达到{“type”:”move”}的效果 //////
 maps.prototype.moveBlock = function(x,y,steps,time,keep,callback) {
     time = time || 500;
-    var floorId = core.status.floorId;
-
-    var block = core.getBlock(x,y);
-    if (block==null) {// 不存在
+    var blockArr = this._getAndRemoveBlock(x, y);
+    if (blockArr == null) {
         if (core.isset(callback)) callback();
         return;
     }
-    var id = block.block.id;
+    var block = blockArr[0], blockInfo = blockArr[1];
+    var moveSteps = core.utils.expandMoveSteps(steps);
+    var canvases = this._initDetachedBlock(blockInfo, x, y, block.event.animate !== false);
+    this._moveDetachedBlock(blockInfo, 32 * x, 32 * y, 1, canvases);
 
-    // 需要删除该块
-    core.removeBlock(x,y);
-
-    block=block.block;
-    var blockInfo = this.getBlockInfo(block);
-    if (blockInfo == null) {
-        if (core.isset(callback)) callback();
-        return;
+    var moveInfo = {
+        x: x, y: y, px: 32 * x, py: 32 * y, opacity: 1, keep: keep,
+        moveSteps: moveSteps, step: 0, per_time: time / 16 / core.status.replay.speed
     }
-    var image = blockInfo.image, bx = blockInfo.bx, by = blockInfo.by, height = blockInfo.height, isTileset = blockInfo.isTileset, faceIds = blockInfo.faceIds;
+    this._moveBlock_doMove(blockInfo, canvases, moveInfo, callback);
+}
 
-    // 要运行的轨迹：将steps展开
-    var moveSteps=[];
-    steps.forEach(function (e) {
-        if (typeof e=="string") {
-            moveSteps.push(e);
-        }
-        else {
-            if (!core.isset(e.value)) {
-                moveSteps.push(e.direction)
-            }
-            else {
-                for (var i=0;i<e.value;i++) {
-                    moveSteps.push(e.direction);
-                }
+maps.prototype._moveBlock_doMove = function (blockInfo, canvases, moveInfo, callback) {
+    var animateTotal = core.icons._getAnimateFrames(blockInfo.cls, true), animateTime = 0;
+    var animate = window.setInterval(function () {
+        if (blockInfo.cls != 'tileset') {
+            animateTime += moveInfo.per_time;
+            if (animateTime > core.values.animateSpeed) {
+                animateTime = 0;
+                blockInfo.posX = (blockInfo.posX + 1) % animateTotal;
             }
         }
-    });
-    moveSteps = moveSteps.filter(function (t) { return ['up','down','left','right'].indexOf(t)>=0;});
-
-    var nowX=32*x, nowY=32*y, step=0;
-    var destX=x, destY=y;
-    moveSteps.forEach(function (t) {
-        destX += core.utils.scan[t].x;
-        destY += core.utils.scan[t].y;
-    });
-
-    var animateValue = core.icons._getAnimateFrames(block.event.cls, true), animateCurrent = isTileset?bx:0, animateTime = 0;
-    var blockCanvas = this.__initBlockCanvas(block, height, x, y);
-    var headCanvas = blockCanvas.headCanvas, bodyCanvas = blockCanvas.bodyCanvas, damageCanvas = blockCanvas.damageCanvas;
-    var opacity = 1;
-
-    core.maps.__moveBlockCanvas(image, animateCurrent, by, height, nowX, nowY, opacity, headCanvas, bodyCanvas, damageCanvas);
-
-    var animate=window.setInterval(function() {
-
-        animateTime += time / 16 / core.status.replay.speed;
-        if (animateTime >= core.values.animateSpeed) {
-            animateCurrent++;
-            animateTime = 0;
-            if (animateCurrent>=animateValue) animateCurrent=0;
-        }
-        if (isTileset) animateCurrent = bx;
-
-        // 已经移动完毕，消失
-        if (moveSteps.length==0 || floorId != core.status.floorId) {
-            if (keep || floorId!=core.status.floorId) opacity=0;
-            else opacity -= 0.06;
-            if (opacity<=0) {
-                delete core.animateFrame.asyncId[animate];
-                clearInterval(animate);
-                core.deleteCanvas(headCanvas);
-                core.deleteCanvas(bodyCanvas);
-                core.deleteCanvas(damageCanvas);
-                // 不消失
-                if (keep) {
-                    core.setBlock(id, destX, destY, floorId);
-                    if (floorId == core.status.floorId)
-                        core.showBlock(destX, destY);
-                }
-                if (core.isset(callback)) callback();
-            }
-            else {
-                core.maps.__moveBlockCanvas(image, animateCurrent, by, height, nowX, nowY, opacity, headCanvas, bodyCanvas, damageCanvas);
-            }
-        }
-        else {
-            // 移动中
-            var direction = moveSteps[0];
-            if (step == 0) {
-                // 根据faceIds修改朝向
-                var currid = faceIds[direction];
-                if (core.isset(currid)) {
-                    var tby = core.material.icons[block.event.cls][currid];
-                    if (core.isset(tby))
-                        by = tby;
-                }
-            }
-            step++;
-            nowX+=core.utils.scan[direction].x*2;
-            nowY+=core.utils.scan[direction].y*2;
-            // 移动
-            core.maps.__moveBlockCanvas(image, animateCurrent, by, height, nowX, nowY, opacity, headCanvas, bodyCanvas, damageCanvas);
-            if (step==16) {
-                // 该移动完毕，继续
-                step=0;
-                moveSteps.shift();
-            }
-        }
-    }, time / 16 / core.status.replay.speed);
+        if (moveInfo.moveSteps.length!=0)
+            core.maps._moveBlock_moving(blockInfo, canvases, moveInfo);
+        else
+            core.maps._moveJumpBlock_finished(blockInfo, canvases, moveInfo, animate, callback);
+    }, moveInfo.per_time);
 
     core.animateFrame.asyncId[animate] = true;
+}
 
+maps.prototype._moveBlock_moving = function (blockInfo, canvases, moveInfo) {
+    var direction = moveInfo.moveSteps[0];
+    if (moveInfo.step == 0) {
+        moveInfo.x += core.utils.scan[direction].x;
+        moveInfo.y += core.utils.scan[direction].y;
+        // 根据faceIds修改朝向
+        var currid = blockInfo.faceIds[direction];
+        if (core.isset(currid)) {
+            var posY = core.material.icons[blockInfo.cls][currid];
+            if (core.isset(posY)) blockInfo.posY = posY;
+        }
+    }
+    moveInfo.step++;
+    moveInfo.px += core.utils.scan[direction].x * 2;
+    moveInfo.py += core.utils.scan[direction].y * 2;
+    this._moveDetachedBlock(blockInfo, moveInfo.px, moveInfo.py, moveInfo.opacity, canvases);
+    if (moveInfo.step == 16) {
+        moveInfo.step = 0;
+        moveInfo.moveSteps.shift();
+    }
 }
 
 ////// 显示跳跃某块的动画，达到{"type":"jump"}的效果 //////
 maps.prototype.jumpBlock = function(sx,sy,ex,ey,time,keep,callback) {
     time = time || 500;
-    var floorId = core.status.floorId;
-    var block = core.getBlock(sx,sy);
-    if (block==null) {
+    var blockArr = this._getAndRemoveBlock(sx, sy);
+    if (blockArr == null) {
         if (core.isset(callback)) callback();
         return;
     }
-    var id = block.block.id;
+    var block = blockArr[0], blockInfo = blockArr[1];
+    var canvases = this._initDetachedBlock(blockInfo, sx, sy, block.event.animate !== false);
+    this._moveDetachedBlock(blockInfo, 32 * sx, 32 * sy, 1, canvases);
 
-    // 需要删除该块
-    core.removeBlock(sx,sy);
+    this._jumpBlock_playSound();
 
-    block=block.block;
-    var blockInfo = this.getBlockInfo(block);
-    if (blockInfo == null) {
-        if (core.isset(callback)) callback();
-        return;
-    }
-    var image = blockInfo.image, bx = blockInfo.bx, by = blockInfo.by, height = blockInfo.height, isTileset = blockInfo.isTileset, faceIds = blockInfo.faceIds;
-
-    core.playSound('jump.mp3');
-
-    var dx = ex-sx, dy=ey-sy, distance = Math.round(Math.sqrt(dx * dx + dy * dy));
+    var dx = ex - sx, dy = ey - sy, distance = Math.round(Math.sqrt(dx * dx + dy * dy));
     var jump_peak = 6 + distance, jump_count = jump_peak * 2;
-    var currx = sx, curry = sy;
+    var jumpInfo = {
+        x: sx, y: sy, ex: ex, ey: ey, px: 32 * sx, py: 32 * sy, opacity: 1, keep: keep,
+        jump_peak: jump_peak, jump_count: jump_count,
+        step: 0, per_time: time / 16 / core.status.replay.speed
+    };
+    this._jumpBlock_doJump(blockInfo, canvases, jumpInfo, callback);
+}
 
-    var drawX = function() {
-        return currx * 32;
-    }
+maps.prototype._jumpBlock_playSound = function () {
+    core.playSound('jump.mp3');
+}
 
-    var drawY = function() {
-        var ret = curry * 32;
-        if(jump_count >= jump_peak){
-            var n = jump_count - jump_peak;
-        }else{
-            var n = jump_peak - jump_count;
-        }
-        return ret - (jump_peak * jump_peak - n * n) / 2;
-    }
-
-    var updateJump = function() {
-        jump_count--;
-        currx = (currx * jump_count + ex) / (jump_count + 1.0);
-        curry = (curry * jump_count + ey) / (jump_count + 1.0);
-    }
-
-    var blockCanvas = this.__initBlockCanvas(block, height, sx, sy);
-    var headCanvas = blockCanvas.headCanvas, bodyCanvas = blockCanvas.bodyCanvas, damageCanvas = blockCanvas.damageCanvas;
-    var opacity = 1;
-
-    core.maps.__moveBlockCanvas(image, bx, by, height, drawX(), drawY(), opacity, headCanvas, bodyCanvas, damageCanvas);
-
+maps.prototype._jumpBlock_doJump = function (blockInfo, canvases, jumpInfo, callback) {
     var animate=window.setInterval(function() {
-
-        if (jump_count>0 && floorId == core.status.floorId) {
-            updateJump();
-            core.maps.__moveBlockCanvas(image, bx, by, height, drawX(), drawY(), opacity, headCanvas, bodyCanvas, damageCanvas);
-        }
-        else {
-            if (keep || floorId != core.status.floorId) opacity=0;
-            else opacity -= 0.06;
-            if (opacity<=0) {
-                delete core.animateFrame.asyncId[animate];
-                clearInterval(animate);
-                core.deleteCanvas(headCanvas);
-                core.deleteCanvas(bodyCanvas);
-                core.deleteCanvas(damageCanvas);
-                if (keep) {
-                    core.setBlock(id, ex, ey, floorId);
-                    if (floorId == core.status.floorId)
-                        core.showBlock(ex, ey);
-                }
-                if (core.isset(callback)) callback();
-            }
-            else {
-                core.maps.__moveBlockCanvas(image, bx, by, height, drawX(), drawY(), opacity, headCanvas, bodyCanvas, damageCanvas);
-            }
-        }
-
-    }, time / 16 / core.status.replay.speed);
+        if (jumpInfo.jump_count>0)
+            core.maps._jumpBlock_jumping(blockInfo, canvases, jumpInfo)
+        else
+            core.maps._moveJumpBlock_finished(blockInfo, canvases, jumpInfo, animate, callback);
+    }, jumpInfo.per_time);
 
     core.animateFrame.asyncId[animate] = true;
 }
 
+maps.prototype._jumpBlock_updateJump = function (jumpInfo) {
+    jumpInfo.jump_count--;
+    jumpInfo.x = (jumpInfo.x * jumpInfo.jump_count + jumpInfo.ex) / (jumpInfo.jump_count + 1.0);
+    jumpInfo.y = (jumpInfo.y * jumpInfo.jump_count + jumpInfo.ey) / (jumpInfo.jump_count + 1.0);
+    jumpInfo.px = 32 * jumpInfo.x;
+    var delta = Math.abs(jumpInfo.jump_count - jumpInfo.jump_peak);
+    jumpInfo.py = 32 * jumpInfo.y - (jumpInfo.jump_peak * jumpInfo.jump_peak - delta * delta) / 2;
+}
+
+maps.prototype._jumpBlock_jumping = function (blockInfo, canvases, jumpInfo) {
+    this._jumpBlock_updateJump(jumpInfo);
+    core.maps._moveDetachedBlock(blockInfo, jumpInfo.px, jumpInfo.py, jumpInfo.opacity, canvases);
+}
+
+maps.prototype._moveJumpBlock_finished = function (blockInfo, canvases, info, animate, callback) {
+    if (info.keep) info.opacity=0;
+    else info.opacity -= 0.06;
+    if (info.opacity<=0) {
+        delete core.animateFrame.asyncId[animate];
+        clearInterval(animate);
+        this._deleteDetachedBlock(canvases);
+        // 不消失
+        if (info.keep) {
+            core.setBlock(blockInfo.number, info.x, info.y);
+            core.showBlock(info.x, info.y);
+        }
+        if (core.isset(callback)) callback();
+    }
+    else {
+        this._moveDetachedBlock(blockInfo, info.px, info.py, info.opacity, canvases);
+    }
+}
+
 ////// 显示/隐藏某个块时的动画效果 //////
 maps.prototype.animateBlock = function (loc,type,time,callback) {
-    if (type!='hide') type='show';
-
+    var isHide = type=='hide';
     if (typeof loc[0] == 'number' && typeof loc[1] == 'number')
         loc = [loc];
+    var list = this._animateBlock_getList(loc);
+    if (list.length==0) {
+        if (core.isset(callback)) callback();
+        return;
+    }
+    this._animateBlock_drawList(list, isHide?1:0);
+    this._animateBlock_doAnimate(loc, list, isHide, 10 / time, callback);
+}
 
+maps.prototype._animateBlock_doAnimate = function (loc, list, isHide, delta, callback) {
+    var opacity = isHide?1:0;
+    var animate = setInterval(function () {
+        opacity += isHide?-delta:delta;
+        core.maps._animateBlock_drawList(list, opacity);
+        if (opacity >=1 || opacity<=0) {
+            delete core.animateFrame.asyncId[animate];
+            clearInterval(animate);
+            list.forEach(function (t) {
+                core.maps._deleteDetachedBlock(t.canvases);
+            });
+            loc.forEach(function (t) {
+                if (isHide) core.removeBlock(t[0],t[1]);
+                else core.showBlock(t[0],t[1]);
+            });
+            if (core.isset(callback)) callback();
+        }
+    }, 10);
+
+    core.animateFrame.asyncId[animate] = true;
+}
+
+maps.prototype._animateBlock_getList = function (loc) {
     var list = [];
     loc.forEach(function (t) {
         var block = core.getBlock(t[0],t[1],null,true);
@@ -1533,76 +1512,36 @@ maps.prototype.animateBlock = function (loc,type,time,callback) {
 
         var blockInfo = core.maps.getBlockInfo(block);
         if (blockInfo == null) return;
-        var blockCanvas = core.maps.__initBlockCanvas(block, blockInfo.height, t[0], t[1]);
-        var headCanvas = blockCanvas.headCanvas, bodyCanvas = blockCanvas.bodyCanvas, damageCanvas = blockCanvas.damageCanvas;
+        var canvases = core.maps._initDetachedBlock(blockInfo, t[0], t[1], block.event.displayDamage !== false);
 
         list.push({
-            'x': t[0], 'y': t[1], 'height': blockInfo.height,
-            'bx': blockInfo.bx, 'by': blockInfo.by, 'image': blockInfo.image,
-            'headCanvas': headCanvas, 'bodyCanvas': bodyCanvas, 'damageCanvas': damageCanvas
+            'x': t[0], 'y': t[1], 'blockInfo': blockInfo, 'canvases': canvases
         });
 
     });
-
-    if (list.length==0) {
-        if (core.isset(callback)) callback();
-        return;
-    }
-
-    var opacity = 0;
-    if (type=='hide') opacity=1;
-
-    var draw = function () {
-        list.forEach(function (t) {
-            core.maps.__moveBlockCanvas(t.image, t.bx, t.by, t.height, t.x*32, t.y*32, opacity, t.headCanvas, t.bodyCanvas, t.damageCanvas);
-        })
-    };
-    draw();
-
-    var per_time = 10, steps = parseInt(time / per_time), delta = 1 / steps;
-    var animate = setInterval(function () {
-        if (type=='show') opacity += delta;
-        else opacity -= delta;
-        if (opacity >=1 || opacity<=0) {
-            delete core.animateFrame.asyncId[animate];
-            clearInterval(animate);
-            list.forEach(function (t) {
-                core.deleteCanvas(t.headCanvas);
-                core.deleteCanvas(t.bodyCanvas);
-                core.deleteCanvas(t.damageCanvas);
-            });
-            if (type == 'show') {
-                loc.forEach(function (t) {
-                    core.showBlock(t[0],t[1],data.floorId);
-                });
-            }
-            else {
-                loc.forEach(function (t) {
-                    core.removeBlock(t[0],t[1],data.floorId);
-                });
-            }
-            if (core.isset(callback)) callback();
-        }
-        else {
-            draw();
-        }
-    }, per_time);
-
-    core.animateFrame.asyncId[animate] = true;
+    return list;
 }
+
+maps.prototype._animateBlock_drawList = function (list, opacity) {
+    list.forEach(function (t) {
+        core.maps._moveDetachedBlock(t.blockInfo, t.x * 32, t.y * 32, opacity, t.canvases);
+    });
+}
+
+// ------ 全局动画控制，动画绘制 ------ //
 
 ////// 添加一个全局动画 //////
 maps.prototype.addGlobalAnimate = function (b) {
-    if (!core.isset(b.event) || !core.isset(b.event.animate) || b.event.animate==1) return;
-    core.status.globalAnimateObjs.push(b);
-}
-
-////// 添加一个Autotile全局动画 //////
-maps.prototype.addAutotileGlobalAnimate = function (b) {
-    if (!core.isset(b.event) || b.event.cls!='autotile') return;
-    var id = b.event.id, img = core.material.images.autotile[id];
-    if (!core.isset(img) || img.width==96) return;
-    core.status.autotileAnimateObjs.blocks.push(b);
+    if (!core.isset(b.event) || !core.isset(b.event.animate)) return;
+    if (b.event.cls == 'autotile') {
+        var id = b.event.id, img = core.material.images.autotile[id];
+        if (!core.isset(img) || img.width==96) return;
+        core.status.autotileAnimateObjs.blocks.push(b);
+    }
+    else {
+        if (!core.isset(b.event.animate) || b.event.animate == 1) return;
+        core.status.globalAnimateObjs.push(b);
+    }
 }
 
 ////// 删除一个或所有全局动画 //////
@@ -1624,12 +1563,6 @@ maps.prototype.removeGlobalAnimate = function (x, y, name) {
         core.status.autotileAnimateObjs.map[y][x] = 0;
     }
 
-}
-
-////// 设置全局动画的显示效果 //////
-maps.prototype.setGlobalAnimate = function () {
-    core.status.globalAnimateStatus = 0;
-    core.animateFrame.globalAnimate = true;
 }
 
 ////// 绘制UI层的box动画 //////

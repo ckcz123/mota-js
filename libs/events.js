@@ -63,7 +63,7 @@ events.prototype._init = function () {
                 var dir = {"up":"down","down":"up","left":"right","right":"left"}[core.getHeroLoc('direction')];
                 var id = data.event.id, toId = (data.event.faceIds||{})[dir];
                 if (core.isset(toId) && id!=toId) {
-                    var number = core.maps.getNumberById(toId);
+                    var number = core.icons.getNumberById(toId);
                     if (number>0)
                         core.setBlock(number, ex, ey);
                 }

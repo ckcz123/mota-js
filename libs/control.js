@@ -64,7 +64,7 @@ control.prototype.setRequestAnimationFrame = function () {
             
             core.status.globalAnimateStatus++;
 
-            if (core.animateFrame.globalAnimate && core.isset(core.status.floorId)) {
+            if (core.isset(core.status.floorId)) {
                 // Global Animate
                 core.status.globalAnimateObjs.forEach(function (block) {
                     core.drawBlock(block, core.status.globalAnimateStatus % (block.event.animate||1));

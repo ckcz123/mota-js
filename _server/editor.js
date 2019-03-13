@@ -306,7 +306,6 @@ editor.prototype.updateMap = function () {
         core.clearMap('fg');
         core.maps._drawMap_drawBgFg();
         core.maps._drawMap_drawEvent();
-        core.setGlobalAnimate(core.values.animateSpeed);
     }
     updateMap();
 

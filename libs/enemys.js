@@ -47,15 +47,6 @@ enemys.prototype.getSpecials = function () {
     return this.enemydata.getSpecials();
 }
 
-enemys.prototype._calSpecialContent = function (enemy, content) {
-    if (typeof content == 'string') return content;
-    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    if (content instanceof Function) {
-        return content(enemy);
-    }
-    return "";
-}
-
 ////// 获得所有特殊属性的名称 //////
 enemys.prototype.getSpecialText = function (enemy) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
@@ -91,6 +82,15 @@ enemys.prototype.getSpecialHint = function (enemy, special) {
     for (var i=0;i<specials.length;i++) {
         if (special == specials[i][0])
             return this._calSpecialContent(enemy, specials[i][1])+"："+this._calSpecialContent(enemy, specials[i][2]);
+    }
+    return "";
+}
+
+enemys.prototype._calSpecialContent = function (enemy, content) {
+    if (typeof content == 'string') return content;
+    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
+    if (content instanceof Function) {
+        return content(enemy);
     }
     return "";
 }
@@ -153,6 +153,40 @@ enemys.prototype.getDamageString = function (enemy, x, y, floorId) {
         "damage": damage,
         "color": color
     };
+}
+
+////// 接下来N个临界值和临界减伤计算 //////
+enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
+    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
+    number = number||1;
+
+    if (this.hasSpecial(enemy.special, 10)) return []; // 模仿怪物临界
+    var info = this.getDamageInfo(enemy, null, x, y, floorId);
+    if (info == null || this.hasSpecial(enemy.special, 3)) { // 未破防，或是坚固怪
+        info = this.getEnemyInfo(enemy, null, x, y, floorId);
+        if (core.status.hero.atk<=info.def) {
+            return [[info.def+1-core.status.hero.atk,'?']];
+        }
+        return [];
+    }
+
+    // getDamageInfo直接返回数字；0伤且无负伤
+    if (typeof info == 'number' || (info.damage<=0 && !core.flags.enableNegativeDamage)) {
+        return [[0,0]];
+    }
+
+    if (core.flags.useLoop) {
+        var LOOP_MAX_VALUE = 1;
+        if (core.status.hero.atk <= LOOP_MAX_VALUE) {
+            return this._nextCriticals_useLoop(enemy, info, number, x, y, floorId);
+        }
+        else {
+            return this._nextCriticals_useBinarySearch(enemy, info, number, x, y, floorId);
+        }
+    }
+    else {
+        return this._nextCriticals_useTurn(enemy, info, number, x, y, floorId);
+    }
 }
 
 enemys.prototype._nextCriticals_useLoop = function (enemy, info, number, x, y, floorId) {
@@ -223,40 +257,6 @@ enemys.prototype._nextCriticals_useTurn = function (enemy, info, number, x, y, f
     }
     if (list.length==0) list.push([0,0]);
     return list;
-}
-
-////// 接下来N个临界值和临界减伤计算 //////
-enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
-    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    number = number||1;
-
-    if (this.hasSpecial(enemy.special, 10)) return []; // 模仿怪物临界
-    var info = this.getDamageInfo(enemy, null, x, y, floorId);
-    if (info == null || this.hasSpecial(enemy.special, 3)) { // 未破防，或是坚固怪
-        info = this.getEnemyInfo(enemy, null, x, y, floorId);
-        if (core.status.hero.atk<=info.def) {
-            return [[info.def+1-core.status.hero.atk,'?']];
-        }
-        return [];
-    }
-
-    // getDamageInfo直接返回数字；0伤且无负伤
-    if (typeof info == 'number' || (info.damage<=0 && !core.flags.enableNegativeDamage)) {
-        return [[0,0]];
-    }
-
-    if (core.flags.useLoop) {
-        var LOOP_MAX_VALUE = 1;
-        if (core.status.hero.atk <= LOOP_MAX_VALUE) {
-            return this._nextCriticals_useLoop(enemy, info, number, x, y, floorId);
-        }
-        else {
-            return this._nextCriticals_useBinarySearch(enemy, info, number, x, y, floorId);
-        }
-    }
-    else {
-        return this._nextCriticals_useTurn(enemy, info, number, x, y, floorId);
-    }
 }
 
 ////// N防减伤计算 //////

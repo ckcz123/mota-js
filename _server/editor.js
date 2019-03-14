@@ -304,8 +304,7 @@ editor.prototype.updateMap = function () {
         core.clearMap('event');
         core.clearMap('event2');
         core.clearMap('fg');
-        core.maps._drawMap_drawBgFg();
-        core.maps._drawMap_drawEvent();
+        core.maps._drawMap_drawAll();
     }
     updateMap();
 

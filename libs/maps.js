@@ -895,6 +895,107 @@ maps.prototype._makeAutotileEdges = function () {
     });
 }
 
+////// 绘制缩略图 //////
+// 此函数将绘制一个缩略图，floorId为目标floorId，blocks为地图的图块（可为null使用floorId对应默认的）
+// options为绘制选项（可为null），包括：
+//    heroLoc: 勇士位置；heroIcon：勇士图标；damage：是否绘制显伤；flags：当前的flags（存读档时使用）
+// toDraw为要绘制到的信息（可为null，或为一个画布名），包括：
+//    ctx：要绘制到的画布（名）；x,y：起点横纵坐标；size：大小；all：是否绘制全图；centerX,centerY：截取中心
+maps.prototype.drawThumbnail = function (floorId, blocks, options, toDraw) {
+    floorId = floorId || core.status.floorId;
+    if (!core.isset(floorId)) return;
+    // Step1：绘制到tempCanvas上
+    this._drawThumbnail_drawTempCanvas(floorId, blocks, options);
+    // Step2：从tempCanvas绘制到对应的画布上
+    this._drawThumbnail_drawToTarget(floorId, toDraw);
+}
+
+maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, options) {
+    if (!core.isset(blocks)) blocks = core.status.maps[floorId].blocks;
+    if (!core.isset(options)) options = {};
+
+    var width = core.floors[floorId].width;
+    var height = core.floors[floorId].height;
+    // 绘制到tempCanvas上面
+    var tempCanvas = core.bigmap.tempCanvas;
+    var tempWidth = width * 32, tempHeight = height * 32;
+    tempCanvas.canvas.width = tempWidth;
+    tempCanvas.canvas.height = tempHeight;
+    tempCanvas.clearRect(0, 0, tempWidth, tempHeight);
+
+    // --- 暂存 flags
+    var hasHero = core.isset(core.status.hero), flags = null;
+    if (options.flags) {
+        if (!hasHero) core.status.hero = {};
+        flags = core.status.hero.flags;
+        core.status.hero.flags = options.flags;
+    }
+
+    this._drawThumbnail_realDrawTempCanvas(floorId, blocks, options, tempCanvas);
+
+    // --- 恢复 flags
+    if (!hasHero) delete core.status.hero;
+    else if (flags != null) core.status.hero.flags = flags;
+}
+
+maps.prototype._drawThumbnail_realDrawTempCanvas = function (floorId, blocks, options, tempCanvas) {
+    // 缩略图：背景
+    this.drawBg(floorId, tempCanvas);
+    // 缩略图：事件
+    this.drawEvents(floorId, blocks, tempCanvas);
+    // 缩略图：勇士
+    if (options.heroLoc) {
+        options.heroIcon = options.heroIcon || "hero.png";
+        var icon = core.material.icons.hero[options.heroLoc.direction];
+        var height = core.material.images.images[options.heroIcon].height/4;
+        tempCanvas.drawImage(core.material.images.images[options.heroIcon], icon.stop * 32, icon.loc * height, 32, height,
+            32 * options.heroLoc.x, 32 * options.heroLoc . y + 32 - height, 32, height);
+    }
+    // 缩略图：前景
+    this.drawFg(floorId, tempCanvas);
+    // 缩略图：显伤
+    if (options.damage)
+        core.control.updateDamage(floorId, tempCanvas);
+}
+
+maps.prototype._drawThumbnail_drawToTarget = function (floorId, toDraw) {
+    if (!core.isset(toDraw)) return;
+    if (typeof toDraw == 'string' || toDraw.canvas) toDraw = {ctx: toDraw};
+    var ctx = core.getContextByName(toDraw.ctx);
+    if (ctx == null) return;
+    var x = toDraw.x || 0, y = toDraw.y || 0, size = toDraw.size || this.DEFAULT_PIXEL_WIDTH;
+    var width = core.floors[floorId].width, height = core.floors[floorId].height;
+    var centerX = toDraw.centerX, centerY = toDraw.centerY;
+    if (!core.isset(centerX)) centerX = Math.floor(width/2);
+    if (!core.isset(centerY)) centerY = Math.floor(height/2);
+    var tempCanvas = core.bigmap.tempCanvas, tempWidth = 32 * width, tempHeight = 32 * height;
+
+    core.clearMap(ctx, x, y, size, size);
+    if (toDraw.all) {
+        // 绘制全景图
+        if (tempWidth<=tempHeight) {
+            var realHeight = size, realWidth = realHeight * tempWidth / tempHeight;
+            var side = (size - realWidth) / 2;
+            core.fillRect(ctx, x, y, side, realHeight, '#000000');
+            core.fillRect(ctx, x + size - side, y, side, realHeight);
+            ctx.drawImage(tempCanvas.canvas, 0, 0, tempWidth, tempHeight, x + side, y, realWidth, realHeight);
+        }
+        else {
+            var realWidth = size, realHeight = realWidth * tempHeight / tempWidth;
+            var side = (size - realHeight) / 2;
+            core.fillRect(ctx, x, y, realWidth, side, '#000000');
+            core.fillRect(ctx, x, y + size - side, realWidth, side);
+            ctx.drawImage(tempCanvas.canvas, 0, 0, tempWidth, tempHeight, x, y + side, realWidth, realHeight);
+        }
+    }
+    else {
+        // 只绘制可见窗口
+        var halfWidth = parseInt(this.DEFAULT_WIDTH / 2), halfHeight = parseInt(this.DEFAULT_HEIGHT / 2);
+        var offsetX = core.clamp(centerX - halfWidth, 0, width - this.DEFAULT_WIDTH), offsetY = core.clamp(centerY - halfHeight, 0, height - this.DEFAULT_HEIGHT);
+        ctx.drawImage(tempCanvas.canvas, offsetX * 32, offsetY * 32, this.DEFAULT_PIXEL_WIDTH, this.DEFAULT_PIXEL_HEIGHT, x, y, size, size);
+    }
+}
+
 // -------- 获得某个点的图块信息 -------- //
 
 ////// 某个点是否不可通行 //////

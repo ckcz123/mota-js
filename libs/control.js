@@ -1220,8 +1220,8 @@ control.prototype.updateFollowers = function () {
 }
 
 ////// 更新领域、夹击、阻击的伤害地图 //////
-control.prototype.updateCheckBlock = function() {
-    return this.controldata.updateCheckBlock();
+control.prototype.updateCheckBlock = function(floorId) {
+    return this.controldata.updateCheckBlock(floorId);
 }
 
 ////// 检查并执行领域、夹击、阻击事件 //////
@@ -1455,9 +1455,11 @@ control.prototype.updateDamage = function (floorId, canvas) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
     if (core.status.gameOver) return;
+    var refreshCheckBlock = true;
     if (!core.isset(canvas)) {
         canvas = core.canvas.damage;
         core.clearMap('damage');
+        refreshCheckBlock = false;
     }
 
     // 更新显伤
@@ -1502,36 +1504,23 @@ control.prototype.updateDamage = function (floorId, canvas) {
     if (core.flags.displayExtraDamage && core.isset((core.status.checkBlock||{}).damage)) {
         canvas.textAlign = 'center';
 
-        // 临时改变
-        var tempCheckBlock = null;
-        if (floorId != core.status.floorId) {
-            tempCheckBlock = core.clone(core.status.checkBlock);
-            core.status.thisMap = core.status.maps[floorId];
-            core.bigmap.width = core.floors[floorId].width;
-            core.bigmap.height = core.floors[floorId].height;
-            core.updateCheckBlock();
-        }
+        if (refreshCheckBlock)
+            this.updateCheckBlock(floorId);
 
-        for (var x=0;x<core.bigmap.width;x++) {
-            for (var y=0;y<core.bigmap.height;y++) {
-                var damage = core.status.checkBlock.damage[x+core.bigmap.width*y];
+        var width = core.floors[floorId].width, height = core.floors[floorId].height;
+        for (var x=0;x<width;x++) {
+            for (var y=0;y<height;y++) {
+                var damage = core.status.checkBlock.damage[x+width*y];
                 if (damage>0) { // 该点伤害
                     damage = core.formatBigNumber(damage, true);
                     core.fillBoldText(canvas, damage, 32*x+16, 32*(y+1)-14, '#FF7F00');
                 }
                 else { // 检查捕捉
-                    if ((core.status.checkBlock.ambush||[])[x+core.bigmap.width*y]) {
+                    if ((core.status.checkBlock.ambush||[])[x+width*y]) {
                         core.fillBoldText(canvas, '!', 32*x+16, 32*(y+1)-14, '#FF7F00');
                     }
                 }
             }
-        }
-
-        if (floorId!=core.status.floorId) {
-            core.status.thisMap = core.status.maps[core.status.floorId];
-            core.status.checkBlock = tempCheckBlock;
-            core.bigmap.width = core.floors[core.status.floorId].width;
-            core.bigmap.height = core.floors[core.status.floorId].height;
         }
     }
 }

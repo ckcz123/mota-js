@@ -351,7 +351,6 @@ core.prototype.init = function (coreData, callback) {
     });
 
     core.loader._load(function () {
-        console.log(core.material);
         // 设置勇士高度
         core.material.icons.hero.height = core.material.images.hero.height/4;
         // 行走图
@@ -369,6 +368,7 @@ core.prototype.init = function (coreData, callback) {
             };
             core.plugin.__init__ = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.plugin;
             core.plugin.__init__();
+            core._forwardFunc("plugin");
         }
 
         core.showStartAnimate();
@@ -379,29 +379,25 @@ core.prototype.init = function (coreData, callback) {
 }
 
 core.prototype._forwardFuncs = function () {
-    var list = {};
     for (var i = 0; i < main.loadList.length; ++i) {
         var name = main.loadList[i];
         if (name == 'core') continue;
-        for (var funcname in core[name]) {
-            if (funcname.charAt(0) != "_" && core[name][funcname] instanceof Function) {
-                if (list[funcname]) {
-                    main.log("Error forward: "+name+"."+funcname);
-                }
-                else {
-                    list[funcname] = name;
-                }
-            }
-        }
-    }
-    for (var funcname in list) {
-        this._forwardFunc(list[funcname], funcname);
+        this._forwardFunc(name);
     }
 }
 
 core.prototype._forwardFunc = function (name, funcname) {
+    if (funcname == null) {
+        for (funcname in core[name]) {
+            if (funcname.charAt(0) != "_" && core[name][funcname] instanceof Function) {
+                this._forwardFunc(name, funcname);
+            }
+        }
+        return;
+    }
+
     if (core[funcname]) {
-        main.log("Error in forwarding "+funcname+" from "+name+"!");
+        console.error("ERROR: Cannot forward function "+funcname+" from "+name+"!");
         return;
     }
     var parameterInfo = /^\s*function\s*[\w_$]*\(([\w_,$\s]*)\)\s*\{/.exec(core[name][funcname].toString());

@@ -1601,6 +1601,8 @@ ui.prototype.drawFly = function(page) {
         core.fillText('ui', '▼', 420, 279 + 96 + 7, '#FFFFFF', "17px "+globalFont);
     }
     core.strokeRect('ui', 20, 100, 273+64, 273+64, '#FFFFFF', 2);
+    core.drawThumbnail(floorId, null, null, {ctx: 'ui', x: 20, y: 100, size: 273+64});
+
     this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 20, 100, 273+64);
 }
 
@@ -1678,7 +1680,7 @@ ui.prototype.drawMaps = function (index, x, y) {
     clearTimeout(core.interval.tipAnimate);
     core.clearLastEvent();
     core.status.checkBlock.cache = {};
-    this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 0, 0, 480, x, y);
+    core.drawThumbnail(floorId, null, {damage: damage}, {ctx: 'ui', centerX: x, centerY: y, all: all});
 
     // 绘图
     if (core.status.event.data.paint) {
@@ -2085,7 +2087,11 @@ ui.prototype.drawSLPanel = function(index, refresh) {
             core.fillText('ui', i==0?"自动存档":name+id, (2*i+1)*u, 38, '#FFFFFF', "bold 17px "+globalFont);
             core.strokeRect('ui', (2*i+1)*u-size/2, 55, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.loadMap(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 55, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
+                core.drawThumbnail(data.floorId, core.maps.loadMap(data.maps, data.floorId).blocks, {
+                    heroLoc: data.hero.loc, heroIcon: data.hero.flags.heroIcon, flags: data.hero.flags
+                }, {
+                    ctx: 'ui', x: (2*i+1)*u-size/2, y: 55, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y
+                });
                 var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
                 var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
                 if (v.length+v2.length<=31) v+=v2;
@@ -2101,7 +2107,11 @@ ui.prototype.drawSLPanel = function(index, refresh) {
             core.fillText('ui', name+id, (2*i-5)*u, 253, '#FFFFFF', "bold 17px "+globalFont);
             core.strokeRect('ui', (2*i-5)*u-size/2, 270, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.loadMap(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 270, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
+                core.drawThumbnail(data.floorId, core.maps.loadMap(data.maps, data.floorId).blocks, {
+                    heroLoc: data.hero.loc, heroIcon: data.hero.flags.heroIcon, flags: data.hero.flags
+                }, {
+                    ctx: 'ui', x: (2*i-5)*u-size/2, y: 270, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y
+                });
                 var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
                 var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
                 if (v.length+v2.length<=31) v+=v2;
@@ -2152,143 +2162,6 @@ ui.prototype.drawSLPanel = function(index, refresh) {
         loadSave(0, drawAll);
     }
     else drawAll();
-}
-
-////// 绘制一个缩略图 //////
-ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, centerX, centerY, heroLoc, heroIcon) {
-
-    var mw = core.floors[floorId].width;
-    var mh = core.floors[floorId].height;
-    // 绘制到tempCanvas上面
-    var tempCanvas = core.bigmap.tempCanvas;
-    var tempWidth = mw*32, tempHeight = mh*32;
-    tempCanvas.canvas.width = tempWidth;
-    tempCanvas.canvas.height = tempHeight;
-    tempCanvas.clearRect(0, 0, tempWidth, tempHeight);
-
-    // -------- 1. 绘制地板
-    var groundId = (core.status.maps||core.floors)[floorId].defaultGround || "ground";
-    var blockIcon = core.material.icons.terrains[groundId];
-    for (var i = 0; i < mw; i++) {
-        for (var j = 0; j < mh; j++) {
-            tempCanvas.drawImage(core.material.images.terrains, 0, blockIcon * 32, 32, 32, i * 32, j * 32, 32, 32);
-        }
-    }
-
-    var images = [];
-    if (core.isset((core.status.maps||core.floors)[floorId].images)) {
-        images = (core.status.maps||core.floors)[floorId].images;
-        if (typeof images == 'string') {
-            images = [[0, 0, images]];
-        }
-    }
-
-    // -------- 2. 绘制背景贴图
-    images.forEach(function (t) {
-        if (typeof t == 'string') t = [0,0,t];
-        var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2], frame = core.clamp(parseInt(t[4]), 1, 8);
-        if (core.isset(dx) && core.isset(dy) &&
-            !core.hasFlag("__floorImg__"+floorId+"_"+dx+"_"+dy) &&
-            core.isset(core.material.images.images[p])) {
-            var image = core.material.images.images[p];
-            var width = image.width / frame, height = image.height;
-            if (!t[3])
-                tempCanvas.drawImage(image, 0, 0, width, height, dx, dy, width, height);
-            else if (t[3]==2)
-                tempCanvas.drawImage(image, 0, height-32, width, 32, dx, dy + height - 32, width, 32);
-        }
-    })
-
-    // -------- 3. 绘制背景图块
-    core.maps.drawBgFgMap(floorId, tempCanvas, "bg");
-
-    // -------- 4. 绘制事件层
-    var mapArray = core.maps.getMapArray(blocks,mw,mh);
-    for (var b in blocks) {
-        var block = blocks[b];
-        if (core.isset(block.event) && !block.disable) {
-            if (block.event.cls == 'autotile') {
-                core.drawAutotile(tempCanvas, mapArray, block, 32, 0, 0);
-            }
-            else if (block.event.cls == 'tileset') {
-                var offset = core.icons.getTilesetOffset(block.event.id);
-                if (offset!=null) {
-                    tempCanvas.drawImage(core.material.images.tilesets[offset.image], 32*offset.x, 32*offset.y, 32, 32, 32*block.x, 32*block.y, 32, 32);
-                }
-            }
-            else if (block.id==17) {
-                if (core.isset(core.material.images.airwall)) {
-                    tempCanvas.drawImage(core.material.images.airwall, 32*block.x, 32*block.y);
-                }
-            }
-            else if (block.event.id!='none') {
-                var blockIcon = core.material.icons[block.event.cls][block.event.id];
-                var blockImage = core.material.images[block.event.cls];
-                var height = block.event.height || 32;
-                tempCanvas.drawImage(blockImage, 0, blockIcon * height, 32, height, 32*block.x, 32*block.y + 32 - height, 32, height);
-            }
-        }
-    }
-    // -------- 5. 绘制勇士
-    if (core.isset(heroLoc)) {
-        if (!core.isset(core.material.images.images[heroIcon]))
-            heroIcon = "hero.png";
-        var icon = core.material.icons.hero[heroLoc.direction];
-        var height = core.material.images.images[heroIcon].height/4;
-        tempCanvas.drawImage(core.material.images.images[heroIcon], icon.stop * 32, icon.loc * height, 32, height, 32*heroLoc.x, 32*heroLoc.y+32-height, 32, height);
-    }
-
-    // -------- 6. 绘制前景贴图
-    images.forEach(function (t) {
-        var dx=parseInt(t[0]), dy=parseInt(t[1]), p=t[2], frame = core.clamp(parseInt(t[4]), 1, 8);
-        if (core.isset(dx) && core.isset(dy) &&
-            !core.hasFlag("__floorImg__"+floorId+"_"+dx+"_"+dy) &&
-            core.isset(core.material.images.images[p])) {
-            var image = core.material.images.images[p];
-            var width = image.width / frame, height = image.height;
-            if (t[3]==1)
-                tempCanvas.drawImage(image, 0, 0, width, height, dx, dy, width, height);
-            else if (t[3]==2)
-                tempCanvas.drawImage(image, 0, 0, width, height-32, dx, dy, width, height-32);
-        }
-    })
-
-    // -------- 7. 绘制前景图块
-    core.maps.drawBgFgMap(floorId, tempCanvas, "fg");
-
-    // -------- 8. 绘制显伤
-    if (core.status.event.id=='viewMaps' && (core.status.event.data||{}).damage)
-        core.control.updateDamage(floorId, tempCanvas);
-
-    var ctx = core.getContextByName(canvas);
-    if (ctx == null) return;
-
-    // draw to canvas
-    core.clearMap(canvas, x, y, size, size);
-    if (!core.isset(centerX)) centerX=parseInt(mw/2);
-    if (!core.isset(centerY)) centerY=parseInt(mh/2);
-
-    // 如果是浏览地图的全模式
-    if (core.status.event.id=='viewMaps' && (core.status.event.data||{}).all) {
-        if (tempWidth<=tempHeight) {
-            var realHeight = 480, realWidth = realHeight * tempWidth / tempHeight;
-            var side = (480 - realWidth) / 2;
-            core.fillRect(canvas, 0, 0, side, realHeight, '#000000');
-            core.fillRect(canvas, 480-side, 0, side, realHeight);
-            ctx.drawImage(tempCanvas.canvas, 0, 0, tempWidth, tempHeight, side, 0, realWidth, realHeight);
-        }
-        else {
-            var realWidth = 480, realHeight = realWidth * tempHeight / tempWidth;
-            var side = (480 - realHeight) / 2;
-            core.fillRect(canvas, 0, 0, realWidth, side, '#000000');
-            core.fillRect(canvas, 0, 480-side, realWidth, side);
-            ctx.drawImage(tempCanvas.canvas, 0, 0, tempWidth, tempHeight, 0, side, realWidth, realHeight);
-        }
-    }
-    else {
-        var offsetX = core.clamp(centerX-7, 0, mw-15), offsetY = core.clamp(centerY-7, 0, mh-15);
-        ctx.drawImage(tempCanvas.canvas, offsetX*32, offsetY*32, 480, 480, x, y, size, size);
-    }
 }
 
 ui.prototype.drawKeyBoard = function () {

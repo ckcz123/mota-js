@@ -191,7 +191,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 检查equipAnimate是否存在SE，如果不存在则使用默认音效
 	if (!core.isset((core.material.animates[equipAnimate] || {}).se))
 		core.playSound('attack.mp3');
-	core.drawAnimate(equipAnimate, x, y);
+	// 强制战斗的战斗动画
+	core.drawAnimate(equipAnimate, core.isset(x)?x:core.getHeroLoc('x'), core.isset(y)?y:core.getHeroLoc('y'));
 
 	var damage = core.enemys.getDamage(enemyId, x, y);
 	if (damage == null) damage = core.status.hero.hp + 1;
@@ -1017,12 +1018,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 更新全地图显伤
 	core.updateDamage();
 },
-        "updateCheckBlock": function () {
+        "updateCheckBlock": function (floorId) {
 	// 领域、夹击、阻击等的伤害值计算
+	floorId = floorId || core.status.floorId;
+	if (!core.isset(floorId) || !core.isset(core.status.maps)) return;
+	var blocks = core.status.maps[floorId].blocks;
+	var width = core.floors[floorId].width, height = core.floors[floorId].height;
 
 	core.status.checkBlock = {};
-	if (!core.isset(core.status.thisMap)) return;
-	var blocks = core.status.thisMap.blocks;
 
 	// Step1: 更新怪物地图
 	core.status.checkBlock.map = []; // 记录怪物地图
@@ -1032,29 +1035,29 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			var id = block.event.id,
 				enemy = core.material.enemys[id];
 			if (core.isset(enemy)) {
-				core.status.checkBlock.map[block.x + core.bigmap.width * block.y] = id;
+				core.status.checkBlock.map[block.x + width * block.y] = id;
 			}
 		}
 		// 血网
 		if (core.isset(block.event) && !block.disable &&
 			block.event.id == 'lavaNet' && block.event.trigger == 'passNet' && !core.hasItem("shoes")) {
-			core.status.checkBlock.map[block.x + core.bigmap.width * block.y] = "lavaNet";
+			core.status.checkBlock.map[block.x + width * block.y] = "lavaNet";
 		}
 	}
 
 	// Step2: 更新领域、阻击伤害
-	core.status.checkBlock.damage = []; // 记录(x,y)点的伤害；(x,y)对应的值是 x+core.bigmap.width*y
-	for (var x = 0; x < core.bigmap.width * core.bigmap.height; x++) core.status.checkBlock.damage[x] = 0;
+	core.status.checkBlock.damage = []; // 记录(x,y)点的伤害；(x,y)对应的值是 x+width*y
+	for (var x = 0; x < width * height; x++) core.status.checkBlock.damage[x] = 0;
 	core.status.checkBlock.ambush = [];
 
-	for (var x = 0; x < core.bigmap.width; x++) {
-		for (var y = 0; y < core.bigmap.height; y++) {
-			var id = core.status.checkBlock.map[x + core.bigmap.width * y];
+	for (var x = 0; x < width; x++) {
+		for (var y = 0; y < height; y++) {
+			var id = core.status.checkBlock.map[x + width * y];
 			if (core.isset(id)) {
 
 				// 如果是血网，直接加上伤害值
 				if (id == "lavaNet") {
-					core.status.checkBlock.damage[x + core.bigmap.width * y] += core.values.lavaDamage || 0;
+					core.status.checkBlock.damage[x + width * y] += core.values.lavaDamage || 0;
 					continue;
 				}
 
@@ -1073,10 +1076,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 							if (dx == 0 && dy == 0) continue;
 							var nx = x + dx,
 								ny = y + dy;
-							if (nx < 0 || nx >= core.bigmap.width || ny < 0 || ny >= core.bigmap.height) continue;
+							if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
 							// 如果是十字领域，则还需要满足 |dx|+|dy|<=range
 							if (!zoneSquare && Math.abs(dx) + Math.abs(dy) > range) continue;
-							core.status.checkBlock.damage[nx + ny * core.bigmap.width] += enemy.value || 0;
+							core.status.checkBlock.damage[nx + ny * width] += enemy.value || 0;
 						}
 					}
 				}
@@ -1084,11 +1087,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				// 如果要防止激光伤害，可以直接简单的将 flag:no_laser 设为true
 				if (core.enemys.hasSpecial(enemy.special, 24) && !core.hasFlag("no_laser")) {
 					// 检查同行和同列，增加激光伤害值
-					for (var nx = 0; nx < core.bigmap.width; nx++) {
-						if (nx != x) core.status.checkBlock.damage[nx + y * core.bigmap.width] += enemy.value || 0;
+					for (var nx = 0; nx < width; nx++) {
+						if (nx != x) core.status.checkBlock.damage[nx + y * width] += enemy.value || 0;
 					}
-					for (var ny = 0; ny < core.bigmap.height; ny++) {
-						if (ny != y) core.status.checkBlock.damage[x + ny * core.bigmap.width] += enemy.value || 0;
+					for (var ny = 0; ny < height; ny++) {
+						if (ny != y) core.status.checkBlock.damage[x + ny * width] += enemy.value || 0;
 					}
 				}
 				// 存在阻击
@@ -1099,8 +1102,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 							if (dx == 0 && dy == 0) continue;
 							var nx = x + dx,
 								ny = y + dy;
-							if (nx < 0 || nx >= core.bigmap.width || ny < 0 || ny >= core.bigmap.height || Math.abs(dx) + Math.abs(dy) > 1) continue;
-							core.status.checkBlock.damage[nx + ny * core.bigmap.width] += enemy.value || 0;
+							if (nx < 0 || nx >= width || ny < 0 || ny >= height || Math.abs(dx) + Math.abs(dy) > 1) continue;
+							core.status.checkBlock.damage[nx + ny * width] += enemy.value || 0;
 						}
 					}
 				}
@@ -1110,10 +1113,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					for (var dir in core.utils.scan) {
 						var nx = x + core.utils.scan[dir].x,
 							ny = y + core.utils.scan[dir].y;
-						if (nx < 0 || nx >= core.bigmap.width || ny < 0 || ny >= core.bigmap.height) continue;
-						if (!core.isset(core.status.checkBlock.ambush[nx + ny * core.bigmap.width]))
-							core.status.checkBlock.ambush[nx + ny * core.bigmap.width] = [];
-						core.status.checkBlock.ambush[nx + ny * core.bigmap.width].push([x, y, id, dir]);
+						if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+						if (!core.isset(core.status.checkBlock.ambush[nx + ny * width]))
+							core.status.checkBlock.ambush[nx + ny * width] = [];
+						core.status.checkBlock.ambush[nx + ny * width].push([x, y, id, dir]);
 					}
 				}
 			}
@@ -1124,14 +1127,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.checkBlock.betweenAttack = []; // 记录(x,y)点是否有夹击
 	// 如果要防止夹击伤害，可以简单的将 flag:no_betweenAttack 设为true
 	if (!core.hasFlag('no_betweenAttack')) {
-		for (var x = 0; x < core.bigmap.width; x++) {
-			for (var y = 0; y < core.bigmap.height; y++) {
+		for (var x = 0; x < width; x++) {
+			for (var y = 0; y < height; y++) {
 				// 该点是否存在夹击
 				var has = false;
 				// 检测左右是否存在相同的怪物，且拥有夹击属性
-				if (x > 0 && x < core.bigmap.width - 1) {
-					var id1 = core.status.checkBlock.map[x - 1 + core.bigmap.width * y],
-						id2 = core.status.checkBlock.map[x + 1 + core.bigmap.width * y];
+				if (x > 0 && x < width - 1) {
+					var id1 = core.status.checkBlock.map[x - 1 +width * y],
+						id2 = core.status.checkBlock.map[x + 1 + width * y];
 					if (core.isset(id1) && core.isset(id2) && id1 == id2) {
 						var enemy = core.material.enemys[id1];
 						if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {
@@ -1140,9 +1143,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					}
 				}
 				// 检测上下是否存在相同的怪物，且拥有夹击属性
-				if (y > 0 && y < core.bigmap.height - 1) {
-					var id1 = core.status.checkBlock.map[x + core.bigmap.width * (y - 1)],
-						id2 = core.status.checkBlock.map[x + core.bigmap.width * (y + 1)];
+				if (y > 0 && y < height - 1) {
+					var id1 = core.status.checkBlock.map[x + width * (y - 1)],
+						id2 = core.status.checkBlock.map[x + width * (y + 1)];
 					if (core.isset(id1) && core.isset(id2) && id1 == id2) {
 						var enemy = core.material.enemys[id1];
 						if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {
@@ -1152,12 +1155,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				}
 				// 计算夹击伤害
 				if (has) {
-					core.status.checkBlock.betweenAttack[x + core.bigmap.width * y] = true;
+					core.status.checkBlock.betweenAttack[x + width * y] = true;
 					// 先扣除该点领域/阻击/激光造成的伤害，再算夹击
-					var leftHp = core.status.hero.hp - core.status.checkBlock.damage[x + core.bigmap.width * y];
+					var leftHp = core.status.hero.hp - core.status.checkBlock.damage[x + width * y];
 					// 1血不夹；core.flags.betweenAttackCeil控制向上还是向下
 					if (leftHp > 1)
-						core.status.checkBlock.damage[x + core.bigmap.width * y] += Math.floor((leftHp + (core.flags.betweenAttackCeil ? 0 : 1)) / 2);
+						core.status.checkBlock.damage[x + width * y] += Math.floor((leftHp + (core.flags.betweenAttackCeil ? 0 : 1)) / 2);
 				}
 			}
 		}

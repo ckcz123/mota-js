@@ -81,7 +81,10 @@ items.prototype._afterUseItem = function (itemId) {
     if (core.status.hero.items[itemCls][itemId]<=0)
         delete core.status.hero.items[itemCls][itemId];
 
-    core.status.event.ui = null;
+    if (!core.status.event.id) {
+        core.status.event.data = null;
+        core.status.event.ui = null;
+    }
     core.updateStatusBar();
 }
 
@@ -114,7 +117,10 @@ items.prototype.canUseItem = function (itemId) {
             main.log(e);
         }
     }
-    if (!able) core.status.event.ui = null;
+    if (!able) {
+        core.status.event.data = null;
+        core.status.event.ui = null;
+    }
 
     return able;
 }

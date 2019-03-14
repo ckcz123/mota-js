@@ -1602,7 +1602,8 @@ ui.prototype.drawFly = function(page) {
         core.fillText('ui', '▼', 356, 247 + 96 + 7, '#FFFFFF', "17px "+globalFont);
     }
     core.strokeRect('ui', 20, 100, 273, 273, '#FFFFFF', 2);
-    this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 20, 100, 273);
+
+    core.drawThumbnail(floorId, null, null, {ctx: 'ui', x: 20, y: 100, size: 273});
 }
 
 ////// 绘制浏览地图界面 //////
@@ -1681,7 +1682,7 @@ ui.prototype.drawMaps = function (index, x, y) {
     clearTimeout(core.interval.tipAnimate);
     core.clearLastEvent();
     core.status.checkBlock.cache = {};
-    this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 0, 0, 416, x, y);
+    core.drawThumbnail(floorId, null, {damage: damage}, {ctx: 'ui', centerX: x, centerY: y, all: all});
 
     // 绘图
     if (core.status.event.data.paint) {
@@ -2088,7 +2089,11 @@ ui.prototype.drawSLPanel = function(index, refresh) {
             core.fillText('ui', i==0?"自动存档":name+id, (2*i+1)*u, 30, '#FFFFFF', "bold 17px "+globalFont);
             core.strokeRect('ui', (2*i+1)*u-size/2, 45, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.loadMap(data.maps, data.floorId).blocks, (2*i+1)*u-size/2, 45, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
+                core.drawThumbnail(data.floorId, core.maps.loadMap(data.maps, data.floorId).blocks, {
+                    heroLoc: data.hero.loc, heroIcon: data.hero.flags.heroIcon, flags: data.hero.flags
+                }, {
+                    ctx: 'ui', x: (2*i+1)*u-size/2, y: 45, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y
+                });
                 var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
                 var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
                 if (v.length+v2.length<=21) v+=v2;
@@ -2104,7 +2109,11 @@ ui.prototype.drawSLPanel = function(index, refresh) {
             core.fillText('ui', name+id, (2*i-5)*u, 218, '#FFFFFF', "bold 17px "+globalFont);
             core.strokeRect('ui', (2*i-5)*u-size/2, 233, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
             if (core.isset(data) && core.isset(data.floorId)) {
-                core.ui.drawThumbnail(data.floorId, 'ui', core.maps.loadMap(data.maps, data.floorId).blocks, (2*i-5)*u-size/2, 233, size, data.hero.loc.x, data.hero.loc.y, data.hero.loc, data.hero.flags.heroIcon||"hero.png");
+                core.drawThumbnail(data.floorId, core.maps.loadMap(data.maps, data.floorId).blocks, {
+                    heroLoc: data.hero.loc, heroIcon: data.hero.flags.heroIcon, flags: data.hero.flags
+                }, {
+                    ctx: 'ui', x: (2*i-5)*u-size/2, y: 233, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y
+                });
                 var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
                 var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
                 if (v.length+v2.length<=21) v+=v2;
@@ -2155,12 +2164,6 @@ ui.prototype.drawSLPanel = function(index, refresh) {
         loadSave(0, drawAll);
     }
     else drawAll();
-}
-
-////// 绘制一个缩略图 //////
-ui.prototype.drawThumbnail = function(floorId, canvas, blocks, x, y, size, centerX, centerY, heroLoc, heroIcon) {
-    core.drawThumbnail(floorId, blocks, {heroLoc: heroLoc, heroIcon: heroIcon},
-        {ctx: canvas, x: x, y: y, size: size, centerX: centerX, centerY: centerY});
 }
 
 ui.prototype.drawKeyBoard = function () {

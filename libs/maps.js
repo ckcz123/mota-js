@@ -339,13 +339,13 @@ maps.prototype.getMapBlocksObj = function (floorId, showDisable) {
 }
 
 ////// 将背景前景层变成二维数组的形式 //////
-maps.prototype.getBgFgMapArray = function (name, floorId) {
+maps.prototype.getBgFgMapArray = function (name, floorId, useCache) {
     floorId = floorId||core.status.floorId;
     if (!core.isset(floorId)) return [];
     var width = core.floors[floorId].width;
     var height = core.floors[floorId].height;
 
-    if (main.mode!='editor' && core.isset(core.status[name+"maps"][floorId]))
+    if (useCache && core.isset(core.status[name+"maps"][floorId]))
         return core.status[name+"maps"][floorId];
 
     var arr = core.clone(core.floors[floorId][name+"map"] || []);
@@ -360,7 +360,8 @@ maps.prototype.getBgFgMapArray = function (name, floorId) {
             if(main.mode=='editor')arr[y][x]= arr[y][x].idnum || arr[y][x] || 0;
         }
     }
-    core.status[name+"maps"][floorId] = core.clone(arr);
+    if (useCache)
+        core.status[name+"maps"][floorId] = core.clone(arr);
     return arr;
 }
 
@@ -371,8 +372,8 @@ maps.prototype.generateMovableArray = function (floorId, x, y) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return null;
     var width = core.floors[floorId].width, height = core.floors[floorId].height;
-    var bgArray = this.getBgFgMapArray('bg', floorId),
-        fgArray = this.getBgFgMapArray('fg', floorId),
+    var bgArray = this.getBgFgMapArray('bg', floorId, true),
+        fgArray = this.getBgFgMapArray('fg', floorId, true),
         eventArray = this.getMapArray(floorId);
 
     var generate = function (x, y) {
@@ -723,8 +724,8 @@ maps.prototype._drawFloorImages = function (floorId, ctx, name, images, currStat
 maps.prototype._getFloorImages = function (floorId) {
     floorId = floorId || core.status.floorId;
     var images = [];
-    if (core.isset(core.status.maps[floorId].images)) {
-        images = core.status.maps[floorId].images;
+    if (core.isset((core.status.maps||core.floors)[floorId].images)) {
+        images = (core.status.maps||core.floors)[floorId].images;
         if (typeof images == 'string') {
             images = [[0, 0, images]];
         }
@@ -898,9 +899,10 @@ maps.prototype._makeAutotileEdges = function () {
 ////// 绘制缩略图 //////
 // 此函数将绘制一个缩略图，floorId为目标floorId，blocks为地图的图块（可为null使用floorId对应默认的）
 // options为绘制选项（可为null），包括：
-//    heroLoc: 勇士位置；heroIcon：勇士图标；damage：是否绘制显伤；flags：当前的flags（存读档时使用）
+//    heroLoc: 勇士位置；heroIcon：勇士图标（默认当前勇士）；damage：是否绘制显伤；flags：当前的flags（存读档时使用）
 // toDraw为要绘制到的信息（可为null，或为一个画布名），包括：
-//    ctx：要绘制到的画布（名）；x,y：起点横纵坐标；size：大小；all：是否绘制全图；centerX,centerY：截取中心
+//    ctx：要绘制到的画布（名）；x,y：起点横纵坐标（默认0）；size：大小（默认416/480）；
+//    all：是否绘制全图（默认false）；centerX,centerY：截取中心（默认为地图正中心）
 maps.prototype.drawThumbnail = function (floorId, blocks, options, toDraw) {
     floorId = floorId || core.status.floorId;
     if (!core.isset(floorId)) return;
@@ -945,7 +947,7 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (floorId, blocks, op
     this.drawEvents(floorId, blocks, tempCanvas);
     // 缩略图：勇士
     if (options.heroLoc) {
-        options.heroIcon = options.heroIcon || "hero.png";
+        options.heroIcon = options.heroIcon || core.getFlag("heroIcon", "hero.png");
         var icon = core.material.icons.hero[options.heroLoc.direction];
         var height = core.material.images.images[options.heroIcon].height/4;
         tempCanvas.drawImage(core.material.images.images[options.heroIcon], icon.stop * 32, icon.loc * height, 32, height,

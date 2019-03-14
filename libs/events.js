@@ -2104,7 +2104,8 @@ events.prototype.tryUseItem = function(itemId) {
         var fillstyle = 'rgba(255,0,0,0.5)';
         if (core.canUseItem('centerFly')) fillstyle = 'rgba(0,255,0,0.5)';
         var toX = core.bigmap.width-1 - core.getHeroLoc('x'), toY = core.bigmap.height-1-core.getHeroLoc('y');
-        core.ui.drawThumbnail(core.status.floorId, 'ui', core.status.thisMap.blocks, 0, 0, 416, toX, toY, core.status.hero.loc, core.getFlag('heroIcon', "hero.png"));
+        core.drawThumbnail(null, null, {heroLoc: core.status.hero.loc, heroIcon: core.getFlag('heroIcon', "hero.png")},
+            {ctx: 'ui', centerX: toX, centerY: toY});
         var offsetX = core.clamp(toX-6, 0, core.bigmap.width-13), offsetY = core.clamp(toY-6, 0, core.bigmap.height-13);
         core.fillRect('ui',(toX-offsetX)*32,(toY-offsetY)*32,32,32,fillstyle);
         core.status.event.data = {"x": toX, "y": toY, "posX": toX-offsetX, "posY": toY-offsetY};

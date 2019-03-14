@@ -61,6 +61,21 @@ items.prototype.getItemEffectTip = function(itemId) {
     return "";
 }
 
+////// 使用道具 //////
+items.prototype.useItem = function (itemId, noRoute, callback) {
+    if (!this.canUseItem(itemId)) {
+        if (core.isset(callback)) callback();
+        return;
+    }
+    // 执行道具效果
+    this._useItemEffect(itemId);
+    // 执行完毕
+    this._afterUseItem(itemId);
+    // 记录路线
+    if (!noRoute) core.status.route.push("item:"+itemId);
+    if (core.isset(callback)) callback();
+}
+
 items.prototype._useItemEffect = function (itemId) {
     if (itemId in this.useItemEffect) {
         try {
@@ -86,21 +101,6 @@ items.prototype._afterUseItem = function (itemId) {
         core.status.event.ui = null;
     }
     core.updateStatusBar();
-}
-
-////// 使用道具 //////
-items.prototype.useItem = function (itemId, noRoute, callback) {
-    if (!this.canUseItem(itemId)) {
-        if (core.isset(callback)) callback();
-        return;
-    }
-    // 执行道具效果
-    this._useItemEffect(itemId);
-    // 执行完毕
-    this._afterUseItem(itemId);
-    // 记录路线
-    if (!noRoute) core.status.route.push("item:"+itemId);
-    if (core.isset(callback)) callback();
 }
 
 ////// 当前能否使用道具 //////
@@ -266,53 +266,6 @@ items.prototype.canEquip = function (equipId, hint) {
     return true;
 }
 
-////// 实际换装的效果 //////
-items.prototype._loadEquipEffect = function (equipId, unloadEquipId, isPercentage) {
-    // 比较能力值
-    var result = core.compareEquipment(equipId, unloadEquipId);
-
-    if (isPercentage) {
-        for (var v in result)
-            core.addFlag('__'+v+'_buff__', result[v]/100);
-    }
-    else {
-        for (var v in result)
-            core.status.hero[v] += result[v];
-    }
-}
-
-items.prototype._realLoadEquip = function (type, loadId, unloadId, callback) {
-    var loadEquip = core.material.items[loadId] || {}, unloadEquip = core.material.items[unloadId] || {};
-    if (!core.isset(loadEquip.equip)) loadEquip.equip = {};
-    if (!core.isset(unloadEquip.equip)) unloadEquip.equip = {};
-
-    var loadPercentage = loadEquip.equip.percentage, unloadPercentage = unloadEquip.equip.percentage;
-
-    if (loadPercentage != null && unloadPercentage != null && loadPercentage != unloadPercentage) {
-        this.unloadEquip(type);
-        this.loadEquip(loadId);
-        if (core.isset(callback)) callback();
-        return;
-    }
-
-    // --- 音效
-    core.playSound('equip.mp3');
-
-    // --- 实际换装
-    this._loadEquipEffect(loadId, unloadId, loadPercentage==null?unloadPercentage:loadPercentage);
-
-    // --- 加减
-    if (loadId) core.removeItem(loadId);
-    if (unloadId) core.addItem(unloadId);
-    core.status.hero.equipment[type] = loadId||null;
-
-    // --- 提示
-    if (loadId) core.drawTip("已装备上"+loadEquip.name, core.material.icons.items[loadId]);
-    else if (unloadId) core.drawTip("已卸下"+unloadEquip.name, core.material.icons.items[unloadId]);
-
-    if (core.isset(callback)) callback();
-}
-
 ////// 换上 //////
 items.prototype.loadEquip = function (equipId, callback) {
     if (!core.isset(core.status.hero)) return null;
@@ -362,6 +315,53 @@ items.prototype.compareEquipment = function (compareEquipId, beComparedEquipId) 
         compareMdef -= (beComparedEquip.equip||{}).mdef || 0;
     }
     return {"atk":compareAtk,"def":compareDef,"mdef":compareMdef};
+}
+
+////// 实际换装的效果 //////
+items.prototype._loadEquipEffect = function (equipId, unloadEquipId, isPercentage) {
+    // 比较能力值
+    var result = core.compareEquipment(equipId, unloadEquipId);
+
+    if (isPercentage) {
+        for (var v in result)
+            core.addFlag('__'+v+'_buff__', result[v]/100);
+    }
+    else {
+        for (var v in result)
+            core.status.hero[v] += result[v];
+    }
+}
+
+items.prototype._realLoadEquip = function (type, loadId, unloadId, callback) {
+    var loadEquip = core.material.items[loadId] || {}, unloadEquip = core.material.items[unloadId] || {};
+    if (!core.isset(loadEquip.equip)) loadEquip.equip = {};
+    if (!core.isset(unloadEquip.equip)) unloadEquip.equip = {};
+
+    var loadPercentage = loadEquip.equip.percentage, unloadPercentage = unloadEquip.equip.percentage;
+
+    if (loadPercentage != null && unloadPercentage != null && loadPercentage != unloadPercentage) {
+        this.unloadEquip(type);
+        this.loadEquip(loadId);
+        if (core.isset(callback)) callback();
+        return;
+    }
+
+    // --- 音效
+    core.playSound('equip.mp3');
+
+    // --- 实际换装
+    this._loadEquipEffect(loadId, unloadId, loadPercentage==null?unloadPercentage:loadPercentage);
+
+    // --- 加减
+    if (loadId) core.removeItem(loadId);
+    if (unloadId) core.addItem(unloadId);
+    core.status.hero.equipment[type] = loadId||null;
+
+    // --- 提示
+    if (loadId) core.drawTip("已装备上"+loadEquip.name, core.material.icons.items[loadId]);
+    else if (unloadId) core.drawTip("已卸下"+unloadEquip.name, core.material.icons.items[unloadId]);
+
+    if (core.isset(callback)) callback();
 }
 
 ////// 保存装备 //////

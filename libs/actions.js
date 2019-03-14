@@ -395,7 +395,7 @@ actions.prototype.ondown = function (loc) {
 actions.prototype._sys_ondown_paint = function (x, y, px, py) {
     // 画板
     if (core.status.played && (core.status.event || {}).id == 'paint') {
-        this.ondownPaint(px, py);
+        this._ondownPaint(px, py);
         return true;
     }
 }
@@ -452,7 +452,7 @@ actions.prototype.onmove = function (loc) {
 actions.prototype._sys_onmove_paint = function (x, y, px, py) {
     // 画板
     if (core.status.played && (core.status.event || {}).id == 'paint') {
-        this.onmovePaint(px, py);
+        this._onmovePaint(px, py);
         return true;
     }
 }
@@ -488,7 +488,7 @@ actions.prototype.onup = function () {
 actions.prototype._sys_onup_paint = function () {
     // 画板
     if (core.status.played && (core.status.event || {}).id == 'paint') {
-        this.onupPaint();
+        this._onupPaint();
         return true;
     }
 }
@@ -2327,7 +2327,7 @@ actions.prototype._keyUpCursor = function (keycode) {
 
 ////// 绘图相关 //////
 
-actions.prototype.ondownPaint = function (x, y) {
+actions.prototype._ondownPaint = function (x, y) {
     x+=core.bigmap.offsetX;
     y+=core.bigmap.offsetY;
     if (!core.status.event.data.erase) {
@@ -2338,7 +2338,7 @@ actions.prototype.ondownPaint = function (x, y) {
     core.status.event.data.y = y;
 }
 
-actions.prototype.onmovePaint = function (x, y) {
+actions.prototype._onmovePaint = function (x, y) {
     if (core.status.event.data.x==null) return;
     x+=core.bigmap.offsetX;
     y+=core.bigmap.offsetY;
@@ -2353,7 +2353,7 @@ actions.prototype.onmovePaint = function (x, y) {
     core.status.event.data.y = y;
 }
 
-actions.prototype.onupPaint = function () {
+actions.prototype._onupPaint = function () {
     core.status.event.data.x = null;
     core.status.event.data.y = null;
     // 保存

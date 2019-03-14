@@ -397,6 +397,36 @@ utils.prototype.arrayToRGBA = function (color) {
     return "rgba("+nowR+","+nowG+","+nowB+","+nowA+")";
 }
 
+////// 加密路线 //////
+utils.prototype.encodeRoute = function (route) {
+    var ans="", lastMove = "", cnt=0;
+
+    route.forEach(function (t) {
+        if (t=='up' || t=='down' || t=='left' || t=='right') {
+            if (t!=lastMove && cnt>0) {
+                ans+=lastMove.substring(0,1).toUpperCase();
+                if (cnt>1) ans+=cnt;
+                cnt=0;
+            }
+            lastMove=t;
+            cnt++;
+        }
+        else {
+            if (cnt>0) {
+                ans+=lastMove.substring(0,1).toUpperCase();
+                if (cnt>1) ans+=cnt;
+                cnt=0;
+            }
+            ans += core.utils._encodeRoute_encodeOne(t);
+        }
+    });
+    if (cnt>0) {
+        ans+=lastMove.substring(0,1).toUpperCase();
+        if (cnt>1) ans+=cnt;
+    }
+    return LZString.compressToBase64(ans);
+}
+
 utils.prototype._encodeRoute_id2number = function (id) {
     var number = core.maps.getNumberById(id);
     return number==0?id:number;
@@ -436,34 +466,23 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
     return '';
 }
 
-////// 加密路线 //////
-utils.prototype.encodeRoute = function (route) {
-    var ans="", lastMove = "", cnt=0;
+////// 解密路线 //////
+utils.prototype.decodeRoute = function (route) {
+    if (!core.isset(route)) return route;
 
-    route.forEach(function (t) {
-        if (t=='up' || t=='down' || t=='left' || t=='right') {
-            if (t!=lastMove && cnt>0) {
-                ans+=lastMove.substring(0,1).toUpperCase();
-                if (cnt>1) ans+=cnt;
-                cnt=0;
-            }
-            lastMove=t;
-            cnt++;
+    // 解压缩
+    try {
+        var v = LZString.decompressFromBase64(route);
+        if (core.isset(v) && /^[a-zA-Z0-9+\/=:]*$/.test(v)) {
+            route = v;
         }
-        else {
-            if (cnt>0) {
-                ans+=lastMove.substring(0,1).toUpperCase();
-                if (cnt>1) ans+=cnt;
-                cnt=0;
-            }
-            ans += core.utils._encodeRoute_encodeOne(t);
-        }
-    });
-    if (cnt>0) {
-        ans+=lastMove.substring(0,1).toUpperCase();
-        if (cnt>1) ans+=cnt;
+    } catch (e) {}
+
+    var decodeObj = {route: route, index: 0, ans: []};
+    while (decodeObj.index < decodeObj.route.length) {
+        this._decodeRoute_decodeOne(decodeObj, decodeObj.route.charAt(decodeObj.index++));
     }
-    return LZString.compressToBase64(ans);
+    return decodeObj.ans;
 }
 
 utils.prototype._decodeRoute_getNumber = function (decodeObj, noparse) {
@@ -516,25 +535,6 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
         case "K": decodeObj.ans.push("key:"+nxt); break;
         case "X": decodeObj.ans.push("random:"+nxt); break;
     }
-}
-
-////// 解密路线 //////
-utils.prototype.decodeRoute = function (route) {
-    if (!core.isset(route)) return route;
-
-    // 解压缩
-    try {
-        var v = LZString.decompressFromBase64(route);
-        if (core.isset(v) && /^[a-zA-Z0-9+\/=:]*$/.test(v)) {
-            route = v;
-        }
-    } catch (e) {}
-
-    var decodeObj = {route: route, index: 0, ans: []};
-    while (decodeObj.index < decodeObj.route.length) {
-        this._decodeRoute_decodeOne(decodeObj, decodeObj.route.charAt(decodeObj.index++));
-    }
-    return decodeObj.ans;
 }
 
 ////// 判断某对象是否不为undefined也不会null //////
@@ -624,21 +624,6 @@ utils.prototype.convertBase = function (str, fromBase, toBase) {
     return ans;
 }
 
-utils.prototype.__init_seed = function () {
-    var rand = new Date().getTime()%34834795 + 3534;
-    rand = this.__next_rand(rand);
-    rand = this.__next_rand(rand);
-    rand = this.__next_rand(rand);
-    core.setFlag('__seed__', rand);
-    core.setFlag('__rand__', rand);
-}
-
-utils.prototype.__next_rand = function (_rand) {
-    _rand=(_rand%127773)*16807-~~(_rand/127773)*2836;
-    _rand+=_rand<0?2147483647:0;
-    return _rand;
-}
-
 utils.prototype.rand = function (num) {
     var rand = core.getFlag('__rand__');
     rand = this.__next_rand(rand);
@@ -670,6 +655,21 @@ utils.prototype.rand2 = function (num) {
     }
     core.status.route.push("random:"+value);
     return value;
+}
+
+utils.prototype.__init_seed = function () {
+    var rand = new Date().getTime()%34834795 + 3534;
+    rand = this.__next_rand(rand);
+    rand = this.__next_rand(rand);
+    rand = this.__next_rand(rand);
+    core.setFlag('__seed__', rand);
+    core.setFlag('__rand__', rand);
+}
+
+utils.prototype.__next_rand = function (_rand) {
+    _rand=(_rand%127773)*16807-~~(_rand/127773)*2836;
+    _rand+=_rand<0?2147483647:0;
+    return _rand;
 }
 
 ////// 读取一个本地文件内容 //////

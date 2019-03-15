@@ -109,8 +109,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 检查重生怪并重置
 	if (!fromLoad) {
 		core.status.maps[floorId].blocks.forEach(function(block) {
-			if (block.disable && core.isset(block.event) && block.event.cls.indexOf('enemy')==0 &&
-					core.enemys.hasSpecial(core.material.enemys[block.event.id].special, 23)) {
+			if (block.disable && core.enemys.hasSpecial(block.event.id, 23)) {
 				block.disable = false;
 			}
 		});
@@ -523,7 +522,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (!core.isset(cache)) {
 		// 没有该点的缓存，则遍历每个图块
 		core.status.maps[floorId].blocks.forEach(function (block) {
-			if (core.isset(block.event) && !block.disable) {
+			if (!block.disable) {
 				// 获得该图块的ID
 				var id = block.event.id,
 					enemy = core.material.enemys[id];
@@ -1037,7 +1036,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.checkBlock.map = []; // 记录怪物地图
 	for (var n = 0; n < blocks.length; n++) {
 		var block = blocks[n];
-		if (core.isset(block.event) && !block.disable && block.event.cls.indexOf('enemy') == 0) {
+		if (!block.disable && block.event.cls.indexOf('enemy') == 0) {
 			var id = block.event.id,
 				enemy = core.material.enemys[id];
 			if (core.isset(enemy)) {
@@ -1045,7 +1044,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			}
 		}
 		// 血网
-		if (core.isset(block.event) && !block.disable &&
+		if (!block.disable &&
 			block.event.id == 'lavaNet' && block.event.trigger == 'passNet' && !core.hasItem("shoes")) {
 			core.status.checkBlock.map[block.x + width * block.y] = "lavaNet";
 		}

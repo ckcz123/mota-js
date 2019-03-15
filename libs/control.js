@@ -1912,9 +1912,8 @@ control.prototype.replay = function () {
     }
     else if (action.indexOf("fly:")==0) {
         var floorId=action.substring(4);
-        var toIndex=core.status.hero.flyRange.indexOf(floorId);
-        var nowIndex=core.status.hero.flyRange.indexOf(core.status.floorId);
-        if (core.hasItem('fly') && toIndex>=0 && nowIndex>=0) {
+        var toIndex=core.floorIds.indexOf(floorId);
+        if (core.hasItem('fly')) {
             core.ui.drawFly(toIndex);
             setTimeout(function () {
                 if (!core.control.flyTo(floorId, function () {core.replay()})) {

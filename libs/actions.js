@@ -660,8 +660,8 @@ actions.prototype._sys_onmousewheel = function (direct) {
 
     // 楼层飞行器
     if (core.status.lockControl && core.status.event.id == 'fly') {
-        if (direct==1) core.ui.drawFly(core.status.event.data+1);
-        if (direct==-1) core.ui.drawFly(core.status.event.data-1);
+        if (direct==1) core.ui.drawFly(this._getNextFlyFloor(1));
+        if (direct==-1) core.ui.drawFly(this._getNextFlyFloor(-1));
         return;
     }
 
@@ -990,23 +990,42 @@ actions.prototype._clickBookDetail = function () {
 
 ////// 楼层传送器界面时的点击操作 //////
 actions.prototype._clickFly = function(x,y) {
-    if ((x==12 || x==13) && y==10) core.ui.drawFly(core.status.event.data-1);
-    if ((x==12 || x==13) && y==6) core.ui.drawFly(core.status.event.data+1);
-    if ((x==12 || x==13) && y==11) core.ui.drawFly(core.status.event.data-10);
-    if ((x==12 || x==13) && y==5) core.ui.drawFly(core.status.event.data+10);
+    if ((x==12 || x==13) && y==10) core.ui.drawFly(this._getNextFlyFloor(-1));
+    if ((x==12 || x==13) && y==6) core.ui.drawFly(this._getNextFlyFloor(1));
+    if ((x==12 || x==13) && y==11) core.ui.drawFly(this._getNextFlyFloor(-10));
+    if ((x==12 || x==13) && y==5) core.ui.drawFly(this._getNextFlyFloor(10));
     if (x>=6 && x<=8 && y==14) core.ui.closePanel();
     if (x>=0 && x<=10 && y>=3 && y<=13)
-        core.control.flyTo(core.status.hero.flyRange[core.status.event.data]);
+        core.control.flyTo(core.floorIds[core.status.event.data]);
     return;
 }
 
 ////// 楼层传送器界面时，按下某个键的操作 //////
 actions.prototype._keyDownFly = function (keycode) {
-    if (keycode==37) core.ui.drawFly(core.status.event.data-10);
-    else if (keycode==38) core.ui.drawFly(core.status.event.data+1);
-    else if (keycode==39) core.ui.drawFly(core.status.event.data+10);
-    else if (keycode==40) core.ui.drawFly(core.status.event.data-1);
+    if (keycode==37) core.ui.drawFly(this._getNextFlyFloor(-10));
+    else if (keycode==38) core.ui.drawFly(this._getNextFlyFloor(1));
+    else if (keycode==39) core.ui.drawFly(this._getNextFlyFloor(10));
+    else if (keycode==40) core.ui.drawFly(this._getNextFlyFloor(-1));
     return;
+}
+
+actions.prototype._getNextFlyFloor = function (delta, index) {
+    if (!core.isset(index)) index = core.status.event.data;
+    if (delta == 0) return index;
+    var sign = Math.sign(delta);
+    delta = Math.abs(delta);
+    var ans = index;
+    while (true) {
+        index += sign;
+        if (index < 0 || index >= core.floorIds.length) break;
+        var floorId = core.floorIds[index];
+        if (core.status.maps[floorId].canFlyTo && core.hasVisitedFloor(floorId)) {
+            delta--;
+            ans = index;
+        }
+        if (delta == 0) break;
+    }
+    return ans;
 }
 
 ////// 楼层传送器界面时，放开某个键的操作 //////

@@ -1574,11 +1574,9 @@ ui.prototype.drawBookDetail = function (index) {
 ////// 绘制楼层传送器 //////
 ui.prototype.drawFly = function(page) {
 
-    if (page<0) page=0;
-    if (page>=core.status.hero.flyRange.length) page=core.status.hero.flyRange.length-1;
     core.status.event.data = page;
 
-    var floorId = core.status.hero.flyRange[page];
+    var floorId = core.floorIds[page];
     var title = core.status.maps[floorId].title;
 
     core.clearMap('ui');
@@ -1590,12 +1588,12 @@ ui.prototype.drawFly = function(page) {
     core.fillText('ui', '楼层跳跃', 240, 60, '#FFFFFF', "bold 28px "+globalFont);
     core.fillText('ui', '返回游戏', 240, 403+64, '#FFFFFF', "bold 15px "+globalFont)
     core.fillText('ui', title, 420, 279, '#FFFFFF', "bold 19px "+globalFont);
-    if (page<core.status.hero.flyRange.length-1) {
+    if (core.actions._getNextFlyFloor(1) != page) {
         core.fillText('ui', '▲', 420, 279 - 64, '#FFFFFF', "17px "+globalFont);
         core.fillText('ui', '▲', 420, 279 - 96, '#FFFFFF', "17px "+globalFont);
         core.fillText('ui', '▲', 420, 279 - 96 - 7, '#FFFFFF', "17px "+globalFont);
     }
-    if (page>0) {
+    if (core.actions._getNextFlyFloor(-1) != page) {
         core.fillText('ui', '▼', 420, 279 + 64, '#FFFFFF', "17px "+globalFont);
         core.fillText('ui', '▼', 420, 279 + 96, '#FFFFFF', "17px "+globalFont);
         core.fillText('ui', '▼', 420, 279 + 96 + 7, '#FFFFFF', "17px "+globalFont);

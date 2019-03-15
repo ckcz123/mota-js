@@ -51,7 +51,9 @@ maps.prototype._mapIntoBlocks = function (map,floor,floorId){
     var mh = core.floors[floorId].height;
     for (var i = 0; i < mh; i++) {
         for (var j = 0; j < mw; j++) {
-            blocks.push(this.initBlock(j, i, (map[i]||[])[j], true, floor));
+            var block = this.initBlock(j, i, (map[i]||[])[j], true, floor);
+            if (block.id != 0 || block.event.trigger)
+                blocks.push(block);
         }
     }
     return blocks;

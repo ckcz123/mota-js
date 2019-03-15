@@ -2100,7 +2100,7 @@ ui.prototype.drawSLPanel = function(index, refresh) {
                 var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
                 if (v.length+v2.length<=21) v+=v2;
                 core.fillText('ui', v, (2*i+1)*u, 60+size, '#FFD700', '10px '+globalFont);
-                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 73+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF');
+                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 73+size, data.hero.flags.__consoleOpened__?'#FF6A6A':'#FFFFFF');
             }
             else {
                 core.fillRect('ui', (2*i+1)*u-size/2, 45, size, size, '#333333', 2);
@@ -2120,7 +2120,7 @@ ui.prototype.drawSLPanel = function(index, refresh) {
                 var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
                 if (v.length+v2.length<=21) v+=v2;
                 core.fillText('ui', v, (2*i-5)*u, 248+size, '#FFD700', '10px '+globalFont);
-                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 261+size, data.hero.flags.consoleOpened?'#FF6A6A':'#FFFFFF', '10px '+globalFont);
+                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 261+size, data.hero.flags.__consoleOpened__?'#FF6A6A':'#FFFFFF', '10px '+globalFont);
             }
             else {
                 core.fillRect('ui', (2*i-5)*u-size/2, 233, size, size, '#333333', 2);

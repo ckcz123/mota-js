@@ -13,101 +13,82 @@ events.prototype._init = function () {
 }
 
 // ------ 初始化，开始和结束 ------ //
-///
+
+/// 初始化游戏
 events.prototype.initGame = function () {
     return this.eventdata.initGame();
 }
 
 ////// 游戏开始事件 //////
 events.prototype.startGame = function (hard, seed, route, callback) {
-
     main.dom.levelChooseButtons.style.display='none';
     main.dom.startButtonGroup.style.display='none';
 
-    var start = function () {
-        console.log('开始游戏');
-        core.resetStatus(core.firstData.hero, hard, null, null, core.initStatus.maps);
-        var nowLoc = core.clone(core.getHeroLoc());
-        core.setHeroLoc('x', -1);
-        core.setHeroLoc('y', -1);
-
-        if (core.isset(seed)) {
-            core.setFlag('__seed__', seed);
-            core.setFlag('__rand__', seed);
-        }
-        else core.utils.__init_seed();
-
-        core.clearMap('all');
-        core.deleteAllCanvas();
-        core.clearStatusBar();
-
-        var post_start = function () {
-            core.ui.closePanel();
-
-            core.control.triggerStatusBar('show');
-            core.dom.musicBtn.style.display = 'none';
-
-            core.changeFloor(core.firstData.floorId, null, nowLoc, null, function() {
-                if (core.isset(callback)) callback();
-            });
-
-            setTimeout(function () {
-                // Upload
-                var formData = new FormData();
-                formData.append('type', 'people');
-                formData.append('name', core.firstData.name);
-                formData.append('version', core.firstData.version);
-                formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
-                formData.append('hard', core.encodeBase64(core.status.hard));
-                formData.append('hardCode', core.getFlag('hard', 0));
-                formData.append('base64', 1);
-
-                core.utils.http("POST", "/games/upload.php", formData);
-            })
-        }
-
-        var real_start = function () {
-            core.insertAction(core.clone(core.firstData.startText), null, null, function() {
-                post_start();
-            });
-        }
-
-        if (core.flags.startUsingCanvas) {
-            core.control.triggerStatusBar('hide');
-            core.dom.musicBtn.style.display = 'block';
-
-            core.insertAction(core.clone(core.firstData.startCanvas), null, null, function() {
-                real_start();
-            });
-        }
-        else {
-            core.events.setInitData(hard);
-            real_start();
-        }
-
-        if (core.isset(route)) {
-            core.startReplay(route);
-        }
-
-    }
-
     if (main.mode!='play') return;
 
-    if (core.flags.startUsingCanvas) {
+    // 无动画的开始游戏
+    if (core.flags.startUsingCanvas || core.isset(route)) {
         core.dom.startPanel.style.display = 'none';
-        start();
-        return;
-    }
-
-    if (core.isset(route)) {
-        core.dom.startPanel.style.display = 'none';
-        start();
+        this._startGame_start(hard, seed, route, callback);
     }
     else {
-        core.hideStartAnimate(function() {
-            start();
-        })
+        core.hideStartAnimate(function () {
+            core.events._startGame_start(hard, seed, route, callback);
+        });
     }
+}
+
+events.prototype._startGame_start = function (hard, seed, route, callback) {
+    console.log('开始游戏');
+    core.resetStatus(core.firstData.hero, hard, null, null, core.initStatus.maps);
+    var nowLoc = core.clone(core.getHeroLoc());
+    core.setHeroLoc('x', -1);
+    core.setHeroLoc('y', -1);
+
+    if (core.isset(seed)) {
+        core.setFlag('__seed__', seed);
+        core.setFlag('__rand__', seed);
+    }
+    else core.utils.__init_seed();
+
+    core.clearMap('all');
+    core.deleteAllCanvas();
+    core.clearStatusBar();
+
+    var todo = [];
+    if (core.flags.startUsingCanvas) {
+        core.control.triggerStatusBar('hide');
+        core.dom.musicBtn.style.display = 'block';
+        core.push(todo, core.firstData.startCanvas);
+    }
+    core.push(todo, core.firstData.startText);
+    this.insertAction(todo, null, null, function () {
+        core.events._startGame_afterStart(nowLoc, callback);
+    });
+
+    if (core.isset(route)) core.startReplay(route);
+}
+
+events.prototype._startGame_afterStart = function (nowLoc, callback) {
+    core.ui.closePanel();
+    core.control.triggerStatusBar('show');
+    core.dom.musicBtn.style.display = 'none';
+    core.changeFloor(core.firstData.floorId, null, nowLoc, null, callback);
+    this._startGame_upload();
+}
+
+events.prototype._startGame_upload = function () {
+    // Upload
+    var formData = new FormData();
+    formData.append('type', 'people');
+    formData.append('name', core.firstData.name);
+    formData.append('version', core.firstData.version);
+    formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
+    formData.append('hard', core.encodeBase64(core.status.hard));
+    formData.append('hardCode', core.getFlag('hard', 0));
+    formData.append('base64', 1);
+
+    core.utils.http("POST", "/games/upload.php", formData);
 }
 
 ////// 不同难度分别设置初始属性 //////
@@ -129,7 +110,6 @@ events.prototype.lose = function (reason) {
 
 ////// 游戏结束 //////
 events.prototype.gameOver = function (ending, fromReplay, norank) {
-
     core.clearMap('all');
     core.deleteAllCanvas();
     core.dom.gif2.innerHTML = "";
@@ -141,136 +121,107 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
         ending += "[比赛]";
     }
 
-    var askRate = function () {
-        if (!core.isset(ending)) {
-            core.restart();
-            return;
-        }
+    var reason = null;
+    if (fromReplay) reason = "录像回放完毕！";
+    else if (core.hasFlag("debug")) reason = "\t[系统提示]调试模式下无法上传成绩";
+    else if (core.hasFlag("__consoleOpened__")) reason = "\t[系统提示]本存档开启过控制台，无法上传成绩";
 
-        core.ui.closePanel();
-        core.ui.drawConfirmBox("恭喜通关本塔，你想进行评分吗？", function () {
-            if (core.platform.isPC) {
-                window.open("/score.php?name="+core.firstData.name+"&num=10", "_blank");
-                core.restart();
-            }
-            else {
-                window.location.href = "/score.php?name="+core.firstData.name+"&num=10";
-            }
-        }, function () {
-            core.restart();
-        });
+    if (reason != null)
+        core.drawText(reason, core.restart);
+    else
+        this._gameOver_confirmUpload(ending, norank);
+}
 
+events.prototype._gameOver_confirmUpload = function (ending, norank) {
+    core.ui.closePanel();
+
+    if (!core.isset(ending)) {
+        this._gameOver_confirmDownload(ending);
+        return;
     }
+    core.ui.drawConfirmBox("你想记录你的ID和成绩吗？", function () {
+        var username = main.isCompetition?"":prompt("请输入你的ID：", core.getCookie('id')||"");
+        core.events._gameOver_doUpload(username, ending, norank);
+    }, function () {
+        if (main.isCompetition)
+            core.events._gameOver_confirmDownload(ending);
+        else
+            core.events._gameOver_doUpload(null, ending, norank);
+    })
+}
 
-    // 下载录像
-    var confirmDownload = function () {
+events.prototype._gameOver_doUpload = function (username, ending, norank) {
+    var hp = core.status.hero.hp;
+    if (!core.isset(username)) hp = 1;
+    core.ui.closePanel();
+    // upload
+    var formData = new FormData();
+    formData.append('type', 'score');
+    formData.append('name', core.firstData.name);
+    formData.append('version', core.firstData.version);
+    formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
+    formData.append('hard', core.encodeBase64(core.status.hard));
+    formData.append('username', core.encodeBase64(username||""));
+    formData.append('ending', core.encodeBase64(ending));
+    formData.append('lv', core.status.hero.lv);
+    formData.append('hp', Math.min(hp, Math.pow(2, 63)));
+    formData.append('atk', core.status.hero.atk);
+    formData.append('def', core.status.hero.def);
+    formData.append('mdef', core.status.hero.mdef);
+    formData.append('money', core.status.hero.money);
+    formData.append('experience', core.status.hero.experience);
+    formData.append('steps', core.status.hero.steps);
+    formData.append('norank', norank||0);
+    formData.append('seed', core.getFlag('__seed__'));
+    formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime/1000));
+    formData.append('route', core.encodeRoute(core.status.route));
+    formData.append('base64', 1);
 
-        core.ui.closePanel();
-        core.ui.drawConfirmBox("你想下载录像吗？", function () {
-            var obj = {
-                'name': core.firstData.name,
-                'version': core.firstData.version,
-                'hard': core.status.hard,
-                'seed': core.getFlag('__seed__'),
-                'route': core.encodeRoute(core.status.route)
-            }
-            core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify(obj));
-            // core.restart();
-            askRate();
-        }, function () {
-            // core.restart();
-            askRate();
-        })
+    if (main.isCompetition)
+        core.http("POST", "/games/competition/upload.php", formData);
+    else
+        core.http("POST", "/games/upload.php", formData);
 
-    }
+    setTimeout(function() {
+        core.events._gameOver_confirmDownload(ending);
+    }, 200);
+}
 
-    // 上传成绩
-    var confirmUpload = function () {
-
-        core.ui.closePanel();
-
-        if (!core.isset(ending)) {
-            confirmDownload();
-            return;
+events.prototype._gameOver_confirmDownload = function (ending) {
+    core.ui.closePanel();
+    core.ui.drawConfirmBox("你想下载录像吗？", function () {
+        var obj = {
+            'name': core.firstData.name,
+            'version': core.firstData.version,
+            'hard': core.status.hard,
+            'seed': core.getFlag('__seed__'),
+            'route': core.encodeRoute(core.status.route)
         }
+        core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify(obj));
+        core.events._gameOver_askRate(ending);
+    }, function () {
+        core.events._gameOver_askRate(ending);
+    });
+}
 
-        var doUpload = function(username) {
-            var hp = core.status.hero.hp;
-            if (username==undefined) hp = 1;
-            core.ui.closePanel();
-            // upload
-            var formData = new FormData();
-            formData.append('type', 'score');
-            formData.append('name', core.firstData.name);
-            formData.append('version', core.firstData.version);
-            formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
-            formData.append('hard', core.encodeBase64(core.status.hard));
-            formData.append('username', core.encodeBase64(username||""));
-            formData.append('ending', core.encodeBase64(ending));
-            formData.append('lv', core.status.hero.lv);
-            formData.append('hp', Math.min(hp, Math.pow(2, 63)));
-            formData.append('atk', core.status.hero.atk);
-            formData.append('def', core.status.hero.def);
-            formData.append('mdef', core.status.hero.mdef);
-            formData.append('money', core.status.hero.money);
-            formData.append('experience', core.status.hero.experience);
-            formData.append('steps', core.status.hero.steps);
-            formData.append('norank', norank||0);
-            formData.append('seed', core.getFlag('__seed__'));
-            formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime/1000));
-            formData.append('route', core.encodeRoute(core.status.route));
-            formData.append('base64', 1);
-
-            if (main.isCompetition)
-                core.http("POST", "/games/competition/upload.php", formData);
-            else
-                core.http("POST", "/games/upload.php", formData);
-
-            setTimeout(function() {
-                confirmDownload();
-            }, 150);
-        }
-
-        core.ui.drawConfirmBox("你想记录你的ID和成绩吗？", function () {
-            if (main.isCompetition) {
-                doUpload("");
-            }
-            else {
-                doUpload(prompt("请输入你的ID：", core.getCookie('id')||""));
-            }
-        }, function () {
-            if (main.isCompetition)
-                confirmDownload();
-            else
-                doUpload(undefined);
-        })
-
+events.prototype._gameOver_askRate = function (ending) {
+    if (!core.isset(ending)) {
+        core.restart();
         return;
     }
 
-    if (fromReplay) {
-        core.drawText("录像回放完毕！", function () {
+    core.ui.closePanel();
+    core.ui.drawConfirmBox("恭喜通关本塔，你想进行评分吗？", function () {
+        if (core.platform.isPC) {
+            window.open("/score.php?name="+core.firstData.name+"&num=10", "_blank");
             core.restart();
-        });
-    }
-    else {
-
-        if (core.hasFlag('debug')) {
-            core.drawText("\t[系统提示]调试模式下无法上传成绩", function () {
-                core.restart();
-            })
-        }
-        else if (core.hasFlag('consoleOpened')) {
-            core.drawText("\t[系统提示]本存档开启过控制台，无法上传成绩", function () {
-                core.restart();
-            })
         }
         else {
-            confirmUpload();
+            window.location.href = "/score.php?name="+core.firstData.name+"&num=10";
         }
-
-    }
-
+    }, function () {
+        core.restart();
+    });
 }
 
 // ------ 系统事件的处理 ------ //

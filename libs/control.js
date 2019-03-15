@@ -297,7 +297,7 @@ control.prototype.setRequestAnimationFrame = function () {
 
         // 检查控制台状态
         if (core.utils.consoleOpened()) {
-            core.setFlag('consoleOpened', true);
+            core.setFlag('__consoleOpened__', true);
         }
 
         window.requestAnimationFrame(draw);

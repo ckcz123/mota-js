@@ -51,8 +51,7 @@ maps.prototype._mapIntoBlocks = function (map,floor,floorId){
     var mh = core.floors[floorId].height;
     for (var i = 0; i < mh; i++) {
         for (var j = 0; j < mw; j++) {
-            var block = this.initBlock(j, i, (map[i]||[])[j], true, floor);
-            if (core.isset(block.event)) blocks.push(block);
+            blocks.push(this.initBlock(j, i, (map[i]||[])[j], true, floor));
         }
     }
     return blocks;
@@ -87,6 +86,7 @@ maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     if (id==17) block.event = {"cls": "terrains", "id": "airwall", "noPass": true};
     else if (id in this.blocksInfo) block.event = JSON.parse(JSON.stringify(this.blocksInfo[id]));
     else if (core.icons.getTilesetOffset(id)) block.event = {"cls": "tileset", "id": "X"+id, "noPass": true};
+    else block.event = {'cls': 'terrains', 'id': 'none', 'noPass': false};
 
     if (addInfo) this._addInfo(block);
     if (eventFloor) {
@@ -100,33 +100,28 @@ maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
 
 ////// 添加一些信息到block上 //////
 maps.prototype._addInfo = function (block) {
-    if (core.isset(block.event)) {
-        if (block.event.cls.indexOf("enemy")==0 && !core.isset(block.event.trigger)) {
-            block.event.trigger = 'battle';
-        }
-        if (block.event.cls == 'items' && !core.isset(block.event.trigger)) {
-            block.event.trigger = 'getItem';
-        }
-        if (!core.isset(block.event.noPass)) {
-            if (block.event.cls != 'items') {
-                block.event.noPass = true;
-            }
-        }
-        if (!core.isset(block.event.animate)) {
-            block.event.animate = core.icons._getAnimateFrames(block.event.cls, false);
-        }
-        block.event.height = 32;
-        if (block.event.cls == 'enemy48' || block.event.cls == 'npc48')
-            block.event.height = 48;
+    if (block.event.cls.indexOf("enemy")==0 && !core.isset(block.event.trigger)) {
+        block.event.trigger = 'battle';
     }
+    if (block.event.cls == 'items' && !core.isset(block.event.trigger)) {
+        block.event.trigger = 'getItem';
+    }
+    if (!core.isset(block.event.noPass)) {
+        if (block.event.cls != 'items') {
+            block.event.noPass = true;
+        }
+    }
+    if (!core.isset(block.event.animate)) {
+        block.event.animate = core.icons._getAnimateFrames(block.event.cls, false);
+    }
+    block.event.height = 32;
+    if (block.event.cls == 'enemy48' || block.event.cls == 'npc48')
+        block.event.height = 48;
 }
 
 ////// 向该楼层添加剧本的自定义事件 //////
 maps.prototype._addEvent = function (block, x, y, event) {
     if (!core.isset(event)) return;
-    if (!core.isset(block.event)) { // 本身是空地？
-        block.event = {'cls': 'terrains', 'id': 'none', 'noPass': false};
-    }
     // event是字符串或数组？
     if (typeof event == "string") {
         event = {"data": [event]};
@@ -685,7 +680,6 @@ maps.prototype._drawBgFgMap = function (floorId, ctx, name, onMap) {
     for (var x = 0; x < width; x++) {
         for (var y = 0; y < height; y++) {
             var block = this.initBlock(x, y, arr[y][x], true);
-            if (!core.isset(block.event)) continue;
             block.name = name;
             var blockInfo = this.getBlockInfo(block);
             if (!core.isset(blockInfo)) continue;
@@ -1058,17 +1052,13 @@ maps.prototype.getBlock = function (x, y, floorId, showDisable) {
 ////// 获得某个点的blockId //////
 maps.prototype.getBlockId = function (x, y, floorId, showDisable) {
     var block = core.getBlock(x, y, floorId, showDisable);
-    if (block == null) return null;
-    if (core.isset(block.block.event)) return block.block.event.id;
-    return null;
+    return block == null ? null : block.block.event.id;
 }
 
 ////// 获得某个点的blockCls //////
 maps.prototype.getBlockCls = function (x, y, floorId, showDisable) {
     var block = core.getBlock(x, y, floorId, showDisable);
-    if (block == null) return null;
-    if (core.isset(block.block.event)) return block.block.event.cls;
-    return null;
+    return block == null ? null : block.block.event.cls;
 }
 
 ////// 获得某个图块或素材的信息，包括 ID，cls，图片，坐标，faceIds 等等 //////
@@ -1081,7 +1071,6 @@ maps.prototype.getBlockInfo = function (block) {
         if (block == 0) return null;
         block = this.initBlock(0, 0, block, true);
     }
-    if (!core.isset(block.event)) return null;
     var number = block.id, id = block.event.id, cls = block.event.cls,
         image = null, posX = 0, posY = 0,
         height = block.event.height || 32, faceIds = {};
@@ -1142,7 +1131,7 @@ maps.prototype.showBlock = function(x, y, floorId) {
     if (block.disable) {
         block.disable = false;
         // 在本层，添加动画
-        if (floorId == core.status.floorId && core.isset(block.event)) {
+        if (floorId == core.status.floorId) {
             core.drawBlock(block);
             core.addGlobalAnimate(block);
         }
@@ -1162,8 +1151,7 @@ maps.prototype.hideBlock = function (x, y, floorId) {
     if (floorId==core.status.floorId) {
         core.removeGlobalAnimate(x, y);
         core.clearMap('event', x * 32, y * 32, 32, 32);
-        var height = 32;
-        if (core.isset(block.block.event)) height=block.block.event.height||32;
+        var height = block.block.event.height || 32;
         if (height>32)
             core.clearMap('event2', x * 32, y * 32 +32-height, 32, height-32);
     }
@@ -1186,8 +1174,7 @@ maps.prototype.removeBlock = function (x, y, floorId) {
     if (floorId==core.status.floorId) {
         core.removeGlobalAnimate(x, y);
         core.clearMap('event', x * 32, y * 32, 32, 32);
-        var height = 32;
-        if (core.isset(block.block.event)) height=block.block.event.height||32;
+        var height = block.block.event.height||32;
         if (height>32)
             core.clearMap('event2', x * 32, y * 32 +32-height, 32, height-32);
     }
@@ -1333,29 +1320,27 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
 
     var originBlock=core.getBlock(x,y,floorId,true);
     var block = this.initBlock(x,y,number,true,core.floors[floorId]);
-    if (core.isset(block.event)) {
-        if (floorId == core.status.floorId) {
-            core.removeGlobalAnimate(x, y);
-            core.clearMap('event', x * 32, y * 32, 32, 32);
-            if (originBlock != null) {
-                var height = (originBlock.block.event||{}).height||32;
-                if (height>32)
-                    core.clearMap('event2', x * 32, y * 32 +32-height, 32, height-32);
-            }
+    if (floorId == core.status.floorId) {
+        core.removeGlobalAnimate(x, y);
+        core.clearMap('event', x * 32, y * 32, 32, 32);
+        if (originBlock != null) {
+            var height = (originBlock.block.event||{}).height||32;
+            if (height>32)
+                core.clearMap('event2', x * 32, y * 32 +32-height, 32, height-32);
         }
-        if (originBlock==null) {
-            core.status.maps[floorId].blocks.push(block);
-        }
-        else {
-            originBlock.block.id = number;
-            originBlock.block.event = block.event;
-            block = originBlock.block;
-        }
-        if (floorId==core.status.floorId && !block.disable) {
-            core.drawBlock(block);
-            core.addGlobalAnimate(block);
-            core.updateStatusBar();
-        }
+    }
+    if (originBlock==null) {
+        core.status.maps[floorId].blocks.push(block);
+    }
+    else {
+        originBlock.block.id = number;
+        originBlock.block.event = block.event;
+        block = originBlock.block;
+    }
+    if (floorId==core.status.floorId && !block.disable) {
+        core.drawBlock(block);
+        core.addGlobalAnimate(block);
+        core.updateStatusBar();
     }
 }
 

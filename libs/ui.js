@@ -2283,8 +2283,7 @@ ui.prototype.drawStatistics = function () {
         if (floor.cannotViewMap && floorId!=core.status.floorId) return;
 
         blocks.forEach(function (block) {
-            if (!core.isset(block.event) || block.disable)
-                return;
+            if (block.disable) return;
             var event = block.event;
             if (event.cls.indexOf("enemy")==0) {
                 var enemyId = event.id, enemy = core.material.enemys[enemyId];

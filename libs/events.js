@@ -257,7 +257,7 @@ events.prototype._trigger = function (x, y) {
     var block = core.getBlock(x, y);
     if (block == null) return;
     block = block.block;
-    if (core.isset(block.event) && core.isset(block.event.trigger)) {
+    if (block.event.trigger) {
         var noPass = block.event.noPass, trigger = block.event.trigger;
         if (noPass) core.clearAutomaticRouteNode(x, y);
         if (trigger == 'ski') core.status.isSkiing = true;
@@ -1283,7 +1283,7 @@ events.prototype.doAction = function() {
                 var block=core.getBlock(toX, toY);
                 if (block!=null) {
                     block = block.block;
-                    if (core.isset(block.event) && core.isset(block.event.trigger)) {
+                    if (block.event.trigger) {
                         core.status.event.data.x=block.x;
                         core.status.event.data.y=block.y;
                         core.status.event.data.list = [
@@ -1661,7 +1661,7 @@ events.prototype.doAction = function() {
                 var block=core.getBlock(x,y); // 重新获得事件
                 if (block!=null) {
                     block = block.block;
-                    if (core.isset(block.event) && block.event.trigger=='action') {
+                    if (block.event.trigger=='action') {
                         core.status.event.data.list = [
                             {"todo": core.clone(block.event.data), "total": core.clone(block.event.data), "condition": "false"}
                         ];

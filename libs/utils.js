@@ -1003,7 +1003,7 @@ utils.prototype._export = function (floorIds) {
             // check monster
             x.forEach(function (t) {
                 var block = core.maps.initBlock(null, null, t);
-                if (core.isset(block.event) && block.event.cls.indexOf("enemy")==0) {
+                if (block.event.cls.indexOf("enemy")==0) {
                     monsterMap[t] = block.event.id;
                 }
             })

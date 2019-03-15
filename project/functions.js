@@ -32,22 +32,22 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.material.items.shield5.cls = 'equips';
 	}
 },
-        "setInitData": function (hard) {
+        "setInitData": function () {
 	// 不同难度分别设置初始属性
-	if (hard == 'Easy') { // 简单难度
+	if (core.status.hard == 'Easy') { // 简单难度
 		core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
 		// 可以在此设置一些初始福利，比如设置初始生命值可以调用：
 		// core.setStatus("hp", 10000);
 		// 赠送一把黄钥匙可以调用
 		// core.setItem("yellowKey", 1);
 	}
-	if (hard == 'Normal') { // 普通难度
+	if (core.status.hard == 'Normal') { // 普通难度
 		core.setFlag('hard', 2); // 可以用flag:hard来获得当前难度
 	}
-	if (hard == 'Hard') { // 困难难度
+	if (core.status.hard == 'Hard') { // 困难难度
 		core.setFlag('hard', 3); // 可以用flag:hard来获得当前难度
 	}
-	if (hard == 'Hell') { // 噩梦难度
+	if (core.status.hard == 'Hell') { // 噩梦难度
 		core.setFlag('hard', 4); // 可以用flag:hard来获得当前难度
 	}
 
@@ -55,6 +55,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	["atk", "def", "mdef"].forEach(function (name) {
 		core.setFlag("__" + name + "_buff__", 1);
 	});
+	// 设置已经到过的楼层
+	core.setFlag("__visited__", {});
 
 	core.events.afterLoadData();
 },
@@ -150,33 +152,50 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 转换楼层结束的事件；此函数会在整个楼层切换完全结束后再执行
 	// floorId是切换到的楼层；fromLoad若为true则代表是从读档行为造成的楼层切换
 
-	// 如果是读档，则进行检查
+	// 如果是读档，则进行检查（是否需要恢复事件）
 	if (fromLoad) {
 		core.events.recoverEvents(core.getFlag("__events__"));
 		core.removeFlag("__events__");
-	}
-	else {
+	} else {
 		// 每次抵达楼层执行的事件
 		core.insertAction(core.floors[floorId].eachArrive);
 
 		// 首次抵达楼层时执行的事件（后插入，先执行）
-		var visited = core.getFlag("__visited__", []);
-		if (visited.indexOf(floorId)===-1) {
+		if (!core.hasVisitedFloor(floorId)) {
 			core.insertAction(core.floors[floorId].firstArrive);
-			visited.push(floorId);
-			core.setFlag("__visited__", visited);
+			core.visitFloor(floorId);
 		}
 	}
 },
-        "addPoint": function (enemy) {
-	// 加点事件
-	var point = enemy.point;
-	if (!core.flags.enableAddPoint || !core.isset(point) || point<=0) return [];
+        "beforeBattle": function (enemyId, x, y) {
+	// 战斗前触发的事件，可以加上一些战前特效（详见下面支援的例子）
+	// 此函数在“检测能否战斗和自动存档”【之后】执行。如果需要更早的战前事件，请在插件中覆重写 core.events.doSystemEvent 函数。
+	// 返回true则将继续战斗，返回false将不再战斗。
 
-	// 加点，返回一个choices事件
-	// ----- 从V2.5.4开始，移动到“公共事件-加点事件”中
-	core.setFlag('point', point); // 设置flag:point
-	return core.getCommonEvent('加点事件');
+	// ------ 支援技能 ------ //
+	if (core.isset(x) && core.isset(y)) {
+		var index = x + "," + y,
+			cache = (core.status.checkBlock.cache || {})[index] || {},
+			guards = cache.guards || [];
+		// 如果存在支援怪
+		if (guards.length > 0) {
+			// 记录flag，当前要参与支援的怪物
+			core.setFlag("__guards__" + x + "_" + y, guards);
+			var actions = [];
+			// 增加支援的特效动画（图块跳跃）
+			guards.forEach(function (g) {
+				core.push(actions, { "type": "jump", "from": [g[0], g[1]], "to": [x, y], "time": 300, "keep": false, "async": true });
+			});
+			core.push(actions, [
+				{ "type": "waitAsync" }, // 等待所有异步事件执行完毕
+				{ "type": "trigger", "loc": [x, y] } // 重要！重新触发本点事件（即重新触发战斗）
+			]);
+			core.insertAction(actions);
+			return false;
+		}
+	}
+
+	return true;
 },
         "afterBattle": function (enemyId, x, y, callback) {
 	// 战斗结束后触发的事件
@@ -192,7 +211,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (!core.isset((core.material.animates[equipAnimate] || {}).se))
 		core.playSound('attack.mp3');
 	// 强制战斗的战斗动画
-	core.drawAnimate(equipAnimate, core.isset(x)?x:core.getHeroLoc('x'), core.isset(y)?y:core.getHeroLoc('y'));
+	core.drawAnimate(equipAnimate, core.isset(x) ? x : core.getHeroLoc('x'), core.isset(y) ? y : core.getHeroLoc('y'));
 
 	var damage = core.enemys.getDamage(enemyId, x, y);
 	if (damage == null) damage = core.status.hero.hp + 1;
@@ -220,26 +239,24 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 
 	// 获得金币和经验
-	var money = enemy.money;
-	guards.forEach(function (g) {
-		money += core.material.enemys[g[2]].money;
-	});
+	var money = guards.reduce(function (curr, g) {
+		return curr + core.material.enemys[g[2]].money;
+	}, enemy.money);
 	if (core.hasItem('coin')) money *= 2;
 	if (core.hasFlag('curse')) money = 0;
 	core.status.hero.money += money;
 	core.status.hero.statistics.money += money;
-	var experience = enemy.experience;
-	guards.forEach(function (g) {
-		experience += core.material.enemys[g[2]].experience;
-	})
+
+	var experience = guards.reduce(function (curr, g) {
+		return curr + core.material.enemys[g[2]].experience;
+	}, enemy.experience);
 	if (core.hasFlag('curse')) experience = 0;
 	core.status.hero.experience += experience;
 	core.status.hero.statistics.experience += experience;
+
 	var hint = "打败 " + enemy.name;
-	if (core.flags.enableMoney)
-		hint += "，金币+" + money;
-	if (core.flags.enableExperience)
-		hint += "，经验+" + experience;
+	if (core.flags.enableMoney) hint += "，金币+" + money;
+	if (core.flags.enableExperience) hint += "，经验+" + experience;
 	core.drawTip(hint);
 
 	// 事件的处理
@@ -263,7 +280,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 	// 仇恨属性：减半
 	if (core.flags.hatredDecrease && core.enemys.hasSpecial(special, 17)) {
-		core.setFlag('hatred', parseInt(core.getFlag('hatred', 0) / 2));
+		core.setFlag('hatred', Math.floor(core.getFlag('hatred', 0) / 2));
 	}
 	// 自爆
 	if (core.enemys.hasSpecial(special, 19)) {
@@ -327,43 +344,42 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.isset(callback)) callback();
 
 },
-        "afterOpenDoor": function(doorId,x,y,callback) {
+        "afterOpenDoor": function (doorId, x, y, callback) {
 	// 开一个门后触发的事件
-	
+
 	var todo = [];
 	if (core.isset(x) && core.isset(y)) {
-		var event = core.floors[core.status.floorId].afterOpenDoor[x+","+y];
+		var event = core.floors[core.status.floorId].afterOpenDoor[x + "," + y];
 		if (core.isset(event)) {
 			core.unshift(todo, event);
 		}
 	}
 
-	if (todo.length>0) {
-		core.events.insertAction(todo,x,y);
+	if (todo.length > 0) {
+		core.events.insertAction(todo, x, y);
 	}
 
 	if (core.status.event.id == null) {
 		core.continueAutomaticRoute();
-	}
-	else {
+	} else {
 		core.clearContinueAutomaticRoute();
 	}
 	if (core.isset(callback)) callback();
 },
-        "afterGetItem": function(itemId,x,y,callback) {
+        "afterGetItem": function (itemId, x, y, callback) {
 	// 获得一个道具后触发的事件
 	core.playSound('item.mp3');
 
 	var todo = [];
 	if (core.isset(x) && core.isset(y)) {
-		var event = core.floors[core.status.floorId].afterGetItem[x+","+y];
+		var event = core.floors[core.status.floorId].afterGetItem[x + "," + y];
 		if (core.isset(event)) {
 			core.unshift(todo, event);
 		}
 	}
 
-	if (todo.length>0) {
-		core.events.insertAction(todo,x,y);
+	if (todo.length > 0) {
+		core.events.insertAction(todo, x, y);
 	}
 
 	if (core.isset(callback)) callback();
@@ -374,17 +390,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 },
         "afterPushBox": function () {
 	// 推箱子后的事件
-
-	var noBoxLeft = function () {
-		// 地图上是否还存在未推到的箱子，如果不存在则返回true，存在则返回false
-		for (var i=0;i<core.status.thisMap.blocks.length;i++) {
-			var block=core.status.thisMap.blocks[i];
-			if (core.isset(block.event) && block.event.id=='box') return false;
-		}
-		return true;
-	}
-
-	if (noBoxLeft()) {
+	if (core.searchBlock('box').length == 0) {
 		// 可以通过if语句来进行开门操作
 		/*
 		if (core.status.floorId=='xxx') { // 在某个楼层

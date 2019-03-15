@@ -50,6 +50,7 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
         core.setFlag('__rand__', seed);
     }
     else core.utils.__init_seed();
+    this.setInitData();
 
     core.clearMap('all');
     core.deleteAllCanvas();
@@ -92,8 +93,8 @@ events.prototype._startGame_upload = function () {
 }
 
 ////// 不同难度分别设置初始属性 //////
-events.prototype.setInitData = function (hard) {
-    return this.eventdata.setInitData(hard);
+events.prototype.setInitData = function () {
+    return this.eventdata.setInitData();
 }
 
 ////// 游戏获胜事件 //////
@@ -248,47 +249,49 @@ events.prototype.doSystemEvent = function (type, data, callback) {
 }
 
 ////// 触发(x,y)点的事件 //////
-events.prototype.trigger = function (x, y) {
-
+events.prototype._trigger = function (x, y) {
+    // 如果正在自定义事件中，忽略
     if (core.status.event.id == 'action') return;
 
     core.status.isSkiing = false;
     var block = core.getBlock(x, y);
-    if (block != null) {
-        block = block.block;
-        if (core.isset(block.event) && core.isset(block.event.trigger)) {
-            var noPass = block.event.noPass, trigger = block.event.trigger;
-            if (noPass) {
-                core.clearAutomaticRouteNode(x, y);
-            }
-            if (trigger == 'ski') core.status.isSkiing = true;
+    if (block == null) return;
+    block = block.block;
+    if (core.isset(block.event) && core.isset(block.event.trigger)) {
+        var noPass = block.event.noPass, trigger = block.event.trigger;
+        if (noPass) core.clearAutomaticRouteNode(x, y);
+        if (trigger == 'ski') core.status.isSkiing = true;
 
-            // 转换楼层能否穿透
-            if (trigger=='changeFloor' && !noPass) {
-                var canCross = core.flags.portalWithoutTrigger;
-                if (core.isset(block.event.data) && core.isset(block.event.data.portalWithoutTrigger))
-                    canCross=block.event.data.portalWithoutTrigger;
-                if (canCross) {
-                    if (core.isReplaying()) {
-                        if (core.status.replay.toReplay[0]=='no') {
-                            core.status.replay.toReplay.shift();
-                            core.status.route.push("no");
-                            return;
-                        }
-                    }
-                    else if (core.status.automaticRoute.autoHeroMove || core.status.automaticRoute.autoStep<core.status.automaticRoute.autoStepRoutes.length) {
-                        core.status.route.push("no");
-                        return;
-                    }
-                }
+        // 转换楼层能否穿透
+        if (trigger=='changeFloor' && !noPass && this._trigger_ignoreChangeFloor(block))
+            return;
+        core.status.automaticRoute.moveDirectly = false;
+        this.doSystemEvent(trigger, block, function () {
+            if (trigger == 'openDoor' || trigger == 'changeFloor')
+                core.replay();
+        })
+    }
+}
+
+events.prototype._trigger_ignoreChangeFloor = function (block) {
+    var able = core.flags.ignoreChangeFloor;
+    if (core.isset(block.event.data) && core.isset(block.event.data.ignoreChangeFloor))
+        able=block.event.data.ignoreChangeFloor;
+    if (able) {
+        if (core.isReplaying()) {
+            if (core.status.replay.toReplay[0]=='no') {
+                core.status.replay.toReplay.shift();
+                core.status.route.push("no");
+                return true;
             }
-            core.status.automaticRoute.moveDirectly = false;
-            core.doSystemEvent(trigger, block, function () {
-                if (trigger == 'openDoor' || trigger == 'changeFloor')
-                    core.replay();
-            })
+        }
+        else if (core.status.automaticRoute.autoHeroMove
+            || core.status.automaticRoute.autoStep<core.status.automaticRoute.autoStepRoutes.length) {
+            core.status.route.push("no");
+            return true;
         }
     }
+    return false;
 }
 
 events.prototype._sys_battle = function (data, callback) {
@@ -297,56 +300,95 @@ events.prototype._sys_battle = function (data, callback) {
 
 ////// 战斗 //////
 events.prototype.battle = function (id, x, y, force, callback) {
-    if (core.status.automaticRoute.moveStepBeforeStop.length==0) {
-        core.status.automaticRoute.moveStepBeforeStop=core.status.automaticRoute.autoStepRoutes.slice(core.status.automaticRoute.autoStep-1,core.status.automaticRoute.autoStepRoutes.length);
-        if (core.status.automaticRoute.moveStepBeforeStop.length>=1)core.status.automaticRoute.moveStepBeforeStop[0].step-=core.status.automaticRoute.movedStep;
-    }
-    core.stopHero();
-    core.stopAutomaticRoute();
-
-    if (!core.isset(id)) id = core.getBlockId(x, y);
-    if (!core.isset(id)) {
-        if (core.isset(callback)) callback();
-        return;
-    }
-
+    core.saveAndStopAutomaticRoute();
+    id = id || core.getBlockId(x, y);
+    if (!core.isset(id)) return core.clearContinueAutomaticRoute(callback);
     // 非强制战斗
     if (!core.enemys.canBattle(id, x, y) && !force && !core.isset(core.status.event.id)) {
         core.drawTip("你打不过此怪物！");
-        core.clearContinueAutomaticRoute();
-        if (core.isset(callback)) callback();
-        return;
+        return core.clearContinueAutomaticRoute(callback);
     }
+    // 自动存档
+    if (!core.isset(core.status.event.id)) core.autosave(true);
+    // 战前事件
+    if (!this.beforeBattle(id, x, y))
+        return core.clearContinueAutomaticRoute(callback);
+    // 战后事件
+    this.afterBattle(id, x, y, callback);
+}
 
-    if (!core.isset(core.status.event.id)) // 自动存档
-        core.autosave(true);
-
-    // ------ 支援技能 ------//
-    if (core.isset(x) && core.isset(y)) {
-        var index = x + "," + y, cache = (core.status.checkBlock.cache || {})[index] || {},
-            guards = cache.guards || [];
-        if (guards.length>0) {
-            core.setFlag("__guards__"+x+"_"+y, guards);
-            var actions = [];
-            guards.forEach(function (g) {
-                core.push(actions, {"type": "jump", "from": [g[0],g[1]], "to": [x, y],
-                    "time": 300, "keep": false, "async": true});
-            })
-            core.push(actions, [
-                {"type": "waitAsync"},
-                {"type": "trigger", "loc": [x,y]}
-            ]);
-            core.insertAction(actions);
-            return;
-        }
-    }
-
-    core.events.afterBattle(id, x, y, callback);
+////// 战斗前触发的事件 //////
+events.prototype.beforeBattle = function (enemyId, x, y) {
+    return this.eventdata.beforeBattle(enemyId, x, y)
 }
 
 ////// 战斗结束后触发的事件 //////
 events.prototype.afterBattle = function (enemyId, x , y,callback) {
-    return this.eventdata.afterBattle(enemyId,x,y,callback);
+    return this.eventdata.afterBattle(enemyId, x, y, callback);
+}
+
+events.prototype._sys_openDoor = function (data, callback) {
+    this.openDoor(data.event.id, data.x, data.y, true, callback);
+}
+
+////// 开门 //////
+events.prototype.openDoor = function (id, x, y, needKey, callback) {
+    id = id || core.getBlockId(x, y);
+    core.saveAndStopAutomaticRoute();
+    if (!this._openDoor_check(id, x, y, needKey)) return false;
+    core.playSound("door.mp3");
+    this._openDoor_animate(id, x, y, callback);
+    return true;
+}
+
+events.prototype._openDoor_check = function (id, x, y, needKey) {
+    // 是否存在门或暗墙
+    if (!core.terrainExists(x, y, id) || !(id.endsWith("Door") || id.endsWith("Wall"))
+        || !core.isset(core.material.icons.animates[id])) {
+        core.clearContinueAutomaticRoute();
+        return false;
+    }
+
+    if (needKey && id.endsWith("Door")) {
+        var key = id.replace("Door", "Key");
+        if (!core.hasItem(key)) {
+            if (key != "specialKey")
+                core.drawTip("你没有" + ((core.material.items[key]||{}).name||"钥匙"));
+            else core.drawTip("无法开启此门");
+            core.clearContinueAutomaticRoute();
+            return false;
+        }
+        core.autosave(true);
+        core.removeItem(key);
+    }
+    return true;
+}
+
+events.prototype._openDoor_animate = function (id, x, y, callback) {
+    var door = core.material.icons.animates[id];
+    var speed = id.endsWith("Door") ? 30 : 70;
+
+    core.lockControl();
+    core.status.replay.animate = true;
+    var state = 0;
+    var animate = window.setInterval(function () {
+        state++;
+        if (state == 4) {
+            clearInterval(animate);
+            core.removeBlock(x, y);
+            core.unLockControl();
+            core.status.replay.animate = false;
+            core.events.afterOpenDoor(id, x, y, callback);
+            return;
+        }
+        core.clearMap('event', 32 * x, 32 * y, 32, 32);
+        core.drawImage('event', core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
+    }, speed / core.status.replay.speed);
+}
+
+////// 开一个门后触发的事件 //////
+events.prototype.afterOpenDoor = function (doorId, x, y, callback) {
+    return this.eventdata.afterOpenDoor(doorId,x,y,callback);
 }
 
 events.prototype._sys_getItem = function (data, callback) {
@@ -355,7 +397,7 @@ events.prototype._sys_getItem = function (data, callback) {
 
 ////// 获得某个物品 //////
 events.prototype.getItem = function (itemId, itemNum, itemX, itemY, callback) {
-    itemNum=itemNum||1;
+    itemNum = itemNum || 1;
     var itemCls = core.material.items[itemId].cls;
     core.items.getItemEffect(itemId, itemNum);
     core.removeBlock(itemX, itemY);
@@ -370,106 +412,57 @@ events.prototype.getItem = function (itemId, itemNum, itemX, itemY, callback) {
 
 ////// 获得面前的物品（轻按） //////
 events.prototype.getNextItem = function() {
-    if (!core.status.heroStop || !core.flags.enableGentleClick) return false;
-
-    if (!core.canMoveHero()) return false;
+    if (core.isMoving() || !core.canMoveHero() || !core.flags.enableGentleClick) return false;
 
     var nextX = core.nextX(), nextY = core.nextY();
     var block = core.getBlock(nextX, nextY);
     if (block==null) return false;
     if (block.block.event.trigger=='getItem') {
-        core.getItem(block.block.event.id, 1, nextX, nextY);
         core.status.route.push("getNext");
+        this.getItem(block.block.event.id, 1, nextX, nextY);
         return true;
     }
     return false;
 }
 
-events.prototype._sys_openDoor = function (data, callback) {
-    this.openDoor(data.event.id, data.x, data.y, true, callback);
-}
-
-////// 开门 //////
-events.prototype.openDoor = function (id, x, y, needKey, callback) {
-    if (!core.isset(id)) id = core.getBlockId(x, y);
-
-    // 是否存在门
-    if (!core.terrainExists(x, y, id) || !(id.endsWith("Door") || id.endsWith("Wall"))
-        || !core.isset(core.material.icons.animates[id])) {
-        return false;
-    }
-    if (core.status.automaticRoute.moveStepBeforeStop.length==0) {
-        core.status.automaticRoute.moveStepBeforeStop=core.status.automaticRoute.autoStepRoutes.slice(core.status.automaticRoute.autoStep-1,core.status.automaticRoute.autoStepRoutes.length);
-        if (core.status.automaticRoute.moveStepBeforeStop.length>=1)core.status.automaticRoute.moveStepBeforeStop[0].step-=core.status.automaticRoute.movedStep;
-    }
-
-    var speed = id.endsWith("Wall")?70:30;
-
-    if (needKey && id.endsWith("Door")) {
-        var key = id.replace("Door", "Key");
-        if (!core.hasItem(key)) {
-            if (key != "specialKey")
-                core.drawTip("你没有" + ((core.material.items[key]||{}).name||"钥匙"));
-            else core.drawTip("无法开启此门");
-            core.clearContinueAutomaticRoute();
-            return false;
-        }
-        core.autosave(true);
-        core.removeItem(key);
-    }
-
-    // open
-    core.playSound("door.mp3");
-    var state = 0;
-    var door = core.material.icons.animates[id];
-
-    core.lockControl();
-    core.stopHero();
-    core.stopAutomaticRoute();
-    core.status.replay.animate=true;
-    core.removeGlobalAnimate(x,y);
-    var animate = window.setInterval(function () {
-        state++;
-        if (state == 4) {
-            clearInterval(animate);
-            core.removeBlock(x, y);
-            core.unLockControl();
-            core.status.replay.animate=false;
-            core.events.afterOpenDoor(id,x,y,callback);
-            return;
-        }
-        core.clearMap('event', 32 * x, 32 * y, 32, 32);
-        core.drawImage('event', core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
-    }, speed / core.status.replay.speed);
-
-    return true;
-}
-
-////// 开一个门后触发的事件 //////
-events.prototype.afterOpenDoor = function (doorId, x, y, callback) {
-    return this.eventdata.afterOpenDoor(doorId,x,y,callback);
-}
-
 events.prototype._sys_changeFloor = function (data, callback) {
+    data = data.event.data;
     var heroLoc = {};
-    if (core.isset(data.event.data.loc))
-        heroLoc = {'x': data.event.data.loc[0], 'y': data.event.data.loc[1]};
-    if (core.isset(data.event.data.direction))
-        heroLoc.direction = data.event.data.direction;
+    if (core.isset(data.loc))
+        heroLoc = {'x': data.loc[0], 'y': data.loc[1]};
+    if (core.isset(data.direction))
+        heroLoc.direction = data.direction;
     if (core.status.event.id!='action') core.status.event.id=null;
-    core.changeFloor(data.event.data.floorId, data.event.data.stair,
-        heroLoc, data.event.data.time, callback);
+    core.changeFloor(data.floorId, data.stair, heroLoc, data.time, callback);
 }
 
 ////// 楼层切换 //////
 events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback, fromLoad) {
-
-    floorId = floorId || core.status.floorId;
-    if (!core.isset(floorId)) {
-        if (core.isset(callback)) callback();
+    var info = this._changeFloor_getInfo(floorId, stair, heroLoc, time);
+    if (info == null) {
+        if (callback) callback();
         return;
     }
+    info.fromLoad = fromLoad;
+    floorId = info.floorId;
 
+    core.dom.floorNameLabel.innerHTML = core.status.maps[floorId].title;
+    core.lockControl();
+    core.stopAutomaticRoute();
+    core.clearContinueAutomaticRoute();
+    core.status.replay.animate=true;
+
+    if (core.status.maps[floorId].canFlyTo && core.status.hero.flyRange.indexOf(floorId)<0) {
+        core.status.hero.flyRange.push(floorId);
+        core.status.hero.flyRange.sort(function (a, b) {
+            return core.floorIds.indexOf(a) - core.floorIds.indexOf(b);
+        })
+    }
+    this._changeFloor_beforeChange(info, callback);
+}
+
+events.prototype._changeFloor_getInfo = function (floorId, stair, heroLoc, time) {
+    floorId = floorId || core.status.floorId;
     if (floorId == ':before') {
         var index=core.floorIds.indexOf(core.status.floorId);
         if (index>0) floorId = core.floorIds[index-1];
@@ -480,24 +473,29 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
         if (index<core.floorIds.length-1) floorId = core.floorIds[index+1];
         else floorId=core.status.floorId;
     }
-    if (main.mode!='play') time = 0;
+    if (!core.status.maps[floorId]) {
+        main.log("不存在的楼层："+floorId);
+        return null;
+    }
+
+    if (main.mode != 'play' || core.isReplaying()) time = 0;
     if (!core.isset(time)) time = core.values.floorChangeTime;
     if (!core.isset(time)) time = 800;
-
-    var displayAnimate = time>=100 && !core.isReplaying();
-
+    if (time<100) time = 0;
     time /= 20;
-    core.lockControl();
-    core.stopHero();
-    core.stopAutomaticRoute();
-    core.clearContinueAutomaticRoute();
-    core.status.replay.animate=true;
-    core.dom.floorNameLabel.innerHTML = core.status.maps[floorId].title;
-    if (!core.isset(stair) && !core.isset(heroLoc))
+
+    return {
+        floorId: floorId,
+        time: time,
+        heroLoc: core.clone(this._changeFloor_getHeroLoc(floorId, stair, heroLoc))
+    };
+}
+
+events.prototype._changeFloor_getHeroLoc = function (floorId, stair, heroLoc) {
+    if (!core.isset(heroLoc))
         heroLoc = core.clone(core.status.hero.loc);
     if (core.isset(stair)) {
-        if (!core.isset(heroLoc)) heroLoc={};
-
+        // 检查该层地图的 upFloor & downFloor
         if (core.isset(core.status.maps[floorId][stair])) {
             heroLoc.x = core.status.maps[floorId][stair][0];
             heroLoc.y = core.status.maps[floorId][stair][1];
@@ -505,65 +503,71 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
         else {
             var blocks = core.status.maps[floorId].blocks;
             for (var i in blocks) {
-                if (core.isset(blocks[i].event) && !blocks[i].disable && blocks[i].event.id === stair) {
+                if (!blocks[i].disable && blocks[i].event.id === stair) {
                     heroLoc.x = blocks[i].x;
                     heroLoc.y = blocks[i].y;
                     break;
                 }
             }
         }
-        if (!core.isset(heroLoc.x)) {
-            heroLoc.x=core.status.hero.loc.x;
-            heroLoc.y=core.status.hero.loc.y;
-        }
     }
-    if (!core.isset(heroLoc.direction)) heroLoc.direction = core.status.hero.loc.direction;
+    ['x', 'y', 'direction'].forEach(function (name) {
+        if (!core.isset(heroLoc[name]))
+            heroLoc[name] = core.getHeroLoc(name);
+    });
+    return heroLoc;
+}
 
-    if (core.status.maps[floorId].canFlyTo && core.status.hero.flyRange.indexOf(floorId)<0) {
-        core.status.hero.flyRange.push(floorId);
-        core.status.hero.flyRange.sort(function (a, b) {
-            return core.floorIds.indexOf(a) - core.floorIds.indexOf(b);
-        })
-    }
-
+events.prototype._changeFloor_beforeChange = function (info, callback) {
+    core.playSound('floor.mp3');
+    // 需要 setTimeout 执行，不然会出错
     window.setTimeout(function () {
-
-        var changing = function () {
-
-            core.events.eventdata.changingFloor(floorId, heroLoc, fromLoad);
-
-            var changed = function () {
-                core.unLockControl();
-                core.status.replay.animate=false;
-                core.events.afterChangeFloor(floorId, fromLoad);
-                if (core.isset(callback)) callback();
-            }
-            if (displayAnimate) {
-                core.hide(core.dom.floorMsgGroup, time/4, function () {
-                    changed();
-                });
-            }
-            else {
-                changed();
-            }
-
-        }
-        core.playSound('floor.mp3');
-        if (displayAnimate) {
-            core.show(core.dom.floorMsgGroup, time/2, function () {
-                changing();
+        if (info.time == 0)
+            core.events._changeFloor_changing(info, callback);
+        else
+            core.show(core.dom.floorMsgGroup, info.time / 2, function () {
+                core.events._changeFloor_changing(info, callback);
             });
-        }
-        else {
-            changing();
-        }
-    }, 25);
+    }, 25)
+}
+
+events.prototype._changeFloor_changing = function (info, callback) {
+    this.changingFloor(info.floorId, info.heroLoc, info.fromLoad);
+
+    if (info.time == 0)
+        this._changeFloor_afterChange(info, callback);
+    else
+        core.hide(core.dom.floorMsgGroup, info.time / 4, function () {
+            core.events._changeFloor_afterChange(info, callback);
+        });
+}
+
+events.prototype._changeFloor_afterChange = function (info, callback) {
+    core.unLockControl();
+    core.status.replay.animate=false;
+    core.events.afterChangeFloor(info.floorId, info.fromLoad);
+
+    if (callback) callback();
+}
+
+events.prototype.changingFloor = function (floorId, heroLoc, fromLoad) {
+    this.eventdata.changingFloor(floorId, heroLoc, fromLoad);
 }
 
 ////// 转换楼层结束的事件 //////
 events.prototype.afterChangeFloor = function (floorId, fromLoad) {
     if (main.mode!='play') return;
     return this.eventdata.afterChangeFloor(floorId, fromLoad);
+}
+
+////// 是否到达过某个楼层 //////
+events.prototype.hasVisitedFloor = function (floorId) {
+    return core.getFlag("__visited__")[floorId] || false;
+}
+
+////// 到达某楼层 //////
+events.prototype.visitFloor = function (floorId) {
+    core.getFlag("__visited__")[floorId] = true;
 }
 
 events.prototype._sys_passNet = function (data, callback) {
@@ -573,21 +577,8 @@ events.prototype._sys_passNet = function (data, callback) {
 
 ////// 经过一个路障 //////
 events.prototype.passNet = function (data) {
-    // 有鞋子
     if (core.hasItem('shoes')) return;
-    if (data.event.id=='lavaNet') {
-        // 血网 lavaNet 移动到 checkBlock 中处理
-        /*
-        core.status.hero.hp -= core.values.lavaDamage;
-        if (core.status.hero.hp<=0) {
-            core.status.hero.hp=0;
-            core.updateStatusBar();
-            core.events.lose();
-            return;
-        }
-        core.drawTip('经过血网，生命-'+core.values.lavaDamage);
-        */
-    }
+    // 血网 lavaNet 移动到 checkBlock 中处理
     if (data.event.id=='poisonNet') { // 毒网
         core.setFlag('debuff', 'poison');
         core.insertAction('毒衰咒处理');
@@ -613,35 +604,26 @@ events.prototype.pushBox = function (data) {
     if (data.event.id!='box' && data.event.id!='boxed') return;
 
     // 判断还能否前进，看看是否存在事件
-    var direction = core.getHeroLoc('direction'), nx=data.x+core.utils.scan[direction].x, ny=data.y+core.utils.scan[direction].y;
+    var direction = core.getHeroLoc('direction'),
+        nx = data.x + core.utils.scan[direction].x, ny = data.y + core.utils.scan[direction].y;
 
-    if (nx<0||nx>=core.bigmap.width||ny<0||ny>=core.bigmap.height) return;
+    // 检测能否推上去
+    if (!core.canMoveHero() || !core.canMoveHero(data.x, data.y, direction)) return;
+    var nextId = core.getBlockId(nx, ny);
+    if (nextId != null && nextId != 'flower') return;
 
-    var block = core.getBlock(nx, ny, null, true);
-    if (block!=null && !(core.isset(block.block.event) && block.block.event.id=='flower'))
-        return;
+    core.setBlock(nextId==null?169:170, nx, ny);
 
-    if (block==null) {
-        core.status.thisMap.blocks.push(core.maps.initBlock(nx, ny, 169));
-        block = core.getBlock(nx, ny);
-    }
-    else {
-        block.block.id=170;
-        block.block.event=core.maps.initBlock(null,null,170).event;
-    }
-    core.drawBlock(block.block);
-
-    if (data.event.id=='box') {
+    if (data.event.id=='box')
         core.removeBlock(data.x, data.y);
-    }
-    else {
-        data.id=168;
-        data.event=core.maps.initBlock(null,null,168).event;
-        core.drawBlock(data);
-    }
+    else
+        core.setBlock(168, data.x, data.y);
 
     core.updateStatusBar();
+    this._pushBox_moveHero(direction);
+}
 
+events.prototype._pushBox_moveHero = function (direction) {
     core.status.replay.animate = true;
     core.lockControl();
     setTimeout(function () {
@@ -655,8 +637,7 @@ events.prototype.pushBox = function (data) {
                 core.replay();
             }
         });
-    })
-
+    });
 }
 
 ////// 推箱子后的事件 //////
@@ -665,21 +646,14 @@ events.prototype.afterPushBox = function () {
 }
 
 events.prototype._sys_changeLight = function (data, callback) {
-    core.events.changeLight(data.x, data.y);
+    core.events.changeLight(data.event.id, data.x, data.y);
     if (callback) callback();
 }
 
 ////// 改变亮灯（感叹号）的事件 //////
-events.prototype.changeLight = function(x, y) {
-    var block = core.getBlock(x, y);
-    if (block==null) return;
-    var index = block.index;
-    block = block.block;
-    if (block.event.id != 'light') return;
-    // 改变为dark
-    block.id = 166;
-    block.event = {'cls': 'terrains', 'id': 'darkLight', 'noPass': true};
-    core.drawBlock(block);
+events.prototype.changeLight = function(id, x, y) {
+    if (id != null && id != 'light') return;
+    core.setBlock(core.getNumberById('darkLight'), x, y);
     this.afterChangeLight(x,y);
 }
 

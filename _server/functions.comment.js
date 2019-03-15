@@ -43,11 +43,11 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_lint": true,
                     "_data": "转换楼层结束的事件\n此函数会在整个楼层切换完全结束后执行"
                 },
-                "addPoint": {
+                "beforeBattle": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "加点事件"
+                    "_data": "战斗前发生的事件"
                 },
                 "afterBattle": {
                     "_leaf": true,

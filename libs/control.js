@@ -486,6 +486,16 @@ control.prototype.stopAutomaticRoute = function () {
         core.deleteCanvas('route');
 }
 
+control.prototype.saveAndStopAutomaticRoute = function () {
+    var automaticRoute = core.status.automaticRoute;
+    if (automaticRoute.moveStepBeforeStop.length == 0) {
+        automaticRoute.moveStepBeforeStop = automaticRoute.autoStepRoutes.slice(automaticRoute.autoStep - 1);
+        if (automaticRoute.moveStepBeforeStop.length>=1)
+            automaticRoute.moveStepBeforeStop[0].step -= automaticRoute.movedStep;
+    }
+    this.stopAutomaticRoute();
+}
+
 ////// 继续剩下的自动寻路操作 //////
 control.prototype.continueAutomaticRoute = function () {
     // 此函数只应由events.afterOpenDoor和events.afterBattle调用
@@ -500,9 +510,10 @@ control.prototype.continueAutomaticRoute = function () {
 }
 
 ////// 清空剩下的自动寻路列表 //////
-control.prototype.clearContinueAutomaticRoute = function () {
+control.prototype.clearContinueAutomaticRoute = function (callback) {
     core.deleteCanvas('route');
     core.status.automaticRoute.moveStepBeforeStop=[];
+    if (callback) callback();
 }
 
 ////// 瞬间移动 //////
@@ -724,6 +735,11 @@ control.prototype.fillPosWithPoint = function (pos) {
     core.fillRect('ui', pos.x*32+12,pos.y*32+12,8,8, '#bfbfbf');
 }
 
+// 当前是否正在移动
+control.prototype.isMoving = function () {
+    return !core.status.heroStop || core.status.heroMoving > 0;
+}
+
 ////// 设置勇士的自动行走路线 //////
 control.prototype.setAutoHeroMove = function (steps) {
     steps=steps||core.status.automaticRoute.autoStepRoutes;
@@ -781,7 +797,7 @@ control.prototype.moveAction = function (callback) {
         core.status.automaticRoute.moveStepBeforeStop = [];
         core.status.automaticRoute.lastDirection = core.getHeroLoc('direction');
         if (canMove) // 非箭头：触发
-            core.trigger(x + core.utils.scan[direction].x, y + core.utils.scan[direction].y);
+            core.events._trigger(x + core.utils.scan[direction].x, y + core.utils.scan[direction].y);
         core.drawHero(direction, x, y);
 
         if (core.status.automaticRoute.moveStepBeforeStop.length==0) {
@@ -822,11 +838,11 @@ control.prototype.moveAction = function (callback) {
             if (block!=null && block.block.event.trigger=='getItem' &&
                 !core.isset(core.floors[core.status.floorId].afterGetItem[nowx+","+nowy])) {
                 hasTrigger = true;
-                core.trigger(nowx, nowy);
+                core.events._trigger(nowx, nowy);
             }
             core.checkBlock();
             if (!hasTrigger && !core.status.gameOver)
-                core.trigger(nowx, nowy);
+                core.events._trigger(nowx, nowy);
             if (core.isset(callback)) callback();
         });
     }
@@ -2023,7 +2039,7 @@ control.prototype.checkStatus = function (name, need, item) {
         core.drawTip("你没有" + core.material.items[name].name);
         return false;
     }
-    if (!core.status.heroStop) {
+    if (core.isMoving()) {
         core.drawTip("请先停止勇士行动");
         return false;
     }

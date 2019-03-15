@@ -352,13 +352,11 @@ ui.prototype.getTitleAndIcon = function (content) {
         var number = core.maps.getNumberById(v);
         if (number>0) {
             var block = core.maps.initBlock(0,0,number,true);
-            if (core.isset(block.event)) {
-                var cls = block.event.cls;
-                image = core.material.images[cls];
-                icon = core.material.icons[cls][v];
-                iconHeight = block.event.height;
-                animate = block.event.animate;
-            }
+            var cls = block.event.cls;
+            image = core.material.images[cls];
+            icon = core.material.icons[cls][v];
+            iconHeight = block.event.height;
+            animate = block.event.animate;
         }
     };
 

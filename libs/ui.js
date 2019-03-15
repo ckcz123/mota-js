@@ -692,7 +692,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
         // 绘制
         if (ss.length==3)
             core.drawImage('ui', img, parseFloat(ss[1]), parseFloat(ss[2]));
-        else if (ss.length=5)
+        else if (ss.length==5)
             core.drawImage('ui', img, 0, 0, img.width, img.height, parseFloat(ss[1]), parseFloat(ss[2]), parseFloat(ss[3]), parseFloat(ss[4]));
         else if (ss.length==9)
             core.drawImage('ui', img, parseFloat(ss[1]), parseFloat(ss[2]), parseFloat(ss[3]), parseFloat(ss[4]), parseFloat(ss[5]), parseFloat(ss[6]), parseFloat(ss[7]), parseFloat(ss[8]));

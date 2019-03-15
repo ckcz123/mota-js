@@ -253,12 +253,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                                 }
                             }
                         },
-                        "flyRange": {
-                            "_leaf": true,
-                            "_type": "textarea",
-                            "_range": "thiseval instanceof Array",
-                            "_data": "初始可飞的楼层；一般留空数组即可"
-                        },
                         "loc": {
                             
                             "_type": "object",

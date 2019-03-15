@@ -452,12 +452,6 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
     core.clearContinueAutomaticRoute();
     core.status.replay.animate=true;
 
-    if (core.status.maps[floorId].canFlyTo && core.status.hero.flyRange.indexOf(floorId)<0) {
-        core.status.hero.flyRange.push(floorId);
-        core.status.hero.flyRange.sort(function (a, b) {
-            return core.floorIds.indexOf(a) - core.floorIds.indexOf(b);
-        })
-    }
     this._changeFloor_beforeChange(info, callback);
 }
 

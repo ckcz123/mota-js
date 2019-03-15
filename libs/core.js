@@ -241,7 +241,6 @@ core.prototype.init = function (coreData, callback) {
     core.material.items = core.items.getItems();
     core.material.enemys = core.enemys.getEnemys();
     core.material.icons = core.icons.getIcons();
-    core.material.events = core.events.getEvents();
 
     core.platform.isOnline = location.protocol.indexOf("http")==0;
     if (core.platform.isOnline) {

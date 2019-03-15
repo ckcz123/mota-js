@@ -1110,6 +1110,25 @@ maps.prototype.getBlockInfo = function (block) {
     return {number:number, id:id, cls:cls, image:image, posX:posX, posY:posY, height:height, faceIds:faceIds};
 }
 
+////// 搜索某个图块出现的所有位置 //////
+maps.prototype.searchBlock = function (id, floorId, showDisable) {
+    if (typeof id == 'number') id = this.initBlock(0, 0, id).event.id;
+    floorId = floorId || core.status.floorId;
+    var result = [];
+    if (floorId instanceof Array) {
+        floorId.forEach(function (floorId) {
+            result = result.concat(core.searchBlock(id, floorId, showDisable));
+        });
+        return result;
+    }
+    for (var i = 0; i < core.status.maps[floorId].blocks.length; ++i) {
+        var block = core.status.maps[floorId].blocks[i];
+        if (block.event.id == id && (showDisable || !block.disable))
+            result.push({floorId: floorId, index: i, block: block});
+    }
+    return result;
+}
+
 // -------- 启用/禁用图块，楼层贴图 -------- //
 
 ////// 将某个块从禁用变成启用状态 //////
@@ -1212,6 +1231,26 @@ maps.prototype.removeBlockByIds = function (floorId, ids) {
     if (!core.isset(floorId)) return;
     ids.sort(function (a,b) {return b-a}).forEach(function (id) {
         core.removeBlockById(id, floorId);
+    });
+}
+
+////// 将地图中所有某个图块替换成另一个图块 //////
+maps.prototype.replaceBlock = function (fromNumber, toNumber, floorId) {
+    floorId = floorId || core.status.floorId;
+    if (floorId instanceof Array) {
+        floorId.forEach(function (floorId) {
+            core.replaceBlock(fromNumber, toNumber, floorId);
+        });
+        return;
+    }
+    var toBlock = this.initBlock(0, 0, toNumber, true);
+    core.status.maps[floorId].blocks.forEach(function (block) {
+        if (block.id == fromNumber) {
+            block.id = toNumber;
+            for (var one in toBlock.event) {
+                block.event[one] = core.clone(toBlock.event[one]);
+            }
+        }
     });
 }
 

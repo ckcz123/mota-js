@@ -636,7 +636,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "寻路算法是否经过血瓶；如果该项为false，则寻路算法会自动尽量绕过血瓶"
                 },
-                "portalWithoutTrigger": {
+                "ignoreChangeFloor": {
                     "_leaf": true,
                     "_type": "checkbox",
                     "_bool": "bool",

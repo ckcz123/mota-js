@@ -200,7 +200,7 @@ var loc = ', "loc": ['+Number_0+', '+Number_1+']';
 if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 Int_0 = (Int_0!=='')  ?(', "time": '+Int_0):'';
-Bool_0 = Bool_0 ?'':(', "portalWithoutTrigger": false');
+Bool_0 = Bool_0 ?'':(', "ignoreChangeFloor": false');
 var code = '{"floorId": "'+toFloorId+'"'+loc+DirectionEx_List_0+Int_0+Bool_0+' }\n';
 return code;
 */;
@@ -2006,7 +2006,7 @@ ActionParser.prototype.parse = function (obj,type) {
       if (!this.isset(obj.time)) obj.time=500;
       return MotaActionBlocks['changeFloor_m'].xmlText([
         obj.floorType||'floorId',obj.floorId,obj.stair||'loc',obj.loc[0],obj.loc[1],obj.direction,
-        obj.time,!this.isset(obj.portalWithoutTrigger)
+        obj.time,!this.isset(obj.ignoreChangeFloor)
       ]);
 
     case 'level':

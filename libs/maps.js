@@ -515,16 +515,15 @@ maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
 // -------- 绘制地图，各层图块，楼层贴图，Autotile -------- //
 
 ////// 绘制一个图块 //////
-maps.prototype.drawBlock = function (block, animate, dx, dy) {
+maps.prototype.drawBlock = function (block, animate) {
     if (block.event.id == 'none') return;
-    animate = animate || 0;
-    dx = dx || 0;
-    dy = dy || 0;
+    var redraw = core.isset(animate);
+    if (!redraw) animate = 0;
     var x = block.x, y = block.y;
     // --- 在界面外的动画不绘制
-    if (animate > 1 && block.event.animate > 1 &&
-        (32*x + dx < core.bigmap.offsetX - 64 || 32*x + dx > core.bigmap.offsetX + this.DEFAULT_PIXEL_WIDTH + 32
-            || 32*y + dy < core.bigmap.offsetY - 64 || 32*y + dy > core.bigmap.offsetY + this.DEFAULT_PIXEL_HEIGHT + 32 + 16)) {
+    if (redraw && block.event.animate > 1 &&
+        (32*x < core.bigmap.offsetX - 64 || 32*x > core.bigmap.offsetX + this.DEFAULT_PIXEL_WIDTH + 32
+            || 32*y < core.bigmap.offsetY - 64 || 32*y > core.bigmap.offsetY + this.DEFAULT_PIXEL_HEIGHT + 32 + 16)) {
         return;
     }
 
@@ -532,19 +531,19 @@ maps.prototype.drawBlock = function (block, animate, dx, dy) {
     if (blockInfo == null) return;
     if (blockInfo.cls != 'tileset') blockInfo.posX = animate % block.event.animate;
     if (!core.isset(block.name))
-        this._drawBlockInfo(blockInfo, block.x, block.y, dx, dy);
+        this._drawBlockInfo(blockInfo, block.x, block.y);
     else
         this._drawBlockInfo_bgfg(blockInfo, block.name, block.x, block.y);
 }
 
-maps.prototype._drawBlockInfo = function (blockInfo, x, y, dx, dy) {
+maps.prototype._drawBlockInfo = function (blockInfo, x, y) {
     var image = blockInfo.image, posX = blockInfo.posX, posY = blockInfo.posY, height = blockInfo.height;
 
-    core.clearMap('event', x * 32 + dx, y * 32 + dy, 32, 32);
-    core.drawImage('event', image, posX * 32, posY * height + height - 32, 32, 32, x * 32 + dx, y * 32 + dy, 32, 32);
+    core.clearMap('event', x * 32, y * 32, 32, 32);
+    core.drawImage('event', image, posX * 32, posY * height + height - 32, 32, 32, x * 32, y * 32, 32, 32);
     if (height>32) {
-        core.clearMap('event2', x * 32 + dx, y * 32 + 32 - height + dy, 32, height - 32)
-        core.drawImage('event2', image, posX * 32, posY * height, 32, height - 32, x * 32 + dx, y * 32 + 32 - height + dy, 32, height-32);
+        core.clearMap('event2', x * 32, y * 32 + 32 - height, 32, height - 32)
+        core.drawImage('event2', image, posX * 32, posY * height, 32, height - 32, x * 32, y * 32 + 32 - height, 32, height-32);
     }
 }
 

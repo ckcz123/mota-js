@@ -2812,8 +2812,7 @@ control.prototype.checkBgm = function() {
 ////// 清空状态栏 //////
 control.prototype.clearStatusBar = function() {
     Object.keys(core.statusBar).forEach(function (e) {
-        if (core.isset(core.statusBar[e].innerHTML))
-            core.statusBar[e].innerHTML = "&nbsp;";
+        core.statusBar[e].innerHTML = "";
     })
     core.statusBar.image.book.style.opacity = 0.3;
     if (!core.flags.equipboxButton) {

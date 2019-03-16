@@ -1509,6 +1509,9 @@ events.prototype._action_exit = function (data, x, y, prefix) {
 
 // ------ 样板提供的的自定义事件 END ------ //
 
+// ------ 一些事件的具体执行过程 ------ //
+
+////// 跟随 //////
 events.prototype.follow = function (name) {
     core.status.hero.followers = core.status.hero.followers || [];
     if (core.isset(core.material.images.images[name])
@@ -1520,6 +1523,7 @@ events.prototype.follow = function (name) {
     }
 }
 
+////// 取消跟随 //////
 events.prototype.unfollow = function (name) {
     core.status.hero.followers = core.status.hero.followers || [];
     if (!core.isset(name)) {
@@ -1538,6 +1542,7 @@ events.prototype.unfollow = function (name) {
     core.drawHero();
 }
 
+////// 绘制或取消一张gif图片 //////
 events.prototype.showGif = function (name, x, y) {
     var image = core.material.images.images[name];
     if (image) {
@@ -1555,6 +1560,7 @@ events.prototype.showGif = function (name, x, y) {
     }
 }
 
+////// 数值操作 //////
 events.prototype.setValue = function (name, value, prefix, add) {
     var value = core.calValue(value, prefix);
     if (add) value += core.calValue(name, prefix);
@@ -1592,16 +1598,19 @@ events.prototype._setValue_setSwitch = function (name, value, prefix) {
     core.setFlag((prefix||"f@x@y")+"@"+data.name.substring(7), value);
 }
 
+////// 数值增减 //////
 events.prototype.setValue2 = function (name, value, prefix) {
     this.setValue(name, value, prefix, true);
 }
 
+////// 设置楼层属性 //////
 events.prototype.setFloorInfo = function (name, value, floorId, prefix) {
     floorId = floorId || data.floorId;
     core.status.maps[floorId][name] = core.calValue(value, prefix);
     core.updateStatusBar();
 }
 
+////// 设置全塔属性 //////
 events.prototype.setGlobalAttribute = function (name, value) {
     if (typeof value == 'string') {
         if ((value.charAt(0)=='"' && value.charAt(value.length-1)=='"')
@@ -1616,36 +1625,13 @@ events.prototype.setGlobalAttribute = function (name, value) {
     core.setFlag('globalAttribute', core.status.globalAttribute);
 }
 
+////// 设置全局开关 //////
 events.prototype.setGlobalFlag = function (name, value) {
     var flags = core.getFlag("globalFlags", {});
     flags[name] = value;
     core.flags[name] = value;
     core.setFlag("globalFlags", flags);
     core.resize();
-}
-
-events.prototype.setFloorName = function (floorId) {
-    floorId = floorId || core.status.floorId;
-    if (!core.isset(floorId)) return;
-    // 根据文字判断是否斜体
-    var floorName = core.status.maps[floorId].name || "";
-    if (typeof floorName == 'number') floorName = ""+floorName;
-    if (!core.isset(floorName) || floorName=="") floorName="&nbsp;"
-    if (core.statusBar.floor.innerHTML == floorName) return;
-    core.statusBar.floor.innerHTML = floorName;
-    if (/^[+-]?\d+$/.test(floorName)) {
-        core.statusBar.floor.style.fontStyle = 'italic';
-        core.statusBar.floor.style.fontSize = '1.1em';
-    }
-    else {
-        core.statusBar.floor.style.fontStyle = 'normal';
-        if (floorName.length<=5)
-            core.statusBar.floor.style.fontSize = '1.1em';
-        else if (floorName.length==6)
-            core.statusBar.floor.style.fontSize = '0.9em';
-        else
-            core.statusBar.floor.style.fontSize = '0.7em';
-    }
 }
 
 ////// 显示图片 //////
@@ -2083,11 +2069,6 @@ events.prototype.tryUseItem = function(itemId) {
 
     if (core.canUseItem(itemId))core.useItem(itemId);
     else core.drawTip("当前无法使用"+core.material.items[itemId].name);
-}
-
-////// 加点事件 //////
-events.prototype.addPoint = function (enemy) {
-    return this.eventdata.addPoint(enemy);
 }
 
 ////// 使用炸弹/圣锤后的事件 //////

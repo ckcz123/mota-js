@@ -946,18 +946,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 
 	// 设置楼层名
-	core.events.setFloorName();
+	if (core.status.floorId) {
+		core.setStatusBarInnerHTML('floor', core.status.maps[core.status.floorId].name);
+	}
 
 	// 设置勇士名字和图标
-	core.statusBar.name.innerHTML = core.getStatus('name');
-
+	core.setStatusBarInnerHTML('name', core.getStatus('name'));
 	// 设置等级名称
-	var lvName = core.getLvName();
-	core.statusBar.lv.innerHTML = lvName;
-	// 检测是不是纯数字；如果带中文等需要取消斜体（不然很难看的！）
-	if (/^[+-]?\d+$/.test(lvName))
-		core.statusBar.lv.style.fontStyle = 'italic';
-	else core.statusBar.lv.style.fontStyle = 'normal';
+	core.setStatusBarInnerHTML('lv', core.getLvName());
 
 	// 设置生命上限、生命值、攻防魔防金币和经验值
 	var statusList = ['hpmax', 'hp', 'mana', 'atk', 'def', 'mdef', 'money', 'experience'];
@@ -965,24 +961,24 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 向下取整
 		if (core.isset(core.status.hero[item]))
 			core.status.hero[item] = Math.floor(core.status.hero[item]);
-		// 大数据格式化；
-		core.statusBar[item].innerHTML = core.formatBigNumber(core.getRealStatus(item));
+		// 大数据格式化
+		core.setStatusBarInnerHTML(item, core.getRealStatus(item));
 	});
 
 	// 设置魔力值
 	if (core.flags.enableMana) {
 		// 也可以使用flag:manaMax来表示最大魔力值；详见文档-个性化-技能塔的支持
 		// core.status.hero.mana = Math.max(core.status.hero.mana, core.getFlag('manaMax', 10));
-		// core.statusBar.mana.innerHTML = core.status.hero.mana + "/" + core.getFlag('manaMax', 10);
+		// core.setStatusBarInnerHTML('mana', core.status.hero.mana + "/" + core.getFlag('manaMax', 10));
 	}
 	// 设置技能栏
 	if (core.flags.enableSkill) {
 		// 可以用flag:skill表示当前开启的技能类型，flag:skillName显示技能名；详见文档-个性化-技能塔的支持
-		core.statusBar.skill.innerHTML = core.getFlag('skillName', '无');
+		core.setStatusBarInnerHTML('skill', core.getFlag('skillName', '无'));
 	}
 
 	// 可以在这里添加自己额外的状态栏信息，比如想攻击显示 +0.5 可以这么写：
-	// if (core.hasFlag('halfAtk')) core.statusBar.atk.innerHTML += "+0.5";
+	// if (core.hasFlag('halfAtk')) core.setStatusBarInnerHTML('atk', core.statusBar.atk.innerText + "+0.5");
 
 	// 如果是自定义添加的状态栏，也需要在这里进行设置显示的数值
 
@@ -990,32 +986,32 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.flags.enableLevelUp && core.status.hero.lv < core.firstData.levelUp.length) {
 		var need = core.calValue(core.firstData.levelUp[core.status.hero.lv].need);
 		if (core.flags.levelUpLeftMode)
-			core.statusBar.up.innerHTML = core.formatBigNumber(need - core.getStatus('experience')) || " ";
+			core.setStatusBarInnerHTML('up', core.formatBigNumber(need - core.getStatus('experience')) || "");
 		else
-			core.statusBar.up.innerHTML = core.formatBigNumber(need) || " ";
-	} else core.statusBar.up.innerHTML = " ";
+			core.setStatusBarInnerHTML('up', core.formatBigNumber(need) || "");
+	} else core.setStatusBarInnerHTML('up', "");
 
 	// 钥匙
 	var keys = ['yellowKey', 'blueKey', 'redKey'];
 	keys.forEach(function (key) {
-		core.statusBar[key].innerHTML = core.setTwoDigits(core.status.hero.items.keys[key]);
+		core.setStatusBarInnerHTML(key, core.setTwoDigits(core.itemCount(key)));
 	});
 	// 毒衰咒
 	if (core.flags.enableDebuff) {
-		core.statusBar.poison.innerHTML = core.hasFlag('poison') ? "毒" : "";
-		core.statusBar.weak.innerHTML = core.hasFlag('weak') ? "衰" : "";
-		core.statusBar.curse.innerHTML = core.hasFlag('curse') ? "咒" : "";
+		core.setStatusBarInnerHTML('poison', core.hasFlag('poison') ? "毒" : "");
+		core.setStatusBarInnerHTML('weak', core.hasFlag('weak') ? "衰" : "");
+		core.setStatusBarInnerHTML('curse', core.hasFlag('curse') ? "咒" : "");
 	}
 	// 破炸飞
 	if (core.flags.enablePZF) {
-		core.statusBar.pickaxe.innerHTML = "破" + core.itemCount('pickaxe');
-		core.statusBar.bomb.innerHTML = "炸" + core.itemCount('bomb');
-		core.statusBar.fly.innerHTML = "飞" + core.itemCount('centerFly');
+		core.setStatusBarInnerHTML('pickaxe', "破" + core.itemCount('pickaxe'));
+		core.setStatusBarInnerHTML('bomb', "炸" + core.itemCount('bomb'));
+		core.setStatusBarInnerHTML('fly', "飞" + core.itemCount('centerFly'));
 	}
 
 	// 难度
 	core.statusBar.hard.innerHTML = core.status.hard;
-	// 状态栏绘制
+	// 自定义状态栏绘制
 	core.drawStatusBar();
 
 	// 更新阻激夹域的伤害值
@@ -1195,30 +1191,37 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
     },
     "ui": {
         "drawStatusBar": function () {
+	// 自定义绘制状态栏，需要开启状态栏canvas化
+
 	// 如果是非状态栏canvas化，直接返回
 	if (!core.flags.statusCanvas) return;
-	var canvas = core.dom.statusCanvas, ctx = canvas.getContext('2d');
+	var canvas = core.dom.statusCanvas,
+		ctx = canvas.getContext('2d');
 	// 清空状态栏
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	// 如果是隐藏状态栏模式，直接返回
 	if (!core.domStyle.showStatusBar) return;
-	
+
 	// 作为样板，只绘制楼层、生命、攻击、防御、魔防、金币、钥匙这七个内容
 	// 需要其他的请自行进行修改；横竖屏都需要进行适配绘制。
 	// （可以使用Chrome浏览器开控制台来模拟手机上的竖屏模式的显示效果，具体方式自行百度）
 	// 横屏模式下的画布大小是 149*480
 	// 竖屏模式下的画布大小是 480*(32*rows+9) 其中rows为状态栏行数，即全塔属性中statusCanvasRowsOnMobile值
 	// 可以使用 core.domStyle.isVertical 来判定当前是否是竖屏模式
-	
+
 	ctx.fillStyle = core.status.globalAttribute.statusBarColor || core.initStatus.globalAttribute.statusBarColor;
 	ctx.font = 'italic bold 18px Verdana';
-	
-	// 距离左侧边框10像素，上侧边框9像素，行距约为42像素
-	var leftOffset = 10, topOffset = 9, lineHeight = 42;
+
+	// 距离左侧边框6像素，上侧边框9像素，行距约为39像素
+	var leftOffset = 10,
+		topOffset = 9,
+		lineHeight = 42;
 	if (core.domStyle.isVertical) { // 竖屏模式，行高32像素
-		leftOffset = 10; topOffset = 6; lineHeight = 32;
+		leftOffset = 10;
+		topOffset = 6;
+		lineHeight = 32;
 	}
-	
+
 	var toDraw = ["floor", "hp", "atk", "def", "mdef", "money"];
 	for (var index = 0; index < toDraw.length; index++) {
 		// 绘制下一个数据
@@ -1226,9 +1229,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 图片大小25x25
 		ctx.drawImage(core.statusBar.icons[name], leftOffset, topOffset, 25, 25);
 		// 文字内容
-		var text = (core.statusBar[name]||{}).innerText || " ";
+		var text = (core.statusBar[name] || {}).innerText || " ";
 		// 斜体判定：如果不是纯数字和字母，斜体会非常难看，需要取消
-		if (!/^[-+_.a-zA-Z0-9]*$/.test(text)) ctx.font = 'bold 18px Verdana';
+		if (!/^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(text))
+			ctx.font = 'bold 18px Verdana';
 		// 绘制文字
 		ctx.fillText(text, leftOffset + 36, topOffset + 20);
 		ctx.font = 'italic bold 18px Verdana';
@@ -1240,8 +1244,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				leftOffset = 10;
 				topOffset += lineHeight;
 			}
-		}
-		else {
+		} else {
 			// 横屏模式
 			topOffset += lineHeight;
 		}

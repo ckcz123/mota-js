@@ -2,10 +2,6 @@
 
 function maps() {
     this._init();
-    this.DEFAULT_WIDTH = 13;
-    this.DEFAULT_HEIGHT = 13;
-    this.DEFAULT_PIXEL_WIDTH = this.DEFAULT_WIDTH * 32;
-    this.DEFAULT_PIXEL_HEIGHT = this.DEFAULT_HEIGHT * 32;
 }
 
 maps.prototype._init = function () {
@@ -20,8 +16,8 @@ maps.prototype._setFloorSize = function (floorId) {
         });
         return;
     }
-    core.floors[floorId].width = core.floors[floorId].width || this.DEFAULT_WIDTH;
-    core.floors[floorId].height = core.floors[floorId].height || this.DEFAULT_HEIGHT;
+    core.floors[floorId].width = core.floors[floorId].width || core.__SIZE__;
+    core.floors[floorId].height = core.floors[floorId].height || core.__SIZE__;
 }
 
 // ------ 加载地图与地图的存档读档（压缩与解压缩） ------ //
@@ -290,8 +286,8 @@ maps.prototype.resizeMap = function (floorId) {
         core.canvas[cn].canvas.style.width = cwidth * core.domStyle.scale + "px";
         core.canvas[cn].canvas.style.height = cheight * core.domStyle.scale + "px";
         if (main.mode === 'editor' && editor.isMobile) {
-            core.canvas[cn].canvas.style.width = core.bigmap.width * 32 / core.maps.DEFAULT_PIXEL_WIDTH * 96 + "vw";
-            core.canvas[cn].canvas.style.height = core.bigmap.height * 32 / core.maps.DEFAULT_PIXEL_HEIGHT * 96 + "vw";
+            core.canvas[cn].canvas.style.width = core.bigmap.width * 32 / core.__PIXELS__ * 96 + "vw";
+            core.canvas[cn].canvas.style.height = core.bigmap.height * 32 / core.__PIXELS__ * 96 + "vw";
         }
     });
 }
@@ -522,8 +518,8 @@ maps.prototype.drawBlock = function (block, animate) {
     var x = block.x, y = block.y;
     // --- 在界面外的动画不绘制
     if (redraw && block.event.animate > 1 &&
-        (32 * x < core.bigmap.offsetX - 64 || 32 * x > core.bigmap.offsetX + this.DEFAULT_PIXEL_WIDTH + 32
-            || 32 * y < core.bigmap.offsetY - 64 || 32 * y > core.bigmap.offsetY + this.DEFAULT_PIXEL_HEIGHT + 32 + 16)) {
+        (32 * x < core.bigmap.offsetX - 64 || 32 * x > core.bigmap.offsetX + core.__PIXELS__ + 32
+            || 32 * y < core.bigmap.offsetY - 64 || 32 * y > core.bigmap.offsetY + core.__PIXELS__ + 32 + 16)) {
         return;
     }
 
@@ -586,7 +582,7 @@ maps.prototype.drawMap = function (floorId, callback) {
 
     this._drawMap_drawAll();
     if (core.isset(core.status.curtainColor)) {
-        core.fillRect('curtain', 0, 0, this.DEFAULT_PIXEL_WIDTH, this.DEFAULT_PIXEL_HEIGHT,
+        core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__,
             core.arrayToRGBA(core.status.curtainColor));
     }
     core.drawHero();
@@ -611,7 +607,7 @@ maps.prototype._drawMap_drawBlockInfo = function (ctx, block, blockInfo, arr, on
     }
     if (!onMap) {
         var height = blockInfo.height;
-        core.drawImage(ctx, blockInfo.image, 32 * blockInfo.posX, height * blockInfo.posY, 32, height, 32 * block.x, 32 * block.y, 32, height);
+        core.drawImage(ctx, blockInfo.image, 32 * blockInfo.posX, height * blockInfo.posY, 32, height, 32 * block.x, 32 * block.y + 32 - height, 32, height);
         return;
     }
     this.drawBlock(block);
@@ -653,10 +649,9 @@ maps.prototype.drawEvents = function (floorId, blocks, ctx) {
     if (onMap) ctx = core.canvas.event;
     blocks.filter(function (block) {
         return block.event && !block.disable;
-    })
-        .forEach(function (block) {
-            core.maps._drawMap_drawBlockInfo(ctx, block, core.maps.getBlockInfo(block), arr, onMap);
-        });
+    }).forEach(function (block) {
+        core.maps._drawMap_drawBlockInfo(ctx, block, core.maps.getBlockInfo(block), arr, onMap);
+    });
     if (onMap) core.status.autotileAnimateObjs.map = core.clone(arr);
 }
 
@@ -962,7 +957,7 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, toDraw) {
     if (typeof toDraw == 'string' || toDraw.canvas) toDraw = {ctx: toDraw};
     var ctx = core.getContextByName(toDraw.ctx);
     if (ctx == null) return;
-    var x = toDraw.x || 0, y = toDraw.y || 0, size = toDraw.size || this.DEFAULT_PIXEL_WIDTH;
+    var x = toDraw.x || 0, y = toDraw.y || 0, size = toDraw.size || core.__PIXELS__;
     var width = core.floors[floorId].width, height = core.floors[floorId].height;
     var centerX = toDraw.centerX, centerY = toDraw.centerY;
     if (!core.isset(centerX)) centerX = Math.floor(width / 2);
@@ -989,10 +984,9 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, toDraw) {
     }
     else {
         // 只绘制可见窗口
-        var halfWidth = parseInt(this.DEFAULT_WIDTH / 2), halfHeight = parseInt(this.DEFAULT_HEIGHT / 2);
-        var offsetX = core.clamp(centerX - halfWidth, 0, width - this.DEFAULT_WIDTH),
-            offsetY = core.clamp(centerY - halfHeight, 0, height - this.DEFAULT_HEIGHT);
-        ctx.drawImage(tempCanvas.canvas, offsetX * 32, offsetY * 32, this.DEFAULT_PIXEL_WIDTH, this.DEFAULT_PIXEL_HEIGHT, x, y, size, size);
+        var offsetX = core.clamp(centerX - core.__HALF_SIZE__, 0, width - core.__SIZE__),
+            offsetY = core.clamp(centerY - core.__HALF_SIZE__, 0, height - core.__SIZE__);
+        ctx.drawImage(tempCanvas.canvas, offsetX * 32, offsetY * 32, core.__PIXELS__, core.__PIXELS__, x, y, size, size);
     }
 }
 

@@ -718,7 +718,7 @@ events.prototype.doEvent = function (data, x, y, prefix) {
     else if (this["_action_"+type]) this["_action_"+type](data, x, y, prefix);
     else {
         core.insertAction("未知的自定义事件: "+type+"！");
-        this.doAction();
+        core.doAction();
     }
 }
 
@@ -728,18 +728,22 @@ events.prototype.doEvents = function (list, x, y, callback) {
     if (!(list instanceof Array)) {
         list = [list];
     }
-
-    core.status.event = {'id': 'action', 'data': {
-        'list': [
-            {"todo": core.clone(list), "total": core.clone(list), "condition": "false"}
-        ], 'x': x, 'y': y, 'callback': callback
-    }}
-
+    this.setEvents(list, x, y, callback);
     // 停止勇士
     core.waitHeroToStop(function() {
         core.lockControl();
-        core.events.doAction();
+        core.doAction();
     });
+}
+
+events.prototype.setEvents = function (list, x, y, callback) {
+    var data = core.status.event.data || {};
+    if (core.isset(list))
+        data.list = [{todo: core.clone(list), total: core.clone(list), condition: "false"}];
+    if (core.isset(x)) data.x = x;
+    if (core.isset(y)) data.y = y;
+    if (core.isset(callback)) data.callback = callback;
+    core.status.event = {id: 'action', data: data};
 }
 
 ////// 执行当前自定义事件列表中的下一个事件 //////
@@ -748,9 +752,25 @@ events.prototype.doAction = function() {
     core.status.boxAnimateObjs = [];
     clearInterval(core.status.event.interval);
     core.status.event.interval = null;
-
     core.clearLastEvent();
+    // 判定是否执行完毕
+    if (this._doAction_finishEvents()) return;
+    // 当前点坐标和前缀
+    var x = core.status.event.data.x, y = core.status.event.data.y;
+    var prefix = [core.status.floorId||"f", core.isset(x)?x:"x", core.isset(y)?y:"y"].join("@");
+    var current = core.status.event.data.list[0];
+    if (this._popEvents(current, prefix)) return;
+    // 当前要执行的事件
+    var data = current.todo.shift();
+    core.status.event.data.current = data;
+    if (typeof data == "string")
+        data = {"type": "text", "text": data};
+    core.status.event.data.type = data.type;
+    this.doEvent(data, x, y, prefix);
+    return;
+}
 
+events.prototype._doAction_finishEvents = function () {
     // 事件处理完毕
     if (core.status.event.data.list.length==0) {
         var callback = core.status.event.data.callback;
@@ -758,955 +778,23 @@ events.prototype.doAction = function() {
         if (core.isset(callback))
             callback();
         core.replay();
-        return;
+        return true;
     }
+    return false;
+}
 
-    var x=core.status.event.data.x, y=core.status.event.data.y;
-    var prefix = [core.status.floorId||"f", core.isset(x)?x:"x", core.isset(y)?y:"y"].join("@");
-
-    var current = core.status.event.data.list[0];
+events.prototype._popEvents = function (current, prefix) {
     if (current.todo.length == 0) { // current list is empty
         if (core.calValue(current.condition, prefix)) { // check condition
             current.todo = core.clone(current.total);
         }
         else {
-            core.status.event.data.list.shift(); // remove stackc
+            core.status.event.data.list.shift(); // remove stack
         }
-        this.doAction();
-        return;
+        core.doAction();
+        return true;
     }
-    var data = current.todo.shift();
-    core.status.event.data.current = data;
-
-    // 不同种类的事件
-
-    // 如果是文字：显示
-    if (typeof data == "string") {
-        core.status.event.data.type='text';
-        // 如果是正在回放中，不显示
-        if (core.isReplaying())
-            core.events.doAction();
-        else
-            core.ui.drawTextBox(data);
-        return;
-    }
-    core.status.event.data.type=data.type;
-    switch (data.type) {
-        case "text": // 文字/对话
-            if (core.isReplaying())
-                core.events.doAction();
-            else
-                core.ui.drawTextBox(data.text, data.showAll);
-            break;
-        case "autoText":
-            if (core.isReplaying())
-                core.events.doAction();
-            else {
-                core.ui.drawTextBox(data.text);
-                setTimeout(function () {
-                    core.events.doAction();
-                }, data.time || 3000);
-            }
-            break;
-        case "scrollText": // 滚动剧情文本
-            if (core.isReplaying())
-                core.events.doAction();
-            else {
-                var content = core.replaceText(data.text);
-                var time = data.time || 5000;
-                if (data.async) {
-                    core.ui.drawScrollText(content, time);
-                    core.events.doAction();
-                }
-                else {
-                    core.ui.drawScrollText(content, time, function() {
-                        core.events.doAction();
-                    });
-                }
-            }
-            break;
-        case "comment":
-            this.doAction();
-            break;
-        case "setText": // 设置文本状态
-            ["position", "offset", "bold", "titlefont", "textfont", "time"].forEach(function (t) {
-                if (core.isset(data[t])) core.status.textAttribute[t]=data[t];
-            });
-            ["background", "title", "text"].forEach(function (t) {
-                if (core.isset(data[t]) && (data[t] instanceof Array) && data[t].length>=3) {
-                    if (data[t].length==3) data[t].push(1);
-                    core.status.textAttribute[t]=data[t];
-                }
-                if (t=='background' && core.isset(data[t])) {
-                    var img = core.material.images.images[data[t]];
-                    if (core.isset(img) && img.width==192 && img.height==128) {
-                        core.status.textAttribute[t]=data[t];
-                    }
-                }
-            });
-            core.setFlag('textAttribute', core.status.textAttribute);
-            core.events.doAction();
-            break;
-        case "tip":
-            core.drawTip(core.replaceText(data.text));
-            core.events.doAction();
-            break;
-        case "show": // 显示
-            if (!core.isset(data.loc))
-                data.loc = [x,y];
-            if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
-                    && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
-                data.loc = [[core.calValue(data.loc[0], prefix), core.calValue(data.loc[1], prefix)]];
-            if (core.isset(data.time) && data.time>0 && (!core.isset(data.floorId) || data.floorId==core.status.floorId)) {
-                if (data.async) {
-                    core.animateBlock(data.loc, 'show', data.time);
-                    this.doAction();
-                }
-                else {
-                    core.animateBlock(data.loc,'show', data.time, function () {
-                        core.events.doAction();
-                    });
-                }
-            }
-            else {
-                data.loc.forEach(function (t) {
-                    core.showBlock(t[0],t[1],data.floorId);
-                })
-                this.doAction();
-            }
-            break;
-        case "hide": // 消失
-            if (!core.isset(data.loc))
-                data.loc = [x,y];
-            if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
-                && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
-                data.loc = [[core.calValue(data.loc[0], prefix), core.calValue(data.loc[1], prefix)]];
-            if (core.isset(data.time) && data.time>0 && (!core.isset(data.floorId) || data.floorId==core.status.floorId)) {
-                data.loc.forEach(function (t) {
-                    core.hideBlock(t[0],t[1],data.floorId);
-                });
-                if (data.async) {
-                    core.animateBlock(data.loc, 'hide', data.time);
-                    this.doAction();
-                }
-                else {
-                    core.animateBlock(data.loc,'hide', data.time, function () {
-                        core.events.doAction();
-                    });
-                }
-            }
-            else {
-                data.loc.forEach(function (t) {
-                    core.removeBlock(t[0],t[1],data.floorId)
-                })
-                this.doAction();
-            }
-            break;
-        case "setBlock": // 设置某图块
-            {
-                if (core.isset(data.loc)) {
-                    x=core.calValue(data.loc[0], prefix);
-                    y=core.calValue(data.loc[1], prefix);
-                }
-                core.setBlock(data.number, x, y, data.floorId);
-                this.doAction();
-                break;
-            }
-        case "showFloorImg": // 显示贴图
-            if (!core.isset(data.loc))
-                data.loc = [x,y];
-            if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
-                && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
-                data.loc = [[core.calValue(data.loc[0], prefix), core.calValue(data.loc[1], prefix)]];
-            core.maps.showFloorImage(data.loc, data.floorId, function() {
-                core.events.doAction();
-            })
-            break;
-        case "hideFloorImg": // 隐藏贴图
-            if (!core.isset(data.loc))
-                data.loc = [x,y];
-            if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
-                && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
-                data.loc = [[core.calValue(data.loc[0], prefix), core.calValue(data.loc[1], prefix)]];
-            core.maps.hideFloorImage(data.loc, data.floorId, function() {
-                core.events.doAction();
-            })
-            break;
-        case "showBgFgMap": // 显示图层块
-            if (!core.isset(data.loc))
-                data.loc = [x,y];
-            if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
-                && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
-                data.loc = [[core.calValue(data.loc[0], prefix), core.calValue(data.loc[1], prefix)]];
-            core.maps.showBgFgMap(data.name, data.loc, data.floorId, function() {
-                core.events.doAction();
-            })
-            break;
-        case "hideBgFgMap": // 隐藏图层块
-            if (!core.isset(data.loc))
-                data.loc = [x,y];
-            if ((typeof data.loc[0] == 'number' || typeof data.loc[0] == 'string')
-                && (typeof data.loc[1] == 'number' || typeof data.loc[1] == 'string'))
-                data.loc = [[core.calValue(data.loc[0], prefix), core.calValue(data.loc[1], prefix)]];
-            core.maps.hideBgFgMap(data.name, data.loc, data.floorId, function() {
-                core.events.doAction();
-            })
-            break;
-        case "setBgFgBlock": // 设置图层块
-            {
-                if (core.isset(data.loc)) {
-                    x=core.calValue(data.loc[0], prefix);
-                    y=core.calValue(data.loc[1], prefix);
-                }
-                core.setBgFgBlock(data.name, data.number, x, y, data.floorId);
-                this.doAction();
-                break;
-            }
-        case "follow": // 跟随
-            if (core.isset(core.material.images.images[data.name])
-                && core.material.images.images[data.name].width==128) {
-                if (!core.isset(core.status.hero.followers))
-                    core.status.hero.followers = [];
-                core.status.hero.followers.push({"img": data.name});
-                core.control.gatherFollowers();
-                core.clearMap('hero');
-                core.drawHero();
-            }
-            this.doAction();
-            break;
-        case "unfollow": // 取消跟随
-            if (core.isset(core.status.hero.followers)) {
-                var remove = false;
-                if (!core.isset(data.name) && core.status.hero.followers.length>0) {
-                    core.status.hero.followers = [];
-                    remove=true;
-                }
-                if (core.isset(data.name)) {
-                    for (var i=0;i<core.status.hero.followers.length;i++) {
-                        if (core.status.hero.followers[i].img == data.name) {
-                            core.status.hero.followers.splice(i, 1);
-                            remove=true;
-                            break;
-                        }
-                    }
-                }
-                if (remove) {
-                    core.control.gatherFollowers();
-                    core.clearMap('hero');
-                    core.drawHero();
-                }
-            }
-            this.doAction();
-            break;
-        case "animate": // 显示动画
-            if (core.isset(data.loc)) {
-                if (data.loc == 'hero') {
-                    x=core.getHeroLoc('x');
-                    y=core.getHeroLoc('y');
-                }
-                else if (data.loc instanceof Array) {
-                    x=core.calValue(data.loc[0], prefix);
-                    y=core.calValue(data.loc[1], prefix);
-                }
-            }
-            if (data.async) {
-                core.drawAnimate(data.name, x, y);
-                core.events.doAction();
-            }
-            else {
-                core.drawAnimate(data.name, x, y, function () {
-                    core.events.doAction();
-                })
-            }
-            break;
-        case "move": // 移动事件
-            if (core.isset(data.loc)) {
-                x=core.calValue(data.loc[0], prefix);
-                y=core.calValue(data.loc[1], prefix);
-            }
-            if (data.async) {
-                core.moveBlock(x,y,data.steps,data.time,data.keep);
-                this.doAction();
-            }
-            else {
-                core.moveBlock(x,y,data.steps,data.time,data.keep,function() {
-                    core.events.doAction();
-                })
-            }
-            break;
-        case "moveHero":
-            if (data.async) {
-                core.eventMoveHero(data.steps, data.time);
-                this.doAction();
-            }
-            else {
-                core.eventMoveHero(data.steps,data.time,function() {
-                    core.events.doAction();
-                });
-            }
-            break;
-        case "jump": // 跳跃事件
-            {
-                var sx=x, sy=y, ex=x,ey=y;
-                if (core.isset(data.from)) {
-                    sx=core.calValue(data.from[0], prefix);
-                    sy=core.calValue(data.from[1], prefix);
-                }
-                if (core.isset(data.to)) {
-                    ex=core.calValue(data.to[0], prefix);
-                    ey=core.calValue(data.to[1], prefix);
-                }
-                if (data.async) {
-                    core.jumpBlock(sx,sy,ex,ey,data.time,data.keep);
-                    this.doAction();
-                }
-                else {
-                    core.jumpBlock(sx,sy,ex,ey,data.time,data.keep,function() {
-                        core.events.doAction();
-                    });
-                }
-                break;
-            }
-        case "jumpHero":
-            {
-                var ex=core.status.hero.loc.x, ey=core.status.hero.loc.y;
-                if (core.isset(data.loc)) {
-                    ex=core.calValue(data.loc[0], prefix);
-                    ey=core.calValue(data.loc[1], prefix);
-                }
-                if (data.async) {
-                    core.jumpHero(ex,ey,data.time);
-                    this.doAction();
-                }
-                else {
-                    core.jumpHero(ex,ey,data.time,function() {
-                        core.events.doAction();
-                    });
-                }
-                break;
-            }
-        case "changeFloor": // 楼层转换
-            {
-                var heroLoc = {"x": core.calValue(data.loc[0], prefix), "y": core.calValue(data.loc[1], prefix)};
-                if (core.isset(data.direction)) heroLoc.direction=data.direction;
-                core.changeFloor(data.floorId||core.status.floorId, null, heroLoc, data.time, function() {
-                    core.lockControl();
-                    core.events.doAction();
-                });
-                break;
-            }
-        case "changePos": // 直接更换勇士位置，不切换楼层
-            core.clearMap('hero');
-            if (core.isset(data.loc)) {
-                core.setHeroLoc('x', core.calValue(data.loc[0], prefix));
-                core.setHeroLoc('y', core.calValue(data.loc[1], prefix));
-            }
-            if (core.isset(data.direction)) core.setHeroLoc('direction', data.direction);
-            core.drawHero();
-            this.doAction();
-            break;
-        case "showImage": // 显示图片
-            if (!core.isset(data.loc)) data.loc=[0, 0];
-            if (core.isReplaying()) {
-                data.time = 0;
-            }
-            var image = core.material.images.images[data.image];
-            if (!core.isset(image)) {
-                this.doAction();
-                break;
-            }
-            if (data.async || data.time == 0) {
-                core.events.showImage(data.code, image, data.loc[0], data.loc[1], data.dw, data.dh, data.opacity, data.time);
-                this.doAction();
-            }
-            else {
-                core.events.showImage(data.code, image, data.loc[0], data.loc[1], data.dw, data.dh, data.opacity, data.time, function () {
-                    core.events.doAction();
-                });
-            }
-            break;
-        case "showTextImage": // 显示图片化文本
-            if (!core.isset(data.loc)) data.loc=[0, 0];
-            if (core.isReplaying()) {
-                data.time = 0;
-            }
-            var content = core.replaceText(data.text);
-            var image = core.events.textImage(content);
-            if (data.async || data.time == 0) {
-                core.events.showImage(data.code, image, data.loc[0], data.loc[1], 100, 100, data.opacity, data.time);
-                this.doAction();
-            }
-            else {
-                core.events.showImage(data.code, image, data.loc[0], data.loc[1], 100, 100, data.opacity, data.time, function() {
-                    core.events.doAction();
-                });
-            }
-            break;
-        case "hideImage": // 隐藏图片
-            if (core.isReplaying()) {
-                data.time = 0;
-            }
-            if (data.async || data.time == 0) {
-                core.events.hideImage(data.code, data.time);
-                this.doAction();
-            }
-            else {
-                core.events.hideImage(data.code, data.time, function () {
-                    core.events.doAction();
-                });
-            }
-            break;
-        case "showGif": // 显示动图
-            if (core.isset(data.loc) && core.isset(core.material.images.images[data.name])) {
-                var gif = new Image();
-                gif.src = core.material.images.images[data.name].src;
-                gif.style.position = 'absolute';
-                gif.style.left = (core.calValue(data.loc[0], prefix)*core.domStyle.scale)+"px";
-                gif.style.top = (core.calValue(data.loc[1], prefix)*core.domStyle.scale)+"px";
-                gif.style.width = core.material.images.images[data.name].width*core.domStyle.scale+"px";
-                gif.style.height = core.material.images.images[data.name].height*core.domStyle.scale+"px";
-                core.dom.gif2.appendChild(gif);
-            }
-            else {
-                core.dom.gif2.innerHTML = "";
-            }
-            this.doAction();
-            break;
-        case "moveImage": // 图片移动
-            if (core.isReplaying()) { // 正在播放录像
-                this.doAction();
-            }
-            else {
-                if (data.async) {
-                    core.events.moveImage(data.code, data.to, data.opacity, data.time);
-                    this.doAction();
-                }
-                else {
-                    core.events.moveImage(data.code, data.to, data.opacity, data.time, function() {
-                        core.events.doAction();
-                    });
-                }
-            }
-            break;
-        case "setFg": // 颜色渐变
-            if (data.async) {
-                core.setFg(data.color, data.time);
-                core.setFlag('__color__', data.color||null);
-                this.doAction();
-            }
-            else {
-                core.setFg(data.color, data.time, function() {
-                    core.setFlag('__color__', data.color||null);
-                    core.events.doAction();
-                });
-            }
-            break;
-        case "screenFlash": // 画面闪烁
-            if (data.async) {
-                core.screenFlash(data.color, data.time, data.times);
-                this.doAction();
-            }
-            else {
-                core.screenFlash(data.color, data.time, data.times, function() {
-                    core.events.doAction();
-                });
-            }
-            break;
-        case "setWeather": // 更改天气
-            core.setWeather(data.name, data.level);
-            if (data.name=='rain' || data.name=='snow' || data.name=='fog')
-                core.setFlag('__weather__', [data.name, data.level]);
-            else core.removeFlag('__weather__');
-            this.doAction();
-            break;
-        case "openDoor": // 开一个门，包括暗墙
-            {
-                if (core.isset(data.loc)) {
-                    x = core.calValue(data.loc[0], prefix);
-                    y = core.calValue(data.loc[1], prefix);
-                }
-                var floorId=data.floorId || core.status.floorId;
-                if (floorId==core.status.floorId) {
-                    var _callback = function () {
-                        core.lockControl();
-                        core.events.doAction();
-                    }
-                    if (!core.openDoor(null, x, y, data.needKey, _callback)) {
-                        _callback();
-                    }
-                }
-                else {
-                    core.removeBlock(x, y, floorId);
-                    this.doAction();
-                }
-                break;
-            }
-        case "useItem": // 使用道具
-            // 考虑到可能覆盖楼传事件的问题，这里不对fly进行检查。
-            if (data.id!='book' && core.canUseItem(data.id)) {
-                core.useItem(data.id, true, function() {
-                    core.events.doAction();
-                });
-            }
-            else {
-                core.drawTip("当前无法使用"+((core.material.items[data.id]||{}).name||"未知道具"));
-                this.doAction();
-            }
-            break;
-        case "openShop": // 打开一个全局商店
-            if (core.isReplaying()) { // 正在播放录像，简单将visited置为true
-                core.status.shops[data.id].visited=true;
-                core.status.event.data.list = [];
-                this.doAction();
-            }
-            else
-                core.events.openShop(data.id);
-            break;
-        case "disableShop": // 禁用一个全局商店
-            core.events.disableQuickShop(data.id);
-            this.doAction();
-            break;
-        case "battle": // 强制战斗
-            core.battle(data.id,null,null,true,function() {
-                core.events.doAction();
-            })
-            break;
-        case "trigger": // 触发另一个事件；当前事件会被立刻结束。需要另一个地点的事件是有效的
-            {
-                var toX=core.calValue(data.loc[0], prefix), toY=core.calValue(data.loc[1], prefix);
-                var block=core.getBlock(toX, toY);
-                if (block!=null) {
-                    block = block.block;
-                    if (block.event.trigger) {
-                        core.status.event.data.x=block.x;
-                        core.status.event.data.y=block.y;
-                        core.status.event.data.list = [
-                            {"todo": [], "total": [], "condition": "false"}
-                        ];
-                        if (block.event.trigger == 'action') {
-                            core.status.event.data.list = [
-                                {"todo": core.clone(block.event.data), "total": core.clone(block.event.data), "condition": "false"}
-                            ];
-                        }
-                        else {
-                            core.doSystemEvent(block.event.trigger, block, function () {
-                                core.lockControl();
-                                core.doAction();
-                            });
-                            return;
-                        }
-                    }
-                }
-                this.doAction();
-                break;
-            }
-        case "insert":
-            if (core.isset(data.name)) {
-                // ----- 公共事件
-                var commonEvent = this.getCommonEvent(data.name);
-                if (core.isset(commonEvent)) {
-                    core.insertAction(commonEvent);
-                }
-            }
-            else {
-                var toX=core.calValue(data.loc[0], prefix), toY=core.calValue(data.loc[1], prefix);
-                var floorId = data.floorId || core.status.floorId;
-                var event = core.floors[floorId].events[toX+","+toY];
-                if (core.isset(event)) {
-                    if (core.isset(event.data)) event = event.data;
-                    if (typeof event == 'string' || event instanceof Array || core.isset(event.type))
-                        core.insertAction(event);
-                }
-            }
-            this.doAction();
-            break;
-        case "playSound":
-            if (!core.isReplaying())
-                core.playSound(data.name);
-            this.doAction();
-            break;
-        case "playBgm":
-            core.playBgm(data.name);
-            this.doAction();
-            break;
-        case "pauseBgm":
-            core.pauseBgm();
-            this.doAction();
-            break
-        case "resumeBgm":
-            core.resumeBgm();
-            this.doAction();
-            break
-        case "loadBgm":
-            core.loadBgm(data.name);
-            this.doAction();
-            break;
-        case "freeBgm":
-            core.freeBgm(data.name);
-            this.doAction();
-            break;
-        case "stopSound":
-            core.stopSound();
-            break;
-        case "setVolume":
-            data.value = core.clamp(parseInt(data.value)/100, 0, 1);
-            core.setFlag("__volume__", data.value);
-            if (data.async) {
-                this.setVolume(data.value, data.time);
-                this.doAction();
-            }
-            else {
-                this.setVolume(data.value, data.time, function() {
-                    core.events.doAction();
-                });
-            }
-            break;
-        case "setValue":
-        case "setValue2":
-            try {
-                var value=core.calValue(data.value, prefix);
-                if (data.type == 'setValue2')
-                    value += core.calValue(data.name, prefix);
-                // 属性
-                if (data.name.indexOf("status:")==0) {
-                    core.setStatus(data.name.substring(7), value);
-                    if (core.status.hero.hp<=0) {
-                        core.status.hero.hp=0;
-                        core.updateStatusBar();
-                        core.events.lose();
-                        break;
-                    }
-                }
-                // 道具
-                if (data.name.indexOf("item:")==0) {
-                    value=parseInt(value);
-                    var itemId=data.name.substring(5);
-                    if (value>core.itemCount(itemId)) // 效果
-                        core.getItem(itemId,value-core.itemCount(itemId));
-                    else core.setItem(itemId, value);
-                }
-                // flag
-                if (data.name.indexOf("flag:")==0) {
-                    core.setFlag(data.name.substring(5), value);
-                }
-                // switch
-                if (data.name.indexOf("switch:")==0) {
-                    core.setFlag((prefix||"global")+"@"+data.name.substring(7), value);
-                }
-            }
-            catch (e) {main.log(e)}
-            core.updateStatusBar();
-            this.doAction();
-            break;
-        case "setFloor":
-            core.status.maps[data.floorId||core.status.floorId][data.name] = core.calValue(data.value, prefix);
-            core.updateStatusBar();
-            this.doAction();
-            break;
-        case "setGlobalAttribute":
-            if (typeof data.value == 'string') {
-                if ((data.value.charAt(0)=='"' && data.value.charAt(data.value.length-1)=='"')
-                    || (data.value.charAt(0)=="'" && data.value.charAt(data.value.length-1)=="'"))
-                    data.value = data.value.substring(1, data.value.length-1);
-                // --- 检查 []
-                if (data.value.charAt(0) == '[' && data.value.charAt(data.value.length-1)==']')
-                    data.value = eval(data.value);
-            }
-            core.status.globalAttribute[data.name] = data.value;
-            core.control.updateGlobalAttribute(data.name);
-            core.setFlag('globalAttribute', core.status.globalAttribute);
-            this.doAction();
-            break;
-        case "setGlobalValue":
-            core.values[data.name] = data.value;
-            this.doAction();
-            break;
-        case "setGlobalFlag":
-            {
-                var flags = core.getFlag("globalFlags", {});
-                flags[data.name] = data.value;
-                core.flags[data.name] = data.value;
-                core.setFlag("globalFlags", flags);
-                core.resize();
-                this.doAction();
-                break;
-            }
-        case "setHeroIcon":
-            {
-                this.setHeroIcon(data.name);
-                this.doAction();
-                break;
-            }
-        case "input":
-            {
-                var value;
-                if (core.isReplaying()) {
-                    var action = core.status.replay.toReplay.shift();
-                    if (action.indexOf("input:")==0 ) {
-                        value=parseInt(action.substring(6));
-                    }
-                    else {
-                        core.stopReplay();
-                        core.drawTip("录像文件出错");
-                        return;
-                    }
-                }
-                else {
-                    core.interval.onDownInterval = 'tmp';
-                    value = prompt(core.replaceText(data.text));
-                }
-                value = Math.abs(parseInt(value)||0);
-                core.status.route.push("input:"+value);
-                core.setFlag("input", value);
-                this.doAction();
-            }
-            break;
-        case "input2":
-            {
-                var value;
-                if (core.isReplaying()) {
-                    var action = core.status.replay.toReplay.shift();
-                    try {
-                        if (action.indexOf("input2:")!=0) throw new Error("Input2 Error. Current action: "+action);
-                        value = core.decodeBase64(action.substring(7));
-                    }
-                    catch (e) {
-                        main.log(e);
-                        core.stopReplay();
-                        core.drawTip("录像文件出错");
-                        return;
-                    }
-                }
-                else {
-                    core.interval.onDownInterval = 'tmp';
-                    value = prompt(core.replaceText(data.text));
-                    if (!core.isset(value)) value="";
-                }
-                core.status.route.push("input2:"+core.encodeBase64(value));
-                core.setFlag("input", value);
-                this.doAction();
-            }
-            break;
-        case "if": // 条件判断
-            if (core.calValue(data.condition, prefix))
-                core.events.insertAction(data["true"])
-            else
-                core.events.insertAction(data["false"])
-            this.doAction();
-            break;
-        case "switch": // 条件选择
-            var key = core.calValue(data.condition, prefix)
-            for (var i = 0; i < data.caseList.length; i++) {
-                if (data.caseList[i]["case"]=="default" || core.calValue(data.caseList[i]["case"], prefix) == key) {
-                    core.events.insertAction(data.caseList[i].action);
-                    break;
-                }
-            }
-            this.doAction();
-            break;
-        case "choices": // 提供选项
-            if (core.isReplaying()) {
-                if (core.status.replay.toReplay.length==0) { // 回放完毕
-                    core.status.replay.replaying=false;
-                    core.drawTip("录像回放完毕");
-                }
-                else {
-                    var action = core.status.replay.toReplay.shift(), index;
-                    if (action == 'turn') action = core.status.replay.toReplay.shift();
-                    if (action.indexOf("choices:")==0 && ((index=parseInt(action.substring(8)))>=0) && index<data.choices.length) {
-                            core.status.event.selection=index;
-                            setTimeout(function () {
-                                core.status.route.push("choices:"+index);
-                                core.events.insertAction(data.choices[index].action);
-                                core.events.doAction();
-                            }, 750 / Math.max(1, core.status.replay.speed))
-                    }
-                    else {
-                        core.stopReplay();
-                        core.drawTip("录像文件出错");
-                    }
-                }
-            }
-            core.ui.drawChoices(data.text, data.choices);
-            break;
-        case "while":
-            if (core.calValue(data.condition, prefix)) {
-                core.unshift(core.status.event.data.list,
-                    {"todo": core.clone(data.data), "total": core.clone(data.data), "condition": data.condition}
-                );
-            }
-            this.doAction();
-            break;
-        case "break":
-            core.status.event.data.list.shift();
-            this.doAction();
-            break;
-        case "continue":
-            if (core.calValue(core.status.event.data.list[0].condition, prefix)) {
-                core.status.event.data.list[0].todo = core.clone(core.status.event.data.list[0].total);
-            }
-            else {
-                core.status.event.data.list.shift();
-            }
-            this.doAction();
-            break;
-        case "win":
-            core.events.win(data.reason, data.norank);
-            break;
-        case "lose":
-            core.events.lose(data.reason);
-            break;
-        case "function":
-            {
-                var func = data["function"];
-                try {
-                    if (core.isset(func)) {
-                        if ((typeof func == "string") && func.indexOf("function")==0) {
-                            eval('('+func+')()');
-                        }
-                    }
-                } catch (e) {
-                    main.log(e);
-                }
-                if (!data.async)
-                    this.doAction();
-                break;
-            }
-        case "update":
-            core.updateStatusBar();
-            this.doAction();
-            break;
-        case "showStatusBar":
-            core.control.triggerStatusBar("show");
-            this.doAction();
-            break;
-        case "hideStatusBar":
-            core.control.triggerStatusBar("hide", data.toolbox);
-            this.doAction();
-            break;
-        case "updateEnemys":
-            core.enemys.updateEnemys();
-            core.updateStatusBar();
-            this.doAction();
-            break;
-        case "vibrate":
-            if (data.async) {
-                core.events.vibrate(data.time);
-                this.doAction();
-            }
-            else {
-                core.events.vibrate(data.time, function () {
-                    core.events.doAction();
-                })
-            }
-            break;
-        case "sleep": // 等待多少毫秒
-            core.timeout.sleepTimeout = setTimeout(function() {
-                core.timeout.sleepTimeout = null;
-                core.events.doAction();
-            }, core.isReplaying()?Math.min(data.time, 20):data.time);
-            break;
-        case "wait":
-            if (core.isReplaying()) {
-                var code = core.status.replay.toReplay.shift();
-                if (code.indexOf("input:")==0) {
-                    var value = parseInt(code.substring(6));
-                    core.status.route.push("input:"+value);
-                    if (value>=1000000) {
-                        core.setFlag('type', 1);
-                        var px = parseInt((value-1000000)/1000), py = value%1000;
-                        core.setFlag('px', px);
-                        core.setFlag('py', py);
-                        core.setFlag('x', parseInt(px/32));
-                        core.setFlag('y', parseInt(py/32));
-                    }
-                    else if (value>=10000) {
-                        core.setFlag('type', 1);
-                        var x = parseInt((value-10000)/100), y = value%100;
-                        core.setFlag('px', 32*x+16);
-                        core.setFlag('py', 32*y+16);
-                        core.setFlag('x', x);
-                        core.setFlag('y', y);
-                    }
-                    else {
-                        core.setFlag('type', 0);
-                        core.setFlag('keycode', value);
-                    }
-                    core.events.doAction();
-                }
-                else {
-                    core.stopReplay();
-                    core.drawTip("录像文件出错");
-                }
-            }
-            break;
-        case "waitAsync": // 等待所有异步事件执行完毕
-            {
-                var test = window.setInterval(function () {
-                    if (Object.keys(core.animateFrame.asyncId).length==0) {
-                        clearInterval(test);
-                        core.events.doAction();
-                    }
-                }, 50);
-                break;
-            }
-        case "revisit": // 立刻重新执行该事件
-            {
-                var block=core.getBlock(x,y); // 重新获得事件
-                if (block!=null) {
-                    block = block.block;
-                    if (block.event.trigger=='action') {
-                        core.status.event.data.list = [
-                            {"todo": core.clone(block.event.data), "total": core.clone(block.event.data), "condition": "false"}
-                        ];
-                    }
-                }
-                this.doAction();
-                break;
-            }
-        case "callBook": // 呼出怪物手册
-            if (core.isReplaying() || !core.hasItem('book')) {
-                this.doAction();
-            }
-            else {
-                var e = core.clone(core.status.event.data);
-                core.ui.closePanel();
-                core.openBook();
-                core.status.event.interval = e;
-            }
-            break;
-        case "callSave": // 呼出存档页面
-            if (core.isReplaying() || core.hasFlag("__events__")) {
-                core.removeFlag("__events__");
-                this.doAction();
-            }
-            else {
-                var e = core.clone(core.status.event.data);
-                core.ui.closePanel();
-                core.save();
-                core.status.event.interval = e;
-            }
-            break;
-        case "callLoad": // 呼出读档页面
-            if (core.isReplaying()) {
-                this.doAction();
-            }
-            else {
-                var e = core.clone(core.status.event.data);
-                core.ui.closePanel();
-                core.load();
-                core.status.event.interval = e;
-            }
-            break;
-        case "exit": // 立刻结束事件
-            core.status.event.data.list = [];
-            core.events.doAction();
-            break;
-        default:
-            core.status.event.data.type='text';
-            core.ui.drawTextBox("\t[警告]出错啦！\n"+data.type+" 事件不被支持...");
-    }
-    return;
+    return false;
 }
 
 ////// 往当前事件列表之前添加一个或多个事件 //////
@@ -1715,25 +803,21 @@ events.prototype.insertAction = function (action, x, y, callback) {
 
     // ------ 判定commonEvent
     var commonEvent = this.getCommonEvent(action);
-    if (core.isset(commonEvent) && commonEvent instanceof Array) {
-        action = commonEvent;
-    }
+    if (commonEvent instanceof Array) action = commonEvent;
     if (!core.isset(action)) return;
 
     if (core.status.event.id != 'action') {
         this.doEvents(action, x, y, callback);
     }
     else {
-        core.unshift(core.status.event.data.list[0].todo, action)
-        if (core.isset(x)) core.status.event.data.x=x;
-        if (core.isset(y)) core.status.event.data.y=y;
-        if (core.isset(callback)) core.status.event.data.callback=callback;
+        core.unshift(core.status.event.data.list[0].todo, action);
+        this.setEvents(null, x, y, callback);
     }
 }
 
 ////// 获得一个公共事件 //////
 events.prototype.getCommonEvent = function (name) {
-    if (!core.isset(name) || !(typeof name === 'string')) return null;
+    if (!core.isset(name) || typeof name !== 'string') return null;
     return this.commonEvent[name] || null;
 }
 
@@ -1752,7 +836,793 @@ events.prototype.recoverEvents = function (data) {
     return false;
 }
 
-// ------ 样板自带的自定义事件处理 ------ //
+// ------ 样板提供的的自定义事件 ------ //
+
+events.prototype.__action_checkReplaying = function () {
+    if (core.isReplaying()) {
+        core.doAction();
+        return true;
+    }
+    return false;
+}
+
+events.prototype.__action_getLoc = function (loc, x, y, prefix) {
+    if (loc) {
+        x = core.calValue(loc[0], prefix);
+        y = core.calValue(loc[1], prefix);
+    }
+    return [x,y];
+}
+
+events.prototype.__action_getHeroLoc = function (loc, prefix) {
+    return this.__action_getLoc(loc, core.getHeroLoc('x'), core.getHeroLoc('y'), prefix);
+}
+
+events.prototype.__action_getLoc2D = function (loc, x, y, prefix) {
+    if (!(loc && loc[0] instanceof Array))
+        loc = [this.__action_getLoc(data.loc, x, y, prefix)];
+    return loc;
+}
+
+events.prototype.__action_doAsyncFunc = function (isAsync, func) {
+    var parameters = Array.prototype.slice.call(arguments, 2);
+    if (isAsync) {
+        func.apply(this, parameters);
+        core.doAction();
+    }
+    else {
+        func.apply(this, parameters.concat(core.doAction));
+    }
+}
+
+events.prototype._action_text = function (data, x, y, prefix) {
+    if (this.__action_checkReplaying()) return;
+    core.ui.drawTextBox(data.text, data.showAll);
+}
+
+events.prototype._action_autoText = function (data, x, y, prefix) {
+    if (this.__action_checkReplaying()) return;
+    core.ui.drawTextBox(data.text);
+    setTimeout(core.doAction, data.time || 3000);
+}
+
+events.prototype._action_scrollText = function (data, x, y, prefix) {
+    if (this.__action_checkReplaying()) return;
+    this.__action_doAsyncFunc(data.async, core.ui.drawScrollText, data.text, data.time || 5000);
+}
+
+events.prototype._action_comment = function (data, x, y, prefix) {
+    core.doAction();
+}
+
+events.prototype._action_setText = function (data, x, y, prefix) {
+    ["position", "offset", "bold", "titlefont", "textfont", "time"].forEach(function (t) {
+        if (core.isset(data[t])) core.status.textAttribute[t]=data[t];
+    });
+    ["background", "title", "text"].forEach(function (t) {
+        if (core.isset(data[t]) && (data[t] instanceof Array) && data[t].length>=3) {
+            if (data[t].length==3) data[t].push(1);
+            core.status.textAttribute[t]=data[t];
+        }
+        if (t=='background' && core.isset(data[t])) {
+            var img = core.material.images.images[data[t]];
+            if (core.isset(img) && img.width==192 && img.height==128) {
+                core.status.textAttribute[t]=data[t];
+            }
+        }
+    });
+    core.setFlag('textAttribute', core.status.textAttribute);
+    core.doAction();
+}
+
+events.prototype._action_tip = function (data, x, y, prefix) {
+    core.drawTip(core.replaceText(data.text));
+    core.doAction();
+}
+
+events.prototype._action_show = function (data, x, y, prefix) {
+    data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    if (data.time>0 && !(data.floorId && data.floorId != core.status.floorId)) {
+        this.__action_doAsyncFunc(data.async, core.animateBlock, data.loc, 'show', data.time);
+    }
+    else {
+        data.loc.forEach(function (t) {
+            core.showBlock(t[0], t[1], data.floorId);
+        });
+        core.doAction();
+    }
+}
+
+events.prototype._action_hide = function (data, x, y, prefix) {
+    data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    if (data.time>0 && !(data.floorId && data.floorId != core.status.floorId)) {
+        data.loc.forEach(function (t) {
+            core.hideBlock(t[0], t[1], data.floorId);
+        });
+        this.__action_doAsyncFunc(data.async, core.animateBlock, data.loc, 'hide', data.time);
+    }
+    else {
+        data.loc.forEach(function (t) {
+            core.removeBlock(t[0],t[1],data.floorId)
+        });
+        core.doAction();
+    }
+}
+
+events.prototype._action_setBlock = function (data, x, y, prefix) {
+    var loc = this.__action_getLoc(data.loc, x, y, prefix);
+    core.setBlock(data.number, loc[0], loc[1], data.floorId);
+    core.doAction();
+}
+
+events.prototype._action_showFloorImg = function (data, x, y, prefix) {
+    core.maps.showFloorImage(this.__action_getLoc2D(data.loc, x, y, prefix), data.floorId, core.doAction);
+}
+
+events.prototype._action_hideFloorImg = function (data, x, y, prefix) {
+    core.maps.hideFloorImage(this.__action_getLoc2D(data.loc, x, y, prefix), data.floorId, core.doAction);
+}
+
+events.prototype._action_showBgFgMap = function (data, x, y, prefix) {
+    core.maps.showBgFgMap(data.name, this.__action_getLoc2D(data.loc, x, y, prefix), data.floorId, core.doAction)
+}
+
+events.prototype._action_hideBgFgMap = function (data, x, y, prefix) {
+    core.maps.hideBgFgMap(data.name, this.__action_getLoc2D(data.loc, x, y, prefix), data.floorId, core.doAction);
+}
+
+events.prototype._action_setBgFgBlock = function (data, x, y, prefix) {
+    var loc = this.__action_getLoc(data.loc, x, y, prefix);
+    core.setBgFgBlock(data.name, data.number, loc[0], loc[1], data.floorId);
+    core.doAction();
+}
+
+events.prototype._action_follow = function (data, x, y, prefix) {
+    this.follow(data.name);
+    core.doAction();
+}
+
+events.prototype._action_unfollow = function (data, x, y, prefix) {
+    this.unfollow(data.name);
+    core.doAction();
+}
+
+events.prototype._action_animate = function (data, x, y, prefix) {
+    if (data.loc == 'hero') data.loc = [core.getHeroLoc('x'), core.getHeroLoc('y')];
+    else data.loc = this.__action_getLoc(data.loc, x, y, prefix);
+    this.__action_doAsyncFunc(data.async, core.drawAnimate, data.name, data.loc[0], data.loc[1]);
+}
+
+events.prototype._action_move = function (data, x, y, prefix) {
+    var loc = this.__action_getLoc(data.loc, x, y, prefix);
+    this.__action_doAsyncFunc(data.async, core.moveBlock, loc[0], loc[1], data.steps, data.time, data.keep);
+}
+
+events.prototype._action_moveHero = function (data, x, y, prefix) {
+    this.__action_doAsyncFunc(data.async, core.eventMoveHero, data.steps, data.time);
+}
+
+events.prototype._action_jump = function (data, x, y, prefix) {
+    var from = this.__action_getLoc(data.from, x, y, prefix),
+        to = this.__action_getLoc(data.to, x, y, prefix);
+    this.__action_doAsyncFunc(data.async, core.jumpBlock, from[0], from[1], to[0], to[1], data.time, data.keep);
+}
+
+events.prototype._action_jumpHero = function (data, x, y, prefix) {
+    var loc = this.__action_getHeroLoc(data.loc, prefix);
+    this.__action_doAsyncFunc(data.async, core.jumpHero, loc[0], loc[1], data.time);
+}
+
+events.prototype._action_changeFloor = function (data, x, y, prefix) {
+    var loc = this.__action_getHeroLoc(data.loc, prefix);
+    var heroLoc = {x: loc[0], y: loc[1], direction: data.direction};
+    core.changeFloor(data.floorId || core.status.floorId, null, heroLoc, data.time, function() {
+        core.lockControl();
+        core.doAction();
+    });
+}
+
+events.prototype._action_changePos = function (data, x, y, prefix) {
+    core.clearMap('hero');
+    var loc = this.__action_getHeroLoc(data.loc, prefix);
+    core.setHeroLoc('x', loc[0]);
+    core.setHeroLoc('y', loc[1]);
+    if (data.direction) core.setHeroLoc('direction', data.direction);
+    core.drawHero();
+    core.doAction();
+}
+
+events.prototype._action_showImage = function (data, x, y, prefix) {
+    var loc = this.__action_getLoc(data.loc, 0, 0, prefix);
+    if (core.isReplaying()) data.time = 0;
+    var image = core.material.images.images[data.image];
+    if (!core.isset(image)) return core.doAction();
+    this.__action_doAsyncFunc(data.async || data.time == 0, this.showImage,
+        data.code, image, loc[0], loc[1], data.dw, data.dh, data.opacity, data.time);
+}
+
+events.prototype._action_showTextImage = function (data, x, y, prefix) {
+    var loc = this.__action_getLoc(data.loc, 0, 0, prefix);
+    if (core.isReplaying()) data.time = 0;
+    this.__action_doAsyncFunc(data.async || data.time == 0, this.showImage,
+        data.code, this.textImage(data.text), loc[0], loc[1], 100, 100, data.opacity, data.time);
+}
+
+events.prototype._action_hideImage = function (data, x, y, prefix) {
+    if (core.isReplaying()) data.time = 0;
+    this.__action_doAsyncFunc(data.async || data.time == 0, this.hideImage, data.code, data.time);
+}
+
+events.prototype._action_showGif = function (data, x, y, prefix) {
+    var loc = this.__action_getLoc(data.loc, 0, 0, prefix);
+    this.showGif(data.name, loc[0], loc[1]);
+    core.doAction();
+}
+
+events.prototype._action_moveImage = function (data, x, y, prefix) {
+    if (this.__action_checkReplaying()) return;
+    this.__action_doAsyncFunc(data.async, this.moveImage, data.code, data.to, data.opacity, data.time);
+}
+
+events.prototype._action_setFg = function (data, x, y, prefix) {
+    if (data.async) {
+        core.setFg(data.color, data.time);
+        core.setFlag('__color__', data.color || null);
+        core.doAction();
+    }
+    else {
+        core.setFg(data.color, data.time, function() {
+            core.setFlag('__color__', data.color || null);
+            core.doAction();
+        });
+    }
+}
+
+events.prototype._action_screenFlash = function (data, x, y, prefix) {
+    this.__action_doAsyncFunc(data.async, core.screenFlash, data.color, data.time, data.times);
+}
+
+events.prototype._action_setWeather = function (data, x, y, prefix) {
+    core.setWeather(data.name, data.level);
+    if (data.name == 'rain' || data.name == 'snow' || data.name == 'fog')
+        core.setFlag('__weather__', [data.name, data.level]);
+    else core.removeFlag('__weather__');
+    core.doAction();
+}
+
+events.prototype._action_openDoor = function (data, x, y, prefix) {
+    var loc = this.__action_getLoc(data.loc, x, y, prefix);
+    var floorId = data.floorId || core.status.floorId;
+    if (floorId == core.status.floorId) {
+        var _callback = function () {
+            core.lockControl();
+            core.doAction();
+        }
+        if (!core.openDoor(null, loc[0], loc[1], data.needKey, _callback))
+            _callback();
+    }
+    else {
+        core.removeBlock(loc[0], loc[1], floorId);
+        core.doAction();
+    }
+}
+
+events.prototype._action_useItem = function (data, x, y, prefix) {
+    // 考虑到可能覆盖楼传事件的问题，这里不对fly进行检查。
+    if (data.id != 'book' && core.canUseItem(data.id)) {
+        core.useItem(data.id, true, core.doAction);
+    }
+    else {
+        core.drawTip("当前无法使用"+((core.material.items[data.id]||{}).name||"未知道具"));
+        core.doAction();
+    }
+}
+
+events.prototype._action_openShop = function (data, x, y, prefix) {
+    if (core.isReplaying()) { // 正在播放录像，简单将visited置为true
+        core.status.shops[data.id].visited = true;
+        this.setEvents([]);
+        core.doAction();
+    }
+    else
+        this.openShop(data.id);
+}
+
+events.prototype._action_disableShop = function (data, x, y, prefix) {
+    this.disableQuickShop(data.id);
+    core.doAction();
+}
+
+events.prototype._action_battle = function (data, x, y, prefix) {
+    this.battle(data.id, null, null, true, core.doAction);
+}
+
+events.prototype._action_trigger = function (data, x, y, prefix) {
+    var loc = this.__action_getLoc(data.loc, x, y, prefix);
+    var block = core.getBlock(loc[0], loc[1]);
+    if (block != null && block.block.event.trigger) {
+        block = block.block;
+        this.setEvents([], block.x, block.y);
+        if (block.event.trigger == 'action')
+            this.setEvents(block.event.data);
+        else {
+            core.doSystemEvent(block.event.trigger, block, function () {
+                core.lockControl();
+                core.doAction();
+            });
+            return;
+        }
+    }
+    core.doAction();
+}
+
+events.prototype._action_insert = function (data, x, y, prefix) {
+    if (core.isset(data.name)) { // 公共事件
+        core.insertAction(this.getCommonEvent(data.name));
+    }
+    else {
+        var loc = this.__action_getLoc(data.loc, x, y, prefix);
+        var floorId = data.floorId || core.status.floorId;
+        var event = core.floors[floorId].events[loc[0]+","+loc[1]];
+        if (core.isset(event)) {
+            if (core.isset(event.data)) event = event.data;
+            this.insertAction(event);
+        }
+    }
+    core.doAction();
+}
+
+events.prototype._action_playBgm = function (data, x, y, prefix) {
+    core.playBgm(data.name);
+    core.doAction();
+}
+
+events.prototype._action_pauseBgm = function (data, x, y, prefix) {
+    core.pauseBgm();
+    core.doAction();
+}
+
+events.prototype._action_resumeBgm = function (data, x, y, prefix) {
+    core.resumeBgm();
+    core.doAction();
+}
+
+events.prototype._action_loadBgm = function (data, x, y, prefix) {
+    core.loadBgm(data.name);
+    core.doAction();
+}
+
+events.prototype._action_freeBgm = function (data, x, y, prefix) {
+    core.freeBgm(data.name);
+    core.doAction();
+}
+
+events.prototype._action_playSound = function (data, x, y, prefix) {
+    core.playSound(data.name);
+    core.doAction();
+}
+
+events.prototype._action_stopSound = function (data, x, y, prefix) {
+    core.stopSound();
+    core.doAction();
+}
+
+events.prototype._action_setVolume = function (data, x, y, prefix) {
+    data.value = core.clamp(parseInt(data.value)/100, 0, 1);
+    core.setFlag("__volume__", data.value);
+    this.__action_doAsyncFunc(data.async, this.setVolume, data.value, data.time || 0);
+}
+
+events.prototype._action_setValue = function (data, x, y, prefix) {
+    this.setValue(data.name, data.value, prefix);
+    core.doAction();
+}
+
+events.prototype._action_setValue2 = function (data, x, y, prefix) {
+    this.setValue2(data.name, data.value, prefix);
+    core.doAction();
+}
+
+events.prototype._action_setFloor = function (data, x, y, prefix) {
+    this.setFloorInfo(data.name, data.value, data.floorId, prefix);
+    core.doAction();
+}
+
+events.prototype._action_setGlobalAttribute = function (data, x, y, prefix) {
+    this.setGlobalAttribute(data.name, data.value);
+    core.doAction();
+}
+
+events.prototype._action_setGlobalValue = function (data, x, y, prefix) {
+    core.values[data.name] = data.value;
+    core.doAction();
+}
+
+events.prototype._action_setGlobalFlag = function (data, x, y, prefix) {
+    this.setGlobalFlag(data.name, data.value);
+    core.doAction();
+}
+
+events.prototype._action_setHeroIcon = function (data, x, y, prefix) {
+    this.setHeroIcon(data.name);
+    core.doAction();
+}
+
+events.prototype._action_input = function (data, x, y, prefix) {
+    var value = this.__action_getInput(data.text, false);
+    if (value == null) return;
+    value = Math.abs(parseInt(value)||0);
+    core.status.route.push("input:" + value);
+    core.setFlag("input", value);
+    core.doAction();
+}
+
+events.prototype._action_input2 = function (data, x, y, prefix) {
+    var value = this.__action_getInput(data.text, true);
+    if (value == null) return;
+    core.status.route.push("input2:" + core.encodeBase64(value));
+    core.setFlag("input", value);
+    core.doAction();
+}
+
+events.prototype.__action_getInput = function (hint, isText) {
+    var value, prefix = isText?"input2:":"input:";
+    if (core.isReplaying()) {
+        var action = core.status.replay.toReplay.shift();
+        try {
+            if (action.indexOf(prefix)!=0)
+                throw new Error("录像文件出错！当前需要一个 "+prefix+" 项，实际为 "+action);
+            if (isText) value = core.decodeBase64(action.substring(7));
+            else value = parseInt(action.substring(6));
+        }
+        catch (e) {
+            main.log(e);
+            core.stopReplay();
+            core.insertAction(["录像文件出错，请在控制台查看报错信息。", {"type":"exit"}]);
+            core.doAction();
+            return null;
+        }
+    }
+    else {
+        core.interval.onDownInterval = 'tmp';
+        value = prompt(core.replaceText(hint));
+        if (!core.isset(value)) value="";
+    }
+    return value;
+}
+
+events.prototype._action_if = function (data, x, y, prefix) {
+    if (core.calValue(data.condition, prefix))
+        core.events.insertAction(data["true"])
+    else
+        core.events.insertAction(data["false"])
+    core.doAction();
+}
+
+events.prototype._action_switch = function (data, x, y, prefix) {
+    var key = core.calValue(data.condition, prefix)
+    for (var i = 0; i < data.caseList.length; i++) {
+        var condition = data.caseList[i]["case"];
+        if (condition == "default" || core.calValue(condition, prefix) == key) {
+            this.insertAction(data.caseList[i].action);
+            break;
+        }
+    }
+    core.doAction();
+}
+
+events.prototype._action_choices = function (data, x, y, prefix) {
+    if (core.isReplaying()) {
+        var action = core.status.replay.toReplay.shift(), index;
+        // --- 忽略可能的turn事件
+        if (action == 'turn') action = core.status.replay.toReplay.shift();
+        if (action.indexOf("choices:")==0 && ((index=parseInt(action.substring(8)))>=0) && index<data.choices.length) {
+            core.status.event.selection=index;
+            setTimeout(function () {
+                core.status.route.push("choices:"+index);
+                core.insertAction(data.choices[index].action);
+                core.doAction();
+            }, 750 / Math.max(1, core.status.replay.speed))
+        }
+        else {
+            main.log("录像文件出错！当前需要一个 choices: 项，实际为 "+action);
+            core.stopReplay();
+            core.insertAction(["录像文件出错，请在控制台查看报错信息。", {"type":"exit"}]);
+            core.doAction();
+            return;
+        }
+    }
+    core.ui.drawChoices(data.text, data.choices);
+}
+
+events.prototype._action_while = function (data, x, y, prefix) {
+    if (core.calValue(data.condition, prefix)) {
+        core.unshift(core.status.event.data.list,
+            {"todo": core.clone(data.data), "total": core.clone(data.data), "condition": data.condition}
+        );
+    }
+    core.doAction();
+}
+
+events.prototype._action_break = function (data, x, y, prefix) {
+    core.status.event.data.list.shift();
+    core.doAction();
+}
+
+events.prototype._action_continue = function (data, x, y, prefix) {
+    if (core.calValue(core.status.event.data.list[0].condition, prefix)) {
+        core.status.event.data.list[0].todo = core.clone(core.status.event.data.list[0].total);
+    }
+    else {
+        core.status.event.data.list.shift();
+    }
+    core.doAction();
+}
+
+events.prototype._action_win = function (data, x, y, prefix) {
+    this.win(data.reason, data.norank);
+}
+
+events.prototype._action_lose = function (data, x, y, prefix) {
+    this.lose(data.reason);
+}
+
+events.prototype._action_function = function (data, x, y, prefix) {
+    var func = data["function"];
+    try {
+        if (typeof func == "string" && func.indexOf("function")==0) {
+            eval('('+func+')()');
+        }
+    } catch (e) {
+        main.log(e);
+    }
+    if (!data.async)
+        core.doAction();
+}
+
+events.prototype._action_update = function (data, x, y, prefix) {
+    core.updateStatusBar();
+    core.doAction();
+}
+
+events.prototype._action_showStatusBar = function (data, x, y, prefix) {
+    core.control.triggerStatusBar("show");
+    core.doAction();
+}
+
+events.prototype._action_hideStatusBar = function (data, x, y, prefix) {
+    core.control.triggerStatusBar("hide", data.toolbox);
+    core.doAction();
+}
+
+events.prototype._action_updateEnemys = function (data, x, y, prefix) {
+    core.enemys.updateEnemys();
+    core.updateStatusBar();
+    core.doAction();
+}
+
+events.prototype._action_vibrate = function (data, x, y, prefix) {
+    this.__action_doAsyncFunc(data.async, this.vibrate, data.time);
+}
+
+events.prototype._action_sleep = function (data, x, y, prefix) {
+    core.timeout.sleepTimeout = setTimeout(function() {
+        core.timeout.sleepTimeout = null;
+        core.doAction();
+    }, core.isReplaying()?Math.min(data.time, 20):data.time);
+}
+
+events.prototype._action_wait = function (data, x, y, prefix) {
+    if (core.isReplaying()) {
+        var code = core.status.replay.toReplay.shift();
+        if (code.indexOf("input:")==0) {
+            var value = parseInt(code.substring(6));
+            core.status.route.push("input:"+value);
+            this.__action_wait_getValue(value);
+        }
+        else {
+            main.log("录像文件出错！当前需要一个 input: 项，实际为 "+code);
+            core.stopReplay();
+            core.insertAction(["录像文件出错，请在控制台查看报错信息。", {"type":"exit"}]);
+        }
+        core.doAction();
+        return;
+    }
+}
+
+events.prototype.__action_wait_getValue = function (value) {
+    if (value >= 1000000) {
+        core.setFlag('type', 1);
+        var px = parseInt((value - 1000000) / 1000), py = value % 1000;
+        core.setFlag('px', px);
+        core.setFlag('py', py);
+        core.setFlag('x', parseInt(px / 32));
+        core.setFlag('y', parseInt(py / 32));
+    }
+    else if (value >= 10000) {
+        core.setFlag('type', 1);
+        var x = parseInt((value - 10000) / 100), y = value % 100;
+        core.setFlag('px', 32 * x + 16);
+        core.setFlag('py', 32 * y + 16);
+        core.setFlag('x', x);
+        core.setFlag('y', y);
+    }
+    else if (value > 0) {
+        core.setFlag('type', 0);
+        core.setFlag('keycode', value);
+    }
+}
+
+events.prototype._action_waitAsync = function (data, x, y, prefix) {
+    var test = window.setInterval(function () {
+        if (Object.keys(core.animateFrame.asyncId).length == 0) {
+            clearInterval(test);
+            core.doAction();
+        }
+    }, 50);
+}
+
+events.prototype._action_revisit = function (data, x, y, prefix) {
+    var block = core.getBlock(x, y);
+    if (block != null && block.block.event.trigger == 'action')
+        this.setEvents(block.block.event.data);
+    core.doAction();
+}
+
+events.prototype._action_callBook = function (data, x, y, prefix) {
+    if (core.isReplaying() || !core.hasItem('book')) {
+        core.doAction();
+    }
+    else {
+        var e = core.clone(core.status.event.data);
+        core.ui.closePanel();
+        core.openBook();
+        core.status.event.interval = e;
+    }
+}
+
+events.prototype._action_callSave = function (data, x, y, prefix) {
+    if (core.isReplaying() || core.hasFlag("__events__")) {
+        core.removeFlag("__events__");
+        core.doAction();
+    }
+    else {
+        var e = core.clone(core.status.event.data);
+        core.ui.closePanel();
+        core.save();
+        core.status.event.interval = e;
+    }
+}
+
+events.prototype._action_callLoad = function (data, x, y, prefix) {
+    if (this.__action_checkReplaying()) return;
+    var e = core.clone(core.status.event.data);
+    core.ui.closePanel();
+    core.load();
+    core.status.event.interval = e;
+}
+
+events.prototype._action_exit = function (data, x, y, prefix) {
+    this.setEvents([]);
+    core.doAction();
+}
+
+// ------ 样板提供的的自定义事件 END ------ //
+
+events.prototype.follow = function (name) {
+    core.status.hero.followers = core.status.hero.followers || [];
+    if (core.isset(core.material.images.images[name])
+        && core.material.images.images[name].width==128) {
+        core.status.hero.followers.push({"img": name});
+        core.control.gatherFollowers();
+        core.clearMap('hero');
+        core.drawHero();
+    }
+}
+
+events.prototype.unfollow = function (name) {
+    core.status.hero.followers = core.status.hero.followers || [];
+    if (!core.isset(name)) {
+        core.status.heroMoving.followers = [];
+    }
+    else {
+        for (var i = 0; i < core.status.hero.followers.length; i++) {
+            if (core.status.hero.followers[i].img == name) {
+                core.status.hero.followers.splice(i, 1);
+                break;
+            }
+        }
+    }
+    core.control.gatherFollowers();
+    core.clearMap('hero');
+    core.drawHero();
+}
+
+events.prototype.showGif = function (name, x, y) {
+    var image = core.material.images.images[name];
+    if (image) {
+        var gif = new Image();
+        gif.src = image.src;
+        gif.style.position = 'absolute';
+        gif.style.left = x * core.domStyle.scale + "px";
+        gif.style.top = y * core.domStyle.scale + "px";
+        gif.style.width = image.width * core.domStyle.scale + "px";
+        gif.style.height = image.height * core.domStyle.scale + "px";
+        core.dom.gif2.appendChild(gif);
+    }
+    else {
+        core.dom.gif2.innerHTML = "";
+    }
+}
+
+events.prototype.setValue = function (name, value, prefix, add) {
+    var value = core.calValue(value, prefix);
+    if (add) value += core.calValue(name, prefix);
+    this._setValue_setStatus(name, value);
+    this._setValue_setItem(name, value);
+    this._setValue_setFlag(name, value);
+    this._setValue_setSwitch(name, value);
+    core.updateStatusBar();
+}
+
+events.prototype._setValue_setStatus = function (name, value) {
+    if (name.indexOf("status:") !== 0) return;
+    core.setStatus(name.substring(7), value);
+    if (core.status.hero.hp <= 0) {
+        core.status.hero.hp = 0;
+        core.updateStatusBar();
+        core.events.lose();
+    }
+}
+
+events.prototype._setValue_setItem = function (name, value) {
+    if (name.indexOf("item:") !== 0) return;
+    var itemId = name.substring(5), count = core.itemCount(itemId);
+    if (value > count) core.getItem(itemId, value - count);
+    else core.setItem(itemId, value);
+}
+
+events.prototype._setValue_setFlag = function (name, value) {
+    if (name.indexOf("flag:") !== 0) return;
+    core.setFlag(name.substring(5), value);
+}
+
+events.prototype._setValue_setSwitch = function (name, value, prefix) {
+    if (name.indexOf("switch:") !==0 ) return;
+    core.setFlag((prefix||"f@x@y")+"@"+data.name.substring(7), value);
+}
+
+events.prototype.setValue2 = function (name, value, prefix) {
+    this.setValue(name, value, prefix, true);
+}
+
+events.prototype.setFloorInfo = function (name, value, floorId, prefix) {
+    floorId = floorId || data.floorId;
+    core.status.maps[floorId][name] = core.calValue(value, prefix);
+    core.updateStatusBar();
+}
+
+events.prototype.setGlobalAttribute = function (name, value) {
+    if (typeof value == 'string') {
+        if ((value.charAt(0)=='"' && value.charAt(value.length-1)=='"')
+            || (value.charAt(0)=="'" && value.charAt(value.length-1)=="'"))
+            value = value.substring(1, value.length-1);
+        // --- 检查 []
+        if (value.charAt(0) == '[' && value.charAt(value.length-1)==']')
+            value = eval(value);
+    }
+    core.status.globalAttribute[name] = value;
+    core.control.updateGlobalAttribute(name);
+    core.setFlag('globalAttribute', core.status.globalAttribute);
+}
+
+events.prototype.setGlobalFlag = function (name, value) {
+    var flags = core.getFlag("globalFlags", {});
+    flags[name] = value;
+    core.flags[name] = value;
+    core.setFlag("globalFlags", flags);
+    core.resize();
+}
 
 events.prototype.setFloorName = function (floorId) {
     floorId = floorId || core.status.floorId;

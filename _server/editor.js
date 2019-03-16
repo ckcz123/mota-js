@@ -195,7 +195,7 @@ editor.prototype.fetchMapFromCore = function(){
     editor.map = mapArray.map(function (v) {
         return v.map(function (v) {
             var x = parseInt(v), y = editor.indexs[x];
-            if (!core.isset(y)) {
+            if (y == null) {
                 printe("素材数字"+x+"未定义。是不是忘了注册，或者接档时没有覆盖icons.js和maps.js？");
                 y = [0];
             }
@@ -213,7 +213,7 @@ editor.prototype.fetchMapFromCore = function(){
         editor[name]=mapArray.map(function (v) {
             return v.map(function (v) {
                 var x = parseInt(v), y = editor.indexs[x];
-                if (!core.isset(y)) {
+                if (y == null) {
                     printe("素材数字"+x+"未定义。是不是忘了注册，或者接档时没有覆盖icons.js和maps.js？");
                     y = [0];
                 }
@@ -242,7 +242,7 @@ editor.prototype.changeFloor = function (floorId, callback) {
         editor.updateMap();
         editor_mode.floor();
         editor.drawEventBlock();
-        if (core.isset(callback)) callback();
+        if (callback) callback();
     });
 }
 
@@ -251,22 +251,22 @@ editor.prototype.changeFloor = function (floorId, callback) {
 editor.prototype.drawEventBlock = function () {
     var fg=document.getElementById('efg').getContext('2d');
 
-    fg.clearRect(0, 0, 416, 416);
-    for (var i=0;i<13;i++) {
-        for (var j=0;j<13;j++) {
+    fg.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+    for (var i=0;i<core.__SIZE__;i++) {
+        for (var j=0;j<core.__SIZE__;j++) {
             var color=[];
             var loc=(i+core.bigmap.offsetX/32)+","+(j+core.bigmap.offsetY/32);
-            if (core.isset(editor.currentFloorData.events[loc]))
+            if (editor.currentFloorData.events[loc])
                 color.push('#FF0000');
-            if (core.isset(editor.currentFloorData.changeFloor[loc]))
+            if (editor.currentFloorData.changeFloor[loc])
                 color.push('#00FF00');
-            if (core.isset(editor.currentFloorData.afterBattle[loc]))
+            if (editor.currentFloorData.afterBattle[loc])
                 color.push('#FFFF00');
-            if (core.isset(editor.currentFloorData.afterGetItem[loc]))
+            if (editor.currentFloorData.afterGetItem[loc])
                 color.push('#00FFFF');
-            if (core.isset(editor.currentFloorData.afterOpenDoor[loc]))
+            if (editor.currentFloorData.afterOpenDoor[loc])
                 color.push('#FF00FF');
-            if (core.isset(editor.currentFloorData.cannotMove[loc]))
+            if (editor.currentFloorData.cannotMove[loc])
                 color.push('#0000FF');
             for(var kk=0,cc;cc=color[kk];kk++){
                 fg.fillStyle = cc;
@@ -347,8 +347,8 @@ editor.prototype.updateMap = function () {
 }
 
 editor.prototype.moveViewport=function(x,y){
-    core.bigmap.offsetX = core.clamp(core.bigmap.offsetX+32*x, 0, 32*core.bigmap.width-416);
-    core.bigmap.offsetY = core.clamp(core.bigmap.offsetY+32*y, 0, 32*core.bigmap.height-416);
+    core.bigmap.offsetX = core.clamp(core.bigmap.offsetX+32*x, 0, 32*core.bigmap.width-core.__PIXELS__);
+    core.bigmap.offsetY = core.clamp(core.bigmap.offsetY+32*y, 0, 32*core.bigmap.height-core.__PIXELS__);
     core.control.updateViewport();
     editor.buildMark();
     editor.drawPosSelection();
@@ -506,14 +506,14 @@ editor.prototype.buildMark = function(){
     var mapRowMark=document.getElementById('mapRowMark');
     var buildMark = function (offsetX,offsetY) {
         var colNum = ' ';
-        for (var i = 0; i < 13; i++) {
+        for (var i = 0; i < core.__SIZE__; i++) {
             var tpl = '<td>' + (i+offsetX) + '<div class="colBlock" style="left:' + (i * 32 + 1) + 'px;"></div></td>';
             colNum += tpl;
         }
         arrColMark.innerHTML = '<tr>' + colNum + '</tr>';
         mapColMark.innerHTML = '<tr>' + colNum + '</tr>';
         var rowNum = ' ';
-        for (var i = 0; i < 13; i++) {
+        for (var i = 0; i < core.__SIZE__; i++) {
             var tpl = '<tr><td>' + (i+offsetY) + '<div class="rowBlock" style="top:' + (i * 32 + 1) + 'px;"></div></td></tr>';
             rowNum += tpl;
         }
@@ -522,29 +522,29 @@ editor.prototype.buildMark = function(){
     }
     var buildMark_mobile = function (offsetX,offsetY) {
         var colNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="colBlock" style="left:' + (i * 96/13 ) + 'vw;"></div></td>';
+        for (var i = 0; i < core.__SIZE__; i++) {
+            var tpl = '<td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="colBlock" style="left:' + (i * 96/core.__SIZE__) + 'vw;"></div></td>';
             colNum += tpl;
         }
         arrColMark.innerHTML = '<tr>' + colNum + '</tr>';
         //mapColMark.innerHTML = '<tr>' + colNum + '</tr>';
         var rowNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<tr><td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="rowBlock" style="top:' + (i * 96/13 ) + 'vw;"></div></td></tr>';
+        for (var i = 0; i < core.__SIZE__; i++) {
+            var tpl = '<tr><td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="rowBlock" style="top:' + (i * 96/core.__SIZE__) + 'vw;"></div></td></tr>';
             rowNum += tpl;
         }
         arrRowMark.innerHTML = rowNum;
         //mapRowMark.innerHTML = rowNum;
         //=====
         var colNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<div class="coltd" style="left:' + (i * 96/13 ) + 'vw;"><div class="coltext">' + (' '+(i+offsetX)).slice(-2).replace(' ','&nbsp;') + '</div><div class="colBlock"></div></div>';
+        for (var i = 0; i < core.__SIZE__; i++) {
+            var tpl = '<div class="coltd" style="left:' + (i * 96/core.__SIZE__) + 'vw;"><div class="coltext">' + (' '+(i+offsetX)).slice(-2).replace(' ','&nbsp;') + '</div><div class="colBlock"></div></div>';
             colNum += tpl;
         }
         mapColMark.innerHTML = '<div class="coltr">' + colNum + '</div>';
         var rowNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<div class="rowtr"><div class="rowtd"  style="top:' + (i * 96/13 ) + 'vw;"><div class="rowtext">' + (' '+(i+offsetY)).slice(-2).replace(' ','&nbsp;') + '</div><div class="rowBlock"></div></div></div>';
+        for (var i = 0; i < core.__SIZE__; i++) {
+            var tpl = '<div class="rowtr"><div class="rowtd"  style="top:' + (i * 96/core.__SIZE__) + 'vw;"><div class="rowtext">' + (' '+(i+offsetY)).slice(-2).replace(' ','&nbsp;') + '</div><div class="rowBlock"></div></div></div>';
             rowNum += tpl;
         }
         mapRowMark.innerHTML = rowNum;
@@ -657,7 +657,7 @@ editor.prototype.listen = function () {
         editor.loc = {
             'x': scrollLeft + xx - mid.offsetLeft - mapEdit.offsetLeft,
             'y': scrollTop + yy - mid.offsetTop - mapEdit.offsetTop,
-            'size': editor.isMobile?(32*innerWidth*0.96/416):32
+            'size': editor.isMobile?(32*innerWidth*0.96/core.__PIXELS__):32
         };
         return editor.loc;
     }//返回可用的组件内坐标
@@ -685,7 +685,7 @@ editor.prototype.listen = function () {
         }
         holdingPath = 0;
         stepPostfix = [];
-        uc.clearRect(0, 0, 416, 416);
+        uc.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
     }//用于鼠标移出canvas时的自动清除状态
 
     eui.oncontextmenu=function(e){e.preventDefault()}
@@ -807,7 +807,7 @@ editor.prototype.listen = function () {
             editor.updateMap();
             holdingPath = 0;
             stepPostfix = [];
-            uc.clearRect(0, 0, 416, 416);
+            uc.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
         }
     }
 

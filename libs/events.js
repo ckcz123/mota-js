@@ -21,10 +21,10 @@ events.prototype.initGame = function () {
 
 ////// 游戏开始事件 //////
 events.prototype.startGame = function (hard, seed, route, callback) {
-    main.dom.levelChooseButtons.style.display='none';
-    main.dom.startButtonGroup.style.display='none';
+    main.dom.levelChooseButtons.style.display = 'none';
+    main.dom.startButtonGroup.style.display = 'none';
 
-    if (main.mode!='play') return;
+    if (main.mode != 'play') return;
 
     // 无动画的开始游戏
     if (core.flags.startUsingCanvas || core.isset(route)) {
@@ -84,7 +84,7 @@ events.prototype._startGame_upload = function () {
     formData.append('type', 'people');
     formData.append('name', core.firstData.name);
     formData.append('version', core.firstData.version);
-    formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
+    formData.append('platform', core.platform.isPC ? "PC" : core.platform.isAndroid ? "Android" : core.platform.isIOS ? "iOS" : "");
     formData.append('hard', core.encodeBase64(core.status.hard));
     formData.append('hardCode', core.getFlag('hard', 0));
     formData.append('base64', 1);
@@ -141,7 +141,7 @@ events.prototype._gameOver_confirmUpload = function (ending, norank) {
         return;
     }
     core.ui.drawConfirmBox("你想记录你的ID和成绩吗？", function () {
-        var username = main.isCompetition?"":prompt("请输入你的ID：", core.getCookie('id')||"");
+        var username = main.isCompetition ? "" : prompt("请输入你的ID：", core.getCookie('id') || "");
         core.events._gameOver_doUpload(username, ending, norank);
     }, function () {
         if (main.isCompetition)
@@ -160,9 +160,9 @@ events.prototype._gameOver_doUpload = function (username, ending, norank) {
     formData.append('type', 'score');
     formData.append('name', core.firstData.name);
     formData.append('version', core.firstData.version);
-    formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
+    formData.append('platform', core.platform.isPC ? "PC" : core.platform.isAndroid ? "Android" : core.platform.isIOS ? "iOS" : "");
     formData.append('hard', core.encodeBase64(core.status.hard));
-    formData.append('username', core.encodeBase64(username||""));
+    formData.append('username', core.encodeBase64(username || ""));
     formData.append('ending', core.encodeBase64(ending));
     formData.append('lv', core.status.hero.lv);
     formData.append('hp', Math.min(hp, Math.pow(2, 63)));
@@ -172,9 +172,9 @@ events.prototype._gameOver_doUpload = function (username, ending, norank) {
     formData.append('money', core.status.hero.money);
     formData.append('experience', core.status.hero.experience);
     formData.append('steps', core.status.hero.steps);
-    formData.append('norank', norank||0);
+    formData.append('norank', norank || 0);
     formData.append('seed', core.getFlag('__seed__'));
-    formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime/1000));
+    formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime / 1000));
     formData.append('route', core.encodeRoute(core.status.route));
     formData.append('base64', 1);
 
@@ -183,7 +183,7 @@ events.prototype._gameOver_doUpload = function (username, ending, norank) {
     else
         core.http("POST", "/games/upload.php", formData);
 
-    setTimeout(function() {
+    setTimeout(function () {
         core.events._gameOver_confirmDownload(ending);
     }, 200);
 }
@@ -198,7 +198,7 @@ events.prototype._gameOver_confirmDownload = function (ending) {
             'seed': core.getFlag('__seed__'),
             'route': core.encodeRoute(core.status.route)
         }
-        core.download(core.firstData.name+"_"+core.formatDate2(new Date())+".h5route", JSON.stringify(obj));
+        core.download(core.firstData.name + "_" + core.formatDate2(new Date()) + ".h5route", JSON.stringify(obj));
         core.events._gameOver_askRate(ending);
     }, function () {
         core.events._gameOver_askRate(ending);
@@ -214,11 +214,11 @@ events.prototype._gameOver_askRate = function (ending) {
     core.ui.closePanel();
     core.ui.drawConfirmBox("恭喜通关本塔，你想进行评分吗？", function () {
         if (core.platform.isPC) {
-            window.open("/score.php?name="+core.firstData.name+"&num=10", "_blank");
+            window.open("/score.php?name=" + core.firstData.name + "&num=10", "_blank");
             core.restart();
         }
         else {
-            window.location.href = "/score.php?name="+core.firstData.name+"&num=10";
+            window.location.href = "/score.php?name=" + core.firstData.name + "&num=10";
         }
     }, function () {
         core.restart();
@@ -241,9 +241,9 @@ events.prototype.unregisterSystemEvent = function (type) {
 ////// 执行一个系统事件 //////
 events.prototype.doSystemEvent = function (type, data, callback) {
     if (this.systemEvents[type]) this.systemEvents[type](data, callback);
-    else if (this["_sys_"+type]) this["_sys_"+type](data, callback);
+    else if (this["_sys_" + type]) this["_sys_" + type](data, callback);
     else {
-        main.log("未知的系统事件: "+type+"！");
+        main.log("未知的系统事件: " + type + "！");
         if (callback) callback();
     }
 }
@@ -263,7 +263,7 @@ events.prototype._trigger = function (x, y) {
         if (trigger == 'ski') core.status.isSkiing = true;
 
         // 转换楼层能否穿透
-        if (trigger=='changeFloor' && !noPass && this._trigger_ignoreChangeFloor(block))
+        if (trigger == 'changeFloor' && !noPass && this._trigger_ignoreChangeFloor(block))
             return;
         core.status.automaticRoute.moveDirectly = false;
         this.doSystemEvent(trigger, block, function () {
@@ -276,17 +276,17 @@ events.prototype._trigger = function (x, y) {
 events.prototype._trigger_ignoreChangeFloor = function (block) {
     var able = core.flags.ignoreChangeFloor;
     if (core.isset(block.event.data) && core.isset(block.event.data.ignoreChangeFloor))
-        able=block.event.data.ignoreChangeFloor;
+        able = block.event.data.ignoreChangeFloor;
     if (able) {
         if (core.isReplaying()) {
-            if (core.status.replay.toReplay[0]=='no') {
+            if (core.status.replay.toReplay[0] == 'no') {
                 core.status.replay.toReplay.shift();
                 core.status.route.push("no");
                 return true;
             }
         }
         else if (core.status.automaticRoute.autoHeroMove
-            || core.status.automaticRoute.autoStep<core.status.automaticRoute.autoStepRoutes.length) {
+            || core.status.automaticRoute.autoStep < core.status.automaticRoute.autoStepRoutes.length) {
             core.status.route.push("no");
             return true;
         }
@@ -323,7 +323,7 @@ events.prototype.beforeBattle = function (enemyId, x, y) {
 }
 
 ////// 战斗结束后触发的事件 //////
-events.prototype.afterBattle = function (enemyId, x , y,callback) {
+events.prototype.afterBattle = function (enemyId, x, y, callback) {
     return this.eventdata.afterBattle(enemyId, x, y, callback);
 }
 
@@ -353,7 +353,7 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
         var key = id.replace("Door", "Key");
         if (!core.hasItem(key)) {
             if (key != "specialKey")
-                core.drawTip("你没有" + ((core.material.items[key]||{}).name||"钥匙"));
+                core.drawTip("你没有" + ((core.material.items[key] || {}).name || "钥匙"));
             else core.drawTip("无法开启此门");
             core.clearContinueAutomaticRoute();
             return false;
@@ -388,7 +388,7 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
 
 ////// 开一个门后触发的事件 //////
 events.prototype.afterOpenDoor = function (doorId, x, y, callback) {
-    return this.eventdata.afterOpenDoor(doorId,x,y,callback);
+    return this.eventdata.afterOpenDoor(doorId, x, y, callback);
 }
 
 events.prototype._sys_getItem = function (data, callback) {
@@ -411,13 +411,13 @@ events.prototype.getItem = function (itemId, itemNum, itemX, itemY, callback) {
 }
 
 ////// 获得面前的物品（轻按） //////
-events.prototype.getNextItem = function() {
+events.prototype.getNextItem = function () {
     if (core.isMoving() || !core.canMoveHero() || !core.flags.enableGentleClick) return false;
 
     var nextX = core.nextX(), nextY = core.nextY();
     var block = core.getBlock(nextX, nextY);
-    if (block==null) return false;
-    if (block.block.event.trigger=='getItem') {
+    if (block == null) return false;
+    if (block.block.event.trigger == 'getItem') {
         core.status.route.push("getNext");
         this.getItem(block.block.event.id, 1, nextX, nextY);
         return true;
@@ -432,7 +432,7 @@ events.prototype._sys_changeFloor = function (data, callback) {
         heroLoc = {'x': data.loc[0], 'y': data.loc[1]};
     if (core.isset(data.direction))
         heroLoc.direction = data.direction;
-    if (core.status.event.id!='action') core.status.event.id=null;
+    if (core.status.event.id != 'action') core.status.event.id = null;
     core.changeFloor(data.floorId, data.stair, heroLoc, data.time, callback);
 }
 
@@ -450,7 +450,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
     core.lockControl();
     core.stopAutomaticRoute();
     core.clearContinueAutomaticRoute();
-    core.status.replay.animate=true;
+    core.status.replay.animate = true;
 
     this._changeFloor_beforeChange(info, callback);
 }
@@ -458,24 +458,24 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
 events.prototype._changeFloor_getInfo = function (floorId, stair, heroLoc, time) {
     floorId = floorId || core.status.floorId;
     if (floorId == ':before') {
-        var index=core.floorIds.indexOf(core.status.floorId);
-        if (index>0) floorId = core.floorIds[index-1];
-        else floorId=core.status.floorId;
+        var index = core.floorIds.indexOf(core.status.floorId);
+        if (index > 0) floorId = core.floorIds[index - 1];
+        else floorId = core.status.floorId;
     }
     else if (floorId == ':next') {
-        var index=core.floorIds.indexOf(core.status.floorId);
-        if (index<core.floorIds.length-1) floorId = core.floorIds[index+1];
-        else floorId=core.status.floorId;
+        var index = core.floorIds.indexOf(core.status.floorId);
+        if (index < core.floorIds.length - 1) floorId = core.floorIds[index + 1];
+        else floorId = core.status.floorId;
     }
     if (!core.status.maps[floorId]) {
-        main.log("不存在的楼层："+floorId);
+        main.log("不存在的楼层：" + floorId);
         return null;
     }
 
     if (main.mode != 'play' || core.isReplaying()) time = 0;
     if (!core.isset(time)) time = core.values.floorChangeTime;
     if (!core.isset(time)) time = 800;
-    if (time<100) time = 0;
+    if (time < 100) time = 0;
     time /= 20;
 
     return {
@@ -538,7 +538,7 @@ events.prototype._changeFloor_changing = function (info, callback) {
 
 events.prototype._changeFloor_afterChange = function (info, callback) {
     core.unLockControl();
-    core.status.replay.animate=false;
+    core.status.replay.animate = false;
     core.events.afterChangeFloor(info.floorId, info.fromLoad);
 
     if (callback) callback();
@@ -550,7 +550,7 @@ events.prototype.changingFloor = function (floorId, heroLoc, fromLoad) {
 
 ////// 转换楼层结束的事件 //////
 events.prototype.afterChangeFloor = function (floorId, fromLoad) {
-    if (main.mode!='play') return;
+    if (main.mode != 'play') return;
     return this.eventdata.afterChangeFloor(floorId, fromLoad);
 }
 
@@ -573,15 +573,15 @@ events.prototype._sys_passNet = function (data, callback) {
 events.prototype.passNet = function (data) {
     if (core.hasItem('shoes')) return;
     // 血网 lavaNet 移动到 checkBlock 中处理
-    if (data.event.id=='poisonNet') { // 毒网
+    if (data.event.id == 'poisonNet') { // 毒网
         core.setFlag('debuff', 'poison');
         core.insertAction('毒衰咒处理');
     }
-    else if (data.event.id=='weakNet') { // 衰网
+    else if (data.event.id == 'weakNet') { // 衰网
         core.setFlag('debuff', 'weak');
         core.insertAction('毒衰咒处理');
     }
-    else if (data.event.id=='curseNet') { // 咒网
+    else if (data.event.id == 'curseNet') { // 咒网
         core.setFlag('debuff', 'curse');
         core.insertAction('毒衰咒处理');
     }
@@ -595,7 +595,7 @@ events.prototype._sys_pushBox = function (data, callback) {
 
 ////// 推箱子 //////
 events.prototype.pushBox = function (data) {
-    if (data.event.id!='box' && data.event.id!='boxed') return;
+    if (data.event.id != 'box' && data.event.id != 'boxed') return;
 
     // 判断还能否前进，看看是否存在事件
     var direction = core.getHeroLoc('direction'),
@@ -606,9 +606,9 @@ events.prototype.pushBox = function (data) {
     var nextId = core.getBlockId(nx, ny);
     if (nextId != null && nextId != 'flower') return;
 
-    core.setBlock(nextId==null?169:170, nx, ny);
+    core.setBlock(nextId == null ? 169 : 170, nx, ny);
 
-    if (data.event.id=='box')
+    if (data.event.id == 'box')
         core.removeBlock(data.x, data.y);
     else
         core.setBlock(168, data.x, data.y);
@@ -621,7 +621,7 @@ events.prototype._pushBox_moveHero = function (direction) {
     core.status.replay.animate = true;
     core.lockControl();
     setTimeout(function () {
-        core.moveHero(direction, function() {
+        core.moveHero(direction, function () {
             core.status.replay.animate = false;
             core.status.route.pop();
             core.events.afterPushBox();
@@ -645,15 +645,15 @@ events.prototype._sys_changeLight = function (data, callback) {
 }
 
 ////// 改变亮灯（感叹号）的事件 //////
-events.prototype.changeLight = function(id, x, y) {
+events.prototype.changeLight = function (id, x, y) {
     if (id != null && id != 'light') return;
     core.setBlock(core.getNumberById('darkLight'), x, y);
-    this.afterChangeLight(x,y);
+    this.afterChangeLight(x, y);
 }
 
 ////// 改变亮灯之后，可以触发的事件 //////
-events.prototype.afterChangeLight = function (x,y) {
-    return this.eventdata.afterChangeLight(x,y);
+events.prototype.afterChangeLight = function (x, y) {
+    return this.eventdata.afterChangeLight(x, y);
 }
 
 events.prototype._sys_ski = function (data, callback) {
@@ -665,16 +665,16 @@ events.prototype._sys_ski = function (data, callback) {
 events.prototype.ski = function (direction) {
     if (!core.isset(direction))
         direction = core.status.automaticRoute.lastDirection || core.getHeroLoc('direction');
-    if (core.status.event.id!='ski') {
+    if (core.status.event.id != 'ski') {
         core.waitHeroToStop(function () {
-            core.status.event.id='ski';
+            core.status.event.id = 'ski';
             core.events.ski(direction);
         });
     }
     else {
         core.moveHero(direction, function () {
-            if (core.status.event.id=='ski' && !core.status.isSkiing) {
-                core.status.event.id=null;
+            if (core.status.event.id == 'ski' && !core.status.isSkiing) {
+                core.status.event.id = null;
                 core.unLockControl();
                 core.replay();
             }
@@ -686,11 +686,11 @@ events.prototype._sys_action = function (data, callback) {
     var ev = core.clone(data.event.data), ex = data.x, ey = data.y;
     // 检查是否需要改变朝向
     if (ex == core.nextX() && ey == core.nextY()) {
-        var dir = {"up":"down","down":"up","left":"right","right":"left"}[core.getHeroLoc('direction')];
-        var id = data.event.id, toId = (data.event.faceIds||{})[dir];
-        if (core.isset(toId) && id!=toId) {
+        var dir = {"up": "down", "down": "up", "left": "right", "right": "left"}[core.getHeroLoc('direction')];
+        var id = data.event.id, toId = (data.event.faceIds || {})[dir];
+        if (core.isset(toId) && id != toId) {
             var number = core.icons.getNumberById(toId);
-            if (number>0)
+            if (number > 0)
                 core.setBlock(number, ex, ey);
         }
     }
@@ -715,9 +715,9 @@ events.prototype.unregisterEvent = function (type) {
 events.prototype.doEvent = function (data, x, y, prefix) {
     var type = data.type;
     if (this.actions[type]) this.actions[type](data, x, y, prefix);
-    else if (this["_action_"+type]) this["_action_"+type](data, x, y, prefix);
+    else if (this["_action_" + type]) this["_action_" + type](data, x, y, prefix);
     else {
-        core.insertAction("未知的自定义事件: "+type+"！");
+        core.insertAction("未知的自定义事件: " + type + "！");
         core.doAction();
     }
 }
@@ -730,7 +730,7 @@ events.prototype.doEvents = function (list, x, y, callback) {
     }
     this.setEvents(list, x, y, callback);
     // 停止勇士
-    core.waitHeroToStop(function() {
+    core.waitHeroToStop(function () {
         core.lockControl();
         core.doAction();
     });
@@ -747,7 +747,7 @@ events.prototype.setEvents = function (list, x, y, callback) {
 }
 
 ////// 执行当前自定义事件列表中的下一个事件 //////
-events.prototype.doAction = function() {
+events.prototype.doAction = function () {
     // 清空boxAnimate和UI层
     core.status.boxAnimateObjs = [];
     clearInterval(core.status.event.interval);
@@ -757,7 +757,7 @@ events.prototype.doAction = function() {
     if (this._doAction_finishEvents()) return;
     // 当前点坐标和前缀
     var x = core.status.event.data.x, y = core.status.event.data.y;
-    var prefix = [core.status.floorId||"f", core.isset(x)?x:"x", core.isset(y)?y:"y"].join("@");
+    var prefix = [core.status.floorId || "f", core.isset(x) ? x : "x", core.isset(y) ? y : "y"].join("@");
     var current = core.status.event.data.list[0];
     if (this._popEvents(current, prefix)) return;
     // 当前要执行的事件
@@ -772,7 +772,7 @@ events.prototype.doAction = function() {
 
 events.prototype._doAction_finishEvents = function () {
     // 事件处理完毕
-    if (core.status.event.data.list.length==0) {
+    if (core.status.event.data.list.length == 0) {
         var callback = core.status.event.data.callback;
         core.ui.closePanel();
         if (core.isset(callback))
@@ -851,7 +851,7 @@ events.prototype.__action_getLoc = function (loc, x, y, prefix) {
         x = core.calValue(loc[0], prefix);
         y = core.calValue(loc[1], prefix);
     }
-    return [x,y];
+    return [x, y];
 }
 
 events.prototype.__action_getHeroLoc = function (loc, prefix) {
@@ -897,17 +897,17 @@ events.prototype._action_comment = function (data, x, y, prefix) {
 
 events.prototype._action_setText = function (data, x, y, prefix) {
     ["position", "offset", "bold", "titlefont", "textfont", "time"].forEach(function (t) {
-        if (core.isset(data[t])) core.status.textAttribute[t]=data[t];
+        if (core.isset(data[t])) core.status.textAttribute[t] = data[t];
     });
     ["background", "title", "text"].forEach(function (t) {
-        if (core.isset(data[t]) && (data[t] instanceof Array) && data[t].length>=3) {
-            if (data[t].length==3) data[t].push(1);
-            core.status.textAttribute[t]=data[t];
+        if (core.isset(data[t]) && (data[t] instanceof Array) && data[t].length >= 3) {
+            if (data[t].length == 3) data[t].push(1);
+            core.status.textAttribute[t] = data[t];
         }
-        if (t=='background' && core.isset(data[t])) {
+        if (t == 'background' && core.isset(data[t])) {
             var img = core.material.images.images[data[t]];
-            if (core.isset(img) && img.width==192 && img.height==128) {
-                core.status.textAttribute[t]=data[t];
+            if (core.isset(img) && img.width == 192 && img.height == 128) {
+                core.status.textAttribute[t] = data[t];
             }
         }
     });
@@ -922,7 +922,7 @@ events.prototype._action_tip = function (data, x, y, prefix) {
 
 events.prototype._action_show = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
-    if (data.time>0 && !(data.floorId && data.floorId != core.status.floorId)) {
+    if (data.time > 0 && !(data.floorId && data.floorId != core.status.floorId)) {
         this.__action_doAsyncFunc(data.async, core.animateBlock, data.loc, 'show', data.time);
     }
     else {
@@ -935,7 +935,7 @@ events.prototype._action_show = function (data, x, y, prefix) {
 
 events.prototype._action_hide = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
-    if (data.time>0 && !(data.floorId && data.floorId != core.status.floorId)) {
+    if (data.time > 0 && !(data.floorId && data.floorId != core.status.floorId)) {
         data.loc.forEach(function (t) {
             core.hideBlock(t[0], t[1], data.floorId);
         });
@@ -943,7 +943,7 @@ events.prototype._action_hide = function (data, x, y, prefix) {
     }
     else {
         data.loc.forEach(function (t) {
-            core.removeBlock(t[0],t[1],data.floorId)
+            core.removeBlock(t[0], t[1], data.floorId)
         });
         core.doAction();
     }
@@ -1016,7 +1016,7 @@ events.prototype._action_jumpHero = function (data, x, y, prefix) {
 events.prototype._action_changeFloor = function (data, x, y, prefix) {
     var loc = this.__action_getHeroLoc(data.loc, prefix);
     var heroLoc = {x: loc[0], y: loc[1], direction: data.direction};
-    core.changeFloor(data.floorId || core.status.floorId, null, heroLoc, data.time, function() {
+    core.changeFloor(data.floorId || core.status.floorId, null, heroLoc, data.time, function () {
         core.lockControl();
         core.doAction();
     });
@@ -1071,7 +1071,7 @@ events.prototype._action_setFg = function (data, x, y, prefix) {
         core.doAction();
     }
     else {
-        core.setFg(data.color, data.time, function() {
+        core.setFg(data.color, data.time, function () {
             core.setFlag('__color__', data.color || null);
             core.doAction();
         });
@@ -1113,7 +1113,7 @@ events.prototype._action_useItem = function (data, x, y, prefix) {
         core.useItem(data.id, true, core.doAction);
     }
     else {
-        core.drawTip("当前无法使用"+((core.material.items[data.id]||{}).name||"未知道具"));
+        core.drawTip("当前无法使用" + ((core.material.items[data.id] || {}).name || "未知道具"));
         core.doAction();
     }
 }
@@ -1163,7 +1163,7 @@ events.prototype._action_insert = function (data, x, y, prefix) {
     else {
         var loc = this.__action_getLoc(data.loc, x, y, prefix);
         var floorId = data.floorId || core.status.floorId;
-        var event = core.floors[floorId].events[loc[0]+","+loc[1]];
+        var event = core.floors[floorId].events[loc[0] + "," + loc[1]];
         if (core.isset(event)) {
             if (core.isset(event.data)) event = event.data;
             this.insertAction(event);
@@ -1208,7 +1208,7 @@ events.prototype._action_stopSound = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setVolume = function (data, x, y, prefix) {
-    data.value = core.clamp(parseInt(data.value)/100, 0, 1);
+    data.value = core.clamp(parseInt(data.value) / 100, 0, 1);
     core.setFlag("__volume__", data.value);
     this.__action_doAsyncFunc(data.async, this.setVolume, data.value, data.time || 0);
 }
@@ -1251,7 +1251,7 @@ events.prototype._action_setHeroIcon = function (data, x, y, prefix) {
 events.prototype._action_input = function (data, x, y, prefix) {
     var value = this.__action_getInput(data.text, false);
     if (value == null) return;
-    value = Math.abs(parseInt(value)||0);
+    value = Math.abs(parseInt(value) || 0);
     core.status.route.push("input:" + value);
     core.setFlag("input", value);
     core.doAction();
@@ -1266,19 +1266,19 @@ events.prototype._action_input2 = function (data, x, y, prefix) {
 }
 
 events.prototype.__action_getInput = function (hint, isText) {
-    var value, prefix = isText?"input2:":"input:";
+    var value, prefix = isText ? "input2:" : "input:";
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
         try {
-            if (action.indexOf(prefix)!=0)
-                throw new Error("录像文件出错！当前需要一个 "+prefix+" 项，实际为 "+action);
+            if (action.indexOf(prefix) != 0)
+                throw new Error("录像文件出错！当前需要一个 " + prefix + " 项，实际为 " + action);
             if (isText) value = core.decodeBase64(action.substring(7));
             else value = parseInt(action.substring(6));
         }
         catch (e) {
             main.log(e);
             core.stopReplay();
-            core.insertAction(["录像文件出错，请在控制台查看报错信息。", {"type":"exit"}]);
+            core.insertAction(["录像文件出错，请在控制台查看报错信息。", {"type": "exit"}]);
             core.doAction();
             return null;
         }
@@ -1286,7 +1286,7 @@ events.prototype.__action_getInput = function (hint, isText) {
     else {
         core.interval.onDownInterval = 'tmp';
         value = prompt(core.replaceText(hint));
-        if (!core.isset(value)) value="";
+        if (!core.isset(value)) value = "";
     }
     return value;
 }
@@ -1316,18 +1316,18 @@ events.prototype._action_choices = function (data, x, y, prefix) {
         var action = core.status.replay.toReplay.shift(), index;
         // --- 忽略可能的turn事件
         if (action == 'turn') action = core.status.replay.toReplay.shift();
-        if (action.indexOf("choices:")==0 && ((index=parseInt(action.substring(8)))>=0) && index<data.choices.length) {
-            core.status.event.selection=index;
+        if (action.indexOf("choices:") == 0 && ((index = parseInt(action.substring(8))) >= 0) && index < data.choices.length) {
+            core.status.event.selection = index;
             setTimeout(function () {
-                core.status.route.push("choices:"+index);
+                core.status.route.push("choices:" + index);
                 core.insertAction(data.choices[index].action);
                 core.doAction();
             }, 750 / Math.max(1, core.status.replay.speed))
         }
         else {
-            main.log("录像文件出错！当前需要一个 choices: 项，实际为 "+action);
+            main.log("录像文件出错！当前需要一个 choices: 项，实际为 " + action);
             core.stopReplay();
-            core.insertAction(["录像文件出错，请在控制台查看报错信息。", {"type":"exit"}]);
+            core.insertAction(["录像文件出错，请在控制台查看报错信息。", {"type": "exit"}]);
             core.doAction();
             return;
         }
@@ -1370,8 +1370,8 @@ events.prototype._action_lose = function (data, x, y, prefix) {
 events.prototype._action_function = function (data, x, y, prefix) {
     var func = data["function"];
     try {
-        if (typeof func == "string" && func.indexOf("function")==0) {
-            eval('('+func+')()');
+        if (typeof func == "string" && func.indexOf("function") == 0) {
+            eval('(' + func + ')()');
         }
     } catch (e) {
         main.log(e);
@@ -1406,24 +1406,24 @@ events.prototype._action_vibrate = function (data, x, y, prefix) {
 }
 
 events.prototype._action_sleep = function (data, x, y, prefix) {
-    core.timeout.sleepTimeout = setTimeout(function() {
+    core.timeout.sleepTimeout = setTimeout(function () {
         core.timeout.sleepTimeout = null;
         core.doAction();
-    }, core.isReplaying()?Math.min(data.time, 20):data.time);
+    }, core.isReplaying() ? Math.min(data.time, 20) : data.time);
 }
 
 events.prototype._action_wait = function (data, x, y, prefix) {
     if (core.isReplaying()) {
         var code = core.status.replay.toReplay.shift();
-        if (code.indexOf("input:")==0) {
+        if (code.indexOf("input:") == 0) {
             var value = parseInt(code.substring(6));
-            core.status.route.push("input:"+value);
+            core.status.route.push("input:" + value);
             this.__action_wait_getValue(value);
         }
         else {
-            main.log("录像文件出错！当前需要一个 input: 项，实际为 "+code);
+            main.log("录像文件出错！当前需要一个 input: 项，实际为 " + code);
             core.stopReplay();
-            core.insertAction(["录像文件出错，请在控制台查看报错信息。", {"type":"exit"}]);
+            core.insertAction(["录像文件出错，请在控制台查看报错信息。", {"type": "exit"}]);
         }
         core.doAction();
         return;
@@ -1515,7 +1515,7 @@ events.prototype._action_exit = function (data, x, y, prefix) {
 events.prototype.follow = function (name) {
     core.status.hero.followers = core.status.hero.followers || [];
     if (core.isset(core.material.images.images[name])
-        && core.material.images.images[name].width==128) {
+        && core.material.images.images[name].width == 128) {
         core.status.hero.followers.push({"img": name});
         core.control.gatherFollowers();
         core.clearMap('hero');
@@ -1594,8 +1594,8 @@ events.prototype._setValue_setFlag = function (name, value) {
 }
 
 events.prototype._setValue_setSwitch = function (name, value, prefix) {
-    if (name.indexOf("switch:") !==0 ) return;
-    core.setFlag((prefix||"f@x@y")+"@"+data.name.substring(7), value);
+    if (name.indexOf("switch:") !== 0) return;
+    core.setFlag((prefix || "f@x@y") + "@" + data.name.substring(7), value);
 }
 
 ////// 数值增减 //////
@@ -1613,11 +1613,11 @@ events.prototype.setFloorInfo = function (name, value, floorId, prefix) {
 ////// 设置全塔属性 //////
 events.prototype.setGlobalAttribute = function (name, value) {
     if (typeof value == 'string') {
-        if ((value.charAt(0)=='"' && value.charAt(value.length-1)=='"')
-            || (value.charAt(0)=="'" && value.charAt(value.length-1)=="'"))
-            value = value.substring(1, value.length-1);
+        if ((value.charAt(0) == '"' && value.charAt(value.length - 1) == '"')
+            || (value.charAt(0) == "'" && value.charAt(value.length - 1) == "'"))
+            value = value.substring(1, value.length - 1);
         // --- 检查 []
-        if (value.charAt(0) == '[' && value.charAt(value.length-1)==']')
+        if (value.charAt(0) == '[' && value.charAt(value.length - 1) == ']')
             value = eval(value);
     }
     core.status.globalAttribute[name] = value;
@@ -1647,7 +1647,7 @@ events.prototype.showImage = function (code, image, x, y, dw, dh, opacityVal, ti
     }
     var zIndex = code + 100;
     time = time || 0;
-    var name = "image"+ zIndex;
+    var name = "image" + zIndex;
     var ctx = core.createCanvas(name, x, y, image.width * dw, image.height * dh, zIndex);
     ctx.drawImage(image, 0, 0, image.width * dw, image.height * dh);
     if (time == 0) {
@@ -1678,7 +1678,7 @@ events.prototype.hideImage = function (code, time, callback) {
 events.prototype.moveImage = function (code, to, opacityVal, time, callback) {
     time = time || 1000;
     to = to || [];
-    var name = "image"+ (code+100);
+    var name = "image" + (code + 100);
     if (!core.dymCanvas[name]) {
         if (callback) callback();
         return;
@@ -1699,16 +1699,16 @@ events.prototype.moveImage = function (code, to, opacityVal, time, callback) {
     }, callback)
 }
 
-events.prototype._moveImage_moving = function(name, moveInfo, callback) {
+events.prototype._moveImage_moving = function (name, moveInfo, callback) {
     var per_time = 10, step = 0, steps = parseInt(moveInfo.time / 10);
     var fromX = moveInfo.fromX, fromY = moveInfo.fromY, toX = moveInfo.toX, toY = moveInfo.toY,
         opacity = moveInfo.opacity, toOpacity = moveInfo.toOpacity;
     var currX = fromX, currY = fromY, currOpacity = opacity;
     var animate = setInterval(function () {
         step++;
-        currOpacity = opacity + (toOpacity-opacity)*step/steps;
-        currX = parseInt(fromX + (toX-fromX)*step/steps);
-        currY = parseInt(fromY + (toY-fromY)*step/steps);
+        currOpacity = opacity + (toOpacity - opacity) * step / steps;
+        currX = parseInt(fromX + (toX - fromX) * step / steps);
+        currY = parseInt(fromY + (toY - fromY) * step / steps);
         core.setOpacity(name, currOpacity);
         core.relocateCanvas(name, currX, currY);
         if (step == steps) {
@@ -1728,7 +1728,7 @@ events.prototype.setVolume = function (value, time, callback) {
         if (core.musicStatus.playingBgm)
             core.material.bgms[core.musicStatus.playingBgm].volume = value;
     }
-    if (!core.isset(time) || time<100) {
+    if (!core.isset(time) || time < 100) {
         set(value);
         if (callback) callback();
         return;
@@ -1737,8 +1737,8 @@ events.prototype.setVolume = function (value, time, callback) {
     var per_time = 10, step = 0, steps = parseInt(time / per_time);
     var fade = setInterval(function () {
         step++;
-        set(currVolume+(value-currVolume)*step/steps);
-        if (step>=steps) {
+        set(currVolume + (value - currVolume) * step / steps);
+        if (step >= steps) {
             delete core.animateFrame.asyncId[fade];
             clearInterval(fade);
             if (callback) callback();
@@ -1748,19 +1748,19 @@ events.prototype.setVolume = function (value, time, callback) {
 }
 
 ////// 画面震动 //////
-events.prototype.vibrate = function(time, callback) {
+events.prototype.vibrate = function (time, callback) {
     if (core.isReplaying()) {
         if (callback) callback();
         return;
     }
-    if (!core.isset(time) || time<1000) time=1000;
+    if (!core.isset(time) || time < 1000) time = 1000;
     // --- 将time调整为500的倍数（上整），不然会出错
     time = Math.ceil(time / 500) * 500;
-    var shakeInfo = { duration: time * 3 / 50, speed: 5, power: 5, direction: 1, shake: 0 };
-    var animate=setInterval(function(){
+    var shakeInfo = {duration: time * 3 / 50, speed: 5, power: 5, direction: 1, shake: 0};
+    var animate = setInterval(function () {
         core.events._vibrate_update(shakeInfo);
         core.control.addGameCanvasTranslate(shakeInfo.shake, 0);
-        if(shakeInfo.duration===0) {
+        if (shakeInfo.duration === 0) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             if (callback) callback();
@@ -1771,33 +1771,33 @@ events.prototype.vibrate = function(time, callback) {
 }
 
 events.prototype._vibrate_update = function (shakeInfo) {
-    if(shakeInfo.duration >= 1 || shakeInfo.shake != 0){
+    if (shakeInfo.duration >= 1 || shakeInfo.shake != 0) {
         var delta = (shakeInfo.power * shakeInfo.speed * shakeInfo.direction) / 10.0;
-        if(shakeInfo.duration <= 1 && shakeInfo.shake * (shakeInfo.shake + delta) < 0){
+        if (shakeInfo.duration <= 1 && shakeInfo.shake * (shakeInfo.shake + delta) < 0) {
             shakeInfo.shake = 0;
-        }else{
+        } else {
             shakeInfo.shake += delta;
         }
-        if(shakeInfo.shake > shakeInfo.power * 2){
+        if (shakeInfo.shake > shakeInfo.power * 2) {
             shakeInfo.direction = -1;
         }
-        if(shakeInfo.shake < - shakeInfo.power * 2){
+        if (shakeInfo.shake < -shakeInfo.power * 2) {
             shakeInfo.direction = 1;
         }
-        if(shakeInfo.duration >= 1){
+        if (shakeInfo.duration >= 1) {
             shakeInfo.duration -= 1
         }
     }
 }
 
 ////// 打开一个全局商店 //////
-events.prototype.openShop = function(shopId, needVisited) {
+events.prototype.openShop = function (shopId, needVisited) {
     var shop = core.status.shops[shopId];
     shop.times = shop.times || 0;
     if (shop.commonTimes) shop.times = core.getFlag('commonTimes', 0);
     if (needVisited && !shop.visited) {
         if (!core.flags.enableDisabledShop) {
-            if (shop.times==0) core.drawTip("该商店尚未开启");
+            if (shop.times == 0) core.drawTip("该商店尚未开启");
             else core.drawTip("该商店已失效");
             return;
         }
@@ -1817,9 +1817,9 @@ events.prototype._useShop = function (shop, index) {
         return false;
     }
     var use = shop.use, choice = shop.choices[index];
-    var times = shop.times, need = core.calValue(choice.need||shop.need, null, null, times);
+    var times = shop.times, need = core.calValue(choice.need || shop.need, null, null, times);
     if (need > core.getStatus(use)) {
-        core.drawTip("你的"+(use=='money'?"金币":"经验")+"不足");
+        core.drawTip("你的" + (use == 'money' ? "金币" : "经验") + "不足");
         return false;
     }
     core.status.event.selection = index;
@@ -1834,8 +1834,8 @@ events.prototype._useShop = function (shop, index) {
 }
 
 events.prototype._exitShop = function () {
-    if (core.status.event.data.actions.length>0) {
-        core.status.route.push("shop:"+core.status.event.data.id+":"+core.status.event.data.actions.join(""));
+    if (core.status.event.data.actions.length > 0) {
+        core.status.route.push("shop:" + core.status.event.data.id + ":" + core.status.event.data.actions.join(""));
     }
     core.status.event.data.actions = [];
     core.status.boxAnimateObjs = [];
@@ -1851,7 +1851,7 @@ events.prototype.disableQuickShop = function (shopId) {
 }
 
 ////// 能否使用快捷商店 //////
-events.prototype.canUseQuickShop = function(shopId) {
+events.prototype.canUseQuickShop = function (shopId) {
     return this.eventdata.canUseQuickShop(shopId);
 }
 
@@ -1861,7 +1861,7 @@ events.prototype.setHeroIcon = function (name, noDraw) {
     if (!img || img.width != 128) return;
     core.setFlag("heroIcon", name);
     core.material.images.hero.onload = function () {
-        core.material.icons.hero.height = img.height/4;
+        core.material.icons.hero.height = img.height / 4;
         core.control.updateHeroIcon(name);
         if (!noDraw) core.drawHero();
     }
@@ -1876,35 +1876,35 @@ events.prototype.checkLvUp = function () {
         if (next == null) break;
         actions = actions.concat(next);
     }
-    if (actions.length>0) core.insertAction(actions);
+    if (actions.length > 0) core.insertAction(actions);
 }
 
 events.prototype._checkLvUp_check = function () {
     if (!core.flags.enableLevelUp || !core.isset(core.firstData.levelUp)
-        || core.status.hero.lv>=core.firstData.levelUp.length) return null;
+        || core.status.hero.lv >= core.firstData.levelUp.length) return null;
     // 计算下一个所需要的数值
-    var next = (core.firstData.levelUp[core.status.hero.lv]||{});
+    var next = (core.firstData.levelUp[core.status.hero.lv] || {});
     var need = core.calValue(next.need);
     if (!core.isset(need)) return null;
-    if (core.status.hero.experience>=need) {
+    if (core.status.hero.experience >= need) {
         // 升级
         core.status.hero.lv++;
         if (next.clear) core.status.hero.experience -= need;
-        return next.action||[];
+        return next.action || [];
     }
     return null;
 }
 
 ////// 尝试使用道具 //////
-events.prototype.tryUseItem = function(itemId) {
+events.prototype.tryUseItem = function (itemId) {
     core.ui.closePanel();
 
-    if (itemId=='book') return core.openBook(false);
-    if (itemId=='fly') return core.useFly(false);
-    if (itemId=='centerFly') return core.ui.drawCenterFly();
+    if (itemId == 'book') return core.openBook(false);
+    if (itemId == 'fly') return core.useFly(false);
+    if (itemId == 'centerFly') return core.ui.drawCenterFly();
 
-    if (core.canUseItem(itemId))core.useItem(itemId);
-    else core.drawTip("当前无法使用"+core.material.items[itemId].name);
+    if (core.canUseItem(itemId)) core.useItem(itemId);
+    else core.drawTip("当前无法使用" + core.material.items[itemId].name);
 }
 
 ////// 使用炸弹/圣锤后的事件 //////
@@ -1929,9 +1929,9 @@ events.prototype.uploadCurrent = function (username) {
     formData.append('type', 'score');
     formData.append('name', core.firstData.name);
     formData.append('version', core.firstData.version);
-    formData.append('platform', core.platform.isPC?"PC":core.platform.isAndroid?"Android":core.platform.isIOS?"iOS":"");
+    formData.append('platform', core.platform.isPC ? "PC" : core.platform.isAndroid ? "Android" : core.platform.isIOS ? "iOS" : "");
     formData.append('hard', core.encodeBase64(core.status.hard));
-    formData.append('username', core.encodeBase64(username||"current"));
+    formData.append('username', core.encodeBase64(username || "current"));
     formData.append('lv', core.status.hero.lv);
     formData.append('hp', Math.min(core.status.hero.hp, Math.pow(2, 63)));
     formData.append('atk', core.status.hero.atk);
@@ -1941,7 +1941,7 @@ events.prototype.uploadCurrent = function (username) {
     formData.append('experience', core.status.hero.experience);
     formData.append('steps', core.status.hero.steps);
     formData.append('seed', core.getFlag('__seed__'));
-    formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime/1000));
+    formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime / 1000));
     formData.append('route', core.encodeRoute(core.status.route));
     formData.append('deler', 'current');
     formData.append('base64', 1);

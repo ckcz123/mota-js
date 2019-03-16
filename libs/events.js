@@ -27,7 +27,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
     if (main.mode != 'play') return;
 
     // 无动画的开始游戏
-    if (core.flags.startUsingCanvas || core.isset(route)) {
+    if (core.flags.startUsingCanvas || route != null) {
         core.dom.startPanel.style.display = 'none';
         this._startGame_start(hard, seed, route, callback);
     }
@@ -45,7 +45,7 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
     core.setHeroLoc('x', -1);
     core.setHeroLoc('y', -1);
 
-    if (core.isset(seed)) {
+    if (seed != null) {
         core.setFlag('__seed__', seed);
         core.setFlag('__rand__', seed);
     }
@@ -67,7 +67,7 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
         core.events._startGame_afterStart(nowLoc, callback);
     });
 
-    if (core.isset(route)) core.startReplay(route);
+    if (route != null) core.startReplay(route);
 }
 
 events.prototype._startGame_afterStart = function (nowLoc, callback) {
@@ -117,7 +117,7 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
     core.setWeather();
     core.ui.closePanel();
 
-    if (main.isCompetition && core.isset(ending)) {
+    if (main.isCompetition && ending != null) {
         if (ending == "") ending = "恭喜通关";
         ending += "[比赛]";
     }
@@ -136,7 +136,7 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
 events.prototype._gameOver_confirmUpload = function (ending, norank) {
     core.ui.closePanel();
 
-    if (!core.isset(ending)) {
+    if (ending == null) {
         this._gameOver_confirmDownload(ending);
         return;
     }
@@ -153,7 +153,7 @@ events.prototype._gameOver_confirmUpload = function (ending, norank) {
 
 events.prototype._gameOver_doUpload = function (username, ending, norank) {
     var hp = core.status.hero.hp;
-    if (!core.isset(username)) hp = 1;
+    if (username == null) hp = 1;
     core.ui.closePanel();
     // upload
     var formData = new FormData();
@@ -206,7 +206,7 @@ events.prototype._gameOver_confirmDownload = function (ending) {
 }
 
 events.prototype._gameOver_askRate = function (ending) {
-    if (!core.isset(ending)) {
+    if (ending == null) {
         core.restart();
         return;
     }
@@ -275,7 +275,7 @@ events.prototype._trigger = function (x, y) {
 
 events.prototype._trigger_ignoreChangeFloor = function (block) {
     var able = core.flags.ignoreChangeFloor;
-    if (core.isset(block.event.data) && core.isset(block.event.data.ignoreChangeFloor))
+    if (block.event.data && block.event.data.ignoreChangeFloor != null)
         able = block.event.data.ignoreChangeFloor;
     if (able) {
         if (core.isReplaying()) {
@@ -302,14 +302,14 @@ events.prototype._sys_battle = function (data, callback) {
 events.prototype.battle = function (id, x, y, force, callback) {
     core.saveAndStopAutomaticRoute();
     id = id || core.getBlockId(x, y);
-    if (!core.isset(id)) return core.clearContinueAutomaticRoute(callback);
+    if (!id) return core.clearContinueAutomaticRoute(callback);
     // 非强制战斗
-    if (!core.enemys.canBattle(id, x, y) && !force && !core.isset(core.status.event.id)) {
+    if (!core.enemys.canBattle(id, x, y) && !force && !core.status.event.id) {
         core.drawTip("你打不过此怪物！");
         return core.clearContinueAutomaticRoute(callback);
     }
     // 自动存档
-    if (!core.isset(core.status.event.id)) core.autosave(true);
+    if (!core.status.event.id) core.autosave(true);
     // 战前事件
     if (!this.beforeBattle(id, x, y))
         return core.clearContinueAutomaticRoute(callback);
@@ -344,7 +344,7 @@ events.prototype.openDoor = function (id, x, y, needKey, callback) {
 events.prototype._openDoor_check = function (id, x, y, needKey) {
     // 是否存在门或暗墙
     if (!core.terrainExists(x, y, id) || !(id.endsWith("Door") || id.endsWith("Wall"))
-        || !core.isset(core.material.icons.animates[id])) {
+        || !core.material.icons.animates[id]) {
         core.clearContinueAutomaticRoute();
         return false;
     }
@@ -428,10 +428,8 @@ events.prototype.getNextItem = function () {
 events.prototype._sys_changeFloor = function (data, callback) {
     data = data.event.data;
     var heroLoc = {};
-    if (core.isset(data.loc))
-        heroLoc = {'x': data.loc[0], 'y': data.loc[1]};
-    if (core.isset(data.direction))
-        heroLoc.direction = data.direction;
+    if (data.loc) heroLoc = {'x': data.loc[0], 'y': data.loc[1]};
+    if (data.direction) heroLoc.direction = data.direction;
     if (core.status.event.id != 'action') core.status.event.id = null;
     core.changeFloor(data.floorId, data.stair, heroLoc, data.time, callback);
 }
@@ -473,8 +471,8 @@ events.prototype._changeFloor_getInfo = function (floorId, stair, heroLoc, time)
     }
 
     if (main.mode != 'play' || core.isReplaying()) time = 0;
-    if (!core.isset(time)) time = core.values.floorChangeTime;
-    if (!core.isset(time)) time = 800;
+    if (time == null) time = core.values.floorChangeTime;
+    if (time == null) time = 800;
     if (time < 100) time = 0;
     time /= 20;
 
@@ -486,11 +484,11 @@ events.prototype._changeFloor_getInfo = function (floorId, stair, heroLoc, time)
 }
 
 events.prototype._changeFloor_getHeroLoc = function (floorId, stair, heroLoc) {
-    if (!core.isset(heroLoc))
+    if (!heroLoc)
         heroLoc = core.clone(core.status.hero.loc);
-    if (core.isset(stair)) {
+    if (stair) {
         // 检查该层地图的 upFloor & downFloor
-        if (core.isset(core.status.maps[floorId][stair])) {
+        if (core.status.maps[floorId][stair]) {
             heroLoc.x = core.status.maps[floorId][stair][0];
             heroLoc.y = core.status.maps[floorId][stair][1];
         }
@@ -506,7 +504,7 @@ events.prototype._changeFloor_getHeroLoc = function (floorId, stair, heroLoc) {
         }
     }
     ['x', 'y', 'direction'].forEach(function (name) {
-        if (!core.isset(heroLoc[name]))
+        if (!heroLoc[name])
             heroLoc[name] = core.getHeroLoc(name);
     });
     return heroLoc;
@@ -663,7 +661,7 @@ events.prototype._sys_ski = function (data, callback) {
 
 ////// 滑冰 //////
 events.prototype.ski = function (direction) {
-    if (!core.isset(direction))
+    if (!direction)
         direction = core.status.automaticRoute.lastDirection || core.getHeroLoc('direction');
     if (core.status.event.id != 'ski') {
         core.waitHeroToStop(function () {
@@ -688,7 +686,7 @@ events.prototype._sys_action = function (data, callback) {
     if (ex == core.nextX() && ey == core.nextY()) {
         var dir = {"up": "down", "down": "up", "left": "right", "right": "left"}[core.getHeroLoc('direction')];
         var id = data.event.id, toId = (data.event.faceIds || {})[dir];
-        if (core.isset(toId) && id != toId) {
+        if (toId && id != toId) {
             var number = core.icons.getNumberById(toId);
             if (number > 0)
                 core.setBlock(number, ex, ey);
@@ -724,7 +722,7 @@ events.prototype.doEvent = function (data, x, y, prefix) {
 
 ////// 开始执行一系列自定义事件 //////
 events.prototype.doEvents = function (list, x, y, callback) {
-    if (!core.isset(list)) return;
+    if (!list) return;
     if (!(list instanceof Array)) {
         list = [list];
     }
@@ -738,11 +736,11 @@ events.prototype.doEvents = function (list, x, y, callback) {
 
 events.prototype.setEvents = function (list, x, y, callback) {
     var data = core.status.event.data || {};
-    if (core.isset(list))
+    if (list)
         data.list = [{todo: core.clone(list), total: core.clone(list), condition: "false"}];
-    if (core.isset(x)) data.x = x;
-    if (core.isset(y)) data.y = y;
-    if (core.isset(callback)) data.callback = callback;
+    if (x != null) data.x = x;
+    if (y != null) data.y = y;
+    if (callback) data.callback = callback;
     core.status.event = {id: 'action', data: data};
 }
 
@@ -757,7 +755,7 @@ events.prototype.doAction = function () {
     if (this._doAction_finishEvents()) return;
     // 当前点坐标和前缀
     var x = core.status.event.data.x, y = core.status.event.data.y;
-    var prefix = [core.status.floorId || "f", core.isset(x) ? x : "x", core.isset(y) ? y : "y"].join("@");
+    var prefix = [core.status.floorId || "f", x != null ? x : "x", y != null ? y : "y"].join("@");
     var current = core.status.event.data.list[0];
     if (this._popEvents(current, prefix)) return;
     // 当前要执行的事件
@@ -775,8 +773,7 @@ events.prototype._doAction_finishEvents = function () {
     if (core.status.event.data.list.length == 0) {
         var callback = core.status.event.data.callback;
         core.ui.closePanel();
-        if (core.isset(callback))
-            callback();
+        if (callback) callback();
         core.replay();
         return true;
     }
@@ -804,7 +801,7 @@ events.prototype.insertAction = function (action, x, y, callback) {
     // ------ 判定commonEvent
     var commonEvent = this.getCommonEvent(action);
     if (commonEvent instanceof Array) action = commonEvent;
-    if (!core.isset(action)) return;
+    if (!action) return;
 
     if (core.status.event.id != 'action') {
         this.doEvents(action, x, y, callback);
@@ -817,13 +814,13 @@ events.prototype.insertAction = function (action, x, y, callback) {
 
 ////// 获得一个公共事件 //////
 events.prototype.getCommonEvent = function (name) {
-    if (!core.isset(name) || typeof name !== 'string') return null;
+    if (!name || typeof name !== 'string') return null;
     return this.commonEvent[name] || null;
 }
 
 ////// 恢复一个事件 //////
 events.prototype.recoverEvents = function (data) {
-    if (core.isset(data)) {
+    if (data) {
         core.ui.closePanel();
         core.lockControl();
         core.status.event.id = 'action';
@@ -897,16 +894,16 @@ events.prototype._action_comment = function (data, x, y, prefix) {
 
 events.prototype._action_setText = function (data, x, y, prefix) {
     ["position", "offset", "bold", "titlefont", "textfont", "time"].forEach(function (t) {
-        if (core.isset(data[t])) core.status.textAttribute[t] = data[t];
+        if (data[t] != null) core.status.textAttribute[t] = data[t];
     });
     ["background", "title", "text"].forEach(function (t) {
-        if (core.isset(data[t]) && (data[t] instanceof Array) && data[t].length >= 3) {
+        if ((data[t] instanceof Array) && data[t].length >= 3) {
             if (data[t].length == 3) data[t].push(1);
             core.status.textAttribute[t] = data[t];
         }
-        if (t == 'background' && core.isset(data[t])) {
+        if (t == 'background') {
             var img = core.material.images.images[data[t]];
-            if (core.isset(img) && img.width == 192 && img.height == 128) {
+            if (img && img.width == 192 && img.height == 128) {
                 core.status.textAttribute[t] = data[t];
             }
         }
@@ -1035,10 +1032,8 @@ events.prototype._action_changePos = function (data, x, y, prefix) {
 events.prototype._action_showImage = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, 0, 0, prefix);
     if (core.isReplaying()) data.time = 0;
-    var image = core.material.images.images[data.image];
-    if (!core.isset(image)) return core.doAction();
     this.__action_doAsyncFunc(data.async || data.time == 0, this.showImage,
-        data.code, image, loc[0], loc[1], data.dw, data.dh, data.opacity, data.time);
+        data.code, data.image, loc[0], loc[1], data.dw, data.dh, data.opacity, data.time);
 }
 
 events.prototype._action_showTextImage = function (data, x, y, prefix) {
@@ -1157,17 +1152,14 @@ events.prototype._action_trigger = function (data, x, y, prefix) {
 }
 
 events.prototype._action_insert = function (data, x, y, prefix) {
-    if (core.isset(data.name)) { // 公共事件
+    if (data.name) { // 公共事件
         core.insertAction(this.getCommonEvent(data.name));
     }
     else {
         var loc = this.__action_getLoc(data.loc, x, y, prefix);
         var floorId = data.floorId || core.status.floorId;
         var event = core.floors[floorId].events[loc[0] + "," + loc[1]];
-        if (core.isset(event)) {
-            if (core.isset(event.data)) event = event.data;
-            this.insertAction(event);
-        }
+        if (event) this.insertAction(event.data || event);
     }
     core.doAction();
 }
@@ -1285,8 +1277,7 @@ events.prototype.__action_getInput = function (hint, isText) {
     }
     else {
         core.interval.onDownInterval = 'tmp';
-        value = prompt(core.replaceText(hint));
-        if (!core.isset(value)) value = "";
+        value = prompt(core.replaceText(hint)) || "";
     }
     return value;
 }
@@ -1514,7 +1505,7 @@ events.prototype._action_exit = function (data, x, y, prefix) {
 ////// 跟随 //////
 events.prototype.follow = function (name) {
     core.status.hero.followers = core.status.hero.followers || [];
-    if (core.isset(core.material.images.images[name])
+    if (core.material.images.images[name]
         && core.material.images.images[name].width == 128) {
         core.status.hero.followers.push({"img": name});
         core.control.gatherFollowers();
@@ -1526,7 +1517,7 @@ events.prototype.follow = function (name) {
 ////// 取消跟随 //////
 events.prototype.unfollow = function (name) {
     core.status.hero.followers = core.status.hero.followers || [];
-    if (!core.isset(name)) {
+    if (!name) {
         core.status.heroMoving.followers = [];
     }
     else {
@@ -1685,7 +1676,7 @@ events.prototype.moveImage = function (code, to, opacityVal, time, callback) {
     }
     var getOrDefault = function (a, b) {
         a = core.calValue(a);
-        return core.isset(a) ? a : b;
+        return a != null ? a : b;
     }
     var canvas = core.dymCanvas[name].canvas;
     var fromX = parseFloat(canvas.getAttribute("_left")),
@@ -1728,7 +1719,7 @@ events.prototype.setVolume = function (value, time, callback) {
         if (core.musicStatus.playingBgm)
             core.material.bgms[core.musicStatus.playingBgm].volume = value;
     }
-    if (!core.isset(time) || time < 100) {
+    if (!time || time < 100) {
         set(value);
         if (callback) callback();
         return;
@@ -1753,7 +1744,7 @@ events.prototype.vibrate = function (time, callback) {
         if (callback) callback();
         return;
     }
-    if (!core.isset(time) || time < 1000) time = 1000;
+    if (!time || time < 1000) time = 1000;
     // --- 将time调整为500的倍数（上整），不然会出错
     time = Math.ceil(time / 500) * 500;
     var shakeInfo = {duration: time * 3 / 50, speed: 5, power: 5, direction: 1, shake: 0};
@@ -1880,12 +1871,12 @@ events.prototype.checkLvUp = function () {
 }
 
 events.prototype._checkLvUp_check = function () {
-    if (!core.flags.enableLevelUp || !core.isset(core.firstData.levelUp)
+    if (!core.flags.enableLevelUp || !core.firstData.levelUp
         || core.status.hero.lv >= core.firstData.levelUp.length) return null;
     // 计算下一个所需要的数值
     var next = (core.firstData.levelUp[core.status.hero.lv] || {});
     var need = core.calValue(next.need);
-    if (!core.isset(need)) return null;
+    if (need == null) return null;
     if (core.status.hero.experience >= need) {
         // 升级
         core.status.hero.lv++;

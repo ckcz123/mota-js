@@ -93,8 +93,8 @@ function core() {
         canvas: ["bg", "event", "event2", "fg", "damage"],
         offsetX: 0, // in pixel
         offsetY: 0,
-        width: 15, // map width and height
-        height: 15,
+        width: this.__SIZE__, // map width and height
+        height: this.__SIZE__,
         tempCanvas: null, // A temp canvas for drawing
     }
     this.paint = {};
@@ -229,7 +229,7 @@ core.prototype.init = function (coreData, callback) {
     if (!core.flags.enableLevelUp)
         core.flags.levelUpLeftMode = false;
 
-    if (core.isset(core.firstData.shops)) {
+    if (core.firstData.shops) {
         core.firstData.shops.forEach(function (t) {
             core.initStatus.shops[t.id] = t;
         })
@@ -274,7 +274,7 @@ core.prototype.init = function (coreData, callback) {
     }
 
     var chrome = /Chrome\/(\d+)\./i.exec(navigator.userAgent);
-    if (core.isset(chrome) && parseInt(chrome[1]) >= 50)
+    if (chrome && parseInt(chrome[1]) >= 50)
         core.platform.isChrome = true;
     core.platform.isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent);
     core.platform.isQQ = /QQ/i.test(navigator.userAgent);
@@ -327,7 +327,7 @@ core.prototype.init = function (coreData, callback) {
             core.readFileContent(core.platform.fileReader.result);
         };
         core.platform.fileReader.onerror = function () {
-            if (core.isset(core.platform.errorCallback))
+            if (core.platform.errorCallback)
                 core.platform.errorCallback();
         }
     }
@@ -379,7 +379,7 @@ core.prototype.init = function (coreData, callback) {
         if (main.mode == 'play')
             core.events.initGame();
 
-        if (core.isset(functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins)) {
+        if (functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins) {
             core.plugin = new function () {
                 this.__renderFrameFuncs = [];
             };
@@ -390,7 +390,7 @@ core.prototype.init = function (coreData, callback) {
 
         core.showStartAnimate();
 
-        if (core.isset(callback)) callback();
+        if (callback) callback();
 
     });
 }

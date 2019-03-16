@@ -24,7 +24,7 @@ enemys.prototype.getEnemys = function () {
 
 ////// 判断是否含有某特殊属性 //////
 enemys.prototype.hasSpecial = function (special, test) {
-    if (!core.isset(special)) return false;
+    if (special == null) return false;
 
     if (special instanceof Array) {
         return special.indexOf(test) >= 0;
@@ -38,7 +38,7 @@ enemys.prototype.hasSpecial = function (special, test) {
         return this.hasSpecial(core.material.enemys[special], test);
     }
 
-    if (core.isset(special.special)) {
+    if (special.special != null) {
         return this.hasSpecial(special.special, test);
     }
 
@@ -52,12 +52,12 @@ enemys.prototype.getSpecials = function () {
 ////// 获得所有特殊属性的名称 //////
 enemys.prototype.getSpecialText = function (enemy) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    if (!core.isset(enemy)) return [];
+    if (!enemy) return [];
     var special = enemy.special;
     var text = [];
 
     var specials = this.getSpecials();
-    if (core.isset(specials)) {
+    if (specials) {
         for (var i = 0; i < specials.length; i++) {
             if (this.hasSpecial(special, specials[i][0]))
                 text.push(this._calSpecialContent(enemy, specials[i][1]));
@@ -70,8 +70,8 @@ enemys.prototype.getSpecialText = function (enemy) {
 enemys.prototype.getSpecialHint = function (enemy, special) {
     var specials = this.getSpecials();
 
-    if (!core.isset(special)) {
-        if (!core.isset(specials)) return [];
+    if (special == null) {
+        if (specials == null) return [];
         var hints = [];
         for (var i = 0; i < specials.length; i++) {
             if (this.hasSpecial(enemy, specials[i][0]))
@@ -80,7 +80,7 @@ enemys.prototype.getSpecialHint = function (enemy, special) {
         return hints;
     }
 
-    if (!core.isset(specials)) return "";
+    if (specials == null) return "";
     for (var i = 0; i < specials.length; i++) {
         if (special == specials[i][0])
             return this._calSpecialContent(enemy, specials[i][1]) + "：" + this._calSpecialContent(enemy, specials[i][2]);
@@ -304,8 +304,7 @@ enemys.prototype.getCurrentEnemys = function (floorId) {
     var enemys = [], used = {};
     var mapBlocks = core.status.maps[floorId].blocks;
     for (var b = 0; b < mapBlocks.length; b++) {
-        if (core.isset(mapBlocks[b].event) && !mapBlocks[b].disable
-            && mapBlocks[b].event.cls.indexOf('enemy') == 0) {
+        if (!mapBlocks[b].disable && mapBlocks[b].event.cls.indexOf('enemy') == 0) {
             this._getCurrentEnemys_addEnemy(mapBlocks[b].event.id, enemys, used, floorId);
         }
     }
@@ -314,14 +313,10 @@ enemys.prototype.getCurrentEnemys = function (floorId) {
 
 enemys.prototype._getCurrentEnemys_getEnemy = function (enemyId) {
     var enemy = core.material.enemys[enemyId];
-    if (!core.isset(enemy)) return null;
+    if (!enemy) return null;
 
     // 检查displayIdInBook
-    var tmpId = enemy.displayIdInBook;
-    if (core.isset(core.material.enemys[tmpId])) {
-        enemy = core.material.enemys[tmpId];
-    }
-    return enemy;
+    return core.material.enemys[enemy.displayIdInBook] || enemy;
 }
 
 enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, floorId) {

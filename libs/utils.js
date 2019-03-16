@@ -590,6 +590,27 @@ utils.prototype.expandMoveSteps = function (steps) {
     return moveSteps;
 }
 
+////// 设置statusBar的innerHTML，会自动斜体和放缩，也可以增加自定义css //////
+utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
+    if (typeof value == 'number') value = this.formatBigNumber(value);
+    // 判定是否斜体
+    var italic = /^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(value);
+    var style = 'font-style: ' + (italic?'italic':'normal') + '; ';
+    // 判定是否需要缩放
+    var length = this.strlen(value) || 1;
+    style += 'font-size: ' + Math.min(1, 7/length) + 'em; ';
+    if (core.isset(css)) style += css;
+    core.statusBar[name].innerHTML = "<span style='" + style + "'>" + value + "</span>";
+}
+
+utils.prototype.strlen = function (str) {
+    var count = 0;
+    for (var i = 0, len = str.length; i < len; i++) {
+        count += str.charCodeAt(i) < 256 ? 1 : 2;
+    }
+    return count;
+};
+
 ////// Base64加密 //////
 utils.prototype.encodeBase64 = function (str) {
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {

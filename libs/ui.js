@@ -8,10 +8,6 @@
 
 function ui() {
     this._init();
-    this.DEFAULT_WIDTH = 15;
-    this.DEFAULT_HEIGHT = 15;
-    this.DEFAULT_PIXEL_WIDTH = this.DEFAULT_WIDTH * 32;
-    this.DEFAULT_PIXEL_HEIGHT = this.DEFAULT_HEIGHT * 32;
 }
 
 // 初始化UI
@@ -1651,9 +1647,8 @@ ui.prototype.drawCenterFly = function () {
     var toX = core.bigmap.width - 1 - core.getHeroLoc('x'), toY = core.bigmap.height - 1 - core.getHeroLoc('y');
     core.drawThumbnail(null, null, {heroLoc: core.status.hero.loc, heroIcon: core.getFlag('heroIcon', "hero.png")},
         {ctx: 'ui', centerX: toX, centerY: toY});
-    var midX = Math.floor(this.DEFAULT_WIDTH / 2), midY = Math.floor(this.DEFAULT_HEIGHT / 2);
-    var offsetX = core.clamp(toX - midX, 0, core.bigmap.width - this.DEFAULT_WIDTH),
-        offsetY = core.clamp(toY - midY, 0, core.bigmap.height - this.DEFAULT_HEIGHT);
+    var offsetX = core.clamp(toX - core.__HALF_SIZE__, 0, core.bigmap.width - core.__SIZE__),
+        offsetY = core.clamp(toY - core.__HALF_SIZE__, 0, core.bigmap.height - core.__SIZE__);
     core.fillRect('ui', (toX - offsetX) * 32, (toY - offsetY) * 32, 32, 32, fillstyle);
     core.status.event.data = {"x": toX, "y": toY, "posX": toX - offsetX, "posY": toY - offsetY};
     core.drawTip("请确认当前中心对称飞行器的位置");

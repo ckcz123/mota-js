@@ -721,7 +721,7 @@ editor.prototype.listen = function () {
         mouseOutCheck = 2;
         setTimeout(clear1);
         e.stopPropagation();
-        uc.clearRect(0, 0, 480, 480);
+        uc.clearRect(0, 0, core.__SIZE__, core.__SIZE__);
         var loc = eToLoc(e);
         var pos = locToPos(loc,true);
         stepPostfix = [];

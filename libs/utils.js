@@ -792,7 +792,7 @@ utils.prototype.readFileContent = function (content) {
         main.log(e);
         alert(e);
     }
-    alert("不是有效的JSON文件！");
+    // alert("不是有效的JSON文件！");
 
     if (core.platform.errorCallback)
         core.platform.errorCallback();
@@ -1049,7 +1049,7 @@ utils.prototype._export = function (floorIds) {
     // map
     var content = floorIds.length + "\n" + core.__SIZE__ + " " + core.__SIZE__ + "\n\n";
     floorIds.forEach(function (floorId) {
-        var arr = core.maps.getMapArray(core.status.maps[floorId].blocks, 13, 13);
+        var arr = core.maps.getMapArray(core.status.maps[floorId].blocks);
         content += arr.map(function (x) {
             // check monster
             x.forEach(function (t) {

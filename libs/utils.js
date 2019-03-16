@@ -600,7 +600,7 @@ utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     var length = this.strlen(value) || 1;
     style += 'font-size: ' + Math.min(1, 7/length) + 'em; ';
     if (core.isset(css)) style += css;
-    core.statusBar[name].innerHTML = "<span style='" + style + "'>" + value + "</span>";
+    core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'>" + value + "</span>";
 }
 
 utils.prototype.strlen = function (str) {

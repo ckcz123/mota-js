@@ -1080,6 +1080,20 @@ control.prototype.setGameCanvasTranslate = function(canvas,x,y){
     }
 };
 
+////// 加减画布偏移
+control.prototype.addGameCanvasTranslate = function (x, y) {
+    for(var ii=0,canvas;canvas=core.dom.gameCanvas[ii];ii++){
+        var id = canvas.getAttribute('id');
+        if (id=='ui' || id=='data') continue; // UI层和data层不移动
+        var offsetX = x, offsetY = y;
+        if (core.bigmap.canvas.indexOf(id)>=0) {
+            offsetX -= core.bigmap.offsetX;
+            offsetY -= core.bigmap.offsetY;
+        }
+        core.control.setGameCanvasTranslate(id, offsetX, offsetY);
+    }
+}
+
 ////// 更新视野范围 //////
 control.prototype.updateViewport = function() {
     core.bigmap.canvas.forEach(function(cn){

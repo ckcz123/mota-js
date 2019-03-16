@@ -194,7 +194,6 @@
     max-height: 1.6em;
 }
 #statusBar span{
-    color: white;
     font: bold italic 1.1em Verdana;
 }
 #statusBar p {

@@ -8,6 +8,10 @@
 
 function ui() {
     this._init();
+    this.DEFAULT_WIDTH = 13;
+    this.DEFAULT_HEIGHT = 13;
+    this.DEFAULT_PIXEL_WIDTH = this.DEFAULT_WIDTH * 32;
+    this.DEFAULT_PIXEL_HEIGHT = this.DEFAULT_HEIGHT * 32;
 }
 
 // 初始化UI
@@ -1042,6 +1046,40 @@ ui.prototype.drawChoices = function(content, choices) {
     return;
 }
 
+////// 文本图片化 //////
+ui.prototype.textImage = function (content) {
+    content = content || "";
+
+    // 获得颜色的盒子等信息
+    var textAttribute = core.status.textAttribute || core.initStatus.textAttribute;
+    var textfont = textAttribute.textfont || 16;
+    var offset = textAttribute.offset || 15;
+    var textColor = core.arrayToRGBA(textAttribute.text);
+
+    var font = textfont+"px "+core.status.globalAttribute.font;
+    if (textAttribute.bold) font = "bold "+font;
+    var contents = core.splitLines('ui', content), lines = contents.length;
+
+    // 计算总高度，按1.4倍行距计算
+    var width = 416, height = textfont * 1.4 * lines;
+    var tempCanvas = core.bigmap.tempCanvas;
+    tempCanvas.canvas.width = width;
+    tempCanvas.canvas.height = height;
+    tempCanvas.clearRect(0, 0, width, height);
+    tempCanvas.font = font;
+    tempCanvas.fillStyle = textColor;
+
+    // 全部绘制
+    var currH = textfont;
+    for (var i = 0; i < lines; ++i) {
+        var text = contents[i];
+        tempCanvas.fillText(text, offset, currH);
+        currH += 1.4 * textfont;
+    }
+
+    return tempCanvas.canvas;
+}
+
 ////// 绘制一个确认/取消的警告页面 //////
 ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     core.lockControl();
@@ -1602,6 +1640,51 @@ ui.prototype.drawFly = function(page) {
     core.strokeRect('ui', 20, 100, 273, 273, '#FFFFFF', 2);
 
     core.drawThumbnail(floorId, null, null, {ctx: 'ui', x: 20, y: 100, size: 273});
+}
+
+////// 绘制中心对称飞行器
+ui.prototype.drawCenterFly = function () {
+    core.lockControl();
+    core.status.event.id = 'centerFly';
+    var fillstyle = 'rgba(255,0,0,0.5)';
+    if (core.canUseItem('centerFly')) fillstyle = 'rgba(0,255,0,0.5)';
+    var toX = core.bigmap.width - 1 - core.getHeroLoc('x'), toY = core.bigmap.height - 1 - core.getHeroLoc('y');
+    core.drawThumbnail(null, null, {heroLoc: core.status.hero.loc, heroIcon: core.getFlag('heroIcon', "hero.png")},
+        {ctx: 'ui', centerX: toX, centerY: toY});
+    var midX = Math.floor(this.DEFAULT_WIDTH / 2), midY = Math.floor(this.DEFAULT_HEIGHT / 2);
+    var offsetX = core.clamp(toX - midX, 0, core.bigmap.width - this.DEFAULT_WIDTH),
+        offsetY = core.clamp(toY - midY, 0, core.bigmap.height - this.DEFAULT_HEIGHT);
+    core.fillRect('ui', (toX - offsetX) * 32, (toY - offsetY) * 32, 32, 32, fillstyle);
+    core.status.event.data = {"x": toX, "y": toY, "posX": toX - offsetX, "posY": toY - offsetY};
+    core.drawTip("请确认当前中心对称飞行器的位置");
+    return;
+}
+
+////// 绘制全局商店
+ui.prototype.drawShop = function (shopId) {
+    var shop = core.status.shops[shopId];
+    var actions = [], fromList = (core.status.event.data||{}).fromList, selection = core.status.event.selection;
+    if (core.status.event.data && core.status.event.data.actions) actions=core.status.event.data.actions;
+
+    core.ui.closePanel();
+    core.lockControl();
+    core.status.event.id = 'shop';
+    core.status.event.data = {'id': shopId, 'shop': shop, 'actions': actions, 'fromList': fromList};
+    core.status.event.selection = selection;
+
+    var times = shop.times, need=core.calValue(shop.need, null, null, times);
+    var content = "\t["+shop.name+","+shop.icon+"]" + core.replaceText(shop.text, need, times);
+    var use = shop.use=='experience'?'经验':'金币';
+    var choices = [];
+    for (var i=0;i<shop.choices.length;i++) {
+        var choice = shop.choices[i];
+        var text = core.replaceText(choice.text, need, times);
+        if (core.isset(choice.need))
+            text += "（"+core.calValue(choice.need, null, null, times)+use+"）";
+        choices.push({"text": text, "color":shop.visited?null:"#999999"});
+    }
+    choices.push("离开");
+    core.ui.drawChoices(content, choices);
 }
 
 ////// 绘制浏览地图界面 //////

@@ -1045,7 +1045,7 @@ events.prototype._action_showTextImage = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, 0, 0, prefix);
     if (core.isReplaying()) data.time = 0;
     this.__action_doAsyncFunc(data.async || data.time == 0, this.showImage,
-        data.code, this.textImage(data.text), loc[0], loc[1], 100, 100, data.opacity, data.time);
+        data.code, core.ui.textImage(data.text), loc[0], loc[1], 100, 100, data.opacity, data.time);
 }
 
 events.prototype._action_hideImage = function (data, x, y, prefix) {
@@ -1640,252 +1640,161 @@ events.prototype.showImage = function (code, image, x, y, dw, dh, opacityVal, ti
     dh /= 100;
     x = core.calValue(x) || 0;
     y = core.calValue(y) || 0;
+    if (typeof image == 'string') image = core.material.images.images[image];
+    if (!image) {
+        if (callback) callback();
+        return;
+    }
     var zIndex = code + 100;
     time = time || 0;
     var name = "image"+ zIndex;
     var ctx = core.createCanvas(name, x, y, image.width * dw, image.height * dh, zIndex);
-
     ctx.drawImage(image, 0, 0, image.width * dw, image.height * dh);
-    if (time == 0)
+    if (time == 0) {
         core.setOpacity(name, opacityVal);
-    else {
-        var per_time = 10, steps = parseInt(time / per_time), per_add = opacityVal / steps;
-        var opacity = 0;
-        core.setOpacity(name, 0);
-        var animate = setInterval(function () {
-            opacity += per_add;
-            core.setOpacity(name, opacity);
-            if (opacity >= opacityVal) {
-                delete core.animateFrame.asyncId[animate];
-                clearInterval(animate);
-                core.setOpacity(name, opacityVal);
-                if (core.isset(callback)) callback();
-            }
-        }, per_time);
-
-        core.animateFrame.asyncId[animate] = true;
+        if (callback) callback();
+        return;
     }
+    core.setOpacity(name, 0);
+    this.moveImage(code, null, opacityVal, time, callback);
 }
 
 ////// 隐藏图片 //////
 events.prototype.hideImage = function (code, time, callback) {
     time = time || 0;
-    var name = "image"+ (code+100);
-    if (!core.isset(core.dymCanvas[name])) {
-        if (core.isset(callback)) callback();
+    var name = "image" + (code + 100);
+    if (time == 0 || !core.dymCanvas[name]) {
+        core.deleteCanvas(name);
+        if (callback) callback();
         return;
     }
-    if (time == 0)
+    this.moveImage(code, null, 0, time, function () {
         core.deleteCanvas(name);
-    else {
-        var opacityVal = parseFloat(core.dymCanvas[name].canvas.style.opacity);
-        var per_time = 10, steps = parseInt(time / per_time), per_add = opacityVal / steps;
-        var animate = setInterval(function () {
-            opacityVal -= per_add;
-            core.setOpacity(name, opacityVal);
-            if (opacityVal < 0) {
-                delete core.animateFrame.asyncId[animate];
-                clearInterval(animate);
-                core.deleteCanvas(name);
-                if (core.isset(callback)) callback();
-            }
-        }, per_time);
-
-        core.animateFrame.asyncId[animate] = true;
-    }
-}
-
-////// 文本图片化 //////
-events.prototype.textImage = function (content) {
-    content = content || "";
-
-    // 获得颜色的盒子等信息
-    var textAttribute = core.status.textAttribute || core.initStatus.textAttribute;
-    var textfont = textAttribute.textfont || 16;
-    var offset = textAttribute.offset || 15;
-    var textColor = core.arrayToRGBA(textAttribute.text);
-
-    var font = textfont+"px "+core.status.globalAttribute.font;
-    if (textAttribute.bold) font = "bold "+font;
-    var contents = core.splitLines('ui', content), lines = contents.length;
-
-    // 计算总高度，按1.4倍行距计算
-    var width = 416, height = textfont * 1.4 * lines;
-    var tempCanvas = core.bigmap.tempCanvas;
-    tempCanvas.canvas.width = width;
-    tempCanvas.canvas.height = height;
-    tempCanvas.clearRect(0, 0, width, height);
-    tempCanvas.font = font;
-    tempCanvas.fillStyle = textColor;
-
-    // 全部绘制
-    var currH = textfont;
-    for (var i = 0; i < lines; ++i) {
-        var text = contents[i];
-        tempCanvas.fillText(text, offset, currH);
-        currH += 1.4 * textfont;
-    }
-    
-    return tempCanvas.canvas;
+        if (callback) callback();
+    });
 }
 
 ////// 移动图片 //////
 events.prototype.moveImage = function (code, to, opacityVal, time, callback) {
     time = time || 1000;
-
+    to = to || [];
     var name = "image"+ (code+100);
-    if (!core.isset(core.dymCanvas[name])) {
-        if (core.isset(callback)) callback();
+    if (!core.dymCanvas[name]) {
+        if (callback) callback();
         return;
     }
-    var fromX = parseFloat(core.dymCanvas[name].canvas.getAttribute("_left")),
-        fromY = parseFloat(core.dymCanvas[name].canvas.getAttribute("_top")),
-        preX = fromX, preY = fromY, toX = fromX, toY = fromY;
+    var getOrDefault = function (a, b) {
+        a = core.calValue(a);
+        return core.isset(a) ? a : b;
+    }
+    var canvas = core.dymCanvas[name].canvas;
+    var fromX = parseFloat(canvas.getAttribute("_left")),
+        fromY = parseFloat(canvas.getAttribute("_top")),
+        toX = getOrDefault(to[0], fromX), toY = getOrDefault(to[1], fromY);
 
-    if (core.isset(to)) {
-        toX = core.calValue(to[0]);
-        toY = core.calValue(to[1]);
-        if (!core.isset(toX)) toX = fromX;
-        if (!core.isset(toY)) toY = fromY;
-    }
+    var opacity = parseFloat(canvas.style.opacity), toOpacity = getOrDefault(opacityVal, opacity);
 
-    var step = 0;
-    var per_time = 10, steps = parseInt(time / per_time);
-    var preOpac = parseFloat(core.dymCanvas[name].canvas.style.opacity), opacStep = 0;
-    if (core.isset(opacityVal)) {
-        opacityVal = core.calValue(opacityVal);
-        opacStep = (opacityVal - preOpac) / steps;
-    }
-    
-    var moveStep = function () {
-        preOpac += opacStep;
-        core.setOpacity(name, preOpac);
-        preX = parseInt(fromX + (toX-fromX)*step/steps);
-        preY = parseInt(fromY + (toY-fromY)*step/steps);
-        core.relocateCanvas(name, preX, preY);
-    }
+    this._moveImage_moving(name, {
+        fromX: fromX, fromY: fromY, toX: toX, toY: toY, opacity: opacity, toOpacity: toOpacity, time: time
+    }, callback)
+}
+
+events.prototype._moveImage_moving = function(name, moveInfo, callback) {
+    var per_time = 10, step = 0, steps = parseInt(moveInfo.time / 10);
+    var fromX = moveInfo.fromX, fromY = moveInfo.fromY, toX = moveInfo.toX, toY = moveInfo.toY,
+        opacity = moveInfo.opacity, toOpacity = moveInfo.toOpacity;
+    var currX = fromX, currY = fromY, currOpacity = opacity;
     var animate = setInterval(function () {
         step++;
-        moveStep();
+        currOpacity = opacity + (toOpacity-opacity)*step/steps;
+        currX = parseInt(fromX + (toX-fromX)*step/steps);
+        currY = parseInt(fromY + (toY-fromY)*step/steps);
+        core.setOpacity(name, currOpacity);
+        core.relocateCanvas(name, currX, currY);
         if (step == steps) {
-            if (core.isset(opacityVal))
-                core.setOpacity(name, opacityVal);
+            core.setOpacity(name, toOpacity);
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
-            if (core.isset(callback)) callback();
+            if (callback) callback();
         }
     }, per_time);
-
     core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 淡入淡出音乐 //////
 events.prototype.setVolume = function (value, time, callback) {
-
     var set = function (value) {
         core.musicStatus.volume = value;
-        if (core.isset(core.musicStatus.playingBgm)) {
+        if (core.musicStatus.playingBgm)
             core.material.bgms[core.musicStatus.playingBgm].volume = value;
-        }
-        // core.musicStatus.gainNode.gain.value = value;
     }
-
     if (!core.isset(time) || time<100) {
         set(value);
-        if (core.isset(callback)) callback();
+        if (callback) callback();
         return;
     }
-
     var currVolume = core.musicStatus.volume;
     var per_time = 10, step = 0, steps = parseInt(time / per_time);
     var fade = setInterval(function () {
         step++;
-        var nowVolume = currVolume+(value-currVolume)*step/steps;
-        set(nowVolume);
+        set(currVolume+(value-currVolume)*step/steps);
         if (step>=steps) {
             delete core.animateFrame.asyncId[fade];
             clearInterval(fade);
-            if (core.isset(callback))
-                callback();
+            if (callback) callback();
         }
     }, per_time);
-
     core.animateFrame.asyncId[fade] = true;
 }
 
 ////// 画面震动 //////
 events.prototype.vibrate = function(time, callback) {
-
     if (core.isReplaying()) {
-        if (core.isset(callback)) callback();
+        if (callback) callback();
         return;
     }
-
-    // core.status.replay.animate=true;
-
-    var addGameCanvasTranslate=function(x,y){
-        for(var ii=0,canvas;canvas=core.dom.gameCanvas[ii];ii++){
-            var id = canvas.getAttribute('id');
-            if (id=='ui' || id=='data') continue;
-            var offsetX = x, offsetY = y;
-            if (core.bigmap.canvas.indexOf(id)>=0) {
-                offsetX-=core.bigmap.offsetX;
-                offsetY-=core.bigmap.offsetY;
-            }
-            core.control.setGameCanvasTranslate(id, offsetX, offsetY);
-        }
-    }
-
     if (!core.isset(time) || time<1000) time=1000;
-
-    var shake_duration = time*3/50;
-    var shake_speed = 5;
-    var shake_power = 5;
-    var shake_direction = 1;
-    var shake = 0;
-
-    var update = function() {
-        if(shake_duration >= 1 || shake != 0){
-            var delta = (shake_power * shake_speed * shake_direction) / 10.0;
-            if(shake_duration <= 1 && shake * (shake + delta) < 0){
-                shake = 0;
-            }else{
-                shake += delta;
-            }
-            if(shake > shake_power * 2){
-                shake_direction = -1;
-            }
-            if(shake < - shake_power * 2){
-                shake_direction = 1;
-            }
-            if(shake_duration >= 1){
-                shake_duration -= 1
-            }
-        }
-    }
-
+    // --- 将time调整为500的倍数（上整），不然会出错
+    time = Math.ceil(time / 500) * 500;
+    var shakeInfo = { duration: time * 3 / 50, speed: 5, power: 5, direction: 1, shake: 0 };
     var animate=setInterval(function(){
-        update();
-        addGameCanvasTranslate(shake, 0);
-        if(shake_duration===0) {
+        core.events._vibrate_update(shakeInfo);
+        core.control.addGameCanvasTranslate(shakeInfo.shake, 0);
+        if(shakeInfo.duration===0) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
-            // core.status.replay.animate=false;
-            if (core.isset(callback)) callback();
+            if (callback) callback();
         }
-    }, 50/3);
+    }, 50 / 3);
 
     core.animateFrame.asyncId[animate] = true;
+}
+
+events.prototype._vibrate_update = function (shakeInfo) {
+    if(shakeInfo.duration >= 1 || shakeInfo.shake != 0){
+        var delta = (shakeInfo.power * shakeInfo.speed * shakeInfo.direction) / 10.0;
+        if(shakeInfo.duration <= 1 && shakeInfo.shake * (shakeInfo.shake + delta) < 0){
+            shakeInfo.shake = 0;
+        }else{
+            shakeInfo.shake += delta;
+        }
+        if(shakeInfo.shake > shakeInfo.power * 2){
+            shakeInfo.direction = -1;
+        }
+        if(shakeInfo.shake < - shakeInfo.power * 2){
+            shakeInfo.direction = 1;
+        }
+        if(shakeInfo.duration >= 1){
+            shakeInfo.duration -= 1
+        }
+    }
 }
 
 ////// 打开一个全局商店 //////
 events.prototype.openShop = function(shopId, needVisited) {
     var shop = core.status.shops[shopId];
     shop.times = shop.times || 0;
-    if (shop.commonTimes)
-        shop.times = core.getFlag('commonTimes', 0);
-    shop.visited = shop.visited || false;
-
+    if (shop.commonTimes) shop.times = core.getFlag('commonTimes', 0);
     if (needVisited && !shop.visited) {
         if (!core.flags.enableDisabledShop) {
             if (shop.times==0) core.drawTip("该商店尚未开启");
@@ -1897,85 +1806,30 @@ events.prototype.openShop = function(shopId, needVisited) {
         }
     }
     else shop.visited = true;
-
-    var selection = core.status.event.selection;
-    var actions = [];
-    if (core.isset(core.status.event.data) && core.isset(core.status.event.data.actions))
-        actions=core.status.event.data.actions;
-    var fromList;
-    if (core.isset(core.status.event.data) && core.isset(core.status.event.data.fromList))
-        fromList = core.status.event.data.fromList;
-
-    core.ui.closePanel();
-    core.lockControl();
-    // core.status.event = {'id': 'shop', 'data': {'id': shopId, 'shop': shop}};
-    core.status.event.id = 'shop';
-    core.status.event.data = {'id': shopId, 'shop': shop, 'actions': actions, 'fromList': fromList};
-    core.status.event.selection = selection;
-
-    // 拼词
-    var content = "\t["+shop.name+","+shop.icon+"]";
-    var times = shop.times, need=core.calValue(shop.need, null, null, times);
-
-    content += core.replaceText(shop.text, need, times);
-
-    var use = shop.use=='experience'?'经验':'金币';
-
-    var choices = [];
-    for (var i=0;i<shop.choices.length;i++) {
-        var choice = shop.choices[i];
-        var text = core.replaceText(choice.text, need, times);
-        if (core.isset(choice.need))
-            text += "（"+core.calValue(choice.need, null, null, times)+use+"）";
-        choices.push({"text": text, "color":shop.visited?null:"#999999"});
-    }
-    choices.push("离开");
-    core.ui.drawChoices(content, choices);
+    core.ui.drawShop(shopId);
 }
 
 events.prototype._useShop = function (shop, index) {
-    // 检查能否使用快捷商店
     var reason = core.events.canUseQuickShop(shop.id);
-    if (core.isset(reason)) {
-        core.drawText(reason);
+    if (!reason && !shop.visited) reason = shop.times ? "该商店已失效" : "该商店尚未开启";
+    if (reason) {
+        core.drawTip(reason);
         return false;
     }
-    if (!shop.visited) {
-        if (shop.times==0) core.drawTip("该商店尚未开启");
-        else core.drawTip("该商店已失效");
+    var use = shop.use, choice = shop.choices[index];
+    var times = shop.times, need = core.calValue(choice.need||shop.need, null, null, times);
+    if (need > core.getStatus(use)) {
+        core.drawTip("你的"+(use=='money'?"金币":"经验")+"不足");
         return false;
     }
-
-    var money = core.getStatus('money'), experience = core.getStatus('experience');
-    var times = shop.times, need = core.calValue(shop.need, null, null, times);
-    var use = shop.use;
-    var use_text = use=='money'?"金币":"经验";
-
-    var choice = shop.choices[index];
-    if (core.isset(choice.need))
-        need = core.calValue(choice.need, null, null, times);
-
-    if (need > eval(use)) {
-        core.drawTip("你的"+use_text+"不足");
-        return false;
-    }
-
     core.status.event.selection = index;
     core.status.event.data.actions.push(index);
-
-    eval(use+'-='+need);
-    core.setStatus('money', money);
-    core.setStatus('experience', experience);
-
-    // 更新属性
-    choice.effect.split(";").forEach(function (t) {
-        core.doEffect(t, need, times);
-    });
+    core.setStatus(use, core.getStatus(use) - need);
+    core.doEffect(choice.effect, need, times);
     core.updateStatusBar();
     shop.times++;
-    if (shop.commonTimes)
-        core.setFlag('commonTimes', shop.times);
-    core.events.openShop(shop.id);
+    if (shop.commonTimes) core.setFlag('commonTimes', shop.times);
+    this.openShop(shop.id);
     return true;
 }
 
@@ -2003,69 +1857,51 @@ events.prototype.canUseQuickShop = function(shopId) {
 
 ////// 设置角色行走图 //////
 events.prototype.setHeroIcon = function (name, noDraw) {
-    if (core.isset(core.material.images.images[name]) && core.material.images.images[name].width==128) {
-        core.setFlag("heroIcon", name);
-        core.material.images.hero.onload = function () {
-            core.material.icons.hero.height = core.material.images.images[name].height/4;
-            core.control.updateHeroIcon(name);
-            if (!noDraw) core.drawHero();
-        }
-        core.material.images.hero.src = core.material.images.images[name].src;
+    var img = core.material.images.images[name];
+    if (!img || img.width != 128) return;
+    core.setFlag("heroIcon", name);
+    core.material.images.hero.onload = function () {
+        core.material.icons.hero.height = img.height/4;
+        core.control.updateHeroIcon(name);
+        if (!noDraw) core.drawHero();
     }
+    core.material.images.hero.src = img.src;
 }
 
 ////// 检查升级事件 //////
 events.prototype.checkLvUp = function () {
-    var check = function () {
-        if (!core.flags.enableLevelUp || !core.isset(core.firstData.levelUp)
-            || core.status.hero.lv>=core.firstData.levelUp.length) return null;
-        // 计算下一个所需要的数值
-        var next = (core.firstData.levelUp[core.status.hero.lv]||{});
-        var need = core.calValue(next.need);
-        if (!core.isset(need)) return null;
-        if (core.status.hero.experience>=need) {
-            // 升级
-            core.status.hero.lv++;
-            if (next.clear) core.status.hero.experience -= need;
-            return next.action||[];
-        }
-        return null;
-    }
     var actions = [];
     while (true) {
-        var next = check();
+        var next = this._checkLvUp_check();
         if (next == null) break;
         actions = actions.concat(next);
     }
     if (actions.length>0) core.insertAction(actions);
 }
 
+events.prototype._checkLvUp_check = function () {
+    if (!core.flags.enableLevelUp || !core.isset(core.firstData.levelUp)
+        || core.status.hero.lv>=core.firstData.levelUp.length) return null;
+    // 计算下一个所需要的数值
+    var next = (core.firstData.levelUp[core.status.hero.lv]||{});
+    var need = core.calValue(next.need);
+    if (!core.isset(need)) return null;
+    if (core.status.hero.experience>=need) {
+        // 升级
+        core.status.hero.lv++;
+        if (next.clear) core.status.hero.experience -= need;
+        return next.action||[];
+    }
+    return null;
+}
+
 ////// 尝试使用道具 //////
 events.prototype.tryUseItem = function(itemId) {
     core.ui.closePanel();
 
-    if (itemId=='book') {
-        core.openBook(false);
-        return;
-    }
-    if (itemId=='fly') {
-        core.useFly(false);
-        return;
-    }
-    if (itemId=='centerFly') {
-        core.lockControl();
-        core.status.event.id = 'centerFly';
-        var fillstyle = 'rgba(255,0,0,0.5)';
-        if (core.canUseItem('centerFly')) fillstyle = 'rgba(0,255,0,0.5)';
-        var toX = core.bigmap.width-1 - core.getHeroLoc('x'), toY = core.bigmap.height-1-core.getHeroLoc('y');
-        core.drawThumbnail(null, null, {heroLoc: core.status.hero.loc, heroIcon: core.getFlag('heroIcon', "hero.png")},
-            {ctx: 'ui', centerX: toX, centerY: toY});
-        var offsetX = core.clamp(toX-6, 0, core.bigmap.width-13), offsetY = core.clamp(toY-6, 0, core.bigmap.height-13);
-        core.fillRect('ui',(toX-offsetX)*32,(toY-offsetY)*32,32,32,fillstyle);
-        core.status.event.data = {"x": toX, "y": toY, "posX": toX-offsetX, "posY": toY-offsetY};
-        core.drawTip("请确认当前中心对称飞行器的位置");
-        return;
-    }
+    if (itemId=='book') return core.openBook(false);
+    if (itemId=='fly') return core.useFly(false);
+    if (itemId=='centerFly') return core.ui.drawCenterFly();
 
     if (core.canUseItem(itemId))core.useItem(itemId);
     else core.drawTip("当前无法使用"+core.material.items[itemId].name);

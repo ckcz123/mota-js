@@ -18,7 +18,7 @@ function utils() {
 utils.prototype._init = function () {
     // 定义Object.assign
     if (typeof Object.assign != "function") {
-        Object.assign = function(target, varArgs) { // .length of function is 2
+        Object.assign = function (target, varArgs) { // .length of function is 2
             if (target == null) { // TypeError if undefined or null
                 throw new TypeError('Cannot convert undefined or null to object');
             }
@@ -41,7 +41,7 @@ utils.prototype._init = function () {
         };
     }
     if (typeof String.prototype.endsWith != "function") {
-        String.prototype.endsWith = function(search, this_len) {
+        String.prototype.endsWith = function (search, this_len) {
             if (this_len === undefined || this_len > this.length) {
                 this_len = this.length;
             }
@@ -63,10 +63,10 @@ utils.prototype.replaceText = function (text, need, times) {
 utils.prototype.calValue = function (value, prefix, need, times) {
     if (!core.isset(value)) return value;
     if (typeof value === 'string') {
-        value=value.replace(/status:([\w\d_]+)/g, "core.getStatus('$1')");
-        value=value.replace(/item:([\w\d_]+)/g, "core.itemCount('$1')");
-        value=value.replace(/flag:([\w\d_]+)/g, "core.getFlag('$1', 0)");
-        value=value.replace(/switch:([\w\d_]+)/g, "core.getFlag('"+(prefix||"global")+"@$1', 0)");
+        value = value.replace(/status:([\w\d_]+)/g, "core.getStatus('$1')");
+        value = value.replace(/item:([\w\d_]+)/g, "core.itemCount('$1')");
+        value = value.replace(/flag:([\w\d_]+)/g, "core.getFlag('$1', 0)");
+        value = value.replace(/switch:([\w\d_]+)/g, "core.getFlag('" + (prefix || "global") + "@$1', 0)");
         return eval(value);
     }
     if (value instanceof Function) {
@@ -76,27 +76,27 @@ utils.prototype.calValue = function (value, prefix, need, times) {
 }
 
 ////// 字符串自动换行的分割 //////
-utils.prototype.splitLines = function(canvas, text, maxLength, font) {
+utils.prototype.splitLines = function (canvas, text, maxLength, font) {
     if (core.isset(font)) core.setFont(canvas, font);
 
     var contents = [];
     var last = 0;
-    for (var i=0;i<text.length;i++) {
+    for (var i = 0; i < text.length; i++) {
 
-        if (text.charAt(i)=='\n') {
+        if (text.charAt(i) == '\n') {
             contents.push(text.substring(last, i));
-            last=i+1;
+            last = i + 1;
         }
-        else if (text.charAt(i)=='\\' && text.charAt(i+1)=='n') {
+        else if (text.charAt(i) == '\\' && text.charAt(i + 1) == 'n') {
             contents.push(text.substring(last, i));
-            last=i+2;
+            last = i + 2;
         }
         else {
-            var toAdd = text.substring(last, i+1);
+            var toAdd = text.substring(last, i + 1);
             var width = core.calWidth(canvas, toAdd);
-            if (core.isset(maxLength) && width>maxLength) {
+            if (core.isset(maxLength) && width > maxLength) {
                 contents.push(text.substring(last, i));
-                last=i;
+                last = i;
             }
         }
     }
@@ -105,7 +105,7 @@ utils.prototype.splitLines = function(canvas, text, maxLength, font) {
 }
 
 ////// 向某个数组前插入另一个数组或元素 //////
-utils.prototype.unshift = function (a,b) {
+utils.prototype.unshift = function (a, b) {
     if (!(a instanceof Array) || !core.isset(b)) return;
     if (b instanceof Array) {
         core.clone(b).reverse().forEach(function (e) {
@@ -117,7 +117,7 @@ utils.prototype.unshift = function (a,b) {
 }
 
 ////// 向某个数组后插入另一个数组或元素 //////
-utils.prototype.push = function (a,b) {
+utils.prototype.push = function (a, b) {
     if (!(a instanceof Array) || !core.isset(b)) return;
     if (b instanceof Array) {
         core.clone(b).forEach(function (e) {
@@ -129,21 +129,21 @@ utils.prototype.push = function (a,b) {
 }
 
 ////// 设置本地存储 //////
-utils.prototype.setLocalStorage = function(key, value) {
+utils.prototype.setLocalStorage = function (key, value) {
     try {
         if (!core.isset(value)) {
             this.removeLocalStorage(key);
             return;
         }
 
-        var str = JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function(chr) {
+        var str = JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function (chr) {
             return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
         });
         var compressed = lzw_encode(str);
 
         // test if we can save to localStorage
         localStorage.setItem("__tmp__", compressed);
-        if (lzw_decode(localStorage.getItem("__tmp__"))==str) {
+        if (lzw_decode(localStorage.getItem("__tmp__")) == str) {
             localStorage.setItem(core.firstData.name + "_" + key, compressed);
         }
         else {
@@ -169,29 +169,33 @@ utils.prototype.decompress = function (value) {
         if (core.isset(output) && output.length > 0)
             return JSON.parse(output);
     }
-    catch (e) {}
+    catch (e) {
+    }
     try {
         var output = LZString.decompress(value);
         if (core.isset(output) && output.length > 0)
             return JSON.parse(output);
     }
-    catch (e) {}
+    catch (e) {
+    }
     try {
         return JSON.parse(value);
     }
-    catch (e) {main.log(e);}
+    catch (e) {
+        main.log(e);
+    }
     return null;
 }
 
 ////// 获得本地存储 //////
-utils.prototype.getLocalStorage = function(key, defaultValue) {
-    var res = this.decompress(localStorage.getItem(core.firstData.name+"_"+key));
-    return res==null?defaultValue:res;
+utils.prototype.getLocalStorage = function (key, defaultValue) {
+    var res = this.decompress(localStorage.getItem(core.firstData.name + "_" + key));
+    return res == null ? defaultValue : res;
 }
 
 ////// 移除本地存储 //////
 utils.prototype.removeLocalStorage = function (key) {
-    localStorage.removeItem(core.firstData.name+"_"+key);
+    localStorage.removeItem(core.firstData.name + "_" + key);
     if (key == 'autoSave') delete core.saves.ids[0];
     else if (/^save\d+$/.test(key)) delete core.saves.ids[parseInt(key.substring(4))];
 }
@@ -214,10 +218,10 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
     }
 
     // Save to localforage
-    var compressed = lzw_encode(JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function(chr) {
+    var compressed = lzw_encode(JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function (chr) {
         return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
     }));
-    localforage.setItem(core.firstData.name+"_"+key, compressed, function (err) {
+    localforage.setItem(core.firstData.name + "_" + key, compressed, function (err) {
         if (core.isset(err)) {
             if (core.isset(errorCallback)) errorCallback(err);
         }
@@ -232,14 +236,14 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
 utils.prototype.getLocalForage = function (key, defaultValue, successCallback, errorCallback) {
 
     if (!core.platform.useLocalForage) {
-        var value=this.getLocalStorage(key, defaultValue);
+        var value = this.getLocalStorage(key, defaultValue);
         if (core.isset(successCallback)) {
             successCallback(value);
         }
         return;
     }
 
-    localforage.getItem(core.firstData.name+"_"+key, function (err, value) {
+    localforage.getItem(core.firstData.name + "_" + key, function (err, value) {
         if (core.isset(err)) {
             if (core.isset(errorCallback)) errorCallback(err);
         }
@@ -247,7 +251,7 @@ utils.prototype.getLocalForage = function (key, defaultValue, successCallback, e
             if (!core.isset(successCallback)) return;
             if (core.isset(value)) {
                 var res = core.utils.decompress(value);
-                successCallback(res==null?defaultValue:res);
+                successCallback(res == null ? defaultValue : res);
                 return;
             }
             successCallback(defaultValue);
@@ -263,7 +267,7 @@ utils.prototype.removeLocalForage = function (key, successCallback, errorCallbac
         return;
     }
 
-    localforage.removeItem(core.firstData.name+"_"+key, function (err) {
+    localforage.removeItem(core.firstData.name + "_" + key, function (err) {
         if (core.isset(err)) {
             if (core.isset(errorCallback)) errorCallback(err);
         }
@@ -280,13 +284,13 @@ utils.prototype.clone = function (data) {
     if (!core.isset(data)) return data;
     // date
     if (data instanceof Date) {
-        var copy=new Date();
+        var copy = new Date();
         copy.setTime(data.getTime());
         return copy;
     }
     // array
     if (data instanceof Array) {
-        var copy=[];
+        var copy = [];
         // for (var i=0;i<data.length;i++) {
         for (var i in data) {
             // copy.push(core.clone(data[i]));
@@ -300,10 +304,10 @@ utils.prototype.clone = function (data) {
     }
     // object
     if (data instanceof Object) {
-        var copy={};
+        var copy = {};
         for (var i in data) {
             if (data.hasOwnProperty(i))
-                copy[i]=core.clone(data[i]);
+                copy[i] = core.clone(data[i]);
         }
         return copy;
     }
@@ -312,49 +316,49 @@ utils.prototype.clone = function (data) {
 
 ////// 裁剪图片 //////
 utils.prototype.cropImage = function (image, size) {
-    size = size||32;
+    size = size || 32;
     var canvas = document.createElement("canvas");
     var context = canvas.getContext("2d");
     canvas.width = size;
     canvas.height = size;
     var ans = [];
-    for (var i=0;i<image.height;i+=size) {
+    for (var i = 0; i < image.height; i += size) {
         context.drawImage(image, 0, i, size, size, 0, 0, size, size);
         var img = new Image();
         img.src = canvas.toDataURL("image/png");
         ans.push(img);
-        context.clearRect(0,0,size,size);
+        context.clearRect(0, 0, size, size);
     }
     return ans;
 }
 
 ////// 格式化时间为字符串 //////
-utils.prototype.formatDate = function(date) {
+utils.prototype.formatDate = function (date) {
     if (!core.isset(date)) return "";
-    return ""+date.getFullYear()+"-"+core.setTwoDigits(date.getMonth()+1)+"-"+core.setTwoDigits(date.getDate())+" "
-        +core.setTwoDigits(date.getHours())+":"+core.setTwoDigits(date.getMinutes())+":"+core.setTwoDigits(date.getSeconds());
+    return "" + date.getFullYear() + "-" + core.setTwoDigits(date.getMonth() + 1) + "-" + core.setTwoDigits(date.getDate()) + " "
+        + core.setTwoDigits(date.getHours()) + ":" + core.setTwoDigits(date.getMinutes()) + ":" + core.setTwoDigits(date.getSeconds());
 }
 
 ////// 格式化时间为最简字符串 //////
 utils.prototype.formatDate2 = function (date) {
     if (!core.isset(date)) return "";
-    return ""+date.getFullYear()+core.setTwoDigits(date.getMonth()+1)+core.setTwoDigits(date.getDate())
-        +core.setTwoDigits(date.getHours())+core.setTwoDigits(date.getMinutes())+core.setTwoDigits(date.getSeconds());
+    return "" + date.getFullYear() + core.setTwoDigits(date.getMonth() + 1) + core.setTwoDigits(date.getDate())
+        + core.setTwoDigits(date.getHours()) + core.setTwoDigits(date.getMinutes()) + core.setTwoDigits(date.getSeconds());
 }
 
 ////// 两位数显示 //////
 utils.prototype.setTwoDigits = function (x) {
-    return parseInt(x)<10?"0"+x:x;
+    return parseInt(x) < 10 ? "0" + x : x;
 }
 
 utils.prototype.formatBigNumber = function (x, onMap) {
     x = Math.floor(parseFloat(x));
     if (!core.isset(x)) return '???';
 
-    var c = x<0?"-":"";
+    var c = x < 0 ? "-" : "";
     x = Math.abs(x);
 
-    if (x<=99999 || (!onMap && x<=999999)) return c + x;
+    if (x <= 99999 || (!onMap && x <= 999999)) return c + x;
 
     var all = [
         {"val": 1e20, "c": "g"},
@@ -364,105 +368,105 @@ utils.prototype.formatBigNumber = function (x, onMap) {
         {"val": 1e4, "c": "w"},
     ]
 
-    for (var i=0;i<all.length;i++) {
+    for (var i = 0; i < all.length; i++) {
         var one = all[i];
         if (onMap) {
-            if (x>=one.val) {
-                var v = x/one.val;
-                return c + v.toFixed(Math.max(0, Math.floor(3-Math.log10(v+1)))) + one.c;
+            if (x >= one.val) {
+                var v = x / one.val;
+                return c + v.toFixed(Math.max(0, Math.floor(3 - Math.log10(v + 1)))) + one.c;
             }
         }
         else {
-            if (x>=10*one.val) {
-                var v = x/one.val;
-                return c + v.toFixed(Math.max(0, Math.floor(4-Math.log10(v+1)))) + one.c;
+            if (x >= 10 * one.val) {
+                var v = x / one.val;
+                return c + v.toFixed(Math.max(0, Math.floor(4 - Math.log10(v + 1)))) + one.c;
             }
         }
     }
 
-    return c+x;
+    return c + x;
 }
 
 ////// 数组转RGB //////
 utils.prototype.arrayToRGB = function (color) {
-    var nowR = this.clamp(parseInt(color[0]),0,255), nowG = this.clamp(parseInt(color[1]),0,255),
-        nowB = this.clamp(parseInt(color[2]),0,255);
-    return "#"+((1<<24)+(nowR<<16)+(nowG<<8)+nowB).toString(16).slice(1);
+    var nowR = this.clamp(parseInt(color[0]), 0, 255), nowG = this.clamp(parseInt(color[1]), 0, 255),
+        nowB = this.clamp(parseInt(color[2]), 0, 255);
+    return "#" + ((1 << 24) + (nowR << 16) + (nowG << 8) + nowB).toString(16).slice(1);
 }
 
 utils.prototype.arrayToRGBA = function (color) {
-    if (!this.isset(color[3])) color[3]=1;
-    var nowR = this.clamp(parseInt(color[0]),0,255), nowG = this.clamp(parseInt(color[1]),0,255),
-        nowB = this.clamp(parseInt(color[2]),0,255), nowA = this.clamp(parseFloat(color[3]),0,1);
-    return "rgba("+nowR+","+nowG+","+nowB+","+nowA+")";
+    if (!this.isset(color[3])) color[3] = 1;
+    var nowR = this.clamp(parseInt(color[0]), 0, 255), nowG = this.clamp(parseInt(color[1]), 0, 255),
+        nowB = this.clamp(parseInt(color[2]), 0, 255), nowA = this.clamp(parseFloat(color[3]), 0, 1);
+    return "rgba(" + nowR + "," + nowG + "," + nowB + "," + nowA + ")";
 }
 
 ////// 加密路线 //////
 utils.prototype.encodeRoute = function (route) {
-    var ans="", lastMove = "", cnt=0;
+    var ans = "", lastMove = "", cnt = 0;
 
     route.forEach(function (t) {
-        if (t=='up' || t=='down' || t=='left' || t=='right') {
-            if (t!=lastMove && cnt>0) {
-                ans+=lastMove.substring(0,1).toUpperCase();
-                if (cnt>1) ans+=cnt;
-                cnt=0;
+        if (t == 'up' || t == 'down' || t == 'left' || t == 'right') {
+            if (t != lastMove && cnt > 0) {
+                ans += lastMove.substring(0, 1).toUpperCase();
+                if (cnt > 1) ans += cnt;
+                cnt = 0;
             }
-            lastMove=t;
+            lastMove = t;
             cnt++;
         }
         else {
-            if (cnt>0) {
-                ans+=lastMove.substring(0,1).toUpperCase();
-                if (cnt>1) ans+=cnt;
-                cnt=0;
+            if (cnt > 0) {
+                ans += lastMove.substring(0, 1).toUpperCase();
+                if (cnt > 1) ans += cnt;
+                cnt = 0;
             }
             ans += core.utils._encodeRoute_encodeOne(t);
         }
     });
-    if (cnt>0) {
-        ans+=lastMove.substring(0,1).toUpperCase();
-        if (cnt>1) ans+=cnt;
+    if (cnt > 0) {
+        ans += lastMove.substring(0, 1).toUpperCase();
+        if (cnt > 1) ans += cnt;
     }
     return LZString.compressToBase64(ans);
 }
 
 utils.prototype._encodeRoute_id2number = function (id) {
     var number = core.maps.getNumberById(id);
-    return number==0?id:number;
+    return number == 0 ? id : number;
 }
 
 utils.prototype._encodeRoute_encodeOne = function (t) {
-    if (t.indexOf('item:')==0)
-        return "I"+this._encodeRoute_id2number(t.substring(5))+":";
-    else if (t.indexOf('unEquip:')==0)
-        return "u"+t.substring(8);
-    else if (t.indexOf('equip:')==0)
-        return "e"+this._encodeRoute_id2number(t.substring(6))+":";
-    else if (t.indexOf('fly:')==0)
-        return "F"+t.substring(4)+":";
-    else if (t.indexOf('choices:')==0)
-        return "C"+t.substring(8);
-    else if (t.indexOf('shop:')==0)
-        return "S"+t.substring(5);
-    else if (t=='turn')
+    if (t.indexOf('item:') == 0)
+        return "I" + this._encodeRoute_id2number(t.substring(5)) + ":";
+    else if (t.indexOf('unEquip:') == 0)
+        return "u" + t.substring(8);
+    else if (t.indexOf('equip:') == 0)
+        return "e" + this._encodeRoute_id2number(t.substring(6)) + ":";
+    else if (t.indexOf('fly:') == 0)
+        return "F" + t.substring(4) + ":";
+    else if (t.indexOf('choices:') == 0)
+        return "C" + t.substring(8);
+    else if (t.indexOf('shop:') == 0)
+        return "S" + t.substring(5);
+    else if (t == 'turn')
         return 'T';
-    else if (t.indexOf('turn:')==0)
-        return "t"+t.substring(5).substring(0,1).toUpperCase()+":";
-    else if (t=='getNext')
+    else if (t.indexOf('turn:') == 0)
+        return "t" + t.substring(5).substring(0, 1).toUpperCase() + ":";
+    else if (t == 'getNext')
         return 'G';
-    else if (t.indexOf('input:')==0)
-        return "P"+t.substring(6);
-    else if (t.indexOf('input2:')==0)
-        return "Q"+t.substring(7)+":";
-    else if (t=='no')
+    else if (t.indexOf('input:') == 0)
+        return "P" + t.substring(6);
+    else if (t.indexOf('input2:') == 0)
+        return "Q" + t.substring(7) + ":";
+    else if (t == 'no')
         return 'N';
-    else if (t.indexOf('move:')==0)
-        return "M"+t.substring(5);
-    else if (t.indexOf('key:')==0)
-        return 'K'+t.substring(4);
-    else if (t.indexOf('random:')==0)
-        return 'X'+t.substring(7);
+    else if (t.indexOf('move:') == 0)
+        return "M" + t.substring(5);
+    else if (t.indexOf('key:') == 0)
+        return 'K' + t.substring(4);
+    else if (t.indexOf('random:') == 0)
+        return 'X' + t.substring(7);
     return '';
 }
 
@@ -476,7 +480,8 @@ utils.prototype.decodeRoute = function (route) {
         if (core.isset(v) && /^[a-zA-Z0-9+\/=:]*$/.test(v)) {
             route = v;
         }
-    } catch (e) {}
+    } catch (e) {
+    }
 
     var decodeObj = {route: route, index: 0, ans: []};
     while (decodeObj.index < decodeObj.route.length) {
@@ -486,18 +491,18 @@ utils.prototype.decodeRoute = function (route) {
 }
 
 utils.prototype._decodeRoute_getNumber = function (decodeObj, noparse) {
-    var num="";
-    while (decodeObj.index<decodeObj.route.length && !isNaN(decodeObj.route.charAt(decodeObj.index))) {
-        num+=decodeObj.route.charAt(decodeObj.index++);
+    var num = "";
+    while (decodeObj.index < decodeObj.route.length && !isNaN(decodeObj.route.charAt(decodeObj.index))) {
+        num += decodeObj.route.charAt(decodeObj.index++);
     }
-    if (num.length==0) num="1";
-    return core.isset(noparse)?num:parseInt(num);
+    if (num.length == 0) num = "1";
+    return core.isset(noparse) ? num : parseInt(num);
 }
 
 utils.prototype._decodeRoute_getString = function (decodeObj) {
-    var str="";
-    while (decodeObj.index<decodeObj.route.length && decodeObj.route.charAt(decodeObj.index)!=':') {
-        str+=decodeObj.route.charAt(decodeObj.index++);
+    var str = "";
+    while (decodeObj.index < decodeObj.route.length && decodeObj.route.charAt(decodeObj.index) != ':') {
+        str += decodeObj.route.charAt(decodeObj.index++);
     }
     decodeObj.index++;
     return str;
@@ -512,34 +517,70 @@ utils.prototype._decodeRoute_number2id = function (number) {
 }
 
 utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
-    var nxt=(c=='I'|| c=='e' ||c=='F'||c=='S'||c=='Q'||c=='t')?
-        this._decodeRoute_getString(decodeObj):this._decodeRoute_getNumber(decodeObj);
+    var nxt = (c == 'I' || c == 'e' || c == 'F' || c == 'S' || c == 'Q' || c == 't') ?
+        this._decodeRoute_getString(decodeObj) : this._decodeRoute_getNumber(decodeObj);
 
     var mp = {"U": "up", "D": "down", "L": "left", "R": "right"};
 
     switch (c) {
-        case "U": case "D": case "L": case "R": for (var i=0;i<nxt;i++) decodeObj.ans.push(mp[c]); break;
-        case "I": decodeObj.ans.push("item:"+this._decodeRoute_number2id(nxt)); break;
-        case "u": decodeObj.ans.push("unEquip:"+nxt); break;
-        case "e": decodeObj.ans.push("equip:"+this._decodeRoute_number2id(nxt)); break;
-        case "F": decodeObj.ans.push("fly:"+nxt); break;
-        case "C": decodeObj.ans.push("choices:"+nxt); break;
-        case "S": decodeObj.ans.push("shop:"+nxt+":"+this._decodeRoute_getNumber(decodeObj, true)); break;
-        case "T": decodeObj.ans.push("turn"); break;
-        case "t": decodeObj.ans.push("turn:"+mp[nxt]); break;
-        case "G": decodeObj.ans.push("getNext"); break;
-        case "P": decodeObj.ans.push("input:"+nxt); break;
-        case "Q": decodeObj.ans.push("input2:"+nxt); break;
-        case "N": decodeObj.ans.push("no"); break;
-        case "M": ++decodeObj.index; decodeObj.ans.push("move:"+nxt+":"+this._decodeRoute_getNumber(decodeObj)); break;
-        case "K": decodeObj.ans.push("key:"+nxt); break;
-        case "X": decodeObj.ans.push("random:"+nxt); break;
+        case "U":
+        case "D":
+        case "L":
+        case "R":
+            for (var i = 0; i < nxt; i++) decodeObj.ans.push(mp[c]);
+            break;
+        case "I":
+            decodeObj.ans.push("item:" + this._decodeRoute_number2id(nxt));
+            break;
+        case "u":
+            decodeObj.ans.push("unEquip:" + nxt);
+            break;
+        case "e":
+            decodeObj.ans.push("equip:" + this._decodeRoute_number2id(nxt));
+            break;
+        case "F":
+            decodeObj.ans.push("fly:" + nxt);
+            break;
+        case "C":
+            decodeObj.ans.push("choices:" + nxt);
+            break;
+        case "S":
+            decodeObj.ans.push("shop:" + nxt + ":" + this._decodeRoute_getNumber(decodeObj, true));
+            break;
+        case "T":
+            decodeObj.ans.push("turn");
+            break;
+        case "t":
+            decodeObj.ans.push("turn:" + mp[nxt]);
+            break;
+        case "G":
+            decodeObj.ans.push("getNext");
+            break;
+        case "P":
+            decodeObj.ans.push("input:" + nxt);
+            break;
+        case "Q":
+            decodeObj.ans.push("input2:" + nxt);
+            break;
+        case "N":
+            decodeObj.ans.push("no");
+            break;
+        case "M":
+            ++decodeObj.index;
+            decodeObj.ans.push("move:" + nxt + ":" + this._decodeRoute_getNumber(decodeObj));
+            break;
+        case "K":
+            decodeObj.ans.push("key:" + nxt);
+            break;
+        case "X":
+            decodeObj.ans.push("random:" + nxt);
+            break;
     }
 }
 
 ////// 判断某对象是否不为undefined也不会null //////
 utils.prototype.isset = function (val) {
-    if (val == undefined || val == null || (typeof val=='number' && isNaN(val))) {
+    if (val == undefined || val == null || (typeof val == 'number' && isNaN(val))) {
         return false;
     }
     return true
@@ -547,33 +588,33 @@ utils.prototype.isset = function (val) {
 
 ////// 获得子数组 //////
 utils.prototype.subarray = function (a, b) {
-    if (!core.isset(a) || !core.isset(b) || !(a instanceof Array) || !(b instanceof Array) || a.length<b.length)
+    if (!core.isset(a) || !core.isset(b) || !(a instanceof Array) || !(b instanceof Array) || a.length < b.length)
         return null;
-    var na = core.clone(a), nb=core.clone(b);
-    while (nb.length>0) {
+    var na = core.clone(a), nb = core.clone(b);
+    while (nb.length > 0) {
         if (na.shift() != nb.shift()) return null;
     }
     return na;
 }
 
 utils.prototype.inArray = function (array, element) {
-    return this.isset(array) && (array instanceof Array) && array.indexOf(element)>=0;
+    return this.isset(array) && (array instanceof Array) && array.indexOf(element) >= 0;
 }
 
 utils.prototype.clamp = function (x, a, b) {
-    var min=Math.min(a, b), max=Math.max(a, b);
-    return Math.min(Math.max(x||0, min), max);
+    var min = Math.min(a, b), max = Math.max(a, b);
+    return Math.min(Math.max(x || 0, min), max);
 }
 
 utils.prototype.getCookie = function (name) {
     var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-	return match?match[2]:null;
+    return match ? match[2] : null;
 }
 
 utils.prototype.expandMoveSteps = function (steps) {
-    var moveSteps=[];
+    var moveSteps = [];
     steps.forEach(function (e) {
-        if (typeof e=="string") {
+        if (typeof e == "string") {
             moveSteps.push(e);
         }
         else {
@@ -581,7 +622,7 @@ utils.prototype.expandMoveSteps = function (steps) {
                 moveSteps.push(e.direction)
             }
             else {
-                for (var i=0;i<e.value;i++) {
+                for (var i = 0; i < e.value; i++) {
                     moveSteps.push(e.direction);
                 }
             }
@@ -595,10 +636,10 @@ utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     if (typeof value == 'number') value = this.formatBigNumber(value);
     // 判定是否斜体
     var italic = /^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(value);
-    var style = 'font-style: ' + (italic?'italic':'normal') + '; ';
+    var style = 'font-style: ' + (italic ? 'italic' : 'normal') + '; ';
     // 判定是否需要缩放
     var length = this.strlen(value) || 1;
-    style += 'font-size: ' + Math.min(1, 7/length) + 'em; ';
+    style += 'font-size: ' + Math.min(1, 7 / length) + 'em; ';
     if (core.isset(css)) style += css;
     core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'>" + value + "</span>";
 }
@@ -620,7 +661,7 @@ utils.prototype.encodeBase64 = function (str) {
 
 ////// Base64解密 //////
 utils.prototype.decodeBase64 = function (str) {
-    return decodeURIComponent(atob(str).split('').map(function(c) {
+    return decodeURIComponent(atob(str).split('').map(function (c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
 }
@@ -628,19 +669,19 @@ utils.prototype.decodeBase64 = function (str) {
 ////// 任意进制转换 //////
 utils.prototype.convertBase = function (str, fromBase, toBase) {
     var map = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ~`!@#$%^&*()_-+={}[]\\|:;<>,.?/";
-    if (fromBase==toBase) return str;
-    var len = str.length, ans="";
+    if (fromBase == toBase) return str;
+    var len = str.length, ans = "";
     var t = [];
-    for (var i=0;i<len;i++) t[i]=map.indexOf(str.charAt(i));
-    t[len]=0;
-    while (len>0) {
-        for (var i=len; i>=1; i--) {
-            t[i-1]+=t[i]%toBase*fromBase;
-            t[i]=parseInt(t[i]/toBase);
+    for (var i = 0; i < len; i++) t[i] = map.indexOf(str.charAt(i));
+    t[len] = 0;
+    while (len > 0) {
+        for (var i = len; i >= 1; i--) {
+            t[i - 1] += t[i] % toBase * fromBase;
+            t[i] = parseInt(t[i] / toBase);
         }
-        ans+=map.charAt(t[0]%toBase);
-        t[0]=parseInt(t[0]/toBase);
-        while (len>0 && t[len-1]==0) len--;
+        ans += map.charAt(t[0] % toBase);
+        t[0] = parseInt(t[0] / toBase);
+        while (len > 0 && t[len - 1] == 0) len--;
     }
     return ans;
 }
@@ -649,21 +690,21 @@ utils.prototype.rand = function (num) {
     var rand = core.getFlag('__rand__');
     rand = this.__next_rand(rand);
     core.setFlag('__rand__', rand);
-    var ans = rand/2147483647;
-    if (core.isset(num) && num>0)
-        return Math.floor(ans*num);
+    var ans = rand / 2147483647;
+    if (core.isset(num) && num > 0)
+        return Math.floor(ans * num);
     return ans;
 }
 
 ////// 生成随机数（录像方法） //////
 utils.prototype.rand2 = function (num) {
-    num = num||2147483648;
+    num = num || 2147483648;
 
     var value;
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
-        if (action.indexOf("random:")==0 ) {
-            value=parseInt(action.substring(7));
+        if (action.indexOf("random:") == 0) {
+            value = parseInt(action.substring(7));
         }
         else {
             core.stopReplay();
@@ -672,14 +713,14 @@ utils.prototype.rand2 = function (num) {
         }
     }
     else {
-        value = Math.floor(Math.random()*num);
+        value = Math.floor(Math.random() * num);
     }
-    core.status.route.push("random:"+value);
+    core.status.route.push("random:" + value);
     return value;
 }
 
 utils.prototype.__init_seed = function () {
-    var rand = new Date().getTime()%34834795 + 3534;
+    var rand = new Date().getTime() % 34834795 + 3534;
     rand = this.__next_rand(rand);
     rand = this.__next_rand(rand);
     rand = this.__next_rand(rand);
@@ -688,8 +729,8 @@ utils.prototype.__init_seed = function () {
 }
 
 utils.prototype.__next_rand = function (_rand) {
-    _rand=(_rand%127773)*16807-~~(_rand/127773)*2836;
-    _rand+=_rand<0?2147483647:0;
+    _rand = (_rand % 127773) * 16807 - ~~(_rand / 127773) * 2836;
+    _rand += _rand < 0 ? 2147483647 : 0;
     return _rand;
 }
 
@@ -712,24 +753,24 @@ utils.prototype.readFile = function (success, error, readType) {
     }
 
     // Step 1: 如果不支持FileReader，直接不支持
-    if (core.platform.fileReader==null) {
+    if (core.platform.fileReader == null) {
         alert("当前浏览器不支持FileReader！");
         if (core.isset(error)) error();
         return;
     }
 
-    if (core.platform.fileInput==null) {
+    if (core.platform.fileInput == null) {
         core.platform.fileInput = document.createElement("input");
         core.platform.fileInput.style.opacity = 0;
         core.platform.fileInput.type = 'file';
         core.platform.fileInput.onchange = function () {
             var files = core.platform.fileInput.files;
-            if (files.length==0) {
+            if (files.length == 0) {
                 if (core.isset(core.platform.errorCallback))
                     core.platform.errorCallback();
                 return;
             }
-            if(!readType)core.platform.fileReader.readAsText(core.platform.fileInput.files[0]);
+            if (!readType) core.platform.fileReader.readAsText(core.platform.fileInput.files[0]);
             else core.platform.fileReader.readAsDataURL(core.platform.fileInput.files[0]);
             core.platform.fileInput.value = '';
         }
@@ -740,14 +781,14 @@ utils.prototype.readFile = function (success, error, readType) {
 
 ////// 读取文件完毕 //////
 utils.prototype.readFileContent = function (content) {
-    var obj=null;
-    if(content.slice(0,4)==='data'){
+    var obj = null;
+    if (content.slice(0, 4) === 'data') {
         if (core.isset(core.platform.successCallback))
             core.platform.successCallback(content);
         return;
     }
     try {
-        obj=JSON.parse(content);
+        obj = JSON.parse(content);
         if (core.isset(obj)) {
             if (core.isset(core.platform.successCallback))
                 core.platform.successCallback(obj);
@@ -807,14 +848,14 @@ utils.prototype.download = function (filename, content) {
         alert("你当前使用的是Safari浏览器，不支持直接下载文件。\n即将打开一个新窗口为应下载内容，请自行全选复制然后创建空白文件并粘贴。");
         var blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
         var href = window.URL.createObjectURL(blob);
-        var opened=window.open(href, "_blank");
+        var opened = window.open(href, "_blank");
         window.URL.revokeObjectURL(href);
         return;
     }
 
     // Step 4: 下载
     var blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
-    if(window.navigator.msSaveOrOpenBlob) {
+    if (window.navigator.msSaveOrOpenBlob) {
         window.navigator.msSaveBlob(blob, filename);
     }
     else {
@@ -868,7 +909,7 @@ utils.prototype.copy = function (data) {
 ////// 动画显示某对象 //////
 utils.prototype.show = function (obj, speed, callback) {
     obj.style.display = 'block';
-    if (!core.isset(speed) && main.mode!='play') {
+    if (!core.isset(speed) && main.mode != 'play') {
         obj.style.opacity = 1;
         if (core.isset(callback)) callback();
         return;
@@ -889,7 +930,7 @@ utils.prototype.show = function (obj, speed, callback) {
 
 ////// 动画使某对象消失 //////
 utils.prototype.hide = function (obj, speed, callback) {
-    if (!core.isset(speed) || main.mode!='play'){
+    if (!core.isset(speed) || main.mode != 'play') {
         obj.style.display = 'none';
         if (core.isset(callback)) callback();
         return;
@@ -918,16 +959,16 @@ utils.prototype.encodeCanvas = function (ctx) {
     ctx.imageSmoothingEnabled = false;
 
     var imgData = ctx.getImageData(0, 0, width, height);
-    for (var i=0;i<imgData.data.length;i+=4) {
-        list.push(Math.sign(imgData.data[i+3]));
+    for (var i = 0; i < imgData.data.length; i += 4) {
+        list.push(Math.sign(imgData.data[i + 3]));
     }
     // compress 01 to array
     var prev = 0, cnt = 0, arr = [];
-    for (var i=0;i<list.length;i++) {
-        if (list[i]!=prev) {
+    for (var i = 0; i < list.length; i++) {
+        if (list[i] != prev) {
             arr.push(cnt);
-            prev=list[i];
-            cnt=0;
+            prev = list[i];
+            cnt = 0;
         }
         cnt++;
     }
@@ -939,24 +980,24 @@ utils.prototype.encodeCanvas = function (ctx) {
 utils.prototype.decodeCanvas = function (arr, width, height) {
     // 清空tempCanvas
     var tempCanvas = core.bigmap.tempCanvas;
-    tempCanvas.canvas.width=width;
-    tempCanvas.canvas.height=height;
+    tempCanvas.canvas.width = width;
+    tempCanvas.canvas.height = height;
     tempCanvas.clearRect(0, 0, width, height);
 
     if (!core.isset(arr)) return null;
     // to byte array
     var curr = 0, list = [];
     arr.forEach(function (x) {
-        for (var i=0;i<x;i++) list.push(curr);
-        curr = 1-curr;
+        for (var i = 0; i < x; i++) list.push(curr);
+        curr = 1 - curr;
     })
 
     var imgData = tempCanvas.getImageData(0, 0, width, height);
-    for (var i=0;i<imgData.data.length;i+=4) {
-        var index = i/4;
+    for (var i = 0; i < imgData.data.length; i += 4) {
+        var index = i / 4;
         if (list[index]) {
-            imgData.data[i]=255;
-            imgData.data[i+3]=255;
+            imgData.data[i] = 255;
+            imgData.data[i + 3] = 255;
         }
     }
     tempCanvas.putImageData(imgData, 0, 0);
@@ -967,9 +1008,9 @@ utils.prototype.consoleOpened = function () {
     if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized)
         return true;
     var threshold = 160;
-    var zoom = Math.min(window.outerWidth/window.innerWidth, window.outerHeight/window.innerHeight);
-    return window.outerWidth - zoom*window.innerWidth > threshold
-        || window.outerHeight - zoom*window.innerHeight > threshold;
+    var zoom = Math.min(window.outerWidth / window.innerWidth, window.outerHeight / window.innerHeight);
+    return window.outerWidth - zoom * window.innerWidth > threshold
+        || window.outerHeight - zoom * window.innerHeight > threshold;
 }
 
 utils.prototype.hashCode = function (obj) {
@@ -977,8 +1018,8 @@ utils.prototype.hashCode = function (obj) {
         var hash = 0, i, chr;
         if (obj.length === 0) return hash;
         for (i = 0; i < obj.length; i++) {
-            chr   = obj.charCodeAt(i);
-            hash  = ((hash << 5) - hash) + chr;
+            chr = obj.charCodeAt(i);
+            hash = ((hash << 5) - hash) + chr;
             hash |= 0;
         }
         return hash;
@@ -1011,20 +1052,20 @@ utils.prototype.same = function (a, b) {
 
 utils.prototype._export = function (floorIds) {
     if (!core.isset(floorIds)) floorIds = [core.status.floorId];
-    else if (floorIds=='all') floorIds = core.clone(core.floorIds);
+    else if (floorIds == 'all') floorIds = core.clone(core.floorIds);
     else if (typeof floorIds == 'string') floorIds = [floorIds];
 
     var monsterMap = {};
 
     // map
-    var content = floorIds.length+"\n13 13\n\n";
+    var content = floorIds.length + "\n13 13\n\n";
     floorIds.forEach(function (floorId) {
         var arr = core.maps.getMapArray(core.status.maps[floorId].blocks, 13, 13);
         content += arr.map(function (x) {
             // check monster
             x.forEach(function (t) {
                 var block = core.maps.initBlock(null, null, t);
-                if (block.event.cls.indexOf("enemy")==0) {
+                if (block.event.cls.indexOf("enemy") == 0) {
                     monsterMap[t] = block.event.id;
                 }
             })
@@ -1034,7 +1075,9 @@ utils.prototype._export = function (floorIds) {
 
     // values
     content += ["redJewel", "blueJewel", "greenJewel", "redPotion", "bluePotion",
-        "yellowPotion", "greenPotion", "sword1", "shield1"].map(function (x) {return core.values[x]}).join(" ") + "\n\n";
+        "yellowPotion", "greenPotion", "sword1", "shield1"].map(function (x) {
+        return core.values[x]
+    }).join(" ") + "\n\n";
 
     // monster
     content += Object.keys(monsterMap).length + "\n";
@@ -1059,26 +1102,26 @@ utils.prototype.http = function (type, url, formData, success, error, mimeType, 
         xhr.overrideMimeType(mimeType);
     if (core.isset(responseType))
         xhr.responseType = responseType;
-    xhr.onload = function(e) {
-        if (xhr.status==200) {
+    xhr.onload = function (e) {
+        if (xhr.status == 200) {
             if (core.isset(success)) {
                 success(xhr.response);
             }
         }
         else {
             if (core.isset(error))
-                error("HTTP "+xhr.status);
+                error("HTTP " + xhr.status);
         }
     };
     xhr.onabort = function () {
         if (core.isset(error))
             error("Abort");
     }
-    xhr.ontimeout = function() {
+    xhr.ontimeout = function () {
         if (core.isset(error))
             error("Timeout");
     }
-    xhr.onerror = function() {
+    xhr.onerror = function () {
         if (core.isset(error))
             error("Error on Connection");
     }
@@ -1096,8 +1139,8 @@ function lzw_encode(s) {
     var currChar;
     var phrase = data[0];
     var code = 256;
-    for (var i=1; i<data.length; i++) {
-        currChar=data[i];
+    for (var i = 1; i < data.length; i++) {
+        currChar = data[i];
         if (dict[phrase + currChar] != null) {
             phrase += currChar;
         }
@@ -1105,11 +1148,11 @@ function lzw_encode(s) {
             out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
             dict[phrase + currChar] = code;
             code++;
-            phrase=currChar;
+            phrase = currChar;
         }
     }
     out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
-    for (var i=0; i<out.length; i++) {
+    for (var i = 0; i < out.length; i++) {
         out[i] = String.fromCharCode(out[i]);
     }
     return out.join("");
@@ -1124,7 +1167,7 @@ function lzw_decode(s) {
     var out = [currChar];
     var code = 256;
     var phrase;
-    for (var i=1; i<data.length; i++) {
+    for (var i = 1; i < data.length; i++) {
         var currCode = data[i].charCodeAt(0);
         if (currCode < 256) {
             phrase = data[i];

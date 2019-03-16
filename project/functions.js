@@ -864,7 +864,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			break;
 		case 51: // 快捷键3: 飞
 			if (core.hasItem('centerFly')) {
-				core.events.tryUseItem('centerFly');
+				core.ui.drawCenterFly();
 			}
 			break;
 		case 52: // 快捷键4：破冰/冰冻/地震/上下楼器/... 其他道具依次判断

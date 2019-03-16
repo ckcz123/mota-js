@@ -172,9 +172,9 @@ function core() {
         'textAttribute': {
             'position': "center",
             "offset": 0,
-            "title": [255,215,0,1],
-            "background": [0,0,0,0.85],
-            "text": [255,255,255,1],
+            "title": [255, 215, 0, 1],
+            "background": [0, 0, 0, 0.85],
+            "text": [255, 255, 255, 1],
             "titlefont": 22,
             "textfont": 16,
             "bold": false,
@@ -242,7 +242,7 @@ core.prototype.init = function (coreData, callback) {
     core.material.enemys = core.enemys.getEnemys();
     core.material.icons = core.icons.getIcons();
 
-    core.platform.isOnline = location.protocol.indexOf("http")==0;
+    core.platform.isOnline = location.protocol.indexOf("http") == 0;
     if (core.platform.isOnline) {
         window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext;
         try {
@@ -256,10 +256,10 @@ core.prototype.init = function (coreData, callback) {
     }
 
     ["Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod"].forEach(function (t) {
-        if (navigator.userAgent.indexOf(t)>=0) {
-            if (t=='iPhone' || t=='iPad' || t=='iPod') core.platform.isIOS = true;
-            if (t=='Android') core.platform.isAndroid=true;
-            core.platform.isPC=false;
+        if (navigator.userAgent.indexOf(t) >= 0) {
+            if (t == 'iPhone' || t == 'iPad' || t == 'iPod') core.platform.isIOS = true;
+            if (t == 'Android') core.platform.isAndroid = true;
+            core.platform.isPC = false;
         }
     });
 
@@ -270,8 +270,8 @@ core.prototype.init = function (coreData, callback) {
         core.platform.supportCopy = false;
     }
 
-    var chrome=/Chrome\/(\d+)\./i.exec(navigator.userAgent);
-    if (core.isset(chrome) && parseInt(chrome[1])>=50)
+    var chrome = /Chrome\/(\d+)\./i.exec(navigator.userAgent);
+    if (core.isset(chrome) && parseInt(chrome[1]) >= 50)
         core.platform.isChrome = true;
     core.platform.isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent);
     core.platform.isQQ = /QQ/i.test(navigator.userAgent);
@@ -279,26 +279,41 @@ core.prototype.init = function (coreData, callback) {
     core.platform.useLocalForage = core.getLocalStorage('useLocalForage', !core.platform.isIOS);
     if (core.platform.useLocalForage) {
         try {
-            core.setLocalForage("__test__", lzw_encode("__test__"), function() {
+            core.setLocalForage("__test__", lzw_encode("__test__"), function () {
                 try {
-                    core.getLocalForage("__test__", null, function(data) {
+                    core.getLocalForage("__test__", null, function (data) {
                         try {
-                            if (lzw_decode(data)!="__test__") {
+                            if (lzw_decode(data) != "__test__") {
                                 console.log("localForage unsupported!");
-                                core.platform.useLocalForage=false;
+                                core.platform.useLocalForage = false;
                             }
                             else {
                                 console.log("localForage supported!")
                                 core.removeLocalForage("__test__");
                             }
                         }
-                        catch (e) {main.log(e); core.platform.useLocalForage=false;}
-                    }, function(e) {main.log(e); core.platform.useLocalForage=false;})
+                        catch (e) {
+                            main.log(e);
+                            core.platform.useLocalForage = false;
+                        }
+                    }, function (e) {
+                        main.log(e);
+                        core.platform.useLocalForage = false;
+                    })
                 }
-                catch (e) {main.log(e); core.platform.useLocalForage=false;}
-            }, function(e) {main.log(e); core.platform.useLocalForage=false;})
+                catch (e) {
+                    main.log(e);
+                    core.platform.useLocalForage = false;
+                }
+            }, function (e) {
+                main.log(e);
+                core.platform.useLocalForage = false;
+            })
         }
-        catch (e) {main.log(e); core.platform.useLocalForage=false;}
+        catch (e) {
+            main.log(e);
+            core.platform.useLocalForage = false;
+        }
     }
 
     core.platform.extendKeyboard = core.getLocalStorage("extendKeyboard", false);
@@ -316,7 +331,7 @@ core.prototype.init = function (coreData, callback) {
 
     // 先从存储中读取BGM状态
     core.musicStatus.bgmStatus = core.getLocalStorage('bgmStatus', true);
-    if (!core.platform.isPC && (navigator.connection||{}).type!='wifi')
+    if (!core.platform.isPC && (navigator.connection || {}).type != 'wifi')
         core.musicStatus.bgmStatus = false;
     core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
 
@@ -336,7 +351,7 @@ core.prototype.init = function (coreData, callback) {
     core.animateFrame.weather.fog.src = "project/images/fog.png";
 
     core.material.images.keyboard = new Image();
-    core.material.images.keyboard.onerror  = function () {
+    core.material.images.keyboard.onerror = function () {
         core.material.images.keyboard = null;
     }
     core.material.images.keyboard.src = "project/images/keyboard.png";
@@ -351,14 +366,14 @@ core.prototype.init = function (coreData, callback) {
 
     core.loader._load(function () {
         // 设置勇士高度
-        core.material.icons.hero.height = core.material.images.hero.height/4;
+        core.material.icons.hero.height = core.material.images.hero.height / 4;
         // 行走图
         core.control.updateHeroIcon();
 
         core.initStatus.maps = core.maps.initMaps(core.floorIds);
         core.setRequestAnimationFrame();
 
-        if (main.mode=='play')
+        if (main.mode == 'play')
             core.events.initGame();
 
         if (core.isset(functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins)) {
@@ -396,13 +411,13 @@ core.prototype._forwardFunc = function (name, funcname) {
     }
 
     if (core[funcname]) {
-        console.error("ERROR: Cannot forward function "+funcname+" from "+name+"!");
+        console.error("ERROR: Cannot forward function " + funcname + " from " + name + "!");
         return;
     }
     var parameterInfo = /^\s*function\s*[\w_$]*\(([\w_,$\s]*)\)\s*\{/.exec(core[name][funcname].toString());
-    var parameters = (parameterInfo==null?"":parameterInfo[1]).replace(/\s*/g, '').replace(/,/g, ', ');
+    var parameters = (parameterInfo == null ? "" : parameterInfo[1]).replace(/\s*/g, '').replace(/,/g, ', ');
     // core[funcname] = new Function(parameters, "return core."+name+"."+funcname+"("+parameters+");");
-    eval("core."+funcname+" = function ("+parameters+") {\n\treturn core."+name+"."+funcname+"("+parameters+");\n}");
+    eval("core." + funcname + " = function (" + parameters + ") {\n\treturn core." + name + "." + funcname + "(" + parameters + ");\n}");
 }
 
 /**

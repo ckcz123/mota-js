@@ -707,7 +707,7 @@ actions.prototype._sys_keyDownCtrl = function () {
         if (core.isset(core.timeout.sleepTimeout) && Object.keys(core.animateFrame.asyncId).length==0) {
             clearTimeout(core.timeout.sleepTimeout);
             core.timeout.sleepTimeout = null;
-            core.events.doAction();
+            core.doAction();
         }
         return true;
     }
@@ -742,7 +742,7 @@ actions.prototype._sys_longClick_lockControl = function (x, y) {
         if (core.isset(core.timeout.sleepTimeout) && Object.keys(core.animateFrame.asyncId).length == 0) {
             clearTimeout(core.timeout.sleepTimeout);
             core.timeout.sleepTimeout = null;
-            core.events.doAction();
+            core.doAction();
             return true;
         }
     }

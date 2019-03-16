@@ -61,7 +61,7 @@ utils.prototype.replaceText = function (text, need, times) {
 
 ////// 计算表达式的值 //////
 utils.prototype.calValue = function (value, prefix, need, times) {
-    if (!core.isset(value)) return value;
+    if (!core.isset(value)) return null;
     if (typeof value === 'string') {
         value = value.replace(/status:([\w\d_]+)/g, "core.getStatus('$1')");
         value = value.replace(/item:([\w\d_]+)/g, "core.itemCount('$1')");
@@ -77,7 +77,7 @@ utils.prototype.calValue = function (value, prefix, need, times) {
 
 ////// 字符串自动换行的分割 //////
 utils.prototype.splitLines = function (canvas, text, maxLength, font) {
-    if (core.isset(font)) core.setFont(canvas, font);
+    if (font) core.setFont(canvas, font);
 
     var contents = [];
     var last = 0;
@@ -94,7 +94,7 @@ utils.prototype.splitLines = function (canvas, text, maxLength, font) {
         else {
             var toAdd = text.substring(last, i + 1);
             var width = core.calWidth(canvas, toAdd);
-            if (core.isset(maxLength) && width > maxLength) {
+            if (maxLength && width > maxLength) {
                 contents.push(text.substring(last, i));
                 last = i;
             }
@@ -106,7 +106,7 @@ utils.prototype.splitLines = function (canvas, text, maxLength, font) {
 
 ////// 向某个数组前插入另一个数组或元素 //////
 utils.prototype.unshift = function (a, b) {
-    if (!(a instanceof Array) || !core.isset(b)) return;
+    if (!(a instanceof Array) || b == null) return;
     if (b instanceof Array) {
         core.clone(b).reverse().forEach(function (e) {
             a.unshift(e);
@@ -118,7 +118,7 @@ utils.prototype.unshift = function (a, b) {
 
 ////// 向某个数组后插入另一个数组或元素 //////
 utils.prototype.push = function (a, b) {
-    if (!(a instanceof Array) || !core.isset(b)) return;
+    if (!(a instanceof Array) || b == null) return;
     if (b instanceof Array) {
         core.clone(b).forEach(function (e) {
             a.push(e);
@@ -131,7 +131,7 @@ utils.prototype.push = function (a, b) {
 ////// 设置本地存储 //////
 utils.prototype.setLocalStorage = function (key, value) {
     try {
-        if (!core.isset(value)) {
+        if (value == null) {
             this.removeLocalStorage(key);
             return;
         }
@@ -166,15 +166,13 @@ utils.prototype.setLocalStorage = function (key, value) {
 utils.prototype.decompress = function (value) {
     try {
         var output = lzw_decode(value);
-        if (core.isset(output) && output.length > 0)
-            return JSON.parse(output);
+        if (output) return JSON.parse(output);
     }
     catch (e) {
     }
     try {
         var output = LZString.decompress(value);
-        if (core.isset(output) && output.length > 0)
-            return JSON.parse(output);
+        if (output) return JSON.parse(output);
     }
     catch (e) {
     }
@@ -204,15 +202,15 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
 
     if (!core.platform.useLocalForage) {
         if (this.setLocalStorage(key, value)) {
-            if (core.isset(successCallback)) successCallback();
+            if (successCallback) successCallback();
         }
         else {
-            if (core.isset(errorCallback)) errorCallback();
+            if (errorCallback) errorCallback();
         }
         return;
     }
 
-    if (!core.isset(value)) {
+    if (value == null) {
         this.removeLocalForage(key);
         return;
     }
@@ -222,13 +220,13 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
         return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
     }));
     localforage.setItem(core.firstData.name + "_" + key, compressed, function (err) {
-        if (core.isset(err)) {
-            if (core.isset(errorCallback)) errorCallback(err);
+        if (err) {
+            if (errorCallback) errorCallback(err);
         }
         else {
             if (key == 'autoSave') core.saves.ids[0] = true;
             else if (/^save\d+$/.test(key)) core.saves.ids[parseInt(key.substring(4))] = true;
-            if (core.isset(successCallback)) successCallback();
+            if (successCallback) successCallback();
         }
     });
 }
@@ -237,19 +235,17 @@ utils.prototype.getLocalForage = function (key, defaultValue, successCallback, e
 
     if (!core.platform.useLocalForage) {
         var value = this.getLocalStorage(key, defaultValue);
-        if (core.isset(successCallback)) {
-            successCallback(value);
-        }
+        if (successCallback) successCallback(value);
         return;
     }
 
     localforage.getItem(core.firstData.name + "_" + key, function (err, value) {
-        if (core.isset(err)) {
-            if (core.isset(errorCallback)) errorCallback(err);
+        if (err) {
+            if (errorCallback) errorCallback(err);
         }
         else {
-            if (!core.isset(successCallback)) return;
-            if (core.isset(value)) {
+            if (!successCallback) return;
+            if (value != null) {
                 var res = core.utils.decompress(value);
                 successCallback(res == null ? defaultValue : res);
                 return;
@@ -263,25 +259,25 @@ utils.prototype.removeLocalForage = function (key, successCallback, errorCallbac
 
     if (!core.platform.useLocalForage) {
         this.removeLocalStorage(key);
-        if (core.isset(successCallback)) successCallback();
+        if (successCallback) successCallback();
         return;
     }
 
     localforage.removeItem(core.firstData.name + "_" + key, function (err) {
-        if (core.isset(err)) {
-            if (core.isset(errorCallback)) errorCallback(err);
+        if (err) {
+            if (errorCallback) errorCallback(err);
         }
         else {
             if (key == 'autoSave') delete core.saves.ids[0];
             else if (/^save\d+$/.test(key)) delete core.saves.ids[parseInt(key.substring(4))];
-            if (core.isset(successCallback)) successCallback();
+            if (successCallback) successCallback();
         }
     })
 }
 
 ////// 深拷贝一个对象 //////
 utils.prototype.clone = function (data) {
-    if (!core.isset(data)) return data;
+    if (!core.isset(data)) return null;
     // date
     if (data instanceof Date) {
         var copy = new Date();
@@ -334,14 +330,14 @@ utils.prototype.cropImage = function (image, size) {
 
 ////// 格式化时间为字符串 //////
 utils.prototype.formatDate = function (date) {
-    if (!core.isset(date)) return "";
+    if (!date) date = new Date();
     return "" + date.getFullYear() + "-" + core.setTwoDigits(date.getMonth() + 1) + "-" + core.setTwoDigits(date.getDate()) + " "
         + core.setTwoDigits(date.getHours()) + ":" + core.setTwoDigits(date.getMinutes()) + ":" + core.setTwoDigits(date.getSeconds());
 }
 
 ////// 格式化时间为最简字符串 //////
 utils.prototype.formatDate2 = function (date) {
-    if (!core.isset(date)) return "";
+    if (!date) date = new Date();
     return "" + date.getFullYear() + core.setTwoDigits(date.getMonth() + 1) + core.setTwoDigits(date.getDate())
         + core.setTwoDigits(date.getHours()) + core.setTwoDigits(date.getMinutes()) + core.setTwoDigits(date.getSeconds());
 }
@@ -395,7 +391,7 @@ utils.prototype.arrayToRGB = function (color) {
 }
 
 utils.prototype.arrayToRGBA = function (color) {
-    if (!this.isset(color[3])) color[3] = 1;
+    if (color[3] == null) color[3] = 1;
     var nowR = this.clamp(parseInt(color[0]), 0, 255), nowG = this.clamp(parseInt(color[1]), 0, 255),
         nowB = this.clamp(parseInt(color[2]), 0, 255), nowA = this.clamp(parseFloat(color[3]), 0, 1);
     return "rgba(" + nowR + "," + nowG + "," + nowB + "," + nowA + ")";
@@ -472,12 +468,12 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
 
 ////// 解密路线 //////
 utils.prototype.decodeRoute = function (route) {
-    if (!core.isset(route)) return route;
+    if (!route) return route;
 
     // 解压缩
     try {
         var v = LZString.decompressFromBase64(route);
-        if (core.isset(v) && /^[a-zA-Z0-9+\/=:]*$/.test(v)) {
+        if (/^[a-zA-Z0-9+\/=:]*$/.test(v)) {
             route = v;
         }
     } catch (e) {
@@ -496,7 +492,7 @@ utils.prototype._decodeRoute_getNumber = function (decodeObj, noparse) {
         num += decodeObj.route.charAt(decodeObj.index++);
     }
     if (num.length == 0) num = "1";
-    return core.isset(noparse) ? num : parseInt(num);
+    return noparse ? num : parseInt(num);
 }
 
 utils.prototype._decodeRoute_getString = function (decodeObj) {
@@ -511,7 +507,7 @@ utils.prototype._decodeRoute_getString = function (decodeObj) {
 utils.prototype._decodeRoute_number2id = function (number) {
     if (/^\d+$/.test(number)) {
         var info = core.maps.blocksInfo[number];
-        if (core.isset(info)) return info.id;
+        if (info) return info.id;
     }
     return number;
 }
@@ -578,17 +574,14 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
     }
 }
 
-////// 判断某对象是否不为undefined也不会null //////
+////// 判断某对象是否不为null也不为NaN //////
 utils.prototype.isset = function (val) {
-    if (val == undefined || val == null || (typeof val == 'number' && isNaN(val))) {
-        return false;
-    }
-    return true
+    return val != null && !(typeof val == 'number' && isNaN(val));
 }
 
 ////// 获得子数组 //////
 utils.prototype.subarray = function (a, b) {
-    if (!core.isset(a) || !core.isset(b) || !(a instanceof Array) || !(b instanceof Array) || a.length < b.length)
+    if (!(a instanceof Array) || !(b instanceof Array) || a.length < b.length)
         return null;
     var na = core.clone(a), nb = core.clone(b);
     while (nb.length > 0) {
@@ -598,7 +591,7 @@ utils.prototype.subarray = function (a, b) {
 }
 
 utils.prototype.inArray = function (array, element) {
-    return this.isset(array) && (array instanceof Array) && array.indexOf(element) >= 0;
+    return (array instanceof Array) && array.indexOf(element) >= 0;
 }
 
 utils.prototype.clamp = function (x, a, b) {
@@ -618,7 +611,7 @@ utils.prototype.expandMoveSteps = function (steps) {
             moveSteps.push(e);
         }
         else {
-            if (!core.isset(e.value)) {
+            if (e.value == null) {
                 moveSteps.push(e.direction)
             }
             else {
@@ -640,7 +633,7 @@ utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     // 判定是否需要缩放
     var length = this.strlen(value) || 1;
     style += 'font-size: ' + Math.min(1, 7 / length) + 'em; ';
-    if (core.isset(css)) style += css;
+    if (css) style += css;
     core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'>" + value + "</span>";
 }
 
@@ -691,7 +684,7 @@ utils.prototype.rand = function (num) {
     rand = this.__next_rand(rand);
     core.setFlag('__rand__', rand);
     var ans = rand / 2147483647;
-    if (core.isset(num) && num > 0)
+    if (num && num > 0)
         return Math.floor(ans * num);
     return ans;
 }
@@ -740,7 +733,7 @@ utils.prototype.readFile = function (success, error, readType) {
     core.platform.successCallback = success;
     core.platform.errorCallback = error;
 
-    if (core.isset(window.jsinterface)) {
+    if (window.jsinterface) {
         window.jsinterface.readFile();
         return;
     }
@@ -748,14 +741,14 @@ utils.prototype.readFile = function (success, error, readType) {
     // step 0: 不为http/https，直接不支持
     if (!core.platform.isOnline) {
         alert("离线状态下不支持文件读取！");
-        if (core.isset(error)) error();
+        if (error) error();
         return;
     }
 
     // Step 1: 如果不支持FileReader，直接不支持
     if (core.platform.fileReader == null) {
         alert("当前浏览器不支持FileReader！");
-        if (core.isset(error)) error();
+        if (error) error();
         return;
     }
 
@@ -766,7 +759,7 @@ utils.prototype.readFile = function (success, error, readType) {
         core.platform.fileInput.onchange = function () {
             var files = core.platform.fileInput.files;
             if (files.length == 0) {
-                if (core.isset(core.platform.errorCallback))
+                if (core.platform.errorCallback)
                     core.platform.errorCallback();
                 return;
             }
@@ -783,14 +776,14 @@ utils.prototype.readFile = function (success, error, readType) {
 utils.prototype.readFileContent = function (content) {
     var obj = null;
     if (content.slice(0, 4) === 'data') {
-        if (core.isset(core.platform.successCallback))
+        if (core.platform.successCallback)
             core.platform.successCallback(content);
         return;
     }
     try {
         obj = JSON.parse(content);
-        if (core.isset(obj)) {
-            if (core.isset(core.platform.successCallback))
+        if (obj) {
+            if (core.platform.successCallback)
                 core.platform.successCallback(obj);
             return;
         }
@@ -801,14 +794,14 @@ utils.prototype.readFileContent = function (content) {
     }
     alert("不是有效的JSON文件！");
 
-    if (core.isset(core.platform.errorCallback))
+    if (core.platform.errorCallback)
         core.platform.errorCallback();
 }
 
 ////// 下载文件到本地 //////
 utils.prototype.download = function (filename, content) {
 
-    if (core.isset(window.jsinterface)) {
+    if (window.jsinterface) {
         window.jsinterface.download(filename, content);
         return;
     }
@@ -873,8 +866,8 @@ utils.prototype.download = function (filename, content) {
 ////// 复制一段内容到剪切板 //////
 utils.prototype.copy = function (data) {
 
-    if (core.isset(window.jsinterface)) {
-        window.jsinterface.copy(filename, content);
+    if (window.jsinterface) {
+        window.jsinterface.copy(data);
         return true;
     }
 
@@ -909,9 +902,9 @@ utils.prototype.copy = function (data) {
 ////// 动画显示某对象 //////
 utils.prototype.show = function (obj, speed, callback) {
     obj.style.display = 'block';
-    if (!core.isset(speed) && main.mode != 'play') {
+    if (!speed && main.mode != 'play') {
         obj.style.opacity = 1;
-        if (core.isset(callback)) callback();
+        if (callback) callback();
         return;
     }
     obj.style.opacity = 0;
@@ -921,18 +914,16 @@ utils.prototype.show = function (obj, speed, callback) {
         obj.style.opacity = opacityVal;
         if (opacityVal > 1) {
             clearInterval(showAnimate);
-            if (core.isset(callback)) {
-                callback();
-            }
+            if (callback) callback();
         }
     }, speed);
 }
 
 ////// 动画使某对象消失 //////
 utils.prototype.hide = function (obj, speed, callback) {
-    if (!core.isset(speed) || main.mode != 'play') {
+    if (!speed || main.mode != 'play') {
         obj.style.display = 'none';
-        if (core.isset(callback)) callback();
+        if (callback) callback();
         return;
     }
     obj.style.opacity = 1;
@@ -943,9 +934,7 @@ utils.prototype.hide = function (obj, speed, callback) {
         if (opacityVal < 0) {
             obj.style.display = 'none';
             clearInterval(hideAnimate);
-            if (core.isset(callback)) {
-                callback();
-            }
+            if (callback) callback();
         }
     }, speed);
 }
@@ -984,7 +973,7 @@ utils.prototype.decodeCanvas = function (arr, width, height) {
     tempCanvas.canvas.height = height;
     tempCanvas.clearRect(0, 0, width, height);
 
-    if (!core.isset(arr)) return null;
+    if (!arr) return null;
     // to byte array
     var curr = 0, list = [];
     arr.forEach(function (x) {
@@ -1028,8 +1017,8 @@ utils.prototype.hashCode = function (obj) {
 }
 
 utils.prototype.same = function (a, b) {
-    if (!core.isset(a) && !core.isset(b)) return true;
-    if (!core.isset(a) || !core.isset(b)) return false;
+    if (a == null && b == null) return true;
+    if (a == null || b == null) return false;
     if (a === b) return true;
     if (a instanceof Array && b instanceof Array) {
         if (a.length != b.length) return false;
@@ -1051,14 +1040,14 @@ utils.prototype.same = function (a, b) {
 }
 
 utils.prototype._export = function (floorIds) {
-    if (!core.isset(floorIds)) floorIds = [core.status.floorId];
+    if (!floorIds) floorIds = [core.status.floorId];
     else if (floorIds == 'all') floorIds = core.clone(core.floorIds);
     else if (typeof floorIds == 'string') floorIds = [floorIds];
 
     var monsterMap = {};
 
     // map
-    var content = floorIds.length + "\n13 13\n\n";
+    var content = floorIds.length + "\n" + core.__SIZE__ + " " + core.__SIZE__ + "\n\n";
     floorIds.forEach(function (floorId) {
         var arr = core.maps.getMapArray(core.status.maps[floorId].blocks, 13, 13);
         content += arr.map(function (x) {
@@ -1098,34 +1087,26 @@ utils.prototype._export = function (floorIds) {
 utils.prototype.http = function (type, url, formData, success, error, mimeType, responseType) {
     var xhr = new XMLHttpRequest();
     xhr.open(type, url, true);
-    if (core.isset(mimeType))
-        xhr.overrideMimeType(mimeType);
-    if (core.isset(responseType))
-        xhr.responseType = responseType;
+    if (mimeType) xhr.overrideMimeType(mimeType);
+    if (responseType) xhr.responseType = responseType;
     xhr.onload = function (e) {
         if (xhr.status == 200) {
-            if (core.isset(success)) {
-                success(xhr.response);
-            }
+            if (success) success(xhr.response);
         }
         else {
-            if (core.isset(error))
-                error("HTTP " + xhr.status);
+            if (error) error("HTTP " + xhr.status);
         }
     };
     xhr.onabort = function () {
-        if (core.isset(error))
-            error("Abort");
+        if (error) error("Abort");
     }
     xhr.ontimeout = function () {
-        if (core.isset(error))
-            error("Timeout");
+        if (error) error("Timeout");
     }
     xhr.onerror = function () {
-        if (core.isset(error))
-            error("Error on Connection");
+        if (error) error("Error on Connection");
     }
-    if (core.isset(formData))
+    if (formData)
         xhr.send(formData);
     else xhr.send();
 }

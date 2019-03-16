@@ -122,25 +122,23 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.drawMap(floorId);
 	
 	// 切换楼层BGM
-	if (core.isset(core.status.maps[floorId].bgm)) {
+	if (core.status.maps[floorId].bgm) {
 		var bgm = core.status.maps[floorId].bgm;
 		if (bgm instanceof Array) bgm = bgm[0];
 		core.playBgm(bgm);
 	}
 	// 更改画面色调
 	var color = core.getFlag('__color__', null);
-	if (!core.isset(color) && core.isset(core.status.maps[floorId].color))
+	if (!color && core.status.maps[floorId].color)
 		color = core.status.maps[floorId].color;
 	core.clearMap('curtain');
 	core.status.curtainColor = color;
-	if (core.isset(color)) {
-		core.fillRect('curtain',0,0,416,416,core.arrayToRGBA(color));
-	}
+	if (color) core.fillRect('curtain', 0, 0, core.__SIZE__, core.__SIZE__, core.arrayToRGBA(color));
 	// 更改天气
 	var weather = core.getFlag('__weather__', null);
-	if (!core.isset(weather) && core.isset(core.status.maps[floorId].weather))
+	if (!weather && core.status.maps[floorId].weather)
 		weather = core.status.maps[floorId].weather;
-	if (core.isset(weather))
+	if (weather)
 		core.setWeather(weather[0], weather[1]);
 	else core.setWeather();
 
@@ -172,7 +170,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 返回true则将继续战斗，返回false将不再战斗。
 
 	// ------ 支援技能 ------ //
-	if (core.isset(x) && core.isset(y)) {
+	if (x != null && y != null) {
 		var index = x + "," + y,
 			cache = (core.status.checkBlock.cache || {})[index] || {},
 			guards = cache.guards || [];
@@ -204,13 +202,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 播放战斗音效和动画
 	var equipAnimate = 'hand',
 		equipId = (core.status.hero.equipment || [])[0];
-	if (core.isset(equipId) && core.isset((core.material.items[equipId].equip || {}).animate))
+	if (equipId && (core.material.items[equipId].equip || {}).animate)
 		equipAnimate = core.material.items[equipId].equip.animate;
 	// 检查equipAnimate是否存在SE，如果不存在则使用默认音效
-	if (!core.isset((core.material.animates[equipAnimate] || {}).se))
+	if (!(core.material.animates[equipAnimate] || {}).se)
 		core.playSound('attack.mp3');
 	// 强制战斗的战斗动画
-	core.drawAnimate(equipAnimate, core.isset(x) ? x : core.getHeroLoc('x'), core.isset(y) ? y : core.getHeroLoc('y'));
+	core.drawAnimate(equipAnimate, x != null ? x : core.getHeroLoc('x'), y != null ? y : core.getHeroLoc('y'));
 
 	var damage = core.enemys.getDamage(enemyId, x, y);
 	if (damage == null) damage = core.status.hero.hp + 1;
@@ -231,7 +229,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 删除该块
 	var guards = []; // 支援
-	if (core.isset(x) && core.isset(y)) {
+	if (x != null && y != null) {
 		core.removeBlock(x, y);
 		guards = core.getFlag("__guards__" + x + "_" + y, []);
 		core.removeFlag("__guards__" + x + "_" + y);
@@ -310,15 +308,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 如果有加点
 	var point = core.material.enemys[enemyId].point;
-	if (core.flags.enableAddPoint && core.isset(point) && point > 0) {
+	if (core.flags.enableAddPoint && point > 0) {
 		core.push(todo, [{ "type": "setValue", "name": "flag:point", "value": point }]);
 		core.push(todo, [{ "type": "insert", "name": "加点事件" }]);
 	}
 
-	// 如果该点存在，且有事件 -- V2.5.4 以后阻击怪也可以有战后事件了
-	if (core.isset(x) && core.isset(y)) {
-		core.push(todo, core.floors[core.status.floorId].afterBattle[x + "," + y]);
-	}
+	// 如果该点存在事件 -- V2.5.4 以后阻击怪也可以有战后事件了
+	core.push(todo, core.floors[core.status.floorId].afterBattle[x + "," + y]);
 
 	// 在这里增加其他的自定义事件需求
 	/*
@@ -330,58 +326,44 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	*/
 
 	// 如果事件不为空，将其插入
-	if (todo.length > 0) {
-		core.events.insertAction(todo, x, y);
-	}
+	if (todo.length > 0) core.insertAction(todo, x, y);
 
 	// 如果已有事件正在处理中
-	if (core.status.event.id == null) {
+	if (core.status.event.id == null)
 		core.continueAutomaticRoute();
-	} else {
+	else
 		core.clearContinueAutomaticRoute();
-	}
-	if (core.isset(callback)) callback();
+
+	if (callback) callback();
 
 },
         "afterOpenDoor": function (doorId, x, y, callback) {
 	// 开一个门后触发的事件
 
 	var todo = [];
-	if (core.isset(x) && core.isset(y)) {
-		var event = core.floors[core.status.floorId].afterOpenDoor[x + "," + y];
-		if (core.isset(event)) {
-			core.unshift(todo, event);
-		}
-	}
+	var event = core.floors[core.status.floorId].afterOpenDoor[x + "," + y];
+	if (event) core.unshift(todo, event);
 
-	if (todo.length > 0) {
-		core.events.insertAction(todo, x, y);
-	}
+	if (todo.length > 0) core.insertAction(todo, x, y);
 
-	if (core.status.event.id == null) {
+	if (core.status.event.id == null)
 		core.continueAutomaticRoute();
-	} else {
+	else
 		core.clearContinueAutomaticRoute();
-	}
-	if (core.isset(callback)) callback();
+
+	if (callback) callback();
 },
         "afterGetItem": function (itemId, x, y, callback) {
 	// 获得一个道具后触发的事件
 	core.playSound('item.mp3');
 
 	var todo = [];
-	if (core.isset(x) && core.isset(y)) {
-		var event = core.floors[core.status.floorId].afterGetItem[x + "," + y];
-		if (core.isset(event)) {
-			core.unshift(todo, event);
-		}
-	}
+	var event = core.floors[core.status.floorId].afterGetItem[x + "," + y];
+	if (event) core.unshift(todo, event);
 
-	if (todo.length > 0) {
-		core.events.insertAction(todo, x, y);
-	}
+	if (todo.length > 0) core.insertAction(todo, x, y);
 
-	if (core.isset(callback)) callback();
+	if (callback) callback();
 },
         "afterChangeLight": function(x,y) {
 	// 改变亮灯之后，可以触发的事件
@@ -516,10 +498,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// ------ 支援 ------
 	var guards = [];
 	// 检查光环缓存
-	if (!core.isset(core.status.checkBlock.cache)) core.status.checkBlock.cache = {};
-	var index = core.isset(x) && core.isset(y) ? (x + "," + y) : "floor";
+	if (!core.status.checkBlock.cache) core.status.checkBlock.cache = {};
+	var index = x != null && y != null ? (x + "," + y) : "floor";
 	var cache = core.status.checkBlock.cache[index];
-	if (!core.isset(cache)) {
+	if (!cache) {
 		// 没有该点的缓存，则遍历每个图块
 		core.status.maps[floorId].blocks.forEach(function (block) {
 			if (!block.disable) {
@@ -527,7 +509,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				var id = block.event.id,
 					enemy = core.material.enemys[id];
 				// 检查是不是怪物，且是否拥有该特殊属性
-				if (core.isset(enemy) && core.hasSpecial(enemy.special, 25)) {
+				if (enemy && core.hasSpecial(enemy.special, 25)) {
 					// 检查是否可叠加
 					if (enemy.add || cnt == 0) {
 						hp_buff += enemy.value || 0;
@@ -537,10 +519,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					}
 				}
 				// 检查【支援】技能
-				if (core.isset(enemy) && core.hasSpecial(enemy.special, 26) &&
+				if (enemy && core.hasSpecial(enemy.special, 26) &&
 					// 检查支援条件，坐标存在，距离为1，且不能是自己
 					// 其他类型的支援怪，比如十字之类的话.... 看着做是一样的
-					core.isset(x) && core.isset(y) && Math.abs(block.x - x) <= 1 && Math.abs(block.y - y) <= 1 && !(x == block.x && y == block.y)) {
+					x != null && y != null && Math.abs(block.x - x) <= 1 && Math.abs(block.y - y) <= 1 && !(x == block.x && y == block.y)) {
 					// 记录怪物的x,y，ID
 					guards.push([block.x, block.y, id]);
 				}
@@ -959,8 +941,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var statusList = ['hpmax', 'hp', 'mana', 'atk', 'def', 'mdef', 'money', 'experience'];
 	statusList.forEach(function (item) {
 		// 向下取整
-		if (core.isset(core.status.hero[item]))
-			core.status.hero[item] = Math.floor(core.status.hero[item]);
+		core.status.hero[item] = Math.floor(core.status.hero[item]);
 		// 大数据格式化
 		core.setStatusBarInnerHTML(item, core.getRealStatus(item));
 	});
@@ -1022,7 +1003,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
         "updateCheckBlock": function (floorId) {
 	// 领域、夹击、阻击等的伤害值计算
 	floorId = floorId || core.status.floorId;
-	if (!core.isset(floorId) || !core.isset(core.status.maps)) return;
+	if (!floorId || !core.status.maps) return;
+
 	var blocks = core.status.maps[floorId].blocks;
 	var width = core.floors[floorId].width, height = core.floors[floorId].height;
 
@@ -1035,9 +1017,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		if (!block.disable && block.event.cls.indexOf('enemy') == 0) {
 			var id = block.event.id,
 				enemy = core.material.enemys[id];
-			if (core.isset(enemy)) {
-				core.status.checkBlock.map[block.x + width * block.y] = id;
-			}
+			if (enemy) core.status.checkBlock.map[block.x + width * block.y] = id;
 		}
 		// 血网
 		if (!block.disable &&
@@ -1054,7 +1034,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	for (var x = 0; x < width; x++) {
 		for (var y = 0; y < height; y++) {
 			var id = core.status.checkBlock.map[x + width * y];
-			if (core.isset(id)) {
+			if (id) {
 
 				// 如果是血网，直接加上伤害值
 				if (id == "lavaNet") {
@@ -1070,7 +1050,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					var range = enemy.range || 1;
 					// 是否是九宫格领域
 					var zoneSquare = false;
-					if (core.isset(enemy.zoneSquare)) zoneSquare = enemy.zoneSquare;
+					if (enemy.zoneSquare != null) zoneSquare = enemy.zoneSquare;
 					// 在范围内进行搜索，增加领域伤害值
 					for (var dx = -range; dx <= range; dx++) {
 						for (var dy = -range; dy <= range; dy++) {
@@ -1115,7 +1095,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 						var nx = x + core.utils.scan[dir].x,
 							ny = y + core.utils.scan[dir].y;
 						if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
-						if (!core.isset(core.status.checkBlock.ambush[nx + ny * width]))
+						if (!core.status.checkBlock.ambush[nx + ny * width])
 							core.status.checkBlock.ambush[nx + ny * width] = [];
 						core.status.checkBlock.ambush[nx + ny * width].push([x, y, id, dir]);
 					}
@@ -1136,9 +1116,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				if (x > 0 && x < width - 1) {
 					var id1 = core.status.checkBlock.map[x - 1 +width * y],
 						id2 = core.status.checkBlock.map[x + 1 + width * y];
-					if (core.isset(id1) && core.isset(id2) && id1 == id2) {
+					if (id1 != null && id2 != null && id1 == id2) {
 						var enemy = core.material.enemys[id1];
-						if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {
+						if (enemy && core.enemys.hasSpecial(enemy.special, 16)) {
 							has = true;
 						}
 					}
@@ -1147,9 +1127,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				if (y > 0 && y < height - 1) {
 					var id1 = core.status.checkBlock.map[x + width * (y - 1)],
 						id2 = core.status.checkBlock.map[x + width * (y + 1)];
-					if (core.isset(id1) && core.isset(id2) && id1 == id2) {
+					if (id1 != null && id2 != null && id1 == id2) {
 						var enemy = core.material.enemys[id1];
-						if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 16)) {
+						if (enemy && core.enemys.hasSpecial(enemy.special, 16)) {
 							has = true;
 						}
 					}
@@ -1308,7 +1288,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (!core.isPlaying()) return;
 
 	// 执行当前楼层的并行事件处理
-	if (core.isset(core.status.floorId)) {
+	if (core.status.floorId) {
 		try {
 			eval(core.floors[core.status.floorId].parallelDo);
 		} catch (e) {
@@ -1377,7 +1357,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		
 		core.clearMap(name);
 		// 绘制色调层，默认不透明度
-		if (!core.isset(color)) color = 0.9;
+		if (color == null) color = 0.9;
 		ctx.fillStyle = "rgba(0,0,0,"+color+")";
 		ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 		

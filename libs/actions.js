@@ -92,7 +92,7 @@ actions.prototype.unregisterAction = function (action, name) {
 ////// 执行一个用户交互行为 //////
 actions.prototype.doRegisteredAction = function (action) {
     var actions = this.actions[action];
-    if (!core.isset(actions)) return false;
+    if (!actions) return false;
     for (var i = 0; i < actions.length; ++i) {
         if (actions[i].func.apply(this, Array.prototype.slice.call(arguments, 1)))
             return true;
@@ -118,7 +118,7 @@ actions.prototype.onkeyDown = function (e) {
 }
 
 actions.prototype._sys_onkeyDown = function (e) {
-    if (!core.isset(core.status.holdingKeys)) core.status.holdingKeys = [];
+    core.status.holdingKeys = core.status.holdingKeys || []
     var isArrow = {37: true, 38: true, 39: true, 40: true}[e.keyCode]
     if (isArrow && !core.status.lockControl) {
         for (var ii = 0; ii < core.status.holdingKeys.length; ii++) {
@@ -382,7 +382,7 @@ actions.prototype._sys_keyUp = function (keyCode, altKey) {
     if (!core.status.played)
         return true;
     this.actionsdata.onKeyUp(keyCode, altKey);
-    if (core.isset(core.status.automaticRoute) && core.status.automaticRoute.autoHeroMove) {
+    if (core.status.automaticRoute && core.status.automaticRoute.autoHeroMove) {
         core.stopAutomaticRoute();
     }
     core.stopHero();
@@ -712,7 +712,7 @@ actions.prototype._sys_keyDownCtrl = function () {
     }
     if (core.status.event.id == 'action' && core.status.event.data.type == 'sleep'
         && !core.status.event.data.current.noSkip) {
-        if (core.isset(core.timeout.sleepTimeout) && Object.keys(core.animateFrame.asyncId).length == 0) {
+        if (core.timeout.sleepTimeout && Object.keys(core.animateFrame.asyncId).length == 0) {
             clearTimeout(core.timeout.sleepTimeout);
             core.timeout.sleepTimeout = null;
             core.doAction();
@@ -747,7 +747,7 @@ actions.prototype._sys_longClick_lockControl = function (x, y) {
     // 长按可以跳过等待事件
     if (core.status.event.id == 'action' && core.status.event.data.type == 'sleep'
         && !core.status.event.data.current.noSkip) {
-        if (core.isset(core.timeout.sleepTimeout) && Object.keys(core.animateFrame.asyncId).length == 0) {
+        if (core.timeout.sleepTimeout && Object.keys(core.animateFrame.asyncId).length == 0) {
             clearTimeout(core.timeout.sleepTimeout);
             core.timeout.sleepTimeout = null;
             core.doAction();
@@ -824,9 +824,9 @@ actions.prototype._keyUpCenterFly = function (keycode) {
 
 ////// 点击确认框时 //////
 actions.prototype._clickConfirmBox = function (x, y) {
-    if ((x == 4 || x == 5) && y == 7 && core.isset(core.status.event.data.yes))
+    if ((x == 4 || x == 5) && y == 7 && core.status.event.data.yes)
         core.status.event.data.yes();
-    if ((x == 7 || x == 8) && y == 7 && core.isset(core.status.event.data.no))
+    if ((x == 7 || x == 8) && y == 7 && core.status.event.data.no)
         core.status.event.data.no();
 }
 
@@ -845,12 +845,12 @@ actions.prototype._keyUpConfirmBox = function (keycode) {
     }
 
     if (keycode == 13 || keycode == 32 || keycode == 67) {
-        if (core.status.event.selection == 0 && core.isset(core.status.event.data.yes)) {
+        if (core.status.event.selection == 0 && core.status.event.data.yes) {
             core.status.event.selection = null;
             core.status.event.data.yes();
             return;
         }
-        if (core.status.event.selection == 1 && core.isset(core.status.event.data.no)) {
+        if (core.status.event.selection == 1 && core.status.event.data.no) {
             core.status.event.selection = null;
             core.status.event.data.no();
             return;
@@ -948,7 +948,7 @@ actions.prototype._clickBook = function (x, y) {
     }
     // 怪物信息
     var data = core.status.event.data;
-    if (core.isset(data) && y < 12) {
+    if (data != null && y < 12) {
         var page = parseInt(data / 6);
         var index = 6 * page + parseInt(y / 2);
         core.ui.drawBook(index);
@@ -983,7 +983,7 @@ actions.prototype._keyUpBook = function (keycode) {
     }
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         var data = core.status.event.data;
-        if (core.isset(data)) {
+        if (data != null) {
             this._clickBook(6, 2 * (data % 6));
         }
         return;
@@ -1018,7 +1018,7 @@ actions.prototype._keyDownFly = function (keycode) {
 }
 
 actions.prototype._getNextFlyFloor = function (delta, index) {
-    if (!core.isset(index)) index = core.status.event.data;
+    if (index == null) index = core.status.event.data;
     if (delta == 0) return index;
     var sign = Math.sign(delta);
     delta = Math.abs(delta);
@@ -1047,7 +1047,7 @@ actions.prototype._keyUpFly = function (keycode) {
 
 ////// 查看地图界面时的点击操作 //////
 actions.prototype._clickViewMaps = function (x, y) {
-    if (!core.isset(core.status.event.data)) {
+    if (core.status.event.data == null) {
         core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
         return;
     }
@@ -1112,7 +1112,7 @@ actions.prototype._clickViewMaps = function (x, y) {
 
 ////// 查看地图界面时，按下某个键的操作 //////
 actions.prototype._keyDownViewMaps = function (keycode) {
-    if (!core.isset(core.status.event.data)) return;
+    if (core.status.event.data == null) return;
 
     var floorId = core.floorIds[core.status.event.data.index], mh = core.floors[floorId].height;
 
@@ -1127,7 +1127,7 @@ actions.prototype._keyDownViewMaps = function (keycode) {
 
 ////// 查看地图界面时，放开某个键的操作 //////
 actions.prototype._keyUpViewMaps = function (keycode) {
-    if (!core.isset(core.status.event.data)) {
+    if (core.status.event.data == null) {
         core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
         return;
     }
@@ -1200,7 +1200,7 @@ actions.prototype._clickQuickShop = function (x, y) {
         var topIndex = 6 - parseInt(keys.length / 2);
         if (y >= topIndex && y < topIndex + keys.length) {
             var reason = core.events.canUseQuickShop(keys[y - topIndex]);
-            if (!core.flags.enableDisabledShop && core.isset(reason)) {
+            if (!core.flags.enableDisabledShop && reason) {
                 core.drawText(reason);
                 return;
             }
@@ -1302,7 +1302,7 @@ actions.prototype._clickToolboxIndex = function (index) {
 
 ////// 工具栏界面时，按下某个键的操作 //////
 actions.prototype._keyDownToolbox = function (keycode) {
-    if (!core.isset(core.status.event.data)) return;
+    if (core.status.event.data == null) return;
 
     var tools = Object.keys(core.status.hero.items.tools).sort();
     var constants = Object.keys(core.status.hero.items.constants).sort();
@@ -1399,7 +1399,7 @@ actions.prototype._keyUpToolbox = function (keycode) {
         core.ui.closePanel();
         return;
     }
-    if (!core.isset(core.status.event.data)) return;
+    if (core.status.event.data == null) return;
 
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         this._clickToolboxIndex(core.status.event.selection);
@@ -1459,7 +1459,7 @@ actions.prototype._clickEquipbox = function (x, y) {
 actions.prototype._clickEquipboxIndex = function (index) {
     if (index < 6) {
         if (index >= core.status.globalAttribute.equipName.length) return;
-        if (index == core.status.event.selection && core.isset(core.status.hero.equipment[index])) {
+        if (index == core.status.event.selection && core.status.hero.equipment[index]) {
             core.unloadEquip(index);
             core.status.route.push("unEquip:" + index);
         }
@@ -1477,7 +1477,7 @@ actions.prototype._clickEquipboxIndex = function (index) {
 
 ////// 装备栏界面时，按下某个键的操作 //////
 actions.prototype._keyDownEquipbox = function (keycode) {
-    if (!core.isset(core.status.event.data)) return;
+    if (core.status.event.data != null) return;
 
     var equipCapacity = core.status.globalAttribute.equipName.length;
     var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
@@ -1563,7 +1563,7 @@ actions.prototype._keyUpEquipbox = function (keycode, altKey) {
         core.ui.closePanel();
         return;
     }
-    if (!core.isset(core.status.event.data.selectId)) return;
+    if (!core.status.event.data.selectId) return;
 
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         this._clickEquipboxIndex(core.status.event.selection);
@@ -1905,7 +1905,7 @@ actions.prototype._clickSyncSave = function (x, y) {
                         alert("游戏版本不一致！");
                         return;
                     }
-                    if (!core.isset(obj.data)) {
+                    if (!obj.data) {
                         alert("无效的存档！");
                         return;
                     }
@@ -2023,7 +2023,7 @@ actions.prototype._clickLocalSaveSelect = function (x, y) {
         var selection = y - topIndex;
         if (selection < 2) {
             core.control.getSaves(selection == 0 ? null : core.saves.saveIndex, function (saves) {
-                if (core.isset(saves)) {
+                if (saves) {
                     var content = {
                         "name": core.firstData.name,
                         "version": core.firstData.version,
@@ -2408,7 +2408,7 @@ actions.prototype.clearPaint = function () {
 actions.prototype.savePaint = function () {
     var data = {};
     for (var floorId in core.paint) {
-        if (core.isset(core.paint[floorId]))
+        if (core.paint[floorId])
             data[floorId] = lzw_decode(core.paint[floorId]);
     }
     core.download(core.firstData.name + ".h5paint", JSON.stringify({
@@ -2423,19 +2423,19 @@ actions.prototype.loadPaint = function () {
             alert("绘图文件和游戏不一致！");
             return;
         }
-        if (!core.isset(obj.paint)) {
+        if (!obj.paint) {
             alert("无效的绘图文件！");
             return;
         }
         core.paint = {};
         for (var floorId in obj.paint) {
-            if (core.isset(obj.paint[floorId]))
+            if (obj.paint[floorId])
                 core.paint[floorId] = lzw_encode(obj.paint[floorId]);
         }
 
         core.clearMap('paint');
         var value = core.paint[core.status.floorId];
-        if (core.isset(value)) value = lzw_decode(value).split(",");
+        if (value) value = lzw_decode(value).split(",");
         core.utils.decodeCanvas(value, 32 * core.bigmap.width, 32 * core.bigmap.height);
         core.drawImage('paint', core.bigmap.tempCanvas.canvas, 0, 0);
 

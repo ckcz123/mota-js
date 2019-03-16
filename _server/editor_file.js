@@ -154,7 +154,7 @@ editor_file = function (editor, callback) {
             cannotMove: {}
         };
         Object.keys(editor.currentFloorData).forEach(function (t) {
-            if (!core.isset(editor.currentFloorData[t]))
+            if (editor.currentFloorData[t] == null)
                 delete editor.currentFloorData[t];
         })
         editor.currentFloorData.map = "new";
@@ -216,7 +216,7 @@ editor_file = function (editor, callback) {
                 cannotMove: {}
             };
             Object.keys(data).forEach(function (t) {
-                if (!core.isset(data[t]))
+                if (data[t] == null)
                     delete data[t];
                 else {
                     if (t=='map') {
@@ -278,7 +278,7 @@ editor_file = function (editor, callback) {
             // get id num
             var id = c+idnum;
 
-            if (image=='terrains' && core.isset(terrainsId[y])) {
+            if (image=='terrains' && terrainsId[y] != null) {
                 id=terrainsId[y];
             }
             else {
@@ -999,8 +999,10 @@ editor_file = function (editor, callback) {
         if (file == 'floorloc') {
             actionList.forEach(function (value) {
                 // 检测null/undefined
-                if (!core.isset(value[2]))value[2]=undefined;
-                eval("editor.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
+                if (value[2]==null)
+                    eval("delete editor.currentFloorData" + value[1]);
+                else
+                    eval("editor.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
             });
             editor_file.saveFloorFile(callback);
             return;

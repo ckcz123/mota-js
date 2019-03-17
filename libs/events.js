@@ -250,9 +250,14 @@ events.prototype.doSystemEvent = function (type, data, callback) {
 }
 
 ////// 触发(x,y)点的事件 //////
-events.prototype._trigger = function (x, y) {
-    // 如果正在自定义事件中，忽略
-    if (core.status.event.id == 'action') return;
+events.prototype.trigger = function (x, y) {
+    // 如果已经死亡，忽略
+    if (core.status.gameOver) return;
+    // 如果正在自定义事件中，则插入
+    if (core.status.event.id == 'action') {
+        core.insertAction({"type": "trigger", "loc": [x, y]});
+        return;
+    }
 
     core.status.isSkiing = false;
     var block = core.getBlock(x, y);
@@ -798,6 +803,7 @@ events.prototype._popEvents = function (current, prefix) {
 ////// 往当前事件列表之前添加一个或多个事件 //////
 events.prototype.insertAction = function (action, x, y, callback) {
     if (core.hasFlag("__statistics__")) return;
+    if (core.status.gameOver) return;
 
     // ------ 判定commonEvent
     var commonEvent = this.getCommonEvent(action);
@@ -1508,8 +1514,8 @@ events.prototype.follow = function (name) {
     core.status.hero.followers = core.status.hero.followers || [];
     if (core.material.images.images[name]
         && core.material.images.images[name].width == 128) {
-        core.status.hero.followers.push({"img": name});
-        core.control.gatherFollowers();
+        core.status.hero.followers.push({"name": name, "img": core.material.images.images[name]});
+        core.gatherFollowers();
         core.clearMap('hero');
         core.drawHero();
     }
@@ -1519,17 +1525,17 @@ events.prototype.follow = function (name) {
 events.prototype.unfollow = function (name) {
     core.status.hero.followers = core.status.hero.followers || [];
     if (!name) {
-        core.status.heroMoving.followers = [];
+        core.status.hero.followers = [];
     }
     else {
         for (var i = 0; i < core.status.hero.followers.length; i++) {
-            if (core.status.hero.followers[i].img == name) {
+            if (core.status.hero.followers[i].name == name) {
                 core.status.hero.followers.splice(i, 1);
                 break;
             }
         }
     }
-    core.control.gatherFollowers();
+    core.gatherFollowers();
     core.clearMap('hero');
     core.drawHero();
 }
@@ -1780,6 +1786,132 @@ events.prototype._vibrate_update = function (shakeInfo) {
             shakeInfo.duration -= 1
         }
     }
+}
+
+/////// 使用事件让勇士移动。这个函数将不会触发任何事件 //////
+control.prototype.eventMoveHero = function(steps, time, callback) {
+    time = time || core.values.moveSpeed || 100;
+
+    // 要运行的轨迹：将steps展开
+    var moveSteps=[];
+    steps.forEach(function (e) {
+        if (typeof e=="string") {
+            moveSteps.push(e);
+        }
+        else {
+            if (!core.isset(e.value)) {
+                moveSteps.push(e.direction)
+            }
+            else {
+                for (var i=0;i<e.value;i++) {
+                    moveSteps.push(e.direction);
+                }
+            }
+        }
+    });
+
+    moveSteps = moveSteps.filter(function (t) { return ['up','down','left','right','forward','backward'].indexOf(t)>=0;});
+
+    var step=0;
+
+    var animate=window.setInterval(function() {
+        var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
+        if (moveSteps.length==0) {
+            delete core.animateFrame.asyncId[animate];
+            clearInterval(animate);
+            core.drawHero(null, x, y);
+            if (core.isset(callback)) callback();
+        }
+        else {
+            var direction = moveSteps[0];
+
+            // ------ 前进/后退
+            var o = direction == 'backward' ? -1 : 1;
+            if (direction == 'forward' || direction == 'backward') direction = core.getHeroLoc('direction');
+
+            core.setHeroLoc('direction', direction);
+            step++;
+            if (step <= 4) {
+                core.drawHero(direction, x, y, 'leftFoot', 4 * o * step);
+            }
+            else if (step <= 8) {
+                core.drawHero(direction, x, y, 'rightFoot', 4 * o * step);
+            }
+            if (step == 8) {
+                step = 0;
+                core.setHeroLoc('x', x + o * core.utils.scan[direction].x, true);
+                core.setHeroLoc('y', y + o * core.utils.scan[direction].y, true);
+                core.updateFollowers();
+                moveSteps.shift();
+            }
+        }
+    }, time / 8 / core.status.replay.speed);
+
+    core.animateFrame.asyncId[animate] = true;
+}
+
+////// 勇士跳跃事件 //////
+control.prototype.jumpHero = function (ex, ey, time, callback) {
+    var sx=core.status.hero.loc.x, sy=core.status.hero.loc.y;
+    if (!core.isset(ex)) ex=sx;
+    if (!core.isset(ey)) ey=sy;
+
+    time = time || 500;
+
+    core.playSound('jump.mp3');
+
+    var dx = ex-sx, dy=ey-sy, distance = Math.round(Math.sqrt(dx * dx + dy * dy));
+    var jump_peak = 6 + distance, jump_count = jump_peak * 2;
+    var currx = sx, curry = sy;
+
+    var heroIcon = core.material.icons.hero[core.getHeroLoc('direction')];
+    var status = 'stop';
+    var height = core.material.icons.hero.height;
+
+    var drawX = function() {
+        return currx * 32;
+    }
+    var drawY = function() {
+        var ret = curry * 32;
+        if(jump_count >= jump_peak){
+            var n = jump_count - jump_peak;
+        }else{
+            var n = jump_peak - jump_count;
+        }
+        return ret - (jump_peak * jump_peak - n * n) / 2;
+    }
+    var updateJump = function() {
+        jump_count--;
+        currx = (currx * jump_count + ex) / (jump_count + 1.0);
+        curry = (curry * jump_count + ey) / (jump_count + 1.0);
+    }
+
+    core.clearMap('hero');
+
+    var animate=window.setInterval(function() {
+
+        if (jump_count>0) {
+            core.clearMap('hero', drawX()-core.bigmap.offsetX, drawY()-height+32-core.bigmap.offsetY, 32, height);
+            updateJump();
+            var nowx = drawX(), nowy = drawY();
+            core.bigmap.offsetX = core.clamp(nowx - 32*6, 0, 32*core.bigmap.width-416);
+            core.bigmap.offsetY = core.clamp(nowy - 32*6, 0, 32*core.bigmap.height-416);
+            core.control.updateViewport();
+            core.drawImage('hero', core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height,
+                nowx - core.bigmap.offsetX, nowy + 32-height - core.bigmap.offsetY, 32, height);
+        }
+        else {
+            delete core.animateFrame.asyncId[animate];
+            clearInterval(animate);
+            core.setHeroLoc('x', ex);
+            core.setHeroLoc('y', ey);
+            core.drawHero();
+            if (core.isset(callback)) callback();
+        }
+
+    }, time / 16 / core.status.replay.speed);
+
+    core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 打开一个全局商店 //////

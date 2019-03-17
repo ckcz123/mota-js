@@ -156,7 +156,7 @@ items.prototype.canUseItem = function (itemId) {
 
 ////// 获得某个物品的个数 //////
 items.prototype.itemCount = function (itemId) {
-    if (!core.material.items[itemId]) return 0;
+    if (!core.material.items[itemId] || !core.isPlaying()) return 0;
     var itemCls = core.material.items[itemId].cls;
     if (itemCls == "items") return 0;
     return core.status.hero.items[itemCls][itemId] || 0;
@@ -169,7 +169,7 @@ items.prototype.hasItem = function (itemId) {
 
 ////// 是否装备某件装备 //////
 items.prototype.hasEquip = function (itemId) {
-    if (!(core.material.items[itemId] || {}).equip) return null;
+    if (!(core.material.items[itemId] || {}).equip || !core.isPlaying()) return null;
 
     for (var i in core.status.hero.equipment)
         if (core.status.hero.equipment[i] == itemId)

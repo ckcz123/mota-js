@@ -105,7 +105,6 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             }
         },
         "enemys": {
-            
             "_type": "object",
             "_data": {
                 "getSpecials": {
@@ -135,7 +134,6 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             }
         },
         "actions": {
-            
             "_type": "object",
             "_data": {
                 "onKeyUp": {
@@ -147,7 +145,6 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             }
         },
         "control": {
-            
             "_type": "object",
             "_data": {
                 "flyTo": {
@@ -173,11 +170,16 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "textarea",
                     "_lint": true,
                     "_data": "勇士每走一步的操作"
+                },
+                "moveDirectly": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "瞬间移动"
                 }
             }
         },
         "ui": {
-            
             "_type": "object",
             "_data": {
                 "drawStatusBar": {
@@ -201,7 +203,6 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             }
         },
         "plugins": {
-            
             "_type": "object",
             "_data": {
                 "parallelDo": {

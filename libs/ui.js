@@ -1155,7 +1155,7 @@ ui.prototype.drawSwitchs = function() {
         "临界显伤： "+(core.flags.displayCritical ? "[ON]" : "[OFF]"),
         "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
         "新版存档： "+(core.platform.useLocalForage ? "[ON]":"[OFF]"),
-        "单击瞬移： "+(core.getFlag('clickMove', true) ? "[ON]":"[OFF]"),
+        "单击瞬移： "+(!core.hasFlag("__noClickMove__") ? "[ON]":"[OFF]"),
         "拓展键盘： "+(core.platform.extendKeyboard ? "[ON]":"[OFF]"),
         "返回主菜单"
     ];

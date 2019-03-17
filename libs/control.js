@@ -175,7 +175,7 @@ control.prototype._animationFrame_animate = function (timestamp) {
 }
 
 control.prototype._animationFrame_heroMoving = function (timestamp) {
-    if (!core.isMoving()) return;
+    if (core.status.heroMoving <= 0) return;
     var x=core.getHeroLoc('x'), y=core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
     // 换腿
     if (timestamp - core.animateFrame.moveTime > (core.values.moveSpeed||100)) {

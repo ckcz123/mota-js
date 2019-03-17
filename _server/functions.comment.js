@@ -4,14 +4,13 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
     "_type": "object",
     "_data": {
         "events": {
-            
             "_type": "object",
             "_data": {
-                "initGame": {
+                "resetGame": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "游戏开始前的一些初始化操作"
+                    "_data": "重置整个游戏"
                 },
                 "setInitData": {
                     "_leaf": true,

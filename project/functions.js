@@ -1,36 +1,45 @@
 var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a = 
 {
     "events": {
-        "initGame": function() {
-	// 游戏开始前的一些初始化操作
+        "resetGame": function (hero, hard, floorId, maps, values) {
+	// 重置整个游戏；此函数将在游戏开始时，或者每次读档时最先被调用
+	// hero：勇士信息；hard：难度；floorId：当前楼层ID；maps：地图信息；values：全局数值信息
 
-	// 根据flag来对道具进行修改
-	if (core.flags.bigKeyIsBox)
-		core.material.items.bigKey = {'cls': 'items', 'name': '钥匙盒'};
-	// 面前的墙？四周的墙？
-	if (core.flags.pickaxeFourDirections)
-		core.material.items.pickaxe.text = "可以破坏勇士四周的墙";
-	if (core.flags.bombFourDirections)
-		core.material.items.bomb.text = "可以炸掉勇士四周的怪物";
-	if (core.flags.snowFourDirections)
-		core.material.items.bomb.text = "可以将四周的熔岩变成平地";
-	// 是否启用装备栏
-	if (core.flags.equipboxButton) {
-		core.statusBar.image.fly.src = core.statusBar.icons.equipbox.src;
-		core.flags.equipment = true;
-	}
-	if (core.flags.equipment) {
-		core.material.items.sword1.cls = 'equips';
-		core.material.items.sword2.cls = 'equips';
-		core.material.items.sword3.cls = 'equips';
-		core.material.items.sword4.cls = 'equips';
-		core.material.items.sword5.cls = 'equips';
-		core.material.items.shield1.cls = 'equips';
-		core.material.items.shield2.cls = 'equips';
-		core.material.items.shield3.cls = 'equips';
-		core.material.items.shield4.cls = 'equips';
-		core.material.items.shield5.cls = 'equips';
-	}
+	// 清除游戏数据
+	core.clearStatus();
+	// 初始化status
+	core.status = core.clone(core.initStatus);
+	core.status.played = true;
+	// 初始化人物，图标，统计信息
+	core.status.hero = core.clone(hero);
+	core.events.setHeroIcon(core.getFlag('heroIcon', 'hero.png'), true);
+	core.control._initStatistics(core.animateFrame.totalTime);
+	core.status.hero.statistics.totalTime = core.animateFrame.totalTime =
+		Math.max(core.status.hero.statistics.totalTime, core.animateFrame.totalTime);
+	core.status.hero.statistics.start = null;
+	// 初始难度
+	core.status.hard = hard || "";
+	// 初始化地图
+	core.status.floorId = floorId;
+	core.status.maps = core.clone(maps);
+	// 初始化怪物和道具
+	core.material.enemys = core.enemys.getEnemys();
+	core.material.items = core.items.getItems();
+	core.items._resetItems();
+	// 初始化全局数值和全局开关
+	core.values = core.clone(core.data.values);
+	for (var key in values || {})
+		core.values[key] = values[key];
+	core.flags = core.clone(core.data.flags);
+	var globalFlags = core.getFlag("globalFlags", {});
+	for (var key in globalFlags)
+		core.flags[key] = globalFlags[key];
+	// 初始化界面，状态栏等
+	core.resize();
+	core.updateGlobalAttribute(Object.keys(core.status.globalAttribute));
+	core.triggerStatusBar(core.hasFlag('hideStatusBar') ? 'hide' : 'show', core.hasFlag('showToolbox'));
+	// 隐藏右下角的音乐按钮
+	core.dom.musicBtn.style.display = 'none';
 },
         "setInitData": function () {
 	// 不同难度分别设置初始属性

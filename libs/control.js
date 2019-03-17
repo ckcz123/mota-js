@@ -761,8 +761,8 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
     offset = offset || 0;
     var way = core.utils.scan[direction];
     var dx = way.x, dy = way.y, offsetX = dx * offset, offsetY = dy * offset;
-    core.bigmap.offsetX = core.clamp((x - 6) * 32 + offsetX, 0, 32*core.bigmap.width-core.__PIXELS__);
-    core.bigmap.offsetY = core.clamp((y - 6) * 32 + offsetY, 0, 32*core.bigmap.height-core.__PIXELS__);
+    core.bigmap.offsetX = core.clamp((x - core.__HALF_SIZE__) * 32 + offsetX, 0, 32*core.bigmap.width-core.__PIXELS__);
+    core.bigmap.offsetY = core.clamp((y - core.__HALF_SIZE__) * 32 + offsetY, 0, 32*core.bigmap.height-core.__PIXELS__);
     core.clearAutomaticRouteNode(x+dx, y+dy);
     core.clearMap('hero');
 
@@ -814,10 +814,10 @@ control.prototype.setGameCanvasTranslate = function(canvas,x,y){
     c.style.OTransform='translate('+x+'px,'+y+'px)';
     c.style.MozTransform='translate('+x+'px,'+y+'px)';
     if(main.mode==='editor' && editor.isMobile){
-        c.style.transform='translate('+(x/480*96)+'vw,'+(y/480*96)+'vw)';
-        c.style.webkitTransform='translate('+(x/480*96)+'vw,'+(y/480*96)+'vw)';
-        c.style.OTransform='translate('+(x/480*96)+'vw,'+(y/480*96)+'vw)';
-        c.style.MozTransform='translate('+(x/480*96)+'vw,'+(y/480*96)+'vw)';
+        c.style.transform='translate('+(x/core.__PIXELS__*96)+'vw,'+(y/core.__PIXELS__*96)+'vw)';
+        c.style.webkitTransform='translate('+(x/core.__PIXELS__*96)+'vw,'+(y/core.__PIXELS__*96)+'vw)';
+        c.style.OTransform='translate('+(x/core.__PIXELS__*96)+'vw,'+(y/core.__PIXELS__*96)+'vw)';
+        c.style.MozTransform='translate('+(x/core.__PIXELS__*96)+'vw,'+(y/core.__PIXELS__*96)+'vw)';
     }
 };
 
@@ -1037,10 +1037,10 @@ control.prototype.setWeather = function (type, level) {
 
     if (!core.isset(level)) level=5;
     if (level<1) level=1; if (level>10) level=10;
-    level *= parseInt(20*core.bigmap.width*core.bigmap.height/169);
+    level *= parseInt(20*core.bigmap.width*core.bigmap.height/(core.__SIZE__*core.__SIZE__));
     // 计算当前的宽高
 
-    core.createCanvas('weather', 0, 0, 480, 480, 80);
+    core.createCanvas('weather', 0, 0, core.__PIXELS__, core.__PIXELS__, 80);
     core.animateFrame.weather.type = type;
     core.animateFrame.weather.level = level;
     core.animateFrame.weather.nodes = [];
@@ -1099,7 +1099,7 @@ control.prototype.setFg = function(color, time, callback) {
     if (time==0) {
         // 直接变色
         core.clearMap('curtain');
-        core.fillRect('curtain', 0, 0, 480, 480, core.arrayToRGBA(color));
+        core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(color));
         core.status.curtainColor = color;
         if (core.isset(callback)) callback();
         return;
@@ -1115,7 +1115,7 @@ control.prototype.setFg = function(color, time, callback) {
             (nowColor[3]*(step-1)+color[3])/step,
         ];
         core.clearMap('curtain');
-        core.fillRect('curtain', 0, 0, 480, 480, core.arrayToRGBA(nowColor));
+        core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(nowColor));
         step--;
 
         if (step <= 0) {
@@ -1612,13 +1612,13 @@ control.prototype.replay = function () {
             var shop=core.status.shops[shopId];
             if (core.isset(shop) && shop.visited) { // 商店可用
                 var choices = shop.choices;
-                var topIndex = 7 - parseInt(choices.length / 2);
+                var topIndex = core.__HALF_SIZE__ - parseInt(choices.length / 2);
 
                 core.status.event.selection = parseInt(selections.shift());
 
                 core.events.openShop(shopId, false);
                 var shopInterval = setInterval(function () {
-                    if (!core.actions._clickShop(7, topIndex+core.status.event.selection)) {
+                    if (!core.actions._clickShop(core.__HALF_SIZE__, topIndex+core.status.event.selection)) {
                         clearInterval(shopInterval);
                         core.stopReplay();
                         core.drawTip("录像文件出错");
@@ -1626,7 +1626,7 @@ control.prototype.replay = function () {
                     }
                     if (selections.length==0) {
                         clearInterval(shopInterval);
-                        core.actions._clickShop(7, topIndex+choices.length);
+                        core.actions._clickShop(core.__HALF_SIZE__, topIndex+choices.length);
                         core.replay();
                         return;
                     }

@@ -1156,26 +1156,61 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		}
 	}
 },
-        "moveOneStep": function () {
-	// 勇士每走一步后执行的操作
-	core.status.hero.steps++;
-	// 中毒状态：扣血
-	if (core.hasFlag('poison')) {
-		core.status.hero.statistics.poisonDamage += core.values.poisonDamage;
-		core.status.hero.hp -= core.values.poisonDamage;
-		if (core.status.hero.hp<=0) {
-			core.status.hero.hp=0;
-			core.updateStatusBar();
-			core.events.lose();
-			return;
-		}
-		core.updateStatusBar();
-	}
-	// 备注：瞬间移动不会执行该函数。如果要控制能否瞬间移动有三种方法：
+        "moveOneStep": function (x, y) {
+	// 勇士每走一步后执行的操作，x,y为要移动到的坐标。
+	// 这个函数执行在“刚走完”的时候，即还没有检查该点的事件和领域伤害等。
+	// 请注意：瞬间移动不会执行该函数。如果要控制能否瞬间移动有三种方法：
 	// 1. 将全塔属性中的cannotMoveDirectly这个开关勾上，即可在全塔中全程禁止使用瞬移。
 	// 2, 将楼层属性中的cannotMoveDirectly这个开关勾上，即禁止在该层楼使用瞬移。
 	// 3. 将flag:cannotMoveDirectly置为true，即可使用flag控制在某段剧情范围内禁止瞬移。
 
+	// 设置当前坐标，增加步数
+	core.setHeroLoc('x', x, true);
+	core.setHeroLoc('y', y, true);
+	core.status.hero.steps++;
+	// 更新跟随者状态，并绘制
+	core.updateFollowers();
+	core.drawHero();
+	// 检查中毒状态的扣血和死亡
+	if (core.hasFlag('poison')) {
+		core.status.hero.statistics.poisonDamage += core.values.poisonDamage;
+		core.status.hero.hp -= core.values.poisonDamage;
+		if (core.status.hero.hp <= 0) {
+			core.status.hero.hp = 0;
+			core.updateStatusBar();
+			core.events.lose();
+			return;
+		}
+	}
+	// 如需强行终止行走可以在这里条件判定：
+	// core.stopAutomaticRoute();
+
+	core.updateStatusBar();
+},
+        "moveDirectly": function (x, y) {
+	// 瞬间移动；x,y为要瞬间移动的点
+	// 返回true代表成功瞬移，false代表没有成功瞬移
+
+	// 判定能否瞬移到该点
+	var ignoreSteps = core.canMoveDirectly(x, y);
+	if (ignoreSteps >= 0) {
+		core.clearMap('hero');
+		// 获得勇士最后的朝向
+		var lastDirection = core.status.route[core.status.route.length - 1];
+		if (['left', 'right', 'up', 'down'].indexOf(lastDirection) >= 0)
+			core.setHeroLoc('direction', lastDirection);
+		// 设置坐标，并绘制
+		core.setHeroLoc('x', x);
+		core.setHeroLoc('y', y);
+		core.drawHero();
+		// 记录录像
+		core.status.route.push("move:" + x + ":" + y);
+		// 统计信息
+		core.status.hero.statistics.moveDirectly++;
+		core.status.hero.statistics.ignoreSteps += ignoreSteps;
+		return true;
+	}
+	return false;
 }
     },
     "ui": {

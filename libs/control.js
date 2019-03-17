@@ -374,20 +374,16 @@ control.prototype._initStatistics = function (totalTime) {
         }
 }
 
-
-/////////////////////// 寻路算法 & 人物行走控制 ///////////////////////
+// ------ 自动寻路，人物行走 ------ //
 
 ////// 清除自动寻路路线 //////
 control.prototype.clearAutomaticRouteNode = function (x, y) {
-    if (core.status.event.id==null)
-        core.clearMap('route', x * 32 + 5 - core.status.automaticRoute.offsetX, y * 32 + 5 - core.status.automaticRoute.offsetY, 27, 27);
+    core.clearMap('route', x * 32 + 5 - core.status.automaticRoute.offsetX, y * 32 + 5 - core.status.automaticRoute.offsetY, 27, 27);
 }
 
 ////// 停止自动寻路操作 //////
 control.prototype.stopAutomaticRoute = function () {
-    if (!core.status.played) {
-        return;
-    }
+    if (!core.status.played) return;
     core.status.automaticRoute.autoHeroMove = false;
     core.status.automaticRoute.autoStep = 0;
     core.status.automaticRoute.destStep = 0;
@@ -401,6 +397,7 @@ control.prototype.stopAutomaticRoute = function () {
         core.deleteCanvas('route');
 }
 
+////// 保存剩下的寻路，并停止 //////
 control.prototype.saveAndStopAutomaticRoute = function () {
     var automaticRoute = core.status.automaticRoute;
     if (automaticRoute.moveStepBeforeStop.length == 0) {
@@ -431,52 +428,33 @@ control.prototype.clearContinueAutomaticRoute = function (callback) {
     if (callback) callback();
 }
 
-////// 瞬间移动 //////
-control.prototype.moveDirectly = function (destX, destY) {
-    var ignoreSteps = core.canMoveDirectly(destX, destY);
-    if (ignoreSteps>=0) {
-        core.clearMap('hero');
-        var lastDirection = core.status.route[core.status.route.length-1];
-        if (['left', 'right', 'up', 'down'].indexOf(lastDirection)>=0)
-            core.setHeroLoc('direction', lastDirection);
-        core.setHeroLoc('x', destX);
-        core.setHeroLoc('y', destY);
-        core.drawHero();
-        core.status.route.push("move:"+destX+":"+destY);
-        core.status.hero.statistics.moveDirectly++;
-        core.status.hero.statistics.ignoreSteps+=ignoreSteps;
-        return true;
-    }
-    return false;
-}
-
-////// 尝试瞬间移动 //////
-control.prototype.tryMoveDirectly = function (destX, destY) {
-    if (Math.abs(core.getHeroLoc('x')-destX)+Math.abs(core.getHeroLoc('y')-destY)<=1)
-        return false;
-    var canMoveArray = core.maps.generateMovableArray();
-    var testMove = function (dx, dy, dir) {
-        if (dx<0 || dx>=core.bigmap.width|| dy<0 || dy>=core.bigmap.height) return false;
-        if (core.isset(dir) && !core.inArray(canMoveArray[dx][dy],dir)) return false;
-        if (core.control.moveDirectly(dx, dy)) {
-            if (core.isset(dir)) core.moveHero(dir, function() {});
-            return true;
-        }
-        return false;
-    }
-    return testMove(destX,destY) || testMove(destX-1, destY, "right") || testMove(destX,destY-1,"down")
-        || testMove(destX,destY+1,"up") || testMove(destX+1,destY,"left");
+////// 显示离散的寻路点 //////
+control.prototype.fillPosWithPoint = function (pos) {
+    core.fillRect('ui', pos.x*32+12,pos.y*32+12,8,8, '#bfbfbf');
 }
 
 ////// 设置自动寻路路线 //////
 control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
-    if (!core.status.played || core.status.lockControl) {
-        return;
-    }
-    // 正在寻路中
+    if (!core.status.played || core.status.lockControl) return;
+    if (this._setAutomaticRoute_isMoving(destX, destY)) return;
+    if (this._setAutomaticRoute_isTurning(destX, destY, stepPostfix)) return;
+    if (this._setAutomaticRoute_clickMoveDirectly(destX, destY, stepPostfix)) return;
+    // 找寻自动寻路路线
+    var moveStep = core.automaticRoute(destX, destY).concat(stepPostfix);
+    if (moveStep.length == 0) return core.deleteCanvas('route');
+    core.status.automaticRoute.destX=destX;
+    core.status.automaticRoute.destY=destY;
+    this._setAutomaticRoute_drawRoute(moveStep);
+    this._setAutomaticRoute_setAutoSteps(moveStep);
+    // 立刻移动
+    core.setAutoHeroMove();
+}
+
+control.prototype._setAutomaticRoute_isMoving = function (destX, destY) {
     if (core.status.automaticRoute.autoHeroMove) {
         var lastX = core.status.automaticRoute.destX, lastY=core.status.automaticRoute.destY;
         core.stopAutomaticRoute();
+        // 双击瞬移
         if (lastX==destX && lastY==destY) {
             core.status.automaticRoute.moveDirectly = true;
             setTimeout(function () {
@@ -486,8 +464,12 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
                 core.status.automaticRoute.moveDirectly = false;
             }, core.values.moveSpeed || 100);
         }
-        return;
+        return true;
     }
+    return false;
+}
+
+control.prototype._setAutomaticRoute_isTurning = function (destX, destY, stepPostfix) {
     if (destX == core.status.hero.loc.x && destY == core.status.hero.loc.y && stepPostfix.length==0) {
         if (core.timeout.turnHeroTimeout==null) {
             core.timeout.turnHeroTimeout = setTimeout(function() {
@@ -501,27 +483,23 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
             core.timeout.turnHeroTimeout = null;
             core.getNextItem();
         }
-        return;
+        return true;
     }
+    if (core.timeout.turnHeroTimeout!=null) return true;
+    return false;
+}
 
-    if (core.timeout.turnHeroTimeout!=null) return;
-
+control.prototype._setAutomaticRoute_clickMoveDirectly = function (destX, destY, stepPostfix) {
     // 单击瞬间移动
     if (core.status.heroStop && core.status.heroMoving==0) {
-        if (stepPostfix.length<=1 && core.getFlag('clickMove', true) && core.control.tryMoveDirectly(destX, destY))
-            return;
+        if (stepPostfix.length<=1 && !core.hasFlag('__noClickMove__') && core.control.tryMoveDirectly(destX, destY))
+            return true;
     }
+    return false;
+}
 
-    var moveStep = core.automaticRoute(destX, destY).concat(stepPostfix);
-    if (moveStep.length == 0) {
-        core.deleteCanvas('route');
-        return;
-    }
-
-    core.status.automaticRoute.destX=destX;
-    core.status.automaticRoute.destY=destY;
-
-    // 计算绘制区域的宽高
+control.prototype._setAutomaticRoute_drawRoute = function (moveStep) {
+    // 计算绘制区域的宽高，并尽可能小的创建route层
     var sx = core.bigmap.width * 32, sy = core.bigmap.height * 32, dx = 0, dy = 0;
     moveStep.forEach(function (t) {
         sx = Math.min(sx, t.x * 32); dx = Math.max(dx, t.x * 32);
@@ -547,7 +525,9 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
             ctx.stroke();
         }
     }
+}
 
+control.prototype._setAutomaticRoute_setAutoSteps = function (moveStep) {
     // 路线转autoStepRoutes
     var step = 0, currStep = null;
     moveStep.forEach(function (t) {
@@ -556,111 +536,17 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
             step++;
         else {
             core.status.automaticRoute.autoStepRoutes.push({'direction': currStep, 'step': step});
-            step = 1; 
+            step = 1;
         }
         currStep = dir;
     });
     core.status.automaticRoute.autoStepRoutes.push({'direction': currStep, 'step': step});
-
-    // 立刻移动
-    core.setAutoHeroMove();
-}
-
-////// 自动寻路算法，找寻最优路径 //////
-control.prototype.automaticRoute = function (destX, destY) {
-    var fw = core.bigmap.width, fh = core.bigmap.height;
-    var startX = core.getHeroLoc('x');
-    var startY = core.getHeroLoc('y');
-    if (destX == startX && destY == startY) return [];
-
-    var route = [];
-    var queue = new PriorityQueue({comparator: function (a,b) {
-        return a.depth - b.depth;
-    }});
-    var ans = [];
-
-    var canMoveArray = core.maps.generateMovableArray();
-
-    route[startX + fw * startY] = '';
-    queue.queue({depth: 0, x: startX, y: startY});
-    while (queue.length!=0) {
-        var curr = queue.dequeue();
-        var deep = curr.depth, nowX = curr.x, nowY = curr.y;
-
-        for (var direction in core.utils.scan) {
-            if (!core.inArray(canMoveArray[nowX][nowY], direction))
-                continue;
-
-            var nx = nowX + core.utils.scan[direction].x;
-            var ny = nowY + core.utils.scan[direction].y;
-            if (nx<0 || nx>=fw || ny<0 || ny>=fh) continue;
-
-            var nid = nx + fw * ny;
-
-            if (core.isset(route[nid])) continue;
-
-            var deepAdd=1;
-            var nextId, nextBlock = core.getBlock(nx,ny);
-            if (nextBlock!=null){
-                nextId = nextBlock.block.event.id;
-                // 绕过亮灯（因为只有一次通行机会很宝贵）
-                if(nextId == "light") deepAdd=100;
-                // 绕过路障
-                // if (nextId.substring(nextId.length-3)=="Net") deepAdd=core.values.lavaDamage*10;
-                // 绕过血瓶
-                if (!core.flags.potionWhileRouting && nextId.substring(nextId.length-6)=="Potion") deepAdd+=20;
-                // 绕过传送点
-                if  (nextBlock.block.event.trigger == 'changeFloor') deepAdd+=10;
-            }
-            deepAdd+=core.status.checkBlock.damage[nid]*10;
-            // 绕过捕捉
-            if ((core.status.checkBlock.ambush||[])[nid])
-                deepAdd += 10000;
-
-            if (nx == destX && ny == destY) {
-                route[nid] = direction;
-                break;
-            }
-            if (core.noPass(nx, ny))
-                continue;
-
-            route[nid] = direction;
-            queue.queue({depth: deep+deepAdd, x: nx, y: ny});
-        }
-        if (core.isset(route[destX + fw * destY])) break;
-    }
-    if (!core.isset(route[destX + fw * destY])) {
-        return [];
-    }
-
-    var nowX = destX, nowY = destY;
-    while (nowX != startX || nowY != startY) {
-        var dir = route[nowX + fw * nowY];
-        ans.push({'direction': dir, 'x': nowX, 'y': nowY});
-        nowX -= core.utils.scan[dir].x;
-        nowY -= core.utils.scan[dir].y;
-    }
-
-    ans.reverse();
-    return ans;
-}
-
-////// 显示离散的寻路点 //////
-control.prototype.fillPosWithPoint = function (pos) {
-    core.fillRect('ui', pos.x*32+12,pos.y*32+12,8,8, '#bfbfbf');
-}
-
-// 当前是否正在移动
-control.prototype.isMoving = function () {
-    return !core.status.heroStop || core.status.heroMoving > 0;
 }
 
 ////// 设置勇士的自动行走路线 //////
 control.prototype.setAutoHeroMove = function (steps) {
     steps=steps||core.status.automaticRoute.autoStepRoutes;
-    if (steps.length == 0) {
-        return;
-    }
+    if (steps.length == 0) return;
     core.status.automaticRoute.autoStepRoutes=steps;
     core.status.automaticRoute.autoHeroMove = true;
     core.status.automaticRoute.autoStep = 1;
@@ -670,33 +556,28 @@ control.prototype.setAutoHeroMove = function (steps) {
 
 ////// 设置行走的效果动画 //////
 control.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
-    if (core.status.heroMoving>0) {
-        return;
-    }
+    if (core.status.heroMoving > 0) return;
     core.status.heroMoving=1;
 
     var toAdd = 1;
-    if (core.status.replay.speed>3)
-        toAdd = 2;
-    if (core.status.replay.speed>6)
-        toAdd = 4;
-    if (core.status.replay.speed>12)
-        toAdd = 8;
+    if (core.status.replay.speed>3) toAdd = 2;
+    if (core.status.replay.speed>6) toAdd = 4;
+    if (core.status.replay.speed>12) toAdd = 8;
 
     core.interval.heroMoveInterval = window.setInterval(function () {
         core.status.heroMoving+=toAdd;
         if (core.status.heroMoving>=8) {
-            core.setHeroLoc('x', x+core.utils.scan[direction].x, true);
-            core.setHeroLoc('y', y+core.utils.scan[direction].y, true);
-            core.control.updateFollowers();
-            core.moveOneStep();
-            core.clearMap('hero');
-            core.drawHero(direction);
             clearInterval(core.interval.heroMoveInterval);
             core.status.heroMoving = 0;
-            if (core.isset(callback)) callback();
+            core.moveOneStep(x + core.utils.scan[direction].x, y + core.utils.scan[direction].y);
+            if (callback) callback();
         }
     }, (core.values.moveSpeed||100) / 8 * toAdd / core.status.replay.speed);
+}
+
+////// 每移动一格后执行的事件 //////
+control.prototype.moveOneStep = function(x, y) {
+    return this.controldata.moveOneStep(x, y);
 }
 
 ////// 实际每一步的行走过程 //////
@@ -763,22 +644,6 @@ control.prototype.moveAction = function (callback) {
     }
 }
 
-////// 转向 //////
-control.prototype.turnHero = function(direction) {
-    if (core.isset(direction)) {
-        core.setHeroLoc('direction', direction);
-        core.drawHero();
-        core.status.route.push("turn:"+direction);
-        return;
-    }
-    if (core.status.hero.loc.direction == 'up') core.status.hero.loc.direction = 'right';
-    else if (core.status.hero.loc.direction == 'right') core.status.hero.loc.direction = 'down';
-    else if (core.status.hero.loc.direction == 'down') core.status.hero.loc.direction = 'left';
-    else if (core.status.hero.loc.direction == 'left') core.status.hero.loc.direction = 'up';
-    core.drawHero();
-    core.status.route.push("turn");
-}
-
 ////// 让勇士开始移动 //////
 control.prototype.moveHero = function (direction, callback) {
     // 如果正在移动，直接return
@@ -820,6 +685,51 @@ control.prototype.moveHero = function (direction, callback) {
             callback();
         })
     }
+}
+
+////// 当前是否正在移动 //////
+control.prototype.isMoving = function () {
+    return !core.status.heroStop || core.status.heroMoving > 0;
+}
+
+////// 停止勇士的一切行动，等待勇士行动结束后，再执行callback //////
+control.prototype.waitHeroToStop = function(callback) {
+    var lastDirection = core.status.automaticRoute.lastDirection;
+    core.stopAutomaticRoute();
+    core.clearContinueAutomaticRoute();
+    if (core.isset(callback)) {
+        core.status.replay.animate=true;
+        core.lockControl();
+        core.status.automaticRoute.moveDirectly = false;
+        setTimeout(function(){
+            core.status.replay.animate=false;
+            if (core.isset(lastDirection))
+                core.setHeroLoc('direction', lastDirection);
+            core.drawHero();
+            callback();
+        }, 30);
+    }
+}
+
+////// 停止勇士的移动状态 //////
+control.prototype.stopHero = function () {
+    core.status.heroStop = true;
+}
+
+////// 转向 //////
+control.prototype.turnHero = function(direction) {
+    if (core.isset(direction)) {
+        core.setHeroLoc('direction', direction);
+        core.drawHero();
+        core.status.route.push("turn:"+direction);
+        return;
+    }
+    if (core.status.hero.loc.direction == 'up') core.status.hero.loc.direction = 'right';
+    else if (core.status.hero.loc.direction == 'right') core.status.hero.loc.direction = 'down';
+    else if (core.status.hero.loc.direction == 'down') core.status.hero.loc.direction = 'left';
+    else if (core.status.hero.loc.direction == 'left') core.status.hero.loc.direction = 'up';
+    core.drawHero();
+    core.status.route.push("turn");
 }
 
 /////// 使用事件让勇士移动。这个函数将不会触发任何事件 //////
@@ -949,33 +859,27 @@ control.prototype.jumpHero = function (ex, ey, time, callback) {
     core.animateFrame.asyncId[animate] = true;
 }
 
-////// 每移动一格后执行的事件 //////
-control.prototype.moveOneStep = function() {
-    return this.controldata.moveOneStep();
+////// 瞬间移动 //////
+control.prototype.moveDirectly = function (destX, destY) {
+    return this.controldata.moveDirectly(destX, destY);
 }
 
-////// 停止勇士的一切行动，等待勇士行动结束后，再执行callback //////
-control.prototype.waitHeroToStop = function(callback) {
-    var lastDirection = core.status.automaticRoute.lastDirection;
-    core.stopAutomaticRoute();
-    core.clearContinueAutomaticRoute();
-    if (core.isset(callback)) {
-        core.status.replay.animate=true;
-        core.lockControl();
-        core.status.automaticRoute.moveDirectly = false;
-        setTimeout(function(){
-            core.status.replay.animate=false;
-            if (core.isset(lastDirection))
-                core.setHeroLoc('direction', lastDirection);
-            core.drawHero();
-            callback();
-        }, 30);
+////// 尝试瞬间移动 //////
+control.prototype.tryMoveDirectly = function (destX, destY) {
+    if (Math.abs(core.getHeroLoc('x')-destX)+Math.abs(core.getHeroLoc('y')-destY)<=1)
+        return false;
+    var canMoveArray = core.maps.generateMovableArray();
+    var testMove = function (dx, dy, dir) {
+        if (dx<0 || dx>=core.bigmap.width|| dy<0 || dy>=core.bigmap.height) return false;
+        if (core.isset(dir) && !core.inArray(canMoveArray[dx][dy],dir)) return false;
+        if (core.control.moveDirectly(dx, dy)) {
+            if (core.isset(dir)) core.moveHero(dir, function() {});
+            return true;
+        }
+        return false;
     }
-}
-
-////// 停止勇士的移动状态 //////
-control.prototype.stopHero = function () {
-    core.status.heroStop = true;
+    return testMove(destX,destY) || testMove(destX-1, destY, "right") || testMove(destX,destY-1,"down")
+        || testMove(destX,destY+1,"up") || testMove(destX+1,destY,"left");
 }
 
 ////// 设置画布偏移
@@ -1038,7 +942,7 @@ control.prototype.drawHero = function (direction, x, y, status, offset) {
 
     core.clearAutomaticRouteNode(x+dx, y+dy);
 
-    core.clearMap('hero', x * 32 - core.bigmap.offsetX - 32, y * 32 - core.bigmap.offsetY - 32, 96, 96);
+    core.clearMap('hero', x * 32 - core.bigmap.offsetX - 32, y * 32 - core.bigmap.offsetY - 64, 96, 128);
 
     var heroIconArr = core.material.icons.hero;
     var drawObjs = [];

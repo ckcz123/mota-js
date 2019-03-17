@@ -505,6 +505,75 @@ maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
     return true;
 }
 
+////// 自动寻路找寻最优路径 //////
+maps.prototype.automaticRoute = function (destX, destY) {
+    var startX = core.getHeroLoc('x'), startY = core.getHeroLoc('y');
+    if (destX == startX && destY == startY) return [];
+    // BFS找寻最短路径
+    var route = this._automaticRoute_bfs(startX, startY, destX, destY);
+    if (route[destX+","+destY] == null) return [];
+    // 路径数组转换
+    var ans = [], nowX = destX, nowY = destY;
+    while (nowX != startX || nowY != startY) {
+        var dir = route[nowX + "," + nowY];
+        ans.push({'direction': dir, 'x': nowX, 'y': nowY});
+        nowX -= core.utils.scan[dir].x;
+        nowY -= core.utils.scan[dir].y;
+    }
+    ans.reverse();
+    return ans;
+}
+
+maps.prototype._automaticRoute_bfs = function (startX, startY, destX, destY) {
+    var route = {}, canMoveArray = this.generateMovableArray();
+    // 使用优先队列
+    var queue = new PriorityQueue({comparator: function (a,b) { return a.depth - b.depth; }});
+    route[startX + "," + startY] = '';
+    queue.queue({depth: 0, x: startX, y: startY});
+    while (queue.length!=0) {
+        var curr = queue.dequeue(), deep = curr.depth, nowX = curr.x, nowY = curr.y;
+        for (var direction in core.utils.scan) {
+            if (!core.inArray(canMoveArray[nowX][nowY], direction)) continue;
+            var nx = nowX + core.utils.scan[direction].x;
+            var ny = nowY + core.utils.scan[direction].y;
+            if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height || route[nx+","+ny] != null) continue;
+            // 重点
+            if (nx == destX && ny == destY) {
+                route[nx+","+ny] = direction;
+                break;
+            }
+            // 不可通行
+            if (core.noPass(nx, ny)) continue;
+            route[nx+","+ny] = direction;
+            queue.queue({depth: deep + this._automaticRoute_deepAdd(nx, ny), x: nx, y: ny});
+        }
+        if (route[destX+","+destY] != null) break;
+    }
+    return route;
+}
+
+maps.prototype._automaticRoute_deepAdd = function (x, y) {
+    // 判定每个可通行点的损耗值，越高越应该绕路
+    var deepAdd = 1;
+    var block = core.getBlock(x,y);
+    if (block != null){
+        var id = block.block.event.id;
+        // 绕过亮灯
+        if (id == "light") deepAdd += 100;
+        // 绕过路障
+        if (id.endsWith("Net")) deepAdd += 100;
+        // 绕过血瓶
+        if (!core.flags.potionWhileRouting && id.endsWith("Potion")) deepAdd += 100;
+        // 绕过传送点
+        // if (nextBlock.block.event.trigger == 'changeFloor') deepAdd+=10;
+    }
+    // 绕过存在伤害的地方
+    deepAdd += core.status.checkBlock.damage[x+","+y] * 100;
+    // 绕过捕捉
+    if ((core.status.checkBlock.ambush||[])[x+","+y]) deepAdd += 1000;
+    return deepAdd;
+}
+
 // -------- 绘制地图，各层图块，楼层贴图，Autotile -------- //
 
 ////// 绘制一个图块 //////

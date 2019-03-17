@@ -1792,7 +1792,8 @@ actions.prototype._clickSwitchs = function (x, y) {
                 core.ui.drawSwitchs();
                 break;
             case 6:
-                core.setFlag('clickMove', !core.getFlag('clickMove', true));
+                if (core.hasFlag('__noClickMove__')) core.removeFlag('__noClickMove__');
+                else core.setFlag('__noClickMove__', true);
                 core.ui.drawSwitchs();
                 break;
             case 7:

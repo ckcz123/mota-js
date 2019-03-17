@@ -555,7 +555,7 @@ control.prototype.setAutoHeroMove = function (steps) {
 }
 
 ////// 设置行走的效果动画 //////
-control.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
+control.prototype.setHeroMoveInterval = function (callback) {
     if (core.status.heroMoving > 0) return;
     core.status.heroMoving=1;
 
@@ -569,7 +569,7 @@ control.prototype.setHeroMoveInterval = function (direction, x, y, callback) {
         if (core.status.heroMoving>=8) {
             clearInterval(core.interval.heroMoveInterval);
             core.status.heroMoving = 0;
-            core.moveOneStep(x + core.utils.scan[direction].x, y + core.utils.scan[direction].y);
+            core.moveOneStep(core.nextX(), core.nextY());
             if (callback) callback();
         }
     }, (core.values.moveSpeed||100) / 8 * toAdd / core.status.replay.speed);
@@ -583,64 +583,70 @@ control.prototype.moveOneStep = function(x, y) {
 ////// 实际每一步的行走过程 //////
 control.prototype.moveAction = function (callback) {
     if (core.status.heroMoving>0) return;
-    var direction = core.getHeroLoc('direction');
-    var x = core.getHeroLoc('x');
-    var y = core.getHeroLoc('y');
-    var noPass = core.noPass(x + core.utils.scan[direction].x, y + core.utils.scan[direction].y), canMove = core.canMoveHero();
-    if (noPass || !canMove) {
+    var noPass = core.noPass(core.nextX(), core.nextY()), canMove = core.canMoveHero();
+    // 下一个点如果不能走
+    if (noPass || !canMove) return this._moveAction_noPass(canMove, callback);
+    this._moveAction_moving(callback);
+}
+
+control.prototype._moveAction_noPass = function (canMove, callback) {
+    if (core.status.event.id!='ski')
+        core.status.route.push(core.getHeroLoc('direction'));
+    core.status.automaticRoute.moveStepBeforeStop = [];
+    core.status.automaticRoute.lastDirection = core.getHeroLoc('direction');
+    if (canMove) core.trigger(core.nextX(), core.nextY());
+    core.drawHero();
+
+    if (core.status.automaticRoute.moveStepBeforeStop.length==0) {
+        core.clearContinueAutomaticRoute();
+        core.stopAutomaticRoute();
+    }
+    if (callback) callback();
+}
+
+control.prototype._moveAction_moving = function (callback) {
+    core.setHeroMoveInterval(function () {
+        var direction = core.getHeroLoc('direction');
+        core.control._moveAction_popAutomaticRoute();
         if (core.status.event.id!='ski')
             core.status.route.push(direction);
-        core.status.automaticRoute.moveStepBeforeStop = [];
-        core.status.automaticRoute.lastDirection = core.getHeroLoc('direction');
-        if (canMove) // 非箭头：触发
-            core.events._trigger(x + core.utils.scan[direction].x, y + core.utils.scan[direction].y);
-        core.drawHero(direction, x, y);
 
-        if (core.status.automaticRoute.moveStepBeforeStop.length==0) {
-            core.clearContinueAutomaticRoute();
-            core.stopAutomaticRoute();
+        // 无事件的道具（如血瓶）需要优先于阻激夹域判定
+        var nowx = core.getHeroLoc('x'), nowy = core.getHeroLoc('y');
+        var block = core.getBlock(nowx,nowy);
+        var hasTrigger = false;
+        if (block!=null && block.block.event.trigger=='getItem' &&
+            !core.floors[core.status.floorId].afterGetItem[nowx+","+nowy]) {
+            hasTrigger = true;
+            core.trigger(nowx, nowy);
         }
-        if (core.isset(callback))
-            callback();
-    }
-    else {
-        core.setHeroMoveInterval(direction, x, y, function () {
-            if (core.status.automaticRoute.autoHeroMove) {
-                core.status.automaticRoute.movedStep++;
-                core.status.automaticRoute.lastDirection = core.getHeroLoc('direction');
-                if (core.status.automaticRoute.destStep == core.status.automaticRoute.movedStep) {
-                    if (core.status.automaticRoute.autoStep == core.status.automaticRoute.autoStepRoutes.length) {
-                        core.clearContinueAutomaticRoute();
-                        core.stopAutomaticRoute();
-                    }
-                    else {
-                        core.status.automaticRoute.movedStep = 0;
-                        core.status.automaticRoute.destStep = core.status.automaticRoute.autoStepRoutes[core.status.automaticRoute.autoStep].step;
-                        core.setHeroLoc('direction', core.status.automaticRoute.autoStepRoutes[core.status.automaticRoute.autoStep].direction);
-                        core.status.automaticRoute.autoStep++;
-                    }
-                }
-            }
-            else if (core.status.heroStop) {
-                core.drawHero();
-            }
-            if (core.status.event.id!='ski')
-                core.status.route.push(direction);
+        // 执行该点的阻激夹域事件
+        core.checkBlock();
+        // 执行该点事件
+        if (!hasTrigger)
+            core.trigger(nowx, nowy);
+        if (callback) callback();
+    });
+}
 
-            // 检查是不是无事件的道具
-            var nowx = core.getHeroLoc('x'), nowy = core.getHeroLoc('y');
-            var block = core.getBlock(nowx,nowy);
-            var hasTrigger = false;
-            if (block!=null && block.block.event.trigger=='getItem' &&
-                !core.isset(core.floors[core.status.floorId].afterGetItem[nowx+","+nowy])) {
-                hasTrigger = true;
-                core.events._trigger(nowx, nowy);
+control.prototype._moveAction_popAutomaticRoute = function () {
+    var automaticRoute = core.status.automaticRoute;
+    // 检查自动寻路是否被弹出
+    if (automaticRoute.autoHeroMove) {
+        automaticRoute.movedStep++;
+        automaticRoute.lastDirection = core.getHeroLoc('direction');
+        if (automaticRoute.destStep == automaticRoute.movedStep) {
+            if (automaticRoute.autoStep == automaticRoute.autoStepRoutes.length) {
+                core.clearContinueAutomaticRoute();
+                core.stopAutomaticRoute();
             }
-            core.checkBlock();
-            if (!hasTrigger && !core.status.gameOver)
-                core.events._trigger(nowx, nowy);
-            if (core.isset(callback)) callback();
-        });
+            else {
+                automaticRoute.movedStep = 0;
+                automaticRoute.destStep = automaticRoute.autoStepRoutes[automaticRoute.autoStep].step;
+                core.setHeroLoc('direction', automaticRoute.autoStepRoutes[automaticRoute.autoStep].direction);
+                core.status.automaticRoute.autoStep++;
+            }
+        }
     }
 }
 
@@ -650,41 +656,34 @@ control.prototype.moveHero = function (direction, callback) {
     if (core.status.heroMoving!=0) return;
     if (core.isset(direction))
         core.setHeroLoc('direction', direction);
-    if (!core.isset(callback)) { // 如果不存在回调函数，则使用heroMoveTrigger
-        core.status.heroStop = false;
-        core.status.automaticRoute.moveDirectly = false;
 
-        var doAction = function () {
-            if (!core.status.heroStop) {
-                if (core.hasFlag('debug') && core.status.ctrlDown) {
-                    if (core.status.heroMoving!=0) return;
-                    // 检测是否穿出去
-                    direction = core.getHeroLoc('direction');
-                    var nx = core.getHeroLoc('x') + core.utils.scan[direction].x, ny=core.getHeroLoc('y') + core.utils.scan[direction].y;
-                    if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height) return;
+    if (callback) return this.moveAction(callback);
+    this._moveHero_moving();
+}
 
-                    core.status.heroMoving=-1;
-                    core.eventMoveHero([direction], 100, function () {
-                        core.status.heroMoving=0;
-                        doAction();
-                    });
-                }
-                else {
-                    core.moveAction();
-                    setTimeout(doAction, 50);
-                }
+control.prototype._moveHero_moving = function () {
+    // ------ 我已经看不懂这个函数了，反正好用就行23333333
+    core.status.heroStop = false;
+    core.status.automaticRoute.moveDirectly = false;
+    var move = function () {
+        if (!core.status.heroStop) {
+            if (core.hasFlag('debug') && core.status.ctrlDown) {
+                if (core.status.heroMoving!=0) return;
+                // 检测是否穿出去
+                if (!core.insideMap(1)) return;
+                core.status.heroMoving=-1;
+                core.eventMoveHero([core.getHeroLoc('direction')], core.values.moveSpeed, function () {
+                    core.status.heroMoving=0;
+                    move();
+                });
             }
             else {
-                core.stopHero();
+                core.moveAction();
+                setTimeout(move, 50);
             }
         }
-        doAction();
     }
-    else { // 否则，只向某个方向移动一步，然后调用callback
-        core.moveAction(function () {
-            callback();
-        })
-    }
+    move();
 }
 
 ////// 当前是否正在移动 //////
@@ -697,7 +696,7 @@ control.prototype.waitHeroToStop = function(callback) {
     var lastDirection = core.status.automaticRoute.lastDirection;
     core.stopAutomaticRoute();
     core.clearContinueAutomaticRoute();
-    if (core.isset(callback)) {
+    if (callback) {
         core.status.replay.animate=true;
         core.lockControl();
         core.status.automaticRoute.moveDirectly = false;
@@ -718,145 +717,16 @@ control.prototype.stopHero = function () {
 
 ////// 转向 //////
 control.prototype.turnHero = function(direction) {
-    if (core.isset(direction)) {
+    if (direction) {
         core.setHeroLoc('direction', direction);
         core.drawHero();
         core.status.route.push("turn:"+direction);
         return;
     }
-    if (core.status.hero.loc.direction == 'up') core.status.hero.loc.direction = 'right';
-    else if (core.status.hero.loc.direction == 'right') core.status.hero.loc.direction = 'down';
-    else if (core.status.hero.loc.direction == 'down') core.status.hero.loc.direction = 'left';
-    else if (core.status.hero.loc.direction == 'left') core.status.hero.loc.direction = 'up';
+    var dirs = {'up':'right','right':'down','down':'left','left':'up'};
+    core.setHeroLoc('direction', dirs[core.getHeroLoc('direction')]);
     core.drawHero();
     core.status.route.push("turn");
-}
-
-/////// 使用事件让勇士移动。这个函数将不会触发任何事件 //////
-control.prototype.eventMoveHero = function(steps, time, callback) {
-    time = time || core.values.moveSpeed || 100;
-
-    // 要运行的轨迹：将steps展开
-    var moveSteps=[];
-    steps.forEach(function (e) {
-        if (typeof e=="string") {
-            moveSteps.push(e);
-        }
-        else {
-            if (!core.isset(e.value)) {
-                moveSteps.push(e.direction)
-            }
-            else {
-                for (var i=0;i<e.value;i++) {
-                    moveSteps.push(e.direction);
-                }
-            }
-        }
-    });
-
-    moveSteps = moveSteps.filter(function (t) { return ['up','down','left','right','forward','backward'].indexOf(t)>=0;});
-
-    var step=0;
-
-    var animate=window.setInterval(function() {
-        var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
-        if (moveSteps.length==0) {
-            delete core.animateFrame.asyncId[animate];
-            clearInterval(animate);
-            core.drawHero(null, x, y);
-            if (core.isset(callback)) callback();
-        }
-        else {
-            var direction = moveSteps[0];
-
-            // ------ 前进/后退
-            var o = direction == 'backward' ? -1 : 1;
-            if (direction == 'forward' || direction == 'backward') direction = core.getHeroLoc('direction');
-
-            core.setHeroLoc('direction', direction);
-            step++;
-            if (step <= 4) {
-                core.drawHero(direction, x, y, 'leftFoot', 4 * o * step);
-            }
-            else if (step <= 8) {
-                core.drawHero(direction, x, y, 'rightFoot', 4 * o * step);
-            }
-            if (step == 8) {
-                step = 0;
-                core.setHeroLoc('x', x + o * core.utils.scan[direction].x, true);
-                core.setHeroLoc('y', y + o * core.utils.scan[direction].y, true);
-                core.control.updateFollowers();
-                moveSteps.shift();
-            }
-        }
-    }, time / 8 / core.status.replay.speed);
-
-    core.animateFrame.asyncId[animate] = true;
-}
-
-////// 勇士跳跃事件 //////
-control.prototype.jumpHero = function (ex, ey, time, callback) {
-    var sx=core.status.hero.loc.x, sy=core.status.hero.loc.y;
-    if (!core.isset(ex)) ex=sx;
-    if (!core.isset(ey)) ey=sy;
-
-    time = time || 500;
-
-    core.playSound('jump.mp3');
-
-    var dx = ex-sx, dy=ey-sy, distance = Math.round(Math.sqrt(dx * dx + dy * dy));
-    var jump_peak = 6 + distance, jump_count = jump_peak * 2;
-    var currx = sx, curry = sy;
-
-    var heroIcon = core.material.icons.hero[core.getHeroLoc('direction')];
-    var status = 'stop';
-    var height = core.material.icons.hero.height;
-
-    var drawX = function() {
-        return currx * 32;
-    }
-    var drawY = function() {
-        var ret = curry * 32;
-        if(jump_count >= jump_peak){
-            var n = jump_count - jump_peak;
-        }else{
-            var n = jump_peak - jump_count;
-        }
-        return ret - (jump_peak * jump_peak - n * n) / 2;
-    }
-    var updateJump = function() {
-        jump_count--;
-        currx = (currx * jump_count + ex) / (jump_count + 1.0);
-        curry = (curry * jump_count + ey) / (jump_count + 1.0);
-    }
-
-    if (core.isset(core.status.hero.followers) && core.status.hero.followers.length>0)
-        core.clearMap('hero');
-
-    var animate=window.setInterval(function() {
-
-        if (jump_count>0) {
-            core.clearMap('hero', drawX()-core.bigmap.offsetX, drawY()-height+32-core.bigmap.offsetY, 32, height);
-            updateJump();
-            var nowx = drawX(), nowy = drawY();
-            core.bigmap.offsetX = core.clamp(nowx - 32*6, 0, 32*core.bigmap.width-416);
-            core.bigmap.offsetY = core.clamp(nowy - 32*6, 0, 32*core.bigmap.height-416);
-            core.control.updateViewport();
-            core.drawImage('hero', core.material.images.hero, heroIcon[status] * 32, heroIcon.loc * height, 32, height,
-                nowx - core.bigmap.offsetX, nowy + 32-height - core.bigmap.offsetY, 32, height);
-        }
-        else {
-            delete core.animateFrame.asyncId[animate];
-            clearInterval(animate);
-            core.setHeroLoc('x', ex);
-            core.setHeroLoc('y', ey);
-            core.drawHero();
-            if (core.isset(callback)) callback();
-        }
-
-    }, time / 16 / core.status.replay.speed);
-
-    core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 瞬间移动 //////
@@ -866,14 +736,13 @@ control.prototype.moveDirectly = function (destX, destY) {
 
 ////// 尝试瞬间移动 //////
 control.prototype.tryMoveDirectly = function (destX, destY) {
-    if (Math.abs(core.getHeroLoc('x')-destX)+Math.abs(core.getHeroLoc('y')-destY)<=1)
-        return false;
+    if (this.nearHero(destX, destY)) return false;
     var canMoveArray = core.maps.generateMovableArray();
     var testMove = function (dx, dy, dir) {
         if (dx<0 || dx>=core.bigmap.width|| dy<0 || dy>=core.bigmap.height) return false;
-        if (core.isset(dir) && !core.inArray(canMoveArray[dx][dy],dir)) return false;
+        if (dir && !core.inArray(canMoveArray[dx][dy],dir)) return false;
         if (core.control.moveDirectly(dx, dy)) {
-            if (core.isset(dir)) core.moveHero(dir, function() {});
+            if (dir) core.moveHero(dir, function() {});
             return true;
         }
         return false;
@@ -881,6 +750,59 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
     return testMove(destX,destY) || testMove(destX-1, destY, "right") || testMove(destX,destY-1,"down")
         || testMove(destX,destY+1,"up") || testMove(destX+1,destY,"left");
 }
+
+////// 绘制勇士 //////
+control.prototype.drawHero = function (direction, x, y, status, offset) {
+    if (!core.isPlaying() || !core.status.floorId) return;
+    if (x == null) x = core.getHeroLoc('x');
+    if (y == null) y = core.getHeroLoc('y');
+    status = status || 'stop';
+    direction = direction || core.getHeroLoc('direction');
+    offset = offset || 0;
+    var way = core.utils.scan[direction];
+    var dx = way.x, dy = way.y, offsetX = dx * offset, offsetY = dy * offset;
+    core.bigmap.offsetX = core.clamp((x - 6) * 32 + offsetX, 0, 32*core.bigmap.width-core.__PIXELS__);
+    core.bigmap.offsetY = core.clamp((y - 6) * 32 + offsetY, 0, 32*core.bigmap.height-core.__PIXELS__);
+    core.clearAutomaticRouteNode(x+dx, y+dy);
+    core.clearMap('hero');
+
+    this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
+        core.drawImage('hero', block.img, block.heroIcon[block.status]*32,
+            block.heroIcon.loc * block.height, 32, block.height,
+            block.posx, block.posy+32-block.height, 32, block.height);
+    });
+
+    core.control.updateViewport();
+}
+
+control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, offset) {
+    var heroIconArr = core.material.icons.hero, drawObjs = [], index = 0;
+    drawObjs.push({
+        "img": core.material.images.hero,
+        "height": core.material.icons.hero.height,
+        "heroIcon": heroIconArr[direction],
+        "posx": x * 32 - core.bigmap.offsetX + core.utils.scan[direction].x * offset,
+        "posy": y * 32 - core.bigmap.offsetY + core.utils.scan[direction].y * offset,
+        "status": status,
+        "index": index++,
+    });
+    (core.status.hero.followers||[]).forEach(function (t) {
+        drawObjs.push({
+            "img": t.img,
+            "height": t.img.height/4,
+            "heroIcon": heroIconArr[t.direction],
+            "posx": 32*t.x - core.bigmap.offsetX + (t.stop?0:core.utils.scan[t.direction].x*offset),
+            "posy": 32*t.y - core.bigmap.offsetY + (t.stop?0:core.utils.scan[t.direction].y*offset),
+            "status": t.stop?"stop":status,
+            "index": index++
+        });
+    });
+    return drawObjs.sort(function(a, b) {
+        return a.posy==b.posy?b.index-a.index:a.posy-b.posy;
+    });
+}
+
+// ------ 画布、位置、阻激夹域等 ------ //
 
 ////// 设置画布偏移
 control.prototype.setGameCanvasTranslate = function(canvas,x,y){
@@ -922,73 +844,6 @@ control.prototype.updateViewport = function() {
     core.relocateCanvas('route', core.status.automaticRoute.offsetX - core.bigmap.offsetX, core.status.automaticRoute.offsetY - core.bigmap.offsetY);
 }
 
-////// 绘制勇士 //////
-control.prototype.drawHero = function (direction, x, y, status, offset) {
-
-    if (!core.isPlaying()) return;
-
-    if (!core.isset(x)) x = core.getHeroLoc('x');
-    if (!core.isset(y)) y = core.getHeroLoc('y');
-    status = status || 'stop';
-    direction = direction || core.getHeroLoc('direction');
-    offset = offset || 0;
-    var way = core.utils.scan[direction];
-    var offsetX = way.x*offset;
-    var offsetY = way.y*offset;
-    var dx=offsetX==0?0:offsetX/Math.abs(offsetX), dy=offsetY==0?0:offsetY/Math.abs(offsetY);
-
-    core.bigmap.offsetX = core.clamp((x - 6) * 32 + offsetX, 0, 32*core.bigmap.width-416);
-    core.bigmap.offsetY = core.clamp((y - 6) * 32 + offsetY, 0, 32*core.bigmap.height-416);
-
-    core.clearAutomaticRouteNode(x+dx, y+dy);
-
-    core.clearMap('hero', x * 32 - core.bigmap.offsetX - 32, y * 32 - core.bigmap.offsetY - 64, 96, 128);
-
-    var heroIconArr = core.material.icons.hero;
-    var drawObjs = [];
-    // add hero
-    drawObjs.push({
-        "img": core.material.images.hero,
-        "height": core.material.icons.hero.height,
-        "heroIcon": heroIconArr[direction],
-        "posx": x * 32 - core.bigmap.offsetX + offsetX,
-        "posy": y * 32 - core.bigmap.offsetY + offsetY,
-        "status": status,
-        "index": 0,
-    });
-    
-    // Add other followers
-    if (core.isset(core.status.hero.followers)) {
-        var index=1;
-        core.status.hero.followers.forEach(function (t) {
-            core.clearMap('hero', 32*t.x-core.bigmap.offsetX-32, 32*t.y-core.bigmap.offsetY-32, 96, 96);
-            if (core.isset(core.material.images.images[t.img])) {
-                drawObjs.push({
-                    "img": core.material.images.images[t.img],
-                    "height": core.material.images.images[t.img].height/4,
-                    "heroIcon": heroIconArr[t.direction],
-                    "posx": 32*t.x - core.bigmap.offsetX + (t.stop?0:core.utils.scan[t.direction].x*offset),
-                    "posy": 32*t.y - core.bigmap.offsetY + (t.stop?0:core.utils.scan[t.direction].y*offset),
-                    "status": t.stop?"stop":status,
-                    "index": index++
-                });
-            }
-        });
-    }
-
-    drawObjs.sort(function (a, b) {
-        return a.posy==b.posy?b.index-a.index:a.posy-b.posy;
-    });
-
-    drawObjs.forEach(function (block) {
-        core.drawImage('hero', block.img, block.heroIcon[block.status]*32,
-            block.heroIcon.loc * block.height, 32, block.height,
-            block.posx, block.posy+32-block.height, 32, block.height);
-    });
-
-    core.control.updateViewport();
-}
-
 ////// 设置勇士的位置 //////
 control.prototype.setHeroLoc = function (itemName, itemVal, noGather) {
     core.status.hero.loc[itemName] = itemVal;
@@ -1018,11 +873,18 @@ control.prototype.nearHero = function (x, y) {
     return Math.abs(x-core.getHeroLoc('x'))+Math.abs(y-core.getHeroLoc('y'))<=1;
 }
 
+////// 判定下一个点是否在界面外 //////
+control.prototype.insideMap = function (n) {
+    n = n || 0;
+    var x = n==0?core.getHeroLoc('x'):core.nextX(n),
+        y = n==0?core.getHeroLoc('y'):core.nextY(n);
+    return x>=0 && x < core.bigmap.width && y >= 0 && y < core.bigmap.height;
+}
+
 ////// 聚集跟随者 //////
 control.prototype.gatherFollowers = function () {
-    if (!core.isset(core.status.hero.followers) || core.status.hero.followers.length==0) return;
     var x=core.getHeroLoc('x'), y=core.getHeroLoc('y'), dir=core.getHeroLoc('direction');
-    core.status.hero.followers.forEach(function (t) {
+    (core.status.hero.followers||[]).forEach(function (t) {
         t.x = x;
         t.y = y;
         t.stop = true;
@@ -1032,8 +894,7 @@ control.prototype.gatherFollowers = function () {
 
 ////// 更新跟随者坐标 //////
 control.prototype.updateFollowers = function () {
-    if (!core.isset(core.status.hero.followers) || core.status.hero.followers.length==0) return;
-    core.status.hero.followers.forEach(function (t) {
+    (core.status.hero.followers||[]).forEach(function (t) {
         if (!t.stop) {
             t.x += core.utils.scan[t.direction].x;
             t.y += core.utils.scan[t.direction].y;
@@ -1041,30 +902,16 @@ control.prototype.updateFollowers = function () {
     })
 
     var nowx = core.getHeroLoc('x'), nowy = core.getHeroLoc('y');
-    core.status.hero.followers.forEach(function (t) {
-        if (t.x == nowx && t.y == nowy) {
-            t.stop = true;
-        }
-        else {
-            var dx = nowx-t.x, dy = nowy-t.y;
-            if (dx==-1) {
-                t.stop=false;
-                t.direction='left';
-            }
-            else if (dx==1) {
-                t.stop=false;
-                t.direction='right';
-            }
-            else if (dy==-1) {
-                t.stop=false;
-                t.direction='up';
-            }
-            else if (dy==1) {
-                t.stop=false;
-                t.direction='down';
+    (core.status.hero.followers||[]).forEach(function (t) {
+        t.stop = true;
+        var dx = nowx - t.x, dy = nowy - t.y;
+        for (var dir in core.utils.scan) {
+            if (core.utils.scan[dir].x == dx && core.utils.scan[dir].y == dy) {
+                t.stop = false;
+                t.direction = dir;
             }
         }
-        nowx=t.x; nowy=t.y;
+        nowx = t.x; nowy = t.y;
     })
 }
 

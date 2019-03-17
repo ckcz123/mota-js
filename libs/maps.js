@@ -461,12 +461,10 @@ maps.prototype._canMoveDirectly_checkGlobal = function () {
 
 maps.prototype._canMoveDirectly_checkStartPoint = function (sx, sy) {
     if (core.status.checkBlock.damage[sx + core.bigmap.width * sy] > 0) return false;
-    var id = core.getBlockId(sx, sy);
-    if (id != null) {
-        // 楼梯或者传送点才能无视
-        if (["upFloor", "downFloor", "portal", "upPortal", "downPortal", "leftPortal", "rightPortal"].indexOf(id) >= 0)
-            return true;
-        return false;
+    var block = core.getBlock(sx, sy);
+    if (block != null) {
+        // 只有起点是传送点才是能无视
+        return block.block.event.trigger == 'changeFloor';
     }
     return true;
 }

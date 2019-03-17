@@ -15,14 +15,15 @@ events.prototype._init = function () {
 // ------ 初始化，开始和结束 ------ //
 
 /// 初始化游戏
-events.prototype.initGame = function () {
-    return this.eventdata.initGame();
+events.prototype.resetGame = function (hero, hard, floorId, maps, values) {
+    return this.eventdata.resetGame(hero, hard, floorId, maps, values);
 }
 
 ////// 游戏开始事件 //////
 events.prototype.startGame = function (hard, seed, route, callback) {
     main.dom.levelChooseButtons.style.display = 'none';
     main.dom.startButtonGroup.style.display = 'none';
+    hard = hard || "";
 
     if (main.mode != 'play') return;
 
@@ -40,7 +41,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 
 events.prototype._startGame_start = function (hard, seed, route, callback) {
     console.log('开始游戏');
-    core.resetStatus(core.firstData.hero, hard, null, null, core.initStatus.maps);
+    core.resetGame(core.firstData.hero, hard, null, core.initStatus.maps);
     var nowLoc = core.clone(core.getHeroLoc());
     core.setHeroLoc('x', -1);
     core.setHeroLoc('y', -1);

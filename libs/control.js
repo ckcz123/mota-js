@@ -25,6 +25,8 @@ control.prototype._init = function () {
     this.registerAnimationFrame("_checkConsoleOpened", true, this._animationFrame_checkConsoleOpened);
 }
 
+// ------ requestAnimationFrame 相关 ------ //
+
 ////// 注册一个 animationFrame //////
 // name：名称，可用来作为注销使用；needPlaying：是否只在游戏运行时才执行（在标题界面不执行）
 // func：要执行的函数，或插件中的函数名；可接受timestamp（从页面加载完毕到当前所经过的时间）作为参数
@@ -286,9 +288,19 @@ control.prototype._animationFrame_checkConsoleOpened = function (timestamp) {
     if (core.consoleOpened()) core.setFlag('__consoleOpened__', true);
 }
 
+// ------ 标题界面的处理 ------ //
 
 ////// 显示游戏开始界面 //////
 control.prototype.showStartAnimate = function (noAnimate, callback) {
+    this._showStartAnimate_resetDom();
+    if (core.flags.startUsingCanvas || noAnimate)
+        return this._showStartAnimate_finished(core.flags.startUsingCanvas, callback);
+    core.hide(core.dom.startTop, 20, function () {
+        core.control._showStartAnimate_finished(false, callback);
+    });
+}
+
+control.prototype._showStartAnimate_resetDom = function () {
     core.dom.startPanel.style.opacity=1;
     core.dom.startPanel.style.display="block";
     core.dom.startTop.style.opacity=1;
@@ -300,59 +312,21 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
     core.clearStatus();
     core.clearMap('all');
     core.deleteAllCanvas();
-
     core.dom.musicBtn.style.display = 'block';
-
     // 重置音量
     core.events.setVolume(1, 0);
-
-    if (core.flags.startUsingCanvas) {
-        core.dom.startTop.style.display = 'none';
-        core.dom.startButtonGroup.style.display = 'block';
-        core.events.startGame('');
-        if (core.isset(callback)) callback();
-        return;
-    }
-
-    if(noAnimate) {
-        core.dom.startTop.style.display = 'none';
-        // core.playGame();
-        core.dom.startButtonGroup.style.display = 'block';
-        if (core.isset(callback)) callback();
-    }
-    else {
-        var opacityVal = 1;
-        var startAnimate = window.setInterval(function () {
-            opacityVal -= 0.03;
-            if (opacityVal < 0) {
-                clearInterval(startAnimate);
-                core.dom.startTop.style.display = 'none';
-                // core.playGame();
-                core.dom.startButtonGroup.style.display = 'block';
-                if (core.isset(callback)) callback();
-            }
-            core.dom.startTop.style.opacity = opacityVal;
-        }, 20);
-    }
-
 }
 
-control.prototype._showStartAnimate_resetDom = function () {
-
+control.prototype._showStartAnimate_finished = function (start, callback) {
+    core.dom.startTop.style.display = 'none';
+    core.dom.startButtonGroup.style.display = 'block';
+    if (start) core.startGame();
+    if (callback) callback();
 }
 
 ////// 隐藏游戏开始界面 //////
 control.prototype.hideStartAnimate = function (callback) {
-    var opacityVal = 1;
-    var startAnimate = window.setInterval(function () {
-        opacityVal -= 0.03;
-        if (opacityVal < 0) {
-            clearInterval(startAnimate);
-            core.dom.startPanel.style.display = 'none';
-            if (core.isset(callback)) callback();
-        }
-        core.dom.startPanel.style.opacity = opacityVal;
-    }, 20);
+    core.hide(core.dom.startPanel, 20, callback);
 }
 
 ////// 游戏是否已经开始 //////
@@ -381,31 +355,9 @@ control.prototype.clearStatus = function() {
     core.clearStatusBar();
     core.deleteAllCanvas();
     core.status.played = false;
-    core.events.setHeroIcon('hero.png', true);
 }
 
-////// 重置游戏状态和初始数据 //////
-control.prototype.resetStatus = function(hero, hard, floorId, route, maps, values) {
-
-    var totalTime = core.animateFrame.totalTime;
-
-    // 清除游戏数据
-    core.clearStatus();
-
-    // 初始化status
-    core.status = core.clone(core.initStatus);
-    core.status.played = true;
-    // 初始化maps
-    core.status.floorId = floorId;
-    core.status.maps = core.clone(maps);
-    // 初始化怪物
-    core.material.enemys = core.enemys.getEnemys();
-    core.material.items = core.items.getItems();
-    // 初始化人物属性
-    core.status.hero = core.clone(hero);
-    // 初始化人物图标
-    core.events.setHeroIcon(core.getFlag('heroIcon', 'hero.png'), true);
-    // 统计数据
+control.prototype._initStatistics = function (totalTime) {
     if (!core.isset(core.status.hero.statistics))
         core.status.hero.statistics = {
             'totalTime': totalTime,
@@ -420,29 +372,6 @@ control.prototype.resetStatus = function(hero, hard, floorId, route, maps, value
             'moveDirectly': 0,
             'ignoreSteps': 0,
         }
-    core.status.hero.statistics.totalTime = core.animateFrame.totalTime =
-        Math.max(core.status.hero.statistics.totalTime, core.animateFrame.totalTime);
-    core.status.hero.statistics.start = null;
-
-    core.status.hard = hard;
-    // 初始化路线
-    if (core.isset(route))
-        core.status.route = route;
-
-    if (core.isset(values))
-        core.values = core.clone(values);
-    else core.values = core.clone(core.data.values);
-
-    core.flags = core.clone(core.data.flags);
-    var systemFlags = core.getFlag("globalFlags", {});
-    for (var key in systemFlags)
-        core.flags[key] = systemFlags[key];
-
-    core.events.initGame();
-    core.resize();
-    this.updateGlobalAttribute(Object.keys(core.status.globalAttribute));
-    this.triggerStatusBar(core.getFlag('hideStatusBar', false)?'hide':'show', core.getFlag("showToolbox"));
-    core.dom.musicBtn.style.display = 'none';
 }
 
 
@@ -2466,8 +2395,8 @@ control.prototype.saveData = function() {
 ////// 从本地读档 //////
 control.prototype.loadData = function (data, callback) {
 
-    core.resetStatus(data.hero, data.hard, data.floorId, core.decodeRoute(data.route), core.maps.loadMap(data.maps),
-        data.values);
+    core.resetGame(data.hero, data.hard, data.floorId, core.maps.loadMap(data.maps), data.values);
+    core.status.route = core.decodeRoute(data.route);
 
     // load shop times
     for (var shop in core.status.shops) {

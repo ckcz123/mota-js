@@ -604,26 +604,6 @@ utils.prototype.getCookie = function (name) {
     return match ? match[2] : null;
 }
 
-utils.prototype.expandMoveSteps = function (steps) {
-    var moveSteps = [];
-    steps.forEach(function (e) {
-        if (typeof e == "string") {
-            moveSteps.push(e);
-        }
-        else {
-            if (e.value == null) {
-                moveSteps.push(e.direction)
-            }
-            else {
-                for (var i = 0; i < e.value; i++) {
-                    moveSteps.push(e.direction);
-                }
-            }
-        }
-    });
-    return moveSteps;
-}
-
 ////// 设置statusBar的innerHTML，会自动斜体和放缩，也可以增加自定义css //////
 utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     if (typeof value == 'number') value = this.formatBigNumber(value);

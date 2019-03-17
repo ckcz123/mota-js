@@ -1545,7 +1545,9 @@ maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
         return;
     }
     var block = blockArr[0], blockInfo = blockArr[1];
-    var moveSteps = core.utils.expandMoveSteps(steps);
+    var moveSteps = (steps||[]).filter(function (t) {
+        return ['up','down','left','right'].indexOf(t)>=0;
+    });
     var canvases = this._initDetachedBlock(blockInfo, x, y, block.event.animate !== false);
     this._moveDetachedBlock(blockInfo, 32 * x, 32 * y, 1, canvases);
 
@@ -1609,19 +1611,25 @@ maps.prototype.jumpBlock = function (sx, sy, ex, ey, time, keep, callback) {
     var canvases = this._initDetachedBlock(blockInfo, sx, sy, block.event.animate !== false);
     this._moveDetachedBlock(blockInfo, 32 * sx, 32 * sy, 1, canvases);
 
-    this._jumpBlock_playSound();
+    this.__playJumpSound();
 
-    var dx = ex - sx, dy = ey - sy, distance = Math.round(Math.sqrt(dx * dx + dy * dy));
-    var jump_peak = 6 + distance, jump_count = jump_peak * 2;
-    var jumpInfo = {
-        x: sx, y: sy, ex: ex, ey: ey, px: 32 * sx, py: 32 * sy, opacity: 1, keep: keep,
-        jump_peak: jump_peak, jump_count: jump_count,
-        step: 0, per_time: time / 16 / core.status.replay.speed
-    };
+    var jumpInfo = ths.__generateJumpInfo(sx, sy, ex, ey, time);
+    jumpInfo.keep = keep;
+
     this._jumpBlock_doJump(blockInfo, canvases, jumpInfo, callback);
 }
 
-maps.prototype._jumpBlock_playSound = function () {
+maps.prototype.__generateJumpInfo = function (sx, sy, ex, ey, time) {
+    var dx = ex - sx, dy = ey - sy, distance = Math.round(Math.sqrt(dx * dx + dy * dy));
+    var jump_peak = 6 + distance, jump_count = jump_peak * 2;
+    return {
+        x: sx, y: sy, ex: ex, ey: ey, px: 32 * sx, py: 32 * sy, opacity: 1,
+        jump_peak: jump_peak, jump_count: jump_count,
+        step: 0, per_time: time / 16 / core.status.replay.speed
+    };
+}
+
+maps.prototype.__playJumpSound = function () {
     core.playSound('jump.mp3');
 }
 
@@ -1636,7 +1644,7 @@ maps.prototype._jumpBlock_doJump = function (blockInfo, canvases, jumpInfo, call
     core.animateFrame.asyncId[animate] = true;
 }
 
-maps.prototype._jumpBlock_updateJump = function (jumpInfo) {
+maps.prototype.__updateJumpInfo = function (jumpInfo) {
     jumpInfo.jump_count--;
     jumpInfo.x = (jumpInfo.x * jumpInfo.jump_count + jumpInfo.ex) / (jumpInfo.jump_count + 1.0);
     jumpInfo.y = (jumpInfo.y * jumpInfo.jump_count + jumpInfo.ey) / (jumpInfo.jump_count + 1.0);
@@ -1646,7 +1654,7 @@ maps.prototype._jumpBlock_updateJump = function (jumpInfo) {
 }
 
 maps.prototype._jumpBlock_jumping = function (blockInfo, canvases, jumpInfo) {
-    this._jumpBlock_updateJump(jumpInfo);
+    this.__updateJumpInfo(jumpInfo);
     core.maps._moveDetachedBlock(blockInfo, jumpInfo.px, jumpInfo.py, jumpInfo.opacity, canvases);
 }
 

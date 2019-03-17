@@ -504,7 +504,7 @@ events.prototype._changeFloor_getHeroLoc = function (floorId, stair, heroLoc) {
         }
     }
     ['x', 'y', 'direction'].forEach(function (name) {
-        if (!heroLoc[name])
+        if (heroLoc[name] == null)
             heroLoc[name] = core.getHeroLoc(name);
     });
     return heroLoc;

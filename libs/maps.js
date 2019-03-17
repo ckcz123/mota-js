@@ -853,6 +853,26 @@ maps.prototype._drawAutotile_getAutotileIndexs = function (x, y, mapArr, indexAr
     return indexArr;
 }
 
+maps.prototype._drawAutotileAnimate = function (block, animate) {
+    var x = block.x, y = block.y;
+    // ------ 界面外的动画不绘制
+    if (32 * x < core.bigmap.offsetX - 64 || 32 * x > core.bigmap.offsetX + core.__PIXELS__ + 32
+        || 32 * y < core.bigmap.offsetY - 64 || 32 * y > core.bigmap.offsetY + core.__PIXELS__ + 32 + 16) {
+        return;
+    }
+
+    var cv = block.name?core.canvas[block.name]:core.canvas.event;
+    cv.clearRect(32 * x, 32 * y, 32, 32);
+    if (block.name) {
+        if (block.name == 'bg')
+            core.drawImage('bg', core.material.groundCanvas.canvas, 32 * x, 32 * y);
+        this.drawAutotile(cv, core.status.autotileAnimateObjs[block.name+"map"], block, 32, 0, 0, animate);
+    }
+    else {
+        this.drawAutotile(cv, core.status.autotileAnimateObjs.map, block, 32, 0, 0, animate);
+    }
+}
+
 ////// 为autotile判定边界 ////// 
 maps.prototype._makeAutotileEdges = function () {
     var autotileIds = Object.keys(core.material.images.autotile);

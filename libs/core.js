@@ -374,15 +374,13 @@ core.prototype.init = function (coreData, callback) {
         core.control.updateHeroIcon();
 
         core.initStatus.maps = core.maps.initMaps(core.floorIds);
-        core.setRequestAnimationFrame();
+        core.control._setRequestAnimationFrame();
 
         if (main.mode == 'play')
             core.events.initGame();
 
         if (functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins) {
-            core.plugin = new function () {
-                this.__renderFrameFuncs = [];
-            };
+            core.plugin = new function () {};
             core.plugin.__init__ = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.plugin;
             core.plugin.__init__();
             core._forwardFunc("plugin");

@@ -239,8 +239,8 @@ ui.prototype.closePanel = function () {
 
 ////// 一般清除事件 //////
 ui.prototype.clearLastEvent = function () {
-    if (core.isset(core.dymCanvas.selector))
-        core.deleteCanvas("selector");
+    if (core.isset(core.dymCanvas._selector))
+        core.deleteCanvas("_selector");
     core.clearMap('ui');
     core.setAlpha('ui', 1);
 }
@@ -409,8 +409,8 @@ ui.prototype.getTitleAndIcon = function (content) {
 // 绘制选择光标
 ui.prototype.drawWindowSelector = function(background,x,y,w,h) {
     w = Math.round(w), h = Math.round(h);
-    var dstImage = core.ui.createCanvas("selector", x, y, w, h, 165);
-    core.setOpacity("selector", 0.8);
+    var dstImage = core.ui.createCanvas("_selector", x, y, w, h, 165);
+    core.setOpacity("_selector", 0.8);
     // back
     dstImage.drawImage(background, 130, 66, 28, 28,  2,  2,w-4,h-4);
     // corner

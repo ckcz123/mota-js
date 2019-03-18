@@ -441,7 +441,7 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 
 另外注意一点的是，如果hp被设置成了0或以下，将触发lose事件，直接死亡。
 
-### setValue2：增减勇士的某个属性、道具个数，或某个变量/Flag的值
+### addValue：增减勇士的某个属性、道具个数，或某个变量/Flag的值
 
 和`{"type": "setValue"}`的写法完全相同，不过此项是可以直接将值加减到原始数值上。
 
@@ -450,11 +450,11 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 ``` js
 "x,y": [ // 实际执行的事件列表
     {"type": "setValue", "name": "status:atk", "value": "status:atk+10" } // 攻击提高10点
-    {"type": "setValue2", "name": "status:atk", "value": "10" } // 和上面写法等价
+    {"type": "addVakue", "name": "status:atk", "value": "10" } // 和上面写法等价
     {"type": "setValue", "name": "item:yellowKey", "value": "item:yellowKey-3" } // 黄钥匙个数-3
-    {"type": "setValue2", "name": "item:yellowKey", "value": "-3" } // 和上面写法等价
+    {"type": "addValue", "name": "item:yellowKey", "value": "-3" } // 和上面写法等价
     {"type": "setValue", "name": "flag:door2", "value": "flag:door2+1" } // 将变量door值+1
-    {"type": "setValue2", "name": "flag:door2", "value": "01" } // 和上面写法等价
+    {"type": "addValue", "name": "flag:door2", "value": "01" } // 和上面写法等价
 ]
 ```
 

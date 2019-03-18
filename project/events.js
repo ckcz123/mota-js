@@ -102,12 +102,12 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 												"text": ">=1：直接扣数值"
 											},
 											{
-												"type": "setValue2",
+												"type": "addValue",
 												"name": "status:atk",
 												"value": "-core.values.weakValue"
 											},
 											{
-												"type": "setValue2",
+												"type": "addValue",
 												"name": "status:def",
 												"value": "-core.values.weakValue"
 											}

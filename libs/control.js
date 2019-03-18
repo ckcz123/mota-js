@@ -951,13 +951,13 @@ control.prototype._checkBlock_ambush = function (ambush) {
 }
 
 ////// 更新全地图显伤 //////
-control.prototype.updateDamage = function (floorId, canvas) {
+control.prototype.updateDamage = function (floorId, ctx) {
     floorId = floorId || core.status.floorId;
-    if (!core.isset(floorId)) return;
+    if (!core.isset(floorId) || core.status.gameOver) return;
     if (core.status.gameOver) return;
     var refreshCheckBlock = true;
-    if (!core.isset(canvas)) {
-        canvas = core.canvas.damage;
+    if (!core.isset(ctx)) {
+        ctx = core.canvas.damage;
         core.clearMap('damage');
         refreshCheckBlock = false;
     }
@@ -966,58 +966,46 @@ control.prototype.updateDamage = function (floorId, canvas) {
     var mapBlocks = core.status.maps[floorId].blocks;
     // 没有怪物手册
     if (!core.hasItem('book')) return;
-    canvas.font = "bold 11px Arial";
+    core.setFont(ctx, "bold 11px Arial");
+    this._updateDamage_damage(floorId, ctx);
+    this._updateDamage_extraDamage(floorId, ctx, refreshCheckBlock);
+}
 
-    if (core.flags.displayEnemyDamage || core.flags.displayCritical) {
-        canvas.textAlign = 'left';
-
-        for (var b = 0; b < mapBlocks.length; b++) {
-            var x = mapBlocks[b].x, y = mapBlocks[b].y;
-            if (core.isset(mapBlocks[b].event) && mapBlocks[b].event.cls.indexOf('enemy')==0
-                && !mapBlocks[b].disable) {
-
-                // 判定是否显伤
-                if (mapBlocks[b].event.displayDamage === false)
-                    continue;
-
-                var id = mapBlocks[b].event.id;
-
-                if (core.flags.displayEnemyDamage) {
-                    var damageString = core.enemys.getDamageString(id, x, y, floorId);
-                    var damage = damageString.damage, color = damageString.color;
-                    core.fillBoldText(canvas, damage, 32*x+1, 32*(y+1)-1, color);
-                }
-
-                // 临界显伤
-                if (core.flags.displayCritical) {
-                    var critical = core.enemys.nextCriticals(id, 1, x, y, floorId);
-                    if (critical.length>0) critical=critical[0];
-                    critical = core.formatBigNumber(critical[0], true);
-                    if (critical == '???') critical = '?';
-                    core.fillBoldText(canvas, critical, 32*x+1, 32*(y+1)-11, '#FFFFFF');
-                }
-
-            }
+control.prototype._updateDamage_damage = function (floorId, ctx) {
+    core.setTextAlign(ctx, 'left');
+    core.status.maps[floorId].blocks.forEach(function (block) {
+        var x = block.x, y = block.y;
+        if (!block.disable && block.event.cls.indexOf('enemy') == 0 && block.event.displayDamage !== false) {
+           if (core.flags.displayEnemyDamage) {
+               var damageString = core.enemys.getDamageString(block.event.id, x, y, floorId);
+               var damage = damageString.damage, color = damageString.color;
+               core.fillBoldText(ctx, damage, 32*x+1, 32*(y+1)-1, color);
+           }
+           if (core.flags.displayCritical) {
+               var critical = core.enemys.nextCriticals(block.event.id, 1, x, y, floorId);
+               critical = core.formatBigNumber((critical[0]||[])[0], true);
+               if (critical == '???') critical = '?';
+               core.fillBoldText(ctx, critical, 32*x+1, 32*(y+1)-11, '#FFFFFF');
+           }
         }
-    }
-    // 如果是领域&夹击
-    if (core.flags.displayExtraDamage && core.isset((core.status.checkBlock||{}).damage)) {
-        canvas.textAlign = 'center';
+    });
+}
 
-        if (refreshCheckBlock)
-            this.updateCheckBlock(floorId);
-
+control.prototype._updateDamage_extraDamage = function (floorId, ctx, refresh) {
+    core.setTextAlign(ctx, 'center');
+    if (refresh) this.updateCheckBlock(floorId);
+    if (core.flags.displayExtraDamage) {
         var width = core.floors[floorId].width, height = core.floors[floorId].height;
         for (var x=0;x<width;x++) {
             for (var y=0;y<height;y++) {
-                var damage = core.status.checkBlock.damage[x+","+y];
+                var damage = core.status.checkBlock.damage[x+","+y]||0;
                 if (damage>0) { // 该点伤害
                     damage = core.formatBigNumber(damage, true);
-                    core.fillBoldText(canvas, damage, 32*x+16, 32*(y+1)-14, '#FF7F00');
+                    core.fillBoldText(ctx, damage, 32*x+16, 32*(y+1)-14, '#FF7F00');
                 }
                 else { // 检查捕捉
                     if (core.status.checkBlock.ambush[x+","+y]) {
-                        core.fillBoldText(canvas, '!', 32*x+16, 32*(y+1)-14, '#FF7F00');
+                        core.fillBoldText(ctx, '!', 32*x+16, 32*(y+1)-14, '#FF7F00');
                     }
                 }
             }
@@ -1025,26 +1013,7 @@ control.prototype.updateDamage = function (floorId, canvas) {
     }
 }
 
-////// 执行一个表达式的effect操作 //////
-control.prototype.doEffect = function (effect, need, times) {
-    effect.split(";").forEach(function (expression) {
-        var arr = expression.split("+=");
-        if (arr.length!=2) return;
-        var name=arr[0], value=core.calValue(arr[1], null, need, times);
-        if (name.indexOf("status:")==0) {
-            var status=name.substring(7);
-            core.setStatus(status, core.getStatus(status)+value);
-        }
-        else if (name.indexOf("item:")==0) {
-            var itemId=name.substring(5);
-            core.setItem(itemId, core.itemCount(itemId)+value);
-        }
-        else if (name.indexOf("flag:")==0) {
-            var flag=name.substring(5);
-            core.setFlag(flag, core.getFlag(flag, 0)+value);
-        }
-    });
-}
+// ------ 录像相关 ------ //
 
 ////// 选择录像文件 //////
 control.prototype.chooseReplayFile = function () {

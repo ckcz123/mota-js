@@ -75,7 +75,7 @@ editor_blockly = function () {
       MotaActionBlocks['setValue_s'].xmlText([
         MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
       ]),
-      MotaActionBlocks['setValue2_s'].xmlText([
+      MotaActionBlocks['addValue_s'].xmlText([
         MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
       ]),
       MotaActionBlocks['setFloor_s'].xmlText(),
@@ -157,7 +157,7 @@ editor_blockly = function () {
       MotaActionBlocks['setValue_s'].xmlText([
         MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
       ]),
-      MotaActionBlocks['setValue2_s'].xmlText([
+      MotaActionBlocks['addValue_s'].xmlText([
         MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
       ]),
       MotaActionBlocks['expression_arithmetic_0'].xmlText(),
@@ -184,8 +184,8 @@ editor_blockly = function () {
             {"text": "黄钥匙（\${9+flag:shop_times}金币）", "color": [255,255,0,1], "action": [
                 {"type": "if", "condition": "status:money>=9+flag:shop_times",
                     "true": [
-                        {"type": "setValue2", "name": "status:money", "value": "-(9+flag:shop_times)"},
-                        {"type": "setValue2", "name": "item:yellowKey", "value": "1"},
+                        {"type": "addValue", "name": "status:money", "value": "-(9+flag:shop_times)"},
+                        {"type": "addValue", "name": "item:yellowKey", "value": "1"},
                     ],
                     "false": [
                         "\t[老人,man]你的金钱不足！",
@@ -200,7 +200,7 @@ editor_blockly = function () {
             ]}
         ]
     },
-    {"type": "setValue2", "name": "flag:shop_times", "value": "1"},
+    {"type": "addValue", "name": "flag:shop_times", "value": "1"},
     {"type": "revisit"}
       ], 'event'),  
       '<label text="战前剧情"></label>',
@@ -223,7 +223,7 @@ editor_blockly = function () {
       ],'afterBattle'),
       '<label text="打怪开门"></label>',
       MotaActionFunctions.actionParser.parse([
-        {"type": "setValue2", "name": "flag:__door__", "value": "1"},
+        {"type": "addValue", "name": "flag:__door__", "value": "1"},
         {"type": "if", "condition": "flag:__door__==2", 
           "true": [
             {"type": "openDoor", "loc": [10,5]}

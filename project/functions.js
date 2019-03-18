@@ -63,7 +63,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 设置已经到过的楼层
 	core.setFlag("__visited__", {});
 
-	core.events.afterLoadData();
+	core.updateEnemys();
 },
         "win": function(reason, norank) {
 	// 游戏获胜事件 
@@ -402,16 +402,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	*/
 
 },
-        "beforeSaveData": function(data) {
-	// 即将存档前可以执行的操作
-
-},
-        "afterLoadData": function(data) {
-	// 读档事件后，载入事件前，可以执行的操作
-	// 怪物数据的动态修改迁移到了“脚本编辑 - updateEnemys”中，详见文档说明
-
-	core.enemys.updateEnemys();
-},
         "canUseQuickShop": function(shopId) {
 	// 当前能否使用某个快捷商店
 	// shopId：快捷商店ID
@@ -719,6 +709,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 },
         "updateEnemys": function () {
 	// 更新怪物数据，可以在这里对怪物属性和数据进行动态更新，详见文档——事件——怪物数据的动态修改
+	// 此函数执行时间：重新开始游戏、读档后、通过事件调用“更新怪物数据”时
+
 	// 比如下面这个例子，如果flag:xxx为真，则将绿头怪的攻击设为100，金币设为20
 	/*
 	if (core.hasFlag('xxx')) {
@@ -726,7 +718,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.material.enemys.greenSlime.money = 20;
 	}
 	*/
-	// 别忘了在事件中调用“更新怪物数据”事件！
 }
     },
     "actions": {
@@ -895,6 +886,78 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 }
     },
     "control": {
+        "saveData": function () {
+	// 存档操作，此函数应该返回“具体要存档的内容”
+
+	// 勇士和hash值（防改存档文件来作弊）
+	var hero = core.clone(core.status.hero),
+		hashCode = core.utils.hashCode(hero);
+	// 差异化存储values
+	var values = {};
+	for (var key in core.values) {
+		if (!core.same(core.values[key], core.data.values[key]))
+			values[key] = core.clone(core.values[key]);
+	}
+
+	// 要存档的内容
+	var data = {
+		'floorId': core.status.floorId,
+		'hero': hero,
+		'hard': core.status.hard,
+		'maps': core.maps.saveMap(),
+		'route': core.encodeRoute(core.status.route),
+		'values': values,
+		'shops': {},
+		'version': core.firstData.version,
+		"time": new Date().getTime(),
+		"hashCode": hashCode
+	};
+	// 设置商店次数
+	for (var shopId in core.status.shops) {
+		data.shops[shopId] = {
+			'times': core.status.shops[shopId].times || 0,
+			'visited': core.status.shops[shopId].visited || false
+		};
+	}
+
+	return data;
+},
+        "loadData": function (data, callback) {
+	// 读档操作；从存储中读取了内容后的行为
+
+	// 重置游戏和路线
+	core.resetGame(data.hero, data.hard, data.floorId, core.maps.loadMap(data.maps), data.values);
+	core.status.route = core.decodeRoute(data.route);
+	// 加载商店信息
+	for (var shopId in core.status.shops) {
+		if (data.shops[shopId]) {
+			core.status.shops[shopId].times = data.shops[shopId].times;
+			core.status.shops[shopId].visited = data.shops[shopId].visited;
+		}
+	}
+	// 文字属性，全局属性
+	core.status.textAttribute = core.getFlag('textAttribute', core.status.textAttribute);
+	var toAttribute = core.getFlag('globalAttribute', core.status.globalAttribute);
+	if (!core.same(toAttribute, core.status.globalAttribute)) {
+		core.status.globalAttribute = toAttribute;
+		core.control.updateGlobalAttribute(Object.keys(toAttribute));
+	}
+	// 重置音量
+	core.events.setVolume(core.getFlag("__volume__", 1), 0);
+	// 加载勇士图标
+	var icon = core.getFlag("heroIcon", "hero.png");
+	if (core.material.images.images[icon]) {
+		core.material.images.hero.src = core.material.images.images[icon].src;
+		core.material.icons.hero.height = core.material.images.images[icon].height / 4;
+	}
+	// 刷新怪物数据
+	core.updateEnemys();
+
+	// TODO：增加自己的一些读档处理
+
+	// 切换到对应的楼层
+	core.changeFloor(data.floorId, null, data.hero.loc, 0, callback, true);
+},
         "flyTo": function (toId, callback) {
 	// 楼层传送器的使用，从当前楼层飞往toId
 	// 如果不能飞行请返回false

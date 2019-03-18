@@ -2157,16 +2157,6 @@ events.prototype.afterUseBomb = function () {
     return this.eventdata.afterUseBomb();
 }
 
-////// 即将存档前可以执行的操作 //////
-events.prototype.beforeSaveData = function (data) {
-    return this.eventdata.beforeSaveData(data);
-}
-
-////// 读档事件后，载入事件前，可以执行的操作 //////
-events.prototype.afterLoadData = function (data) {
-    return this.eventdata.afterLoadData(data);
-}
-
 ////// 上传当前数据 //////
 events.prototype.uploadCurrent = function (username) {
     var formData = new FormData();

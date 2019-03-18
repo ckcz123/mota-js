@@ -1365,7 +1365,7 @@ control.prototype._replayAction_fly = function (action) {
     if (!core.canUseItem('fly')) return false;
     core.ui.drawFly(toIndex);
     setTimeout(function () {
-        if (!core.control.flyTo(floorId, core.replay))
+        if (!core.flyTo(floorId, core.replay))
             core.control._replay_error(action);
     }, core.control.__replay_getTimeout());
     return true;
@@ -1450,27 +1450,19 @@ control.prototype._replayAction_key = function (action) {
 control.prototype.autosave = function (removeLast) {
     if (core.status.event.id!=null) return;
     var x=null;
-    if (removeLast)
-        x=core.status.route.pop();
+    if (removeLast) x=core.status.route.pop();
     core.status.route.push("turn:"+core.getHeroLoc('direction'));
-    // core.setLocalForage("autoSave", core.saveData());
-    // ----- Add to autosaveData
     core.saves.autosave.data = core.saveData();
     core.saves.autosave.updated = true;
     core.saves.ids[0] = true;
-    // ----- Updated every 5s
     core.status.route.pop();
-    if (removeLast && core.isset(x))
-        core.status.route.push(x);
+    if (x) core.status.route.push(x);
 }
 
 /////// 实际进行自动存档 //////
 control.prototype.checkAutosave = function () {
-
     if (!core.animateFrame || !core.saves || !core.saves.autosave) return;
-
     core.setLocalStorage('totalTime', core.animateFrame.totalTime);
-
     if (core.saves.autosave.data == null || !core.saves.autosave.updated) return;
     core.saves.autosave.updated = false;
     core.setLocalForage("autoSave", core.saves.autosave.data);
@@ -1478,168 +1470,152 @@ control.prototype.checkAutosave = function () {
 
 ////// 实际进行存读档事件 //////
 control.prototype.doSL = function (id, type) {
-    if (type=='save') {
-        if (id=='autoSave') {
-            core.drawTip('不能覆盖自动存档！');
-            return;
-        }
-        // 事件中的存档
-        if (core.status.event.interval != null) {
-            core.setFlag("__events__", core.status.event.interval);
-        }
-        core.setLocalForage("save"+id, core.saveData(), function() {
-            if (id!="autoSave") {
-                core.saves.saveIndex=id;
-                core.setLocalStorage('saveIndex', core.saves.saveIndex);
-            }
-            if (core.events.recoverEvents(core.status.event.interval)) {
-                core.drawTip("存档成功！");
-                return;
-            }
+    switch (type) {
+        case 'save': this._doSL_save(id); break;
+        case 'load': this._doSL_load(id); break;
+        case 'replayLoad': this._doSL_replayLoad(id); break;
+    }
+}
+
+control.prototype._doSL_save = function (id) {
+    if (id=='autoSave') return core.drawTip('不能覆盖自动存档！');
+    // 在事件中的存档
+    if (core.status.event.interval != null)
+        core.setFlag("__events__", core.status.event.interval);
+    core.setLocalForage("save"+id, core.saveData(), function() {
+        core.saves.saveIndex=id;
+        core.setLocalStorage('saveIndex', core.saves.saveIndex);
+        // 恢复事件
+        if (!core.events.recoverEvents(core.status.event.interval))
             core.ui.closePanel();
-            core.drawTip('存档成功！');
+        core.drawTip('存档成功！');
+    }, function(err) {
+        main.log(err);
+        if (core.platform.useLocalForage) {
+            alert("存档失败，错误信息：\n"+err);
+        }
+        else {
+            alert("存档失败，错误信息：\n"+err+"\n建议使用垃圾存档清理工具进行清理！");
+        }
+    });
+    core.removeFlag("__events__");
+    return;
+}
+
+control.prototype._doSL_load = function (id) {
+    if (id == 'autoSave' && core.saves.autosave.data != null) {
+        this._doSL_load_afterGet(id, core.clone(core.saves.autosave.data));
+    }
+    else {
+        core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
+            if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
+            core.control._doSL_load_afterGet(id, data);
         }, function(err) {
-            console.info(err);
-            if (core.platform.useLocalForage) {
-                alert("存档失败，错误信息：\n"+err);
-            }
-            else {
-                alert("存档失败，错误信息：\n"+err+"\n建议使用垃圾存档清理工具进行清理！");
-            }
-        });
-        core.removeFlag("__events__");
+            main.log(err);
+            alert("无效的存档");
+        })
+    }
+    return;
+}
+
+control.prototype._doSL_load_afterGet = function (id, data) {
+    if (!data) return alert("无效的存档");
+    if (core.flags.checkConsole && data.hashCode != null && data.hashCode != core.hashCode(data.hero)) {
+        if (confirm("存档校验失败，请勿修改存档文件！\n你想回放此存档的录像吗？"))
+            core.startGame(data.hard, data.hero.flags.__seed__, core.decodeRoute(data.route));
         return;
     }
-    else if (type=='load') {
-        var afterGet = function (data) {
-            if (!core.isset(data)) {
-                alert("无效的存档");
-                return;
-            }
-            if (core.flags.checkConsole && core.isset(data.hashCode) && data.hashCode != core.utils.hashCode(data.hero)) {
-                if (confirm("存档校验失败，请勿修改存档文件！\n你想回放此存档的录像吗？")) {
-                    core.startGame(data.hard, data.hero.flags.__seed__, core.decodeRoute(data.route));
-                }
-                return;
-            }
-            if (data.version != core.firstData.version) {
-                // core.drawTip("存档版本不匹配");
-                if (confirm("存档版本不匹配！\n你想回放此存档的录像吗？\n可以随时停止录像播放以继续游戏。")) {
-                    core.startGame(data.hard, data.hero.flags.__seed__, core.decodeRoute(data.route));
-                }
-                return;
-            }
-            core.ui.closePanel();
-            core.loadData(data, function() {
-                core.drawTip("读档成功");
-                if (id!="autoSave") {
-                    core.saves.saveIndex=id;
-                    core.setLocalStorage('saveIndex', core.saves.saveIndex);
-                }
-            });
-        }
-        if (id == 'autoSave' && core.saves.autosave.data != null) {
-            afterGet(core.clone(core.saves.autosave.data));
-        }
-        else {
-            core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
-                if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
-                afterGet(data);
-            }, function(err) {
-                main.log(err);
-                alert("无效的存档");
-            })
-        }
+    if (data.version != core.firstData.version) {
+        if (confirm("存档版本不匹配！\n你想回放此存档的录像吗？\n可以随时停止录像播放以继续游戏。"))
+            core.startGame(data.hard, data.hero.flags.__seed__, core.decodeRoute(data.route));
         return;
     }
-    else if (type == 'replayLoad') {
-        var afterGet = function (data) {
-            if (!core.isset(data)) {
-                core.drawTip("无效的存档");
-                return;
-            }
-            if (data.version != core.firstData.version) {
-                core.drawTip("存档版本不匹配");
-                return;
-            }
-            if (data.hard != core.status.hard) {
-                core.drawTip("游戏难度不匹配！");
-                return;
-            }
-            if (core.isset(data.hashCode) && data.hashCode != core.utils.hashCode(data.hero)) {
-                alert("存档校验失败，请勿修改存档文件！");
-                return;
-            }
-            var route = core.subarray(core.status.route, core.decodeRoute(data.route));
-            if (!core.isset(route) || data.hero.flags.__seed__!=core.getFlag('__seed__')) {
-                core.drawTip("无法从此存档回放录像");
-                return;
-            }
-            core.loadData(data, function () {
-                core.startReplay(route);
-                core.drawTip("回退到存档节点");
-            });
+    core.ui.closePanel();
+    core.loadData(data, function() {
+        core.drawTip("读档成功");
+        if (id!="autoSave") {
+            core.saves.saveIndex=id;
+            core.setLocalStorage('saveIndex', core.saves.saveIndex);
         }
-        if (id == 'autoSave' && core.saves.autosave.data != null) {
-            afterGet(core.clone(core.saves.autosave.data));
-        }
-        else {
-            core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
-                if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
-                afterGet(data);
-            }, function(err) {
-                main.log(err);
-                alert("无效的存档");
-            })
-        }
+    });
+
+}
+
+control.prototype._doSL_replayLoad = function (id) {
+    if (id == 'autoSave' && core.saves.autosave.data != null) {
+        this._doSL_replayLoad_afterGet(core.clone(core.saves.autosave.data));
     }
+    else{
+        core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
+            if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
+            core.control._doSL_replayLoad_afterGet(data);
+        }, function(err) {
+            main.log(err);
+            alert("无效的存档");
+        })
+    }
+}
+
+control.prototype._doSL_replayLoad_afterGet = function (id, data) {
+    if (!data) return core.drawTip("无效的存档");
+    if (data.version != core.firstData.version) return core.drawTip("存档版本不匹配");
+    if (data.hard != core.status.hard) core.drawTip("游戏难度不匹配！");
+    if (data.hashCode != null && data.hashCode != core.utils.hashCode(data.hero))
+        return alert("存档校验失败，请勿修改存档文件！");
+    var route = core.subarray(core.status.route, core.decodeRoute(data.route));
+    if (route == null || data.hero.flags.__seed__ != core.getFlag('__seed__'))
+        return core.drawTip("无法从此存档回放录像");
+    core.loadData(data, function () {
+        core.startReplay(route);
+        core.drawTip("回退到存档节点");
+    });
+
 }
 
 ////// 同步存档到服务器 //////
 control.prototype.syncSave = function (type) {
     core.ui.drawWaiting("正在同步，请稍后...");
     core.control.getSaves(type=='all'?null:core.saves.saveIndex, function (saves) {
-        if (!core.isset(saves)) {
-            core.drawText("没有要同步的存档");
-            return;
+        if (!saves) return core.drawText("没有要同步的存档");
+        core.control._syncSave_http(saves);
+    })
+}
+
+control.prototype._syncSave_http = function (saves) {
+    var formData = new FormData();
+    formData.append('type', 'save');
+    formData.append('name', core.firstData.name);
+    formData.append('data', JSON.stringify(saves));
+
+    core.http("POST", "/games/sync.php", formData, function (data) {
+        var response = JSON.parse(data);
+        if (response.code<0) {
+            core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+response.msg);
         }
-
-        var formData = new FormData();
-        formData.append('type', 'save');
-        formData.append('name', core.firstData.name);
-        var save_text = JSON.stringify(saves);
-        formData.append('data', save_text);
-
-        core.http("POST", "/games/sync.php", formData, function (data) {
-            var response = JSON.parse(data);
-            if (response.code<0) {
-                core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+response.msg);
-            }
-            else {
-                core.drawText((type=='all'?"所有存档":"存档"+core.saves.saveIndex)+"同步成功！\n\n您的存档编号： "
-                    +response.code+"\n您的存档密码： "+response.msg
-                    +"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。")
-            }
-        }, function (e) {
-            core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+e);
-        })
+        else {
+            core.drawText((type=='all'?"所有存档":"存档"+core.saves.saveIndex)+"同步成功！\n\n您的存档编号： "
+                +response.code+"\n您的存档密码： "+response.msg
+                +"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。")
+        }
+    }, function (e) {
+        core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+e);
     })
 }
 
 ////// 从服务器加载存档 //////
 control.prototype.syncLoad = function () {
     core.interval.onDownInterval = 'tmp';
-    var id = prompt("请输入存档编号：");
-    if (id==null || id=="") {
-        core.ui.drawSyncSave(); return;
-    }
+    var id = prompt("请输入存档编号：") || "";
+    if (id=="") return core.ui.drawSyncSave();
     core.interval.onDownInterval = 'tmp';
-    var password = prompt("请输入存档密码：");
-    if (password==null || password=="") {
-        core.ui.drawSyncSave(); return;
-    }
-    core.ui.drawWaiting("正在同步，请稍后...");
+    var password = prompt("请输入存档密码：") || "";
+    if (password=="") return core.ui.drawSyncSave();
 
+    core.ui.drawWaiting("正在同步，请稍后...");
+    this._syncLoad_http(id, password);
+}
+
+control.prototype._syncLoad_http = function (id, password) {
     var formData = new FormData();
     formData.append('type', 'load');
     formData.append('name', core.firstData.name);
@@ -1648,141 +1624,67 @@ control.prototype.syncLoad = function () {
 
     core.http("POST", "/games/sync.php", formData, function (data) {
         var response = JSON.parse(data);
-        switch (response.code) {
-            case 0:
-                // 成功
-                var data=JSON.parse(response.msg);
-                if (data instanceof Array) {
-                    core.status.event.selection=1;
-                    core.ui.drawConfirmBox("所有本地存档都将被覆盖，确认？", function () {
-                        for (var i=1;i<=5*(main.savePages||30);i++) {
-                            if (i<=data.length) {
-                                // core.setLocalStorage("save"+i, data[i-1]);
-                                core.setLocalForage("save"+i, data[i-1]);
-                            }
-                            else {
-                                if (core.saves.ids[i])
-                                    core.removeLocalForage("save"+i);
-                            }
-                        }
-                        core.ui.closePanel();
-                        core.drawText("同步成功！\n你的本地所有存档均已被覆盖。");
-                    }, function () {
-                        core.status.event.selection=0;
-                        core.ui.drawSyncSave();
-                    })
-                }
-                else {
-                    // 只覆盖单存档
-                    core.setLocalForage("save"+core.saves.saveIndex, data, function() {
-                        core.drawText("同步成功！\n单存档已覆盖至存档"+core.saves.saveIndex);
-                    });
-                }
-                break;
-            case -1:
-                core.drawText("出错啦！\n存档编号"+id+"不存在！");
-                break;
-            case -2:
-                core.drawText("出错啦！\n存档密码错误！");
-                break;
-            default:
-                core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因："+response.msg);
-                break;
+        if (response.code == 0) {
+            core.control._syncLoad_write(JSON.parse(response.msg));
+        }
+        else {
+            core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因："+response.msg);
         }
     }, function (e) {
         core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因："+e);
     });
 }
 
+control.prototype._syncLoad_write = function (data) {
+    if (data instanceof Array) {
+        core.status.event.selection=1;
+        core.ui.drawConfirmBox("所有本地存档都将被覆盖，确认？", function () {
+            for (var i=1;i<=5*(main.savePages||30);i++) {
+                if (i<=data.length)
+                    core.setLocalForage("save"+i, data[i-1]);
+                else if (core.saves.ids[i])
+                    core.removeLocalForage("save"+i);
+            }
+            core.ui.closePanel();
+            core.drawText("同步成功！\n你的本地所有存档均已被覆盖。");
+        }, function () {
+            core.status.event.selection=0;
+            core.ui.drawSyncSave();
+        });
+    }
+    else {
+        // 只覆盖单存档
+        core.setLocalForage("save"+core.saves.saveIndex, data, function() {
+            core.drawText("同步成功！\n单存档已覆盖至存档"+core.saves.saveIndex);
+        });
+    }
+}
+
 ////// 存档到本地 //////
 control.prototype.saveData = function() {
-    var hero = core.clone(core.status.hero);
-    var hashCode = core.utils.hashCode(hero);
-
-    var data = {
-        'floorId': core.status.floorId,
-        'hero': hero,
-        'hard': core.status.hard,
-        'maps': core.maps.saveMap(),
-        'route': core.encodeRoute(core.status.route),
-        'values': core.clone(core.values),
-        'shops': {},
-        'version': core.firstData.version,
-        "time": new Date().getTime(),
-        "hashCode": hashCode
-    };
-    // set shop times
-    for (var shop in core.status.shops) {
-        data.shops[shop]={
-            'times': core.status.shops[shop].times || 0,
-            'visited': core.status.shops[shop].visited || false
-        }
-    }
-    core.events.beforeSaveData(data);
-
-    return data;
+    return this.controldata.saveData();
 }
 
 ////// 从本地读档 //////
 control.prototype.loadData = function (data, callback) {
-
-    core.resetGame(data.hero, data.hard, data.floorId, core.maps.loadMap(data.maps), data.values);
-    core.status.route = core.decodeRoute(data.route);
-
-    // load shop times
-    for (var shop in core.status.shops) {
-        if (core.isset(data.shops[shop])) {
-            core.status.shops[shop].times = data.shops[shop].times;
-            core.status.shops[shop].visited = data.shops[shop].visited;
-        }
-    }
-
-    core.status.textAttribute = core.getFlag('textAttribute', core.status.textAttribute);
-    var toAttribute = core.getFlag('globalAttribute', core.status.globalAttribute);
-    // if (core.utils.hashCode(toAttribute) != core.utils.hashCode(core.status.globalAttribute)) {
-    if (!core.same(toAttribute, core.status.globalAttribute)) {
-        core.status.globalAttribute = toAttribute;
-        core.control.updateGlobalAttribute(Object.keys(toAttribute));
-    }
-
-    // 重置音量
-    core.events.setVolume(core.getFlag("__volume__", 1), 0);
-
-    // load icons
-    var icon = core.getFlag("heroIcon", "hero.png");
-    if (core.isset(core.material.images.images[icon])) {
-        core.material.images.hero.src = core.material.images.images[icon].src;
-        core.material.icons.hero.height = core.material.images.images[icon].height/4;
-    }
-
-    core.events.afterLoadData(data);
-
-    core.changeFloor(data.floorId, null, data.hero.loc, 0, function() {
-        if (core.isset(callback)) callback();
-    }, true);
+    return this.controldata.loadData(data, callback);
 }
 
 control.prototype.getSaves = function (index, callback) {
-    if (core.isset(index)) {
+    if (index != null) {
         core.getLocalForage("save"+index, null, function(data) {
-            if (core.isset(callback)) callback(data);
+            if (callback) callback(data);
         }, function(err) {
             main.log(err);
-            if (core.isset(callback))
-                callback(null);
+            if (callback) callback(null);
         })
         return;
     }
-
     var ids = Object.keys(core.saves.ids).filter(function(x){return x!=0;})
-        .sort(function(a,b) {return a-b;}), number = ids.length;
-
-    // 不计0
-    var saves = [];
-
+        .sort(function(a,b) {return a-b;}), number = ids.length, saves = [];
     var load = function (index, callback) {
         if (index > number) {
-            if (core.isset(callback)) callback(saves);
+            if (callback) callback(saves);
             return;
         }
         core.getLocalForage("save"+ids[index], null, function (data) {
@@ -1799,33 +1701,32 @@ control.prototype.getSaves = function (index, callback) {
 ////// 获得所有存在存档的存档位 //////
 control.prototype.getSaveIndexes = function (callback) {
     var indexes = {};
-
-    var getIndex = function (name) {
-        var e = new RegExp('^'+core.firstData.name+"_(save\\d+|autoSave)$").exec(name);
-        if (e!=null) {
-            if (e[1]=='autoSave') indexes[0]=true;
-            else indexes[parseInt(e[1].substring(4))] = true;
-        }
-    };
-
-    if (!core.platform.useLocalForage) {
+    if (core.platform.useLocalForage) {
+        localforage.iterate(function (value, key, n) {
+            core.control._getSaveIndexes_getIndex(indexes, key);
+        }, function () {
+            callback(indexes);
+        });
+    }
+    else {
         Object.keys(localStorage).forEach(function (key) {
-            getIndex(key);
+            core.control._getSaveIndexes_getIndex(indexes, key);
         });
         callback(indexes);
     }
-    else {
-        localforage.iterate(function (value, key, n) {
-            getIndex(key)
-        }, function () {
-            callback(indexes);
-        })
+}
+
+control.prototype._getSaveIndexes_getIndex = function (indexes, name) {
+    var e = new RegExp('^'+core.firstData.name+"_(save\\d+|autoSave)$").exec(name);
+    if (e) {
+        if (e[1]=='autoSave') indexes[0]=true;
+        else indexes[parseInt(e[1].substring(4))] = true;
     }
 }
 
 ////// 判断某个存档位是否存在存档 //////
 control.prototype.hasSave = function (index) {
-    return core.saves.ids[index]||false;
+    return core.saves.ids[index] || false;
 }
 
 // ------ 属性，状态，位置，buff，变量，锁定控制等 ------ //

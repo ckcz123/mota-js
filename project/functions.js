@@ -1130,7 +1130,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 						enemyId = leftBlock.event.id;
 				}
 				// 检查上下夹击
-				var topBlock = block[x + "," + (y - 1)],
+				var topBlock = blocks[x + "," + (y - 1)],
 					bottomBlock = blocks[x + "," + (y + 1)];
 				if (topBlock && bottomBlock && topBlock.id == bottomBlock.id) {
 					if (core.hasSpecial(topBlock.event.id, 16))

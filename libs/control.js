@@ -13,16 +13,28 @@ function control() {
 control.prototype._init = function () {
     this.controldata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.control;
     this.renderFrameFuncs = [];
+    this.replayActions = [];
     // --- 注册系统的animationFrame
-    this.registerAnimationFrame("_totalTime", false, this._animationFrame_totalTime);
-    this.registerAnimationFrame("_autoSave", true, this._animationFrame_autoSave);
-    this.registerAnimationFrame("_globalAnimate", true, this._animationFrame_globalAnimate);
-    this.registerAnimationFrame("_selector", false, this._animationFrame_selector);
-    this.registerAnimationFrame("_animate", true, this._animationFrame_animate);
-    this.registerAnimationFrame("_heroMoving", true, this._animationFrame_heroMoving);
-    this.registerAnimationFrame("_weather", true, this._animationFrame_weather);
-    this.registerAnimationFrame("_parallelDo", false, this._animationFrame_parallelDo);
-    this.registerAnimationFrame("_checkConsoleOpened", true, this._animationFrame_checkConsoleOpened);
+    this.registerAnimationFrame("totalTime", false, this._animationFrame_totalTime);
+    this.registerAnimationFrame("autoSave", true, this._animationFrame_autoSave);
+    this.registerAnimationFrame("globalAnimate", true, this._animationFrame_globalAnimate);
+    this.registerAnimationFrame("selector", false, this._animationFrame_selector);
+    this.registerAnimationFrame("animate", true, this._animationFrame_animate);
+    this.registerAnimationFrame("heroMoving", true, this._animationFrame_heroMoving);
+    this.registerAnimationFrame("weather", true, this._animationFrame_weather);
+    this.registerAnimationFrame("parallelDo", false, this._animationFrame_parallelDo);
+    this.registerAnimationFrame("checkConsoleOpened", true, this._animationFrame_checkConsoleOpened);
+    // --- 注册系统的replay
+    this.registerReplayAction("move", this._replayAction_move);
+    this.registerReplayAction("item", this._replayAction_item);
+    this.registerReplayAction("equip", this._replayAction_equip);
+    this.registerReplayAction("unEquip", this._replayAction_unEquip);
+    this.registerReplayAction("fly", this._replayAction_fly);
+    this.registerReplayAction("shop", this._replayAction_shop);
+    this.registerReplayAction("turn", this._replayAction_turn);
+    this.registerReplayAction("getNext", this._replayAction_getNext);
+    this.registerReplayAction("moveDirectly", this._replayAction_moveDirectly);
+    this.registerReplayAction("key", this._replayAction_key);
 }
 
 // ------ requestAnimationFrame 相关 ------ //
@@ -48,12 +60,8 @@ control.prototype._setRequestAnimationFrame = function () {
         core.control.renderFrameFuncs.forEach(function (b) {
             if (b.func) {
                 try {
-                    if (core.isPlaying() || !b.needPlaying) {
-                        if (b.func instanceof Function)
-                            b.func(timestamp);
-                        else if (typeof b.func == 'string')
-                            core.plugin[b.func](timestamp);
-                    }
+                    if (core.isPlaying() || !b.needPlaying)
+                        core.doFunc(b.func, timestamp);
                 }
                 catch (e) {
                     main.log(e);
@@ -1018,30 +1026,14 @@ control.prototype._updateDamage_extraDamage = function (floorId, ctx, refresh) {
 ////// 选择录像文件 //////
 control.prototype.chooseReplayFile = function () {
     core.readFile(function (obj) {
-        if (obj.name!=core.firstData.name) {
-            alert("存档和游戏不一致！");
-            return;
-        }
-        if (core.isset(obj.version) && obj.version!=core.firstData.version) {
-            // alert("游戏版本不一致！");
-            if (!confirm("游戏版本不一致！\n你仍然想播放录像吗？")) {
+        if (obj.name!=core.firstData.name) return alert("存档和游戏不一致！");
+        if (obj.version && obj.version!=core.firstData.version) {
+            if (!confirm("游戏版本不一致！\n你仍然想播放录像吗？"))
                 return;
-            }
         }
-        if (!core.isset(obj.route)) {
-            alert("无效的录像！");
-            return;
-        }
-
-        if (core.flags.startUsingCanvas) {
-            core.startGame('', obj.seed, core.decodeRoute(obj.route));
-        }
-        else {
-            core.startGame(obj.hard, obj.seed, core.decodeRoute(obj.route));
-        }
-    }, function () {
-
-    })
+        if (!obj.route) return alert("无效的录像！");
+        core.startGame(core.flags.startUsingCanvas?'':obj.hard||'', obj.seed, core.decodeRoute(obj.route));
+    });
 }
 
 ////// 开始播放 //////
@@ -1057,22 +1049,17 @@ control.prototype.startReplay = function (list) {
     core.updateStatusBar();
     core.drawTip("开始播放");
     this.replay();
-    return;
 }
 
 ////// 更改播放状态 //////
 control.prototype.triggerReplay = function () {
-    if (!core.isPlaying()) return;
-    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
     if (core.status.replay.pausing) this.resumeReplay();
     else this.pauseReplay();
 }
 
 ////// 暂停播放 //////
 control.prototype.pauseReplay = function () {
-    if (!core.isPlaying()) return;
-    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.isReplaying()) return;
+    if (!core.isPlaying() || !core.isReplaying()) return;
     core.status.replay.pausing = true;
     core.updateStatusBar();
     core.drawTip("暂停播放");
@@ -1080,9 +1067,9 @@ control.prototype.pauseReplay = function () {
 
 ////// 恢复播放 //////
 control.prototype.resumeReplay = function () {
-    if (!core.isPlaying()) return;
-    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.isReplaying()) return;
+    if (!core.isPlaying() || !core.isReplaying()) return;
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+        return core.drawTip("请等待当前事件的处理结束");
     core.status.replay.pausing = false;
     core.updateStatusBar();
     core.drawTip("恢复播放");
@@ -1091,12 +1078,10 @@ control.prototype.resumeReplay = function () {
 
 ////// 加速播放 //////
 control.prototype.speedUpReplay = function () {
-    if (!core.isPlaying()) return;
-    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.isReplaying()) return;
-    if (core.status.replay.speed==12) core.status.replay.speed=24.0;
-    else if (core.status.replay.speed==6) core.status.replay.speed=12.0;
-    else if (core.status.replay.speed==3) core.status.replay.speed=6.0;
+    if (!core.isPlaying() || !core.isReplaying()) return;
+    if (core.status.replay.speed==12) core.status.replay.speed=24;
+    else if (core.status.replay.speed==6) core.status.replay.speed=12;
+    else if (core.status.replay.speed==3) core.status.replay.speed=6;
     else if (core.status.replay.speed<3) {
         var toAdd = core.status.replay.speed>=2?2:1;
         core.status.replay.speed = parseInt(10*core.status.replay.speed + toAdd)/10;
@@ -1106,9 +1091,7 @@ control.prototype.speedUpReplay = function () {
 
 ////// 减速播放 //////
 control.prototype.speedDownReplay = function () {
-    if (!core.isPlaying()) return;
-    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.isReplaying()) return;
+    if (!core.isPlaying() || !core.isReplaying()) return;
     if (core.status.replay.speed==24) core.status.replay.speed=12.0;
     else if (core.status.replay.speed==12) core.status.replay.speed=6.0;
     else if (core.status.replay.speed==6) core.status.replay.speed=3.0;
@@ -1122,18 +1105,15 @@ control.prototype.speedDownReplay = function () {
 
 ////// 设置播放速度 //////
 control.prototype.setReplaySpeed = function (speed) {
-    if (!core.isPlaying()) return;
-    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.isReplaying()) return;
+    if (!core.isPlaying() || !core.isReplaying()) return;
     core.status.replay.speed = speed;
     core.drawTip("x"+core.status.replay.speed+"倍");
 }
 
 ////// 停止播放 //////
-control.prototype.stopReplay = function () {
+control.prototype.stopReplay = function (force) {
     if (!core.isPlaying()) return;
-    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    // if (!core.isReplaying()) return;
+    if (!core.isReplaying() && !force) return;
     core.status.replay.toReplay = [];
     core.status.replay.totalList = [];
     core.status.replay.replaying=false;
@@ -1147,24 +1127,13 @@ control.prototype.stopReplay = function () {
 
 ////// 回退 //////
 control.prototype.rewindReplay = function () {
-    if (!core.isPlaying()) return;
-    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.isReplaying()) return;
-    if (!core.status.replay.pausing) {
-        core.drawTip("请先暂停录像");
-        return;
-    }
-    if (core.status.replay.animate) {
-        core.drawTip("请等待当前事件的处理结束");
-        return;
-    }
-    if (core.status.replay.save.length==0) {
-        core.drawTip("无法再回到上一个节点");
-        return;
-    }
-
-    var save = core.status.replay.save;
-    var data = save.pop();
+    if (!core.isPlaying() || !core.isReplaying()) return;
+    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+        return core.drawTip("请等待当前事件的处理结束");
+    if (core.status.replay.save.length==0)
+        return core.drawTip("无法再回到上一个节点");
+    var save = core.status.replay.save, data = save.pop();
     core.loadData(data.data, function () {
         core.status.replay = {
             "replaying": true,
@@ -1178,22 +1147,15 @@ control.prototype.rewindReplay = function () {
         }
         core.updateStatusBar();
         core.drawTip("成功回退到上一个节点");
-    })
+    });
 }
 
 ////// 回放时存档 //////
 control.prototype.saveReplay = function () {
-    if (!core.isPlaying()) return;
-    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-    if (!core.isReplaying()) return;
-    if (!core.status.replay.pausing) {
-        core.drawTip("请先暂停录像");
-        return;
-    }
-    if (core.status.replay.animate || core.isset(core.status.event.id)) {
-        core.drawTip("请等待当前事件的处理结束");
-        return;
-    }
+    if (!core.isPlaying() || !core.isReplaying()) return;
+    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+        return core.drawTip("请等待当前事件的处理结束");
 
     core.lockControl();
     core.status.event.id='save';
@@ -1205,24 +1167,15 @@ control.prototype.saveReplay = function () {
 
 ////// 回放时查看怪物手册 //////
 control.prototype.bookReplay = function () {
-    if (!core.isPlaying()) return;
-    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0) return;
-    if (!core.isReplaying()) return;
-    if (!core.status.replay.pausing) {
-        core.drawTip("请先暂停录像");
-        return;
-    }
+    if (!core.isPlaying() || !core.isReplaying()) return;
+    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
+    if (core.isMoving() || core.status.replay.animate
+        || (core.status.event.id && core.status.event.id != 'viewMaps'))
+        return core.drawTip("请等待当前事件的处理结束");
 
     // 从“浏览地图”页面打开
-    if (core.status.event.id=='viewMaps') {
+    if (core.status.event.id=='viewMaps')
         core.status.event.selection = core.status.event.data;
-        core.status.event.id=null;
-    }
-
-    if (core.status.replay.animate || core.isset(core.status.event.id)) {
-        core.drawTip("请等待当前事件的处理结束");
-        return;
-    }
 
     core.lockControl();
     core.status.event.id='book';
@@ -1231,38 +1184,75 @@ control.prototype.bookReplay = function () {
 
 ////// 回放录像时浏览地图 //////
 control.prototype.viewMapReplay = function () {
-    if (!core.isPlaying()) return;
-    if (core.status.event.id=='save' || (core.status.event.id||"").indexOf('book')==0 || core.status.event.id=='viewMaps') return;
-
-    if (!core.isReplaying()) return;
-    if (!core.status.replay.pausing) {
-        core.drawTip("请先暂停录像");
-        return;
-    }
-    if (core.status.replay.animate || core.isset(core.status.event.id)) {
-        core.drawTip("请等待当前事件的处理结束");
-        return;
-    }
+    if (!core.isPlaying() || !core.isReplaying()) return;
+    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+        return core.drawTip("请等待当前事件的处理结束");
 
     core.lockControl();
     core.status.event.id='viewMaps';
     core.ui.drawMaps();
 }
 
+////// 是否正在播放录像 //////
+control.prototype.isReplaying = function () {
+    return (core.status.replay||{}).replaying;
+}
+
 ////// 回放 //////
 control.prototype.replay = function () {
-    if (!core.isPlaying()) return;
+    if (!core.isPlaying() || !core.isReplaying()
+        || core.status.replay.pausing || core.status.replay.animate || core.status.event.id) return;
+    if (core.status.replay.toReplay.length==0)
+        return this._replay_finished();
+    this._replay_save();
+    var action=core.status.replay.toReplay.shift();
+    if (this._doReplayAction(action)) return;
+    this._replay_error(action);
+}
 
-    if (!core.isReplaying()) return; // 没有回放
-    if (core.status.replay.pausing) return; // 暂停状态
-    if (core.status.replay.animate) return; // 正在某段动画中
+////// 注册一个录像行为 //////
+// name：自定义名称，可用于注销使用
+// func：具体执行录像的函数，可为一个函数或插件中的函数名；
+//       需要接受一个action参数，代表录像回放时的下一个操作
+// func返回true代表成功处理了此录像行为，false代表没有处理此录像行为。
+control.prototype.registerReplayAction = function (name, func) {
+    this.unregisterReplayAction(name);
+    this.replayActions.push({name: name, func: func});
+}
 
-    if (core.status.replay.toReplay.length==0) { // 回放完毕
-        core.stopReplay();
-        core.insertAction("录像回放完毕！");
-        return;
+////// 注销一个录像行为 //////
+control.prototype.unregisterReplayAction = function (name) {
+    this.replayActions = this.replayActions.filter(function (b) { return b.name != name; });
+}
+
+////// 执行录像行为，会在注册的函数中依次执行直到得到true为止 //////
+control.prototype._doReplayAction = function (action) {
+    for (var i in this.replayActions) {
+        try {
+            if (core.doFunc(this.replayActions[i].func, action)) return true;
+        } catch (e) {
+            main.log(e);
+            main.log("ERROR in replayActions["+this.replayActions[i].name+"]：已自动注销该项。");
+            core.unregisterReplayAction(this.replayActions[i].name);
+        }
     }
+    return false;
+}
 
+control.prototype._replay_finished = function () {
+    core.status.replay.replaying = false;
+    core.ui.drawConfirmBox("录像播放完毕，你想退出播放吗？", function () {
+        core.ui.closePanel();
+        core.stopReplay(true);
+    }, function () {
+        core.status.replay.replaying = true;
+        core.ui.closePanel();
+        core.pauseReplay();
+    });
+}
+
+control.prototype._replay_save = function () {
     core.status.replay.steps++;
     if (core.status.replay.steps%50==0) {
         if (core.status.replay.save.length == 30)
@@ -1274,182 +1264,11 @@ control.prototype.replay = function () {
             "steps": core.status.replay.steps
         }});
     }
+}
 
-    var action=core.status.replay.toReplay.shift();
-
-    if (action == 'input2:===') {
-        core.replay();
-        return;
-    }
-
-    if (action=='up' || action=='down' || action=='left' || action=='right') {
-        core.moveHero(action, function () {
-            setTimeout(function() {
-                core.replay();
-            });
-        });
-        return;
-    }
-    else if (action.indexOf("item:")==0) {
-        var itemId = action.substring(5);
-        if (core.canUseItem(itemId)) {
-            // 是否绘制道具栏
-            if (core.material.items[itemId].hideInReplay) {
-                core.useItem(itemId, false, function () {
-                    core.replay();
-                });
-                return;
-            }
-            else {
-                var tools = Object.keys(core.status.hero.items.tools).sort();
-                var constants = Object.keys(core.status.hero.items.constants).sort();
-                var index=-1;
-                if ((index=tools.indexOf(itemId))>=0) {
-                    core.status.event.data = {"toolsPage":Math.floor(index/14)+1, "constantsPage":1, "selectId":null};
-                    index = index%14;
-                }
-                else if ((index=constants.indexOf(itemId))>=0) {
-                    core.status.event.data = {"toolsPage":1, "constantsPage":Math.floor(index/14)+1, "selectId":null};
-                    index = index%14+14;
-                }
-                if (index>=0) {
-                    core.ui.drawToolbox(index);
-                    setTimeout(function () {
-                        core.ui.closePanel();
-                        core.useItem(itemId, false, function () {
-                            core.replay();
-                        });
-                    }, 750 / Math.max(1, core.status.replay.speed));
-                    return;
-                }
-            }
-        }
-    }
-    else if (action.indexOf("unEquip:")==0) {
-        var equipType = parseInt(action.substring(8));
-        if (core.isset(equipType)) {
-            core.ui.drawEquipbox(equipType);
-            core.status.route.push(action);
-            setTimeout(function () {
-                core.ui.closePanel();
-                core.unloadEquip(equipType, function () {
-                    core.replay();
-                });
-            }, 750 / Math.max(1, core.status.replay.speed));
-            return;
-        }
-    }
-    else if (action.indexOf("equip:")==0) {
-        var equipId = action.substring(6);
-        var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
-        var index = ownEquipment.indexOf(equipId);
-        if (index>=0) {
-            core.status.route.push(action);
-            core.status.event.data = {"page":Math.floor(index/14)+1, "selectId":null};
-            index = index%14+14;
-            core.ui.drawEquipbox(index);
-            setTimeout(function () {
-                core.ui.closePanel();
-                core.loadEquip(equipId, function () {
-                    core.replay();
-                });
-            }, 750 / Math.max(1, core.status.replay.speed));
-            return;
-        }
-    }
-    else if (action.indexOf("fly:")==0) {
-        var floorId=action.substring(4);
-        var toIndex=core.floorIds.indexOf(floorId);
-        if (core.hasItem('fly')) {
-            core.ui.drawFly(toIndex);
-            setTimeout(function () {
-                if (!core.control.flyTo(floorId, function () {core.replay()})) {
-                    core.stopReplay();
-                    core.insertAction("录像文件出错");
-                }
-            }, 750 / Math.max(1, core.status.replay.speed));
-            return;
-        }
-    }
-    else if (action.indexOf("shop:")==0) {
-        var sps=action.substring(5).split(":");
-        var shopId=sps[0], selections=sps[1].split("");
-
-        if (selections.length>0) {
-            var shop=core.status.shops[shopId];
-            if (core.isset(shop) && shop.visited) { // 商店可用
-                var choices = shop.choices;
-                var topIndex = core.__HALF_SIZE__ - parseInt(choices.length / 2);
-
-                core.status.event.selection = parseInt(selections.shift());
-
-                core.events.openShop(shopId, false);
-                var shopInterval = setInterval(function () {
-                    if (!core.actions._clickShop(core.__HALF_SIZE__, topIndex+core.status.event.selection)) {
-                        clearInterval(shopInterval);
-                        core.stopReplay();
-                        core.drawTip("录像文件出错");
-                        return;
-                    }
-                    if (selections.length==0) {
-                        clearInterval(shopInterval);
-                        core.actions._clickShop(core.__HALF_SIZE__, topIndex+choices.length);
-                        core.replay();
-                        return;
-                    }
-                    core.status.event.selection = parseInt(selections.shift());
-                    core.events.openShop(shopId, false);
-
-                }, 750 / Math.max(1, core.status.replay.speed));
-                return;
-            }
-        }
-    }
-    else if (action=='turn') {
-        core.turnHero();
-        core.replay();
-        return;
-    }
-    else if (action.indexOf("turn:")==0) {
-        core.turnHero(action.substring(5));
-        core.replay();
-        return;
-    }
-    else if (action=='getNext') {
-        if (core.getNextItem()) {
-            core.replay();
-            return;
-        }
-    }
-    else if (action.indexOf('move:')==0) {
-        while (core.status.replay.toReplay.length>0 &&
-            core.status.replay.toReplay[0].indexOf('move:')==0) {
-            action = core.status.replay.toReplay.shift();
-        }
-
-        var pos=action.substring(5).split(":");
-        var x=parseInt(pos[0]), y=parseInt(pos[1]);
-        var nowx=core.getHeroLoc('x'), nowy=core.getHeroLoc('y');
-        if (core.control.moveDirectly(x,y)) {
-            core.ui.drawArrow('ui', 32*nowx+16-core.bigmap.offsetX, 32*nowy+16-core.bigmap.offsetY, 32*x+16-core.bigmap.offsetX, 32*y+16-core.bigmap.offsetY, '#FF0000', 3);
-            setTimeout(function () {
-                core.clearMap('ui');
-                core.replay();
-            }, 750 / Math.max(1, core.status.replay.speed));
-            return;
-        }
-    }
-    else if (action.indexOf('key:')==0) {
-        core.actions.keyUp(parseInt(action.substring(4)), false, true);
-        core.replay();
-        return;
-    }
-
-    // core.stopReplay();
-    // core.insertAction("录像文件出错");
-
+control.prototype._replay_error = function (action) {
     core.status.replay.replaying = false;
-    main.log("录像文件出错，当前操作："+action+
+    main.log("录像文件出错，当前操作：" + action +
         "\n接下来10个操作是："+core.status.replay.toReplay.slice(0, 10).toString());
     core.ui.drawConfirmBox("录像文件出错，你想回到上个节点吗？", function () {
         core.ui.closePanel();
@@ -1460,17 +1279,168 @@ control.prototype.replay = function () {
         }
         else {
             core.drawTip("无法回到上一个节点");
-            core.stopReplay();
+            core.stopReplay(true);
         }
     }, function () {
         core.ui.closePanel();
-        core.stopReplay();
+        core.stopReplay(true);
     });
-
 }
 
-control.prototype.isReplaying = function () {
-    return (core.status.replay||{}).replaying;
+control.prototype.__replay_getTimeout = function () {
+    return 750 / Math.max(1, core.status.replay.speed);
+}
+
+control.prototype._replayAction_move = function (action) {
+    if (["up","down","left","right"].indexOf(action)<0) return false;
+    core.moveHero(action, function () {
+        setTimeout(core.replay);
+    });
+    return true;
+}
+
+control.prototype._replayAction_item = function (action) {
+    if (action.indexOf("item:")!=0) return false;
+    var itemId = action.substring(5);
+    if (!core.canUseItem(itemId)) return false;
+    if (core.material.items[itemId].hideInReplay) {
+        core.useItem(itemId, false, core.replay);
+        return true;
+    }
+    var tools = Object.keys(core.status.hero.items.tools).sort();
+    var constants = Object.keys(core.status.hero.items.constants).sort();
+    var index, per = core.__SIZE__-1;
+    if ((index=tools.indexOf(itemId))>=0) {
+        core.status.event.data = {"toolsPage": Math.floor(index/per)+1, "constantsPage":1};
+        index = index%per;
+    }
+    else if ((index=constants.indexOf(itemId))>=0) {
+        core.status.event.data = {"toolsPage": 1, "constantsPage": Math.floor(index/per)+1};
+        index = index%per+per;
+    }
+    if (index<0) return false;
+    core.ui.drawToolbox(index);
+    setTimeout(function () {
+        core.ui.closePanel();
+        core.useItem(itemId, false, core.replay);
+    }, core.control.__replay_getTimeout());
+    return true;
+}
+
+control.prototype._replayAction_equip = function (action) {
+    if (action.indexOf("equip:")!=0) return false;
+    var equipId = action.substring(6);
+    var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
+    var index = ownEquipment.indexOf(equipId), per = core.__SIZE__-1;
+    if (index<0) return false;
+    core.status.route.push(action);
+    core.status.event.data = {"page":Math.floor(index/per)+1, "selectId":null};
+    index = index%per+per;
+    core.ui.drawEquipbox(index);
+    setTimeout(function () {
+        core.ui.closePanel();
+        core.loadEquip(equipId, core.replay);
+    }, core.control.__replay_getTimeout());
+    return true;
+}
+
+control.prototype._replayAction_unEquip = function (action) {
+    if (action.indexOf("unEquip:")!=0) return false;
+    var equipType = parseInt(action.substring(8));
+    if (!core.isset(equipType)) return false;
+    core.ui.drawEquipbox(equipType);
+    core.status.route.push(action);
+    setTimeout(function () {
+        core.ui.closePanel();
+        core.unloadEquip(equipType, core.replay);
+    }, core.control.__replay_getTimeout());
+    return true;
+}
+
+control.prototype._replayAction_fly = function (action) {
+    if (action.indexOf("fly:")!=0) return false;
+    var floorId=action.substring(4);
+    var toIndex=core.floorIds.indexOf(floorId);
+    if (!core.canUseItem('fly')) return false;
+    core.ui.drawFly(toIndex);
+    setTimeout(function () {
+        if (!core.control.flyTo(floorId, core.replay))
+            core.control._replay_error(action);
+    }, core.control.__replay_getTimeout());
+    return true;
+}
+
+control.prototype._replayAction_shop = function (action) {
+    if (action.indexOf("shop:")!=0) return false;
+    var sps=action.substring(5).split(":");
+    var shopId=sps[0], selections=sps[1].split("");
+    if (selections.length == 0) return false;
+    var shop=core.status.shops[shopId];
+    if (!shop || !shop.visited) return false;
+    var choices = shop.choices;
+    var topIndex = core.__HALF_SIZE__ - parseInt(choices.length / 2);
+    core.status.event.selection = parseInt(selections.shift());
+    core.events.openShop(shopId, false);
+    var shopInterval = setInterval(function () {
+        if (!core.actions._clickShop(core.__HALF_SIZE__, topIndex+core.status.event.selection)) {
+            clearInterval(shopInterval);
+            core.stopReplay();
+            core.drawTip("录像文件出错");
+            return;
+        }
+        if (selections.length==0) {
+            clearInterval(shopInterval);
+            core.actions._clickShop(core.__HALF_SIZE__, topIndex+choices.length);
+            core.replay();
+            return;
+        }
+        core.status.event.selection = parseInt(selections.shift());
+        core.events.openShop(shopId, false);
+    }, core.control.__replay_getTimeout());
+    return true;
+}
+
+control.prototype._replayAction_turn = function (action) {
+    if (action != 'turn' || action.indexOf('turn:') != 0) return false;
+    if (action == 'turn') core.turnHero();
+    else core.turnHero(action.substring(5));
+    setTimeout(core.replay);
+    return true;
+}
+
+control.prototype._replayAction_getNext = function (action) {
+    if (action != "getNext") return false;
+    if (!core.getNextItem()) return false;
+    setTimeout(core.replay);
+    return true;
+}
+
+control.prototype._replayAction_moveDirectly = function (action) {
+    if (action.indexOf("move:")!=0) return false;
+    // 忽略连续的瞬移事件
+    while (core.status.replay.toReplay.length>0 &&
+        core.status.replay.toReplay[0].indexOf('move:')==0) {
+            action = core.status.replay.toReplay.shift();
+    }
+
+    var pos=action.substring(5).split(":");
+    var x=parseInt(pos[0]), y=parseInt(pos[1]);
+    var nowx=core.getHeroLoc('x'), nowy=core.getHeroLoc('y');
+    if (!core.moveDirectly(x, y)) return false;
+    core.ui.drawArrow('ui', 32*nowx+16-core.bigmap.offsetX, 32*nowy+16-core.bigmap.offsetY,
+        32*x+16-core.bigmap.offsetX, 32*y+16-core.bigmap.offsetY, '#FF0000', 3);
+    setTimeout(function () {
+        core.clearMap('ui');
+        core.replay();
+    }, core.control.__replay_getTimeout());
+    return true;
+}
+
+control.prototype._replayAction_key = function (action) {
+    if (action.indexOf("key:") != 0) return false;
+    core.actions.keyUp(parseInt(action.substring(4)), false, true);
+    setTimeout(core.replay);
+    return true;
 }
 
 ////// 判断当前能否进入某个事件 //////

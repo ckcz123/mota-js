@@ -2064,6 +2064,8 @@ actions.prototype._clickStorageRemove = function (x, y) {
         var selection = y - topIndex;
         switch (selection) {
             case 0:
+                if (!confirm("你确定要清除【全部塔】的所有本地存档？\n此行为不可逆！！！"))
+                    break;
                 if (core.platform.useLocalForage) {
                     core.ui.drawWaiting("正在清空，请稍后...");
                     localforage.clear(function () {
@@ -2081,6 +2083,8 @@ actions.prototype._clickStorageRemove = function (x, y) {
                 }
                 break;
             case 1:
+                if (!confirm("你确定要清除本塔的所有本地存档？\n此行为不可逆！！！"))
+                    break;
                 if (core.platform.useLocalForage) {
                     core.ui.drawWaiting("正在清空，请稍后...");
                     Object.keys(core.saves.ids).forEach(function (v) {

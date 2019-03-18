@@ -250,14 +250,9 @@ events.prototype.doSystemEvent = function (type, data, callback) {
 }
 
 ////// 触发(x,y)点的事件 //////
-events.prototype.trigger = function (x, y) {
-    // 如果已经死亡，忽略
-    if (core.status.gameOver) return;
-    // 如果正在自定义事件中，则插入
-    if (core.status.event.id == 'action') {
-        core.insertAction({"type": "trigger", "loc": [x, y]});
-        return;
-    }
+events.prototype._trigger = function (x, y) {
+    // 如果已经死亡，或正处于某事件中，则忽略
+    if (core.status.gameOver || core.status.event.id) return;
 
     core.status.isSkiing = false;
     var block = core.getBlock(x, y);
@@ -690,7 +685,7 @@ events.prototype._sys_action = function (data, callback) {
     var ev = core.clone(data.event.data), ex = data.x, ey = data.y;
     // 检查是否需要改变朝向
     if (ex == core.nextX() && ey == core.nextY()) {
-        var dir = {"up": "down", "down": "up", "left": "right", "right": "left"}[core.getHeroLoc('direction')];
+        var dir = core.reverseDirection();
         var id = data.event.id, toId = (data.event.faceIds || {})[dir];
         if (toId && id != toId) {
             var number = core.icons.getNumberById(toId);
@@ -1817,10 +1812,10 @@ events.prototype._eventMoveHero_moving = function (step, moveSteps) {
     if (direction == 'forward' || direction == 'backward') direction = core.getHeroLoc('direction');
     core.setHeroLoc('direction', direction);
     if (step <= 4) {
-        core.drawHero(direction, x, y, 'leftFoot', 4 * o * step);
+        core.drawHero('leftFoot', 4 * o * step);
     }
     else if (step <= 8) {
-        core.drawHero(direction, x, y, 'rightFoot', 4 * o * step);
+        core.drawHero('rightFoot', 4 * o * step);
     }
     if (step == 8) {
         core.setHeroLoc('x', x + o * core.utils.scan[direction].x, true);

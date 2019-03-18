@@ -181,7 +181,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// ------ 支援技能 ------ //
 	if (x != null && y != null) {
 		var index = x + "," + y,
-			cache = (core.status.checkBlock.cache || {})[index] || {},
+			cache = core.status.checkBlock.cache[index] || {},
 			guards = cache.guards || [];
 		// 如果存在支援怪
 		if (guards.length > 0) {
@@ -507,7 +507,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// ------ 支援 ------
 	var guards = [];
 	// 检查光环缓存
-	if (!core.status.checkBlock.cache) core.status.checkBlock.cache = {};
 	var index = x != null && y != null ? (x + "," + y) : "floor";
 	var cache = core.status.checkBlock.cache[index];
 	if (!cache) {
@@ -1014,147 +1013,154 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	floorId = floorId || core.status.floorId;
 	if (!floorId || !core.status.maps) return;
 
-	var blocks = core.status.maps[floorId].blocks;
-	var width = core.floors[floorId].width, height = core.floors[floorId].height;
+	var width = core.floors[floorId].width,
+		height = core.floors[floorId].height;
+	var blocks = core.getMapBlocksObj(floorId);
 
-	core.status.checkBlock = {};
+	var damage = {}, // 每个点的伤害值
+		type = {}, // 每个点的伤害类型
+		snipe = {}, // 每个点的阻击怪信息
+		ambush = {}; // 每个点的捕捉信息
 
-	// Step1: 更新怪物地图
-	core.status.checkBlock.map = []; // 记录怪物地图
-	for (var n = 0; n < blocks.length; n++) {
-		var block = blocks[n];
-		if (!block.disable && block.event.cls.indexOf('enemy') == 0) {
-			var id = block.event.id,
-				enemy = core.material.enemys[id];
-			if (enemy) core.status.checkBlock.map[block.x + width * block.y] = id;
-		}
+	// 计算血网和领域、阻击、激光的伤害，计算捕捉信息
+	for (var loc in blocks) {
+		var block = blocks[loc],
+			x = block.x,
+			y = block.y,
+			id = block.event.id,
+			enemy = core.material.enemys[id];
+
 		// 血网
-		if (!block.disable &&
-			block.event.id == 'lavaNet' && block.event.trigger == 'passNet' && !core.hasItem("shoes")) {
-			core.status.checkBlock.map[block.x + width * block.y] = "lavaNet";
+		if (id == 'lavaNet' && block.event.trigger == 'passNet' && !core.hasItem('shoes')) {
+			damage[loc] = (damage[loc] || 0) + core.values.lavaDamage;
+			type[loc] = "血网伤害";
 		}
-	}
 
-	// Step2: 更新领域、阻击伤害
-	core.status.checkBlock.damage = []; // 记录(x,y)点的伤害；(x,y)对应的值是 x+width*y
-	for (var x = 0; x < width * height; x++) core.status.checkBlock.damage[x] = 0;
-	core.status.checkBlock.ambush = [];
+		// 领域
+		// 如果要防止领域伤害，可以直接简单的将 flag:no_zone 设为true
+		if (enemy && core.hasSpecial(enemy.special, 15) && !core.hasFlag('no_zone')) {
+			// 领域范围，默认为1
+			var range = enemy.range || 1;
+			// 是否是九宫格领域
+			var zoneSquare = false;
+			if (enemy.zoneSquare != null) zoneSquare = enemy.zoneSquare;
+			// 在范围内进行搜索，增加领域伤害值
+			for (var dx = -range; dx <= range; dx++) {
+				for (var dy = -range; dy <= range; dy++) {
+					if (dx == 0 && dy == 0) continue;
+					var nx = x + dx,
+						ny = y + dy,
+						currloc = nx + "," + ny;
+					if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+					// 如果是十字领域，则还需要满足 |dx|+|dy|<=range
+					if (!zoneSquare && Math.abs(dx) + Math.abs(dy) > range) continue;
+					damage[currloc] = (damage[currloc] || 0) + (enemy.value || 0);
+					type[currloc] = "领域伤害";
+				}
+			}
+		}
 
-	for (var x = 0; x < width; x++) {
-		for (var y = 0; y < height; y++) {
-			var id = core.status.checkBlock.map[x + width * y];
-			if (id) {
+		// 阻击
+		// 如果要防止阻击伤害，可以直接简单的将 flag:no_snipe 设为true
+		if (enemy && core.hasSpecial(enemy.special, 18) && !core.hasFlag('no_snipe')) {
+			for (var dir in core.utils.scan) {
+				var nx = x + core.utils.scan[dir].x,
+					ny = y + core.utils.scan[dir].y,
+					currloc = nx + "," + ny;
+				if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+				damage[currloc] = (damage[currloc] || 0) + (enemy.value || 0);
+				type[currloc] = "阻击伤害";
 
-				// 如果是血网，直接加上伤害值
-				if (id == "lavaNet") {
-					core.status.checkBlock.damage[x + width * y] += core.values.lavaDamage || 0;
-					continue;
+				var rdir = core.reverseDirection(dir);
+				// 检查下一个点是否存在事件（从而判定是否移动）
+				var rnx = x + core.utils.scan[rdir].x,
+					rny = y + core.utils.scan[rdir].y;
+				if (rnx >= 0 && rnx < width && rny >= 0 && rny < height && core.getBlock(rnx, rny, floorId) == null) {
+					snipe[currloc] = (snipe[currloc] || []).concat([
+						[x, y, id, rdir]
+					]);
 				}
+			}
+		}
 
-				var enemy = core.material.enemys[id];
-				// 存在领域
-				// 如果要防止领域伤害，可以直接简单的将 flag:no_zone 设为true
-				if (core.enemys.hasSpecial(enemy.special, 15) && !core.hasFlag("no_zone")) {
-					// 领域范围，默认为1
-					var range = enemy.range || 1;
-					// 是否是九宫格领域
-					var zoneSquare = false;
-					if (enemy.zoneSquare != null) zoneSquare = enemy.zoneSquare;
-					// 在范围内进行搜索，增加领域伤害值
-					for (var dx = -range; dx <= range; dx++) {
-						for (var dy = -range; dy <= range; dy++) {
-							if (dx == 0 && dy == 0) continue;
-							var nx = x + dx,
-								ny = y + dy;
-							if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
-							// 如果是十字领域，则还需要满足 |dx|+|dy|<=range
-							if (!zoneSquare && Math.abs(dx) + Math.abs(dy) > range) continue;
-							core.status.checkBlock.damage[nx + ny * width] += enemy.value || 0;
-						}
-					}
+		// 激光
+		// 如果要防止激光伤害，可以直接简单的将 flag:no_laser 设为true
+		if (enemy && core.hasSpecial(enemy.special, 24) && !core.hasFlag("no_laser")) {
+			for (var nx = 0; nx < width; nx++) {
+				var currloc = nx + "," + y;
+				if (nx != x) {
+					damage[currloc] = (damage[currloc] || 0) + (enemy.value || 0);
+					type[currloc] = "激光伤害";
 				}
-				// 存在激光
-				// 如果要防止激光伤害，可以直接简单的将 flag:no_laser 设为true
-				if (core.enemys.hasSpecial(enemy.special, 24) && !core.hasFlag("no_laser")) {
-					// 检查同行和同列，增加激光伤害值
-					for (var nx = 0; nx < width; nx++) {
-						if (nx != x) core.status.checkBlock.damage[nx + y * width] += enemy.value || 0;
-					}
-					for (var ny = 0; ny < height; ny++) {
-						if (ny != y) core.status.checkBlock.damage[x + ny * width] += enemy.value || 0;
-					}
+			}
+			for (var ny = 0; ny < height; ny++) {
+				var currloc = x + "," + ny;
+				if (ny != y) {
+					damage[currloc] = (damage[currloc] || 0) + (enemy.value || 0);
+					type[currloc] = "激光伤害";
 				}
-				// 存在阻击
-				// 如果要防止阻击伤害，可以直接简单的将 flag:no_snipe 设为true
-				if (core.enemys.hasSpecial(enemy.special, 18) && !core.hasFlag("no_snipe")) {
-					for (var dx = -1; dx <= 1; dx++) {
-						for (var dy = -1; dy <= 1; dy++) {
-							if (dx == 0 && dy == 0) continue;
-							var nx = x + dx,
-								ny = y + dy;
-							if (nx < 0 || nx >= width || ny < 0 || ny >= height || Math.abs(dx) + Math.abs(dy) > 1) continue;
-							core.status.checkBlock.damage[nx + ny * width] += enemy.value || 0;
-						}
-					}
-				}
-				// 存在捕捉
-				if (core.enemys.hasSpecial(enemy.special, 27)) {
-					// 给周围格子加上【捕捉】记号
-					for (var dir in core.utils.scan) {
-						var nx = x + core.utils.scan[dir].x,
-							ny = y + core.utils.scan[dir].y;
-						if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
-						if (!core.status.checkBlock.ambush[nx + ny * width])
-							core.status.checkBlock.ambush[nx + ny * width] = [];
-						core.status.checkBlock.ambush[nx + ny * width].push([x, y, id, dir]);
-					}
-				}
+			}
+		}
+
+		// 捕捉
+		// 如果要防止捕捉效果，可以直接简单的将 flag:no_ambush 设为true
+		if (enemy && core.enemys.hasSpecial(enemy.special, 27)) {
+			// 给周围格子加上【捕捉】记号
+			for (var dir in core.utils.scan) {
+				var nx = x + core.utils.scan[dir].x,
+					ny = y + core.utils.scan[dir].y,
+					currloc = nx + "," + ny;
+				if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+				ambush[currloc] = (ambush[currloc] || []).concat([
+					[x, y, id, dir]
+				]);
 			}
 		}
 	}
 
-	// Step3: 更新夹击点坐标，并将夹击伤害加入到damage中
-	core.status.checkBlock.betweenAttack = []; // 记录(x,y)点是否有夹击
+	// 更新夹击伤害
 	// 如果要防止夹击伤害，可以简单的将 flag:no_betweenAttack 设为true
 	if (!core.hasFlag('no_betweenAttack')) {
 		for (var x = 0; x < width; x++) {
 			for (var y = 0; y < height; y++) {
-				// 该点是否存在夹击
-				var has = false;
-				// 检测左右是否存在相同的怪物，且拥有夹击属性
-				if (x > 0 && x < width - 1) {
-					var id1 = core.status.checkBlock.map[x - 1 +width * y],
-						id2 = core.status.checkBlock.map[x + 1 + width * y];
-					if (id1 != null && id2 != null && id1 == id2) {
-						var enemy = core.material.enemys[id1];
-						if (enemy && core.enemys.hasSpecial(enemy.special, 16)) {
-							has = true;
-						}
-					}
+				var loc = x + "," + y;
+				// 夹击怪物的ID
+				var enemyId = null;
+				// 检查左右夹击
+				var leftBlock = blocks[(x - 1) + "," + y],
+					rightBlock = blocks[(x + 1) + "," + y];
+				if (leftBlock && rightBlock && leftBlock.id == rightBlock.id) {
+					if (core.hasSpecial(leftBlock.event.id, 16))
+						enemyId = leftBlock.event.id;
 				}
-				// 检测上下是否存在相同的怪物，且拥有夹击属性
-				if (y > 0 && y < height - 1) {
-					var id1 = core.status.checkBlock.map[x + width * (y - 1)],
-						id2 = core.status.checkBlock.map[x + width * (y + 1)];
-					if (id1 != null && id2 != null && id1 == id2) {
-						var enemy = core.material.enemys[id1];
-						if (enemy && core.enemys.hasSpecial(enemy.special, 16)) {
-							has = true;
-						}
-					}
+				// 检查上下夹击
+				var topBlock = block[x + "," + (y - 1)],
+					bottomBlock = blocks[x + "," + (y + 1)];
+				if (topBlock && bottomBlock && topBlock.id == bottomBlock.id) {
+					if (core.hasSpecial(topBlock.event.id, 16))
+						enemyId = topBlock.event.id;
 				}
-				// 计算夹击伤害
-				if (has) {
-					core.status.checkBlock.betweenAttack[x + width * y] = true;
-					// 先扣除该点领域/阻击/激光造成的伤害，再算夹击
-					var leftHp = core.status.hero.hp - core.status.checkBlock.damage[x + width * y];
-					// 1血不夹；core.flags.betweenAttackCeil控制向上还是向下
-					if (leftHp > 1)
-						core.status.checkBlock.damage[x + width * y] += Math.floor((leftHp + (core.flags.betweenAttackCeil ? 0 : 1)) / 2);
+
+				if (enemyId != null) {
+					var leftHp = core.status.hero.hp - (damage[x + "," + y] || 0);
+					if (leftHp > 1) {
+						// 上整/下整
+						var value = Math.floor((leftHp + (core.flags.betweenAttackCeil ? 0 : 1)) / 2);
+						damage[loc] = (damage[loc] || 0) + value;
+						type[loc] = "夹击伤害";
+					}
 				}
 			}
 		}
 	}
+
+	core.status.checkBlock = {
+		damage: damage,
+		type: type,
+		snipe: snipe,
+		ambush: ambush,
+		cache: {}
+	};
 },
         "moveOneStep": function (x, y) {
 	// 勇士每走一步后执行的操作，x,y为要移动到的坐标。

@@ -416,7 +416,7 @@ maps.prototype._canMoveHero_checkPoint = function (x, y, direction, floorId, ext
 
     // 3. 检查是否能进将死的领域
     if (floorId == core.status.floorId
-        && core.status.hero.hp <= core.status.checkBlock.damage[nx + core.bigmap.width * ny]
+        && core.status.hero.hp <= (core.status.checkBlock.damage[nx + "," + ny]||0)
         && !core.flags.canGoDeadZone && extraData.eventArray[ny][nx] == 0)
         return false;
 
@@ -460,7 +460,7 @@ maps.prototype._canMoveDirectly_checkGlobal = function () {
 }
 
 maps.prototype._canMoveDirectly_checkStartPoint = function (sx, sy) {
-    if (core.status.checkBlock.damage[sx + core.bigmap.width * sy] > 0) return false;
+    if (core.status.checkBlock.damage[sx + "," + sy]) return false;
     var block = core.getBlock(sx, sy);
     if (block != null) {
         // 只有起点是传送点才是能无视
@@ -498,9 +498,9 @@ maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
     // 该点是否有事件
     if (blocksObj[index]) return false;
     // 是否存在阻激夹域伤害
-    if (core.status.checkBlock.damage[x + core.bigmap.width * y] > 0) return false;
+    if (core.status.checkBlock.damage[x + "," + y]) return false;
     // 是否存在捕捉
-    if (core.status.checkBlock.ambush[x + core.bigmap.width * y]) return false;
+    if (core.status.checkBlock.ambush[x + "," + y]) return false;
 
     return true;
 }
@@ -568,9 +568,9 @@ maps.prototype._automaticRoute_deepAdd = function (x, y) {
         // if (nextBlock.block.event.trigger == 'changeFloor') deepAdd+=10;
     }
     // 绕过存在伤害的地方
-    deepAdd += core.status.checkBlock.damage[x+","+y] * 100;
+    deepAdd += (core.status.checkBlock.damage[x+","+y]||0) * 100;
     // 绕过捕捉
-    if ((core.status.checkBlock.ambush||[])[x+","+y]) deepAdd += 1000;
+    if (core.status.checkBlock.ambush[x+","+y]) deepAdd += 1000;
     return deepAdd;
 }
 

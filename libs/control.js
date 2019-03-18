@@ -182,7 +182,7 @@ control.prototype._animationFrame_heroMoving = function (timestamp) {
         core.animateFrame.leftLeg = !core.animateFrame.leftLeg;
         core.animateFrame.moveTime = timestamp;
     }
-    core.drawHero(direction, x, y, core.animateFrame.leftLeg?'leftFoot':'rightFoot', 4*core.status.heroMoving);
+    core.drawHero(core.animateFrame.leftLeg?'leftFoot':'rightFoot', 4*core.status.heroMoving);
 }
 
 control.prototype._animationFrame_weather = function (timestamp) {
@@ -315,6 +315,7 @@ control.prototype._showStartAnimate_resetDom = function () {
     core.dom.musicBtn.style.display = 'block';
     // 重置音量
     core.events.setVolume(1, 0);
+    core.updateStatusBar();
 }
 
 control.prototype._showStartAnimate_finished = function (start, callback) {
@@ -594,7 +595,7 @@ control.prototype._moveAction_noPass = function (canMove, callback) {
         core.status.route.push(core.getHeroLoc('direction'));
     core.status.automaticRoute.moveStepBeforeStop = [];
     core.status.automaticRoute.lastDirection = core.getHeroLoc('direction');
-    if (canMove) core.trigger(core.nextX(), core.nextY());
+    if (canMove) core.events._trigger(core.nextX(), core.nextY());
     core.drawHero();
 
     if (core.status.automaticRoute.moveStepBeforeStop.length==0) {
@@ -618,13 +619,14 @@ control.prototype._moveAction_moving = function (callback) {
         if (block!=null && block.block.event.trigger=='getItem' &&
             !core.floors[core.status.floorId].afterGetItem[nowx+","+nowy]) {
             hasTrigger = true;
-            core.trigger(nowx, nowy);
+            core.events._trigger(nowx, nowy);
         }
         // 执行该点的阻激夹域事件
         core.checkBlock();
         // 执行该点事件
         if (!hasTrigger)
-            core.trigger(nowx, nowy);
+            core.events._trigger(nowx, nowy);
+        core.updateStatusBar();
         if (callback) callback();
     });
 }
@@ -670,7 +672,8 @@ control.prototype._moveHero_moving = function () {
             if (core.hasFlag('debug') && core.status.ctrlDown) {
                 if (core.status.heroMoving!=0) return;
                 // 检测是否穿出去
-                if (!core.insideMap(1)) return;
+                var nx = core.nextX(), ny = core.nextY();
+                if (nx < 0 || nx >= core.bigmap.width || ny < 0 || ny >= core.bigmap.height) return;
                 core.status.heroMoving=-1;
                 core.eventMoveHero([core.getHeroLoc('direction')], core.values.moveSpeed, function () {
                     core.status.heroMoving=0;
@@ -752,12 +755,10 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
 }
 
 ////// 绘制勇士 //////
-control.prototype.drawHero = function (direction, x, y, status, offset) {
+control.prototype.drawHero = function (status, offset) {
     if (!core.isPlaying() || !core.status.floorId) return;
-    if (x == null) x = core.getHeroLoc('x');
-    if (y == null) y = core.getHeroLoc('y');
+    var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
     status = status || 'stop';
-    direction = direction || core.getHeroLoc('direction');
     offset = offset || 0;
     var way = core.utils.scan[direction];
     var dx = way.x, dy = way.y, offsetX = dx * offset, offsetY = dy * offset;
@@ -854,7 +855,7 @@ control.prototype.setHeroLoc = function (itemName, itemVal, noGather) {
 
 ////// 获得勇士的位置 //////
 control.prototype.getHeroLoc = function (itemName) {
-    if (!core.isset(itemName)) return core.status.hero.loc;
+    if (itemName == null) return core.status.hero.loc;
     return core.status.hero.loc[itemName];
 }
 
@@ -871,14 +872,6 @@ control.prototype.nextY = function (n) {
 ////// 某个点是否在勇士旁边 //////
 control.prototype.nearHero = function (x, y) {
     return Math.abs(x-core.getHeroLoc('x'))+Math.abs(y-core.getHeroLoc('y'))<=1;
-}
-
-////// 判定下一个点是否在界面外 //////
-control.prototype.insideMap = function (n) {
-    n = n || 0;
-    var x = n==0?core.getHeroLoc('x'):core.nextX(n),
-        y = n==0?core.getHeroLoc('y'):core.nextY(n);
-    return x>=0 && x < core.bigmap.width && y >= 0 && y < core.bigmap.height;
 }
 
 ////// 聚集跟随者 //////
@@ -922,96 +915,52 @@ control.prototype.updateCheckBlock = function(floorId) {
 
 ////// 检查并执行领域、夹击、阻击事件 //////
 control.prototype.checkBlock = function () {
-    var x=core.getHeroLoc('x'), y=core.getHeroLoc('y');
-    var damage = core.status.checkBlock.damage[x+core.bigmap.width*y];
-    if (damage>0) {
+    var x=core.getHeroLoc('x'), y=core.getHeroLoc('y'), loc = x+","+y;
+    var damage = core.status.checkBlock.damage[loc];
+    if (damage) {
         core.status.hero.hp -= damage;
-
-        // 检查阻击事件
-        var snipe = [];
-        if (!core.hasFlag("no_snipe")) {
-            for (var direction in core.utils.scan) {
-                var nx = x+core.utils.scan[direction].x, ny=y+core.utils.scan[direction].y;
-                if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height) continue;
-                var id=core.status.checkBlock.map[nx+core.bigmap.width*ny];
-                if (core.isset(id)) {
-                    var enemy = core.material.enemys[id];
-                    if (core.isset(enemy) && core.enemys.hasSpecial(enemy.special, 18)) {
-                        snipe.push({'direction': direction, 'x': nx, 'y': ny});
-                    }
-                }
-            }
-        }
-
-        if (core.status.checkBlock.betweenAttack[x+core.bigmap.width*y] && damage>0) {
-            core.drawTip('受到夹击，生命变成一半');
-        }
-        else if (core.status.checkBlock.map[x+core.bigmap.width*y]=='lavaNet') {
-            core.drawTip('受到血网伤害'+damage+'点');
-        }
-        // 阻击
-        else if (snipe.length>0 && damage>0) {
-            core.drawTip('受到阻击伤害'+damage+'点');
-        }
-        else if (damage>0) {
-            core.drawTip('受到领域或激光伤害'+damage+'点');
-        }
-
-        if (damage>0) {
-            core.playSound('zone.mp3');
-            core.drawAnimate("zone", x, y);
-
-            // 禁用快捷商店
-            if (core.flags.disableShopOnDamage) {
-                for (var shopId in core.status.shops) {
-                    core.status.shops[shopId].visited = false;
-                }
-            }
-
-        }
-        core.status.hero.statistics.extraDamage += damage;
-
-        if (core.status.hero.hp<=0) {
+        core.drawTip("受到"+(core.status.checkBlock.type[loc]||"伤害")+damage+"点");
+        this._checkBlock_soundAndAnimate(x, y);
+        if (core.status.hero.hp <= 0) {
             core.status.hero.hp=0;
             core.updateStatusBar();
             core.events.lose();
             return;
         }
-        snipe = snipe.filter(function (t) {
-            var x=t.x, y=t.y, direction = t.direction;
-            var nx = x+core.utils.scan[direction].x, ny=y+core.utils.scan[direction].y;
-
-            return nx>=0 && nx<core.bigmap.width && ny>=0 && ny<core.bigmap.height && core.getBlock(nx, ny)==null;
-        });
-        core.updateStatusBar();
-        if (snipe.length>0)
-            core.snipe(snipe);
     }
-    // 检查捕捉
-    var ambush = (core.status.checkBlock.ambush||[])[x+core.bigmap.width*y];
-    if (core.isset(ambush)) {
-        // 捕捉效果
-        var actions = [];
-        ambush.forEach(function (t) {
-            actions.push({"type": "move", "loc": [t[0],t[1]], "steps": [t[3]], "time": 500, "keep": false, "async":true});
-        });
-        actions.push({"type": "waitAsync"});
-        // 强制战斗
-        ambush.forEach(function (t) {
-            actions.push({"type": "battle", "id": t[2]});
-        })
-        core.insertAction(actions);
-    }
+    this._checkBlock_snipe(core.status.checkBlock.snipe[loc]);
+    this._checkBlock_ambush(core.status.checkBlock.ambush[loc]);
 }
 
-////// 阻击事件（动画效果） //////
-control.prototype.snipe = function (snipes) {
-    // 阻击改成moveBlock事件完成
+control.prototype._checkBlock_soundAndAnimate = function (x,y) {
+    core.playSound('zone.mp3');
+    core.drawAnimate("zone", x, y);
+}
+
+////// 阻击 //////
+control.prototype._checkBlock_snipe = function (snipe) {
+    if (!snipe || snipe.length == 0) return;
     var actions = [];
-    snipes.forEach(function (t) {
-        actions.push({"type": "move", "loc": [t.x, t.y], "steps": [t.direction], "time": 500, "keep": true, "async": true});
+    snipe.forEach(function (t) {
+        actions.push({"type": "move", "loc": [t[0],t[1]], "steps": [t[3]], "time": 500, "keep": true, "async": true});
     });
     actions.push({"type": "waitAsync"});
+    core.insertAction(actions);
+}
+
+////// 捕捉 //////
+control.prototype._checkBlock_ambush = function (ambush) {
+    if (!ambush || ambush.length == 0) return;
+    // 捕捉效果
+    var actions = [];
+    ambush.forEach(function (t) {
+        actions.push({"type": "move", "loc": [t[0],t[1]], "steps": [t[3]], "time": 500, "keep": false, "async":true});
+    });
+    actions.push({"type": "waitAsync"});
+    // 强制战斗
+    ambush.forEach(function (t) {
+        actions.push({"type": "battle", "id": t[2]});
+    });
     core.insertAction(actions);
 }
 
@@ -1206,13 +1155,13 @@ control.prototype.updateDamage = function (floorId, canvas) {
         var width = core.floors[floorId].width, height = core.floors[floorId].height;
         for (var x=0;x<width;x++) {
             for (var y=0;y<height;y++) {
-                var damage = core.status.checkBlock.damage[x+width*y];
+                var damage = core.status.checkBlock.damage[x+","+y];
                 if (damage>0) { // 该点伤害
                     damage = core.formatBigNumber(damage, true);
                     core.fillBoldText(canvas, damage, 32*x+16, 32*(y+1)-14, '#FF7F00');
                 }
                 else { // 检查捕捉
-                    if ((core.status.checkBlock.ambush||[])[x+width*y]) {
+                    if (core.status.checkBlock.ambush[x+","+y]) {
                         core.fillBoldText(canvas, '!', 32*x+16, 32*(y+1)-14, '#FF7F00');
                     }
                 }

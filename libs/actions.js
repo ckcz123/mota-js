@@ -1004,7 +1004,7 @@ actions.prototype._clickFly = function (x, y) {
     if ((x == 12 || x == 13) && y == 5) core.ui.drawFly(this._getNextFlyFloor(10));
     if (x >= 6 && x <= 8 && y == 14) core.ui.closePanel();
     if (x >= 0 && x <= 10 && y >= 3 && y <= 13)
-        core.control.flyTo(core.floorIds[core.status.event.data]);
+        core.flyTo(core.floorIds[core.status.event.data]);
     return;
 }
 

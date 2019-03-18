@@ -241,12 +241,18 @@ events.prototype.unregisterSystemEvent = function (type) {
 
 ////// 执行一个系统事件 //////
 events.prototype.doSystemEvent = function (type, data, callback) {
-    if (this.systemEvents[type]) this.systemEvents[type](data, callback);
-    else if (this["_sys_" + type]) this["_sys_" + type](data, callback);
-    else {
-        main.log("未知的系统事件: " + type + "！");
-        if (callback) callback();
+    if (this.systemEvents[type]) {
+        try {
+            return core.doFunc(this.systemEvents[type], data, data, callback);
+        }
+        catch (e) {
+            main.log(e);
+            main.log("ERROR in systemEvents["+type+"]");
+        }
     }
+    if (this["_sys_" + type]) return this["_sys_" + type](data, callback);
+    main.log("未知的系统事件: " + type + "！");
+    if (callback) callback();
 }
 
 ////// 触发(x,y)点的事件 //////
@@ -713,12 +719,18 @@ events.prototype.unregisterEvent = function (type) {
 ////// 执行一个自定义事件
 events.prototype.doEvent = function (data, x, y, prefix) {
     var type = data.type;
-    if (this.actions[type]) this.actions[type](data, x, y, prefix);
-    else if (this["_action_" + type]) this["_action_" + type](data, x, y, prefix);
-    else {
-        core.insertAction("未知的自定义事件: " + type + "！");
-        core.doAction();
+    if (this.actions[type]) {
+        try {
+            return core.doFunc(this.actions[type], data, x, y, prefix);
+        }
+        catch (e) {
+            main.log(e);
+            main.log("ERROR in actions["+type+"]");
+        }
     }
+    if (this["_action_" + type]) return this["_action_" + type](data, x, y, prefix);
+    core.insertAction("未知的自定义事件: " + type + "！");
+    core.doAction();
 }
 
 ////// 开始执行一系列自定义事件 //////
@@ -859,7 +871,7 @@ events.prototype.__action_getHeroLoc = function (loc, prefix) {
 
 events.prototype.__action_getLoc2D = function (loc, x, y, prefix) {
     if (!(loc && loc[0] instanceof Array))
-        loc = [this.__action_getLoc(data.loc, x, y, prefix)];
+        loc = [this.__action_getLoc(loc, x, y, prefix)];
     return loc;
 }
 

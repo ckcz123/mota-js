@@ -118,14 +118,12 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 												"text": "<1：扣比例"
 											},
 											{
-												"type": "setValue2",
-												"name": "flag:__atk_buff__",
-												"value": "-core.values.weakValue"
+												"type": "function",
+												"function": "function(){\ncore.addBuff('atk', -core.values.weakValue);\n}"
 											},
 											{
-												"type": "setValue2",
-												"name": "flag:__def_buff__",
-												"value": "-core.values.weakValue"
+												"type": "function",
+												"function": "function(){\ncore.addBuff('def', -core.values.weakValue);\n}"
 											}
 										]
 									}

@@ -333,12 +333,12 @@ items.prototype._loadEquipEffect = function (equipId, unloadEquipId, isPercentag
     var result = core.compareEquipment(equipId, unloadEquipId);
 
     if (isPercentage) {
-        for (var v in result)
-            core.addFlag('__' + v + '_buff__', result[v] / 100);
+        for (var name in result)
+            core.addBuff(name, result[name] / 100);
     }
     else {
-        for (var v in result)
-            core.status.hero[v] += result[v];
+        for (var name in result)
+            core.status.hero[name] += result[name];
     }
 }
 

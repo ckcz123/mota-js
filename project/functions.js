@@ -36,8 +36,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.flags[key] = globalFlags[key];
 	// 初始化界面，状态栏等
 	core.resize();
-	core.updateGlobalAttribute(Object.keys(core.status.globalAttribute));
-	core.triggerStatusBar(core.hasFlag('hideStatusBar') ? 'hide' : 'show', core.hasFlag('showToolbox'));
+	core.updateGlobalAttribute();
+	// 状态栏是否显示
+	if (core.hasFlag('hideStatusBar'))
+		core.hideStatusBar(core.hasFlag('showToolbox'));
+	else
+		core.showStatusBar();
 	// 隐藏右下角的音乐按钮
 	core.dom.musicBtn.style.display = 'none';
 },
@@ -940,7 +944,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var toAttribute = core.getFlag('globalAttribute', core.status.globalAttribute);
 	if (!core.same(toAttribute, core.status.globalAttribute)) {
 		core.status.globalAttribute = toAttribute;
-		core.control.updateGlobalAttribute(Object.keys(toAttribute));
+		core.updateGlobalAttribute();
 	}
 	// 重置音量
 	core.events.setVolume(core.getFlag("__volume__", 1), 0);

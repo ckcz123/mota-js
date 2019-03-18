@@ -59,7 +59,7 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
 
     var todo = [];
     if (core.flags.startUsingCanvas) {
-        core.control.triggerStatusBar('hide');
+        core.hideStatusBar();
         core.dom.musicBtn.style.display = 'block';
         core.push(todo, core.firstData.startCanvas);
     }
@@ -73,7 +73,7 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
 
 events.prototype._startGame_afterStart = function (nowLoc, callback) {
     core.ui.closePanel();
-    core.control.triggerStatusBar('show');
+    core.showStatusBar();
     core.dom.musicBtn.style.display = 'none';
     core.changeFloor(core.firstData.floorId, null, nowLoc, null, callback);
     this._startGame_upload();
@@ -1395,12 +1395,12 @@ events.prototype._action_update = function (data, x, y, prefix) {
 }
 
 events.prototype._action_showStatusBar = function (data, x, y, prefix) {
-    core.control.triggerStatusBar("show");
+    core.showStatusBar();
     core.doAction();
 }
 
 events.prototype._action_hideStatusBar = function (data, x, y, prefix) {
-    core.control.triggerStatusBar("hide", data.toolbox);
+    core.hideStatusBar(data.toolbox);
     core.doAction();
 }
 
@@ -1775,7 +1775,7 @@ events.prototype.setGlobalAttribute = function (name, value) {
             value = eval(value);
     }
     core.status.globalAttribute[name] = value;
-    core.control.updateGlobalAttribute(name);
+    core.updateGlobalAttribute(name);
     core.setFlag('globalAttribute', core.status.globalAttribute);
 }
 

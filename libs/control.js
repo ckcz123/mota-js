@@ -195,7 +195,7 @@ control.prototype._animationFrame_heroMoving = function (timestamp) {
 
 control.prototype._animationFrame_weather = function (timestamp) {
     var weather = core.animateFrame.weather;
-    if (timestamp - weather.time <= 30 || weather.level <= 0 || !core.dymCanvas.weather) return;
+    if (timestamp - weather.time <= 30 || !core.dymCanvas.weather) return;
     core.control["_animationFrame_weather_"+weather.type]();
     weather.time = timestamp;
 }
@@ -1861,83 +1861,71 @@ control.prototype.debug = function() {
 
 ////// 更改天气效果 //////
 control.prototype.setWeather = function (type, level) {
-
     // 非雨雪
-    if (type!='rain' && type!='snow' && type!='fog') {
-        // core.clearMap('weather');
+    if (type == null) {
         core.deleteCanvas('weather')
         core.animateFrame.weather.type = null;
-        core.animateFrame.weather.level = 0;
         core.animateFrame.weather.nodes = [];
         return;
     }
-
-    level = parseInt(level);
-
     // 当前天气：则忽略
-    if (type==core.animateFrame.weather.type && !core.isset(level)) {
-        return;
-    }
-
-    if (!core.isset(level)) level=5;
-    if (level<1) level=1; if (level>10) level=10;
+    if (type==core.animateFrame.weather.type && level == null) return;
+    level = core.clamp(parseInt(level) || 5, 1, 10);
     level *= parseInt(20*core.bigmap.width*core.bigmap.height/(core.__SIZE__*core.__SIZE__));
-    // 计算当前的宽高
 
+    // 计算当前的宽高
     core.createCanvas('weather', 0, 0, core.__PIXELS__, core.__PIXELS__, 80);
     core.animateFrame.weather.type = type;
-    core.animateFrame.weather.level = level;
     core.animateFrame.weather.nodes = [];
+    this._setWeather_createNodes(type, level);
+}
 
-    if (type == 'rain') {
-        for (var a=0;a<level;a++) {
-            core.animateFrame.weather.nodes.push({
-                'x': Math.random()*core.bigmap.width*32,
-                'y': Math.random()*core.bigmap.height*32,
-                'l': Math.random() * 2.5,
-                'xs': -4 + Math.random() * 4 + 2,
-                'ys': Math.random() * 10 + 10
-            })
-        }
-    }
-    else if (type=='snow') {
-        for (var a=0;a<level;a++) {
-            core.animateFrame.weather.nodes.push({
-                'x': Math.random()*core.bigmap.width*32,
-                'y': Math.random()*core.bigmap.height*32,
-                'r': Math.random() * 5 + 1,
-                'd': Math.random() * Math.min(level, 200),
-            })
-        }
-    }
-    else if (type=='fog') {
-        if (core.animateFrame.weather.fog) {
-            for (var a=0;a<level/10;a++) {
+control.prototype._setWeather_createNodes = function (type, level) {
+    switch (type) {
+        case 'rain':
+            for (var a=0;a<level;a++) {
                 core.animateFrame.weather.nodes.push({
-                    'x': Math.random()*core.bigmap.width*32 - 208,
-                    'y': Math.random()*core.bigmap.height*32 - 208,
-                    'xs': Math.random() * 4 - 2,
-                    'ys': Math.random() * 4 - 2
+                    'x': Math.random()*core.bigmap.width*32,
+                    'y': Math.random()*core.bigmap.height*32,
+                    'l': Math.random() * 2.5,
+                    'xs': -4 + Math.random() * 4 + 2,
+                    'ys': Math.random() * 10 + 10
                 })
             }
-        }
+            break;
+        case 'snow':
+            for (var a=0;a<level;a++) {
+                core.animateFrame.weather.nodes.push({
+                    'x': Math.random()*core.bigmap.width*32,
+                    'y': Math.random()*core.bigmap.height*32,
+                    'r': Math.random() * 5 + 1,
+                    'd': Math.random() * Math.min(level, 200),
+                })
+            }
+            break;
+        case 'fog':
+            if (core.animateFrame.weather.fog) {
+                for (var a=0;a<level/10;a++) {
+                    core.animateFrame.weather.nodes.push({
+                        'x': Math.random()*core.bigmap.width*32 - 208,
+                        'y': Math.random()*core.bigmap.height*32 - 208,
+                        'xs': Math.random() * 4 - 2,
+                        'ys': Math.random() * 4 - 2
+                    })
+                }
+            }
+            break;
     }
 }
 
 ////// 更改画面色调 //////
 control.prototype.setFg = function(color, time, callback) {
-    if (!core.isset(time)) time=750;
+    if (time == null) time=750;
     if (time<=0) time=0;
-
-    if (!core.isset(core.status.curtainColor)) {
+    if (!core.status.curtainColor)
         core.status.curtainColor = [0,0,0,0];
-    }
-
-    var nowColor = core.status.curtainColor;
-
-    if (!core.isset(color))
-        color = [0,0,0,0];
-    if (!core.isset(color[3])) color[3] = 1;
+    if (!color) color = [0,0,0,0];
+    if (color[3] == null) color[3] = 1;
     color[3] = core.clamp(color[3],0,1);
 
     if (time==0) {
@@ -1945,46 +1933,47 @@ control.prototype.setFg = function(color, time, callback) {
         core.clearMap('curtain');
         core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(color));
         core.status.curtainColor = color;
-        if (core.isset(callback)) callback();
+        if (callback) callback();
         return;
     }
 
-    var per_time = 10, step = parseInt(time / per_time);
+    this._setFg_animate(core.status.curtainColor, color, callback);
+}
 
-    var changeAnimate = setInterval(function() {
+control.prototype._setFg_animate = function (nowColor, color, callback) {
+    var per_time = 10, step = parseInt(time / per_time);
+    var animate = setInterval(function() {
         nowColor = [
-            parseInt(nowColor[0]*(step-1)+color[0])/step,
-            parseInt(nowColor[1]*(step-1)+color[1])/step,
-            parseInt(nowColor[2]*(step-1)+color[2])/step,
+            (nowColor[0]*(step-1)+color[0])/step,
+            (nowColor[1]*(step-1)+color[1])/step,
+            (nowColor[2]*(step-1)+color[2])/step,
             (nowColor[3]*(step-1)+color[3])/step,
         ];
         core.clearMap('curtain');
         core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(nowColor));
         step--;
-
         if (step <= 0) {
-            delete core.animateFrame.asyncId[changeAnimate];
-            clearInterval(changeAnimate);
+            delete core.animate.asyncId[animate];
+            clearInterval(animate);
             core.status.curtainColor = color;
-            // core.status.replay.animate=false;
             if (core.isset(callback)) callback();
         }
     }, per_time);
 
-    core.animateFrame.asyncId[changeAnimate] = true;
+    core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 画面闪烁 //////
 control.prototype.screenFlash = function (color, time, times, callback) {
     times = times || 1;
-    time = time/3;
+    time = time / 3;
     var nowColor = core.clone(core.status.curtainColor);
     core.setFg(color, time, function() {
         core.setFg(nowColor, time * 2, function() {
             if (times > 1)
                 core.screenFlash(color, time * 3, times - 1, callback);
             else {
-                if (core.isset(callback)) callback();
+                if (callback) callback();
             }
         });
     });
@@ -1992,9 +1981,7 @@ control.prototype.screenFlash = function (color, time, times, callback) {
 
 ////// 播放背景音乐 //////
 control.prototype.playBgm = function (bgm, startTime) {
-    if (main.mode!='play')return;
-    // 音频不存在
-    if (!core.isset(core.material.bgms[bgm])) return;
+    if (main.mode!='play' || !core.material.bgms[bgm]) return;
     // 如果不允许播放
     if (!core.musicStatus.bgmStatus) {
         try {
@@ -2010,22 +1997,7 @@ control.prototype.playBgm = function (bgm, startTime) {
     this.setMusicBtn();
 
     try {
-        // 缓存BGM
-        core.loader.loadBgm(bgm);
-        // 如果当前正在播放，且和本BGM相同，直接忽略
-        if (core.musicStatus.playingBgm == bgm && !core.material.bgms[core.musicStatus.playingBgm].paused) {
-            return;
-        }
-        // 如果正在播放中，暂停
-        if (core.isset(core.musicStatus.playingBgm)) {
-            core.material.bgms[core.musicStatus.playingBgm].pause();
-        }
-        // 播放当前BGM
-        core.material.bgms[bgm].volume = core.musicStatus.volume;
-        core.material.bgms[bgm].currentTime = startTime || 0;
-        core.material.bgms[bgm].play();
-        core.musicStatus.playingBgm = bgm;
-        core.musicStatus.lastBgm = bgm;
+        this._playBgm_play(bgm, startTime);
     }
     catch (e) {
         console.log("无法播放BGM "+bgm);
@@ -2034,11 +2006,30 @@ control.prototype.playBgm = function (bgm, startTime) {
     }
 }
 
+control.prototype._playBgm_play = function (bgm, startTime) {
+    // 缓存BGM
+    core.loader.loadBgm(bgm);
+    // 如果当前正在播放，且和本BGM相同，直接忽略
+    if (core.musicStatus.playingBgm == bgm && !core.material.bgms[core.musicStatus.playingBgm].paused) {
+        return;
+    }
+    // 如果正在播放中，暂停
+    if (core.musicStatus.playingBgm) {
+        core.material.bgms[core.musicStatus.playingBgm].pause();
+    }
+    // 播放当前BGM
+    core.material.bgms[bgm].volume = core.musicStatus.volume;
+    core.material.bgms[bgm].currentTime = startTime || 0;
+    core.material.bgms[bgm].play();
+    core.musicStatus.playingBgm = bgm;
+    core.musicStatus.lastBgm = bgm;
+}
+
 ////// 暂停背景音乐的播放 //////
 control.prototype.pauseBgm = function () {
-    // 直接暂停播放
+    if (main.mode!='play')return;
     try {
-        if (core.isset(core.musicStatus.playingBgm)) {
+        if (core.musicStatus.playingBgm) {
             core.material.bgms[core.musicStatus.playingBgm].pause();
             core.musicStatus.playingBgm = null;
         }
@@ -2053,8 +2044,6 @@ control.prototype.pauseBgm = function () {
 ////// 恢复背景音乐的播放 //////
 control.prototype.resumeBgm = function () {
     if (main.mode!='play')return;
-
-    // 恢复BGM
     try {
         core.playBgm(core.musicStatus.playingBgm || core.musicStatus.lastBgm);
     }
@@ -2074,25 +2063,19 @@ control.prototype.setMusicBtn = function () {
 
 ////// 更改背景音乐的播放 //////
 control.prototype.triggerBgm = function () {
-    if (main.mode!='play')return;
+    if (main.mode!='play') return;
 
     core.musicStatus.bgmStatus = !core.musicStatus.bgmStatus;
     if (core.musicStatus.bgmStatus)
         this.resumeBgm();
-    else {
+    else
         this.pauseBgm();
-    }
     core.setLocalStorage('bgmStatus', core.musicStatus.bgmStatus);
 }
 
 ////// 播放音频 //////
 control.prototype.playSound = function (sound) {
-    if (main.mode!='play')return;
-    // 如果不允许播放
-    if (!core.musicStatus.soundStatus) return;
-    // 音频不存在
-    if (!core.isset(core.material.sounds[sound])) return;
-
+    if (main.mode!='play' || !core.musicStatus.soundStatus || !core.material.sounds[sound]) return;
     try {
         if (core.musicStatus.audioContext != null) {
             var source = core.musicStatus.audioContext.createBufferSource();
@@ -2102,18 +2085,8 @@ control.prototype.playSound = function (sound) {
             source.onended = function () {
                 delete core.musicStatus.playingSounds[id];
             }
-            try {
-                source.start(0);
-            }
-            catch (e) {
-                try {
-                    source.noteOn(0);
-                }
-                catch (ee) {
-                    main.log(ee);
-                    return;
-                }
-            }
+            if (source.start) source.start(0);
+            else if (source.noteOn) source.noteOn(0);
             core.musicStatus.playingSounds[id] = source;
         }
         else {
@@ -2121,32 +2094,33 @@ control.prototype.playSound = function (sound) {
             core.material.sounds[sound].play();
         }
     }
-    catch (eee) {
+    catch (e) {
         console.log("无法播放SE "+sound);
-        main.log(eee);
+        main.log(e);
     }
 }
 
+////// 停止所有音频 //////
 control.prototype.stopSound = function () {
     for (var i in core.musicStatus.playingSounds) {
         var source = core.musicStatus.playingSounds[i];
         try {
-            source.stop();
+            if (source[i].stop) source[i].stop();
+            else if (source[i].noteOff) source[i].noteOff();
         }
         catch (e) {
-            try {
-                source.noteOff(0);
-            }
-            catch (e) {
-                main.log(e);
-            }
+            main.log(e);
         }
     }
+    core.musicStatus.playingSounds = {};
 }
 
+////// 检查bgm状态 //////
 control.prototype.checkBgm = function() {
     core.playBgm(core.musicStatus.playingBgm || main.startBgm);
 }
+
+// ------ 状态栏，工具栏等相关 ------ //
 
 ////// 清空状态栏 //////
 control.prototype.clearStatusBar = function() {
@@ -2154,42 +2128,33 @@ control.prototype.clearStatusBar = function() {
         core.statusBar[e].innerHTML = "";
     })
     core.statusBar.image.book.style.opacity = 0.3;
-    if (!core.flags.equipboxButton) {
+    if (!core.flags.equipboxButton)
         core.statusBar.image.fly.style.opacity = 0.3;
-    }
 }
 
 ////// 更新状态栏 //////
 control.prototype.updateStatusBar = function () {
-
     if (core.isPlaying())
         this.controldata.updateStatusBar();
+    this._updateStatusBar_setToolboxImage();
+}
 
-    // 回放
+control.prototype._updateStatusBar_setToolboxImage = function () {
     if (core.isReplaying()) {
         core.statusBar.image.book.src = core.status.replay.pausing ? core.statusBar.icons.play.src : core.statusBar.icons.pause.src;
         core.statusBar.image.book.style.opacity = 1;
-
         core.statusBar.image.fly.src = core.statusBar.icons.stop.src;
         core.statusBar.image.fly.style.opacity = 1;
-
         core.statusBar.image.toolbox.src = core.statusBar.icons.rewind.src;
-
         core.statusBar.image.keyboard.src = core.statusBar.icons.book.src;
-
         core.statusBar.image.shop.src = core.statusBar.icons.floor.src;
-
         core.statusBar.image.save.src = core.statusBar.icons.speedDown.src;
-
         core.statusBar.image.load.src = core.statusBar.icons.speedUp.src;
-
         core.statusBar.image.settings.src = core.statusBar.icons.save.src;
-
     }
     else {
         core.statusBar.image.book.src = core.statusBar.icons.book.src;
         core.statusBar.image.book.style.opacity = core.hasItem('book') ? 1 : 0.3;
-
         if (!core.flags.equipboxButton) {
             core.statusBar.image.fly.src = core.statusBar.icons.fly.src;
             core.statusBar.image.fly.style.opacity = core.hasItem('fly') ? 1 : 0.3;
@@ -2198,52 +2163,46 @@ control.prototype.updateStatusBar = function () {
             core.statusBar.image.fly.src = core.statusBar.icons.equipbox.src;
             core.statusBar.image.fly.style.opacity = 1;
         }
-
         core.statusBar.image.toolbox.src = core.statusBar.icons.toolbox.src;
-
         core.statusBar.image.keyboard.src = core.statusBar.icons.keyboard.src;
-
         core.statusBar.image.shop.src = core.statusBar.icons.shop.src;
-
         core.statusBar.image.save.src = core.statusBar.icons.save.src;
-
         core.statusBar.image.load.src = core.statusBar.icons.load.src;
-
         core.statusBar.image.settings.src = core.statusBar.icons.settings.src;
     }
 }
 
-control.prototype.triggerStatusBar = function (name, showToolbox) {
-    if (name!='hide') name='show';
-
-    // 如果是隐藏 -> 显示工具栏，则先显示
-    if (name == 'hide' && !core.domStyle.showStatusBar) {
-        this.triggerStatusBar("show");
-        this.triggerStatusBar("hide", showToolbox);
-        return;
-    }
-
+control.prototype.showStatusBar = function () {
+    if (core.domStyle.showStatusBar) return;
     var statusItems = core.dom.status;
-    var toolItems = core.dom.tools;
-    core.domStyle.showStatusBar = name == 'show';
-    core.setFlag('hideStatusBar', core.domStyle.showStatusBar?null:true);
-    core.setFlag('showToolbox', showToolbox?true:null);
-    if (!core.domStyle.showStatusBar) {
-        for (var i = 0; i < statusItems.length; ++i)
-            statusItems[i].style.opacity = 0;
-        if (!core.domStyle.isVertical || !showToolbox) {
-            for (var i = 0; i < toolItems.length; ++i)
-                toolItems[i].style.display = 'none';
-        }
-    }
-    else {
-        for (var i = 0; i < statusItems.length; ++i)
-            statusItems[i].style.opacity = 1;
-        this.setToolbarButton(false);
-        core.dom.tools.hard.style.display = 'block';
+    core.domStyle.showStatusBar = true;
+    core.removeFlag('hideStatusBar');
+    // 显示
+    for (var i = 0; i < statusItems.length; ++i)
+        statusItems[i].style.opacity = 1;
+    this.setToolbarButton(false);
+    core.dom.tools.hard.style.display = 'block';
+}
+
+control.prototype.hideStatusBar = function (showToolbox) {
+    // 如果原本就是隐藏的，则先显示
+    if (!core.domStyle.showStatusBar)
+        this.showStatusBar();
+
+    var statusItems = core.dom.status, toolItems = core.dom.tools;
+    core.domStyle.showStatusBar = false;
+    core.setFlag('hideStatusBar', true);
+    core.setFlag('showToolbox', showToolbox || null);
+    // 隐藏
+    for (var i = 0; i < statusItems.length; ++i)
+        statusItems[i].style.opacity = 0;
+    if (!core.domStyle.isVertical || !showToolbox) {
+        for (var i = 0; i < toolItems.length; ++i)
+            toolItems[i].style.display = 'none';
     }
 }
 
+////// 更新状态栏的勇士图标 //////
 control.prototype.updateHeroIcon = function (name) {
     name = name || "hero.png";
     if (core.statusBar.icons.name == name) return;
@@ -2261,11 +2220,10 @@ control.prototype.updateHeroIcon = function (name) {
     context.drawImage(image, 0, 0, 32, height, left, 0, width, 32);
 
     core.statusBar.image.name.src = canvas.toDataURL("image/png");
-
 }
 
 control.prototype.updateGlobalAttribute = function (name) {
-    if (!core.isset(name)) return;
+    if (name == null) name = Object.keys(core.status.globalAttribute);
     if (name instanceof Array) {
         name.forEach(function (t) {
             core.control.updateGlobalAttribute(t);
@@ -2273,7 +2231,7 @@ control.prototype.updateGlobalAttribute = function (name) {
         return;
     }
     var attribute = core.status.globalAttribute || core.initStatus.globalAttribute;
-    if (!core.isset(attribute)) return;
+    if (attribute == null) return;
     switch (name) {
         case 'statusLeftBackground':
             if (!core.domStyle.isVertical) {
@@ -2334,11 +2292,10 @@ control.prototype.setToolbarButton = function (useButton) {
         else core.dom.tools.hard.style.display = 'block';
     }
 
-    if (!core.isset(useButton)) useButton = core.domStyle.toolbarBtn;
-    if (!core.domStyle.isVertical) useButton = false;
-    if (!core.platform.extendKeyboard) useButton = false;
-
+    if (useButton == null) useButton = core.domStyle.toolbarBtn;
+    if (!core.domStyle.isVertical || !core.platform.extendKeyboard) useButton = false;
     core.domStyle.toolbarBtn = useButton;
+
     if (useButton) {
         ["book","fly","toolbox","keyboard","shop","save","load","settings"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'none';
@@ -2360,14 +2317,16 @@ control.prototype.setToolbarButton = function (useButton) {
     }
 }
 
-control.prototype.needDraw = function(id) {
-    if (!core.isset(id)) {
+////// ------ resize处理 ------ //
+
+control.prototype._shouldDisplayStatus = function(id) {
+    if (id == null) {
         var toDraw = [], status = core.dom.status;
         for (var i = 0; i<status.length; ++i) {
             var dom = core.dom.status[i], idCol = dom.id;
             if (idCol.indexOf("Col")!=idCol.length-3) continue;
             var id = idCol.substring(0, idCol.length-3);
-            if (!this.needDraw(id)) continue;
+            if (!this._shouldDisplayStatus(id)) continue;
             toDraw.push(id);
         }
         return toDraw;
@@ -2425,7 +2384,7 @@ control.prototype.resize = function(clientWidth, clientHeight) {
         fontSize, toolbarFontSize, margin, statusBackground, toolsBackground,
         statusCanvasWidth, statusCanvasHeight, musicBtnBottom, musicBtnRight;
 
-    var toDraw = this.needDraw();
+    var toDraw = this._shouldDisplayStatus();
     var count = toDraw.length;
     var statusCanvas = core.flags.statusCanvas, statusCanvasRows = core.flags.statusCanvasRowsOnMobile || 3;
 

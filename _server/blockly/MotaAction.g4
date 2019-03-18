@@ -228,7 +228,7 @@ action
     |   setText_s
     |   tip_s
     |   setValue_s
-    |   setValue2_s
+    |   addValue_s
     |   setFloor_s
     |   setGlobalAttribute_s
     |   setGlobalValue_s
@@ -465,15 +465,15 @@ var code = '{"type": "setValue", "name": "'+idString_e_0+'", "value": "'+express
 return code;
 */;
 
-setValue2_s
+addValue_s
     :   '数值增减' ':' '名称' idString_e '+=' expression Newline
 
 
-/* setValue2_s
-tooltip : setValue2：增减勇士的某个属性、道具个数, 或某个变量/Flag的值
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=setValue2%ef%bc%9a%e5%a2%9e%e5%87%8f%e5%8b%87%e5%a3%ab%e7%9a%84%e6%9f%90%e4%b8%aa%e5%b1%9e%e6%80%a7%e3%80%81%e9%81%93%e5%85%b7%e4%b8%aa%e6%95%b0%ef%bc%8c%e6%88%96%e6%9f%90%e4%b8%aa%e5%8f%98%e9%87%8f%2fFlag%e7%9a%84%e5%80%bc
+/* addValue_s
+tooltip : addValue：增减勇士的某个属性、道具个数, 或某个变量/Flag的值
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=addValue%ef%bc%9a%e5%a2%9e%e5%87%8f%e5%8b%87%e5%a3%ab%e7%9a%84%e6%9f%90%e4%b8%aa%e5%b1%9e%e6%80%a7%e3%80%81%e9%81%93%e5%85%b7%e4%b8%aa%e6%95%b0%ef%bc%8c%e6%88%96%e6%9f%90%e4%b8%aa%e5%8f%98%e9%87%8f%2fFlag%e7%9a%84%e5%80%bc
 colour : this.dataColor
-var code = '{"type": "setValue2", "name": "'+idString_e_0+'", "value": "'+expression_0+'"},\n';
+var code = '{"type": "addValue", "name": "'+idString_e_0+'", "value": "'+expression_0+'"},\n';
 return code;
 */;
 
@@ -2372,14 +2372,13 @@ ActionParser.prototype.parseAction = function() {
       break
     case "setValue":
       this.next = MotaActionBlocks['setValue_s'].xmlText([
-        // MotaActionBlocks['idString_e'].xmlText([data.name]),
         this.tryToUseEvFlag_e('idString_e', [data.name]),
         MotaActionBlocks['evalString_e'].xmlText([data.value]),
         this.next]);
       break;
     case "setValue2":
-      this.next = MotaActionBlocks['setValue2_s'].xmlText([
-        // MotaActionBlocks['idString_e'].xmlText([data.name]),
+    case "addValue":
+      this.next = MotaActionBlocks['addValue_s'].xmlText([
         this.tryToUseEvFlag_e('idString_e', [data.name]),
         MotaActionBlocks['evalString_e'].xmlText([data.value]),
         this.next]);

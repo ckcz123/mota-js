@@ -1213,7 +1213,11 @@ events.prototype._action_setValue = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setValue2 = function (data, x, y, prefix) {
-    this.setValue2(data.name, data.value, prefix);
+    this._action_addValue(data, x, y, prefix);
+}
+
+events.prototype._action_addValue = function (data, x, y, prefix) {
+    this.addValue(data.name, data.value, prefix);
     core.doAction();
 }
 
@@ -1592,8 +1596,18 @@ events.prototype._setValue_setSwitch = function (name, value, prefix) {
 }
 
 ////// 数值增减 //////
-events.prototype.setValue2 = function (name, value, prefix) {
+events.prototype.addValue = function (name, value, prefix) {
     this.setValue(name, value, prefix, true);
+}
+
+////// 执行一个表达式的effect操作 //////
+events.prototype.doEffect = function (effect, need, times) {
+    effect.split(";").forEach(function (expression) {
+        var arr = expression.split("+=");
+        if (arr.length != 2) return;
+        var name=arr[0], value=core.calValue(arr[1], null, need, times);
+        core.addValue(name, value);
+    });
 }
 
 ////// 设置楼层属性 //////

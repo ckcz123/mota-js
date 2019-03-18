@@ -1516,7 +1516,142 @@ events.prototype._action_exit = function (data, x, y, prefix) {
     core.doAction();
 }
 
-// ------ 样板提供的的自定义事件 END ------ //
+// ------ 点击状态栏图标所进行的一些操作 ------ //
+
+////// 判断当前能否进入某个事件 //////
+events.prototype._checkStatus = function (name, fromUserAction, checkItem) {
+    if (fromUserAction && core.status.event.id == name) {
+        core.ui.closePanel();
+        return false;
+    }
+    if (fromUserAction && core.status.lockControl) return false;
+    if (checkItem && !core.hasItem(name)) {
+        core.drawTip("你没有" + core.material.items[name].name);
+        return false;
+    }
+    if (core.isMoving()) {
+        core.drawTip("请先停止勇士行动");
+        return false;
+    }
+    core.lockControl();
+    core.status.event.id = name;
+    return true;
+}
+
+////// 点击怪物手册时的打开操作 //////
+events.prototype.openBook = function (fromUserAction) {
+    if (core.isReplaying()) return;
+    // 如果能恢复事件（从callBook事件触发）
+    if (core.status.event.id == 'book' && core.events.recoverEvents(core.status.event.interval))
+        return;
+    // 当前是book，且从“浏览地图”打开
+    if (core.status.event.id == 'book' && core.status.event.ui) {
+        core.status.boxAnimateObjs = [];
+        core.ui.drawMaps(core.status.event.ui);
+        return;
+    }
+    // 从“浏览地图”页面打开
+    if (core.status.event.id == 'viewMaps') {
+        fromUserAction = false;
+        core.status.event.ui = core.status.event.data;
+    }
+    if (!this._checkStatus('book', fromUserAction, true)) return;
+    core.useItem('book', true);
+}
+
+////// 点击楼层传送器时的打开操作 //////
+events.prototype.useFly = function (fromUserAction) {
+    if (core.isReplaying()) return;
+    if (!this._checkStatus('fly', fromUserAction, true)) return;
+    if (core.flags.flyNearStair && !core.nearStair()) {
+        core.drawTip("只有在楼梯边才能使用传送器");
+        core.unLockControl();
+        core.status.event.data = null;
+        core.status.event.id = null;
+        return;
+    }
+    if (!core.canUseItem('fly')) {
+        core.drawTip("楼层传送器好像失效了");
+        core.unLockControl();
+        core.status.event.data = null;
+        core.status.event.id = null;
+        return;
+    }
+    core.useItem('fly', true);
+    return;
+}
+
+events.prototype.flyTo = function (toId, callback) {
+    return this.controldata.flyTo(toId, callback);
+}
+
+////// 点击装备栏时的打开操作 //////
+events.prototype.openEquipbox = function (fromUserAction) {
+    if (core.isReplaying()) return;
+    if (!this._checkStatus('equipbox', fromUserAction)) return;
+    core.ui.drawEquipbox();
+}
+
+////// 点击工具栏时的打开操作 //////
+events.prototype.openToolbox = function (fromUserAction) {
+    if (core.isReplaying()) return;
+    if (!this._checkStatus('toolbox', fromUserAction)) return;
+    core.ui.drawToolbox();
+}
+
+////// 点击快捷商店按钮时的打开操作 //////
+events.prototype.openQuickShop = function (fromUserAction) {
+    if (core.isReplaying()) return;
+    if (!this._checkStatus('selectShop', fromUserAction)) return;
+    core.ui.drawQuickShop();
+}
+
+events.prototype.openKeyBoard = function (fromUserAction) {
+    if (core.isReplaying()) return;
+    if (!this._checkStatus('keyBoard', fromUserAction)) return;
+    core.ui.drawKeyBoard();
+}
+
+////// 点击保存按钮时的打开操作 //////
+events.prototype.save = function (fromUserAction) {
+    if (core.isReplaying()) return;
+    if (core.status.event.id == 'save' && core.events.recoverEvents(core.status.event.interval))
+        return;
+    if (!this._checkStatus('save', fromUserAction)) return;
+    var saveIndex = core.saves.saveIndex;
+    var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
+    core.ui.drawSLPanel(10*page+offset);
+}
+
+////// 点击读取按钮时的打开操作 //////
+events.prototype.load = function (fromUserAction) {
+    if (core.isReplaying()) return;
+    var saveIndex = core.saves.saveIndex;
+    var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
+    // 游戏开始前读档
+    if (!core.isPlaying()) {
+        core.dom.startPanel.style.display = 'none';
+        core.clearStatus();
+        core.clearMap('all');
+        core.deleteAllCanvas();
+        core.status.event = {'id': 'load', 'data': null};
+        core.status.lockControl = true;
+        core.ui.drawSLPanel(10*page+offset);
+        return;
+    }
+    if (core.status.event.id == 'load' && core.events.recoverEvents(core.status.event.interval))
+        return;
+    if (!this._checkStatus('load', fromUserAction)) return;
+    core.ui.drawSLPanel(10*page+offset);
+}
+
+////// 点击设置按钮时的操作 //////
+events.prototype.openSettings = function (fromUserAction) {
+    if (core.isReplaying()) return;
+    if (!this._checkStatus('settings', fromUserAction))
+        return;
+    core.ui.drawSettings();
+}
 
 // ------ 一些事件的具体执行过程 ------ //
 

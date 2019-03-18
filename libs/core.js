@@ -44,7 +44,6 @@ function core() {
         'weather': {
             'time': 0,
             'type': null,
-            'level': 0,
             'nodes': [],
             'data': null,
             'fog': null,

@@ -60,10 +60,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.setFlag('hard', 4); // 可以用flag:hard来获得当前难度
 	}
 
-	// 设置三围的初始增幅属性（均为1）
-	["atk", "def", "mdef"].forEach(function (name) {
-		core.setFlag("__" + name + "_buff__", 1);
-	});
 	// 设置已经到过的楼层
 	core.setFlag("__visited__", {});
 

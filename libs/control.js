@@ -803,7 +803,7 @@ control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, off
     });
 }
 
-// ------ 画布、位置、阻激夹域等 ------ //
+// ------ 画布、位置、阻激夹域，显伤 ------ //
 
 ////// 设置画布偏移
 control.prototype.setGameCanvasTranslate = function(canvas,x,y){
@@ -843,20 +843,6 @@ control.prototype.updateViewport = function() {
     });
     // ------ 路线
     core.relocateCanvas('route', core.status.automaticRoute.offsetX - core.bigmap.offsetX, core.status.automaticRoute.offsetY - core.bigmap.offsetY);
-}
-
-////// 设置勇士的位置 //////
-control.prototype.setHeroLoc = function (itemName, itemVal, noGather) {
-    core.status.hero.loc[itemName] = itemVal;
-    if ((itemName=='x' || itemName=='y') && !noGather) {
-        this.gatherFollowers();
-    }
-}
-
-////// 获得勇士的位置 //////
-control.prototype.getHeroLoc = function (itemName) {
-    if (itemName == null) return core.status.hero.loc;
-    return core.status.hero.loc[itemName];
 }
 
 ////// 获得勇士面对位置的x坐标 //////
@@ -964,137 +950,6 @@ control.prototype._checkBlock_ambush = function (ambush) {
     core.insertAction(actions);
 }
 
-////// 更改天气效果 //////
-control.prototype.setWeather = function (type, level) {
-
-    // 非雨雪
-    if (type!='rain' && type!='snow' && type!='fog') {
-        // core.clearMap('weather');
-        core.deleteCanvas('weather')
-        core.animateFrame.weather.type = null;
-        core.animateFrame.weather.level = 0;
-        core.animateFrame.weather.nodes = [];
-        return;
-    }
-
-    level = parseInt(level);
-
-    // 当前天气：则忽略
-    if (type==core.animateFrame.weather.type && !core.isset(level)) {
-        return;
-    }
-
-    if (!core.isset(level)) level=5;
-    if (level<1) level=1; if (level>10) level=10;
-    level *= parseInt(20*core.bigmap.width*core.bigmap.height/(core.__SIZE__*core.__SIZE__));
-    // 计算当前的宽高
-
-    core.createCanvas('weather', 0, 0, core.__PIXELS__, core.__PIXELS__, 80);
-    core.animateFrame.weather.type = type;
-    core.animateFrame.weather.level = level;
-    core.animateFrame.weather.nodes = [];
-
-    if (type == 'rain') {
-        for (var a=0;a<level;a++) {
-            core.animateFrame.weather.nodes.push({
-                'x': Math.random()*core.bigmap.width*32,
-                'y': Math.random()*core.bigmap.height*32,
-                'l': Math.random() * 2.5,
-                'xs': -4 + Math.random() * 4 + 2,
-                'ys': Math.random() * 10 + 10
-            })
-        }
-    }
-    else if (type=='snow') {
-        for (var a=0;a<level;a++) {
-            core.animateFrame.weather.nodes.push({
-                'x': Math.random()*core.bigmap.width*32,
-                'y': Math.random()*core.bigmap.height*32,
-                'r': Math.random() * 5 + 1,
-                'd': Math.random() * Math.min(level, 200),
-            })
-        }
-    }
-    else if (type=='fog') {
-        if (core.animateFrame.weather.fog) {
-            for (var a=0;a<level/10;a++) {
-                core.animateFrame.weather.nodes.push({
-                    'x': Math.random()*core.bigmap.width*32 - 208,
-                    'y': Math.random()*core.bigmap.height*32 - 208,
-                    'xs': Math.random() * 4 - 2,
-                    'ys': Math.random() * 4 - 2
-                })
-            }
-        }
-    }
-}
-
-////// 更改画面色调 //////
-control.prototype.setFg = function(color, time, callback) {
-    if (!core.isset(time)) time=750;
-    if (time<=0) time=0;
-
-    if (!core.isset(core.status.curtainColor)) {
-        core.status.curtainColor = [0,0,0,0];
-    }
-
-    var nowColor = core.status.curtainColor;
-
-    if (!core.isset(color))
-        color = [0,0,0,0];
-    if (!core.isset(color[3])) color[3] = 1;
-    color[3] = core.clamp(color[3],0,1);
-
-    if (time==0) {
-        // 直接变色
-        core.clearMap('curtain');
-        core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(color));
-        core.status.curtainColor = color;
-        if (core.isset(callback)) callback();
-        return;
-    }
-
-    var per_time = 10, step = parseInt(time / per_time);
-
-    var changeAnimate = setInterval(function() {
-        nowColor = [
-            parseInt(nowColor[0]*(step-1)+color[0])/step,
-            parseInt(nowColor[1]*(step-1)+color[1])/step,
-            parseInt(nowColor[2]*(step-1)+color[2])/step,
-            (nowColor[3]*(step-1)+color[3])/step,
-        ];
-        core.clearMap('curtain');
-        core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(nowColor));
-        step--;
-
-        if (step <= 0) {
-            delete core.animateFrame.asyncId[changeAnimate];
-            clearInterval(changeAnimate);
-            core.status.curtainColor = color;
-            // core.status.replay.animate=false;
-            if (core.isset(callback)) callback();
-        }
-    }, per_time);
-
-    core.animateFrame.asyncId[changeAnimate] = true;
-}
-
-////// 画面闪烁 //////
-control.prototype.screenFlash = function (color, time, times, callback) {
-    times = times || 1;
-    time = time/3;
-    var nowColor = core.clone(core.status.curtainColor);
-    core.setFg(color, time, function() {
-        core.setFg(nowColor, time * 2, function() {
-            if (times > 1)
-                core.screenFlash(color, time * 3, times - 1, callback);
-            else {
-                if (core.isset(callback)) callback();
-            }
-        });
-    });
-}
-
 ////// 更新全地图显伤 //////
 control.prototype.updateDamage = function (floorId, canvas) {
     floorId = floorId || core.status.floorId;
@@ -1189,12 +1044,6 @@ control.prototype.doEffect = function (effect, need, times) {
             core.setFlag(flag, core.getFlag(flag, 0)+value);
         }
     });
-}
-
-////// 开启debug模式 //////
-control.prototype.debug = function() {
-    core.setFlag('debug', true);
-    core.drawText("\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n同时，录像将失效，也无法上传成绩。");
 }
 
 ////// 选择录像文件 //////
@@ -2197,77 +2046,116 @@ control.prototype.hasSave = function (index) {
     return core.saves.ids[index]||false;
 }
 
+// ------ 属性，状态，位置，buff，变量，锁定控制等 ------ //
+
 ////// 设置勇士属性 //////
-control.prototype.setStatus = function (statusName, statusVal) {
-    if (!core.isset(core.status.hero)) return;
-    if (statusName == 'exp') statusName = 'experience';
-    if (core.isset(core.status.hero.loc[statusName]))
-        core.status.hero.loc[statusName] = statusVal;
+control.prototype.setStatus = function (name, value) {
+    if (!core.status.hero) return;
+    if (name == 'exp') name = 'experience';
+    if (name == 'x' || name == 'y' || name == 'direction')
+        this.setHeroLoc(name, value);
     else
-        core.status.hero[statusName] = statusVal;
+        core.status.hero[name] = value;
+}
+
+////// 增减勇士属性 //////
+control.prototype.addStatus = function (name, value) {
+    this.setStatus(name, this.getStatus(name) + value);
 }
 
 ////// 获得勇士属性 //////
 control.prototype.getStatus = function (name) {
-    if (!core.isset(core.status.hero)) return null;
-    // support status:x
-    if (core.isset(core.status.hero.loc[name]))
-        return core.status.hero.loc[name];
+    if (!core.status.hero) return null;
+    if (name == 'x' || name == 'y' || name == 'direction')
+        return this.getHeroLoc('x');
     if (name == 'exp') name = 'experience';
     return core.status.hero[name];
 }
 
+////// 从status中获得属性，如果不存在则从勇士属性中获取 //////
 control.prototype.getStatusOrDefault = function (status, name) {
-    if (core.isset(status) && name in status)
+    if (status && name in status)
         return status[name];
     return this.getStatus(name);
 }
 
+////// 获得勇士实际属性（增幅后的） //////
 control.prototype.getRealStatus = function (name) {
     return this.getRealStatusOrDefault(null, name);
 }
 
+////// 从status中获得实际属性（增幅后的），如果不存在则从勇士属性中获取 //////
 control.prototype.getRealStatusOrDefault = function (status, name) {
-    return this.getStatusOrDefault(status, name) * core.getFlag('__'+name+'_buff__', 1);
+    return this.getStatusOrDefault(status, name) * this.getBuff(name);
+}
+
+////// 设置某个属性的增幅值 //////
+control.prototype.setBuff = function (name, value) {
+    this.setFlag('flag:__'+name+'_buff__', value);
+}
+
+////// 加减某个属性的增幅值 //////
+control.prototype.addBuff = function (name, value) {
+    this.setFlag('flag:__'+name+'_buff__', this.getBuff(name) + value);
+}
+
+////// 获得某个属性的增幅值 //////
+control.prototype.getBuff = function (name) {
+    return core.getFlag('__'+name+'_buff__', 1);
+}
+
+////// 设置勇士的位置 //////
+control.prototype.setHeroLoc = function (name, value, noGather) {
+    if (!core.status.hero) return;
+    core.status.hero.loc[name] = value;
+    if ((name=='x' || name=='y') && !noGather) {
+        this.gatherFollowers();
+    }
+}
+
+////// 获得勇士的位置 //////
+control.prototype.getHeroLoc = function (name) {
+    if (!core.status.hero) return;
+    if (name == null) return core.status.hero.loc;
+    return core.status.hero.loc[name];
 }
 
 ////// 获得某个等级的名称 //////
-control.prototype.getLvName = function () {
-    if (!core.isset(core.status.hero)) return null;
-    return ((core.firstData.levelUp||[])[core.status.hero.lv-1]||{}).title || core.status.hero.lv;
+control.prototype.getLvName = function (lv) {
+    if (!core.status.hero) return null;
+    if (lv == null) lv = core.status.hero.lv;
+    return ((core.firstData.levelUp||[])[lv-1]||{}).title || lv;
 }
 
 ////// 设置某个自定义变量或flag //////
-control.prototype.setFlag = function(flag, value) {
-    if (!core.isset(value)) return this.removeFlag(flag);
-    if (!core.isset(core.status.hero)) return;
-    core.status.hero.flags[flag]=value;
-}
-
-////// 获得某个自定义变量或flag //////
-control.prototype.getFlag = function(flag, defaultValue) {
-    if (!core.isset(core.status.hero)) return defaultValue;
-    var value = core.status.hero.flags[flag];
-    if (core.isset(value)) return value;
-    return defaultValue;
-}
-
-////// 是否存在某个自定义变量或flag，且值为true //////
-control.prototype.hasFlag = function(flag) {
-    if (core.getFlag(flag)) return true;
-    return false;
-}
-
-////// 删除某个自定义变量或flag //////
-control.prototype.removeFlag = function(flag) {
-    if (!core.isset(core.status.hero)) return;
-    delete core.status.hero.flags[flag];
+control.prototype.setFlag = function(name, value) {
+    if (value == null) return this.removeFlag(name);
+    if (!core.status.hero) return;
+    core.status.hero.flags[name]=value;
 }
 
 ////// 增加某个flag数值 //////
-control.prototype.addFlag = function(flag, delta) {
-    if (!core.isset(core.status.hero)) return;
-    core.setFlag(flag, core.getFlag(flag, 0) + delta);
+control.prototype.addFlag = function(name, value) {
+    if (!core.status.hero) return;
+    core.setFlag(name, core.getFlag(name, 0) + value);
+}
+
+////// 获得某个自定义变量或flag //////
+control.prototype.getFlag = function(name, defaultValue) {
+    if (!core.status.hero) return defaultValue;
+    var value = core.status.hero.flags[name];
+    return value != null ? value : defaultValue;
+}
+
+////// 是否存在某个自定义变量或flag，且值为true //////
+control.prototype.hasFlag = function(name) {
+    return !!core.getFlag(name);
+}
+
+////// 删除某个自定义变量或flag //////
+control.prototype.removeFlag = function(name) {
+    if (!core.status.hero) return;
+    delete core.status.hero.flags[name];
 }
 
 ////// 锁定状态栏，常常用于事件处理 //////
@@ -2278,6 +2166,145 @@ control.prototype.lockControl = function () {
 ////// 解锁状态栏 //////
 control.prototype.unLockControl = function () {
     core.status.lockControl = false;
+}
+
+////// 开启debug模式 //////
+control.prototype.debug = function() {
+    core.setFlag('debug', true);
+    core.drawText("\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n同时，录像将失效，也无法上传成绩。");
+}
+
+// ------ 天气，色调，BGM ------ //
+
+////// 更改天气效果 //////
+control.prototype.setWeather = function (type, level) {
+
+    // 非雨雪
+    if (type!='rain' && type!='snow' && type!='fog') {
+        // core.clearMap('weather');
+        core.deleteCanvas('weather')
+        core.animateFrame.weather.type = null;
+        core.animateFrame.weather.level = 0;
+        core.animateFrame.weather.nodes = [];
+        return;
+    }
+
+    level = parseInt(level);
+
+    // 当前天气：则忽略
+    if (type==core.animateFrame.weather.type && !core.isset(level)) {
+        return;
+    }
+
+    if (!core.isset(level)) level=5;
+    if (level<1) level=1; if (level>10) level=10;
+    level *= parseInt(20*core.bigmap.width*core.bigmap.height/(core.__SIZE__*core.__SIZE__));
+    // 计算当前的宽高
+
+    core.createCanvas('weather', 0, 0, core.__PIXELS__, core.__PIXELS__, 80);
+    core.animateFrame.weather.type = type;
+    core.animateFrame.weather.level = level;
+    core.animateFrame.weather.nodes = [];
+
+    if (type == 'rain') {
+        for (var a=0;a<level;a++) {
+            core.animateFrame.weather.nodes.push({
+                'x': Math.random()*core.bigmap.width*32,
+                'y': Math.random()*core.bigmap.height*32,
+                'l': Math.random() * 2.5,
+                'xs': -4 + Math.random() * 4 + 2,
+                'ys': Math.random() * 10 + 10
+            })
+        }
+    }
+    else if (type=='snow') {
+        for (var a=0;a<level;a++) {
+            core.animateFrame.weather.nodes.push({
+                'x': Math.random()*core.bigmap.width*32,
+                'y': Math.random()*core.bigmap.height*32,
+                'r': Math.random() * 5 + 1,
+                'd': Math.random() * Math.min(level, 200),
+            })
+        }
+    }
+    else if (type=='fog') {
+        if (core.animateFrame.weather.fog) {
+            for (var a=0;a<level/10;a++) {
+                core.animateFrame.weather.nodes.push({
+                    'x': Math.random()*core.bigmap.width*32 - 208,
+                    'y': Math.random()*core.bigmap.height*32 - 208,
+                    'xs': Math.random() * 4 - 2,
+                    'ys': Math.random() * 4 - 2
+                })
+            }
+        }
+    }
+}
+
+////// 更改画面色调 //////
+control.prototype.setFg = function(color, time, callback) {
+    if (!core.isset(time)) time=750;
+    if (time<=0) time=0;
+
+    if (!core.isset(core.status.curtainColor)) {
+        core.status.curtainColor = [0,0,0,0];
+    }
+
+    var nowColor = core.status.curtainColor;
+
+    if (!core.isset(color))
+        color = [0,0,0,0];
+    if (!core.isset(color[3])) color[3] = 1;
+    color[3] = core.clamp(color[3],0,1);
+
+    if (time==0) {
+        // 直接变色
+        core.clearMap('curtain');
+        core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(color));
+        core.status.curtainColor = color;
+        if (core.isset(callback)) callback();
+        return;
+    }
+
+    var per_time = 10, step = parseInt(time / per_time);
+
+    var changeAnimate = setInterval(function() {
+        nowColor = [
+            parseInt(nowColor[0]*(step-1)+color[0])/step,
+            parseInt(nowColor[1]*(step-1)+color[1])/step,
+            parseInt(nowColor[2]*(step-1)+color[2])/step,
+            (nowColor[3]*(step-1)+color[3])/step,
+        ];
+        core.clearMap('curtain');
+        core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(nowColor));
+        step--;
+
+        if (step <= 0) {
+            delete core.animateFrame.asyncId[changeAnimate];
+            clearInterval(changeAnimate);
+            core.status.curtainColor = color;
+            // core.status.replay.animate=false;
+            if (core.isset(callback)) callback();
+        }
+    }, per_time);
+
+    core.animateFrame.asyncId[changeAnimate] = true;
+}
+
+////// 画面闪烁 //////
+control.prototype.screenFlash = function (color, time, times, callback) {
+    times = times || 1;
+    time = time/3;
+    var nowColor = core.clone(core.status.curtainColor);
+    core.setFg(color, time, function() {
+        core.setFg(nowColor, time * 2, function() {
+            if (times > 1)
+                core.screenFlash(color, time * 3, times - 1, callback);
+            else {
+                if (core.isset(callback)) callback();
+            }
+        });
+    });
 }
 
 ////// 播放背景音乐 //////

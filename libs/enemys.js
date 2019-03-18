@@ -245,7 +245,7 @@ enemys.prototype._nextCriticals_useTurn = function (enemy, info, number, x, y, f
     for (var t = turn - 1; t >= 1; t--) {
         var nextAtk = Math.ceil(mon_hp / t) + mon_def;
         // 装备提升比例的计算临界
-        nextAtk = Math.ceil(nextAtk / core.getFlag('__atk_buff__', 1));
+        nextAtk = Math.ceil(nextAtk / core.getBuff('atk'));
         if (nextAtk <= hero_atk) break;
         if (nextAtk != pre) {
             var nextInfo = this.getDamageInfo(enemy, {"atk": nextAtk}, x, y, floorId);

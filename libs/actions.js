@@ -1609,10 +1609,11 @@ actions.prototype._clickSL = function (x, y) {
             core.ui.drawSLPanel(index);
         }
         else {
-            var index = parseInt(prompt("请输入读档编号")) || 0;
-            if (index > 0) {
-                core.doSL(index, core.status.event.id);
-            }
+            core.myprompt("请输入读档编号", null, function (index) {
+                index = parseInt(index) || 0;
+                if (index > 0)
+                    core.doSL(index, core.status.event.id);
+            });
         }
         return;
     }
@@ -1725,11 +1726,12 @@ actions.prototype._keyUpSL = function (keycode) {
         }
         return;
     }
-    if (keycode == 69 && core.status.event.id == 'load') { // E
-        var index = parseInt(prompt("请输入读档编号")) || 0;
-        if (index > 0) {
-            core.doSL(index, core.status.event.id);
-        }
+    if (keycode == 69 && core.status.event.id != 'save') { // E
+        core.myprompt("请输入读档编号", null, function (index) {
+            index = parseInt(index) || 0;
+            if (index > 0)
+                core.doSL(index, core.status.event.id);
+        });
         return;
     }
     if (keycode == 46) {
@@ -2064,55 +2066,55 @@ actions.prototype._clickStorageRemove = function (x, y) {
         var selection = y - topIndex;
         switch (selection) {
             case 0:
-                if (!confirm("你确定要清除【全部塔】的所有本地存档？\n此行为不可逆！！！"))
-                    break;
-                if (core.platform.useLocalForage) {
-                    core.ui.drawWaiting("正在清空，请稍后...");
-                    localforage.clear(function () {
-                        core.ui.closePanel();
+                core.myconfirm("你确定要清除【全部塔】的所有本地存档？\n此行为不可逆！！！", function () {
+                    if (core.platform.useLocalForage) {
+                        core.ui.drawWaiting("正在清空，请稍后...");
+                        localforage.clear(function () {
+                            core.ui.closePanel();
+                            core.drawText("\t[操作成功]你的所有存档已被清空。");
+                            core.saves.saveIndex = 1;
+                            core.removeLocalStorage('saveIndex');
+                        });
+                    }
+                    else {
+                        localStorage.clear();
                         core.drawText("\t[操作成功]你的所有存档已被清空。");
                         core.saves.saveIndex = 1;
                         core.removeLocalStorage('saveIndex');
-                    });
-                }
-                else {
-                    localStorage.clear();
-                    core.drawText("\t[操作成功]你的所有存档已被清空。");
-                    core.saves.saveIndex = 1;
-                    core.removeLocalStorage('saveIndex');
-                }
+                    }
+                });
                 break;
             case 1:
-                if (!confirm("你确定要清除本塔的所有本地存档？\n此行为不可逆！！！"))
-                    break;
-                if (core.platform.useLocalForage) {
-                    core.ui.drawWaiting("正在清空，请稍后...");
-                    Object.keys(core.saves.ids).forEach(function (v) {
-                        if (v != 0)
-                            core.removeLocalForage("save" + v);
-                    });
-                    core.removeLocalForage("autoSave", function () {
+                core.myconfirm("你确定要清除本塔的所有本地存档？\n此行为不可逆！！！", function () {
+                    if (core.platform.useLocalForage) {
+                        core.ui.drawWaiting("正在清空，请稍后...");
+                        Object.keys(core.saves.ids).forEach(function (v) {
+                            if (v != 0)
+                                core.removeLocalForage("save" + v);
+                        });
+                        core.removeLocalForage("autoSave", function () {
+                            core.saves.autosave.data = null;
+                            core.saves.autosave.updated = false;
+                            core.ui.closePanel();
+                            core.drawText("\t[操作成功]当前塔的存档已被清空。");
+                            core.saves.saveIndex = 1;
+                            core.removeLocalStorage('saveIndex');
+                        });
+                    }
+                    else {
+                        Object.keys(core.saves.ids).forEach(function (v) {
+                            if (v != 0)
+                                core.removeLocalStorage("save" + v);
+                        });
+                        core.removeLocalStorage("autoSave");
                         core.saves.autosave.data = null;
                         core.saves.autosave.updated = false;
-                        core.ui.closePanel();
                         core.drawText("\t[操作成功]当前塔的存档已被清空。");
                         core.saves.saveIndex = 1;
                         core.removeLocalStorage('saveIndex');
-                    });
-                }
-                else {
-                    Object.keys(core.saves.ids).forEach(function (v) {
-                        if (v != 0)
-                            core.removeLocalStorage("save" + v);
-                    });
-                    core.removeLocalStorage("autoSave");
-                    core.saves.autosave.data = null;
-                    core.saves.autosave.updated = false;
-                    core.drawText("\t[操作成功]当前塔的存档已被清空。");
-                    core.saves.saveIndex = 1;
-                    core.removeLocalStorage('saveIndex');
-                }
-                break;
+                    }
+                    break;
+                });
             case 2:
                 core.status.event.selection = 6;
                 core.ui.drawSyncSave();
@@ -2203,8 +2205,10 @@ actions.prototype._clickGameInfo = function (x, y) {
             case 1:
                 if (core.platform.isPC)
                     window.open("editor.html", "_blank");
-                else if (confirm("即将离开本塔，跳转至本塔工程页面，确认？")) {
-                    window.location.href = "editor-mobile.html";
+                else {
+                    core.myconfirm("即将离开本塔，跳转至本塔工程页面，确认？", function () {
+                        window.location.href = "editor-mobile.html";
+                    });
                 }
                 break;
             case 2:
@@ -2212,9 +2216,9 @@ actions.prototype._clickGameInfo = function (x, y) {
                     window.open("/score.php?name=" + core.firstData.name + "&num=10", "_blank");
                 }
                 else {
-                    if (confirm("即将离开本塔，跳转至本塔评论页面，确认？")) {
+                    core.myconfirm("即将离开本塔，跳转至本塔评论页面，确认？", function () {
                         window.location.href = "/score.php?name=" + core.firstData.name + "&num=10";
-                    }
+                    });
                 }
                 break;
             case 3:

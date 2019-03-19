@@ -1033,12 +1033,15 @@ control.prototype._updateDamage_extraDamage = function (floorId, ctx, refresh) {
 control.prototype.chooseReplayFile = function () {
     core.readFile(function (obj) {
         if (obj.name!=core.firstData.name) return alert("存档和游戏不一致！");
-        if (obj.version && obj.version!=core.firstData.version) {
-            if (!confirm("游戏版本不一致！\n你仍然想播放录像吗？"))
-                return;
-        }
         if (!obj.route) return alert("无效的录像！");
-        core.startGame(core.flags.startUsingCanvas?'':obj.hard||'', obj.seed, core.decodeRoute(obj.route));
+        var _replay = function () {
+            core.startGame(core.flags.startUsingCanvas?'':obj.hard||'', obj.seed, core.decodeRoute(obj.route));
+        }
+        if (obj.version && obj.version!=core.firstData.version) {
+            core.myconfirm("游戏版本不一致！\n你仍然想播放录像吗？", _replay);
+            return;
+        }
+        _replay();
     });
 }
 
@@ -1526,14 +1529,15 @@ control.prototype._doSL_load = function (id) {
 
 control.prototype._doSL_load_afterGet = function (id, data) {
     if (!data) return alert("无效的存档");
+    var _replay = function () {
+        core.startGame(data.hard, data.hero.flags.__seed__, core.decodeRoute(data.route));
+    };
     if (core.flags.checkConsole && data.hashCode != null && data.hashCode != core.hashCode(data.hero)) {
-        if (confirm("存档校验失败，请勿修改存档文件！\n你想回放此存档的录像吗？"))
-            core.startGame(data.hard, data.hero.flags.__seed__, core.decodeRoute(data.route));
+        core.myconfirm("存档校验失败，请勿修改存档文件！\n你想回放此存档的录像吗？\n可以随时停止录像播放以继续游戏。", _replay);
         return;
     }
     if (data.version != core.firstData.version) {
-        if (confirm("存档版本不匹配！\n你想回放此存档的录像吗？\n可以随时停止录像播放以继续游戏。"))
-            core.startGame(data.hard, data.hero.flags.__seed__, core.decodeRoute(data.route));
+        core.myconfirm("存档版本不匹配！\n你想回放此存档的录像吗？\n可以随时停止录像播放以继续游戏。", _replay);
         return;
     }
     core.ui.closePanel();
@@ -1610,15 +1614,14 @@ control.prototype._syncSave_http = function (saves) {
 
 ////// 从服务器加载存档 //////
 control.prototype.syncLoad = function () {
-    core.interval.onDownInterval = 'tmp';
-    var id = prompt("请输入存档编号：") || "";
-    if (id=="") return core.ui.drawSyncSave();
-    core.interval.onDownInterval = 'tmp';
-    var password = prompt("请输入存档密码：") || "";
-    if (password=="") return core.ui.drawSyncSave();
-
-    core.ui.drawWaiting("正在同步，请稍后...");
-    this._syncLoad_http(id, password);
+    core.myprompt("请输入存档编号", null, function (id) {
+        if (!id) return core.ui.drawSyncSave();
+        core.myprompt("请输入存档密码：", null, function (password) {
+            if (!password) return core.ui.drawSyncSave();
+            core.ui.drawWaiting("正在同步，请稍后...");
+            core.control._syncLoad_http(id, password);
+        });
+    });
 }
 
 control.prototype._syncLoad_http = function (id, password) {

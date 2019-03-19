@@ -1483,6 +1483,7 @@ ui.prototype.drawBookDetail = function (index) {
 
     var enemy = enemys[index], enemyId = enemy.id;
     var hints=core.enemys.getSpecialHint(enemyId);
+    var damageInfo = core.enemys.getDamageInfo(enemy, null, null, null, floorId);
 
     if (hints.length==0)
         hints.push("该怪物无特殊属性。");
@@ -1553,6 +1554,7 @@ ui.prototype.drawBookDetail = function (index) {
     }
 
     hints.push("");
+    hints.push("战斗回合数："+((damageInfo||{}).turn||0));
     var criticals = core.enemys.nextCriticals(enemyId, 10, null, null, floorId).map(function (v) {
         return core.formatBigNumber(v[0])+":"+core.formatBigNumber(v[1]);
     });

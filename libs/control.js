@@ -2141,8 +2141,8 @@ control.prototype.clearStatusBar = function() {
 
 ////// 更新状态栏 //////
 control.prototype.updateStatusBar = function () {
-    if (core.isPlaying())
-        this.controldata.updateStatusBar();
+    if (!core.isPlaying()) return;
+    this.controldata.updateStatusBar();
     this._updateStatusBar_setToolboxIcon();
 }
 

@@ -69,6 +69,7 @@ function main() {
         'skillCol': document.getElementById('skillCol'),
         'hard': document.getElementById('hard'),
         'statusCanvas': document.getElementById('statusCanvas'),
+        'statusCanvasCtx': document.getElementById('statusCanvas').getContext('2d')
     };
     this.mode = 'play';
     this.loadList = [

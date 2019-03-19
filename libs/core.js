@@ -81,9 +81,7 @@ function core() {
     }
     // 样式
     this.domStyle = {
-        styles: [],
         scale: 1.0,
-        screenMode: null,
         isVertical: false,
         toolbarBtn: false,
         showStatusBar: true,

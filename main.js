@@ -226,7 +226,7 @@ main.prototype.init = function (mode, callback) {
                     coreData[t] = main[t];
                 })
                 main.core.init(coreData, callback);
-                main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
+                main.core.resize();
             });
         });
     });
@@ -327,7 +327,7 @@ main.prototype.listen = function () {
 ////// 窗口大小变化时 //////
 window.onresize = function () {
     try {
-        main.core.resize(main.dom.body.clientWidth, main.dom.body.clientHeight);
+        main.core.resize();
     }catch (e) { main.log(e); }
 }
 

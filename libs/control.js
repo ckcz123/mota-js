@@ -14,6 +14,7 @@ control.prototype._init = function () {
     this.controldata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.control;
     this.renderFrameFuncs = [];
     this.replayActions = [];
+    this.resizes = [];
     // --- 注册系统的animationFrame
     this.registerAnimationFrame("totalTime", false, this._animationFrame_totalTime);
     this.registerAnimationFrame("autoSave", true, this._animationFrame_autoSave);
@@ -35,6 +36,12 @@ control.prototype._init = function () {
     this.registerReplayAction("getNext", this._replayAction_getNext);
     this.registerReplayAction("moveDirectly", this._replayAction_moveDirectly);
     this.registerReplayAction("key", this._replayAction_key);
+    // --- 注册系统的resize
+    this.registerResize("gameGroup", this._resize_gameGroup);
+    this.registerResize("canvas", this._resize_canvas);
+    this.registerResize("statusBar", this._resize_statusBar);
+    this.registerResize("status", this._resize_status);
+    this.registerResize("tools", this._resize_tools);
 }
 
 // ------ requestAnimationFrame 相关 ------ //
@@ -970,8 +977,6 @@ control.prototype.updateDamage = function (floorId, ctx) {
         refreshCheckBlock = false;
     }
 
-    // 更新显伤
-    var mapBlocks = core.status.maps[floorId].blocks;
     // 没有怪物手册
     if (!core.hasItem('book')) return;
     core.setFont(ctx, "bold 11px Arial");
@@ -2125,7 +2130,8 @@ control.prototype.checkBgm = function() {
 ////// 清空状态栏 //////
 control.prototype.clearStatusBar = function() {
     Object.keys(core.statusBar).forEach(function (e) {
-        core.statusBar[e].innerHTML = "";
+        if (core.statusBar[e].innerHTML != null)
+            core.statusBar[e].innerHTML = "&nbsp;";
     })
     core.statusBar.image.book.style.opacity = 0.3;
     if (!core.flags.equipboxButton)
@@ -2136,10 +2142,10 @@ control.prototype.clearStatusBar = function() {
 control.prototype.updateStatusBar = function () {
     if (core.isPlaying())
         this.controldata.updateStatusBar();
-    this._updateStatusBar_setToolboxImage();
+    this._updateStatusBar_setToolboxIcon();
 }
 
-control.prototype._updateStatusBar_setToolboxImage = function () {
+control.prototype._updateStatusBar_setToolboxIcon = function () {
     if (core.isReplaying()) {
         core.statusBar.image.book.src = core.status.replay.pausing ? core.statusBar.icons.play.src : core.statusBar.icons.pause.src;
         core.statusBar.image.book.style.opacity = 1;
@@ -2349,421 +2355,125 @@ control.prototype._shouldDisplayStatus = function(id) {
     }
 }
 
-////// 屏幕分辨率改变后重新自适应 //////
-control.prototype.resize = function(clientWidth, clientHeight) {
-    if (main.mode=='editor')return;
-
-    clientWidth = clientWidth || main.dom.body.clientWidth;
-    clientHeight = clientHeight || main.dom.body.clientHeight;
-
-    // 默认画布大小
-    var DEFAULT_CANVAS_WIDTH = 480+6;
-    // 默认边栏宽度
-    var DEFAULT_BAR_WIDTH = 149+3;
-
-    var BASE_LINEHEIGHT = 32;
-    var SPACE = 3;
-    var DEFAULT_FONT_SIZE = 16;
-    //适配宽度 422
-    var ADAPT_WIDTH = DEFAULT_CANVAS_WIDTH;
-    var CHANGE_WIDTH = DEFAULT_CANVAS_WIDTH+DEFAULT_BAR_WIDTH;
-    //判断横竖屏
-    var width = clientWidth;
-    var isHorizontal = false;
-    if(clientWidth > clientHeight && clientHeight < ADAPT_WIDTH){
-        isHorizontal = true;
-        width = clientHeight;
-    }
-    // 各元素大小的变量声明
-    var gameGroupWidth, gameGroupHeight, borderRight,
-        canvasWidth, canvasTop, // canvasLeft,
-        statusBarWidth, statusBarHeight, statusBarBorder,
-        statusWidth, statusHeight, statusMaxWidth,statusLabelsLH,
-        toolBarWidth, toolBarHeight, toolBarTop, toolBarBorder,
-        toolsWidth, toolsHeight,toolsMargin,toolsPMaxwidth,
-        fontSize, toolbarFontSize, margin, statusBackground, toolsBackground,
-        statusCanvasWidth, statusCanvasHeight, musicBtnBottom, musicBtnRight,
-        hardWidth, statusMarginLeft;
-
-    var toDraw = this._shouldDisplayStatus();
-    var count = toDraw.length;
-    var statusCanvas = core.flags.statusCanvas, statusCanvasRows = core.flags.statusCanvasRowsOnMobile || 3;
-
-    if (!statusCanvas && count>12) alert("当前状态栏数目("+count+")大于12，请调整到不超过12以避免手机端出现显示问题。");
-    var col = Math.ceil(count / 3);
-    if (statusCanvas) col = statusCanvasRows;
-
-    var statusLineHeight = BASE_LINEHEIGHT * 10 / count;
-    var statusLineFontSize = DEFAULT_FONT_SIZE;
-    if (count>10) statusLineFontSize = statusLineFontSize * 10 / count;
-
-    var borderColor = (core.status.globalAttribute||core.initStatus.globalAttribute).borderColor;
-
-    statusBarBorder = '3px '+borderColor+' solid';
-    toolBarBorder = '3px '+borderColor+' solid';
-    var zoom = (ADAPT_WIDTH - width) / (DEFAULT_CANVAS_WIDTH/100);
-    var aScale = 1 - zoom / 100;
-
-    core.domStyle.toolbarBtn = false;
-
-    // 移动端
-    if (width < CHANGE_WIDTH) {
-        if(width < ADAPT_WIDTH){
-
-            core.domStyle.scale = aScale;
-            canvasWidth = width;
-        }else{
-            canvasWidth = DEFAULT_CANVAS_WIDTH;
-            core.domStyle.scale = 1;
-        }
-
-        var scale = core.domStyle.scale
-        var tempWidth = DEFAULT_CANVAS_WIDTH * scale;
-        if(!isHorizontal){ //竖屏
-            core.domStyle.screenMode = 'vertical';
-            core.domStyle.isVertical = true;
-
-            var tempTopBarH = scale * (BASE_LINEHEIGHT * col + SPACE * 2) + 6;
-            var tempBotBarH = scale * (BASE_LINEHEIGHT + SPACE * 4) + 6;
-
-            gameGroupHeight = tempWidth + tempTopBarH + tempBotBarH;
-
-            gameGroupWidth = tempWidth
-            statusCanvasWidth = canvasWidth;
-            statusCanvasHeight = tempTopBarH;
-            canvasTop = tempTopBarH;
-            // canvasLeft = 0;
-            toolBarWidth = statusBarWidth = canvasWidth;
-            statusBarHeight = tempTopBarH;
-            statusBarBorder = '3px '+borderColor+' solid';
-
-            statusHeight = scale*BASE_LINEHEIGHT * .8;
-            statusLabelsLH = .8 * BASE_LINEHEIGHT *scale;
-            statusMaxWidth = scale * DEFAULT_BAR_WIDTH * .95;
-            statusBackground = (core.status.globalAttribute||core.initStatus.globalAttribute).statusTopBackground;
-            toolBarHeight = tempBotBarH;
-
-            toolBarTop = statusBarHeight + canvasWidth;
-            toolBarBorder = '3px '+borderColor+' solid';
-            toolsHeight = scale * BASE_LINEHEIGHT;
-            toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH * .4;
-            toolsBackground = (core.status.globalAttribute||core.initStatus.globalAttribute).toolsBackground;
-            borderRight = '3px '+borderColor+' solid';
-
-            margin = scale * SPACE * 2;
-            statusMarginLeft = margin;
-            toolsMargin = scale * SPACE * 4;
-
-            fontSize = DEFAULT_FONT_SIZE * scale;
-            toolbarFontSize = DEFAULT_FONT_SIZE * scale;
-            musicBtnRight = 3;
-            musicBtnBottom = 3;
-        }else { //横屏
-            core.domStyle.screenMode = 'horizontal';
-            core.domStyle.isVertical = false;
-            gameGroupWidth = tempWidth + DEFAULT_BAR_WIDTH * scale;
-            gameGroupHeight = tempWidth;
-            canvasTop = 0;
-            // canvasLeft = DEFAULT_BAR_WIDTH * scale;
-            toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH * scale;
-            statusBarHeight = gameGroupHeight - SPACE;
-            statusBarBorder = '3px '+borderColor+' solid';
-            statusCanvasWidth = toolBarWidth + SPACE;
-            statusCanvasHeight = statusBarHeight;
-            statusBackground = (core.status.globalAttribute||core.initStatus.globalAttribute).statusLeftBackground;
-
-            statusHeight = scale*statusLineHeight * .8;
-            statusLabelsLH = .8 * statusLineHeight *scale;
-            toolBarTop = (DEFAULT_CANVAS_WIDTH - 135) * scale;
-            toolBarHeight = canvasWidth - toolBarTop;
-            toolBarBorder = '3px '+borderColor+' solid';
-            toolsHeight = scale * BASE_LINEHEIGHT;
-            toolsBackground = 'transparent';
-            fontSize = statusLineFontSize * scale;
-            toolbarFontSize = DEFAULT_FONT_SIZE * scale;
-            borderRight = '';
-            statusMaxWidth = scale * DEFAULT_BAR_WIDTH;
-            toolsPMaxwidth = scale * DEFAULT_BAR_WIDTH;
-
-            margin = scale * SPACE * 2;
-            toolsMargin = (DEFAULT_BAR_WIDTH * scale - 3*SPACE - 3 * toolsHeight)/4;
-            hardWidth = DEFAULT_BAR_WIDTH * scale - 3*SPACE - 2*toolsMargin;
-            statusMarginLeft = toolsMargin;
-
-            musicBtnRight = 3;
-            musicBtnBottom = 3;
-        }
-
-    }else { //大屏设备 pc端
-        core.domStyle.scale = 1;
-        core.domStyle.screenMode = 'bigScreen';
-        core.domStyle.isVertical = false;
-
-        gameGroupWidth = DEFAULT_CANVAS_WIDTH + DEFAULT_BAR_WIDTH;
-        gameGroupHeight = DEFAULT_CANVAS_WIDTH;
-        canvasWidth = DEFAULT_CANVAS_WIDTH;
-        canvasTop = 0;
-        // canvasLeft = DEFAULT_BAR_WIDTH;
-
-        toolBarWidth = statusBarWidth = DEFAULT_BAR_WIDTH;
-        // statusBarHeight = statusLineHeight * count + SPACE * 2; //一共有9行
-        statusBackground = (core.status.globalAttribute||core.initStatus.globalAttribute).statusLeftBackground;
-        statusBarHeight = gameGroupHeight - SPACE;
-        statusCanvasWidth = toolBarWidth + SPACE;
-        statusCanvasHeight = statusBarHeight;
-
-        statusHeight = statusLineHeight * .8;
-        statusLabelsLH = .8 * statusLineHeight;
-        // toolBarTop = statusLineHeight * count + SPACE * 2;
-        toolBarTop = DEFAULT_CANVAS_WIDTH - 135;
-        toolBarHeight = DEFAULT_CANVAS_WIDTH - toolBarTop;
-        toolsBackground = 'transparent';
-
-        toolsHeight = BASE_LINEHEIGHT;
-        borderRight = '';
-        fontSize = statusLineFontSize;
-        toolbarFontSize = DEFAULT_FONT_SIZE;
-        statusMaxWidth = DEFAULT_BAR_WIDTH;
-        toolsPMaxwidth = DEFAULT_BAR_WIDTH * .9;
-        margin = 2 * SPACE;
-        toolsMargin = (DEFAULT_BAR_WIDTH - 3*SPACE - 3 * toolsHeight)/4;
-        hardWidth = DEFAULT_BAR_WIDTH - 3*SPACE - 2*toolsMargin;
-        statusMarginLeft = toolsMargin;
-
-        musicBtnRight = (clientWidth-gameGroupWidth)/2;
-        musicBtnBottom = (clientHeight-gameGroupHeight)/2 - 27;
-    }
-
-    var unit = 'px'
-    core.domStyle.styles = [
-        {
-            id: 'gameGroup',
-            rules:{
-                width: gameGroupWidth + unit,
-                height: gameGroupHeight + unit,
-                top: (clientHeight-gameGroupHeight)/2 + unit,
-                left: (clientWidth-gameGroupWidth)/2 + unit,
-            }
-        },
-        {
-            className: 'gameCanvas',
-            rules:{
-                width: (canvasWidth - SPACE*2) + unit,
-                height: (canvasWidth - SPACE*2) + unit,
-            }
-        },
-        {
-            id: 'statusCanvas',
-            rules: {
-                width: (statusCanvasWidth - SPACE*2) + unit,
-                height: (statusCanvasHeight - SPACE) + unit,
-                display: statusCanvas?'block':'none'
-            }
-        },
-        {
-            id: 'gif',
-            rules: {
-                width: (canvasWidth - SPACE*2) + unit,
-                height:(canvasWidth - SPACE*2) + unit,
-            }
-        },
-        {
-            id: 'gif2',
-            rules: {
-                width: (canvasWidth - SPACE*2) + unit,
-                height:(canvasWidth - SPACE*2) + unit,
-            }
-        },
-        {
-            id: 'gameDraw',
-            rules: {
-                width: (canvasWidth - SPACE*2) + unit,
-                height:(canvasWidth - SPACE*2) + unit,
-                top: canvasTop + unit,
-                right: 0,
-                border: statusBarBorder
-            }
-        },
-        {
-            id: 'floorMsgGroup',
-            rules:{
-                width: (canvasWidth - SPACE*2) + unit,
-                height: (gameGroupHeight - SPACE*2) + unit,
-                top: SPACE + unit,
-                right: SPACE + unit,
-                background: (core.status.globalAttribute||core.initStatus.globalAttribute).floorChangingBackground,
-                color: (core.status.globalAttribute||core.initStatus.globalAttribute).floorChangingTextColor
-            }
-        },
-        {
-            id: 'statusBar',
-            rules:{
-                width: statusBarWidth + unit,
-                height: statusBarHeight + unit,
-                top: 0,
-                left: 0,
-                padding: SPACE + unit,
-
-                borderTop: statusBarBorder,
-                borderLeft: statusBarBorder,
-                borderRight: borderRight,
-                fontSize: fontSize + unit,
-                background: statusBackground
-            }
-        },
-        {
-            className: 'status',
-            rules:{
-                width: '100%',
-                maxWidth: statusMaxWidth + unit,
-                height: statusHeight + unit,
-                margin: margin/2 + unit,
-                display: !statusCanvas?'block':'none',
-                marginLeft: statusMarginLeft + unit,
-            }
-        },
-        {
-            className: 'statusLabels',
-            rules:{
-                marginLeft: margin + unit,
-                lineHeight: statusLabelsLH + unit
-            }
-        },
-        {
-            className: 'statusTexts',
-            rules: {
-                color: (core.status.globalAttribute||core.initStatus.globalAttribute).statusBarColor
-            }
-        },
-        {
-            id: 'toolBar',
-            rules:{
-                width: toolBarWidth + unit,
-                height: toolBarHeight + unit,
-                top: toolBarTop +unit,
-                left: 0,
-                padding: SPACE + unit,
-                borderBottom: toolBarBorder,
-                borderLeft: toolBarBorder,
-                borderRight: borderRight,
-                fontSize: toolbarFontSize + unit,
-                background: toolsBackground,
-            }
-        },
-        {
-            className: 'tools',
-            rules:{
-                height: toolsHeight + unit,
-                maxWidth: toolsPMaxwidth + unit,
-                marginLeft: toolsMargin + unit,
-                marginTop: margin + unit,
-            }
-        },
-        {
-            imgId: 'keyboard',
-            rules:{
-                display: core.domStyle.isVertical && core.domStyle.showStatusBar
-            }
-        },
-        {
-            imgId: 'shop',
-            rules:{
-                display: core.domStyle.isVertical && core.domStyle.showStatusBar
-            }
-        },
-        {
-            id: 'hard',
-            rules: {
-                lineHeight: toolsHeight + unit,
-                color: (core.status.globalAttribute||core.initStatus.globalAttribute).hardLabelColor,
-                width: hardWidth + unit,
-                maxWidth: hardWidth+unit
-            }
-        },
-        {
-            id: 'musicBtn',
-            rules: {
-                display: 'block',
-                right: musicBtnRight + unit,
-                bottom: musicBtnBottom + unit
-            }
-        },
-        {
-            className: 'noMarginLeft',
-            rules: {
-                marginLeft: 0
-            }
-        }
-    ]
-    for (var i = 0; i < core.dom.status.length; ++i) {
-        var id = core.dom.status[i].id;
-        core.domStyle.styles.push({
-            id: id,
-            rules: {
-                display: toDraw.indexOf(id.substring(0, id.length-3))>=0 && !statusCanvas ? "block": "none"
-            }
-        });
-    }
-
-    core.domRenderer();
-    this.setToolbarButton();
-
-    if (core.domStyle.isVertical) {
-        core.dom.statusCanvas.width = 480;
-        core.dom.statusCanvas.height = col * BASE_LINEHEIGHT + SPACE + 6;
-    }
-    else {
-        core.dom.statusCanvas.width = 149;
-        core.dom.statusCanvas.height = 480;
-    }
-    this.setMusicBtn();
-    if (core.isPlaying())
-        core.updateStatusBar();
+////// 注册一个resize函数 //////
+// name为名称，可供注销使用
+// func可以是一个函数，或者是插件中的函数名；可以接受obj参数，详见resize函数。
+control.prototype.registerResize = function (name, func) {
+    this.unregisterResize(name);
+    this.resizes.push({ name: name, func: func });
 }
 
-////// 渲染DOM //////
-control.prototype.domRenderer = function(){
+////// 注销一个resize函数 //////
+control.prototype.unregisterResize = function (name) {
+    this.resizes = this.resizes.filter(function (b) { return b.name != name; });
+}
 
-    core.dom.statusBar.style.display = 'block';
-    core.dom.toolBar.style.display = 'block';
-
-    var styles = core.domStyle.styles;
-
-    for(var i=0; i<styles.length; i++){
-        if(styles[i].hasOwnProperty('rules')){
-            var rules = styles[i].rules;
-            var rulesProp = Object.keys(rules);
-
-            if(styles[i].hasOwnProperty('className')){
-                var className = styles[i].className
-                for(var j=0; j<core.dom[className].length; j++)
-                    for(var k=0; k<rulesProp.length; k++) {
-                        core.dom[className][j].style[rulesProp[k]] = rules[rulesProp[k]];
-                    }
-            }
-            if(styles[i].hasOwnProperty('id')){
-                var id = styles[i].id;
-
-                for(var j=0; j<rulesProp.length; j++)
-                    core.dom[id].style[rulesProp[j]] = rules[rulesProp[j]];
-            }
-            if(styles[i].hasOwnProperty('imgId')){
-                var imgId = styles[i].imgId;
-
-                for(var j=0; j<rulesProp.length; j++)
-                    core.statusBar.image[imgId].style[rulesProp[j]] = rules[rulesProp[j]];
-            }
+control.prototype._doResize = function (obj) {
+    for (var i in this.resizes) {
+        try {
+            if (core.doFunc(this.resizes[i].func, obj)) return true;
+        } catch (e) {
+            main.log(e);
+            main.log("ERROR in resizes["+this.resizes[i].name+"]：已自动注销该项。");
+            this.unregisterResize(this.resizes[i].name);
         }
+    }
+    return false;
+}
 
+////// 屏幕分辨率改变后重新自适应 //////
+control.prototype.resize = function() {
+    if (main.mode=='editor')return;
+    var clientWidth = main.dom.body.clientWidth, clientHeight = main.dom.body.clientHeight;
+    var CANVAS_WIDTH = core.__PIXELS__ + 6, BAR_WIDTH = Math.round(core.__PIXELS__ * 0.31) + 3;
+
+    if (clientWidth >= CANVAS_WIDTH + BAR_WIDTH || (clientWidth > clientHeight && clientHeight < CANVAS_WIDTH)) {
+        // 横屏
+        core.domStyle.isVertical = false;
+        core.domStyle.scale = Math.min(1, clientHeight / CANVAS_WIDTH);
     }
-    // resize map
-    if (core.isPlaying() && core.isset(core.status) && core.isset(core.bigmap)) {
-        core.bigmap.canvas.forEach(function(cn){
-            core.canvas[cn].canvas.style.width = core.bigmap.width*32*core.domStyle.scale + "px";
-            core.canvas[cn].canvas.style.height = core.bigmap.height*32*core.domStyle.scale + "px";
-        });
+    else {
+        // 竖屏
+        core.domStyle.isVertical = true;
+        core.domStyle.scale = Math.min(1, clientWidth / CANVAS_WIDTH);
     }
-    // 动态canvas
+
+    var statusDisplayArr = this._shouldDisplayStatus(), count = statusDisplayArr.length;
+    var statusCanvas = core.flags.statusCanvas, statusCanvasRows = core.flags.statusCanvasRowsOnMobile || 3;
+    var col = statusCanvas ? statusCanvasRows : Math.ceil(count / 3);
+    if (col > 4) {
+        if (statusCanvas) alert("自绘状态栏的在竖屏下的行数应不超过4！");
+        else alert("当前状态栏数目("+count+")大于12，请调整到不超过12以避免手机端出现显示问题。");
+    }
+    var globalAttribute = core.status.globalAttribute || core.initStatus.globalAttribute;
+
+    var obj = {
+        clientWidth: clientWidth,
+        clientHeight: clientHeight,
+        CANVAS_WIDTH: CANVAS_WIDTH,
+        BAR_WIDTH: BAR_WIDTH,
+        outerSize: CANVAS_WIDTH * core.domStyle.scale,
+        globalAttribute: globalAttribute,
+        border: '3px ' + globalAttribute.borderColor + ' solid',
+        statusDisplayArr: statusDisplayArr,
+        count: count,
+        col: col,
+        statusBarHeightInVertical: core.domStyle.isVertical ? (32 * col + 6) * core.domStyle.scale + 6 : 0,
+        toolbarHeightInVertical: core.domStyle.isVertical ? 44 * core.domStyle.scale + 6 : 0,
+    };
+
+    this._doResize(obj);
+    this.setToolbarButton();
+    core.updateStatusBar();
+}
+
+control.prototype._resize_gameGroup = function (obj) {
+    var gameGroup = core.dom.gameGroup;
+    var totalWidth, totalHeight;
+    if (core.domStyle.isVertical) {
+        totalWidth = obj.outerSize;
+        totalHeight = obj.outerSize + obj.statusBarHeightInVertical + obj.toolbarHeightInVertical
+    }
+    else {
+        totalWidth = (obj.CANVAS_WIDTH + obj.BAR_WIDTH) * core.domStyle.scale;
+        totalHeight = obj.outerSize;
+    }
+    gameGroup.style.width = totalWidth + "px";
+    gameGroup.style.height = totalHeight + "px";
+    gameGroup.style.left = (obj.clientWidth - totalWidth) / 2 + "px";
+    gameGroup.style.top = (obj.clientHeight - totalHeight) / 2 + "px";
+    // floorMsgGroup
+    var floorMsgGroup = core.dom.floorMsgGroup;
+    floorMsgGroup.style.width = obj.outerSize - 6 + "px";
+    floorMsgGroup.style.height = totalHeight - 6 + "px";
+    floorMsgGroup.style.background = obj.globalAttribute.floorChangingBackground;
+    floorMsgGroup.style.color = obj.globalAttribute.floorChangingTextColor;
+    // musicBtn
+    if (core.domStyle.isVertical || core.domStyle.scale < 1) {
+        core.dom.musicBtn.style.right = core.dom.musicBtn.style.height = "3px";
+    }
+    else {
+        core.dom.musicBtn.style.right = (obj.clientWidth - totalWidth) / 2 + "px";
+        core.dom.musicBtn.style.bottom = (obj.clientHeight - totalHeight) / 2 - 27 + "px";
+    }
+}
+
+control.prototype._resize_canvas = function (obj) {
+    var innerSize = (obj.outerSize - 6) + "px";
+    for (var i = 0; i < core.dom.gameCanvas.length; ++i)
+        core.dom.gameCanvas[i].style.width = core.dom.gameCanvas[i].style.height = innerSize;
+    core.dom.gif.style.width = core.dom.gif.style.height = innerSize;
+    core.dom.gif2.style.width = core.dom.gif2.style.height = innerSize;
+    core.dom.gameDraw.style.width = core.dom.gameDraw.style.height = innerSize;
+    core.dom.gameDraw.style.top = obj.statusBarHeightInVertical + "px";
+    core.dom.gameDraw.style.right = 0;
+    core.dom.gameDraw.style.border = obj.border;
+    // resize bigmap
+    core.bigmap.canvas.forEach(function(cn){
+        core.canvas[cn].canvas.style.width = core.bigmap.width * 32 * core.domStyle.scale + "px";
+        core.canvas[cn].canvas.style.height = core.bigmap.height * 32 * core.domStyle.scale + "px";
+    });
+    // resize dynamic canvas
     for (var name in core.dymCanvas) {
         var ctx = core.dymCanvas[name], canvas = ctx.canvas;
         canvas.style.width = canvas.width * core.domStyle.scale + "px";
@@ -2771,4 +2481,96 @@ control.prototype.domRenderer = function(){
         canvas.style.left = parseFloat(canvas.getAttribute("_left")) * core.domStyle.scale + "px";
         canvas.style.top = parseFloat(canvas.getAttribute("_top")) * core.domStyle.scale + "px";
     }
+}
+
+control.prototype._resize_statusBar = function (obj) {
+    // statusBar
+    var statusBar = core.dom.statusBar;
+    if (core.domStyle.isVertical) {
+        statusBar.style.width = obj.outerSize + "px";
+        statusBar.style.height = obj.statusBarHeightInVertical + "px";
+        statusBar.style.background = obj.globalAttribute.statusTopBackground;
+        statusBar.style.fontSize = 16 * core.domStyle.scale + "px";
+    }
+    else {
+        statusBar.style.width = obj.BAR_WIDTH * core.domStyle.scale + "px";
+        statusBar.style.height = obj.outerSize - 3 + "px";
+        statusBar.style.background = obj.globalAttribute.statusLeftBackground;
+        // --- 计算文字大小
+        statusBar.style.fontSize = 16 * Math.min(1, (core.__HALF_SIZE__ + 3) / obj.count) * core.domStyle.scale + "px";
+    }
+    statusBar.style.display = 'block';
+    statusBar.style.borderTop = statusBar.style.borderLeft = obj.border;
+    statusBar.style.borderRight = core.domStyle.isVertical ? obj.border : '';
+    // 自绘状态栏
+    if (core.domStyle.isVertical) {
+        core.dom.statusCanvas.style.width = obj.outerSize - 6 + "px";
+        core.dom.statusCanvas.width = core.__PIXELS__;
+        core.dom.statusCanvas.style.height = obj.statusBarHeightInVertical - 3 + "px";
+        core.dom.statusCanvas.height = obj.col * 32 + 9;
+    }
+    else {
+        core.dom.statusCanvas.style.width = obj.BAR_WIDTH * core.domStyle.scale - 3 + "px";
+        core.dom.statusCanvas.width = obj.BAR_WIDTH - 3;
+        core.dom.statusCanvas.style.height = obj.outerSize - 6 + "px";
+        core.dom.statusCanvas.height = core.__PIXELS__;
+    }
+    core.dom.statusCanvas.style.display = core.flags.statusCanvas ? "block" : "none";
+}
+
+control.prototype._resize_status = function (obj) {
+    var statusHeight = (core.domStyle.isVertical ? 1 : (core.__HALF_SIZE__ + 3) / obj.count) *  32 * core.domStyle.scale * 0.8;
+    // status
+    for (var i = 0; i < core.dom.status.length; ++i) {
+        var id = core.dom.status[i].id, style = core.dom.status[i].style;
+        if (id.endsWith("Col")) id = id.substring(0, id.length-3);
+        style.display = core.flags.statusCanvas || obj.statusDisplayArr.indexOf(id) < 0 ? 'none': 'block';
+        style.margin = 3 * core.domStyle.scale + "px";
+        style.height = statusHeight + "px";
+        style.maxWidth = obj.BAR_WIDTH * core.domStyle.scale * (core.domStyle.isVertical ? 0.95 : 1) + "px";
+    }
+    // statusLabels, statusTexts
+    for (var i = 0; i < core.dom.statusLabels.length; ++i) {
+        core.dom.statusLabels[i].style.lineHeight = statusHeight + "px";
+        core.dom.statusLabels[i].style.marginLeft = 6 * core.domStyle.scale + "px";
+    }
+    for (var i = 0; i < core.dom.statusTexts.length; ++i) {
+        core.dom.statusTexts[i].style.color = obj.globalAttribute.statusBarColor;
+    }
+}
+
+control.prototype._resize_tools = function (obj) {
+    // toolBar
+    var toolBar = core.dom.toolBar;
+    if (core.domStyle.isVertical) {
+        toolBar.style.width = obj.outerSize + "px";
+        toolBar.style.top = obj.statusBarHeightInVertical + obj.outerSize + "px";
+        toolBar.style.height = obj.toolbarHeightInVertical + "px";
+        toolBar.style.background = obj.globalAttribute.toolsBackground;
+    }
+    else {
+        toolBar.style.width = obj.BAR_WIDTH * core.domStyle.scale + "px";
+        toolBar.style.top = 0.718 * obj.outerSize + "px";
+        toolBar.style.height = 0.281 * obj.outerSize + "px";
+        toolBar.style.background = 'transparent';
+    }
+    toolBar.style.display = 'block';
+    toolBar.style.borderLeft = toolBar.style.borderBottom = obj.border;
+    toolBar.style.borderRight = core.domStyle.isVertical ? obj.border : '';
+    toolBar.style.fontSize = 16 * core.domStyle.scale + "px";
+    // tools
+    var toolsHeight = 32 * core.domStyle.scale * (core.domStyle.isVertical ? 0.95 : 1);
+    for (var i = 0; i < core.dom.tools.length; ++i) {
+        var style = core.dom.tools[i].style;
+        style.height = toolsHeight + "px";
+        style.maxWidth = obj.BAR_WIDTH * core.domStyle.scale * 0.95 + "px"
+        style.marginLeft = (core.domStyle.isVertical ? 3 : 2) * 3 * core.domStyle.scale + "px";
+        style.marginTop = 6 * core.domStyle.scale + "px"
+    }
+    core.dom.hard.style.lineHeight = toolsHeight + "px";
+    core.dom.hard.style.color = obj.globalAttribute.hardLabelColor;
+    if (core.domStyle.isVertical)
+        core.dom.hard.style.maxWidth = obj.BAR_WIDTH * core.domStyle.scale * 0.4 + "px";
+    else
+        core.dom.hard.style.marginTop = 0;
 }

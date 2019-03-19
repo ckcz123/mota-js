@@ -884,6 +884,30 @@ utils.prototype.copy = function (data) {
     return successful;
 }
 
+////// 显示一段confirm //////
+utils.prototype.myconfirm = function (hint, yesCallback, noCallback) {
+    main.dom.inputDiv.style.display = 'block';
+    main.dom.inputMessage.innerHTML = hint.replace(/\n/g, '<br/>');
+    main.dom.inputBox.style.display = 'none';
+    main.dom.inputYes.focus();
+
+    core.platform.successCallback = yesCallback;
+    core.platform.errorCallback = noCallback;
+}
+
+////// 让用户输入一段文字 //////
+utils.prototype.myprompt = function (hint, value, callback) {
+    main.dom.inputDiv.style.display = 'block';
+    main.dom.inputMessage.innerHTML = hint.replace(/\n/g, '<br/>');
+    main.dom.inputBox.style.display = 'block';
+    main.dom.inputBox.value = value==null?"":value;
+    setTimeout(function () {
+        main.dom.inputBox.focus();
+    });
+
+    core.platform.successCallback = core.platform.errorCallback = callback;
+}
+
 ////// 动画显示某对象 //////
 utils.prototype.show = function (obj, speed, callback) {
     obj.style.display = 'block';

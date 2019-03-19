@@ -142,8 +142,14 @@ events.prototype._gameOver_confirmUpload = function (ending, norank) {
         return;
     }
     core.ui.drawConfirmBox("你想记录你的ID和成绩吗？", function () {
-        var username = main.isCompetition ? "" : prompt("请输入你的ID：", core.getCookie('id') || "");
-        core.events._gameOver_doUpload(username, ending, norank);
+        if (main.isCompetition) {
+            core.events._gameOver_doUpload("", ending, norank);
+        }
+        else {
+            core.myprompt("请输入你的ID：", core.getCookie('id') || "", function (username)  {
+                core.events._gameOver_doUpload(username, ending, norank);
+            });
+        }
     }, function () {
         if (main.isCompetition)
             core.events._gameOver_confirmDownload(ending);
@@ -184,9 +190,7 @@ events.prototype._gameOver_doUpload = function (username, ending, norank) {
     else
         core.http("POST", "/games/upload.php", formData);
 
-    setTimeout(function () {
-        core.events._gameOver_confirmDownload(ending);
-    }, 200);
+    core.events._gameOver_confirmDownload(ending);
 }
 
 events.prototype._gameOver_confirmDownload = function (ending) {
@@ -1267,23 +1271,24 @@ events.prototype._action_setHeroIcon = function (data, x, y, prefix) {
 }
 
 events.prototype._action_input = function (data, x, y, prefix) {
-    var value = this.__action_getInput(data.text, false);
-    if (value == null) return;
-    value = Math.abs(parseInt(value) || 0);
-    core.status.route.push("input:" + value);
-    core.setFlag("input", value);
-    core.doAction();
+    this.__action_getInput(data.text, false, function (value) {
+        value = Math.abs(parseInt(value) || 0);
+        core.status.route.push("input:" + value);
+        core.setFlag("input", value);
+        core.doAction();
+    });
 }
 
 events.prototype._action_input2 = function (data, x, y, prefix) {
-    var value = this.__action_getInput(data.text, true);
-    if (value == null) return;
-    core.status.route.push("input2:" + core.encodeBase64(value));
-    core.setFlag("input", value);
-    core.doAction();
+    this.__action_getInput(data.text, true, function (value) {
+        value = value || "";
+        core.status.route.push("input2:" + core.encodeBase64(value));
+        core.setFlag("input", value);
+        core.doAction();
+    });
 }
 
-events.prototype.__action_getInput = function (hint, isText) {
+events.prototype.__action_getInput = function (hint, isText, callback) {
     var value, prefix = isText ? "input2:" : "input:";
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
@@ -1292,20 +1297,18 @@ events.prototype.__action_getInput = function (hint, isText) {
                 throw new Error("录像文件出错！当前需要一个 " + prefix + " 项，实际为 " + action);
             if (isText) value = core.decodeBase64(action.substring(7));
             else value = parseInt(action.substring(6));
+            callback(value);
         }
         catch (e) {
             main.log(e);
             core.stopReplay();
             core.insertAction(["录像文件出错，请在控制台查看报错信息。", {"type": "exit"}]);
             core.doAction();
-            return null;
         }
     }
     else {
-        core.interval.onDownInterval = 'tmp';
-        value = prompt(core.replaceText(hint)) || "";
+        core.myprompt(core.replaceText(hint), null, callback);
     }
-    return value;
 }
 
 events.prototype._action_if = function (data, x, y, prefix) {

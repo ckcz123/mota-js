@@ -69,7 +69,12 @@ function main() {
         'skillCol': document.getElementById('skillCol'),
         'hard': document.getElementById('hard'),
         'statusCanvas': document.getElementById('statusCanvas'),
-        'statusCanvasCtx': document.getElementById('statusCanvas').getContext('2d')
+        'statusCanvasCtx': document.getElementById('statusCanvas').getContext('2d'),
+        'inputDiv': document.getElementById('inputDiv'),
+        'inputMessage': document.getElementById('inputMessage'),
+        'inputBox': document.getElementById('inputBox'),
+        'inputYes': document.getElementById('inputYes'),
+        'inputNo': document.getElementById('inputNo')
     };
     this.mode = 'play';
     this.loadList = [
@@ -335,6 +340,7 @@ window.onresize = function () {
 ////// 在界面上按下某按键时 //////
 main.dom.body.onkeydown = function(e) {
     try {
+        if (main.dom.inputDiv.style.display == 'block') return;
         if (main.core && (main.core.isPlaying() || main.core.status.lockControl))
             main.core.onkeyDown(e);
     } catch (ee) { main.log(ee); }
@@ -343,6 +349,7 @@ main.dom.body.onkeydown = function(e) {
 ////// 在界面上放开某按键时 //////
 main.dom.body.onkeyup = function(e) {
     try {
+        if (main.dom.inputDiv.style.display == 'block') return;
         if (main.core && (main.core.isPlaying() || main.core.status.lockControl))
             main.core.onkeyUp(e);
     } catch (ee) { main.log(ee); }
@@ -669,6 +676,33 @@ window.onblur = function () {
         try {
             main.core.control.checkAutosave();
         } catch (e) {main.log(e);}
+    }
+}
+
+main.dom.inputYes.onclick = function () {
+    main.dom.inputDiv.style.display = 'none';
+    var func = core.platform.successCallback;
+    core.platform.successCallback = core.platform.errorCallback = null;
+    if (func) func(main.dom.inputBox.value);
+}
+
+main.dom.inputNo.onclick = function () {
+    main.dom.inputDiv.style.display = 'none';
+    var func = core.platform.errorCallback;
+    core.platform.successCallback = core.platform.errorCallback = null;
+    if (func) func(null);
+}
+
+main.dom.inputDiv.onkeyup = function (e) {
+    if (e.keyCode == 13) {
+        setTimeout(function () {
+            main.dom.inputYes.click();
+        }, 50);
+    }
+    else if (e.keyCode == 27) {
+        setTimeout(function () {
+            main.dom.inputNo.click();
+        }, 50);
     }
 }
 

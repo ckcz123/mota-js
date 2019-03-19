@@ -791,7 +791,7 @@ editor_mode = function (editor) {
                     var pixel = getPixel(imgData, i, j);
                     if (pixel[3]==0) trans++;
                     if (pixel[0]==255 && pixel[1]==255 && pixel[2]==255 && pixel[3]==255) white++;
-                    if (pixel[0]==0 && pixel[1]==0 && pixel[2]==0 && pixel[3]==255) black++;
+                    // if (pixel[0]==0 && pixel[1]==0 && pixel[2]==0 && pixel[3]==255) black++;
                 }
             }
             if (white>black && white>trans*10 && confirm("看起来这张图片是以纯白为底色，是否自动调整为透明底色？")) {
@@ -807,6 +807,7 @@ editor_mode = function (editor) {
                 tempCanvas.putImageData(imgData, 0, 0);
                 changed = true;
             }
+            /*
             if (black>white && black>trans*10 && confirm("看起来这张图片是以纯黑为底色，是否自动调整为透明底色？")) {
                 for (var i=0;i<image.width;i++) {
                     for (var j=0;j<image.height;j++) {
@@ -820,6 +821,7 @@ editor_mode = function (editor) {
                 tempCanvas.putImageData(imgData, 0, 0);
                 changed = true;
             }
+            */
 
             // Step 2: 检测长宽比
             var ysize = selectAppend.value.indexOf('48') === -1 ? 32 : 48;

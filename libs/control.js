@@ -2421,6 +2421,7 @@ control.prototype.resize = function() {
         col: col,
         statusBarHeightInVertical: core.domStyle.isVertical ? (32 * col + 6) * core.domStyle.scale + 6 : 0,
         toolbarHeightInVertical: core.domStyle.isVertical ? 44 * core.domStyle.scale + 6 : 0,
+        is15x15: core.__SIZE__ == 15
     };
 
     this._doResize(obj);
@@ -2529,6 +2530,8 @@ control.prototype._resize_status = function (obj) {
         style.margin = 3 * core.domStyle.scale + "px";
         style.height = statusHeight + "px";
         style.maxWidth = obj.BAR_WIDTH * core.domStyle.scale * (core.domStyle.isVertical ? 0.95 : 1) + "px";
+        if (obj.is15x15 && !core.domStyle.isVertical)
+            style.marginLeft = 11 * core.domStyle.scale + "px";
     }
     // statusLabels, statusTexts
     for (var i = 0; i < core.dom.statusLabels.length; ++i) {
@@ -2577,10 +2580,10 @@ control.prototype._resize_tools = function (obj) {
     core.dom.hard.style.lineHeight = toolsHeight + "px";
     core.dom.hard.style.color = obj.globalAttribute.hardLabelColor;
     if (core.domStyle.isVertical) {
-        core.dom.hard.style.width = obj.outerSize - (obj.toolbarHeightInVertical - 7 * core.domStyle.scale) * 8 - 3 + "px";
+        core.dom.hard.style.width = obj.outerSize - 9 * toolsMarginLeft - 8.5 * toolsHeight - 12 + "px";
     }
     else {
         core.dom.hard.style.width = obj.BAR_WIDTH * core.domStyle.scale - 9 - 2 * toolsMarginLeft + "px";
-        core.dom.hard.style.marginTop = 0;
+        if (!obj.is15x15) core.dom.hard.style.marginTop = 0;
     }
 }

@@ -271,18 +271,15 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var special = enemy.special;
 	// 中毒
 	if (core.enemys.hasSpecial(special, 12)) {
-		core.push(todo, [{ "type": "setValue", "name": "flag:debuff", "value": "'poison'" }]);
-		core.push(todo, [{ "type": "insert", "name": "毒衰咒处理" }]);
+		core.push(todo, [{ "type": "insert", "name": "毒衰咒处理", "args": [0] }]);
 	}
 	// 衰弱
 	if (core.enemys.hasSpecial(special, 13)) {
-		core.push(todo, [{ "type": "setValue", "name": "flag:debuff", "value": "'weak'" }]);
-		core.push(todo, [{ "type": "insert", "name": "毒衰咒处理" }]);
+		core.push(todo, [{ "type": "insert", "name": "毒衰咒处理", "args": [1] }]);
 	}
 	// 诅咒
 	if (core.enemys.hasSpecial(special, 14)) {
-		core.push(todo, [{ "type": "setValue", "name": "flag:debuff", "value": "'curse'" }]);
-		core.push(todo, [{ "type": "insert", "name": "毒衰咒处理" }]);
+		core.push(todo, [{ "type": "insert", "name": "毒衰咒处理", "args": [2] }]);
 	}
 	// 仇恨属性：减半
 	if (core.flags.hatredDecrease && core.enemys.hasSpecial(special, 17)) {
@@ -318,8 +315,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 如果有加点
 	var point = core.material.enemys[enemyId].point;
 	if (core.flags.enableAddPoint && point > 0) {
-		core.push(todo, [{ "type": "setValue", "name": "flag:point", "value": point }]);
-		core.push(todo, [{ "type": "insert", "name": "加点事件" }]);
+		core.push(todo, [{ "type": "insert", "name": "加点事件", "args": [point] }]);
 	}
 
 	// 如果该点存在事件 -- V2.5.4 以后阻击怪也可以有战后事件了
@@ -1289,7 +1285,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 如果是非状态栏canvas化，直接返回
 	if (!core.flags.statusCanvas) return;
 	var canvas = core.dom.statusCanvas,
-		ctx = canvas.getContext('2d');
+		ctx = core.dom.statusCanvasCtx;
 	// 清空状态栏
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	// 如果是隐藏状态栏模式，直接返回
@@ -1372,7 +1368,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.lockControl();
 	core.status.event.id = 'about';
 
-	var left = 52, top = 68, right = 480 - 2 * left, bottom = 480 - 2 * top;
+	var left = 52, top = 68, right = core.__PIXELS__ - 2 * left, bottom = core.__PIXELS__ - 2 * top;
 
 	core.setAlpha('ui', 0.85);
 	core.fillRect('ui', left, top, right, bottom, '#000000');
@@ -1459,7 +1455,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		var ctx = core.getContextByName(name);
 		if (ctx == null) {
 			if (typeof name == 'string')
-				ctx = core.createCanvas(name, 0, 0, 480, 480, 98);
+				ctx = core.createCanvas(name, 0, 0, core.__PIXELS__, core.__PIXELS__, 98);
 			else return;
 		}
 		

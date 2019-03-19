@@ -579,16 +579,13 @@ events.prototype.passNet = function (data) {
     if (core.hasItem('shoes')) return;
     // 血网 lavaNet 移动到 checkBlock 中处理
     if (data.event.id == 'poisonNet') { // 毒网
-        core.setFlag('debuff', 'poison');
-        core.insertAction('毒衰咒处理');
+        core.insertAction({"type":"insert","name":"毒衰咒处理","args":[0]});
     }
     else if (data.event.id == 'weakNet') { // 衰网
-        core.setFlag('debuff', 'weak');
-        core.insertAction('毒衰咒处理');
+        core.insertAction({"type":"insert","name":"毒衰咒处理","args":[1]});
     }
     else if (data.event.id == 'curseNet') { // 咒网
-        core.setFlag('debuff', 'curse');
-        core.insertAction('毒衰咒处理');
+        core.insertAction({"type":"insert","name":"毒衰咒处理","args":[2]});
     }
     core.updateStatusBar();
 }
@@ -1166,13 +1163,24 @@ events.prototype._action_trigger = function (data, x, y, prefix) {
 }
 
 events.prototype._action_insert = function (data, x, y, prefix) {
+    // 设置参数
+    if (data.args instanceof Array) {
+       for (var i = 0; i < data.args.length; ++i) {
+           try {
+               core.setFlag('arg'+(i+1), core.calValue(data.args[i], prefix));
+           } catch (e) { main.log(e); }
+       }
+    }
     if (data.name) { // 公共事件
+        core.setFlag('arg0', data.name);
         core.insertAction(this.getCommonEvent(data.name));
     }
     else {
         var loc = this.__action_getLoc(data.loc, x, y, prefix);
+        core.setFlag('arg0', loc);
         var floorId = data.floorId || core.status.floorId;
-        var event = core.floors[floorId].events[loc[0] + "," + loc[1]];
+        var which = data.which || "events";
+        var event = (core.floors[floorId][which]||[])[loc[0] + "," + loc[1]];
         if (event) this.insertAction(event.data || event);
     }
     core.doAction();

@@ -4,60 +4,55 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 		"加点事件": [
 			{
 				"type": "comment",
-				"text": "flag:point表示当前应该的加点数值"
+				"text": "通过传参，flag:arg1表示当前应该的加点数值"
 			},
 			{
 				"type": "choices",
 				"choices": [
 					{
-						"text": "攻击+${1*flag:point}",
+						"text": "攻击+${1*flag:arg1}",
 						"action": [
 							{
 								"type": "setValue",
 								"name": "status:atk",
-								"value": "status:atk+1*flag:point"
+								"value": "status:atk+1*flag:arg1"
 							}
 						]
 					},
 					{
-						"text": "防御+${2*flag:point}",
+						"text": "防御+${2*flag:arg1}",
 						"action": [
 							{
 								"type": "setValue",
 								"name": "status:def",
-								"value": "status:def+2*flag:point"
+								"value": "status:def+2*flag:arg1"
 							}
 						]
 					},
 					{
-						"text": "生命+${200*flag:point}",
+						"text": "生命+${200*flag:arg1}",
 						"action": [
 							{
 								"type": "setValue",
 								"name": "status:hp",
-								"value": "status:hp+200*flag:point"
+								"value": "status:hp+200*flag:arg1"
 							}
 						]
 					}
 				]
-			},
-			{
-				"type": "setValue",
-				"name": "flag:point",
-				"value": "null"
 			}
 		],
 		"毒衰咒处理": [
 			{
 				"type": "comment",
-				"text": "获得毒衰咒效果，flag:debuff为要获得的类型"
+				"text": "获得毒衰咒效果，flag:arg1为要获得的类型"
 			},
 			{
 				"type": "switch",
-				"condition": "flag:debuff",
+				"condition": "flag:arg1",
 				"caseList": [
 					{
-						"case": "'poison'",
+						"case": "0",
 						"action": [
 							{
 								"type": "comment",
@@ -78,7 +73,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 						]
 					},
 					{
-						"case": "'weak'",
+						"case": "1",
 						"action": [
 							{
 								"type": "comment",
@@ -133,7 +128,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 						]
 					},
 					{
-						"case": "'curse'",
+						"case": "2",
 						"action": [
 							{
 								"type": "comment",
@@ -154,11 +149,6 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 						]
 					}
 				]
-			},
-			{
-				"type": "setValue",
-				"name": "flag:debuff",
-				"value": "null"
 			}
 		]
 	}

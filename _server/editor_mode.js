@@ -13,6 +13,7 @@ editor_mode = function (editor) {
             'appendpic': 'left1',
 
             'commonevent': 'left9',
+            'plugins': 'left10',
         }
         this._ids = {}
         this.dom = {}
@@ -385,6 +386,9 @@ editor_mode = function (editor) {
             case 'commonevent':
                 editor.file.editCommonEvent(actionList, cb);
                 break;
+            case 'plugins':
+                editor.file.editPlugins(actionList, cb);
+                break;
             default:
                 break;
         }
@@ -394,7 +398,7 @@ editor_mode = function (editor) {
         if (editor_mode.mode != mode) {
             if (mode === 'save') editor_mode.doActionList(editor_mode.mode, editor_mode.actionList);
             if (editor_mode.mode === 'nextChange' && mode) editor_mode.showMode(mode);
-            editor_mode.mode = mode;
+            if (mode !== 'save') editor_mode.mode = mode;
             editor_mode.actionList = [];
         }
     }
@@ -523,6 +527,19 @@ editor_mode = function (editor) {
         //只查询不修改时,内部实现不是异步的,所以可以这么写
         var tableinfo = editor_mode.objToTable_(objs[0], objs[1]);
         document.getElementById('table_b7bf0124_99fd_4af8_ae2f_0017f04a7c7d').innerHTML = tableinfo.HTML;
+        tableinfo.listen(tableinfo.guids);
+        if (Boolean(callback)) callback();
+    }
+    
+    editor_mode.prototype.plugins = function (callback) {
+        var objs = [];
+        editor.file.editPlugins([], function (objs_) {
+            objs = objs_;
+            //console.log(objs_)
+        });
+        //只查询不修改时,内部实现不是异步的,所以可以这么写
+        var tableinfo = editor_mode.objToTable_(objs[0], objs[1]);
+        document.getElementById('table_e2c034ec_47c6_48ae_8db8_4f8f32fea2d6').innerHTML = tableinfo.HTML;
         tableinfo.listen(tableinfo.guids);
         if (Boolean(callback)) callback();
     }

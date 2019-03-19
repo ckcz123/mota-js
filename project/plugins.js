@@ -1,9 +1,9 @@
 var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = 
 {
-	"test": function(){
+    "test": function(){
 		console.log("插件函数执行测试");
 	},
-	"drawLight" : function (name, color, lights, lightDec) {
+    "drawLight": function (name, color, lights, lightDec) {
 		// 绘制灯光/漆黑层效果。调用方式 core.plugin.drawLight(...)
 		// 【参数说明】
 		// name：必填，要绘制到的画布名；可以是一个系统画布，或者是个自定义画布；如果不存在则创建

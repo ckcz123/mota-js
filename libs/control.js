@@ -41,6 +41,7 @@ control.prototype._init = function () {
     this.registerResize("canvas", this._resize_canvas);
     this.registerResize("statusBar", this._resize_statusBar);
     this.registerResize("status", this._resize_status);
+    this.registerResize("toolBar", this._resize_toolBar);
     this.registerResize("tools", this._resize_tools);
 }
 
@@ -2539,7 +2540,7 @@ control.prototype._resize_status = function (obj) {
     }
 }
 
-control.prototype._resize_tools = function (obj) {
+control.prototype._resize_toolBar = function (obj) {
     // toolBar
     var toolBar = core.dom.toolBar;
     if (core.domStyle.isVertical) {
@@ -2558,19 +2559,28 @@ control.prototype._resize_tools = function (obj) {
     toolBar.style.borderLeft = toolBar.style.borderBottom = obj.border;
     toolBar.style.borderRight = core.domStyle.isVertical ? obj.border : '';
     toolBar.style.fontSize = 16 * core.domStyle.scale + "px";
-    // tools
+}
+
+control.prototype._resize_tools = function (obj) {
     var toolsHeight = 32 * core.domStyle.scale * (core.domStyle.isVertical ? 0.95 : 1);
+    var toolsMarginLeft;
+    if (core.domStyle.isVertical)
+        toolsMarginLeft = (core.__HALF_SIZE__ - 3) * 3 * core.domStyle.scale;
+    else
+        toolsMarginLeft = (obj.BAR_WIDTH * core.domStyle.scale - 9 - toolsHeight * 3) / 4;
     for (var i = 0; i < core.dom.tools.length; ++i) {
         var style = core.dom.tools[i].style;
         style.height = toolsHeight + "px";
-        style.maxWidth = obj.BAR_WIDTH * core.domStyle.scale * 0.95 + "px"
-        style.marginLeft = (core.domStyle.isVertical ? 3 : 2) * 3 * core.domStyle.scale + "px";
+        style.marginLeft = toolsMarginLeft + "px";
         style.marginTop = 6 * core.domStyle.scale + "px"
     }
     core.dom.hard.style.lineHeight = toolsHeight + "px";
     core.dom.hard.style.color = obj.globalAttribute.hardLabelColor;
-    if (core.domStyle.isVertical)
-        core.dom.hard.style.maxWidth = obj.BAR_WIDTH * core.domStyle.scale * 0.4 + "px";
-    else
+    if (core.domStyle.isVertical) {
+        core.dom.hard.style.width = obj.outerSize - (obj.toolbarHeightInVertical - 7 * core.domStyle.scale) * 8 - 3 + "px";
+    }
+    else {
+        core.dom.hard.style.width = obj.BAR_WIDTH * core.domStyle.scale - 9 - 2 * toolsMarginLeft + "px";
         core.dom.hard.style.marginTop = 0;
+    }
 }

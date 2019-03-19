@@ -309,11 +309,3 @@ p#name {
 #data {
     z-index: 170;
 }
-
-.clearfix:before,
-.clearfix:after {
-   content: ".";
-   display: block;
-   height: 0;
-   visibility: hidden;
-}

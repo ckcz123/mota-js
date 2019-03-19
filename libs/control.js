@@ -2130,7 +2130,8 @@ control.prototype.checkBgm = function() {
 ////// 清空状态栏 //////
 control.prototype.clearStatusBar = function() {
     Object.keys(core.statusBar).forEach(function (e) {
-        core.statusBar[e].innerHTML = "";
+        if (core.statusBar[e].innerHTML != null)
+            core.statusBar[e].innerHTML = "&nbsp;";
     })
     core.statusBar.image.book.style.opacity = 0.3;
     if (!core.flags.equipboxButton)
@@ -2464,7 +2465,7 @@ control.prototype._resize_canvas = function (obj) {
     core.dom.gif.style.width = core.dom.gif.style.height = innerSize;
     core.dom.gif2.style.width = core.dom.gif2.style.height = innerSize;
     core.dom.gameDraw.style.width = core.dom.gameDraw.style.height = innerSize;
-    core.dom.gameDraw.style.top = obj.statusBarHeightInVertical;
+    core.dom.gameDraw.style.top = obj.statusBarHeightInVertical + "px";
     core.dom.gameDraw.style.right = 0;
     core.dom.gameDraw.style.border = obj.border;
     // resize bigmap
@@ -2498,6 +2499,7 @@ control.prototype._resize_statusBar = function (obj) {
         // --- 计算文字大小
         statusBar.style.fontSize = 16 * Math.min(1, (core.__HALF_SIZE__ + 3) / obj.count) * core.domStyle.scale + "px";
     }
+    statusBar.style.display = 'block';
     statusBar.style.borderTop = statusBar.style.borderLeft = obj.border;
     statusBar.style.borderRight = core.domStyle.isVertical ? obj.border : '';
     // 自绘状态栏
@@ -2517,7 +2519,7 @@ control.prototype._resize_statusBar = function (obj) {
 }
 
 control.prototype._resize_status = function (obj) {
-    var statusHeight = (core.domStyle.isVertical ? 1 : obj.count / (core.__HALF_SIZE__ + 3)) *  32 * core.domStyle.scale * 0.8;
+    var statusHeight = (core.domStyle.isVertical ? 1 : (core.__HALF_SIZE__ + 3) / obj.count) *  32 * core.domStyle.scale * 0.8;
     // status
     for (var i = 0; i < core.dom.status.length; ++i) {
         var id = core.dom.status[i].id, style = core.dom.status[i].style;
@@ -2532,8 +2534,9 @@ control.prototype._resize_status = function (obj) {
         core.dom.statusLabels[i].style.lineHeight = statusHeight + "px";
         core.dom.statusLabels[i].style.marginLeft = 6 * core.domStyle.scale + "px";
     }
-    for (var i = 0; i < core.dom.statusTexts.length; ++i)
+    for (var i = 0; i < core.dom.statusTexts.length; ++i) {
         core.dom.statusTexts[i].style.color = obj.globalAttribute.statusBarColor;
+    }
 }
 
 control.prototype._resize_tools = function (obj) {
@@ -2541,6 +2544,7 @@ control.prototype._resize_tools = function (obj) {
     var toolBar = core.dom.toolBar;
     if (core.domStyle.isVertical) {
         toolBar.style.width = obj.outerSize + "px";
+        toolBar.style.top = obj.statusBarHeightInVertical + obj.outerSize + "px";
         toolBar.style.height = obj.toolbarHeightInVertical + "px";
         toolBar.style.background = obj.globalAttribute.toolsBackground;
     }
@@ -2550,19 +2554,23 @@ control.prototype._resize_tools = function (obj) {
         toolBar.style.height = 0.281 * obj.outerSize + "px";
         toolBar.style.background = 'transparent';
     }
+    toolBar.style.display = 'block';
     toolBar.style.borderLeft = toolBar.style.borderBottom = obj.border;
     toolBar.style.borderRight = core.domStyle.isVertical ? obj.border : '';
     toolBar.style.fontSize = 16 * core.domStyle.scale + "px";
     // tools
-    var tools = core.dom.tools;
-    var toolsHeight = 16 * core.domStyle.scale * (core.domStyle.isVertical ? 0.95 : 1);
-    for (var i = 0; i < tools; ++i) {
+    var toolsHeight = 32 * core.domStyle.scale * (core.domStyle.isVertical ? 0.95 : 1);
+    for (var i = 0; i < core.dom.tools.length; ++i) {
         var style = core.dom.tools[i].style;
         style.height = toolsHeight + "px";
         style.maxWidth = obj.BAR_WIDTH * core.domStyle.scale * 0.95 + "px"
         style.marginLeft = (core.domStyle.isVertical ? 3 : 2) * 3 * core.domStyle.scale + "px";
-        style.marginTop = 3 * core.domStyle.scale + "px"
+        style.marginTop = 6 * core.domStyle.scale + "px"
     }
     core.dom.hard.style.lineHeight = toolsHeight + "px";
     core.dom.hard.style.color = obj.globalAttribute.hardLabelColor;
+    if (core.domStyle.isVertical)
+        core.dom.hard.style.maxWidth = obj.BAR_WIDTH * core.domStyle.scale * 0.4 + "px";
+    else
+        core.dom.hard.style.marginTop = 0;
 }

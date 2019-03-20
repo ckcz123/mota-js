@@ -173,6 +173,32 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		}
 	}
 },
+        "flyTo": function (toId, callback) {
+	// 楼层传送器的使用，从当前楼层飞往toId
+	// 如果不能飞行请返回false
+
+	var fromId = core.status.floorId;
+
+	// 检查能否飞行
+	if (!core.status.maps[fromId].canFlyTo || !core.status.maps[toId].canFlyTo) {
+		core.drawTip("无法飞往" + core.status.maps[toId].title + "！");
+		return false;
+	}
+
+	// 获得两个楼层的索引，以决定是上楼梯还是下楼梯
+	var fromIndex = core.floorIds.indexOf(fromId),
+		toIndex = core.floorIds.indexOf(toId);
+	var stair = fromIndex <= toIndex ? "downFloor" : "upFloor";
+	// 地下层：同层传送至上楼梯
+	if (fromIndex == toIndex && core.status.maps[fromId].underGround) stair = "upFloor";
+	// 记录录像
+	core.status.route.push("fly:" + toId);
+	// 传送
+	core.ui.closePanel();
+	core.changeFloor(toId, stair, null, null, callback);
+
+	return true;
+},
         "beforeBattle": function (enemyId, x, y) {
 	// 战斗前触发的事件，可以加上一些战前特效（详见下面支援的例子）
 	// 此函数在“检测能否战斗和自动存档”【之后】执行。如果需要更早的战前事件，请在插件中覆重写 core.events.doSystemEvent 函数。
@@ -946,31 +972,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 切换到对应的楼层
 	core.changeFloor(data.floorId, null, data.hero.loc, 0, callback, true);
-},
-        "flyTo": function (toId, callback) {
-	// 楼层传送器的使用，从当前楼层飞往toId
-	// 如果不能飞行请返回false
-
-	var fromId = core.status.floorId;
-	
-	// 检查能否飞行
-	if (!core.status.maps[fromId].canFlyTo || !core.status.maps[toId].canFlyTo) {
-		core.drawTip("无法飞往" + core.status.maps[toId].title +"！");
-		return false;
-	}
-	
-	// 获得两个楼层的索引，以决定是上楼梯还是下楼梯
-	var fromIndex = core.floorIds.indexOf(fromId), toIndex = core.floorIds.indexOf(toId);
-	var stair = fromIndex<=toIndex?"downFloor":"upFloor";
-	// 地下层：同层传送至上楼梯
-	if (fromIndex == toIndex && core.status.maps[fromId].underGround) stair = "upFloor";
-	// 记录录像
-	core.status.route.push("fly:"+toId);
-	// 传送
-	core.ui.closePanel();
-	core.changeFloor(toId, stair, null, null, callback);
-	
-	return true;
 },
         "updateStatusBar": function () {
 	// 更新状态栏

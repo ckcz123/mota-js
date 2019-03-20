@@ -1593,7 +1593,7 @@ events.prototype.useFly = function (fromUserAction) {
 }
 
 events.prototype.flyTo = function (toId, callback) {
-    return this.controldata.flyTo(toId, callback);
+    return this.eventdata.flyTo(toId, callback);
 }
 
 ////// 点击装备栏时的打开操作 //////

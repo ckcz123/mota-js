@@ -776,12 +776,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			core.getNextItem();
 			break;
 		case 82: // R：回放录像
-			if (core.hasFlag('debug')) {
-				core.drawText("\t[系统提示]调试模式下无法回放录像");
-			}
-			else {
-				core.ui.drawReplay();
-			}
+			core.actions._clickSyncSave_replay();
 			break;
 		case 33: case 34: // PgUp/PgDn：浏览地图
 			core.ui.drawMaps();
@@ -796,19 +791,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			core.ui.drawHelp();
 			break;
 		case 78: // N：重新开始
-			core.status.event.selection=1;
-			core.ui.drawConfirmBox("你确定要返回标题页面吗？", function () {
-				core.ui.closePanel();
-				core.restart();
-			}, function () {
-				core.ui.closePanel();
-			});
+			core.confirmRestart();
 			break;
 		case 79: // O：查看工程
-			window.open(core.platform.isPC?"editor.html":"editor-mobile.html", "_blank");
+			core.actions._clickGameInfo_openProject();
 			break;
 		case 80: // P：游戏主页
-			window.open("/score.php?name="+core.firstData.name+"&num=10", "_blank");
+            core.actions._clickGameInfo_openComments();
 			break;
 		case 49: // 快捷键1: 破
 			if (core.hasItem('pickaxe')) {

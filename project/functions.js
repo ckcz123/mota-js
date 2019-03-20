@@ -797,7 +797,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			core.actions._clickGameInfo_openProject();
 			break;
 		case 80: // P：游戏主页
-            core.actions._clickGameInfo_openComments();
+			core.actions._clickGameInfo_openComments();
 			break;
 		case 49: // 快捷键1: 破
 			if (core.hasItem('pickaxe')) {
@@ -1265,6 +1265,37 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		return true;
 	}
 	return false;
+},
+        "parallelDo": function (timestamp) {
+	// 并行事件处理，可以在这里写任何需要并行处理的脚本或事件
+	// 该函数将被系统反复执行，每次执行间隔视浏览器或设备性能而定，一般约为16.6ms一次
+	// 参数timestamp为“从游戏资源加载完毕到当前函数执行时”的时间差，以毫秒为单位
+
+	// 检查当前是否处于游戏开始状态
+	if (!core.isPlaying()) return;
+
+	// 执行当前楼层的并行事件处理
+	if (core.status.floorId) {
+		try {
+			eval(core.floors[core.status.floorId].parallelDo);
+		} catch (e) {
+			main.log(e);
+		}
+	}
+
+	// 下面是一个并行事件开门的样例
+	/*
+	// 如果某个flag为真
+	if (core.hasFlag("xxx")) {
+	    // 千万别忘了将该flag清空！否则下次仍然会执行这段代码。
+	    core.removeFlag("xxx");
+	    // 使用insertAction来插入若干自定义事件执行
+	    core.insertAction([
+	        {"type":"openDoor", "loc":[0,0], "floorId": "MT0"}
+	    ])
+	    // 也可以写任意其他的脚本代码
+	}
+	*/
 }
     },
     "ui": {
@@ -1374,59 +1405,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.fillText('ui', "作者： 艾之葵", text_start, top + 112);
 	core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112+32);
 	// TODO: 写自己的“关于”页面，每次增加32像素即可
-}
-    },
-    "plugins": {
-        "parallelDo": function (timestamp) {
-	// 并行事件处理，可以在这里写任何需要并行处理的脚本或事件
-	// 该函数将被系统反复执行，每次执行间隔视浏览器或设备性能而定，一般约为16.6ms一次
-	// 参数timestamp为“从游戏资源加载完毕到当前函数执行时”的时间差，以毫秒为单位
-
-	// 检查当前是否处于游戏开始状态
-	if (!core.isPlaying()) return;
-
-	// 执行当前楼层的并行事件处理
-	if (core.status.floorId) {
-		try {
-			eval(core.floors[core.status.floorId].parallelDo);
-		} catch (e) {
-			main.log(e);
-		}
-	}
-
-	// 下面是一个并行事件开门的样例
-	/*
-	// 如果某个flag为真
-	if (core.hasFlag("xxx")) {
-		// 千万别忘了将该flag清空！否则下次仍然会执行这段代码。
-		core.removeFlag("xxx");
-		// 使用insertAction来插入若干自定义事件执行
-		core.insertAction([
-			{"type":"openDoor", "loc":[0,0], "floorId": "MT0"}
-		])
-		// 也可以写任意其他的脚本代码
-	}
-	 */
-
-
-},
-        "plugin": function () {
-	////// 插件编写，此处会导入插件编写中的所有函数 //////
-
-	// 在这里写的代码，在所有模块加载完毕后，游戏开始前会被执行
-	console.log("插件编写测试");
-	// 可以写一些其他的被直接执行的代码
-
-	var pluginsData=plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1
-	for(var functionName in pluginsData){
-		this[functionName]=pluginsData[functionName]
-	}
-
-	// 可以在任何地方（如afterXXX或自定义脚本事件）调用函数，方法为  core.plugin.xxx();
-
-	// 可以在此处直接执行插件编写中的函数
-	core.plugin.test();
-
 }
     }
 }

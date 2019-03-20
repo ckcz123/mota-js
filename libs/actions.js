@@ -2075,6 +2075,8 @@ actions.prototype._clickStorageRemove = function (x, y) {
 actions.prototype._clickStorageRemove_all = function () {
     core.myconfirm("你确定要清除【全部塔】的所有本地存档？\n此行为不可逆！！！", function () {
         var done = function () {
+            core.saves.autosave.data = null;
+            core.saves.autosave.updated = false;
             core.ui.closePanel();
             core.drawText("\t[操作成功]你的所有存档已被清空。");
             core.saves.saveIndex = 1;

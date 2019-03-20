@@ -142,7 +142,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		color = core.status.maps[floorId].color;
 	core.clearMap('curtain');
 	core.status.curtainColor = color;
-	if (color) core.fillRect('curtain', 0, 0, core.__SIZE__, core.__SIZE__, core.arrayToRGBA(color));
+	if (color) core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(color));
 	// 更改天气
 	var weather = core.getFlag('__weather__', null);
 	if (!weather && core.status.maps[floorId].weather)

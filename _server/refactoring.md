@@ -12,8 +12,10 @@
 + [ ] editor_table 处理表格的生成, 及其响应的事件, 从原editor\_mode中分离
 + [ ] editor_file 调用fs.js编辑文件, 把原editor\_file模块化
 + [ ] editor_game 处理来自core的数据, 导入为editor的数据, 从原editor中分离
++ [ ] editor 执行初始化流程加组合各组件
 
 + [ ] 原editor_mode 移除
++ [ ] 原vm 移除
 
 ---
 
@@ -31,6 +33,9 @@
 + [ ] 大地图  
   在切换时, 每次都回到最左上->每个楼层记录一个位置  
   四个箭头不能长按
+
++ [ ] ? 表格折叠  
+  变为四栏, 可以折叠展开
 
 ## 左侧页面模式
 

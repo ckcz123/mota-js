@@ -348,7 +348,13 @@ core.prototype._initPlugins = function () {
 
     for (var name in plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1) {
         if (plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1[name] instanceof Function) {
-            plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1[name].apply(core.plugin);
+            try {
+                plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1[name].apply(core.plugin);
+            }
+            catch (e) {
+                main.log(e);
+                main.log("无法初始化插件"+name);
+            }
         }
     }
 

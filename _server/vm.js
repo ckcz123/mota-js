@@ -29,106 +29,112 @@ exportMap.onclick=function(){
         filestr += ']' + (yy == sy ? '' : ',\n');
     }
     pout.value = filestr;
-    mapEditArea.mapArr = filestr;
+    mapEditArea.mapArr(filestr);
     exportMap.isExport = true;
-    mapEditArea.error = 0;
+    mapEditArea.error(0);
     tip.whichShow = 2;
 }
-var mapEditArea = new Vue({
-    el: '#mapEditArea',
-    data: {
-        mapArr: '',
-        errors: [ // 编号1,2,3,4
-            "格式错误！请使用正确格式(请使用地图生成器进行生成，且需要和本地图宽高完全一致)",
-            "当前有未定义ID（在地图区域显示红块），请修改ID或者到icons.js和maps.js中进行定义！",
-            "ID越界（在地图区域显示红块），当前编辑器暂时支持编号小于400，请修改编号！",
-            // "发生错误！",
-        ],
-        error: 0,
-        formatTimer: null,
-    },
-    watch: {
-        mapArr: function (val, oldval) {
-            if (val == '') return;
-            if (exportMap.isExport) {
-                exportMap.isExport = false;
-                return;
-            }
-            if (mapEditArea.formatArr()) {
-                mapEditArea.error = 0;
+var mapEditArea = document.getElementById('mapEditArea')
+mapEditArea.errors=[ // 编号1,2
+    "格式错误！请使用正确格式(请使用地图生成器进行生成，且需要和本地图宽高完全一致)",
+    "当前有未定义ID（在地图区域显示红块），请修改ID或者到icons.js和maps.js中进行定义！"
+]
+mapEditArea.formatTimer=null
+mapEditArea._mapArr=''
+mapEditArea.mapArr=function(value){
+    if(value!=null){
+        var val=value
+        var oldval=mapEditArea._mapArr
+        if (val==oldval) return;
 
-                setTimeout(function () {
-                    mapEditArea.mapArr = mapEditArea.formatArr();
-                    mapEditArea.drawMap();
-                    tip.whichShow = 8
-                }, 1000);
-                mapEditArea.formatTimer = setTimeout(function () {
-                    pout.value = mapEditArea.formatArr();
-                }, 5000); //5s后再格式化，不然光标跳到最后很烦
-            } else {
-                mapEditArea.error = 1;
-            }
-        },
-        error: function () {
-            // console.log(mapEditArea.mapArr);
-            if (mapEditArea.error>0)
-                printe(mapEditArea.errors[mapEditArea.error-1])
+        if (exportMap.isExport) {
+            exportMap.isExport = false;
+            return;
         }
-    },
-    methods: {
-        drawMap: function () {
-            // var mapArray = mapEditArea.mapArr.split(/\D+/).join(' ').trim().split(' ');
-            var mapArray = JSON.parse('[' + mapEditArea.mapArr + ']');
-            var sy=editor.map.length,sx=editor.map[0].length;
-            for (var y = 0; y < sy; y++)
-                for (var x = 0; x < sx; x++) {
-                    var num = mapArray[y][x];
-                    if (num == 0)
-                        editor.map[y][x] = 0;
-                    else if (typeof(editor.indexs[num][0]) == 'undefined') {
-                        mapEditArea.error = 2;
-                        editor.map[y][x] = undefined;
-                    } else editor.map[y][x] = editor.ids[[editor.indexs[num][0]]];
-                }
+        if (mapEditArea.formatArr()) {
+            mapEditArea.error(0);
 
-            editor.updateMap();
-
-        },
-        formatArr: function () {
-            var formatArrStr = '';
+            setTimeout(function () {
+                if (mapEditArea.formatArr())mapEditArea.mapArr(mapEditArea.formatArr());
+                mapEditArea.drawMap();
+                tip.whichShow = 8
+            }, 1000);
             clearTimeout(mapEditArea.formatTimer);
-            var si=editor.map.length,sk=editor.map[0].length;
-            if (mapEditArea.mapArr.split(/\D+/).join(' ').trim().split(' ').length != si*sk) return false;
-            var arr = mapEditArea.mapArr.replace(/\s+/g, '').split('],[');
-
-            if (arr.length != si) return;
-            for (var i = 0; i < si; i++) {
-                var a = [];
-                formatArrStr += '[';
-                if (i == 0 || i == si-1) a = arr[i].split(/\D+/).join(' ').trim().split(' ');
-                else a = arr[i].split(/\D+/);
-                if (a.length != sk) {
-                    formatArrStr = '';
-                    return;
-                }
-
-                for (var k = 0; k < sk; k++) {
-                    var num = parseInt(a[k]);
-                    formatArrStr += Array(Math.max(4 - String(num).length, 0)).join(' ') + num + (k == sk-1 ? '' : ',');
-                }
-                formatArrStr += ']' + (i == si-1 ? '' : ',\n');
-            }
-            return formatArrStr;
+            mapEditArea.formatTimer = setTimeout(function () {
+                pout.value = mapEditArea.formatArr();
+            }, 5000); //5s后再格式化，不然光标跳到最后很烦
+        } else {
+            mapEditArea.error(1);
         }
+
+        mapEditArea._mapArr=value
     }
-});
+    return mapEditArea._mapArr
+}
+pout.oninput=function(){
+    mapEditArea.mapArr(pout.value)
+}
+mapEditArea._error=0
+mapEditArea.error=function(value){
+    if(value!=null){
+        mapEditArea._error=value
+        if (value>0)
+        printe(mapEditArea.errors[value-1])
+    }
+    return mapEditArea._error
+}
+mapEditArea.drawMap= function () {
+    // var mapArray = mapEditArea.mapArr().split(/\D+/).join(' ').trim().split(' ');
+    var mapArray = JSON.parse('[' + mapEditArea.mapArr() + ']');
+    var sy=editor.map.length,sx=editor.map[0].length;
+    for (var y = 0; y < sy; y++)
+        for (var x = 0; x < sx; x++) {
+            var num = mapArray[y][x];
+            if (num == 0)
+                editor.map[y][x] = 0;
+            else if (typeof(editor.indexs[num][0]) == 'undefined') {
+                mapEditArea.error(2);
+                editor.map[y][x] = undefined;
+            } else editor.map[y][x] = editor.ids[[editor.indexs[num][0]]];
+        }
+
+    editor.updateMap();
+
+}
+mapEditArea.formatArr= function () {
+    var formatArrStr = '';
+    console.log(1)
+    
+    var si=editor.map.length,sk=editor.map[0].length;
+    if (mapEditArea.mapArr().split(/\D+/).join(' ').trim().split(' ').length != si*sk) return false;
+    var arr = mapEditArea.mapArr().replace(/\s+/g, '').split('],[');
+
+    if (arr.length != si) return;
+    for (var i = 0; i < si; i++) {
+        var a = [];
+        formatArrStr += '[';
+        if (i == 0 || i == si-1) a = arr[i].split(/\D+/).join(' ').trim().split(' ');
+        else a = arr[i].split(/\D+/);
+        if (a.length != sk) {
+            formatArrStr = '';
+            return;
+        }
+
+        for (var k = 0; k < sk; k++) {
+            var num = parseInt(a[k]);
+            formatArrStr += Array(Math.max(4 - String(num).length, 0)).join(' ') + num + (k == sk-1 ? '' : ',');
+        }
+        formatArrStr += ']' + (i == si-1 ? '' : ',\n');
+    }
+    return formatArrStr;
+}
 var copyMap=document.getElementById('copyMap')
 copyMap.err=''
 copyMap.onclick=function(){
     tip.whichShow = 0;
     if (pout.value.trim() != '') {
-        if (mapEditArea.error) {
-            copyMap.err = mapEditArea.errors[mapEditArea.error - 1];
+        if (mapEditArea.error()) {
+            copyMap.err = mapEditArea.errors[mapEditArea.error() - 1];
             tip.whichShow = 5
             return;
         }
@@ -160,9 +166,9 @@ clearMapButton.onclick=function () {
     clearTimeout(mapEditArea.formatTimer);
     clearTimeout(tip.timer);
     pout.value = '';
-    mapEditArea.mapArr = '';
+    mapEditArea.mapArr('');
     tip.whichShow = 4;
-    mapEditArea.error = 0;
+    mapEditArea.error(0);
 }
 var deleteMap=document.getElementById('deleteMap')
 deleteMap.onclick=function () {

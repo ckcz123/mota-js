@@ -223,7 +223,7 @@ main.prototype.init = function (mode, callback) {
             for (i = 0; i < main.loadList.length; i++) {
                 var name = main.loadList[i];
                 if (name === 'core') continue;
-                main.core[name] = new (eval(name))();
+                main.core[name] = new window[name]();
             }
 
             main.loadFloors(function() {

@@ -1429,7 +1429,7 @@ control.prototype._replayAction_shop = function (action) {
 }
 
 control.prototype._replayAction_turn = function (action) {
-    if (action != 'turn' || action.indexOf('turn:') != 0) return false;
+    if (action != 'turn' && action.indexOf('turn:') != 0) return false;
     if (action == 'turn') core.turnHero();
     else core.turnHero(action.substring(5));
     setTimeout(core.replay);

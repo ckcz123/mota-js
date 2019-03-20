@@ -185,7 +185,7 @@ deleteMap.onclick=function () {
     else printe('删除成功,请F5刷新编辑器生效');
 }
 printf = function (str_, type) {
-    selectBox.isSelected = false;
+    selectBox.isSelected(false);
     if (!type) {
         tip.whichShow = 11;
     } else {
@@ -279,18 +279,17 @@ var tip = new Vue({
         }
     }
 })
-
-var selectBox = new Vue({
-    el: '#selectBox',
-    data: {
-        isSelected: false
-    },
-    watch: {
-        isSelected: function () {
-            tip.isSelectedBlock = this.isSelected;
-            tip.whichShow = 0;
-            clearTimeout(tip.timer);
-        }
+var selectBox=document.getElementById('selectBox')
+var dataSelection=document.getElementById('dataSelection')
+selectBox._isSelected=false
+selectBox.isSelected=function(value){
+    if(value!=null){
+        selectBox._isSelected=value;
+        tip.isSelectedBlock = value;
+        tip.whichShow = 0;
+        clearTimeout(tip.timer);
+        dataSelection.style.display=value?'':'none'
     }
-})
+    return selectBox._isSelected
+}
 

@@ -512,7 +512,7 @@ function omitedcheckUpdateFunction(event) {
 
     var blocklyWidgetDiv = document.getElementsByClassName('blocklyWidgetDiv');
     editor_blockly.show = function () {
-        if (typeof(selectBox) !== typeof(undefined)) selectBox.isSelected = false;
+        if (typeof(selectBox) !== typeof(undefined)) selectBox.isSelected(false);
         document.getElementById('left6').style = '';
         for (var ii = 0, node; node = blocklyWidgetDiv[ii]; ii++) {
             node.style.zIndex = 201;

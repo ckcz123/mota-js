@@ -573,7 +573,7 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent){
     dataSelection.style.left = pos.x * 32 + 'px';
     dataSelection.style.top = pos.y * ysize + 'px';
     dataSelection.style.height = ysize - 6 + 'px';
-    setTimeout(function(){selectBox.isSelected = true;});
+    setTimeout(function(){selectBox.isSelected(true);});
     editor.info = JSON.parse(JSON.stringify(thisevent));
     tip.infos = JSON.parse(JSON.stringify(thisevent));
     editor.pos=pos;
@@ -617,7 +617,7 @@ editor.prototype.listen = function () {
         }
         if (unselect) {
             if (clickpath.indexOf('eui') === -1) {
-                if (selectBox.isSelected) {
+                if (selectBox.isSelected()) {
                     editor_mode.onmode('');
                     editor.file.saveFloorFile(function (err) {
                         if (err) {
@@ -627,7 +627,7 @@ editor.prototype.listen = function () {
                         ;printf('地图保存成功');
                     });
                 }
-                selectBox.isSelected = false;
+                selectBox.isSelected(false);
                 editor.info = {};
             }
         }
@@ -705,7 +705,7 @@ editor.prototype.listen = function () {
             editor.showMidMenu(e.clientX,e.clientY);
             return;
         }
-        if (!selectBox.isSelected) {
+        if (!selectBox.isSelected()) {
             var loc = eToLoc(e);
             var pos = locToPos(loc,true);
             editor_mode.onmode('nextChange');
@@ -730,7 +730,7 @@ editor.prototype.listen = function () {
     }
 
     eui.onmousemove = function (e) {
-        if (!selectBox.isSelected) {
+        if (!selectBox.isSelected()) {
             //tip.whichShow = 1;
             return;
         }
@@ -761,7 +761,7 @@ editor.prototype.listen = function () {
     }
 
     eui.onmouseup = function (e) {
-        if (!selectBox.isSelected) {
+        if (!selectBox.isSelected()) {
             //tip.whichShow = 1;
             return;
         }
@@ -892,7 +892,7 @@ editor.prototype.listen = function () {
         if (e.altKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
             e.preventDefault();
         //Ctrl+z 撤销上一步undo
-        if (e.keyCode == 90 && e.ctrlKey && editor.preMapData && currDrawData.pos.length && selectBox.isSelected) {
+        if (e.keyCode == 90 && e.ctrlKey && editor.preMapData && currDrawData.pos.length && selectBox.isSelected()) {
             editor.map = JSON.parse(JSON.stringify(editor.preMapData.map));
             editor.fgmap = JSON.parse(JSON.stringify(editor.preMapData.fgmap));
             editor.bgmap = JSON.parse(JSON.stringify(editor.preMapData.bgmap));
@@ -902,7 +902,7 @@ editor.prototype.listen = function () {
             editor.preMapData = null;
         }
         //Ctrl+y 重做一步redo
-        if (e.keyCode == 89 && e.ctrlKey && reDo && reDo.pos.length && selectBox.isSelected) {
+        if (e.keyCode == 89 && e.ctrlKey && reDo && reDo.pos.length && selectBox.isSelected()) {
             editor.preMapData = JSON.parse(JSON.stringify({map:editor.map,fgmap:editor.fgmap,bgmap:editor.bgmap}));
             for (var j = 0; j < reDo.pos.length; j++)
                 editor.map[reDo.pos[j].y][reDo.pos[j].x] = JSON.parse(JSON.stringify(reDo.info));
@@ -1024,7 +1024,7 @@ editor.prototype.listen = function () {
                 } else if ((pos.y + 1) * ysize > editor.widthsX[spriter][3])
                     pos.y = ~~(editor.widthsX[spriter][3] / ysize) - 1;
 
-                selectBox.isSelected = true;
+                selectBox.isSelected(true);
                 // console.log(pos,core.material.images[pos.images].height)
                 dataSelection.style.left = pos.x * 32 + 'px';
                 dataSelection.style.top = pos.y * ysize + 'px';
@@ -1127,7 +1127,7 @@ editor.prototype.listen = function () {
     chooseThis.onmousedown = function(e){
         editor.hideMidMenu();
         e.stopPropagation();
-        selectBox.isSelected = false;
+        selectBox.isSelected(false);
 
         editor_mode.onmode('nextChange');
         editor_mode.onmode('loc');

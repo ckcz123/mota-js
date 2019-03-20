@@ -755,7 +755,8 @@ events.prototype.setEvents = function (list, x, y, callback) {
     if (x != null) data.x = x;
     if (y != null) data.y = y;
     if (callback) data.callback = callback;
-    core.status.event = {id: 'action', data: data};
+    core.status.event.id = 'action';
+    core.status.event.data = data;
 }
 
 ////// 执行当前自定义事件列表中的下一个事件 //////

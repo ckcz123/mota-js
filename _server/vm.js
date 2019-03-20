@@ -1,46 +1,39 @@
-// vue 相关处理
 
-var exportMap = new Vue({
-    el: '#exportMap',
-    data: {
-        isExport: false,
-    },
-    methods: {
-        exportMap: function () {
-            editor.updateMap();
-            var sx=editor.map.length-1,sy=editor.map[0].length-1;
+var exportMap = document.getElementById('exportMap')
+exportMap.isExport=false
+exportMap.onclick=function(){
+    editor.updateMap();
+    var sx=editor.map.length-1,sy=editor.map[0].length-1;
 
-            var filestr = '';
-            for (var yy = 0; yy <= sy; yy++) {
-                filestr += '['
-                for (var xx = 0; xx <= sx; xx++) {
-                    var mapxy = editor.map[yy][xx];
-                    if (typeof(mapxy) == typeof({})) {
-                        if ('idnum' in mapxy) mapxy = mapxy.idnum;
-                        else {
-                            // mapxy='!!?';
-                            tip.whichShow = 3;
-                            return;
-                        }
-                    } else if (typeof(mapxy) == 'undefined') {
-                        tip.whichShow = 3;
-                        return;
-                    }
-                    mapxy = String(mapxy);
-                    mapxy = Array(Math.max(4 - mapxy.length, 0)).join(' ') + mapxy;
-                    filestr += mapxy + (xx == sx ? '' : ',')
+    var filestr = '';
+    for (var yy = 0; yy <= sy; yy++) {
+        filestr += '['
+        for (var xx = 0; xx <= sx; xx++) {
+            var mapxy = editor.map[yy][xx];
+            if (typeof(mapxy) == typeof({})) {
+                if ('idnum' in mapxy) mapxy = mapxy.idnum;
+                else {
+                    // mapxy='!!?';
+                    tip.whichShow = 3;
+                    return;
                 }
-
-                filestr += ']' + (yy == sy ? '' : ',\n');
+            } else if (typeof(mapxy) == 'undefined') {
+                tip.whichShow = 3;
+                return;
             }
-            pout.value = filestr;
-            editArea.mapArr = filestr;
-            this.isExport = true;
-            editArea.error = 0;
-            tip.whichShow = 2;
+            mapxy = String(mapxy);
+            mapxy = Array(Math.max(4 - mapxy.length, 0)).join(' ') + mapxy;
+            filestr += mapxy + (xx == sx ? '' : ',')
         }
+
+        filestr += ']' + (yy == sy ? '' : ',\n');
     }
-})
+    pout.value = filestr;
+    editArea.mapArr = filestr;
+    exportMap.isExport = true;
+    editArea.error = 0;
+    tip.whichShow = 2;
+}
 var editArea = new Vue({
     el: '#editArea',
     data: {
@@ -133,80 +126,64 @@ var editArea = new Vue({
         }
     }
 });
-var copyMap = new Vue({
-    el: '#copyMap',
-    data: {
-        err: ''
-    },
-    methods: {
-        copyMap: function () {
-
-            tip.whichShow = 0;
-            if (pout.value.trim() != '') {
-                if (editArea.error) {
-                    this.err = editArea.errors[editArea.error - 1];
-                    tip.whichShow = 5
-                    return;
-                }
-                try {
-                    pout.focus();
-                    pout.setSelectionRange(0, pout.value.length);
-                    document.execCommand("Copy");
-                    tip.whichShow = 6;
-                } catch (e) {
-                    this.err = e;
-                    tip.whichShow = 5;
-                }
-            } else {
-                tip.whichShow = 7;
-            }
+var copyMap=document.getElementById('copyMap')
+copyMap.err=''
+copyMap.onclick=function(){
+    tip.whichShow = 0;
+    if (pout.value.trim() != '') {
+        if (editArea.error) {
+            copyMap.err = editArea.errors[editArea.error - 1];
+            tip.whichShow = 5
+            return;
         }
-    },
-})
-var clearMap = new Vue({
-    el: '#clearMap',
-
-    methods: {
-        clearMap: function () {
-            editor.mapInit();
-            editor_mode.onmode('');
-            editor.file.saveFloorFile(function (err) {
-                if (err) {
-                    printe(err);
-                    throw(err)
-                }
-                ;printf('地图清除成功');
-            });
-            editor.updateMap();
-            clearTimeout(editArea.formatTimer);
-            clearTimeout(tip.timer);
-            pout.value = '';
-            editArea.mapArr = '';
-            tip.whichShow = 4;
-            editArea.error = 0;
+        try {
+            pout.focus();
+            pout.setSelectionRange(0, pout.value.length);
+            document.execCommand("Copy");
+            tip.whichShow = 6;
+        } catch (e) {
+            copyMap.err = e;
+            tip.whichShow = 5;
         }
+    } else {
+        tip.whichShow = 7;
     }
-})
-var deleteMap = new Vue({
-    el: '#deleteMap',
-    methods: {
-        deleteMap: function () {
-            editor_mode.onmode('');
-            var index = core.floorIds.indexOf(editor.currentFloorId);
-            if (index>=0) {
-                core.floorIds.splice(index,1);
-                editor.file.editTower([['change', "['main']['floorIds']", core.floorIds]], function (objs_) {//console.log(objs_);
-                    if (objs_.slice(-1)[0] != null) {
-                        printe(objs_.slice(-1)[0]);
-                        throw(objs_.slice(-1)[0])
-                    }
-                    ;printe('删除成功,请F5刷新编辑器生效');
-                });
-            }
-            else printe('删除成功,请F5刷新编辑器生效');
+}
+var clearMapButton=document.getElementById('clearMapButton')
+clearMapButton.onclick=function () {
+    editor.mapInit();
+    editor_mode.onmode('');
+    editor.file.saveFloorFile(function (err) {
+        if (err) {
+            printe(err);
+            throw(err)
         }
+        ;printf('地图清除成功');
+    });
+    editor.updateMap();
+    clearTimeout(editArea.formatTimer);
+    clearTimeout(tip.timer);
+    pout.value = '';
+    editArea.mapArr = '';
+    tip.whichShow = 4;
+    editArea.error = 0;
+}
+var deleteMap=document.getElementById('deleteMap')
+deleteMap.onclick=function () {
+    editor_mode.onmode('');
+    var index = core.floorIds.indexOf(editor.currentFloorId);
+    if (index>=0) {
+        core.floorIds.splice(index,1);
+        editor.file.editTower([['change', "['main']['floorIds']", core.floorIds]], function (objs_) {//console.log(objs_);
+            if (objs_.slice(-1)[0] != null) {
+                printe(objs_.slice(-1)[0]);
+                throw(objs_.slice(-1)[0])
+            }
+            ;printe('删除成功,请F5刷新编辑器生效');
+        });
     }
-})
+    else printe('删除成功,请F5刷新编辑器生效');
+}
 printf = function (str_, type) {
     selectBox.isSelected = false;
     if (!type) {

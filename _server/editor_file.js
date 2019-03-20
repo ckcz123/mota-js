@@ -8,6 +8,7 @@ editor_file = function (editor, callback) {
         'data.comment': 'dataComment',
         'functions.comment': 'functionsComment',
         'events.comment': 'eventsComment',
+        'plugins.comment': 'pluginsComment',
     }
     for (var key in commentjs) {
         (function (key) {
@@ -849,6 +850,65 @@ editor_file = function (editor, callback) {
 
     ////////////////////////////////////////////////////////////////////
 
+    var plmap = {};
+    var pljson = JSON.stringify(plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1, function (k, v) {
+        if (v instanceof Function) {
+            var id_ = editor.guid();
+            plmap[id_] = v.toString();
+            return id_;
+        } else if(v===null){
+            var id_ = editor.guid();
+            plmap[id_] = 'null';
+            return id_;
+        } return v
+    }, 4);
+    var plobj = JSON.parse(pljson);
+    editor_file.pluginsMap = plmap;
+    editor_file.pluginsObj = plobj;
+    var buildpllocobj = function (locObj) {
+        for (var key in locObj) {
+            if (typeof(locObj[key]) !== typeof('')) buildpllocobj(locObj[key]);
+            else locObj[key] = plmap[locObj[key]];
+        }
+    };
+
+    editor_file.editPlugins = function (actionList, callback) {
+        /*actionList:[
+          ["change","['test']","function(x,y){console.log(x,y)}"],
+        ]
+        为[]时只查询不修改
+        */
+        if (!isset(callback)) {
+            printe('未设置callback');
+            throw('未设置callback')
+        }
+        ;
+        if (isset(actionList) && actionList.length > 0) {
+            saveSetting('plugins', actionList, function (err) {
+                callback([
+                    (function () {
+                        var locObj = JSON.parse(JSON.stringify(plobj));
+                        buildpllocobj(locObj);
+                        return locObj;
+                    })(),
+                    editor_file.pluginsComment,
+                    err]);
+            });
+        } else {
+            callback([
+                (function () {
+                    var locObj = JSON.parse(JSON.stringify(plobj));
+                    buildpllocobj(locObj);
+                    return locObj;
+                })(),
+                editor_file.pluginsComment,
+                null]);
+        }
+    }
+    //callback([obj,commentObj,err:String])
+
+    ////////////////////////////////////////////////////////////////////
+
     var isset = function (val) {
         if (val == undefined || val == null) {
             return false;
@@ -1021,6 +1081,25 @@ editor_file = function (editor, callback) {
             var datastr = 'var events_c12a15a8_c380_4b28_8144_256cba95f760 = \n';
             datastr += JSON.stringify(events_c12a15a8_c380_4b28_8144_256cba95f760, null, '\t');
             fs.writeFile('project/events.js', encode(datastr), 'base64', function (err, data) {
+                callback(err);
+            });
+            return;
+        }
+        if (file == 'plugins') {
+            actionList.forEach(function (value) {
+                if(value[0]==='add'){
+                    eval("plobj" + value[1] + '=' + JSON.stringify(value[2]));
+                } else {
+                    eval("plmap[plobj" + value[1] + ']=' + JSON.stringify(value[2]));
+                }
+            });
+            var plraw = JSON.stringify(plobj,null,4);
+            for (var id_ in plmap) {
+                plraw = plraw.replace('"' + id_ + '"', plmap[id_])
+            }
+            var datastr = 'var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = \n';
+            datastr += plraw;
+            fs.writeFile('project/plugins.js', encode(datastr), 'base64', function (err, data) {
                 callback(err);
             });
             return;

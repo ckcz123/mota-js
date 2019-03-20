@@ -824,9 +824,9 @@ actions.prototype._keyUpCenterFly = function (keycode) {
 
 ////// 点击确认框时 //////
 actions.prototype._clickConfirmBox = function (x, y) {
-    if ((x == 5 || x == 6) && y == 8 && core.status.event.data.yes);
+    if ((x == 5 || x == 6) && y == 8 && core.status.event.data.yes)
         core.status.event.data.yes();
-    if ((x == 8 || x == 9) && y == 8 && core.status.event.data.no);
+    if ((x == 8 || x == 9) && y == 8 && core.status.event.data.no)
         core.status.event.data.no();
 }
 

@@ -1636,8 +1636,6 @@ ui.prototype.drawFly = function(page) {
     }
     core.strokeRect('ui', 20, 100, 273+64, 273+64, '#FFFFFF', 2);
     core.drawThumbnail(floorId, null, null, {ctx: 'ui', x: 20, y: 100, size: 273+64});
-
-    this.drawThumbnail(floorId, 'ui', core.status.maps[floorId].blocks, 20, 100, 273+64);
 }
 
 ////// 绘制中心对称飞行器

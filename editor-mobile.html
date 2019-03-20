@@ -260,6 +260,23 @@
             </div>
         </div>
     </div>
+    <div id="left10" class='leftTab' style="z-index:-1;opacity: 0;"><!-- plugins -->
+        <h3 class="leftTabHeader">插件编写&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('add')">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>
+        </h3>
+        <div class="leftTabContent">
+            <div class='etable'>
+                <table>
+                    <tbody id='table_e2c034ec_47c6_48ae_8db8_4f8f32fea2d6'>
+                    <tr>
+                        <td>条目</td>
+                        <td>注释</td>
+                        <td>值</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     <div id="mid">
         <div class="col" id='mapColMark'></div>
         <div class="row" id='mapRowMark'></div>
@@ -329,6 +346,7 @@
                     <option value="functions">脚本编辑</option>
                     <option value="appendpic">追加素材</option>
                     <option value="commonevent">公共事件</option>
+                    <option value="plugins">插件编写</option>
                 </select>
                 <select id="brushMod" style="clear:right">
                     <option value="line">画线</option>

@@ -1,5 +1,7 @@
 # editor
 
+[重构](refactoring.md)
+
 >! 以下均是v2.0时的说明, 未及时改动
 
 本目录下所有文件,以及`../editor.html`和`../启动服务.exe`([源码](http://github.com/ckcz123/mota-js-server/))是地图编辑器的所有组件.

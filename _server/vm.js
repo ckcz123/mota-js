@@ -29,13 +29,13 @@ exportMap.onclick=function(){
         filestr += ']' + (yy == sy ? '' : ',\n');
     }
     pout.value = filestr;
-    editArea.mapArr = filestr;
+    mapEditArea.mapArr = filestr;
     exportMap.isExport = true;
-    editArea.error = 0;
+    mapEditArea.error = 0;
     tip.whichShow = 2;
 }
-var editArea = new Vue({
-    el: '#editArea',
+var mapEditArea = new Vue({
+    el: '#mapEditArea',
     data: {
         mapArr: '',
         errors: [ // 编号1,2,3,4
@@ -49,39 +49,36 @@ var editArea = new Vue({
     },
     watch: {
         mapArr: function (val, oldval) {
-            var that = this;
             if (val == '') return;
             if (exportMap.isExport) {
                 exportMap.isExport = false;
                 return;
             }
-            if (that.formatArr()) {
-                that.error = 0;
+            if (mapEditArea.formatArr()) {
+                mapEditArea.error = 0;
 
                 setTimeout(function () {
-                    that.mapArr = that.formatArr();
-                    that.drawMap();
+                    mapEditArea.mapArr = mapEditArea.formatArr();
+                    mapEditArea.drawMap();
                     tip.whichShow = 8
                 }, 1000);
-                that.formatTimer = setTimeout(function () {
-                    pout.value = that.formatArr();
+                mapEditArea.formatTimer = setTimeout(function () {
+                    pout.value = mapEditArea.formatArr();
                 }, 5000); //5s后再格式化，不然光标跳到最后很烦
             } else {
-                that.error = 1;
+                mapEditArea.error = 1;
             }
         },
         error: function () {
-            // console.log(editArea.mapArr);
-            if (this.error>0)
-                printe(this.errors[this.error-1])
+            // console.log(mapEditArea.mapArr);
+            if (mapEditArea.error>0)
+                printe(mapEditArea.errors[mapEditArea.error-1])
         }
     },
     methods: {
         drawMap: function () {
-            var that = this;
-
-            // var mapArray = that.mapArr.split(/\D+/).join(' ').trim().split(' ');
-            var mapArray = JSON.parse('[' + that.mapArr + ']');
+            // var mapArray = mapEditArea.mapArr.split(/\D+/).join(' ').trim().split(' ');
+            var mapArray = JSON.parse('[' + mapEditArea.mapArr + ']');
             var sy=editor.map.length,sx=editor.map[0].length;
             for (var y = 0; y < sy; y++)
                 for (var x = 0; x < sx; x++) {
@@ -89,7 +86,7 @@ var editArea = new Vue({
                     if (num == 0)
                         editor.map[y][x] = 0;
                     else if (typeof(editor.indexs[num][0]) == 'undefined') {
-                        that.error = 2;
+                        mapEditArea.error = 2;
                         editor.map[y][x] = undefined;
                     } else editor.map[y][x] = editor.ids[[editor.indexs[num][0]]];
                 }
@@ -99,11 +96,10 @@ var editArea = new Vue({
         },
         formatArr: function () {
             var formatArrStr = '';
-            var that = this;
-            clearTimeout(that.formatTimer);
+            clearTimeout(mapEditArea.formatTimer);
             var si=editor.map.length,sk=editor.map[0].length;
-            if (this.mapArr.split(/\D+/).join(' ').trim().split(' ').length != si*sk) return false;
-            var arr = this.mapArr.replace(/\s+/g, '').split('],[');
+            if (mapEditArea.mapArr.split(/\D+/).join(' ').trim().split(' ').length != si*sk) return false;
+            var arr = mapEditArea.mapArr.replace(/\s+/g, '').split('],[');
 
             if (arr.length != si) return;
             for (var i = 0; i < si; i++) {
@@ -131,8 +127,8 @@ copyMap.err=''
 copyMap.onclick=function(){
     tip.whichShow = 0;
     if (pout.value.trim() != '') {
-        if (editArea.error) {
-            copyMap.err = editArea.errors[editArea.error - 1];
+        if (mapEditArea.error) {
+            copyMap.err = mapEditArea.errors[mapEditArea.error - 1];
             tip.whichShow = 5
             return;
         }
@@ -161,12 +157,12 @@ clearMapButton.onclick=function () {
         ;printf('地图清除成功');
     });
     editor.updateMap();
-    clearTimeout(editArea.formatTimer);
+    clearTimeout(mapEditArea.formatTimer);
     clearTimeout(tip.timer);
     pout.value = '';
-    editArea.mapArr = '';
+    mapEditArea.mapArr = '';
     tip.whichShow = 4;
-    editArea.error = 0;
+    mapEditArea.error = 0;
 }
 var deleteMap=document.getElementById('deleteMap')
 deleteMap.onclick=function () {

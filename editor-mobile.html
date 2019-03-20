@@ -18,7 +18,7 @@
         <div id="arrEditor">
             <table class="col" id='arrColMark'></table>
             <table class="row" id='arrRowMark'></table>
-            <div id="editArea" v-cloak>
+            <div id="mapEditArea" v-cloak>
                 <textarea cols="10" rows="10" id="pout" v-model="mapArr"></textarea>
                 <!-- <p class="warnText" v-if="error">{{ errors[error-1] }}</p> -->
             </div>
@@ -522,8 +522,8 @@ if (location.protocol.indexOf("http")!=0) {
 <script>
     //所有全局量
     __all__ = ['Vue', 'fs', 'editor_file', 'editor_mode', 'main', 'core', 'hasOwnProp', 'printf', 'printe', 'editor', 'converter', 'ActionParser', 'MotaActionFunctions', 'MotaActionBlocks'];
-    __id__ = ['editArea', 'arrRowMark', 'mapRowMark', 'data', 'bg', 'dataSelection', 'blocklyDiv', 'codeAreaHL', 'entryType'];
-    __Vue__ = ['editArea', 'exportMap', 'copyMap', 'clearMap', 'deleteMap', 'tip', 'selectBox'];
+    __id__ = ['mapEditArea', 'arrRowMark', 'mapRowMark', 'data', 'bg', 'dataSelection', 'blocklyDiv', 'codeAreaHL', 'entryType'];
+    __Vue__ = ['mapEditArea', 'exportMap', 'copyMap', 'clearMap', 'deleteMap', 'tip', 'selectBox'];
     //var event = document.getElementById('event');
 
     var hasOwnProperty = Object.prototype.hasOwnProperty;

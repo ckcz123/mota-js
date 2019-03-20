@@ -338,14 +338,21 @@ core.prototype._init_others = function () {
 
 core.prototype._afterLoadResources = function (callback) {
     core.control._setRequestAnimationFrame();
-
-    core.plugin = new function () {};
-    core.plugin.__init__ = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.plugin;
-    core.plugin.__init__();
-    core._forwardFunc("plugin");
-
+    core._initPlugins();
     core.showStartAnimate();
     if (callback) callback();
+}
+
+core.prototype._initPlugins = function () {
+    core.plugin = new function () {};
+
+    for (var name in plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1) {
+        if (plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1[name] instanceof Function) {
+            plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1[name].apply(core.plugin);
+        }
+    }
+
+    core._forwardFunc("plugin");
 }
 
 core.prototype._forwardFuncs = function () {

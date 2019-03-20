@@ -176,6 +176,12 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "textarea",
                     "_lint": true,
                     "_data": "瞬间移动处理"
+                },
+                "parallelDo": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "并行事件处理"
                 }
             }
         },
@@ -199,23 +205,6 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_type": "textarea",
                     "_lint": true,
                     "_data": "绘制关于界面"
-                }
-            }
-        },
-        "plugins": {
-            "_type": "object",
-            "_data": {
-                "parallelDo": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_lint": true,
-                    "_data": "并行事件处理"
-                },
-                "plugin": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_lint": true,
-                    "_data": "自定义插件编写"
                 }
             }
         }

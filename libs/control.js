@@ -297,7 +297,7 @@ control.prototype._animationFrame_weather_fog = function () {
 }
 
 control.prototype._animationFrame_parallelDo = function (timestamp) {
-    functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.parallelDo(timestamp);
+    core.control.controldata.parallelDo(timestamp);
 }
 
 control.prototype._animationFrame_checkConsoleOpened = function (timestamp) {

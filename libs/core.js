@@ -242,8 +242,6 @@ core.prototype._init_flags = function () {
     document.getElementById("startLogo").innerHTML = core.firstData.title;
     (core.firstData.shops||[]).forEach(function (t) { core.initStatus.shops[t.id] = t; });
     core.maps._setFloorSize();
-    // 初始化地图
-    core.initStatus.maps = core.maps.initMaps(core.floorIds);
     // 初始化怪物、道具等
     core.material.enemys = core.enemys.getEnemys();
     core.material.items = core.items.getItems();
@@ -337,6 +335,8 @@ core.prototype._init_others = function () {
 }
 
 core.prototype._afterLoadResources = function (callback) {
+    // 初始化地图
+    core.initStatus.maps = core.maps.initMaps(core.floorIds);
     core.control._setRequestAnimationFrame();
     core._initPlugins();
     core.showStartAnimate();

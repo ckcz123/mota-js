@@ -383,9 +383,12 @@ core.prototype._forwardFunc = function (name, funcname) {
     eval("core." + funcname + " = function (" + parameters + ") {\n\treturn core." + name + "." + funcname + "(" + parameters + ");\n}");
 }
 
-core.prototype.doFunc = function (func) {
-    if (typeof func == 'string') func = core.plugin[func];
-    return func.apply(this, Array.prototype.slice.call(arguments, 1));
+core.prototype.doFunc = function (func, _this) {
+    if (typeof func == 'string') {
+        func = core.plugin[func];
+        _this = core.plugin;
+    }
+    return func.apply(_this, Array.prototype.slice.call(arguments, 2));
 }
 
 /**

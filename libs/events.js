@@ -247,7 +247,7 @@ events.prototype.unregisterSystemEvent = function (type) {
 events.prototype.doSystemEvent = function (type, data, callback) {
     if (this.systemEvents[type]) {
         try {
-            return core.doFunc(this.systemEvents[type], data, data, callback);
+            return core.doFunc(this.systemEvents[type], this, data, data, callback);
         }
         catch (e) {
             main.log(e);
@@ -722,7 +722,7 @@ events.prototype.doEvent = function (data, x, y, prefix) {
     var type = data.type;
     if (this.actions[type]) {
         try {
-            return core.doFunc(this.actions[type], data, x, y, prefix);
+            return core.doFunc(this.actions[type], this, data, x, y, prefix);
         }
         catch (e) {
             main.log(e);

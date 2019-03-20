@@ -109,7 +109,7 @@ actions.prototype.checkReplaying = function () {
 
 ////// 检查是否在录像播放中，如果是，则停止交互
 actions.prototype._sys_checkReplay = function () {
-    if (this.checkReplaying()) return true;
+    if (core.actions.checkReplaying()) return true;
 }
 
 ////// 按下某个键时 //////
@@ -127,10 +127,10 @@ actions.prototype._sys_onkeyDown = function (e) {
             }
         }
         core.status.holdingKeys.push(e.keyCode);
-        this.pressKey(e.keyCode);
+        core.actions.pressKey(e.keyCode);
     } else {
         if (e.keyCode == 17) core.status.ctrlDown = true;
-        this.keyDown(e.keyCode);
+        core.actions.keyDown(e.keyCode);
     }
 }
 
@@ -140,7 +140,7 @@ actions.prototype.onkeyUp = function (e) {
 }
 
 actions.prototype._sys_onkeyUp_replay = function (e) {
-    if (this.checkReplaying()) {
+    if (core.actions.checkReplaying()) {
         if (e.keyCode == 27) // ESCAPE
             core.stopReplay();
         else if (e.keyCode == 90) // Z
@@ -179,10 +179,10 @@ actions.prototype._sys_onkeyUp = function (e) {
                 break;
             }
         }
-        this.keyUp(e.keyCode, e.altKey);
+        core.actions.keyUp(e.keyCode, e.altKey);
     } else {
         if (e.keyCode == 17) core.status.ctrlDown = false;
-        this.keyUp(e.keyCode, e.altKey);
+        core.actions.keyUp(e.keyCode, e.altKey);
     }
 }
 
@@ -209,32 +209,32 @@ actions.prototype._sys_keyDown_lockControl = function (keyCode) {
     if (!core.status.lockControl) return false;
     // Ctrl跳过对话
     if (keyCode == 17) {
-        this.keyDownCtrl();
+        core.actions.keyDownCtrl();
         return true;
     }
     switch (core.status.event.id) {
         case 'action':
-            this._keyDownAction(keyCode);
+            core.actions._keyDownAction(keyCode);
             break;
         case 'book':
-            this._keyDownBook(keyCode);
+            core.actions._keyDownBook(keyCode);
             break;
         case 'fly':
-            this._keyDownFly(keyCode);
+            core.actions._keyDownFly(keyCode);
             break;
         case 'viewMaps':
-            this._keyDownViewMaps(keyCode);
+            core.actions._keyDownViewMaps(keyCode);
             break;
         case 'equipbox':
-            this._keyDownEquipbox(keyCode);
+            core.actions._keyDownEquipbox(keyCode);
             break;
         case 'toolbox':
-            this._keyDownToolbox(keyCode);
+            core.actions._keyDownToolbox(keyCode);
             break;
         case 'save':
         case 'load':
         case 'replayLoad':
-            this._keyDownSL(keyCode);
+            core.actions._keyDownSL(keyCode);
             break;
         case 'shop':
         case 'selectShop':
@@ -246,10 +246,10 @@ actions.prototype._sys_keyDown_lockControl = function (keyCode) {
         case 'storageRemove':
         case 'replay':
         case 'gameInfo':
-            this._keyDownChoices(keyCode);
+            core.actions._keyDownChoices(keyCode);
             break;
         case 'cursor':
-            this._keyDownCursor(keyCode);
+            core.actions._keyDownCursor(keyCode);
             break;
     }
     return true;
@@ -282,7 +282,7 @@ actions.prototype.keyUp = function (keyCode, altKey, fromReplay) {
 }
 
 actions.prototype._sys_keyUp_replay = function (keyCode, altKey, fromReplay) {
-    if (!fromReplay && this.checkReplaying()) return true;
+    if (!fromReplay && core.actions.checkReplaying()) return true;
 }
 
 actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
@@ -298,10 +298,10 @@ actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
             ok() && core.drawText();
             break;
         case 'confirmBox':
-            this._keyUpConfirmBox(keyCode);
+            core.actions._keyUpConfirmBox(keyCode);
             break;
         case 'action':
-            this._keyUpAction(keyCode);
+            core.actions._keyUpAction(keyCode);
             break;
         case 'about':
             ok() && core.ui.closePanel();
@@ -310,69 +310,69 @@ actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
             ok() && core.ui.closePanel();
             break;
         case 'book':
-            this._keyUpBook(keyCode);
+            core.actions._keyUpBook(keyCode);
             break;
         case 'book-detail':
-            ok() && this._clickBookDetail();
+            ok() && core.actions._clickBookDetail();
             break;
         case 'fly':
             this._keyUpFly(keyCode);
             break;
         case 'viewMaps':
-            this._keyUpViewMaps(keyCode);
+            core.actions._keyUpViewMaps(keyCode);
             break;
         case 'shop':
-            this._keyUpShop(keyCode);
+            core.actions._keyUpShop(keyCode);
             break;
         case 'selectShop':
-            this._keyUpQuickShop(keyCode);
+            core.actions._keyUpQuickShop(keyCode);
             break;
         case 'toolbox':
-            this._keyUpToolbox(keyCode);
+            core.actions._keyUpToolbox(keyCode);
             break;
         case 'equipbox':
-            this._keyUpEquipbox(keyCode, altKey);
+            core.actions._keyUpEquipbox(keyCode, altKey);
             break;
         case 'save':
         case 'load':
         case 'replayLoad':
-            this._keyUpSL(keyCode);
+            core.actions._keyUpSL(keyCode);
             break;
         case 'keyBoard':
             ok() && core.ui.closePanel();
             break;
         case 'switchs':
-            this._keyUpSwitchs(keyCode);
+            core.actions._keyUpSwitchs(keyCode);
             break;
         case 'settings':
-            this._keyUpSettings(keyCode);
+            core.actions._keyUpSettings(keyCode);
             break;
         case 'syncSave':
-            this._keyUpSyncSave(keyCode);
+            core.actions._keyUpSyncSave(keyCode);
             break;
         case 'syncSelect':
-            this._keyUpSyncSelect(keyCode);
+            core.actions._keyUpSyncSelect(keyCode);
             break;
         case 'localSaveSelect':
-            this._keyUpLocalSaveSelect(keyCode);
+            core.actions._keyUpLocalSaveSelect(keyCode);
             break;
         case 'storageRemove':
-            this._keyUpStorageRemove(keyCode);
+            core.actions._keyUpStorageRemove(keyCode);
             break;
         case 'cursor':
-            this._keyUpCursor(keyCode);
+            core.actions._keyUpCursor(keyCode);
             break;
         case 'replay':
-            this._keyUpReplay(keyCode);
+            core.actions._keyUpReplay(keyCode);
             break;
         case 'gameInfo':
-            this._keyUpGameInfo(keyCode);
+            core.actions._keyUpGameInfo(keyCode);
             break;
         case 'centerFly':
-            this._keyUpCenterFly(keyCode);
+            core.actions._keyUpCenterFly(keyCode);
             break;
         case 'paint':
-            this._keyUpPaint(keyCode);
+            core.actions._keyUpPaint(keyCode);
             break;
     }
     return true;
@@ -399,7 +399,7 @@ actions.prototype.ondown = function (loc) {
 actions.prototype._sys_ondown_paint = function (x, y, px, py) {
     // 画板
     if (core.status.played && (core.status.event || {}).id == 'paint') {
-        this._ondownPaint(px, py);
+        core.actions._ondownPaint(px, py);
         return true;
     }
 }
@@ -418,7 +418,7 @@ actions.prototype._sys_ondown_lockControl = function (x, y, px, py) {
         core.doAction();
     }
     else {
-        this.onclick(x, y, []);
+        core.actions.onclick(x, y, []);
     }
 
     // --- 长按判定
@@ -456,7 +456,7 @@ actions.prototype.onmove = function (loc) {
 actions.prototype._sys_onmove_paint = function (x, y, px, py) {
     // 画板
     if (core.status.played && (core.status.event || {}).id == 'paint') {
-        this._onmovePaint(px, py);
+        core.actions._onmovePaint(px, py);
         return true;
     }
 }
@@ -492,7 +492,7 @@ actions.prototype.onup = function () {
 actions.prototype._sys_onup_paint = function () {
     // 画板
     if (core.status.played && (core.status.event || {}).id == 'paint') {
-        this._onupPaint();
+        core.actions._onupPaint();
         return true;
     }
 }
@@ -525,11 +525,11 @@ actions.prototype._sys_onup = function () {
 
     // 长按
     if (!core.status.lockControl && stepPostfix.length == 0 && core.status.downTime != null && new Date() - core.status.downTime >= 1000) {
-        this.longClick(posx, posy);
+        core.actions.longClick(posx, posy);
     }
     else {
         //posx,posy是寻路的目标点,stepPostfix是后续的移动
-        this.onclick(posx, posy, stepPostfix);
+        core.actions.onclick(posx, posy, stepPostfix);
     }
     core.status.downTime = null;
     return true;
@@ -567,75 +567,75 @@ actions.prototype._sys_onclick_lockControl = function (x, y) {
     if (!core.status.lockControl) return false;
     switch (core.status.event.id) {
         case 'centerFly':
-            this._clickCenterFly(x, y);
+            core.actions._clickCenterFly(x, y);
             break;
         case 'book':
-            this._clickBook(x, y);
+            core.actions._clickBook(x, y);
             break;
         case 'book-detail':
-            this._clickBookDetail(x, y);
+            core.actions._clickBookDetail(x, y);
             break;
         case 'fly':
-            this._clickFly(x, y);
+            core.actions._clickFly(x, y);
             break;
         case 'viewMaps':
-            this._clickViewMaps(x, y);
+            core.actions._clickViewMaps(x, y);
             break;
         case 'switchs':
-            this._clickSwitchs(x, y);
+            core.actions._clickSwitchs(x, y);
             break;
         case 'settings':
-            this._clickSettings(x, y);
+            core.actions._clickSettings(x, y);
             break;
         case 'shop':
-            this._clickShop(x, y);
+            core.actions._clickShop(x, y);
             break;
         case 'selectShop':
-            this._clickQuickShop(x, y);
+            core.actions._clickQuickShop(x, y);
             break;
         case 'equipbox':
-            this._clickEquipbox(x, y);
+            core.actions._clickEquipbox(x, y);
             break;
         case 'toolbox':
-            this._clickToolbox(x, y);
+            core.actions._clickToolbox(x, y);
             break;
         case 'save':
         case 'load':
         case 'replayLoad':
-            this._clickSL(x, y);
+            core.actions._clickSL(x, y);
             break;
         case 'confirmBox':
-            this._clickConfirmBox(x, y);
+            core.actions._clickConfirmBox(x, y);
             break;
         case 'keyBoard':
-            this._clickKeyBoard(x, y);
+            core.actions._clickKeyBoard(x, y);
             break;
         case 'action':
-            this._clickAction(x, y);
+            core.actions._clickAction(x, y);
             break;
         case 'text':
             core.drawText();
             break;
         case 'syncSave':
-            this._clickSyncSave(x, y);
+            core.actions._clickSyncSave(x, y);
             break;
         case 'syncSelect':
-            this._clickSyncSelect(x, y);
+            core.actions._clickSyncSelect(x, y);
             break;
         case 'localSaveSelect':
-            this._clickLocalSaveSelect(x, y);
+            core.actions._clickLocalSaveSelect(x, y);
             break;
         case 'storageRemove':
-            this._clickStorageRemove(x, y);
+            core.actions._clickStorageRemove(x, y);
             break;
         case 'cursor':
-            this._clickCursor(x, y);
+            core.actions._clickCursor(x, y);
             break;
         case 'replay':
-            this._clickReplay(x, y);
+            core.actions._clickReplay(x, y);
             break;
         case 'gameInfo':
-            this._clickGameInfo(x, y);
+            core.actions._clickGameInfo(x, y);
             break;
         case 'about':
         case 'help':
@@ -668,8 +668,8 @@ actions.prototype._sys_onmousewheel = function (direct) {
 
     // 楼层飞行器
     if (core.status.lockControl && core.status.event.id == 'fly') {
-        if (direct == 1) core.ui.drawFly(this._getNextFlyFloor(1));
-        if (direct == -1) core.ui.drawFly(this._getNextFlyFloor(-1));
+        if (direct == 1) core.ui.drawFly(core.actions._getNextFlyFloor(1));
+        if (direct == -1) core.ui.drawFly(core.actions._getNextFlyFloor(-1));
         return;
     }
 
@@ -689,8 +689,8 @@ actions.prototype._sys_onmousewheel = function (direct) {
 
     // 浏览地图
     if (core.status.lockControl && core.status.event.id == 'viewMaps') {
-        if (direct == 1) this._clickViewMaps(7, 4);
-        if (direct == -1) this._clickViewMaps(7, 10);
+        if (direct == 1) core.actions._clickViewMaps(7, 4);
+        if (direct == -1) core.actions._clickViewMaps(7, 10);
         return;
     }
 
@@ -740,7 +740,7 @@ actions.prototype._sys_longClick_lockControl = function (x, y) {
     // 长按楼传器的箭头可以快速翻页
     if (core.status.event.id == 'fly') {
         if ((x == 10 || x == 11) && (y == 5 || y == 9)) {
-            this._clickFly(x, y);
+            core.actions._clickFly(x, y);
             return true;
         }
     }
@@ -774,12 +774,12 @@ actions.prototype._sys_longClick = function (x, y, fromEvent) {
 actions.prototype._selectChoices = function (length, keycode, callback) {
     var topIndex = 7 - parseInt((length - 1) / 2);
     if (keycode == 13 || keycode == 32 || keycode == 67) {
-        callback(7, topIndex + core.status.event.selection);
+        callback.apply(this, [7, topIndex + core.status.event.selection]);
     }
     if (keycode >= 49 && keycode <= 57) {
         var index = keycode - 49;
         if (index < length) {
-            callback(7, topIndex + index);
+            callback.apply(this, [7, topIndex + index]);
         }
     }
 }
@@ -1757,59 +1757,84 @@ actions.prototype._clickSwitchs = function (x, y) {
     var topIndex = 7 - parseInt((choices.length - 1) / 2);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
+        core.status.event.selection = selection;
         switch (selection) {
             case 0:
-                core.triggerBgm();
-                core.ui.drawSwitchs();
-                break;
+                return this._clickSwitchs_bgm();
             case 1:
-                core.musicStatus.soundStatus = !core.musicStatus.soundStatus;
-                core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
-                core.ui.drawSwitchs();
-                break;
+                return this._clickSwitchs_sound();
             case 2:
-                core.flags.displayEnemyDamage = !core.flags.displayEnemyDamage;
-                core.updateDamage();
-                core.setLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
-                core.ui.drawSwitchs();
-                break;
+                return this._clickSwitchs_displayEnemyDamage();
             case 3:
-                core.flags.displayCritical = !core.flags.displayCritical;
-                core.updateDamage();
-                core.setLocalStorage('critical', core.flags.displayCritical);
-                core.ui.drawSwitchs();
-                break;
+                return this._clickSwitchs_displayCritical();
             case 4:
-                core.flags.displayExtraDamage = !core.flags.displayExtraDamage;
-                core.updateDamage();
-                core.setLocalStorage('extraDamage', core.flags.displayExtraDamage);
-                core.ui.drawSwitchs();
-                break;
+                return this._clickSwitchs_displayExtraDamage();
             case 5:
-                core.platform.useLocalForage = !core.platform.useLocalForage;
-                core.setLocalStorage('useLocalForage', core.platform.useLocalForage);
-                core.control.getSaveIndexes(function (indexes) {
-                    core.saves.ids = indexes;
-                });
-                core.ui.drawSwitchs();
-                break;
+                return this._clickSwitchs_localForage();
             case 6:
-                if (core.hasFlag('__noClickMove__')) core.removeFlag('__noClickMove__');
-                else core.setFlag('__noClickMove__', true);
-                core.ui.drawSwitchs();
-                break;
+                return this._clickSwitchs_clickMove();
             case 7:
-                core.platform.extendKeyboard = !core.platform.extendKeyboard;
-                core.setLocalStorage('extendKeyboard', core.platform.extendKeyboard);
-                core.updateStatusBar();
-                core.ui.drawSwitchs();
-                break;
+                return this._clickSwitchs_ExtendKeyboard();
             case 8:
                 core.status.event.selection = 0;
                 core.ui.drawSettings();
                 break;
         }
     }
+}
+
+actions.prototype._clickSwitchs_bgm = function () {
+    core.triggerBgm();
+    core.ui.drawSwitchs();
+}
+
+actions.prototype._clickSwitchs_sound = function () {
+    core.musicStatus.soundStatus = !core.musicStatus.soundStatus;
+    core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
+    core.ui.drawSwitchs();
+}
+
+actions.prototype._clickSwitchs_displayEnemyDamage = function () {
+    core.flags.displayEnemyDamage = !core.flags.displayEnemyDamage;
+    core.updateDamage();
+    core.setLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
+    core.ui.drawSwitchs();
+}
+
+actions.prototype._clickSwitchs_displayCritical = function () {
+    core.flags.displayCritical = !core.flags.displayCritical;
+    core.updateDamage();
+    core.setLocalStorage('critical', core.flags.displayCritical);
+    core.ui.drawSwitchs();
+}
+
+actions.prototype._clickSwitchs_displayExtraDamage = function () {
+    core.flags.displayExtraDamage = !core.flags.displayExtraDamage;
+    core.updateDamage();
+    core.setLocalStorage('extraDamage', core.flags.displayExtraDamage);
+    core.ui.drawSwitchs();
+}
+
+actions.prototype._clickSwitchs_localForage = function () {
+    core.platform.useLocalForage = !core.platform.useLocalForage;
+    core.setLocalStorage('useLocalForage', core.platform.useLocalForage);
+    core.control.getSaveIndexes(function (indexes) {
+        core.saves.ids = indexes;
+    });
+    core.ui.drawSwitchs();
+}
+
+actions.prototype._clickSwitchs_clickMove = function () {
+    if (core.hasFlag('__noClickMove__')) core.removeFlag('__noClickMove__');
+    else core.setFlag('__noClickMove__', true);
+    core.ui.drawSwitchs();
+}
+
+actions.prototype._clickSwitchs_ExtendKeyboard = function () {
+    core.platform.extendKeyboard = !core.platform.extendKeyboard;
+    core.setLocalStorage('extendKeyboard', core.platform.extendKeyboard);
+    core.updateStatusBar();
+    core.ui.drawSwitchs();
 }
 
 ////// 系统设置界面时，放开某个键的操作 //////
@@ -1829,7 +1854,7 @@ actions.prototype._clickSettings = function (x, y) {
     var topIndex = 7 - parseInt((choices.length - 1) / 2);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
-
+        core.status.event.selection = selection;
         switch (selection) {
             case 0:
                 core.status.event.selection = 0;
@@ -1855,15 +1880,7 @@ actions.prototype._clickSettings = function (x, y) {
                 core.ui.drawGameInfo();
                 break;
             case 6:
-                core.status.event.selection = 1;
-                core.ui.drawConfirmBox("你确定要返回标题页面吗？", function () {
-                    core.ui.closePanel();
-                    core.restart();
-                }, function () {
-                    core.status.event.selection = 3;
-                    core.ui.drawSettings();
-                });
-                break;
+                return core.confirmRestart(true);
             case 7:
                 core.ui.closePanel();
                 break;
@@ -1888,9 +1905,9 @@ actions.prototype._clickSyncSave = function (x, y) {
     var topIndex = 7 - parseInt((choices.length - 1) / 2);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
+        core.status.event.selection = selection;
         switch (selection) {
             case 0:
-                // core.syncSave("save");
                 core.status.event.selection = 0;
                 core.ui.drawSyncSelect();
                 break;
@@ -1902,65 +1919,11 @@ actions.prototype._clickSyncSave = function (x, y) {
                 core.ui.drawLocalSaveSelect();
                 break;
             case 3:
-                core.readFile(function (obj) {
-                    if (obj.name != core.firstData.name) {
-                        alert("存档和游戏不一致！");
-                        return;
-                    }
-                    if (obj.version != core.firstData.version) {
-                        alert("游戏版本不一致！");
-                        return;
-                    }
-                    if (!obj.data) {
-                        alert("无效的存档！");
-                        return;
-                    }
-                    var data = obj.data;
-
-                    if (data instanceof Array) {
-                        core.ui.drawConfirmBox("所有本地存档都将被覆盖，确认？", function () {
-                            for (var i = 1; i <= 5 * (main.savePages || 30); i++) {
-                                if (i <= data.length) {
-                                    core.setLocalForage("save" + i, data[i - 1]);
-                                }
-                                else {
-                                    if (core.saves.ids[i])
-                                        core.removeLocalForage("save" + i);
-                                }
-                            }
-                            core.ui.closePanel();
-                            core.drawText("读取成功！\n你的本地所有存档均已被覆盖。");
-                        }, function () {
-                            core.status.event.selection = 0;
-                            core.ui.drawSyncSave();
-                        })
-                    }
-                    else {
-                        // core.setLocalStorage("save"+core.saves.saveIndex, data);
-                        core.setLocalForage("save" + core.saves.saveIndex, data, function () {
-                            core.drawText("同步成功！\n单存档已覆盖至存档" + core.saves.saveIndex);
-                        })
-                    }
-                }, function () {
-
-                });
-                break;
+                return this._clickSyncSave_readFile();
             case 4:
-                core.status.event.selection = 0;
-                core.ui.drawReplay();
-                break;
+                return this._clickSyncSave_replay();
             case 5:
-                if (core.hasFlag('debug')) {
-                    core.drawText("\t[系统提示]调试模式下无法下载录像");
-                    break;
-                }
-                core.download(core.firstData.name + "_" + core.formatDate2(new Date()) + ".h5route", JSON.stringify({
-                    'name': core.firstData.name,
-                    'hard': core.status.hard,
-                    'seed': core.getFlag('__seed__'),
-                    'route': core.encodeRoute(core.status.route)
-                }));
-                break;
+                return this._clickSyncSave_download();
             case 6:
                 core.status.event.selection = 0;
                 core.ui.drawStorageRemove();
@@ -1973,6 +1936,38 @@ actions.prototype._clickSyncSave = function (x, y) {
         }
     }
     return;
+}
+
+actions.prototype._clickSyncSave_readFile = function () {
+    core.readFile(function (obj) {
+        if (obj.name != core.firstData.name) return alert("存档和游戏不一致！");
+        if (obj.version != core.firstData.version) return alert("游戏版本不一致！");
+        if (!obj.data) return alert("无效的存档！");
+        core.control._syncLoad_write(obj.data);
+    });
+}
+
+actions.prototype._clickSyncSave_replay = function () {
+    if (core.hasFlag('debug')) {
+        core.drawText("\t[系统提示]调试模式下无法回放录像");
+    }
+    else {
+        core.status.event.selection = 0;
+        core.ui.drawReplay();
+    }
+}
+
+actions.prototype._clickSyncSave_download = function () {
+    if (core.hasFlag('debug')) {
+        core.drawText("\t[系统提示]调试模式下无法下载录像");
+        return;
+    }
+    core.download(core.firstData.name + "_" + core.formatDate2() + ".h5route", JSON.stringify({
+        'name': core.firstData.name,
+        'hard': core.status.hard,
+        'seed': core.getFlag('__seed__'),
+        'route': core.encodeRoute(core.status.route)
+    }));
 }
 
 ////// 同步存档界面时，放开某个键的操作 //////
@@ -1993,6 +1988,7 @@ actions.prototype._clickSyncSelect = function (x, y) {
     var topIndex = 7 - parseInt((choices.length - 1) / 2);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
+        core.status.event.selection = selection;
         switch (selection) {
             case 0:
                 core.syncSave('all');
@@ -2027,6 +2023,7 @@ actions.prototype._clickLocalSaveSelect = function (x, y) {
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
+        core.status.event.selection = selection;
         if (selection < 2) {
             core.control.getSaves(selection == 0 ? null : core.saves.saveIndex, function (saves) {
                 if (saves) {
@@ -2039,10 +2036,10 @@ actions.prototype._clickLocalSaveSelect = function (x, y) {
                 }
             })
         }
-    }
 
-    core.status.event.selection = 2;
-    core.ui.drawSyncSave();
+        core.status.event.selection = 2;
+        core.ui.drawSyncSave();
+    }
 }
 
 ////// 存档下载界面时，放开某个键的操作 //////
@@ -2064,63 +2061,64 @@ actions.prototype._clickStorageRemove = function (x, y) {
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
+        core.status.event.selection = selection;
         switch (selection) {
             case 0:
-                core.myconfirm("你确定要清除【全部塔】的所有本地存档？\n此行为不可逆！！！", function () {
-                    if (core.platform.useLocalForage) {
-                        core.ui.drawWaiting("正在清空，请稍后...");
-                        localforage.clear(function () {
-                            core.ui.closePanel();
-                            core.drawText("\t[操作成功]你的所有存档已被清空。");
-                            core.saves.saveIndex = 1;
-                            core.removeLocalStorage('saveIndex');
-                        });
-                    }
-                    else {
-                        localStorage.clear();
-                        core.drawText("\t[操作成功]你的所有存档已被清空。");
-                        core.saves.saveIndex = 1;
-                        core.removeLocalStorage('saveIndex');
-                    }
-                });
-                break;
+                return this._clickStorageRemove_all();
             case 1:
-                core.myconfirm("你确定要清除本塔的所有本地存档？\n此行为不可逆！！！", function () {
-                    if (core.platform.useLocalForage) {
-                        core.ui.drawWaiting("正在清空，请稍后...");
-                        Object.keys(core.saves.ids).forEach(function (v) {
-                            if (v != 0)
-                                core.removeLocalForage("save" + v);
-                        });
-                        core.removeLocalForage("autoSave", function () {
-                            core.saves.autosave.data = null;
-                            core.saves.autosave.updated = false;
-                            core.ui.closePanel();
-                            core.drawText("\t[操作成功]当前塔的存档已被清空。");
-                            core.saves.saveIndex = 1;
-                            core.removeLocalStorage('saveIndex');
-                        });
-                    }
-                    else {
-                        Object.keys(core.saves.ids).forEach(function (v) {
-                            if (v != 0)
-                                core.removeLocalStorage("save" + v);
-                        });
-                        core.removeLocalStorage("autoSave");
-                        core.saves.autosave.data = null;
-                        core.saves.autosave.updated = false;
-                        core.drawText("\t[操作成功]当前塔的存档已被清空。");
-                        core.saves.saveIndex = 1;
-                        core.removeLocalStorage('saveIndex');
-                    }
-                    break;
-                });
+                return this._clickStorageRemove_current();
             case 2:
                 core.status.event.selection = 6;
                 core.ui.drawSyncSave();
                 break;
         }
     }
+}
+
+actions.prototype._clickStorageRemove_all = function () {
+    core.myconfirm("你确定要清除【全部塔】的所有本地存档？\n此行为不可逆！！！", function () {
+        var done = function () {
+            core.ui.closePanel();
+            core.drawText("\t[操作成功]你的所有存档已被清空。");
+            core.saves.saveIndex = 1;
+            core.removeLocalStorage('saveIndex');
+        };
+        if (core.platform.useLocalForage) {
+            core.ui.drawWaiting("正在清空，请稍后...");
+            localforage.clear(done);
+        }
+        else {
+            localStorage.clear();
+            done();
+        }
+    });
+}
+
+actions.prototype._clickStorageRemove_current = function () {
+    core.myconfirm("你确定要清除本塔的所有本地存档？\n此行为不可逆！！！", function () {
+        var done = function () {
+            core.saves.autosave.data = null;
+            core.saves.autosave.updated = false;
+            core.ui.closePanel();
+            core.drawText("\t[操作成功]当前塔的存档已被清空。");
+            core.saves.saveIndex = 1;
+            core.removeLocalStorage('saveIndex');
+        }
+        if (core.platform.useLocalForage) {
+            core.ui.drawWaiting("正在清空，请稍后...");
+            Object.keys(core.saves.ids).forEach(function (v) {
+                core.removeLocalForage("save" + v);
+            });
+            core.removeLocalForage("autoSave", done);
+        }
+        else {
+            Object.keys(core.saves.ids).forEach(function (v) {
+                core.removeLocalStorage("save" + v);
+            });
+            core.removeLocalStorage("autoSave");
+            done();
+        }
+    });
 }
 
 ////// 存档删除界面时，放开某个键的操作 //////
@@ -2142,42 +2140,40 @@ actions.prototype._clickReplay = function (x, y) {
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
+        core.status.event.selection = selection;
         switch (selection) {
-            case 0: {
-                core.ui.closePanel();
-                core.startGame(core.status.hard, core.getFlag('__seed__'), core.clone(core.status.route));
-                break;
-            }
-            case 1: {
-                core.status.event.id = 'replayLoad';
-                core.status.event.selection = null;
-                core.ui.clearLastEvent();
-                var saveIndex = core.saves.saveIndex;
-                var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
-                core.ui.drawSLPanel(10 * page + offset);
-                break;
-            }
-            case 2:
-                core.chooseReplayFile();
-                break;
-            case 3:
-                if (core.hasFlag('debug')) {
-                    core.drawText("\t[系统提示]调试模式下无法下载录像");
-                    break;
-                }
-                core.download(core.firstData.name + "_" + core.formatDate2(new Date()) + ".h5route", JSON.stringify({
-                    'name': core.firstData.name,
-                    'hard': core.status.hard,
-                    'seed': core.getFlag('__seed__'),
-                    'route': core.encodeRoute(core.status.route)
-                }));
-                break;
-                break;
-            case 4:
-                core.ui.closePanel();
-                break;
+            case 0: return this._clickReplay_fromBeginning();
+            case 1: return this._clickReplay_fromLoad();
+            case 2: return core.chooseReplayFile();
+            case 3: return this._clickReplay_download();
+            case 4: return core.ui.closePanel();
         }
     }
+}
+
+actions.prototype._clickReplay_fromBeginning = function () {
+    core.ui.closePanel();
+    core.startGame(core.status.hard, core.getFlag('__seed__'), core.clone(core.status.route));
+}
+
+actions.prototype._clickReplay_fromLoad = function () {
+    core.status.event.id = 'replayLoad';
+    core.status.event.selection = null;
+    core.ui.clearLastEvent();
+    var saveIndex = core.saves.saveIndex;
+    var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
+    core.ui.drawSLPanel(10 * page + offset);
+}
+
+actions.prototype._clickReplay_download = function () {
+    if (core.hasFlag('debug')) return core.drawText("\t[系统提示]调试模式下无法下载录像");
+    core.download(core.firstData.name + "_" + core.formatDate2() + ".h5route", JSON.stringify({
+        'name': core.firstData.name,
+        'hard': core.status.hard,
+        'seed': core.getFlag('__seed__'),
+        'route': core.encodeRoute(core.status.route)
+    }));
+
 }
 
 ////// 回放选择界面时，放开某个键的操作 //////
@@ -2198,47 +2194,48 @@ actions.prototype._clickGameInfo = function (x, y) {
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
+        core.status.event.selection = selection;
         switch (selection) {
-            case 0:
-                core.ui.drawStatistics();
-                break;
-            case 1:
-                if (core.platform.isPC)
-                    window.open("editor.html", "_blank");
-                else {
-                    core.myconfirm("即将离开本塔，跳转至本塔工程页面，确认？", function () {
-                        window.location.href = "editor-mobile.html";
-                    });
-                }
-                break;
-            case 2:
-                if (core.platform.isPC) {
-                    window.open("/score.php?name=" + core.firstData.name + "&num=10", "_blank");
-                }
-                else {
-                    core.myconfirm("即将离开本塔，跳转至本塔评论页面，确认？", function () {
-                        window.location.href = "/score.php?name=" + core.firstData.name + "&num=10";
-                    });
-                }
-                break;
-            case 3:
-                core.ui.drawHelp();
-                break;
-            case 4:
-                core.ui.drawAbout();
-                break;
-            case 5:
-                if (core.platform.isPC)
-                    window.open(core.firstData.name + ".zip");
-                else
-                    window.location.href = core.firstData.name + ".zip";
-                break;
+            case 0: return core.ui.drawStatistics();
+            case 1: return this._clickGameInfo_openProject();
+            case 2: return this._clickGameInfo_openComments();
+            case 3: return core.ui.drawHelp();
+            case 4: return core.ui.drawAbout();
+            case 5: return this._clickGameInfo_download();
             case 6:
                 core.status.event.selection = 5;
                 core.ui.drawSettings();
                 break;
         }
     }
+}
+
+actions.prototype._clickGameInfo_openProject = function () {
+    if (core.platform.isPC)
+        window.open("editor.html", "_blank");
+    else {
+        core.myconfirm("即将离开本塔，跳转至本塔工程页面，确认？", function () {
+            window.location.href = "editor-mobile.html";
+        });
+    }
+}
+
+actions.prototype._clickGameInfo_openComments = function () {
+    if (core.platform.isPC) {
+        window.open("/score.php?name=" + core.firstData.name + "&num=10", "_blank");
+    }
+    else {
+        core.myconfirm("即将离开本塔，跳转至本塔评论页面，确认？", function () {
+            window.location.href = "/score.php?name=" + core.firstData.name + "&num=10";
+        });
+    }
+}
+
+actions.prototype._clickGameInfo_download = function () {
+    if (core.platform.isPC)
+        window.open(core.firstData.name + ".zip");
+    else
+        window.location.href = core.firstData.name + ".zip";
 }
 
 ////// 游戏信息界面时，放开某个键的操作 //////

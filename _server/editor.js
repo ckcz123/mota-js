@@ -575,7 +575,7 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent){
     dataSelection.style.height = ysize - 6 + 'px';
     setTimeout(function(){selectBox.isSelected(true);});
     editor.info = JSON.parse(JSON.stringify(thisevent));
-    tip.infos = JSON.parse(JSON.stringify(thisevent));
+    tip.infos(JSON.parse(JSON.stringify(thisevent)));
     editor.pos=pos;
     editor_mode.onmode('nextChange');
     editor_mode.onmode('enemyitem');
@@ -711,7 +711,7 @@ editor.prototype.listen = function () {
             editor_mode.onmode('nextChange');
             editor_mode.onmode('loc');
             //editor_mode.loc();
-            //tip.whichShow = 1;
+            //tip.whichShow(1);
             if(editor.isMobile)editor.showMidMenu(e.clientX,e.clientY);
             return;
         }
@@ -731,7 +731,7 @@ editor.prototype.listen = function () {
 
     eui.onmousemove = function (e) {
         if (!selectBox.isSelected()) {
-            //tip.whichShow = 1;
+            //tip.whichShow(1);
             return;
         }
 
@@ -762,7 +762,7 @@ editor.prototype.listen = function () {
 
     eui.onmouseup = function (e) {
         if (!selectBox.isSelected()) {
-            //tip.whichShow = 1;
+            //tip.whichShow(1);
             return;
         }
         holdingPath = 0;
@@ -1055,7 +1055,7 @@ editor.prototype.listen = function () {
                         }
                     }
                 }
-                tip.infos = JSON.parse(JSON.stringify(editor.info));
+                tip.infos(JSON.parse(JSON.stringify(editor.info)));
                 editor_mode.onmode('nextChange');
                 editor_mode.onmode('enemyitem');
                 //editor_mode.enemyitem();
@@ -1132,7 +1132,7 @@ editor.prototype.listen = function () {
         editor_mode.onmode('nextChange');
         editor_mode.onmode('loc');
         //editor_mode.loc();
-        //tip.whichShow = 1;
+        //tip.whichShow(1);
         if(editor.isMobile)editor.showdataarea(false);
     }
 

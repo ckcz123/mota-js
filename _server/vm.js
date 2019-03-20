@@ -14,11 +14,11 @@ exportMap.onclick=function(){
                 if ('idnum' in mapxy) mapxy = mapxy.idnum;
                 else {
                     // mapxy='!!?';
-                    tip.whichShow = 3;
+                    tip.whichShow(3);
                     return;
                 }
             } else if (typeof(mapxy) == 'undefined') {
-                tip.whichShow = 3;
+                tip.whichShow(3);
                 return;
             }
             mapxy = String(mapxy);
@@ -32,7 +32,7 @@ exportMap.onclick=function(){
     mapEditArea.mapArr(filestr);
     exportMap.isExport = true;
     mapEditArea.error(0);
-    tip.whichShow = 2;
+    tip.whichShow(2);
 }
 var mapEditArea = document.getElementById('mapEditArea')
 mapEditArea.errors=[ // 编号1,2
@@ -57,7 +57,7 @@ mapEditArea.mapArr=function(value){
             setTimeout(function () {
                 if (mapEditArea.formatArr())mapEditArea.mapArr(mapEditArea.formatArr());
                 mapEditArea.drawMap();
-                tip.whichShow = 8
+                tip.whichShow(8)
             }, 1000);
             clearTimeout(mapEditArea.formatTimer);
             mapEditArea.formatTimer = setTimeout(function () {
@@ -131,24 +131,24 @@ mapEditArea.formatArr= function () {
 var copyMap=document.getElementById('copyMap')
 copyMap.err=''
 copyMap.onclick=function(){
-    tip.whichShow = 0;
+    tip.whichShow(0);
     if (pout.value.trim() != '') {
         if (mapEditArea.error()) {
             copyMap.err = mapEditArea.errors[mapEditArea.error() - 1];
-            tip.whichShow = 5
+            tip.whichShow(5)
             return;
         }
         try {
             pout.focus();
             pout.setSelectionRange(0, pout.value.length);
             document.execCommand("Copy");
-            tip.whichShow = 6;
+            tip.whichShow(6);
         } catch (e) {
             copyMap.err = e;
-            tip.whichShow = 5;
+            tip.whichShow(5);
         }
     } else {
-        tip.whichShow = 7;
+        tip.whichShow(7);
     }
 }
 var clearMapButton=document.getElementById('clearMapButton')
@@ -167,7 +167,7 @@ clearMapButton.onclick=function () {
     clearTimeout(tip.timer);
     pout.value = '';
     mapEditArea.mapArr('');
-    tip.whichShow = 4;
+    tip.whichShow(4);
     mapEditArea.error(0);
 }
 var deleteMap=document.getElementById('deleteMap')
@@ -189,17 +189,17 @@ deleteMap.onclick=function () {
 printf = function (str_, type) {
     selectBox.isSelected(false);
     if (!type) {
-        tip.whichShow = 11;
+        tip.whichShow(11);
     } else {
-        tip.whichShow = 12;
+        tip.whichShow(12);
     }
     setTimeout(function () {
         if (!type) {
             tip.msgs[11] = String(str_);
-            tip.whichShow = 12;
+            tip.whichShow(12);
         } else {
             tip.msgs[10] = String(str_);
-            tip.whichShow = 11;
+            tip.whichShow(11);
         }
     }, 1);
 }
@@ -212,83 +212,155 @@ tip_in_showMode = [
     '事件编辑器中的显示文本和自定义脚本的方块也可以双击',
     "画出的地图要点击\"保存地图\"才会写入到文件中",
 ];
-var tip = new Vue({
-    el: '#tip',
-    data: {
-        infos: {},
-        hasId: true,
-        isAutotile: false,
-        isSelectedBlock: false,
-        isClearBlock: false,
-        isAirwall: false,
-        geneMapSuccess: false,
-        timer: null,
-        msgs: [ //分别编号1,2,3,4,5,6,7,8,9,10；奇数警告，偶数成功
-            "当前未选择任何图块，请先在右边选择要画的图块!",
-            "生成地图成功！可点击复制按钮复制地图数组到剪切板",
-            "生成失败! 地图中有未定义的图块，建议先用其他有效图块覆盖或点击清除地图！",
-            "地图清除成功!",
-            "复制失败！",
-            "复制成功！可直接粘贴到楼层文件的地图数组中。",
-            "复制失败！当前还没有数据",
-            "修改成功！可点击复制按钮复制地图数组到剪切板",
-            "选择背景图片失败！文件名格式错误或图片不存在！",
-            "更新背景图片成功！",
-            "11:警告",
-            "12:成功"
-        ],
-        mapMsg: '',
-        whichShow: 0,
-    },
-    watch: {
-        infos: {
-            handler: function (val, oldval) {
-                this.isClearBlock = false;
-                this.isAirwall = false;
-                if (typeof(val) != 'undefined') {
-                    if (val == 0) {
-                        this.isClearBlock = true;
-                        return;
-                    }
-                    if ('id' in val) {
-                        if (val.idnum == 17) {
-                            this.isAirwall = true;
-                            return;
-                        }
-                        this.hasId = true;
-                    } else {
-                        this.hasId = false;
-                    }
-                    this.isAutotile = false;
-                    if (val.images == "autotile" && this.hasId) this.isAutotile = true;
-                }
-            },
-            deep: true
-        },
+var tip=document.getElementById('tip')
+tip._infos= {}
+tip.infos=function(value){
+    if(value!=null){
+        var val=value
+        var oldval=tip._infos
 
-        whichShow: function () {
-            var that = this;
-            that.mapMsg = '';
-            that.msgs[4] = "复制失败！" + editTip.err;
-            clearTimeout(that.timer);
-            if (that.whichShow) {
-                that.mapMsg = that.msgs[that.whichShow - 1];
-                that.timer = setTimeout(function () {
-                    if (!(that.whichShow % 2))
-                        that.whichShow = 0;
-                }, 5000); //5秒后自动清除success，warn不清除
+        tip.isClearBlock(false);
+        tip.isAirwall(false);
+        if (typeof(val) != 'undefined') {
+            if (val == 0) {
+                tip.isClearBlock(true);
+                return;
             }
+            if ('id' in val) {
+                if (val.idnum == 17) {
+                    tip.isAirwall(true);
+                    return;
+                }
+                tip.hasId = true;
+            } else {
+                tip.hasId = false;
+            }
+            tip.isAutotile = false;
+            if (val.images == "autotile" && tip.hasId) tip.isAutotile = true;
+            document.getElementById('isAirwall-else').innerHTML=(tip.hasId?`<p>图块编号：<span class="infoText">${ value['idnum'] }</span></p>
+            <p>图块ID：<span class="infoText">${ value['id'] }</span></p>`:`
+            <p class="warnText">该图块无对应的数字或ID存在，请先前往icons.js和maps.js中进行定义！</p>`)+`
+            <p>图块所在素材：<span class="infoText">${ value['images'] + (tip.isAutotile ? '( '+infos['id']+' )' : '') }</span>
+            </p>
+            <p>图块索引：<span class="infoText">${ value['y'] }</span></p>`
         }
+
+        tip._infos=value
     }
-})
+    return tip._infos
+}
+tip.hasId= true
+tip.isAutotile= false
+tip._isSelectedBlock= false
+tip.isSelectedBlock=function(value){
+    if(value!=null){
+        var dshow=document.getElementById('isSelectedBlock-if')
+        var dhide=document.getElementById('isSelectedBlock-else')
+        if(!value){
+            var dtemp=dshow
+            dshow=dhide
+            dhide=dtemp
+        }
+        dshow.style.display=''
+        dhide.style.display='none'
+        tip._isSelectedBlock=value
+    }
+    return tip._isSelectedBlock
+}
+tip._isClearBlock= false
+tip.isClearBlock=function(value){
+    if(value!=null){
+        var dshow=document.getElementById('isClearBlock-if')
+        var dhide=document.getElementById('isClearBlock-else')
+        if(!value){
+            var dtemp=dshow
+            dshow=dhide
+            dhide=dtemp
+        }
+        dshow.style.display=''
+        dhide.style.display='none'
+        tip._isClearBlock=value
+    }
+    return tip._isClearBlock
+}
+tip._isAirwall= false
+tip.isAirwall=function(value){
+    if(value!=null){
+        var dshow=document.getElementById('isAirwall-if')
+        var dhide=document.getElementById('isAirwall-else')
+        if(!value){
+            var dtemp=dshow
+            dshow=dhide
+            dhide=dtemp
+        }
+        dshow.style.display=''
+        dhide.style.display='none'
+        tip._isAirwall=value
+    }
+    return tip._isAirwall
+}
+tip.geneMapSuccess= false
+tip.timer= null
+tip.msgs= [ //分别编号1,2,3,4,5,6,7,8,9,10；奇数警告，偶数成功
+    "当前未选择任何图块，请先在右边选择要画的图块!",
+    "生成地图成功！可点击复制按钮复制地图数组到剪切板",
+    "生成失败! 地图中有未定义的图块，建议先用其他有效图块覆盖或点击清除地图！",
+    "地图清除成功!",
+    "复制失败！",
+    "复制成功！可直接粘贴到楼层文件的地图数组中。",
+    "复制失败！当前还没有数据",
+    "修改成功！可点击复制按钮复制地图数组到剪切板",
+    "选择背景图片失败！文件名格式错误或图片不存在！",
+    "更新背景图片成功！",
+    "11:警告",
+    "12:成功"
+]
+tip._mapMsg= ''
+tip.mapMsg=function(value){
+    if(value!=null){
+        document.getElementById('whichShow-if').innerText=value
+        tip._mapMsg=value
+    }
+    return tip._mapMsg
+}
+tip._whichShow= 0
+tip.whichShow=function(value){
+    if(value!=null){
+
+        var dshow=document.getElementById('whichShow-if')
+        var dhide=null
+        if(!value){
+            var dtemp=dshow
+            dshow=dhide
+            dhide=dtemp
+        }
+        if(dshow)dshow.style.display=''
+        if(dhide)dhide.style.display='none'
+
+        if(dshow)dshow.setAttribute('class',(value%2) ? 'warnText' : 'successText')
+
+        tip.mapMsg('');
+        tip.msgs[4] = "复制失败！" + editTip.err;
+        clearTimeout(tip.timer);
+        if (value) {
+            tip.mapMsg(tip.msgs[value - 1]);
+            tip.timer = setTimeout(function () {
+                if (!(value % 2))
+                value = 0;
+            }, 5000); //5秒后自动清除success，warn不清除
+        }
+        tip._whichShow=value
+    }
+    return tip._whichShow
+}
 var selectBox=document.getElementById('selectBox')
 var dataSelection=document.getElementById('dataSelection')
 selectBox._isSelected=false
 selectBox.isSelected=function(value){
     if(value!=null){
         selectBox._isSelected=value;
-        tip.isSelectedBlock = value;
-        tip.whichShow = 0;
+        tip.isSelectedBlock(value);
+        tip.whichShow(0);
         clearTimeout(tip.timer);
         dataSelection.style.display=value?'':'none'
     }

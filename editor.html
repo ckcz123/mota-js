@@ -267,21 +267,16 @@
             <canvas class='egameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
         </div>
         <div class="tools">
-            <div id="tip" v-cloak>
-                <div v-if="isSelectedBlock">
-                    <p v-if="isClearBlock" class="infoText">当前选择为清除块，可擦除地图上块</p>
-                    <p v-else-if="isAirwall" class="infoText">当前选择为空气墙, 在编辑器中可视, 在游戏中隐藏的墙, 用来配合前景/背景的贴图</p>
-                    <div v-else>
-                        <p v-if="hasId">图块编号：<span class="infoText">{{ infos['idnum'] }}</span></p>
-                        <p v-if="hasId">图块ID：<span class="infoText">{{ infos['id'] }}</span></p>
-                        <p v-else class="warnText">该图块无对应的数字或ID存在，请先前往icons.js和maps.js中进行定义！</p>
-                        <p>图块所在素材：<span class="infoText">{{ infos['images'] + (isAutotile ? '( '+infos['id']+' )' : '') }}</span>
-                        </p>
-                        <p>图块索引：<span class="infoText">{{ infos['y'] }}</span></p>
-                    </div>
+            <div id="tip">
+                <div id="isSelectedBlock-if" style="display:none">
+                    <p id="isClearBlock-if" style="display:none" class="infoText">当前选择为清除块，可擦除地图上块</p>
+                    <div id="isClearBlock-else"><p id="isAirwall-if" style="display:none" class="infoText">当前选择为空气墙, 在编辑器中可视, 在游戏中隐藏的墙, 用来配合前景/背景的贴图</p>
+                    <div id="isAirwall-else">
+                        
+                    </div></div>
                 </div>
-                <div v-else>
-                    <p v-if="whichShow" v-bind:class="[ (whichShow%2) ? 'warnText' : 'successText']">{{ mapMsg }}</p>
+                <div id="isSelectedBlock-else">
+                    <p id="whichShow-if" style="display:none"></p>
                 </div>
             </div>
 

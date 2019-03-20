@@ -69,7 +69,7 @@ control.prototype._setRequestAnimationFrame = function () {
             if (b.func) {
                 try {
                     if (core.isPlaying() || !b.needPlaying)
-                        core.doFunc(b.func, timestamp);
+                        core.doFunc(b.func, core.control, timestamp);
                 }
                 catch (e) {
                     main.log(e);
@@ -1257,7 +1257,7 @@ control.prototype.unregisterReplayAction = function (name) {
 control.prototype._doReplayAction = function (action) {
     for (var i in this.replayActions) {
         try {
-            if (core.doFunc(this.replayActions[i].func, action)) return true;
+            if (core.doFunc(this.replayActions[i].func, this, action)) return true;
         } catch (e) {
             main.log(e);
             main.log("ERROR in replayActions["+this.replayActions[i].name+"]：已自动注销该项。");
@@ -2393,7 +2393,7 @@ control.prototype.unregisterResize = function (name) {
 control.prototype._doResize = function (obj) {
     for (var i in this.resizes) {
         try {
-            if (core.doFunc(this.resizes[i].func, obj)) return true;
+            if (core.doFunc(this.resizes[i].func, this, obj)) return true;
         } catch (e) {
             main.log(e);
             main.log("ERROR in resizes["+this.resizes[i].name+"]：已自动注销该项。");

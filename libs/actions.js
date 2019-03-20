@@ -94,7 +94,7 @@ actions.prototype.doRegisteredAction = function (action) {
     var actions = this.actions[action];
     if (!actions) return false;
     for (var i = 0; i < actions.length; ++i) {
-        if (core.doFunc.apply(this, [actions[i].func].concat(Array.prototype.slice.call(arguments, 1))))
+        if (core.doFunc.apply(core, [actions[i].func, this].concat(Array.prototype.slice.call(arguments, 1))))
             return true;
     }
     return false;

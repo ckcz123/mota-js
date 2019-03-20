@@ -207,10 +207,8 @@ main.floors.sample1=
             "type": "move",
             "time": 750,
             "steps": [
-                {
-                    "direction": "right",
-                    "value": 2
-                },
+                "right",
+                "right",
                 "down"
             ]
         },

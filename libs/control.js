@@ -1964,10 +1964,10 @@ control.prototype.setFg = function(color, time, callback) {
         return;
     }
 
-    this._setFg_animate(core.status.curtainColor, color, callback);
+    this._setFg_animate(core.status.curtainColor, color, time, callback);
 }
 
-control.prototype._setFg_animate = function (nowColor, color, callback) {
+control.prototype._setFg_animate = function (nowColor, color, time, callback) {
     var per_time = 10, step = parseInt(time / per_time);
     var animate = setInterval(function() {
         nowColor = [
@@ -1980,7 +1980,7 @@ control.prototype._setFg_animate = function (nowColor, color, callback) {
         core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(nowColor));
         step--;
         if (step <= 0) {
-            delete core.animate.asyncId[animate];
+            delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             core.status.curtainColor = color;
             if (core.isset(callback)) callback();

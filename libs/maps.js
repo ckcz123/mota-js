@@ -360,7 +360,7 @@ maps.prototype.getBgFgMapArray = function (name, floorId, useCache) {
 // ------ 当前能否朝某方向移动，能否瞬间移动 ------ //
 
 ////// 生成全图的当前可移动信息 //////
-maps.prototype.generateMovableArray = function (floorId, x, y) {
+maps.prototype.generateMovableArray = function (floorId, x, y, direction) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return null;
     var width = core.floors[floorId].width, height = core.floors[floorId].height;
@@ -368,7 +368,12 @@ maps.prototype.generateMovableArray = function (floorId, x, y) {
         fgArray = this.getBgFgMapArray('fg', floorId, true),
         eventArray = this.getMapArray(floorId);
 
-    var generate = function (x, y) {
+    var generate = function (x, y, direction) {
+        if (direction != null) {
+            return core.maps._canMoveHero_checkPoint(x, y, direction, floorId, {
+                bgArray: bgArray, fgArray: fgArray, eventArray: eventArray
+            });
+        }
         return ["left", "down", "up", "right"].filter(function (direction) {
             return core.maps._canMoveHero_checkPoint(x, y, direction, floorId, {
                 bgArray: bgArray, fgArray: fgArray, eventArray: eventArray
@@ -376,7 +381,7 @@ maps.prototype.generateMovableArray = function (floorId, x, y) {
         });
     }
 
-    if (x != null && y != null) return generate(x, y);
+    if (x != null && y != null) return generate(x, y, direction);
     var array = [];
     for (var x = 0; x < width; x++) {
         array[x] = [];
@@ -392,7 +397,7 @@ maps.prototype.canMoveHero = function (x, y, direction, floorId) {
     if (x == null) x = core.getHeroLoc('x');
     if (y == null) y = core.getHeroLoc('y');
     direction = direction || core.getHeroLoc('direction');
-    return core.inArray(this.generateMovableArray(floorId, x, y), direction);
+    return this.generateMovableArray(floorId, x, y, direction);
 }
 
 maps.prototype._canMoveHero_checkPoint = function (x, y, direction, floorId, extraData) {
@@ -565,7 +570,7 @@ maps.prototype._automaticRoute_deepAdd = function (x, y) {
         // 绕过血瓶
         if (!core.flags.potionWhileRouting && id.endsWith("Potion")) deepAdd += 100;
         // 绕过传送点
-        // if (nextBlock.block.event.trigger == 'changeFloor') deepAdd+=10;
+        // if (block.block.event.trigger == 'changeFloor') deepAdd+=10;
     }
     // 绕过存在伤害的地方
     deepAdd += (core.status.checkBlock.damage[x+","+y]||0) * 100;

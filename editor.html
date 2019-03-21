@@ -17,9 +17,8 @@
         <div id="arrEditor">
             <table class="col" id='arrColMark'></table>
             <table class="row" id='arrRowMark'></table>
-            <div id="editArea" v-cloak>
-                <textarea cols="10" rows="10" id="pout" v-model="mapArr"></textarea>
-                <!-- <p class="warnText" v-if="error">{{ errors[error-1] }}</p> -->
+            <div id="mapEditArea">
+                <textarea cols="10" rows="10" id="pout"></textarea>
             </div>
             <div id="editTip">
                 <input type="button" value="新建空白地图" id='newMap'/>
@@ -32,10 +31,10 @@
                 <span style='vertical-align: bottom; margin-left: -4px'>保留楼层属性</span>
             </div>
             <div id="editBtns">
-                <input type="button" value="导出地图" id="exportMap" v-on:click="exportMap"/>
-                <input type="button" value="复制地图" id="copyMap" v-on:click="copyMap"/>
-                <input type="button" value="清除地图" id='clearMap' v-on:click="clearMap"/>
-                <input type="button" value="删除地图" id="deleteMap" v-on:click="deleteMap"/>
+                <input type="button" value="导出地图" id="exportMap"/>
+                <input type="button" value="复制地图" id="copyMap"/>
+                <input type="button" value="清除地图" id='clearMapButton'/>
+                <input type="button" value="删除地图" id="deleteMap"/>
             </div>
             <input type="button" value="批量创建空白地图 ↓" id='newMaps'/>
             <div id='newFloors' style='display:none'>
@@ -285,21 +284,16 @@
             <canvas class='egameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
         </div>
         <div class="tools">
-            <div id="tip" v-cloak>
-                <div v-if="isSelectedBlock">
-                    <p v-if="isClearBlock" class="infoText">当前选择为清除块，可擦除地图上块</p>
-                    <p v-else-if="isAirwall" class="infoText">当前选择为空气墙, 在编辑器中可视, 在游戏中隐藏的墙, 用来配合前景/背景的贴图</p>
-                    <div v-else>
-                        <p v-if="hasId">图块编号：<span class="infoText">{{ infos['idnum'] }}</span></p>
-                        <p v-if="hasId">图块ID：<span class="infoText">{{ infos['id'] }}</span></p>
-                        <p v-else class="warnText">该图块无对应的数字或ID存在，请先前往icons.js和maps.js中进行定义！</p>
-                        <p>图块所在素材：<span class="infoText">{{ infos['images'] + (isAutotile ? '( '+infos['id']+' )' : '') }}</span>
-                        </p>
-                        <p>图块索引：<span class="infoText">{{ infos['y'] }}</span></p>
-                    </div>
+            <div id="tip">
+                <div id="isSelectedBlock-if" style="display:none">
+                    <p id="isClearBlock-if" style="display:none" class="infoText">当前选择为清除块，可擦除地图上块</p>
+                    <div id="isClearBlock-else"><p id="isAirwall-if" style="display:none" class="infoText">当前选择为空气墙, 在编辑器中可视, 在游戏中隐藏的墙, 用来配合前景/背景的贴图</p>
+                    <div id="isAirwall-else">
+                        
+                    </div></div>
                 </div>
-                <div v-else>
-                    <p v-if="whichShow" v-bind:class="[ (whichShow%2) ? 'warnText' : 'successText']">{{ mapMsg }}</p>
+                <div id="isSelectedBlock-else">
+                    <p id="whichShow-if" style="display:none"></p>
                 </div>
             </div>
 
@@ -343,7 +337,7 @@
         <div id="iconLib">
             <div id="iconImages"></div>
             <div id="selectBox">
-                <div id='dataSelection' v-show="isSelected" v-cloak></div>
+                <div id='dataSelection' style="display:none"></div>
             </div>
         </div>
     </div>
@@ -523,8 +517,8 @@ if (location.protocol.indexOf("http")!=0) {
 <script>
     //所有全局量
     __all__ = ['Vue', 'fs', 'editor_file', 'editor_mode', 'main', 'core', 'hasOwnProp', 'printf', 'printe', 'editor', 'converter', 'ActionParser', 'MotaActionFunctions', 'MotaActionBlocks'];
-    __id__ = ['editArea', 'arrRowMark', 'mapRowMark', 'data', 'bg', 'dataSelection', 'blocklyDiv', 'codeAreaHL', 'entryType'];
-    __Vue__ = ['editArea', 'exportMap', 'copyMap', 'clearMap', 'deleteMap', 'tip', 'selectBox'];
+    __id__ = ['mapEditArea', 'arrRowMark', 'mapRowMark', 'data', 'bg', 'dataSelection', 'blocklyDiv', 'codeAreaHL', 'entryType'];
+    __Vue__ = ['mapEditArea', 'exportMap', 'copyMap', 'clearMap', 'deleteMap', 'tip', 'selectBox'];
     //var event = document.getElementById('event');
 
     var hasOwnProperty = Object.prototype.hasOwnProperty;

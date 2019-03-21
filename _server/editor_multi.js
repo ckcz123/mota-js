@@ -39,7 +39,7 @@ editor_multi = function () {
     editor_multi.lintAutocomplete = false;
 
     editor_multi.show = function () {
-        if (typeof(selectBox) !== typeof(undefined)) selectBox.isSelected = false;
+        if (typeof(selectBox) !== typeof(undefined)) selectBox.isSelected(false);
         var valueNow = codeEditor.getValue();
         //try{eval('function _asdygakufyg_() { return '+valueNow+'\n}');editor_multi.lintAutocomplete=true;}catch(ee){}
         if (valueNow.slice(0, 8) === 'function') editor_multi.lintAutocomplete = true;

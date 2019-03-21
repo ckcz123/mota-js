@@ -8,6 +8,12 @@
 
 function ui() {
     this._init();
+    // for convenience
+    this.SIZE = core.__SIZE__;
+    this.HSIZE = core.__HALF_SIZE__;
+    this.LAST = this.SIZE - 1;
+    this.PIXEL = core.__PIXELS__;
+    this.HPIXEL = this.PIX / 2;
 }
 
 // 初始化UI
@@ -19,12 +25,12 @@ ui.prototype._init = function () {
 
 ui.prototype.getContextByName = function (canvas) {
     if (typeof canvas == 'string') {
-        if (core.isset(core.canvas[canvas]))
+        if (core.canvas[canvas])
             canvas = core.canvas[canvas];
-        else if (core.isset(core.dymCanvas[canvas]))
+        else if (core.dymCanvas[canvas])
             canvas = core.dymCanvas[canvas];
     }
-    if (core.isset(canvas) && core.isset(canvas.canvas)) {
+    if (canvas && canvas.canvas) {
         return canvas;
     }
     return null;
@@ -47,12 +53,8 @@ ui.prototype.clearMap = function (name, x, y, width, height) {
 
 ////// 在某个canvas上绘制一段文字 //////
 ui.prototype.fillText = function (name, text, x, y, style, font) {
-    if (core.isset(style)) {
-        core.setFillStyle(name, style);
-    }
-    if (core.isset(font)) {
-        core.setFont(name, font);
-    }
+    if (style) core.setFillStyle(name, style);
+    if (font) core.setFont(name, font);
     var ctx = this.getContextByName(name);
     if (ctx) ctx.fillText(text, x, y);
 }
@@ -61,8 +63,8 @@ ui.prototype.fillText = function (name, text, x, y, style, font) {
 ui.prototype.fillBoldText = function (name, text, x, y, style, font) {
     var ctx = this.getContextByName(name);
     if (!ctx) return;
-    if (core.isset(font)) ctx.font = font;
-    if (!core.isset(style)) style = ctx.fillStyle;
+    if (font) ctx.font = font;
+    if (!style) style = ctx.fillStyle;
     ctx.fillStyle = '#000000';
     ctx.fillText(text, x-1, y-1);
     ctx.fillText(text, x-1, y+1);
@@ -74,33 +76,23 @@ ui.prototype.fillBoldText = function (name, text, x, y, style, font) {
 
 ////// 在某个canvas上绘制一个矩形 //////
 ui.prototype.fillRect = function (name, x, y, width, height, style) {
-    if (core.isset(style)) {
-        core.setFillStyle(name, style);
-    }
+    if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
     if (ctx) ctx.fillRect(x, y, width, height);
 }
 
 ////// 在某个canvas上绘制一个矩形的边框 //////
 ui.prototype.strokeRect = function (name, x, y, width, height, style, lineWidth) {
-    if (core.isset(style)) {
-        core.setStrokeStyle(name, style);
-    }
-    if (core.isset(lineWidth)) {
-        core.setLineWidth(name, lineWidth);
-    }
+    if (style) core.setStrokeStyle(name, style);
+    if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (ctx) ctx.strokeRect(x, y, width, height);
 }
 
 ////// 在某个canvas上绘制一条线 //////
 ui.prototype.drawLine = function (name, x1, y1, x2, y2, style, lineWidth) {
-    if (core.isset(style)) {
-        core.setStrokeStyle(name, style);
-    }
-    if (core.isset(lineWidth)) {
-        core.setLineWidth(name, lineWidth);
-    }
+    if (style) core.setStrokeStyle(name, style);
+    if (lineWidth != null) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     ctx.beginPath();
@@ -112,12 +104,8 @@ ui.prototype.drawLine = function (name, x1, y1, x2, y2, style, lineWidth) {
 ////// 在某个canvas上绘制一个箭头 //////
 ui.prototype.drawArrow = function (name, x1, y1, x2, y2, style, lineWidth) {
     if (x1==x2 && y1==y2) return;
-    if (core.isset(style)) {
-        core.setStrokeStyle(name, style);
-    }
-    if (core.isset(lineWidth)) {
-        core.setLineWidth(name, lineWidth);
-    }
+    if (style) core.setStrokeStyle(name, style);
+    if (lineWidth != null) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     var head = 10;
@@ -190,7 +178,7 @@ ui.prototype.setTextAlign = function (name, align) {
 ui.prototype.calWidth = function (name, text, font) {
     var ctx = this.getContextByName(name);
     if (ctx) {
-        if (core.isset(font)) ctx.font = font;
+        if (font) ctx.font = font;
         return ctx.measureText(text).width;
     }
     return 0;
@@ -202,7 +190,7 @@ ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
     if (!ctx) return;
     if (typeof image == 'string') {
         image = core.material.images.images[image];
-        if (!core.isset(image)) return;
+        if (!image) return;
     }
 
     // 只能接受2, 4, 8个参数
@@ -226,7 +214,7 @@ ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
 ui.prototype.closePanel = function () {
     core.status.boxAnimateObjs = [];
     clearInterval(core.status.event.interval);
-    core.clearLastEvent();
+    core.clearSelector();
     core.maps.generateGroundPattern();
     core.updateStatusBar();
     core.unLockControl();
@@ -237,21 +225,20 @@ ui.prototype.closePanel = function () {
     core.status.event.interval = null;
 }
 
-////// 一般清除事件 //////
-ui.prototype.clearLastEvent = function () {
-    if (core.isset(core.dymCanvas._selector))
-        core.deleteCanvas("_selector");
+////// 清除光标 //////
+ui.prototype.clearSelector = function () {
+    if (core.dymCanvas._selector) core.deleteCanvas("_selector");
     core.clearMap('ui');
     core.setAlpha('ui', 1);
 }
 
 ////// 左上角绘制一段提示 //////
 ui.prototype.drawTip = function (text, itemIcon) {
-    var textX, textY, width, height, hide = false, alpha = 0;
+    var textX, textY, width, height;
     clearInterval(core.interval.tipAnimate);
     core.setFont('data', "16px Arial");
     core.setTextAlign('data', 'left');
-    if (!core.isset(itemIcon)) {
+    if (!itemIcon) {
         textX = 16;
         textY = 18;
         width = textX + core.calWidth('data', text) + 16;
@@ -263,32 +250,32 @@ ui.prototype.drawTip = function (text, itemIcon) {
         width = textX + core.calWidth('data', text) + 8;
         height = 42;
     }
+    this._drawTip_animate(text, itemIcon, textX, textY, width, height);
+}
+
+ui.prototype._drawTip_animate = function (text, itemIcon, textX, textY, width, height) {
+    var alpha = 0, hide = false;
     core.interval.tipAnimate = window.setInterval(function () {
-        if (hide) {
-            alpha -= 0.1;
-        }
-        else {
-            alpha += 0.1;
-        }
-        core.clearMap('data', 5, 5, 416, height);
+        if (hide) alpha -= 0.1;
+        else alpha += 0.1;
+        core.clearMap('data', 5, 5, core.ui.PIXEL, height);
         core.setAlpha('data', alpha);
         core.fillRect('data', 5, 5, width, height, '#000');
-        if (core.isset(itemIcon)) {
+        if (itemIcon)
             core.drawImage('data', core.material.images.items, 0, itemIcon * 32, 32, 32, 10, 8, 32, 32);
-        }
         core.fillText('data', text, textX + 5, textY + 15, '#fff');
         core.setAlpha('data', 1);
         if (alpha > 0.6 || alpha < 0) {
             if (hide) {
-                core.clearMap('data', 5, 5, 416, height);
+                core.clearMap('data', 5, 5, core.ui.PIXEL, height);
                 clearInterval(core.interval.tipAnimate);
                 return;
             }
             else {
-                if (!core.isset(core.timeout.getItemTipTimeout)) {
-                    core.timeout.getItemTipTimeout = window.setTimeout(function () {
+                if (!core.timeout.tipTimeout) {
+                    core.timeout.tipTimeout = window.setTimeout(function () {
                         hide = true;
-                        core.timeout.getItemTipTimeout = null;
+                        core.timeout.tipTimeout = null;
                     }, 750);
                 }
                 alpha = 0.6;
@@ -299,41 +286,12 @@ ui.prototype.drawTip = function (text, itemIcon) {
 
 ////// 地图中间绘制一段文字 //////
 ui.prototype.drawText = function (contents, callback) {
-    if (core.isset(contents)) {
-
-        // 合并
-        if ((core.isset(core.status.event)&&core.status.event.id=='action') || core.isReplaying()) {
-            core.insertAction(contents,null,null,callback);
-            return;
-        }
-
-        if (typeof contents == 'string') {
-            contents = [{'content': contents}];
-        }
-        else if (contents instanceof Object && core.isset(contents.content)) {
-            contents = [contents];
-        }
-        else if (!(contents instanceof Array)) {
-            core.drawTip("出错了");
-            console.log(contents);
-            return;
-        }
-
-        core.status.event = {'id': 'text', 'data': {'list': contents, 'callback': callback}};
-        core.lockControl();
-
-        // wait the hero to stop
-        core.stopAutomaticRoute();
-        setTimeout(function() {
-            core.drawText();
-        }, 30);
-        return;
-    }
+    if (contents != null) return this._drawText_setContent(contents, callback);
 
     if (core.status.event.data.list.length==0) {
         var callback = core.status.event.data.callback;
         core.ui.closePanel(false);
-        if (core.isset(callback)) callback();
+        if (callback) callback();
         return;
     }
 
@@ -342,7 +300,21 @@ ui.prototype.drawText = function (contents, callback) {
         core.ui.drawTextBox(data);
     else
         core.ui.drawTextBox(data.content, data.id);
-    // core.drawTextBox(content);
+}
+
+ui.prototype._drawText_setContent = function (contents, callback) {
+    // 合并进 insertAction
+    if ((core.status.event && core.status.event.id=='action') || core.isReplaying()) {
+        core.insertAction(contents,null,null,callback);
+        return;
+    }
+    if (!(contents instanceof Array)) contents = [contents];
+
+    core.status.event = {'id': 'text', 'data': {'list': contents, 'callback': callback}};
+    core.lockControl();
+
+    core.waitHeroToStop(core.drawText);
+    return;
 }
 
 ui.prototype.getTitleAndIcon = function (content) {
@@ -679,7 +651,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
     content = core.replaceText(content);
 
     core.status.boxAnimateObjs = [];
-    core.clearLastEvent();
+    core.clearSelector();
 
     // drawImage
     content = content.replace(/(\f|\\f)\[(.*?)]/g, function (text, sympol, str) {
@@ -1087,7 +1059,7 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     if (!core.isset(core.status.event.selection) || core.status.event.selection>1) core.status.event.selection=1;
     if (core.status.event.selection<0) core.status.event.selection=0;
 
-    core.clearLastEvent();
+    core.clearSelector();
 
     var background = core.status.textAttribute.background;
     var isWindowSkin = false;
@@ -1191,7 +1163,7 @@ ui.prototype.drawWaiting = function(text) {
     core.lockControl();
     core.status.event.id = 'waiting';
 
-    core.clearLastEvent();
+    core.clearSelector();
 
     var background = core.status.textAttribute.background;
     var isWindowSkin = false;
@@ -1326,7 +1298,7 @@ ui.prototype.drawBook = function (index) {
     var floorId = core.floorIds[(core.status.event.ui||{}).index] || core.status.floorId;
     var enemys = core.enemys.getCurrentEnemys(floorId);
     
-    core.clearLastEvent();
+    core.clearSelector();
     core.clearMap('data');
 
     // 生成groundPattern
@@ -1691,7 +1663,7 @@ ui.prototype.drawMaps = function (index, x, y) {
 
     if (!core.isset(index)) {
         core.status.event.data = null;
-        core.clearLastEvent();
+        core.clearSelector();
 
         core.fillRect('ui', 0, 0, 416, 416, 'rgba(0,0,0,0.4)');
 
@@ -1758,7 +1730,7 @@ ui.prototype.drawMaps = function (index, x, y) {
     core.status.event.data = {"index": index, "x": x, "y": y, "damage": damage, "paint": paint, "all": all};
 
     clearTimeout(core.interval.tipAnimate);
-    core.clearLastEvent();
+    core.clearSelector();
     core.status.checkBlock.cache = {};
     core.drawThumbnail(floorId, null, {damage: damage}, {ctx: 'ui', centerX: x, centerY: y, all: all});
 
@@ -2248,7 +2220,7 @@ ui.prototype.drawKeyBoard = function () {
     core.lockControl();
     core.status.event.id = 'keyBoard';
 
-    core.clearLastEvent();
+    core.clearSelector();
 
     var left = 16, top = 48, width = 416 - 2 * left, height = 416 - 2 * top;
 
@@ -2522,7 +2494,7 @@ ui.prototype.drawPaint = function () {
             core.status.event.id = 'paint';
             core.status.event.data = {"x": null, "y": null, "erase": false};
 
-            core.clearLastEvent();
+            core.clearSelector();
             core.createCanvas('paint', -core.bigmap.offsetX, -core.bigmap.offsetY, 32*core.bigmap.width, 32*core.bigmap.height, 95);
 
             // 将已有的内容绘制到route上
@@ -2549,7 +2521,7 @@ ui.prototype.drawPaint = function () {
 
 ////// 绘制帮助页面 //////
 ui.prototype.drawHelp = function () {
-    core.clearLastEvent();
+    core.clearSelector();
     if (core.material.images.keyboard) {
         core.status.event.id = 'help';
         core.lockControl();

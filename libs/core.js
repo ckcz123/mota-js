@@ -20,7 +20,7 @@ function core() {
         'events': {}
     }
     this.timeout = {
-        'getItemTipTimeout': null,
+        'tipTimeout': null,
         'turnHeroTimeout': null,
         'onDownTimeout': null,
         'sleepTimeout': null,

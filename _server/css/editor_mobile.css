@@ -37,7 +37,7 @@ body {
     position: absolute;
 }
 
-#editArea {
+#mapEditArea {
     position: absolute;
     width: 100%;
     height: 70%;
@@ -64,7 +64,7 @@ body {
     overflow: auto;
 }
 
-#editArea p {
+#mapEditArea p {
     margin: 10px;
     display: block;
     width: 70%;

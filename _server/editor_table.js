@@ -332,6 +332,6 @@ editor_table_wrapper = function (editor) {
         return num;
     }
 
-    editor.table = new editor_table();
+    editor.constructor.prototype.table = new editor_table();
 }
 //editor_table_wrapper(editor);

@@ -1118,6 +1118,11 @@ events.prototype._action_openDoor = function (data, x, y, prefix) {
     }
 }
 
+events.prototype._action_closeDoor = function (data, x, y, prefix) {
+    var loc = this.__action_getLoc(data.loc, x, y, prefix);
+    core.closeDoor(loc[0], loc[1], data.id, core.doAction);
+}
+
 events.prototype._action_useItem = function (data, x, y, prefix) {
     // 考虑到可能覆盖楼传事件的问题，这里不对fly进行检查。
     if (data.id != 'book' && core.canUseItem(data.id)) {
@@ -1798,6 +1803,32 @@ events.prototype.setGlobalFlag = function (name, value) {
     core.flags[name] = value;
     core.setFlag("globalFlags", flags);
     core.resize();
+}
+
+events.prototype.closeDoor = function (x, y, id, callback) {
+    id = id || "";
+    if (!(id.endsWith("Door") || id.endsWith("Wall"))
+        || !core.material.icons.animates[id] || core.getBlock(x, y) != null) {
+        if (callback) callback();
+        return;
+    }
+    // 关门动画
+    core.playSound('door.mp3');
+    var door = core.material.icons.animates[id];
+    var speed = id.endsWith("Door") ? 30 : 70, state = 0;
+    var animate = window.setInterval(function () {
+        state++;
+        if (state == 4) {
+            clearInterval(animate);
+            delete core.animateFrame.asyncId[animate];
+            core.setBlock(core.getNumberById(id), x, y);
+            if (callback) callback();
+            return;
+        }
+        core.clearMap('event', 32 * x, 32 * y, 32, 32);
+        core.drawImage('event', core.material.images.animates, 32 * (4-state), 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
+    }, speed / core.status.replay.speed);
+    core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 显示图片 //////

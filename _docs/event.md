@@ -901,6 +901,30 @@ needKey是可选的，如果设置为true则需要钥匙才能打开此门。如
 
 !> needKey仅对当前楼层开门有效！跨楼层的门仍然不需要钥匙即可打开，如有需求请自行判定。
 
+### closeDoor：关门
+
+从V2.6开始提供了关门事件`{"type": "closeDoor"}`，拥有关门动画和对应的音效。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "closeDoor", "id": "yellowDoor", "loc": [3,6]}, // 给(3,6)点关上黄门
+    {"type": "closeDoor", "id": "specialDoor"}, // 不写loc则视为当前点
+]
+```
+
+id为你要关门的ID，需要是一个合法的门，系统默认只支持如下几种：
+
+```
+yellowDoor, blueDoor, redDoor, greenDoor, specialDoor, steelDoor,
+yellowWall, blueWall, whiteWall
+```
+
+如果需要自己添加门，请参考[新增门和对应的钥匙](personalization#新增门和对应的钥匙)。
+
+loc可选，为要关的位置，不填默认为当前点。
+
+关门事件需要保证该点是空地，否则将无视此事件。
+
 ### changeFloor：楼层切换
 
 在事件中也可以对楼层进行切换。一个比较典型的例子就是TSW中，勇士在三楼的陷阱被扔到了二楼，就是一个楼层切换事件。

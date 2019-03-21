@@ -1576,7 +1576,7 @@ control.prototype._doSL_replayLoad = function (id) {
     else{
         core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
             if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
-            core.control._doSL_replayLoad_afterGet(data);
+            core.control._doSL_replayLoad_afterGet(id, data);
         }, function(err) {
             main.log(err);
             alert("无效的存档");

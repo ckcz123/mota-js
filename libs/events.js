@@ -765,7 +765,7 @@ events.prototype.doAction = function () {
     core.status.boxAnimateObjs = [];
     clearInterval(core.status.event.interval);
     core.status.event.interval = null;
-    core.clearLastEvent();
+    core.clearSelector();
     // 判定是否执行完毕
     if (this._doAction_finishEvents()) return;
     // 当前点坐标和前缀

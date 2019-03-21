@@ -1864,11 +1864,11 @@ actions.prototype._clickSettings = function (x, y) {
                 core.ui.drawKeyBoard();
                 break;
             case 2:
-                core.clearLastEvent();
+                core.clearSelector();
                 core.ui.drawMaps();
                 break;
             case 3:
-                core.clearLastEvent();
+                core.clearSelector();
                 core.ui.drawPaint();
                 break;
             case 4:
@@ -2161,7 +2161,7 @@ actions.prototype._clickReplay_fromBeginning = function () {
 actions.prototype._clickReplay_fromLoad = function () {
     core.status.event.id = 'replayLoad';
     core.status.event.selection = null;
-    core.ui.clearLastEvent();
+    core.ui.clearSelector();
     var saveIndex = core.saves.saveIndex;
     var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
     core.ui.drawSLPanel(10 * page + offset);

@@ -9,8 +9,13 @@ editor_table_wrapper = function (editor) {
      * HTML模板 
      */
 
-    editor_table.prototype.select = function (options) {
-        return `<select>\n${options.join('')}</select>\n`
+    editor_table.prototype.select = function (value, values) {
+        return `<select>\n${
+            editor.table.option(value) +
+            values.map(function (v) {
+                return editor.table.option(v)
+            }).join('')
+            }</select>\n`
     }
     editor_table.prototype.option = function (value) {
         return `<option value='${JSON.stringify(value)}'>${JSON.stringify(value)}</option>\n`
@@ -25,6 +30,51 @@ editor_table_wrapper = function (editor) {
         return `<textarea spellcheck='false'>${JSON.stringify(value, null, indent || 0)}</textarea>\n`
     }
 
+    editor_table.prototype.title = function () {
+        return `\n<tr><td>条目</td><td>注释</td><td>值</td></tr>\n`
+    }
+
+    editor_table.prototype.gap = function (field) {
+        return `<tr><td>----</td><td>----</td><td>${field}</td></tr>\n`
+    }
+
+
+    /////////////////////////////////////////////////////////////////////////////
+    /**
+     * 表格生成的控制
+     */
+
+
+    /**
+     * 缩进控制, 此函数未实装, 目前全部使用的是0
+     */
+    editor_table.prototype.indent = function (field) {
+        var num = '\t';
+        if (field.indexOf("['main']") === 0) return 0;
+        if (field === "['special']") return 0;
+        return num;
+    }
+
+    /**
+     * 注释对象的默认值
+     */
+    editor_table.prototype.defaultcobj = {
+        // 默认是文本域
+        _type: 'textarea',
+        _data: '',
+        _string: function (args) {//object~[field,cfield,vobj,cobj]
+            var thiseval = args.vobj;
+            return (typeof (thiseval) === typeof ('')) && thiseval[0] === '"';
+        },
+        // 默认情况下 非对象和数组的视为叶节点
+        _leaf: function (args) {//object~[field,cfield,vobj,cobj]
+            var thiseval = args.vobj;
+            if (thiseval == null || thiseval == undefined) return true;//null,undefined
+            if (typeof (thiseval) === typeof ('')) return true;//字符串
+            if (Object.keys(thiseval).length === 0) return true;//数字,true,false,空数组,空对象
+            return false;
+        },
+    }
 
     /////////////////////////////////////////////////////////////////////////////
     /**
@@ -56,7 +106,7 @@ editor_table_wrapper = function (editor) {
      */
     editor_table.prototype.objToTable_ = function (obj, commentObj) {
         // 表格抬头
-        var outstr = ["\n<tr><td>条目</td><td>注释</td><td>值</td></tr>\n"];
+        var outstr = [editor.table.title()];
         var guids = [];
         var defaultcobj = {
             // 默认是文本域
@@ -124,7 +174,7 @@ editor_table_wrapper = function (editor) {
                 if (cobj._hide) continue;
                 if (!cobj._leaf) {
                     // 不是叶节点时, 插入展开的标记并继续遍历, 此处可以改成按钮用来添加新项或折叠等
-                    outstr.push(["<tr><td>----</td><td>----</td><td>", field, "</td></tr>\n"].join(''));
+                    outstr.push(editor.table.gap(field));
                     recursionParse(field, cfield, vobj, cobj);
                 } else {
                     // 是叶节点时, 调objToTr_渲染<tr>
@@ -309,28 +359,18 @@ editor_table_wrapper = function (editor) {
         var thiseval = vobj;
         if (cobj._select) {
             var values = cobj._select.values;
-            var outstr = ['<select>\n', "<option value='", JSON.stringify(thiseval), "'>", JSON.stringify(thiseval), '</option>\n'];
-            values.forEach(function (v) {
-                outstr.push(["<option value='", JSON.stringify(v), "'>", JSON.stringify(v), '</option>\n'].join(''))
-            });
-            outstr.push('</select>');
-            return outstr.join('');
+            return editor.table.select(thiseval,values);
         } else if (cobj._input) {
-            return ["<input type='text' spellcheck='false' value='", JSON.stringify(thiseval), "'/>\n"].join('');
+            return editor.table.text(thiseval);
         } else if (cobj._bool) {
-            return ["<input type='checkbox' ", (thiseval ? 'checked ' : ''), "/>\n"].join('');
+            return editor.table.checkbox(thiseval);
         } else {
             var num = 0;//editor_table.indent(field);
-            return ["<textarea spellcheck='false' >", JSON.stringify(thiseval, null, num), '</textarea>\n'].join('');
+            return editor.table.textarea(thiseval,num);
         }
     }
 
-    editor_table.prototype.indent = function (field) {
-        var num = '\t';
-        if (field.indexOf("['main']") === 0) return 0;
-        if (field === "['special']") return 0;
-        return num;
-    }
+
 
     editor.constructor.prototype.table = new editor_table();
 }

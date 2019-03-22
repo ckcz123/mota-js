@@ -346,10 +346,15 @@ events.prototype._sys_openDoor = function (data, callback) {
 events.prototype.openDoor = function (id, x, y, needKey, callback) {
     id = id || core.getBlockId(x, y);
     core.saveAndStopAutomaticRoute();
-    if (!this._openDoor_check(id, x, y, needKey)) return false;
+    if (!this._openDoor_check(id, x, y, needKey)) {
+        core.waitHeroToStop(function () {
+            core.unLockControl();
+            if (callback) callback();
+        });
+        return;
+    }
     core.playSound("door.mp3");
     this._openDoor_animate(id, x, y, callback);
-    return true;
 }
 
 events.prototype._openDoor_check = function (id, x, y, needKey) {
@@ -1105,12 +1110,10 @@ events.prototype._action_openDoor = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, x, y, prefix);
     var floorId = data.floorId || core.status.floorId;
     if (floorId == core.status.floorId) {
-        var _callback = function () {
+        core.openDoor(null, loc[0], loc[1], data.needKey, function () {
             core.lockControl();
             core.doAction();
-        }
-        if (!core.openDoor(null, loc[0], loc[1], data.needKey, _callback))
-            _callback();
+        });
     }
     else {
         core.removeBlock(loc[0], loc[1], floorId);
@@ -1159,13 +1162,14 @@ events.prototype._action_trigger = function (data, x, y, prefix) {
     if (block != null && block.block.event.trigger) {
         block = block.block;
         this.setEvents([], block.x, block.y);
+        var _callback = function () {
+            core.lockControl();
+            core.doAction();
+        }
         if (block.event.trigger == 'action')
             this.setEvents(block.event.data);
         else {
-            core.doSystemEvent(block.event.trigger, block, function () {
-                core.lockControl();
-                core.doAction();
-            });
+            core.doSystemEvent(block.event.trigger, block, _callback);
             return;
         }
     }

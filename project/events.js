@@ -226,8 +226,8 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 								"condition": "core.getBgFgNumber('bg') == 167",
 								"true": [
 									{
-										"type": "insert",
-										"name": "滑冰事件"
+										"type": "function",
+										"function": "function(){\ncore.insertAction(\"滑冰事件\",null,null,null,true)\n}"
 									}
 								],
 								"false": []

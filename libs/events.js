@@ -264,14 +264,12 @@ events.prototype._trigger = function (x, y) {
     // 如果已经死亡，或正处于某事件中，则忽略
     if (core.status.gameOver || core.status.event.id) return;
 
-    core.status.isSkiing = false;
     var block = core.getBlock(x, y);
     if (block == null) return;
     block = block.block;
     if (block.event.trigger) {
         var noPass = block.event.noPass, trigger = block.event.trigger;
         if (noPass) core.clearAutomaticRouteNode(x, y);
-        if (trigger == 'ski') core.status.isSkiing = true;
 
         // 转换楼层能否穿透
         if (trigger == 'changeFloor' && !noPass && this._trigger_ignoreChangeFloor(block))
@@ -668,29 +666,7 @@ events.prototype.afterChangeLight = function (x, y) {
 }
 
 events.prototype._sys_ski = function (data, callback) {
-    this.ski();
-    if (callback) callback();
-}
-
-////// 滑冰 //////
-events.prototype.ski = function (direction) {
-    if (!direction)
-        direction = core.status.automaticRoute.lastDirection || core.getHeroLoc('direction');
-    if (core.status.event.id != 'ski') {
-        core.waitHeroToStop(function () {
-            core.status.event.id = 'ski';
-            core.events.ski(direction);
-        });
-    }
-    else {
-        core.moveHero(direction, function () {
-            if (core.status.event.id == 'ski' && !core.status.isSkiing) {
-                core.status.event.id = null;
-                core.unLockControl();
-                core.replay();
-            }
-        })
-    }
+    core.insertAction(["V2.6后，请将滑冰放在背景层！"], data.x, data.y, callback);
 }
 
 events.prototype._sys_action = function (data, callback) {
@@ -815,7 +791,7 @@ events.prototype._popEvents = function (current, prefix) {
 }
 
 ////// 往当前事件列表之前添加一个或多个事件 //////
-events.prototype.insertAction = function (action, x, y, callback) {
+events.prototype.insertAction = function (action, x, y, callback, addToLast) {
     if (core.hasFlag("__statistics__")) return;
     if (core.status.gameOver) return;
 
@@ -828,7 +804,10 @@ events.prototype.insertAction = function (action, x, y, callback) {
         this.doEvents(action, x, y, callback);
     }
     else {
-        core.unshift(core.status.event.data.list[0].todo, action);
+        if (addToLast)
+            core.push(core.status.event.data.list[0].todo, action)
+        else
+            core.unshift(core.status.event.data.list[0].todo, action);
         this.setEvents(null, x, y, callback);
     }
 }

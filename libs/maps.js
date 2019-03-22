@@ -352,7 +352,7 @@ maps.prototype.getBgFgMapArray = function (name, floorId, noCache) {
             if (main.mode == 'editor') arr[y][x] = arr[y][x].idnum || arr[y][x] || 0;
         }
     }
-    if (!noCache)
+    if (core.status[name + "maps"])
         core.status[name + "maps"][floorId] = core.clone(arr);
     return arr;
 }

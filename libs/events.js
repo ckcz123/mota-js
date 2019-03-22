@@ -264,14 +264,12 @@ events.prototype._trigger = function (x, y) {
     // 如果已经死亡，或正处于某事件中，则忽略
     if (core.status.gameOver || core.status.event.id) return;
 
-    core.status.isSkiing = false;
     var block = core.getBlock(x, y);
     if (block == null) return;
     block = block.block;
     if (block.event.trigger) {
         var noPass = block.event.noPass, trigger = block.event.trigger;
         if (noPass) core.clearAutomaticRouteNode(x, y);
-        if (trigger == 'ski') core.status.isSkiing = true;
 
         // 转换楼层能否穿透
         if (trigger == 'changeFloor' && !noPass && this._trigger_ignoreChangeFloor(block))
@@ -346,10 +344,15 @@ events.prototype._sys_openDoor = function (data, callback) {
 events.prototype.openDoor = function (id, x, y, needKey, callback) {
     id = id || core.getBlockId(x, y);
     core.saveAndStopAutomaticRoute();
-    if (!this._openDoor_check(id, x, y, needKey)) return false;
+    if (!this._openDoor_check(id, x, y, needKey)) {
+        core.waitHeroToStop(function () {
+            core.unLockControl();
+            if (callback) callback();
+        });
+        return;
+    }
     core.playSound("door.mp3");
     this._openDoor_animate(id, x, y, callback);
-    return true;
 }
 
 events.prototype._openDoor_check = function (id, x, y, needKey) {
@@ -663,29 +666,7 @@ events.prototype.afterChangeLight = function (x, y) {
 }
 
 events.prototype._sys_ski = function (data, callback) {
-    this.ski();
-    if (callback) callback();
-}
-
-////// 滑冰 //////
-events.prototype.ski = function (direction) {
-    if (!direction)
-        direction = core.status.automaticRoute.lastDirection || core.getHeroLoc('direction');
-    if (core.status.event.id != 'ski') {
-        core.waitHeroToStop(function () {
-            core.status.event.id = 'ski';
-            core.events.ski(direction);
-        });
-    }
-    else {
-        core.moveHero(direction, function () {
-            if (core.status.event.id == 'ski' && !core.status.isSkiing) {
-                core.status.event.id = null;
-                core.unLockControl();
-                core.replay();
-            }
-        })
-    }
+    core.insertAction(["V2.6后，请将滑冰放在背景层！"], data.x, data.y, callback);
 }
 
 events.prototype._sys_action = function (data, callback) {
@@ -810,7 +791,7 @@ events.prototype._popEvents = function (current, prefix) {
 }
 
 ////// 往当前事件列表之前添加一个或多个事件 //////
-events.prototype.insertAction = function (action, x, y, callback) {
+events.prototype.insertAction = function (action, x, y, callback, addToLast) {
     if (core.hasFlag("__statistics__")) return;
     if (core.status.gameOver) return;
 
@@ -823,7 +804,10 @@ events.prototype.insertAction = function (action, x, y, callback) {
         this.doEvents(action, x, y, callback);
     }
     else {
-        core.unshift(core.status.event.data.list[0].todo, action);
+        if (addToLast)
+            core.push(core.status.event.data.list[0].todo, action)
+        else
+            core.unshift(core.status.event.data.list[0].todo, action);
         this.setEvents(null, x, y, callback);
     }
 }
@@ -1105,12 +1089,10 @@ events.prototype._action_openDoor = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, x, y, prefix);
     var floorId = data.floorId || core.status.floorId;
     if (floorId == core.status.floorId) {
-        var _callback = function () {
+        core.openDoor(null, loc[0], loc[1], data.needKey, function () {
             core.lockControl();
             core.doAction();
-        }
-        if (!core.openDoor(null, loc[0], loc[1], data.needKey, _callback))
-            _callback();
+        });
     }
     else {
         core.removeBlock(loc[0], loc[1], floorId);
@@ -1159,13 +1141,14 @@ events.prototype._action_trigger = function (data, x, y, prefix) {
     if (block != null && block.block.event.trigger) {
         block = block.block;
         this.setEvents([], block.x, block.y);
+        var _callback = function () {
+            core.lockControl();
+            core.doAction();
+        }
         if (block.event.trigger == 'action')
             this.setEvents(block.event.data);
         else {
-            core.doSystemEvent(block.event.trigger, block, function () {
-                core.lockControl();
-                core.doAction();
-            });
+            core.doSystemEvent(block.event.trigger, block, _callback);
             return;
         }
     }

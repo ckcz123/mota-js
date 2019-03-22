@@ -194,7 +194,6 @@ function core() {
         },
         'curtainColor': null,
         'openingDoor': null,
-        'isSkiing': false,
 
         // 动画
         'globalAnimateObjs': [],

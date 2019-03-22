@@ -625,8 +625,6 @@ control.prototype.moveAction = function (callback) {
 }
 
 control.prototype._moveAction_noPass = function (canMove, callback) {
-    if (core.status.event.id!='ski')
-        core.status.route.push(core.getHeroLoc('direction'));
     core.status.automaticRoute.moveStepBeforeStop = [];
     core.status.automaticRoute.lastDirection = core.getHeroLoc('direction');
     if (canMove) core.events._trigger(core.nextX(), core.nextY());
@@ -643,8 +641,6 @@ control.prototype._moveAction_moving = function (callback) {
     core.setHeroMoveInterval(function () {
         var direction = core.getHeroLoc('direction');
         core.control._moveAction_popAutomaticRoute();
-        if (core.status.event.id!='ski')
-            core.status.route.push(direction);
 
         // 无事件的道具（如血瓶）需要优先于阻激夹域判定
         var nowx = core.getHeroLoc('x'), nowy = core.getHeroLoc('y');
@@ -657,10 +653,17 @@ control.prototype._moveAction_moving = function (callback) {
         }
         // 执行该点的阻激夹域事件
         core.checkBlock();
+
         // 执行该点事件
         if (!hasTrigger)
             core.events._trigger(nowx, nowy);
         core.updateStatusBar();
+
+        // 检查该点是否是滑冰
+        if (core.getBgFgNumber('bg') == 167) {
+            core.insertAction("滑冰事件", null, null, null, true);
+        }
+
         if (callback) callback();
     });
 }

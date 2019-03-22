@@ -13,14 +13,21 @@ var events_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         "_type": "event",
                         "_range": "thiseval instanceof Array",
                         "_event": "commonEvent",
-                        "_data": "打败怪物后进行加点"
+                        "_data": "打败怪物后加点"
                     },
                     "毒衰咒处理": {
                         "_leaf": true,
                         "_type": "event",
                         "_range": "thiseval instanceof Array",
                         "_event": "commonEvent",
-                        "_data": "对毒衰咒效果进行的处理"
+                        "_data": "毒衰咒效果处理"
+                    },
+                    "滑冰事件": {
+                        "_leaf": true,
+                        "_type": "event",
+                        "_range": "thiseval instanceof Array",
+                        "_event": "commonEvent",
+                        "_data": "滑冰事件"
                     },
                 }
                 if (obj[key]) return obj[key];

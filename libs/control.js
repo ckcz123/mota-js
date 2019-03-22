@@ -657,10 +657,17 @@ control.prototype._moveAction_moving = function (callback) {
         }
         // 执行该点的阻激夹域事件
         core.checkBlock();
+
         // 执行该点事件
         if (!hasTrigger)
             core.events._trigger(nowx, nowy);
         core.updateStatusBar();
+
+        // 检查该点是否是滑冰
+        if (core.getBgFgNumber('bg') == 167) {
+            core.insertAction("滑冰事件");
+        }
+
         if (callback) callback();
     });
 }

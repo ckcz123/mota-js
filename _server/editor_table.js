@@ -38,22 +38,19 @@ editor_table_wrapper = function (editor) {
         return `<tr><td>----</td><td>----</td><td>${field}</td></tr>\n`
     }
 
+    editor_table.prototype.tr = function (guid, field, shortField, commentHTMLescape, cobjstr, shortCommentHTMLescape, tdstr) {
+        return `<tr id="${guid}">
+        <td title="${field}">${shortField}</td>
+        <td title="${commentHTMLescape}" cobj="${cobjstr}">${shortCommentHTMLescape}</td>
+        <td><div class="etableInputDiv">${tdstr}</div></td>
+        </tr>\n`
+    }
+
 
     /////////////////////////////////////////////////////////////////////////////
     /**
      * 表格生成的控制
      */
-
-
-    /**
-     * 缩进控制, 此函数未实装, 目前全部使用的是0
-     */
-    editor_table.prototype.indent = function (field) {
-        var num = '\t';
-        if (field.indexOf("['main']") === 0) return 0;
-        if (field === "['special']") return 0;
-        return num;
-    }
 
     /**
      * 注释对象的默认值
@@ -348,25 +345,23 @@ editor_table_wrapper = function (editor) {
         // 把cobj塞到第二个td的[cobj]中, 方便绑定事件时取
         cobjstr = editor.HTMLescape(JSON.stringify(cobjstr));
 
-        var outstr = ['<tr id="', guid, '"><td title="', field, '">', shortField, '</td>',
-            '<td title="', commentHTMLescape, '" cobj="', cobjstr, '">', shortCommentHTMLescape, '</td>',
-            '<td><div class="etableInputDiv">', editor_mode.objToTd_(obj, commentObj, field, cfield, vobj, cobj), '</div></td></tr>\n',
-        ];
-        return [outstr.join(''), guid];
+        var tdstr = editor_mode.objToTd_(obj, commentObj, field, cfield, vobj, cobj)
+        var outstr = editor.table.tr(guid, field, shortField, commentHTMLescape, cobjstr, shortCommentHTMLescape, tdstr)
+        return [outstr, guid];
     }
 
     editor_table.prototype.objToTd_ = function (obj, commentObj, field, cfield, vobj, cobj) {
         var thiseval = vobj;
         if (cobj._select) {
             var values = cobj._select.values;
-            return editor.table.select(thiseval,values);
+            return editor.table.select(thiseval, values);
         } else if (cobj._input) {
             return editor.table.text(thiseval);
         } else if (cobj._bool) {
             return editor.table.checkbox(thiseval);
         } else {
-            var num = 0;//editor_table.indent(field);
-            return editor.table.textarea(thiseval,num);
+            var num = 0;
+            return editor.table.textarea(thiseval, num);
         }
     }
 

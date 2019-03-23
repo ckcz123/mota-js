@@ -1169,7 +1169,7 @@ maps.prototype.getBlockInfo = function (block) {
         block = this.initBlock(0, 0, block, true);
     }
     var number = block.id, id = block.event.id, cls = block.event.cls,
-        image = null, posX = 0, posY = 0,
+        image = null, posX = 0, posY = 0, animate = block.event.animate,
         height = block.event.height || 32, faceIds = {};
 
     if (id == 'none') return null;
@@ -1193,7 +1193,7 @@ maps.prototype.getBlockInfo = function (block) {
         faceIds = block.event.faceIds || {};
     }
 
-    return {number: number, id: id, cls: cls, image: image, posX: posX, posY: posY, height: height, faceIds: faceIds};
+    return {number: number, id: id, cls: cls, image: image, posX: posX, posY: posY, height: height, faceIds: faceIds, animate: animate};
 }
 
 ////// 搜索某个图块出现的所有位置 //////

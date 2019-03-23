@@ -90,6 +90,7 @@ editor.prototype.init = function (callback) {
             editor.file = editor_file;
             editor_mode = editor_mode(editor);
             editor.mode = editor_mode;
+            editor_table_wrapper(editor);
             core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.initStatus.maps);
             core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function () {
                 afterCoreReset();

@@ -96,7 +96,7 @@ editor_table_wrapper = function (editor) {
      * @param {Object} commentObj 
      * @returns {{"HTML":String,"guids":String[],"listen":Function}}
      */
-    editor_table.prototype.objToTable_ = function (obj, commentObj) {
+    editor_table.prototype.objToTable = function (obj, commentObj) {
         // 表格抬头
         var outstr = [editor.table.title()];
         var guids = [];
@@ -154,7 +154,7 @@ editor_table_wrapper = function (editor) {
                     recursionParse(field, cfield, vobj, cobj);
                 } else {
                     // 是叶节点时, 调objToTr_渲染<tr>
-                    var leafnode = editor_table.objToTr_(obj, commentObj, field, cfield, vobj, cobj);
+                    var leafnode = editor.table.objToTr(obj, commentObj, field, cfield, vobj, cobj);
                     outstr.push(leafnode[0]);
                     guids.push(leafnode[1]);
                 }
@@ -175,7 +175,7 @@ editor_table_wrapper = function (editor) {
      * tr>td[title=field]
      *   >td[title=comment,cobj=cobj:json]
      *   >td>div>input[value=thiseval]
-     * 参数意义在 objToTable_ 中已解释
+     * 参数意义在 objToTable 中已解释
      * @param {Object} obj 
      * @param {Object} commentObj 
      * @param {String} field 
@@ -183,7 +183,7 @@ editor_table_wrapper = function (editor) {
      * @param {Object} vobj 
      * @param {Object} cobj 
      */
-    editor_table.prototype.objToTr_ = function (obj, commentObj, field, cfield, vobj, cobj) {
+    editor_table.prototype.objToTr = function (obj, commentObj, field, cfield, vobj, cobj) {
         var guid = editor.guid();
         var thiseval = vobj;
         var comment = String(cobj._data);
@@ -204,12 +204,12 @@ editor_table_wrapper = function (editor) {
         // 把cobj塞到第二个td的[cobj]中, 方便绑定事件时取
         cobjstr = editor.HTMLescape(JSON.stringify(cobjstr));
 
-        var tdstr = editor_mode.objToTd_(obj, commentObj, field, cfield, vobj, cobj)
+        var tdstr = editor.table.objToTd(obj, commentObj, field, cfield, vobj, cobj)
         var outstr = editor.table.tr(guid, field, shortField, commentHTMLescape, cobjstr, shortCommentHTMLescape, tdstr)
         return [outstr, guid];
     }
 
-    editor_table.prototype.objToTd_ = function (obj, commentObj, field, cfield, vobj, cobj) {
+    editor_table.prototype.objToTd = function (obj, commentObj, field, cfield, vobj, cobj) {
         var thiseval = vobj;
         if (cobj._select) {
             var values = cobj._select.values;

@@ -33,6 +33,7 @@ editor: {
         util: 组件
     }
     game: 来自游戏的数据
+    config: 编辑器配置
     mode: 当前的模式(左侧的选择)
     map: 当前编辑层的地图
     ...

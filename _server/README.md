@@ -33,7 +33,7 @@
 ``` js
 editor.mapInit();//清空地图
 editor.changeFloor('MT2')//切换地图
-editor.guid()//产生一个可以作为id的长随机字符串
+editor.util.guid()//产生一个可以作为id的长随机字符串
 ```
 
 `editor.updateMap`中画未定义快的报错

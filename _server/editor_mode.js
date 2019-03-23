@@ -474,21 +474,8 @@ editor_mode = function (editor) {
         }
         selectAppend.onchange();
 
-        var getPixel=function(imgData, x, y) {
-            var offset = (x + y * imgData.width) * 4;
-            var r = imgData.data[offset+0];
-            var g = imgData.data[offset+1];
-            var b = imgData.data[offset+2];
-            var a = imgData.data[offset+3];
-            return [r,g,b,a];
-        }
-        var setPixel=function(imgData, x, y, rgba) {
-            var offset = (x + y * imgData.width) * 4;
-            imgData.data[offset+0]=rgba[0];
-            imgData.data[offset+1]=rgba[1];
-            imgData.data[offset+2]=rgba[2];
-            imgData.data[offset+3]=rgba[3];
-        }
+        var getPixel=editor.util.getPixel
+        var setPixel=editor.util.setPixel
 
         var autoAdjust = function (image, callback) {
             var changed = false;
@@ -647,113 +634,9 @@ editor_mode = function (editor) {
             var nimgData=new ImageData(imgData.width,imgData.height);
             // ImageData .data 形如一维数组,依次排着每个点的 R(0~255) G(0~255) B(0~255) A(0~255)
             var convert=function(rgba,delta){
-                var round=Math.round;
-                // rgbToHsl hue2rgb hslToRgb from https://github.com/carloscabo/colz.git
-                //--------------------------------------------
-                // The MIT License (MIT)
-                //
-                // Copyright (c) 2014 Carlos Cabo
-                //
-                // Permission is hereby granted, free of charge, to any person obtaining a copy
-                // of this software and associated documentation files (the "Software"), to deal
-                // in the Software without restriction, including without limitation the rights
-                // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-                // copies of the Software, and to permit persons to whom the Software is
-                // furnished to do so, subject to the following conditions:
-                //
-                // The above copyright notice and this permission notice shall be included in all
-                // copies or substantial portions of the Software.
-                //
-                // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-                // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-                // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-                // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-                // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-                // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-                // SOFTWARE.
-                //--------------------------------------------
-                // https://github.com/carloscabo/colz/blob/master/public/js/colz.class.js
-                var rgbToHsl = function (rgba) {
-                    var arg, r, g, b, h, s, l, d, max, min;
-                
-                    arg = rgba;
-                
-                    if (typeof arg[0] === 'number') {
-                      r = arg[0];
-                      g = arg[1];
-                      b = arg[2];
-                    } else {
-                      r = arg[0][0];
-                      g = arg[0][1];
-                      b = arg[0][2];
-                    }
-                
-                    r /= 255;
-                    g /= 255;
-                    b /= 255;
-                
-                    max = Math.max(r, g, b);
-                    min = Math.min(r, g, b);
-                    l = (max + min) / 2;
-                
-                    if (max === min) {
-                      h = s = 0; // achromatic
-                    } else {
-                      d = max - min;
-                      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-                
-                      switch (max) {
-                      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-                      case g: h = (b - r) / d + 2; break;
-                      case b: h = (r - g) / d + 4; break;
-                      }
-                
-                      h /= 6;
-                    }
-                
-                    //CARLOS
-                    h = round(h * 360);
-                    s = round(s * 100);
-                    l = round(l * 100);
-                
-                    return [h, s, l];
-                }
-                //
-                var hue2rgb = function (p, q, t) {
-                    if (t < 0) { t += 1; }
-                    if (t > 1) { t -= 1; }
-                    if (t < 1 / 6) { return p + (q - p) * 6 * t; }
-                    if (t < 1 / 2) { return q; }
-                    if (t < 2 / 3) { return p + (q - p) * (2 / 3 - t) * 6; }
-                    return p;
-                }
-                var hslToRgb = function (hsl) {
-                    var arg, r, g, b, h, s, l, q, p;
-                
-                    arg = hsl;
-                
-                    if (typeof arg[0] === 'number') {
-                      h = arg[0] / 360;
-                      s = arg[1] / 100;
-                      l = arg[2] / 100;
-                    } else {
-                      h = arg[0][0] / 360;
-                      s = arg[0][1] / 100;
-                      l = arg[0][2] / 100;
-                    }
-                
-                    if (s === 0) {
-                      r = g = b = l; // achromatic
-                    } else {
-                
-                      q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-                      p = 2 * l - q;
-                      r = hue2rgb(p, q, h + 1 / 3);
-                      g = hue2rgb(p, q, h);
-                      b = hue2rgb(p, q, h - 1 / 3);
-                    }
-                    return [round(r * 255), round(g * 255), round(b * 255)];
-                }
+                var rgbToHsl = editor.util.rgbToHsl
+                var hue2rgb = editor.util.hue2rgb
+                var hslToRgb = editor.util.hslToRgb
                 //
                 var hsl=rgbToHsl(rgba)
                 hsl[0]=(hsl[0]+delta)%360

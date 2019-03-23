@@ -184,7 +184,7 @@ editor_table_wrapper = function (editor) {
      * @param {Object} cobj 
      */
     editor_table.prototype.objToTr = function (obj, commentObj, field, cfield, vobj, cobj) {
-        var guid = editor.guid();
+        var guid = editor.util.guid();
         var thiseval = vobj;
         var comment = String(cobj._data);
 
@@ -195,14 +195,14 @@ editor_table_wrapper = function (editor) {
         shortField = (shortField.length < charlength ? shortField : shortField.slice(0, charlength) + '...');
 
         // 完整的内容转义后供悬停查看
-        var commentHTMLescape = editor.HTMLescape(comment);
+        var commentHTMLescape = editor.util.HTMLescape(comment);
         // 把长度超过 charlength 的字符改成 固定长度+...的形式
-        var shortCommentHTMLescape = (comment.length < charlength ? commentHTMLescape : editor.HTMLescape(comment.slice(0, charlength)) + '...');
+        var shortCommentHTMLescape = (comment.length < charlength ? commentHTMLescape : editor.util.HTMLescape(comment.slice(0, charlength)) + '...');
 
         var cobjstr = Object.assign({}, cobj);
         delete cobjstr._data;
         // 把cobj塞到第二个td的[cobj]中, 方便绑定事件时取
-        cobjstr = editor.HTMLescape(JSON.stringify(cobjstr));
+        cobjstr = editor.util.HTMLescape(JSON.stringify(cobjstr));
 
         var tdstr = editor.table.objToTd(obj, commentObj, field, cfield, vobj, cobj)
         var outstr = editor.table.tr(guid, field, shortField, commentHTMLescape, cobjstr, shortCommentHTMLescape, tdstr)

@@ -69,7 +69,7 @@ control.prototype._setRequestAnimationFrame = function () {
             if (b.func) {
                 try {
                     if (core.isPlaying() || !b.needPlaying)
-                        core.doFunc(b.func, timestamp);
+                        core.doFunc(b.func, core.control, timestamp);
                 }
                 catch (e) {
                     main.log(e);
@@ -297,7 +297,7 @@ control.prototype._animationFrame_weather_fog = function () {
 }
 
 control.prototype._animationFrame_parallelDo = function (timestamp) {
-    functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.parallelDo(timestamp);
+    core.control.controldata.parallelDo(timestamp);
 }
 
 control.prototype._animationFrame_checkConsoleOpened = function (timestamp) {
@@ -356,6 +356,24 @@ control.prototype.restart = function() {
     this.showStartAnimate();
     core.playBgm(main.startBgm);
 }
+
+////// 询问是否需要重新开始 //////
+control.prototype.confirmRestart = function (fromSettings) {
+    core.status.event.selection = 1;
+    core.ui.drawConfirmBox("你确定要返回标题页面吗？", function () {
+        core.ui.closePanel();
+        core.restart();
+    }, function () {
+        if (fromSettings) {
+            core.status.event.selection = 3;
+            core.ui.drawSettings();
+        }
+        else {
+            core.ui.closePanel();
+        }
+    });
+}
+
 
 ////// 清除游戏状态和数据 //////
 control.prototype.clearStatus = function() {
@@ -607,8 +625,6 @@ control.prototype.moveAction = function (callback) {
 }
 
 control.prototype._moveAction_noPass = function (canMove, callback) {
-    if (core.status.event.id!='ski')
-        core.status.route.push(core.getHeroLoc('direction'));
     core.status.automaticRoute.moveStepBeforeStop = [];
     core.status.automaticRoute.lastDirection = core.getHeroLoc('direction');
     if (canMove) core.events._trigger(core.nextX(), core.nextY());
@@ -625,8 +641,6 @@ control.prototype._moveAction_moving = function (callback) {
     core.setHeroMoveInterval(function () {
         var direction = core.getHeroLoc('direction');
         core.control._moveAction_popAutomaticRoute();
-        if (core.status.event.id!='ski')
-            core.status.route.push(direction);
 
         // 无事件的道具（如血瓶）需要优先于阻激夹域判定
         var nowx = core.getHeroLoc('x'), nowy = core.getHeroLoc('y');
@@ -639,10 +653,17 @@ control.prototype._moveAction_moving = function (callback) {
         }
         // 执行该点的阻激夹域事件
         core.checkBlock();
+
         // 执行该点事件
         if (!hasTrigger)
             core.events._trigger(nowx, nowy);
         core.updateStatusBar();
+
+        // 检查该点是否是滑冰
+        if (core.getBgFgNumber('bg') == 167) {
+            core.insertAction("滑冰事件", null, null, null, true);
+        }
+
         if (callback) callback();
     });
 }
@@ -1239,7 +1260,7 @@ control.prototype.unregisterReplayAction = function (name) {
 control.prototype._doReplayAction = function (action) {
     for (var i in this.replayActions) {
         try {
-            if (core.doFunc(this.replayActions[i].func, action)) return true;
+            if (core.doFunc(this.replayActions[i].func, this, action)) return true;
         } catch (e) {
             main.log(e);
             main.log("ERROR in replayActions["+this.replayActions[i].name+"]：已自动注销该项。");
@@ -1411,7 +1432,7 @@ control.prototype._replayAction_shop = function (action) {
 }
 
 control.prototype._replayAction_turn = function (action) {
-    if (action != 'turn' || action.indexOf('turn:') != 0) return false;
+    if (action != 'turn' && action.indexOf('turn:') != 0) return false;
     if (action == 'turn') core.turnHero();
     else core.turnHero(action.substring(5));
     setTimeout(core.replay);
@@ -1558,7 +1579,7 @@ control.prototype._doSL_replayLoad = function (id) {
     else{
         core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
             if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
-            core.control._doSL_replayLoad_afterGet(data);
+            core.control._doSL_replayLoad_afterGet(id, data);
         }, function(err) {
             main.log(err);
             alert("无效的存档");
@@ -1946,10 +1967,10 @@ control.prototype.setFg = function(color, time, callback) {
         return;
     }
 
-    this._setFg_animate(core.status.curtainColor, color, callback);
+    this._setFg_animate(core.status.curtainColor, color, time, callback);
 }
 
-control.prototype._setFg_animate = function (nowColor, color, callback) {
+control.prototype._setFg_animate = function (nowColor, color, time, callback) {
     var per_time = 10, step = parseInt(time / per_time);
     var animate = setInterval(function() {
         nowColor = [
@@ -1962,7 +1983,7 @@ control.prototype._setFg_animate = function (nowColor, color, callback) {
         core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(nowColor));
         step--;
         if (step <= 0) {
-            delete core.animate.asyncId[animate];
+            delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             core.status.curtainColor = color;
             if (core.isset(callback)) callback();
@@ -2375,7 +2396,7 @@ control.prototype.unregisterResize = function (name) {
 control.prototype._doResize = function (obj) {
     for (var i in this.resizes) {
         try {
-            if (core.doFunc(this.resizes[i].func, obj)) return true;
+            if (core.doFunc(this.resizes[i].func, this, obj)) return true;
         } catch (e) {
             main.log(e);
             main.log("ERROR in resizes["+this.resizes[i].name+"]：已自动注销该项。");

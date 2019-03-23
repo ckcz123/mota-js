@@ -142,7 +142,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		color = core.status.maps[floorId].color;
 	core.clearMap('curtain');
 	core.status.curtainColor = color;
-	if (color) core.fillRect('curtain', 0, 0, core.__SIZE__, core.__SIZE__, core.arrayToRGBA(color));
+	if (color) core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(color));
 	// 更改天气
 	var weather = core.getFlag('__weather__', null);
 	if (!weather && core.status.maps[floorId].weather)
@@ -172,6 +172,32 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			core.visitFloor(floorId);
 		}
 	}
+},
+        "flyTo": function (toId, callback) {
+	// 楼层传送器的使用，从当前楼层飞往toId
+	// 如果不能飞行请返回false
+
+	var fromId = core.status.floorId;
+
+	// 检查能否飞行
+	if (!core.status.maps[fromId].canFlyTo || !core.status.maps[toId].canFlyTo) {
+		core.drawTip("无法飞往" + core.status.maps[toId].title + "！");
+		return false;
+	}
+
+	// 获得两个楼层的索引，以决定是上楼梯还是下楼梯
+	var fromIndex = core.floorIds.indexOf(fromId),
+		toIndex = core.floorIds.indexOf(toId);
+	var stair = fromIndex <= toIndex ? "downFloor" : "upFloor";
+	// 地下层：同层传送至上楼梯
+	if (fromIndex == toIndex && core.status.maps[fromId].underGround) stair = "upFloor";
+	// 记录录像
+	core.status.route.push("fly:" + toId);
+	// 传送
+	core.ui.closePanel();
+	core.changeFloor(toId, stair, null, null, callback);
+
+	return true;
 },
         "beforeBattle": function (enemyId, x, y) {
 	// 战斗前触发的事件，可以加上一些战前特效（详见下面支援的例子）
@@ -776,12 +802,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			core.getNextItem();
 			break;
 		case 82: // R：回放录像
-			if (core.hasFlag('debug')) {
-				core.drawText("\t[系统提示]调试模式下无法回放录像");
-			}
-			else {
-				core.ui.drawReplay();
-			}
+			core.actions._clickSyncSave_replay();
 			break;
 		case 33: case 34: // PgUp/PgDn：浏览地图
 			core.ui.drawMaps();
@@ -796,19 +817,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			core.ui.drawHelp();
 			break;
 		case 78: // N：重新开始
-			core.status.event.selection=1;
-			core.ui.drawConfirmBox("你确定要返回标题页面吗？", function () {
-				core.ui.closePanel();
-				core.restart();
-			}, function () {
-				core.ui.closePanel();
-			});
+			core.confirmRestart();
 			break;
 		case 79: // O：查看工程
-			window.open(core.platform.isPC?"editor.html":"editor-mobile.html", "_blank");
+			core.actions._clickGameInfo_openProject();
 			break;
 		case 80: // P：游戏主页
-			window.open("/score.php?name="+core.firstData.name+"&num=10", "_blank");
+			core.actions._clickGameInfo_openComments();
 			break;
 		case 49: // 快捷键1: 破
 			if (core.hasItem('pickaxe')) {
@@ -957,31 +972,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 切换到对应的楼层
 	core.changeFloor(data.floorId, null, data.hero.loc, 0, callback, true);
-},
-        "flyTo": function (toId, callback) {
-	// 楼层传送器的使用，从当前楼层飞往toId
-	// 如果不能飞行请返回false
-
-	var fromId = core.status.floorId;
-	
-	// 检查能否飞行
-	if (!core.status.maps[fromId].canFlyTo || !core.status.maps[toId].canFlyTo) {
-		core.drawTip("无法飞往" + core.status.maps[toId].title +"！");
-		return false;
-	}
-	
-	// 获得两个楼层的索引，以决定是上楼梯还是下楼梯
-	var fromIndex = core.floorIds.indexOf(fromId), toIndex = core.floorIds.indexOf(toId);
-	var stair = fromIndex<=toIndex?"downFloor":"upFloor";
-	// 地下层：同层传送至上楼梯
-	if (fromIndex == toIndex && core.status.maps[fromId].underGround) stair = "upFloor";
-	// 记录录像
-	core.status.route.push("fly:"+toId);
-	// 传送
-	core.ui.closePanel();
-	core.changeFloor(toId, stair, null, null, callback);
-	
-	return true;
 },
         "updateStatusBar": function () {
 	// 更新状态栏
@@ -1276,6 +1266,37 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		return true;
 	}
 	return false;
+},
+        "parallelDo": function (timestamp) {
+	// 并行事件处理，可以在这里写任何需要并行处理的脚本或事件
+	// 该函数将被系统反复执行，每次执行间隔视浏览器或设备性能而定，一般约为16.6ms一次
+	// 参数timestamp为“从游戏资源加载完毕到当前函数执行时”的时间差，以毫秒为单位
+
+	// 检查当前是否处于游戏开始状态
+	if (!core.isPlaying()) return;
+
+	// 执行当前楼层的并行事件处理
+	if (core.status.floorId) {
+		try {
+			eval(core.floors[core.status.floorId].parallelDo);
+		} catch (e) {
+			main.log(e);
+		}
+	}
+
+	// 下面是一个并行事件开门的样例
+	/*
+	// 如果某个flag为真
+	if (core.hasFlag("xxx")) {
+	    // 千万别忘了将该flag清空！否则下次仍然会执行这段代码。
+	    core.removeFlag("xxx");
+	    // 使用insertAction来插入若干自定义事件执行
+	    core.insertAction([
+	        {"type":"openDoor", "loc":[0,0], "floorId": "MT0"}
+	    ])
+	    // 也可以写任意其他的脚本代码
+	}
+	*/
 }
     },
     "ui": {
@@ -1385,59 +1406,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.fillText('ui', "作者： 艾之葵", text_start, top + 112);
 	core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112+32);
 	// TODO: 写自己的“关于”页面，每次增加32像素即可
-}
-    },
-    "plugins": {
-        "parallelDo": function (timestamp) {
-	// 并行事件处理，可以在这里写任何需要并行处理的脚本或事件
-	// 该函数将被系统反复执行，每次执行间隔视浏览器或设备性能而定，一般约为16.6ms一次
-	// 参数timestamp为“从游戏资源加载完毕到当前函数执行时”的时间差，以毫秒为单位
-
-	// 检查当前是否处于游戏开始状态
-	if (!core.isPlaying()) return;
-
-	// 执行当前楼层的并行事件处理
-	if (core.status.floorId) {
-		try {
-			eval(core.floors[core.status.floorId].parallelDo);
-		} catch (e) {
-			main.log(e);
-		}
-	}
-
-	// 下面是一个并行事件开门的样例
-	/*
-	// 如果某个flag为真
-	if (core.hasFlag("xxx")) {
-		// 千万别忘了将该flag清空！否则下次仍然会执行这段代码。
-		core.removeFlag("xxx");
-		// 使用insertAction来插入若干自定义事件执行
-		core.insertAction([
-			{"type":"openDoor", "loc":[0,0], "floorId": "MT0"}
-		])
-		// 也可以写任意其他的脚本代码
-	}
-	 */
-
-
-},
-        "plugin": function () {
-	////// 插件编写，此处会导入插件编写中的所有函数 //////
-
-	// 在这里写的代码，在所有模块加载完毕后，游戏开始前会被执行
-	console.log("插件编写测试");
-	// 可以写一些其他的被直接执行的代码
-
-	var pluginsData=plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1
-	for(var functionName in pluginsData){
-		this[functionName]=pluginsData[functionName]
-	}
-
-	// 可以在任何地方（如afterXXX或自定义脚本事件）调用函数，方法为  core.plugin.xxx();
-
-	// 可以在此处直接执行插件编写中的函数
-	core.plugin.test();
-
 }
     }
 }

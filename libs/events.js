@@ -247,7 +247,7 @@ events.prototype.unregisterSystemEvent = function (type) {
 events.prototype.doSystemEvent = function (type, data, callback) {
     if (this.systemEvents[type]) {
         try {
-            return core.doFunc(this.systemEvents[type], data, data, callback);
+            return core.doFunc(this.systemEvents[type], this, data, data, callback);
         }
         catch (e) {
             main.log(e);
@@ -264,14 +264,12 @@ events.prototype._trigger = function (x, y) {
     // 如果已经死亡，或正处于某事件中，则忽略
     if (core.status.gameOver || core.status.event.id) return;
 
-    core.status.isSkiing = false;
     var block = core.getBlock(x, y);
     if (block == null) return;
     block = block.block;
     if (block.event.trigger) {
         var noPass = block.event.noPass, trigger = block.event.trigger;
         if (noPass) core.clearAutomaticRouteNode(x, y);
-        if (trigger == 'ski') core.status.isSkiing = true;
 
         // 转换楼层能否穿透
         if (trigger == 'changeFloor' && !noPass && this._trigger_ignoreChangeFloor(block))
@@ -346,10 +344,15 @@ events.prototype._sys_openDoor = function (data, callback) {
 events.prototype.openDoor = function (id, x, y, needKey, callback) {
     id = id || core.getBlockId(x, y);
     core.saveAndStopAutomaticRoute();
-    if (!this._openDoor_check(id, x, y, needKey)) return false;
+    if (!this._openDoor_check(id, x, y, needKey)) {
+        core.waitHeroToStop(function () {
+            core.unLockControl();
+            if (callback) callback();
+        });
+        return;
+    }
     core.playSound("door.mp3");
     this._openDoor_animate(id, x, y, callback);
-    return true;
 }
 
 events.prototype._openDoor_check = function (id, x, y, needKey) {
@@ -663,29 +666,7 @@ events.prototype.afterChangeLight = function (x, y) {
 }
 
 events.prototype._sys_ski = function (data, callback) {
-    this.ski();
-    if (callback) callback();
-}
-
-////// 滑冰 //////
-events.prototype.ski = function (direction) {
-    if (!direction)
-        direction = core.status.automaticRoute.lastDirection || core.getHeroLoc('direction');
-    if (core.status.event.id != 'ski') {
-        core.waitHeroToStop(function () {
-            core.status.event.id = 'ski';
-            core.events.ski(direction);
-        });
-    }
-    else {
-        core.moveHero(direction, function () {
-            if (core.status.event.id == 'ski' && !core.status.isSkiing) {
-                core.status.event.id = null;
-                core.unLockControl();
-                core.replay();
-            }
-        })
-    }
+    core.insertAction(["V2.6后，请将滑冰放在背景层！"], data.x, data.y, callback);
 }
 
 events.prototype._sys_action = function (data, callback) {
@@ -722,7 +703,7 @@ events.prototype.doEvent = function (data, x, y, prefix) {
     var type = data.type;
     if (this.actions[type]) {
         try {
-            return core.doFunc(this.actions[type], data, x, y, prefix);
+            return core.doFunc(this.actions[type], this, data, x, y, prefix);
         }
         catch (e) {
             main.log(e);
@@ -755,7 +736,8 @@ events.prototype.setEvents = function (list, x, y, callback) {
     if (x != null) data.x = x;
     if (y != null) data.y = y;
     if (callback) data.callback = callback;
-    core.status.event = {id: 'action', data: data};
+    core.status.event.id = 'action';
+    core.status.event.data = data;
 }
 
 ////// 执行当前自定义事件列表中的下一个事件 //////
@@ -764,12 +746,12 @@ events.prototype.doAction = function () {
     core.status.boxAnimateObjs = [];
     clearInterval(core.status.event.interval);
     core.status.event.interval = null;
-    core.clearLastEvent();
+    core.clearSelector();
     // 判定是否执行完毕
     if (this._doAction_finishEvents()) return;
     // 当前点坐标和前缀
     var x = core.status.event.data.x, y = core.status.event.data.y;
-    var prefix = [core.status.floorId || "f", x != null ? x : "x", y != null ? y : "y"].join("@");
+    var prefix = [core.status.floorId || ":f", x != null ? x : "x", y != null ? y : "y"].join("@");
     var current = core.status.event.data.list[0];
     if (this._popEvents(current, prefix)) return;
     // 当前要执行的事件
@@ -809,7 +791,7 @@ events.prototype._popEvents = function (current, prefix) {
 }
 
 ////// 往当前事件列表之前添加一个或多个事件 //////
-events.prototype.insertAction = function (action, x, y, callback) {
+events.prototype.insertAction = function (action, x, y, callback, addToLast) {
     if (core.hasFlag("__statistics__")) return;
     if (core.status.gameOver) return;
 
@@ -822,7 +804,10 @@ events.prototype.insertAction = function (action, x, y, callback) {
         this.doEvents(action, x, y, callback);
     }
     else {
-        core.unshift(core.status.event.data.list[0].todo, action);
+        if (addToLast)
+            core.push(core.status.event.data.list[0].todo, action)
+        else
+            core.unshift(core.status.event.data.list[0].todo, action);
         this.setEvents(null, x, y, callback);
     }
 }
@@ -1104,17 +1089,20 @@ events.prototype._action_openDoor = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, x, y, prefix);
     var floorId = data.floorId || core.status.floorId;
     if (floorId == core.status.floorId) {
-        var _callback = function () {
+        core.openDoor(null, loc[0], loc[1], data.needKey, function () {
             core.lockControl();
             core.doAction();
-        }
-        if (!core.openDoor(null, loc[0], loc[1], data.needKey, _callback))
-            _callback();
+        });
     }
     else {
         core.removeBlock(loc[0], loc[1], floorId);
         core.doAction();
     }
+}
+
+events.prototype._action_closeDoor = function (data, x, y, prefix) {
+    var loc = this.__action_getLoc(data.loc, x, y, prefix);
+    core.closeDoor(loc[0], loc[1], data.id, core.doAction);
 }
 
 events.prototype._action_useItem = function (data, x, y, prefix) {
@@ -1153,13 +1141,14 @@ events.prototype._action_trigger = function (data, x, y, prefix) {
     if (block != null && block.block.event.trigger) {
         block = block.block;
         this.setEvents([], block.x, block.y);
+        var _callback = function () {
+            core.lockControl();
+            core.doAction();
+        }
         if (block.event.trigger == 'action')
             this.setEvents(block.event.data);
         else {
-            core.doSystemEvent(block.event.trigger, block, function () {
-                core.lockControl();
-                core.doAction();
-            });
+            core.doSystemEvent(block.event.trigger, block, _callback);
             return;
         }
     }
@@ -1593,7 +1582,7 @@ events.prototype.useFly = function (fromUserAction) {
 }
 
 events.prototype.flyTo = function (toId, callback) {
-    return this.controldata.flyTo(toId, callback);
+    return this.eventdata.flyTo(toId, callback);
 }
 
 ////// 点击装备栏时的打开操作 //////
@@ -1722,7 +1711,7 @@ events.prototype.setValue = function (name, value, prefix, add) {
     this._setValue_setStatus(name, value);
     this._setValue_setItem(name, value);
     this._setValue_setFlag(name, value);
-    this._setValue_setSwitch(name, value);
+    this._setValue_setSwitch(name, value, prefix);
     core.updateStatusBar();
 }
 
@@ -1750,7 +1739,7 @@ events.prototype._setValue_setFlag = function (name, value) {
 
 events.prototype._setValue_setSwitch = function (name, value, prefix) {
     if (name.indexOf("switch:") !== 0) return;
-    core.setFlag((prefix || "f@x@y") + "@" + data.name.substring(7), value);
+    core.setFlag((prefix || ":f@x@y") + "@" + name.substring(7), value);
 }
 
 ////// 数值增减 //////
@@ -1797,6 +1786,32 @@ events.prototype.setGlobalFlag = function (name, value) {
     core.flags[name] = value;
     core.setFlag("globalFlags", flags);
     core.resize();
+}
+
+events.prototype.closeDoor = function (x, y, id, callback) {
+    id = id || "";
+    if (!(id.endsWith("Door") || id.endsWith("Wall"))
+        || !core.material.icons.animates[id] || core.getBlock(x, y) != null) {
+        if (callback) callback();
+        return;
+    }
+    // 关门动画
+    core.playSound('door.mp3');
+    var door = core.material.icons.animates[id];
+    var speed = id.endsWith("Door") ? 30 : 70, state = 0;
+    var animate = window.setInterval(function () {
+        state++;
+        if (state == 4) {
+            clearInterval(animate);
+            delete core.animateFrame.asyncId[animate];
+            core.setBlock(core.getNumberById(id), x, y);
+            if (callback) callback();
+            return;
+        }
+        core.clearMap('event', 32 * x, 32 * y, 32, 32);
+        core.drawImage('event', core.material.images.animates, 32 * (4-state), 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
+    }, speed / core.status.replay.speed);
+    core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 显示图片 //////

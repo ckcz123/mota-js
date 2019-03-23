@@ -331,13 +331,13 @@ maps.prototype.getMapBlocksObj = function (floorId, showDisable) {
 }
 
 ////// 将背景前景层变成二维数组的形式 //////
-maps.prototype.getBgFgMapArray = function (name, floorId, useCache) {
+maps.prototype.getBgFgMapArray = function (name, floorId, noCache) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return [];
     var width = core.floors[floorId].width;
     var height = core.floors[floorId].height;
 
-    if (useCache && core.status[name + "maps"][floorId])
+    if (!noCache && core.status[name + "maps"][floorId])
         return core.status[name + "maps"][floorId];
 
     var arr = core.clone(core.floors[floorId][name + "map"] || []);
@@ -352,23 +352,34 @@ maps.prototype.getBgFgMapArray = function (name, floorId, useCache) {
             if (main.mode == 'editor') arr[y][x] = arr[y][x].idnum || arr[y][x] || 0;
         }
     }
-    if (useCache)
+    if (core.status[name + "maps"])
         core.status[name + "maps"][floorId] = core.clone(arr);
     return arr;
+}
+
+maps.prototype.getBgFgNumber = function (name, x, y, floorId, noCache) {
+    if (x == null) x = core.getHeroLoc('x');
+    if (y == null) y = core.getHeroLoc('y');
+    return this.getBgFgMapArray(name, floorId, noCache)[y][x];
 }
 
 // ------ 当前能否朝某方向移动，能否瞬间移动 ------ //
 
 ////// 生成全图的当前可移动信息 //////
-maps.prototype.generateMovableArray = function (floorId, x, y) {
+maps.prototype.generateMovableArray = function (floorId, x, y, direction) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return null;
     var width = core.floors[floorId].width, height = core.floors[floorId].height;
-    var bgArray = this.getBgFgMapArray('bg', floorId, true),
-        fgArray = this.getBgFgMapArray('fg', floorId, true),
+    var bgArray = this.getBgFgMapArray('bg', floorId),
+        fgArray = this.getBgFgMapArray('fg', floorId),
         eventArray = this.getMapArray(floorId);
 
-    var generate = function (x, y) {
+    var generate = function (x, y, direction) {
+        if (direction != null) {
+            return core.maps._canMoveHero_checkPoint(x, y, direction, floorId, {
+                bgArray: bgArray, fgArray: fgArray, eventArray: eventArray
+            });
+        }
         return ["left", "down", "up", "right"].filter(function (direction) {
             return core.maps._canMoveHero_checkPoint(x, y, direction, floorId, {
                 bgArray: bgArray, fgArray: fgArray, eventArray: eventArray
@@ -376,7 +387,7 @@ maps.prototype.generateMovableArray = function (floorId, x, y) {
         });
     }
 
-    if (x != null && y != null) return generate(x, y);
+    if (x != null && y != null) return generate(x, y, direction);
     var array = [];
     for (var x = 0; x < width; x++) {
         array[x] = [];
@@ -392,7 +403,7 @@ maps.prototype.canMoveHero = function (x, y, direction, floorId) {
     if (x == null) x = core.getHeroLoc('x');
     if (y == null) y = core.getHeroLoc('y');
     direction = direction || core.getHeroLoc('direction');
-    return core.inArray(this.generateMovableArray(floorId, x, y), direction);
+    return this.generateMovableArray(floorId, x, y, direction);
 }
 
 maps.prototype._canMoveHero_checkPoint = function (x, y, direction, floorId, extraData) {
@@ -472,6 +483,8 @@ maps.prototype._canMoveDirectly_checkStartPoint = function (sx, sy) {
 maps.prototype._canMoveDirectly_bfs = function (sx, sy, ex, ey) {
     var canMoveArray = this.generateMovableArray();
     var blocksObj = this.getMapBlocksObj(core.status.floorId);
+    // 滑冰
+    var bgMap = this.getBgFgMapArray('bg');
 
     var visited = [], queue = [];
     visited[sx + "," + sy] = 0;
@@ -483,6 +496,7 @@ maps.prototype._canMoveDirectly_bfs = function (sx, sy, ex, ey) {
             if (!core.inArray(canMoveArray[x][y], direction)) continue;
             var nx = x + core.utils.scan[direction].x, ny = y + core.utils.scan[direction].y, nindex = nx + "," + ny;
             if (visited[nindex]) continue;
+            if (bgMap[ny][nx] == 167) continue;
             if (!this._canMoveDirectly_checkNextPoint(blocksObj, nx, ny)) continue;
             visited[nindex] = visited[now] + 1;
             if (nx == ex && ny == ey) return visited[nindex];
@@ -565,7 +579,7 @@ maps.prototype._automaticRoute_deepAdd = function (x, y) {
         // 绕过血瓶
         if (!core.flags.potionWhileRouting && id.endsWith("Potion")) deepAdd += 100;
         // 绕过传送点
-        // if (nextBlock.block.event.trigger == 'changeFloor') deepAdd+=10;
+        // if (block.block.event.trigger == 'changeFloor') deepAdd+=10;
     }
     // 绕过存在伤害的地方
     deepAdd += (core.status.checkBlock.damage[x+","+y]||0) * 100;
@@ -739,7 +753,7 @@ maps.prototype._drawBgFgMap = function (floorId, ctx, name, onMap) {
     if (!core.status[name + "maps"])
         core.status[name + "maps"] = {};
 
-    var arr = this.getBgFgMapArray(name, floorId);
+    var arr = this.getBgFgMapArray(name, floorId, true);
     for (var x = 0; x < width; x++) {
         for (var y = 0; y < height; y++) {
             var block = this.initBlock(x, y, arr[y][x], true);
@@ -1155,7 +1169,7 @@ maps.prototype.getBlockInfo = function (block) {
         block = this.initBlock(0, 0, block, true);
     }
     var number = block.id, id = block.event.id, cls = block.event.cls,
-        image = null, posX = 0, posY = 0,
+        image = null, posX = 0, posY = 0, animate = block.event.animate,
         height = block.event.height || 32, faceIds = {};
 
     if (id == 'none') return null;
@@ -1179,7 +1193,7 @@ maps.prototype.getBlockInfo = function (block) {
         faceIds = block.event.faceIds || {};
     }
 
-    return {number: number, id: id, cls: cls, image: image, posX: posX, posY: posY, height: height, faceIds: faceIds};
+    return {number: number, id: id, cls: cls, image: image, posX: posX, posY: posY, height: height, faceIds: faceIds, animate: animate};
 }
 
 ////// 搜索某个图块出现的所有位置 //////

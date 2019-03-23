@@ -256,6 +256,7 @@ action
     |   waitAsync_s
     |   battle_s
     |   openDoor_s
+    |   closeDoor_s
     |   changeFloor_s
     |   changePos_0_s
     |   changePos_1_s
@@ -958,6 +959,23 @@ if (PosString_0 && PosString_1) {
 }
 Bool_0 = Bool_0 ? ', "needKey": true' : '';
 var code = '{"type": "openDoor"'+floorstr+IdString_0+Bool_0+'},\n';
+return code;
+*/;
+
+closeDoor_s
+    :   '关门' 'x' PosString? ',' 'y' PosString? 'ID' IdString  Newline
+
+
+/* closeDoor_s
+tooltip : closeDoor: 关门事件，需要该点本身无事件
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=opendoor%EF%BC%9A%E5%BC%80%E9%97%A8
+default : ["","","yellowDoor"]
+colour : this.dataColor
+var floorstr = '';
+if (PosString_0 && PosString_1) {
+    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+}
+var code = '{"type": "closeDoor", "id": "'+IdString_0+'"'+floorstr+'},\n';
 return code;
 */;
 
@@ -2337,6 +2355,11 @@ ActionParser.prototype.parseAction = function() {
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['openDoor_s'].xmlText([
         data.loc[0],data.loc[1],data.floorId||'',data.needKey||false,this.next]);
+      break;
+    case "closeDoor": // 关一个门，需要该点无事件
+      data.loc=data.loc||['','']
+      this.next = MotaActionBlocks['closeDoor_s'].xmlText([
+        data.loc[0],data.loc[1],data.id,this.next]);
       break;
     case "useItem": // 使用道具
       this.next = MotaActionBlocks['useItem_s'].xmlText([

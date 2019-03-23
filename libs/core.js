@@ -20,7 +20,7 @@ function core() {
         'events': {}
     }
     this.timeout = {
-        'getItemTipTimeout': null,
+        'tipTimeout': null,
         'turnHeroTimeout': null,
         'onDownTimeout': null,
         'sleepTimeout': null,
@@ -194,7 +194,6 @@ function core() {
         },
         'curtainColor': null,
         'openingDoor': null,
-        'isSkiing': false,
 
         // 动画
         'globalAnimateObjs': [],
@@ -242,8 +241,6 @@ core.prototype._init_flags = function () {
     document.getElementById("startLogo").innerHTML = core.firstData.title;
     (core.firstData.shops||[]).forEach(function (t) { core.initStatus.shops[t.id] = t; });
     core.maps._setFloorSize();
-    // 初始化地图
-    core.initStatus.maps = core.maps.initMaps(core.floorIds);
     // 初始化怪物、道具等
     core.material.enemys = core.enemys.getEnemys();
     core.material.items = core.items.getItems();
@@ -337,15 +334,30 @@ core.prototype._init_others = function () {
 }
 
 core.prototype._afterLoadResources = function (callback) {
+    // 初始化地图
+    core.initStatus.maps = core.maps.initMaps(core.floorIds);
     core.control._setRequestAnimationFrame();
-
-    core.plugin = new function () {};
-    core.plugin.__init__ = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.plugin;
-    core.plugin.__init__();
-    core._forwardFunc("plugin");
-
+    core._initPlugins();
     core.showStartAnimate();
     if (callback) callback();
+}
+
+core.prototype._initPlugins = function () {
+    core.plugin = new function () {};
+
+    for (var name in plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1) {
+        if (plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1[name] instanceof Function) {
+            try {
+                plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1[name].apply(core.plugin);
+            }
+            catch (e) {
+                main.log(e);
+                main.log("无法初始化插件"+name);
+            }
+        }
+    }
+
+    core._forwardFunc("plugin");
 }
 
 core.prototype._forwardFuncs = function () {
@@ -376,9 +388,12 @@ core.prototype._forwardFunc = function (name, funcname) {
     eval("core." + funcname + " = function (" + parameters + ") {\n\treturn core." + name + "." + funcname + "(" + parameters + ");\n}");
 }
 
-core.prototype.doFunc = function (func) {
-    if (typeof func == 'string') func = core.plugin[func];
-    return func.apply(this, Array.prototype.slice.call(arguments, 1));
+core.prototype.doFunc = function (func, _this) {
+    if (typeof func == 'string') {
+        func = core.plugin[func];
+        _this = core.plugin;
+    }
+    return func.apply(_this, Array.prototype.slice.call(arguments, 2));
 }
 
 /**

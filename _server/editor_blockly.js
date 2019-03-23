@@ -93,6 +93,7 @@ editor_blockly = function () {
       MotaActionBlocks['changePos_1_s'].xmlText(),
       MotaActionBlocks['battle_s'].xmlText(),
       MotaActionBlocks['openDoor_s'].xmlText(),
+      MotaActionBlocks['closeDoor_s'].xmlText(),
       MotaActionBlocks['useItem_s'].xmlText(),
       MotaActionBlocks['openShop_s'].xmlText(),
       MotaActionBlocks['setBlock_s'].xmlText(),
@@ -312,7 +313,8 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
   //console.log(e);
   e.preventDefault();
   var hvScroll = e.shiftKey?'hScroll':'vScroll';
-  workspace.scrollbar[hvScroll].handlePosition_+=( ((e.deltaY||0)+(e.detail||0)) >0?20:-20);
+  var mousewheelOffsetValue=20/380*workspace.scrollbar[hvScroll].handleLength_*3;
+  workspace.scrollbar[hvScroll].handlePosition_+=( ((e.deltaY||0)+(e.detail||0)) >0?mousewheelOffsetValue:-mousewheelOffsetValue);
   workspace.scrollbar[hvScroll].onScroll_();
   workspace.setScale(workspace.scale);
 }
@@ -442,13 +444,13 @@ function omitedcheckUpdateFunction(event) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState != 4) return;
         if (xhr.status != 200) {
-            alert("无法在file://下加载");
+            alert("图块描述文件加载失败, 请在'启动服务.exe'中打开编辑器");
             return;
         }
         input_ = xhr.responseText;
         editor_blockly.runOne();
     }
-    xhr.open('GET', '_server/blockly/MotaAction.g4', true);
+    xhr.open('GET', '_server/MotaAction.g4', true);
     xhr.send(null);
 
     codeAreaHL = CodeMirror.fromTextArea(document.getElementById("codeArea"), {

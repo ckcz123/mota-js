@@ -751,7 +751,7 @@ events.prototype.doAction = function () {
     if (this._doAction_finishEvents()) return;
     // 当前点坐标和前缀
     var x = core.status.event.data.x, y = core.status.event.data.y;
-    var prefix = [core.status.floorId || "f", x != null ? x : "x", y != null ? y : "y"].join("@");
+    var prefix = [core.status.floorId || ":f", x != null ? x : "x", y != null ? y : "y"].join("@");
     var current = core.status.event.data.list[0];
     if (this._popEvents(current, prefix)) return;
     // 当前要执行的事件
@@ -1711,7 +1711,7 @@ events.prototype.setValue = function (name, value, prefix, add) {
     this._setValue_setStatus(name, value);
     this._setValue_setItem(name, value);
     this._setValue_setFlag(name, value);
-    this._setValue_setSwitch(name, value);
+    this._setValue_setSwitch(name, value, prefix);
     core.updateStatusBar();
 }
 
@@ -1739,7 +1739,7 @@ events.prototype._setValue_setFlag = function (name, value) {
 
 events.prototype._setValue_setSwitch = function (name, value, prefix) {
     if (name.indexOf("switch:") !== 0) return;
-    core.setFlag((prefix || "f@x@y") + "@" + data.name.substring(7), value);
+    core.setFlag((prefix || ":f@x@y") + "@" + name.substring(7), value);
 }
 
 ////// 数值增减 //////

@@ -873,29 +873,31 @@ ui.prototype._createTextCanvas = function (content, lineHeight) {
     ctx.canvas.width = width;
     ctx.canvas.height = height;
     ctx.clearRect(0, 0, width, height);
+    return ctx;
 }
 
 ////// 绘制滚动字幕 //////
-ui.prototype.drawScrollText = function (content, time, callback) {
+ui.prototype.drawScrollText = function (content, time, lineHeight, callback) {
     content = core.replaceText(content || "");
+    lineHeight = lineHeight || 1.4;
     time = time || 5000;
     clearInterval(core.status.event.interval);
     core.status.event.interval = null;
     var offset = core.status.textAttribute.offset || 15;
-    var lineHeight = core.status.textAttribute.textfont * 1.4;
+    lineHeight *= core.status.textAttribute.textfont;
     var ctx = this._createTextCanvas(content, lineHeight);
     var obj = { align: core.status.textAttribute.align, lineHeight: lineHeight };
     if (obj.align == 'right') obj.left = this.PIXEL - offset;
     else if (obj.align != 'center') obj.left = offset;
     this.drawTextContent(ctx, content, obj);
-    this._drawScrollText_animate(ctx, height, time, callback);
+    this._drawScrollText_animate(ctx, time, callback);
 }
 
-ui.prototype._drawScrollText_animate = function (ctx, height, time, callback) {
+ui.prototype._drawScrollText_animate = function (ctx, time, callback) {
     // 开始绘制到UI上
     core.clearMap('ui');
-    var per_pixel = 1, per_time = time * per_pixel / (416+height);
-    var currH = 416;
+    var per_pixel = 1, height = ctx.canvas.height, per_time = time * per_pixel / (this.PIXEL+height);
+    var currH = this.PIXEL;
     core.drawImage('ui', ctx.canvas, 0, currH);
     var animate = setInterval(function () {
         core.clearMap('ui');
@@ -913,9 +915,10 @@ ui.prototype._drawScrollText_animate = function (ctx, height, time, callback) {
 }
 
 ////// 文本图片化 //////
-ui.prototype.textImage = function (content) {
+ui.prototype.textImage = function (content, lineHeight) {
     content = core.replaceText(content || "");
-    var lineHeight = core.status.textAttribute.textfont * 1.4;
+    lineHeight = lineHeight || 1.4;
+    lineHeight *= core.status.textAttribute.textfont;
     var ctx = this._createTextCanvas(content, lineHeight);
     this.drawTextContent(ctx, content, { align: core.status.textAttribute.align, lineHeight: lineHeight });
     return ctx.canvas;

@@ -311,19 +311,25 @@ utils.prototype.clone = function (data) {
 }
 
 ////// 裁剪图片 //////
-utils.prototype.cropImage = function (image, size) {
-    size = size || 32;
+utils.prototype.splitImage = function (image, width, height) {
+    if (typeof image == "string")
+        image = core.material.images.images[image];
+    if (!image) return [];
+    width = width || 32;
+    height = height || width;
     var canvas = document.createElement("canvas");
     var context = canvas.getContext("2d");
-    canvas.width = size;
-    canvas.height = size;
+    canvas.width = width;
+    canvas.height = height;
     var ans = [];
-    for (var i = 0; i < image.height; i += size) {
-        context.drawImage(image, 0, i, size, size, 0, 0, size, size);
-        var img = new Image();
-        img.src = canvas.toDataURL("image/png");
-        ans.push(img);
-        context.clearRect(0, 0, size, size);
+    for (var j = 0; j < image.height; j += height) {
+        for (var i = 0; i < image.width; i += width) {
+            context.drawImage(image, i, j, width, height, 0, 0, width, height);
+            var img = new Image();
+            img.src = canvas.toDataURL("image/png");
+            ans.push(img);
+            context.clearRect(0, 0, width, height);
+        }
     }
     return ans;
 }

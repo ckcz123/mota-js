@@ -103,7 +103,7 @@ editor_multi = function () {
             var tmap = {};
             var tstr = JSON.stringify(tobj, function (k, v) {
                 if (typeof(v) === typeof('') && v.slice(0, 8) === 'function') {
-                    var id_ = editor.guid();
+                    var id_ = editor.util.guid();
                     tmap[id_] = v.toString();
                     return id_;
                 } else return v
@@ -146,7 +146,7 @@ editor_multi = function () {
                 var tmap = {};
                 var tstr = JSON.stringify(tobj, function (k, v) {
                     if (v instanceof Function) {
-                        var id_ = editor.guid();
+                        var id_ = editor.util.guid();
                         tmap[id_] = v.toString();
                         return id_;
                     } else return v

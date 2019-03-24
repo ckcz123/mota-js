@@ -94,7 +94,7 @@ editor_file = function (editor, callback) {
         }
         // format 更改实现方式以支持undefined删除
         var tempJsonObj=Object.assign({},editor.currentFloorData);
-        var tempMap=[['map',editor.guid()],['bgmap',editor.guid()],['fgmap',editor.guid()]];
+        var tempMap=[['map',editor.util.guid()],['bgmap',editor.util.guid()],['fgmap',editor.util.guid()]];
         tempMap.forEach(function(v){
             v[2]=tempJsonObj[v[0]];
             tempJsonObj[v[0]]=v[1];
@@ -764,7 +764,7 @@ editor_file = function (editor, callback) {
     var fmap = {};
     var fjson = JSON.stringify(functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a, function (k, v) {
         if (v instanceof Function) {
-            var id_ = editor.guid();
+            var id_ = editor.util.guid();
             fmap[id_] = v.toString();
             return id_;
         } else return v
@@ -853,11 +853,11 @@ editor_file = function (editor, callback) {
     var plmap = {};
     var pljson = JSON.stringify(plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1, function (k, v) {
         if (v instanceof Function) {
-            var id_ = editor.guid();
+            var id_ = editor.util.guid();
             plmap[id_] = v.toString();
             return id_;
         } else if(v===null){
-            var id_ = editor.guid();
+            var id_ = editor.util.guid();
             plmap[id_] = 'null';
             return id_;
         } return v
@@ -980,7 +980,7 @@ editor_file = function (editor, callback) {
             var emap = {};
             var estr = JSON.stringify(maps_90f36752_8815_4be8_b32b_d7fad1d0542e, function (k, v) {
                 if (v.id != null) {
-                    var id_ = editor.guid();
+                    var id_ = editor.util.guid();
                     emap[id_] = JSON.stringify(v);
                     return id_;
                 } else return v
@@ -1014,7 +1014,7 @@ editor_file = function (editor, callback) {
             var emap = {};
             var estr = JSON.stringify(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80, function (k, v) {
                 if (v.hp != null) {
-                    var id_ = editor.guid();
+                    var id_ = editor.util.guid();
                     emap[id_] = JSON.stringify(v);
                     return id_;
                 } else return v

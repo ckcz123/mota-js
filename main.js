@@ -51,7 +51,6 @@ function main() {
         'data': document.getElementById('data'),
         'statusLabels': document.getElementsByClassName('statusLabel'),
         'statusTexts': document.getElementsByClassName('statusText'),
-        'noMarginLeft': document.getElementsByClassName('noMarginLeft'),
         'floorCol': document.getElementById('floorCol'),
         'nameCol': document.getElementById('nameCol'),
         'lvCol': document.getElementById('lvCol'),

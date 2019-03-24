@@ -944,7 +944,7 @@ ui.prototype.drawChoices = function(content, choices) {
 
 ui.prototype._drawChoices_getHorizontalPosition = function (titleInfo, choices) {
     // 宽度计算：考虑选项的长度
-    var width = this.PIXEL - 2 * 85;
+    var width = 246;
     core.setFont('ui', "bold 17px "+core.status.globalAttribute.font);
     for (var i = 0; i < choices.length; i++) {
         if (typeof choices[i] === 'string')

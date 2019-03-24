@@ -625,6 +625,7 @@ control.prototype.moveAction = function (callback) {
 }
 
 control.prototype._moveAction_noPass = function (canMove, callback) {
+    core.status.route.push(core.getHeroLoc('direction'));
     core.status.automaticRoute.moveStepBeforeStop = [];
     core.status.automaticRoute.lastDirection = core.getHeroLoc('direction');
     if (canMove) core.events._trigger(core.nextX(), core.nextY());
@@ -641,6 +642,7 @@ control.prototype._moveAction_moving = function (callback) {
     core.setHeroMoveInterval(function () {
         var direction = core.getHeroLoc('direction');
         core.control._moveAction_popAutomaticRoute();
+        core.status.route.push(direction);
 
         // 无事件的道具（如血瓶）需要优先于阻激夹域判定
         var nowx = core.getHeroLoc('x'), nowy = core.getHeroLoc('y');

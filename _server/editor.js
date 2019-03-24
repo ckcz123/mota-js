@@ -41,31 +41,9 @@ editor.info
 /////////// 数据相关 ///////////
 
 editor.prototype.init = function (callback) {
-    var afterCoreReset = function () {
 
-        editor.idsInit(core.maps, core.icons.icons); // 初始化图片素材信息
-        editor.drawInitData(core.icons.icons); // 初始化绘图
-
-        editor.fetchMapFromCore();
-        editor.updateMap();
-        editor.buildMark();
-        editor.drawEventBlock();
-        
-        editor.pos = {x: 0, y: 0};
-        editor.mode.loc();
-        editor.info = editor.ids[editor.indexs[201]];
-        editor.mode.enemyitem();
-        editor.mode.floor();
-        editor.mode.tower();
-        editor.mode.functions();
-        editor.mode.commonevent();
-        editor.mode.showMode('tower');
-        
-        editor_multi = editor_multi();
-        editor_blockly = editor_blockly();
-        if (Boolean(callback)) callback();
-
-    }
+    editor_util_wrapper(editor);
+    editor_table_wrapper(editor);
 
     var afterMainInit = function () {
         core.floors = JSON.parse(JSON.stringify(core.floors, function (k, v) {
@@ -97,6 +75,33 @@ editor.prototype.init = function (callback) {
             core.events.setInitData(null);
         });
     }
+
+    var afterCoreReset = function () {
+        
+        editor.idsInit(core.maps, core.icons.icons); // 初始化图片素材信息
+        editor.drawInitData(core.icons.icons); // 初始化绘图
+
+        editor.fetchMapFromCore();
+        editor.updateMap();
+        editor.buildMark();
+        editor.drawEventBlock();
+        
+        editor.pos = {x: 0, y: 0};
+        editor.mode.loc();
+        editor.info = editor.ids[editor.indexs[201]];
+        editor.mode.enemyitem();
+        editor.mode.floor();
+        editor.mode.tower();
+        editor.mode.functions();
+        editor.mode.commonevent();
+        editor.mode.showMode('tower');
+        
+        editor_multi = editor_multi();
+        editor_blockly = editor_blockly();
+        if (Boolean(callback)) callback();
+
+    }
+
     afterMainInit();
 }
 
@@ -352,21 +357,6 @@ editor.prototype.moveViewport=function(x,y){
     core.control.updateViewport();
     editor.buildMark();
     editor.drawPosSelection();
-}
-
-/////////// 通用 ///////////
-
-editor.prototype.guid = function () {
-    return 'id_' + 'xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-}
-
-editor.prototype.HTMLescape = function (str_) {
-    return String(str_).split('').map(function (v) {
-        return '&#' + v.charCodeAt(0) + ';'
-    }).join('');
 }
 
 /////////// 界面交互相关 ///////////

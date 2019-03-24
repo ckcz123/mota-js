@@ -38,10 +38,12 @@ HTML5 canvas制作的魔塔样板，支持全平台游戏！
 │ ├─ /sounds/        # 音效目录
 │ ├─ data.js         # 全局变量信息
 │ ├─ enemys.js       # 怪物属性数据
+│ ├─ events.js       # 公共事件
 │ ├─ functions.js    # 可能会被修改的脚本代码
 │ ├─ icons.js        # 素材和ID的对应关系定义
 │ ├─ items.js        # 道具的定义，获得道具的效果
-│ └─ maps.js         # 地图和数字的对应关系
+│ ├─ maps.js         # 地图和数字的对应关系
+│ └─ plugins.js      # 自定义插件
 ├── /常用工具/        # 一些常用工具，可以辅助造塔；具体可参见下面的【相关工具】
 ├── editor.html      # 可视化地图编辑工具
 ├── editor-mobile.html      # 可视化地图编辑工具（手机版）

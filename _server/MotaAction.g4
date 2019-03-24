@@ -268,6 +268,7 @@ action
     |   animate_s
     |   vibrate_s
     |   showImage_s
+    |   showImage_1_s
     |   hideImage_s
     |   showTextImage_s
     |   moveImage_s
@@ -380,27 +381,28 @@ return code;
 */;
 
 scrollText_s
-    :   '滚动剧情文本:' '时间' Int '不等待执行完毕' Bool? BGNL? EvalString Newline
+    :   '滚动剧情文本:' '时间' Int '行距' Number '不等待执行完毕' Bool? BGNL? EvalString Newline
 
 
 /* scrollText_s
 tooltip : scrollText：滚动剧情文本，将从下到上进行滚动显示。
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=scrollText%ef%bc%9a%e6%bb%9a%e5%8a%a8%e5%89%a7%e6%83%85%e6%96%87%e6%9c%ac
-default : [5000,false,"时间是总时间，可以使用setText事件来控制字体、颜色、大小、偏移量等"]
+default : [5000,1.4,false,"时间是总时间，可以使用setText事件来控制字体、颜色、大小、偏移量等"]
 Bool_0 = Bool_0?', "async": true':'';
-var code =  '{"type": "scrollText", "text": "'+EvalString_0+'"'+Bool_0+', "time" :'+Int_0+'},\n';
+var code =  '{"type": "scrollText", "text": "'+EvalString_0+'"'+Bool_0+', "time" :'+Int_0+', "lineHeight": '+Number_0+'},\n';
 return code;
 */;
 
 setText_s
-    :   '设置剧情文本的属性' '位置' SetTextPosition_List '偏移像素' EvalString? BGNL? '标题颜色' EvalString? Colour '正文颜色' EvalString? Colour '背景色' EvalString? Colour BGNL? '粗体' B_1_List '标题字体大小' EvalString? '正文字体大小' EvalString? '打字间隔' EvalString? Newline
+    :   '设置剧情文本的属性' '位置' SetTextPosition_List '偏移像素' EvalString? '对齐' SetTextAlign_List? BGNL? '标题颜色' EvalString? Colour '正文颜色' EvalString? Colour '背景色' EvalString? Colour BGNL? '粗体' B_1_List '标题字体大小' EvalString? '正文字体大小' EvalString? '打字间隔' EvalString? Newline
     
 
 /* setText_s
 tooltip : setText：设置剧情文本的属性,颜色为RGB三元组或RGBA四元组,打字间隔为剧情文字添加的时间间隔,为整数或不填
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=settext%EF%BC%9A%E8%AE%BE%E7%BD%AE%E5%89%A7%E6%83%85%E6%96%87%E6%9C%AC%E7%9A%84%E5%B1%9E%E6%80%A7
-default : [null,"","",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',null,"","",""]
+default : [null,"",null,"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',null,"","",""]
 SetTextPosition_List_0 =SetTextPosition_List_0==='null'?'': ', "position": "'+SetTextPosition_List_0+'"';
+SetTextAlign_List_0 =SetTextAlign_List_0==='null'?'': ', "align": "'+SetTextAlign_List_0+'"';
 var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
 if (EvalString_0) {
   if (!/^\d+$/.test(EvalString_0))throw new Error('像素偏移量必须是整数或不填');
@@ -438,7 +440,7 @@ if (EvalString_6) {
   EvalString_6 = ', "time": '+EvalString_6;
 }
 B_1_List_0 = B_1_List_0==='null'?'':', "bold": '+B_1_List_0;
-var code = '{"type": "setText"'+SetTextPosition_List_0+EvalString_0+EvalString_1+EvalString_2+B_1_List_0+EvalString_3+EvalString_4+EvalString_5+EvalString_6+'},\n';
+var code = '{"type": "setText"'+SetTextPosition_List_0+EvalString_0+SetTextAlign_List_0+EvalString_1+EvalString_2+B_1_List_0+EvalString_3+EvalString_4+EvalString_5+EvalString_6+'},\n';
 return code;
 */;
 
@@ -1132,34 +1134,54 @@ return code;
 */;
 
 showImage_s
-    :   '显示图片' '图片编号' Int '图片' EvalString '起点像素位置' 'x' PosString 'y' PosString BGNL?
-        '放大率 : x' Int '% y' Int '% 不透明度' Number '时间' Int '不等待执行完毕' Bool Newline
+    :   '显示图片' '图片编号' Int '图片' EvalString BGNL?
+        '绘制的起点像素' 'x' PosString 'y' PosString '不透明度' Number '时间' Int '不等待执行完毕' Bool Newline
     
 
 /* showImage_s
 tooltip : showImage：显示图片
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=showImage%ef%bc%9a%e6%98%be%e7%a4%ba%e5%9b%be%e7%89%87
-default : [1,"bg.jpg","0","0",100,100,1,0,false]
+default : [1,"bg.jpg","0","0",1,0,false]
 colour : this.printColor
 if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "showImage", "code": '+Int_0+', "image": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "dw": '+Int_1+', "dh": '+Int_2+', "opacity": '+Number_0+', "time": '+Int_3+async+'},\n';
+var code = '{"type": "showImage", "code": '+Int_0+', "image": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "opacity": '+Number_0+', "time": '+Int_1+async+'},\n';
+return code;
+*/;
+
+showImage_1_s
+    :   '显示图片' '图片编号' Int '图片' EvalString BGNL?
+        '裁剪的起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? '不透明度' Number BGNL?
+        '绘制的起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? '时间' Int '不等待执行完毕' Bool Newline
+
+
+/* showImage_1_s
+tooltip : showImage_1：显示图片
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=showImage%ef%bc%9a%e6%98%be%e7%a4%ba%e5%9b%be%e7%89%87
+default : [1,"bg.jpg","0","0","","",1,"0","0","","",0,false]
+colour : this.printColor
+if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
+var async = Bool_0?', "async": true':'';
+var code = '{"type": "showImage", "code": '+Int_0+', "image": "'+EvalString_0+'", '+
+           '"sloc": ['+PosString_0+','+PosString_1+','+PosString_2+','+PosString_3+'], '+
+           '"loc": ['+PosString_4+','+PosString_5+','+PosString_6+','+PosString_7+'], '+
+           '"opacity": '+Number_0+', "time": '+Int_1+async+'},\n';
 return code;
 */;
 
 showTextImage_s
     :   '显示图片化文本' '文本内容' EvalString BGNL?
-        '图片编号' Int '起点像素位置' 'x' PosString 'y' PosString '不透明度' Number '时间' Int '不等待执行完毕' Bool Newline
+        '图片编号' Int '起点像素' 'x' PosString 'y' PosString '行距' Number '不透明度' Number '时间' Int '不等待执行完毕' Bool Newline
     
 
 /* showTextImage_s
 tooltip : showTextImage：显示图片化文本
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=showTextImage%ef%bc%9a%e6%98%be%e7%a4%ba%e6%96%87%e6%9c%ac%e5%8c%96%e5%9b%be%e7%89%87
 colour : this.printColor
-default : ["可以使用setText事件来控制字体、颜色、大小、偏移量等",1,"0","0",1,0,false]
+default : ["可以使用setText事件来控制字体、颜色、大小、偏移量等",1,"0","0",1.4,1,0,false]
 if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "showTextImage", "code": '+Int_0+', "text": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "opacity": '+Number_0+', "time": '+Int_1+async+'},\n';
+var code = '{"type": "showTextImage", "code": '+Int_0+', "text": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "lineHeight": '+Number_0+', "opacity": '+Number_1+', "time": '+Int_1+async+'},\n';
 return code;
 */;
 
@@ -1872,6 +1894,10 @@ SetTextPosition_List
     :   '不改变'|'距离顶部'|'居中'|'距离底部'
     /*SetTextPosition_List ['null','up','center','down']*/;
 
+SetTextAlign_List
+    :   '不改变'|'左对齐'|'左右居中'|'右对齐'
+    /*SetTextAlign_List ['null','left','center','right']*/;
+
 ShopUse_List
     :   '金币' | '经验'
     /*ShopUse_List ['money','experience']*/;
@@ -2151,7 +2177,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "scrollText":
       this.next = MotaActionBlocks['scrollText_s'].xmlText([
-        data.time, data.async||false, this.EvalString(data.text), this.next]);
+        data.time, data.lineHeight||1.4, data.async||false, this.EvalString(data.text), this.next]);
         break;
     case "comment": // 注释
       this.next = MotaActionBlocks['comment_s'].xmlText([this.EvalString(data.text),this.next],null,data.text);
@@ -2163,7 +2189,7 @@ ActionParser.prototype.parseAction = function() {
       if (!/^\w+\.png$/.test(data.background))
         data.background=setTextfunc(data.background);
       this.next = MotaActionBlocks['setText_s'].xmlText([
-        data.position,data.offset,data.title,'rgba('+data.title+')',
+        data.position,data.offset,data.align,data.title,'rgba('+data.title+')',
         data.text,'rgba('+data.text+')',data.background,'rgba('+data.background+')',
         data.bold,data.titlefont,data.textfont,data.time,this.next]);
       break;
@@ -2308,8 +2334,16 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "showImage": // 显示图片
       data.loc=data.loc||['','']
-      this.next = MotaActionBlocks['showImage_s'].xmlText([
-        data.code,data.image||data.name,data.loc[0],data.loc[1],data.dw,data.dh,data.opacity,data.time||0,data.async||false,this.next]);
+      if (data.sloc) {
+        this.next = MotaActionBlocks['showImage_1_s'].xmlText([
+            data.code,data.image||data.name,data.sloc[0],data.sloc[1],data.sloc[2],data.sloc[3],data.opacity,
+            data.loc[0],data.loc[1],data.loc[2],data.loc[3],data.time||0,data.async||false,this.next
+        ]);
+      }
+      else {
+        this.next = MotaActionBlocks['showImage_s'].xmlText([
+              data.code,data.image||data.name,data.loc[0],data.loc[1],data.opacity,data.time||0,data.async||false,this.next]);
+      }
       break;
     case "hideImage": // 清除图片
       this.next = MotaActionBlocks['hideImage_s'].xmlText([
@@ -2318,7 +2352,7 @@ ActionParser.prototype.parseAction = function() {
     case "showTextImage": // 显示图片化文本
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['showTextImage_s'].xmlText([
-        this.EvalString(data.text),data.code,data.loc[0],data.loc[1],data.opacity,data.time||0,data.async||false,this.next]);
+        this.EvalString(data.text),data.code,data.loc[0],data.loc[1],data.lineHeight||1.4,data.opacity,data.time||0,data.async||false,this.next]);
       break;
     case "moveImage": // 移动图片
       data.to=data.to||['','']

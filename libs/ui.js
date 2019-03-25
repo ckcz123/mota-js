@@ -2175,7 +2175,7 @@ ui.prototype.drawKeyBoard = function () {
         offset+=32;
     });
 
-    core.fillText("ui", "返回游戏", this.PIXEL - 80, offset-3, '#FFFFFF', this._buildFont(15, true));
+    core.fillText("ui", "返回游戏", this.HPIXEL + 128, offset-3, '#FFFFFF', this._buildFont(15, true));
 
     if (isWindowSkin)
         this.drawWindowSelector(core.status.textAttribute.background, this.HPIXEL + 92, offset - 22, 72, 27);

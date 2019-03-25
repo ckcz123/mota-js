@@ -412,7 +412,7 @@ maps.prototype._canMoveHero_checkPoint = function (x, y, direction, floorId, ext
         return false;
 
     var nx = x + core.utils.scan[direction].x, ny = y + core.utils.scan[direction].y;
-    if (nx < 0 || ny < 0 || nx >= core.floors[floorId].width || ny >= core.floors[floorId].width)
+    if (nx < 0 || ny < 0 || nx >= core.floors[floorId].width || ny >= core.floors[floorId].height)
         return false;
 
     // 2. 检查该点素材的 cannotOut 和下一个点的 cannotIn

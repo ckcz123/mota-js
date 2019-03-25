@@ -1610,11 +1610,11 @@ control.prototype.syncSave = function (type) {
     core.ui.drawWaiting("正在同步，请稍后...");
     core.control.getSaves(type=='all'?null:core.saves.saveIndex, function (saves) {
         if (!saves) return core.drawText("没有要同步的存档");
-        core.control._syncSave_http(saves);
+        core.control._syncSave_http(type, saves);
     })
 }
 
-control.prototype._syncSave_http = function (saves) {
+control.prototype._syncSave_http = function (type, saves) {
     var formData = new FormData();
     formData.append('type', 'save');
     formData.append('name', core.firstData.name);

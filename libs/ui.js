@@ -218,9 +218,7 @@ ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
 
 ////// 结束一切事件和绘制，关闭UI窗口，返回游戏进程 //////
 ui.prototype.closePanel = function () {
-    core.status.boxAnimateObjs = [];
-    clearInterval(core.status.event.interval);
-    core.clearSelector();
+    this.clearUI();
     core.maps.generateGroundPattern();
     core.updateStatusBar();
     core.unLockControl();
@@ -229,6 +227,15 @@ ui.prototype.closePanel = function () {
     core.status.event.selection = null;
     core.status.event.ui = null;
     core.status.event.interval = null;
+}
+
+ui.prototype.clearUI = function () {
+    clearInterval(core.status.event.interval);
+    core.status.event.interval = null;
+    core.status.boxAnimateObjs = [];
+    core.clearSelector();
+    core.clearMap('ui');
+    core.setAlpha('ui', 1);
 }
 
 ////// 清除光标 //////
@@ -390,6 +397,8 @@ ui.prototype._getPosition = function (content) {
 
 ////// 绘制选择光标
 ui.prototype.drawWindowSelector = function(background, x, y, w, h) {
+    if (typeof background == 'string')
+        background = core.material.images.images[background];
     w = Math.round(w), h = Math.round(h);
     var dstImage = core.ui.createCanvas("_selector", x, y, w, h, 165);
     core.setOpacity("_selector", 0.8);
@@ -671,11 +680,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
     if (core.status.event && core.status.event.id == 'action')
         core.status.event.ui = content;
 
-    clearInterval(core.status.event.interval);
-    core.status.event.interval = null;
-    core.status.boxAnimateObjs = [];
-    core.clearSelector();
-    core.clearMap('ui');
+    this.clearUI();
 
     content = core.replaceText(content);
 
@@ -881,8 +886,7 @@ ui.prototype.drawScrollText = function (content, time, lineHeight, callback) {
     content = core.replaceText(content || "");
     lineHeight = lineHeight || 1.4;
     time = time || 5000;
-    clearInterval(core.status.event.interval);
-    core.status.event.interval = null;
+    this.clearUI();
     var offset = core.status.textAttribute.offset || 15;
     lineHeight *= core.status.textAttribute.textfont;
     var ctx = this._createTextCanvas(content, lineHeight);
@@ -895,7 +899,6 @@ ui.prototype.drawScrollText = function (content, time, lineHeight, callback) {
 
 ui.prototype._drawScrollText_animate = function (ctx, time, callback) {
     // 开始绘制到UI上
-    core.clearMap('ui');
     var per_pixel = 1, height = ctx.canvas.height, per_time = time * per_pixel / (this.PIXEL+height);
     var currH = this.PIXEL;
     core.drawImage('ui', ctx.canvas, 0, currH);
@@ -929,11 +932,7 @@ ui.prototype.drawChoices = function(content, choices) {
     choices = core.clone(choices || []);
 
     core.status.event.ui = {"text": content, "choices": choices};
-    clearInterval(core.status.event.interval);
-    core.status.event.interval = null;
-    core.status.boxAnimateObjs = [];
-    core.clearSelector();
-    core.clearMap('ui');
+    this.clearUI();
 
     content = core.replaceText(content || "");
     var titleInfo = this._getTitleAndIcon(content);
@@ -1047,75 +1046,49 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
 ////// 绘制一个确认/取消的警告页面 //////
 ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     core.lockControl();
+    text = core.replaceText(text || "");
 
     core.status.event.id = 'confirmBox';
     core.status.event.data = {'yes': yesCallback, 'no': noCallback};
     core.status.event.ui = text;
+    if (core.status.event.selection != 0) core.status.event.selection = 1;
+    this.clearUI();
 
-    if (!core.isset(core.status.event.selection) || core.status.event.selection>1) core.status.event.selection=1;
-    if (core.status.event.selection<0) core.status.event.selection=0;
-
-    core.clearSelector();
-
-    var background = core.status.textAttribute.background;
-    var isWindowSkin = false;
-    if (typeof background == 'string') {
-        background = core.material.images.images[background];
-        if (core.isset(background) && background.width==192 && background.height==128) isWindowSkin = true;
-        else background = core.initStatus.textAttribute.background;
-    }
-    if (!isWindowSkin) background = core.arrayToRGBA(background);
-    var borderColor = core.status.globalAttribute.borderColor;
-    var textColor = core.arrayToRGBA(core.status.textAttribute.text);
-
-    var globalFont = core.status.globalAttribute.font;
-    core.setFont('ui', "bold 19px "+globalFont);
-
-    var contents = text.split('\n');
-    var lines = contents.length;
-    var max_length = 0;
-    for (var i in contents) {
-        max_length = Math.max(max_length, core.calWidth('ui', contents[i]));
-    }
-
-    var left = Math.min(240 - 40 - parseInt(max_length / 2), 100);
-    var top = 140+32 - (lines-1)*30;
-    var right = 480 - left, bottom = 480 - 140-32, width = right - left, height = bottom - top;
-
-    core.clearMap('ui');
-    if (isWindowSkin) {
-        core.setAlpha('ui', 0.85);
-        this.drawWindowSkin(background,'ui',left,top,width,height);
-    }
-    else {
-        core.fillRect('ui', left, top, width, height, background);
-        core.strokeRect('ui', left - 1, top - 1, width + 1, height + 1, borderColor, 2);
-    }
-    core.setAlpha('ui', 1);
+    core.setFont('ui', this._buildFont(19, true));
+    var contents = text.split("\n");
+    var rect = this._drawConfirmBox_getRect(contents);
+    var isWindowSkin = this._drawTextBox_drawBackground({}, {}, rect, rect);
 
     core.setTextAlign('ui', 'center');
+    core.setFillStyle('ui', core.arrayToRGBA(core.status.textAttribute.text))
     for (var i in contents) {
-        core.fillText('ui', contents[i], 240, top + 50 + i*30, textColor);
+        core.fillText('ui', contents[i], this.HPIXEL, rect.top + 50 + i*30);
     }
 
-    core.fillText('ui', "确定", 240 - 38, bottom - 35, null, "bold 17px "+globalFont);
-    core.fillText('ui', "取消", 240 + 38, bottom - 35);
-
+    core.fillText('ui', "确定", this.HPIXEL - 38, rect.bottom - 35, null, this._buildFont(17, true));
+    core.fillText('ui', "取消", this.HPIXEL + 38, rect.bottom - 35);
     var len=core.calWidth('ui', "确定");
-
-    var strokeLeft = 240 + (76*core.status.event.selection-38) - parseInt(len/2) - 5;
+    var strokeLeft = this.HPIXEL + (76*core.status.event.selection-38) - parseInt(len/2) - 5;
 
     if (isWindowSkin)
-        this.drawWindowSelector(background, strokeLeft, bottom-35-20, len+10, 28);
+        this.drawWindowSelector(core.status.textAttribute.background, strokeLeft, rect.bottom-35-20, len+10, 28);
     else
-        core.strokeRect('ui', strokeLeft, bottom-35-20, len+10, 28, "#FFD700", 2);
+        core.strokeRect('ui', strokeLeft, rect.bottom-35-20, len+10, 28, "#FFD700", 2);
 
+}
+
+ui.prototype._drawConfirmBox_getRect = function (contents) {
+    var max_width = contents.reduce(function (pre, curr) {
+        return Math.max(pre, core.calWidth('ui', curr));
+    }, 0);
+    var left = Math.min(this.HPIXEL - 40 - parseInt(max_width / 2), 100), right = this.PIXEL - left;
+    var top = this.HPIXEL - 68 - (contents.length-1)*30, bottom = this.HPIXEL + 68;
+    return { top: top, left: left, bottom: bottom, right: right, width: right - left, height: bottom - top };
 }
 
 ////// 绘制系统设置界面 //////
 ui.prototype.drawSwitchs = function() {
     core.status.event.id = 'switchs';
-
     var choices = [
         "背景音乐： "+(core.musicStatus.bgmStatus ? "[ON]" : "[OFF]"),
         "背景音效： "+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
@@ -1133,7 +1106,6 @@ ui.prototype.drawSwitchs = function() {
 ////// 绘制系统菜单栏 //////
 ui.prototype.drawSettings = function () {
     core.status.event.id = 'settings';
-
     this.drawChoices(null, [
         "系统设置", "虚拟键盘", "浏览地图", "绘图模式", "同步存档", "游戏信息", "返回标题", "返回游戏"
     ]);
@@ -1141,68 +1113,37 @@ ui.prototype.drawSettings = function () {
 
 ////// 绘制快捷商店选择栏 //////
 ui.prototype.drawQuickShop = function () {
-
     core.status.event.id = 'selectShop';
-
-    var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {return shopList[shopId].visited || !shopList[shopId].mustEnable});
+    var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {
+        return shopList[shopId].visited || !shopList[shopId].mustEnable
+    });
     var choices = keys.map(function (shopId) {
         return {"text": shopList[shopId].textInList, "color": shopList[shopId].visited?null:"#999999"};
     });
-
     choices.push("返回游戏");
     this.drawChoices(null, choices);
 }
 
 ////// 绘制等待界面 //////
 ui.prototype.drawWaiting = function(text) {
-
     core.lockControl();
     core.status.event.id = 'waiting';
-
     core.clearSelector();
-
-    var background = core.status.textAttribute.background;
-    var isWindowSkin = false;
-    if (typeof background == 'string') {
-        background = core.material.images.images[background];
-        if (core.isset(background) && background.width==192 && background.height==128) isWindowSkin = true;
-        else background = core.initStatus.textAttribute.background;
-    }
-    if (!isWindowSkin) background = core.arrayToRGBA(background);
-    var borderColor = core.status.globalAttribute.borderColor;
-    var textColor = core.arrayToRGBA(core.status.textAttribute.text);
-
-    var globalFont = core.status.globalAttribute.font;
-    var text_length = core.calWidth('ui', text, "bold 19px "+globalFont);
-
-    var right = Math.max(text_length+50, 220);
-    var left = 240-parseInt(right/2), top = 240 - 32 - 16, bottom = 480 - 2 * top;
-
-    core.clearMap('ui');
-    if (isWindowSkin) {
-        core.setAlpha('ui', 0.85);
-        this.drawWindowSkin(background,'ui',left,top,right,bottom);
-    }
-    else {
-        core.fillRect('ui', left, top, right, bottom, background);
-        core.strokeRect('ui', left - 1, top - 1, right + 1, bottom + 1, borderColor, 2);
-    }
-    core.setAlpha('ui', 1);
-
+    text = core.replaceText(text || "");
+    var text_length = core.calWidth('ui', text, this._buildFont(19, true));
+    var width = Math.max(text_length + 80, 220), left = this.HPIXEL - parseInt(width / 2), right = left + width;
+    var top = this.HPIXEL - 48, height = 96, bottom = top + height;
+    this._drawTextBox_drawBackground({}, {}, {left: left, right: right}, {top: top, bottom: bottom});
     core.setTextAlign('ui', 'center');
-    core.fillText('ui', text, 240, top + 56, textColor);
-
+    core.fillText('ui', text, 208, top + 56, core.arrayToRGBA(core.status.textAttribute.text));
 }
 
 ////// 绘制存档同步界面 //////
 ui.prototype.drawSyncSave = function () {
-
     core.status.event.id = 'syncSave';
-
     this.drawChoices(null, [
         "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "回放当前录像", "下载当前录像", "清空本地存档", "返回主菜单"
     ]);
-
 }
 
 ////// 绘制存档同步选择页面 //////
@@ -1247,44 +1188,36 @@ ui.prototype.drawGameInfo = function () {
 ////// 绘制分页 //////
 ui.prototype.drawPagination = function (page, totalPage, top) {
     // if (totalPage<page) totalPage=page;
-    if (totalPage<=1) return;
-    if (!core.isset(top)) top=14;
+    if (totalPage <= 1) return;
+    if (top == null) top = this.LAST;
 
-    var globalFont = (core.status.globalAttribute||core.initStatus.globalAttribute).font;
     core.setFillStyle('ui', '#DDDDDD');
-
-    var length = core.calWidth('ui', page + " / " + page, 'bold 15px '+globalFont);
+    var length = core.calWidth('ui', page + " / " + page,
+        "bold 15px " + (core.status.globalAttribute || core.initStatus.globalAttribute).font);
 
     core.setTextAlign('ui', 'left');
-    core.fillText('ui', page + " / " + totalPage, parseInt((480 - length) / 2), top*32+19);
+    core.fillText('ui', page + " / " + totalPage, parseInt((this.PIXEL - length) / 2), top*32+19);
 
     core.setTextAlign('ui', 'center');
     if (page > 1)
-        core.fillText('ui', '上一页', 240 - 80, top*32+19);
+        core.fillText('ui', '上一页', this.HPIXEL - 80, top*32+19);
     if (page < totalPage)
-        core.fillText('ui', '下一页', 240 + 80, top*32+19);
+        core.fillText('ui', '下一页', this.HPIXEL + 80, top*32+19);
 }
 
 ////// 绘制键盘光标 //////
 ui.prototype.drawCursor = function () {
-
-    if (!core.isset(core.status.automaticRoute.cursorX))
-        core.status.automaticRoute.cursorX=core.getHeroLoc('x');
-    if (core.status.automaticRoute.cursorX<0) core.status.automaticRoute.cursorX=0;
-    if (core.status.automaticRoute.cursorX>14) core.status.automaticRoute.cursorX=14;
-    if (!core.isset(core.status.automaticRoute.cursorY))
-        core.status.automaticRoute.cursorY=core.getHeroLoc('y');
-    if (core.status.automaticRoute.cursorY<0) core.status.automaticRoute.cursorY=0;
-    if (core.status.automaticRoute.cursorY>14) core.status.automaticRoute.cursorY=14;
-
+    var automaticRoute = core.status.automaticRoute;
+    if (automaticRoute.cursorX == null)
+        automaticRoute.cursorX = core.getHeroLoc('x');
+    if (automaticRoute.cursorY == null)
+        automaticRoute.cursorY = core.getHeroLoc('y');
+    automaticRoute.cursorX = core.clamp(automaticRoute.cursorX, 0, this.LAST);
     core.status.event.id = 'cursor';
     core.lockControl();
-
-    core.clearMap('ui');
-    core.setAlpha('ui', 1);
-
+    core.clearUI();
     var width = 4;
-    core.strokeRect('ui', 32*core.status.automaticRoute.cursorX+width/2, 32*core.status.automaticRoute.cursorY+width/2,
+    core.strokeRect('ui', 32*automaticRoute.cursorX+width/2, 32*automaticRoute.cursorY+width/2,
         32-width, 32-width, '#FFD700', width);
 
 }

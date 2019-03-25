@@ -1525,33 +1525,31 @@ ui.prototype._drawBookDetail_drawContent = function (enemy, contents, pos) {
 
 ////// 绘制楼层传送器 //////
 ui.prototype.drawFly = function(page) {
-
     core.status.event.data = page;
-
     var floorId = core.floorIds[page];
     var title = core.status.maps[floorId].title;
-
     core.clearMap('ui');
     core.setAlpha('ui', 0.85);
-    core.fillRect('ui', 0, 0, 480, 480, '#000000');
+    core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');
     core.setAlpha('ui', 1);
     core.setTextAlign('ui', 'center');
-    var globalFont = core.status.globalAttribute.font;
-    core.fillText('ui', '楼层跳跃', 240, 60, '#FFFFFF', "bold 28px "+globalFont);
-    core.fillText('ui', '返回游戏', 240, 403+64, '#FFFFFF', "bold 15px "+globalFont)
-    core.fillText('ui', title, 420, 279, '#FFFFFF', "bold 19px "+globalFont);
+    core.fillText('ui', '楼层跳跃', this.HPIXEL, 60, '#FFFFFF', this._buildFont(28, true));
+    core.fillText('ui', '返回游戏', this.HPIXEL, this.PIXEL - 13, null, this._buildFont(15, true))
+    core.fillText('ui', title, this.PIXEL - 60, this.HPIXEL + 39, null, this._buildFont(19, true));
+    var middle = this.HPIXEL + 39;
     if (core.actions._getNextFlyFloor(1) != page) {
-        core.fillText('ui', '▲', 420, 279 - 64, '#FFFFFF', "17px "+globalFont);
-        core.fillText('ui', '▲', 420, 279 - 96, '#FFFFFF', "17px "+globalFont);
-        core.fillText('ui', '▲', 420, 279 - 96 - 7, '#FFFFFF', "17px "+globalFont);
+        core.fillText('ui', '▲', this.PIXEL - 60, middle - 64, null, this._buildFont(17, false));
+        core.fillText('ui', '▲', this.PIXEL - 60, middle - 96,);
+        core.fillText('ui', '▲', this.PIXEL - 60, middle - 96 - 7);
     }
     if (core.actions._getNextFlyFloor(-1) != page) {
-        core.fillText('ui', '▼', 420, 279 + 64, '#FFFFFF', "17px "+globalFont);
-        core.fillText('ui', '▼', 420, 279 + 96, '#FFFFFF', "17px "+globalFont);
-        core.fillText('ui', '▼', 420, 279 + 96 + 7, '#FFFFFF', "17px "+globalFont);
+        core.fillText('ui', '▼', this.PIXEL - 60, middle + 64, null, this._buildFont(17, false));
+        core.fillText('ui', '▼', this.PIXEL - 60, middle + 96);
+        core.fillText('ui', '▼', this.PIXEL - 60, middle + 96 + 7);
     }
-    core.strokeRect('ui', 20, 100, 273+64, 273+64, '#FFFFFF', 2);
-    core.drawThumbnail(floorId, null, null, {ctx: 'ui', x: 20, y: 100, size: 273+64});
+    var size = this.PIXEL - 143;
+    core.strokeRect('ui', 20, 100, size, size, '#FFFFFF', 2);
+    core.drawThumbnail(floorId, null, null, {ctx: 'ui', x: 20, y: 100, size: size});
 }
 
 ////// 绘制中心对称飞行器

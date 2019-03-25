@@ -1135,7 +1135,7 @@ ui.prototype.drawWaiting = function(text) {
     var top = this.HPIXEL - 48, height = 96, bottom = top + height;
     this._drawTextBox_drawBackground({}, {}, {left: left, right: right}, {top: top, bottom: bottom});
     core.setTextAlign('ui', 'center');
-    core.fillText('ui', text, 208, top + 56, core.arrayToRGBA(core.status.textAttribute.text));
+    core.fillText('ui', text, this.HPIXEL, top + 56, core.arrayToRGBA(core.status.textAttribute.text));
 }
 
 ////// 绘制存档同步界面 //////

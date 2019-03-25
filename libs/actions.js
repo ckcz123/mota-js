@@ -2252,11 +2252,12 @@ actions.prototype._keyUpGameInfo = function (keycode) {
 
 ////// “虚拟键盘”界面时的点击操作 //////
 actions.prototype._clickKeyBoard = function (x, y) {
-    if (y == 3 && x >= 1 && x <= 11) {
+    var m = this.HSIZE;
+    if (y == m - 3 && x >= m - 5 && x <= m + 5) {
         core.ui.closePanel();
-        core.keyUp(112 + x - 1); // F1-F12: 112-122
+        core.keyUp(112 + x + 5 - m);
     }
-    if (y == 3 && x == 12) {
+    if (y == m - 3 && x == m + 6) {
         var val = prompt();
         if (val != null) {
             try {
@@ -2266,9 +2267,9 @@ actions.prototype._clickKeyBoard = function (x, y) {
             }
         }
     }
-    if (y == 4 && x >= 1 && x <= 10) {
+    if (y == m - 2 && x >= m - 5 && x <= m + 4) {
         core.ui.closePanel();
-        core.keyUp(x == 10 ? 48 : 48 + x); // 1-9: 49-57; 0: 48
+        core.keyUp(x == m + 4 ? 48 : 49 + x + 5 - m); // 1-9: 49-57; 0: 48
     }
     // 字母
     var lines = [
@@ -2276,46 +2277,46 @@ actions.prototype._clickKeyBoard = function (x, y) {
         ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
         ["Z", "X", "C", "V", "B", "N", "M"],
     ];
-    if (y == 5 && x >= 1 && x <= 10) {
+    if (y == m - 1 && x >= m - 5 && x <= m + 4) {
         core.ui.closePanel();
-        core.keyUp(lines[0][x - 1].charCodeAt(0));
+        core.keyUp(lines[0][x + 5 - m].charCodeAt(0));
     }
-    if (y == 6 && x >= 1 && x <= 9) {
+    if (y == m && x >= m - 5 && x <= m + 3) {
         core.ui.closePanel();
-        core.keyUp(lines[1][x - 1].charCodeAt(0));
+        core.keyUp(lines[1][x + 5 - m].charCodeAt(0));
     }
-    if (y == 7 && x >= 1 && x <= 7) {
+    if (y == m + 1 && x >= m - 5 && x <= m + 1) {
         core.ui.closePanel();
-        core.keyUp(lines[2][x - 1].charCodeAt(0));
+        core.keyUp(lines[2][x + 5 - m].charCodeAt(0));
     }
-    if (y == 8 && x >= 1 && x <= 11) {
+    if (y == m + 2 && x >= m - 5 && x <= m + 5) {
         core.ui.closePanel();
-        if (x == 1) core.keyUp(189); // -
-        if (x == 2) core.keyUp(187); // =
-        if (x == 3) core.keyUp(219); // [
-        if (x == 4) core.keyUp(221); // ]
-        if (x == 5) core.keyUp(220); // \
-        if (x == 6) core.keyUp(186); // ;
-        if (x == 7) core.keyUp(222); // '
-        if (x == 8) core.keyUp(188); // ,
-        if (x == 9) core.keyUp(190); // .
-        if (x == 10) core.keyUp(191); // /
-        if (x == 11) core.keyUp(192); // `
+        if (x == m - 5) core.keyUp(189); // -
+        if (x == m - 4) core.keyUp(187); // =
+        if (x == m - 3) core.keyUp(219); // [
+        if (x == m - 2) core.keyUp(221); // ]
+        if (x == m - 1) core.keyUp(220); // \
+        if (x == m) core.keyUp(186); // ;
+        if (x == m + 1) core.keyUp(222); // '
+        if (x == m + 2) core.keyUp(188); // ,
+        if (x == m + 3) core.keyUp(190); // .
+        if (x == m + 4) core.keyUp(191); // /
+        if (x == m + 5) core.keyUp(192); // `
     }
-    if (y == 9 && x >= 1 && x <= 10) {
+    if (y == m + 3 && x >= m - 5 && x <= m + 4) {
         core.ui.closePanel();
-        if (x == 1) core.keyUp(27); // ESC
-        if (x == 2) core.keyUp(9); // TAB
-        if (x == 3) core.keyUp(20); // CAPS
-        if (x == 4) core.keyUp(16); // SHIFT
-        if (x == 5) core.keyUp(17); // CTRL
-        if (x == 6) core.keyUp(18); // ALT
-        if (x == 7) core.keyUp(32); // SPACE
-        if (x == 8) core.keyUp(8); // BACKSPACE
-        if (x == 9) core.keyUp(13); // ENTER
-        if (x == 10) core.keyUp(46); // DEL
+        if (x == m - 5) core.keyUp(27); // ESC
+        if (x == m - 4) core.keyUp(9); // TAB
+        if (x == m - 3) core.keyUp(20); // CAPS
+        if (x == m - 2) core.keyUp(16); // SHIFT
+        if (x == m - 1) core.keyUp(17); // CTRL
+        if (x == m) core.keyUp(18); // ALT
+        if (x == m + 1) core.keyUp(32); // SPACE
+        if (x == m + 2) core.keyUp(8); // BACKSPACE
+        if (x == m + 3) core.keyUp(13); // ENTER
+        if (x == m + 4) core.keyUp(46); // DEL
     }
-    if (y == 10 && x >= 9 && x <= 11)
+    if (y == m + 4 && x >= m + 3 && x <= m + 5)
         core.ui.closePanel();
 }
 

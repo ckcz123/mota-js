@@ -1375,60 +1375,96 @@ ui.prototype.drawBook = function (index) {
 
 ////// 绘制怪物属性的详细信息 //////
 ui.prototype.drawBookDetail = function (index) {
+    var info = this._drawBookDetail_getInfo(index), enemy = info[0];
+    var content = info[1].join("\n");
+    core.status.event.id = 'book-detail';
+    clearInterval(core.interval.tipAnimate);
+    core.clearMap('data');
+
+    var left = 10, width = this.PIXEL - 2 * left, right = left + width;
+    var content_left = left + 25, validWidth = right - content_left - 13;
+    var contents = core.splitLines("data", content, validWidth, this._buildFont(16, false));
+    var height = Math.max(24 * contents.length + 55, 80), top = (this.PIXEL - height) / 2, bottom = top + height;
+
+    core.setAlpha('data', 0.9);
+    core.fillRect('data', left, top, width, height, '#000000');
+    core.setAlpha('data', 1);
+    core.strokeRect('data', left - 1, top - 1, width + 1, height + 1,
+        core.status.globalAttribute.borderColor, 2);
+
+    this._drawBookDetail_drawContent(enemy, contents, {top: top, content_left: content_left, bottom: bottom});
+}
+
+ui.prototype._drawBookDetail_getInfo = function (index) {
     var floorId = core.floorIds[(core.status.event.ui||{}).index] || core.status.floorId;
     var enemys = core.enemys.getCurrentEnemys(floorId);
-
     if (enemys.length==0) return;
-    if (index<0) index=0;
-    if (index>=enemys.length) index=enemys.length-1;
-
+    index = core.clamp(index, 0, enemys.length - 1);
     var enemy = enemys[index], enemyId = enemy.id;
-    var hints=core.enemys.getSpecialHint(enemyId);
+    var texts=core.enemys.getSpecialHint(enemyId);
     var damageInfo = core.enemys.getDamageInfo(enemy, null, null, null, floorId);
+    if (texts.length == 0) texts.push("该怪物无特殊属性。");
+    texts.push("");
+    this._drawBookDetail_getTexts(enemy, floorId, texts);
+    return [enemy, texts];
+}
 
-    if (hints.length==0)
-        hints.push("该怪物无特殊属性。");
+ui.prototype._drawBookDetail_getTexts = function (enemy, floorId, texts) {
+    // --- 模仿临界计算器
+    this._drawBookDetail_mofang(enemy, texts);
+    // --- 吸血怪最低生命值
+    this._drawBookDetail_vampire(enemy, texts);
+    // --- 仇恨伤害
+    this._drawBookDetail_hatred(enemy, texts);
+    // --- 战斗回合数，临界表
+    this._drawBookDetail_turnAndCriticals(enemy, floorId, texts);
+}
 
+ui.prototype._drawBookDetail_mofang = function (enemy, texts) {
     // 模仿临界计算器
     if (core.enemys.hasSpecial(enemy.special, 10)) {
         var hp = enemy.hp;
         var delta = core.status.hero.atk - core.status.hero.def;
         if (delta<hp && hp<=10000 && hp>0) {
-            hints.push("");
-            hints.push("模仿临界计算器：（当前攻防差"+core.formatBigNumber(delta)+"）");
-            var arr = [];
-            (function () {
-                var last=0, start=0;
-                for (var i=1;i<hp;i++) {
-                    var now=parseInt((hp-1)/i);
-                    if (now!=last) {
-                        if (last!=0) {
-                            arr.push([start, last+"x"]);
-                        }
-                        last=now;
-                        start=i;
-                    }
-                }
-                if (last!=0) {
-                    arr.push([start,"1x"]);
-                    arr.push([hp,"0"]);
-                }
-            })();
+            texts.push("模仿临界计算器：（当前攻防差"+core.formatBigNumber(delta)+"）");
             var u = [];
-            arr.forEach(function (t) {
+            this._drawBookDetail_mofang_getArray(hp).forEach(function (t) {
                 if (u.length < 20) u.push(t);
                 else if (Math.abs(t[0]-delta)<Math.abs(u[0][0]-delta)) {
                     u.shift();
                     u.push(t);
                 }
             });
-            hints.push(JSON.stringify(u.map(function (v) {return core.formatBigNumber(v[0])+":"+core.formatBigNumber(v[1]);})));
+            texts.push(JSON.stringify(u.map(function (v) {
+                return core.formatBigNumber(v[0])+":"+v[1];
+            })));
         }
     }
+}
 
-    // 吸血怪的最低生命值
+ui.prototype._drawBookDetail_mofang_getArray = function (hp) {
+    var arr = [];
+    var last=0, start=0;
+    for (var i=1;i<hp;i++) {
+        var now=parseInt((hp-1)/i);
+        if (now!=last) {
+            if (last!=0) {
+                arr.push([start, last+"x"]);
+            }
+            last=now;
+            start=i;
+        }
+    }
+    if (last!=0) {
+        arr.push([start,"1x"]);
+        arr.push([hp,"0"]);
+    }
+    return arr;
+}
+
+ui.prototype._drawBookDetail_vampire = function (enemy, texts) {
     if (core.enemys.hasSpecial(enemy.special, 11)) {
-        var damage = core.getDamage(enemyId);
+        var damage = core.getDamage(enemy.id);
         if (damage != null) {
             // 二分HP
             var start = 1, end = 100 * damage;
@@ -1436,76 +1472,55 @@ ui.prototype.drawBookDetail = function (index) {
             while (start<end) {
                 var mid = Math.floor((start+end)/2);
                 core.status.hero.hp = mid;
-                if (core.canBattle(enemyId)) end = mid;
+                if (core.canBattle(enemy.id)) end = mid;
                 else start = mid+1;
             }
             core.status.hero.hp = start;
-            if (core.canBattle(enemyId)) {
-                hints.push("");
-                hints.push("打死该怪物最低需要生命值："+core.formatBigNumber(start));
+            if (core.canBattle(enemy.id)) {
+                texts.push("打死该怪物最低需要生命值："+core.formatBigNumber(start));
             }
             core.status.hero.hp = nowHp;
         }
     }
+}
 
-    // 仇恨伤害
+ui.prototype._drawBookDetail_hatred = function (enemy, texts) {
     if (core.enemys.hasSpecial(enemy.special, 17)) {
-        hints.push("");
-        hints.push("当前仇恨伤害值："+core.getFlag('hatred', 0));
+        texts.push("当前仇恨伤害值："+core.getFlag('hatred', 0));
     }
+}
 
-    hints.push("");
-    hints.push("战斗回合数："+((damageInfo||{}).turn||0));
-    var criticals = core.enemys.nextCriticals(enemyId, 10, null, null, floorId).map(function (v) {
+ui.prototype._drawBookDetail_turnAndCriticals = function (enemy, floorId, texts) {
+    var damageInfo = core.getDamageInfo(enemy, null, null, null, floorId);
+    texts.push("战斗回合数："+((damageInfo||{}).turn||0));
+    // 临界表
+    var criticals = core.enemys.nextCriticals(enemy, 10, null, null, floorId).map(function (v) {
         return core.formatBigNumber(v[0])+":"+core.formatBigNumber(v[1]);
     });
     while (criticals[0]=='0:0') criticals.shift();
-    hints.push("临界表："+JSON.stringify(criticals))
+    texts.push("临界表："+JSON.stringify(criticals))
+}
 
-    var content=hints.join("\n");
-
-    core.status.event.id = 'book-detail';
-    clearInterval(core.interval.tipAnimate);
-
-    core.clearMap('data');
-
-    var left=10, right=480-2*left;
-    var content_left = left + 25;
-
-    var validWidth = right-(content_left-left)-13;
-    var globalFont = core.status.globalAttribute.font;
-    var contents = core.splitLines("data", content, validWidth, '16px '+globalFont);
-
-    var height = 480 - 10 - Math.min(480-24*(contents.length+1)-65, 310);
-    var top = (480-height)/2, bottom = height;
-
-    core.setAlpha('data', 0.9);
-    core.fillRect('data', left, top, right, bottom, '#000000');
-    core.setAlpha('data', 1);
-    core.strokeRect('data', left - 1, top - 1, right + 1, bottom + 1, core.status.globalAttribute.borderColor, 2);
-
+ui.prototype._drawBookDetail_drawContent = function (enemy, contents, pos) {
     // 名称
     core.setTextAlign('data', 'left');
-
-    core.fillText('data', enemy.name, content_left, top + 30, '#FFD700', 'bold 22px '+globalFont);
-    var content_top = top + 57;
+    core.fillText('data', enemy.name, pos.content_left, pos.top + 30, '#FFD700', this._buildFont(22, true));
+    var content_top = pos.top + 57;
 
     for (var i=0;i<contents.length;i++) {
         var text=contents[i];
         var index=text.indexOf("：");
         if (index>=0) {
             var x1 = text.substring(0, index+1);
-            core.fillText('data', x1, content_left, content_top, '#FF6A6A', 'bold 16px '+globalFont);
+            core.fillText('data', x1, pos.content_left, content_top, '#FF6A6A', this._buildFont(16, true));
             var len=core.calWidth('data', x1);
-            core.fillText('data', text.substring(index+1), content_left+len, content_top, '#FFFFFF', '16px '+globalFont);
+            core.fillText('data', text.substring(index+1), pos.content_left+len, content_top, '#FFFFFF', this._buildFont(16, false));
         }
         else {
-            core.fillText('data', contents[i], content_left, content_top, '#FFFFFF', '16px '+globalFont);
+            core.fillText('data', contents[i], pos.content_left, content_top, '#FFFFFF', this._buildFont(16, false));
         }
         content_top+=24;
     }
-
-    core.fillText('data', '<点击任意位置继续>', 334, top+height-13, '#CCCCCC', '13px '+globalFont);
 }
 
 ////// 绘制楼层传送器 //////
@@ -2189,177 +2204,21 @@ ui.prototype.drawStatusBar = function () {
 }
 
 ////// 绘制“数据统计”界面 //////
-ui.prototype.drawStatistics = function () {
-
-    // 数据统计要统计如下方面：
-    // 1. 当前全塔剩余下的怪物数量，总金币数，总经验数，总加点数
-    // 2. 当前全塔剩余的黄蓝红铁门数量，和对应的钥匙数量
-    // 3. 当前全塔剩余的三种宝石数量，血瓶数量，装备数量；总共增加的攻防生命值
-    // 4. 当前层的上述信息
-    // 5. 当前已走的步数；瞬间移动的步数，瞬间移动的次数（和少走的步数）；游戏时长
-    // 6. 当前已恢复的生命值；当前总伤害、战斗伤害、阻激夹域血网伤害、中毒伤害。
-
-    var ori = this.uidata.drawStatistics();
-    var ids = ori.filter(function (e) {
-        return e.endsWith("Door") || core.isset(core.material.items[e]);
+ui.prototype.drawStatistics = function (floorIds) {
+    var obj = this._drawStatistics_buildObj();
+    if (typeof floorIds == 'string') floorIds = [floorIds];
+    (floorIds || core.floorIds).forEach(function (floorId) {
+        core.ui._drawStatistics_floorId(floorId, obj);
     });
-    var obj = {};
-    var cls = {};
-    ids.forEach(function (e) {
-        if (e.endsWith("Door")) cls[e] = "doors";
-        else cls[e] = core.material.items[e].cls;
-        obj[e] = 0;
-    })
-    var order = ["doors", "keys", "items", "tools", "constants", "equips"];
-    ids.sort(function (a, b) {
-        var c1 = order.indexOf(cls[a]), c2 = order.indexOf(cls[b]);
-        if (c1==c2) return ori.indexOf(a)-ori.indexOf(b);
-        return c1-c2;
-    });
-    var ext = {};
-
-    var total = {
-        'monster': {
-            'count': 0, 'money': 0, 'experience': 0, 'point': 0,
-        },
-        'count': obj,
-        'add': {
-            'hp': 0, 'atk': 0, 'def': 0, 'mdef': 0
-        }
-    };
-    var current = core.clone(total);
-
-    core.floorIds.forEach(function (floorId) {
-        var floor=core.status.maps[floorId]||core.floors[floorId];
-        var blocks=core.status.maps[floorId].blocks;
-        // 隐藏层不给看
-        if (floor.cannotViewMap && floorId!=core.status.floorId) return;
-
-        blocks.forEach(function (block) {
-            if (block.disable) return;
-            var event = block.event;
-            if (event.cls.indexOf("enemy")==0) {
-                var enemyId = event.id, enemy = core.material.enemys[enemyId];
-                total.monster.money+=enemy.money||0;
-                total.monster.experience+=enemy.experience||0;
-                total.monster.point+=enemy.point||0;
-                total.monster.count++;
-                if (floorId==core.status.floorId) {
-                    current.monster.money+=enemy.money||0;
-                    current.monster.experience+=enemy.experience||0;
-                    current.monster.point+=enemy.point||0;
-                    current.monster.count++;
-                }
-            }
-            else {
-                var id = event.id;
-
-                if (core.isset(total.count[id])) {
-                    var hp=0, atk=0, def=0, mdef=0;
-
-                    if (cls[id]=='items' && id!='superPotion') {
-                        var temp = core.clone(core.status.hero);
-                        core.setFlag("__statistics__", true);
-                        var ratio = floor.item_ratio||1;
-                        if (core.isset(core.items.itemEffect[id])) {
-                            try {
-                                // 需要检查是否是测试状态...
-                                eval(core.items.itemEffect[id]);
-                            }
-                            catch (e) {}
-                        }
-                        hp = core.status.hero.hp - temp.hp;
-                        atk = core.status.hero.atk - temp.atk;
-                        def = core.status.hero.def - temp.def;
-                        mdef = core.status.hero.mdef - temp.mdef;
-                        core.status.hero = temp;
-                    }
-                    else {
-                        // 装备
-                        if (cls[id]=='equips') {
-                            var values = core.material.items[id].equip||{};
-                            atk = values.atk||0;
-                            def = values.def||0;
-                            mdef = values.mdef||0;
-                        }
-                    }
-
-                    if (id.indexOf('sword')==0 || id.indexOf('shield')==0 || cls[id]=='equips') {
-                        var t = "";
-                        if (atk>0) t+=atk+"攻";
-                        if (def>0) t+=def+"防";
-                        if (mdef>0) t+=mdef+"魔防";
-                        if (t!="") ext[id]=t;
-                    }
-
-                    total.count[id]++;
-                    total.add.hp+=hp;
-                    total.add.atk+=atk;
-                    total.add.def+=def;
-                    total.add.mdef+=mdef;
-                    if (floorId==core.status.floorId) {
-                        current.count[id]++;
-                        current.add.hp+=hp;
-                        current.add.atk+=atk;
-                        current.add.def+=def;
-                        current.add.mdef+=mdef;
-                    }
-                }
-            }
-        })
-    })
-
-    var getText = function (type, data) {
-        var text = type+"地图中：\n";
-        text += "共有怪物"+data.monster.count+"个";
-        if (core.flags.enableMoney) text+="，总金币数"+data.monster.money;
-        if (core.flags.enableExperience) text+="，总经验数"+data.monster.experience;
-        if (core.flags.enableAddPoint) text+="，总加点数"+data.monster.point;
-        text+="。\n";
-
-        var prev = "";
-        ids.forEach(function (key) {
-            var value = data.count[key];
-            if (value==0) return;
-            var c = cls[key];
-            if (c!=prev) {
-                if (prev != "") text += "。";
-                text += "\n";
-            }
-            else
-                text += "，";
-            prev = c;
-            var name = null;
-            if (key=='yellowDoor') name="黄门";
-            else if (key=='blueDoor') name="蓝门";
-            else if (key=='redDoor') name="红门";
-            else if (key=='greenDoor') name="绿门";
-            else if (key=='steelDoor') name="铁门";
-            else name=core.material.items[key].name;
-            text+=name+value+"个";
-            if (core.isset(ext[key]))
-                text+="("+ext[key]+")";
-        })
-
-        if (prev!="") text+="。";
-        text+="\n\n";
-        text+="共加生命值"+core.formatBigNumber(data.add.hp)+"点，攻击"
-            +core.formatBigNumber(data.add.atk)+"点，防御"
-            +core.formatBigNumber(data.add.def)+"点，魔防"
-            +core.formatBigNumber(data.add.mdef)+"点。";
-        return text;
-    }
-
     var formatTime = function (time) {
         return core.setTwoDigits(parseInt(time/3600000))
             +":"+core.setTwoDigits(parseInt(time/60000)%60)
             +":"+core.setTwoDigits(parseInt(time/1000)%60);
     }
-
     var statistics = core.status.hero.statistics;
     core.drawText([
-        getText("全塔", total),
-        getText("当前", current),
+        this._drawStatistics_generateText(obj, "全塔", obj.total),
+        this._drawStatistics_generateText(obj, "当前", obj.current),
         "当前总步数："+core.status.hero.steps+"，当前游戏时长："+formatTime(statistics.currTime)
         +"，总游戏时长"+formatTime(statistics.totalTime)
         +"。\n瞬间移动次数："+statistics.moveDirectly+"，共计少走"+statistics.ignoreSteps+"步。"
@@ -2371,10 +2230,148 @@ ui.prototype.drawStatistics = function () {
         +"，领域/夹击/阻击/血网伤害"+core.formatBigNumber(statistics.extraDamage)+"点。",
         "\t[说明]1. 地图数据统计的效果仅模拟当前立刻获得该道具的效果。\n2. 不会计算“不可被浏览地图”的隐藏层的数据。\n" +
         "3. 不会计算任何通过事件得到的道具（显示事件、改变图块、或直接增加道具等）。\n"+
-        "4. 在自定义道具（例如其他宝石）后，需在ui.js的drawStatistics中注册，不然不会进行统计。\n"+
+        "4. 在自定义道具（例如其他宝石）后，需在脚本编辑的drawStatistics中注册，不然不会进行统计。\n"+
         "5. 所有统计信息仅供参考，如有错误，概不负责。"
     ])
+}
 
+ui.prototype._drawStatistics_buildObj = function () {
+    // 数据统计要统计如下方面：
+    // 1. 当前全塔剩余下的怪物数量，总金币数，总经验数，总加点数
+    // 2. 当前全塔剩余的黄蓝红铁门数量，和对应的钥匙数量
+    // 3. 当前全塔剩余的三种宝石数量，血瓶数量，装备数量；总共增加的攻防生命值
+    // 4. 当前层的上述信息
+    // 5. 当前已走的步数；瞬间移动的步数，瞬间移动的次数（和少走的步数）；游戏时长
+    // 6. 当前已恢复的生命值；当前总伤害、战斗伤害、阻激夹域血网伤害、中毒伤害。
+    var ori = this.uidata.drawStatistics();
+    var ids = ori.filter(function (e) {
+        return e.endsWith("Door") || core.material.items[e];
+    });
+    var cnt = {}, cls = {}, ext = {};
+    ids.forEach(function (e) {
+        if (e.endsWith("Door")) cls[e] = "doors";
+        else cls[e] = core.material.items[e].cls;
+        cnt[e] = 0;
+    })
+    var order = ["doors", "keys", "items", "tools", "constants", "equips"];
+    ids.sort(function (a, b) {
+        var c1 = order.indexOf(cls[a]), c2 = order.indexOf(cls[b]);
+        if (c1==c2) return ori.indexOf(a)-ori.indexOf(b);
+        return c1-c2;
+    });
+    var obj = {
+        'monster': {
+            'count': 0, 'money': 0, 'experience': 0, 'point': 0,
+        },
+        'count': cnt,
+        'add': {
+            'hp': 0, 'atk': 0, 'def': 0, 'mdef': 0
+        }
+    };
+    return {ids: ids, cls: cls, ext: ext, total: core.clone(obj), current: core.clone(obj)};
+}
+
+ui.prototype._drawStatistics_add = function (floorId, obj, x1, x2, value) {
+    obj.total[x1][x2] += value || 0;
+    if (floorId == core.status.floorId)
+        obj.current[x1][x2] += value || 0;
+}
+
+ui.prototype._drawStatistics_floorId = function (floorId, obj) {
+    var floor = core.status.maps[floorId], blocks = floor.blocks;
+    // 隐藏层不给看
+    if (floor.cannotViewMap && floorId!=core.status.floorId) return;
+    blocks.forEach(function (block) {
+        if (block.disable) return;
+        var event = block.event;
+        if (event.cls.indexOf("enemy")==0) {
+            core.ui._drawStatistics_enemy(floorId, event.id, obj);
+        }
+        else {
+            var id = event.id;
+            if (obj.total.count[id] != null)
+                core.ui._drawStatistics_items(floorId, floor, id, obj);
+        }
+    })
+}
+
+ui.prototype._drawStatistics_enemy = function (floorId, id, obj) {
+    var enemy = core.material.enemys[id];
+    this._drawStatistics_add(floorId, obj, 'monster', 'money', enemy.money);
+    this._drawStatistics_add(floorId, obj, 'monster', 'experience', enemy.experience);
+    this._drawStatistics_add(floorId, obj, 'monster', 'point', enemy.point);
+    this._drawStatistics_add(floorId, obj, 'monster', 'count', 1);
+}
+
+ui.prototype._drawStatistics_items = function (floorId, floor, id, obj) {
+    var hp=0, atk=0, def=0, mdef=0;
+    if (obj.cls[id]=='items' && id!='superPotion') {
+        var temp = core.clone(core.status.hero);
+        core.setFlag("__statistics__", true);
+        var ratio = floor.item_ratio||1;
+        try { eval(core.items.itemEffect[id]); }
+        catch (e) {}
+        hp = core.status.hero.hp - temp.hp;
+        atk = core.status.hero.atk - temp.atk;
+        def = core.status.hero.def - temp.def;
+        mdef = core.status.hero.mdef - temp.mdef;
+        core.status.hero = temp;
+    }
+    else if (obj.cls[id]=='equips') {
+        var values = core.material.items[id].equip || {};
+        atk = values.atk || 0;
+        def = values.def || 0;
+        mdef = values.mdef || 0;
+    }
+    if (id.indexOf('sword')==0 || id.indexOf('shield')==0 || obj.cls[id]=='equips') {
+        var t = "";
+        if (atk > 0) t += atk + "攻";
+        if (def > 0) t += def + "防";
+        if (mdef > 0) t += mdef + "魔防";
+        if (t != "") obj.ext[id] = t;
+    }
+    this._drawStatistics_add(floorId, obj, 'count', id, 1);
+    this._drawStatistics_add(floorId, obj, 'add', 'hp', hp);
+    this._drawStatistics_add(floorId, obj, 'add', 'atk', atk);
+    this._drawStatistics_add(floorId, obj, 'add', 'def', def);
+    this._drawStatistics_add(floorId, obj, 'add', 'mdef', mdef);
+}
+
+ui.prototype._drawStatistics_generateText = function (obj, type, data) {
+    var text = type+"地图中：\n";
+    text += "共有怪物"+data.monster.count+"个";
+    if (core.flags.enableMoney) text+="，总金币数"+data.monster.money;
+    if (core.flags.enableExperience) text+="，总经验数"+data.monster.experience;
+    if (core.flags.enableAddPoint) text+="，总加点数"+data.monster.point;
+    text+="。\n";
+
+    var prev = "";
+    obj.ids.forEach(function (key) {
+        var value = data.count[key];
+        if (value==0) return;
+        if (obj.cls[key] != prev) {
+            if (prev != "") text += "。";
+            text += "\n";
+        }
+        else text += "，";
+        prev = obj.cls[key];
+        text+=core.ui._drawStatistics_getName(key)+value+"个";
+        if (obj.ext[key])
+            text+="("+obj.ext[key]+")";
+    })
+    if (prev!="") text+="。";
+
+    text+="\n\n";
+    text+="共加生命值"+core.formatBigNumber(data.add.hp)+"点，攻击"
+        +core.formatBigNumber(data.add.atk)+"点，防御"
+        +core.formatBigNumber(data.add.def)+"点，魔防"
+        +core.formatBigNumber(data.add.mdef)+"点。";
+    return text;
+}
+
+ui.prototype._drawStatistics_getName = function (key) {
+    return {"yellowDoor": "黄门", "blueDoor": "蓝门", "redDoor": "红门", "greenDoor": "绿门",
+            "steelDoor": "铁门"}[key] || core.material.items[key].name;
 }
 
 ////// 绘制“关于”界面 //////
@@ -2430,8 +2427,8 @@ ui.prototype.drawHelp = function () {
         core.status.event.id = 'help';
         core.lockControl();
         core.setAlpha('ui', 1);
-        core.fillRect('ui', 0, 0, 480, 480, '#fff');
-        core.drawImage('ui', core.material.images.keyboard, 32, 32);
+        core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#FFFFFF');
+        core.drawImage('ui', core.material.images.keyboard, 32 * (this.HSIZE - 6), 32 * (this.HSIZE - 6));
     }
     else {
         core.drawText([

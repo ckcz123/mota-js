@@ -2144,41 +2144,19 @@ ui.prototype.drawSLPanel = function(index, refresh) {
 ui.prototype.drawKeyBoard = function () {
     core.lockControl();
     core.status.event.id = 'keyBoard';
+    core.clearUI();
 
-    core.clearSelector();
+    var width = 384, height = 320;
+    var left = (this.PIXEL - width) / 2, right = left + width;
+    var top = (this.PIXEL - height) / 2, bottom = top + height;
 
-    var left = 16 + 32, top = 48 + 32, width = 480 - 2 * left, height = 480 - 2 * top;
-
-    var background = core.status.textAttribute.background;
-    var isWindowSkin = false;
-    if (typeof background == 'string') {
-        background = core.material.images.images[background];
-        if (core.isset(background) && background.width==192 && background.height==128) isWindowSkin = true;
-        else background = core.initStatus.textAttribute.background;
-    }
-    if (!isWindowSkin) background = core.arrayToRGBA(background);
-    var borderColor = core.status.globalAttribute.borderColor;
-    var titleColor = core.arrayToRGBA(core.status.textAttribute.title);
-    var textColor = core.arrayToRGBA(core.status.textAttribute.text);
-
-    core.clearMap('ui');
-    if (isWindowSkin) {
-        core.setAlpha('ui', 0.85);
-        this.drawWindowSkin(background,'ui',left,top,width,height);
-    }
-    else {
-        core.fillRect('ui', left, top, width, height, background);
-        core.strokeRect('ui', left - 1, top - 1, width + 1, height + 1, borderColor, 2);
-    }
-    core.setAlpha('ui', 1);
-
+    var isWindowSkin = this._drawTextBox_drawBackground({}, {}, {left:left, right:right}, {top:top, bottom: bottom});
     core.setTextAlign('ui', 'center');
-    var globalFont = core.status.globalAttribute.font;
-    core.fillText('ui', "虚拟键盘", 240, top+35, titleColor, "bold 22px "+globalFont);
-
-    core.setFont('ui', '17px '+globalFont);
-    core.setFillStyle('ui', textColor);
-    var offset = 128+32-9;
+    core.setFillStyle('ui', core.arrayToRGBA(core.status.textAttribute.title));
+    core.fillText('ui', '虚拟键盘', this.HPIXEL, top + 35, null, this._buildFont(22, true));
+    core.setFont('ui', this._buildFont(17, false));
+    core.setFillStyle('ui', core.arrayToRGBA(core.status.textAttribute.text));
+    var offset = this.HPIXEL - 89;
 
     var lines = [
         ["F1","F2","F3","F4","F5","F6","F7","F8","F9","10","11"],
@@ -2192,17 +2170,17 @@ ui.prototype.drawKeyBoard = function () {
 
     lines.forEach(function (line) {
         for (var i=0;i<line.length;i++) {
-            core.fillText('ui', line[i], 48+32+32*i, offset);
+            core.fillText('ui', line[i], core.ui.HPIXEL + 32*(i-5), offset);
         }
         offset+=32;
     });
 
-    core.fillText("ui", "返回游戏", 448+-80, offset-3, '#FFFFFF', 'bold 15px '+globalFont);
+    core.fillText("ui", "返回游戏", this.PIXEL - 80, offset-3, '#FFFFFF', this._buildFont(15, true));
 
     if (isWindowSkin)
-        this.drawWindowSelector(background, 300+32, offset - 22, 72, 27);
+        this.drawWindowSelector(core.status.textAttribute.background, this.HPIXEL + 92, offset - 22, 72, 27);
     else
-        core.strokeRect('ui', 300+32, offset - 22, 72, 27, "#FFD700", 2);
+        core.strokeRect('ui', this.HPIXEL + 92, offset - 22, 72, 27, "#FFD700", 2);
 }
 
 ////// 绘制状态栏 /////
@@ -2406,42 +2384,43 @@ ui.prototype.drawAbout = function () {
 
 ////// 绘制“画图”界面 //////
 ui.prototype.drawPaint = function () {
-
     core.drawText(
         "\t[进入绘图模式]你可以在此页面上任意进行绘图和标记操作。\nM键可以进入或退出此模式。\n\n"+
         "绘图的内容会自动保存，且以页面为生命周期，和存读档无关，重新开始游戏或读档后绘制的内容仍有效，但刷新页面就会消失。\n"+
         "你可以将绘制内容保存到文件，也可以从文件读取保存的绘制内容。\n"+
         "浏览地图页面可以按楼传按钮或M键来开启/关闭该层的绘图显示。\n\n更多功能请详见文档-元件-绘图模式。",
-        function () {
-            core.drawTip("打开绘图模式，现在可以任意在界面上绘图标记");
-
-            core.lockControl();
-            core.status.event.id = 'paint';
-            core.status.event.data = {"x": null, "y": null, "erase": false};
-
-            core.clearSelector();
-            core.createCanvas('paint', -core.bigmap.offsetX, -core.bigmap.offsetY, 32*core.bigmap.width, 32*core.bigmap.height, 95);
-
-            // 将已有的内容绘制到route上
-            var value = core.paint[core.status.floorId];
-            if (core.isset(value)) value = lzw_decode(value).split(",");
-            core.utils.decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
-            core.drawImage('paint', core.bigmap.tempCanvas.canvas, 0, 0);
-
-            core.setLineWidth('paint', 3);
-            core.setStrokeStyle('paint', '#FF0000');
-
-            core.statusBar.image.keyboard.style.opacity = 0;
-            core.statusBar.image.shop.style.opacity = 0;
-
-            core.statusBar.image.book.src = core.statusBar.icons.paint.src;
-            core.statusBar.image.fly.src = core.statusBar.icons.erase.src;
-            core.statusBar.image.toolbox.src = core.statusBar.icons.empty.src;
-            core.statusBar.image.settings.src = core.statusBar.icons.exit.src;
-            core.statusBar.image.book.style.opacity = 1;
-            core.statusBar.image.fly.style.opacity = 1;
-        }
+        this._drawPaint_draw
     );
+}
+
+ui.prototype._drawPaint_draw = function () {
+    core.drawTip("打开绘图模式，现在可以任意在界面上绘图标记");
+
+    core.lockControl();
+    core.status.event.id = 'paint';
+    core.status.event.data = {"x": null, "y": null, "erase": false};
+
+    core.clearSelector();
+    core.createCanvas('paint', -core.bigmap.offsetX, -core.bigmap.offsetY, 32*core.bigmap.width, 32*core.bigmap.height, 95);
+
+    // 将已有的内容绘制到route上
+    var value = core.paint[core.status.floorId];
+    if (core.isset(value)) value = lzw_decode(value).split(",");
+    core.utils.decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
+    core.drawImage('paint', core.bigmap.tempCanvas.canvas, 0, 0);
+
+    core.setLineWidth('paint', 3);
+    core.setStrokeStyle('paint', '#FF0000');
+
+    core.statusBar.image.keyboard.style.opacity = 0;
+    core.statusBar.image.shop.style.opacity = 0;
+
+    core.statusBar.image.book.src = core.statusBar.icons.paint.src;
+    core.statusBar.image.fly.src = core.statusBar.icons.erase.src;
+    core.statusBar.image.toolbox.src = core.statusBar.icons.empty.src;
+    core.statusBar.image.settings.src = core.statusBar.icons.exit.src;
+    core.statusBar.image.book.style.opacity = 1;
+    core.statusBar.image.fly.style.opacity = 1;
 }
 
 ////// 绘制帮助页面 //////

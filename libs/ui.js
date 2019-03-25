@@ -1402,7 +1402,6 @@ ui.prototype._drawBookDetail_getInfo = function (index) {
     index = core.clamp(index, 0, enemys.length - 1);
     var enemy = enemys[index], enemyId = enemy.id;
     var texts=core.enemys.getSpecialHint(enemyId);
-    var damageInfo = core.enemys.getDamageInfo(enemy, null, null, null, floorId);
     if (texts.length == 0) texts.push("该怪物无特殊属性。");
     texts.push("");
     this._drawBookDetail_getTexts(enemy, floorId, texts);
@@ -1600,98 +1599,92 @@ ui.prototype.drawShop = function (shopId) {
 ui.prototype.drawMaps = function (index, x, y) {
     core.lockControl();
     core.status.event.id = 'viewMaps';
-
-    if (!core.isset(index)) {
-        core.status.event.data = null;
-        core.clearSelector();
-
-        core.fillRect('ui', 0, 0, 416, 416, 'rgba(0,0,0,0.4)');
-
-        core.strokeRect('ui', 66, 2, 284, 60, "#FFD700", 4);
-        core.strokeRect('ui', 2, 66, 60, 284);
-        core.strokeRect('ui', 66, 416-62, 284, 60);
-        core.strokeRect('ui', 416-62, 66, 60, 284);
-        core.strokeRect('ui', 66, 66, 284, 92);
-        core.strokeRect('ui', 66, 32*8+2, 284, 92);
-        core.setTextAlign('ui', 'center');
-        core.fillText('ui', "上移地图 [W]", 208, 38, '#FFD700', '20px Arial');
-        core.fillText('ui', "下移地图 [S]", 208, 390);
-
-        core.strokeRect('ui', 2, 2, 28, 28);
-        core.fillText('ui', 'V', 16, 24);
-        core.strokeRect('ui', 2, 416-30, 28, 28);
-        core.fillText('ui', 'M', 16, 408);
-        core.strokeRect('ui', 416-30, 2, 28, 28);
-        core.fillText('ui', 'Z', 400, 24);
-
-        var top = 150;
-        core.fillText('ui', "左", 32, top);
-        core.fillText('ui', "移", 32, top+32);
-        core.fillText('ui', "地", 32, top+32*2);
-        core.fillText('ui', "图", 32, top+32*3);
-        core.fillText('ui', "[A]", 32, top+32*4);
-        core.fillText('ui', "右", 384, top);
-        core.fillText('ui', "移", 384, top+32);
-        core.fillText('ui', "地", 384, top+32*2);
-        core.fillText('ui', "图", 384, top+32*3);
-        core.fillText('ui', "[D]", 384, top+32*4);
-
-        core.fillText('ui', "前张地图 [▲ / PGUP]", 208, 64+54);
-        core.fillText('ui', "后张地图 [▼ / PGDN]", 208, 32*8+54);
-
-        core.fillText('ui', "退出 [ESC / ENTER]", 208, 208+8);
-        core.fillText('ui', "[X] 可查看怪物手册", 285, 208+40, null, '13px Arial');
-
-        return;
-    }
-
-    var damage = (core.status.event.data||{}).damage, paint =  (core.status.event.data||{}).paint;
-    var all = (core.status.event.data||{}).all;
-    if (core.isset(index.damage)) damage=index.damage;
-    if (core.isset(index.paint)) paint=index.paint;
-    if (core.isset(index.all)) all=index.all;
-
-    if (core.isset(index.index)) {
-        x=index.x;
-        y=index.y;
-        index=index.index;
-    }
-
-    if (index<0) index=0;
-    if (index>=core.floorIds.length) index=core.floorIds.length-1;
-    var floorId = core.floorIds[index], mw = core.floors[floorId].width, mh = core.floors[floorId].height;
-    if (!core.isset(x)) x = parseInt(mw/2);
-    if (!core.isset(y)) y = parseInt(mh/2);
-    if (x<6) x=6;
-    if (x>mw-7) x=mw-7;
-    if (y<6) y=6;
-    if (y>mh-7) y=mh-7;
-
-    core.status.event.data = {"index": index, "x": x, "y": y, "damage": damage, "paint": paint, "all": all};
-
+    this.clearUI();
+    if (index == null) return this._drawMaps_drawHint();
     clearTimeout(core.interval.tipAnimate);
-    core.clearSelector();
     core.status.checkBlock.cache = {};
-    core.drawThumbnail(floorId, null, {damage: damage}, {ctx: 'ui', centerX: x, centerY: y, all: all});
-
+    var data = this._drawMaps_buildData(index, x, y);
+    core.drawThumbnail(data.floorId, null, {damage: data.damage},
+        {ctx: 'ui', centerX: data.x, centerY: data.y, all: data.all});
     // 绘图
-    if (core.status.event.data.paint) {
-        var offsetX = core.clamp(x-6, 0, mw-13), offsetY = core.clamp(y-6, 0, mh-13);
-        var value = core.paint[floorId];
-        if (core.isset(value)) value = lzw_decode(value).split(",");
-        core.utils.decodeCanvas(value, 32*mw, 32*mh);
-        core.drawImage('ui', core.bigmap.tempCanvas.canvas, offsetX*32, offsetY*32, 416, 416, 0, 0, 416, 416);
+    if (data.paint) {
+        var offsetX = 32 * (data.x - this.HSIZE), offsetY = 32 * (data.y - this.HSIZE);
+        var value = core.paint[data.floorId];
+        if (value) value = lzw_decode(value).split(",");
+        core.utils.decodeCanvas(value, 32 * data.mw, 32 * data.mh);
+        core.drawImage('ui', core.bigmap.tempCanvas.canvas, offsetX * 32, offsetY * 32,
+            this.PIXEL, this.PIXEL, 0, 0, this.PIXEL, this.PIXEL);
     }
-
     core.clearMap('data');
     core.setTextAlign('data', 'left');
     core.setFont('data', '16px Arial');
-
-    var text = core.status.maps[floorId].title;
-    if (!all && (mw>13 || mh>13)) text+=" ["+(x-6)+","+(y-6)+"]";
+    var text = core.status.maps[data.floorId].title;
+    if (!data.all && (data.mw>this.SIZE || data.mh>this.SIZE))
+        text+=" ["+(data.x-this.HSIZE)+","+(data.y-this.HSIZE)+"]";
     var textX = 16, textY = 18, width = textX + core.calWidth('data', text) + 16, height = 42;
     core.fillRect('data', 5, 5, width, height, 'rgba(0,0,0,0.4)');
     core.fillText('data', text, textX + 5, textY + 15, 'rgba(255,255,255,0.6)');
+}
+
+ui.prototype._drawMaps_drawHint = function () {
+    core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, 'rgba(0,0,0,0.4)');
+    core.setTextAlign('ui', 'center');
+    var stroke = function (left, top, width, height, fillStyle, lineWidth) {
+        core.strokeRect('ui', left*32+2, top*32+2, width*32-4, height*32-4, fillStyle, lineWidth);
+    }
+    var per = this.HSIZE - 4;
+    stroke(per, 0, 9, per, '#FFD700', 4); // up
+    stroke(0, per, per, 9); // left
+    stroke(per, this.SIZE - per, 9, per); // down
+    stroke(this.SIZE - per, per, per, 9); // right
+    stroke(per, per, 9, 3); // prev
+    stroke(per, this.SIZE - per - 3, 9, 3); // next
+    stroke(0, 0, per-1, per-1); // left top
+    stroke(this.SIZE-(per - 1), 0, per-1, per-1); // right top
+    stroke(0, this.SIZE-(per-1), per-1, per-1); // left bottom
+
+    core.setTextBaseline('ui', 'middle');
+    core.fillText('ui', "上移地图 [W]", this.HPIXEL, per * 16, '#FFD700', '20px Arial');
+    core.fillText('ui', "下移地图 [S]", this.HPIXEL, this.PIXEL - per * 16);
+    core.fillText('ui', 'V', (per-1)*16, (per-1)*16);
+    core.fillText('ui', 'Z', this.PIXEL - (per-1)*16, (per-1)*16);
+    core.fillText('ui', 'M', (per-1)*16, this.PIXEL - (per-1)*16);
+
+    var top = this.HPIXEL - 66, left = per * 16, right = this.PIXEL - left;
+    var lt = ["左", "移", "地", "图", "[A]"], rt = ["右", "移", "地", "图", "[D]"];
+    for (var i = 0; i < 5; ++i) {
+        core.fillText("ui", lt[i], left, top + 32 * i);
+        core.fillText("ui", rt[i], right, top + 32 * i);
+    }
+    core.fillText('ui', "前张地图 [▲ / PGUP]", this.HPIXEL, 32 * per + 48);
+    core.fillText('ui', "后张地图 [▼ / PGDN]", this.HPIXEL, this.PIXEL - (32 * per + 48));
+
+    core.fillText('ui', "退出 [ESC / ENTER]", this.HPIXEL, this.HPIXEL);
+    core.fillText('ui', "[X] 可查看怪物手册", this.HPIXEL + 77, this.HPIXEL + 32, null, '13px Arial');
+
+    core.setTextBaseline('ui', 'alphabetic');
+}
+
+ui.prototype._drawMaps_buildData = function (index, x, y) {
+    var damage = (core.status.event.data||{}).damage;
+    var paint =  (core.status.event.data||{}).paint;
+    var all = (core.status.event.data||{}).all;
+    if (index.damage != null) damage=index.damage;
+    if (index.paint != null) paint=index.paint;
+    if (index.all != null) all=index.all;
+    if (index.index != null) { x=index.x; y=index.y; index=index.index; }
+    index = core.clamp(index, 0, core.floorIds.length-1);
+    if (damage == null) damage = true; // 浏览地图默认开显伤好了
+
+    var floorId = core.floorIds[index], mw = core.floors[floorId].width, mh = core.floors[floorId].height;
+    if (x == null) x = parseInt(mw / 2);
+    if (y == null) y = parseInt(mh / 2);
+    x = core.clamp(x, this.HSIZE, mw - this.HSIZE - 1);
+    y = core.clamp(y, this.HSIZE, mh - this.HSIZE - 1);
+
+    core.status.event.data = {index: index, x: x, y: y, floorId: floorId, mw: mw, mh: mh,
+                              damage: damage, paint: paint, all: all };
+    return core.status.event.data;
 }
 
 ////// 绘制道具栏 //////

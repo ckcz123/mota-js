@@ -1055,60 +1055,60 @@ actions.prototype._clickViewMaps = function (x, y) {
         core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
         return;
     }
-
     var now = core.floorIds.indexOf(core.status.floorId);
     var index = core.status.event.data.index;
     var cx = core.status.event.data.x, cy = core.status.event.data.y;
     var floorId = core.floorIds[index], mw = core.floors[floorId].width, mh = core.floors[floorId].height;
+    var per = this.HSIZE - 4;
 
-    if (x <= 1 && y <= 1) {
+    if (x <= per - 2 && y <= per - 2) {
         core.status.event.data.damage = !core.status.event.data.damage;
         core.ui.drawMaps(index, cx, cy);
         return;
     }
-    if (x <= 1 && y >= 13) {
+    if (x <= per - 2 && y >= this.SIZE + 1 - per) {
         core.status.event.data.paint = !core.status.event.data.paint;
         core.ui.drawMaps(index, cx, cy);
         return;
     }
-    if (x >= 13 && y <= 1) {
+    if (x >= this.SIZE + 1 - per && y <= per - 2) {
         core.status.event.data.all = !core.status.event.data.all;
         core.ui.drawMaps(index, cx, cy);
         return;
     }
 
-    if (x >= 3 && x <= 11 && y <= 2 && mh > 15) {
+    if (x >= per && x <= this.LAST - per && y <= per - 1 && mh > this.SIZE) {
         core.ui.drawMaps(index, cx, cy - 1);
         return;
     }
-    if (x >= 3 && x <= 11 && y >= 12 && mh > 15) {
+    if (x >= per && x <= this.LAST - per && y >= this.SIZE - per && mh > this.SIZE) {
         core.ui.drawMaps(index, cx, cy + 1);
         return;
     }
-    if (x <= 2 && y >= 3 && y <= 11) {
+    if (x <= per - 1 && y >= per && y <= this.LAST - per) {
         core.ui.drawMaps(index, cx - 1, cy);
         return;
     }
-    if (x >= 12 && y >= 3 && y <= 11) {
+    if (x >= this.SIZE - per && y >= per && y <= this.LAST - per) {
         core.ui.drawMaps(index, cx + 1, cy);
         return;
     }
 
-    if (y <= 5 && (mh == 15 || (x >= 3 && x <= 11))) {
+    if (y <= this.HSIZE - 2 && (mh == this.SIZE || (x >= per && x <= this.LAST - per))) {
         index++;
         while (index < core.floorIds.length && index != now && core.status.maps[core.floorIds[index]].cannotViewMap)
             index++;
         if (index < core.floorIds.length)
             core.ui.drawMaps(index);
     }
-    else if (y >= 9 && (mh == 15 || (x >= 3 && x <= 11))) {
+    else if (y >= this.HSIZE + 2 && (mh == this.SIZE || (x >= per && x <= this.LAST - per))) {
         index--;
         while (index >= 0 && index != now && core.status.maps[core.floorIds[index]].cannotViewMap)
             index--;
         if (index >= 0)
             core.ui.drawMaps(index);
     }
-    else if (x >= 3 && x <= 11 && y >= 6 && y <= 8) {
+    else if (x >= per && x <= this.LAST - per && y >= this.HSIZE - 1 && y <= this.HSIZE + 1) {
         core.clearMap('data');
         core.ui.closePanel();
     }
@@ -1120,12 +1120,12 @@ actions.prototype._keyDownViewMaps = function (keycode) {
 
     var floorId = core.floorIds[core.status.event.data.index], mh = core.floors[floorId].height;
 
-    if (keycode == 38 || keycode == 33) this._clickViewMaps(7, 4);
-    if (keycode == 40 || keycode == 34) this._clickViewMaps(7, 11);
-    if (keycode == 87 && mh > 15) this._clickViewMaps(7, 1);
-    if (keycode == 65) this._clickViewMaps(1, 7);
-    if (keycode == 83 && mh > 15) this._clickViewMaps(7, 13);
-    if (keycode == 68) this._clickViewMaps(13, 7);
+    if (keycode == 38 || keycode == 33) this._clickViewMaps(this.HSIZE, this.HSIZE - 3);
+    if (keycode == 40 || keycode == 34) this._clickViewMaps(this.HSIZE, this.HSIZE + 3);
+    if (keycode == 87 && mh > this.SIZE) this._clickViewMaps(this.HSIZE, 0);
+    if (keycode == 65) this._clickViewMaps(0, this.HSIZE);
+    if (keycode == 83 && mh > this.SIZE) this._clickViewMaps(this.HSIZE, this.LAST);
+    if (keycode == 68) this._clickViewMaps(this.LAST, this.HSIZE);
     return;
 }
 

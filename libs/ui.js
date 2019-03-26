@@ -1226,151 +1226,170 @@ ui.prototype.drawCursor = function () {
 ui.prototype.drawBook = function (index) {
     var floorId = core.floorIds[(core.status.event.ui||{}).index] || core.status.floorId;
     var enemys = core.enemys.getCurrentEnemys(floorId);
-    
-    core.clearSelector();
+    core.clearUI();
     core.clearMap('data');
 
+    if (this._drawBook_drawBackground(floorId, enemys)) return;
+    index = core.clamp(index, 0, enemys.length - 1);
+    var perpage = this.HSIZE, page = parseInt(index / perpage) + 1;
+    var totalPage = parseInt((enemys.length - 1) / perpage) + 1;
+    core.status.event.data = index;
+    var start = (page - 1) * perpage, end = Math.min(page * perpage, enemys.length);
+    enemys = enemys.slice(start, end);
+
+    for (var i = 0; i < enemys.length; i++) {
+        this._drawBook_drawOne(floorId, i, enemys[i]);
+    }
+
+    if (index - start >= 0 && index - start < enemys.length) {
+        core.strokeRect('ui', 10, 62 * (index - start) + 13, this.PIXEL - 10 * 2,  62, '#FFD700');
+    }
+
+    core.drawBoxAnimate();
+    this.drawPagination(page, totalPage);
+    core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13,'#DDDDDD', this._buildFont(15, true));
+}
+
+ui.prototype._drawBook_drawBackground = function (floorId, enemys) {
     // 生成groundPattern
     core.maps.generateGroundPattern(floorId);
 
     core.setFillStyle('ui', core.material.groundPattern);
-    core.fillRect('ui', 0, 0, 480, 480);
+    core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL);
 
     core.setAlpha('ui', 0.6);
     core.setFillStyle('ui', '#000000');
-    core.fillRect('ui', 0, 0, 480, 480);
+    core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL);
 
     core.setAlpha('ui', 1);
-    core.setTextAlign('ui', 'left');
-    var globalFont = core.status.globalAttribute.font;
-    core.setFont('ui', 'bold 15px '+globalFont);
-
     if (enemys.length == 0) {
-        core.fillText('ui', "本层无怪物", 83, 286, '#999999', "bold 50px "+globalFont);
-        // 退出
         core.setTextAlign('ui', 'center');
-        core.fillText('ui', '返回游戏', 370, 467,'#DDDDDD', 'bold 15px '+globalFont);
-        return;
+        core.fillText('ui', "本层无怪物", this.HPIXEL, this.HPIXEL + 14, '#999999', this._buildFont(50, true));
+        core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13,'#DDDDDD', this._buildFont(15, true));
+        return true;
     }
+    return false;
+}
 
-    if (index<0) index=0;
-    if (index>=enemys.length) index=enemys.length-1;
-    var perpage = 7;
-    var page=parseInt(index/perpage)+1;
-    var totalPage = parseInt((enemys.length - 1) / perpage) + 1;
-    core.status.event.data = index;
-    var start = (page - 1) * perpage, end = Math.min(page * perpage, enemys.length);
+ui.prototype._drawBook_drawOne = function (floorId, index, enemy) {
+    // --- 区域规划：每个区域总高度为62，宽度为 PIXEL
+    var top = 62 * index + 12; // 最上面margin是12px
+    // 横向规划：
+    // 22 + 42 = 64 是头像框
+    this._drawBook_drawBox(index, enemy, top);
+    // 剩余 PIXEL - 64 的宽度，按照 10 : 9 : 8 : 8 的比例划分
+    var left = 64, total_width = this.PIXEL - left;
+    var name_width = total_width * 10 / 35,
+        col1_width = total_width * 9 / 35, col1_offset = left + name_width,
+        col2_width = total_width * 8 / 35, col2_offset = col1_offset + col2_width,
+        col3_width = total_width * 8 / 35, col3_offset = col2_offset + col3_width;
+    this._drawBook_drawNameCol(index, enemy, top, left, name_width);
 
-    enemys = enemys.slice(start, end);
-    core.status.boxAnimateObjs = [];
-    for (var i = 0; i < enemys.length; i++) {
-        // 边框
-        var enemy = enemys[i];
-        core.strokeRect('ui', 22, 62 * i + 22, 42, 42, '#DDDDDD', 2);
+    // 第二行：金币、加点、经验
+    var second_line = [];
+    if (core.flags.enableMoney) second_line.push(["金币", core.formatBigNumber(enemy.money || 0)]);
+    if (core.flags.enableAddPoint) second_line.push(["加点", core.formatBigNumber(enemy.point || 0)]);
+    if (core.flags.enableExperience && second_line.length < 2)
+        second_line.push(["经验", core.formatBigNumber(enemy.experience || 0)]);
+    var cnt = second_line.length;
 
-        var cls = 'enemys';
-        if (core.isset(core.material.icons.enemy48[enemy.id]))
-            cls = 'enemy48';
-        var height = cls=='enemy48'?48:32;
-        var animate = cls=='enemy48'?4:2;
+    this._drawBook_drawCol1(index, enemy, top, col1_offset, col1_width, second_line);
+    this._drawBook_drawCol2(index, enemy, top, col2_offset, col2_width, second_line);
+    this._drawBook_drawCol3(index, enemy, top, col3_offset, col3_width);
 
-        // 怪物
-        core.status.boxAnimateObjs.push({
-            'bgx': 22, 'bgy': 62 * i + 22, 'bgWidth': 42, 'bgHeight': 42,
-            'x': 27, 'y': 62 * i + 27, 'height': 32, 'animate': animate,
-            'image': core.material.images[cls],
-            'pos': core.material.icons[cls][enemy.id] * height
-        });
+    // get damage offset
+    var damageOffset = col1_offset + (col1_width + col2_width + col3_width) / 2 - 12;
+    if (cnt == 1) damageOffset = col2_offset + (col2_width + col3_width) / 2 - 12;
+    else if (cnt == 2) damageOffset = col3_offset + col3_width / 2 - 12;
+    this._drawBook_drawDamage(index, enemy, top, damageOffset);
+}
 
-        // 数据
-        core.setTextAlign('ui', 'center');
+ui.prototype._drawBook_drawBox = function (index, enemy, top) {
+    // 横向：22+42；纵向：10 + 42 + 10（正好居中）；内部图像 32x32
+    var border_top = top + 10, border_left = 22;
+    var img_top = border_top + 5, img_left = border_left + 5;
+    core.strokeRect('ui', 22, border_top, 42, 42, '#DDDDDD', 2);
+    var blockInfo = core.getBlockInfo(enemy.id);
+    core.status.boxAnimateObjs.push({
+        'bgx': border_left, 'bgy': border_top, 'bgWidth': 42, 'bgHeight': 42,
+        'x': img_left, 'y': img_top, 'height': 32, 'animate': blockInfo.animate,
+        'image': blockInfo.image, 'pos': blockInfo.posY * blockInfo.height
+    });
+}
 
-        if (enemy.specialText=='') {
-            core.fillText('ui', enemy.name, 125, 62 * i + 47, '#DDDDDD', 'bold 17px '+globalFont);
-        }
-        else {
-            core.fillText('ui', enemy.name, 125, 62 * i + 40, '#DDDDDD', 'bold 17px '+globalFont);
-            core.fillText('ui', enemy.specialText, 125, 62 * i + 62, '#FF6A6A', 'bold 15px '+globalFont);
-        }
-        core.setTextAlign('ui', 'left');
-        core.fillText('ui', '生命', 185, 62 * i + 32, '#DDDDDD', '13px '+globalFont);
-        core.fillText('ui', core.formatBigNumber(enemy.hp||0), 215, 62 * i + 32, '#DDDDDD', 'bold 13px '+globalFont);
-        core.fillText('ui', '攻击', 285, 62 * i + 32, '#DDDDDD', '13px '+globalFont);
-        core.fillText('ui', core.formatBigNumber(enemy.atk||0), 315, 62 * i + 32, '#DDDDDD', 'bold 13px '+globalFont);
-        core.fillText('ui', '防御', 375, 62 * i + 32, '#DDDDDD', '13px '+globalFont);
-        core.fillText('ui', core.formatBigNumber(enemy.def||0), 405, 62 * i + 32, '#DDDDDD', 'bold 13px '+globalFont);
-
-        var expOffset = 185, line_cnt=0;
-        if (core.flags.enableMoney) {
-            core.fillText('ui', '金币', expOffset, 62 * i + 50, '#DDDDDD', '13px '+globalFont);
-            core.fillText('ui', core.formatBigNumber(enemy.money||0), expOffset + 30, 62 * i + 50, '#DDDDDD', 'bold 13px '+globalFont);
-            expOffset = 285;
-            line_cnt++;
-        }
-
-        // 加点
-        if (core.flags.enableAddPoint) {
-            core.setTextAlign('ui', 'left');
-            core.fillText('ui', '加点', expOffset, 62 * i + 50, '#DDDDDD', '13px '+globalFont);
-            core.fillText('ui', core.formatBigNumber(enemy.point||0), expOffset + 30, 62 * i + 50, '#DDDDDD', 'bold 13px '+globalFont);
-            expOffset = 285;
-            line_cnt++;
-        }
-
-        if (core.flags.enableExperience && line_cnt<2) {
-            core.setTextAlign('ui', 'left');
-            core.fillText('ui', '经验', expOffset, 62 * i + 50, '#DDDDDD', '13px '+globalFont);
-            core.fillText('ui', core.formatBigNumber(enemy.experience||0), expOffset + 30, 62 * i + 50, '#DDDDDD', 'bold 13px '+globalFont);
-            line_cnt++;
-        }
-
-        var damageOffset = 309;
-        if (line_cnt==1) damageOffset=362;
-        if (line_cnt==2) damageOffset=409;
-
-        core.setTextAlign('ui', 'center');
-
-        var damage = enemy.damage;
-        var color = '#FFFF00';
-        if (damage == null) {
-            damage = '无法战斗';
-            color = '#FF0000';
-        }
-        else {
-            if (damage >= core.status.hero.hp) color = '#FF0000';
-            if (damage<=0) color = '#00FF00';
-
-            damage = core.formatBigNumber(damage);
-            if (core.enemys.hasSpecial(enemy, 19))
-                damage += "+";
-            if (core.enemys.hasSpecial(enemy, 21))
-                damage += "-";
-            if (core.enemys.hasSpecial(enemy, 11))
-                damage += "^";
-        }
-        if (enemy.notBomb)
-            damage += "[b]";
-        core.fillText('ui', damage, damageOffset, 62 * i + 50, color, 'bold 13px '+globalFont);
-
-        core.setTextAlign('ui', 'left');
-
-        core.fillText('ui', '临界', 185, 62 * i + 68, '#DDDDDD', '13px '+globalFont);
-        core.fillText('ui', core.formatBigNumber(enemy.critical||0), 215, 62 * i + 68, '#DDDDDD', 'bold 13px '+globalFont);
-        core.fillText('ui', '减伤', 285, 62 * i + 68, '#DDDDDD', '13px '+globalFont);
-        core.fillText('ui', core.formatBigNumber(enemy.criticalDamage||0), 315, 62 * i + 68, '#DDDDDD', 'bold 13px '+globalFont);
-        core.fillText('ui', '1防', 375, 62 * i + 68, '#DDDDDD', '13px '+globalFont);
-        core.fillText('ui', core.formatBigNumber(enemy.defDamage||0), 405, 62 * i + 68, '#DDDDDD', 'bold 13px '+globalFont);
-
-        if (index == start+i) {
-            core.strokeRect('ui', 10, 62 * i + 13, 480-10*2,  62, '#FFD700');
-        }
-
-    }
-    core.drawBoxAnimate();
-    this.drawPagination(page, totalPage);
+ui.prototype._drawBook_drawNameCol = function (index, enemy, top, left, width) {
+    // 绘制第零列（名称和特殊属性）
+    // 如果需要添加自己的比如怪物的称号等，也可以在这里绘制
     core.setTextAlign('ui', 'center');
-    // 退出
-    core.fillText('ui', '返回游戏', 370+59, 403+64,'#DDDDDD', 'bold 15px '+globalFont);
+    if (enemy.specialText=='') {
+        core.fillText('ui', enemy.name, left + width / 2,
+            top + 35, '#DDDDDD', this._buildFont(17, true));
+    }
+    else {
+        core.fillText('ui', enemy.name, left + width / 2,
+            top + 28, '#DDDDDD', this._buildFont(17, true));
+        core.fillText('ui', enemy.specialText, left + width / 2,
+            top + 50, '#FF6A6A', this._buildFont(15, true));
+    }
+}
+
+ui.prototype._drawBook_drawCol1 = function (index, enemy, top, left, width, second_line) {
+    // 绘制第一列
+    core.setTextAlign('ui', 'left');
+    var b13 = this._buildFont(13, true), f13 = this._buildFont(13, false);
+    core.fillText('ui', '生命', left, top + 20, '#DDDDDD', f13);
+    core.fillText('ui', core.formatBigNumber(enemy.hp||0), left + 30, top + 20, null, b13);
+    if (second_line.length>0) {
+        var one = second_line.shift();
+        core.fillText('ui', one[0], left, top + 38, '#DDDDDD', f13);
+        core.fillText('ui', one[1], left + 30, top + 38, null, b13);
+    }
+    core.fillText('ui', '临界', left, top + 56, '#DDDDDD', f13);
+    core.fillText('ui', core.formatBigNumber(enemy.critical||0), left + 30, top + 56, null, b13);
+}
+
+ui.prototype._drawBook_drawCol2 = function (index, enemy, top, left, width, second_line) {
+    // 绘制第二列
+    core.setTextAlign('ui', 'left');
+    var b13 = this._buildFont(13, true), f13 = this._buildFont(13, false);
+    core.fillText('ui', '攻击', left, top + 20, '#DDDDDD', f13);
+    core.fillText('ui', core.formatBigNumber(enemy.atk||0), left + 30, top + 20, null, b13);
+    if (second_line.length>0) {
+        var one = second_line.shift();
+        core.fillText('ui', one[0], left, top + 38, '#DDDDDD', f13);
+        core.fillText('ui', one[1], left + 30, top + 38, null, b13);
+    }
+    core.fillText('ui', '减伤', left, top + 56, '#DDDDDD', f13);
+    core.fillText('ui', core.formatBigNumber(enemy.criticalDamage||0), left + 30, top + 56, null, b13);
+}
+
+ui.prototype._drawBook_drawCol3 = function (index, enemy, top, left, width) {
+    // 绘制第三列
+    core.setTextAlign('ui', 'left');
+    var b13 = this._buildFont(13, true), f13 = this._buildFont(13, false);
+    core.fillText('ui', '防御', left, top + 20, '#DDDDDD', f13);
+    core.fillText('ui', core.formatBigNumber(enemy.def||0), left + 30, top + 20, null, b13);
+    core.fillText('ui', '1防', left, top + 56, '#DDDDDD', f13);
+    core.fillText('ui', core.formatBigNumber(enemy.defDamage||0), left + 30, top + 56, null, b13);
+}
+
+ui.prototype._drawBook_drawDamage = function (index, enemy, top, damageOffset) {
+    core.setTextAlign('ui', 'center');
+    var damage = enemy.damage, color = '#FFFF00';
+    if (damage == null) {
+        damage = '无法战斗';
+        color = '#FF0000';
+    }
+    else {
+        if (damage >= core.status.hero.hp) color = '#FF0000';
+        if (damage <= 0) color = '#00FF00';
+        damage = core.formatBigNumber(damage);
+        if (core.enemys.hasSpecial(enemy, 19)) damage += "+";
+        if (core.enemys.hasSpecial(enemy, 21)) damage += "-";
+        if (core.enemys.hasSpecial(enemy, 11)) damage += "^";
+    }
+    if (enemy.notBomb) damage += "[b]";
+    core.fillText('ui', damage, damageOffset, top + 38, color, this._buildFont(13, true));
 }
 
 ////// 绘制怪物属性的详细信息 //////

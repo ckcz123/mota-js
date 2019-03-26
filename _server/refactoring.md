@@ -10,32 +10,34 @@
 
 + [x] editor_blockly 图块化事件编辑器, 基本不改动
 + [x] editor_multi 多行文本编辑器, 基本不改动
-+ [ ] editor_table 处理表格的生成, 及其响应的事件, 从原editor\_mode中分离
++ [x] editor_table 处理表格的生成, 及其响应的事件, 从原editor\_mode中分离
 + [ ] editor_file 调用fs.js编辑文件, 把原editor\_file模块化
 + [ ] editor_game 处理来自core的数据, 导入为editor的数据, 从原editor中分离
-+ [ ] editor_util 生成guid等函数, 从editor分离
++ [x] editor_util 生成guid等函数, 从editor分离
 + [ ] editor 执行初始化流程加组合各组件
-
 + [ ] 原editor_mode 移除
 + [ ] 原vm 移除
 
 ---
 
-对象结构
++ [ ] 对象结构
 
 ```
 editor: {
     __proto__: {
-        blockly: 组件
-        multi: 组件
-        file: 组件
-        table: 组件
-        util: 组件
+        fs
+        util
+        file
+        table
+        multi
+        blockly
     }
     game: 来自游戏的数据
     config: 编辑器配置
     mode: 当前的模式(左侧的选择)
     map: 当前编辑层的地图
+    isMobile: 编辑器是否是手机端
+    currentFloorData: 当前编辑的楼层数据
     ...
 }
 ```

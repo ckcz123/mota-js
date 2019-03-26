@@ -227,13 +227,7 @@ core.prototype._init_flags = function () {
     core.flags = core.clone(core.data.flags);
     core.values = core.clone(core.data.values);
     core.firstData = core.clone(core.data.firstData);
-
-    if (!core.flags.enableExperience) core.flags.enableLevelUp = false;
-    if (!core.flags.enableLevelUp) core.flags.levelUpLeftMode = false;
-    if (core.flags.equipboxButton) core.flags.equipment = true;
-    core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
-    core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
-    core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
+    this._init_sys_flags();
 
     core.dom.versionLabel.innerHTML = core.firstData.version;
     core.dom.logoLabel.innerHTML = core.firstData.title;
@@ -246,6 +240,15 @@ core.prototype._init_flags = function () {
     core.material.items = core.items.getItems();
     core.items._resetItems();
     core.material.icons = core.icons.getIcons();
+}
+
+core.prototype._init_sys_flags = function () {
+    if (!core.flags.enableExperience) core.flags.enableLevelUp = false;
+    if (!core.flags.enableLevelUp) core.flags.levelUpLeftMode = false;
+    if (core.flags.equipboxButton) core.flags.equipment = true;
+    core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
+    core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
+    core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
 }
 
 core.prototype._init_platform = function () {

@@ -16,7 +16,7 @@ events.prototype._init = function () {
 
 /// 初始化游戏
 events.prototype.resetGame = function (hero, hard, floorId, maps, values) {
-    return this.eventdata.resetGame(hero, hard, floorId, maps, values);
+    this.eventdata.resetGame(hero, hard, floorId, maps, values);
 }
 
 ////// 游戏开始事件 //////
@@ -75,7 +75,11 @@ events.prototype._startGame_afterStart = function (nowLoc, callback) {
     core.ui.closePanel();
     core.showStatusBar();
     core.dom.musicBtn.style.display = 'none';
-    core.changeFloor(core.firstData.floorId, null, nowLoc, null, callback);
+    core.changeFloor(core.firstData.floorId, null, nowLoc, null, function () {
+        // 插入一个空事件避免直接回放录像出错
+        core.insertAction([]);
+        if (callback) callback();
+    });
     this._startGame_upload();
 }
 

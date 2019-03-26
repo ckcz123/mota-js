@@ -7,6 +7,11 @@ actions.js：用户交互的事件的处理
 
 function actions() {
     this._init();
+    this.SIZE = core.__SIZE__;
+    this.HSIZE = core.__HALF_SIZE__;
+    this.LAST = this.SIZE - 1;
+    this.CHOICES_LEFT = 5; // choices
+    this.CHOICES_RIGHT = this.LAST - this.CHOICES_LEFT;
 }
 
 actions.prototype._init = function () {
@@ -109,7 +114,7 @@ actions.prototype.checkReplaying = function () {
 
 ////// 检查是否在录像播放中，如果是，则停止交互
 actions.prototype._sys_checkReplay = function () {
-    if (core.actions.checkReplaying()) return true;
+    if (this.checkReplaying()) return true;
 }
 
 ////// 按下某个键时 //////
@@ -127,10 +132,10 @@ actions.prototype._sys_onkeyDown = function (e) {
             }
         }
         core.status.holdingKeys.push(e.keyCode);
-        core.actions.pressKey(e.keyCode);
+        this.pressKey(e.keyCode);
     } else {
         if (e.keyCode == 17) core.status.ctrlDown = true;
-        core.actions.keyDown(e.keyCode);
+        this.keyDown(e.keyCode);
     }
 }
 
@@ -140,7 +145,7 @@ actions.prototype.onkeyUp = function (e) {
 }
 
 actions.prototype._sys_onkeyUp_replay = function (e) {
-    if (core.actions.checkReplaying()) {
+    if (this.checkReplaying()) {
         if (e.keyCode == 27) // ESCAPE
             core.stopReplay();
         else if (e.keyCode == 90) // Z
@@ -179,10 +184,10 @@ actions.prototype._sys_onkeyUp = function (e) {
                 break;
             }
         }
-        core.actions.keyUp(e.keyCode, e.altKey);
+        this.keyUp(e.keyCode, e.altKey);
     } else {
         if (e.keyCode == 17) core.status.ctrlDown = false;
-        core.actions.keyUp(e.keyCode, e.altKey);
+        this.keyUp(e.keyCode, e.altKey);
     }
 }
 
@@ -209,32 +214,32 @@ actions.prototype._sys_keyDown_lockControl = function (keyCode) {
     if (!core.status.lockControl) return false;
     // Ctrl跳过对话
     if (keyCode == 17) {
-        core.actions.keyDownCtrl();
+        this.keyDownCtrl();
         return true;
     }
     switch (core.status.event.id) {
         case 'action':
-            core.actions._keyDownAction(keyCode);
+            this._keyDownAction(keyCode);
             break;
         case 'book':
-            core.actions._keyDownBook(keyCode);
+            this._keyDownBook(keyCode);
             break;
         case 'fly':
-            core.actions._keyDownFly(keyCode);
+            this._keyDownFly(keyCode);
             break;
         case 'viewMaps':
-            core.actions._keyDownViewMaps(keyCode);
+            this._keyDownViewMaps(keyCode);
             break;
         case 'equipbox':
-            core.actions._keyDownEquipbox(keyCode);
+            this._keyDownEquipbox(keyCode);
             break;
         case 'toolbox':
-            core.actions._keyDownToolbox(keyCode);
+            this._keyDownToolbox(keyCode);
             break;
         case 'save':
         case 'load':
         case 'replayLoad':
-            core.actions._keyDownSL(keyCode);
+            this._keyDownSL(keyCode);
             break;
         case 'shop':
         case 'selectShop':
@@ -246,10 +251,10 @@ actions.prototype._sys_keyDown_lockControl = function (keyCode) {
         case 'storageRemove':
         case 'replay':
         case 'gameInfo':
-            core.actions._keyDownChoices(keyCode);
+            this._keyDownChoices(keyCode);
             break;
         case 'cursor':
-            core.actions._keyDownCursor(keyCode);
+            this._keyDownCursor(keyCode);
             break;
     }
     return true;
@@ -271,7 +276,6 @@ actions.prototype._sys_keyDown = function (keyCode) {
         case 40:
             core.moveHero('down');
             break;
-            break;
     }
     return true;
 }
@@ -282,7 +286,7 @@ actions.prototype.keyUp = function (keyCode, altKey, fromReplay) {
 }
 
 actions.prototype._sys_keyUp_replay = function (keyCode, altKey, fromReplay) {
-    if (!fromReplay && core.actions.checkReplaying()) return true;
+    if (!fromReplay && this.checkReplaying()) return true;
 }
 
 actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
@@ -298,81 +302,81 @@ actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
             ok() && core.drawText();
             break;
         case 'confirmBox':
-            core.actions._keyUpConfirmBox(keyCode);
+            this._keyUpConfirmBox(keyCode);
             break;
         case 'action':
-            core.actions._keyUpAction(keyCode);
+            this._keyUpAction(keyCode);
             break;
         case 'about':
-            ok() && core.ui.closePanel();
+            ok() && core.closePanel();
             break;
         case 'help':
-            ok() && core.ui.closePanel();
+            ok() && core.closePanel();
             break;
         case 'book':
-            core.actions._keyUpBook(keyCode);
+            this._keyUpBook(keyCode);
             break;
         case 'book-detail':
-            ok() && core.actions._clickBookDetail();
+            ok() && this._clickBookDetail();
             break;
         case 'fly':
             this._keyUpFly(keyCode);
             break;
         case 'viewMaps':
-            core.actions._keyUpViewMaps(keyCode);
+            this._keyUpViewMaps(keyCode);
             break;
         case 'shop':
-            core.actions._keyUpShop(keyCode);
+            this._keyUpShop(keyCode);
             break;
         case 'selectShop':
-            core.actions._keyUpQuickShop(keyCode);
+            this._keyUpQuickShop(keyCode);
             break;
         case 'toolbox':
-            core.actions._keyUpToolbox(keyCode);
+            this._keyUpToolbox(keyCode);
             break;
         case 'equipbox':
-            core.actions._keyUpEquipbox(keyCode, altKey);
+            this._keyUpEquipbox(keyCode, altKey);
             break;
         case 'save':
         case 'load':
         case 'replayLoad':
-            core.actions._keyUpSL(keyCode);
+            this._keyUpSL(keyCode);
             break;
         case 'keyBoard':
-            ok() && core.ui.closePanel();
+            ok() && core.closePanel();
             break;
         case 'switchs':
-            core.actions._keyUpSwitchs(keyCode);
+            this._keyUpSwitchs(keyCode);
             break;
         case 'settings':
-            core.actions._keyUpSettings(keyCode);
+            this._keyUpSettings(keyCode);
             break;
         case 'syncSave':
-            core.actions._keyUpSyncSave(keyCode);
+            this._keyUpSyncSave(keyCode);
             break;
         case 'syncSelect':
-            core.actions._keyUpSyncSelect(keyCode);
+            this._keyUpSyncSelect(keyCode);
             break;
         case 'localSaveSelect':
-            core.actions._keyUpLocalSaveSelect(keyCode);
+            this._keyUpLocalSaveSelect(keyCode);
             break;
         case 'storageRemove':
-            core.actions._keyUpStorageRemove(keyCode);
+            this._keyUpStorageRemove(keyCode);
             break;
         case 'cursor':
-            core.actions._keyUpCursor(keyCode);
+            this._keyUpCursor(keyCode);
             break;
         case 'replay':
-            core.actions._keyUpReplay(keyCode);
+            this._keyUpReplay(keyCode);
             break;
         case 'gameInfo':
-            core.actions._keyUpGameInfo(keyCode);
+            this._keyUpGameInfo(keyCode);
             break;
         case 'centerFly':
-            core.actions._keyUpCenterFly(keyCode);
+            this._keyUpCenterFly(keyCode);
             break;
         case 'paint':
-            core.actions._keyUpPaint(keyCode);
+            this._keyUpPaint(keyCode);
             break;
     }
     return true;
@@ -399,7 +403,7 @@ actions.prototype.ondown = function (loc) {
 actions.prototype._sys_ondown_paint = function (x, y, px, py) {
     // 画板
     if (core.status.played && (core.status.event || {}).id == 'paint') {
-        core.actions._ondownPaint(px, py);
+        this._ondownPaint(px, py);
         return true;
     }
 }
@@ -492,7 +496,7 @@ actions.prototype.onup = function () {
 actions.prototype._sys_onup_paint = function () {
     // 画板
     if (core.status.played && (core.status.event || {}).id == 'paint') {
-        core.actions._onupPaint();
+        this._onupPaint();
         return true;
     }
 }
@@ -567,75 +571,75 @@ actions.prototype._sys_onclick_lockControl = function (x, y) {
     if (!core.status.lockControl) return false;
     switch (core.status.event.id) {
         case 'centerFly':
-            core.actions._clickCenterFly(x, y);
+            this._clickCenterFly(x, y);
             break;
         case 'book':
-            core.actions._clickBook(x, y);
+            this._clickBook(x, y);
             break;
         case 'book-detail':
-            core.actions._clickBookDetail(x, y);
+            this._clickBookDetail(x, y);
             break;
         case 'fly':
-            core.actions._clickFly(x, y);
+            this._clickFly(x, y);
             break;
         case 'viewMaps':
-            core.actions._clickViewMaps(x, y);
+            this._clickViewMaps(x, y);
             break;
         case 'switchs':
-            core.actions._clickSwitchs(x, y);
+            this._clickSwitchs(x, y);
             break;
         case 'settings':
-            core.actions._clickSettings(x, y);
+            this._clickSettings(x, y);
             break;
         case 'shop':
-            core.actions._clickShop(x, y);
+            this._clickShop(x, y);
             break;
         case 'selectShop':
-            core.actions._clickQuickShop(x, y);
+            this._clickQuickShop(x, y);
             break;
         case 'equipbox':
-            core.actions._clickEquipbox(x, y);
+            this._clickEquipbox(x, y);
             break;
         case 'toolbox':
-            core.actions._clickToolbox(x, y);
+            this._clickToolbox(x, y);
             break;
         case 'save':
         case 'load':
         case 'replayLoad':
-            core.actions._clickSL(x, y);
+            this._clickSL(x, y);
             break;
         case 'confirmBox':
-            core.actions._clickConfirmBox(x, y);
+            this._clickConfirmBox(x, y);
             break;
         case 'keyBoard':
-            core.actions._clickKeyBoard(x, y);
+            this._clickKeyBoard(x, y);
             break;
         case 'action':
-            core.actions._clickAction(x, y);
+            this._clickAction(x, y);
             break;
         case 'text':
             core.drawText();
             break;
         case 'syncSave':
-            core.actions._clickSyncSave(x, y);
+            this._clickSyncSave(x, y);
             break;
         case 'syncSelect':
-            core.actions._clickSyncSelect(x, y);
+            this._clickSyncSelect(x, y);
             break;
         case 'localSaveSelect':
-            core.actions._clickLocalSaveSelect(x, y);
+            this._clickLocalSaveSelect(x, y);
             break;
         case 'storageRemove':
-            core.actions._clickStorageRemove(x, y);
+            this._clickStorageRemove(x, y);
             break;
         case 'cursor':
-            core.actions._clickCursor(x, y);
+            this._clickCursor(x, y);
             break;
         case 'replay':
-            core.actions._clickReplay(x, y);
+            this._clickReplay(x, y);
             break;
         case 'gameInfo':
-            core.actions._clickGameInfo(x, y);
+            this._clickGameInfo(x, y);
             break;
         case 'about':
         case 'help':
@@ -668,15 +672,15 @@ actions.prototype._sys_onmousewheel = function (direct) {
 
     // 楼层飞行器
     if (core.status.lockControl && core.status.event.id == 'fly') {
-        if (direct == 1) core.ui.drawFly(core.actions._getNextFlyFloor(1));
-        if (direct == -1) core.ui.drawFly(core.actions._getNextFlyFloor(-1));
+        if (direct == 1) core.ui.drawFly(this._getNextFlyFloor(1));
+        if (direct == -1) core.ui.drawFly(this._getNextFlyFloor(-1));
         return;
     }
 
     // 怪物手册
     if (core.status.lockControl && core.status.event.id == 'book') {
-        if (direct == 1) core.ui.drawBook(core.status.event.data - 6);
-        if (direct == -1) core.ui.drawBook(core.status.event.data + 6);
+        if (direct == 1) core.ui.drawBook(core.status.event.data - this.HSIZE);
+        if (direct == -1) core.ui.drawBook(core.status.event.data + this.HSIZE);
         return;
     }
 
@@ -689,8 +693,8 @@ actions.prototype._sys_onmousewheel = function (direct) {
 
     // 浏览地图
     if (core.status.lockControl && core.status.event.id == 'viewMaps') {
-        if (direct == 1) core.actions._clickViewMaps(6, 3);
-        if (direct == -1) core.actions._clickViewMaps(6, 9);
+        if (direct == 1) this._clickViewMaps(this.HSIZE, this.HSIZE - 3);
+        if (direct == -1) this._clickViewMaps(this.HSIZE, this.HSIZE + 3);
         return;
     }
 
@@ -740,7 +744,7 @@ actions.prototype._sys_longClick_lockControl = function (x, y) {
     // 长按楼传器的箭头可以快速翻页
     if (core.status.event.id == 'fly') {
         if ((x == 10 || x == 11) && (y == 5 || y == 9)) {
-            core.actions._clickFly(x, y);
+            this._clickFly(x, y);
             return true;
         }
     }
@@ -772,14 +776,14 @@ actions.prototype._sys_longClick = function (x, y, fromEvent) {
 
 // 数字键快速选择选项
 actions.prototype._selectChoices = function (length, keycode, callback) {
-    var topIndex = 6 - parseInt((length - 1) / 2);
+    var topIndex = this.HSIZE - parseInt((length - 1) / 2);
     if (keycode == 13 || keycode == 32 || keycode == 67) {
-        callback.apply(this, [6, topIndex + core.status.event.selection]);
+        callback.apply(this, [this.HSIZE, topIndex + core.status.event.selection]);
     }
     if (keycode >= 49 && keycode <= 57) {
         var index = keycode - 49;
         if (index < length) {
-            callback.apply(this, [6, topIndex + index]);
+            callback.apply(this, [this.HSIZE, topIndex + index]);
         }
     }
 }
@@ -824,9 +828,9 @@ actions.prototype._keyUpCenterFly = function (keycode) {
 
 ////// 点击确认框时 //////
 actions.prototype._clickConfirmBox = function (x, y) {
-    if ((x == 4 || x == 5) && y == 7 && core.status.event.data.yes)
+    if ((x == this.HSIZE-2 || x == this.HSIZE-1) && y == this.HSIZE+1 && core.status.event.data.yes)
         core.status.event.data.yes();
-    if ((x == 7 || x == 8) && y == 7 && core.status.event.data.no)
+    if ((x == this.HSIZE+2 || x == this.HSIZE+1) && y == this.HSIZE+1 && core.status.event.data.no)
         core.status.event.data.no();
 }
 
@@ -877,8 +881,8 @@ actions.prototype._clickAction = function (x, y) {
         var data = core.status.event.data.current;
         var choices = data.choices;
         if (choices.length == 0) return;
-        if (x >= 5 && x <= 7) {
-            var topIndex = 6 - parseInt((choices.length - 1) / 2);
+        if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
+            var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
             if (y >= topIndex && y < topIndex + choices.length) {
                 // 选择
                 core.status.route.push("choices:" + (y - topIndex));
@@ -925,17 +929,17 @@ actions.prototype._keyUpAction = function (keycode) {
 ////// 怪物手册界面的点击操作 //////
 actions.prototype._clickBook = function (x, y) {
     // 上一页
-    if ((x == 3 || x == 4) && y == 12) {
-        core.ui.drawBook(core.status.event.data - 6);
+    if ((x == this.HSIZE-2 || x == this.HSIZE-3) && y == this.LAST) {
+        core.ui.drawBook(core.status.event.data - this.HSIZE);
         return;
     }
     // 下一页
-    if ((x == 8 || x == 9) && y == 12) {
-        core.ui.drawBook(core.status.event.data + 6);
+    if ((x == this.HSIZE+2 || x == this.HSIZE+3) && y == this.LAST) {
+        core.ui.drawBook(core.status.event.data + this.HSIZE);
         return;
     }
     // 返回
-    if (x >= 10 && x <= 12 && y == 12) {
+    if (x >= this.LAST-2 && y == this.LAST) {
         if (core.events.recoverEvents(core.status.event.interval)) {
             return;
         }
@@ -948,9 +952,9 @@ actions.prototype._clickBook = function (x, y) {
     }
     // 怪物信息
     var data = core.status.event.data;
-    if (data != null && y < 12) {
-        var page = parseInt(data / 6);
-        var index = 6 * page + parseInt(y / 2);
+    if (data != null && y < this.LAST) {
+        var page = parseInt(data / this.HSIZE);
+        var index = this.HSIZE * page + parseInt(y / 2);
         core.ui.drawBook(index);
         core.ui.drawBookDetail(index);
     }
@@ -959,12 +963,12 @@ actions.prototype._clickBook = function (x, y) {
 
 ////// 怪物手册界面时，按下某个键的操作 //////
 actions.prototype._keyDownBook = function (keycode) {
-    if (keycode == 37) core.ui.drawBook(core.status.event.data - 6);
+    if (keycode == 37) core.ui.drawBook(core.status.event.data - this.HSIZE);
     if (keycode == 38) core.ui.drawBook(core.status.event.data - 1);
-    if (keycode == 39) core.ui.drawBook(core.status.event.data + 6);
+    if (keycode == 39) core.ui.drawBook(core.status.event.data + this.HSIZE);
     if (keycode == 40) core.ui.drawBook(core.status.event.data + 1);
-    if (keycode == 33) core.ui.drawBook(core.status.event.data - 6);
-    if (keycode == 34) core.ui.drawBook(core.status.event.data + 6);
+    if (keycode == 33) core.ui.drawBook(core.status.event.data - this.HSIZE);
+    if (keycode == 34) core.ui.drawBook(core.status.event.data + this.HSIZE);
     return;
 }
 
@@ -984,7 +988,7 @@ actions.prototype._keyUpBook = function (keycode) {
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         var data = core.status.event.data;
         if (data != null) {
-            this._clickBook(6, 2 * (data % 6));
+            this._clickBook(this.HSIZE, 2 * (data % this.HSIZE));
         }
         return;
     }
@@ -998,12 +1002,12 @@ actions.prototype._clickBookDetail = function () {
 
 ////// 楼层传送器界面时的点击操作 //////
 actions.prototype._clickFly = function (x, y) {
-    if ((x == 10 || x == 11) && y == 9) core.ui.drawFly(this._getNextFlyFloor(-1));
-    if ((x == 10 || x == 11) && y == 5) core.ui.drawFly(this._getNextFlyFloor(1));
-    if ((x == 10 || x == 11) && y == 10) core.ui.drawFly(this._getNextFlyFloor(-10));
-    if ((x == 10 || x == 11) && y == 4) core.ui.drawFly(this._getNextFlyFloor(10));
-    if (x >= 5 && x <= 7 && y == 12) core.ui.closePanel();
-    if (x >= 0 && x <= 9 && y >= 3 && y <= 11)
+    if ((x == this.SIZE-2 || x == this.SIZE-3) && y == this.HSIZE+3) core.ui.drawFly(this._getNextFlyFloor(-1));
+    if ((x == this.SIZE-2 || x == this.SIZE-3) && y == this.HSIZE-1) core.ui.drawFly(this._getNextFlyFloor(1));
+    if ((x == this.SIZE-2 || x == this.SIZE-3) && y == this.HSIZE+4) core.ui.drawFly(this._getNextFlyFloor(-10));
+    if ((x == this.SIZE-2 || x == this.SIZE-3) && y == this.HSIZE-2) core.ui.drawFly(this._getNextFlyFloor(10));
+    if (x >= this.HSIZE-1 && x <= this.HSIZE+1 && y == this.LAST) core.ui.closePanel();
+    if (x >= 0 && x <= this.HSIZE+3 && y >= 3 && y <= this.LAST - 1)
         core.flyTo(core.floorIds[core.status.event.data]);
     return;
 }
@@ -1041,7 +1045,7 @@ actions.prototype._keyUpFly = function (keycode) {
     if (keycode == 71 || keycode == 27 || keycode == 88)
         core.ui.closePanel();
     if (keycode == 13 || keycode == 32 || keycode == 67)
-        this._clickFly(5, 5);
+        this._clickFly(this.HSIZE-1, this.HSIZE-1);
     return;
 }
 
@@ -1051,60 +1055,60 @@ actions.prototype._clickViewMaps = function (x, y) {
         core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
         return;
     }
-
     var now = core.floorIds.indexOf(core.status.floorId);
     var index = core.status.event.data.index;
     var cx = core.status.event.data.x, cy = core.status.event.data.y;
     var floorId = core.floorIds[index], mw = core.floors[floorId].width, mh = core.floors[floorId].height;
+    var per = this.HSIZE - 4;
 
-    if (x == 0 && y == 0) {
+    if (x <= per - 2 && y <= per - 2) {
         core.status.event.data.damage = !core.status.event.data.damage;
         core.ui.drawMaps(index, cx, cy);
         return;
     }
-    if (x == 0 && y == 12) {
+    if (x <= per - 2 && y >= this.SIZE + 1 - per) {
         core.status.event.data.paint = !core.status.event.data.paint;
         core.ui.drawMaps(index, cx, cy);
         return;
     }
-    if (x == 12 && y == 0) {
+    if (x >= this.SIZE + 1 - per && y <= per - 2) {
         core.status.event.data.all = !core.status.event.data.all;
         core.ui.drawMaps(index, cx, cy);
         return;
     }
 
-    if (x >= 2 && x <= 10 && y <= 1 && mh > 13) {
+    if (x >= per && x <= this.LAST - per && y <= per - 1 && mh > this.SIZE) {
         core.ui.drawMaps(index, cx, cy - 1);
         return;
     }
-    if (x >= 2 && x <= 10 && y >= 11 && mh > 13) {
+    if (x >= per && x <= this.LAST - per && y >= this.SIZE - per && mh > this.SIZE) {
         core.ui.drawMaps(index, cx, cy + 1);
         return;
     }
-    if (x <= 1 && y >= 2 && y <= 10) {
+    if (x <= per - 1 && y >= per && y <= this.LAST - per) {
         core.ui.drawMaps(index, cx - 1, cy);
         return;
     }
-    if (x >= 11 && y >= 2 && y <= 10) {
+    if (x >= this.SIZE - per && y >= per && y <= this.LAST - per) {
         core.ui.drawMaps(index, cx + 1, cy);
         return;
     }
 
-    if (y <= 4 && (mh == 13 || (x >= 2 && x <= 10))) {
+    if (y <= this.HSIZE - 2 && (mh == this.SIZE || (x >= per && x <= this.LAST - per))) {
         index++;
         while (index < core.floorIds.length && index != now && core.status.maps[core.floorIds[index]].cannotViewMap)
             index++;
         if (index < core.floorIds.length)
             core.ui.drawMaps(index);
     }
-    else if (y >= 8 && (mh == 13 || (x >= 2 && x <= 10))) {
+    else if (y >= this.HSIZE + 2 && (mh == this.SIZE || (x >= per && x <= this.LAST - per))) {
         index--;
         while (index >= 0 && index != now && core.status.maps[core.floorIds[index]].cannotViewMap)
             index--;
         if (index >= 0)
             core.ui.drawMaps(index);
     }
-    else if (x >= 2 && x <= 10 && y >= 5 && y <= 7) {
+    else if (x >= per && x <= this.LAST - per && y >= this.HSIZE - 1 && y <= this.HSIZE + 1) {
         core.clearMap('data');
         core.ui.closePanel();
     }
@@ -1116,12 +1120,12 @@ actions.prototype._keyDownViewMaps = function (keycode) {
 
     var floorId = core.floorIds[core.status.event.data.index], mh = core.floors[floorId].height;
 
-    if (keycode == 38 || keycode == 33) this._clickViewMaps(6, 3);
-    if (keycode == 40 || keycode == 34) this._clickViewMaps(6, 9);
-    if (keycode == 87 && mh > 13) this._clickViewMaps(6, 0);
-    if (keycode == 65) this._clickViewMaps(0, 6);
-    if (keycode == 83 && mh > 13) this._clickViewMaps(6, 12);
-    if (keycode == 68) this._clickViewMaps(12, 6);
+    if (keycode == 38 || keycode == 33) this._clickViewMaps(this.HSIZE, this.HSIZE - 3);
+    if (keycode == 40 || keycode == 34) this._clickViewMaps(this.HSIZE, this.HSIZE + 3);
+    if (keycode == 87 && mh > this.SIZE) this._clickViewMaps(this.HSIZE, 0);
+    if (keycode == 65) this._clickViewMaps(0, this.HSIZE);
+    if (keycode == 83 && mh > this.SIZE) this._clickViewMaps(this.HSIZE, this.LAST);
+    if (keycode == 68) this._clickViewMaps(this.LAST, this.HSIZE);
     return;
 }
 
@@ -1167,8 +1171,8 @@ actions.prototype._keyUpViewMaps = function (keycode) {
 actions.prototype._clickShop = function (x, y) {
     var shop = core.status.event.data.shop;
     var choices = shop.choices;
-    if (x >= 5 && x <= 7) {
-        var topIndex = 6 - parseInt(choices.length / 2);
+    if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
+        var topIndex = this.HSIZE - parseInt(choices.length / 2);
         if (y >= topIndex && y < topIndex + choices.length) {
             return core.events._useShop(shop, y - topIndex);
         }
@@ -1196,8 +1200,8 @@ actions.prototype._clickQuickShop = function (x, y) {
     var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {
         return shopList[shopId].visited || !shopList[shopId].mustEnable
     });
-    if (x >= 5 && x <= 7) {
-        var topIndex = 6 - parseInt(keys.length / 2);
+    if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
+        var topIndex = this.HSIZE - parseInt(keys.length / 2);
         if (y >= topIndex && y < topIndex + keys.length) {
             var reason = core.events.canUseQuickShop(keys[y - topIndex]);
             if (!core.flags.enableDisabledShop && reason) {
@@ -1749,9 +1753,9 @@ actions.prototype._keyUpSL = function (keycode) {
 
 ////// 系统设置界面时的点击操作 //////
 actions.prototype._clickSwitchs = function (x, y) {
-    if (x < 5 || x > 7) return;
+    if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
@@ -1844,11 +1848,11 @@ actions.prototype._keyUpSwitchs = function (keycode) {
     this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickSwitchs);
 }
 
-////// 系统菜单栏界面时的点击事件 //////
+////// 系统菜单栏界面时的点击操作 //////
 actions.prototype._clickSettings = function (x, y) {
-    if (x < 5 || x > 7) return;
+    if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
@@ -1897,9 +1901,9 @@ actions.prototype._keyUpSettings = function (keycode) {
 
 ////// 同步存档界面时的点击操作 //////
 actions.prototype._clickSyncSave = function (x, y) {
-    if (x < 5 || x > 7) return;
+    if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
@@ -1979,10 +1983,10 @@ actions.prototype._keyUpSyncSave = function (keycode) {
 
 ////// 同步存档选择界面时的点击操作 //////
 actions.prototype._clickSyncSelect = function (x, y) {
-    if (x < 5 || x > 7) return;
+    if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
@@ -2013,10 +2017,10 @@ actions.prototype._keyUpSyncSelect = function (keycode) {
 
 ////// 存档下载界面时的点击操作 //////
 actions.prototype._clickLocalSaveSelect = function (x, y) {
-    if (x < 5 || x > 7) return;
+    if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
@@ -2051,10 +2055,10 @@ actions.prototype._keyUpLocalSaveSelect = function (keycode) {
 
 ////// 存档删除界面时的点击操作 //////
 actions.prototype._clickStorageRemove = function (x, y) {
-    if (x < 5 || x > 7) return;
+    if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
@@ -2132,10 +2136,10 @@ actions.prototype._keyUpStorageRemove = function (keycode) {
 
 ////// 回放选择界面时的点击操作 //////
 actions.prototype._clickReplay = function (x, y) {
-    if (x < 5 || x > 7) return;
+    if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
@@ -2186,10 +2190,10 @@ actions.prototype._keyUpReplay = function (keycode) {
 
 ////// 游戏信息界面时的点击操作 //////
 actions.prototype._clickGameInfo = function (x, y) {
-    if (x < 5 || x > 7) return;
+    if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = 6 - parseInt((choices.length - 1) / 2);
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
@@ -2248,11 +2252,12 @@ actions.prototype._keyUpGameInfo = function (keycode) {
 
 ////// “虚拟键盘”界面时的点击操作 //////
 actions.prototype._clickKeyBoard = function (x, y) {
-    if (y == 3 && x >= 1 && x <= 11) {
+    var m = this.HSIZE;
+    if (y == m - 3 && x >= m - 5 && x <= m + 5) {
         core.ui.closePanel();
-        core.keyUp(112 + x - 1); // F1-F12: 112-122
+        core.keyUp(112 + x + 5 - m);
     }
-    if (y == 3 && x == 12) {
+    if (y == m - 3 && x == m + 6) {
         var val = prompt();
         if (val != null) {
             try {
@@ -2262,9 +2267,9 @@ actions.prototype._clickKeyBoard = function (x, y) {
             }
         }
     }
-    if (y == 4 && x >= 1 && x <= 10) {
+    if (y == m - 2 && x >= m - 5 && x <= m + 4) {
         core.ui.closePanel();
-        core.keyUp(x == 10 ? 48 : 48 + x); // 1-9: 49-57; 0: 48
+        core.keyUp(x == m + 4 ? 48 : 49 + x + 5 - m); // 1-9: 49-57; 0: 48
     }
     // 字母
     var lines = [
@@ -2272,46 +2277,46 @@ actions.prototype._clickKeyBoard = function (x, y) {
         ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
         ["Z", "X", "C", "V", "B", "N", "M"],
     ];
-    if (y == 5 && x >= 1 && x <= 10) {
+    if (y == m - 1 && x >= m - 5 && x <= m + 4) {
         core.ui.closePanel();
-        core.keyUp(lines[0][x - 1].charCodeAt(0));
+        core.keyUp(lines[0][x + 5 - m].charCodeAt(0));
     }
-    if (y == 6 && x >= 1 && x <= 9) {
+    if (y == m && x >= m - 5 && x <= m + 3) {
         core.ui.closePanel();
-        core.keyUp(lines[1][x - 1].charCodeAt(0));
+        core.keyUp(lines[1][x + 5 - m].charCodeAt(0));
     }
-    if (y == 7 && x >= 1 && x <= 7) {
+    if (y == m + 1 && x >= m - 5 && x <= m + 1) {
         core.ui.closePanel();
-        core.keyUp(lines[2][x - 1].charCodeAt(0));
+        core.keyUp(lines[2][x + 5 - m].charCodeAt(0));
     }
-    if (y == 8 && x >= 1 && x <= 11) {
+    if (y == m + 2 && x >= m - 5 && x <= m + 5) {
         core.ui.closePanel();
-        if (x == 1) core.keyUp(189); // -
-        if (x == 2) core.keyUp(187); // =
-        if (x == 3) core.keyUp(219); // [
-        if (x == 4) core.keyUp(221); // ]
-        if (x == 5) core.keyUp(220); // \
-        if (x == 6) core.keyUp(186); // ;
-        if (x == 7) core.keyUp(222); // '
-        if (x == 8) core.keyUp(188); // ,
-        if (x == 9) core.keyUp(190); // .
-        if (x == 10) core.keyUp(191); // /
-        if (x == 11) core.keyUp(192); // `
+        if (x == m - 5) core.keyUp(189); // -
+        if (x == m - 4) core.keyUp(187); // =
+        if (x == m - 3) core.keyUp(219); // [
+        if (x == m - 2) core.keyUp(221); // ]
+        if (x == m - 1) core.keyUp(220); // \
+        if (x == m) core.keyUp(186); // ;
+        if (x == m + 1) core.keyUp(222); // '
+        if (x == m + 2) core.keyUp(188); // ,
+        if (x == m + 3) core.keyUp(190); // .
+        if (x == m + 4) core.keyUp(191); // /
+        if (x == m + 5) core.keyUp(192); // `
     }
-    if (y == 9 && x >= 1 && x <= 10) {
+    if (y == m + 3 && x >= m - 5 && x <= m + 4) {
         core.ui.closePanel();
-        if (x == 1) core.keyUp(27); // ESC
-        if (x == 2) core.keyUp(9); // TAB
-        if (x == 3) core.keyUp(20); // CAPS
-        if (x == 4) core.keyUp(16); // SHIFT
-        if (x == 5) core.keyUp(17); // CTRL
-        if (x == 6) core.keyUp(18); // ALT
-        if (x == 7) core.keyUp(32); // SPACE
-        if (x == 8) core.keyUp(8); // BACKSPACE
-        if (x == 9) core.keyUp(13); // ENTER
-        if (x == 10) core.keyUp(46); // DEL
+        if (x == m - 5) core.keyUp(27); // ESC
+        if (x == m - 4) core.keyUp(9); // TAB
+        if (x == m - 3) core.keyUp(20); // CAPS
+        if (x == m - 2) core.keyUp(16); // SHIFT
+        if (x == m - 1) core.keyUp(17); // CTRL
+        if (x == m) core.keyUp(18); // ALT
+        if (x == m + 1) core.keyUp(32); // SPACE
+        if (x == m + 2) core.keyUp(8); // BACKSPACE
+        if (x == m + 3) core.keyUp(13); // ENTER
+        if (x == m + 4) core.keyUp(46); // DEL
     }
-    if (y == 10 && x >= 9 && x <= 11)
+    if (y == m + 4 && x >= m + 3 && x <= m + 5)
         core.ui.closePanel();
 }
 

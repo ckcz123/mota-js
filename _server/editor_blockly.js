@@ -54,6 +54,7 @@ editor_blockly = function () {
       MotaActionBlocks['scrollText_s'].xmlText(),
       MotaActionBlocks['setText_s'].xmlText(),
       MotaActionBlocks['showImage_s'].xmlText(),
+      MotaActionBlocks['showImage_1_s'].xmlText(),
       MotaActionBlocks['hideImage_s'].xmlText(),
       MotaActionBlocks['showTextImage_s'].xmlText(),
       MotaActionBlocks['moveImage_s'].xmlText(),

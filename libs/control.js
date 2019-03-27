@@ -795,7 +795,7 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
 
 ////// 绘制勇士 //////
 control.prototype.drawHero = function (status, offset) {
-    if (!core.isPlaying() || !core.status.floorId) return;
+    if (!core.isPlaying() || !core.status.floorId || core.status.gameOver) return;
     var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
     status = status || 'stop';
     offset = offset || 0;

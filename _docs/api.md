@@ -1,6 +1,6 @@
 # 附录: API列表
 
-?> 目前版本**v2.5.3**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.5.5**，上次更新时间：* {docsify-updated} *
 
 **这里只列出所有可能会被造塔者用到的常用API，更多的有关内容请在代码内进行查询。**
 
@@ -124,6 +124,9 @@ core.insertAction(list, x, y, callback)
 x和y如果设置则覆盖"当前事件点"的坐标，callback如果设置则覆盖事件执行完毕后的回调函数。
 例如： core.insertAction(["楼层切换", {"type":"changeFloor", "floorId": "MT3"}])
 将依次显示剧情文本，并执行一个楼层切换的自定义事件。
+--------
+从V2.5.4开始提出了“公共事件”的说法，这里也可以插入一个公共事件名。
+例如：core.insertAction("毒衰咒处理") 将插入公共事件“毒衰咒处理”。
 
 
 core.changeFloor(floorId, stair, heroLoc, time, callback)    [异步]
@@ -136,15 +139,12 @@ core.changeFloor('MT5', null, {'x': 3, 'y': 6}, 0) 无动画切换到MT5层的(3
 
 core.resetMap()
 重置当前楼层地图和楼层属性。
-当我们修改某一层地图后，进游戏读档，会发现修改的内容并没有被更新上去。
-这是因为，H5的存档是会存下来每一个楼层的地图的，读档会从档里面获得地图信息。
-此时，如果我们在某一层地图执行 core.resetMap() ，则可以立刻从剧本中读取并重置当前楼层地图。
-已经被修改过的内容也会相应出现。
 此函数参数有三种形式：
  - 不加任何参数，表示重置当前层：core.resetMap()
  - 加上一个floorId，表示重置某一层：core.resetMap("MT1")
  - 使用一个数组，表示重置若干层：core.resetMap(["MT1", "MT2", "MT3"])
-
+---------------------------
+** 说明：从V2.5.5开始存档方式发生了改变，在编辑器修改了地图后现在将直接生效，无需再重置地图。
 
 R
 录像回放的快捷键；这不是一个控制台命令，但是也把它放在这里供使用。
@@ -168,10 +168,15 @@ core.nextY(n)
 获得勇士面向的第n个位置的y坐标，n可以省略默认为1（即正前方）
 
 
+core.nearHero(x, y)
+判断某个点是否和勇士的距离不超过1。
+
+
 core.openDoor(id, x, y, needKey, callback)    [异步]
 尝试开门操作。id为目标点的ID，x和y为坐标，needKey表示是否需要使用钥匙，callback为开门完毕后的回调函数。
 id可为null代表使用地图上的值。
 例如：core.openDoor('yellowDoor', 10, 3, false, function() {console.log("1")})
+此函数返回true代表成功开门，并将执行callback回调；返回false代表无法开门，且不会执行回调函数。
 
 
 core.battle(id, x, y, force, callback)    [异步]
@@ -182,6 +187,10 @@ id可为null代表使用地图上的值。
 
 core.trigger(x, y)    [异步]
 触发某个地点的事件。
+
+
+core.isReplaying()
+当前是否正在录像播放中
 
 
 core.drawBlock(block)
@@ -244,8 +253,9 @@ core.setBlock(number, x, y, floorId)
 改变图块。number为要改变到的图块数字，x和y为坐标，floorId为楼层ID，可忽略表示当前楼层。
 
 
-core.useItem(itemId, callback)
-尝试使用某个道具。itemId为道具ID，callback为成功或失败后的回调。
+core.useItem(itemId, noRoute, callback)
+尝试使用某个道具。itemId为道具ID，noRoute如果为真则该道具的使用不计入录像。
+callback为成功或失败后的回调。
 
 
 core.canUseItem(itemId)
@@ -281,7 +291,7 @@ core.replaceText(text)
 将一段文字中的${}进行计算并替换。
 
 
-core.calValue(value)
+core.calValue(value, prefix, need, times)
 计算表达式的实际值。这个函数可以传入status:atk等这样的参数。
 
 
@@ -292,6 +302,11 @@ core.getLocalStorage(key, defaultValue)
 core.getLocalForage(key, defaultValue, successCallback, errorCallback)
 从localForage中获得某个数据（已被parse），如果对应的key不存在则返回defaultValue。
 如果成功则通过successCallback回调，失败则通过errorCallback回调。
+
+
+core.hasSave(index)
+判定当前某个存档位是否存在存档，返回true/false。
+index为存档编号，0代表自动存档，大于0则为正常的存档位。
 
 
 core.clone(data)
@@ -330,11 +345,18 @@ control.js主要用来进行游戏控制，比如行走控制、自动寻路、�
 core.control.setGameCanvasTranslate(canvasId, x, y)
 设置大地图的偏移量
 
+
 core.control.updateViewport()
 更新大地图的可见区域
 
+
+core.control.gatherFollowers()
+立刻聚集所有的跟随者
+
+
 core.control.replay()
 回放下一个操作
+
 
 ========== core.enemys.XXX 和怪物相关的函数 ==========
 enemys.js主要用来进行怪物相关的内容，比如怪物的特殊属性，伤害和临界计算等。
@@ -409,6 +431,10 @@ core.events.doAction()
 执行下一个事件。此函数中将对所有自定义事件类型分别处理。
 
 
+core.events.getCommonEvent(name)
+根据名称获得一个公共事件；如果不存在对应的公共事件则返回null。
+
+
 core.events.openShop(shopId, needVisited)    [异步]
 打开一个全局商店。needVisited表示是否需要该商店已被打开过。
 
@@ -463,6 +489,17 @@ core.maps.removeBlockByIds(floorId, ids)
 根据索引删除或禁用若干块。
 
 
+core.maps.drawAnimate(name, x, y, callback)
+播放一段动画，name为动画名（需在全塔属性注册），x和y为坐标（0-12之间），callback可选，为播放完毕的回调函数。
+播放过程是异步的，如需等待播放完毕请使用insertAction插入一条type:waitAsync事件。
+此函数将随机返回一个数字id，为此异步动画的唯一标识符。
+
+
+core.maps.stopAnimate(id, doCallback)
+立刻停止一个异步动画。
+id为该动画的唯一标识符（由drawAnimate函数返回），doCallback可选，若为true则会执行该动画所绑定的回调函数。
+
+
 ========== core.ui.XXX 和对话框绘制相关的函数 ==========
 ui.js主要用来进行UI窗口的绘制，比如对话框、怪物手册、楼传器、存读档界面等等。
 
@@ -483,7 +520,7 @@ core.ui.fillText(name, text, x, y, style, font)
 text为要绘制的文本，x,y为要绘制的坐标，style可选为绘制的样式，font可选为绘制的字体。（下同）
 
 
-core.ui.fillBoldText(name, text, style, x, y, font)
+core.ui.fillBoldText(name, text, x, y, style, font)
 在某个画布上绘制一个描黑边的文字。
 
 
@@ -543,10 +580,6 @@ zIndex为创建的纵向高度（关系到画布之间的覆盖），z值高的�
 返回创建的画布的context，也可以通过core.dymCanvas[name]调用。
 
 
-core.ui.findCanvas(name)
-寻找一个自定义画布的索引；如果存在该画布则返回对应的索引，不存在画布则返回-1。
-
-
 core.ui.relocateCanvas(name, x, y)
 重新定位一个自定义画布。
 
@@ -582,6 +615,10 @@ core.utils.cropImage(image, size)
 纵向对图片进行切分（裁剪）。
 
 
+core.utils.push(a,b)
+向某个数组后插入另一个数组或元素
+
+
 core.utils.unshift(a, b)
 向某个数组前插入另一个数组或元素
 
@@ -596,6 +633,15 @@ Base64解密字符串
 
 core.utils.formatBigNumber(x, onMap)
 大数据的格式化
+
+
+core.utils.subarray(a, b)
+检查b是否是a的从头开始子串。
+如果是，则返回a删去b的一段；否则返回null。
+
+
+core.utils.same(a, b)
+比较a和b两个对象是否相同
 
 
 core.utils.clamp(x, a, b)

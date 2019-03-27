@@ -1,14 +1,14 @@
 var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
 {
-    "_leaf": false,
+    
     "_type": "object",
     "_data": {
         "items": {
-            "_leaf": false,
+            
             "_type": "object",
             "_data": {
                 "items": {
-                    "_leaf": false,
+                    
                     "_type": "object",
                     "_data": {
                         "cls": {
@@ -89,7 +89,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
         },
         "items_template" : {'cls': 'items', 'name': '新物品'},
         "enemys": {
-            "_leaf": false,
+            
             "_type": "object",
             "_data": {
                 "name": {
@@ -197,7 +197,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
         },
         "enemys_template" : {'name': '新敌人', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'point': 0, 'special': 0},
         "maps": {
-            "_leaf": false,
+            
             "_type": "object",
             "_data": {
                 "id": {
@@ -263,6 +263,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_range": "thiseval==null||(thiseval instanceof Array)",
                     "_data": "该图块的不可入方向\n可以在这里定义不能朝哪个方向进入该图块，可以达到悬崖之类的效果\n例如 [\"down\"] 代表不能从该图块的上方点朝向下进入此图块\n此值对背景层、事件层、前景层上的图块均有效"
                 },
+                "animate": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_range": "thiseval==~~thiseval||thiseval==null",
+                    "_data": "该图块的全局动画帧数。\n如果此项为null，则对于除了npc48外，使用素材默认帧数；npc48默认是1帧（即静止）。"
+                },
                 "faceIds": {
                     "_leaf": true,
                     "_type": "textarea",
@@ -271,11 +277,11 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
             }
         },
         "floors": {
-            "_leaf": false,
+            
             "_type": "object",
             "_data": {
                 "floor": {
-                    "_leaf": false,
+                    
                     "_type": "object",
                     "_data": {
                         "floorId": {
@@ -386,7 +392,10 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                         },
                         "bgm": {
                             "_leaf": true,
-                            "_type": "textarea",
+                            "_type": "select",
+                            "_select": {
+                                "values": [null].concat(Object.keys(editor.core.material.bgms))
+                            },
                             "_data": "到达该层后默认播放的BGM。本项可忽略，或者为一个定义过的背景音乐如\"bgm.mp3\"。"
                         },
                         "item_ratio": {
@@ -404,7 +413,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     }
                 },
                 "loc": {
-                    "_leaf": false,
+                    
                     "_type": "object",
                     "_data": {
                         "events": {

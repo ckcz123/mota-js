@@ -23,17 +23,6 @@ editor_blockly = function () {
         {"type": "hide", "time": 500},
       ],'event'),
       MotaActionBlocks['changeFloor_m'].xmlText(),
-      //MotaActionFunctions.actionParser.parse({"type": "choices", "choices": [
-      //  {"text": "攻击+\${point}", "action": [
-      //    {"type": "setValue", "name": "status:atk", "value": "status:atk+\${point}"},
-      //  ]},
-      //  {"text": "防御+\${2*point}", "action": [
-      //    {"type": "setValue", "name": "status:def", "value": "status:def+\${2*point}"},
-      //  ]},
-      //  {"text": "生命+\${200*point}", "action": [
-      //    {"type": "setValue", "name": "status:hp", "value": "status:hp+\${200*point}"},
-      //  ]},
-      //]},'point'),
       MotaActionFunctions.actionParser.parse([{
         "id": "moneyShop1",
         "name": "贪婪之神", 
@@ -55,6 +44,7 @@ editor_blockly = function () {
       MotaActionBlocks['firstArrive_m'].xmlText(),
       MotaActionBlocks['eachArrive_m'].xmlText(),
       MotaActionBlocks['level_m'].xmlText(),
+      MotaActionBlocks['commonEvent_m'].xmlText(),
     ],
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),
@@ -64,6 +54,7 @@ editor_blockly = function () {
       MotaActionBlocks['scrollText_s'].xmlText(),
       MotaActionBlocks['setText_s'].xmlText(),
       MotaActionBlocks['showImage_s'].xmlText(),
+      MotaActionBlocks['showImage_1_s'].xmlText(),
       MotaActionBlocks['hideImage_s'].xmlText(),
       MotaActionBlocks['showTextImage_s'].xmlText(),
       MotaActionBlocks['moveImage_s'].xmlText(),
@@ -74,9 +65,9 @@ editor_blockly = function () {
       MotaActionBlocks['lose_s'].xmlText(),
       MotaActionBlocks['choices_s'].xmlText([
         '选择剑或者盾','流浪者','man',MotaActionBlocks['choicesContext'].xmlText([
-          '剑',MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [3,3]}]),
+          '剑','','',null,MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [3,3]}]),
           MotaActionBlocks['choicesContext'].xmlText([
-            '盾',MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [9,3]}]),
+            '盾','','',null,MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [9,3]}]),
           ])
         ])
       ]),
@@ -85,9 +76,13 @@ editor_blockly = function () {
       MotaActionBlocks['setValue_s'].xmlText([
         MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
       ]),
+      MotaActionBlocks['addValue_s'].xmlText([
+        MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
+      ]),
       MotaActionBlocks['setFloor_s'].xmlText(),
       MotaActionBlocks['setGlobalAttribute_s'].xmlText(),
       MotaActionBlocks['setGlobalValue_s'].xmlText(),
+      MotaActionBlocks['setGlobalFlag_s'].xmlText(),
       MotaActionBlocks['input_s'].xmlText(),
       MotaActionBlocks['input2_s'].xmlText(),
       MotaActionBlocks['update_s'].xmlText(),
@@ -99,8 +94,11 @@ editor_blockly = function () {
       MotaActionBlocks['changePos_1_s'].xmlText(),
       MotaActionBlocks['battle_s'].xmlText(),
       MotaActionBlocks['openDoor_s'].xmlText(),
+      MotaActionBlocks['closeDoor_s'].xmlText(),
+      MotaActionBlocks['useItem_s'].xmlText(),
       MotaActionBlocks['openShop_s'].xmlText(),
       MotaActionBlocks['setBlock_s'].xmlText(),
+      MotaActionBlocks['setBgFgBlock_s'].xmlText(),
       MotaActionBlocks['setHeroIcon_s'].xmlText(),
       MotaActionBlocks['follow_s'].xmlText(),
       MotaActionBlocks['unfollow_s'].xmlText(),
@@ -123,9 +121,9 @@ editor_blockly = function () {
       MotaActionBlocks['hideFloorImg_s'].xmlText(),
       MotaActionBlocks['showBgFgMap_s'].xmlText(),
       MotaActionBlocks['hideBgFgMap_s'].xmlText(),
-      MotaActionBlocks['setBgFgBlock_s'].xmlText(),
       MotaActionBlocks['trigger_s'].xmlText(),
-      MotaActionBlocks['insert_s'].xmlText(),
+      MotaActionBlocks['insert_1_s'].xmlText(),
+      MotaActionBlocks['insert_2_s'].xmlText(),
       MotaActionBlocks['move_s'].xmlText(),
       MotaActionBlocks['jump_s'].xmlText(),
       MotaActionBlocks['disableShop_s'].xmlText(),
@@ -148,7 +146,11 @@ editor_blockly = function () {
       MotaActionBlocks['loadBgm_s'].xmlText(),
       MotaActionBlocks['freeBgm_s'].xmlText(),
       MotaActionBlocks['playSound_s'].xmlText(),
+      MotaActionBlocks['stopSound_s'].xmlText(),
       MotaActionBlocks['setVolume_s'].xmlText(),
+      MotaActionBlocks['callBook_s'].xmlText(),
+      MotaActionBlocks['callSave_s'].xmlText(),
+      MotaActionBlocks['callLoad_s'].xmlText(),
     ],
     '原生脚本':[
       MotaActionBlocks['function_s'].xmlText(),
@@ -157,7 +159,11 @@ editor_blockly = function () {
       MotaActionBlocks['setValue_s'].xmlText([
         MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
       ]),
+      MotaActionBlocks['addValue_s'].xmlText([
+        MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
+      ]),
       MotaActionBlocks['expression_arithmetic_0'].xmlText(),
+      MotaActionBlocks['evFlag_e'].xmlText(),
       MotaActionBlocks['negate_e'].xmlText(),
       MotaActionBlocks['bool_e'].xmlText(),
       MotaActionBlocks['idString_e'].xmlText(),
@@ -177,11 +183,11 @@ editor_blockly = function () {
       MotaActionFunctions.actionParser.parse([
         {"type": "choices", "text": "\t[老人,man]少年，你需要钥匙吗？\n我这里有大把的！",
         "choices": [
-            {"text": "黄钥匙（\${9+flag:shop_times}金币）", "action": [
+            {"text": "黄钥匙（\${9+flag:shop_times}金币）", "color": [255,255,0,1], "action": [
                 {"type": "if", "condition": "status:money>=9+flag:shop_times",
                     "true": [
-                        {"type": "setValue", "name": "status:money", "value": "status:money-(9+flag:shop_times)"},
-                        {"type": "setValue", "name": "item:yellowKey", "value": "item:yellowKey+1"},
+                        {"type": "addValue", "name": "status:money", "value": "-(9+flag:shop_times)"},
+                        {"type": "addValue", "name": "item:yellowKey", "value": "1"},
                     ],
                     "false": [
                         "\t[老人,man]你的金钱不足！",
@@ -189,14 +195,14 @@ editor_blockly = function () {
                     ]
                 }
             ]},
-            {"text": "蓝钥匙（\${18+2*flag:shop_times}金币）", "action": [
+            {"text": "蓝钥匙（\${18+2*flag:shop_times}金币）", "color": [0,0,255,1], "action": [
             ]},
             {"text": "离开", "action": [
                 {"type": "exit"}
             ]}
         ]
     },
-    {"type": "setValue", "name": "flag:shop_times", "value": "flag:shop_times+1"},
+    {"type": "addValue", "name": "flag:shop_times", "value": "1"},
     {"type": "revisit"}
       ], 'event'),  
       '<label text="战前剧情"></label>',
@@ -219,7 +225,7 @@ editor_blockly = function () {
       ],'afterBattle'),
       '<label text="打怪开门"></label>',
       MotaActionFunctions.actionParser.parse([
-        {"type": "setValue", "name": "flag:__door__", "value": "flag:__door__+1"},
+        {"type": "addValue", "name": "flag:__door__", "value": "1"},
         {"type": "if", "condition": "flag:__door__==2", 
           "true": [
             {"type": "openDoor", "loc": [10,5]}
@@ -308,7 +314,8 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
   //console.log(e);
   e.preventDefault();
   var hvScroll = e.shiftKey?'hScroll':'vScroll';
-  workspace.scrollbar[hvScroll].handlePosition_+=( ((e.deltaY||0)+(e.detail||0)) >0?20:-20);
+  var mousewheelOffsetValue=20/380*workspace.scrollbar[hvScroll].handleLength_*3;
+  workspace.scrollbar[hvScroll].handlePosition_+=( ((e.deltaY||0)+(e.detail||0)) >0?mousewheelOffsetValue:-mousewheelOffsetValue);
   workspace.scrollbar[hvScroll].onScroll_();
   workspace.setScale(workspace.scale);
 }
@@ -341,7 +348,7 @@ function omitedcheckUpdateFunction(event) {
     }
   }
   try {
-    var code = Blockly.JavaScript.workspaceToCode(workspace);
+    var code = Blockly.JavaScript.workspaceToCode(workspace).replace(/\\i/g, '\\\\i');
     codeAreaHL.setValue(code);
   } catch (error) {
     codeAreaHL.setValue(String(error));
@@ -362,6 +369,54 @@ function omitedcheckUpdateFunction(event) {
 
   MotaActionFunctions.workspace = function(){
     return editor_blockly.workspace;
+  }
+
+  // 因为在editor_blockly.parse里已经HTML转义过一次了,所以这里要覆盖掉以避免在注释中出现&lt;等
+  MotaActionFunctions.xmlText = function (ruleName,inputs,isShadow,comment) {
+    var rule = MotaActionBlocks[ruleName];
+    var blocktext = isShadow?'shadow':'block';
+    var xmlText = [];
+    xmlText.push('<'+blocktext+' type="'+ruleName+'">');
+    if(!inputs)inputs=[];
+    for (var ii=0,inputType;inputType=rule.argsType[ii];ii++) {
+      var input = inputs[ii];
+      var _input = '';
+      var noinput = (input===null || input===undefined);
+      if(noinput && inputType==='field') continue;
+      if(noinput) input = '';
+      if(inputType!=='field') {
+        var subList = false;
+        var subrulename = rule.args[ii];
+        subrulename=subrulename.split('_').slice(0,-1).join('_');
+        var subrule = MotaActionBlocks[subrulename];
+        if (subrule instanceof Array) {
+          subrulename=subrule[subrule.length-1];
+          subrule = MotaActionBlocks[subrulename];
+          subList = true;
+        }
+        _input = subrule.xmlText([],true);
+        if(noinput && !subList && !isShadow) {
+          //无输入的默认行为是: 如果语句块的备选方块只有一个,直接代入方块
+          input = subrule.xmlText();
+        }
+      }
+      xmlText.push('<'+inputType+' name="'+rule.args[ii]+'">');
+      xmlText.push(_input+input);
+      xmlText.push('</'+inputType+'>');
+    }
+    if(comment){
+      xmlText.push('<comment>');
+      xmlText.push(comment);
+      xmlText.push('</comment>');
+    }
+    var next = inputs[rule.args.length];
+    if (next) {//next
+      xmlText.push('<next>');
+      xmlText.push(next);
+      xmlText.push('</next>');
+    }
+    xmlText.push('</'+blocktext+'>');
+    return xmlText.join('');
   }
 })();
 `;
@@ -390,13 +445,13 @@ function omitedcheckUpdateFunction(event) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState != 4) return;
         if (xhr.status != 200) {
-            alert("无法在file://下加载");
+            alert("图块描述文件加载失败, 请在'启动服务.exe'中打开编辑器");
             return;
         }
         input_ = xhr.responseText;
         editor_blockly.runOne();
     }
-    xhr.open('GET', '_server/blockly/MotaAction.g4', true);
+    xhr.open('GET', '_server/MotaAction.g4', true);
     xhr.send(null);
 
     codeAreaHL = CodeMirror.fromTextArea(document.getElementById("codeArea"), {
@@ -435,7 +490,8 @@ function omitedcheckUpdateFunction(event) {
         MotaActionFunctions.parse(
             eval('obj=' + codeAreaHL.getValue().replace(/[<>&]/g, function (c) {
                 return {'<': '&lt;', '>': '&gt;', '&': '&amp;'}[c];
-            }).replace(/\\r/g, '\\\\r').replace(/\\f/g, '\\\\f')),
+            }).replace(/\\r/g, '\\\\r').replace(/\\f/g, '\\\\f')
+                .replace(/\\i/,'\\\\i')),
             document.getElementById('entryType').value
         );
     }
@@ -459,7 +515,7 @@ function omitedcheckUpdateFunction(event) {
 
     var blocklyWidgetDiv = document.getElementsByClassName('blocklyWidgetDiv');
     editor_blockly.show = function () {
-        if (typeof(selectBox) !== typeof(undefined)) selectBox.isSelected = false;
+        if (typeof(selectBox) !== typeof(undefined)) selectBox.isSelected(false);
         document.getElementById('left6').style = '';
         for (var ii = 0, node; node = blocklyWidgetDiv[ii]; ii++) {
             node.style.zIndex = 201;
@@ -509,6 +565,7 @@ function omitedcheckUpdateFunction(event) {
             return;
         }
         var code = Blockly.JavaScript.workspaceToCode(editor_blockly.workspace);
+        code = code.replace(/\\i/g, '\\\\i');
         eval('var obj=' + code);
         setvalue(JSON.stringify(obj));
     }
@@ -553,7 +610,8 @@ function omitedcheckUpdateFunction(event) {
         'exit_s',
         'revisit_s',
         'sleep_s',
-        'setBlock_s'
+        'setBlock_s',
+        'insert_1_s'
     ]; // 最常用的15个图块
     editor_blockly.lastUsedTypeNum=15;
 

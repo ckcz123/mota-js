@@ -11,7 +11,7 @@ main.floors.sample1=
         0,
         0,
         "bg.jpg",
-        false
+        0
     ]
 ],
 "weather": [
@@ -205,10 +205,8 @@ main.floors.sample1=
             "type": "move",
             "time": 750,
             "steps": [
-                {
-                    "direction": "right",
-                    "value": 2
-                },
+                "right",
+                "right",
                 "down"
             ]
         },
@@ -766,10 +764,15 @@ main.floors.sample1=
             ],
             "false": []
         }
-    ],
-    "10,12": null
+    ]
 },
 "afterGetItem": {},
 "afterOpenDoor": {},
 "cannotMove": {},
+"bgmap": [
+
+],
+"fgmap": [
+
+],
 }

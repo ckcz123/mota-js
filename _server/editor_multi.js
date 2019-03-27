@@ -1,3 +1,5 @@
+
+
 editor_multi = function () {
 
     var editor_multi = {};
@@ -19,6 +21,8 @@ editor_multi = function () {
         highlightSelectionMatches: {showToken: /\w/, annotateScrollbar: true}
     });
 
+    editor_multi.codeEditor = codeEditor;
+
     codeEditor.on("keyup", function (cm, event) {
         if (codeEditor.getOption("autocomplete") && !event.ctrlKey && (
             (event.keyCode >= 65 && event.keyCode <= 90) ||
@@ -35,7 +39,7 @@ editor_multi = function () {
     editor_multi.lintAutocomplete = false;
 
     editor_multi.show = function () {
-        if (typeof(selectBox) !== typeof(undefined)) selectBox.isSelected = false;
+        if (typeof(selectBox) !== typeof(undefined)) selectBox.isSelected(false);
         var valueNow = codeEditor.getValue();
         //try{eval('function _asdygakufyg_() { return '+valueNow+'\n}');editor_multi.lintAutocomplete=true;}catch(ee){}
         if (valueNow.slice(0, 8) === 'function') editor_multi.lintAutocomplete = true;
@@ -60,6 +64,24 @@ editor_multi = function () {
         return '\t';
     }
 
+    var _format = function () {
+        if (!editor_multi.lintAutocomplete) return;
+        codeEditor.setValue(js_beautify(codeEditor.getValue(), {
+            brace_style: "collapse-preserve-inline",
+            indent_with_tabs: true,
+            jslint_happy: true
+        }));
+    }
+
+    editor_multi.format = function () {
+        if (!editor_multi.lintAutocomplete) {
+            alert("只有代码才能进行格式化操作！");
+            return;
+        }
+        _format();
+    }
+
+
     editor_multi.import = function (id_, args) {
         var thisTr = document.getElementById(id_);
         if (!thisTr) return false;
@@ -81,7 +103,7 @@ editor_multi = function () {
             var tmap = {};
             var tstr = JSON.stringify(tobj, function (k, v) {
                 if (typeof(v) === typeof('') && v.slice(0, 8) === 'function') {
-                    var id_ = editor.guid();
+                    var id_ = editor.util.guid();
                     tmap[id_] = v.toString();
                     return id_;
                 } else return v
@@ -106,6 +128,8 @@ editor_multi = function () {
             editor_multi.id = '';
             return;
         }
+        // ----- 自动格式化
+        _format();
         if (editor_multi.id === 'callFromBlockly') {
             editor_multi.id = '';
             editor_multi.multiLineDone();
@@ -122,7 +146,7 @@ editor_multi = function () {
                 var tmap = {};
                 var tstr = JSON.stringify(tobj, function (k, v) {
                     if (v instanceof Function) {
-                        var id_ = editor.guid();
+                        var id_ = editor.util.guid();
                         tmap[id_] = v.toString();
                         return id_;
                     } else return v

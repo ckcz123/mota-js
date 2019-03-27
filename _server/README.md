@@ -1,5 +1,9 @@
 # editor
 
+[重构](refactoring.md)
+
+>! 以下均是v2.0时的说明, 未及时改动
+
 本目录下所有文件,以及`../editor.html`和`../启动服务.exe`([源码](http://github.com/ckcz123/mota-js-server/))是地图编辑器的所有组件.
 
 `editor.js`,`editor_file.js`和`editor_mode.js`耦合较强,`editor_blockly.js`和`editor_multi.js`和`fs.js`基本可以独立使用.
@@ -29,7 +33,7 @@
 ``` js
 editor.mapInit();//清空地图
 editor.changeFloor('MT2')//切换地图
-editor.guid()//产生一个可以作为id的长随机字符串
+editor.util.guid()//产生一个可以作为id的长随机字符串
 ```
 
 `editor.updateMap`中画未定义快的报错
@@ -103,23 +107,6 @@ editor_mode.onmode(editor_mode._ids[node.getAttribute('id')]);
 
 `editor.mode.listen`中提供了追加素材的支持.
 
-处理注释的特殊指令
-```
-$range(evalstr:thiseval)$end
-  限制取值范围,要求修改后的eval(evalstr)为true
-$leaf(evalstr:thiseval)$end
-  强制指定为叶节点,如果eval(evalstr)为true
-
-//以下几个中选一个 [
-$select(evalstr)$end
-  渲染成<select>,选项为数组eval(evalstr)['values']
-$input(evalstr)$end
-  渲染成<input>
-$textarea(evalstr)$end
-  渲染成<textarea>
-默认选项为$textarea()$end
-// ]
-```
 
 ### editor_blockly.js
 
@@ -177,9 +164,3 @@ fs.readdir(path, callback)
 //所有参数不允许缺省
 ```
 
-## z-index
-
-目前主体部分使用了 0-15,75,100
-
-blockly使用 200,201  
-多行文本编辑器使用 300

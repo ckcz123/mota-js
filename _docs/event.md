@@ -1,6 +1,6 @@
 # 事件
 
-?> 目前版本**v2.5.3**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.5.5**，上次更新时间：* {docsify-updated} *
 
 本章内将对样板所支持的事件进行介绍。
 
@@ -255,7 +255,7 @@
 
 从V2.5.3以后，也可以使用`\f[...]`来同时绘制一张图片。
 
-其基本写法是`\f[图片名,起始x像素,起始y像素]`，或者`\f[图片名,起始x像素,起始y像素,绘制宽度,绘制高度]`。
+其基本写法是`\f[img,x,y]`，或者`\f[img,x,y,w,h]`，或者`\f[img,sx,sy,sw,sh,x,y,w,h]`。
 
 需要注意的是，这个图片是绘制在UI层上的，下一个事件执行时即会擦除；同时如果使用了\t的图标动画效果，重叠的地方也会被图标动画给覆盖掉。
 
@@ -263,9 +263,25 @@
 "x,y": [ // 实际执行的事件列表
     "\t[勇士]\b[up,hero]\f[1.png,100,100]以(100,100)为左上角绘制1.png图片",
     "\t[hero]\f[1.png,100,100]\f[2.png,300,300]同时绘制了两张图片",
-    "\f[1.png,100,100,300,300]也可以填写宽高，这样会把图片强制进行放缩到指定的宽高值"
+    "\f[1.png,100,100,300,300]也可以填写宽高，这样会把图片强制进行放缩到指定的宽高值",
+    "\f[1.png,64,64,128,128,100,100,128,128]裁剪1.png上以(64,64)开始的128x128图片，并绘制到画布的(100,100)处"
 ]
 ```
+
+从V2.5.5以后，也可以使用`\\i[...]`来在对话框中绘制一个图标。
+
+这里可以使用一个合法ID（32x48图块除外），或使用一个系统图标（`core.statusBar.icons`中的内容）。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    "\t[勇士]\b[up,hero]这是一个飞行器\\i[fly]，这是一个破墙镐\\i[pickaxe]",
+    "\t[hero]也可以使用系统图标，比如这是存档\\i[save]，这是工具栏\\i[toolbox]",
+]
+```
+
+**可以在控制台中输入`core.statusBar.icons`以查看所有的系统图标定义。**
+
+!> 注意，在事件块中，允许只写一个反斜杠`\i`，系统会自动转义成`\\i`；但是在脚本中必须两个反斜杠都写上！
 
 另外值得一提的是，我们是可以在文字中计算一个表达式的值的。只需要将表达式用 `${ }`整个括起来就可以。
 
@@ -322,13 +338,15 @@ time为可选项，代表该自动文本的时间。可以不指定，不指定�
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    {"type": "scrollText", "text": "第一排\n第二牌\n\n空行后的一排", "time": 5000, "async": true},
+    {"type": "scrollText", "text": "第一排\n第二牌\n\n空行后的一排", "time": 5000, "lineHeight": 1.4, "async": true},
 ]
 ```
 
 text为正文文本内容。可以使用`${ }`来计算表达式的值，且使用`\n`手动换行。系统不会对滚动剧情文本进行自动换行。
 
 time为可选项，代表总的滚动时间。默认为5000毫秒。
+
+lineHeight为可选项，代表行距。默认为1.4。
 
 async可选，如果为true则会异步执行（即不等待当前事件执行完毕，立刻执行下一个事件）。
 
@@ -425,6 +443,23 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 
 另外注意一点的是，如果hp被设置成了0或以下，将触发lose事件，直接死亡。
 
+### addValue：增减勇士的某个属性、道具个数，或某个变量/Flag的值
+
+和`{"type": "setValue"}`的写法完全相同，不过此项是可以直接将值加减到原始数值上。
+
+即下面的写法是等价的：
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "setValue", "name": "status:atk", "value": "status:atk+10" } // 攻击提高10点
+    {"type": "addVakue", "name": "status:atk", "value": "10" } // 和上面写法等价
+    {"type": "setValue", "name": "item:yellowKey", "value": "item:yellowKey-3" } // 黄钥匙个数-3
+    {"type": "addValue", "name": "item:yellowKey", "value": "-3" } // 和上面写法等价
+    {"type": "setValue", "name": "flag:door2", "value": "flag:door2+1" } // 将变量door值+1
+    {"type": "addValue", "name": "flag:door2", "value": "01" } // 和上面写法等价
+]
+```
+
 ### setFloor：设置楼层属性
 
 使用`{"type":"setFloor"}`可以设置某层楼的楼层属性。
@@ -480,6 +515,23 @@ name必填项，代表要修改的全局数值，其和全塔属性中的values�
 "purify", "hatred", "moveSpeed", "animateSpeed"`。
 
 value为必填项，代表要修改到的结果。该项必须是个数值。
+
+### setGlobalFlag：设置一个系统开关
+
+使用`{"type":"setGlobalFlag"}`可以设置一个系统开关。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+  {"type": "setGlobalFlag", "name": "enableMDef", "value": false}, // 不在状态栏显示魔防值
+]
+```
+
+name必填项，代表要修改的系统开关，其是全塔属性中的flags中的一部分。目前只能为`"enableFloor", "enableName", "enableLv",
+"enableHPMax", "enableMana", "enableMDef", "enableMoney", "enableExperience", "enableLevelUp", "levelUpLeftMode",
+"enableKeys", "enablePZF", "enableDebuff", "enableSkill", "flyNearStair", "enableAddPoint", "enableNegativeDamage",
+"useLoop", "enableGentleClick", "canGoDeadZone", "enableMoveDirectly", "disableShopOnDamage"`。
+
+value为必填项，只能为true或false，代表要修改到的结果。
 
 ### show：将一个禁用事件启用
 
@@ -556,23 +608,33 @@ NPC对话事件结束后如果需要NPC消失也需要调用 `{"type": "hide"}`�
 
 例如上面这个例子，下面的文字将不会再被显示，而是直接跳转到`"3,6"`对应的事件列表从头执行。
 
-### insert：插入另一个地点的事件
+!> 从V2.5.4开始，允许执行另一个点的“系统事件”，如打怪、开门、拾取道具等等。对应点的战后事件等也会被执行。
 
-`{"type":"insert"}` 会插入另一个地点的事件执行。
+### insert：插入公共事件或另一个地点的事件并执行
+
+`{"type":"insert"}` 会插入公共事件或另一个地点的事件并执行。
 
 其基本写法如下：
 
 ``` js
 "x,y": [ // 实际执行的事件列表
+    {"type": "insert", "name": "加点事件", "args": [10] }, // 插入公共事件：加点事件，传入参数10
+    {"type": "insert", "name": "毒衰咒处理", "args": [0]}, // 插入公共事件：毒衰咒处理，传入参数0
     {"type": "insert", "loc": [3,6]}, // 插入[3,6]点的事件并执行
     {"type": "insert", "loc": [10,10], "floorId": "MT1"}, // 插入MT1层[10,10]点的事件并执行
+    {"type": "insert", "loc": [2,2], "args": [1,"flag:abc","status:atk+status:def"]}, // 传入三个参数
     "上面的插入事件执行完毕后会接着继续执行后面的事件"
 ]
 ```
 
-loc是必须的，代表另一个地点的坐标。
+`insert`的写法有两种，可以写`name`，或者`loc`。
 
-floorId可选，代表另一个地点所在的楼层；如果不写则默认为当前层。
+- 如果写了`"name": "xxx"`，则会去公共事件列表中找寻对应的事件，并执行。
+  - name为公共事件的名称，如果对应公共事件不存在则跳过。
+- 否则，如果写了`"loc": [x,y]`，则会插入另一个地点的事件
+  - loc为另一个地点的坐标
+  - floorId可选，代表另一个地点所在的楼层；如果不写则默认为当前层。
+  - 从V2.6开始，还可以传可选的which，可以为`afterBattle`/`afterGetItem`/`afterOpenDoor`，代表插入该点的战后/获得道具后/开门后事件。
 
 和`type:trigger`不同的是，**`type:trigger`是立刻将当前事件结束（剩下所有内容都忽略），然后重新启动另一个地点的action事件。**
 
@@ -580,7 +642,15 @@ floorId可选，代表另一个地点所在的楼层；如果不写则默认为�
 
 **这个过程中，当前事件不会被结束，当前的楼层和事件坐标不会发生改变。** 插入的事件执行完毕后，会继续执行接下来的内容。
 
-我们某个事件写在某个角落的墙上然后远程调用，从而达到“公共事件”的效果。
+从V2.6开始，插入事件允许传参。如果需要传参，则需要增加一个`args`数组。
+
+例如： `"args": [1,"flag:abc","status:atk+status:def"]` 传入了三个参数。
+
+系统会自动把`flag:arg1`设置为第一个参数数值，`flag:arg2`设置为第二个参数数值，等等。
+
+（`flag:arg0`则会被置为公共事件名称，或者插入的点的坐标）
+
+即可在事件中直接取用`flag:arg1`等等来获得各项参数值！。
 
 ### revisit：立即重启当前事件
 
@@ -771,9 +841,14 @@ name是可选的，代表目标行走图的文件名。
 ``` js
 "x,y": [ // 实际执行的事件列表
     {"type": "sleep", "time": 1000}, // 等待1000ms
-    "等待1000ms后才开始执行这个事件"
+    "等待1000ms后才开始执行这个事件",
+    {"type": "sleep", "time": 2000, "noSkip": true}, // 等待2000毫秒，且不可被跳过
 ]
 ```
+
+默认的等待事件可以被Ctrl跳过，下面两种情况下不可呗跳过：
+ - 加上`"noSkip": true`后
+ - 当前存在尚未执行完毕的异步事件。
 
 ### battle：强制战斗
 
@@ -814,6 +889,7 @@ name是可选的，代表目标行走图的文件名。
 "x,y": [ // 实际执行的事件列表
     {"type": "openDoor", "loc": [3,6], "floorId": "MT1"}, // 打开MT1层的[3,6]位置的门
     {"type": "openDoor", "loc": [3,6]}, // 如果是本层则可省略floorId
+    {"type": "openDoor", "loc": [3,6], "needKey": true} // 打开此门需要钥匙
 ]
 ```
 
@@ -822,6 +898,34 @@ loc指定门的坐标，floorId指定门所在的楼层ID。如果是当前层�
 如果loc所在的点是一个墙壁，则作为暗墙来开启。
 
 如果loc所在的点既不是门也不是墙壁，则忽略本事件。
+
+needKey是可选的，如果设置为true则需要钥匙才能打开此门。如果没有钥匙则跳过此事件。
+
+!> needKey仅对当前楼层开门有效！跨楼层的门仍然不需要钥匙即可打开，如有需求请自行判定。
+
+### closeDoor：关门
+
+从V2.6开始提供了关门事件`{"type": "closeDoor"}`，拥有关门动画和对应的音效。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "closeDoor", "id": "yellowDoor", "loc": [3,6]}, // 给(3,6)点关上黄门
+    {"type": "closeDoor", "id": "specialDoor"}, // 不写loc则视为当前点
+]
+```
+
+id为你要关门的ID，需要是一个合法的门，系统默认只支持如下几种：
+
+```
+yellowDoor, blueDoor, redDoor, greenDoor, specialDoor, steelDoor,
+yellowWall, blueWall, whiteWall
+```
+
+如果需要自己添加门，请参考[新增门和对应的钥匙](personalization#新增门和对应的钥匙)。
+
+loc可选，为要关的位置，不填默认为当前点。
+
+关门事件需要保证该点是空地，否则将无视此事件。
 
 ### changeFloor：楼层切换
 
@@ -859,6 +963,24 @@ time为可选的，指定的话将作为楼层切换动画的时间。
     {"type": "changePos", "direction": "left"} // loc也可省略，只指定direction；此时等价于当前勇士转向到某个方向。
 ]
 ```
+
+### useItem：使用道具
+
+调用`{"type": "useItem"}`可以使用一个道具。
+
+``` js
+"x,y": [ // 实际执行的事件列表
+    {"type": "changePos", "id": "pickaxe"}, // 尝试使用破
+    {"type": "changePos", "id": "bomb"}, // 尝试使用炸
+    {"type": "changePos", "id": "centerFly"} // 尝试使用飞
+]
+```
+
+使用道具事件会消耗对应的道具。
+
+如果当前不可使用该道具（如没有，或者达不到使用条件），则会进行提示并跳过本事件。
+
+不可使用“怪物手册”（请使用【呼出怪物手册】事件）或楼层传送器（如果[覆盖楼传事件](personalization#覆盖楼传事件)则可忽视本项）。
 
 ### openShop：打开一个全局商店
 
@@ -939,9 +1061,10 @@ loc可忽略，如果忽略则显示为事件当前点。
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    {"type": "showImage", "code": 1, "image": "bg.jpg", "loc": [231,297], "dw": 100, "dy" : 100, "opacity": 1, "time" : 0}, // 在(231,297)显示bg.jpg
-    {"type": "showImage", "code": 12, "image": "1.png", "loc": [209,267], "dw": 100, "dy" : 100, "opacity": 0.5, "time" : 1000}, // 在(209,267)渐变显示1.png，渐变时间为1000毫秒，完成时不透明度为0.5，这张图片将遮盖上一张
-    {"type": "showImage", "code": 8, "image": "hero.png", "loc": [349,367], "dw": 50, "dy" : 50, "opacity": 1, "time" : 500, "async": true}, // 在(209,267)渐变显示hero.png，大小为原图片的一半，渐变时间为500毫秒，异步执行；这张图片将被上一张遮盖
+    {"type": "showImage", "code": 1, "image": "bg.jpg", "loc": [231,297], "opacity": 1, "time" : 0}, // 在(231,297)显示bg.jpg
+    {"type": "showImage", "code": 12, "image": "1.png", "loc": [209,267],  "opacity": 0.5, "time" : 1000}, // 在(209,267)渐变显示1.png，渐变时间为1000毫秒，完成时不透明度为0.5，这张图片将遮盖上一张
+    {"type": "showImage", "code": 8, "image": "hero.png", "loc": [349,367],  "opacity": 1, "time" : 500, "async": true}, // 在(209,267)渐变显示hero.png，渐变时间为500毫秒，异步执行；这张图片将被上一张遮盖
+    {"type": "showImage", "code": 10, "image": "hero.png", "sloc": [100,100,100,100], "loc": [0,0,100,100], "opacity": 1, "time": 0} // 截取原图的一部分绘制到画布上的一部分。
 ]
 ```
 
@@ -949,9 +1072,9 @@ code为图片编号，如果两张图片重叠，编号较大会覆盖编号较�
 
 image为图片名。**请确保图片在全塔属性中的images中被定义过。**
 
-loc为图片左上角坐标，以像素为单位进行计算。
+sloc为可选项；如果设置了则是个2或4元组，代表裁剪原始图片的左上角像素位置和宽高。
 
-dw和dh为图片的横向、纵向放大率，默认值为100，即不进行缩放。
+loc为2或4元组，代表要绘制的画布上的左上角像素位置和宽高。
 
 opacity为图片不透明度，在0~1之间，默认值为1，即不透明。
 
@@ -976,6 +1099,8 @@ text为要显示的文本。默认行宽为416。
 loc为图片左上角坐标，以像素为单位进行计算。
 
 opacity为图片不透明度，在0~1之间，默认值为1，即不透明。
+
+lineHeight为可选项，代表行距。默认为1.4。
 
 time为渐变时间，默认值为0，即不渐变直接显示。
 
@@ -1260,13 +1385,19 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 
 值得注意的是，如果是额外添加进文件的音效，则需在main.js中this.sounds里加载它。
 
+### stopSound：停止所有音效
+
+使用`{"type": "stopSound"}`可以停止所有音效。
+
+这在人物对话音效时很有用。
+
 ### setVolume：设置音量
 
 使用setVolume可以设置音量大小。
 
 使用方法： `{"type": "setVolume", "value": 90, "time": 500, "async": true}`
 
-value为音量大小，在0到100之间，默认为100。设置后，BGM和SE都将使用该音量进行播放。
+value为音量大小，在0到100之间，默认为100。设置后，BGM将使用该音量进行播放。SE的音量大小不会发生改变。
 
 可以设置time为音量渐变时间。
 
@@ -1285,6 +1416,24 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 `{"type": "lose", "reason": "xxx"}` 将会直接调用`events.js`中的lose函数，并将reason作为参数传入。
 
 该事件会显示失败页面，并重新开始游戏。
+
+### callBook：呼出怪物手册
+
+`{"type": "callBook"}` 可以呼出怪物手册，玩家可以自由查看当前楼层怪物数据和详细信息。
+
+返回游戏后将继续执行后面的事件。没有怪物手册或在录像播放中，则会跳过本事件。
+
+### callSave：呼出存档界面
+
+`{"type": "callSave"}` 可以呼出存档页面并允许玩家存一次档。
+
+在玩家进行一次存档，或者直接点返回游戏后，将接着执行后面的事件。录像播放将会跳过本事件。
+
+### callLoad：呼出读档界面
+
+`{"type": "callLoad"}` 可以呼出读档页面并允许玩家进行读档。
+
+如果玩家没有进行读档而是直接返回游戏，则会继续执行后面的事件。录像播放将会跳过本事件。
 
 ### input：接受用户输入数字
 
@@ -1451,7 +1600,8 @@ choices是一个很麻烦的事件，它将弹出一个列表供用户进行选�
 
 ``` js
 "x,y": [ // 实际执行的事件列表
-    {"type": "choices", "text": "...", // 提示文字
+    {"type": "choices", "text": "...",  // 提示文字
+        "color": [255,0,0,1], // 颜色
         "choices": [
             {"text": "选项1文字", "action": [
                     // 选项1执行的事件
@@ -1467,11 +1617,15 @@ choices是一个很麻烦的事件，它将弹出一个列表供用户进行选�
 ]
 ```
 
-其中最外面的"text"为提示文本。同上面的`"type":"text"`一样，支持`${}`表达式的计算，和\t显示名称、图标。text可省略，如果省略将不显示任何提示文字。
+其中最外面的"text"为提示文本。同上面的`"type":"text"`一样，支持`${}`表达式的计算，和\t显示名称、图标，\r更改颜色。text可省略，如果省略将不显示任何提示文字。
 
 choices为一个数组，其中每一项都是一个选项列表。
 
-每一项的text为显示在屏幕上的选项名，也支持${}的表达式计算，但不支持`\t[]`的显示。action为当用户选择了该选项时将执行的事件。
+每一项的text为显示在屏幕上的选项名，也支持${}的表达式计算，但不支持`\t[]`的显示。
+
+action为当用户选择了该选项时将执行的事件。
+
+color为可选的，可以是一个字符串（#FF0000），或者一个RGBA数组（[255,0,0,1]）。
 
 选项可以有任意多个，但一般不要超过6个，否则屏幕可能塞不下。
 
@@ -1500,7 +1654,7 @@ choices为一个数组，其中每一项都是一个选项列表。
                 "false": [ // 否则，显示选择页面
                     {"type": "choices", "text": "\t[老人,woman]少年，你需要钥匙吗？\n我这里有大把的！", // 显示一个卖钥匙的选择页面
                         "choices": [ // 提供四个选项：黄钥匙、蓝钥匙、红钥匙、离开。前三个选项显示需要的金额
-                            {"text": "黄钥匙（${9+flag:woman_times}金币）", "action": [ // 第一个选项，黄钥匙
+                            {"text": "黄钥匙（${9+flag:woman_times}金币）", "color": [255,255,0,1], "action": [ // 第一个选项，黄钥匙
                                 // 选择该选项的执行内容
                                 {"type": "if", "condition": "status:money>=9+flag:woman_times", // 条件判断：钱够不够
                                     "true": [
@@ -1514,10 +1668,10 @@ choices为一个数组，其中每一项都是一个选项列表。
                                     ]
                                 }
                             ]},
-                            {"text": "蓝钥匙（${18+2*flag:woman_times}金币）", "action": [ // 第二个选项：蓝钥匙
+                            {"text": "蓝钥匙（${18+2*flag:woman_times}金币）", "color": [0,0,255,1],  "action": [ // 第二个选项：蓝钥匙
                                 // 逻辑和上面黄钥匙完全相同，略
                             ]},
-                            {"text": "红钥匙（${36+4*flag:woman_times}金币）", "action": [ // 第三个选项：红钥匙
+                            {"text": "红钥匙（${36+4*flag:woman_times}金币）", "color": [255,0,0,1], "action": [ // 第三个选项：红钥匙
                                 // 逻辑和上面黄钥匙完全相同，略
                             ]},
                             {"text": "离开", "action": [ // 第四个选项：离开
@@ -1607,7 +1761,7 @@ choices为一个数组，其中每一项都是一个选项列表。
 
 当用户执行操作后：
 - 如果是键盘的按键操作，则会将flag:type置为0，并且把flag:keycode置为刚刚按键的keycode。
-- 如果是屏幕的点击操作，则会将flag:type置为1，并且设置flag:x和flag:y为刚刚的点击坐标。
+- 如果是屏幕的点击操作，则会将flag:type置为1，并且设置flag:x和flag:y为刚刚的点击坐标（0-12之间），flag:px和flag:py置为刚刚的像素坐标（0-415之间）。
 
 下面是一个while事件和wait合并使用的例子，这个例子将不断接收用户的点击或按键行为，并输出该信息。
 如果用户按下了ESC或者点击了屏幕正中心，则退出循环。
@@ -1627,7 +1781,7 @@ choices为一个数组，其中每一项都是一个选项列表。
                     }
                 ],
                 "false": [ // flag:type==1，鼠标点击
-                    "你当前点击屏幕了，坐标是[${flag:x},${flag:y}]",
+                    "你当前点击屏幕了，位置坐标是[${flag:x},${flag:y}]，像素坐标是[${flag:px},${flag:py}]",
                     {"type": "if", "condition": "flag:x==6 && flag:y==6", // 点击(6,6)
                         "true": [{"type": "break"}], // 跳出循环
                         "false": []
@@ -1688,6 +1842,21 @@ core.insertAction([
 ```
 
 !> 从V2.5.3开始，提供了一个"不自动执行下一个事件"的选项（`"async": true`）。如果设置了此项，那么在该部分代码执行完毕后，不会立刻执行下一个事件。你需要在脚本中手动调用`core.events.doAction()`来执行下一个事件。可以通过此项来实现一些异步的代码，即在异步函数的回调中再执行下一个事件。使用此选项请谨慎，最好向开发者寻求咨询。
+
+## 独立开关
+
+从V2.5.3开始，针对每个事件都提供了独立开关。
+
+独立开关的写法是`switch:A`, `switch:A`直到`switch:Z`，共计26个；不过样板中的值块默认只提供前6个。
+
+独立开关算是特殊的flag，它在事件中使用时会和事件的楼层及坐标进行绑定；换句话说每个事件对应的`switch:A`都是不同的。
+
+事实上，在某个楼层某个点的事件的独立开关A对应的系统flag为`floorId@x@y@A`，
+比如在`MT0`层的`[2,5]`点事件，对应的`switch:B`独立开关，实际会被映射到`flag:MT0@2@5@B`。
+
+如果在事件外想访问某个事件的独立开关也需要通过上面这个方式。
+
+通过独立开关的方式，我们无需对某些NPC的对话都设立单独的互不重复flag，只需要关注该事件自身的逻辑即可。
 
 ## 同一个点的多事件处理
 
@@ -1792,7 +1961,7 @@ core.insertAction([
 		try {
 			eval(core.floors[core.status.floorId].parallelDo);
 		} catch (e) {
-			console.log(e);
+			main.log(e);
 		}
 	}
 	
@@ -2191,9 +2360,9 @@ if (core.getFlag("door",0)==2) {
     if (hard=='Easy') { // 简单难度
         core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
         // 可以在此设置一些初始福利，比如设置初始生命值可以调用：
-        // core.setStatus("hp", 10000);
+        // core.setStatus('hp', 10000);
         // 赠送一把黄钥匙可以调用
-        // core.setItem("yellowKey", 1);
+        // core.setItem('yellowKey', 1);
     }
     if (hard=='Normal') { // 普通难度
         core.setFlag('hard', 2); // 可以用flag:hard来获得当前难度
@@ -2216,7 +2385,7 @@ if (core.getFlag("door",0)==2) {
 ////// 游戏获胜事件 //////
 "win": function(reason, norank) {
     core.ui.closePanel();
-    var replaying = core.status.replay.replaying;
+    var replaying = core.isReplaying();
     core.stopReplay();
     core.waitHeroToStop(function() {
         core.clearMap('all'); // 清空全地图
@@ -2240,7 +2409,7 @@ if (core.getFlag("door",0)==2) {
 ////// 游戏失败事件 //////
 "lose": function(reason) {
     core.ui.closePanel();
-    var replaying = core.status.replay.replaying;
+    var replaying = core.isReplaying();
     core.stopReplay();
     core.waitHeroToStop(function() {
         core.drawText([

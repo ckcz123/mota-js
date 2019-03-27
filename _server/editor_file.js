@@ -7,6 +7,8 @@ editor_file = function (editor, callback) {
         'comment': 'comment',
         'data.comment': 'dataComment',
         'functions.comment': 'functionsComment',
+        'events.comment': 'eventsComment',
+        'plugins.comment': 'pluginsComment',
     }
     for (var key in commentjs) {
         (function (key) {
@@ -49,25 +51,7 @@ editor_file = function (editor, callback) {
             throw('未设置callback')
         }
         ;
-        /* var fs = editor.fs;
-        fs.readFile('project/floors/'+filename+'.js','utf-8',function(err, data){
-          if (err!=null){callback(err);return;}
-          data=data.split('=');
-          data=[data[0],data.slice(1).join('=')];
-          var varnameId = data[0].split('.').slice(-1)[0].trim();
-          var filenameId = filename.split('/').slice(-1)[0].split('\\').slice(-1)[0];
-          eval('b3917d1d_71c2_41f2_a8aa_481b215ffb99='+data[1]);
-          var floorData = b3917d1d_71c2_41f2_a8aa_481b215ffb99;
-          delete(b3917d1d_71c2_41f2_a8aa_481b215ffb99);
-          var floorId = floorData.floorId;
-          if (varnameId!=filenameId || filenameId!=floorId){
-            callback('文件名,第一行的变量名以及floorId不一致');
-            return;
-          }
-          editor.currentFloorId = floorId;
-          editor.currentFloorData = floorData;
-          callback(null)
-        }); */
+        
         editor.currentFloorId = editor.core.status.floorId;
         editor.currentFloorData = editor.core.floors[editor.currentFloorId];
     }
@@ -82,7 +66,7 @@ editor_file = function (editor, callback) {
           callback('未选中文件或无数据');
         } */
         var filename = 'project/floors/' + editor.currentFloorId + '.js';
-        var datastr = ['main.floors.', editor.currentFloorId, '=\n{'];
+        var datastr = ['main.floors.', editor.currentFloorId, '=\n'];
         if (editor.currentFloorData.map == 'new') {
             /*
             editor.currentFloorData.map = editor.map.map(function (v) {
@@ -108,14 +92,18 @@ editor_file = function (editor, callback) {
                 editor.currentFloorData[name]=mapArray;
             }
         }
-        for (var ii in editor.currentFloorData)
-            if (editor.currentFloorData.hasOwnProperty(ii)) {
-                if (['map','bgmap','fgmap'].indexOf(ii)!==-1)
-                    datastr = datastr.concat(['\n"', ii, '": [\n', formatMap(editor.currentFloorData[ii],ii!='map'), '\n],']);
-                else
-                    datastr = datastr.concat(['\n"', ii, '": ', JSON.stringify(editor.currentFloorData[ii], null, 4), ',']);
-            }
-        datastr = datastr.concat(['\n}']);
+        // format 更改实现方式以支持undefined删除
+        var tempJsonObj=Object.assign({},editor.currentFloorData);
+        var tempMap=[['map',editor.util.guid()],['bgmap',editor.util.guid()],['fgmap',editor.util.guid()]];
+        tempMap.forEach(function(v){
+            v[2]=tempJsonObj[v[0]];
+            tempJsonObj[v[0]]=v[1];
+        });
+        var tempJson=JSON.stringify(tempJsonObj, null, 4);
+        tempMap.forEach(function(v){
+            tempJson=tempJson.replace('"'+v[1]+'"','[\n'+ formatMap(v[2],v[0]!='map')+ '\n]')
+        });
+        datastr = datastr.concat([tempJson]);
         datastr = datastr.join('');
         alertWhenCompress();
         fs.writeFile(filename, encode(datastr), 'base64', function (err, data) {
@@ -167,13 +155,89 @@ editor_file = function (editor, callback) {
             cannotMove: {}
         };
         Object.keys(editor.currentFloorData).forEach(function (t) {
-            if (!core.isset(editor.currentFloorData[t]))
+            if (editor.currentFloorData[t] == null)
                 delete editor.currentFloorData[t];
         })
         editor.currentFloorData.map = "new";
         editor.currentFloorId = saveFilename;
         editor_file.saveFloorFile(callback);
     }
+    editor_file.saveNewFiles = function (floorIdList, from, to, callback) {
+        if (!isset(callback)) {
+            printe('未设置callback');
+            throw('未设置callback')
+        };
+        var currData=editor.currentFloorData;
+        var saveStatus = document.getElementById('newMapsStatus').checked;
+
+        var calValue = function (text, i) {
+            return text.replace(/\${(.*?)}/g, function (word, value) {
+                return eval(value);
+            });
+        }
+
+        var width = parseInt(document.getElementById('newMapsWidth').value);
+        var height = parseInt(document.getElementById('newMapsHeight').value);
+
+        var row = [], map = [];
+        for (var i=0;i<width;i++) row.push(0);
+        for (var i=0;i<height;i++) map.push(row);
+
+        var filenames = floorIdList.map(function (v) {return "project/floors/"+v+".js";});
+        var datas = [];
+        for (var i=from;i<=to;i++) {
+            var datastr = ['main.floors.', floorIdList[i-from], '=\n{'];
+            var data = {
+                floorId: floorIdList[i-from],
+                title: calValue(document.getElementById('newFloorTitles').value, i),
+                name: calValue(document.getElementById('newFloorNames').value, i),
+                width: width,
+                height: height,
+                map: map,
+                canFlyTo: saveStatus?currData.canFlyTo:true,
+                canUseQuickShop: saveStatus?currData.canUseQuickShop:true,
+                cannotViewMap: saveStatus?currData.cannotViewMap:false,
+                cannotMoveDirectly: saveStatus?currData.cannotMoveDirectly:false,
+                images: [],
+                item_ratio: saveStatus?currData.item_ratio:1,
+                defaultGround: saveStatus?currData.defaultGround:"ground",
+                bgm: saveStatus?currData.bgm:null,
+                upFloor: null,
+                downFloor: null,
+                color: saveStatus?currData.color:null,
+                weather: saveStatus?currData.weather:null,
+                firstArrive: [],
+                eachArrive: [],
+                parallelDo: "",
+                events: {},
+                changeFloor: {},
+                afterBattle: {},
+                afterGetItem: {},
+                afterOpenDoor: {},
+                cannotMove: {}
+            };
+            Object.keys(data).forEach(function (t) {
+                if (data[t] == null)
+                    delete data[t];
+                else {
+                    if (t=='map') {
+                        datastr = datastr.concat(['\n"', t, '": [\n', formatMap(data[t]), '\n],']);
+                    }
+                    else {
+                        datastr = datastr.concat(['\n"', t, '": ', JSON.stringify(data[t], null, 4), ',']);
+                    }
+                }
+            });
+            datastr = datastr.concat(['\n}']);
+            datastr = datastr.join('');
+            datas.push(encode(datastr));
+        }
+        alertWhenCompress();
+        fs.writeMultiFiles(filenames, datas, function (err, data) {
+            callback(err);
+        });
+    }
+
     //callback(err:String)
 
     ////////////////////////////////////////////////////////////////////
@@ -215,7 +279,7 @@ editor_file = function (editor, callback) {
             // get id num
             var id = c+idnum;
 
-            if (image=='terrains' && core.isset(terrainsId[y])) {
+            if (image=='terrains' && terrainsId[y] != null) {
                 id=terrainsId[y];
             }
             else {
@@ -550,7 +614,7 @@ editor_file = function (editor, callback) {
             actionList.forEach(function (value) {
                 value[1] = value[1] + "['" + x + "," + y + "']";
             });
-            saveSetting('floors', actionList, function (err) {
+            saveSetting('floorloc', actionList, function (err) {
                 callback([
                     (function () {
                         var locObj = {};
@@ -669,7 +733,7 @@ editor_file = function (editor, callback) {
                             if (isset(editor.main[v]))
                                 locObj.main[v] = data_obj.main[v];
                             else
-                                locObj[v] = null;
+                                locObj.main[v] = null;
                         });
                         return locObj;
                     })(),
@@ -685,7 +749,7 @@ editor_file = function (editor, callback) {
                         if (isset(editor.main[v]))
                             locObj.main[v] = data_obj.main[v];
                         else
-                            locObj[v] = null;
+                            locObj.main[v] = null;
                     });
                     return locObj;
                 })(),
@@ -700,7 +764,7 @@ editor_file = function (editor, callback) {
     var fmap = {};
     var fjson = JSON.stringify(functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a, function (k, v) {
         if (v instanceof Function) {
-            var id_ = editor.guid();
+            var id_ = editor.util.guid();
             fmap[id_] = v.toString();
             return id_;
         } else return v
@@ -746,6 +810,98 @@ editor_file = function (editor, callback) {
                     return locObj;
                 })(),
                 editor_file.functionsComment,
+                null]);
+        }
+    }
+    //callback([obj,commentObj,err:String])
+
+    ////////////////////////////////////////////////////////////////////
+
+    editor_file.editCommonEvent = function (actionList, callback) {
+        /*actionList:[
+          ["change","['test']",['123']],
+        ]
+        为[]时只查询不修改
+        */
+        var data_obj = events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent;
+        if (!isset(callback)) {
+            printe('未设置callback');
+            throw('未设置callback')
+        }
+        ;
+        if (isset(actionList) && actionList.length > 0) {
+            actionList.forEach(function (value) {
+                value[1] = "['commonEvent']" + value[1];
+            });
+            saveSetting('events', actionList, function (err) {
+                callback([
+                    Object.assign({},data_obj),
+                    editor_file.eventsComment._data.commonEvent,
+                    err]);
+            });
+        } else {
+            callback([
+                Object.assign({},data_obj),
+                editor_file.eventsComment._data.commonEvent,
+                null]);
+        }
+    }
+    //callback([obj,commentObj,err:String])
+
+    ////////////////////////////////////////////////////////////////////
+
+    var plmap = {};
+    var pljson = JSON.stringify(plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1, function (k, v) {
+        if (v instanceof Function) {
+            var id_ = editor.util.guid();
+            plmap[id_] = v.toString();
+            return id_;
+        } else if(v===null){
+            var id_ = editor.util.guid();
+            plmap[id_] = 'null';
+            return id_;
+        } return v
+    }, 4);
+    var plobj = JSON.parse(pljson);
+    editor_file.pluginsMap = plmap;
+    editor_file.pluginsObj = plobj;
+    var buildpllocobj = function (locObj) {
+        for (var key in locObj) {
+            if (typeof(locObj[key]) !== typeof('')) buildpllocobj(locObj[key]);
+            else locObj[key] = plmap[locObj[key]];
+        }
+    };
+
+    editor_file.editPlugins = function (actionList, callback) {
+        /*actionList:[
+          ["change","['test']","function(x,y){console.log(x,y)}"],
+        ]
+        为[]时只查询不修改
+        */
+        if (!isset(callback)) {
+            printe('未设置callback');
+            throw('未设置callback')
+        }
+        ;
+        if (isset(actionList) && actionList.length > 0) {
+            saveSetting('plugins', actionList, function (err) {
+                callback([
+                    (function () {
+                        var locObj = JSON.parse(JSON.stringify(plobj));
+                        buildpllocobj(locObj);
+                        return locObj;
+                    })(),
+                    editor_file.pluginsComment,
+                    err]);
+            });
+        } else {
+            callback([
+                (function () {
+                    var locObj = JSON.parse(JSON.stringify(plobj));
+                    buildpllocobj(locObj);
+                    return locObj;
+                })(),
+                editor_file.pluginsComment,
                 null]);
         }
     }
@@ -824,7 +980,7 @@ editor_file = function (editor, callback) {
             var emap = {};
             var estr = JSON.stringify(maps_90f36752_8815_4be8_b32b_d7fad1d0542e, function (k, v) {
                 if (v.id != null) {
-                    var id_ = editor.guid();
+                    var id_ = editor.util.guid();
                     emap[id_] = JSON.stringify(v);
                     return id_;
                 } else return v
@@ -858,7 +1014,7 @@ editor_file = function (editor, callback) {
             var emap = {};
             var estr = JSON.stringify(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80, function (k, v) {
                 if (v.hp != null) {
-                    var id_ = editor.guid();
+                    var id_ = editor.util.guid();
                     emap[id_] = JSON.stringify(v);
                     return id_;
                 } else return v
@@ -900,48 +1056,57 @@ editor_file = function (editor, callback) {
             });
             return;
         }
-        if (file == 'floors') {
+        if (file == 'floorloc') {
             actionList.forEach(function (value) {
                 // 检测null/undefined
-                if (core.isset(value[2]))
-                    eval("editor.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
+                if (value[2]==null)
+                    eval("delete editor.currentFloorData" + value[1]);
                 else
-                    eval("delete editor.currentFloorData"+value[1]);
+                    eval("editor.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
             });
             editor_file.saveFloorFile(callback);
+            return;
+        }
+        if (file == 'floors') {
+            actionList.forEach(function (value) {
+                eval("editor.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
+            });
+            editor_file.saveFloorFile(callback);
+            return;
+        }
+        if (file == 'events') {
+            actionList.forEach(function (value) {
+                eval("events_c12a15a8_c380_4b28_8144_256cba95f760" + value[1] + '=' + JSON.stringify(value[2]));
+            });
+            var datastr = 'var events_c12a15a8_c380_4b28_8144_256cba95f760 = \n';
+            datastr += JSON.stringify(events_c12a15a8_c380_4b28_8144_256cba95f760, null, '\t');
+            fs.writeFile('project/events.js', encode(datastr), 'base64', function (err, data) {
+                callback(err);
+            });
+            return;
+        }
+        if (file == 'plugins') {
+            actionList.forEach(function (value) {
+                if(value[0]==='add'){
+                    eval("plobj" + value[1] + '=' + JSON.stringify(value[2]));
+                } else {
+                    eval("plmap[plobj" + value[1] + ']=' + JSON.stringify(value[2]));
+                }
+            });
+            var plraw = JSON.stringify(plobj,null,4);
+            for (var id_ in plmap) {
+                plraw = plraw.replace('"' + id_ + '"', plmap[id_])
+            }
+            var datastr = 'var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = \n';
+            datastr += plraw;
+            fs.writeFile('project/plugins.js', encode(datastr), 'base64', function (err, data) {
+                callback(err);
+            });
             return;
         }
         callback('出错了,要设置的文件名不识别');
     }
 
-    /*
-    $select({\"values\":[\"keys\",\"items\",\"constants\",\"tools\"]})$end
-    $range(thiseval==~~thiseval &&thiseval>0)$end
-    $leaf(true)$end
-    $select({\"values\":[true]})$end
-    $select({\"values\":[false]})$end
-    $select({\"values\":[true,false]})$end
-
-    */
-
-    /*
-    所有注释中的特殊指令
-    $range(evalstr:thiseval)$end
-      限制取值范围,要求修改后的eval(evalstr)为true
-    $leaf(evalstr:thiseval)$end
-      强制指定为叶节点,如果eval(evalstr)为true
-
-    //以下几个中选一个 [
-    $select(evalstr)$end
-      渲染成<select>,选项为数组eval(evalstr)['values']
-    $input(evalstr)$end
-      渲染成<input>
-    $textarea(evalstr)$end
-      渲染成<textarea>
-    默认选项为$textarea()$end
-    // ]
-
-    */
     return editor_file;
 }
 //editor_file = editor_file(editor);

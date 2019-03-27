@@ -56,7 +56,7 @@
                 callback(null, data);
             }
         }, function (e) {
-            console.log(e);
+            main.log(e);
             callback(e+"：请检查启动服务是否处于正常运行状态。");
         }, "text/plain; charset=x-user-defined");
     }
@@ -117,6 +117,10 @@
             return;
         }
         throw 'Type Error in fs.writeFile';
+    }
+
+    fs.writeMultiFiles = function (filenames, datastrs, callback) {
+        postsomething('name='+filenames.join(';')+'&value='+datastrs.join(';'), '/writeMultiFiles', callback);
     }
 
     fs.readdir = function (path, callback) {

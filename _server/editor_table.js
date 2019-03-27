@@ -8,12 +8,11 @@ editor_table_wrapper = function (editor) {
     // HTML模板
 
     editor_table.prototype.select = function (value, values) {
-        return `<select>\n${
-            editor.table.option(value) +
+        let content = editor.table.option(value) +
             values.map(function (v) {
                 return editor.table.option(v)
             }).join('')
-            }</select>\n`
+        return `<select>\n${content}</select>\n`
     }
     editor_table.prototype.option = function (value) {
         return `<option value='${JSON.stringify(value)}'>${JSON.stringify(value)}</option>\n`
@@ -165,7 +164,9 @@ editor_table_wrapper = function (editor) {
 
         var listen = function (guids) {
             // 每个叶节点的事件绑定
-            guids.forEach(editor.table.guidListen);
+            guids.forEach(function (guid) {
+                editor.table.guidListen(guid, obj, commentObj)
+            });
         }
         return { "HTML": outstr.join(''), "guids": guids, "listen": listen };
     }
@@ -249,7 +250,7 @@ editor_table_wrapper = function (editor) {
      * 监听一个guid对应的表格项
      * @param {String} guid 
      */
-    editor_table.prototype.guidListen = function (guid) {
+    editor_table.prototype.guidListen = function (guid, obj, commentObj) {
         // tr>td[title=field]
         //   >td[title=comment,cobj=cobj:json]
         //   >td>div>input[value=thiseval]
@@ -262,7 +263,7 @@ editor_table_wrapper = function (editor) {
             modeNode = modeNode.parentNode;
         }
         input.onchange = function () {
-            editor.table.onchange(guid, thisTr, input, field, cobj, modeNode)
+            editor.table.onchange(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
         }
         // 用检测两次单击的方式来实现双击(以支持手机端的双击)
         var doubleClickCheck = [0];
@@ -271,7 +272,7 @@ editor_table_wrapper = function (editor) {
             var lastClick = doubleClickCheck.shift();
             doubleClickCheck.push(newClick);
             if (newClick - lastClick < 500) {
-                editor.table.dblclickfunc(guid, thisTr, input, field, cobj, modeNode)
+                editor.table.dblclickfunc(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
             }
         }
     }
@@ -279,7 +280,7 @@ editor_table_wrapper = function (editor) {
     /**
      * 表格的值变化时
      */
-    editor_table.prototype.onchange = function (guid, thisTr, input, field, cobj, modeNode) {
+    editor_table.prototype.onchange = function (guid, obj, commentObj, thisTr, input, field, cobj, modeNode) {
         editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
         var thiseval = null;
         if (input.checked != null) input.value = input.checked;
@@ -304,23 +305,23 @@ editor_table_wrapper = function (editor) {
      *     删除: 删除该项, 刷新后生效
      * 在点击按钮 添加/删除 后,下一次双击将被视为 添加/删除
      */
-    editor_table.prototype.dblclickfunc = function (guid, thisTr, input, field, cobj, modeNode) {
+    editor_table.prototype.dblclickfunc = function (guid, obj, commentObj, thisTr, input, field, cobj, modeNode) {
         if (editor_mode.doubleClickMode === 'change') {
             if (cobj._type === 'event') editor_blockly.import(guid, { type: cobj._event });
             if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string });
         } else if (editor_mode.doubleClickMode === 'add') {
             editor_mode.doubleClickMode = 'change';
-            editor.table.addfunc(guid, thisTr, input, field, cobj, modeNode)
+            editor.table.addfunc(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
         } else if (editor_mode.doubleClickMode === 'delete') {
             editor_mode.doubleClickMode = 'change';
-            editor.table.deletefunc(guid, thisTr, input, field, cobj, modeNode)
+            editor.table.deletefunc(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
         }
     }
 
     /**
      * 删除表格项
      */
-    editor_table.prototype.deletefunc = function (guid, thisTr, input, field, cobj, modeNode) {
+    editor_table.prototype.deletefunc = function (guid, obj, commentObj, thisTr, input, field, cobj, modeNode) {
         editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
         if (editor.table.checkRange(cobj, null)) {
             editor_mode.addAction(['delete', field, undefined]);
@@ -333,7 +334,7 @@ editor_table_wrapper = function (editor) {
     /**
      * 添加表格项
      */
-    editor_table.prototype.addfunc = function (guid, thisTr, input, field, cobj, modeNode) {
+    editor_table.prototype.addfunc = function (guid, obj, commentObj, thisTr, input, field, cobj, modeNode) {
         editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
 
         var mode = document.getElementById('editModeSelect').value;

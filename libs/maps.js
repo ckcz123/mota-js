@@ -1696,6 +1696,7 @@ maps.prototype.animateBlock = function (loc, type, time, callback) {
     var isHide = type == 'hide';
     if (typeof loc[0] == 'number' && typeof loc[1] == 'number')
         loc = [loc];
+    // --- 检测所有是0的点
     var list = this._animateBlock_getList(loc);
     if (list.length == 0) {
         if (callback) callback();
@@ -1714,7 +1715,8 @@ maps.prototype._animateBlock_doAnimate = function (loc, list, isHide, delta, cal
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             list.forEach(function (t) {
-                core.maps._deleteDetachedBlock(t.canvases);
+                if (t.blockInfo)
+                    core.maps._deleteDetachedBlock(t.canvases);
             });
             loc.forEach(function (t) {
                 if (isHide) core.removeBlock(t[0], t[1]);
@@ -1735,7 +1737,10 @@ maps.prototype._animateBlock_getList = function (loc) {
         block = block.block;
 
         var blockInfo = core.maps.getBlockInfo(block);
-        if (blockInfo == null) return;
+        if (blockInfo == null) {
+            list.push({ 'x': t[0], 'y': t[1] });
+            return;
+        }
         var canvases = core.maps._initDetachedBlock(blockInfo, t[0], t[1], block.event.displayDamage !== false);
 
         list.push({
@@ -1748,7 +1753,8 @@ maps.prototype._animateBlock_getList = function (loc) {
 
 maps.prototype._animateBlock_drawList = function (list, opacity) {
     list.forEach(function (t) {
-        core.maps._moveDetachedBlock(t.blockInfo, t.x * 32, t.y * 32, opacity, t.canvases);
+        if (t.blockInfo)
+            core.maps._moveDetachedBlock(t.blockInfo, t.x * 32, t.y * 32, opacity, t.canvases);
     });
 }
 

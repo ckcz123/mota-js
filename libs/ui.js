@@ -1332,7 +1332,7 @@ ui.prototype._drawBook_drawRow1 = function (index, enemy, top, left, width, posi
 }
 
 ui.prototype._drawBook_drawRow2 = function (index, enemy, top, left, width, position) {
-    // 绘制第三行
+    // 绘制第二行
     core.setTextAlign('ui', 'left');
     var b13 = this._buildFont(13, true), f13 = this._buildFont(13, false);
     var col1 = left, col2 = left + width * 9 / 25, col3 = left + width * 17 / 25;
@@ -1396,6 +1396,7 @@ ui.prototype._drawBook_drawDamage = function (index, enemy, offset, position) {
 ////// 绘制怪物属性的详细信息 //////
 ui.prototype.drawBookDetail = function (index) {
     var info = this._drawBookDetail_getInfo(index), enemy = info[0];
+    if (!enemy) return;
     var content = info[1].join("\n");
     core.status.event.id = 'book-detail';
     clearInterval(core.interval.tipAnimate);
@@ -1418,7 +1419,7 @@ ui.prototype.drawBookDetail = function (index) {
 ui.prototype._drawBookDetail_getInfo = function (index) {
     var floorId = core.floorIds[(core.status.event.ui||{}).index] || core.status.floorId;
     var enemys = core.enemys.getCurrentEnemys(floorId);
-    if (enemys.length==0) return;
+    if (enemys.length==0) return [];
     index = core.clamp(index, 0, enemys.length - 1);
     var enemy = enemys[index], enemyId = enemy.id;
     var texts=core.enemys.getSpecialHint(enemyId);

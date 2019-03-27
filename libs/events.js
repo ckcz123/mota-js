@@ -1163,7 +1163,8 @@ events.prototype._action_insert = function (data, x, y, prefix) {
     if (data.args instanceof Array) {
        for (var i = 0; i < data.args.length; ++i) {
            try {
-               core.setFlag('arg'+(i+1), core.calValue(data.args[i], prefix));
+               if (data.args[i] != null)
+                   core.setFlag('arg'+(i+1), data.args[i]);
            } catch (e) { main.log(e); }
        }
     }

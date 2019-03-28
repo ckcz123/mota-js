@@ -1710,149 +1710,129 @@ ui.prototype._drawMaps_buildData = function (index, x, y) {
 
 ////// 绘制道具栏 //////
 ui.prototype.drawToolbox = function(index) {
-    // 设定eventdata
-    if (!core.isset(core.status.event.data) || !core.isset(core.status.event.data.toolsPage) || !core.isset(core.status.event.data.constantsPage))
-        core.status.event.data = {"toolsPage":1, "constantsPage":1, "selectId":null}
+    var info = this._drawToolbox_getInfo(index);
+    this._drawToolbox_drawBackground();
 
+    // 绘制线
+    core.setAlpha('ui', 1);
+    core.setStrokeStyle('ui', '#DDDDDD');
+    core.canvas.ui.lineWidth = 2;
+    core.canvas.ui.strokeWidth = 2;
+    core.setTextAlign('ui', 'right');
+    var line1 = this.PIXEL - 306;
+    this._drawToolbox_drawLine(line1, "消耗道具");
+    var line2 = this.PIXEL - 146;
+    this._drawToolbox_drawLine(line2, "永久道具");
+
+    this._drawToolbox_drawDescription(info, line1);
+
+    this._drawToolbox_drawContent(info, line1, info.tools, info.toolsPage, true);
+    this.drawPagination(info.toolsPage, info.toolsTotalPage, this.LAST - 5);
+    this._drawToolbox_drawContent(info, line2, info.constants, info.constantsPage);
+    this.drawPagination(info.constantsPage, info.constantsTotalPage);
+
+    core.setTextAlign('ui', 'center');
+    core.fillText('ui', '[装备栏]', this.PIXEL - 46, 25, '#DDDDDD', this._buildFont(15, true));
+    core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13,'#DDDDDD');
+}
+
+ui.prototype._drawToolbox_getInfo = function (index) {
+    // 设定eventdata
+    if (!core.status.event.data || core.status.event.data.toolsPage == null)
+        core.status.event.data = {"toolsPage":1, "constantsPage":1, "selectId":null}
     // 获取物品列表
     var tools = Object.keys(core.status.hero.items.tools).sort();
     var constants = Object.keys(core.status.hero.items.constants).sort();
-
     // 处理页数
     var toolsPage = core.status.event.data.toolsPage;
     var constantsPage = core.status.event.data.constantsPage;
-    var toolsTotalPage = Math.ceil(tools.length/12);
-    var constantsTotalPage = Math.ceil(constants.length/12);
-
+    var toolsTotalPage = Math.ceil(tools.length/this.LAST);
+    var constantsTotalPage = Math.ceil(constants.length/this.LAST);
     // 处理index
-    if (!core.isset(index)) {
-        if (tools.length>0) index=0;
-        else if (constants.length>0) index=12;
-        else index=0;
-    }
+    if (index == null)
+        index = tools.length == 0 && constants.length > 0 ? this.LAST : 0;
     core.status.event.selection=index;
-
     // 确认选择对象
-    var select;
-    var selectId;
-    if (index<12) {
-        select = index + (toolsPage-1)*12;
+    var select, selectId;
+    if (index<this.LAST) {
+        select = index + (toolsPage-1)*this.LAST;
         if (select>=tools.length) select=Math.max(0, tools.length-1);
         selectId = tools[select];
     }
     else {
-        select = index%12 + (constantsPage-1)*12;
+        select = index%this.LAST + (constantsPage-1)*this.LAST;
         if (select>=constants.length) select=Math.max(0, constants.length-1);
         selectId = constants[select];
     }
     if (!core.hasItem(selectId)) selectId=null;
     core.status.event.data.selectId=selectId;
+    return {
+        index: index, tools: tools, constants: constants, toolsPage: toolsPage, constantsPage: constantsPage,
+        toolsTotalPage: toolsTotalPage, constantsTotalPage: constantsTotalPage, selectId: selectId
+    };
+}
 
+ui.prototype._drawToolbox_drawBackground = function () {
     // 绘制
     core.clearMap('ui');
     core.setAlpha('ui', 0.85);
-    core.fillRect('ui', 0, 0, 416, 416, '#000000');
-    core.setAlpha('ui', 1);
+    core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');
+}
+
+ui.prototype._drawToolbox_drawLine = function (yoffset, text) {
     core.setFillStyle('ui', '#DDDDDD');
-    core.setStrokeStyle('ui', '#DDDDDD');
-    core.canvas.ui.lineWidth = 2;
-    core.canvas.ui.strokeWidth = 2;
-
-    var ydelta = 20;
-
-    // 画线
     core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(0, 130-ydelta);
-    core.canvas.ui.lineTo(416, 130-ydelta);
+    core.canvas.ui.moveTo(0, yoffset);
+    core.canvas.ui.lineTo(this.PIXEL, yoffset);
     core.canvas.ui.stroke();
     core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(416,129-ydelta);
-    core.canvas.ui.lineTo(416,105-ydelta);
-    core.canvas.ui.lineTo(416-72,105-ydelta);
-    core.canvas.ui.lineTo(416-102,129-ydelta);
+    core.canvas.ui.moveTo(this.PIXEL, yoffset-1);
+    core.canvas.ui.lineTo(this.PIXEL, yoffset-25);
+    core.canvas.ui.lineTo(this.PIXEL-72, yoffset-25);
+    core.canvas.ui.lineTo(this.PIXEL-102, yoffset-1);
     core.canvas.ui.fill();
+    core.fillText('ui', text, this.PIXEL - 5, yoffset-6, '#333333', this._buildFont(16, true));
+}
 
-    core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(0, 290-ydelta);
-    core.canvas.ui.lineTo(416, 290-ydelta);
-    core.canvas.ui.stroke();
-    core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(416,289-ydelta);
-    core.canvas.ui.lineTo(416,265-ydelta);
-    core.canvas.ui.lineTo(416-72,265-ydelta);
-    core.canvas.ui.lineTo(416-102,289-ydelta);
-    core.canvas.ui.fill();
-
-    // 文字
-    core.setTextAlign('ui', 'right');
-    var globalFont = core.status.globalAttribute.font;
-    core.fillText('ui', "消耗道具", 411, 124-ydelta, '#333333', "bold 16px "+globalFont);
-    core.fillText('ui', "永久道具", 411, 284-ydelta);
-
+ui.prototype._drawToolbox_drawDescription = function (info, max_height) {
     core.setTextAlign('ui', 'left');
     // 描述
-    if (core.isset(selectId)) {
-        var item=core.material.items[selectId];
-        core.fillText('ui', item.name, 10, 32, '#FFD700', "bold 20px "+globalFont)
-
+    if (info.selectId) {
+        var item=core.material.items[info.selectId];
+        core.fillText('ui', item.name, 10, 32, '#FFD700', this._buildFont(20, true))
         var text = item.text||"该道具暂无描述。";
         try {
             // 检查能否eval
             text = core.replaceText(text);
         } catch (e) {}
-
-        var lines = core.splitLines('ui', text, 406, '17px '+globalFont);
-
-        core.fillText('ui', lines[0], 10, 62, '#FFFFFF', '17px '+globalFont);
-
-        if (lines.length==1) {
-            core.fillText('ui', '<继续点击该道具即可进行使用>', 10, 89, '#CCCCCC', '14px '+globalFont);
+        var lines = core.splitLines('ui', text, this.PIXEL - 15, this._buildFont(17, false));
+        // --- 开始逐行绘制
+        var curr = 62, line_height = 25;
+        core.setFillStyle('ui', '#FFFFFF');
+        for (var i=0;i<lines.length;++i) {
+            core.fillText('ui', lines[i], 10, curr);
+            curr += line_height;
+            if (curr>=max_height) break;
         }
-        else {
-            var leftText = text.substring(lines[0].length);
-            core.fillText('ui', leftText, 10, 89, '#FFFFFF', '17px '+globalFont);
+        if (curr < max_height) {
+            core.fillText('ui', '<继续点击该道具即可进行使用>', 10, curr, '#CCCCCC', this._buildFont(14, false));
         }
     }
+}
 
+ui.prototype._drawToolbox_drawContent = function (info, line, items, page, drawCount) {
     core.setTextAlign('ui', 'right');
-    var images = core.material.images.items;
-
-    // 消耗道具
-    for (var i=0;i<12;i++) {
-        var tool=tools[12*(toolsPage-1)+i];
-        if (!core.isset(tool)) break;
-        var yoffset = 144 + Math.floor(i/6)*54 + 5 - ydelta;
-        var icon=core.material.icons.items[tool];
-        core.drawImage('ui', images, 0, icon*32, 32, 32, 16*(4*(i%6)+1)+5, yoffset, 32, 32)
-        // 个数
-        core.fillText('ui', core.itemCount(tool), 16*(4*(i%6)+1)+40, yoffset+33, '#FFFFFF', "bold 14px "+globalFont);
-        if (selectId == tool)
-            core.strokeRect('ui', 16*(4*(i%6)+1)+1, yoffset-4, 40, 40, '#FFD700');
+    for (var i = 0; i < this.LAST; i++) {
+        var item = items[this.LAST * (page - 1) + i];
+        if (!item) continue;
+        var yoffset = line + 54 * Math.floor(i / this.HSIZE) + 19;
+        var icon = core.material.icons.items[item], image = core.material.images.items;
+        core.drawImage('ui', image, 0, 32 * icon, 32, 32, 64 * (i % this.HSIZE) + 21, yoffset, 32, 32);
+        if (drawCount)
+            core.fillText('ui', core.itemCount(item), 64 * (i % this.HSIZE) + 56, yoffset + 33, '#FFFFFF', this._buildFont(14, true));
+        if (info.selectId == item)
+            core.strokeRect('ui', 64 * (i % this.HSIZE) + 17, yoffset - 4, 40, 40, '#FFD700');
     }
-
-    // 永久道具
-    for (var i=0;i<12;i++) {
-        var constant=constants[12*(constantsPage-1)+i];
-        if (!core.isset(constant)) break;
-        var yoffset = 304+Math.floor(i/6)*54+5-ydelta;
-        var icon=core.material.icons.items[constant];
-        core.drawImage('ui', images, 0, icon*32, 32, 32, 16*(4*(i%6)+1)+5, yoffset, 32, 32)
-        if (selectId == constant)
-            core.strokeRect('ui', 16*(4*(i%6)+1)+1, yoffset-4, 40, 40, '#FFD700');
-    }
-
-    // 分页
-    this.drawPagination(toolsPage, toolsTotalPage, 7);
-    this.drawPagination(constantsPage, constantsTotalPage, 12);
-
-    core.setTextAlign('ui', 'center');
-
-    // 装备栏
-    // if (core.flags.equipment)
-    core.fillText('ui', '[装备栏]', 370, 25,'#DDDDDD', 'bold 15px '+globalFont);
-    // core.fillText('ui', '删除道具', 370, 32,'#DDDDDD', 'bold 15px '+globalFont);
-    // 退出
-    core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px '+globalFont);
 }
 
 ////// 绘制装备界面 //////

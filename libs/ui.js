@@ -543,7 +543,8 @@ ui.prototype._getDrawableIconInfo = function (id) {
 }
 
 ui.prototype._buildFont = function (fontSize, bold) {
-    var textAttribute = core.status.textAttribute,  globalAttribute = core.status.globalAttribute;
+    var textAttribute = core.status.textAttribute || core.initStatus.textAttribute,
+        globalAttribute = core.status.globalAttribute || core.initStatus.globalAttribute;
     if (bold == null) bold = textAttribute.bold;
     return (bold?"bold ":"") + (fontSize || textAttribute.textfont) + "px " + globalAttribute.font;
 }
@@ -844,7 +845,7 @@ ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, al
         core.setStrokeStyle('ui', core.arrayToRGB(textAttribute.title));
 
         // --- title也要居中或者右对齐？
-        var title_width = core.calWidth('ui', titleInfo.title, 'bold '+titlefont+'px '+core.status.globalAttribute.font);
+        var title_width = core.calWidth('ui', titleInfo.title, this._buildFont(titlefont, true));
         var title_left = hPos.content_left;
         if (textAttribute.align == 'center')
             title_left = hPos.left + (hPos.width - title_width) / 2;
@@ -950,7 +951,7 @@ ui.prototype.drawChoices = function(content, choices) {
 ui.prototype._drawChoices_getHorizontalPosition = function (titleInfo, choices) {
     // 宽度计算：考虑选项的长度
     var width = 246;
-    core.setFont('ui', "bold 17px "+core.status.globalAttribute.font);
+    core.setFont('ui', this._buildFont(17, true));
     for (var i = 0; i < choices.length; i++) {
         if (typeof choices[i] === 'string')
             choices[i] = {"text": choices[i]};
@@ -1002,7 +1003,7 @@ ui.prototype._drawChoices_drawTitle = function (titleInfo, hPos, vPos) {
         };
 
         core.fillText('ui', titleInfo.title, title_offset, vPos.top + 27,
-            core.arrayToRGBA(core.status.textAttribute.title), 'bold 19px '+core.status.globalAttribute.font);
+            core.arrayToRGBA(core.status.textAttribute.title), this._buildFont(19, true));
     }
 
     core.setTextAlign('ui', 'left');
@@ -1015,7 +1016,7 @@ ui.prototype._drawChoices_drawTitle = function (titleInfo, hPos, vPos) {
 ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, vPos) {
     // 选项
     core.setTextAlign('ui', 'center');
-    core.setFont('ui', "bold 17px " + core.status.globalAttribute.font);
+    core.setFont('ui', this._buildFont(17, true));
     for (var i = 0; i < choices.length; i++) {
         var color = choices[i].color || core.status.textAttribute.text;
         if (color instanceof Array) color = core.arrayToRGBA(color);
@@ -1195,8 +1196,7 @@ ui.prototype.drawPagination = function (page, totalPage, top) {
     if (top == null) top = this.LAST;
 
     core.setFillStyle('ui', '#DDDDDD');
-    var length = core.calWidth('ui', page + " / " + page,
-        "bold 15px " + (core.status.globalAttribute || core.initStatus.globalAttribute).font);
+    var length = core.calWidth('ui', page + " / " + page, this._buildFont(15, true));
 
     core.setTextAlign('ui', 'left');
     core.fillText('ui', page + " / " + totalPage, parseInt((this.PIXEL - length) / 2), top*32+19);

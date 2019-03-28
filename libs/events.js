@@ -251,7 +251,7 @@ events.prototype.unregisterSystemEvent = function (type) {
 events.prototype.doSystemEvent = function (type, data, callback) {
     if (this.systemEvents[type]) {
         try {
-            return core.doFunc(this.systemEvents[type], this, data, data, callback);
+            return core.doFunc(this.systemEvents[type], this, data, callback);
         }
         catch (e) {
             main.log(e);
@@ -686,6 +686,11 @@ events.prototype._sys_action = function (data, callback) {
         }
     }
     this.insertAction(ev, ex, ey, callback);
+}
+
+events.prototype._sys_custom = function (data, callback) {
+    core.insertAction(["请使用\r[yellow]core.registerSystemEvent('custom', func)\r来处理自己添加的系统触发器！"],
+        data.x, data.y, callback);
 }
 
 // ------ 自定义事件的处理 ------ //

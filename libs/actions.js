@@ -686,8 +686,9 @@ actions.prototype._sys_onmousewheel = function (direct) {
 
     // 存读档
     if (core.status.lockControl && (core.status.event.id == 'save' || core.status.event.id == 'load')) {
-        if (direct == 1) core.ui.drawSLPanel(core.status.event.data - 10);
-        if (direct == -1) core.ui.drawSLPanel(core.status.event.data + 10);
+        var index = core.status.event.data.page*10+core.status.event.data.offset;
+        if (direct == 1) core.ui.drawSLPanel(index - 10);
+        if (direct == -1) core.ui.drawSLPanel(index + 10);
         return;
     }
 
@@ -1576,23 +1577,24 @@ actions.prototype._keyUpEquipbox = function (keycode, altKey) {
 }
 
 ////// 存读档界面时的点击操作 //////
-actions.prototype._clickSL = function (x, y) {
-
-    var index = core.status.event.data;
-    var page = parseInt(index / 10), offset = index % 10;
+actions.prototype._clickSL = function (x, y, px, py) {
+    var page = core.status.event.data.page, offset = core.status.event.data.offset;
+    var index = page*10 + offset;
+    //var index = core.status.event.data;
+    //var page = parseInt(index / 10), offset = index % 10;
 
     // 上一页
-    if ((x == 3 || x == 4) && y == 12) {
+    if ((x == this.HSIZE-2 || x == this.HSIZE-3) && y == this.LAST) {
         core.ui.drawSLPanel(10 * (page - 1) + offset);
         return;
     }
     // 下一页
-    if ((x == 8 || x == 9) && y == 12) {
+    if ((x == this.HSIZE+2 || x == this.HSIZE+3) && y == this.LAST) {
         core.ui.drawSLPanel(10 * (page + 1) + offset);
         return;
     }
     // 返回
-    if (x >= 10 && x <= 12 && y == 12) {
+    if (x >= this.LAST-2 && y == this.LAST) {
         if (core.events.recoverEvents(core.status.event.interval)) {
             return;
         }
@@ -1603,32 +1605,52 @@ actions.prototype._clickSL = function (x, y) {
         return;
     }
     // 删除
-    if (x >= 0 && x <= 2 && y == 12) {
-
+    if (x >= 0 && x <= 2 && y == this.LAST) {
         if (core.status.event.id == 'save') {
             core.status.event.selection = !core.status.event.selection;
             core.ui.drawSLPanel(index);
         }
-        else {
-            core.myprompt("请输入读档编号", null, function (index) {
-                index = parseInt(index) || 0;
-                if (index > 0)
-                    core.doSL(index, core.status.event.id);
-            });
+        else {// 显示收藏
+            core.status.event.data.mode = core.status.event.data.mode == 'all'?'fav':'all';
+            core.saves.index = {};
+            for(var i in core.saves.favorite){
+                core.saves.index[i] = core.saves.favorite[i];
+            }
+            core.ui.drawSLPanel(index,true);
         }
         return;
     }
+    // 收藏
+    var fav = null;
+    var centerX = parseInt(this.SIZE/2), leftX = 2, rightX = this.LAST-2;
 
-    var id = null;
-    if (y >= 1 && y <= 4) {
-        if (x >= 1 && x <= 3) id = "autoSave";
-        if (x >= 5 && x <= 7) id = 5 * page + 1;
-        if (x >= 9 && x <= 11) id = 5 * page + 2;
+    // 三个关键坐标：
+    var xLeft = parseInt(this.SIZE/3),xRight = parseInt(this.SIZE*2/3);
+    var topY1 = 0, topY2 = parseInt(this.SIZE/2);
+
+    if(y==topY1){
+        if (x >= xLeft && x < xRight) fav = 5 * page + 1;
+        if (x >= xRight) fav = 5 * page + 2;
     }
-    if (y >= 7 && y <= 10) {
-        if (x >= 1 && x <= 3) id = 5 * page + 3;
-        if (x >= 5 && x <= 7) id = 5 * page + 4;
-        if (x >= 9 && x <= 11) id = 5 * page + 5;
+    if(y==topY2){
+        if (x < xLeft) fav = 5 * page + 3;
+        if (x >= xLeft && x < xRight) fav = 5 * page + 4;
+        if (x >= xRight) fav = 5 * page + 5;
+    }
+    if (fav != null){
+        this._keyDownFav(page,fav%5);
+    }
+    var id = null;
+    var topSpan = parseInt(this.SIZE/7);
+    if (y >= topY1 + topSpan && y <= topY1 + topSpan + 3) {
+        if (x < xLeft) id = "autoSave";
+        if (x >= xLeft && x < xRight) id = 5 * page + 1;
+        if (x >= xRight) id = 5 * page + 2;
+    }
+    if (y >= topY2+1 && y <= topY2+5) {
+        if (x < xLeft) id = 5 * page + 3;
+        if (x >= xLeft && x < xRight) id = 5 * page + 4;
+        if (x >= xRight) id = 5 * page + 5;
     }
     if (id != null) {
         if (core.status.event.selection) {
@@ -1638,13 +1660,19 @@ actions.prototype._clickSL = function (x, y) {
             else {
                 // core.removeLocalStorage("save"+id);
                 core.removeLocalForage("save" + id, function () {
-                    core.ui.drawSLPanel(index, true);
+                    var idx = core.saves.favorite.indexOf(id);
+                    core.saves.favorite.splice(idx,1);
+                    delete core.saves.favName[id];
+                    core.ui._drawSLPanel_saveFav(function(){
+                        core.ui._drawSLPanel_flushIndex();
+                        core.ui.drawSLPanel(index, true)});
                 }, function () {
                     core.drawTip("无法删除存档！");
                 })
             }
         }
         else {
+            if(core.status.event.data.mode=='fav')id = core.saves.favIndex[id];
             core.doSL(id, core.status.event.id);
         }
     }
@@ -1653,8 +1681,9 @@ actions.prototype._clickSL = function (x, y) {
 ////// 存读档界面时，按下某个键的操作 //////
 actions.prototype._keyDownSL = function (keycode) {
 
-    var index = core.status.event.data;
-    var page = parseInt(index / 10), offset = index % 10;
+//    var index = core.status.event.data;
+    var page = core.status.event.data.page, offset = core.status.event.data.offset;
+    var index = page*10 + offset;
 
     if (keycode == 37) { // left
         if (offset == 0) {
@@ -1700,13 +1729,46 @@ actions.prototype._keyDownSL = function (keycode) {
         core.ui.drawSLPanel(10 * (page + 1) + offset);
         return;
     }
+    if (keycode == 70){ // F
+        this._keyDownFav(page,offset);
+    }
+}
+actions.prototype._keyDownFav = function(page, offset){
+    var fav = page*5+offset;
+    var idx = fav;
+    var index = page*10 + offset;
+    if(core.status.event.data.mode=='fav'){//收藏模式下点击的下标直接对应favorite
+        fav = core.saves.favIndex[idx];
+        var dataIdx = index;
+        core.myprompt("请输入想要显示的存档名(长度不超过5字符)", null, function (index) {
+            if(index && index.length<=5 && index.length>0){
+                core.saves.favName[fav]=index;
+                core.ui._drawSLPanel_saveFav(function(){core.ui.drawSLPanel(dataIdx, false)});
+            }else{
+                alert("无效的输入！");
+            }
+        });
+    }else{
+        idx = core.saves.favorite.indexOf(fav);
+        if(idx>=0){
+            core.saves.favorite.splice(idx,1);
+            delete core.saves.favName[fav];
+        }else{
+            if(core.hasSave(fav)){
+                core.saves.favorite.push(fav);
+                core.saves.favName[idx] = fav;//暂时的 收藏下标到名字的映射（实际存储的是收藏ID到名字的映射）
+            }
+        }
+        core.ui._drawSLPanel_saveFav(function(){
+            core.ui._drawSLPanel_flushIndex();
+            core.ui.drawSLPanel(index, false)});
+    }
 }
 
 ////// 存读档界面时，放开某个键的操作 //////
 actions.prototype._keyUpSL = function (keycode) {
-
-    var index = core.status.event.data;
-    var page = parseInt(index / 10), offset = index % 10;
+    var page = core.status.event.data.page, offset = core.status.event.data.offset;
+    var index = page*10 + offset;
 
     if (keycode == 27 || keycode == 88 || (core.status.event.id == 'save' && keycode == 83) || (core.status.event.id == 'load' && keycode == 68)) {
         if (core.events.recoverEvents(core.status.event.interval)) {
@@ -1723,16 +1785,20 @@ actions.prototype._keyUpSL = function (keycode) {
             core.doSL("autoSave", core.status.event.id);
         }
         else {
-            core.doSL(5 * page + offset, core.status.event.id);
+            var id = 5 * page + offset;
+            if(core.status.event.data.mode=='fav')id = core.saves.favIndex[id];
+            core.doSL(id, core.status.event.id);
         }
         return;
     }
-    if (keycode == 69 && core.status.event.id != 'save') { // E
-        core.myprompt("请输入读档编号", null, function (index) {
-            index = parseInt(index) || 0;
-            if (index > 0)
-                core.doSL(index, core.status.event.id);
-        });
+    if (keycode == 69 && core.status.event.id != 'save') { // E 收藏切换
+        core.status.event.data.mode = core.status.event.data.mode == 'all'?'fav':'all';
+        core.saves.index = {};
+        for(var i in core.saves.favorite){
+            core.saves.index[i] = core.saves.favorite[i];
+        }
+        core.ui.drawSLPanel(core.saves.saveIndex,true);
+        
         return;
     }
     if (keycode == 46) {
@@ -1740,16 +1806,21 @@ actions.prototype._keyUpSL = function (keycode) {
             core.drawTip("无法删除自动存档！");
         }
         else {
-            // core.removeLocalStorage("save"+(5*page+offset));
-            // core.ui.drawSLPanel(index);
             core.removeLocalForage("save" + (5 * page + offset), function () {
-                core.ui.drawSLPanel(index, true);
+                var id = 5 * page + offset;
+                var idx = core.saves.favorite.indexOf(id);
+                core.saves.favorite.splice(idx,1);
+                delete core.saves.favName[id];
+                core.ui._drawSLPanel_saveFav(function(){
+                    core.ui._drawSLPanel_flushIndex();
+                    core.ui.drawSLPanel(index, true)});
             }, function () {
                 core.drawTip("无法删除存档！");
             })
         }
     }
 }
+
 
 ////// 系统设置界面时的点击操作 //////
 actions.prototype._clickSwitchs = function (x, y) {

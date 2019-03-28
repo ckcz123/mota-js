@@ -1234,49 +1234,47 @@ actions.prototype._keyUpQuickShop = function (keycode) {
 ////// 工具栏界面时的点击操作 //////
 actions.prototype._clickToolbox = function (x, y) {
     // 装备栏
-    if (x >= 12 && x <= 14 && y == 0) {
+    if (x >= this.LAST - 2 && y == 0) {
         core.ui.closePanel();
         core.openEquipbox();
         return;
     }
-    // 返回
-    if (x >= 12 && x <= 14 && y == 14) {
+    if (x >= this.LAST - 2 && y == this.LAST) {
         core.ui.closePanel();
         return;
     }
+
     var toolsPage = core.status.event.data.toolsPage;
     var constantsPage = core.status.event.data.constantsPage;
     // 上一页
-    if (x == 4 || x == 5) {
-        if (y == 9 && toolsPage > 1) {
+    if (x == this.HSIZE-2 || x == this.HSIZE-3) {
+        if (y == this.LAST - 5 && toolsPage > 1) {
             core.status.event.data.toolsPage--;
             core.ui.drawToolbox(core.status.event.selection);
         }
-        if (y == 14 && constantsPage > 1) {
+        if (y == this.LAST && constantsPage > 1) {
             core.status.event.data.toolsPage--;
             core.ui.drawToolbox(core.status.event.selection);
         }
     }
     // 下一页
-    if (x == 9 || x == 10) {
-        if (y == 9 && toolsPage < Math.ceil(Object.keys(core.status.hero.items.tools).length / 14)) {
+    if (x == this.HSIZE+2 || x == this.HSIZE+3) {
+        if (y == this.LAST - 5 && toolsPage < Math.ceil(Object.keys(core.status.hero.items.tools).length / this.LAST)) {
             core.status.event.data.toolsPage++;
             core.ui.drawToolbox(core.status.event.selection);
         }
-        if (y == 14 && constantsPage < Math.ceil(Object.keys(core.status.hero.items.constants).length / 14)) {
+        if (y == this.LAST && constantsPage < Math.ceil(Object.keys(core.status.hero.items.constants).length / this.LAST)) {
             core.status.event.data.constantsPage++;
             core.ui.drawToolbox(core.status.event.selection);
         }
     }
 
     var index = parseInt(x / 2);
-    ;
-    if (y == 6) index += 0;
-    else if (y == 8) index += 7;
-    else if (y == 11) index += 14;
-    else if (y == 13) index += 21;
+    if (y == this.LAST - 8) index += 0;
+    else if (y == this.LAST - 6) index += this.HSIZE;
+    else if (y == this.LAST - 3) index += this.LAST;
+    else if (y == this.LAST - 1) index += this.LAST + this.HSIZE;
     else index = -1;
-
     if (index >= 0)
         this._clickToolboxIndex(index);
 }
@@ -1285,12 +1283,12 @@ actions.prototype._clickToolbox = function (x, y) {
 actions.prototype._clickToolboxIndex = function (index) {
     var items = null;
     var select;
-    if (index < 14) {
-        select = index + 14 * (core.status.event.data.toolsPage - 1);
+    if (index < this.LAST) {
+        select = index + this.LAST * (core.status.event.data.toolsPage - 1);
         items = Object.keys(core.status.hero.items.tools).sort();
     }
     else {
-        select = index % 14 + 14 * (core.status.event.data.constantsPage - 1);
+        select = index % this.LAST + this.LAST * (core.status.event.data.constantsPage - 1);
         items = Object.keys(core.status.hero.items.constants).sort();
     }
     if (items == null) return;
@@ -1308,33 +1306,35 @@ actions.prototype._clickToolboxIndex = function (index) {
 actions.prototype._keyDownToolbox = function (keycode) {
     if (core.status.event.data == null) return;
 
+    var last_index = this.LAST - 1;
+
     var tools = Object.keys(core.status.hero.items.tools).sort();
     var constants = Object.keys(core.status.hero.items.constants).sort();
     var index = core.status.event.selection;
     var toolsPage = core.status.event.data.toolsPage;
     var constantsPage = core.status.event.data.constantsPage;
-    var toolsTotalPage = Math.ceil(tools.length / 14);
-    var constantsTotalPage = Math.ceil(constants.length / 14);
-    var toolsLastIndex = toolsPage < toolsTotalPage ? 13 : (tools.length + 13) % 14;
-    var constantsLastIndex = 14 + (constantsPage < constantsTotalPage ? 13 : (constants.length + 13) % 14);
+    var toolsTotalPage = Math.ceil(tools.length / this.LAST);
+    var constantsTotalPage = Math.ceil(constants.length / this.LAST);
+    var toolsLastIndex = toolsPage < toolsTotalPage ? last_index : (tools.length + last_index) % this.LAST;
+    var constantsLastIndex = this.LAST + (constantsPage < constantsTotalPage ? last_index : (constants.length + last_index) % this.LAST);
 
     if (keycode == 37) { // left
         if (index == 0) { // 处理向前翻页
             if (toolsPage > 1) {
                 core.status.event.data.toolsPage--;
-                index = 13;
+                index = last_index;
             }
             else return; // 第一页不向前翻
         }
-        else if (index == 14) {
+        else if (index == this.LAST) {
             if (constantsPage == 1) {
                 if (toolsTotalPage == 0) return;
                 core.status.event.data.toolsPage = toolsTotalPage;
-                index = (tools.length + 13) % 14;
+                index = (tools.length + last_index) % this.LAST;
             }
             else {
                 core.status.event.data.constantsPage--;
-                index = 27;
+                index = 2 * this.LAST - 1;
             }
         }
         else index -= 1;
@@ -1342,29 +1342,29 @@ actions.prototype._keyDownToolbox = function (keycode) {
         return;
     }
     if (keycode == 38) { // up
-        if (index >= 14 && index <= 20) { // 进入tools
+        if (index >= this.LAST && index < this.LAST + this.HSIZE) { // 进入tools
             if (toolsTotalPage == 0) return;
-            if (toolsLastIndex >= 7) index = Math.min(toolsLastIndex, index - 7);
-            else index = Math.min(toolsLastIndex, index - 14);
+            if (toolsLastIndex >= this.HSIZE) index = Math.min(toolsLastIndex, index - this.HSIZE);
+            else index = Math.min(toolsLastIndex, index - this.LAST);
         }
-        else if (index < 7) return; // 第一行没有向上
-        else index -= 7;
+        else if (index < this.HSIZE) return; // 第一行没有向上
+        else index -= this.HSIZE;
         this._clickToolboxIndex(index);
         return;
     }
     if (keycode == 39) { // right
-        if (toolsPage < toolsTotalPage && index == 13) {
+        if (toolsPage < toolsTotalPage && index == last_index) {
             core.status.event.data.toolsPage++;
             index = 0;
         }
-        else if (constantsPage < constantsTotalPage && index == 27) {
+        else if (constantsPage < constantsTotalPage && index == 2 * this.LAST - 1) {
             core.status.event.data.constantsPage++;
-            index = 14;
+            index = this.LAST;
         }
         else if (index == toolsLastIndex) {
             if (constantsTotalPage == 0) return;
             core.status.event.data.constantsPage = 1;
-            index = 14;
+            index = this.LAST;
         }
         else if (index == constantsLastIndex) // 一个物品无操作
             return;
@@ -1374,16 +1374,17 @@ actions.prototype._keyDownToolbox = function (keycode) {
     }
     if (keycode == 40) { // down
         var nextIndex = null;
-        if (index <= 6) {
-            if (toolsLastIndex > 6) nextIndex = Math.min(toolsLastIndex, index + 7);
-            else index += 7;
+        if (index < this.HSIZE) {
+            if (toolsLastIndex >= this.HSIZE) nextIndex = Math.min(toolsLastIndex, index + this.HSIZE);
+            else index += this.HSIZE;
         }
-        if (nextIndex == null && index <= 13) {
+        if (nextIndex == null && index < this.LAST) {
             if (constantsTotalPage == 0) return;
-            nextIndex = Math.min(index + 7, constantsLastIndex);
+            nextIndex = Math.min(index + this.HSIZE, constantsLastIndex);
         }
-        if (nextIndex == null && index <= 20) {
-            if (constantsLastIndex > 20) nextIndex = Math.min(constantsLastIndex, index + 7);
+        if (nextIndex == null && index < this.LAST + this.HSIZE) {
+            if (constantsLastIndex >= this.LAST + this.HSIZE)
+                nextIndex = Math.min(constantsLastIndex, index + this.HSIZE);
         }
         if (nextIndex != null) {
             this._clickToolboxIndex(nextIndex);

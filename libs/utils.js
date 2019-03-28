@@ -348,6 +348,12 @@ utils.prototype.formatDate2 = function (date) {
         + core.setTwoDigits(date.getHours()) + core.setTwoDigits(date.getMinutes()) + core.setTwoDigits(date.getSeconds());
 }
 
+utils.prototype.formatTime = function (time) {
+    return core.setTwoDigits(parseInt(time/3600000))
+        +":"+core.setTwoDigits(parseInt(time/60000)%60)
+        +":"+core.setTwoDigits(parseInt(time/1000)%60);
+}
+
 ////// 两位数显示 //////
 utils.prototype.setTwoDigits = function (x) {
     return parseInt(x) < 10 ? "0" + x : x;

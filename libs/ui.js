@@ -2224,17 +2224,12 @@ ui.prototype.drawStatistics = function (floorIds) {
     (floorIds || core.floorIds).forEach(function (floorId) {
         core.ui._drawStatistics_floorId(floorId, obj);
     });
-    var formatTime = function (time) {
-        return core.setTwoDigits(parseInt(time/3600000))
-            +":"+core.setTwoDigits(parseInt(time/60000)%60)
-            +":"+core.setTwoDigits(parseInt(time/1000)%60);
-    }
     var statistics = core.status.hero.statistics;
     core.drawText([
         this._drawStatistics_generateText(obj, "全塔", obj.total),
         this._drawStatistics_generateText(obj, "当前", obj.current),
-        "当前总步数："+core.status.hero.steps+"，当前游戏时长："+formatTime(statistics.currTime)
-        +"，总游戏时长"+formatTime(statistics.totalTime)
+        "当前总步数："+core.status.hero.steps+"，当前游戏时长："+core.formatTime(statistics.currTime)
+        +"，总游戏时长"+core.formatTime(statistics.totalTime)
         +"。\n瞬间移动次数："+statistics.moveDirectly+"，共计少走"+statistics.ignoreSteps+"步。"
         +"\n\n总计通过血瓶恢复生命值为"+core.formatBigNumber(statistics.hp)+"点。\n\n"
         +"总计打死了"+statistics.battle+"个怪物，得到了"+core.formatBigNumber(statistics.money)+"金币，"+core.formatBigNumber(statistics.experience)+"点经验。\n\n"

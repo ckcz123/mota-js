@@ -1604,21 +1604,58 @@ actions.prototype._clickSL = function (x, y) {
     }
     // 删除
     if (x >= 0 && x <= 2 && y == 12) {
-
         if (core.status.event.id == 'save') {
             core.status.event.selection = !core.status.event.selection;
             core.ui.drawSLPanel(index);
         }
-        else {
-            core.myprompt("请输入读档编号", null, function (index) {
-                index = parseInt(index) || 0;
-                if (index > 0)
-                    core.doSL(index, core.status.event.id);
-            });
+        else {// 显示收藏
+            core.status.event.mode = core.status.event.mode == 'all'?'fav':'all';
+            core.saves.index = {};
+            for(var i in core.saves.favorite){
+                core.saves.index[i] = core.saves.favorite[i];
+            }
+            core.ui.drawSLPanel(index,true);
         }
         return;
     }
-
+    // 收藏
+    var fav = null;
+    if(y==0){
+        if (x >= 5 && x <= 7) fav = 5 * page + 1;
+        if (x >= 9 && x <= 11) fav = 5 * page + 2;
+    }
+    if(y==6){
+        if (x >= 0 && x <= 4) fav = 5 * page + 3;
+        if (x >= 5 && x <= 7) fav = 5 * page + 4;
+        if (x >= 9 && x <= 11) fav = 5 * page + 5;
+    }
+    if (fav != null){
+        var idx = fav;
+        if(core.status.event.mode=='fav'){//收藏模式下点击的下标直接对应favorite
+            fav = core.saves.favIndex[idx];
+            var dataIdx = index;
+            core.myprompt("请输入想要显示的存档名(长度小于5字符)", null, function (index) {
+                if(index.length<5 && index.length>0){
+                    core.saves.favName[fav]=index;
+                    core.ui._drawSLPanel_saveFav(function(){core.ui.drawSLPanel(dataIdx, false)});
+                }else{
+                    alert("无效的输入！");
+                }
+            });
+        }else{
+            idx = core.saves.favorite.indexOf(fav);
+            if(idx>=0){
+                core.saves.favorite.splice(idx,1);
+                delete core.saves.favName[fav];
+            }else{
+                core.saves.favorite.push(fav);
+                core.saves.favName[idx] = fav;//暂时的 收藏下标到名字的映射（实际存储的是收藏ID到名字的映射）
+            }
+            core.ui._drawSLPanel_saveFav(function(){
+                core.ui._drawSLPanel_flushIndex();
+                core.ui.drawSLPanel(index, false)});
+        }
+    }
     var id = null;
     if (y >= 1 && y <= 4) {
         if (x >= 1 && x <= 3) id = "autoSave";
@@ -1645,6 +1682,7 @@ actions.prototype._clickSL = function (x, y) {
             }
         }
         else {
+            if(core.status.event.mode=='fav')id = core.saves.favIndex[id];
             core.doSL(id, core.status.event.id);
         }
     }
@@ -1723,16 +1761,20 @@ actions.prototype._keyUpSL = function (keycode) {
             core.doSL("autoSave", core.status.event.id);
         }
         else {
-            core.doSL(5 * page + offset, core.status.event.id);
+            var id = 5 * page + offset;
+            if(core.status.event.mode=='fav')id = core.saves.favIndex[id];
+            core.doSL(id, core.status.event.id);
         }
         return;
     }
-    if (keycode == 69 && core.status.event.id != 'save') { // E
-        core.myprompt("请输入读档编号", null, function (index) {
-            index = parseInt(index) || 0;
-            if (index > 0)
-                core.doSL(index, core.status.event.id);
-        });
+    if (keycode == 69 && core.status.event.id != 'save') { // E 收藏切换
+        core.status.event.mode = core.status.event.mode == 'all'?'fav':'all';
+        core.saves.index = {};
+        for(var i in core.saves.favorite){
+            core.saves.index[i] = core.saves.favorite[i];
+        }
+        core.ui.drawSLPanel(index,true);
+        
         return;
     }
     if (keycode == 46) {

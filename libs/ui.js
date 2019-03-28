@@ -2186,7 +2186,7 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
     if (!core.isset(data) || !core.isset(data.floorId)) { //存在数据时才高亮
         highLight = false;
     }
-    core.fillText('ui', title, x, y, highLight?'#FFD700':'#FFFFFF', this._buildFont(17))//"bold 17px "+globalFont);//名字
+    core.fillText('ui', title, x, y, highLight?'#FFD700':'#FFFFFF', this._buildFont(17,true));//"bold 17px "+globalFont);//名字
 
     core.strokeRect('ui', x-size/2, y+15, size, size, cho?strokeColor:'#FFFFFF', cho?6:2);
     if (core.isset(data) && core.isset(data.floorId)) {
@@ -2203,7 +2203,7 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
     }
     else {
         core.fillRect('ui', x-size/2, y+15, size, size, '#333333', 2);
-        core.fillText('ui', '空', x, parseInt(y+15+size/2), '#FFFFFF', this._buildFont(30))//'bold 30px '+globalFont);
+        core.fillText('ui', '空', x, parseInt(y+15+size/2), '#FFFFFF', this._buildFont(30,true));//'bold 30px '+globalFont);
     } 
 }
 

@@ -1578,11 +1578,9 @@ actions.prototype._keyUpEquipbox = function (keycode, altKey) {
 }
 
 ////// 存读档界面时的点击操作 //////
-actions.prototype._clickSL = function (x, y, px, py) {
+actions.prototype._clickSL = function (x, y) {
     var page = core.status.event.data.page, offset = core.status.event.data.offset;
-    var index = page*10 + offset;
-    //var index = core.status.event.data;
-    //var page = parseInt(index / 10), offset = index % 10;
+    var index = page * 10 + offset;
 
     // 上一页
     if ((x == this.HSIZE-2 || x == this.HSIZE-3) && y == this.LAST) {
@@ -1596,13 +1594,11 @@ actions.prototype._clickSL = function (x, y, px, py) {
     }
     // 返回
     if (x >= this.LAST-2 && y == this.LAST) {
-        if (core.events.recoverEvents(core.status.event.interval)) {
+        if (core.events.recoverEvents(core.status.event.interval))
             return;
-        }
         core.ui.closePanel();
-        if (!core.isPlaying()) {
+        if (!core.isPlaying())
             core.showStartAnimate(true);
-        }
         return;
     }
     // 删除
@@ -1611,36 +1607,31 @@ actions.prototype._clickSL = function (x, y, px, py) {
             core.status.event.selection = !core.status.event.selection;
             core.ui.drawSLPanel(index);
         }
-        else {// 显示收藏
+        else { // 显示收藏
             core.status.event.data.mode = core.status.event.data.mode == 'all'?'fav':'all';
-            core.saves.index = {};
-            for(var i in core.saves.favorite){
-                core.saves.index[i] = core.saves.favorite[i];
+            if (core.status.event.data.mode == 'fav')
+                core.ui.drawSLPanel(1, true);
+            else {
+                page = parseInt((core.saves.saveIndex-1)/5);
+                offset = core.saves.saveIndex-5*page;
+                core.ui.drawSLPanel(10*page + offset);
             }
-            core.ui.drawSLPanel(index,true);
         }
         return;
     }
-    // 收藏
-    var fav = null;
-    var centerX = parseInt(this.SIZE/2), leftX = 2, rightX = this.LAST-2;
-
-    // 三个关键坐标：
-    var xLeft = parseInt(this.SIZE/3),xRight = parseInt(this.SIZE*2/3);
-    var topY1 = 0, topY2 = parseInt(this.SIZE/2);
-
+    // 点存档名
+    var xLeft = parseInt(this.SIZE/3), xRight = parseInt(this.SIZE*2/3);
+    var topY1 = 0, topY2 = this.HSIZE;
     if(y==topY1){
-        if (x >= xLeft && x < xRight) fav = 5 * page + 1;
-        if (x >= xRight) fav = 5 * page + 2;
+        if (x >= xLeft && x < xRight) return this._clickSL_favorite(page, 1);
+        if (x >= xRight) return this._clickSL_favorite(page, 2);
     }
     if(y==topY2){
-        if (x < xLeft) fav = 5 * page + 3;
-        if (x >= xLeft && x < xRight) fav = 5 * page + 4;
-        if (x >= xRight) fav = 5 * page + 5;
+        if (x < xLeft) return this._clickSL_favorite(page, 3);
+        if (x >= xLeft && x < xRight) return this._clickSL_favorite(page, 4);
+        if (x >= xRight) return this._clickSL_favorite(page, 5);
     }
-    if (fav != null){
-        this._keyDownFav(page,fav%5);
-    }
+
     var id = null;
     var topSpan = parseInt(this.SIZE/7);
     if (y >= topY1 + topSpan && y <= topY1 + topSpan + 3) {
@@ -1655,27 +1646,49 @@ actions.prototype._clickSL = function (x, y, px, py) {
     }
     if (id != null) {
         if (core.status.event.selection) {
-            if (id == 'autoSave') {
+            if (id == 'autoSave')
                 core.drawTip("无法删除自动存档！");
-            }
             else {
-                // core.removeLocalStorage("save"+id);
-                core.removeLocalForage("save" + id, function () {
-                    var idx = core.saves.favorite.indexOf(id);
-                    core.saves.favorite.splice(idx,1);
-                    delete core.saves.favName[id];
-                    core.ui._drawSLPanel_saveFav(function(){
-                        core.ui._drawSLPanel_flushIndex();
-                        core.ui.drawSLPanel(index, true)});
-                }, function () {
-                    core.drawTip("无法删除存档！");
-                })
+                core.removeSave(id, function () {
+                    core.ui.drawSLPanel(index, true);
+                });
             }
         }
         else {
-            if(core.status.event.data.mode=='fav')id = core.saves.favIndex[id];
+            if(core.status.event.data.mode == 'fav' && id != 'autoSave')
+                id = core.saves.favorite[id - 1];
             core.doSL(id, core.status.event.id);
         }
+    }
+}
+
+actions.prototype._clickSL_favorite = function (page, offset) {
+    if (offset == 0) return;
+    var index = 5 * page + offset;
+    if (core.status.event.data.mode == 'fav') { // 收藏模式下点击的下标直接对应favorite
+        index = core.saves.favorite[index - 1];
+        core.myprompt("请输入想要显示的存档名(长度不超过5字符)", null, function (value) {
+            if(value && value.length <= 5){
+                core.saves.favoriteName[index] = value;
+                core.control._updateFavoriteSaves();
+                core.drawSLPanel(10 * page + offset);
+            } else if (value) {
+                alert("无效的输入！");
+            }
+        });
+    } else {
+        var v = core.saves.favorite.indexOf(index);
+        if (v >= 0) { // 已经处于收藏状态：取消收藏
+            core.saves.favorite.splice(v, 1);
+            delete core.saves.favoriteName[index];
+        }
+        else if (core.hasSave(index)) { // 存在存档则进行收藏
+            core.saves.favorite.push(index);
+            core.saves.favorite = core.saves.favorite.sort(function (a,b) {return a-b;}); // 保证有序
+            core.drawTip("收藏成功！");
+        }
+        core.control._updateFavoriteSaves();
+        core.ui.drawSLPanel(10 * page + offset);
     }
 }
 
@@ -1730,76 +1743,30 @@ actions.prototype._keyDownSL = function (keycode) {
         core.ui.drawSLPanel(10 * (page + 1) + offset);
         return;
     }
-    if (keycode == 70){ // F
-        this._keyDownFav(page,offset);
-    }
-}
-actions.prototype._keyDownFav = function(page, offset){
-    var fav = page*5+offset;
-    var idx = fav;
-    var index = page*10 + offset;
-    if(core.status.event.data.mode=='fav'){//收藏模式下点击的下标直接对应favorite
-        fav = core.saves.favIndex[idx];
-        var dataIdx = index;
-        core.myprompt("请输入想要显示的存档名(长度不超过5字符)", null, function (index) {
-            if(index && index.length<=5 && index.length>0){
-                core.saves.favName[fav]=index;
-                core.ui._drawSLPanel_saveFav(function(){core.ui.drawSLPanel(dataIdx, false)});
-            }else{
-                alert("无效的输入！");
-            }
-        });
-    }else{
-        idx = core.saves.favorite.indexOf(fav);
-        if(idx>=0){
-            core.saves.favorite.splice(idx,1);
-            delete core.saves.favName[fav];
-        }else{
-            if(core.hasSave(fav)){
-                core.saves.favorite.push(fav);
-                core.saves.favName[idx] = fav;//暂时的 收藏下标到名字的映射（实际存储的是收藏ID到名字的映射）
-            }
-        }
-        core.ui._drawSLPanel_saveFav(function(){
-            core.ui._drawSLPanel_flushIndex();
-            core.ui.drawSLPanel(index, false)});
-    }
 }
 
 ////// 存读档界面时，放开某个键的操作 //////
 actions.prototype._keyUpSL = function (keycode) {
     var page = core.status.event.data.page, offset = core.status.event.data.offset;
-    var index = page*10 + offset;
+    var index = page * 10 + offset;
 
-    if (keycode == 27 || keycode == 88 || (core.status.event.id == 'save' && keycode == 83) || (core.status.event.id == 'load' && keycode == 68)) {
-        if (core.events.recoverEvents(core.status.event.interval)) {
-            return;
-        }
-        core.ui.closePanel();
-        if (!core.isPlaying()) {
-            core.showStartAnimate(true);
-        }
+    if (keycode == 27 || keycode == 88 || (core.status.event.id == 'save' && keycode == 83)
+        || (core.status.event.id == 'load' && keycode == 68)) {
+        this._clickSL(this.LAST, this.LAST);
         return;
     }
     if (keycode == 13 || keycode == 32 || keycode == 67) {
-        if (offset == 0) {
+        if (offset == 0)
             core.doSL("autoSave", core.status.event.id);
-        }
         else {
             var id = 5 * page + offset;
-            if(core.status.event.data.mode=='fav')id = core.saves.favIndex[id];
+            if(core.status.event.data.mode == 'fav') id = core.saves.favorite[id - 1];
             core.doSL(id, core.status.event.id);
         }
         return;
     }
     if (keycode == 69 && core.status.event.id != 'save') { // E 收藏切换
-        core.status.event.data.mode = core.status.event.data.mode == 'all'?'fav':'all';
-        core.saves.index = {};
-        for(var i in core.saves.favorite){
-            core.saves.index[i] = core.saves.favorite[i];
-        }
-        core.ui.drawSLPanel(core.saves.saveIndex,true);
-        
+        this._clickSL(0, this.LAST);
         return;
     }
     if (keycode == 46) {
@@ -1807,18 +1774,15 @@ actions.prototype._keyUpSL = function (keycode) {
             core.drawTip("无法删除自动存档！");
         }
         else {
-            core.removeLocalForage("save" + (5 * page + offset), function () {
-                var id = 5 * page + offset;
-                var idx = core.saves.favorite.indexOf(id);
-                core.saves.favorite.splice(idx,1);
-                delete core.saves.favName[id];
-                core.ui._drawSLPanel_saveFav(function(){
-                    core.ui._drawSLPanel_flushIndex();
-                    core.ui.drawSLPanel(index, true)});
-            }, function () {
-                core.drawTip("无法删除存档！");
-            })
+            var id = 5 * page + offset;
+            if(core.status.event.data.mode == 'fav') id = core.saves.favorite[id - 1];
+            core.removeSave(id, function () {
+                core.ui.drawSLPanel(index, true);
+            });
         }
+    }
+    if (keycode == 70 && core.status.event.data.mode == 'all') { // F
+        this._clickSL_favorite(page, offset);
     }
 }
 
@@ -2098,7 +2062,7 @@ actions.prototype._clickLocalSaveSelect = function (x, y) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
         if (selection < 2) {
-            core.control.getSaves(selection == 0 ? null : core.saves.saveIndex, function (saves) {
+            core.getAllSaves(selection == 0 ? null : core.saves.saveIndex, function (saves) {
                 if (saves) {
                     var content = {
                         "name": core.firstData.name,
@@ -2154,9 +2118,12 @@ actions.prototype._clickStorageRemove_all = function () {
             core.saves.autosave.data = null;
             core.saves.autosave.updated = false;
             core.ui.closePanel();
-            core.drawText("\t[操作成功]你的所有存档已被清空。");
             core.saves.saveIndex = 1;
+            core.saves.favorite = [];
+            core.saves.favoriteName = {};
+            core.control._updateFavoriteSaves();
             core.removeLocalStorage('saveIndex');
+            core.drawText("\t[操作成功]你的所有存档已被清空。");
         };
         if (core.platform.useLocalForage) {
             core.ui.drawWaiting("正在清空，请稍后...");
@@ -2175,9 +2142,12 @@ actions.prototype._clickStorageRemove_current = function () {
             core.saves.autosave.data = null;
             core.saves.autosave.updated = false;
             core.ui.closePanel();
-            core.drawText("\t[操作成功]当前塔的存档已被清空。");
             core.saves.saveIndex = 1;
+            core.saves.favorite = [];
+            core.saves.favoriteName = {};
+            core.control._updateFavoriteSaves();
             core.removeLocalStorage('saveIndex');
+            core.drawText("\t[操作成功]当前塔的存档已被清空。");
         }
         if (core.platform.useLocalForage) {
             core.ui.drawWaiting("正在清空，请稍后...");

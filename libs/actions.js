@@ -1614,7 +1614,7 @@ actions.prototype._clickSL = function (x, y) {
             else {
                 page = parseInt((core.saves.saveIndex-1)/5);
                 offset = core.saves.saveIndex-5*page;
-                core.ui.drawSLPanel(10*page + offset);
+                core.ui.drawSLPanel(10*page + offset, true);
             }
         }
         return;

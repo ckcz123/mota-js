@@ -1625,24 +1625,23 @@ actions.prototype._clickSL = function (x, y) {
     // 点存档名
     var xLeft = parseInt(this.SIZE/3), xRight = parseInt(this.SIZE*2/3);
     var topY1 = 0, topY2 = this.HSIZE;
-    if(y==topY1){
+    if(y >= topY1 && y <= topY1 + 1) {
         if (x >= xLeft && x < xRight) return this._clickSL_favorite(page, 1);
         if (x >= xRight) return this._clickSL_favorite(page, 2);
     }
-    if(y==topY2){
+    if(y >= topY2 && y <= topY2 + 1) {
         if (x < xLeft) return this._clickSL_favorite(page, 3);
         if (x >= xLeft && x < xRight) return this._clickSL_favorite(page, 4);
         if (x >= xRight) return this._clickSL_favorite(page, 5);
     }
 
     var id = null;
-    var topSpan = parseInt(this.SIZE/7);
-    if (y >= topY1 + topSpan && y <= topY1 + topSpan + 3) {
+    if (y >= topY1 + 2 && y < this.HSIZE - 1) {
         if (x < xLeft) id = "autoSave";
         if (x >= xLeft && x < xRight) id = 5 * page + 1;
         if (x >= xRight) id = 5 * page + 2;
     }
-    if (y >= topY2+1 && y <= topY2+5) {
+    if (y >= topY2 + 2 && y < this.SIZE - 1) {
         if (x < xLeft) id = 5 * page + 3;
         if (x >= xLeft && x < xRight) id = 5 * page + 4;
         if (x >= xRight) id = 5 * page + 5;
@@ -2118,6 +2117,7 @@ actions.prototype._clickStorageRemove = function (x, y) {
 actions.prototype._clickStorageRemove_all = function () {
     core.myconfirm("你确定要清除【全部塔】的所有本地存档？\n此行为不可逆！！！", function () {
         var done = function () {
+            core.saves.ids = {};
             core.saves.autosave.data = null;
             core.saves.autosave.updated = false;
             core.ui.closePanel();
@@ -2142,6 +2142,7 @@ actions.prototype._clickStorageRemove_all = function () {
 actions.prototype._clickStorageRemove_current = function () {
     core.myconfirm("你确定要清除本塔的所有本地存档？\n此行为不可逆！！！", function () {
         var done = function () {
+            core.saves.ids = {};
             core.saves.autosave.data = null;
             core.saves.autosave.updated = false;
             core.ui.closePanel();

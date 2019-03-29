@@ -2122,7 +2122,7 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
     }
     else {
         core.fillRect('ui', x-size/2, y+15, size, size, '#333333', 2);
-        core.fillText('ui', '空', x, parseInt(y+15+size/2), '#FFFFFF', this._buildFont(30,true));
+        core.fillText('ui', '空', x, parseInt(y+22+size/2), '#FFFFFF', this._buildFont(30,true));
     } 
 }
 

@@ -1559,7 +1559,7 @@ ui.prototype.drawFly = function(page) {
     var middle = this.HPIXEL + 39;
     if (core.actions._getNextFlyFloor(1) != page) {
         core.fillText('ui', '▲', this.PIXEL - 60, middle - 64, null, this._buildFont(17, false));
-        core.fillText('ui', '▲', this.PIXEL - 60, middle - 96,);
+        core.fillText('ui', '▲', this.PIXEL - 60, middle - 96);
         core.fillText('ui', '▲', this.PIXEL - 60, middle - 96 - 7);
     }
     if (core.actions._getNextFlyFloor(-1) != page) {

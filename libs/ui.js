@@ -2023,133 +2023,139 @@ ui.prototype.drawEquipbox = function(index) {
 
 ////// 绘制存档/读档界面 //////
 ui.prototype.drawSLPanel = function(index, refresh) {
-    if (!core.isset(index)) index=1;
-    if (index<0) index=0;
+    core.control._loadFavoriteSaves();
+    if (index == null) index = 1;
+    if (index < 0) index = 0;
 
     var page = parseInt(index/10), offset=index%10;
     var max_page = main.savePages || 30;
+    if(core.status.event.data && core.status.event.data.mode=='fav')
+        max_page = Math.ceil((core.saves.favorite||[]).length/5);
     if (page>=max_page) page=max_page - 1;
     if (offset>5) offset=5;
-    index=10*page+offset;
+    if (core.status.event.data && core.status.event.data.mode=='fav' && page == max_page - 1) {
+        offset = Math.min(offset, (core.saves.favorite||[]).length - 5 * page);
+    }
 
     var last_page = -1;
-    if (core.isset(core.status.event.data)) {
-        last_page = parseInt(core.status.event.data/10);
+    var mode = 'all';
+    if (core.status.event.data) {
+        last_page = core.status.event.data.page;
+        mode = core.status.event.data.mode;
     }
-
-    core.status.event.data=index;
-    if (!core.isset(core.status.event.ui))
+    core.status.event.data={ 'page':page, 'offset':offset, 'mode':mode };
+    core.status.event.ui = core.status.event.ui || [];
+    if (refresh || page != last_page) {
         core.status.event.ui = [];
+        this._drawSLPanel_loadSave(page, function () {
+            core.ui._drawSLPanel_draw(page, max_page);
+        });
+    }
+    else this._drawSLPanel_draw(page, max_page);
+}
 
-    var u=480/6, size=138;
+ui.prototype._drawSLPanel_draw = function (page, max_page) {
+    // --- 绘制背景
+    this._drawSLPanel_drawBackground();
+    // --- 绘制文字
+    core.ui.drawPagination(page+1, max_page);
+    core.setTextAlign('ui', 'center');
+    var bottom = this.PIXEL-13;
+    core.fillText('ui', '返回游戏', this.PIXEL-48, bottom, '#DDDDDD', this._buildFont(15, true));
 
+    if (core.status.event.selection)
+        core.setFillStyle('ui', '#FF6A6A');
+    if (core.status.event.id=='save')
+        core.fillText('ui', '删除模式', 48, bottom);
+    else{
+        if(core.status.event.data.mode=='all'){
+            core.fillText('ui', '[E]显示收藏', 52, bottom);
+        }else{
+            core.fillText('ui', '[E]显示全部', 52, bottom);
+        }
+    }
+    // --- 绘制记录
+    this._drawSLPanel_drawRecords();
+}
+
+ui.prototype._drawSLPanel_drawBackground = function() {
+    core.clearMap('ui');
+    core.setAlpha('ui', 0.85);
+    core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');//可改成背景图图
+    core.setAlpha('ui', 1);
+}
+
+ui.prototype._drawSLPanel_loadSave = function(page, callback) {
+    var ids = [0];
+    for (var i = 1; i <= 5; ++i) {
+        var id = 5 * page + i;
+        if(core.status.event.data.mode=='fav')
+            id = core.saves.favorite[id - 1]; // 因为favorite第一个不是自动存档 所以要偏移1
+        ids.push(id);
+    }
+    core.getSaves(ids, function (data) {
+        for (var i = 0; i < ids.length; ++i)
+            core.status.event.ui[i] = data[i];
+        core.saves.autosave.data = data[0];
+        callback();
+    });
+}
+
+// 在以x为中心轴 y为顶坐标 的位置绘制一条宽为size的记录 cho表示是否被选中 选中会加粗 highlight表示高亮标题 ✐
+ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, highLight){
     var strokeColor = '#FFD700';
     if (core.status.event.selection) strokeColor = '#FF6A6A';
-    var globalFont = (core.status.globalAttribute||core.initStatus.globalAttribute).font;
+    if (!data || !data.floorId) highLight = false;
 
-    var drawBg = function() {
-        core.clearMap('ui');
-        core.setAlpha('ui', 0.85);
-        core.fillRect('ui', 0, 0, 480, 480, '#000000');
-        core.setAlpha('ui', 1);
-
-        core.ui.drawPagination(page+1, max_page);
-        core.setTextAlign('ui', 'center');
-        // 退出
-        core.fillText('ui', '返回游戏', 370+59, 403+64,'#DDDDDD', 'bold 15px '+globalFont);
-
-        if (core.status.event.selection)
-            core.setFillStyle('ui', '#FF6A6A');
-        if (core.status.event.id=='save')
-            core.fillText('ui', '删除模式', 48, 403+64);
-        else
-            core.fillText('ui', '输入编号', 48, 403+64);
+    core.fillText('ui', title, x, y, highLight?'#FFD700':'#FFFFFF', this._buildFont(17, true));
+    core.strokeRect('ui', x-size/2, y+15, size, size, cho?strokeColor:'#FFFFFF', cho?6:2);
+    if (data && data.floorId) {
+        core.drawThumbnail(data.floorId, core.maps.loadMap(data.maps, data.floorId).blocks, {
+            heroLoc: data.hero.loc, heroIcon: data.hero.flags.heroIcon, flags: data.hero.flags
+        }, {
+            ctx: 'ui', x: x-size/2, y: y+15, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y
+        });
+        var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
+        var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
+        if (core.calWidth('ui', v + v2, this._buildFont(10, false)) <= size) v += v2;
+        core.fillText('ui', v, x, y+30+size, '#FFD700');
+        core.fillText('ui', core.formatDate(new Date(data.time)), x, y+43+size, data.hero.flags.__consoleOpened__?'#FF6A6A':'#FFFFFF');
     }
-
-    var draw = function (data, i) {
-        var name=core.status.event.id=='save'?"存档":core.status.event.id=='load'?"读档":core.status.event.id=='replayLoad'?"回放":"";
-        core.status.event.ui[i] = data;
-        var id=5*page+i;
-        if (i<3) {
-            core.fillText('ui', i==0?"自动存档":name+id, (2*i+1)*u, 38, '#FFFFFF', "bold 17px "+globalFont);
-            core.strokeRect('ui', (2*i+1)*u-size/2, 55, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
-            if (core.isset(data) && core.isset(data.floorId)) {
-                core.drawThumbnail(data.floorId, core.maps.loadMap(data.maps, data.floorId).blocks, {
-                    heroLoc: data.hero.loc, heroIcon: data.hero.flags.heroIcon, flags: data.hero.flags
-                }, {
-                    ctx: 'ui', x: (2*i+1)*u-size/2, y: 55, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y
-                });
-                var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
-                var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
-                if (v.length+v2.length<=31) v+=v2;
-                core.fillText('ui', v, (2*i+1)*u, 73+size, '#FFD700', '10px '+globalFont);
-                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i+1)*u, 88+size, data.hero.flags.__consoleOpened__?'#FF6A6A':'#FFFFFF');
-            }
-            else {
-                core.fillRect('ui', (2*i+1)*u-size/2, 55, size, size, '#333333', 2);
-                core.fillText('ui', '空', (2*i+1)*u, 135, '#FFFFFF', 'bold 30px '+globalFont);
-            }
-        }
-        else {
-            core.fillText('ui', name+id, (2*i-5)*u, 253, '#FFFFFF', "bold 17px "+globalFont);
-            core.strokeRect('ui', (2*i-5)*u-size/2, 270, size, size, i==offset?strokeColor:'#FFFFFF', i==offset?6:2);
-            if (core.isset(data) && core.isset(data.floorId)) {
-                core.drawThumbnail(data.floorId, core.maps.loadMap(data.maps, data.floorId).blocks, {
-                    heroLoc: data.hero.loc, heroIcon: data.hero.flags.heroIcon, flags: data.hero.flags
-                }, {
-                    ctx: 'ui', x: (2*i-5)*u-size/2, y: 270, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y
-                });
-                var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
-                var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
-                if (v.length+v2.length<=31) v+=v2;
-                core.fillText('ui', v, (2*i-5)*u, 288+size, '#FFD700', '10px '+globalFont);
-                core.fillText('ui', core.formatDate(new Date(data.time)), (2*i-5)*u, 303+size, data.hero.flags.__consoleOpened__?'#FF6A6A':'#FFFFFF', '10px '+globalFont);
-            }
-            else {
-                core.fillRect('ui', (2*i-5)*u-size/2, 270, size, size, '#333333', 2);
-                core.fillText('ui', '空', (2*i-5)*u, 350, '#FFFFFF', 'bold 30px '+globalFont);
-            }
-        }
-    };
-
-    function loadSave(i, callback) {
-        if (i==6) {
-            callback();
-            return;
-        }
-
-        if (i==0) {
-            if (core.saves.autosave.data!=null) {
-                core.status.event.ui[i] = core.saves.autosave.data;
-                loadSave(1, callback);
-            }
-            else {
-                core.getLocalForage("autoSave", null, function(data) {
-                    core.saves.autosave.data = data;
-                    core.status.event.ui[i]=data;
-                    loadSave(i+1, callback);
-                }, function(err) {main.log(err);});
-            }
-        }
-        else {
-            core.getLocalForage("save"+(5*page+i), null, function(data) {
-                core.status.event.ui[i]=data;
-                loadSave(i+1, callback);
-            }, function(err) {main.log(err);});
-        }
-    }
-
-    function drawAll() {
-        drawBg();
-        for (var i=0;i<6;i++)
-            draw(core.status.event.ui[i], i);
-    }
-    if (refresh || page!=last_page) {
-        core.status.event.ui = [];
-        loadSave(0, drawAll);
-    }
-    else drawAll();
+    else {
+        core.fillRect('ui', x-size/2, y+15, size, size, '#333333', 2);
+        core.fillText('ui', '空', x, parseInt(y+15+size/2), '#FFFFFF', this._buildFont(30,true));
+    } 
 }
+
+ui.prototype._drawSLPanel_drawRecords  = function (n) {
+    var page = core.status.event.data.page;
+    var offset = core.status.event.data.offset;
+    var u = Math.floor(this.PIXEL/6), size = Math.floor(this.PIXEL/3-20);
+    var name=core.status.event.id=='save'?"存档":core.status.event.id=='load'?"读档":core.status.event.id=='replayLoad'?"回放":"";
+
+    for (var i = 0; i < (n||6); i++){
+        var data = core.status.event.ui[i];
+        var id = 5 * page + i;
+        var highLight = (i>0&&core.saves.favorite.indexOf(id)>=0) || core.status.event.data.mode=='fav';
+        var title = (highLight?'★ ':'☆ ') + (core.saves.favoriteName[id] || (name + id));
+        if (i != 0 && core.status.event.data.mode=='fav') {
+            if (!data) break;
+            var real_id = core.saves.favorite[id - 1];
+            title = (core.saves.favoriteName[real_id] || (name + real_id)) + ' ✐';
+        }
+
+        var charSize = 32;// 字体占用像素范围
+        var topSpan = parseInt((this.PIXEL-charSize-2*(charSize*2 + size))/3);// Margin
+        var yTop1 = topSpan+parseInt(charSize/2) + 8;//文字的中心
+        var yTop2 = yTop1+charSize*2+size+topSpan;
+        if (i<3) {
+            this._drawSLPanel_drawRecord(i==0?"自动存档":title, data, (2*i+1)*u, yTop1, size, i==offset, highLight);
+        }
+        else {
+            this._drawSLPanel_drawRecord(title, data, (2*i-5)*u, yTop2, size, i==offset, highLight);
+        }
+    }
+};
 
 ui.prototype.drawKeyBoard = function () {
     core.lockControl();

@@ -67,6 +67,7 @@ function core() {
         'isPC': true, // 是否是PC
         'isAndroid': false, // 是否是Android
         'isIOS': false, // 是否是iOS
+        'string': 'PC',
         'isWeChat': false, // 是否是微信
         'isQQ': false, // 是否是QQ
         'isChrome': false, // 是否是Chrome
@@ -272,6 +273,7 @@ core.prototype._init_platform = function () {
             core.platform.isPC = false;
         }
     });
+    core.platform.string = core.platform.isPC ? "PC" : core.platform.isAndroid ? "Android" : core.platform.isIOS ? "iOS" : "";
     core.platform.supportCopy = document.queryCommandSupported || document.queryCommandSupported("copy");
     var chrome = /Chrome\/(\d+)\./i.exec(navigator.userAgent);
     if (chrome && parseInt(chrome[1]) >= 50) core.platform.isChrome = true;

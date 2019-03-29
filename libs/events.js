@@ -89,7 +89,7 @@ events.prototype._startGame_upload = function () {
     formData.append('type', 'people');
     formData.append('name', core.firstData.name);
     formData.append('version', core.firstData.version);
-    formData.append('platform', core.platform.isPC ? "PC" : core.platform.isAndroid ? "Android" : core.platform.isIOS ? "iOS" : "");
+    formData.append('platform', core.platform.string);
     formData.append('hard', core.encodeBase64(core.status.hard));
     formData.append('hardCode', core.getFlag('hard', 0));
     formData.append('base64', 1);
@@ -171,7 +171,7 @@ events.prototype._gameOver_doUpload = function (username, ending, norank) {
     formData.append('type', 'score');
     formData.append('name', core.firstData.name);
     formData.append('version', core.firstData.version);
-    formData.append('platform', core.platform.isPC ? "PC" : core.platform.isAndroid ? "Android" : core.platform.isIOS ? "iOS" : "");
+    formData.append('platform', core.platform.string);
     formData.append('hard', core.encodeBase64(core.status.hard));
     formData.append('username', core.encodeBase64(username || ""));
     formData.append('ending', core.encodeBase64(ending));
@@ -2205,7 +2205,7 @@ events.prototype.uploadCurrent = function (username) {
     formData.append('type', 'score');
     formData.append('name', core.firstData.name);
     formData.append('version', core.firstData.version);
-    formData.append('platform', core.platform.isPC ? "PC" : core.platform.isAndroid ? "Android" : core.platform.isIOS ? "iOS" : "");
+    formData.append('platform', core.platform.string);
     formData.append('hard', core.encodeBase64(core.status.hard));
     formData.append('username', core.encodeBase64(username || "current"));
     formData.append('lv', core.status.hero.lv);

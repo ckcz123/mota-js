@@ -30,12 +30,14 @@ maps.prototype.loadFloor = function (floorId, map) {
         map = {"map": map};
     }
     var content = {};
+    var notCopy = ["firstArrive", "eachArrive", "parallelDo", "map", "bgmap", "fgmap",
+        "events", "changeFloor", "afterBattle", "afterGetItem", "afterOpenDoor", "cannotMove"];
     for (var name in floor) {
-        if (name != 'map' && name != 'bgmap' && name != 'fgmap' && floor[name] != null)
+        if (notCopy.indexOf(name) == -1 && floor[name] != null)
             content[name] = core.clone(floor[name]);
     }
     for (var name in map) {
-        if (name != 'map' && name != 'bgmap' && name != 'fgmap' && map[name] != null)
+        if (notCopy.indexOf(name) == -1 && map[name] != null)
             content[name] = core.clone(map[name]);
     }
     map = this.decompressMap(map.map, floorId);

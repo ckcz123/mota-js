@@ -30,11 +30,14 @@ maps.prototype.loadFloor = function (floorId, map) {
         map = {"map": map};
     }
     var content = {};
-    ["floorId", "title", "name", "canFlyTo", "canUseQuickShop", "cannotViewMap", "cannotMoveDirectly", "color", "weather",
-        "defaultGround", "images", "item_ratio", "upFloor", "bgm", "downFloor", "underGround"].forEach(function (e) {
-        if (map[e] != null) content[e] = core.clone(map[e]);
-        else content[e] = core.clone(floor[e]);
-    });
+    for (var name in floor) {
+        if (name != 'map' && name != 'bgmap' && name != 'fgmap' && floor[name] != null)
+            content[name] = core.clone(floor[name]);
+    }
+    for (var name in map) {
+        if (name != 'map' && name != 'bgmap' && name != 'fgmap' && map[name] != null)
+            content[name] = core.clone(map[name]);
+    }
     map = this.decompressMap(map.map, floorId);
     // 事件处理
     content['blocks'] = this._mapIntoBlocks(map, floor, floorId);

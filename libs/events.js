@@ -1496,7 +1496,7 @@ events.prototype.__action_wait_getValue = function (value) {
 
 events.prototype._action_waitAsync = function (data, x, y, prefix) {
     var test = window.setInterval(function () {
-        if (Object.keys(core.animateFrame.asyncId).length == 0) {
+        if (!core.hasAsync()) {
             clearInterval(test);
             core.doAction();
         }
@@ -1686,6 +1686,10 @@ events.prototype.openSettings = function (fromUserAction) {
 }
 
 // ------ 一些事件的具体执行过程 ------ //
+
+events.prototype.hasAsync = function () {
+    return Object.keys(core.animateFrame.asyncId).length > 0 || (core.status.animateObjs || []).length > 0;
+}
 
 ////// 跟随 //////
 events.prototype.follow = function (name) {

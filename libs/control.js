@@ -169,25 +169,22 @@ control.prototype._animationFrame_animate = function (timestamp) {
     if (timestamp - core.animateFrame.animateTime < 50 || !core.status.animateObjs || core.status.animateObjs.length == 0) return;
     core.clearMap('animate');
     // 更新帧
-    var animateObjs = [];
-    for (var i=0;i<core.status.animateObjs.length;i++) {
+    for (var i = 0; i < core.status.animateObjs.length; i++) {
         var obj = core.status.animateObjs[i];
         if (obj.index == obj.animate.frames.length) {
-            // 绘制完毕
-            delete core.animateFrame.asyncId[obj.id];
-            // 异步执行回调...
-            (function(callback) {
-                setTimeout(function() {
+            (function (callback) {
+                setTimeout(function () {
                     if (callback) callback();
                 });
             })(obj.callback);
         }
-        else {
-            core.maps._drawAnimateFrame(obj.animate, obj.centerX, obj.centerY, obj.index++);
-            animateObjs.push(obj);
-        }
     }
-    core.status.animateObjs = animateObjs;
+    core.status.animateObjs = core.status.animateObjs.filter(function (obj) {
+        return obj.index < obj.animate.frames.length;
+    });
+    core.status.animateObjs.forEach(function (obj) {
+        core.maps._drawAnimateFrame(obj.animate, obj.centerX, obj.centerY, obj.index++);
+    });
     core.animateFrame.animateTime = timestamp;
 }
 
@@ -2187,7 +2184,7 @@ control.prototype.playSound = function (sound) {
             var source = core.musicStatus.audioContext.createBufferSource();
             source.buffer = core.material.sounds[sound];
             source.connect(core.musicStatus.gainNode);
-            var id = parseInt(Math.random()*10000000);
+            var id = setTimeout(null);
             source.onended = function () {
                 delete core.musicStatus.playingSounds[id];
             }

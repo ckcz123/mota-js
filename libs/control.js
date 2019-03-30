@@ -1841,7 +1841,7 @@ control.prototype.addStatus = function (name, value) {
 control.prototype.getStatus = function (name) {
     if (!core.status.hero) return null;
     if (name == 'x' || name == 'y' || name == 'direction')
-        return this.getHeroLoc('x');
+        return this.getHeroLoc(name);
     if (name == 'exp') name = 'experience';
     return core.status.hero[name];
 }

@@ -67,6 +67,7 @@ function core() {
         'isPC': true, // 是否是PC
         'isAndroid': false, // 是否是Android
         'isIOS': false, // 是否是iOS
+        'string': 'PC',
         'isWeChat': false, // 是否是微信
         'isQQ': false, // 是否是QQ
         'isChrome': false, // 是否是Chrome
@@ -102,7 +103,9 @@ function core() {
             "data": null,
             "time": 0,
             "updated": false,
-        }
+        },
+        "favorite": [],
+        "favoriteName": {}
     }
     this.initStatus = {
         'played': false,
@@ -227,13 +230,7 @@ core.prototype._init_flags = function () {
     core.flags = core.clone(core.data.flags);
     core.values = core.clone(core.data.values);
     core.firstData = core.clone(core.data.firstData);
-
-    if (!core.flags.enableExperience) core.flags.enableLevelUp = false;
-    if (!core.flags.enableLevelUp) core.flags.levelUpLeftMode = false;
-    if (core.flags.equipboxButton) core.flags.equipment = true;
-    core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
-    core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
-    core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
+    this._init_sys_flags();
 
     core.dom.versionLabel.innerHTML = core.firstData.version;
     core.dom.logoLabel.innerHTML = core.firstData.title;
@@ -246,6 +243,15 @@ core.prototype._init_flags = function () {
     core.material.items = core.items.getItems();
     core.items._resetItems();
     core.material.icons = core.icons.getIcons();
+}
+
+core.prototype._init_sys_flags = function () {
+    if (!core.flags.enableExperience) core.flags.enableLevelUp = false;
+    if (!core.flags.enableLevelUp) core.flags.levelUpLeftMode = false;
+    if (core.flags.equipboxButton) core.flags.equipment = true;
+    core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
+    core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
+    core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
 }
 
 core.prototype._init_platform = function () {
@@ -269,6 +275,7 @@ core.prototype._init_platform = function () {
             core.platform.isPC = false;
         }
     });
+    core.platform.string = core.platform.isPC ? "PC" : core.platform.isAndroid ? "Android" : core.platform.isIOS ? "iOS" : "";
     core.platform.supportCopy = document.queryCommandSupported || document.queryCommandSupported("copy");
     var chrome = /Chrome\/(\d+)\./i.exec(navigator.userAgent);
     if (chrome && parseInt(chrome[1]) >= 50) core.platform.isChrome = true;
@@ -290,7 +297,7 @@ core.prototype._init_platform = function () {
 }
 
 core.prototype._init_checkLocalForage = function () {
-    core.platform.useLocalForage = core.getLocalStorage('useLocalForage', !core.platform.isIOS);
+    core.platform.useLocalForage = core.getLocalStorage('useLocalForage', true);
     var _error = function (e) {
         main.log(e);
         core.platform.useLocalForage = false;
@@ -379,13 +386,16 @@ core.prototype._forwardFunc = function (name, funcname) {
     }
 
     if (core[funcname]) {
-        console.error("ERROR: Cannot forward function " + funcname + " from " + name + "!");
+        console.error("ERROR: 无法转发 "+name+" 中的函数 "+funcname+" 到 core 中！同名函数已存在。");
         return;
     }
     var parameterInfo = /^\s*function\s*[\w_$]*\(([\w_,$\s]*)\)\s*\{/.exec(core[name][funcname].toString());
     var parameters = (parameterInfo == null ? "" : parameterInfo[1]).replace(/\s*/g, '').replace(/,/g, ', ');
     // core[funcname] = new Function(parameters, "return core."+name+"."+funcname+"("+parameters+");");
     eval("core." + funcname + " = function (" + parameters + ") {\n\treturn core." + name + "." + funcname + "(" + parameters + ");\n}");
+    if (name == 'plugin') {
+        main.log("插件函数转发：core."+funcname+" = core.plugin."+funcname);
+    }
 }
 
 core.prototype.doFunc = function (func, _this) {

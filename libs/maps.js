@@ -30,11 +30,14 @@ maps.prototype.loadFloor = function (floorId, map) {
         map = {"map": map};
     }
     var content = {};
-    ["floorId", "title", "name", "canFlyTo", "canUseQuickShop", "cannotViewMap", "cannotMoveDirectly", "color", "weather",
-        "defaultGround", "images", "item_ratio", "upFloor", "bgm", "downFloor", "underGround"].forEach(function (e) {
-        if (map[e] != null) content[e] = core.clone(map[e]);
-        else content[e] = core.clone(floor[e]);
-    });
+    for (var name in floor) {
+        if (name != 'map' && name != 'bgmap' && name != 'fgmap' && floor[name] != null)
+            content[name] = core.clone(floor[name]);
+    }
+    for (var name in map) {
+        if (name != 'map' && name != 'bgmap' && name != 'fgmap' && map[name] != null)
+            content[name] = core.clone(map[name]);
+    }
     map = this.decompressMap(map.map, floorId);
     // 事件处理
     content['blocks'] = this._mapIntoBlocks(map, floor, floorId);
@@ -412,7 +415,7 @@ maps.prototype._canMoveHero_checkPoint = function (x, y, direction, floorId, ext
         return false;
 
     var nx = x + core.utils.scan[direction].x, ny = y + core.utils.scan[direction].y;
-    if (nx < 0 || ny < 0 || nx >= core.floors[floorId].width || ny >= core.floors[floorId].width)
+    if (nx < 0 || ny < 0 || nx >= core.floors[floorId].width || ny >= core.floors[floorId].height)
         return false;
 
     // 2. 检查该点素材的 cannotOut 和下一个点的 cannotIn
@@ -1696,6 +1699,7 @@ maps.prototype.animateBlock = function (loc, type, time, callback) {
     var isHide = type == 'hide';
     if (typeof loc[0] == 'number' && typeof loc[1] == 'number')
         loc = [loc];
+    // --- 检测所有是0的点
     var list = this._animateBlock_getList(loc);
     if (list.length == 0) {
         if (callback) callback();
@@ -1714,7 +1718,8 @@ maps.prototype._animateBlock_doAnimate = function (loc, list, isHide, delta, cal
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             list.forEach(function (t) {
-                core.maps._deleteDetachedBlock(t.canvases);
+                if (t.blockInfo)
+                    core.maps._deleteDetachedBlock(t.canvases);
             });
             loc.forEach(function (t) {
                 if (isHide) core.removeBlock(t[0], t[1]);
@@ -1735,7 +1740,10 @@ maps.prototype._animateBlock_getList = function (loc) {
         block = block.block;
 
         var blockInfo = core.maps.getBlockInfo(block);
-        if (blockInfo == null) return;
+        if (blockInfo == null) {
+            list.push({ 'x': t[0], 'y': t[1] });
+            return;
+        }
         var canvases = core.maps._initDetachedBlock(blockInfo, t[0], t[1], block.event.displayDamage !== false);
 
         list.push({
@@ -1748,7 +1756,8 @@ maps.prototype._animateBlock_getList = function (loc) {
 
 maps.prototype._animateBlock_drawList = function (list, opacity) {
     list.forEach(function (t) {
-        core.maps._moveDetachedBlock(t.blockInfo, t.x * 32, t.y * 32, opacity, t.canvases);
+        if (t.blockInfo)
+            core.maps._moveDetachedBlock(t.blockInfo, t.x * 32, t.y * 32, opacity, t.canvases);
     });
 }
 

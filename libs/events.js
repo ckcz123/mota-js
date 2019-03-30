@@ -16,7 +16,7 @@ events.prototype._init = function () {
 
 /// 初始化游戏
 events.prototype.resetGame = function (hero, hard, floorId, maps, values) {
-    return this.eventdata.resetGame(hero, hard, floorId, maps, values);
+    this.eventdata.resetGame(hero, hard, floorId, maps, values);
 }
 
 ////// 游戏开始事件 //////
@@ -75,7 +75,11 @@ events.prototype._startGame_afterStart = function (nowLoc, callback) {
     core.ui.closePanel();
     core.showStatusBar();
     core.dom.musicBtn.style.display = 'none';
-    core.changeFloor(core.firstData.floorId, null, nowLoc, null, callback);
+    core.changeFloor(core.firstData.floorId, null, nowLoc, null, function () {
+        // 插入一个空事件避免直接回放录像出错
+        core.insertAction([]);
+        if (callback) callback();
+    });
     this._startGame_upload();
 }
 
@@ -85,7 +89,7 @@ events.prototype._startGame_upload = function () {
     formData.append('type', 'people');
     formData.append('name', core.firstData.name);
     formData.append('version', core.firstData.version);
-    formData.append('platform', core.platform.isPC ? "PC" : core.platform.isAndroid ? "Android" : core.platform.isIOS ? "iOS" : "");
+    formData.append('platform', core.platform.string);
     formData.append('hard', core.encodeBase64(core.status.hard));
     formData.append('hardCode', core.getFlag('hard', 0));
     formData.append('base64', 1);
@@ -167,7 +171,7 @@ events.prototype._gameOver_doUpload = function (username, ending, norank) {
     formData.append('type', 'score');
     formData.append('name', core.firstData.name);
     formData.append('version', core.firstData.version);
-    formData.append('platform', core.platform.isPC ? "PC" : core.platform.isAndroid ? "Android" : core.platform.isIOS ? "iOS" : "");
+    formData.append('platform', core.platform.string);
     formData.append('hard', core.encodeBase64(core.status.hard));
     formData.append('username', core.encodeBase64(username || ""));
     formData.append('ending', core.encodeBase64(ending));
@@ -247,7 +251,7 @@ events.prototype.unregisterSystemEvent = function (type) {
 events.prototype.doSystemEvent = function (type, data, callback) {
     if (this.systemEvents[type]) {
         try {
-            return core.doFunc(this.systemEvents[type], this, data, data, callback);
+            return core.doFunc(this.systemEvents[type], this, data, callback);
         }
         catch (e) {
             main.log(e);
@@ -684,6 +688,11 @@ events.prototype._sys_action = function (data, callback) {
     this.insertAction(ev, ex, ey, callback);
 }
 
+events.prototype._sys_custom = function (data, callback) {
+    core.insertAction(["请使用\r[yellow]core.registerSystemEvent('custom', func)\r来处理自己添加的系统触发器！"],
+        data.x, data.y, callback);
+}
+
 // ------ 自定义事件的处理 ------ //
 
 ////// 注册一个自定义事件 //////
@@ -797,7 +806,10 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
 
     // ------ 判定commonEvent
     var commonEvent = this.getCommonEvent(action);
-    if (commonEvent instanceof Array) action = commonEvent;
+    if (commonEvent instanceof Array) {
+        this._addCommentEventToList(action, commonEvent);
+        action = commonEvent;
+    }
     if (!action) return;
 
     if (core.status.event.id != 'action') {
@@ -816,6 +828,22 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
 events.prototype.getCommonEvent = function (name) {
     if (!name || typeof name !== 'string') return null;
     return this.commonEvent[name] || null;
+}
+
+events.prototype._addCommentEventToList = function (name, list) {
+    if (list == null) list = this.getCommonEvent(name);
+    if (!list || !core.flags.quickCommonEvents) return;
+    var addToList = false;
+    for (var x in list) {
+        if (list[x].type == 'addToList') {
+            addToList = true;
+            break;
+        }
+    }
+    if (!addToList) return;
+    var obj = core.getFlag("__commonEventList__", []);
+    if (obj.indexOf(name) == -1) obj.push(name);
+    core.setFlag("__commonEventList__", obj);
 }
 
 ////// 恢复一个事件 //////
@@ -885,7 +913,7 @@ events.prototype._action_autoText = function (data, x, y, prefix) {
 
 events.prototype._action_scrollText = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
-    this.__action_doAsyncFunc(data.async, core.ui.drawScrollText, data.text, data.time || 5000);
+    this.__action_doAsyncFunc(data.async, core.ui.drawScrollText, data.text, data.lineHeight || 1.4, data.time || 5000);
 }
 
 events.prototype._action_comment = function (data, x, y, prefix) {
@@ -893,7 +921,7 @@ events.prototype._action_comment = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setText = function (data, x, y, prefix) {
-    ["position", "offset", "bold", "titlefont", "textfont", "time"].forEach(function (t) {
+    ["position", "offset", "align", "bold", "titlefont", "textfont", "time"].forEach(function (t) {
         if (data[t] != null) core.status.textAttribute[t] = data[t];
     });
     ["background", "title", "text"].forEach(function (t) {
@@ -1030,10 +1058,9 @@ events.prototype._action_changePos = function (data, x, y, prefix) {
 }
 
 events.prototype._action_showImage = function (data, x, y, prefix) {
-    var loc = this.__action_getLoc(data.loc, 0, 0, prefix);
     if (core.isReplaying()) data.time = 0;
     this.__action_doAsyncFunc(data.async || data.time == 0, this.showImage,
-        data.code, data.image, loc[0], loc[1], data.dw, data.dh, data.opacity, data.time);
+        data.code, data.image, data.sloc, data.loc, data.opacity, data.time);
 }
 
 events.prototype._action_showTextImage = function (data, x, y, prefix) {
@@ -1160,13 +1187,14 @@ events.prototype._action_insert = function (data, x, y, prefix) {
     if (data.args instanceof Array) {
        for (var i = 0; i < data.args.length; ++i) {
            try {
-               core.setFlag('arg'+(i+1), core.calValue(data.args[i], prefix));
+               if (data.args[i] != null)
+                   core.setFlag('arg'+(i+1), data.args[i]);
            } catch (e) { main.log(e); }
        }
     }
     if (data.name) { // 公共事件
         core.setFlag('arg0', data.name);
-        core.insertAction(this.getCommonEvent(data.name));
+        core.insertAction(data.name);
     }
     else {
         var loc = this.__action_getLoc(data.loc, x, y, prefix);
@@ -1176,6 +1204,10 @@ events.prototype._action_insert = function (data, x, y, prefix) {
         var event = (core.floors[floorId][which]||[])[loc[0] + "," + loc[1]];
         if (event) this.insertAction(event.data || event);
     }
+    core.doAction();
+}
+
+events.prototype._action_addToList = function (data, x, y, prefix) {
     core.doAction();
 }
 
@@ -1815,21 +1847,27 @@ events.prototype.closeDoor = function (x, y, id, callback) {
 }
 
 ////// 显示图片 //////
-events.prototype.showImage = function (code, image, x, y, dw, dh, opacityVal, time, callback) {
-    dw /= 100;
-    dh /= 100;
-    x = core.calValue(x) || 0;
-    y = core.calValue(y) || 0;
+events.prototype.showImage = function (code, image, sloc, loc, opacityVal, time, callback) {
     if (typeof image == 'string') image = core.material.images.images[image];
     if (!image) {
         if (callback) callback();
         return;
     }
+    sloc = sloc || [];
+    var sx = core.calValue(sloc[0]) || 0, sy = core.calValue(sloc[1]) || 0;
+    var sw = core.calValue(sloc[2]), sh = core.calValue(sloc[3]);
+    if (sw == null) sw = image.width;
+    if (sh == null) sh = image.height;
+    loc = loc || [];
+    var x = core.calValue(loc[0]) || 0, y = core.calValue(loc[1]) || 0;
+    var w = core.calValue(loc[2]), h = core.calValue(loc[3]);
+    if (w == null) w = sw;
+    if (h == null) h = sh;
     var zIndex = code + 100;
     time = time || 0;
     var name = "image" + zIndex;
-    var ctx = core.createCanvas(name, x, y, image.width * dw, image.height * dh, zIndex);
-    ctx.drawImage(image, 0, 0, image.width * dw, image.height * dh);
+    var ctx = core.createCanvas(name, x, y, w, h, zIndex);
+    ctx.drawImage(image, sx, sy, sw, sh, 0, 0, w, h);
     if (time == 0) {
         core.setOpacity(name, opacityVal);
         if (callback) callback();
@@ -2190,7 +2228,7 @@ events.prototype.uploadCurrent = function (username) {
     formData.append('type', 'score');
     formData.append('name', core.firstData.name);
     formData.append('version', core.firstData.version);
-    formData.append('platform', core.platform.isPC ? "PC" : core.platform.isAndroid ? "Android" : core.platform.isIOS ? "iOS" : "");
+    formData.append('platform', core.platform.string);
     formData.append('hard', core.encodeBase64(core.status.hard));
     formData.append('username', core.encodeBase64(username || "current"));
     formData.append('lv', core.status.hero.lv);

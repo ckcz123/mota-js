@@ -675,7 +675,7 @@ window.onblur = function () {
     if (main.core && main.core.control) {
         try {
             main.core.control.checkAutosave();
-        } catch (e) {main.log(e);}
+        } catch (e) {}
     }
 }
 

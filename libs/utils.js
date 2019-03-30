@@ -311,19 +311,25 @@ utils.prototype.clone = function (data) {
 }
 
 ////// 裁剪图片 //////
-utils.prototype.cropImage = function (image, size) {
-    size = size || 32;
+utils.prototype.splitImage = function (image, width, height) {
+    if (typeof image == "string")
+        image = core.material.images.images[image];
+    if (!image) return [];
+    width = width || 32;
+    height = height || width;
     var canvas = document.createElement("canvas");
     var context = canvas.getContext("2d");
-    canvas.width = size;
-    canvas.height = size;
+    canvas.width = width;
+    canvas.height = height;
     var ans = [];
-    for (var i = 0; i < image.height; i += size) {
-        context.drawImage(image, 0, i, size, size, 0, 0, size, size);
-        var img = new Image();
-        img.src = canvas.toDataURL("image/png");
-        ans.push(img);
-        context.clearRect(0, 0, size, size);
+    for (var j = 0; j < image.height; j += height) {
+        for (var i = 0; i < image.width; i += width) {
+            context.drawImage(image, i, j, width, height, 0, 0, width, height);
+            var img = new Image();
+            img.src = canvas.toDataURL("image/png");
+            ans.push(img);
+            context.clearRect(0, 0, width, height);
+        }
     }
     return ans;
 }
@@ -340,6 +346,12 @@ utils.prototype.formatDate2 = function (date) {
     if (!date) date = new Date();
     return "" + date.getFullYear() + core.setTwoDigits(date.getMonth() + 1) + core.setTwoDigits(date.getDate())
         + core.setTwoDigits(date.getHours()) + core.setTwoDigits(date.getMinutes()) + core.setTwoDigits(date.getSeconds());
+}
+
+utils.prototype.formatTime = function (time) {
+    return core.setTwoDigits(parseInt(time/3600000))
+        +":"+core.setTwoDigits(parseInt(time/60000)%60)
+        +":"+core.setTwoDigits(parseInt(time/1000)%60);
 }
 
 ////// 两位数显示 //////
@@ -455,6 +467,8 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
         return "P" + t.substring(6);
     else if (t.indexOf('input2:') == 0)
         return "Q" + t.substring(7) + ":";
+    else if (t.indexOf('common:') == 0)
+        return "c" + t.substring(7) + ":";
     else if (t == 'no')
         return 'N';
     else if (t.indexOf('move:') == 0)
@@ -513,7 +527,7 @@ utils.prototype._decodeRoute_number2id = function (number) {
 }
 
 utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
-    var nxt = (c == 'I' || c == 'e' || c == 'F' || c == 'S' || c == 'Q' || c == 't') ?
+    var nxt = (c == 'I' || c == 'e' || c == 'F' || c == 'S' || c == 'Q' || c == 't' || c == 'c') ?
         this._decodeRoute_getString(decodeObj) : this._decodeRoute_getNumber(decodeObj);
 
     var mp = {"U": "up", "D": "down", "L": "left", "R": "right"};
@@ -557,6 +571,9 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
             break;
         case "Q":
             decodeObj.ans.push("input2:" + nxt);
+            break;
+        case "c":
+            decodeObj.ans.push("common:" + nxt);
             break;
         case "N":
             decodeObj.ans.push("no");

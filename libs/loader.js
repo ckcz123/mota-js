@@ -38,7 +38,7 @@ loader.prototype._load = function (callback) {
 
 loader.prototype._loadIcons = function () {
     this.loadImage("icons.png", function (id, image) {
-        var images = core.cropImage(image);
+        var images = core.splitImage(image);
         for (var key in core.statusBar.icons) {
             if (typeof core.statusBar.icons[key] == 'number') {
                 core.statusBar.icons[key] = images[core.statusBar.icons[key]];

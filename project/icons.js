@@ -259,7 +259,7 @@ var icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1 =
 		"hammer": 48,
 		"jumpShoes": 49,
 		"skill1": 30,
-		"I73": 10
+		"wand": 10
 	},
 	"autotile": {
 		"autotile": 0,

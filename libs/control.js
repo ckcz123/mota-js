@@ -33,6 +33,7 @@ control.prototype._init = function () {
     this.registerReplayAction("fly", this._replayAction_fly);
     this.registerReplayAction("shop", this._replayAction_shop);
     this.registerReplayAction("turn", this._replayAction_turn);
+    this.registerReplayAction("common", this._replayAction_common);
     this.registerReplayAction("getNext", this._replayAction_getNext);
     this.registerReplayAction("moveDirectly", this._replayAction_moveDirectly);
     this.registerReplayAction("key", this._replayAction_key);
@@ -625,6 +626,7 @@ control.prototype.moveAction = function (callback) {
 }
 
 control.prototype._moveAction_noPass = function (canMove, callback) {
+    core.status.route.push(core.getHeroLoc('direction'));
     core.status.automaticRoute.moveStepBeforeStop = [];
     core.status.automaticRoute.lastDirection = core.getHeroLoc('direction');
     if (canMove) core.events._trigger(core.nextX(), core.nextY());
@@ -641,6 +643,7 @@ control.prototype._moveAction_moving = function (callback) {
     core.setHeroMoveInterval(function () {
         var direction = core.getHeroLoc('direction');
         core.control._moveAction_popAutomaticRoute();
+        core.status.route.push(direction);
 
         // 无事件的道具（如血瓶）需要优先于阻激夹域判定
         var nowx = core.getHeroLoc('x'), nowy = core.getHeroLoc('y');
@@ -793,7 +796,7 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
 
 ////// 绘制勇士 //////
 control.prototype.drawHero = function (status, offset) {
-    if (!core.isPlaying() || !core.status.floorId) return;
+    if (!core.isPlaying() || !core.status.floorId || core.status.gameOver) return;
     var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
     status = status || 'stop';
     offset = offset || 0;
@@ -1299,8 +1302,12 @@ control.prototype._replay_save = function () {
 
 control.prototype._replay_error = function (action) {
     core.status.replay.replaying = false;
-    main.log("录像文件出错，当前操作：" + action +
-        "\n接下来10个操作是："+core.status.replay.toReplay.slice(0, 10).toString());
+    var len = core.status.replay.toReplay.length;
+    var prevList = core.status.replay.totalList.slice(-len - 11, -len - 1);
+    var nextList = core.status.replay.toReplay.slice(0, 10);
+    main.log("录像文件出错，当前操作：" + action);
+    main.log("之前的10个操作是：\n" + prevList.toString());
+    main.log("接下来10个操作是：\n" + nextList.toString());
     core.ui.drawConfirmBox("录像文件出错，你想回到上个节点吗？", function () {
         core.ui.closePanel();
         if (core.status.replay.save.length > 0) {
@@ -1435,6 +1442,16 @@ control.prototype._replayAction_turn = function (action) {
     if (action != 'turn' && action.indexOf('turn:') != 0) return false;
     if (action == 'turn') core.turnHero();
     else core.turnHero(action.substring(5));
+    setTimeout(core.replay);
+    return true;
+}
+
+control.prototype._replayAction_common = function (action) {
+    if (action.indexOf("common:") != 0) return false;
+    var name = core.decodeBase64(action.substring(7));
+    if (core.getFlag("__commonEventList__").indexOf(name) == -1) return false;
+    core.status.route.push(action);
+    core.insertAction(name);
     setTimeout(core.replay);
     return true;
 }
@@ -1606,13 +1623,13 @@ control.prototype._doSL_replayLoad_afterGet = function (id, data) {
 ////// 同步存档到服务器 //////
 control.prototype.syncSave = function (type) {
     core.ui.drawWaiting("正在同步，请稍后...");
-    core.control.getSaves(type=='all'?null:core.saves.saveIndex, function (saves) {
+    core.getAllSaves(type=='all'?null:core.saves.saveIndex, function (saves) {
         if (!saves) return core.drawText("没有要同步的存档");
-        core.control._syncSave_http(saves);
+        core.control._syncSave_http(type, saves);
     })
 }
 
-control.prototype._syncSave_http = function (saves) {
+control.prototype._syncSave_http = function (type, saves) {
     var formData = new FormData();
     formData.append('type', 'save');
     formData.append('name', core.firstData.name);
@@ -1700,32 +1717,54 @@ control.prototype.loadData = function (data, callback) {
     return this.controldata.loadData(data, callback);
 }
 
-control.prototype.getSaves = function (index, callback) {
-    if (index != null) {
-        core.getLocalForage("save"+index, null, function(data) {
-            if (callback) callback(data);
-        }, function(err) {
-            main.log(err);
-            if (callback) callback(null);
-        })
+control.prototype.getSave = function (index, callback) {
+    if (index == 0) {
+        // --- 自动存档先从缓存中获取
+        if (core.saves.autosave.data != null)
+            callback(core.clone(core.saves.autosave.data));
+        else {
+            core.getLocalForage("autoSave", null, function(data) {
+                callback(data);
+            }, function(err) {
+                main.log(err);
+                callback(null);
+            });
+        }
         return;
     }
-    var ids = Object.keys(core.saves.ids).filter(function(x){return x!=0;})
-        .sort(function(a,b) {return a-b;}), number = ids.length, saves = [];
-    var load = function (index, callback) {
-        if (index > number) {
-            if (callback) callback(saves);
-            return;
-        }
-        core.getLocalForage("save"+ids[index], null, function (data) {
-            saves.push(data);
-            load(index+1, callback);
-        }, function(err) {
-            main.log(err);
-            load(index+1, callback);
-        })
+    core.getLocalForage("save"+index, null, function(data) {
+        if (callback) callback(data);
+    }, function(err) {
+        main.log(err);
+        if (callback) callback(null);
+    });
+}
+
+control.prototype.getSaves = function (ids, callback) {
+    if (!(ids instanceof Array)) return this.getSave(ids, callback);
+    var count = ids.length, data = {};
+    for (var i = 0; i < ids.length; ++i) {
+        (function (i) {
+            core.getSave(ids[i], function (result) {
+                data[i] = result;
+                if (Object.keys(data).length == count)
+                    callback(data);
+            })
+        })(i);
     }
-    load(0, callback);
+}
+
+control.prototype.getAllSaves = function (id, callback) {
+    if (id != null) return this.getSave(id, callback);
+    var ids = Object.keys(core.saves.ids).filter(function(x){return x!=0;})
+        .sort(function(a,b) {return a-b;}), saves = [];
+    this.getSaves(ids, function (data) {
+        for (var i = 0; i < ids.length; ++i) {
+            if (data[i] != null)
+                saves.push(data[i]);
+        }
+        callback(saves);
+    });
 }
 
 ////// 获得所有存在存档的存档位 //////
@@ -1759,6 +1798,43 @@ control.prototype.hasSave = function (index) {
     return core.saves.ids[index] || false;
 }
 
+////// 删除一个或多个存档
+control.prototype.removeSave = function (index, callback) {
+    if (index == 0 || index == "autoSave") {
+        index = "autoSave";
+        core.removeLocalForage(index, function () {
+            core.saves.autosave.data = null;
+            core.saves.autosave.updated = false;
+            if (callback) callback();
+        });
+        return;
+    }
+    core.removeLocalForage("save" + index, function () {
+        core.saves.favorite = core.saves.favorite.filter(function (i) { return core.hasSave(i); });
+        delete core.saves.favoriteName[index];
+        core.control._updateFavoriteSaves();
+        if (callback) callback();
+    }, function () {
+        core.drawTip("无法删除存档！");
+        if (callback) callback();
+    });
+}
+
+////// 读取收藏信息
+control.prototype._loadFavoriteSaves = function () {
+    core.saves.favorite = core.getLocalStorage("favorite", []);
+    // --- 移除不存在的收藏
+    core.saves.favorite = core.saves.favorite.filter(function (i) { return core.hasSave(i); });
+    core.saves.favoriteName = core.getLocalStorage("favoriteName", {});
+}
+
+control.prototype._updateFavoriteSaves = function () {
+    core.setLocalStorage("favorite", core.saves.favorite);
+    core.setLocalStorage("favoriteName", core.saves.favoriteName);
+}
+
+////// 加载某个存档
+
 // ------ 属性，状态，位置，buff，变量，锁定控制等 ------ //
 
 ////// 设置勇士属性 //////
@@ -1780,7 +1856,7 @@ control.prototype.addStatus = function (name, value) {
 control.prototype.getStatus = function (name) {
     if (!core.status.hero) return null;
     if (name == 'x' || name == 'y' || name == 'direction')
-        return this.getHeroLoc('x');
+        return this.getHeroLoc(name);
     if (name == 'exp') name = 'experience';
     return core.status.hero[name];
 }
@@ -1804,12 +1880,12 @@ control.prototype.getRealStatusOrDefault = function (status, name) {
 
 ////// 设置某个属性的增幅值 //////
 control.prototype.setBuff = function (name, value) {
-    this.setFlag('flag:__'+name+'_buff__', value);
+    this.setFlag('__'+name+'_buff__', value);
 }
 
 ////// 加减某个属性的增幅值 //////
 control.prototype.addBuff = function (name, value) {
-    this.setFlag('flag:__'+name+'_buff__', this.getBuff(name) + value);
+    this.setFlag('__'+name+'_buff__', this.getBuff(name) + value);
 }
 
 ////// 获得某个属性的增幅值 //////

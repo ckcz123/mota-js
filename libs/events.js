@@ -806,10 +806,7 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
 
     // ------ 判定commonEvent
     var commonEvent = this.getCommonEvent(action);
-    if (commonEvent instanceof Array) {
-        this._addCommentEventToList(action, commonEvent);
-        action = commonEvent;
-    }
+    if (commonEvent instanceof Array) action = commonEvent;
     if (!action) return;
 
     if (core.status.event.id != 'action') {
@@ -828,22 +825,6 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
 events.prototype.getCommonEvent = function (name) {
     if (!name || typeof name !== 'string') return null;
     return this.commonEvent[name] || null;
-}
-
-events.prototype._addCommentEventToList = function (name, list) {
-    if (list == null) list = this.getCommonEvent(name);
-    if (!list || !core.flags.quickCommonEvents) return;
-    var addToList = false;
-    for (var x in list) {
-        if (list[x].type == 'addToList') {
-            addToList = true;
-            break;
-        }
-    }
-    if (!addToList) return;
-    var obj = core.getFlag("__commonEventList__", []);
-    if (obj.indexOf(name) == -1) obj.push(name);
-    core.setFlag("__commonEventList__", obj);
 }
 
 ////// 恢复一个事件 //////
@@ -1144,13 +1125,12 @@ events.prototype._action_useItem = function (data, x, y, prefix) {
 }
 
 events.prototype._action_openShop = function (data, x, y, prefix) {
-    if (core.isReplaying()) { // 正在播放录像，简单将visited置为true
-        core.status.shops[data.id].visited = true;
-        this.setEvents([]);
-        core.doAction();
-    }
-    else
+    core.status.shops[data.id].visited = true;
+    this.setEvents([]);
+    if (!core.isReplaying())
         this.openShop(data.id);
+    if (core.status.event.id == 'action')
+        core.doAction();
 }
 
 events.prototype._action_disableShop = function (data, x, y, prefix) {
@@ -1204,10 +1184,6 @@ events.prototype._action_insert = function (data, x, y, prefix) {
         var event = (core.floors[floorId][which]||[])[loc[0] + "," + loc[1]];
         if (event) this.insertAction(event.data || event);
     }
-    core.doAction();
-}
-
-events.prototype._action_addToList = function (data, x, y, prefix) {
     core.doAction();
 }
 
@@ -2109,9 +2085,9 @@ events.prototype.openShop = function (shopId, needVisited) {
     shop.times = shop.times || 0;
     if (shop.commonTimes) shop.times = core.getFlag('commonTimes', 0);
     if (needVisited && !shop.visited) {
-        if (!core.flags.enableDisabledShop) {
-            if (shop.times == 0) core.drawTip("该商店尚未开启");
-            else core.drawTip("该商店已失效");
+        if (!core.flags.enableDisabledShop || shop.commonEvent) {
+            if (shop.times == 0) core.drawTip("该项尚未开启");
+            else core.drawTip("该项已失效");
             return;
         }
         else {
@@ -2119,6 +2095,13 @@ events.prototype.openShop = function (shopId, needVisited) {
         }
     }
     else shop.visited = true;
+
+    // --- 商店
+    if (shop.commonEvent) {
+        core.status.route.push("shop:"+shopId+":0");
+        core.insertAction({"type": "insert", "name": shop.commonEvent, "args": shop.args});
+        return;
+    }
     core.ui.drawShop(shopId);
 }
 

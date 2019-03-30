@@ -85,13 +85,25 @@ shopcommonevent
 tooltip : 全局商店, 执行一个公共事件
 helpUrl : https://h5mota.com/games/template/docs/#/
 default : ["shop1","回收钥匙商店",false,"回收钥匙商店",""]
+if (EvalString_2) {
+    if (EvalString_2.indexOf('"')>=0)
+        throw new Error('请勿在此处使用双引号！尝试使用单引号吧~');
+    // 检查是不是数组
+    try {
+        EvalString_2 = JSON.parse(EvalString_2.replace(/'/g, '"'));
+        if (!(EvalString_2 instanceof Array)) throw new Error();
+    }
+    catch (e) {
+        throw new Error('参数列表必须是个有效的数组！');
+    }
+}
 var code = {
     'id': IdString_0,
     'textInList': EvalString_0,
     'mustEnable': Bool_0,
-    'commonEvent': EvalString_1,
-    'args': EvalString_2
+    'commonEvent': EvalString_1
 }
+if (EvalString_2) code.args = EvalString_2;
 code=JSON.stringify(code,null,2)+',\n';
 return code;
 */;
@@ -322,7 +334,7 @@ action
     |   callBook_s
     |   callSave_s
     |   callLoad_s
-    |   unknow_s
+    |   unknown_s
     |   function_s
     |   pass_s
     ;
@@ -1746,17 +1758,19 @@ var code = '{"type": "callLoad"},\n';
 return code;
 */;
 
-unknow_s
+unknown_s
     :   '自定义事件' BGNL? RawEvalString
 
-/* unknow_s
+/* unknown_s
 tooltip : 通过脚本自定义的事件类型, 以及编辑器不识别的事件类型
 helpUrl : https://h5mota.com/games/template/docs/#/
-default : ['{"type":"eventType1"}']
+default : ['{"type":"test", "data": "这是自定义的参数"}']
 colour : this.dataColor
-var tempobj={};
-eval("tempobj='"+RawEvalString_0+"'");
-var code = tempobj +',\n';
+try {
+    var tempobj = JSON.parse(RawEvalString_0);
+} catch (e) {throw new Error("不合法的JSON格式！");}
+if (!tempobj.type) throw new Error("自定义事件需要一个type:xxx");
+var code = JSON.stringify(tempobj) +',\n';
 return code;
 */;
 
@@ -2148,8 +2162,13 @@ ActionParser.prototype.parse = function (obj,type) {
         ]);
       }
       var buildcommentevent = function(obj,parser,next){
+        if (obj.args instanceof Array) {
+          try { obj.args = JSON.stringify(obj.args).replace(/"/g, "'"); }
+          catch (e) {obj.args = '';}
+        }
+        else obj.args = null;
         return MotaActionBlocks['shopcommonevent'].xmlText([
-          obj.id,parser.EvalString(obj.textInList),obj.mustEnable,parser.EvalString(obj.commonEvent),parser.EvalString(obj.args),next
+          obj.id,parser.EvalString(obj.textInList),obj.mustEnable,parser.EvalString(obj.commonEvent),obj.args,next
         ]);
       }
       var next=null;
@@ -2651,13 +2670,8 @@ ActionParser.prototype.parseAction = function() {
     case "animateImage":  // 兼容 animateImage
       break;
     default:
-      var rawdata = JSON.stringify(data,function(k,v){
-        if(typeof(v)=='string')return v.split('\n').join('\\n');
-        else return v;
-      },2);
-      rawdata=rawdata.split('\n').join('\\n');
-      this.next = MotaActionBlocks['unknow_s'].xmlText([
-        rawdata,this.next]);
+      this.next = MotaActionBlocks['unknown_s'].xmlText([
+        JSON.stringify(data),this.next]);
   }
   this.parseAction();
   return;

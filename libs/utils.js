@@ -467,8 +467,6 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
         return "P" + t.substring(6);
     else if (t.indexOf('input2:') == 0)
         return "Q" + t.substring(7) + ":";
-    else if (t.indexOf('common:') == 0)
-        return "c" + t.substring(7) + ":";
     else if (t == 'no')
         return 'N';
     else if (t.indexOf('move:') == 0)
@@ -527,7 +525,7 @@ utils.prototype._decodeRoute_number2id = function (number) {
 }
 
 utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
-    var nxt = (c == 'I' || c == 'e' || c == 'F' || c == 'S' || c == 'Q' || c == 't' || c == 'c') ?
+    var nxt = (c == 'I' || c == 'e' || c == 'F' || c == 'S' || c == 'Q' || c == 't') ?
         this._decodeRoute_getString(decodeObj) : this._decodeRoute_getNumber(decodeObj);
 
     var mp = {"U": "up", "D": "down", "L": "left", "R": "right"};
@@ -571,9 +569,6 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
             break;
         case "Q":
             decodeObj.ans.push("input2:" + nxt);
-            break;
-        case "c":
-            decodeObj.ans.push("common:" + nxt);
             break;
         case "N":
             decodeObj.ans.push("no");

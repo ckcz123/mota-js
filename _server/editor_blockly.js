@@ -159,6 +159,7 @@ editor_blockly = function () {
     ],
     '原生脚本':[
       MotaActionBlocks['function_s'].xmlText(),
+      MotaActionBlocks['unknown_s'].xmlText(),
     ],
     '值块':[
       MotaActionBlocks['setValue_s'].xmlText([

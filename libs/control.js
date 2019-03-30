@@ -1865,12 +1865,12 @@ control.prototype.getRealStatusOrDefault = function (status, name) {
 
 ////// 设置某个属性的增幅值 //////
 control.prototype.setBuff = function (name, value) {
-    this.setFlag('flag:__'+name+'_buff__', value);
+    this.setFlag('__'+name+'_buff__', value);
 }
 
 ////// 加减某个属性的增幅值 //////
 control.prototype.addBuff = function (name, value) {
-    this.setFlag('flag:__'+name+'_buff__', this.getBuff(name) + value);
+    this.setFlag('__'+name+'_buff__', this.getBuff(name) + value);
 }
 
 ////// 获得某个属性的增幅值 //////

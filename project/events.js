@@ -241,18 +241,15 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 		"回收钥匙商店": [
 			{
 				"type": "comment",
-				"text": "公共事件：回收钥匙商店"
-			},
-			{
-				"type": "addToList"
+				"text": "此事件在全局商店中被引用了(全局商店keyShop1)"
 			},
 			{
 				"type": "comment",
-				"text": "使用上述事件并在全塔属性打开quickCommonEvent开关"
+				"text": "解除引用前勿删除此事件"
 			},
 			{
 				"type": "comment",
-				"text": "就可以在快捷列表（V键）中使用本公共事件"
+				"text": "玩家在快捷列表（V键）中可以使用本公共事件"
 			},
 			{
 				"type": "while",
@@ -300,7 +297,27 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 									255,
 									1
 								],
-								"action": []
+								"action": [
+									{
+										"type": "if",
+										"condition": "item:blueKey >= 1",
+										"true": [
+											{
+												"type": "addValue",
+												"name": "item:blueKey",
+												"value": "-1"
+											},
+											{
+												"type": "addValue",
+												"name": "status:money",
+												"value": "50"
+											}
+										],
+										"false": [
+											"\t[商人,woman]你没有蓝钥匙！"
+										]
+									}
+								]
 							},
 							{
 								"text": "离开",

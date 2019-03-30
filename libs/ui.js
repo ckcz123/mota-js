@@ -1118,18 +1118,12 @@ ui.prototype.drawSettings = function () {
 ////// 绘制快捷商店选择栏 //////
 ui.prototype.drawQuickShop = function () {
     core.status.event.id = 'selectShop';
-    var choices;
-    if (core.flags.quickCommonEvents) {
-        choices = core.clone(core.getFlag("__commonEventList__", []));
-    }
-    else {
-        var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {
-            return shopList[shopId].visited || !shopList[shopId].mustEnable
-        });
-        choices = keys.map(function (shopId) {
-            return {"text": shopList[shopId].textInList, "color": shopList[shopId].visited?null:"#999999"};
-        });
-    }
+    var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {
+        return shopList[shopId].visited || !shopList[shopId].mustEnable
+    });
+    var choices = keys.map(function (shopId) {
+        return {"text": shopList[shopId].textInList, "color": shopList[shopId].visited?null:"#999999"};
+    });
     choices.push("返回游戏");
     this.drawChoices(null, choices);
 }

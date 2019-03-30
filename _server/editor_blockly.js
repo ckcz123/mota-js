@@ -37,6 +37,11 @@ editor_blockly = function () {
           {"text": "防御+4", "effect": "status:def+=4"},
           {"text": "魔防+10", "effect": "status:mdef+=10"}
         ]
+      },{
+        "id": "keyShop1",
+        "textInList": "回收钥匙商店",
+        "commonEvent": "回收钥匙商店",
+        "args": ""
       }],'shop'),
       MotaActionBlocks['afterBattle_m'].xmlText(),
       MotaActionBlocks['afterGetItem_m'].xmlText(),
@@ -123,7 +128,6 @@ editor_blockly = function () {
       MotaActionBlocks['hideBgFgMap_s'].xmlText(),
       MotaActionBlocks['trigger_s'].xmlText(),
       MotaActionBlocks['insert_1_s'].xmlText(),
-      MotaActionBlocks['addToList_s'].xmlText(),
       MotaActionBlocks['insert_2_s'].xmlText(),
       MotaActionBlocks['move_s'].xmlText(),
       MotaActionBlocks['jump_s'].xmlText(),
@@ -155,6 +159,7 @@ editor_blockly = function () {
     ],
     '原生脚本':[
       MotaActionBlocks['function_s'].xmlText(),
+      MotaActionBlocks['unknown_s'].xmlText(),
     ],
     '值块':[
       MotaActionBlocks['setValue_s'].xmlText([
@@ -584,6 +589,7 @@ function omitedcheckUpdateFunction(event) {
             'showTextImage_s': 'EvalString_0',
             'function_s': 'RawEvalString_0',
             'shopsub': 'EvalString_3',
+            'unknow_s': 'RawEvalString_0',
         }
         var f = b ? textStringDict[b.type] : null;
         if (f) {

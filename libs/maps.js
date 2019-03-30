@@ -30,12 +30,14 @@ maps.prototype.loadFloor = function (floorId, map) {
         map = {"map": map};
     }
     var content = {};
+    var notCopy = ["firstArrive", "eachArrive", "parallelDo", "map", "bgmap", "fgmap",
+        "events", "changeFloor", "afterBattle", "afterGetItem", "afterOpenDoor", "cannotMove"];
     for (var name in floor) {
-        if (name != 'map' && name != 'bgmap' && name != 'fgmap' && floor[name] != null)
+        if (notCopy.indexOf(name) == -1 && floor[name] != null)
             content[name] = core.clone(floor[name]);
     }
     for (var name in map) {
-        if (name != 'map' && name != 'bgmap' && name != 'fgmap' && map[name] != null)
+        if (notCopy.indexOf(name) == -1 && map[name] != null)
             content[name] = core.clone(map[name]);
     }
     map = this.decompressMap(map.map, floorId);
@@ -1832,18 +1834,17 @@ maps.prototype.drawAnimate = function (name, x, y, callback) {
     // 播放音效
     core.playSound(animate.se);
 
-    var animateId = parseInt(Math.random() * 100000000);
+    var id = setTimeout(null);
     core.status.animateObjs.push({
+        "id": id,
         "animate": animate,
         "centerX": centerX,
         "centerY": centerY,
         "index": 0,
-        "id": animateId,
         "callback": callback
     });
 
-    core.animateFrame.asyncId[animateId] = true;
-    return animateId;
+    return id;
 }
 
 ////// 绘制动画的某一帧 //////
@@ -1881,7 +1882,6 @@ maps.prototype.stopAnimate = function (id, doCallback) {
     for (var i = 0; i < core.status.animateObjs.length; i++) {
         var obj = core.status.animateObjs[i];
         if (obj.id == id) {
-            delete core.animateFrame.asyncId[obj.id];
             if (doCallback) {
                 (function (callback) {
                     setTimeout(function () {
@@ -1890,10 +1890,8 @@ maps.prototype.stopAnimate = function (id, doCallback) {
                 })(obj.callback);
             }
         }
-        core.status.animateObjs.splice(i, 1);
-        if (core.status.animateObjs.length == 0) {
-            core.clearMap('animate');
-        }
-        break;
     }
+    core.status.animateObjs = core.status.animateObjs.filter(function (x) { return x.id != id });
+    if (core.status.animateObjs.length == 0)
+        core.clearMap('animate');
 }

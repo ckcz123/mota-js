@@ -303,10 +303,9 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			},
 			{
 				"id": "keyShop1",
-				"textInList": "1F回收钥匙商店",
+				"textInList": "回收钥匙商店",
 				"mustEnable": false,
-				"commonEvent": "回收钥匙商店",
-				"args": ""
+				"commonEvent": "回收钥匙商店"
 			}
 		],
 		"levelUp": [
@@ -408,7 +407,6 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"enableMoveDirectly": true,
 		"enableDisabledShop": true,
 		"disableShopOnDamage": false,
-		"quickCommonEvents": false,
 		"checkConsole": false
 	}
 }

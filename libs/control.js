@@ -33,7 +33,6 @@ control.prototype._init = function () {
     this.registerReplayAction("fly", this._replayAction_fly);
     this.registerReplayAction("shop", this._replayAction_shop);
     this.registerReplayAction("turn", this._replayAction_turn);
-    this.registerReplayAction("common", this._replayAction_common);
     this.registerReplayAction("getNext", this._replayAction_getNext);
     this.registerReplayAction("moveDirectly", this._replayAction_moveDirectly);
     this.registerReplayAction("key", this._replayAction_key);
@@ -169,25 +168,22 @@ control.prototype._animationFrame_animate = function (timestamp) {
     if (timestamp - core.animateFrame.animateTime < 50 || !core.status.animateObjs || core.status.animateObjs.length == 0) return;
     core.clearMap('animate');
     // 更新帧
-    var animateObjs = [];
-    for (var i=0;i<core.status.animateObjs.length;i++) {
+    for (var i = 0; i < core.status.animateObjs.length; i++) {
         var obj = core.status.animateObjs[i];
         if (obj.index == obj.animate.frames.length) {
-            // 绘制完毕
-            delete core.animateFrame.asyncId[obj.id];
-            // 异步执行回调...
-            (function(callback) {
-                setTimeout(function() {
+            (function (callback) {
+                setTimeout(function () {
                     if (callback) callback();
                 });
             })(obj.callback);
         }
-        else {
-            core.maps._drawAnimateFrame(obj.animate, obj.centerX, obj.centerY, obj.index++);
-            animateObjs.push(obj);
-        }
     }
-    core.status.animateObjs = animateObjs;
+    core.status.animateObjs = core.status.animateObjs.filter(function (obj) {
+        return obj.index < obj.animate.frames.length;
+    });
+    core.status.animateObjs.forEach(function (obj) {
+        core.maps._drawAnimateFrame(obj.animate, obj.centerX, obj.centerY, obj.index++);
+    });
     core.animateFrame.animateTime = timestamp;
 }
 
@@ -1415,6 +1411,12 @@ control.prototype._replayAction_shop = function (action) {
     if (selections.length == 0) return false;
     var shop=core.status.shops[shopId];
     if (!shop || !shop.visited) return false;
+    // --- 判定commonEvent
+    if (shop.commonEvent) {
+        core.openShop(shopId, false);
+        setTimeout(core.replay);
+        return true;
+    }
     var choices = shop.choices;
     var topIndex = core.__HALF_SIZE__ - parseInt(choices.length / 2);
     core.status.event.selection = parseInt(selections.shift());
@@ -1442,16 +1444,6 @@ control.prototype._replayAction_turn = function (action) {
     if (action != 'turn' && action.indexOf('turn:') != 0) return false;
     if (action == 'turn') core.turnHero();
     else core.turnHero(action.substring(5));
-    setTimeout(core.replay);
-    return true;
-}
-
-control.prototype._replayAction_common = function (action) {
-    if (action.indexOf("common:") != 0) return false;
-    var name = core.decodeBase64(action.substring(7));
-    if (core.getFlag("__commonEventList__").indexOf(name) == -1) return false;
-    core.status.route.push(action);
-    core.insertAction(name);
     setTimeout(core.replay);
     return true;
 }
@@ -2187,7 +2179,7 @@ control.prototype.playSound = function (sound) {
             var source = core.musicStatus.audioContext.createBufferSource();
             source.buffer = core.material.sounds[sound];
             source.connect(core.musicStatus.gainNode);
-            var id = parseInt(Math.random()*10000000);
+            var id = setTimeout(null);
             source.onended = function () {
                 delete core.musicStatus.playingSounds[id];
             }

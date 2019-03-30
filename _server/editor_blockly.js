@@ -159,6 +159,7 @@ editor_blockly = function () {
     ],
     '原生脚本':[
       MotaActionBlocks['function_s'].xmlText(),
+      MotaActionBlocks['unknown_s'].xmlText(),
     ],
     '值块':[
       MotaActionBlocks['setValue_s'].xmlText([
@@ -588,7 +589,6 @@ function omitedcheckUpdateFunction(event) {
             'showTextImage_s': 'EvalString_0',
             'function_s': 'RawEvalString_0',
             'shopsub': 'EvalString_3',
-            'unknow_s': 'RawEvalString_0',
         }
         var f = b ? textStringDict[b.type] : null;
         if (f) {

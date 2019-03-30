@@ -348,6 +348,12 @@ utils.prototype.formatDate2 = function (date) {
         + core.setTwoDigits(date.getHours()) + core.setTwoDigits(date.getMinutes()) + core.setTwoDigits(date.getSeconds());
 }
 
+utils.prototype.formatTime = function (time) {
+    return core.setTwoDigits(parseInt(time/3600000))
+        +":"+core.setTwoDigits(parseInt(time/60000)%60)
+        +":"+core.setTwoDigits(parseInt(time/1000)%60);
+}
+
 ////// 两位数显示 //////
 utils.prototype.setTwoDigits = function (x) {
     return parseInt(x) < 10 ? "0" + x : x;
@@ -461,6 +467,8 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
         return "P" + t.substring(6);
     else if (t.indexOf('input2:') == 0)
         return "Q" + t.substring(7) + ":";
+    else if (t.indexOf('common:') == 0)
+        return "c" + t.substring(7) + ":";
     else if (t == 'no')
         return 'N';
     else if (t.indexOf('move:') == 0)
@@ -519,7 +527,7 @@ utils.prototype._decodeRoute_number2id = function (number) {
 }
 
 utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
-    var nxt = (c == 'I' || c == 'e' || c == 'F' || c == 'S' || c == 'Q' || c == 't') ?
+    var nxt = (c == 'I' || c == 'e' || c == 'F' || c == 'S' || c == 'Q' || c == 't' || c == 'c') ?
         this._decodeRoute_getString(decodeObj) : this._decodeRoute_getNumber(decodeObj);
 
     var mp = {"U": "up", "D": "down", "L": "left", "R": "right"};
@@ -563,6 +571,9 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
             break;
         case "Q":
             decodeObj.ans.push("input2:" + nxt);
+            break;
+        case "c":
+            decodeObj.ans.push("common:" + nxt);
             break;
         case "N":
             decodeObj.ans.push("no");

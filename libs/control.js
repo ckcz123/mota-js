@@ -1302,8 +1302,12 @@ control.prototype._replay_save = function () {
 
 control.prototype._replay_error = function (action) {
     core.status.replay.replaying = false;
-    main.log("录像文件出错，当前操作：" + action +
-        "\n接下来10个操作是："+core.status.replay.toReplay.slice(0, 10).toString());
+    var len = core.status.replay.toReplay.length;
+    var prevList = core.status.replay.totalList.slice(-len - 11, -len - 1);
+    var nextList = core.status.replay.toReplay.slice(0, 10);
+    main.log("录像文件出错，当前操作：" + action);
+    main.log("之前的10个操作是：\n" + prevList.toString());
+    main.log("接下来10个操作是：\n" + nextList.toString());
     core.ui.drawConfirmBox("录像文件出错，你想回到上个节点吗？", function () {
         core.ui.closePanel();
         if (core.status.replay.save.length > 0) {

@@ -1416,64 +1416,65 @@ actions.prototype._keyUpToolbox = function (keycode) {
 ////// 装备栏界面时的点击操作 //////
 actions.prototype._clickEquipbox = function (x, y) {
     // 道具栏
-    if (x >= 10 && x <= 12 && y == 0) {
+    if (x >= this.LAST - 2 && y == 0) {
         core.ui.closePanel();
         core.openToolbox();
         return;
     }
     // 返回
-    if (x >= 10 && x <= 12 && y == 12) {
+    if (x >= this.LAST - 2 && y == this.LAST) {
         core.ui.closePanel();
         return;
     }
 
-    // 当前页面
-    var page = core.status.event.data.page;
-
     // 上一页
-    if ((x == 3 || x == 4) && y == 12) {
-        if (page > 1) {
+    if ((x == this.HSIZE-2 || x == this.HSIZE-3) && y == this.LAST) {
+        if (core.status.event.data.page > 1) {
             core.status.event.data.page--;
             core.ui.drawEquipbox(core.status.event.selection);
         }
         return;
     }
     // 下一页
-    if ((x == 8 || x == 9) && y == 12) {
-        var lastPage = Math.ceil(Object.keys(core.status.hero.items.equips).length / 12);
-        if (page < lastPage) {
+    if ((x == this.HSIZE+2 || x == this.HSIZE+3) && y == this.LAST) {
+        var lastPage = Math.ceil(Object.keys(core.status.hero.items.equips).length / this.LAST);
+        if (core.status.event.data.page < lastPage) {
             core.status.event.data.page++;
             core.ui.drawEquipbox(core.status.event.selection);
         }
         return;
     }
 
-    var index = parseInt(x / 2);
-    if (y == 4) index += 0;
-    else if (y == 6) index += 6;
-    else if (y == 9) index += 12;
-    else if (y == 11) index += 18;
-    else index = -1;
-
-    if (index >= 0) {
-        if (index < 12) index = parseInt(index / 2);
-        this._clickEquipboxIndex(index);
+    var per_page = this.HSIZE - 3, v = this.SIZE / per_page;
+    if (y == this.LAST - 8) {
+        for (var i = 0; i < per_page; ++i)
+            if (x >= i * v && x <= (i + 1) * v)
+                return this._clickEquipboxIndex(i);
     }
+    else if (y == this.LAST - 6) {
+        for (var i = 0; i < per_page; ++i)
+            if (x >= i * v && x <= (i + 1) * v)
+                return this._clickEquipboxIndex(per_page + i);
+    }
+    else if (y == this.LAST - 3)
+        this._clickEquipboxIndex(this.LAST + parseInt(x / 2))
+    else if (y == this.LAST - 1)
+        this._clickEquipboxIndex(this.LAST + this.HSIZE + parseInt(x / 2));
 }
 
 ////// 选择装备栏界面中某个Index后的操作 //////
 actions.prototype._clickEquipboxIndex = function (index) {
-    if (index < 6) {
+    if (index < this.LAST) {
         if (index >= core.status.globalAttribute.equipName.length) return;
         if (index == core.status.event.selection && core.status.hero.equipment[index]) {
             core.unloadEquip(index);
             core.status.route.push("unEquip:" + index);
         }
     }
-    else if (index >= 12) {
+    else {
         var equips = Object.keys(core.status.hero.items.equips || {}).sort();
         if (index == core.status.event.selection) {
-            var equipId = equips[index - 12 + (core.status.event.data.page - 1) * 12];
+            var equipId = equips[index - this.LAST + (core.status.event.data.page - 1) * this.LAST];
             core.loadEquip(equipId);
             core.status.route.push("equip:" + equipId);
         }
@@ -1483,21 +1484,23 @@ actions.prototype._clickEquipboxIndex = function (index) {
 
 ////// 装备栏界面时，按下某个键的操作 //////
 actions.prototype._keyDownEquipbox = function (keycode) {
-    if (core.status.event.data != null) return;
+    if (core.status.event.data == null) return;
 
+    var last_index = this.LAST - 1;
+    var per_line = this.HSIZE - 3;
     var equipCapacity = core.status.globalAttribute.equipName.length;
     var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
     var index = core.status.event.selection;
     var page = core.status.event.data.page;
-    var totalPage = Math.ceil(ownEquipment.length / 12);
-    var totalLastIndex = 12 + (page < totalPage ? 11 : (ownEquipment.length + 11) % 12);
+    var totalPage = Math.ceil(ownEquipment.length / this.LAST);
+    var totalLastIndex = this.LAST + (page < totalPage ? last_index : (ownEquipment.length + last_index) % this.LAST);
 
     if (keycode == 37) { // left
         if (index == 0) return;
-        if (index == 12) {
+        if (index == this.LAST) {
             if (page > 1) {
                 core.status.event.data.page--;
-                index = 23;
+                index = this.LAST + last_index;
             }
             else if (page == 1)
                 index = equipCapacity - 1;
@@ -1508,25 +1511,25 @@ actions.prototype._keyDownEquipbox = function (keycode) {
         return;
     }
     if (keycode == 38) { // up
-        if (index < 3) return;
-        else if (index < 6) index -= 3;
-        else if (index < 18) {
-            index = parseInt((index - 12) / 2);
-            if (equipCapacity > 3) index = Math.min(equipCapacity - 1, index + 3);
+        if (index < per_line) return;
+        else if (index < 2 * per_line) index -= per_line;
+        else if (index < this.LAST + this.HSIZE) {
+            index = parseInt((index - this.LAST) / 2);
+            if (equipCapacity > per_line) index = Math.min(equipCapacity - 1, index + per_line);
             else index = Math.min(equipCapacity - 1, index);
         }
-        else index -= 6;
+        else index -= this.HSIZE;
         this._clickEquipboxIndex(index);
         return;
     }
     if (keycode == 39) { // right
-        if (page < totalPage && index == 23) {
+        if (page < totalPage && index == this.LAST + last_index) {
             core.status.event.data.page++;
-            index = 12;
+            index = this.LAST;
         }
         else if (index == equipCapacity - 1) {
             if (totalPage == 0) return;
-            index = 12;
+            index = this.LAST;
         }
         else if (index == totalLastIndex)
             return;
@@ -1535,19 +1538,19 @@ actions.prototype._keyDownEquipbox = function (keycode) {
         return;
     }
     if (keycode == 40) { // down
-        if (index < 3) {
-            if (equipCapacity > 3) index = Math.min(index + 3, equipCapacity - 1);
+        if (index < per_line) {
+            if (equipCapacity > per_line) index = Math.min(index + per_line, equipCapacity - 1);
             else {
                 if (totalPage == 0) return;
-                index = Math.min(2 * index + 1 + 12, totalLastIndex);
+                index = Math.min(2 * index + 1 + this.LAST, totalLastIndex);
             }
         }
-        else if (index < 6) {
+        else if (index < 2 * per_line) {
             if (totalPage == 0) return;
-            index = Math.min(2 * (index - 3) + 1 + 12, totalLastIndex);
+            index = Math.min(2 * (index - per_line) + 1 + this.LAST, totalLastIndex);
         }
-        else if (index < 18)
-            index = Math.min(index + 6, totalLastIndex);
+        else if (index < this.LAST + this.HSIZE)
+            index = Math.min(index + this.HSIZE, totalLastIndex);
         else return;
         this._clickEquipboxIndex(index);
         return;

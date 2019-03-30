@@ -311,20 +311,17 @@ items.prototype.unloadEquip = function (equipType, callback) {
 }
 
 items.prototype.compareEquipment = function (compareEquipId, beComparedEquipId) {
-    var compareAtk = 0, compareDef = 0, compareMdef = 0;
-    if (compareEquipId) {
-        var compareEquip = core.material.items[compareEquipId];
-        compareAtk += (compareEquip.equip || {}).atk || 0;
-        compareDef += (compareEquip.equip || {}).def || 0;
-        compareMdef += (compareEquip.equip || {}).mdef || 0;
+    var result = {};
+    var first = core.material.items[compareEquipId], second = core.material.items[beComparedEquipId];
+    for (var name in core.status.hero) {
+        if (typeof core.status.hero[name] == 'number') {
+            var ans = 0;
+            if (first) ans += (first.equip || {})[name] || 0;
+            if (second) ans -= (second.equip || {})[name] || 0;
+            if (ans != 0) result[name] = ans;
+        }
     }
-    if (beComparedEquipId) {
-        var beComparedEquip = core.material.items[beComparedEquipId];
-        compareAtk -= (beComparedEquip.equip || {}).atk || 0;
-        compareDef -= (beComparedEquip.equip || {}).def || 0;
-        compareMdef -= (beComparedEquip.equip || {}).mdef || 0;
-    }
-    return {"atk": compareAtk, "def": compareDef, "mdef": compareMdef};
+    return result;
 }
 
 ////// 实际换装的效果 //////
@@ -349,7 +346,7 @@ items.prototype._realLoadEquip = function (type, loadId, unloadId, callback) {
 
     var loadPercentage = loadEquip.equip.percentage, unloadPercentage = unloadEquip.equip.percentage;
 
-    if (loadPercentage != null && unloadPercentage != null && loadPercentage != unloadPercentage) {
+    if (loadId && unloadId && (loadPercentage || false) != (unloadPercentage || false)) {
         this.unloadEquip(type);
         this.loadEquip(loadId);
         if (callback) callback();

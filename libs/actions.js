@@ -717,7 +717,7 @@ actions.prototype._sys_keyDownCtrl = function () {
     }
     if (core.status.event.id == 'action' && core.status.event.data.type == 'sleep'
         && !core.status.event.data.current.noSkip) {
-        if (core.timeout.sleepTimeout && Object.keys(core.animateFrame.asyncId).length == 0) {
+        if (core.timeout.sleepTimeout && !core.hasAsync()) {
             clearTimeout(core.timeout.sleepTimeout);
             core.timeout.sleepTimeout = null;
             core.doAction();
@@ -752,7 +752,7 @@ actions.prototype._sys_longClick_lockControl = function (x, y) {
     // 长按可以跳过等待事件
     if (core.status.event.id == 'action' && core.status.event.data.type == 'sleep'
         && !core.status.event.data.current.noSkip) {
-        if (core.timeout.sleepTimeout && Object.keys(core.animateFrame.asyncId).length == 0) {
+        if (core.timeout.sleepTimeout && !core.hasAsync()) {
             clearTimeout(core.timeout.sleepTimeout);
             core.timeout.sleepTimeout = null;
             core.doAction();

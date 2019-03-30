@@ -237,6 +237,83 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 				],
 				"false": []
 			}
+		],
+		"回收钥匙商店": [
+			{
+				"type": "comment",
+				"text": "公共事件：回收钥匙商店"
+			},
+			{
+				"type": "addToList"
+			},
+			{
+				"type": "comment",
+				"text": "使用上述事件并在全塔属性打开quickCommonEvent开关"
+			},
+			{
+				"type": "comment",
+				"text": "就可以在快捷列表（V键）中使用本公共事件"
+			},
+			{
+				"type": "while",
+				"condition": "1",
+				"data": [
+					{
+						"type": "choices",
+						"text": "\t[商人,woman]你有多余的钥匙想要出售吗？",
+						"choices": [
+							{
+								"text": "黄钥匙（10金币）",
+								"color": [
+									255,
+									255,
+									0,
+									1
+								],
+								"action": [
+									{
+										"type": "if",
+										"condition": "item:yellowKey >= 1",
+										"true": [
+											{
+												"type": "addValue",
+												"name": "item:yellowKey",
+												"value": "-1"
+											},
+											{
+												"type": "addValue",
+												"name": "status:money",
+												"value": "10"
+											}
+										],
+										"false": [
+											"\t[商人,woman]你没有黄钥匙！"
+										]
+									}
+								]
+							},
+							{
+								"text": "蓝钥匙（50金币）",
+								"color": [
+									0,
+									0,
+									255,
+									1
+								],
+								"action": []
+							},
+							{
+								"text": "离开",
+								"action": [
+									{
+										"type": "exit"
+									}
+								]
+							}
+						]
+					}
+				]
+			}
 		]
 	}
 }

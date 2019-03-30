@@ -1198,20 +1198,35 @@ actions.prototype._keyUpShop = function (keycode) {
 
 ////// 快捷商店界面时的点击操作 //////
 actions.prototype._clickQuickShop = function (x, y) {
-    var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {
-        return shopList[shopId].visited || !shopList[shopId].mustEnable
-    });
+    var keys = [];
+    if (core.flags.quickCommonEvents) {
+        keys = core.getFlag("__commonEventList__", []);
+    }
+    else {
+        keys = Object.keys(core.status.shops).filter(function (shopId) {
+            return core.status.shops[shopId].visited || !core.status.shops[shopId].mustEnable
+        });
+    }
+
     if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
         var topIndex = this.HSIZE - parseInt(keys.length / 2);
         if (y >= topIndex && y < topIndex + keys.length) {
-            var reason = core.events.canUseQuickShop(keys[y - topIndex]);
-            if (!core.flags.enableDisabledShop && reason) {
-                core.drawText(reason);
-                return;
+            if (core.flags.quickCommonEvents) {
+                var name = keys[y - topIndex];
+                core.ui.closePanel();
+                core.status.route.push("common:" + core.encodeBase64(name));
+                core.insertAction(name);
             }
-            core.events.openShop(keys[y - topIndex], true);
-            if (core.status.event.id == 'shop')
-                core.status.event.data.fromList = true;
+            else {
+                var reason = core.events.canUseQuickShop(keys[y - topIndex]);
+                if (!core.flags.enableDisabledShop && reason) {
+                    core.drawText(reason);
+                    return;
+                }
+                core.events.openShop(keys[y - topIndex], true);
+                if (core.status.event.id == 'shop')
+                    core.status.event.data.fromList = true;
+            }
         }
         // 离开
         else if (y == topIndex + keys.length)
@@ -1225,10 +1240,17 @@ actions.prototype._keyUpQuickShop = function (keycode) {
         core.ui.closePanel();
         return;
     }
-    var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {
-        return shopList[shopId].visited || !shopList[shopId].mustEnable
-    });
-    this._selectChoices(keys.length + 1, keycode, this._clickQuickShop);
+    var length = 0;
+    if (core.flags.quickCommonEvents) {
+        length = core.getFlag("__commonEventList__", []).length;
+    }
+    else {
+        var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {
+            return shopList[shopId].visited || !shopList[shopId].mustEnable
+        });
+        length = keys.length;
+    }
+    this._selectChoices(length + 1, keycode, this._clickQuickShop);
     return;
 }
 

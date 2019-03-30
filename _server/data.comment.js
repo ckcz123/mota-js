@@ -660,6 +660,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "是否在经过领域/夹击/路障等伤害后禁用快捷商店。"
                 },
+                "quickCommonEvents": {
+                    "_leaf": true,
+                    "_type": "checkbox",
+                    "_bool": "bool",
+                    "_data": "是否使用自定义的公共事件列表来代替快捷商店列表。\n如果此项开启，则快捷商店列表中将会显示加入的公共事件。"
+                },
                 "checkConsole": {
                     "_leaf": true,
                     "_type": "checkbox",

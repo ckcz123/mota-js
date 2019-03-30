@@ -123,6 +123,7 @@ editor_blockly = function () {
       MotaActionBlocks['hideBgFgMap_s'].xmlText(),
       MotaActionBlocks['trigger_s'].xmlText(),
       MotaActionBlocks['insert_1_s'].xmlText(),
+      MotaActionBlocks['addToList_s'].xmlText(),
       MotaActionBlocks['insert_2_s'].xmlText(),
       MotaActionBlocks['move_s'].xmlText(),
       MotaActionBlocks['jump_s'].xmlText(),

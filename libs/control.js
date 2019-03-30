@@ -33,6 +33,7 @@ control.prototype._init = function () {
     this.registerReplayAction("fly", this._replayAction_fly);
     this.registerReplayAction("shop", this._replayAction_shop);
     this.registerReplayAction("turn", this._replayAction_turn);
+    this.registerReplayAction("common", this._replayAction_common);
     this.registerReplayAction("getNext", this._replayAction_getNext);
     this.registerReplayAction("moveDirectly", this._replayAction_moveDirectly);
     this.registerReplayAction("key", this._replayAction_key);
@@ -1301,8 +1302,12 @@ control.prototype._replay_save = function () {
 
 control.prototype._replay_error = function (action) {
     core.status.replay.replaying = false;
-    main.log("录像文件出错，当前操作：" + action +
-        "\n接下来10个操作是："+core.status.replay.toReplay.slice(0, 10).toString());
+    var len = core.status.replay.toReplay.length;
+    var prevList = core.status.replay.totalList.slice(-len - 11, -len - 1);
+    var nextList = core.status.replay.toReplay.slice(0, 10);
+    main.log("录像文件出错，当前操作：" + action);
+    main.log("之前的10个操作是：\n" + prevList.toString());
+    main.log("接下来10个操作是：\n" + nextList.toString());
     core.ui.drawConfirmBox("录像文件出错，你想回到上个节点吗？", function () {
         core.ui.closePanel();
         if (core.status.replay.save.length > 0) {
@@ -1437,6 +1442,16 @@ control.prototype._replayAction_turn = function (action) {
     if (action != 'turn' && action.indexOf('turn:') != 0) return false;
     if (action == 'turn') core.turnHero();
     else core.turnHero(action.substring(5));
+    setTimeout(core.replay);
+    return true;
+}
+
+control.prototype._replayAction_common = function (action) {
+    if (action.indexOf("common:") != 0) return false;
+    var name = core.decodeBase64(action.substring(7));
+    if (core.getFlag("__commonEventList__").indexOf(name) == -1) return false;
+    core.status.route.push(action);
+    core.insertAction(name);
     setTimeout(core.replay);
     return true;
 }
@@ -1841,7 +1856,7 @@ control.prototype.addStatus = function (name, value) {
 control.prototype.getStatus = function (name) {
     if (!core.status.hero) return null;
     if (name == 'x' || name == 'y' || name == 'direction')
-        return this.getHeroLoc('x');
+        return this.getHeroLoc(name);
     if (name == 'exp') name = 'experience';
     return core.status.hero[name];
 }
@@ -1865,12 +1880,12 @@ control.prototype.getRealStatusOrDefault = function (status, name) {
 
 ////// 设置某个属性的增幅值 //////
 control.prototype.setBuff = function (name, value) {
-    this.setFlag('flag:__'+name+'_buff__', value);
+    this.setFlag('__'+name+'_buff__', value);
 }
 
 ////// 加减某个属性的增幅值 //////
 control.prototype.addBuff = function (name, value) {
-    this.setFlag('flag:__'+name+'_buff__', this.getBuff(name) + value);
+    this.setFlag('__'+name+'_buff__', this.getBuff(name) + value);
 }
 
 ////// 获得某个属性的增幅值 //////

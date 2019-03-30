@@ -1118,12 +1118,18 @@ ui.prototype.drawSettings = function () {
 ////// 绘制快捷商店选择栏 //////
 ui.prototype.drawQuickShop = function () {
     core.status.event.id = 'selectShop';
-    var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {
-        return shopList[shopId].visited || !shopList[shopId].mustEnable
-    });
-    var choices = keys.map(function (shopId) {
-        return {"text": shopList[shopId].textInList, "color": shopList[shopId].visited?null:"#999999"};
-    });
+    var choices;
+    if (core.flags.quickCommonEvents) {
+        choices = core.clone(core.getFlag("__commonEventList__", []));
+    }
+    else {
+        var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {
+            return shopList[shopId].visited || !shopList[shopId].mustEnable
+        });
+        choices = keys.map(function (shopId) {
+            return {"text": shopList[shopId].textInList, "color": shopList[shopId].visited?null:"#999999"};
+        });
+    }
     choices.push("返回游戏");
     this.drawChoices(null, choices);
 }
@@ -1733,7 +1739,7 @@ ui.prototype.drawToolbox = function(index) {
 
     core.setTextAlign('ui', 'center');
     core.fillText('ui', '[装备栏]', this.PIXEL - 46, 25, '#DDDDDD', this._buildFont(15, true));
-    core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13,'#DDDDDD');
+    core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13);
 }
 
 ui.prototype._drawToolbox_getInfo = function (index) {
@@ -1796,27 +1802,25 @@ ui.prototype._drawToolbox_drawLine = function (yoffset, text) {
 
 ui.prototype._drawToolbox_drawDescription = function (info, max_height) {
     core.setTextAlign('ui', 'left');
-    // 描述
-    if (info.selectId) {
-        var item=core.material.items[info.selectId];
-        core.fillText('ui', item.name, 10, 32, '#FFD700', this._buildFont(20, true))
-        var text = item.text||"该道具暂无描述。";
-        try {
-            // 检查能否eval
-            text = core.replaceText(text);
-        } catch (e) {}
-        var lines = core.splitLines('ui', text, this.PIXEL - 15, this._buildFont(17, false));
-        // --- 开始逐行绘制
-        var curr = 62, line_height = 25;
-        core.setFillStyle('ui', '#FFFFFF');
-        for (var i=0;i<lines.length;++i) {
-            core.fillText('ui', lines[i], 10, curr);
-            curr += line_height;
-            if (curr>=max_height) break;
-        }
-        if (curr < max_height) {
-            core.fillText('ui', '<继续点击该道具即可进行使用>', 10, curr, '#CCCCCC', this._buildFont(14, false));
-        }
+    if (!info.selectId) return;
+    var item=core.material.items[info.selectId];
+    core.fillText('ui', item.name, 10, 32, '#FFD700', this._buildFont(20, true))
+    var text = item.text||"该道具暂无描述。";
+    try {
+        // 检查能否eval
+        text = core.replaceText(text);
+    } catch (e) {}
+    var lines = core.splitLines('ui', text, this.PIXEL - 15, this._buildFont(17, false));
+    // --- 开始逐行绘制
+    var curr = 62, line_height = 25;
+    core.setFillStyle('ui', '#FFFFFF');
+    for (var i=0;i<lines.length;++i) {
+        core.fillText('ui', lines[i], 10, curr);
+        curr += line_height;
+        if (curr>=max_height) break;
+    }
+    if (curr < max_height) {
+        core.fillText('ui', '<继续点击该道具即可进行使用>', 10, curr, '#CCCCCC', this._buildFont(14, false));
     }
 }
 
@@ -1837,187 +1841,155 @@ ui.prototype._drawToolbox_drawContent = function (info, line, items, page, drawC
 
 ////// 绘制装备界面 //////
 ui.prototype.drawEquipbox = function(index) {
-    // 设定eventdata
-    if (!core.isset(core.status.event.data) || !core.isset(core.status.event.data.page))
-        core.status.event.data = {"page":1, "selectId":null};
+    var info = this._drawEquipbox_getInfo(index);
+    this._drawToolbox_drawBackground();
 
+    core.setAlpha('ui', 1);
+    core.setStrokeStyle('ui', '#DDDDDD');
+    core.canvas.ui.lineWidth = 2;
+    core.canvas.ui.strokeWidth = 2;
+    core.setTextAlign('ui', 'right');
+    var line1 = this.PIXEL - 306;
+    this._drawToolbox_drawLine(line1, "当前装备");
+    var line2 = this.PIXEL - 146;
+    this._drawToolbox_drawLine(line2, "拥有装备");
+
+    this._drawEquipbox_description(info, line1);
+
+    this._drawEquipbox_drawEquiped(info, line1);
+    this._drawToolbox_drawContent(info, line2, info.ownEquipment, info.page, true);
+    this.drawPagination(info.page, info.totalPage);
+
+    core.setTextAlign('ui', 'center');
+    core.fillText('ui', '[道具栏]', this.PIXEL - 46, 25, '#DDDDDD', this._buildFont(15, true));
+    core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13);
+}
+
+ui.prototype._drawEquipbox_getInfo = function (index) {
+    if (!core.status.event.data || core.status.event.data.page == null)
+        core.status.event.data = {"page":1, "selectId":null};
     var allEquips = core.status.globalAttribute.equipName;
     var equipLength = allEquips.length;
-
-    if (!core.isset(core.status.hero.equipment)) core.status.hero.equipment = [];
-
+    if (!core.status.hero.equipment) core.status.hero.equipment = [];
     var equipEquipment = core.status.hero.equipment;
     var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
-    
     var page = core.status.event.data.page;
-    var totalPage = Math.ceil(ownEquipment.length/12);
-
+    var totalPage = Math.ceil(ownEquipment.length / this.LAST);
     // 处理index
-    if (!core.isset(index)) {
-        if (equipLength>0 && core.isset(equipEquipment[0])) index=0;
-        else if (ownEquipment.length>0) index=12;
-        else index=0;
+    if (index == null) {
+        if (equipLength > 0 && equipEquipment[0]) index = 0;
+        else if (ownEquipment.length > 0) index = this.LAST;
+        else index = 0;
     }
-    if (index>=12 && ownEquipment.length==0) index = 0;
+    if (index >= this.LAST && ownEquipment.length == 0) index = 0;
     var selectId=null;
-    if (index<12) {
+    if (index < this.LAST) {
         if (index >= equipLength) index=Math.max(0, equipLength - 1);
-        selectId = equipEquipment[index]||null;
+        selectId = equipEquipment[index] || null;
     }
     else {
-        if (page == totalPage) index = Math.min(index, (ownEquipment.length+11)%12+12);
-        selectId = ownEquipment[index-12 + (page-1)*12];
+        if (page == totalPage) index = Math.min(index, (ownEquipment.length+this.LAST-1)%this.LAST+this.LAST);
+        selectId = ownEquipment[index - this.LAST + (page - 1) * this.LAST];
         if (!core.hasItem(selectId)) selectId=null;
     }
     core.status.event.selection=index;
     core.status.event.data.selectId=selectId;
+    return { index: index, selectId: selectId, page: page, totalPage: totalPage, allEquips: allEquips,
+            equipLength: equipLength, equipEquipment: equipEquipment, ownEquipment: ownEquipment};
+}
 
-    core.clearMap('ui', 0, 0, 416, 416);
-    core.setAlpha('ui', 0.85);
-    core.fillRect('ui', 0, 0, 416, 416, '#000000');
-    core.setAlpha('ui', 1);
-    core.setFillStyle('ui', '#DDDDDD');
-    core.setStrokeStyle('ui', '#DDDDDD');
-    core.canvas.ui.lineWidth = 2;
-    core.canvas.ui.strokeWidth = 2;
-
-    var ydelta = 20;
-
-    // 画线
-    core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(0, 130-ydelta);
-    core.canvas.ui.lineTo(416, 130-ydelta);
-    core.canvas.ui.stroke();
-    core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(416,129-ydelta);
-    core.canvas.ui.lineTo(416,105-ydelta);
-    core.canvas.ui.lineTo(416-72,105-ydelta);
-    core.canvas.ui.lineTo(416-102,129-ydelta);
-    core.canvas.ui.fill();
-
-    core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(0, 290-ydelta);
-    core.canvas.ui.lineTo(416, 290-ydelta);
-    core.canvas.ui.stroke();
-    core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(416,289-ydelta);
-    core.canvas.ui.lineTo(416,265-ydelta);
-    core.canvas.ui.lineTo(416-72,265-ydelta);
-    core.canvas.ui.lineTo(416-102,289-ydelta);
-    core.canvas.ui.fill();
-
-    // 文字
-    core.setTextAlign('ui', 'right');
-    var globalFont = core.status.globalAttribute.font;
-    core.fillText('ui', "当前装备", 411, 124-ydelta, '#333333', "bold 16px "+globalFont);
-    core.fillText('ui', "拥有装备", 411, 284-ydelta);
-    
+ui.prototype._drawEquipbox_description = function (info, max_height) {
     core.setTextAlign('ui', 'left');
+    if (!info.selectId) return;
+    var equip=core.material.items[info.selectId];
+    // --- 标题
+    if (!equip.equip) equip.equip = {"type": 0};
+    var equipType = equip.equip.type, equipString;
+    if (typeof equipType === 'string') {
+        equipString = equipType || "未知部位";
+        equipType = core.items.getEquipTypeByName(equipType);
+    }
+    else equipString = info.allEquips[equipType] || "未知部位";
+    core.fillText('ui', equip.name + "（" + equipString + "）", 10, 32, '#FFD700', this._buildFont(20, true))
+    // --- 描述
+    var text = equip.text || "该装备暂无描述。";
+    try {
+        text = core.replaceText(text);
+    } catch (e) {}
+    var lines = core.splitLines('ui', text, this.PIXEL - 15, this._buildFont(17, false));
+    var curr = 62, line_height = 25;
+    core.setFillStyle('ui', '#FFFFFF');
+    for (var i = 0; i < lines.length; ++i) {
+        core.fillText('ui', lines[i], 10, curr);
+        curr += line_height;
+        if (curr >= max_height) break;
+    }
+    // --- 变化值
+    if (curr >= max_height) return;
+    this._drawEquipbox_drawStatusChanged(info, curr, equip, equipType);
+}
 
-    // 描述
-    if (core.isset(selectId)) {
-        var equip=core.material.items[selectId];
-        if (!core.isset(equip.equip)) equip.equip = {"type": 0};
-        var equipType = equip.equip.type;
-        var equipString;
-        if (typeof equipType === 'string') {
-            equipString = equipType||"未知部位";
-            equipType = core.items.getEquipTypeByName(equipType);
-        }
-        else equipString = allEquips[equipType]||"未知部位";
-
-        core.fillText('ui', equip.name + "（" + equipString + "）", 10, 32, '#FFD700', "bold 20px "+globalFont)
-
-        var text = equip.text||"该装备暂无描述。";
-        try {
-            text = core.replaceText(text);
-        } catch (e) {}
-        var lines = core.splitLines('ui', text, 406, '17px '+globalFont);
-
-        core.fillText('ui', lines[0], 10, 62, '#FFFFFF', '17px '+globalFont);
-        
-        // 比较属性
-        if (lines.length==1) {
-            var compare, differentMode = null;
-            if (index<12) compare = core.compareEquipment(null, selectId);
-            else {
-                if (equipType<0) {
-                    differentMode = '<当前没有该装备的空位，请先卸下装备>';
-                }
-                else {
-                    var last = core.material.items[equipEquipment[equipType]]||{};
-                    // 检查是不是数值模式和比例模式之间的切换
-                    if (core.isset(last.equip) && (last.equip.percentage||false) != (equip.equip.percentage||false)) {
-                        differentMode = '<数值和比例模式之间的切换不显示属性变化>';
-                    }
-                    else {
-                        compare = core.compareEquipment(selectId, equipEquipment[equipType]);
-                    }
-                }
-            }
-            if (differentMode != null) {
-                core.fillText('ui', differentMode, 10, 89, '#CCCCCC', '14px '+globalFont);
-            }
-            else {
-                var drawOffset = 10;
-                [['攻击','atk'], ['防御','def'], ['魔防','mdef']].forEach(function (t) {
-                    var title = t[0], name = t[1];
-                    if (!core.isset(compare[name]) || compare[name]==0) return;
-                    var color = '#00FF00';
-                    if (compare[name]<0) color = '#FF0000';
-                    var nowValue = core.getStatus(name), newValue = nowValue + compare[name];
-                    if (equip.equip.percentage) {
-                        var nowBuff = core.getBuff(name), newBuff = nowBuff+compare[name]/100;
-                        nowValue = Math.floor(nowBuff*core.getStatus(name));
-                        newValue = Math.floor(newBuff*core.getStatus(name));
-                    }
-                    var content = title + ' ' + nowValue + '->';
-                    core.fillText('ui', content, drawOffset, 89, '#CCCCCC', 'bold 14px '+globalFont);
-                    drawOffset += core.calWidth('ui', content);
-                    core.fillText('ui', newValue, drawOffset, 89, color);
-                    drawOffset += core.calWidth('ui', newValue) + 15;
-                })
-            }
-        }
+ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipType) {
+    var compare, differentMode = null;
+    if (info.index < this.LAST) compare = core.compareEquipment(null, info.selectId);
+    else {
+        if (equipType<0) differentMode = '<当前没有该装备的空位，请先卸下装备>';
         else {
-            var leftText = text.substring(lines[0].length);
-            core.fillText('ui', leftText, 10, 89, '#FFFFFF', '17px '+globalFont);
+            var last = core.material.items[info.equipEquipment[equipType]]||{};
+            if (last.equip && (last.equip.percentage || false) != (equip.equip.percentage || false))
+                differentMode = '<数值和比例模式之间的切换不显示属性变化>';
+            else
+                compare = core.compareEquipment(info.selectId, info.equipEquipment[equipType]);
         }
     }
+    if (differentMode != null) {
+        core.fillText('ui', differentMode, 10, y, '#CCCCCC', this._buildFont(14, false));
+        return;
+    }
+    var drawOffset = 10;
+    // --- 变化值...
+    core.setFont('ui', this._buildFont(14, true));
+    for (var name in compare) {
+        var img = core.statusBar.icons[name];
+        if (img) { // 绘制图标
+            core.drawImage('ui', img, 0, 0, 32, 32, drawOffset, y - 13, 16, 16);
+            drawOffset += 20;
+        }
+        else { // 绘制文字
+            core.fillText('ui', name + " ", drawOffset, y, '#CCCCCC');
+            drawOffset += core.calWidth('ui', name + " ");
+        }
+        var nowValue = core.getStatus(name) * core.getBuff(name), newValue = (nowValue + compare[name]) * core.getBuff(name);
+        if (equip.equip.percentage) {
+            var nowBuff = core.getBuff(name), newBuff = nowBuff + compare[name] / 100;
+            nowValue = Math.floor(nowBuff * core.getStatus(name));
+            newValue = Math.floor(newBuff * core.getStatus(name));
+        }
+        nowValue = core.formatBigNumber(nowValue);
+        newValue = core.formatBigNumber(newValue);
+        core.fillText('ui', nowValue + "->", drawOffset, y, '#CCCCCC');
+        drawOffset += core.calWidth('ui', nowValue + "->");
+        core.fillText('ui', newValue, drawOffset, y, compare[name]>0?'#00FF00':'#FF0000');
+        drawOffset += core.calWidth('ui', newValue) + 8;
+    }
+}
 
+ui.prototype._drawEquipbox_drawEquiped = function (info, line) {
     core.setTextAlign('ui', 'right');
-    var images = core.material.images.items;
-
+    var per_line = this.HSIZE - 3, width = Math.floor(this.PIXEL / (per_line + 0.25));
     // 当前装备
-    for (var i = 0 ; i < equipLength ; i++) {
-        var equipId = equipEquipment[i] || null;
-        if (core.isset(equipId)) {
+    for (var i = 0; i < info.equipLength ; i++) {
+        var equipId = info.equipEquipment[i] || null;
+        var offset_text = width * (i % per_line) + 56;
+        var offset_image = width * (i % per_line) + width * 2 / 3;
+        var y = line + 54 * Math.floor(i / per_line) + 19;
+        if (equipId) {
             var icon = core.material.icons.items[equipId];
-            core.drawImage('ui', images, 0, icon*32, 32, 32, 16*(8*(i%3)+5)+5, 144+Math.floor(i/3)*54+5-ydelta, 32, 32);
+            core.drawImage('ui', core.material.images.items, 0, 32 * icon, 32, 32, offset_image, y, 32, 32);
         }
-        core.fillText('ui', allEquips[i]||"未知", 16*(8*(i%3)+1)+40, 144+Math.floor(i/3)*54+32-ydelta, '#FFFFFF', "bold 16px "+globalFont);
-        core.strokeRect('ui', 16*(8*(i%3)+5)+1, 144+Math.floor(i/3)*54+1-ydelta, 40, 40, index==i?'#FFD700':"#FFFFFF");
+        core.fillText('ui', info.allEquips[i] || "未知", offset_text, y + 27, '#FFFFFF', this._buildFont(16, true))
+        core.strokeRect('ui', offset_image - 4, y - 4, 40, 40, info.index==i?'#FFD700':"#FFFFFF");
     }
-
-    // 现有装备 
-    for (var i=0;i<12;i++) {
-        var ownEquip=ownEquipment[12*(page-1)+i];
-        if (!core.isset(ownEquip)) continue;
-        var icon=core.material.icons.items[ownEquip];
-        core.drawImage('ui', images, 0, icon*32, 32, 32, 16*(4*(i%6)+1)+5, 304+Math.floor(i/6)*54+5-ydelta, 32, 32)
-        // 个数
-        if (core.itemCount(ownEquip)>1)
-            core.fillText('ui', core.itemCount(ownEquip), 16*(4*(i%6)+1)+40, 304+Math.floor(i/6)*54+38-ydelta, '#FFFFFF', "bold 14px "+globalFont);
-        if (index>=12 && selectId == ownEquip)
-            core.strokeRect('ui', 16*(4*(i%6)+1)+1, 304+Math.floor(i/6)*54+1-ydelta, 40, 40, '#FFD700');
-    }
-
-    this.drawPagination(page, totalPage, 12);
-    // 道具栏
-    core.setTextAlign('ui', 'center');
-    core.fillText('ui', '[道具栏]', 370, 25,'#DDDDDD', 'bold 15px '+globalFont);
-    // 退出按钮
-    core.fillText('ui', '返回游戏', 370, 403,'#DDDDDD', 'bold 15px '+globalFont);
 }
 
 ////// 绘制存档/读档界面 //////

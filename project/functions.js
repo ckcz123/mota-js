@@ -699,7 +699,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				gid = guards[i][2];
 			// 递归计算支援怪伤害信息，这里不传x,y保证不会重复调用
 			// 这里的mdef传0，因为护盾应该只会被计算一次
-			var info = core.enemys.getDamageInfo(core.material.enemys[gid], origin_hero_hp, origin_hero_atk, origin_hero_def, 0);
+			var info = core.enemys.getDamageInfo(core.material.enemys[gid], { hp: origin_hero_hp, atk: origin_hero_atk, def: origin_hero_def, mdef: 0 });
 			if (info == null) { // 小队中任何一个怪物不可战斗，直接返回null
 				return null;
 			}

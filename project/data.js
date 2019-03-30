@@ -249,6 +249,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"name": "贪婪之神",
 				"icon": "blueShop",
 				"textInList": "1F金币商店",
+				"commonTimes": false,
+				"mustEnable": false,
 				"use": "money",
 				"need": "20+10*times*(times+1)",
 				"text": "勇敢的武士啊，给我${need}金币就可以：",
@@ -276,6 +278,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"name": "经验之神",
 				"icon": "pinkShop",
 				"textInList": "1F经验商店",
+				"commonTimes": false,
+				"mustEnable": false,
 				"use": "experience",
 				"need": "-1",
 				"text": "勇敢的武士啊，给我若干经验就可以：",
@@ -296,6 +300,13 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 						"effect": "status:def+=5"
 					}
 				]
+			},
+			{
+				"id": "keyShop1",
+				"textInList": "1F回收钥匙商店",
+				"mustEnable": false,
+				"commonEvent": "回收钥匙商店",
+				"args": ""
 			}
 		],
 		"levelUp": [

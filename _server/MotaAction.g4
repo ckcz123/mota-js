@@ -65,6 +65,7 @@ return code;
 
 shoplist
     :   shopsub
+    |   shopcommonevent
     |   emptyshop
     ;
 
@@ -74,6 +75,24 @@ emptyshop
 
 /* emptyshop
 var code = ' \n';
+return code;
+*/;
+
+shopcommonevent
+    :   '商店 id' IdString '快捷商店栏中名称' EvalString BGNL? '未开启状态则不显示在列表中' Bool BGNL? '执行的公共事件 id' EvalString '参数列表' EvalString?
+    
+/* shopcommonevent
+tooltip : 全局商店, 执行一个公共事件
+helpUrl : https://h5mota.com/games/template/docs/#/
+default : ["shop1","回收钥匙商店",false,"回收钥匙商店",""]
+var code = {
+    'id': IdString_0,
+    'textInList': EvalString_0,
+    'mustEnable': Bool_0,
+    'commonEvent': EvalString_1,
+    'args': EvalString_2
+}
+code=JSON.stringify(code,null,2)+',\n';
 return code;
 */;
 
@@ -240,7 +259,6 @@ action
     |   insert_2_s
     |   revisit_s
     |   exit_s
-    |   addToList_s
     |   setBlock_s
     |   showFloorImg_s
     |   hideFloorImg_s
@@ -304,6 +322,7 @@ action
     |   callBook_s
     |   callSave_s
     |   callLoad_s
+    |   unknow_s
     |   function_s
     |   pass_s
     ;
@@ -691,18 +710,6 @@ tooltip : exit: 立刻结束当前事件
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=exit%EF%BC%9A%E7%AB%8B%E5%88%BB%E7%BB%93%E6%9D%9F%E5%BD%93%E5%89%8D%E4%BA%8B%E4%BB%B6
 colour : this.eventColor
 var code = '{"type": "exit"},\n';
-return code;
-*/;
-
-addToList_s
-    :   '将本公共事件插入到快捷列表中' Newline
-
-
-/* addToList_s
-tooltip : addToList: 将本公共事件插入到快捷列表中
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=exit%EF%BC%9A%E7%AB%8B%E5%88%BB%E7%BB%93%E6%9D%9F%E5%BD%93%E5%89%8D%E4%BA%8B%E4%BB%B6
-colour : this.eventColor
-var code = '{"type": "addToList"},\n';
 return code;
 */;
 
@@ -1739,6 +1746,19 @@ var code = '{"type": "callLoad"},\n';
 return code;
 */;
 
+unknow_s
+    :   '自定义事件' BGNL? RawEvalString
+
+/* unknow_s
+tooltip : 通过脚本自定义的事件类型, 以及编辑器不识别的事件类型
+helpUrl : https://h5mota.com/games/template/docs/#/
+default : ['{"type":"eventType1"}']
+colour : this.dataColor
+var tempobj={};
+eval("tempobj='"+RawEvalString_0+"'");
+var code = tempobj +',\n';
+return code;
+*/;
 
 function_s
     :   '自定义JS脚本' '不自动执行下一个事件' Bool BGNL? Newline RawEvalString Newline BEND Newline
@@ -2127,10 +2147,21 @@ ActionParser.prototype.parse = function (obj,type) {
           obj.id,obj.name,obj.icon,obj.textInList,obj.commonTimes,obj.mustEnable,obj.use,obj.need,parser.EvalString(obj.text),text_choices,next
         ]);
       }
+      var buildcommentevent = function(obj,parser,next){
+        return MotaActionBlocks['shopcommonevent'].xmlText([
+          obj.id,parser.EvalString(obj.textInList),obj.mustEnable,parser.EvalString(obj.commonEvent),parser.EvalString(obj.args),next
+        ]);
+      }
       var next=null;
       if(!obj)obj=[];
       while(obj.length){
-        next=buildsub(obj.pop(),this,next);
+        var shopobj=obj.pop()
+        if(shopobj.choices)
+          next=buildsub(shopobj,this,next);
+        else if(shopobj.commonEvent)
+          next=buildcommentevent(shopobj,this,next);
+        else
+          throw new Error("[警告]出错啦！\n"+shopobj.id+" 无效的商店");
       }
       return MotaActionBlocks['shop_m'].xmlText([next]);
     
@@ -2617,14 +2648,16 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['exit_s'].xmlText([
         this.next]);
       break;
-    case "addToList": // 立刻结束事件
-      this.next = MotaActionBlocks['addToList_s'].xmlText([
-        this.next]);
-      break;
     case "animateImage":  // 兼容 animateImage
       break;
     default:
-      throw new Error("[警告]出错啦！\n"+data.type+" 事件不被支持...");
+      var rawdata = JSON.stringify(data,function(k,v){
+        if(typeof(v)=='string')return v.split('\n').join('\\n');
+        else return v;
+      },2);
+      rawdata=rawdata.split('\n').join('\\n');
+      this.next = MotaActionBlocks['unknow_s'].xmlText([
+        rawdata,this.next]);
   }
   this.parseAction();
   return;

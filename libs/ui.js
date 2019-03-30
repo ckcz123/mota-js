@@ -1795,6 +1795,7 @@ ui.prototype._drawToolbox_drawLine = function (yoffset, text) {
 }
 
 ui.prototype._drawToolbox_drawDescription = function (info, max_height) {
+    core.setTextAlign('ui', 'left');
     if (!info.selectId) return;
     var item=core.material.items[info.selectId];
     core.fillText('ui', item.name, 10, 32, '#FFD700', this._buildFont(20, true))

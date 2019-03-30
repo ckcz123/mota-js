@@ -33,6 +33,7 @@ control.prototype._init = function () {
     this.registerReplayAction("fly", this._replayAction_fly);
     this.registerReplayAction("shop", this._replayAction_shop);
     this.registerReplayAction("turn", this._replayAction_turn);
+    this.registerReplayAction("common", this._replayAction_common);
     this.registerReplayAction("getNext", this._replayAction_getNext);
     this.registerReplayAction("moveDirectly", this._replayAction_moveDirectly);
     this.registerReplayAction("key", this._replayAction_key);
@@ -1437,6 +1438,16 @@ control.prototype._replayAction_turn = function (action) {
     if (action != 'turn' && action.indexOf('turn:') != 0) return false;
     if (action == 'turn') core.turnHero();
     else core.turnHero(action.substring(5));
+    setTimeout(core.replay);
+    return true;
+}
+
+control.prototype._replayAction_common = function (action) {
+    if (action.indexOf("common:") != 0) return false;
+    var name = core.decodeBase64(action.substring(7));
+    if (core.getFlag("__commonEventList__").indexOf(name) == -1) return false;
+    core.status.route.push(action);
+    core.insertAction(name);
     setTimeout(core.replay);
     return true;
 }

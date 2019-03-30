@@ -806,7 +806,10 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
 
     // ------ 判定commonEvent
     var commonEvent = this.getCommonEvent(action);
-    if (commonEvent instanceof Array) action = commonEvent;
+    if (commonEvent instanceof Array) {
+        this._addCommentEventToList(action, commonEvent);
+        action = commonEvent;
+    }
     if (!action) return;
 
     if (core.status.event.id != 'action') {
@@ -825,6 +828,22 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
 events.prototype.getCommonEvent = function (name) {
     if (!name || typeof name !== 'string') return null;
     return this.commonEvent[name] || null;
+}
+
+events.prototype._addCommentEventToList = function (name, list) {
+    if (list == null) list = this.getCommonEvent(name);
+    if (!list || !core.flags.quickCommonEvents) return;
+    var addToList = false;
+    for (var x in list) {
+        if (list[x].type == 'addToList') {
+            addToList = true;
+            break;
+        }
+    }
+    if (!addToList) return;
+    var obj = core.getFlag("__commonEventList__", []);
+    if (obj.indexOf(name) == -1) obj.push(name);
+    core.setFlag("__commonEventList__", obj);
 }
 
 ////// 恢复一个事件 //////
@@ -1175,7 +1194,7 @@ events.prototype._action_insert = function (data, x, y, prefix) {
     }
     if (data.name) { // 公共事件
         core.setFlag('arg0', data.name);
-        core.insertAction(this.getCommonEvent(data.name));
+        core.insertAction(data.name);
     }
     else {
         var loc = this.__action_getLoc(data.loc, x, y, prefix);
@@ -1185,6 +1204,10 @@ events.prototype._action_insert = function (data, x, y, prefix) {
         var event = (core.floors[floorId][which]||[])[loc[0] + "," + loc[1]];
         if (event) this.insertAction(event.data || event);
     }
+    core.doAction();
+}
+
+events.prototype._action_addToList = function (data, x, y, prefix) {
     core.doAction();
 }
 

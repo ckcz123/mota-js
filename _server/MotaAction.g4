@@ -240,6 +240,7 @@ action
     |   insert_2_s
     |   revisit_s
     |   exit_s
+    |   addToList_s
     |   setBlock_s
     |   showFloorImg_s
     |   hideFloorImg_s
@@ -690,6 +691,18 @@ tooltip : exit: 立刻结束当前事件
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=exit%EF%BC%9A%E7%AB%8B%E5%88%BB%E7%BB%93%E6%9D%9F%E5%BD%93%E5%89%8D%E4%BA%8B%E4%BB%B6
 colour : this.eventColor
 var code = '{"type": "exit"},\n';
+return code;
+*/;
+
+addToList_s
+    :   '将本公共事件插入到快捷列表中' Newline
+
+
+/* addToList_s
+tooltip : addToList: 将本公共事件插入到快捷列表中
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=exit%EF%BC%9A%E7%AB%8B%E5%88%BB%E7%BB%93%E6%9D%9F%E5%BD%93%E5%89%8D%E4%BA%8B%E4%BB%B6
+colour : this.eventColor
+var code = '{"type": "addToList"},\n';
 return code;
 */;
 
@@ -2602,6 +2615,10 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "exit": // 立刻结束事件
       this.next = MotaActionBlocks['exit_s'].xmlText([
+        this.next]);
+      break;
+    case "addToList": // 立刻结束事件
+      this.next = MotaActionBlocks['addToList_s'].xmlText([
         this.next]);
       break;
     case "animateImage":  // 兼容 animateImage

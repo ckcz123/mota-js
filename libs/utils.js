@@ -475,7 +475,7 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
         return 'K' + t.substring(4);
     else if (t.indexOf('random:') == 0)
         return 'X' + t.substring(7);
-    return '';
+    return '('+t+')';
 }
 
 ////// 解密路线 //////
@@ -485,7 +485,7 @@ utils.prototype.decodeRoute = function (route) {
     // 解压缩
     try {
         var v = LZString.decompressFromBase64(route);
-        if (/^[a-zA-Z0-9+\/=:]*$/.test(v)) {
+        if (/^[a-zA-Z0-9+\/=:()]*$/.test(v)) {
             route = v;
         }
     } catch (e) {
@@ -525,6 +525,15 @@ utils.prototype._decodeRoute_number2id = function (number) {
 }
 
 utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
+    // --- 特殊处理自定义项
+    if (c == '(') {
+        var idx = decodeObj.route.indexOf(')', decodeObj.index);
+        if (idx >= 0) {
+            decodeObj.ans.push(decodeObj.route.substring(decodeObj.index, idx));
+            decodeObj.index = idx + 1;
+            return;
+        }
+    }
     var nxt = (c == 'I' || c == 'e' || c == 'F' || c == 'S' || c == 'Q' || c == 't') ?
         this._decodeRoute_getString(decodeObj) : this._decodeRoute_getNumber(decodeObj);
 

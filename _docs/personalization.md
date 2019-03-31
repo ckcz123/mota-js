@@ -337,28 +337,16 @@ function (enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId) {
 
 对于特殊的塔，我们可以考虑修改楼传事件来完成一些特殊的要求，比如镜子可以按楼传来切换表里。
 
-要修改楼传事件，需要进行如下几步：
+要修改楼传事件，需要进行如下两步：
 
-1. 截获楼传的点击事件。在control.js中找到useFly函数，并将其替换成如下内容：
-``` js
-////// 点击楼层传送器时的打开操作 //////
-control.prototype.useFly = function (need) {
-    if (core.isMoving()) {
-        core.drawTip("请先停止勇士行动");
-        return;
-    }
-    if (core.status.lockControl || core.status.event.id != null) return;
-    
-    if (core.canUseItem('fly')) core.useItem('fly');
-    else core.drawTip("当前无法使用"+core.material.items.fly.name);
-}
-```
+1. 重写楼传的点击事件。在插件中对`core.control.useFly进行重写`。详细代码参见[重写点击楼传事件](api#重写点击楼传事件)。
 2. 修改楼传的使用事件。和其他永久道具一样，在地图编辑器的图块属性中修改楼传的useItemEffect和canUseItemEffect两个内容。例如：
 ``` js
 "useItemEffect": "core.insertAction([...])" // 执行某段自定义事件，或者其他脚本
 "canUseItemEffect": "true" // 任何时候可用
 ```
-修改时，请先把`null`改成空字符串`""`，然后再双击进行编辑。
+
+除了覆盖楼传事件外，对于快捷商店、虚拟键盘等等也可以进行覆盖，只不过是仿照上述代码重写对应的函数（`openQuickShop`,`openKeyboard`）即可。
 
 ## 自定义怪物属性
 
@@ -441,7 +429,7 @@ this.myfunc = function(x) {
 
 从V2.6开始，在插件中用`this.xxx`定义的函数将会被转发到core中。例如上述的`myfunc`除了`core.plugin.myfunc`外也可以直接`core.myfunc`调用。
 
-详见[函数转发](api#函数转发)。
+详见[函数的转发](api#函数的转发)。
 
 ## 标题界面事件化
 

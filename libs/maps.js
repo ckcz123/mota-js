@@ -1632,7 +1632,7 @@ maps.prototype.jumpBlock = function (sx, sy, ex, ey, time, keep, callback) {
 
     this.__playJumpSound();
 
-    var jumpInfo = ths.__generateJumpInfo(sx, sy, ex, ey, time);
+    var jumpInfo = this.__generateJumpInfo(sx, sy, ex, ey, time);
     jumpInfo.keep = keep;
 
     this._jumpBlock_doJump(blockInfo, canvases, jumpInfo, callback);

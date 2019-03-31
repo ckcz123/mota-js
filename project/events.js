@@ -223,7 +223,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 							},
 							{
 								"type": "if",
-								"condition": "core.getBgFgNumber('bg') == 167",
+								"condition": "core.getBgNumber() == 167",
 								"true": [
 									{
 										"type": "function",

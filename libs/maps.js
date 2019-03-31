@@ -362,10 +362,26 @@ maps.prototype.getBgFgMapArray = function (name, floorId, noCache) {
     return arr;
 }
 
+maps.prototype.getBgMapArray = function (floorId, noCache) {
+    return this.getBgFgMapArray('bg', floorId, noCache);
+}
+
+maps.prototype.getFgMapArray = function (floorId, noCache) {
+    return this.getBgFgMapArray('fg', floorId, noCache);
+}
+
 maps.prototype.getBgFgNumber = function (name, x, y, floorId, noCache) {
     if (x == null) x = core.getHeroLoc('x');
     if (y == null) y = core.getHeroLoc('y');
     return this.getBgFgMapArray(name, floorId, noCache)[y][x];
+}
+
+maps.prototype.getBgNumber = function (x, y, floorId, noCache) {
+    return this.getBgFgNumber('bg', x, y, floorId, noCache);
+}
+
+maps.prototype.getFgNumber = function (x, y, floorId, noCache) {
+    return this.getBgFgNumber('fg', x, y, floorId, noCache);
 }
 
 // ------ 当前能否朝某方向移动，能否瞬间移动 ------ //
@@ -375,8 +391,8 @@ maps.prototype.generateMovableArray = function (floorId, x, y, direction) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return null;
     var width = core.floors[floorId].width, height = core.floors[floorId].height;
-    var bgArray = this.getBgFgMapArray('bg', floorId),
-        fgArray = this.getBgFgMapArray('fg', floorId),
+    var bgArray = this.getBgMapArray(floorId),
+        fgArray = this.getFgMapArray(floorId),
         eventArray = this.getMapArray(floorId);
 
     var generate = function (x, y, direction) {
@@ -489,7 +505,7 @@ maps.prototype._canMoveDirectly_bfs = function (sx, sy, ex, ey) {
     var canMoveArray = this.generateMovableArray();
     var blocksObj = this.getMapBlocksObj(core.status.floorId);
     // 滑冰
-    var bgMap = this.getBgFgMapArray('bg');
+    var bgMap = this.getBgMapArray();
 
     var visited = [], queue = [];
     visited[sx + "," + sy] = 0;

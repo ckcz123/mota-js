@@ -1385,6 +1385,8 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 
 值得注意的是，如果是额外添加进文件的音效，则需在main.js中this.sounds里加载它。
 
+可以加`"stop": true`来停止之前正在播放的音效。
+
 ### stopSound：停止所有音效
 
 使用`{"type": "stopSound"}`可以停止所有音效。

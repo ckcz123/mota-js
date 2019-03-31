@@ -240,7 +240,7 @@ tip.infos=function(value){
             document.getElementById('isAirwall-else').innerHTML=(tip.hasId?`<p>图块编号：<span class="infoText">${ value['idnum'] }</span></p>
             <p>图块ID：<span class="infoText">${ value['id'] }</span></p>`:`
             <p class="warnText">该图块无对应的数字或ID存在，请先前往icons.js和maps.js中进行定义！</p>`)+`
-            <p>图块所在素材：<span class="infoText">${ value['images'] + (tip.isAutotile ? '( '+infos['id']+' )' : '') }</span>
+            <p>图块所在素材：<span class="infoText">${ value['images'] + (tip.isAutotile ? '( '+value['id']+' )' : '') }</span>
             </p>
             <p>图块索引：<span class="infoText">${ value['y'] }</span></p>`
         }

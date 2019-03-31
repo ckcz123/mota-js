@@ -1635,7 +1635,7 @@ control.prototype._syncSave_http = function (type, saves) {
         else {
             core.drawText((type=='all'?"所有存档":"存档"+core.saves.saveIndex)+"同步成功！\n\n您的存档编号： "
                 +response.code+"\n您的存档密码： "+response.msg
-                +"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。")
+                +"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。\n\r[yellow]另外请注意，存档同步只会保存一个月的时间。\r")
         }
     }, function (e) {
         core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+e);

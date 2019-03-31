@@ -2203,8 +2203,8 @@ control.prototype.stopSound = function () {
     for (var i in core.musicStatus.playingSounds) {
         var source = core.musicStatus.playingSounds[i];
         try {
-            if (source[i].stop) source[i].stop();
-            else if (source[i].noteOff) source[i].noteOff();
+            if (source.stop) source.stop();
+            else if (source.noteOff) source.noteOff();
         }
         catch (e) {
             main.log(e);

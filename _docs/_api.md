@@ -1,52 +1,6 @@
-# 脚本
+# 附录: API列表
 
 ?> 目前版本**v2.6**，上次更新时间：* {docsify-updated} *
-
-在V2.6版本中，基本对整个项目代码进行了重写，更加方便
-
-## 控制台的使用
-
-在Chrome浏览器中，按（Ctrl+Shift+I）可打开控制台。
-
-![](img/console.jpg)
-
-控制台中有很多的标签，最常用的是`Console`, `Sources`和`Elements`。
-
-有关更详尽的控制台使用可自行搜索[Chrome开发者工具](https://www.baidu.com/s?wd=chrome%20%E5%BC%80%E5%8F%91%E8%80%85%E5%B7%A5%E5%85%B7)了解更多。
-
-### Console：命令行
-
-### Sources：断点调试
-
-### Elements：网页元素查看
-
-## 整体项目架构
-
-## 函数的转发，复写函数
-
-## 附录：API列表
-
-### core.js
-
-### actions.js
-
-### control.js
-
-### enemys.js
-
-### events.js
-
-### icons.js
-
-### items.js
-
-### loader.js
-
-### map.js
-
-### ui.js
-
-### utils.js
 
 **这里只列出所有可能会被造塔者用到的常用API，更多的有关内容请在代码内进行查询。**
 

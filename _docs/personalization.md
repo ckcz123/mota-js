@@ -51,7 +51,7 @@ core.fillText('test', '这是一段文字', 10, 30, '#FF0000', '16px Verdana'); 
 
 `core.deleteAllCanvas()`可以删除所有动态创建的画布，`core.relocateCanvas(name, x, y)`和`core.resizeCanvas(name, x, y)`可以对画布的位置和大小进行改变。
 
-更多详细API请参见[API列表](api)。
+更多详细API请参见[API列表](api#附录：API列表)。
 
 ## 自定义素材
 
@@ -726,4 +726,4 @@ if (core.flags.enableSkill) {
 
 ==========================================================================================
 
-[继续阅读附录：所有API列表](api)
+[继续阅读脚本](api)

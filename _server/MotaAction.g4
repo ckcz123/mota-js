@@ -1481,15 +1481,16 @@ return code;
 */;
 
 playSound_s
-    :   '播放音效' EvalString Newline
+    :   '播放音效' EvalString '停止之前音效' Bool? Newline
     
 
 /* playSound_s
 tooltip : playSound: 播放音效
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=playsound%EF%BC%9A%E6%92%AD%E6%94%BE%E9%9F%B3%E6%95%88
-default : ["item.mp3"]
+default : ["item.mp3",false]
 colour : this.soundColor
-var code = '{"type": "playSound", "name": "'+EvalString_0+'"},\n';
+Bool_0 = Bool_0 ? ', "stop": true' : '';
+var code = '{"type": "playSound", "name": "'+EvalString_0+'"'+Bool_0+'},\n';
 return code;
 */;
 
@@ -2495,7 +2496,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "playSound":
       this.next = MotaActionBlocks['playSound_s'].xmlText([
-        data.name,this.next]);
+        data.name,data.stop,this.next]);
       break;
     case "playBgm":
       this.next = MotaActionBlocks['playBgm_s'].xmlText([

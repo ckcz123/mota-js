@@ -1213,6 +1213,7 @@ events.prototype._action_freeBgm = function (data, x, y, prefix) {
 }
 
 events.prototype._action_playSound = function (data, x, y, prefix) {
+    if (data.stop) core.stopSound();
     core.playSound(data.name);
     core.doAction();
 }

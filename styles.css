@@ -1,235 +1,228 @@
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #000;
-    overflow: hidden;
-}
-
-@font-face {
-    font-family: number;
-    src: url("fonts/number.ttf");
+html,body {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	background-color: #000;
 }
 
 #gameGroup {
-    position: absolute;
-    outline: 3px #fff solid;
-    background-color: #000;
+	position: absolute;
+	border: 3px #fff solid;
+	background-color: #000;
 }
 
 #mainTips {
-    color: #fff;
-    font-size: 0.8rem;
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 12;
+	color: #fff;
+	font-size: 0.8rem;
+	position: fixed;
+	top: 10px;
+	left: 10px;
+	z-index: 12;
+}
+
+#musicBtn {
+	position: fixed;
+	bottom: 10px;
+	left: 10px;
+	cursor: pointer;
+	z-index: 12;
 }
 
 #startPanel {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    background-color: #fff;
-    overflow: hidden;
-    z-index: 8;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-color: #fff;
+	overflow: hidden;
+	z-index: 8;
 }
 
 #startTop {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    background-color: #000;
-    z-index: 11;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-color: #000;
+	z-index: 11;
 }
 
 #startTopProgressBar {
-    width: 90%;
-    height: 5%;
-    margin: 0 5%;
-    position: absolute;
-    top: 5%;
-    background-color: #fff;
-    z-index: 12;
+	width: 90%;
+	height: 5%;
+	margin: 0 5%;
+	position: absolute;
+	top: 5%;
+	background-color: #fff;
+	z-index: 12;
 }
 
 #startTopProgress {
-    width: 0%;
-    height: 100%;
-    background-color: #666;
+	width: 0%;
+	height: 100%;
+	background-color: #666;
 }
 
 #startTopLoadTips {
-    color: #fff;
-    font-size: 0.6rem;
-    position: absolute;
-    top: 8%;
-    left: 5%;
-    z-index: 12;
+	color: #fff;
+	font-size: 0.6rem;
+	position: absolute;
+	top: 8%;
+	left: 5%;
+	z-index: 12;
 }
 
 #startBackground {
-    position:absolute;
-    top:50%;
-    left:50%;
-    height: 100%;
-    width: auto;
-    transform:translate(-50%,-50%);
-    z-index: 9;
-}
-
-#startLogo {
-    position: absolute;
-    z-index: 9;
-    left: 0;
-    right: 0;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 8%;
-    max-width: 100%;
-    text-align: center;
-    font: bold 4rem 华文行楷;
+	position: absolute;
+	z-index: 9;
 }
 
 #startTitle {
-    position: absolute;
-    z-index: 10;
+	position: absolute;
+	z-index: 10;
 }
 
 #startButtonGroup {
-    width: 100%;
-    position: absolute;
-    text-align: center;
-    font-size: 1.4rem;
-    background-color: #000;
-    opacity: 0.85;
-    display: none;
-    z-index: 9;
-    bottom: 0;
-    margin-bottom: 7%;
-}
-
-#startButtons {
-    display: block;
-}
-
-#levelChooseButtons {
-    display: none;
+	width: 100%;
+	position: absolute;
+	text-align: center;
+	font-size: 1.4rem;
+	background-color: #000;
+	opacity: 0.7;
+	display: none;
+	z-index: 9;
 }
 
 .startButton {
-    width: 100%;
-    margin: 20px 0;
-    color: #fff;
-    font-weight: bold;
-    display: block;
-    cursor: pointer;
+	width: 100%;
+	margin: 20px 0;
+	color: #fff;
+	font-weight: bold;
+	display: block;
+	cursor: pointer;
 }
 
 .startButton:hover {
-    color: #ff0000;
+	color: #ff0000;
 }
 
 #floorMsgGroup {
-    width: 416px;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    right: 0;
-    text-align: center;
-    display: none;
-    color: #fff;
-    background-color: #000;
-    z-index: 7;
+	width: 352px;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	right: 0;
+	text-align: center;
+	color: #fff;
+	background-color: #000;
+	z-index: 7;
 }
 
-#logoLabel {
-    margin-top: 8%;
-    font: bold 3rem 华文行楷;
-    margin-left: auto;
-    margin-right: auto;
+#logoImage {
+	width: 50%;
+	height: auto;
+	margin-top: 30px;
 }
 
 #versionLabel {
-    margin-top: -3%;
-    font-size: 1.2rem;
-    font-weight: bold;
+	margin-top: 10px;
+	font-size: 1.2rem;
+	font-weight: bold;
 }
 
 #floorNameLabel {
-    margin-top: 30px;
-    font-size: 1.6rem;
-    font-weight: bold;
+	margin-top: 20px;
+	font-size: 1.6rem;
+	font-weight: bold;
 }
 
 #statusBar {
-    position: absolute;
-    background: url(images/ground.png) round;
-    z-index: 6;
-}
-
-#toolBar {
-    position: absolute;
-    background: url(images/ground.png) round;
-    z-index: 5;
-    display: none;
-    left: 0px;
-    border-top: 3px #fff solid;
-}
-
-#statusBar img {
-    position: absolute;
-    display: none;
-}
-
-#statusBar p {
-    position: absolute;
-    color: white;
-    font: bold italic 1.1em Verdana;
-    margin: 0;
-}
-
-#statusBar p#hard {
-    color: red;
-    font: bold normal 1.1em "Arial Black";
-    text-align: center;
-    right: 0;
-}
-
-p#poison, p#weak, p#curse {
-    font-style: normal;
-    font-size: 1em;
+	position: absolute;
+	background: url(images/floor.png) round;
+	z-index: 6;
 }
 
 .gameCanvas {
-    position: absolute;
+	position: absolute;
 }
 
 #bg {
-    z-index: 1;
+	z-index: 1;
 }
 
 #event {
-    z-index: 2;
+	z-index: 2;
 }
 
 #fg {
-    z-index: 3;
+	z-index: 3;
 }
 
 #hero {
-    z-index: 4;
+	z-index: 4;
 }
 
 #ui {
-    z-index: 5;
+	z-index: 5;
 }
 
 #data {
-    z-index: 6;
+	z-index: 6;
+}
+
+#moveBtnGroup {
+	width: 124px;
+	height: 124px;
+	position: fixed;
+	bottom: 20px;
+	display: none;
+	z-index: 13;
+}
+
+.moveBtn {
+	width: 30%;
+	height: 30%;
+	position: absolute;
+}
+
+#upBtn {
+	top: 0px;
+	left: 35%;
+	right: 35%;
+}
+
+#leftBtn {
+	top: 35%;
+	left: 0px;
+	bottom: 35%;
+	transform:rotate(-90deg);
+	-ms-transform:rotate(-90deg); 	/* IE 9 */
+	-moz-transform:rotate(-90deg); 	/* Firefox */
+	-webkit-transform:rotate(-90deg); /* Safari 和 Chrome */
+	-o-transform:rotate(-90deg); 	/* Opera */
+}
+
+#downBtn {
+	left: 35%;
+	bottom: 0px;
+	right: 35%;
+	transform:rotate(180deg);
+	-ms-transform:rotate(180deg); 	/* IE 9 */
+	-moz-transform:rotate(180deg); 	/* Firefox */
+	-webkit-transform:rotate(180deg); /* Safari 和 Chrome */
+	-o-transform:rotate(180deg); 	/* Opera */
+}
+
+#rightBtn {
+	top: 35%;
+	right: 0px;
+	bottom: 35%;
+	transform:rotate(90deg);
+	-ms-transform:rotate(90deg); 	/* IE 9 */
+	-moz-transform:rotate(90deg); 	/* Firefox */
+	-webkit-transform:rotate(90deg); /* Safari 和 Chrome */
+	-o-transform:rotate(90deg); 	/* Opera */
 }

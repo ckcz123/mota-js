@@ -753,152 +753,156 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// keyCode：当前按键的keyCode（每个键的keyCode自行百度）
 	// altKey：Alt键是否被按下，为true代表同时按下了Alt键
 	// 可以在这里任意增加或编辑每个按键的行为
-	
+
 	// 如果处于正在行走状态，则不处理
-	if (!core.status.heroStop || core.status.heroMoving > 0)
+	if (core.isMoving())
 		return;
 
 	// Alt+0~9，快捷换上套装
-	if (altKey && keyCode>=48 && keyCode<=57) {
-		core.items.quickLoadEquip(keyCode-48);
+	if (altKey && keyCode >= 48 && keyCode <= 57) {
+		core.items.quickLoadEquip(keyCode - 48);
 		return;
 	}
 
 	// 根据keyCode值来执行对应操作
 	switch (keyCode) {
-		case 27: // ESC：打开菜单栏
-			core.openSettings(true);
-			break;
-		case 88: // X：使用怪物手册
-			core.openBook(true);
-			break;
-		case 71: // G：使用楼传器
-			core.useFly(true);
-			break;
-		case 65: // A：读取自动存档（回退）
-			core.doSL("autoSave", "load");
-			break;
-		case 83: // S：存档
-			core.save(true);
-			break;
-		case 68: // D：读档
-			core.load(true);
-			break;
-		case 69: // E：打开光标
-			core.ui.drawCursor();
-			break;
-		case 84: // T：打开道具栏
-			core.openToolbox(true);
-			break;
-		case 81: // Q：打开装备栏
-			core.openEquipbox(true);
-			break;
-		case 90: // Z：转向
-			core.turnHero();
-			break;
-		case 75: case 86: // V：打开快捷商店列表
-			core.openQuickShop(true);
-			break;
-		case 32: // SPACE：轻按
-			core.getNextItem();
-			break;
-		case 82: // R：回放录像
-			core.actions._clickSyncSave_replay();
-			break;
-		case 33: case 34: // PgUp/PgDn：浏览地图
-			core.ui.drawMaps();
-			break;
-		case 77: // M：绘图模式
-			core.ui.drawPaint();
-			break;
-		case 66: // B：打开数据统计
-			core.ui.drawStatistics();
-			break;
-		case 72: // H：打开帮助页面
-			core.ui.drawHelp();
-			break;
-		case 78: // N：重新开始
-			core.confirmRestart();
-			break;
-		case 79: // O：查看工程
-			core.actions._clickGameInfo_openProject();
-			break;
-		case 80: // P：游戏主页
-			core.actions._clickGameInfo_openComments();
-			break;
-		case 49: // 快捷键1: 破
-			if (core.hasItem('pickaxe')) {
-				if (core.canUseItem('pickaxe')) {
-					core.useItem('pickaxe');
-				}
-				else {
-					core.drawTip('当前不能使用破墙镐');
-				}
+	case 27: // ESC：打开菜单栏
+		core.openSettings(true);
+		break;
+	case 88: // X：使用怪物手册
+		core.openBook(true);
+		break;
+	case 71: // G：使用楼传器
+		core.useFly(true);
+		break;
+	case 65: // A：读取自动存档（回退）
+		core.doSL("autoSave", "load");
+		break;
+	case 83: // S：存档
+		core.save(true);
+		break;
+	case 68: // D：读档
+		core.load(true);
+		break;
+	case 69: // E：打开光标
+		core.ui.drawCursor();
+		break;
+	case 84: // T：打开道具栏
+		core.openToolbox(true);
+		break;
+	case 81: // Q：打开装备栏
+		core.openEquipbox(true);
+		break;
+	case 90: // Z：转向
+		core.turnHero();
+		break;
+	case 75:
+	case 86: // V：打开快捷商店列表
+		core.openQuickShop(true);
+		break;
+	case 32: // SPACE：轻按
+		core.getNextItem();
+		break;
+	case 82: // R：回放录像
+		core.actions._clickSyncSave_replay();
+		break;
+	case 33:
+	case 34: // PgUp/PgDn：浏览地图
+		core.ui.drawMaps();
+		break;
+	case 77: // M：绘图模式
+		core.ui.drawPaint();
+		break;
+	case 66: // B：打开数据统计
+		core.ui.drawStatistics();
+		break;
+	case 72: // H：打开帮助页面
+		core.ui.drawHelp();
+		break;
+	case 78: // N：重新开始
+		core.confirmRestart();
+		break;
+	case 79: // O：查看工程
+		core.actions._clickGameInfo_openProject();
+		break;
+	case 80: // P：游戏主页
+		core.actions._clickGameInfo_openComments();
+		break;
+	case 49: // 快捷键1: 破
+		if (core.hasItem('pickaxe')) {
+			if (core.canUseItem('pickaxe')) {
+				core.status.route.push("key:49"); // 将按键记在录像中
+				core.useItem('pickaxe', true); // 第二个参数true代表该次使用道具是被按键触发的，使用过程不计入录像
+			} else {
+				core.drawTip('当前不能使用破墙镐');
 			}
-			break;
-		case 50: // 快捷键2: 炸
-			if (core.hasItem('bomb')) {
-				if (core.canUseItem('bomb')) {
-					core.useItem('bomb');
-				}
-				else {
-					core.drawTip('当前不能使用炸弹');
-				}
+		}
+		break;
+	case 50: // 快捷键2: 炸
+		if (core.hasItem('bomb')) {
+			if (core.canUseItem('bomb')) {
+				core.status.route.push("key:50"); // 将按键记在录像中
+				core.useItem('bomb', true); // 第二个参数true代表该次使用道具是被按键触发的，使用过程不计入录像
+			} else {
+				core.drawTip('当前不能使用炸弹');
 			}
-			else if (core.hasItem('hammer')) {
-				if (core.canUseItem('hammer')) {
-					core.useItem('hammer');
-				}
-				else {
-					core.drawTip('当前不能使用圣锤');
-				}
-
-			}
-			break;
-		case 51: // 快捷键3: 飞
-			if (core.hasItem('centerFly')) {
-				core.ui.drawCenterFly();
-			}
-			break;
-		case 52: // 快捷键4：破冰/冰冻/地震/上下楼器/... 其他道具依次判断
-			{
-				var list = ["icePickaxe", "snow", "earthquake", "upFly", "downFly", "jumpShoes", "lifeWand", "poisonWine", "weakWine", "curseWine", "superWine"];
-				for (var i=0;i<list.length;i++) {
-					var itemId = list[i];
-					if (core.canUseItem(itemId)) {
-						core.useItem(itemId);
-						break;
-					}
-				}
-			}
-			break;
-		case 55: // 快捷键7：绑定为轻按，方便手机版操作
-			core.getNextItem();
-			break;
-		case 118: // F7：开启debug模式
-			core.debug();
-			break;
-		case 87: // W：开启技能“二倍斩”
-			// 检测是否拥有“二倍斩”这个技能道具
-			if (core.hasItem('skill1')) {
-				core.useItem('skill1');
-			}
-			break;
-		// 在这里可以任意新增或编辑已有的快捷键内容
-		/*
-		case 0: // 使用该按键的keyCode
-			// 还可以再判定altKey是否被按下，即 if (altKey) { ...
-
-			// ... 在这里写你要执行脚本
-			// **强烈建议所有新增的自定义快捷键均能给个对应的道具可点击，以方便手机端的行为**
-			if (core.hasItem('...')) {
-				core.useItem('...');
+		} else if (core.hasItem('hammer')) {
+			if (core.canUseItem('hammer')) {
+				core.status.route.push("key:50"); // 将按键记在录像中
+				core.useItem('hammer', true); // 第二个参数true代表该次使用道具是被按键触发的，使用过程不计入录像
+			} else {
+				core.drawTip('当前不能使用圣锤');
 			}
 
-			break;
-		*/
-    }
-	
+		}
+		break;
+	case 51: // 快捷键3: 飞
+		if (core.hasItem('centerFly')) {
+			core.ui.drawCenterFly();
+		}
+		break;
+	case 52: // 快捷键4：破冰/冰冻/地震/上下楼器/... 其他道具依次判断
+		{
+			var list = ["icePickaxe", "snow", "earthquake", "upFly", "downFly", "jumpShoes", "lifeWand", "poisonWine", "weakWine", "curseWine", "superWine"];
+			for (var i = 0; i < list.length; i++) {
+				var itemId = list[i];
+				if (core.canUseItem(itemId)) {
+					core.status.route.push("key:52");
+					core.useItem(itemId, true);
+					break;
+				}
+			}
+		}
+		break;
+	case 55: // 快捷键7：绑定为轻按，方便手机版操作
+		core.getNextItem();
+		break;
+	case 118: // F7：开启debug模式
+		core.debug();
+		break;
+	case 87: // W：开启技能“二倍斩”
+		// 检测是否拥有“二倍斩”这个技能道具
+		if (core.hasItem('skill1')) {
+			core.status.route.push("key:87");
+			core.useItem('skill1', true);
+		}
+		break;
+	// 在这里可以任意新增或编辑已有的快捷键内容
+	/*
+	case 0: // 使用该按键的keyCode
+		// 还可以再判定altKey是否被按下，即 if (altKey) { ...
+
+		// ... 在这里写你要执行脚本
+		// **强烈建议所有新增的自定义快捷键均能给个对应的道具可点击，以方便手机端的行为**
+		if (core.hasItem('...')) {
+			core.status.route.push("key:0");
+			core.useItem('...', true); // 增加true代表该使用道具不计入录像
+		}
+
+		break;
+	*/
+	}
+
 }
     },
     "control": {
@@ -1006,9 +1010,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 设置魔力值
 	if (core.flags.enableMana) {
-		// 也可以使用flag:manaMax来表示最大魔力值；详见文档-个性化-技能塔的支持
-		// core.status.hero.mana = Math.max(core.status.hero.mana, core.getFlag('manaMax', 10));
-		// core.setStatusBarInnerHTML('mana', core.status.hero.mana + "/" + core.getFlag('manaMax', 10));
+		// status:manamax 只有在非负时才生效。
+		if (core.status.hero.manamax != null && core.status.hero.manamax >= 0) {
+			core.status.hero.mana = Math.min(core.status.hero.mana, core.status.hero.manamax);
+			core.setStatusBarInnerHTML('mana', core.status.hero.mana + "/" + core.status.hero.manamax);
+		}
+		else {
+			core.setStatusBarInnerHTML("mana", core.status.hero.mana);
+		}
 	}
 	// 设置技能栏
 	if (core.flags.enableSkill) {

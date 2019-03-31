@@ -85,7 +85,7 @@ percentage为该装备是否按比例增加属性。
 
 使用`core.getEquip(equipType)`来获得某个装备类型的当前装备。
 
-更多相关API详见[附录：API列表](api)。
+更多相关API详见[附录：API列表](api#附录：API列表)。
 
 ### 多重装备
 

@@ -1,6 +1,6 @@
 # 事件
 
-?> 目前版本**v2.5.5**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.6**，上次更新时间：* {docsify-updated} *
 
 本章内将对样板所支持的事件进行介绍。
 
@@ -20,11 +20,13 @@
 
 ## 关于V2.0的重要说明
 
-在V2.0版本中，所有事件均可以使用blockly来进行块的可视化编辑。
+在V2.0以后版本中，所有事件均可以使用blockly来进行块的可视化编辑。
 
 它能通过拖动、复制粘贴等方式帮助你快速生成事件列表，而不用手动打大量字符。
 
-但是，仍然强烈建议要对每个事件的写法进行了解，因为在脚本编辑，`insertAction`等地方需要插入自定义事件时，还是很有必要的。
+下述所说的都是在事件编辑器右边所展示的，该事件的代码化写法。
+
+强烈建议要对每个事件的写法进行了解，因为在脚本编辑，`insertAction`等地方需要插入自定义事件时，还是很有必要的。
 
 ## 自定义事件
 
@@ -33,21 +35,17 @@
 所有自定义的事件都是如下的写法：
 
 ``` js
-"events": { // 该楼的所有可能事件列表
-    "x,y": {
-        "trigger": "action", // 触发的trigger, action代表自定义事件
-        "enable": true, // 该事件初始状态下是否处于启用状态
-        "noPass": true, // 该点是否不可通行。true代表不可通行，false代表可通行。
-        "data": [ // 实际执行的事件列表
-            // 事件1
-            // 事件2
-            // ...
-        ]
-    }
+{
+    "trigger": "action", // 触发的trigger, action代表自定义事件
+    "enable": true, // 该事件初始状态下是否处于启用状态
+    "noPass": true, // 该点是否不可通行。true代表不可通行，false代表可通行。
+    "data": [ // 实际执行的事件列表
+        // 事件1
+        // 事件2
+        // ...
+    ]
 }
 ```
-
-这里的`"x,y"`代表该点的横坐标为`x`，纵坐标为`y`；即从左到右第`x`列，从上到下的第`y`行（从0开始计算）。
 
 我们上面提到，有很多系统已经默认的事件（例如开门、打怪等，相当于公共事件）。如果我们需要自定义一个事件，则需要`"trigger": "action"`，它表示该点是一个自定义事件。
 
@@ -58,17 +56,15 @@
 如果该点本身不存在系统事件，则`"trigger":"action"`可被省略不写：
 
 ``` js
-"events": { // 该楼的所有可能事件列表
-    "x,y": {
-        // 除非你要覆盖该点已存在的系统默认事件，否则"trigger": "action"可以省略
-        "enable": true, // 该事件初始状态下是否处于启用状态
-        "noPass": true, // 该点是否不可通行。true代表不可通行，false代表可通行。
-        "data": [ // 实际执行的事件列表
-            // 事件1
-            // 事件2
-            // ...
-        ]
-    }
+{
+    // 除非你要覆盖该点已存在的系统默认事件，否则"trigger": "action"可以省略
+    "enable": true, // 该事件初始状态下是否处于启用状态
+    "noPass": true, // 该点是否不可通行。true代表不可通行，false代表可通行。
+    "data": [ // 实际执行的事件列表
+        // 事件1
+        // 事件2
+        // ...
+    ]
 }
 ```
 
@@ -77,17 +73,15 @@
 默认情况下`enable`是`true`，所以如果`enable`为`true`，该项也可以省略不写：
 
 ``` js
-"events": { // 该楼的所有可能事件列表
-    "x,y": {
-        // 除非你要覆盖该点已存在的系统默认事件，否则"trigger": "action"可以省略
-        // 该事件初始状态下是启用状态，则可以省略"enable": true；如果是禁用状态则必须加上"enable": false
-        "noPass": true, // 该点是否不可通行。true代表不可通行，false代表可通行。
-        "data": [ // 实际执行的事件列表
-            // 事件1
-            // 事件2
-            // ...
-        ]
-    }
+{
+    // 除非你要覆盖该点已存在的系统默认事件，否则"trigger": "action"可以省略
+    // 该事件初始状态下是启用状态，则可以省略"enable": true；如果是禁用状态则必须加上"enable": false
+    "noPass": true, // 该点是否不可通行。true代表不可通行，false代表可通行。
+    "data": [ // 实际执行的事件列表
+        // 事件1
+        // 事件2
+        // ...
+    ]
 }
 ```
 
@@ -98,17 +92,15 @@
 因此，除非你想覆盖默认的可通行选项（比如将一个空地设为不可通行），否则该项可以忽略。
 
 ``` js
-"events": { // 该楼的所有可能事件列表
-    "x,y": {
-        // 除非你要覆盖该点已存在的系统默认事件，否则"trigger": "action"可以省略
-        // 该事件初始状态下是启用状态，则可以省略"enable": true；如果是禁用状态则必须加上"enable": false
-        // 除非你想覆盖系统默认的可通行状态，否则"noPass"项可以忽略
-        "data": [ // 实际执行的事件列表
-            // 事件1
-            // 事件2
-            // ...
-        ]
-    }
+{
+    // 除非你要覆盖该点已存在的系统默认事件，否则"trigger": "action"可以省略
+    // 该事件初始状态下是启用状态，则可以省略"enable": true；如果是禁用状态则必须加上"enable": false
+    // 除非你想覆盖系统默认的可通行状态，否则"noPass"项可以忽略
+    "data": [ // 实际执行的事件列表
+        // 事件1
+        // 事件2
+        // ...
+    ]
 }
 ```
 
@@ -117,14 +109,12 @@
 如果大括号里只有`"data"`，则可以省略大括号和`"data"`，直接写中括号数组，换句话说，上面和下面这种写法也是等价的，可以进行一下比较：
 
 ``` js
-"events": { // 该楼的所有可能事件列表
-    // 如果大括号里只有"data"项(没有"action", "enable"或"noPass")，则可以省略到只剩下中括号
-    "x,y": [ // 实际执行的事件列表
-        // 事件1
-        // 事件2
-        // ...
-    ]
-}
+// 如果大括号里只有"data"项(没有"action", "enable"或"noPass")，则可以省略到只剩下中括号
+[
+    // 事件1
+    // 事件2
+    // ...
+]
 ```
 
 这种简写方式可以极大方便地造塔者进行造塔。
@@ -136,15 +126,13 @@
 `"data"`中，是由一系列的自定义事件类型组成。每个元素类似于：
 
 ``` js
-"events": { // 该楼的所有可能事件列表
-    // 如果大括号里只有"data"项(没有"action"或"enable")，则可以省略到只剩下中括号
-    "x,y": [ // 实际执行的事件列表
-        {"type": "xxx", ...}, // 事件1
-        {"type": "xxx", ...}, // 事件2
-        // ...
-        // 按顺序写事件，直到结束
-    ]
-}
+// 如果大括号里只有"data"项(没有"action"或"enable")，则可以省略到只剩下中括号
+[
+    {"type": "xxx", ...}, // 事件1
+    {"type": "xxx", ...}, // 事件2
+    // ...
+    // 按顺序写事件，直到结束
+]
 ```
 
 `"type"`为该自定义事件的类型；而后面的`...`则为具体的一些事件参数。
@@ -158,29 +146,23 @@
 使用`{"type": "text"}`可以显示一段文字。后面`"text"`可以指定文字内容。
 
 ``` js
-"events": { // 该楼的所有可能事件列表
-    // 如果大括号里只有"data"项(没有"action"或"enable")，则可以省略到只剩下中括号
-    "x,y": [ // 实际执行的事件列表
-        {"type": "text", "text": "在界面上的一段文字"}, // 显示文字事件
-        {"type": "text", "text": "这是第二段文字"}, // 显示第二个文字事件
-        // ...
-        // 按顺序写事件，直到结束
-    ]
-}
+[
+    {"type": "text", "text": "在界面上的一段文字"}, // 显示文字事件
+    {"type": "text", "text": "这是第二段文字"}, // 显示第二个文字事件
+    // ...
+    // 按顺序写事件，直到结束
+]
 ```
 
 该项可以简写成直接的字符串的形式，即下面这种方式也是可以的：
 
 ``` js
-"events": { // 该楼的所有可能事件列表
-    // 如果大括号里只有"data"项(没有"action"或"enable")，则可以省略到只剩下中括号
-    "x,y": [ // 实际执行的事件列表
-        "在界面上的一段文字",// 直接简写，和下面写法完全等价
-        {"type": "text", "text": "这是第二段文字"}, // 显示第二个文字事件
-        // ...
-        // 按顺序写事件，直到结束
-    ]
-}
+[
+    "在界面上的一段文字",// 直接简写，和下面写法完全等价
+    {"type": "text", "text": "这是第二段文字"}, // 显示第二个文字事件
+    // ...
+    // 按顺序写事件，直到结束
+]
 ```
 
 所有文字事件均可以进行简写，系统会自动转成`{"type": "text"}`的形式。
@@ -188,15 +170,12 @@
 值得注意的是，系统会自动对文字进行换行；不过我们也可以手动加入`\n`来换行。
 
 ``` js
-"events": { // 该楼的所有可能事件列表
-  // 如果大括号里只有"data"项(没有"action"或"enable")，则可以省略到只剩下中括号
-  "x,y": [ // 实际执行的事件列表
+[
     "这一段文字特别特别长，但是系统可以对它进行自动换行，因此我们无需手动换行",
     "这是第一行\n这是第二行\n这是第三行",
     // ...
     // 按顺序写事件，直到结束
-  ]
-}
+]
 ```
 
 我们可以给文字加上标题或图标，只要以`\t[...]`开头就可以。
@@ -210,7 +189,7 @@
 从V2.5.2以后，新增了绘制大头像的功能。绘制大头像图的基本写法是`\t[1.png]`或者`\t[标题,1.png]`。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     "一段普通文字",
     "\t[勇士,hero]这是一段勇士说的话",
     "\t[hero]如果使用勇士默认名称也可以直接简写hero",
@@ -233,7 +212,7 @@
 - `\b[up,x,y]` 显示在(x,y)点的上方（下方）；x和y都为整数且在0到12之间。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     "\b[up]这段文字显示在当前点上方",
     "\b[down]这段文字显示在当前点上方",
     "\t[hero]\b[up,hero]这是一段勇士说的话，会显示在勇士上方",
@@ -246,7 +225,7 @@
 还可以使用`\r[...]`来调整剧情文本的颜色。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     "这句话是默认颜色，\r[red]将颜色变成红色，\r[blue]将颜色变成蓝色",
     "\r[#FF00FF]还可以使用RGB值来控制颜色，\r如果不加中括号则回到默认颜色",
     "\t[hero]\b[up,hero]啊啊啊，别过来，\r[red]别过来！！！\n\r你到底是什么东西！"
@@ -260,7 +239,7 @@
 需要注意的是，这个图片是绘制在UI层上的，下一个事件执行时即会擦除；同时如果使用了\t的图标动画效果，重叠的地方也会被图标动画给覆盖掉。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     "\t[勇士]\b[up,hero]\f[1.png,100,100]以(100,100)为左上角绘制1.png图片",
     "\t[hero]\f[1.png,100,100]\f[2.png,300,300]同时绘制了两张图片",
     "\f[1.png,100,100,300,300]也可以填写宽高，这样会把图片强制进行放缩到指定的宽高值",
@@ -273,7 +252,7 @@
 这里可以使用一个合法ID（32x48图块除外），或使用一个系统图标（`core.statusBar.icons`中的内容）。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     "\t[勇士]\b[up,hero]这是一个飞行器\\i[fly]，这是一个破墙镐\\i[pickaxe]",
     "\t[hero]也可以使用系统图标，比如这是存档\\i[save]，这是工具栏\\i[toolbox]",
 ]
@@ -286,7 +265,7 @@
 另外值得一提的是，我们是可以在文字中计算一个表达式的值的。只需要将表达式用 `${ }`整个括起来就可以。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     "1+2=${1+2}, 4*5+6=${4*5+6}", // 显示"1+2=3, 4*5+6=26"
 ]
 ```
@@ -294,7 +273,7 @@
 我们可以使用 `status:xxx` 代表勇士的一个属性值；`item:xxx` 代表某个道具的个数；`flag:xxx` 代表某个自定义的变量或flag值。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     "你当前的攻击力是${status:atk}, 防御是${status:def}，坐标是(${status:x},${status:y})",
     "你的攻防和的十倍是${10*(status:atk+status:def)}",
     "你的红黄蓝钥匙总数为${item:yellowKey+item:blueKey+item:redKey}",
@@ -306,18 +285,12 @@
 - `item:xxx` 中的xxx为道具ID。所有道具的ID定义在items.js中，请自行查看。例如，`item:centerFly` 代表中心对称飞行器的个数。
 - `flag:xxx` 中的xxx为一个自定义的变量/Flag；如果没有对其进行赋值则默认值为false。
 
-另外，有个小`trick`。是否想立刻知道显示效果？
-
-你可以用Chrome浏览器打开游戏，按Ctrl+Shift+I打开开发者工具，找到Console（控制台），并中输入`core.drawText("...")` 即可立刻看到文字显示的效果。适当调整文字，使得显示效果满意后，再复制粘贴到你的剧情文本中。
-
-![调试](./img/eventdebug.png)
-
 ### autoText：自动剧情文本
 
 使用`{"type": "autoText"}`可以使用剧情文本。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "autoText", "text": "一段自动显示的剧情文字", "time": 5000}
 ]
 ```
@@ -337,7 +310,7 @@ time为可选项，代表该自动文本的时间。可以不指定，不指定�
 使用`{"type": "scrollText"}`可以使用滚动剧情文本，即将一段文字从屏幕最下方滚动到屏幕最上方。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "scrollText", "text": "第一排\n第二牌\n\n空行后的一排", "time": 5000, "lineHeight": 1.4, "async": true},
 ]
 ```
@@ -359,7 +332,7 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 使用`{"type": "setText"}`可以设置剧情文本的各项属性。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "setText", "title": [255,0,0], "text": [255,255,0], "background": [0,0,255,0.3], "time": 70},
     {"type": "setText", "position": "up", "offset": 15, "bold": true, "titlefont": 26, "textfont": 17},
     "这段话将显示在上方（距离顶端15像素），标题为红色，正文为黄色粗体，背景为透明度0.3的蓝色，标题26px，正文17px，70毫秒速度打字机效果",
@@ -392,7 +365,7 @@ time为可选项，表示文字添加的速度。若此项设置为0将直接全
 `{"type": "tip"}`可以在左上角显示一段提示文字。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "tip", "text": "这段话将在左上角以气泡形式显示"}
 ]
 ```
@@ -404,7 +377,7 @@ time为可选项，表示文字添加的速度。若此项设置为0将直接全
 使用`{"type": "comment"}`可以添加一段注释
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "comment", "text": "这是一段会被跳过的注释内容"}
 ]
 ```
@@ -418,7 +391,7 @@ time为可选项，表示文字添加的速度。若此项设置为0将直接全
 其大致写法如下：
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "setValue", "name": "...", "value": "..."}, // 设置一个属性、道具或自定义Flag
 ]
 ```
@@ -430,7 +403,7 @@ name为你要修改的属性/道具/Flag，每次只能修改一个值。写法�
 value是一个表达式，将通过这个表达式计算出的结果赋值给name。该表达式同样可以使用`status:xxx`, `item:xxx`, `flag:xxx`的写法表示勇士当前属性，道具个数和某个变量/Flag值。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "setValue", "name": "status:atk", "value": "status:atk+10" } // 攻击提高10点
     {"type": "setValue", "name": "status:money", "value": "1000" } // 将金币数设为1000（不是+1000）
     {"type": "setValue", "name": "status:hp", "value": "status:hp*2" } // 生命值翻倍
@@ -450,7 +423,7 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 即下面的写法是等价的：
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "setValue", "name": "status:atk", "value": "status:atk+10" } // 攻击提高10点
     {"type": "addVakue", "name": "status:atk", "value": "10" } // 和上面写法等价
     {"type": "setValue", "name": "item:yellowKey", "value": "item:yellowKey-3" } // 黄钥匙个数-3
@@ -465,7 +438,7 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 使用`{"type":"setFloor"}`可以设置某层楼的楼层属性。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "setFloor", "name": "title", "value": "'主塔 0 层'" } // 设置当前楼层的中文名为主塔0层
     {"type": "setFloor", "name": "canFlyTo", "floorId": "MT2", "value": "false" } // 设置MT2层不可飞行
     {"type": "setFloor", "name": "cannotViewMap", "floorId": "MT0", "value": "true" } // 设置MT0层不可被浏览地图
@@ -476,8 +449,7 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 ]
 ```
 
-name为必填项，代表要修改的楼层属性。其和楼层属性中一一对应，目前只能为`"title", "name", "canFlyTo", "canUseQuickShop", "cannotViewMap", "cannotMoveDirectly", "color", "weather",
-"defaultGround", "images", "item_ratio", "upFloor", "bgm", "downFloor", "underGround"`。
+name为必填项，代表要修改的楼层属性，和楼层属性中的一一对应。
 
 floorId为可选项，代表要修改的楼层ID；可以省略代表当前楼层。
 
@@ -490,13 +462,12 @@ value为必填项，代表要修改到的数值。其应该和楼层属性中的
 使用`{"type":"setGlobalAttribute"}`可以设置一个全局属性。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
-  {"type": "setGlobalAttribute", "name": "font", "value": "Verdana"}, // 设置字体为Verdana
+[
+    {"type": "setGlobalAttribute", "name": "font", "value": "Verdana"}, // 设置字体为Verdana
 ]
 ```
 
-name必填项，代表要修改的全局属性。目前只能为`"font", "statusLeftBackground", "statusTopBackground", "toolsBackground", 
-"borderColor", "statusBarColor", "hardLabelColor", "floorChangingBackground", "floorChangingTextColor"`。
+name必填项，代表要修改的全局属性。
 
 value为必填项，代表要修改到的结果。此项无需再手动加单引号。
 
@@ -505,14 +476,12 @@ value为必填项，代表要修改到的结果。此项无需再手动加单引
 使用`{"type":"setGlobalValue"}`可以设置一个全局数值。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
   {"type": "setGlobalValue", "name": "lavaDamage", "value": 200}, // 设置血网伤害为200
 ]
 ```
 
-name必填项，代表要修改的全局数值，其和全塔属性中的values一一对应。目前只能为`"lavaDamage", "poisonDamage", "weakValue", "redJewel", 
-"blueJewel", "greenJewel", "redPotion", "bluePotion", "yellowPotion", "greenPotion", "breakArmor", "counterAttack",
-"purify", "hatred", "moveSpeed", "animateSpeed"`。
+name必填项，代表要修改的全局数值，其和全塔属性中的values一一对应。
 
 value为必填项，代表要修改到的结果。该项必须是个数值。
 
@@ -521,15 +490,12 @@ value为必填项，代表要修改到的结果。该项必须是个数值。
 使用`{"type":"setGlobalFlag"}`可以设置一个系统开关。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
   {"type": "setGlobalFlag", "name": "enableMDef", "value": false}, // 不在状态栏显示魔防值
 ]
 ```
 
-name必填项，代表要修改的系统开关，其是全塔属性中的flags中的一部分。目前只能为`"enableFloor", "enableName", "enableLv",
-"enableHPMax", "enableMana", "enableMDef", "enableMoney", "enableExperience", "enableLevelUp", "levelUpLeftMode",
-"enableKeys", "enablePZF", "enableDebuff", "enableSkill", "flyNearStair", "enableAddPoint", "enableNegativeDamage",
-"useLoop", "enableGentleClick", "canGoDeadZone", "enableMoveDirectly", "disableShopOnDamage"`。
+name必填项，代表要修改的系统开关，其是全塔属性中的flags中的一部分。
 
 value为必填项，只能为true或false，代表要修改到的结果。
 
@@ -540,7 +506,7 @@ value为必填项，只能为true或false，代表要修改到的结果。
 使用`{"type":"show"}`可以将一个本身禁用的事件启用。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
   {"type": "show", "loc": [3,6], "floorId": "MT1", "time": 500}, // 启用MT1层[3,6]位置事件，动画500ms
   {"type": "show", "loc": [3,6], "time": 500}, // 如果启用目标是当前层，则可以省略floorId项
   {"type": "show", "loc": [3,6]}, // 如果不指定动画时间，则立刻显示，否则动画效果逐渐显示，time为动画时间
@@ -576,7 +542,7 @@ loc同样可以简单的写[x,y]表示单个点，或二维数组[[x1,y1],[x2,y2
 NPC对话事件结束后如果需要NPC消失也需要调用 `{"type": "hide"}`，可以不写loc选项代表当前事件，可以指定time使NPC动画消失。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "hide", "loc": [3,6], "floorId": "MT1", "time": 500}, // 禁用MT1层[3,6]位置事件，动画500ms
     {"type": "hide", "loc": [3,6], "time": 500}, // 如果启用目标是当前层，则可以省略floorId项
     {"type": "hide", "loc": [3,6]}, // 如果不指定动画时间，则立刻消失，否则动画效果逐渐消失，time为动画时间
@@ -596,7 +562,7 @@ NPC对话事件结束后如果需要NPC消失也需要调用 `{"type": "hide"}`�
 其基本写法如下：
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "trigger", "loc": [3,6]}, // 立即触发loc位置的事件，当前剩下的事件全部不再执行
     "执行trigger后，这段文字将不会再被显示"
 ]
@@ -617,7 +583,7 @@ NPC对话事件结束后如果需要NPC消失也需要调用 `{"type": "hide"}`�
 其基本写法如下：
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "insert", "name": "加点事件", "args": [10] }, // 插入公共事件：加点事件，传入参数10
     {"type": "insert", "name": "毒衰咒处理", "args": [0]}, // 插入公共事件：毒衰咒处理，传入参数0
     {"type": "insert", "loc": [3,6]}, // 插入[3,6]点的事件并执行
@@ -657,7 +623,7 @@ NPC对话事件结束后如果需要NPC消失也需要调用 `{"type": "hide"}`�
 revisit和trigger完全相同，只不过是立刻触发的还是本地点的事件
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "revisit"}, // 立即触发本事件，等价于 {"type": "trigger", "loc": [x,y]}
     "执行revisit后，这段文字将不会再被显示"
 ]
@@ -676,7 +642,7 @@ revisit常常使用在一些商人之类的地方，当用户购买物品后不�
 例如玩家点击商人的"离开"选项，则可以调用exit返回游戏。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "exit" }, // 立即结束事件并恢复游戏，一切列表中的事件都将不再被执行
     "执行exit后，这段文字将不会再被显示"
 ]
@@ -687,7 +653,7 @@ revisit常常使用在一些商人之类的地方，当用户购买物品后不�
 我们可以采用 `{"type": "setBlock"}` 来改变某个地图块。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "setBlock", "floorId": "MT1", "loc": [3,3], "number": 233}, // 将MT1层的(3,3)点变成数字233
     {"type": "setBlock", "loc": [2,1], "number": 121}, // 省略floorId则默认为本层
     {"type": "setBlock", "number": 57}, // loc也可省略，默认为当前点
@@ -715,7 +681,7 @@ number为**要更改到的数字**，有关“数字”的定义详见参见[素
 有关贴图说明请参见[使用自己的图片作为某层楼的背景/前景素材](personalization#使用自己的图片作为某层楼的背景前景素材)。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
   {"type": "hideFloorImg", "loc": [3,6], "floorId": "MT1"}, // 隐藏[3,6]的贴图
   {"type": "hideFloorImg", "loc": [3,6]}, // 如果是当前层，则可以省略floorId项
   {"type": "hideFloorImg", "loc": [[3,6],[2,9],[1,2]]} // 我们也可以同时隐藏多个贴图。
@@ -735,7 +701,7 @@ floorId为目标点的楼层，如果是当前楼层可以忽略不写。
 其做法和参数，和隐藏贴图是完全一致的。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
   {"type": "showFloorImg", "loc": [3,6], "floorId": "MT1"}, // 显示[3,6]的贴图
 ]
 ```
@@ -747,7 +713,7 @@ floorId为目标点的楼层，如果是当前楼层可以忽略不写。
 从V2.4.1开始，允许绘制三层图层（背景层，事件层和前景层）。使用`hideBgFgMap`可以隐藏背景或前景层中的图块。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
   {"type": "hideBgFgMap", "name": "bg", "loc": [3,6], "floorId": "MT1"}, // 隐藏MT1层[3,6]的背景层图块
   {"type": "hideBgFgMap", "name": "bg", "loc": [3,6]}, // 如果是当前层，则可以省略floorId项
   {"type": "hideBgFgMap", "name": "fg", "loc": [[3,6],[2,9],[1,2]]} // 我们也可以同时隐藏多个贴图。
@@ -767,7 +733,7 @@ floorId为目标点的楼层，如果是当前楼层可以忽略不写。
 其做法和参数，和隐藏贴图是完全一致的。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
   {"type": "showBgFgMap", "name": "bg", "loc": [3,6], "floorId": "MT1"}, // 显示MT1层[3,6]的前景层图块
 ]
 ```
@@ -777,7 +743,7 @@ floorId为目标点的楼层，如果是当前楼层可以忽略不写。
 我们可以采用 `{"type": "setBgFgBlock"}` 来改变某个背景或前景层地图块。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "setBgFgBlock", "name": "bg", "floorId": "MT1", "loc": [3,3], "number": 233}, // 将MT1层背景层的(3,3)点变成数字233
     {"type": "setBgFgBlock", "name": "bg", "loc": [2,1], "number": 121}, // 省略floorId则默认为本层
     {"type": "setBgFgBlock", "name": "fg", "number": 57}, // loc也可省略，默认为当前点
@@ -797,7 +763,7 @@ loc为可选的，表示要更改地图块的坐标。如果忽略此项，则�
 使用`{"type": "setHeroIcon"}`可以更改角色行走图。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "setHeroIcon", "name": "hero2.png"}, // 将勇士行走图改成hero2.png；必须在全塔属性的images中被定义过。
     {"type": "setHeroIcon"}, // 如果不加name则恢复最初默认状态
     {"type": "setValue", "name": "status:name", "value": "'可绒'"}, // 修改勇士名；请注意value必须加单引号。
@@ -839,7 +805,7 @@ name是可选的，代表目标行走图的文件名。
 基本写法：`{"type": "sleep", "time": xxx}` ，其中xxx为指定的毫秒数。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "sleep", "time": 1000}, // 等待1000ms
     "等待1000ms后才开始执行这个事件",
     {"type": "sleep", "time": 2000, "noSkip": true}, // 等待2000毫秒，且不可被跳过
@@ -854,12 +820,10 @@ name是可选的，代表目标行走图的文件名。
 
 调用battle可强制与某怪物进行战斗（而无需去触碰到它）。
 
-例如，《宿命的旋律》中，一区有个骷髅队长，当你拿了它周围三个物品时，就会立刻触发强制战斗事件。这时候就可以用`{"type": "battle"}` 实现。
-
 其基本写法是： `{"type": "battle", "id": xxx}`，其中xxx为怪物ID。
 
 ``` js
-"10,4": [ // 开门后走进去的事件：强制战斗
+[
     "\t[blackKing]你终于还是来了。",
     "\t[hero]放开我们的公主！",
     "\t[blackKing]如果我不愿意呢？",
@@ -877,8 +841,6 @@ name是可选的，代表目标行走图的文件名。
 
 如果强制战斗失败，则会立刻生命归0并死亡，调用lose函数，接下来的事件不会再被执行。
 
-打败怪物后可以进行加点操作。有关加点塔的制作可参见[加点事件](#加点事件)。
-
 强制战斗没有指定loc的选项，因此战斗后需要调用hide使怪物消失（如果有必要）。
 
 ### openDoor：开门
@@ -886,7 +848,7 @@ name是可选的，代表目标行走图的文件名。
 调用`{"type":"openDoor"}`可以打开一扇门。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "openDoor", "loc": [3,6], "floorId": "MT1"}, // 打开MT1层的[3,6]位置的门
     {"type": "openDoor", "loc": [3,6]}, // 如果是本层则可省略floorId
     {"type": "openDoor", "loc": [3,6], "needKey": true} // 打开此门需要钥匙
@@ -908,7 +870,7 @@ needKey是可选的，如果设置为true则需要钥匙才能打开此门。如
 从V2.6开始提供了关门事件`{"type": "closeDoor"}`，拥有关门动画和对应的音效。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "closeDoor", "id": "yellowDoor", "loc": [3,6]}, // 给(3,6)点关上黄门
     {"type": "closeDoor", "id": "specialDoor"}, // 不写loc则视为当前点
 ]
@@ -934,7 +896,7 @@ loc可选，为要关的位置，不填默认为当前点。
 changeFloor的事件写法大致如下。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "changeFloor", "floorId": "sample0"，"loc": [10, 10], "direction": "left", "time": 1000 },
     //后面几项依次为楼层id，楼层位置（这两项为必填）；勇士方向可选，切换时间也是可选。
 ]
@@ -957,7 +919,7 @@ time为可选的，指定的话将作为楼层切换动画的时间。
 这时候可以用changePos。其参数和changeFloor类似，但少了floorId和time两个选项。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "changePos", "loc": [10,10], "direction": "left"}, // 直接切换勇士的坐标，loc为目标地点，后面勇士换位后方向
     {"type": "changePos", "loc", [10,10]}, // 如无需指定方向则direction可省略
     {"type": "changePos", "direction": "left"} // loc也可省略，只指定direction；此时等价于当前勇士转向到某个方向。
@@ -969,7 +931,7 @@ time为可选的，指定的话将作为楼层切换动画的时间。
 调用`{"type": "useItem"}`可以使用一个道具。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "changePos", "id": "pickaxe"}, // 尝试使用破
     {"type": "changePos", "id": "bomb"}, // 尝试使用炸
     {"type": "changePos", "id": "centerFly"} // 尝试使用飞
@@ -995,7 +957,7 @@ time为可选的，指定的话将作为楼层切换动画的时间。
 使用 `{"type": "follow"}` 可以让一个npc加入跟随。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "follow", "name": "npc.png"}, // 将 npc.png 这个行走图加入跟随
     {"type": "follow", "name": "hero.png"}, // 再将另一个行走图加入跟随
 ]
@@ -1010,7 +972,7 @@ name所指定的图片必须存在，在全塔属性中的images中被定义过�
 使用 `{"type": "unfollow"}` 来取消一个跟随。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "unfollow", "name": "npc.png"}, // 将 npc.png 这个行走图取消跟随
     {"type": "follow"}, // 取消所有跟随
 ]
@@ -1037,7 +999,7 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 有关动画的详细介绍可参见[动画和天气系统](element#动画和天气系统)。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "animate", "name": "yongchang", "loc": [1,3]}, // 在(1,3)显示“咏唱魔法”动画
     {"type": "animate", "name": "zone", "loc": "hero"}, // 在勇士位置显示“领域”动画
     {"type": "animate", "name": "hand"}, // 可以不指定loc，则默认为当前事件点
@@ -1060,7 +1022,7 @@ loc可忽略，如果忽略则显示为事件当前点。
 我们可以使用 `{"type": "showImage"}` 来显示一张图片。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "showImage", "code": 1, "image": "bg.jpg", "loc": [231,297], "opacity": 1, "time" : 0}, // 在(231,297)显示bg.jpg
     {"type": "showImage", "code": 12, "image": "1.png", "loc": [209,267],  "opacity": 0.5, "time" : 1000}, // 在(209,267)渐变显示1.png，渐变时间为1000毫秒，完成时不透明度为0.5，这张图片将遮盖上一张
     {"type": "showImage", "code": 8, "image": "hero.png", "loc": [349,367],  "opacity": 1, "time" : 500, "async": true}, // 在(209,267)渐变显示hero.png，渐变时间为500毫秒，异步执行；这张图片将被上一张遮盖
@@ -1087,7 +1049,7 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 我们可以使用 `{"type": "showTextImage"}` 以图片的方式显示文本。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "showTextImage", "code": 1, "text": "第一排\n第二排\n\n空行后的一排", "loc": [231,297], "opacity": 1, "time" : 0}, // 在(231,297)显示"第一排\n第二排\n\n空行后的一排"
 ]
 ```
@@ -1113,7 +1075,7 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 我们可以使用 `{"type": "hideImage"}` 来清除一张图片。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "hideImage", "code": 1, "time" : 0}, // 使1号图片消失
     {"type": "hideImage", "code": 12, "time" : 1000}, // 使12号图片渐变消失，时间为1000毫秒
 ]
@@ -1130,7 +1092,7 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 我们可以使用 `{"type": "showGif"}` 来显示一张图片。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "showGif", "name": "timg.gif", "loc": [231,297]}, // 在(231,297)显示一张动图
     {"type": "showGif"} // 如果不指定name则清除所有动图。
 ]
@@ -1147,7 +1109,7 @@ loc为动图左上角坐标，以像素为单位进行计算。
 我们可以使用 `{"type": "moveImage"}` 来造成图片移动，淡入淡出等效果。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "moveImage", "code": 1, "to": [22,333], "opacity": 1, "time": 1000}, // 将1号图片移动到(22,333)，动画时间为1000ms
     {"type": "moveImage", "code": 12, "opacity": 0.5, "time": 500}, // 将二号图片的透明度变为0.5，动画时间500ms
     {"type": "moveImage", "code": 1, "to": [109,167], "opacity": 0, "time": 300, "async": true}, // 将1号图片移动到(109,167)，透明度设为0（不可见），动画时间300ms，异步执行
@@ -1169,7 +1131,7 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 我们可以使用 `{"type": "setFg"}` 来更改画面色调。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "setFg", "color": [255,255,255,0.6], "time": 1000}, // 更改画面色调为纯白，不透明度0.6，动画时间1000毫秒
     {"type": "setFg", "color": [0,0,0], "async": true}, // 更改画面色调为纯黑，不透明度1，不指定动画时间（使用默认时间），且异步执行
     {"type": "setFg"} // 如果不指定color则恢复原样。
@@ -1191,7 +1153,7 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 我们可以使用 `{"type": "screenFlash"}` 来进行画面闪烁。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "screenFlash", "color": [255,255,255,0.6], "time": 500, "times": 1}, // 闪光为白色，不透明度0.6，动画时间1000毫秒
     {"type": "screenFlash", "color": [255,0,0,1], "time": 100, "times": 2, "async": true}, // 闪光为红色，强度最大，动画时间100毫秒，闪烁两次且异步执行
 ]
@@ -1212,7 +1174,7 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 我们可以使用 `{"type": "setWeather"}` 来更改天气。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "setWeather", "name": "rain", "level": 6}, // 更改为雨天，强度为6级
     {"type": "setWeather", "name": "snow", "level": 3}, // 更改为雪天，强度为3级
     {"type": "setWeather"} // 更改回晴天
@@ -1236,10 +1198,9 @@ level为天气的强度等级，在1-10之间。1级为最弱，10级为最强�
 下面是该事件常见的写法：
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "move", "time": 750, "loc": [x,y], "steps": [// 动画效果，time为移动速度(比如这里每750ms一步)，loc为位置可选，steps为移动数组
-        {"direction": "right", "value": 2},// 这里steps 的效果为向右移动2步，在向下移动一步并消失
-        "down" // 如果该方向上只移动一步则可以这样简写，效果等价于上面value为1
+        "right", "right", "down" // 向右两格，向下一格
     ], "keep": true, "async":true }, // keep可选，如果为true则不消失，否则渐变消失；async可选，如果为true则异步执行。
 ]
 ```
@@ -1248,9 +1209,7 @@ time选项必须指定，为每移动一步所需要用到的时间。
 
 loc为需要移动的事件位置。可以省略，如果省略则移动本事件。
 
-steps为一个数组，其每一项为一个 `{"direction" : xxx, "value": n}`，表示该步是向xxx方向移动n步。
-
-如果只移动一步可以直接简单的写方向字符串（`up/left/down/right`）。
+steps为一个数组，其每一项是`up, down, left, right`之一，表示这一步应该朝哪个方向走。
 
 keep为一个可选项，代表该事件移动完毕后是否消失。如果该项指定了并为true，则移动完毕后将不消失，否则以动画效果消失。
 
@@ -1265,7 +1224,7 @@ keep为一个可选项，代表该事件移动完毕后是否消失。如果该�
 ``` js
 "4,3": [ // [4,3]是一个NPC，比如小偷
     {"type": "move", "time": 750, "steps": [ // 向上移动两格，每步750毫秒
-        {"direction": "up", "value": 2},
+        "up", "up"
     ], "keep": true}, // 移动完毕后不消失
 ],
 "4,1": { // [4,1]为目标地点
@@ -1289,13 +1248,14 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 ``` js
 "x,y": [ // 实际执行的事件列表
     {"type": "moveHero", "time": 750, "async": true, "steps": [// 动画效果，time为移动速度(比如这里每750ms一步)，steps为移动数组
-        {"direction": "right", "value": 2},// 这里steps 的效果为向右移动2步，在向下移动一步并消失
-        "down" // 如果该方向上只移动一步则可以这样简写，效果等价于上面value为1
+        "down", "right", "forward", "backward" // 向下、右、前、后各走一步
     ]},
 ]
 ```
 
-可以看到，和上面的move事件几乎完全相同，除了不能指定loc，且少了immediateHide选项。
+可以看到，和上面的move事件几乎完全相同，除了不能指定loc，且少了keep选项。
+
+勇士的steps也允许`forward`和`backward`，即前进和后退。
 
 不过值得注意的是，用这种方式移动勇士的过程中将无视一切地形，无视一切事件，中毒状态也不会扣血。
 
@@ -1308,7 +1268,7 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 下面是该事件常见的写法：
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "jump", "from": [3,6], "to": [2,1], "time": 750, "keep": true, "async": true},
 ]
 ```
@@ -1332,7 +1292,7 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 下面是该事件常见的写法：
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "jump", "loc": [3,6], "time": 750, "async": true},
 ]
 ```
@@ -1351,7 +1311,7 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 
 值得注意的是，额外添加进文件的背景音乐，需在main.js中this.bgms里加载它。
 
-目前支持mp3/ogg/wav/mid等多种格式的音乐播放。
+目前支持mp3/ogg/wav等多种格式的音乐播放。
 
 有关BGM播放的详细说明参见[背景音乐](element#背景音乐)
 
@@ -1385,7 +1345,7 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 
 值得注意的是，如果是额外添加进文件的音效，则需在main.js中this.sounds里加载它。
 
-可以加`"stop": true`来停止之前正在播放的音效。
+从V2.6开始，也可以加`"stop": true`来停止之前正在播放的音效。
 
 ### stopSound：停止所有音效
 
@@ -1410,6 +1370,8 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 `{"type": "win", "reason": "xxx"}` 将会直接调用events.js中的win函数，并将reason作为结局传入。
 
 该事件会显示获胜页面，并重新游戏。
+
+可以增加`"norank": 1`来表示该结局不计入榜单。
 
 !> 如果`reason`不为空，则会以reason作为获胜的结局!
 
@@ -1442,7 +1404,7 @@ async可选，如果为true则会异步执行（即不等待当前事件执行�
 使用`{"type": "input"}`可以接受用户的输入的数字。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "input", "text": "请输入一个数"}, // 显示一个弹窗让用户输入数字
     "你刚刚输入的数是${flag:input}" // 输入结果将被赋值为flag:input
 ]
@@ -1461,7 +1423,7 @@ text为提示文字，可以在这里给输入提示文字。这里同样可以�
 类似于input事件，使用`{"type": "input2"}`可以接受用户的输入的文本。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "input2", "text": "请输入你的ID"}, // 显示一个弹窗让用户输入文本
     "你好，${flag:input}，欢迎来到本塔" // 输入结果将被赋值为flag:input
 ]
@@ -1482,7 +1444,7 @@ text为提示文字，可以在这里给输入提示文字。这里同样可以�
 其大致写法如下：
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "if", "condition": "...", // 测试某个条件
         "true": [ // 条件成立则执行true里面的事件
             
@@ -1503,7 +1465,7 @@ text为提示文字，可以在这里给输入提示文字。这里同样可以�
 例如下面这个例子，每次将检查你的攻击力是否大于500，不是的场合将给你的攻击力加100点。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "if", "condition": "status:atk>500", // 判断攻击力是否大于500
         "true": [ // 条件成立则执行true里面的事件
             "你的攻击力已经大于500了！",
@@ -1511,7 +1473,7 @@ text为提示文字，可以在这里给输入提示文字。这里同样可以�
         ],
         "false": [ // 条件不成立则执行false里的事件
             "你当前攻击力为${status:atk}, 不足500！\n给你增加100点攻击力！",
-            {"type": "setValue", "name": "status:atk", "value": "status:atk+100"}, // 攻击力加100， 接着会执行revisit事件
+            {"type": "addValue", "name": "status:atk", "value": "100"}, // 攻击力加100， 接着会执行revisit事件
         ]
     },
     {"type", "revisit"}, // 立刻重启本事件， 直到攻击力大于500后结束
@@ -1521,7 +1483,7 @@ text为提示文字，可以在这里给输入提示文字。这里同样可以�
 需要额外注意的几点：
 
 - 给定的表达式（condition）一般需要返回true或false。
-- `flag:xxx` 可取用一个自定义变量或flag。如果从未设置过该flag，则其值默认为false。而JS中，`false==0`这个判断是成立的，因此我们可以简单使用 `"flag:npc_times==0"` 来判断某个NPC是否被访问过。
+- `flag:xxx` 可取用一个自定义变量或flag。如果从未设置过该flag，则其值默认为0。
 - 即使成功失败的场合不执行事件，对应的true或false数组也需要存在，不过简单的留空就好。
 - if可以不断进行嵌套，一层套一层；如成立的场合再进行另一个if判断等。
 - if语句内的内容执行完毕后将接着其后面的语句继续执行。
@@ -1534,7 +1496,7 @@ text为提示文字，可以在这里给输入提示文字。这里同样可以�
 其大致写法如下：
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "switch", "condition": "...", // 计算某个表达式
         "caseList": [
             {"case": "a", "action": [// 若表达式的值等于a则执行该处事件
@@ -1560,7 +1522,7 @@ text为提示文字，可以在这里给输入提示文字。这里同样可以�
 例如下面这个例子，将检查当前游戏难度并赠送不同属性。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "switch", "condition": "flag:hard", // 判断当前游戏难度
          "caseList": [
             {"case": "0", "action": [// 若表达式的值等于0则执行该处事件
@@ -1583,11 +1545,31 @@ text为提示文字，可以在这里给输入提示文字。这里同样可以�
 
 需要额外注意的几点：
 
-- 各个条件分支的判断是顺序执行的，因此若多个分支的条件都满足，将只执行最靠前的分支，同理，请不要在`default`分支后添加分支，这些分支将不可能被执行。
+- 各个条件分支的判断是顺序执行的，因此若多个分支的条件都满足，将只执行最靠前的分支。
+  - 同理，请不要在`default`分支后添加分支，这些分支将不可能被执行。
 - `default`分支并不是必要的，如果删除，则在没有满足条件的分支时将不执行任何事件。
 - 即使某个场合不执行事件，对应的action数组也需要存在，不过简单的留空就好。
-- switch可以不断进行嵌套，一层套一层；如某条件成立的场合再进行另一个switch判断等。
 - switch语句内的内容执行完毕后将接着其后面的语句继续执行。
+
+由于`case`中的内容是会被计算的，因此如下写法也是合法的
+
+```js
+[
+    {"type": "switch", "condition": "true", // 条件：某一项为真时
+         "caseList": [
+            {"case": "flag:a==1", "action": [ // 如果 flag:a == 1
+                "走进了 flag:a==1 分支！"
+            ],
+            {"case": "flag:b>=3", "action": [ // 如果 flag:b >= 3
+                "走进了 flag:b>=3 分支！"
+            ],
+            {"case": "default", "action": [ // 上述两条均布成立
+                "上述两条均不成立"
+            ]
+        ]
+    },
+]
+```
 
 
 ### choices：给用户提供选项
@@ -1601,17 +1583,16 @@ choices是一个很麻烦的事件，它将弹出一个列表供用户进行选�
 其大致写法如下：
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "choices", "text": "...",  // 提示文字
-        "color": [255,0,0,1], // 颜色
         "choices": [
             {"text": "选项1文字", "action": [
                     // 选项1执行的事件
             ]},
-            {"text": "选项2文字", "action": [
+            {"text": "选项2文字", "color": [255,0,0,1], "action": [
                     // 选项2执行的事件
             ]},
-            {"text": "选项3文字", "action": [
+            {"text": "选项3文字", "icon": "fly", "action": [
                     // 选项3执行的事件
             ]},
         ]
@@ -1629,66 +1610,9 @@ action为当用户选择了该选项时将执行的事件。
 
 color为可选的，可以是一个字符串（#FF0000），或者一个RGBA数组（[255,0,0,1]）。
 
+icon是可选的，如果设置则会在选项前绘制图标，其可以是一个有效的ID，或者`core.statusBar.icons`中的系统图标。
+
 选项可以有任意多个，但一般不要超过6个，否则屏幕可能塞不下。
-
-下面是一个卖钥匙的事件，是一个比较复杂却也较为典型的if和choices合并使用的样例。
-
-``` js
-"10,11": [ // 商人事件，if语句和choices语句的写法
-    // 这部分逻辑相对比较长，细心看，很容易看懂的。
-    {"type": "if", "condition": "flag:woman_times==0", // 条件判断：是否从未访问过此商人。
-        "true": [ // 如果从未访问过该商人，显示一段文字
-            "\t[老人,woman]这是个很复杂的例子，它将教会你如何使用if 语句进行条件判断，以及 choices 提供选项来供用户进行选择。",
-            "\t[老人,woman]第一次访问我将显示这段文字；从第二次开始将会向你出售钥匙。\n钥匙价格将随着访问次数递增。\n当合计出售了七把钥匙后，将送你一把大黄门钥匙，并消失不再出现。",
-            "\t[老人,woman]这部分的逻辑比较长，请细心看样板的写法，是很容易看懂并理解的。"
-            // 第一次访问结束
-        ],
-        "false": [ // 如果已经访问过该商人
-            {"type": "if", "condition": "flag:woman_times==8", // 条件判断：是否已经出售七把钥匙
-                "true": [ // 如果已经出售过七把钥匙，则直接结束
-                    "\t[老人,woman]你购买的钥匙已经够多了，再继续卖给你的话我会有危险的。",
-                    "\t[老人,woman]看在你贡献给我这么多钱的份上，送你一把大黄门钥匙吧，希望你能好好用它。",
-                    {"type": "setValue", "name": "item:bigKey", "value": "item:bigKey+1"}, // 获得一把大黄门钥匙
-                    "\t[老人,woman]我先走了，拜拜~",
-                    {"type":"hide", "time": 500}, // 消失
-                    {"type":"exit"} // 立刻结束当前事件。下面的 setValue 和 revisit 都不会再执行。
-                ],
-                "false": [ // 否则，显示选择页面
-                    {"type": "choices", "text": "\t[老人,woman]少年，你需要钥匙吗？\n我这里有大把的！", // 显示一个卖钥匙的选择页面
-                        "choices": [ // 提供四个选项：黄钥匙、蓝钥匙、红钥匙、离开。前三个选项显示需要的金额
-                            {"text": "黄钥匙（${9+flag:woman_times}金币）", "color": [255,255,0,1], "action": [ // 第一个选项，黄钥匙
-                                // 选择该选项的执行内容
-                                {"type": "if", "condition": "status:money>=9+flag:woman_times", // 条件判断：钱够不够
-                                    "true": [
-                                        {"type": "setValue", "name": "status:money", "value": "status:money-(9+flag:woman_times)"}, // 扣减金钱
-                                        {"type": "setValue", "name": "item:yellowKey", "value": "item:yellowKey+1"}, // 增加黄钥匙
-                                        // 然后会继续执行下面的setValue来增加商人访问次数
-                                    ],
-                                    "false": [
-                                        "\t[老人,woman]你的金钱不足！",
-                                        {"type": "revisit"} // 直接重新访问；不执行下面的setValue来增加访问次数
-                                    ]
-                                }
-                            ]},
-                            {"text": "蓝钥匙（${18+2*flag:woman_times}金币）", "color": [0,0,255,1],  "action": [ // 第二个选项：蓝钥匙
-                                // 逻辑和上面黄钥匙完全相同，略
-                            ]},
-                            {"text": "红钥匙（${36+4*flag:woman_times}金币）", "color": [255,0,0,1], "action": [ // 第三个选项：红钥匙
-                                // 逻辑和上面黄钥匙完全相同，略
-                            ]},
-                            {"text": "离开", "action": [ // 第四个选项：离开
-                                {"type": "exit"} // 立刻结束当前事件
-                            ]}
-                        ]
-                    }
-                ]
-            }
-        ]
-    },
-    {"type": "setValue", "name": "flag:woman_times", "value": "flag:woman_times+1"}, // 增加该商人的访问次数。
-    {"type": "revisit"} // 立即重新开始这个事件
-],
-```
 
 ### while：循环处理
 
@@ -1697,7 +1621,7 @@ color为可选的，可以是一个字符串（#FF0000），或者一个RGBA数�
 其大致写法如下：
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "while", "condition": "...", // 循环测试某个条件
         "data": [ // 条件成立则执行data里面的事件
             
@@ -1715,10 +1639,10 @@ color为可选的，可以是一个字符串（#FF0000），或者一个RGBA数�
 下面是一个输出1到10之间的数字，每隔1秒显示一个的例子。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type":"while", "condition": "flag:i<=10", // 循环处理；注意flag未设置则默认为0
         "data":[
-            {"type": "setValue", "name": "flag:i", "value": "flag:i+1"}, // 递增i
+            {"type": "addValue", "name": "flag:i", "value": "1"}, // 递增i
             "${flag:i}", // 输出i
             {"type": "sleep","time":1000}, // 等待1秒
         ]
@@ -1739,10 +1663,10 @@ color为可选的，可以是一个字符串（#FF0000），或者一个RGBA数�
 上面的输出例子也可以这么写：
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type":"while", "condition": "true", // 循环处理；永远为真
         "data":[
-            {"type": "setValue", "name": "flag:i", "value": "flag:i+1"}, // 递增i
+            {"type": "addValue", "name": "flag:i", "value": "1"}, // 递增i
             "${flag:i}", // 输出i
             {"type": "sleep","time":1000}, // 等待1秒
             {"type": "if", "condition": "flag:i<10", // 测试i是否小于10
@@ -1762,15 +1686,14 @@ color为可选的，可以是一个字符串（#FF0000），或者一个RGBA数�
 使用 `{"type": "wait"}` 可以等待用户进行操作（如点击、按键等）。
 
 当用户执行操作后：
-- 如果是键盘的按键操作，则会将flag:type置为0，并且把flag:keycode置为刚刚按键的keycode。
-- 如果是屏幕的点击操作，则会将flag:type置为1，并且设置flag:x和flag:y为刚刚的点击坐标（0-12之间），flag:px和flag:py置为刚刚的像素坐标（0-415之间）。
+- 如果是键盘的按键操作，则会将flag:type置为0，并且把flag:keycode置为按键的keycode。
+- 如果是屏幕的点击操作，则会将flag:type置为1，并且设置flag:x和flag:y为点击的位置坐标，flag:px和flag:py为点击的像素坐标。
 
 下面是一个while事件和wait合并使用的例子，这个例子将不断接收用户的点击或按键行为，并输出该信息。
 如果用户按下了ESC或者点击了屏幕正中心，则退出循环。
 
-
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "while", "condition": "true", // 永久循环
         "data": [
             {"type": "wait"}, // 等待用户操作
@@ -1793,7 +1716,6 @@ color为可选的，可以是一个字符串（#FF0000），或者一个RGBA数�
         ]
     }
 ]
-
 ```
 
 ### waitAsync：等待所有异步事件执行完毕
@@ -1814,7 +1736,7 @@ color为可选的，可以是一个字符串（#FF0000），或者一个RGBA数�
 上述给出了这么多事件，但有时候往往不能满足需求，这时候就需要执行自定义脚本了。
 
 ``` js
-"x,y": [ // 实际执行的事件列表
+[
     {"type": "function", "function": function(){ // 执行一段js脚本
         // 这里写js代码
         alert(core.getStatus("atk")); // 弹窗显示勇士的攻击力
@@ -1931,7 +1853,6 @@ core.insertAction([
 }
 ```
 
-
 总之，记住如下两点：
 
  - 可以使用setBlock来更改一个图块。
@@ -2015,31 +1936,13 @@ if (core.getFlag("door",0)==2) {
 
 如果要对某个怪物进行加点操作，则首先需要修改该怪物的`point`数值，代表怪物本身的加点数值。
 
-然后在脚本编辑中找到加点事件，双击进行修改。它将返回一个choices事件。修改此函数为我们需要的加点项即可。
+从V2.5.5开始，加点事件移动到了[公共事件](personalization#公共事件)之中，会通过传参的形式来传递怪物的加点值。
 
-``` js
-////// 加点事件 //////
-"addPoint" : function (enemy) {
-    // 加点事件
-    var point = enemy.point;
-    if (!core.flags.enableAddPoint || !core.isset(point) || point<=0) return [];
-
-    // 加点，返回一个choices事件
-    return [
-        {"type": "choices",
-            "choices": [ // 提供三个选项：对于每一点，攻击+1/防御+2/生命+200
-                {"text": "攻击+"+(1*point), "action": [
-                    {"type": "setValue", "name": "status:atk", "value": "status:atk+"+(1*point)}
-                ]},
-                {"text": "防御+"+(2*point), "action": [
-                    {"type": "setValue", "name": "status:def", "value": "status:def+"+(2*point)}
-                ]},
-                {"text": "生命+"+(200*point), "action": [
-                    {"type": "setValue", "name": "status:hp", "value": "status:hp+"+(200*point)}
-                ]},
-            ]
-        }
-    ];
+```js
+// 如果有加点
+var point = core.material.enemys[enemyId].point;
+if (core.flags.enableAddPoint && point > 0) {
+    core.push(todo, [{ "type": "insert", "name": "加点事件", "args": [point] }]);
 }
 ```
 
@@ -2062,42 +1965,14 @@ if (core.getFlag("door",0)==2) {
         "textInList": "1F金币商店", // 在快捷商店栏中显示的名称
         "use": "money", // 商店所要使用的。只能是"money"或"experience"。
         "commonTimes": true, // 是否使用全局次数
-        "mustEnable": true, // 如果未开启则不显示在状态栏中
-        "need": "20+10*times*(times+1)",  // 商店需要的金币/经验数值；可以是一个表达式，以times作为参数计算。
-        // 这里用到的times为该商店的已经的访问次数。首次访问该商店时times的值为0。
-        // 上面的例子是50层商店的计算公式。你也可以写任意其他的计算公式，只要以times作为参数即可。
-        // 例如： "need": "25" 就是恒定需要25金币的商店； "need": "20+2*times" 就是第一次访问要20金币，以后每次递增2金币的商店。
-        // 如果是对于每个选项有不同的计算公式，写 "need": "-1" 即可。可参见下面的经验商店。
-        "text": "勇敢的武士啊，给我${need}金币就可以：", // 显示的文字，需手动加换行符。可以使用${need}表示上面的need值。
+        "mustEnable": false, // 如果未开启则不显示在状态栏中
+        "need": "20+10*times*(times+1)",  // 商店需要的金币/经验数值；可以是一个表达式，以times（访问次数）作为参数计算。
+        "text": "勇敢的武士啊，给我${need}金币就可以：", // 显示的文字。可以使用${need}表示上面的need值。
         "choices": [ // 商店的选项
-            {"text": "生命+800", "effect": "status:hp+=800"},
-            // 如果有多个effect以分号分开，参见下面的经验商店
-            {"text": "攻击+4", "effect": "status:atk+=4"},
-            {"text": "防御+4", "effect": "status:def+=4"},
-            {"text": "魔防+10", "effect": "status:mdef+=10"}
-            // effect可以对status，item和flag进行操作。
-            // 必须是X+=Y的形式，其中Y可以是一个表达式，以status:xxx, item:xxx或flag:xxx为参数
-            // 其他effect样例：
-            // "item:yellowKey+=1" 黄钥匙+1
-            // "item:pickaxe+=3" 破墙镐+3
-            // "status:hp+=2*(status:atk+status:def)" 将生命提升攻防和的数值的两倍
-        ]
-    },
-    {
-        "id": "expShop1", // 商店唯一ID
-        "name": "经验之神",
-        "icon": "pinkShop",
-        "textInList": "1F经验商店",
-        "use": "experience", // 该商店使用的是经验进行计算
-        "need": "-1", // 如果是对于每个选项所需要的数值不同，这里直接写-1，然后下面选项里给定具体数值
-        "text": "勇敢的武士啊，给我若干经验就可以：",
-        "choices": [
-            // 在choices中写need，可以针对每个选项都有不同的需求。
-            // 这里的need同样可以以times作为参数，比如 "need": "100+20*times"
-            {"text": "等级+1", "need": "100", "effect": "status:lv+=1;status:hp+=1000;status:atk+=7;status:def+=7"},
-            // 多个effect直接以分号分开即可。如上面的意思是生命+1000，攻击+7，防御+7。
-            {"text": "攻击+5", "need": "30", "effect": "status:atk+=5"},
-            {"text": "防御+5", "need": "30", "effect": "status:def+=5"},
+            // effect可以对status，item和flag进行操作；必须是X+=Y的形式，其中Y可以是一个表达式
+            {"text": "生命+800", "effect": "status:hp+=800"}, // 生命+800
+            {"text": "攻击+4", "need": 30, "effect": "status:atk+=4"}, // 规定具体的数值
+            {"text": "防御+2，魔防+4", "effect": "status:def+=2;status:mdef+=4"}, // 多个效果用分号分开
         ]
     }
 ],
@@ -2119,14 +1994,15 @@ if (core.getFlag("door",0)==2) {
 - choices 为商店的各个选项，是一个list，每一项是一个选项
   - text为显示文字。请注意这里不支持 ${} 的表达式计算。
   - effect 为该选项的效果；effect必须是 `status:xxx+=yyy`, `item:xxx+=yyy`或`flag:xxx+=yyy`的形式。即中间必须是+=符号。
-  - 如有多个effect（例如升级全属性提升），使用分号分开，参见经验商店的写法。
+  - 如有多个effect（例如升级全属性提升），使用分号分开。
 
 像这样定义了全局商店后，即可在快捷栏中看到。
 
 请注意，快捷商店默认是不可被使用的。直到至少调用一次自定义事件中的 `{"type": "openShop"}` 打开商店后，才能真正在快捷栏中被使用。
 
 ``` js
-"1,0": [ // 金币商店
+// 事件列表
+[
     // 打开商店前，你也可以添加自己的剧情
     // 例如，通过if来事件来判断是不是第一次访问商店，是的则显示一段文字（类似宿命的华音那样）
     {"type": "openShop", "id": "moneyShop1"}, // 这里的id要和data.js中你定义的商店ID完全一致
@@ -2142,6 +2018,27 @@ if (core.getFlag("door",0)==2) {
 禁用商店后商店将无法从快捷栏中进行使用，直到再次使用openShop打开商店为止。
 
 另外需要注意的一点就是，每层楼都有一个 canUseQuickShop 选项。如果该选项置为false则无法在该层使用快捷商店。
+
+**从V2.6开始，也提出了“公共事件化的全局商店”，即打开使用全局商店实际上是执行一个公共事件。**
+
+```js
+"shops": [
+    // 定义公共事件化的全局商店
+    {
+        "id": "keyShop1", // 商店唯一ID
+        "textInList": "回收钥匙商店", // 在快捷商店栏中显示的名称
+        "mustEnable": false, // 如果未开启则不显示在状态栏中
+        "commonEvent": "回收钥匙商店", // 公共事件名
+        "args": [], // 向该公共事件传递的参数
+    }
+]
+```
+
+`id`, `textInList`, `mustEnable`和上述完全相同。
+
+`commonEvent`为公共事件名，即选择此项时要执行的公共事件。
+
+`args`为向该公共事件传递的参数，参见[type:insert](#insert：插入公共事件或另一个地点的事件并执行)的说明。
 
 ## 系统引发的自定义事件
 
@@ -2181,17 +2078,13 @@ if (core.getFlag("door",0)==2) {
 
 !> 多个机关门请分别设置开门变量如door1, door2等等。请勿存在两个机关门用相同的变量！
 
-同样，为了实现类似于RMXP中，到达某一层后自动触发某段事件的效果，样板中还存在`firstArrive`事件。
-
-当且仅当勇士第一次到达某层时，将会触发此事件。可以利用此事件来显示一些剧情，或再让它调用 `{"type": "trigger"}` 来继续调用其他的事件。
+除此以外，每层楼还提供了`firstArrive`和`eachArrive`事件，分别为首次到达该楼层和每次到达该楼层时执行的事件。
 
 ## 使用炸弹后的事件
 
 上面的afterBattle事件只对和怪物进行战斗后才有会被处理。
 
-如果我们想在使用炸弹后也能触发一些事件（如开门），则可以在`functions.js`里面的`afterUseBomb`函数进行处理：
-
-!> V2.0版本可以直接在“脚本编辑 - 使用炸弹后的事件”中双击进行修改！
+如果我们想在使用炸弹后也能触发一些事件（如开门），则可以在脚本编辑里面的`afterUseBomb`函数进行处理：
 
 ``` js
 ////// 使用炸弹/圣锤后的事件 //////
@@ -2207,47 +2100,42 @@ if (core.getFlag("door",0)==2) {
 }
 ```
 
-## 滑冰和推箱子事件
+## 滑冰事件
 
-最新的样板还支持滑冰和推箱子事件。
+从V2.6开始，滑冰事件被重写。现在的滑冰由公共事件执行。
 
-滑冰事件的数字是167，trigger为ski。
+在新版本中，冰面应该放在背景层上，上面可以放置道具、怪物、门等图块。
 
-当角色走上冰面时，将触发ski事件，并会一直向前滑行，直到撞上不可通行的块会触发事件（比如撞上怪物会触发battle，撞上门会触发openDoor等等），或者离开冰面为止。
+角色走上冰面后，将一直向前滑行，直到撞上不可通行的图块，或触发事件为止。
 
-!> 由于H5魔塔只有事件一层，因此滑冰的冰面上将无法摆放任何东西（如怪物，门或道具等）;不过可以在战后/开门后/道具后的事件写转变图块成167，从而继续滑冰。
+如果撞上怪物将自动进行战斗，此战斗是强制的，打不过将直接死亡。
 
-!> 撞上怪物将触发battle进行战斗，该战斗是强制战斗，打不过将直接死亡。
+默认情况下，拾取冰面上道具后将停止滑冰行为。如果要继续滑冰，请在`afterGetItem`中插入公共事件：滑冰事件。打怪和开门同理。
+
+!> 滑冰图块的数字是167，请勿修改此数字！
+
+## 推箱子事件
 
 关于推箱子，存在三种状态：花（168），箱子（169）和已经推到花的箱子（170）。
 
 !> 推箱子的前方不允许存在任何事件（花除外），包括已经禁用的自定义事件。
 
-推完箱子后将触发functions.js中的afterPushBox事件，你可以在这里进行开门判断。
+推完箱子后将触发脚本编辑中的afterPushBox函数，你可以在这里进行开门判断。
 
 ``` js
 ////// 推箱子后的事件 //////
 "afterPushBox" = function () {
-
-    var noBoxLeft = function () {
-        // 地图上是否还存在未推到的箱子，如果不存在则返回true，存在则返回false
-        for (var i=0;i<core.status.thisMap.blocks.length;i++) {
-            var block=core.status.thisMap.blocks[i];
-            if (core.isset(block.event) && block.event.id=='box') return false;
-        }
-        return true;
-    }
-
-    if (noBoxLeft()) {
-        // 可以通过if语句来进行开门操作
-        /*
-        if (core.status.floorId=='xxx') { // 在某个楼层
-            core.insertAction([ // 插入一条事件
-                {"type": "openDoor", "loc": [x,y]} // 开门
-            ])
-        }
-        */
-    }
+    // 推箱子后的事件
+	if (core.searchBlock('box').length == 0) {
+		// 可以通过if语句来进行开门操作
+		/*
+		if (core.status.floorId=='xxx') { // 在某个楼层
+			core.insertAction([ // 插入一条事件
+				{"type": "openDoor", "loc": [x,y]} // 开门
+			])
+		}
+		*/
+	}
 }
 ```
 
@@ -2260,7 +2148,6 @@ if (core.getFlag("door",0)==2) {
 我们可以在脚本编辑中的`updateEnemys`进行处理。
 
 ``` js
-////// 读档事件后，载入事件前，可以执行的操作 //////
 "updateEnemys" : function () {
 	// 更新怪物数据，可以在这里对怪物属性和数据进行动态更新，详见文档——事件——怪物数据的动态修改
 	// 比如下面这个例子，如果flag:xxx为真，则将绿头怪的攻击设为100，红头怪的金币设为20
@@ -2280,12 +2167,14 @@ if (core.getFlag("door",0)==2) {
 
 ``` js
 // 调用`updateEnemys`（更新怪物数据）事件就可以触发了
-"x,y": [
+[
     "将flag:xxx置为真，就可以让怪物数据发生改变！",
     {"type": "setValue", "name": "flag:xxx", "value": "true"}, // 将flag:xxx置为真
     {"type": "updateEnemys"} // 更新怪物数据；此时绿头怪攻击就会变成100了
 ]
 ```
+
+事实上，除了动态修改怪物属性外，也可以在这里动态修改道具的类型、使用效果等等。都是一样的。
 
 ## 战前剧情
 
@@ -2296,9 +2185,8 @@ if (core.getFlag("door",0)==2) {
 值得注意的是，使用这种自定义事件来覆盖系统的默认战斗事件时，可以增加`displayDamage`代表该点是否需要显伤。此项可省略，默认为有显伤。
 
 ``` js
-"x,y": { // (x,y)为该怪物坐标
-    "trigger": "action", // 覆盖该点本身默认事件，变成自定义事件
-    "displayDamage": true, // 覆盖后，该点是否有显伤；此项可忽略，默认为有。
+{
+    "trigger": "action", // 覆盖该点触发器，变成自定义事件
     "data": [ // 该点的自定义事件列表
         // ... 战前剧情
         {"type": "battle", "id": "xxx"}, // 强制战斗
@@ -2306,6 +2194,8 @@ if (core.getFlag("door",0)==2) {
     ]
 }
 ```
+
+另外，从V2.6开始，脚本编辑中提供了战前事件`beforeBattle`，这里不再详细展开，如有需求可自行前往研究。
 
 ## 经验升级（进阶/境界塔）
 
@@ -2318,23 +2208,18 @@ if (core.getFlag("door",0)==2) {
 ``` js
 "levelUp": [ // 经验升级所需要的数值，是一个数组
     {"need": "0", "title": "", "action": []}, // 第一项为初始等级，仅title生效
-
-    // 每一个里面可以含有三个参数 need, title, action
+    // 每一个里面可以含有四个参数 need, title, clear, action
     // need为所需要的经验数值，可以是个表达式。请确保need依次递增
     // title为该等级的名称，也可以省略代表使用系统默认值；本项将显示在状态栏中
-    // action为本次升级所执行的操作，可由若干项组成
-    {"need": "20", "title": "第二级", "action": [
+    // clear如果为true则自动扣除经验
+    // action为本次升级所执行的事件列表
+    {"need": "20", "title": "第二级", "clear": true, "action": [ // 加上clear则自动扣除经验
 		{"type": "setValue","name": "status:atk","value": "status:atk+10"}, // 攻击+10
         {"type": "setValue","name": "status:def","value": "status:def+10"}  // 防御+10
-        ]
-    },
-
-    // action也允许其他操作，比如可以显示一段提示文字，或者触发一个事件
+    ]},
     {"need": "40", "effect": [
         {"type": "tip", "text": "恭喜升级"}, 
-    ]
-    },
-
+    ]},
     // 依次往下写需要的数值即可
 ]
 ```
@@ -2342,9 +2227,10 @@ if (core.getFlag("door",0)==2) {
 `levelUp`是一个数组，里面分别定义了每个等级的信息。里面每一项有三个参数`need`, `title`, `effect`
 - `need` 该等级所需要的经验值，可以是个表达式。请确保数组中的need依次递增。
 - `title` 该等级的名称，比如“佣兵下级”等。该项可以忽略，以使用系统默认的等级。该项将显示在状态栏中。
-- `action` 为本次等级执行的操作。
+- `clear` 是否扣除经验。如果此项为true，则升级时自动扣除经验。
+- `action` 为本次等级要执行的事件流。
 
-## 开始，难度分歧，获胜与失败，多结局
+## 开始游戏与难度分歧
 
 游戏开始时将调用`events.js`中的`startGame`函数。
 
@@ -2379,51 +2265,17 @@ if (core.getFlag("door",0)==2) {
 
 请不要在任何事件中修改对`flag:hard`进行任何赋值（修改它），不然可能会造成一些不可知的后果。
 
-当获胜`{"type": "win"}`事件发生时，将调用`events.js`中的win事件。其显示一段恭喜文字，并重新开始游戏。
+如果是在游戏中根据不同的难度分析来控制地图，比如简单难度删除绿钥匙，则可以在该楼层的`firstArrive`（首次到达楼层）中进行条件判定。
 
-可以指定norank表示该结局不计入榜单。
-
-``` js
-////// 游戏获胜事件 //////
-"win": function(reason, norank) {
-    core.ui.closePanel();
-    var replaying = core.isReplaying();
-    core.stopReplay();
-    core.waitHeroToStop(function() {
-        core.clearMap('all'); // 清空全地图
-        core.deleteAllCanvas();
-        core.drawText([
-            "\t[恭喜通关]你的分数是${status:hp}。"
-        ], function () {
-            core.events.gameOver(reason||'', replaying, norank);
-        })
-    });
-}
+```js
+// 该楼层的firstArrive
+[
+    {"type": "if", "condition": "flag:hard==1", // 条件判定flag:hard是否为1
+        "true": [{"type":"hide","loc":[0,0]}], // 如果是，则隐藏某点事件
+        "false": []
+    }
+]
 ```
-
-其参数reason为获胜原因（即type:win事件里面的reason参数）。
-
-!> 如果reason不为空，则将会作为结局名！
-
-当失败（`{"type": "lose"}`，或者被怪强制战斗打死、被领域怪扣血死、中毒导致扣血死，路障导致扣血死等等）事件发生时，将调用`events.js`中的`lose`事件。其直接显示一段文字，并重新开始游戏。
-
-``` js
-////// 游戏失败事件 //////
-"lose": function(reason) {
-    core.ui.closePanel();
-    var replaying = core.isReplaying();
-    core.stopReplay();
-    core.waitHeroToStop(function() {
-        core.drawText([
-            "\t[结局1]你死了。\n如题。"
-        ], function () {
-            core.events.gameOver(null, replaying);
-        });
-    })
-}
-```
-
-其参数reason为失败原因。你可以在这里修改失败界面时显示的文字。
 
 ==========================================================================================
 

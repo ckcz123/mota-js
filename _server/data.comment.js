@@ -187,6 +187,11 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_type": "textarea",
                             "_data": "初始生命值"
                         },
+                        "manamax": {
+                            "_leaf": true,
+                            "_type": "textarea",
+                            "_data": "魔力上限；此项非负才会生效（null或小于0都不会生效）"
+                        },
                         "mana": {
                             "_leaf": true,
                             "_type": "textarea",

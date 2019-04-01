@@ -1645,9 +1645,7 @@ maps.prototype.jumpBlock = function (sx, sy, ex, ey, time, keep, callback) {
     var block = blockArr[0], blockInfo = blockArr[1];
     var canvases = this._initDetachedBlock(blockInfo, sx, sy, block.event.animate !== false);
     this._moveDetachedBlock(blockInfo, 32 * sx, 32 * sy, 1, canvases);
-
-    this.__playJumpSound();
-
+    core.playSound('jump.mp3');
     var jumpInfo = this.__generateJumpInfo(sx, sy, ex, ey, time);
     jumpInfo.keep = keep;
 
@@ -1660,12 +1658,8 @@ maps.prototype.__generateJumpInfo = function (sx, sy, ex, ey, time) {
     return {
         x: sx, y: sy, ex: ex, ey: ey, px: 32 * sx, py: 32 * sy, opacity: 1,
         jump_peak: jump_peak, jump_count: jump_count,
-        step: 0, per_time: time / 16 / core.status.replay.speed
+        step: 0, per_time: time / jump_count
     };
-}
-
-maps.prototype.__playJumpSound = function () {
-    core.playSound('jump.mp3');
 }
 
 maps.prototype._jumpBlock_doJump = function (blockInfo, canvases, jumpInfo, callback) {

@@ -472,8 +472,10 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     if (this._setAutomaticRoute_isTurning(destX, destY, stepPostfix)) return;
     if (this._setAutomaticRoute_clickMoveDirectly(destX, destY, stepPostfix)) return;
     // 找寻自动寻路路线
-    var moveStep = core.automaticRoute(destX, destY).concat(stepPostfix);
-    if (moveStep.length == 0) return core.deleteCanvas('route');
+    var moveStep = core.automaticRoute(destX, destY);
+    if (moveStep.length == 0 && (destX != core.status.hero.loc.x || destY != core.status.hero.loc.y || stepPostfix.length == 0))
+        return;
+    moveStep = moveStep.concat(stepPostfix);
     core.status.automaticRoute.destX=destX;
     core.status.automaticRoute.destY=destY;
     this._setAutomaticRoute_drawRoute(moveStep);
@@ -2353,10 +2355,11 @@ control.prototype.updateGlobalAttribute = function (name) {
                 core.dom.statusBar.style.borderTop = border;
                 core.dom.statusBar.style.borderLeft = border;
                 core.dom.statusBar.style.borderRight = core.domStyle.isVertical?border:'';
+                core.dom.statusBar.style.borderBottom = core.domStyle.isVertical?'':border;
                 core.dom.gameDraw.style.border = border;
-                core.dom.toolBar.style.borderBottom = border;
                 core.dom.toolBar.style.borderLeft = border;
                 core.dom.toolBar.style.borderRight = core.domStyle.isVertical?border:'';
+                core.dom.toolBar.style.borderBottom = core.domStyle.isVertical?border:'';
                 break;
             }
         case 'statusBarColor':
@@ -2588,7 +2591,7 @@ control.prototype._resize_statusBar = function (obj) {
     }
     else {
         statusBar.style.width = obj.BAR_WIDTH * core.domStyle.scale + "px";
-        statusBar.style.height = obj.outerSize - 3 + "px";
+        statusBar.style.height = obj.outerSize + "px";
         statusBar.style.background = obj.globalAttribute.statusLeftBackground;
         // --- 计算文字大小
         statusBar.style.fontSize = 16 * Math.min(1, (core.__HALF_SIZE__ + 3) / obj.count) * core.domStyle.scale + "px";
@@ -2596,6 +2599,7 @@ control.prototype._resize_statusBar = function (obj) {
     statusBar.style.display = 'block';
     statusBar.style.borderTop = statusBar.style.borderLeft = obj.border;
     statusBar.style.borderRight = core.domStyle.isVertical ? obj.border : '';
+    statusBar.style.borderBottom = core.domStyle.isVertical ? '' : obj.border;
     // 自绘状态栏
     if (core.domStyle.isVertical) {
         core.dom.statusCanvas.style.width = obj.outerSize - 6 + "px";
@@ -2651,8 +2655,8 @@ control.prototype._resize_toolBar = function (obj) {
         toolBar.style.background = 'transparent';
     }
     toolBar.style.display = 'block';
-    toolBar.style.borderLeft = toolBar.style.borderBottom = obj.border;
-    toolBar.style.borderRight = core.domStyle.isVertical ? obj.border : '';
+    toolBar.style.borderLeft = obj.border;
+    toolBar.style.borderRight = toolBar.style.borderBottom = core.domStyle.isVertical ? obj.border : '';
     toolBar.style.fontSize = 16 * core.domStyle.scale + "px";
 }
 

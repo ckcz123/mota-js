@@ -305,8 +305,8 @@ action
     |   moveImage_s
     |   showGif_0_s
     |   showGif_1_s
-    |   setFg_0_s
-    |   setFg_1_s
+    |   setCurtain_0_s
+    |   setCurtain_1_s
     |   screenFlash_s
     |   setWeather_s
     |   move_s
@@ -1277,35 +1277,35 @@ var code = '{"type": "moveImage", "code": '+Int_0+toloc+EvalString_0+',"time": '
 return code;
 */;
 
-setFg_0_s
+setCurtain_0_s
     :   '更改画面色调' EvalString Colour '动画时间' Int? '不等待执行完毕' Bool Newline
     
 
-/* setFg_0_s
-tooltip : setFg: 更改画面色调,动画时间可不填
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=setfg%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
+/* setCurtain_0_s
+tooltip : setCurtain: 更改画面色调,动画时间可不填
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=setcurtain%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
 default : ["255,255,255,1",'rgba(255,255,255,1)',500,false]
 colour : this.soundColor
 var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
 if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
 Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "setFg", "color": ['+EvalString_0+']'+Int_0 +async+'},\n';
+var code = '{"type": "setCurtain", "color": ['+EvalString_0+']'+Int_0 +async+'},\n';
 return code;
 */;
 
-setFg_1_s
+setCurtain_1_s
     :   '恢复画面色调' '动画时间' Int? '不等待执行完毕' Bool Newline
     
 
-/* setFg_1_s
-tooltip : setFg: 恢复画面色调,动画时间可不填
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=setfg%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
+/* setCurtain_1_s
+tooltip : setCurtain: 恢复画面色调,动画时间可不填
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=setcurtain%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
 default : [500,false]
 colour : this.soundColor
 Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "setFg"'+Int_0 +async+'},\n';
+var code = '{"type": "setCurtain"'+Int_0 +async+'},\n';
 return code;
 */;
 
@@ -2433,11 +2433,12 @@ ActionParser.prototype.parseAction = function() {
         }
         break;
     case "setFg": // 颜色渐变
+    case "setCurtain":
       if(this.isset(data.color)){
-        this.next = MotaActionBlocks['setFg_0_s'].xmlText([
+        this.next = MotaActionBlocks['setCurtain_0_s'].xmlText([
           data.color,'rgba('+data.color+')',data.time||0,data.async||false,this.next]);
       } else {
-        this.next = MotaActionBlocks['setFg_1_s'].xmlText([
+        this.next = MotaActionBlocks['setCurtain_1_s'].xmlText([
           data.time||0,data.async||false,this.next]);
       }
       break;

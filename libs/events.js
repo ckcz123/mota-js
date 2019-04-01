@@ -1068,13 +1068,17 @@ events.prototype._action_moveImage = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setFg = function (data, x, y, prefix) {
+    return this._action_setCurtain(data, x, y, prefix);
+}
+
+events.prototype._action_setCurtain = function (data, x, y, prefix) {
     if (data.async) {
-        core.setFg(data.color, data.time);
+        core.setCurtain(data.color, data.time);
         core.setFlag('__color__', data.color || null);
         core.doAction();
     }
     else {
-        core.setFg(data.color, data.time, function () {
+        core.setCurtain(data.color, data.time, function () {
             core.setFlag('__color__', data.color || null);
             core.doAction();
         });

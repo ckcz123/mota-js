@@ -16,8 +16,7 @@ function core() {
         'ground': null,
         'items': {},
         'enemys': {},
-        'icons': {},
-        'events': {}
+        'icons': {}
     }
     this.timeout = {
         'tipTimeout': null,
@@ -84,8 +83,8 @@ function core() {
     this.domStyle = {
         scale: 1.0,
         isVertical: false,
-        toolbarBtn: false,
         showStatusBar: true,
+        toolbarBtn: false,
     }
     this.bigmap = {
         canvas: ["bg", "event", "event2", "fg", "damage"],

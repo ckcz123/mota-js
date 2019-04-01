@@ -371,7 +371,6 @@ control.prototype.confirmRestart = function (fromSettings) {
     });
 }
 
-
 ////// 清除游戏状态和数据 //////
 control.prototype.clearStatus = function() {
     // 停止各个Timeout和Interval
@@ -424,7 +423,7 @@ control.prototype.stopAutomaticRoute = function () {
     core.status.automaticRoute.destX=null;
     core.status.automaticRoute.destY=null;
     core.status.automaticRoute.lastDirection = null;
-    core.stopHero();
+    core.status.heroStop = true;
     if (core.status.automaticRoute.moveStepBeforeStop.length==0)
         core.deleteCanvas('route');
 }
@@ -749,11 +748,6 @@ control.prototype.waitHeroToStop = function(callback) {
             callback();
         }, 30);
     }
-}
-
-////// 停止勇士的移动状态 //////
-control.prototype.stopHero = function () {
-    core.status.heroStop = true;
 }
 
 ////// 转向 //////
@@ -1274,7 +1268,12 @@ control.prototype._doReplayAction = function (action) {
 control.prototype._replay_finished = function () {
     core.status.replay.replaying = false;
     core.status.event.selection = 0;
-    core.ui.drawConfirmBox("录像播放完毕，你想退出播放吗？", function () {
+    var str = "录像播放完毕，你想退出播放吗？";
+    if (core.status.route.length != core.status.replay.totalList.length
+        || core.subarray(core.status.route, core.status.replay.totalList) == null) {
+        str = "录像播放完毕，但记录不一致。\n请检查录像播放时的二次记录问题。\n你想退出播放吗？";
+    }
+    core.ui.drawConfirmBox(str, function () {
         core.ui.closePanel();
         core.stopReplay(true);
     }, function () {
@@ -1462,6 +1461,7 @@ control.prototype._replayAction_moveDirectly = function (action) {
     // 忽略连续的瞬移事件
     while (core.status.replay.toReplay.length>0 &&
         core.status.replay.toReplay[0].indexOf('move:')==0) {
+            core.status.route.push(action);
             action = core.status.replay.toReplay.shift();
     }
 
@@ -1617,13 +1617,15 @@ control.prototype._doSL_replayLoad_afterGet = function (id, data) {
 ////// 同步存档到服务器 //////
 control.prototype.syncSave = function (type) {
     core.ui.drawWaiting("正在同步，请稍后...");
-    core.getAllSaves(type=='all'?null:core.saves.saveIndex, function (saves) {
-        if (!saves) return core.drawText("没有要同步的存档");
+    var callback = function (saves) {
         core.control._syncSave_http(type, saves);
-    })
+    }
+    if (type == 'all') core.getAllSaves(callback);
+    else core.getSave(core.saves.saveIndex, callback);
 }
 
 control.prototype._syncSave_http = function (type, saves) {
+    if (!saves) return core.drawText("没有要同步的存档");
     var formData = new FormData();
     formData.append('type', 'save');
     formData.append('name', core.firstData.name);
@@ -1748,8 +1750,7 @@ control.prototype.getSaves = function (ids, callback) {
     }
 }
 
-control.prototype.getAllSaves = function (id, callback) {
-    if (id != null) return this.getSave(id, callback);
+control.prototype.getAllSaves = function (callback) {
     var ids = Object.keys(core.saves.ids).filter(function(x){return x!=0;})
         .sort(function(a,b) {return a-b;}), saves = [];
     this.getSaves(ids, function (data) {
@@ -1792,7 +1793,7 @@ control.prototype.hasSave = function (index) {
     return core.saves.ids[index] || false;
 }
 
-////// 删除一个或多个存档
+////// 删除某个存档
 control.prototype.removeSave = function (index, callback) {
     if (index == 0 || index == "autoSave") {
         index = "autoSave";
@@ -1826,8 +1827,6 @@ control.prototype._updateFavoriteSaves = function () {
     core.setLocalStorage("favorite", core.saves.favorite);
     core.setLocalStorage("favoriteName", core.saves.favoriteName);
 }
-
-////// 加载某个存档
 
 // ------ 属性，状态，位置，buff，变量，锁定控制等 ------ //
 
@@ -2019,7 +2018,7 @@ control.prototype._setWeather_createNodes = function (type, level) {
 }
 
 ////// 更改画面色调 //////
-control.prototype.setFg = function(color, time, callback) {
+control.prototype.setCurtain = function(color, time, callback) {
     if (time == null) time=750;
     if (time<=0) time=0;
     if (!core.status.curtainColor)
@@ -2037,10 +2036,10 @@ control.prototype.setFg = function(color, time, callback) {
         return;
     }
 
-    this._setFg_animate(core.status.curtainColor, color, time, callback);
+    this._setCurtain_animate(core.status.curtainColor, color, time, callback);
 }
 
-control.prototype._setFg_animate = function (nowColor, color, time, callback) {
+control.prototype._setCurtain_animate = function (nowColor, color, time, callback) {
     var per_time = 10, step = parseInt(time / per_time);
     var animate = setInterval(function() {
         nowColor = [
@@ -2068,8 +2067,8 @@ control.prototype.screenFlash = function (color, time, times, callback) {
     times = times || 1;
     time = time / 3;
     var nowColor = core.clone(core.status.curtainColor);
-    core.setFg(color, time, function() {
-        core.setFg(nowColor, time * 2, function() {
+    core.setCurtain(color, time, function() {
+        core.setCurtain(nowColor, time * 2, function() {
             if (times > 1)
                 core.screenFlash(color, time * 3, times - 1, callback);
             else {
@@ -2381,7 +2380,7 @@ control.prototype.updateGlobalAttribute = function (name) {
     }
 }
 
-////// 改变工具栏为按钮1-7 //////
+////// 改变工具栏为按钮1-8 //////
 control.prototype.setToolbarButton = function (useButton) {
     if (!core.domStyle.showStatusBar) {
         // 隐藏状态栏时检查竖屏

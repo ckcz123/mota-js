@@ -105,7 +105,7 @@ actions.prototype.doRegisteredAction = function (action) {
     return false;
 }
 
-actions.prototype.checkReplaying = function () {
+actions.prototype._checkReplaying = function () {
     if (core.isReplaying() && core.status.event.id != 'save'
         && (core.status.event.id || "").indexOf('book') != 0 && core.status.event.id != 'viewMaps')
         return true;
@@ -114,7 +114,7 @@ actions.prototype.checkReplaying = function () {
 
 ////// 检查是否在录像播放中，如果是，则停止交互
 actions.prototype._sys_checkReplay = function () {
-    if (this.checkReplaying()) return true;
+    if (this._checkReplaying()) return true;
 }
 
 ////// 按下某个键时 //////
@@ -145,7 +145,7 @@ actions.prototype.onkeyUp = function (e) {
 }
 
 actions.prototype._sys_onkeyUp_replay = function (e) {
-    if (this.checkReplaying()) {
+    if (this._checkReplaying()) {
         if (e.keyCode == 27) // ESCAPE
             core.stopReplay();
         else if (e.keyCode == 90) // Z
@@ -286,7 +286,7 @@ actions.prototype.keyUp = function (keyCode, altKey, fromReplay) {
 }
 
 actions.prototype._sys_keyUp_replay = function (keyCode, altKey, fromReplay) {
-    if (!fromReplay && this.checkReplaying()) return true;
+    if (!fromReplay && this._checkReplaying()) return true;
 }
 
 actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
@@ -389,7 +389,7 @@ actions.prototype._sys_keyUp = function (keyCode, altKey) {
     if (core.status.automaticRoute && core.status.automaticRoute.autoHeroMove) {
         core.stopAutomaticRoute();
     }
-    core.stopHero();
+    core.status.heroStop = true;
     return true;
 }
 
@@ -539,8 +539,8 @@ actions.prototype._sys_onup = function () {
     return true;
 }
 
-////// 获得点击事件相对左上角的坐标（0到12之间） //////
-actions.prototype.getClickLoc = function (x, y) {
+////// 获得点击事件相对左上角的坐标 //////
+actions.prototype._getClickLoc = function (x, y) {
 
     var statusBar = {'x': 0, 'y': 0};
     var size = 32;
@@ -663,7 +663,7 @@ actions.prototype.onmousewheel = function (direct) {
 actions.prototype._sys_onmousewheel = function (direct) {
     // 向下滚动是 -1 ,向上是 1
 
-    if (this.checkReplaying()) {
+    if (this._checkReplaying()) {
         // 滚轮控制速度
         if (direct == 1) core.speedUpReplay();
         if (direct == -1) core.speedDownReplay();
@@ -2065,7 +2065,7 @@ actions.prototype._clickLocalSaveSelect = function (x, y) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
         if (selection < 2) {
-            core.getAllSaves(selection == 0 ? null : core.saves.saveIndex, function (saves) {
+            var callback = function (saves) {
                 if (saves) {
                     var content = {
                         "name": core.firstData.name,
@@ -2074,7 +2074,9 @@ actions.prototype._clickLocalSaveSelect = function (x, y) {
                     }
                     core.download(core.firstData.name + "_" + core.formatDate2(new Date()) + ".h5save", JSON.stringify(content));
                 }
-            })
+            };
+            if (selection == 0) core.getAllSaves(callback);
+            else core.getSave(core.saves.saveIndex, callback);
         }
 
         core.status.event.selection = 2;

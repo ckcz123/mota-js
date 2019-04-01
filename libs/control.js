@@ -473,13 +473,9 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     if (this._setAutomaticRoute_clickMoveDirectly(destX, destY, stepPostfix)) return;
     // 找寻自动寻路路线
     var moveStep = core.automaticRoute(destX, destY);
-    if (moveStep.length == 0) {
-        if (destX != core.status.hero.loc.x || destY != core.status.hero.loc.y)
-            return;
-        moveStep = [];
-    }
-    var moveStep = moveStep.concat(stepPostfix);
-    if (moveStep.length == 0) return;
+    if (moveStep.length == 0 && (destX != core.status.hero.loc.x || destY != core.status.hero.loc.y || stepPostfix.length == 0))
+        return;
+    moveStep = moveStep.concat(stepPostfix);
     core.status.automaticRoute.destX=destX;
     core.status.automaticRoute.destY=destY;
     this._setAutomaticRoute_drawRoute(moveStep);

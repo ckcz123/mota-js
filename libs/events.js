@@ -183,7 +183,7 @@ events.prototype._gameOver_doUpload = function (username, ending, norank) {
     formData.append('money', core.status.hero.money);
     formData.append('experience', core.status.hero.experience);
     formData.append('steps', core.status.hero.steps);
-    formData.append('norank', norank || 0);
+    formData.append('norank', norank ? 1 : 0);
     formData.append('seed', core.getFlag('__seed__'));
     formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime / 1000));
     formData.append('route', core.encodeRoute(core.status.route));
@@ -2041,7 +2041,7 @@ events.prototype.jumpHero = function (ex, ey, time, callback) {
     var sx=core.status.hero.loc.x, sy=core.status.hero.loc.y;
     if (!core.isset(ex)) ex=sx;
     if (!core.isset(ey)) ey=sy;
-    core.maps.__playJumpSound();
+    core.playSound('jump.mp3');
     var jumpInfo = core.maps.__generateJumpInfo(sx, sy, ex, ey, time || 500);
     jumpInfo.icon = core.material.icons.hero[core.getHeroLoc('direction')];
     jumpInfo.height = core.material.icons.hero.height;

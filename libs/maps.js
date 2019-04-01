@@ -1660,7 +1660,7 @@ maps.prototype.__generateJumpInfo = function (sx, sy, ex, ey, time) {
     return {
         x: sx, y: sy, ex: ex, ey: ey, px: 32 * sx, py: 32 * sy, opacity: 1,
         jump_peak: jump_peak, jump_count: jump_count,
-        step: 0, per_time: time / 16 / core.status.replay.speed
+        step: 0, per_time: time / jump_count
     };
 }
 

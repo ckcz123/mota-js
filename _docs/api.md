@@ -301,7 +301,7 @@ core.musicStatus.soundStatus    （音效开启状态）
 core.musicStatus.playingBgm    （当前正在播放的BGM）
 core.musicStatus.lastBgm    （最近一次尝试播放的BGM）
 core.musicStatus.volume    （当前的音量）
-core.musicStatus.cachedBgms    （背景音乐的缓存内从）
+core.musicStatus.cachedBgms    （背景音乐的缓存内容）
 core.musicStatus.cacheBgmCount    （背景音乐的缓存数量，默认值是4）
 
 
@@ -555,14 +555,6 @@ core.hideStartAnimate(callback)
 
 core.isPlaying()
 当前是否正在游戏中。
-
-
-core.restart()
-重新开始游戏。本质上就是播放标题界面的BGM并调用showStartAnimate。
-
-
-core.confirmRestart()
-确认用户是否需要重新开始。
 
 
 core.clearStatus()
@@ -955,16 +947,901 @@ core.resize()
 
 ### enemys.js
 
+enemys.js中定义了一系列和怪物相关的API函数。
+
+```js
+core.hasSpecial(special, test)
+判断是否含有某个特殊属性。test为要检查的特殊属性编号。
+special为要测试的内容，允许接收如下类型参数：
+ - 一个数字：将直接和test进行判等。
+ - 一个数组：将检查test是否在该数组之中存在。
+ - 一个怪物信息：将检查test是否在该怪物的特殊属性中存在
+ - 一个字符串：视为怪物ID，将检查该怪物的特殊属性
+
+
+core.getSpecials()
+获得所有特殊属性的列表。实际上被转发到了脚本编辑中。
+
+
+core.getSpecialText(enemy)
+获得某个怪物的全部特殊属性名称。enemy可以是怪物信息或怪物ID。
+将返回一个数组，每一项是该怪物所拥有的一个特殊属性的名称。
+
+
+core.getSpecialHint(enemy, special)
+获得怪物的某个特殊属性的描述。enemy可以是怪物信息或怪物ID，special为该特殊属性编号。
+
+
+core.canBattle(enemy, x, y, floorId)
+判定当前能否战胜某个怪物。
+enemy可以是怪物信息或怪物ID，x,y,floorId为当前坐标和楼层。（下同）
+能战胜返回true，不能战胜返回false。
+
+
+core.getDamage(enemy, x, y, floorId)
+获得某个怪物的全部伤害值。
+如果没有破防或无法战斗则返回null，否则返回具体的伤害值。
+
+
+core.getExtraDamage(enemy, x, y, floorId)
+获得某个怪物的额外伤害值（不可被魔防减伤）。
+目前暂时只包含了仇恨和固伤两者，如有需要可复写该函数。
+
+
+core.getDamageString(enemy, x, y, floorId)
+获得某个怪物伤害字符串和颜色信息，以便于在地图上绘制显伤。
+
+
+core.nextCriticals(enemy, number, x, y, floorId)
+获得接下来的N个临界值和临界减伤。enemy可以是怪物信息或怪物ID，x,y,floorId为当前坐标和楼层。
+number为要计算的临界值数量，不填默认为1。
+如果全塔属性中的useLoop开关被开启，则将使用循环法或二分法计算临界，否则使用回合法计算临界。
+返回一个二维数组 [[x1,y1],[x2,y2],...] 表示接下来的每个临界值和减伤值。
+
+
+core.getDefDamage(enemy, k, x, y, floorId)
+获得某个怪物的k防减伤值。k可不填默认为1。
+
+
+core.getEnemyInfo(enemy, hero, x, y, floorId)
+获得某个怪物的实际计算时的属性。该函数实际被转发到了脚本编辑中。
+hero可为null或一个对象，具体将使用core.getRealStatusOrDefault(hero, "atk")来获得攻击力数值。
+该函数应当返回一个对象，记录了怪物的实际计算时的属性。
+
+
+core.getDamageInfo(enemy, hero, x, y, floorId)
+获得某个怪物的战斗信息。该函数实际被转发到了脚本编辑中。
+hero可为null或一个对象，具体将使用core.getRealStatusOrDefault(hero, "atk")来获得攻击力数值。
+如果该函数返回null，则代表不可战斗（如没有破防，或无敌等）。
+否则，该函数应该返回一个对象，记录了战斗伤害信息，如战斗回合数等。
+从V2.5.5开始，该函数也允许直接返回一个数字，代表战斗伤害值，此时回合数将视为0。
+
+
+core.updateEnemys()
+更新怪物数据。该函数实际被转发到了脚本编辑中。详见文档-事件-更新怪物数据。
+
+
+core.getCurrentEnemys(floorId)
+获得某个楼层不重复的怪物信息，floorId不填默认为当前楼层。该函数会被怪物手册所调用。
+该函数将返回一个列表，每一项都是一个不同的怪物，按照伤害值从小到大排序。
+另外值得注意的是，如果设置了某个怪物的displayIdInBook，则会返回对应的怪物。
+
+
+core.hasEnemyLeft(floorId)
+检查某个楼层是否还有剩余的怪物。等价于 core.getCurrentEnemys(floorId).length > 0
+```
+
 ### events.js
+
+events.js将处理所有和事件相关的操作，主要分为五个部分：
+- 游戏的开始和结束
+- 系统事件的处理
+- 自定义事件的处理
+- 点击状态栏图标所进行的操作
+- 一些具体事件的执行内容
+
+
+```js
+// ------ 游戏的开始和结束 ------ //
+
+core.resetGame(hero, hard, floorId, maps, values)
+重置整个游戏。该函数实际被转发到了脚本编辑中。
+
+
+core.startGame(hard, seed, route, callback)
+开始新游戏。
+hard为难度字符串，会被设置为core.status.hard。
+seed为开始时要设置的的种子，route为要开始播放的录像，callback为回调函数。
+该函数将重置整个游戏，调用setInitData，执行startText事件，上传游戏人数统计信息等。
+
+
+core.setInitData()
+根据难度分歧来初始化难度，包括设置flag:hard，设置初始属性等。
+该函数实际被转发到了脚本编辑中。
+
+
+core.win(reason, norank)
+游戏胜利，reason为结局名，norank如果为真则该结局不计入榜单。
+该函数实际被转发到了脚本编辑中。
+
+
+core.lose(reason)
+游戏失败，reason为结局名。该函数实际被转发到了脚本编辑中。
+
+
+core.gameOver(ending, fromReplay, norank)
+游戏结束。ending为获胜结局名，null代表失败；fromReplay标识是否是录像触发的。
+此函数将询问是否上传成绩（如果ending不是null），是否下载录像等，并重新开始。
+
+
+core.restart()
+重新开始游戏。本质上就是播放标题界面的BGM并调用showStartAnimate。
+
+
+core.confirmRestart()
+确认用户是否需要重新开始。
+
+// ------ 系统事件处理 ------ //
+
+core.registerSystemEvent(type, func)
+注册一个系统事件，即通过图块的默认触发器所触发的事件。
+type为一个要注册的事件类型，func为要执行的函数体或插件中的函数名。
+func需要接受(data, callback)作为参数，分别是触发点的图块信息，和执行完毕时的回调。
+如果注册一个已经存在的系统事件，比如openDoor，则会覆盖系统的默认函数。
+
+
+core.unregisterSystemEvent(type)
+注销一个系统事件。type是上面你注册的事件类型。
+
+
+core.doSystemEvent(type, data, callback)
+执行一个系统事件。type为事件类型，data为该事件点的图块信息，callback为执行完毕的回调。
+
+
+core.battle(id, x, y, force, callback)
+和怪物进行战斗。
+id为怪物的ID，x和y为怪物坐标，force如果为真将强制战斗，callback为执行完毕的回调。
+如果填写了怪物坐标，则会删除对应点的图块并执行该点战后事件。
+如果是在事件流的执行过程中调用此函数，则不会进行自动存档，且会强制战斗。
+
+
+core.beforeBattle(enemyId, x, y)
+战前事件。实际被转发到了脚本编辑中，可以在这里加上一些战前特效。
+此函数在“检测能否战斗和自动存档”【之后】执行。
+如果需要更早的战前事件，请在插件中覆重写 core.events.doSystemEvent 函数。
+此函数返回true则将继续本次战斗，返回false将不再战斗。
+
+
+core.afterBattle(enemyId, x, y, callback)
+战后事件，将执行扣血、加金币经验、特殊属性处理、战后事件处理等操作。
+实际被转发到了脚本编辑中。
+
+
+core.openDoor(x, y, needKey, callback)
+尝试开一个门。x和y为门的坐标，needKey表示是否需要钥匙，callback为执行完毕的回调。
+如果不是一个有效的门，需要钥匙且未持有等，均会忽略此事件并直接执行callback。
+
+
+core.afterOpenDoor(doorId, x, y, callback)
+开完一个门后执行的事件，实际被转发到了脚本编辑中。
+
+
+core.getItem(id, num, x, y, callback)
+获得若干个道具。itemId为道具ID，itemNum为获得的道具个数，不填默认为1。
+x和y为道具点的坐标，如果设置则会擦除地图上的该点。
+
+
+core.afterGetItem(id, x, y, callback)
+获得一个道具后执行的事件，实际被转发到了脚本编辑中。
+
+
+core.getNextItem(noRoute)
+轻按，即获得面对的道具。如果noRoute为真则这个轻按行为不会计入录像。
+
+
+core.changeFloor(floorId, stair, heroLoc, time, callback, fromLoad)
+楼层切换。floorId为目标楼层ID，stair为是什么楼梯，heroLoc为目标点坐标。
+time为切换时间，callback为切换完毕的回调，fromLoad标志是否是从读档造成的切换。
+floorId也可以填":before"和":next"表示前一层和后一层。
+heroLoc为{"x": 0, "y": 0, "direction": "up"}的形式。不存在则从勇士位置取。
+如果stair不为null，则会在该楼层中找对应的图块作为目标点的坐标并覆盖heroLoc。
+一般设置的是"upFloor"和"downFloor"，但也可以用任何其他的图块ID。
+
+
+core.changingFloor(floorId, heroLoc, fromLoad)
+正在执行楼层切换中执行的操作，实际被转发到了脚本编辑中。
+
+
+core.hasVisitedFloor(floorId)
+是否曾经到达过某一层。
+
+
+core.visitFloor(floorId)
+标记曾经到达了某一层。
+
+
+core.passNet(data)
+执行一个路障处理。这里只有毒衰咒网的处理，血网被移动到了updateCheckBlock中。
+
+
+core.pushBox(data)
+执行一个推箱子事件。
+
+
+core.afterPushBox()
+推箱子之后触发的事件，实际被转发到了脚本编辑中。
+
+
+core.changeLight(id, x, y)
+踩灯后的事件。
+
+// ------ 自定义事件的处理 ------ //
+
+core.registerEvent(type, func)
+注册一个自定义事件。type为事件名，func为执行事件的函数体或插件中的函数名。
+func可以接受(data, x, y, prefix)参数，其中data为事件内容，x和y为该点坐标，prefix为该点前缀。
+同名注册的事件将进行覆盖。
+请记得在自定义处理事件完毕后调用core.doAction()再继续执行下一个事件！
+
+
+core.unregisterEvent(type)
+注销一个自定义事件。
+
+
+core.doEvent(data, x, y, prefix)
+执行一个自定义事件。data为事件内容，将根据data.type去注册的事件列表中查找对应的执行函数。
+x和y为该点坐标，prefix为该点前缀。执行事件时也会把(data, x, y, prefix)传入执行函数。
+
+
+core.setEvents(list, x, y, callback)
+设置自定义事件的执行列表，坐标和回调函数。
+
+
+core.startEvents(list, x, y, callback)
+开始执行一系列的自定义事件。list为事件列表，x和y为事件坐标，callback为执行完毕的回调。
+此函数将调用core.setEvents，然后停止勇士，再执行core.doAction()。
+
+
+core.doAction()
+执行下一个自定义事件。
+此函数将检测事件列表是否全部执行完毕，如果是则执行回调函数。
+否则，将从事件列表中弹出下一个事件，并调用core.doEvent进行执行。
+
+
+core.insertAction(action, x, y, callback, addToLast)
+向当前的事件列表中插入一个或多个事件并执行。
+如果当前并不是在事件执行流中，则会调用core.startEvents()开始执行事件，否则仅仅执行插入操作。
+action为要插入的事件，可以是一个单独的事件，或者是一个事件列表。
+x,y,callback如果设置了且不为null，则会覆盖当前的坐标和回调函数。
+addToLast如果为真，则会插入到事件执行列表的尾部，否则是插入到执行列表的头部。
+
+
+core.getCommonEvent(name)
+根据名称获得某个公共事件内容。
+
+
+core.recoverEvents(data)
+恢复事件现场。一般用于呼出怪物手册、呼出存读档页面等时，恢复事件执行流。
+
+// ------ 点击状态栏图标时执行的一些操作 ------ //
+
+core.openBook(fromUserAction)
+尝试打开怪物手册。fromUserAction标志是否是从用户的行为触发，如按键或点击状态栏。（下同）
+不建议复写此函数，否则【呼出怪物手册】事件会出问题。
+
+
+core.useFly(fromUserAction)
+尝试使用楼传器。可以安全的复写此函数，参见文档-个性化-覆盖楼传事件。
+
+
+core.flyTo(toId, callback)
+尝试飞行到某个楼层，被转发到了脚本编辑中。
+如果此函数返回true代表成功进行了飞行，false代表不能进行飞行。
+
+
+core.openEquipbox(fromUserAction) / core.openToolbox(fromUserAction)
+尝试打开道具栏和装备栏。可以安全复写这两个函数。
+
+
+core.openQuickShop(fromUserAction) / core.openKeyBoard(fromUserAction)
+尝试打开快捷商店和虚拟键盘。可以安全复写这两个函数。
+
+
+core.save(fromUserAction) / core.load(fromUserAction)
+尝试打开存读档页面。
+不建议复写这两个函数，否则【呼出存读档页面】事件会出问题。
+
+
+core.openSettings(fromUserAction)
+尝试打开系统菜单。不建议复写此函数。
+
+
+// ------ 一些具体事件的执行内容 ------ //
+
+core.hasAsync()
+当前是否存在未执行完毕的异步事件。请注意正在播放的动画也算异步事件。
+
+
+core.follow(name) / core.unfollow(name)
+跟随勇士/取消跟随。name为行走图名称。
+在取消跟随时如果指定了name，则会从跟随列表中选取一个该行走图取消，否则取消所有跟随。
+跟随和取消跟随都会调用core.gatherFollowers()来聚集所有的跟随者。
+
+
+core.setValue(name, value, prefix) / core.addValue(name, value, prefix)
+设置/增减某个数值。name可以是status:xxx，item:xxx或flag:xxx。
+value可以是一个表达式，将调用core.calValue()计算。prefix为前缀，独立开关使用。
+
+
+core.doEffect(effect, need, times)
+执行一个effect操作。该函数目前仅被全局商店的status:xxx+=yyy所调用。
+
+
+core.setFloorInfo(name, values, floorId, prefix)
+设置某层楼的楼层属性。
+
+
+core.setGlobalAttribute(name, value)
+设置一个全局属性，如边框颜色等。
+
+
+core.setGlobalFlag(name, value)
+设置一个全局开关，如enableXXX等。
+如果需要设置一个全局数值如红宝石数值，可以直接简单的修改core.values，因此没有单独列出函数。
+
+
+core.closeDoor(x, y, id, callback)
+执行一个关门事件。如果不是一个合法的门，或者该点不为空地，则会忽略本事件。
+
+
+core.showImage(code, image, sloc, loc, opacityVal, time, callback)
+显示一张图片。code为图片编号，image为图片内容或图片名。
+sloc为[x,y,w,h]形式，表示在原始图片上裁剪的区域，也可直接设为null表示整张图片。
+loc为[x,y,w,h]形式，表示在界面上绘制的位置和大小，w和h可忽略表示使用绘制大小。
+opacityVal为绘制的不透明度，time为淡入时间。
+此函数将创建一个画布，其z-index是100+code，即图片编号为1则是101，编号50则是150。
+请注意，curtain层的z-index是125，UI层的z-index是140；因此可以通过图片编号来调整覆盖关系。
+
+
+core.hideImage(code, time, callback)
+隐藏一张图片。code为图片编号，time为淡出时间。
+
+
+core.moveImage(code, to, opacityVal, time, callback)
+移动一张图片。code为图片编号，to为[x,y]表示目标位置，opacityVal目标不透明度，time为移动时间。
+
+
+core.showGif(name, x, y)
+绘制一张gif图片或取消所有绘制内容。如果name不设置则视为取消。x和y为左上角像素坐标。
+
+
+core.setVolume(value, time, callback)
+设置音量。value为目标音量大小，在0到1之间。time为音量渐变的时间。
+
+
+core.vibrate(time, callback)
+画面震动。time为震动时间。
+请注意，画面震动时间必须是500的倍数，系统也会自动把time调整为上整的500倍数值。
+
+
+core.eventMoveHero(steps, time, callback)
+使用事件移动勇士。time为每步的移动时间。
+steps为移动数组，可以接受'up','down','left','right','forward'和'backward'项。
+使用事件移动勇士将不会触发任何地图上的事件。
+
+
+core.jumpHero(ex, ey, time, callback)
+跳跃勇士。ex和ey为目标点的坐标，可以为null表示原地跳跃。time为总跳跃时间。
+
+
+core.openShop(shopId, needVisited)
+打开一个全局商店。needVisited表示是否需要该商店原本就是启用状态。
+如果该商店对应的实际上是一个全局事件，则会直接插入并执行。
+
+
+core.disableQuickShop(shopId)
+禁用一个全局商店，即把一个商店从启用变成禁用状态。
+
+
+core.canUseQuickShop(shopId)
+当前能否使用某个全局商店，实际被转发到了脚本编辑中。
+如果此函数返回null则表示可以使用，返回一个字符串表示不可以，该字符串表示不可以的原因。
+
+
+core.setHeroIcon(name, noDraw)
+设置勇士的行走图。
+name为行走图名称，noDraw如果为真则不会调用core.drawHero()函数进行刷新。
+
+
+core.checkLvUp()
+检查升级事件。该函数将判定当前是否升级（或连续升级），然后执行升级事件。
+
+
+core.tryUseItem(itemId)
+尝试使用一个道具。
+对于怪物手册和楼传器，将分别调用core.openBook()和core.useFly()函数。
+对于中心对称飞行器，则会调用core.drawCenterFly()函数。
+对于其他的道具，将检查是否拥有，能否使用，并且进行使用。
+
+
+core.afterUseBomb()
+使用炸弹或圣锤后的事件。实际被转发到了脚本编辑中。
+```
 
 ### icons.js
 
+icons.js主要是负责素材相关信息，比如某个素材在对应的图片上的位置。
+
+```js
+core.getClsFromId(id)
+根据某个素材的ID获得该素材的cls
+
+
+core.getTilesetOffset(id)
+根据某个素材来获得对应的tileset和坐标信息。
+如果该素材不是tileset，则返回null。
+```
+
 ### items.js
+
+items.js主要负责一切和道具相关的内容。
+
+```js
+core.getItemEffect(itemId, itemNum)
+即捡即用类的道具获得时的效果。实际对应道具图块属性中的itemEffect框。
+
+
+core.getItemEffectTip(itemId)
+即捡即用类的道具获得时的额外提示，比如“，攻击+100”。
+实际对应道具图块属性中的itemEffectTip框。
+
+
+core.useItem(itemId, noRoute, callback)
+尝试使用一个道具。实际对应道具图块属性中的useItemEffect框。
+此函数也会调用一遍core.canUseItem()，如果无法使用将直接返回。
+noRoute如果为真，则这次使用道具的过程不会被计入录像。
+使用道具完毕后，对于消耗道具将自动扣除，永久道具不会扣除。
+
+
+core.canUseItem(itemId)
+当前能否使用某个道具。
+有些系统道具如破炸和上下楼器等，会在计算出目标点的坐标后存入core.status.event.ui。
+使用道具时将直接从core.status.event.ui调用，不会重新计算。
+
+
+core.itemCount(itemId)
+获得某个道具的个数。
+
+
+core.hasItem(itemId)
+当前是否拥有某个道具。等价于 core.itemCount(itemId) > 0
+请注意，装备上的装备不视为拥有该道具，即core.hasEquip()和core.hasItem()是完全不同的。
+
+
+core.hasEquip(itemId)
+当前是否装备上某个装备。
+请注意，装备上的装备不视为拥有该道具，即core.hasEquip()和core.hasItem()是完全不同的。
+
+
+core.getEquip(equipType)
+获得某个装备位的当前装备。equipType为装备类型，从0开始。
+如果该装备位没有装备则返回null，否则返回当前装备的ID。
+
+
+core.setItem(itemId, itemNum)
+设置某个道具的个数。
+
+
+core.addItem(itemId, itemNum)
+增减某个道具的个数，itemNum可不填默认为1。
+
+
+core.getEquipTypeByName(name)
+根据装备位名称来找到一个空的装备孔，适用于多重装备。
+如果没有一个装备孔是该装备名称，则返回-1。
+
+
+core.getEquipTypeById(equipId)
+获得某个装备的装备类型。
+如果其type写的是装备名（多重装备），则调用core.getEquipTypeByName()函数。
+
+
+core.canEquip(equipId, hint)
+当前能否穿上某个装备。如果hint为真，则不可装备时会气泡提示原因。
+
+
+core.loadEquip(equipId, callback)
+穿上某个装备。
+
+
+core.unloadEquip(equipType, callback)
+脱下某个装备孔的装备。
+
+
+core.compareEquipment(compareEquipId, beComparedEquipId)
+比较两个套装的差异。
+此函数将对所有的勇士属性包括生命魔力攻防魔防金币等进行比较。
+如果存在差异的，将作为一个对象返回其差异内容。
+
+
+core.quickSaveEquip(index)
+保存当前套装。index为保存的套装编号。
+
+
+core.quickLoadEquip()
+读取当前套装。index为读取的套装编号。
+```
 
 ### loader.js
 
+loader.js主要负责资源加载相关的内容。
+
+```js
+core.loadImage(imgName, callback)
+从 project/images/ 中加载一张图片。imgName为图片名。
+callback为执行完毕的回调函数，接收(imgName, image)即图片名和图片内容作为参数。
+如果图片不存在或加载失败则会在控制台打出一条错误日志，不会执行回调。
+
+
+core.loadImages(names, toSave, callback)
+从 project/images/ 中加载若干张图片。
+names为一个图片名的列表，toSave为加载并存到的对象。
+callback为全部加载完毕执行的回调。
+
+
+core.loadOneMusic(name)
+从 project/sounds/ 或第三方中加载一个音乐，并存入core.material.bgms中。name为音乐名。
+
+
+core.loadOneSound(name)
+从 project/sounds/ 中加载一个音效，并存入core.material.sounds中。name为音效名。
+
+
+core.loadBgm(name)
+预加载一个bgm并加入缓存列表core.musicStatus.cachedBgms。
+此函数将会检查bgm的缓存，预加载和静音播放。
+如果缓存列表溢出(core.musicStatus.cacheBgmCount)则通过LRU算法选择一个bgm并调用core.freeBgm()。
+
+
+core.freeBgm(name)
+释放一个bgm的内存并移出缓存列表。如果该bgm正在播放则也会立刻停止。
+```
+
 ### map.js
 
+maps.js负责一切和地图相关的处理内容，包括如下几个方面：
+- 地图的初始化，保存和读取，地图数组的生成
+- 是否可移动或瞬间移动的判定
+- 地图的绘制
+- 获得某个点的图块信息
+- 启用和禁用图块，改变图块
+- 移动/跳跃图块，淡入淡出图块
+- 全局动画控制，动画的绘制
+
+```js
+// ------ 地图的初始化，保存和读取，地图数组的生成 ------ //
+
+core.loadFloor(floorId, map)
+从楼层或者存档中生成core.status.maps的内容。
+map为存档信息，如果某项在map中不存在则会从core.floors中读取。
+
+
+core.getNumberById(id)
+给定一个图块ID，找到对应的数字。
+
+
+core.initBlock(x, y, id, addInfo, eventFloor)
+给定一个数字，初始化一个图块信息。
+x和y为坐标，id为数字或者可以:t或:f结尾表示初始是启用还是禁用状态。
+addInfo如果为true则会填充上图块的默认信息，比如给怪物添加battle触发器。
+eventFloor如果设置为某个楼层信息，则会填充上该点的自定义或楼层切换事件。
+
+
+core.compressMap(mapArr, floorId)
+压缩地图。mapArr为要压缩的二维数组，floorId为对应的楼层。
+此函数将把mapArr和对应的楼层中的数组进行比较，并只取差异值进行存储。
+通过这种压缩地图的方式，不仅节省了存档空间，还支持了任意修改地图的接档。
+
+
+core.decompressMap(mapArr, floorId)
+解压缩地图。mapArr为压缩后的地图，floorId为对应的楼层。
+此函数返回解压后的二维数组。
+
+
+core.saveMap(floorId)
+将某层楼的数据生成存档所保存的内容。在core.saveData()中被调用。
+
+
+core.loadMap(data, floorId)
+从data中读取楼层数据，并调用core.loadFloor()进行初始化。
+
+
+core.resizeMap(floorId)
+根据某层楼的地图大小来调整大地图的画布大小。floorId可为null表示当前层。
+
+
+core.getMapArray(floorId, showDisable)
+生成某层楼的二维数组。floorId可不填代表当前楼层。
+showDisable若为真，则对于禁用的点会加上:f表示，否则视为0。
+
+
+core.getMapBlocksObj(floorId, showDisable)
+以x,y的形式返回每个点的图块信息。floorId可不填表示当前楼层。
+此函数将返回 {"0,0": {...}, "0,1": {...}} 这样的结构，其中内部为对应点的block信息。
+
+
+core.getBgMapArray(floorId, noCache)
+获得某层楼的背景层的二维数组。floorId可不填表示当前楼层。
+如果noCache为真则重新从剧本中读取而不使用缓存数据。
+
+
+core.getFgMapArray(floorId, noCache)
+获得某层楼的前景层的二维数组。floorId可不填表示当前楼层。
+如果noCache为真则重新从剧本中读取而不使用缓存数据。
+
+
+core.getBgNumber(x, y, floorId, noCache)
+获得某层楼的背景层中某个点的数字。floorId可不填表示当前楼层。
+如果noCache为真则重新从剧本中读取而不使用缓存数据。
+本函数实际等价于 core.getBgMapArray(floorId, noCache)[y][x]
+
+
+core.getBgNumber(x, y, floorId, noCache)
+获得某层楼的前景层中某个点的数字。参数和方法同上。
+
+// ------ 是否可移动或瞬间移动的判定 ------ //
+
+core.generateMovableArray(floorId, x, y, direction)
+生成全图或某个点的可通行方向数组。floorId为楼层Id，可不填默认为当前点。
+这里的可通行方向数组，指的是["up","down","left","right"]中的一个或多个组成的数组。
+ - 如果不设置x和y，则会返回一个三维数组，其中每个点都是一个该点可通行方向的数组。
+ - 如果设置了x和y但没有设置direction，则只会返回该点的可通行方向数组，
+ - 如果设置了x和y以及direction，则会判定direction是否在该点可通行方向数组中，并返回true或false。
+可以使用core.inArray()来判定某个方向是否在可通行方向数组中。
+
+
+core.canMoveHero(x, y, direction, floorId)
+某个点是否可朝某个方向移动。x和y可选，不填或为null则默认为勇士当前点。
+direction可选，不填或为null则默认勇士当前朝向。floorId不填则默认为当前楼层。
+此函数将直接调用 core.generateMovableArray() 进行判定。
+
+
+core.canMoveDirectly(destX, destY)
+当前能否瞬间移动到某个点。
+如果可以瞬移则返回非负数，其值为该次瞬移所少走的步数；如果不能瞬移则返回-1。
+
+
+core.automaticRoute(destX, destY)
+找寻到目标点的一条自动寻路路径。
+
+// ------ 绘制地图相关 ------ //
+
+core.drawBlock(block, animate)
+重新绘制一个图块，block为图块信息。
+如果animate不为null则代表是通过全局动画的绘制，其值为当前的帧数。
+
+
+core.generateGroundPattern(floorId)
+生成某个楼层的地板信息。floorId不填默认为当前楼层。
+该函数可被怪物手册、对话框帧动画等地方使用。
+
+
+core.drawMap(floorId, callback)
+绘制某层楼的地图。floorId为目标楼层ID，可不填表示当前楼层。
+此函数会将core.status.floorId设置为floorId，并设置core.status.thisMap。
+将依次调用core.drawBg(), core.drawEvents()和core.drawFg()函数，最后绘制勇士和更新地图显伤。
+
+
+core.drawBg(floorId, ctx)
+绘制背景层。floorId为目标楼层ID，可不填表示当前楼层。
+如果ctx不为null，则背景层将绘制在该画布上而不是bg层上（drawThumbnail使用）。
+可以通过复写该函数，调整_drawFloorImages和_drawBgFgMap的顺序来调整背景图块和贴图的遮挡顺序。
+
+
+core.drawEvents(floorId, blocks, ctx)
+绘制事件层。floorId为目标楼层ID，可不填表示当前楼层。
+block表示要绘制的图块列表，可不填使用当前楼层的图块列表。
+如果ctx不为null，则背景层将绘制在该画布上而不是event层上（drawThumbnail使用）。
+
+
+core.drawFg(floorId, ctx)
+绘制前景层。floorId为目标楼层ID，可不填表示当前楼层。
+如果ctx不为null，则背景层将绘制在该画布上而不是fg层上（drawThumbnail使用）。
+可以通过复写该函数，调整_drawFloorImages和_drawBgFgMap的顺序来调整前景图块和贴图的遮挡顺序。
+
+
+core.drawThumbnail(floorId, blocks, options, toDraw)
+绘制一个楼层的缩略图。floorId为目标楼层ID，可不填表示当前楼层。
+block表示要绘制的图块列表，可不填使用当前楼层的图块列表。
+options为绘制选项（可为null），包括：
+    heroLoc: 勇士位置；heroIcon：勇士图标（默认当前勇士）；damage：是否绘制显伤；
+    flags：当前的flags（在存读档时使用）
+toDraw为要绘制到的信息（可为null，或为一个画布名），包括：
+    ctx：要绘制到的画布（名）；x,y：起点横纵坐标（默认0）；size：绘制大小（默认416/480）；
+    all：是否绘制全图（默认false）；centerX,centerY：截取中心（默认为地图正中心）
+
+// ------ 获得某个点的图块信息 ------ //
+
+core.noPass(x, y, floorId)
+判定某个点是否有noPass的图块。
+
+
+core.npcExists(x, y, floorId)
+判定某个点是否有NPC的存在。
+
+
+core.terrainExists(x, y, id, floorId)
+判定某个点是否有（指定的）地形存在。
+如果id为null，则只要存在terrains即为真，否则还会判定对应点的ID。
+
+
+core.stairExists(x, y, floorId)
+判定某个点是否存在楼梯。
+
+
+core.nearStair()
+判定当前勇士是否在楼梯上或旁边（距离不超过1）。
+
+
+core.enemyExists(x, y, id, floorId)
+判定某个点是否有（指定的）怪物存在。
+如果id为null，则只要存在怪物即为真，否则还会判定对应点的怪物ID。
+请注意，如果需要判定某个楼层是否存在怪物请使用core.hasEnemyLeft()函数。
+
+
+core.getBlock(x, y, floorId, showDisable)
+获得某个点的当前图块信息。x和y为坐标；floorId为楼层ID，可忽略或null表示当前楼层。
+showDisable如果为true，则对于禁用的点和事件也会进行返回。
+如果该点不存在图块，则返回null。
+否则，返回值如下： {"index": xxx, "block": xxx}
+其中index为该点在该楼层blocks数组中的索引，block为该图块实际内容。
+
+
+core.getBlockId(x, y, floorId, showDisable)
+获得某个点的图块ID。如果该点不存在图块则返回null。
+
+
+core.getBlockCls(x, y, floorId, showDisable)
+获得某个点的图块类型。如果该点不存在图块则返回null。
+
+
+core.getBlockInfo(block)
+根据某个的图块信息获得其详细的素材信息。
+如果参数block为字符串，则视为图块ID；如果参数为数字，则视为图块的数字。
+此函数将返回一个非常详尽的素材信息，目前包括如下几项：
+number：素材数字；id：素材id；cls：素材类型；image：素材所在的素材图片；animate：素材的帧数。
+posX, posY：素材在该素材图片上的位置；height：素材的高度；faceIds：NPC朝向记录。
+
+
+core.searchBlock(id, floorId, showDisable)
+搜索一个图块出现过的所有位置。id为图块ID，也可以传入图块的数字。
+floorId为要搜索的楼层，可以是一个楼层ID，或者一个楼层数组。如果floorId不填则只搜索当前楼层。
+showDisable如果为真，则对于禁用的图块也会返回。
+此函数将返回一个数组，每一项为一个搜索到的结果：
+{"floorId": ..., "index": ..., "block": {...}, "x": ..., "y": ...}
+即包含该图块所在的楼层ID，在该楼层的blocks数组的索引，图块内容，和横纵坐标。
+
+
+// ------ 启用和禁用图块，改变图块 ------ //
+
+core.showBlock(x, y, floorId)
+将某个点从禁用变成启用状态。floorId可不填或null表示当前楼层。
+
+
+core.hideBlock(x, y, floorId)
+将某个点从启用变成禁用状态，但不会对其进行删除。floorId可不填或null表示当前楼层。
+此函数不会实际将该块从地图中进行删除，而是将该点设置为禁用，以供以后可能的启用事件。
+
+
+core.removeBlock(x, y, floorId)
+将从启用变成禁用状态，并尽可能将其从地图上删除。
+和hideBlock相比，如果该点不存在自定义事件（比如门或普通的怪物），则将直接从地图中删除。
+如果存在自定义事件，则简单的禁用它，以供以后可能的启用事件。
+
+
+core.removeBlockById(index, floorId)
+根据索引从地图的block数组中尽可能删除一个图块。floorId可不填或null表示当前楼层。
+
+
+core.removeBlockByIds(floorId, ids)
+根据索引数组从地图的block数组中尽可能删除一系列图块。floorId可不填或null表示当前楼层。
+
+
+core.canRemoveBlock(block, floorId)
+判定当前能否完全删除某个图块。floorId可不填或null表示当前楼层。
+如果该点存在自定义事件，或者是重生怪，则不可进行删除。
+
+
+core.showBgFgMap(name, loc, floorId, callback)
+显示某层楼中某个背景/前景层的图块。name只能为'bg'或'fg'表示背景或前景层。
+loc为该点坐标，floorId可不填默认为当前楼层。callback为执行完毕的回调。
+
+
+core.hideBgFgMap(name, loc, floorId, callback)
+隐藏某层楼中某个背景/前景层的图块。name只能为'bg'或'fg'表示背景或前景层。
+loc为该点坐标，floorId可不填默认为当前楼层。callback为执行完毕的回调。
+
+
+core.showFloorImage(loc, floorId, callback)
+显示某层楼中的某个楼层贴图。loc为该贴图的左上角坐标。floorId可省略表示当前楼层。
+
+
+core.hideFloorImage(loc, floorId, callback)
+隐藏某层楼中的某个楼层贴图。loc为该贴图的左上角坐标。floorId可省略表示当前楼层。
+
+
+core.setBlock(number, x, y, floorId)
+改变某个楼层的某个图块。
+number为要改变到的数字，也可以传入图块id（将调用core.getNumberById()来获得数字）。
+x,y和floorId为目标点坐标和楼层，可忽略为当前点和当前楼层。
+
+
+core.replaceBlock(fromNumber, toNumber, floorId)
+将某个或某些楼层中的所有某个图块替换成另一个图块
+fromNumber和toNumber为要被替换和替换到的数字。
+floorId可为某个楼层ID，或者一个楼层数组；如果不填只视为当前楼层。
+值得注意的是，使用此函数转了的点上的自定义事件可能无法被执行。
+如有需要，再对那些存在事件的点执行core.setBlock()即可
+
+
+core.setBgFgBlock(name, number, x, y, floorId)
+设置前景/背景层的某个图块。name只能为'bg'或'fg'表示前景或背景层。
+number为要设置到的图块数字，x,y和floorId为目标点坐标和楼层，可忽略为当前点和当前楼层。
+
+
+core.resetMap(floorId)
+重置某层或若干层的地图和楼层属性。
+floorId可为某个楼层ID，或者一个楼层数组（同时重置若干层）；如果不填则只重置当前楼层。
+
+// ------ 移动/跳跃图块，淡入淡出图块 ------ //
+
+core.moveBlock(x, y, steps, time, keep, callback)
+移动一个图块，x和y为图块的坐标。
+steps为移动的数组，每一项只能是"up","down","left","right"之一。
+time为每一步的移动时间，不填默认为500ms。
+如果keep为真，则在移动完毕后将自动调用一个setBlock事件，改变目标点的图块（即不消失），
+否则会按照time时间来淡出消失。callback会执行完毕后的回调。
+
+
+core.jumpBlock(sx, sy, ex, ey, time, keep, callback)
+跳跃一个图块，sx和sy为图块的坐标，ex和ey为目标坐标。time为整个跳跃过程中的全程用时，不填默认500。
+如果keep为真，则在移动完毕后将自动调用一个setBlock事件，改变目标点的图块（即不消失），
+否则会按照time时间来淡出消失。callback会执行完毕后的回调。
+
+
+core.animateBlock(loc, type, time, callback)
+淡入/淡出一个或多个图块。
+loc为一个图块坐标，或者一个二维数组表示一系列图块坐标（将同时显示和隐藏）。
+type只能为'show'或'hide'表示是淡入但是淡出。time为动画时间，callback为执行完毕的回调。
+
+// ------ 全局动画控制，动画的绘制 ------ //
+
+core.addGlobalAnimate(block)
+添加一个全局帧动画。
+
+
+core.removeGlobalAnimate(x, y, name)
+删除一个或全部的全局帧动画。name可为'bg',null或'fg'表示某个图层。
+x和y如果为null，则会删除全部的全局帧动画，否则只会删除该点的该层的帧动画。
+
+
+core.drawBoxAnimate()
+绘制UI层的box动画，如怪物手册和对话框中的帧动画等。
+
+
+core.drawAnimate(name, x, y, callback)
+绘制一个动画。name为动画名，x和y为绘制的基准坐标，callback为绘制完毕的回调函数。
+此函数将播放动画音效，并异步开始绘制该动画。
+此函数会返回一个动画id，可以通过core.stopAnimate()立刻停止该动画的播放。
+
+
+core.stopAnimate(id, doCallback)
+立刻停止某个动画的播放。id为上面core.drawAnimate的返回值。
+如果doCallback为真，则会执行该动画所对应的回调函数。
+```
+
 ### ui.js
+
+
 
 ### utils.js

@@ -326,6 +326,7 @@ control.prototype._showStartAnimate_resetDom = function () {
     core.clearMap('all');
     core.deleteAllCanvas();
     core.dom.musicBtn.style.display = 'block';
+    core.setMusicBtn();
     // 重置音量
     core.events.setVolume(1, 0);
     core.updateStatusBar();
@@ -346,29 +347,6 @@ control.prototype.hideStartAnimate = function (callback) {
 ////// 游戏是否已经开始 //////
 control.prototype.isPlaying = function() {
     return core.status.played;
-}
-
-////// 重新开始游戏；此函数将回到标题页面 //////
-control.prototype.restart = function() {
-    this.showStartAnimate();
-    core.playBgm(main.startBgm);
-}
-
-////// 询问是否需要重新开始 //////
-control.prototype.confirmRestart = function (fromSettings) {
-    core.status.event.selection = 1;
-    core.ui.drawConfirmBox("你确定要返回标题页面吗？", function () {
-        core.ui.closePanel();
-        core.restart();
-    }, function () {
-        if (fromSettings) {
-            core.status.event.selection = 3;
-            core.ui.drawSettings();
-        }
-        else {
-            core.ui.closePanel();
-        }
-    });
 }
 
 ////// 清除游戏状态和数据 //////

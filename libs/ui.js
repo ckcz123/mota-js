@@ -1254,6 +1254,7 @@ ui.prototype.drawBook = function (index) {
 
     core.drawBoxAnimate();
     this.drawPagination(page, totalPage);
+    core.setTextAlign('ui', 'center');
     core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13,'#DDDDDD', this._buildFont(15, true));
 }
 

@@ -955,7 +955,128 @@ core.resize()
 
 ### enemys.js
 
+enemys.js中定义了一系列和怪物相关的API函数。
+
+```js
+core.hasSpecial(special, test)
+判断是否含有某个特殊属性。test为要检查的特殊属性编号。
+special为要测试的内容，允许接收如下类型参数：
+ - 一个数字：将直接和test进行判等。
+ - 一个数组：将检查test是否在该数组之中存在。
+ - 一个怪物信息：将检查test是否在该怪物的特殊属性中存在
+ - 一个字符串：视为怪物ID，将检查该怪物的特殊属性
+
+
+core.getSpecials()
+获得所有特殊属性的列表。实际上被转发到了脚本编辑中。
+
+
+core.getSpecialText(enemy)
+获得某个怪物的全部特殊属性名称。enemy可以是怪物信息或怪物ID。
+将返回一个数组，每一项是该怪物所拥有的一个特殊属性的名称。
+
+
+core.getSpecialHint(enemy, special)
+获得怪物的某个特殊属性的描述。enemy可以是怪物信息或怪物ID，special为该特殊属性编号。
+
+
+core.canBattle(enemy, x, y, floorId)
+判定当前能否战胜某个怪物。
+enemy可以是怪物信息或怪物ID，x,y,floorId为当前坐标和楼层。（下同）
+能战胜返回true，不能战胜返回false。
+
+
+core.getDamage(enemy, x, y, floorId)
+获得某个怪物的全部伤害值。
+如果没有破防或无法战斗则返回null，否则返回具体的伤害值。
+
+
+core.getExtraDamage(enemy, x, y, floorId)
+获得某个怪物的额外伤害值（不可被魔防减伤）。
+目前暂时只包含了仇恨和固伤两者，如有需要可复写该函数。
+
+
+core.getDamageString(enemy, x, y, floorId)
+获得某个怪物伤害字符串和颜色信息，以便于在地图上绘制显伤。
+
+
+core.nextCriticals(enemy, number, x, y, floorId)
+获得接下来的N个临界值和临界减伤。enemy可以是怪物信息或怪物ID，x,y,floorId为当前坐标和楼层。
+number为要计算的临界值数量，不填默认为1。
+如果全塔属性中的useLoop开关被开启，则将使用循环法或二分法计算临界，否则使用回合法计算临界。
+返回一个二维数组 [[x1,y1],[x2,y2],...] 表示接下来的每个临界值和减伤值。
+
+
+core.getDefDamage(enemy, k, x, y, floorId)
+获得某个怪物的k防减伤值。k可不填默认为1。
+
+
+core.getEnemyInfo(enemy, hero, x, y, floorId)
+获得某个怪物的实际计算时的属性。该函数实际被转发到了脚本编辑中。
+hero可为null或一个对象，具体将使用core.getRealStatusOrDefault(hero, "atk")来获得攻击力数值。
+该函数应当返回一个对象，记录了怪物的实际计算时的属性。
+
+
+core.getDamageInfo(enemy, hero, x, y, floorId)
+获得某个怪物的战斗信息。该函数实际被转发到了脚本编辑中。
+hero可为null或一个对象，具体将使用core.getRealStatusOrDefault(hero, "atk")来获得攻击力数值。
+如果该函数返回null，则代表不可战斗（如没有破防，或无敌等）。
+否则，该函数应该返回一个对象，记录了战斗伤害信息，如战斗回合数等。
+从V2.5.5开始，该函数也允许直接返回一个数字，代表战斗伤害值，此时回合数将视为0。
+
+
+core.updateEnemys()
+更新怪物数据。该函数实际被转发到了脚本编辑中。详见文档-事件-更新怪物数据。
+
+
+core.getCurrentEnemys(floorId)
+获得某个楼层不重复的怪物信息，floorId不填默认为当前楼层。该函数会被怪物手册所调用。
+该函数将返回一个列表，每一项都是一个不同的怪物，按照伤害值从小到大排序。
+另外值得注意的是，如果设置了某个怪物的displayIdInBook，则会返回对应的怪物。
+
+
+core.hasEnemyLeft(floorId)
+检查某个楼层是否还有剩余的怪物。等价于 core.getCurrentEnemys(floorId).length > 0
+```
+
 ### events.js
+
+events.js将处理所有和事件相关的操作。
+
+```js
+core.resetGame(hero, hard, floorId, maps, values)
+重置整个游戏。该函数实际被转发到了脚本编辑中。
+
+
+core.startGame(hard, seed, route, callback)
+开始新游戏。
+hard为难度字符串，会被设置为core.status.hard。
+seed为开始时要设置的的种子，route为要开始播放的录像，callback为回调函数。
+该函数将重置整个游戏，调用setInitData，执行startText事件，上传游戏人数统计信息等。
+
+
+core.setInitData()
+根据难度分歧来初始化难度，包括设置flag:hard，设置初始属性等。
+该函数实际被转发到了脚本编辑中。
+
+
+core.win(reason, norank)
+游戏胜利，reason为结局名，norank如果为真则该结局不计入榜单。
+该函数实际被转发到了脚本编辑中。
+
+
+core.lose(reason)
+游戏失败，reason为结局名。该函数实际被转发到了脚本编辑中。
+
+
+core.gameOver(ending, fromReplay, norank)
+游戏结束。ending为获胜结局名，null代表失败；fromReplay标识是否是录像触发的。
+此函数将询问是否上传成绩（如果ending不是null），是否下载录像等，并重新开始。
+
+
+
+```
+
 
 ### icons.js
 

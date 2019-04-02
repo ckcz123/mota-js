@@ -1255,7 +1255,7 @@ actions.prototype._clickToolbox = function (x, y) {
             core.ui.drawToolbox(core.status.event.selection);
         }
         if (y == this.LAST && constantsPage > 1) {
-            core.status.event.data.toolsPage--;
+            core.status.event.data.constantsPage--;
             core.ui.drawToolbox(core.status.event.selection);
         }
     }

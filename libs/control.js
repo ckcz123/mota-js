@@ -326,6 +326,7 @@ control.prototype._showStartAnimate_resetDom = function () {
     core.clearMap('all');
     core.deleteAllCanvas();
     core.dom.musicBtn.style.display = 'block';
+    core.setMusicBtn();
     // 重置音量
     core.events.setVolume(1, 0);
     core.updateStatusBar();

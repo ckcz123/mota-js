@@ -196,20 +196,6 @@ items.prototype.setItem = function (itemId, itemNum) {
     core.updateStatusBar();
 }
 
-////// 删除某个物品 //////
-items.prototype.removeItem = function (itemId, itemNum) {
-    if (itemNum == null) itemNum = 1;
-    if (!core.hasItem(itemId)) return false;
-    var itemCls = core.material.items[itemId].cls;
-    core.status.hero.items[itemCls][itemId] -= itemNum;
-    if (core.status.hero.items[itemCls][itemId] <= 0) {
-        if (itemCls != 'keys') delete core.status.hero.items[itemCls][itemId];
-        else core.status.hero.items[itemCls][itemId] = 0;
-    }
-    core.updateStatusBar();
-    return true;
-}
-
 ////// 增加某个物品的个数 //////
 items.prototype.addItem = function (itemId, itemNum) {
     if (itemNum == null) itemNum = 1;
@@ -230,14 +216,21 @@ items.prototype.addItem = function (itemId, itemNum) {
     core.updateStatusBar();
 }
 
-// ---------- 装备相关 ------------ //
-
-items.prototype.getEquipTypeById = function (equipId) {
-    var type = core.material.items[equipId].equip.type;
-    if (typeof type == 'string')
-        type = this.getEquipTypeByName(type);
-    return type;
+////// 删除某个物品 //////
+items.prototype.removeItem = function (itemId, itemNum) {
+    if (itemNum == null) itemNum = 1;
+    if (!core.hasItem(itemId)) return false;
+    var itemCls = core.material.items[itemId].cls;
+    core.status.hero.items[itemCls][itemId] -= itemNum;
+    if (core.status.hero.items[itemCls][itemId] <= 0) {
+        if (itemCls != 'keys') delete core.status.hero.items[itemCls][itemId];
+        else core.status.hero.items[itemCls][itemId] = 0;
+    }
+    core.updateStatusBar();
+    return true;
 }
+
+// ---------- 装备相关 ------------ //
 
 items.prototype.getEquipTypeByName = function (name) {
     var names = core.status.globalAttribute.equipName;
@@ -247,6 +240,13 @@ items.prototype.getEquipTypeByName = function (name) {
         }
     }
     return -1;
+}
+
+items.prototype.getEquipTypeById = function (equipId) {
+    var type = core.material.items[equipId].equip.type;
+    if (typeof type == 'string')
+        type = this.getEquipTypeByName(type);
+    return type;
 }
 
 // 当前能否撞上某装备

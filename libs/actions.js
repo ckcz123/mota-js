@@ -1920,7 +1920,7 @@ actions.prototype._clickSettings = function (x, y) {
                 core.ui.drawGameInfo();
                 break;
             case 6:
-                return core.confirmRestart(true);
+                return core.confirmRestart();
             case 7:
                 core.ui.closePanel();
                 break;

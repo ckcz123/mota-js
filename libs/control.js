@@ -308,7 +308,7 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
     this._showStartAnimate_resetDom();
     if (core.flags.startUsingCanvas || noAnimate)
         return this._showStartAnimate_finished(core.flags.startUsingCanvas, callback);
-    core.hide(core.dom.startTop, 20, function () {
+    core.hideWithAnimate(core.dom.startTop, 20, function () {
         core.control._showStartAnimate_finished(false, callback);
     });
 }
@@ -323,8 +323,6 @@ control.prototype._showStartAnimate_resetDom = function () {
     core.dom.levelChooseButtons.style.display = 'none';
     core.status.played = false;
     core.clearStatus();
-    core.clearMap('all');
-    core.deleteAllCanvas();
     core.dom.musicBtn.style.display = 'block';
     core.setMusicBtn();
     // 重置音量
@@ -341,7 +339,7 @@ control.prototype._showStartAnimate_finished = function (start, callback) {
 
 ////// 隐藏游戏开始界面 //////
 control.prototype.hideStartAnimate = function (callback) {
-    core.hide(core.dom.startPanel, 20, callback);
+    core.hideWithAnimate(core.dom.startPanel, 20, callback);
 }
 
 ////// 游戏是否已经开始 //////
@@ -362,6 +360,7 @@ control.prototype.clearStatus = function() {
     }
     core.status = {};
     core.clearStatusBar();
+    core.clearMap('all');
     core.deleteAllCanvas();
     core.status.played = false;
 }
@@ -2524,7 +2523,7 @@ control.prototype._resize_gameGroup = function (obj) {
     floorMsgGroup.style.color = obj.globalAttribute.floorChangingTextColor;
     // musicBtn
     if (core.domStyle.isVertical || core.domStyle.scale < 1) {
-        core.dom.musicBtn.style.right = core.dom.musicBtn.style.height = "3px";
+        core.dom.musicBtn.style.right = core.dom.musicBtn.style.bottom = "3px";
     }
     else {
         core.dom.musicBtn.style.right = (obj.clientWidth - totalWidth) / 2 + "px";

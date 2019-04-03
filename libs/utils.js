@@ -75,35 +75,6 @@ utils.prototype.calValue = function (value, prefix, need, times) {
     return value;
 }
 
-////// 字符串自动换行的分割 //////
-utils.prototype.splitLines = function (canvas, text, maxLength, font) {
-    if (font) core.setFont(canvas, font);
-
-    var contents = [];
-    var last = 0;
-    for (var i = 0; i < text.length; i++) {
-
-        if (text.charAt(i) == '\n') {
-            contents.push(text.substring(last, i));
-            last = i + 1;
-        }
-        else if (text.charAt(i) == '\\' && text.charAt(i + 1) == 'n') {
-            contents.push(text.substring(last, i));
-            last = i + 2;
-        }
-        else {
-            var toAdd = text.substring(last, i + 1);
-            var width = core.calWidth(canvas, toAdd);
-            if (maxLength && width > maxLength) {
-                contents.push(text.substring(last, i));
-                last = i;
-            }
-        }
-    }
-    contents.push(text.substring(last));
-    return contents;
-}
-
 ////// 向某个数组前插入另一个数组或元素 //////
 utils.prototype.unshift = function (a, b) {
     if (!(a instanceof Array) || b == null) return;
@@ -126,6 +97,28 @@ utils.prototype.push = function (a, b) {
     }
     else a.push(b);
     return a;
+}
+
+utils.prototype.decompress = function (value) {
+    try {
+        var output = lzw_decode(value);
+        if (output) return JSON.parse(output);
+    }
+    catch (e) {
+    }
+    try {
+        var output = LZString.decompress(value);
+        if (output) return JSON.parse(output);
+    }
+    catch (e) {
+    }
+    try {
+        return JSON.parse(value);
+    }
+    catch (e) {
+        main.log(e);
+    }
+    return null;
 }
 
 ////// 设置本地存储 //////
@@ -161,28 +154,6 @@ utils.prototype.setLocalStorage = function (key, value) {
         main.log(e);
         return false;
     }
-}
-
-utils.prototype.decompress = function (value) {
-    try {
-        var output = lzw_decode(value);
-        if (output) return JSON.parse(output);
-    }
-    catch (e) {
-    }
-    try {
-        var output = LZString.decompress(value);
-        if (output) return JSON.parse(output);
-    }
-    catch (e) {
-    }
-    try {
-        return JSON.parse(value);
-    }
-    catch (e) {
-        main.log(e);
-    }
-    return null;
 }
 
 ////// 获得本地存储 //////
@@ -628,6 +599,7 @@ utils.prototype.getCookie = function (name) {
 
 ////// 设置statusBar的innerHTML，会自动斜体和放缩，也可以增加自定义css //////
 utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
+    if (!core.statusBar[name]) return;
     if (typeof value == 'number') value = this.formatBigNumber(value);
     // 判定是否斜体
     var italic = /^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(value);
@@ -931,7 +903,7 @@ utils.prototype.myprompt = function (hint, value, callback) {
 }
 
 ////// 动画显示某对象 //////
-utils.prototype.show = function (obj, speed, callback) {
+utils.prototype.showWithAnimate = function (obj, speed, callback) {
     obj.style.display = 'block';
     if (!speed && main.mode != 'play') {
         obj.style.opacity = 1;
@@ -951,7 +923,7 @@ utils.prototype.show = function (obj, speed, callback) {
 }
 
 ////// 动画使某对象消失 //////
-utils.prototype.hide = function (obj, speed, callback) {
+utils.prototype.hideWithAnimate = function (obj, speed, callback) {
     if (!speed || main.mode != 'play') {
         obj.style.display = 'none';
         if (callback) callback();
@@ -970,7 +942,7 @@ utils.prototype.hide = function (obj, speed, callback) {
     }, speed);
 }
 
-utils.prototype.encodeCanvas = function (ctx) {
+utils.prototype._encodeCanvas = function (ctx) {
     var list = [];
     var width = ctx.canvas.width, height = ctx.canvas.height;
     ctx.mozImageSmoothingEnabled = false;
@@ -997,7 +969,7 @@ utils.prototype.encodeCanvas = function (ctx) {
 }
 
 ////// 解析arr数组，并绘制到tempCanvas上 //////
-utils.prototype.decodeCanvas = function (arr, width, height) {
+utils.prototype._decodeCanvas = function (arr, width, height) {
     // 清空tempCanvas
     var tempCanvas = core.bigmap.tempCanvas;
     tempCanvas.canvas.width = width;

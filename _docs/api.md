@@ -215,7 +215,7 @@ core.events._changeFloor_beforeChange = function (info, callback) {
         if (info.time == 0)
             core.events._changeFloor_changing(info, callback);
         else
-            core.show(core.dom.floorMsgGroup, info.time / 2, function () {
+            core.showWithAnimate(core.dom.floorMsgGroup, info.time / 2, function () {
                 core.events._changeFloor_changing(info, callback);
             });
     }, 25)
@@ -724,6 +724,8 @@ name：自定义名称，可用户注销使用。
 func：具体执行录像的函数，是一个函数体或者插件中的函数名。
 func需要接受action参数，代表录像回放时的当前操作行为。
 如果func返回true，则代表成功处理了此次操作，返回false代表没有进行处理。
+自己添加的录像项只能由数字、大小写、下划线线、冒号等符号组成，否则无法正常压缩和解压缩。
+对于自定义内容（比如中文文本或数组）请使用JSON.stringify再core.encodeBase64处理。
 请注意回放录像时的二次记录问题（即回放时录像会重新记录路线）。
 
 
@@ -1842,6 +1844,495 @@ core.stopAnimate(id, doCallback)
 
 ### ui.js
 
+ui.js负责一切UI界面的绘制。主要包括三个部分：
+- 设置某个画布的属性的相关API
+- 具体的某个UI界面的绘制
+- 动态创建画布相关的API
 
+```js
+// ------ 设置某个画布的属性的相关API ------//
+这系列函数的name一般都是画布名，可以是系统画布或动态创建的画布。
+但也同时也允许直接传画布的context本身，将返回自身。
+
+
+core.getContextByName(name)
+根据画布名找到一个画布的context；支持系统画布和自定义画布。
+如果不存在画布此函数返回null。
+该参数也可以直接传画布的context自身，则返回自己。
+
+
+core.clearMap(name)
+清空某个画布图层。
+该函数的name也可以是'all'，若为'all'则为清空所有系统画布。
+
+
+core.fillText(name, text, x, y, style, font)
+在某个画布上绘制一段文字。
+text为要绘制的文本，x,y为要绘制的坐标，style可选为绘制的样式，font可选为绘制的字体。（下同）
+请注意textAlign和textBaseline将决定绘制的左右对齐和上下对齐方式。
+具体可详见core.setTextAlign()和core.setTextBaseline()函数。
+
+
+core.fillBoldText(name, text, x, y, style, font)
+在某个画布上绘制一个描黑边的文字。
+
+
+core.fillRect(name, x, y, width, height, style)
+绘制一个矩形。style可选为绘制样式。如果设置将调用core.setFillStyle()。（下同）
+
+
+core.strokeRect(name, x, y, width, height, style, lineWidth)
+绘制一个矩形的边框。style可选为绘制样式，如果设置将调用core.setStrokeStyle()。
+lineWidth如果设置将调用core.setLineWidth()。（下同）
+
+
+core.drawLine(name, x1, y1, x2, y2, style, lineWidth)
+绘制一条线。
+
+
+core.drawArrow(name, x1, y1, x2, y2, style, lineWidth)
+绘制一个箭头。
+
+
+core.setFont(name, font) / core.setLineWidth(name, lineWidth)
+设置一个画布的字体/线宽。
+
+
+core.setAlpha(name, font) / core.setOpacity(name, font)
+设置一个画布的绘制不透明度和画布本身的不透明度。
+两者区别如下：
+  - setAlpha是设置"接下来绘制的内容的不透明度"，不会对已经绘制的内容产生影响。
+    > 比如setAlpha('ui', 0.5)则会在接下来的绘制中使用0.5的不透明度。
+  - setOpacity是设置"画布本身的不透明度"，已经绘制的内容也会产生影响。
+    > 比如我已经在UI层绘制了一段文字，再setOpacity则也会让已经绘制的文字变得透明。
+尽量不要对系统画布使用setOpacity（因为会对已经绘制的内容产生影响），自定义创建的画布则不受此限制。
+
+
+core.setFillStyle(name, style) / core.setStrokeStyle(name, style)
+设置一个画布的填充样式/描边样式。
+
+
+core.setTextAlign(name, align)
+设置一个画布的文字横向对齐模式，这里的align只能为'left', 'right'和'center'。
+默认为'left'。
+
+
+core.setTextBaseline(name, baseline)
+设置一个画布的纵向对齐模式。有关textBaseline的说明可参见如下资料：
+http://www.runoob.com/tags/canvas-textbaseline.html
+默认值是'alphabetic'。
+请注意，系统画布在绘制前都是没有设置过textBaseline的，都是按照alphabetic进行坐标绘制。
+因此，如果你修改了系统画布的textBaseline来绘图，记得再绘制完毕后修改回来。
+
+
+core.calWidth(name, text, font)
+计算一段文字在某个画布上的绘制宽度，此函数其实是ctx.measureText()的包装。
+font可选，如果存在则会先设置该画布上的字体。
+此函数不会对文字进行换行，如需换行版本请使用core.splitLines()函数。
+
+
+core.splitLines(name, text, maxWidth, font)
+计算一段文字在某画布上换行分割的结果。
+text为文字内容，maxWidth为最大宽度，可为null表示不自动换行。
+font可选，如果存在则会先设置该画布上的字体。
+此函数将返回一个换行完毕的文本列表。
+
+
+core.drawImage(name, image, x, y, w, h, x1, y1, w1, h1)
+在一张画布上绘制一张图片，此函数其实是ctx.drawImage()的包装。
+可以查看下面的文档以了解各项参数的信息：
+http://www.w3school.com.cn/html5/canvas_drawimage.asp
+这里的image允许传一个图片，画布。也允许传递图片名，将从你导入的图片中获取图片内容。
+
+// ------ 具体的某个UI界面的绘制 ------ //
+core.closePanel()
+结束一切事件和UI绘制，关闭UI窗口，返回游戏。
+此函数将以此调用core.clearUI()，core.unlockControl()，并清空core.status.event里面的内容。
+
+
+core.clearUI()
+重置UI窗口。此函数将清掉所有的UI帧动画和光标，清空UI画布，并将alpha设为1。
+
+
+core.drawTip(text, id)
+在左上角以气泡的形式绘制一段提示。
+text为文字内容，仅支持${}的表达式计算，不支持换行和变色。
+id可选，为同时绘制的图标ID，如果不为null则会同时绘制该图标（仅对32x32的素材有效）。
+
+
+core.drawText(content, callback)
+绘制一段文字。contents为一个字符串或一个字符串数组，callback为全部绘制完毕的回调。
+支持所有的文字效果（如\n，${}，\r，\\i等），也支持\t和\b的语法。
+如果当前在事件处理中或录像回放中，则会自动转成core.insertAction处理。
+不建议使用该函数，如有绘制文字的需求请尽量使用core.insertAction()插入剧情文本事件。
+
+
+core.drawWindowSelector(background, x, y, w, h)
+绘制一个WindowSkin的闪烁光标。background可为winskin的图片名或图片本身。
+x,y,w,h为绘制的左上角位置和宽高，都是像素为单位。
+
+
+core.drawWindowSkin(background, ctx, x, y, w, h, direction, px, py)
+绘制一个WindowSkin。background可为winskin的图片名或图片本身。
+ctx为画布名或画布本身，x,y,w,h为左上角位置和宽高，都是像素为单位。
+direction, px, py可选，如果设置则会绘制一个对话框箭头。
+
+
+core.drawBackground(left, top, right, bottom, posInfo)
+绘制一个背景图。此函数将使用你在【剧情文本设置】中设置的背景，即用纯色或WindowSkin来绘制。
+left, top, right, bottom为你要绘制的左上角和右下角的坐标。
+posInfo如果不为null则是一个含position, px和py的对象，表示一个对话框箭头的绘制。
+
+
+core.drawTextContent(ctx, content, config)
+根据配置在某个画布上绘制一段文字。此函数会被core.drawTextBox()所调用。
+ctx为画布名或画布本身，如果不设置则会忽略该函数。
+content为要绘制的文字内容，支持所有的文字效果（如\n，${}，\r，\\i等），但不支持支持\t和\b的语法。
+config为绘制的配置项，目前可以包括如下几项：
+ - left, top：在该画布上绘制的左上角像素位置，不设置默认为(0,0)。
+   > 该函数绘制时会将textBaseline设置为'top'，因此只需要考虑第一个字的左上角位置。
+ - maxWidth：单行最大宽度，超过此宽度将自动换行，不设置不会自动换行。
+ - color：默认颜色，为#XXXXXX形式。如果不设置则使用剧情文本设置中的正文颜色。
+ - bold：是否粗体。如果不设置默认为false。
+ - align：文字对齐方式，仅在maxWidth设置时有效，默认为'left'。
+ - fontSize：字体大小，如果不设置则使用剧情文本设置中的正文字体大小。
+ - lineHeight：绘制的行距值，如果不设置则使用fontSize*1.3（即1.3被行距）。
+ - time：打字机效果。如果此项不为0，则会用打字机效果逐个字进行绘制，并设置core.status.event.interval定时器。
+
+
+core.drawTextBox(content, showAll)
+绘制一个对话框。content为一个字符串或一个字符串数组。
+支持所有的文字效果（如\n，${}，\r，\\i等），也支持\t和\b的语法。
+该函数将使用用户在剧情文本设置中的配置项进行绘制。
+实际执行时，会计算文本框宽度并绘制背景，绘制标题和头像，再调用core.drawTextContent()绘制正文内容。
+showAll可选，如果为true则不会使用打字机效果而全部显示，主要用于打字机效果的点击显示全部。
+
+
+core.drawScrollText(content, time, lineHeight, callback)
+绘制一个滚动字幕。content为绘制内容，time为总滚动时间（默认为5000），lineHeight为行距比例（默认为1.4）。
+滚动字幕将绘制在UI上，支持所有的文字效果（如\n，${}，\r，\\i等），但不支持\t和\b效果。
+可以通过剧情文本设置中的align控制是否居中绘制，offset控制其距离左边的偏移量。
+
+
+core.textImage(content, lineHeight)
+将文本图片化。content为绘制内容，lineHeight为行距比例（默认为1.4）。
+可以通过剧情文本设置中的align控制是否居中绘制。
+此函数将返回一个临时画布的canvas，供转绘到其他画布上使用。
+
+
+core.drawChoices(content, choices)
+绘制一个选项框。
+content可选，为选项上方的提示文字，支持所有的文字效果（如\n，${}，\r，\\i等），也支持\t效果。
+choices必选，为要绘制的选项内容，是一个列表。其中的每一项：
+ - 可以是一个字符串，表示选项文字，将使用剧情文本设置中的正文颜色来绘制，仅支持${}表达式计算。
+ - 或者是一个包含text, color和icon的对象。
+   > text必选，为要绘制的文字内容，仅支持${}的表达式计算，
+   > color为要绘制的选项颜色，可以是#XXXXXX的格式或RGBA数组。不设置则使用正文颜色。
+   > icon为要绘制的图标ID，支持使用素材的ID，或者系统图标。
+
+
+core.drawConfirmBox(text, yesCallback, noCallback)
+绘制一个确认框。text为确认文字，支持\n换行（但不支持自动换行）和${}表达式计算。
+yesCallback和noCallback分别为确定和取消的回调函数。
+可以在调用此函数前设置core.status.event.selection来控制默认的选中项（0确定1取消）。
+此函数和core.myconfirm的区别主要在于：
+ - 此函数会清掉UI层原有的绘制信息，core.myconfirm不会清除。
+ - 此函数可以用键盘进行操作，core.myconfirm必须用鼠标点击。
+另外请注意：本函数和事件流的执行不兼容，选择也不会进录像。
+如果需要在事件流中调用请使用提供选择项。
+
+
+core.drawWaiting(text)
+绘制一个等待界面，一般用于同步存档之类的操作。
+调用此函数后，需要再调用core.closePanel()才会恢复游戏。
+
+
+core.drawPagination(page, totalPage, y)
+绘制一个分页。y如果不设置则绘制在最后一行。
+
+
+core.drawBook(index) / core.drawBookDetail(index)
+绘制怪物手册，绘制怪物的详细信息。
+
+
+core.drawFly(page) / core.drawCenterFly() / core.drawShop(shopId)
+绘制楼传页面，中心对称飞行器，绘制商店
+ 
+ 
+core.drawToolbox(index) / core.drawEquipbox(index) / core.drawKeyBoard()
+绘制道具栏，绘制装备栏，绘制虚拟键盘。
+ 
+ 
+core.drawMaps(index, x, y) / core.drawSLPanel(index, refresh) 
+绘制浏览地图，绘制存读档界面。
+
+
+core.drawStatusBar()
+自定义绘制状态栏，仅在状态栏canvas化开启时有效，实际被转发到了脚本编辑中。
+
+
+core.drawStatistics()
+绘制数据统计。将从脚本编辑中获得要统计的数据列表，再遍历所有地图进行统计。
+
+
+core.drawAbout() / core.drawPaint() / core.drawHelp()
+绘制关于界面，绘图模式，帮助界面。
+
+// ------ 动态创建画布相关的API ------ //
+
+
+core.ui.createCanvas(name, x, y, width, height, z)
+动态创建一个自定义画布。name为要创建的画布名，如果已存在则会直接取用当前存在的。
+x,y为创建的画布相对窗口左上角的像素坐标，width,height为创建的长宽。
+z值为创建的纵向高度（关系到画布之间的覆盖），z值高的将覆盖z值低的；系统画布的z值可在个性化中查看。
+返回创建的画布的context，也可以通过core.dymCanvas[name]或core.getContextByName获得。
+
+
+core.ui.relocateCanvas(name, x, y)
+重新定位一个自定义画布。x和y为画布的左上角坐标。
+
+
+core.ui.resizeCanvas(name, width, height)
+重新设置一个自定义画布的大小。width和height为新设置的宽高。此操作会清空画布。
+
+
+core.ui.deleteCanvas(name)
+删除一个自定义画布。
+
+
+core.ui.deleteAllCanvas()
+删除所有的自定义画布。
+```
 
 ### utils.js
+
+utils.js是一个工具函数库，里面有各个样板中使用到的工具函数。
+
+```js
+core.replayText(text, need, times)
+将一段文字中的${}（表达式）进行替换。need和time一般可以直接忽略。
+
+
+core.calValue(value, prefix, need, time)
+计算一个表达式的值，支持status:xxx等的计算。
+prefix为前缀（switch:xxx的独立开关使用），need和time一般可以直接忽略。
+
+
+core.unshift(a, b) / core.push(a, b)
+将b插入到列表a之前或之后。b可以是一个元素或者一个数组。
+
+
+core.decompress(value)
+解压缩一个字符串并进行JSON解析。value可能会被LZString或LZW算法进行压缩。
+返回解压后的JSON格式内容，如果无法解压则返回null。
+
+
+core.setLocalStorage(key, value)
+将一个键值对存入localStorage中，会立刻返回结果。
+此函数会自动给key加上它的name作为前缀，以便于不同塔之间的区分。
+value为要存储的内容，存储前会被JSON转成字符串形式，并LZW算法进行压缩。
+如果value为null，则实际会调用core.removeLocalStorage()函数清除该key。
+localStorage为浏览器的默认存储，和存档无关，只有5M的空间大小。
+此函数立刻返回true或false，如果为false则代表存储失败，一般指的是空间满了。
+
+
+core.getLocalStorage(key, defaultValue)
+从localStorage中获得一个键的值，会立刻返回结果。
+此函数会自动给key加上它的name作为前缀，以便于不同塔之间的区分。
+如果对应的键值不存在或为null，则会返回defaultValue。
+返回的结果会被调用core.decompress进行解压缩和JSON解析。
+
+
+core.removeLocalStorage(key)
+从localStorage中删除一个键的值，会立刻返回。
+此函数会自动给key加上它的name作为前缀，以便于不同塔之间的区分。
+
+
+core.setLocalForage(key, value, successCallback, errorCallback)
+将一个键值对存入localForage中，异步返回结果。
+如果用户没有开启【新版存档】开关，则仍然会使用core.setLocalStorage()。
+localForage为一个开源库，项目地址 https://github.com/localForage/localForage
+一般存入的是indexedDB，这是一个浏览器的自带数据库，没有空间限制。
+successCallback和errorCallback均可选，表示该次存储成功或失败的回调，
+此函数为异步的，只能通过回调函数来获得存储的成功或失败信息。
+
+
+core.getLocalForage(key, defaultValue, successCallback, errorCallback)
+从localForage中获得一个键的值，异步返回结果。
+如果对应的键值不存在，则会使用defaultValue。
+如果获得成功，则会将core.decompress后的结果传入successCallback回调函数执行。
+errorCallback可选，如果失败，则会将错误信息传入errorCallback()。
+此函数是异步的，只能通过回调函数来获得读取的结果或错误信息。
+
+
+core.clone(data)
+深拷贝一个对象。有关浅拷贝，深拷贝，基本类型和引用类型等相关知识可参见：
+https://zhuanlan.zhihu.com/p/26282765
+
+
+core.splitImage(image, width, height)
+等比例切分一张图片。width和height为每张子图片的宽高。
+请确保原始图片的宽度和高度都是是width和height的倍数。
+此函数将返回一个一维数组，每一项都是一张切分好的图片，横向再纵向排列。
+例如4x3的图片按1x1切分得到一个长度为12的数组，按如下方式进行排列：
+0   1   2   3
+4   5   6   7
+8   9  10  11
+可以将很多需要的图片拼在一张大图上，然后在插件的_afterLoadResources中切分。
+切分好的图片再存入core.material.images.images中，这样可以少很多IO请求。
+
+
+core.formatDate(date) / core.formatDate2(date) / core.formatTime(time)
+格式化日期和时间。
+
+
+core.setTwoDigits(x)
+将x变成两位数。其实就是 parseInt(x) < 10 ? "0" + x : x
+
+
+core.formatBigNumber(x, onMap)
+大数据格式化。x为要格式化的内容，如果不合法会返回???。
+onMap标记是否在地图上调用，如果为真则尝试格式化成六位，否则五位。
+
+
+core.arrayToRGB(color) / core.arrayToRGBA(color)
+将一个颜色数组，例如[255,0,0,1]转成#FF0000或rgba(255,0,0,1)的形式。
+
+
+core.encodeRoute(route)
+录像压缩和解压缩。route为要压缩的路线数组。
+此函数将尽可能对录像进行压缩。对于无法识别的项目（比如自己添加的），将不压缩而原样放入。
+例如，["up","up","left","move:3:5","test:2333","getNext","item:bomb","down"]
+将被压缩成"U2LM3:5(test:2333)GIbomb:D"。
+自己添加的录像项只能由数字、大小写、下划线线、冒号等符号组成，否则无法正常压缩和解压缩。
+对于自定义内容（比如中文文本或数组）请使用JSON.stringify再core.encodeBase64处理。
+压缩的结果将再次进行LZString.compressToBase64()的压缩以进一步节省空间。
+
+
+core.decodeRoute(route)
+解压缩一个录像，返回解压完毕的路线数组。
+
+
+core.isset(v)
+判定v是不是null, undefined或NaN。
+请尽量避免使用此函数，而是直接判定 v == null （请注意 null==undefined ！）
+
+
+core.subarray(a, b)
+判定数组b是不是数组a的一个前缀子数组。
+如果是，则返回a中除去b后的剩余数组，否则返回null。
+
+
+core.inArray(array, element)
+判定array是不是一个数组，以及element是否在该数组中。
+
+
+core.clamp(x, a, b)
+将x限定在[a,b]区间内。
+
+
+core.getCookie(name)
+获得一个cookie值，如果不存在该cookie则返回null。
+
+
+core.setStatusBarInnerHTML(name, value, css)
+设置一个状态栏的innerHTML。此函数会自动设置状态栏的文字放缩和斜体等效果。
+name为状态栏的名称，如atk, def等。需要是core.statusBar中的一个合法项。
+value为要设置到的数值，如果是数字则会先core.formatBigNumber()进行格式化。
+css可选，为增添的额外css内容，比如可以设定颜色等。
+
+
+core.strlen(str)
+计算某个字符串的实际长度。每个字符的长度，ASCII码视为1，中文等视为2。
+
+
+core.reverseDirection(direction)
+翻转方向，即"up"转成"down", "left"转成"right"等。
+
+
+core.encodeBase64(str) / core.decodeBase64(str)
+将字符串进行base64加密或解密。
+
+
+core.convertBase(str, fromBase, toBase)
+任意进制转换。此函数可能执行的非常慢，慎用。
+
+
+core.rand(num)
+使用伪种子生成伪随机数。该随机函数能被录像支持。
+num如果设置大于0，则生成一个[0, num-1]之间的数；否则生成一个0到1之间的浮点数。
+此函数为伪随机算法，SL大法无效。（即多次SL后调用的该函数返回的值都是相同的。）
+
+
+core.rand2(num)
+使用系统的随机数算法得到的随机数。该随机函数能被录像支持。
+num如果设置大于0，则生成一个[0, num-1]之间的数；否则生成一个0到2147483647之间的整数。
+此函数使用了系统的Math.random()函数，支持SL大法。
+但是，此函数会将生成的随机数值存入录像，因此如果调用次数太多则会导致录像文件过大。
+对于需要大量生成随机数，但又想使用真随机支持SL大法的（例如随机生成地图等），可以采用如下方式：
+  var x = core.rand2(100); for (var i = 0; i < x; i++) core.rand()
+即先生成一个真随机数，根据该数来推进伪随机的种子，这样就可以放心调用core.rand()啦。
+
+
+core.readFile(success, error)
+读取一个本地文件内容。success和error分别为读取成功或失败的回调函数。
+iOS平台暂不支持读取文件操作。
+
+
+core.readFileContent(content)
+读取到的文件内容。此函数会被APP等调用，来传递文件的具体内容。
+
+
+core.download(filename, content)
+生成一个文件并下载。filename为文件名，content为具体的文件内容。
+iOS平台暂不支持下载文件操作。
+
+
+core.copy(data)
+将一段内容拷贝到剪切板。
+
+
+core.myconfirm(hint, yesCallback, noCallback)
+弹窗绘制一段提示信息并让用户确认。hint为提示信息。
+yesCallback和noCallback分别为确定和取消的回调函数。
+此函数和core.drawConfirmBox的区别主要在于：
+ - drawConfirmBox会清掉UI层原有的绘制信息，此函数不会清除。
+ - drawConfirmBox可以用键盘进行操作，此函数必须用鼠标点击。
+另外请注意：本函数的选择也不会进录像，一般用于全局的提示。
+如果需要在事件流中调用请使用显示确认框或显示选择项。
+
+
+core.myprompt(hint, value, callback)
+弹窗让用户输入一段内容。hint为提示信息，value为框内的默认填写内容。
+callback为用户点击确认或取消后的回调。
+如果用户点击了确认，则会把框内的内容（可能是空串）传递给callback，否则把null传递给callback。
+
+
+core.showWithAnimate(obj, speed, callback) / core.hideWithAnimate(obj, speed, callback)
+动画淡入或淡出一个对象。
+
+
+core.consoleOpened()
+检测当前的控制台是否处于开启状态。仅在全塔属性中的检查控制台开关开启时有效。
+此函数有可能会存在误伤行为，即没开过控制台仍认为开启过。
+
+
+core.hashCode(obj)
+计算一个对象的哈希值。
+
+
+core.same(a, b)
+判定a和b是否相同，包括类型相同和值相同。
+如果a和b都是数组，则会递归依次比较数组中的值；如果都是对象亦然。
+
+
+core.utils.http(type, url, formData, success, error, mimeType, responseType)
+发送一个异步HTTP请求。
+type为'GET'或者'POST'；url为目标地址；formData如果是POST请求则为表单数据。
+success为成功后的回调，error为失败后的回调。
+mimeType和responseType如果设置将会覆盖默认值。
+
+
+lzw_encode(s) / lzw_decode(s)
+LZW压缩算法，来自https://gist.github.com/revolunet/843889
+```

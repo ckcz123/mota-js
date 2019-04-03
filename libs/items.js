@@ -365,8 +365,8 @@ items.prototype._realLoadEquip = function (type, loadId, unloadId, callback) {
     core.status.hero.equipment[type] = loadId || null;
 
     // --- 提示
-    if (loadId) core.drawTip("已装备上" + loadEquip.name, core.material.icons.items[loadId]);
-    else if (unloadId) core.drawTip("已卸下" + unloadEquip.name, core.material.icons.items[unloadId]);
+    if (loadId) core.drawTip("已装备上" + loadEquip.name, loadId);
+    else if (unloadId) core.drawTip("已卸下" + unloadEquip.name, unloadId);
 
     if (callback) callback();
 }

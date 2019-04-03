@@ -1904,11 +1904,11 @@ actions.prototype._clickSettings = function (x, y) {
                 core.ui.drawKeyBoard();
                 break;
             case 2:
-                core.clearSelector();
+                core.clearUI();
                 core.ui.drawMaps();
                 break;
             case 3:
-                core.clearSelector();
+                core.clearUI();
                 core.ui.drawPaint();
                 break;
             case 4:
@@ -2211,7 +2211,7 @@ actions.prototype._clickReplay_fromBeginning = function () {
 actions.prototype._clickReplay_fromLoad = function () {
     core.status.event.id = 'replayLoad';
     core.status.event.selection = null;
-    core.ui.clearSelector();
+    core.clearUI();
     var saveIndex = core.saves.saveIndex;
     var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
     core.ui.drawSLPanel(10 * page + offset);
@@ -2450,7 +2450,7 @@ actions.prototype._onupPaint = function () {
     core.status.event.data.x = null;
     core.status.event.data.y = null;
     // 保存
-    core.paint[core.status.floorId] = lzw_encode(core.utils.encodeCanvas(core.dymCanvas.paint).join(","));
+    core.paint[core.status.floorId] = lzw_encode(core.utils._encodeCanvas(core.dymCanvas.paint).join(","));
 }
 
 actions.prototype.setPaintMode = function (mode) {
@@ -2498,7 +2498,7 @@ actions.prototype.loadPaint = function () {
         core.clearMap('paint');
         var value = core.paint[core.status.floorId];
         if (value) value = lzw_decode(value).split(",");
-        core.utils.decodeCanvas(value, 32 * core.bigmap.width, 32 * core.bigmap.height);
+        core.utils._decodeCanvas(value, 32 * core.bigmap.width, 32 * core.bigmap.height);
         core.drawImage('paint', core.bigmap.tempCanvas.canvas, 0, 0);
 
         core.drawTip("读取绘图文件成功");

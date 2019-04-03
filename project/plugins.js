@@ -1,18 +1,28 @@
 var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = 
 {
     "init": function () {
-	// 在这里写的代码，在所有模块加载完毕后，游戏开始前会被执行
+
 	console.log("插件编写测试");
 
-	// 可以写一些其他的被直接执行的代码
+	// 可以写一些直接执行的代码
+	// 在这里写的代码将会在【资源加载前】被执行，此时图片等资源尚未被加载。
+	// 请勿在这里对包括bgm，图片等资源进行操作。
 
 
-	this.test = function () {
-		console.log("插件函数执行测试");
-		console.log(this);
+	this._afterLoadResources = function () {
+		// 本函数将在所有资源加载完毕后，游戏开启前被执行
+		// 可以在这个函数里面对资源进行一些操作，比如切分图片等。
+
+		// 这是一个将assets.png拆分成若干个32x32像素的小图片并保存的样例。
+		// var arr = core.splitImage("assets.png", 32, 32);
+		// for (var i = 0; i < arr.length; i++) {
+		//     core.material.images.images["asset"+i+".png", arr[i]);
+		// }
+
 	}
 
-	// 可以在任何地方（如afterXXX或自定义脚本事件）调用函数，方法为  core.plugin.xxx();
+	// 可以在任何地方（如afterXXX或自定义脚本事件）调用函数，方法为 core.plugin.xxx();
+	// 从V2.6开始，插件中用this.XXX方式定义的函数也会被转发到core中，详见文档-脚本-函数的转发。
 },
     "drawLight": function () {
 

@@ -308,7 +308,7 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
     this._showStartAnimate_resetDom();
     if (core.flags.startUsingCanvas || noAnimate)
         return this._showStartAnimate_finished(core.flags.startUsingCanvas, callback);
-    core.hide(core.dom.startTop, 20, function () {
+    core.hideWithAnimate(core.dom.startTop, 20, function () {
         core.control._showStartAnimate_finished(false, callback);
     });
 }
@@ -339,7 +339,7 @@ control.prototype._showStartAnimate_finished = function (start, callback) {
 
 ////// 隐藏游戏开始界面 //////
 control.prototype.hideStartAnimate = function (callback) {
-    core.hide(core.dom.startPanel, 20, callback);
+    core.hideWithAnimate(core.dom.startPanel, 20, callback);
 }
 
 ////// 游戏是否已经开始 //////

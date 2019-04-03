@@ -344,6 +344,8 @@ core.prototype._afterLoadResources = function (callback) {
     // 初始化地图
     core.initStatus.maps = core.maps._initMaps();
     core.control._setRequestAnimationFrame();
+    if (core.plugin._afterLoadResources)
+        core.plugin._afterLoadResources();
     core.showStartAnimate();
     if (callback) callback();
 }

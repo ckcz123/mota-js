@@ -438,7 +438,7 @@ events.prototype.getItem = function (id, num, x, y, callback) {
     var text = '获得 ' + core.material.items[id].name;
     if (num > 1) text += "x" + num;
     if (itemCls === 'items') text += core.items.getItemEffectTip(id);
-    core.drawTip(text, core.material.icons.items[id]);
+    core.drawTip(text, id);
     core.updateStatusBar();
 
     this.afterGetItem(id, x, y, callback);
@@ -559,7 +559,7 @@ events.prototype._changeFloor_beforeChange = function (info, callback) {
         if (info.time == 0)
             core.events._changeFloor_changing(info, callback);
         else
-            core.show(core.dom.floorMsgGroup, info.time / 2, function () {
+            core.showWithAnimate(core.dom.floorMsgGroup, info.time / 2, function () {
                 core.events._changeFloor_changing(info, callback);
             });
     }, 25)
@@ -571,7 +571,7 @@ events.prototype._changeFloor_changing = function (info, callback) {
     if (info.time == 0)
         this._changeFloor_afterChange(info, callback);
     else
-        core.hide(core.dom.floorMsgGroup, info.time / 4, function () {
+        core.hideWithAnimate(core.dom.floorMsgGroup, info.time / 4, function () {
             core.events._changeFloor_afterChange(info, callback);
         });
 }
@@ -771,10 +771,7 @@ events.prototype.startEvents = function (list, x, y, callback) {
 ////// 执行当前自定义事件列表中的下一个事件 //////
 events.prototype.doAction = function () {
     // 清空boxAnimate和UI层
-    core.status.boxAnimateObjs = [];
-    clearInterval(core.status.event.interval);
-    core.status.event.interval = null;
-    core.clearSelector();
+    core.clearUI();
     // 判定是否执行完毕
     if (this._doAction_finishEvents()) return;
     // 当前点坐标和前缀

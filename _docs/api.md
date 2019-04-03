@@ -425,7 +425,7 @@ core.doFunc(func, _this)
 
 actions.js主要是处理一些和用户交互相关的内容。
 
-``` js
+```text
 core.registerAction(action, name, func, priority)
 注册一个用户交互行为。
 action：要注册的交互类型，如 ondown, onclick, keyDown 等等。
@@ -951,7 +951,7 @@ core.resize()
 
 enemys.js中定义了一系列和怪物相关的API函数。
 
-```js
+```text
 core.hasSpecial(special, test)
 判断是否含有某个特殊属性。test为要检查的特殊属性编号。
 special为要测试的内容，允许接收如下类型参数：
@@ -1043,7 +1043,7 @@ events.js将处理所有和事件相关的操作，主要分为五个部分：
 - 一些具体事件的执行内容
 
 
-```js
+```text
 // ------ 游戏的开始和结束 ------ //
 
 core.resetGame(hero, hard, floorId, maps, values)
@@ -1374,7 +1374,7 @@ core.afterUseBomb()
 
 icons.js主要是负责素材相关信息，比如某个素材在对应的图片上的位置。
 
-```js
+```text
 core.getClsFromId(id)
 根据某个素材的ID获得该素材的cls
 
@@ -1388,7 +1388,7 @@ core.getTilesetOffset(id)
 
 items.js主要负责一切和道具相关的内容。
 
-```js
+```text
 core.getItemEffect(itemId, itemNum)
 即捡即用类的道具获得时的效果。实际对应道具图块属性中的itemEffect框。
 
@@ -1478,7 +1478,7 @@ core.quickLoadEquip()
 
 loader.js主要负责资源加载相关的内容。
 
-```js
+```text
 core.loadImage(imgName, callback)
 从 project/images/ 中加载一张图片。imgName为图片名。
 callback为执行完毕的回调函数，接收(imgName, image)即图片名和图片内容作为参数。
@@ -1520,7 +1520,7 @@ maps.js负责一切和地图相关的处理内容，包括如下几个方面：
 - 移动/跳跃图块，淡入淡出图块
 - 全局动画控制，动画的绘制
 
-```js
+```text
 // ------ 地图的初始化，保存和读取，地图数组的生成 ------ //
 
 core.loadFloor(floorId, map)
@@ -1849,7 +1849,7 @@ ui.js负责一切UI界面的绘制。主要包括三个部分：
 - 具体的某个UI界面的绘制
 - 动态创建画布相关的API
 
-```js
+```text
 // ------ 设置某个画布的属性的相关API ------//
 这系列函数的name一般都是画布名，可以是系统画布或动态创建的画布。
 但也同时也允许直接传画布的context本身，将返回自身。
@@ -2108,7 +2108,7 @@ core.ui.deleteAllCanvas()
 
 utils.js是一个工具函数库，里面有各个样板中使用到的工具函数。
 
-```js
+```text
 core.replayText(text, need, times)
 将一段文字中的${}（表达式）进行替换。need和time一般可以直接忽略。
 

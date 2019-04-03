@@ -16,7 +16,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		// 这是一个将assets.png拆分成若干个32x32像素的小图片并保存的样例。
 		// var arr = core.splitImage("assets.png", 32, 32);
 		// for (var i = 0; i < arr.length; i++) {
-		//     core.material.images.images["asset"+i+".png", arr[i]);
+		//     core.material.images.images["asset"+i+".png"] = arr[i];
 		// }
 
 	}

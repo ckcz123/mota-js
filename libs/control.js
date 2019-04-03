@@ -323,8 +323,6 @@ control.prototype._showStartAnimate_resetDom = function () {
     core.dom.levelChooseButtons.style.display = 'none';
     core.status.played = false;
     core.clearStatus();
-    core.clearMap('all');
-    core.deleteAllCanvas();
     core.dom.musicBtn.style.display = 'block';
     core.setMusicBtn();
     // 重置音量
@@ -362,6 +360,7 @@ control.prototype.clearStatus = function() {
     }
     core.status = {};
     core.clearStatusBar();
+    core.clearMap('all');
     core.deleteAllCanvas();
     core.status.played = false;
 }
@@ -2524,7 +2523,7 @@ control.prototype._resize_gameGroup = function (obj) {
     floorMsgGroup.style.color = obj.globalAttribute.floorChangingTextColor;
     // musicBtn
     if (core.domStyle.isVertical || core.domStyle.scale < 1) {
-        core.dom.musicBtn.style.right = core.dom.musicBtn.style.height = "3px";
+        core.dom.musicBtn.style.right = core.dom.musicBtn.style.bottom = "3px";
     }
     else {
         core.dom.musicBtn.style.right = (obj.clientWidth - totalWidth) / 2 + "px";

@@ -52,9 +52,6 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
     }
     else core.utils.__init_seed();
     this.setInitData();
-
-    core.clearMap('all');
-    core.deleteAllCanvas();
     core.clearStatusBar();
 
     var todo = [];
@@ -1657,8 +1654,6 @@ events.prototype.load = function (fromUserAction) {
     if (!core.isPlaying()) {
         core.dom.startPanel.style.display = 'none';
         core.clearStatus();
-        core.clearMap('all');
-        core.deleteAllCanvas();
         core.status.event = {'id': 'load', 'data': null};
         core.status.lockControl = true;
         core.ui.drawSLPanel(10*page+offset);

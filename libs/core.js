@@ -219,6 +219,7 @@ core.prototype.init = function (coreData, callback) {
     this._init_flags();
     this._init_platform();
     this._init_others();
+    this._initPlugins();
 
     core.loader._load(function () {
         core._afterLoadResources(callback);
@@ -343,7 +344,6 @@ core.prototype._afterLoadResources = function (callback) {
     // 初始化地图
     core.initStatus.maps = core.maps._initMaps();
     core.control._setRequestAnimationFrame();
-    core._initPlugins();
     core.showStartAnimate();
     if (callback) callback();
 }

@@ -6,6 +6,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// hero：勇士信息；hard：难度；floorId：当前楼层ID；maps：地图信息；values：全局数值信息
 
 	// 清除游戏数据
+	// 这一步会清空状态栏和全部画布内容，并删除所有动态创建的画布
 	core.clearStatus();
 	// 初始化status
 	core.status = core.clone(core.initStatus);

@@ -76,6 +76,7 @@ editor_blockly = function () {
           ])
         ])
       ]),
+      MotaActionBlocks['confirm_s'].xmlText(),
     ],
     '数据相关':[
       MotaActionBlocks['setValue_s'].xmlText([
@@ -589,6 +590,7 @@ function omitedcheckUpdateFunction(event) {
             'showTextImage_s': 'EvalString_0',
             'function_s': 'RawEvalString_0',
             'shopsub': 'EvalString_3',
+            'confirm_s': 'EvalString_0',
         }
         var f = b ? textStringDict[b.type] : null;
         if (f) {

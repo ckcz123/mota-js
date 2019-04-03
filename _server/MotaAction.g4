@@ -331,6 +331,7 @@ action
     |   input_s
     |   input2_s
     |   choices_s
+    |   confirm_s
     |   callBook_s
     |   callSave_s
     |   callLoad_s
@@ -1658,6 +1659,20 @@ var code = '{"text": "'+EvalString_0+'"'+IdString_0+EvalString_1+', "action": [\
 return code;
 */;
 
+confirm_s
+    :   '显示确认框' ':' EvalString BGNL? '确定' ':' BGNL? Newline action+ '取消' ':' BGNL? Newline action+ BEND Newline
+
+/* confirm_s
+tooltip : 弹出确认框
+helpUrl : https://h5mota.com/games/template/docs/#/
+default : ["确认要???吗?"]
+var code = ['{"type": "confirm", "text": "',EvalString_0,'",\n',
+    '"yes": [\n',action_0,'],\n',
+    '"no": [\n',action_1,']\n',
+'},\n'].join('');
+return code;
+*/;
+
 while_s
     :   '循环处理' '：' '当' expression '时' BGNL? Newline action+ BEND Newline
 
@@ -2568,6 +2583,13 @@ ActionParser.prototype.parseAction = function() {
         this.tryToUseEvFlag_e('evalString_e', [data.condition]),
         this.insertActionList(data["true"]),
         this.insertActionList(data["false"]),
+        this.next]);
+      break;
+    case "confirm": // 显示确认框
+      this.next = MotaActionBlocks['confirm_s'].xmlText([
+        this.EvalString(data.text),
+        this.insertActionList(data["yes"]),
+        this.insertActionList(data["no"]),
         this.next]);
       break;
     case "switch": // 多重条件分歧

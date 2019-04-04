@@ -70,12 +70,13 @@ editor_blockly = function () {
       MotaActionBlocks['lose_s'].xmlText(),
       MotaActionBlocks['choices_s'].xmlText([
         '选择剑或者盾','流浪者','man',MotaActionBlocks['choicesContext'].xmlText([
-          '剑','','',null,MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [3,3]}]),
+          '剑','','',null,null,MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [3,3]}]),
           MotaActionBlocks['choicesContext'].xmlText([
-            '盾','','',null,MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [9,3]}]),
+            '盾','','',null,null,MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [9,3]}]),
           ])
         ])
       ]),
+      MotaActionBlocks['confirm_s'].xmlText(),
     ],
     '数据相关':[
       MotaActionBlocks['setValue_s'].xmlText([
@@ -589,6 +590,7 @@ function omitedcheckUpdateFunction(event) {
             'showTextImage_s': 'EvalString_0',
             'function_s': 'RawEvalString_0',
             'shopsub': 'EvalString_3',
+            'confirm_s': 'EvalString_0',
         }
         var f = b ? textStringDict[b.type] : null;
         if (f) {

@@ -331,6 +331,7 @@ action
     |   input_s
     |   input2_s
     |   choices_s
+    |   confirm_s
     |   callBook_s
     |   callSave_s
     |   callLoad_s
@@ -1639,13 +1640,13 @@ return code;
 */;
 
 choicesContext
-    :   '子选项' EvalString '图标' IdString? '颜色' EvalString? Colour BGNL? Newline action+
+    :   '子选项' EvalString '图标' IdString? '颜色' EvalString? Colour '不跳出' Bool BGNL? Newline action+
 
 
 /* choicesContext
 tooltip : 选项的选择
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=choices%EF%BC%9A%E7%BB%99%E7%94%A8%E6%88%B7%E6%8F%90%E4%BE%9B%E9%80%89%E9%A1%B9
-default : ["提示文字:红钥匙","",""]
+default : ["提示文字:红钥匙","","",null,false]
 colour : this.subColor
 if (EvalString_1) {
   var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
@@ -1655,7 +1656,22 @@ if (EvalString_1) {
       EvalString_1 = ', "color": "'+EvalString_1+'"';
 }
 IdString_0 = IdString_0?(', "icon": "'+IdString_0+'"'):'';
-var code = '{"text": "'+EvalString_0+'"'+IdString_0+EvalString_1+', "action": [\n'+action_0+']},\n';
+var nobreak = Bool_0?', "nobreak": true':'';
+var code = '{"text": "'+EvalString_0+'"'+IdString_0+EvalString_1+', "action": [\n'+action_0+']'+nobreak+'},\n';
+return code;
+*/;
+
+confirm_s
+    :   '显示确认框' ':' EvalString BGNL? '确定' ':' BGNL? Newline action+ '取消' ':' BGNL? Newline action+ BEND Newline
+
+/* confirm_s
+tooltip : 弹出确认框
+helpUrl : https://h5mota.com/games/template/docs/#/
+default : ["确认要???吗?"]
+var code = ['{"type": "confirm", "text": "',EvalString_0,'",\n',
+    '"yes": [\n',action_0,'],\n',
+    '"no": [\n',action_1,']\n',
+'},\n'].join('');
 return code;
 */;
 
@@ -2572,6 +2588,13 @@ ActionParser.prototype.parseAction = function() {
         this.insertActionList(data["false"]),
         this.next]);
       break;
+    case "confirm": // 显示确认框
+      this.next = MotaActionBlocks['confirm_s'].xmlText([
+        this.EvalString(data.text),
+        this.insertActionList(data["yes"]),
+        this.insertActionList(data["no"]),
+        this.next]);
+      break;
     case "switch": // 多重条件分歧
       var case_caseList = null;
       for(var ii=data.caseList.length-1,caseNow;caseNow=data.caseList[ii];ii--) {
@@ -2587,7 +2610,7 @@ ActionParser.prototype.parseAction = function() {
       var text_choices = null;
       for(var ii=data.choices.length-1,choice;choice=data.choices[ii];ii--) {
         text_choices=MotaActionBlocks['choicesContext'].xmlText([
-          choice.text,choice.icon,choice.color,'rgba('+choice.color+')',this.insertActionList(choice.action),text_choices]);
+          choice.text,choice.icon,choice.color,'rgba('+choice.color+')',choice.nobreak,this.insertActionList(choice.action),text_choices]);
       }
       this.next = MotaActionBlocks['choices_s'].xmlText([
         this.isset(data.text)?this.EvalString(data.text):null,'','',text_choices,this.next]);

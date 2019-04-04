@@ -1604,14 +1604,16 @@ return code;
 */;
 
 switchCase
-    :   '如果是' expression '的场合' BGNL? Newline action+
+    :   '如果是' expression '的场合' '不跳出' Bool BGNL? Newline action+
 
 
 /* switchCase
 tooltip : 选项的选择
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=switch%EF%BC%9A%E5%A4%9A%E9%87%8D%E6%9D%A1%E4%BB%B6%E5%88%86%E6%AD%A7
+default : ["", false]
 colour : this.subColor
-var code = '{"case": "'+expression_0+'", "action": [\n'+action_0+']},\n';
+Bool_0 = Bool_0?', "nobreak": true':'';
+var code = '{"case": "'+expression_0+'"'+Bool_0+', "action": [\n'+action_0+']},\n';
 return code;
 */;
 
@@ -1640,13 +1642,13 @@ return code;
 */;
 
 choicesContext
-    :   '子选项' EvalString '图标' IdString? '颜色' EvalString? Colour '不跳出' Bool BGNL? Newline action+
+    :   '子选项' EvalString '图标' IdString? '颜色' EvalString? Colour BGNL? Newline action+
 
 
 /* choicesContext
 tooltip : 选项的选择
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=choices%EF%BC%9A%E7%BB%99%E7%94%A8%E6%88%B7%E6%8F%90%E4%BE%9B%E9%80%89%E9%A1%B9
-default : ["提示文字:红钥匙","","",null,false]
+default : ["提示文字:红钥匙","",""]
 colour : this.subColor
 if (EvalString_1) {
   var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
@@ -1656,19 +1658,19 @@ if (EvalString_1) {
       EvalString_1 = ', "color": "'+EvalString_1+'"';
 }
 IdString_0 = IdString_0?(', "icon": "'+IdString_0+'"'):'';
-var nobreak = Bool_0?', "nobreak": true':'';
-var code = '{"text": "'+EvalString_0+'"'+IdString_0+EvalString_1+', "action": [\n'+action_0+']'+nobreak+'},\n';
+var code = '{"text": "'+EvalString_0+'"'+IdString_0+EvalString_1+', "action": [\n'+action_0+']},\n';
 return code;
 */;
 
 confirm_s
-    :   '显示确认框' ':' EvalString BGNL? '确定' ':' BGNL? Newline action+ '取消' ':' BGNL? Newline action+ BEND Newline
+    :   '显示确认框' ':' EvalString BGNL? '确定的场合' ':' '（默认选中' Bool '）' BGNL? Newline action+ '取消的场合' ':' BGNL? Newline action+ BEND Newline
 
 /* confirm_s
 tooltip : 弹出确认框
 helpUrl : https://h5mota.com/games/template/docs/#/
-default : ["确认要???吗?"]
-var code = ['{"type": "confirm", "text": "',EvalString_0,'",\n',
+default : ["确认要xxx吗?",false]
+Bool_0 = Bool_0?', "default": true':''
+var code = ['{"type": "confirm"'+Bool_0+', "text": "',EvalString_0,'",\n',
     '"yes": [\n',action_0,'],\n',
     '"no": [\n',action_1,']\n',
 '},\n'].join('');
@@ -2590,7 +2592,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "confirm": // 显示确认框
       this.next = MotaActionBlocks['confirm_s'].xmlText([
-        this.EvalString(data.text),
+        this.EvalString(data.text), data["default"],
         this.insertActionList(data["yes"]),
         this.insertActionList(data["no"]),
         this.next]);
@@ -2599,7 +2601,7 @@ ActionParser.prototype.parseAction = function() {
       var case_caseList = null;
       for(var ii=data.caseList.length-1,caseNow;caseNow=data.caseList[ii];ii--) {
         case_caseList=MotaActionBlocks['switchCase'].xmlText([
-          this.isset(caseNow.case)?MotaActionBlocks['evalString_e'].xmlText([caseNow.case]):"值",this.insertActionList(caseNow.action),case_caseList]);
+          this.isset(caseNow.case)?MotaActionBlocks['evalString_e'].xmlText([caseNow.case]):"值",caseNow.nobreak,this.insertActionList(caseNow.action),case_caseList]);
       }
       this.next = MotaActionBlocks['switch_s'].xmlText([
         // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
@@ -2610,7 +2612,7 @@ ActionParser.prototype.parseAction = function() {
       var text_choices = null;
       for(var ii=data.choices.length-1,choice;choice=data.choices[ii];ii--) {
         text_choices=MotaActionBlocks['choicesContext'].xmlText([
-          choice.text,choice.icon,choice.color,'rgba('+choice.color+')',choice.nobreak,this.insertActionList(choice.action),text_choices]);
+          choice.text,choice.icon,choice.color,'rgba('+choice.color+')',this.insertActionList(choice.action),text_choices]);
       }
       this.next = MotaActionBlocks['choices_s'].xmlText([
         this.isset(data.text)?this.EvalString(data.text):null,'','',text_choices,this.next]);

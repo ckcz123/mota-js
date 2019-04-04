@@ -1329,13 +1329,16 @@ events.prototype._action_if = function (data, x, y, prefix) {
 
 events.prototype._action_switch = function (data, x, y, prefix) {
     var key = core.calValue(data.condition, prefix)
+    var list = [];
     for (var i = 0; i < data.caseList.length; i++) {
         var condition = data.caseList[i]["case"];
         if (condition == "default" || core.calValue(condition, prefix) == key) {
-            this.insertAction(data.caseList[i].action);
-            break;
+            core.push(list, data.caseList[i].action);
+            if (!data.caseList[i].nobreak)
+                break;
         }
     }
+    core.insertAction(list);
     core.doAction();
 }
 
@@ -1361,6 +1364,35 @@ events.prototype._action_choices = function (data, x, y, prefix) {
         }
     }
     core.ui.drawChoices(data.text, data.choices);
+}
+
+events.prototype._action_confirm = function (data, x, y, prefix) {
+    core.status.event.ui = {"text": data.text, "yes": data.yes, "no": data.no};
+    if (core.isReplaying()) {
+        var action = core.status.replay.toReplay.shift(), index;
+        // --- 忽略可能的turn事件
+        if (action == 'turn') action = core.status.replay.toReplay.shift();
+        if (action.indexOf("choices:") == 0 && ((index = parseInt(action.substring(8))) >= 0) && index < 2) {
+            core.status.event.selection = index;
+            setTimeout(function () {
+                core.status.route.push("choices:" + index);
+                if (index == 0) core.insertAction(data.yes);
+                else core.insertAction(data.no);
+                core.doAction();
+            }, 750 / Math.max(1, core.status.replay.speed))
+        }
+        else {
+            main.log("录像文件出错！当前需要一个 choices: 项，实际为 " + action);
+            core.stopReplay();
+            core.insertAction(["录像文件出错，请在控制台查看报错信息。", {"type": "exit"}]);
+            core.doAction();
+            return;
+        }
+    }
+    else {
+        core.status.event.selection = data["default"] ? 0 : 1;
+    }
+    core.ui.drawConfirmBox(data.text);
 }
 
 events.prototype._action_while = function (data, x, y, prefix) {

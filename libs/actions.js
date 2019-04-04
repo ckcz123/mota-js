@@ -892,12 +892,29 @@ actions.prototype._clickAction = function (x, y) {
             }
         }
     }
+
+    if (core.status.event.data.type == 'confirm') {
+        if ((x == this.HSIZE-2 || x == this.HSIZE-1) && y == this.HSIZE+1) {
+            core.status.route.push("choices:0");
+            core.insertAction(core.status.event.ui.yes);
+            core.doAction();
+        }
+        if ((x == this.HSIZE+2 || x == this.HSIZE+1) && y == this.HSIZE+1) {
+            core.status.route.push("choices:1");
+            core.insertAction(core.status.event.ui.no);
+            core.doAction();
+        }
+    }
 }
 
 ////// 自定义事件时，按下某个键的操作 //////
 actions.prototype._keyDownAction = function (keycode) {
     if (core.status.event.data.type == 'choices') {
         this._keyDownChoices(keycode);
+    }
+    if (core.status.event.data.type == 'confirm' && (keycode == 37 || keycode == 39)) {
+        core.status.event.selection = 1 - core.status.event.selection;
+        core.drawConfirmBox(core.status.event.ui.text);
     }
 }
 
@@ -924,6 +941,15 @@ actions.prototype._keyUpAction = function (keycode) {
         if (choices.length > 0) {
             this._selectChoices(choices.length, keycode, this._clickAction);
         }
+        return;
+    }
+    if (core.status.event.data.type == 'confirm'&& (keycode == 13 || keycode == 32 || keycode == 67)) {
+        core.status.route.push("choices:" + core.status.event.selection);
+        if (core.status.event.selection == 0)
+            core.insertAction(core.status.event.ui.yes);
+        else core.insertAction(core.status.event.ui.no);
+        core.doAction();
+        return;
     }
 }
 

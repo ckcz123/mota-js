@@ -1081,9 +1081,12 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     core.lockControl();
     text = core.replaceText(text || "");
 
-    core.status.event.id = 'confirmBox';
-    core.status.event.data = {'yes': yesCallback, 'no': noCallback};
-    core.status.event.ui = text;
+    // 处理自定义事件
+    if (core.status.event.id != 'action') {
+        core.status.event.id = 'confirmBox';
+        core.status.event.data = {'yes': yesCallback, 'no': noCallback};
+    }
+
     if (core.status.event.selection != 0) core.status.event.selection = 1;
     this.clearUI();
 

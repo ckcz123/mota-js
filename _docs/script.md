@@ -224,8 +224,8 @@ function () {
 ```js
 // 重写ui.js中的_drawBook_drawBackground函数
 core.ui._drawBook_drawBackground = function () {
-    // core.__PIXEL__为定义的一个宏，对于13x13的值是416，对于15x15的值是480
-    core.drawBackground(0, 0, core.__PIXEL__, core.__PIXEL__);
+    // core.__PIXELS__为定义的一个宏，对于13x13的值是416，对于15x15的值是480
+    core.drawBackground(0, 0, core.__PIXELS__, core.__PIXELS__);
 }
 ```
 

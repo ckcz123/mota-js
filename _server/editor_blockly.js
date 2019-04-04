@@ -76,6 +76,7 @@ editor_blockly = function () {
           ])
         ])
       ]),
+      MotaActionBlocks['confirm_s'].xmlText(),
     ],
     '数据相关':[
       MotaActionBlocks['setValue_s'].xmlText([
@@ -112,7 +113,7 @@ editor_blockly = function () {
       MotaActionBlocks['if_s'].xmlText(),
       MotaActionFunctions.actionParser.parseList({"type": "switch", "condition": "判别值", "caseList": [
         {"action": [{"type": "comment", "text": "当判别值是值的场合执行此事件"}]},
-        {"action": []},
+        {"action": [], "nobreak": true},
         {"case": "default", "action": [{"type": "comment", "text": "当没有符合的值的场合执行default事件"}]},
       ]}),
       MotaActionBlocks['while_s'].xmlText(),
@@ -589,6 +590,7 @@ function omitedcheckUpdateFunction(event) {
             'showTextImage_s': 'EvalString_0',
             'function_s': 'RawEvalString_0',
             'shopsub': 'EvalString_3',
+            'confirm_s': 'EvalString_0',
         }
         var f = b ? textStringDict[b.type] : null;
         if (f) {

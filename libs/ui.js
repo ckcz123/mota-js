@@ -542,7 +542,7 @@ ui.prototype._calTextBoxWidth = function (ctx, content, min_width, max_width, fo
 
     // 如果不存在手动换行，尽量调成半行形式
     if (allLines.length == 1) {
-        var w = core.calWidth(ctx, allLines[0]) + 5;
+        var w = core.calWidth(ctx, allLines[0]) + 10;
         if (w<min_width*2.3) return core.clamp(w / 1.4, min_width, max_width);
         if (w<max_width*2.2) return core.clamp(w / 2.4, min_width, max_width);
         return core.clamp(w / 3.4, min_width, max_width);
@@ -550,7 +550,7 @@ ui.prototype._calTextBoxWidth = function (ctx, content, min_width, max_width, fo
     // 存在手动换行：以最长的为准
     else {
         return core.clamp(allLines.reduce(function (pre, curr) {
-            return Math.max(pre, core.calWidth(ctx, curr) + 5)
+            return Math.max(pre, core.calWidth(ctx, curr) + 10);
         }, 0), min_width, max_width);
     }
 }
@@ -1081,9 +1081,12 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     core.lockControl();
     text = core.replaceText(text || "");
 
-    core.status.event.id = 'confirmBox';
-    core.status.event.data = {'yes': yesCallback, 'no': noCallback};
-    core.status.event.ui = text;
+    // 处理自定义事件
+    if (core.status.event.id != 'action') {
+        core.status.event.id = 'confirmBox';
+        core.status.event.data = {'yes': yesCallback, 'no': noCallback};
+    }
+
     if (core.status.event.selection != 0) core.status.event.selection = 1;
     this.clearUI();
 

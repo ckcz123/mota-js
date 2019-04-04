@@ -51,7 +51,7 @@ core.fillText('test', '这是一段文字', 10, 30, '#FF0000', '16px Verdana'); 
 
 `core.deleteAllCanvas()`可以删除所有动态创建的画布，`core.relocateCanvas(name, x, y)`和`core.resizeCanvas(name, x, y)`可以对画布的位置和大小进行改变。
 
-更多详细API请参见[API列表](api#附录：API列表)。
+更多详细API请参见[API列表](api)。
 
 ## 自定义素材
 
@@ -339,7 +339,7 @@ function (enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId) {
 
 要修改楼传事件，需要进行如下两步：
 
-1. 重写楼传的点击事件。在插件中对`core.control.useFly进行重写`。详细代码参见[重写点击楼传事件](api#重写点击楼传事件)。
+1. 重写楼传的点击事件。在插件中对`core.control.useFly进行重写`。详细代码参见[重写点击楼传事件](script#重写点击楼传事件)。
 2. 修改楼传的使用事件。和其他永久道具一样，在地图编辑器的图块属性中修改楼传的useItemEffect和canUseItemEffect两个内容。例如：
 ``` js
 "useItemEffect": "core.insertAction([...])" // 执行某段自定义事件，或者其他脚本
@@ -429,7 +429,7 @@ this.myfunc = function(x) {
 
 从V2.6开始，在插件中用`this.xxx`定义的函数将会被转发到core中。例如上述的`myfunc`除了`core.plugin.myfunc`外也可以直接`core.myfunc`调用。
 
-详见[函数的转发](api#函数的转发)。
+详见[函数的转发](script#函数的转发)。
 
 ## 标题界面事件化
 
@@ -714,4 +714,4 @@ if (core.flags.enableSkill) {
 
 ==========================================================================================
 
-[继续阅读脚本](api)
+[继续阅读脚本](script)

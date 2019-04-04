@@ -331,6 +331,7 @@ action
     |   input_s
     |   input2_s
     |   choices_s
+    |   confirm_s
     |   callBook_s
     |   callSave_s
     |   callLoad_s
@@ -1603,14 +1604,16 @@ return code;
 */;
 
 switchCase
-    :   '如果是' expression '的场合' BGNL? Newline action+
+    :   '如果是' expression '的场合' '不跳出' Bool BGNL? Newline action+
 
 
 /* switchCase
 tooltip : 选项的选择
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=switch%EF%BC%9A%E5%A4%9A%E9%87%8D%E6%9D%A1%E4%BB%B6%E5%88%86%E6%AD%A7
+default : ["", false]
 colour : this.subColor
-var code = '{"case": "'+expression_0+'", "action": [\n'+action_0+']},\n';
+Bool_0 = Bool_0?', "nobreak": true':'';
+var code = '{"case": "'+expression_0+'"'+Bool_0+', "action": [\n'+action_0+']},\n';
 return code;
 */;
 
@@ -1656,6 +1659,21 @@ if (EvalString_1) {
 }
 IdString_0 = IdString_0?(', "icon": "'+IdString_0+'"'):'';
 var code = '{"text": "'+EvalString_0+'"'+IdString_0+EvalString_1+', "action": [\n'+action_0+']},\n';
+return code;
+*/;
+
+confirm_s
+    :   '显示确认框' ':' EvalString BGNL? '确定的场合' ':' '（默认选中' Bool '）' BGNL? Newline action+ '取消的场合' ':' BGNL? Newline action+ BEND Newline
+
+/* confirm_s
+tooltip : 弹出确认框
+helpUrl : https://h5mota.com/games/template/docs/#/
+default : ["确认要xxx吗?",false]
+Bool_0 = Bool_0?', "default": true':''
+var code = ['{"type": "confirm"'+Bool_0+', "text": "',EvalString_0,'",\n',
+    '"yes": [\n',action_0,'],\n',
+    '"no": [\n',action_1,']\n',
+'},\n'].join('');
 return code;
 */;
 
@@ -2572,11 +2590,18 @@ ActionParser.prototype.parseAction = function() {
         this.insertActionList(data["false"]),
         this.next]);
       break;
+    case "confirm": // 显示确认框
+      this.next = MotaActionBlocks['confirm_s'].xmlText([
+        this.EvalString(data.text), data["default"],
+        this.insertActionList(data["yes"]),
+        this.insertActionList(data["no"]),
+        this.next]);
+      break;
     case "switch": // 多重条件分歧
       var case_caseList = null;
       for(var ii=data.caseList.length-1,caseNow;caseNow=data.caseList[ii];ii--) {
         case_caseList=MotaActionBlocks['switchCase'].xmlText([
-          this.isset(caseNow.case)?MotaActionBlocks['evalString_e'].xmlText([caseNow.case]):"值",this.insertActionList(caseNow.action),case_caseList]);
+          this.isset(caseNow.case)?MotaActionBlocks['evalString_e'].xmlText([caseNow.case]):"值",caseNow.nobreak,this.insertActionList(caseNow.action),case_caseList]);
       }
       this.next = MotaActionBlocks['switch_s'].xmlText([
         // MotaActionBlocks['evalString_e'].xmlText([data.condition]),

@@ -5,6 +5,9 @@
 "use strict";
 
 function core() {
+    this.__SIZE__ = 13;
+    this.__PIXELS__ = this.__SIZE__ * 32;
+    this.__HALF_SIZE__ = Math.floor(this.__SIZE__ / 2);
     this.material = {
         'animates': {},
         'images': {},
@@ -13,11 +16,10 @@ function core() {
         'ground': null,
         'items': {},
         'enemys': {},
-        'icons': {},
-        'events': {}
+        'icons': {}
     }
     this.timeout = {
-        'getItemTipTimeout': null,
+        'tipTimeout': null,
         'turnHeroTimeout': null,
         'onDownTimeout': null,
         'sleepTimeout': null,
@@ -41,7 +43,6 @@ function core() {
         'weather': {
             'time': 0,
             'type': null,
-            'level': 0,
             'nodes': [],
             'data': null,
             'fog': null,
@@ -65,6 +66,7 @@ function core() {
         'isPC': true, // 是否是PC
         'isAndroid': false, // 是否是Android
         'isIOS': false, // 是否是iOS
+        'string': 'PC',
         'isWeChat': false, // 是否是微信
         'isQQ': false, // 是否是QQ
         'isChrome': false, // 是否是Chrome
@@ -79,19 +81,17 @@ function core() {
     }
     // 样式
     this.domStyle = {
-        styles: [],
         scale: 1.0,
-        screenMode: null,
         isVertical: false,
-        toolbarBtn: false,
         showStatusBar: true,
+        toolbarBtn: false,
     }
     this.bigmap = {
         canvas: ["bg", "event", "event2", "fg", "damage"],
         offsetX: 0, // in pixel
         offsetY: 0,
-        width: 13, // map width and height
-        height: 13,
+        width: this.__SIZE__, // map width and height
+        height: this.__SIZE__,
         tempCanvas: null, // A temp canvas for drawing
     }
     this.paint = {};
@@ -102,7 +102,9 @@ function core() {
             "data": null,
             "time": 0,
             "updated": false,
-        }
+        },
+        "favorite": [],
+        "favoriteName": {}
     }
     this.initStatus = {
         'played': false,
@@ -172,9 +174,9 @@ function core() {
         'textAttribute': {
             'position': "center",
             "offset": 0,
-            "title": [255,215,0,1],
-            "background": [0,0,0,0.85],
-            "text": [255,255,255,1],
+            "title": [255, 215, 0, 1],
+            "background": [0, 0, 0, 0.85],
+            "text": [255, 255, 255, 1],
             "titlefont": 22,
             "textfont": 16,
             "bold": false,
@@ -194,7 +196,6 @@ function core() {
         },
         'curtainColor': null,
         'openingDoor': null,
-        'isSkiing': false,
 
         // 动画
         'globalAnimateObjs': [],
@@ -213,201 +214,197 @@ function core() {
 ////// 初始化 //////
 core.prototype.init = function (coreData, callback) {
     this._forwardFuncs();
-
-    for (var key in coreData) {
+    for (var key in coreData)
         core[key] = coreData[key];
-    }
+    this._init_flags();
+    this._init_platform();
+    this._init_others();
+    this._initPlugins();
+
+    core.loader._load(function () {
+        core._afterLoadResources(callback);
+    });
+}
+
+core.prototype._init_flags = function () {
     core.flags = core.clone(core.data.flags);
     core.values = core.clone(core.data.values);
-    core.firstData = core.data.getFirstData();
-
-    if (!core.flags.enableExperience)
-        core.flags.enableLevelUp = false;
-    if (!core.flags.enableLevelUp)
-        core.flags.levelUpLeftMode = false;
-
-    if (core.isset(core.firstData.shops)) {
-        core.firstData.shops.forEach(function (t) {
-            core.initStatus.shops[t.id] = t;
-        })
-    }
-
-    core.maps._setFloorSize();
+    core.firstData = core.clone(core.data.firstData);
+    this._init_sys_flags();
 
     core.dom.versionLabel.innerHTML = core.firstData.version;
     core.dom.logoLabel.innerHTML = core.firstData.title;
     document.title = core.firstData.title + " - HTML5魔塔";
     document.getElementById("startLogo").innerHTML = core.firstData.title;
-    core.material.items = core.items.getItems();
+    (core.firstData.shops||[]).forEach(function (t) { core.initStatus.shops[t.id] = t; });
+    core.maps._setFloorSize();
+    // 初始化怪物、道具等
     core.material.enemys = core.enemys.getEnemys();
+    core.material.items = core.items.getItems();
+    core.items._resetItems();
     core.material.icons = core.icons.getIcons();
-    core.material.events = core.events.getEvents();
+}
 
-    core.platform.isOnline = location.protocol.indexOf("http")==0;
-    if (core.platform.isOnline) {
-        window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext;
-        try {
-            core.musicStatus.audioContext = new window.AudioContext();
-            core.musicStatus.gainNode = core.musicStatus.audioContext.createGain();
-            core.musicStatus.gainNode.connect(core.musicStatus.audioContext.destination);
-        } catch (e) {
-            console.log("该浏览器不支持AudioContext");
-            core.musicStatus.audioContext = null;
-        }
+core.prototype._init_sys_flags = function () {
+    if (!core.flags.enableExperience) core.flags.enableLevelUp = false;
+    if (!core.flags.enableLevelUp) core.flags.levelUpLeftMode = false;
+    if (core.flags.equipboxButton) core.flags.equipment = true;
+    core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
+    core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
+    core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
+}
+
+core.prototype._init_platform = function () {
+    core.platform.isOnline = location.protocol.indexOf("http") == 0;
+    if (!core.platform.isOnline) alert("请勿直接打开html文件！使用启动服务或者APP进行离线游戏。");
+    window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext;
+    try {
+        core.musicStatus.audioContext = new window.AudioContext();
+        core.musicStatus.gainNode = core.musicStatus.audioContext.createGain();
+        core.musicStatus.gainNode.connect(core.musicStatus.audioContext.destination);
+    } catch (e) {
+        console.log("该浏览器不支持AudioContext");
+        core.musicStatus.audioContext = null;
     }
-
+    core.musicStatus.bgmStatus = core.getLocalStorage('bgmStatus', true);
+    core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
     ["Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod"].forEach(function (t) {
-        if (navigator.userAgent.indexOf(t)>=0) {
-            if (t=='iPhone' || t=='iPad' || t=='iPod') core.platform.isIOS = true;
-            if (t=='Android') core.platform.isAndroid=true;
-            core.platform.isPC=false;
+        if (navigator.userAgent.indexOf(t) >= 0) {
+            if (t == 'iPhone' || t == 'iPad' || t == 'iPod') core.platform.isIOS = true;
+            if (t == 'Android') core.platform.isAndroid = true;
+            core.platform.isPC = false;
         }
     });
-
-    try {
-        core.platform.supportCopy = document.queryCommandSupported("copy");
-    }
-    catch (e) {
-        core.platform.supportCopy = false;
-    }
-
-    var chrome=/Chrome\/(\d+)\./i.exec(navigator.userAgent);
-    if (core.isset(chrome) && parseInt(chrome[1])>=50)
-        core.platform.isChrome = true;
+    core.platform.string = core.platform.isPC ? "PC" : core.platform.isAndroid ? "Android" : core.platform.isIOS ? "iOS" : "";
+    core.platform.supportCopy = document.queryCommandSupported || document.queryCommandSupported("copy");
+    var chrome = /Chrome\/(\d+)\./i.exec(navigator.userAgent);
+    if (chrome && parseInt(chrome[1]) >= 50) core.platform.isChrome = true;
     core.platform.isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent);
     core.platform.isQQ = /QQ/i.test(navigator.userAgent);
     core.platform.isWeChat = /MicroMessenger/i.test(navigator.userAgent);
-    core.platform.useLocalForage = core.getLocalStorage('useLocalForage', !core.platform.isIOS);
-    if (core.platform.useLocalForage) {
-        try {
-            core.setLocalForage("__test__", lzw_encode("__test__"), function() {
-                try {
-                    core.getLocalForage("__test__", null, function(data) {
-                        try {
-                            if (lzw_decode(data)!="__test__") {
-                                console.log("localForage unsupported!");
-                                core.platform.useLocalForage=false;
-                            }
-                            else {
-                                console.log("localForage supported!")
-                                core.removeLocalForage("__test__");
-                            }
-                        }
-                        catch (e) {main.log(e); core.platform.useLocalForage=false;}
-                    }, function(e) {main.log(e); core.platform.useLocalForage=false;})
-                }
-                catch (e) {main.log(e); core.platform.useLocalForage=false;}
-            }, function(e) {main.log(e); core.platform.useLocalForage=false;})
-        }
-        catch (e) {main.log(e); core.platform.useLocalForage=false;}
-    }
-
+    this._init_checkLocalForage();
     core.platform.extendKeyboard = core.getLocalStorage("extendKeyboard", false);
-
     if (window.FileReader) {
         core.platform.fileReader = new FileReader();
         core.platform.fileReader.onload = function () {
             core.readFileContent(core.platform.fileReader.result);
         };
         core.platform.fileReader.onerror = function () {
-            if (core.isset(core.platform.errorCallback))
+            if (core.platform.errorCallback)
                 core.platform.errorCallback();
         }
     }
+}
 
-    // 先从存储中读取BGM状态
-    core.musicStatus.bgmStatus = core.getLocalStorage('bgmStatus', true);
-    if (!core.platform.isPC && (navigator.connection||{}).type!='wifi')
-        core.musicStatus.bgmStatus = false;
-    core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
+core.prototype._init_checkLocalForage = function () {
+    core.platform.useLocalForage = core.getLocalStorage('useLocalForage', true);
+    var _error = function (e) {
+        main.log(e);
+        core.platform.useLocalForage = false;
+    };
+    if (core.platform.useLocalForage) {
+        try {
+            core.setLocalForage("__test__", lzw_encode("__test__"), function () {
+                try {
+                    core.getLocalForage("__test__", null, function (data) {
+                        try {
+                            if (lzw_decode(data) != "__test__") {
+                                console.log("localForage unsupported!");
+                                core.platform.useLocalForage = false;
+                            }
+                            else {
+                                console.log("localForage supported!");
+                                core.removeLocalForage("__test__");
+                            }
+                        }
+                        catch (e) {_error(e);}
+                    }, _error)
+                }
+                catch (e) {_error(e);}
+            }, _error)
+        }
+        catch (e) {_error(e);}
+    }
+}
 
-    // switchs
-    core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
-    core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
-    core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
-
+core.prototype._init_others = function () {
+    // 一些额外的东西
     core.material.groundCanvas = document.createElement('canvas').getContext('2d');
     core.material.groundCanvas.canvas.width = core.material.groundCanvas.canvas.height = 32;
     core.material.groundPattern = core.material.groundCanvas.createPattern(core.material.groundCanvas.canvas, 'repeat');
-
-    core.animateFrame.weather.fog = new Image();
-    core.animateFrame.weather.fog.onerror = function () {
-        core.animateFrame.weather.fog = null;
-    }
-    core.animateFrame.weather.fog.src = "project/images/fog.png";
-
-    core.material.images.keyboard = new Image();
-    core.material.images.keyboard.onerror  = function () {
-        core.material.images.keyboard = null;
-    }
-    core.material.images.keyboard.src = "project/images/keyboard.png";
-
     core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
-
-    ////// 记录所有的存档编号！！！ //////
+    core.loadImage('fog', function (name, img) { core.animateFrame.weather.fog = img; });
+    core.loadImage('keyboard', function (name, img) {core.material.images.keyboard = img; });
+    // 记录存档编号
     core.saves.saveIndex = core.getLocalStorage('saveIndex', 1);
-    core.control.getSaveIndexes(function (indexes) {
-        core.saves.ids = indexes;
-    });
-
-    core.loader._load(function () {
-        console.log(core.material);
-        // 设置勇士高度
-        core.material.icons.hero.height = core.material.images.hero.height/4;
-        // 行走图
-        core.control.updateHeroIcon();
-
-        core.initStatus.maps = core.maps.initMaps(core.floorIds);
-        core.setRequestAnimationFrame();
-
-        if (main.mode=='play')
-            core.events.initGame();
-
-        if (core.isset(functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins)) {
-            core.plugin = new function () {
-                this.__renderFrameFuncs = [];
-            };
-            core.plugin.__init__ = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.plugins.plugin;
-            core.plugin.__init__();
-        }
-
-        core.showStartAnimate();
-
-        if (core.isset(callback)) callback();
-
-    });
+    core.control.getSaveIndexes(function (indexes) { core.saves.ids = indexes; });
 }
 
-core.prototype._forwardFuncs = function () {
-    var list = {};
-    for (var i = 0; i < main.loadList.length; ++i) {
-        var name = main.loadList[i];
-        if (name == 'core') continue;
-        for (var funcname in core[name]) {
-            if (funcname.charAt(0) != "_" && core[name][funcname] instanceof Function) {
-                if (list[funcname]) {
-                    main.log("Error forward: "+name+"."+funcname);
-                }
-                else {
-                    list[funcname] = name;
-                }
+core.prototype._afterLoadResources = function (callback) {
+    // 初始化地图
+    core.initStatus.maps = core.maps._initMaps();
+    core.control._setRequestAnimationFrame();
+    if (core.plugin._afterLoadResources)
+        core.plugin._afterLoadResources();
+    core.showStartAnimate();
+    if (callback) callback();
+}
+
+core.prototype._initPlugins = function () {
+    core.plugin = new function () {};
+
+    for (var name in plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1) {
+        if (plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1[name] instanceof Function) {
+            try {
+                plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1[name].apply(core.plugin);
+            }
+            catch (e) {
+                main.log(e);
+                main.log("无法初始化插件"+name);
             }
         }
     }
-    for (var funcname in list) {
-        this._forwardFunc(list[funcname], funcname);
+
+    core._forwardFunc("plugin");
+}
+
+core.prototype._forwardFuncs = function () {
+    for (var i = 0; i < main.loadList.length; ++i) {
+        var name = main.loadList[i];
+        if (name == 'core') continue;
+        this._forwardFunc(name);
     }
 }
 
 core.prototype._forwardFunc = function (name, funcname) {
+    if (funcname == null) {
+        for (funcname in core[name]) {
+            if (funcname.charAt(0) != "_" && core[name][funcname] instanceof Function) {
+                this._forwardFunc(name, funcname);
+            }
+        }
+        return;
+    }
+
     if (core[funcname]) {
-        main.log("Error in forwarding "+funcname+" from "+name+"!");
+        console.error("ERROR: 无法转发 "+name+" 中的函数 "+funcname+" 到 core 中！同名函数已存在。");
         return;
     }
     var parameterInfo = /^\s*function\s*[\w_$]*\(([\w_,$\s]*)\)\s*\{/.exec(core[name][funcname].toString());
-    var parameters = (parameterInfo==null?"":parameterInfo[1]).replace(/\s*/g, '').replace(/,/g, ', ');
+    var parameters = (parameterInfo == null ? "" : parameterInfo[1]).replace(/\s*/g, '').replace(/,/g, ', ');
     // core[funcname] = new Function(parameters, "return core."+name+"."+funcname+"("+parameters+");");
-    eval("core."+funcname+" = function ("+parameters+") {\n\treturn core."+name+"."+funcname+"("+parameters+");\n}");
+    eval("core." + funcname + " = function (" + parameters + ") {\n\treturn core." + name + "." + funcname + "(" + parameters + ");\n}");
+    if (name == 'plugin') {
+        main.log("插件函数转发：core."+funcname+" = core.plugin."+funcname);
+    }
+}
+
+core.prototype.doFunc = function (func, _this) {
+    if (typeof func == 'string') {
+        func = core.plugin[func];
+        _this = core.plugin;
+    }
+    return func.apply(_this, Array.prototype.slice.call(arguments, 2));
 }
 
 /**

@@ -4,20 +4,19 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
     "_type": "object",
     "_data": {
         "events": {
-            
             "_type": "object",
             "_data": {
-                "initGame": {
+                "resetGame": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "游戏开始前的一些初始化操作"
+                    "_data": "重置整个游戏"
                 },
                 "setInitData": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "不同难度分别设置初始属性"
+                    "_data": "设置初始属性"
                 },
                 "win": {
                     "_leaf": true,
@@ -35,127 +34,124 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "正在切换楼层过程中的操作\n此函数的执行时间是在切换楼层过程中屏幕完全变黑的一刻"
+                    "_data": "切换楼层中"
                 },
                 "afterChangeFloor": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "转换楼层结束的事件\n此函数会在整个楼层切换完全结束后执行"
+                    "_data": "切换楼层后"
                 },
-                "addPoint": {
+                "flyTo": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "加点事件"
+                    "_data": "楼层飞行"
+                },
+                "beforeBattle": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "战前事件"
                 },
                 "afterBattle": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "战斗结束后触发的事件"
+                    "_data": "战后事件"
                 },
                 "afterOpenDoor": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "开一个门后触发的事件"
+                    "_data": "开门后事件"
                 },
                 "afterGetItem": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "获得一个道具后触发的事件"
+                    "_data": "获得道具后事件"
                 },
                 "afterChangeLight": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "改变亮灯之后，可以触发的事件"
+                    "_data": "改变亮灯事件"
                 },
                 "afterPushBox": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "推箱子后的事件"
+                    "_data": "推箱子事件"
                 },
                 "afterUseBomb": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "使用炸弹/圣锤后的事件"
-                },
-                "beforeSaveData": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_lint": true,
-                    "_data": "即将存档前可以执行的操作"
-                },
-                "afterLoadData": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_lint": true,
-                    "_data": "读档事件后，载入事件前，可以执行的操作"
+                    "_data": "炸弹事件"
                 },
                 "canUseQuickShop": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "当前能否使用快捷商店"
+                    "_data": "能否用快捷商店"
                 }
             }
         },
         "enemys": {
-            
             "_type": "object",
             "_data": {
                 "getSpecials": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "怪物特殊属性的定义（获得怪物的特殊属性）"
+                    "_data": "怪物特殊属性定义"
                 },
                 "getEnemyInfo": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "获得某个怪物的当前属性数据\n该函数主要是会被伤害计算和怪物手册等使用"
+                    "_data": "获得怪物真实属性"
                 },
                 "getDamageInfo": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "获得战斗伤害信息（实际伤害计算函数）"
+                    "_data": "获得战斗伤害信息"
                 },
                 "updateEnemys": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "更新怪物数据，可以在这里对怪物属性和数据进行动态更新"
+                    "_data": "更新怪物数据"
                 }
             }
         },
         "actions": {
-            
             "_type": "object",
             "_data": {
                 "onKeyUp": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "按键处理；可以在这里自定义快捷键，详见文档-个性化-自定义快捷键"
+                    "_data": "按键处理"
                 }
             }
         },
         "control": {
-            
             "_type": "object",
             "_data": {
-                "flyTo": {
+                "saveData": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "使用楼层传送器飞到某层"
+                    "_data": "存档操作"
+                },
+                "loadData": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "读档操作"
                 },
                 "updateStatusBar": {
                     "_leaf": true,
@@ -167,55 +163,48 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "阻激夹域的伤害值计算"
+                    "_data": "阻激夹域伤害"
                 },
                 "moveOneStep": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "勇士每走一步的操作"
+                    "_data": "每一步后的操作"
+                },
+                "moveDirectly": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "瞬间移动处理"
+                },
+                "parallelDo": {
+                    "_leaf": true,
+                    "_type": "textarea",
+                    "_lint": true,
+                    "_data": "并行事件处理"
                 }
             }
         },
         "ui": {
-            
             "_type": "object",
             "_data": {
                 "drawStatusBar": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "自定义绘制状态栏。\n当状态栏canvas化开启时，可以在这里对状态栏进行自定义绘制。\n仅当statusCanvas开启时有效。"
+                    "_data": "自绘状态栏"
                 },
                 "drawStatistics": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "地图数据统计项的注册"
+                    "_data": "地图数据统计"
                 },
                 "drawAbout": {
                     "_leaf": true,
                     "_type": "textarea",
                     "_lint": true,
-                    "_data": "绘制“关于”界面"
-                }
-            }
-        },
-        "plugins": {
-            
-            "_type": "object",
-            "_data": {
-                "parallelDo": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_lint": true,
-                    "_data": "并行事件处理"
-                },
-                "plugin": {
-                    "_leaf": true,
-                    "_type": "textarea",
-                    "_lint": true,
-                    "_data": "自定义插件编写"
+                    "_data": "绘制关于界面"
                 }
             }
         }

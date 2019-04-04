@@ -227,8 +227,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "openDoor",
                             "passNet",
                             "changeLight",
-                            "ski",
-                            "pushBox"
+                            "pushBox",
+                            "custom"
                         ]
                     },
                     "_data": "该图块的默认触发器"

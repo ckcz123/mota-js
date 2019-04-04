@@ -187,6 +187,11 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                             "_type": "textarea",
                             "_data": "初始生命值"
                         },
+                        "manamax": {
+                            "_leaf": true,
+                            "_type": "textarea",
+                            "_data": "魔力上限；此项非负才会生效（null或小于0都不会生效）"
+                        },
                         "mana": {
                             "_leaf": true,
                             "_type": "textarea",
@@ -252,12 +257,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                                     "_data": "初始装备个数，例如初始送铁剑可以写 {\"sword1\": 1}"
                                 }
                             }
-                        },
-                        "flyRange": {
-                            "_leaf": true,
-                            "_type": "textarea",
-                            "_range": "thiseval instanceof Array",
-                            "_data": "初始可飞的楼层；一般留空数组即可"
                         },
                         "loc": {
                             
@@ -636,7 +635,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc =
                     "_bool": "bool",
                     "_data": "寻路算法是否经过血瓶；如果该项为false，则寻路算法会自动尽量绕过血瓶"
                 },
-                "portalWithoutTrigger": {
+                "ignoreChangeFloor": {
                     "_leaf": true,
                     "_type": "checkbox",
                     "_bool": "bool",

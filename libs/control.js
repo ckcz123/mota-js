@@ -323,6 +323,7 @@ control.prototype._showStartAnimate_resetDom = function () {
     core.dom.levelChooseButtons.style.display = 'none';
     core.status.played = false;
     core.clearStatus();
+    core.clearMap('all');
     core.dom.musicBtn.style.display = 'block';
     core.setMusicBtn();
     // 重置音量
@@ -360,7 +361,6 @@ control.prototype.clearStatus = function() {
     }
     core.status = {};
     core.clearStatusBar();
-    core.clearMap('all');
     core.deleteAllCanvas();
     core.status.played = false;
 }

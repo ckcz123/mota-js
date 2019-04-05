@@ -1084,6 +1084,7 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     // 处理自定义事件
     if (core.status.event.id != 'action') {
         core.status.event.id = 'confirmBox';
+        core.status.event.ui = text;
         core.status.event.data = {'yes': yesCallback, 'no': noCallback};
     }
 

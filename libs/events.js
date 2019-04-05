@@ -1683,6 +1683,7 @@ events.prototype.load = function (fromUserAction) {
     if (!core.isPlaying()) {
         core.dom.startPanel.style.display = 'none';
         core.clearStatus();
+        core.clearMap('all');
         core.status.event = {'id': 'load', 'data': null};
         core.status.lockControl = true;
         core.ui.drawSLPanel(10*page+offset);

@@ -377,7 +377,7 @@ events.prototype.openDoor = function (x, y, needKey, callback) {
 events.prototype._openDoor_check = function (id, x, y, needKey) {
     // 是否存在门或暗墙
     if (!core.terrainExists(x, y, id) || !(id.endsWith("Door") || id.endsWith("Wall"))
-        || !core.material.icons.animates[id]) {
+        || core.material.icons.animates[id] == null) {
         core.clearContinueAutomaticRoute();
         return false;
     }

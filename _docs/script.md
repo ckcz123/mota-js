@@ -207,11 +207,22 @@ function () {
 样板的功能毕竟是写死的，有时候我们也需要修改样板的一些行为。
 
 在V2.6以前，需要直接打开libs目录下的对应文件并进行修改。但是开libs下的文件就会出现各种问题：
+
+- 不容易记得自己修改过什么，而且如果改错了很麻烦
+  - 例如，直接修改了某函数加了新功能，结果过段时间发现不需要，想删掉，但是这时候已经很难找到自己改过了什么了。
+  - 或者，如果代码改错了，不断往上面打补丁，也只会使得libs越来越乱，最后连自己做过什么都不记得。
 - 不容易随着新样板接档进行迁移
-- 也不好找到自己改过什么，从而能整理成新的插件在别的塔使用
+- 不方便能整理成新的插件在别的塔使用（总不能让别的塔也去修改libs吧）
 - ……
 
 好消息的是，从V2.6开始，我们再也不需要开文件了，而是可以直接在插件中对原始函数进行复写。
+
+函数复写的好处如下：
+
+- 不会影响系统原有代码。
+  - 即使写错了或不需要了，也只用把插件中的函数注释或删除即可，不会对原来的系统代码产生任何影响。
+- 清晰明了。很容易方便知道自己修改过什么，尤其是可以和系统原有代码进行对比。
+- 方便整理成新的插件，给其他的塔使用。
 
 如果我想对xxx文件中的yyy函数进行重写，其模式一般是：`core.xxx.yyy = function (参数列表) { ... }`
 
@@ -300,7 +311,7 @@ core.events.openShop = function (shopId, needVisited) {
 var drawMap = core.maps.drawMap; // 先把原始函数用一个变量记录下来
 core.maps.drawMap = function (floorId, callback) {
     console.log("drawMap..."); // 控制台打出一条信息
-    drawMap.call(core.maps, floorId, callback); // 需要使用`call`来告知this是core.maps
+    return drawMap.call(core.maps, floorId, callback); // 需要使用`call`来告知this是core.maps
 }
 ```
 

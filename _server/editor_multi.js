@@ -138,6 +138,7 @@ editor_multi = function () {
         }
 
         if (editor_multi.id === 'importFile') {
+            _format();
             editor_multi.id = '';
             editor_multi.writeFileDone();
             return;
@@ -210,7 +211,10 @@ editor_multi = function () {
     editor_multi.writeFileDone = function () {
         fs.writeFile(_fileValues[0], editor.util.encode64(codeEditor.getValue() || ''), 'base64', function (err, data) {
             if (err) printe('文件写入失败,请手动粘贴至' + _fileValues[0] + '\n' + err);
-            else editor_multi.hide();
+            else {
+                editor_multi.hide();
+                printf(_fileValues[0] + " 写入成功，F5刷新后生效");
+            }
         });
     }
 

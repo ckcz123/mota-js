@@ -941,11 +941,7 @@ editor_file = function (editor, callback) {
         return formatArrStr;
     }
 
-    var encode = function (str) {
-        return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
-            return String.fromCharCode(parseInt(p1, 16))
-        }))
-    }
+    var encode = editor.util.encode64
 
     var alertWhenCompress = function(){
         if(editor.useCompress===true){

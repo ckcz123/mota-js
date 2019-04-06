@@ -220,13 +220,13 @@ editor_multi = function () {
 
     editor_multi.editCommentJs = function (mod) {
         var dict = {
-            loc: '_server/comment.js',
-            enemyitem: '_server/comment.js',
-            floor: '_server/comment.js',
-            tower: '_server/data.comment.js',
-            functions: '_server/functions.comment.js',
-            commonevent: '_server/events.comment.js',
-            plugins: '_server/plugins.comment.js',
+            loc: '_server/table/comment.js',
+            enemyitem: '_server/table/comment.js',
+            floor: '_server/table/comment.js',
+            tower: '_server/table/data.comment.js',
+            functions: '_server/table/functions.comment.js',
+            commonevent: '_server/table/events.comment.js',
+            plugins: '_server/table/plugins.comment.js',
         }
         editor_multi.lintAutocomplete = true
         editor_multi.setLint()

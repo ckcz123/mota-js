@@ -17,7 +17,7 @@ editor_file = function (editor, callback) {
             if (window.location.href.indexOf('_server') !== -1)
                 script.src = key + '.js';
             else
-                script.src = '_server/' + key + '.js';
+                script.src = '_server/table/' + key + '.js';
             document.body.appendChild(script);
             script.onload = function () {
                 editor_file[value] = eval(key.replace('.', '_') + '_c456ea59_6018_45ef_8bcc_211a24c627dc');

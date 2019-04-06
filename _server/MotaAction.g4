@@ -305,8 +305,8 @@ action
     |   moveImage_s
     |   showGif_0_s
     |   showGif_1_s
-    |   setFg_0_s
-    |   setFg_1_s
+    |   setCurtain_0_s
+    |   setCurtain_1_s
     |   screenFlash_s
     |   setWeather_s
     |   move_s
@@ -324,6 +324,7 @@ action
     |   win_s
     |   lose_s
     |   if_s
+    |   if_1_s
     |   switch_s
     |   while_s
     |   break_s
@@ -1278,35 +1279,35 @@ var code = '{"type": "moveImage", "code": '+Int_0+toloc+EvalString_0+',"time": '
 return code;
 */;
 
-setFg_0_s
+setCurtain_0_s
     :   '更改画面色调' EvalString Colour '动画时间' Int? '不等待执行完毕' Bool Newline
     
 
-/* setFg_0_s
-tooltip : setFg: 更改画面色调,动画时间可不填
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=setfg%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
+/* setCurtain_0_s
+tooltip : setCurtain: 更改画面色调,动画时间可不填
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=setcurtain%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
 default : ["255,255,255,1",'rgba(255,255,255,1)',500,false]
 colour : this.soundColor
 var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
 if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
 Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "setFg", "color": ['+EvalString_0+']'+Int_0 +async+'},\n';
+var code = '{"type": "setCurtain", "color": ['+EvalString_0+']'+Int_0 +async+'},\n';
 return code;
 */;
 
-setFg_1_s
+setCurtain_1_s
     :   '恢复画面色调' '动画时间' Int? '不等待执行完毕' Bool Newline
     
 
-/* setFg_1_s
-tooltip : setFg: 恢复画面色调,动画时间可不填
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=setfg%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
+/* setCurtain_1_s
+tooltip : setCurtain: 恢复画面色调,动画时间可不填
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=setcurtain%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
 default : [500,false]
 colour : this.soundColor
 Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "setFg"'+Int_0 +async+'},\n';
+var code = '{"type": "setCurtain"'+Int_0 +async+'},\n';
 return code;
 */;
 
@@ -1482,15 +1483,16 @@ return code;
 */;
 
 playSound_s
-    :   '播放音效' EvalString Newline
+    :   '播放音效' EvalString '停止之前音效' Bool? Newline
     
 
 /* playSound_s
 tooltip : playSound: 播放音效
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=playsound%EF%BC%9A%E6%92%AD%E6%94%BE%E9%9F%B3%E6%95%88
-default : ["item.mp3"]
+default : ["item.mp3",false]
 colour : this.soundColor
-var code = '{"type": "playSound", "name": "'+EvalString_0+'"},\n';
+Bool_0 = Bool_0 ? ', "stop": true' : '';
+var code = '{"type": "playSound", "name": "'+EvalString_0+'"'+Bool_0+'},\n';
 return code;
 */;
 
@@ -1587,6 +1589,20 @@ var code = ['{"type": "if", "condition": "',expression_0,'",\n',
 return code;
 */;
 
+if_1_s
+    :   '如果' ':' expression BGNL? Newline action+  BEND Newline
+
+
+/* if_1_s
+tooltip : if: 条件判断
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=if%EF%BC%9A%E6%9D%A1%E4%BB%B6%E5%88%A4%E6%96%AD
+colour : this.eventColor
+var code = ['{"type": "if", "condition": "',expression_0,'",\n',
+    '"true": [\n',action_0,'],\n',
+'},\n'].join('');
+return code;
+*/;
+
 switch_s
     :   '多重分歧 条件判定' ':' expression BGNL? Newline switchCase+ BEND Newline
 
@@ -1603,14 +1619,16 @@ return code;
 */;
 
 switchCase
-    :   '如果是' expression '的场合' BGNL? Newline action+
+    :   '如果是' expression '的场合' '不跳出' Bool BGNL? Newline action+
 
 
 /* switchCase
 tooltip : 选项的选择
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=switch%EF%BC%9A%E5%A4%9A%E9%87%8D%E6%9D%A1%E4%BB%B6%E5%88%86%E6%AD%A7
+default : ["", false]
 colour : this.subColor
-var code = '{"case": "'+expression_0+'", "action": [\n'+action_0+']},\n';
+Bool_0 = Bool_0?', "nobreak": true':'';
+var code = '{"case": "'+expression_0+'"'+Bool_0+', "action": [\n'+action_0+']},\n';
 return code;
 */;
 
@@ -1639,13 +1657,13 @@ return code;
 */;
 
 choicesContext
-    :   '子选项' EvalString '图标' IdString? '颜色' EvalString? Colour '不跳出' Bool BGNL? Newline action+
+    :   '子选项' EvalString '图标' IdString? '颜色' EvalString? Colour BGNL? Newline action+
 
 
 /* choicesContext
 tooltip : 选项的选择
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=choices%EF%BC%9A%E7%BB%99%E7%94%A8%E6%88%B7%E6%8F%90%E4%BE%9B%E9%80%89%E9%A1%B9
-default : ["提示文字:红钥匙","","",null,false]
+default : ["提示文字:红钥匙","",""]
 colour : this.subColor
 if (EvalString_1) {
   var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
@@ -1655,19 +1673,19 @@ if (EvalString_1) {
       EvalString_1 = ', "color": "'+EvalString_1+'"';
 }
 IdString_0 = IdString_0?(', "icon": "'+IdString_0+'"'):'';
-var nobreak = Bool_0?', "nobreak": true':'';
-var code = '{"text": "'+EvalString_0+'"'+IdString_0+EvalString_1+', "action": [\n'+action_0+']'+nobreak+'},\n';
+var code = '{"text": "'+EvalString_0+'"'+IdString_0+EvalString_1+', "action": [\n'+action_0+']},\n';
 return code;
 */;
 
 confirm_s
-    :   '显示确认框' ':' EvalString BGNL? '确定' ':' BGNL? Newline action+ '取消' ':' BGNL? Newline action+ BEND Newline
+    :   '显示确认框' ':' EvalString BGNL? '确定的场合' ':' '（默认选中' Bool '）' BGNL? Newline action+ '取消的场合' ':' BGNL? Newline action+ BEND Newline
 
 /* confirm_s
 tooltip : 弹出确认框
 helpUrl : https://h5mota.com/games/template/docs/#/
-default : ["确认要???吗?"]
-var code = ['{"type": "confirm", "text": "',EvalString_0,'",\n',
+default : ["确认要xxx吗?",false]
+Bool_0 = Bool_0?', "default": true':''
+var code = ['{"type": "confirm"'+Bool_0+', "text": "',EvalString_0,'",\n',
     '"yes": [\n',action_0,'],\n',
     '"no": [\n',action_1,']\n',
 '},\n'].join('');
@@ -2448,11 +2466,12 @@ ActionParser.prototype.parseAction = function() {
         }
         break;
     case "setFg": // 颜色渐变
+    case "setCurtain":
       if(this.isset(data.color)){
-        this.next = MotaActionBlocks['setFg_0_s'].xmlText([
+        this.next = MotaActionBlocks['setCurtain_0_s'].xmlText([
           data.color,'rgba('+data.color+')',data.time||0,data.async||false,this.next]);
       } else {
-        this.next = MotaActionBlocks['setFg_1_s'].xmlText([
+        this.next = MotaActionBlocks['setCurtain_1_s'].xmlText([
           data.time||0,data.async||false,this.next]);
       }
       break;
@@ -2511,7 +2530,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "playSound":
       this.next = MotaActionBlocks['playSound_s'].xmlText([
-        data.name,this.next]);
+        data.name,data.stop,this.next]);
       break;
     case "playBgm":
       this.next = MotaActionBlocks['playBgm_s'].xmlText([
@@ -2579,16 +2598,23 @@ ActionParser.prototype.parseAction = function() {
         data.text,this.next]);
       break;
     case "if": // 条件判断
-      this.next = MotaActionBlocks['if_s'].xmlText([
-        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
-        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
-        this.insertActionList(data["true"]),
-        this.insertActionList(data["false"]),
-        this.next]);
+      if (data["false"]) {
+        this.next = MotaActionBlocks['if_s'].xmlText([
+          this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+          this.insertActionList(data["true"]),
+          this.insertActionList(data["false"]),
+          this.next]);
+      }
+      else {
+        this.next = MotaActionBlocks['if_1_s'].xmlText([
+          this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+          this.insertActionList(data["true"]),
+          this.next]);
+      }
       break;
     case "confirm": // 显示确认框
       this.next = MotaActionBlocks['confirm_s'].xmlText([
-        this.EvalString(data.text),
+        this.EvalString(data.text), data["default"],
         this.insertActionList(data["yes"]),
         this.insertActionList(data["no"]),
         this.next]);
@@ -2597,7 +2623,7 @@ ActionParser.prototype.parseAction = function() {
       var case_caseList = null;
       for(var ii=data.caseList.length-1,caseNow;caseNow=data.caseList[ii];ii--) {
         case_caseList=MotaActionBlocks['switchCase'].xmlText([
-          this.isset(caseNow.case)?MotaActionBlocks['evalString_e'].xmlText([caseNow.case]):"值",this.insertActionList(caseNow.action),case_caseList]);
+          this.isset(caseNow.case)?MotaActionBlocks['evalString_e'].xmlText([caseNow.case]):"值",caseNow.nobreak,this.insertActionList(caseNow.action),case_caseList]);
       }
       this.next = MotaActionBlocks['switch_s'].xmlText([
         // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
@@ -2608,7 +2634,7 @@ ActionParser.prototype.parseAction = function() {
       var text_choices = null;
       for(var ii=data.choices.length-1,choice;choice=data.choices[ii];ii--) {
         text_choices=MotaActionBlocks['choicesContext'].xmlText([
-          choice.text,choice.icon,choice.color,'rgba('+choice.color+')',choice.nobreak,this.insertActionList(choice.action),text_choices]);
+          choice.text,choice.icon,choice.color,'rgba('+choice.color+')',this.insertActionList(choice.action),text_choices]);
       }
       this.next = MotaActionBlocks['choices_s'].xmlText([
         this.isset(data.text)?this.EvalString(data.text):null,'','',text_choices,this.next]);

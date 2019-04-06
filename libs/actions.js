@@ -105,7 +105,7 @@ actions.prototype.doRegisteredAction = function (action) {
     return false;
 }
 
-actions.prototype.checkReplaying = function () {
+actions.prototype._checkReplaying = function () {
     if (core.isReplaying() && core.status.event.id != 'save'
         && (core.status.event.id || "").indexOf('book') != 0 && core.status.event.id != 'viewMaps')
         return true;
@@ -114,7 +114,7 @@ actions.prototype.checkReplaying = function () {
 
 ////// 检查是否在录像播放中，如果是，则停止交互
 actions.prototype._sys_checkReplay = function () {
-    if (this.checkReplaying()) return true;
+    if (this._checkReplaying()) return true;
 }
 
 ////// 按下某个键时 //////
@@ -145,7 +145,7 @@ actions.prototype.onkeyUp = function (e) {
 }
 
 actions.prototype._sys_onkeyUp_replay = function (e) {
-    if (this.checkReplaying()) {
+    if (this._checkReplaying()) {
         if (e.keyCode == 27) // ESCAPE
             core.stopReplay();
         else if (e.keyCode == 90) // Z
@@ -286,7 +286,7 @@ actions.prototype.keyUp = function (keyCode, altKey, fromReplay) {
 }
 
 actions.prototype._sys_keyUp_replay = function (keyCode, altKey, fromReplay) {
-    if (!fromReplay && this.checkReplaying()) return true;
+    if (!fromReplay && this._checkReplaying()) return true;
 }
 
 actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
@@ -389,7 +389,7 @@ actions.prototype._sys_keyUp = function (keyCode, altKey) {
     if (core.status.automaticRoute && core.status.automaticRoute.autoHeroMove) {
         core.stopAutomaticRoute();
     }
-    core.stopHero();
+    core.status.heroStop = true;
     return true;
 }
 
@@ -539,8 +539,8 @@ actions.prototype._sys_onup = function () {
     return true;
 }
 
-////// 获得点击事件相对左上角的坐标（0到12之间） //////
-actions.prototype.getClickLoc = function (x, y) {
+////// 获得点击事件相对左上角的坐标 //////
+actions.prototype._getClickLoc = function (x, y) {
 
     var statusBar = {'x': 0, 'y': 0};
     var size = 32;
@@ -663,7 +663,7 @@ actions.prototype.onmousewheel = function (direct) {
 actions.prototype._sys_onmousewheel = function (direct) {
     // 向下滚动是 -1 ,向上是 1
 
-    if (this.checkReplaying()) {
+    if (this._checkReplaying()) {
         // 滚轮控制速度
         if (direct == 1) core.speedUpReplay();
         if (direct == -1) core.speedDownReplay();
@@ -891,6 +891,21 @@ actions.prototype._clickAction = function (x, y) {
                 core.doAction();
             }
         }
+        return;
+    }
+
+    if (core.status.event.data.type == 'confirm') {
+        if ((x == this.HSIZE-2 || x == this.HSIZE-1) && y == this.HSIZE+1) {
+            core.status.route.push("choices:0");
+            core.insertAction(core.status.event.ui.yes);
+            core.doAction();
+        }
+        if ((x == this.HSIZE+2 || x == this.HSIZE+1) && y == this.HSIZE+1) {
+            core.status.route.push("choices:1");
+            core.insertAction(core.status.event.ui.no);
+            core.doAction();
+        }
+        return;
     }
 }
 
@@ -898,6 +913,12 @@ actions.prototype._clickAction = function (x, y) {
 actions.prototype._keyDownAction = function (keycode) {
     if (core.status.event.data.type == 'choices') {
         this._keyDownChoices(keycode);
+        return;
+    }
+    if (core.status.event.data.type == 'confirm' && (keycode == 37 || keycode == 39)) {
+        core.status.event.selection = 1 - core.status.event.selection;
+        core.drawConfirmBox(core.status.event.ui.text);
+        return;
     }
 }
 
@@ -924,6 +945,15 @@ actions.prototype._keyUpAction = function (keycode) {
         if (choices.length > 0) {
             this._selectChoices(choices.length, keycode, this._clickAction);
         }
+        return;
+    }
+    if (core.status.event.data.type == 'confirm'&& (keycode == 13 || keycode == 32 || keycode == 67)) {
+        core.status.route.push("choices:" + core.status.event.selection);
+        if (core.status.event.selection == 0)
+            core.insertAction(core.status.event.ui.yes);
+        else core.insertAction(core.status.event.ui.no);
+        core.doAction();
+        return;
     }
 }
 
@@ -958,6 +988,7 @@ actions.prototype._clickBook = function (x, y) {
         var index = this.HSIZE * page + parseInt(y / 2);
         core.ui.drawBook(index);
         core.ui.drawBookDetail(index);
+        return;
     }
     return;
 }
@@ -1101,17 +1132,20 @@ actions.prototype._clickViewMaps = function (x, y) {
             index++;
         if (index < core.floorIds.length)
             core.ui.drawMaps(index);
+        return;
     }
-    else if (y >= this.HSIZE + 2 && (mh == this.SIZE || (x >= per && x <= this.LAST - per))) {
+    if (y >= this.HSIZE + 2 && (mh == this.SIZE || (x >= per && x <= this.LAST - per))) {
         index--;
         while (index >= 0 && index != now && core.status.maps[core.floorIds[index]].cannotViewMap)
             index--;
         if (index >= 0)
             core.ui.drawMaps(index);
+        return;
     }
-    else if (x >= per && x <= this.LAST - per && y >= this.HSIZE - 1 && y <= this.HSIZE + 1) {
+    if (x >= per && x <= this.LAST - per && y >= this.HSIZE - 1 && y <= this.HSIZE + 1) {
         core.clearMap('data');
         core.ui.closePanel();
+        return;
     }
 }
 
@@ -1217,7 +1251,9 @@ actions.prototype._clickQuickShop = function (x, y) {
         // 离开
         else if (y == topIndex + keys.length)
             core.ui.closePanel();
+        return;
     }
+    return;
 }
 
 ////// 快捷商店界面时，放开某个键的操作 //////
@@ -1255,7 +1291,7 @@ actions.prototype._clickToolbox = function (x, y) {
             core.ui.drawToolbox(core.status.event.selection);
         }
         if (y == this.LAST && constantsPage > 1) {
-            core.status.event.data.toolsPage--;
+            core.status.event.data.constantsPage--;
             core.ui.drawToolbox(core.status.event.selection);
         }
     }
@@ -1904,11 +1940,11 @@ actions.prototype._clickSettings = function (x, y) {
                 core.ui.drawKeyBoard();
                 break;
             case 2:
-                core.clearSelector();
+                core.clearUI();
                 core.ui.drawMaps();
                 break;
             case 3:
-                core.clearSelector();
+                core.clearUI();
                 core.ui.drawPaint();
                 break;
             case 4:
@@ -1920,7 +1956,7 @@ actions.prototype._clickSettings = function (x, y) {
                 core.ui.drawGameInfo();
                 break;
             case 6:
-                return core.confirmRestart(true);
+                return core.confirmRestart();
             case 7:
                 core.ui.closePanel();
                 break;
@@ -2065,7 +2101,7 @@ actions.prototype._clickLocalSaveSelect = function (x, y) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
         if (selection < 2) {
-            core.getAllSaves(selection == 0 ? null : core.saves.saveIndex, function (saves) {
+            var callback = function (saves) {
                 if (saves) {
                     var content = {
                         "name": core.firstData.name,
@@ -2074,7 +2110,9 @@ actions.prototype._clickLocalSaveSelect = function (x, y) {
                     }
                     core.download(core.firstData.name + "_" + core.formatDate2(new Date()) + ".h5save", JSON.stringify(content));
                 }
-            })
+            };
+            if (selection == 0) core.getAllSaves(callback);
+            else core.getSave(core.saves.saveIndex, callback);
         }
 
         core.status.event.selection = 2;
@@ -2209,7 +2247,7 @@ actions.prototype._clickReplay_fromBeginning = function () {
 actions.prototype._clickReplay_fromLoad = function () {
     core.status.event.id = 'replayLoad';
     core.status.event.selection = null;
-    core.ui.clearSelector();
+    core.clearUI();
     var saveIndex = core.saves.saveIndex;
     var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
     core.ui.drawSLPanel(10 * page + offset);
@@ -2448,7 +2486,7 @@ actions.prototype._onupPaint = function () {
     core.status.event.data.x = null;
     core.status.event.data.y = null;
     // 保存
-    core.paint[core.status.floorId] = lzw_encode(core.utils.encodeCanvas(core.dymCanvas.paint).join(","));
+    core.paint[core.status.floorId] = lzw_encode(core.utils._encodeCanvas(core.dymCanvas.paint).join(","));
 }
 
 actions.prototype.setPaintMode = function (mode) {
@@ -2496,7 +2534,7 @@ actions.prototype.loadPaint = function () {
         core.clearMap('paint');
         var value = core.paint[core.status.floorId];
         if (value) value = lzw_decode(value).split(",");
-        core.utils.decodeCanvas(value, 32 * core.bigmap.width, 32 * core.bigmap.height);
+        core.utils._decodeCanvas(value, 32 * core.bigmap.width, 32 * core.bigmap.height);
         core.drawImage('paint', core.bigmap.tempCanvas.canvas, 0, 0);
 
         core.drawTip("读取绘图文件成功");

@@ -1,6 +1,6 @@
 # 个性化
 
-?> 目前版本**v2.5.5**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.6**，上次更新时间：* {docsify-updated} *
 
 有时候只靠样板本身可能是不够的。我们需要一些个性化、自定义的素材，道具效果，怪物属性，等等。
 
@@ -21,9 +21,13 @@ HTML5魔塔是使用画布（canvas）来绘制，存在若干个图层，它们
 - route**[D]**：路线层；主要用来绘制勇士的行走路线图。 (z-index: 95)
 - paint**[D]**：绘图层；主要用来进行绘图模式。（z-index: 95)
 - curtain：色调层；用来控制当前楼层的画面色调 (z-index: 125)
-- image1\~50**[D]**：图片层；用来绘制图片等操作。（z-index: 100+code, 101~150；也就是图片编号在1~25的在色调层之下，26~50的在色调层之上）
-- ui：UI层；用来绘制一切UI窗口，如剧情文本、怪物手册、楼传器、系统菜单等等 (z-index: 160)
+- image1\~50**[D]**：图片层；用来绘制图片等操作。（z-index: 100+code, 101~150）
+- ui：UI层；用来绘制一切UI窗口，如剧情文本、怪物手册、楼传器、系统菜单等等 (z-index: 140)
 - data：数据层；用来绘制一些顶层的或更新比较快的数据，如左上角的提示，战斗界面中数据的变化等等。 (z-index: 170)
+
+请注意：显示图片事件将自动创建一个图片层，z-index是100+图片编号。
+
+而，色调层的z-index是25，ui层的z-index是140；因此，图片编号在1~24的将被色调层遮挡，25~40的将被ui层遮挡，41~50的将遮挡UI层。
 
 ### 动态创建canvas
 
@@ -104,11 +108,11 @@ core.fillText('test', '这是一段文字', 10, 30, '#FF0000', '16px Verdana'); 
 从V2.5.4开始，贴图也允许进行帧动画，只要设置第五项的数值。
 
 ``` js
-"images": [[96,120,"bg.jpg",0]], // 背景图；你可以选择一张或多张图片来作为背景/前景素材。
-"images": [], // 无任何背景图
-"images": [[32,32,"house.png",0], [160,170,"bed.png",1]] // 在(32,32)放一个house.png在背景层，且(160,170)放bed.png在前景层
-"images": [[96,120,"tree.png",2]] // 如果写2，则会自动调节遮挡效果
-"images": [[64,0,"x.png",1,4]] // 这是一个前景层的4帧动画贴图
+[[96,120,"bg.jpg",0]] // 背景图；你可以选择一张或多张图片来作为背景/前景素材。
+[] // 无任何背景图
+[[32,32,"house.png",0], [160,170,"bed.png",1]] // 在(32,32)放一个house.png在背景层，且(160,170)放bed.png在前景层
+[[96,120,"tree.png",2]] // 如果写2，则会自动调节遮挡效果
+[[64,0,"x.png",1,4]] // 这是一个前景层的4帧动画贴图
 ```
 
 images为一个数组，代表当前层所有作为背景素材的图片信息。每一项为一个五元组，分别为该背景素材的x，y，图片名，遮挡方式和帧数。
@@ -129,18 +133,21 @@ images为一个数组，代表当前层所有作为背景素材的图片信息�
 
 关于楼层贴图和前景、背景层的层叠覆盖关系，默认是：**地板 - 背景贴图 - 背景图块 - 事件 - 勇士 - 前景贴图 - 前景图块**。
 
-可以通过修改`libs/maps.js`的`drawMap`函数中下面三行的顺序来改变其覆盖关系。
+可以通过修改`libs/maps.js`的`drawBg`和`drawFg`函数来改变其覆盖关系。
 
 ``` js
-// ----- 可以调整这三行的顺序来修改覆盖关系；同层画布上，后绘制的覆盖先绘制的
-// ----- ui.js的drawThumbnail函数也需要对应进行修改。
-
-// 绘制楼层贴图
-core.maps.drawFloorImages(floorId, images);
-// 绘制背景层图块
-core.maps.drawBgFgMap(floorId, core.canvas.bg, "bg", true);
-// 绘制前景层图块
-core.maps.drawBgFgMap(floorId, core.canvas.fg, "fg", true);
+////// 绘制背景层 //////
+maps.prototype.drawBg = function (floorId, ctx) {
+    var onMap = ctx == null;
+    if (onMap) {
+        ctx = core.canvas.bg;
+        core.clearMap(ctx);
+    }
+    this._drawBg_drawBackground(floorId, ctx);
+    // ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
+    this._drawFloorImages(floorId, ctx, 'bg');
+    this._drawBgFgMap(floorId, ctx, 'bg', onMap);
+}
 ```
 
 楼层贴图可以被事件隐藏和显示，详见[隐藏贴图](event#hideFloorImg：隐藏贴图)的写法。
@@ -192,7 +199,7 @@ ID必须由数字字母下划线组成，数字在1000以内，且均不能和�
 
 之后刷新编辑器即可。
 
-对于怪物和道具，我们也可以进行自动注册，只需要点击“自动注册”按钮，将对该栏下所有未注册的素材进行自动注册（自动分配ID和数字）。
+我们也可以进行自动注册，只需要点击“自动注册”按钮，将对该栏下所有未注册的素材进行自动注册（自动分配ID和数字）。
 
 素材注册完毕后，即可在游戏中正常使用，也可以被地图生成器所识别（需要重开地图生成器）。
 
@@ -205,85 +212,6 @@ ID必须由数字字母下划线组成，数字在1000以内，且均不能和�
 1. 下拉框切到“追加素材”，导入文件到画板，然后导入一张Autotile自动元件图片。
 2. 下拉框选择autotile，然后点“追加”
 3. 看到成功的提示后刷新编辑器即可。
-
-<!--
-
-1. 将新的Autotile图片复制到images目录下。文件名必须是字母数字和下划线组成。
-2. 进入icons.js，在autotile分类下进行添加该文件的名称，索引简单的写0。
-3. 指定一个数字，在maps.js中类似进行添加。
-
-!> Autotile的ID和文件名应确保完全相同！
-
--->
-<!--
-#### 新添加自定义地形（路面、墙壁等）
-
-如果你在terrains.png中新增了一行：
-
-1. 指定一个唯一的英文ID，不能和现有的重复。
-2. 进入icons.js，在terrains分类下进行添加索引（对应图标在图片上的位置，即index）
-
-**如果你无须在游戏内使用本地形，而仅仅是将其作为“背景图”使用，则操作如下：**
-3. 修改对应楼层的剧本文件的`defaultGround`项，改成新的ID。
-
-**如果你要在游戏内使用本地形，则操作如下：**
-3. 指定一个数字，在maps.js中类似进行添加。
-
-#### 新添加Autotile
-
-如果你需要新增一个Autotile：
-
-1. 将新的Autotile图片复制到images目录下。
-2. 进入icons.js，在autotile分类下进行添加该文件的名称，索引简单的写0。
-3. 指定一个数字，在maps.js中类似进行添加。
-
-!> Autotile的ID和文件名完全相同！且其ID/文件名不能含有中文、空格或特殊字符。
-
-!> V2.0版本不能在地图编辑器中添加Autotile，请按上面的操作来执行。
-
-#### 新添加道具
-
-如果你需要新增一个未被定义的道具：
-
-1. 指定一个唯一的英文ID，不能和现有的重复。
-2. 进入icons.js，在items分类下进行添加索引（对应图标在图片上的位置，即index）
-3. 指定一个数字，在maps.js中类似进行添加。
-4. 在items.js中仿照其他道具，来添加道具的信息。
-
-有关如何自行实现一个道具的效果，参见[自定义道具效果](#自定义道具效果)。
-
-#### 新添加怪物
-
-如果我们需要新添加怪物，请在enemys.png中新增一行。
-
-你可以通过便捷PS工具的“更改色相”来将红头怪变成橙头怪等。
-
-然后执行如下操作：
-
-1. 指定一个唯一的英文ID，不能和enemys中现有的重复。
-2. 进入icons.js，在enemys分类下进行添加索引（对应图标在图片上的位置，即index）
-3. 在maps.js中继续进行添加。
-4. 在enemys.js中仿照其他怪物，来添加怪物的信息。
-
-!> 如果是48x32的怪物素材，请放在enemy48.png中，然后在icons.js的enemy48下添加索引。
-
-有关如何自行实现一个怪物的特殊属性或伤害计算公式，参见[怪物的特殊属性](#怪物的特殊属性)。
-
-#### 新添加NPC
-
-1. 指定一个唯一的英文ID，不能和现有的重复。
-2. 进入icons.js，在npcs分类下进行添加索引（对应图标在图片上的位置，即index）
-3. 指定一个数字，在maps.js的getBlock下类似进行添加。
-
-!> 如果是48x32的怪物素材，请放在npc48.png中，然后在icons.js的npc48下添加索引。
-
--->
-
-### 地图生成器使用自定义素材
-
-地图生成器是直接从js文件中读取数字-图标对应关系的。
-
-因此，在你修改了icons.js和maps.js两个文件，也就是将素材添加到游戏后，地图生成器的对应关系也将同步更新。
 
 ### 额外素材
 
@@ -300,6 +228,7 @@ ID必须由数字字母下划线组成，数字在1000以内，且均不能和�
 **该素材的宽高必须都是32的倍数，且图片上的总图块数不超过1000（即最多有1000个32*32的图块在该图片上）。**
 
 ```js
+// 在全塔属性中的tilesets导入素材
 "tilesets": ["1.png", "2.png"]    // 导入两个额外素材，文件名分别是1.png和2.png
 ```
 
@@ -349,19 +278,6 @@ core.status.hero.atk += core.values.redJewel + 2*ratio
 如果要自己实现消耗类道具或永久类道具的使用效果，则需修改`items.js`中的canUseItem和useItem两个函数。
 
 具体过程比较复杂，需要一定的JS能力，在这里就不多说了，有需求可以找`艾之葵`进行了解。
-
-但值得一提的是，我们可以使用`core.hasItem(name)` 来判断是否某个道具是否存在。例如下面是passNet（通过路障处理）的一部分：
-
-``` js
-/****** 经过路障 ******/
-events.prototype.passNet = function (data) {
-    // 有鞋子
-    if (core.hasItem('shoes')) return;
-    if (data.event.id=='lavaNet') { // 血网
-// ... 下略
-```
-
-我们进行了一个简单的判断，如果拥有绿鞋，则不进行任何路障的处理。
 
 ### 实战！拿到神圣盾后免疫吸血、领域、夹击效果
 
@@ -421,109 +337,20 @@ function (enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId) {
 
 对于特殊的塔，我们可以考虑修改楼传事件来完成一些特殊的要求，比如镜子可以按楼传来切换表里。
 
-要修改楼传事件，需要进行如下几步：
+要修改楼传事件，需要进行如下两步：
 
-1. 截获楼传的点击事件。在control.js中找到useFly函数，并将其替换成如下内容：
-``` js
-////// 点击楼层传送器时的打开操作 //////
-control.prototype.useFly = function (need) {
-    if (core.isMoving()) {
-        core.drawTip("请先停止勇士行动");
-        return;
-    }
-    if (core.status.lockControl || core.status.event.id != null) return;
-    
-    if (core.canUseItem('fly')) core.useItem('fly');
-    else core.drawTip("当前无法使用"+core.material.items.fly.name);
-}
-```
+1. 重写楼传的点击事件。在插件中对`core.control.useFly进行重写`。详细代码参见[重写点击楼传事件](script#重写点击楼传事件)。
 2. 修改楼传的使用事件。和其他永久道具一样，在地图编辑器的图块属性中修改楼传的useItemEffect和canUseItemEffect两个内容。例如：
 ``` js
 "useItemEffect": "core.insertAction([...])" // 执行某段自定义事件，或者其他脚本
 "canUseItemEffect": "true" // 任何时候可用
 ```
-修改时，请先把`null`改成空字符串`""`，然后再双击进行编辑。
 
-<!--
-
-## 自定义装备
-
-由于HTML5魔塔并不像RM那样存在一个装备界面可供我们对装备进行调整，但是我们也可以使用一个替代的方式实现这个目标。
-
-### 装备的实现原理
-
-在HTML5中，装备将全部看成是永久道具（constants），同时对于每个装备位置，勇士都定义一个flag域表示正在装备的内容。
-
-例如：当勇士获得银剑时，将获得一个永久道具“银剑”；当使用这个银剑，首先检查勇士当前是否装备了武器（比如铁剑），如果
-装备了则先脱掉装备（减去已装备的铁剑所加的属性，并获得永久道具铁剑），然后再穿上新的银剑。
-
-同时由于脱剑术和脱盾术的存在，我们还需要一个“脱掉装备”的永久道具（比如sword0），使用它可以脱掉对应位置的装备。
-
-### 装备加值的修改
-
-要启用装备，首先需要在data.js（全塔属性）中设置`'equipment': true`。此时，游戏内将自动将剑盾变成装备的存在，其
-所加的数值就是全塔属性中对应的数值（比如铁剑sword1就加的全塔属性中sword1的值）。
-
-有时候，我们还会有一个装备加多种属性的需求，此时需要将对应的项从数值改变成一个对象。
-
-``` js
-"sword1": {"atk": 10, "def": 0, "mdef": 5}, // 铁剑加10攻和5魔防
-"shield1": {"atk": 0, "def": 10, "mdef": 10}, // 铁盾加10防和10魔防
-```
-
-通过这种方式，当穿上装备时，将会给你的三围分别加上对应项的数值（支持负数，比如装剑减防御）。
-
-### 新增剑盾
-
-样板默认提供了铁剑（盾），银剑（盾），骑士剑（盾），圣剑（盾）和神圣剑（盾）这五类装备。但有时候，五类是不够的，
-我们可能还需要更多的剑盾。
-
-要增加更多的剑盾，我们需要进行如下步骤：（以新增剑为例）
-
-1. 新注册一个素材到游戏；**其ID必须是sword+数字的形式，比如sword6等。**（同理如果是盾就必须是shield+数字的形式比如shield6。）
-2. 将其cls设置为`constants`，`useItemEffect`和`canUseItem`直接复制其他几个剑盾的内容。  
-（即：`useItemEffect`必须为`"core.plugin.useEquipment(itemId)"`，`canUseItemEffect`必须为`"true"`）。
-3. 使用VSCode或其他文本编辑器直接打开`data.js`文件，并在`"values"`中仿照已有的内容添加剑盾的属性。  
-（例如：`"sword6": 100`，或者`"sword6": `{"atk": 100, "def": 0, "mdef": 50}`）
-
-!> 请注意：新的剑的ID必须是sword+数字，新的盾的ID必须是shield+数字的形式，不然装备将无效！
-
-### 新增其他部位的装备
-
-如果我们还需要新增更多部位的装备，比如戒指、首饰等等，也是可以的，只需要依次进行如下步骤：（以新建戒指为例）
-
-1. 选择一个装备的部位的ID；比如假设我们的装备部位为戒指，那么我们可以选择"ring"作为装备的部位。
-2. 定义一个空戒指，相当于脱掉戒指。注册一个素材到游戏，**其ID必须是ring0**（即部位ID+数字0）。
-3. 同上述新建剑盾的方式来设置ring0这个空戒指的属性。请注意打开data.js后，设置的其值必须为0。  
-(即：必须是`"ring0": 0`)
-3. 创建更多的戒指；每加一个新的戒指到游戏，其ID必须是**ring+数字**的形式，比如`ring1`, `ring2`，等等。
-4. 对于每一个创建的戒指，按照上述新建剑盾的方式设置属性（图块属性，打开data.js直接编辑）。  
-（例如：`"ring2": {"atk": 3, "def": 5, "mdef": 8}`）
-5. **切换到脚本编辑 - 自定义插件编写，在`this.useEquipment`中仿照着新增一行代表戒指的使用。**
-
-``` js
-this.useEquipment = function (itemId) { // 使用装备
-	_useEquipment(itemId, "sword", "atk"); // 剑
-	_useEquipment(itemId, "shield", "def"); // 盾
-	_useEquipment(itemId, "ring", "mdef"); // 新增的戒指
-}
-```
-
-我们仿照着新增一行`_useEquipment(itemId, "ring", "mdef")`。
-
-其中第二项为装备部位的ID，比如我们上述定义的是ring；第三项表示“如果values中该值为数字，则加到什么属性上”。
-比如如果我们这里写mdef，那么我们假设在data.js的values中设置`"ring1": 20`，则使用该戒指会增加20点魔防。
-
-如果你定义的是对象`{"atk": xxx, "def": xxx, "mdef": xxx}`的形式，则不会受到第三项的影响。
-
-!> 必须对于每一个装备部位定义唯一一个不同的ID；脱掉装备（空装备）必须是该ID加数字0的形式，其他有效装备必须是
-该ID+正整数的形式，不然会出错！
-
--->
+除了覆盖楼传事件外，对于快捷商店、虚拟键盘等等也可以进行覆盖，只不过是仿照上述代码重写对应的函数（`openQuickShop`,`openKeyBoard`）即可。
 
 ## 自定义怪物属性
 
-如果你对现有的怪物不满意，想自行添加怪物属性也是可以的。具体参见脚本编辑-getSpecials。
+如果你对现有的怪物不满意，想自行添加怪物属性也是可以的。具体参见脚本编辑的getSpecials。
 
 你需自己指定一个special数字，修改属性名和属性提示文字。后两者可以直接写字符串，或写个函数传入怪物。
 
@@ -552,13 +379,18 @@ case 89: // 使用该按键的keyCode，比如Y键就是89
     // ... 在这里写你要执行脚本
     // **强烈建议所有新增的自定义快捷键均能给个对应的道具可点击，以方便手机端的行为**
     if (core.hasItem('...')) {
-        core.useItem('...');
+        core.status.route.push("key:0"); // 记录按键到录像中
+        core.useItem('...', true); // 第二个参数true代表该次使用道具是被按键触发的，使用过程不计入录像
     }
 
     break;
 ```
 
 强烈建议所有新增的自定义快捷键均给个对应的永久道具可点击，以方便手机端的行为。
+
+使用`core.status.route.push("key:"+keyCode)`可以将这次按键记录在录像中。
+
+!> 如果记录了按键，且使用道具的话，需要将useItem的第二个参数设为true，避免重复记录！
 
 可以使用altKey来判断Alt键是否被同时按下。
 
@@ -574,13 +406,9 @@ case 89: // 使用该按键的keyCode，比如Y键就是89
 
 ## 插件系统
 
-在H5中，提供了“插件”系统。具体参见“脚本编辑 - 插件编写”。
+在H5中，提供了“插件”系统。在V2.6中提供了一个插件下拉框，用户可以自行创建和写插件。
 
-![插件编写](./img/plugin.png)
-
-当我们在这上面定义了自己需要的函数（插件后），就可以通过任何方式进行调用。
-
-在这个插件编写的过程中，我们可以使用任何[常见API](api)里面的代码调用；也可以通过`core.insertAction`来插入自定义事件执行。
+在插件编写的过程中，我们可以使用任何[常见API](api)里面的代码调用；也可以通过`core.insertAction`来插入自定义事件执行。
 
 下面是一个很简单的例子，我编写一个插件函数，其效果是让勇士生命值变成原来的x倍，并令面前的图块消失。
 
@@ -599,11 +427,13 @@ this.myfunc = function(x) {
 
 网站上也提供了一个[插件库](https://h5mota.com/plugins/)，欢迎大家把自己写的插件进行共享。
 
+从V2.6开始，在插件中用`this.xxx`定义的函数将会被转发到core中。例如上述的`myfunc`除了`core.plugin.myfunc`外也可以直接`core.myfunc`调用。
+
+详见[函数的转发](script#函数的转发)。
+
 ## 标题界面事件化
 
-从V2.5.3开始，我们可以将标题界面的绘制和游戏开始用事件来完成。可以通过绘制画布、
-
-全塔属性，flags中的startUsingCanvas可以决定是否开启标题界面事件化。
+从V2.5.3开始，我们可以将标题界面的绘制和游戏开始用事件来完成。可以通过绘制画布、全塔属性，flags中的startUsingCanvas可以决定是否开启标题界面事件化。
 
 然后就可以使用“事件流”的形式来绘制标题界面、提供选项等等。
 
@@ -619,36 +449,70 @@ this.myfunc = function(x) {
 
 从V2.5.3以后，我们可以给手机端增加按键了，这样将非常有利于技能的释放。
 
-当用户在竖屏模式下点击工具栏，就会在工具栏按钮和快捷键模式之间进行切换。
+用户在菜单栏打开“拓展键盘”后，在竖屏模式下点击工具栏，就会在工具栏按钮和快捷键模式之间进行切换。
 
-切换到快捷键模式后，可以点1-7，分别等价于在电脑端按键1-7。
+切换到快捷键模式后，可以点1-8，分别等价于在电脑端按键1-8。
 
 可以在脚本编辑的onKeyUp中定义每个快捷键的使用效果，比如使用道具或释放技能等。
 
-默认值下，1使用破，2使用炸，3使用飞，4使用其他存在的道具，5-7未定义。可以相应修改成自己的效果。
+默认值下，1使用破，2使用炸，3使用飞，4使用其他存在的道具，5-8未定义。可以相应修改成自己的效果。
 
-也可以替换icons.png中的对应图标，以及修改main.js中`main.statusBar.image.btn1~7`中的onclick事件来自定义按钮和对应按键。
+也可以替换icons.png中的对应图标，以及修改main.js中`main.statusBar.image.btn1~8`中的onclick事件来自定义按钮和对应按键。
 
 非竖屏模式下、回放录像中、隐藏状态栏中，将不允许进行切换。
 
-## 自定义状态栏（新增显示项）
+## 自绘状态栏
+
+从V2.5.3开始允许自绘状态栏。要自绘状态栏，则应该打开全塔属性中的`statusCanvas`开关。
+
+自绘模式下，全塔属性中的`statusCanvasRowsOnMobile`将控制竖屏模式下的状态栏行数。
+
+开启自绘模式后，可以在脚本编辑的`drawStatusBar`中自行进行绘制。
+
+横屏模式下的状态栏为`129x416`（15x15则是`149x480`）；竖屏模式下的状态栏为`416*(32*rows+9)`（15x15是480）。
+
+具体可详见脚本编辑的`drawStatusBar`函数。
+
+## 自定义状态栏的显示项
 
 在V2.2以后，我们可以自定义状态栏背景图（全塔属性 - statusLeftBackground）等等。
 
 但是，如果我们还想新增其他项目的显示，比如攻速或者暴击，该怎么办？
 
-需要进行如下几个操作：
+我们可以[自绘状态栏](#自绘状态栏)，或者采用下面两个方式之一来新增。
+
+### 利用已有项目
+
+一个最为简单的方式是，直接利用已有项目。
+
+例如，如果本塔中没有技能栏，则可以使用技能栏所对应的显示项。
+
+1. 覆盖project/icons.png中技能的图标
+2. 打开全塔属性的enableSkill开关
+3. 在脚本编辑-updateStatusBar中可以直接替换技能栏的显示内容
+
+```
+	// 设置技能栏
+	if (core.flags.enableSkill) {
+		// 替换成你想显示的内容，比如你定义的一个flag:abc。
+		core.setStatusBarInnerHTML('skill', core.getFlag("abc", 0));
+	}
+```
+
+### 额外新增新项目
+
+如果是在需要给状态栏新定义项目，则需要进行如下几个操作：
 
 1. 定义ID；比如攻速我就定义speed，暴击可以简单的定义baoji；你也可以定义其他的ID，但是不能和已有的重复。这里以speed为例。
-2. 在index.html的statusBar中（44行起），进行该状态栏项的定义。仿照其他几项，插在其应当显示的位置，注意替换掉相应的ID。
+2. 在index.html的statusBar中（46行起），进行该状态栏项的定义。仿照其他几项，插在其应当显示的位置，注意替换掉相应的ID。
 ``` html
 <div class="status" id="speedCol">
     <img id="img-speed">
     <p class='statusLabel' id='speed'></p>
 </div>
 ```
-3. 在editor.html中的statusBar（323行起），仿照第二点同样添加；这一项如果不进行则会地图编辑器报错。editor-mobile.html同理。
-4. 使用便捷PS工具，打开icons.png，新增一行并将魔力的图标P上去；记下其索引比如37（从0开始数）。
+3. 在editor.html中的statusBar（383行起），仿照第二点同样添加；这一项如果不进行则会地图编辑器报错。editor-mobile.html同理。
+4. 使用便捷PS工具，打开project/icons.png，新增一行并将魔力的图标P上去；记下其索引比如37（从0开始数）。
 5. 在main.js的this.statusBar中增加图片、图标和内容的定义。
 ``` js
 this.statusBar = {
@@ -674,16 +538,14 @@ core.statusBar.speed.innerHTML = core.getFlag('speed', 0);
 
 ## 技能塔的支持
 
-其实，在HTML5上制作技能塔是完全可行的。
-
 要支持技能塔，可能需要如下几个方面：
+
+从V2.5开始，内置了"二倍斩"技能，可以仿照其制作自己的技能。
 
 - 魔力（和上限）的添加；技能的定义
 - 状态栏的显示
 - 技能的触发（按键与录像问题）
 - 技能的效果
-
-从V2.5开始，内置了"二倍斩"技能，可以仿照其制作自己的技能。
 
 ### 魔力的定义添加；技能的定义
 
@@ -697,6 +559,8 @@ core.statusBar.speed.innerHTML = core.getFlag('speed', 0);
 
 如果flag:skill不为0，则代表当前处于某个技能开启状态，且状态栏显示flag:skillName值。伤害计算函数中只需要对flag:skill进行处理即可。
 
+!> 关于魔力上限：样板中默认没有提供status:manamax
+
 ### 状态栏的显示
 
 从V2.5开始，魔力值和技能名的状态栏项目已经被添加，可以直接使用。
@@ -706,9 +570,14 @@ core.statusBar.speed.innerHTML = core.getFlag('speed', 0);
 ``` js
 // 设置魔力值
 if (core.flags.enableMana) {
-    // 也可以使用flag:manaMax来表示最大魔力值
-    // core.status.hero.mana = Math.max(core.status.hero.mana, core.getFlag('manaMax', 10));
-    // core.statusBar.mana.innerHTML = core.status.hero.mana + "/" + core.getFlag('manaMax', 10);
+    // status:manamax 只有在非负时才生效。
+    if (core.status.hero.manamax != null && core.status.hero.manamax >= 0) {
+        core.status.hero.mana = Math.min(core.status.hero.mana, core.status.hero.manamax);
+        core.setStatusBarInnerHTML('mana', core.status.hero.mana + "/" + core.status.hero.manamax);
+    }
+    else {
+        core.setStatusBarInnerHTML("mana", core.status.hero.mana);
+    }
 }
 // 设置技能栏
 if (core.flags.enableSkill) {
@@ -761,14 +630,15 @@ else { // 关闭技能
 case 87: // W：开启技能“二倍斩”
     // 检测技能栏是否开启，是否拥有“二倍斩”这个技能道具
     if (core.flags.enableSkill && core.hasItem('skill1')) {
-        core.useItem('skill1');
+        core.status.route.push("key:87");
+        core.useItem('skill1', true);
     }
     break;
 ```
 
 在勇士处于停止的条件下，按下W键时，判断技能的道具是否存在，如果存在再使用它。
 
-!> 1，2，3这三个键被默认绑定到了破炸飞；如果想用的话也是一样，只不过是把已有的实现进行替换。
+!> 由于现在手机端存在拓展键盘，也强烈建议直接覆盖1-8的使用效果，这样手机端使用也非常方便。
 
 ### 技能的效果
 
@@ -816,141 +686,6 @@ if (core.flags.enableSkill) {
 
 通过上述这几种方式，我们就能成功的让H5支持技能啦！
 
-## 成就系统
-
-我们还可以给HTML5魔塔增加成就系统。注意到成就是和游戏相关，因此需要使用getLocalStorage而不是getFlag判定。
-
-可将下面的代码粘贴到脚本编辑 - 插件编写中。
-
-``` js
-// 所有成就项的定义
-this.achievements = [
-    // 每行一个，分别定义flag、名称、描述、是否存在提示、成就点数
-    {"flag": "a1", "name": "成就1", "text": "成就1的达成描述", "hint": false, "point": 1},
-    // 可以继续往后新增其他的。
-];
-
-// 达成成就；如 core.plugin.achieve("a1") 即达成a1对应的成就
-this.achieve = function (flag) {
-    // 获得已达成的成就；如果跟存档而不是跟游戏则改成getFlag
-    var achieved = core.getLocalStorage("achievements", []);
-    var point = core.getLocalStorage("achievePoint", 0);
-    // 已经获得该成就
-    if (achieved.indexOf(flag)>=0) return;
-    // 尝试达成成就；找到对应的成就项
-    this.achievements.forEach(function (one) {
-        if (one.flag == flag) {
-            // 执行达成成就的操作；也可以自行在上面加上达成成就后的事件
-            core.insertAction("\t[达成成就："+one.name+"]"+one.text);
-            point += one.point || 0;
-        }
-    });
-    achieved.push(flag);
-    // 存入localStorage中；如果跟存档走则使用setFlag
-    core.setLocalStorage("achievements", achieved);
-    core.setLocalStorage("achievePoint", point);
-}
-
-// 获得所有成就说明；这里简单使用两个insertAction，你也可以修改成自己的实现
-// 简单一点的可以使用insertAction+剧情文本；稍微复杂一点的可以使用图片化文本等；更复杂的可以自绘UI。
-this.getAchievements = function () {
-    var achieved = core.getLocalStorage("achievements", []);
-    var yes = [], no = [];
-    // 对所有成就进行遍历
-    this.achievements.forEach(function (one) {
-        // 检测是否达成
-        if (achieved.indexOf(one.flag)>=0) {
-            yes.push(one.name+"："+one.text);
-        }
-        else {
-            no.push(one.name+"："+(one.hint?one.text:"达成条件请自行探索"));
-        }
-    });
-    core.insertAction([
-        "\t[已达成的成就]"+(yes.length==0?"暂无":yes.join("\n")),
-        "\t[尚未达成的成就]"+(no.length==0?"暂无":no.join("\n"))
-    ]);
-}
-```
-
-
-
-## 多角色的支持
-
-其实，我们的样板还能支持多角色的制作。比如《黑·白·间》之类的塔也是完全可以刻的。
-
-你只需要如下几步来达到多角色的效果。
-
-1. 每个角色弄一张行走图。相关信息参见[自定义事件：setHeroIcon](event#setHeroIcon：更改角色行走图)。
-2. [覆盖楼传事件](#覆盖楼传事件)，这样可以通过点工具栏的楼层传送按钮来切换角色。当然你也完全可以自己写一个道具，或[自定义快捷键](#自定义快捷键)来进行绑定。
-3. 将下述代码直接贴入脚本编辑 - 插件编写中。
-    ``` js
-    // 所有需要保存的内容；这些保存的内容不会多角色共用，在切换时会进行恢复。
-    // 你也可以自行新增或删除，比如不共用金币则可以加上"money"的初始化，不共用道具则可以加上"items"的初始化，
-    // 多角色共用hp的话则删除hp，等等。总之，不共用的属性都在这里进行定义就好。
-    var hero1 = { // 1号勇士（默认的是0号）
-        "floorId": "MT0", // 该角色楼层ID
-        "icon": "hero1.png", // 角色的行走图名称
-        "name": "1号角色",
-        "lv": 1,
-        "hp": 1000,
-        "atk": 10,
-        "def": 10,
-        "mdef": 0,
-        "loc": {"x": 0, "y": 0, "direction": "up"},
-        // 如果道具不共用就将下面这句话取消注释
-        // "items": {"keys":{"yellowKey":0,"blueKey":0,"redKey":0},"tools":{},"constants":{}}
-    }
-    // 也可以类似新增其他勇士
-    // var hero2 = { ...
-
-    var heroCount = 2; // 包含默认的在内总共多少个勇士，该值需手动修改。
-    
-    // 初始化该勇士
-    this.initHeros = function () {
-        core.status.hero.icon = "hero.png";
-        core.setFlag("hero1", core.clone(hero1)); // 将属性值存到变量中
-        // core.setFlag("hero2", core.clone(hero2)); // 更多的勇士...
-    }
-    
-    // 切换勇士
-    this.changeHero = function (toHeroId) {
-        var currHeroId = core.getFlag("heroId", 0); // 获得当前角色ID
-        if (!core.isset(toHeroId)) {
-            toHeroId = (currHeroId+1)%heroCount;
-        }
-        if (currHeroId == toHeroId) return;
-
-        var saveList = Object.keys(hero1);
-
-	    // 保存当前内容
-        var toSave = {};
-        saveList.forEach(function(name) {
-            if (name=='floorId') toSave[name] = core.status.floorId; // 楼层单独设置
-            else toSave[name] = core.clone(core.status.hero[name]); // 使用core.clone()来创建新对象
-        })
-    
-        core.setFlag("hero"+currHeroId, toSave); // 将当前角色信息进行保存
-        var data = core.getFlag("hero"+toHeroId); // 获得要切换的角色保存内容
-    
-        // 设置角色的属性值
-        saveList.forEach(function(name) {
-            if (name != 'floorId')
-                core.status.hero[name] = core.clone(data[name]);
-        })
-    
-        // 插入事件：改变角色行走图并进行楼层切换
-        core.insertAction([
-            {"type": "setHeroIcon", "name": data.icon||"hero.png"}, // 改变行走图
-            {"type": "changeFloor", "floorId": data.floorId, "loc": [data.loc.x, data.loc.y], 
-                "direction": data.loc.direction, "time": 0} // 楼层切换事件
-        ])
-        core.setFlag("heroId", toHeroId); // 保存切换到的角色ID
-    }
-    ```
-3. 在脚本编辑 - setInitData中加上`core.plugin.initHeros()`来初始化新勇士。（写在`core.events.afterLoadData()`后，反大括号之前。）
-4. 如果需要切换角色（包括事件、道具或者快捷键等），可以直接调用自定义JS脚本：`core.plugin.changeHero();`进行切换。也可以指定参数调用`core.plugin.changeHero(1)`来切换到某个具体的勇士上。
-
 ## 系统使用的flag变量
 
 众所周知，自定义flag变量都可以任意定义并取用（未定义直接取用的flag默认值为0）。
@@ -979,4 +714,4 @@ this.getAchievements = function () {
 
 ==========================================================================================
 
-[继续阅读附录：所有API列表](api)
+[继续阅读脚本](script)

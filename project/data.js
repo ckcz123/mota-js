@@ -78,6 +78,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"lv": 1,
 			"hpmax": 9999,
 			"hp": 1000,
+			"manamax": -1,
 			"mana": 0,
 			"atk": 100,
 			"def": 100,

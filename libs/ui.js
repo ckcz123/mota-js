@@ -23,12 +23,13 @@ ui.prototype._init = function () {
 
 ////////////////// 地图设置
 
-ui.prototype.getContextByName = function (canvas) {
-    if (typeof canvas == 'string') {
-        if (core.canvas[canvas])
-            canvas = core.canvas[canvas];
-        else if (core.dymCanvas[canvas])
-            canvas = core.dymCanvas[canvas];
+ui.prototype.getContextByName = function (name) {
+    var canvas = name;
+    if (typeof name == 'string') {
+        if (core.canvas[name])
+            canvas = core.canvas[name];
+        else if (core.dymCanvas[name])
+            canvas = core.dymCanvas[name];
     }
     if (canvas && canvas.canvas) {
         return canvas;
@@ -190,6 +191,36 @@ ui.prototype.calWidth = function (name, text, font) {
     return 0;
 }
 
+////// 字符串自动换行的分割 //////
+ui.prototype.splitLines = function (name, text, maxWidth, font) {
+    var ctx = this.getContextByName(name);
+    if (!ctx) return;
+    if (font) core.setFont(name, font);
+
+    var contents = [];
+    var last = 0;
+    for (var i = 0; i < text.length; i++) {
+        if (text.charAt(i) == '\n') {
+            contents.push(text.substring(last, i));
+            last = i + 1;
+        }
+        else if (text.charAt(i) == '\\' && text.charAt(i + 1) == 'n') {
+            contents.push(text.substring(last, i));
+            last = i + 2;
+        }
+        else {
+            var toAdd = text.substring(last, i + 1);
+            var width = core.calWidth(name, toAdd);
+            if (maxWidth && width > maxWidth) {
+                contents.push(text.substring(last, i));
+                last = i;
+            }
+        }
+    }
+    contents.push(text.substring(last));
+    return contents;
+}
+
 ////// 绘制一张图片 //////
 ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
     var ctx = this.getContextByName(name);
@@ -233,25 +264,23 @@ ui.prototype.clearUI = function () {
     clearInterval(core.status.event.interval);
     core.status.event.interval = null;
     core.status.boxAnimateObjs = [];
-    core.clearSelector();
-    core.clearMap('ui');
-    core.setAlpha('ui', 1);
-}
-
-////// 清除光标 //////
-ui.prototype.clearSelector = function () {
     if (core.dymCanvas._selector) core.deleteCanvas("_selector");
     core.clearMap('ui');
     core.setAlpha('ui', 1);
 }
 
 ////// 左上角绘制一段提示 //////
-ui.prototype.drawTip = function (text, itemIcon) {
+ui.prototype.drawTip = function (text, id) {
     var textX, textY, width, height;
     clearInterval(core.interval.tipAnimate);
     core.setFont('data', "16px Arial");
     core.setTextAlign('data', 'left');
-    if (!itemIcon) {
+    if (id != null) {
+        var info = core.getBlockInfo(id);
+        if (info == null || !info.image || info.height != 32) id = null;
+        else id = info;
+    }
+    if (!id) {
         textX = 16;
         textY = 18;
         width = textX + core.calWidth('data', text) + 16;
@@ -263,10 +292,10 @@ ui.prototype.drawTip = function (text, itemIcon) {
         width = textX + core.calWidth('data', text) + 8;
         height = 42;
     }
-    this._drawTip_animate(text, itemIcon, textX, textY, width, height);
+    this._drawTip_animate(text, id, textX, textY, width, height);
 }
 
-ui.prototype._drawTip_animate = function (text, itemIcon, textX, textY, width, height) {
+ui.prototype._drawTip_animate = function (text, info, textX, textY, width, height) {
     var alpha = 0, hide = false;
     core.interval.tipAnimate = window.setInterval(function () {
         if (hide) alpha -= 0.1;
@@ -274,8 +303,8 @@ ui.prototype._drawTip_animate = function (text, itemIcon, textX, textY, width, h
         core.clearMap('data', 5, 5, core.ui.PIXEL, height);
         core.setAlpha('data', alpha);
         core.fillRect('data', 5, 5, width, height, '#000');
-        if (itemIcon)
-            core.drawImage('data', core.material.images.items, 0, itemIcon * 32, 32, 32, 10, 8, 32, 32);
+        if (info)
+            core.drawImage('data', info.image, info.posX * 32, info.posY * 32, 32, 32, 10, 8, 32, 32);
         core.fillText('data', text, textX + 5, textY + 15, '#fff');
         core.setAlpha('data', 1);
         if (alpha > 0.6 || alpha < 0) {
@@ -507,13 +536,13 @@ ui.prototype.drawBackground = function (left, top, right, bottom, posInfo) {
 }
 
 ////// 计算有效文本框的宽度
-ui.prototype.calTextBoxWidth = function (ctx, content, min_width, max_width, font) {
+ui.prototype._calTextBoxWidth = function (ctx, content, min_width, max_width, font) {
     // 无限长度自动换行
     var allLines = core.splitLines(ctx, content, null, font);
 
     // 如果不存在手动换行，尽量调成半行形式
     if (allLines.length == 1) {
-        var w = core.calWidth(ctx, allLines[0]);
+        var w = core.calWidth(ctx, allLines[0]) + 10;
         if (w<min_width*2.3) return core.clamp(w / 1.4, min_width, max_width);
         if (w<max_width*2.2) return core.clamp(w / 2.4, min_width, max_width);
         return core.clamp(w / 3.4, min_width, max_width);
@@ -521,7 +550,7 @@ ui.prototype.calTextBoxWidth = function (ctx, content, min_width, max_width, fon
     // 存在手动换行：以最长的为准
     else {
         return core.clamp(allLines.reduce(function (pre, curr) {
-            return Math.max(pre, core.calWidth(ctx, curr))
+            return Math.max(pre, core.calWidth(ctx, curr) + 10);
         }, 0), min_width, max_width);
     }
 }
@@ -794,7 +823,7 @@ ui.prototype._drawTextBox_getHorizontalPosition = function (content, titleInfo, 
         var min_width = 220 - paddingLeft, max_width = validWidth;
         // 无行走图或头像，则可以适当缩小min_width
         if (titleInfo.image == null) min_width = 160;
-        validWidth = this.calTextBoxWidth('ui', realContent, min_width, max_width, this._buildFont());
+        validWidth = this._calTextBoxWidth('ui', realContent, min_width, max_width, this._buildFont());
         width = validWidth + paddingLeft + paddingRight;
         left = core.clamp(32 * posInfo.px + 16 - width / 2 - core.bigmap.offsetX, left, right - width);
         right = left + width;
@@ -1052,9 +1081,13 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
     core.lockControl();
     text = core.replaceText(text || "");
 
-    core.status.event.id = 'confirmBox';
-    core.status.event.data = {'yes': yesCallback, 'no': noCallback};
-    core.status.event.ui = text;
+    // 处理自定义事件
+    if (core.status.event.id != 'action') {
+        core.status.event.id = 'confirmBox';
+        core.status.event.ui = text;
+        core.status.event.data = {'yes': yesCallback, 'no': noCallback};
+    }
+
     if (core.status.event.selection != 0) core.status.event.selection = 1;
     this.clearUI();
 
@@ -1088,6 +1121,20 @@ ui.prototype._drawConfirmBox_getRect = function (contents) {
     var left = Math.min(this.HPIXEL - 40 - parseInt(max_width / 2), 100), right = this.PIXEL - left;
     var top = this.HPIXEL - 68 - (contents.length-1)*30, bottom = this.HPIXEL + 68;
     return { top: top, left: left, bottom: bottom, right: right, width: right - left, height: bottom - top };
+}
+
+////// 绘制等待界面 //////
+ui.prototype.drawWaiting = function(text) {
+    core.lockControl();
+    core.status.event.id = 'waiting';
+    core.clearUI();
+    text = core.replaceText(text || "");
+    var text_length = core.calWidth('ui', text, this._buildFont(19, true));
+    var width = Math.max(text_length + 80, 220), left = this.HPIXEL - parseInt(width / 2), right = left + width;
+    var top = this.HPIXEL - 48, height = 96, bottom = top + height;
+    this.drawBackground(left, top, right, bottom);
+    core.setTextAlign('ui', 'center');
+    core.fillText('ui', text, this.HPIXEL, top + 56, core.arrayToRGBA(core.status.textAttribute.text));
 }
 
 ////// 绘制系统设置界面 //////
@@ -1126,20 +1173,6 @@ ui.prototype.drawQuickShop = function () {
     });
     choices.push("返回游戏");
     this.drawChoices(null, choices);
-}
-
-////// 绘制等待界面 //////
-ui.prototype.drawWaiting = function(text) {
-    core.lockControl();
-    core.status.event.id = 'waiting';
-    core.clearSelector();
-    text = core.replaceText(text || "");
-    var text_length = core.calWidth('ui', text, this._buildFont(19, true));
-    var width = Math.max(text_length + 80, 220), left = this.HPIXEL - parseInt(width / 2), right = left + width;
-    var top = this.HPIXEL - 48, height = 96, bottom = top + height;
-    this.drawBackground(left, top, right, bottom);
-    core.setTextAlign('ui', 'center');
-    core.fillText('ui', text, this.HPIXEL, top + 56, core.arrayToRGBA(core.status.textAttribute.text));
 }
 
 ////// 绘制存档同步界面 //////
@@ -1190,22 +1223,22 @@ ui.prototype.drawGameInfo = function () {
 }
 
 ////// 绘制分页 //////
-ui.prototype.drawPagination = function (page, totalPage, top) {
+ui.prototype.drawPagination = function (page, totalPage, y) {
     // if (totalPage<page) totalPage=page;
     if (totalPage <= 1) return;
-    if (top == null) top = this.LAST;
+    if (y == null) y = this.LAST;
 
     core.setFillStyle('ui', '#DDDDDD');
     var length = core.calWidth('ui', page + " / " + page, this._buildFont(15, true));
 
     core.setTextAlign('ui', 'left');
-    core.fillText('ui', page + " / " + totalPage, parseInt((this.PIXEL - length) / 2), top*32+19);
+    core.fillText('ui', page + " / " + totalPage, parseInt((this.PIXEL - length) / 2), y*32+19);
 
     core.setTextAlign('ui', 'center');
     if (page > 1)
-        core.fillText('ui', '上一页', this.HPIXEL - 80, top*32+19);
+        core.fillText('ui', '上一页', this.HPIXEL - 80, y*32+19);
     if (page < totalPage)
-        core.fillText('ui', '下一页', this.HPIXEL + 80, top*32+19);
+        core.fillText('ui', '下一页', this.HPIXEL + 80, y*32+19);
 }
 
 ////// 绘制键盘光标 //////
@@ -1254,6 +1287,7 @@ ui.prototype.drawBook = function (index) {
 
     core.drawBoxAnimate();
     this.drawPagination(page, totalPage);
+    core.setTextAlign('ui', 'center');
     core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13,'#DDDDDD', this._buildFont(15, true));
 }
 
@@ -1632,7 +1666,7 @@ ui.prototype.drawMaps = function (index, x, y) {
         var offsetX = 32 * (data.x - this.HSIZE), offsetY = 32 * (data.y - this.HSIZE);
         var value = core.paint[data.floorId];
         if (value) value = lzw_decode(value).split(",");
-        core.utils.decodeCanvas(value, 32 * data.mw, 32 * data.mh);
+        core.utils._decodeCanvas(value, 32 * data.mw, 32 * data.mh);
         core.drawImage('ui', core.bigmap.tempCanvas.canvas, offsetX * 32, offsetY * 32,
             this.PIXEL, this.PIXEL, 0, 0, this.PIXEL, this.PIXEL);
     }
@@ -2358,13 +2392,13 @@ ui.prototype._drawPaint_draw = function () {
     core.status.event.id = 'paint';
     core.status.event.data = {"x": null, "y": null, "erase": false};
 
-    core.clearSelector();
+    core.clearUI();
     core.createCanvas('paint', -core.bigmap.offsetX, -core.bigmap.offsetY, 32*core.bigmap.width, 32*core.bigmap.height, 95);
 
     // 将已有的内容绘制到route上
     var value = core.paint[core.status.floorId];
     if (core.isset(value)) value = lzw_decode(value).split(",");
-    core.utils.decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
+    core.utils._decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
     core.drawImage('paint', core.bigmap.tempCanvas.canvas, 0, 0);
 
     core.setLineWidth('paint', 3);
@@ -2383,7 +2417,7 @@ ui.prototype._drawPaint_draw = function () {
 
 ////// 绘制帮助页面 //////
 ui.prototype.drawHelp = function () {
-    core.clearSelector();
+    core.clearUI();
     if (core.material.images.keyboard) {
         core.status.event.id = 'help';
         core.lockControl();

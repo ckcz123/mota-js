@@ -16,8 +16,7 @@ function core() {
         'ground': null,
         'items': {},
         'enemys': {},
-        'icons': {},
-        'events': {}
+        'icons': {}
     }
     this.timeout = {
         'tipTimeout': null,
@@ -84,8 +83,8 @@ function core() {
     this.domStyle = {
         scale: 1.0,
         isVertical: false,
-        toolbarBtn: false,
         showStatusBar: true,
+        toolbarBtn: false,
     }
     this.bigmap = {
         canvas: ["bg", "event", "event2", "fg", "damage"],
@@ -220,6 +219,7 @@ core.prototype.init = function (coreData, callback) {
     this._init_flags();
     this._init_platform();
     this._init_others();
+    this._initPlugins();
 
     core.loader._load(function () {
         core._afterLoadResources(callback);
@@ -342,9 +342,10 @@ core.prototype._init_others = function () {
 
 core.prototype._afterLoadResources = function (callback) {
     // 初始化地图
-    core.initStatus.maps = core.maps.initMaps(core.floorIds);
+    core.initStatus.maps = core.maps._initMaps();
     core.control._setRequestAnimationFrame();
-    core._initPlugins();
+    if (core.plugin._afterLoadResources)
+        core.plugin._afterLoadResources();
     core.showStartAnimate();
     if (callback) callback();
 }

@@ -308,7 +308,7 @@ control.prototype.showStartAnimate = function (noAnimate, callback) {
     this._showStartAnimate_resetDom();
     if (core.flags.startUsingCanvas || noAnimate)
         return this._showStartAnimate_finished(core.flags.startUsingCanvas, callback);
-    core.hide(core.dom.startTop, 20, function () {
+    core.hideWithAnimate(core.dom.startTop, 20, function () {
         core.control._showStartAnimate_finished(false, callback);
     });
 }
@@ -324,8 +324,8 @@ control.prototype._showStartAnimate_resetDom = function () {
     core.status.played = false;
     core.clearStatus();
     core.clearMap('all');
-    core.deleteAllCanvas();
     core.dom.musicBtn.style.display = 'block';
+    core.setMusicBtn();
     // 重置音量
     core.events.setVolume(1, 0);
     core.updateStatusBar();
@@ -340,37 +340,13 @@ control.prototype._showStartAnimate_finished = function (start, callback) {
 
 ////// 隐藏游戏开始界面 //////
 control.prototype.hideStartAnimate = function (callback) {
-    core.hide(core.dom.startPanel, 20, callback);
+    core.hideWithAnimate(core.dom.startPanel, 20, callback);
 }
 
 ////// 游戏是否已经开始 //////
 control.prototype.isPlaying = function() {
     return core.status.played;
 }
-
-////// 重新开始游戏；此函数将回到标题页面 //////
-control.prototype.restart = function() {
-    this.showStartAnimate();
-    core.playBgm(main.startBgm);
-}
-
-////// 询问是否需要重新开始 //////
-control.prototype.confirmRestart = function (fromSettings) {
-    core.status.event.selection = 1;
-    core.ui.drawConfirmBox("你确定要返回标题页面吗？", function () {
-        core.ui.closePanel();
-        core.restart();
-    }, function () {
-        if (fromSettings) {
-            core.status.event.selection = 3;
-            core.ui.drawSettings();
-        }
-        else {
-            core.ui.closePanel();
-        }
-    });
-}
-
 
 ////// 清除游戏状态和数据 //////
 control.prototype.clearStatus = function() {
@@ -424,7 +400,7 @@ control.prototype.stopAutomaticRoute = function () {
     core.status.automaticRoute.destX=null;
     core.status.automaticRoute.destY=null;
     core.status.automaticRoute.lastDirection = null;
-    core.stopHero();
+    core.status.heroStop = true;
     if (core.status.automaticRoute.moveStepBeforeStop.length==0)
         core.deleteCanvas('route');
 }
@@ -472,8 +448,10 @@ control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     if (this._setAutomaticRoute_isTurning(destX, destY, stepPostfix)) return;
     if (this._setAutomaticRoute_clickMoveDirectly(destX, destY, stepPostfix)) return;
     // 找寻自动寻路路线
-    var moveStep = core.automaticRoute(destX, destY).concat(stepPostfix);
-    if (moveStep.length == 0) return core.deleteCanvas('route');
+    var moveStep = core.automaticRoute(destX, destY);
+    if (moveStep.length == 0 && (destX != core.status.hero.loc.x || destY != core.status.hero.loc.y || stepPostfix.length == 0))
+        return;
+    moveStep = moveStep.concat(stepPostfix);
     core.status.automaticRoute.destX=destX;
     core.status.automaticRoute.destY=destY;
     this._setAutomaticRoute_drawRoute(moveStep);
@@ -659,7 +637,7 @@ control.prototype._moveAction_moving = function (callback) {
         core.updateStatusBar();
 
         // 检查该点是否是滑冰
-        if (core.getBgFgNumber('bg') == 167) {
+        if (core.getBgNumber() == 167) {
             core.insertAction("滑冰事件", null, null, null, true);
         }
 
@@ -747,11 +725,6 @@ control.prototype.waitHeroToStop = function(callback) {
             callback();
         }, 30);
     }
-}
-
-////// 停止勇士的移动状态 //////
-control.prototype.stopHero = function () {
-    core.status.heroStop = true;
 }
 
 ////// 转向 //////
@@ -1272,7 +1245,12 @@ control.prototype._doReplayAction = function (action) {
 control.prototype._replay_finished = function () {
     core.status.replay.replaying = false;
     core.status.event.selection = 0;
-    core.ui.drawConfirmBox("录像播放完毕，你想退出播放吗？", function () {
+    var str = "录像播放完毕，你想退出播放吗？";
+    if (core.status.route.length != core.status.replay.totalList.length
+        || core.subarray(core.status.route, core.status.replay.totalList) == null) {
+        str = "录像播放完毕，但记录不一致。\n请检查录像播放时的二次记录问题。\n你想退出播放吗？";
+    }
+    core.ui.drawConfirmBox(str, function () {
         core.ui.closePanel();
         core.stopReplay(true);
     }, function () {
@@ -1460,6 +1438,7 @@ control.prototype._replayAction_moveDirectly = function (action) {
     // 忽略连续的瞬移事件
     while (core.status.replay.toReplay.length>0 &&
         core.status.replay.toReplay[0].indexOf('move:')==0) {
+            core.status.route.push(action);
             action = core.status.replay.toReplay.shift();
     }
 
@@ -1615,13 +1594,15 @@ control.prototype._doSL_replayLoad_afterGet = function (id, data) {
 ////// 同步存档到服务器 //////
 control.prototype.syncSave = function (type) {
     core.ui.drawWaiting("正在同步，请稍后...");
-    core.getAllSaves(type=='all'?null:core.saves.saveIndex, function (saves) {
-        if (!saves) return core.drawText("没有要同步的存档");
+    var callback = function (saves) {
         core.control._syncSave_http(type, saves);
-    })
+    }
+    if (type == 'all') core.getAllSaves(callback);
+    else core.getSave(core.saves.saveIndex, callback);
 }
 
 control.prototype._syncSave_http = function (type, saves) {
+    if (!saves) return core.drawText("没有要同步的存档");
     var formData = new FormData();
     formData.append('type', 'save');
     formData.append('name', core.firstData.name);
@@ -1635,7 +1616,7 @@ control.prototype._syncSave_http = function (type, saves) {
         else {
             core.drawText((type=='all'?"所有存档":"存档"+core.saves.saveIndex)+"同步成功！\n\n您的存档编号： "
                 +response.code+"\n您的存档密码： "+response.msg
-                +"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。")
+                +"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。\n\r[yellow]另外请注意，存档同步只会保存一个月的时间。\r")
         }
     }, function (e) {
         core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+e);
@@ -1746,8 +1727,7 @@ control.prototype.getSaves = function (ids, callback) {
     }
 }
 
-control.prototype.getAllSaves = function (id, callback) {
-    if (id != null) return this.getSave(id, callback);
+control.prototype.getAllSaves = function (callback) {
     var ids = Object.keys(core.saves.ids).filter(function(x){return x!=0;})
         .sort(function(a,b) {return a-b;}), saves = [];
     this.getSaves(ids, function (data) {
@@ -1790,7 +1770,7 @@ control.prototype.hasSave = function (index) {
     return core.saves.ids[index] || false;
 }
 
-////// 删除一个或多个存档
+////// 删除某个存档
 control.prototype.removeSave = function (index, callback) {
     if (index == 0 || index == "autoSave") {
         index = "autoSave";
@@ -1824,8 +1804,6 @@ control.prototype._updateFavoriteSaves = function () {
     core.setLocalStorage("favorite", core.saves.favorite);
     core.setLocalStorage("favoriteName", core.saves.favoriteName);
 }
-
-////// 加载某个存档
 
 // ------ 属性，状态，位置，buff，变量，锁定控制等 ------ //
 
@@ -2017,7 +1995,7 @@ control.prototype._setWeather_createNodes = function (type, level) {
 }
 
 ////// 更改画面色调 //////
-control.prototype.setFg = function(color, time, callback) {
+control.prototype.setCurtain = function(color, time, callback) {
     if (time == null) time=750;
     if (time<=0) time=0;
     if (!core.status.curtainColor)
@@ -2035,10 +2013,10 @@ control.prototype.setFg = function(color, time, callback) {
         return;
     }
 
-    this._setFg_animate(core.status.curtainColor, color, time, callback);
+    this._setCurtain_animate(core.status.curtainColor, color, time, callback);
 }
 
-control.prototype._setFg_animate = function (nowColor, color, time, callback) {
+control.prototype._setCurtain_animate = function (nowColor, color, time, callback) {
     var per_time = 10, step = parseInt(time / per_time);
     var animate = setInterval(function() {
         nowColor = [
@@ -2066,8 +2044,8 @@ control.prototype.screenFlash = function (color, time, times, callback) {
     times = times || 1;
     time = time / 3;
     var nowColor = core.clone(core.status.curtainColor);
-    core.setFg(color, time, function() {
-        core.setFg(nowColor, time * 2, function() {
+    core.setCurtain(color, time, function() {
+        core.setCurtain(nowColor, time * 2, function() {
             if (times > 1)
                 core.screenFlash(color, time * 3, times - 1, callback);
             else {
@@ -2203,8 +2181,8 @@ control.prototype.stopSound = function () {
     for (var i in core.musicStatus.playingSounds) {
         var source = core.musicStatus.playingSounds[i];
         try {
-            if (source[i].stop) source[i].stop();
-            else if (source[i].noteOff) source[i].noteOff();
+            if (source.stop) source.stop();
+            else if (source.noteOff) source.noteOff();
         }
         catch (e) {
             main.log(e);
@@ -2353,10 +2331,11 @@ control.prototype.updateGlobalAttribute = function (name) {
                 core.dom.statusBar.style.borderTop = border;
                 core.dom.statusBar.style.borderLeft = border;
                 core.dom.statusBar.style.borderRight = core.domStyle.isVertical?border:'';
+                core.dom.statusBar.style.borderBottom = core.domStyle.isVertical?'':border;
                 core.dom.gameDraw.style.border = border;
-                core.dom.toolBar.style.borderBottom = border;
                 core.dom.toolBar.style.borderLeft = border;
                 core.dom.toolBar.style.borderRight = core.domStyle.isVertical?border:'';
+                core.dom.toolBar.style.borderBottom = core.domStyle.isVertical?border:'';
                 break;
             }
         case 'statusBarColor':
@@ -2378,7 +2357,7 @@ control.prototype.updateGlobalAttribute = function (name) {
     }
 }
 
-////// 改变工具栏为按钮1-7 //////
+////// 改变工具栏为按钮1-8 //////
 control.prototype.setToolbarButton = function (useButton) {
     if (!core.domStyle.showStatusBar) {
         // 隐藏状态栏时检查竖屏
@@ -2544,7 +2523,7 @@ control.prototype._resize_gameGroup = function (obj) {
     floorMsgGroup.style.color = obj.globalAttribute.floorChangingTextColor;
     // musicBtn
     if (core.domStyle.isVertical || core.domStyle.scale < 1) {
-        core.dom.musicBtn.style.right = core.dom.musicBtn.style.height = "3px";
+        core.dom.musicBtn.style.right = core.dom.musicBtn.style.bottom = "3px";
     }
     else {
         core.dom.musicBtn.style.right = (obj.clientWidth - totalWidth) / 2 + "px";
@@ -2588,7 +2567,7 @@ control.prototype._resize_statusBar = function (obj) {
     }
     else {
         statusBar.style.width = obj.BAR_WIDTH * core.domStyle.scale + "px";
-        statusBar.style.height = obj.outerSize - 3 + "px";
+        statusBar.style.height = obj.outerSize + "px";
         statusBar.style.background = obj.globalAttribute.statusLeftBackground;
         // --- 计算文字大小
         statusBar.style.fontSize = 16 * Math.min(1, (core.__HALF_SIZE__ + 3) / obj.count) * core.domStyle.scale + "px";
@@ -2596,6 +2575,7 @@ control.prototype._resize_statusBar = function (obj) {
     statusBar.style.display = 'block';
     statusBar.style.borderTop = statusBar.style.borderLeft = obj.border;
     statusBar.style.borderRight = core.domStyle.isVertical ? obj.border : '';
+    statusBar.style.borderBottom = core.domStyle.isVertical ? '' : obj.border;
     // 自绘状态栏
     if (core.domStyle.isVertical) {
         core.dom.statusCanvas.style.width = obj.outerSize - 6 + "px";
@@ -2651,8 +2631,8 @@ control.prototype._resize_toolBar = function (obj) {
         toolBar.style.background = 'transparent';
     }
     toolBar.style.display = 'block';
-    toolBar.style.borderLeft = toolBar.style.borderBottom = obj.border;
-    toolBar.style.borderRight = core.domStyle.isVertical ? obj.border : '';
+    toolBar.style.borderLeft = obj.border;
+    toolBar.style.borderRight = toolBar.style.borderBottom = core.domStyle.isVertical ? obj.border : '';
     toolBar.style.fontSize = 16 * core.domStyle.scale + "px";
 }
 

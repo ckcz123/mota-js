@@ -16,7 +16,7 @@
 + [ ] editor 执行初始化流程加组合各组件
 + [ ] 原editor_mode 移除
 + [ ] 原vm 移除
-+ [ ] \*comment.js 表格注释与结构, 移至comment/\*comment.js
++ [x] \*comment.js 表格注释与结构, 移至table/\*comment.js
 
 ## 对象结构
 

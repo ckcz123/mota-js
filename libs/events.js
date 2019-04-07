@@ -377,7 +377,7 @@ events.prototype.openDoor = function (x, y, needKey, callback) {
 events.prototype._openDoor_check = function (id, x, y, needKey) {
     // 是否存在门或暗墙
     if (!core.terrainExists(x, y, id) || !(id.endsWith("Door") || id.endsWith("Wall"))
-        || !core.material.icons.animates[id]) {
+        || core.material.icons.animates[id] == null) {
         core.clearContinueAutomaticRoute();
         return false;
     }
@@ -431,6 +431,7 @@ events.prototype._sys_getItem = function (data, callback) {
 
 ////// 获得某个物品 //////
 events.prototype.getItem = function (id, num, x, y, callback) {
+    if (num == null) num = 1;
     num = num || 1;
     var itemCls = core.material.items[id].cls;
     core.items.getItemEffect(id, num);
@@ -1683,6 +1684,7 @@ events.prototype.load = function (fromUserAction) {
     if (!core.isPlaying()) {
         core.dom.startPanel.style.display = 'none';
         core.clearStatus();
+        core.clearMap('all');
         core.status.event = {'id': 'load', 'data': null};
         core.status.lockControl = true;
         core.ui.drawSLPanel(10*page+offset);

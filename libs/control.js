@@ -323,6 +323,7 @@ control.prototype._showStartAnimate_resetDom = function () {
     core.dom.levelChooseButtons.style.display = 'none';
     core.status.played = false;
     core.clearStatus();
+    core.clearMap('all');
     core.dom.musicBtn.style.display = 'block';
     core.setMusicBtn();
     // 重置音量
@@ -360,7 +361,6 @@ control.prototype.clearStatus = function() {
     }
     core.status = {};
     core.clearStatusBar();
-    core.clearMap('all');
     core.deleteAllCanvas();
     core.status.played = false;
 }
@@ -856,17 +856,20 @@ control.prototype.updateViewport = function() {
 
 ////// 获得勇士面对位置的x坐标 //////
 control.prototype.nextX = function(n) {
-    return core.getHeroLoc('x')+core.utils.scan[core.getHeroLoc('direction')].x*(n||1);
+    if (n == null) n = 1;
+    return core.getHeroLoc('x')+core.utils.scan[core.getHeroLoc('direction')].x*n;
 }
 
 ////// 获得勇士面对位置的y坐标 //////
 control.prototype.nextY = function (n) {
-    return core.getHeroLoc('y')+core.utils.scan[core.getHeroLoc('direction')].y*(n||1);
+    if (n == null) n = 1;
+    return core.getHeroLoc('y')+core.utils.scan[core.getHeroLoc('direction')].y*n;
 }
 
 ////// 某个点是否在勇士旁边 //////
-control.prototype.nearHero = function (x, y) {
-    return Math.abs(x-core.getHeroLoc('x'))+Math.abs(y-core.getHeroLoc('y'))<=1;
+control.prototype.nearHero = function (x, y, n) {
+    if (n == null) n = 1;
+    return Math.abs(x-core.getHeroLoc('x'))+Math.abs(y-core.getHeroLoc('y'))<=n;
 }
 
 ////// 聚集跟随者 //////
@@ -2637,7 +2640,7 @@ control.prototype._resize_toolBar = function (obj) {
 }
 
 control.prototype._resize_tools = function (obj) {
-    var toolsHeight = 32 * core.domStyle.scale * (core.domStyle.isVertical ? 0.95 : 1);
+    var toolsHeight = 32 * core.domStyle.scale * (core.domStyle.isVertical && !obj.is15x15 ? 0.95 : 1);
     var toolsMarginLeft;
     if (core.domStyle.isVertical)
         toolsMarginLeft = (core.__HALF_SIZE__ - 3) * 3 * core.domStyle.scale;

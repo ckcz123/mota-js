@@ -324,6 +324,7 @@ action
     |   win_s
     |   lose_s
     |   if_s
+    |   if_1_s
     |   switch_s
     |   while_s
     |   break_s
@@ -1588,6 +1589,20 @@ var code = ['{"type": "if", "condition": "',expression_0,'",\n',
 return code;
 */;
 
+if_1_s
+    :   '如果' ':' expression BGNL? Newline action+  BEND Newline
+
+
+/* if_1_s
+tooltip : if: 条件判断
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=if%EF%BC%9A%E6%9D%A1%E4%BB%B6%E5%88%A4%E6%96%AD
+colour : this.eventColor
+var code = ['{"type": "if", "condition": "',expression_0,'",\n',
+    '"true": [\n',action_0,'],\n',
+'},\n'].join('');
+return code;
+*/;
+
 switch_s
     :   '多重分歧 条件判定' ':' expression BGNL? Newline switchCase+ BEND Newline
 
@@ -2583,12 +2598,19 @@ ActionParser.prototype.parseAction = function() {
         data.text,this.next]);
       break;
     case "if": // 条件判断
-      this.next = MotaActionBlocks['if_s'].xmlText([
-        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
-        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
-        this.insertActionList(data["true"]),
-        this.insertActionList(data["false"]),
-        this.next]);
+      if (data["false"]) {
+        this.next = MotaActionBlocks['if_s'].xmlText([
+          this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+          this.insertActionList(data["true"]),
+          this.insertActionList(data["false"]),
+          this.next]);
+      }
+      else {
+        this.next = MotaActionBlocks['if_1_s'].xmlText([
+          this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+          this.insertActionList(data["true"]),
+          this.next]);
+      }
       break;
     case "confirm": // 显示确认框
       this.next = MotaActionBlocks['confirm_s'].xmlText([

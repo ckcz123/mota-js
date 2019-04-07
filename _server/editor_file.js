@@ -17,7 +17,7 @@ editor_file = function (editor, callback) {
             if (window.location.href.indexOf('_server') !== -1)
                 script.src = key + '.js';
             else
-                script.src = '_server/' + key + '.js';
+                script.src = '_server/table/' + key + '.js';
             document.body.appendChild(script);
             script.onload = function () {
                 editor_file[value] = eval(key.replace('.', '_') + '_c456ea59_6018_45ef_8bcc_211a24c627dc');
@@ -941,11 +941,7 @@ editor_file = function (editor, callback) {
         return formatArrStr;
     }
 
-    var encode = function (str) {
-        return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
-            return String.fromCharCode(parseInt(p1, 16))
-        }))
-    }
+    var encode = editor.util.encode64
 
     var alertWhenCompress = function(){
         if(editor.useCompress===true){

@@ -394,12 +394,12 @@ core.updateViewport()
 根据大地图的偏移量来更新窗口的视野范围。
 
 
-core.nextX(n) / core.nextY(m)
+core.nextX(n) / core.nextY(n)
 获得勇士面对的第n个位置的横纵坐标。n可不填，默认为1。
 
 
-core.nearHero(x, y)
-判定某个点是否和勇士的距离不大于1。
+core.nearHero(x, y, n)
+判定某个点是否和勇士的距离不大于n。n可不填，默认为1。
 
 
 core.gatherFollowers()
@@ -775,8 +775,9 @@ core.getCurrentEnemys(floorId)
 另外值得注意的是，如果设置了某个怪物的displayIdInBook，则会返回对应的怪物。
 
 
-core.hasEnemyLeft(floorId)
-检查某个楼层是否还有剩余的怪物。等价于 core.getCurrentEnemys(floorId).length > 0
+core.hasEnemyLeft(enemyId, floorId)
+检查某个楼层是否还有剩余的（指定）怪物。floorId为楼层ID，可忽略表示当前楼层。
+enemyId如果不填或null则检查是否剩余任何怪物，否则只检查是否剩余指定的某类怪物。
 ```
 
 ## events.js
@@ -1743,7 +1744,7 @@ config为绘制的配置项，目前可以包括如下几项：
  - align：文字对齐方式，仅在maxWidth设置时有效，默认为'left'。
  - fontSize：字体大小，如果不设置则使用剧情文本设置中的正文字体大小。
  - lineHeight：绘制的行距值，如果不设置则使用fontSize*1.3（即1.3被行距）。
- - time：打字机效果。如果此项不为0，则会用打字机效果逐个字进行绘制，并设置core.status.event.interval定时器。
+ - time：打字机效果。若不为0，则会逐个字进行绘制，并设置core.status.event.interval定时器。
 
 
 core.drawTextBox(content, showAll)
@@ -1755,7 +1756,7 @@ showAll可选，如果为true则不会使用打字机效果而全部显示，主
 
 
 core.drawScrollText(content, time, lineHeight, callback)
-绘制一个滚动字幕。content为绘制内容，time为总滚动时间（默认为5000），lineHeight为行距比例（默认为1.4）。
+绘制一个滚动字幕。content为绘制内容，time为总时间（默认为5000），lineHeight为行距比例（默认为1.4）。
 滚动字幕将绘制在UI上，支持所有的文字效果（如\n，${}，\r，\\i等），但不支持\t和\b效果。
 可以通过剧情文本设置中的align控制是否居中绘制，offset控制其距离左边的偏移量。
 

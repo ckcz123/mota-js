@@ -891,6 +891,7 @@ actions.prototype._clickAction = function (x, y) {
                 core.doAction();
             }
         }
+        return;
     }
 
     if (core.status.event.data.type == 'confirm') {
@@ -904,6 +905,7 @@ actions.prototype._clickAction = function (x, y) {
             core.insertAction(core.status.event.ui.no);
             core.doAction();
         }
+        return;
     }
 }
 
@@ -911,10 +913,12 @@ actions.prototype._clickAction = function (x, y) {
 actions.prototype._keyDownAction = function (keycode) {
     if (core.status.event.data.type == 'choices') {
         this._keyDownChoices(keycode);
+        return;
     }
     if (core.status.event.data.type == 'confirm' && (keycode == 37 || keycode == 39)) {
         core.status.event.selection = 1 - core.status.event.selection;
         core.drawConfirmBox(core.status.event.ui.text);
+        return;
     }
 }
 
@@ -984,6 +988,7 @@ actions.prototype._clickBook = function (x, y) {
         var index = this.HSIZE * page + parseInt(y / 2);
         core.ui.drawBook(index);
         core.ui.drawBookDetail(index);
+        return;
     }
     return;
 }
@@ -1127,17 +1132,20 @@ actions.prototype._clickViewMaps = function (x, y) {
             index++;
         if (index < core.floorIds.length)
             core.ui.drawMaps(index);
+        return;
     }
-    else if (y >= this.HSIZE + 2 && (mh == this.SIZE || (x >= per && x <= this.LAST - per))) {
+    if (y >= this.HSIZE + 2 && (mh == this.SIZE || (x >= per && x <= this.LAST - per))) {
         index--;
         while (index >= 0 && index != now && core.status.maps[core.floorIds[index]].cannotViewMap)
             index--;
         if (index >= 0)
             core.ui.drawMaps(index);
+        return;
     }
-    else if (x >= per && x <= this.LAST - per && y >= this.HSIZE - 1 && y <= this.HSIZE + 1) {
+    if (x >= per && x <= this.LAST - per && y >= this.HSIZE - 1 && y <= this.HSIZE + 1) {
         core.clearMap('data');
         core.ui.closePanel();
+        return;
     }
 }
 
@@ -1243,7 +1251,9 @@ actions.prototype._clickQuickShop = function (x, y) {
         // 离开
         else if (y == topIndex + keys.length)
             core.ui.closePanel();
+        return;
     }
+    return;
 }
 
 ////// 快捷商店界面时，放开某个键的操作 //////

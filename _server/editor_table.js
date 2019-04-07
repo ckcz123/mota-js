@@ -121,7 +121,7 @@ editor_table_wrapper = function (editor) {
                 //    事实上能执行到这一步工程没崩掉打不开,就继续吧..
                 if (keysForTableOrder[ii] === voidMark) {
                     if (typeof id_815975ad_ee6f_4684_aac7_397b7e392702 === "undefined") {
-                        alert('comment和data不匹配,请在群 HTML5造塔技术交流群 959329661 内反馈')
+                        // alert('comment和data不匹配,请在群 HTML5造塔技术交流群 959329661 内反馈')
                         console.error('comment和data不匹配,请在群 HTML5造塔技术交流群 959329661 内反馈')
                         id_815975ad_ee6f_4684_aac7_397b7e392702 = 1;
                     }

@@ -11,14 +11,14 @@ editor_multi = function () {
         tabSize: 4,
         indentWithTabs: true,
         smartIndent: true,
-        mode: {name: "javascript", globalVars: true, localVars: true},
+        mode: { name: "javascript", globalVars: true, localVars: true },
         lineWrapping: true,
         continueComments: "Enter",
         gutters: ["CodeMirror-lint-markers"],
         lint: true,
         autocomplete: true,
         autoCloseBrackets: true,
-        highlightSelectionMatches: {showToken: /\w/, annotateScrollbar: true}
+        highlightSelectionMatches: { showToken: /\w/, annotateScrollbar: true }
     });
 
     editor_multi.codeEditor = codeEditor;
@@ -26,9 +26,9 @@ editor_multi = function () {
     codeEditor.on("keyup", function (cm, event) {
         if (codeEditor.getOption("autocomplete") && !event.ctrlKey && (
             (event.keyCode >= 65 && event.keyCode <= 90) ||
-                (!event.shiftKey && event.keyCode == 190) || (event.shiftKey && event.keyCode == 189))){
+            (!event.shiftKey && event.keyCode == 190) || (event.shiftKey && event.keyCode == 189))) {
             try {
-                CodeMirror.commands.autocomplete(cm, null, {completeSingle: false});
+                CodeMirror.commands.autocomplete(cm, null, { completeSingle: false });
             } catch (e) {
             }
         }
@@ -39,7 +39,7 @@ editor_multi = function () {
     editor_multi.lintAutocomplete = false;
 
     editor_multi.show = function () {
-        if (typeof(selectBox) !== typeof(undefined)) selectBox.isSelected(false);
+        if (typeof (selectBox) !== typeof (undefined)) selectBox.isSelected(false);
         var valueNow = codeEditor.getValue();
         //try{eval('function _asdygakufyg_() { return '+valueNow+'\n}');editor_multi.lintAutocomplete=true;}catch(ee){}
         if (valueNow.slice(0, 8) === 'function') editor_multi.lintAutocomplete = true;
@@ -60,7 +60,7 @@ editor_multi = function () {
     }
 
     editor_multi.indent = function (field) {
-        if (typeof(editor) !== typeof(undefined) && editor && editor.mode && editor.mode.indent) return editor.mode.indent(field);
+        if (typeof (editor) !== typeof (undefined) && editor && editor.mode && editor.mode.indent) return editor.mode.indent(field);
         return '\t';
     }
 
@@ -102,7 +102,7 @@ editor_multi = function () {
             eval('var tobj=' + (input.value || 'null'));
             var tmap = {};
             var tstr = JSON.stringify(tobj, function (k, v) {
-                if (typeof(v) === typeof('') && v.slice(0, 8) === 'function') {
+                if (typeof (v) === typeof ('') && v.slice(0, 8) === 'function') {
                     var id_ = editor.util.guid();
                     tmap[id_] = v.toString();
                     return id_;
@@ -128,13 +128,22 @@ editor_multi = function () {
             editor_multi.id = '';
             return;
         }
-        // ----- 自动格式化
-        _format();
+
         if (editor_multi.id === 'callFromBlockly') {
+            // ----- 自动格式化
+            _format();
             editor_multi.id = '';
             editor_multi.multiLineDone();
             return;
         }
+
+        if (editor_multi.id === 'importFile') {
+            _format();
+            editor_multi.id = '';
+            editor_multi.writeFileDone();
+            return;
+        }
+
         var setvalue = function (value) {
             var thisTr = document.getElementById(editor_multi.id);
             editor_multi.id = '';
@@ -159,6 +168,8 @@ editor_multi = function () {
             editor_multi.hide();
             input.onchange();
         }
+        // ----- 自动格式化
+        _format();
         setvalue(codeEditor.getValue() || '');
     }
 
@@ -177,6 +188,49 @@ editor_multi = function () {
         if (!multiLineArgs[0] || !multiLineArgs[1] || !multiLineArgs[2]) return;
         var newvalue = codeEditor.getValue() || '';
         multiLineArgs[2](newvalue, multiLineArgs[0], multiLineArgs[1])
+    }
+
+    var _fileValues = ['']
+    editor_multi.importFile = function (filename) {
+        editor_multi.id = 'importFile'
+        _fileValues[0] = filename
+        codeEditor.setValue('loading')
+        editor_multi.show();
+        fs.readFile(filename, 'base64', function (e, d) {
+            if (e) {
+                codeEditor.setValue('加载文件失败:\n' + e)
+                editor_multi.id = ''
+                return;
+            }
+            var str = editor.util.decode64(d)
+            codeEditor.setValue(str)
+            _fileValues[1] = str
+        })
+    }
+
+    editor_multi.writeFileDone = function () {
+        fs.writeFile(_fileValues[0], editor.util.encode64(codeEditor.getValue() || ''), 'base64', function (err, data) {
+            if (err) printe('文件写入失败,请手动粘贴至' + _fileValues[0] + '\n' + err);
+            else {
+                editor_multi.hide();
+                printf(_fileValues[0] + " 写入成功，F5刷新后生效");
+            }
+        });
+    }
+
+    editor_multi.editCommentJs = function (mod) {
+        var dict = {
+            loc: '_server/table/comment.js',
+            enemyitem: '_server/table/comment.js',
+            floor: '_server/table/comment.js',
+            tower: '_server/table/data.comment.js',
+            functions: '_server/table/functions.comment.js',
+            commonevent: '_server/table/events.comment.js',
+            plugins: '_server/table/plugins.comment.js',
+        }
+        editor_multi.lintAutocomplete = true
+        editor_multi.setLint()
+        editor_multi.importFile(dict[mod])
     }
 
     return editor_multi;

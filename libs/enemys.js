@@ -359,6 +359,8 @@ enemys.prototype._getCurrentEnemys_sort = function (enemys) {
     });
 }
 
-enemys.prototype.hasEnemyLeft = function (floorId) {
-    return core.getCurrentEnemys(floorId).length > 0;
+enemys.prototype.hasEnemyLeft = function (enemyId, floorId) {
+    return core.getCurrentEnemys(floorId).filter(function (enemy) {
+        return enemyId == null || enemy.id == enemyId;
+    }).length > 0;
 }

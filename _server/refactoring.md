@@ -16,7 +16,7 @@
 + [ ] editor 执行初始化流程加组合各组件
 + [ ] 原editor_mode 移除
 + [ ] 原vm 移除
-+ [ ] \*comment.js 表格注释与结构, 移至comment/\*comment.js
++ [x] \*comment.js 表格注释与结构, 移至table/\*comment.js
 
 ## 对象结构
 
@@ -85,7 +85,7 @@ editor: {
 
 + [ ] 画地图也自动保存
 
-+ [ ] 修改系统的触发器（下拉菜单增加新项）  
++ [x] 修改系统的触发器（下拉菜单增加新项）  
   在编辑器修改`comment.js`：现场发readFile请求读文件，然后开脚本编辑器进行编辑
 
 + [ ] ? 删除注册项/修改图块ID

@@ -382,6 +382,9 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
         return false;
     }
 
+    if (id == 'steelDoor' && core.flags.steelDoorWithoutKey)
+        needKey = false;
+
     if (needKey && id.endsWith("Door")) {
         var key = id.replace("Door", "Key");
         if (!core.hasItem(key)) {

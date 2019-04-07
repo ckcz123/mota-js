@@ -856,17 +856,20 @@ control.prototype.updateViewport = function() {
 
 ////// 获得勇士面对位置的x坐标 //////
 control.prototype.nextX = function(n) {
-    return core.getHeroLoc('x')+core.utils.scan[core.getHeroLoc('direction')].x*(n||1);
+    if (n == null) n = 1;
+    return core.getHeroLoc('x')+core.utils.scan[core.getHeroLoc('direction')].x*n;
 }
 
 ////// 获得勇士面对位置的y坐标 //////
 control.prototype.nextY = function (n) {
-    return core.getHeroLoc('y')+core.utils.scan[core.getHeroLoc('direction')].y*(n||1);
+    if (n == null) n = 1;
+    return core.getHeroLoc('y')+core.utils.scan[core.getHeroLoc('direction')].y*n;
 }
 
 ////// 某个点是否在勇士旁边 //////
-control.prototype.nearHero = function (x, y) {
-    return Math.abs(x-core.getHeroLoc('x'))+Math.abs(y-core.getHeroLoc('y'))<=1;
+control.prototype.nearHero = function (x, y, n) {
+    if (n == null) n = 1;
+    return Math.abs(x-core.getHeroLoc('x'))+Math.abs(y-core.getHeroLoc('y'))<=n;
 }
 
 ////// 聚集跟随者 //////

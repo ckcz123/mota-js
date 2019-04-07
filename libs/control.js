@@ -2637,7 +2637,7 @@ control.prototype._resize_toolBar = function (obj) {
 }
 
 control.prototype._resize_tools = function (obj) {
-    var toolsHeight = 32 * core.domStyle.scale * (core.domStyle.isVertical ? 0.95 : 1);
+    var toolsHeight = 32 * core.domStyle.scale * (core.domStyle.isVertical && !obj.is15x15 ? 0.95 : 1);
     var toolsMarginLeft;
     if (core.domStyle.isVertical)
         toolsMarginLeft = (core.__HALF_SIZE__ - 3) * 3 * core.domStyle.scale;

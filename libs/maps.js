@@ -1425,7 +1425,10 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId || number == null || x == null || y == null) return;
     if (x < 0 || x >= core.floors[floorId].width || y < 0 || y >= core.floors[floorId].height) return;
-    if (typeof number == 'string') number = core.getNumberById(number);
+    if (typeof number == 'string') {
+        if (/^\d+$/.test(number)) number = parseInt(number);
+        else number = core.getNumberById(number);
+    }
 
     var originBlock = core.getBlock(x, y, floorId, true);
     var block = this.initBlock(x, y, number, true, core.floors[floorId]);
@@ -1479,6 +1482,10 @@ maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
     if (!floorId || number == null || x == null || y == null) return;
     if (x < 0 || x >= core.floors[floorId].width || y < 0 || y >= core.floors[floorId].height) return;
     if (name != 'bg' && name != 'fg') return;
+    if (typeof number == 'string') {
+        if (/^\d+$/.test(number)) number = parseInt(number);
+        else number = core.getNumberById(number);
+    }
 
     var vFlag = "__" + name + "Value__" + floorId + "_" + x + "_" + y;
     core.setFlag(vFlag, number);

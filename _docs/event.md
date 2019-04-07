@@ -657,6 +657,7 @@ revisit常常使用在一些商人之类的地方，当用户购买物品后不�
     {"type": "setBlock", "floorId": "MT1", "loc": [3,3], "number": 233}, // 将MT1层的(3,3)点变成数字233
     {"type": "setBlock", "loc": [2,1], "number": 121}, // 省略floorId则默认为本层
     {"type": "setBlock", "number": 57}, // loc也可省略，默认为当前点
+    {"type": "setBlock", "number": "yellowDoor"}, // 从V2.6开始也允许写图块ID
 ]
 ```
 
@@ -665,6 +666,8 @@ floorId为可选的，表示要更改的目标楼层。如果忽略此项，则�
 loc为可选的，表示要更改地图块的坐标。如果忽略此项，则默认为当前事件点。
 
 number为**要更改到的数字**，有关“数字”的定义详见参见[素材的机制](personalization#素材的机制)。
+
+从V2.6开始，number也允许写图块的ID，将自动转成对应的数字。
 
 图块更改后：
 

@@ -588,14 +588,15 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     ctx = core.getContextByName(ctx);
     if (!ctx) return;
     // 设置默认配置项
+    var textAttribute = core.status.textAttribute || core.initStatus.textAttribute;
     config = core.clone(config || {});
     config.left = config.left || 0;
     config.right = config.left + (config.maxWidth == null ? ctx.canvas.width : config.maxWidth);
     config.top = config.top || 0;
-    config.color = config.color || core.arrayToRGBA(core.status.textAttribute.text);
-    config.bold = config.bold || false;
-    config.align = config.align || core.status.textAttribute.align || "left";
-    config.fontSize = config.fontSize || core.status.textAttribute.textfont;
+    config.color = config.color || core.arrayToRGBA(textAttribute.text);
+    if (config.bold == null) config.bold = textAttribute.bold;
+    config.align = config.align || textAttribute.align || "left";
+    config.fontSize = config.fontSize || textAttribute.textfont;
     config.lineHeight = config.lineHeight || (config.fontSize * 1.3);
     config.time = config.time || 0;
 
@@ -783,7 +784,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
     var isWindowSkin = this.drawBackground(hPos.left, vPos.top, hPos.right, vPos.bottom, pInfo);
     var alpha = isWindowSkin ? 0.85 : textAttribute.background[3];
 
-    // Step 4: 绘制标题、头像、
+    // Step 4: 绘制标题、头像、动画
     var content_top = this._drawTextBox_drawTitleAndIcon(titleInfo, hPos, vPos, alpha);
 
     // Step 5: 绘制正文

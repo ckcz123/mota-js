@@ -394,12 +394,12 @@ core.updateViewport()
 根据大地图的偏移量来更新窗口的视野范围。
 
 
-core.nextX(n) / core.nextY(m)
+core.nextX(n) / core.nextY(n)
 获得勇士面对的第n个位置的横纵坐标。n可不填，默认为1。
 
 
-core.nearHero(x, y)
-判定某个点是否和勇士的距离不大于1。
+core.nearHero(x, y, n)
+判定某个点是否和勇士的距离不大于n。n可不填，默认为1。
 
 
 core.gatherFollowers()

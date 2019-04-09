@@ -382,6 +382,9 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
         return false;
     }
 
+    if (id == 'steelDoor' && core.flags.steelDoorWithoutKey)
+        needKey = false;
+
     if (needKey && id.endsWith("Door")) {
         var key = id.replace("Door", "Key");
         if (!core.hasItem(key)) {
@@ -773,6 +776,8 @@ events.prototype.startEvents = function (list, x, y, callback) {
 events.prototype.doAction = function () {
     // 清空boxAnimate和UI层
     core.clearUI();
+    clearInterval(core.status.event.interval);
+    core.status.event.interval = null;
     // 判定是否执行完毕
     if (this._doAction_finishEvents()) return;
     // 当前点坐标和前缀
@@ -1405,6 +1410,13 @@ events.prototype._action_while = function (data, x, y, prefix) {
     core.doAction();
 }
 
+events.prototype._action_dowhile = function (data, x, y, prefix) {
+    core.unshift(core.status.event.data.list,
+        {"todo": core.clone(data.data), "total": core.clone(data.data), "condition": data.condition}
+    );
+    core.doAction();
+}
+
 events.prototype._action_break = function (data, x, y, prefix) {
     core.status.event.data.list.shift();
     core.doAction();
@@ -1715,7 +1727,7 @@ events.prototype.follow = function (name) {
     core.status.hero.followers = core.status.hero.followers || [];
     if (core.material.images.images[name]
         && core.material.images.images[name].width == 128) {
-        core.status.hero.followers.push({"name": name, "img": core.material.images.images[name]});
+        core.status.hero.followers.push({"name": name});
         core.gatherFollowers();
         core.clearMap('hero');
         core.drawHero();

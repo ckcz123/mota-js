@@ -261,8 +261,6 @@ ui.prototype.closePanel = function () {
 }
 
 ui.prototype.clearUI = function () {
-    clearInterval(core.status.event.interval);
-    core.status.event.interval = null;
     core.status.boxAnimateObjs = [];
     if (core.dymCanvas._selector) core.deleteCanvas("_selector");
     core.clearMap('ui');
@@ -1980,13 +1978,14 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
     core.setFont('ui', this._buildFont(14, true));
     for (var name in compare) {
         var img = core.statusBar.icons[name];
-        if (img) { // 绘制图标
+        var text = core.getStatusName(name);
+        if (img && core.flags.iconInEquipbox) { // 绘制图标
             core.drawImage('ui', img, 0, 0, 32, 32, drawOffset, y - 13, 16, 16);
             drawOffset += 20;
         }
         else { // 绘制文字
-            core.fillText('ui', name + " ", drawOffset, y, '#CCCCCC');
-            drawOffset += core.calWidth('ui', name + " ");
+            core.fillText('ui', text + " ", drawOffset, y, '#CCCCCC');
+            drawOffset += core.calWidth('ui', text + " ");
         }
         var nowValue = core.getStatus(name) * core.getBuff(name), newValue = (nowValue + compare[name]) * core.getBuff(name);
         if (equip.equip.percentage) {

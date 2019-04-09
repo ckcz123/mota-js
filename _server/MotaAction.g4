@@ -327,6 +327,7 @@ action
     |   if_1_s
     |   switch_s
     |   while_s
+    |   dowhile_s
     |   break_s
     |   continue_s
     |   input_s
@@ -728,20 +729,20 @@ return code;
 */;
 
 setBlock_s
-    :   '转变图块为' Int 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
+    :   '转变图块为' EvalString 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
     
 
 /* setBlock_s
 tooltip : setBlock：设置某个图块,忽略坐标楼层则为当前事件
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=setblock%EF%BC%9A%E8%AE%BE%E7%BD%AE%E6%9F%90%E4%B8%AA%E5%9B%BE%E5%9D%97
 colour : this.dataColor
-default : [0,"","",""]
+default : ["yellowDoor","","",""]
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var code = '{"type": "setBlock", "number":'+Int_0+floorstr+IdString_0+'},\n';
+var code = '{"type": "setBlock", "number": "'+EvalString_0+'"'+floorstr+IdString_0+'},\n';
 return code;
 */;
 
@@ -870,20 +871,20 @@ return code;
 */;
 
 setBgFgBlock_s
-    :   '转变图层块' Bg_Fg_List '为' Int 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
+    :   '转变图层块' Bg_Fg_List '为' EvalString 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
 
 
 /* setBgFgBlock_s
 tooltip : setBgFgBlock：设置某个图层块,忽略坐标楼层则为当前点
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=setblock%EF%BC%9A%E8%AE%BE%E7%BD%AE%E6%9F%90%E4%B8%AA%E5%9B%BE%E5%9D%97
 colour : this.dataColor
-default : ["bg",0,"","",""]
+default : ["bg","yellowDoor","","",""]
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var code = '{"type": "setBgFgBlock", "name": "' + Bg_Fg_List_0 + '", "number":'+Int_0+floorstr+IdString_0+'},\n';
+var code = '{"type": "setBgFgBlock", "name": "' + Bg_Fg_List_0 + '", "number": "'+EvalString_0+'"'+floorstr+IdString_0+'},\n';
 return code;
 */;
 
@@ -1693,13 +1694,26 @@ return code;
 */;
 
 while_s
-    :   '循环处理' '：' '当' expression '时' BGNL? Newline action+ BEND Newline
+    :   '前置条件循环' '：' '当' expression '时' BGNL? Newline action+ BEND Newline
 
 /* while_s
-tooltip : while：循环处理
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=while%EF%BC%9A%E5%BE%AA%E7%8E%AF%E5%A4%84%E7%90%86
+tooltip : while：前置条件循环
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=while%ef%bc%9a%e5%89%8d%e7%bd%ae%e6%9d%a1%e4%bb%b6%e5%be%aa%e7%8e%af
 colour : this.eventColor
 var code = ['{"type": "while", "condition": "',expression_0,'",\n',
+    '"data": [\n',action_0,'],\n',
+'},\n'].join('');
+return code;
+*/;
+
+dowhile_s
+    :   '后置条件循环' '：'  BGNL? Newline action+ BEND '当' expression '时' Newline
+
+/* dowhile_s
+tooltip : dowhile：后置条件循环
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=dowhile%ef%bc%9a%e5%90%8e%e7%bd%ae%e6%9d%a1%e4%bb%b6%e5%be%aa%e7%8e%af
+colour : this.eventColor
+var code = ['{"type": "dowhile", "condition": "',expression_0,'",\n',
     '"data": [\n',action_0,'],\n',
 '},\n'].join('');
 return code;
@@ -2021,8 +2035,8 @@ Global_Value_List
 
 
 Global_Flag_List
-    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示魔力值'|'显示魔防值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'开启加点'|'开启负伤'|'仇恨怪战后扣减一半'|'夹击是否上整'|'循环计算临界'|'允许轻按'|'寻路算法不绕血瓶'|'允许走到将死领域'|'允许瞬间移动'|'允许查看禁用商店'|'阻激夹域后禁用快捷商店'|'检查控制台'
-    /*Global_Flag_List ['enableFloor','enableName','enableLv', 'enableHPMax', 'enableMana', 'enableMDef', 'enableMoney', 'enableExperience', 'enableLevelUp', 'levelUpLeftMode', 'enableKeys', 'enablePZF', 'enableDebuff', 'enableSkill', 'flyNearStair', 'enableAddPoint', 'enableNegativeDamage', 'hatredDecrease', 'betweenAttackCeil', 'useLoop', 'enableGentleClick', 'potionWhileRouting', 'canGoDeadZone', 'enableMoveDirectly', 'enableDisabledShop', 'disableShopOnDamage', 'checkConsole']*/;
+    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示魔力值'|'显示魔防值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'破墙镐四方向'|'炸弹四方向'|'冰冻徽章四方向'|'铁门不需要钥匙'|'开启加点'|'开启负伤'|'仇恨怪战后扣减一半'|'夹击是否上整'|'循环计算临界'|'允许轻按'|'寻路算法不绕血瓶'|'允许走到将死领域'|'允许瞬间移动'|'允许查看禁用商店'|'阻激夹域后禁用快捷商店'|'检查控制台'
+    /*Global_Flag_List ['enableFloor','enableName','enableLv', 'enableHPMax', 'enableMana', 'enableMDef', 'enableMoney', 'enableExperience', 'enableLevelUp', 'levelUpLeftMode', 'enableKeys', 'enablePZF', 'enableDebuff', 'enableSkill', 'flyNearStair', 'pickaxeFourDirections', 'bombFourDirections', 'snowFourDirections', 'steelDoorWithoutKey', 'enableAddPoint', 'enableNegativeDamage', 'hatredDecrease', 'betweenAttackCeil', 'useLoop', 'enableGentleClick', 'potionWhileRouting', 'canGoDeadZone', 'enableMoveDirectly', 'enableDisabledShop', 'disableShopOnDamage', 'checkConsole']*/;
 
 Colour
     :   'sdeirughvuiyasdeb'+ //为了被识别为复杂词法规则
@@ -2639,11 +2653,18 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['choices_s'].xmlText([
         this.isset(data.text)?this.EvalString(data.text):null,'','',text_choices,this.next]);
       break;
-    case "while": // 循环处理
+    case "while": // 前置条件循环处理
       this.next = MotaActionBlocks['while_s'].xmlText([
         // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
         this.tryToUseEvFlag_e('evalString_e', [data.condition]),
         this.insertActionList(data["data"]),
+        this.next]);
+      break;
+    case "dowhile": // 后置条件循环处理
+      this.next = MotaActionBlocks['dowhile_s'].xmlText([
+        this.insertActionList(data["data"]),
+        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
+        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
         this.next]);
       break;
     case "break": // 跳出循环

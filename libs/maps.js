@@ -977,10 +977,10 @@ maps.prototype._drawAutotileAnimate = function (block, animate) {
     if (block.name) {
         if (block.name == 'bg')
             core.drawImage('bg', core.material.groundCanvas.canvas, 32 * x, 32 * y);
-        this.drawAutotile(cv, core.status.autotileAnimateObjs[block.name+"map"], block, 32, 0, 0, animate);
+        this._drawAutotile(cv, core.status.autotileAnimateObjs[block.name+"map"], block, 32, 0, 0, animate);
     }
     else {
-        this.drawAutotile(cv, core.status.autotileAnimateObjs.map, block, 32, 0, 0, animate);
+        this._drawAutotile(cv, core.status.autotileAnimateObjs.map, block, 32, 0, 0, animate);
     }
 }
 

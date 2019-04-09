@@ -554,6 +554,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_bool": "bool",
 					"_data": "状态栏的装备按钮。若此项为true则将状态栏中的楼层转换器按钮换为装备栏按钮"
 				},
+				"iconInEquipbox": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_bool": "bool",
+					"_data": "在装备栏中的属性变化，是否绘制图标；如果此项开启，则会绘制图标而不是文字"
+				},
 				"enableAddPoint": {
 					"_leaf": true,
 					"_type": "checkbox",

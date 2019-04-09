@@ -655,7 +655,7 @@ revisit常常使用在一些商人之类的地方，当用户购买物品后不�
 ``` js
 [
     {"type": "setBlock", "floorId": "MT1", "loc": [3,3], "number": 233}, // 将MT1层的(3,3)点变成数字233
-    {"type": "setBlock", "loc": [2,1], "number": 121}, // 省略floorId则默认为本层
+    {"type": "setBlock", "loc": [2,1],setVa "number": 121}, // 省略floorId则默认为本层
     {"type": "setBlock", "number": 57}, // loc也可省略，默认为当前点
     {"type": "setBlock", "number": "yellowDoor"}, // 从V2.6开始也允许写图块ID
 ]
@@ -1645,7 +1645,7 @@ default可选，如果为true则显示选择项时默认选中【确定】，否
 
 yes和no均为必填项，即用户点击确认或取消后执行的事件。
 
-### while：循环处理
+### while：前置条件循环
 
 从2.2.1样板开始，我们提供了循环处理（while事件）。
 
@@ -1680,6 +1680,12 @@ yes和no均为必填项，即用户点击确认或取消后执行的事件。
     },
 ]
 ```
+
+### dowhile：后置条件循环
+
+`type:dowhile`可以制作一个后置条件循环。
+
+其写法与参数和`type:while`完全一致，不过与其不同的是，会先执行一次事件列表，再对条件进行判定，就和C/C++中的 `do {...} while (...);` 语法一样。
 
 ### break：跳出循环
 

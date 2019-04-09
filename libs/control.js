@@ -798,8 +798,8 @@ control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, off
     });
     (core.status.hero.followers||[]).forEach(function (t) {
         drawObjs.push({
-            "img": t.img,
-            "height": t.img.height/4,
+            "img": core.material.images.images[t.name],
+            "height": core.material.images.images[t.name].height/4,
             "heroIcon": heroIconArr[t.direction],
             "posx": 32*t.x - core.bigmap.offsetX + (t.stop?0:core.utils.scan[t.direction].x*offset),
             "posy": 32*t.y - core.bigmap.offsetY + (t.stop?0:core.utils.scan[t.direction].y*offset),
@@ -1880,6 +1880,15 @@ control.prototype.getHeroLoc = function (name) {
     if (!core.status.hero) return;
     if (name == null) return core.status.hero.loc;
     return core.status.hero.loc[name];
+}
+
+////// 获得某个属性的中文名 //////
+control.prototype.getStatusName = function (name) {
+    var map = {
+        name: "名称", lv: "等级", hpmax: "生命上限", hp: "生命", manamax: "魔力上限", mana: "魔力",
+        atk: "攻击", def: "防御", mdef: "魔防", money: "金币", exp: "经验", experience: "经验", steps: "步数"
+    };
+    return map[name] || name;
 }
 
 ////// 获得某个等级的名称 //////

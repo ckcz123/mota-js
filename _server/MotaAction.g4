@@ -327,6 +327,7 @@ action
     |   if_1_s
     |   switch_s
     |   while_s
+    |   dowhile_s
     |   break_s
     |   continue_s
     |   input_s
@@ -1693,13 +1694,26 @@ return code;
 */;
 
 while_s
-    :   '循环处理' '：' '当' expression '时' BGNL? Newline action+ BEND Newline
+    :   '前置条件循环' '：' '当' expression '时' BGNL? Newline action+ BEND Newline
 
 /* while_s
-tooltip : while：循环处理
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=while%EF%BC%9A%E5%BE%AA%E7%8E%AF%E5%A4%84%E7%90%86
+tooltip : while：前置条件循环
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=while%ef%bc%9a%e5%89%8d%e7%bd%ae%e6%9d%a1%e4%bb%b6%e5%be%aa%e7%8e%af
 colour : this.eventColor
 var code = ['{"type": "while", "condition": "',expression_0,'",\n',
+    '"data": [\n',action_0,'],\n',
+'},\n'].join('');
+return code;
+*/;
+
+dowhile_s
+    :   '后置条件循环' '：'  BGNL? Newline action+ BEND '当' expression '时' Newline
+
+/* dowhile_s
+tooltip : dowhile：后置条件循环
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=dowhile%ef%bc%9a%e5%90%8e%e7%bd%ae%e6%9d%a1%e4%bb%b6%e5%be%aa%e7%8e%af
+colour : this.eventColor
+var code = ['{"type": "dowhile", "condition": "',expression_0,'",\n',
     '"data": [\n',action_0,'],\n',
 '},\n'].join('');
 return code;
@@ -2639,11 +2653,18 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['choices_s'].xmlText([
         this.isset(data.text)?this.EvalString(data.text):null,'','',text_choices,this.next]);
       break;
-    case "while": // 循环处理
+    case "while": // 前置条件循环处理
       this.next = MotaActionBlocks['while_s'].xmlText([
         // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
         this.tryToUseEvFlag_e('evalString_e', [data.condition]),
         this.insertActionList(data["data"]),
+        this.next]);
+      break;
+    case "dowhile": // 后置条件循环处理
+      this.next = MotaActionBlocks['dowhile_s'].xmlText([
+        this.insertActionList(data["data"]),
+        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
+        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
         this.next]);
       break;
     case "break": // 跳出循环

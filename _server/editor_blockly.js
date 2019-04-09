@@ -118,6 +118,7 @@ editor_blockly = function () {
         {"case": "default", "action": [{"type": "comment", "text": "当没有符合的值的场合执行default事件"}]},
       ]}),
       MotaActionBlocks['while_s'].xmlText(),
+      MotaActionBlocks['dowhile_s'].xmlText(),
       MotaActionBlocks['break_s'].xmlText(),
       MotaActionBlocks['continue_s'].xmlText(),
       MotaActionBlocks['revisit_s'].xmlText(),

@@ -1464,6 +1464,7 @@ posX, posY：素材在该素材图片上的位置；height：素材的高度；f
 
 core.searchBlock(id, floorId, showDisable)
 搜索一个图块出现过的所有位置。id为图块ID，也可以传入图块的数字。
+id支持通配符搜索，比如"*Door"可以搜索所有的门，"unknownEvent*"可以所有所有的unknownEvent。
 floorId为要搜索的楼层，可以是一个楼层ID，或者一个楼层数组。如果floorId不填则只搜索当前楼层。
 showDisable如果为真，则对于禁用的图块也会返回。
 此函数将返回一个数组，每一项为一个搜索到的结果：
@@ -1995,6 +1996,10 @@ core.strlen(str)
 
 core.reverseDirection(direction)
 翻转方向，即"up"转成"down", "left"转成"right"等。
+
+
+core.matchWildcard(pattern, string)
+进行通配符的匹配判定，目前仅支持*（可匹配0或任意个字符）。比如"a*b*c"可以匹配"aa012bc"。
 
 
 core.encodeBase64(str) / core.decodeBase64(str)

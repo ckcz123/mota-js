@@ -1956,7 +1956,7 @@ ui.prototype._drawEquipbox_description = function (info, max_height) {
     this._drawEquipbox_drawStatusChanged(info, curr, equip, equipType);
 }
 
-ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipType) {
+ui.prototype._drawEquipbox_getStatusChanged = function (info, equip, equipType) {
     var compare, differentMode = null;
     if (info.index < this.LAST) compare = core.compareEquipment(null, info.selectId);
     else {
@@ -1973,6 +1973,12 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
         core.fillText('ui', differentMode, 10, y, '#CCCCCC', this._buildFont(14, false));
         return;
     }
+    return compare;
+}
+
+ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipType) {
+    var compare = this._drawEquipbox_getStatusChanged(info, equip, equipType);
+    if (compare == null) return;
     var drawOffset = 10;
     // --- 变化值...
     core.setFont('ui', this._buildFont(14, true));
@@ -2003,13 +2009,14 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
 }
 
 ui.prototype._drawEquipbox_drawEquiped = function (info, line) {
-    core.setTextAlign('ui', 'right');
+    core.setTextAlign('ui', 'center');
     var per_line = this.HSIZE - 3, width = Math.floor(this.PIXEL / (per_line + 0.25));
     // 当前装备
     for (var i = 0; i < info.equipLength ; i++) {
         var equipId = info.equipEquipment[i] || null;
-        var offset_text = width * (i % per_line) + 56;
+        // var offset_text = width * (i % per_line) + 56;
         var offset_image = width * (i % per_line) + width * 2 / 3;
+        var offset_text = offset_image - (width - 32) / 2;
         var y = line + 54 * Math.floor(i / per_line) + 19;
         if (equipId) {
             var icon = core.material.icons.items[equipId];

@@ -70,7 +70,7 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
 
 events.prototype._startGame_afterStart = function (nowLoc, callback) {
     core.ui.closePanel();
-    core.showStatusBar();
+    this._startGame_statusBar();
     core.dom.musicBtn.style.display = 'none';
     core.changeFloor(core.firstData.floorId, null, nowLoc, null, function () {
         // 插入一个空事件避免直接回放录像出错
@@ -78,6 +78,14 @@ events.prototype._startGame_afterStart = function (nowLoc, callback) {
         if (callback) callback();
     });
     this._startGame_upload();
+}
+
+// 开始游戏时是否显示状态栏
+events.prototype._startGame_statusBar = function () {
+    if (core.flags.startUsingCanvas)
+        core.hideStatusBar();
+    else
+        core.showStatusBar();
 }
 
 events.prototype._startGame_upload = function () {

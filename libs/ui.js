@@ -768,8 +768,8 @@ ui.prototype.drawTextBox = function(content, showAll) {
     var textAttribute = core.status.textAttribute;
     var titleInfo = this._getTitleAndIcon(content);
     var posInfo = this._getPosition(titleInfo.content);
-    if (!posInfo.position) posInfo.position = textAttribute.position;
     if (posInfo.position != 'up' && posInfo.position != 'down') posInfo.px = posInfo.py = null;
+    if (!posInfo.position) posInfo.position = textAttribute.position;
     content = this._drawTextBox_drawImages(posInfo.content);
 
     // Step 2: 计算对话框的矩形位置

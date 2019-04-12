@@ -68,6 +68,7 @@ editor_blockly = function () {
       MotaActionBlocks['tip_s'].xmlText(),
       MotaActionBlocks['win_s'].xmlText(),
       MotaActionBlocks['lose_s'].xmlText(),
+      MotaActionBlocks['confirm_s'].xmlText(),
       MotaActionBlocks['choices_s'].xmlText([
         '选择剑或者盾','流浪者','man',MotaActionBlocks['choicesContext'].xmlText([
           '剑','','',null,MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [3,3]}]),
@@ -76,7 +77,6 @@ editor_blockly = function () {
           ])
         ])
       ]),
-      MotaActionBlocks['confirm_s'].xmlText(),
     ],
     '数据相关':[
       MotaActionBlocks['setValue_s'].xmlText([

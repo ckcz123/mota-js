@@ -199,7 +199,7 @@ core.onkeyDown(e)
 
 core.onkeyUp(e)
 当放开某个键时的操作，e为KeyboardEvent。
-请勿直接覆盖或调用此函数，如有需要请注册一个"onkeyDown"的交互函数。
+请勿直接覆盖或调用此函数，如有需要请注册一个"onkeyUp"的交互函数。
 
 
 core.pressKey(keyCode)

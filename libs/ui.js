@@ -555,9 +555,8 @@ ui.prototype._calTextBoxWidth = function (ctx, content, min_width, max_width, fo
 
 ////// 处理 \i[xxx] 的问题
 ui.prototype._getDrawableIconInfo = function (id) {
-    var splt = id.split(':');
-    if (splt[0] == 'flag' && splt.length > 1) { // 使用变量表示图标
-        id = core.getFlag(splt[1], id);
+    if (id && id.indexOf('flag:') === 0) {
+        id = core.getFlag(id.substring(5), id);
     }
     var image = null, icon = null;
     ["terrains","animates","items","npcs","enemys"].forEach(function (v) {
@@ -974,6 +973,7 @@ ui.prototype.drawChoices = function(content, choices) {
     var titleInfo = this._getTitleAndIcon(content);
     var hPos = this._drawChoices_getHorizontalPosition(titleInfo, choices);
     var vPos = this._drawChoices_getVerticalPosition(titleInfo, choices, hPos);
+    core.status.event.ui.offset = vPos.offset;
 
     var isWindowSkin = this.drawBackground(hPos.left, vPos.top, hPos.right, vPos.bottom);
     this._drawChoices_drawTitle(titleInfo, hPos, vPos);
@@ -1002,20 +1002,22 @@ ui.prototype._drawChoices_getVerticalPosition = function (titleInfo, choices, hP
     var length = choices.length;
     var height = 32 * (length + 2), bottom = this.HPIXEL + height / 2;
     if (length % 2 == 0) bottom += 16;
+    var offset = 0;
     var choice_top = bottom - height + 56;
     if (titleInfo.content) {
+        var headHeight = 0;
         var realContent = this._getRealContent(titleInfo.content);
         var lines = core.splitLines('ui', realContent, hPos.validWidth, this._buildFont(15, true));
-        if (titleInfo.title) height += 25;
-        height += lines.length * 20;
+        if (titleInfo.title) headHeight += 25;
+        headHeight += lines.length * 20;
+        height += headHeight;
+        if (bottom - height <= 32) {
+            offset = Math.floor(headHeight / 64);
+            bottom += 32 * offset;
+            choice_top += 32 * offset;
+        }
     }
-    if(bottom-height<0){
-        var sep = Math.ceil((height-bottom)/32);
-        choice_top += sep * 32;
-        bottom += sep*32;
-        core.status.event.ui.sep = sep;
-    }
-    return {top: bottom - height, height: height, bottom: bottom, choice_top: choice_top };
+    return {top: bottom - height, height: height, bottom: bottom, choice_top: choice_top, offset: offset };
 }
 
 ui.prototype._drawChoices_drawTitle = function (titleInfo, hPos, vPos) {

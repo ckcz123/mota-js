@@ -977,10 +977,10 @@ maps.prototype._drawAutotileAnimate = function (block, animate) {
     if (block.name) {
         if (block.name == 'bg')
             core.drawImage('bg', core.material.groundCanvas.canvas, 32 * x, 32 * y);
-        this.drawAutotile(cv, core.status.autotileAnimateObjs[block.name+"map"], block, 32, 0, 0, animate);
+        this._drawAutotile(cv, core.status.autotileAnimateObjs[block.name+"map"], block, 32, 0, 0, animate);
     }
     else {
-        this.drawAutotile(cv, core.status.autotileAnimateObjs.map, block, 32, 0, 0, animate);
+        this._drawAutotile(cv, core.status.autotileAnimateObjs.map, block, 32, 0, 0, animate);
     }
 }
 
@@ -1239,8 +1239,9 @@ maps.prototype.searchBlock = function (id, floorId, showDisable) {
     }
     for (var i = 0; i < core.status.maps[floorId].blocks.length; ++i) {
         var block = core.status.maps[floorId].blocks[i];
-        if (block.event.id == id && (showDisable || !block.disable))
+        if ((showDisable || !block.disable) && core.matchWildcard(id, block.event.id)) {
             result.push({floorId: floorId, index: i, block: block, x: block.x, y: block.y});
+        }
     }
     return result;
 }
@@ -1425,7 +1426,10 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId || number == null || x == null || y == null) return;
     if (x < 0 || x >= core.floors[floorId].width || y < 0 || y >= core.floors[floorId].height) return;
-    if (typeof number == 'string') number = core.getNumberById(number);
+    if (typeof number == 'string') {
+        if (/^\d+$/.test(number)) number = parseInt(number);
+        else number = core.getNumberById(number);
+    }
 
     var originBlock = core.getBlock(x, y, floorId, true);
     var block = this.initBlock(x, y, number, true, core.floors[floorId]);
@@ -1479,6 +1483,10 @@ maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
     if (!floorId || number == null || x == null || y == null) return;
     if (x < 0 || x >= core.floors[floorId].width || y < 0 || y >= core.floors[floorId].height) return;
     if (name != 'bg' && name != 'fg') return;
+    if (typeof number == 'string') {
+        if (/^\d+$/.test(number)) number = parseInt(number);
+        else number = core.getNumberById(number);
+    }
 
     var vFlag = "__" + name + "Value__" + floorId + "_" + x + "_" + y;
     core.setFlag(vFlag, number);

@@ -261,8 +261,6 @@ ui.prototype.closePanel = function () {
 }
 
 ui.prototype.clearUI = function () {
-    clearInterval(core.status.event.interval);
-    core.status.event.interval = null;
     core.status.boxAnimateObjs = [];
     if (core.dymCanvas._selector) core.deleteCanvas("_selector");
     core.clearMap('ui');
@@ -557,6 +555,9 @@ ui.prototype._calTextBoxWidth = function (ctx, content, min_width, max_width, fo
 
 ////// 处理 \i[xxx] 的问题
 ui.prototype._getDrawableIconInfo = function (id) {
+    if (id && id.indexOf('flag:') === 0) {
+        id = core.getFlag(id.substring(5), id);
+    }
     var image = null, icon = null;
     ["terrains","animates","items","npcs","enemys"].forEach(function (v) {
         if (core.material.icons[v][id] != null) {
@@ -770,8 +771,8 @@ ui.prototype.drawTextBox = function(content, showAll) {
     var textAttribute = core.status.textAttribute;
     var titleInfo = this._getTitleAndIcon(content);
     var posInfo = this._getPosition(titleInfo.content);
-    if (!posInfo.position) posInfo.position = textAttribute.position;
     if (posInfo.position != 'up' && posInfo.position != 'down') posInfo.px = posInfo.py = null;
+    if (!posInfo.position) posInfo.position = textAttribute.position;
     content = this._drawTextBox_drawImages(posInfo.content);
 
     // Step 2: 计算对话框的矩形位置
@@ -972,6 +973,7 @@ ui.prototype.drawChoices = function(content, choices) {
     var titleInfo = this._getTitleAndIcon(content);
     var hPos = this._drawChoices_getHorizontalPosition(titleInfo, choices);
     var vPos = this._drawChoices_getVerticalPosition(titleInfo, choices, hPos);
+    core.status.event.ui.offset = vPos.offset;
 
     var isWindowSkin = this.drawBackground(hPos.left, vPos.top, hPos.right, vPos.bottom);
     this._drawChoices_drawTitle(titleInfo, hPos, vPos);
@@ -1000,14 +1002,22 @@ ui.prototype._drawChoices_getVerticalPosition = function (titleInfo, choices, hP
     var length = choices.length;
     var height = 32 * (length + 2), bottom = this.HPIXEL + height / 2;
     if (length % 2 == 0) bottom += 16;
+    var offset = 0;
     var choice_top = bottom - height + 56;
     if (titleInfo.content) {
+        var headHeight = 0;
         var realContent = this._getRealContent(titleInfo.content);
         var lines = core.splitLines('ui', realContent, hPos.validWidth, this._buildFont(15, true));
-        if (titleInfo.title) height += 25;
-        height += lines.length * 20;
+        if (titleInfo.title) headHeight += 25;
+        headHeight += lines.length * 20;
+        height += headHeight;
+        if (bottom - height <= 32) {
+            offset = Math.floor(headHeight / 64);
+            bottom += 32 * offset;
+            choice_top += 32 * offset;
+        }
     }
-    return {top: bottom - height, height: height, bottom: bottom, choice_top: choice_top };
+    return {top: bottom - height, height: height, bottom: bottom, choice_top: choice_top, offset: offset };
 }
 
 ui.prototype._drawChoices_drawTitle = function (titleInfo, hPos, vPos) {
@@ -1958,7 +1968,7 @@ ui.prototype._drawEquipbox_description = function (info, max_height) {
     this._drawEquipbox_drawStatusChanged(info, curr, equip, equipType);
 }
 
-ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipType) {
+ui.prototype._drawEquipbox_getStatusChanged = function (info, equip, equipType) {
     var compare, differentMode = null;
     if (info.index < this.LAST) compare = core.compareEquipment(null, info.selectId);
     else {
@@ -1975,18 +1985,25 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
         core.fillText('ui', differentMode, 10, y, '#CCCCCC', this._buildFont(14, false));
         return;
     }
+    return compare;
+}
+
+ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipType) {
+    var compare = this._drawEquipbox_getStatusChanged(info, equip, equipType);
+    if (compare == null) return;
     var drawOffset = 10;
     // --- 变化值...
     core.setFont('ui', this._buildFont(14, true));
     for (var name in compare) {
         var img = core.statusBar.icons[name];
-        if (img) { // 绘制图标
+        var text = core.getStatusName(name);
+        if (img && core.flags.iconInEquipbox) { // 绘制图标
             core.drawImage('ui', img, 0, 0, 32, 32, drawOffset, y - 13, 16, 16);
             drawOffset += 20;
         }
         else { // 绘制文字
-            core.fillText('ui', name + " ", drawOffset, y, '#CCCCCC');
-            drawOffset += core.calWidth('ui', name + " ");
+            core.fillText('ui', text + " ", drawOffset, y, '#CCCCCC');
+            drawOffset += core.calWidth('ui', text + " ");
         }
         var nowValue = core.getStatus(name) * core.getBuff(name), newValue = (nowValue + compare[name]) * core.getBuff(name);
         if (equip.equip.percentage) {
@@ -2004,13 +2021,14 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
 }
 
 ui.prototype._drawEquipbox_drawEquiped = function (info, line) {
-    core.setTextAlign('ui', 'right');
+    core.setTextAlign('ui', 'center');
     var per_line = this.HSIZE - 3, width = Math.floor(this.PIXEL / (per_line + 0.25));
     // 当前装备
     for (var i = 0; i < info.equipLength ; i++) {
         var equipId = info.equipEquipment[i] || null;
-        var offset_text = width * (i % per_line) + 56;
+        // var offset_text = width * (i % per_line) + 56;
         var offset_image = width * (i % per_line) + width * 2 / 3;
+        var offset_text = offset_image - (width - 32) / 2;
         var y = line + 54 * Math.floor(i / per_line) + 19;
         if (equipId) {
             var icon = core.material.icons.items[equipId];

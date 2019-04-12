@@ -536,6 +536,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_bool": "bool",
 					"_data": "如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙"
 				},
+				"steelDoorWithoutKey": {
+					"_left": true,
+					"_type": "checkbox",
+					"_bool": "bool",
+					"_data": "铁门是否不需要钥匙开启。如果此项为true，则无需钥匙也可以开铁门。"
+				},
 				"equipment": {
 					"_leaf": true,
 					"_type": "checkbox",
@@ -547,6 +553,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "checkbox",
 					"_bool": "bool",
 					"_data": "状态栏的装备按钮。若此项为true则将状态栏中的楼层转换器按钮换为装备栏按钮"
+				},
+				"iconInEquipbox": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_bool": "bool",
+					"_data": "在装备栏中的属性变化，是否绘制图标；如果此项开启，则会绘制图标而不是文字"
 				},
 				"enableAddPoint": {
 					"_leaf": true,

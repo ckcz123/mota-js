@@ -624,6 +624,12 @@ utils.prototype.reverseDirection = function (direction) {
     return {"left":"right","right":"left","down":"up","up":"down"}[direction] || direction;
 }
 
+utils.prototype.matchWildcard = function (pattern, string) {
+    return new RegExp('^' + pattern.split(/\*+/).map(function (s) {
+        return s.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
+    }).join('.*') + '$').test(string);
+}
+
 ////// Base64加密 //////
 utils.prototype.encodeBase64 = function (str) {
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {

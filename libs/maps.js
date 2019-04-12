@@ -1239,8 +1239,9 @@ maps.prototype.searchBlock = function (id, floorId, showDisable) {
     }
     for (var i = 0; i < core.status.maps[floorId].blocks.length; ++i) {
         var block = core.status.maps[floorId].blocks[i];
-        if (block.event.id == id && (showDisable || !block.disable))
+        if ((showDisable || !block.disable) && core.matchWildcard(id, block.event.id)) {
             result.push({floorId: floorId, index: i, block: block, x: block.x, y: block.y});
+        }
     }
     return result;
 }

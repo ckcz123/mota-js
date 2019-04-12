@@ -107,13 +107,13 @@ enemys.prototype.canBattle = function (enemy, x, y, floorId) {
 ////// 获得某个怪物的伤害 //////
 enemys.prototype.getDamage = function (enemy, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    var damage = this.calDamage(enemy, null, x, y, floorId);
+    var damage = this._calDamage(enemy, null, x, y, floorId);
     if (damage == null) return null;
-    return damage + this.getExtraDamage(enemy);
+    return damage + this.getExtraDamage(enemy, x, y, floorId);
 }
 
 ////// 获得某个怪物的额外伤害 //////
-enemys.prototype.getExtraDamage = function (enemy) {
+enemys.prototype.getExtraDamage = function (enemy, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     var extra_damage = 0;
     if (this.hasSpecial(enemy.special, 17)) { // 仇恨
@@ -265,8 +265,8 @@ enemys.prototype._nextCriticals_useTurn = function (enemy, info, number, x, y, f
 enemys.prototype.getDefDamage = function (enemy, k, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     k = k || 1;
-    var nowDamage = this.calDamage(enemy, null, x, y, floorId);
-    var nextDamage = this.calDamage(enemy, {"def": core.status.hero.def + k}, x, y, floorId);
+    var nowDamage = this._calDamage(enemy, null, x, y, floorId);
+    var nextDamage = this._calDamage(enemy, {"def": core.status.hero.def + k}, x, y, floorId);
     if (nowDamage == null || nextDamage == null) return "???";
     return nowDamage - nextDamage;
 }
@@ -284,7 +284,7 @@ enemys.prototype.getDamageInfo = function (enemy, hero, x, y, floorId) {
 }
 
 ////// 获得在某个勇士属性下怪物伤害 //////
-enemys.prototype.calDamage = function (enemy, hero, x, y, floorId) {
+enemys.prototype._calDamage = function (enemy, hero, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
 
     var info = this.getDamageInfo(enemy, hero, x, y, floorId);
@@ -357,4 +357,10 @@ enemys.prototype._getCurrentEnemys_sort = function (enemys) {
         }
         return a.damage - b.damage;
     });
+}
+
+enemys.prototype.hasEnemyLeft = function (enemyId, floorId) {
+    return core.getCurrentEnemys(floorId).filter(function (enemy) {
+        return enemyId == null || enemy.id == enemyId;
+    }).length > 0;
 }

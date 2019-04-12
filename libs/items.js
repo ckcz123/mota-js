@@ -196,20 +196,6 @@ items.prototype.setItem = function (itemId, itemNum) {
     core.updateStatusBar();
 }
 
-////// 删除某个物品 //////
-items.prototype.removeItem = function (itemId, itemNum) {
-    if (itemNum == null) itemNum = 1;
-    if (!core.hasItem(itemId)) return false;
-    var itemCls = core.material.items[itemId].cls;
-    core.status.hero.items[itemCls][itemId] -= itemNum;
-    if (core.status.hero.items[itemCls][itemId] <= 0) {
-        if (itemCls != 'keys') delete core.status.hero.items[itemCls][itemId];
-        else core.status.hero.items[itemCls][itemId] = 0;
-    }
-    core.updateStatusBar();
-    return true;
-}
-
 ////// 增加某个物品的个数 //////
 items.prototype.addItem = function (itemId, itemNum) {
     if (itemNum == null) itemNum = 1;
@@ -230,14 +216,21 @@ items.prototype.addItem = function (itemId, itemNum) {
     core.updateStatusBar();
 }
 
-// ---------- 装备相关 ------------ //
-
-items.prototype.getEquipTypeById = function (equipId) {
-    var type = core.material.items[equipId].equip.type;
-    if (typeof type == 'string')
-        type = this.getEquipTypeByName(type);
-    return type;
+////// 删除某个物品 //////
+items.prototype.removeItem = function (itemId, itemNum) {
+    if (itemNum == null) itemNum = 1;
+    if (!core.hasItem(itemId)) return false;
+    var itemCls = core.material.items[itemId].cls;
+    core.status.hero.items[itemCls][itemId] -= itemNum;
+    if (core.status.hero.items[itemCls][itemId] <= 0) {
+        if (itemCls != 'keys') delete core.status.hero.items[itemCls][itemId];
+        else core.status.hero.items[itemCls][itemId] = 0;
+    }
+    core.updateStatusBar();
+    return true;
 }
+
+// ---------- 装备相关 ------------ //
 
 items.prototype.getEquipTypeByName = function (name) {
     var names = core.status.globalAttribute.equipName;
@@ -247,6 +240,13 @@ items.prototype.getEquipTypeByName = function (name) {
         }
     }
     return -1;
+}
+
+items.prototype.getEquipTypeById = function (equipId) {
+    var type = core.material.items[equipId].equip.type;
+    if (typeof type == 'string')
+        type = this.getEquipTypeByName(type);
+    return type;
 }
 
 // 当前能否撞上某装备
@@ -311,20 +311,17 @@ items.prototype.unloadEquip = function (equipType, callback) {
 }
 
 items.prototype.compareEquipment = function (compareEquipId, beComparedEquipId) {
-    var compareAtk = 0, compareDef = 0, compareMdef = 0;
-    if (compareEquipId) {
-        var compareEquip = core.material.items[compareEquipId];
-        compareAtk += (compareEquip.equip || {}).atk || 0;
-        compareDef += (compareEquip.equip || {}).def || 0;
-        compareMdef += (compareEquip.equip || {}).mdef || 0;
+    var result = {};
+    var first = core.material.items[compareEquipId], second = core.material.items[beComparedEquipId];
+    for (var name in core.status.hero) {
+        if (typeof core.status.hero[name] == 'number') {
+            var ans = 0;
+            if (first) ans += (first.equip || {})[name] || 0;
+            if (second) ans -= (second.equip || {})[name] || 0;
+            if (ans != 0) result[name] = ans;
+        }
     }
-    if (beComparedEquipId) {
-        var beComparedEquip = core.material.items[beComparedEquipId];
-        compareAtk -= (beComparedEquip.equip || {}).atk || 0;
-        compareDef -= (beComparedEquip.equip || {}).def || 0;
-        compareMdef -= (beComparedEquip.equip || {}).mdef || 0;
-    }
-    return {"atk": compareAtk, "def": compareDef, "mdef": compareMdef};
+    return result;
 }
 
 ////// 实际换装的效果 //////
@@ -349,7 +346,7 @@ items.prototype._realLoadEquip = function (type, loadId, unloadId, callback) {
 
     var loadPercentage = loadEquip.equip.percentage, unloadPercentage = unloadEquip.equip.percentage;
 
-    if (loadPercentage != null && unloadPercentage != null && loadPercentage != unloadPercentage) {
+    if (loadId && unloadId && (loadPercentage || false) != (unloadPercentage || false)) {
         this.unloadEquip(type);
         this.loadEquip(loadId);
         if (callback) callback();
@@ -368,8 +365,8 @@ items.prototype._realLoadEquip = function (type, loadId, unloadId, callback) {
     core.status.hero.equipment[type] = loadId || null;
 
     // --- 提示
-    if (loadId) core.drawTip("已装备上" + loadEquip.name, core.material.icons.items[loadId]);
-    else if (unloadId) core.drawTip("已卸下" + unloadEquip.name, core.material.icons.items[unloadId]);
+    if (loadId) core.drawTip("已装备上" + loadEquip.name, loadId);
+    else if (unloadId) core.drawTip("已卸下" + unloadEquip.name, unloadId);
 
     if (callback) callback();
 }

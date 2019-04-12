@@ -364,7 +364,7 @@ main.dom.body.onselectstart = function () {
 main.dom.data.onmousedown = function (e) {
     try {
         e.stopPropagation();
-        var loc = main.core.getClickLoc(e.clientX, e.clientY);
+        var loc = main.core.actions._getClickLoc(e.clientX, e.clientY);
         if (loc == null) return;
         main.core.ondown(loc);
     } catch (ee) { main.log(ee); }
@@ -374,7 +374,7 @@ main.dom.data.onmousedown = function (e) {
 main.dom.data.onmousemove = function (e) {
     try {
         e.stopPropagation();
-        var loc = main.core.getClickLoc(e.clientX, e.clientY);
+        var loc = main.core.actions._getClickLoc(e.clientX, e.clientY);
         if (loc == null) return;
         main.core.onmove(loc);
     }catch (ee) { main.log(ee); }
@@ -401,7 +401,7 @@ main.dom.data.onmousewheel = function(e) {
 main.dom.data.ontouchstart = function (e) {
     try {
         e.preventDefault();
-        var loc = main.core.getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
+        var loc = main.core.actions._getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
         if (loc == null) return;
         main.core.ondown(loc);
     }catch (ee) { main.log(ee); }
@@ -411,7 +411,7 @@ main.dom.data.ontouchstart = function (e) {
 main.dom.data.ontouchmove = function (e) {
     try {
         e.preventDefault();
-        var loc = main.core.getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
+        var loc = main.core.actions._getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
         if (loc == null) return;
         main.core.onmove(loc);
     }catch (ee) { main.log(ee); }
@@ -675,7 +675,7 @@ window.onblur = function () {
     if (main.core && main.core.control) {
         try {
             main.core.control.checkAutosave();
-        } catch (e) {main.log(e);}
+        } catch (e) {}
     }
 }
 

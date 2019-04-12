@@ -59,7 +59,7 @@ editor_util_wrapper = function (editor) {
     // SOFTWARE.
     //--------------------------------------------
     // https://github.com/carloscabo/colz/blob/master/public/js/colz.class.js
-    var round=Math.round;
+    var round = Math.round;
     var rgbToHsl = function (rgba) {
         var arg, r, g, b, h, s, l, d, max, min;
 
@@ -141,9 +141,21 @@ editor_util_wrapper = function (editor) {
         }
         return [round(r * 255), round(g * 255), round(b * 255)];
     }
-    editor_util.prototype.rgbToHsl=rgbToHsl
-    editor_util.prototype.hue2rgb=hue2rgb
-    editor_util.prototype.hslToRgb=hslToRgb
+    editor_util.prototype.rgbToHsl = rgbToHsl
+    editor_util.prototype.hue2rgb = hue2rgb
+    editor_util.prototype.hslToRgb = hslToRgb
+
+    editor_util.prototype.encode64 = function (str) {
+        return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
+            return String.fromCharCode(parseInt(p1, 16))
+        }))
+    }
+
+    editor_util.prototype.decode64 = function (str) {
+        return decodeURIComponent(atob(str.replace(/-/g, '+').replace(/_/g, '/').replace(/\s/g, '')).split('').map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+        }).join(''))
+    }
 
     editor.constructor.prototype.util = new editor_util();
 }

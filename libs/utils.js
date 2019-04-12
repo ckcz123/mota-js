@@ -75,35 +75,6 @@ utils.prototype.calValue = function (value, prefix, need, times) {
     return value;
 }
 
-////// 字符串自动换行的分割 //////
-utils.prototype.splitLines = function (canvas, text, maxLength, font) {
-    if (font) core.setFont(canvas, font);
-
-    var contents = [];
-    var last = 0;
-    for (var i = 0; i < text.length; i++) {
-
-        if (text.charAt(i) == '\n') {
-            contents.push(text.substring(last, i));
-            last = i + 1;
-        }
-        else if (text.charAt(i) == '\\' && text.charAt(i + 1) == 'n') {
-            contents.push(text.substring(last, i));
-            last = i + 2;
-        }
-        else {
-            var toAdd = text.substring(last, i + 1);
-            var width = core.calWidth(canvas, toAdd);
-            if (maxLength && width > maxLength) {
-                contents.push(text.substring(last, i));
-                last = i;
-            }
-        }
-    }
-    contents.push(text.substring(last));
-    return contents;
-}
-
 ////// 向某个数组前插入另一个数组或元素 //////
 utils.prototype.unshift = function (a, b) {
     if (!(a instanceof Array) || b == null) return;
@@ -126,6 +97,28 @@ utils.prototype.push = function (a, b) {
     }
     else a.push(b);
     return a;
+}
+
+utils.prototype.decompress = function (value) {
+    try {
+        var output = lzw_decode(value);
+        if (output) return JSON.parse(output);
+    }
+    catch (e) {
+    }
+    try {
+        var output = LZString.decompress(value);
+        if (output) return JSON.parse(output);
+    }
+    catch (e) {
+    }
+    try {
+        return JSON.parse(value);
+    }
+    catch (e) {
+        main.log(e);
+    }
+    return null;
 }
 
 ////// 设置本地存储 //////
@@ -161,28 +154,6 @@ utils.prototype.setLocalStorage = function (key, value) {
         main.log(e);
         return false;
     }
-}
-
-utils.prototype.decompress = function (value) {
-    try {
-        var output = lzw_decode(value);
-        if (output) return JSON.parse(output);
-    }
-    catch (e) {
-    }
-    try {
-        var output = LZString.decompress(value);
-        if (output) return JSON.parse(output);
-    }
-    catch (e) {
-    }
-    try {
-        return JSON.parse(value);
-    }
-    catch (e) {
-        main.log(e);
-    }
-    return null;
 }
 
 ////// 获得本地存储 //////
@@ -475,7 +446,7 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
         return 'K' + t.substring(4);
     else if (t.indexOf('random:') == 0)
         return 'X' + t.substring(7);
-    return '';
+    return '('+t+')';
 }
 
 ////// 解密路线 //////
@@ -485,8 +456,9 @@ utils.prototype.decodeRoute = function (route) {
     // 解压缩
     try {
         var v = LZString.decompressFromBase64(route);
-        if (/^[a-zA-Z0-9+\/=:]*$/.test(v)) {
-            route = v;
+        if (v != null && /^[-_a-zA-Z0-9+\/=:()]*$/.test(v)) {
+            if (v != "" || route.length < 8)
+                route = v;
         }
     } catch (e) {
     }
@@ -525,6 +497,15 @@ utils.prototype._decodeRoute_number2id = function (number) {
 }
 
 utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
+    // --- 特殊处理自定义项
+    if (c == '(') {
+        var idx = decodeObj.route.indexOf(')', decodeObj.index);
+        if (idx >= 0) {
+            decodeObj.ans.push(decodeObj.route.substring(decodeObj.index, idx));
+            decodeObj.index = idx + 1;
+            return;
+        }
+    }
     var nxt = (c == 'I' || c == 'e' || c == 'F' || c == 'S' || c == 'Q' || c == 't') ?
         this._decodeRoute_getString(decodeObj) : this._decodeRoute_getNumber(decodeObj);
 
@@ -618,6 +599,7 @@ utils.prototype.getCookie = function (name) {
 
 ////// 设置statusBar的innerHTML，会自动斜体和放缩，也可以增加自定义css //////
 utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
+    if (!core.statusBar[name]) return;
     if (typeof value == 'number') value = this.formatBigNumber(value);
     // 判定是否斜体
     var italic = /^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(value);
@@ -640,6 +622,12 @@ utils.prototype.strlen = function (str) {
 utils.prototype.reverseDirection = function (direction) {
     direction = direction || core.getHeroLoc('direction');
     return {"left":"right","right":"left","down":"up","up":"down"}[direction] || direction;
+}
+
+utils.prototype.matchWildcard = function (pattern, string) {
+    return new RegExp('^' + pattern.split(/\*+/).map(function (s) {
+        return s.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
+    }).join('.*') + '$').test(string);
 }
 
 ////// Base64加密 //////
@@ -921,7 +909,7 @@ utils.prototype.myprompt = function (hint, value, callback) {
 }
 
 ////// 动画显示某对象 //////
-utils.prototype.show = function (obj, speed, callback) {
+utils.prototype.showWithAnimate = function (obj, speed, callback) {
     obj.style.display = 'block';
     if (!speed && main.mode != 'play') {
         obj.style.opacity = 1;
@@ -941,7 +929,7 @@ utils.prototype.show = function (obj, speed, callback) {
 }
 
 ////// 动画使某对象消失 //////
-utils.prototype.hide = function (obj, speed, callback) {
+utils.prototype.hideWithAnimate = function (obj, speed, callback) {
     if (!speed || main.mode != 'play') {
         obj.style.display = 'none';
         if (callback) callback();
@@ -960,7 +948,7 @@ utils.prototype.hide = function (obj, speed, callback) {
     }, speed);
 }
 
-utils.prototype.encodeCanvas = function (ctx) {
+utils.prototype._encodeCanvas = function (ctx) {
     var list = [];
     var width = ctx.canvas.width, height = ctx.canvas.height;
     ctx.mozImageSmoothingEnabled = false;
@@ -987,7 +975,7 @@ utils.prototype.encodeCanvas = function (ctx) {
 }
 
 ////// 解析arr数组，并绘制到tempCanvas上 //////
-utils.prototype.decodeCanvas = function (arr, width, height) {
+utils.prototype._decodeCanvas = function (arr, width, height) {
     // 清空tempCanvas
     var tempCanvas = core.bigmap.tempCanvas;
     tempCanvas.canvas.width = width;
@@ -1070,7 +1058,7 @@ utils.prototype._export = function (floorIds) {
     // map
     var content = floorIds.length + "\n" + core.__SIZE__ + " " + core.__SIZE__ + "\n\n";
     floorIds.forEach(function (floorId) {
-        var arr = core.maps.getMapArray(core.status.maps[floorId].blocks);
+        var arr = core.maps._getMapArrayFromBlocks(core.status.maps[floorId].blocks);
         content += arr.map(function (x) {
             // check monster
             x.forEach(function (t) {

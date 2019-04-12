@@ -16,8 +16,7 @@ function core() {
         'ground': null,
         'items': {},
         'enemys': {},
-        'icons': {},
-        'events': {}
+        'icons': {}
     }
     this.timeout = {
         'tipTimeout': null,
@@ -67,6 +66,7 @@ function core() {
         'isPC': true, // 是否是PC
         'isAndroid': false, // 是否是Android
         'isIOS': false, // 是否是iOS
+        'string': 'PC',
         'isWeChat': false, // 是否是微信
         'isQQ': false, // 是否是QQ
         'isChrome': false, // 是否是Chrome
@@ -83,8 +83,8 @@ function core() {
     this.domStyle = {
         scale: 1.0,
         isVertical: false,
-        toolbarBtn: false,
         showStatusBar: true,
+        toolbarBtn: false,
     }
     this.bigmap = {
         canvas: ["bg", "event", "event2", "fg", "damage"],
@@ -102,7 +102,9 @@ function core() {
             "data": null,
             "time": 0,
             "updated": false,
-        }
+        },
+        "favorite": [],
+        "favoriteName": {}
     }
     this.initStatus = {
         'played': false,
@@ -217,6 +219,7 @@ core.prototype.init = function (coreData, callback) {
     this._init_flags();
     this._init_platform();
     this._init_others();
+    this._initPlugins();
 
     core.loader._load(function () {
         core._afterLoadResources(callback);
@@ -272,6 +275,7 @@ core.prototype._init_platform = function () {
             core.platform.isPC = false;
         }
     });
+    core.platform.string = core.platform.isPC ? "PC" : core.platform.isAndroid ? "Android" : core.platform.isIOS ? "iOS" : "";
     core.platform.supportCopy = document.queryCommandSupported || document.queryCommandSupported("copy");
     var chrome = /Chrome\/(\d+)\./i.exec(navigator.userAgent);
     if (chrome && parseInt(chrome[1]) >= 50) core.platform.isChrome = true;
@@ -293,7 +297,7 @@ core.prototype._init_platform = function () {
 }
 
 core.prototype._init_checkLocalForage = function () {
-    core.platform.useLocalForage = core.getLocalStorage('useLocalForage', !core.platform.isIOS);
+    core.platform.useLocalForage = core.getLocalStorage('useLocalForage', true);
     var _error = function (e) {
         main.log(e);
         core.platform.useLocalForage = false;
@@ -338,9 +342,10 @@ core.prototype._init_others = function () {
 
 core.prototype._afterLoadResources = function (callback) {
     // 初始化地图
-    core.initStatus.maps = core.maps.initMaps(core.floorIds);
+    core.initStatus.maps = core.maps._initMaps();
     core.control._setRequestAnimationFrame();
-    core._initPlugins();
+    if (core.plugin._afterLoadResources)
+        core.plugin._afterLoadResources();
     core.showStartAnimate();
     if (callback) callback();
 }
@@ -382,13 +387,16 @@ core.prototype._forwardFunc = function (name, funcname) {
     }
 
     if (core[funcname]) {
-        console.error("ERROR: Cannot forward function " + funcname + " from " + name + "!");
+        console.error("ERROR: 无法转发 "+name+" 中的函数 "+funcname+" 到 core 中！同名函数已存在。");
         return;
     }
     var parameterInfo = /^\s*function\s*[\w_$]*\(([\w_,$\s]*)\)\s*\{/.exec(core[name][funcname].toString());
     var parameters = (parameterInfo == null ? "" : parameterInfo[1]).replace(/\s*/g, '').replace(/,/g, ', ');
     // core[funcname] = new Function(parameters, "return core."+name+"."+funcname+"("+parameters+");");
     eval("core." + funcname + " = function (" + parameters + ") {\n\treturn core." + name + "." + funcname + "(" + parameters + ");\n}");
+    if (name == 'plugin') {
+        main.log("插件函数转发：core."+funcname+" = core.plugin."+funcname);
+    }
 }
 
 core.prototype.doFunc = function (func, _this) {

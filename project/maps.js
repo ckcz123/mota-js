@@ -67,7 +67,7 @@ var maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
 	"70": {"cls":"items","id":"sword0"},
 	"71": {"cls":"items","id":"shield0"},
 	"72": {"cls":"items","id":"skill1"},
-	"73": {"cls":"items","id":"I73"},
+	"73": {"cls":"items","id":"wand"},
 	"81": {"cls":"terrains","id":"yellowDoor","trigger":"openDoor"},
 	"82": {"cls":"terrains","id":"blueDoor","trigger":"openDoor"},
 	"83": {"cls":"terrains","id":"redDoor","trigger":"openDoor"},

@@ -151,7 +151,7 @@ main.floors.sample1=
             "type": "hide"
         },
         {
-            "type": "setFg",
+            "type": "setCurtain",
             "color": [
                 0,
                 0,
@@ -184,7 +184,7 @@ main.floors.sample1=
     "2,11": [
         "\t[杰克,thief]喂！醒醒！快醒醒！",
         {
-            "type": "setFg",
+            "type": "setCurtain",
             "time": 1500
         },
         "\t[hero]额，我这是在什么地方？",

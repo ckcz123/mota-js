@@ -37,6 +37,11 @@ editor_blockly = function () {
           {"text": "防御+4", "effect": "status:def+=4"},
           {"text": "魔防+10", "effect": "status:mdef+=10"}
         ]
+      },{
+        "id": "keyShop1",
+        "textInList": "回收钥匙商店",
+        "commonEvent": "回收钥匙商店",
+        "args": ""
       }],'shop'),
       MotaActionBlocks['afterBattle_m'].xmlText(),
       MotaActionBlocks['afterGetItem_m'].xmlText(),
@@ -71,6 +76,7 @@ editor_blockly = function () {
           ])
         ])
       ]),
+      MotaActionBlocks['confirm_s'].xmlText(),
     ],
     '数据相关':[
       MotaActionBlocks['setValue_s'].xmlText([
@@ -105,12 +111,14 @@ editor_blockly = function () {
     ],
     '事件控制':[
       MotaActionBlocks['if_s'].xmlText(),
+      MotaActionBlocks['if_1_s'].xmlText(),
       MotaActionFunctions.actionParser.parseList({"type": "switch", "condition": "判别值", "caseList": [
         {"action": [{"type": "comment", "text": "当判别值是值的场合执行此事件"}]},
-        {"action": []},
+        {"action": [], "nobreak": true},
         {"case": "default", "action": [{"type": "comment", "text": "当没有符合的值的场合执行default事件"}]},
       ]}),
       MotaActionBlocks['while_s'].xmlText(),
+      MotaActionBlocks['dowhile_s'].xmlText(),
       MotaActionBlocks['break_s'].xmlText(),
       MotaActionBlocks['continue_s'].xmlText(),
       MotaActionBlocks['revisit_s'].xmlText(),
@@ -136,8 +144,8 @@ editor_blockly = function () {
       MotaActionBlocks['animate_s'].xmlText(),
       MotaActionBlocks['showStatusBar_s'].xmlText(),
       MotaActionBlocks['hideStatusBar_s'].xmlText(),
-      MotaActionBlocks['setFg_0_s'].xmlText(),
-      MotaActionBlocks['setFg_1_s'].xmlText(),
+      MotaActionBlocks['setCurtain_0_s'].xmlText(),
+      MotaActionBlocks['setCurtain_1_s'].xmlText(),
       MotaActionBlocks['screenFlash_s'].xmlText(),
       MotaActionBlocks['setWeather_s'].xmlText(),
       MotaActionBlocks['playBgm_s'].xmlText(),
@@ -154,6 +162,7 @@ editor_blockly = function () {
     ],
     '原生脚本':[
       MotaActionBlocks['function_s'].xmlText(),
+      MotaActionBlocks['unknown_s'].xmlText(),
     ],
     '值块':[
       MotaActionBlocks['setValue_s'].xmlText([
@@ -583,6 +592,7 @@ function omitedcheckUpdateFunction(event) {
             'showTextImage_s': 'EvalString_0',
             'function_s': 'RawEvalString_0',
             'shopsub': 'EvalString_3',
+            'confirm_s': 'EvalString_0',
         }
         var f = b ? textStringDict[b.type] : null;
         if (f) {

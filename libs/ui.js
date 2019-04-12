@@ -555,6 +555,10 @@ ui.prototype._calTextBoxWidth = function (ctx, content, min_width, max_width, fo
 
 ////// 处理 \i[xxx] 的问题
 ui.prototype._getDrawableIconInfo = function (id) {
+    var splt = id.split(':');
+    if (splt[0] == 'flag' && splt.length > 1) { // 使用变量表示图标
+        id = core.getFlag(splt[1], id);
+    }
     var image = null, icon = null;
     ["terrains","animates","items","npcs","enemys"].forEach(function (v) {
         if (core.material.icons[v][id] != null) {
@@ -1004,6 +1008,12 @@ ui.prototype._drawChoices_getVerticalPosition = function (titleInfo, choices, hP
         var lines = core.splitLines('ui', realContent, hPos.validWidth, this._buildFont(15, true));
         if (titleInfo.title) height += 25;
         height += lines.length * 20;
+    }
+    if(bottom-height<0){
+        var sep = Math.ceil((height-bottom)/32);
+        choice_top += sep * 32;
+        bottom += sep*32;
+        core.status.event.ui.sep = sep;
     }
     return {top: bottom - height, height: height, bottom: bottom, choice_top: choice_top };
 }

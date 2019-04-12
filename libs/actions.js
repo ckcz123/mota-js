@@ -779,6 +779,7 @@ actions.prototype._sys_longClick = function (x, y, fromEvent) {
 actions.prototype._selectChoices = function (length, keycode, callback) {
     var topIndex = this.HSIZE - parseInt((length - 1) / 2);
     if (keycode == 13 || keycode == 32 || keycode == 67) {
+		core.status.event.ui.sep = 0;
         callback.apply(this, [this.HSIZE, topIndex + core.status.event.selection]);
     }
     if (keycode >= 49 && keycode <= 57) {
@@ -883,7 +884,7 @@ actions.prototype._clickAction = function (x, y) {
         var choices = data.choices;
         if (choices.length == 0) return;
         if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
-            var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
+            var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.sep || 0);
             if (y >= topIndex && y < topIndex + choices.length) {
                 // 选择
                 core.status.route.push("choices:" + (y - topIndex));

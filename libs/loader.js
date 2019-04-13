@@ -13,12 +13,12 @@ loader.prototype._init = function () {
 }
 
 ////// 设置加载进度条进度 //////
-loader.prototype.setStartProgressVal = function (val) {
+loader.prototype._setStartProgressVal = function (val) {
     core.dom.startTopProgress.style.width = val + '%';
 }
 
 ////// 设置加载进度条提示文字 //////
-loader.prototype.setStartLoadTipText = function (text) {
+loader.prototype._setStartLoadTipText = function (text) {
     core.dom.startTopLoadTips.innerHTML = text;
 }
 
@@ -38,11 +38,11 @@ loader.prototype._load = function (callback) {
 
 loader.prototype._loadIcons = function () {
     this.loadImage("icons.png", function (id, image) {
-        var images = core.cropImage(image);
+        var images = core.splitImage(image);
         for (var key in core.statusBar.icons) {
             if (typeof core.statusBar.icons[key] == 'number') {
                 core.statusBar.icons[key] = images[core.statusBar.icons[key]];
-                if (core.isset(core.statusBar.image[key]))
+                if (core.statusBar.image[key] != null)
                     core.statusBar.image[key].src = core.statusBar.icons[key].src;
             }
         }
@@ -57,7 +57,7 @@ loader.prototype._loadExtraImages = function (callback) {
     core.material.images.images = {};
 
     var images = core.clone(core.images);
-    if (images.indexOf("hero.png")<0)
+    if (images.indexOf("hero.png") < 0)
         images.push("hero.png");
 
     this.loadImages(images, core.material.images.images, callback);
@@ -73,7 +73,7 @@ loader.prototype._loadAutotiles = function (callback) {
         });
 
         setTimeout(function () {
-            core.maps.makeAutotileEdges();
+            core.maps._makeAutotileEdges();
         });
 
         callback();
@@ -82,16 +82,16 @@ loader.prototype._loadAutotiles = function (callback) {
 
 loader.prototype._loadTilesets = function (callback) {
     core.material.images.tilesets = {};
-    if (!core.isset(core.tilesets)) core.tilesets = [];
+    core.tilesets = core.tilesets || [];
     core.loader.loadImages(core.clone(core.tilesets), core.material.images.tilesets, function () {
         // 检查宽高是32倍数，如果出错在控制台报错
         for (var imgName in core.material.images.tilesets) {
             var img = core.material.images.tilesets[imgName];
-            if (img.width%32!=0 || img.height%32!=0) {
-                console.warn("警告！"+imgName+"的宽或高不是32的倍数！");
+            if (img.width % 32 != 0 || img.height % 32 != 0) {
+                console.warn("警告！" + imgName + "的宽或高不是32的倍数！");
             }
-            if (img.width * img.height > 32*32*3000) {
-                console.warn("警告！"+imgName+"上的图块素材个数大于3000！");
+            if (img.width * img.height > 32 * 32 * 3000) {
+                console.warn("警告！" + imgName + "上的图块素材个数大于3000！");
             }
         }
         callback();
@@ -99,19 +99,19 @@ loader.prototype._loadTilesets = function (callback) {
 }
 
 loader.prototype.loadImages = function (names, toSave, callback) {
-    if (!core.isset(names) || names.length==0) {
-        if (core.isset(callback)) callback();
+    if (!names || names.length == 0) {
+        if (callback) callback();
         return;
     }
     var items = 0;
-    for (var i=0;i<names.length;i++) {
+    for (var i = 0; i < names.length; i++) {
         this.loadImage(names[i], function (id, image) {
-            core.loader.setStartLoadTipText('正在加载图片 ' + id + "...");
+            core.loader._setStartLoadTipText('正在加载图片 ' + id + "...");
             toSave[id] = image;
             items++;
-            core.loader.setStartProgressVal(items * (100 / names.length));
+            core.loader._setStartProgressVal(items * (100 / names.length));
             if (items == names.length) {
-                if (core.isset(callback)) callback();
+                if (callback) callback();
             }
         })
     }
@@ -119,9 +119,9 @@ loader.prototype.loadImages = function (names, toSave, callback) {
 
 loader.prototype.loadImage = function (imgName, callback) {
     try {
-        var name=imgName;
-        if (name.indexOf(".")<0)
-            name=name+".png";
+        var name = imgName;
+        if (name.indexOf(".") < 0)
+            name = name + ".png";
         var image = new Image();
         image.onload = function () {
             callback(imgName, image);
@@ -144,7 +144,7 @@ loader.prototype._loadAnimates = function () {
                 data.images = [];
                 data.images_rev = [];
                 content.bitmaps.forEach(function (t2) {
-                    if (!core.isset(t2) || t2 == "") {
+                    if (!t2) {
                         data.images.push(null);
                     }
                     else {
@@ -204,15 +204,15 @@ loader.prototype._loadMusic = function () {
 loader.prototype.loadOneMusic = function (name) {
     var music = new Audio();
     music.preload = 'none';
-    if (main.bgmRemote) music.src = main.bgmRemoteRoot+core.firstData.name+'/'+name;
-    else music.src = 'project/sounds/'+name;
+    if (main.bgmRemote) music.src = main.bgmRemoteRoot + core.firstData.name + '/' + name;
+    else music.src = 'project/sounds/' + name;
     music.loop = 'loop';
     core.material.bgms[name] = music;
 }
 
 loader.prototype.loadOneSound = function (name) {
     if (core.musicStatus.audioContext != null) {
-        core.http('GET', 'project/sounds/'+name, null, function (data) {
+        core.http('GET', 'project/sounds/' + name, null, function (data) {
             try {
                 core.musicStatus.audioContext.decodeAudioData(data, function (buffer) {
                     core.material.sounds[name] = buffer;
@@ -232,40 +232,18 @@ loader.prototype.loadOneSound = function (name) {
     }
     else {
         var music = new Audio();
-        music.src = 'project/sounds/'+name;
+        music.src = 'project/sounds/' + name;
         core.material.sounds[name] = music;
     }
 }
 
-loader.prototype.freeBgm = function (name) {
-    if (!core.isset(core.material.bgms[name])) return;
-    // 从cachedBgms中删除
-    core.musicStatus.cachedBgms = core.musicStatus.cachedBgms.filter(function (t) {return t!=name; });
-    // 清掉缓存
-    core.material.bgms[name].removeAttribute("src");
-    core.material.bgms[name].load();
-    core.material.bgms[name] = null;
-    if (name == core.musicStatus.playingBgm) {
-        core.musicStatus.playingBgm = null;
-    }
-    // 三秒后重新加载
-    setTimeout(function () {
-        core.loader.loadOneMusic(name);
-    }, 3000);
-}
-
-loader.prototype._preloadBgm = function (bgm) {
-    bgm.volume = 0;
-    bgm.play();
-}
-
 loader.prototype.loadBgm = function (name) {
-    if (!core.isset(core.material.bgms[name])) return;
+    if (!core.material.bgms[name]) return;
     // 如果没开启音乐，则不预加载
     if (!core.musicStatus.bgmStatus) return;
     // 是否已经预加载过
     var index = core.musicStatus.cachedBgms.indexOf(name);
-    if (index>=0) {
+    if (index >= 0) {
         core.musicStatus.cachedBgms.splice(index, 1);
     }
     else {
@@ -279,4 +257,28 @@ loader.prototype.loadBgm = function (name) {
     }
     // 移动到缓存最前方
     core.musicStatus.cachedBgms.unshift(name);
+}
+
+loader.prototype._preloadBgm = function (bgm) {
+    bgm.volume = 0;
+    bgm.play();
+}
+
+loader.prototype.freeBgm = function (name) {
+    if (!core.material.bgms[name]) return;
+    // 从cachedBgms中删除
+    core.musicStatus.cachedBgms = core.musicStatus.cachedBgms.filter(function (t) {
+        return t != name;
+    });
+    // 清掉缓存
+    core.material.bgms[name].removeAttribute("src");
+    core.material.bgms[name].load();
+    core.material.bgms[name] = null;
+    if (name == core.musicStatus.playingBgm) {
+        core.musicStatus.playingBgm = null;
+    }
+    // 三秒后重新加载
+    setTimeout(function () {
+        core.loader.loadOneMusic(name);
+    }, 3000);
 }

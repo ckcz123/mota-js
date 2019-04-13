@@ -41,15 +41,34 @@ editor.info
 /////////// 数据相关 ///////////
 
 editor.prototype.init = function (callback) {
+
+    editor_util_wrapper(editor);
+    editor_game_wrapper(editor, main, core);
+    editor_table_wrapper(editor);
+
+    var afterMainInit = function () {
+        editor.game.fixFunctionInGameData();
+        editor.main = main;
+        editor.core = core;
+        editor.fs = fs;
+        editor_file = editor_file(editor, function () {
+            editor.file = editor_file;
+            editor_mode = editor_mode(editor);
+            editor.mode = editor_mode;
+            core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.initStatus.maps);
+            core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function () {
+                afterCoreReset();
+            }, true);
+            core.events.setInitData(null);
+        });
+    }
+
     var afterCoreReset = function () {
-
-        main.editor.disableGlobalAnimate = false;//允许GlobalAnimate
-        // core.setHeroMoveTriggerInterval(); 
-
-        editor.idsInit(core.maps, core.icons.icons); // 初始化图片素材信息
+        
+        editor.game.idsInit(core.maps, core.icons.icons); // 初始化图片素材信息
         editor.drawInitData(core.icons.icons); // 初始化绘图
 
-        editor.fetchMapFromCore();
+        editor.game.fetchMapFromCore();
         editor.updateMap();
         editor.buildMark();
         editor.drawEventBlock();
@@ -70,100 +89,7 @@ editor.prototype.init = function (callback) {
 
     }
 
-    var afterMainInit = function () {
-        core.floors = JSON.parse(JSON.stringify(core.floors, function (k, v) {
-            if (v instanceof Function) {
-                return v.toString()
-            } else return v
-        }));
-        core.data = JSON.parse(JSON.stringify(core.data, function (k, v) {
-            if (v instanceof Function) {
-                return v.toString()
-            } else return v
-        }));
-        data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d = JSON.parse(JSON.stringify(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d, function (k, v) {
-            if (v instanceof Function) {
-                return v.toString()
-            } else return v
-        }));
-        editor.main = main;
-        editor.core = core;
-        editor.fs = fs;
-        editor_file = editor_file(editor, function () {
-            editor.file = editor_file;
-            editor_mode = editor_mode(editor);
-            editor.mode = editor_mode;
-            core.resetStatus(core.firstData.hero, null, core.firstData.floorId, null, core.initStatus.maps);
-            core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function () {
-                afterCoreReset();
-            }, true);
-            core.events.setInitData(null);
-        });
-    }
     afterMainInit();
-}
-
-editor.prototype.idsInit = function (maps, icons) {
-    editor.ids = [0];
-    editor.indexs = [];
-    var MAX_NUM = 0;
-    var keys=Object.keys(maps_90f36752_8815_4be8_b32b_d7fad1d0542e);
-    for(var ii=0;ii<keys.length;ii++){
-        var v=~~keys[ii];
-        if(v>MAX_NUM && v<core.icons.tilesetStartOffset)MAX_NUM=v;
-    }
-    editor.MAX_NUM=MAX_NUM;
-    var getInfoById = function (id) {
-        var block = maps.initBlock(0, 0, id);
-        if (hasOwnProp(block, 'event')) {
-            return block;
-        }
-    }
-    var point = 0;
-    for (var i = 0; i <= MAX_NUM; i++) {
-        var indexBlock = getInfoById(i);
-        editor.indexs[i] = [];
-        if (indexBlock) {
-            var id = indexBlock.event.id;
-            var indexId = indexBlock.id;
-            var allCls = Object.keys(icons);
-            if(i==17){
-                editor.ids.push({'idnum': 17, 'id': id, 'images': 'terrains'});
-                point++;
-                editor.indexs[i].push(point);
-                continue;
-            }
-            for (var j = 0; j < allCls.length; j++) {
-                if (id in icons[allCls[j]]) {
-                    editor.ids.push({'idnum': indexId, 'id': id, 'images': allCls[j], 'y': icons[allCls[j]][id]});
-                    point++;
-                    editor.indexs[i].push(point);
-                }
-            }
-        }
-    }
-    editor.indexs[0] = [0];
-
-    var startOffset = core.icons.tilesetStartOffset;
-    for (var i in core.tilesets) {
-        var imgName = core.tilesets[i];
-        var img = core.material.images.tilesets[imgName];
-        var width = Math.floor(img.width/32), height = Math.floor(img.height/32);
-        if(img.width%32 || img.height%32){
-            alert(imgName+'的长或宽不是32的整数倍, 请修改后刷新页面');
-        }
-        if(img.width*img.height > 32*32*3000){
-            alert(imgName+'上的图块数量超过了3000，请修改后刷新页面');
-        }
-        for (var id=startOffset; id<startOffset+width*height;id++) {
-            var x = (id-startOffset)%width, y = parseInt((id-startOffset)/width);
-            var indexBlock = getInfoById(id);
-            editor.ids.push({'idnum': id, 'id': indexBlock.event.id, 'images': imgName, "x": x, "y": y, isTile: true});
-            point++;
-            editor.indexs[id]=[point];
-        }
-        startOffset += core.icons.tilesetStartOffset;
-    }
 }
 
 editor.prototype.mapInit = function () {
@@ -193,39 +119,6 @@ editor.prototype.mapInit = function () {
     editor.currentFloorData.cannotMove = {};
 }
 
-editor.prototype.fetchMapFromCore = function(){
-    var mapArray = core.maps.saveMap(core.status.floorId);
-    editor.map = mapArray.map(function (v) {
-        return v.map(function (v) {
-            var x = parseInt(v), y = editor.indexs[x];
-            if (!core.isset(y)) {
-                printe("素材数字"+x+"未定义。是不是忘了注册，或者接档时没有覆盖icons.js和maps.js？");
-                y = [0];
-            }
-            return editor.ids[y[0]]
-        })
-    });
-    editor.currentFloorId = core.status.floorId;
-    editor.currentFloorData = core.floors[core.status.floorId];
-    for(var ii=0,name;name=['bgmap','fgmap'][ii];ii++){
-        var mapArray = editor.currentFloorData[name];
-        if(!mapArray || JSON.stringify(mapArray)==JSON.stringify([])){//未设置或空数组
-            //与editor.map同形的全0
-            mapArray=eval('['+Array(editor.map.length+1).join('['+Array(editor.map[0].length+1).join('0,')+'],')+']');
-        }
-        editor[name]=mapArray.map(function (v) {
-            return v.map(function (v) {
-                var x = parseInt(v), y = editor.indexs[x];
-                if (!core.isset(y)) {
-                    printe("素材数字"+x+"未定义。是不是忘了注册，或者接档时没有覆盖icons.js和maps.js？");
-                    y = [0];
-                }
-                return editor.ids[y[0]]
-            })
-        });
-    }
-}
-
 editor.prototype.changeFloor = function (floorId, callback) {
     for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
         var mapArray=editor[name].map(function (v) {
@@ -241,11 +134,11 @@ editor.prototype.changeFloor = function (floorId, callback) {
         core.bigmap.offsetY=0;
         editor.moveViewport(0,0);
 
-        editor.fetchMapFromCore();
+        editor.game.fetchMapFromCore();
         editor.updateMap();
         editor_mode.floor();
         editor.drawEventBlock();
-        if (core.isset(callback)) callback();
+        if (callback) callback();
     });
 }
 
@@ -254,22 +147,22 @@ editor.prototype.changeFloor = function (floorId, callback) {
 editor.prototype.drawEventBlock = function () {
     var fg=document.getElementById('efg').getContext('2d');
 
-    fg.clearRect(0, 0, 416, 416);
-    for (var i=0;i<13;i++) {
-        for (var j=0;j<13;j++) {
+    fg.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+    for (var i=0;i<core.__SIZE__;i++) {
+        for (var j=0;j<core.__SIZE__;j++) {
             var color=[];
             var loc=(i+core.bigmap.offsetX/32)+","+(j+core.bigmap.offsetY/32);
-            if (core.isset(editor.currentFloorData.events[loc]))
+            if (editor.currentFloorData.events[loc])
                 color.push('#FF0000');
-            if (core.isset(editor.currentFloorData.changeFloor[loc]))
+            if (editor.currentFloorData.changeFloor[loc])
                 color.push('#00FF00');
-            if (core.isset(editor.currentFloorData.afterBattle[loc]))
+            if (editor.currentFloorData.afterBattle[loc])
                 color.push('#FFFF00');
-            if (core.isset(editor.currentFloorData.afterGetItem[loc]))
+            if (editor.currentFloorData.afterGetItem[loc])
                 color.push('#00FFFF');
-            if (core.isset(editor.currentFloorData.afterOpenDoor[loc]))
+            if (editor.currentFloorData.afterOpenDoor[loc])
                 color.push('#FF00FF');
-            if (core.isset(editor.currentFloorData.cannotMove[loc]))
+            if (editor.currentFloorData.cannotMove[loc])
                 color.push('#0000FF');
             for(var kk=0,cc;cc=color[kk];kk++){
                 fg.fillStyle = cc;
@@ -302,14 +195,12 @@ editor.prototype.updateMap = function () {
     core.status.thisMap.blocks = blocks;
 
     var updateMap = function () {
-        core.removeGlobalAnimate(null, null, true);
+        core.removeGlobalAnimate();
         core.clearMap('bg');
         core.clearMap('event');
         core.clearMap('event2');
         core.clearMap('fg');
-        core.maps._drawMap_drawBgFg();
-        core.maps._drawMap_drawEvent();
-        core.setGlobalAnimate(core.values.animateSpeed);
+        core.maps._drawMap_drawAll();
     }
     updateMap();
 
@@ -352,26 +243,11 @@ editor.prototype.updateMap = function () {
 }
 
 editor.prototype.moveViewport=function(x,y){
-    core.bigmap.offsetX = core.clamp(core.bigmap.offsetX+32*x, 0, 32*core.bigmap.width-416);
-    core.bigmap.offsetY = core.clamp(core.bigmap.offsetY+32*y, 0, 32*core.bigmap.height-416);
+    core.bigmap.offsetX = core.clamp(core.bigmap.offsetX+32*x, 0, 32*core.bigmap.width-core.__PIXELS__);
+    core.bigmap.offsetY = core.clamp(core.bigmap.offsetY+32*y, 0, 32*core.bigmap.height-core.__PIXELS__);
     core.control.updateViewport();
     editor.buildMark();
     editor.drawPosSelection();
-}
-
-/////////// 通用 ///////////
-
-editor.prototype.guid = function () {
-    return 'id_' + 'xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-}
-
-editor.prototype.HTMLescape = function (str_) {
-    return String(str_).split('').map(function (v) {
-        return '&#' + v.charCodeAt(0) + ';'
-    }).join('');
 }
 
 /////////// 界面交互相关 ///////////
@@ -511,14 +387,14 @@ editor.prototype.buildMark = function(){
     var mapRowMark=document.getElementById('mapRowMark');
     var buildMark = function (offsetX,offsetY) {
         var colNum = ' ';
-        for (var i = 0; i < 13; i++) {
+        for (var i = 0; i < core.__SIZE__; i++) {
             var tpl = '<td>' + (i+offsetX) + '<div class="colBlock" style="left:' + (i * 32 + 1) + 'px;"></div></td>';
             colNum += tpl;
         }
         arrColMark.innerHTML = '<tr>' + colNum + '</tr>';
         mapColMark.innerHTML = '<tr>' + colNum + '</tr>';
         var rowNum = ' ';
-        for (var i = 0; i < 13; i++) {
+        for (var i = 0; i < core.__SIZE__; i++) {
             var tpl = '<tr><td>' + (i+offsetY) + '<div class="rowBlock" style="top:' + (i * 32 + 1) + 'px;"></div></td></tr>';
             rowNum += tpl;
         }
@@ -527,29 +403,29 @@ editor.prototype.buildMark = function(){
     }
     var buildMark_mobile = function (offsetX,offsetY) {
         var colNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="colBlock" style="left:' + (i * 96/13 ) + 'vw;"></div></td>';
+        for (var i = 0; i < core.__SIZE__; i++) {
+            var tpl = '<td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="colBlock" style="left:' + (i * 96/core.__SIZE__) + 'vw;"></div></td>';
             colNum += tpl;
         }
         arrColMark.innerHTML = '<tr>' + colNum + '</tr>';
         //mapColMark.innerHTML = '<tr>' + colNum + '</tr>';
         var rowNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<tr><td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="rowBlock" style="top:' + (i * 96/13 ) + 'vw;"></div></td></tr>';
+        for (var i = 0; i < core.__SIZE__; i++) {
+            var tpl = '<tr><td>' + (' '+i).slice(-2).replace(' ','&nbsp;') + '<div class="rowBlock" style="top:' + (i * 96/core.__SIZE__) + 'vw;"></div></td></tr>';
             rowNum += tpl;
         }
         arrRowMark.innerHTML = rowNum;
         //mapRowMark.innerHTML = rowNum;
         //=====
         var colNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<div class="coltd" style="left:' + (i * 96/13 ) + 'vw;"><div class="coltext">' + (' '+(i+offsetX)).slice(-2).replace(' ','&nbsp;') + '</div><div class="colBlock"></div></div>';
+        for (var i = 0; i < core.__SIZE__; i++) {
+            var tpl = '<div class="coltd" style="left:' + (i * 96/core.__SIZE__) + 'vw;"><div class="coltext">' + (' '+(i+offsetX)).slice(-2).replace(' ','&nbsp;') + '</div><div class="colBlock"></div></div>';
             colNum += tpl;
         }
         mapColMark.innerHTML = '<div class="coltr">' + colNum + '</div>';
         var rowNum = ' ';
-        for (var i = 0; i < 13; i++) {
-            var tpl = '<div class="rowtr"><div class="rowtd"  style="top:' + (i * 96/13 ) + 'vw;"><div class="rowtext">' + (' '+(i+offsetY)).slice(-2).replace(' ','&nbsp;') + '</div><div class="rowBlock"></div></div></div>';
+        for (var i = 0; i < core.__SIZE__; i++) {
+            var tpl = '<div class="rowtr"><div class="rowtd"  style="top:' + (i * 96/core.__SIZE__) + 'vw;"><div class="rowtext">' + (' '+(i+offsetY)).slice(-2).replace(' ','&nbsp;') + '</div><div class="rowBlock"></div></div></div>';
             rowNum += tpl;
         }
         mapRowMark.innerHTML = rowNum;
@@ -578,9 +454,9 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent){
     dataSelection.style.left = pos.x * 32 + 'px';
     dataSelection.style.top = pos.y * ysize + 'px';
     dataSelection.style.height = ysize - 6 + 'px';
-    setTimeout(function(){selectBox.isSelected = true;});
+    setTimeout(function(){selectBox.isSelected(true);});
     editor.info = JSON.parse(JSON.stringify(thisevent));
-    tip.infos = JSON.parse(JSON.stringify(thisevent));
+    tip.infos(JSON.parse(JSON.stringify(thisevent)));
     editor.pos=pos;
     editor_mode.onmode('nextChange');
     editor_mode.onmode('enemyitem');
@@ -622,7 +498,7 @@ editor.prototype.listen = function () {
         }
         if (unselect) {
             if (clickpath.indexOf('eui') === -1) {
-                if (selectBox.isSelected) {
+                if (selectBox.isSelected()) {
                     editor_mode.onmode('');
                     editor.file.saveFloorFile(function (err) {
                         if (err) {
@@ -632,7 +508,7 @@ editor.prototype.listen = function () {
                         ;printf('地图保存成功');
                     });
                 }
-                selectBox.isSelected = false;
+                selectBox.isSelected(false);
                 editor.info = {};
             }
         }
@@ -662,7 +538,7 @@ editor.prototype.listen = function () {
         editor.loc = {
             'x': scrollLeft + xx - mid.offsetLeft - mapEdit.offsetLeft,
             'y': scrollTop + yy - mid.offsetTop - mapEdit.offsetTop,
-            'size': editor.isMobile?(32*innerWidth*0.96/416):32
+            'size': editor.isMobile?(32*innerWidth*0.96/core.__PIXELS__):32
         };
         return editor.loc;
     }//返回可用的组件内坐标
@@ -690,7 +566,7 @@ editor.prototype.listen = function () {
         }
         holdingPath = 0;
         stepPostfix = [];
-        uc.clearRect(0, 0, 416, 416);
+        uc.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
     }//用于鼠标移出canvas时的自动清除状态
 
     eui.oncontextmenu=function(e){e.preventDefault()}
@@ -710,13 +586,13 @@ editor.prototype.listen = function () {
             editor.showMidMenu(e.clientX,e.clientY);
             return;
         }
-        if (!selectBox.isSelected) {
+        if (!selectBox.isSelected()) {
             var loc = eToLoc(e);
             var pos = locToPos(loc,true);
             editor_mode.onmode('nextChange');
             editor_mode.onmode('loc');
             //editor_mode.loc();
-            //tip.whichShow = 1;
+            //tip.whichShow(1);
             if(editor.isMobile)editor.showMidMenu(e.clientX,e.clientY);
             return;
         }
@@ -726,7 +602,7 @@ editor.prototype.listen = function () {
         mouseOutCheck = 2;
         setTimeout(clear1);
         e.stopPropagation();
-        uc.clearRect(0, 0, 416, 416);
+        uc.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
         var loc = eToLoc(e);
         var pos = locToPos(loc,true);
         stepPostfix = [];
@@ -735,8 +611,8 @@ editor.prototype.listen = function () {
     }
 
     eui.onmousemove = function (e) {
-        if (!selectBox.isSelected) {
-            //tip.whichShow = 1;
+        if (!selectBox.isSelected()) {
+            //tip.whichShow(1);
             return;
         }
 
@@ -766,8 +642,8 @@ editor.prototype.listen = function () {
     }
 
     eui.onmouseup = function (e) {
-        if (!selectBox.isSelected) {
-            //tip.whichShow = 1;
+        if (!selectBox.isSelected()) {
+            //tip.whichShow(1);
             return;
         }
         holdingPath = 0;
@@ -812,7 +688,7 @@ editor.prototype.listen = function () {
             editor.updateMap();
             holdingPath = 0;
             stepPostfix = [];
-            uc.clearRect(0, 0, 416, 416);
+            uc.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
         }
     }
 
@@ -897,7 +773,7 @@ editor.prototype.listen = function () {
         if (e.altKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
             e.preventDefault();
         //Ctrl+z 撤销上一步undo
-        if (e.keyCode == 90 && e.ctrlKey && editor.preMapData && currDrawData.pos.length && selectBox.isSelected) {
+        if (e.keyCode == 90 && e.ctrlKey && editor.preMapData && currDrawData.pos.length && selectBox.isSelected()) {
             editor.map = JSON.parse(JSON.stringify(editor.preMapData.map));
             editor.fgmap = JSON.parse(JSON.stringify(editor.preMapData.fgmap));
             editor.bgmap = JSON.parse(JSON.stringify(editor.preMapData.bgmap));
@@ -907,7 +783,7 @@ editor.prototype.listen = function () {
             editor.preMapData = null;
         }
         //Ctrl+y 重做一步redo
-        if (e.keyCode == 89 && e.ctrlKey && reDo && reDo.pos.length && selectBox.isSelected) {
+        if (e.keyCode == 89 && e.ctrlKey && reDo && reDo.pos.length && selectBox.isSelected()) {
             editor.preMapData = JSON.parse(JSON.stringify({map:editor.map,fgmap:editor.fgmap,bgmap:editor.bgmap}));
             for (var j = 0; j < reDo.pos.length; j++)
                 editor.map[reDo.pos[j].y][reDo.pos[j].x] = JSON.parse(JSON.stringify(reDo.info));
@@ -1029,7 +905,7 @@ editor.prototype.listen = function () {
                 } else if ((pos.y + 1) * ysize > editor.widthsX[spriter][3])
                     pos.y = ~~(editor.widthsX[spriter][3] / ysize) - 1;
 
-                selectBox.isSelected = true;
+                selectBox.isSelected(true);
                 // console.log(pos,core.material.images[pos.images].height)
                 dataSelection.style.left = pos.x * 32 + 'px';
                 dataSelection.style.top = pos.y * ysize + 'px';
@@ -1060,7 +936,7 @@ editor.prototype.listen = function () {
                         }
                     }
                 }
-                tip.infos = JSON.parse(JSON.stringify(editor.info));
+                tip.infos(JSON.parse(JSON.stringify(editor.info)));
                 editor_mode.onmode('nextChange');
                 editor_mode.onmode('enemyitem');
                 //editor_mode.enemyitem();
@@ -1132,12 +1008,12 @@ editor.prototype.listen = function () {
     chooseThis.onmousedown = function(e){
         editor.hideMidMenu();
         e.stopPropagation();
-        selectBox.isSelected = false;
+        selectBox.isSelected(false);
 
         editor_mode.onmode('nextChange');
         editor_mode.onmode('loc');
         //editor_mode.loc();
-        //tip.whichShow = 1;
+        //tip.whichShow(1);
         if(editor.isMobile)editor.showdataarea(false);
     }
 

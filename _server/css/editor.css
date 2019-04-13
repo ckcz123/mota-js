@@ -54,7 +54,7 @@ body {
     height: 630px;
 }
 
-#editArea {
+#mapEditArea {
     position: absolute;
     width: 100%;
     height: 400px;
@@ -107,7 +107,7 @@ body {
     top: 530px;
 }
 
-#editArea p {
+#mapEditArea p {
     margin: 10px;
     display: block;
     width: 70%;
@@ -148,7 +148,6 @@ body {
     height: 180px;
     left: 0;
     bottom: 0;
-    border-top: 1px solid #ccc;
     padding: 10px 5px;
     margin-left: 8px;;
     box-sizing: border-box;

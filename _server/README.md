@@ -1,5 +1,7 @@
 # editor
 
+[重构](refactoring.md)
+
 >! 以下均是v2.0时的说明, 未及时改动
 
 本目录下所有文件,以及`../editor.html`和`../启动服务.exe`([源码](http://github.com/ckcz123/mota-js-server/))是地图编辑器的所有组件.
@@ -31,7 +33,7 @@
 ``` js
 editor.mapInit();//清空地图
 editor.changeFloor('MT2')//切换地图
-editor.guid()//产生一个可以作为id的长随机字符串
+editor.util.guid()//产生一个可以作为id的长随机字符串
 ```
 
 `editor.updateMap`中画未定义快的报错

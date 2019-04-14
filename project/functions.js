@@ -522,7 +522,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var guards = [];
 	// 检查光环缓存
 	var index = x != null && y != null ? (x + "," + y) : "floor";
-	var cache = core.status.checkBlock.cache[index];
+	var cache = ((core.status.checkBlock||{}).cache||{})[index];
 	if (!cache) {
 		// 没有该点的缓存，则遍历每个图块
 		core.status.maps[floorId].blocks.forEach(function (block) {
@@ -554,6 +554,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		});
 
 		// 放入缓存中
+		core.status.checkBlock.cache = core.status.checkBlock.cache || {};
 		core.status.checkBlock.cache[index] = { "hp_buff": hp_buff, "atk_buff": atk_buff, "def_buff": def_buff, "guards": guards };
 	} else {
 		// 直接使用缓存数据
@@ -1219,7 +1220,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		type: type,
 		snipe: snipe,
 		ambush: ambush,
-		cache: {}
+		cache: (core.status.checkBlock||{}).cache||{}
 	};
 },
         "moveOneStep": function (x, y) {

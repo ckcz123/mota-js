@@ -1005,6 +1005,7 @@ utils.prototype.consoleOpened = function () {
     if (!core.flags.checkConsole) return false;
     if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized)
         return true;
+    if (!core.platform.isPC) return false;
     var threshold = 160;
     var zoom = Math.min(window.outerWidth / window.innerWidth, window.outerHeight / window.innerHeight);
     return window.outerWidth - zoom * window.innerWidth > threshold

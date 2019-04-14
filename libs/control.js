@@ -920,6 +920,7 @@ control.prototype.checkBlock = function () {
         core.drawTip("受到"+(core.status.checkBlock.type[loc]||"伤害")+damage+"点");
         this._checkBlock_soundAndAnimate(x, y);
         this._checkBlock_disableQuickShop();
+        core.status.hero.statistics.extraDamage += damage;
         if (core.status.hero.hp <= 0) {
             core.status.hero.hp=0;
             core.updateStatusBar();

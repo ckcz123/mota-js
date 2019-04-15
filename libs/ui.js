@@ -974,9 +974,9 @@ ui.prototype.drawChoices = function(content, choices) {
 
     content = core.replaceText(content || "");
     var titleInfo = this._getTitleAndIcon(content);
+    titleInfo.content = this._drawTextBox_drawImages(titleInfo.content);
     var hPos = this._drawChoices_getHorizontalPosition(titleInfo, choices);
     var vPos = this._drawChoices_getVerticalPosition(titleInfo, choices, hPos);
-    titleInfo.content = this._drawTextBox_drawImages(titleInfo.content);
     core.status.event.ui.offset = vPos.offset;
 
     var isWindowSkin = this.drawBackground(hPos.left, vPos.top, hPos.right, vPos.bottom);

@@ -1448,6 +1448,10 @@ events.prototype._action_lose = function (data, x, y, prefix) {
     this.lose(data.reason);
 }
 
+events.prototype._action_restart = function (data, x, y, prefix) {
+    core.restart();
+}
+
 events.prototype._action_function = function (data, x, y, prefix) {
     var func = data["function"];
     try {

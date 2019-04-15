@@ -395,6 +395,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"enableNegativeDamage": false,
 		"hatredDecrease": true,
 		"betweenAttackCeil": false,
+		"betweenAttackMax": false,
 		"useLoop": false,
 		"startUsingCanvas": false,
 		"startDirectly": false,

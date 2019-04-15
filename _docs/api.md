@@ -1913,9 +1913,17 @@ errorCallback可选，如果失败，则会将错误信息传入errorCallback()�
 此函数是异步的，只能通过回调函数来获得读取的结果或错误信息。
 
 
-core.clone(data)
+core.clone(data, filter, recursion)
 深拷贝一个对象。有关浅拷贝，深拷贝，基本类型和引用类型等相关知识可参见：
 https://zhuanlan.zhihu.com/p/26282765
+filter为过滤函数，如果设置且不为null则需传递一个可接受(name, value)的函数，
+并返回true或false，表示该项是否应该被深拷贝。
+recursion表示该filter是否应递归向下传递，如果为true则递归函数也将传该filter。
+例如：
+core.clone(core.status.hero, function(name, value) {
+    return name == 'items' || typeof value == 'number';
+}, false);
+这个例子将会深拷贝勇士的属性和道具。
 
 
 core.splitImage(image, width, height)

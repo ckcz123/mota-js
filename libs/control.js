@@ -919,6 +919,8 @@ control.prototype.checkBlock = function () {
         core.status.hero.hp -= damage;
         core.drawTip("受到"+(core.status.checkBlock.type[loc]||"伤害")+damage+"点");
         this._checkBlock_soundAndAnimate(x, y);
+        this._checkBlock_disableQuickShop();
+        core.status.hero.statistics.extraDamage += damage;
         if (core.status.hero.hp <= 0) {
             core.status.hero.hp=0;
             core.updateStatusBar();
@@ -933,6 +935,15 @@ control.prototype.checkBlock = function () {
 control.prototype._checkBlock_soundAndAnimate = function (x,y) {
     core.playSound('zone.mp3');
     core.drawAnimate("zone", x, y);
+}
+
+control.prototype._checkBlock_disableQuickShop = function () {
+    // 禁用快捷商店
+    if (core.flags.disableShopOnDamage) {
+        for (var shopId in core.status.shops) {
+            core.status.shops[shopId].visited = false;
+        }
+    }
 }
 
 ////// 阻击 //////

@@ -228,7 +228,8 @@ default : [null,"MT1",null,0,0,null,500,null]
 var toFloorId = IdString_0;
 if (Floor_List_0!='floorId') toFloorId = Floor_List_0;
 var loc = ', "loc": ['+Number_0+', '+Number_1+']';
-if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
+if (Stair_List_0==='now')loc = '';
+else if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 Int_0 = (Int_0!=='')  ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0 ?'':(', "ignoreChangeFloor": false');
@@ -323,10 +324,12 @@ action
     |   setVolume_s
     |   win_s
     |   lose_s
+    |   restart_s
     |   if_s
     |   if_1_s
     |   switch_s
     |   while_s
+    |   dowhile_s
     |   break_s
     |   continue_s
     |   input_s
@@ -579,7 +582,7 @@ show_s
 tooltip : show: 将禁用事件启用,楼层和动画时间可不填,xy可用逗号分隔表示多个点
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=show%EF%BC%9A%E5%B0%86%E4%B8%80%E4%B8%AA%E7%A6%81%E7%94%A8%E4%BA%8B%E4%BB%B6%E5%90%AF%E7%94%A8
 default : ["","","",500,false]
-colour : this.eventColor
+colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
   var pattern1 = /^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
@@ -612,7 +615,7 @@ hide_s
 tooltip : hide: 将一个启用事件禁用,所有参数均可不填,代表禁用事件自身,xy可用逗号分隔表示多个点
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=hide%EF%BC%9A%E5%B0%86%E4%B8%80%E4%B8%AA%E5%90%AF%E7%94%A8%E4%BA%8B%E4%BB%B6%E7%A6%81%E7%94%A8
 default : ["","","",500,false]
-colour : this.eventColor
+colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
   var pattern1 = /^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
@@ -728,20 +731,20 @@ return code;
 */;
 
 setBlock_s
-    :   '转变图块为' Int 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
+    :   '转变图块为' EvalString 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
     
 
 /* setBlock_s
 tooltip : setBlock：设置某个图块,忽略坐标楼层则为当前事件
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=setblock%EF%BC%9A%E8%AE%BE%E7%BD%AE%E6%9F%90%E4%B8%AA%E5%9B%BE%E5%9D%97
-colour : this.dataColor
-default : [0,"","",""]
+colour : this.mapColor
+default : ["yellowDoor","","",""]
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var code = '{"type": "setBlock", "number":'+Int_0+floorstr+IdString_0+'},\n';
+var code = '{"type": "setBlock", "number": "'+EvalString_0+'"'+floorstr+IdString_0+'},\n';
 return code;
 */;
 
@@ -753,7 +756,7 @@ showFloorImg_s
 tooltip : showFloorImg: 显示一个贴图，xy为左上角坐标，可用逗号分隔表示多个点
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=showFloorImg%ef%bc%9a%e6%98%be%e7%a4%ba%e8%b4%b4%e5%9b%be
 default : ["","",""]
-colour : this.eventColor
+colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
   var pattern1 = /^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
@@ -784,7 +787,7 @@ hideFloorImg_s
 tooltip : hideFloorImg: 隐藏一个贴图，xy为左上角坐标，可用逗号分隔表示多个点
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=hideFloorImg%ef%bc%9a%e9%9a%90%e8%97%8f%e8%b4%b4%e5%9b%be
 default : ["","",""]
-colour : this.eventColor
+colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
   var pattern1 = /^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
@@ -815,7 +818,7 @@ showBgFgMap_s
 tooltip : showBgFgMap: 显示图层块，即背景图层/前景图层的某些图块，xy为左上角坐标，可用逗号分隔表示多个点
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=showFloorImg%ef%bc%9a%e6%98%be%e7%a4%ba%e8%b4%b4%e5%9b%be
 default : ["bg","","",""]
-colour : this.eventColor
+colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
   var pattern1 = /^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
@@ -846,7 +849,7 @@ hideBgFgMap_s
 tooltip : hideBgFgMap: 隐藏图层块，即背景图层/前景图层的某些图块，xy为左上角坐标，可用逗号分隔表示多个点
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=hideFloorImg%ef%bc%9a%e9%9a%90%e8%97%8f%e8%b4%b4%e5%9b%be
 default : ["bg","","",""]
-colour : this.eventColor
+colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
   var pattern1 = /^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
@@ -870,20 +873,20 @@ return code;
 */;
 
 setBgFgBlock_s
-    :   '转变图层块' Bg_Fg_List '为' Int 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
+    :   '转变图层块' Bg_Fg_List '为' EvalString 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
 
 
 /* setBgFgBlock_s
 tooltip : setBgFgBlock：设置某个图层块,忽略坐标楼层则为当前点
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=setblock%EF%BC%9A%E8%AE%BE%E7%BD%AE%E6%9F%90%E4%B8%AA%E5%9B%BE%E5%9D%97
-colour : this.dataColor
-default : ["bg",0,"","",""]
+colour : this.mapColor
+default : ["bg","yellowDoor","","",""]
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var code = '{"type": "setBgFgBlock", "name": "' + Bg_Fg_List_0 + '", "number":'+Int_0+floorstr+IdString_0+'},\n';
+var code = '{"type": "setBgFgBlock", "name": "' + Bg_Fg_List_0 + '", "number": "'+EvalString_0+'"'+floorstr+IdString_0+'},\n';
 return code;
 */;
 
@@ -987,7 +990,7 @@ openDoor_s
 tooltip : openDoor: 开门,楼层可不填表示当前层
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=opendoor%EF%BC%9A%E5%BC%80%E9%97%A8
 default : ["","","",false]
-colour : this.dataColor
+colour : this.mapColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var floorstr = '';
 if (PosString_0 && PosString_1) {
@@ -1006,7 +1009,7 @@ closeDoor_s
 tooltip : closeDoor: 关门事件，需要该点本身无事件
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=opendoor%EF%BC%9A%E5%BC%80%E9%97%A8
 default : ["","","yellowDoor"]
-colour : this.dataColor
+colour : this.mapColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
@@ -1095,7 +1098,7 @@ disableShop_s
 tooltip : 全局商店
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=disableshop%EF%BC%9A%E7%A6%81%E7%94%A8%E4%B8%80%E4%B8%AA%E5%85%A8%E5%B1%80%E5%95%86%E5%BA%97
 default : ["shop1"]
-colour : this.eventColor
+colour : this.dataColor
 var code = '{"type": "disableShop", "id": "'+IdString_0+'"},\n';
 return code;
 */;
@@ -1350,7 +1353,7 @@ move_s
 tooltip : move: 让某个NPC/怪物移动,位置可不填代表当前事件
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=move%EF%BC%9A%E8%AE%A9%E6%9F%90%E4%B8%AAnpc%E6%80%AA%E7%89%A9%E7%A7%BB%E5%8A%A8
 default : ["","",500,false,false,"上右3下2左上左2"]
-colour : this.eventColor
+colour : this.mapColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
@@ -1385,7 +1388,7 @@ jump_s
 tooltip : jump: 让某个NPC/怪物跳跃
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=jump%EF%BC%9A%E8%AE%A9%E6%9F%90%E4%B8%AANPC%2F%E6%80%AA%E7%89%A9%E8%B7%B3%E8%B7%83
 default : ["","","","",500,true,false]
-colour : this.eventColor
+colour : this.mapColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr += ', "from": ['+PosString_0+','+PosString_1+']';
@@ -1548,6 +1551,17 @@ var code = '{"type": "lose", "reason": "'+EvalString_0+'"},\n';
 return code;
 */;
 
+restart_s
+    :   '直接回到标题界面' Newline
+
+
+/* restart_s
+tooltip : restart: 直接回到标题界面
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=restart%ef%bc%9a%e7%9b%b4%e6%8e%a5%e5%9b%9e%e5%88%b0%e6%a0%87%e9%a2%98%e7%95%8c%e9%9d%a2
+var code = '{"type": "restart"},\n';
+return code;
+*/;
+
 input_s
     :   '接受用户输入数字,提示' ':' EvalString Newline
     
@@ -1693,13 +1707,26 @@ return code;
 */;
 
 while_s
-    :   '循环处理' '：' '当' expression '时' BGNL? Newline action+ BEND Newline
+    :   '前置条件循环' '：' '当' expression '时' BGNL? Newline action+ BEND Newline
 
 /* while_s
-tooltip : while：循环处理
-helpUrl : https://h5mota.com/games/template/docs/#/event?id=while%EF%BC%9A%E5%BE%AA%E7%8E%AF%E5%A4%84%E7%90%86
+tooltip : while：前置条件循环
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=while%ef%bc%9a%e5%89%8d%e7%bd%ae%e6%9d%a1%e4%bb%b6%e5%be%aa%e7%8e%af
 colour : this.eventColor
 var code = ['{"type": "while", "condition": "',expression_0,'",\n',
+    '"data": [\n',action_0,'],\n',
+'},\n'].join('');
+return code;
+*/;
+
+dowhile_s
+    :   '后置条件循环' '：'  BGNL? Newline action+ BEND '当' expression '时' Newline
+
+/* dowhile_s
+tooltip : dowhile：后置条件循环
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=dowhile%ef%bc%9a%e5%90%8e%e7%bd%ae%e6%9d%a1%e4%bb%b6%e5%be%aa%e7%8e%af
+colour : this.eventColor
+var code = ['{"type": "dowhile", "condition": "',expression_0,'",\n',
     '"data": [\n',action_0,'],\n',
 '},\n'].join('');
 return code;
@@ -1968,8 +1995,8 @@ Floor_List
     /*Floor_List ['floorId',':before',':next']*/;
 
 Stair_List
-    :   '坐标'|'上楼梯'|'下楼梯'
-    /*Stair_List ['loc','upFloor','downFloor']*/;
+    :   '坐标'|'上楼梯'|'下楼梯'|'保持不变'
+    /*Stair_List ['loc','upFloor','downFloor','now']*/;
 
 SetTextPosition_List
     :   '不改变'|'距离顶部'|'居中'|'距离底部'
@@ -2021,8 +2048,8 @@ Global_Value_List
 
 
 Global_Flag_List
-    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示魔力值'|'显示魔防值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'开启加点'|'开启负伤'|'仇恨怪战后扣减一半'|'夹击是否上整'|'循环计算临界'|'允许轻按'|'寻路算法不绕血瓶'|'允许走到将死领域'|'允许瞬间移动'|'允许查看禁用商店'|'阻激夹域后禁用快捷商店'|'检查控制台'
-    /*Global_Flag_List ['enableFloor','enableName','enableLv', 'enableHPMax', 'enableMana', 'enableMDef', 'enableMoney', 'enableExperience', 'enableLevelUp', 'levelUpLeftMode', 'enableKeys', 'enablePZF', 'enableDebuff', 'enableSkill', 'flyNearStair', 'enableAddPoint', 'enableNegativeDamage', 'hatredDecrease', 'betweenAttackCeil', 'useLoop', 'enableGentleClick', 'potionWhileRouting', 'canGoDeadZone', 'enableMoveDirectly', 'enableDisabledShop', 'disableShopOnDamage', 'checkConsole']*/;
+    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示魔力值'|'显示魔防值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'破墙镐四方向'|'炸弹四方向'|'冰冻徽章四方向'|'铁门不需要钥匙'|'开启加点'|'开启负伤'|'仇恨怪战后扣减一半'|'夹击是否上整'|'夹击不超伤害值'|'循环计算临界'|'允许轻按'|'寻路算法不绕血瓶'|'允许走到将死领域'|'允许瞬间移动'|'允许查看禁用商店'|'阻激夹域后禁用快捷商店'|'检查控制台'
+    /*Global_Flag_List ['enableFloor','enableName','enableLv', 'enableHPMax', 'enableMana', 'enableMDef', 'enableMoney', 'enableExperience', 'enableLevelUp', 'levelUpLeftMode', 'enableKeys', 'enablePZF', 'enableDebuff', 'enableSkill', 'flyNearStair', 'pickaxeFourDirections', 'bombFourDirections', 'snowFourDirections', 'steelDoorWithoutKey', 'enableAddPoint', 'enableNegativeDamage', 'hatredDecrease', 'betweenAttackCeil', 'betweenAttackMax', 'useLoop', 'enableGentleClick', 'potionWhileRouting', 'canGoDeadZone', 'enableMoveDirectly', 'enableDisabledShop', 'disableShopOnDamage', 'checkConsole']*/;
 
 Colour
     :   'sdeirughvuiyasdeb'+ //为了被识别为复杂词法规则
@@ -2127,6 +2154,7 @@ this.evisitor.dataColor=130;
 this.evisitor.eventColor=220;
 this.evisitor.soundColor=20;
 this.evisitor.commentColor=285;
+this.evisitor.mapColor=175;
 */
 
 /* Function_1
@@ -2153,7 +2181,10 @@ ActionParser.prototype.parse = function (obj,type) {
     
     case 'changeFloor':
       if(!obj)obj={};
-      if(!this.isset(obj.loc))obj.loc=[0,0];
+      if(!this.isset(obj.loc)) {
+        obj.loc=[0,0];
+        if (!this.isset(obj.stair)) obj.stair='now';
+      }
       if (obj.floorId==':before'||obj.floorId==':next') {
         obj.floorType=obj.floorId;
         delete obj.floorId;
@@ -2639,11 +2670,18 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['choices_s'].xmlText([
         this.isset(data.text)?this.EvalString(data.text):null,'','',text_choices,this.next]);
       break;
-    case "while": // 循环处理
+    case "while": // 前置条件循环处理
       this.next = MotaActionBlocks['while_s'].xmlText([
         // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
         this.tryToUseEvFlag_e('evalString_e', [data.condition]),
         this.insertActionList(data["data"]),
+        this.next]);
+      break;
+    case "dowhile": // 后置条件循环处理
+      this.next = MotaActionBlocks['dowhile_s'].xmlText([
+        this.insertActionList(data["data"]),
+        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
+        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
         this.next]);
       break;
     case "break": // 跳出循环
@@ -2661,6 +2699,10 @@ ActionParser.prototype.parseAction = function() {
     case "lose":
       this.next = MotaActionBlocks['lose_s'].xmlText([
         data.reason,this.next]);
+      break;
+    case "restart":
+      this.next = MotaActionBlocks['restart_s'].xmlText([
+        this.next]);
       break;
     case "function":
       var func = data["function"];

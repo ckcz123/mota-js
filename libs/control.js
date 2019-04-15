@@ -798,8 +798,8 @@ control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, off
     });
     (core.status.hero.followers||[]).forEach(function (t) {
         drawObjs.push({
-            "img": t.img,
-            "height": t.img.height/4,
+            "img": core.material.images.images[t.name],
+            "height": core.material.images.images[t.name].height/4,
             "heroIcon": heroIconArr[t.direction],
             "posx": 32*t.x - core.bigmap.offsetX + (t.stop?0:core.utils.scan[t.direction].x*offset),
             "posy": 32*t.y - core.bigmap.offsetY + (t.stop?0:core.utils.scan[t.direction].y*offset),
@@ -856,17 +856,20 @@ control.prototype.updateViewport = function() {
 
 ////// 获得勇士面对位置的x坐标 //////
 control.prototype.nextX = function(n) {
-    return core.getHeroLoc('x')+core.utils.scan[core.getHeroLoc('direction')].x*(n||1);
+    if (n == null) n = 1;
+    return core.getHeroLoc('x')+core.utils.scan[core.getHeroLoc('direction')].x*n;
 }
 
 ////// 获得勇士面对位置的y坐标 //////
 control.prototype.nextY = function (n) {
-    return core.getHeroLoc('y')+core.utils.scan[core.getHeroLoc('direction')].y*(n||1);
+    if (n == null) n = 1;
+    return core.getHeroLoc('y')+core.utils.scan[core.getHeroLoc('direction')].y*n;
 }
 
 ////// 某个点是否在勇士旁边 //////
-control.prototype.nearHero = function (x, y) {
-    return Math.abs(x-core.getHeroLoc('x'))+Math.abs(y-core.getHeroLoc('y'))<=1;
+control.prototype.nearHero = function (x, y, n) {
+    if (n == null) n = 1;
+    return Math.abs(x-core.getHeroLoc('x'))+Math.abs(y-core.getHeroLoc('y'))<=n;
 }
 
 ////// 聚集跟随者 //////
@@ -916,6 +919,8 @@ control.prototype.checkBlock = function () {
         core.status.hero.hp -= damage;
         core.drawTip("受到"+(core.status.checkBlock.type[loc]||"伤害")+damage+"点");
         this._checkBlock_soundAndAnimate(x, y);
+        this._checkBlock_disableQuickShop();
+        core.status.hero.statistics.extraDamage += damage;
         if (core.status.hero.hp <= 0) {
             core.status.hero.hp=0;
             core.updateStatusBar();
@@ -930,6 +935,15 @@ control.prototype.checkBlock = function () {
 control.prototype._checkBlock_soundAndAnimate = function (x,y) {
     core.playSound('zone.mp3');
     core.drawAnimate("zone", x, y);
+}
+
+control.prototype._checkBlock_disableQuickShop = function () {
+    // 禁用快捷商店
+    if (core.flags.disableShopOnDamage) {
+        for (var shopId in core.status.shops) {
+            core.status.shops[shopId].visited = false;
+        }
+    }
 }
 
 ////// 阻击 //////
@@ -1879,6 +1893,15 @@ control.prototype.getHeroLoc = function (name) {
     return core.status.hero.loc[name];
 }
 
+////// 获得某个属性的中文名 //////
+control.prototype.getStatusName = function (name) {
+    var map = {
+        name: "名称", lv: "等级", hpmax: "生命上限", hp: "生命", manamax: "魔力上限", mana: "魔力",
+        atk: "攻击", def: "防御", mdef: "魔防", money: "金币", exp: "经验", experience: "经验", steps: "步数"
+    };
+    return map[name] || name;
+}
+
 ////// 获得某个等级的名称 //////
 control.prototype.getLvName = function (lv) {
     if (!core.status.hero) return null;
@@ -2637,7 +2660,7 @@ control.prototype._resize_toolBar = function (obj) {
 }
 
 control.prototype._resize_tools = function (obj) {
-    var toolsHeight = 32 * core.domStyle.scale * (core.domStyle.isVertical ? 0.95 : 1);
+    var toolsHeight = 32 * core.domStyle.scale * (core.domStyle.isVertical && !obj.is15x15 ? 0.95 : 1);
     var toolsMarginLeft;
     if (core.domStyle.isVertical)
         toolsMarginLeft = (core.__HALF_SIZE__ - 3) * 3 * core.domStyle.scale;

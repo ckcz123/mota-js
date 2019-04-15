@@ -70,7 +70,7 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
 
 events.prototype._startGame_afterStart = function (nowLoc, callback) {
     core.ui.closePanel();
-    core.showStatusBar();
+    this._startGame_statusBar();
     core.dom.musicBtn.style.display = 'none';
     core.changeFloor(core.firstData.floorId, null, nowLoc, null, function () {
         // 插入一个空事件避免直接回放录像出错
@@ -78,6 +78,14 @@ events.prototype._startGame_afterStart = function (nowLoc, callback) {
         if (callback) callback();
     });
     this._startGame_upload();
+}
+
+// 开始游戏时是否显示状态栏
+events.prototype._startGame_statusBar = function () {
+    if (core.flags.startUsingCanvas)
+        core.hideStatusBar();
+    else
+        core.showStatusBar();
 }
 
 events.prototype._startGame_upload = function () {
@@ -382,6 +390,9 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
         return false;
     }
 
+    if (id == 'steelDoor' && core.flags.steelDoorWithoutKey)
+        needKey = false;
+
     if (needKey && id.endsWith("Door")) {
         var key = id.replace("Door", "Key");
         if (!core.hasItem(key)) {
@@ -431,6 +442,7 @@ events.prototype._sys_getItem = function (data, callback) {
 
 ////// 获得某个物品 //////
 events.prototype.getItem = function (id, num, x, y, callback) {
+    if (num == null) num = 1;
     num = num || 1;
     var itemCls = core.material.items[id].cls;
     core.items.getItemEffect(id, num);
@@ -772,6 +784,8 @@ events.prototype.startEvents = function (list, x, y, callback) {
 events.prototype.doAction = function () {
     // 清空boxAnimate和UI层
     core.clearUI();
+    clearInterval(core.status.event.interval);
+    core.status.event.interval = null;
     // 判定是否执行完毕
     if (this._doAction_finishEvents()) return;
     // 当前点坐标和前缀
@@ -1404,6 +1418,13 @@ events.prototype._action_while = function (data, x, y, prefix) {
     core.doAction();
 }
 
+events.prototype._action_dowhile = function (data, x, y, prefix) {
+    core.unshift(core.status.event.data.list,
+        {"todo": core.clone(data.data), "total": core.clone(data.data), "condition": data.condition}
+    );
+    core.doAction();
+}
+
 events.prototype._action_break = function (data, x, y, prefix) {
     core.status.event.data.list.shift();
     core.doAction();
@@ -1425,6 +1446,10 @@ events.prototype._action_win = function (data, x, y, prefix) {
 
 events.prototype._action_lose = function (data, x, y, prefix) {
     this.lose(data.reason);
+}
+
+events.prototype._action_restart = function (data, x, y, prefix) {
+    core.restart();
 }
 
 events.prototype._action_function = function (data, x, y, prefix) {
@@ -1714,7 +1739,7 @@ events.prototype.follow = function (name) {
     core.status.hero.followers = core.status.hero.followers || [];
     if (core.material.images.images[name]
         && core.material.images.images[name].width == 128) {
-        core.status.hero.followers.push({"name": name, "img": core.material.images.images[name]});
+        core.status.hero.followers.push({"name": name});
         core.gatherFollowers();
         core.clearMap('hero');
         core.drawHero();

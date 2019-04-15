@@ -777,7 +777,7 @@ actions.prototype._sys_longClick = function (x, y, fromEvent) {
 
 // 数字键快速选择选项
 actions.prototype._selectChoices = function (length, keycode, callback) {
-    var topIndex = this.HSIZE - parseInt((length - 1) / 2);
+    var topIndex = this.HSIZE - parseInt((length - 1) / 2) + (core.status.event.ui.offset || 0);
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         callback.apply(this, [this.HSIZE, topIndex + core.status.event.selection]);
     }
@@ -883,7 +883,7 @@ actions.prototype._clickAction = function (x, y) {
         var choices = data.choices;
         if (choices.length == 0) return;
         if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
-            var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
+            var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
             if (y >= topIndex && y < topIndex + choices.length) {
                 // 选择
                 core.status.route.push("choices:" + (y - topIndex));
@@ -1207,7 +1207,7 @@ actions.prototype._clickShop = function (x, y) {
     var shop = core.status.event.data.shop;
     var choices = shop.choices;
     if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
-        var topIndex = this.HSIZE - parseInt(choices.length / 2);
+        var topIndex = this.HSIZE - parseInt(choices.length / 2) + (core.status.event.ui.offset || 0);
         if (y >= topIndex && y < topIndex + choices.length) {
             return core.events._useShop(shop, y - topIndex);
         }
@@ -1237,7 +1237,7 @@ actions.prototype._clickQuickShop = function (x, y) {
     });
 
     if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
-        var topIndex = this.HSIZE - parseInt(keys.length / 2);
+        var topIndex = this.HSIZE - parseInt(keys.length / 2) + (core.status.event.ui.offset || 0);
         if (y >= topIndex && y < topIndex + keys.length) {
             var reason = core.events.canUseQuickShop(keys[y - topIndex]);
             if (!core.flags.enableDisabledShop && reason) {
@@ -1830,7 +1830,7 @@ actions.prototype._keyUpSL = function (keycode) {
 actions.prototype._clickSwitchs = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
@@ -1927,7 +1927,7 @@ actions.prototype._keyUpSwitchs = function (keycode) {
 actions.prototype._clickSettings = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
@@ -1978,7 +1978,7 @@ actions.prototype._keyUpSettings = function (keycode) {
 actions.prototype._clickSyncSave = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
@@ -2061,7 +2061,7 @@ actions.prototype._clickSyncSelect = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
@@ -2095,7 +2095,7 @@ actions.prototype._clickLocalSaveSelect = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
@@ -2135,7 +2135,7 @@ actions.prototype._clickStorageRemove = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
@@ -2224,7 +2224,7 @@ actions.prototype._clickReplay = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
@@ -2278,7 +2278,7 @@ actions.prototype._clickGameInfo = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2);
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;

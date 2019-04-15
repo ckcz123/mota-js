@@ -199,7 +199,7 @@ core.onkeyDown(e)
 
 core.onkeyUp(e)
 当放开某个键时的操作，e为KeyboardEvent。
-请勿直接覆盖或调用此函数，如有需要请注册一个"onkeyDown"的交互函数。
+请勿直接覆盖或调用此函数，如有需要请注册一个"onkeyUp"的交互函数。
 
 
 core.pressKey(keyCode)
@@ -394,12 +394,12 @@ core.updateViewport()
 根据大地图的偏移量来更新窗口的视野范围。
 
 
-core.nextX(n) / core.nextY(m)
+core.nextX(n) / core.nextY(n)
 获得勇士面对的第n个位置的横纵坐标。n可不填，默认为1。
 
 
-core.nearHero(x, y)
-判定某个点是否和勇士的距离不大于1。
+core.nearHero(x, y, n)
+判定某个点是否和勇士的距离不大于n。n可不填，默认为1。
 
 
 core.gatherFollowers()
@@ -1464,6 +1464,7 @@ posX, posY：素材在该素材图片上的位置；height：素材的高度；f
 
 core.searchBlock(id, floorId, showDisable)
 搜索一个图块出现过的所有位置。id为图块ID，也可以传入图块的数字。
+id支持通配符搜索，比如"*Door"可以搜索所有的门，"unknownEvent*"可以所有所有的unknownEvent。
 floorId为要搜索的楼层，可以是一个楼层ID，或者一个楼层数组。如果floorId不填则只搜索当前楼层。
 showDisable如果为真，则对于禁用的图块也会返回。
 此函数将返回一个数组，每一项为一个搜索到的结果：
@@ -1912,9 +1913,17 @@ errorCallback可选，如果失败，则会将错误信息传入errorCallback()�
 此函数是异步的，只能通过回调函数来获得读取的结果或错误信息。
 
 
-core.clone(data)
+core.clone(data, filter, recursion)
 深拷贝一个对象。有关浅拷贝，深拷贝，基本类型和引用类型等相关知识可参见：
 https://zhuanlan.zhihu.com/p/26282765
+filter为过滤函数，如果设置且不为null则需传递一个可接受(name, value)的函数，
+并返回true或false，表示该项是否应该被深拷贝。
+recursion表示该filter是否应递归向下传递，如果为true则递归函数也将传该filter。
+例如：
+core.clone(core.status.hero, function(name, value) {
+    return name == 'items' || typeof value == 'number';
+}, false);
+这个例子将会深拷贝勇士的属性和道具。
 
 
 core.splitImage(image, width, height)
@@ -1995,6 +2004,10 @@ core.strlen(str)
 
 core.reverseDirection(direction)
 翻转方向，即"up"转成"down", "left"转成"right"等。
+
+
+core.matchWildcard(pattern, string)
+进行通配符的匹配判定，目前仅支持*（可匹配0或任意个字符）。比如"a*b*c"可以匹配"aa012bc"。
 
 
 core.encodeBase64(str) / core.decodeBase64(str)

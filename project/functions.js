@@ -1203,10 +1203,16 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				}
 
 				if (enemyId != null) {
-					var leftHp = core.status.hero.hp - (damage[x + "," + y] || 0);
+					var leftHp = core.status.hero.hp - (damage[loc] || 0);
 					if (leftHp > 1) {
 						// 上整/下整
 						var value = Math.floor((leftHp + (core.flags.betweenAttackCeil ? 1 : 0)) / 2);
+						// 是否不超过怪物伤害值
+						if (core.flags.betweenAttackMax) {
+							var enemyDamage = core.getDamage(enemyId, x, y, floorId);
+							if (enemyDamage != null && enemyDamage < value)
+								value = enemyDamage;
+						}
 						damage[loc] = (damage[loc] || 0) + value;
 						type[loc] = "夹击伤害";
 					}

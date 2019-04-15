@@ -582,7 +582,13 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "checkbox",
 					"_bool": "bool",
-					"_data": "夹击方式是向上取整还是向下取整。如果此项为true则为向上取整，为false则为向下取整"
+					"_data": "夹击上整还是下整。如果此项为true则夹击伤害值向上取整，为false则为向下取整"
+				},
+				"betweenAttackMax": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_bool": "bool",
+					"_data": "夹击伤害是否不超过怪物伤害值。"
 				},
 				"useLoop": {
 					"_leaf": true,

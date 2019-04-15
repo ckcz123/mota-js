@@ -247,7 +247,7 @@ utils.prototype.removeLocalForage = function (key, successCallback, errorCallbac
 }
 
 ////// 深拷贝一个对象 //////
-utils.prototype.clone = function (data) {
+utils.prototype.clone = function (data, filter, recursion) {
     if (!core.isset(data)) return null;
     // date
     if (data instanceof Date) {
@@ -258,10 +258,9 @@ utils.prototype.clone = function (data) {
     // array
     if (data instanceof Array) {
         var copy = [];
-        // for (var i=0;i<data.length;i++) {
         for (var i in data) {
-            // copy.push(core.clone(data[i]));
-            copy[i] = core.clone(data[i]);
+            if (!filter || filter(i, data[i]))
+                copy[i] = core.clone(data[i], recursion?filter:null, recursion);
         }
         return copy;
     }
@@ -273,8 +272,8 @@ utils.prototype.clone = function (data) {
     if (data instanceof Object) {
         var copy = {};
         for (var i in data) {
-            if (data.hasOwnProperty(i))
-                copy[i] = core.clone(data[i]);
+            if (data.hasOwnProperty(i) && (!filter || filter(i, data[i])))
+                copy[i] = core.clone(data[i], recursion?filter:null, recursion);
         }
         return copy;
     }

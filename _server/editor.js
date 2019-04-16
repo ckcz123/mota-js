@@ -460,7 +460,7 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent){
         pos.y=thisevent.y;
         if(thisevent.x)pos.x+=thisevent.x;
         if(thisevent.images=='terrains')pos.y+=2;
-        ysize = thisevent.images.indexOf('48') === -1 ? 32 : 48;
+        ysize = thisevent.images.endsWith('48') ? 48 : 32;
     }
     var dataSelection = document.getElementById('dataSelection');
     dataSelection.style.left = pos.x * 32 + 'px';

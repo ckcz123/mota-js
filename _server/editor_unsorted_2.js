@@ -204,7 +204,7 @@ editor_unsorted_2_wrapper=function(editor_mode){
                 return;
             }
 
-            var ysize = selectAppend.value.indexOf('48') === -1 ? 32 : 48;
+            var ysize = selectAppend.value.endsWith('48') ? 48 : 32;
             editor_mode.appendPic.imageName = value;
             var img = core.material.images[value];
             editor_mode.appendPic.toImg = img;
@@ -281,7 +281,7 @@ editor_unsorted_2_wrapper=function(editor_mode){
             */
 
             // Step 2: 检测长宽比
-            var ysize = selectAppend.value.indexOf('48') === -1 ? 32 : 48;
+            var ysize = selectAppend.value.endsWith('48') ? 48 : 32;
             if ((image.width%32!=0 || image.height%ysize!=0) && (image.width<=128 && image.height<=ysize*4)
                 && confirm("目标长宽不符合条件，是否自动进行调整？")) {
                 var ncanvas = document.createElement('canvas').getContext('2d');
@@ -344,7 +344,7 @@ editor_unsorted_2_wrapper=function(editor_mode){
                             sprite_ctx.drawImage(image, 0, 0);
                         }
                         else {
-                            var ysize = selectAppend.value.indexOf('48') === -1 ? 32 : 48;
+                            var ysize = selectAppend.value.endsWith('48') ? 48 : 32;
                             for (var ii = 0; ii < 3; ii++) {
                                 var newsprite = appendPicCanvas.children[ii];
                                 newsprite.style.width = (newsprite.width = Math.floor(image.width / 32) * 32) / ratio + 'px';
@@ -413,7 +413,7 @@ editor_unsorted_2_wrapper=function(editor_mode){
                 'x': scrollLeft + e.clientX + appendPicCanvas.scrollLeft - left1.offsetLeft - appendPicCanvas.offsetLeft,
                 'y': scrollTop + e.clientY + appendPicCanvas.scrollTop - left1.offsetTop - appendPicCanvas.offsetTop,
                 'size': 32,
-                'ysize': selectAppend.value.indexOf('48') === -1 ? 32 : 48
+                'ysize': selectAppend.value.endsWith('48') ? 48 : 32
             };
             return loc;
         }//返回可用的组件内坐标
@@ -492,7 +492,7 @@ editor_unsorted_2_wrapper=function(editor_mode){
                 return;
             }
 
-            var ysize = selectAppend.value.indexOf('48') === -1 ? 32 : 48;
+            var ysize = selectAppend.value.endsWith('48') ? 48 : 32;
             for (var ii = 0, v; v = editor_mode.appendPic.selectPos[ii]; ii++) {
                 // var imgData = source_ctx.getImageData(v.x * 32, v.y * ysize, 32, ysize);
                 // sprite_ctx.putImageData(imgData, ii * 32, sprite.height - ysize);

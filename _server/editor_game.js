@@ -34,7 +34,7 @@ editor_game_wrapper = function (editor, main, core) {
         editor.MAX_NUM=MAX_NUM;
         var getInfoById = function (id) {
             var block = maps.initBlock(0, 0, id);
-            if (hasOwnProp(block, 'event')) {
+            if (Object.prototype.hasOwnProperty.call(block, 'event')) {
                 return block;
             }
         }

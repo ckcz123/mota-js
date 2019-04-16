@@ -46,16 +46,18 @@ editor: {
 
 + 插入公共事件的参数的转义处理, .g4中添加ObjectString, 要求其中的值可以JSON.parse, 生成的code中也是作为对象而不是字符串出现
 
-+ 转义改由editor.blockly处理,editor.multi原样接受和返回
++ 修改editor.multi中的转义处理
 
 + 地图的编辑与其他(如全塔属性和楼层属性), 现在的文件操作的模式是完全不同的  
   楼层文件的储存与其他不同
 
++ editor.file在修改时不再返回obj和commentobj,只在查询时返回
+
++ editor.file中的各个条目, 非常相似, 但是细节的不同处理非常麻烦. 是类似的代码复制后修改一部分, 尝试模块化
+
 + functions和plugins的借助JSON.stringify的replacer特殊处理
 
 + 目前editor.map中储存的是info\<object\>, 准备改为和core一致只储存数字
-
-+ editor.file在修改是不再返回obj和commentobj,只在查询时返回
 
 ## 功能改进
 
@@ -91,6 +93,11 @@ editor: {
 + [ ] ? 删除注册项/修改图块ID
 
 + [ ] ? 怪物和道具也能像其他类型那样查看“图块信息”（而不只是具体的怪物属性）
+
++ [ ] 素材区自动换列  
+  怪物或道具太多时, 按照每100个进行拆分新开列来显示  
+
++ [ ] 多帧素材只显示第一帧  
 
 ## 左侧页面模式
 

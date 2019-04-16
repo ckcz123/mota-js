@@ -945,8 +945,8 @@ editor_file = function (editor, callback) {
 
     var alertWhenCompress = function(){
         if(editor.useCompress===true){
-            editor.useCompress=null;
-            setTimeout("alert('当前游戏使用的是压缩文件,修改完成后请重新压缩')",1000)
+            editor.useCompress='alerted';
+            setTimeout("alert('当前游戏使用的是压缩文件,修改完成后请使用启动服务.exe->Js代码压缩工具重新压缩,或者把main.js的useCompress改成false来使用原始文件')",1000)
         }
     }
 

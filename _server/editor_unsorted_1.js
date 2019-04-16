@@ -409,7 +409,7 @@ editor.constructor.prototype.listen=function () {
     var iconLib=document.getElementById('iconLib');
     iconLib.onmousedown = function (e) {
         e.stopPropagation();
-        if (!editor.isMobile && e.clientY>=((core.__size__==13?630:655) - scrollBarHeight)) return;
+        if (!editor.isMobile && e.clientY>=((core.__SIZE__==13?630:655) - scrollBarHeight)) return;
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
         var loc = {

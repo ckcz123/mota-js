@@ -269,7 +269,7 @@ editor_file = function (editor, callback) {
             }
         })
 
-        var per_height = image.indexOf('48')>=0?48:32;
+        var per_height = image.endsWith('48')?48:32;
 
         var idnum=300;
         for (var y=0; y<editor.widthsX[image][3]/per_height;y++) {

@@ -448,7 +448,7 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent){
         pos.y=thisevent.y;
         if(thisevent.x)pos.x+=thisevent.x;
         if(thisevent.images=='terrains')pos.y+=2;
-        ysize = thisevent.images.indexOf('48') === -1 ? 32 : 48;
+        ysize = thisevent.images.endsWith('48') ? 48 : 32;
     }
     var dataSelection = document.getElementById('dataSelection');
     dataSelection.style.left = pos.x * 32 + 'px';
@@ -884,7 +884,7 @@ editor.prototype.listen = function () {
         var pos = locToPos(loc);
         for (var spriter in editor.widthsX) {
             if (pos.x >= editor.widthsX[spriter][1] && pos.x < editor.widthsX[spriter][2]) {
-                var ysize = spriter.indexOf('48') === -1 ? 32 : 48;
+                var ysize = spriter.endsWith('48') ? 48 : 32;
                 loc.ysize = ysize;
                 pos.images = editor.widthsX[spriter][0];
                 pos.y = ~~(loc.y / loc.ysize);

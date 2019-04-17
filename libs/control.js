@@ -1098,9 +1098,10 @@ control.prototype.speedUpReplay = function () {
     if (core.status.replay.speed==12) core.status.replay.speed=24;
     else if (core.status.replay.speed==6) core.status.replay.speed=12;
     else if (core.status.replay.speed==3) core.status.replay.speed=6;
-    else if (core.status.replay.speed<3) {
-        var toAdd = core.status.replay.speed>=2?2:1;
-        core.status.replay.speed = parseInt(10*core.status.replay.speed + toAdd)/10;
+    else if (core.status.replay.speed==2.5) core.status.replay.speed=3;
+    else if (core.status.replay.speed==2) core.status.replay.speed=2.5;
+    else {
+        core.status.replay.speed = parseInt(10*core.status.replay.speed + 2)/10;
     }
     core.drawTip("x"+core.status.replay.speed+"倍");
 }
@@ -1108,14 +1109,15 @@ control.prototype.speedUpReplay = function () {
 ////// 减速播放 //////
 control.prototype.speedDownReplay = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
-    if (core.status.replay.speed==24) core.status.replay.speed=12.0;
-    else if (core.status.replay.speed==12) core.status.replay.speed=6.0;
-    else if (core.status.replay.speed==6) core.status.replay.speed=3.0;
+    if (core.status.replay.speed==24) core.status.replay.speed=12;
+    else if (core.status.replay.speed==12) core.status.replay.speed=6;
+    else if (core.status.replay.speed==6) core.status.replay.speed=3;
+    else if (core.status.replay.speed==3) core.status.replay.speed=2.5;
+    else if (core.status.replay.speed==2.5) core.status.replay.speed=2;
     else {
-        var toAdd = core.status.replay.speed>=2?2:1;
-        core.status.replay.speed = parseInt(10*core.status.replay.speed - toAdd)/10;
+        core.status.replay.speed = parseInt(10*core.status.replay.speed - 2)/10;
     }
-    if (core.status.replay.speed<0.3) core.status.replay.speed=0.3;
+    if (core.status.replay.speed<0.2) core.status.replay.speed=0.2;
     core.drawTip("x"+core.status.replay.speed+"倍");
 }
 

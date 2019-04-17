@@ -952,7 +952,7 @@ events.prototype._action_setText = function (data, x, y, prefix) {
 }
 
 events.prototype._action_tip = function (data, x, y, prefix) {
-    core.drawTip(core.replaceText(data.text));
+    core.drawTip(core.replaceText(data.text), data.icon);
     core.doAction();
 }
 

@@ -673,11 +673,11 @@ function omitedcheckUpdateFunction(event) {
 
     var searchInput = document.getElementById("searchBlock");
     searchInput.onfocus = function () {
-        editor_blockly.reopenToolbox(9);
+        editor_blockly.reopenToolbox(10);
     }
 
     searchInput.oninput = function () {
-        editor_blockly.reopenToolbox(9);
+        editor_blockly.reopenToolbox(10);
     }
 
     editor_blockly.searchBlock = function (value) {

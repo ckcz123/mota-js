@@ -161,6 +161,7 @@ editor_blockly = function () {
       MotaActionBlocks['setVolume_s'].xmlText(),
       MotaActionBlocks['callBook_s'].xmlText(),
       MotaActionBlocks['callSave_s'].xmlText(),
+      MotaActionBlocks['autoSave_s'].xmlText(),
       MotaActionBlocks['callLoad_s'].xmlText(),
     ],
     '原生脚本':[

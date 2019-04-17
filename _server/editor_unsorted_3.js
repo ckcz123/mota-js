@@ -1,5 +1,5 @@
 
-var exportMap = document.getElementById('exportMap')
+exportMap = document.getElementById('exportMap')
 exportMap.isExport=false
 exportMap.onclick=function(){
     editor.updateMap();
@@ -34,7 +34,7 @@ exportMap.onclick=function(){
     mapEditArea.error(0);
     tip.whichShow(2);
 }
-var mapEditArea = document.getElementById('mapEditArea')
+mapEditArea = document.getElementById('mapEditArea')
 mapEditArea.errors=[ // 编号1,2
     "格式错误！请使用正确格式(请使用地图生成器进行生成，且需要和本地图宽高完全一致)",
     "当前有未定义ID（在地图区域显示红块），请修改ID或者到icons.js和maps.js中进行定义！"
@@ -128,7 +128,7 @@ mapEditArea.formatArr= function () {
     }
     return formatArrStr;
 }
-var copyMap=document.getElementById('copyMap')
+copyMap=document.getElementById('copyMap')
 copyMap.err=''
 copyMap.onclick=function(){
     tip.whichShow(0);
@@ -151,7 +151,7 @@ copyMap.onclick=function(){
         tip.whichShow(7);
     }
 }
-var clearMapButton=document.getElementById('clearMapButton')
+clearMapButton=document.getElementById('clearMapButton')
 clearMapButton.onclick=function () {
     editor.mapInit();
     editor_mode.onmode('');
@@ -170,7 +170,7 @@ clearMapButton.onclick=function () {
     tip.whichShow(4);
     mapEditArea.error(0);
 }
-var deleteMap=document.getElementById('deleteMap')
+deleteMap=document.getElementById('deleteMap')
 deleteMap.onclick=function () {
     editor_mode.onmode('');
     var index = core.floorIds.indexOf(editor.currentFloorId);
@@ -212,7 +212,7 @@ tip_in_showMode = [
     '事件编辑器中的显示文本和自定义脚本的方块也可以双击',
     "画出的地图要点击\"保存地图\"才会写入到文件中",
 ];
-var tip=document.getElementById('tip')
+tip=document.getElementById('tip')
 tip._infos= {}
 tip.infos=function(value){
     if(value!=null){
@@ -353,8 +353,8 @@ tip.whichShow=function(value){
     }
     return tip._whichShow
 }
-var selectBox=document.getElementById('selectBox')
-var dataSelection=document.getElementById('dataSelection')
+selectBox=document.getElementById('selectBox')
+dataSelection=document.getElementById('dataSelection')
 selectBox._isSelected=false
 selectBox.isSelected=function(value){
     if(value!=null){

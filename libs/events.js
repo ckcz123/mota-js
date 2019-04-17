@@ -1448,6 +1448,10 @@ events.prototype._action_lose = function (data, x, y, prefix) {
     this.lose(data.reason);
 }
 
+events.prototype._action_restart = function (data, x, y, prefix) {
+    core.restart();
+}
+
 events.prototype._action_function = function (data, x, y, prefix) {
     var func = data["function"];
     try {
@@ -1573,6 +1577,12 @@ events.prototype._action_callSave = function (data, x, y, prefix) {
         core.save();
         core.status.event.interval = e;
     }
+}
+
+events.prototype._action_autoSave = function (data, x, y, prefix) {
+    core.autosave();
+    core.drawTip("已自动存档");
+    core.doAction();
 }
 
 events.prototype._action_callLoad = function (data, x, y, prefix) {

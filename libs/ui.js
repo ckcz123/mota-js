@@ -403,9 +403,9 @@ ui.prototype._getPosition = function (content) {
         py = core.status.event.data.y;
     }
     content = content.replace("\b", "\\b")
-        .replace(/\\b\[(up|center|down)(,(hero|null|\d+,\d+))?]/g, function (s0, s1, s2, s3) {
+        .replace(/\\b\[(up|center|down|hero|null)(,(hero|null|\d+,\d+))?]/g, function (s0, s1, s2, s3) {
             pos = s1;
-            if (s3 == 'hero') {
+            if (s3 == 'hero' || s1=='hero') {
                 px = core.status.hero.loc.x;
                 py = core.status.hero.loc.y;
             }
@@ -416,6 +416,9 @@ ui.prototype._getPosition = function (content) {
                 var str = s3.split(',');
                 px = parseInt(str[0]);
                 py = parseInt(str[1]);
+            }
+            if(pos=='hero' || pos=='null'){
+                pos = py==null?'center':(py>=core.__HALF_SIZE__? 'up':'down'); 
             }
             return "";
         });
@@ -971,6 +974,7 @@ ui.prototype.drawChoices = function(content, choices) {
 
     content = core.replaceText(content || "");
     var titleInfo = this._getTitleAndIcon(content);
+    titleInfo.content = this._drawTextBox_drawImages(titleInfo.content);
     var hPos = this._drawChoices_getHorizontalPosition(titleInfo, choices);
     var vPos = this._drawChoices_getVerticalPosition(titleInfo, choices, hPos);
     core.status.event.ui.offset = vPos.offset;

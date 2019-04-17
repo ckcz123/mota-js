@@ -1480,14 +1480,28 @@ control.prototype._replayAction_key = function (action) {
 
 ////// 自动存档 //////
 control.prototype.autosave = function (removeLast) {
-    if (core.status.event.id!=null) return;
+    var inEvent = false; // 检测是否是事件中的自动存档
+    if (core.status.event.id!=null) {
+        if (core.status.event.id!='action') return;
+        inEvent = true;
+    }
     var x=null;
     if (removeLast) x=core.status.route.pop();
-    core.status.route.push("turn:"+core.getHeroLoc('direction'));
+    if (inEvent) {
+        core.setFlag("__events__", core.clone(core.status.event.data));
+    }
+    else {
+        core.status.route.push("turn:"+core.getHeroLoc('direction'));
+    }
     core.saves.autosave.data = core.saveData();
     core.saves.autosave.updated = true;
     core.saves.ids[0] = true;
-    core.status.route.pop();
+    if (inEvent) {
+        core.removeFlag("__events__");
+    }
+    else {
+        core.status.route.pop();
+    }
     if (x) core.status.route.push(x);
 }
 

@@ -338,6 +338,7 @@ action
     |   confirm_s
     |   callBook_s
     |   callSave_s
+    |   autoSave_s
     |   callLoad_s
     |   unknown_s
     |   function_s
@@ -1799,10 +1800,23 @@ callSave_s
 
 
 /* callSave_s
-tooltip : callSave: 呼出存档页面；之后读此档将执行eachArrive
+tooltip : callSave: 呼出存档页面
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=callSave%ef%bc%9a%e5%91%bc%e5%87%ba%e5%ad%98%e6%a1%a3%e7%95%8c%e9%9d%a2
 colour : this.soundColor
 var code = '{"type": "callSave"},\n';
+return code;
+*/;
+
+
+autoSave_s
+    :   '自动存档'
+
+
+/* autoSave_s
+tooltip : autoSave: 自动存档
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=autoSave%ef%bc%9a%e8%87%aa%e5%8a%a8%e5%ad%98%e6%a1%a3
+colour : this.soundColor
+var code = '{"type": "autoSave"},\n';
 return code;
 */;
 
@@ -2748,6 +2762,10 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "callSave": // 呼出存档界面
       this.next = MotaActionBlocks['callSave_s'].xmlText([
+        this.next]);
+      break;
+    case "autoSave": // 自动存档
+      this.next = MotaActionBlocks['autoSave_s'].xmlText([
         this.next]);
       break;
     case "callLoad": // 呼出读档界面

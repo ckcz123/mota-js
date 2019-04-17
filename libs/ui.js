@@ -403,9 +403,9 @@ ui.prototype._getPosition = function (content) {
         py = core.status.event.data.y;
     }
     content = content.replace("\b", "\\b")
-        .replace(/\\b\[(up|center|down|hero|null)(,(hero|null|\d+,\d+|\d+))?]/g, function (s0, s1, s2, s3) {
+        .replace(/\\b\[(up|center|down|hero|null)(,(hero|null|\d+,\d+))?]/g, function (s0, s1, s2, s3) {
             pos = s1;
-            if (s3 == 'hero' || s1=='hero' && !s3) {
+            if (s3 == 'hero' || s1=='hero') {
                 px = core.status.hero.loc.x;
                 py = core.status.hero.loc.y;
             }
@@ -414,14 +414,8 @@ ui.prototype._getPosition = function (content) {
             }
             else if (s3) {
                 var str = s3.split(',');
-                if(str.length==1){
-                    var follower = (core.status.hero.followers||{})[parseInt(str[0])-1]||{};
-                    px = follower.x || null;
-                    py = follower.y || null;
-                }else{
-                    px = parseInt(str[0]);
-                    py = parseInt(str[1]);
-                }
+                px = parseInt(str[0]);
+                py = parseInt(str[1]);
             }
             if(pos=='hero' || pos=='null'){
                 pos = py==null?'center':(py>=core.__HALF_SIZE__? 'up':'down'); 

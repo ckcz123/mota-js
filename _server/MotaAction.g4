@@ -483,14 +483,15 @@ return code;
 */;
 
 tip_s
-    :   '显示提示' ':' EvalString Newline
+    :   '显示提示' ':' EvalString '图标ID' IdString? Newline
     
 
 /* tip_s
 tooltip : tip：显示一段提示文字
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=tip%EF%BC%9A%E6%98%BE%E7%A4%BA%E4%B8%80%E6%AE%B5%E6%8F%90%E7%A4%BA%E6%96%87%E5%AD%97
-default : ["这段话将在左上角以气泡形式显示"]
-var code = '{"type": "tip", "text": "'+EvalString_0+'"},\n';
+default : ["这段话将在左上角以气泡形式显示",""]
+IdString_0 = IdString_0 && (', "icon": "' + IdString_0 + '"');
+var code = '{"type": "tip", "text": "'+EvalString_0+'"'+IdString_0+'},\n';
 return code;
 */;
 
@@ -2337,7 +2338,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "tip":
       this.next = MotaActionBlocks['tip_s'].xmlText([
-        data.text,this.next]);
+        data.text,data.icon||"",this.next]);
       break;
     case "show": // 显示
       data.loc=data.loc||[];

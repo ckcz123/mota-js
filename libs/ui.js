@@ -275,7 +275,13 @@ ui.prototype.drawTip = function (text, id) {
     core.setTextAlign('data', 'left');
     if (id != null) {
         var info = core.getBlockInfo(id);
-        if (info == null || !info.image || info.height != 32) id = null;
+        if (info == null || !info.image || info.height != 32) {
+            // 检查状态栏图标
+            if (core.statusBar.icons[id] instanceof Image) {
+                id = {image: core.statusBar.icons[id], posX: 0, posY: 0};
+            }
+            else id = null;
+        }
         else id = info;
     }
     if (!id) {

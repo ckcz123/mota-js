@@ -1706,6 +1706,7 @@ core.drawTip(text, id)
 在左上角以气泡的形式绘制一段提示。
 text为文字内容，仅支持${}的表达式计算，不支持换行和变色。
 id可选，为同时绘制的图标ID，如果不为null则会同时绘制该图标（仅对32x32的素材有效）。
+也可以使用状态栏的图标ID，例如lv, hp, up, save, settings等。
 
 
 core.drawText(content, callback)

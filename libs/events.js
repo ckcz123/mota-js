@@ -287,8 +287,12 @@ events.prototype.doSystemEvent = function (type, data, callback) {
 
 ////// 触发(x,y)点的事件 //////
 events.prototype._trigger = function (x, y) {
-    // 如果已经死亡，或正处于某事件中，则忽略
-    if (core.status.gameOver || core.status.event.id) return;
+    if (core.status.gameOver) return;
+    if (core.status.event.id == 'action') {
+        core.insertAction({"type": "trigger", "loc": [x, y]}, x, y, null, true);
+        return;
+    }
+    if (core.status.event.id) return;
 
     var block = core.getBlock(x, y);
     if (block == null) return;

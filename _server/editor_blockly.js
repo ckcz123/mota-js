@@ -161,6 +161,7 @@ editor_blockly = function () {
       MotaActionBlocks['setVolume_s'].xmlText(),
       MotaActionBlocks['callBook_s'].xmlText(),
       MotaActionBlocks['callSave_s'].xmlText(),
+      MotaActionBlocks['autoSave_s'].xmlText(),
       MotaActionBlocks['callLoad_s'].xmlText(),
     ],
     '原生脚本':[
@@ -672,11 +673,11 @@ function omitedcheckUpdateFunction(event) {
 
     var searchInput = document.getElementById("searchBlock");
     searchInput.onfocus = function () {
-        editor_blockly.reopenToolbox(9);
+        editor_blockly.reopenToolbox(10);
     }
 
     searchInput.oninput = function () {
-        editor_blockly.reopenToolbox(9);
+        editor_blockly.reopenToolbox(10);
     }
 
     editor_blockly.searchBlock = function (value) {

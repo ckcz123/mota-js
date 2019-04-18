@@ -1098,9 +1098,10 @@ control.prototype.speedUpReplay = function () {
     if (core.status.replay.speed==12) core.status.replay.speed=24;
     else if (core.status.replay.speed==6) core.status.replay.speed=12;
     else if (core.status.replay.speed==3) core.status.replay.speed=6;
-    else if (core.status.replay.speed<3) {
-        var toAdd = core.status.replay.speed>=2?2:1;
-        core.status.replay.speed = parseInt(10*core.status.replay.speed + toAdd)/10;
+    else if (core.status.replay.speed==2.5) core.status.replay.speed=3;
+    else if (core.status.replay.speed==2) core.status.replay.speed=2.5;
+    else {
+        core.status.replay.speed = parseInt(10*core.status.replay.speed + 2)/10;
     }
     core.drawTip("x"+core.status.replay.speed+"倍");
 }
@@ -1108,14 +1109,15 @@ control.prototype.speedUpReplay = function () {
 ////// 减速播放 //////
 control.prototype.speedDownReplay = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
-    if (core.status.replay.speed==24) core.status.replay.speed=12.0;
-    else if (core.status.replay.speed==12) core.status.replay.speed=6.0;
-    else if (core.status.replay.speed==6) core.status.replay.speed=3.0;
+    if (core.status.replay.speed==24) core.status.replay.speed=12;
+    else if (core.status.replay.speed==12) core.status.replay.speed=6;
+    else if (core.status.replay.speed==6) core.status.replay.speed=3;
+    else if (core.status.replay.speed==3) core.status.replay.speed=2.5;
+    else if (core.status.replay.speed==2.5) core.status.replay.speed=2;
     else {
-        var toAdd = core.status.replay.speed>=2?2:1;
-        core.status.replay.speed = parseInt(10*core.status.replay.speed - toAdd)/10;
+        core.status.replay.speed = parseInt(10*core.status.replay.speed - 2)/10;
     }
-    if (core.status.replay.speed<0.3) core.status.replay.speed=0.3;
+    if (core.status.replay.speed<0.2) core.status.replay.speed=0.2;
     core.drawTip("x"+core.status.replay.speed+"倍");
 }
 
@@ -1480,15 +1482,21 @@ control.prototype._replayAction_key = function (action) {
 
 ////// 自动存档 //////
 control.prototype.autosave = function (removeLast) {
-    if (core.status.event.id!=null) return;
     var x=null;
-    if (removeLast) x=core.status.route.pop();
-    core.status.route.push("turn:"+core.getHeroLoc('direction'));
+    if (removeLast) {
+        x=core.status.route.pop();
+        core.status.route.push("turn:"+core.getHeroLoc('direction'));
+    }
+    if (core.status.event.id == 'action') // 事件中的自动存档
+        core.setFlag("__events__", core.clone(core.status.event.data));
     core.saves.autosave.data = core.saveData();
     core.saves.autosave.updated = true;
     core.saves.ids[0] = true;
-    core.status.route.pop();
-    if (x) core.status.route.push(x);
+    core.removeFlag("__events__");
+    if (removeLast) {
+        core.status.route.pop();
+        if (x) core.status.route.push(x);
+    }
 }
 
 /////// 实际进行自动存档 //////

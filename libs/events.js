@@ -287,8 +287,12 @@ events.prototype.doSystemEvent = function (type, data, callback) {
 
 ////// 触发(x,y)点的事件 //////
 events.prototype._trigger = function (x, y) {
-    // 如果已经死亡，或正处于某事件中，则忽略
-    if (core.status.gameOver || core.status.event.id) return;
+    if (core.status.gameOver) return;
+    if (core.status.event.id == 'action') {
+        core.insertAction({"type": "trigger", "loc": [x, y]}, x, y, null, true);
+        return;
+    }
+    if (core.status.event.id) return;
 
     var block = core.getBlock(x, y);
     if (block == null) return;
@@ -952,7 +956,7 @@ events.prototype._action_setText = function (data, x, y, prefix) {
 }
 
 events.prototype._action_tip = function (data, x, y, prefix) {
-    core.drawTip(core.replaceText(data.text));
+    core.drawTip(core.replaceText(data.text), data.icon);
     core.doAction();
 }
 
@@ -1577,6 +1581,12 @@ events.prototype._action_callSave = function (data, x, y, prefix) {
         core.save();
         core.status.event.interval = e;
     }
+}
+
+events.prototype._action_autoSave = function (data, x, y, prefix) {
+    core.autosave();
+    core.drawTip("已自动存档");
+    core.doAction();
 }
 
 events.prototype._action_callLoad = function (data, x, y, prefix) {

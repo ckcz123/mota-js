@@ -744,8 +744,15 @@ actions.prototype._sys_longClick_lockControl = function (x, y) {
     }
     // 长按楼传器的箭头可以快速翻页
     if (core.status.event.id == 'fly') {
-        if ((x == 10 || x == 11) && (y == 5 || y == 9)) {
+        if ((x == this.SIZE-2 || x == this.SIZE-3) && (y == this.HSIZE - 1 || y == this.HSIZE+3)) {
             this._clickFly(x, y);
+            return true;
+        }
+    }
+    // 长按SL快速翻页
+    if (["save","load","replayLoad"].indexOf(core.status.event.id) >= 0) {
+        if ([this.HSIZE-2, this.HSIZE-3, this.HSIZE+2, this.HSIZE+3].indexOf(x) >= 0 && y == this.LAST) {
+            this._clickSL(x, y);
             return true;
         }
     }

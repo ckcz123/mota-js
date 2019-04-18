@@ -338,6 +338,7 @@ action
     |   confirm_s
     |   callBook_s
     |   callSave_s
+    |   autoSave_s
     |   callLoad_s
     |   unknown_s
     |   function_s
@@ -482,14 +483,15 @@ return code;
 */;
 
 tip_s
-    :   '显示提示' ':' EvalString Newline
+    :   '显示提示' ':' EvalString '图标ID' IdString? Newline
     
 
 /* tip_s
 tooltip : tip：显示一段提示文字
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=tip%EF%BC%9A%E6%98%BE%E7%A4%BA%E4%B8%80%E6%AE%B5%E6%8F%90%E7%A4%BA%E6%96%87%E5%AD%97
-default : ["这段话将在左上角以气泡形式显示"]
-var code = '{"type": "tip", "text": "'+EvalString_0+'"},\n';
+default : ["这段话将在左上角以气泡形式显示",""]
+IdString_0 = IdString_0 && (', "icon": "' + IdString_0 + '"');
+var code = '{"type": "tip", "text": "'+EvalString_0+'"'+IdString_0+'},\n';
 return code;
 */;
 
@@ -1799,10 +1801,23 @@ callSave_s
 
 
 /* callSave_s
-tooltip : callSave: 呼出存档页面；之后读此档将执行eachArrive
+tooltip : callSave: 呼出存档页面
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=callSave%ef%bc%9a%e5%91%bc%e5%87%ba%e5%ad%98%e6%a1%a3%e7%95%8c%e9%9d%a2
 colour : this.soundColor
 var code = '{"type": "callSave"},\n';
+return code;
+*/;
+
+
+autoSave_s
+    :   '自动存档'
+
+
+/* autoSave_s
+tooltip : autoSave: 自动存档
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=autoSave%ef%bc%9a%e8%87%aa%e5%8a%a8%e5%ad%98%e6%a1%a3
+colour : this.soundColor
+var code = '{"type": "autoSave"},\n';
 return code;
 */;
 
@@ -2323,7 +2338,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "tip":
       this.next = MotaActionBlocks['tip_s'].xmlText([
-        data.text,this.next]);
+        data.text,data.icon||"",this.next]);
       break;
     case "show": // 显示
       data.loc=data.loc||[];
@@ -2748,6 +2763,10 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "callSave": // 呼出存档界面
       this.next = MotaActionBlocks['callSave_s'].xmlText([
+        this.next]);
+      break;
+    case "autoSave": // 自动存档
+      this.next = MotaActionBlocks['autoSave_s'].xmlText([
         this.next]);
       break;
     case "callLoad": // 呼出读档界面

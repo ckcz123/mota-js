@@ -997,10 +997,17 @@ actions.prototype._clickBook = function (x, y) {
     // 怪物信息
     var data = core.status.event.data;
     if (data != null && y < this.LAST) {
-        var page = parseInt(data / this.HSIZE);
-        var index = this.HSIZE * page + parseInt(y / 2);
-        core.ui.drawBook(index);
-        core.ui.drawBookDetail(index);
+        var pageinfo = core.ui._drawBook_pageinfo();
+        var per_page = pageinfo.per_page, page = parseInt(data / per_page);
+        var u = this.LAST / per_page;
+        for (var i = 0; i < per_page; ++i) {
+            if (y >= u*i && y <= u*(i+1)) {
+                var index = per_page * page + i;
+                core.ui.drawBook(index);
+                core.ui.drawBookDetail(index);
+                break;
+            }
+        }
         return;
     }
     return;
@@ -1033,7 +1040,7 @@ actions.prototype._keyUpBook = function (keycode) {
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         var data = core.status.event.data;
         if (data != null) {
-            this._clickBook(this.HSIZE, 2 * (data % this.HSIZE));
+            core.ui.drawBookDetail(data);
         }
         return;
     }

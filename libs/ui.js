@@ -516,11 +516,15 @@ ui.prototype.drawBackground = function (left, top, right, bottom, posInfo) {
     return false;
 }
 
+ui.prototype._drawWindowSkin_getOpacity = function () {
+    return core.getFlag("__winskin_opacity__", 0.85);
+}
+
 ui.prototype._drawBackground_drawWindowSkin = function (background, left, top, right, bottom, position, px, py) {
     if (typeof background == 'string' && core.material.images.images[background]) {
         var image = core.material.images.images[background];
         if (image.width==192 && image.height==128) {
-            core.setAlpha('ui', 0.85);
+            core.setAlpha('ui', this._drawWindowSkin_getOpacity());
             this.drawWindowSkin(image, 'ui', left, top, right - left, bottom - top, position, px, py);
             core.setAlpha('ui', 1);
             return true;
@@ -810,7 +814,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
     var pInfo = core.clone(posInfo);
     pInfo.xoffset = hPos.xoffset; pInfo.yoffset = vPos.yoffset - 4;
     var isWindowSkin = this.drawBackground(hPos.left, vPos.top, hPos.right, vPos.bottom, pInfo);
-    var alpha = isWindowSkin ? 0.85 : textAttribute.background[3];
+    var alpha = isWindowSkin ? this._drawWindowSkin_getOpacity() : textAttribute.background[3];
 
     // Step 4: 绘制标题、头像、动画
     var content_top = this._drawTextBox_drawTitleAndIcon(titleInfo, hPos, vPos, alpha);
@@ -1317,17 +1321,26 @@ ui.prototype.drawBook = function (index) {
 
     index = core.clamp(index, 0, enemys.length - 1);
     core.status.event.data = index;
-    var perpage = this.HSIZE, page = parseInt(index / perpage) + 1, totalPage = Math.ceil(enemys.length / perpage);
+    var pageinfo = this._drawBook_pageinfo();
+    var perpage = pageinfo.per_page, page = parseInt(index / perpage) + 1, totalPage = Math.ceil(enemys.length / perpage);
+
     var start = (page - 1) * perpage;
     enemys = enemys.slice(start, page * perpage);
 
     for (var i = 0; i < enemys.length; i++)
-        this._drawBook_drawOne(floorId, i, enemys[i], index == start + i);
+        this._drawBook_drawOne(floorId, i, enemys[i], pageinfo, index == start + i);
 
     core.drawBoxAnimate();
     this.drawPagination(page, totalPage);
     core.setTextAlign('ui', 'center');
     core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13,'#DDDDDD', this._buildFont(15, true));
+}
+
+ui.prototype._drawBook_pageinfo = function () {
+    var per_page = this.HSIZE; // 每页个数
+    var padding_top = 12; // 距离顶端像素
+    var per_height = (this.PIXEL - 32 - padding_top) / per_page;
+    return { per_page: per_page, padding_top: padding_top, per_height: per_height };
 }
 
 ui.prototype._drawBook_drawBackground = function () {
@@ -1340,24 +1353,24 @@ ui.prototype._drawBook_drawBackground = function () {
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL);
 }
 
-ui.prototype._drawBook_drawOne = function (floorId, index, enemy, selected) {
-    // --- 区域规划：每个区域总高度为62，宽度为 PIXEL
-    var top = 62 * index + 12; // 最上面margin是12px
+ui.prototype._drawBook_drawOne = function (floorId, index, enemy, pageinfo, selected) {
+    // --- 区域规划：每个区域总高度默认为62，宽度为 PIXEL
+    var top = pageinfo.per_height * index + pageinfo.padding_top; // 最上面margin默认是12px
     // 横向规划：
     // 22 + 42 = 64 是头像框
-    this._drawBook_drawBox(index, enemy, top);
+    this._drawBook_drawBox(index, enemy, top, pageinfo);
     // 剩余 PIXEL - 64 的宽度，按照 10 : 9 : 8 : 8 的比例划分
     var left = 64, total_width = this.PIXEL - left;
     var name_width = total_width * 10 / 35;
     this._drawBook_drawName(index, enemy, top, left, name_width);
     this._drawBook_drawContent(index, enemy, top, left + name_width);
     if (selected)
-        core.strokeRect('ui', 10, top + 1, this.PIXEL - 10 * 2,  62, '#FFD700');
+        core.strokeRect('ui', 10, top + 1, this.PIXEL - 10 * 2, pageinfo.per_height, '#FFD700');
 }
 
-ui.prototype._drawBook_drawBox = function (index, enemy, top) {
+ui.prototype._drawBook_drawBox = function (index, enemy, top, pageinfo) {
     // 横向：22+42；纵向：10 + 42 + 10（正好居中）；内部图像 32x32
-    var border_top = top + 10, border_left = 22;
+    var border_top = top + (pageinfo.per_height - 42) / 2, border_left = 22;
     var img_top = border_top + 5, img_left = border_left + 5;
     core.strokeRect('ui', 22, border_top, 42, 42, '#DDDDDD', 2);
     var blockInfo = core.getBlockInfo(enemy.id);

@@ -521,7 +521,7 @@ ui.prototype._drawBackground_drawWindowSkin = function (background, left, top, r
         var image = core.material.images.images[background];
         if (image.width==192 && image.height==128) {
             core.setAlpha('ui', 0.85);
-            this.drawWindowSkin(image, 'ui', left, top, right - left, bottom - top, posInfo.position, px, py);
+            this.drawWindowSkin(image, 'ui', left, top, right - left, bottom - top, position, px, py);
             core.setAlpha('ui', 1);
             return true;
         }

@@ -509,6 +509,14 @@ ui.prototype.drawBackground = function (left, top, right, bottom, posInfo) {
     var xoffset = posInfo.xoffset || 0, yoffset = posInfo.yoffset || 0;
     var background = core.status.textAttribute.background;
 
+    if (this._drawBackground_drawWindowSkin(background, left, top, right, bottom, posInfo.position, px, py))
+        return true;
+    if (typeof background == 'string') background = core.initStatus.textAttribute.background;
+    this._drawBackground_drawColor(background, left, top, right, bottom, posInfo.position, px, py, xoffset, yoffset);
+    return false;
+}
+
+ui.prototype._drawBackground_drawWindowSkin = function (background, left, top, right, bottom, position, px, py) {
     if (typeof background == 'string' && core.material.images.images[background]) {
         var image = core.material.images.images[background];
         if (image.width==192 && image.height==128) {
@@ -517,21 +525,22 @@ ui.prototype.drawBackground = function (left, top, right, bottom, posInfo) {
             core.setAlpha('ui', 1);
             return true;
         }
-        background = core.initStatus.textAttribute.background;
     }
+    return false;
+}
 
+ui.prototype._drawBackground_drawColor = function (background, left, top, right, bottom, position, px, py, xoffset, yoffset) {
     var alpha = background[3];
     core.setAlpha('ui', alpha);
     core.setStrokeStyle('ui', core.status.globalAttribute.borderColor);
     core.setFillStyle('ui', core.arrayToRGB(background));
     core.setLineWidth('ui', 2);
-
     // 绘制
     var ctx = core.canvas.ui;
     ctx.beginPath();
     ctx.moveTo(left, top);
     // 上边缘三角
-    if (posInfo.position == 'down' && px != null && py != null) {
+    if (position == 'down' && px != null && py != null) {
         ctx.lineTo(px + xoffset, top);
         ctx.lineTo(px + 16, top - yoffset);
         ctx.lineTo(px + 32 - xoffset, top);
@@ -539,7 +548,7 @@ ui.prototype.drawBackground = function (left, top, right, bottom, posInfo) {
     ctx.lineTo(right, top);
     ctx.lineTo(right, bottom);
     // 下边缘三角
-    if (posInfo.position == 'up' && px != null && py != null) {
+    if (position == 'up' && px != null && py != null) {
         ctx.lineTo(px + 32 - xoffset, bottom);
         ctx.lineTo(px + 16, bottom + yoffset);
         ctx.lineTo(px + xoffset, bottom);
@@ -549,7 +558,6 @@ ui.prototype.drawBackground = function (left, top, right, bottom, posInfo) {
     ctx.fill();
     ctx.stroke();
     core.setAlpha('ui', 1);
-    return false;
 }
 
 ////// 计算有效文本框的宽度

@@ -928,7 +928,7 @@ events.prototype._action_autoText = function (data, x, y, prefix) {
 
 events.prototype._action_scrollText = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
-    this.__action_doAsyncFunc(data.async, core.ui.drawScrollText, data.text, data.lineHeight || 1.4, data.time || 5000);
+    this.__action_doAsyncFunc(data.async, core.drawScrollText, data.text, data.time || 5000, data.lineHeight || 1.4);
 }
 
 events.prototype._action_comment = function (data, x, y, prefix) {
@@ -1071,20 +1071,20 @@ events.prototype._action_changePos = function (data, x, y, prefix) {
 
 events.prototype._action_showImage = function (data, x, y, prefix) {
     if (core.isReplaying()) data.time = 0;
-    this.__action_doAsyncFunc(data.async || data.time == 0, this.showImage,
+    this.__action_doAsyncFunc(data.async || data.time == 0, core.showImage,
         data.code, data.image, data.sloc, data.loc, data.opacity, data.time);
 }
 
 events.prototype._action_showTextImage = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, 0, 0, prefix);
     if (core.isReplaying()) data.time = 0;
-    this.__action_doAsyncFunc(data.async || data.time == 0, this.showImage,
+    this.__action_doAsyncFunc(data.async || data.time == 0, core.showImage,
         data.code, core.ui.textImage(data.text), loc[0], loc[1], 100, 100, data.opacity, data.time);
 }
 
 events.prototype._action_hideImage = function (data, x, y, prefix) {
     if (core.isReplaying()) data.time = 0;
-    this.__action_doAsyncFunc(data.async || data.time == 0, this.hideImage, data.code, data.time);
+    this.__action_doAsyncFunc(data.async || data.time == 0, core.hideImage, data.code, data.time);
 }
 
 events.prototype._action_showGif = function (data, x, y, prefix) {
@@ -1095,7 +1095,7 @@ events.prototype._action_showGif = function (data, x, y, prefix) {
 
 events.prototype._action_moveImage = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
-    this.__action_doAsyncFunc(data.async, this.moveImage, data.code, data.to, data.opacity, data.time);
+    this.__action_doAsyncFunc(data.async, core.moveImage, data.code, data.to, data.opacity, data.time);
 }
 
 events.prototype._action_setFg = function (data, x, y, prefix) {
@@ -1254,7 +1254,7 @@ events.prototype._action_stopSound = function (data, x, y, prefix) {
 events.prototype._action_setVolume = function (data, x, y, prefix) {
     data.value = core.clamp(parseInt(data.value) / 100, 0, 1);
     core.setFlag("__volume__", data.value);
-    this.__action_doAsyncFunc(data.async, this.setVolume, data.value, data.time || 0);
+    this.__action_doAsyncFunc(data.async, core.setVolume, data.value, data.time || 0);
 }
 
 events.prototype._action_setValue = function (data, x, y, prefix) {
@@ -1491,7 +1491,7 @@ events.prototype._action_updateEnemys = function (data, x, y, prefix) {
 }
 
 events.prototype._action_vibrate = function (data, x, y, prefix) {
-    this.__action_doAsyncFunc(data.async, this.vibrate, data.time);
+    this.__action_doAsyncFunc(data.async, core.vibrate, data.time);
 }
 
 events.prototype._action_sleep = function (data, x, y, prefix) {

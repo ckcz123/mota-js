@@ -71,7 +71,7 @@ actions.prototype._init = function () {
  * 返回：如果func返回true，则不会再继续执行其他的交互函数；否则会继续执行其他的交互函数。
  */
 actions.prototype.registerAction = function (action, name, func, priority) {
-    if (!name || !func || !(func instanceof Function))
+    if (!name || !func)
         return;
     priority = priority || 0;
     if (!this.actions[action]) {
@@ -99,8 +99,14 @@ actions.prototype.doRegisteredAction = function (action) {
     var actions = this.actions[action];
     if (!actions) return false;
     for (var i = 0; i < actions.length; ++i) {
-        if (core.doFunc.apply(core, [actions[i].func, this].concat(Array.prototype.slice.call(arguments, 1))))
-            return true;
+        try {
+            if (core.doFunc.apply(core, [actions[i].func, this].concat(Array.prototype.slice.call(arguments, 1))))
+                return true;
+        }
+        catch (e) {
+            main.log(e);
+            main.log("ERROR in actions["+actions[i].name+"]。");
+        }
     }
     return false;
 }

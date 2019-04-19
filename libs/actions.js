@@ -1001,7 +1001,7 @@ actions.prototype._clickBook = function (x, y) {
         var per_page = pageinfo.per_page, page = parseInt(data / per_page);
         var u = this.LAST / per_page;
         for (var i = 0; i < per_page; ++i) {
-            if (y >= u*i && y <= u*(i+1)) {
+            if (y >= u*i && y < u*(i+1)) {
                 var index = per_page * page + i;
                 core.ui.drawBook(index);
                 core.ui.drawBookDetail(index);

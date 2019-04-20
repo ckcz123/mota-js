@@ -1190,6 +1190,7 @@ ui.prototype.drawSwitchs = function() {
     var choices = [
         "背景音乐： "+(core.musicStatus.bgmStatus ? "[ON]" : "[OFF]"),
         "背景音效： "+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
+        "行走速度： "+parseInt(core.values.moveSpeed),
         "怪物显伤： "+(core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
         "临界显伤： "+(core.flags.displayCritical ? "[ON]" : "[OFF]"),
         "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),

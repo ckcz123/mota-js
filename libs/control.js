@@ -1100,7 +1100,7 @@ control.prototype.speedUpReplay = function () {
     else if (core.status.replay.speed==3) core.status.replay.speed=6;
     else if (core.status.replay.speed==2.5) core.status.replay.speed=3;
     else if (core.status.replay.speed==2) core.status.replay.speed=2.5;
-    else {
+    else if (core.status.replay.speed<2) {
         core.status.replay.speed = parseInt(10*core.status.replay.speed + 2)/10;
     }
     core.drawTip("x"+core.status.replay.speed+"倍");

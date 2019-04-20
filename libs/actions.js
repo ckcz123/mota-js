@@ -1860,18 +1860,20 @@ actions.prototype._clickSwitchs = function (x, y) {
             case 1:
                 return this._clickSwitchs_sound();
             case 2:
-                return this._clickSwitchs_displayEnemyDamage();
+                return this._clickSwitchs_moveSpeed();
             case 3:
-                return this._clickSwitchs_displayCritical();
+                return this._clickSwitchs_displayEnemyDamage();
             case 4:
-                return this._clickSwitchs_displayExtraDamage();
+                return this._clickSwitchs_displayCritical();
             case 5:
-                return this._clickSwitchs_localForage();
+                return this._clickSwitchs_displayExtraDamage();
             case 6:
-                return this._clickSwitchs_clickMove();
+                return this._clickSwitchs_localForage();
             case 7:
-                return this._clickSwitchs_ExtendKeyboard();
+                return this._clickSwitchs_clickMove();
             case 8:
+                return this._clickSwitchs_ExtendKeyboard();
+            case 9:
                 core.status.event.selection = 0;
                 core.ui.drawSettings();
                 break;
@@ -1888,6 +1890,16 @@ actions.prototype._clickSwitchs_sound = function () {
     core.musicStatus.soundStatus = !core.musicStatus.soundStatus;
     core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
     core.ui.drawSwitchs();
+}
+
+actions.prototype._clickSwitchs_moveSpeed = function () {
+    core.myprompt("请输入行走速度（每走一步的时间，单位毫秒，默认100）", core.values.moveSpeed, function (value) {
+        value = parseInt(value) || core.values.moveSpeed;
+        value = core.clamp(value, 10, 500);
+        core.values.moveSpeed = value;
+        core.setLocalStorage("moveSpeed", value);
+        core.ui.drawSwitchs();
+    });
 }
 
 actions.prototype._clickSwitchs_displayEnemyDamage = function () {

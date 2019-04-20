@@ -252,6 +252,8 @@ core.prototype._init_sys_flags = function () {
     core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
     core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
+    // 行走速度
+    core.values.moveSpeed = core.getLocalStorage('moveSpeed', core.values.moveSpeed);
 }
 
 core.prototype._init_platform = function () {

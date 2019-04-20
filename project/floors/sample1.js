@@ -10,7 +10,7 @@ main.floors.sample1=
     [
         0,
         0,
-        "bg.jpg",
+        "背景图",
         0
     ]
 ],

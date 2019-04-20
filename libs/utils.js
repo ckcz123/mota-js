@@ -282,8 +282,10 @@ utils.prototype.clone = function (data, filter, recursion) {
 
 ////// 裁剪图片 //////
 utils.prototype.splitImage = function (image, width, height) {
-    if (typeof image == "string")
+    if (typeof image == "string") {
+        image = core.getMappedName(image);
         image = core.material.images.images[image];
+    }
     if (!image) return [];
     width = width || 32;
     height = height || width;

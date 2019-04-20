@@ -226,6 +226,7 @@ ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     if (typeof image == 'string') {
+        image = core.getMappedName(image);
         image = core.material.images.images[image];
         if (!image) return;
     }
@@ -374,8 +375,10 @@ ui.prototype._getTitleAndIcon = function (content) {
                 icon = 0;
                 height = core.material.icons.hero.height;
             }
-            else if (/^[-\w.]+\.png$/.test(s4))
+            else if (s4.endsWith(".png")) {
+                s4 = core.getMappedName(s4);
                 image = core.material.images.images[s4];
+            }
             else {
                 var blockInfo = core.getBlockInfo(s4);
                 if (blockInfo != null) {
@@ -830,6 +833,7 @@ ui.prototype._drawTextBox_drawImages = function (content) {
     return content.replace(/(\f|\\f)\[(.*?)]/g, function (text, sympol, str) {
         var ss = str.split(",");
         if (ss.length!=3 && ss.length!=5 && ss.length!=9) return "";
+        ss[0] = core.getMappedName(ss[0]);
         var img = core.material.images.images[ss[0]];
         if (!img) return "";
         // 绘制

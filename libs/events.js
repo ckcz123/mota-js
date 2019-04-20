@@ -945,9 +945,10 @@ events.prototype._action_setText = function (data, x, y, prefix) {
             core.status.textAttribute[t] = data[t];
         }
         if (t == 'background') {
-            var img = core.material.images.images[data[t]];
+            var name = core.getMappedName(data[t]);
+            var img = core.material.images.images[name];
             if (img && img.width == 192 && img.height == 128) {
-                core.status.textAttribute[t] = data[t];
+                core.status.textAttribute[t] = name;
             }
         }
     });
@@ -1747,6 +1748,7 @@ events.prototype.hasAsync = function () {
 ////// 跟随 //////
 events.prototype.follow = function (name) {
     core.status.hero.followers = core.status.hero.followers || [];
+    name = core.getMappedName(name);
     if (core.material.images.images[name]
         && core.material.images.images[name].width == 128) {
         core.status.hero.followers.push({"name": name});
@@ -1763,6 +1765,7 @@ events.prototype.unfollow = function (name) {
         core.status.hero.followers = [];
     }
     else {
+        name = core.getMappedName(name);
         for (var i = 0; i < core.status.hero.followers.length; i++) {
             if (core.status.hero.followers[i].name == name) {
                 core.status.hero.followers.splice(i, 1);
@@ -1887,7 +1890,10 @@ events.prototype.closeDoor = function (x, y, id, callback) {
 
 ////// 显示图片 //////
 events.prototype.showImage = function (code, image, sloc, loc, opacityVal, time, callback) {
-    if (typeof image == 'string') image = core.material.images.images[image];
+    if (typeof image == 'string') {
+        image = core.getMappedName(image);
+        image = core.material.images.images[image];
+    }
     if (!image) {
         if (callback) callback();
         return;
@@ -1980,6 +1986,7 @@ events.prototype._moveImage_moving = function (name, moveInfo, callback) {
 
 ////// 绘制或取消一张gif图片 //////
 events.prototype.showGif = function (name, x, y) {
+    name = core.getMappedName(name);
     var image = core.material.images.images[name];
     if (image) {
         var gif = new Image();
@@ -2230,6 +2237,7 @@ events.prototype.canUseQuickShop = function (shopId) {
 
 ////// 设置角色行走图 //////
 events.prototype.setHeroIcon = function (name, noDraw) {
+    name = core.getMappedName(name);
     var img = core.material.images.images[name];
     if (!img || img.width != 128) return;
     core.setFlag("heroIcon", name);

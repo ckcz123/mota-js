@@ -806,6 +806,7 @@ maps.prototype._drawFloorImages = function (floorId, ctx, name, images, currStat
     images.forEach(function (t) {
         if (typeof t == 'string') t = [0, 0, t];
         var dx = parseInt(t[0]), dy = parseInt(t[1]), imageName = t[2], frame = core.clamp(parseInt(t[4]), 1, 8);
+        imageName = core.getMappedName(imageName);
         var image = core.material.images.images[imageName];
         if (redraw && frame == 1) return; // 不重绘
 
@@ -1069,6 +1070,7 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (floorId, blocks, op
     // 缩略图：勇士
     if (options.heroLoc) {
         options.heroIcon = options.heroIcon || core.getFlag("heroIcon", "hero.png");
+        options.heroIcon = core.getMappedName(options.heroIcon);
         var icon = core.material.icons.hero[options.heroLoc.direction];
         var height = core.material.images.images[options.heroIcon].height / 4;
         tempCanvas.drawImage(core.material.images.images[options.heroIcon], icon.stop * 32, icon.loc * height, 32, height,
@@ -1844,6 +1846,7 @@ maps.prototype.drawBoxAnimate = function () {
 
 ////// 绘制动画 //////
 maps.prototype.drawAnimate = function (name, x, y, callback) {
+    name = core.getMappedName(name);
 
     // 正在播放录像：不显示动画
     if (core.isReplaying()) {

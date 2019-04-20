@@ -776,7 +776,8 @@ core.getCurrentEnemys(floorId)
 
 
 core.hasEnemyLeft(enemyId, floorId)
-检查某个楼层是否还有剩余的（指定）怪物。floorId为楼层ID，可忽略表示当前楼层。
+检查某个楼层是否还有剩余的（指定）怪物。
+floorId为楼层ID，可忽略表示当前楼层。也可以传数组如["MT0","MT1"]同时检测多个楼层。
 enemyId如果不填或null则检查是否剩余任何怪物，否则只检查是否剩余指定的某类怪物。
 ```
 

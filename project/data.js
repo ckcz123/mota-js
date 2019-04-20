@@ -35,6 +35,10 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"bomb.mp3",
 			"centerFly.mp3"
 		],
+		"nameMap": {
+			"背景图.jpg": "bg.jpg",
+			"背景音乐.mp3": "bgm.mp3"
+		},
 		"startBackground": "bg.jpg",
 		"startLogoStyle": "color: black",
 		"levelChoose": [
@@ -63,7 +67,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"statusLeftBackground": "url(project/images/ground.png) repeat",
 		"statusTopBackground": "url(project/images/ground.png) repeat",
 		"toolsBackground": "url(project/images/ground.png) repeat",
-		"borderColor": "white",
+		"borderColor": "#CCCCCC",
 		"statusBarColor": "white",
 		"hardLabelColor": "red",
 		"floorChangingBackground": "black",

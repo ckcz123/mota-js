@@ -439,27 +439,7 @@ editor_file = function (editor, callback) {
                 value[1] = [value[1].slice(0, tempindex), "['" + id + "']", value[1].slice(tempindex)].join('');
             });
             saveSetting('items', actionList, function (err) {
-                callback([
-                    (function () {
-                        var locObj_ = {};
-                        Object.keys(editor_file.comment._data.items._data).forEach(function (v) {
-                            if (isset(editor.core.items[v][id]) && v !== 'items')
-                                locObj_[v] = editor.core.items[v][id];
-                            else
-                                locObj_[v] = null;
-                        });
-                        locObj_['items'] = (function () {
-                            var locObj = Object.assign({}, editor.core.items.items[id]);
-                            Object.keys(editor_file.comment._data.items._data.items._data).forEach(function (v) {
-                                if (!isset(editor.core.items.items[id][v]))
-                                    locObj[v] = null;
-                            });
-                            return locObj;
-                        })();
-                        return locObj_;
-                    })(),
-                    editor_file.comment._data.items,
-                    err]);
+                callback([err]);
             });
         } else {
             callback([
@@ -505,19 +485,7 @@ editor_file = function (editor, callback) {
                 value[1] = "['" + id + "']" + value[1];
             });
             saveSetting('enemys', actionList, function (err) {
-                callback([
-                    (function () {
-                        var locObj = Object.assign({}, editor.core.enemys.enemys[id]);
-                        Object.keys(editor_file.comment._data.enemys._data).forEach(function (v) {
-                            if (!isset(editor.core.enemys.enemys[id][v]))
-                            /* locObj[v]=editor.core.enemys.enemys[id][v];
-                          else */
-                                locObj[v] = null;
-                        });
-                        return locObj;
-                    })(),
-                    editor_file.comment._data.enemys,
-                    err]);
+                callback([err]);
             });
         } else {
             callback([
@@ -562,20 +530,7 @@ editor_file = function (editor, callback) {
                 value[1] = "['" + idnum + "']" + value[1];
             }
             saveSetting('maps', actionList, function (err) {
-                callback([
-                    (function () {
-                        var sourceobj=editor.core.maps.blocksInfo[idnum];
-                        if(!isset(sourceobj) && idnum>=editor.core.icons.tilesetStartOffset)sourceobj={"cls": "tileset", "id": "X"+idnum, "noPass": true}
-                        var locObj = Object.assign({}, sourceobj);
-                        Object.keys(editor_file.comment._data.maps._data).forEach(function (v) {
-                            if (!isset(sourceobj[v]))
-                                locObj[v] = null;
-                        });
-                        locObj.idnum = idnum;
-                        return locObj;
-                    })(),
-                    editor_file.comment._data.maps,
-                    null]);
+                callback([err]);
             });
         } else {
             callback([
@@ -615,19 +570,7 @@ editor_file = function (editor, callback) {
                 value[1] = value[1] + "['" + x + "," + y + "']";
             });
             saveSetting('floorloc', actionList, function (err) {
-                callback([
-                    (function () {
-                        var locObj = {};
-                        Object.keys(editor_file.comment._data.floors._data.loc._data).forEach(function (v) {
-                            if (isset(editor.currentFloorData[v][x + ',' + y]))
-                                locObj[v] = editor.currentFloorData[v][x + ',' + y];
-                            else
-                                locObj[v] = null;
-                        });
-                        return locObj;
-                    })(),
-                    editor_file.comment._data.floors._data.loc,
-                    err]);
+                callback([err]);
             });
         } else {
             callback([
@@ -664,25 +607,7 @@ editor_file = function (editor, callback) {
         ;
         if (isset(actionList) && actionList.length > 0) {
             saveSetting('floors', actionList, function (err) {
-                callback([
-                    (function () {
-                        var locObj = Object.assign({}, editor.currentFloorData);
-                        Object.keys(editor_file.comment._data.floors._data.floor._data).forEach(function (v) {
-                            if (!isset(editor.currentFloorData[v]))
-                            /* locObj[v]=editor.currentFloorData[v];
-                          else */
-                                locObj[v] = null;
-                        });
-                        Object.keys(editor_file.comment._data.floors._data.loc._data).forEach(function (v) {
-                            delete(locObj[v]);
-                        });
-                        delete(locObj.map);
-                        delete(locObj.bgmap);
-                        delete(locObj.fgmap);
-                        return locObj;
-                    })(),
-                    editor_file.comment._data.floors._data.floor,
-                    err]);
+                callback([err]);
             });
         } else {
             callback([
@@ -725,20 +650,7 @@ editor_file = function (editor, callback) {
         ;
         if (isset(actionList) && actionList.length > 0) {
             saveSetting('data', actionList, function (err) {
-                callback([
-                    (function () {
-                        //var locObj=Object.assign({'main':{}},editor.core.data);
-                        var locObj = Object.assign({}, data_obj, {'main': {}});
-                        Object.keys(editor_file.dataComment._data.main._data).forEach(function (v) {
-                            if (isset(editor.main[v]))
-                                locObj.main[v] = data_obj.main[v];
-                            else
-                                locObj.main[v] = null;
-                        });
-                        return locObj;
-                    })(),
-                    editor_file.dataComment,
-                    err]);
+                callback([err]);
             });
         } else {
             callback([
@@ -793,14 +705,7 @@ editor_file = function (editor, callback) {
         ;
         if (isset(actionList) && actionList.length > 0) {
             saveSetting('functions', actionList, function (err) {
-                callback([
-                    (function () {
-                        var locObj = JSON.parse(fjson);
-                        buildlocobj(locObj);
-                        return locObj;
-                    })(),
-                    editor_file.functionsComment,
-                    err]);
+                callback([err]);
             });
         } else {
             callback([
@@ -834,10 +739,7 @@ editor_file = function (editor, callback) {
                 value[1] = "['commonEvent']" + value[1];
             });
             saveSetting('events', actionList, function (err) {
-                callback([
-                    Object.assign({},data_obj),
-                    editor_file.eventsComment._data.commonEvent,
-                    err]);
+                callback([err]);
             });
         } else {
             callback([
@@ -885,14 +787,7 @@ editor_file = function (editor, callback) {
         ;
         if (isset(actionList) && actionList.length > 0) {
             saveSetting('plugins', actionList, function (err) {
-                callback([
-                    (function () {
-                        var locObj = JSON.parse(JSON.stringify(plobj));
-                        buildpllocobj(locObj);
-                        return locObj;
-                    })(),
-                    editor_file.pluginsComment,
-                    err]);
+                callback([err]);
             });
         } else {
             callback([

@@ -71,7 +71,7 @@ actions.prototype._init = function () {
  * 返回：如果func返回true，则不会再继续执行其他的交互函数；否则会继续执行其他的交互函数。
  */
 actions.prototype.registerAction = function (action, name, func, priority) {
-    if (!name || !func || !(func instanceof Function))
+    if (!name || !func)
         return;
     priority = priority || 0;
     if (!this.actions[action]) {
@@ -99,8 +99,14 @@ actions.prototype.doRegisteredAction = function (action) {
     var actions = this.actions[action];
     if (!actions) return false;
     for (var i = 0; i < actions.length; ++i) {
-        if (core.doFunc.apply(core, [actions[i].func, this].concat(Array.prototype.slice.call(arguments, 1))))
-            return true;
+        try {
+            if (core.doFunc.apply(core, [actions[i].func, this].concat(Array.prototype.slice.call(arguments, 1))))
+                return true;
+        }
+        catch (e) {
+            main.log(e);
+            main.log("ERROR in actions["+actions[i].name+"].");
+        }
     }
     return false;
 }
@@ -991,10 +997,17 @@ actions.prototype._clickBook = function (x, y) {
     // 怪物信息
     var data = core.status.event.data;
     if (data != null && y < this.LAST) {
-        var page = parseInt(data / this.HSIZE);
-        var index = this.HSIZE * page + parseInt(y / 2);
-        core.ui.drawBook(index);
-        core.ui.drawBookDetail(index);
+        var pageinfo = core.ui._drawBook_pageinfo();
+        var per_page = pageinfo.per_page, page = parseInt(data / per_page);
+        var u = this.LAST / per_page;
+        for (var i = 0; i < per_page; ++i) {
+            if (y >= u*i && y < u*(i+1)) {
+                var index = per_page * page + i;
+                core.ui.drawBook(index);
+                core.ui.drawBookDetail(index);
+                break;
+            }
+        }
         return;
     }
     return;
@@ -1027,7 +1040,7 @@ actions.prototype._keyUpBook = function (keycode) {
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         var data = core.status.event.data;
         if (data != null) {
-            this._clickBook(this.HSIZE, 2 * (data % this.HSIZE));
+            core.ui.drawBookDetail(data);
         }
         return;
     }
@@ -1847,18 +1860,20 @@ actions.prototype._clickSwitchs = function (x, y) {
             case 1:
                 return this._clickSwitchs_sound();
             case 2:
-                return this._clickSwitchs_displayEnemyDamage();
+                return this._clickSwitchs_moveSpeed();
             case 3:
-                return this._clickSwitchs_displayCritical();
+                return this._clickSwitchs_displayEnemyDamage();
             case 4:
-                return this._clickSwitchs_displayExtraDamage();
+                return this._clickSwitchs_displayCritical();
             case 5:
-                return this._clickSwitchs_localForage();
+                return this._clickSwitchs_displayExtraDamage();
             case 6:
-                return this._clickSwitchs_clickMove();
+                return this._clickSwitchs_localForage();
             case 7:
-                return this._clickSwitchs_ExtendKeyboard();
+                return this._clickSwitchs_clickMove();
             case 8:
+                return this._clickSwitchs_ExtendKeyboard();
+            case 9:
                 core.status.event.selection = 0;
                 core.ui.drawSettings();
                 break;
@@ -1875,6 +1890,16 @@ actions.prototype._clickSwitchs_sound = function () {
     core.musicStatus.soundStatus = !core.musicStatus.soundStatus;
     core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
     core.ui.drawSwitchs();
+}
+
+actions.prototype._clickSwitchs_moveSpeed = function () {
+    core.myprompt("请输入行走速度（每走一步的时间，单位毫秒，默认100）", core.values.moveSpeed, function (value) {
+        value = parseInt(value) || core.values.moveSpeed;
+        value = core.clamp(value, 10, 500);
+        core.values.moveSpeed = value;
+        core.setLocalStorage("moveSpeed", value);
+        core.ui.drawSwitchs();
+    });
 }
 
 actions.prototype._clickSwitchs_displayEnemyDamage = function () {

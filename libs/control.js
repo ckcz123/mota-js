@@ -1100,7 +1100,7 @@ control.prototype.speedUpReplay = function () {
     else if (core.status.replay.speed==3) core.status.replay.speed=6;
     else if (core.status.replay.speed==2.5) core.status.replay.speed=3;
     else if (core.status.replay.speed==2) core.status.replay.speed=2.5;
-    else {
+    else if (core.status.replay.speed<2) {
         core.status.replay.speed = parseInt(10*core.status.replay.speed + 2)/10;
     }
     core.drawTip("x"+core.status.replay.speed+"倍");
@@ -1966,6 +1966,10 @@ control.prototype.debug = function() {
 
 // ------ 天气，色调，BGM ------ //
 
+control.prototype.getMappedName = function (name) {
+    return (main.nameMap || {})[name] || name;
+}
+
 ////// 更改天气效果 //////
 control.prototype.setWeather = function (type, level) {
     // 非雨雪
@@ -2088,6 +2092,7 @@ control.prototype.screenFlash = function (color, time, times, callback) {
 
 ////// 播放背景音乐 //////
 control.prototype.playBgm = function (bgm, startTime) {
+    bgm = core.getMappedName(bgm);
     if (main.mode!='play' || !core.material.bgms[bgm]) return;
     // 如果不允许播放
     if (!core.musicStatus.bgmStatus) {
@@ -2114,8 +2119,6 @@ control.prototype.playBgm = function (bgm, startTime) {
 }
 
 control.prototype._playBgm_play = function (bgm, startTime) {
-    // 缓存BGM
-    core.loader.loadBgm(bgm);
     // 如果当前正在播放，且和本BGM相同，直接忽略
     if (core.musicStatus.playingBgm == bgm && !core.material.bgms[core.musicStatus.playingBgm].paused) {
         return;
@@ -2124,6 +2127,8 @@ control.prototype._playBgm_play = function (bgm, startTime) {
     if (core.musicStatus.playingBgm) {
         core.material.bgms[core.musicStatus.playingBgm].pause();
     }
+    // 缓存BGM
+    core.loader.loadBgm(bgm);
     // 播放当前BGM
     core.material.bgms[bgm].volume = core.musicStatus.volume;
     core.material.bgms[bgm].currentTime = startTime || 0;
@@ -2152,7 +2157,7 @@ control.prototype.pauseBgm = function () {
 control.prototype.resumeBgm = function () {
     if (main.mode!='play')return;
     try {
-        core.playBgm(core.musicStatus.playingBgm || core.musicStatus.lastBgm);
+        core.playBgm(core.musicStatus.playingBgm || core.musicStatus.lastBgm || main.startBgm);
     }
     catch (e) {
         console.log("无法恢复BGM");
@@ -2182,6 +2187,7 @@ control.prototype.triggerBgm = function () {
 
 ////// 播放音频 //////
 control.prototype.playSound = function (sound) {
+    sound = core.getMappedName(sound);
     if (main.mode!='play' || !core.musicStatus.soundStatus || !core.material.sounds[sound]) return;
     try {
         if (core.musicStatus.audioContext != null) {

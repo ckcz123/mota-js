@@ -238,6 +238,7 @@ loader.prototype.loadOneSound = function (name) {
 }
 
 loader.prototype.loadBgm = function (name) {
+    name = core.getMappedName(name);
     if (!core.material.bgms[name]) return;
     // 如果没开启音乐，则不预加载
     if (!core.musicStatus.bgmStatus) return;
@@ -265,6 +266,7 @@ loader.prototype._preloadBgm = function (bgm) {
 }
 
 loader.prototype.freeBgm = function (name) {
+    name = core.getMappedName(name);
     if (!core.material.bgms[name]) return;
     // 从cachedBgms中删除
     core.musicStatus.cachedBgms = core.musicStatus.cachedBgms.filter(function (t) {

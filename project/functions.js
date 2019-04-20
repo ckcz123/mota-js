@@ -968,6 +968,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.events.setVolume(core.getFlag("__volume__", 1), 0);
 	// 加载勇士图标
 	var icon = core.getFlag("heroIcon", "hero.png");
+	icon = core.getMappedName(icon);
 	if (core.material.images.images[icon]) {
 		core.material.images.hero.src = core.material.images.images[icon].src;
 		core.material.icons.hero.height = core.material.images.images[icon].height / 4;

@@ -63,10 +63,10 @@ utils.prototype.replaceText = function (text, need, times) {
 utils.prototype.calValue = function (value, prefix, need, times) {
     if (!core.isset(value)) return null;
     if (typeof value === 'string') {
-        value = value.replace(/status:([\w\d_]+)/g, "core.getStatus('$1')");
-        value = value.replace(/item:([\w\d_]+)/g, "core.itemCount('$1')");
-        value = value.replace(/flag:([\w\d_]+)/g, "core.getFlag('$1', 0)");
-        value = value.replace(/switch:([\w\d_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
+        value = value.replace(/status:([a-zA-Z0-9_]+)/g, "core.getStatus('$1')");
+        value = value.replace(/item:([a-zA-Z0-9_]+)/g, "core.itemCount('$1')");
+        value = value.replace(/flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getFlag('$1', 0)");
+        value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
         return eval(value);
     }
     if (value instanceof Function) {
@@ -282,8 +282,10 @@ utils.prototype.clone = function (data, filter, recursion) {
 
 ////// 裁剪图片 //////
 utils.prototype.splitImage = function (image, width, height) {
-    if (typeof image == "string")
+    if (typeof image == "string") {
+        image = core.getMappedName(image);
         image = core.material.images.images[image];
+    }
     if (!image) return [];
     width = width || 32;
     height = height || width;

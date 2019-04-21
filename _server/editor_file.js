@@ -32,11 +32,7 @@ editor_file = function (editor, callback) {
 
 
     editor_file.getFloorFileList = function (callback) {
-        if (!isset(callback)) {
-            printe('未设置callback');
-            throw('未设置callback')
-        }
-        ;
+        checkCallback(callback);
         /* var fs = editor.fs;
         fs.readdir('project/floors',function(err, data){
           callback([data,err]);
@@ -46,22 +42,14 @@ editor_file = function (editor, callback) {
     //callback([Array<String>,err:String])
     editor_file.loadFloorFile = function (filename, callback) {
         //filename不含'/'不含'.js'
-        if (!isset(callback)) {
-            printe('未设置callback');
-            throw('未设置callback')
-        }
-        ;
+        checkCallback(callback);
         
         editor.currentFloorId = editor.core.status.floorId;
         editor.currentFloorData = editor.core.floors[editor.currentFloorId];
     }
     //callback(err:String)
     editor_file.saveFloorFile = function (callback) {
-        if (!isset(callback)) {
-            printe('未设置callback');
-            throw('未设置callback')
-        }
-        ;
+        checkCallback(callback);
         /* if (!isset(editor.currentFloorId) || !isset(editor.currentFloorData)) {
           callback('未选中文件或无数据');
         } */
@@ -113,10 +101,7 @@ editor_file = function (editor, callback) {
     //callback(err:String)
     editor_file.saveNewFile = function (saveFilename, callback) {
         //saveAsFilename不含'/'不含'.js'
-        if (!isset(callback)) {
-            printe('未设置callback');
-            throw('未设置callback')
-        };
+        checkCallback(callback);
         var currData=editor.currentFloorData;
         var saveStatus = document.getElementById('newMapStatus').checked;
 
@@ -163,10 +148,7 @@ editor_file = function (editor, callback) {
         editor_file.saveFloorFile(callback);
     }
     editor_file.saveNewFiles = function (floorIdList, from, to, callback) {
-        if (!isset(callback)) {
-            printe('未设置callback');
-            throw('未设置callback')
-        };
+        checkCallback(callback);
         var currData=editor.currentFloorData;
         var saveStatus = document.getElementById('newMapsStatus').checked;
 
@@ -349,11 +331,7 @@ editor_file = function (editor, callback) {
     }
 
     editor_file.changeIdAndIdnum = function (id, idnum, info, callback) {
-        if (!isset(callback)) {
-            printe('未设置callback');
-            throw('未设置callback')
-        }
-        ;
+        checkCallback(callback);
         //检查maps中是否有重复的idnum或id
         var change = -1;
         for (var ii in editor.core.maps.blocksInfo) {
@@ -428,11 +406,7 @@ editor_file = function (editor, callback) {
         ]
         为[]时只查询不修改
         */
-        if (!isset(callback)) {
-            printe('未设置callback');
-            throw('未设置callback')
-        }
-        ;
+        checkCallback(callback);
         if (isset(actionList) && actionList.length > 0) {
             actionList.forEach(function (value) {
                 var tempindex = value[1].indexOf(']') + 1;
@@ -475,11 +449,7 @@ editor_file = function (editor, callback) {
         ]
         为[]时只查询不修改
         */
-        if (!isset(callback)) {
-            printe('未设置callback');
-            throw('未设置callback')
-        }
-        ;
+        checkCallback(callback);
         if (isset(actionList) && actionList.length > 0) {
             actionList.forEach(function (value) {
                 value[1] = "['" + id + "']" + value[1];
@@ -512,11 +482,7 @@ editor_file = function (editor, callback) {
         ]
         为[]时只查询不修改
         */
-        if (!isset(callback)) {
-            printe('未设置callback');
-            throw('未设置callback')
-        }
-        ;
+        checkCallback(callback);
         if (isset(actionList) && actionList.length > 0) {
             var tempmap=[];
             for(var ii=0;ii<actionList.length;ii++){
@@ -560,11 +526,7 @@ editor_file = function (editor, callback) {
         ]
         为[]时只查询不修改
         */
-        if (!isset(callback)) {
-            printe('未设置callback');
-            throw('未设置callback')
-        }
-        ;
+        checkCallback(callback);
         if (isset(actionList) && actionList.length > 0) {
             actionList.forEach(function (value) {
                 value[1] = value[1] + "['" + x + "," + y + "']";
@@ -600,11 +562,7 @@ editor_file = function (editor, callback) {
         ]
         为[]时只查询不修改
         */
-        if (!isset(callback)) {
-            printe('未设置callback');
-            throw('未设置callback')
-        }
-        ;
+        checkCallback(callback);
         if (isset(actionList) && actionList.length > 0) {
             saveSetting('floors', actionList, function (err) {
                 callback([err]);
@@ -643,11 +601,7 @@ editor_file = function (editor, callback) {
         为[]时只查询不修改
         */
         var data_obj = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d;
-        if (!isset(callback)) {
-            printe('未设置callback');
-            throw('未设置callback')
-        }
-        ;
+        checkCallback(callback);
         if (isset(actionList) && actionList.length > 0) {
             saveSetting('data', actionList, function (err) {
                 callback([err]);
@@ -698,11 +652,7 @@ editor_file = function (editor, callback) {
         ]
         为[]时只查询不修改
         */
-        if (!isset(callback)) {
-            printe('未设置callback');
-            throw('未设置callback')
-        }
-        ;
+        checkCallback(callback);
         if (isset(actionList) && actionList.length > 0) {
             saveSetting('functions', actionList, function (err) {
                 callback([err]);
@@ -729,11 +679,7 @@ editor_file = function (editor, callback) {
         为[]时只查询不修改
         */
         var data_obj = events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent;
-        if (!isset(callback)) {
-            printe('未设置callback');
-            throw('未设置callback')
-        }
-        ;
+        checkCallback(callback);
         if (isset(actionList) && actionList.length > 0) {
             actionList.forEach(function (value) {
                 value[1] = "['commonEvent']" + value[1];
@@ -780,11 +726,7 @@ editor_file = function (editor, callback) {
         ]
         为[]时只查询不修改
         */
-        if (!isset(callback)) {
-            printe('未设置callback');
-            throw('未设置callback')
-        }
-        ;
+        checkCallback(callback);
         if (isset(actionList) && actionList.length > 0) {
             saveSetting('plugins', actionList, function (err) {
                 callback([err]);
@@ -809,6 +751,13 @@ editor_file = function (editor, callback) {
             return false;
         }
         return true
+    }
+
+    var checkCallback=function(callback){
+        if (!isset(callback)) {
+            printe('未设置callback');
+            throw('未设置callback')
+        }
     }
 
     var formatMap = function (mapArr,trySimplify) {

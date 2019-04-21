@@ -11,7 +11,7 @@
 + [ ] editor_multi 多行文本编辑器
 + [x] editor_table 处理表格的生成, 及其响应的事件, 从原editor\_mode中分离
 + [ ] editor_file 调用fs.js编辑文件, 把原editor\_file模块化
-+ [ ] editor_game 处理来自core的数据, 导入为editor的数据, 从原editor中分离. **只有此文件允许`\b(main|core)`形式的调用**(以及其初始化`editor_game_wrapper(editor, main, core);`)
++ [ ] editor_game 处理来自core的数据, 导入为editor的数据, 从原editor中分离. **只有此文件允许`\s(main|core)`形式的调用**(以及其初始化`editor_game_wrapper(editor, main, core);`)
 + [x] editor_util 生成guid等函数, 从editor分离
 + [ ] editor 执行初始化流程加组合各组件
 + [ ] 原editor_mode 移除

@@ -1,5 +1,5 @@
 editor_game_wrapper = function (editor, main, core) {
-    // 原则上重构后只有此文件允许`\b(main|core)`形式的调用, 以及其初始化 editor_game_wrapper(editor, main, core)
+    // 原则上重构后只有此文件允许`\s(main|core)`形式的调用, 以及其初始化 editor_game_wrapper(editor, main, core)
 
     editor_game = function () {
         this.replacerRecord = {}

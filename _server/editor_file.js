@@ -706,7 +706,7 @@ editor_file = function (editor, callback) {
             return id_;
         } else if(v===null){
             var id_ = editor.util.guid();
-            plmap[id_] = 'null';
+            plmap[id_] = null;
             return id_;
         } return v
     }, 4);

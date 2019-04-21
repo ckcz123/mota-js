@@ -1,4 +1,5 @@
 editor_game_wrapper = function (editor, main, core) {
+    // 原则上重构后只有此文件允许`\b(main|core)`形式的调用, 以及其初始化 editor_game_wrapper(editor, main, core)
 
     editor_game = function () {
         this.replacerRecord = {}
@@ -12,7 +13,7 @@ editor_game_wrapper = function (editor, main, core) {
             rmap[guid_] = value.toString()
             return guid_
         } else if (value === null) {
-            // 为了包含functions的新建, 不使用'null'是否有问题待测
+            // 为了包含plugins的新建
             var guid_ = editor.util.guid()
             rmap[guid_] = null
             return guid_

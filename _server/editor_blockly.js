@@ -2,7 +2,11 @@ editor_blockly = function () {
 
     var editor_blockly = {};
 
-    initscript = String.raw`
+/////////////////initscript start/////////////////////////////
+// do not use String.raw because of highlighting
+// Comment tagged templates
+// https://marketplace.visualstudio.com/items?itemName=bierner.comment-tagged-templates
+    initscript = /* js */`
 (function(){
   var getCategory = function(name,custom){
     for(var node of document.getElementById('toolbox').children) {
@@ -30,7 +34,7 @@ editor_blockly = function () {
         "textInList": "1F金币商店", 
         "use": "money",
         "need": "20+10*times*(times+1)",  
-        "text": "勇敢的武士啊，给我\${need}金币就可以：", 
+        "text": "勇敢的武士啊，给我\\\${need}金币就可以：", 
         "choices": [ 
           {"text": "生命+800", "effect": "status:hp+=800"},
           {"text": "攻击+4", "effect": "status:atk+=4"},
@@ -188,27 +192,27 @@ editor_blockly = function () {
       '<label text="检测音乐如果没有开启则系统提示开启"></label>',
       MotaActionFunctions.actionParser.parseList({"type": "if", "condition": "!core.musicStatus.bgmStatus",
         "true": [
-          "\t[系统提示]你当前音乐处于关闭状态，本塔开音乐游戏效果更佳"
+          "\\t[系统提示]你当前音乐处于关闭状态，本塔开音乐游戏效果更佳"
         ],
         "false": []
       }),
       '<label text="商店购买属性/钥匙"></label>',
       MotaActionFunctions.actionParser.parse([
-        {"type": "choices", "text": "\t[老人,man]少年，你需要钥匙吗？\n我这里有大把的！",
+        {"type": "choices", "text": "\\t[老人,man]少年，你需要钥匙吗？\\n我这里有大把的！",
         "choices": [
-            {"text": "黄钥匙（\${9+flag:shop_times}金币）", "color": [255,255,0,1], "action": [
+            {"text": "黄钥匙（\\\${9+flag:shop_times}金币）", "color": [255,255,0,1], "action": [
                 {"type": "if", "condition": "status:money>=9+flag:shop_times",
                     "true": [
                         {"type": "addValue", "name": "status:money", "value": "-(9+flag:shop_times)"},
                         {"type": "addValue", "name": "item:yellowKey", "value": "1"},
                     ],
                     "false": [
-                        "\t[老人,man]你的金钱不足！",
+                        "\\t[老人,man]你的金钱不足！",
                         {"type": "revisit"}
                     ]
                 }
             ]},
-            {"text": "蓝钥匙（\${18+2*flag:shop_times}金币）", "color": [0,0,255,1], "action": [
+            {"text": "蓝钥匙（\\\${18+2*flag:shop_times}金币）", "color": [0,0,255,1], "action": [
             ]},
             {"text": "离开", "action": [
                 {"type": "exit"}
@@ -361,7 +365,7 @@ function omitedcheckUpdateFunction(event) {
     }
   }
   try {
-    var code = Blockly.JavaScript.workspaceToCode(workspace).replace(/\\i/g, '\\\\i');
+    var code = Blockly.JavaScript.workspaceToCode(workspace).replace(/\\\\i/g, '\\\\\\\\i');
     codeAreaHL.setValue(code);
   } catch (error) {
     codeAreaHL.setValue(String(error));
@@ -433,6 +437,7 @@ function omitedcheckUpdateFunction(event) {
   }
 })();
 `;
+/////////////////initscript end  /////////////////////////////
 
     var input_ = '';
     editor_blockly.runOne = function () {

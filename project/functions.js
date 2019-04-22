@@ -9,7 +9,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 这一步会清空状态栏和全部画布内容，并删除所有动态创建的画布
 	core.clearStatus();
 	// 初始化status
-	core.status = core.clone(core.initStatus);
+	core.status = core.clone(core.initStatus, function (name) {
+		return name != 'hero' && name != 'maps';
+	});
 	core.status.played = true;
 	// 初始化人物，图标，统计信息
 	core.status.hero = core.clone(hero);
@@ -22,7 +24,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.hard = hard || "";
 	// 初始化地图
 	core.status.floorId = floorId;
-	core.status.maps = core.clone(maps);
+	core.status.maps = maps;
 	// 初始化怪物和道具
 	core.material.enemys = core.enemys.getEnemys();
 	core.material.items = core.items.getItems();

@@ -715,7 +715,7 @@ events.prototype._sys_action = function (data, callback) {
         var dir = core.reverseDirection();
         var id = data.event.id, toId = (data.event.faceIds || {})[dir];
         if (toId && id != toId) {
-            var number = core.icons.getNumberById(toId);
+            var number = core.getNumberById(toId);
             if (number > 0)
                 core.setBlock(number, ex, ey);
         }

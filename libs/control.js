@@ -1856,7 +1856,7 @@ control.prototype.getStatus = function (name) {
 ////// 从status中获得属性，如果不存在则从勇士属性中获取 //////
 control.prototype.getStatusOrDefault = function (status, name) {
     if (status && name in status)
-        return status[name];
+        return Math.floor(status[name]);
     return Math.floor(this.getStatus(name));
 }
 

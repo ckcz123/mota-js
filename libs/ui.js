@@ -2037,19 +2037,19 @@ ui.prototype._drawEquipbox_getStatusChanged = function (info, equip, equipType) 
 ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipType) {
     var compare = this._drawEquipbox_getStatusChanged(info, equip, equipType);
     if (compare == null) return;
-    var drawOffset = 10;
+    var obj = { drawOffset: 10, y: y };
+
     // --- 变化值...
     core.setFont('ui', this._buildFont(14, true));
     for (var name in compare) {
         var img = core.statusBar.icons[name];
         var text = core.getStatusName(name);
         if (img && core.flags.iconInEquipbox) { // 绘制图标
-            core.drawImage('ui', img, 0, 0, 32, 32, drawOffset, y - 13, 16, 16);
-            drawOffset += 20;
+            core.drawImage('ui', img, 0, 0, 32, 32, obj.drawOffset, y - 13, 16, 16);
+            obj.drawOffset += 20;
         }
         else { // 绘制文字
-            core.fillText('ui', text + " ", drawOffset, y, '#CCCCCC');
-            drawOffset += core.calWidth('ui', text + " ");
+            this._drawEquipbox_drawStatusChanged_draw(text + " ", '#CCCCCC', obj);
         }
         var nowValue = core.getStatus(name) * core.getBuff(name), newValue = (nowValue + compare[name]) * core.getBuff(name);
         if (equip.equip.percentage) {
@@ -2059,11 +2059,20 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
         }
         nowValue = core.formatBigNumber(nowValue);
         newValue = core.formatBigNumber(newValue);
-        core.fillText('ui', nowValue + "->", drawOffset, y, '#CCCCCC');
-        drawOffset += core.calWidth('ui', nowValue + "->");
-        core.fillText('ui', newValue, drawOffset, y, compare[name]>0?'#00FF00':'#FF0000');
-        drawOffset += core.calWidth('ui', newValue) + 8;
+        this._drawEquipbox_drawStatusChanged_draw(nowValue+"->", '#CCCCCC', obj);
+        this._drawEquipbox_drawStatusChanged_draw(newValue, compare[name]>0?'#00FF00':'#FF0000', obj);
+        obj.drawOffset += 8;
     }
+}
+
+ui.prototype._drawEquipbox_drawStatusChanged_draw = function (text, color, obj) {
+    var len = core.calWidth('ui', text);
+    if (obj.drawOffset + len >= core.__PIXELS__) { // 换行
+        obj.y += 19;
+        obj.drawOffset = 10;
+    }
+    core.fillText('ui', text, obj.drawOffset, obj.y, color);
+    obj.drawOffset += len;
 }
 
 ui.prototype._drawEquipbox_drawEquiped = function (info, line) {

@@ -785,7 +785,7 @@ maps.prototype._drawBgFgMap = function (floorId, ctx, name, onMap) {
 
     var arr = this._getBgFgMapArray(name, floorId, true);
     var eventArr = null;
-    if (main.mode == 'editor' && name == 'fg') {
+    if (main.mode == 'editor' && name == 'fg' && onMap) {
         eventArr = this.getMapArray(floorId);
     }
 

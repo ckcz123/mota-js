@@ -1,37 +1,13 @@
 editor_file = function (editor, callback) {
 
-    var editor_file = {};
+    var editor_file = new editor_file_proto();
+    editor.file=editor_file;
 
+    editor.file.loadCommentjs(callback);
 
-    var commentjs = {
-        'comment': 'comment',
-        'data.comment': 'dataComment',
-        'functions.comment': 'functionsComment',
-        'events.comment': 'eventsComment',
-        'plugins.comment': 'pluginsComment',
-    }
-    for (var key in commentjs) {
-        (function (key) {
-            var value = commentjs[key];
-            var script = document.createElement('script');
-            if (window.location.href.indexOf('_server') !== -1)
-                script.src = key + '.js';
-            else
-                script.src = '_server/table/' + key + '.js';
-            document.body.appendChild(script);
-            script.onload = function () {
-                editor_file[value] = eval(key.replace('.', '_') + '_c456ea59_6018_45ef_8bcc_211a24c627dc');
-                var loaded = Boolean(callback);
-                for (var key_ in commentjs) {
-                    loaded = loaded && editor_file[commentjs[key_]]
-                }
-                if (loaded) callback();
-            }
-        })(key);
-    }
+    ///////////////////////////////////////////////////////////////////////////
 
-
-    editor_file.getFloorFileList = function (callback) {
+    editor.file.getFloorFileList = function (callback) {
         checkCallback(callback);
         /* var fs = editor.fs;
         fs.readdir('project/floors',function(err, data){
@@ -40,7 +16,7 @@ editor_file = function (editor, callback) {
         callback([editor.core.floorIds, null]);
     }
     //callback([Array<String>,err:String])
-    editor_file.loadFloorFile = function (filename, callback) {
+    editor.file.loadFloorFile = function (filename, callback) {
         //filename不含'/'不含'.js'
         checkCallback(callback);
         
@@ -48,7 +24,7 @@ editor_file = function (editor, callback) {
         editor.currentFloorData = editor.core.floors[editor.currentFloorId];
     }
     //callback(err:String)
-    editor_file.saveFloorFile = function (callback) {
+    editor.file.saveFloorFile = function (callback) {
         checkCallback(callback);
         /* if (!isset(editor.currentFloorId) || !isset(editor.currentFloorData)) {
           callback('未选中文件或无数据');
@@ -99,7 +75,7 @@ editor_file = function (editor, callback) {
         });
     }
     //callback(err:String)
-    editor_file.saveNewFile = function (saveFilename, callback) {
+    editor.file.saveNewFile = function (saveFilename, callback) {
         //saveAsFilename不含'/'不含'.js'
         checkCallback(callback);
         var currData=editor.currentFloorData;
@@ -145,9 +121,9 @@ editor_file = function (editor, callback) {
         })
         editor.currentFloorData.map = "new";
         editor.currentFloorId = saveFilename;
-        editor_file.saveFloorFile(callback);
+        editor.file.saveFloorFile(callback);
     }
-    editor_file.saveNewFiles = function (floorIdList, from, to, callback) {
+    editor.file.saveNewFiles = function (floorIdList, from, to, callback) {
         checkCallback(callback);
         var currData=editor.currentFloorData;
         var saveStatus = document.getElementById('newMapsStatus').checked;
@@ -224,7 +200,7 @@ editor_file = function (editor, callback) {
 
     ////////////////////////////////////////////////////////////////////
 
-    editor_file.autoRegister = function (info, callback) {
+    editor.file.autoRegister = function (info, callback) {
 
         var iconActions = [];
         var mapActions = [];
@@ -269,9 +245,9 @@ editor_file = function (editor, callback) {
             }
             mapActions.push(["add", "['" + idnum + "']", {'cls': image, 'id': id}])
             if (image=='items')
-                templateActions.push(["add", "['items']['" + id + "']", editor_file.comment._data.items_template]);
+                templateActions.push(["add", "['items']['" + id + "']", editor.file.comment._data.items_template]);
             else if (image.indexOf('enemy')==0)
-                templateActions.push(["add", "['" + id + "']", editor_file.comment._data.enemys_template]);
+                templateActions.push(["add", "['" + id + "']", editor.file.comment._data.enemys_template]);
             idnum++;
         }
 
@@ -304,7 +280,7 @@ editor_file = function (editor, callback) {
         else tempcallback(null);
     }
 
-    editor_file.registerAutotile = function (filename, callback) {
+    editor.file.registerAutotile = function (filename, callback) {
         var idnum = 140;
         while (editor.core.maps.blocksInfo[idnum]) idnum++;
 
@@ -330,7 +306,7 @@ editor_file = function (editor, callback) {
         saveSetting('maps', mapActions, tempcallback);
     }
 
-    editor_file.changeIdAndIdnum = function (id, idnum, info, callback) {
+    editor.file.changeIdAndIdnum = function (id, idnum, info, callback) {
         checkCallback(callback);
         //检查maps中是否有重复的idnum或id
         var change = -1;
@@ -379,7 +355,7 @@ editor_file = function (editor, callback) {
         saveSetting('maps', [["add", "['" + idnum + "']", {'cls': info.images, 'id': id}]], tempcallback);
         saveSetting('icons', [["add", "['" + info.images + "']['" + id + "']", info.y]], tempcallback);
         if (info.images === 'items') {
-            saveSetting('items', [["add", "['items']['" + id + "']", editor_file.comment._data.items_template]], function (err) {
+            saveSetting('items', [["add", "['items']['" + id + "']", editor.file.comment._data.items_template]], function (err) {
                 if (err) {
                     printe(err);
                     throw(err)
@@ -387,7 +363,7 @@ editor_file = function (editor, callback) {
             });
         }
         if (info.images === 'enemys' || info.images === 'enemy48') {
-            saveSetting('enemys', [["add", "['" + id + "']", editor_file.comment._data.enemys_template]], function (err) {
+            saveSetting('enemys', [["add", "['" + id + "']", editor.file.comment._data.enemys_template]], function (err) {
                 if (err) {
                     printe(err);
                     throw(err)
@@ -398,7 +374,7 @@ editor_file = function (editor, callback) {
         callback(null);
     }
     //callback(err:String)
-    editor_file.editItem = function (id, actionList, callback) {
+    editor.file.editItem = function (id, actionList, callback) {
         /*actionList:[
           ["change","['items']['name']","红宝石的新名字"],
           ["add","['items']['新的和name同级的属性']",123],
@@ -419,7 +395,7 @@ editor_file = function (editor, callback) {
             callback([
                 (function () {
                     var locObj_ = {};
-                    Object.keys(editor_file.comment._data.items._data).forEach(function (v) {
+                    Object.keys(editor.file.comment._data.items._data).forEach(function (v) {
                         if (isset(editor.core.items[v][id]) && v !== 'items')
                             locObj_[v] = editor.core.items[v][id];
                         else
@@ -427,7 +403,7 @@ editor_file = function (editor, callback) {
                     });
                     locObj_['items'] = (function () {
                         var locObj = Object.assign({}, editor.core.items.items[id]);
-                        Object.keys(editor_file.comment._data.items._data.items._data).forEach(function (v) {
+                        Object.keys(editor.file.comment._data.items._data.items._data).forEach(function (v) {
                             if (!isset(editor.core.items.items[id][v]))
                                 locObj[v] = null;
                         });
@@ -435,13 +411,13 @@ editor_file = function (editor, callback) {
                     })();
                     return locObj_;
                 })(),
-                editor_file.comment._data.items,
+                editor.file.comment._data.items,
                 null]);
         }
         //只有items.cls是items的才有itemEffect和itemEffectTip,keys和constants和tools只有items
     }
     //callback([obj,commentObj,err:String])
-    editor_file.editEnemy = function (id, actionList, callback) {
+    editor.file.editEnemy = function (id, actionList, callback) {
         /*actionList:[
           ["change","['name']","初级巫师的新名字"],
           ["add","['新的和name同级的属性']",123],
@@ -461,7 +437,7 @@ editor_file = function (editor, callback) {
             callback([
                 (function () {
                     var locObj = Object.assign({}, editor.core.enemys.enemys[id]);
-                    Object.keys(editor_file.comment._data.enemys._data).forEach(function (v) {
+                    Object.keys(editor.file.comment._data.enemys._data).forEach(function (v) {
                         if (!isset(editor.core.enemys.enemys[id][v]))
                         /* locObj[v]=editor.core.enemys.enemys[id][v];
                       else */
@@ -469,13 +445,13 @@ editor_file = function (editor, callback) {
                     });
                     return locObj;
                 })(),
-                editor_file.comment._data.enemys,
+                editor.file.comment._data.enemys,
                 null]);
         }
     }
     //callback([obj,commentObj,err:String])
 
-    editor_file.editMapBlocksInfo = function (idnum, actionList, callback) {
+    editor.file.editMapBlocksInfo = function (idnum, actionList, callback) {
         /*actionList:[
           ["change","['events']",["\t[老人,magician]领域、夹击。\n请注意领域怪需要设置value为伤害数值，可参见样板中初级巫师的写法。"]],
           ["change","['afterBattle']",null],
@@ -504,14 +480,14 @@ editor_file = function (editor, callback) {
                     var sourceobj=editor.core.maps.blocksInfo[idnum];
                     if(!isset(sourceobj) && idnum>=editor.core.icons.tilesetStartOffset)sourceobj={"cls": "tileset", "id": "X"+idnum, "noPass": true}
                     var locObj = Object.assign({}, sourceobj);
-                    Object.keys(editor_file.comment._data.maps._data).forEach(function (v) {
+                    Object.keys(editor.file.comment._data.maps._data).forEach(function (v) {
                         if (!isset(sourceobj[v]))
                             locObj[v] = null;
                     });
                     locObj.idnum = idnum;
                     return locObj;
                 })(),
-                editor_file.comment._data.maps,
+                editor.file.comment._data.maps,
                 null]);
         }
     }
@@ -519,7 +495,7 @@ editor_file = function (editor, callback) {
 
     ////////////////////////////////////////////////////////////////////
 
-    editor_file.editLoc = function (x, y, actionList, callback) {
+    editor.file.editLoc = function (x, y, actionList, callback) {
         /*actionList:[
           ["change","['events']",["\t[老人,magician]领域、夹击。\n请注意领域怪需要设置value为伤害数值，可参见样板中初级巫师的写法。"]],
           ["change","['afterBattle']",null],
@@ -538,7 +514,7 @@ editor_file = function (editor, callback) {
             callback([
                 (function () {
                     var locObj = {};
-                    Object.keys(editor_file.comment._data.floors._data.loc._data).forEach(function (v) {
+                    Object.keys(editor.file.comment._data.floors._data.loc._data).forEach(function (v) {
                         if (isset(editor.currentFloorData[v][x + ',' + y]))
                             locObj[v] = editor.currentFloorData[v][x + ',' + y];
                         else
@@ -546,7 +522,7 @@ editor_file = function (editor, callback) {
                     });
                     return locObj;
                 })(),
-                editor_file.comment._data.floors._data.loc,
+                editor.file.comment._data.floors._data.loc,
                 null]);
         }
 
@@ -555,7 +531,7 @@ editor_file = function (editor, callback) {
 
     ////////////////////////////////////////////////////////////////////
 
-    editor_file.editFloor = function (actionList, callback) {
+    editor.file.editFloor = function (actionList, callback) {
         /*actionList:[
           ["change","['title']",'样板 3 层'],
           ["change","['color']",null],
@@ -571,13 +547,13 @@ editor_file = function (editor, callback) {
             callback([
                 (function () {
                     var locObj = Object.assign({}, editor.currentFloorData);
-                    Object.keys(editor_file.comment._data.floors._data.floor._data).forEach(function (v) {
+                    Object.keys(editor.file.comment._data.floors._data.floor._data).forEach(function (v) {
                         if (!isset(editor.currentFloorData[v]))
                         /* locObj[v]=editor.currentFloorData[v];
                       else */
                             locObj[v] = null;
                     });
-                    Object.keys(editor_file.comment._data.floors._data.loc._data).forEach(function (v) {
+                    Object.keys(editor.file.comment._data.floors._data.loc._data).forEach(function (v) {
                         delete(locObj[v]);
                     });
                     delete(locObj.map);
@@ -585,7 +561,7 @@ editor_file = function (editor, callback) {
                     delete(locObj.fgmap);
                     return locObj;
                 })(),
-                editor_file.comment._data.floors._data.floor,
+                editor.file.comment._data.floors._data.floor,
                 null]);
         }
     }
@@ -593,7 +569,7 @@ editor_file = function (editor, callback) {
 
     ////////////////////////////////////////////////////////////////////
 
-    editor_file.editTower = function (actionList, callback) {
+    editor.file.editTower = function (actionList, callback) {
         /*actionList:[
           ["change","['firstData']['version']",'Ver 1.0.1 (Beta)'],
           ["change","['values']['lavaDamage']",200],
@@ -611,7 +587,7 @@ editor_file = function (editor, callback) {
                 (function () {
                     //var locObj=Object.assign({'main':{}},editor.core.data);
                     var locObj = Object.assign({}, data_obj, {'main': {}});
-                    Object.keys(editor_file.dataComment._data.main._data).forEach(function (v) {
+                    Object.keys(editor.file.dataComment._data.main._data).forEach(function (v) {
                         if (isset(editor.main[v]))
                             locObj.main[v] = data_obj.main[v];
                         else
@@ -619,7 +595,7 @@ editor_file = function (editor, callback) {
                     });
                     return locObj;
                 })(),
-                editor_file.dataComment,
+                editor.file.dataComment,
                 null]);
         }
     }
@@ -636,8 +612,8 @@ editor_file = function (editor, callback) {
         } else return v
     }, 4);
     var fobj = JSON.parse(fjson);
-    editor_file.functionsMap = fmap;
-    editor_file.functionsJSON = fjson;
+    editor.file.functionsMap = fmap;
+    editor.file.functionsJSON = fjson;
     var buildlocobj = function (locObj) {
         for (var key in locObj) {
             if (typeof(locObj[key]) !== typeof('')) buildlocobj(locObj[key]);
@@ -645,7 +621,7 @@ editor_file = function (editor, callback) {
         }
     };
 
-    editor_file.editFunctions = function (actionList, callback) {
+    editor.file.editFunctions = function (actionList, callback) {
         /*actionList:[
           ["change","['events']['afterChangeLight']","function(x,y){console.log(x,y)}"],
           ["change","['ui']['drawAbout']","function(){...}"],
@@ -664,7 +640,7 @@ editor_file = function (editor, callback) {
                     buildlocobj(locObj);
                     return locObj;
                 })(),
-                editor_file.functionsComment,
+                editor.file.functionsComment,
                 null]);
         }
     }
@@ -672,7 +648,7 @@ editor_file = function (editor, callback) {
 
     ////////////////////////////////////////////////////////////////////
 
-    editor_file.editCommonEvent = function (actionList, callback) {
+    editor.file.editCommonEvent = function (actionList, callback) {
         /*actionList:[
           ["change","['test']",['123']],
         ]
@@ -690,7 +666,7 @@ editor_file = function (editor, callback) {
         } else {
             callback([
                 Object.assign({},data_obj),
-                editor_file.eventsComment._data.commonEvent,
+                editor.file.eventsComment._data.commonEvent,
                 null]);
         }
     }
@@ -711,8 +687,8 @@ editor_file = function (editor, callback) {
         } return v
     }, 4);
     var plobj = JSON.parse(pljson);
-    editor_file.pluginsMap = plmap;
-    editor_file.pluginsObj = plobj;
+    editor.file.pluginsMap = plmap;
+    editor.file.pluginsObj = plobj;
     var buildpllocobj = function (locObj) {
         for (var key in locObj) {
             if (typeof(locObj[key]) !== typeof('')) buildpllocobj(locObj[key]);
@@ -720,7 +696,7 @@ editor_file = function (editor, callback) {
         }
     };
 
-    editor_file.editPlugins = function (actionList, callback) {
+    editor.file.editPlugins = function (actionList, callback) {
         /*actionList:[
           ["change","['test']","function(x,y){console.log(x,y)}"],
         ]
@@ -738,7 +714,7 @@ editor_file = function (editor, callback) {
                     buildpllocobj(locObj);
                     return locObj;
                 })(),
-                editor_file.pluginsComment,
+                editor.file.pluginsComment,
                 null]);
         }
     }
@@ -904,14 +880,14 @@ editor_file = function (editor, callback) {
                 else
                     eval("editor.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
             });
-            editor_file.saveFloorFile(callback);
+            editor.file.saveFloorFile(callback);
             return;
         }
         if (file == 'floors') {
             actionList.forEach(function (value) {
                 eval("editor.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
             });
-            editor_file.saveFloorFile(callback);
+            editor.file.saveFloorFile(callback);
             return;
         }
         if (file == 'events') {

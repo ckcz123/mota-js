@@ -1227,7 +1227,7 @@ ui.prototype.drawQuickShop = function () {
 ui.prototype.drawSyncSave = function () {
     core.status.event.id = 'syncSave';
     this.drawChoices(null, [
-        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "回放当前录像", "下载当前录像", "清空本地存档", "返回主菜单"
+        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "回放和下载录像", "清空本地存档", "返回主菜单"
     ]);
 }
 
@@ -1259,7 +1259,7 @@ ui.prototype.drawReplay = function () {
     core.lockControl();
     core.status.event.id = 'replay';
     this.drawChoices(null, [
-        "从头回放录像", "从存档开始回放", "选择录像文件", "下载当前录像", "返回游戏"
+        "从头回放录像", "从存档开始回放", "接续播放剩余录像", "选择录像文件", "下载当前录像", "返回游戏"
     ]);
 }
 
@@ -2037,19 +2037,19 @@ ui.prototype._drawEquipbox_getStatusChanged = function (info, equip, equipType) 
 ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipType) {
     var compare = this._drawEquipbox_getStatusChanged(info, equip, equipType);
     if (compare == null) return;
-    var drawOffset = 10;
+    var obj = { drawOffset: 10, y: y };
+
     // --- 变化值...
     core.setFont('ui', this._buildFont(14, true));
     for (var name in compare) {
         var img = core.statusBar.icons[name];
         var text = core.getStatusName(name);
         if (img && core.flags.iconInEquipbox) { // 绘制图标
-            core.drawImage('ui', img, 0, 0, 32, 32, drawOffset, y - 13, 16, 16);
-            drawOffset += 20;
+            core.drawImage('ui', img, 0, 0, 32, 32, obj.drawOffset, obj.y - 13, 16, 16);
+            obj.drawOffset += 20;
         }
         else { // 绘制文字
-            core.fillText('ui', text + " ", drawOffset, y, '#CCCCCC');
-            drawOffset += core.calWidth('ui', text + " ");
+            this._drawEquipbox_drawStatusChanged_draw(text + " ", '#CCCCCC', obj);
         }
         var nowValue = core.getStatus(name) * core.getBuff(name), newValue = (nowValue + compare[name]) * core.getBuff(name);
         if (equip.equip.percentage) {
@@ -2059,11 +2059,20 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
         }
         nowValue = core.formatBigNumber(nowValue);
         newValue = core.formatBigNumber(newValue);
-        core.fillText('ui', nowValue + "->", drawOffset, y, '#CCCCCC');
-        drawOffset += core.calWidth('ui', nowValue + "->");
-        core.fillText('ui', newValue, drawOffset, y, compare[name]>0?'#00FF00':'#FF0000');
-        drawOffset += core.calWidth('ui', newValue) + 8;
+        this._drawEquipbox_drawStatusChanged_draw(nowValue+"->", '#CCCCCC', obj);
+        this._drawEquipbox_drawStatusChanged_draw(newValue, compare[name]>0?'#00FF00':'#FF0000', obj);
+        obj.drawOffset += 8;
     }
+}
+
+ui.prototype._drawEquipbox_drawStatusChanged_draw = function (text, color, obj) {
+    var len = core.calWidth('ui', text);
+    if (obj.drawOffset + len >= core.__PIXELS__) { // 换行
+        obj.y += 19;
+        obj.drawOffset = 10;
+    }
+    core.fillText('ui', text, obj.drawOffset, obj.y, color);
+    obj.drawOffset += len;
 }
 
 ui.prototype._drawEquipbox_drawEquiped = function (info, line) {
@@ -2195,7 +2204,7 @@ ui.prototype._drawSLPanel_drawRecords  = function (n) {
     var page = core.status.event.data.page;
     var offset = core.status.event.data.offset;
     var u = Math.floor(this.PIXEL/6), size = Math.floor(this.PIXEL/3-20);
-    var name=core.status.event.id=='save'?"存档":core.status.event.id=='load'?"读档":core.status.event.id=='replayLoad'?"回放":"";
+    var name=core.status.event.id=='save'?"存档":core.status.event.id=='load'?"读档":"回放";
 
     for (var i = 0; i < (n||6); i++){
         var data = core.status.event.ui[i];

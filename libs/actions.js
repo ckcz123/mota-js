@@ -245,6 +245,7 @@ actions.prototype._sys_keyDown_lockControl = function (keyCode) {
         case 'save':
         case 'load':
         case 'replayLoad':
+        case 'replayRemain':
             this._keyDownSL(keyCode);
             break;
         case 'shop':
@@ -346,6 +347,7 @@ actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
         case 'save':
         case 'load':
         case 'replayLoad':
+        case 'replayRemain':
             this._keyUpSL(keyCode);
             break;
         case 'keyBoard':
@@ -612,6 +614,7 @@ actions.prototype._sys_onclick_lockControl = function (x, y) {
         case 'save':
         case 'load':
         case 'replayLoad':
+        case 'replayRemain':
             this._clickSL(x, y);
             break;
         case 'confirmBox':
@@ -756,7 +759,7 @@ actions.prototype._sys_longClick_lockControl = function (x, y) {
         }
     }
     // 长按SL快速翻页
-    if (["save","load","replayLoad"].indexOf(core.status.event.id) >= 0) {
+    if (["save","load","replayLoad","replayRemain"].indexOf(core.status.event.id) >= 0) {
         if ([this.HSIZE-2, this.HSIZE-3, this.HSIZE+2, this.HSIZE+3].indexOf(x) >= 0 && y == this.LAST) {
             this._clickSL(x, y);
             return true;
@@ -1657,6 +1660,7 @@ actions.prototype._clickSL = function (x, y) {
         if (core.events.recoverEvents(core.status.event.interval))
             return;
         core.ui.closePanel();
+        delete core.status.tempRoute;
         if (!core.isPlaying())
             core.showStartAnimate(true);
         return;
@@ -2031,12 +2035,10 @@ actions.prototype._clickSyncSave = function (x, y) {
             case 4:
                 return this._clickSyncSave_replay();
             case 5:
-                return this._clickSyncSave_download();
-            case 6:
                 core.status.event.selection = 0;
                 core.ui.drawStorageRemove();
                 break;
-            case 7:
+            case 6:
                 core.status.event.selection = 4;
                 core.ui.drawSettings();
                 break;
@@ -2063,19 +2065,6 @@ actions.prototype._clickSyncSave_replay = function () {
         core.status.event.selection = 0;
         core.ui.drawReplay();
     }
-}
-
-actions.prototype._clickSyncSave_download = function () {
-    if (core.hasFlag('debug')) {
-        core.drawText("\t[系统提示]调试模式下无法下载录像");
-        return;
-    }
-    core.download(core.firstData.name + "_" + core.formatDate2() + ".h5route", JSON.stringify({
-        'name': core.firstData.name,
-        'hard': core.status.hard,
-        'seed': core.getFlag('__seed__'),
-        'route': core.encodeRoute(core.status.route)
-    }));
 }
 
 ////// 同步存档界面时，放开某个键的操作 //////
@@ -2264,9 +2253,10 @@ actions.prototype._clickReplay = function (x, y) {
         switch (selection) {
             case 0: return this._clickReplay_fromBeginning();
             case 1: return this._clickReplay_fromLoad();
-            case 2: return core.chooseReplayFile();
-            case 3: return this._clickReplay_download();
-            case 4: return core.ui.closePanel();
+            case 2: return this._clickReplay_continueReplay();
+            case 3: return core.chooseReplayFile();
+            case 4: return this._clickReplay_download();
+            case 5: return core.ui.closePanel();
         }
     }
 }
@@ -2283,6 +2273,21 @@ actions.prototype._clickReplay_fromLoad = function () {
     var saveIndex = core.saves.saveIndex;
     var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
     core.ui.drawSLPanel(10 * page + offset);
+}
+
+actions.prototype._clickReplay_continueReplay = function () {
+    core.closePanel();
+    core.drawText([
+        "\t[接续播放录像]该功能允许你播放\r[yellow]两个存档之间的录像\r，常常用于\r[yellow]区域优化\r。\n" +
+        "例如，有若干个区，已经全部通关；之后重打一区并进行了优化，则可以对剩余区域直接播放录像而无需全部重打。",
+        "\t[步骤1]请选择一个存档。\n\r[yellow]该存档的坐标必须和当前勇士坐标完全相同。\r\n将尝试从此处开始回放。",
+    ], function () {
+        core.status.event.id = 'replayRemain';
+        core.lockControl();
+        var saveIndex = core.saves.saveIndex;
+        var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
+        core.ui.drawSLPanel(10 * page + offset);
+    });
 }
 
 actions.prototype._clickReplay_download = function () {

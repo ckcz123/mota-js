@@ -41,7 +41,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 
 events.prototype._startGame_start = function (hard, seed, route, callback) {
     console.log('开始游戏');
-    core.resetGame(core.firstData.hero, hard, null, core.initStatus.maps);
+    core.resetGame(core.firstData.hero, hard, null, core.clone(core.initStatus.maps));
     var nowLoc = core.clone(core.getHeroLoc());
     core.setHeroLoc('x', -1);
     core.setHeroLoc('y', -1);
@@ -715,7 +715,7 @@ events.prototype._sys_action = function (data, callback) {
         var dir = core.reverseDirection();
         var id = data.event.id, toId = (data.event.faceIds || {})[dir];
         if (toId && id != toId) {
-            var number = core.icons.getNumberById(toId);
+            var number = core.getNumberById(toId);
             if (number > 0)
                 core.setBlock(number, ex, ey);
         }

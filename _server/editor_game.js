@@ -29,6 +29,26 @@ editor_game_wrapper = function (editor, main, core) {
         return value
     }
 
+    editor_game.prototype.getValue = function(field){
+        var rmap = editor.game.replacerRecord;
+        var value = eval(field)
+        if (rmap.hasOwnProperty(oldval)) {
+            return rmap[value]
+        } else {
+            return value
+        }
+    }
+
+    editor_game.prototype.setValue = function(field,value){
+        var rmap = editor.game.replacerRecord;
+        var oldval = eval(field)
+        if (rmap.hasOwnProperty(oldval)) {
+            rmap[value]=eval(value)
+        } else {
+            eval(field+'='+value)
+        }
+    }
+
     editor_game.prototype.replacerWithoutRecord = function (_key, value) {
         if (value instanceof Function) {
             return value.toString()

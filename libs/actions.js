@@ -2253,7 +2253,7 @@ actions.prototype._clickReplay = function (x, y) {
         switch (selection) {
             case 0: return this._clickReplay_fromBeginning();
             case 1: return this._clickReplay_fromLoad();
-            case 2: return this._clickReplay_continueReplay();
+            case 2: return this._clickReplay_replayRemain();
             case 3: return core.chooseReplayFile();
             case 4: return this._clickReplay_download();
             case 5: return core.ui.closePanel();
@@ -2275,7 +2275,7 @@ actions.prototype._clickReplay_fromLoad = function () {
     core.ui.drawSLPanel(10 * page + offset);
 }
 
-actions.prototype._clickReplay_continueReplay = function () {
+actions.prototype._clickReplay_replayRemain = function () {
     core.closePanel();
     core.drawText([
         "\t[接续播放录像]该功能允许你播放\r[yellow]两个存档之间的录像\r，常常用于\r[yellow]区域优化\r。\n" +

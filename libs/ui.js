@@ -2045,7 +2045,7 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
         var img = core.statusBar.icons[name];
         var text = core.getStatusName(name);
         if (img && core.flags.iconInEquipbox) { // 绘制图标
-            core.drawImage('ui', img, 0, 0, 32, 32, obj.drawOffset, y - 13, 16, 16);
+            core.drawImage('ui', img, 0, 0, 32, 32, obj.drawOffset, obj.y - 13, 16, 16);
             obj.drawOffset += 20;
         }
         else { // 绘制文字

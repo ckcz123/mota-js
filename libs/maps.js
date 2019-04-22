@@ -784,13 +784,26 @@ maps.prototype._drawBgFgMap = function (floorId, ctx, name, onMap) {
         core.status[name + "maps"] = {};
 
     var arr = this._getBgFgMapArray(name, floorId, true);
+    var eventArr = null;
+    if (main.mode == 'editor' && name == 'fg') {
+        eventArr = this.getMapArray(floorId);
+    }
+
     for (var x = 0; x < width; x++) {
         for (var y = 0; y < height; y++) {
             var block = this.initBlock(x, y, arr[y][x], true);
             block.name = name;
             var blockInfo = this.getBlockInfo(block);
             if (!blockInfo) continue;
+            // --- 前景虚化
+            var blur = false, alpha;
+            if (eventArr != null && eventArr[y][x] != 0) {
+                blur = true;
+                alpha = ctx.globalAlpha;
+                ctx.globalAlpha = 0.6;
+            }
             this._drawMap_drawBlockInfo(ctx, block, blockInfo, arr, onMap);
+            if (blur) ctx.globalAlpha = alpha;
         }
     }
     if (onMap)

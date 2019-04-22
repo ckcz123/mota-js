@@ -979,7 +979,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// TODO：增加自己的一些读档处理
 
 	// 切换到对应的楼层
-	core.changeFloor(data.floorId, null, data.hero.loc, 0, callback, true);
+	core.changeFloor(data.floorId, null, data.hero.loc, 0, function () {
+		// TODO：可以在这里设置读档后播放BGM
+		// if (core.getFlag("bgm", 0)==1) core.playBgm("bgm.mp3");
+
+		if (callback) callback();
+	}, true);
 },
         "updateStatusBar": function () {
 	// 更新状态栏

@@ -1059,7 +1059,7 @@ control.prototype.startReplay = function (list) {
     core.status.replay.pausing=false;
     core.status.replay.speed=1.0;
     core.status.replay.toReplay = core.clone(list);
-    core.status.replay.totalList = core.clone(list);
+    core.status.replay.totalList = core.status.route.concat(list);
     core.status.replay.steps = 0;
     core.status.replay.save = [];
     core.updateStatusBar();
@@ -1512,8 +1512,9 @@ control.prototype.checkAutosave = function () {
 control.prototype.doSL = function (id, type) {
     switch (type) {
         case 'save': this._doSL_save(id); break;
-        case 'load': this._doSL_load(id); break;
-        case 'replayLoad': this._doSL_replayLoad(id); break;
+        case 'load': this._doSL_load(id, this._doSL_load_afterGet); break;
+        case 'replayLoad': this._doSL_load(id, this._doSL_replayLoad_afterGet); break;
+        case 'replayRemain': this._doSL_load(id, this._doSL_replayRemain_afterGet); break;
     }
 }
 
@@ -1542,14 +1543,14 @@ control.prototype._doSL_save = function (id) {
     return;
 }
 
-control.prototype._doSL_load = function (id) {
+control.prototype._doSL_load = function (id, callback) {
     if (id == 'autoSave' && core.saves.autosave.data != null) {
-        this._doSL_load_afterGet(id, core.clone(core.saves.autosave.data));
+        callback(id, core.clone(core.saves.autosave.data))
     }
     else {
         core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
             if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
-            core.control._doSL_load_afterGet(id, data);
+            callback(id, data);
         }, function(err) {
             main.log(err);
             alert("无效的存档");
@@ -1579,22 +1580,6 @@ control.prototype._doSL_load_afterGet = function (id, data) {
             core.setLocalStorage('saveIndex', core.saves.saveIndex);
         }
     });
-
-}
-
-control.prototype._doSL_replayLoad = function (id) {
-    if (id == 'autoSave' && core.saves.autosave.data != null) {
-        this._doSL_replayLoad_afterGet(core.clone(core.saves.autosave.data));
-    }
-    else{
-        core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
-            if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
-            core.control._doSL_replayLoad_afterGet(id, data);
-        }, function(err) {
-            main.log(err);
-            alert("无效的存档");
-        })
-    }
 }
 
 control.prototype._doSL_replayLoad_afterGet = function (id, data) {
@@ -1611,6 +1596,34 @@ control.prototype._doSL_replayLoad_afterGet = function (id, data) {
         core.drawTip("回退到存档节点");
     });
 
+}
+
+control.prototype._doSL_replayRemain_afterGet = function (id, data) {
+    if (!data) return core.drawTip("无效的存档");
+
+    var route = core.decodeRoute(data.route);
+    if (core.status.tempRoute) {
+        var remainRoute = core.subarray(route, core.status.tempRoute);
+        if (remainRoute == null)
+            return alert("无法接续播放录像！\n该存档必须是前一个选择的存档的后续内容。");
+        delete core.status.tempRoute;
+        core.ui.closePanel();
+        core.startReplay(remainRoute);
+        core.drawTip("接续播放录像");
+        return;
+    }
+    else if (data.floorId != core.status.floorId || data.hero.loc.x != core.getHeroLoc('x') || data.hero.loc.y != core.getHeroLoc('y'))
+        return alert("楼层或坐标不一致！");
+
+    core.status.tempRoute = route;
+    core.ui.closePanel();
+    core.drawText("\t[步骤2]请选择第二个存档。\n\r[yellow]该存档必须是前一个存档的后续。\r\n将尝试播放到此存档。", function () {
+        core.status.event.id = 'replayRemain';
+        core.lockControl();
+        var saveIndex = core.saves.saveIndex;
+        var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
+        core.ui.drawSLPanel(10 * page + offset);
+    });
 }
 
 ////// 同步存档到服务器 //////

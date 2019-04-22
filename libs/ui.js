@@ -1227,7 +1227,7 @@ ui.prototype.drawQuickShop = function () {
 ui.prototype.drawSyncSave = function () {
     core.status.event.id = 'syncSave';
     this.drawChoices(null, [
-        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "回放当前录像", "下载当前录像", "清空本地存档", "返回主菜单"
+        "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "回放和下载录像", "清空本地存档", "返回主菜单"
     ]);
 }
 
@@ -1259,7 +1259,7 @@ ui.prototype.drawReplay = function () {
     core.lockControl();
     core.status.event.id = 'replay';
     this.drawChoices(null, [
-        "从头回放录像", "从存档开始回放", "选择录像文件", "下载当前录像", "返回游戏"
+        "从头回放录像", "从存档开始回放", "接续播放剩余录像", "选择录像文件", "下载当前录像", "返回游戏"
     ]);
 }
 
@@ -2204,7 +2204,7 @@ ui.prototype._drawSLPanel_drawRecords  = function (n) {
     var page = core.status.event.data.page;
     var offset = core.status.event.data.offset;
     var u = Math.floor(this.PIXEL/6), size = Math.floor(this.PIXEL/3-20);
-    var name=core.status.event.id=='save'?"存档":core.status.event.id=='load'?"读档":core.status.event.id=='replayLoad'?"回放":"";
+    var name=core.status.event.id=='save'?"存档":core.status.event.id=='load'?"读档":"回放";
 
     for (var i = 0; i < (n||6); i++){
         var data = core.status.event.ui[i];

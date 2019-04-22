@@ -1857,7 +1857,7 @@ control.prototype.getStatus = function (name) {
 control.prototype.getStatusOrDefault = function (status, name) {
     if (status && name in status)
         return status[name];
-    return this.getStatus(name);
+    return Math.floor(this.getStatus(name));
 }
 
 ////// 获得勇士实际属性（增幅后的） //////
@@ -1867,7 +1867,7 @@ control.prototype.getRealStatus = function (name) {
 
 ////// 从status中获得实际属性（增幅后的），如果不存在则从勇士属性中获取 //////
 control.prototype.getRealStatusOrDefault = function (status, name) {
-    return this.getStatusOrDefault(status, name) * this.getBuff(name);
+    return Math.floor(this.getStatusOrDefault(status, name) * this.getBuff(name));
 }
 
 ////// 设置某个属性的增幅值 //////

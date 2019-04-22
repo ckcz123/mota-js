@@ -1059,7 +1059,7 @@ control.prototype.startReplay = function (list) {
     core.status.replay.pausing=false;
     core.status.replay.speed=1.0;
     core.status.replay.toReplay = core.clone(list);
-    core.status.replay.totalList = core.clone(list);
+    core.status.replay.totalList = core.status.route.concat(list);
     core.status.replay.steps = 0;
     core.status.replay.save = [];
     core.updateStatusBar();
@@ -1100,7 +1100,7 @@ control.prototype.speedUpReplay = function () {
     else if (core.status.replay.speed==3) core.status.replay.speed=6;
     else if (core.status.replay.speed==2.5) core.status.replay.speed=3;
     else if (core.status.replay.speed==2) core.status.replay.speed=2.5;
-    else {
+    else if (core.status.replay.speed<2) {
         core.status.replay.speed = parseInt(10*core.status.replay.speed + 2)/10;
     }
     core.drawTip("x"+core.status.replay.speed+"倍");
@@ -1512,8 +1512,9 @@ control.prototype.checkAutosave = function () {
 control.prototype.doSL = function (id, type) {
     switch (type) {
         case 'save': this._doSL_save(id); break;
-        case 'load': this._doSL_load(id); break;
-        case 'replayLoad': this._doSL_replayLoad(id); break;
+        case 'load': this._doSL_load(id, this._doSL_load_afterGet); break;
+        case 'replayLoad': this._doSL_load(id, this._doSL_replayLoad_afterGet); break;
+        case 'replayRemain': this._doSL_load(id, this._doSL_replayRemain_afterGet); break;
     }
 }
 
@@ -1542,14 +1543,14 @@ control.prototype._doSL_save = function (id) {
     return;
 }
 
-control.prototype._doSL_load = function (id) {
+control.prototype._doSL_load = function (id, callback) {
     if (id == 'autoSave' && core.saves.autosave.data != null) {
-        this._doSL_load_afterGet(id, core.clone(core.saves.autosave.data));
+        callback(id, core.clone(core.saves.autosave.data))
     }
     else {
         core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
             if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
-            core.control._doSL_load_afterGet(id, data);
+            callback(id, data);
         }, function(err) {
             main.log(err);
             alert("无效的存档");
@@ -1579,22 +1580,6 @@ control.prototype._doSL_load_afterGet = function (id, data) {
             core.setLocalStorage('saveIndex', core.saves.saveIndex);
         }
     });
-
-}
-
-control.prototype._doSL_replayLoad = function (id) {
-    if (id == 'autoSave' && core.saves.autosave.data != null) {
-        this._doSL_replayLoad_afterGet(core.clone(core.saves.autosave.data));
-    }
-    else{
-        core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
-            if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
-            core.control._doSL_replayLoad_afterGet(id, data);
-        }, function(err) {
-            main.log(err);
-            alert("无效的存档");
-        })
-    }
 }
 
 control.prototype._doSL_replayLoad_afterGet = function (id, data) {
@@ -1611,6 +1596,34 @@ control.prototype._doSL_replayLoad_afterGet = function (id, data) {
         core.drawTip("回退到存档节点");
     });
 
+}
+
+control.prototype._doSL_replayRemain_afterGet = function (id, data) {
+    if (!data) return core.drawTip("无效的存档");
+
+    var route = core.decodeRoute(data.route);
+    if (core.status.tempRoute) {
+        var remainRoute = core.subarray(route, core.status.tempRoute);
+        if (remainRoute == null)
+            return alert("无法接续播放录像！\n该存档必须是前一个选择的存档的后续内容。");
+        delete core.status.tempRoute;
+        core.ui.closePanel();
+        core.startReplay(remainRoute);
+        core.drawTip("接续播放录像");
+        return;
+    }
+    else if (data.floorId != core.status.floorId || data.hero.loc.x != core.getHeroLoc('x') || data.hero.loc.y != core.getHeroLoc('y'))
+        return alert("楼层或坐标不一致！");
+
+    core.status.tempRoute = route;
+    core.ui.closePanel();
+    core.drawText("\t[步骤2]请选择第二个存档。\n\r[yellow]该存档必须是前一个存档的后续。\r\n将尝试播放到此存档。", function () {
+        core.status.event.id = 'replayRemain';
+        core.lockControl();
+        var saveIndex = core.saves.saveIndex;
+        var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
+        core.ui.drawSLPanel(10 * page + offset);
+    });
 }
 
 ////// 同步存档到服务器 //////
@@ -1856,8 +1869,8 @@ control.prototype.getStatus = function (name) {
 ////// 从status中获得属性，如果不存在则从勇士属性中获取 //////
 control.prototype.getStatusOrDefault = function (status, name) {
     if (status && name in status)
-        return status[name];
-    return this.getStatus(name);
+        return Math.floor(status[name]);
+    return Math.floor(this.getStatus(name));
 }
 
 ////// 获得勇士实际属性（增幅后的） //////
@@ -1867,7 +1880,7 @@ control.prototype.getRealStatus = function (name) {
 
 ////// 从status中获得实际属性（增幅后的），如果不存在则从勇士属性中获取 //////
 control.prototype.getRealStatusOrDefault = function (status, name) {
-    return this.getStatusOrDefault(status, name) * this.getBuff(name);
+    return Math.floor(this.getStatusOrDefault(status, name) * this.getBuff(name));
 }
 
 ////// 设置某个属性的增幅值 //////
@@ -1965,6 +1978,10 @@ control.prototype.debug = function() {
 }
 
 // ------ 天气，色调，BGM ------ //
+
+control.prototype.getMappedName = function (name) {
+    return (main.nameMap || {})[name] || name;
+}
 
 ////// 更改天气效果 //////
 control.prototype.setWeather = function (type, level) {
@@ -2088,6 +2105,7 @@ control.prototype.screenFlash = function (color, time, times, callback) {
 
 ////// 播放背景音乐 //////
 control.prototype.playBgm = function (bgm, startTime) {
+    bgm = core.getMappedName(bgm);
     if (main.mode!='play' || !core.material.bgms[bgm]) return;
     // 如果不允许播放
     if (!core.musicStatus.bgmStatus) {
@@ -2114,8 +2132,6 @@ control.prototype.playBgm = function (bgm, startTime) {
 }
 
 control.prototype._playBgm_play = function (bgm, startTime) {
-    // 缓存BGM
-    core.loader.loadBgm(bgm);
     // 如果当前正在播放，且和本BGM相同，直接忽略
     if (core.musicStatus.playingBgm == bgm && !core.material.bgms[core.musicStatus.playingBgm].paused) {
         return;
@@ -2124,6 +2140,8 @@ control.prototype._playBgm_play = function (bgm, startTime) {
     if (core.musicStatus.playingBgm) {
         core.material.bgms[core.musicStatus.playingBgm].pause();
     }
+    // 缓存BGM
+    core.loader.loadBgm(bgm);
     // 播放当前BGM
     core.material.bgms[bgm].volume = core.musicStatus.volume;
     core.material.bgms[bgm].currentTime = startTime || 0;
@@ -2152,7 +2170,7 @@ control.prototype.pauseBgm = function () {
 control.prototype.resumeBgm = function () {
     if (main.mode!='play')return;
     try {
-        core.playBgm(core.musicStatus.playingBgm || core.musicStatus.lastBgm);
+        core.playBgm(core.musicStatus.playingBgm || core.musicStatus.lastBgm || main.startBgm);
     }
     catch (e) {
         console.log("无法恢复BGM");
@@ -2182,6 +2200,7 @@ control.prototype.triggerBgm = function () {
 
 ////// 播放音频 //////
 control.prototype.playSound = function (sound) {
+    sound = core.getMappedName(sound);
     if (main.mode!='play' || !core.musicStatus.soundStatus || !core.material.sounds[sound]) return;
     try {
         if (core.musicStatus.audioContext != null) {

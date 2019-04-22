@@ -587,7 +587,7 @@ default : ["","","",500,false]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = /^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
+  var pattern1 = /^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
   if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
     EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
     EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
@@ -620,7 +620,7 @@ default : ["","","",500,false]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = /^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
+  var pattern1 = /^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
   if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
     EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
     EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
@@ -761,7 +761,7 @@ default : ["","",""]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = /^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
+  var pattern1 = /^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
   if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
     EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
     EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
@@ -792,7 +792,7 @@ default : ["","",""]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = /^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
+  var pattern1 = /^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
   if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
     EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
     EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
@@ -823,7 +823,7 @@ default : ["bg","","",""]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = /^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
+  var pattern1 = /^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
   if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
     EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
     EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
@@ -854,7 +854,7 @@ default : ["bg","","",""]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = /^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
+  var pattern1 = /^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
   if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
     EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
     EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
@@ -1157,7 +1157,7 @@ helpUrl : https://h5mota.com/games/template/docs/#/event?id=animate%EF%BC%9A%E6%
 default : ["zone","hero",false]
 colour : this.soundColor
 if (EvalString_0) {
-  if(/^flag:[0-9a-zA-Z_][0-9a-zA-Z_\-]*,flag:[0-9a-zA-Z_][0-9a-zA-Z_\-]*$/.test(EvalString_0)) {
+  if(/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+),flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/.test(EvalString_0)) {
     EvalString_0=', "loc": ["'+EvalString_0.split(',').join('","')+'"]';
   } else if (/hero|([+-]?\d+),([+-]?\d+)/.test(EvalString_0)) {
     if(EvalString_0.indexOf(',')!==-1)EvalString_0='['+EvalString_0+']';
@@ -2857,13 +2857,14 @@ MotaActionFunctions.EvalString_pre = function(EvalString){
 
 MotaActionFunctions.IdString_pre = function(IdString){
   if (IdString.indexOf('__door__')!==-1) throw new Error('请修改开门变量__door__，如door1，door2，door3等依次向后。请勿存在两个门使用相同的开门变量。');
-  if (IdString && !(/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/.test(IdString)))throw new Error('id: '+IdString+'中包含了0-9 a-z A-Z _ - :之外的字符');
+  if (IdString && !(/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/.test(IdString)) && !(/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/.test(IdString)))
+      throw new Error('id: '+IdString+'中包含了0-9 a-z A-Z _ - :之外的字符');
   return IdString;
 }
 
 MotaActionFunctions.PosString_pre = function(PosString){
   if (!PosString || /^-?\d+$/.test(PosString)) return PosString;
-  if (!(/^flag:[0-9a-zA-Z_][0-9a-zA-Z_:]*$/.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ :之外的字符,或者是没有以flag: 开头');
+  if (!(/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ 和中文之外的字符,或者是没有以flag: 开头');
   return '"'+PosString+'"';
 }
 

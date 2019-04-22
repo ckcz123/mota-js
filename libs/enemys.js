@@ -360,6 +360,14 @@ enemys.prototype._getCurrentEnemys_sort = function (enemys) {
 }
 
 enemys.prototype.hasEnemyLeft = function (enemyId, floorId) {
+    if (floorId == null) floorId = core.status.floorId;
+    if (floorId instanceof Array) {
+        for (var i = 0; i < floorId.length; ++i) {
+            if (core.hasEnemyLeft(enemyId, floorId[i]))
+                return true;
+        }
+        return false;
+    }
     return core.getCurrentEnemys(floorId).filter(function (enemy) {
         return enemyId == null || enemy.id == enemyId;
     }).length > 0;

@@ -5,7 +5,10 @@ editor_game_wrapper = function (editor, main, core) {
         this.replacerRecord = {}
     }
 
+
+    //////////////////// 修改数据相关 ////////////////////
     // 三个 replacer 和 replacerRecord 暂时放在此处
+
     editor_game.prototype.replacerForLoading = function (_key, value) {
         var rmap = editor.game.replacerRecord;
         if (value instanceof Function) {
@@ -29,7 +32,7 @@ editor_game_wrapper = function (editor, main, core) {
         return value
     }
 
-    editor_game.prototype.getValue = function(field){
+    editor_game.prototype.getValue = function (field) {
         var rmap = editor.game.replacerRecord;
         var value = eval(field)
         if (rmap.hasOwnProperty(oldval)) {
@@ -39,13 +42,13 @@ editor_game_wrapper = function (editor, main, core) {
         }
     }
 
-    editor_game.prototype.setValue = function(field,value){
+    editor_game.prototype.setValue = function (field, value) {
         var rmap = editor.game.replacerRecord;
         var oldval = eval(field)
         if (rmap.hasOwnProperty(oldval)) {
-            rmap[value]=eval(value)
+            rmap[value] = eval(value)
         } else {
-            eval(field+'='+value)
+            eval(field + '=' + value)
         }
     }
 
@@ -62,6 +65,9 @@ editor_game_wrapper = function (editor, main, core) {
         data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d = JSON.parse(JSON.stringify(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d, rf));
     }
 
+    //////////////////// 加载游戏数据相关 ////////////////////
+
+    // 初始化数字与地图图块的对应
     editor_game.prototype.idsInit = function (maps, icons) {
         editor.ids = [0];
         editor.indexs = [];
@@ -125,6 +131,7 @@ editor_game_wrapper = function (editor, main, core) {
         }
     }
 
+    // 获取当前地图
     editor_game.prototype.fetchMapFromCore = function () {
         var mapArray = core.maps.saveMap(core.status.floorId);
         editor.map = mapArray.map(function (v) {
@@ -156,6 +163,16 @@ editor_game_wrapper = function (editor, main, core) {
                 })
             });
         }
+    }
+
+    // 获取地图列表
+    editor_game.prototype.getFloorFileList = function (callback) {
+        // callback([Array<String>,err:String])
+        editor.util.checkCallback(callback);
+        /* editor.fs.readdir('project/floors',function(err, data){
+          callback([data,err]);
+        }); */
+        callback([editor.core.floorIds, null]);
     }
 
     editor.constructor.prototype.game = new editor_game();

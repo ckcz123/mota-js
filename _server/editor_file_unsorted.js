@@ -7,23 +7,6 @@ editor_file = function (editor, callback) {
 
     ///////////////////////////////////////////////////////////////////////////
 
-    editor.file.getFloorFileList = function (callback) {
-        checkCallback(callback);
-        /* var fs = editor.fs;
-        fs.readdir('project/floors',function(err, data){
-          callback([data,err]);
-        }); */
-        callback([editor.core.floorIds, null]);
-    }
-    //callback([Array<String>,err:String])
-    editor.file.loadFloorFile = function (filename, callback) {
-        //filename不含'/'不含'.js'
-        checkCallback(callback);
-        
-        editor.currentFloorId = editor.core.status.floorId;
-        editor.currentFloorData = editor.core.floors[editor.currentFloorId];
-    }
-    //callback(err:String)
     editor.file.saveFloorFile = function (callback) {
         checkCallback(callback);
         /* if (!isset(editor.currentFloorId) || !isset(editor.currentFloorData)) {

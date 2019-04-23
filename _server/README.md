@@ -42,8 +42,6 @@ editor.util.guid()//产生一个可以作为id的长随机字符串
 
 提供了以下函数进行楼层`map`数组相关的操作
 ```javascript
-editor.file.getFloorFileList
-editor.file.loadFloorFile
 editor.file.saveFloorFile
 editor.file.saveFloorFileAs
 ```

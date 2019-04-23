@@ -77,16 +77,17 @@ editor_file = function (editor, callback) {
             name: name,
             width: parseInt(document.getElementById('newMapWidth').value),
             height: parseInt(document.getElementById('newMapHeight').value),
-            canFlyTo: saveStatus?currData.canFlyTo:true,
-            canUseQuickShop: saveStatus?currData.canUseQuickShop:true,
-            cannotViewMap: saveStatus?currData.cannotViewMap:false,
-            cannotMoveDirectly: saveStatus?currData.cannotMoveDirectly:false,
-            item_ratio: saveStatus?currData.item_ratio:1,
-            defaultGround: saveStatus?currData.defaultGround:"ground",
-            bgm: saveStatus?currData.bgm:null,
-            color: saveStatus?currData.color:null,
-            weather: saveStatus?currData.weather:null,
-        });
+        },saveStatus?{
+            canFlyTo: currData.canFlyTo,
+            canUseQuickShop: currData.canUseQuickShop,
+            cannotViewMap: currData.cannotViewMap,
+            cannotMoveDirectly: currData.cannotMoveDirectly,
+            item_ratio: currData.item_ratio,
+            defaultGround: currData.defaultGround,
+            bgm: currData.bgm,
+            color: currData.color,
+            weather: currData.weather,
+        }:{});
         
         Object.keys(editor.currentFloorData).forEach(function (t) {
             if (editor.currentFloorData[t] == null)
@@ -125,16 +126,17 @@ editor_file = function (editor, callback) {
                 width: width,
                 height: height,
                 map: map,
-                canFlyTo: saveStatus?currData.canFlyTo:true,
-                canUseQuickShop: saveStatus?currData.canUseQuickShop:true,
-                cannotViewMap: saveStatus?currData.cannotViewMap:false,
-                cannotMoveDirectly: saveStatus?currData.cannotMoveDirectly:false,
-                item_ratio: saveStatus?currData.item_ratio:1,
-                defaultGround: saveStatus?currData.defaultGround:"ground",
-                bgm: saveStatus?currData.bgm:null,
-                color: saveStatus?currData.color:null,
-                weather: saveStatus?currData.weather:null,
-            });
+            },saveStatus?{
+                canFlyTo: currData.canFlyTo,
+                canUseQuickShop: currData.canUseQuickShop,
+                cannotViewMap: currData.cannotViewMap,
+                cannotMoveDirectly: currData.cannotMoveDirectly,
+                item_ratio: currData.item_ratio,
+                defaultGround: currData.defaultGround,
+                bgm: currData.bgm,
+                color: currData.color,
+                weather: currData.weather,
+            }:{});
             Object.keys(data).forEach(function (t) {
                 if (data[t] == null)
                     delete data[t];

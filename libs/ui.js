@@ -383,7 +383,6 @@ ui.prototype._getTitleAndIcon = function (content) {
                 var blockInfo = core.getBlockInfo(s4);
                 if (blockInfo != null) {
                     if (core.material.enemys[s4]) title = core.material.enemys[s4].name;
-                    else title = s4;
                     image = blockInfo.image;
                     icon = blockInfo.posY;
                     height = blockInfo.height;
@@ -874,8 +873,10 @@ ui.prototype._drawTextBox_getVerticalPosition = function (content, titleInfo, po
     var realContent = this._getRealContent(content);
     var height = 30 + lineHeight * core.splitLines("ui", realContent, validWidth, this._buildFont()).length;
     if (titleInfo.title) height += textAttribute.titlefont + 5;
-    if (titleInfo.icon != null)
-        height =  Math.max(height, titleInfo.height+50);
+    if (titleInfo.icon != null) {
+        if (titleInfo.title) height = Math.max(height, titleInfo.height+50);
+        else height = Math.max(height, titleInfo.height + 30);
+    }
     else if (titleInfo.image)
         height = Math.max(height, 90);
 
@@ -904,9 +905,11 @@ ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, al
     core.setTextAlign('ui', 'left');
     var textAttribute = core.status.textAttribute;
     var content_top = vPos.top + 15;
+    var image_top = vPos.top + 15;
     if (titleInfo.title != null) {
         var titlefont = textAttribute.titlefont;
         content_top += titlefont + 5;
+        image_top = vPos.top + 40;
         core.setFillStyle('ui', core.arrayToRGB(textAttribute.title));
         core.setStrokeStyle('ui', core.arrayToRGB(textAttribute.title));
 
@@ -919,19 +922,18 @@ ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, al
             title_left = hPos.right - title_width - 12;
 
         core.fillText('ui', titleInfo.title, title_left, vPos.top + 8 + titlefont);
-
-        if (titleInfo.icon != null) {
-            core.setAlpha('ui', alpha);
-            core.strokeRect('ui', hPos.left + 15 - 1, vPos.top + 40-1, 34, titleInfo.height + 2, null, 2);
-            core.setAlpha('ui', 1);
-            core.status.boxAnimateObjs = [];
-            core.status.boxAnimateObjs.push({
-                'bgx': hPos.left + 15, 'bgy': vPos.top + 40, 'bgWidth': 32, 'bgHeight': titleInfo.height,
-                'x': hPos.left + 15, 'y': vPos.top + 40, 'height': titleInfo.height, 'animate': titleInfo.animate,
-                'image': titleInfo.image, 'pos': titleInfo.icon * titleInfo.height
-            });
-            core.drawBoxAnimate();
-        }
+    }
+    if (titleInfo.icon != null) {
+        core.setAlpha('ui', alpha);
+        core.strokeRect('ui', hPos.left + 15 - 1, image_top-1, 34, titleInfo.height + 2, null, 2);
+        core.setAlpha('ui', 1);
+        core.status.boxAnimateObjs = [];
+        core.status.boxAnimateObjs.push({
+            'bgx': hPos.left + 15, 'bgy': image_top, 'bgWidth': 32, 'bgHeight': titleInfo.height,
+            'x': hPos.left + 15, 'y': image_top, 'height': titleInfo.height, 'animate': titleInfo.animate,
+            'image': titleInfo.image, 'pos': titleInfo.icon * titleInfo.height
+        });
+        core.drawBoxAnimate();
     }
     if (titleInfo.image != null && titleInfo.icon == null) { // 头像图
         core.drawImage('ui', titleInfo.image, 0, 0, titleInfo.image.width, titleInfo.image.height,

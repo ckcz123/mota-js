@@ -14,31 +14,16 @@ editor_file = function (editor, callback) {
         } */
         var filename = 'project/floors/' + editor.currentFloorId + '.js';
         var datastr = ['main.floors.', editor.currentFloorId, '=\n'];
-        if (editor.currentFloorData.map == 'new') {
-            /*
-            editor.currentFloorData.map = editor.map.map(function (v) {
-                return v.map(function () {
-                    return 0
+
+        for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
+            var mapArray=editor[name].map(function (v) {
+                return v.map(function (v) {
+                    return v.idnum || v || 0
                 })
             });
-            */
-            var width = parseInt(document.getElementById('newMapWidth').value);
-            var height = parseInt(document.getElementById('newMapHeight').value);
-            var row = [];
-            for (var i=0;i<width;i++) row.push(0);
-            editor.currentFloorData.map = [];
-            for (var i=0;i<height;i++) editor.currentFloorData.map.push(row);
+            editor.currentFloorData[name]=mapArray;
         }
-        else{
-            for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
-                var mapArray=editor[name].map(function (v) {
-                    return v.map(function (v) {
-                        return v.idnum || v || 0
-                    })
-                });
-                editor.currentFloorData[name]=mapArray;
-            }
-        }
+        
         // format 更改实现方式以支持undefined删除
         var tempJsonObj=Object.assign({},editor.currentFloorData);
         var tempMap=[['map',editor.util.guid()],['bgmap',editor.util.guid()],['fgmap',editor.util.guid()]];
@@ -70,13 +55,19 @@ editor_file = function (editor, callback) {
             name = saveFilename.substring(2);
             title = "主塔 "+name+" 层";
         }
-        // editor.file.comment._data.floors_template
+        
+        var width = parseInt(document.getElementById('newMapsWidth').value);
+        var height = parseInt(document.getElementById('newMapsHeight').value);
+        var row = [], map = [];
+        for (var i=0;i<width;i++) row.push(0);
+        for (var i=0;i<height;i++) map.push(row);
         editor.currentFloorData = Object.assign(JSON.parse(JSON.stringify(editor.file.comment._data.floors_template)), {
             floorId: saveFilename,
             title: title,
             name: name,
-            width: parseInt(document.getElementById('newMapWidth').value),
-            height: parseInt(document.getElementById('newMapHeight').value),
+            width: width,
+            height: height,
+            map: map,
         },saveStatus?{
             canFlyTo: currData.canFlyTo,
             canUseQuickShop: currData.canUseQuickShop,
@@ -93,7 +84,6 @@ editor_file = function (editor, callback) {
             if (editor.currentFloorData[t] == null)
                 delete editor.currentFloorData[t];
         })
-        editor.currentFloorData.map = "new";
         editor.currentFloorId = saveFilename;
         editor.file.saveFloorFile(callback);
     }

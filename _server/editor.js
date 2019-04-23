@@ -50,6 +50,7 @@ editor.prototype.init = function (callback) {
     main.init('editor', function () {
         editor_util_wrapper(editor);
         editor_game_wrapper(editor, main, core);
+        editor_file_wrapper(editor);
         editor_table_wrapper(editor);
         editor_unsorted_1_wrapper(editor);
         afterMainInit();

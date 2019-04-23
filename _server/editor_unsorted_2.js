@@ -473,7 +473,7 @@ editor_unsorted_2_wrapper=function(editor_mode){
                             throw(err);
                         }
                         // Step 4: 自动注册
-                        editor_file.registerAutotile(filename, function (err) {
+                        editor.file.registerAutotile(filename, function (err) {
                             if (err) {
                                 printe(err);
                                 throw(err);

@@ -70,7 +70,8 @@ editor_file = function (editor, callback) {
             name = saveFilename.substring(2);
             title = "主塔 "+name+" 层";
         }
-        editor.currentFloorData = {
+        // editor.file.comment._data.floors_template
+        editor.currentFloorData = Object.assign(JSON.parse(JSON.stringify(editor.file.comment._data.floors_template)), {
             floorId: saveFilename,
             title: title,
             name: name,
@@ -80,24 +81,13 @@ editor_file = function (editor, callback) {
             canUseQuickShop: saveStatus?currData.canUseQuickShop:true,
             cannotViewMap: saveStatus?currData.cannotViewMap:false,
             cannotMoveDirectly: saveStatus?currData.cannotMoveDirectly:false,
-            images: [],
             item_ratio: saveStatus?currData.item_ratio:1,
             defaultGround: saveStatus?currData.defaultGround:"ground",
             bgm: saveStatus?currData.bgm:null,
-            upFloor: null,
-            downFloor: null,
             color: saveStatus?currData.color:null,
             weather: saveStatus?currData.weather:null,
-            firstArrive: [],
-            eachArrive: [],
-            parallelDo: "",
-            events: {},
-            changeFloor: {},
-            afterBattle: {},
-            afterGetItem: {},
-            afterOpenDoor: {},
-            cannotMove: {}
-        };
+        });
+        
         Object.keys(editor.currentFloorData).forEach(function (t) {
             if (editor.currentFloorData[t] == null)
                 delete editor.currentFloorData[t];
@@ -128,7 +118,7 @@ editor_file = function (editor, callback) {
         var datas = [];
         for (var i=from;i<=to;i++) {
             var datastr = ['main.floors.', floorIdList[i-from], '=\n{'];
-            var data = {
+            var data = Object.assign(JSON.parse(JSON.stringify(editor.file.comment._data.floors_template)), {
                 floorId: floorIdList[i-from],
                 title: calValue(document.getElementById('newFloorTitles').value, i),
                 name: calValue(document.getElementById('newFloorNames').value, i),
@@ -139,24 +129,12 @@ editor_file = function (editor, callback) {
                 canUseQuickShop: saveStatus?currData.canUseQuickShop:true,
                 cannotViewMap: saveStatus?currData.cannotViewMap:false,
                 cannotMoveDirectly: saveStatus?currData.cannotMoveDirectly:false,
-                images: [],
                 item_ratio: saveStatus?currData.item_ratio:1,
                 defaultGround: saveStatus?currData.defaultGround:"ground",
                 bgm: saveStatus?currData.bgm:null,
-                upFloor: null,
-                downFloor: null,
                 color: saveStatus?currData.color:null,
                 weather: saveStatus?currData.weather:null,
-                firstArrive: [],
-                eachArrive: [],
-                parallelDo: "",
-                events: {},
-                changeFloor: {},
-                afterBattle: {},
-                afterGetItem: {},
-                afterOpenDoor: {},
-                cannotMove: {}
-            };
+            });
             Object.keys(data).forEach(function (t) {
                 if (data[t] == null)
                     delete data[t];

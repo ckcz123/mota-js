@@ -12,31 +12,31 @@ editor_table_wrapper = function (editor) {
             values.map(function (v) {
                 return editor.table.option(v)
             }).join('')
-        return `<select>\n${content}</select>\n`
+        return /* html */`<select>\n${content}</select>\n`
     }
     editor_table.prototype.option = function (value) {
-        return `<option value='${JSON.stringify(value)}'>${JSON.stringify(value)}</option>\n`
+        return /* html */`<option value='${JSON.stringify(value)}'>${JSON.stringify(value)}</option>\n`
     }
     editor_table.prototype.text = function (value) {
-        return `<input type='text' spellcheck='false' value='${JSON.stringify(value)}'/>\n`
+        return /* html */`<input type='text' spellcheck='false' value='${JSON.stringify(value)}'/>\n`
     }
     editor_table.prototype.checkbox = function (value) {
-        return `<input type='checkbox' ${(value ? 'checked ' : '')}/>\n`
+        return /* html */`<input type='checkbox' ${(value ? 'checked ' : '')}/>\n`
     }
     editor_table.prototype.textarea = function (value, indent) {
-        return `<textarea spellcheck='false'>${JSON.stringify(value, null, indent || 0)}</textarea>\n`
+        return /* html */`<textarea spellcheck='false'>${JSON.stringify(value, null, indent || 0)}</textarea>\n`
     }
 
     editor_table.prototype.title = function () {
-        return `\n<tr><td>条目</td><td>注释</td><td>值</td></tr>\n`
+        return /* html */`\n<tr><td>条目</td><td>注释</td><td>值</td></tr>\n`
     }
 
     editor_table.prototype.gap = function (field) {
-        return `<tr><td>----</td><td>----</td><td>${field}</td></tr>\n`
+        return /* html */`<tr><td>----</td><td>----</td><td>${field}</td></tr>\n`
     }
 
     editor_table.prototype.tr = function (guid, field, shortField, commentHTMLescape, cobjstr, shortCommentHTMLescape, tdstr) {
-        return `<tr id="${guid}">
+        return /* html */`<tr id="${guid}">
         <td title="${field}">${shortField}</td>
         <td title="${commentHTMLescape}" cobj="${cobjstr}">${shortCommentHTMLescape}</td>
         <td><div class="etableInputDiv">${tdstr}</div></td>

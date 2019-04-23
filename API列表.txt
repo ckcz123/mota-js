@@ -1,20 +1,19 @@
-# 附录：API列表
-
-?> 目前版本**v2.6**，上次更新时间：* {docsify-updated} *
+附录：API列表（V2.6版）
 
 这里将列出所有被转发到core的API，没有被转发的函数此处不会列出，请自行在代码中查看。
 
-本附录量较大，如有什么需求请自行Ctrl+F进行搜索。
+本文档较大，如有什么需求请自行Ctrl+F进行搜索。
 
 如有任何疑问，请联系小艾寻求帮助。
 
-## core.js
+------------------------------------ [core.js] ------------------------------------
 
 core.js中只有很少的几个函数，主要是游戏开始前的初始化等。
-
 但是，core中定义了很多游戏运行时的状态，这些状态很多都会被使用到。
 
-``` text
+
+
+
 core.__SIZE__, core.__PIXELS__
 游戏窗口大小；对于13x13的游戏而言这两个值分别是13和416，15x15来说分别是15和480。
 
@@ -109,7 +108,7 @@ core.status.hero    （勇士信息；此项和全塔属性中的hero大体是�
     core.status.hero.flags   当前的各项flag信息
     core.status.hero.step    当前的步数值
     core.status.hero.statistics    当前的统计信息
-core.status.floorId    （当前所在的楼层）    
+core.status.floorId    （当前所在的楼层）
 core.status.maps    （所有的地图信息）
 core.status.thisMap    （当前的地图信息，等价于core.status.maps[core.status.floorId]）
 core.status.bgmaps   （所有背景层的信息）
@@ -165,13 +164,17 @@ core.doFunc(func, _this)
 执行一个函数，func为函数体或者插件中的函数名，_this为使用的this。
 如果func为一个字符串，则视为插件中的函数名，同时_this将被设置成core.plugin。
 此函数剩余参数将作为参数被传入func。
-```
 
-## actions.js
+
+
+
+------------------------------------ [actions.js] ------------------------------------
 
 actions.js主要是处理一些和用户交互相关的内容。
 
-```text
+
+
+
 core.registerAction(action, name, func, priority)
 注册一个用户交互行为。
 action：要注册的交互类型，如 ondown, onclick, keyDown 等等。
@@ -257,9 +260,11 @@ core.longClick()
 请勿直接覆盖或调用此函数，如有需要请注册一个"keyDownCtrl"的交互函数。
 注册的交互函数如果某一项返回true，则之后仍然会继续触发该长按，
 如果全部返回false则将停止本次长按行为，直到手指离开屏幕并重新进行长按为止。
-```
 
-## control.js
+
+
+
+------------------------------------ [control.js] ------------------------------------
 
 control.js将负责整个游戏的核心控制系统，分为如下几个部分：
 - requestAnimationFrame相关
@@ -273,7 +278,9 @@ control.js将负责整个游戏的核心控制系统，分为如下几个部分�
 - 状态栏和工具栏相关
 - 界面resize相关
 
-```text
+
+
+
 // ------ requestAnimationFrame 相关 ------ //
 
 core.registerAnimationFrame(name, needPlaying, func)
@@ -612,7 +619,7 @@ core.lockControl() / core.unlockControl()
 core.debug()
 开启调试模式。此模式下可以按住Ctrl进行穿墙。
 
-// ------ 天气，色调，音乐和音效 ------ // 
+// ------ 天气，色调，音乐和音效 ------ //
 
 core.setWeather(type, level)
 设置当前的天气。type只能为'rain', 'snow'或'fog'，level为1-10之间代表强度信息。
@@ -691,13 +698,17 @@ core.unregisterResize(name)
 core.resize()
 屏幕分辨率改变后的重新自适应。
 此函数将根据当前的屏幕分辨率信息，生成一个obj，并传入各个注册好的resize函数中执行。
-```
 
-## enemys.js
+
+
+
+------------------------------------ [enemys.js] ------------------------------------
 
 enemys.js中定义了一系列和怪物相关的API函数。
 
-```text
+
+
+
 core.hasSpecial(special, test)
 判断是否含有某个特殊属性。test为要检查的特殊属性编号。
 special为要测试的内容，允许接收如下类型参数：
@@ -779,9 +790,11 @@ core.hasEnemyLeft(enemyId, floorId)
 检查某个楼层是否还有剩余的（指定）怪物。
 floorId为楼层ID，可忽略表示当前楼层。也可以传数组如["MT0","MT1"]同时检测多个楼层。
 enemyId如果不填或null则检查是否剩余任何怪物，否则只检查是否剩余指定的某类怪物。
-```
 
-## events.js
+
+
+
+------------------------------------ [events.js] ------------------------------------
 
 events.js将处理所有和事件相关的操作，主要分为五个部分：
 - 游戏的开始和结束
@@ -791,7 +804,8 @@ events.js将处理所有和事件相关的操作，主要分为五个部分：
 - 一些具体事件的执行内容
 
 
-```text
+
+
 // ------ 游戏的开始和结束 ------ //
 
 core.resetGame(hero, hard, floorId, maps, values)
@@ -1116,13 +1130,17 @@ core.tryUseItem(itemId)
 
 core.afterUseBomb()
 使用炸弹或圣锤后的事件。实际被转发到了脚本编辑中。
-```
 
-## icons.js
+
+
+
+------------------------------------ [icons.js] ------------------------------------
 
 icons.js主要是负责素材相关信息，比如某个素材在对应的图片上的位置。
 
-```text
+
+
+
 core.getClsFromId(id)
 根据某个素材的ID获得该素材的cls
 
@@ -1130,13 +1148,17 @@ core.getClsFromId(id)
 core.getTilesetOffset(id)
 根据某个素材来获得对应的tileset和坐标信息。
 如果该素材不是tileset，则返回null。
-```
 
-## items.js
+
+
+
+------------------------------------ [items.js] ------------------------------------
 
 items.js主要负责一切和道具相关的内容。
 
-```text
+
+
+
 core.getItemEffect(itemId, itemNum)
 即捡即用类的道具获得时的效果。实际对应道具图块属性中的itemEffect框。
 
@@ -1255,9 +1277,11 @@ core.loadBgm(name)
 
 core.freeBgm(name)
 释放一个bgm的内存并移出缓存列表。如果该bgm正在播放则也会立刻停止。
-```
 
-## map.js
+
+
+
+------------------------------------ [maps.js] ------------------------------------
 
 maps.js负责一切和地图相关的处理内容，包括如下几个方面：
 - 地图的初始化，保存和读取，地图数组的生成
@@ -1268,7 +1292,9 @@ maps.js负责一切和地图相关的处理内容，包括如下几个方面：
 - 移动/跳跃图块，淡入淡出图块
 - 全局动画控制，动画的绘制
 
-```text
+
+
+
 // ------ 地图的初始化，保存和读取，地图数组的生成 ------ //
 
 core.loadFloor(floorId, map)
@@ -1589,16 +1615,20 @@ core.drawAnimate(name, x, y, callback)
 core.stopAnimate(id, doCallback)
 立刻停止某个动画的播放。id为上面core.drawAnimate的返回值。
 如果doCallback为真，则会执行该动画所对应的回调函数。
-```
 
-## ui.js
+
+
+
+------------------------------------ [ui.js] ------------------------------------
 
 ui.js负责一切UI界面的绘制。主要包括三个部分：
 - 设置某个画布的属性的相关API
 - 具体的某个UI界面的绘制
 - 动态创建画布相关的API
 
-```text
+
+
+
 // ------ 设置某个画布的属性的相关API ------//
 这系列函数的name一般都是画布名，可以是系统画布或动态创建的画布。
 但也同时也允许直接传画布的context本身，将返回自身。
@@ -1807,13 +1837,13 @@ core.drawBook(index) / core.drawBookDetail(index)
 
 core.drawFly(page) / core.drawCenterFly() / core.drawShop(shopId)
 绘制楼传页面，中心对称飞行器，绘制商店
- 
- 
+
+
 core.drawToolbox(index) / core.drawEquipbox(index) / core.drawKeyBoard()
 绘制道具栏，绘制装备栏，绘制虚拟键盘。
- 
- 
-core.drawMaps(index, x, y) / core.drawSLPanel(index, refresh) 
+
+
+core.drawMaps(index, x, y) / core.drawSLPanel(index, refresh)
 绘制浏览地图，绘制存读档界面。
 
 
@@ -1852,13 +1882,17 @@ core.ui.deleteCanvas(name)
 
 core.ui.deleteAllCanvas()
 删除所有的自定义画布。
-```
 
-## utils.js
+
+
+
+------------------------------------ [utils.js] ------------------------------------
 
 utils.js是一个工具函数库，里面有各个样板中使用到的工具函数。
 
-```text
+
+
+
 core.replayText(text, need, times)
 将一段文字中的${}（表达式）进行替换。need和time一般可以直接忽略。
 
@@ -2097,4 +2131,3 @@ mimeType和responseType如果设置将会覆盖默认值。
 
 lzw_encode(s) / lzw_decode(s)
 LZW压缩算法，来自https://gist.github.com/revolunet/843889
-```

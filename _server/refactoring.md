@@ -11,11 +11,11 @@
 + [ ] editor_multi 多行文本编辑器
 + [x] editor_table 处理表格的生成, 及其响应的事件, 从原editor\_mode中分离
 + [ ] editor_file 调用fs.js编辑文件, 把原editor\_file模块化
-+ [ ] editor_game 处理来自core的数据, 导入为editor的数据, 从原editor中分离
++ [ ] editor_game 处理来自core的数据, 导入为editor的数据, 从原editor中分离. **只有此文件允许`\s(main|core)`形式的调用**(以及其初始化`editor_game_wrapper(editor, main, core);`)
 + [x] editor_util 生成guid等函数, 从editor分离
 + [ ] editor 执行初始化流程加组合各组件
 + [ ] 原editor_mode 移除
-+ [ ] 原vm 移除
++ [x] 原vm 移除
 + [x] \*comment.js 表格注释与结构, 移至table/\*comment.js
 
 ## 对象结构
@@ -46,18 +46,22 @@ editor: {
 
 + 插入公共事件的参数的转义处理, .g4中添加ObjectString, 要求其中的值可以JSON.parse, 生成的code中也是作为对象而不是字符串出现
 
-+ 修改editor.multi中的转义处理
++ 修改editor.multi中的转义处理, 目前双击某些方块使用文本编辑的处理, 一部分在editor.blockly, 一部分在editor.multi, 比较混乱
 
 + 地图的编辑与其他(如全塔属性和楼层属性), 现在的文件操作的模式是完全不同的  
   楼层文件的储存与其他不同
 
-+ editor.file在修改时不再返回obj和commentobj,只在查询时返回
++ [x] editor.file在修改时不再返回obj和commentobj,只在查询时返回
 
-+ editor.file中的各个条目, 非常相似, 但是细节的不同处理非常麻烦. 是类似的代码复制后修改一部分, 尝试模块化
++ editor.file中的各个条目, 非常相似, 但是细节的不同处理非常麻烦. 是类似的代码复制后修改一部分, 尝试模块化(或者重写)
 
-+ functions和plugins的借助JSON.stringify的replacer特殊处理
++ functions和plugins的借助JSON.stringify的replacer特殊处理, 与其他项的处理完全不同, 改成用统一的方法处理(为了统一,全部使用这种不直观的replacer的处理)
+
++ 怪物/物品/地图选点事件的处理, field中怪物id等明显与其他节地位不等, 处理起来很繁琐
 
 + 目前editor.map中储存的是info\<object\>, 准备改为和core一致只储存数字
+
++ editor.widthX特别不直观
 
 ## 功能改进
 
@@ -98,6 +102,10 @@ editor: {
   怪物或道具太多时, 按照每100个进行拆分新开列来显示  
 
 + [ ] 多帧素材只显示第一帧  
+
++ [ ] `显示文章`以及`选项`等方块, 把`标题`和`图像`从字符串提取出填回相应的空
+
++ [ ] blockly中某些需要选点的填空, 增加按钮, 点击后从缩略图中点击位置
 
 ## 左侧页面模式
 

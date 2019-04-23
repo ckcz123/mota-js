@@ -41,7 +41,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 
 events.prototype._startGame_start = function (hard, seed, route, callback) {
     console.log('开始游戏');
-    core.resetGame(core.firstData.hero, hard, null, core.initStatus.maps);
+    core.resetGame(core.firstData.hero, hard, null, core.clone(core.initStatus.maps));
     var nowLoc = core.clone(core.getHeroLoc());
     core.setHeroLoc('x', -1);
     core.setHeroLoc('y', -1);
@@ -287,8 +287,12 @@ events.prototype.doSystemEvent = function (type, data, callback) {
 
 ////// 触发(x,y)点的事件 //////
 events.prototype._trigger = function (x, y) {
-    // 如果已经死亡，或正处于某事件中，则忽略
-    if (core.status.gameOver || core.status.event.id) return;
+    if (core.status.gameOver) return;
+    if (core.status.event.id == 'action') {
+        core.insertAction({"type": "trigger", "loc": [x, y]}, x, y, null, true);
+        return;
+    }
+    if (core.status.event.id) return;
 
     var block = core.getBlock(x, y);
     if (block == null) return;
@@ -711,7 +715,7 @@ events.prototype._sys_action = function (data, callback) {
         var dir = core.reverseDirection();
         var id = data.event.id, toId = (data.event.faceIds || {})[dir];
         if (toId && id != toId) {
-            var number = core.icons.getNumberById(toId);
+            var number = core.getNumberById(toId);
             if (number > 0)
                 core.setBlock(number, ex, ey);
         }
@@ -924,7 +928,7 @@ events.prototype._action_autoText = function (data, x, y, prefix) {
 
 events.prototype._action_scrollText = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
-    this.__action_doAsyncFunc(data.async, core.ui.drawScrollText, data.text, data.lineHeight || 1.4, data.time || 5000);
+    this.__action_doAsyncFunc(data.async, core.drawScrollText, data.text, data.time || 5000, data.lineHeight || 1.4);
 }
 
 events.prototype._action_comment = function (data, x, y, prefix) {
@@ -941,9 +945,10 @@ events.prototype._action_setText = function (data, x, y, prefix) {
             core.status.textAttribute[t] = data[t];
         }
         if (t == 'background') {
-            var img = core.material.images.images[data[t]];
+            var name = core.getMappedName(data[t]);
+            var img = core.material.images.images[name];
             if (img && img.width == 192 && img.height == 128) {
-                core.status.textAttribute[t] = data[t];
+                core.status.textAttribute[t] = name;
             }
         }
     });
@@ -1067,20 +1072,20 @@ events.prototype._action_changePos = function (data, x, y, prefix) {
 
 events.prototype._action_showImage = function (data, x, y, prefix) {
     if (core.isReplaying()) data.time = 0;
-    this.__action_doAsyncFunc(data.async || data.time == 0, this.showImage,
+    this.__action_doAsyncFunc(data.async || data.time == 0, core.showImage,
         data.code, data.image, data.sloc, data.loc, data.opacity, data.time);
 }
 
 events.prototype._action_showTextImage = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, 0, 0, prefix);
     if (core.isReplaying()) data.time = 0;
-    this.__action_doAsyncFunc(data.async || data.time == 0, this.showImage,
+    this.__action_doAsyncFunc(data.async || data.time == 0, core.showImage,
         data.code, core.ui.textImage(data.text), loc[0], loc[1], 100, 100, data.opacity, data.time);
 }
 
 events.prototype._action_hideImage = function (data, x, y, prefix) {
     if (core.isReplaying()) data.time = 0;
-    this.__action_doAsyncFunc(data.async || data.time == 0, this.hideImage, data.code, data.time);
+    this.__action_doAsyncFunc(data.async || data.time == 0, core.hideImage, data.code, data.time);
 }
 
 events.prototype._action_showGif = function (data, x, y, prefix) {
@@ -1091,7 +1096,7 @@ events.prototype._action_showGif = function (data, x, y, prefix) {
 
 events.prototype._action_moveImage = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
-    this.__action_doAsyncFunc(data.async, this.moveImage, data.code, data.to, data.opacity, data.time);
+    this.__action_doAsyncFunc(data.async, core.moveImage, data.code, data.to, data.opacity, data.time);
 }
 
 events.prototype._action_setFg = function (data, x, y, prefix) {
@@ -1250,7 +1255,7 @@ events.prototype._action_stopSound = function (data, x, y, prefix) {
 events.prototype._action_setVolume = function (data, x, y, prefix) {
     data.value = core.clamp(parseInt(data.value) / 100, 0, 1);
     core.setFlag("__volume__", data.value);
-    this.__action_doAsyncFunc(data.async, this.setVolume, data.value, data.time || 0);
+    this.__action_doAsyncFunc(data.async, core.setVolume, data.value, data.time || 0);
 }
 
 events.prototype._action_setValue = function (data, x, y, prefix) {
@@ -1487,7 +1492,7 @@ events.prototype._action_updateEnemys = function (data, x, y, prefix) {
 }
 
 events.prototype._action_vibrate = function (data, x, y, prefix) {
-    this.__action_doAsyncFunc(data.async, this.vibrate, data.time);
+    this.__action_doAsyncFunc(data.async, core.vibrate, data.time);
 }
 
 events.prototype._action_sleep = function (data, x, y, prefix) {
@@ -1743,6 +1748,7 @@ events.prototype.hasAsync = function () {
 ////// 跟随 //////
 events.prototype.follow = function (name) {
     core.status.hero.followers = core.status.hero.followers || [];
+    name = core.getMappedName(name);
     if (core.material.images.images[name]
         && core.material.images.images[name].width == 128) {
         core.status.hero.followers.push({"name": name});
@@ -1759,6 +1765,7 @@ events.prototype.unfollow = function (name) {
         core.status.hero.followers = [];
     }
     else {
+        name = core.getMappedName(name);
         for (var i = 0; i < core.status.hero.followers.length; i++) {
             if (core.status.hero.followers[i].name == name) {
                 core.status.hero.followers.splice(i, 1);
@@ -1883,7 +1890,10 @@ events.prototype.closeDoor = function (x, y, id, callback) {
 
 ////// 显示图片 //////
 events.prototype.showImage = function (code, image, sloc, loc, opacityVal, time, callback) {
-    if (typeof image == 'string') image = core.material.images.images[image];
+    if (typeof image == 'string') {
+        image = core.getMappedName(image);
+        image = core.material.images.images[image];
+    }
     if (!image) {
         if (callback) callback();
         return;
@@ -1976,6 +1986,7 @@ events.prototype._moveImage_moving = function (name, moveInfo, callback) {
 
 ////// 绘制或取消一张gif图片 //////
 events.prototype.showGif = function (name, x, y) {
+    name = core.getMappedName(name);
     var image = core.material.images.images[name];
     if (image) {
         var gif = new Image();
@@ -2226,6 +2237,7 @@ events.prototype.canUseQuickShop = function (shopId) {
 
 ////// 设置角色行走图 //////
 events.prototype.setHeroIcon = function (name, noDraw) {
+    name = core.getMappedName(name);
     var img = core.material.images.images[name];
     if (!img || img.width != 128) return;
     core.setFlag("heroIcon", name);

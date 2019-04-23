@@ -50,6 +50,7 @@ editor.prototype.init = function (callback) {
     main.init('editor', function () {
         editor_util_wrapper(editor);
         editor_game_wrapper(editor, main, core);
+        editor_file_wrapper(editor);
         editor_table_wrapper(editor);
         editor_unsorted_1_wrapper(editor);
         afterMainInit();
@@ -65,7 +66,7 @@ editor.prototype.init = function (callback) {
             editor_mode = editor_mode(editor);
             editor_unsorted_2_wrapper(editor_mode);
             editor.mode = editor_mode;
-            core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.initStatus.maps);
+            core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.clone(core.initStatus.maps));
             core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function () {
                 afterCoreReset();
             }, true);

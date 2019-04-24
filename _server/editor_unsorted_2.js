@@ -37,7 +37,7 @@ editor_unsorted_2_wrapper=function(editor_mode){
         }
 
         var selectFloor = document.getElementById('selectFloor');
-        editor.file.getFloorFileList(function (floors) {
+        editor.game.getFloorFileList(function (floors) {
             var outstr = [];
             floors[0].forEach(function (floor) {
                 outstr.push(["<option value='", floor, "'>", floor, '</option>\n'].join(''));

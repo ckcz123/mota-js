@@ -7,23 +7,6 @@ editor_file = function (editor, callback) {
 
     ///////////////////////////////////////////////////////////////////////////
 
-    editor.file.getFloorFileList = function (callback) {
-        checkCallback(callback);
-        /* var fs = editor.fs;
-        fs.readdir('project/floors',function(err, data){
-          callback([data,err]);
-        }); */
-        callback([editor.core.floorIds, null]);
-    }
-    //callback([Array<String>,err:String])
-    editor.file.loadFloorFile = function (filename, callback) {
-        //filename不含'/'不含'.js'
-        checkCallback(callback);
-        
-        editor.currentFloorId = editor.core.status.floorId;
-        editor.currentFloorData = editor.core.floors[editor.currentFloorId];
-    }
-    //callback(err:String)
     editor.file.saveFloorFile = function (callback) {
         checkCallback(callback);
         /* if (!isset(editor.currentFloorId) || !isset(editor.currentFloorData)) {
@@ -31,31 +14,16 @@ editor_file = function (editor, callback) {
         } */
         var filename = 'project/floors/' + editor.currentFloorId + '.js';
         var datastr = ['main.floors.', editor.currentFloorId, '=\n'];
-        if (editor.currentFloorData.map == 'new') {
-            /*
-            editor.currentFloorData.map = editor.map.map(function (v) {
-                return v.map(function () {
-                    return 0
+
+        for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
+            var mapArray=editor[name].map(function (v) {
+                return v.map(function (v) {
+                    return v.idnum || v || 0
                 })
             });
-            */
-            var width = parseInt(document.getElementById('newMapWidth').value);
-            var height = parseInt(document.getElementById('newMapHeight').value);
-            var row = [];
-            for (var i=0;i<width;i++) row.push(0);
-            editor.currentFloorData.map = [];
-            for (var i=0;i<height;i++) editor.currentFloorData.map.push(row);
+            editor.currentFloorData[name]=mapArray;
         }
-        else{
-            for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
-                var mapArray=editor[name].map(function (v) {
-                    return v.map(function (v) {
-                        return v.idnum || v || 0
-                    })
-                });
-                editor.currentFloorData[name]=mapArray;
-            }
-        }
+        
         // format 更改实现方式以支持undefined删除
         var tempJsonObj=Object.assign({},editor.currentFloorData);
         var tempMap=[['map',editor.util.guid()],['bgmap',editor.util.guid()],['fgmap',editor.util.guid()]];
@@ -87,39 +55,35 @@ editor_file = function (editor, callback) {
             name = saveFilename.substring(2);
             title = "主塔 "+name+" 层";
         }
-        editor.currentFloorData = {
+        
+        var width = parseInt(document.getElementById('newMapsWidth').value);
+        var height = parseInt(document.getElementById('newMapsHeight').value);
+        var row = [], map = [];
+        for (var i=0;i<width;i++) row.push(0);
+        for (var i=0;i<height;i++) map.push(row);
+        editor.currentFloorData = Object.assign(JSON.parse(JSON.stringify(editor.file.comment._data.floors_template)), {
             floorId: saveFilename,
             title: title,
             name: name,
-            width: parseInt(document.getElementById('newMapWidth').value),
-            height: parseInt(document.getElementById('newMapHeight').value),
-            canFlyTo: saveStatus?currData.canFlyTo:true,
-            canUseQuickShop: saveStatus?currData.canUseQuickShop:true,
-            cannotViewMap: saveStatus?currData.cannotViewMap:false,
-            cannotMoveDirectly: saveStatus?currData.cannotMoveDirectly:false,
-            images: [],
-            item_ratio: saveStatus?currData.item_ratio:1,
-            defaultGround: saveStatus?currData.defaultGround:"ground",
-            bgm: saveStatus?currData.bgm:null,
-            upFloor: null,
-            downFloor: null,
-            color: saveStatus?currData.color:null,
-            weather: saveStatus?currData.weather:null,
-            firstArrive: [],
-            eachArrive: [],
-            parallelDo: "",
-            events: {},
-            changeFloor: {},
-            afterBattle: {},
-            afterGetItem: {},
-            afterOpenDoor: {},
-            cannotMove: {}
-        };
+            width: width,
+            height: height,
+            map: map,
+        },saveStatus?{
+            canFlyTo: currData.canFlyTo,
+            canUseQuickShop: currData.canUseQuickShop,
+            cannotViewMap: currData.cannotViewMap,
+            cannotMoveDirectly: currData.cannotMoveDirectly,
+            item_ratio: currData.item_ratio,
+            defaultGround: currData.defaultGround,
+            bgm: currData.bgm,
+            color: currData.color,
+            weather: currData.weather,
+        }:{});
+        
         Object.keys(editor.currentFloorData).forEach(function (t) {
             if (editor.currentFloorData[t] == null)
                 delete editor.currentFloorData[t];
         })
-        editor.currentFloorData.map = "new";
         editor.currentFloorId = saveFilename;
         editor.file.saveFloorFile(callback);
     }
@@ -145,35 +109,24 @@ editor_file = function (editor, callback) {
         var datas = [];
         for (var i=from;i<=to;i++) {
             var datastr = ['main.floors.', floorIdList[i-from], '=\n{'];
-            var data = {
+            var data = Object.assign(JSON.parse(JSON.stringify(editor.file.comment._data.floors_template)), {
                 floorId: floorIdList[i-from],
                 title: calValue(document.getElementById('newFloorTitles').value, i),
                 name: calValue(document.getElementById('newFloorNames').value, i),
                 width: width,
                 height: height,
                 map: map,
-                canFlyTo: saveStatus?currData.canFlyTo:true,
-                canUseQuickShop: saveStatus?currData.canUseQuickShop:true,
-                cannotViewMap: saveStatus?currData.cannotViewMap:false,
-                cannotMoveDirectly: saveStatus?currData.cannotMoveDirectly:false,
-                images: [],
-                item_ratio: saveStatus?currData.item_ratio:1,
-                defaultGround: saveStatus?currData.defaultGround:"ground",
-                bgm: saveStatus?currData.bgm:null,
-                upFloor: null,
-                downFloor: null,
-                color: saveStatus?currData.color:null,
-                weather: saveStatus?currData.weather:null,
-                firstArrive: [],
-                eachArrive: [],
-                parallelDo: "",
-                events: {},
-                changeFloor: {},
-                afterBattle: {},
-                afterGetItem: {},
-                afterOpenDoor: {},
-                cannotMove: {}
-            };
+            },saveStatus?{
+                canFlyTo: currData.canFlyTo,
+                canUseQuickShop: currData.canUseQuickShop,
+                cannotViewMap: currData.cannotViewMap,
+                cannotMoveDirectly: currData.cannotMoveDirectly,
+                item_ratio: currData.item_ratio,
+                defaultGround: currData.defaultGround,
+                bgm: currData.bgm,
+                color: currData.color,
+                weather: currData.weather,
+            }:{});
             Object.keys(data).forEach(function (t) {
                 if (data[t] == null)
                     delete data[t];

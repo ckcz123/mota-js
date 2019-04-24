@@ -53,6 +53,7 @@ editor.prototype.init = function (callback) {
         editor_file_wrapper(editor);
         editor_table_wrapper(editor);
         editor_unsorted_1_wrapper(editor);
+        editor.printe=printe;
         afterMainInit();
     });
 

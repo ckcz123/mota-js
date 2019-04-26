@@ -619,7 +619,7 @@ maps.prototype._automaticRoute_deepAdd = function (x, y) {
 // -------- 绘制地图，各层图块，楼层贴图，Autotile -------- //
 
 ////// 绘制一个图块 //////
-maps.prototype.drawBlock = function (block, animate) {
+mmaps.prototype.drawBlock = function (block, animate,ctx) {
     if (block.event.id == 'none') return;
     var redraw = animate != null;
     if (!redraw) animate = 0;
@@ -635,19 +635,19 @@ maps.prototype.drawBlock = function (block, animate) {
     if (blockInfo == null) return;
     if (blockInfo.cls != 'tileset') blockInfo.posX = animate % block.event.animate;
     if (!block.name)
-        this._drawBlockInfo(blockInfo, block.x, block.y);
+        this._drawBlockInfo(blockInfo, block.x, block.y,ctx);
     else
         this._drawBlockInfo_bgfg(blockInfo, block.name, block.x, block.y);
 }
 
-maps.prototype._drawBlockInfo = function (blockInfo, x, y) {
+maps.prototype._drawBlockInfo = function (blockInfo, x, y,ctx) {
     var image = blockInfo.image, posX = blockInfo.posX, posY = blockInfo.posY, height = blockInfo.height;
 
-    core.clearMap('event', x * 32, y * 32, 32, 32);
-    core.drawImage('event', image, posX * 32, posY * height + height - 32, 32, 32, x * 32, y * 32, 32, 32);
+    core.clearMap(ctx || 'event', x * 32, y * 32, 32, 32);
+    core.drawImage(ctx || 'event', image, posX * 32, posY * height + height - 32, 32, 32, x * 32, y * 32, 32, 32);
     if (height > 32) {
-        core.clearMap('event2', x * 32, y * 32 + 32 - height, 32, height - 32)
-        core.drawImage('event2', image, posX * 32, posY * height, 32, height - 32, x * 32, y * 32 + 32 - height, 32, height - 32);
+        core.clearMap(ctx || 'event2', x * 32, y * 32 + 32 - height, 32, height - 32)
+        core.drawImage(ctx || 'event2', image, posX * 32, posY * height, 32, height - 32, x * 32, y * 32 + 32 - height, 32, height - 32);
     }
 }
 

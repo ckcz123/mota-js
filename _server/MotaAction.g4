@@ -1376,7 +1376,7 @@ move_s
 /* move_s
 tooltip : move: 让某个NPC/怪物移动,位置可不填代表当前事件
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=move%EF%BC%9A%E8%AE%A9%E6%9F%90%E4%B8%AAnpc%E6%80%AA%E7%89%A9%E7%A7%BB%E5%8A%A8
-default : ["","",500,false,false,"上右3下2左上左2"]
+default : ["","",500,false,false,"上右3下2后4左前2"]
 colour : this.mapColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {

@@ -1,6 +1,14 @@
 editor_file_wrapper = function (editor) {
     editor_file_proto = function () {
-
+        /**
+         * 以 
+         * {
+         *     "floor.MT1":true,
+         *     "plugins":true
+         * }
+         * 的形式记录所有更改过的文件,save时写入
+         */
+        this.fileMark={}
     }
 
     // 这个函数之后挪到editor.table?
@@ -90,5 +98,12 @@ editor_file_wrapper = function (editor) {
         });
     }
 
+    editor_file_proto.prototype.save=function(callback){
+        // 根据 editor.file.fileMark 把游戏对象格式化写入文件
+    }
+
+    editor_file_proto.prototype.saveItem=function(callback){
+        
+    }
 
 }

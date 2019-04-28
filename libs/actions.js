@@ -251,6 +251,8 @@ actions.prototype._sys_keyDown_lockControl = function (keyCode) {
             this._keyDownSL(keyCode);
             break;
         case 'shop':
+            this._keyDownShop(keyCode);
+            break;
         case 'selectShop':
         case 'switchs':
         case 'settings':
@@ -760,12 +762,16 @@ actions.prototype._sys_longClick_lockControl = function (x, y) {
             return true;
         }
     }
-    // 长按SL快速翻页
+    // 长按SL上下页快速翻页
     if (["save","load","replayLoad","replayRemain"].indexOf(core.status.event.id) >= 0) {
         if ([this.HSIZE-2, this.HSIZE-3, this.HSIZE+2, this.HSIZE+3].indexOf(x) >= 0 && y == this.LAST) {
             this._clickSL(x, y);
             return true;
         }
+    }
+    // 长按商店连续购买
+    if (core.status.event.id == 'shop' && x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
+        return this._clickShop(x, y);
     }
     // 长按可以跳过等待事件
     if (core.status.event.id == 'action' && core.status.event.data.type == 'sleep'
@@ -918,7 +924,7 @@ actions.prototype._clickAction = function (x, y) {
             core.insertAction(core.status.event.ui.yes);
             core.doAction();
         }
-        if ((x == this.HSIZE+2 || x == this.HSIZE+1) && y == this.HSIZE+1) {
+        else if ((x == this.HSIZE+2 || x == this.HSIZE+1) && y == this.HSIZE+1) {
             core.status.route.push("choices:1");
             core.insertAction(core.status.event.ui.no);
             core.doAction();
@@ -1245,13 +1251,25 @@ actions.prototype._clickShop = function (x, y) {
     return true;
 }
 
+actions.prototype._keyDownShop = function (keycode) {
+    // 商店界面长按空格连续购买
+    if (keycode == 32) {
+        this._selectChoices(core.status.event.data.shop.choices.length + 1, keycode, this._clickShop);
+        return;
+    }
+    this._keyDownChoices(keycode);
+}
+
 ////// 商店界面时，放开某个键的操作 //////
 actions.prototype._keyUpShop = function (keycode) {
     if (keycode == 27 || keycode == 88) {
         core.events._exitShop();
         return;
     }
-    this._selectChoices(core.status.event.data.shop.choices.length + 1, keycode, this._clickShop);
+    if (keycode != 32) {
+        this._selectChoices(core.status.event.data.shop.choices.length + 1, keycode, this._clickShop);
+        return;
+    }
     return;
 }
 

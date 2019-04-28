@@ -1758,8 +1758,7 @@ events.prototype.hasAsync = function () {
 events.prototype.follow = function (name) {
     core.status.hero.followers = core.status.hero.followers || [];
     name = core.getMappedName(name);
-    if (core.material.images.images[name]
-        && core.material.images.images[name].width == 128) {
+    if (core.material.images.images[name]) {
         core.status.hero.followers.push({"name": name});
         core.gatherFollowers();
         core.clearMap('hero');
@@ -2139,6 +2138,7 @@ events.prototype.jumpHero = function (ex, ey, time, callback) {
     core.playSound('jump.mp3');
     var jumpInfo = core.maps.__generateJumpInfo(sx, sy, ex, ey, time || 500);
     jumpInfo.icon = core.material.icons.hero[core.getHeroLoc('direction')];
+    jumpInfo.width = core.material.icons.hero.width || 32;
     jumpInfo.height = core.material.icons.hero.height;
 
     this._jumpHero_doJump(jumpInfo, callback);
@@ -2158,12 +2158,12 @@ events.prototype._jumpHero_doJump = function (jumpInfo, callback) {
 events.prototype._jumpHero_jumping = function (jumpInfo) {
     core.clearMap('hero');
     core.maps.__updateJumpInfo(jumpInfo);
-    var nowx = jumpInfo.px, nowy = jumpInfo.py, height = jumpInfo.height;
+    var nowx = jumpInfo.px, nowy = jumpInfo.py, width = jumpInfo.width || 32, height = jumpInfo.height;
     core.bigmap.offsetX = core.clamp(nowx - 32*core.__HALF_SIZE__, 0, 32*core.bigmap.width-core.__PIXELS__);
     core.bigmap.offsetY = core.clamp(nowy - 32*core.__HALF_SIZE__, 0, 32*core.bigmap.height-core.__PIXELS__);
     core.control.updateViewport();
-    core.drawImage('hero', core.material.images.hero, jumpInfo.icon.stop, jumpInfo.icon.loc * height, 32, height,
-        nowx - core.bigmap.offsetX, nowy + 32-height - core.bigmap.offsetY, 32, height);
+    core.drawImage('hero', core.material.images.hero, jumpInfo.icon.stop, jumpInfo.icon.loc * height, width, height,
+        nowx + (32 - width) / 2 - core.bigmap.offsetX, nowy + 32-height - core.bigmap.offsetY, width, height);
 }
 
 events.prototype._jumpHero_finished = function (animate, ex, ey, callback) {
@@ -2251,9 +2251,10 @@ events.prototype.canUseQuickShop = function (shopId) {
 events.prototype.setHeroIcon = function (name, noDraw) {
     name = core.getMappedName(name);
     var img = core.material.images.images[name];
-    if (!img || img.width != 128) return;
+    if (!img) return;
     core.setFlag("heroIcon", name);
     core.material.images.hero.onload = function () {
+        core.material.icons.hero.width = img.width / 4;
         core.material.icons.hero.height = img.height / 4;
         core.control.updateHeroIcon(name);
         if (!noDraw) core.drawHero();

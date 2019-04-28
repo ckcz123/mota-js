@@ -25,6 +25,7 @@ var icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1 =
 			"leftFoot": 1,
 			"rightFoot": 3
 		},
+		"width": 32,
 		"height": 48
 	},
 	"terrains": {

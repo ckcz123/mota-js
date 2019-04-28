@@ -777,9 +777,9 @@ control.prototype.drawHero = function (status, offset) {
     core.clearMap('hero');
 
     this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
-        core.drawImage('hero', block.img, block.heroIcon[block.status]*32,
-            block.heroIcon.loc * block.height, 32, block.height,
-            block.posx, block.posy+32-block.height, 32, block.height);
+        core.drawImage('hero', block.img, block.heroIcon[block.status]*block.width,
+            block.heroIcon.loc * block.height, block.width, block.height,
+            block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
     });
 
     core.control.updateViewport();
@@ -789,6 +789,7 @@ control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, off
     var heroIconArr = core.material.icons.hero, drawObjs = [], index = 0;
     drawObjs.push({
         "img": core.material.images.hero,
+        "width": core.material.icons.hero.width || 32,
         "height": core.material.icons.hero.height,
         "heroIcon": heroIconArr[direction],
         "posx": x * 32 - core.bigmap.offsetX + core.utils.scan[direction].x * offset,
@@ -799,6 +800,7 @@ control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, off
     (core.status.hero.followers||[]).forEach(function (t) {
         drawObjs.push({
             "img": core.material.images.images[t.name],
+            "width": core.material.images.images[t.name].width/4,
             "height": core.material.images.images[t.name].height/4,
             "heroIcon": heroIconArr[t.direction],
             "posx": 32*t.x - core.bigmap.offsetX + (t.stop?0:core.utils.scan[t.direction].x*offset),
@@ -2345,14 +2347,15 @@ control.prototype.updateHeroIcon = function (name) {
 
     var image = core.material.images.hero;
     // 全身图
-    var height = core.material.icons.hero.height;
-    var ratio = 32 / height, width = 32 * ratio, left = 16-width/2;
+    var w = core.material.icons.hero.width || 32;
+    var h = core.material.icons.hero.height || 48;
+    var ratio = Math.max(w / h, 1), width = 32 * ratio, left = 16 - width/2;
 
     var canvas = document.createElement("canvas");
     var context = canvas.getContext("2d");
     canvas.width = 32;
     canvas.height = 32;
-    context.drawImage(image, 0, 0, 32, height, left, 0, width, 32);
+    context.drawImage(image, 0, 0, w, h, left, 0, width, 32);
 
     core.statusBar.image.name.src = canvas.toDataURL("image/png");
 }

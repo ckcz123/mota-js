@@ -419,20 +419,23 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
     var locked = core.status.lockControl;
     core.lockControl();
     core.status.replay.animate = true;
+    core.removeBlock(x, y);
+    core.drawImage('event', core.material.images.animates, 0, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
     var state = 0;
     var animate = window.setInterval(function () {
+        core.clearMap('event', 32 * x, 32 * y, 32, 32);
         state++;
         if (state == 4) {
             clearInterval(animate);
-            core.removeBlock(x, y);
+            delete core.animateFrame.asyncId[animate];
             if (!locked) core.unLockControl();
             core.status.replay.animate = false;
             core.events.afterOpenDoor(id, x, y, callback);
             return;
         }
-        core.clearMap('event', 32 * x, 32 * y, 32, 32);
         core.drawImage('event', core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
     }, speed / Math.max(core.status.replay.speed, 1));
+    core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 开一个门后触发的事件 //////
@@ -1133,7 +1136,7 @@ events.prototype._action_openDoor = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, x, y, prefix);
     var floorId = data.floorId || core.status.floorId;
     if (floorId == core.status.floorId) {
-        core.openDoor(loc[0], loc[1], data.needKey, core.doAction);
+        this.__action_doAsyncFunc(data.async, core.openDoor, loc[0], loc[1], data.needKey);
     }
     else {
         core.removeBlock(loc[0], loc[1], floorId);
@@ -1172,7 +1175,13 @@ events.prototype._action_disableShop = function (data, x, y, prefix) {
 }
 
 events.prototype._action_battle = function (data, x, y, prefix) {
-    this.battle(data.id, null, null, true, core.doAction);
+    if (data.id) {
+        this.battle(data.id, null, null, true, core.doAction);
+    }
+    else {
+        var loc = this.__action_getLoc(data.loc, x, y, prefix);
+        this.battle(null, loc[0], loc[1], true, core.doAction);
+    }
 }
 
 events.prototype._action_trigger = function (data, x, y, prefix) {
@@ -1180,9 +1189,9 @@ events.prototype._action_trigger = function (data, x, y, prefix) {
     var block = core.getBlock(loc[0], loc[1]);
     if (block != null && block.block.event.trigger) {
         block = block.block;
-        this.setEvents([], block.x, block.y);
+        this.setEvents(data.keep ? null : [], block.x, block.y);
         if (block.event.trigger == 'action')
-            this.setEvents(block.event.data);
+            this.insertAction(block.event.data);
         else {
             core.doSystemEvent(block.event.trigger, block, core.doAction);
             return;

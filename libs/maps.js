@@ -1615,13 +1615,13 @@ maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
     }
     var block = blockArr[0], blockInfo = blockArr[1];
     var moveSteps = (steps||[]).filter(function (t) {
-        return ['up','down','left','right'].indexOf(t)>=0;
+        return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
     });
     var canvases = this._initDetachedBlock(blockInfo, x, y, block.event.animate !== false);
     this._moveDetachedBlock(blockInfo, 32 * x, 32 * y, 1, canvases);
 
     var moveInfo = {
-        x: x, y: y, px: 32 * x, py: 32 * y, opacity: 1, keep: keep,
+        x: x, y: y, px: 32 * x, py: 32 * y, opacity: 1, keep: keep, lastDirection: null, offset: 1,
         moveSteps: moveSteps, step: 0, per_time: time / 16 / core.status.replay.speed
     }
     this._moveBlock_doMove(blockInfo, canvases, moveInfo, callback);
@@ -1646,21 +1646,46 @@ maps.prototype._moveBlock_doMove = function (blockInfo, canvases, moveInfo, call
     core.animateFrame.asyncId[animate] = true;
 }
 
-maps.prototype._moveBlock_moving = function (blockInfo, canvases, moveInfo) {
+maps.prototype._moveBlock_updateDirection = function (blockInfo, moveInfo) {
+    moveInfo.offset = 1;
     var direction = moveInfo.moveSteps[0];
-    if (moveInfo.step == 0) {
-        moveInfo.x += core.utils.scan[direction].x;
-        moveInfo.y += core.utils.scan[direction].y;
-        // 根据faceIds修改朝向
-        var currid = blockInfo.faceIds[direction];
-        if (currid) {
-            var posY = core.material.icons[blockInfo.cls][currid];
-            if (posY != null) blockInfo.posY = posY;
+    if (moveInfo.lastDirection == null) {
+        for (var d in blockInfo.faceIds) {
+            if (blockInfo.faceIds[d] == blockInfo.id) {
+                moveInfo.lastDirection = d;
+                break;
+            }
         }
     }
+    if (direction == 'forward' || direction == 'backward') {
+        if (moveInfo.lastDirection == null) {
+            moveInfo.moveSteps.shift();
+            return false;
+        }
+        if (direction == 'backward')
+            moveInfo.offset = -1;
+        direction = moveInfo.lastDirection;
+    }
+    moveInfo.lastDirection = moveInfo.moveSteps[0] = direction;
+    moveInfo.x += core.utils.scan[direction].x * moveInfo.offset;
+    moveInfo.y += core.utils.scan[direction].y * moveInfo.offset;
+    // 根据faceIds修改朝向
+    var currid = blockInfo.faceIds[direction];
+    if (currid) {
+        var posY = core.material.icons[blockInfo.cls][currid];
+        if (posY != null) blockInfo.posY = posY;
+    }
+    return true;
+}
+
+maps.prototype._moveBlock_moving = function (blockInfo, canvases, moveInfo) {
+    if (moveInfo.step == 0) {
+        if (!this._moveBlock_updateDirection(blockInfo, moveInfo)) return;
+    }
+    var direction = moveInfo.moveSteps[0];
     moveInfo.step++;
-    moveInfo.px += core.utils.scan[direction].x * 2;
-    moveInfo.py += core.utils.scan[direction].y * 2;
+    moveInfo.px += core.utils.scan[direction].x * 2 * moveInfo.offset;
+    moveInfo.py += core.utils.scan[direction].y * 2 * moveInfo.offset;
     this._moveDetachedBlock(blockInfo, moveInfo.px, moveInfo.py, moveInfo.opacity, canvases);
     if (moveInfo.step == 16) {
         moveInfo.step = 0;

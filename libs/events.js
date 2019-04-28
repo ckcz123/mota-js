@@ -1794,6 +1794,7 @@ events.prototype.setValue = function (name, value, prefix, add) {
     this._setValue_setItem(name, value);
     this._setValue_setFlag(name, value);
     this._setValue_setSwitch(name, value, prefix);
+    this._setValue_setGlobal(name, value);
     core.updateStatusBar();
 }
 
@@ -1822,6 +1823,11 @@ events.prototype._setValue_setFlag = function (name, value) {
 events.prototype._setValue_setSwitch = function (name, value, prefix) {
     if (name.indexOf("switch:") !== 0) return;
     core.setFlag((prefix || ":f@x@y") + "@" + name.substring(7), value);
+}
+
+events.prototype._setValue_setGlobal = function (name, value) {
+    if (name.indexOf("global:") !== 0) return;
+    core.setLocalStorage(name.substring(7), value);
 }
 
 ////// 数值增减 //////

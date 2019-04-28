@@ -67,6 +67,7 @@ utils.prototype.calValue = function (value, prefix, need, times) {
         value = value.replace(/item:([a-zA-Z0-9_]+)/g, "core.itemCount('$1')");
         value = value.replace(/flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getFlag('$1', 0)");
         value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
+        value = value.replace(/global:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getLocalStorage('$1', 0)");
         return eval(value);
     }
     if (value instanceof Function) {

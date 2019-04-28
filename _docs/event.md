@@ -287,18 +287,22 @@
 
 我们可以使用 `status:xxx` 代表勇士的一个属性值；`item:xxx` 代表某个道具的个数；`flag:xxx` 代表某个自定义的变量或flag值。
 
+从V2.6开始，也可以使用`global:xxx`代表全局存储（和存档无关的存储）。
+
 ``` js
 [
     "你当前的攻击力是${status:atk}, 防御是${status:def}，坐标是(${status:x},${status:y})",
     "你的攻防和的十倍是${10*(status:atk+status:def)}",
     "你的红黄蓝钥匙总数为${item:yellowKey+item:blueKey+item:redKey}",
     "你访问某个老人的次数为${flag:man_times}",
+    "当前的存档编号是${global:saveIndex}",
 ]
 ```
 
 - `status:xxx` 获取勇士属性时只能使用如下几个：hp（生命值），atk（攻击力），def（防御力），mdef（魔防值），money（金币），experience（经验），x（勇士的横坐标），y（勇士的纵坐标），direction（勇士的方向）。
 - `item:xxx` 中的xxx为道具ID。所有道具的ID定义在items.js中，请自行查看。例如，`item:centerFly` 代表中心对称飞行器的个数。
-- `flag:xxx` 中的xxx为一个自定义的变量/Flag；如果没有对其进行赋值则默认值为false。
+- `flag:xxx` 中的xxx为一个自定义的变量/Flag（支持中文）；如果没有对其进行赋值则默认值为0。
+- `global:xxx` 中的xxx为一个全局存储的名称（支持中文）；如果没有对其进行赋值则默认值为0。
 
 ### autoText：自动剧情文本
 
@@ -417,7 +421,7 @@ icon是可选的，如果设置则会绘制图标，其可以是一个有效的I
 
 name为你要修改的属性/道具/Flag，每次只能修改一个值。写法和上面完全相同，`status:xxx` 表示勇士一个属性，`item:xxx` 表示某个道具个数，`flag:xxx` 表示某个变量或flag值。参见上面的介绍。
 
-value是一个表达式，将通过这个表达式计算出的结果赋值给name。该表达式同样可以使用`status:xxx`, `item:xxx`, `flag:xxx`的写法表示勇士当前属性，道具个数和某个变量/Flag值。
+value是一个表达式，将通过这个表达式计算出的结果赋值给name。该表达式同样可以使用`status:xxx`, `item:xxx`, `flag:xxx`, `global:xxx`的写法表示勇士当前属性，道具个数，某个变量/Flag值和某个全局存储值。
 
 ``` js
 [
@@ -428,6 +432,7 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
     {"type": "setValue", "name": "item:bomb", "value": "item:bomb+10" } // 炸弹个数+10
     {"type": "setValue", "name": "flag:man_times", "value": "0" } // 将变量man_times设为0
     {"type": "setValue", "name": "flag:man_times", "value": "flag:man_times+2*status:atk" } // 将变量man_times的值加上勇士的攻击数值的两倍
+    {"type": "setValue", "name": "global:123", "value": "4"} // 设置全局存储233为4（任何存档都可以读取它）
 ]
 ```
 

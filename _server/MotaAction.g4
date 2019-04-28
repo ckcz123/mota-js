@@ -2135,8 +2135,8 @@ FixedId_List
     /*FixedId_List ['status:hp','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:experience']*/;
 
 Id_List
-    :   '变量' | '状态' | '物品' | '独立开关'
-    /*Id_List ['flag','status','item', 'switch']*/;
+    :   '变量' | '状态' | '物品' | '独立开关' | '全局存储'
+    /*Id_List ['flag','status','item', 'switch', 'global']*/;
 
 //转blockly后不保留需要加"
 EvalString

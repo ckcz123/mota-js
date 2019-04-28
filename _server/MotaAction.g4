@@ -287,6 +287,7 @@ action
     |   wait_s
     |   waitAsync_s
     |   battle_s
+    |   battle_1_s
     |   openDoor_s
     |   closeDoor_s
     |   changeFloor_s
@@ -643,15 +644,16 @@ return code;
 */;
 
 trigger_s
-    :   '触发事件' 'x' PosString ',' 'y' PosString Newline
+    :   '触发事件' 'x' PosString ',' 'y' PosString '不结束当前事件' Bool Newline
     
 
 /* trigger_s
 tooltip : trigger: 立即触发另一个地点的事件
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=trigger%EF%BC%9A%E7%AB%8B%E5%8D%B3%E8%A7%A6%E5%8F%91%E5%8F%A6%E4%B8%80%E4%B8%AA%E5%9C%B0%E7%82%B9%E7%9A%84%E4%BA%8B%E4%BB%B6
-default : ["0","0"]
+default : ["0","0",false]
 colour : this.eventColor
-var code = '{"type": "trigger", "loc": ['+PosString_0+','+PosString_1+']},\n';
+Bool_0 = Bool_0 ?', "keep": true':'';
+var code = '{"type": "trigger", "loc": ['+PosString_0+','+PosString_1+']'+Bool_0+'},\n';
 return code;
 */;
 
@@ -984,14 +986,32 @@ var code = '{"type": "battle", "id": "'+IdString_0+'"},\n';
 return code;
 */;
 
+
+battle_1_s
+    :   '强制战斗' 'x' PosString? ',' 'y' PosString? Newline
+
+
+/* battle_1_s
+tooltip : battle: 强制战斗
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=battle%EF%BC%9A%E5%BC%BA%E5%88%B6%E6%88%98%E6%96%97
+default : ["","",""]
+colour : this.mapColor
+var floorstr = '';
+if (PosString_0 && PosString_1) {
+    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+}
+var code = '{"type": "battle"'+floorstr+'},\n';
+return code;
+*/;
+
 openDoor_s
-    :   '开门' 'x' PosString? ',' 'y' PosString? '楼层' IdString? '需要钥匙' Bool? Newline
+    :   '开门' 'x' PosString? ',' 'y' PosString? '楼层' IdString? '需要钥匙' Bool? '不等待执行完毕' Bool Newline
     
 
 /* openDoor_s
 tooltip : openDoor: 开门,楼层可不填表示当前层
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=opendoor%EF%BC%9A%E5%BC%80%E9%97%A8
-default : ["","","",false]
+default : ["","","",false,false]
 colour : this.mapColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var floorstr = '';
@@ -999,24 +1019,26 @@ if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
 Bool_0 = Bool_0 ? ', "needKey": true' : '';
-var code = '{"type": "openDoor"'+floorstr+IdString_0+Bool_0+'},\n';
+Bool_1 = Bool_1 ? ', "async": true' : '';
+var code = '{"type": "openDoor"'+floorstr+IdString_0+Bool_0+Bool_1+'},\n';
 return code;
 */;
 
 closeDoor_s
-    :   '关门' 'x' PosString? ',' 'y' PosString? 'ID' IdString  Newline
+    :   '关门' 'x' PosString? ',' 'y' PosString? 'ID' IdString '不等待执行完毕' Bool Newline
 
 
 /* closeDoor_s
 tooltip : closeDoor: 关门事件，需要该点本身无事件
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=opendoor%EF%BC%9A%E5%BC%80%E9%97%A8
-default : ["","","yellowDoor"]
+default : ["","","yellowDoor",false]
 colour : this.mapColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
-var code = '{"type": "closeDoor", "id": "'+IdString_0+'"'+floorstr+'},\n';
+Bool_0 = Bool_0 ? ', "async": true' : '';
+var code = '{"type": "closeDoor", "id": "'+IdString_0+'"'+floorstr+Bool_0+'},\n';
 return code;
 */;
 
@@ -1354,7 +1376,7 @@ move_s
 /* move_s
 tooltip : move: 让某个NPC/怪物移动,位置可不填代表当前事件
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=move%EF%BC%9A%E8%AE%A9%E6%9F%90%E4%B8%AAnpc%E6%80%AA%E7%89%A9%E7%A7%BB%E5%8A%A8
-default : ["","",500,false,false,"上右3下2左上左2"]
+default : ["","",500,false,false,"上右3下2后4左前2"]
 colour : this.mapColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
@@ -2113,8 +2135,8 @@ FixedId_List
     /*FixedId_List ['status:hp','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:experience']*/;
 
 Id_List
-    :   '变量' | '状态' | '物品' | '独立开关'
-    /*Id_List ['flag','status','item', 'switch']*/;
+    :   '变量' | '状态' | '物品' | '独立开关' | '全局存储'
+    /*Id_List ['flag','status','item', 'switch', 'global']*/;
 
 //转blockly后不保留需要加"
 EvalString
@@ -2532,12 +2554,12 @@ ActionParser.prototype.parseAction = function() {
     case "openDoor": // 开一个门, 包括暗墙
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['openDoor_s'].xmlText([
-        data.loc[0],data.loc[1],data.floorId||'',data.needKey||false,this.next]);
+        data.loc[0],data.loc[1],data.floorId||'',data.needKey||false,data.async||false,this.next]);
       break;
     case "closeDoor": // 关一个门，需要该点无事件
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['closeDoor_s'].xmlText([
-        data.loc[0],data.loc[1],data.id,this.next]);
+        data.loc[0],data.loc[1],data.id,data.async||false,this.next]);
       break;
     case "useItem": // 使用道具
       this.next = MotaActionBlocks['useItem_s'].xmlText([
@@ -2552,12 +2574,19 @@ ActionParser.prototype.parseAction = function() {
         data.id,this.next]);
       break;
     case "battle": // 强制战斗
-      this.next = MotaActionBlocks['battle_s'].xmlText([
-        data.id,this.next]);
+      if (data.id) {
+        this.next = MotaActionBlocks['battle_s'].xmlText([
+          data.id,this.next]);
+      }
+      else {
+        data.loc = data.loc || [];
+        this.next = MotaActionBlocks['battle_1_s'].xmlText([
+          data.loc[0],data.loc[1],this.next]);
+      }
       break;
     case "trigger": // 触发另一个事件；当前事件会被立刻结束。需要另一个地点的事件是有效的
       this.next = MotaActionBlocks['trigger_s'].xmlText([
-        data.loc[0],data.loc[1],this.next]);
+        data.loc[0],data.loc[1],data.keep,this.next]);
       break;
     case "insert": // 强制插入另一个点的事件在当前事件列表执行，当前坐标和楼层不会改变
       if (data.args instanceof Array) {

@@ -419,20 +419,23 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
     var locked = core.status.lockControl;
     core.lockControl();
     core.status.replay.animate = true;
+    core.removeBlock(x, y);
+    core.drawImage('event', core.material.images.animates, 0, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
     var state = 0;
     var animate = window.setInterval(function () {
+        core.clearMap('event', 32 * x, 32 * y, 32, 32);
         state++;
         if (state == 4) {
             clearInterval(animate);
-            core.removeBlock(x, y);
+            delete core.animateFrame.asyncId[animate];
             if (!locked) core.unLockControl();
             core.status.replay.animate = false;
             core.events.afterOpenDoor(id, x, y, callback);
             return;
         }
-        core.clearMap('event', 32 * x, 32 * y, 32, 32);
         core.drawImage('event', core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
-    }, speed / core.status.replay.speed);
+    }, speed / Math.max(core.status.replay.speed, 1));
+    core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 开一个门后触发的事件 //////
@@ -1133,7 +1136,7 @@ events.prototype._action_openDoor = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, x, y, prefix);
     var floorId = data.floorId || core.status.floorId;
     if (floorId == core.status.floorId) {
-        core.openDoor(loc[0], loc[1], data.needKey, core.doAction);
+        this.__action_doAsyncFunc(data.async, core.openDoor, loc[0], loc[1], data.needKey);
     }
     else {
         core.removeBlock(loc[0], loc[1], floorId);
@@ -1172,7 +1175,13 @@ events.prototype._action_disableShop = function (data, x, y, prefix) {
 }
 
 events.prototype._action_battle = function (data, x, y, prefix) {
-    this.battle(data.id, null, null, true, core.doAction);
+    if (data.id) {
+        this.battle(data.id, null, null, true, core.doAction);
+    }
+    else {
+        var loc = this.__action_getLoc(data.loc, x, y, prefix);
+        this.battle(null, loc[0], loc[1], true, core.doAction);
+    }
 }
 
 events.prototype._action_trigger = function (data, x, y, prefix) {
@@ -1180,9 +1189,9 @@ events.prototype._action_trigger = function (data, x, y, prefix) {
     var block = core.getBlock(loc[0], loc[1]);
     if (block != null && block.block.event.trigger) {
         block = block.block;
-        this.setEvents([], block.x, block.y);
+        this.setEvents(data.keep ? null : [], block.x, block.y);
         if (block.event.trigger == 'action')
-            this.setEvents(block.event.data);
+            this.insertAction(block.event.data);
         else {
             core.doSystemEvent(block.event.trigger, block, core.doAction);
             return;
@@ -1749,8 +1758,7 @@ events.prototype.hasAsync = function () {
 events.prototype.follow = function (name) {
     core.status.hero.followers = core.status.hero.followers || [];
     name = core.getMappedName(name);
-    if (core.material.images.images[name]
-        && core.material.images.images[name].width == 128) {
+    if (core.material.images.images[name]) {
         core.status.hero.followers.push({"name": name});
         core.gatherFollowers();
         core.clearMap('hero');
@@ -1786,6 +1794,7 @@ events.prototype.setValue = function (name, value, prefix, add) {
     this._setValue_setItem(name, value);
     this._setValue_setFlag(name, value);
     this._setValue_setSwitch(name, value, prefix);
+    this._setValue_setGlobal(name, value);
     core.updateStatusBar();
 }
 
@@ -1814,6 +1823,11 @@ events.prototype._setValue_setFlag = function (name, value) {
 events.prototype._setValue_setSwitch = function (name, value, prefix) {
     if (name.indexOf("switch:") !== 0) return;
     core.setFlag((prefix || ":f@x@y") + "@" + name.substring(7), value);
+}
+
+events.prototype._setValue_setGlobal = function (name, value) {
+    if (name.indexOf("global:") !== 0) return;
+    core.setLocalStorage(name.substring(7), value);
 }
 
 ////// 数值增减 //////
@@ -1884,7 +1898,7 @@ events.prototype.closeDoor = function (x, y, id, callback) {
         }
         core.clearMap('event', 32 * x, 32 * y, 32, 32);
         core.drawImage('event', core.material.images.animates, 32 * (4-state), 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
-    }, speed / core.status.replay.speed);
+    }, speed / Math.max(core.status.replay.speed, 1));
     core.animateFrame.asyncId[animate] = true;
 }
 
@@ -1958,7 +1972,8 @@ events.prototype.moveImage = function (code, to, opacityVal, time, callback) {
     var opacity = parseFloat(canvas.style.opacity), toOpacity = getOrDefault(opacityVal, opacity);
 
     this._moveImage_moving(name, {
-        fromX: fromX, fromY: fromY, toX: toX, toY: toY, opacity: opacity, toOpacity: toOpacity, time: time
+        fromX: fromX, fromY: fromY, toX: toX, toY: toY, opacity: opacity, toOpacity: toOpacity,
+        time: time / Math.max(core.status.replay.speed, 1)
     }, callback)
 }
 
@@ -2016,6 +2031,7 @@ events.prototype.setVolume = function (value, time, callback) {
         return;
     }
     var currVolume = core.musicStatus.volume;
+    time /= Math.max(core.status.replay.speed, 1);
     var per_time = 10, step = 0, steps = parseInt(time / per_time);
     var fade = setInterval(function () {
         step++;
@@ -2037,6 +2053,7 @@ events.prototype.vibrate = function (time, callback) {
     }
     if (!time || time < 1000) time = 1000;
     // --- 将time调整为500的倍数（上整），不然会出错
+    time /= Math.max(core.status.replay.speed, 1)
     time = Math.ceil(time / 500) * 500;
     var shakeInfo = {duration: time * 3 / 50, speed: 5, power: 5, direction: 1, shake: 0};
     var animate = setInterval(function () {
@@ -2127,6 +2144,7 @@ events.prototype.jumpHero = function (ex, ey, time, callback) {
     core.playSound('jump.mp3');
     var jumpInfo = core.maps.__generateJumpInfo(sx, sy, ex, ey, time || 500);
     jumpInfo.icon = core.material.icons.hero[core.getHeroLoc('direction')];
+    jumpInfo.width = core.material.icons.hero.width || 32;
     jumpInfo.height = core.material.icons.hero.height;
 
     this._jumpHero_doJump(jumpInfo, callback);
@@ -2146,12 +2164,12 @@ events.prototype._jumpHero_doJump = function (jumpInfo, callback) {
 events.prototype._jumpHero_jumping = function (jumpInfo) {
     core.clearMap('hero');
     core.maps.__updateJumpInfo(jumpInfo);
-    var nowx = jumpInfo.px, nowy = jumpInfo.py, height = jumpInfo.height;
+    var nowx = jumpInfo.px, nowy = jumpInfo.py, width = jumpInfo.width || 32, height = jumpInfo.height;
     core.bigmap.offsetX = core.clamp(nowx - 32*core.__HALF_SIZE__, 0, 32*core.bigmap.width-core.__PIXELS__);
     core.bigmap.offsetY = core.clamp(nowy - 32*core.__HALF_SIZE__, 0, 32*core.bigmap.height-core.__PIXELS__);
     core.control.updateViewport();
-    core.drawImage('hero', core.material.images.hero, jumpInfo.icon.stop, jumpInfo.icon.loc * height, 32, height,
-        nowx - core.bigmap.offsetX, nowy + 32-height - core.bigmap.offsetY, 32, height);
+    core.drawImage('hero', core.material.images.hero, jumpInfo.icon.stop, jumpInfo.icon.loc * height, width, height,
+        nowx + (32 - width) / 2 - core.bigmap.offsetX, nowy + 32-height - core.bigmap.offsetY, width, height);
 }
 
 events.prototype._jumpHero_finished = function (animate, ex, ey, callback) {
@@ -2239,9 +2257,10 @@ events.prototype.canUseQuickShop = function (shopId) {
 events.prototype.setHeroIcon = function (name, noDraw) {
     name = core.getMappedName(name);
     var img = core.material.images.images[name];
-    if (!img || img.width != 128) return;
+    if (!img) return;
     core.setFlag("heroIcon", name);
     core.material.images.hero.onload = function () {
+        core.material.icons.hero.width = img.width / 4;
         core.material.icons.hero.height = img.height / 4;
         core.control.updateHeroIcon(name);
         if (!noDraw) core.drawHero();

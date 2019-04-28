@@ -37,7 +37,7 @@ editor_unsorted_2_wrapper=function(editor_mode){
         }
 
         var selectFloor = document.getElementById('selectFloor');
-        editor.file.getFloorFileList(function (floors) {
+        editor.game.getFloorFileList(function (floors) {
             var outstr = [];
             floors[0].forEach(function (floor) {
                 outstr.push(["<option value='", floor, "'>", floor, '</option>\n'].join(''));
@@ -473,7 +473,7 @@ editor_unsorted_2_wrapper=function(editor_mode){
                             throw(err);
                         }
                         // Step 4: 自动注册
-                        editor_file.registerAutotile(filename, function (err) {
+                        editor.file.registerAutotile(filename, function (err) {
                             if (err) {
                                 printe(err);
                                 throw(err);

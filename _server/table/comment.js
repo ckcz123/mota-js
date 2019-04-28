@@ -230,7 +230,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "select",
 					"_select": {
 						"values": [
-							null,
+							"null",
 							"openDoor",
 							"passNet",
 							"changeLight",
@@ -245,9 +245,9 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "select",
 					"_select": {
 						"values": [
-							null,
-							true,
-							false
+							"null",
+							"true",
+							"false"
 						]
 					},
 					"_data": "该图块是否不可通行；true代表不可通行，false代表可通行，null代表使用系统缺省值"
@@ -462,6 +462,35 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					}
 				}
 			}
+		},
+
+		"floors_template": {
+			"floorId": "to be covered",
+			"title": "new floor",
+			"name": "new floor",
+			"width": 13,
+			"height": 13,
+			"canFlyTo": true,
+			"canUseQuickShop": true,
+			"cannotViewMap": false,
+			"cannotMoveDirectly": false,
+			"images": [],
+			"item_ratio": 1,
+			"defaultGround": "ground",
+			"bgm": null,
+			"upFloor": null,
+			"downFloor": null,
+			"color": null,
+			"weather": null,
+			"firstArrive": [],
+			"eachArrive": [],
+			"parallelDo": "",
+			"events": {},
+			"changeFloor": {},
+			"afterBattle": {},
+			"afterGetItem": {},
+			"afterOpenDoor": {},
+			"cannotMove": {}
 		}
 	}
 }

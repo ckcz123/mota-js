@@ -112,6 +112,7 @@ editor_blockly = function () {
       MotaActionBlocks['unfollow_s'].xmlText(),
     ],
     '地图处理':[
+      MotaActionBlocks['battle_1_s'].xmlText(),
       MotaActionBlocks['openDoor_s'].xmlText(),
       MotaActionBlocks['closeDoor_s'].xmlText(),
       MotaActionBlocks['show_s'].xmlText(),

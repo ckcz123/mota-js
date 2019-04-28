@@ -3,12 +3,13 @@ editor_file_wrapper = function (editor) {
         /**
          * 以 
          * {
-         *     "floor.MT1":true,
-         *     "plugins":true
+         *     "floor.MT1":<obj>,
+         *     "plugins":<obj>
          * }
          * 的形式记录所有更改过的文件,save时写入
+         * <obj>的内容暂时还没想好
          */
-        this.fileMark={}
+        this.fileMark = {}
     }
 
     // 这个函数之后挪到editor.table?
@@ -79,31 +80,68 @@ editor_file_wrapper = function (editor) {
         var filename = 'project/floors/' + floorId + '.js';
         var datastr = ['main.floors.', floorId, '=\n'];
 
-        // format 更改实现方式以支持undefined删除
         var tempJsonObj = Object.assign({}, floorData);
         var tempMap = [['map', editor.util.guid()], ['bgmap', editor.util.guid()], ['fgmap', editor.util.guid()]];
         tempMap.forEach(function (v) {
             v[2] = tempJsonObj[v[0]];
             tempJsonObj[v[0]] = v[1];
         });
-        var tempJson = JSON.stringify(tempJsonObj, null, 4);
+        var tempJson = JSON.stringify(tempJsonObj, editor.game.replacerForSaving, 4);
         tempMap.forEach(function (v) {
             tempJson = tempJson.replace('"' + v[1] + '"', '[\n' + editor.file.formatMap(v[2], v[0] != 'map') + '\n]')
         });
         datastr = datastr.concat([tempJson]);
         datastr = datastr.join('');
         editor.file.alertWhenCompress();
-        editor.fs.writeFile(filename, encode(datastr), 'base64', function (err, data) {
+        editor.fs.writeFile(filename, editor.util.encode64(datastr), 'base64', function (err, data) {
             callback(err);
         });
     }
 
-    editor_file_proto.prototype.save=function(callback){
+    editor_file_proto.prototype.saveScript = function (name, varName, dataObj, callback) {
+        // 此处格式化以及写入 project/xxx.js 形式的文件
+        editor.file.alertWhenCompress();
+
+        if (['maps', 'enemys'].indexOf(name) === -1) {
+            // 全部用\t展开
+            var content = JSON.stringify(dataObj, editor.game.replacerForSaving, '\t');
+        } else {
+            // 只用\t展开第一层
+            var emap = {};
+            var estr = JSON.stringify(dataObj, function (_k, v) {
+                if (v.id != null) {
+                    var id_ = editor.util.guid();
+                    emap[id_] = JSON.stringify(v, editor.game.replacerForSaving);
+                    return id_;
+                } else return v
+            }, '\t');
+            for (var id_ in emap) {
+                estr = estr.replace('"' + id_ + '"', emap[id_]);
+            }
+            var content = estr;
+        }
+
+        var strToWrite = `var ${varName} = \n${content}`;
+        editor.fs.writeFile(`project/${name}.js`, editor.util.encode64(strToWrite), 'base64', function (err, data) {
+            callback(err);
+        });
+    }
+
+    editor_file_proto.prototype.saveCommentJs = function () {
+        // 无需格式化的写入, 把multi的那部分略微修改
+    }
+
+    editor_file_proto.prototype.saveImage = function () {
+        // 给追加素材使用
+    }
+
+    editor_file_proto.prototype.addMark = function (name) {
+        // 把name对应的文件在editor.file.fileMark添加标记
+    }
+
+    editor_file_proto.prototype.save = function (callback) {
         // 根据 editor.file.fileMark 把游戏对象格式化写入文件
     }
 
-    editor_file_proto.prototype.saveItem=function(callback){
-        
-    }
 
 }

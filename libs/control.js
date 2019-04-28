@@ -1056,7 +1056,7 @@ control.prototype.chooseReplayFile = function () {
 control.prototype.startReplay = function (list) {
     if (!core.isPlaying()) return;
     core.status.replay.replaying=true;
-    core.status.replay.pausing=false;
+    core.status.replay.pausing=true;
     core.status.replay.speed=1.0;
     core.status.replay.toReplay = core.clone(list);
     core.status.replay.totalList = core.status.route.concat(list);
@@ -1092,16 +1092,24 @@ control.prototype.resumeReplay = function () {
     core.replay();
 }
 
+////// 单步播放 //////
+control.prototype.stepReplay = function () {
+    if (!core.isPlaying() || !core.isReplaying()) return;
+    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+        return core.drawTip("请等待当前事件的处理结束");
+    core.replay(true);
+}
+
 ////// 加速播放 //////
 control.prototype.speedUpReplay = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
-    if (core.status.replay.speed==12) core.status.replay.speed=24;
-    else if (core.status.replay.speed==6) core.status.replay.speed=12;
-    else if (core.status.replay.speed==3) core.status.replay.speed=6;
-    else if (core.status.replay.speed==2.5) core.status.replay.speed=3;
-    else if (core.status.replay.speed==2) core.status.replay.speed=2.5;
-    else if (core.status.replay.speed<2) {
-        core.status.replay.speed = parseInt(10*core.status.replay.speed + 2)/10;
+    var speeds = [0.2, 0.5, 1, 2, 3, 6, 12, 24];
+    for (var i = speeds.length - 2; i >= 0; i--) {
+        if (speeds[i] <= core.status.replay.speed) {
+            core.status.replay.speed = speeds[i+1];
+            break;
+        }
     }
     core.drawTip("x"+core.status.replay.speed+"倍");
 }
@@ -1109,15 +1117,13 @@ control.prototype.speedUpReplay = function () {
 ////// 减速播放 //////
 control.prototype.speedDownReplay = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
-    if (core.status.replay.speed==24) core.status.replay.speed=12;
-    else if (core.status.replay.speed==12) core.status.replay.speed=6;
-    else if (core.status.replay.speed==6) core.status.replay.speed=3;
-    else if (core.status.replay.speed==3) core.status.replay.speed=2.5;
-    else if (core.status.replay.speed==2.5) core.status.replay.speed=2;
-    else {
-        core.status.replay.speed = parseInt(10*core.status.replay.speed - 2)/10;
+    var speeds = [0.2, 0.5, 1, 2, 3, 6, 12, 24];
+    for (var i = 1; i <= speeds.length; i++) {
+        if (speeds[i] >= core.status.replay.speed) {
+            core.status.replay.speed = speeds[i-1];
+            break;
+        }
     }
-    if (core.status.replay.speed<0.2) core.status.replay.speed=0.2;
     core.drawTip("x"+core.status.replay.speed+"倍");
 }
 
@@ -1218,9 +1224,10 @@ control.prototype.isReplaying = function () {
 }
 
 ////// 回放 //////
-control.prototype.replay = function () {
+control.prototype.replay = function (force) {
     if (!core.isPlaying() || !core.isReplaying()
-        || core.status.replay.pausing || core.status.replay.animate || core.status.event.id) return;
+         || core.status.replay.animate || core.status.event.id) return;
+    if (core.status.replay.pausing && !force) return;
     if (core.status.replay.toReplay.length==0)
         return this._replay_finished();
     this._replay_save();
@@ -1412,9 +1419,9 @@ control.prototype._replayAction_shop = function (action) {
         return true;
     }
     var choices = shop.choices;
-    var topIndex = core.__HALF_SIZE__ - parseInt(choices.length / 2);
     core.status.event.selection = parseInt(selections.shift());
     core.events.openShop(shopId, false);
+    var topIndex = core.__HALF_SIZE__ - parseInt(choices.length / 2) + (core.status.event.ui.offset || 0);
     var shopInterval = setInterval(function () {
         if (!core.actions._clickShop(core.__HALF_SIZE__, topIndex+core.status.event.selection)) {
             clearInterval(shopInterval);
@@ -2065,6 +2072,7 @@ control.prototype.setCurtain = function(color, time, callback) {
 }
 
 control.prototype._setCurtain_animate = function (nowColor, color, time, callback) {
+    time /= Math.max(core.status.replay.speed, 1)
     var per_time = 10, step = parseInt(time / per_time);
     var animate = setInterval(function() {
         nowColor = [

@@ -432,7 +432,7 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
         }
         core.clearMap('event', 32 * x, 32 * y, 32, 32);
         core.drawImage('event', core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
-    }, speed / core.status.replay.speed);
+    }, speed / Math.max(core.status.replay.speed, 1));
 }
 
 ////// 开一个门后触发的事件 //////
@@ -1884,7 +1884,7 @@ events.prototype.closeDoor = function (x, y, id, callback) {
         }
         core.clearMap('event', 32 * x, 32 * y, 32, 32);
         core.drawImage('event', core.material.images.animates, 32 * (4-state), 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
-    }, speed / core.status.replay.speed);
+    }, speed / Math.max(core.status.replay.speed, 1));
     core.animateFrame.asyncId[animate] = true;
 }
 
@@ -1958,7 +1958,8 @@ events.prototype.moveImage = function (code, to, opacityVal, time, callback) {
     var opacity = parseFloat(canvas.style.opacity), toOpacity = getOrDefault(opacityVal, opacity);
 
     this._moveImage_moving(name, {
-        fromX: fromX, fromY: fromY, toX: toX, toY: toY, opacity: opacity, toOpacity: toOpacity, time: time
+        fromX: fromX, fromY: fromY, toX: toX, toY: toY, opacity: opacity, toOpacity: toOpacity,
+        time: time / Math.max(core.status.replay.speed, 1)
     }, callback)
 }
 
@@ -2016,6 +2017,7 @@ events.prototype.setVolume = function (value, time, callback) {
         return;
     }
     var currVolume = core.musicStatus.volume;
+    time /= Math.max(core.status.replay.speed, 1);
     var per_time = 10, step = 0, steps = parseInt(time / per_time);
     var fade = setInterval(function () {
         step++;
@@ -2037,6 +2039,7 @@ events.prototype.vibrate = function (time, callback) {
     }
     if (!time || time < 1000) time = 1000;
     // --- 将time调整为500的倍数（上整），不然会出错
+    time /= Math.max(core.status.replay.speed, 1)
     time = Math.ceil(time / 500) * 500;
     var shakeInfo = {duration: time * 3 / 50, speed: 5, power: 5, direction: 1, shake: 0};
     var animate = setInterval(function () {

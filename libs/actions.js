@@ -162,19 +162,21 @@ actions.prototype._sys_onkeyUp_replay = function (e) {
             core.triggerReplay();
         else if (e.keyCode == 65) // A
             core.rewindReplay();
-        else if (e.keyCode == 83)
+        else if (e.keyCode == 83) // S
             core.saveReplay();
-        else if (e.keyCode == 67)
+        else if (e.keyCode == 67) // C
             core.bookReplay();
-        else if (e.keyCode == 33 || e.keyCode == 34)
+        else if (e.keyCode == 33 || e.keyCode == 34) // PgUp/PgDn
             core.viewMapReplay();
-        else if (e.keyCode >= 49 && e.keyCode <= 51)
+        else if (e.keyCode == 78) // N
+            core.stepReplay();
+        else if (e.keyCode >= 49 && e.keyCode <= 51) // 1-3
             core.setReplaySpeed(e.keyCode - 48);
-        else if (e.keyCode == 52)
+        else if (e.keyCode == 52) // 4
             core.setReplaySpeed(6);
-        else if (e.keyCode == 53)
+        else if (e.keyCode == 53) // 5
             core.setReplaySpeed(12);
-        else if (e.keyCode == 54)
+        else if (e.keyCode == 54) // 6
             core.setReplaySpeed(24);
         return true;
     }

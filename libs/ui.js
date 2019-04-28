@@ -971,6 +971,7 @@ ui.prototype.drawScrollText = function (content, time, lineHeight, callback) {
 
 ui.prototype._drawScrollText_animate = function (ctx, time, callback) {
     // 开始绘制到UI上
+    time /= Math.max(core.status.replay.speed, 1)
     var per_pixel = 1, height = ctx.canvas.height, per_time = time * per_pixel / (this.PIXEL+height);
     var currH = this.PIXEL;
     core.drawImage('ui', ctx.canvas, 0, currH);

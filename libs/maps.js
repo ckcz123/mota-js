@@ -238,7 +238,8 @@ maps.prototype.saveMap = function (floorId) {
     if (!floorId) {
         var map = {};
         for (var id in maps) {
-            map[id] = this.saveMap(id);
+            var obj = this.saveMap(id);
+            if (Object.keys(obj).length > 0) map[id] = obj;
         }
         return map;
     }
@@ -1688,6 +1689,7 @@ maps.prototype.jumpBlock = function (sx, sy, ex, ey, time, keep, callback) {
 maps.prototype.__generateJumpInfo = function (sx, sy, ex, ey, time) {
     var dx = ex - sx, dy = ey - sy, distance = Math.round(Math.sqrt(dx * dx + dy * dy));
     var jump_peak = 6 + distance, jump_count = jump_peak * 2;
+    time /= Math.max(core.status.replay.speed, 1)
     return {
         x: sx, y: sy, ex: ex, ey: ey, px: 32 * sx, py: 32 * sy, opacity: 1,
         jump_peak: jump_peak, jump_count: jump_count,
@@ -1751,6 +1753,7 @@ maps.prototype.animateBlock = function (loc, type, time, callback) {
         return;
     }
     this._animateBlock_drawList(list, isHide ? 1 : 0);
+    time /= Math.max(core.status.replay.speed, 1)
     this._animateBlock_doAnimate(loc, list, isHide, 10 / time, callback);
 }
 

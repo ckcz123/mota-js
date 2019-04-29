@@ -1336,10 +1336,8 @@ events.prototype.__action_getInput = function (hint, isText, callback) {
             callback(value);
         }
         catch (e) {
-            main.log(e);
-            core.stopReplay();
-            core.insertAction(["录像文件出错，请在控制台查看报错信息。", {"type": "exit"}]);
-            core.doAction();
+            core.control._replay_error(action);
+            return;
         }
     }
     else {
@@ -1384,10 +1382,7 @@ events.prototype._action_choices = function (data, x, y, prefix) {
             }, 750 / Math.max(1, core.status.replay.speed))
         }
         else {
-            main.log("录像文件出错！当前需要一个 choices: 项，实际为 " + action);
-            core.stopReplay();
-            core.insertAction(["录像文件出错，请在控制台查看报错信息。", {"type": "exit"}]);
-            core.doAction();
+            core.control._replay_error(action);
             return;
         }
     }
@@ -1410,10 +1405,7 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
             }, 750 / Math.max(1, core.status.replay.speed))
         }
         else {
-            main.log("录像文件出错！当前需要一个 choices: 项，实际为 " + action);
-            core.stopReplay();
-            core.insertAction(["录像文件出错，请在控制台查看报错信息。", {"type": "exit"}]);
-            core.doAction();
+            core.control._replay_error(action);
             return;
         }
     }
@@ -1827,7 +1819,7 @@ events.prototype._setValue_setSwitch = function (name, value, prefix) {
 
 events.prototype._setValue_setGlobal = function (name, value) {
     if (name.indexOf("global:") !== 0) return;
-    core.setLocalStorage(name.substring(7), value);
+    core.setGlobal(name.substring(7), value);
 }
 
 ////// 数值增减 //////

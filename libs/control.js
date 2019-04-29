@@ -1300,6 +1300,7 @@ control.prototype._replay_save = function () {
 }
 
 control.prototype._replay_error = function (action) {
+    core.ui.closePanel();
     core.status.replay.replaying = false;
     var len = core.status.replay.toReplay.length;
     var prevList = core.status.replay.totalList.slice(-len - 11, -len - 1);
@@ -1427,8 +1428,7 @@ control.prototype._replayAction_shop = function (action) {
     var shopInterval = setInterval(function () {
         if (!core.actions._clickShop(core.__HALF_SIZE__, topIndex+core.status.event.selection)) {
             clearInterval(shopInterval);
-            core.stopReplay();
-            core.drawTip("录像文件出错");
+            core.control._replay_error(action);
             return;
         }
         if (selections.length==0) {

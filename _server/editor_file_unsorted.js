@@ -5,16 +5,9 @@ editor_file = function (editor, callback) {
 
     editor.file.loadCommentjs(callback);
 
-    ///////////////////////////////////////////////////////////////////////////
-
     editor.file.saveFloorFile = function (callback) {
+        //callback(err:String)
         checkCallback(callback);
-        /* if (!isset(editor.currentFloorId) || !isset(editor.currentFloorData)) {
-          callback('未选中文件或无数据');
-        } */
-        var filename = 'project/floors/' + editor.currentFloorId + '.js';
-        var datastr = ['main.floors.', editor.currentFloorId, '=\n'];
-
         for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
             var mapArray=editor[name].map(function (v) {
                 return v.map(function (v) {
@@ -23,26 +16,11 @@ editor_file = function (editor, callback) {
             });
             editor.currentFloorData[name]=mapArray;
         }
-        
-        // format 更改实现方式以支持undefined删除
-        var tempJsonObj=Object.assign({},editor.currentFloorData);
-        var tempMap=[['map',editor.util.guid()],['bgmap',editor.util.guid()],['fgmap',editor.util.guid()]];
-        tempMap.forEach(function(v){
-            v[2]=tempJsonObj[v[0]];
-            tempJsonObj[v[0]]=v[1];
-        });
-        var tempJson=JSON.stringify(tempJsonObj, null, 4);
-        tempMap.forEach(function(v){
-            tempJson=tempJson.replace('"'+v[1]+'"','[\n'+ formatMap(v[2],v[0]!='map')+ '\n]')
-        });
-        datastr = datastr.concat([tempJson]);
-        datastr = datastr.join('');
-        alertWhenCompress();
-        fs.writeFile(filename, encode(datastr), 'base64', function (err, data) {
-            callback(err);
-        });
+        editor.file.saveFloor(editor.currentFloorData)
     }
-    //callback(err:String)
+
+    ///////////////////////////////////////////////////////////////////////////
+
     editor.file.saveNewFile = function (saveFilename, callback) {
         //saveAsFilename不含'/'不含'.js'
         checkCallback(callback);
@@ -132,7 +110,7 @@ editor_file = function (editor, callback) {
                     delete data[t];
                 else {
                     if (t=='map') {
-                        datastr = datastr.concat(['\n"', t, '": [\n', formatMap(data[t]), '\n],']);
+                        datastr = datastr.concat(['\n"', t, '": [\n', editor.file.formatMap(data[t]), '\n],']);
                     }
                     else {
                         datastr = datastr.concat(['\n"', t, '": ', JSON.stringify(data[t], null, 4), ',']);
@@ -143,7 +121,7 @@ editor_file = function (editor, callback) {
             datastr = datastr.join('');
             datas.push(encode(datastr));
         }
-        alertWhenCompress();
+        editor.file.alertWhenCompress();
         fs.writeMultiFiles(filenames, datas, function (err, data) {
             callback(err);
         });
@@ -689,44 +667,12 @@ editor_file = function (editor, callback) {
         }
     }
 
-    var formatMap = function (mapArr,trySimplify) {
-        if(!mapArr || JSON.stringify(mapArr)==JSON.stringify([]))return '';
-        if(trySimplify){
-            //检查是否是全0二维数组
-            var jsoncheck=JSON.stringify(mapArr).replace(/\D/g,'');
-            if(jsoncheck==Array(jsoncheck.length+1).join('0'))return '';
-        }
-        //把二维数组格式化
-        var formatArrStr = '';
-        var arr = JSON.stringify(mapArr).replace(/\s+/g, '').split('],[');
-        var si=mapArr.length-1,sk=mapArr[0].length-1;
-        for (var i = 0; i <= si; i++) {
-            var a = [];
-            formatArrStr += '    [';
-            if (i == 0 || i == si) a = arr[i].split(/\D+/).join(' ').trim().split(' ');
-            else a = arr[i].split(/\D+/);
-            for (var k = 0; k <= sk; k++) {
-                var num = parseInt(a[k]);
-                formatArrStr += Array(Math.max(4 - String(num).length, 0)).join(' ') + num + (k == sk ? '' : ',');
-            }
-            formatArrStr += ']' + (i == si ? '' : ',\n');
-        }
-        return formatArrStr;
-    }
-
     var encode = editor.util.encode64
-
-    var alertWhenCompress = function(){
-        if(editor.useCompress===true){
-            editor.useCompress='alerted';
-            setTimeout("alert('当前游戏使用的是压缩文件,修改完成后请使用启动服务.exe->Js代码压缩工具重新压缩,或者把main.js的useCompress改成false来使用原始文件')",1000)
-        }
-    }
 
     var saveSetting = function (file, actionList, callback) {
         //console.log(file);
         //console.log(actionList);
-        alertWhenCompress();
+        editor.file.alertWhenCompress();
 
         if (file == 'icons') {
             actionList.forEach(function (value) {

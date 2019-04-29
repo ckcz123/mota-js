@@ -248,7 +248,7 @@ utils.prototype.removeLocalForage = function (key, successCallback, errorCallbac
 }
 
 utils.prototype.setGlobal = function (key, value) {
-    if (core.status.replay.replaying) return;
+    if (core.isReplaying()) return;
     core.setLocalStorage(key, value);
 }
 
@@ -262,7 +262,7 @@ utils.prototype.getGlobal = function (key, defaultValue) {
         }
         else {
             core.control._replay_error(action);
-            return defaultValue;
+            return core.getLocalStorage(key, defaultValue);
         }
     }
     else {

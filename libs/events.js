@@ -843,7 +843,10 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
 
     // ------ 判定commonEvent
     var commonEvent = this.getCommonEvent(action);
-    if (commonEvent instanceof Array) action = commonEvent;
+    if (commonEvent instanceof Array) {
+        // 将公共事件视为一个do-while事件插入执行，可被break跳出
+        action = [{"type": "dowhile", "condition": "false", "data": commonEvent}];
+    }
     if (!action) return;
 
     if (core.status.event.id != 'action') {

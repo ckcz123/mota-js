@@ -1757,7 +1757,7 @@ return code;
 */;
 
 break_s
-    :   '跳出循环' Newline
+    :   '跳出当前循环或公共事件' Newline
 
 /* break_s
 tooltip : break：跳出循环, 如果break事件不在任何循环中被执行，则和exit等价，即会立刻结束当前事件！

@@ -442,7 +442,7 @@ helpUrl : https://h5mota.com/games/template/docs/#/event?id=settext%EF%BC%9A%E8%
 default : [null,"",null,"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',null,"","",""]
 SetTextPosition_List_0 =SetTextPosition_List_0==='null'?'': ', "position": "'+SetTextPosition_List_0+'"';
 SetTextAlign_List_0 =SetTextAlign_List_0==='null'?'': ', "align": "'+SetTextAlign_List_0+'"';
-var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
+var colorRe = MotaActionFunctions.pattern.colorRe;
 if (EvalString_0) {
   if (!/^\d+$/.test(EvalString_0))throw new Error('像素偏移量必须是整数或不填');
   EvalString_0 = ', "offset": '+EvalString_0;
@@ -588,7 +588,7 @@ default : ["","","",500,false]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = /^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+  var pattern1 = MotaActionFunctions.pattern.id;
   if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
     EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
     EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
@@ -621,7 +621,7 @@ default : ["","","",500,false]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = /^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+  var pattern1 = MotaActionFunctions.pattern.id;
   if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
     EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
     EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
@@ -763,7 +763,7 @@ default : ["","",""]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = /^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+  var pattern1 = MotaActionFunctions.pattern.id;
   if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
     EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
     EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
@@ -794,7 +794,7 @@ default : ["","",""]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = /^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+  var pattern1 = MotaActionFunctions.pattern.id;
   if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
     EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
     EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
@@ -825,7 +825,7 @@ default : ["bg","","",""]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = /^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+  var pattern1 = MotaActionFunctions.pattern.id;
   if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
     EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
     EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
@@ -856,7 +856,7 @@ default : ["bg","","",""]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = /^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+  var pattern1 = MotaActionFunctions.pattern.id;
   if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
     EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
     EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
@@ -1179,7 +1179,7 @@ helpUrl : https://h5mota.com/games/template/docs/#/event?id=animate%EF%BC%9A%E6%
 default : ["zone","hero",false]
 colour : this.soundColor
 if (EvalString_0) {
-  if(/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+),flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/.test(EvalString_0)) {
+  if(MotaActionFunctions.pattern.id2.test(EvalString_0)) {
     EvalString_0=', "loc": ["'+EvalString_0.split(',').join('","')+'"]';
   } else if (/hero|([+-]?\d+),([+-]?\d+)/.test(EvalString_0)) {
     if(EvalString_0.indexOf(',')!==-1)EvalString_0='['+EvalString_0+']';
@@ -1315,7 +1315,7 @@ tooltip : setCurtain: 更改画面色调,动画时间可不填
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=setcurtain%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
 default : ["255,255,255,1",'rgba(255,255,255,1)',500,false]
 colour : this.soundColor
-var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
+var colorRe = MotaActionFunctions.pattern.colorRe;
 if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
 Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
 var async = Bool_0?', "async": true':'';
@@ -1346,7 +1346,7 @@ tooltip : screenFlash: 画面闪烁,动画时间可不填
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=screenFlash%EF%BC%9A%E7%94%BB%E9%9D%A2%E9%97%AA%E7%83%81
 default : ["255,255,255,1",'rgba(255,255,255,1)',500,1,false]
 colour : this.soundColor
-var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
+var colorRe = MotaActionFunctions.pattern.colorRe;
 if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
 Int_1 = Int_1!=='' ?(', "times": '+Int_1):'';
 var async = Bool_0?', "async": true':'';
@@ -1704,7 +1704,7 @@ helpUrl : https://h5mota.com/games/template/docs/#/event?id=choices%EF%BC%9A%E7%
 default : ["提示文字:红钥匙","",""]
 colour : this.subColor
 if (EvalString_1) {
-  var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
+  var colorRe = MotaActionFunctions.pattern.colorRe;
   if (colorRe.test(EvalString_1))
       EvalString_1 = ', "color": ['+EvalString_1+']';
   else
@@ -2886,14 +2886,14 @@ MotaActionFunctions.EvalString_pre = function(EvalString){
 
 MotaActionFunctions.IdString_pre = function(IdString){
   if (IdString.indexOf('__door__')!==-1) throw new Error('请修改开门变量__door__，如door1，door2，door3等依次向后。请勿存在两个门使用相同的开门变量。');
-  if (IdString && !(/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/.test(IdString)) && !(/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/.test(IdString)))
+  if (IdString && !(MotaActionFunctions.pattern.id.test(IdString)) && !(MotaActionFunctions.pattern.idWithoutFlag.test(IdString)))
       throw new Error('id: '+IdString+'中包含了0-9 a-z A-Z _ - :之外的字符');
   return IdString;
 }
 
 MotaActionFunctions.PosString_pre = function(PosString){
   if (!PosString || /^-?\d+$/.test(PosString)) return PosString;
-  if (!(/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ 和中文之外的字符,或者是没有以flag: 开头');
+  if (!(MotaActionFunctions.pattern.id.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ 和中文之外的字符,或者是没有以flag: 开头');
   return '"'+PosString+'"';
 }
 
@@ -2934,5 +2934,11 @@ MotaActionFunctions.StepString_pre = function(StepString){
   }
   return ans;
 }
+
+MotaActionFunctions.pattern=MotaActionFunctions.pattern||{};
+MotaActionFunctions.pattern.id=/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+MotaActionFunctions.pattern.id2=/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+),flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+MotaActionFunctions.pattern.idWithoutFlag=/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
+MotaActionFunctions.pattern.colorRe=/^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
 
 */

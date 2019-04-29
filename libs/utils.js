@@ -67,7 +67,7 @@ utils.prototype.calValue = function (value, prefix, need, times) {
         value = value.replace(/item:([a-zA-Z0-9_]+)/g, "core.itemCount('$1')");
         value = value.replace(/flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getFlag('$1', 0)");
         value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
-        value = value.replace(/global:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getLocalStorage('$1', 0)");
+        value = value.replace(/global:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getGlobal('$1', 0)");
         return eval(value);
     }
     if (value instanceof Function) {
@@ -245,6 +245,31 @@ utils.prototype.removeLocalForage = function (key, successCallback, errorCallbac
             if (successCallback) successCallback();
         }
     })
+}
+
+utils.prototype.setGlobal = function (key, value) {
+    if (core.isReplaying()) return;
+    core.setLocalStorage(key, value);
+}
+
+utils.prototype.getGlobal = function (key, defaultValue) {
+    var value;
+    if (core.isReplaying()) {
+        // 不考虑key不一致的情况
+        var action = core.status.replay.toReplay.shift();
+        if (action.indexOf("input2:") == 0) {
+            value = JSON.parse(core.decodeBase64(action.substring(7)));
+        }
+        else {
+            core.control._replay_error(action);
+            return core.getLocalStorage(key, defaultValue);
+        }
+    }
+    else {
+        value = core.getLocalStorage(key, defaultValue);
+    }
+    core.status.route.push("input2:" + core.encodeBase64(JSON.stringify(value)));
+    return value;
 }
 
 ////// 深拷贝一个对象 //////
@@ -687,9 +712,8 @@ utils.prototype.rand2 = function (num) {
             value = parseInt(action.substring(7));
         }
         else {
-            core.stopReplay();
-            core.drawTip("录像文件出错");
-            return;
+            core.control._replay_error(action);
+            return 0;
         }
     }
     else {

@@ -241,6 +241,11 @@ enemys.prototype._nextCriticals_useBinarySearch = function (enemy, info, number,
 
 enemys.prototype._nextCriticals_useTurn = function (enemy, info, number, x, y, floorId) {
     var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = info.mon_def, turn = info.turn;
+    // ------ 超大回合数强制使用二分算临界
+    // 以避免1攻10e回合，2攻5e回合导致下述循环卡死问题
+    if (turn >= 1e6) { // 100w回合以上强制二分计算临界
+        return this._nextCriticals_useBinarySearch(enemy, info, number, x, y, floorId);
+    }
     var list = [], pre = null;
     for (var t = turn - 1; t >= 1; t--) {
         var nextAtk = Math.ceil(mon_hp / t) + mon_def;

@@ -11,9 +11,9 @@ items.prototype._init = function () {
     this.itemEffectTip = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.itemEffectTip;
     this.useItemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.useItemEffect;
     this.canUseItemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canUseItemEffect;
-    if (!items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canEquip)
-        items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canEquip = {};
-    this.equipCondition = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canEquip;
+    if (!items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.equipCondition)
+        items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.equipCondition = {};
+    this.equipCondition = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.equipCondition;
 }
 
 ////// 获得所有道具 //////

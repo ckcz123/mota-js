@@ -467,6 +467,11 @@ ui.prototype.drawWindowSelector = function(background, x, y, w, h) {
 
 ////// 绘制 WindowSkin
 ui.prototype.drawWindowSkin = function(background, ctx, x, y, w, h, direction, px, py) {
+    background = background || core.status.textAttribute.background;
+    if (typeof background == 'string') {
+        background = core.getMappedName(background);
+        background = core.material.images.images[background];
+    }
 	// 仿RM窗口皮肤 ↓
     var dstImage = core.getContextByName(ctx);
     if (!dstImage) return;

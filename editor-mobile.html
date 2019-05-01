@@ -121,13 +121,6 @@
         <h3 class="leftTabHeader">图块属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('add')">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('enemyitem')">配置表格</button>
         </h3>
         <div class="leftTabContent">
-            <div id='newIdIdnum'><!-- id and idnum -->
-                <input placeholder="新id（唯一标识符）"/>
-                <input placeholder="新idnum（10000以内数字）"/>
-                <button>save</button>
-                <br/>
-                <button style="margin-top: 10px">自动注册</button>
-            </div>
             <div id="enemyItemTable"><!-- enemy and item -->
                 <div class='etable'>
                     <table>
@@ -140,6 +133,13 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <div id='newIdIdnum'><!-- id and idnum -->
+                <input placeholder="新id（唯一标识符）"/>
+                <input placeholder="新idnum（10000以内数字）"/>
+                <button>save</button>
+                <br/>
+                <button style="margin-top: 10px">自动注册</button>
             </div>
         </div>
     </div>

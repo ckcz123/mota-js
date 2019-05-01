@@ -150,7 +150,7 @@ editor_mode = function (editor) {
             return;
         }
 
-        document.getElementById('newIdIdnum').style.display = 'none';
+        document.getElementById('newIdIdnum').style.display = 'block';
         document.getElementById('enemyItemTable').style.display = 'block';
 
         var objs = [];

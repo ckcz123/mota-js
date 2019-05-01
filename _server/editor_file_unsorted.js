@@ -261,70 +261,93 @@ editor_file = function (editor, callback) {
 
     editor.file.changeIdAndIdnum = function (id, idnum, info, callback) {
         checkCallback(callback);
-        //检查maps中是否有重复的idnum或id
-        var change = -1;
-        for (var ii in editor.core.maps.blocksInfo) {
-            if (ii == idnum) {
-                //暂时只允许创建新的不允许修改已有的
-                //if (info.idnum==idnum){change=ii;break;}//修改id
-                callback('idnum重复了');
-                return;
-            }
-            if (editor.core.maps.blocksInfo[ii].id == id) {
-                //if (info.id==id){change=ii;break;}//修改idnum
-                callback('id重复了');
-                return;
-            }
-        }
-        /*
-        if (change!=-1 && change!=idnum){//修改idnum
-          editor.core.maps.blocksInfo[idnum] = editor.core.maps.blocksInfo[change];
-          delete(editor.core.maps.blocksInfo[change]);
-        } else if (change==idnum) {//修改id
-          var oldid = editor.core.maps.blocksInfo[idnum].id;
-          editor.core.maps.blocksInfo[idnum].id = id;
-          for(var ii in editor.core.icons.icons){
-            if (ii.hasOwnProperty(oldid)){
-              ii[id]=ii[oldid];
-              delete(ii[oldid]);
-            }
-          }
-        } else {//创建新的
-          editor.core.maps.blocksInfo[idnum]={'cls': info.images, 'id':id};
-          editor.core.icons.icons[info.images][id]=info.y;
-        }
-        */
-        var templist = [];
-        var tempcallback = function (err) {
-            templist.push(err);
-            if (templist.length == 2) {
-                if (templist[0] != null || templist[1] != null)
-                    callback((templist[0] || '') + '\n' + (templist[1] || ''));
-                //这里如果一个成功一个失败会出严重bug
-                else
-                    callback(null);
-            }
-        }
-        saveSetting('maps', [["add", "['" + idnum + "']", {'cls': info.images, 'id': id}]], tempcallback);
-        saveSetting('icons', [["add", "['" + info.images + "']['" + id + "']", info.y]], tempcallback);
-        if (info.images === 'items') {
-            saveSetting('items', [["add", "['items']['" + id + "']", editor.file.comment._data.items_template]], function (err) {
-                if (err) {
-                    printe(err);
-                    throw(err)
+        
+        var changeOrNew=core.isset(editor_mode.info.id)?'change':'new'
+        if(changeOrNew=='new'){
+            //检查maps中是否有重复的idnum或id
+            for (var ii in editor.core.maps.blocksInfo) {
+                if (ii == idnum) {
+                    callback('idnum重复了');
+                    return;
                 }
-            });
-        }
-        if (info.images === 'enemys' || info.images === 'enemy48') {
-            saveSetting('enemys', [["add", "['" + id + "']", editor.file.comment._data.enemys_template]], function (err) {
-                if (err) {
-                    printe(err);
-                    throw(err)
+                if (editor.core.maps.blocksInfo[ii].id == id) {
+                    callback('id重复了');
+                    return;
                 }
-            });
-        }
+            }
+            var templist = [];
+            var tempcallback = function (err) {
+                templist.push(err);
+                if (templist.length == 2) {
+                    if (templist[0] != null || templist[1] != null)
+                        callback((templist[0] || '') + '\n' + (templist[1] || ''));
+                    //这里如果一个成功一个失败会出严重bug
+                    else
+                        callback(null);
+                }
+            }
+            saveSetting('maps', [["add", "['" + idnum + "']", {'cls': info.images, 'id': id}]], tempcallback);
+            saveSetting('icons', [["add", "['" + info.images + "']['" + id + "']", info.y]], tempcallback);
+            if (info.images === 'items') {
+                saveSetting('items', [["add", "['items']['" + id + "']", editor.file.comment._data.items_template]], function (err) {
+                    if (err) {
+                        printe(err);
+                        throw(err)
+                    }
+                });
+            }
+            if (info.images === 'enemys' || info.images === 'enemy48') {
+                saveSetting('enemys', [["add", "['" + id + "']", editor.file.comment._data.enemys_template]], function (err) {
+                    if (err) {
+                        printe(err);
+                        throw(err)
+                    }
+                });
+            }
 
-        callback(null);
+            callback(null);
+
+        }else{
+            //检查maps中是否有重复的idnum或id
+            for (var ii in editor.core.maps.blocksInfo) {
+                if (ii == idnum && idnum != info.idnum) {
+                    callback('idnum重复了');
+                    return;
+                }
+                if (editor.core.maps.blocksInfo[ii].id == id && id != info.id) {
+                    callback('id重复了');
+                    return;
+                }
+            }
+            if (idnum != info.idnum && id != info.id) {
+                callback('此版本idnum和id一次只允许修改一个, 请修改idnum刷新后再修改id');
+                return;
+            }
+            if (idnum == info.idnum && id == info.id) {
+                callback('无改动');
+                return;
+            }
+            
+            if (idnum != info.idnum){//修改idnum
+                maps_90f36752_8815_4be8_b32b_d7fad1d0542e[idnum] = maps_90f36752_8815_4be8_b32b_d7fad1d0542e[info.idnum];
+                delete(maps_90f36752_8815_4be8_b32b_d7fad1d0542e[info.idnum]);
+            } else {//修改id
+                maps_90f36752_8815_4be8_b32b_d7fad1d0542e[idnum].id = id;
+                var obj=Object.assign({},icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1,items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a,{enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80:enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80})
+                for(var jj in obj){
+                    var ii=obj[jj]
+                    if (ii.hasOwnProperty(info.id)){
+                    ii[id]=ii[info.id];
+                    delete(ii[info.id]);
+                    }
+                }
+            }
+            editor.file.save_icons_maps_items_enemys(callback)
+            
+        }
+        
+        
+        
     }
     //callback(err:String)
     editor.file.editItem = function (id, actionList, callback) {
@@ -721,6 +744,30 @@ editor_file = function (editor, callback) {
             editor.useCompress='alerted';
             setTimeout("alert('当前游戏使用的是压缩文件,修改完成后请使用启动服务.exe->Js代码压缩工具重新压缩,或者把main.js的useCompress改成false来使用原始文件')",1000)
         }
+    }
+
+    editor.file.save_icons_maps_items_enemys=function(callback){
+        var check=[]
+        saveSetting('icons',[],function(err){
+            if(err){callback(err);return;}
+            check.push('icons')
+            if(check.length==4)callback(null);
+        })
+        saveSetting('maps',[],function(err){
+            if(err){callback(err);return;}
+            check.push('maps')
+            if(check.length==4)callback(null);
+        })
+        saveSetting('items',[],function(err){
+            if(err){callback(err);return;}
+            check.push('items')
+            if(check.length==4)callback(null);
+        })
+        saveSetting('enemys',[],function(err){
+            if(err){callback(err);return;}
+            check.push('enemys')
+            if(check.length==4)callback(null);
+        })
     }
 
     var saveSetting = function (file, actionList, callback) {

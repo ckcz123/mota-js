@@ -19,7 +19,7 @@ editor_unsorted_2_wrapper=function(editor_mode){
                         printe(err);
                         throw(err)
                     }
-                    printe('添加id的idnum成功,请F5刷新编辑器');
+                    printe(core.isset(editor_mode.info.id)?'修改id和idnum成功,请F5刷新编辑器':'添加id和idnum成功,请F5刷新编辑器');
                 });
             } else {
                 printe('请输入id和idnum');

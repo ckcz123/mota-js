@@ -310,44 +310,29 @@ editor_file = function (editor, callback) {
         }else{
             //检查maps中是否有重复的idnum或id
             for (var ii in editor.core.maps.blocksInfo) {
-                if (ii == idnum && idnum != info.idnum) {
-                    callback('idnum重复了');
-                    return;
-                }
-                if (editor.core.maps.blocksInfo[ii].id == id && id != info.id) {
+                if (editor.core.maps.blocksInfo[ii].id == id) {
                     callback('id重复了');
                     return;
                 }
             }
-            if (idnum != info.idnum && id != info.id) {
-                callback('此版本idnum和id一次只允许修改一个, 请修改idnum刷新后再修改id');
-                return;
-            }
-            if (idnum == info.idnum && id == info.id) {
-                callback('无改动');
-                return;
-            }
-            
-            if (idnum != info.idnum){//修改idnum
-                maps_90f36752_8815_4be8_b32b_d7fad1d0542e[idnum] = maps_90f36752_8815_4be8_b32b_d7fad1d0542e[info.idnum];
-                delete(maps_90f36752_8815_4be8_b32b_d7fad1d0542e[info.idnum]);
-            } else {//修改id
-                maps_90f36752_8815_4be8_b32b_d7fad1d0542e[idnum].id = id;
-                var obj=Object.assign({},icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1,items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a,{enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80:enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80})
+            idnum = info.idnum;
+
+            maps_90f36752_8815_4be8_b32b_d7fad1d0542e[idnum].id = id;
+
+            var arr=[icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1,items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a,{enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80:enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80}]
+            arr.forEach(function (obj) {
                 for(var jj in obj){
                     var ii=obj[jj]
                     if (ii.hasOwnProperty(info.id)){
-                    ii[id]=ii[info.id];
-                    delete(ii[info.id]);
+                        ii[id]=ii[info.id];
+                        delete(ii[info.id]);
                     }
                 }
-            }
+            });
+
             editor.file.save_icons_maps_items_enemys(callback)
             
         }
-        
-        
-        
     }
     //callback(err:String)
     editor.file.editItem = function (id, actionList, callback) {

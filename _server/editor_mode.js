@@ -145,13 +145,15 @@ editor_mode = function (editor) {
 
         if (!core.isset(editor_mode.info.id)) {
             // document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML = '';
-            document.getElementById('enemyItemTable').style.display = 'none';
             document.getElementById('newIdIdnum').style.display = 'block';
+            document.getElementById('enemyItemTable').style.display = 'none';
+            document.getElementById('changeId').style.display = 'none';
             return;
         }
 
-        document.getElementById('newIdIdnum').style.display = 'block';
+        document.getElementById('newIdIdnum').style.display = 'none';
         document.getElementById('enemyItemTable').style.display = 'block';
+        document.getElementById('changeId').style.display = 'block';
 
         var objs = [];
         if (editor_mode.info.images == 'enemys' || editor_mode.info.images == 'enemy48') {

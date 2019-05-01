@@ -19,7 +19,7 @@ editor_unsorted_2_wrapper=function(editor_mode){
                         printe(err);
                         throw(err)
                     }
-                    printe('添加id的idnum成功,请F5刷新编辑器');
+                    printe('添加id和idnum成功,请F5刷新编辑器');
                 });
             } else {
                 printe('请输入id和idnum');
@@ -34,6 +34,26 @@ editor_unsorted_2_wrapper=function(editor_mode){
                 }
                 printe('该列所有剩余项全部自动注册成功,请F5刷新编辑器');
             })
+        }
+
+        var changeId = document.getElementById('changeId');
+        changeId.children[1].onclick = function () {
+            var id = changeId.children[0].value;
+            if (id) {
+                if (!/^[0-9a-zA-Z_]+$/.test(id)) {
+                    printe('不合法的id，请使用字母、数字或下划线')
+                    return;
+                }
+                editor.file.changeIdAndIdnum(id, null, editor_mode.info, function (err) {
+                    if (err) {
+                        printe(err);
+                        throw(err);
+                    }
+                    printe('修改id成功,请F5刷新编辑器');
+                });
+            } else {
+                printe('请输入要修改到的ID');
+            }
         }
 
         var selectFloor = document.getElementById('selectFloor');

@@ -11,9 +11,9 @@ items.prototype._init = function () {
     this.itemEffectTip = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.itemEffectTip;
     this.useItemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.useItemEffect;
     this.canUseItemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canUseItemEffect;
-    if (!items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canEquip)
-        items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canEquip = {};
-    this.equipCondition = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canEquip;
+    if (!items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.equipCondition)
+        items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.equipCondition = {};
+    this.equipCondition = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.equipCondition;
 }
 
 ////// 获得所有道具 //////
@@ -35,7 +35,7 @@ items.prototype._resetItems = function () {
     if (core.flags.bombFourDirections)
         core.material.items.bomb.text = "可以炸掉勇士四周的怪物";
     if (core.flags.snowFourDirections)
-        core.material.items.bomb.text = "可以将四周的熔岩变成平地";
+        core.material.items.snow.text = "可以将四周的熔岩变成平地";
     if (core.flags.equipment) {
         core.material.items.sword1.cls = 'equips';
         core.material.items.sword2.cls = 'equips';

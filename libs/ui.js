@@ -373,7 +373,8 @@ ui.prototype._getTitleAndIcon = function (content) {
                 title = core.status.hero.name;
                 image = core.material.images.hero;
                 icon = 0;
-                height = core.material.icons.hero.height;
+                var w = core.material.icons.hero.width || 32;
+                height = 32 * core.material.icons.hero.height / w;
             }
             else if (s4.endsWith(".png")) {
                 s4 = core.getMappedName(s4);
@@ -466,6 +467,11 @@ ui.prototype.drawWindowSelector = function(background, x, y, w, h) {
 
 ////// 绘制 WindowSkin
 ui.prototype.drawWindowSkin = function(background, ctx, x, y, w, h, direction, px, py) {
+    background = background || core.status.textAttribute.background;
+    if (typeof background == 'string') {
+        background = core.getMappedName(background);
+        background = core.material.images.images[background];
+    }
 	// 仿RM窗口皮肤 ↓
     var dstImage = core.getContextByName(ctx);
     if (!dstImage) return;
@@ -928,11 +934,20 @@ ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, al
         core.strokeRect('ui', hPos.left + 15 - 1, image_top-1, 34, titleInfo.height + 2, null, 2);
         core.setAlpha('ui', 1);
         core.status.boxAnimateObjs = [];
-        core.status.boxAnimateObjs.push({
-            'bgx': hPos.left + 15, 'bgy': image_top, 'bgWidth': 32, 'bgHeight': titleInfo.height,
-            'x': hPos.left + 15, 'y': image_top, 'height': titleInfo.height, 'animate': titleInfo.animate,
-            'image': titleInfo.image, 'pos': titleInfo.icon * titleInfo.height
-        });
+        // --- 勇士
+        if (titleInfo.image == core.material.images.hero) {
+            core.clearMap('ui', hPos.left + 15, image_top, 32, titleInfo.height);
+            core.fillRect('ui', hPos.left + 15, image_top, 32, titleInfo.height, core.material.groundPattern);
+            core.drawImage('ui', titleInfo.image, 0, 0, core.material.icons.hero.width || 32, core.material.icons.hero.height,
+                hPos.left + 15, image_top, 32, titleInfo.height);
+        }
+        else {
+            core.status.boxAnimateObjs.push({
+                'bgx': hPos.left + 15, 'bgy': image_top, 'bgWidth': 32, 'bgHeight': titleInfo.height,
+                'x': hPos.left + 15, 'y': image_top, 'height': titleInfo.height, 'animate': titleInfo.animate,
+                'image': titleInfo.image, 'pos': titleInfo.icon * titleInfo.height
+            });
+        }
         core.drawBoxAnimate();
     }
     if (titleInfo.image != null && titleInfo.icon == null) { // 头像图
@@ -971,6 +986,7 @@ ui.prototype.drawScrollText = function (content, time, lineHeight, callback) {
 
 ui.prototype._drawScrollText_animate = function (ctx, time, callback) {
     // 开始绘制到UI上
+    time /= Math.max(core.status.replay.speed, 1)
     var per_pixel = 1, height = ctx.canvas.height, per_time = time * per_pixel / (this.PIXEL+height);
     var currH = this.PIXEL;
     core.drawImage('ui', ctx.canvas, 0, currH);

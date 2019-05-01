@@ -91,6 +91,9 @@ maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     else if (core.icons.getTilesetOffset(id)) block.event = {"cls": "tileset", "id": "X" + id, "noPass": true};
     else block.event = {'cls': 'terrains', 'id': 'none', 'noPass': false};
 
+    if (typeof block.event.noPass === 'string')
+        block.event.noPass = JSON.parse(block.event.noPass);
+
     if (addInfo) this._addInfo(block);
     if (eventFloor) {
         this._addEvent(block, x, y, (eventFloor.events || {})[x + "," + y]);
@@ -1447,8 +1450,13 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
         else number = core.getNumberById(number);
     }
 
-    var originBlock = core.getBlock(x, y, floorId, true);
     var block = this.initBlock(x, y, number, true, core.floors[floorId]);
+    if (block.id == 0 && !block.event.trigger) {
+        // 转变图块为0且该点无事件，视为隐藏
+        core.removeBlock(x, y, floorId);
+        return;
+    }
+    var originBlock = core.getBlock(x, y, floorId, true);
     if (floorId == core.status.floorId) {
         core.removeGlobalAnimate(x, y);
         core.clearMap('event', x * 32, y * 32, 32, 32);

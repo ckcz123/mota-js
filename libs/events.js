@@ -1149,7 +1149,7 @@ events.prototype._action_openDoor = function (data, x, y, prefix) {
 
 events.prototype._action_closeDoor = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, x, y, prefix);
-    core.closeDoor(loc[0], loc[1], data.id, core.doAction);
+    this.__action_doAsyncFunc(data.async, core.closeDoor, loc[0], loc[1], data.id);
 }
 
 events.prototype._action_useItem = function (data, x, y, prefix) {

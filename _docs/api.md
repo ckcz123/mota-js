@@ -1,6 +1,6 @@
 # 附录：API列表
 
-?> 目前版本**v2.6**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.6.1**，上次更新时间：* {docsify-updated} *
 
 这里将列出所有被转发到core的API，没有被转发的函数此处不会列出，请自行在代码中查看。
 
@@ -1913,6 +1913,17 @@ core.getLocalForage(key, defaultValue, successCallback, errorCallback)
 如果获得成功，则会将core.decompress后的结果传入successCallback回调函数执行。
 errorCallback可选，如果失败，则会将错误信息传入errorCallback()。
 此函数是异步的，只能通过回调函数来获得读取的结果或错误信息。
+
+
+core.setGlobal(key, value)
+设置一个全局存储，适用于global:xxx。
+录像播放时将忽略此函数，否则直接调用core.setLocalStorage。
+
+
+core.getGlobal(key, value)
+获得一个全局存储，适用于global:xxx，支持录像。
+正常游戏时将使用core.getLocalStorage获得具体的数据，并将结果存放到录像中。
+录像播放时会直接从录像中获得对应的数据。
 
 
 core.clone(data, filter, recursion)

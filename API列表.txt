@@ -1949,6 +1949,17 @@ errorCallback可选，如果失败，则会将错误信息传入errorCallback()�
 此函数是异步的，只能通过回调函数来获得读取的结果或错误信息。
 
 
+core.setGlobal(key, value)
+设置一个全局存储，适用于global:xxx。
+录像播放时将忽略此函数，否则直接调用core.setLocalStorage。
+
+
+core.getGlobal(key, value)
+获得一个全局存储，适用于global:xxx，支持录像。
+正常游戏时将使用core.getLocalStorage获得具体的数据，并将结果存放到录像中。
+录像播放时会直接从录像中获得对应的数据。
+
+
 core.clone(data, filter, recursion)
 深拷贝一个对象。有关浅拷贝，深拷贝，基本类型和引用类型等相关知识可参见：
 https://zhuanlan.zhihu.com/p/26282765

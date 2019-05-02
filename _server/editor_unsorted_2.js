@@ -200,7 +200,7 @@ editor_unsorted_2_wrapper=function(editor_mode){
                 var currentFloorId = editor.currentFloorId;
                 editor.currentFloorId = floorId;
                 editor.currentFloorData.floorId = floorId;
-                editor.file.saveFloorFile(floorId, function (err) {
+                editor.file.saveFloorFile(function (err) {
                     if (err) {
                         printe(err);
                         throw(err);

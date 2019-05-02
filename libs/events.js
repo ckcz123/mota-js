@@ -2254,13 +2254,11 @@ events.prototype.setHeroIcon = function (name, noDraw) {
     var img = core.material.images.images[name];
     if (!img) return;
     core.setFlag("heroIcon", name);
-    core.material.images.hero.onload = function () {
-        core.material.icons.hero.width = img.width / 4;
-        core.material.icons.hero.height = img.height / 4;
-        core.control.updateHeroIcon(name);
-        if (!noDraw) core.drawHero();
-    }
-    core.material.images.hero.src = img.src;
+    core.material.images.hero = img;
+    core.material.icons.hero.width = img.width / 4;
+    core.material.icons.hero.height = img.height / 4;
+    core.control.updateHeroIcon(name);
+    if (!noDraw) core.drawHero();
 }
 
 ////// 检查升级事件 //////

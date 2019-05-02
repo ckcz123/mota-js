@@ -19,7 +19,7 @@ editor_unsorted_2_wrapper=function(editor_mode){
                         printe(err);
                         throw(err)
                     }
-                    printe('添加id的idnum成功,请F5刷新编辑器');
+                    printe('添加id和idnum成功,请F5刷新编辑器');
                 });
             } else {
                 printe('请输入id和idnum');
@@ -36,8 +36,28 @@ editor_unsorted_2_wrapper=function(editor_mode){
             })
         }
 
+        var changeId = document.getElementById('changeId');
+        changeId.children[1].onclick = function () {
+            var id = changeId.children[0].value;
+            if (id) {
+                if (!/^[0-9a-zA-Z_]+$/.test(id)) {
+                    printe('不合法的id，请使用字母、数字或下划线')
+                    return;
+                }
+                editor.file.changeIdAndIdnum(id, null, editor_mode.info, function (err) {
+                    if (err) {
+                        printe(err);
+                        throw(err);
+                    }
+                    printe('修改id成功,请F5刷新编辑器');
+                });
+            } else {
+                printe('请输入要修改到的ID');
+            }
+        }
+
         var selectFloor = document.getElementById('selectFloor');
-        editor.file.getFloorFileList(function (floors) {
+        editor.game.getFloorFileList(function (floors) {
             var outstr = [];
             floors[0].forEach(function (floor) {
                 outstr.push(["<option value='", floor, "'>", floor, '</option>\n'].join(''));
@@ -163,6 +183,41 @@ editor_unsorted_2_wrapper=function(editor_mode){
                     ;printe('批量创建 '+floorIdList[0]+'~'+floorIdList[floorIdList.length-1]+' 成功,请F5刷新编辑器生效');
                 });
             });
+        }
+
+        var changeFloorId = document.getElementById('changeFloorId');
+        changeFloorId.children[1].onclick = function () {
+            var floorId = changeFloorId.children[0].value;
+            if (floorId) {
+                if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(floorId)) {
+                    printe("楼层名 "+floorId+" 不合法！请使用字母、数字、下划线，且不能以数字开头！");
+                    return;
+                }
+                if (main.floorIds.indexOf(floorId)>=0) {
+                    printe("楼层名 "+floorId+" 已存在！");
+                    return;
+                }
+                var currentFloorId = editor.currentFloorId;
+                editor.currentFloorId = floorId;
+                editor.currentFloorData.floorId = floorId;
+                editor.file.saveFloorFile(function (err) {
+                    if (err) {
+                        printe(err);
+                        throw(err);
+                    }
+                    core.floorIds[core.floorIds.indexOf(currentFloorId)] = floorId;
+                    editor.file.editTower([['change', "['main']['floorIds']", core.floorIds]], function (objs_) {//console.log(objs_);
+                        if (objs_.slice(-1)[0] != null) {
+                            printe(objs_.slice(-1)[0]);
+                            throw(objs_.slice(-1)[0])
+                        }
+                        alert("修改floorId成功，需要刷新编辑器生效。\n请注意，原始的楼层文件没有删除，请根据需要手动删除。");
+                        window.location.reload();
+                    });
+                });
+            } else {
+                printe('请输入要修改到的floorId');
+            }
         }
 
         var ratio = 1;

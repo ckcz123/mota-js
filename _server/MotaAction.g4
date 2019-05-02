@@ -287,6 +287,7 @@ action
     |   wait_s
     |   waitAsync_s
     |   battle_s
+    |   battle_1_s
     |   openDoor_s
     |   closeDoor_s
     |   changeFloor_s
@@ -441,7 +442,7 @@ helpUrl : https://h5mota.com/games/template/docs/#/event?id=settext%EF%BC%9A%E8%
 default : [null,"",null,"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',null,"","",""]
 SetTextPosition_List_0 =SetTextPosition_List_0==='null'?'': ', "position": "'+SetTextPosition_List_0+'"';
 SetTextAlign_List_0 =SetTextAlign_List_0==='null'?'': ', "align": "'+SetTextAlign_List_0+'"';
-var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
+var colorRe = MotaActionFunctions.pattern.colorRe;
 if (EvalString_0) {
   if (!/^\d+$/.test(EvalString_0))throw new Error('像素偏移量必须是整数或不填');
   EvalString_0 = ', "offset": '+EvalString_0;
@@ -587,7 +588,7 @@ default : ["","","",500,false]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = /^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+  var pattern1 = MotaActionFunctions.pattern.id;
   if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
     EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
     EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
@@ -620,7 +621,7 @@ default : ["","","",500,false]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = /^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+  var pattern1 = MotaActionFunctions.pattern.id;
   if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
     EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
     EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
@@ -643,15 +644,16 @@ return code;
 */;
 
 trigger_s
-    :   '触发事件' 'x' PosString ',' 'y' PosString Newline
+    :   '触发事件' 'x' PosString ',' 'y' PosString '不结束当前事件' Bool Newline
     
 
 /* trigger_s
 tooltip : trigger: 立即触发另一个地点的事件
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=trigger%EF%BC%9A%E7%AB%8B%E5%8D%B3%E8%A7%A6%E5%8F%91%E5%8F%A6%E4%B8%80%E4%B8%AA%E5%9C%B0%E7%82%B9%E7%9A%84%E4%BA%8B%E4%BB%B6
-default : ["0","0"]
+default : ["0","0",false]
 colour : this.eventColor
-var code = '{"type": "trigger", "loc": ['+PosString_0+','+PosString_1+']},\n';
+Bool_0 = Bool_0 ?', "keep": true':'';
+var code = '{"type": "trigger", "loc": ['+PosString_0+','+PosString_1+']'+Bool_0+'},\n';
 return code;
 */;
 
@@ -761,7 +763,7 @@ default : ["","",""]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = /^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+  var pattern1 = MotaActionFunctions.pattern.id;
   if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
     EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
     EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
@@ -792,7 +794,7 @@ default : ["","",""]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = /^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+  var pattern1 = MotaActionFunctions.pattern.id;
   if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
     EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
     EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
@@ -823,7 +825,7 @@ default : ["bg","","",""]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = /^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+  var pattern1 = MotaActionFunctions.pattern.id;
   if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
     EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
     EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
@@ -854,7 +856,7 @@ default : ["bg","","",""]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = /^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+  var pattern1 = MotaActionFunctions.pattern.id;
   if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
     EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
     EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
@@ -984,14 +986,32 @@ var code = '{"type": "battle", "id": "'+IdString_0+'"},\n';
 return code;
 */;
 
+
+battle_1_s
+    :   '强制战斗' 'x' PosString? ',' 'y' PosString? Newline
+
+
+/* battle_1_s
+tooltip : battle: 强制战斗
+helpUrl : https://h5mota.com/games/template/docs/#/event?id=battle%EF%BC%9A%E5%BC%BA%E5%88%B6%E6%88%98%E6%96%97
+default : ["","",""]
+colour : this.mapColor
+var floorstr = '';
+if (PosString_0 && PosString_1) {
+    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+}
+var code = '{"type": "battle"'+floorstr+'},\n';
+return code;
+*/;
+
 openDoor_s
-    :   '开门' 'x' PosString? ',' 'y' PosString? '楼层' IdString? '需要钥匙' Bool? Newline
+    :   '开门' 'x' PosString? ',' 'y' PosString? '楼层' IdString? '需要钥匙' Bool? '不等待执行完毕' Bool Newline
     
 
 /* openDoor_s
 tooltip : openDoor: 开门,楼层可不填表示当前层
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=opendoor%EF%BC%9A%E5%BC%80%E9%97%A8
-default : ["","","",false]
+default : ["","","",false,false]
 colour : this.mapColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var floorstr = '';
@@ -999,24 +1019,26 @@ if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
 Bool_0 = Bool_0 ? ', "needKey": true' : '';
-var code = '{"type": "openDoor"'+floorstr+IdString_0+Bool_0+'},\n';
+Bool_1 = Bool_1 ? ', "async": true' : '';
+var code = '{"type": "openDoor"'+floorstr+IdString_0+Bool_0+Bool_1+'},\n';
 return code;
 */;
 
 closeDoor_s
-    :   '关门' 'x' PosString? ',' 'y' PosString? 'ID' IdString  Newline
+    :   '关门' 'x' PosString? ',' 'y' PosString? 'ID' IdString '不等待执行完毕' Bool Newline
 
 
 /* closeDoor_s
 tooltip : closeDoor: 关门事件，需要该点本身无事件
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=opendoor%EF%BC%9A%E5%BC%80%E9%97%A8
-default : ["","","yellowDoor"]
+default : ["","","yellowDoor",false]
 colour : this.mapColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
-var code = '{"type": "closeDoor", "id": "'+IdString_0+'"'+floorstr+'},\n';
+Bool_0 = Bool_0 ? ', "async": true' : '';
+var code = '{"type": "closeDoor", "id": "'+IdString_0+'"'+floorstr+Bool_0+'},\n';
 return code;
 */;
 
@@ -1157,7 +1179,7 @@ helpUrl : https://h5mota.com/games/template/docs/#/event?id=animate%EF%BC%9A%E6%
 default : ["zone","hero",false]
 colour : this.soundColor
 if (EvalString_0) {
-  if(/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+),flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/.test(EvalString_0)) {
+  if(MotaActionFunctions.pattern.id2.test(EvalString_0)) {
     EvalString_0=', "loc": ["'+EvalString_0.split(',').join('","')+'"]';
   } else if (/hero|([+-]?\d+),([+-]?\d+)/.test(EvalString_0)) {
     if(EvalString_0.indexOf(',')!==-1)EvalString_0='['+EvalString_0+']';
@@ -1293,7 +1315,7 @@ tooltip : setCurtain: 更改画面色调,动画时间可不填
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=setcurtain%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
 default : ["255,255,255,1",'rgba(255,255,255,1)',500,false]
 colour : this.soundColor
-var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
+var colorRe = MotaActionFunctions.pattern.colorRe;
 if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
 Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
 var async = Bool_0?', "async": true':'';
@@ -1324,7 +1346,7 @@ tooltip : screenFlash: 画面闪烁,动画时间可不填
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=screenFlash%EF%BC%9A%E7%94%BB%E9%9D%A2%E9%97%AA%E7%83%81
 default : ["255,255,255,1",'rgba(255,255,255,1)',500,1,false]
 colour : this.soundColor
-var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
+var colorRe = MotaActionFunctions.pattern.colorRe;
 if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
 Int_1 = Int_1!=='' ?(', "times": '+Int_1):'';
 var async = Bool_0?', "async": true':'';
@@ -1354,7 +1376,7 @@ move_s
 /* move_s
 tooltip : move: 让某个NPC/怪物移动,位置可不填代表当前事件
 helpUrl : https://h5mota.com/games/template/docs/#/event?id=move%EF%BC%9A%E8%AE%A9%E6%9F%90%E4%B8%AAnpc%E6%80%AA%E7%89%A9%E7%A7%BB%E5%8A%A8
-default : ["","",500,false,false,"上右3下2左上左2"]
+default : ["","",500,false,false,"上右3下2后4左前2"]
 colour : this.mapColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
@@ -1682,7 +1704,7 @@ helpUrl : https://h5mota.com/games/template/docs/#/event?id=choices%EF%BC%9A%E7%
 default : ["提示文字:红钥匙","",""]
 colour : this.subColor
 if (EvalString_1) {
-  var colorRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
+  var colorRe = MotaActionFunctions.pattern.colorRe;
   if (colorRe.test(EvalString_1))
       EvalString_1 = ', "color": ['+EvalString_1+']';
   else
@@ -1735,7 +1757,7 @@ return code;
 */;
 
 break_s
-    :   '跳出循环' Newline
+    :   '跳出当前循环或公共事件' Newline
 
 /* break_s
 tooltip : break：跳出循环, 如果break事件不在任何循环中被执行，则和exit等价，即会立刻结束当前事件！
@@ -2113,8 +2135,8 @@ FixedId_List
     /*FixedId_List ['status:hp','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:experience']*/;
 
 Id_List
-    :   '变量' | '状态' | '物品' | '独立开关'
-    /*Id_List ['flag','status','item', 'switch']*/;
+    :   '变量' | '状态' | '物品' | '独立开关' | '全局存储'
+    /*Id_List ['flag','status','item', 'switch', 'global']*/;
 
 //转blockly后不保留需要加"
 EvalString
@@ -2532,12 +2554,12 @@ ActionParser.prototype.parseAction = function() {
     case "openDoor": // 开一个门, 包括暗墙
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['openDoor_s'].xmlText([
-        data.loc[0],data.loc[1],data.floorId||'',data.needKey||false,this.next]);
+        data.loc[0],data.loc[1],data.floorId||'',data.needKey||false,data.async||false,this.next]);
       break;
     case "closeDoor": // 关一个门，需要该点无事件
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['closeDoor_s'].xmlText([
-        data.loc[0],data.loc[1],data.id,this.next]);
+        data.loc[0],data.loc[1],data.id,data.async||false,this.next]);
       break;
     case "useItem": // 使用道具
       this.next = MotaActionBlocks['useItem_s'].xmlText([
@@ -2552,12 +2574,19 @@ ActionParser.prototype.parseAction = function() {
         data.id,this.next]);
       break;
     case "battle": // 强制战斗
-      this.next = MotaActionBlocks['battle_s'].xmlText([
-        data.id,this.next]);
+      if (data.id) {
+        this.next = MotaActionBlocks['battle_s'].xmlText([
+          data.id,this.next]);
+      }
+      else {
+        data.loc = data.loc || [];
+        this.next = MotaActionBlocks['battle_1_s'].xmlText([
+          data.loc[0],data.loc[1],this.next]);
+      }
       break;
     case "trigger": // 触发另一个事件；当前事件会被立刻结束。需要另一个地点的事件是有效的
       this.next = MotaActionBlocks['trigger_s'].xmlText([
-        data.loc[0],data.loc[1],this.next]);
+        data.loc[0],data.loc[1],data.keep,this.next]);
       break;
     case "insert": // 强制插入另一个点的事件在当前事件列表执行，当前坐标和楼层不会改变
       if (data.args instanceof Array) {
@@ -2857,14 +2886,14 @@ MotaActionFunctions.EvalString_pre = function(EvalString){
 
 MotaActionFunctions.IdString_pre = function(IdString){
   if (IdString.indexOf('__door__')!==-1) throw new Error('请修改开门变量__door__，如door1，door2，door3等依次向后。请勿存在两个门使用相同的开门变量。');
-  if (IdString && !(/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/.test(IdString)) && !(/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/.test(IdString)))
+  if (IdString && !(MotaActionFunctions.pattern.id.test(IdString)) && !(MotaActionFunctions.pattern.idWithoutFlag.test(IdString)))
       throw new Error('id: '+IdString+'中包含了0-9 a-z A-Z _ - :之外的字符');
   return IdString;
 }
 
 MotaActionFunctions.PosString_pre = function(PosString){
   if (!PosString || /^-?\d+$/.test(PosString)) return PosString;
-  if (!(/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ 和中文之外的字符,或者是没有以flag: 开头');
+  if (!(MotaActionFunctions.pattern.id.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ 和中文之外的字符,或者是没有以flag: 开头');
   return '"'+PosString+'"';
 }
 
@@ -2905,5 +2934,11 @@ MotaActionFunctions.StepString_pre = function(StepString){
   }
   return ans;
 }
+
+MotaActionFunctions.pattern=MotaActionFunctions.pattern||{};
+MotaActionFunctions.pattern.id=/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+MotaActionFunctions.pattern.id2=/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+),flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+MotaActionFunctions.pattern.idWithoutFlag=/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
+MotaActionFunctions.pattern.colorRe=/^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
 
 */

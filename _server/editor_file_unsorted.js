@@ -7,23 +7,6 @@ editor_file = function (editor, callback) {
 
     ///////////////////////////////////////////////////////////////////////////
 
-    editor.file.getFloorFileList = function (callback) {
-        checkCallback(callback);
-        /* var fs = editor.fs;
-        fs.readdir('project/floors',function(err, data){
-          callback([data,err]);
-        }); */
-        callback([editor.core.floorIds, null]);
-    }
-    //callback([Array<String>,err:String])
-    editor.file.loadFloorFile = function (filename, callback) {
-        //filename不含'/'不含'.js'
-        checkCallback(callback);
-        
-        editor.currentFloorId = editor.core.status.floorId;
-        editor.currentFloorData = editor.core.floors[editor.currentFloorId];
-    }
-    //callback(err:String)
     editor.file.saveFloorFile = function (callback) {
         checkCallback(callback);
         /* if (!isset(editor.currentFloorId) || !isset(editor.currentFloorData)) {
@@ -31,31 +14,16 @@ editor_file = function (editor, callback) {
         } */
         var filename = 'project/floors/' + editor.currentFloorId + '.js';
         var datastr = ['main.floors.', editor.currentFloorId, '=\n'];
-        if (editor.currentFloorData.map == 'new') {
-            /*
-            editor.currentFloorData.map = editor.map.map(function (v) {
-                return v.map(function () {
-                    return 0
+
+        for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
+            var mapArray=editor[name].map(function (v) {
+                return v.map(function (v) {
+                    return v.idnum || v || 0
                 })
             });
-            */
-            var width = parseInt(document.getElementById('newMapWidth').value);
-            var height = parseInt(document.getElementById('newMapHeight').value);
-            var row = [];
-            for (var i=0;i<width;i++) row.push(0);
-            editor.currentFloorData.map = [];
-            for (var i=0;i<height;i++) editor.currentFloorData.map.push(row);
+            editor.currentFloorData[name]=mapArray;
         }
-        else{
-            for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
-                var mapArray=editor[name].map(function (v) {
-                    return v.map(function (v) {
-                        return v.idnum || v || 0
-                    })
-                });
-                editor.currentFloorData[name]=mapArray;
-            }
-        }
+        
         // format 更改实现方式以支持undefined删除
         var tempJsonObj=Object.assign({},editor.currentFloorData);
         var tempMap=[['map',editor.util.guid()],['bgmap',editor.util.guid()],['fgmap',editor.util.guid()]];
@@ -87,39 +55,35 @@ editor_file = function (editor, callback) {
             name = saveFilename.substring(2);
             title = "主塔 "+name+" 层";
         }
-        editor.currentFloorData = {
+        
+        var width = parseInt(document.getElementById('newMapsWidth').value);
+        var height = parseInt(document.getElementById('newMapsHeight').value);
+        var row = [], map = [];
+        for (var i=0;i<width;i++) row.push(0);
+        for (var i=0;i<height;i++) map.push(row);
+        editor.currentFloorData = Object.assign(JSON.parse(JSON.stringify(editor.file.comment._data.floors_template)), {
             floorId: saveFilename,
             title: title,
             name: name,
-            width: parseInt(document.getElementById('newMapWidth').value),
-            height: parseInt(document.getElementById('newMapHeight').value),
-            canFlyTo: saveStatus?currData.canFlyTo:true,
-            canUseQuickShop: saveStatus?currData.canUseQuickShop:true,
-            cannotViewMap: saveStatus?currData.cannotViewMap:false,
-            cannotMoveDirectly: saveStatus?currData.cannotMoveDirectly:false,
-            images: [],
-            item_ratio: saveStatus?currData.item_ratio:1,
-            defaultGround: saveStatus?currData.defaultGround:"ground",
-            bgm: saveStatus?currData.bgm:null,
-            upFloor: null,
-            downFloor: null,
-            color: saveStatus?currData.color:null,
-            weather: saveStatus?currData.weather:null,
-            firstArrive: [],
-            eachArrive: [],
-            parallelDo: "",
-            events: {},
-            changeFloor: {},
-            afterBattle: {},
-            afterGetItem: {},
-            afterOpenDoor: {},
-            cannotMove: {}
-        };
+            width: width,
+            height: height,
+            map: map,
+        },saveStatus?{
+            canFlyTo: currData.canFlyTo,
+            canUseQuickShop: currData.canUseQuickShop,
+            cannotViewMap: currData.cannotViewMap,
+            cannotMoveDirectly: currData.cannotMoveDirectly,
+            item_ratio: currData.item_ratio,
+            defaultGround: currData.defaultGround,
+            bgm: currData.bgm,
+            color: currData.color,
+            weather: currData.weather,
+        }:{});
+        
         Object.keys(editor.currentFloorData).forEach(function (t) {
             if (editor.currentFloorData[t] == null)
                 delete editor.currentFloorData[t];
         })
-        editor.currentFloorData.map = "new";
         editor.currentFloorId = saveFilename;
         editor.file.saveFloorFile(callback);
     }
@@ -145,35 +109,24 @@ editor_file = function (editor, callback) {
         var datas = [];
         for (var i=from;i<=to;i++) {
             var datastr = ['main.floors.', floorIdList[i-from], '=\n{'];
-            var data = {
+            var data = Object.assign(JSON.parse(JSON.stringify(editor.file.comment._data.floors_template)), {
                 floorId: floorIdList[i-from],
                 title: calValue(document.getElementById('newFloorTitles').value, i),
                 name: calValue(document.getElementById('newFloorNames').value, i),
                 width: width,
                 height: height,
                 map: map,
-                canFlyTo: saveStatus?currData.canFlyTo:true,
-                canUseQuickShop: saveStatus?currData.canUseQuickShop:true,
-                cannotViewMap: saveStatus?currData.cannotViewMap:false,
-                cannotMoveDirectly: saveStatus?currData.cannotMoveDirectly:false,
-                images: [],
-                item_ratio: saveStatus?currData.item_ratio:1,
-                defaultGround: saveStatus?currData.defaultGround:"ground",
-                bgm: saveStatus?currData.bgm:null,
-                upFloor: null,
-                downFloor: null,
-                color: saveStatus?currData.color:null,
-                weather: saveStatus?currData.weather:null,
-                firstArrive: [],
-                eachArrive: [],
-                parallelDo: "",
-                events: {},
-                changeFloor: {},
-                afterBattle: {},
-                afterGetItem: {},
-                afterOpenDoor: {},
-                cannotMove: {}
-            };
+            },saveStatus?{
+                canFlyTo: currData.canFlyTo,
+                canUseQuickShop: currData.canUseQuickShop,
+                cannotViewMap: currData.cannotViewMap,
+                cannotMoveDirectly: currData.cannotMoveDirectly,
+                item_ratio: currData.item_ratio,
+                defaultGround: currData.defaultGround,
+                bgm: currData.bgm,
+                color: currData.color,
+                weather: currData.weather,
+            }:{});
             Object.keys(data).forEach(function (t) {
                 if (data[t] == null)
                     delete data[t];
@@ -308,70 +261,78 @@ editor_file = function (editor, callback) {
 
     editor.file.changeIdAndIdnum = function (id, idnum, info, callback) {
         checkCallback(callback);
-        //检查maps中是否有重复的idnum或id
-        var change = -1;
-        for (var ii in editor.core.maps.blocksInfo) {
-            if (ii == idnum) {
-                //暂时只允许创建新的不允许修改已有的
-                //if (info.idnum==idnum){change=ii;break;}//修改id
-                callback('idnum重复了');
-                return;
-            }
-            if (editor.core.maps.blocksInfo[ii].id == id) {
-                //if (info.id==id){change=ii;break;}//修改idnum
-                callback('id重复了');
-                return;
-            }
-        }
-        /*
-        if (change!=-1 && change!=idnum){//修改idnum
-          editor.core.maps.blocksInfo[idnum] = editor.core.maps.blocksInfo[change];
-          delete(editor.core.maps.blocksInfo[change]);
-        } else if (change==idnum) {//修改id
-          var oldid = editor.core.maps.blocksInfo[idnum].id;
-          editor.core.maps.blocksInfo[idnum].id = id;
-          for(var ii in editor.core.icons.icons){
-            if (ii.hasOwnProperty(oldid)){
-              ii[id]=ii[oldid];
-              delete(ii[oldid]);
-            }
-          }
-        } else {//创建新的
-          editor.core.maps.blocksInfo[idnum]={'cls': info.images, 'id':id};
-          editor.core.icons.icons[info.images][id]=info.y;
-        }
-        */
-        var templist = [];
-        var tempcallback = function (err) {
-            templist.push(err);
-            if (templist.length == 2) {
-                if (templist[0] != null || templist[1] != null)
-                    callback((templist[0] || '') + '\n' + (templist[1] || ''));
-                //这里如果一个成功一个失败会出严重bug
-                else
-                    callback(null);
-            }
-        }
-        saveSetting('maps', [["add", "['" + idnum + "']", {'cls': info.images, 'id': id}]], tempcallback);
-        saveSetting('icons', [["add", "['" + info.images + "']['" + id + "']", info.y]], tempcallback);
-        if (info.images === 'items') {
-            saveSetting('items', [["add", "['items']['" + id + "']", editor.file.comment._data.items_template]], function (err) {
-                if (err) {
-                    printe(err);
-                    throw(err)
+        
+        var changeOrNew=core.isset(editor_mode.info.id)?'change':'new'
+        if(changeOrNew=='new'){
+            //检查maps中是否有重复的idnum或id
+            for (var ii in editor.core.maps.blocksInfo) {
+                if (ii == idnum) {
+                    callback('idnum重复了');
+                    return;
                 }
-            });
-        }
-        if (info.images === 'enemys' || info.images === 'enemy48') {
-            saveSetting('enemys', [["add", "['" + id + "']", editor.file.comment._data.enemys_template]], function (err) {
-                if (err) {
-                    printe(err);
-                    throw(err)
+                if (editor.core.maps.blocksInfo[ii].id == id) {
+                    callback('id重复了');
+                    return;
                 }
-            });
-        }
+            }
+            var templist = [];
+            var tempcallback = function (err) {
+                templist.push(err);
+                if (templist.length == 2) {
+                    if (templist[0] != null || templist[1] != null)
+                        callback((templist[0] || '') + '\n' + (templist[1] || ''));
+                    //这里如果一个成功一个失败会出严重bug
+                    else
+                        callback(null);
+                }
+            }
+            saveSetting('maps', [["add", "['" + idnum + "']", {'cls': info.images, 'id': id}]], tempcallback);
+            saveSetting('icons', [["add", "['" + info.images + "']['" + id + "']", info.y]], tempcallback);
+            if (info.images === 'items') {
+                saveSetting('items', [["add", "['items']['" + id + "']", editor.file.comment._data.items_template]], function (err) {
+                    if (err) {
+                        printe(err);
+                        throw(err)
+                    }
+                });
+            }
+            if (info.images === 'enemys' || info.images === 'enemy48') {
+                saveSetting('enemys', [["add", "['" + id + "']", editor.file.comment._data.enemys_template]], function (err) {
+                    if (err) {
+                        printe(err);
+                        throw(err)
+                    }
+                });
+            }
 
-        callback(null);
+            callback(null);
+
+        }else{
+            //检查maps中是否有重复的idnum或id
+            for (var ii in editor.core.maps.blocksInfo) {
+                if (editor.core.maps.blocksInfo[ii].id == id) {
+                    callback('id重复了');
+                    return;
+                }
+            }
+            idnum = info.idnum;
+
+            maps_90f36752_8815_4be8_b32b_d7fad1d0542e[idnum].id = id;
+
+            var arr=[icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1,items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a,{enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80:enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80}]
+            arr.forEach(function (obj) {
+                for(var jj in obj){
+                    var ii=obj[jj]
+                    if (ii.hasOwnProperty(info.id)){
+                        ii[id]=ii[info.id];
+                        delete(ii[info.id]);
+                    }
+                }
+            });
+
+            editor.file.save_icons_maps_items_enemys(callback)
+            
+        }
     }
     //callback(err:String)
     editor.file.editItem = function (id, actionList, callback) {
@@ -768,6 +729,30 @@ editor_file = function (editor, callback) {
             editor.useCompress='alerted';
             setTimeout("alert('当前游戏使用的是压缩文件,修改完成后请使用启动服务.exe->Js代码压缩工具重新压缩,或者把main.js的useCompress改成false来使用原始文件')",1000)
         }
+    }
+
+    editor.file.save_icons_maps_items_enemys=function(callback){
+        var check=[]
+        saveSetting('icons',[],function(err){
+            if(err){callback(err);return;}
+            check.push('icons')
+            if(check.length==4)callback(null);
+        })
+        saveSetting('maps',[],function(err){
+            if(err){callback(err);return;}
+            check.push('maps')
+            if(check.length==4)callback(null);
+        })
+        saveSetting('items',[],function(err){
+            if(err){callback(err);return;}
+            check.push('items')
+            if(check.length==4)callback(null);
+        })
+        saveSetting('enemys',[],function(err){
+            if(err){callback(err);return;}
+            check.push('enemys')
+            if(check.length==4)callback(null);
+        })
     }
 
     var saveSetting = function (file, actionList, callback) {

@@ -157,6 +157,17 @@ editor_util_wrapper = function (editor) {
         }).join(''))
     }
 
+    editor_util.prototype.isset = function (val) {
+        return val != null && !(typeof val == 'number' && isNaN(val));
+    }
+
+    editor_util.prototype.checkCallback=function(callback){
+        if (!editor.util.isset(callback)) {
+            editor.printe('未设置callback');
+            throw('未设置callback')
+        }
+    }
+
     editor.constructor.prototype.util = new editor_util();
 }
 //editor_util_wrapper(editor);

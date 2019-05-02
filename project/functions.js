@@ -465,7 +465,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		[12, "中毒", "战斗后，勇士陷入中毒状态，每一步损失生命" + core.values.poisonDamage + "点"],
 		[13, "衰弱", "战斗后，勇士陷入衰弱状态，攻防暂时下降" + (core.values.weakValue >= 1 ? core.values.weakValue + "点" : parseInt(core.values.weakValue * 100) + "%")],
 		[14, "诅咒", "战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验"],
-		[15, "领域", function (enemy) { return "经过怪物周围" + (enemy.range || 1) + "格时自动减生命" + (enemy.value || 0) + "点"; }],
+		[15, "领域", function (enemy) { return "经过怪物周围" + (enemy.zoneSquare ? "九宫格" : "十字") + "范围内" + (enemy.range || 1) + "格时自动减生命" + (enemy.value || 0) + "点"; }],
 		[16, "夹击", "经过两只相同的怪物中间，勇士生命值变成一半"],
 		[17, "仇恨", "战斗前，怪物附加之前积累的仇恨值作为伤害" + (core.flags.hatredDecrease ? "；战斗后，释放一半的仇恨值" : "") + "。（每杀死一个怪物获得" + (core.values.hatred || 0) + "点仇恨值）"],
 		[18, "阻击", function (enemy) { return "经过怪物的十字领域时自动减生命" + (enemy.value || 0) + "点，同时怪物后退一格"; }],
@@ -973,6 +973,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	icon = core.getMappedName(icon);
 	if (core.material.images.images[icon]) {
 		core.material.images.hero.src = core.material.images.images[icon].src;
+		core.material.icons.hero.width = core.material.images.images[icon].width / 4;
 		core.material.icons.hero.height = core.material.images.images[icon].height / 4;
 	}
 	// 刷新怪物数据

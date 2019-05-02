@@ -1,18 +1,27 @@
 # 重构
 
+总体思路  
 + 按功能拆分文件
 + 左侧页面模块化, 方便添加
 + 不同的模式的文件操作尽可能模块化
 
+目前主要在重构editor_file, 思路是editor.file负责把editor.game内的游戏数据格式化成字符串以及写入到文件, 由editor.game来修改数据
++ editor.file维护一些标记, 描述哪些数据需要格式化并写入, 在save时写入文件(自动保存的话就是每次修改数据都触发save)
++ editor.game修改数据, 并修改editor.file中的标记
++ 此思路下editor.file的大部分内容会挪到editor.game, editor.game和editor.table可能会再进一步合并拆分
+
+editor_file之后是更改editor.map的储存方式, 现有的存对象的模式要在对象和数字间来回转换, 非常繁琐和奇怪
+
+再之后是把editor_unsorted_*.js整理清晰
 
 ## 文件结构
 
 + [ ] editor_blockly 图块化事件编辑器
 + [ ] editor_multi 多行文本编辑器
 + [x] editor_table 处理表格的生成, 及其响应的事件, 从原editor\_mode中分离
-+ [ ] editor_file 调用fs.js编辑文件, 把原editor\_file模块化
-+ [ ] editor_game 处理来自core的数据, 导入为editor的数据, 从原editor中分离. **只有此文件允许`\s(main|core)`形式的调用**(以及其初始化`editor_game_wrapper(editor, main, core);`)
-+ [x] editor_util 生成guid等函数, 从editor分离
++ [ ] editor_file 调用fs.js编辑文件, 把原editor\_file模块化, 并且只负责文件写入
++ [ ] editor_game 处理游戏数据, 导入为editor的数据, 编辑数据, 从原editor和editor_file中抽离. **只有此文件允许`\s(main|core)`形式的调用**(以及其初始化`editor_game_wrapper(editor, main, core);`)
++ [x] editor_util 生成guid/处理颜色 等函数, 从editor分离
 + [ ] editor 执行初始化流程加组合各组件
 + [ ] 原editor_mode 移除
 + [x] 原vm 移除

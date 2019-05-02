@@ -3,6 +3,7 @@ editor_file_wrapper = function (editor) {
 
     }
 
+    // 这个函数之后挪到editor.table?
     editor_file_proto.prototype.loadCommentjs=function(callback){
         var commentjs = {
             'comment': 'comment',

@@ -189,7 +189,6 @@ control.prototype._animationFrame_animate = function (timestamp) {
 
 control.prototype._animationFrame_heroMoving = function (timestamp) {
     if (core.status.heroMoving <= 0) return;
-    var x=core.getHeroLoc('x'), y=core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
     // 换腿
     if (timestamp - core.animateFrame.moveTime > (core.values.moveSpeed||100)) {
         core.animateFrame.leftLeg = !core.animateFrame.leftLeg;
@@ -777,9 +776,9 @@ control.prototype.drawHero = function (status, offset) {
     core.clearMap('hero');
 
     this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
-        core.drawImage('hero', block.img, block.heroIcon[block.status]*32,
-            block.heroIcon.loc * block.height, 32, block.height,
-            block.posx, block.posy+32-block.height, 32, block.height);
+        core.drawImage('hero', block.img, block.heroIcon[block.status]*block.width,
+            block.heroIcon.loc * block.height, block.width, block.height,
+            block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
     });
 
     core.control.updateViewport();
@@ -789,6 +788,7 @@ control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, off
     var heroIconArr = core.material.icons.hero, drawObjs = [], index = 0;
     drawObjs.push({
         "img": core.material.images.hero,
+        "width": core.material.icons.hero.width || 32,
         "height": core.material.icons.hero.height,
         "heroIcon": heroIconArr[direction],
         "posx": x * 32 - core.bigmap.offsetX + core.utils.scan[direction].x * offset,
@@ -799,6 +799,7 @@ control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, off
     (core.status.hero.followers||[]).forEach(function (t) {
         drawObjs.push({
             "img": core.material.images.images[t.name],
+            "width": core.material.images.images[t.name].width/4,
             "height": core.material.images.images[t.name].height/4,
             "heroIcon": heroIconArr[t.direction],
             "posx": 32*t.x - core.bigmap.offsetX + (t.stop?0:core.utils.scan[t.direction].x*offset),
@@ -1056,7 +1057,7 @@ control.prototype.chooseReplayFile = function () {
 control.prototype.startReplay = function (list) {
     if (!core.isPlaying()) return;
     core.status.replay.replaying=true;
-    core.status.replay.pausing=false;
+    core.status.replay.pausing=true;
     core.status.replay.speed=1.0;
     core.status.replay.toReplay = core.clone(list);
     core.status.replay.totalList = core.status.route.concat(list);
@@ -1092,16 +1093,24 @@ control.prototype.resumeReplay = function () {
     core.replay();
 }
 
+////// 单步播放 //////
+control.prototype.stepReplay = function () {
+    if (!core.isPlaying() || !core.isReplaying()) return;
+    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+        return core.drawTip("请等待当前事件的处理结束");
+    core.replay(true);
+}
+
 ////// 加速播放 //////
 control.prototype.speedUpReplay = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
-    if (core.status.replay.speed==12) core.status.replay.speed=24;
-    else if (core.status.replay.speed==6) core.status.replay.speed=12;
-    else if (core.status.replay.speed==3) core.status.replay.speed=6;
-    else if (core.status.replay.speed==2.5) core.status.replay.speed=3;
-    else if (core.status.replay.speed==2) core.status.replay.speed=2.5;
-    else if (core.status.replay.speed<2) {
-        core.status.replay.speed = parseInt(10*core.status.replay.speed + 2)/10;
+    var speeds = [0.2, 0.5, 1, 2, 3, 6, 12, 24];
+    for (var i = speeds.length - 2; i >= 0; i--) {
+        if (speeds[i] <= core.status.replay.speed) {
+            core.status.replay.speed = speeds[i+1];
+            break;
+        }
     }
     core.drawTip("x"+core.status.replay.speed+"倍");
 }
@@ -1109,15 +1118,13 @@ control.prototype.speedUpReplay = function () {
 ////// 减速播放 //////
 control.prototype.speedDownReplay = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
-    if (core.status.replay.speed==24) core.status.replay.speed=12;
-    else if (core.status.replay.speed==12) core.status.replay.speed=6;
-    else if (core.status.replay.speed==6) core.status.replay.speed=3;
-    else if (core.status.replay.speed==3) core.status.replay.speed=2.5;
-    else if (core.status.replay.speed==2.5) core.status.replay.speed=2;
-    else {
-        core.status.replay.speed = parseInt(10*core.status.replay.speed - 2)/10;
+    var speeds = [0.2, 0.5, 1, 2, 3, 6, 12, 24];
+    for (var i = 1; i <= speeds.length; i++) {
+        if (speeds[i] >= core.status.replay.speed) {
+            core.status.replay.speed = speeds[i-1];
+            break;
+        }
     }
-    if (core.status.replay.speed<0.2) core.status.replay.speed=0.2;
     core.drawTip("x"+core.status.replay.speed+"倍");
 }
 
@@ -1218,9 +1225,10 @@ control.prototype.isReplaying = function () {
 }
 
 ////// 回放 //////
-control.prototype.replay = function () {
+control.prototype.replay = function (force) {
     if (!core.isPlaying() || !core.isReplaying()
-        || core.status.replay.pausing || core.status.replay.animate || core.status.event.id) return;
+         || core.status.replay.animate || core.status.event.id) return;
+    if (core.status.replay.pausing && !force) return;
     if (core.status.replay.toReplay.length==0)
         return this._replay_finished();
     this._replay_save();
@@ -1291,6 +1299,7 @@ control.prototype._replay_save = function () {
 }
 
 control.prototype._replay_error = function (action) {
+    core.ui.closePanel();
     core.status.replay.replaying = false;
     var len = core.status.replay.toReplay.length;
     var prevList = core.status.replay.totalList.slice(-len - 11, -len - 1);
@@ -1412,14 +1421,13 @@ control.prototype._replayAction_shop = function (action) {
         return true;
     }
     var choices = shop.choices;
-    var topIndex = core.__HALF_SIZE__ - parseInt(choices.length / 2);
     core.status.event.selection = parseInt(selections.shift());
     core.events.openShop(shopId, false);
+    var topIndex = core.__HALF_SIZE__ - parseInt(choices.length / 2) + (core.status.event.ui.offset || 0);
     var shopInterval = setInterval(function () {
         if (!core.actions._clickShop(core.__HALF_SIZE__, topIndex+core.status.event.selection)) {
             clearInterval(shopInterval);
-            core.stopReplay();
-            core.drawTip("录像文件出错");
+            core.control._replay_error(action);
             return;
         }
         if (selections.length==0) {
@@ -2065,6 +2073,7 @@ control.prototype.setCurtain = function(color, time, callback) {
 }
 
 control.prototype._setCurtain_animate = function (nowColor, color, time, callback) {
+    time /= Math.max(core.status.replay.speed, 1)
     var per_time = 10, step = parseInt(time / per_time);
     var animate = setInterval(function() {
         nowColor = [
@@ -2337,14 +2346,15 @@ control.prototype.updateHeroIcon = function (name) {
 
     var image = core.material.images.hero;
     // 全身图
-    var height = core.material.icons.hero.height;
-    var ratio = 32 / height, width = 32 * ratio, left = 16-width/2;
+    var w = core.material.icons.hero.width || 32;
+    var h = core.material.icons.hero.height || 48;
+    var ratio = Math.max(w / h, 1), width = 32 * ratio, left = 16 - width/2;
 
     var canvas = document.createElement("canvas");
     var context = canvas.getContext("2d");
     canvas.width = 32;
     canvas.height = 32;
-    context.drawImage(image, 0, 0, 32, height, left, 0, width, 32);
+    context.drawImage(image, 0, 0, w, h, left, 0, width, 32);
 
     core.statusBar.image.name.src = canvas.toDataURL("image/png");
 }

@@ -1,6 +1,6 @@
 # 脚本
 
-?> 目前版本**v2.6**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.6.1**，上次更新时间：* {docsify-updated} *
 
 在V2.6版本中，基本对整个项目代码进行了重写，更加方便造塔者的使用和复写函数。
 
@@ -224,7 +224,11 @@ function () {
 - 清晰明了。很容易方便知道自己修改过什么，尤其是可以和系统原有代码进行对比。
 - 方便整理成新的插件，给其他的塔使用。
 
-如果我想对xxx文件中的yyy函数进行重写，其模式一般是：`core.xxx.yyy = function (参数列表) { ... }`
+一般而言，复写规则如下：
+
+**对xxx文件中的yyy函数进行复写，规则是`core.xxx.yyy = function (参数列表) { ... }`。**
+
+但是，对于`registerXXX`所注册的函数是无效的，例如直接复写`core.control._animationFrame_globalAnimate`函数是没有效果的。对于这种情况引入的函数，需要注册同名函数，可参见最下面的样例。
 
 下面是几个例子，从简单到复杂。
 
@@ -316,6 +320,32 @@ core.maps.drawMap = function (floorId, callback) {
 ```
 
 详见[call和apply的用法](https://www.jianshu.com/p/80ea0d1c04f8)。
+
+### 复写全局动画绘制函数
+
+全局动画绘制在`control.js`的`_animationFrame_globalAnimate`函数。
+
+注意到此函数是由`registerAnimationFrame`注册的，因此直接复写是无效的。
+
+其在control.js的注册的定义如下：
+
+```js
+// 注册全局动画函数
+this.registerAnimationFrame("globalAnimate", true, this._animationFrame_globalAnimate);
+```
+
+因此，可以在插件中自行注册一个**同名**的函数来覆盖原始的内容。
+
+```js
+// 插件中复写全局动画绘制函数
+this.myGlobalAnimate = function (timestamp) {
+    // ...... 实际复写的函数内容
+}
+
+// 注册同名（globalAnimate）函数来覆盖系统原始内容
+core.registerAnimationFrame("globalAnimate", true, "myGlobalAnimate");
+```
+
 
 ==========================================================================================
 

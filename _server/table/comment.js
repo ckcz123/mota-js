@@ -81,12 +81,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_lint": true,
 					"_data": "当前能否使用该道具，仅对cls为tools或constants有效。"
 				},
-				"canEquip": {
+				"equipCondition": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_string": true,
 					"_lint": true,
-					"_data": "当前能否装备某个装备，仅对cls为equips有效。\n与canUseItemEffect不同，这里null代表可以装备。"
+					"_data": "能装备某个装备的条件，仅对cls为equips有效。\n与canUseItemEffect不同，这里null代表可以装备。"
 				}
 			}
 		},
@@ -230,7 +230,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "select",
 					"_select": {
 						"values": [
-							null,
+							"null",
 							"openDoor",
 							"passNet",
 							"changeLight",
@@ -245,9 +245,9 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "select",
 					"_select": {
 						"values": [
-							null,
-							true,
-							false
+							"null",
+							"true",
+							"false"
 						]
 					},
 					"_data": "该图块是否不可通行；true代表不可通行，false代表可通行，null代表使用系统缺省值"
@@ -462,6 +462,35 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					}
 				}
 			}
+		},
+
+		"floors_template": {
+			"floorId": "to be covered",
+			"title": "new floor",
+			"name": "new floor",
+			"width": 13,
+			"height": 13,
+			"canFlyTo": true,
+			"canUseQuickShop": true,
+			"cannotViewMap": false,
+			"cannotMoveDirectly": false,
+			"images": [],
+			"item_ratio": 1,
+			"defaultGround": "ground",
+			"bgm": null,
+			"upFloor": null,
+			"downFloor": null,
+			"color": null,
+			"weather": null,
+			"firstArrive": [],
+			"eachArrive": [],
+			"parallelDo": "",
+			"events": {},
+			"changeFloor": {},
+			"afterBattle": {},
+			"afterGetItem": {},
+			"afterOpenDoor": {},
+			"cannotMove": {}
 		}
 	}
 }

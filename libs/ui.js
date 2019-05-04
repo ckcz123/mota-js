@@ -2032,7 +2032,7 @@ ui.prototype._drawEquipbox_description = function (info, max_height) {
     this._drawEquipbox_drawStatusChanged(info, curr, equip, equipType);
 }
 
-ui.prototype._drawEquipbox_getStatusChanged = function (info, equip, equipType) {
+ui.prototype._drawEquipbox_getStatusChanged = function (info, equip, equipType, y) {
     var compare, differentMode = null;
     if (info.index < this.LAST) compare = core.compareEquipment(null, info.selectId);
     else {
@@ -2053,7 +2053,7 @@ ui.prototype._drawEquipbox_getStatusChanged = function (info, equip, equipType) 
 }
 
 ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipType) {
-    var compare = this._drawEquipbox_getStatusChanged(info, equip, equipType);
+    var compare = this._drawEquipbox_getStatusChanged(info, equip, equipType, y);
     if (compare == null) return;
     var obj = { drawOffset: 10, y: y };
 

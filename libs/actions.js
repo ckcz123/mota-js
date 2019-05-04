@@ -1253,7 +1253,7 @@ actions.prototype._clickShop = function (x, y) {
 
 actions.prototype._keyDownShop = function (keycode) {
     // 商店界面长按空格连续购买
-    if (keycode == 32) {
+    if (keycode == 32 && core.status.event.selection != core.status.event.data.shop.choices.length) {
         this._selectChoices(core.status.event.data.shop.choices.length + 1, keycode, this._clickShop);
         return;
     }
@@ -1266,7 +1266,7 @@ actions.prototype._keyUpShop = function (keycode) {
         core.events._exitShop();
         return;
     }
-    if (keycode != 32) {
+    if (keycode != 32 || core.status.event.selection == core.status.event.data.shop.choices.length) {
         this._selectChoices(core.status.event.data.shop.choices.length + 1, keycode, this._clickShop);
         return;
     }

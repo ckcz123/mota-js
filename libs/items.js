@@ -354,7 +354,7 @@ items.prototype._realLoadEquip = function (type, loadId, unloadId, callback) {
     }
 
     // --- 音效
-    core.playSound('equip.mp3');
+    this._realLoadEquip_playSound();
 
     // --- 实际换装
     this._loadEquipEffect(loadId, unloadId, loadPercentage == null ? unloadPercentage : loadPercentage);
@@ -369,6 +369,11 @@ items.prototype._realLoadEquip = function (type, loadId, unloadId, callback) {
     else if (unloadId) core.drawTip("已卸下" + unloadEquip.name, unloadId);
 
     if (callback) callback();
+}
+
+items.prototype._realLoadEquip_playSound = function () {
+    core.stopSound(); // 先停止所有音效（为了避免快捷换装很乱）
+    core.playSound('equip.mp3');
 }
 
 ////// 保存装备 //////

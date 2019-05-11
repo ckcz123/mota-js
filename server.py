@@ -11,7 +11,7 @@ import base64
 
 isPy3 = sys.version_info > (3, 0)
 
-def p(s): #s is unicode in py2 and str in py3
+def p(s): # s is unicode in py2 and str in py3
         if isPy3: print(s)
         else: print(s.decode('utf-8'))
 p("")
@@ -52,7 +52,7 @@ def get_file(path):
 		abort(403)
 		return None
 	with open(path, 'rb') as f:
-		content = f.read()#str in py2 and bytes in py3
+		content = f.read() # str in py2 and bytes in py3
 	return content 
 
 @app.route('/', methods=['GET'])
@@ -64,7 +64,7 @@ def static_file(path):
 	return Response(get_file(path), mimetype = get_mimetype(path))
 
 def process_request():
-	data = request.get_data()#str in py2 and bytes in py3
+	data = request.get_data() # str in py2 and bytes in py3
 	if isPy3: data = str(data, encoding = 'utf-8')
 	params = data.split("&")
 	d = {}
@@ -72,7 +72,7 @@ def process_request():
 		index = one.find("=")
 		if index >= 0:
 			d[one[:index]] = one[index+1:]
-	return d#str in py2&py3
+	return d # str in py2 & py3
 
 @app.route('/readFile', methods=['POST'])
 def readFile():
@@ -94,7 +94,7 @@ def writeFile():
 	if isPy3: value = value.encode('utf-8')
 	if tp == 'base64': value = base64.b64decode(value)
 	with open(filename, 'wb') as f:
-		f.write(value)#str in py2 and bytes in py3
+		f.write(value) # str in py2 and bytes in py3
 	return str(len(value))
 
 @app.route('/writeMultiFiles', methods=['POST'])

@@ -952,10 +952,11 @@ core.startEvents(list, x, y, callback)
 此函数将调用core.setEvents，然后停止勇士，再执行core.doAction()。
 
 
-core.doAction()
+core.doAction(keepUI)
 执行下一个自定义事件。
 此函数将检测事件列表是否全部执行完毕，如果是则执行回调函数。
 否则，将从事件列表中弹出下一个事件，并调用core.doEvent进行执行。
+如果keepUI为true，则不会清掉UI层和selector，适合于自己用脚本的绘制。
 
 
 core.insertAction(action, x, y, callback, addToLast)

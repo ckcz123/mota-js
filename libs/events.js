@@ -1876,7 +1876,7 @@ events.prototype.setGlobalFlag = function (name, value) {
 events.prototype.closeDoor = function (x, y, id, callback) {
     id = id || "";
     if (!(id.endsWith("Door") || id.endsWith("Wall"))
-        || !core.material.icons.animates[id] || core.getBlock(x, y) != null) {
+        || core.material.icons.animates[id] == null || core.getBlock(x, y) != null) {
         if (callback) callback();
         return;
     }

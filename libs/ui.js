@@ -1664,8 +1664,19 @@ ui.prototype.drawFly = function(page) {
     core.setTextAlign('ui', 'center');
     core.fillText('ui', '楼层跳跃', this.HPIXEL, 60, '#FFFFFF', this._buildFont(28, true));
     core.fillText('ui', '返回游戏', this.HPIXEL, this.PIXEL - 13, null, this._buildFont(15, true))
-    core.fillText('ui', title, this.PIXEL - 60, this.HPIXEL + 39, null, this._buildFont(19, true));
+
     var middle = this.HPIXEL + 39;
+
+    // 换行
+    var lines = core.splitLines('ui', title, 120, this._buildFont(19, true));
+    var start_y = middle - (lines.length - 1) * 11;
+    for (var i in lines) {
+        core.fillText('ui', lines[i], this.PIXEL - 60, start_y);
+        start_y += 22;
+    }
+
+    // core.fillText('ui', title, this.PIXEL - 60, this.HPIXEL + 39, null, this._buildFont(19, true));
+
     if (core.actions._getNextFlyFloor(1) != page) {
         core.fillText('ui', '▲', this.PIXEL - 60, middle - 64, null, this._buildFont(17, false));
         core.fillText('ui', '▲', this.PIXEL - 60, middle - 96);
@@ -1913,9 +1924,12 @@ ui.prototype._drawToolbox_drawDescription = function (info, max_height) {
         // 检查能否eval
         text = core.replaceText(text);
     } catch (e) {}
-    var lines = core.splitLines('ui', text, this.PIXEL - 15, this._buildFont(17, false));
-    // --- 开始逐行绘制
-    var curr = 62, line_height = 25;
+
+    for (var font_size = 17; font_size >= 14; font_size -= 3) {
+        var lines = core.splitLines('ui', text, this.PIXEL - 15, this._buildFont(font_size, false));
+        var line_height = parseInt(font_size * 1.4), curr = 37 + line_height;
+        if (curr + lines.length * line_height < max_height) break;
+    }
     core.setFillStyle('ui', '#FFFFFF');
     for (var i=0;i<lines.length;++i) {
         core.fillText('ui', lines[i], 10, curr);
@@ -2019,8 +2033,12 @@ ui.prototype._drawEquipbox_description = function (info, max_height) {
     try {
         text = core.replaceText(text);
     } catch (e) {}
-    var lines = core.splitLines('ui', text, this.PIXEL - 15, this._buildFont(17, false));
-    var curr = 62, line_height = 25;
+
+    for (var font_size = 17; font_size >= 11; font_size -= 3) {
+        var lines = core.splitLines('ui', text, this.PIXEL - 15, this._buildFont(font_size, false));
+        var line_height = parseInt(font_size * 1.4), curr = 37 + line_height;
+        if (curr + lines.length * line_height < max_height) break;
+    }
     core.setFillStyle('ui', '#FFFFFF');
     for (var i = 0; i < lines.length; ++i) {
         core.fillText('ui', lines[i], 10, curr);

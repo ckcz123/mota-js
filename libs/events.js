@@ -788,11 +788,13 @@ events.prototype.startEvents = function (list, x, y, callback) {
 }
 
 ////// 执行当前自定义事件列表中的下一个事件 //////
-events.prototype.doAction = function () {
-    // 清空boxAnimate和UI层
-    core.clearUI();
-    clearInterval(core.status.event.interval);
-    core.status.event.interval = null;
+events.prototype.doAction = function (keepUI) {
+    if (!keepUI) {
+        // 清空boxAnimate和UI层
+        core.clearUI();
+        clearInterval(core.status.event.interval);
+        core.status.event.interval = null;
+    }
     // 判定是否执行完毕
     if (this._doAction_finishEvents()) return;
     // 当前点坐标和前缀
@@ -1874,7 +1876,7 @@ events.prototype.setGlobalFlag = function (name, value) {
 events.prototype.closeDoor = function (x, y, id, callback) {
     id = id || "";
     if (!(id.endsWith("Door") || id.endsWith("Wall"))
-        || !core.material.icons.animates[id] || core.getBlock(x, y) != null) {
+        || core.material.icons.animates[id] == null || core.getBlock(x, y) != null) {
         if (callback) callback();
         return;
     }

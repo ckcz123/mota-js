@@ -64,9 +64,7 @@ maps.prototype._mapIntoBlocks = function (map, floor, floorId) {
 maps.prototype.getNumberById = function (id) {
     core.status.id2number = core.status.id2number || {};
     if (core.status.id2number[id] != null) return core.status.id2number[id];
-    var number = this._getNumberById(id);
-    core.status.id2number[id] = number;
-    return number;
+    return core.status.id2number[id] = this._getNumberById(id);
 }
 
 maps.prototype._getNumberById = function (id) {

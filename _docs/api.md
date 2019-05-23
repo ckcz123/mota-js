@@ -1616,9 +1616,10 @@ core.clearMap(name)
 该函数的name也可以是'all'，若为'all'则为清空所有系统画布。
 
 
-core.fillText(name, text, x, y, style, font)
+core.fillText(name, text, x, y, style, font, maxWidth)
 在某个画布上绘制一段文字。
 text为要绘制的文本，x,y为要绘制的坐标，style可选为绘制的样式，font可选为绘制的字体。（下同）
+如果maxWidth不为null，则视为文字最大宽度，如果超过此宽度则会自动放缩文字直到自适应为止。
 请注意textAlign和textBaseline将决定绘制的左右对齐和上下对齐方式。
 具体可详见core.setTextAlign()和core.setTextBaseline()函数。
 

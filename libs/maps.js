@@ -62,6 +62,14 @@ maps.prototype._mapIntoBlocks = function (map, floor, floorId) {
 
 ////// 从ID获得数字 //////
 maps.prototype.getNumberById = function (id) {
+    core.status.id2number = core.status.id2number || {};
+    if (core.status.id2number[id] != null) return core.status.id2number[id];
+    var number = this._getNumberById(id);
+    core.status.id2number[id] = number;
+    return number;
+}
+
+maps.prototype._getNumberById = function (id) {
     for (var number in this.blocksInfo) {
         if ((this.blocksInfo[number] || {}).id == id)
             return parseInt(number) || 0;

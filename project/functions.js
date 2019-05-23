@@ -913,9 +913,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
         "saveData": function () {
 	// 存档操作，此函数应该返回“具体要存档的内容”
 
-	// 勇士和hash值（防改存档文件来作弊）
-	var hero = core.clone(core.status.hero),
-		hashCode = core.utils.hashCode(hero);
 	// 差异化存储values
 	var values = {};
 	for (var key in core.values) {
@@ -926,16 +923,18 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 要存档的内容
 	var data = {
 		'floorId': core.status.floorId,
-		'hero': hero,
+		'hero': core.clone(core.status.hero),
 		'hard': core.status.hard,
 		'maps': core.maps.saveMap(),
 		'route': core.encodeRoute(core.status.route),
 		'values': values,
 		'shops': {},
 		'version': core.firstData.version,
-		"time": new Date().getTime(),
-		"hashCode": hashCode
+		"time": new Date().getTime()
 	};
+	if (core.flags.checkConsole) {
+		data.hashCode = core.utils.hashCode(data.hero);
+	}
 	// 设置商店次数
 	for (var shopId in core.status.shops) {
 		data.shops[shopId] = {

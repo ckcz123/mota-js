@@ -372,7 +372,8 @@ items.prototype._realLoadEquip = function (type, loadId, unloadId, callback) {
 }
 
 items.prototype._realLoadEquip_playSound = function () {
-    core.stopSound(); // 先停止所有音效（为了避免快捷换装很乱）
+    if (core.hasFlag("__quickLoadEquip__")) return;
+    core.stopSound();
     core.playSound('equip.mp3');
 }
 
@@ -398,20 +399,30 @@ items.prototype.quickLoadEquip = function (index) {
         if (v && !this.canEquip(v, true))
             return;
     }
+    core.setFlag("__quickLoadEquip__", true);
     // 快速换装
+    var toEquip = [];
     for (var i = 0; i < equipSize; i++) {
         var now = core.status.hero.equipment[i];
-        if (now) {
-            this.unloadEquip(i);
-            core.status.route.push("unEquip:" + i);
+        // --- 只考虑diff的装备
+        var to = current[i];
+        if (now != to) {
+            toEquip.push(to || null);
+            if (now) {
+                this.unloadEquip(i);
+                core.status.route.push("unEquip:" + i);
+            }
         }
     }
-    for (var i = 0; i < equipSize; i++) {
-        var to = current[i];
+    for (var i in toEquip) {
+        var to = toEquip[i];
         if (to) {
             this.loadEquip(to);
             core.status.route.push("equip:" + to);
         }
     }
+    core.removeFlag("__quickLoadEquip__");
+    this._realLoadEquip_playSound();
+
     core.drawTip("成功换上" + index + "号套装");
 }

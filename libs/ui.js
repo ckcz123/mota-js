@@ -53,11 +53,30 @@ ui.prototype.clearMap = function (name, x, y, width, height) {
 }
 
 ////// 在某个canvas上绘制一段文字 //////
-ui.prototype.fillText = function (name, text, x, y, style, font) {
+ui.prototype.fillText = function (name, text, x, y, style, font, maxWidth) {
     if (style) core.setFillStyle(name, style);
     if (font) core.setFont(name, font);
     var ctx = this.getContextByName(name);
-    if (ctx) ctx.fillText(text, x, y);
+    if (ctx) {
+        // 如果存在最大宽度
+        if (maxWidth != null)
+            this._fillTextWithMaxWidth(ctx, text, x, y, maxWidth);
+        else
+            ctx.fillText(text, x, y);
+    }
+}
+
+////// 自适配字体大小
+ui.prototype._fillTextWithMaxWidth = function (ctx, text, x, y, maxWidth) {
+    // 获得当前字体
+    var font = ctx.font, u = /(\d+)px/.exec(font);
+    if (u == null) return ctx.fillText(text, x, y);
+    for (var font_size = parseInt(u[1]); font_size >= 8; font_size--) {
+        ctx.font = font.replace(/(\d+)px/, font_size+"px");
+        if (ctx.measureText(text).width <= maxWidth) break;
+    }
+    ctx.fillText(text, x, y);
+    ctx.font = font;
 }
 
 ////// 在某个canvas上绘制粗体 //////
@@ -875,7 +894,7 @@ ui.prototype._drawTextBox_getHorizontalPosition = function (content, titleInfo, 
 
 ui.prototype._drawTextBox_getVerticalPosition = function (content, titleInfo, posInfo, validWidth) {
     var textAttribute = core.status.textAttribute || core.initStatus.textAttribute;
-    var lineHeight = textAttribute.textfont + 5;
+    var lineHeight = textAttribute.textfont + 6;
     var realContent = this._getRealContent(content);
     var height = 30 + lineHeight * core.splitLines("ui", realContent, validWidth, this._buildFont()).length;
     if (titleInfo.title) height += textAttribute.titlefont + 5;

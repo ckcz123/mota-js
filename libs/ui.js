@@ -553,6 +553,12 @@ ui.prototype.drawWindowSelector = function(background, x, y, w, h) {
 }
 
 ui.prototype._uievent_drawSelector = function (data) {
+    if (data.x == null || data.y == null || data.width == null || data.height == null) {
+        if (main.mode != 'editor')
+            core.deleteCanvas('_uievent_selector');
+        return;
+    }
+
     var background = data.background || core.status.textAttribute.background;
     if (typeof background != 'string') return;
     var x = core.calValue(data.x), y = core.calValue(data.y), w = core.calValue(data.width), h = core.calValue(data.height);

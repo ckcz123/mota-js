@@ -164,6 +164,7 @@ control.prototype._animationFrame_selector = function (timestamp) {
     if (opacity > 0.95 || opacity < 0.55)
         core.animateFrame.selectorUp = !core.animateFrame.selectorUp;
     core.setOpacity("_selector", opacity);
+    core.setOpacity("_uievent_selector", opacity);
     core.animateFrame.selectorTime = timestamp;
 }
 

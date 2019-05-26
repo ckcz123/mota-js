@@ -1621,7 +1621,7 @@ events.prototype._action_exit = function (data, x, y, prefix) {
 }
 
 events.prototype._action_previewUIEvent = function (data, x, y, prefix) {
-    this.insert(data.action);
+    this.insertAction(data.action);
     core.doAction();
 }
 

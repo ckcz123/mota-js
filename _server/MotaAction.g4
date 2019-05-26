@@ -1877,13 +1877,13 @@ return code;
 
 
 previewUI_s
-    :   'UI绘制预览' '（双击此项可进行预览）' BGNL? Newline action+  BEND Newline
+    :   'ui绘制并预览' '（双击此项可进行预览）' BGNL? Newline action+  BEND Newline
 
 
 /* previewUI_s
-tooltip : previewUI: UI绘制预览
-helpUrl : https://h5mota.com/games/template/_docs/#/event?id=previewUI%ef%bc%9aUI%e7%bb%98%e5%88%b6%e9%a2%84%e8%a7%88
-colour : this.commentColor
+tooltip : previewUI: ui绘制并预览
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=previewUI%ef%bc%9aUI%e7%bb%98%e5%88%b6%e5%b9%b6%e9%a2%84%e8%a7%88
+colour : this.subColor
 var code = ['{"type": "previewUI", "action": [\n', action_0,']},\n'].join('');
 return code;
 */;
@@ -2007,7 +2007,7 @@ drawTextContent_s
 tooltip : drawTextContent：绘制多行文本
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawTextContent%ef%bc%9a%e7%bb%98%e5%88%b6%e5%a4%9a%e8%a1%8c%e6%96%87%e6%9c%ac
 colour : this.subColor
-default : ["绘制多行文本\\n第二行","0","0","","",'rgba(255,255,255,1)',null,"","",false]
+default : ["绘制多行文本\\n可双击编辑","0","0","","",'rgba(255,255,255,1)',null,"","",false]
 var colorRe = MotaActionFunctions.pattern.colorRe;
 TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
 Bool_0 = Bool_0 ?  (', "bold": true') : '';

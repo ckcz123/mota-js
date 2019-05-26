@@ -624,6 +624,7 @@ function omitedcheckUpdateFunction(event) {
             'function_s': 'RawEvalString_0',
             'shopsub': 'EvalString_3',
             'confirm_s': 'EvalString_0',
+            'drawTextContent_s': 'EvalString_0',
         }
         var f = b ? textStringDict[b.type] : null;
         if (f) {

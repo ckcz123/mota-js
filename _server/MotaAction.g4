@@ -1883,7 +1883,6 @@ previewUI_s
 /* previewUI_s
 tooltip : previewUI: ui绘制并预览
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=previewUI%ef%bc%9aUI%e7%bb%98%e5%88%b6%e5%b9%b6%e9%a2%84%e8%a7%88
-colour : this.subColor
 var code = ['{"type": "previewUI", "action": [\n', action_0,']},\n'].join('');
 return code;
 */;
@@ -2001,7 +2000,7 @@ return code;
 */;
 
 drawTextContent_s
-    :   '绘制多行文本'  EvalString BGNL? '左上角坐标' 'x' PosString 'y' PosString '最大宽度' EvalString? '颜色' EvalString? Colour BGNL? '对齐' TextAlign_List '字体大小' EvalString? '行距' EvalString? '粗体' Bool Newline
+    :   '绘制多行文本'  EvalString BGNL? '起点像素' 'x' PosString 'y' PosString '最大宽度' EvalString? '颜色' EvalString? Colour BGNL? '对齐' TextAlign_List '字体大小' EvalString? '行距' EvalString? '粗体' Bool Newline
 
 /* drawTextContent_s
 tooltip : drawTextContent：绘制多行文本
@@ -2032,7 +2031,7 @@ return code;
 */;
 
 fillRect_s
-    :   '绘制矩形' '起点像素坐标' 'x' PosString 'y' PosString '宽' PosString '高' PosString '颜色' EvalString? Colour Newline
+    :   '绘制矩形' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '颜色' EvalString? Colour Newline
 
 /* fillRect_s
 tooltip : fillRect：绘制矩形
@@ -2049,7 +2048,7 @@ return code;
 */;
 
 strokeRect_s
-    :   '绘制矩形边框' '起点像素坐标' 'x' PosString 'y' PosString '宽' PosString '高' PosString '颜色' EvalString? Colour '线宽' EvalString? Newline
+    :   '绘制矩形边框' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '颜色' EvalString? Colour '线宽' EvalString? Newline
 
 /* strokeRect_s
 tooltip : strokeRect：绘制矩形边框
@@ -2070,7 +2069,7 @@ return code;
 */;
 
 drawLine_s
-    :   '绘制线段' '起点像素坐标' 'x' PosString 'y' PosString '终点像素坐标' 'x' PosString 'y' PosString '颜色' EvalString? Colour '线宽' EvalString? Newline
+    :   '绘制线段' '起点像素' 'x' PosString 'y' PosString '终点像素' 'x' PosString 'y' PosString '颜色' EvalString? Colour '线宽' EvalString? Newline
 
 /* drawLine_s
 tooltip : drawLine：绘制线段
@@ -2091,7 +2090,7 @@ return code;
 */;
 
 drawArrow_s
-    :   '绘制箭头' '起点像素坐标' 'x' PosString 'y' PosString '终点像素坐标' 'x' PosString 'y' PosString '颜色' EvalString? Colour '线宽' EvalString? Newline
+    :   '绘制箭头' '起点像素' 'x' PosString 'y' PosString '终点像素' 'x' PosString 'y' PosString '颜色' EvalString? Colour '线宽' EvalString? Newline
 
 /* drawArrow_s
 tooltip : drawArrow：绘制箭头
@@ -2164,7 +2163,7 @@ return code;
 */;
 
 drawImage_s
-    :   '绘制图片' '图片' EvalString '起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? Newline
+    :   '绘制图片' EvalString '起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? Newline
 
 
 /* drawImage_s
@@ -2179,7 +2178,7 @@ return code;
 */;
 
 drawImage_1_s
-    :   '绘制图片' '图片' EvalString BGNL? '裁剪的起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString BGNL?
+    :   '绘制图片' EvalString '裁剪的起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString BGNL?
         '绘制的起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString Newline
 
 

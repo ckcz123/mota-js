@@ -346,6 +346,20 @@ action
     |   clearMap_1_s
     |   setAttribute_s
     |   fillText_s
+    |   fillBoldText_s
+    |   drawTextContent_s
+    |   fillRect_s
+    |   strokeRect_s
+    |   drawLine_s
+    |   drawArrow_s
+    |   fillPolygon_s
+    |   strokePolygon_s
+    |   drawImage_s
+    |   drawImage_1_s
+    |   drawIcon_s
+    |   drawBackground_s
+    |   drawSelector_s
+    |   drawSelector_1_s
     |   unknown_s
     |   function_s
     |   pass_s
@@ -1964,6 +1978,285 @@ var code = '{"type": "fillText", "x": '+PosString_0+', "y": '+PosString_1+EvalSt
 return code;
 */;
 
+fillBoldText_s
+    :   '绘制描边文本' 'x' PosString 'y' PosString '样式' EvalString? Colour '字体' EvalString? BGNL? EvalString Newline
+
+/* fillBoldText_s
+tooltip : fillBoldText：绘制一行描边文本
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillBoldText%ef%bc%9a%e7%bb%98%e5%88%b6%e6%8f%8f%e8%be%b9%e6%96%87%e6%9c%ac
+colour : this.subColor
+default : ["0","0","",'rgba(255,255,255,1)',"","绘制一行描边文本"]
+var colorRe = MotaActionFunctions.pattern.colorRe;
+var fontRe = MotaActionFunctions.pattern.fontRe;
+if (EvalString_0) {
+  if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
+  EvalString_0 = ', "style": ['+EvalString_0+']';
+}
+if (EvalString_1) {
+  if (!fontRe.test(EvalString_1)) throw new Error('字体必须是 [italic] [bold] 14px Verdana 这种形式或不填');
+  EvalString_1 = ', "font": "' + EvalString_1 + '"';
+}
+var code = '{"type": "fillBoldText", "x": '+PosString_0+', "y": '+PosString_1+EvalString_0+EvalString_1+', "text": "'+EvalString_2+'"},\n';
+return code;
+*/;
+
+drawTextContent_s
+    :   '绘制多行文本'  EvalString BGNL? '左上角坐标' 'x' PosString 'y' PosString '最大宽度' EvalString? '颜色' EvalString? Colour BGNL? '对齐' TextAlign_List '字体大小' EvalString? '行距' EvalString? '粗体' Bool Newline
+
+/* drawTextContent_s
+tooltip : drawTextContent：绘制多行文本
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawTextContent%ef%bc%9a%e7%bb%98%e5%88%b6%e5%a4%9a%e8%a1%8c%e6%96%87%e6%9c%ac
+colour : this.subColor
+default : ["绘制多行文本\\n第二行","0","0","","",'rgba(255,255,255,1)',null,"","",false]
+var colorRe = MotaActionFunctions.pattern.colorRe;
+TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
+Bool_0 = Bool_0 ?  (', "bold": true') : '';
+if (EvalString_1) {
+  if (!/^\d+$/.test(EvalString_1)) throw new Error('最大宽度必须是整数或不填');
+  EvalString_1 = ', "maxWidth": ' + EvalString_1;
+}
+if (EvalString_2) {
+  if (!colorRe.test(EvalString_2))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
+  EvalString_2 = ', "color": ['+EvalString_2+']';
+}
+if (EvalString_3) {
+  if (!/^\d+$/.test(EvalString_3)) throw new Error('字体大小必须是整数或不填');
+  EvalString_3 = ', "fontSize": ' + EvalString_3;
+}
+if (EvalString_4) {
+  if (!/^\d+$/.test(EvalString_4)) throw new Error('行距必须是整数或不填');
+  EvalString_4 = ', "lineHeight": ' + EvalString_4;
+}
+var code = '{"type": "drawTextContent", "text": "'+EvalString_0+'", "left": '+PosString_0+', "top": '+PosString_1+TextAlign_List_0+EvalString_1+EvalString_2+EvalString_3+EvalString_4+Bool_0+'},\n';
+return code;
+*/;
+
+fillRect_s
+    :   '绘制矩形' '起点像素坐标' 'x' PosString 'y' PosString '宽' PosString '高' PosString '颜色' EvalString? Colour Newline
+
+/* fillRect_s
+tooltip : fillRect：绘制矩形
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillRect%ef%bc%9a%e7%bb%98%e5%88%b6%e7%9f%a9%e5%bd%a2
+colour : this.subColor
+default : ["0","0","flag:x","300","",null]
+var colorRe = MotaActionFunctions.pattern.colorRe;
+if (EvalString_0) {
+  if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
+  EvalString_0 = ', "style": ['+EvalString_0+']';
+}
+var code = '{"type": "fillRect", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+EvalString_0+'},\n';
+return code;
+*/;
+
+strokeRect_s
+    :   '绘制矩形边框' '起点像素坐标' 'x' PosString 'y' PosString '宽' PosString '高' PosString '颜色' EvalString? Colour '线宽' EvalString? Newline
+
+/* strokeRect_s
+tooltip : strokeRect：绘制矩形边框
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=strokeRect%ef%bc%9a%e7%bb%98%e5%88%b6%e7%9f%a9%e5%bd%a2%e8%be%b9%e6%a1%86
+colour : this.subColor
+default : ["0","0","flag:x","300","",null,""]
+var colorRe = MotaActionFunctions.pattern.colorRe;
+if (EvalString_0) {
+  if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
+  EvalString_0 = ', "style": ['+EvalString_0+']';
+}
+if (EvalString_1) {
+  if (!/^\d+$/.test(EvalString_1))throw new Error('线宽必须是整数或不填');
+  EvalString_1 = ', "lineWidth": '+EvalString_1;
+}
+var code = '{"type": "strokeRect", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+EvalString_0+EvalString_1+'},\n';
+return code;
+*/;
+
+drawLine_s
+    :   '绘制线段' '起点像素坐标' 'x' PosString 'y' PosString '终点像素坐标' 'x' PosString 'y' PosString '颜色' EvalString? Colour '线宽' EvalString? Newline
+
+/* drawLine_s
+tooltip : drawLine：绘制线段
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawLine%ef%bc%9a%e7%bb%98%e5%88%b6%e7%ba%bf%e6%ae%b5
+colour : this.subColor
+default : ["0","0","flag:x","300","",null,""]
+var colorRe = MotaActionFunctions.pattern.colorRe;
+if (EvalString_0) {
+  if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
+  EvalString_0 = ', "style": ['+EvalString_0+']';
+}
+if (EvalString_1) {
+  if (!/^\d+$/.test(EvalString_1))throw new Error('线宽必须是整数或不填');
+  EvalString_1 = ', "lineWidth": '+EvalString_1;
+}
+var code = '{"type": "drawLine", "x1": '+PosString_0+', "y1": '+PosString_1+', "x2": '+PosString_2+', "y2": '+PosString_3+EvalString_0+EvalString_1+'},\n';
+return code;
+*/;
+
+drawArrow_s
+    :   '绘制箭头' '起点像素坐标' 'x' PosString 'y' PosString '终点像素坐标' 'x' PosString 'y' PosString '颜色' EvalString? Colour '线宽' EvalString? Newline
+
+/* drawArrow_s
+tooltip : drawArrow：绘制箭头
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawArrow%ef%bc%9a%e7%bb%98%e5%88%b6%e7%ae%ad%e5%a4%b4
+colour : this.subColor
+default : ["0","0","flag:x","300","",null,""]
+var colorRe = MotaActionFunctions.pattern.colorRe;
+if (EvalString_0) {
+  if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
+  EvalString_0 = ', "style": ['+EvalString_0+']';
+}
+if (EvalString_1) {
+  if (!/^\d+$/.test(EvalString_1))throw new Error('线宽必须是整数或不填');
+  EvalString_1 = ', "lineWidth": '+EvalString_1;
+}
+var code = '{"type": "drawArrow", "x1": '+PosString_0+', "y1": '+PosString_1+', "x2": '+PosString_2+', "y2": '+PosString_3+EvalString_0+EvalString_1+'},\n';
+return code;
+*/;
+
+
+fillPolygon_s
+    :   '绘制多边形' '顶点像素列表' 'x' EvalString 'y' EvalString '颜色' EvalString? Colour Newline
+
+/* fillPolygon_s
+tooltip : fillPolygon：绘制多边形
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillPolygon%ef%bc%9a%e7%bb%98%e5%88%b6%e5%a4%9a%e8%be%b9%e5%bd%a2
+colour : this.subColor
+default : ["0,0,100","0,100,0","",null]
+var colorRe = MotaActionFunctions.pattern.colorRe;
+var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
+if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
+EvalString_0=EvalString_0.split(',');
+EvalString_1=EvalString_1.split(',');
+if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
+for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+if (EvalString_2) {
+  if (!colorRe.test(EvalString_2))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
+  EvalString_2 = ', "style": ['+EvalString_2+']';
+}
+var code = '{"type": "fillPolygon", "nodes": ['+EvalString_0+']'+EvalString_2+'},\n';
+return code;
+*/;
+
+
+strokePolygon_s
+    :   '绘制多边形边框' '顶点像素列表' 'x' EvalString 'y' EvalString '颜色' EvalString? Colour '线宽' EvalString? Newline
+
+/* strokePolygon_s
+tooltip : strokePolygon：绘制多边形边框
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=strokePolygon%ef%bc%9a%e7%bb%98%e5%88%b6%e5%a4%9a%e8%be%b9%e5%bd%a2%e8%be%b9%e6%a1%86
+colour : this.subColor
+default : ["0,0,100","0,100,0","",null,""]
+var colorRe = MotaActionFunctions.pattern.colorRe;
+var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
+if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
+EvalString_0=EvalString_0.split(',');
+EvalString_1=EvalString_1.split(',');
+if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
+for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+if (EvalString_2) {
+  if (!colorRe.test(EvalString_2))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
+  EvalString_2 = ', "style": ['+EvalString_2+']';
+}
+if (EvalString_3) {
+  if (!/^\d+$/.test(EvalString_3))throw new Error('线宽必须是整数或不填');
+  EvalString_3 = ', "lineWidth": '+EvalString_3;
+}
+var code = '{"type": "strokePolygon", "nodes": ['+EvalString_0+']'+EvalString_2+EvalString_3+'},\n';
+return code;
+*/;
+
+drawImage_s
+    :   '绘制图片' '图片' EvalString '起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? Newline
+
+
+/* drawImage_s
+tooltip : drawImage：绘制图片
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawImage%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9b%be%e7%89%87
+default : ["bg.jpg","0","0","",""]
+colour : this.subColor
+PosString_2 = PosString_2 ? (', "w": '+PosString_2) : '';
+PosString_3 = PosString_3 ? (', "h": '+PosString_3) : '';
+var code = '{"type": "drawImage", "image": "'+EvalString_0+'", "x": '+PosString_0+', "y": '+PosString_1+PosString_2+PosString_3+'},\n';
+return code;
+*/;
+
+drawImage_1_s
+    :   '绘制图片' '图片' EvalString BGNL? '裁剪的起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString BGNL?
+        '绘制的起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString Newline
+
+
+/* drawImage_1_s
+tooltip : drawImage：绘制图片
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawImage%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9b%be%e7%89%87
+default : ["bg.jpg","0","0","32","32","0","0","32","32"]
+colour : this.subColor
+var code = '{"type": "drawImage", "image": "'+EvalString_0+'"'+
+           ', "x": '+PosString_0+', "y": '+PosString_1+', "w": '+PosString_2+', "h": '+PosString_3+
+           ', "x1": '+PosString_4+', "y1": '+PosString_5+', "w1": '+PosString_6+', "h1": '+PosString_7+'},\n';
+return code;
+*/;
+
+drawIcon_s
+    :   '绘制图标' 'ID' IdString '起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? Newline
+
+
+/* drawIcon_s
+tooltip : drawIcon：绘制图标
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawIcon%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9b%be%e6%a0%87
+default : ["yellowKey","0","0","",""]
+colour : this.subColor
+PosString_2 = PosString_2 ? (', "width": '+PosString_2) : '';
+PosString_3 = PosString_3 ? (', "height": '+PosString_3) : '';
+var code = '{"type": "drawIcon", "id": "'+IdString_0+'", "x": '+PosString_0+', "y": '+PosString_1+PosString_2+PosString_3+'},\n';
+return code;
+*/;
+
+drawBackground_s
+    :   '绘制背景图' EvalString Colour '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString Newline
+
+
+/* drawBackground_s
+tooltip : drawBackground：绘制背景
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawBackground%ef%bc%9a%e7%bb%98%e5%88%b6%e8%83%8c%e6%99%af%e5%9b%be
+default : ["winskin.png",null,"0","0","100","100"]
+colour : this.subColor
+var colorRe = MotaActionFunctions.pattern.colorRe;
+if (colorRe.test(EvalString_0)) {
+  EvalString_0 = ', "background": ['+EvalString_0+']';
+}
+else if (/^\w+\.png$/.test(EvalString_0)) {
+  EvalString_0 = ', "background": "'+EvalString_0+'"';
+}
+else {
+  throw new Error('背景格式错误,必须是形如0~255,0~255,0~255,0~1的颜色，或一个WindowSkin的png图片名称');
+}
+var code = '{"type": "drawBackground"'+EvalString_0+', "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+'},\n';
+return code;
+*/;
+
+drawSelector_s
+    :   '绘制闪烁光标' EvalString Colour '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString Newline
+
+
+/* drawSelector_s
+tooltip : drawSelector：绘制闪烁光标
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawSelector%ef%bc%9a%e7%bb%98%e5%88%b6%e9%97%aa%e7%83%81%e5%85%89%e6%a0%87
+default : ["winskin.png",null,"0","0","100","100"]
+colour : this.subColor
+var code = '{"type": "drawSelector", "image": "'+EvalString_0+'", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+'},\n';
+return code;
+*/;
+
+drawSelector_1_s
+    :   '清除闪烁光标' Newline
+
+
+/* drawSelector_1_s
+tooltip : drawSelector：清除闪烁光标
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showImage%ef%bc%9a%e6%98%be%e7%a4%ba%e5%9b%be%e7%89%87
+colour : this.subColor
+var code = '{"type": "drawSelector"},\n';
+return code;
+*/;
+
 unknown_s
     :   '自定义事件' BGNL? RawEvalString
 
@@ -2948,6 +3241,98 @@ ActionParser.prototype.parseAction = function() {
         data.x, data.y, data.style, 'rgba('+data.style+')', data.font, data.maxWidth, this.EvalString(data.text), this.next
       ]);
       break;
+    case "fillBoldText": // 绘制一行描边文本
+      data.style = this.Colour(data.style);
+      this.next = MotaActionBlocks['fillBoldText_s'].xmlText([
+        data.x, data.y, data.style, 'rgba('+data.style+')', data.font, this.EvalString(data.text), this.next
+      ]);
+      break;
+    case "drawTextContent": // 绘制多行文本
+      data.color = this.Colour(data.color);
+      this.next = MotaActionBlocks['drawTextContent_s'].xmlText([
+        this.EvalString(data.text), data.left, data.top, data.maxWidth, data.color, 'rgba('+data.color+')',
+        data.align, data.fontSize, data.lineHeight, data.bold, this.next
+      ]);
+      break;
+    case "fillRect": // 绘制矩形
+      data.style = this.Colour(data.style);
+      this.next = MotaActionBlocks['fillRect_s'].xmlText([
+        data.x, data.y, data.width, data.height, data.style, 'rgba('+data.style+')', this.next
+      ]);
+      break;
+    case "strokeRect": // 绘制矩形边框
+      data.style = this.Colour(data.style);
+      this.next = MotaActionBlocks['strokeRect_s'].xmlText([
+        data.x, data.y, data.width, data.height, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
+      ]);
+      break;
+    case "drawLine": // 绘制线段
+      data.style = this.Colour(data.style);
+      this.next = MotaActionBlocks['drawLine_s'].xmlText([
+        data.x1, data.y1, data.x2, data.y2, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
+      ]);
+      break;
+    case "drawArrow": // 绘制线段
+      data.style = this.Colour(data.style);
+      this.next = MotaActionBlocks['drawArrow_s'].xmlText([
+        data.x1, data.y1, data.x2, data.y2, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
+      ]);
+      break;
+    case "fillPolygon": // 绘制多边形
+      data.style = this.Colour(data.style);
+      var x_str=[],y_str=[];
+      data.nodes.forEach(function (t) {
+        x_str.push(t[0]);
+        y_str.push(t[1]);
+      })
+      this.next = MotaActionBlocks['fillPolygon_s'].xmlText([
+        x_str.join(','), y_str.join(','), data.style, 'rgba('+data.style+')', this.next
+      ]);
+      break;
+    case "strokePolygon": // 绘制多边形
+      data.style = this.Colour(data.style);
+      var x_str=[],y_str=[];
+      data.nodes.forEach(function (t) {
+        x_str.push(t[0]);
+        y_str.push(t[1]);
+      })
+      this.next = MotaActionBlocks['strokePolygon_s'].xmlText([
+        x_str.join(','), y_str.join(','), data.style, 'rgba('+data.style+')', data.lineWidth, this.next
+      ]);
+      break;
+    case "drawImage": // 绘制图片
+      if (data.x1 != null && data.y1 != null && data.w1 != null && data.h1 != null) {
+        this.next = MotaActionBlocks['drawImage_1_s'].xmlText([
+          data.image, data.x, data.y, data.w, data.h, data.x1, data.y1, data.w1, data.h1, this.next
+        ]);
+      }
+      else {
+        this.next = MotaActionBlocks['drawImage_s'].xmlText([
+          data.image, data.x, data.y, data.w, data.h, this.next
+        ]);
+      }
+      break;
+    case "drawIcon": // 绘制图标
+      this.next = MotaActionBlocks['drawIcon_s'].xmlText([
+        data.id, data.x, data.y, data.width, data.height, this.next
+      ]);
+      break;
+    case "drawBackground": // 绘制背景
+      if (!/^\w+\.png$/.test(data.background))
+        data.background=this.Colour(data.background);
+      this.next = MotaActionBlocks['drawBackground_s'].xmlText([
+        data.background, 'rgba('+data.background+')', data.x, data.y, data.width, data.height, this.next
+      ]);
+      break;
+    case "drawSelector": // 绘制光标
+      if (data.image) {
+        this.next = MotaActionBlocks['drawSelector_s'].xmlText([
+          data.image, data.x, data.y, data.width, data.height, this.next
+        ]);
+      }
+      else {
+        this.next = MotaActionBlocks['drawSelector_1_s'].xmlText([this.next]);
+      }
     case "animateImage":  // 兼容 animateImage
       break;
     default:

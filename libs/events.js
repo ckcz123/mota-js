@@ -1645,8 +1645,18 @@ events.prototype._action_fillRect = function (data, x, y, prefix) {
     core.doAction();
 }
 
+events.prototype._action_fillPolygon = function (data, x, y, prefix) {
+    core.ui._uievent_fillPolygon(data);
+    core.doAction();
+}
+
 events.prototype._action_strokeRect = function (data, x, y, prefix) {
     core.ui._uievent_strokeRect(data);
+    core.doAction();
+}
+
+events.prototype._action_strokePolygon = function (data, x, y, prefix) {
+    core.ui._uievent_strokePolygon(data);
     core.doAction();
 }
 

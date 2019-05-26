@@ -938,8 +938,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		'values': values,
 		'shops': {},
 		'version': core.firstData.version,
-		"time": new Date().getTime(),
-		"hashCode": hashCode
+		"time": new Date().getTime()
 	};
 	if (core.flags.checkConsole) {
 		data.hashCode = core.utils.hashCode(data.hero);

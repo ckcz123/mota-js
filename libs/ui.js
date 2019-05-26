@@ -106,6 +106,7 @@ ui.prototype.fillBoldText = function (name, text, x, y, style, font) {
     if (!ctx) return;
     if (font) ctx.font = font;
     if (!style) style = ctx.fillStyle;
+    if (style instanceof Array) style = core.arrayToRGBA(style);
     ctx.fillStyle = '#000000';
     ctx.fillText(text, x-1, y-1);
     ctx.fillText(text, x-1, y+1);
@@ -132,6 +133,27 @@ ui.prototype._uievent_fillRect = function (data) {
     this.fillRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), data.style);
 }
 
+////// 在某个canvas上绘制一个多边形 //////
+ui.prototype.fillPolygon = function (name, nodes, style) {
+    if (style) core.setFillStyle(name, style);
+    var ctx = this.getContextByName(name);
+    if (!ctx) return;
+    if (!nodes || nodes.length<3) return;
+    ctx.beginPath();
+    for (var i = 0; i < nodes.length; ++i) {
+        var x = core.calValue(nodes[i][0]), y = core.calValue(nodes[i][1]);
+        if (i == 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fill();
+}
+
+ui.prototype._uievent_fillPolygon = function (data) {
+    this._createUIEvent();
+    this.fillPolygon('uievent', data.nodes, data.style);
+}
+
 ////// 在某个canvas上绘制一个矩形的边框 //////
 ui.prototype.strokeRect = function (name, x, y, width, height, style, lineWidth) {
     if (style) core.setStrokeStyle(name, style);
@@ -143,6 +165,28 @@ ui.prototype.strokeRect = function (name, x, y, width, height, style, lineWidth)
 ui.prototype._uievent_strokeRect = function (data) {
     this._createUIEvent();
     this.strokeRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), data.style, data.lineWidth);
+}
+
+////// 在某个canvas上绘制一个多边形的边框 //////
+ui.prototype.strokePolygon = function (name, nodes, style, lineWidth) {
+    if (style) core.setStrokeStyle(name, style);
+    if (lineWidth) core.setLineWidth(name, lineWidth);
+    var ctx = this.getContextByName(name);
+    if (!ctx) return;
+    if (!nodes || nodes.length<3) return;
+    ctx.beginPath();
+    for (var i = 0; i < nodes.length; ++i) {
+        var x = core.calValue(nodes[i][0]), y = core.calValue(nodes[i][1]);
+        if (i == 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+}
+
+ui.prototype._uievent_strokePolygon = function (data) {
+    this._createUIEvent();
+    this.strokePolygon('uievent', data.nodes, data.style, data.lineWidth);
 }
 
 ////// 在某个canvas上绘制一条线 //////
@@ -326,7 +370,7 @@ ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
 
 ui.prototype._uievent_drawImage = function (data) {
     this._createUIEvent();
-    this.drawImage(data.name, core.calValue(data.x), core.calValue(data.y), core.calValue(data.w), core.calValue(data.h),
+    this.drawImage('uievent', data.image, core.calValue(data.x), core.calValue(data.y), core.calValue(data.w), core.calValue(data.h),
         core.calValue(data.x1), core.calValue(data.y1), core.calValue(data.w1), core.calValue(data.h1));
 }
 
@@ -555,13 +599,13 @@ ui.prototype.drawWindowSelector = function(background, x, y, w, h) {
 }
 
 ui.prototype._uievent_drawSelector = function (data) {
-    if (data.x == null || data.y == null || data.width == null || data.height == null) {
+    if (data.image == null) {
         if (main.mode != 'editor')
             core.deleteCanvas('_uievent_selector');
         return;
     }
 
-    var background = data.background || core.status.textAttribute.background;
+    var background = data.image || core.status.textAttribute.background;
     if (typeof background != 'string') return;
     var x = core.calValue(data.x), y = core.calValue(data.y), w = core.calValue(data.width), h = core.calValue(data.height);
     w = Math.round(w); h = Math.round(h);
@@ -775,7 +819,8 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     config.left = config.left || 0;
     config.right = config.left + (config.maxWidth == null ? ctx.canvas.width : config.maxWidth);
     config.top = config.top || 0;
-    config.color = config.color || core.arrayToRGBA(textAttribute.text);
+    config.color = config.color || textAttribute.text;
+    if (config.color instanceof Array) config.color = core.arrayToRGBA(config.color);
     if (config.bold == null) config.bold = textAttribute.bold;
     config.align = config.align || textAttribute.align || "left";
     config.fontSize = config.fontSize || textAttribute.textfont;
@@ -796,16 +841,16 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     var _textBaseLine = tempCtx.textBaseline;
     tempCtx.textBaseline = 'top';
     tempCtx.font = this._buildFont(config.fontSize, config.bold);
-    var color = config.color;
-    if (color instanceof Array) color = core.arrayToRGBA(color);
-    tempCtx.fillStyle = color;
+    tempCtx.fillStyle = config.color;
     this._drawTextContent_draw(ctx, tempCtx, content, config);
     tempCtx.textBaseline = _textBaseLine;
 }
 
 ui.prototype._uievent_drawTextContent = function (data) {
     this._createUIEvent();
-    this.drawTextContent('uievent', core.replaceText(data.content), data);
+    data.left = core.calValue(data.left);
+    data.top = core.calValue(data.top);
+    this.drawTextContent('uievent', core.replaceText(data.text), data);
 }
 
 // 绘制的基本逻辑：

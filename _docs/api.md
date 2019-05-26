@@ -1755,7 +1755,7 @@ config为绘制的配置项，目前可以包括如下几项：
  - bold：是否粗体。如果不设置默认为false。
  - align：文字对齐方式，仅在maxWidth设置时有效，默认为'left'。
  - fontSize：字体大小，如果不设置则使用剧情文本设置中的正文字体大小。
- - lineHeight：绘制的行距值，如果不设置则使用fontSize*1.3（即1.3被行距）。
+ - lineHeight：绘制的行距值，如果不设置则使用fontSize*1.3（即1.3倍行距）。
  - time：打字机效果。若不为0，则会逐个字进行绘制，并设置core.status.event.interval定时器。
 
 

@@ -228,7 +228,7 @@ default : [null,"MT1",null,0,0,null,500,null]
 var toFloorId = IdString_0;
 if (Floor_List_0!='floorId') toFloorId = Floor_List_0;
 var loc = ', "loc": ['+Number_0+', '+Number_1+']';
-if (Stair_List_0==='now')loc = '';
+if (Stair_List_0===':now') loc = '';
 else if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 Int_0 = (Int_0!=='')  ?(', "time": '+Int_0):'';
@@ -2032,8 +2032,8 @@ Floor_List
     /*Floor_List ['floorId',':before',':next']*/;
 
 Stair_List
-    :   '坐标'|'上楼梯'|'下楼梯'|'保持不变'
-    /*Stair_List ['loc','upFloor','downFloor','now']*/;
+    :   '坐标'|'上楼梯'|'下楼梯'|'保持不变'|'中心对称点'|'x对称点'|'y对称点'
+    /*Stair_List ['loc','upFloor','downFloor',':now',':symmetry',':symmetry_x',':symmetry_y']*/;
 
 SetTextPosition_List
     :   '不改变'|'距离顶部'|'居中'|'距离底部'
@@ -2220,7 +2220,7 @@ ActionParser.prototype.parse = function (obj,type) {
       if(!obj)obj={};
       if(!this.isset(obj.loc)) {
         obj.loc=[0,0];
-        if (!this.isset(obj.stair)) obj.stair='now';
+        if (!this.isset(obj.stair)) obj.stair=':now';
       }
       if (obj.floorId==':before'||obj.floorId==':next') {
         obj.floorType=obj.floorId;

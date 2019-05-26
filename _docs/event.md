@@ -1795,6 +1795,74 @@ yes和no均为必填项，即用户点击确认或取消后执行的事件。
 
 该事件会进行等待，直到所有可能的异步事件（异步动画除外）执行完毕。
 
+### previewUI：UI绘制预览
+
+此项可在地图编辑器中预览UI界面的绘制效果。
+
+在编辑器中将会把此项包含的所有UI绘制事件进行绘制从而可以进行预览。
+
+值得注意的是，在游戏中，UI绘制事件都是绘制在uievent层上的。
+
+### clearMap：清除画布
+
+UI绘制事件。
+
+`{"type": "clearMap"}`可以清除`uievent`画布的内容。
+
+```js
+[
+    {"type": "clearMap", "x": 0, "y": 0, "width": "flag:width", "height": 416}, // 清除画布的一部分
+    {"type": "clearMap"}, // 清空并删除画布
+]
+```
+
+x, y, width, height均可选，表示要清除的坐标和长宽。也可以使用`flag:xxx`。
+
+如果存在某一项不填则会清空全部画布并删除。
+
+### setAttribute：设置画布属性
+
+UI绘制事件。
+
+此项可以设置`uievent`画布的各项属性。
+
+```js
+[
+    {"type": "setAttribute", "font": "17px Verdana", "fillStyle": [255,0,0,1]},
+]
+```
+
+可以选择性的设置如下几项内容：
+- `font`：字体，必须是`[italic] [bold] 14px Verdana`这种形式
+- `fillStyle`：填充样式，必须是三元组RGB或四元组RGBA
+- `strokeStyle`：边框样式，必须是三元组RGB或者四元组RGBA
+- `lineWidth`：线宽度，必须是正整数
+- `alpha`：不透明度，必须是0到1之间的浮点数
+- `align`：对齐方式，只能是`left`, `center`, `right`，分别代表左对齐，居中和右对齐
+- `baseline`：基准线，只能是`top`, `middle`, `alphabetic`, `bottom`，分别代表顶部，居中，标准值和底部。
+
+### fillText：绘制文本
+
+UI绘制事件。
+
+此项可以绘制一行文本。
+
+```js
+[
+    {"type": "fillText", "text"："要绘制的文本", "x": 10, "y": 20, "maxWidth": 50}
+]
+```
+
+text必填，为要绘制的文本，支持`${}`的写法，不支持一切转义字符或换行符。
+
+x和y必填，为要绘制的左上角坐标。请使用`setAttribute`来设置绘制的对齐方式和基准线。
+
+style可选，如果设置需要是三元组RGB或四元组RBGA，代表绘制样式。
+
+font可选，如果设置则是要绘制的字体。
+
+maxWidth可选，如果设置且不为0，则代表要绘制的最大宽度；超过此宽度会自动放缩。
+
 ### function: 自定义JS脚本
 
 上述给出了这么多事件，但有时候往往不能满足需求，这时候就需要执行自定义脚本了。

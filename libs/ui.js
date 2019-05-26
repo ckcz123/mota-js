@@ -225,12 +225,14 @@ ui.prototype.setOpacity = function (name, opacity) {
 ////// 设置某个canvas的绘制属性（如颜色等） //////
 ui.prototype.setFillStyle = function (name, style) {
     var ctx = this.getContextByName(name);
+    if (style instanceof Array) style = core.arrayToRGBA(style);
     if (ctx) ctx.fillStyle = style;
 }
 
 ////// 设置某个canvas边框属性 //////
 ui.prototype.setStrokeStyle = function (name, style) {
     var ctx = this.getContextByName(name);
+    if (style instanceof Array) style = core.arrayToRGBA(style);
     if (ctx) ctx.strokeStyle = style;
 }
 
@@ -656,17 +658,11 @@ ui.prototype._uievent_drawBackground = function (data) {
     var background = data.background || core.status.textAttribute.background;
     var x = core.calValue(data.x), y = core.calValue(data.y), w = core.calValue(data.width), h = core.calValue(data.height);
     if (typeof background == 'string') {
-        if (data.alpha != null) this.setAlpha('uievent', data.alpha);
         this.drawWindowSkin(background, 'uievent', x, y, w, h);
     }
     else if (background instanceof Array) {
-        var alpha = background[3];
-        if (alpha == null) alpha = 1;
-        if (data.alpha != null) alpha = data.alpha;
-        this.setAlpha('uievent', alpha);
-        this.setLineWidth('uievent', 2);
-        this.fillRect('uievent', x, y, w, h, core.arrayToRGB(background));
-        this.strokeRect('uievent', x, y, w, h, core.status.globalAttribute.borderColor);
+        this.fillRect('uievent', x, y, w, h, core.arrayToRGBA(background));
+        this.strokeRect('uievent', x, y, w, h);
     }
 }
 
@@ -800,7 +796,9 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     var _textBaseLine = tempCtx.textBaseline;
     tempCtx.textBaseline = 'top';
     tempCtx.font = this._buildFont(config.fontSize, config.bold);
-    tempCtx.fillStyle = config.color;
+    var color = config.color;
+    if (color instanceof Array) color = core.arrayToRGBA(color);
+    tempCtx.fillStyle = color;
     this._drawTextContent_draw(ctx, tempCtx, content, config);
     tempCtx.textBaseline = _textBaseLine;
 }

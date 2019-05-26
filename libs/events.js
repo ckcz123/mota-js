@@ -1620,7 +1620,7 @@ events.prototype._action_exit = function (data, x, y, prefix) {
     core.doAction();
 }
 
-events.prototype._action_previewUIEvent = function (data, x, y, prefix) {
+events.prototype._action_previewUI = function (data, x, y, prefix) {
     this.insertAction(data.action);
     core.doAction();
 }

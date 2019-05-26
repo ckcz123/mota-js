@@ -169,6 +169,13 @@ editor_blockly = function () {
       MotaActionBlocks['autoSave_s'].xmlText(),
       MotaActionBlocks['callLoad_s'].xmlText(),
     ],
+    'UI绘制':[
+      MotaActionBlocks['previewUI_s'].xmlText(),
+      MotaActionBlocks['clearMap_s'].xmlText(),
+      MotaActionBlocks['clearMap_1_s'].xmlText(),
+      MotaActionBlocks['setAttribute_s'].xmlText(),
+      MotaActionBlocks['fillText_s'].xmlText(),
+    ],
     '原生脚本':[
       MotaActionBlocks['function_s'].xmlText(),
       MotaActionBlocks['unknown_s'].xmlText(),
@@ -650,40 +657,26 @@ function omitedcheckUpdateFunction(event) {
 
     // Index from 1 - 9
     editor_blockly.openToolbox = function(index) {
-        // var element = document.getElementById(':'+index);
-        // if (element == null || element.getAttribute("aria-selected")=="true") return;
-        // element.click();
-        editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index-1]);
+        if (index < 0) index += editor_blockly.workspace.toolbox_.tree_.children_.length;
+        editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index]);
     }
     editor_blockly.reopenToolbox = function(index) {
-        // var element = document.getElementById(':'+index);
-        // if (element == null) return;
-        // if (element.getAttribute("aria-selected")=="true") element.click();
-        // element.click();
-        editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index-1]);
-        editor_blockly.workspace.getFlyout_().show(editor_blockly.workspace.toolbox_.tree_.children_[index-1].blocks);
+        if (index < 0) index += editor_blockly.workspace.toolbox_.tree_.children_.length;
+        editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index]);
+        editor_blockly.workspace.getFlyout_().show(editor_blockly.workspace.toolbox_.tree_.children_[index].blocks);
     }
 
     editor_blockly.closeToolbox = function() {
-        /*
-        for (var i=1; i<=10; i++) {
-            var element = document.getElementById(':'+i);
-            if (element && element.getAttribute("aria-selected")=="true") {
-                element.click();
-                return;
-            }
-        }
-        */
         editor_blockly.workspace.toolbox_.clearSelection();
     }
 
     var searchInput = document.getElementById("searchBlock");
     searchInput.onfocus = function () {
-        editor_blockly.reopenToolbox(10);
+        editor_blockly.reopenToolbox(-1);
     }
 
     searchInput.oninput = function () {
-        editor_blockly.reopenToolbox(10);
+        editor_blockly.reopenToolbox(-1);
     }
 
     editor_blockly.searchBlock = function (value) {

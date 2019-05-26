@@ -152,8 +152,11 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
 }
 
 control.prototype._animationFrame_selector = function (timestamp) {
-    if (timestamp - core.animateFrame.selectorTime <= 20 || !core.dymCanvas._selector) return;
-    var opacity = parseFloat(core.dymCanvas._selector.canvas.style.opacity);
+    if (timestamp - core.animateFrame.selectorTime <= 20) return;
+    var opacity = null;
+    if (core.dymCanvas._selector) opacity = parseFloat(core.dymCanvas._selector.canvas.style.opacity);
+    else if (core.dymCanvas._uievent_selector) opacity = parseFloat(core.dymCanvas._uievent_selector.canvas.style.opacity);
+    if (!core.isset(opacity)) return;
     if (core.animateFrame.selectorUp)
         opacity += 0.02;
     else

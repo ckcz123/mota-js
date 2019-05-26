@@ -1620,6 +1620,76 @@ events.prototype._action_exit = function (data, x, y, prefix) {
     core.doAction();
 }
 
+events.prototype._action_previewUIEvent = function (data, x, y, prefix) {
+    this.insert(data.action);
+    core.doAction();
+}
+
+events.prototype._action_clearMap = function (data, x, y, prefix) {
+    core.ui._uievent_clearMap(data);
+    core.doAction();
+}
+
+events.prototype._action_fillText = function (data, x, y, prefix) {
+    core.ui._uievent_fillText(data);
+    core.doAction();
+}
+
+events.prototype._action_fillBoldText = function (data, x, y, prefix) {
+    core.ui._uievent_fillBoldText(data);
+    core.doAction();
+}
+
+events.prototype._action_fillRect = function (data, x, y, prefix) {
+    core.ui._uievent_fillRect(data);
+    core.doAction();
+}
+
+events.prototype._action_strokeRect = function (data, x, y, prefix) {
+    core.ui._uievent_strokeRect(data);
+    core.doAction();
+}
+
+events.prototype._action_drawLine = function (data, x, y, prefix) {
+    core.ui._uievent_drawLine(data);
+    core.doAction();
+}
+
+events.prototype._action_drawArrow = function (data, x, y, prefix) {
+    core.ui._uievent_drawArrow(data);
+    core.doAction();
+}
+
+events.prototype._action_setAttribute = function (data, x, y, prefix) {
+    core.ui._uievent_setAttribute(data);
+    core.doAction();
+}
+
+events.prototype._action_drawImage = function (data, x, y, prefix) {
+    core.ui._uievent_drawImage(data);
+    core.doAction();
+}
+
+events.prototype._action_drawIcon = function (data, x, y, prefix) {
+    core.ui._uievent_drawIcon(data);
+    core.doAction();
+}
+
+events.prototype._action_drawSelector = function (data, x, y, prefix) {
+    core.ui._uievent_drawSelector(data);
+    core.doAction();
+}
+
+events.prototype._action_drawBackground = function (data, x, y, prefix) {
+    core.ui._uievent_drawBackground(data);
+    core.doAction();
+}
+
+events.prototype._action_drawTextContent = function (data, x, y, prefix) {
+    core.ui._uievent_drawTextContent(data);
+    core.doAction();
+}
+
 // ------ 点击状态栏图标所进行的一些操作 ------ //
 
 ////// 判断当前能否进入某个事件 //////

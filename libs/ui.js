@@ -37,6 +37,13 @@ ui.prototype.getContextByName = function (name) {
     return null;
 }
 
+ui.prototype._createUIEvent = function () {
+    if (main.mode == 'editor') return;
+    if (!core.dymCanvas['uievent']) {
+        core.createCanvas('uievent', 0, 0, this.PIXEL, this.PIXEL, 135);
+    }
+}
+
 ////// 清除地图 //////
 ui.prototype.clearMap = function (name, x, y, width, height) {
     if (name == 'all') {
@@ -52,6 +59,15 @@ ui.prototype.clearMap = function (name, x, y, width, height) {
     }
 }
 
+ui.prototype._uievent_clearMap = function (data) {
+    if (main.mode != 'editor' && (data.x == null || data.y == null || data.width == null || data.height == null)) {
+        this.deleteCanvas('uievent');
+        return;
+    }
+    this._createUIEvent();
+    this.clearMap('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height));
+}
+
 ////// 在某个canvas上绘制一段文字 //////
 ui.prototype.fillText = function (name, text, x, y, style, font, maxWidth) {
     if (style) core.setFillStyle(name, style);
@@ -64,6 +80,11 @@ ui.prototype.fillText = function (name, text, x, y, style, font, maxWidth) {
         else
             ctx.fillText(text, x, y);
     }
+}
+
+ui.prototype._uievent_fillText = function (data) {
+    this._createUIEvent();
+    this.fillText('uievent', core.replaceText(data.text), core.calValue(data.x), core.calValue(data.y), data.style, data.font, data.maxWidth);
 }
 
 ////// 自适配字体大小
@@ -94,11 +115,21 @@ ui.prototype.fillBoldText = function (name, text, x, y, style, font) {
     ctx.fillText(text, x, y);
 }
 
+ui.prototype._uievent_fillBoldText = function (data) {
+    this._createUIEvent();
+    this.fillBoldText('uievent', core.replaceText(data.text), core.calValue(data.x), core.calValue(data.y), data.style, data.font);
+}
+
 ////// 在某个canvas上绘制一个矩形 //////
 ui.prototype.fillRect = function (name, x, y, width, height, style) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
     if (ctx) ctx.fillRect(x, y, width, height);
+}
+
+ui.prototype._uievent_fillRect = function (data) {
+    this._createUIEvent();
+    this.fillRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), data.style);
 }
 
 ////// 在某个canvas上绘制一个矩形的边框 //////
@@ -107,6 +138,11 @@ ui.prototype.strokeRect = function (name, x, y, width, height, style, lineWidth)
     if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (ctx) ctx.strokeRect(x, y, width, height);
+}
+
+ui.prototype._uievent_strokeRect = function (data) {
+    this._createUIEvent();
+    this.strokeRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), data.style, data.lineWidth);
 }
 
 ////// 在某个canvas上绘制一条线 //////
@@ -119,6 +155,11 @@ ui.prototype.drawLine = function (name, x1, y1, x2, y2, style, lineWidth) {
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
     ctx.stroke();
+}
+
+ui.prototype._uievent_drawLine = function (data) {
+    this._createUIEvent();
+    this.drawLine('uievent', core.calValue(data.x1), core.calValue(data.y1), core.calValue(data.x2), core.calValue(data.y2), data.style, data.lineWidth);
 }
 
 ////// 在某个canvas上绘制一个箭头 //////
@@ -138,6 +179,11 @@ ui.prototype.drawArrow = function (name, x1, y1, x2, y2, style, lineWidth) {
     ctx.moveTo(x2, y2);
     ctx.lineTo(x2-head*Math.cos(angle+Math.PI/6),y2-head*Math.sin(angle+Math.PI/6));
     ctx.stroke();
+}
+
+ui.prototype._uievent_drawArrow = function (data) {
+    this._createUIEvent();
+    this.drawArrow('uievent', core.calValue(data.x1), core.calValue(data.y1), core.calValue(data.x2), core.calValue(data.y2), data.style, data.lineWidth);
 }
 
 ////// 设置某个canvas的文字字体 //////
@@ -200,6 +246,17 @@ ui.prototype.setTextBaseline = function (name, baseline) {
     if (ctx) ctx.textBaseline = baseline;
 }
 
+ui.prototype._uievent_setAttribute = function (data) {
+    this._createUIEvent();
+    if (data.font) this.setFont('uievent', data.font);
+    if (data.lineWidth) this.setLineWidth('uievent', data.lineWidth);
+    if (data.alpha != null) this.setAlpha('uievent', data.alpha);
+    if (data.fillStyle) this.setFillStyle('uievent', data.fillStyle);
+    if (data.strokeStyle) this.setStrokeStyle('uievent', data.strokeStyle);
+    if (data.align) this.setTextAlign('uievent', data.align);
+    if (data.baseline) this.setTextBaseline('uievent', data.baseline);
+}
+
 ////// 计算某段文字的宽度 //////
 ui.prototype.calWidth = function (name, text, font) {
     var ctx = this.getContextByName(name);
@@ -251,9 +308,9 @@ ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
     }
 
     // 只能接受2, 4, 8个参数
-    if (core.isset(x) && core.isset(y)) {
-        if (core.isset(w) && core.isset(h)) {
-            if (core.isset(x1) && core.isset(y1) && core.isset(w1) && core.isset(h1)) {
+    if (x != null && y != null) {
+        if (w != null && h != null) {
+            if (x1 != null && y1 != null && w1 != null && h1 != null) {
                 ctx.drawImage(image, x, y, w, h, x1, y1, w1, h1);
                 return;
             }
@@ -263,6 +320,30 @@ ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
         ctx.drawImage(image, x, y);
         return;
     }
+}
+
+ui.prototype._uievent_drawImage = function (data) {
+    this._createUIEvent();
+    this.drawImage(data.name, core.calValue(data.x), core.calValue(data.y), core.calValue(data.w), core.calValue(data.h),
+        core.calValue(data.x1), core.calValue(data.y1), core.calValue(data.w1), core.calValue(data.h1));
+}
+
+ui.prototype.drawIcon = function (name, id, x, y, w, h) {
+    var ctx = this.getContextByName(name);
+    if (!ctx) return;
+    var info = core.getBlockInfo(id);
+    if (!info) {
+        // 检查状态栏图标
+        if (core.statusBar.icons[id] instanceof Image)
+            info = {image: core.statusBar.icons[id], posX: 0, posY: 0, height: 32};
+        else return;
+    }
+    ctx.drawImage(info.image, 32 * info.posX, info.height * info.posY, 32, info.height, x, y, w || 32, h || info.height);
+}
+
+ui.prototype._uievent_drawIcon = function (data) {
+    this._createUIEvent();
+    this.drawIcon('uievent', data.id, core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height));
 }
 
 ///////////////// UI绘制
@@ -465,23 +546,44 @@ ui.prototype._getPosition = function (content) {
 
 ////// 绘制选择光标
 ui.prototype.drawWindowSelector = function(background, x, y, w, h) {
+    w = Math.round(w), h = Math.round(h);
+    var ctx = core.ui.createCanvas("_selector", x, y, w, h, 165);
+    ctx.canvas.style.opacity = 0.8;
+    this._drawSelector(ctx, background, x, y, w, h);
+}
+
+ui.prototype._uievent_drawSelector = function (data) {
+    var background = data.background || core.status.textAttribute.background;
+    if (typeof background != 'string') return;
+    var x = core.calValue(data.x), y = core.calValue(data.y), w = core.calValue(data.width), h = core.calValue(data.height);
+    w = Math.round(w); h = Math.round(h);
+    if (main.mode == 'editor') {
+        this._drawSelector('uievent', background, x, y, w, h);
+        return;
+    }
+    var ctx = core.createCanvas('_uievent_selector', x, y, w, h, 136);
+    ctx.canvas.style.opacity = 0.8;
+    this._drawSelector(ctx, background, x, y, w, h);
+}
+
+ui.prototype._drawSelector = function (ctx, background, x, y, w, h) {
+    ctx = this.getContextByName(ctx);
+    if (!ctx) return;
     if (typeof background == 'string')
         background = core.material.images.images[background];
-    w = Math.round(w), h = Math.round(h);
-    var dstImage = core.ui.createCanvas("_selector", x, y, w, h, 165);
-    core.setOpacity("_selector", 0.8);
+    if (!(background instanceof Image)) return;
     // back
-    dstImage.drawImage(background, 130, 66, 28, 28,  2,  2,w-4,h-4);
+    ctx.drawImage(background, 130, 66, 28, 28,  2,  2,w-4,h-4);
     // corner
-    dstImage.drawImage(background, 128, 64,  2,  2,  0,  0,  2,  2);
-    dstImage.drawImage(background, 158, 64,  2,  2,w-2,  0,  2,  2);
-    dstImage.drawImage(background, 128, 94,  2,  2,  0,h-2,  2,  2);
-    dstImage.drawImage(background, 158, 94,  2,  2,w-2,h-2,  2,  2);
+    ctx.drawImage(background, 128, 64,  2,  2,  0,  0,  2,  2);
+    ctx.drawImage(background, 158, 64,  2,  2,w-2,  0,  2,  2);
+    ctx.drawImage(background, 128, 94,  2,  2,  0,h-2,  2,  2);
+    ctx.drawImage(background, 158, 94,  2,  2,w-2,h-2,  2,  2);
     // border
-    dstImage.drawImage(background, 130, 64, 28,  2,  2,  0,w-4,  2);
-    dstImage.drawImage(background, 130, 94, 28,  2,  2,h-2,w-4,  2);
-    dstImage.drawImage(background, 128, 66,  2, 28,  0,  2,  2,h-4);
-    dstImage.drawImage(background, 158, 66,  2, 28,w-2,  2,  2,h-4);
+    ctx.drawImage(background, 130, 64, 28,  2,  2,  0,w-4,  2);
+    ctx.drawImage(background, 130, 94, 28,  2,  2,h-2,w-4,  2);
+    ctx.drawImage(background, 128, 66,  2, 28,  0,  2,  2,h-4);
+    ctx.drawImage(background, 158, 66,  2, 28,w-2,  2,  2,h-4);
 }
 
 ////// 绘制 WindowSkin
@@ -541,6 +643,25 @@ ui.prototype.drawBackground = function (left, top, right, bottom, posInfo) {
     if (typeof background == 'string') background = core.initStatus.textAttribute.background;
     this._drawBackground_drawColor(background, left, top, right, bottom, posInfo.position, px, py, xoffset, yoffset);
     return false;
+}
+
+ui.prototype._uievent_drawBackground = function (data) {
+    this._createUIEvent();
+    var background = data.background || core.status.textAttribute.background;
+    var x = core.calValue(data.x), y = core.calValue(data.y), w = core.calValue(data.width), h = core.calValue(data.height);
+    if (typeof background == 'string') {
+        if (data.alpha != null) this.setAlpha('uievent', data.alpha);
+        this.drawWindowSkin(background, 'uievent', x, y, w, h);
+    }
+    else if (background instanceof Array) {
+        var alpha = background[3];
+        if (alpha == null) alpha = 1;
+        if (data.alpha != null) alpha = data.alpha;
+        this.setAlpha('uievent', alpha);
+        this.setLineWidth('uievent', 2);
+        this.fillRect('uievent', x, y, w, h, core.arrayToRGB(background));
+        this.strokeRect('uievent', x, y, w, h, core.status.globalAttribute.borderColor);
+    }
 }
 
 ui.prototype._drawWindowSkin_getOpacity = function () {
@@ -676,6 +797,11 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     tempCtx.fillStyle = config.color;
     this._drawTextContent_draw(ctx, tempCtx, content, config);
     tempCtx.textBaseline = _textBaseLine;
+}
+
+ui.prototype._uievent_drawTextContent = function (data) {
+    this._createUIEvent();
+    this.drawTextContent('uievent', core.replaceText(data.content), data);
 }
 
 // 绘制的基本逻辑：

@@ -2233,13 +2233,13 @@ return code;
 */;
 
 drawSelector_s
-    :   '绘制闪烁光标' EvalString Colour '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString Newline
+    :   '绘制闪烁光标' EvalString '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString Newline
 
 
 /* drawSelector_s
 tooltip : drawSelector：绘制闪烁光标
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawSelector%ef%bc%9a%e7%bb%98%e5%88%b6%e9%97%aa%e7%83%81%e5%85%89%e6%a0%87
-default : ["winskin.png",null,"0","0","100","100"]
+default : ["winskin.png","0","0","100","100"]
 colour : this.subColor
 var code = '{"type": "drawSelector", "image": "'+EvalString_0+'", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+'},\n';
 return code;

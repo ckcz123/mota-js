@@ -612,7 +612,19 @@ function omitedcheckUpdateFunction(event) {
 
     editor_blockly.doubleClickBlock = function (blockId) {
         var b = editor_blockly.workspace.getBlockById(blockId);
-        //console.log(b);
+        // console.log(Blockly.JavaScript.blockToCode(b));
+        if (b && b.type == 'previewUI_s') { // previewUI
+            try {
+                var code = "[" + Blockly.JavaScript.blockToCode(b).replace(/\\i/g, '\\\\i') + "]";
+                eval("var obj="+code);
+                // console.log(obj);
+                if (obj.length > 0 && obj[0].type == 'previewUI') {
+                    uievent.previewUI(obj[0].action);
+                }
+            } catch (e) {main.log(e);}
+            return;
+        }
+
         var textStringDict = {
             'text_0_s': 'EvalString_0',
             'text_1_s': 'EvalString_2',

@@ -371,38 +371,36 @@ selectBox.isSelected=function(value){
 
 uievent = {};
 
-uievent.uieventDiv = document.getElementById('uieventDiv');
+uievent.div = document.getElementById('uieventDiv');
+uievent.title = document.getElementById('uieventTitle');
+uievent.selectPoint = document.getElementById('selectPoint');
+uievent.yes = document.getElementById('uieventYes');
+uievent.no = document.getElementById('uieventNo');
 
-uievent.uieventNo = document.getElementById('uieventNo');
-uievent.uieventNo.onclick = function () {
-    uievent.close();
-}
-
-uievent.uieventYes = document.getElementById('uieventYes');
-uievent.uieventYes.onclick = function () {
+uievent.confirm = function () {
     uievent.close();
     if (uievent.callback) {
         uievent.callback(uievent.floorId, uievent.x, uievent.y);
     }
     delete uievent.callback;
 }
-
-uievent.title = document.getElementById('uieventTitle');
-uievent.selectPoint = document.getElementById('selectPoint');
+uievent.yes.onclick = uievent.confirm;
 
 uievent.close = function () {
     uievent.isOpen = false;
-    uievent.uieventDiv.style.display = 'none';
+    uievent.div.style.display = 'none';
 }
+uievent.no.onclick = uievent.close;
 
 uievent.previewUI = function (list) {
     uievent.isOpen = true;
-    uievent.uieventDiv.style.display = 'block';
+    uievent.div.style.display = 'block';
     uievent.mode = 'previewUI';
     uievent.selectPoint.style.display = 'none';
-    uievent.uieventYes.style.display = 'none';
+    uievent.yes.style.display = 'none';
     uievent.title.innerText = 'UI绘制预览';
 
+    core.setAlpha('uievent', 1);
     core.clearMap('uievent');
 
     // 绘制UI

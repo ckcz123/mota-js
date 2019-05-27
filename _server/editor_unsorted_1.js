@@ -285,6 +285,15 @@ editor.constructor.prototype.listen=function () {
     var shortcut = core.getLocalStorage('shortcut',{48: 0, 49: 0, 50: 0, 51: 0, 52: 0, 53: 0, 54: 0, 55: 0, 56: 0, 57: 0});
     document.body.onkeydown = function (e) {
 
+        // UI预览 & 地图选点
+        if (uievent && uievent.isOpen) {
+            e.preventDefault();
+            if (e.keyCode == 27) uievent.close();
+            if (e.keyCode == 13) uievent.confirm();
+            // TODO：WASD平移大地图
+            return;
+        }
+
         // 监听Ctrl+S保存
         if (e.ctrlKey && e.keyCode == 83) {
             e.preventDefault();

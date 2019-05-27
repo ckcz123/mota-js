@@ -1851,20 +1851,22 @@ return code;
 
 
 autoSave_s
-    :   '自动存档'
+    :   '自动存档' '不提示' Bool Newline
 
 
 /* autoSave_s
 tooltip : autoSave: 自动存档
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=autoSave%ef%bc%9a%e8%87%aa%e5%8a%a8%e5%ad%98%e6%a1%a3
 colour : this.soundColor
-var code = '{"type": "autoSave"},\n';
+default : [false]
+Bool_0 = Bool_0 ? (', "nohint": true') : '';
+var code = '{"type": "autoSave"'+Bool_0+'},\n';
 return code;
 */;
 
 
 callLoad_s
-    :   '呼出读档页面'
+    :   '呼出读档页面' Newline
 
 
 /* callLoad_s
@@ -1903,7 +1905,7 @@ return code;
 
 
 clearMap_1_s
-    : '清空画布'
+    : '清空画布' Newline
 
 /* clearMap_1_s
 tooltip : clearMap: 清除画布
@@ -3202,7 +3204,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "autoSave": // 自动存档
       this.next = MotaActionBlocks['autoSave_s'].xmlText([
-        this.next]);
+        this.nohint, this.next]);
       break;
     case "callLoad": // 呼出读档界面
       this.next = MotaActionBlocks['callLoad_s'].xmlText([

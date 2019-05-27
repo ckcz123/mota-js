@@ -1223,6 +1223,28 @@ control.prototype.viewMapReplay = function () {
     core.ui.drawMaps();
 }
 
+control.prototype.toolboxReplay = function () {
+    if (!core.isPlaying() || !core.isReplaying()) return;
+    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+        return core.drawTip("请等待当前事件的处理结束");
+
+    core.lockControl();
+    core.status.event.id='toolbox';
+    core.ui.drawToolbox();
+}
+
+control.prototype.equipboxReplay = function () {
+    if (!core.isPlaying() || !core.isReplaying()) return;
+    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+        return core.drawTip("请等待当前事件的处理结束");
+
+    core.lockControl();
+    core.status.event.id='equipbox';
+    core.ui.drawEquipbox();
+}
+
 ////// 是否正在播放录像 //////
 control.prototype.isReplaying = function () {
     return (core.status.replay||{}).replaying;

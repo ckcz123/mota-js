@@ -1603,7 +1603,7 @@ events.prototype._action_callSave = function (data, x, y, prefix) {
 
 events.prototype._action_autoSave = function (data, x, y, prefix) {
     core.autosave();
-    core.drawTip("已自动存档");
+    if (!data.nohint) core.drawTip("已自动存档");
     core.doAction();
 }
 

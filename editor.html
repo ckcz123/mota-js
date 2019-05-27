@@ -497,7 +497,7 @@
         <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
     </div>
 </div>
-<div id='inputBackground' style='display: none'>
+<div id='inputDiv' style='display: none'>
     <div id='inputDialog'>
         <p id="inputMessage">请输入文字...</p>
         <input id='inputBox' type="text"/>
@@ -505,6 +505,29 @@
         <button id='inputNo'>取消</button>
     </div>
 </div>
+<!-- UI预览 & 地图选点 -->
+<div id='uieventDiv' style='display: none'>
+    <div id='uieventDialog'>
+        <div id="uieventHead">
+            <span id="uieventTitle"></span>
+            <button id="uieventNo">关闭</button>
+            <button id="uieventYes">确定</button>
+        </div>
+        <hr style="clear: both; margin-top: 0"/>
+        <canvas class='gameCanvas' id='uievent' width='416' height='416'></canvas>
+        <div id="selectPoint">
+            <select id="selectPointFloor"></select>
+            <div id="selectPointButtons">
+                <input type="button" value="←"/>
+                <input type="button" value="↑"/>
+                <input type="button" value="↓"/>
+                <input type="button" value="→"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <!-- */</script> -->
 
 <!-- =========================================================== -->

@@ -367,3 +367,54 @@ selectBox.isSelected=function(value){
     return selectBox._isSelected
 }
 
+// ------ UI预览 & 地图选点相关 ------ //
+
+uievent = {};
+
+uievent.uieventDiv = document.getElementById('uieventDiv');
+
+uievent.uieventNo = document.getElementById('uieventNo');
+uievent.uieventNo.onclick = function () {
+    uievent.close();
+}
+
+uievent.uieventYes = document.getElementById('uieventYes');
+uievent.uieventYes.onclick = function () {
+    uievent.close();
+    if (uievent.callback) {
+        uievent.callback(uievent.floorId, uievent.x, uievent.y);
+    }
+    delete uievent.callback;
+}
+
+uievent.title = document.getElementById('uieventTitle');
+uievent.selectPoint = document.getElementById('selectPoint');
+
+uievent.close = function () {
+    uievent.isOpen = false;
+    uievent.uieventDiv.style.display = 'none';
+}
+
+uievent.previewUI = function (list) {
+    uievent.isOpen = true;
+    uievent.uieventDiv.style.display = 'block';
+    uievent.mode = 'previewUI';
+    uievent.selectPoint.style.display = 'none';
+    uievent.uieventYes.style.display = 'none';
+    uievent.title.innerText = 'UI绘制预览';
+
+    core.clearMap('uievent');
+
+    // 绘制UI
+    core.drawThumbnail(editor.currentFloorId, null, {}, 'uievent');
+    if (list instanceof Array) {
+        list.forEach(function (data) {
+            var type = data.type;
+            if (!type || !core.ui["_uievent_"+type]) return;
+            core.ui["_uievent_"+type](data);
+        })
+    }
+}
+
+
+

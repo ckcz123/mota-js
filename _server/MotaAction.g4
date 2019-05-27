@@ -3204,7 +3204,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "autoSave": // 自动存档
       this.next = MotaActionBlocks['autoSave_s'].xmlText([
-        this.nohint, this.next]);
+        data.nohint||false, this.next]);
       break;
     case "callLoad": // 呼出读档界面
       this.next = MotaActionBlocks['callLoad_s'].xmlText([

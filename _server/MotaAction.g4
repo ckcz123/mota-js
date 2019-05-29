@@ -1897,7 +1897,7 @@ clearMap_s
 tooltip : clearMap: 清除画布
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=clearMap%ef%bc%9a%e6%b8%85%e9%99%a4%e7%94%bb%e5%b8%83
 colour : this.subColor
-default : ["0", "0", "416", "480"]
+default : ["0", "0", "100", "100"]
 var code = '{"type": "clearMap", "x": ' + PosString_0 + ', "y": ' + PosString_1 +
     ', "width": ' + PosString_2 + ', "height": ' + PosString_3 + '},\n';
 return code;

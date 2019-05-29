@@ -439,8 +439,8 @@ uievent.previewUI = function (list) {
     uievent.drawPreviewUI();
 }
 
-uievent.selectPoint = function (floorId, x, y, forceCurrent, callback) {
-    uievent.forceCurrent = forceCurrent;
+uievent.selectPoint = function (floorId, x, y, hideFloor, callback) {
+    uievent.hideFloor = hideFloor;
     uievent.callback = callback;
 
     uievent.isOpen = true;
@@ -449,7 +449,7 @@ uievent.selectPoint = function (floorId, x, y, forceCurrent, callback) {
     uievent.selectDiv.style.display = 'block';
     uievent.yes.style.display = 'inline';
     uievent.background.style.display = 'none';
-    uievent.selectFloor.style.display = forceCurrent ? 'none': 'inline';
+    uievent.selectFloor.style.display = hideFloor ? 'none': 'inline';
     uievent.selectPointBox.style.display = 'block';
 
     // Append children
@@ -474,6 +474,7 @@ uievent.updateSelectPoint = function (redraw) {
 
 uievent.setPoint = function (floorId, x, y) {
     uievent.floorId = floorId;
+    uievent.selectFloor.value = floorId;
     uievent.x = x || uievent.x || 0;
     uievent.y = y || uievent.y || 0;
     uievent.width = core.floors[uievent.floorId].width || core.__SIZE__;
@@ -518,7 +519,7 @@ uievent.selectPointButtons.children[3].onclick = function () {
 }
 
 uievent.div.onmousewheel = function (e) {
-    if (uievent.mode != 'selectPoint' || uievent.forceCurrent) return;
+    if (uievent.mode != 'selectPoint' || uievent.hideFloor) return;
     var index = core.floorIds.indexOf(uievent.floorId);
     try {
         if (e.wheelDelta)
@@ -527,8 +528,6 @@ uievent.div.onmousewheel = function (e) {
             index+=Math.sign(e.detail);
     } catch (ee) { main.log(ee); }
     index = core.clamp(index, 0, core.floorIds.length - 1);
-    var floorId = core.floorIds[index];
-    uievent.selectFloor.value = floorId;
-    uievent.setPoint(floorId);
+    uievent.setPoint(core.floorIds[index]);
 }
 

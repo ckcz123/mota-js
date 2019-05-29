@@ -392,6 +392,33 @@ uievent.close = function () {
 }
 uievent.no.onclick = uievent.close;
 
+uievent.background = document.getElementById('uieventBackground');
+uievent.background.onchange = function () {
+    uievent.drawPreviewUI();
+}
+
+uievent.drawPreviewUI = function () {
+    core.setAlpha('uievent', 1);
+    core.clearMap('uievent');
+
+    // 绘制UI
+    var background = uievent.background.value;
+    if (background == 'thumbnail') {
+        core.drawThumbnail(editor.currentFloorId, null, {}, 'uievent');
+    }
+    else {
+        core.fillRect('uievent', 0, 0, core.__PIXELS__, core.__PIXELS__, background);
+    }
+
+    if (uievent.list instanceof Array) {
+        uievent.list.forEach(function (data) {
+            var type = data.type;
+            if (!type || !core.ui["_uievent_"+type]) return;
+            core.ui["_uievent_"+type](data);
+        })
+    }
+}
+
 uievent.previewUI = function (list) {
     uievent.isOpen = true;
     uievent.div.style.display = 'block';
@@ -399,19 +426,11 @@ uievent.previewUI = function (list) {
     uievent.selectPoint.style.display = 'none';
     uievent.yes.style.display = 'none';
     uievent.title.innerText = 'UI绘制预览';
+    uievent.background.style.display = 'inline';
+    uievent.background.value = 'thumbnail';
 
-    core.setAlpha('uievent', 1);
-    core.clearMap('uievent');
-
-    // 绘制UI
-    core.drawThumbnail(editor.currentFloorId, null, {}, 'uievent');
-    if (list instanceof Array) {
-        list.forEach(function (data) {
-            var type = data.type;
-            if (!type || !core.ui["_uievent_"+type]) return;
-            core.ui["_uievent_"+type](data);
-        })
-    }
+    uievent.list = list;
+    uievent.drawPreviewUI();
 }
 
 

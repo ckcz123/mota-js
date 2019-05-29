@@ -595,7 +595,7 @@ ui.prototype.drawWindowSelector = function(background, x, y, w, h) {
     w = Math.round(w), h = Math.round(h);
     var ctx = core.ui.createCanvas("_selector", x, y, w, h, 165);
     ctx.canvas.style.opacity = 0.8;
-    this._drawSelector(ctx, background, x, y, w, h);
+    this._drawSelector(ctx, background, w, h);
 }
 
 ui.prototype._uievent_drawSelector = function (data) {
@@ -610,32 +610,34 @@ ui.prototype._uievent_drawSelector = function (data) {
     var x = core.calValue(data.x), y = core.calValue(data.y), w = core.calValue(data.width), h = core.calValue(data.height);
     w = Math.round(w); h = Math.round(h);
     if (main.mode == 'editor') {
-        this._drawSelector('uievent', background, x, y, w, h);
+        this._drawSelector('uievent', background, w, h, x, y);
         return;
     }
     var ctx = core.createCanvas('_uievent_selector', x, y, w, h, 136);
     ctx.canvas.style.opacity = 0.8;
-    this._drawSelector(ctx, background, x, y, w, h);
+    this._drawSelector(ctx, background, w, h);
 }
 
-ui.prototype._drawSelector = function (ctx, background, x, y, w, h) {
+ui.prototype._drawSelector = function (ctx, background, w, h, left, top) {
+    left = left || 0;
+    top = top || 0;
     ctx = this.getContextByName(ctx);
     if (!ctx) return;
     if (typeof background == 'string')
         background = core.material.images.images[background];
     if (!(background instanceof Image)) return;
     // back
-    ctx.drawImage(background, 130, 66, 28, 28,  2,  2,w-4,h-4);
+    ctx.drawImage(background, 130, 66, 28, 28, left+2, top+2, w-4, h-4);
     // corner
-    ctx.drawImage(background, 128, 64,  2,  2,  0,  0,  2,  2);
-    ctx.drawImage(background, 158, 64,  2,  2,w-2,  0,  2,  2);
-    ctx.drawImage(background, 128, 94,  2,  2,  0,h-2,  2,  2);
-    ctx.drawImage(background, 158, 94,  2,  2,w-2,h-2,  2,  2);
+    ctx.drawImage(background, 128, 64,  2,  2, left,  top,  2,  2);
+    ctx.drawImage(background, 158, 64,  2,  2, left+w-2, top,  2,  2);
+    ctx.drawImage(background, 128, 94,  2,  2, left, top+h-2,  2,  2);
+    ctx.drawImage(background, 158, 94,  2,  2, left+w-2, top+h-2,  2,  2);
     // border
-    ctx.drawImage(background, 130, 64, 28,  2,  2,  0,w-4,  2);
-    ctx.drawImage(background, 130, 94, 28,  2,  2,h-2,w-4,  2);
-    ctx.drawImage(background, 128, 66,  2, 28,  0,  2,  2,h-4);
-    ctx.drawImage(background, 158, 66,  2, 28,w-2,  2,  2,h-4);
+    ctx.drawImage(background, 130, 64, 28,  2, left+2, top, w-4,  2);
+    ctx.drawImage(background, 130, 94, 28,  2, left+2, top+h-2, w-4,  2);
+    ctx.drawImage(background, 128, 66,  2, 28, left,  top+2,  2,h-4);
+    ctx.drawImage(background, 158, 66,  2, 28, left+w-2, top+2,  2,h-4);
 }
 
 ////// 绘制 WindowSkin

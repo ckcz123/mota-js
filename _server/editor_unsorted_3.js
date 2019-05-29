@@ -373,9 +373,14 @@ uievent = {};
 
 uievent.div = document.getElementById('uieventDiv');
 uievent.title = document.getElementById('uieventTitle');
-uievent.selectPoint = document.getElementById('selectPoint');
 uievent.yes = document.getElementById('uieventYes');
 uievent.no = document.getElementById('uieventNo');
+
+uievent.selectDiv = document.getElementById('selectPoint');
+uievent.selectFloor = document.getElementById('selectPointFloor');
+uievent.selectPointBox = document.getElementById('selectPointBox');
+uievent.body = document.getElementById('uieventBody');
+uievent.selectPointButtons = document.getElementById('selectPointButtons');
 
 uievent.confirm = function () {
     uievent.close();
@@ -423,15 +428,107 @@ uievent.previewUI = function (list) {
     uievent.isOpen = true;
     uievent.div.style.display = 'block';
     uievent.mode = 'previewUI';
-    uievent.selectPoint.style.display = 'none';
+    uievent.selectDiv.style.display = 'none';
     uievent.yes.style.display = 'none';
     uievent.title.innerText = 'UI绘制预览';
     uievent.background.style.display = 'inline';
     uievent.background.value = 'thumbnail';
+    uievent.selectPointBox.style.display = 'none';
 
     uievent.list = list;
     uievent.drawPreviewUI();
 }
 
+uievent.selectPoint = function (floorId, x, y, forceCurrent, callback) {
+    uievent.forceCurrent = forceCurrent;
+    uievent.callback = callback;
 
+    uievent.isOpen = true;
+    uievent.div.style.display = 'block';
+    uievent.mode = 'selectPoint';
+    uievent.selectDiv.style.display = 'block';
+    uievent.yes.style.display = 'inline';
+    uievent.background.style.display = 'none';
+    uievent.selectFloor.style.display = forceCurrent ? 'none': 'inline';
+    uievent.selectPointBox.style.display = 'block';
+
+    // Append children
+    var floors = "";
+    core.floorIds.forEach(function (f) {
+        floors += "<option value="+f+">"+f+"</option>";
+    })
+    uievent.selectFloor.innerHTML = floors;
+
+    this.setPoint(floorId || editor.currentFloorId, core.calValue(x) || 0, core.calValue(y) || 0);
+}
+
+uievent.updateSelectPoint = function (redraw) {
+    uievent.title.innerText = '地图选点 ('+uievent.x+","+uievent.y+')';
+    if (redraw) {
+        core.drawThumbnail(uievent.floorId, null, null,
+            {ctx: 'uievent', centerX: uievent.left + core.__HALF_SIZE__, centerY: uievent.top + core.__HALF_SIZE__});
+    }
+    uievent.selectPointBox.style.left = 32 * (uievent.x - uievent.left) + "px";
+    uievent.selectPointBox.style.top = 32 * (uievent.y - uievent.top) + "px";
+}
+
+uievent.setPoint = function (floorId, x, y) {
+    uievent.floorId = floorId;
+    uievent.x = x || uievent.x || 0;
+    uievent.y = y || uievent.y || 0;
+    uievent.width = core.floors[uievent.floorId].width || core.__SIZE__;
+    uievent.height = core.floors[uievent.floorId].height || core.__SIZE__;
+    uievent.left = core.clamp(uievent.x - core.__HALF_SIZE__, 0, uievent.width - core.__SIZE__);
+    uievent.top = core.clamp(uievent.y - core.__HALF_SIZE__, 0, uievent.height - core.__SIZE__);
+    uievent.updateSelectPoint(true);
+}
+
+uievent.selectFloor.onchange = function () {
+    uievent.setPoint(uievent.selectFloor.value);
+}
+
+uievent.body.onclick = function (e) {
+    if (uievent.mode != 'selectPoint') return;
+    uievent.x = uievent.left + Math.floor(e.offsetX / 32);
+    uievent.y = uievent.top + Math.floor(e.offsetY / 32);
+    uievent.updateSelectPoint(false);
+}
+
+uievent.move = function (dx, dy) {
+    if (uievent.mode != 'selectPoint') return;
+    uievent.left = core.clamp(uievent.left + dx, 0, uievent.width - core.__SIZE__);
+    uievent.top = core.clamp(uievent.top + dy, 0, uievent.height - core.__SIZE__);
+    this.updateSelectPoint(true);
+}
+
+uievent.selectPointButtons.children[0].onclick = function () {
+    uievent.move(-1, 0);
+}
+
+uievent.selectPointButtons.children[1].onclick = function () {
+    uievent.move(0, -1);
+}
+
+uievent.selectPointButtons.children[2].onclick = function () {
+    uievent.move(0, 1);
+}
+
+uievent.selectPointButtons.children[3].onclick = function () {
+    uievent.move(1, 0);
+}
+
+uievent.div.onmousewheel = function (e) {
+    if (uievent.mode != 'selectPoint' || uievent.forceCurrent) return;
+    var index = core.floorIds.indexOf(uievent.floorId);
+    try {
+        if (e.wheelDelta)
+            index+=Math.sign(e.wheelDelta);
+        else if (e.detail)
+            index+=Math.sign(e.detail);
+    } catch (ee) { main.log(ee); }
+    index = core.clamp(index, 0, core.floorIds.length - 1);
+    var floorId = core.floorIds[index];
+    uievent.selectFloor.value = floorId;
+    uievent.setPoint(floorId);
+}
 

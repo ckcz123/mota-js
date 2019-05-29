@@ -289,8 +289,11 @@ editor.constructor.prototype.listen=function () {
         if (uievent && uievent.isOpen) {
             e.preventDefault();
             if (e.keyCode == 27) uievent.close();
-            if (e.keyCode == 13) uievent.confirm();
-            // TODO：WASD平移大地图
+            else if (e.keyCode == 13) uievent.confirm();
+            else if (e.keyCode==87) uievent.move(0,-1)
+            else if (e.keyCode==65) uievent.move(-1,0)
+            else if (e.keyCode==83) uievent.move(0,1);
+            else if (e.keyCode==68) uievent.move(1,0);
             return;
         }
 

@@ -624,6 +624,10 @@ function omitedcheckUpdateFunction(event) {
             } catch (e) {main.log(e);}
             return;
         }
+        if (b && b.type in selectPointBlocks) { // selectPoint
+            this.selectPoint();
+            return;
+        }
 
         var textStringDict = {
             'text_0_s': 'EvalString_0',
@@ -726,6 +730,55 @@ function omitedcheckUpdateFunction(event) {
         }
 
         return results.length == 0 ? editor_blockly.lastUsedType : results;
+    }
+
+    // ------ select point ------
+
+    // id: [x, y, floorId]
+    var selectPointBlocks = {
+        "changeFloor_m": ["Number_0", "Number_1", "IdString_0"],
+        "jumpHero_s": ["PosString_0", "PosString_1"],
+        "changeFloor_s": ["PosString_0", "PosString_1", "IdString_0"],
+        "changePos_0_s": ["PosString_0", "PosString_1"],
+        "battle_1_s": ["PosString_0", "PosString_1"],
+        "openDoor_s": ["PosString_0", "PosString_1", "IdString_0"],
+        "closeDoor_s": ["PosString_0", "PosString_1"],
+        "show_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "hide_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "setBlock_s": ["PosString_0", "PosString_1"],
+        "move_s": ["PosString_0", "PosString_1"],
+        "jump_s": ["PosString_2", "PosString_3"], // 跳跃暂时只考虑终点
+        "showBgFgMap_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "hideBgFgMap_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "setBgFgBlock_s": ["PosString_0", "PosString_1", "IdString_0"],
+        "showFloorImg_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "hideFloorImg_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "trigger_s": ["PosString_0", "PosString_1"],
+        "insert_2_s": ["PosString_0", "PosString_1", "IdString_0"]
+    }
+
+    editor_blockly.selectPoint = function () {
+        var block = Blockly.selected, x_area = null, y_area = null, floor_area = null;
+        var floorId = editor.currentFloorId, pos = editor.pos, x = pos.x, y = pos.y;
+        if (block != null && block.type in selectPointBlocks) {
+            var arr = selectPointBlocks[block.type];
+            x_area = arr[0];
+            y_area = arr[1];
+            floor_area = arr[2];
+            var xv = parseInt(block.getFieldValue(x_area)), yv = parseInt(block.getFieldValue(y_area));
+            if (!isNaN(xv)) x = xv;
+            if (!isNaN(yv)) y = yv;
+            if (floor_area != null) floorId = block.getFieldValue(floor_area) || floorId;
+        }
+        uievent.selectPoint(floorId, x, y, floor_area == null, function (fv, xv, yv) {
+            if (x_area == null || y_area == null) return;
+            if (floor_area != null) {
+                if (fv != editor.currentFloorId) block.setFieldValue(fv, floor_area);
+                else block.setFieldValue("", floor_area);
+            }
+            block.setFieldValue(xv, x_area);
+            block.setFieldValue(yv, y_area);
+        });
     }
 
     return editor_blockly;

@@ -448,6 +448,7 @@ uievent.previewUI = function (list) {
 uievent.selectPoint = function (floorId, x, y, hideFloor, callback) {
     uievent.values.hideFloor = hideFloor;
     uievent.values.callback = callback;
+    uievent.values.size = editor.isMobile ? window.innerWidth / core.__SIZE__ : 32;
 
     uievent.isOpen = true;
     uievent.elements.div.style.display = 'block';
@@ -475,8 +476,10 @@ uievent.updateSelectPoint = function (redraw) {
             {ctx: 'uievent', centerX: uievent.values.left + core.__HALF_SIZE__,
                 centerY: uievent.values.top + core.__HALF_SIZE__});
     }
-    uievent.elements.selectPointBox.style.left = 32 * (uievent.values.x - uievent.values.left) + "px";
-    uievent.elements.selectPointBox.style.top = 32 * (uievent.values.y - uievent.values.top) + "px";
+    uievent.elements.selectPointBox.style.width = (uievent.values.size - 6) + "px";
+    uievent.elements.selectPointBox.style.height = (uievent.values.size - 6) + "px";
+    uievent.elements.selectPointBox.style.left = uievent.values.size * (uievent.values.x - uievent.values.left) + "px";
+    uievent.elements.selectPointBox.style.top = uievent.values.size * (uievent.values.y - uievent.values.top) + "px";
 }
 
 uievent.setPoint = function (floorId, x, y) {
@@ -497,8 +500,8 @@ uievent.elements.selectFloor.onchange = function () {
 
 uievent.elements.body.onclick = function (e) {
     if (uievent.mode != 'selectPoint') return;
-    uievent.values.x = uievent.values.left + Math.floor(e.offsetX / 32);
-    uievent.values.y = uievent.values.top + Math.floor(e.offsetY / 32);
+    uievent.values.x = uievent.values.left + Math.floor(e.offsetX / uievent.values.size);
+    uievent.values.y = uievent.values.top + Math.floor(e.offsetY / uievent.values.size);
     uievent.updateSelectPoint(false);
 }
 

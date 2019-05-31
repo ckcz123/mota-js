@@ -1695,6 +1695,13 @@ core.drawImage(name, image, x, y, w, h, x1, y1, w1, h1)
 http://www.w3school.com.cn/html5/canvas_drawimage.asp
 这里的image允许传一个图片，画布。也允许传递图片名，将从你导入的图片中获取图片内容。
 
+
+core.drawIcon(name, id, x, y, w, h)
+在一张画布上绘制一个图标。
+id为注册过的图标ID，也可以使用状态栏的图标ID，例如lv, hp, up, save, settings等。
+x和y为绘制的左上角坐标；w和h可选为绘制的宽高，如果不填或null则使用该图标的默认宽高。
+
+
 // ------ 具体的某个UI界面的绘制 ------ //
 core.closePanel()
 结束一切事件和UI绘制，关闭UI窗口，返回游戏。
@@ -1748,7 +1755,7 @@ config为绘制的配置项，目前可以包括如下几项：
  - bold：是否粗体。如果不设置默认为false。
  - align：文字对齐方式，仅在maxWidth设置时有效，默认为'left'。
  - fontSize：字体大小，如果不设置则使用剧情文本设置中的正文字体大小。
- - lineHeight：绘制的行距值，如果不设置则使用fontSize*1.3（即1.3被行距）。
+ - lineHeight：绘制的行距值，如果不设置则使用fontSize*1.3（即1.3倍行距）。
  - time：打字机效果。若不为0，则会逐个字进行绘制，并设置core.status.event.interval定时器。
 
 

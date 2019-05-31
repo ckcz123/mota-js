@@ -216,6 +216,7 @@
                     <input class="color" id="colorPicker" value="255,215,0,1"/>
                     <button onclick="confirmColor()">确定</button>
                 </div>
+                <button class="cpPanel" onclick="editor_blockly.selectPoint()">选点</button>
                 <xml id="toolbox" style="display:none">
                 </xml>
             </h3>
@@ -514,12 +515,41 @@
         <canvas class='gameCanvas' id='data' width='480' height='480'>此浏览器不支持HTML5</canvas>
     </div>
 </div>
-<div id='inputBackground' style='display: none'>
+<div id='inputDiv' style='display: none'>
     <div id='inputDialog'>
         <p id="inputMessage">请输入文字...</p>
         <input id='inputBox' type="text"/>
         <button id='inputYes'>确定</button>
         <button id='inputNo'>取消</button>
+    </div>
+</div>
+<!-- UI预览 & 地图选点 -->
+<div id='uieventDiv' style='display: none'>
+    <div id='uieventDialog'>
+        <div id="uieventHead">
+            <span id="uieventTitle"></span>
+            <select id="uieventBackground" style="margin-left: 20px">
+                <option value="thumbnail" selected>缩略图</option>
+                <option value="#000000">黑色</option>
+                <option value="#FFFFFF">白色</option>
+            </select>
+            <button id="uieventNo">关闭</button>
+            <button id="uieventYes">确定</button>
+        </div>
+        <hr style="clear: both; margin-top: 0"/>
+        <div id='uieventBody'>
+            <canvas class='gameCanvas' id='uievent' width='416' height='416'></canvas>
+            <div id="selectPointBox"></div>
+        </div>
+        <div id="selectPoint">
+            <select id="selectPointFloor"></select>
+            <div id="selectPointButtons">
+                <input type="button" value="←"/>
+                <input type="button" value="↑"/>
+                <input type="button" value="↓"/>
+                <input type="button" value="→"/>
+            </div>
+        </div>
     </div>
 </div>
 <!-- */</script> -->

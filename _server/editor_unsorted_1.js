@@ -285,6 +285,18 @@ editor.constructor.prototype.listen=function () {
     var shortcut = core.getLocalStorage('shortcut',{48: 0, 49: 0, 50: 0, 51: 0, 52: 0, 53: 0, 54: 0, 55: 0, 56: 0, 57: 0});
     document.body.onkeydown = function (e) {
 
+        // UI预览 & 地图选点
+        if (uievent && uievent.isOpen) {
+            e.preventDefault();
+            if (e.keyCode == 27) uievent.close();
+            else if (e.keyCode == 13) uievent.confirm();
+            else if (e.keyCode==87) uievent.move(0,-1)
+            else if (e.keyCode==65) uievent.move(-1,0)
+            else if (e.keyCode==83) uievent.move(0,1);
+            else if (e.keyCode==68) uievent.move(1,0);
+            return;
+        }
+
         // 监听Ctrl+S保存
         if (e.ctrlKey && e.keyCode == 83) {
             e.preventDefault();
@@ -502,6 +514,10 @@ editor.constructor.prototype.listen=function () {
             addFloorEvent.style.display='block';
             addFloorEvent.children[0].innerHTML='绑定下楼事件';
         }
+        else if (['leftPortal','rightPortal','downPortal','upPortal'].indexOf(thisevent.id)>=0) {
+            addFloorEvent.style.display='block';
+            addFloorEvent.children[0].innerHTML='绑定楼传事件';
+        }
         else addFloorEvent.style.display='none';
 
         chooseThis.children[0].innerHTML='选中此点'+'('+editor.pos.x+','+editor.pos.y+')'
@@ -524,20 +540,27 @@ editor.constructor.prototype.listen=function () {
         editor.hideMidMenu();
         e.stopPropagation();
         var thisevent = editor.map[editor.pos.y][editor.pos.x];
+        var loc = editor.pos.x+","+editor.pos.y;
         if (thisevent.id=='upFloor') {
-            editor.currentFloorData.changeFloor[editor.pos.x+","+editor.pos.y] = {"floorId": ":next", "stair": "downFloor"};
+            editor.currentFloorData.changeFloor[loc] = {"floorId": ":next", "stair": "downFloor"};
         }
         else if (thisevent.id=='downFloor') {
-            editor.currentFloorData.changeFloor[editor.pos.x+","+editor.pos.y] = {"floorId": ":before", "stair": "upFloor"};
+            editor.currentFloorData.changeFloor[loc] = {"floorId": ":before", "stair": "upFloor"};
+        }
+        else if (thisevent.id=='leftPortal' || thisevent.id=='rightPortal') {
+            editor.currentFloorData.changeFloor[loc] = {"floorId": ":next", "stair": ":symmetry_x"}
+        }
+        else if (thisevent.id=='upPortal' || thisevent.id=='downPortal') {
+            editor.currentFloorData.changeFloor[loc] = {"floorId": ":next", "stair": ":symmetry_y"}
         }
         editor.file.saveFloorFile(function (err) {
             if (err) {
                 printe(err);
                 throw(err)
             }
-            ;printf('添加楼梯事件成功');
             editor.drawPosSelection();
             editor_mode.showMode('loc');
+            printf('添加楼梯事件成功');
         });
     }
 

@@ -548,8 +548,19 @@ events.prototype._changeFloor_getHeroLoc = function (floorId, stair, heroLoc) {
     if (!heroLoc)
         heroLoc = core.clone(core.status.hero.loc);
     if (stair) {
+        // --- 对称
+        if (stair == ':now')
+            heroLoc = core.clone(core.status.hero.loc);
+        else if (stair == ':symmetry') {
+            heroLoc.x = core.bigmap.width - 1 - core.getHeroLoc('x');
+            heroLoc.y = core.bigmap.height - 1 - core.getHeroLoc('y');
+        }
+        else if (stair == ':symmetry_x')
+            heroLoc.x = core.bigmap.width - 1 - core.getHeroLoc('x');
+        else if (stair == ':symmetry_y')
+            heroLoc.y = core.bigmap.height - 1 - core.getHeroLoc('y');
         // 检查该层地图的 upFloor & downFloor
-        if (core.status.maps[floorId][stair]) {
+        else if (core.status.maps[floorId][stair]) {
             heroLoc.x = core.status.maps[floorId][stair][0];
             heroLoc.y = core.status.maps[floorId][stair][1];
         }
@@ -1592,7 +1603,7 @@ events.prototype._action_callSave = function (data, x, y, prefix) {
 
 events.prototype._action_autoSave = function (data, x, y, prefix) {
     core.autosave();
-    core.drawTip("已自动存档");
+    if (!data.nohint) core.drawTip("已自动存档");
     core.doAction();
 }
 
@@ -1606,6 +1617,86 @@ events.prototype._action_callLoad = function (data, x, y, prefix) {
 
 events.prototype._action_exit = function (data, x, y, prefix) {
     this.setEvents([]);
+    core.doAction();
+}
+
+events.prototype._action_previewUI = function (data, x, y, prefix) {
+    this.insertAction(data.action);
+    core.doAction();
+}
+
+events.prototype._action_clearMap = function (data, x, y, prefix) {
+    core.ui._uievent_clearMap(data);
+    core.doAction();
+}
+
+events.prototype._action_fillText = function (data, x, y, prefix) {
+    core.ui._uievent_fillText(data);
+    core.doAction();
+}
+
+events.prototype._action_fillBoldText = function (data, x, y, prefix) {
+    core.ui._uievent_fillBoldText(data);
+    core.doAction();
+}
+
+events.prototype._action_fillRect = function (data, x, y, prefix) {
+    core.ui._uievent_fillRect(data);
+    core.doAction();
+}
+
+events.prototype._action_fillPolygon = function (data, x, y, prefix) {
+    core.ui._uievent_fillPolygon(data);
+    core.doAction();
+}
+
+events.prototype._action_strokeRect = function (data, x, y, prefix) {
+    core.ui._uievent_strokeRect(data);
+    core.doAction();
+}
+
+events.prototype._action_strokePolygon = function (data, x, y, prefix) {
+    core.ui._uievent_strokePolygon(data);
+    core.doAction();
+}
+
+events.prototype._action_drawLine = function (data, x, y, prefix) {
+    core.ui._uievent_drawLine(data);
+    core.doAction();
+}
+
+events.prototype._action_drawArrow = function (data, x, y, prefix) {
+    core.ui._uievent_drawArrow(data);
+    core.doAction();
+}
+
+events.prototype._action_setAttribute = function (data, x, y, prefix) {
+    core.ui._uievent_setAttribute(data);
+    core.doAction();
+}
+
+events.prototype._action_drawImage = function (data, x, y, prefix) {
+    core.ui._uievent_drawImage(data);
+    core.doAction();
+}
+
+events.prototype._action_drawIcon = function (data, x, y, prefix) {
+    core.ui._uievent_drawIcon(data);
+    core.doAction();
+}
+
+events.prototype._action_drawSelector = function (data, x, y, prefix) {
+    core.ui._uievent_drawSelector(data);
+    core.doAction();
+}
+
+events.prototype._action_drawBackground = function (data, x, y, prefix) {
+    core.ui._uievent_drawBackground(data);
+    core.doAction();
+}
+
+events.prototype._action_drawTextContent = function (data, x, y, prefix) {
+    core.ui._uievent_drawTextContent(data);
     core.doAction();
 }
 

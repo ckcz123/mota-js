@@ -152,8 +152,11 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
 }
 
 control.prototype._animationFrame_selector = function (timestamp) {
-    if (timestamp - core.animateFrame.selectorTime <= 20 || !core.dymCanvas._selector) return;
-    var opacity = parseFloat(core.dymCanvas._selector.canvas.style.opacity);
+    if (timestamp - core.animateFrame.selectorTime <= 20) return;
+    var opacity = null;
+    if (core.dymCanvas._selector) opacity = parseFloat(core.dymCanvas._selector.canvas.style.opacity);
+    else if (core.dymCanvas._uievent_selector) opacity = parseFloat(core.dymCanvas._uievent_selector.canvas.style.opacity);
+    if (!core.isset(opacity)) return;
     if (core.animateFrame.selectorUp)
         opacity += 0.02;
     else
@@ -161,6 +164,7 @@ control.prototype._animationFrame_selector = function (timestamp) {
     if (opacity > 0.95 || opacity < 0.55)
         core.animateFrame.selectorUp = !core.animateFrame.selectorUp;
     core.setOpacity("_selector", opacity);
+    core.setOpacity("_uievent_selector", opacity);
     core.animateFrame.selectorTime = timestamp;
 }
 
@@ -1217,6 +1221,28 @@ control.prototype.viewMapReplay = function () {
     core.lockControl();
     core.status.event.id='viewMaps';
     core.ui.drawMaps();
+}
+
+control.prototype.toolboxReplay = function () {
+    if (!core.isPlaying() || !core.isReplaying()) return;
+    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+        return core.drawTip("请等待当前事件的处理结束");
+
+    core.lockControl();
+    core.status.event.id='toolbox';
+    core.ui.drawToolbox();
+}
+
+control.prototype.equipboxReplay = function () {
+    if (!core.isPlaying() || !core.isReplaying()) return;
+    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+        return core.drawTip("请等待当前事件的处理结束");
+
+    core.lockControl();
+    core.status.event.id='equipbox';
+    core.ui.drawEquipbox();
 }
 
 ////// 是否正在播放录像 //////

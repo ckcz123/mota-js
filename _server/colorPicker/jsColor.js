@@ -314,7 +314,11 @@ Blockly.FieldColour.prototype.createWidget_ = function() {
 
     var getValue=function(){
         // return self.getValue() // css颜色
-        return pb.getFieldValue(targetf);
+        var f = pb.getFieldValue(targetf);
+        if (/^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/.test(f)) {
+            return f;
+        }
+        return "";
         // 也可以用 pb.getFieldValue(targetf) 获得颜色块左边的域的内容
     }
 

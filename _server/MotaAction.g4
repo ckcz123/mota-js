@@ -1917,13 +1917,13 @@ return code;
 
 
 setAttribute_s
-    : '设置画布属性' '字体' EvalString? '填充样式' EvalString? Colour '边框样式' EvalString? Colour BGNL? '线宽度' EvalString? '不透明度' EvalString? '对齐' TextAlign_List '基准线' TextBaseline_List Newline
+    : '设置画布属性' '字体' EvalString? '填充样式' EvalString? Colour '边框样式' EvalString? Colour BGNL? '线宽度' EvalString? '不透明度' EvalString? '对齐' TextAlign_List '基准线' TextBaseline_List 'z值' EvalString? Newline
 
 /* setAttribute_s
 tooltip : setAttribute：设置画布属性
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setAttribute%ef%bc%9a%e8%ae%be%e7%bd%ae%e7%94%bb%e5%b8%83%e5%b1%9e%e6%80%a7
 colour : this.subColor
-default : ["","",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"","",null,null]
+default : ["","",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"","",null,null,""]
 TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
 TextBaseline_List_0 = TextBaseline_List_0==='null'?'': ', "baseline": "'+TextBaseline_List_0+'"';
 var colorRe = MotaActionFunctions.pattern.colorRe;
@@ -1949,7 +1949,11 @@ if (EvalString_4) {
   if (isNaN(f) || f<0 || f>1) throw new Error('不透明度必须是0到1的浮点数或不填');
   EvalString_4 = ', "alpha": '+EvalString_4;
 }
-var code = '{"type": "setAttribute"'+EvalString_0+EvalString_1+EvalString_2+EvalString_3+EvalString_4+TextAlign_List_0+TextBaseline_List_0+'},\n';
+if (EvalString_5) {
+  if (!/^\d+$/.test(EvalString_5))throw new Error('z值必须是整数或不填');
+  EvalString_5 = ', "z": '+EvalString_5;
+}
+var code = '{"type": "setAttribute"'+EvalString_0+EvalString_1+EvalString_2+EvalString_3+EvalString_4+TextAlign_List_0+TextBaseline_List_0+EvalString_5+'},\n';
 return code;
 */;
 
@@ -3234,7 +3238,7 @@ ActionParser.prototype.parseAction = function() {
       data.strokeStyle=this.Colour(data.strokeStyle);
       this.next = MotaActionBlocks['setAttribute_s'].xmlText([
         data.font,data.fillStyle,'rgba('+data.fillStyle+')',data.strokeStyle,'rgba('+data.strokeStyle+')',
-        data.lineWidth,data.alpha,data.align,data.baseline,this.next]);
+        data.lineWidth,data.alpha,data.align,data.baseline,data.z,this.next]);
       break;
     case "fillText": // 绘制一行文本
       data.style = this.Colour(data.style);

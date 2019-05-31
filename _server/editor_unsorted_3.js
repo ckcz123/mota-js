@@ -483,6 +483,7 @@ uievent.updateSelectPoint = function (redraw) {
 }
 
 uievent.setPoint = function (floorId, x, y) {
+    if (core.floorIds.indexOf(floorId) == -1) floorId = editor.currentFloorId;
     uievent.values.floorId = floorId;
     uievent.elements.selectFloor.value = floorId;
     uievent.values.x = x != null ? x : ( uievent.values.x || 0);

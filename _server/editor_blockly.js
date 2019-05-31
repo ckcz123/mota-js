@@ -734,11 +734,11 @@ function omitedcheckUpdateFunction(event) {
 
     // ------ select point ------
 
-    // id: [x, y, floorId]
+    // id: [x, y, floorId, forceFloor]
     var selectPointBlocks = {
-        "changeFloor_m": ["Number_0", "Number_1", "IdString_0"],
+        "changeFloor_m": ["Number_0", "Number_1", "IdString_0", true],
         "jumpHero_s": ["PosString_0", "PosString_1"],
-        "changeFloor_s": ["PosString_0", "PosString_1", "IdString_0"],
+        "changeFloor_s": ["PosString_0", "PosString_1", "IdString_0", true],
         "changePos_0_s": ["PosString_0", "PosString_1"],
         "battle_1_s": ["PosString_0", "PosString_1"],
         "openDoor_s": ["PosString_0", "PosString_1", "IdString_0"],
@@ -758,26 +758,23 @@ function omitedcheckUpdateFunction(event) {
     }
 
     editor_blockly.selectPoint = function () {
-        var block = Blockly.selected, x_area = null, y_area = null, floor_area = null;
+        var block = Blockly.selected, arr = null;
         var floorId = editor.currentFloorId, pos = editor.pos, x = pos.x, y = pos.y;
         if (block != null && block.type in selectPointBlocks) {
-            var arr = selectPointBlocks[block.type];
-            x_area = arr[0];
-            y_area = arr[1];
-            floor_area = arr[2];
-            var xv = parseInt(block.getFieldValue(x_area)), yv = parseInt(block.getFieldValue(y_area));
+            arr = selectPointBlocks[block.type];
+            var xv = parseInt(block.getFieldValue(arr[0])), yv = parseInt(block.getFieldValue(arr[1]));
             if (!isNaN(xv)) x = xv;
             if (!isNaN(yv)) y = yv;
-            if (floor_area != null) floorId = block.getFieldValue(floor_area) || floorId;
+            if (arr[2] != null) floorId = block.getFieldValue(arr[2]) || floorId;
         }
-        uievent.selectPoint(floorId, x, y, floor_area == null, function (fv, xv, yv) {
-            if (x_area == null || y_area == null) return;
-            if (floor_area != null) {
-                if (fv != editor.currentFloorId) block.setFieldValue(fv, floor_area);
-                else block.setFieldValue("", floor_area);
+        uievent.selectPoint(floorId, x, y, arr && arr[2] == null, function (fv, xv, yv) {
+            if (!arr) return;
+            if (arr[2] != null) {
+                if (fv != editor.currentFloorId) block.setFieldValue(fv, arr[2]);
+                else block.setFieldValue(arr[3] ? fv : "", arr[2]);
             }
-            block.setFieldValue(xv, x_area);
-            block.setFieldValue(yv, y_area);
+            block.setFieldValue(xv+"", arr[0]);
+            block.setFieldValue(yv+"", arr[1]);
         });
     }
 

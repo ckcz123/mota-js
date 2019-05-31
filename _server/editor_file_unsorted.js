@@ -15,13 +15,15 @@ editor_file = function (editor, callback) {
         var filename = 'project/floors/' + editor.currentFloorId + '.js';
         var datastr = ['main.floors.', editor.currentFloorId, '=\n'];
 
-        for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
-            var mapArray=editor[name].map(function (v) {
-                return v.map(function (v) {
-                    return v.idnum || v || 0
-                })
-            });
-            editor.currentFloorData[name]=mapArray;
+        if (core.floorIds.indexOf(editor.currentFloorId) >= 0) {
+            for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
+                var mapArray=editor[name].map(function (v) {
+                    return v.map(function (v) {
+                        return v.idnum || v || 0
+                    })
+                });
+                editor.currentFloorData[name]=mapArray;
+            }
         }
         
         // format 更改实现方式以支持undefined删除

@@ -109,7 +109,7 @@ return code;
 */;
 
 shopsub
-    :   '商店 id' IdString '标题' EvalString '图标' IdString BGNL? Newline '快捷商店栏中名称' EvalString '共用times' Bool BGNL? Newline '未开启状态则不显示在列表中' Bool BGNL? NewLine '使用' ShopUse_List '消耗' EvalString BGNL? Newline '显示文字' EvalString BGNL? Newline shopChoices+ BEND
+    :   '商店 id' IdString '标题' EvalString '图标' IdString BGNL? Newline '快捷商店栏中名称' EvalString '共用times' Bool BGNL? Newline '未开启状态则不显示在列表中' Bool BGNL? Newline '使用' ShopUse_List '消耗' EvalString BGNL? Newline '显示文字' EvalString BGNL? Newline shopChoices+ BEND
     
 
 /* shopsub
@@ -702,7 +702,7 @@ return code;
 */;
 
 insert_2_s
-    :   '插入事件' 'x' PosString ',' 'y' PosString Event_List? '楼层' IdString? '参数列表' EvalString? ENewline
+    :   '插入事件' 'x' PosString ',' 'y' PosString Event_List? '楼层' IdString? '参数列表' EvalString? Newline
 
 
 /* insert_2_s

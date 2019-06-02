@@ -144,14 +144,15 @@ editor.prototype.changeFloor = function (floorId, callback) {
     }
     editor.preMapData = null;
     core.changeFloor(floorId, null, {"x": 0, "y": 0, "direction": "up"}, null, function () {
-        core.bigmap.offsetX=0;
-        core.bigmap.offsetY=0;
-        editor.moveViewport(0,0);
-
         editor.game.fetchMapFromCore();
         editor.updateMap();
         editor_mode.floor();
         editor.drawEventBlock();
+
+        editor.viewportLoc = editor.viewportLoc || {};
+        var loc = editor.viewportLoc[floorId] || [], x = loc[0] || 0, y = loc[1] || 0;
+        editor.setViewport(x, y);
+
         if (callback) callback();
     });
 }
@@ -256,12 +257,17 @@ editor.prototype.updateMap = function () {
     
 }
 
-editor.prototype.moveViewport=function(x,y){
-    core.bigmap.offsetX = core.clamp(core.bigmap.offsetX+32*x, 0, 32*core.bigmap.width-core.__PIXELS__);
-    core.bigmap.offsetY = core.clamp(core.bigmap.offsetY+32*y, 0, 32*core.bigmap.height-core.__PIXELS__);
+editor.prototype.setViewport=function (x, y) {
+    core.bigmap.offsetX = core.clamp(x, 0, 32*core.bigmap.width-core.__PIXELS__);
+    core.bigmap.offsetY = core.clamp(y, 0, 32*core.bigmap.height-core.__PIXELS__);
+    editor.viewportLoc[editor.currentFloorId] = [core.bigmap.offsetX, core.bigmap.offsetY];
     core.control.updateViewport();
     editor.buildMark();
     editor.drawPosSelection();
+}
+
+editor.prototype.moveViewport=function(x,y){
+    this.setViewport(core.bigmap.offsetX+32*x, core.bigmap.offsetY+32*y);
 }
 
 /////////// 界面交互相关 ///////////

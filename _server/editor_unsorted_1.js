@@ -379,16 +379,43 @@ editor.constructor.prototype.listen=function () {
         }
         var focusElement = document.activeElement;
         if (!focusElement || focusElement.tagName.toLowerCase()=='body') {
-            // wasd平移大地图
-            if (e.keyCode==87)
-                editor.moveViewport(0,-1)
-            else if (e.keyCode==65)
-                editor.moveViewport(-1,0)
-            else if (e.keyCode==83)
-                editor.moveViewport(0,1);
-            else if (e.keyCode==68)
-                editor.moveViewport(1,0);
+            switch (e.keyCode) {
+                // WASD
+                case 87: editor.moveViewport(0,-1); break;
+                case 65: editor.moveViewport(-1,0); break;
+                case 83: editor.moveViewport(0,1); break;
+                case 68: editor.moveViewport(1,0); break;
+                // Z~.
+                case 90: editor_mode.change('map'); break; // Z
+                case 88: editor_mode.change('loc'); break; // X
+                case 67: editor_mode.change('enemyitem'); break; // C
+                case 86: editor_mode.change('floor'); break; // V
+                case 66: editor_mode.change('tower'); break; // B
+                case 78: editor_mode.change('functions'); break; // N
+                case 77: editor_mode.change('appendpic'); break; // M
+                case 188: editor_mode.change('commonevent'); break; // ,
+                case 190: editor_mode.change('plugins'); break; // .
+                // H
+                case 72: editor.showHelp(); break;
+            }
         }
+    }
+
+    editor.showHelp = function () {
+        alert(
+            "快捷操作帮助：\n" +
+            "点击空白处：自动保存当前修改" +
+            "WASD / 长按箭头：平移大地图\n" +
+            "PgUp, PgDn / 鼠标滚轮：上下切换楼层\n" +
+            "Z~.（键盘的第三排）：快捷切换标签\n" +
+            "双击地图：选中对应点的素材\n" +
+            "右键地图：弹出菜单栏\n" +
+            "Alt+0~9：保存当前使用的图块\n" +
+            "Ctrl+0~9：选中保存的图块\n" +
+            "Ctrl+Z / Ctrl+Y：撤销/重做上次绘制\n" +
+            "Ctrl+S：事件与脚本编辑器的保存并退出\n" +
+            "双击事件编辑器：长文本编辑/脚本编辑/地图选点/UI绘制预览"
+        );
     }
 
     var getScrollBarHeight = function () {
@@ -780,7 +807,7 @@ editor.constructor.prototype.listen=function () {
                 }, 500);
             };
             node.onmouseup = function () {
-                if (pressTimer >= 0) {
+                if (pressTimer > 0) {
                     clearTimeout(pressTimer);
                     move();
                 }

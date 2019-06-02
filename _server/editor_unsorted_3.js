@@ -207,10 +207,11 @@ printe = function (str_) {
     printf(str_, 'error')
 }
 tip_in_showMode = [
-    '涉及图片的更改需要F5刷新浏览器来生效',
-    '文本域可以通过双击,在文本编辑器或事件编辑器中编辑',
-    '事件编辑器中的显示文本和自定义脚本的方块也可以双击',
-    "画出的地图要点击\"保存地图\"才会写入到文件中",
+    '表格的文本域可以双击进行编辑',
+    '双击地图可以选中素材，右键可以弹出菜单',
+    '双击事件编辑器的图块可以进行长文本编辑/脚本编辑/地图选点/UI绘制预览等操作',
+    '点击空白处可以自动保存当前修改',
+    'H键可以打开操作帮助哦',
 ];
 tip=document.getElementById('tip')
 tip._infos= {}
@@ -536,7 +537,7 @@ uievent.move = function (dx, dy) {
                 }, 500);
             };
             node.onmouseup = function () {
-                if (pressTimer >= 0) {
+                if (pressTimer > 0) {
                     clearTimeout(pressTimer);
                     move();
                 }

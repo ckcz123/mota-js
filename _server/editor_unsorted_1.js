@@ -492,7 +492,7 @@ editor.constructor.prototype.listen=function () {
                 }
                 else {
                     var height = editor.widthsX[spriter][3], col = height / ysize;
-                    if (editor.folded) {
+                    if (editor.folded && core.tilesets.indexOf(pos.images)==-1) {
                         col = (pos.x == editor.widthsX[spriter][2] - 1) ? ((col - 1) % editor.foldPerCol + 1) : editor.foldPerCol;
                     }
                     if (spriter == 'terrains' && pos.x == editor.widthsX[spriter][1]) col += 2;

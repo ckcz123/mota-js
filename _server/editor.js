@@ -280,7 +280,7 @@ editor.prototype.drawInitData = function (icons) {
     editor.widthsX = {};
     editor.folded = core.getLocalStorage('folded', false);
     // editor.folded = true;
-    editor.foldPerCol = 30;
+    editor.foldPerCol = 50;
     // var imgNames = Object.keys(images);  //还是固定顺序吧；
     var imgNames = ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"];
 
@@ -465,7 +465,7 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent){
         pos.y=thisevent.y;
         if(thisevent.x)pos.x+=thisevent.x;
         ysize = thisevent.images.endsWith('48') ? 48 : 32;
-        if (editor.folded) {
+        if (editor.folded && core.tilesets.indexOf(thisevent.images)==-1) {
             pos.x += Math.floor(pos.y / editor.foldPerCol);
             pos.y %= editor.foldPerCol;
         }

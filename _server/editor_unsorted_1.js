@@ -760,10 +760,31 @@ editor.constructor.prototype.listen=function () {
     }
 
     var viewportButtons=document.getElementById('viewportButtons');
+    var pressTimer = null;
     for(var ii=0,node;node=viewportButtons.children[ii];ii++){
         (function(x,y){
-            node.onclick=function(){
-                editor.moveViewport(x,y);
+            var move = function () {
+                editor.moveViewport(x, y);
+            }
+            node.onmousedown = function () {
+                clearTimeout(pressTimer);
+                pressTimer = setTimeout(function () {
+                    pressTimer = -1;
+                    var f = function () {
+                        if (pressTimer != null) {
+                            move();
+                            setTimeout(f, 150);
+                        }
+                    }
+                    f();
+                }, 500);
+            };
+            node.onmouseup = function () {
+                if (pressTimer >= 0) {
+                    clearTimeout(pressTimer);
+                    move();
+                }
+                pressTimer = null;
             }
         })([-1,0,0,1][ii],[0,-1,1,0][ii]);
     }

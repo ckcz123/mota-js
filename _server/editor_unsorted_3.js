@@ -511,23 +511,40 @@ uievent.move = function (dx, dy) {
     uievent.values.left = core.clamp(uievent.values.left + dx, 0, uievent.values.width - core.__SIZE__);
     uievent.values.top = core.clamp(uievent.values.top + dy, 0, uievent.values.height - core.__SIZE__);
     this.updateSelectPoint(true);
-}
+};
 
-uievent.elements.selectPointButtons.children[0].onclick = function () {
-    uievent.move(-1, 0);
-}
+(function() {
 
-uievent.elements.selectPointButtons.children[1].onclick = function () {
-    uievent.move(0, -1);
-}
-
-uievent.elements.selectPointButtons.children[2].onclick = function () {
-    uievent.move(0, 1);
-}
-
-uievent.elements.selectPointButtons.children[3].onclick = function () {
-    uievent.move(1, 0);
-}
+    var viewportButtons = uievent.elements.selectPointButtons;
+    var pressTimer = null;
+    for(var ii=0,node;node=viewportButtons.children[ii];ii++){
+        (function(x,y){
+            var move = function () {
+                uievent.move(x, y);
+            }
+            node.onmousedown = function () {
+                clearTimeout(pressTimer);
+                pressTimer = setTimeout(function () {
+                    pressTimer = -1;
+                    var f = function () {
+                        if (pressTimer != null) {
+                            move();
+                            setTimeout(f, 150);
+                        }
+                    }
+                    f();
+                }, 500);
+            };
+            node.onmouseup = function () {
+                if (pressTimer >= 0) {
+                    clearTimeout(pressTimer);
+                    move();
+                }
+                pressTimer = null;
+            }
+        })([-1,0,0,1][ii],[0,-1,1,0][ii]);
+    }
+})();
 
 uievent.elements.div.onmousewheel = function (e) {
     if (uievent.mode != 'selectPoint' || uievent.values.hideFloor) return;

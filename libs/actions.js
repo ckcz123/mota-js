@@ -2098,13 +2098,7 @@ actions.prototype._clickSyncSave_readFile = function () {
 }
 
 actions.prototype._clickSyncSave_replay = function () {
-    if (core.hasFlag('debug')) {
-        core.drawText("\t[系统提示]调试模式下无法回放录像");
-    }
-    else {
-        core.status.event.selection = 0;
-        core.ui.drawReplay();
-    }
+    core.ui.drawReplay();
 }
 
 ////// 同步存档界面时，放开某个键的操作 //////
@@ -2331,7 +2325,7 @@ actions.prototype._clickReplay_replayRemain = function () {
 }
 
 actions.prototype._clickReplay_download = function () {
-    if (core.hasFlag('debug')) return core.drawText("\t[系统提示]调试模式下无法下载录像");
+    // if (core.hasFlag('debug')) return core.drawText("\t[系统提示]调试模式下无法下载录像");
     core.download(core.firstData.name + "_" + core.formatDate2() + ".h5route", JSON.stringify({
         'name': core.firstData.name,
         'hard': core.status.hard,

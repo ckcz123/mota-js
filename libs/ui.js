@@ -2432,7 +2432,7 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
         var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
         if (core.calWidth('ui', v + v2, this._buildFont(10, false)) <= size) v += v2;
         core.fillText('ui', v, x, y+30+size, '#FFD700');
-        core.fillText('ui', core.formatDate(new Date(data.time)), x, y+43+size, data.hero.flags.__consoleOpened__?'#FF6A6A':'#FFFFFF');
+        core.fillText('ui', core.formatDate(new Date(data.time)), x, y+43+size, data.hero.flags.__consoleOpened__||data.hero.flags.debug?'#FF6A6A':'#FFFFFF');
     }
     else {
         core.fillRect('ui', x-size/2, y+15, size, size, '#333333', 2);

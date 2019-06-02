@@ -1935,7 +1935,7 @@ events.prototype.doEffect = function (effect, need, times) {
 
 ////// 设置楼层属性 //////
 events.prototype.setFloorInfo = function (name, value, floorId, prefix) {
-    floorId = floorId || data.floorId;
+    floorId = floorId || core.status.floorId;
     core.status.maps[floorId][name] = core.calValue(value, prefix);
     core.updateStatusBar();
 }

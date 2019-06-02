@@ -287,6 +287,13 @@ body {
     0 0 0 3px #000;
 }
 
+#iconExpandBtn {
+    position: absolute;
+    left: 10px;
+    bottom: 30px;
+    display: none;
+}
+
 .warnText {
     color: #D50000;
     font-weight: 700;

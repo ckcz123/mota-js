@@ -267,7 +267,7 @@ editor.prototype.setViewport=function (x, y) {
 }
 
 editor.prototype.moveViewport=function(x,y){
-    this.setViewport(core.bigmap.offsetX+32*x, core.bigmap.offsetY+32*y);
+    editor.setViewport(core.bigmap.offsetX+32*x, core.bigmap.offsetY+32*y);
 }
 
 /////////// 界面交互相关 ///////////
@@ -278,6 +278,9 @@ editor.prototype.drawInitData = function (icons) {
     var maxHeight = 700;
     var sumWidth = 0;
     editor.widthsX = {};
+    editor.folded = core.getLocalStorage('folded', false);
+    // editor.folded = true;
+    editor.foldPerCol = 30;
     // var imgNames = Object.keys(images);  //还是固定顺序吧；
     var imgNames = ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"];
 
@@ -288,20 +291,21 @@ editor.prototype.drawInitData = function (icons) {
             for (var im in autotiles) {
                 tempy += autotiles[im].height;
             }
-            editor.widthsX[img] = [img, sumWidth / 32, (sumWidth + 3 * 32) / 32, tempy];
-            sumWidth += 3 * 32;
+            var tempx = editor.folded ? 32 : 3 * 32;
+            editor.widthsX[img] = [img, sumWidth / 32, (sumWidth + tempx) / 32, tempy];
+            sumWidth += tempx;
             maxHeight = Math.max(maxHeight, tempy);
             continue;
         }
-        if (img == 'terrains') {
-            editor.widthsX[img] = [img, sumWidth / 32, (sumWidth + images[img].width) / 32, images[img].height + 32*2]
-            sumWidth += images[img].width;
-            maxHeight = Math.max(maxHeight, images[img].height + 32*2);
-            continue;
+        var width = images[img].width, height = images[img].height, mh = height;
+        if (editor.folded) {
+            var per_height = (img == 'enemy48' || img == 'npc48' ? 48 : 32);
+            width = Math.ceil(height / per_height / editor.foldPerCol) * 32;
+            if (width > 32) mh = per_height * editor.foldPerCol;
         }
-        editor.widthsX[img] = [img, sumWidth / 32, (sumWidth + images[img].width) / 32, images[img].height];
-        sumWidth += images[img].width;
-        maxHeight = Math.max(maxHeight, images[img].height);
+        editor.widthsX[img] = [img, sumWidth / 32, (sumWidth + width) / 32, height];
+        sumWidth += width;
+        maxHeight = Math.max(maxHeight, mh + 64);
     }
     var tilesets = images.tilesets;
     for (var ii in core.tilesets) {
@@ -318,82 +322,75 @@ editor.prototype.drawInitData = function (icons) {
     if (fullWidth > edata.width) edata.style.width = (edata.width = fullWidth) / ratio + 'px';
     edata.style.height = (edata.height = fullHeight) / ratio + 'px';
     */
+    var iconImages = document.getElementById('iconImages');
     iconImages.style.width = (iconImages.width = fullWidth) / ratio + 'px';
     iconImages.style.height = (iconImages.height = fullHeight) / ratio + 'px';
-    var dc = {drawImage:function(){
-        var image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight;
-        var a=Array.prototype.slice.call(arguments)
-        if(arguments.length==3){
-            // [image, dx, dy]=arguments
-            // [sx, sy, sWidth, sHeight, dWidth, dHeight]=[0,0,image.width,image.height,image.width,image.height]
-            image=a[0]
-            a=[a[0],0,0,image.width,image.height,a[1],a[2],image.width,image.height]
-        }
-        if(arguments.length==5){
-            // [image, dx, dy, dWidth, dHeight]=arguments
-            // [sx, sy, sWidth, sHeight]=[0,0,image.width,image.height]
-            image=a[0]
-            a=[a[0],0,0,image.width,image.height,a[1],a[2],a[3],a[4]]
-        }
-        if(arguments.length==9){
-            // [image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight]=arguments
-        }
-        image=a[0];
-        sx=a[1];
-        sy=a[2];
-        sWidth=a[3];
-        sHeight=a[4];
-        dx=a[5];
-        dy=a[6];
-        dWidth=a[7];
-        dHeight=a[8];
-        //放弃对 dWidth, dHeight 的支持, 始终画一样大的
-        var dimg=new Image()
-        dimg.src = image.src;
-        dimg.style.clip=['rect(',sy,'px,',sx+sWidth,'px,',sy+sHeight,'px,',sx,'px)'].join('')
-        dimg.style.top=dy-sy+'px'
-        dimg.style.left=dx-sx+'px'
-        dimg.width=image.width/ratio
-        dimg.height=image.height/ratio
-        iconImages.appendChild(dimg)
-    }}
-    // var dc = edata.getContext('2d');
-    var nowx = 0;
-    var nowy = 0;
+    var drawImage = function (image, x, y) {
+        image.style.left = x + 'px';
+        image.style.top = y + 'px';
+        iconImages.appendChild(image);
+    }
+
+    var nowx = 0, nowy = 0;
     for (var ii = 0; ii < imgNames.length; ii++) {
         var img = imgNames[ii];
         if (img == 'terrains') {
-            (function(image,dc,nowx){
+            (function(image,nowx){
                 if (image.complete) {
-                    dc.drawImage(image, nowx, 32);
+                    drawImage(image, nowx, 32);
                     core.material.images.airwall = image;
                     delete(editor.airwallImg);
                 } else image.onload = function () {
-                    dc.drawImage(image, nowx, 32);
+                    drawImage(image, nowx, 32);
                     core.material.images.airwall = image;
                     delete(editor.airwallImg);
                     editor.updateMap();
                 }
-            })(editor.airwallImg,dc,nowx);
-            dc.drawImage(images[img], nowx, 32*2);
-            nowx += images[img].width;
+            })(editor.airwallImg,nowx);
+            if (editor.folded) {
+                // --- 单列 & 折行
+                var subimgs = core.splitImage(images[img], 32, editor.foldPerCol * 32);
+                var frames = images[img].width / 32;
+                for (var i = 0; i < subimgs.length; i+=frames) {
+                    drawImage(subimgs[i], nowx, i==0?2*32:0);
+                    nowx += 32;
+                }
+            }
+            else {
+                drawImage(images[img], nowx, 32*2);
+                nowx += images[img].width;
+            }
             continue;
         }
         if (img == 'autotile') {
             var autotiles = images[img];
+            var tempx = editor.folded ? 32 : 96;
             for (var im in autotiles) {
-                dc.drawImage(autotiles[im], 0, 0, 96, 128, nowx, nowy, 96, 128);
+                var subimgs = core.splitImage(autotiles[im], tempx, autotiles[im].height);
+                drawImage(subimgs[0], nowx, nowy);
                 nowy += autotiles[im].height;
             }
-            nowx += 3 * 32;
+            nowx += tempx;
             continue;
         }
-        dc.drawImage(images[img], nowx, 0)
-        nowx += images[img].width;
+        if (editor.folded) {
+            // --- 单列 & 折行
+            var per_height = img.endsWith('48') ? 48 : 32;
+            var subimgs = core.splitImage(images[img], 32, editor.foldPerCol * per_height);
+            var frames = images[img].width / 32;
+            for (var i = 0; i < subimgs.length; i+=frames) {
+                drawImage(subimgs[i], nowx, 0);
+                nowx += 32;
+            }
+        }
+        else {
+            drawImage(images[img], nowx, 0);
+            nowx += images[img].width;
+        }
     }
     for (var ii in core.tilesets) {
         var img = core.tilesets[ii];
-        dc.drawImage(tilesets[img], nowx, 0)
+        drawImage(tilesets[img], nowx, 0);
         nowx += tilesets[img].width;
     }
     //editor.mapInit();
@@ -467,8 +464,12 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent){
         pos.x=editor.widthsX[thisevent.images][1];
         pos.y=thisevent.y;
         if(thisevent.x)pos.x+=thisevent.x;
-        if(thisevent.images=='terrains')pos.y+=2;
         ysize = thisevent.images.endsWith('48') ? 48 : 32;
+        if (editor.folded) {
+            pos.x += Math.floor(pos.y / editor.foldPerCol);
+            pos.y %= editor.foldPerCol;
+        }
+        if(pos.x == 0) pos.y+=2;
     }
     var dataSelection = document.getElementById('dataSelection');
     dataSelection.style.left = pos.x * 32 + 'px';

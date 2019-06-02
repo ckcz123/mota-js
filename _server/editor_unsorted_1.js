@@ -444,11 +444,22 @@ editor.constructor.prototype.listen=function () {
     }
     var scrollBarHeight = getScrollBarHeight();
 
+    var iconExpandBtn = document.getElementById('iconExpandBtn');
+    iconExpandBtn.style.display = 'block';
+    iconExpandBtn.innerText = editor.folded ? "展开" : "折叠";
+    iconExpandBtn.onclick = function () {
+        if (confirm(editor.folded ? "你想要展开素材吗？\n展开模式下将显示全素材内容。"
+            : ("你想要折叠素材吗？\n折叠模式下每个素材将仅显示单列，并且每"+editor.foldPerCol+"个自动换列。"))) {
+            core.setLocalStorage('folded', !editor.folded);
+            window.location.reload();
+        }
+    }
+
     var dataSelection = document.getElementById('dataSelection');
     var iconLib=document.getElementById('iconLib');
     iconLib.onmousedown = function (e) {
         e.stopPropagation();
-        if (!editor.isMobile && e.clientY>=((core.__SIZE__==13?630:655) - scrollBarHeight)) return;
+        if (!editor.isMobile && e.clientY>=iconLib.offsetHeight - scrollBarHeight) return;
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
         var loc = {
@@ -460,11 +471,11 @@ editor.constructor.prototype.listen=function () {
         var pos = locToPos(loc);
         for (var spriter in editor.widthsX) {
             if (pos.x >= editor.widthsX[spriter][1] && pos.x < editor.widthsX[spriter][2]) {
-                var ysize = spriter.indexOf('48') === -1 ? 32 : 48;
+                var ysize = spriter.endsWith('48') ? 48 : 32;
                 loc.ysize = ysize;
                 pos.images = editor.widthsX[spriter][0];
                 pos.y = ~~(loc.y / loc.ysize);
-                if(core.tilesets.indexOf(pos.images)==-1)pos.x = editor.widthsX[spriter][1];
+                if(!editor.folded && core.tilesets.indexOf(pos.images)==-1) pos.x = editor.widthsX[spriter][1];
                 var autotiles = core.material.images['autotile'];
                 if (pos.images == 'autotile') {
                     var imNames = Object.keys(autotiles);
@@ -478,8 +489,15 @@ editor.constructor.prototype.listen=function () {
                             }
                         }
                     }
-                } else if ((pos.y + 1) * ysize > editor.widthsX[spriter][3])
-                    pos.y = ~~(editor.widthsX[spriter][3] / ysize) - 1;
+                }
+                else {
+                    var height = editor.widthsX[spriter][3], col = height / ysize;
+                    if (editor.folded) {
+                        col = (pos.x == editor.widthsX[spriter][2] - 1) ? ((col - 1) % editor.foldPerCol + 1) : editor.foldPerCol;
+                    }
+                    if (spriter == 'terrains' && pos.x == editor.widthsX[spriter][1]) col += 2;
+                    pos.y = Math.min(pos.y, col - 1);
+                }
 
                 selectBox.isSelected(true);
                 // console.log(pos,core.material.images[pos.images].height)
@@ -493,10 +511,16 @@ editor.constructor.prototype.listen=function () {
                 } else if(pos.x == 0 && pos.y == 1){
                     editor.info = editor.ids[editor.indexs[17]];
                 } else {
-                    if (Object.prototype.hasOwnProperty.call(autotiles, pos.images)) editor.info = {'images': pos.images, 'y': 0};
-                    else if (pos.images == 'terrains') editor.info = {'images': pos.images, 'y': pos.y - 2};
+                    if (autotiles[pos.images]) editor.info = {'images': pos.images, 'y': 0};
                     else if (core.tilesets.indexOf(pos.images)!=-1) editor.info = {'images': pos.images, 'y': pos.y, 'x': pos.x-editor.widthsX[spriter][1]};
-                    else editor.info = {'images': pos.images, 'y': pos.y};
+                    else {
+                        var y = pos.y;
+                        if (editor.folded) {
+                            y += editor.foldPerCol * (pos.x-editor.widthsX[spriter][1]);
+                        }
+                        if (pos.images == 'terrains' && pos.x == 0) y -= 2;
+                        editor.info = {'images': pos.images, 'y': y}
+                    }
 
                     for (var ii = 0; ii < editor.ids.length; ii++) {
                         if ((core.tilesets.indexOf(pos.images)!=-1 && editor.info.images == editor.ids[ii].images

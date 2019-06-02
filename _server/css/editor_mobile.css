@@ -272,6 +272,13 @@ body {
     0 0 0 3px #000;
 }
 
+#iconExpandBtn {
+    position: absolute;
+    left: 10px;
+    bottom: 30px;
+    display: none;
+}
+
 .warnText {
     color: #D50000;
     font-weight: 700;
@@ -433,7 +440,7 @@ div.row .rowtd .rowtext{
     font: normal 2.5vw Arial, sans-serif;
     list-style: none;
     margin: 0;
-    padding: 4px 7em 4px 28px;
+    padding: 4px 7em 4px 4px;
     white-space: nowrap;
 
     /* padding-left: 12px; */

@@ -58,8 +58,8 @@ editor_file = function (editor, callback) {
             title = "主塔 "+name+" 层";
         }
         
-        var width = parseInt(document.getElementById('newMapsWidth').value);
-        var height = parseInt(document.getElementById('newMapsHeight').value);
+        var width = parseInt(document.getElementById('newMapWidth').value);
+        var height = parseInt(document.getElementById('newMapHeight').value);
         var row = [], map = [];
         for (var i=0;i<width;i++) row.push(0);
         for (var i=0;i<height;i++) map.push(row);

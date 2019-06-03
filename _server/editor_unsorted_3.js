@@ -206,13 +206,20 @@ printf = function (str_, type) {
 printe = function (str_) {
     printf(str_, 'error')
 }
-tip_in_showMode = [
-    '涉及图片的更改需要F5刷新浏览器来生效',
-    '文本域可以通过双击,在文本编辑器或事件编辑器中编辑',
-    '事件编辑器中的显示文本和自定义脚本的方块也可以双击',
-    "画出的地图要点击\"保存地图\"才会写入到文件中",
-];
 tip=document.getElementById('tip')
+tip.showHelp = function(value) {
+    var tips = [
+        '表格的文本域可以双击进行编辑',
+        '双击地图可以选中素材，右键可以弹出菜单',
+        '双击事件编辑器的图块可以进行长文本编辑/脚本编辑/地图选点/UI绘制预览等操作',
+        'ESC或点击空白处可以自动保存当前修改',
+        'H键可以打开操作帮助哦',
+        'tileset贴图模式下可以按选中tileset素材，并在地图上拖动来一次绘制一个区域',
+        '可以拖动地图上的图块和事件，或按Ctrl+C, Ctrl+X和Ctrl+V进行复制，剪切和粘贴'
+    ];
+    if (value == null) value = Math.floor(Math.random() * tips.length);
+    printf('tips: ' + tips[value])
+}
 tip._infos= {}
 tip.infos=function(value){
     if(value!=null){
@@ -511,23 +518,40 @@ uievent.move = function (dx, dy) {
     uievent.values.left = core.clamp(uievent.values.left + dx, 0, uievent.values.width - core.__SIZE__);
     uievent.values.top = core.clamp(uievent.values.top + dy, 0, uievent.values.height - core.__SIZE__);
     this.updateSelectPoint(true);
-}
+};
 
-uievent.elements.selectPointButtons.children[0].onclick = function () {
-    uievent.move(-1, 0);
-}
+(function() {
 
-uievent.elements.selectPointButtons.children[1].onclick = function () {
-    uievent.move(0, -1);
-}
-
-uievent.elements.selectPointButtons.children[2].onclick = function () {
-    uievent.move(0, 1);
-}
-
-uievent.elements.selectPointButtons.children[3].onclick = function () {
-    uievent.move(1, 0);
-}
+    var viewportButtons = uievent.elements.selectPointButtons;
+    var pressTimer = null;
+    for(var ii=0,node;node=viewportButtons.children[ii];ii++){
+        (function(x,y){
+            var move = function () {
+                uievent.move(x, y);
+            }
+            node.onmousedown = function () {
+                clearTimeout(pressTimer);
+                pressTimer = setTimeout(function () {
+                    pressTimer = -1;
+                    var f = function () {
+                        if (pressTimer != null) {
+                            move();
+                            setTimeout(f, 150);
+                        }
+                    }
+                    f();
+                }, 500);
+            };
+            node.onmouseup = function () {
+                if (pressTimer > 0) {
+                    clearTimeout(pressTimer);
+                    move();
+                }
+                pressTimer = null;
+            }
+        })([-1,0,0,1][ii],[0,-1,1,0][ii]);
+    }
+})();
 
 uievent.elements.div.onmousewheel = function (e) {
     if (uievent.mode != 'selectPoint' || uievent.values.hideFloor) return;

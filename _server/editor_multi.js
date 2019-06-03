@@ -94,6 +94,8 @@ editor_multi = function () {
         editor_multi.lintAutocomplete = false;
         if (args.lint === true) editor_multi.lintAutocomplete = true;
         if (field.indexOf('Effect') !== -1) editor_multi.lintAutocomplete = true;
+        if ((!input.value || input.value == 'null') && editor_mode.mode == 'plugins')
+            input.value = '"function () {\\n\\t// 在此增加新插件\\n\\t\\n}"';
         if (input.value.slice(0, 1) === '"' || args.string) {
             editor_multi.isString = true;
             codeEditor.setValue(JSON.parse(input.value) || '');

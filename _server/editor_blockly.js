@@ -745,7 +745,7 @@ function omitedcheckUpdateFunction(event) {
         "closeDoor_s": ["PosString_0", "PosString_1"],
         "show_s": ["EvalString_0", "EvalString_1", "IdString_0"],
         "hide_s": ["EvalString_0", "EvalString_1", "IdString_0"],
-        "setBlock_s": ["PosString_0", "PosString_1"],
+        "setBlock_s": ["PosString_0", "PosString_1", "IdString_0"],
         "move_s": ["PosString_0", "PosString_1"],
         "jump_s": ["PosString_2", "PosString_3"], // 跳跃暂时只考虑终点
         "showBgFgMap_s": ["EvalString_0", "EvalString_1", "IdString_0"],
@@ -775,6 +775,10 @@ function omitedcheckUpdateFunction(event) {
             }
             block.setFieldValue(xv+"", arr[0]);
             block.setFieldValue(yv+"", arr[1]);
+            if (block.type == 'changeFloor_m') {
+                block.setFieldValue("floorId", "Floor_List_0");
+                block.setFieldValue("loc", "Stair_List_0");
+            }
         });
     }
 

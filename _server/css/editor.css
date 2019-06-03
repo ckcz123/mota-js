@@ -262,10 +262,6 @@ body {
     position: absolute;
 }
 
-.egameCanvas {
-    position: absolute;
-}
-
 .gameCanvas {
     position: absolute;
 }
@@ -285,6 +281,13 @@ body {
     border: 1px solid #000;
     box-shadow: 0 0 0 2px #fff,
     0 0 0 3px #000;
+}
+
+#iconExpandBtn {
+    position: absolute;
+    left: 10px;
+    bottom: 30px;
+    display: none;
 }
 
 .warnText {

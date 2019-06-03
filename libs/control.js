@@ -923,7 +923,7 @@ control.prototype.checkBlock = function () {
     if (damage) {
         core.status.hero.hp -= damage;
         core.drawTip("受到"+(core.status.checkBlock.type[loc]||"伤害")+damage+"点");
-        this._checkBlock_soundAndAnimate(x, y);
+        core.drawAnimate("zone", x, y);
         this._checkBlock_disableQuickShop();
         core.status.hero.statistics.extraDamage += damage;
         if (core.status.hero.hp <= 0) {
@@ -935,11 +935,6 @@ control.prototype.checkBlock = function () {
     }
     this._checkBlock_snipe(core.status.checkBlock.snipe[loc]);
     this._checkBlock_ambush(core.status.checkBlock.ambush[loc]);
-}
-
-control.prototype._checkBlock_soundAndAnimate = function (x,y) {
-    core.playSound('zone.mp3');
-    core.drawAnimate("zone", x, y);
 }
 
 control.prototype._checkBlock_disableQuickShop = function () {
@@ -2008,7 +2003,7 @@ control.prototype.unLockControl = function () {
 ////// 开启debug模式 //////
 control.prototype.debug = function() {
     core.setFlag('debug', true);
-    core.drawText("\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n同时，录像将失效，也无法上传成绩。");
+    core.drawText("\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n此模式下将无法上传成绩。");
 }
 
 // ------ 天气，色调，BGM ------ //

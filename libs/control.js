@@ -923,7 +923,7 @@ control.prototype.checkBlock = function () {
     if (damage) {
         core.status.hero.hp -= damage;
         core.drawTip("受到"+(core.status.checkBlock.type[loc]||"伤害")+damage+"点");
-        this._checkBlock_soundAndAnimate(x, y);
+        core.drawAnimate("zone", x, y);
         this._checkBlock_disableQuickShop();
         core.status.hero.statistics.extraDamage += damage;
         if (core.status.hero.hp <= 0) {
@@ -935,11 +935,6 @@ control.prototype.checkBlock = function () {
     }
     this._checkBlock_snipe(core.status.checkBlock.snipe[loc]);
     this._checkBlock_ambush(core.status.checkBlock.ambush[loc]);
-}
-
-control.prototype._checkBlock_soundAndAnimate = function (x,y) {
-    core.playSound('zone.mp3');
-    core.drawAnimate("zone", x, y);
 }
 
 control.prototype._checkBlock_disableQuickShop = function () {

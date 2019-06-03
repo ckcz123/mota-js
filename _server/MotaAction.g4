@@ -2743,12 +2743,19 @@ ActionParser.prototype.parseAction = function() {
       this.next = data.next;
       return;
     case "text": // 文字/对话
-      this.next = MotaActionBlocks['text_0_s'].xmlText([
-        this.EvalString(data.text),this.next]);
+      var info = this.getTitleAndPosition(data.text);
+      if (info[0] || info[1] || info[2]) {
+        this.next = MotaActionBlocks['text_1_s'].xmlText([
+          info[0], info[1], info[2], info[3], this.next]);
+      }
+      else {
+        this.next = MotaActionBlocks['text_0_s'].xmlText([info[3],this.next]);
+      }
       break;
     case "autoText": // 自动剧情文本
+      var info = this.getTitleAndPosition(data.text);
       this.next = MotaActionBlocks['autoText_s'].xmlText([
-        '','','',data.time,this.EvalString(data.text),this.next]);
+        info[0],info[1],info[2],data.time,info[3],this.next]);
       break;
     case "scrollText":
       this.next = MotaActionBlocks['scrollText_s'].xmlText([
@@ -3123,8 +3130,10 @@ ActionParser.prototype.parseAction = function() {
         text_choices=MotaActionBlocks['choicesContext'].xmlText([
           choice.text,choice.icon,choice.color,'rgba('+choice.color+')',this.insertActionList(choice.action),text_choices]);
       }
+      if (!this.isset(data.text)) data.text = '';
+      var info = this.getTitleAndPosition(data.text);
       this.next = MotaActionBlocks['choices_s'].xmlText([
-        this.isset(data.text)?this.EvalString(data.text):null,'','',text_choices,this.next]);
+        info[3],info[0],info[1],text_choices,this.next]);
       break;
     case "while": // 前置条件循环处理
       this.next = MotaActionBlocks['while_s'].xmlText([
@@ -3391,6 +3400,20 @@ ActionParser.prototype.EvalString = function(EvalString) {
   return EvalString.split('\b').join('\\b').split('\t').join('\\t').split('\n').join('\\n');
 }
 
+ActionParser.prototype.getTitleAndPosition = function (string) {
+  string = this.EvalString(string);
+  var title = '', icon = '', position = '';
+  string = string.replace(/\\t\[(([^\],]+),)?([^\],]+)\]/g, function (s0, s1, s2, s3) {
+    if (s3) title = s3;
+    if (s2) { icon = s3; title = s2; }
+    if (icon.endsWith('.png')) { title += "," + icon; icon = ''; }
+    return "";
+  }).replace(/\\b\[(.*?)\]/g, function (s0, s1) {
+    position = s1; return "";
+  });
+  return [title, icon, position, string];
+}
+
 ActionParser.prototype.Colour = function(color) {
   return color?JSON.stringify(color).slice(1,-1):null;
 }
@@ -3477,5 +3500,6 @@ MotaActionFunctions.pattern.id2=/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+),flag:([a-zA-
 MotaActionFunctions.pattern.idWithoutFlag=/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
 MotaActionFunctions.pattern.colorRe=/^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
 MotaActionFunctions.pattern.fontRe=/^(italic )?(bold )?(\d+)px ([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+
 
 */

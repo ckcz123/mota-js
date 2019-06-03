@@ -349,7 +349,7 @@ editor.constructor.prototype.listen=function () {
             return;
 
         // 禁止快捷键的默认行为
-        if (e.ctrlKey && [88, 67, 86, 89, 90, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
+        if (e.ctrlKey && [89, 90, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
             e.preventDefault();
         if (e.altKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
             e.preventDefault();
@@ -402,59 +402,62 @@ editor.constructor.prototype.listen=function () {
             core.setLocalStorage('shortcut',shortcut);
             return;
         }
-        // Ctrl+C, Ctrl+X, Ctrl+V
-        if (e.ctrlKey && e.keyCode == 67 && !selectBox.isSelected()) {
-            copyedInfo = editor.copyFromPos();
-            printf('该点事件已复制');
-            return;
-        }
-        if (e.ctrlKey && e.keyCode == 88 && !selectBox.isSelected()) {
-            copyedInfo = editor.copyFromPos();
-            editor.clearPos(true, null, function () {
-                printf('该点事件已剪切');
-            })
-            return;
-        }
-        if (e.ctrlKey && e.keyCode == 86 && !selectBox.isSelected()) {
-            if (!copyedInfo) {
-                printe("没有复制的事件");
+        var focusElement = document.activeElement;
+        if (!focusElement || focusElement.tagName.toLowerCase()=='body') {
+            // Ctrl+C, Ctrl+X, Ctrl+V
+            if (e.ctrlKey && e.keyCode == 67 && !selectBox.isSelected()) {
+                e.preventDefault();
+                copyedInfo = editor.copyFromPos();
+                printf('该点事件已复制');
                 return;
             }
-            editor.pasteToPos(copyedInfo);
-            editor.updateMap();
-            editor.file.saveFloorFile(function (err) {
-                if (err) {
-                    printe(err);
-                    throw(err)
+            if (e.ctrlKey && e.keyCode == 88 && !selectBox.isSelected()) {
+                e.preventDefault();
+                copyedInfo = editor.copyFromPos();
+                editor.clearPos(true, null, function () {
+                    printf('该点事件已剪切');
+                })
+                return;
+            }
+            if (e.ctrlKey && e.keyCode == 86 && !selectBox.isSelected()) {
+                e.preventDefault();
+                if (!copyedInfo) {
+                    printe("没有复制的事件");
+                    return;
                 }
-                ;printf('粘贴事件成功');
-                editor.drawPosSelection();
-            });
-            return;
-        }
-        // DELETE
-        if (e.keyCode == 46 && !selectBox.isSelected()) {
-            editor.clearPos(true);
-            return;
-        }
-        // ESC
-        if (e.keyCode == 27) {
-            if (selectBox.isSelected()) {
-                editor_mode.onmode('');
+                editor.pasteToPos(copyedInfo);
+                editor.updateMap();
                 editor.file.saveFloorFile(function (err) {
                     if (err) {
                         printe(err);
                         throw(err)
                     }
-                    ;printf('地图保存成功');
+                    ;printf('粘贴事件成功');
+                    editor.drawPosSelection();
                 });
+                return;
             }
-            selectBox.isSelected(false);
-            editor.info = {};
-            return;
-        }
-        var focusElement = document.activeElement;
-        if (!focusElement || focusElement.tagName.toLowerCase()=='body') {
+            // DELETE
+            if (e.keyCode == 46 && !selectBox.isSelected()) {
+                editor.clearPos(true);
+                return;
+            }
+            // ESC
+            if (e.keyCode == 27) {
+                if (selectBox.isSelected()) {
+                    editor_mode.onmode('');
+                    editor.file.saveFloorFile(function (err) {
+                        if (err) {
+                            printe(err);
+                            throw(err)
+                        }
+                        ;printf('地图保存成功');
+                    });
+                }
+                selectBox.isSelected(false);
+                editor.info = {};
+                return;
+            }
             switch (e.keyCode) {
                 // WASD
                 case 87: editor.moveViewport(0,-1); break;

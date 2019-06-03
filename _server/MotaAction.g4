@@ -2513,8 +2513,8 @@ Bool:   'TRUE'
 Int :   '0' | [1-9][0-9]* ; // no leading zeros
 
 Letter_List
-    :  'A'|'B'|'C'|'D'|'E'|'F'
-    /*Letter_List ['A','B','C','D','E','F']*/;
+    :  'A'|'B'|'C'|'D'|'E'|'F'|'G'|'H'|'I'|'J'|'K'|'L'|'M'|'N'|'O'|'P'|'Q'|'R'|'S'|'T'|'U'|'V'|'W'|'X'|'Y'|'Z'
+    /*Letter_List ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']*/;
 
 
 Number
@@ -3419,7 +3419,7 @@ ActionParser.prototype.Colour = function(color) {
 }
 
 ActionParser.prototype.tryToUseEvFlag_e = function(defaultType, args, isShadow, comment) {
-  var match=/^switch:([A-F])$/.exec(args[0])
+  var match=/^switch:([A-Z])$/.exec(args[0])
   if(match){
     args[0]=match[1]
     return MotaActionBlocks['evFlag_e'].xmlText(args, isShadow, comment);
@@ -3495,7 +3495,7 @@ MotaActionFunctions.StepString_pre = function(StepString){
 }
 
 MotaActionFunctions.pattern=MotaActionFunctions.pattern||{};
-MotaActionFunctions.pattern.id=/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+MotaActionFunctions.pattern.id=/^(flag|global):([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
 MotaActionFunctions.pattern.id2=/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+),flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
 MotaActionFunctions.pattern.idWithoutFlag=/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
 MotaActionFunctions.pattern.colorRe=/^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;

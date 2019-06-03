@@ -206,14 +206,20 @@ printf = function (str_, type) {
 printe = function (str_) {
     printf(str_, 'error')
 }
-tip_in_showMode = [
-    '表格的文本域可以双击进行编辑',
-    '双击地图可以选中素材，右键可以弹出菜单',
-    '双击事件编辑器的图块可以进行长文本编辑/脚本编辑/地图选点/UI绘制预览等操作',
-    '点击空白处可以自动保存当前修改',
-    'H键可以打开操作帮助哦',
-];
 tip=document.getElementById('tip')
+tip.showHelp = function(value) {
+    var tips = [
+        '表格的文本域可以双击进行编辑',
+        '双击地图可以选中素材，右键可以弹出菜单',
+        '双击事件编辑器的图块可以进行长文本编辑/脚本编辑/地图选点/UI绘制预览等操作',
+        'ESC或点击空白处可以自动保存当前修改',
+        'H键可以打开操作帮助哦',
+        'tileset贴图模式下可以按选中tileset素材，并在地图上拖动来一次绘制一个区域',
+        '可以拖动地图上的图块和事件，或按Ctrl+C, Ctrl+X和Ctrl+V进行复制，剪切和粘贴'
+    ];
+    if (value == null) value = Math.floor(Math.random() * tips.length);
+    printf('tips: ' + tips[value])
+}
 tip._infos= {}
 tip.infos=function(value){
     if(value!=null){

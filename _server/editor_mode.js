@@ -114,8 +114,7 @@ editor_mode = function (editor) {
         editor.drawEventBlock();
         if (editor_mode[mode]) editor_mode[mode]();
         document.getElementById('editModeSelect').value = mode;
-        var tips = tip_in_showMode;
-        if (!selectBox.isSelected()) printf('tips: ' + tips[~~(tips.length * Math.random())]);
+        if (!selectBox.isSelected()) tip.showHelp();
     }
 
     editor_mode.prototype.loc = function (callback) {

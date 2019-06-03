@@ -491,4 +491,69 @@ editor.prototype.mobile_listen=function(){
     // 移动至 editor_unsorted_1.js
 }
 
+editor.prototype.copyFromPos = function (pos) {
+    var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
+    pos = pos || editor.pos;
+    var map = core.clone(editor.map[pos.y][pos.x]);
+    var events = {};
+    fields.forEach(function(v){
+        events[v] = core.clone(editor.currentFloorData[v][pos.x+','+pos.y]);
+    })
+    return {map: map, events: events};
+}
+
+editor.prototype.pasteToPos = function (info, pos) {
+    if (info == null) return;
+    var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
+    pos = pos || editor.pos;
+    editor.map[pos.y][pos.x] = core.clone(info.map);
+    fields.forEach(function(v){
+        if (info.events[v] == null) delete editor.currentFloorData[v][pos.x+","+pos.y];
+        else editor.currentFloorData[v][pos.x+","+pos.y] = core.clone(info.events[v]);
+    });
+}
+
+editor.prototype.movePos = function (startPos, endPos, callback) {
+    if (!startPos || !endPos) return;
+    if (startPos.x == endPos.x && startPos.y == endPos.y) return;
+    var copyed = editor.copyFromPos(startPos);
+    editor.pasteToPos({map:0, events: {}}, startPos);
+    editor.pasteToPos(copyed, endPos);
+    editor.updateMap();
+    editor.file.saveFloorFile(function (err) {
+        if (err) {
+            printe(err);
+            throw(err)
+        }
+        ;printf('移动事件成功');
+        editor.drawPosSelection();
+        if (callback) callback();
+    });
+}
+
+editor.prototype.clearPos = function (clearPos, pos, callback) {
+    var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
+    pos = pos || editor.pos;
+    editor.hideMidMenu();
+    editor.preMapData = null;
+    editor.info = 0;
+    editor_mode.onmode('');
+    if (clearPos)
+        editor.map[pos.y][pos.x]=editor.info;
+    editor.updateMap();
+    fields.forEach(function(v){
+        delete editor.currentFloorData[v][pos.x+','+pos.y];
+    })
+    editor.file.saveFloorFile(function (err) {
+        if (err) {
+            printe(err);
+            throw(err)
+        }
+        ;printf(clearPos?'清空该点和事件成功':'只清空该点事件成功');
+        editor.drawPosSelection();
+        if (callback) callback();
+    });
+}
+
+
 editor = new editor();

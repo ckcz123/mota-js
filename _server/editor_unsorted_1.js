@@ -403,19 +403,19 @@ editor.constructor.prototype.listen=function () {
             return;
         }
         // Ctrl+C, Ctrl+X, Ctrl+V
-        if (e.ctrlKey && e.keyCode == 67) {
+        if (e.ctrlKey && e.keyCode == 67 && !selectBox.isSelected()) {
             copyedInfo = editor.copyFromPos();
             printf('该点事件已复制');
             return;
         }
-        if (e.ctrlKey && e.keyCode == 88) {
+        if (e.ctrlKey && e.keyCode == 88 && !selectBox.isSelected()) {
             copyedInfo = editor.copyFromPos();
             editor.clearPos(true, null, function () {
                 printf('该点事件已剪切');
             })
             return;
         }
-        if (e.keyCode == 86) {
+        if (e.ctrlKey && e.keyCode == 86 && !selectBox.isSelected()) {
             if (!copyedInfo) {
                 printe("没有复制的事件");
                 return;
@@ -432,6 +432,12 @@ editor.constructor.prototype.listen=function () {
             });
             return;
         }
+        // DELETE
+        if (e.keyCode == 46 && !selectBox.isSelected()) {
+            editor.clearPos(true);
+            return;
+        }
+        // ESC
         if (e.keyCode == 27) {
             if (selectBox.isSelected()) {
                 editor_mode.onmode('');

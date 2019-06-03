@@ -301,6 +301,12 @@ ui.prototype._uievent_setAttribute = function (data) {
     if (data.strokeStyle) this.setStrokeStyle('uievent', data.strokeStyle);
     if (data.align) this.setTextAlign('uievent', data.align);
     if (data.baseline) this.setTextBaseline('uievent', data.baseline);
+    if (data.z != null && main.mode != 'editor') {
+        var z = parseInt(data.z) || 135;
+        core.dymCanvas.uievent.canvas.style.zIndex = z;
+        if (core.dymCanvas._uievent_selector)
+            core.dymCanvas._uievent_selector.canvas.style.zIndex = z + 1;
+    }
 }
 
 ////// 计算某段文字的宽度 //////
@@ -613,7 +619,9 @@ ui.prototype._uievent_drawSelector = function (data) {
         this._drawSelector('uievent', background, w, h, x, y);
         return;
     }
-    var ctx = core.createCanvas('_uievent_selector', x, y, w, h, 136);
+    var z = 136;
+    if (core.dymCanvas.uievent) z = (parseInt(core.dymCanvas.uievent.canvas.style.zIndex) || 135) + 1;
+    var ctx = core.createCanvas('_uievent_selector', x, y, w, h, z);
     ctx.canvas.style.opacity = 0.8;
     this._drawSelector(ctx, background, w, h);
 }
@@ -2424,7 +2432,7 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
         var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
         if (core.calWidth('ui', v + v2, this._buildFont(10, false)) <= size) v += v2;
         core.fillText('ui', v, x, y+30+size, '#FFD700');
-        core.fillText('ui', core.formatDate(new Date(data.time)), x, y+43+size, data.hero.flags.__consoleOpened__?'#FF6A6A':'#FFFFFF');
+        core.fillText('ui', core.formatDate(new Date(data.time)), x, y+43+size, data.hero.flags.__consoleOpened__||data.hero.flags.debug?'#FF6A6A':'#FFFFFF');
     }
     else {
         core.fillRect('ui', x-size/2, y+15, size, size, '#333333', 2);

@@ -109,7 +109,7 @@ return code;
 */;
 
 shopsub
-    :   '商店 id' IdString '标题' EvalString '图标' IdString BGNL? Newline '快捷商店栏中名称' EvalString '共用times' Bool BGNL? Newline '未开启状态则不显示在列表中' Bool BGNL? NewLine '使用' ShopUse_List '消耗' EvalString BGNL? Newline '显示文字' EvalString BGNL? Newline shopChoices+ BEND
+    :   '商店 id' IdString '标题' EvalString '图标' IdString BGNL? Newline '快捷商店栏中名称' EvalString '共用times' Bool BGNL? Newline '未开启状态则不显示在列表中' Bool BGNL? Newline '使用' ShopUse_List '消耗' EvalString BGNL? Newline '显示文字' EvalString BGNL? Newline shopChoices+ BEND
     
 
 /* shopsub
@@ -224,7 +224,7 @@ changeFloor_m
 /* changeFloor_m
 tooltip : 楼梯, 传送门, 如果目标楼层有多个楼梯, 写upFloor或downFloor可能会导致到达的楼梯不确定, 这时候请使用loc方式来指定具体的点位置
 helpUrl : https://h5mota.com/games/template/_docs/#/element?id=%e8%b7%af%e9%9a%9c%ef%bc%8c%e6%a5%bc%e6%a2%af%ef%bc%8c%e4%bc%a0%e9%80%81%e9%97%a8
-default : [null,"MT1",null,0,0,null,500,null]
+default : [null,"MTx",null,0,0,null,500,null]
 var toFloorId = IdString_0;
 if (Floor_List_0!='floorId') toFloorId = Floor_List_0;
 var loc = ', "loc": ['+Number_0+', '+Number_1+']';
@@ -702,7 +702,7 @@ return code;
 */;
 
 insert_2_s
-    :   '插入事件' 'x' PosString ',' 'y' PosString Event_List? '楼层' IdString? '参数列表' EvalString? ENewline
+    :   '插入事件' 'x' PosString ',' 'y' PosString Event_List? '楼层' IdString? '参数列表' EvalString? Newline
 
 
 /* insert_2_s
@@ -1068,7 +1068,7 @@ changeFloor_s
 /* changeFloor_s
 tooltip : changeFloor: 楼层切换,动画时间可不填
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=changefloor%EF%BC%9A%E6%A5%BC%E5%B1%82%E5%88%87%E6%8D%A2
-default : ["MT1","0","0",null,500]
+default : ["MTx","0","0",null,500]
 colour : this.dataColor
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 Int_0 = (Int_0!=='')  ?(', "time": '+Int_0):'';
@@ -1917,13 +1917,13 @@ return code;
 
 
 setAttribute_s
-    : '设置画布属性' '字体' EvalString? '填充样式' EvalString? Colour '边框样式' EvalString? Colour BGNL? '线宽度' EvalString? '不透明度' EvalString? '对齐' TextAlign_List '基准线' TextBaseline_List Newline
+    : '设置画布属性' '字体' EvalString? '填充样式' EvalString? Colour '边框样式' EvalString? Colour BGNL? '线宽度' EvalString? '不透明度' EvalString? '对齐' TextAlign_List '基准线' TextBaseline_List 'z值' EvalString? Newline
 
 /* setAttribute_s
 tooltip : setAttribute：设置画布属性
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setAttribute%ef%bc%9a%e8%ae%be%e7%bd%ae%e7%94%bb%e5%b8%83%e5%b1%9e%e6%80%a7
 colour : this.subColor
-default : ["","",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"","",null,null]
+default : ["","",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"","",null,null,""]
 TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
 TextBaseline_List_0 = TextBaseline_List_0==='null'?'': ', "baseline": "'+TextBaseline_List_0+'"';
 var colorRe = MotaActionFunctions.pattern.colorRe;
@@ -1949,7 +1949,11 @@ if (EvalString_4) {
   if (isNaN(f) || f<0 || f>1) throw new Error('不透明度必须是0到1的浮点数或不填');
   EvalString_4 = ', "alpha": '+EvalString_4;
 }
-var code = '{"type": "setAttribute"'+EvalString_0+EvalString_1+EvalString_2+EvalString_3+EvalString_4+TextAlign_List_0+TextBaseline_List_0+'},\n';
+if (EvalString_5) {
+  if (!/^\d+$/.test(EvalString_5))throw new Error('z值必须是整数或不填');
+  EvalString_5 = ', "z": '+EvalString_5;
+}
+var code = '{"type": "setAttribute"'+EvalString_0+EvalString_1+EvalString_2+EvalString_3+EvalString_4+TextAlign_List_0+TextBaseline_List_0+EvalString_5+'},\n';
 return code;
 */;
 
@@ -2509,8 +2513,8 @@ Bool:   'TRUE'
 Int :   '0' | [1-9][0-9]* ; // no leading zeros
 
 Letter_List
-    :  'A'|'B'|'C'|'D'|'E'|'F'
-    /*Letter_List ['A','B','C','D','E','F']*/;
+    :  'A'|'B'|'C'|'D'|'E'|'F'|'G'|'H'|'I'|'J'|'K'|'L'|'M'|'N'|'O'|'P'|'Q'|'R'|'S'|'T'|'U'|'V'|'W'|'X'|'Y'|'Z'
+    /*Letter_List ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']*/;
 
 
 Number
@@ -2739,12 +2743,19 @@ ActionParser.prototype.parseAction = function() {
       this.next = data.next;
       return;
     case "text": // 文字/对话
-      this.next = MotaActionBlocks['text_0_s'].xmlText([
-        this.EvalString(data.text),this.next]);
+      var info = this.getTitleAndPosition(data.text);
+      if (info[0] || info[1] || info[2]) {
+        this.next = MotaActionBlocks['text_1_s'].xmlText([
+          info[0], info[1], info[2], info[3], this.next]);
+      }
+      else {
+        this.next = MotaActionBlocks['text_0_s'].xmlText([info[3],this.next]);
+      }
       break;
     case "autoText": // 自动剧情文本
+      var info = this.getTitleAndPosition(data.text);
       this.next = MotaActionBlocks['autoText_s'].xmlText([
-        '','','',data.time,this.EvalString(data.text),this.next]);
+        info[0],info[1],info[2],data.time,info[3],this.next]);
       break;
     case "scrollText":
       this.next = MotaActionBlocks['scrollText_s'].xmlText([
@@ -3119,8 +3130,10 @@ ActionParser.prototype.parseAction = function() {
         text_choices=MotaActionBlocks['choicesContext'].xmlText([
           choice.text,choice.icon,choice.color,'rgba('+choice.color+')',this.insertActionList(choice.action),text_choices]);
       }
+      if (!this.isset(data.text)) data.text = '';
+      var info = this.getTitleAndPosition(data.text);
       this.next = MotaActionBlocks['choices_s'].xmlText([
-        this.isset(data.text)?this.EvalString(data.text):null,'','',text_choices,this.next]);
+        info[3],info[0],info[1],text_choices,this.next]);
       break;
     case "while": // 前置条件循环处理
       this.next = MotaActionBlocks['while_s'].xmlText([
@@ -3234,7 +3247,7 @@ ActionParser.prototype.parseAction = function() {
       data.strokeStyle=this.Colour(data.strokeStyle);
       this.next = MotaActionBlocks['setAttribute_s'].xmlText([
         data.font,data.fillStyle,'rgba('+data.fillStyle+')',data.strokeStyle,'rgba('+data.strokeStyle+')',
-        data.lineWidth,data.alpha,data.align,data.baseline,this.next]);
+        data.lineWidth,data.alpha,data.align,data.baseline,data.z,this.next]);
       break;
     case "fillText": // 绘制一行文本
       data.style = this.Colour(data.style);
@@ -3387,12 +3400,26 @@ ActionParser.prototype.EvalString = function(EvalString) {
   return EvalString.split('\b').join('\\b').split('\t').join('\\t').split('\n').join('\\n');
 }
 
+ActionParser.prototype.getTitleAndPosition = function (string) {
+  string = this.EvalString(string);
+  var title = '', icon = '', position = '';
+  string = string.replace(/\\t\[(([^\],]+),)?([^\],]+)\]/g, function (s0, s1, s2, s3) {
+    if (s3) title = s3;
+    if (s2) { icon = s3; title = s2; }
+    if (icon.endsWith('.png')) { title += "," + icon; icon = ''; }
+    return "";
+  }).replace(/\\b\[(.*?)\]/g, function (s0, s1) {
+    position = s1; return "";
+  });
+  return [title, icon, position, string];
+}
+
 ActionParser.prototype.Colour = function(color) {
   return color?JSON.stringify(color).slice(1,-1):null;
 }
 
 ActionParser.prototype.tryToUseEvFlag_e = function(defaultType, args, isShadow, comment) {
-  var match=/^switch:([A-F])$/.exec(args[0])
+  var match=/^switch:([A-Z])$/.exec(args[0])
   if(match){
     args[0]=match[1]
     return MotaActionBlocks['evFlag_e'].xmlText(args, isShadow, comment);
@@ -3468,10 +3495,11 @@ MotaActionFunctions.StepString_pre = function(StepString){
 }
 
 MotaActionFunctions.pattern=MotaActionFunctions.pattern||{};
-MotaActionFunctions.pattern.id=/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+MotaActionFunctions.pattern.id=/^(flag|global):([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
 MotaActionFunctions.pattern.id2=/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+),flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
 MotaActionFunctions.pattern.idWithoutFlag=/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
 MotaActionFunctions.pattern.colorRe=/^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
 MotaActionFunctions.pattern.fontRe=/^(italic )?(bold )?(\d+)px ([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+
 
 */

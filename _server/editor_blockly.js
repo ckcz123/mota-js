@@ -775,6 +775,10 @@ function omitedcheckUpdateFunction(event) {
             }
             block.setFieldValue(xv+"", arr[0]);
             block.setFieldValue(yv+"", arr[1]);
+            if (block.type == 'changeFloor_m') {
+                block.setFieldValue("floorId", "Floor_List_0");
+                block.setFieldValue("loc", "Stair_List_0");
+            }
         });
     }
 

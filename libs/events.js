@@ -434,7 +434,7 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
             return;
         }
         core.drawImage('event', core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
-    }, speed / Math.max(core.status.replay.speed, 1));
+    }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
     core.animateFrame.asyncId[animate] = true;
 }
 
@@ -1395,7 +1395,7 @@ events.prototype._action_choices = function (data, x, y, prefix) {
                 core.status.route.push("choices:" + index);
                 core.insertAction(data.choices[index].action);
                 core.doAction();
-            }, 750 / Math.max(1, core.status.replay.speed))
+            }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed))
         }
         else {
             core.control._replay_error(action);
@@ -1418,7 +1418,7 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
                 if (index == 0) core.insertAction(data.yes);
                 else core.insertAction(data.no);
                 core.doAction();
-            }, 750 / Math.max(1, core.status.replay.speed))
+            }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed))
         }
         else {
             core.control._replay_error(action);
@@ -1986,7 +1986,7 @@ events.prototype.closeDoor = function (x, y, id, callback) {
         }
         core.clearMap('event', 32 * x, 32 * y, 32, 32);
         core.drawImage('event', core.material.images.animates, 32 * (4-state), 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
-    }, speed / Math.max(core.status.replay.speed, 1));
+    }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
     core.animateFrame.asyncId[animate] = true;
 }
 
@@ -2194,7 +2194,7 @@ events.prototype.eventMoveHero = function(steps, time, callback) {
             if (core.events._eventMoveHero_moving(++step, moveSteps))
                 step = 0;
         }
-    }, time / 8 / core.status.replay.speed);
+    }, core.status.replay.speed == 24 ? 1 : time / 8 / core.status.replay.speed);
 
     core.animateFrame.asyncId[animate] = true;
 }

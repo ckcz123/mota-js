@@ -152,8 +152,11 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
 }
 
 control.prototype._animationFrame_selector = function (timestamp) {
-    if (timestamp - core.animateFrame.selectorTime <= 20 || !core.dymCanvas._selector) return;
-    var opacity = parseFloat(core.dymCanvas._selector.canvas.style.opacity);
+    if (timestamp - core.animateFrame.selectorTime <= 20) return;
+    var opacity = null;
+    if (core.dymCanvas._selector) opacity = parseFloat(core.dymCanvas._selector.canvas.style.opacity);
+    else if (core.dymCanvas._uievent_selector) opacity = parseFloat(core.dymCanvas._uievent_selector.canvas.style.opacity);
+    if (!core.isset(opacity)) return;
     if (core.animateFrame.selectorUp)
         opacity += 0.02;
     else
@@ -161,6 +164,7 @@ control.prototype._animationFrame_selector = function (timestamp) {
     if (opacity > 0.95 || opacity < 0.55)
         core.animateFrame.selectorUp = !core.animateFrame.selectorUp;
     core.setOpacity("_selector", opacity);
+    core.setOpacity("_uievent_selector", opacity);
     core.animateFrame.selectorTime = timestamp;
 }
 
@@ -919,7 +923,7 @@ control.prototype.checkBlock = function () {
     if (damage) {
         core.status.hero.hp -= damage;
         core.drawTip("受到"+(core.status.checkBlock.type[loc]||"伤害")+damage+"点");
-        this._checkBlock_soundAndAnimate(x, y);
+        core.drawAnimate("zone", x, y);
         this._checkBlock_disableQuickShop();
         core.status.hero.statistics.extraDamage += damage;
         if (core.status.hero.hp <= 0) {
@@ -931,11 +935,6 @@ control.prototype.checkBlock = function () {
     }
     this._checkBlock_snipe(core.status.checkBlock.snipe[loc]);
     this._checkBlock_ambush(core.status.checkBlock.ambush[loc]);
-}
-
-control.prototype._checkBlock_soundAndAnimate = function (x,y) {
-    core.playSound('zone.mp3');
-    core.drawAnimate("zone", x, y);
 }
 
 control.prototype._checkBlock_disableQuickShop = function () {
@@ -1217,6 +1216,28 @@ control.prototype.viewMapReplay = function () {
     core.lockControl();
     core.status.event.id='viewMaps';
     core.ui.drawMaps();
+}
+
+control.prototype.toolboxReplay = function () {
+    if (!core.isPlaying() || !core.isReplaying()) return;
+    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+        return core.drawTip("请等待当前事件的处理结束");
+
+    core.lockControl();
+    core.status.event.id='toolbox';
+    core.ui.drawToolbox();
+}
+
+control.prototype.equipboxReplay = function () {
+    if (!core.isPlaying() || !core.isReplaying()) return;
+    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+        return core.drawTip("请等待当前事件的处理结束");
+
+    core.lockControl();
+    core.status.event.id='equipbox';
+    core.ui.drawEquipbox();
 }
 
 ////// 是否正在播放录像 //////
@@ -1982,7 +2003,7 @@ control.prototype.unLockControl = function () {
 ////// 开启debug模式 //////
 control.prototype.debug = function() {
     core.setFlag('debug', true);
-    core.drawText("\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n同时，录像将失效，也无法上传成绩。");
+    core.drawText("\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n此模式下将无法上传成绩。");
 }
 
 // ------ 天气，色调，BGM ------ //

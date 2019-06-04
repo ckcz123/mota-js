@@ -317,16 +317,15 @@ utils.prototype.splitImage = function (image, width, height) {
     height = height || width;
     var canvas = document.createElement("canvas");
     var context = canvas.getContext("2d");
-    canvas.width = width;
-    canvas.height = height;
     var ans = [];
     for (var j = 0; j < image.height; j += height) {
         for (var i = 0; i < image.width; i += width) {
-            context.drawImage(image, i, j, width, height, 0, 0, width, height);
+            var w = Math.min(width, image.width - i), h = Math.min(height, image.height - j);
+            canvas.width = w; canvas.height = h;
+            context.drawImage(image, i, j, w, h, 0, 0, w, h);
             var img = new Image();
             img.src = canvas.toDataURL("image/png");
             ans.push(img);
-            context.clearRect(0, 0, width, height);
         }
     }
     return ans;

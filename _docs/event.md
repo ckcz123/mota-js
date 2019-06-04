@@ -1795,6 +1795,270 @@ yes和no均为必填项，即用户点击确认或取消后执行的事件。
 
 该事件会进行等待，直到所有可能的异步事件（异步动画除外）执行完毕。
 
+### previewUI：UI绘制并预览
+
+此项可在地图编辑器中预览UI界面的绘制效果。
+
+在编辑器中将会把此项包含的所有UI绘制事件进行绘制从而可以进行预览。
+
+值得注意的是，在游戏中，UI绘制事件都是绘制在uievent层上的。
+
+### clearMap：清除画布
+
+UI绘制事件。
+
+`{"type": "clearMap"}`可以清除`uievent`画布的内容。
+
+```js
+[
+    {"type": "clearMap", "x": 0, "y": 0, "width": "flag:width", "height": 416}, // 清除画布的一部分
+    {"type": "clearMap"}, // 清空并删除画布
+]
+```
+
+x, y, width, height均可选，表示要清除的坐标和长宽。也可以使用`flag:xxx`。
+
+如果存在某一项不填则会清空全部画布并删除。
+
+### setAttribute：设置画布属性
+
+UI绘制事件。
+
+此项可以设置`uievent`画布的各项属性。
+
+```js
+[
+    {"type": "setAttribute", "font": "17px Verdana", "fillStyle": [255,0,0,1]},
+]
+```
+
+可以选择性的设置如下几项内容：
+- `font`：字体，必须是`[italic] [bold] 14px Verdana`这种形式
+- `fillStyle`：填充样式，必须是三元组RGB或四元组RGBA
+- `strokeStyle`：边框样式，必须是三元组RGB或者四元组RGBA
+- `lineWidth`：线宽度，必须是正整数
+- `alpha`：不透明度，必须是0到1之间的浮点数
+- `align`：对齐方式，只能是`left`, `center`, `right`，分别代表左对齐，居中和右对齐
+- `baseline`：基准线，只能是`top`, `middle`, `alphabetic`, `bottom`，分别代表顶部，居中，标准值和底部。
+- `z`：画布的z值，必须是正整数。初始创建时画布的z值是135。请注意，闪烁光标所在画布的z值永远比该画布大1。
+
+### fillText：绘制文本
+
+UI绘制事件。
+
+此项可以绘制一行文本。
+
+```js
+[
+    {"type": "fillText", "text"："要绘制的文本", "x": 10, "y": 20, "maxWidth": 50}
+]
+```
+
+text必填，为要绘制的文本，支持`${}`的写法，不支持一切转义字符或换行符。
+
+x和y必填，为要绘制的左上角坐标。请使用`setAttribute`来设置绘制的对齐方式和基准线。
+
+style可选，如果设置需要是三元组RGB或四元组RBGA，代表绘制样式。
+
+font可选，如果设置则是要绘制的字体。
+
+maxWidth可选，如果设置且不为0，则代表要绘制的最大宽度；超过此宽度会自动放缩。
+
+### fillBoldText：绘制描边文本
+
+UI绘制事件。
+
+此项可以绘制一行描边文本。
+
+```js
+[
+    {"type": "fillText", "text"："要绘制的描边文本", "x": 10, "y": 20, "style": [255,0,0,1]}
+]
+```
+
+text必填，为要绘制的文本，支持`${}`的写法，不支持一切转义字符或换行符。
+
+x和y必填，为要绘制的左上角坐标。请使用`setAttribute`来设置绘制的对齐方式和基准线。
+
+style可选，如果设置需要是三元组RGB或四元组RBGA，代表绘制样式。
+
+font可选，如果设置则是要绘制的字体。
+
+### drawTextContent：绘制多行文本
+
+UI绘制事件。
+
+此项可以绘制多行文本。
+
+```js
+[
+    {"type": "drawTextContent", "text"："要绘制的多行文本", "left": 10, "top": 20, "maxWidth": 100}
+]
+```
+
+text必填，为要绘制的文本，支持所有的文字效果（如\n，${}，\r，\\i等），但不支持支持\t和\b的语法。
+
+left和top必填，为要绘制的起始像素坐标。实际绘制时会将textBaseline设置为'top'，因此只需要考虑第一个字的左上角位置。
+
+maxWidth可选，为单行最大宽度，超过此宽度将自动换行，不设置不会自动换行。
+
+color可选，表示绘制时的颜色，为三元组RGB或四元组RGBA。如果不设置则使用剧情文本设置中的正文颜色。
+
+bold可选，是否粗体。如果不设置默认为false。
+
+align可选，文字对齐方式，仅在maxWidth设置时有效，默认为'left'。
+
+fontSize可选，为字体大小，如果不设置则使用剧情文本设置中的正文字体大小。
+
+lineHeight可选，绘制的行距值，如果不设置则使用fontSize*1.3（即1.3倍行距）。
+
+此项不支持字体样式的设置，使用的是全塔属性中的全局字体；如有需要请使用“设置全局属性”事件来设置字体样式。
+
+### fillRect：绘制矩形
+
+UI绘制事件。此项可以绘制一个矩形。
+
+```js
+[
+    {"type": "fillRect", "x": 100, "y": 100, "width": 120, "height": 120, "style": [255,0,0,1]}
+]
+```
+
+x, y, width, height必填，为要绘制的起点坐标和宽高；也可以用`flag:xxx`。
+
+color可选，表示绘制时的颜色，为三元组RGB或四元组RGBA。
+
+### strokeRect：绘制矩形边框
+
+UI绘制事件。此项可以绘制一个矩形边框。
+
+```js
+[
+    {"type": "strokeRect", "x": 100, "y": 100, "width": 120, "height": 120, "style": [255,0,0,1], "lineWidth": 4}
+]
+```
+
+x, y, width, height必填，为要绘制的起点坐标和宽高；也可以用`flag:xxx`。
+
+style可选，表示绘制时的颜色，为三元组RGB或四元组RGBA。
+
+lineWidth可选，表示边框的线宽。
+
+### drawLine：绘制线段
+
+UI绘制事件。此事件可以绘制一个函数。
+
+```js
+[
+    {"type": "drawLine", "x1": 0, "y1": 0, "x2": "flag:x", "y2": 200, "style": [255,0,0,1]}
+]
+```
+
+x1, y1, x2, x2必填，为要绘制的起点和终点坐标；也可以用`flag:xxx`的写法。
+
+style可选，表示绘制时的颜色，为三元组RGB或四元组RGBA。
+
+lineWidth可选，表示边框的线宽。
+
+### drawArrow：绘制箭头
+
+UI绘制事件。此事件可以绘制一个箭头。
+
+参数和写法与`drawLine`完全一致，只不过是会多画一个箭头标记。
+
+### fillPolygon：绘制多边形
+
+UI绘制事件。此事件可以绘制一个多边形。
+
+```js
+[
+   {"type": "fillPolygon", "nodes": [[0,0],[0,100],[100,0]], "style": [255,0,0,1]}
+]
+```
+
+nodes必填，为一个二维数组，其中每一项都是多边形一个顶点坐标。（与显示/隐藏事件写法相同）
+
+style可选，表示绘制时的颜色，为三元组RGB或四元组RGBA。
+
+### strokePolygon：绘制多边形边框
+
+UI绘制事件。此事件可以绘制一个多边形边框。
+
+参数列表和`fillPolygon`基本相同，不过多了一个`lineWidth`表示的绘制线宽。
+
+### drawImage：绘制图片
+
+UI绘制事件。此事件可以绘制一个图片。
+
+```js
+[
+    {"type": "drawImage", "image": "bg.jpg", "x": 0, "y": 0}, // 在(0,0)绘制bg.jpg
+    {"type": "drawImage", "image": "bg.jpg", "x": 0, "y": 0, "w": 100, "h": 100}, // 在(0,0)绘制bg.jpg，且放缩到100x100
+    // 裁剪并放缩图片
+    {"type": "drawImage", "image": "bg.jpg", "x": 0, "y": 0, "w": 100, "h": 100, "x1": 0, "y1": 0, "w1": 100, "h1": 100}
+]
+```
+
+image必填，为图片名。图片必须在全塔属性中被注册过。
+
+此函数有三种写法：
+
+- 只写x和y：表示要绘制到的位置。
+- 写x, y, w, h：表示要绘制到的位置，且将图片放缩到指定宽高。
+- 写x, y, w, h, x1, y1, w1, h1：从原始图片上裁剪[x,y,w,h]的图片，并绘制画布上的[x1,y1,w1,h1]
+
+可以查看下面的文档以了解各项参数的信息：
+http://www.w3school.com.cn/html5/canvas_drawimage.asp
+
+### drawIcon：绘制图标
+
+UI绘制事件。此事件可以绘制一个图标。
+
+```js
+[
+    {"type": "drawIcon", "id": "yellowKey", "x": 100, "y": 100}, // 在(100,100)绘制黄钥匙
+]
+```
+
+id必填，为要绘制的图标ID。可以是一个注册过的图标ID，也可以使用状态栏的图标ID，例如lv, hp, up, save, settings等。
+
+x, y必填，为要绘制的左上角坐标。width和height可选，如果设置则会将图标放缩成对应的宽高。
+
+### drawBackground：绘制背景图
+
+UI绘制事件。此事件可以绘制一个背景图。
+
+```js
+[
+    {"type": "drawBackground", "background": "winskin.png", "x": 0, "y": 0, "width": 100, "height": 100},
+]
+```
+
+background必填，为要绘制的背景图内容。其可以是一个三元组RGB或四元组RGBA（纯色绘制），或一个WindowSkin的图片名。
+
+x, y, width, height必填，分别为要绘制的起点坐标和长宽。
+
+可以使用“设置画布属性”来设置不透明度和纯色绘制时的边框颜色。
+
+### drawSelector：绘制闪烁光标
+
+UI绘制事件。此事件可以绘制闪烁光标。
+
+```js
+[
+    {"type": "drawSelector", "image": "winskin.png", "x": 0, "y": 0, "width": 100, "height": 100},
+    {"type": "drawSelector"} // 清除闪烁光标
+]
+```
+
+image为要绘制的WindowSkin图片名；如果不填则视为“清除闪烁光标”。
+
+x, y, width, height分别为要绘制的起点坐标和长宽。
+
+请注意，同时只会有一个闪烁光标存在，如果创建多个则后者会替换前者。
+
+闪烁光标将会一直存在即使事件流结束；请使用本事件并不填`image`来清除闪烁光标。
+
 ### function: 自定义JS脚本
 
 上述给出了这么多事件，但有时候往往不能满足需求，这时候就需要执行自定义脚本了。

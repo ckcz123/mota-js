@@ -568,11 +568,14 @@ editor_unsorted_2_wrapper=function(editor_mode){
             });
         }
 
+        editor_mode.change = function (value) {
+            editor_mode.onmode('nextChange');
+            editor_mode.onmode(value);
+            if(editor.isMobile)editor.showdataarea(false);
+        }
         var editModeSelect = document.getElementById('editModeSelect');
         editModeSelect.onchange = function () {
-            editor_mode.onmode('nextChange');
-            editor_mode.onmode(editModeSelect.value);
-            if(editor.isMobile)editor.showdataarea(false);
+            editor_mode.change(editModeSelect.value);
         }
 
         editor_mode.checkUnique = function (thiseval) {

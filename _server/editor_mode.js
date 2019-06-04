@@ -57,7 +57,7 @@ editor_mode = function (editor) {
                 printe(objs_.slice(-1)[0]);
                 throw(objs_.slice(-1)[0])
             }
-            ;printf('修改成功');
+            ;printf('修改成功' + (data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.name == 'template' ? '\n\n请注意：全塔属性的name尚未修改，请及时予以设置' : ''));
         }
         switch (mode) {
             case 'loc':
@@ -114,8 +114,7 @@ editor_mode = function (editor) {
         editor.drawEventBlock();
         if (editor_mode[mode]) editor_mode[mode]();
         document.getElementById('editModeSelect').value = mode;
-        var tips = tip_in_showMode;
-        if (!selectBox.isSelected()) printf('tips: ' + tips[~~(tips.length * Math.random())]);
+        if (!selectBox.isSelected()) tip.showHelp();
     }
 
     editor_mode.prototype.loc = function (callback) {

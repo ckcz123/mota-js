@@ -8,13 +8,21 @@ editor_file = function (editor, callback) {
     editor.file.saveFloorFile = function (callback) {
         //callback(err:String)
         checkCallback(callback);
-        for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
-            var mapArray=editor[name].map(function (v) {
-                return v.map(function (v) {
-                    return v.idnum || v || 0
-                })
-            });
-            editor.currentFloorData[name]=mapArray;
+        /* if (!isset(editor.currentFloorId) || !isset(editor.currentFloorData)) {
+          callback('未选中文件或无数据');
+        } */
+        var filename = 'project/floors/' + editor.currentFloorId + '.js';
+        var datastr = ['main.floors.', editor.currentFloorId, '=\n'];
+
+        if (core.floorIds.indexOf(editor.currentFloorId) >= 0) {
+            for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
+                var mapArray=editor[name].map(function (v) {
+                    return v.map(function (v) {
+                        return v.idnum || v || 0
+                    })
+                });
+                editor.currentFloorData[name]=mapArray;
+            }
         }
         editor.file.saveFloor(editor.currentFloorData)
     }
@@ -34,8 +42,8 @@ editor_file = function (editor, callback) {
             title = "主塔 "+name+" 层";
         }
         
-        var width = parseInt(document.getElementById('newMapsWidth').value);
-        var height = parseInt(document.getElementById('newMapsHeight').value);
+        var width = parseInt(document.getElementById('newMapWidth').value);
+        var height = parseInt(document.getElementById('newMapHeight').value);
         var row = [], map = [];
         for (var i=0;i<width;i++) row.push(0);
         for (var i=0;i<height;i++) map.push(row);

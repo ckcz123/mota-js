@@ -113,7 +113,8 @@ actions.prototype.doRegisteredAction = function (action) {
 
 actions.prototype._checkReplaying = function () {
     if (core.isReplaying() && core.status.event.id != 'save'
-        && (core.status.event.id || "").indexOf('book') != 0 && core.status.event.id != 'viewMaps')
+        && (core.status.event.id || "").indexOf('book') != 0 && core.status.event.id != 'viewMaps'
+        && core.status.event.id != 'toolbox' && core.status.event.id != 'equipbox')
         return true;
     return false;
 }
@@ -170,6 +171,10 @@ actions.prototype._sys_onkeyUp_replay = function (e) {
             core.viewMapReplay();
         else if (e.keyCode == 78) // N
             core.stepReplay();
+        else if (e.keyCode == 84) // T
+            core.toolboxReplay();
+        else if (e.keyCode == 81) // Q
+            core.equipboxReplay();
         else if (e.keyCode >= 49 && e.keyCode <= 51) // 1-3
             core.setReplaySpeed(e.keyCode - 48);
         else if (e.keyCode == 52) // 4
@@ -1317,7 +1322,10 @@ actions.prototype._clickToolbox = function (x, y) {
     // 装备栏
     if (x >= this.LAST - 2 && y == 0) {
         core.ui.closePanel();
-        core.openEquipbox();
+        if (core.isReplaying())
+            core.equipboxReplay();
+        else
+            core.openEquipbox();
         return;
     }
     if (x >= this.LAST - 2 && y == this.LAST) {
@@ -1376,6 +1384,7 @@ actions.prototype._clickToolboxIndex = function (index) {
     if (select >= items.length) return;
     var itemId = items[select];
     if (itemId == core.status.event.data.selectId) {
+        if (core.isReplaying()) return;
         core.events.tryUseItem(itemId);
     }
     else {
@@ -1478,7 +1487,10 @@ actions.prototype._keyDownToolbox = function (keycode) {
 actions.prototype._keyUpToolbox = function (keycode) {
     if (keycode == 81) {
         core.ui.closePanel();
-        core.openEquipbox();
+        if (core.isReplaying())
+            core.equipboxReplay();
+        else
+            core.openEquipbox();
         return;
     }
     if (keycode == 84 || keycode == 27 || keycode == 88) {
@@ -1498,7 +1510,10 @@ actions.prototype._clickEquipbox = function (x, y) {
     // 道具栏
     if (x >= this.LAST - 2 && y == 0) {
         core.ui.closePanel();
-        core.openToolbox();
+        if (core.isReplaying())
+            core.toolboxReplay();
+        else
+            core.openToolbox();
         return;
     }
     // 返回
@@ -1547,6 +1562,7 @@ actions.prototype._clickEquipboxIndex = function (index) {
     if (index < this.LAST) {
         if (index >= core.status.globalAttribute.equipName.length) return;
         if (index == core.status.event.selection && core.status.hero.equipment[index]) {
+            if (core.isReplaying()) return;
             core.unloadEquip(index);
             core.status.route.push("unEquip:" + index);
         }
@@ -1554,6 +1570,7 @@ actions.prototype._clickEquipboxIndex = function (index) {
     else {
         var equips = Object.keys(core.status.hero.items.equips || {}).sort();
         if (index == core.status.event.selection) {
+            if (core.isReplaying()) return;
             var equipId = equips[index - this.LAST + (core.status.event.data.page - 1) * this.LAST];
             core.loadEquip(equipId);
             core.status.route.push("equip:" + equipId);
@@ -1645,7 +1662,10 @@ actions.prototype._keyUpEquipbox = function (keycode, altKey) {
     }
     if (keycode == 84) {
         core.ui.closePanel();
-        core.openToolbox();
+        if (core.isReplaying())
+            core.toolboxReplay();
+        else
+            core.openToolbox();
         return;
     }
     if (keycode == 81 || keycode == 27 || keycode == 88) {
@@ -2078,13 +2098,7 @@ actions.prototype._clickSyncSave_readFile = function () {
 }
 
 actions.prototype._clickSyncSave_replay = function () {
-    if (core.hasFlag('debug')) {
-        core.drawText("\t[系统提示]调试模式下无法回放录像");
-    }
-    else {
-        core.status.event.selection = 0;
-        core.ui.drawReplay();
-    }
+    core.ui.drawReplay();
 }
 
 ////// 同步存档界面时，放开某个键的操作 //////
@@ -2311,7 +2325,7 @@ actions.prototype._clickReplay_replayRemain = function () {
 }
 
 actions.prototype._clickReplay_download = function () {
-    if (core.hasFlag('debug')) return core.drawText("\t[系统提示]调试模式下无法下载录像");
+    // if (core.hasFlag('debug')) return core.drawText("\t[系统提示]调试模式下无法下载录像");
     core.download(core.firstData.name + "_" + core.formatDate2() + ".h5route", JSON.stringify({
         'name': core.firstData.name,
         'hard': core.status.hard,

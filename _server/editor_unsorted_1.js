@@ -104,6 +104,7 @@ editor.constructor.prototype.listen=function () {
         holdingPath = 0;
         stepPostfix = [];
         uc.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+        startPos = endPos = null;
     }//用于鼠标移出canvas时的自动清除状态
 
     eui.oncontextmenu=function(e){e.preventDefault()}
@@ -116,6 +117,7 @@ editor.constructor.prototype.listen=function () {
         return;
     }
 
+    var startPos=null, endPos=null;
     eui.onmousedown = function (e) {
         if (e.button==2){
             var loc = eToLoc(e);
@@ -130,6 +132,10 @@ editor.constructor.prototype.listen=function () {
             editor_mode.onmode('loc');
             //editor_mode.loc();
             //tip.whichShow(1);
+            tip.showHelp(6);
+            startPos = pos;
+            uc.strokeStyle = '#FF0000';
+            uc.lineWidth = 3;
             if(editor.isMobile)editor.showMidMenu(e.clientX,e.clientY);
             return;
         }
@@ -149,7 +155,29 @@ editor.constructor.prototype.listen=function () {
 
     eui.onmousemove = function (e) {
         if (!selectBox.isSelected()) {
+            if (startPos == null) return;
             //tip.whichShow(1);
+            var loc = eToLoc(e);
+            var pos = locToPos(loc,true);
+            if (endPos != null && endPos.x == pos.x && endPos.y == pos.y) return;
+            if (endPos != null) {
+                uc.clearRect(Math.min(32 * startPos.x - core.bigmap.offsetX, 32 * endPos.x - core.bigmap.offsetX),
+                    Math.min(32 * startPos.y - core.bigmap.offsetY, 32 * endPos.y - core.bigmap.offsetY),
+                    (Math.abs(startPos.x - endPos.x) + 1) * 32, (Math.abs(startPos.y - endPos.y) + 1) * 32)
+            }
+            endPos = pos;
+            if (startPos != null) {
+                if (startPos.x != endPos.x || startPos.y != endPos.y) {
+                    core.drawArrow('eui',
+                        32 * startPos.x + 16 - core.bigmap.offsetX, 32 * startPos.y + 16 - core.bigmap.offsetY,
+                        32 * endPos.x + 16 - core.bigmap.offsetX, 32 * endPos.y + 16 - core.bigmap.offsetY);
+                }
+            }
+            // editor_mode.onmode('nextChange');
+            // editor_mode.onmode('loc');
+            //editor_mode.loc();
+            //tip.whichShow(1);
+            // tip.showHelp(6);
             return;
         }
 
@@ -181,6 +209,9 @@ editor.constructor.prototype.listen=function () {
     eui.onmouseup = function (e) {
         if (!selectBox.isSelected()) {
             //tip.whichShow(1);
+            editor.movePos(startPos, endPos);
+            startPos = endPos = null;
+            uc.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
             return;
         }
         holdingPath = 0;
@@ -283,7 +314,20 @@ editor.constructor.prototype.listen=function () {
     };
     var reDo = null;
     var shortcut = core.getLocalStorage('shortcut',{48: 0, 49: 0, 50: 0, 51: 0, 52: 0, 53: 0, 54: 0, 55: 0, 56: 0, 57: 0});
+    var copyedInfo = null;
     document.body.onkeydown = function (e) {
+
+        // UI预览 & 地图选点
+        if (uievent && uievent.isOpen) {
+            e.preventDefault();
+            if (e.keyCode == 27) uievent.close();
+            else if (e.keyCode == 13) uievent.confirm();
+            else if (e.keyCode==87) uievent.move(0,-1)
+            else if (e.keyCode==65) uievent.move(-1,0)
+            else if (e.keyCode==83) uievent.move(0,1);
+            else if (e.keyCode==68) uievent.move(1,0);
+            return;
+        }
 
         // 监听Ctrl+S保存
         if (e.ctrlKey && e.keyCode == 83) {
@@ -331,31 +375,23 @@ editor.constructor.prototype.listen=function () {
         }
 
         // PGUP和PGDOWN切换楼层
-        if (e.keyCode==33) {
+        if (e.keyCode==33 || e.keyCode==34) {
             e.preventDefault();
             var index=editor.core.floorIds.indexOf(editor.currentFloorId);
-            if (index<editor.core.floorIds.length-1) {
-                var toId = editor.core.floorIds[index+1];
+            var nextIndex = index + (e.keyCode==33?1:-1);
+            if (nextIndex>=0 && nextIndex<editor.core.floorIds.length) {
+                var toId = editor.core.floorIds[nextIndex];
                 editor_mode.onmode('nextChange');
                 editor_mode.onmode('floor');
                 document.getElementById('selectFloor').value = toId;
                 editor.changeFloor(toId);
             }
-        }
-        if (e.keyCode==34) {
-            e.preventDefault();
-            var index=editor.core.floorIds.indexOf(editor.currentFloorId);
-            if (index>0) {
-                var toId = editor.core.floorIds[index-1];
-                editor_mode.onmode('nextChange');
-                editor_mode.onmode('floor');
-                document.getElementById('selectFloor').value = toId;
-                editor.changeFloor(toId);
-            }
+            return;
         }
         //ctrl + 0~9 切换到快捷图块
         if (e.ctrlKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1){
             editor.setSelectBoxFromInfo(JSON.parse(JSON.stringify(shortcut[e.keyCode]||0)));
+            return;
         }
         //alt + 0~9 改变快捷图块
         if (e.altKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1){
@@ -364,19 +400,102 @@ editor.constructor.prototype.listen=function () {
             shortcut[e.keyCode]=JSON.parse(infoToSave);
             printf('已保存该快捷图块, ctrl + '+(e.keyCode-48)+' 使用.')
             core.setLocalStorage('shortcut',shortcut);
+            return;
         }
         var focusElement = document.activeElement;
         if (!focusElement || focusElement.tagName.toLowerCase()=='body') {
-            // wasd平移大地图
-            if (e.keyCode==87)
-                editor.moveViewport(0,-1)
-            else if (e.keyCode==65)
-                editor.moveViewport(-1,0)
-            else if (e.keyCode==83)
-                editor.moveViewport(0,1);
-            else if (e.keyCode==68)
-                editor.moveViewport(1,0);
+            // Ctrl+C, Ctrl+X, Ctrl+V
+            if (e.ctrlKey && e.keyCode == 67 && !selectBox.isSelected()) {
+                e.preventDefault();
+                copyedInfo = editor.copyFromPos();
+                printf('该点事件已复制');
+                return;
+            }
+            if (e.ctrlKey && e.keyCode == 88 && !selectBox.isSelected()) {
+                e.preventDefault();
+                copyedInfo = editor.copyFromPos();
+                editor.clearPos(true, null, function () {
+                    printf('该点事件已剪切');
+                })
+                return;
+            }
+            if (e.ctrlKey && e.keyCode == 86 && !selectBox.isSelected()) {
+                e.preventDefault();
+                if (!copyedInfo) {
+                    printe("没有复制的事件");
+                    return;
+                }
+                editor.pasteToPos(copyedInfo);
+                editor.updateMap();
+                editor.file.saveFloorFile(function (err) {
+                    if (err) {
+                        printe(err);
+                        throw(err)
+                    }
+                    ;printf('粘贴事件成功');
+                    editor.drawPosSelection();
+                });
+                return;
+            }
+            // DELETE
+            if (e.keyCode == 46 && !selectBox.isSelected()) {
+                editor.clearPos(true);
+                return;
+            }
+            // ESC
+            if (e.keyCode == 27) {
+                if (selectBox.isSelected()) {
+                    editor_mode.onmode('');
+                    editor.file.saveFloorFile(function (err) {
+                        if (err) {
+                            printe(err);
+                            throw(err)
+                        }
+                        ;printf('地图保存成功');
+                    });
+                }
+                selectBox.isSelected(false);
+                editor.info = {};
+                return;
+            }
+            switch (e.keyCode) {
+                // WASD
+                case 87: editor.moveViewport(0,-1); break;
+                case 65: editor.moveViewport(-1,0); break;
+                case 83: editor.moveViewport(0,1); break;
+                case 68: editor.moveViewport(1,0); break;
+                // Z~.
+                case 90: editor_mode.change('map'); break; // Z
+                case 88: editor_mode.change('loc'); break; // X
+                case 67: editor_mode.change('enemyitem'); break; // C
+                case 86: editor_mode.change('floor'); break; // V
+                case 66: editor_mode.change('tower'); break; // B
+                case 78: editor_mode.change('functions'); break; // N
+                case 77: editor_mode.change('appendpic'); break; // M
+                case 188: editor_mode.change('commonevent'); break; // ,
+                case 190: editor_mode.change('plugins'); break; // .
+                // H
+                case 72: editor.showHelp(); break;
+            }
+            return;
         }
+    }
+
+    editor.showHelp = function () {
+        alert(
+            "快捷操作帮助：\n" +
+            "ESC / 点击空白处：自动保存当前修改" +
+            "WASD / 长按箭头：平移大地图\n" +
+            "PgUp, PgDn / 鼠标滚轮：上下切换楼层\n" +
+            "Z~.（键盘的第三排）：快捷切换标签\n" +
+            "双击地图：选中对应点的素材\n" +
+            "右键地图：弹出菜单栏\n" +
+            "Alt+0~9：保存当前使用的图块\n" +
+            "Ctrl+0~9：选中保存的图块\n" +
+            "Ctrl+Z / Ctrl+Y：撤销/重做上次绘制\n" +
+            "Ctrl+S：事件与脚本编辑器的保存并退出\n" +
+            "双击事件编辑器：长文本编辑/脚本编辑/地图选点/UI绘制预览"
+        );
     }
 
     var getScrollBarHeight = function () {
@@ -405,11 +524,22 @@ editor.constructor.prototype.listen=function () {
     }
     var scrollBarHeight = getScrollBarHeight();
 
+    var iconExpandBtn = document.getElementById('iconExpandBtn');
+    iconExpandBtn.style.display = 'block';
+    iconExpandBtn.innerText = editor.folded ? "展开" : "折叠";
+    iconExpandBtn.onclick = function () {
+        if (confirm(editor.folded ? "你想要展开素材吗？\n展开模式下将显示全素材内容。"
+            : ("你想要折叠素材吗？\n折叠模式下每个素材将仅显示单列，并且每"+editor.foldPerCol+"个自动换列。"))) {
+            core.setLocalStorage('folded', !editor.folded);
+            window.location.reload();
+        }
+    }
+
     var dataSelection = document.getElementById('dataSelection');
     var iconLib=document.getElementById('iconLib');
     iconLib.onmousedown = function (e) {
         e.stopPropagation();
-        if (!editor.isMobile && e.clientY>=((core.__SIZE__==13?630:655) - scrollBarHeight)) return;
+        if (!editor.isMobile && e.clientY>=iconLib.offsetHeight - scrollBarHeight) return;
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
         var loc = {
@@ -421,11 +551,11 @@ editor.constructor.prototype.listen=function () {
         var pos = locToPos(loc);
         for (var spriter in editor.widthsX) {
             if (pos.x >= editor.widthsX[spriter][1] && pos.x < editor.widthsX[spriter][2]) {
-                var ysize = spriter.indexOf('48') === -1 ? 32 : 48;
+                var ysize = spriter.endsWith('48') ? 48 : 32;
                 loc.ysize = ysize;
                 pos.images = editor.widthsX[spriter][0];
                 pos.y = ~~(loc.y / loc.ysize);
-                if(core.tilesets.indexOf(pos.images)==-1)pos.x = editor.widthsX[spriter][1];
+                if(!editor.folded && core.tilesets.indexOf(pos.images)==-1) pos.x = editor.widthsX[spriter][1];
                 var autotiles = core.material.images['autotile'];
                 if (pos.images == 'autotile') {
                     var imNames = Object.keys(autotiles);
@@ -439,8 +569,15 @@ editor.constructor.prototype.listen=function () {
                             }
                         }
                     }
-                } else if ((pos.y + 1) * ysize > editor.widthsX[spriter][3])
-                    pos.y = ~~(editor.widthsX[spriter][3] / ysize) - 1;
+                }
+                else {
+                    var height = editor.widthsX[spriter][3], col = height / ysize;
+                    if (editor.folded && core.tilesets.indexOf(pos.images)==-1) {
+                        col = (pos.x == editor.widthsX[spriter][2] - 1) ? ((col - 1) % editor.foldPerCol + 1) : editor.foldPerCol;
+                    }
+                    if (spriter == 'terrains' && pos.x == editor.widthsX[spriter][1]) col += 2;
+                    pos.y = Math.min(pos.y, col - 1);
+                }
 
                 selectBox.isSelected(true);
                 // console.log(pos,core.material.images[pos.images].height)
@@ -454,10 +591,16 @@ editor.constructor.prototype.listen=function () {
                 } else if(pos.x == 0 && pos.y == 1){
                     editor.info = editor.ids[editor.indexs[17]];
                 } else {
-                    if (Object.prototype.hasOwnProperty.call(autotiles, pos.images)) editor.info = {'images': pos.images, 'y': 0};
-                    else if (pos.images == 'terrains') editor.info = {'images': pos.images, 'y': pos.y - 2};
+                    if (autotiles[pos.images]) editor.info = {'images': pos.images, 'y': 0};
                     else if (core.tilesets.indexOf(pos.images)!=-1) editor.info = {'images': pos.images, 'y': pos.y, 'x': pos.x-editor.widthsX[spriter][1]};
-                    else editor.info = {'images': pos.images, 'y': pos.y};
+                    else {
+                        var y = pos.y;
+                        if (editor.folded) {
+                            y += editor.foldPerCol * (pos.x-editor.widthsX[spriter][1]);
+                        }
+                        if (pos.images == 'terrains' && pos.x == 0) y -= 2;
+                        editor.info = {'images': pos.images, 'y': y}
+                    }
 
                     for (var ii = 0; ii < editor.ids.length; ii++) {
                         if ((core.tilesets.indexOf(pos.images)!=-1 && editor.info.images == editor.ids[ii].images
@@ -484,10 +627,13 @@ editor.constructor.prototype.listen=function () {
     var midMenu=document.getElementById('midMenu');
     midMenu.oncontextmenu=function(e){e.preventDefault()}
     editor.lastRightButtonPos=[{x:0,y:0},{x:0,y:0}];
+    editor.lastCopyedInfo = [null, null];
     editor.showMidMenu=function(x,y){
         editor.lastRightButtonPos=JSON.parse(JSON.stringify(
             [editor.pos,editor.lastRightButtonPos[0]]
         ));
+        // --- copy
+        editor.lastCopyedInfo = [editor.copyFromPos(), editor.lastCopyedInfo[0]];
         var locStr='('+editor.lastRightButtonPos[1].x+','+editor.lastRightButtonPos[1].y+')';
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
@@ -501,6 +647,10 @@ editor.constructor.prototype.listen=function () {
         else if (thisevent.id=='downFloor') {
             addFloorEvent.style.display='block';
             addFloorEvent.children[0].innerHTML='绑定下楼事件';
+        }
+        else if (['leftPortal','rightPortal','downPortal','upPortal'].indexOf(thisevent.id)>=0) {
+            addFloorEvent.style.display='block';
+            addFloorEvent.children[0].innerHTML='绑定楼传事件';
         }
         else addFloorEvent.style.display='none';
 
@@ -524,20 +674,27 @@ editor.constructor.prototype.listen=function () {
         editor.hideMidMenu();
         e.stopPropagation();
         var thisevent = editor.map[editor.pos.y][editor.pos.x];
+        var loc = editor.pos.x+","+editor.pos.y;
         if (thisevent.id=='upFloor') {
-            editor.currentFloorData.changeFloor[editor.pos.x+","+editor.pos.y] = {"floorId": ":next", "stair": "downFloor"};
+            editor.currentFloorData.changeFloor[loc] = {"floorId": ":next", "stair": "downFloor"};
         }
         else if (thisevent.id=='downFloor') {
-            editor.currentFloorData.changeFloor[editor.pos.x+","+editor.pos.y] = {"floorId": ":before", "stair": "upFloor"};
+            editor.currentFloorData.changeFloor[loc] = {"floorId": ":before", "stair": "upFloor"};
+        }
+        else if (thisevent.id=='leftPortal' || thisevent.id=='rightPortal') {
+            editor.currentFloorData.changeFloor[loc] = {"floorId": ":next", "stair": ":symmetry_x"}
+        }
+        else if (thisevent.id=='upPortal' || thisevent.id=='downPortal') {
+            editor.currentFloorData.changeFloor[loc] = {"floorId": ":next", "stair": ":symmetry_y"}
         }
         editor.file.saveFloorFile(function (err) {
             if (err) {
                 printe(err);
                 throw(err)
             }
-            ;printf('添加楼梯事件成功');
             editor.drawPosSelection();
             editor_mode.showMode('loc');
+            printf('添加楼梯事件成功');
         });
     }
 
@@ -562,8 +719,6 @@ editor.constructor.prototype.listen=function () {
         editor.setSelectBoxFromInfo(thisevent);
     }
 
-    var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
-
     var copyLoc = document.getElementById('copyLoc');
     copyLoc.onmousedown = function(e){
         editor.hideMidMenu();
@@ -571,22 +726,10 @@ editor.constructor.prototype.listen=function () {
         editor.preMapData = null;
         reDo = null;
         editor_mode.onmode('');
-        var now = editor.pos;
-        var last = editor.lastRightButtonPos[1];
-        var lastevent = editor.map[last.y][last.x];
-        var lastinfo = 0;
-        if(lastevent==0){
-            lastinfo = 0;
-        } else {
-            var ids=editor.indexs[lastevent.idnum];
-            ids=ids[0]?ids[0]:ids;
-            lastinfo=editor.ids[ids];
-        }
-        editor.map[now.y][now.x]=lastinfo;
+        var now = editor.pos, last = editor.lastRightButtonPos[1];
+        if (now.x == last.x && now.y == last.y) return;
+        editor.pasteToPos(editor.lastCopyedInfo[1]);
         editor.updateMap();
-        fields.forEach(function(v){
-            editor.currentFloorData[v][now.x+','+now.y]=editor.currentFloorData[v][last.x+','+last.y]
-        })
         editor.file.saveFloorFile(function (err) {
             if (err) {
                 printe(err);
@@ -603,36 +746,12 @@ editor.constructor.prototype.listen=function () {
         e.stopPropagation();
         editor.preMapData = null;
         reDo = null;
-        var thisevent = editor.map[editor.pos.y][editor.pos.x];
-        if(thisevent==0){
-            editor.info = 0;
-        } else {
-            var ids=editor.indexs[thisevent.idnum];
-            ids=ids[0]?ids[0]:ids;
-            editor.info=editor.ids[ids];
-        }
         editor_mode.onmode('');
-        var now = editor.pos;
-        var last = editor.lastRightButtonPos[1];
-        
-        var lastevent = editor.map[last.y][last.x];
-        var lastinfo = 0;
-        if(lastevent==0){
-            lastinfo = 0;
-        } else {
-            var ids=editor.indexs[lastevent.idnum];
-            ids=ids[0]?ids[0]:ids;
-            lastinfo=editor.ids[ids];
-        }
-        editor.map[last.y][last.x]=editor.info;
-        editor.map[now.y][now.x]=lastinfo;
+        var now = editor.pos, last = editor.lastRightButtonPos[1];
+        if (now.x == last.x && now.y == last.y) return;
+        editor.pasteToPos(editor.lastCopyedInfo[1], now);
+        editor.pasteToPos(editor.lastCopyedInfo[0], last);
         editor.updateMap();
-
-        fields.forEach(function(v){
-            var temp_atsfcytaf=editor.currentFloorData[v][now.x+','+now.y];
-            editor.currentFloorData[v][now.x+','+now.y]=editor.currentFloorData[v][last.x+','+last.y];
-            editor.currentFloorData[v][last.x+','+last.y]=temp_atsfcytaf;
-        })
         editor.file.saveFloorFile(function (err) {
             if (err) {
                 printe(err);
@@ -643,39 +762,18 @@ editor.constructor.prototype.listen=function () {
         });
     }
 
-    var _clearPoint = function (clearPoint) {
-        editor.hideMidMenu();
-        editor.preMapData = null;
-        reDo = null;
-        editor.info = 0;
-        editor_mode.onmode('');
-        var now = editor.pos;
-        if (clearPoint)
-            editor.map[now.y][now.x]=editor.info;
-        editor.updateMap();
-        fields.forEach(function(v){
-            delete editor.currentFloorData[v][now.x+','+now.y];
-        })
-        editor.file.saveFloorFile(function (err) {
-            if (err) {
-                printe(err);
-                throw(err)
-            }
-            ;printf(clearPoint?'清空该点和事件成功':'只清空该点事件成功');
-            editor.drawPosSelection();
-        });
-    }
-
     var clearEvent = document.getElementById('clearEvent');
     clearEvent.onmousedown = function (e) {
         e.stopPropagation();
-        _clearPoint(false);
+        reDo = null;
+        editor.clearPos(false);
     }
 
     var clearLoc = document.getElementById('clearLoc');
     clearLoc.onmousedown = function(e){
         e.stopPropagation();
-        _clearPoint(true);
+        reDo = null;
+        editor.clearPos(true);
     }
 
     var brushMod=document.getElementById('brushMod');
@@ -689,8 +787,11 @@ editor.constructor.prototype.listen=function () {
     }
 
     var brushMod3=document.getElementById('brushMod3');
-    if(brushMod3)brushMod3.onchange=function(){
-        editor.brushMod=brushMod3.value;
+    if(brushMod3) {
+        brushMod3.onchange=function(){
+            tip.showHelp(5)
+            editor.brushMod=brushMod3.value;
+        }
     }
 
     var bgc = document.getElementById('bg'), fgc = document.getElementById('fg'),
@@ -737,10 +838,31 @@ editor.constructor.prototype.listen=function () {
     }
 
     var viewportButtons=document.getElementById('viewportButtons');
+    var pressTimer = null;
     for(var ii=0,node;node=viewportButtons.children[ii];ii++){
         (function(x,y){
-            node.onclick=function(){
-                editor.moveViewport(x,y);
+            var move = function () {
+                editor.moveViewport(x, y);
+            }
+            node.onmousedown = function () {
+                clearTimeout(pressTimer);
+                pressTimer = setTimeout(function () {
+                    pressTimer = -1;
+                    var f = function () {
+                        if (pressTimer != null) {
+                            move();
+                            setTimeout(f, 150);
+                        }
+                    }
+                    f();
+                }, 500);
+            };
+            node.onmouseup = function () {
+                if (pressTimer > 0) {
+                    clearTimeout(pressTimer);
+                    move();
+                }
+                pressTimer = null;
             }
         })([-1,0,0,1][ii],[0,-1,1,0][ii]);
     }

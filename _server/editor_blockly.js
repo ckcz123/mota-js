@@ -169,6 +169,27 @@ editor_blockly = function () {
       MotaActionBlocks['autoSave_s'].xmlText(),
       MotaActionBlocks['callLoad_s'].xmlText(),
     ],
+    'UI绘制':[
+      MotaActionBlocks['previewUI_s'].xmlText(),
+      MotaActionBlocks['clearMap_s'].xmlText(),
+      MotaActionBlocks['clearMap_1_s'].xmlText(),
+      MotaActionBlocks['setAttribute_s'].xmlText(),
+      MotaActionBlocks['fillText_s'].xmlText(),
+      MotaActionBlocks['fillBoldText_s'].xmlText(),
+      MotaActionBlocks['drawTextContent_s'].xmlText(),
+      MotaActionBlocks['fillRect_s'].xmlText(),
+      MotaActionBlocks['strokeRect_s'].xmlText(),
+      MotaActionBlocks['drawLine_s'].xmlText(),
+      MotaActionBlocks['drawArrow_s'].xmlText(),
+      MotaActionBlocks['fillPolygon_s'].xmlText(),
+      MotaActionBlocks['strokePolygon_s'].xmlText(),
+      MotaActionBlocks['drawImage_s'].xmlText(),
+      MotaActionBlocks['drawImage_1_s'].xmlText(),
+      MotaActionBlocks['drawIcon_s'].xmlText(),
+      MotaActionBlocks['drawBackground_s'].xmlText(),
+      MotaActionBlocks['drawSelector_s'].xmlText(),
+      MotaActionBlocks['drawSelector_1_s'].xmlText(),
+    ],
     '原生脚本':[
       MotaActionBlocks['function_s'].xmlText(),
       MotaActionBlocks['unknown_s'].xmlText(),
@@ -591,7 +612,23 @@ function omitedcheckUpdateFunction(event) {
 
     editor_blockly.doubleClickBlock = function (blockId) {
         var b = editor_blockly.workspace.getBlockById(blockId);
-        //console.log(b);
+        // console.log(Blockly.JavaScript.blockToCode(b));
+        if (b && b.type == 'previewUI_s') { // previewUI
+            try {
+                var code = "[" + Blockly.JavaScript.blockToCode(b).replace(/\\i/g, '\\\\i') + "]";
+                eval("var obj="+code);
+                // console.log(obj);
+                if (obj.length > 0 && obj[0].type == 'previewUI') {
+                    uievent.previewUI(obj[0].action);
+                }
+            } catch (e) {main.log(e);}
+            return;
+        }
+        if (b && b.type in selectPointBlocks) { // selectPoint
+            this.selectPoint();
+            return;
+        }
+
         var textStringDict = {
             'text_0_s': 'EvalString_0',
             'text_1_s': 'EvalString_2',
@@ -603,6 +640,7 @@ function omitedcheckUpdateFunction(event) {
             'function_s': 'RawEvalString_0',
             'shopsub': 'EvalString_3',
             'confirm_s': 'EvalString_0',
+            'drawTextContent_s': 'EvalString_0',
         }
         var f = b ? textStringDict[b.type] : null;
         if (f) {
@@ -650,40 +688,26 @@ function omitedcheckUpdateFunction(event) {
 
     // Index from 1 - 9
     editor_blockly.openToolbox = function(index) {
-        // var element = document.getElementById(':'+index);
-        // if (element == null || element.getAttribute("aria-selected")=="true") return;
-        // element.click();
-        editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index-1]);
+        if (index < 0) index += editor_blockly.workspace.toolbox_.tree_.children_.length;
+        editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index]);
     }
     editor_blockly.reopenToolbox = function(index) {
-        // var element = document.getElementById(':'+index);
-        // if (element == null) return;
-        // if (element.getAttribute("aria-selected")=="true") element.click();
-        // element.click();
-        editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index-1]);
-        editor_blockly.workspace.getFlyout_().show(editor_blockly.workspace.toolbox_.tree_.children_[index-1].blocks);
+        if (index < 0) index += editor_blockly.workspace.toolbox_.tree_.children_.length;
+        editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index]);
+        editor_blockly.workspace.getFlyout_().show(editor_blockly.workspace.toolbox_.tree_.children_[index].blocks);
     }
 
     editor_blockly.closeToolbox = function() {
-        /*
-        for (var i=1; i<=10; i++) {
-            var element = document.getElementById(':'+i);
-            if (element && element.getAttribute("aria-selected")=="true") {
-                element.click();
-                return;
-            }
-        }
-        */
         editor_blockly.workspace.toolbox_.clearSelection();
     }
 
     var searchInput = document.getElementById("searchBlock");
     searchInput.onfocus = function () {
-        editor_blockly.reopenToolbox(10);
+        editor_blockly.reopenToolbox(-1);
     }
 
     searchInput.oninput = function () {
-        editor_blockly.reopenToolbox(10);
+        editor_blockly.reopenToolbox(-1);
     }
 
     editor_blockly.searchBlock = function (value) {
@@ -706,6 +730,56 @@ function omitedcheckUpdateFunction(event) {
         }
 
         return results.length == 0 ? editor_blockly.lastUsedType : results;
+    }
+
+    // ------ select point ------
+
+    // id: [x, y, floorId, forceFloor]
+    var selectPointBlocks = {
+        "changeFloor_m": ["Number_0", "Number_1", "IdString_0", true],
+        "jumpHero_s": ["PosString_0", "PosString_1"],
+        "changeFloor_s": ["PosString_0", "PosString_1", "IdString_0", true],
+        "changePos_0_s": ["PosString_0", "PosString_1"],
+        "battle_1_s": ["PosString_0", "PosString_1"],
+        "openDoor_s": ["PosString_0", "PosString_1", "IdString_0"],
+        "closeDoor_s": ["PosString_0", "PosString_1"],
+        "show_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "hide_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "setBlock_s": ["PosString_0", "PosString_1", "IdString_0"],
+        "move_s": ["PosString_0", "PosString_1"],
+        "jump_s": ["PosString_2", "PosString_3"], // 跳跃暂时只考虑终点
+        "showBgFgMap_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "hideBgFgMap_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "setBgFgBlock_s": ["PosString_0", "PosString_1", "IdString_0"],
+        "showFloorImg_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "hideFloorImg_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "trigger_s": ["PosString_0", "PosString_1"],
+        "insert_2_s": ["PosString_0", "PosString_1", "IdString_0"]
+    }
+
+    editor_blockly.selectPoint = function () {
+        var block = Blockly.selected, arr = null;
+        var floorId = editor.currentFloorId, pos = editor.pos, x = pos.x, y = pos.y;
+        if (block != null && block.type in selectPointBlocks) {
+            arr = selectPointBlocks[block.type];
+            var xv = parseInt(block.getFieldValue(arr[0])), yv = parseInt(block.getFieldValue(arr[1]));
+            if (!isNaN(xv)) x = xv;
+            if (!isNaN(yv)) y = yv;
+            if (arr[2] != null) floorId = block.getFieldValue(arr[2]) || floorId;
+        }
+        uievent.selectPoint(floorId, x, y, arr && arr[2] == null, function (fv, xv, yv) {
+            if (!arr) return;
+            if (arr[2] != null) {
+                if (fv != editor.currentFloorId) block.setFieldValue(fv, arr[2]);
+                else block.setFieldValue(arr[3] ? fv : "", arr[2]);
+            }
+            block.setFieldValue(xv+"", arr[0]);
+            block.setFieldValue(yv+"", arr[1]);
+            if (block.type == 'changeFloor_m') {
+                block.setFieldValue("floorId", "Floor_List_0");
+                block.setFieldValue("loc", "Stair_List_0");
+            }
+        });
     }
 
     return editor_blockly;

@@ -215,7 +215,7 @@ tip.showHelp = function(value) {
         'ESC或点击空白处可以自动保存当前修改',
         'H键可以打开操作帮助哦',
         'tileset贴图模式下可以按选中tileset素材，并在地图上拖动来一次绘制一个区域',
-        '可以拖动地图上的图块和事件，或按Ctrl+C, Ctrl+X和Ctrl+V进行复制，剪切和粘贴'
+        '可以拖动地图上的图块和事件，或按Ctrl+C, Ctrl+X和Ctrl+V进行复制，剪切和粘贴，Delete删除'
     ];
     if (value == null) value = Math.floor(Math.random() * tips.length);
     printf('tips: ' + tips[value])

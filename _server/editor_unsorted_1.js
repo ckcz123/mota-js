@@ -209,7 +209,8 @@ editor.constructor.prototype.listen=function () {
     eui.onmouseup = function (e) {
         if (!selectBox.isSelected()) {
             //tip.whichShow(1);
-            editor.movePos(startPos, endPos);
+            // editor.movePos(startPos, endPos);
+            editor.exchangePos(startPos, endPos);
             startPos = endPos = null;
             uc.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
             return;
@@ -747,19 +748,7 @@ editor.constructor.prototype.listen=function () {
         editor.preMapData = null;
         reDo = null;
         editor_mode.onmode('');
-        var now = editor.pos, last = editor.lastRightButtonPos[1];
-        if (now.x == last.x && now.y == last.y) return;
-        editor.pasteToPos(editor.lastCopyedInfo[1], now);
-        editor.pasteToPos(editor.lastCopyedInfo[0], last);
-        editor.updateMap();
-        editor.file.saveFloorFile(function (err) {
-            if (err) {
-                printe(err);
-                throw(err)
-            }
-            ;printf('两位置的事件已互换');
-            editor.drawPosSelection();
-        });
+        editor.exchangePos(editor.pos, editor.lastRightButtonPos[1]);
     }
 
     var clearEvent = document.getElementById('clearEvent');

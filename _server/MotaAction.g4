@@ -393,7 +393,7 @@ if (EvalString_0==''){
     if (IdString_0=='')title='\\t['+EvalString_0+']';
     else title='\\t['+EvalString_0+','+IdString_0+']';
 }
-if(EvalString_1 && !(/^(up|down)(,hero)?(,([+-]?\d+),([+-]?\d+))?$/.test(EvalString_1))) {
+if(EvalString_1 && !(/^(up|center|down|hero|null)(,(hero|null|\d+,\d+|\d+))?$/.test(EvalString_1))) {
   throw new Error('对话框效果的用法请右键点击帮助');
 }
 EvalString_1 = EvalString_1 && ('\\b['+EvalString_1+']');
@@ -3406,7 +3406,7 @@ ActionParser.prototype.getTitleAndPosition = function (string) {
   string = string.replace(/\\t\[(([^\],]+),)?([^\],]+)\]/g, function (s0, s1, s2, s3) {
     if (s3) title = s3;
     if (s2) { icon = s3; title = s2; }
-    if (icon.endsWith('.png')) { title += "," + icon; icon = ''; }
+    if (icon && !/^[0-9a-zA-Z_][0-9a-zA-Z_:]*$/.test(icon)) { title += "," + icon; icon = ''; }
     return "";
   }).replace(/\\b\[(.*?)\]/g, function (s0, s1) {
     position = s1; return "";

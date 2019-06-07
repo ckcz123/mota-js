@@ -1229,8 +1229,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 							if (enemyDamage != null && enemyDamage < value)
 								value = enemyDamage;
 						}
-						damage[loc] = (damage[loc] || 0) + value;
-						type[loc] = "夹击伤害";
+						if (value > 0) {
+							damage[loc] = (damage[loc] || 0) + value;
+							type[loc] = "夹击伤害";
+						}
 					}
 				}
 			}

@@ -363,7 +363,8 @@ maps.prototype._getBgFgMapArray = function (name, floorId, noCache) {
         return core.status[name + "maps"][floorId];
 
     var arr = core.clone(core.floors[floorId][name + "map"] || []);
-    if (main.mode == 'editor') arr = core.clone(editor[name + "map"]) || arr;
+    if (main.mode == 'editor' && !(uievent && uievent.isOpen))
+        arr = core.clone(editor[name + "map"]) || arr;
     for (var x = 0; x < width; x++) {
         for (var y = 0; y < height; y++) {
             arr[y] = arr[y] || [];
@@ -1223,7 +1224,7 @@ maps.prototype.getBlockInfo = function (block) {
         if (block == 0) return null;
         block = this.initBlock(0, 0, block, true);
     }
-    var number = block.id, id = block.event.id, cls = block.event.cls,
+    var number = block.id, id = block.event.id, cls = block.event.cls, name = block.event.name,
         image = null, posX = 0, posY = 0, animate = block.event.animate,
         height = block.event.height || 32, faceIds = {};
 
@@ -1231,6 +1232,7 @@ maps.prototype.getBlockInfo = function (block) {
     else if (id == 'airwall') {
         if (!core.material.images.airwall) return null;
         image = core.material.images.airwall;
+        name = "空气墙";
     }
     else if (cls == 'tileset') {
         var offset = core.icons.getTilesetOffset(id);
@@ -1246,9 +1248,12 @@ maps.prototype.getBlockInfo = function (block) {
         image = core.material.images[cls];
         posY = core.material.icons[cls][id];
         faceIds = block.event.faceIds || {};
+        if (core.material.enemys[id]) {
+            name = core.material.enemys[id].name;
+        }
     }
 
-    return {number: number, id: id, cls: cls, image: image, posX: posX, posY: posY, height: height, faceIds: faceIds, animate: animate};
+    return {number: number, id: id, cls: cls, name: name, image: image, posX: posX, posY: posY, height: height, faceIds: faceIds, animate: animate};
 }
 
 ////// 搜索某个图块出现的所有位置 //////

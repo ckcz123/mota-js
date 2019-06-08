@@ -544,7 +544,10 @@ ui.prototype._getTitleAndIcon = function (content) {
                 else title = s4;
             }
         }
-        if (s3) title = s3;
+        if (s3 != null) {
+            title = s3;
+            if (title == 'null') title = null;
+        }
         return "";
     });
     return {

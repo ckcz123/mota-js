@@ -363,7 +363,8 @@ maps.prototype._getBgFgMapArray = function (name, floorId, noCache) {
         return core.status[name + "maps"][floorId];
 
     var arr = core.clone(core.floors[floorId][name + "map"] || []);
-    if (main.mode == 'editor') arr = core.clone(editor[name + "map"]) || arr;
+    if (main.mode == 'editor' && !(uievent && uievent.isOpen))
+        arr = core.clone(editor[name + "map"]) || arr;
     for (var x = 0; x < width; x++) {
         for (var y = 0; y < height; y++) {
             arr[y] = arr[y] || [];

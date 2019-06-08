@@ -481,6 +481,8 @@ uievent.selectPoint = function (floorId, x, y, hideFloor, callback) {
 uievent.updateSelectPoint = function (redraw) {
     uievent.elements.title.innerText = '地图选点 ('+uievent.values.x+","+uievent.values.y+')';
     if (redraw) {
+        core.setAlpha('uievent', 1);
+        core.clearMap('uievent');
         core.drawThumbnail(uievent.values.floorId, null, null,
             {ctx: 'uievent', centerX: uievent.values.left + core.__HALF_SIZE__,
                 centerY: uievent.values.top + core.__HALF_SIZE__});

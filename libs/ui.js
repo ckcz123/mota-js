@@ -535,7 +535,7 @@ ui.prototype._getTitleAndIcon = function (content) {
             else {
                 var blockInfo = core.getBlockInfo(s4);
                 if (blockInfo != null) {
-                    if (core.material.enemys[s4]) title = core.material.enemys[s4].name;
+                    if (blockInfo.name) title = blockInfo.name;
                     image = blockInfo.image;
                     icon = blockInfo.posY;
                     height = blockInfo.height;

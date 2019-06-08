@@ -225,6 +225,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_range": "false",
 					"_data": "图块类别"
 				},
+				"name": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_string": true,
+					"_data": "图块名称"
+				},
 				"trigger": {
 					"_leaf": true,
 					"_type": "select",

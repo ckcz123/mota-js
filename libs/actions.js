@@ -1858,6 +1858,11 @@ actions.prototype._keyUpSL = function (keycode) {
         this._clickSL(this.LAST, this.LAST);
         return;
     }
+    if (keycode >= 48 && keycode <= 57) {
+        if (keycode == 48) keycode = 58;
+        core.ui.drawSLPanel((keycode - 49) * 1000 + 1);
+        return;
+    }
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         if (offset == 0)
             core.doSL("autoSave", core.status.event.id);

@@ -123,7 +123,7 @@ editor.constructor.prototype.listen=function () {
             var loc = eToLoc(e);
             var pos = locToPos(loc,true);
             editor.showMidMenu(e.clientX,e.clientY);
-            return;
+            return false;
         }
         if (!selectBox.isSelected()) {
             var loc = eToLoc(e);
@@ -137,20 +137,19 @@ editor.constructor.prototype.listen=function () {
             uc.strokeStyle = '#FF0000';
             uc.lineWidth = 3;
             if(editor.isMobile)editor.showMidMenu(e.clientX,e.clientY);
-            return;
+            return false;
         }
-        
 
         holdingPath = 1;
         mouseOutCheck = 2;
         setTimeout(clear1);
-        e.stopPropagation();
         uc.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
         var loc = eToLoc(e);
         var pos = locToPos(loc,true);
         stepPostfix = [];
         stepPostfix.push(pos);
         fillPos(pos);
+        return false;
     }
 
     eui.onmousemove = function (e) {
@@ -178,14 +177,13 @@ editor.constructor.prototype.listen=function () {
             //editor_mode.loc();
             //tip.whichShow(1);
             // tip.showHelp(6);
-            return;
+            return false;
         }
 
         if (holdingPath == 0) {
-            return;
+            return false;
         }
         mouseOutCheck = 2;
-        e.stopPropagation();
         var loc = eToLoc(e);
         var pos = locToPos(loc,true);
         var pos0 = stepPostfix[stepPostfix.length - 1]
@@ -204,18 +202,19 @@ editor.constructor.prototype.listen=function () {
             stepPostfix.push(pos);
             fillPos(pos);
         }
+        return false;
     }
 
     eui.onmouseup = function (e) {
         if (!selectBox.isSelected()) {
             //tip.whichShow(1);
-            editor.movePos(startPos, endPos);
+            // editor.movePos(startPos, endPos);
+            editor.exchangePos(startPos, endPos);
             startPos = endPos = null;
             uc.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
-            return;
+            return false;
         }
         holdingPath = 0;
-        e.stopPropagation();
         if (stepPostfix && stepPostfix.length) {
             editor.preMapData = JSON.parse(JSON.stringify({map:editor.map,fgmap:editor.fgmap,bgmap:editor.bgmap}));
             if(editor.brushMod!=='line'){
@@ -258,6 +257,7 @@ editor.constructor.prototype.listen=function () {
             stepPostfix = [];
             uc.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
         }
+        return false;
     }
 
     /*
@@ -279,7 +279,6 @@ editor.constructor.prototype.listen=function () {
     */
 
     document.getElementById('mid').onmousewheel = function (e) {
-        e.preventDefault();
         var wheel = function (direct) {
             var index=editor.core.floorIds.indexOf(editor.currentFloorId);
             var toId = editor.currentFloorId;
@@ -305,6 +304,7 @@ editor.constructor.prototype.listen=function () {
         catch (ee) {
             console.log(ee);
         }
+        return false;
     }
 
     editor.preMapData = null;
@@ -747,19 +747,7 @@ editor.constructor.prototype.listen=function () {
         editor.preMapData = null;
         reDo = null;
         editor_mode.onmode('');
-        var now = editor.pos, last = editor.lastRightButtonPos[1];
-        if (now.x == last.x && now.y == last.y) return;
-        editor.pasteToPos(editor.lastCopyedInfo[1], now);
-        editor.pasteToPos(editor.lastCopyedInfo[0], last);
-        editor.updateMap();
-        editor.file.saveFloorFile(function (err) {
-            if (err) {
-                printe(err);
-                throw(err)
-            }
-            ;printf('两位置的事件已互换');
-            editor.drawPosSelection();
-        });
+        editor.exchangePos(editor.pos, editor.lastRightButtonPos[1]);
     }
 
     var clearEvent = document.getElementById('clearEvent');

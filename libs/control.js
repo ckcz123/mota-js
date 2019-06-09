@@ -570,6 +570,12 @@ control.prototype.setAutoHeroMove = function (steps) {
 ////// 设置行走的效果动画 //////
 control.prototype.setHeroMoveInterval = function (callback) {
     if (core.status.heroMoving > 0) return;
+    if (core.status.replay.speed == 24) {
+        core.moveOneStep(core.nextX(), core.nextY());
+        if (callback) callback();
+        return;
+    }
+
     core.status.heroMoving=1;
 
     var toAdd = 1;
@@ -1346,6 +1352,7 @@ control.prototype._replay_error = function (action) {
 }
 
 control.prototype.__replay_getTimeout = function () {
+    if (core.status.replay.speed == 24) return 0;
     return 750 / Math.max(1, core.status.replay.speed);
 }
 

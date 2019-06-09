@@ -531,6 +531,25 @@ editor.prototype.movePos = function (startPos, endPos, callback) {
     });
 }
 
+editor.prototype.exchangePos = function (startPos, endPos, callback) {
+    if (!startPos || !endPos) return;
+    if (startPos.x == endPos.x && startPos.y == endPos.y) return;
+    var startInfo = editor.copyFromPos(startPos);
+    var endInfo = editor.copyFromPos(endPos);
+    editor.pasteToPos(startInfo, endPos);
+    editor.pasteToPos(endInfo, startPos);
+    editor.updateMap();
+    editor.file.saveFloorFile(function (err) {
+        if (err) {
+            printe(err);
+            throw(err)
+        }
+        ;printf('交换事件成功');
+        editor.drawPosSelection();
+        if (callback) callback();
+    });
+}
+
 editor.prototype.clearPos = function (clearPos, pos, callback) {
     var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
     pos = pos || editor.pos;

@@ -362,6 +362,7 @@ editor.constructor.prototype.listen=function () {
             reDo = JSON.parse(JSON.stringify(currDrawData));
             currDrawData = {pos: [], info: {}};
             editor.preMapData = null;
+            return;
         }
         //Ctrl+y 重做一步redo
         if (e.keyCode == 89 && e.ctrlKey && reDo && reDo.pos.length && selectBox.isSelected()) {
@@ -372,6 +373,7 @@ editor.constructor.prototype.listen=function () {
             editor.updateMap();
             currDrawData = JSON.parse(JSON.stringify(reDo));
             reDo = null;
+            return;
         }
 
         // PGUP和PGDOWN切换楼层

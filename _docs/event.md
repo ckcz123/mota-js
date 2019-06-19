@@ -2088,6 +2088,26 @@ UI绘制事件。此事件可以绘制一个多边形边框。
 
 参数列表和`fillPolygon`基本相同，不过多了一个`lineWidth`表示的绘制线宽。
 
+### fillCircle：绘制圆
+
+UI绘制事件。此项可以绘制一个圆。
+
+```js
+[
+    {"type": "fillCircle", "x": 100, "y": 100, "r": 10, "style": [255,0,0,1]}
+]
+```
+
+x, y, r必填，为要绘制的圆心和半径；也可以用`flag:xxx`。
+
+color可选，表示绘制时的颜色，为三元组RGB或四元组RGBA。
+
+### strokeCircle：绘制圆边框
+
+UI绘制事件。此项可以绘制一个圆边框。
+
+参数列表和`fillCircle`基本相同，不过多了一个`lineWidth`表示的绘制线宽。
+
 ### drawImage：绘制图片
 
 UI绘制事件。此事件可以绘制一个图片。

@@ -508,6 +508,10 @@ uievent.elements.selectFloor.onchange = function () {
     uievent.setPoint(uievent.elements.selectFloor.value);
 }
 
+uievent.elements.selectPointBox.onclick = function (e) {
+    e.stopPropagation();
+}
+
 uievent.elements.body.onclick = function (e) {
     if (uievent.mode != 'selectPoint') return;
     uievent.values.x = uievent.values.left + Math.floor(e.offsetX / uievent.values.size);

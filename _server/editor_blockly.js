@@ -183,6 +183,8 @@ editor_blockly = function () {
       MotaActionBlocks['drawArrow_s'].xmlText(),
       MotaActionBlocks['fillPolygon_s'].xmlText(),
       MotaActionBlocks['strokePolygon_s'].xmlText(),
+      MotaActionBlocks['fillCircle_s'].xmlText(),
+      MotaActionBlocks['strokeCircle_s'].xmlText(),
       MotaActionBlocks['drawImage_s'].xmlText(),
       MotaActionBlocks['drawImage_1_s'].xmlText(),
       MotaActionBlocks['drawIcon_s'].xmlText(),
@@ -610,20 +612,35 @@ function omitedcheckUpdateFunction(event) {
         setvalue(JSON.stringify(obj));
     }
 
-    editor_blockly.doubleClickBlock = function (blockId) {
-        var b = editor_blockly.workspace.getBlockById(blockId);
-        // console.log(Blockly.JavaScript.blockToCode(b));
-        if (b && b.type == 'previewUI_s') { // previewUI
+    var previewBlock = function (b) {
+        var types = [
+            "previewUI_s", "clearMap_s", "clearMap_1_s", "setAttribute_s", "fillText_s",
+            "fillBoldText_s", "drawTextContent_s", "fillRect_s", "strokeRect_s", "drawLine_s",
+            "drawArrow_s", "fillPolygon_s", "strokePolygon_s", "fillCircle_s", "strokeCircle_s",
+            "drawImage_s", "drawImage_1_s", "drawIcon_s", "drawBackground_s", "drawSelector_s", "drawSelector_1_s"
+        ];
+        if (b && types.indexOf(b.type)>=0) {
             try {
                 var code = "[" + Blockly.JavaScript.blockToCode(b).replace(/\\i/g, '\\\\i') + "]";
                 eval("var obj="+code);
                 // console.log(obj);
-                if (obj.length > 0 && obj[0].type == 'previewUI') {
-                    uievent.previewUI(obj[0].action);
+                if (obj.length > 0 && b.type.startsWith(obj[0].type)) {
+                    if (b.type == 'previewUI_s')
+                        uievent.previewUI(obj[0].action);
+                    else uievent.previewUI(obj);
                 }
             } catch (e) {main.log(e);}
-            return;
+            return true;
         }
+        return false;
+    }
+
+    editor_blockly.doubleClickBlock = function (blockId) {
+        var b = editor_blockly.workspace.getBlockById(blockId);
+        console.log(Blockly.JavaScript.blockToCode(b));
+
+        if (previewBlock(b)) return;
+
         if (b && b.type in selectPointBlocks) { // selectPoint
             this.selectPoint();
             return;

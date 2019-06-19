@@ -189,6 +189,37 @@ ui.prototype._uievent_strokePolygon = function (data) {
     this.strokePolygon('uievent', data.nodes, data.style, data.lineWidth);
 }
 
+////// 在某个canvas上绘制一个圆 //////
+ui.prototype.fillCircle = function (name, x, y, r, style) {
+    if (style) core.setFillStyle(name, style);
+    var ctx = this.getContextByName(name);
+    if (!ctx) return;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 2*Math.PI);
+    ctx.fill();
+}
+
+ui.prototype._uievent_fillCircle = function (data) {
+    this._createUIEvent();
+    this.fillCircle('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.r), data.style);
+}
+
+////// 在某个canvas上绘制一个圆的边框 //////
+ui.prototype.strokeCircle = function (name, x, y, r, style, lineWidth) {
+    if (style) core.setStrokeStyle(name, style);
+    if (lineWidth) core.setLineWidth(name, lineWidth);
+    var ctx = this.getContextByName(name);
+    if (!ctx) return;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 2*Math.PI);
+    ctx.stroke();
+}
+
+ui.prototype._uievent_strokeCircle = function (data) {
+    this._createUIEvent();
+    this.strokeCircle('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.r), data.style, data.lineWidth);
+}
+
 ////// 在某个canvas上绘制一条线 //////
 ui.prototype.drawLine = function (name, x1, y1, x2, y2, style, lineWidth) {
     if (style) core.setStrokeStyle(name, style);
@@ -395,7 +426,12 @@ ui.prototype.drawIcon = function (name, id, x, y, w, h) {
 
 ui.prototype._uievent_drawIcon = function (data) {
     this._createUIEvent();
-    this.drawIcon('uievent', data.id, core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height));
+    var id;
+    try {
+        id = core.calValue(data.id);
+        if (typeof id !== 'string') id = data.id;
+    } catch (e) { id = data.id; }
+    this.drawIcon('uievent', id, core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height));
 }
 
 ///////////////// UI绘制

@@ -853,6 +853,221 @@ ui.prototype._buildFont = function (fontSize, bold) {
     return (bold?"bold ":"") + (fontSize || textAttribute.textfont) + "px " + globalAttribute.font;
 }
 
+
+// 处理剧本文字的工具类，但更规范的应该定义在context的封装类中
+function TextTool() {
+    this.initialize.apply(this, arguments);
+}
+
+TextTool.prototype.constructor = TextTool;
+
+// 初始化 确定画布信息，并保存画布原型
+TextTool.prototype.initialize = function(ctx,size,color) {
+    this.contents = {ctx:ctx,fontSize:size,textColor:color};
+    this.contents.ctx.save();
+    this.rebuildFont();
+};
+
+// 预处理文本
+TextTool.prototype.prepare = function(text,x,y,r) {
+    if (text) {
+        this.textState = { index: 0, x: x, y: y, left: x,right : r };
+        this.textState.text = this.convertEscapeCharacters(text);
+        this.textState.height = this.calcTextHeight();
+    }
+};
+
+// 恢复画布信息
+TextTool.prototype.dispose = function() {
+    this.contents.ctx.restore();
+};
+
+// 逐字处理
+TextTool.prototype.run = function() {
+    if (this.textState && this.textState.index < this.textState.text.length) {
+        this.processCharacter();
+        return true;
+    }else{
+        return false;
+    }
+};
+
+// 具体每个字符的处理方法
+TextTool.prototype.processCharacter = function() {
+    switch (this.textState.text[this.textState.index]) {
+    case '\n':
+        this.processNewLine();
+        break;
+    case '\x1b':
+        this.processEscapeCharacter(this.obtainEscapeCode());
+        break;
+    default:
+        this.processNormalCharacter();
+        break;
+    }
+};
+
+// 常规字符的处理（画就完事儿了，未处理自动换行）
+TextTool.prototype.processNormalCharacter = function() {
+    var c = this.textState.text[this.textState.index++];
+    var w = this.textWidth(c);
+    var bmp = this.contents.ctx;
+    this.drawText(c, this.textState.x, this.textState.y, w * 2,this.textState.height);
+    this.textState.x += w;
+};
+
+// 描绘字符串
+TextTool.prototype.drawText = function(text, x, y, maxWidth, lineHeight, align) {
+    var tx = x;
+    var ty = y + lineHeight - (lineHeight - this.contents.fontSize * 0.7) / 2;
+    var context = this.contents.ctx;
+    var alpha = context.globalAlpha;
+    maxWidth = maxWidth || 0xffffffff;
+    if (align === 'center') {
+        tx += maxWidth / 2;
+    }
+    if (align === 'right') {
+        tx += maxWidth;
+    }
+    context.textAlign = align;
+    context.fillText(text, tx, ty, maxWidth);
+};
+
+// 测量字符宽度
+TextTool.prototype.textWidth = function(text) {
+    return this.contents.ctx.measureText(text).width;
+};
+
+// 获取下一个命令字符的命令，比如 \R[#FF6500] 的R
+TextTool.prototype.obtainEscapeCode = function() {
+    this.textState.index++;
+    var regExp = /^[\$\.\|\^!><\{\}\\]|^[A-Z]+/i;
+    var arr = regExp.exec(this.textState.text.slice(this.textState.index));
+    if (arr) {
+        this.textState.index += arr[0].length;
+        return arr[0].toUpperCase();
+    } else {
+        return '';
+    }
+};
+
+// 获取下一个命令字符的参数，比如 \R[#FF6500] 的#FF6500
+TextTool.prototype.obtainEscapeParam = function() {
+    var arr = /^\[[^\]]+\]/.exec(this.textState.text.slice(this.textState.index));
+    if (arr) {
+        this.textState.index += arr[0].length;
+        return arr[0].slice(1,arr[0].length-1);
+    } else {
+        return '';
+    }
+};
+
+
+// 处理特殊命令，此处跳过了图标处理，交给小艾（x
+TextTool.prototype.processEscapeCharacter = function(code) {
+    switch (code) {
+    case 'R':
+        this.changeTextColor(this.obtainEscapeParam());
+        break;
+    // case 'I':
+    //     this.processDrawIcon(this.obtainEscapeParam());
+    //     break;
+    case '{':
+        this.makeFontBigger();
+        break;
+    case '}':
+        this.makeFontSmaller();
+        break;
+    }
+};
+
+// 重组字体信息 每次描绘信息发生变化时原则上需要调用此函数
+TextTool.prototype.rebuildFont = function() {
+    var globalAttribute = core.status.globalAttribute || core.initStatus.globalAttribute;
+    this.contents.ctx.fillStyle = this.contents.textColor;
+    this.contents.ctx.font = this.contents.fontSize+'px '+globalAttribute.font;
+};
+
+// 更变描绘字色
+TextTool.prototype.changeTextColor = function(color) {
+    this.contents.textColor = color;
+    this.rebuildFont();
+};
+
+// 字体加大一码
+TextTool.prototype.makeFontBigger = function() {
+    this._makeFontBigger();
+    this.rebuildFont();
+};
+
+TextTool.prototype._makeFontBigger = function() {
+    if (this.contents.fontSize <= 96) {
+        this.contents.fontSize += 6;
+        this.rebuildFont();
+    }
+};
+
+// 字体缩小一码
+TextTool.prototype.makeFontSmaller = function() {
+    this._makeFontSmaller();
+    this.rebuildFont();
+};
+
+TextTool.prototype._makeFontSmaller = function() {
+    if (this.contents.fontSize >= 16) {
+        this.contents.fontSize -= 6;
+    }
+};
+
+// 新起一行的处理，此处特别处理\n，推进序列
+TextTool.prototype.processNewLine = function() {
+    this.textState.x = this.textState.left;
+    this.textState.y += this.textState.height;
+    this.textState.height = this.calcTextHeight();
+    this.textState.index++;
+};
+
+// 计算当前行的高度
+TextTool.prototype.calcTextHeight = function() {
+    var lastFontSize = this.contents.fontSize;
+    var textHeight = 0;
+    var maxWidth = this.textState.right - this.textState.left;
+    var line = this.textState.text.slice(this.textState.index).split('\n')[0];
+    var maxFontSize = this.contents.fontSize;
+    var regExp = /\x1b[\{\}]/g;
+    for (;;) {
+        var array = regExp.exec(line);
+        if (array) {
+            if (array[0] === '\x1b{') {
+                this._makeFontBigger();
+            }
+            if (array[0] === '\x1b}') {
+                this._makeFontSmaller();
+            }
+            if (maxFontSize < this.contents.fontSize) {
+                maxFontSize = this.contents.fontSize;
+            }
+        } else {
+            break;
+        }
+    }
+    textHeight += maxFontSize + 4;
+    this.contents.fontSize = lastFontSize;
+    return textHeight;
+};
+
+// 预处理整个字符串的具体方法，先将命令字符串替换为特殊字符避免误操作
+TextTool.prototype.convertEscapeCharacters = function(text) {
+    text = text.replace(/\|/g, '\x1b');
+    text = text.replace(/\x1b\x1b/g, '||');
+    // 下面是原本的反斜杠指令转换
+    //text = text.replace(/\\/g, '\x1b');
+    //text = text.replace(/\x1b\x1b/g, '\\');
+    return text;
+};
+
+// TextTool 结束
+
 ////// 绘制一段文字到某个画布上面
 // ctx：要绘制到的画布
 // content：要绘制的内容；转义字符目前只允许留 \n, \r[...] 和 \i[...]
@@ -860,6 +1075,7 @@ ui.prototype._buildFont = function (fontSize, bold) {
 //         left, top：起始点位置；maxWidth：单行最大宽度；color：默认颜色；align：左中右
 //         fontSize：字体大小；lineHeight：行高；time：打字机间隔
 ui.prototype.drawTextContent = function (ctx, content, config) {
+    core.setTextBaseline(ctx,'alphabetic');
     ctx = core.getContextByName(ctx);
     if (!ctx) return;
     // 设置默认配置项
@@ -884,15 +1100,20 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     config.blocks = [];
 
     // 创建一个新的临时画布
-    var tempCtx = core.bigmap.tempCanvas;
-    tempCtx.canvas.height = ctx.canvas.height;
-    tempCtx.canvas.width = ctx.canvas.width;
-    var _textBaseLine = tempCtx.textBaseline;
-    tempCtx.textBaseline = 'top';
-    tempCtx.font = this._buildFont(config.fontSize, config.bold);
-    tempCtx.fillStyle = config.color;
-    this._drawTextContent_draw(ctx, tempCtx, content, config);
-    tempCtx.textBaseline = _textBaseLine;
+    var textTool = new TextTool(ctx,config.fontSize,config.color);
+    textTool.prepare(content,config.left,config.top,config.right);
+    if (config.time == 0) {
+        while (textTool.run());
+    }
+    else {
+        core.status.event.interval = setInterval(function () {
+            if (!textTool.run()) {
+                clearInterval(core.status.event.interval);
+                core.status.event.interval = null;
+            }
+        }, config.time);
+    }
+    textTool.dispose();
 }
 
 ui.prototype._uievent_drawTextContent = function (data) {

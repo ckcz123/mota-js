@@ -1170,9 +1170,12 @@ maps.prototype.terrainExists = function (x, y, id, floorId) {
 
 ////// 某个点是否存在楼梯 //////
 maps.prototype.stairExists = function (x, y, floorId) {
-    var block = this.getBlock(x, y, floorId);
-    if (block == null) return false;
-    return block.block.event.cls == 'terrains' && (block.block.event.id == 'upFloor' || block.block.event.id == 'downFloor');
+    var blockId = this.getBlockId(x, y, floorId);
+    if (blockId == null) return false;
+    var ids = ['upFloor','downFloor'];
+    if (core.flags.flyRecordPosition)
+        ids = ids.concat(['leftPortal','rightPortal','upPortal','downPortal']);
+    return ids.indexOf(blockId)>=0;
 }
 
 ////// 当前位置是否在楼梯边 //////

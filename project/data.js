@@ -389,6 +389,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"enableDebuff": false,
 		"enableSkill": false,
 		"flyNearStair": true,
+		"flyRecordPosition": false,
 		"pickaxeFourDirections": false,
 		"bombFourDirections": false,
 		"snowFourDirections": false,

@@ -112,9 +112,8 @@ actions.prototype.doRegisteredAction = function (action) {
 }
 
 actions.prototype._checkReplaying = function () {
-    if (core.isReplaying() && core.status.event.id != 'save'
-        && (core.status.event.id || "").indexOf('book') != 0 && core.status.event.id != 'viewMaps'
-        && core.status.event.id != 'toolbox' && core.status.event.id != 'equipbox')
+    if (core.isReplaying() &&
+        ['save','book','book-detail','viewMaps','toolbox','equipbox','text'].indexOf(core.status.event.id)<0)
         return true;
     return false;
 }
@@ -175,6 +174,8 @@ actions.prototype._sys_onkeyUp_replay = function (e) {
             core.toolboxReplay();
         else if (e.keyCode == 81) // Q
             core.equipboxReplay();
+        else if (e.keyCode == 66) // B
+            core.drawStatistics();
         else if (e.keyCode >= 49 && e.keyCode <= 51) // 1-3
             core.setReplaySpeed(e.keyCode - 48);
         else if (e.keyCode == 52) // 4

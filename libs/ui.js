@@ -539,7 +539,8 @@ ui.prototype.drawText = function (contents, callback) {
 
 ui.prototype._drawText_setContent = function (contents, callback) {
     // 合并进 insertAction
-    if ((core.status.event && core.status.event.id=='action') || core.isReplaying()) {
+    if ((core.status.event && core.status.event.id=='action')
+        || (!core.hasFlag('__replayText__') && core.isReplaying())) {
         core.insertAction(contents,null,null,callback);
         return;
     }
@@ -1866,11 +1867,19 @@ ui.prototype._drawBookDetail_turnAndCriticals = function (enemy, floorId, texts)
     var damageInfo = core.getDamageInfo(enemy, null, null, null, floorId);
     texts.push("战斗回合数："+((damageInfo||{}).turn||0));
     // 临界表
-    var criticals = core.enemys.nextCriticals(enemy, 10, null, null, floorId).map(function (v) {
+    var criticals = core.enemys.nextCriticals(enemy, 8, null, null, floorId).map(function (v) {
         return core.formatBigNumber(v[0])+":"+core.formatBigNumber(v[1]);
     });
     while (criticals[0]=='0:0') criticals.shift();
-    texts.push("临界表："+JSON.stringify(criticals))
+    texts.push("临界表："+JSON.stringify(criticals));
+    var prevInfo = core.getDamageInfo(enemy, {atk: core.status.hero.atk-1}, null, null, floorId);
+    if (prevInfo != null && damageInfo != null) {
+        if (damageInfo.damage != null) damageInfo = damageInfo.damage;
+        if (prevInfo.damage != null) prevInfo = prevInfo.damage;
+        if (prevInfo > damageInfo) {
+            texts.push("（当前攻击力正位于临界点上）")
+        }
+    }
 }
 
 ui.prototype._drawBookDetail_drawContent = function (enemy, contents, pos) {
@@ -2564,6 +2573,7 @@ ui.prototype.drawStatistics = function (floorIds) {
         core.ui._drawStatistics_floorId(floorId, obj);
     });
     var statistics = core.status.hero.statistics;
+    core.setFlag("__replayText__", true);
     core.drawText([
         this._drawStatistics_generateText(obj, "全塔", obj.total),
         this._drawStatistics_generateText(obj, "当前", obj.current),
@@ -2581,6 +2591,7 @@ ui.prototype.drawStatistics = function (floorIds) {
         "4. 在自定义道具（例如其他宝石）后，需在脚本编辑的drawStatistics中注册，不然不会进行统计。\n"+
         "5. 所有统计信息仅供参考，如有错误，概不负责。"
     ])
+    core.removeFlag("__replayText__");
 }
 
 ui.prototype._drawStatistics_buildObj = function () {

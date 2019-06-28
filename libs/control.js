@@ -1202,6 +1202,7 @@ control.prototype.bookReplay = function () {
     if (core.isMoving() || core.status.replay.animate
         || (core.status.event.id && core.status.event.id != 'viewMaps'))
         return core.drawTip("请等待当前事件的处理结束");
+    if (!core.hasItem('book')) return core.drawTip('你没有怪物手册');
 
     // 从“浏览地图”页面打开
     if (core.status.event.id=='viewMaps')

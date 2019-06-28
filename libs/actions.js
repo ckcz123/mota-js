@@ -718,6 +718,16 @@ actions.prototype._sys_onmousewheel = function (direct) {
         return;
     }
 
+    // wait事件
+    if (core.status.lockControl && core.status.event.id == 'action' && core.status.event.data.type == 'wait') {
+        core.setFlag('type', 0);
+        var keycode = direct == 1 ? 33 : 34;
+        core.setFlag('keycode', keycode);
+        core.status.route.push("input:" + keycode);
+        core.doAction();
+        return;
+    }
+
 }
 
 ////// 长按Ctrl键时 //////

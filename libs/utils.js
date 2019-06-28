@@ -1086,7 +1086,7 @@ utils.prototype._export = function (floorIds) {
     // map
     var content = floorIds.length + "\n" + core.__SIZE__ + " " + core.__SIZE__ + "\n\n";
     floorIds.forEach(function (floorId) {
-        var arr = core.maps._getMapArrayFromBlocks(core.status.maps[floorId].blocks);
+        var arr = core.maps._getMapArrayFromBlocks(core.status.maps[floorId].blocks, core.__SIZE__, core.__SIZE__);
         content += arr.map(function (x) {
             // check monster
             x.forEach(function (t) {
@@ -1102,7 +1102,7 @@ utils.prototype._export = function (floorIds) {
     // values
     content += ["redJewel", "blueJewel", "greenJewel", "redPotion", "bluePotion",
         "yellowPotion", "greenPotion", "sword1", "shield1"].map(function (x) {
-        return core.values[x]
+        return core.values[x] || 0;
     }).join(" ") + "\n\n";
 
     // monster

@@ -1290,12 +1290,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	core.updateStatusBar();
 },
-        "moveDirectly": function (x, y) {
-	// 瞬间移动；x,y为要瞬间移动的点
+        "moveDirectly": function (x, y, ignoreSteps) {
+	// 瞬间移动；x,y为要瞬间移动的点；ignoreSteps为减少的步数，可能之前已经被计算过
 	// 返回true代表成功瞬移，false代表没有成功瞬移
 
 	// 判定能否瞬移到该点
-	var ignoreSteps = core.canMoveDirectly(x, y);
+	if (ignoreSteps == null) ignoreSteps = core.canMoveDirectly(x, y);
 	if (ignoreSteps >= 0) {
 		core.clearMap('hero');
 		// 获得勇士最后的朝向

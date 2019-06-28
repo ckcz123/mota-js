@@ -486,14 +486,39 @@ maps.prototype._canMoveHero_checkCannotInOut = function (number, name, direction
 
 ////// 能否瞬间移动 //////
 maps.prototype.canMoveDirectly = function (destX, destY) {
-    if (!this._canMoveDirectly_checkGlobal()) return -1;
+    return this.canMoveDirectlyArray([[destX,destY]])[0];
+}
+
+maps.prototype.canMoveDirectlyArray = function (locs) {
+    var ans = [], number = locs.length;
 
     var fromX = core.getHeroLoc('x'), fromY = core.getHeroLoc('y');
-    if (fromX == destX && fromY == destY) return 0;
-    // 检查起点事件
-    if (!this._canMoveDirectly_checkStartPoint(fromX, fromY)) return -1;
+    if (!this._canMoveDirectly_checkGlobal()) {
+        for (var i = 0; i < number; ++i) ans.push(-1);
+        return ans;
+    }
+    for (var i = 0; i < number; ++i) {
+        if (locs[i][0] == fromX && locs[i][1] == fromY) {
+            ans.push(0);
+            number--;
+        }
+        else if (locs[i][0] < 0 || locs[i][0] >= core.bigmap.width || locs[i][1] < 0 || locs[i][1] >= core.bigmap.height) {
+            ans.push(-1);
+            number--;
+        }
+        else ans.push(null);
+    }
+    if (number == 0) return ans;
 
-    return this._canMoveDirectly_bfs(fromX, fromY, destX, destY);
+    // 检查起点事件
+    if (!this._canMoveDirectly_checkStartPoint(fromX, fromY)) {
+        for (var i in ans) {
+            if (ans[i] == null) ans[i] = -1;
+        }
+        return ans;
+    }
+
+    return this._canMoveDirectly_bfs(fromX, fromY, locs, number, ans);
 }
 
 maps.prototype._canMoveDirectly_checkGlobal = function () {
@@ -519,7 +544,7 @@ maps.prototype._canMoveDirectly_checkStartPoint = function (sx, sy) {
     return true;
 }
 
-maps.prototype._canMoveDirectly_bfs = function (sx, sy, ex, ey) {
+maps.prototype._canMoveDirectly_bfs = function (sx, sy, locs, number, ans) {
     var canMoveArray = this.generateMovableArray();
     var blocksObj = this.getMapBlocksObj(core.status.floorId);
     // 滑冰
@@ -538,12 +563,22 @@ maps.prototype._canMoveDirectly_bfs = function (sx, sy, ex, ey) {
             if (bgMap[ny][nx] == 167) continue;
             if (!this._canMoveDirectly_checkNextPoint(blocksObj, nx, ny)) continue;
             visited[nindex] = visited[now] + 1;
-            if (nx == ex && ny == ey) return visited[nindex];
+            // if (nx == ex && ny == ey) return visited[nindex];
+            for (var i in ans) {
+                if (locs[i][0] == nx && locs[i][1] == ny && ans[i] == null) {
+                    ans[i] = visited[nindex];
+                    number--;
+                    if (number == 0) return ans;
+                }
+            }
             queue.push(nindex);
         }
     }
 
-    return -1;
+    for (var i in ans) {
+        if (ans[i] == null) ans[i] = -1;
+    }
+    return ans;
 }
 
 maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {

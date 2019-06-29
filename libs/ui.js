@@ -885,15 +885,12 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     config.blocks = [];
 
     // 创建一个新的临时画布
-    var tempCtx = core.bigmap.tempCanvas;
-    tempCtx.canvas.height = ctx.canvas.height;
-    tempCtx.canvas.width = ctx.canvas.width;
-    var _textBaseLine = tempCtx.textBaseline;
+    var tempCtx = core.createCanvas('__temp__', 0, 0, ctx.canvas.width, ctx.canvas.height, -1);
     tempCtx.textBaseline = 'top';
     tempCtx.font = this._buildFont(config.fontSize, config.bold);
     tempCtx.fillStyle = config.color;
     this._drawTextContent_draw(ctx, tempCtx, content, config);
-    tempCtx.textBaseline = _textBaseLine;
+    core.deleteCanvas('__temp__');
 }
 
 ui.prototype._uievent_drawTextContent = function (data) {

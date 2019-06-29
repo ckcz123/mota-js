@@ -799,6 +799,57 @@ function omitedcheckUpdateFunction(event) {
         });
     }
 
+    editor_blockly.getAutoCompletions = function (content) {
+        // --- content为当前框中输入内容；将返回一个列表，为后续所有可补全内容
+
+        // 检查 flag:xxx，item:xxx和flag:xxx
+        var index = content.lastIndexOf(":");
+        if (index >= 0) {
+            var before = content.substring(0, index), token = content.substring(index+1);
+            if (/^\w*$/.test(token)) {
+                if (before.endsWith("status")) {
+                    return Object.keys(core.status.hero).filter(function (one) {
+                        return one != token && one.startsWith(token);
+                    }).sort();
+                }
+                else if (before.endsWith("item")) {
+                    return Object.keys(core.material.items).filter(function (one) {
+                        return one.startsWith(token);
+                    }).sort();
+                }
+                else if (before.endsWith("flag")) {
+                    // TODO：提供 flag:xxx 的补全
+                    return [];
+                }
+            }
+        }
+
+        // 提供 core.xxx 的补全
+        index = content.lastIndexOf("core.");
+        if (index >= 0) {
+            var s = content.substring(index + 5);
+            if (/^[\w.]*$/.test(s)) {
+                var tokens = s.split(".");
+                var now = core, prefix = tokens[tokens.length - 1];
+                for (var i = 0; i < tokens.length - 1; ++i) {
+                    now = now[tokens[i]];
+                    if (now == null) break;
+                }
+                if (now != null) {
+                    var candidates = [];
+                    for (var i in now) {
+                        candidates.push(i);
+                    }
+                    return candidates.filter(function (one) {
+                        return one != prefix && one.startsWith(prefix);
+                    }).sort();
+                }
+            }
+        }
+
+        return [];
+    }
+
     return editor_blockly;
 }
 //editor_blockly=editor_blockly();

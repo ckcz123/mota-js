@@ -814,12 +814,13 @@ function omitedcheckUpdateFunction(event) {
                 }
                 else if (before.endsWith("item")) {
                     return Object.keys(core.material.items).filter(function (one) {
-                        return one.startsWith(token);
+                        return one != token && one.startsWith(token);
                     }).sort();
                 }
                 else if (before.endsWith("flag")) {
-                    // TODO：提供 flag:xxx 的补全
-                    return [];
+                    return Object.keys(editor.used_flags || {}).filter(function (one) {
+                        return one != token && one.startsWith(token);
+                    }).sort();
                 }
             }
         }

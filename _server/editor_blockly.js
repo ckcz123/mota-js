@@ -627,7 +627,7 @@ function omitedcheckUpdateFunction(event) {
                 if (obj.length > 0 && b.type.startsWith(obj[0].type)) {
                     if (b.type == 'previewUI_s')
                         uievent.previewUI(obj[0].action);
-                    else uievent.previewUI(obj);
+                    else uievent.previewUI([obj[0]]);
                 }
             } catch (e) {main.log(e);}
             return true;
@@ -637,7 +637,6 @@ function omitedcheckUpdateFunction(event) {
 
     editor_blockly.doubleClickBlock = function (blockId) {
         var b = editor_blockly.workspace.getBlockById(blockId);
-        console.log(Blockly.JavaScript.blockToCode(b));
 
         if (previewBlock(b)) return;
 
@@ -853,4 +852,148 @@ function omitedcheckUpdateFunction(event) {
 
     return editor_blockly;
 }
-//editor_blockly=editor_blockly();
+
+// --- modify Blockly
+
+Blockly.FieldColour.prototype.createWidget_ = function() {
+    Blockly.WidgetDiv.hide();
+
+    // console.log('here')
+    var self=this;
+    var pb=self.sourceBlock_
+    var args = MotaActionBlocks[pb.type].args
+    var targetf=args[args.indexOf(self.name)-1]
+
+    var getValue=function(){
+        // return self.getValue() // css颜色
+        var f = pb.getFieldValue(targetf);
+        if (/^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/.test(f)) {
+            return f;
+        }
+        return "";
+        // 也可以用 pb.getFieldValue(targetf) 获得颜色块左边的域的内容
+    }
+
+    var setValue=function(newValue){ // css颜色
+        self.setValue(newValue)
+        var c=new Colors();
+        c.setColor(newValue)
+        var rgbatext = [c.colors.webSmart.r,c.colors.webSmart.g,c.colors.webSmart.b,c.colors.alpha].join(",");
+        pb.setFieldValue(rgbatext, targetf) // 放在颜色块左边的域中
+    }
+
+    setTimeout(function () {
+        document.getElementById("colorPicker").value = getValue();
+        window.jsColorPicker.confirm = setValue;
+        // 设置位置
+        triggerColorPicker(Blockly.WidgetDiv.DIV.style.left, Blockly.WidgetDiv.DIV.style.top);
+    });
+
+    return document.createElement('table');
+};
+
+Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
+    Blockly.WidgetDiv.show(this, this.sourceBlock_.RTL, this.widgetDispose_());
+    var div = Blockly.WidgetDiv.DIV;
+    // Create the input.
+    var htmlInput =
+        goog.dom.createDom(goog.dom.TagName.INPUT, 'blocklyHtmlInput');
+    htmlInput.setAttribute('spellcheck', this.spellcheck_);
+    var fontSize =
+        (Blockly.FieldTextInput.FONTSIZE * this.workspace_.scale) + 'pt';
+    div.style.fontSize = fontSize;
+    htmlInput.style.fontSize = fontSize;
+
+    Blockly.FieldTextInput.htmlInput_ = htmlInput;
+    div.appendChild(htmlInput);
+
+    htmlInput.value = htmlInput.defaultValue = this.text_;
+    htmlInput.oldValue_ = null;
+
+    // console.log('here')
+    var self=this;
+    var pb=self.sourceBlock_
+    var args = MotaActionBlocks[pb.type].args
+    var targetf=args[args.indexOf(self.name)+1]
+
+    // ------ colour
+
+    if(targetf && targetf.slice(0,7)==='Colour_'){
+        var inputDom = htmlInput;
+        // var getValue=function(){ // 获得自己的字符串
+        //     return pb.getFieldValue(self.name);
+        // }
+        var setValue = function(newValue){ // 设置右边颜色块的css颜色
+            pb.setFieldValue(newValue, targetf)
+        }
+        // 给inputDom绑事件
+        inputDom.oninput=function(){
+            var value=inputDom.value
+            if(/[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?/.test(value)){
+                setValue('rgba('+value+')')
+            }
+        }
+    }
+    else {
+        // --- awesomplete
+        var awesomplete = new Awesomplete(htmlInput, {
+            minChars: 4,
+            maxItems: 12,
+            replace: function (text) {
+                var value = this.input.value, index = this.input.selectionEnd;
+                if (index == null) index = value.length;
+                var str = value.substring(0, index - awesomplete.prefix.length) + text + value.substring(index);
+                this.input.value = str;
+                pb.setFieldValue(str, self.name);
+                index += text.length - awesomplete.prefix.length;
+                this.input.setSelectionRange(index, index);
+            },
+            filter: function () {return true;},
+            item: function (text, input) {
+                var li = document.createElement("li");
+                li.setAttribute("role", "option");
+                li.setAttribute("aria-selected", "false");
+                input = awesomplete.prefix.trim();
+                if (input != "") text = text.replace(new RegExp("^"+input, "i"), "<mark>$&</mark>");
+                li.innerHTML = text;
+                return li;
+            }
+        });
+
+        htmlInput.oninput = function () {
+            var value = htmlInput.value, index = htmlInput.selectionEnd;
+            if (index == null) index = value.length;
+            value = value.substring(0, index);
+            // cal prefix
+            awesomplete.prefix = "";
+            for (var i = index - 1; i>=0; i--) {
+                var c = value.charAt(i);
+                if (!/^\w$/.test(c)) {
+                    awesomplete.prefix = value.substring(i+1);
+                    break;
+                }
+            }
+
+            var list = editor_blockly.getAutoCompletions(value);
+            awesomplete.list = list;
+            var coordinates = getCaretCoordinates(htmlInput, htmlInput.selectionStart, {debug: true});
+            // console.log(coordinates);
+            awesomplete.ul.style.marginLeft = coordinates.left -
+                htmlInput.scrollLeft - 20 + "px";
+            awesomplete.evaluate();
+        }
+
+        awesomplete.container.style.width = "100%";
+
+        window.awesomplete = awesomplete;
+    }
+
+    if (!quietInput) {
+        htmlInput.focus();
+        htmlInput.select();
+    }
+    this.validate_();
+    this.resizeEditor_();
+
+    this.bindEvents_(htmlInput);
+};

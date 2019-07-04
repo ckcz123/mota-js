@@ -1721,7 +1721,7 @@ id可选，为同时绘制的图标ID，如果不为null则会同时绘制该图
 
 core.drawText(content, callback)
 绘制一段文字。contents为一个字符串或一个字符串数组，callback为全部绘制完毕的回调。
-支持所有的文字效果（如\n，${}，\r，\\i等），也支持\t和\b的语法。
+支持所有的文字效果（如\n，${}，\r，\\i，\\c，\\d，\\e等），也支持\t和\b的语法。
 如果当前在事件处理中或录像回放中，则会自动转成core.insertAction处理。
 不建议使用该函数，如有绘制文字的需求请尽量使用core.insertAction()插入剧情文本事件。
 
@@ -1746,7 +1746,8 @@ posInfo如果不为null则是一个含position, px和py的对象，表示一个�
 core.drawTextContent(ctx, content, config)
 根据配置在某个画布上绘制一段文字。此函数会被core.drawTextBox()所调用。
 ctx为画布名或画布本身，如果不设置则会忽略该函数。
-content为要绘制的文字内容，支持所有的文字效果（如\n，${}，\r，\\i等），但不支持支持\t和\b的语法。
+content为要绘制的文字内容，支持所有的文字效果（如\n，${}，\r，\\i，\\c，\\d，\\e等）
+    ，但不支持支持\t和\b的语法。
 config为绘制的配置项，目前可以包括如下几项：
  - left, top：在该画布上绘制的左上角像素位置，不设置默认为(0,0)。
    > 该函数绘制时会将textBaseline设置为'top'，因此只需要考虑第一个字的左上角位置。
@@ -1761,7 +1762,7 @@ config为绘制的配置项，目前可以包括如下几项：
 
 core.drawTextBox(content, showAll)
 绘制一个对话框。content为一个字符串或一个字符串数组。
-支持所有的文字效果（如\n，${}，\r，\\i等），也支持\t和\b的语法。
+支持所有的文字效果（如\n，${}，\r，\\i，\\c，\\d，\\e等），也支持\t和\b的语法。
 该函数将使用用户在剧情文本设置中的配置项进行绘制。
 实际执行时，会计算文本框宽度并绘制背景，绘制标题和头像，再调用core.drawTextContent()绘制正文内容。
 showAll可选，如果为true则不会使用打字机效果而全部显示，主要用于打字机效果的点击显示全部。
@@ -1769,7 +1770,7 @@ showAll可选，如果为true则不会使用打字机效果而全部显示，主
 
 core.drawScrollText(content, time, lineHeight, callback)
 绘制一个滚动字幕。content为绘制内容，time为总时间（默认为5000），lineHeight为行距比例（默认为1.4）。
-滚动字幕将绘制在UI上，支持所有的文字效果（如\n，${}，\r，\\i等），但不支持\t和\b效果。
+滚动字幕将绘制在UI上，支持所有的文字效果（如\n，${}，\r，\\i，\\c，\\d，\\e等），但不支持\t和\b效果。
 可以通过剧情文本设置中的align控制是否居中绘制，offset控制其距离左边的偏移量。
 
 
@@ -1781,7 +1782,7 @@ core.textImage(content, lineHeight)
 
 core.drawChoices(content, choices)
 绘制一个选项框。
-content可选，为选项上方的提示文字，支持所有的文字效果（如\n，${}，\r，\\i等），也支持\t效果。
+content可选，为选项上方的提示文字，支持所有的文字效果（如\n，${}，\r，\\i，\\c，\\d，\\e等），也支持\t。
 choices必选，为要绘制的选项内容，是一个列表。其中的每一项：
  - 可以是一个字符串，表示选项文字，将使用剧情文本设置中的正文颜色来绘制，仅支持${}表达式计算。
  - 或者是一个包含text, color和icon的对象。

@@ -389,7 +389,7 @@ function omitedcheckUpdateFunction(event) {
     }
   }
   try {
-    var code = Blockly.JavaScript.workspaceToCode(workspace).replace(/\\\\i/g, '\\\\\\\\i');
+    var code = Blockly.JavaScript.workspaceToCode(workspace).replace(/\\\\(i|c|d|e)/g, '\\\\\\\\$1');
     codeAreaHL.setValue(code);
   } catch (error) {
     codeAreaHL.setValue(String(error));
@@ -532,8 +532,7 @@ function omitedcheckUpdateFunction(event) {
         MotaActionFunctions.parse(
             eval('obj=' + codeAreaHL.getValue().replace(/[<>&]/g, function (c) {
                 return {'<': '&lt;', '>': '&gt;', '&': '&amp;'}[c];
-            }).replace(/\\r/g, '\\\\r').replace(/\\f/g, '\\\\f')
-                .replace(/\\i/,'\\\\i')),
+            }).replace(/\\(r|f|i|c|d|e)/g,'\\\\$1')),
             document.getElementById('entryType').value
         );
     }
@@ -607,7 +606,7 @@ function omitedcheckUpdateFunction(event) {
             return;
         }
         var code = Blockly.JavaScript.workspaceToCode(editor_blockly.workspace);
-        code = code.replace(/\\i/g, '\\\\i');
+        code = code.replace(/\\(i|c|d|e)/g, '\\\\$1');
         eval('var obj=' + code);
         setvalue(JSON.stringify(obj));
     }
@@ -621,7 +620,7 @@ function omitedcheckUpdateFunction(event) {
         ];
         if (b && types.indexOf(b.type)>=0) {
             try {
-                var code = "[" + Blockly.JavaScript.blockToCode(b).replace(/\\i/g, '\\\\i') + "]";
+                var code = "[" + Blockly.JavaScript.blockToCode(b).replace(/\\(i|c|d|e)/g, '\\\\$1') + "]";
                 eval("var obj="+code);
                 // console.log(obj);
                 if (obj.length > 0 && b.type.startsWith(obj[0].type)) {

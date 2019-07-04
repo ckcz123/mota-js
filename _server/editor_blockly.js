@@ -976,9 +976,7 @@ Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
 
             var list = editor_blockly.getAutoCompletions(value);
             awesomplete.list = list;
-            var coordinates = getCaretCoordinates(htmlInput, htmlInput.selectionStart, {debug: true});
-            // console.log(coordinates);
-            awesomplete.ul.style.marginLeft = coordinates.left -
+            awesomplete.ul.style.marginLeft = getCaretCoordinates(htmlInput, htmlInput.selectionStart).left -
                 htmlInput.scrollLeft - 20 + "px";
             awesomplete.evaluate();
         }

@@ -486,14 +486,39 @@ maps.prototype._canMoveHero_checkCannotInOut = function (number, name, direction
 
 ////// 能否瞬间移动 //////
 maps.prototype.canMoveDirectly = function (destX, destY) {
-    if (!this._canMoveDirectly_checkGlobal()) return -1;
+    return this.canMoveDirectlyArray([[destX,destY]])[0];
+}
+
+maps.prototype.canMoveDirectlyArray = function (locs) {
+    var ans = [], number = locs.length;
 
     var fromX = core.getHeroLoc('x'), fromY = core.getHeroLoc('y');
-    if (fromX == destX && fromY == destY) return 0;
-    // 检查起点事件
-    if (!this._canMoveDirectly_checkStartPoint(fromX, fromY)) return -1;
+    if (!this._canMoveDirectly_checkGlobal()) {
+        for (var i = 0; i < number; ++i) ans.push(-1);
+        return ans;
+    }
+    for (var i = 0; i < number; ++i) {
+        if (locs[i][0] == fromX && locs[i][1] == fromY) {
+            ans.push(0);
+            number--;
+        }
+        else if (locs[i][0] < 0 || locs[i][0] >= core.bigmap.width || locs[i][1] < 0 || locs[i][1] >= core.bigmap.height) {
+            ans.push(-1);
+            number--;
+        }
+        else ans.push(null);
+    }
+    if (number == 0) return ans;
 
-    return this._canMoveDirectly_bfs(fromX, fromY, destX, destY);
+    // 检查起点事件
+    if (!this._canMoveDirectly_checkStartPoint(fromX, fromY)) {
+        for (var i in ans) {
+            if (ans[i] == null) ans[i] = -1;
+        }
+        return ans;
+    }
+
+    return this._canMoveDirectly_bfs(fromX, fromY, locs, number, ans);
 }
 
 maps.prototype._canMoveDirectly_checkGlobal = function () {
@@ -519,7 +544,7 @@ maps.prototype._canMoveDirectly_checkStartPoint = function (sx, sy) {
     return true;
 }
 
-maps.prototype._canMoveDirectly_bfs = function (sx, sy, ex, ey) {
+maps.prototype._canMoveDirectly_bfs = function (sx, sy, locs, number, ans) {
     var canMoveArray = this.generateMovableArray();
     var blocksObj = this.getMapBlocksObj(core.status.floorId);
     // 滑冰
@@ -538,12 +563,22 @@ maps.prototype._canMoveDirectly_bfs = function (sx, sy, ex, ey) {
             if (bgMap[ny][nx] == 167) continue;
             if (!this._canMoveDirectly_checkNextPoint(blocksObj, nx, ny)) continue;
             visited[nindex] = visited[now] + 1;
-            if (nx == ex && ny == ey) return visited[nindex];
+            // if (nx == ex && ny == ey) return visited[nindex];
+            for (var i in ans) {
+                if (locs[i][0] == nx && locs[i][1] == ny && ans[i] == null) {
+                    ans[i] = visited[nindex];
+                    number--;
+                    if (number == 0) return ans;
+                }
+            }
             queue.push(nindex);
         }
     }
 
-    return -1;
+    for (var i in ans) {
+        if (ans[i] == null) ans[i] = -1;
+    }
+    return ans;
 }
 
 maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
@@ -739,6 +774,7 @@ maps.prototype.drawBg = function (floorId, ctx) {
     if (onMap) {
         ctx = core.canvas.bg;
         core.clearMap(ctx);
+        core.status.floorAnimateObjs = this._getFloorImages(floorId);
     }
     core.maps._drawBg_drawBackground(floorId, ctx);
     // ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
@@ -778,7 +814,10 @@ maps.prototype.drawEvents = function (floorId, blocks, ctx) {
 maps.prototype.drawFg = function (floorId, ctx) {
     floorId = floorId || core.status.floorId;
     var onMap = ctx == null;
-    if (onMap) ctx = core.canvas.fg;
+    if (onMap) {
+        ctx = core.canvas.fg;
+        core.status.floorAnimateObjs = this._getFloorImages(floorId);
+    }
     // ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
     this._drawFloorImages(floorId, ctx, 'fg');
     this._drawBgFgMap(floorId, ctx, 'fg', onMap);
@@ -826,7 +865,6 @@ maps.prototype._drawFloorImages = function (floorId, ctx, name, images, currStat
     floorId = floorId || core.status.floorId;
     if (!images) images = this._getFloorImages(floorId);
     var redraw = currStatus != null;
-    if (!redraw) core.status.floorAnimateObjs = core.clone(images);
     images.forEach(function (t) {
         if (typeof t == 'string') t = [0, 0, t];
         var dx = parseInt(t[0]), dy = parseInt(t[1]), imageName = t[2], frame = core.clamp(parseInt(t[4]), 1, 8);
@@ -1170,9 +1208,12 @@ maps.prototype.terrainExists = function (x, y, id, floorId) {
 
 ////// 某个点是否存在楼梯 //////
 maps.prototype.stairExists = function (x, y, floorId) {
-    var block = this.getBlock(x, y, floorId);
-    if (block == null) return false;
-    return block.block.event.cls == 'terrains' && (block.block.event.id == 'upFloor' || block.block.event.id == 'downFloor');
+    var blockId = this.getBlockId(x, y, floorId);
+    if (blockId == null) return false;
+    var ids = ['upFloor','downFloor'];
+    if (core.flags.flyRecordPosition)
+        ids = ids.concat(['leftPortal','rightPortal','upPortal','downPortal']);
+    return ids.indexOf(blockId)>=0;
 }
 
 ////// 当前位置是否在楼梯边 //////

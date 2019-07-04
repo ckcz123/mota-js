@@ -751,25 +751,28 @@ control.prototype.turnHero = function(direction) {
 }
 
 ////// 瞬间移动 //////
-control.prototype.moveDirectly = function (destX, destY) {
-    return this.controldata.moveDirectly(destX, destY);
+control.prototype.moveDirectly = function (destX, destY, ignoreSteps) {
+    return this.controldata.moveDirectly(destX, destY, ignoreSteps);
 }
 
 ////// 尝试瞬间移动 //////
 control.prototype.tryMoveDirectly = function (destX, destY) {
     if (this.nearHero(destX, destY)) return false;
     var canMoveArray = core.maps.generateMovableArray();
-    var testMove = function (dx, dy, dir) {
-        if (dx<0 || dx>=core.bigmap.width|| dy<0 || dy>=core.bigmap.height) return false;
-        if (dir && !core.inArray(canMoveArray[dx][dy],dir)) return false;
-        if (core.control.moveDirectly(dx, dy)) {
+    var dirs = [[destX,destY],[destX-1,destY,"right"],[destX,destY-1,"down"],[destX,destY+1,"up"],[destX+1,destY,"left"]];
+    var canMoveDirectlyArray = core.canMoveDirectlyArray(dirs);
+
+    for (var i = 0; i < dirs.length; ++i) {
+        var d = dirs[i], dx = d[0], dy = d[1], dir = d[2];
+        if (dx<0 || dx>=core.bigmap.width|| dy<0 || dy>=core.bigmap.height) continue;
+        if (dir && !core.inArray(canMoveArray[dx][dy],dir)) continue;
+        if (canMoveDirectlyArray[i]<0) continue;
+        if (core.control.moveDirectly(dx, dy, canMoveDirectlyArray[i])) {
             if (dir) core.moveHero(dir, function() {});
             return true;
         }
-        return false;
     }
-    return testMove(destX,destY) || testMove(destX-1, destY, "right") || testMove(destX,destY-1,"down")
-        || testMove(destX,destY+1,"up") || testMove(destX+1,destY,"left");
+    return false;
 }
 
 ////// 绘制勇士 //////
@@ -1202,6 +1205,7 @@ control.prototype.bookReplay = function () {
     if (core.isMoving() || core.status.replay.animate
         || (core.status.event.id && core.status.event.id != 'viewMaps'))
         return core.drawTip("请等待当前事件的处理结束");
+    if (!core.hasItem('book')) return core.drawTip('你没有怪物手册');
 
     // 从“浏览地图”页面打开
     if (core.status.event.id=='viewMaps')

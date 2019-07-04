@@ -354,6 +354,8 @@ action
     |   drawArrow_s
     |   fillPolygon_s
     |   strokePolygon_s
+    |   fillCircle_s
+    |   strokeCircle_s
     |   drawImage_s
     |   drawImage_1_s
     |   drawIcon_s
@@ -2168,6 +2170,45 @@ var code = '{"type": "strokePolygon", "nodes": ['+EvalString_0+']'+EvalString_2+
 return code;
 */;
 
+fillCircle_s
+    :   '绘制圆' '圆心' 'x' PosString 'y' PosString '半径' PosString '颜色' EvalString? Colour Newline
+
+/* fillCircle_s
+tooltip : fillCircle：绘制圆
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillCircle%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86
+colour : this.subColor
+default : ["0","0","100","",null]
+var colorRe = MotaActionFunctions.pattern.colorRe;
+if (EvalString_0) {
+  if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
+  EvalString_0 = ', "style": ['+EvalString_0+']';
+}
+var code = '{"type": "fillCircle", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+EvalString_0+'},\n';
+return code;
+*/;
+
+strokeCircle_s
+    :   '绘制圆边框' '圆心' 'x' PosString 'y' PosString '半径' PosString '颜色' EvalString? Colour '线宽' EvalString? Newline
+
+/* strokeCircle_s
+tooltip : strokeCircle：绘制圆边框
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=strokeCircle%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86%e8%be%b9%e6%a1%86
+colour : this.subColor
+default : ["0","0","100","",null,""]
+var colorRe = MotaActionFunctions.pattern.colorRe;
+if (EvalString_0) {
+  if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
+  EvalString_0 = ', "style": ['+EvalString_0+']';
+}
+if (EvalString_1) {
+  if (!/^\d+$/.test(EvalString_1))throw new Error('线宽必须是整数或不填');
+  EvalString_1 = ', "lineWidth": '+EvalString_1;
+}
+var code = '{"type": "strokeCircle", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+EvalString_0+EvalString_1+'},\n';
+return code;
+*/;
+
+
 drawImage_s
     :   '绘制图片' EvalString '起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? Newline
 
@@ -2495,8 +2536,8 @@ Global_Value_List
 
 
 Global_Flag_List
-    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示魔力值'|'显示魔防值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'破墙镐四方向'|'炸弹四方向'|'冰冻徽章四方向'|'铁门不需要钥匙'|'开启加点'|'开启负伤'|'仇恨怪战后扣减一半'|'夹击是否上整'|'夹击不超伤害值'|'循环计算临界'|'允许轻按'|'寻路算法不绕血瓶'|'允许走到将死领域'|'允许瞬间移动'|'允许查看禁用商店'|'阻激夹域后禁用快捷商店'|'检查控制台'
-    /*Global_Flag_List ['enableFloor','enableName','enableLv', 'enableHPMax', 'enableMana', 'enableMDef', 'enableMoney', 'enableExperience', 'enableLevelUp', 'levelUpLeftMode', 'enableKeys', 'enablePZF', 'enableDebuff', 'enableSkill', 'flyNearStair', 'pickaxeFourDirections', 'bombFourDirections', 'snowFourDirections', 'steelDoorWithoutKey', 'enableAddPoint', 'enableNegativeDamage', 'hatredDecrease', 'betweenAttackCeil', 'betweenAttackMax', 'useLoop', 'enableGentleClick', 'potionWhileRouting', 'canGoDeadZone', 'enableMoveDirectly', 'enableDisabledShop', 'disableShopOnDamage', 'checkConsole']*/;
+    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示魔力值'|'显示魔防值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'楼传平面塔模式'|'破墙镐四方向'|'炸弹四方向'|'冰冻徽章四方向'|'铁门不需要钥匙'|'开启加点'|'开启负伤'|'仇恨怪战后扣减一半'|'夹击是否上整'|'夹击不超伤害值'|'循环计算临界'|'允许轻按'|'寻路算法不绕血瓶'|'允许走到将死领域'|'允许瞬间移动'|'允许查看禁用商店'|'阻激夹域后禁用快捷商店'|'检查控制台'
+    /*Global_Flag_List ['enableFloor','enableName','enableLv', 'enableHPMax', 'enableMana', 'enableMDef', 'enableMoney', 'enableExperience', 'enableLevelUp', 'levelUpLeftMode', 'enableKeys', 'enablePZF', 'enableDebuff', 'enableSkill', 'flyNearStair', 'flyRecordPosition', 'pickaxeFourDirections', 'bombFourDirections', 'snowFourDirections', 'steelDoorWithoutKey', 'enableAddPoint', 'enableNegativeDamage', 'hatredDecrease', 'betweenAttackCeil', 'betweenAttackMax', 'useLoop', 'enableGentleClick', 'potionWhileRouting', 'canGoDeadZone', 'enableMoveDirectly', 'enableDisabledShop', 'disableShopOnDamage', 'checkConsole']*/;
 
 Colour
     :   'sdeirughvuiyasdeb'+ //为了被识别为复杂词法规则
@@ -3312,6 +3353,18 @@ ActionParser.prototype.parseAction = function() {
       })
       this.next = MotaActionBlocks['strokePolygon_s'].xmlText([
         x_str.join(','), y_str.join(','), data.style, 'rgba('+data.style+')', data.lineWidth, this.next
+      ]);
+      break;
+    case "fillCircle": // 绘制圆
+      data.style = this.Colour(data.style);
+      this.next = MotaActionBlocks['fillCircle_s'].xmlText([
+        data.x, data.y, data.r, data.style, 'rgba('+data.style+')', this.next
+      ]);
+      break;
+    case "strokeCircle": // 绘制圆边框
+      data.style = this.Colour(data.style);
+      this.next = MotaActionBlocks['strokeCircle_s'].xmlText([
+        data.x, data.y, data.r, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
       ]);
       break;
     case "drawImage": // 绘制图片

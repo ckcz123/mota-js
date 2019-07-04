@@ -805,7 +805,7 @@ function omitedcheckUpdateFunction(event) {
         var index = content.lastIndexOf(":");
         if (index >= 0) {
             var before = content.substring(0, index), token = content.substring(index+1);
-            if (/^\w*$/.test(token)) {
+            if (/^[a-zA-Z0-9_\u4E00-\u9FCC]*$/.test(token)) {
                 if (before.endsWith("status")) {
                     return Object.keys(core.status.hero).filter(function (one) {
                         return one != token && one.startsWith(token);
@@ -850,6 +850,7 @@ function omitedcheckUpdateFunction(event) {
         return [];
     }
 
+    editor_blockly.completeItems = [];
     return editor_blockly;
 }
 
@@ -939,14 +940,22 @@ Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
         var awesomplete = new Awesomplete(htmlInput, {
             minChars: 4,
             maxItems: 12,
+            autoFirst: true,
             replace: function (text) {
+                text = text.toString();
                 var value = this.input.value, index = this.input.selectionEnd;
                 if (index == null) index = value.length;
+                if (index < awesomplete.prefix.length) index = awesomplete.prefix.length;
                 var str = value.substring(0, index - awesomplete.prefix.length) + text + value.substring(index);
                 this.input.value = str;
                 pb.setFieldValue(str, self.name);
                 index += text.length - awesomplete.prefix.length;
                 this.input.setSelectionRange(index, index);
+
+                editor_blockly.completeItems = editor_blockly.completeItems.filter(function (x) {
+                    return x != text;
+                });
+                editor_blockly.completeItems.unshift(text);
             },
             filter: function () {return true;},
             item: function (text, input) {
@@ -957,6 +966,15 @@ Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
                 if (input != "") text = text.replace(new RegExp("^"+input, "i"), "<mark>$&</mark>");
                 li.innerHTML = text;
                 return li;
+            },
+            sort: function (a, b) {
+                a = a.toString(); b = b.toString();
+                var ia = editor_blockly.completeItems.indexOf(a), ib = editor_blockly.completeItems.indexOf(b);
+                if (ia < 0) ia = editor_blockly.completeItems.length;
+                if (ib < 0) ib = editor_blockly.completeItems.length;
+                if (ia != ib) return ia - ib;
+                if (a.length != b.length) return a.length - b.length;
+                return a < b ? -1 : 1;
             }
         });
 
@@ -968,7 +986,7 @@ Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
             awesomplete.prefix = "";
             for (var i = index - 1; i>=0; i--) {
                 var c = value.charAt(i);
-                if (!/^\w$/.test(c)) {
+                if (!/^[a-zA-Z0-9_\u4E00-\u9FCC]$/.test(c)) {
                     awesomplete.prefix = value.substring(i+1);
                     break;
                 }

@@ -76,6 +76,7 @@
     position: relative;
     padding: .2em .5em;
     cursor: pointer;
+    word-break: keep-all;
 }
 
 .awesomplete > ul > li:hover {

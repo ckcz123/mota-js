@@ -774,6 +774,7 @@ maps.prototype.drawBg = function (floorId, ctx) {
     if (onMap) {
         ctx = core.canvas.bg;
         core.clearMap(ctx);
+        core.status.floorAnimateObjs = this._getFloorImages(floorId);
     }
     core.maps._drawBg_drawBackground(floorId, ctx);
     // ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
@@ -813,7 +814,10 @@ maps.prototype.drawEvents = function (floorId, blocks, ctx) {
 maps.prototype.drawFg = function (floorId, ctx) {
     floorId = floorId || core.status.floorId;
     var onMap = ctx == null;
-    if (onMap) ctx = core.canvas.fg;
+    if (onMap) {
+        ctx = core.canvas.fg;
+        core.status.floorAnimateObjs = this._getFloorImages(floorId);
+    }
     // ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
     this._drawFloorImages(floorId, ctx, 'fg');
     this._drawBgFgMap(floorId, ctx, 'fg', onMap);
@@ -861,7 +865,6 @@ maps.prototype._drawFloorImages = function (floorId, ctx, name, images, currStat
     floorId = floorId || core.status.floorId;
     if (!images) images = this._getFloorImages(floorId);
     var redraw = currStatus != null;
-    if (!redraw) core.status.floorAnimateObjs = core.clone(images);
     images.forEach(function (t) {
         if (typeof t == 'string') t = [0, 0, t];
         var dx = parseInt(t[0]), dy = parseInt(t[1]), imageName = t[2], frame = core.clamp(parseInt(t[4]), 1, 8);

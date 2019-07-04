@@ -1660,6 +1660,16 @@ events.prototype._action_strokePolygon = function (data, x, y, prefix) {
     core.doAction();
 }
 
+events.prototype._action_fillCircle = function (data, x, y, prefix) {
+    core.ui._uievent_fillCircle(data);
+    core.doAction();
+}
+
+events.prototype._action_strokeCircle = function (data, x, y, prefix) {
+    core.ui._uievent_strokeCircle(data);
+    core.doAction();
+}
+
 events.prototype._action_drawLine = function (data, x, y, prefix) {
     core.ui._uievent_drawLine(data);
     core.doAction();

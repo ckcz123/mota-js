@@ -41,6 +41,7 @@ editor_file = function (editor, callback) {
         datastr = datastr.join('');
         alertWhenCompress();
         fs.writeFile(filename, encode(datastr), 'base64', function (err, data) {
+            editor.addUsedFlags(datastr);
             callback(err);
         });
     }

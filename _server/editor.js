@@ -98,6 +98,12 @@ editor.prototype.init = function (callback) {
         editor_multi = editor_multi();
         editor_blockly = editor_blockly();
 
+        // --- 所有用到的flags
+        editor.used_flags = {};
+        for (var floorId in editor.main.floors) {
+            editor.addUsedFlags(JSON.stringify(editor.main.floors[floorId]));
+        }
+
         if (editor.useCompress == null) editor.useCompress = useCompress;
         if (Boolean(callback)) callback();
 
@@ -574,5 +580,10 @@ editor.prototype.clearPos = function (clearPos, pos, callback) {
     });
 }
 
+editor.prototype.addUsedFlags = function (s) {
+    s.replace(/flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, function (s0, s1) {
+        editor.used_flags[s1] = true; return s0;
+    });
+}
 
 editor = new editor();

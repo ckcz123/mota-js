@@ -515,7 +515,13 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "checkbox",
 					"_bool": "bool",
-					"_data": "是否需要在楼梯边使用传送器"
+					"_data": "传送器是否需要在楼梯边使用；如果flyRecordPosition开启，则此项对箭头也有效。"
+				},
+				"flyRecordPosition": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_bool": "bool",
+					"_data": "传送器平面塔模式；此模式下楼层传送器将飞到上次离开该楼层的位置。"
 				},
 				"pickaxeFourDirections": {
 					"_leaf": true,

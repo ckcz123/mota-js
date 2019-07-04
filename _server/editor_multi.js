@@ -81,6 +81,12 @@ editor_multi = function () {
         _format();
     }
 
+    editor_multi.hasError = function () {
+        if (!editor_multi.lintAutocomplete) return false;
+        return JSHINT.errors.filter(function (e) {
+            return e.code.startsWith("E")
+        }).length > 0;
+    }
 
     editor_multi.import = function (id_, args) {
         var thisTr = document.getElementById(id_);
@@ -126,6 +132,11 @@ editor_multi = function () {
     }
 
     editor_multi.confirm = function () {
+        if (editor_multi.hasError()) {
+            alert("当前好像存在严重的语法错误，请处理后再保存。\n严重的语法错误可能会导致整个编辑器的崩溃。");
+            return;
+        }
+
         if (!editor_multi.id) {
             editor_multi.id = '';
             return;

@@ -458,6 +458,24 @@ events.prototype.getItem = function (id, num, x, y, callback) {
     if (num > 1) text += "x" + num;
     if (itemCls === 'items') text += core.items.getItemEffectTip(id);
     core.drawTip(text, id);
+
+    // --- 首次获得道具的提示
+    if (!core.hasFlag("__itemHint__")) core.setFlag("__itemHint__", []);
+    var itemHint = core.getFlag("__itemHint__");
+    if (itemHint.indexOf(id) < 0 && itemCls != 'items') {
+        var hint = core.material.items[id].text || "该道具暂无描述";
+        try {
+            hint = core.replaceText(hint);
+        } catch (e) {}
+        core.insertAction("\t["+core.material.items[id].name+","+id+"]" + hint + "\n"
+            + (itemCls == 'keys' || id == 'greenKey' || id == 'steelKey' ? "（钥匙类道具，遇到对应的门时自动打开）"
+                : itemCls == 'tools' ? "（消耗类道具，请按T在道具栏使用）"
+                : itemCls == 'constants' ? "（永久类道具，请按T在道具栏使用）"
+                : itemCls == 'equips' ? "（装备类道具，请按Q在装备栏进行装备）" : ""))
+        itemHint.push(id);
+    }
+
+
     core.updateStatusBar();
 
     this.afterGetItem(id, x, y, callback);
@@ -1243,6 +1261,7 @@ events.prototype._action_insert = function (data, x, y, prefix) {
 
 events.prototype._action_playBgm = function (data, x, y, prefix) {
     core.playBgm(data.name);
+    core.setFlag("__bgm__", data.keep ? data.name : null);
     core.doAction();
 }
 
@@ -1385,6 +1404,11 @@ events.prototype._action_switch = function (data, x, y, prefix) {
 }
 
 events.prototype._action_choices = function (data, x, y, prefix) {
+    data.choices = data.choices.filter(function (x) {
+        if (x.condition == null || x.condition == '') return true;
+        try { return core.calValue(x.condition, prefix); } catch (e) { return true; }
+    })
+    if (data.choices.length == 0) return this.doAction();
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift(), index;
         // --- 忽略可能的turn事件
@@ -1796,6 +1820,25 @@ events.prototype.openToolbox = function (fromUserAction) {
 ////// 点击快捷商店按钮时的打开操作 //////
 events.prototype.openQuickShop = function (fromUserAction) {
     if (core.isReplaying()) return;
+
+    if (Object.keys(core.status.shops).length == 0) {
+        core.drawTip("本塔没有快捷商店！");
+        return;
+    }
+
+    // --- 如果只有一个商店，则直接打开之
+    if (Object.keys(core.status.shops).length == 1) {
+        var shopId = Object.keys(core.status.shops)[0];
+        if (core.status.event.id != null || !this._checkStatus('shop', false)) return;
+        var reason = core.events.canUseQuickShop(shopId);
+        if (!core.flags.enableDisabledShop && reason) {
+            core.drawText(reason);
+            return;
+        }
+        core.events.openShop(shopId, true);
+        return;
+    }
+
     if (!this._checkStatus('selectShop', fromUserAction)) return;
     core.ui.drawQuickShop();
 }

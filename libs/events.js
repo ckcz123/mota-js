@@ -1819,6 +1819,21 @@ events.prototype.openToolbox = function (fromUserAction) {
 ////// 点击快捷商店按钮时的打开操作 //////
 events.prototype.openQuickShop = function (fromUserAction) {
     if (core.isReplaying()) return;
+
+    // --- 如果只有一个商店，则直接打开之
+    if (Object.keys(core.status.shops).length == 1) {
+        var shopId = Object.keys(core.status.shops)[0];
+        if (core.status.event.id != null) return;
+        if (!this._checkStatus('shop', false)) return;
+        var reason = core.events.canUseQuickShop(shopId);
+        if (!core.flags.enableDisabledShop && reason) {
+            core.drawText(reason);
+            return;
+        }
+        core.events.openShop(shopId, true);
+        return;
+    }
+
     if (!this._checkStatus('selectShop', fromUserAction)) return;
     core.ui.drawQuickShop();
 }

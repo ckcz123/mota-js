@@ -458,6 +458,24 @@ events.prototype.getItem = function (id, num, x, y, callback) {
     if (num > 1) text += "x" + num;
     if (itemCls === 'items') text += core.items.getItemEffectTip(id);
     core.drawTip(text, id);
+
+    // --- 首次获得道具的提示
+    if (!core.hasFlag("__itemHint__")) core.setFlag("__itemHint__", []);
+    var itemHint = core.getFlag("__itemHint__");
+    if (itemHint.indexOf(id) < 0 && itemCls != 'items') {
+        var hint = core.material.items[id].text || "该道具暂无描述";
+        try {
+            hint = core.replaceText(hint);
+        } catch (e) {}
+        core.insertAction("\t["+core.material.items[id].name+","+id+"]" + hint + "\n"
+            + (itemCls == 'keys' || id == 'greenKey' || id == 'steelKey' ? "（钥匙类道具，遇到对应的门时自动打开）"
+                : itemCls == 'tools' ? "（消耗类道具，请按T在道具栏使用）"
+                : itemCls == 'constants' ? "（永久类道具，请按T在道具栏使用）"
+                : itemCls == 'equips' ? "（装备类道具，请按Q在装备栏进行装备）" : ""))
+        itemHint.push(id);
+    }
+
+
     core.updateStatusBar();
 
     this.afterGetItem(id, x, y, callback);
@@ -1385,6 +1403,11 @@ events.prototype._action_switch = function (data, x, y, prefix) {
 }
 
 events.prototype._action_choices = function (data, x, y, prefix) {
+    data.choices = data.choices.filter(function (x) {
+        if (x.condition == null || x.condition == '') return true;
+        try { return core.calValue(x.condition, prefix); } catch (e) { return true; }
+    })
+    if (data.choices.length == 0) return this.doAction();
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift(), index;
         // --- 忽略可能的turn事件

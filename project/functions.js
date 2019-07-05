@@ -15,6 +15,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.played = true;
 	// 初始化人物，图标，统计信息
 	core.status.hero = core.clone(hero);
+	window.flags = core.status.hero.flags;
 	core.events.setHeroIcon(core.getFlag('heroIcon', 'hero.png'), true);
 	core.control._initStatistics(core.animateFrame.totalTime);
 	core.status.hero.statistics.totalTime = core.animateFrame.totalTime =

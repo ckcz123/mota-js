@@ -3,15 +3,18 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 	"items": {
 		"yellowKey": {
 			"cls": "keys",
-			"name": "黄钥匙"
+			"name": "黄钥匙",
+			"text": "可以打开一扇黄门"
 		},
 		"blueKey": {
 			"cls": "keys",
-			"name": "蓝钥匙"
+			"name": "蓝钥匙",
+			"text": "可以打开一扇蓝门"
 		},
 		"redKey": {
 			"cls": "keys",
-			"name": "红钥匙"
+			"name": "红钥匙",
+			"text": "可以打开一扇红门"
 		},
 		"redJewel": {
 			"cls": "items",

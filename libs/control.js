@@ -337,6 +337,8 @@ control.prototype._showStartAnimate_resetDom = function () {
 control.prototype._showStartAnimate_finished = function (start, callback) {
     core.dom.startTop.style.display = 'none';
     core.dom.startButtonGroup.style.display = 'block';
+    main.selectedButton = null;
+    main.selectButton(0);
     if (start) core.startGame();
     if (callback) callback();
 }

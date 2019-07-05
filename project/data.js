@@ -72,7 +72,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"hardLabelColor": "red",
 		"floorChangingBackground": "black",
 		"floorChangingTextColor": "white",
-		"font": "Verdana"
+		"font": "Verdana",
+		"startButtonsStyle": "background-color: #32369F; opacity: 0.85; color: #FFFFFF; border: #FFFFFF 2px solid; caret-color: #FFD700;"
 	},
 	"firstData": {
 		"title": "魔塔样板",

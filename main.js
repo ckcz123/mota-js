@@ -204,6 +204,7 @@ main.prototype.init = function (mode, callback) {
         
         main.dom.startBackground.src="project/images/"+main.startBackground;
         main.dom.startLogo.style=main.startLogoStyle;
+        main.dom.startButtonGroup.style = main.startButtonsStyle;
         main.levelChoose.forEach(function(value){
             var span = document.createElement('span');
             span.setAttribute('class','startButton');
@@ -327,6 +328,29 @@ main.prototype.log = function (e) {
     }
 }
 
+////// 选项 //////
+main.prototype.selectButton = function (index) {
+    var select = function (children) {
+        index = (index + children.length) % children.length;
+        for (var i = 0;i < children.length; ++i) {
+            children[i].style.borderColor = 'transparent';
+        }
+        children[index].style.borderColor = main.dom.startButtonGroup.style.caretColor || '#FFD700';
+        if (main.selectedButton == index) {
+            children[index].click();
+        }
+        else {
+            main.selectedButton = index;
+        }
+    }
+
+    if (main.dom.startButtons.style.display == 'block') {
+        select(main.dom.startButtons.children);
+    }
+    else if (main.dom.levelChooseButtons.style.display == 'block') {
+        select(main.dom.levelChooseButtons.children);
+    }
+}
 
 main.prototype.listen = function () {
 
@@ -348,6 +372,16 @@ main.dom.body.onkeydown = function(e) {
 
 ////// 在界面上放开某按键时 //////
 main.dom.body.onkeyup = function(e) {
+    if (main.dom.startButtons.style.display == 'block' || main.dom.levelChooseButtons.style.display == 'block') {
+        if (e.keyCode == 38 || e.keyCode == 33) // up/pgup
+            main.selectButton((main.selectedButton||0) - 1);
+        else if (e.keyCode == 40 || e.keyCode == 34) // down/pgdn
+            main.selectButton((main.selectedButton||0) + 1);
+        else if (e.keyCode == 67 || e.keyCode == 13 || e.keyCode == 32) // C/Enter/Space
+            main.selectButton(main.selectedButton);
+        return;
+    }
+
     try {
         if (main.dom.inputDiv.style.display == 'block') return;
         if (main.core && (main.core.isPlaying() || main.core.status.lockControl))
@@ -649,6 +683,8 @@ main.dom.playGame.onclick = function () {
     }
     else {
         main.dom.levelChooseButtons.style.display='block';
+        main.selectedButton = null;
+        main.selectButton(0);
     }
 }
 

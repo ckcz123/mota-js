@@ -137,6 +137,7 @@ actions.prototype._sys_onkeyDown = function (e) {
                 return;
             }
         }
+        e.preventDefault();
         core.status.holdingKeys.push(e.keyCode);
         this.pressKey(e.keyCode);
     } else {
@@ -198,6 +199,7 @@ actions.prototype._sys_onkeyUp = function (e) {
                 break;
             }
         }
+        e.preventDefault();
         this.keyUp(e.keyCode, e.altKey);
     } else {
         if (e.keyCode == 17) core.status.ctrlDown = false;

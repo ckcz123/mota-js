@@ -1468,15 +1468,16 @@ return code;
 */;
 
 playBgm_s
-    :   '播放背景音乐' EvalString Newline
+    :   '播放背景音乐' EvalString '持续到下个本事件' Bool Newline
     
 
 /* playBgm_s
 tooltip : playBgm: 播放背景音乐
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=playbgm%EF%BC%9A%E6%92%AD%E6%94%BE%E8%83%8C%E6%99%AF%E9%9F%B3%E4%B9%90
-default : ["bgm.mp3"]
+default : ["bgm.mp3", true]
 colour : this.soundColor
-var code = '{"type": "playBgm", "name": "'+EvalString_0+'"},\n';
+Bool_0 = Bool_0 ? ', "keep": true' : '';
+var code = '{"type": "playBgm", "name": "'+EvalString_0+'"'+Bool_0+'},\n';
 return code;
 */;
 
@@ -1716,13 +1717,13 @@ return code;
 */;
 
 choicesContext
-    :   '子选项' EvalString '图标' IdString? '颜色' EvalString? Colour BGNL? Newline action+
+    :   '子选项' EvalString '图标' IdString? '颜色' EvalString? Colour '出现条件' EvalString? BGNL? Newline action+
 
 
 /* choicesContext
 tooltip : 选项的选择
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=choices%EF%BC%9A%E7%BB%99%E7%94%A8%E6%88%B7%E6%8F%90%E4%BE%9B%E9%80%89%E9%A1%B9
-default : ["提示文字:红钥匙","",""]
+default : ["提示文字:红钥匙","","",""]
 colour : this.subColor
 if (EvalString_1) {
   var colorRe = MotaActionFunctions.pattern.colorRe;
@@ -1731,8 +1732,9 @@ if (EvalString_1) {
   else
       EvalString_1 = ', "color": "'+EvalString_1+'"';
 }
+EvalString_2 = EvalString_2 && (', "condition": "'+EvalString_2+'"')
 IdString_0 = IdString_0?(', "icon": "'+IdString_0+'"'):'';
-var code = '{"text": "'+EvalString_0+'"'+IdString_0+EvalString_1+', "action": [\n'+action_0+']},\n';
+var code = '{"text": "'+EvalString_0+'"'+IdString_0+EvalString_1+EvalString_2+', "action": [\n'+action_0+']},\n';
 return code;
 */;
 
@@ -3068,7 +3070,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "playBgm":
       this.next = MotaActionBlocks['playBgm_s'].xmlText([
-        data.name,this.next]);
+        data.name,data.keep||false,this.next]);
       break
     case "pauseBgm":
       this.next = MotaActionBlocks['pauseBgm_s'].xmlText([
@@ -3169,7 +3171,7 @@ ActionParser.prototype.parseAction = function() {
       for(var ii=data.choices.length-1,choice;choice=data.choices[ii];ii--) {
         choice.color = this.Colour(choice.color);
         text_choices=MotaActionBlocks['choicesContext'].xmlText([
-          choice.text,choice.icon,choice.color,'rgba('+choice.color+')',this.insertActionList(choice.action),text_choices]);
+          choice.text,choice.icon,choice.color,'rgba('+choice.color+')',choice.condition||'',this.insertActionList(choice.action),text_choices]);
       }
       if (!this.isset(data.text)) data.text = '';
       var info = this.getTitleAndPosition(data.text);

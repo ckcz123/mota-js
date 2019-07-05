@@ -337,6 +337,8 @@ control.prototype._showStartAnimate_resetDom = function () {
 control.prototype._showStartAnimate_finished = function (start, callback) {
     core.dom.startTop.style.display = 'none';
     core.dom.startButtonGroup.style.display = 'block';
+    main.selectedButton = null;
+    main.selectButton(0);
     if (start) core.startGame();
     if (callback) callback();
 }
@@ -1317,7 +1319,7 @@ control.prototype._replay_finished = function () {
 
 control.prototype._replay_save = function () {
     core.status.replay.steps++;
-    if (core.status.replay.steps%50==0) {
+    if (core.status.replay.steps%40==1) {
         if (core.status.replay.save.length == 30)
             core.status.replay.save.shift();
         core.status.replay.save.push({"data": core.saveData(), "replay": {

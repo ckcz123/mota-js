@@ -63,6 +63,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_string": true,
 					"_data": "标题样式：可以改变颜色，也可以写\"display: none\"来隐藏标题"
 				},
+				"startButtonsStyle": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_string": true,
+					"_data": "标题界面按钮的样式；caret-color指的是当前选中项的边框颜色"
+				},
 				"levelChoose": {
 					"_leaf": true,
 					"_type": "textarea",

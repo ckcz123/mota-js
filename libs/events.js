@@ -1261,6 +1261,7 @@ events.prototype._action_insert = function (data, x, y, prefix) {
 
 events.prototype._action_playBgm = function (data, x, y, prefix) {
     core.playBgm(data.name);
+    core.setFlag("__bgm__", data.keep ? data.name : null);
     core.doAction();
 }
 
@@ -1820,11 +1821,15 @@ events.prototype.openToolbox = function (fromUserAction) {
 events.prototype.openQuickShop = function (fromUserAction) {
     if (core.isReplaying()) return;
 
+    if (Object.keys(core.status.shops).length == 0) {
+        core.drawTip("本塔没有快捷商店！");
+        return;
+    }
+
     // --- 如果只有一个商店，则直接打开之
     if (Object.keys(core.status.shops).length == 1) {
         var shopId = Object.keys(core.status.shops)[0];
-        if (core.status.event.id != null) return;
-        if (!this._checkStatus('shop', false)) return;
+        if (core.status.event.id != null || !this._checkStatus('shop', false)) return;
         var reason = core.events.canUseQuickShop(shopId);
         if (!core.flags.enableDisabledShop && reason) {
             core.drawText(reason);

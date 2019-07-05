@@ -1468,15 +1468,16 @@ return code;
 */;
 
 playBgm_s
-    :   '播放背景音乐' EvalString Newline
+    :   '播放背景音乐' EvalString '持续到下个本事件' Bool Newline
     
 
 /* playBgm_s
 tooltip : playBgm: 播放背景音乐
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=playbgm%EF%BC%9A%E6%92%AD%E6%94%BE%E8%83%8C%E6%99%AF%E9%9F%B3%E4%B9%90
-default : ["bgm.mp3"]
+default : ["bgm.mp3", true]
 colour : this.soundColor
-var code = '{"type": "playBgm", "name": "'+EvalString_0+'"},\n';
+Bool_0 = Bool_0 ? ', "keep": true' : '';
+var code = '{"type": "playBgm", "name": "'+EvalString_0+'"'+Bool_0+'},\n';
 return code;
 */;
 
@@ -3069,7 +3070,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "playBgm":
       this.next = MotaActionBlocks['playBgm_s'].xmlText([
-        data.name,this.next]);
+        data.name,data.keep||false,this.next]);
       break
     case "pauseBgm":
       this.next = MotaActionBlocks['pauseBgm_s'].xmlText([

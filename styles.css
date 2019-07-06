@@ -117,16 +117,25 @@
 }
 
 #startButtonGroup {
-    width: 100%;
+    width: auto;
     position: absolute;
     text-align: center;
     font-size: 1.4rem;
-    background-color: #000;
-    opacity: 0.85;
     display: none;
     z-index: 310;
     bottom: 0;
-    margin-bottom: 7%;
+    margin-bottom: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 25px;
+    min-width: 20%;
+    /* default value */
+    background-color: #32369F;
+    opacity: 0.85;
+    color: #FFFFFF;
+    border: #FFFFFF 2px solid;
+    caret-color: #FFD700;
+    border-radius: 10px;
 }
 
 #startButtons {
@@ -139,15 +148,15 @@
 
 .startButton {
     width: 100%;
-    margin: 20px 0;
-    color: #fff;
+    margin: 0;
     font-weight: bold;
     display: block;
     cursor: pointer;
-}
-
-.startButton:hover {
-    color: #ff0000;
+    padding: 4px 0;
+    border-color: transparent;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 6px;
 }
 
 #floorMsgGroup {

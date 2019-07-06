@@ -15,6 +15,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.played = true;
 	// 初始化人物，图标，统计信息
 	core.status.hero = core.clone(hero);
+	window.flags = core.status.hero.flags;
 	core.events.setHeroIcon(core.getFlag('heroIcon', 'hero.png'), true);
 	core.control._initStatistics(core.animateFrame.totalTime);
 	core.status.hero.statistics.totalTime = core.animateFrame.totalTime =
@@ -141,7 +142,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.status.maps[floorId].bgm) {
 		var bgm = core.status.maps[floorId].bgm;
 		if (bgm instanceof Array) bgm = bgm[0];
-		core.playBgm(bgm);
+		if (!core.hasFlag("__bgm__")) core.playBgm(bgm);
 	}
 	// 更改画面色调
 	var color = core.getFlag('__color__', null);
@@ -1003,7 +1004,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 切换到对应的楼层
 	core.changeFloor(data.floorId, null, data.hero.loc, 0, function () {
 		// TODO：可以在这里设置读档后播放BGM
-		// if (core.getFlag("bgm", 0)==1) core.playBgm("bgm.mp3");
+		if (core.hasFlag("__bgm__")) { // 持续播放
+			core.playBgm(core.getFlag("__bgm__"));
+		}
 
 		if (callback) callback();
 	}, true);

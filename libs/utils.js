@@ -914,7 +914,8 @@ utils.prototype.myconfirm = function (hint, yesCallback, noCallback) {
     main.dom.inputDiv.style.display = 'block';
     main.dom.inputMessage.innerHTML = hint.replace(/\n/g, '<br/>');
     main.dom.inputBox.style.display = 'none';
-    main.dom.inputYes.focus();
+    main.dom.inputYes.blur();
+    main.dom.inputNo.blur();
     core.status.holdingKeys = [];
 
     core.platform.successCallback = yesCallback;
@@ -927,6 +928,8 @@ utils.prototype.myprompt = function (hint, value, callback) {
     main.dom.inputMessage.innerHTML = hint.replace(/\n/g, '<br/>');
     main.dom.inputBox.style.display = 'block';
     main.dom.inputBox.value = value==null?"":value;
+    main.dom.inputYes.blur();
+    main.dom.inputNo.blur();
     setTimeout(function () {
         main.dom.inputBox.focus();
     });

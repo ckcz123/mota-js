@@ -344,6 +344,8 @@ main.prototype.selectButton = function (index) {
         }
     }
 
+    if (core.dom.startPanel.style.display != 'block') return;
+
     if (main.dom.startButtons.style.display == 'block') {
         select(main.dom.startButtons.children);
     }
@@ -372,7 +374,8 @@ main.dom.body.onkeydown = function(e) {
 
 ////// 在界面上放开某按键时 //////
 main.dom.body.onkeyup = function(e) {
-    if (main.dom.startButtons.style.display == 'block' || main.dom.levelChooseButtons.style.display == 'block') {
+    if (core.dom.startPanel.style.display == 'block' &&
+        (main.dom.startButtons.style.display == 'block' || main.dom.levelChooseButtons.style.display == 'block')) {
         if (e.keyCode == 38 || e.keyCode == 33) // up/pgup
             main.selectButton((main.selectedButton||0) - 1);
         else if (e.keyCode == 40 || e.keyCode == 34) // down/pgdn

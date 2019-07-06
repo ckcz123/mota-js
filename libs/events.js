@@ -528,6 +528,8 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
     core.stopAutomaticRoute();
     core.clearContinueAutomaticRoute();
     core.status.replay.animate = true;
+    clearInterval(core.interval.onDownInterval);
+    core.interval.onDownInterval = 'tmp';
 
     this._changeFloor_beforeChange(info, callback);
 }

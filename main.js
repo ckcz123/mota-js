@@ -642,7 +642,7 @@ main.statusBar.image.settings.onclick = function (e) {
 }
 
 ////// 点击工具栏时 //////
-main.dom.toolBar.onclick = function () {
+main.dom.hard.onclick = function () {
     if (core.isReplaying())
         return;
     main.core.control.setToolbarButton(!core.domStyle.toolbarBtn);

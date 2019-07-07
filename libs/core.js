@@ -72,7 +72,6 @@ function core() {
         'isChrome': false, // 是否是Chrome
         'supportCopy': false, // 是否支持复制到剪切板
         'useLocalForage': true,
-        'extendKeyboard': false,
 
         'fileInput': null, // FileInput
         'fileReader': null, // 是否支持FileReader
@@ -285,7 +284,6 @@ core.prototype._init_platform = function () {
     core.platform.isQQ = /QQ/i.test(navigator.userAgent);
     core.platform.isWeChat = /MicroMessenger/i.test(navigator.userAgent);
     this._init_checkLocalForage();
-    core.platform.extendKeyboard = core.getLocalStorage("extendKeyboard", false);
     if (window.FileReader) {
         core.platform.fileReader = new FileReader();
         core.platform.fileReader.onload = function () {

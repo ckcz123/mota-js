@@ -2465,7 +2465,7 @@ control.prototype.setToolbarButton = function (useButton) {
     }
 
     if (useButton == null) useButton = core.domStyle.toolbarBtn;
-    if (!core.domStyle.isVertical || !core.platform.extendKeyboard) useButton = false;
+    if (!core.domStyle.isVertical) useButton = false;
     core.domStyle.toolbarBtn = useButton;
 
     if (useButton) {

@@ -556,6 +556,42 @@ editor.prototype.exchangePos = function (startPos, endPos, callback) {
     });
 }
 
+editor.prototype.moveBgFg = function (startPos, endPos, name, callback) {
+    if (!startPos || !endPos || ["bgmap","fgmap"].indexOf(name)<0) return;
+    if (startPos.x == endPos.x && startPos.y == endPos.y) return;
+    editor[name][endPos.y][endPos.x] = editor[name][startPos.y][startPos.x];
+    editor[name][startPos.y][startPos.x] = 0;
+    editor.updateMap();
+    editor.file.saveFloorFile(function (err) {
+        if (err) {
+            printe(err);
+            throw(err)
+        }
+        ;printf('移动图块成功');
+        editor.drawPosSelection();
+        if (callback) callback();
+    });
+}
+
+editor.prototype.exchangeBgFg = function (startPos, endPos, name, callback) {
+    if (!startPos || !endPos || ["bgmap","fgmap"].indexOf(name)<0) return;
+    if (startPos.x == endPos.x && startPos.y == endPos.y) return;
+    var value = editor[name][endPos.y][endPos.x];
+    editor[name][endPos.y][endPos.x] = editor[name][startPos.y][startPos.x];
+    editor[name][startPos.y][startPos.x] = value;
+    editor.updateMap();
+    editor.file.saveFloorFile(function (err) {
+        if (err) {
+            printe(err);
+            throw(err)
+        }
+        ;printf('交换图块成功');
+        editor.drawPosSelection();
+        if (callback) callback();
+    });
+
+}
+
 editor.prototype.clearPos = function (clearPos, pos, callback) {
     var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
     pos = pos || editor.pos;

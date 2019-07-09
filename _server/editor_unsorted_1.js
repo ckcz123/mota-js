@@ -209,7 +209,10 @@ editor.constructor.prototype.listen=function () {
         if (!selectBox.isSelected()) {
             //tip.whichShow(1);
             // editor.movePos(startPos, endPos);
-            editor.exchangePos(startPos, endPos);
+            if (editor.layerMod == 'map')
+                editor.exchangePos(startPos, endPos);
+            else
+                editor.exchangeBgFg(startPos, endPos, editor.layerMod);
             startPos = endPos = null;
             uc.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
             return false;

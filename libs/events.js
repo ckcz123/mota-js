@@ -1077,6 +1077,21 @@ events.prototype._action_animate = function (data, x, y, prefix) {
     this.__action_doAsyncFunc(data.async, core.drawAnimate, data.name, data.loc[0], data.loc[1]);
 }
 
+events.prototype._action_setViewport = function (data, x, y, prefix) {
+    if (data.loc == null) {
+        core.drawHero();
+    }
+    else {
+        var loc = this.__action_getLoc(data.loc, x, y, prefix);
+        core.setViewport(32 * loc[0], 32 * loc[1]);
+    }
+    core.doAction();
+}
+
+events.prototype._action_moveViewport = function (data, x, y, prefix) {
+    this.__action_doAsyncFunc(data.async, core.moveViewport, data.steps, data.time);
+}
+
 events.prototype._action_move = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, x, y, prefix);
     this.__action_doAsyncFunc(data.async, core.moveBlock, loc[0], loc[1], data.steps, data.time, data.keep);
@@ -2268,7 +2283,7 @@ events.prototype._eventMoveHero_moving = function (step, moveSteps) {
         core.drawHero('leftFoot', 4 * o * step);
     }
     else if (step <= 8) {
-        core.drawHero('rightFoot', 4 * o * step);
+        core.drawHero('rightFoot', 4 * o * step);SGTM
     }
     if (step == 8) {
         core.setHeroLoc('x', x + o * core.utils.scan[direction].x, true);

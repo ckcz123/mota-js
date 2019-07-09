@@ -150,6 +150,8 @@ editor_blockly = function () {
       MotaActionBlocks['waitAsync_s'].xmlText(),
       MotaActionBlocks['vibrate_s'].xmlText(),
       MotaActionBlocks['animate_s'].xmlText(),
+      MotaActionBlocks['setViewport_s'].xmlText(),
+      MotaActionBlocks['moveViewport_s'].xmlText(),
       MotaActionBlocks['showStatusBar_s'].xmlText(),
       MotaActionBlocks['hideStatusBar_s'].xmlText(),
       MotaActionBlocks['setCurtain_0_s'].xmlText(),

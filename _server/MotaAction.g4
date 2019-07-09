@@ -293,6 +293,8 @@ action
     |   changeFloor_s
     |   changePos_0_s
     |   changePos_1_s
+    |   setViewport_s
+    |   moveViewport_s
     |   useItem_s
     |   openShop_s
     |   disableShop_s
@@ -1238,6 +1240,38 @@ if (EvalString_0) {
 }
 var async = Bool_0?', "async": true':'';
 var code = '{"type": "animate", "name": "'+IdString_0+'"'+EvalString_0+async+'},\n';
+return code;
+*/;
+
+setViewport_s
+    :   '设置视角' '左上角坐标' 'x' PosString? ',' 'y' PosString? Newline
+
+
+/* setViewport_s
+tooltip : setViewport: 设置视角
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=changepos%EF%BC%9A%E5%BD%93%E5%89%8D%E4%BD%8D%E7%BD%AE%E5%88%87%E6%8D%A2%E5%8B%87%E5%A3%AB%E8%BD%AC%E5%90%91
+default : ["",""]
+colour : this.soundColor
+var loc = '';
+if (PosString_0 && PosString_1) {
+    loc = ', "loc": ['+PosString_0+','+PosString_1+']';
+}
+var code = '{"type": "setViewport"'+loc+'},\n';
+return code;
+*/;
+
+moveViewport_s
+    :   '移动视角' '动画时间' Int? '不等待执行完毕' Bool BGNL? StepString Newline
+
+
+/* moveViewport_s
+tooltip : moveViewport：移动视角
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=movehero%EF%BC%9A%E7%A7%BB%E5%8A%A8%E5%8B%87%E5%A3%AB
+default : [300,false,"上右3下2左"]
+colour : this.soundColor
+Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
+Bool_0 = Bool_0?', "async": true':'';
+var code = '{"type": "moveViewport"'+Int_0+Bool_0+', "steps": '+JSON.stringify(StepString_0)+'},\n';
 return code;
 */;
 
@@ -2993,6 +3027,15 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['animate_s'].xmlText([
         data.name,animate_loc,data.async||false,this.next]);
       break;
+    case "setViewport": // 设置视角
+      data.loc = data.loc||['',''];
+      this.next = MotaActionBlocks['setViewport_s'].xmlText([
+        data.loc[0],data.loc[1],this.next]);
+      break;
+    case "moveViewport": // 移动视角
+      this.next = MotaActionBlocks['moveViewport_s'].xmlText([
+        data.time||0,data.async||false,this.StepString(data.steps),this.next]);
+      break;
     case "vibrate": // 画面震动
       this.next = MotaActionBlocks['vibrate_s'].xmlText([data.time||0, data.async||false, this.next]);
       break;
@@ -3547,7 +3590,7 @@ MotaActionFunctions.IdString_pre = function(IdString){
 
 MotaActionFunctions.PosString_pre = function(PosString){
   if (!PosString || /^-?\d+$/.test(PosString)) return PosString;
-  if (!(MotaActionFunctions.pattern.id.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ 和中文之外的字符,或者是没有以flag: 开头');
+  //if (!(MotaActionFunctions.pattern.id.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ 和中文之外的字符,或者是没有以flag: 开头');
   return '"'+PosString+'"';
 }
 

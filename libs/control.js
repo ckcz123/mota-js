@@ -779,6 +779,7 @@ control.prototype.drawHero = function (status, offset) {
     });
 
     core.control.updateViewport();
+    core.setGameCanvasTranslate('hero', 0, 0);
 }
 
 control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, offset) {
@@ -850,6 +851,48 @@ control.prototype.updateViewport = function() {
     });
     // ------ 路线
     core.relocateCanvas('route', core.status.automaticRoute.offsetX - core.bigmap.offsetX, core.status.automaticRoute.offsetY - core.bigmap.offsetY);
+}
+
+////// 设置视野范围 //////
+control.prototype.setViewport = function (x, y) {
+    core.bigmap.offsetX = core.clamp(x, 0, 32 * core.bigmap.width - core.__PIXELS__);
+    core.bigmap.offsetY = core.clamp(y, 0, 32 * core.bigmap.height - core.__PIXELS__);
+    this.updateViewport();
+    // ------ hero层也需要！
+    var hero_x = core.clamp((core.getHeroLoc('x') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.width-core.__PIXELS__);
+    var hero_y = core.clamp((core.getHeroLoc('y') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.height-core.__PIXELS__);
+    core.control.setGameCanvasTranslate('hero', hero_x - core.bigmap.offsetX, hero_y - core.bigmap.offsetY);
+}
+
+////// 移动视野范围 //////
+control.prototype.moveViewport = function (steps, time, callback) {
+    time = time || core.values.moveSpeed || 300;
+    var step = 0, moveSteps = (steps||[]).filter(function (t) {
+        return ['up','down','left','right'].indexOf(t)>=0;
+    });
+    var animate=window.setInterval(function() {
+        if (moveSteps.length==0) {
+            delete core.animateFrame.asyncId[animate];
+            clearInterval(animate);
+            if (callback) callback();
+        }
+        else {
+            if (core.control._moveViewport_moving(++step, moveSteps))
+                step = 0;
+        }
+    }, time / 16 / core.status.replay.speed);
+
+    core.animateFrame.asyncId[animate] = true;
+}
+
+control.prototype._moveViewport_moving = function (step, moveSteps) {
+    var direction = moveSteps[0], scan = core.utils.scan[direction];
+    core.setViewport(core.bigmap.offsetX + 2 * scan.x, core.bigmap.offsetY + 2 * scan.y);
+    if (step == 16) {
+        moveSteps.shift();
+        return true;
+    }
+    return false;
 }
 
 ////// 获得勇士面对位置的x坐标 //////

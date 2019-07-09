@@ -1030,8 +1030,10 @@ events.prototype._action_hide = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setBlock = function (data, x, y, prefix) {
-    var loc = this.__action_getLoc(data.loc, x, y, prefix);
-    core.setBlock(data.number, loc[0], loc[1], data.floorId);
+    data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    data.loc.forEach(function (t) {
+        core.setBlock(data.number, t[0], t[1], data.floorId);
+    });
     core.doAction();
 }
 
@@ -1052,8 +1054,10 @@ events.prototype._action_hideBgFgMap = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setBgFgBlock = function (data, x, y, prefix) {
-    var loc = this.__action_getLoc(data.loc, x, y, prefix);
-    core.setBgFgBlock(data.name, data.number, loc[0], loc[1], data.floorId);
+    data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    data.loc.forEach(function (t) {
+        core.setBgFgBlock(data.name, data.number, t[0], t[1], data.floorId);
+    });
     core.doAction();
 }
 

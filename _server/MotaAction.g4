@@ -756,7 +756,7 @@ return code;
 */;
 
 setBlock_s
-    :   '转变图块为' EvalString 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
+    :   '转变图块为' EvalString 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
     
 
 /* setBlock_s
@@ -765,8 +765,21 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setblock%EF%BC%9A%E
 colour : this.mapColor
 default : ["yellowDoor","","",""]
 var floorstr = '';
-if (PosString_0 && PosString_1) {
-    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+if (EvalString_1 && EvalString_2) {
+  var pattern1 = MotaActionFunctions.pattern.id;
+  if(pattern1.test(EvalString_1) || pattern1.test(EvalString_2)){
+    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
+    EvalString_2=MotaActionFunctions.PosString_pre(EvalString_2);
+    EvalString_1=[EvalString_1,EvalString_2]
+  } else {
+    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
+    if(!pattern2.test(EvalString_1) || !pattern2.test(EvalString_2))throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    EvalString_1=EvalString_1.split(',');
+    EvalString_2=EvalString_2.split(',');
+    if(EvalString_1.length!==EvalString_2.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    for(var ii=0;ii<EvalString_1.length;ii++)EvalString_1[ii]='['+EvalString_1[ii]+','+EvalString_2[ii]+']';
+  }
+  floorstr = ', "loc": ['+EvalString_1.join(',')+']';
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "setBlock", "number": "'+EvalString_0+'"'+floorstr+IdString_0+'},\n';
@@ -898,7 +911,7 @@ return code;
 */;
 
 setBgFgBlock_s
-    :   '转变图层块' Bg_Fg_List '为' EvalString 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
+    :   '转变图层块' Bg_Fg_List '为' EvalString 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
 
 
 /* setBgFgBlock_s
@@ -907,8 +920,21 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setblock%EF%BC%9A%E
 colour : this.mapColor
 default : ["bg","yellowDoor","","",""]
 var floorstr = '';
-if (PosString_0 && PosString_1) {
-    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+if (EvalString_1 && EvalString_2) {
+  var pattern1 = MotaActionFunctions.pattern.id;
+  if(pattern1.test(EvalString_1) || pattern1.test(EvalString_2)){
+    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
+    EvalString_2=MotaActionFunctions.PosString_pre(EvalString_2);
+    EvalString_1=[EvalString_1,EvalString_2]
+  } else {
+    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
+    if(!pattern2.test(EvalString_1) || !pattern2.test(EvalString_2))throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    EvalString_1=EvalString_1.split(',');
+    EvalString_2=EvalString_2.split(',');
+    if(EvalString_1.length!==EvalString_2.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    for(var ii=0;ii<EvalString_1.length;ii++)EvalString_1[ii]='['+EvalString_1[ii]+','+EvalString_2[ii]+']';
+  }
+  floorstr = ', "loc": ['+EvalString_1.join(',')+']';
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "setBgFgBlock", "name": "' + Bg_Fg_List_0 + '", "number": "'+EvalString_0+'"'+floorstr+IdString_0+'},\n';
@@ -2846,9 +2872,16 @@ ActionParser.prototype.parseAction = function() {
         x_str.join(','),y_str.join(','),data.floorId||'',data.time||0,data.async||false,this.next]);
       break;
     case "setBlock": // 设置图块
-      data.loc=data.loc||['',''];
+      data.loc=data.loc||[];
+      if (!(data.loc[0] instanceof Array))
+        data.loc = [data.loc];
+      var x_str=[],y_str=[];
+      data.loc.forEach(function (t) {
+        x_str.push(t[0]);
+        y_str.push(t[1]);
+      })
       this.next = MotaActionBlocks['setBlock_s'].xmlText([
-        data.number||0,data.loc[0],data.loc[1],data.floorId||'',this.next]);
+        data.number||0,x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
       break;
     case "showFloorImg": // 显示贴图
       data.loc=data.loc||[];
@@ -2899,9 +2932,16 @@ ActionParser.prototype.parseAction = function() {
         data.name||'bg', x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
       break;
     case "setBgFgBlock": // 设置图块
-      data.loc=data.loc||['',''];
+      data.loc=data.loc||[];
+      if (!(data.loc[0] instanceof Array))
+        data.loc = [data.loc];
+      var x_str=[],y_str=[];
+      data.loc.forEach(function (t) {
+        x_str.push(t[0]);
+        y_str.push(t[1]);
+      })
       this.next = MotaActionBlocks['setBgFgBlock_s'].xmlText([
-        data.name||"bg", data.number||0,data.loc[0],data.loc[1],data.floorId||'',this.next]);
+        data.name||'bg', data.number||0, x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
       break;
     case "setHeroIcon": // 改变勇士
       this.next = MotaActionBlocks['setHeroIcon_s'].xmlText([

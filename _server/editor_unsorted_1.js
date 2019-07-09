@@ -782,7 +782,10 @@ editor.constructor.prototype.listen=function () {
     var brushMod3=document.getElementById('brushMod3');
     if(brushMod3) {
         brushMod3.onchange=function(){
-            tip.showHelp(5)
+            // tip.showHelp(5)
+            tip.isSelectedBlock(false)
+            tip.msgs[11] = String('tileset贴图模式下可以按选中tileset素材，并在地图上拖动来一次绘制一个区域');
+            tip.whichShow(12);
             editor.brushMod=brushMod3.value;
         }
     }

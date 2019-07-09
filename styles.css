@@ -159,6 +159,11 @@
     border-radius: 6px;
 }
 
+.onChoiceAnimate {
+    animation: 2s ease-in-out 0s infinite normal none running;
+    animation-name: onChoice;
+}
+
 #floorMsgGroup {
     top: 3px;
     right: 3px;
@@ -375,3 +380,21 @@ p#name {
     float:right;
     margin-right: 10%;
 }
+
+#_selector, #_uievent_selector {
+    animation: 2s ease-in-out 0s infinite normal none running;
+    animation-name: selector;
+}
+
+@-webkit-keyframes selector {
+    0% { opacity: 0.95; }
+    50% { opacity: 0.55; }
+    100% { opacity: 0.95; }
+}
+
+@keyframes selector {
+    0% { opacity: 0.95; }
+    50% { opacity: 0.55; }
+    100% { opacity: 0.95; }
+}
+

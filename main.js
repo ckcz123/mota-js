@@ -216,6 +216,7 @@ main.prototype.init = function (mode, callback) {
             })(span,value[1]);
             main.dom.levelChooseButtons.appendChild(span);
         });
+        main.createOnChoiceAnimation();
         
         main.loadJs('libs', main.loadList, function () {
             main.core = core;
@@ -328,14 +329,32 @@ main.prototype.log = function (e) {
     }
 }
 
+main.prototype.createOnChoiceAnimation = function () {
+    var borderColor = main.dom.startButtonGroup.style.caretColor || "rgb(255, 215, 0)";
+    // get rgb value
+    var rgb = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(,\s*\d+\s*)?\)$/.exec(borderColor);
+    if (rgb != null) {
+        var value = rgb[1] + ", " + rgb[2] + ", " + rgb[3];
+        var style = document.createElement("style");
+        style.type = 'text/css';
+        var keyFrames = "onChoice { " +
+            "0% { border-color: rgba("+value+", 0.9); } " +
+            "50% { border-color: rgba("+value+", 0.3); } " +
+            "100% { border-color: rgba("+value+", 0.9); } " +
+            "}";
+        style.innerHTML = "@-webkit-keyframes " + keyFrames + " @keyframes " + keyFrames;
+        document.body.appendChild(style);
+    }
+}
+
 ////// 选项 //////
 main.prototype.selectButton = function (index) {
     var select = function (children) {
         index = (index + children.length) % children.length;
         for (var i = 0;i < children.length; ++i) {
-            children[i].style.borderColor = 'transparent';
+            children[i].classList.remove("onChoiceAnimate");
         }
-        children[index].style.borderColor = main.dom.startButtonGroup.style.caretColor || '#FFD700';
+        children[index].classList.add("onChoiceAnimate");
         if (main.selectedButton == index) {
             children[index].click();
         }

@@ -19,7 +19,7 @@ control.prototype._init = function () {
     this.registerAnimationFrame("totalTime", false, this._animationFrame_totalTime);
     this.registerAnimationFrame("autoSave", true, this._animationFrame_autoSave);
     this.registerAnimationFrame("globalAnimate", true, this._animationFrame_globalAnimate);
-    this.registerAnimationFrame("selector", false, this._animationFrame_selector);
+    //this.registerAnimationFrame("selector", false, this._animationFrame_selector);
     this.registerAnimationFrame("animate", true, this._animationFrame_animate);
     this.registerAnimationFrame("heroMoving", true, this._animationFrame_heroMoving);
     this.registerAnimationFrame("weather", true, this._animationFrame_weather);

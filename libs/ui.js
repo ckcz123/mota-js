@@ -640,7 +640,6 @@ ui.prototype._getPosition = function (content) {
 ui.prototype.drawWindowSelector = function(background, x, y, w, h) {
     w = Math.round(w), h = Math.round(h);
     var ctx = core.ui.createCanvas("_selector", x, y, w, h, 165);
-    ctx.canvas.style.opacity = 0.8;
     this._drawSelector(ctx, background, w, h);
 }
 
@@ -662,7 +661,6 @@ ui.prototype._uievent_drawSelector = function (data) {
     var z = 136;
     if (core.dymCanvas.uievent) z = (parseInt(core.dymCanvas.uievent.canvas.style.zIndex) || 135) + 1;
     var ctx = core.createCanvas('_uievent_selector', x, y, w, h, z);
-    ctx.canvas.style.opacity = 0.8;
     this._drawSelector(ctx, background, w, h);
 }
 

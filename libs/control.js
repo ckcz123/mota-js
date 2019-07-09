@@ -19,7 +19,6 @@ control.prototype._init = function () {
     this.registerAnimationFrame("totalTime", false, this._animationFrame_totalTime);
     this.registerAnimationFrame("autoSave", true, this._animationFrame_autoSave);
     this.registerAnimationFrame("globalAnimate", true, this._animationFrame_globalAnimate);
-    //this.registerAnimationFrame("selector", false, this._animationFrame_selector);
     this.registerAnimationFrame("animate", true, this._animationFrame_animate);
     this.registerAnimationFrame("heroMoving", true, this._animationFrame_heroMoving);
     this.registerAnimationFrame("weather", true, this._animationFrame_weather);
@@ -149,23 +148,6 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
     // Box animate
     core.drawBoxAnimate();
     core.animateFrame.globalTime = timestamp;
-}
-
-control.prototype._animationFrame_selector = function (timestamp) {
-    if (timestamp - core.animateFrame.selectorTime <= 20) return;
-    var opacity = null;
-    if (core.dymCanvas._selector) opacity = parseFloat(core.dymCanvas._selector.canvas.style.opacity);
-    else if (core.dymCanvas._uievent_selector) opacity = parseFloat(core.dymCanvas._uievent_selector.canvas.style.opacity);
-    if (!core.isset(opacity)) return;
-    if (core.animateFrame.selectorUp)
-        opacity += 0.02;
-    else
-        opacity -= 0.02;
-    if (opacity > 0.95 || opacity < 0.55)
-        core.animateFrame.selectorUp = !core.animateFrame.selectorUp;
-    core.setOpacity("_selector", opacity);
-    core.setOpacity("_uievent_selector", opacity);
-    core.animateFrame.selectorTime = timestamp;
 }
 
 control.prototype._animationFrame_animate = function (timestamp) {
@@ -2648,6 +2630,11 @@ control.prototype._resize_canvas = function (obj) {
         canvas.style.left = parseFloat(canvas.getAttribute("_left")) * core.domStyle.scale + "px";
         canvas.style.top = parseFloat(canvas.getAttribute("_top")) * core.domStyle.scale + "px";
     }
+    // resize next
+    main.dom.next.style.width = main.dom.next.style.height = 5 * core.domStyle.scale + "px";
+    main.dom.next.style.borderBottomWidth = main.dom.next.style.borderRightWidth = 4 * core.domStyle.scale + "px";
+
+
 }
 
 control.prototype._resize_statusBar = function (obj) {

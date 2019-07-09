@@ -74,7 +74,8 @@ function main() {
         'inputMessage': document.getElementById('inputMessage'),
         'inputBox': document.getElementById('inputBox'),
         'inputYes': document.getElementById('inputYes'),
-        'inputNo': document.getElementById('inputNo')
+        'inputNo': document.getElementById('inputNo'),
+        'next': document.getElementById('next')
     };
     this.mode = 'play';
     this.loadList = [

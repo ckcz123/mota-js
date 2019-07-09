@@ -160,8 +160,7 @@
 }
 
 .onChoiceAnimate {
-    animation: 2s ease-in-out 0s infinite normal none running;
-    animation-name: onChoice;
+    animation: onChoice 2s ease-in-out 0s infinite normal none running;
 }
 
 #floorMsgGroup {
@@ -382,8 +381,7 @@ p#name {
 }
 
 #_selector, #_uievent_selector {
-    animation: 2s ease-in-out 0s infinite normal none running;
-    animation-name: selector;
+    animation: selector 2s ease-in-out 0s infinite normal none running;
 }
 
 @-webkit-keyframes selector {
@@ -398,3 +396,31 @@ p#name {
     100% { opacity: 0.95; }
 }
 
+#next {
+    width: 5px;
+    height: 5px;
+    display: none;
+    position: absolute;
+    transform: rotate(45deg);
+    border-bottom-width: 4px;
+    border-bottom-style: solid;
+    border-right-width: 4px;
+    border-right-style: solid;
+    -webkit-animation: next .5s ease-in-out alternate infinite;
+    animation: next .5s ease-in-out alternate infinite;
+    left: 0;
+    top: 0;
+    opacity: 0.7;
+    z-index: 169;
+}
+
+@-webkit-keyframes next {
+    100% {
+        transform: rotate(45deg) translate(-3px, -3px);
+    }
+}
+@keyframes next {
+    100% {
+        transform: rotate(45deg) translate(-3px, -3px);
+    }
+}

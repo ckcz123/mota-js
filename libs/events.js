@@ -1030,8 +1030,10 @@ events.prototype._action_hide = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setBlock = function (data, x, y, prefix) {
-    var loc = this.__action_getLoc(data.loc, x, y, prefix);
-    core.setBlock(data.number, loc[0], loc[1], data.floorId);
+    data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    data.loc.forEach(function (t) {
+        core.setBlock(data.number, t[0], t[1], data.floorId);
+    });
     core.doAction();
 }
 
@@ -1052,8 +1054,10 @@ events.prototype._action_hideBgFgMap = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setBgFgBlock = function (data, x, y, prefix) {
-    var loc = this.__action_getLoc(data.loc, x, y, prefix);
-    core.setBgFgBlock(data.name, data.number, loc[0], loc[1], data.floorId);
+    data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    data.loc.forEach(function (t) {
+        core.setBgFgBlock(data.name, data.number, t[0], t[1], data.floorId);
+    });
     core.doAction();
 }
 
@@ -1071,6 +1075,21 @@ events.prototype._action_animate = function (data, x, y, prefix) {
     if (data.loc == 'hero') data.loc = [core.getHeroLoc('x'), core.getHeroLoc('y')];
     else data.loc = this.__action_getLoc(data.loc, x, y, prefix);
     this.__action_doAsyncFunc(data.async, core.drawAnimate, data.name, data.loc[0], data.loc[1]);
+}
+
+events.prototype._action_setViewport = function (data, x, y, prefix) {
+    if (data.loc == null) {
+        core.drawHero();
+    }
+    else {
+        var loc = this.__action_getLoc(data.loc, x, y, prefix);
+        core.setViewport(32 * loc[0], 32 * loc[1]);
+    }
+    core.doAction();
+}
+
+events.prototype._action_moveViewport = function (data, x, y, prefix) {
+    this.__action_doAsyncFunc(data.async, core.moveViewport, data.steps, data.time);
 }
 
 events.prototype._action_move = function (data, x, y, prefix) {
@@ -2264,7 +2283,7 @@ events.prototype._eventMoveHero_moving = function (step, moveSteps) {
         core.drawHero('leftFoot', 4 * o * step);
     }
     else if (step <= 8) {
-        core.drawHero('rightFoot', 4 * o * step);
+        core.drawHero('rightFoot', 4 * o * step);SGTM
     }
     if (step == 8) {
         core.setHeroLoc('x', x + o * core.utils.scan[direction].x, true);

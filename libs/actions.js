@@ -1934,8 +1934,6 @@ actions.prototype._clickSwitchs = function (x, y) {
             case 7:
                 return this._clickSwitchs_clickMove();
             case 8:
-                return this._clickSwitchs_ExtendKeyboard();
-            case 9:
                 core.status.event.selection = 0;
                 core.ui.drawSettings();
                 break;
@@ -1997,13 +1995,6 @@ actions.prototype._clickSwitchs_localForage = function () {
 actions.prototype._clickSwitchs_clickMove = function () {
     if (core.hasFlag('__noClickMove__')) core.removeFlag('__noClickMove__');
     else core.setFlag('__noClickMove__', true);
-    core.ui.drawSwitchs();
-}
-
-actions.prototype._clickSwitchs_ExtendKeyboard = function () {
-    core.platform.extendKeyboard = !core.platform.extendKeyboard;
-    core.setLocalStorage('extendKeyboard', core.platform.extendKeyboard);
-    core.updateStatusBar();
     core.ui.drawSwitchs();
 }
 

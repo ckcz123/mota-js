@@ -74,7 +74,8 @@ function main() {
         'inputMessage': document.getElementById('inputMessage'),
         'inputBox': document.getElementById('inputBox'),
         'inputYes': document.getElementById('inputYes'),
-        'inputNo': document.getElementById('inputNo')
+        'inputNo': document.getElementById('inputNo'),
+        'next': document.getElementById('next')
     };
     this.mode = 'play';
     this.loadList = [
@@ -216,6 +217,7 @@ main.prototype.init = function (mode, callback) {
             })(span,value[1]);
             main.dom.levelChooseButtons.appendChild(span);
         });
+        main.createOnChoiceAnimation();
         
         main.loadJs('libs', main.loadList, function () {
             main.core = core;
@@ -328,14 +330,32 @@ main.prototype.log = function (e) {
     }
 }
 
+main.prototype.createOnChoiceAnimation = function () {
+    var borderColor = main.dom.startButtonGroup.style.caretColor || "rgb(255, 215, 0)";
+    // get rgb value
+    var rgb = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(,\s*\d+\s*)?\)$/.exec(borderColor);
+    if (rgb != null) {
+        var value = rgb[1] + ", " + rgb[2] + ", " + rgb[3];
+        var style = document.createElement("style");
+        style.type = 'text/css';
+        var keyFrames = "onChoice { " +
+            "0% { border-color: rgba("+value+", 0.9); } " +
+            "50% { border-color: rgba("+value+", 0.3); } " +
+            "100% { border-color: rgba("+value+", 0.9); } " +
+            "}";
+        style.innerHTML = "@-webkit-keyframes " + keyFrames + " @keyframes " + keyFrames;
+        document.body.appendChild(style);
+    }
+}
+
 ////// 选项 //////
 main.prototype.selectButton = function (index) {
     var select = function (children) {
         index = (index + children.length) % children.length;
         for (var i = 0;i < children.length; ++i) {
-            children[i].style.borderColor = 'transparent';
+            children[i].classList.remove("onChoiceAnimate");
         }
-        children[index].style.borderColor = main.dom.startButtonGroup.style.caretColor || '#FFD700';
+        children[index].classList.add("onChoiceAnimate");
         if (main.selectedButton == index) {
             children[index].click();
         }
@@ -642,7 +662,7 @@ main.statusBar.image.settings.onclick = function (e) {
 }
 
 ////// 点击工具栏时 //////
-main.dom.toolBar.onclick = function () {
+main.dom.hard.onclick = function () {
     if (core.isReplaying())
         return;
     main.core.control.setToolbarButton(!core.domStyle.toolbarBtn);

@@ -462,7 +462,7 @@ events.prototype.getItem = function (id, num, x, y, callback) {
     // --- 首次获得道具的提示
     if (!core.hasFlag("__itemHint__")) core.setFlag("__itemHint__", []);
     var itemHint = core.getFlag("__itemHint__");
-    if (itemHint.indexOf(id) < 0 && itemCls != 'items') {
+    if (core.flags.itemFirstText && itemHint.indexOf(id) < 0 && itemCls != 'items') {
         var hint = core.material.items[id].text || "该道具暂无描述";
         try {
             hint = core.replaceText(hint);
@@ -2283,7 +2283,7 @@ events.prototype._eventMoveHero_moving = function (step, moveSteps) {
         core.drawHero('leftFoot', 4 * o * step);
     }
     else if (step <= 8) {
-        core.drawHero('rightFoot', 4 * o * step);SGTM
+        core.drawHero('rightFoot', 4 * o * step);
     }
     if (step == 8) {
         core.setHeroLoc('x', x + o * core.utils.scan[direction].x, true);

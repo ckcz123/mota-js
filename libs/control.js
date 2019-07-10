@@ -2368,6 +2368,7 @@ control.prototype._updateStatusBar_setToolboxIcon = function () {
 }
 
 control.prototype.showStatusBar = function () {
+    if (main.mode == 'editor') return;
     if (core.domStyle.showStatusBar) return;
     var statusItems = core.dom.status;
     core.domStyle.showStatusBar = true;
@@ -2380,6 +2381,8 @@ control.prototype.showStatusBar = function () {
 }
 
 control.prototype.hideStatusBar = function (showToolbox) {
+    if (main.mode == 'editor') return;
+
     // 如果原本就是隐藏的，则先显示
     if (!core.domStyle.showStatusBar)
         this.showStatusBar();

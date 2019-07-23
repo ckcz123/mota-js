@@ -762,7 +762,7 @@ function omitedcheckUpdateFunction(event) {
         "closeDoor_s": ["PosString_0", "PosString_1"],
         "show_s": ["EvalString_0", "EvalString_1", "IdString_0"],
         "hide_s": ["EvalString_0", "EvalString_1", "IdString_0"],
-        "setBlock_s": ["PosString_0", "PosString_1", "IdString_0"],
+        "setBlock_s": ["EvalString_1", "EvalString_2", "IdString_0"],
         "move_s": ["PosString_0", "PosString_1"],
         "jump_s": ["PosString_2", "PosString_3"], // 跳跃暂时只考虑终点
         "showBgFgMap_s": ["EvalString_0", "EvalString_1", "IdString_0"],
@@ -772,7 +772,8 @@ function omitedcheckUpdateFunction(event) {
         "hideFloorImg_s": ["EvalString_0", "EvalString_1", "IdString_0"],
         "trigger_s": ["PosString_0", "PosString_1"],
         "insert_2_s": ["PosString_0", "PosString_1", "IdString_0"],
-        "animate_s": ["EvalString_0", "EvalString_0"]
+        "animate_s": ["EvalString_0", "EvalString_0"],
+        "setViewport_s": ["PosString_0", "PosString_1"]
     }
 
     editor_blockly.selectPoint = function () {

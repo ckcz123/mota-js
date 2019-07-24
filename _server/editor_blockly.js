@@ -948,6 +948,17 @@ Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
         }
     }
     else {
+
+        htmlInput.onkeydown = function (e) {
+            if (e.keyCode == 13 && awesomplete.opened && awesomplete.selected) {
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                awesomplete.select();
+                return false;
+            }
+        }
+
         // --- awesomplete
         var awesomplete = new Awesomplete(htmlInput, {
             minChars: 4,

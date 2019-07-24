@@ -19,7 +19,6 @@ control.prototype._init = function () {
     this.registerAnimationFrame("totalTime", false, this._animationFrame_totalTime);
     this.registerAnimationFrame("autoSave", true, this._animationFrame_autoSave);
     this.registerAnimationFrame("globalAnimate", true, this._animationFrame_globalAnimate);
-    this.registerAnimationFrame("selector", false, this._animationFrame_selector);
     this.registerAnimationFrame("animate", true, this._animationFrame_animate);
     this.registerAnimationFrame("heroMoving", true, this._animationFrame_heroMoving);
     this.registerAnimationFrame("weather", true, this._animationFrame_weather);
@@ -149,23 +148,6 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
     // Box animate
     core.drawBoxAnimate();
     core.animateFrame.globalTime = timestamp;
-}
-
-control.prototype._animationFrame_selector = function (timestamp) {
-    if (timestamp - core.animateFrame.selectorTime <= 20) return;
-    var opacity = null;
-    if (core.dymCanvas._selector) opacity = parseFloat(core.dymCanvas._selector.canvas.style.opacity);
-    else if (core.dymCanvas._uievent_selector) opacity = parseFloat(core.dymCanvas._uievent_selector.canvas.style.opacity);
-    if (!core.isset(opacity)) return;
-    if (core.animateFrame.selectorUp)
-        opacity += 0.02;
-    else
-        opacity -= 0.02;
-    if (opacity > 0.95 || opacity < 0.55)
-        core.animateFrame.selectorUp = !core.animateFrame.selectorUp;
-    core.setOpacity("_selector", opacity);
-    core.setOpacity("_uievent_selector", opacity);
-    core.animateFrame.selectorTime = timestamp;
 }
 
 control.prototype._animationFrame_animate = function (timestamp) {
@@ -797,6 +779,7 @@ control.prototype.drawHero = function (status, offset) {
     });
 
     core.control.updateViewport();
+    core.setGameCanvasTranslate('hero', 0, 0);
 }
 
 control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, offset) {
@@ -868,6 +851,48 @@ control.prototype.updateViewport = function() {
     });
     // ------ 路线
     core.relocateCanvas('route', core.status.automaticRoute.offsetX - core.bigmap.offsetX, core.status.automaticRoute.offsetY - core.bigmap.offsetY);
+}
+
+////// 设置视野范围 //////
+control.prototype.setViewport = function (x, y) {
+    core.bigmap.offsetX = core.clamp(x, 0, 32 * core.bigmap.width - core.__PIXELS__);
+    core.bigmap.offsetY = core.clamp(y, 0, 32 * core.bigmap.height - core.__PIXELS__);
+    this.updateViewport();
+    // ------ hero层也需要！
+    var hero_x = core.clamp((core.getHeroLoc('x') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.width-core.__PIXELS__);
+    var hero_y = core.clamp((core.getHeroLoc('y') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.height-core.__PIXELS__);
+    core.control.setGameCanvasTranslate('hero', hero_x - core.bigmap.offsetX, hero_y - core.bigmap.offsetY);
+}
+
+////// 移动视野范围 //////
+control.prototype.moveViewport = function (steps, time, callback) {
+    time = time || core.values.moveSpeed || 300;
+    var step = 0, moveSteps = (steps||[]).filter(function (t) {
+        return ['up','down','left','right'].indexOf(t)>=0;
+    });
+    var animate=window.setInterval(function() {
+        if (moveSteps.length==0) {
+            delete core.animateFrame.asyncId[animate];
+            clearInterval(animate);
+            if (callback) callback();
+        }
+        else {
+            if (core.control._moveViewport_moving(++step, moveSteps))
+                step = 0;
+        }
+    }, time / 16 / core.status.replay.speed);
+
+    core.animateFrame.asyncId[animate] = true;
+}
+
+control.prototype._moveViewport_moving = function (step, moveSteps) {
+    var direction = moveSteps[0], scan = core.utils.scan[direction];
+    core.setViewport(core.bigmap.offsetX + 2 * scan.x, core.bigmap.offsetY + 2 * scan.y);
+    if (step == 16) {
+        moveSteps.shift();
+        return true;
+    }
+    return false;
 }
 
 ////// 获得勇士面对位置的x坐标 //////
@@ -1211,7 +1236,7 @@ control.prototype.bookReplay = function () {
 
     // 从“浏览地图”页面打开
     if (core.status.event.id=='viewMaps')
-        core.status.event.selection = core.status.event.data;
+        core.status.event.ui = core.status.event.data;
 
     core.lockControl();
     core.status.event.id='book';
@@ -2343,6 +2368,7 @@ control.prototype._updateStatusBar_setToolboxIcon = function () {
 }
 
 control.prototype.showStatusBar = function () {
+    if (main.mode == 'editor') return;
     if (core.domStyle.showStatusBar) return;
     var statusItems = core.dom.status;
     core.domStyle.showStatusBar = true;
@@ -2355,9 +2381,12 @@ control.prototype.showStatusBar = function () {
 }
 
 control.prototype.hideStatusBar = function (showToolbox) {
+    if (main.mode == 'editor') return;
+
     // 如果原本就是隐藏的，则先显示
     if (!core.domStyle.showStatusBar)
         this.showStatusBar();
+    if (core.isReplaying()) showToolbox = true;
 
     var statusItems = core.dom.status, toolItems = core.dom.tools;
     core.domStyle.showStatusBar = false;
@@ -2465,7 +2494,7 @@ control.prototype.setToolbarButton = function (useButton) {
     }
 
     if (useButton == null) useButton = core.domStyle.toolbarBtn;
-    if (!core.domStyle.isVertical || !core.platform.extendKeyboard) useButton = false;
+    if (!core.domStyle.isVertical || core.isReplaying()) useButton = false;
     core.domStyle.toolbarBtn = useButton;
 
     if (useButton) {
@@ -2648,6 +2677,11 @@ control.prototype._resize_canvas = function (obj) {
         canvas.style.left = parseFloat(canvas.getAttribute("_left")) * core.domStyle.scale + "px";
         canvas.style.top = parseFloat(canvas.getAttribute("_top")) * core.domStyle.scale + "px";
     }
+    // resize next
+    main.dom.next.style.width = main.dom.next.style.height = 5 * core.domStyle.scale + "px";
+    main.dom.next.style.borderBottomWidth = main.dom.next.style.borderRightWidth = 4 * core.domStyle.scale + "px";
+
+
 }
 
 control.prototype._resize_statusBar = function (obj) {

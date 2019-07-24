@@ -159,6 +159,10 @@
     border-radius: 6px;
 }
 
+.onChoiceAnimate {
+    animation: onChoice 2s ease-in-out 0s infinite normal none running;
+}
+
 #floorMsgGroup {
     top: 3px;
     right: 3px;
@@ -374,4 +378,49 @@ p#name {
 #inputNo {
     float:right;
     margin-right: 10%;
+}
+
+#_selector, #_uievent_selector {
+    animation: selector 2s ease-in-out 0s infinite normal none running;
+}
+
+@-webkit-keyframes selector {
+    0% { opacity: 0.95; }
+    50% { opacity: 0.55; }
+    100% { opacity: 0.95; }
+}
+
+@keyframes selector {
+    0% { opacity: 0.95; }
+    50% { opacity: 0.55; }
+    100% { opacity: 0.95; }
+}
+
+#next {
+    width: 5px;
+    height: 5px;
+    display: none;
+    position: absolute;
+    transform: rotate(45deg);
+    border-bottom-width: 4px;
+    border-bottom-style: solid;
+    border-right-width: 4px;
+    border-right-style: solid;
+    -webkit-animation: next .5s ease-in-out alternate infinite;
+    animation: next .5s ease-in-out alternate infinite;
+    left: 0;
+    top: 0;
+    opacity: 0.7;
+    z-index: 169;
+}
+
+@-webkit-keyframes next {
+    100% {
+        transform: rotate(45deg) translate(-3px, -3px);
+    }
+}
+@keyframes next {
+    100% {
+        transform: rotate(45deg) translate(-3px, -3px);
+    }
 }

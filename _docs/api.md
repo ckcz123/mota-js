@@ -57,7 +57,6 @@ core.platform.isPC    （是否是电脑端）
 core.platform.isAndroid    （是否是安卓端）
 core.platform.isIOS    （是否是iOS端）
 core.platform.useLocalForage    （是否开启了新版存档）
-core.platform.extendKeyBoard    （是否开启了拓展键盘）
 
 
 core.domStyle

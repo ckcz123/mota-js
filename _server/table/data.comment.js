@@ -554,10 +554,16 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_data": "如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙"
 				},
 				"steelDoorWithoutKey": {
-					"_left": true,
+					"_leaf": true,
 					"_type": "checkbox",
 					"_bool": "bool",
 					"_data": "铁门是否不需要钥匙开启。如果此项为true，则无需钥匙也可以开铁门。"
+				},
+				"itemFirstText": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_bool": "bool",
+					"_data": "首次获得道具是否提示"
 				},
 				"equipment": {
 					"_leaf": true,

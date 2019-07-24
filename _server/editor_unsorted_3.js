@@ -496,7 +496,7 @@ uievent.setPoint = function (floorId, x, y) {
     uievent.values.floorId = floorId;
     uievent.elements.selectFloor.value = floorId;
     uievent.values.x = x != null ? x : ( uievent.values.x || 0);
-    uievent.values.y = y != null ? y : ( uievent.values.x || 0);
+    uievent.values.y = y != null ? y : ( uievent.values.y || 0);
     uievent.values.width = core.floors[uievent.values.floorId].width || core.__SIZE__;
     uievent.values.height = core.floors[uievent.values.floorId].height || core.__SIZE__;
     uievent.values.left = core.clamp(uievent.values.x - core.__HALF_SIZE__, 0, uievent.values.width - core.__SIZE__);

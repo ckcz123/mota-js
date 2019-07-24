@@ -452,6 +452,7 @@ ui.prototype.closePanel = function () {
 ui.prototype.clearUI = function () {
     core.status.boxAnimateObjs = [];
     if (core.dymCanvas._selector) core.deleteCanvas("_selector");
+    main.dom.next.style.display = 'none';
     core.clearMap('ui');
     core.setAlpha('ui', 1);
 }
@@ -640,7 +641,6 @@ ui.prototype._getPosition = function (content) {
 ui.prototype.drawWindowSelector = function(background, x, y, w, h) {
     w = Math.round(w), h = Math.round(h);
     var ctx = core.ui.createCanvas("_selector", x, y, w, h, 165);
-    ctx.canvas.style.opacity = 0.8;
     this._drawSelector(ctx, background, w, h);
 }
 
@@ -662,7 +662,6 @@ ui.prototype._uievent_drawSelector = function (data) {
     var z = 136;
     if (core.dymCanvas.uievent) z = (parseInt(core.dymCanvas.uievent.canvas.style.zIndex) || 135) + 1;
     var ctx = core.createCanvas('_uievent_selector', x, y, w, h, z);
-    ctx.canvas.style.opacity = 0.8;
     this._drawSelector(ctx, background, w, h);
 }
 
@@ -1119,10 +1118,20 @@ ui.prototype.drawTextBox = function(content, showAll) {
     var content_top = this._drawTextBox_drawTitleAndIcon(titleInfo, hPos, vPos, alpha);
 
     // Step 5: 绘制正文
-    return this.drawTextContent('ui', content, {
+    var config = this.drawTextContent('ui', content, {
         left: hPos.content_left, top: content_top, maxWidth: hPos.validWidth,
         lineHeight: vPos.lineHeight, time: (showAll || textAttribute.time<=0 || core.status.event.id!='action')?0:textAttribute.time
     });
+
+    // Step 6: 绘制光标
+    main.dom.next.style.display = 'block';
+    main.dom.next.style.borderRightColor = main.dom.next.style.borderBottomColor = core.arrayToRGB(textAttribute.text);
+    main.dom.next.style.top = (vPos.bottom - 20) * core.domStyle.scale + "px";
+    var left = (hPos.left + hPos.right) / 2;
+    if (pInfo.position == 'up' && pInfo.px != null && Math.abs(pInfo.px * 32 + 16 - left) < 50)
+        left = hPos.right - 64;
+    main.dom.next.style.left = left * core.domStyle.scale + "px";
+    return config;
 }
 
 ui.prototype._drawTextBox_drawImages = function (content) {
@@ -1170,7 +1179,7 @@ ui.prototype._drawTextBox_getHorizontalPosition = function (content, titleInfo, 
 ui.prototype._drawTextBox_getVerticalPosition = function (content, titleInfo, posInfo, validWidth) {
     var textAttribute = core.status.textAttribute || core.initStatus.textAttribute;
     var lineHeight = textAttribute.textfont + 6;
-    var height = 30 + this.getTextContentHeight(content, {
+    var height = 45 + this.getTextContentHeight(content, {
         lineHeight: lineHeight, maxWidth: validWidth
     });
     if (titleInfo.title) height += textAttribute.titlefont + 5;
@@ -1507,7 +1516,6 @@ ui.prototype.drawSwitchs = function() {
         "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
         "新版存档： "+(core.platform.useLocalForage ? "[ON]":"[OFF]"),
         "单击瞬移： "+(!core.hasFlag("__noClickMove__") ? "[ON]":"[OFF]"),
-        "拓展键盘： "+(core.platform.extendKeyboard ? "[ON]":"[OFF]"),
         "返回主菜单"
     ];
     this.drawChoices(null, choices);

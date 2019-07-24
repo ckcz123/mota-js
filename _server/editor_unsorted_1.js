@@ -209,7 +209,10 @@ editor.constructor.prototype.listen=function () {
         if (!selectBox.isSelected()) {
             //tip.whichShow(1);
             // editor.movePos(startPos, endPos);
-            editor.exchangePos(startPos, endPos);
+            if (editor.layerMod == 'map')
+                editor.exchangePos(startPos, endPos);
+            else
+                editor.exchangeBgFg(startPos, endPos, editor.layerMod);
             startPos = endPos = null;
             uc.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
             return false;
@@ -779,7 +782,10 @@ editor.constructor.prototype.listen=function () {
     var brushMod3=document.getElementById('brushMod3');
     if(brushMod3) {
         brushMod3.onchange=function(){
-            tip.showHelp(5)
+            // tip.showHelp(5)
+            tip.isSelectedBlock(false)
+            tip.msgs[11] = String('tileset贴图模式下可以按选中tileset素材，并在地图上拖动来一次绘制一个区域');
+            tip.whichShow(12);
             editor.brushMod=brushMod3.value;
         }
     }

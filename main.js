@@ -403,6 +403,9 @@ main.dom.body.onkeyup = function(e) {
                 main.selectButton((main.selectedButton||0) + 1);
             else if (e.keyCode == 67 || e.keyCode == 13 || e.keyCode == 32) // C/Enter/Space
                 main.selectButton(main.selectedButton);
+            else if (e.keyCode == 27 && main.dom.levelChooseButtons.style.display == 'block') { // ESC
+                main.core.showStartAnimate(true);
+            }
             e.stopPropagation();
             return;
         }

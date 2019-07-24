@@ -1236,7 +1236,7 @@ control.prototype.bookReplay = function () {
 
     // 从“浏览地图”页面打开
     if (core.status.event.id=='viewMaps')
-        core.status.event.selection = core.status.event.data;
+        core.status.event.ui = core.status.event.data;
 
     core.lockControl();
     core.status.event.id='book';
@@ -2386,6 +2386,7 @@ control.prototype.hideStatusBar = function (showToolbox) {
     // 如果原本就是隐藏的，则先显示
     if (!core.domStyle.showStatusBar)
         this.showStatusBar();
+    if (core.isReplaying()) showToolbox = true;
 
     var statusItems = core.dom.status, toolItems = core.dom.tools;
     core.domStyle.showStatusBar = false;
@@ -2493,7 +2494,7 @@ control.prototype.setToolbarButton = function (useButton) {
     }
 
     if (useButton == null) useButton = core.domStyle.toolbarBtn;
-    if (!core.domStyle.isVertical) useButton = false;
+    if (!core.domStyle.isVertical || core.isReplaying()) useButton = false;
     core.domStyle.toolbarBtn = useButton;
 
     if (useButton) {

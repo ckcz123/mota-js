@@ -15,6 +15,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.played = true;
 	// 初始化人物，图标，统计信息
 	core.status.hero = core.clone(hero);
+	window.flags = core.status.hero.flags;
 	core.events.setHeroIcon(core.getFlag('heroIcon', 'hero.png'), true);
 	core.control._initStatistics(core.animateFrame.totalTime);
 	core.status.hero.statistics.totalTime = core.animateFrame.totalTime =
@@ -112,16 +113,19 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// ---------- 此时还没有进行切换，当前floorId还是原来的 ---------- //
 	var currentId = core.status.floorId || null; // 获得当前的floorId，可能为null
+	if (!core.hasFlag("__leaveLoc__")) core.setFlag("__leaveLoc__", {});
+	if (currentId != null) core.getFlag("__leaveLoc__")[currentId] = core.status.hero.loc;
+
 	// 可以对currentId进行判定，比如删除某些自定义图层等
 	// if (currentId == 'MT0') {
 	//     core.deleteAllCanvas();
 	// }
-	
+
 	// 重置画布尺寸
 	core.maps.resizeMap(floorId);
 	// 检查重生怪并重置
 	if (!fromLoad) {
-		core.status.maps[floorId].blocks.forEach(function(block) {
+		core.status.maps[floorId].blocks.forEach(function (block) {
 			if (block.disable && core.enemys.hasSpecial(block.event.id, 23)) {
 				block.disable = false;
 			}
@@ -133,12 +137,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// ---------- 重绘新地图；这一步将会设置core.status.floorId ---------- //
 	core.drawMap(floorId);
-	
+
 	// 切换楼层BGM
 	if (core.status.maps[floorId].bgm) {
 		var bgm = core.status.maps[floorId].bgm;
 		if (bgm instanceof Array) bgm = bgm[0];
-		core.playBgm(bgm);
+		if (!core.hasFlag("__bgm__")) core.playBgm(bgm);
 	}
 	// 更改画面色调
 	var color = core.getFlag('__color__', null);
@@ -189,17 +193,26 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		return false;
 	}
 
-	// 获得两个楼层的索引，以决定是上楼梯还是下楼梯
-	var fromIndex = core.floorIds.indexOf(fromId),
-		toIndex = core.floorIds.indexOf(toId);
-	var stair = fromIndex <= toIndex ? "downFloor" : "upFloor";
-	// 地下层：同层传送至上楼梯
-	if (fromIndex == toIndex && core.status.maps[fromId].underGround) stair = "upFloor";
+	// 平面塔模式
+	var stair = null,
+		loc = null;
+	if (core.flags.flyRecordPosition) {
+		loc = core.getFlag("__leaveLoc__", {})[toId] || null;
+	}
+	if (loc == null) {
+		// 获得两个楼层的索引，以决定是上楼梯还是下楼梯
+		var fromIndex = core.floorIds.indexOf(fromId),
+			toIndex = core.floorIds.indexOf(toId);
+		var stair = fromIndex <= toIndex ? "downFloor" : "upFloor";
+		// 地下层：同层传送至上楼梯
+		if (fromIndex == toIndex && core.status.maps[fromId].underGround) stair = "upFloor";
+	}
+
 	// 记录录像
 	core.status.route.push("fly:" + toId);
 	// 传送
 	core.ui.closePanel();
-	core.changeFloor(toId, stair, null, null, callback);
+	core.changeFloor(toId, stair, loc, null, callback);
 
 	return true;
 },
@@ -991,7 +1004,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 切换到对应的楼层
 	core.changeFloor(data.floorId, null, data.hero.loc, 0, function () {
 		// TODO：可以在这里设置读档后播放BGM
-		// if (core.getFlag("bgm", 0)==1) core.playBgm("bgm.mp3");
+		if (core.hasFlag("__bgm__")) { // 持续播放
+			core.playBgm(core.getFlag("__bgm__"));
+		}
 
 		if (callback) callback();
 	}, true);
@@ -1278,12 +1293,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	core.updateStatusBar();
 },
-        "moveDirectly": function (x, y) {
-	// 瞬间移动；x,y为要瞬间移动的点
+        "moveDirectly": function (x, y, ignoreSteps) {
+	// 瞬间移动；x,y为要瞬间移动的点；ignoreSteps为减少的步数，可能之前已经被计算过
 	// 返回true代表成功瞬移，false代表没有成功瞬移
 
 	// 判定能否瞬移到该点
-	var ignoreSteps = core.canMoveDirectly(x, y);
+	if (ignoreSteps == null) ignoreSteps = core.canMoveDirectly(x, y);
 	if (ignoreSteps >= 0) {
 		core.clearMap('hero');
 		// 获得勇士最后的朝向

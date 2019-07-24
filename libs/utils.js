@@ -914,7 +914,9 @@ utils.prototype.myconfirm = function (hint, yesCallback, noCallback) {
     main.dom.inputDiv.style.display = 'block';
     main.dom.inputMessage.innerHTML = hint.replace(/\n/g, '<br/>');
     main.dom.inputBox.style.display = 'none';
-    main.dom.inputYes.focus();
+    main.dom.inputYes.blur();
+    main.dom.inputNo.blur();
+    core.status.holdingKeys = [];
 
     core.platform.successCallback = yesCallback;
     core.platform.errorCallback = noCallback;
@@ -926,9 +928,12 @@ utils.prototype.myprompt = function (hint, value, callback) {
     main.dom.inputMessage.innerHTML = hint.replace(/\n/g, '<br/>');
     main.dom.inputBox.style.display = 'block';
     main.dom.inputBox.value = value==null?"":value;
+    main.dom.inputYes.blur();
+    main.dom.inputNo.blur();
     setTimeout(function () {
         main.dom.inputBox.focus();
     });
+    core.status.holdingKeys = [];
 
     core.platform.successCallback = core.platform.errorCallback = callback;
 }
@@ -1084,7 +1089,7 @@ utils.prototype._export = function (floorIds) {
     // map
     var content = floorIds.length + "\n" + core.__SIZE__ + " " + core.__SIZE__ + "\n\n";
     floorIds.forEach(function (floorId) {
-        var arr = core.maps._getMapArrayFromBlocks(core.status.maps[floorId].blocks);
+        var arr = core.maps._getMapArrayFromBlocks(core.status.maps[floorId].blocks, core.__SIZE__, core.__SIZE__);
         content += arr.map(function (x) {
             // check monster
             x.forEach(function (t) {
@@ -1100,7 +1105,7 @@ utils.prototype._export = function (floorIds) {
     // values
     content += ["redJewel", "blueJewel", "greenJewel", "redPotion", "bluePotion",
         "yellowPotion", "greenPotion", "sword1", "shield1"].map(function (x) {
-        return core.values[x]
+        return core.values[x] || 0;
     }).join(" ") + "\n\n";
 
     // monster

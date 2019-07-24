@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
     <link href="_server/css/editor_mobile.css" rel="stylesheet">
     <link href="_server/CodeMirror/codemirror.css" rel="stylesheet">
+    <link href="_server/thirdparty/awesomplete.css" rel="stylesheet">
     <link href="_server/css/editor_mode_mobile.css" rel="stylesheet">
 </head>
 <body>
@@ -514,6 +515,7 @@
         <canvas class='gameCanvas' id='curtain' width='416' height='416'></canvas>
         <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
         <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
+        <div id="next"></div>
     </div>
 </div>
 <div id='inputDiv' style='display: none'>
@@ -598,9 +600,11 @@
 <script src="_server/CodeMirror/jshint.min.js"></script>
 <script src="_server/CodeMirror/beautify.min.js"></script>
 <script src="_server/CodeMirror/codeMirror.plugin.min.js"></script>
-<!-- colorPicker -->
-<script type="text/javascript" src="_server/colorPicker/color.all.min.js"></script>
-<script type="text/javascript" src="_server/colorPicker/jsColor.js"></script>
+<!-- thirdparty -->
+<script src="_server/thirdparty/color.all.min.js"></script>
+<script src="_server/thirdparty/awesomplete.min.js"></script>
+<script src="_server/thirdparty/caret-position.js"></script>
+<script src="_server/thirdparty/jsColor.js"></script>
 
 </body>
 </html>

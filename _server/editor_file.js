@@ -94,6 +94,7 @@ editor_file_wrapper = function (editor) {
         datastr = datastr.join('');
         editor.file.alertWhenCompress();
         editor.fs.writeFile(filename, editor.util.encode64(datastr), 'base64', function (err, data) {
+            editor.addUsedFlags(datastr);
             callback(err);
         });
     }

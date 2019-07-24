@@ -293,6 +293,8 @@ action
     |   changeFloor_s
     |   changePos_0_s
     |   changePos_1_s
+    |   setViewport_s
+    |   moveViewport_s
     |   useItem_s
     |   openShop_s
     |   disableShop_s
@@ -756,7 +758,7 @@ return code;
 */;
 
 setBlock_s
-    :   '转变图块为' EvalString 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
+    :   '转变图块为' EvalString 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
     
 
 /* setBlock_s
@@ -765,8 +767,21 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setblock%EF%BC%9A%E
 colour : this.mapColor
 default : ["yellowDoor","","",""]
 var floorstr = '';
-if (PosString_0 && PosString_1) {
-    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+if (EvalString_1 && EvalString_2) {
+  var pattern1 = MotaActionFunctions.pattern.id;
+  if(pattern1.test(EvalString_1) || pattern1.test(EvalString_2)){
+    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
+    EvalString_2=MotaActionFunctions.PosString_pre(EvalString_2);
+    EvalString_1=[EvalString_1,EvalString_2]
+  } else {
+    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
+    if(!pattern2.test(EvalString_1) || !pattern2.test(EvalString_2))throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    EvalString_1=EvalString_1.split(',');
+    EvalString_2=EvalString_2.split(',');
+    if(EvalString_1.length!==EvalString_2.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    for(var ii=0;ii<EvalString_1.length;ii++)EvalString_1[ii]='['+EvalString_1[ii]+','+EvalString_2[ii]+']';
+  }
+  floorstr = ', "loc": ['+EvalString_1.join(',')+']';
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "setBlock", "number": "'+EvalString_0+'"'+floorstr+IdString_0+'},\n';
@@ -898,7 +913,7 @@ return code;
 */;
 
 setBgFgBlock_s
-    :   '转变图层块' Bg_Fg_List '为' EvalString 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
+    :   '转变图层块' Bg_Fg_List '为' EvalString 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
 
 
 /* setBgFgBlock_s
@@ -907,8 +922,21 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setblock%EF%BC%9A%E
 colour : this.mapColor
 default : ["bg","yellowDoor","","",""]
 var floorstr = '';
-if (PosString_0 && PosString_1) {
-    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+if (EvalString_1 && EvalString_2) {
+  var pattern1 = MotaActionFunctions.pattern.id;
+  if(pattern1.test(EvalString_1) || pattern1.test(EvalString_2)){
+    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
+    EvalString_2=MotaActionFunctions.PosString_pre(EvalString_2);
+    EvalString_1=[EvalString_1,EvalString_2]
+  } else {
+    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
+    if(!pattern2.test(EvalString_1) || !pattern2.test(EvalString_2))throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    EvalString_1=EvalString_1.split(',');
+    EvalString_2=EvalString_2.split(',');
+    if(EvalString_1.length!==EvalString_2.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    for(var ii=0;ii<EvalString_1.length;ii++)EvalString_1[ii]='['+EvalString_1[ii]+','+EvalString_2[ii]+']';
+  }
+  floorstr = ', "loc": ['+EvalString_1.join(',')+']';
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "setBgFgBlock", "name": "' + Bg_Fg_List_0 + '", "number": "'+EvalString_0+'"'+floorstr+IdString_0+'},\n';
@@ -1215,6 +1243,38 @@ var code = '{"type": "animate", "name": "'+IdString_0+'"'+EvalString_0+async+'},
 return code;
 */;
 
+setViewport_s
+    :   '设置视角' '左上角坐标' 'x' PosString? ',' 'y' PosString? Newline
+
+
+/* setViewport_s
+tooltip : setViewport: 设置视角
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=changepos%EF%BC%9A%E5%BD%93%E5%89%8D%E4%BD%8D%E7%BD%AE%E5%88%87%E6%8D%A2%E5%8B%87%E5%A3%AB%E8%BD%AC%E5%90%91
+default : ["",""]
+colour : this.soundColor
+var loc = '';
+if (PosString_0 && PosString_1) {
+    loc = ', "loc": ['+PosString_0+','+PosString_1+']';
+}
+var code = '{"type": "setViewport"'+loc+'},\n';
+return code;
+*/;
+
+moveViewport_s
+    :   '移动视角' '动画时间' Int? '不等待执行完毕' Bool BGNL? StepString Newline
+
+
+/* moveViewport_s
+tooltip : moveViewport：移动视角
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=movehero%EF%BC%9A%E7%A7%BB%E5%8A%A8%E5%8B%87%E5%A3%AB
+default : [300,false,"上右3下2左"]
+colour : this.soundColor
+Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
+Bool_0 = Bool_0?', "async": true':'';
+var code = '{"type": "moveViewport"'+Int_0+Bool_0+', "steps": '+JSON.stringify(StepString_0)+'},\n';
+return code;
+*/;
+
 showImage_s
     :   '显示图片' '图片编号' Int '图片' EvalString BGNL?
         '绘制的起点像素' 'x' PosString 'y' PosString '不透明度' Number '时间' Int '不等待执行完毕' Bool Newline
@@ -1468,15 +1528,16 @@ return code;
 */;
 
 playBgm_s
-    :   '播放背景音乐' EvalString Newline
+    :   '播放背景音乐' EvalString '持续到下个本事件' Bool Newline
     
 
 /* playBgm_s
 tooltip : playBgm: 播放背景音乐
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=playbgm%EF%BC%9A%E6%92%AD%E6%94%BE%E8%83%8C%E6%99%AF%E9%9F%B3%E4%B9%90
-default : ["bgm.mp3"]
+default : ["bgm.mp3", true]
 colour : this.soundColor
-var code = '{"type": "playBgm", "name": "'+EvalString_0+'"},\n';
+Bool_0 = Bool_0 ? ', "keep": true' : '';
+var code = '{"type": "playBgm", "name": "'+EvalString_0+'"'+Bool_0+'},\n';
 return code;
 */;
 
@@ -1716,13 +1777,13 @@ return code;
 */;
 
 choicesContext
-    :   '子选项' EvalString '图标' IdString? '颜色' EvalString? Colour BGNL? Newline action+
+    :   '子选项' EvalString '图标' IdString? '颜色' EvalString? Colour '出现条件' EvalString? BGNL? Newline action+
 
 
 /* choicesContext
 tooltip : 选项的选择
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=choices%EF%BC%9A%E7%BB%99%E7%94%A8%E6%88%B7%E6%8F%90%E4%BE%9B%E9%80%89%E9%A1%B9
-default : ["提示文字:红钥匙","",""]
+default : ["提示文字:红钥匙","","",""]
 colour : this.subColor
 if (EvalString_1) {
   var colorRe = MotaActionFunctions.pattern.colorRe;
@@ -1731,8 +1792,9 @@ if (EvalString_1) {
   else
       EvalString_1 = ', "color": "'+EvalString_1+'"';
 }
+EvalString_2 = EvalString_2 && (', "condition": "'+EvalString_2+'"')
 IdString_0 = IdString_0?(', "icon": "'+IdString_0+'"'):'';
-var code = '{"text": "'+EvalString_0+'"'+IdString_0+EvalString_1+', "action": [\n'+action_0+']},\n';
+var code = '{"text": "'+EvalString_0+'"'+IdString_0+EvalString_1+EvalString_2+', "action": [\n'+action_0+']},\n';
 return code;
 */;
 
@@ -2536,8 +2598,8 @@ Global_Value_List
 
 
 Global_Flag_List
-    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示魔力值'|'显示魔防值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'破墙镐四方向'|'炸弹四方向'|'冰冻徽章四方向'|'铁门不需要钥匙'|'开启加点'|'开启负伤'|'仇恨怪战后扣减一半'|'夹击是否上整'|'夹击不超伤害值'|'循环计算临界'|'允许轻按'|'寻路算法不绕血瓶'|'允许走到将死领域'|'允许瞬间移动'|'允许查看禁用商店'|'阻激夹域后禁用快捷商店'|'检查控制台'
-    /*Global_Flag_List ['enableFloor','enableName','enableLv', 'enableHPMax', 'enableMana', 'enableMDef', 'enableMoney', 'enableExperience', 'enableLevelUp', 'levelUpLeftMode', 'enableKeys', 'enablePZF', 'enableDebuff', 'enableSkill', 'flyNearStair', 'pickaxeFourDirections', 'bombFourDirections', 'snowFourDirections', 'steelDoorWithoutKey', 'enableAddPoint', 'enableNegativeDamage', 'hatredDecrease', 'betweenAttackCeil', 'betweenAttackMax', 'useLoop', 'enableGentleClick', 'potionWhileRouting', 'canGoDeadZone', 'enableMoveDirectly', 'enableDisabledShop', 'disableShopOnDamage', 'checkConsole']*/;
+    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示魔力值'|'显示魔防值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'楼传平面塔模式'|'破墙镐四方向'|'炸弹四方向'|'冰冻徽章四方向'|'铁门不需要钥匙'|'开启加点'|'开启负伤'|'仇恨怪战后扣减一半'|'夹击是否上整'|'夹击不超伤害值'|'循环计算临界'|'允许轻按'|'寻路算法不绕血瓶'|'允许走到将死领域'|'允许瞬间移动'|'允许查看禁用商店'|'阻激夹域后禁用快捷商店'|'检查控制台'
+    /*Global_Flag_List ['enableFloor','enableName','enableLv', 'enableHPMax', 'enableMana', 'enableMDef', 'enableMoney', 'enableExperience', 'enableLevelUp', 'levelUpLeftMode', 'enableKeys', 'enablePZF', 'enableDebuff', 'enableSkill', 'flyNearStair', 'flyRecordPosition', 'pickaxeFourDirections', 'bombFourDirections', 'snowFourDirections', 'steelDoorWithoutKey', 'enableAddPoint', 'enableNegativeDamage', 'hatredDecrease', 'betweenAttackCeil', 'betweenAttackMax', 'useLoop', 'enableGentleClick', 'potionWhileRouting', 'canGoDeadZone', 'enableMoveDirectly', 'enableDisabledShop', 'disableShopOnDamage', 'checkConsole']*/;
 
 Colour
     :   'sdeirughvuiyasdeb'+ //为了被识别为复杂词法规则
@@ -2844,9 +2906,16 @@ ActionParser.prototype.parseAction = function() {
         x_str.join(','),y_str.join(','),data.floorId||'',data.time||0,data.async||false,this.next]);
       break;
     case "setBlock": // 设置图块
-      data.loc=data.loc||['',''];
+      data.loc=data.loc||[];
+      if (!(data.loc[0] instanceof Array))
+        data.loc = [data.loc];
+      var x_str=[],y_str=[];
+      data.loc.forEach(function (t) {
+        x_str.push(t[0]);
+        y_str.push(t[1]);
+      })
       this.next = MotaActionBlocks['setBlock_s'].xmlText([
-        data.number||0,data.loc[0],data.loc[1],data.floorId||'',this.next]);
+        data.number||0,x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
       break;
     case "showFloorImg": // 显示贴图
       data.loc=data.loc||[];
@@ -2897,9 +2966,16 @@ ActionParser.prototype.parseAction = function() {
         data.name||'bg', x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
       break;
     case "setBgFgBlock": // 设置图块
-      data.loc=data.loc||['',''];
+      data.loc=data.loc||[];
+      if (!(data.loc[0] instanceof Array))
+        data.loc = [data.loc];
+      var x_str=[],y_str=[];
+      data.loc.forEach(function (t) {
+        x_str.push(t[0]);
+        y_str.push(t[1]);
+      })
       this.next = MotaActionBlocks['setBgFgBlock_s'].xmlText([
-        data.name||"bg", data.number||0,data.loc[0],data.loc[1],data.floorId||'',this.next]);
+        data.name||'bg', data.number||0, x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
       break;
     case "setHeroIcon": // 改变勇士
       this.next = MotaActionBlocks['setHeroIcon_s'].xmlText([
@@ -2950,6 +3026,15 @@ ActionParser.prototype.parseAction = function() {
       if(animate_loc && animate_loc!=='hero')animate_loc = animate_loc[0]+','+animate_loc[1];
       this.next = MotaActionBlocks['animate_s'].xmlText([
         data.name,animate_loc,data.async||false,this.next]);
+      break;
+    case "setViewport": // 设置视角
+      data.loc = data.loc||['',''];
+      this.next = MotaActionBlocks['setViewport_s'].xmlText([
+        data.loc[0],data.loc[1],this.next]);
+      break;
+    case "moveViewport": // 移动视角
+      this.next = MotaActionBlocks['moveViewport_s'].xmlText([
+        data.time||0,data.async||false,this.StepString(data.steps),this.next]);
       break;
     case "vibrate": // 画面震动
       this.next = MotaActionBlocks['vibrate_s'].xmlText([data.time||0, data.async||false, this.next]);
@@ -3068,7 +3153,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "playBgm":
       this.next = MotaActionBlocks['playBgm_s'].xmlText([
-        data.name,this.next]);
+        data.name,data.keep||false,this.next]);
       break
     case "pauseBgm":
       this.next = MotaActionBlocks['pauseBgm_s'].xmlText([
@@ -3169,7 +3254,7 @@ ActionParser.prototype.parseAction = function() {
       for(var ii=data.choices.length-1,choice;choice=data.choices[ii];ii--) {
         choice.color = this.Colour(choice.color);
         text_choices=MotaActionBlocks['choicesContext'].xmlText([
-          choice.text,choice.icon,choice.color,'rgba('+choice.color+')',this.insertActionList(choice.action),text_choices]);
+          choice.text,choice.icon,choice.color,'rgba('+choice.color+')',choice.condition||'',this.insertActionList(choice.action),text_choices]);
       }
       if (!this.isset(data.text)) data.text = '';
       var info = this.getTitleAndPosition(data.text);
@@ -3505,7 +3590,7 @@ MotaActionFunctions.IdString_pre = function(IdString){
 
 MotaActionFunctions.PosString_pre = function(PosString){
   if (!PosString || /^-?\d+$/.test(PosString)) return PosString;
-  if (!(MotaActionFunctions.pattern.id.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ 和中文之外的字符,或者是没有以flag: 开头');
+  //if (!(MotaActionFunctions.pattern.id.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ 和中文之外的字符,或者是没有以flag: 开头');
   return '"'+PosString+'"';
 }
 

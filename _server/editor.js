@@ -98,6 +98,12 @@ editor.prototype.init = function (callback) {
         editor_multi = editor_multi();
         editor_blockly = editor_blockly();
 
+        // --- 所有用到的flags
+        editor.used_flags = {};
+        for (var floorId in editor.main.floors) {
+            editor.addUsedFlags(JSON.stringify(editor.main.floors[floorId]));
+        }
+
         if (editor.useCompress == null) editor.useCompress = useCompress;
         if (Boolean(callback)) callback();
 
@@ -550,6 +556,42 @@ editor.prototype.exchangePos = function (startPos, endPos, callback) {
     });
 }
 
+editor.prototype.moveBgFg = function (startPos, endPos, name, callback) {
+    if (!startPos || !endPos || ["bgmap","fgmap"].indexOf(name)<0) return;
+    if (startPos.x == endPos.x && startPos.y == endPos.y) return;
+    editor[name][endPos.y][endPos.x] = editor[name][startPos.y][startPos.x];
+    editor[name][startPos.y][startPos.x] = 0;
+    editor.updateMap();
+    editor.file.saveFloorFile(function (err) {
+        if (err) {
+            printe(err);
+            throw(err)
+        }
+        ;printf('移动图块成功');
+        editor.drawPosSelection();
+        if (callback) callback();
+    });
+}
+
+editor.prototype.exchangeBgFg = function (startPos, endPos, name, callback) {
+    if (!startPos || !endPos || ["bgmap","fgmap"].indexOf(name)<0) return;
+    if (startPos.x == endPos.x && startPos.y == endPos.y) return;
+    var value = editor[name][endPos.y][endPos.x];
+    editor[name][endPos.y][endPos.x] = editor[name][startPos.y][startPos.x];
+    editor[name][startPos.y][startPos.x] = value;
+    editor.updateMap();
+    editor.file.saveFloorFile(function (err) {
+        if (err) {
+            printe(err);
+            throw(err)
+        }
+        ;printf('交换图块成功');
+        editor.drawPosSelection();
+        if (callback) callback();
+    });
+
+}
+
 editor.prototype.clearPos = function (clearPos, pos, callback) {
     var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
     pos = pos || editor.pos;
@@ -574,5 +616,10 @@ editor.prototype.clearPos = function (clearPos, pos, callback) {
     });
 }
 
+editor.prototype.addUsedFlags = function (s) {
+    s.replace(/flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, function (s0, s1) {
+        editor.used_flags[s1] = true; return s0;
+    });
+}
 
 editor = new editor();

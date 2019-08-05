@@ -938,127 +938,14 @@ maps.prototype._drawFloorImage = function (ctx, name, type, image, offsetX, widt
 }
 
 ////// 绘制Autotile //////
+
+
 maps.prototype._drawAutotile = function (ctx, mapArr, block, size, left, top, status) {
     var xx = block.x, yy = block.y;
     var autotile = core.material.images['autotile'][block.event.id];
     status = status || 0;
     status %= parseInt(autotile.width / 96);
     var done = {};
-    function drawAutotile(canvas, x, y, size, autotile, index) {
-        var data = [];
-        switch (index) {
-            case 0:
-                data.push([96 * status +  0, 0, 32, 32, x, y, size, size]);
-                break;
-            case 1:
-                data.push([96 * status +  0, 3 * 32, 16, 32, x, y, size / 2, size]);
-                data.push([96 * status +  2 * 32 + 16, 3 * 32, 16, 32, x + size / 2, y, size / 2, size]);
-                break;
-            case 2:
-                data.push([96 * status +  2 * 32, 32, 32, 16, x, y, size, size / 2]);
-                data.push([96 * status +  2 * 32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2]);
-                break;
-            case 3:
-                data.push([96 * status +  2 * 32, 3 * 32, 32, 32, x, y, size, size]);
-                break;
-            case 4:
-                data.push([96 * status +  0, 1 * 32, 16, 32, x, y, size / 2, size]);
-                data.push([96 * status +  2 * 32 + 16, 1 * 32, 16, 32, x + size / 2, y, size / 2, size]);
-                break;
-            case 5:
-                data.push([96 * status +  0, 2 * 32, 16, 32, x, y, size / 2, size]);
-                data.push([96 * status +  2 * 32 + 16, 2 * 32, 16, 32, x + size / 2, y, size / 2, size]);
-                break;
-            case 6:
-                data.push([96 * status +  2 * 32, 1 * 32, 32, 32, x, y, size, size]);
-                break;
-            case 7:
-                data.push([96 * status +  2 * 32, 2 * 32, 32, 32, x, y, size, size]);
-                break;
-            case 8:
-                data.push([96 * status +  0, 32, 32, 16, x, y, size, size / 2]);
-                data.push([96 * status +  0, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2]);
-                break;
-            case 9:
-                data.push([96 * status +  0, 3 * 32, 32, 32, x, y, size, size]);
-                break;
-            case 10:
-                data.push([96 * status +  32, 32, 32, 16, x, y, size, size / 2]);
-                data.push([96 * status +  32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2]);
-                break;
-            case 11:
-                data.push([96 * status +  32, 3 * 32, 32, 32, x, y, size, size]);
-                break;
-            case 12:
-                data.push([96 * status +  0, 32, 32, 32, x, y, size, size]);
-                break;
-            case 13:
-                data.push([96 * status +  0, 2 * 32, 32, 32, x, y, size, size]);
-                break;
-            case 14:
-                data.push([96 * status +  32, 32, 32, 32, x, y, size, size]);
-                break;
-            case 15:
-                data.push([96 * status +  32, 2 * 32, 32, 32, x, y, size, size]);
-                break;
-            case 16:
-                //canvas.clearRect(x, y, size / 2, size / 2);
-                data.push([96 * status +  2 * 32, 0, 16, 16, x, y, size / 2, size / 2]);
-                break;
-            case 17:
-                //canvas.clearRect(x, y, size / 2, size / 2);
-                data.push([96 * status +  2 * 32 + 16, 0, 16, 16, x, y, size / 2, size / 2]);
-                break;
-            case 18:
-                //canvas.clearRect(x, y, size / 2, size / 2);
-                data.push([96 * status +  2 * 32 + 16, 16, 16, 16, x, y, size / 2, size / 2]);
-                break;
-            case 19:
-                data.push([96 * status +  2 * 32, 16, 16, 16, x, y, size / 2, size / 2]);
-                break;
-        }
-        if(index>=16){
-            canvas.drawImage(autotile, data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], size/2, size/2);
-            return;
-        }
-        var drawData = [];
-        if(data.length == 2){
-            var idx = 0;
-            var cut = 0;
-            for(var i in data){
-                if(data[i][2] % 32){ // 是否纵切
-                    cut = 0;
-                }
-                else if(data[i][3] % 32){ // 是否横切
-                    cut = 1;
-                }
-                if(data[i][0] % 32 || data[i][1] % 32){ // right down
-                    idx = 1;
-                }else{  // left top
-                    idx = 0;
-                }
-                if(cut){
-                    idx *= 2;
-                    if(!done[idx])drawData[idx] = [data[i][0], data[i][1]];
-                    if(!done[idx + 1])drawData[idx + 1] = [parseInt(data[i][0]) + 16, data[i][1]];
-                }else{
-                    if(!done[idx])drawData[idx] = [data[i][0], data[i][1]];
-                    if(!done[idx + 2])drawData[idx + 2] = [data[i][0], parseInt(data[i][1]) + 16];
-                }
-                
-            }
-        }else{
-            if(!done[0])drawData[0] = [data[0][0], data[0][1]];
-            if(!done[1])drawData[1] = [data[0][0] + 16, data[0][1]];
-            if(!done[2])drawData[2] = [data[0][0], data[0][1] + 16];
-            if(!done[3])drawData[3] = [data[0][0] + 16, data[0][1] + 16];
-        }
-        [0,1,2,3].forEach(function(i){
-            var dt = drawData[i];if(!dt)return;
-            canvas.drawImage(autotile, dt[0], dt[1], 16, 16, x + (i % 2) * size / 2, y + parseInt(i / 2) * size / 2, size/2, size/2);
-        });
-
-    }
     var isGrass = function(x,y){
         if(core.maps._drawAutotile_getAutotileAroundId(mapArr[yy][xx],x,y,mapArr)){
             return 1;
@@ -1066,35 +953,194 @@ maps.prototype._drawAutotile = function (ctx, mapArr, block, size, left, top, st
             return 0;
         }
     }
-    var grass = function (ii, x, y) {
-        //ctx.clearRect(x * size, y * size, size, size);
-        drawAutotile(ctx, x * size, y * size, size, autotile, ii);
-    }
     var iG = [];
     [-1,0,1].forEach(function(_x){
     iG[_x] = [];
-    [-1,0,1].forEach(function(_y){
-        iG[_x][_y] = isGrass(xx + _x, yy + _y);
-    })});
-    var _id = iG[0][-1] + 2 * iG[-1][0] + 4 * iG[0][1] + 8 * iG[1][0];
+        [-1,0,1].forEach(function(_y){
+            iG[_x][_y] = isGrass(xx + _x, yy + _y);
+        })});
     if(iG[-1][-1] + iG[0][-1] + iG[0][0] + iG[-1][0] == 3 && !iG[-1][-1]){
-        drawAutotile(ctx, xx * size + left, yy * size + top, size, autotile, 16);
+        this._drawAutotile_render(ctx, xx * size + left, yy * size + top, size, autotile, status, 16);
         done[0] = true;
     }
     if(iG[0][-1] + iG[1][-1] + iG[1][0] + iG[0][0] == 3 && !iG[1][-1]){
-        drawAutotile(ctx, xx * size + left + size/2, yy * size + top, size, autotile, 17);
+        this._drawAutotile_render(ctx, xx * size + left + size/2, yy * size + top, size, autotile, status,  17);
         done[1] = true;
     }
     if(iG[0][0] + iG[1][0] + iG[1][1] + iG[0][1] == 3 && !iG[1][1]){
-        drawAutotile(ctx, xx * size + left+size/2, yy * size + top + size/2, size, autotile, 18);
+        this._drawAutotile_render(ctx, xx * size + left+size/2, yy * size + top + size/2, size, autotile, status, 18);
         done[3] = true;
     }
     if(iG[0-1][0] + iG[0][0] + iG[0][1] + iG[-1][1] == 3 && !iG[-1][1]){
-        drawAutotile(ctx, xx * size + left, yy * size + top + size/2, size, autotile, 19);
+        this._drawAutotile_render(ctx, xx * size + left, yy * size + top + size/2, size, autotile, status, 19);
         done[2] = true;
     }
+    var _id = iG[0][-1] + 2 * iG[-1][0] + 4 * iG[0][1] + 8 * iG[1][0];
+    this._drawAutotile_render(ctx, xx * size, yy * size, size, autotile, status,  _id, done);
+
+/*
+    var _id = isGrass(xx, yy - 1) + 2 * isGrass(xx - 1, yy) + 4 * isGrass(xx, yy + 1) + 8 * isGrass(xx + 1, yy);
     grass(_id, xx, yy);
+    if(isGrass(xx-1, yy-1) + isGrass(xx, yy - 1) + isGrass(xx, yy) + isGrass(xx - 1, yy) == 3){
+        if (!isGrass(xx - 1, yy - 1)) {
+            drawAutotile(ctx, xx * size + left, yy * size + top, size, autotile, 16);
+        }
+    }
+    if(isGrass(xx, yy - 1) + isGrass(xx + 1, yy - 1) + isGrass(xx + 1, yy) + isGrass(xx, yy) == 3){
+        if (!isGrass(xx + 1, yy - 1)) {
+            drawAutotile(ctx, xx * size + left + size/2, yy * size + top, size, autotile, 17);
+        }
+    }
+    if(isGrass(xx, yy) + isGrass(xx + 1, yy) + isGrass(xx + 1, yy + 1) + isGrass(xx, yy + 1) == 3){
+        if (!isGrass(xx + 1, yy + 1)) {
+            drawAutotile(ctx, xx * size + left+size/2, yy * size + top + size/2, size, autotile, 18);
+        }
+    }
+    if(isGrass(xx-1, yy) + isGrass(xx, yy) + isGrass(xx, yy + 1) + isGrass(xx - 1, yy + 1) == 3){
+        if (!isGrass(xx - 1, yy + 1)) {
+            drawAutotile(ctx, xx * size + left, yy * size + top + size/2, size, autotile, 19);
+        }
+    }
+    if (isGrass(xx, yy) + isGrass(xx + 1, yy) + isGrass(xx + 1, yy + 1) + isGrass(xx, yy + 1) != 3){
+
+    }
+    else{
+        if (!isGrass(xx, yy)) {
+            drawAutotile(ctx, xx * 32 + 32, yy * 32 + 32, 32, autotile, 16);
+        }
+        if (!isGrass(xx + 1, yy)) {
+            drawAutotile(ctx, xx * 32 + 16, yy * 32 + 32, 32, autotile, 17);
+        }
+        if (!isGrass(xx + 1, yy + 1)) {
+            drawAutotile(ctx, xx * 32 + 16, yy * 32 + 16, 32, autotile, 18);
+        }
+        if (!isGrass(xx, yy + 1)) {
+            drawAutotile(ctx, xx * 32 + 32, yy * 32 + 16, 32, autotile, 19);
+        }
+    }
+    */
 }
+
+
+maps.prototype._drawAutotile_render = function(canvas, x, y, size, autotile, status, index, done) {
+    var data = [];
+    switch (index) {
+        case 0:
+            data.push([96 * status +  0, 0, 32, 32, x, y, size, size]);
+            break;
+        case 1:
+            data.push([96 * status +  0, 3 * 32, 16, 32, x, y, size / 2, size]);
+            data.push([96 * status +  2 * 32 + 16, 3 * 32, 16, 32, x + size / 2, y, size / 2, size]);
+            break;
+        case 2:
+            data.push([96 * status +  2 * 32, 32, 32, 16, x, y, size, size / 2]);
+            data.push([96 * status +  2 * 32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2]);
+            break;
+        case 3:
+            data.push([96 * status +  2 * 32, 3 * 32, 32, 32, x, y, size, size]);
+            break;
+        case 4:
+            data.push([96 * status +  0, 1 * 32, 16, 32, x, y, size / 2, size]);
+            data.push([96 * status +  2 * 32 + 16, 1 * 32, 16, 32, x + size / 2, y, size / 2, size]);
+            break;
+        case 5:
+            data.push([96 * status +  0, 2 * 32, 16, 32, x, y, size / 2, size]);
+            data.push([96 * status +  2 * 32 + 16, 2 * 32, 16, 32, x + size / 2, y, size / 2, size]);
+            break;
+        case 6:
+            data.push([96 * status +  2 * 32, 1 * 32, 32, 32, x, y, size, size]);
+            break;
+        case 7:
+            data.push([96 * status +  2 * 32, 2 * 32, 32, 32, x, y, size, size]);
+            break;
+        case 8:
+            data.push([96 * status +  0, 32, 32, 16, x, y, size, size / 2]);
+            data.push([96 * status +  0, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2]);
+            break;
+        case 9:
+            data.push([96 * status +  0, 3 * 32, 32, 32, x, y, size, size]);
+            break;
+        case 10:
+            data.push([96 * status +  32, 32, 32, 16, x, y, size, size / 2]);
+            data.push([96 * status +  32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2]);
+            break;
+        case 11:
+            data.push([96 * status +  32, 3 * 32, 32, 32, x, y, size, size]);
+            break;
+        case 12:
+            data.push([96 * status +  0, 32, 32, 32, x, y, size, size]);
+            break;
+        case 13:
+            data.push([96 * status +  0, 2 * 32, 32, 32, x, y, size, size]);
+            break;
+        case 14:
+            data.push([96 * status +  32, 32, 32, 32, x, y, size, size]);
+            break;
+        case 15:
+            data.push([96 * status +  32, 2 * 32, 32, 32, x, y, size, size]);
+            break;
+        case 16:
+            //canvas.clearRect(x, y, size / 2, size / 2);
+            data.push([96 * status +  2 * 32, 0, 16, 16, x, y, size / 2, size / 2]);
+            break;
+        case 17:
+            //canvas.clearRect(x, y, size / 2, size / 2);
+            data.push([96 * status +  2 * 32 + 16, 0, 16, 16, x, y, size / 2, size / 2]);
+            break;
+        case 18:
+            //canvas.clearRect(x, y, size / 2, size / 2);
+            data.push([96 * status +  2 * 32 + 16, 16, 16, 16, x, y, size / 2, size / 2]);
+            break;
+        case 19:
+            data.push([96 * status +  2 * 32, 16, 16, 16, x, y, size / 2, size / 2]);
+            break;
+    }
+    if(index>=16){ // 拐角直接绘制
+        canvas.drawImage(autotile, data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], size/2, size/2);
+    }else{ // 非拐角要根据是否已经绘制进行切分后绘制
+        this._drawAutotile_renderCut(canvas, autotile, x, y, size, data, done);
+    }
+}
+
+maps.prototype._drawAutotile_renderCut = function(canvas, autotile, x, y, size, data, done){
+    var drawData = [];
+    done = done || {};
+    if(data.length == 2){
+        var idx = 0;
+        var cut = 0;
+        for(var i in data){
+            if(data[i][2] % 32){ // 是否纵切
+                cut = 0;
+            }
+            else if(data[i][3] % 32){ // 是否横切
+                cut = 1;
+            }
+            if(data[i][0] % 32 || data[i][1] % 32){ // right down
+                idx = 1;
+            }else{  // left top
+                idx = 0;
+            }
+            if(cut){
+                idx *= 2;
+                if(!done[idx])drawData[idx] = [data[i][0], data[i][1]];
+                if(!done[idx + 1])drawData[idx + 1] = [parseInt(data[i][0]) + 16, data[i][1]];
+            }else{
+                if(!done[idx])drawData[idx] = [data[i][0], data[i][1]];
+                if(!done[idx + 2])drawData[idx + 2] = [data[i][0], parseInt(data[i][1]) + 16];
+            }
+        }
+    }else{
+        if(!done[0])drawData[0] = [data[0][0], data[0][1]];
+        if(!done[1])drawData[1] = [data[0][0] + 16, data[0][1]];
+        if(!done[2])drawData[2] = [data[0][0], data[0][1] + 16];
+        if(!done[3])drawData[3] = [data[0][0] + 16, data[0][1] + 16];
+    }
+    for(var i = 0; i<4; i++){
+        var dt = drawData[i];if(!dt)continue;
+        canvas.drawImage(autotile, dt[0], dt[1], 16, 16, x + (i % 2) * size / 2, y + parseInt(i / 2) * size / 2, size/2, size/2);
+    };
+}
+
 
 maps.prototype._drawAutotile_drawBlockByIndex = function (ctx, dx, dy, autotileImg, index, size, status) {
     //index为autotile的图块索引1-48

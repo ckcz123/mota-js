@@ -977,48 +977,6 @@ maps.prototype._drawAutotile = function (ctx, mapArr, block, size, left, top, st
     }
     var _id = iG[0][-1] + 2 * iG[-1][0] + 4 * iG[0][1] + 8 * iG[1][0];
     this._drawAutotile_render(ctx, xx * size, yy * size, size, autotile, status,  _id, done);
-
-/*
-    var _id = isGrass(xx, yy - 1) + 2 * isGrass(xx - 1, yy) + 4 * isGrass(xx, yy + 1) + 8 * isGrass(xx + 1, yy);
-    grass(_id, xx, yy);
-    if(isGrass(xx-1, yy-1) + isGrass(xx, yy - 1) + isGrass(xx, yy) + isGrass(xx - 1, yy) == 3){
-        if (!isGrass(xx - 1, yy - 1)) {
-            drawAutotile(ctx, xx * size + left, yy * size + top, size, autotile, 16);
-        }
-    }
-    if(isGrass(xx, yy - 1) + isGrass(xx + 1, yy - 1) + isGrass(xx + 1, yy) + isGrass(xx, yy) == 3){
-        if (!isGrass(xx + 1, yy - 1)) {
-            drawAutotile(ctx, xx * size + left + size/2, yy * size + top, size, autotile, 17);
-        }
-    }
-    if(isGrass(xx, yy) + isGrass(xx + 1, yy) + isGrass(xx + 1, yy + 1) + isGrass(xx, yy + 1) == 3){
-        if (!isGrass(xx + 1, yy + 1)) {
-            drawAutotile(ctx, xx * size + left+size/2, yy * size + top + size/2, size, autotile, 18);
-        }
-    }
-    if(isGrass(xx-1, yy) + isGrass(xx, yy) + isGrass(xx, yy + 1) + isGrass(xx - 1, yy + 1) == 3){
-        if (!isGrass(xx - 1, yy + 1)) {
-            drawAutotile(ctx, xx * size + left, yy * size + top + size/2, size, autotile, 19);
-        }
-    }
-    if (isGrass(xx, yy) + isGrass(xx + 1, yy) + isGrass(xx + 1, yy + 1) + isGrass(xx, yy + 1) != 3){
-
-    }
-    else{
-        if (!isGrass(xx, yy)) {
-            drawAutotile(ctx, xx * 32 + 32, yy * 32 + 32, 32, autotile, 16);
-        }
-        if (!isGrass(xx + 1, yy)) {
-            drawAutotile(ctx, xx * 32 + 16, yy * 32 + 32, 32, autotile, 17);
-        }
-        if (!isGrass(xx + 1, yy + 1)) {
-            drawAutotile(ctx, xx * 32 + 16, yy * 32 + 16, 32, autotile, 18);
-        }
-        if (!isGrass(xx, yy + 1)) {
-            drawAutotile(ctx, xx * 32 + 32, yy * 32 + 16, 32, autotile, 19);
-        }
-    }
-    */
 }
 
 

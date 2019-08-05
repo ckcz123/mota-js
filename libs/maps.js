@@ -981,78 +981,8 @@ maps.prototype._drawAutotile = function (ctx, mapArr, block, size, left, top, st
 
 
 maps.prototype._drawAutotile_render = function(canvas, x, y, size, autotile, status, index, done) {
-    var data = [];
-    switch (index) {
-        case 0:
-            data.push([96 * status +  0, 0, 32, 32, x, y, size, size]);
-            break;
-        case 1:
-            data.push([96 * status +  0, 3 * 32, 16, 32, x, y, size / 2, size]);
-            data.push([96 * status +  2 * 32 + 16, 3 * 32, 16, 32, x + size / 2, y, size / 2, size]);
-            break;
-        case 2:
-            data.push([96 * status +  2 * 32, 32, 32, 16, x, y, size, size / 2]);
-            data.push([96 * status +  2 * 32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2]);
-            break;
-        case 3:
-            data.push([96 * status +  2 * 32, 3 * 32, 32, 32, x, y, size, size]);
-            break;
-        case 4:
-            data.push([96 * status +  0, 1 * 32, 16, 32, x, y, size / 2, size]);
-            data.push([96 * status +  2 * 32 + 16, 1 * 32, 16, 32, x + size / 2, y, size / 2, size]);
-            break;
-        case 5:
-            data.push([96 * status +  0, 2 * 32, 16, 32, x, y, size / 2, size]);
-            data.push([96 * status +  2 * 32 + 16, 2 * 32, 16, 32, x + size / 2, y, size / 2, size]);
-            break;
-        case 6:
-            data.push([96 * status +  2 * 32, 1 * 32, 32, 32, x, y, size, size]);
-            break;
-        case 7:
-            data.push([96 * status +  2 * 32, 2 * 32, 32, 32, x, y, size, size]);
-            break;
-        case 8:
-            data.push([96 * status +  0, 32, 32, 16, x, y, size, size / 2]);
-            data.push([96 * status +  0, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2]);
-            break;
-        case 9:
-            data.push([96 * status +  0, 3 * 32, 32, 32, x, y, size, size]);
-            break;
-        case 10:
-            data.push([96 * status +  32, 32, 32, 16, x, y, size, size / 2]);
-            data.push([96 * status +  32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2]);
-            break;
-        case 11:
-            data.push([96 * status +  32, 3 * 32, 32, 32, x, y, size, size]);
-            break;
-        case 12:
-            data.push([96 * status +  0, 32, 32, 32, x, y, size, size]);
-            break;
-        case 13:
-            data.push([96 * status +  0, 2 * 32, 32, 32, x, y, size, size]);
-            break;
-        case 14:
-            data.push([96 * status +  32, 32, 32, 32, x, y, size, size]);
-            break;
-        case 15:
-            data.push([96 * status +  32, 2 * 32, 32, 32, x, y, size, size]);
-            break;
-        case 16:
-            //canvas.clearRect(x, y, size / 2, size / 2);
-            data.push([96 * status +  2 * 32, 0, 16, 16, x, y, size / 2, size / 2]);
-            break;
-        case 17:
-            //canvas.clearRect(x, y, size / 2, size / 2);
-            data.push([96 * status +  2 * 32 + 16, 0, 16, 16, x, y, size / 2, size / 2]);
-            break;
-        case 18:
-            //canvas.clearRect(x, y, size / 2, size / 2);
-            data.push([96 * status +  2 * 32 + 16, 16, 16, 16, x, y, size / 2, size / 2]);
-            break;
-        case 19:
-            data.push([96 * status +  2 * 32, 16, 16, 16, x, y, size / 2, size / 2]);
-            break;
-    }
+    var indexData = [[[96 * status +  0, 0, 32, 32, x, y, size, size],],[[96 * status +  0, 3 * 32, 16, 32, x, y, size / 2, size],[96 * status +  2 * 32 + 16, 3 * 32, 16, 32, x + size / 2, y, size / 2, size],],[[96 * status +  2 * 32, 32, 32, 16, x, y, size, size / 2],[96 * status +  2 * 32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],[[96 * status +  2 * 32, 3 * 32, 32, 32, x, y, size, size],],[[96 * status +  0, 1 * 32, 16, 32, x, y, size / 2, size],[96 * status +  2 * 32 + 16, 1 * 32, 16, 32, x + size / 2, y, size / 2, size],],[[96 * status +  0, 2 * 32, 16, 32, x, y, size / 2, size],[96 * status +  2 * 32 + 16, 2 * 32, 16, 32, x + size / 2, y, size / 2, size],],[[96 * status +  2 * 32, 1 * 32, 32, 32, x, y, size, size],],[[96 * status +  2 * 32, 2 * 32, 32, 32, x, y, size, size],],[[96 * status +  0, 32, 32, 16, x, y, size, size / 2],[96 * status +  0, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],[[96 * status +  0, 3 * 32, 32, 32, x, y, size, size],],[[96 * status +  32, 32, 32, 16, x, y, size, size / 2],[96 * status +  32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],[[96 * status +  32, 3 * 32, 32, 32, x, y, size, size],],[[96 * status +  0, 32, 32, 32, x, y, size, size],],[[96 * status +  0, 2 * 32, 32, 32, x, y, size, size],],[[96 * status +  32, 32, 32, 32, x, y, size, size],],[[96 * status +  32, 2 * 32, 32, 32, x, y, size, size],],[[96 * status +  2 * 32, 0, 16, 16, x, y, size / 2, size / 2],],[[96 * status +  2 * 32 + 16, 0, 16, 16, x, y, size / 2, size / 2],],[[96 * status +  2 * 32 + 16, 16, 16, 16, x, y, size / 2, size / 2],],[[96 * status +  2 * 32, 16, 16, 16, x, y, size / 2, size / 2],],];
+    var data = indexData[index];
     if(index>=16){ // 拐角直接绘制
         canvas.drawImage(autotile, data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], size/2, size/2);
     }else{ // 非拐角要根据是否已经绘制进行切分后绘制

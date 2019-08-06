@@ -981,7 +981,27 @@ maps.prototype._drawAutotile = function (ctx, mapArr, block, size, left, top, st
 
 
 maps.prototype._drawAutotile_render = function(canvas, x, y, size, autotile, status, index, done) {
-    var indexData = [[[96 * status +  0, 0, 32, 32, x, y, size, size],],[[96 * status +  0, 3 * 32, 16, 32, x, y, size / 2, size],[96 * status +  2 * 32 + 16, 3 * 32, 16, 32, x + size / 2, y, size / 2, size],],[[96 * status +  2 * 32, 32, 32, 16, x, y, size, size / 2],[96 * status +  2 * 32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],[[96 * status +  2 * 32, 3 * 32, 32, 32, x, y, size, size],],[[96 * status +  0, 1 * 32, 16, 32, x, y, size / 2, size],[96 * status +  2 * 32 + 16, 1 * 32, 16, 32, x + size / 2, y, size / 2, size],],[[96 * status +  0, 2 * 32, 16, 32, x, y, size / 2, size],[96 * status +  2 * 32 + 16, 2 * 32, 16, 32, x + size / 2, y, size / 2, size],],[[96 * status +  2 * 32, 1 * 32, 32, 32, x, y, size, size],],[[96 * status +  2 * 32, 2 * 32, 32, 32, x, y, size, size],],[[96 * status +  0, 32, 32, 16, x, y, size, size / 2],[96 * status +  0, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],[[96 * status +  0, 3 * 32, 32, 32, x, y, size, size],],[[96 * status +  32, 32, 32, 16, x, y, size, size / 2],[96 * status +  32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],[[96 * status +  32, 3 * 32, 32, 32, x, y, size, size],],[[96 * status +  0, 32, 32, 32, x, y, size, size],],[[96 * status +  0, 2 * 32, 32, 32, x, y, size, size],],[[96 * status +  32, 32, 32, 32, x, y, size, size],],[[96 * status +  32, 2 * 32, 32, 32, x, y, size, size],],[[96 * status +  2 * 32, 0, 16, 16, x, y, size / 2, size / 2],],[[96 * status +  2 * 32 + 16, 0, 16, 16, x, y, size / 2, size / 2],],[[96 * status +  2 * 32 + 16, 16, 16, 16, x, y, size / 2, size / 2],],[[96 * status +  2 * 32, 16, 16, 16, x, y, size / 2, size / 2],],];
+    var indexData = [[[96 * status, 0, 32, 32, x, y, size, size],],
+        [[96 * status, 3 * 32, 16, 32, x, y, size / 2, size],[96 * status +  2 * 32 + 16, 3 * 32, 16, 32, x + size / 2, y, size / 2, size],],
+        [[96 * status +  2 * 32, 32, 32, 16, x, y, size, size / 2],[96 * status +  2 * 32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],
+        [[96 * status +  2 * 32, 3 * 32, 32, 32, x, y, size, size],],
+        [[96 * status, 32, 16, 32, x, y, size / 2, size],[96 * status +  2 * 32 + 16, 32, 16, 32, x + size / 2, y, size / 2, size],],
+        [[96 * status, 2 * 32, 16, 32, x, y, size / 2, size],[96 * status +  2 * 32 + 16, 2 * 32, 16, 32, x + size / 2, y, size / 2, size],],
+        [[96 * status +  2 * 32, 32, 32, 32, x, y, size, size],],
+        [[96 * status +  2 * 32, 2 * 32, 32, 32, x, y, size, size],],
+        [[96 * status, 32, 32, 16, x, y, size, size / 2],[96 * status, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],
+        [[96 * status, 3 * 32, 32, 32, x, y, size, size],],
+        [[96 * status +  32, 32, 32, 16, x, y, size, size / 2],[96 * status +  32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],
+        [[96 * status +  32, 3 * 32, 32, 32, x, y, size, size],],
+        [[96 * status, 32, 32, 32, x, y, size, size],],
+        [[96 * status, 2 * 32, 32, 32, x, y, size, size],],
+        [[96 * status +  32, 32, 32, 32, x, y, size, size],],
+        [[96 * status +  32, 2 * 32, 32, 32, x, y, size, size],],
+        [[96 * status +  2 * 32, 0, 16, 16, x, y, size / 2, size / 2],],
+        [[96 * status +  2 * 32 + 16, 0, 16, 16, x, y, size / 2, size / 2],],
+        [[96 * status +  2 * 32 + 16, 16, 16, 16, x, y, size / 2, size / 2],],
+        [[96 * status +  2 * 32, 16, 16, 16, x, y, size / 2, size / 2],],
+    ];
     var data = indexData[index];
     if(index>=16){ // 拐角直接绘制
         canvas.drawImage(autotile, data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], size/2, size/2);

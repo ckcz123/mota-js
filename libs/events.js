@@ -2352,6 +2352,7 @@ events.prototype.openShop = function (shopId, needVisited) {
         if (!core.flags.enableDisabledShop || shop.commonEvent) {
             if (shop.times == 0) core.drawTip("该项尚未开启");
             else core.drawTip("该项已失效");
+            core.ui.closePanel();
             return;
         }
         else {

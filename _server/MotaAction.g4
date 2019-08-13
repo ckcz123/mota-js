@@ -282,6 +282,8 @@ action
     |   update_s
     |   showStatusBar_s
     |   hideStatusBar_s
+    |   showHero_s
+    |   hideHero_s
     |   updateEnemys_s
     |   sleep_s
     |   wait_s
@@ -992,6 +994,30 @@ colour : this.soundColor
 default : [false]
 Bool_0 = Bool_0?', "toolbox": true':'';
 var code = '{"type": "hideStatusBar"'+Bool_0+'},\n';
+return code;
+*/;
+
+showHero_s
+    :   '显示勇士' Newline
+
+
+/* showHero_s
+tooltip : showHero: 显示勇士
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showHero%3a+%e6%98%be%e7%a4%ba%e5%8b%87%e5%a3%ab
+colour : this.soundColor
+var code = '{"type": "showHero"},\n';
+return code;
+*/;
+
+hideHero_s
+    :   '隐藏勇士' Newline
+
+
+/* hideHero_s
+tooltip : hideHero: 隐藏勇士
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=hideHero%ef%bc%9a%e9%9a%90%e8%97%8f%e5%8b%87%e5%a3%ab
+colour : this.soundColor
+var code = '{"type": "hideHero"},\n';
 return code;
 */;
 
@@ -3312,6 +3338,14 @@ ActionParser.prototype.parseAction = function() {
     case "hideStatusBar":
       this.next = MotaActionBlocks['hideStatusBar_s'].xmlText([
         data.toolbox||false,this.next]);
+      break;
+    case "showHero":
+      this.next = MotaActionBlocks['showHero_s'].xmlText([
+        this.next]);
+      break;
+    case "hideHero":
+      this.next = MotaActionBlocks['hideHero_s'].xmlText([
+        this.next]);
       break;
     case "updateEnemys":
       this.next = MotaActionBlocks['updateEnemys_s'].xmlText([

@@ -125,10 +125,8 @@ items.prototype._afterUseItem = function (itemId) {
     if (core.status.hero.items[itemCls][itemId] <= 0)
         delete core.status.hero.items[itemCls][itemId];
 
-    if (!core.status.event.id) {
-        core.status.event.data = null;
+    if (!core.status.event.id)
         core.status.event.ui = null;
-    }
     core.updateStatusBar();
 }
 

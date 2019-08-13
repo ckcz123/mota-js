@@ -2048,6 +2048,8 @@ events.prototype.setGlobalFlag = function (name, value) {
     core.flags[name] = value;
     core.setFlag("globalFlags", flags);
     core.resize();
+    if (name == 'blurFg')
+        core.drawMap();
 }
 
 events.prototype.closeDoor = function (x, y, id, callback) {

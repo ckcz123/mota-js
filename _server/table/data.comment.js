@@ -703,6 +703,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_bool": "bool",
 					"_data": "是否在经过领域/夹击/路障等伤害后禁用快捷商店。"
 				},
+				"blurFg": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_bool": "bool",
+					"_data": "是否虚化前景层；如果此项开启，则在游戏中事件层有东西（如宝石等）时虚化前景层。"
+				},
 				"checkConsole": {
 					"_leaf": true,
 					"_type": "checkbox",

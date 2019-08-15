@@ -835,7 +835,7 @@ maps.prototype._drawBgFgMap = function (floorId, ctx, name, onMap) {
 
     var arr = this._getBgFgMapArray(name, floorId, true);
     var eventArr = null;
-    if (main.mode == 'editor' && name == 'fg' && onMap) {
+    if (name == 'fg' && onMap && this._drawBgFgMap_shouldBlurFg()) {
         eventArr = this.getMapArray(floorId);
     }
 
@@ -858,6 +858,11 @@ maps.prototype._drawBgFgMap = function (floorId, ctx, name, onMap) {
     }
     if (onMap)
         core.status.autotileAnimateObjs[name + "map"] = core.clone(arr);
+}
+
+////// 是否应当存在事件时虚化前景层 //////
+maps.prototype._drawBgFgMap_shouldBlurFg = function () {
+    return main.mode == 'editor' || core.flags.blurFg;
 }
 
 ////// 绘制楼层贴图 //////

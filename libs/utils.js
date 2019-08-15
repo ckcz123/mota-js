@@ -941,7 +941,7 @@ utils.prototype.myprompt = function (hint, value, callback) {
 ////// 动画显示某对象 //////
 utils.prototype.showWithAnimate = function (obj, speed, callback) {
     obj.style.display = 'block';
-    if (!speed && main.mode != 'play') {
+    if (!speed || main.mode != 'play') {
         obj.style.opacity = 1;
         if (callback) callback();
         return;

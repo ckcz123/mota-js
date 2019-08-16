@@ -277,7 +277,7 @@ core.prototype._init_platform = function () {
         }
     });
     core.platform.string = core.platform.isPC ? "PC" : core.platform.isAndroid ? "Android" : core.platform.isIOS ? "iOS" : "";
-    core.platform.supportCopy = document.queryCommandSupported || document.queryCommandSupported("copy");
+    core.platform.supportCopy = document.queryCommandSupported && document.queryCommandSupported("copy");
     var chrome = /Chrome\/(\d+)\./i.exec(navigator.userAgent);
     if (chrome && parseInt(chrome[1]) >= 50) core.platform.isChrome = true;
     core.platform.isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent);

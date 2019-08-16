@@ -941,7 +941,7 @@ utils.prototype.myprompt = function (hint, value, callback) {
 ////// 动画显示某对象 //////
 utils.prototype.showWithAnimate = function (obj, speed, callback) {
     obj.style.display = 'block';
-    if (!speed && main.mode != 'play') {
+    if (!speed || main.mode != 'play') {
         obj.style.opacity = 1;
         if (callback) callback();
         return;
@@ -1093,7 +1093,7 @@ utils.prototype._export = function (floorIds) {
         content += arr.map(function (x) {
             // check monster
             x.forEach(function (t) {
-                var block = core.maps.initBlock(null, null, t);
+                var block = core.maps.getBlockByNumber(t);
                 if (block.event.cls.indexOf("enemy") == 0) {
                     monsterMap[t] = block.event.id;
                 }

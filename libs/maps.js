@@ -82,6 +82,12 @@ maps.prototype._getNumberById = function (id) {
     return 0;
 }
 
+maps.prototype.getBlockByNumber = function (number) {
+    core.status.number2Block = core.status.number2Block || {};
+    if (core.status.number2Block[number] != null) return core.status.number2Block[number];
+    return core.status.number2Block[number] = this.initBlock(null, null, number, true);
+}
+
 ////// 数字和ID的对应关系 //////
 maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     var disable = null;
@@ -481,7 +487,7 @@ maps.prototype._canMoveHero_checkCannotInOut = function (number, name, direction
         }
         return false;
     }
-    return core.inArray((this.initBlock(0, 0, number).event || {})[name], direction);
+    return core.inArray((this.getBlockByNumber(number).event || {})[name], direction);
 }
 
 ////// 能否瞬间移动 //////
@@ -835,7 +841,7 @@ maps.prototype._drawBgFgMap = function (floorId, ctx, name, onMap) {
 
     var arr = this._getBgFgMapArray(name, floorId, true);
     var eventArr = null;
-    if (main.mode == 'editor' && name == 'fg' && onMap) {
+    if (name == 'fg' && onMap && this._drawBgFgMap_shouldBlurFg()) {
         eventArr = this.getMapArray(floorId);
     }
 
@@ -858,6 +864,11 @@ maps.prototype._drawBgFgMap = function (floorId, ctx, name, onMap) {
     }
     if (onMap)
         core.status.autotileAnimateObjs[name + "map"] = core.clone(arr);
+}
+
+////// 是否应当存在事件时虚化前景层 //////
+maps.prototype._drawBgFgMap_shouldBlurFg = function () {
+    return main.mode == 'editor' || core.flags.blurFg;
 }
 
 ////// 绘制楼层贴图 //////
@@ -938,55 +949,117 @@ maps.prototype._drawFloorImage = function (ctx, name, type, image, offsetX, widt
 }
 
 ////// 绘制Autotile //////
+
+
 maps.prototype._drawAutotile = function (ctx, mapArr, block, size, left, top, status) {
-    var indexArrs = [ //16种组合的图块索引数组;
-        // 将autotile分割成48块16*16的小块; 数组索引即对应各个小块
-        //                                 +----+----+----+----+----+----+
-        [10, 9, 4, 3],  //0   bin:0000     | 1  | 2  | 3  | 4  | 5  | 6  |
-        [10, 9, 4, 13],  //1   bin:0001    +----+----+----+----+----+----+
-        [10, 9, 18, 3],  //2   bin:0010    | 7  | 8  | 9  | 10 | 11 | 12 |
-        [10, 9, 16, 15],  //3   bin:0011   +----+----+----+----+----+----+
-        [10, 43, 4, 3],  //4   bin:0100    | 13 | 14 | 15 | 16 | 17 | 18 |
-        [10, 31, 4, 25],  //5   bin:0101   +----+----+----+----+----+----+
-        [10, 43, 18, 3],  //6   bin:0110   | 19 | 20 | 21 | 22 | 23 | 24 |
-        [10, 31, 16, 5],  //7   bin:0111   +----+----+----+----+----+----+
-        [48, 9, 4, 3],  //8   bin:1000     | 25 | 26 | 27 | 28 | 29 | 30 |
-        [48, 9, 4, 13],  //9   bin:1001    +----+----+----+----+----+----+
-        [36, 9, 30, 3],  //10  bin:1010    | 31 | 32 | 33 | 34 | 35 | 36 |
-        [36, 9, 6, 15],  //11  bin:1011    +----+----+----+----+----+----+
-        [46, 45, 4, 3],  //12  bin:1100    | 37 | 38 | 39 | 40 | 41 | 42 |
-        [46, 11, 4, 25],  //13  bin:1101   +----+----+----+----+----+----+
-        [12, 45, 30, 3],  //14  bin:1110   | 43 | 44 | 45 | 46 | 47 | 48 |
-        [20, 23, 38, 41]   //15  bin:1111  +----+----+----+----+----+----+
+    var xx = block.x, yy = block.y;
+    var autotile = core.material.images['autotile'][block.event.id];
+    status = status || 0;
+    status %= parseInt(autotile.width / 96);
+    var done = {};
+    var isGrass = function(x,y){
+        if(core.maps._drawAutotile_getAutotileAroundId(mapArr[yy][xx],x,y,mapArr)){
+            return 1;
+        }else{
+            return 0;
+        }
+    }
+    var iG = [];
+    [-1,0,1].forEach(function(_x){
+    iG[_x] = [];
+        [-1,0,1].forEach(function(_y){
+            iG[_x][_y] = isGrass(xx + _x, yy + _y);
+        })});
+    if(iG[-1][-1] + iG[0][-1] + iG[0][0] + iG[-1][0] == 3 && !iG[-1][-1]){
+        this._drawAutotile_render(ctx, xx * size + left, yy * size + top, size, autotile, status, 16);
+        done[0] = true;
+    }
+    if(iG[0][-1] + iG[1][-1] + iG[1][0] + iG[0][0] == 3 && !iG[1][-1]){
+        this._drawAutotile_render(ctx, xx * size + left + size/2, yy * size + top, size, autotile, status,  17);
+        done[1] = true;
+    }
+    if(iG[0][0] + iG[1][0] + iG[1][1] + iG[0][1] == 3 && !iG[1][1]){
+        this._drawAutotile_render(ctx, xx * size + left+size/2, yy * size + top + size/2, size, autotile, status, 18);
+        done[3] = true;
+    }
+    if(iG[0-1][0] + iG[0][0] + iG[0][1] + iG[-1][1] == 3 && !iG[-1][1]){
+        this._drawAutotile_render(ctx, xx * size + left, yy * size + top + size/2, size, autotile, status, 19);
+        done[2] = true;
+    }
+    var _id = iG[0][-1] + 2 * iG[-1][0] + 4 * iG[0][1] + 8 * iG[1][0];
+    this._drawAutotile_render(ctx, xx * size, yy * size, size, autotile, status,  _id, done);
+}
+
+
+maps.prototype._drawAutotile_render = function(canvas, x, y, size, autotile, status, index, done) {
+    var indexData = [[[96 * status, 0, 32, 32, x, y, size, size],],
+        [[96 * status, 3 * 32, 16, 32, x, y, size / 2, size],[96 * status +  2 * 32 + 16, 3 * 32, 16, 32, x + size / 2, y, size / 2, size],],
+        [[96 * status +  2 * 32, 32, 32, 16, x, y, size, size / 2],[96 * status +  2 * 32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],
+        [[96 * status +  2 * 32, 3 * 32, 32, 32, x, y, size, size],],
+        [[96 * status, 32, 16, 32, x, y, size / 2, size],[96 * status +  2 * 32 + 16, 32, 16, 32, x + size / 2, y, size / 2, size],],
+        [[96 * status, 2 * 32, 16, 32, x, y, size / 2, size],[96 * status +  2 * 32 + 16, 2 * 32, 16, 32, x + size / 2, y, size / 2, size],],
+        [[96 * status +  2 * 32, 32, 32, 32, x, y, size, size],],
+        [[96 * status +  2 * 32, 2 * 32, 32, 32, x, y, size, size],],
+        [[96 * status, 32, 32, 16, x, y, size, size / 2],[96 * status, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],
+        [[96 * status, 3 * 32, 32, 32, x, y, size, size],],
+        [[96 * status +  32, 32, 32, 16, x, y, size, size / 2],[96 * status +  32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],
+        [[96 * status +  32, 3 * 32, 32, 32, x, y, size, size],],
+        [[96 * status, 32, 32, 32, x, y, size, size],],
+        [[96 * status, 2 * 32, 32, 32, x, y, size, size],],
+        [[96 * status +  32, 32, 32, 32, x, y, size, size],],
+        [[96 * status +  32, 2 * 32, 32, 32, x, y, size, size],],
+        [[96 * status +  2 * 32, 0, 16, 16, x, y, size / 2, size / 2],],
+        [[96 * status +  2 * 32 + 16, 0, 16, 16, x, y, size / 2, size / 2],],
+        [[96 * status +  2 * 32 + 16, 16, 16, 16, x, y, size / 2, size / 2],],
+        [[96 * status +  2 * 32, 16, 16, 16, x, y, size / 2, size / 2],],
     ];
-
-    // 开始绘制autotile
-    var x = block.x, y = block.y;
-    var pieceIndexs = this._drawAutotile_getAutotileIndexs(x, y, mapArr, indexArrs);
-
-    //修正四个边角的固定搭配
-    if (pieceIndexs[0] == 13) {
-        if (pieceIndexs[1] == 16) pieceIndexs[1] = 14;
-        if (pieceIndexs[2] == 31) pieceIndexs[2] = 19;
-    }
-    if (pieceIndexs[1] == 18) {
-        if (pieceIndexs[0] == 15) pieceIndexs[0] = 17;
-        if (pieceIndexs[3] == 36) pieceIndexs[3] = 24;
-    }
-    if (pieceIndexs[2] == 43) {
-        if (pieceIndexs[0] == 25) pieceIndexs[0] = 37;
-        if (pieceIndexs[3] == 46) pieceIndexs[3] = 44;
-    }
-    if (pieceIndexs[3] == 48) {
-        if (pieceIndexs[1] == 30) pieceIndexs[1] = 42;
-        if (pieceIndexs[2] == 45) pieceIndexs[2] = 47;
-    }
-    for (var i = 0; i < 4; i++) {
-        var index = pieceIndexs[i];
-        var dx = x * size + size / 2 * (i % 2), dy = y * size + size / 2 * (~~(i / 2));
-        this._drawAutotile_drawBlockByIndex(ctx, dx + left, dy + top, core.material.images['autotile'][block.event.id], index, size, status);
+    var data = indexData[index];
+    if(index>=16){ // 拐角直接绘制
+        canvas.drawImage(autotile, data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], size/2, size/2);
+    }else{ // 非拐角要根据是否已经绘制进行切分后绘制
+        this._drawAutotile_renderCut(canvas, autotile, x, y, size, data, done);
     }
 }
+
+maps.prototype._drawAutotile_renderCut = function(canvas, autotile, x, y, size, data, done){
+    var drawData = [];
+    done = done || {};
+    if(data.length == 2){
+        var idx = 0;
+        var cut = 0;
+        for(var i in data){
+            if(data[i][2] % 32){ // 是否纵切
+                cut = 0;
+            }
+            else if(data[i][3] % 32){ // 是否横切
+                cut = 1;
+            }
+            if(data[i][0] % 32 || data[i][1] % 32){ // right down
+                idx = 1;
+            }else{  // left top
+                idx = 0;
+            }
+            if(cut){
+                idx *= 2;
+                if(!done[idx])drawData[idx] = [data[i][0], data[i][1]];
+                if(!done[idx + 1])drawData[idx + 1] = [parseInt(data[i][0]) + 16, data[i][1]];
+            }else{
+                if(!done[idx])drawData[idx] = [data[i][0], data[i][1]];
+                if(!done[idx + 2])drawData[idx + 2] = [data[i][0], parseInt(data[i][1]) + 16];
+            }
+        }
+    }else{
+        if(!done[0])drawData[0] = [data[0][0], data[0][1]];
+        if(!done[1])drawData[1] = [data[0][0] + 16, data[0][1]];
+        if(!done[2])drawData[2] = [data[0][0], data[0][1] + 16];
+        if(!done[3])drawData[3] = [data[0][0] + 16, data[0][1] + 16];
+    }
+    for(var i = 0; i<4; i++){
+        var dt = drawData[i];if(!dt)continue;
+        canvas.drawImage(autotile, dt[0], dt[1], 16, 16, x + (i % 2) * size / 2, y + parseInt(i / 2) * size / 2, size/2, size/2);
+    };
+}
+
 
 maps.prototype._drawAutotile_drawBlockByIndex = function (ctx, dx, dy, autotileImg, index, size, status) {
     //index为autotile的图块索引1-48
@@ -1264,7 +1337,7 @@ maps.prototype.getBlockInfo = function (block) {
     }
     if (typeof block == 'number') { // 参数是数字
         if (block == 0) return null;
-        block = this.initBlock(0, 0, block, true);
+        block = this.getBlockByNumber(block);
     }
     var number = block.id, id = block.event.id, cls = block.event.cls, name = block.event.name,
         image = null, posX = 0, posY = 0, animate = block.event.animate,
@@ -1300,7 +1373,7 @@ maps.prototype.getBlockInfo = function (block) {
 
 ////// 搜索某个图块出现的所有位置 //////
 maps.prototype.searchBlock = function (id, floorId, showDisable) {
-    if (typeof id == 'number') id = this.initBlock(0, 0, id).event.id;
+    if (typeof id == 'number') id = this.getBlockByNumber(id).event.id;
     floorId = floorId || core.status.floorId;
     var result = [];
     if (floorId instanceof Array) {
@@ -1543,7 +1616,7 @@ maps.prototype.replaceBlock = function (fromNumber, toNumber, floorId) {
         });
         return;
     }
-    var toBlock = this.initBlock(0, 0, toNumber, true);
+    var toBlock = this.getBlockByNumber(toNumber, true);
     core.status.maps[floorId].blocks.forEach(function (block) {
         if (block.id == fromNumber) {
             block.id = toNumber;

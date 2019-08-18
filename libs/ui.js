@@ -353,7 +353,7 @@ ui.prototype.calWidth = function (name, text, font) {
 ////// 字符串自动换行的分割 //////
 ui.prototype.splitLines = function (name, text, maxWidth, font) {
     var ctx = this.getContextByName(name);
-    if (!ctx) return;
+    if (!ctx) return [text];
     if (font) core.setFont(name, font);
 
     var contents = [];

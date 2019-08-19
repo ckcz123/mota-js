@@ -2919,15 +2919,15 @@ ui.prototype.relocateCanvas = function (name, x, y) {
 }
 
 ////// canvas重置 //////
-ui.prototype.resizeCanvas = function (name, width, height) {
+ui.prototype.resizeCanvas = function (name, width, height, styleOnly) {
     var ctx = core.dymCanvas[name];
     if (!core.isset(ctx)) return null;
     if (core.isset(width)) {
-        ctx.canvas.width = width;
+        if (!styleOnly) ctx.canvas.width = width;
         ctx.canvas.style.width = width * core.domStyle.scale + 'px';
     }
     if (core.isset(height)) {
-        ctx.canvas.height = height;
+        if (!styleOnly) ctx.canvas.height = height;
         ctx.canvas.style.height = height * core.domStyle.scale + 'px';
     }
     return ctx;

@@ -12,9 +12,29 @@ function editor() {
         mapEdit:document.getElementById('mapEdit'),
         selectFloor:document.getElementById('selectFloor'),
         iconExpandBtn :document.getElementById('iconExpandBtn'),
+        dataSelection : document.getElementById('dataSelection'),
+        iconLib:document.getElementById('iconLib'),
+        midMenu:document.getElementById('midMenu'),
+        addFloorEvent :document.getElementById('addFloorEvent'),
+        chooseThis : document.getElementById('chooseThis'),
+        chooseInRight : document.getElementById('chooseInRight'),
+        copyLoc : document.getElementById('copyLoc'),
+        moveLoc : document.getElementById('moveLoc'),
+        clearEvent : document.getElementById('clearEvent'),
+        clearLoc : document.getElementById('clearLoc'),
+        brushMod:document.getElementById('brushMod'),
+        brushMod2:document.getElementById('brushMod2'),
+        brushMod3:document.getElementById('brushMod3'),
+        bgc : document.getElementById('bg'),
+        fgc : document.getElementById('fg'),
+        evc : document.getElementById('event'), 
+        ev2c : document.getElementById('event2'),
+        layerMod:document.getElementById('layerMod'),
+        layerMod2:document.getElementById('layerMod2'),
+        layerMod3:document.getElementById('layerMod3'),
+        viewportButtons:document.getElementById('viewportButtons'),
     };
 
-    this.uifunctions={};
     this.uivalues={
         // 绘制区拖动有关
         holdingPath : 0,
@@ -32,8 +52,14 @@ function editor() {
         //
         shortcut:{},
         copyedInfo : null,
+        // 折叠素材
         scrollBarHeight :0,
         folded:false,
+        foldPerCol: 50,
+        // 画图区菜单
+        lastRightButtonPos:[{x:0,y:0},{x:0,y:0}],
+        lastCopyedInfo : [null, null],
+        //
 
     };
 
@@ -63,6 +89,8 @@ function editor() {
     };
 }
 
+editor.prototype.uifunctions={};
+
 /* 
 editor.loc
 editor.pos
@@ -89,7 +117,7 @@ editor.prototype.init = function (callback) {
         editor_mappanel_wrapper(editor);
         editor_datapanel_wrapper(editor);
         editor_materialpanel_wrapper(editor);
-        editor_unsorted_1_wrapper(editor);
+        editor_listen_wrapper(editor);
         editor.printe=printe;
         afterMainInit();
     });
@@ -323,7 +351,7 @@ editor.prototype.drawInitData = function (icons) {
     editor.widthsX = {};
     editor.uivalues.folded = core.getLocalStorage('folded', false);
     // editor.uivalues.folded = true;
-    editor.foldPerCol = 50;
+    editor.uivalues.foldPerCol = 50;
     // var imgNames = Object.keys(images);  //还是固定顺序吧；
     var imgNames = ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"];
 
@@ -343,8 +371,8 @@ editor.prototype.drawInitData = function (icons) {
         var width = images[img].width, height = images[img].height, mh = height;
         if (editor.uivalues.folded) {
             var per_height = (img == 'enemy48' || img == 'npc48' ? 48 : 32);
-            width = Math.ceil(height / per_height / editor.foldPerCol) * 32;
-            if (width > 32) mh = per_height * editor.foldPerCol;
+            width = Math.ceil(height / per_height / editor.uivalues.foldPerCol) * 32;
+            if (width > 32) mh = per_height * editor.uivalues.foldPerCol;
         }
         editor.widthsX[img] = [img, sumWidth / 32, (sumWidth + width) / 32, height];
         sumWidth += width;
@@ -392,7 +420,7 @@ editor.prototype.drawInitData = function (icons) {
             })(editor.airwallImg,nowx);
             if (editor.uivalues.folded) {
                 // --- 单列 & 折行
-                var subimgs = core.splitImage(images[img], 32, editor.foldPerCol * 32);
+                var subimgs = core.splitImage(images[img], 32, editor.uivalues.foldPerCol * 32);
                 var frames = images[img].width / 32;
                 for (var i = 0; i < subimgs.length; i+=frames) {
                     drawImage(subimgs[i], nowx, i==0?2*32:0);
@@ -419,7 +447,7 @@ editor.prototype.drawInitData = function (icons) {
         if (editor.uivalues.folded) {
             // --- 单列 & 折行
             var per_height = img.endsWith('48') ? 48 : 32;
-            var subimgs = core.splitImage(images[img], 32, editor.foldPerCol * per_height);
+            var subimgs = core.splitImage(images[img], 32, editor.uivalues.foldPerCol * per_height);
             var frames = images[img].width / 32;
             for (var i = 0; i < subimgs.length; i+=frames) {
                 drawImage(subimgs[i], nowx, 0);
@@ -509,15 +537,14 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent){
         if(thisevent.x)pos.x+=thisevent.x;
         ysize = thisevent.images.endsWith('48') ? 48 : 32;
         if (editor.uivalues.folded && core.tilesets.indexOf(thisevent.images)==-1) {
-            pos.x += Math.floor(pos.y / editor.foldPerCol);
-            pos.y %= editor.foldPerCol;
+            pos.x += Math.floor(pos.y / editor.uivalues.foldPerCol);
+            pos.y %= editor.uivalues.foldPerCol;
         }
         if(pos.x == 0) pos.y+=2;
     }
-    var dataSelection = document.getElementById('dataSelection');
-    dataSelection.style.left = pos.x * 32 + 'px';
-    dataSelection.style.top = pos.y * ysize + 'px';
-    dataSelection.style.height = ysize - 6 + 'px';
+    editor.dom.dataSelection.style.left = pos.x * 32 + 'px';
+    editor.dom.dataSelection.style.top = pos.y * ysize + 'px';
+    editor.dom.dataSelection.style.height = ysize - 6 + 'px';
     setTimeout(function(){selectBox.isSelected(true);});
     editor.info = JSON.parse(JSON.stringify(thisevent));
     tip.infos(JSON.parse(JSON.stringify(thisevent)));
@@ -527,11 +554,11 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent){
 }
 
 editor.prototype.listen = function () {
-    // 移动至 editor_unsorted_1.js
+    // 移动至 editor_listen.js
 }//绑定事件
 
 editor.prototype.mobile_listen=function(){
-    // 移动至 editor_unsorted_1.js
+    // 移动至 editor_listen.js
 }
 
 editor.prototype.copyFromPos = function (pos) {
@@ -632,7 +659,7 @@ editor.prototype.exchangeBgFg = function (startPos, endPos, name, callback) {
 editor.prototype.clearPos = function (clearPos, pos, callback) {
     var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
     pos = pos || editor.pos;
-    editor.hideMidMenu();
+    editor.uifunctions.hideMidMenu();
     editor.uivalues.preMapData = null;
     editor.info = 0;
     editor_mode.onmode('');

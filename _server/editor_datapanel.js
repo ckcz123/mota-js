@@ -1,1 +1,4 @@
-editor_datapanel_wrapper = function (editor) {}
+editor_datapanel_wrapper = function (editor) {
+
+
+}

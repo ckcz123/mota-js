@@ -1,13 +1,13 @@
 editor_ui_wrapper = function (editor) {
 
-    
+
     /**
      * 根据鼠标点击, 得到从元素向上到body的所有id
      */
-    editor.uifunctions.getClickpath=function(e){
+    editor.uifunctions.getClickpath = function (e) {
         //console.log(e);
         var clickpath = [];
-        var getpath=function(e) {
+        var getpath = function (e) {
             var path = [];
             var currentElem = e.target;
             while (currentElem) {
@@ -38,13 +38,13 @@ editor_ui_wrapper = function (editor) {
      * + 维护绘图区的菜单的隐藏
      * + 记录最后一次点击的id(主要为了数据区服务)
      */
-    editor.uifunctions.body_click=function (e) {
-        var clickpath=editor.uifunctions.getClickpath(e);
-    
-        var unselect=true;
-        for(var ii=0,thisId;thisId=['edit','tip','brushMod','brushMod2','brushMod3','layerMod','layerMod2','layerMod3','viewportButtons'][ii];ii++){
-            if (clickpath.indexOf(thisId) !== -1){
-                unselect=false;
+    editor.uifunctions.body_click = function (e) {
+        var clickpath = editor.uifunctions.getClickpath(e);
+
+        var unselect = true;
+        for (var ii = 0, thisId; thisId = ['edit', 'tip', 'brushMod', 'brushMod2', 'brushMod3', 'layerMod', 'layerMod2', 'layerMod3', 'viewportButtons'][ii]; ii++) {
+            if (clickpath.indexOf(thisId) !== -1) {
+                unselect = false;
                 break;
             }
         }
@@ -55,9 +55,9 @@ editor_ui_wrapper = function (editor) {
                     editor.file.saveFloorFile(function (err) {
                         if (err) {
                             printe(err);
-                            throw(err)
+                            throw (err)
                         }
-                        ;printf('地图保存成功');
+                        ; printf('地图保存成功');
                     });
                 }
                 selectBox.isSelected(false);
@@ -65,30 +65,30 @@ editor_ui_wrapper = function (editor) {
             }
         }
         //editor.mode.onmode('');
-        if (e.button!=2 && !editor.isMobile){
-            editor.hideMidMenu();
+        if (e.button != 2 && !editor.isMobile) {
+            editor.uifunctions.hideMidMenu();
         }
-        if (clickpath.indexOf('down') !== -1 && editor.isMobile && clickpath.indexOf('midMenu') === -1){
-            editor.hideMidMenu();
+        if (clickpath.indexOf('down') !== -1 && editor.isMobile && clickpath.indexOf('midMenu') === -1) {
+            editor.uifunctions.hideMidMenu();
         }
-        if(clickpath.length>=2 && clickpath[0].indexOf('id_')===0){editor.lastClickId=clickpath[0]}
+        if (clickpath.length >= 2 && clickpath[0].indexOf('id_') === 0) { editor.lastClickId = clickpath[0] }
     }
 
     /**
      * editor.dom.body.onkeydown
      * 绑定快捷键
      */
-    editor.uifunctions.body_shortcut=function (e) {
+    editor.uifunctions.body_shortcut = function (e) {
 
         // UI预览 & 地图选点
         if (uievent && uievent.isOpen) {
             e.preventDefault();
             if (e.keyCode == 27) uievent.close();
             else if (e.keyCode == 13) uievent.confirm();
-            else if (e.keyCode==87) uievent.move(0,-1)
-            else if (e.keyCode==65) uievent.move(-1,0)
-            else if (e.keyCode==83) uievent.move(0,1);
-            else if (e.keyCode==68) uievent.move(1,0);
+            else if (e.keyCode == 87) uievent.move(0, -1)
+            else if (e.keyCode == 65) uievent.move(-1, 0)
+            else if (e.keyCode == 83) uievent.move(0, 1);
+            else if (e.keyCode == 68) uievent.move(1, 0);
             return;
         }
 
@@ -108,7 +108,7 @@ editor_ui_wrapper = function (editor) {
         }
 
         // 如果是开启事件/脚本编辑器状态，则忽略
-        if (editor_multi.id!="" || editor_blockly.id!="")
+        if (editor_multi.id != "" || editor_blockly.id != "")
             return;
 
         // 禁止快捷键的默认行为
@@ -123,13 +123,13 @@ editor_ui_wrapper = function (editor) {
             editor.bgmap = JSON.parse(JSON.stringify(editor.uivalues.preMapData.bgmap));
             editor.updateMap();
             editor.uivalues.reDo = JSON.parse(JSON.stringify(editor.uivalues.currDrawData));
-            editor.uivalues.currDrawData = {pos: [], info: {}};
+            editor.uivalues.currDrawData = { pos: [], info: {} };
             editor.uivalues.preMapData = null;
             return;
         }
         //Ctrl+y 重做一步redo
         if (e.keyCode == 89 && e.ctrlKey && editor.uivalues.reDo && editor.uivalues.reDo.pos.length && selectBox.isSelected()) {
-            editor.uivalues.preMapData = JSON.parse(JSON.stringify({map:editor.map,fgmap:editor.fgmap,bgmap:editor.bgmap}));
+            editor.uivalues.preMapData = JSON.parse(JSON.stringify({ map: editor.map, fgmap: editor.fgmap, bgmap: editor.bgmap }));
             for (var j = 0; j < editor.uivalues.reDo.pos.length; j++)
                 editor.map[editor.uivalues.reDo.pos[j].y][editor.uivalues.reDo.pos[j].x] = JSON.parse(JSON.stringify(editor.uivalues.reDo.info));
 
@@ -140,11 +140,11 @@ editor_ui_wrapper = function (editor) {
         }
 
         // PGUP和PGDOWN切换楼层
-        if (e.keyCode==33 || e.keyCode==34) {
+        if (e.keyCode == 33 || e.keyCode == 34) {
             e.preventDefault();
-            var index=editor.core.floorIds.indexOf(editor.currentFloorId);
-            var nextIndex = index + (e.keyCode==33?1:-1);
-            if (nextIndex>=0 && nextIndex<editor.core.floorIds.length) {
+            var index = editor.core.floorIds.indexOf(editor.currentFloorId);
+            var nextIndex = index + (e.keyCode == 33 ? 1 : -1);
+            if (nextIndex >= 0 && nextIndex < editor.core.floorIds.length) {
                 var toId = editor.core.floorIds[nextIndex];
                 editor_mode.onmode('nextChange');
                 editor_mode.onmode('floor');
@@ -154,21 +154,21 @@ editor_ui_wrapper = function (editor) {
             return;
         }
         //ctrl + 0~9 切换到快捷图块
-        if (e.ctrlKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1){
-            editor.setSelectBoxFromInfo(JSON.parse(JSON.stringify(editor.uivalues.shortcut[e.keyCode]||0)));
+        if (e.ctrlKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1) {
+            editor.setSelectBoxFromInfo(JSON.parse(JSON.stringify(editor.uivalues.shortcut[e.keyCode] || 0)));
             return;
         }
         //alt + 0~9 改变快捷图块
-        if (e.altKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1){
-            var infoToSave = JSON.stringify(editor.info||0);
-            if(infoToSave==JSON.stringify({}))return;
-            editor.uivalues.shortcut[e.keyCode]=JSON.parse(infoToSave);
-            printf('已保存该快捷图块, ctrl + '+(e.keyCode-48)+' 使用.')
-            core.setLocalStorage('shortcut',editor.uivalues.shortcut);
+        if (e.altKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1) {
+            var infoToSave = JSON.stringify(editor.info || 0);
+            if (infoToSave == JSON.stringify({})) return;
+            editor.uivalues.shortcut[e.keyCode] = JSON.parse(infoToSave);
+            printf('已保存该快捷图块, ctrl + ' + (e.keyCode - 48) + ' 使用.')
+            core.setLocalStorage('shortcut', editor.uivalues.shortcut);
             return;
         }
         var focusElement = document.activeElement;
-        if (!focusElement || focusElement.tagName.toLowerCase()=='body') {
+        if (!focusElement || focusElement.tagName.toLowerCase() == 'body') {
             // Ctrl+C, Ctrl+X, Ctrl+V
             if (e.ctrlKey && e.keyCode == 67 && !selectBox.isSelected()) {
                 e.preventDefault();
@@ -195,9 +195,9 @@ editor_ui_wrapper = function (editor) {
                 editor.file.saveFloorFile(function (err) {
                     if (err) {
                         printe(err);
-                        throw(err)
+                        throw (err)
                     }
-                    ;printf('粘贴事件成功');
+                    ; printf('粘贴事件成功');
                     editor.drawPosSelection();
                 });
                 return;
@@ -214,9 +214,9 @@ editor_ui_wrapper = function (editor) {
                     editor.file.saveFloorFile(function (err) {
                         if (err) {
                             printe(err);
-                            throw(err)
+                            throw (err)
                         }
-                        ;printf('地图保存成功');
+                        ; printf('地图保存成功');
                     });
                 }
                 selectBox.isSelected(false);
@@ -225,10 +225,10 @@ editor_ui_wrapper = function (editor) {
             }
             switch (e.keyCode) {
                 // WASD
-                case 87: editor.moveViewport(0,-1); break;
-                case 65: editor.moveViewport(-1,0); break;
-                case 83: editor.moveViewport(0,1); break;
-                case 68: editor.moveViewport(1,0); break;
+                case 87: editor.moveViewport(0, -1); break;
+                case 65: editor.moveViewport(-1, 0); break;
+                case 83: editor.moveViewport(0, 1); break;
+                case 68: editor.moveViewport(1, 0); break;
                 // Z~.
                 case 90: editor_mode.change('map'); break; // Z
                 case 88: editor_mode.change('loc'); break; // X

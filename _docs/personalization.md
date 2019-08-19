@@ -562,8 +562,6 @@ core.statusBar.speed.innerHTML = core.getFlag('speed', 0);
 
 如果flag:skill不为0，则代表当前处于某个技能开启状态，且状态栏显示flag:skillName值。伤害计算函数中只需要对flag:skill进行处理即可。
 
-!> 关于魔力上限：样板中默认没有提供status:manamax
-
 ### 状态栏的显示
 
 从V2.5开始，魔力值和技能名的状态栏项目已经被添加，可以直接使用。

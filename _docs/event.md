@@ -888,6 +888,14 @@ name是可选的，代表目标行走图的文件名。
 
 使用`{"type": "showStatusBar"}`会重新显示状态栏。
 
+### hideHero：隐藏勇士
+
+使用`{"type": "hideHero"}`可以隐藏勇士。
+
+### showHero：显示勇士
+
+使用`{"type": "showHero"}`会重新显示勇士。
+
 ### updateEnemys：更新怪物数据
 
 使用 `{"type": "updateEnemys"}` 可以动态修改怪物数据。

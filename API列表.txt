@@ -1871,8 +1871,11 @@ core.ui.relocateCanvas(name, x, y)
 重新定位一个自定义画布。x和y为画布的左上角坐标。
 
 
-core.ui.resizeCanvas(name, width, height)
-重新设置一个自定义画布的大小。width和height为新设置的宽高。此操作会清空画布。
+core.ui.resizeCanvas(name, width, height, styleOnly)
+重新设置一个自定义画布的大小。width和height为新设置的宽高。
+styleOnly控制是否只修改画布的显示大小（而不修改画布的内部大小）。
+如果styleOnly为true，则只修改其显示大小（即canvas.style.width）；
+否则，则会同时修改画布的显示大小和内部大小并清空画布内容。
 
 
 core.ui.deleteCanvas(name)

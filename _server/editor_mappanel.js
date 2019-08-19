@@ -500,7 +500,7 @@ editor_mappanel_wrapper = function (editor) {
     /**
      * 移动大地图可视窗口的绑定
      */
-    editor.uifunctions.viewportButtons_clickBinding = function () {
+    editor.uifunctions.viewportButtons_func = function () {
         var pressTimer = null;
         for (var ii = 0, node; node = editor.dom.viewportButtons.children[ii]; ii++) {
             (function (x, y) {
@@ -531,8 +531,38 @@ editor_mappanel_wrapper = function (editor) {
         }
     }
 
+    editor.uifunctions.selectFloor_func = function () {
+        var selectFloor = document.getElementById('selectFloor');
+        editor.game.getFloorFileList(function (floors) {
+            var outstr = [];
+            floors[0].forEach(function (floor) {
+                outstr.push(["<option value='", floor, "'>", floor, '</option>\n'].join(''));
+            });
+            selectFloor.innerHTML = outstr.join('');
+            selectFloor.value = core.status.floorId;
+            selectFloor.onchange = function () {
+                editor_mode.onmode('nextChange');
+                editor_mode.onmode('floor');
+                editor.changeFloor(selectFloor.value);
+            }
+        });
+    }
 
 
+    editor.uifunctions.saveFloor_func = function () {
+        var saveFloor = document.getElementById('saveFloor');
+        editor_mode.saveFloor = function () {
+            editor_mode.onmode('');
+            editor.file.saveFloorFile(function (err) {
+                if (err) {
+                    printe(err);
+                    throw (err)
+                }
+                ; printf('保存成功');
+            });
+        }
+        saveFloor.onclick = editor_mode.saveFloor;
+    }
 
 
 

@@ -41,7 +41,7 @@ editor_listen_wrapper = function (editor) {
         if (editor.dom.layerMod2) editor.dom.layerMod2.onchange = editor.uifunctions.layerMod2_onchange;
         if (editor.dom.layerMod3) editor.dom.layerMod3.onchange = editor.uifunctions.layerMod3_onchange;
 
-        editor.uifunctions.viewportButtons_clickBinding()
+        editor.uifunctions.viewportButtons_func()
     }
 
     editor.constructor.prototype.mobile_listen = function () {

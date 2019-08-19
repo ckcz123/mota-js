@@ -4,6 +4,39 @@ function editor() {
     this.layerMod = "map";//["fgmap","map","bgmap"]
     this.isMobile = false;
 
+    this.dom={
+        body:document.body,
+        eui:document.getElementById('eui'),
+        euiCtx:document.getElementById('eui').getContext('2d'),
+        mid:document.getElementById('mid'),
+        mapEdit:document.getElementById('mapEdit'),
+        selectFloor:document.getElementById('selectFloor'),
+        iconExpandBtn :document.getElementById('iconExpandBtn'),
+    };
+
+    this.uifunctions={};
+    this.uivalues={
+        // 绘制区拖动有关
+        holdingPath : 0,
+        stepPostfix : null,//用于存放寻路检测的第一个点之后的后续移动
+        mouseOutCheck : 2,
+        startPos:null,
+        endPos:null,
+        // 撤销/恢复
+        currDrawData : {
+            pos: [],
+            info: {}
+        },
+        reDo : null,
+        preMapData : null,
+        //
+        shortcut:{},
+        copyedInfo : null,
+        scrollBarHeight :0,
+        folded:false,
+
+    };
+
     window.onerror = function (msg, url, lineNo, columnNo, error) {
         var string = msg.toLowerCase();
         var substring = "script error";
@@ -52,6 +85,10 @@ editor.prototype.init = function (callback) {
         editor_game_wrapper(editor, main, core);
         editor_file_wrapper(editor);
         editor_table_wrapper(editor);
+        editor_ui_wrapper(editor);
+        editor_mappanel_wrapper(editor);
+        editor_datapanel_wrapper(editor);
+        editor_materialpanel_wrapper(editor);
         editor_unsorted_1_wrapper(editor);
         editor.printe=printe;
         afterMainInit();
@@ -148,7 +185,7 @@ editor.prototype.changeFloor = function (floorId, callback) {
         });
         editor.currentFloorData[name]=mapArray;
     }
-    editor.preMapData = null;
+    editor.uivalues.preMapData = null;
     core.changeFloor(floorId, null, {"x": 0, "y": 0, "direction": "up"}, null, function () {
         editor.game.fetchMapFromCore();
         editor.updateMap();
@@ -284,8 +321,8 @@ editor.prototype.drawInitData = function (icons) {
     var maxHeight = 700;
     var sumWidth = 0;
     editor.widthsX = {};
-    editor.folded = core.getLocalStorage('folded', false);
-    // editor.folded = true;
+    editor.uivalues.folded = core.getLocalStorage('folded', false);
+    // editor.uivalues.folded = true;
     editor.foldPerCol = 50;
     // var imgNames = Object.keys(images);  //还是固定顺序吧；
     var imgNames = ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"];
@@ -297,14 +334,14 @@ editor.prototype.drawInitData = function (icons) {
             for (var im in autotiles) {
                 tempy += autotiles[im].height;
             }
-            var tempx = editor.folded ? 32 : 3 * 32;
+            var tempx = editor.uivalues.folded ? 32 : 3 * 32;
             editor.widthsX[img] = [img, sumWidth / 32, (sumWidth + tempx) / 32, tempy];
             sumWidth += tempx;
             maxHeight = Math.max(maxHeight, tempy);
             continue;
         }
         var width = images[img].width, height = images[img].height, mh = height;
-        if (editor.folded) {
+        if (editor.uivalues.folded) {
             var per_height = (img == 'enemy48' || img == 'npc48' ? 48 : 32);
             width = Math.ceil(height / per_height / editor.foldPerCol) * 32;
             if (width > 32) mh = per_height * editor.foldPerCol;
@@ -353,7 +390,7 @@ editor.prototype.drawInitData = function (icons) {
                     editor.updateMap();
                 }
             })(editor.airwallImg,nowx);
-            if (editor.folded) {
+            if (editor.uivalues.folded) {
                 // --- 单列 & 折行
                 var subimgs = core.splitImage(images[img], 32, editor.foldPerCol * 32);
                 var frames = images[img].width / 32;
@@ -370,7 +407,7 @@ editor.prototype.drawInitData = function (icons) {
         }
         if (img == 'autotile') {
             var autotiles = images[img];
-            var tempx = editor.folded ? 32 : 96;
+            var tempx = editor.uivalues.folded ? 32 : 96;
             for (var im in autotiles) {
                 var subimgs = core.splitImage(autotiles[im], tempx, autotiles[im].height);
                 drawImage(subimgs[0], nowx, nowy);
@@ -379,7 +416,7 @@ editor.prototype.drawInitData = function (icons) {
             nowx += tempx;
             continue;
         }
-        if (editor.folded) {
+        if (editor.uivalues.folded) {
             // --- 单列 & 折行
             var per_height = img.endsWith('48') ? 48 : 32;
             var subimgs = core.splitImage(images[img], 32, editor.foldPerCol * per_height);
@@ -471,7 +508,7 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent){
         pos.y=thisevent.y;
         if(thisevent.x)pos.x+=thisevent.x;
         ysize = thisevent.images.endsWith('48') ? 48 : 32;
-        if (editor.folded && core.tilesets.indexOf(thisevent.images)==-1) {
+        if (editor.uivalues.folded && core.tilesets.indexOf(thisevent.images)==-1) {
             pos.x += Math.floor(pos.y / editor.foldPerCol);
             pos.y %= editor.foldPerCol;
         }
@@ -596,7 +633,7 @@ editor.prototype.clearPos = function (clearPos, pos, callback) {
     var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
     pos = pos || editor.pos;
     editor.hideMidMenu();
-    editor.preMapData = null;
+    editor.uivalues.preMapData = null;
     editor.info = 0;
     editor_mode.onmode('');
     if (clearPos)

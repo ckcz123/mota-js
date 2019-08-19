@@ -28,7 +28,7 @@ editor_file之后是更改editor.map的储存方式, 现有的存对象的模式
 + [ ] editor_mappanel 与地图面板相关的功能, <-unsorted_1/2/3
 + [ ] editor_datapanel 与数据面板相关的功能, <-unsorted_1/2/3
 + [ ] editor_materialpanel 与素材面板相关的功能, <-unsorted_1/2/3
-+ [ ] editor_ui 维护printe/printf/tip, 以及之后可能的窗口化
++ [ ] editor_ui 维护printe/printf/tip, 以及之后可能的窗口化, ui事件中没有具体到前三个面板中的函数 <-unsorted_1/2/3
 + [ ] editor 执行初始化流程加组合各组件
 + [ ] 原editor_mode 移除
 + [x] 原vm 移除

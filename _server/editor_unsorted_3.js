@@ -361,7 +361,6 @@ tip.whichShow=function(value){
     return tip._whichShow
 }
 selectBox=document.getElementById('selectBox')
-dataSelection=document.getElementById('dataSelection')
 selectBox._isSelected=false
 selectBox.isSelected=function(value){
     if(value!=null){
@@ -369,7 +368,7 @@ selectBox.isSelected=function(value){
         tip.isSelectedBlock(value);
         tip.whichShow(0);
         clearTimeout(tip.timer);
-        dataSelection.style.display=value?'':'none'
+        editor.dom.dataSelection.style.display=value?'':'none'
     }
     return selectBox._isSelected
 }

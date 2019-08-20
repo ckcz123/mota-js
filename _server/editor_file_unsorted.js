@@ -24,7 +24,7 @@ editor_file = function (editor, callback) {
                 editor.currentFloorData[name]=mapArray;
             }
         }
-        editor.file.saveFloor(editor.currentFloorData)
+        editor.file.saveFloor(editor.currentFloorData, callback)
     }
 
     ///////////////////////////////////////////////////////////////////////////

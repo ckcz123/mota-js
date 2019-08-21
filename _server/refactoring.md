@@ -1,5 +1,7 @@
 # 重构
 
+> 目前状态: 按功能分类已基本完成
+
 总体思路  
 + 按功能拆分文件
 + 左侧页面模块化, 方便添加
@@ -11,8 +13,6 @@
 + 此思路下editor.file的大部分内容会挪到editor.game, editor.game和editor.table可能会再进一步合并拆分
 
 editor_file之后是更改editor.map的储存方式, 现有的存对象的模式要在对象和数字间来回转换, 非常繁琐和奇怪
-
-再之后是把editor_unsorted_*.js整理清晰
 
 ## 文件结构
 

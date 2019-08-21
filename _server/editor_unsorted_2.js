@@ -15,72 +15,12 @@ editor_unsorted_2_wrapper=function(editor_mode){
         editor.uifunctions.createNewMaps_func()
 
         editor.uifunctions.changeFloorId_func()
-
-
-        // ratio|appendPicCanvas|bg|source_ctx|source|picClick|sprite_ctx|sprite|appendPicSelection
-        var ratio = 1;
-        var appendPicCanvas = document.getElementById('appendPicCanvas');
-        var bg = appendPicCanvas.children[0];
-        var source = appendPicCanvas.children[1];
-        var source_ctx=source.getContext('2d');
-        var picClick = appendPicCanvas.children[2];
-        var sprite = appendPicCanvas.children[3];
-        var sprite_ctx=sprite.getContext('2d');
-        var appendPicSelection = document.getElementById('appendPicSelection');
         
-        [source_ctx,sprite_ctx].forEach(function(ctx){
-            ctx.mozImageSmoothingEnabled = false;
-            ctx.webkitImageSmoothingEnabled = false;
-            ctx.msImageSmoothingEnabled = false;
-            ctx.imageSmoothingEnabled = false;
-        })
+        editor.uifunctions.fixCtx_func()
+        editor.uifunctions.selectAppend_func()
 
-        var selectAppend = document.getElementById('selectAppend');
-        var selectAppend_str = [];
-        ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"].forEach(function (image) {
-            selectAppend_str.push(["<option value='", image, "'>", image, '</option>\n'].join(''));
-        });
-        selectAppend.innerHTML = selectAppend_str.join('');
-        selectAppend.onchange = function () {
 
-            var value = selectAppend.value;
 
-            if (value == 'autotile') {
-                editor_mode.appendPic.imageName = 'autotile';
-                for (var jj=0;jj<4;jj++) appendPicSelection.children[jj].style = 'display:none';
-                if (editor_mode.appendPic.img) {
-                    sprite.style.width = (sprite.width = editor_mode.appendPic.img.width) / ratio + 'px';
-                    sprite.style.height = (sprite.height = editor_mode.appendPic.img.height) / ratio + 'px';
-                    sprite_ctx.clearRect(0, 0, sprite.width, sprite.height);
-                    sprite_ctx.drawImage(editor_mode.appendPic.img, 0, 0);
-                }
-                return;
-            }
-
-            var ysize = selectAppend.value.endsWith('48') ? 48 : 32;
-            editor_mode.appendPic.imageName = value;
-            var img = core.material.images[value];
-            editor_mode.appendPic.toImg = img;
-            var num = ~~img.width / 32;
-            editor_mode.appendPic.num = num;
-            editor_mode.appendPic.index = 0;
-            var selectStr = '';
-            for (var ii = 0; ii < num; ii++) {
-                appendPicSelection.children[ii].style = 'left:0;top:0;height:' + (ysize - 6) + 'px';
-                selectStr += '{"x":0,"y":0},'
-            }
-            editor_mode.appendPic.selectPos = eval('[' + selectStr + ']');
-            for (var jj = num; jj < 4; jj++) {
-                appendPicSelection.children[jj].style = 'display:none';
-            }
-            sprite.style.width = (sprite.width = img.width) / ratio + 'px';
-            sprite.style.height = (sprite.height = img.height + ysize) / ratio + 'px';
-            sprite_ctx.drawImage(img, 0, 0);
-        }
-        selectAppend.onchange();
-
-        var getPixel=editor.util.getPixel
-        var setPixel=editor.util.setPixel
 
         var autoAdjust = function (image, callback) {
             var changed = false;
@@ -98,7 +38,7 @@ editor_unsorted_2_wrapper=function(editor_mode){
             var trans = 0, white = 0, black=0;
             for (var i=0;i<image.width;i++) {
                 for (var j=0;j<image.height;j++) {
-                    var pixel = getPixel(imgData, i, j);
+                    var pixel = editor.util.getPixel(imgData, i, j);
                     if (pixel[3]==0) trans++;
                     if (pixel[0]==255 && pixel[1]==255 && pixel[2]==255 && pixel[3]==255) white++;
                     // if (pixel[0]==0 && pixel[1]==0 && pixel[2]==0 && pixel[3]==255) black++;
@@ -107,9 +47,9 @@ editor_unsorted_2_wrapper=function(editor_mode){
             if (white>black && white>trans*10 && confirm("看起来这张图片是以纯白为底色，是否自动调整为透明底色？")) {
                 for (var i=0;i<image.width;i++) {
                     for (var j=0;j<image.height;j++) {
-                        var pixel = getPixel(imgData, i, j);
+                        var pixel = editor.util.getPixel(imgData, i, j);
                         if (pixel[0]==255 && pixel[1]==255 && pixel[2]==255 && pixel[3]==255) {
-                            setPixel(imgData, i, j, [0,0,0,0]);
+                            editor.util.setPixel(imgData, i, j, [0,0,0,0]);
                         }
                     }
                 }
@@ -121,9 +61,9 @@ editor_unsorted_2_wrapper=function(editor_mode){
             if (black>white && black>trans*10 && confirm("看起来这张图片是以纯黑为底色，是否自动调整为透明底色？")) {
                 for (var i=0;i<image.width;i++) {
                     for (var j=0;j<image.height;j++) {
-                        var pixel = getPixel(imgData, i, j);
+                        var pixel = editor.util.getPixel(imgData, i, j);
                         if (pixel[0]==0 && pixel[1]==0 && pixel[2]==0 && pixel[3]==255) {
-                            setPixel(imgData, i, j, [0,0,0,0]);
+                            editor.util.setPixel(imgData, i, j, [0,0,0,0]);
                         }
                     }
                 }
@@ -134,7 +74,7 @@ editor_unsorted_2_wrapper=function(editor_mode){
             */
 
             // Step 2: 检测长宽比
-            var ysize = selectAppend.value.endsWith('48') ? 48 : 32;
+            var ysize = editor.dom.selectAppend.value.endsWith('48') ? 48 : 32;
             if ((image.width%32!=0 || image.height%ysize!=0) && (image.width<=128 && image.height<=ysize*4)
                 && confirm("目标长宽不符合条件，是否自动进行调整？")) {
                 var ncanvas = document.createElement('canvas').getContext('2d');
@@ -187,26 +127,26 @@ editor_unsorted_2_wrapper=function(editor_mode){
                         editor_mode.appendPic.width = image.width;
                         editor_mode.appendPic.height = image.height;
 
-                        if (selectAppend.value == 'autotile') {
+                        if (editor.dom.selectAppend.value == 'autotile') {
                             for (var ii = 0; ii < 3; ii++) {
-                                var newsprite = appendPicCanvas.children[ii];
-                                newsprite.style.width = (newsprite.width = image.width) / ratio + 'px';
-                                newsprite.style.height = (newsprite.height = image.height) / ratio + 'px';
+                                var newsprite = editor.dom.appendPicCanvas.children[ii];
+                                newsprite.style.width = (newsprite.width = image.width) / editor.uivalues.ratio + 'px';
+                                newsprite.style.height = (newsprite.height = image.height) / editor.uivalues.ratio + 'px';
                             }
-                            sprite_ctx.clearRect(0, 0, sprite.width, sprite.height);
-                            sprite_ctx.drawImage(image, 0, 0);
+                            editor.dom.spriteCtx.clearRect(0, 0, editor.dom.sprite.width, editor.dom.sprite.height);
+                            editor.dom.spriteCtx.drawImage(image, 0, 0);
                         }
                         else {
-                            var ysize = selectAppend.value.endsWith('48') ? 48 : 32;
+                            var ysize = editor.dom.selectAppend.value.endsWith('48') ? 48 : 32;
                             for (var ii = 0; ii < 3; ii++) {
-                                var newsprite = appendPicCanvas.children[ii];
-                                newsprite.style.width = (newsprite.width = Math.floor(image.width / 32) * 32) / ratio + 'px';
-                                newsprite.style.height = (newsprite.height = Math.floor(image.height / ysize) * ysize) / ratio + 'px';
+                                var newsprite = editor.dom.appendPicCanvas.children[ii];
+                                newsprite.style.width = (newsprite.width = Math.floor(image.width / 32) * 32) / editor.uivalues.ratio + 'px';
+                                newsprite.style.height = (newsprite.height = Math.floor(image.height / ysize) * ysize) / editor.uivalues.ratio + 'px';
                             }
                         }
 
                         //画灰白相间的格子
-                        var bgc = bg.getContext('2d');
+                        var bgc = editor.dom.bg.getContext('2d');
                         var colorA = ["#f8f8f8", "#cccccc"];
                         var colorIndex;
                         var sratio = 4;
@@ -220,11 +160,11 @@ editor_unsorted_2_wrapper=function(editor_mode){
                         }
 
                         //把导入的图片画出
-                        source_ctx.drawImage(image, 0, 0);
-                        editor_mode.appendPic.sourceImageData=source_ctx.getImageData(0,0,image.width,image.height);
+                        editor.dom.sourceCtx.drawImage(image, 0, 0);
+                        editor_mode.appendPic.sourceImageData=editor.dom.sourceCtx.getImageData(0,0,image.width,image.height);
 
                         //重置临时变量
-                        selectAppend.onchange();
+                        editor.dom.selectAppend.onchange();
                     });
                 });
             }, null, 'img');
@@ -251,11 +191,11 @@ editor_unsorted_2_wrapper=function(editor_mode){
             }
             for(var x=0; x<imgData.width; x++){
                 for(var y=0 ; y<imgData.height; y++){
-                    setPixel(nimgData,x,y,convert(getPixel(imgData,x,y),delta))
+                    editor.util.setPixel(nimgData,x,y,convert(editor.util.getPixel(imgData,x,y),delta))
                 }
             }
-            source_ctx.clearRect(0, 0, imgData.width, imgData.height);
-            source_ctx.putImageData(nimgData, 0, 0);
+            editor.dom.sourceCtx.clearRect(0, 0, imgData.width, imgData.height);
+            editor.dom.sourceCtx.putImageData(nimgData, 0, 0);
         }
 
         var left1 = document.getElementById('left1');
@@ -263,10 +203,10 @@ editor_unsorted_2_wrapper=function(editor_mode){
             var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
             var scrollTop = document.documentElement.scrollTop || document.body.scrollTop
             var loc = {
-                'x': scrollLeft + e.clientX + appendPicCanvas.scrollLeft - left1.offsetLeft - appendPicCanvas.offsetLeft,
-                'y': scrollTop + e.clientY + appendPicCanvas.scrollTop - left1.offsetTop - appendPicCanvas.offsetTop,
+                'x': scrollLeft + e.clientX + editor.dom.appendPicCanvas.scrollLeft - left1.offsetLeft - editor.dom.appendPicCanvas.offsetLeft,
+                'y': scrollTop + e.clientY + editor.dom.appendPicCanvas.scrollTop - left1.offsetTop - editor.dom.appendPicCanvas.offsetTop,
                 'size': 32,
-                'ysize': selectAppend.value.endsWith('48') ? 48 : 32
+                'ysize': editor.dom.selectAppend.value.endsWith('48') ? 48 : 32
             };
             return loc;
         }//返回可用的组件内坐标
@@ -276,7 +216,7 @@ editor_unsorted_2_wrapper=function(editor_mode){
             return pos;
         }
 
-        picClick.onclick = function (e) {
+        editor.dom.picClick.onclick = function (e) {
             var loc = eToLoc(e);
             var pos = locToPos(loc);
             //console.log(e,loc,pos);
@@ -285,7 +225,7 @@ editor_unsorted_2_wrapper=function(editor_mode){
             if (ii + 1 >= num) editor_mode.appendPic.index = ii + 1 - num;
             else editor_mode.appendPic.index++;
             editor_mode.appendPic.selectPos[ii] = pos;
-            appendPicSelection.children[ii].style = [
+            editor.dom.appendPicSelection.children[ii].style = [
                 'left:', pos.x * 32, 'px;',
                 'top:', pos.y * pos.ysize, 'px;',
                 'height:', pos.ysize - 6, 'px;'
@@ -301,9 +241,9 @@ editor_unsorted_2_wrapper=function(editor_mode){
                     printe("不合法的Autotile图片！");
                     return;
                 }
-                var imgData = source_ctx.getImageData(0,0,image.width,image.height);
-                sprite_ctx.putImageData(imgData, 0, 0);
-                var imgbase64 = sprite.toDataURL().split(',')[1];
+                var imgData = editor.dom.sourceCtx.getImageData(0,0,image.width,image.height);
+                editor.dom.spriteCtx.putImageData(imgData, 0, 0);
+                var imgbase64 = editor.dom.sprite.toDataURL().split(',')[1];
 
                 // Step 1: List文件名
                 fs.readdir('./project/images', function (err, data) {
@@ -340,29 +280,29 @@ editor_unsorted_2_wrapper=function(editor_mode){
 
             }
 
-            if (selectAppend.value == 'autotile') {
+            if (editor.dom.selectAppend.value == 'autotile') {
                 confirmAutotile();
                 return;
             }
 
-            var ysize = selectAppend.value.endsWith('48') ? 48 : 32;
+            var ysize = editor.dom.selectAppend.value.endsWith('48') ? 48 : 32;
             for (var ii = 0, v; v = editor_mode.appendPic.selectPos[ii]; ii++) {
-                // var imgData = source_ctx.getImageData(v.x * 32, v.y * ysize, 32, ysize);
-                // sprite_ctx.putImageData(imgData, ii * 32, sprite.height - ysize);
-                // sprite_ctx.drawImage(editor_mode.appendPic.img, v.x * 32, v.y * ysize, 32, ysize,  ii * 32, height,  32, ysize)
+                // var imgData = editor.dom.sourceCtx.getImageData(v.x * 32, v.y * ysize, 32, ysize);
+                // editor.dom.spriteCtx.putImageData(imgData, ii * 32, editor.dom.sprite.height - ysize);
+                // editor.dom.spriteCtx.drawImage(editor_mode.appendPic.img, v.x * 32, v.y * ysize, 32, ysize,  ii * 32, height,  32, ysize)
 
-                sprite_ctx.drawImage(source_ctx.canvas, v.x*32, v.y*ysize, 32, ysize, 32*ii, sprite.height - ysize, 32, ysize);
+                editor.dom.spriteCtx.drawImage(editor.dom.sourceCtx.canvas, v.x*32, v.y*ysize, 32, ysize, 32*ii, editor.dom.sprite.height - ysize, 32, ysize);
             }
-            var dt = sprite_ctx.getImageData(0, 0, sprite.width, sprite.height);
-            var imgbase64 = sprite.toDataURL().split(',')[1];
+            var dt = editor.dom.spriteCtx.getImageData(0, 0, editor.dom.sprite.width, editor.dom.sprite.height);
+            var imgbase64 = editor.dom.sprite.toDataURL().split(',')[1];
             fs.writeFile('./project/images/' + editor_mode.appendPic.imageName + '.png', imgbase64, 'base64', function (err, data) {
                 if (err) {
                     printe(err);
                     throw(err)
                 }
                 printe('追加素材成功，请F5刷新编辑器，或继续追加当前素材');
-                sprite.style.height = (sprite.height = (sprite.height+ysize)) + "px";
-                sprite_ctx.putImageData(dt, 0, 0);
+                editor.dom.sprite.style.height = (editor.dom.sprite.height = (editor.dom.sprite.height+ysize)) + "px";
+                editor.dom.spriteCtx.putImageData(dt, 0, 0);
             });
         }
 

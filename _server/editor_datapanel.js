@@ -299,8 +299,60 @@ editor_datapanel_wrapper = function (editor) {
 
 
 
+    editor.uifunctions.fixCtx_func = function () {
+        [editor.dom.sourceCtx, editor.dom.spriteCtx].forEach(function (ctx) {
+            ctx.mozImageSmoothingEnabled = false;
+            ctx.webkitImageSmoothingEnabled = false;
+            ctx.msImageSmoothingEnabled = false;
+            ctx.imageSmoothingEnabled = false;
+        })
+    }
 
+    editor.uifunctions.selectAppend_func = function () {
 
+        var selectAppend_str = [];
+        ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"].forEach(function (image) {
+            selectAppend_str.push(["<option value='", image, "'>", image, '</option>\n'].join(''));
+        });
+        editor.dom.selectAppend.innerHTML = selectAppend_str.join('');
+        editor.dom.selectAppend.onchange = function () {
+
+            var value = editor.dom.selectAppend.value;
+
+            if (value == 'autotile') {
+                editor_mode.appendPic.imageName = 'autotile';
+                for (var jj = 0; jj < 4; jj++) editor.dom.appendPicSelection.children[jj].style = 'display:none';
+                if (editor_mode.appendPic.img) {
+                    editor.dom.sprite.style.width = (editor.dom.sprite.width = editor_mode.appendPic.img.width) / editor.uivalues.ratio + 'px';
+                    editor.dom.sprite.style.height = (editor.dom.sprite.height = editor_mode.appendPic.img.height) / editor.uivalues.ratio + 'px';
+                    editor.dom.spriteCtx.clearRect(0, 0, editor.dom.sprite.width, editor.dom.sprite.height);
+                    editor.dom.spriteCtx.drawImage(editor_mode.appendPic.img, 0, 0);
+                }
+                return;
+            }
+
+            var ysize = editor.dom.selectAppend.value.endsWith('48') ? 48 : 32;
+            editor_mode.appendPic.imageName = value;
+            var img = core.material.images[value];
+            editor_mode.appendPic.toImg = img;
+            var num = ~~img.width / 32;
+            editor_mode.appendPic.num = num;
+            editor_mode.appendPic.index = 0;
+            var selectStr = '';
+            for (var ii = 0; ii < num; ii++) {
+                editor.dom.appendPicSelection.children[ii].style = 'left:0;top:0;height:' + (ysize - 6) + 'px';
+                selectStr += '{"x":0,"y":0},'
+            }
+            editor_mode.appendPic.selectPos = eval('[' + selectStr + ']');
+            for (var jj = num; jj < 4; jj++) {
+                editor.dom.appendPicSelection.children[jj].style = 'display:none';
+            }
+            editor.dom.sprite.style.width = (editor.dom.sprite.width = img.width) / editor.uivalues.ratio + 'px';
+            editor.dom.sprite.style.height = (editor.dom.sprite.height = img.height + ysize) / editor.uivalues.ratio + 'px';
+            editor.dom.spriteCtx.drawImage(img, 0, 0);
+        }
+        editor.dom.selectAppend.onchange();
+    }
 
 
 

@@ -33,6 +33,15 @@ function editor() {
         layerMod2:document.getElementById('layerMod2'),
         layerMod3:document.getElementById('layerMod3'),
         viewportButtons:document.getElementById('viewportButtons'),
+        appendPicCanvas : document.getElementById('appendPicCanvas'),
+        bg : document.getElementById('appendPicCanvas').children[0],
+        source : document.getElementById('appendPicCanvas').children[1],
+        picClick : document.getElementById('appendPicCanvas').children[2],
+        sprite : document.getElementById('appendPicCanvas').children[3],
+        sourceCtx:document.getElementById('appendPicCanvas').children[1].getContext('2d'),
+        spriteCtx:document.getElementById('appendPicCanvas').children[3].getContext('2d'),
+        appendPicSelection : document.getElementById('appendPicSelection'),
+        selectAppend : document.getElementById('selectAppend'),
     };
 
     this.uivalues={
@@ -60,6 +69,7 @@ function editor() {
         lastRightButtonPos:[{x:0,y:0},{x:0,y:0}],
         lastCopyedInfo : [null, null],
         //
+        ratio : 1,
 
     };
 

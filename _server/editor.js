@@ -42,6 +42,10 @@ function editor() {
         spriteCtx:document.getElementById('appendPicCanvas').children[3].getContext('2d'),
         appendPicSelection : document.getElementById('appendPicSelection'),
         selectAppend : document.getElementById('selectAppend'),
+        selectFileBtn :document.getElementById('selectFileBtn'),
+        changeFloorId :document.getElementById('changeFloorId'),
+        left1 : document.getElementById('left1'),
+        editModeSelect :document.getElementById('editModeSelect'),
     };
 
     this.uivalues={
@@ -140,7 +144,6 @@ editor.prototype.init = function (callback) {
         editor_file = editor_file(editor, function () {
             editor.file = editor_file;
             editor_mode = editor_mode(editor);
-            editor_unsorted_2_wrapper(editor_mode);
             editor.mode = editor_mode;
             core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.clone(core.initStatus.maps));
             core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function () {
@@ -563,6 +566,12 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent){
     editor_mode.onmode('enemyitem');
 }
 
+editor.prototype.addUsedFlags = function (s) {
+    s.replace(/flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, function (s0, s1) {
+        editor.used_flags[s1] = true; return s0;
+    });
+}
+
 editor.prototype.listen = function () {
     // 移动至 editor_listen.js
 }//绑定事件
@@ -571,129 +580,7 @@ editor.prototype.mobile_listen=function(){
     // 移动至 editor_listen.js
 }
 
-editor.prototype.copyFromPos = function (pos) {
-    var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
-    pos = pos || editor.pos;
-    var map = core.clone(editor.map[pos.y][pos.x]);
-    var events = {};
-    fields.forEach(function(v){
-        events[v] = core.clone(editor.currentFloorData[v][pos.x+','+pos.y]);
-    })
-    return {map: map, events: events};
-}
 
-editor.prototype.pasteToPos = function (info, pos) {
-    if (info == null) return;
-    var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
-    pos = pos || editor.pos;
-    editor.map[pos.y][pos.x] = core.clone(info.map);
-    fields.forEach(function(v){
-        if (info.events[v] == null) delete editor.currentFloorData[v][pos.x+","+pos.y];
-        else editor.currentFloorData[v][pos.x+","+pos.y] = core.clone(info.events[v]);
-    });
-}
 
-editor.prototype.movePos = function (startPos, endPos, callback) {
-    if (!startPos || !endPos) return;
-    if (startPos.x == endPos.x && startPos.y == endPos.y) return;
-    var copyed = editor.copyFromPos(startPos);
-    editor.pasteToPos({map:0, events: {}}, startPos);
-    editor.pasteToPos(copyed, endPos);
-    editor.updateMap();
-    editor.file.saveFloorFile(function (err) {
-        if (err) {
-            printe(err);
-            throw(err)
-        }
-        ;printf('移动事件成功');
-        editor.drawPosSelection();
-        if (callback) callback();
-    });
-}
-
-editor.prototype.exchangePos = function (startPos, endPos, callback) {
-    if (!startPos || !endPos) return;
-    if (startPos.x == endPos.x && startPos.y == endPos.y) return;
-    var startInfo = editor.copyFromPos(startPos);
-    var endInfo = editor.copyFromPos(endPos);
-    editor.pasteToPos(startInfo, endPos);
-    editor.pasteToPos(endInfo, startPos);
-    editor.updateMap();
-    editor.file.saveFloorFile(function (err) {
-        if (err) {
-            printe(err);
-            throw(err)
-        }
-        ;printf('交换事件成功');
-        editor.drawPosSelection();
-        if (callback) callback();
-    });
-}
-
-editor.prototype.moveBgFg = function (startPos, endPos, name, callback) {
-    if (!startPos || !endPos || ["bgmap","fgmap"].indexOf(name)<0) return;
-    if (startPos.x == endPos.x && startPos.y == endPos.y) return;
-    editor[name][endPos.y][endPos.x] = editor[name][startPos.y][startPos.x];
-    editor[name][startPos.y][startPos.x] = 0;
-    editor.updateMap();
-    editor.file.saveFloorFile(function (err) {
-        if (err) {
-            printe(err);
-            throw(err)
-        }
-        ;printf('移动图块成功');
-        editor.drawPosSelection();
-        if (callback) callback();
-    });
-}
-
-editor.prototype.exchangeBgFg = function (startPos, endPos, name, callback) {
-    if (!startPos || !endPos || ["bgmap","fgmap"].indexOf(name)<0) return;
-    if (startPos.x == endPos.x && startPos.y == endPos.y) return;
-    var value = editor[name][endPos.y][endPos.x];
-    editor[name][endPos.y][endPos.x] = editor[name][startPos.y][startPos.x];
-    editor[name][startPos.y][startPos.x] = value;
-    editor.updateMap();
-    editor.file.saveFloorFile(function (err) {
-        if (err) {
-            printe(err);
-            throw(err)
-        }
-        ;printf('交换图块成功');
-        editor.drawPosSelection();
-        if (callback) callback();
-    });
-
-}
-
-editor.prototype.clearPos = function (clearPos, pos, callback) {
-    var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
-    pos = pos || editor.pos;
-    editor.uifunctions.hideMidMenu();
-    editor.uivalues.preMapData = null;
-    editor.info = 0;
-    editor_mode.onmode('');
-    if (clearPos)
-        editor.map[pos.y][pos.x]=editor.info;
-    editor.updateMap();
-    fields.forEach(function(v){
-        delete editor.currentFloorData[v][pos.x+','+pos.y];
-    })
-    editor.file.saveFloorFile(function (err) {
-        if (err) {
-            printe(err);
-            throw(err)
-        }
-        ;printf(clearPos?'清空该点和事件成功':'只清空该点事件成功');
-        editor.drawPosSelection();
-        if (callback) callback();
-    });
-}
-
-editor.prototype.addUsedFlags = function (s) {
-    s.replace(/flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, function (s0, s1) {
-        editor.used_flags[s1] = true; return s0;
-    });
-}
 
 editor = new editor();

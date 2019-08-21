@@ -337,7 +337,7 @@ editor_table_wrapper = function (editor) {
     editor_table.prototype.addfunc = function (guid, obj, commentObj, thisTr, input, field, cobj, modeNode) {
         editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
 
-        var mode = document.getElementById('editModeSelect').value;
+        var mode = editor.dom.editModeSelect.value;
 
         // 1.输入id
         var newid = prompt('请输入新项的ID（仅公共事件支持中文ID）');

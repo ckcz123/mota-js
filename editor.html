@@ -559,7 +559,6 @@
 <script src='_server/editor_datapanel.js'></script>
 <script src='_server/editor_materialpanel.js'></script>
 <script src='_server/editor_listen.js'></script>
-<script src='_server/editor_unsorted_2.js'></script>
 <script src='_server/editor_unsorted_3.js'></script>
 <script src='libs/thirdparty/lz-string.min.js'></script>
 <script src='libs/thirdparty/localforage.min.js'></script>
@@ -568,7 +567,7 @@
 <script>
     editor.init(function () {
         editor.listen();
-        editor.mode.listen();
+        editor.mode_listen();
         editor.mobile_listen();
     });
     //main.listen();

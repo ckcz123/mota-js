@@ -76,9 +76,9 @@ editor_blockly = function () {
       MotaActionBlocks['confirm_s'].xmlText(),
       MotaActionBlocks['choices_s'].xmlText([
         '选择剑或者盾','流浪者','man',MotaActionBlocks['choicesContext'].xmlText([
-          '剑','','',null,MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [3,3]}]),
+          '剑','','',null,'',MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [3,3]}]),
           MotaActionBlocks['choicesContext'].xmlText([
-            '盾','','',null,MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [9,3]}]),
+            '盾','','',null,'',MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [9,3]}]),
           ])
         ])
       ]),
@@ -150,8 +150,12 @@ editor_blockly = function () {
       MotaActionBlocks['waitAsync_s'].xmlText(),
       MotaActionBlocks['vibrate_s'].xmlText(),
       MotaActionBlocks['animate_s'].xmlText(),
+      MotaActionBlocks['setViewport_s'].xmlText(),
+      MotaActionBlocks['moveViewport_s'].xmlText(),
       MotaActionBlocks['showStatusBar_s'].xmlText(),
       MotaActionBlocks['hideStatusBar_s'].xmlText(),
+      MotaActionBlocks['showHero_s'].xmlText(),
+      MotaActionBlocks['hideHero_s'].xmlText(),
       MotaActionBlocks['setCurtain_0_s'].xmlText(),
       MotaActionBlocks['setCurtain_1_s'].xmlText(),
       MotaActionBlocks['screenFlash_s'].xmlText(),
@@ -168,6 +172,29 @@ editor_blockly = function () {
       MotaActionBlocks['callSave_s'].xmlText(),
       MotaActionBlocks['autoSave_s'].xmlText(),
       MotaActionBlocks['callLoad_s'].xmlText(),
+    ],
+    'UI绘制':[
+      MotaActionBlocks['previewUI_s'].xmlText(),
+      MotaActionBlocks['clearMap_s'].xmlText(),
+      MotaActionBlocks['clearMap_1_s'].xmlText(),
+      MotaActionBlocks['setAttribute_s'].xmlText(),
+      MotaActionBlocks['fillText_s'].xmlText(),
+      MotaActionBlocks['fillBoldText_s'].xmlText(),
+      MotaActionBlocks['drawTextContent_s'].xmlText(),
+      MotaActionBlocks['fillRect_s'].xmlText(),
+      MotaActionBlocks['strokeRect_s'].xmlText(),
+      MotaActionBlocks['drawLine_s'].xmlText(),
+      MotaActionBlocks['drawArrow_s'].xmlText(),
+      MotaActionBlocks['fillPolygon_s'].xmlText(),
+      MotaActionBlocks['strokePolygon_s'].xmlText(),
+      MotaActionBlocks['fillCircle_s'].xmlText(),
+      MotaActionBlocks['strokeCircle_s'].xmlText(),
+      MotaActionBlocks['drawImage_s'].xmlText(),
+      MotaActionBlocks['drawImage_1_s'].xmlText(),
+      MotaActionBlocks['drawIcon_s'].xmlText(),
+      MotaActionBlocks['drawBackground_s'].xmlText(),
+      MotaActionBlocks['drawSelector_s'].xmlText(),
+      MotaActionBlocks['drawSelector_1_s'].xmlText(),
     ],
     '原生脚本':[
       MotaActionBlocks['function_s'].xmlText(),
@@ -366,7 +393,7 @@ function omitedcheckUpdateFunction(event) {
     }
   }
   try {
-    var code = Blockly.JavaScript.workspaceToCode(workspace).replace(/\\\\i/g, '\\\\\\\\i');
+    var code = Blockly.JavaScript.workspaceToCode(workspace).replace(/\\\\(i|c|d|e)/g, '\\\\\\\\$1');
     codeAreaHL.setValue(code);
   } catch (error) {
     codeAreaHL.setValue(String(error));
@@ -509,8 +536,7 @@ function omitedcheckUpdateFunction(event) {
         MotaActionFunctions.parse(
             eval('obj=' + codeAreaHL.getValue().replace(/[<>&]/g, function (c) {
                 return {'<': '&lt;', '>': '&gt;', '&': '&amp;'}[c];
-            }).replace(/\\r/g, '\\\\r').replace(/\\f/g, '\\\\f')
-                .replace(/\\i/,'\\\\i')),
+            }).replace(/\\(r|f|i|c|d|e)/g,'\\\\$1')),
             document.getElementById('entryType').value
         );
     }
@@ -584,14 +610,44 @@ function omitedcheckUpdateFunction(event) {
             return;
         }
         var code = Blockly.JavaScript.workspaceToCode(editor_blockly.workspace);
-        code = code.replace(/\\i/g, '\\\\i');
+        code = code.replace(/\\(i|c|d|e)/g, '\\\\$1');
         eval('var obj=' + code);
         setvalue(JSON.stringify(obj));
     }
 
+    var previewBlock = function (b) {
+        var types = [
+            "previewUI_s", "clearMap_s", "clearMap_1_s", "setAttribute_s", "fillText_s",
+            "fillBoldText_s", "drawTextContent_s", "fillRect_s", "strokeRect_s", "drawLine_s",
+            "drawArrow_s", "fillPolygon_s", "strokePolygon_s", "fillCircle_s", "strokeCircle_s",
+            "drawImage_s", "drawImage_1_s", "drawIcon_s", "drawBackground_s", "drawSelector_s", "drawSelector_1_s"
+        ];
+        if (b && types.indexOf(b.type)>=0) {
+            try {
+                var code = "[" + Blockly.JavaScript.blockToCode(b).replace(/\\(i|c|d|e)/g, '\\\\$1') + "]";
+                eval("var obj="+code);
+                // console.log(obj);
+                if (obj.length > 0 && b.type.startsWith(obj[0].type)) {
+                    if (b.type == 'previewUI_s')
+                        uievent.previewUI(obj[0].action);
+                    else uievent.previewUI([obj[0]]);
+                }
+            } catch (e) {main.log(e);}
+            return true;
+        }
+        return false;
+    }
+
     editor_blockly.doubleClickBlock = function (blockId) {
         var b = editor_blockly.workspace.getBlockById(blockId);
-        //console.log(b);
+
+        if (previewBlock(b)) return;
+
+        if (b && b.type in selectPointBlocks) { // selectPoint
+            this.selectPoint();
+            return;
+        }
+
         var textStringDict = {
             'text_0_s': 'EvalString_0',
             'text_1_s': 'EvalString_2',
@@ -603,6 +659,7 @@ function omitedcheckUpdateFunction(event) {
             'function_s': 'RawEvalString_0',
             'shopsub': 'EvalString_3',
             'confirm_s': 'EvalString_0',
+            'drawTextContent_s': 'EvalString_0',
         }
         var f = b ? textStringDict[b.type] : null;
         if (f) {
@@ -650,40 +707,26 @@ function omitedcheckUpdateFunction(event) {
 
     // Index from 1 - 9
     editor_blockly.openToolbox = function(index) {
-        // var element = document.getElementById(':'+index);
-        // if (element == null || element.getAttribute("aria-selected")=="true") return;
-        // element.click();
-        editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index-1]);
+        if (index < 0) index += editor_blockly.workspace.toolbox_.tree_.children_.length;
+        editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index]);
     }
     editor_blockly.reopenToolbox = function(index) {
-        // var element = document.getElementById(':'+index);
-        // if (element == null) return;
-        // if (element.getAttribute("aria-selected")=="true") element.click();
-        // element.click();
-        editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index-1]);
-        editor_blockly.workspace.getFlyout_().show(editor_blockly.workspace.toolbox_.tree_.children_[index-1].blocks);
+        if (index < 0) index += editor_blockly.workspace.toolbox_.tree_.children_.length;
+        editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index]);
+        editor_blockly.workspace.getFlyout_().show(editor_blockly.workspace.toolbox_.tree_.children_[index].blocks);
     }
 
     editor_blockly.closeToolbox = function() {
-        /*
-        for (var i=1; i<=10; i++) {
-            var element = document.getElementById(':'+i);
-            if (element && element.getAttribute("aria-selected")=="true") {
-                element.click();
-                return;
-            }
-        }
-        */
         editor_blockly.workspace.toolbox_.clearSelection();
     }
 
     var searchInput = document.getElementById("searchBlock");
     searchInput.onfocus = function () {
-        editor_blockly.reopenToolbox(10);
+        editor_blockly.reopenToolbox(-1);
     }
 
     searchInput.oninput = function () {
-        editor_blockly.reopenToolbox(10);
+        editor_blockly.reopenToolbox(-1);
     }
 
     editor_blockly.searchBlock = function (value) {
@@ -708,6 +751,290 @@ function omitedcheckUpdateFunction(event) {
         return results.length == 0 ? editor_blockly.lastUsedType : results;
     }
 
+    // ------ select point ------
+
+    // id: [x, y, floorId, forceFloor]
+    var selectPointBlocks = {
+        "changeFloor_m": ["Number_0", "Number_1", "IdString_0", true],
+        "jumpHero_s": ["PosString_0", "PosString_1"],
+        "changeFloor_s": ["PosString_0", "PosString_1", "IdString_0", true],
+        "changePos_0_s": ["PosString_0", "PosString_1"],
+        "battle_1_s": ["PosString_0", "PosString_1"],
+        "openDoor_s": ["PosString_0", "PosString_1", "IdString_0"],
+        "closeDoor_s": ["PosString_0", "PosString_1"],
+        "show_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "hide_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "setBlock_s": ["EvalString_1", "EvalString_2", "IdString_0"],
+        "move_s": ["PosString_0", "PosString_1"],
+        "jump_s": ["PosString_2", "PosString_3"], // 跳跃暂时只考虑终点
+        "showBgFgMap_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "hideBgFgMap_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "setBgFgBlock_s": ["PosString_0", "PosString_1", "IdString_0"],
+        "showFloorImg_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "hideFloorImg_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "trigger_s": ["PosString_0", "PosString_1"],
+        "insert_2_s": ["PosString_0", "PosString_1", "IdString_0"],
+        "animate_s": ["EvalString_0", "EvalString_0"],
+        "setViewport_s": ["PosString_0", "PosString_1"]
+    }
+
+    editor_blockly.selectPoint = function () {
+        var block = Blockly.selected, arr = null;
+        var floorId = editor.currentFloorId, pos = editor.pos, x = pos.x, y = pos.y;
+        if (block != null && block.type in selectPointBlocks) {
+            arr = selectPointBlocks[block.type];
+            var xv = parseInt(block.getFieldValue(arr[0])), yv = parseInt(block.getFieldValue(arr[1]));
+            if (block.type == 'animate_s') {
+                var v = block.getFieldValue(arr[0]).split(",");
+                xv = parseInt(v[0]); yv = parseInt(v[1]);
+            }
+            if (!isNaN(xv)) x = xv;
+            if (!isNaN(yv)) y = yv;
+            if (arr[2] != null) floorId = block.getFieldValue(arr[2]) || floorId;
+        }
+        uievent.selectPoint(floorId, x, y, arr && arr[2] == null, function (fv, xv, yv) {
+            if (!arr) return;
+            if (arr[2] != null) {
+                if (fv != editor.currentFloorId) block.setFieldValue(fv, arr[2]);
+                else block.setFieldValue(arr[3] ? fv : "", arr[2]);
+            }
+            if (block.type == 'animate_s') {
+                block.setFieldValue(xv+","+yv, arr[0]);
+            }
+            else {
+                block.setFieldValue(xv+"", arr[0]);
+                block.setFieldValue(yv+"", arr[1]);
+            }
+            if (block.type == 'changeFloor_m') {
+                block.setFieldValue("floorId", "Floor_List_0");
+                block.setFieldValue("loc", "Stair_List_0");
+            }
+        });
+    }
+
+    editor_blockly.getAutoCompletions = function (content) {
+        // --- content为当前框中输入内容；将返回一个列表，为后续所有可补全内容
+
+        // 检查 flag:xxx，item:xxx和flag:xxx
+        var index = content.lastIndexOf(":");
+        if (index >= 0) {
+            var before = content.substring(0, index), token = content.substring(index+1);
+            if (/^[a-zA-Z0-9_\u4E00-\u9FCC]*$/.test(token)) {
+                if (before.endsWith("status")) {
+                    return Object.keys(core.status.hero).filter(function (one) {
+                        return one != token && one.startsWith(token);
+                    }).sort();
+                }
+                else if (before.endsWith("item")) {
+                    return Object.keys(core.material.items).filter(function (one) {
+                        return one != token && one.startsWith(token);
+                    }).sort();
+                }
+                else if (before.endsWith("flag")) {
+                    return Object.keys(editor.used_flags || {}).filter(function (one) {
+                        return one != token && one.startsWith(token);
+                    }).sort();
+                }
+            }
+        }
+
+        // 提供 core.xxx 的补全
+        index = content.lastIndexOf("core.");
+        if (index >= 0) {
+            var s = content.substring(index + 5);
+            if (/^[\w.]*$/.test(s)) {
+                var tokens = s.split(".");
+                var now = core, prefix = tokens[tokens.length - 1];
+                for (var i = 0; i < tokens.length - 1; ++i) {
+                    now = now[tokens[i]];
+                    if (now == null) break;
+                }
+                if (now != null) {
+                    var candidates = [];
+                    for (var i in now) {
+                        candidates.push(i);
+                    }
+                    return candidates.filter(function (one) {
+                        return one != prefix && one.startsWith(prefix);
+                    }).sort();
+                }
+            }
+        }
+
+        return [];
+    }
+
+    editor_blockly.completeItems = [];
     return editor_blockly;
 }
-//editor_blockly=editor_blockly();
+
+// --- modify Blockly
+
+Blockly.FieldColour.prototype.createWidget_ = function() {
+    Blockly.WidgetDiv.hide();
+
+    // console.log('here')
+    var self=this;
+    var pb=self.sourceBlock_
+    var args = MotaActionBlocks[pb.type].args
+    var targetf=args[args.indexOf(self.name)-1]
+
+    var getValue=function(){
+        // return self.getValue() // css颜色
+        var f = pb.getFieldValue(targetf);
+        if (/^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/.test(f)) {
+            return f;
+        }
+        return "";
+        // 也可以用 pb.getFieldValue(targetf) 获得颜色块左边的域的内容
+    }
+
+    var setValue=function(newValue){ // css颜色
+        self.setValue(newValue)
+        var c=new Colors();
+        c.setColor(newValue)
+        var rgbatext = [c.colors.webSmart.r,c.colors.webSmart.g,c.colors.webSmart.b,c.colors.alpha].join(",");
+        pb.setFieldValue(rgbatext, targetf) // 放在颜色块左边的域中
+    }
+
+    setTimeout(function () {
+        document.getElementById("colorPicker").value = getValue();
+        window.jsColorPicker.confirm = setValue;
+        // 设置位置
+        triggerColorPicker(Blockly.WidgetDiv.DIV.style.left, Blockly.WidgetDiv.DIV.style.top);
+    });
+
+    return document.createElement('table');
+};
+
+Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
+    Blockly.WidgetDiv.show(this, this.sourceBlock_.RTL, this.widgetDispose_());
+    var div = Blockly.WidgetDiv.DIV;
+    // Create the input.
+    var htmlInput =
+        goog.dom.createDom(goog.dom.TagName.INPUT, 'blocklyHtmlInput');
+    htmlInput.setAttribute('spellcheck', this.spellcheck_);
+    var fontSize =
+        (Blockly.FieldTextInput.FONTSIZE * this.workspace_.scale) + 'pt';
+    div.style.fontSize = fontSize;
+    htmlInput.style.fontSize = fontSize;
+
+    Blockly.FieldTextInput.htmlInput_ = htmlInput;
+    div.appendChild(htmlInput);
+
+    htmlInput.value = htmlInput.defaultValue = this.text_;
+    htmlInput.oldValue_ = null;
+
+    // console.log('here')
+    var self=this;
+    var pb=self.sourceBlock_
+    var args = MotaActionBlocks[pb.type].args
+    var targetf=args[args.indexOf(self.name)+1]
+
+    // ------ colour
+
+    if(targetf && targetf.slice(0,7)==='Colour_'){
+        var inputDom = htmlInput;
+        // var getValue=function(){ // 获得自己的字符串
+        //     return pb.getFieldValue(self.name);
+        // }
+        var setValue = function(newValue){ // 设置右边颜色块的css颜色
+            pb.setFieldValue(newValue, targetf)
+        }
+        // 给inputDom绑事件
+        inputDom.oninput=function(){
+            var value=inputDom.value
+            if(/[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?/.test(value)){
+                setValue('rgba('+value+')')
+            }
+        }
+    }
+    else {
+
+        htmlInput.onkeydown = function (e) {
+            if (e.keyCode == 13 && awesomplete.opened && awesomplete.selected) {
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                awesomplete.select();
+                return false;
+            }
+        }
+
+        // --- awesomplete
+        var awesomplete = new Awesomplete(htmlInput, {
+            minChars: 4,
+            maxItems: 12,
+            autoFirst: true,
+            replace: function (text) {
+                text = text.toString();
+                var value = this.input.value, index = this.input.selectionEnd;
+                if (index == null) index = value.length;
+                if (index < awesomplete.prefix.length) index = awesomplete.prefix.length;
+                var str = value.substring(0, index - awesomplete.prefix.length) + text + value.substring(index);
+                this.input.value = str;
+                pb.setFieldValue(str, self.name);
+                index += text.length - awesomplete.prefix.length;
+                this.input.setSelectionRange(index, index);
+
+                editor_blockly.completeItems = editor_blockly.completeItems.filter(function (x) {
+                    return x != text;
+                });
+                editor_blockly.completeItems.unshift(text);
+            },
+            filter: function () {return true;},
+            item: function (text, input) {
+                var li = document.createElement("li");
+                li.setAttribute("role", "option");
+                li.setAttribute("aria-selected", "false");
+                input = awesomplete.prefix.trim();
+                if (input != "") text = text.replace(new RegExp("^"+input, "i"), "<mark>$&</mark>");
+                li.innerHTML = text;
+                return li;
+            },
+            sort: function (a, b) {
+                a = a.toString(); b = b.toString();
+                var ia = editor_blockly.completeItems.indexOf(a), ib = editor_blockly.completeItems.indexOf(b);
+                if (ia < 0) ia = editor_blockly.completeItems.length;
+                if (ib < 0) ib = editor_blockly.completeItems.length;
+                if (ia != ib) return ia - ib;
+                if (a.length != b.length) return a.length - b.length;
+                return a < b ? -1 : 1;
+            }
+        });
+
+        htmlInput.oninput = function () {
+            var value = htmlInput.value, index = htmlInput.selectionEnd;
+            if (index == null) index = value.length;
+            value = value.substring(0, index);
+            // cal prefix
+            awesomplete.prefix = "";
+            for (var i = index - 1; i>=0; i--) {
+                var c = value.charAt(i);
+                if (!/^[a-zA-Z0-9_\u4E00-\u9FCC]$/.test(c)) {
+                    awesomplete.prefix = value.substring(i+1);
+                    break;
+                }
+            }
+
+            var list = editor_blockly.getAutoCompletions(value);
+            awesomplete.list = list;
+            awesomplete.ul.style.marginLeft = getCaretCoordinates(htmlInput, htmlInput.selectionStart).left -
+                htmlInput.scrollLeft - 20 + "px";
+            awesomplete.evaluate();
+        }
+
+        awesomplete.container.style.width = "100%";
+
+        window.awesomplete = awesomplete;
+    }
+
+    if (!quietInput) {
+        htmlInput.focus();
+        htmlInput.select();
+    }
+    this.validate_();
+    this.resizeEditor_();
+
+    this.bindEvents_(htmlInput);
+};

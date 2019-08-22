@@ -15,13 +15,15 @@ editor_file = function (editor, callback) {
         var filename = 'project/floors/' + editor.currentFloorId + '.js';
         var datastr = ['main.floors.', editor.currentFloorId, '=\n'];
 
-        for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
-            var mapArray=editor[name].map(function (v) {
-                return v.map(function (v) {
-                    return v.idnum || v || 0
-                })
-            });
-            editor.currentFloorData[name]=mapArray;
+        if (core.floorIds.indexOf(editor.currentFloorId) >= 0) {
+            for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
+                var mapArray=editor[name].map(function (v) {
+                    return v.map(function (v) {
+                        return v.idnum || v || 0
+                    })
+                });
+                editor.currentFloorData[name]=mapArray;
+            }
         }
         
         // format 更改实现方式以支持undefined删除
@@ -39,6 +41,7 @@ editor_file = function (editor, callback) {
         datastr = datastr.join('');
         alertWhenCompress();
         fs.writeFile(filename, encode(datastr), 'base64', function (err, data) {
+            editor.addUsedFlags(datastr);
             callback(err);
         });
     }
@@ -56,8 +59,8 @@ editor_file = function (editor, callback) {
             title = "主塔 "+name+" 层";
         }
         
-        var width = parseInt(document.getElementById('newMapsWidth').value);
-        var height = parseInt(document.getElementById('newMapsHeight').value);
+        var width = parseInt(document.getElementById('newMapWidth').value);
+        var height = parseInt(document.getElementById('newMapHeight').value);
         var row = [], map = [];
         for (var i=0;i<width;i++) row.push(0);
         for (var i=0;i<height;i++) map.push(row);

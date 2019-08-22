@@ -1,6 +1,6 @@
 # 附录：API列表
 
-?> 目前版本**v2.6.1**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.6.3**，上次更新时间：* {docsify-updated} *
 
 这里将列出所有被转发到core的API，没有被转发的函数此处不会列出，请自行在代码中查看。
 
@@ -57,7 +57,6 @@ core.platform.isPC    （是否是电脑端）
 core.platform.isAndroid    （是否是安卓端）
 core.platform.isIOS    （是否是iOS端）
 core.platform.useLocalForage    （是否开启了新版存档）
-core.platform.extendKeyBoard    （是否开启了拓展键盘）
 
 
 core.domStyle
@@ -952,10 +951,11 @@ core.startEvents(list, x, y, callback)
 此函数将调用core.setEvents，然后停止勇士，再执行core.doAction()。
 
 
-core.doAction()
+core.doAction(keepUI)
 执行下一个自定义事件。
 此函数将检测事件列表是否全部执行完毕，如果是则执行回调函数。
 否则，将从事件列表中弹出下一个事件，并调用core.doEvent进行执行。
+如果keepUI为true，则不会清掉UI层和selector，适合于自己用脚本的绘制。
 
 
 core.insertAction(action, x, y, callback, addToLast)
@@ -1615,9 +1615,10 @@ core.clearMap(name)
 该函数的name也可以是'all'，若为'all'则为清空所有系统画布。
 
 
-core.fillText(name, text, x, y, style, font)
+core.fillText(name, text, x, y, style, font, maxWidth)
 在某个画布上绘制一段文字。
 text为要绘制的文本，x,y为要绘制的坐标，style可选为绘制的样式，font可选为绘制的字体。（下同）
+如果maxWidth不为null，则视为文字最大宽度，如果超过此宽度则会自动放缩文字直到自适应为止。
 请注意textAlign和textBaseline将决定绘制的左右对齐和上下对齐方式。
 具体可详见core.setTextAlign()和core.setTextBaseline()函数。
 
@@ -1693,6 +1694,13 @@ core.drawImage(name, image, x, y, w, h, x1, y1, w1, h1)
 http://www.w3school.com.cn/html5/canvas_drawimage.asp
 这里的image允许传一个图片，画布。也允许传递图片名，将从你导入的图片中获取图片内容。
 
+
+core.drawIcon(name, id, x, y, w, h)
+在一张画布上绘制一个图标。
+id为注册过的图标ID，也可以使用状态栏的图标ID，例如lv, hp, up, save, settings等。
+x和y为绘制的左上角坐标；w和h可选为绘制的宽高，如果不填或null则使用该图标的默认宽高。
+
+
 // ------ 具体的某个UI界面的绘制 ------ //
 core.closePanel()
 结束一切事件和UI绘制，关闭UI窗口，返回游戏。
@@ -1712,7 +1720,7 @@ id可选，为同时绘制的图标ID，如果不为null则会同时绘制该图
 
 core.drawText(content, callback)
 绘制一段文字。contents为一个字符串或一个字符串数组，callback为全部绘制完毕的回调。
-支持所有的文字效果（如\n，${}，\r，\\i等），也支持\t和\b的语法。
+支持所有的文字效果（如\n，${}，\r，\\i，\\c，\\d，\\e等），也支持\t和\b的语法。
 如果当前在事件处理中或录像回放中，则会自动转成core.insertAction处理。
 不建议使用该函数，如有绘制文字的需求请尽量使用core.insertAction()插入剧情文本事件。
 
@@ -1737,7 +1745,8 @@ posInfo如果不为null则是一个含position, px和py的对象，表示一个�
 core.drawTextContent(ctx, content, config)
 根据配置在某个画布上绘制一段文字。此函数会被core.drawTextBox()所调用。
 ctx为画布名或画布本身，如果不设置则会忽略该函数。
-content为要绘制的文字内容，支持所有的文字效果（如\n，${}，\r，\\i等），但不支持支持\t和\b的语法。
+content为要绘制的文字内容，支持所有的文字效果（如\n，${}，\r，\\i，\\c，\\d，\\e等）
+    ，但不支持支持\t和\b的语法。
 config为绘制的配置项，目前可以包括如下几项：
  - left, top：在该画布上绘制的左上角像素位置，不设置默认为(0,0)。
    > 该函数绘制时会将textBaseline设置为'top'，因此只需要考虑第一个字的左上角位置。
@@ -1746,13 +1755,13 @@ config为绘制的配置项，目前可以包括如下几项：
  - bold：是否粗体。如果不设置默认为false。
  - align：文字对齐方式，仅在maxWidth设置时有效，默认为'left'。
  - fontSize：字体大小，如果不设置则使用剧情文本设置中的正文字体大小。
- - lineHeight：绘制的行距值，如果不设置则使用fontSize*1.3（即1.3被行距）。
+ - lineHeight：绘制的行距值，如果不设置则使用fontSize*1.3（即1.3倍行距）。
  - time：打字机效果。若不为0，则会逐个字进行绘制，并设置core.status.event.interval定时器。
 
 
 core.drawTextBox(content, showAll)
 绘制一个对话框。content为一个字符串或一个字符串数组。
-支持所有的文字效果（如\n，${}，\r，\\i等），也支持\t和\b的语法。
+支持所有的文字效果（如\n，${}，\r，\\i，\\c，\\d，\\e等），也支持\t和\b的语法。
 该函数将使用用户在剧情文本设置中的配置项进行绘制。
 实际执行时，会计算文本框宽度并绘制背景，绘制标题和头像，再调用core.drawTextContent()绘制正文内容。
 showAll可选，如果为true则不会使用打字机效果而全部显示，主要用于打字机效果的点击显示全部。
@@ -1760,7 +1769,7 @@ showAll可选，如果为true则不会使用打字机效果而全部显示，主
 
 core.drawScrollText(content, time, lineHeight, callback)
 绘制一个滚动字幕。content为绘制内容，time为总时间（默认为5000），lineHeight为行距比例（默认为1.4）。
-滚动字幕将绘制在UI上，支持所有的文字效果（如\n，${}，\r，\\i等），但不支持\t和\b效果。
+滚动字幕将绘制在UI上，支持所有的文字效果（如\n，${}，\r，\\i，\\c，\\d，\\e等），但不支持\t和\b效果。
 可以通过剧情文本设置中的align控制是否居中绘制，offset控制其距离左边的偏移量。
 
 
@@ -1772,7 +1781,7 @@ core.textImage(content, lineHeight)
 
 core.drawChoices(content, choices)
 绘制一个选项框。
-content可选，为选项上方的提示文字，支持所有的文字效果（如\n，${}，\r，\\i等），也支持\t效果。
+content可选，为选项上方的提示文字，支持所有的文字效果（如\n，${}，\r，\\i，\\c，\\d，\\e等），也支持\t。
 choices必选，为要绘制的选项内容，是一个列表。其中的每一项：
  - 可以是一个字符串，表示选项文字，将使用剧情文本设置中的正文颜色来绘制，仅支持${}表达式计算。
  - 或者是一个包含text, color和icon的对象。
@@ -1842,8 +1851,11 @@ core.ui.relocateCanvas(name, x, y)
 重新定位一个自定义画布。x和y为画布的左上角坐标。
 
 
-core.ui.resizeCanvas(name, width, height)
-重新设置一个自定义画布的大小。width和height为新设置的宽高。此操作会清空画布。
+core.ui.resizeCanvas(name, width, height, styleOnly)
+重新设置一个自定义画布的大小。width和height为新设置的宽高。
+styleOnly控制是否只修改画布的显示大小（而不修改画布的内部大小）。
+如果styleOnly为true，则只修改其显示大小（即canvas.style.width）；
+否则，则会同时修改画布的显示大小和内部大小并清空画布内容。
 
 
 core.ui.deleteCanvas(name)

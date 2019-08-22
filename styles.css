@@ -117,16 +117,25 @@
 }
 
 #startButtonGroup {
-    width: 100%;
+    width: auto;
     position: absolute;
     text-align: center;
     font-size: 1.4rem;
-    background-color: #000;
-    opacity: 0.85;
     display: none;
     z-index: 310;
     bottom: 0;
-    margin-bottom: 7%;
+    margin-bottom: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 25px;
+    min-width: 20%;
+    /* default value */
+    background-color: #32369F;
+    opacity: 0.85;
+    color: #FFFFFF;
+    border: #FFFFFF 2px solid;
+    caret-color: #FFD700;
+    border-radius: 10px;
 }
 
 #startButtons {
@@ -139,15 +148,19 @@
 
 .startButton {
     width: 100%;
-    margin: 20px 0;
-    color: #fff;
+    margin: 0;
     font-weight: bold;
     display: block;
     cursor: pointer;
+    padding: 4px 0;
+    border-color: transparent;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 6px;
 }
 
-.startButton:hover {
-    color: #ff0000;
+.onChoiceAnimate {
+    animation: onChoice 2s ease-in-out 0s infinite normal none running;
 }
 
 #floorMsgGroup {
@@ -365,4 +378,49 @@ p#name {
 #inputNo {
     float:right;
     margin-right: 10%;
+}
+
+#_selector, #_uievent_selector {
+    animation: selector 2s ease-in-out 0s infinite normal none running;
+}
+
+@-webkit-keyframes selector {
+    0% { opacity: 0.95; }
+    50% { opacity: 0.55; }
+    100% { opacity: 0.95; }
+}
+
+@keyframes selector {
+    0% { opacity: 0.95; }
+    50% { opacity: 0.55; }
+    100% { opacity: 0.95; }
+}
+
+#next {
+    width: 5px;
+    height: 5px;
+    display: none;
+    position: absolute;
+    transform: rotate(45deg);
+    border-bottom-width: 4px;
+    border-bottom-style: solid;
+    border-right-width: 4px;
+    border-right-style: solid;
+    -webkit-animation: next .5s ease-in-out alternate infinite;
+    animation: next .5s ease-in-out alternate infinite;
+    left: 0;
+    top: 0;
+    opacity: 0.7;
+    z-index: 169;
+}
+
+@-webkit-keyframes next {
+    100% {
+        transform: rotate(45deg) translate(-3px, -3px);
+    }
+}
+@keyframes next {
+    100% {
+        transform: rotate(45deg) translate(-3px, -3px);
+    }
 }

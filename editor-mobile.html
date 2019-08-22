@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
     <link href="_server/css/editor_mobile.css" rel="stylesheet">
     <link href="_server/CodeMirror/codemirror.css" rel="stylesheet">
+    <link href="_server/thirdparty/awesomplete.css" rel="stylesheet">
     <link href="_server/css/editor_mode_mobile.css" rel="stylesheet">
 </head>
 <body>
@@ -216,6 +217,7 @@
                     <input class="color" id="colorPicker" value="255,215,0,1"/>
                     <button onclick="confirmColor()">确定</button>
                 </div>
+                <button class="cpPanel" onclick="editor_blockly.selectPoint()">选点</button>
                 <xml id="toolbox" style="display:none">
                 </xml>
             </h3>
@@ -296,7 +298,7 @@
             <canvas class='gameCanvas' id='event2' width='416' height='416'></canvas>
             <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
             <canvas class='gameCanvas' id='efg' width='416' height='416'></canvas>
-            <canvas class='egameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
+            <canvas class='gameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
         </div>
         
     </div>
@@ -307,6 +309,7 @@
                 <div id='dataSelection' style="display:none"></div>
             </div>
         </div>
+        <button id="iconExpandBtn"></button>
     </div>
     <div id="down">
         <div style="margin:0.5rem">
@@ -512,14 +515,44 @@
         <canvas class='gameCanvas' id='curtain' width='416' height='416'></canvas>
         <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
         <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
+        <div id="next"></div>
     </div>
 </div>
-<div id='inputBackground' style='display: none'>
+<div id='inputDiv' style='display: none'>
     <div id='inputDialog'>
         <p id="inputMessage">请输入文字...</p>
         <input id='inputBox' type="text"/>
         <button id='inputYes'>确定</button>
         <button id='inputNo'>取消</button>
+    </div>
+</div>
+<!-- UI预览 & 地图选点 -->
+<div id='uieventDiv' style='display: none'>
+    <div id='uieventDialog'>
+        <div id="uieventHead">
+            <span id="uieventTitle"></span>
+            <select id="uieventBackground" style="margin-left: 20px">
+                <option value="thumbnail" selected>缩略图</option>
+                <option value="#000000">黑色</option>
+                <option value="#FFFFFF">白色</option>
+            </select>
+            <button id="uieventNo">关闭</button>
+            <button id="uieventYes">确定</button>
+        </div>
+        <hr style="clear: both; margin-top: 0"/>
+        <div id='uieventBody'>
+            <canvas class='gameCanvas' id='uievent' width='416' height='416'></canvas>
+            <div id="selectPointBox"></div>
+        </div>
+        <div id="selectPoint">
+            <select id="selectPointFloor"></select>
+            <div id="selectPointButtons">
+                <input type="button" value="←"/>
+                <input type="button" value="↑"/>
+                <input type="button" value="↓"/>
+                <input type="button" value="→"/>
+            </div>
+        </div>
     </div>
 </div>
 <!-- */</script> -->
@@ -567,9 +600,11 @@
 <script src="_server/CodeMirror/jshint.min.js"></script>
 <script src="_server/CodeMirror/beautify.min.js"></script>
 <script src="_server/CodeMirror/codeMirror.plugin.min.js"></script>
-<!-- colorPicker -->
-<script type="text/javascript" src="_server/colorPicker/color.all.min.js"></script>
-<script type="text/javascript" src="_server/colorPicker/jsColor.js"></script>
+<!-- thirdparty -->
+<script src="_server/thirdparty/color.all.min.js"></script>
+<script src="_server/thirdparty/awesomplete.min.js"></script>
+<script src="_server/thirdparty/caret-position.js"></script>
+<script src="_server/thirdparty/jsColor.js"></script>
 
 </body>
 </html>

@@ -434,7 +434,7 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
             return;
         }
         core.drawImage('event', core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
-    }, speed / Math.max(core.status.replay.speed, 1));
+    }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
     core.animateFrame.asyncId[animate] = true;
 }
 
@@ -458,6 +458,24 @@ events.prototype.getItem = function (id, num, x, y, callback) {
     if (num > 1) text += "x" + num;
     if (itemCls === 'items') text += core.items.getItemEffectTip(id);
     core.drawTip(text, id);
+
+    // --- 首次获得道具的提示
+    if (!core.hasFlag("__itemHint__")) core.setFlag("__itemHint__", []);
+    var itemHint = core.getFlag("__itemHint__");
+    if (core.flags.itemFirstText && itemHint.indexOf(id) < 0 && itemCls != 'items') {
+        var hint = core.material.items[id].text || "该道具暂无描述";
+        try {
+            hint = core.replaceText(hint);
+        } catch (e) {}
+        core.insertAction("\t["+core.material.items[id].name+","+id+"]" + hint + "\n"
+            + (itemCls == 'keys' || id == 'greenKey' || id == 'steelKey' ? "（钥匙类道具，遇到对应的门时自动打开）"
+                : itemCls == 'tools' ? "（消耗类道具，请按T在道具栏使用）"
+                : itemCls == 'constants' ? "（永久类道具，请按T在道具栏使用）"
+                : itemCls == 'equips' ? "（装备类道具，请按Q在装备栏进行装备）" : ""))
+        itemHint.push(id);
+    }
+
+
     core.updateStatusBar();
 
     this.afterGetItem(id, x, y, callback);
@@ -510,6 +528,8 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
     core.stopAutomaticRoute();
     core.clearContinueAutomaticRoute();
     core.status.replay.animate = true;
+    clearInterval(core.interval.onDownInterval);
+    core.interval.onDownInterval = 'tmp';
 
     this._changeFloor_beforeChange(info, callback);
 }
@@ -548,8 +568,19 @@ events.prototype._changeFloor_getHeroLoc = function (floorId, stair, heroLoc) {
     if (!heroLoc)
         heroLoc = core.clone(core.status.hero.loc);
     if (stair) {
+        // --- 对称
+        if (stair == ':now')
+            heroLoc = core.clone(core.status.hero.loc);
+        else if (stair == ':symmetry') {
+            heroLoc.x = core.bigmap.width - 1 - core.getHeroLoc('x');
+            heroLoc.y = core.bigmap.height - 1 - core.getHeroLoc('y');
+        }
+        else if (stair == ':symmetry_x')
+            heroLoc.x = core.bigmap.width - 1 - core.getHeroLoc('x');
+        else if (stair == ':symmetry_y')
+            heroLoc.y = core.bigmap.height - 1 - core.getHeroLoc('y');
         // 检查该层地图的 upFloor & downFloor
-        if (core.status.maps[floorId][stair]) {
+        else if (core.status.maps[floorId][stair]) {
             heroLoc.x = core.status.maps[floorId][stair][0];
             heroLoc.y = core.status.maps[floorId][stair][1];
         }
@@ -759,7 +790,7 @@ events.prototype.doEvent = function (data, x, y, prefix) {
     }
     if (this["_action_" + type]) return this["_action_" + type](data, x, y, prefix);
     core.insertAction("未知的自定义事件: " + type + "！");
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype.setEvents = function (list, x, y, callback) {
@@ -783,16 +814,18 @@ events.prototype.startEvents = function (list, x, y, callback) {
     // 停止勇士
     core.waitHeroToStop(function () {
         core.lockControl();
-        core.doAction();
+        setTimeout(core.doAction);
     });
 }
 
 ////// 执行当前自定义事件列表中的下一个事件 //////
-events.prototype.doAction = function () {
-    // 清空boxAnimate和UI层
-    core.clearUI();
-    clearInterval(core.status.event.interval);
-    core.status.event.interval = null;
+events.prototype.doAction = function (keepUI) {
+    if (!keepUI) {
+        // 清空boxAnimate和UI层
+        core.clearUI();
+        clearInterval(core.status.event.interval);
+        core.status.event.interval = null;
+    }
     // 判定是否执行完毕
     if (this._doAction_finishEvents()) return;
     // 当前点坐标和前缀
@@ -830,7 +863,7 @@ events.prototype._popEvents = function (current, prefix) {
         else {
             core.status.event.data.list.shift(); // remove stack
         }
-        core.doAction();
+        setTimeout(core.doAction);
         return true;
     }
     return false;
@@ -875,7 +908,7 @@ events.prototype.recoverEvents = function (data) {
         core.status.event.id = 'action';
         core.status.event.data = data;
         setTimeout(function () {
-            core.doAction();
+            setTimeout(core.doAction);
         }, 30);
         return true;
     }
@@ -886,7 +919,7 @@ events.prototype.recoverEvents = function (data) {
 
 events.prototype.__action_checkReplaying = function () {
     if (core.isReplaying()) {
-        core.doAction();
+        setTimeout(core.doAction);
         return true;
     }
     return false;
@@ -914,7 +947,7 @@ events.prototype.__action_doAsyncFunc = function (isAsync, func) {
     var parameters = Array.prototype.slice.call(arguments, 2);
     if (isAsync) {
         func.apply(this, parameters);
-        core.doAction();
+        setTimeout(core.doAction);
     }
     else {
         func.apply(this, parameters.concat(core.doAction));
@@ -938,7 +971,7 @@ events.prototype._action_scrollText = function (data, x, y, prefix) {
 }
 
 events.prototype._action_comment = function (data, x, y, prefix) {
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_setText = function (data, x, y, prefix) {
@@ -959,12 +992,12 @@ events.prototype._action_setText = function (data, x, y, prefix) {
         }
     });
     core.setFlag('textAttribute', core.status.textAttribute);
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_tip = function (data, x, y, prefix) {
     core.drawTip(core.replaceText(data.text), data.icon);
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_show = function (data, x, y, prefix) {
@@ -976,7 +1009,7 @@ events.prototype._action_show = function (data, x, y, prefix) {
         data.loc.forEach(function (t) {
             core.showBlock(t[0], t[1], data.floorId);
         });
-        core.doAction();
+        setTimeout(core.doAction);
     }
 }
 
@@ -992,14 +1025,16 @@ events.prototype._action_hide = function (data, x, y, prefix) {
         data.loc.forEach(function (t) {
             core.removeBlock(t[0], t[1], data.floorId)
         });
-        core.doAction();
+        setTimeout(core.doAction);
     }
 }
 
 events.prototype._action_setBlock = function (data, x, y, prefix) {
-    var loc = this.__action_getLoc(data.loc, x, y, prefix);
-    core.setBlock(data.number, loc[0], loc[1], data.floorId);
-    core.doAction();
+    data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    data.loc.forEach(function (t) {
+        core.setBlock(data.number, t[0], t[1], data.floorId);
+    });
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_showFloorImg = function (data, x, y, prefix) {
@@ -1019,25 +1054,42 @@ events.prototype._action_hideBgFgMap = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setBgFgBlock = function (data, x, y, prefix) {
-    var loc = this.__action_getLoc(data.loc, x, y, prefix);
-    core.setBgFgBlock(data.name, data.number, loc[0], loc[1], data.floorId);
-    core.doAction();
+    data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    data.loc.forEach(function (t) {
+        core.setBgFgBlock(data.name, data.number, t[0], t[1], data.floorId);
+    });
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_follow = function (data, x, y, prefix) {
     this.follow(data.name);
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_unfollow = function (data, x, y, prefix) {
     this.unfollow(data.name);
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_animate = function (data, x, y, prefix) {
     if (data.loc == 'hero') data.loc = [core.getHeroLoc('x'), core.getHeroLoc('y')];
     else data.loc = this.__action_getLoc(data.loc, x, y, prefix);
     this.__action_doAsyncFunc(data.async, core.drawAnimate, data.name, data.loc[0], data.loc[1]);
+}
+
+events.prototype._action_setViewport = function (data, x, y, prefix) {
+    if (data.loc == null) {
+        core.drawHero();
+    }
+    else {
+        var loc = this.__action_getLoc(data.loc, x, y, prefix);
+        core.setViewport(32 * loc[0], 32 * loc[1]);
+    }
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_moveViewport = function (data, x, y, prefix) {
+    this.__action_doAsyncFunc(data.async, core.moveViewport, data.steps, data.time);
 }
 
 events.prototype._action_move = function (data, x, y, prefix) {
@@ -1073,7 +1125,7 @@ events.prototype._action_changePos = function (data, x, y, prefix) {
     core.setHeroLoc('y', loc[1]);
     if (data.direction) core.setHeroLoc('direction', data.direction);
     core.drawHero();
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_showImage = function (data, x, y, prefix) {
@@ -1086,7 +1138,7 @@ events.prototype._action_showTextImage = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, 0, 0, prefix);
     if (core.isReplaying()) data.time = 0;
     this.__action_doAsyncFunc(data.async || data.time == 0, core.showImage,
-        data.code, core.ui.textImage(data.text), loc[0], loc[1], 100, 100, data.opacity, data.time);
+        data.code, core.ui.textImage(data.text), null, loc, data.opacity, data.time);
 }
 
 events.prototype._action_hideImage = function (data, x, y, prefix) {
@@ -1097,7 +1149,7 @@ events.prototype._action_hideImage = function (data, x, y, prefix) {
 events.prototype._action_showGif = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, 0, 0, prefix);
     this.showGif(data.name, loc[0], loc[1]);
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_moveImage = function (data, x, y, prefix) {
@@ -1113,12 +1165,12 @@ events.prototype._action_setCurtain = function (data, x, y, prefix) {
     if (data.async) {
         core.setCurtain(data.color, data.time);
         core.setFlag('__color__', data.color || null);
-        core.doAction();
+        setTimeout(core.doAction);
     }
     else {
         core.setCurtain(data.color, data.time, function () {
             core.setFlag('__color__', data.color || null);
-            core.doAction();
+            setTimeout(core.doAction);
         });
     }
 }
@@ -1132,7 +1184,7 @@ events.prototype._action_setWeather = function (data, x, y, prefix) {
     if (data.name == 'rain' || data.name == 'snow' || data.name == 'fog')
         core.setFlag('__weather__', [data.name, data.level]);
     else core.removeFlag('__weather__');
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_openDoor = function (data, x, y, prefix) {
@@ -1143,7 +1195,7 @@ events.prototype._action_openDoor = function (data, x, y, prefix) {
     }
     else {
         core.removeBlock(loc[0], loc[1], floorId);
-        core.doAction();
+        setTimeout(core.doAction);
     }
 }
 
@@ -1159,7 +1211,7 @@ events.prototype._action_useItem = function (data, x, y, prefix) {
     }
     else {
         core.drawTip("当前无法使用" + ((core.material.items[data.id] || {}).name || "未知道具"));
-        core.doAction();
+        setTimeout(core.doAction);
     }
 }
 
@@ -1169,12 +1221,12 @@ events.prototype._action_openShop = function (data, x, y, prefix) {
     if (!core.isReplaying())
         this.openShop(data.id);
     if (core.status.event.id == 'action')
-        core.doAction();
+        setTimeout(core.doAction);
 }
 
 events.prototype._action_disableShop = function (data, x, y, prefix) {
     this.disableQuickShop(data.id);
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_battle = function (data, x, y, prefix) {
@@ -1200,7 +1252,7 @@ events.prototype._action_trigger = function (data, x, y, prefix) {
             return;
         }
     }
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_insert = function (data, x, y, prefix) {
@@ -1225,43 +1277,44 @@ events.prototype._action_insert = function (data, x, y, prefix) {
         var event = (core.floors[floorId][which]||[])[loc[0] + "," + loc[1]];
         if (event) this.insertAction(event.data || event);
     }
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_playBgm = function (data, x, y, prefix) {
     core.playBgm(data.name);
-    core.doAction();
+    core.setFlag("__bgm__", data.keep ? data.name : null);
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_pauseBgm = function (data, x, y, prefix) {
     core.pauseBgm();
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_resumeBgm = function (data, x, y, prefix) {
     core.resumeBgm();
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_loadBgm = function (data, x, y, prefix) {
     core.loadBgm(data.name);
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_freeBgm = function (data, x, y, prefix) {
     core.freeBgm(data.name);
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_playSound = function (data, x, y, prefix) {
     if (data.stop) core.stopSound();
     core.playSound(data.name);
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_stopSound = function (data, x, y, prefix) {
     core.stopSound();
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_setVolume = function (data, x, y, prefix) {
@@ -1272,7 +1325,7 @@ events.prototype._action_setVolume = function (data, x, y, prefix) {
 
 events.prototype._action_setValue = function (data, x, y, prefix) {
     this.setValue(data.name, data.value, prefix);
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_setValue2 = function (data, x, y, prefix) {
@@ -1281,32 +1334,32 @@ events.prototype._action_setValue2 = function (data, x, y, prefix) {
 
 events.prototype._action_addValue = function (data, x, y, prefix) {
     this.addValue(data.name, data.value, prefix);
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_setFloor = function (data, x, y, prefix) {
     this.setFloorInfo(data.name, data.value, data.floorId, prefix);
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_setGlobalAttribute = function (data, x, y, prefix) {
     this.setGlobalAttribute(data.name, data.value);
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_setGlobalValue = function (data, x, y, prefix) {
     core.values[data.name] = data.value;
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_setGlobalFlag = function (data, x, y, prefix) {
     this.setGlobalFlag(data.name, data.value);
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_setHeroIcon = function (data, x, y, prefix) {
     this.setHeroIcon(data.name);
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_input = function (data, x, y, prefix) {
@@ -1314,7 +1367,7 @@ events.prototype._action_input = function (data, x, y, prefix) {
         value = Math.abs(parseInt(value) || 0);
         core.status.route.push("input:" + value);
         core.setFlag("input", value);
-        core.doAction();
+        setTimeout(core.doAction);
     });
 }
 
@@ -1323,7 +1376,7 @@ events.prototype._action_input2 = function (data, x, y, prefix) {
         value = value || "";
         core.status.route.push("input2:" + core.encodeBase64(value));
         core.setFlag("input", value);
-        core.doAction();
+        setTimeout(core.doAction);
     });
 }
 
@@ -1353,7 +1406,7 @@ events.prototype._action_if = function (data, x, y, prefix) {
         core.events.insertAction(data["true"])
     else
         core.events.insertAction(data["false"])
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_switch = function (data, x, y, prefix) {
@@ -1368,10 +1421,15 @@ events.prototype._action_switch = function (data, x, y, prefix) {
         }
     }
     core.insertAction(list);
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_choices = function (data, x, y, prefix) {
+    data.choices = data.choices.filter(function (x) {
+        if (x.condition == null || x.condition == '') return true;
+        try { return core.calValue(x.condition, prefix); } catch (e) { return true; }
+    })
+    if (data.choices.length == 0) return this.doAction();
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift(), index;
         // --- 忽略可能的turn事件
@@ -1381,8 +1439,8 @@ events.prototype._action_choices = function (data, x, y, prefix) {
             setTimeout(function () {
                 core.status.route.push("choices:" + index);
                 core.insertAction(data.choices[index].action);
-                core.doAction();
-            }, 750 / Math.max(1, core.status.replay.speed))
+                setTimeout(core.doAction);
+            }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed))
         }
         else {
             core.control._replay_error(action);
@@ -1404,8 +1462,8 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
                 core.status.route.push("choices:" + index);
                 if (index == 0) core.insertAction(data.yes);
                 else core.insertAction(data.no);
-                core.doAction();
-            }, 750 / Math.max(1, core.status.replay.speed))
+                setTimeout(core.doAction);
+            }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed))
         }
         else {
             core.control._replay_error(action);
@@ -1424,19 +1482,19 @@ events.prototype._action_while = function (data, x, y, prefix) {
             {"todo": core.clone(data.data), "total": core.clone(data.data), "condition": data.condition}
         );
     }
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_dowhile = function (data, x, y, prefix) {
     core.unshift(core.status.event.data.list,
         {"todo": core.clone(data.data), "total": core.clone(data.data), "condition": data.condition}
     );
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_break = function (data, x, y, prefix) {
     core.status.event.data.list.shift();
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_continue = function (data, x, y, prefix) {
@@ -1446,7 +1504,7 @@ events.prototype._action_continue = function (data, x, y, prefix) {
     else {
         core.status.event.data.list.shift();
     }
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_win = function (data, x, y, prefix) {
@@ -1471,28 +1529,40 @@ events.prototype._action_function = function (data, x, y, prefix) {
         main.log(e);
     }
     if (!data.async)
-        core.doAction();
+        setTimeout(core.doAction);
 }
 
 events.prototype._action_update = function (data, x, y, prefix) {
     core.updateStatusBar();
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_showStatusBar = function (data, x, y, prefix) {
     core.showStatusBar();
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_hideStatusBar = function (data, x, y, prefix) {
     core.hideStatusBar(data.toolbox);
-    core.doAction();
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_showHero = function (data, x, y, prefix) {
+    core.removeFlag('hideHero');
+    core.drawHero();
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_hideHero = function (data, x, y, prefix) {
+    core.setFlag('hideHero', true);
+    core.drawHero();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_updateEnemys = function (data, x, y, prefix) {
     core.enemys.updateEnemys();
     core.updateStatusBar();
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_vibrate = function (data, x, y, prefix) {
@@ -1502,7 +1572,7 @@ events.prototype._action_vibrate = function (data, x, y, prefix) {
 events.prototype._action_sleep = function (data, x, y, prefix) {
     core.timeout.sleepTimeout = setTimeout(function () {
         core.timeout.sleepTimeout = null;
-        core.doAction();
+        setTimeout(core.doAction);
     }, core.isReplaying() ? Math.min(data.time, 20) : data.time);
 }
 
@@ -1519,7 +1589,7 @@ events.prototype._action_wait = function (data, x, y, prefix) {
             core.stopReplay();
             core.insertAction(["录像文件出错，请在控制台查看报错信息。", {"type": "exit"}]);
         }
-        core.doAction();
+        setTimeout(core.doAction);
         return;
     }
 }
@@ -1551,7 +1621,7 @@ events.prototype._action_waitAsync = function (data, x, y, prefix) {
     var test = window.setInterval(function () {
         if (!core.hasAsync()) {
             clearInterval(test);
-            core.doAction();
+            setTimeout(core.doAction);
         }
     }, 50);
 }
@@ -1560,12 +1630,12 @@ events.prototype._action_revisit = function (data, x, y, prefix) {
     var block = core.getBlock(x, y);
     if (block != null && block.block.event.trigger == 'action')
         this.setEvents(block.block.event.data);
-    core.doAction();
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_callBook = function (data, x, y, prefix) {
     if (core.isReplaying() || !core.hasItem('book')) {
-        core.doAction();
+        setTimeout(core.doAction);
     }
     else {
         var e = core.clone(core.status.event.data);
@@ -1578,7 +1648,7 @@ events.prototype._action_callBook = function (data, x, y, prefix) {
 events.prototype._action_callSave = function (data, x, y, prefix) {
     if (core.isReplaying() || core.hasFlag("__events__")) {
         core.removeFlag("__events__");
-        core.doAction();
+        setTimeout(core.doAction);
     }
     else {
         var e = core.clone(core.status.event.data);
@@ -1590,8 +1660,8 @@ events.prototype._action_callSave = function (data, x, y, prefix) {
 
 events.prototype._action_autoSave = function (data, x, y, prefix) {
     core.autosave();
-    core.drawTip("已自动存档");
-    core.doAction();
+    if (!data.nohint) core.drawTip("已自动存档");
+    setTimeout(core.doAction);
 }
 
 events.prototype._action_callLoad = function (data, x, y, prefix) {
@@ -1604,7 +1674,97 @@ events.prototype._action_callLoad = function (data, x, y, prefix) {
 
 events.prototype._action_exit = function (data, x, y, prefix) {
     this.setEvents([]);
-    core.doAction();
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_previewUI = function (data, x, y, prefix) {
+    this.insertAction(data.action);
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_clearMap = function (data, x, y, prefix) {
+    core.ui._uievent_clearMap(data);
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_fillText = function (data, x, y, prefix) {
+    core.ui._uievent_fillText(data);
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_fillBoldText = function (data, x, y, prefix) {
+    core.ui._uievent_fillBoldText(data);
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_fillRect = function (data, x, y, prefix) {
+    core.ui._uievent_fillRect(data);
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_fillPolygon = function (data, x, y, prefix) {
+    core.ui._uievent_fillPolygon(data);
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_strokeRect = function (data, x, y, prefix) {
+    core.ui._uievent_strokeRect(data);
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_strokePolygon = function (data, x, y, prefix) {
+    core.ui._uievent_strokePolygon(data);
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_fillCircle = function (data, x, y, prefix) {
+    core.ui._uievent_fillCircle(data);
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_strokeCircle = function (data, x, y, prefix) {
+    core.ui._uievent_strokeCircle(data);
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_drawLine = function (data, x, y, prefix) {
+    core.ui._uievent_drawLine(data);
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_drawArrow = function (data, x, y, prefix) {
+    core.ui._uievent_drawArrow(data);
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_setAttribute = function (data, x, y, prefix) {
+    core.ui._uievent_setAttribute(data);
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_drawImage = function (data, x, y, prefix) {
+    core.ui._uievent_drawImage(data);
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_drawIcon = function (data, x, y, prefix) {
+    core.ui._uievent_drawIcon(data);
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_drawSelector = function (data, x, y, prefix) {
+    core.ui._uievent_drawSelector(data);
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_drawBackground = function (data, x, y, prefix) {
+    core.ui._uievent_drawBackground(data);
+    setTimeout(core.doAction);
+}
+
+events.prototype._action_drawTextContent = function (data, x, y, prefix) {
+    core.ui._uievent_drawTextContent(data);
+    setTimeout(core.doAction);
 }
 
 // ------ 点击状态栏图标所进行的一些操作 ------ //
@@ -1693,6 +1853,25 @@ events.prototype.openToolbox = function (fromUserAction) {
 ////// 点击快捷商店按钮时的打开操作 //////
 events.prototype.openQuickShop = function (fromUserAction) {
     if (core.isReplaying()) return;
+
+    if (Object.keys(core.status.shops).length == 0) {
+        core.drawTip("本塔没有快捷商店！");
+        return;
+    }
+
+    // --- 如果只有一个商店，则直接打开之
+    if (Object.keys(core.status.shops).length == 1) {
+        var shopId = Object.keys(core.status.shops)[0];
+        if (core.status.event.id != null || !this._checkStatus('shop', false)) return;
+        var reason = core.events.canUseQuickShop(shopId);
+        if (!core.flags.enableDisabledShop && reason) {
+            core.drawText(reason);
+            return;
+        }
+        core.events.openShop(shopId, true);
+        return;
+    }
+
     if (!this._checkStatus('selectShop', fromUserAction)) return;
     core.ui.drawQuickShop();
 }
@@ -1842,7 +2021,7 @@ events.prototype.doEffect = function (effect, need, times) {
 
 ////// 设置楼层属性 //////
 events.prototype.setFloorInfo = function (name, value, floorId, prefix) {
-    floorId = floorId || data.floorId;
+    floorId = floorId || core.status.floorId;
     core.status.maps[floorId][name] = core.calValue(value, prefix);
     core.updateStatusBar();
 }
@@ -1869,12 +2048,14 @@ events.prototype.setGlobalFlag = function (name, value) {
     core.flags[name] = value;
     core.setFlag("globalFlags", flags);
     core.resize();
+    if (name == 'blurFg')
+        core.drawMap();
 }
 
 events.prototype.closeDoor = function (x, y, id, callback) {
     id = id || "";
     if (!(id.endsWith("Door") || id.endsWith("Wall"))
-        || !core.material.icons.animates[id] || core.getBlock(x, y) != null) {
+        || core.material.icons.animates[id] == null || core.getBlock(x, y) != null) {
         if (callback) callback();
         return;
     }
@@ -1893,7 +2074,7 @@ events.prototype.closeDoor = function (x, y, id, callback) {
         }
         core.clearMap('event', 32 * x, 32 * y, 32, 32);
         core.drawImage('event', core.material.images.animates, 32 * (4-state), 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
-    }, speed / Math.max(core.status.replay.speed, 1));
+    }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
     core.animateFrame.asyncId[animate] = true;
 }
 
@@ -2101,7 +2282,7 @@ events.prototype.eventMoveHero = function(steps, time, callback) {
             if (core.events._eventMoveHero_moving(++step, moveSteps))
                 step = 0;
         }
-    }, time / 8 / core.status.replay.speed);
+    }, core.status.replay.speed == 24 ? 1 : time / 8 / core.status.replay.speed);
 
     core.animateFrame.asyncId[animate] = true;
 }
@@ -2185,6 +2366,7 @@ events.prototype.openShop = function (shopId, needVisited) {
         if (!core.flags.enableDisabledShop || shop.commonEvent) {
             if (shop.times == 0) core.drawTip("该项尚未开启");
             else core.drawTip("该项已失效");
+            core.ui.closePanel();
             return;
         }
         else {

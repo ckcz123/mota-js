@@ -125,10 +125,8 @@ items.prototype._afterUseItem = function (itemId) {
     if (core.status.hero.items[itemCls][itemId] <= 0)
         delete core.status.hero.items[itemCls][itemId];
 
-    if (!core.status.event.id) {
-        core.status.event.data = null;
+    if (!core.status.event.id)
         core.status.event.ui = null;
-    }
     core.updateStatusBar();
 }
 
@@ -354,7 +352,7 @@ items.prototype._realLoadEquip = function (type, loadId, unloadId, callback) {
     }
 
     // --- 音效
-    core.playSound('equip.mp3');
+    this._realLoadEquip_playSound();
 
     // --- 实际换装
     this._loadEquipEffect(loadId, unloadId, loadPercentage == null ? unloadPercentage : loadPercentage);
@@ -369,6 +367,12 @@ items.prototype._realLoadEquip = function (type, loadId, unloadId, callback) {
     else if (unloadId) core.drawTip("已卸下" + unloadEquip.name, unloadId);
 
     if (callback) callback();
+}
+
+items.prototype._realLoadEquip_playSound = function () {
+    if (core.hasFlag("__quickLoadEquip__")) return;
+    core.stopSound();
+    core.playSound('equip.mp3');
 }
 
 ////// 保存装备 //////
@@ -393,20 +397,30 @@ items.prototype.quickLoadEquip = function (index) {
         if (v && !this.canEquip(v, true))
             return;
     }
+    core.setFlag("__quickLoadEquip__", true);
     // 快速换装
+    var toEquip = [];
     for (var i = 0; i < equipSize; i++) {
         var now = core.status.hero.equipment[i];
-        if (now) {
-            this.unloadEquip(i);
-            core.status.route.push("unEquip:" + i);
+        // --- 只考虑diff的装备
+        var to = current[i];
+        if (now != to) {
+            toEquip.push(to || null);
+            if (now) {
+                this.unloadEquip(i);
+                core.status.route.push("unEquip:" + i);
+            }
         }
     }
-    for (var i = 0; i < equipSize; i++) {
-        var to = current[i];
+    for (var i in toEquip) {
+        var to = toEquip[i];
         if (to) {
             this.loadEquip(to);
             core.status.route.push("equip:" + to);
         }
     }
+    core.removeFlag("__quickLoadEquip__");
+    this._realLoadEquip_playSound();
+
     core.drawTip("成功换上" + index + "号套装");
 }

@@ -72,7 +72,6 @@ function core() {
         'isChrome': false, // 是否是Chrome
         'supportCopy': false, // 是否支持复制到剪切板
         'useLocalForage': true,
-        'extendKeyboard': false,
 
         'fileInput': null, // FileInput
         'fileReader': null, // 是否支持FileReader
@@ -278,14 +277,13 @@ core.prototype._init_platform = function () {
         }
     });
     core.platform.string = core.platform.isPC ? "PC" : core.platform.isAndroid ? "Android" : core.platform.isIOS ? "iOS" : "";
-    core.platform.supportCopy = document.queryCommandSupported || document.queryCommandSupported("copy");
+    core.platform.supportCopy = document.queryCommandSupported && document.queryCommandSupported("copy");
     var chrome = /Chrome\/(\d+)\./i.exec(navigator.userAgent);
     if (chrome && parseInt(chrome[1]) >= 50) core.platform.isChrome = true;
     core.platform.isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent);
     core.platform.isQQ = /QQ/i.test(navigator.userAgent);
     core.platform.isWeChat = /MicroMessenger/i.test(navigator.userAgent);
     this._init_checkLocalForage();
-    core.platform.extendKeyboard = core.getLocalStorage("extendKeyboard", false);
     if (window.FileReader) {
         core.platform.fileReader = new FileReader();
         core.platform.fileReader.onload = function () {

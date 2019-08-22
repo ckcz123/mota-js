@@ -19,7 +19,6 @@ control.prototype._init = function () {
     this.registerAnimationFrame("totalTime", false, this._animationFrame_totalTime);
     this.registerAnimationFrame("autoSave", true, this._animationFrame_autoSave);
     this.registerAnimationFrame("globalAnimate", true, this._animationFrame_globalAnimate);
-    this.registerAnimationFrame("selector", false, this._animationFrame_selector);
     this.registerAnimationFrame("animate", true, this._animationFrame_animate);
     this.registerAnimationFrame("heroMoving", true, this._animationFrame_heroMoving);
     this.registerAnimationFrame("weather", true, this._animationFrame_weather);
@@ -149,19 +148,6 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
     // Box animate
     core.drawBoxAnimate();
     core.animateFrame.globalTime = timestamp;
-}
-
-control.prototype._animationFrame_selector = function (timestamp) {
-    if (timestamp - core.animateFrame.selectorTime <= 20 || !core.dymCanvas._selector) return;
-    var opacity = parseFloat(core.dymCanvas._selector.canvas.style.opacity);
-    if (core.animateFrame.selectorUp)
-        opacity += 0.02;
-    else
-        opacity -= 0.02;
-    if (opacity > 0.95 || opacity < 0.55)
-        core.animateFrame.selectorUp = !core.animateFrame.selectorUp;
-    core.setOpacity("_selector", opacity);
-    core.animateFrame.selectorTime = timestamp;
 }
 
 control.prototype._animationFrame_animate = function (timestamp) {
@@ -333,6 +319,8 @@ control.prototype._showStartAnimate_resetDom = function () {
 control.prototype._showStartAnimate_finished = function (start, callback) {
     core.dom.startTop.style.display = 'none';
     core.dom.startButtonGroup.style.display = 'block';
+    main.selectedButton = null;
+    main.selectButton(0);
     if (start) core.startGame();
     if (callback) callback();
 }
@@ -566,6 +554,12 @@ control.prototype.setAutoHeroMove = function (steps) {
 ////// 设置行走的效果动画 //////
 control.prototype.setHeroMoveInterval = function (callback) {
     if (core.status.heroMoving > 0) return;
+    if (core.status.replay.speed == 24) {
+        core.moveOneStep(core.nextX(), core.nextY());
+        if (callback) callback();
+        return;
+    }
+
     core.status.heroMoving=1;
 
     var toAdd = 1;
@@ -741,25 +735,28 @@ control.prototype.turnHero = function(direction) {
 }
 
 ////// 瞬间移动 //////
-control.prototype.moveDirectly = function (destX, destY) {
-    return this.controldata.moveDirectly(destX, destY);
+control.prototype.moveDirectly = function (destX, destY, ignoreSteps) {
+    return this.controldata.moveDirectly(destX, destY, ignoreSteps);
 }
 
 ////// 尝试瞬间移动 //////
 control.prototype.tryMoveDirectly = function (destX, destY) {
     if (this.nearHero(destX, destY)) return false;
     var canMoveArray = core.maps.generateMovableArray();
-    var testMove = function (dx, dy, dir) {
-        if (dx<0 || dx>=core.bigmap.width|| dy<0 || dy>=core.bigmap.height) return false;
-        if (dir && !core.inArray(canMoveArray[dx][dy],dir)) return false;
-        if (core.control.moveDirectly(dx, dy)) {
+    var dirs = [[destX,destY],[destX-1,destY,"right"],[destX,destY-1,"down"],[destX,destY+1,"up"],[destX+1,destY,"left"]];
+    var canMoveDirectlyArray = core.canMoveDirectlyArray(dirs);
+
+    for (var i = 0; i < dirs.length; ++i) {
+        var d = dirs[i], dx = d[0], dy = d[1], dir = d[2];
+        if (dx<0 || dx>=core.bigmap.width|| dy<0 || dy>=core.bigmap.height) continue;
+        if (dir && !core.inArray(canMoveArray[dx][dy],dir)) continue;
+        if (canMoveDirectlyArray[i]<0) continue;
+        if (core.control.moveDirectly(dx, dy, canMoveDirectlyArray[i])) {
             if (dir) core.moveHero(dir, function() {});
             return true;
         }
-        return false;
     }
-    return testMove(destX,destY) || testMove(destX-1, destY, "right") || testMove(destX,destY-1,"down")
-        || testMove(destX,destY+1,"up") || testMove(destX+1,destY,"left");
+    return false;
 }
 
 ////// 绘制勇士 //////
@@ -775,13 +772,16 @@ control.prototype.drawHero = function (status, offset) {
     core.clearAutomaticRouteNode(x+dx, y+dy);
     core.clearMap('hero');
 
-    this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
-        core.drawImage('hero', block.img, block.heroIcon[block.status]*block.width,
-            block.heroIcon.loc * block.height, block.width, block.height,
-            block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
-    });
+    if (!core.hasFlag('hideHero')) {
+        this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
+            core.drawImage('hero', block.img, block.heroIcon[block.status]*block.width,
+                block.heroIcon.loc * block.height, block.width, block.height,
+                block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
+        });
+    }
 
     core.control.updateViewport();
+    core.setGameCanvasTranslate('hero', 0, 0);
 }
 
 control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, offset) {
@@ -855,6 +855,48 @@ control.prototype.updateViewport = function() {
     core.relocateCanvas('route', core.status.automaticRoute.offsetX - core.bigmap.offsetX, core.status.automaticRoute.offsetY - core.bigmap.offsetY);
 }
 
+////// 设置视野范围 //////
+control.prototype.setViewport = function (x, y) {
+    core.bigmap.offsetX = core.clamp(x, 0, 32 * core.bigmap.width - core.__PIXELS__);
+    core.bigmap.offsetY = core.clamp(y, 0, 32 * core.bigmap.height - core.__PIXELS__);
+    this.updateViewport();
+    // ------ hero层也需要！
+    var hero_x = core.clamp((core.getHeroLoc('x') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.width-core.__PIXELS__);
+    var hero_y = core.clamp((core.getHeroLoc('y') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.height-core.__PIXELS__);
+    core.control.setGameCanvasTranslate('hero', hero_x - core.bigmap.offsetX, hero_y - core.bigmap.offsetY);
+}
+
+////// 移动视野范围 //////
+control.prototype.moveViewport = function (steps, time, callback) {
+    time = time || core.values.moveSpeed || 300;
+    var step = 0, moveSteps = (steps||[]).filter(function (t) {
+        return ['up','down','left','right'].indexOf(t)>=0;
+    });
+    var animate=window.setInterval(function() {
+        if (moveSteps.length==0) {
+            delete core.animateFrame.asyncId[animate];
+            clearInterval(animate);
+            if (callback) callback();
+        }
+        else {
+            if (core.control._moveViewport_moving(++step, moveSteps))
+                step = 0;
+        }
+    }, time / 16 / core.status.replay.speed);
+
+    core.animateFrame.asyncId[animate] = true;
+}
+
+control.prototype._moveViewport_moving = function (step, moveSteps) {
+    var direction = moveSteps[0], scan = core.utils.scan[direction];
+    core.setViewport(core.bigmap.offsetX + 2 * scan.x, core.bigmap.offsetY + 2 * scan.y);
+    if (step == 16) {
+        moveSteps.shift();
+        return true;
+    }
+    return false;
+}
+
 ////// 获得勇士面对位置的x坐标 //////
 control.prototype.nextX = function(n) {
     if (n == null) n = 1;
@@ -919,7 +961,7 @@ control.prototype.checkBlock = function () {
     if (damage) {
         core.status.hero.hp -= damage;
         core.drawTip("受到"+(core.status.checkBlock.type[loc]||"伤害")+damage+"点");
-        this._checkBlock_soundAndAnimate(x, y);
+        core.drawAnimate("zone", x, y);
         this._checkBlock_disableQuickShop();
         core.status.hero.statistics.extraDamage += damage;
         if (core.status.hero.hp <= 0) {
@@ -931,11 +973,6 @@ control.prototype.checkBlock = function () {
     }
     this._checkBlock_snipe(core.status.checkBlock.snipe[loc]);
     this._checkBlock_ambush(core.status.checkBlock.ambush[loc]);
-}
-
-control.prototype._checkBlock_soundAndAnimate = function (x,y) {
-    core.playSound('zone.mp3');
-    core.drawAnimate("zone", x, y);
 }
 
 control.prototype._checkBlock_disableQuickShop = function () {
@@ -1197,10 +1234,11 @@ control.prototype.bookReplay = function () {
     if (core.isMoving() || core.status.replay.animate
         || (core.status.event.id && core.status.event.id != 'viewMaps'))
         return core.drawTip("请等待当前事件的处理结束");
+    if (!core.hasItem('book')) return core.drawTip('你没有怪物手册');
 
     // 从“浏览地图”页面打开
     if (core.status.event.id=='viewMaps')
-        core.status.event.selection = core.status.event.data;
+        core.status.event.ui = core.status.event.data;
 
     core.lockControl();
     core.status.event.id='book';
@@ -1217,6 +1255,28 @@ control.prototype.viewMapReplay = function () {
     core.lockControl();
     core.status.event.id='viewMaps';
     core.ui.drawMaps();
+}
+
+control.prototype.toolboxReplay = function () {
+    if (!core.isPlaying() || !core.isReplaying()) return;
+    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+        return core.drawTip("请等待当前事件的处理结束");
+
+    core.lockControl();
+    core.status.event.id='toolbox';
+    core.ui.drawToolbox();
+}
+
+control.prototype.equipboxReplay = function () {
+    if (!core.isPlaying() || !core.isReplaying()) return;
+    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+        return core.drawTip("请等待当前事件的处理结束");
+
+    core.lockControl();
+    core.status.event.id='equipbox';
+    core.ui.drawEquipbox();
 }
 
 ////// 是否正在播放录像 //////
@@ -1286,7 +1346,7 @@ control.prototype._replay_finished = function () {
 
 control.prototype._replay_save = function () {
     core.status.replay.steps++;
-    if (core.status.replay.steps%50==0) {
+    if (core.status.replay.steps%40==1) {
         if (core.status.replay.save.length == 30)
             core.status.replay.save.shift();
         core.status.replay.save.push({"data": core.saveData(), "replay": {
@@ -1325,6 +1385,7 @@ control.prototype._replay_error = function (action) {
 }
 
 control.prototype.__replay_getTimeout = function () {
+    if (core.status.replay.speed == 24) return 0;
     return 750 / Math.max(1, core.status.replay.speed);
 }
 
@@ -1982,7 +2043,7 @@ control.prototype.unLockControl = function () {
 ////// 开启debug模式 //////
 control.prototype.debug = function() {
     core.setFlag('debug', true);
-    core.drawText("\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n同时，录像将失效，也无法上传成绩。");
+    core.drawText("\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n此模式下将无法上传成绩。");
 }
 
 // ------ 天气，色调，BGM ------ //
@@ -2309,6 +2370,7 @@ control.prototype._updateStatusBar_setToolboxIcon = function () {
 }
 
 control.prototype.showStatusBar = function () {
+    if (main.mode == 'editor') return;
     if (core.domStyle.showStatusBar) return;
     var statusItems = core.dom.status;
     core.domStyle.showStatusBar = true;
@@ -2321,9 +2383,12 @@ control.prototype.showStatusBar = function () {
 }
 
 control.prototype.hideStatusBar = function (showToolbox) {
+    if (main.mode == 'editor') return;
+
     // 如果原本就是隐藏的，则先显示
     if (!core.domStyle.showStatusBar)
         this.showStatusBar();
+    if (core.isReplaying()) showToolbox = true;
 
     var statusItems = core.dom.status, toolItems = core.dom.tools;
     core.domStyle.showStatusBar = false;
@@ -2431,7 +2496,7 @@ control.prototype.setToolbarButton = function (useButton) {
     }
 
     if (useButton == null) useButton = core.domStyle.toolbarBtn;
-    if (!core.domStyle.isVertical || !core.platform.extendKeyboard) useButton = false;
+    if (!core.domStyle.isVertical || core.isReplaying()) useButton = false;
     core.domStyle.toolbarBtn = useButton;
 
     if (useButton) {
@@ -2614,6 +2679,11 @@ control.prototype._resize_canvas = function (obj) {
         canvas.style.left = parseFloat(canvas.getAttribute("_left")) * core.domStyle.scale + "px";
         canvas.style.top = parseFloat(canvas.getAttribute("_top")) * core.domStyle.scale + "px";
     }
+    // resize next
+    main.dom.next.style.width = main.dom.next.style.height = 5 * core.domStyle.scale + "px";
+    main.dom.next.style.borderBottomWidth = main.dom.next.style.borderRightWidth = 4 * core.domStyle.scale + "px";
+
+
 }
 
 control.prototype._resize_statusBar = function (obj) {

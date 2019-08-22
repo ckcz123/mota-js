@@ -268,16 +268,6 @@ ui事件中没有具体到前三个区中的函数
 
 ### editor.js
 
-``` js
-editor.mapInit();//清空地图
-editor.changeFloor('MT2')//切换地图
-editor.util.guid()//产生一个可以作为id的长随机字符串
-```
-
-`editor.updateMap`中画未定义快的报错
-
-### editor_file.js
-
 初始化加整合各模块
 
 现状是还放了一些游戏数据有关的函数未挪到editor_game, 以及部分和入口页面生成有关的函数

@@ -21,6 +21,7 @@ control.prototype._init = function () {
     this.registerAnimationFrame("globalAnimate", true, this._animationFrame_globalAnimate);
     this.registerAnimationFrame("animate", true, this._animationFrame_animate);
     this.registerAnimationFrame("heroMoving", true, this._animationFrame_heroMoving);
+    this.registerAnimationFrame("sprite", true, this._animationFrame_sprite);
     this.registerAnimationFrame("weather", true, this._animationFrame_weather);
     this.registerAnimationFrame("parallelDo", false, this._animationFrame_parallelDo);
     this.registerAnimationFrame("checkConsoleOpened", true, this._animationFrame_checkConsoleOpened);
@@ -127,6 +128,10 @@ control.prototype._animationFrame_autoSave = function (timestamp) {
     core.saves.autosave.time = timestamp;
 }
 
+control.prototype._animationFrame_sprite = function (timestamp) {
+    core.sprite.render.update();
+}
+
 control.prototype._animationFrame_globalAnimate = function (timestamp) {
     if (timestamp - core.animateFrame.globalTime <= core.values.animateSpeed) return;
     core.status.globalAnimateStatus++;
@@ -180,6 +185,7 @@ control.prototype._animationFrame_heroMoving = function (timestamp) {
         core.animateFrame.leftLeg = !core.animateFrame.leftLeg;
         core.animateFrame.moveTime = timestamp;
     }
+
     core.drawHero(core.animateFrame.leftLeg?'leftFoot':'rightFoot', 4*core.status.heroMoving);
 }
 
@@ -759,9 +765,36 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
     return false;
 }
 
+
+///// ----- 变换的观察者 -----
+function transformOberver(obj){
+    this.position = obj || {};
+}
+transformOberver.prototype.getPosition = function() {
+    return this.position;
+}
+transformOberver.prototype.notify = function(changeFunc){
+    changeFunc.call(this.position);
+}
+
+
+var heroTransform = function(){
+
+}
+
 ////// 绘制勇士 //////
 control.prototype.drawHero = function (status, offset) {
     if (!core.isPlaying() || !core.status.floorId || core.status.gameOver) return;
+
+    if(!core.status.heroSprite){
+        var tmp = {};
+        tmp.obj = core.sprite.getSpriteObj('hero');
+        tmp.observer = new transformOberver(tmp.obj);
+        // tmp.obj.bindPosition(tmp.observer.getPosition());
+        core.sprite.render.addNewObj(tmp.obj, true);
+        core.status.heroSprite = tmp;
+    }
+
     var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
     status = status || 'stop';
     offset = offset || 0;
@@ -770,8 +803,31 @@ control.prototype.drawHero = function (status, offset) {
     core.bigmap.offsetX = core.clamp((x - core.__HALF_SIZE__) * 32 + offsetX, 0, 32*core.bigmap.width-core.__PIXELS__);
     core.bigmap.offsetY = core.clamp((y - core.__HALF_SIZE__) * 32 + offsetY, 0, 32*core.bigmap.height-core.__PIXELS__);
     core.clearAutomaticRouteNode(x+dx, y+dy);
-    core.clearMap('hero');
+    // core.clearMap('hero');
+    core.status.heroSprite.observer.notify(
+        function(){
+            var mesh = {
+                "stop": 0,
+                "leftFoot": 1,
+                "rightFoot": 3
+            };
+            var dir = {
+                "down": 0,
+                "left": 1,
+                "right": 2,
+                "up": 3,
+            };
+            this.x = x * 32+16 - ~~(this.info.width/2+0.5) - core.bigmap.offsetX;
+            this.y = (y+1) * 32 - this.info.height - core.bigmap.offsetY;
+            this.offsetX = core.utils.scan[direction].x * offset;
+            this.offsetY = core.utils.scan[direction].y * offset;
+            this.nFrame = mesh[status];
+            this.nLine = dir[direction];
+        }
+    )
+    core.sprite.render.reloacate(core.status.heroSprite.obj);
 
+    /*
     this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
         core.drawImage('hero', block.img, block.heroIcon[block.status]*block.width,
             block.heroIcon.loc * block.height, block.width, block.height,
@@ -779,7 +835,7 @@ control.prototype.drawHero = function (status, offset) {
     });
 
     core.control.updateViewport();
-    core.setGameCanvasTranslate('hero', 0, 0);
+    core.setGameCanvasTranslate('hero', 0, 0);*/
 }
 
 control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, offset) {

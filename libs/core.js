@@ -221,6 +221,7 @@ core.prototype.init = function (coreData, callback) {
     this._initPlugins();
 
     core.loader._load(function () {
+        core.sprite._load();
         core._afterLoadResources(callback);
     });
 }

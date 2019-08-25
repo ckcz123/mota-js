@@ -286,7 +286,7 @@ utils.prototype.clone = function (data, filter, recursion) {
         var copy = [];
         for (var i in data) {
             if (!filter || filter(i, data[i]))
-                copy[i] = core.clone(data[i], recursion?filter:null, recursion);
+                copy[i] = core.clone(data[i], recursion ? filter : null, recursion);
         }
         return copy;
     }
@@ -299,7 +299,7 @@ utils.prototype.clone = function (data, filter, recursion) {
         var copy = {};
         for (var i in data) {
             if (data.hasOwnProperty(i) && (!filter || filter(i, data[i])))
-                copy[i] = core.clone(data[i], recursion?filter:null, recursion);
+                copy[i] = core.clone(data[i], recursion ? filter : null, recursion);
         }
         return copy;
     }
@@ -321,7 +321,8 @@ utils.prototype.splitImage = function (image, width, height) {
     for (var j = 0; j < image.height; j += height) {
         for (var i = 0; i < image.width; i += width) {
             var w = Math.min(width, image.width - i), h = Math.min(height, image.height - j);
-            canvas.width = w; canvas.height = h;
+            canvas.width = w;
+            canvas.height = h;
             context.drawImage(image, i, j, w, h, 0, 0, w, h);
             var img = new Image();
             img.src = canvas.toDataURL("image/png");
@@ -346,9 +347,9 @@ utils.prototype.formatDate2 = function (date) {
 }
 
 utils.prototype.formatTime = function (time) {
-    return core.setTwoDigits(parseInt(time/3600000))
-        +":"+core.setTwoDigits(parseInt(time/60000)%60)
-        +":"+core.setTwoDigits(parseInt(time/1000)%60);
+    return core.setTwoDigits(parseInt(time / 3600000))
+        + ":" + core.setTwoDigits(parseInt(time / 60000) % 60)
+        + ":" + core.setTwoDigits(parseInt(time / 1000) % 60);
 }
 
 ////// 两位数显示 //////
@@ -472,7 +473,7 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
         return 'K' + t.substring(4);
     else if (t.indexOf('random:') == 0)
         return 'X' + t.substring(7);
-    return '('+t+')';
+    return '(' + t + ')';
 }
 
 ////// 解密路线 //////
@@ -647,7 +648,7 @@ utils.prototype.strlen = function (str) {
 
 utils.prototype.reverseDirection = function (direction) {
     direction = direction || core.getHeroLoc('direction');
-    return {"left":"right","right":"left","down":"up","up":"down"}[direction] || direction;
+    return {"left": "right", "right": "left", "down": "up", "up": "down"}[direction] || direction;
 }
 
 utils.prototype.matchWildcard = function (pattern, string) {
@@ -927,7 +928,7 @@ utils.prototype.myprompt = function (hint, value, callback) {
     main.dom.inputDiv.style.display = 'block';
     main.dom.inputMessage.innerHTML = hint.replace(/\n/g, '<br/>');
     main.dom.inputBox.style.display = 'block';
-    main.dom.inputBox.value = value==null?"":value;
+    main.dom.inputBox.value = value == null ? "" : value;
     main.dom.inputYes.blur();
     main.dom.inputNo.blur();
     setTimeout(function () {
@@ -1203,4 +1204,83 @@ function lzw_decode(s) {
         oldPhrase = phrase;
     }
     return out.join("");
+}
+
+
+utils.prototype.concatImage = function (imgA, imgB, dir) {
+    dir = dir || 'width';
+    var inv_dir = dir=='width' ? 'height':'width';
+    if (imgA[dir] != imgB[dir]) {
+        main.log(imgA[dir]+'!='+imgB[dir]);
+        main.log('必须要'+dir+'一致才能合并');
+        return null;
+    }
+    var canvas = document.createElement("canvas");
+    var context = canvas.getContext("2d");
+    canvas[dir] = imgA[dir];
+    canvas[inv_dir] = imgA[inv_dir] + imgB[inv_dir];
+    context.drawImage(imgA, 0, 0);
+    if(dir=='width')context.drawImage(imgB, 0, imgA[inv_dir]);
+    else context.drawImage(imgB, imgA[inv_dir], 0);
+    console.log(canvas.width+','+canvas.height)
+    return canvas.toDataURL("image/png");
+}
+
+///// 将旧类型的素材批量注册到sprite
+utils.prototype.convertOldTypes = function () {
+    var _icon = icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1;
+    var _sprite = sprite_90f36752_8815_4be8_b32b_d7fad1d0542e;
+    var oldConvert = {
+        'terrains': 'terrains',
+        'items': 'terrains',
+        'npcs': 'npcs',
+        'enemys': 'npcs',
+        'npc48': 'npc48',
+        'enemy48': 'npc48',
+        'animates': 'animates',
+    };
+    var frame = {
+        'terrains': 1,
+        'items': 1,
+        'npcs': 2,
+        'enemys': 2,
+        'npc48': 4,
+        'enemy48': 4,
+        'animates': 4,
+    }
+    var th = 0;
+    var oldType = null;
+    for (var org in oldConvert) {
+        if (oldConvert[org] != oldType) th = 0;
+        oldType = oldConvert[org];
+        var h = 32, dh = 0;
+        if (oldType.indexOf('48') >= 0) h = 48;
+        for (var k in _icon[org]) {
+            _sprite[k] = {
+                x: 0,
+                y: _icon[org][k] * h + th,
+                width: 32,
+                height: h,
+                frame: frame[org],
+                oldType: oldType,
+            };
+            dh += h;
+        }
+        console.log(h)
+        th += dh;
+    }
+    // 自动元件 16x16
+    var tx = 0;
+    for(var it in _icon.autotile){
+        var w = core.material.images.autotile[it].width;
+        _sprite[it] = {
+            x: tx,
+            y: 0,
+            width: 16,
+            height: 16,
+            frame: w/96,
+            oldType: 'autotile',
+        };
+        tx += w;
+    }
 }

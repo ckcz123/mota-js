@@ -969,6 +969,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
         "loadData": function (data, callback) {
 	// 读档操作；从存储中读取了内容后的行为
 
+	core.sprite.render.destCtx = core.getContextByName('hero');
 	// 重置游戏和路线
 	core.resetGame(data.hero, data.hard, data.floorId, core.maps.loadMap(data.maps), data.values);
 	core.status.route = core.decodeRoute(data.route);
@@ -1000,7 +1001,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.updateEnemys();
 
 	// TODO：增加自己的一些读档处理
-
 	// 切换到对应的楼层
 	core.changeFloor(data.floorId, null, data.hero.loc, 0, function () {
 		// TODO：可以在这里设置读档后播放BGM

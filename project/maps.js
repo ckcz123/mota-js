@@ -16,7 +16,7 @@ var maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
 	"14": {"cls":"animates","id":"curseNet","noPass":false,"trigger":"passNet"},
 	"15": {"cls":"animates","id":"blueWater","noPass":true},
 	"16": {"cls":"animates","id":"water","noPass":true},
-	"20": {"cls":"autotile","id":"autotile","noPass":true},
+	"20": {"cls":"autotile","id":"autotile0","noPass":true},
 	"21": {"cls":"items","id":"yellowKey"},
 	"22": {"cls":"items","id":"blueKey"},
 	"23": {"cls":"items","id":"redKey"},

@@ -776,16 +776,20 @@ maps.prototype._drawMap_drawAll = function (floorId) {
     this.drawFg(floorId);
 }
 
-maps.prototype._drawMap_drawBlockInfo = function (ctx, block, blockInfo, arr, onMap) {
+maps.prototype._drawMap_drawBlockInfo = function (render, block, blockInfo, arr, onMap) {
     if (blockInfo == null) return;
     if (blockInfo.cls == 'autotile') { // Autotile单独处理
-        this._drawAutotile(ctx, arr, block, 32, 0, 0);
+        this._drawAutotile(render, arr, block, 32, 0, 0);
         if (onMap) this.addGlobalAnimate(block);
         return;
     }
     if (!onMap) {
-        var height = blockInfo.height;
-        core.drawImage(ctx, blockInfo.image, 32 * blockInfo.posX, height * blockInfo.posY, 32, height, 32 * block.x, 32 * block.y + 32 - height, 32, height);
+        if(!render.hasObj(block.event.sprite)){
+            core.heroSpritePositionTransForm(block.event.sprite, block.x, block.y);
+            render.addNewObj(block.event.sprite);
+        }
+        // var height = blockInfo.height;
+        // core.drawImage(ctx, blockInfo.image, 32 * blockInfo.posX, height * blockInfo.posY, 32, height, 32 * block.x, 32 * block.y + 32 - height, 32, height);
         return;
     }
     this.drawBlock(block);
@@ -821,16 +825,16 @@ maps.prototype._drawBg_drawBackground = function (floorId, ctx) {
 }
 
 ////// 绘制事件层 //////
-maps.prototype.drawEvents = function (floorId, blocks, ctx) {
+maps.prototype.drawEvents = function (floorId, blocks, render) {
     floorId = floorId || core.status.floorId;
     if (!blocks) blocks = core.status.maps[floorId].blocks;
     var arr = this._getMapArrayFromBlocks(blocks, core.floors[floorId].width, core.floors[floorId].height);
-    var onMap = ctx == null;
-    if (onMap) ctx = core.sprite.render.destCtx;
+    var onMap = render == null;
+    if (onMap) render = core.sprite.render.destCtx;
     blocks.filter(function (block) {
         return block.event && !block.disable;
     }).forEach(function (block) {
-        core.maps._drawMap_drawBlockInfo(ctx, block, core.maps.getBlockInfo(block), arr, onMap);
+        core.maps._drawMap_drawBlockInfo(render, block, core.maps.getBlockInfo(block), arr, onMap);
     });
     if (onMap) core.status.autotileAnimateObjs.map = core.clone(arr);
 }
@@ -1024,7 +1028,7 @@ maps.prototype._drawAutotile = function (render, mapArr, block, size, left, top,
         ctx.forEach(function(obj){
             obj.info.x += core.sprite.sprite[block.event.id].x;
         });
-        if(!render.addNewObj){
+        if(!render || !render.addNewObj){
             render = core.sprite.render;
         }
         if(render.objs.indexOf(block.event.sprite)<0){
@@ -1231,6 +1235,8 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
     tempCanvas.canvas.height = tempHeight;
     tempCanvas.clearRect(0, 0, tempWidth, tempHeight);
 
+    var render = core.getTempRenderSprite();
+
     // --- 暂存 flags
     var hasHero = core.status.hero != null, flags = null;
     if (options.flags) {
@@ -1239,32 +1245,40 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
         core.status.hero.flags = options.flags;
     }
 
-    this._drawThumbnail_realDrawTempCanvas(floorId, blocks, options, tempCanvas);
+    this._drawThumbnail_realDrawTempCanvas(floorId, blocks, options, render);
+    render.update(true);
+    render.drawTo(tempCanvas);
+    console.log(render)
 
     // --- 恢复 flags
     if (!hasHero) delete core.status.hero;
     else if (flags != null) core.status.hero.flags = flags;
 }
 
-maps.prototype._drawThumbnail_realDrawTempCanvas = function (floorId, blocks, options, tempCanvas) {
+maps.prototype._drawThumbnail_realDrawTempCanvas = function (floorId, blocks, options, tempRender) {
+    var tempCanvas = core.bigmap.tempCanvas;
     // 缩略图：背景
     this.drawBg(floorId, tempCanvas);
     // 缩略图：事件
-    this.drawEvents(floorId, blocks, tempCanvas);
+    this.drawEvents(floorId, blocks, tempRender);
     // 缩略图：勇士
     if (options.heroLoc) {
+        var obj = core.getSpriteObj('hero');
+        core.heroSpritePositionTransForm(obj, options.heroLoc.x, options.heroLoc.y, options.heroLoc.direction);
+        tempRender.addNewObj(obj);
+        /*
         options.heroIcon = options.heroIcon || core.getFlag("heroIcon", "hero.png");
         options.heroIcon = core.getMappedName(options.heroIcon);
         var icon = core.material.icons.hero[options.heroLoc.direction];
         var height = core.material.images.images[options.heroIcon].height / 4;
         tempCanvas.drawImage(core.material.images.images[options.heroIcon], icon.stop * 32, icon.loc * height, 32, height,
-            32 * options.heroLoc.x, 32 * options.heroLoc.y + 32 - height, 32, height);
+            32 * options.heroLoc.x, 32 * options.heroLoc.y + 32 - height, 32, height); */
     }
     // 缩略图：前景
     this.drawFg(floorId, tempCanvas);
     // 缩略图：显伤
     if (options.damage)
-        core.control.updateDamage(floorId, tempCanvas);
+        core.control.updateDamage(floorId, tempRender.ctx);
 }
 
 maps.prototype._drawThumbnail_drawToTarget = function (floorId, toDraw) {

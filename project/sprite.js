@@ -1,5 +1,5 @@
 var sprite_90f36752_8815_4be8_b32b_d7fad1d0542e = {
-    "__xhBias__": {"x": 0, "h": 0},
+    "__xhBias__": {"x": 0, "h": 384},
     "hero": {"x": 0, "y": 0, "width": 48, "height": 64, "frame": 4, "line": 4, "oldType": "hero"},
     "yellowKey": {"x": 0, "y": 1440, "width": 32, "height": 32, "frame": 1, "oldType": "terrains"},
     "ground": {"x": 0, "y": 0, "width": 32, "height": 32, "frame": 1, "oldType": "terrains"},
@@ -215,5 +215,7 @@ var sprite_90f36752_8815_4be8_b32b_d7fad1d0542e = {
     "autotile0": {"x": 0, "y": 0, "width": 16, "height": 16, "frame": 1, "oldType": "autotile"},
     "autotile1": {"x": 96, "y": 0, "width": 16, "height": 16, "frame": 4, "oldType": "autotile"},
     "autotile2": {"x": 480, "y": 0, "width": 16, "height": 16, "frame": 1, "oldType": "autotile"},
-    "autotile3": {"x": 576, "y": 0, "width": 16, "height": 16, "frame": 1, "oldType": "autotile"}
+    "autotile3": {"x": 576, "y": 0, "width": 16, "height": 16, "frame": 1, "oldType": "autotile"},
+    "darkMon1": {"width": 48, "height": 48, "frame": 4, "line": 4, "name": "darkMon1", "x": 0, "y": 256},
+    "darkMon2": {"width": 96, "height": 96, "frame": 4, "line": 4, "name": "darkMon2", "x": 192, "y": 0},
 }

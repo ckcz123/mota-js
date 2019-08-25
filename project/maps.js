@@ -195,5 +195,8 @@ var maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
 	"261": {"cls":"enemy48","id":"angel"},
 	"262": {"cls":"enemy48","id":"elemental"},
 	"263": {"cls":"enemy48","id":"steelGuard"},
-	"264": {"cls":"enemy48","id":"evilBat"}
+    "264": {"cls":"enemy48","id":"evilBat"},
+    "265": {"cls":"enemy48","id":"evilBat"},
+    "266": {"cls":"enemys","id":"darkMon1"},
+    "267": {"cls":"enemys","id":"darkMon2"},
 }

@@ -778,11 +778,36 @@ transformOberver.prototype.notify = function(changeFunc){
 }
 
 
-var heroTransform = function(){
+
+control.prototype.eventSpritePositionTransForm = function(obj, x, y, direction, status, offset){
 
 }
 
+control.prototype.heroSpritePositionTransForm = function(obj, x, y, direction, status, offset){
+    var mesh = {
+        "stop": 0,
+        "leftFoot": 1,
+        "rightFoot": 3
+    };
+    var dir = {
+        "down": 0,
+        "left": 1,
+        "right": 2,
+        "up": 3,
+    };
+    offset = offset || 0;
+    direction = direction || 'down';
+    obj.nFrame = mesh[status||'stop'];
+    obj.x = x * 32+16 - ~~(obj.info.width/2+0.5) - core.bigmap.offsetX;
+    obj.y = (y+1) * 32 - obj.info.height - core.bigmap.offsetY;
+    obj.offsetX = core.utils.scan[direction].x * offset;
+    obj.offsetY = core.utils.scan[direction].y * offset;
+    obj.nFrame = mesh[status||'stop'];
+    obj.nLine = dir[direction];
+}
+
 ////// 绘制勇士 //////
+
 control.prototype.drawHero = function (status, offset) {
     if (!core.isPlaying() || !core.status.floorId || core.status.gameOver) return;
 
@@ -804,6 +829,8 @@ control.prototype.drawHero = function (status, offset) {
     core.bigmap.offsetY = core.clamp((y - core.__HALF_SIZE__) * 32 + offsetY, 0, 32*core.bigmap.height-core.__PIXELS__);
     core.clearAutomaticRouteNode(x+dx, y+dy);
     // core.clearMap('hero');
+    this.heroSpritePositionTransForm(core.status.heroSprite.obj, x, y, direction, status, offset);
+    /*
     core.status.heroSprite.observer.notify(
         function(){
             var mesh = {
@@ -825,17 +852,18 @@ control.prototype.drawHero = function (status, offset) {
             this.nLine = dir[direction];
         }
     )
+   */
     core.sprite.render.reloacate(core.status.heroSprite.obj);
 
+    core.control.updateViewport();
+    core.setGameCanvasTranslate('hero', 0, 0);
     /*
     this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
         core.drawImage('hero', block.img, block.heroIcon[block.status]*block.width,
             block.heroIcon.loc * block.height, block.width, block.height,
             block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
     });
-
-    core.control.updateViewport();
-    core.setGameCanvasTranslate('hero', 0, 0);*/
+*/
 }
 
 control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, offset) {

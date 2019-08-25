@@ -5,6 +5,13 @@
     2. spriteObj： 提供所有图块图标的渲染接口的对象，包括terr、items、enemys、icons、animates， 
     autotile和大地图贴图暂时不做（特殊的处理？）
     3. spriteRender
+
+
+
+    可优化点：
+    1. 部分清除/渲染（增加计算时间、减少渲染时间
+    2. sprite图加载后就地切分，建立id-canvas的字典，避免反复对大图进行切分drawImage（减少渲染时间、增大运行时内存
+    3. 去掉spriteObj的info，改为从sprite查询（减少运行时内存
 */
 function sprite() {
     this._init();
@@ -16,8 +23,8 @@ function spriteObj(info, image){
     this.nLine = 0;
     this.image = image;
 }
-function spriteRender(){
-    this._init();
+function spriteRender(ctx){
+    this._init(ctx);
 }
 ///// ----- 资源管理 -----
 sprite.prototype._init = function(){
@@ -46,6 +53,7 @@ sprite.prototype._load = function(){
 }
 
 ////// 注册一个精灵， 测试版 | TODO： 服务器交互 //////
+// 自动元件需要单独处理
 sprite.prototype._registerSprite = function(image, name, x, y, w, h, frame, line){
     if(!name || !image)return null;
     if(this.sprite[name]){main.log('重复的spirte命名：'+name);}
@@ -73,7 +81,6 @@ sprite.prototype._registerSprite = function(image, name, x, y, w, h, frame, line
     var canvas = document.createElement("canvas");
     var context = canvas.getContext("2d");
     canvas.width = dimg.width; canvas.height = dimg.height;
-    context.drawImage(dimg, 0, 0);
     var dx=this.xhBias.x,dy=this.xhBias.h;
     // 寻找合适位置 | 
     // 扩充规则： 如果当前宽度不足以容下新素材 则换新列；如果当前高度不足以容下新素材，增加高度
@@ -95,15 +102,18 @@ sprite.prototype._registerSprite = function(image, name, x, y, w, h, frame, line
     }
 
     // 嵌入图片
+    context.drawImage(dimg, 0, 0);
     context.drawImage(image, x, y, w, h, dx, dy, w, h);
     dimg.src = canvas.toDataURL("image/png");
 
     // 保存注册信息
     obj.name = name;
-    obj.x = x;  obj.y = y;
+    obj.x = dx;  obj.y = dy;
     this.sprite[name] = obj;
 
-    // TODO: 回传服务器
+    dimg.src.onload = function(){
+        // TODO: 回传服务器
+    }
 }
 
 ////// 依据行列状态 获取一个精灵图的frame 返回img x y w h //////
@@ -162,6 +172,11 @@ sprite.prototype.drawSpriteToCanvas = function(obj, ctx, bias){
 }
 
 ///// ------ 绘制 ------
+
+sprite.prototype.getTempRenderSprite = function(ctx){
+    return new spriteRender(ctx);
+}
+
 ///// 添加对象到当前的渲染队列
 sprite.prototype.addRenderSpriteObj = function(obj){
     this.render.addNewObj(obj);
@@ -172,7 +187,7 @@ sprite.prototype.deleteRenderSpriteObj = function(obj){
 }
 /////
 sprite.prototype.hasRenderSpriteObj = function(obj){
-    return this.render.objs.indexOf(obj)>=0;
+    return this.render.hasObj(obj);
 }
 /////
 sprite.prototype.relocateRenderSpriteObj = function(obj, prior){
@@ -202,13 +217,19 @@ sprite.prototype.clearRenderSprite = function(){
 
 ///// ----- 渲染 -----
 
-spriteRender.prototype._init = function(){
+spriteRender.prototype._init = function(ctx){
     this.dirty = false;
-    this.canvas = document.createElement("canvas");
-    this.canvas.width = core.__PIXELS__;
-    this.canvas.height = core.__PIXELS__;
-    this.ctx = this.canvas.getContext('2d');
+    if(ctx){
+        this.ctx = ctx;
+        this.canvas = ctx.canvas;
+    }else{
+        this.canvas = document.createElement("canvas");
+        this.canvas.width = core.__PIXELS__;
+        this.canvas.height = core.__PIXELS__;
+        this.ctx = this.canvas.getContext('2d');
+    }
     this.objs = [];
+    this.destCtx = null;
 }
 spriteRender.prototype.update = function(blur){
     if(this.dirty || blur){
@@ -237,6 +258,8 @@ spriteRender.prototype.reloacate = function(obj, prior){
     this.addNewObj(obj, prior);
 }
 
+
+///// TODO: 定位blur的区域 减少重绘次数
 spriteRender.prototype.blur = function(){
     this.dirty = true;
 }
@@ -266,6 +289,9 @@ spriteRender.prototype.deleteObj = function(obj){
     var idx = this.objs.indexOf(obj);
     if(idx>=0)this.objs.splice(idx, 1);
     this.blur();
+}
+spriteRender.prototype.hasObj = function(obj){
+    return this.objs.indexOf(obj)>=0;
 }
 spriteRender.prototype.drawTo = function(ctx){
     ctx.drawImage(this.canvas, 0, 0, this.canvas.width, this.canvas.height, 0, 0, ctx.canvas.width, ctx.canvas.height);

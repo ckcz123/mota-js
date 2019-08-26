@@ -35,7 +35,7 @@ sprite.prototype._init = function(){
     this.oldType = {
         '32,32,1':'terrains',
         '128,32,4':'animates',
-        '64,32,2':'npc',
+        '64,32,2':'npcs',
         '128,48,4':'npc48',
     }
     // 资源x重定位 —— 如果出现比当前宽的sprite 则将其x定位为上一次的宽
@@ -52,8 +52,8 @@ sprite.prototype._load = function(){
     //this.render.destCtx = core.getContexByName('hero');
 }
 
-////// 注册一个精灵， 测试版 | TODO： 服务器交互 //////
-// 自动元件需要单独处理
+////// 注册一个精灵， 测试版 | TODO： 服务器交互 ///
+//  自动元件需要单独处理
 sprite.prototype._registerSprite = function(image, name, x, y, w, h, frame, line){
     if(!name || !image)return null;
     if(this.sprite[name]){main.log('重复的spirte命名：'+name);}
@@ -115,6 +115,150 @@ sprite.prototype._registerSprite = function(image, name, x, y, w, h, frame, line
         // TODO: 回传服务器
     }
 }
+
+///// 取消注册并删除所在画布区域
+sprite.prototype._unregisterSprite = function(name, arrangeDirectly){
+    if(this.sprite[name]){
+        var sprite = this.sprite [name];
+        delete this.sprite [name];
+        if(sprite.oldType){
+            this._rearrangementOldtype(sprite);
+        }
+        else if(arrangeDirectly) // 删除后并不立即进行重排 因为重排开销较大 应该加一个脏标记表示需要重排 下次刷新的时候做
+        {
+            this._rearrangementSprite();
+        }
+    }
+}
+
+///// 对sprite.png进行重排 需要全重排 尽量保证空间消耗少
+// 堆叠方法： 宽度从小到大纵向排列 高度取平均高度
+sprite.prototype._rearrangementSprite = function(){
+    var arrangeSprites = Object.values(this.sprite).filter(function(obj){return !obj.oldType});
+    var heightBucket = {};
+    var objBucket = {};
+    var sumHeight = 0;
+    var maxHeight = 0;
+        arrangeSprites.forEach(function(obj) {
+        var w =  obj.width*(obj.frame||1), h = obj.height*(obj.line || 1);
+        heightBucket[w] = (heightBucket[w]||0) + h;
+        objBucket[w] = objBucket[w] || [];
+        objBucket[w].push(obj);
+        sumHeight += h;
+        maxHeight = maxHeight > h? maxHeight : h;
+    });
+    var widthArr = Object.keys(heightBucket).sort(function(a,b){return parseInt(a)-parseInt(b)});
+    var avgHeight = Math.max(~~ sumHeight/widthArr.length, maxHeight);
+
+    var drawQueue = [];
+    var widthQueue = [];
+    for(var i = 0; i < widthArr.length; i++){
+        var w = parseInt(widthArr[i]);
+        var h = heightBucket[w];
+        if(h > avgHeight){ // 需要切分
+            var tmpH = 0;
+            var tmpArr = [];
+            objBucket[w].forEach(function(obj) {
+                if(tmpH + obj.height*(obj.line||1) > avgHeight){
+                    widthQueue.push(w);
+                    drawQueue.push(tmpArr);
+                    tmpArr = [];
+                }
+                tmpArr.push(obj);
+                tmpH += obj.height*(obj.line||1);
+            })
+            if(tmpArr.length>0){
+                drawQueue.push(tmpArr);
+                widthQueue.push(w);
+            }
+        }else if(i+1<widthArr.length && h + heightBucket[widthArr[i+1]].h < avgHeight){ //可以合并
+            var tmpArr = objBucket[w];
+            do{
+                w = widthArr[i+1];
+                h += heightBucket[w];
+                tmpArr = tmpArr.concat(objBucket[w]);
+                i++;
+            }while(i+1<widthArr.length && h + heightBucket[widthArr[i+1]].h < avgHeight);
+            drawQueue.push(tmpArr);
+            widthQueue.push(w);
+        }else{ // 只绘制当前列
+            widthQueue.push(w);
+            drawQueue.push(objBucket[w]);
+        }
+    }
+    var image = core.material.images.sprite;
+    this._rearrange_drawImageByWidthArray(image, drawQueue, widthQueue, avgHeight);
+}
+
+//
+sprite.prototype._rearrange_drawImageByWidthArray = function(image, drawQueue, widthArr, height){
+    var ctx = document.createElement("canvas").getContext("2d");
+    ctx.canvas.width = eval(widthArr.join("+"));
+    ctx.canvas.height = height;
+    var x_bias = 0, y_bias = 0;
+    for(var i = 0;i<drawQueue.length; i++){
+        y_bias = 0;
+        drawQueue[i].forEach(function(obj) {
+            var w = obj.width * (obj.frame || 1);
+            var h = obj.height * (obj.line || 1);
+            ctx.drawImage(image, obj.x, obj.y, w, h, x_bias, y_bias, w, h);
+            obj.x = x_bias; obj.y = y_bias;
+            y_bias += h;
+        });
+        x_bias += widthArr[i];
+    };
+    image.src = ctx.canvas.toDataURL('image/png');
+}
+
+///// 对oldtype.png进行重排 只需要将y大于删除对象的素材位移即可 如果不提供sprite 则需要全重排
+sprite.prototype._rearrangementOldtype = function(delSprite){
+    var arrangeSprites = Object.values(this.sprite);
+    if(delSprite){
+        var image = core.material.images[delSprite.oldType];
+        var ctx = document.createElement("canvas").getContext("2d");
+        var dy = delSprite.y;
+        var dh = (delSprite.height||32)*(delSprite.line||1);
+        ctx.canvas.width = image.width;
+        ctx.canvas.height = image.height - dh;
+        ctx.drawImage(image, 0, 0, image.width, dy, 0, 0, image.width, dy);
+        var y_bias = dy;
+        arrangeSprites
+            .filter(function(obj){return obj.oldType == delSprite.oldType && obj.y > dy && obj !== delSprite})
+            .sort(function(o1,o2) {return o1.y-o2.y}) /// 不知道为什么不排序就会出错
+            .forEach(function(obj){
+                ctx.drawImage(image, 0, obj.y, image.width, dh, 0, y_bias, image.width, dh);
+                obj.y = y_bias;
+                y_bias += dh;
+            });
+        core.material.images[delSprite.oldType].src = ctx.canvas.toDataURL('image/png');
+    }else{
+        Object.values(this.oldType).forEach(function(type) {
+            var image = core.material.images[type];
+            var ctx = document.createElement("canvas").getContext("2d");
+            ctx.canvas.width = image.width;
+            ctx.canvas.height = image.height;
+            var y_bias = 0;
+            arrangeSprites
+                .filter(function(obj) { return obj.oldType == type;})
+                .sort(function(o1,o2) {return o1.y-o2.y})
+                .forEach(function(obj) {
+                    var w =  obj.width*(obj.frame||1), h = obj.height; // oldType 的line都是1，所以不用管高度
+                    ctx.drawImage(image,
+                        0, obj.y, w, h,
+                        0, y_bias, w, h,
+                    );
+                    obj.y = y_bias;
+                    y_bias += h;
+                });
+            var imgData = ctx.getImageData(0,0,ctx.canvas.width,y_bias);
+            ctx.canvas.height = y_bias;
+            ctx.putImageData(imgData,0,0);
+            core.material.images[type].src = ctx.canvas.toDataURL('image/png');
+        })
+    }
+
+}
+
 
 ////// 依据行列状态 获取一个精灵图的frame 返回img x y w h //////
 sprite.prototype.getSpriteFrame = function(name, frame, line){

@@ -2251,8 +2251,60 @@ events.prototype._vibrate_update = function (shakeInfo) {
     }
 }
 
+///// 让一个sprite对象按步骤移动
+events.prototype.eventMoveSprite= function(obj, steps, time, callback){
+    time = 800/(time || core.values.moveSpeed || 100);
+    var step = 0, moveSteps = (steps||[]).filter(function (t) {
+        return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
+    });
+    var nextStep = function(){
+        if(step<moveSteps.length){
+            this._eventMoveSprite_moving(obj, moveSteps[step++], time, nextStep);
+        }else{
+            obj.stopMoving();
+            if(callback)callback();
+        }
+    }
+    nextStep();
+}
+
+///// 实际移动，有朝向的角色会自动转向
+events.prototype._eventMoveSprite_moving = function(obj, direction, speed, callback){
+    var o = direction == 'backward' ? -1 : 1;
+    if (direction == 'forward' || direction == 'backward'){
+        direction = core.utils.face[obj.nLine];
+    }
+    var line = core.utils.line[direction];
+    var dx = core.utils.scan[direction].x * core.__BLOCK_SIZE__ * o,
+        dy = core.utils.scan[direction].y * core.__BLOCK_SIZE__ * o;
+    if(o>0 && obj.info.line>line){
+        obj.changeStatus(null, line);
+    }
+    obj.addMoveInfo(dx, dy, speed, callback);
+}
+
+
 /////// 使用事件让勇士移动。这个函数将不会触发任何事件 //////
 events.prototype.eventMoveHero = function(steps, time, callback) {
+    time = 800/(time || core.values.moveSpeed || 100);
+    var step = 0, moveSteps = (steps||[]).filter(function (t) {
+        return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
+    });
+    var obj = core.status.heroSprite.obj;
+    obj.addAnimateInfo();
+    var nextStep = function(){
+        if(step<moveSteps.length){
+            core.events._eventMoveSprite_moving(obj, moveSteps[step++], time, nextStep);
+        }else{
+            core.setHeroLoc('direction', core.utils.face[obj.nLine]);
+            obj.stopAnimate();
+            obj.resetFrame();
+            if(callback)callback();
+        }
+    }
+    nextStep();
+    return ;
+    ///// XXXXXXXXXXXXXXXXXXXX
     time = time || core.values.moveSpeed || 100;
     var step = 0, moveSteps = (steps||[]).filter(function (t) {
         return ['up','down','left','right','forward','backward'].indexOf(t)>=0;

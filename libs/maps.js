@@ -97,7 +97,8 @@ maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     else if (core.icons.getTilesetOffset(id)) block.event = {"cls": "tileset", "id": "X" + id, "noPass": true};
     else block.event = {'cls': 'terrains', 'id': 'none', 'noPass': false};
 
-    block.event.sprite = core.sprite.getSpriteObj(block.event.id); // todo: id->sprite
+    block.event.sprite = core.getSpriteObj(block.event.id);
+    // todo: 实现元件的贴图自由选择 此处就是认为，id就是对应的贴图
     if (typeof block.event.noPass === 'string')
         block.event.noPass = JSON.parse(block.event.noPass);
 
@@ -666,19 +667,19 @@ maps.prototype._automaticRoute_deepAdd = function (x, y) {
 // -------- 绘制地图，各层图块，楼层贴图，Autotile -------- //
 
 ///// 主画布上绘制一个精灵块
-maps.prototype._drawSpriteBlock = function(blockInfo, x, y){
+maps.prototype._drawSpriteBlock = function(blockInfo, x, y, render){
     var obj = null;
     if(blockInfo.sprite)obj = blockInfo.sprite;
     else if(blockInfo.event && blockInfo.event.sprite)obj = blockInfo.event.sprite;
     if(obj){
-        var change = function (){ // TODO: 标准的坐标变换函数
+        render = render || core.sprite.render; // TODO: 不要使用全局render，由场景管理
+        var change = function (){ // TODO: 坐标变换单一类，提供统一变换方法
             this.x = x * 32+16 - ~~(this.info.width/2+0.5);
             this.y = (y + 1) * 32 - this.info.height;
         }
         change.call(obj);
-        if(core.sprite.render.objs.indexOf(obj)<0)
-            core.sprite.render.addNewObj(obj);
-        core.sprite.render.blur();
+        if(!render.hasObj(obj))render.addNewObj(obj);
+        render.blur(); // TODO: 统一请求
     }
 }
 ////// 绘制一个图块 //////
@@ -778,16 +779,17 @@ maps.prototype._drawMap_drawAll = function (floorId) {
 
 maps.prototype._drawMap_drawBlockInfo = function (render, block, blockInfo, arr, onMap) {
     if (blockInfo == null) return;
-    if (blockInfo.cls == 'autotile') { // Autotile单独处理
+    if (blockInfo.cls == 'autotile') { // Autotile特殊处理：分为4个子sprite
         this._drawAutotile(render, arr, block, 32, 0, 0);
         if (onMap) this.addGlobalAnimate(block);
         return;
     }
     if (!onMap) {
-        if(!render.hasObj(block.event.sprite)){
-            core.heroSpritePositionTransForm(block.event.sprite, block.x, block.y);
-            render.addNewObj(block.event.sprite);
-        }
+        this._drawSpriteBlock(block, block.x, block.y, render);
+        //if(!render.hasObj(block.event.sprite)){
+        //    core.heroSpritePositionTransForm(block.event.sprite, block.x, block.y);
+        //    render.addNewObj(block.event.sprite);
+        //}
         // var height = blockInfo.height;
         // core.drawImage(ctx, blockInfo.image, 32 * blockInfo.posX, height * blockInfo.posY, 32, height, 32 * block.x, 32 * block.y + 32 - height, 32, height);
         return;
@@ -1246,9 +1248,9 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
     }
 
     this._drawThumbnail_realDrawTempCanvas(floorId, blocks, options, render);
-    render.update(true);
+    render.blur();
+    render.update();
     render.drawTo(tempCanvas);
-    console.log(render)
 
     // --- 恢复 flags
     if (!hasHero) delete core.status.hero;

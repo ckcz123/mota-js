@@ -375,6 +375,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"floorChangeTime": 800
 	},
 	"flags": {
+		"mspf":30, // 全局每一帧用时的毫秒数
 		"enableFloor": true,
 		"enableName": false,
 		"enableLv": false,

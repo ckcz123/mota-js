@@ -20,7 +20,7 @@ control.prototype._init = function () {
     this.registerAnimationFrame("autoSave", true, this._animationFrame_autoSave);
     this.registerAnimationFrame("globalAnimate", true, this._animationFrame_globalAnimate);
     this.registerAnimationFrame("animate", true, this._animationFrame_animate);
-    this.registerAnimationFrame("heroMoving", true, this._animationFrame_heroMoving);
+    //this.registerAnimationFrame("heroMoving", true, this._animationFrame_heroMoving);
     this.registerAnimationFrame("sprite", true, this._animationFrame_sprite);
     this.registerAnimationFrame("weather", true, this._animationFrame_weather);
     this.registerAnimationFrame("parallelDo", false, this._animationFrame_parallelDo);
@@ -129,7 +129,7 @@ control.prototype._animationFrame_autoSave = function (timestamp) {
 }
 
 control.prototype._animationFrame_sprite = function (timestamp) {
-    core.sprite.render.update();
+    core.updateRenderSprite();
 }
 
 control.prototype._animationFrame_globalAnimate = function (timestamp) {
@@ -181,7 +181,8 @@ control.prototype._animationFrame_animate = function (timestamp) {
 control.prototype._animationFrame_heroMoving = function (timestamp) {
     if (core.status.heroMoving <= 0) return;
     // 换腿
-    if (timestamp - core.animateFrame.moveTime > (core.values.moveSpeed||100)) {
+    var lag = timestamp - core.animateFrame.moveTime;
+    if (lag > (core.values.moveSpeed||100)) {
         core.animateFrame.leftLeg = !core.animateFrame.leftLeg;
         core.animateFrame.moveTime = timestamp;
     }
@@ -573,6 +574,23 @@ control.prototype.setHeroMoveInterval = function (callback) {
     if (core.status.replay.speed>6) toAdd = 4;
     if (core.status.replay.speed>12) toAdd = 8;
 
+    var direction = core.getHeroLoc('direction');
+    var dx = core.utils.scan[direction].x * 32,
+        dy = core.utils.scan[direction].y * 32;
+    var line = core.utils.line[direction];
+    core.sprite.render.blur();
+    core.status.heroSprite.obj.addAnimateInfo(toAdd*2, line);
+    core.status.heroSprite.obj.addMoveInfo(
+        dx,dy,~~(800 / core.values.moveSpeed),
+        function(){
+            core.status.heroMoving = 0;
+            core.moveOneStep(core.nextX(), core.nextY());
+            core.status.heroSprite.obj.stopMoving();
+            core.status.heroSprite.obj.stopAnimate();
+            if (callback) callback();
+        });
+    return;
+    //// XXXXXXXXXXXXXXXX ///////////
     core.interval.heroMoveInterval = window.setInterval(function () {
         core.status.heroMoving+=toAdd;
         if (core.status.heroMoving>=8) {
@@ -680,6 +698,8 @@ control.prototype._moveHero_moving = function () {
     // ------ 我已经看不懂这个函数了，反正好用就行23333333
     core.status.heroStop = false;
     core.status.automaticRoute.moveDirectly = false;
+    //if (!core.status.heroStop) {core.moveAction();}
+    //return;
     var move = function () {
         if (!core.status.heroStop) {
             if (core.hasFlag('debug') && core.status.ctrlDown) {
@@ -816,7 +836,7 @@ control.prototype.drawHero = function (status, offset) {
         tmp.obj = core.sprite.getSpriteObj('hero');
         tmp.observer = new transformOberver(tmp.obj);
         // tmp.obj.bindPosition(tmp.observer.getPosition());
-        core.sprite.render.addNewObj(tmp.obj, true);
+        if(main.mode=='play')core.addRenderSpriteObj(tmp.obj);
         core.status.heroSprite = tmp;
     }
 
@@ -856,7 +876,7 @@ control.prototype.drawHero = function (status, offset) {
     core.sprite.render.reloacate(core.status.heroSprite.obj);
 
     core.control.updateViewport();
-    core.setGameCanvasTranslate('hero', 0, 0);
+    // core.setGameCanvasTranslate('hero', 0, 0);
     /*
     this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
         core.drawImage('hero', block.img, block.heroIcon[block.status]*block.width,

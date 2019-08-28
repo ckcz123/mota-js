@@ -13,6 +13,13 @@ function utils() {
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
+    this.line = {
+        'down': 0,
+        'up': 3,
+        'left': 1,
+        'right': 2
+    }
+    this.face = ['down','left','right','up'];
 }
 
 utils.prototype._init = function () {

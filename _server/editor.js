@@ -41,7 +41,6 @@ editor.info
 /////////// 数据相关 ///////////
 
 editor.prototype.init = function (callback) {
-    
     var useCompress = main.useCompress;
     main.useCompress = false;
     editor.airwallImg = new Image();
@@ -62,6 +61,7 @@ editor.prototype.init = function (callback) {
         editor.main = main;
         editor.core = core;
         editor.fs = fs;
+        core.sprite.render.destCtx = core.getContextByName('event');
         editor_file = editor_file(editor, function () {
             editor.file = editor_file;
             editor_mode = editor_mode(editor);
@@ -288,11 +288,12 @@ editor.prototype.drawInitData = function (icons) {
     // editor.folded = true;
     editor.foldPerCol = 50;
     // var imgNames = Object.keys(images);  //还是固定顺序吧；
-    var imgNames = ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"];
+   //  var imgNames = ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"];
+    var imgNames = ["terrains", "animates", "npcs", "npc48", "autotile", "sprite"];
 
     for (var ii = 0; ii < imgNames.length; ii++) {
         var img = imgNames[ii], tempy = 0;
-        if (img == 'autotile') {
+        if (img == '????autotile') {
             var autotiles = images[img];
             for (var im in autotiles) {
                 tempy += autotiles[im].height;
@@ -368,7 +369,7 @@ editor.prototype.drawInitData = function (icons) {
             }
             continue;
         }
-        if (img == 'autotile') {
+        if (img == 'autotile????') {
             var autotiles = images[img];
             var tempx = editor.folded ? 32 : 96;
             for (var im in autotiles) {

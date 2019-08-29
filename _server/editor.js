@@ -61,7 +61,11 @@ editor.prototype.init = function (callback) {
         editor.main = main;
         editor.core = core;
         editor.fs = fs;
-        core.sprite.render.destCtx = core.getContextByName('event');
+
+        core.scenes.mapScene.getRender('event').redirectCtx(core.getContextByName('event'));
+        core.scenes.mapScene.getRender('bg').redirectCtx(core.getContextByName('bg'));
+        core.scenes.mapScene.getRender('fg').redirectCtx(core.getContextByName('fg'));
+
         editor_file = editor_file(editor, function () {
             editor.file = editor_file;
             editor_mode = editor_mode(editor);

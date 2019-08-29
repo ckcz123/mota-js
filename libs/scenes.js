@@ -58,14 +58,19 @@ baseScene.prototype.config = function(cfg){
 }
 
 
-baseScene.prototype.update = function(){
-    this.children.forEach(function(c){c.update();});
-    this.render.forEach(function(r){r.update();})
+baseScene.prototype.update = function(timeDelta){
+    this.children.forEach(function(c){c.update(timeDelta);});
+    this.render.forEach(function(r){r.update(timeDelta);})
 }
 
 baseScene.prototype.refresh = function(){
     this.children.forEach(function(c){c.refresh();});
-    this.render.forEach(function(r){r.update(true);})
+    this.render.forEach(function(r){r.refresh();});
+}
+
+baseScene.prototype.clear = function(){
+    this.children.forEach(function(c){c.clear();});
+    this.render.forEach(function(r){r.clear();});
 }
 
 ///// 注意：子场景之间是不考虑碰撞和先后的问题的
@@ -86,10 +91,12 @@ baseScene.prototype.stop = function(c){
 baseScene.prototype.addRender = function(name, r, floor){
     r._floor = floor||this.render.length;
     this.renderTable[name] = r;
-    this.render.splice(this.render.findIndex(
+    var idx = this.render.findIndex(
         function(it){
-            return it._floor >= floor;
-        }), 0, r);
+            return it._floor >= r._floor;
+        });
+    idx = idx < 0 ? this.render.length : idx;
+    this.render.splice(idx, 0, r);
 }
 
 ///// 在某一层添加sprite（！重要）
@@ -100,13 +107,13 @@ baseScene.prototype.addSpriteToRender = function(name, obj){
 }
 
 ///// 查找一个渲染层（不建议使用 渲染层应该隐藏起来 通过数据驱动）
-baseScene.prototype.findRender = function(name){
+baseScene.prototype.getRender = function(name){
     if(this.renderTable[name]){
         return this.renderTable[name];
     }else{
         var ret = null;
         for(var i in this.children){
-            ret = this.children[i].findRender(name);
+            ret = this.children[i].getRender(name);
             if(ret)break;
         }
         return ret;
@@ -120,6 +127,13 @@ baseScene.prototype.findRender = function(name){
 
 scenes.prototype._init = function(){
     this.mainScene = this.getNewScene();
+    this.mapScene = this.getNewScene();
+    // TODO : 更多系统场景（状态栏、工具栏窗口化）
+    this.mainScene.addChildScene(this.mapScene);
+    this.mapScene.addRender('bg', core.sprite.getNewRenderSprite(),0);
+    this.mapScene.addRender('event', core.sprite.getNewRenderSprite(),1);
+    this.mapScene.addRender('fg', core.sprite.getNewRenderSprite(),2);
+    this.mapScene.addRender('animate', core.sprite.getNewRenderSprite(),3);
 }
 scenes.prototype.updateAllScenes = function(){
     this.mainScene.update();

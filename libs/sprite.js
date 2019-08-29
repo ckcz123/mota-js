@@ -310,10 +310,19 @@ sprite.prototype.changeSpriteStatus = function(obj, nFrame, nLine){
 // 这是一个渲染方法 因此spriteObj不应该有此方法
 // obj : spirte data obj ctx : context bias : offset
 sprite.prototype.drawSpriteToCanvas = function(obj, ctx, bias){
+    if(obj.disable)return;
     bias = bias || {}
     var x = (obj.x || 0) + (obj.offsetX || 0) + (bias.x || 0);
     var y = (obj.y || 0) + (obj.offsetY || 0) + (bias.y || 0);
     /// var info = this.sprite[obj.info]; /// todo: 通用spriteInfo 减少内存开销
+
+    if(obj.special){
+        ctx.save();
+        for(var i in obj.special){
+            ctx[i] = obj.special [i];
+        }
+    }
+
     if(obj.image && core.material.images[obj.image])
         ctx.drawImage(core.material.images[obj.image],
             obj.info.x+(obj.nFrame||0)*obj.info.width,
@@ -328,6 +337,10 @@ sprite.prototype.drawSpriteToCanvas = function(obj, ctx, bias){
         // bias.y = (bias.y || 0) + obj.y;
         obj.children.forEach(function(child) {core.drawSpriteToCanvas(child, ctx, bias)})
     }
+
+    if(obj.special){
+        ctx.restore();
+    }
 }
 
 ///// 添加移动信息, 每次更新重绘时，会重新计算坐标（添加移动信息后 需要申请重绘直到停止） | 像素级
@@ -337,7 +350,7 @@ sprite.prototype.drawSpriteToCanvas = function(obj, ctx, bias){
 
 ///// ------ 绘制 ------
 
-sprite.prototype.getTempRenderSprite = function(ctx){
+sprite.prototype.getNewRenderSprite = function(ctx){
     return new spriteRender(ctx);
 }
 
@@ -397,50 +410,80 @@ spriteRender.prototype._init = function(ctx){
     this.mspf = 16;//core.flags.mspf;
     this.lastTime = null;
 }
+
+/////
+spriteRender.prototype.requestUpdate = function(){
+    this.changed = true;
+}
+
+///// 判断对象内部状态是否发生改变
+spriteRender.prototype.updateData = function(timeDelta) {
+    var need = false;
+    var self = this;
+    var callbackList = [];
+    this.objs.forEach(function(obj){
+        if(obj.animateAction(timeDelta)){
+            need = true;
+        }
+        if(obj.move && !obj.move.stop){
+            if(obj.move.done){
+                obj.stopMoving();
+                if(obj.move.callback)
+                    callbackList.push(obj.move.callback);
+            }else{
+                obj.moveAction(timeDelta);
+                self.reloacate(obj);
+                need = true;
+            }
+        }
+        if(obj.changed){
+            need = true;
+            obj.changed = false;
+        }
+    })
+    if(callbackList.length>0){
+        setTimeout(function(){
+            callbackList.forEach(function(f){f();});
+        });
+    }
+    if(this.changed){
+        this.changed = false;
+        need = true;
+    }
+    return need;
+}
+///// dirty是由外部驱动的 表示需要它【保持】更新 needUpdate是内部判断的——当前内容是否值得更新
 spriteRender.prototype.update = function(timeStamp){
     if(this.dirty){
         var timeDelta = 1;
         if(timeStamp){
-            if(this.lastTime == null)this.lastTime = timeStamp;
+            if(this.lastTime == null)
+                this.lastTime = timeStamp;
             else{
                 timeDelta = timeStamp - this.lastTime;
                 if(timeDelta<this.mspf)return; // 没到刷新率 无需更新
                 timeDelta = this.mspf/timeDelta;
             }
+            this.lastTime = timeStamp;
         }
-        this.ctx.clearRect(0,0,this.canvas.width, this.canvas.height);
-        this.dirty = false;
-        var self = this;
-        // 对运动中的对象重定位
-        var callbackList = [];
-        this.objs
-            .filter(function(obj){return obj.move && !obj.move.stop})
-            .forEach(function(obj){
-                obj.moveAction(timeDelta);
-                if(obj.move.done){
-                    obj.stopMoving();
-                    if(obj.move.callback)
-                        callbackList.push(obj.move.callback);
-                }
-                self.reloacate(obj);
-                // TODO: 优化定位速度 - 由于重定位导致画布dirty
-            });
-        this.objs.forEach(function(obj){
-            obj.animateAction(timeDelta);
-            core.drawSpriteToCanvas(obj, self.ctx);
-        })
-        this.refresh();
-        if(callbackList.length>0){
-            setTimeout(function(){
-                callbackList.forEach(function(f){f();});
-            });
+        if(this.updateData(timeDelta)){
+            this.ctx.clearRect(0,0,this.canvas.width, this.canvas.height); // TODO:  pixi
+            // this.dirty = false;
+            // 绘制背景
+            if(this.backImage)
+                this.ctx.drawImage(this.backImage,0,0);
+            var self = this;
+            this.objs.forEach(function(obj){
+                core.drawSpriteToCanvas(obj, self.ctx);
+            })
+            this.refresh();
         }
     }
 }
 
 ///// refresh : 立即将缓存绘制到目标 注意，如果直接调用此函数 那么可能会是旧数据 可用于无需更新的静态场景
 spriteRender.prototype.refresh = function(){
-    if(this.destCtx){ // TODO: 也许不应该在此clearRect
+    if(this.destCtx){ // TODO: 也许不应该在此clearRect?
         this.destCtx.clearRect(0,0,this.destCtx.canvas.width, this.destCtx.canvas.height);
         this.drawTo(this.destCtx);
     }
@@ -455,6 +498,27 @@ spriteRender.prototype.redirectCtx = function(ctx){
     this.destCtx = ctx;
 }
 
+///// 添加一个静态背景 每次重绘的时候先画一次背景
+spriteRender.prototype.addBackImage = function(bg){
+    this.backImage = bg;
+}
+
+///// 添加一个静态背景 每次重绘的时候先画一次背景
+spriteRender.prototype.getBackCanvas = function(){
+    if(this.backImage)return this.backImage.getContext('2d');
+    else return this.createBackCanvas();
+}
+
+///// 添加一个静态背景 每次重绘的时候先画一次背景
+spriteRender.prototype.createBackCanvas = function(){
+    var canvas = document.createElement("canvas");
+    canvas.width = this.canvas.width;
+    canvas.height = this.canvas.height;
+    this.backImage = canvas;
+    return canvas.getContext('2d');
+}
+
+
 ///// 对obj重定位
 spriteRender.prototype.reloacate = function(obj, prior){
     var idx = this.objs.indexOf(obj);
@@ -465,7 +529,7 @@ spriteRender.prototype.reloacate = function(obj, prior){
 
 
 ///// TODO: 定位脏区 减少重绘次数
-// 改名： 请求刷新
+// 改名：启动
 spriteRender.prototype.blur = function(){
     this.dirty = true;
 }
@@ -479,6 +543,8 @@ spriteRender.prototype.calcuPrior = function(obj){
 spriteRender.prototype.addNewObj = function(obj, prior){
     if(typeof obj === 'string'){
         obj = core.sprite.getSpriteObj(obj);
+    }else if(!obj.prototype){
+        Object.setPrototypeOf(obj, spriteObj.prototype);
     }
     if(typeof prior != 'number'){
         prior = this.calcuPrior(obj);
@@ -493,7 +559,7 @@ spriteRender.prototype.addNewObj = function(obj, prior){
         }
     }
     this.objs.splice(index, 0, obj);
-    this.blur();
+    obj.changed = true;
 }
 spriteRender.prototype.deleteObj = function(obj){
     var idx = this.objs.indexOf(obj);
@@ -508,30 +574,26 @@ spriteRender.prototype.drawTo = function(ctx){
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 ///// ----- 对象 ------ 从数据初始化，数据为位置信息和原始信息
 
 spriteObj.prototype._init = function(){
     ;
 }
 spriteObj.prototype.playFrame = function(){
-    this.nFrame = (this.nFrame+1)%(this.info.frame||1);
+    var d = (this.animate||{}).inverse ? -1 : 1;
+    this.nFrame = (this.nFrame+d+this.info.frame)%(this.info.frame||1);
+}
+spriteObj.prototype.playFrameOneTime = function(){
+    this.playFrame();
+    if(this.nFrame==0){
+        return true;
+    }
+    return false;
 }
 
 ///// 添加移动信息 速度的单位是像素/帧 —— 帧率由画布决定
-spriteObj.prototype.addMoveInfo = function(dx, dy, speed, callback){
+spriteObj.prototype.addMoveInfo = function(dx, dy, speed, callback, info){
+    info = info || {};
     this.move = {
         'sx':this.x, 'sy':this.y,
         'realX':this.x, 'realY': this.y,
@@ -539,33 +601,56 @@ spriteObj.prototype.addMoveInfo = function(dx, dy, speed, callback){
         'xDir': dx>0?1:dx<0?-1:0,
         'yDir': dy>0?1:dy<0?-1:0,
         'speed':speed, 'lag': 0,
+        'animate': true,
+        'startStep': false,
         'callback': callback,
     };
+    for(var i in info){
+        this.move[i] = info[i];
+    }
 }
 
+///// 添加特效信息
+spriteObj.prototype.setAlpha = function(alpha){
+    this.special = this.special || {};
+    this.special['globalAlpha'] = alpha;
+}
+///// 添加
+spriteObj.prototype.setMixMode = function(mode){
+    this.special = this.special || {};
+    this.special['globalCompositeOperation'] = mode;
+}
 
-///// 添加帧动画自动播放信息
-spriteObj.prototype.addAnimateInfo = function(speed, line){
+// TODO: https://www.w3school.com.cn/tags/canvas_globalcompositeoperation.asp
+
+
+///// 添加帧动画自动播放信息 speed是帧率
+spriteObj.prototype.addAnimateInfo = function(info){
+    info = info || {};
     if(this.animate && !this.animate.stop){ // 如果已有动画且在播放 将添加到其尾部
         var lastCall = this.animate.callback;
         var self = this;
         this.animate.callback = function(){
             if(lastCall)lastCall();
-            self.addAnimateInfo(speed,line);
+            self.addAnimateInfo(info);
         }
         return;
     }
-    this.changeStatus(null, line);
+    this.changeStatus(info.frame, info.line);
     this.animate = {
-        'speed': speed || 6, // 默认6帧(180ms)动一次，
         'lastTime': 0,
         'stop': false,
+        'speed': info.speed || 6,
+    }
+    for(var it in info){
+        this.animate[it] = info[it];
     }
 }
 
 ///// 停止动画
 spriteObj.prototype.stopAnimate = function(){
-    if(this.animate)this.animate.stop = true;
+    if(this.animate)
+        this.animate.stop = true;
 }
 
 ///// 停止动画
@@ -603,8 +688,20 @@ spriteObj.prototype.moveAction = function(timeDelta){
             this.x = this.move.sx + this.move.dx;
             this.y = this.move.sy + this.move.dy;
             this.move.done = true; // TODO: 告诉渲染器移动完了 把回调统一放到后面处理 还是立即setTimeOut?
+            if(this.move.animate && this.move.startStep){
+                this.playFrame();
+                this.move.startStep = false;
+            }
+        }else{
+            this.move.lastTime += timeDelta;
+            if(this.move.animate && !this.move.startStep){
+                this.move.startStep = true;
+                this.playFrame();
+            }
         }
+        return true;
     }
+    return false;
 }
 
 ////// timeDelta —— 其实就是帧差 如果无误应该是1 但是如果卡了或者机器比较垃圾就会大于1
@@ -614,9 +711,20 @@ spriteObj.prototype.animateAction = function(timeDelta){
         var diff = timeDelta+this.animate.lastTime - this.animate.speed;
         if(diff > 0){
             this.animate.lastTime = diff;
-            this.playFrame()
+            if(this.animate.onetime){
+                if(this.playFrameOneTime()){
+                    this.stopAnimate();
+                    if(this.animate.callafterplay){
+                        this.animate.callafterplay();
+                    }
+                }
+            }else{
+                this.playFrame();
+            }
+            return true;// 进行了更新
         }else{
             this.animate.lastTime += timeDelta;
+            return false;
         }
     }
 }

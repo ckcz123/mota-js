@@ -49,6 +49,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.showStatusBar();
 	// 隐藏右下角的音乐按钮
 	core.dom.musicBtn.style.display = 'none';
+	//core.sprite.render.destCtx = core.getContextByName('hero');
+
+            core.scenes.mapScene.getRender('event').redirectCtx(core.getContextByName('event'));
+            core.scenes.mapScene.getRender('bg').redirectCtx(core.getContextByName('bg'));
+            core.scenes.mapScene.getRender('fg').redirectCtx(core.getContextByName('fg'));
 },
         "setInitData": function () {
 	// 不同难度分别设置初始属性
@@ -969,7 +974,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
         "loadData": function (data, callback) {
 	// 读档操作；从存储中读取了内容后的行为
 
-	core.sprite.render.destCtx = core.getContextByName('hero');
 	// 重置游戏和路线
 	core.resetGame(data.hero, data.hard, data.floorId, core.maps.loadMap(data.maps), data.values);
 	core.status.route = core.decodeRoute(data.route);

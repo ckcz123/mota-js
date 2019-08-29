@@ -672,7 +672,7 @@ maps.prototype._drawSpriteBlock = function(blockInfo, x, y, render){
     if(blockInfo.sprite)obj = blockInfo.sprite;
     else if(blockInfo.event && blockInfo.event.sprite)obj = blockInfo.event.sprite;
     if(obj){
-        render = render || core.sprite.render; // TODO: 不要使用全局render，由场景管理
+        render = render || core.scenes.mapScene.getRender('event'); //core.sprite.render; // TODO: 不要使用全局render，由场景管理
         var change = function (){ // TODO: 坐标变换单一类，提供统一变换方法
             this.x = x * 32+16 - ~~(this.info.width/2+0.5);
             this.y = (y + 1) * 32 - this.info.height;
@@ -803,9 +803,10 @@ maps.prototype.drawBg = function (floorId, ctx) {
     floorId = floorId || core.status.floorId;
     var onMap = ctx == null;
     if (onMap) {
-        ctx = core.canvas.bg;
-        core.clearMap(ctx);
-        core.status.floorAnimateObjs = this._getFloorImages(floorId);
+        ctx = core.scenes.mapScene.getRender('bg');//core.canvas.bg;
+        ctx.clear();
+        //core.clearMap(ctx);
+        core.status.floorAnimateObjs = this._getFloorImages(floorId); // TODO 添加到静态前景 或者objs
     }
     core.maps._drawBg_drawBackground(floorId, ctx);
     // ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
@@ -813,17 +814,24 @@ maps.prototype.drawBg = function (floorId, ctx) {
     core.maps._drawBgFgMap(floorId, ctx, 'bg', onMap);
 }
 
-maps.prototype._drawBg_drawBackground = function (floorId, ctx) {
+maps.prototype._drawBg_drawBackground = function (floorId, render) {
     var width = core.floors[floorId].width, height = core.floors[floorId].height;
     var groundId = (core.status.maps || core.floors)[floorId].defaultGround || "ground";
-    var yOffset = core.material.icons.terrains[groundId];
+    var yOffset = core.material.icons.terrains[groundId]; // TODO: 改成sprite
+    var ctx = render.createBackCanvas(); //document.createElement("canvas").getContext("2d");
+    var obj = core.getSpriteObj(groundId);
     if (yOffset != null) {
         for (var i = 0; i < width; i++) {
             for (var j = 0; j < height; j++) {
-                ctx.drawImage(core.material.images.terrains, 0, yOffset * 32, 32, 32, i * 32, j * 32, 32, 32);
+                // ctx.drawImage(core.material.images.terrains, 0, yOffset * 32, 32, 32, i * 32, j * 32, 32, 32);
+                obj.x = i * core.__BLOCK_SIZE__;
+                obj.y = j * core.__BLOCK_SIZE__;
+                obj.drawToCanvas(ctx); // render.drawObj(obj)
             }
         }
     }
+    render.blur();
+    render.requestUpdate();
 }
 
 ////// 绘制事件层 //////
@@ -832,7 +840,7 @@ maps.prototype.drawEvents = function (floorId, blocks, render) {
     if (!blocks) blocks = core.status.maps[floorId].blocks;
     var arr = this._getMapArrayFromBlocks(blocks, core.floors[floorId].width, core.floors[floorId].height);
     var onMap = render == null;
-    if (onMap) render = core.sprite.render.destCtx;
+    if (onMap) render = core.scenes.mapScene.getRender('event')//core.sprite.render.destCtx;
     blocks.filter(function (block) {
         return block.event && !block.disable;
     }).forEach(function (block) {
@@ -846,11 +854,12 @@ maps.prototype.drawFg = function (floorId, ctx) {
     floorId = floorId || core.status.floorId;
     var onMap = ctx == null;
     if (onMap) {
-        ctx = core.canvas.fg;
+        // ctx = core.canvas.fg;
+        ctx = core.scenes.mapScene.getRender('fg');//core.canvas.bg;
         core.status.floorAnimateObjs = this._getFloorImages(floorId);
     }
     // ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
-    this._drawFloorImages(floorId, ctx, 'fg');
+    // this._drawFloorImages(floorId, ctx, 'fg');
     this._drawBgFgMap(floorId, ctx, 'fg', onMap);
 }
 
@@ -880,9 +889,10 @@ maps.prototype._drawBgFgMap = function (floorId, ctx, name, onMap) {
             var blur = false, alpha;
             if (eventArr != null && eventArr[y][x] != 0) {
                 blur = true;
-                alpha = ctx.globalAlpha;
-                ctx.globalAlpha = 0.6;
+                //alpha = ctx.globalAlpha;
+                //ctx.globalAlpha = 0.6;
             }
+            if(blur)blockInfo.sprite.setAlpha(0.6);
             this._drawMap_drawBlockInfo(ctx, block, blockInfo, arr, onMap);
             if (blur) ctx.globalAlpha = alpha;
         }
@@ -892,10 +902,11 @@ maps.prototype._drawBgFgMap = function (floorId, ctx, name, onMap) {
 }
 
 ////// 绘制楼层贴图 //////
-maps.prototype._drawFloorImages = function (floorId, ctx, name, images, currStatus) {
+maps.prototype._drawFloorImages = function (floorId, render, name, images, currStatus) {
     floorId = floorId || core.status.floorId;
     if (!images) images = this._getFloorImages(floorId);
     var redraw = currStatus != null;
+    var ctx = render.getBackCanvas();
     images.forEach(function (t) {
         if (typeof t == 'string') t = [0, 0, t];
         var dx = parseInt(t[0]), dy = parseInt(t[1]), imageName = t[2], frame = core.clamp(parseInt(t[4]), 1, 8);
@@ -1031,7 +1042,7 @@ maps.prototype._drawAutotile = function (render, mapArr, block, size, left, top,
             obj.info.x += core.sprite.sprite[block.event.id].x;
         });
         if(!render || !render.addNewObj){
-            render = core.sprite.render;
+            render = core.scenes.mapScene.getRender('event');//core.sprite.render;
         }
         if(render.objs.indexOf(block.event.sprite)<0){
             render.addNewObj(block.event.sprite);
@@ -1163,7 +1174,7 @@ maps.prototype._drawAutotileAnimate = function (block, animate) {
         return;
     }
 
-    var cv = block.name?core.canvas[block.name]:core.sprite.render.destCtx;
+    var cv = block.name?core.canvas[block.name]:core.scenes.mapScene.getRender('event').destCtx;//core.sprite.render.destCtx;
     cv.clearRect(32 * x, 32 * y, 32, 32);
     if (block.name) {
         if (block.name == 'bg')
@@ -1237,7 +1248,7 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
     tempCanvas.canvas.height = tempHeight;
     tempCanvas.clearRect(0, 0, tempWidth, tempHeight);
 
-    var render = core.getTempRenderSprite();
+    var render = core.getNewRenderSprite();
 
     // --- 暂存 flags
     var hasHero = core.status.hero != null, flags = null;
@@ -1260,7 +1271,7 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
 maps.prototype._drawThumbnail_realDrawTempCanvas = function (floorId, blocks, options, tempRender) {
     var tempCanvas = core.bigmap.tempCanvas;
     // 缩略图：背景
-    this.drawBg(floorId, tempCanvas);
+    this.drawBg(floorId, tempRender);
     // 缩略图：事件
     this.drawEvents(floorId, blocks, tempRender);
     // 缩略图：勇士
@@ -1492,7 +1503,7 @@ maps.prototype.hideBlock = function (x, y, floorId) {
     // 删除动画，清除地图
     if (floorId == core.status.floorId) {
         core.removeGlobalAnimate(x, y);
-        core.clearMap('event', x * 32, y * 32, 32, 32);
+        //core.clearMap('event', x * 32, y * 32, 32, 32);
         var height = block.block.event.height || 32;
         if (height > 32)
             core.clearMap('event2', x * 32, y * 32 + 32 - height, 32, height - 32);
@@ -1515,11 +1526,12 @@ maps.prototype.removeBlock = function (x, y, floorId) {
     // 删除动画，清除地图
     if (floorId == core.status.floorId) {
         core.removeGlobalAnimate(x, y);
-        core.sprite.render.deleteObj(block.block.event.sprite);
-        core.clearMap('event', x * 32, y * 32, 32, 32);
+        core.scenes.mapScene.getRender('event').deleteObj(block.block.event.sprite);
+//        core.clearMap('event', x * 32, y * 32, 32, 32);
         var height = block.block.event.height || 32;
-        if (height > 32)
+        if (height > 32) {
             core.clearMap('event2', x * 32, y * 32 + 32 - height, 32, height - 32);
+        }
     }
 
     // 删除Index
@@ -1655,7 +1667,7 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     var originBlock = core.getBlock(x, y, floorId, true);
     if (floorId == core.status.floorId) {
         core.removeGlobalAnimate(x, y);
-        core.clearMap('event', x * 32, y * 32, 32, 32);
+        //core.clearMap('event', x * 32, y * 32, 32, 32);
         if (originBlock != null) {
             var height = (originBlock.block.event || {}).height || 32;
             if (height > 32)
@@ -2050,7 +2062,8 @@ maps.prototype.addGlobalAnimate = function (block) {
     }
     else {
         if (!block.event.animate || block.event.animate == 1) return;
-        core.status.globalAnimateObjs.push(block);
+        block.event.sprite.addAnimateInfo({speed:20});
+        //core.status.globalAnimateObjs.push(block);
     }
 }
 
@@ -2060,7 +2073,7 @@ maps.prototype.removeGlobalAnimate = function (x, y, name) {
     if (x == null || y == null) {
         core.status.globalAnimateStatus = 0;
         (core.status.globalAnimateObjs||[]).forEach(function(block){
-            core.sprite.render.deleteObj(block.event.sprite);
+            core.scenes.mapScene.getRender('event').deleteObj(block.event.sprite); //TODO: 取消全局动画列表
         })
         core.status.globalAnimateObjs = [];
         core.status.autotileAnimateObjs = {"blocks": [], "map": null, "bgmap": null, "fgmap": null};
@@ -2070,7 +2083,7 @@ maps.prototype.removeGlobalAnimate = function (x, y, name) {
 
     core.status.globalAnimateObjs = core.status.globalAnimateObjs.filter(function (block) {
         var ans = block.x != x || block.y != y || block.name != name;
-        if(!ans)core.sprite.render.deleteObj(block.event.sprite);
+        if(!ans)core.scenes.mapScene.getRender('event').deleteObj(block.event.sprite);
         return ans;
     });
 

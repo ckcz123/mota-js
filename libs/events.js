@@ -419,23 +419,40 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
     var locked = core.status.lockControl;
     core.lockControl();
     core.status.replay.animate = true;
-    core.removeBlock(x, y);
-    core.drawImage('event', core.material.images.animates, 0, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
-    var state = 0;
-    var animate = window.setInterval(function () {
-        core.clearMap('event', 32 * x, 32 * y, 32, 32);
-        state++;
-        if (state == 4) {
-            clearInterval(animate);
-            delete core.animateFrame.asyncId[animate];
+    /*
+       core.removeBlock(x, y);
+       core.drawImage('event', core.material.images.animates, 0, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
+       var state = 0;
+       var animate = window.setInterval(function () {
+           //core.clearMap('event', 32 * x, 32 * y, 32, 32);
+           state++;
+           if (state == 4) {
+               clearInterval(animate);
+               delete core.animateFrame.asyncId[animate];
+               if (!locked) core.unLockControl();
+               core.status.replay.animate = false;
+               core.events.afterOpenDoor(id, x, y, callback);
+               return;
+           }
+           core.drawImage('event', core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
+       }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
+   */
+    // core.setBlock(core.getNumberById(id), x, y);
+    var sprite = core.getBlock(x,y).block.event.sprite;
+    sprite.addAnimateInfo({
+        'speed': (speed - 10) / 10,
+        'onetime':true,
+        'callafterplay': function(){
+            core.removeBlock(x,y);
+            delete core.animateFrame.asyncId[sprite];
             if (!locked) core.unLockControl();
+            sprite.disable = true;
             core.status.replay.animate = false;
             core.events.afterOpenDoor(id, x, y, callback);
-            return;
         }
-        core.drawImage('event', core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
-    }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
-    core.animateFrame.asyncId[animate] = true;
+    })
+    core.animateFrame.asyncId[sprite] = true;
+    // core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 开一个门后触发的事件 //////
@@ -2045,6 +2062,7 @@ events.prototype.closeDoor = function (x, y, id, callback) {
         if (callback) callback();
         return;
     }
+    /*
     // 关门动画
     core.playSound('door.mp3');
     var door = core.material.icons.animates[id];
@@ -2058,10 +2076,24 @@ events.prototype.closeDoor = function (x, y, id, callback) {
             if (callback) callback();
             return;
         }
-        core.clearMap('event', 32 * x, 32 * y, 32, 32);
+        //core.clearMap('event', 32 * x, 32 * y, 32, 32);
         core.drawImage('event', core.material.images.animates, 32 * (4-state), 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
     }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
-    core.animateFrame.asyncId[animate] = true;
+*/
+    core.setBlock(core.getNumberById(id), x, y);
+    var sprite = core.getBlock(x,y).block.event.sprite;
+    sprite.nFrame = 3;
+    sprite.addAnimateInfo({
+        'inverse': true,
+        'onetime': true,
+        'speed': 2,
+        'callafterplay': function(){
+            sprite.nFrame = 0;
+            delete core.animateFrame.asyncId[sprite];
+            if(callback)callback();
+        }
+    })
+    core.animateFrame.asyncId[sprite] = true;
 }
 
 ////// 显示图片 //////

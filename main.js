@@ -79,7 +79,7 @@ function main() {
     };
     this.mode = 'play';
     this.loadList = [
-        'loader', 'control', 'utils', 'items', 'icons', 'maps', 'enemys', 'events', 'actions', 'data', 'ui', 'sprite', 'core'
+        'loader', 'control', 'utils', 'items', 'icons','sprite', 'scenes', 'maps', 'enemys', 'events', 'actions', 'data', 'ui', 'core'
     ];
     this.pureData = [ 
         'data', 'enemys', 'icons', 'maps', 'items', 'functions', 'events', 'plugins', 'sprite',

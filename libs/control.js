@@ -129,7 +129,8 @@ control.prototype._animationFrame_autoSave = function (timestamp) {
 }
 
 control.prototype._animationFrame_sprite = function (timestamp) {
-    core.updateRenderSprite();
+    // core.updateRenderSprite();
+    core.scenes.updateAllScenes();
 }
 
 control.prototype._animationFrame_globalAnimate = function (timestamp) {
@@ -142,13 +143,13 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
         });
 
         // Global floor images
-        core.maps._drawFloorImages(core.status.floorId, core.canvas.bg, 'bg', core.status.floorAnimateObjs||[], core.status.globalAnimateStatus);
-        core.maps._drawFloorImages(core.status.floorId, core.canvas.fg, 'fg', core.status.floorAnimateObjs||[], core.status.globalAnimateStatus);
+        // core.maps._drawFloorImages(core.status.floorId, core.canvas.bg, 'bg', core.status.floorAnimateObjs||[], core.status.globalAnimateStatus);
+        // core.maps._drawFloorImages(core.status.floorId, core.canvas.fg, 'fg', core.status.floorAnimateObjs||[], core.status.globalAnimateStatus);
 
-        // Global Autotile Animate
-        core.status.autotileAnimateObjs.blocks.forEach(function (block) {
-            core.maps._drawAutotileAnimate(block, core.status.globalAnimateStatus);
-        });
+        // Global Autotile Animate 直接一开始就加动画
+        //core.status.autotileAnimateObjs.blocks.forEach(function (block) {
+        //    core.maps._drawAutotileAnimate(block, core.status.globalAnimateStatus);
+        //});
     }
     // Box animate
     core.drawBoxAnimate();
@@ -578,16 +579,21 @@ control.prototype.setHeroMoveInterval = function (callback) {
     var dx = core.utils.scan[direction].x * 32,
         dy = core.utils.scan[direction].y * 32;
     var line = core.utils.line[direction];
-    core.sprite.render.blur();
-    core.status.heroSprite.obj.addAnimateInfo(toAdd*2, line);
+    var render = core.scenes.mapScene.getRender('event');
+    render.blur();//core.sprite.render.blur();
+    //core.status.heroSprite.obj.addAnimateInfo({
+    //    'speed':1.9, 'line':line,
+    //});
+    core.status.heroSprite.obj.changeStatus(null, line);
     core.status.heroSprite.obj.addMoveInfo(
         dx,dy,~~(800 / core.values.moveSpeed),
         function(){
             core.status.heroMoving = 0;
             core.moveOneStep(core.nextX(), core.nextY());
             core.status.heroSprite.obj.stopMoving();
-            core.status.heroSprite.obj.stopAnimate();
             if (callback) callback();
+        }, {
+            'freq':4
         });
     return;
     //// XXXXXXXXXXXXXXXX ///////////
@@ -817,13 +823,13 @@ control.prototype.heroSpritePositionTransForm = function(obj, x, y, direction, s
     };
     offset = offset || 0;
     direction = direction || 'down';
-    obj.nFrame = mesh[status||'stop'];
+    obj.nFrame = (obj.nFrame||0)%2==1?obj.nFrame-1:obj.nFrame;
     obj.x = x * 32+16 - ~~(obj.info.width/2+0.5) - core.bigmap.offsetX;
     obj.y = (y+1) * 32 - obj.info.height - core.bigmap.offsetY;
     obj.offsetX = core.utils.scan[direction].x * offset;
     obj.offsetY = core.utils.scan[direction].y * offset;
-    obj.nFrame = mesh[status||'stop'];
-    obj.nLine = dir[direction];
+    //obj.nFrame = obj.nFrame || mesh[status||'stop'];
+   // obj.nLine =  obj.nLine || dir[direction];
 }
 
 ////// 绘制勇士 //////
@@ -873,7 +879,7 @@ control.prototype.drawHero = function (status, offset) {
         }
     )
    */
-    core.sprite.render.reloacate(core.status.heroSprite.obj);
+    core.scenes.mapScene.getRender('event').reloacate(core.status.heroSprite.obj);
 
     core.control.updateViewport();
     // core.setGameCanvasTranslate('hero', 0, 0);

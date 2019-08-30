@@ -223,6 +223,7 @@ core.prototype.init = function (coreData, callback) {
 
     core.loader._load(function () {
         core.sprite._load();
+        core.scenes._load();
         core._afterLoadResources(callback);
     });
 }

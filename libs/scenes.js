@@ -1,5 +1,7 @@
 "use strict";
 
+var Stage = PIXI.Application;
+
 /* * * * * * * * * * *
 * 场景： 一个显示容器，提供如何显示的方法与接口，与设备、canvas、数据无关，类比于【摄像机】
 * 包含一组spriteRender，控制着各个render之间的【层级】关系，保证其渲染有序
@@ -30,13 +32,32 @@ function scenes(){
 function baseScene(){
     this._init();
 }
+baseScene.prototype = Object.create(Stage.prototype);
+baseScene.prototype.constructor = Stage;
+////// canvas创建 //////
+var createCleanCanvas = function (name, x, y, width, height, z) {
+    var newCanvas = document.createElement("canvas");
+    newCanvas.id = name;
+    newCanvas.style.display = 'block';
+    newCanvas.width = width;
+    newCanvas.height = height;
+    newCanvas.setAttribute("_left", x);
+    newCanvas.setAttribute("_top", y);
+    newCanvas.style.width = width * core.domStyle.scale + 'px';
+    newCanvas.style.height = height * core.domStyle.scale + 'px';
+    newCanvas.style.left = x * core.domStyle.scale + 'px';
+    newCanvas.style.top = y * core.domStyle.scale + 'px';
+    newCanvas.style.zIndex = z;
+    newCanvas.style.position = 'absolute';
+    core.dymCanvas[name] = {canvas:newCanvas};
+    core.dom.gameDraw.appendChild(newCanvas);
+    return newCanvas;
+}
 
-baseScene.prototype._init = function(){
-    this._activeRate = 1;
-    this._active = false; // 活跃度
-    this._fadeSign = 0;
-    this._fadeDuration = 0;
-    this._fadeSprite = null;
+baseScene.prototype._init = function(name){
+    Stage.call(this, {
+        'view': createCleanCanvas(name||'temp', 0,0, 416, 416, 300)
+    });
     this.parent = null;
     this.children = [];
     this.render = [];
@@ -47,6 +68,8 @@ baseScene.prototype._init = function(){
         'offsetX':0, 'offsetY':0,
         'opacity':1.0,
     };
+    var self = this;
+    this.ticker.add(function(time){self.update(time)});
 }
 
 /////
@@ -59,7 +82,7 @@ baseScene.prototype.config = function(cfg){
 
 
 baseScene.prototype.update = function(timeDelta){
-    this.children.forEach(function(c){c.update(timeDelta);});
+    // this.children.forEach(function(c){c.update(timeDelta);});
     this.render.forEach(function(r){r.update(timeDelta);})
 }
 
@@ -120,12 +143,12 @@ baseScene.prototype.getRender = function(name){
     }
 }
 
-
-
-
 ///// core.scenes.mainScene 就是主场景管理器，其子场景为实际游戏场景
 
 scenes.prototype._init = function(){
+}
+
+scenes.prototype._load = function(){
     this.mainScene = this.getNewScene();
     this.mapScene = this.getNewScene();
     // TODO : 更多系统场景（状态栏、工具栏窗口化）
@@ -135,6 +158,7 @@ scenes.prototype._init = function(){
     this.mapScene.addRender('fg', core.sprite.getNewRenderSprite(),2);
     this.mapScene.addRender('animate', core.sprite.getNewRenderSprite(),3);
 }
+
 scenes.prototype.updateAllScenes = function(){
     this.mainScene.update();
 }
@@ -145,3 +169,5 @@ scenes.prototype.addSceneToMainList = function(scene){
 scenes.prototype.getNewScene = function(){
     return new baseScene();
 }
+
+

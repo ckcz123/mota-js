@@ -1,4 +1,9 @@
 "use strict";
+
+var PSprite = PIXI.AnimatedSprite;
+var Container = PIXI.Container;
+var Texture = PIXI.Texture;
+var Rectangle = PIXI.Rectangle;
 /*
     Sprite.js 包含：
     1. sprite： 对资源的注册管理
@@ -21,12 +26,8 @@
 function sprite() {
     this._init();
 }
-function spriteObj(info, image){
-    this.x = -100; this.y = -100;
-    this.info = info;
-    this.nFrame = 0;
-    this.nLine = 0;
-    this.image = image;
+function spriteObj(texture, image){
+    this._init(texture,image);
 }
 function spriteRender(ctx){
     this._init(ctx);
@@ -42,6 +43,8 @@ sprite.prototype._init = function(){
         '128,32,4':'animates',
         '64,32,2':'npcs',
         '128,48,4':'npc48',
+        '?,?,?':'hero',
+        '?,96,?':'autotile',
     }
     // 资源x重定位 —— 如果出现比当前宽的sprite 则将其x定位为上一次的宽
     // 所以尽量先导入比较大的图，然后再导小图 减少空白
@@ -49,13 +52,63 @@ sprite.prototype._init = function(){
     //if(!core.material.images.sprite)core.material.images.sprite = new Image();
 
     this.render = new spriteRender();
-    this._load();
+//    this._load();
 }
 
 sprite.prototype._load = function(){
     this.assets = core.material.images.sprite;
+
+    this._generateTextures()
     //this.render.destCtx = core.getContexByName('hero');
 }
+
+
+///// 生成材质后 原来的sprite全部需要重新链接
+sprite.prototype._generateTextures = function() {
+    this.textures = this.textures || {}; // 存储各个动画对应的textrues数组
+    var baseTextures = this.baseTextures || {};
+    for(var i in this.oldType){
+        var type = this.oldType[i];
+        baseTextures[type] = Texture.from(core.material.images[type]);
+    }
+    baseTextures['sprite'] = Texture.from(core.material.images.sprite);
+    this.baseTextures = baseTextures;
+    for(var id in this.sprite){
+        var it = this.sprite[id];
+        var type = it.oldType || 'sprite';
+        var nf = it.frame||1;
+        var nl= it.line||1;
+        var tmp = [];
+        var width = it.width || 32;
+        var height = it.height || 32;
+
+        var org = new Rectangle(it.x||0, it.y||0, width*it.frame, width*it.line);
+        for(var i = 0; i<nl; i++){
+            var line = [];
+            for(var j = 0; j<nf; j++){
+                if(!baseTextures[type])debugger
+                line.push(
+                    new Texture(baseTextures[type],
+                        new Rectangle(j*width,i*height,width,height)),
+                    org
+                );
+            }
+            tmp.push(line);
+        }
+        this.textures[id] = tmp;
+    }
+}
+
+
+////// 绘制Autotile //////
+sprite.prototype.getAutotileSprite = function(name,sx,sy,sw,sh,dx,dy,dw,dh,){
+    var base = this.baseTextures[name] || null;
+    if(!base)return null;
+    var ret = new PSprite(base,new Rectangle(dx,dy,dw,dh), new Rectangle(sx,sy,sw,sh));
+    return ret;
+}
+
+
 
 ////// 注册一个精灵， 测试版 | TODO： 服务器交互 ///
 //  自动元件需要单独处理
@@ -289,11 +342,14 @@ sprite.prototype.getSpriteFrame = function(name, frame, line){
 
 ///// 获取一个常驻的精灵对象 支持一系列操作 /////
 sprite.prototype.getSpriteObj = function(name){
-    var info = this.sprite[name];
-    if(!info)return null;
-    return new spriteObj(info, info.oldType?info.oldType:'sprite');
+    var texture = this.textures[name];//this.sprite[name];
+    if(!texture)return null;
+    return new spriteObj(texture,{name:name});
 }
 
+sprite.prototype.getEmptySprite = function(name){
+    return new Container();
+}
 
 ///// ------ sprite纯数据对象操作 -----
 sprite.prototype.playSpriteObj = function(obj){
@@ -309,6 +365,7 @@ sprite.prototype.changeSpriteStatus = function(obj, nFrame, nLine){
 // 此处的obj是数据对象 即不含方法的
 // 这是一个渲染方法 因此spriteObj不应该有此方法
 // obj : spirte data obj ctx : context bias : offset
+// ( X  —— 抛弃此方法
 sprite.prototype.drawSpriteToCanvas = function(obj, ctx, bias){
     if(obj.disable)return;
     bias = bias || {}
@@ -392,10 +449,15 @@ sprite.prototype.clearRenderSprite = function(){
 
 
 
-///// ----- 渲染 -----
+///// ----- 渲染分组 -----
+
+spriteRender.prototype = Object.create(Container.prototype);
+spriteRender.prototype.constructor = spriteRender;
 
 spriteRender.prototype._init = function(ctx){
+    Container.call(this)
     this.dirty = false;
+    this.sortableChildren = true;
     if(ctx){
         this.ctx = ctx;
         this.canvas = ctx.canvas;
@@ -405,7 +467,7 @@ spriteRender.prototype._init = function(ctx){
         this.canvas.height = core.__PIXELS__;
         this.ctx = this.canvas.getContext('2d');
     }
-    this.objs = [];
+    this.objs = this.children;
     this.destCtx = null;
     this.mspf = 16;//core.flags.mspf;
     this.lastTime = null;
@@ -466,7 +528,10 @@ spriteRender.prototype.update = function(timeStamp){
             }
             this.lastTime = timeStamp;
         }
-        if(this.updateData(timeDelta)){
+        this.updateData(timeDelta);
+        return;
+
+        if(false){
             this.ctx.clearRect(0,0,this.canvas.width, this.canvas.height); // TODO:  pixi
             // this.dirty = false;
             // 绘制背景
@@ -521,10 +586,12 @@ spriteRender.prototype.createBackCanvas = function(){
 
 ///// 对obj重定位
 spriteRender.prototype.reloacate = function(obj, prior){
-    var idx = this.objs.indexOf(obj);
-    if(idx>=0)
-        this.objs.splice(idx, 1);
-    this.addNewObj(obj, prior);
+    obj.zindex = prior || this.calcuPrior(obj);
+    obj.sortDirty = true;
+    // var idx = this.objs.indexOf(obj);
+    // if(idx>=0)
+    //    this.objs.splice(idx, 1);
+    // this.addNewObj(obj, prior);
 }
 
 
@@ -536,52 +603,73 @@ spriteRender.prototype.blur = function(){
 
 ///// 图块优先级: bottom * 1000 + width  越小越优先画
 spriteRender.prototype.calcuPrior = function(obj){
-    return (obj.priority || (obj.info.width||32) + 1000*(obj.y+obj.info.height));
+    return (obj.priority || (obj.texture.width||32) + 1000*(obj.y+obj.texture.height));
 }
 
 // 只有添加到render中，sprite才是一个对象，否则只是一个数据
 spriteRender.prototype.addNewObj = function(obj, prior){
     if(typeof obj === 'string'){
         obj = core.sprite.getSpriteObj(obj);
-    }else if(!obj.prototype){
+    }else if(!obj.prototype){ // 纯数据转换成对象
         Object.setPrototypeOf(obj, spriteObj.prototype);
     }
     if(typeof prior != 'number'){
-        prior = this.calcuPrior(obj);
+        obj.zindex = this.calcuPrior(obj);
     }else{
-        obj.priority = prior; // 可以指定优先级 并且此优先级会持久化 可以用来做飞翔的鸟
+        obj.zindex = prior; // 可以指定优先级 并且此优先级会持久化 可以用来做飞翔的鸟
     }
+    this.addChild(obj);
+    /*
     var index = this.objs.length;
     for(var i in this.objs){
         if(this.calcuPrior(this.objs[i]) >= prior){
             index = i;
             break;
         }
-    }
-    this.objs.splice(index, 0, obj);
+    }*/
+    // this.objs.splice(index, 0, obj);
     obj.changed = true;
 }
 spriteRender.prototype.deleteObj = function(obj){
-    var idx = this.objs.indexOf(obj);
-    if(idx>=0)this.objs.splice(idx, 1);
-    this.blur();
+    this.removeChild(obj);
+    // var idx = this.objs.indexOf(obj);
+    // if(idx>=0)this.objs.splice(idx, 1);
+    // this.blur();
 }
 spriteRender.prototype.hasObj = function(obj){
     return this.objs.indexOf(obj)>=0;
 }
-spriteRender.prototype.drawTo = function(ctx){
-    ctx.drawImage(this.canvas, 0, 0, this.canvas.width, this.canvas.height, 0, 0, ctx.canvas.width, ctx.canvas.height);
+
+// CTX是场景
+spriteRender.prototype.drawTo = function(stage){
+    stage.addChild(this);
+    //ctx.drawImage(this.canvas, 0, 0, this.canvas.width, this.canvas.height, 0, 0, ctx.canvas.width, ctx.canvas.height);
 }
 
 
 ///// ----- 对象 ------ 从数据初始化，数据为位置信息和原始信息
 
-spriteObj.prototype._init = function(){
-    ;
+spriteObj.prototype = Object.create(PSprite.prototype);
+spriteObj.prototype.constructor = spriteObj;
+
+spriteObj.prototype._init = function(texture, extra){
+    PSprite.call(this, texture[0], false);
+    this.name = extra.name;
+    this.image = texture;
+    this.x = -100; this.y = -100;
+    this.anchor.set(0.5, 1);
+    // this.info = info;
+    this.nFrame = 0;
+    this.nLine = 0;
+    // this.image = image;
 }
+
+
+///// 手动操作的帧播放
 spriteObj.prototype.playFrame = function(){
     var d = (this.animate||{}).inverse ? -1 : 1;
     this.nFrame = (this.nFrame+d+this.info.frame)%(this.info.frame||1);
+    this.updateStatus(info.frame);
 }
 spriteObj.prototype.playFrameOneTime = function(){
     this.playFrame();
@@ -612,13 +700,15 @@ spriteObj.prototype.addMoveInfo = function(dx, dy, speed, callback, info){
 
 ///// 添加特效信息
 spriteObj.prototype.setAlpha = function(alpha){
-    this.special = this.special || {};
-    this.special['globalAlpha'] = alpha;
+    this.alpha = alpha;
+    // this.special = this.special || {};
+    // this.special['globalAlpha'] = alpha;
 }
 ///// 添加
-spriteObj.prototype.setMixMode = function(mode){
-    this.special = this.special || {};
-    this.special['globalCompositeOperation'] = mode;
+spriteObj.prototype.setBlendMode = function(mode){
+    this.blendMode = mode;
+    //    this.special = this.special || {};
+//    this.special['globalCompositeOperation'] = mode;
 }
 
 // TODO: https://www.w3school.com.cn/tags/canvas_globalcompositeoperation.asp
@@ -636,14 +726,20 @@ spriteObj.prototype.addAnimateInfo = function(info){
         }
         return;
     }
-    this.changeStatus(info.frame, info.line);
+    this.updateStatus(info.frame, info.line);
     this.animate = {
         'lastTime': 0,
-        'stop': false,
-        'speed': info.speed || 6,
+        'stop': info.stop || false,
+        'speed': info.speed || 1,
     }
     for(var it in info){
         this.animate[it] = info[it];
+    }
+    this.animationSpeed = this.animate.speed;
+    if(this.animate.auto){ // 自动播放 无需轮询
+        this.play();
+    }else{
+        this.loop = false;
     }
 }
 
@@ -651,6 +747,7 @@ spriteObj.prototype.addAnimateInfo = function(info){
 spriteObj.prototype.stopAnimate = function(){
     if(this.animate)
         this.animate.stop = true;
+    this.gotoAndStop(this.nFrame);
 }
 
 ///// 停止动画
@@ -663,10 +760,12 @@ spriteObj.prototype.resetFrame = function(){
     this.nFrame = 0;
 }
 
-///// 复位： changeStatus(0)
-spriteObj.prototype.changeStatus = function(nFrame, nLine){
+///// 复位： updateStatus(0)
+spriteObj.prototype.updateStatus = function(nFrame, nLine){
     if(core.isset(nFrame))this.nFrame = nFrame % this.info.frame;
     if(core.isset(nLine))this.nLine = nLine % this.info.line;
+    this.textures = this.image[this.nLine]
+    this.gotoAndStop(this.nFrame);
 }
 
 ////// 渲染与数据的一个耦合点：timeDelta - 距离上次绘制过去的
@@ -687,7 +786,8 @@ spriteObj.prototype.moveAction = function(timeDelta){
         ){
             this.x = this.move.sx + this.move.dx;
             this.y = this.move.sy + this.move.dy;
-            this.move.done = true; // TODO: 告诉渲染器移动完了 把回调统一放到后面处理 还是立即setTimeOut?
+            this.move.done = true;
+            // TODO: 告诉渲染器移动完了 把回调统一放到后面处理 还是立即setTimeOut?
             if(this.move.animate && this.move.startStep){
                 this.playFrame();
                 this.move.startStep = false;
@@ -706,9 +806,9 @@ spriteObj.prototype.moveAction = function(timeDelta){
 
 ////// timeDelta —— 其实就是帧差 如果无误应该是1 但是如果卡了或者机器比较垃圾就会大于1
 spriteObj.prototype.animateAction = function(timeDelta){
-    if(this.animate && !this.animate.stop){
+    if(this.animate && !this.animate.stop && !this.animate.auto){
         timeDelta = timeDelta || 1;
-        var diff = timeDelta+this.animate.lastTime - this.animate.speed;
+        var diff = timeDelta + this.animate.lastTime - this.animate.speed;
         if(diff > 0){
             this.animate.lastTime = diff;
             if(this.animate.onetime){

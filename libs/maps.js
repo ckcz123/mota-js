@@ -97,7 +97,7 @@ maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     else if (core.icons.getTilesetOffset(id)) block.event = {"cls": "tileset", "id": "X" + id, "noPass": true};
     else block.event = {'cls': 'terrains', 'id': 'none', 'noPass': false};
 
-    block.event.sprite = core.getSpriteObj(block.event.id);
+    block.event.sprite = block.event.id;//core.getSpriteObj();
     // todo: 实现元件的贴图自由选择 此处就是认为，id就是对应的贴图
     if (typeof block.event.noPass === 'string')
         block.event.noPass = JSON.parse(block.event.noPass);
@@ -674,8 +674,8 @@ maps.prototype._drawSpriteBlock = function(blockInfo, x, y, render){
     if(obj){
         render = render || core.scenes.mapScene.getRender('event'); //core.sprite.render; // TODO: 不要使用全局render，由场景管理
         var change = function (){ // TODO: 坐标变换单一类，提供统一变换方法
-            this.x = x * 32+16 - ~~(this.info.width/2+0.5);
-            this.y = (y + 1) * 32 - this.info.height;
+            this.x = x * 32 + 16; //this.x = x * 32+16 - ~~(this.info.width/2+0.5);
+            this.y = (y+1) * 32; //this.y = (y + 1) * 32 - this.info.height;
         }
         change.call(obj);
         if(!render.hasObj(obj))render.addNewObj(obj);
@@ -892,7 +892,7 @@ maps.prototype._drawBgFgMap = function (floorId, ctx, name, onMap) {
                 //alpha = ctx.globalAlpha;
                 //ctx.globalAlpha = 0.6;
             }
-            if(blur)blockInfo.sprite.setAlpha(0.6);
+            // if(blur)blockInfo.sprite.setAlpha(0.6);
             this._drawMap_drawBlockInfo(ctx, block, blockInfo, arr, onMap);
             if (blur) ctx.globalAlpha = alpha;
         }
@@ -980,7 +980,8 @@ maps.prototype._drawFloorImage = function (ctx, name, type, image, offsetX, widt
 }
 
 ////// 绘制Autotile //////
-maps.prototype._drawAutotile_createSprite = function(sx,sy,sw,sh,dx,dy,dw,dh,){
+maps.prototype._drawAutotile_createSprite = function(name,sx,sy,sw,sh,dx,dy,dw,dh,){
+    return core.sprite.getAutotileSprite(name,sx,sy,sw,sh,dx,dy,dw,dh);
     return {
         'info':{
             'x':sx,
@@ -998,11 +999,11 @@ maps.prototype._drawAutotile_createSprite = function(sx,sy,sw,sh,dx,dy,dw,dh,){
 
 maps.prototype._drawAutotile = function (render, mapArr, block, size, left, top, status) {
     var xx = block.x, yy = block.y;
-    var autotile = core.material.images['autotile'][block.event.id];
+    // var autotile = core.material.images['autotile'][block.event.id];
     var sprite = block.event.sprite;
-    status = status || 0;
+    // status = status || 0;
     var ctx = [];
-    status %= sprite.info.frame;
+    // status %= sprite.info.frame;
     //status %= parseInt(autotile.width / 96);
     var done = {};
     var isGrass = function(x,y){
@@ -1037,21 +1038,18 @@ maps.prototype._drawAutotile = function (render, mapArr, block, size, left, top,
     var _id = iG[0][-1] + 2 * iG[-1][0] + 4 * iG[0][1] + 8 * iG[1][0];
     this._drawAutotile_render(ctx, xx * size, yy * size, size, autotile, status,  _id, done);
 
-    if(sprite){
-        ctx.forEach(function(obj){
-            obj.info.x += core.sprite.sprite[block.event.id].x;
-        });
-        if(!render || !render.addNewObj){
-            render = core.scenes.mapScene.getRender('event');//core.sprite.render;
-        }
-        if(render.objs.indexOf(block.event.sprite)<0){
-            render.addNewObj(block.event.sprite);
-        }
-        sprite.image = null;
-        sprite.x = 0;
-        sprite.y = 0;
-        sprite.children = ctx;
-        //console.log(ctx)
+    if(!sprite.prototype) {
+        sprite = core.getEmptySprite();
+    }
+    ctx.forEach(function(obj){
+        sprite.addChild(obj);
+        // obj.info.x += core.sprite.sprite[block.event.id].x;
+    });
+    if(!render || !render.addNewObj){
+        render = core.scenes.mapScene.getRender('event');//core.sprite.render;
+    }
+    if(!render.hasObj(block.event.sprite)){
+        render.addNewObj(block.event.sprite);
     }
 }
 

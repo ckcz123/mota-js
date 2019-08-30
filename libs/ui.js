@@ -2908,32 +2908,6 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
     return core.dymCanvas[name];
 }
 
-////// canvas创建 //////
-ui.prototype.createCleanCanvas = function (name, x, y, width, height, z) {
-    // 如果画布已存在则直接调用
-    if (core.isset(core.dymCanvas[name])) {
-        this.relocateCanvas(name, x, y);
-        this.resizeCanvas(name, width, height);
-        core.dymCanvas[name].canvas.style.zIndex = z;
-        return core.dymCanvas[name];
-    }
-    var newCanvas = document.createElement("canvas");
-    newCanvas.id = name;
-    newCanvas.style.display = 'block';
-    newCanvas.width = width;
-    newCanvas.height = height;
-    newCanvas.setAttribute("_left", x);
-    newCanvas.setAttribute("_top", y);
-    newCanvas.style.width = width * core.domStyle.scale + 'px';
-    newCanvas.style.height = height * core.domStyle.scale + 'px';
-    newCanvas.style.left = x * core.domStyle.scale + 'px';
-    newCanvas.style.top = y * core.domStyle.scale + 'px';
-    newCanvas.style.zIndex = z;
-    newCanvas.style.position = 'absolute';
-    core.dymCanvas[name] = newCanvas;
-    core.dom.gameDraw.appendChild(newCanvas);
-    return core.dymCanvas[name];
-}
 
 
 ////// canvas重定位 //////

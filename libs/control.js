@@ -582,15 +582,16 @@ control.prototype.setHeroMoveInterval = function (callback) {
     var render = core.scenes.mapScene.getRender('event');
     render.blur();//core.sprite.render.blur();
     //core.status.heroSprite.obj.addAnimateInfo({
-    //    'speed':1.9, 'line':line,
+    //    'speed':30, 'line':line,
     //});
-    core.status.heroSprite.obj.changeStatus(null, line);
+    core.status.heroSprite.obj.updateStatus(null, line);
     core.status.heroSprite.obj.addMoveInfo(
-        dx,dy,~~(800 / core.values.moveSpeed),
+        dx,dy,4,//~~(800 / core.values.moveSpeed),
         function(){
             core.status.heroMoving = 0;
             core.moveOneStep(core.nextX(), core.nextY());
             core.status.heroSprite.obj.stopMoving();
+            core.status.heroSprite.obj.stopAnimate();
             if (callback) callback();
         }, {
             'freq':4
@@ -824,8 +825,8 @@ control.prototype.heroSpritePositionTransForm = function(obj, x, y, direction, s
     offset = offset || 0;
     direction = direction || 'down';
     obj.nFrame = (obj.nFrame||0)%2==1?obj.nFrame-1:obj.nFrame;
-    obj.x = x * 32+16 - ~~(obj.info.width/2+0.5) - core.bigmap.offsetX;
-    obj.y = (y+1) * 32 - obj.info.height - core.bigmap.offsetY;
+    obj.x = x * 32 + 16 - core.bigmap.offsetX;
+    obj.y = (y+1) * 32 - core.bigmap.offsetY;
     obj.offsetX = core.utils.scan[direction].x * offset;
     obj.offsetY = core.utils.scan[direction].y * offset;
     //obj.nFrame = obj.nFrame || mesh[status||'stop'];
@@ -842,8 +843,12 @@ control.prototype.drawHero = function (status, offset) {
         tmp.obj = core.sprite.getSpriteObj('hero');
         tmp.observer = new transformOberver(tmp.obj);
         // tmp.obj.bindPosition(tmp.observer.getPosition());
-        if(main.mode=='play')core.addRenderSpriteObj(tmp.obj);
         core.status.heroSprite = tmp;
+    }
+    if(main.mode=='play'){
+        if(!core.scenes.mapScene.getRender('event').hasObj(core.status.heroSprite.obj)){ // TODO：简化-查看是否位于当前场景
+            core.scenes.mapScene.addSpriteToRender('event', core.status.heroSprite.obj);
+        }
     }
 
     var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), direction = core.getHeroLoc('direction');

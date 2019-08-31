@@ -29,8 +29,8 @@ function scenes(){
     this._init();
 }
 
-function baseScene(){
-    this._init();
+function baseScene(name){
+    this._init(name);
 }
 baseScene.prototype = Object.create(Stage.prototype);
 baseScene.prototype.constructor = Stage;
@@ -49,18 +49,30 @@ var createCleanCanvas = function (name, x, y, width, height, z) {
     newCanvas.style.top = y * core.domStyle.scale + 'px';
     newCanvas.style.zIndex = z;
     newCanvas.style.position = 'absolute';
-    core.dymCanvas[name] = {canvas:newCanvas};
     core.dom.gameDraw.appendChild(newCanvas);
     return newCanvas;
 }
 
 baseScene.prototype._init = function(name){
-    Stage.call(this, {
-        'view': createCleanCanvas(name||'temp', 0,0, 416, 416, 300)
-    });
+    if(name){
+        Stage.call(this, {
+            'view': name?createCleanCanvas(name, 0,0, 416, 416, 50):null,
+        });
+        this.view.width = core.__PIXELS__;
+        this.view.height = core.__PIXELS__;
+        this.view.style.width = core.domStyle.scale * this.view.width + 'px';
+        this.view.style.height = core.domStyle.scale * this.view.height + 'px';
+        core.dom.gameDraw.appendChild(this.view);
+
+        var self = this;
+        this.ticker.add(function(time){self.update(time)});
+        this.render = this.stage.children;
+    }
+    else{
+        this.render = [];
+    }
     this.parent = null;
     this.children = [];
-    this.render = [];
     this.renderTable = {};
     this.configData = { // 当前场景的配置数据 是需要传给各个子场景
         'x':0, 'y':0,
@@ -68,8 +80,7 @@ baseScene.prototype._init = function(name){
         'offsetX':0, 'offsetY':0,
         'opacity':1.0,
     };
-    var self = this;
-    this.ticker.add(function(time){self.update(time)});
+
 }
 
 /////
@@ -112,14 +123,9 @@ baseScene.prototype.stop = function(c){
 ///// 添加渲染器是需要考虑【层优先级】的，如果不加此参数，按长度计算层级，即后添加的后绘制
 // ！支持动态添加图层的方法，就是新增render，将block的绘制放到该render上，类似多前景与多背景
 baseScene.prototype.addRender = function(name, r, floor){
-    r._floor = floor||this.render.length;
+    r.zIndex = floor ? floor : r.zIndex;
     this.renderTable[name] = r;
-    var idx = this.render.findIndex(
-        function(it){
-            return it._floor >= r._floor;
-        });
-    idx = idx < 0 ? this.render.length : idx;
-    this.render.splice(idx, 0, r);
+    this.stage.addChild(r);
 }
 
 ///// 在某一层添加sprite（！重要）
@@ -150,7 +156,8 @@ scenes.prototype._init = function(){
 
 scenes.prototype._load = function(){
     this.mainScene = this.getNewScene();
-    this.mapScene = this.getNewScene();
+
+    this.mapScene = this.getNewScene('map');
     // TODO : 更多系统场景（状态栏、工具栏窗口化）
     this.mainScene.addChildScene(this.mapScene);
     this.mapScene.addRender('bg', core.sprite.getNewRenderSprite(),0);
@@ -166,8 +173,8 @@ scenes.prototype.addSceneToMainList = function(scene){
     this.mainScene.addChildScene(scene)
 }
 
-scenes.prototype.getNewScene = function(){
-    return new baseScene();
+scenes.prototype.getNewScene = function(name){
+    return new baseScene(name);
 }
 
 

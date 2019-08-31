@@ -86,11 +86,10 @@ sprite.prototype._generateTextures = function() {
         for(var i = 0; i<nl; i++){
             var line = [];
             for(var j = 0; j<nf; j++){
-                if(!baseTextures[type])debugger
                 line.push(
                     new Texture(baseTextures[type],
-                        new Rectangle(j*width,i*height,width,height)),
-                    org
+                        new Rectangle(org.x+j*width,org.y+i*height,width,height)
+                    )
                 );
             }
             tmp.push(line);
@@ -102,9 +101,15 @@ sprite.prototype._generateTextures = function() {
 
 ////// 绘制Autotile //////
 sprite.prototype.getAutotileSprite = function(name,sx,sy,sw,sh,dx,dy,dw,dh,){
-    var base = this.baseTextures[name] || null;
+    var base = this.textures[name] || null;
     if(!base)return null;
-    var ret = new PSprite(base,new Rectangle(dx,dy,dw,dh), new Rectangle(sx,sy,sw,sh));
+    var arr = [];
+    for(var i in base[0]){
+        arr.push(
+            new Texture(base[0][i],new Rectangle(dx,dy,dw,dh), new Rectangle(sx,sy,sw,sh))
+        );
+    }
+    var ret = new PSprite(arr);
     return ret;
 }
 
@@ -357,8 +362,7 @@ sprite.prototype.playSpriteObj = function(obj){
 }
 ///// 改变sprite状态
 sprite.prototype.changeSpriteStatus = function(obj, nFrame, nLine){
-    if(core.isset(nFrame))obj.nFrame = nFrame % obj.info.frame;
-    if(core.isset(nLine))obj.nLine = nLine % obj.info.line;
+    obj.updateStatus(nFrame, nLine)
 }
 
 ///// 绘制spirte到指定位置
@@ -469,8 +473,8 @@ spriteRender.prototype._init = function(ctx){
     }
     this.objs = this.children;
     this.destCtx = null;
-    this.mspf = 16;//core.flags.mspf;
-    this.lastTime = null;
+    this.mspf = 1;//core.flags.mspf;
+    this.lastTime = 0;
 }
 
 /////
@@ -480,13 +484,10 @@ spriteRender.prototype.requestUpdate = function(){
 
 ///// 判断对象内部状态是否发生改变
 spriteRender.prototype.updateData = function(timeDelta) {
-    var need = false;
     var self = this;
     var callbackList = [];
     this.objs.forEach(function(obj){
-        if(obj.animateAction(timeDelta)){
-            need = true;
-        }
+        obj.animateAction(timeDelta);
         if(obj.move && !obj.move.stop){
             if(obj.move.done){
                 obj.stopMoving();
@@ -495,12 +496,7 @@ spriteRender.prototype.updateData = function(timeDelta) {
             }else{
                 obj.moveAction(timeDelta);
                 self.reloacate(obj);
-                need = true;
             }
-        }
-        if(obj.changed){
-            need = true;
-            obj.changed = false;
         }
     })
     if(callbackList.length>0){
@@ -508,28 +504,21 @@ spriteRender.prototype.updateData = function(timeDelta) {
             callbackList.forEach(function(f){f();});
         });
     }
-    if(this.changed){
-        this.changed = false;
-        need = true;
-    }
-    return need;
 }
 ///// dirty是由外部驱动的 表示需要它【保持】更新 needUpdate是内部判断的——当前内容是否值得更新
-spriteRender.prototype.update = function(timeStamp){
-    if(this.dirty){
-        var timeDelta = 1;
-        if(timeStamp){
-            if(this.lastTime == null)
-                this.lastTime = timeStamp;
-            else{
-                timeDelta = timeStamp - this.lastTime;
-                if(timeDelta<this.mspf)return; // 没到刷新率 无需更新
-                timeDelta = this.mspf/timeDelta;
-            }
-            this.lastTime = timeStamp;
-        }
+spriteRender.prototype.update = function(time){
+    var timeDelta = 1;
+    if(time){
+        this.lastTime += time/this.mspf;
+        timeDelta = this.lastTime;
+    }
+    if(timeDelta>=1){
+        this.lastTime =  0;//1 - timeDelta;
         this.updateData(timeDelta);
-        return;
+    }
+    return;
+
+    if(this.dirty){
 
         if(false){
             this.ctx.clearRect(0,0,this.canvas.width, this.canvas.height); // TODO:  pixi
@@ -555,7 +544,7 @@ spriteRender.prototype.refresh = function(){
 }
 
 spriteRender.prototype.clear = function(){
-    this.objs = [];
+    this.removeChildren();
 }
 
 ///// 重定向一个ctx作为绘制目标
@@ -661,6 +650,9 @@ spriteObj.prototype._init = function(texture, extra){
     // this.info = info;
     this.nFrame = 0;
     this.nLine = 0;
+
+
+    this._stopCount = 0;
     // this.image = image;
 }
 
@@ -668,8 +660,8 @@ spriteObj.prototype._init = function(texture, extra){
 ///// 手动操作的帧播放
 spriteObj.prototype.playFrame = function(){
     var d = (this.animate||{}).inverse ? -1 : 1;
-    this.nFrame = (this.nFrame+d+this.info.frame)%(this.info.frame||1);
-    this.updateStatus(info.frame);
+    this.nFrame = (this.nFrame+d+this.totalFrames)%(this.totalFrames);
+    this.updateStatus(this.nFrame);
 }
 spriteObj.prototype.playFrameOneTime = function(){
     this.playFrame();
@@ -685,6 +677,7 @@ spriteObj.prototype.addMoveInfo = function(dx, dy, speed, callback, info){
     this.move = {
         'sx':this.x, 'sy':this.y,
         'realX':this.x, 'realY': this.y,
+        'destX':this.x + dx, 'destY': this.y + dy,
         'dx':dx, 'dy': dy,
         'xDir': dx>0?1:dx<0?-1:0,
         'yDir': dy>0?1:dy<0?-1:0,
@@ -695,6 +688,9 @@ spriteObj.prototype.addMoveInfo = function(dx, dy, speed, callback, info){
     };
     for(var i in info){
         this.move[i] = info[i];
+    }
+    if(this.move.animate){
+        this.addAnimateInfo({'speed': speed });
     }
 }
 
@@ -730,13 +726,13 @@ spriteObj.prototype.addAnimateInfo = function(info){
     this.animate = {
         'lastTime': 0,
         'stop': info.stop || false,
-        'speed': info.speed || 1,
+        'speed': info.speed || 20,
     }
     for(var it in info){
         this.animate[it] = info[it];
     }
     this.animationSpeed = this.animate.speed;
-    if(this.animate.auto){ // 自动播放 无需轮询
+    if(this.animate.auto){ // 自动播放 无需轮询??
         this.play();
     }else{
         this.loop = false;
@@ -762,55 +758,62 @@ spriteObj.prototype.resetFrame = function(){
 
 ///// 复位： updateStatus(0)
 spriteObj.prototype.updateStatus = function(nFrame, nLine){
-    if(core.isset(nFrame))this.nFrame = nFrame % this.info.frame;
-    if(core.isset(nLine))this.nLine = nLine % this.info.line;
+    if(core.isset(nFrame))this.nFrame = nFrame % this.totalFrames;
+    if(core.isset(nLine))this.nLine = nLine % this.image.length;
     this.textures = this.image[this.nLine]
     this.gotoAndStop(this.nFrame);
 }
 
-////// 渲染与数据的一个耦合点：timeDelta - 距离上次绘制过去的
+
+
+spriteObj.prototype.isMoving = function(){
+    return this.move && !this.move.stop && !this.move.done;
+}
+
+
+spriteObj.prototype.getSpeed = function(){
+    return this.move.speed;
+}
+
+//////
 spriteObj.prototype.moveAction = function(timeDelta){
-    if(this.move && !this.move.stop && !this.move.done){
-        timeDelta = timeDelta || 1;
-        var step = this.move.speed * timeDelta;
-        //this.move.realX += this.move.xDir * step;
-        //this.move.realY += this.move.yDir * step;
-        var xDir = this.move.xDir,
-            yDir = this.move.yDir;
-        this.x += ~~(xDir * step);
-        this.y += ~~(yDir * step);
-        if(
-            (this.x-this.move.sx)*xDir >= (this.move.dx)*xDir
-            &&
-            (this.y-this.move.sy)*yDir >= (this.move.dy)*yDir
-        ){
-            this.x = this.move.sx + this.move.dx;
-            this.y = this.move.sy + this.move.dy;
+    if(this.isMoving()){
+        var step = this.move.speed*timeDelta;
+        if(this.move.dx < 0){
+            this.move.realX = Math.max(this.move.realX - step, this.move.destX);
+        }
+        if(this.move.dx > 0){
+            this.move.realX = Math.min(this.move.realX + step, this.move.destX);
+        }
+        if(this.move.dy < 0){
+            this.move.realY = Math.max(this.move.realY - step, this.move.destY);
+        }
+        if(this.move.dy > 0){
+            this.move.realY = Math.min(this.move.realY + step, this.move.destY);
+        }
+        this.x = ~~this.move.realX;
+        this.y = ~~this.move.realY;
+        if(this.x == this.move.destX && this.y == this.move.destY){
             this.move.done = true;
-            // TODO: 告诉渲染器移动完了 把回调统一放到后面处理 还是立即setTimeOut?
-            if(this.move.animate && this.move.startStep){
-                this.playFrame();
-                this.move.startStep = false;
-            }
-        }else{
-            this.move.lastTime += timeDelta;
-            if(this.move.animate && !this.move.startStep){
-                this.move.startStep = true;
-                this.playFrame();
-            }
         }
         return true;
+    }else{
+        this._stopCount += 1;
     }
-    return false;
+}
+
+
+spriteObj.prototype.isAnimating = function(){
+    return this.animate && !this.animate.stop && !this.animate.auto || this.isMoving() && this.move.animate;
 }
 
 ////// timeDelta —— 其实就是帧差 如果无误应该是1 但是如果卡了或者机器比较垃圾就会大于1
 spriteObj.prototype.animateAction = function(timeDelta){
-    if(this.animate && !this.animate.stop && !this.animate.auto){
+    if(this.isAnimating()){
         timeDelta = timeDelta || 1;
         var diff = timeDelta + this.animate.lastTime - this.animate.speed;
         if(diff > 0){
-            this.animate.lastTime = diff;
+            this.animate.lastTime = 0;
             if(this.animate.onetime){
                 if(this.playFrameOneTime()){
                     this.stopAnimate();
@@ -827,6 +830,12 @@ spriteObj.prototype.animateAction = function(timeDelta){
             return false;
         }
     }
+    else if(this._stopCount > 50 && this.nFrame % 2==1){
+        this.stopAnimate();
+        this.updateStatus(this.nFrame+1);
+        this._stopCount = 0;
+    }
+
 }
 
 ///// 绘制到指定位置 (x

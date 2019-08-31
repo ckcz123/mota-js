@@ -2310,7 +2310,7 @@ events.prototype._eventMoveSprite_moving = function(obj, direction, speed, callb
     var dx = core.utils.scan[direction].x * core.__BLOCK_SIZE__ * o,
         dy = core.utils.scan[direction].y * core.__BLOCK_SIZE__ * o;
     if(o>0 && obj.info.line>line){
-        obj.changeStatus(null, line);
+        obj.updateStatus(null, line);
     }
     obj.addMoveInfo(dx, dy, speed, callback);
 }

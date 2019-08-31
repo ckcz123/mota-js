@@ -695,6 +695,9 @@ maps.prototype.drawBlock = function (block, animate) {
         return;
     }
     if(block.event.sprite){
+        if(typeof block.event.sprite == 'string'){
+            block.event.sprite = core.getSpriteObj(block.event.sprite);
+        }
         core.changeSpriteStatus(block.event.sprite, animate);
     }
     var blockInfo = this.getBlockInfo(block);
@@ -999,7 +1002,7 @@ maps.prototype._drawAutotile_createSprite = function(name,sx,sy,sw,sh,dx,dy,dw,d
 
 maps.prototype._drawAutotile = function (render, mapArr, block, size, left, top, status) {
     var xx = block.x, yy = block.y;
-    // var autotile = core.material.images['autotile'][block.event.id];
+    var autotile = block.event.id;//core.material.images['autotile'][block.event.id];
     var sprite = block.event.sprite;
     // status = status || 0;
     var ctx = [];
@@ -1077,7 +1080,7 @@ maps.prototype._drawAutotile_render = function(sprite, x, y, size, autotile, sta
     ];
     var data = indexData[index];
     if(index>=16){ // 拐角直接绘制
-        sprite.push(this._drawAutotile_createSprite(data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], size/2, size/2));
+        sprite.push(this._drawAutotile_createSprite(autotile, data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], size/2, size/2));
         //canvas.drawImage(autotile, data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], size/2, size/2);
     }else{ // 非拐角要根据是否已经绘制进行切分后绘制
         this._drawAutotile_renderCut(sprite, autotile, x, y, size, data, done);
@@ -1119,7 +1122,7 @@ maps.prototype._drawAutotile_renderCut = function(sprite, autotile, x, y, size, 
     }
     for(var i = 0; i<4; i++){
         var dt = drawData[i];if(!dt)continue;
-        sprite.push(this._drawAutotile_createSprite(dt[0], dt[1], 16, 16, x + (i % 2) * size / 2, y + parseInt(i / 2) * size / 2, size/2, size/2));
+        sprite.push(this._drawAutotile_createSprite(autotile, dt[0], dt[1], 16, 16, x + (i % 2) * size / 2, y + parseInt(i / 2) * size / 2, size/2, size/2));
         //canvas.drawImage(autotile, dt[0], dt[1], 16, 16, x + (i % 2) * size / 2, y + parseInt(i / 2) * size / 2, size/2, size/2);
     };
 }
@@ -2060,7 +2063,7 @@ maps.prototype.addGlobalAnimate = function (block) {
     }
     else {
         if (!block.event.animate || block.event.animate == 1) return;
-        block.event.sprite.addAnimateInfo({speed:20});
+        block.event.sprite.addAnimateInfo({speed:30});
         //core.status.globalAnimateObjs.push(block);
     }
 }

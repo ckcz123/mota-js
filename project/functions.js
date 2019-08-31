@@ -51,9 +51,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.dom.musicBtn.style.display = 'none';
 	//core.sprite.render.destCtx = core.getContextByName('hero');
 
-            core.scenes.mapScene.getRender('event').redirectCtx(core.getContextByName('event'));
-            core.scenes.mapScene.getRender('bg').redirectCtx(core.getContextByName('bg'));
-            core.scenes.mapScene.getRender('fg').redirectCtx(core.getContextByName('fg'));
+	//core.scenes.mapScene.getRender('event').redirectCtx(core.getContextByName('event'));
+	//core.scenes.mapScene.getRender('bg').redirectCtx(core.getContextByName('bg'));
+	//core.scenes.mapScene.getRender('fg').redirectCtx(core.getContextByName('fg'));
 },
         "setInitData": function () {
 	// 不同难度分别设置初始属性

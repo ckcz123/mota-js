@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" serverName="xfyy">
+  <component name="PublishConfigData" serverName="xfyy" uploadOnCheckin="3fea1c5f-43ce-4b4a-b1f1-99e3f8addfd3">
     <serverData>
       <paths name="xfyy">
         <serverdata>
@@ -10,5 +10,6 @@
         </serverdata>
       </paths>
     </serverData>
+    <option name="myUploadOnCheckinName" value="xfyy" />
   </component>
 </project>

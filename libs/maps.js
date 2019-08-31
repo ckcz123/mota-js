@@ -82,6 +82,12 @@ maps.prototype._getNumberById = function (id) {
     return 0;
 }
 
+maps.prototype.getBlockByNumber = function (number) {
+    core.status.number2Block = core.status.number2Block || {};
+    if (core.status.number2Block[number] != null) return core.status.number2Block[number];
+    return core.status.number2Block[number] = this.initBlock(null, null, number, true);
+}
+
 ////// 数字和ID的对应关系 //////
 maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     var disable = null;
@@ -481,7 +487,7 @@ maps.prototype._canMoveHero_checkCannotInOut = function (number, name, direction
         }
         return false;
     }
-    return core.inArray((this.initBlock(0, 0, number).event || {})[name], direction);
+    return core.inArray((this.getBlockByNumber(number).event || {})[name], direction);
 }
 
 ////// 能否瞬间移动 //////
@@ -835,7 +841,7 @@ maps.prototype._drawBgFgMap = function (floorId, ctx, name, onMap) {
 
     var arr = this._getBgFgMapArray(name, floorId, true);
     var eventArr = null;
-    if (main.mode == 'editor' && name == 'fg' && onMap) {
+    if (name == 'fg' && onMap && this._drawBgFgMap_shouldBlurFg()) {
         eventArr = this.getMapArray(floorId);
     }
 
@@ -858,6 +864,11 @@ maps.prototype._drawBgFgMap = function (floorId, ctx, name, onMap) {
     }
     if (onMap)
         core.status.autotileAnimateObjs[name + "map"] = core.clone(arr);
+}
+
+////// 是否应当存在事件时虚化前景层 //////
+maps.prototype._drawBgFgMap_shouldBlurFg = function () {
+    return main.mode == 'editor' || core.flags.blurFg;
 }
 
 ////// 绘制楼层贴图 //////
@@ -1326,7 +1337,7 @@ maps.prototype.getBlockInfo = function (block) {
     }
     if (typeof block == 'number') { // 参数是数字
         if (block == 0) return null;
-        block = this.initBlock(0, 0, block, true);
+        block = this.getBlockByNumber(block);
     }
     var number = block.id, id = block.event.id, cls = block.event.cls, name = block.event.name,
         image = null, posX = 0, posY = 0, animate = block.event.animate,
@@ -1362,7 +1373,7 @@ maps.prototype.getBlockInfo = function (block) {
 
 ////// 搜索某个图块出现的所有位置 //////
 maps.prototype.searchBlock = function (id, floorId, showDisable) {
-    if (typeof id == 'number') id = this.initBlock(0, 0, id).event.id;
+    if (typeof id == 'number') id = this.getBlockByNumber(id).event.id;
     floorId = floorId || core.status.floorId;
     var result = [];
     if (floorId instanceof Array) {
@@ -1605,7 +1616,7 @@ maps.prototype.replaceBlock = function (fromNumber, toNumber, floorId) {
         });
         return;
     }
-    var toBlock = this.initBlock(0, 0, toNumber, true);
+    var toBlock = this.getBlockByNumber(toNumber, true);
     core.status.maps[floorId].blocks.forEach(function (block) {
         if (block.id == fromNumber) {
             block.id = toNumber;

@@ -772,11 +772,13 @@ control.prototype.drawHero = function (status, offset) {
     core.clearAutomaticRouteNode(x+dx, y+dy);
     core.clearMap('hero');
 
-    this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
-        core.drawImage('hero', block.img, block.heroIcon[block.status]*block.width,
-            block.heroIcon.loc * block.height, block.width, block.height,
-            block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
-    });
+    if (!core.hasFlag('hideHero')) {
+        this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
+            core.drawImage('hero', block.img, block.heroIcon[block.status]*block.width,
+                block.heroIcon.loc * block.height, block.width, block.height,
+                block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
+        });
+    }
 
     core.control.updateViewport();
     core.setGameCanvasTranslate('hero', 0, 0);

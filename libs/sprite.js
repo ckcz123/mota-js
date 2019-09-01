@@ -17,6 +17,7 @@ var Rectangle = PIXI.Rectangle;
         动态的： 怪物、勇士
         全局持续动态的：天气、特殊动画
         对这些render的管理，交由场景类进行
+    4. canvasRender: 对一个离屏canvas的渲染器，适用于慢更新图层
 
 
     可优化点：
@@ -376,7 +377,7 @@ sprite.prototype.playSpriteObj = function(obj){
 }
 ///// 改变sprite状态
 sprite.prototype.changeSpriteStatus = function(obj, nFrame, nLine){
-    obj.updateStatus(nFrame, nLine)
+    obj.changePattern(nFrame, nLine)
 }
 
 ///// 绘制spirte到指定位置
@@ -674,6 +675,10 @@ spriteObj.prototype._init = function(texture, extra){
     PSprite.call(this, texture[0], false);
     this.name = extra.name;
     this.image = texture;
+    this.info = {
+        'line': texture.length,
+        'frame': texture[0].length,
+    }
     this.x = -100; this.y = -100;
     this.anchor.set(0.5, 1);
     // this.info = info;
@@ -689,7 +694,7 @@ spriteObj.prototype._init = function(texture, extra){
 spriteObj.prototype.playFrame = function(){
     var d = (this.animate||{}).inverse ? -1 : 1;
     this.nFrame = (this.nFrame+d+this.totalFrames)%(this.totalFrames);
-    this.updateStatus(this.nFrame);
+    this.changePattern(this.nFrame);
 }
 spriteObj.prototype.playFrameOneTime = function(){
     this.playFrame();
@@ -697,6 +702,15 @@ spriteObj.prototype.playFrameOneTime = function(){
         return true;
     }
     return false;
+}
+
+spriteObj.prototype.playFading = function() {
+    if (this.animate.fade) { ///// 渐变 需要指定每次渐变的量
+        this.alpha = core.clamp(this.alpha + this.animate.fade, 0, 1);
+        if (this.alpha <= 0 || this.alpha >= 1) {
+            return true;
+        }
+    }
 }
 
 ///// 添加移动信息 速度的单位是像素/帧 —— 帧率由画布决定
@@ -753,12 +767,13 @@ spriteObj.prototype.addAnimateInfo = function(info){
         }
         return;
     }
-    this.updateStatus(info.frame, info.line);
+    this.changePattern(info.frame, info.line);
     this.animate = {
         'lastTime': 0,
         'stop': info.stop || false,
         'speed': info.speed || 20,
     }
+    if(info.fade)this.animate.lastFadeTime = 0;
     for(var it in info){
         this.animate[it] = info[it];
     }
@@ -788,8 +803,8 @@ spriteObj.prototype.resetFrame = function(){
     this.gotoAndStop(this.nFrame);
 }
 
-///// 复位： updateStatus(0)
-spriteObj.prototype.updateStatus = function(nFrame, nLine){
+///// 复位： changePattern(0)
+spriteObj.prototype.changePattern = function(nFrame, nLine){
     if(core.isset(nFrame))this.nFrame = nFrame % this.totalFrames;
     if(core.isset(nLine))this.nLine = nLine % this.image.length;
     this.textures = this.image[this.nLine]
@@ -889,10 +904,12 @@ spriteObj.prototype.isAnimating = function(){
 spriteObj.prototype.animateAction = function(timeDelta){
     if(this.isAnimating()){
         timeDelta = timeDelta || 1;
-        var diff = timeDelta + this.animate.lastTime - this.animate.speed;
-        if(diff > 0){
+        //// todo 单sprite的动画行为分开注册
+
+        // 帧动画
+        if(timeDelta + this.animate.lastTime > this.animate.speed){
             this.animate.lastTime = 0;
-            if(this.animate.onetime){
+            if(this.animate.onetime){ //// 一次性动画有： 渐变 、 小动作、 开门
                 if(this.playFrameOneTime()){
                     this.stopAnimate();
                     if(this.animate.callafterplay){
@@ -902,11 +919,26 @@ spriteObj.prototype.animateAction = function(timeDelta){
             }else{
                 this.playFrame();
             }
-            return true;// 进行了更新
         }else{
             this.animate.lastTime += timeDelta;
-            return false;
         }
+
+
+        // 渐变动画
+        if(this.animate.fade && this.animate.lastFadeTime + timeDelta > this.animate.fadeFreq){
+            this.animate.lastFadeTime = 0;
+            if(this.playFading()){ //// 渐变只进行一次就callback
+                this.stopAnimate();
+                if(this.animate.callafterplay){
+                    this.animate.callafterplay();
+                }
+            }
+        }else{
+            this.animate.lastFadeTime += timeDelta;
+        }
+
+
+        // 绑定贴图动画
     }
 }
 

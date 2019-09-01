@@ -1862,11 +1862,16 @@ maps.prototype._deleteDetachedBlock = function (canvases) {
 maps.prototype._catchTempBlock = function (x, y) {
     var block = core.getBlock(x, y);
     if (block == null) return null;
+    core.status.thisMap.blocks.splice(block.index,1);
     block = block.block;
     var blockInfo = this.getBlockInfo(block);
     if (blockInfo == null) return;
-    core.removeBlock(x, y);
     return [block, blockInfo];
+}
+
+///// 恢复临时kuai
+maps.prototype._recoverTempBlock = function (block) {
+    core.status.thisMap.blocks.push(block);
 }
 
 maps.prototype._getAndRemoveBlock = function (x, y) {
@@ -1882,7 +1887,7 @@ maps.prototype._getAndRemoveBlock = function (x, y) {
 ////// 显示移动某块的动画，达到{“type”:”move”}的效果 //////
 maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
     time = time || 500;
-    var blockArr = this._getAndRemoveBlock(x, y);
+    var blockArr = this._catchTempBlock(x, y);
     if (blockArr == null) {
         if (callback) callback();
         return;
@@ -1891,17 +1896,35 @@ maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
     var moveSteps = (steps||[]).filter(function (t) {
         return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
     });
-    var canvases = this._initDetachedBlock(blockInfo, x, y, block.event.animate !== false);
-    this._moveDetachedBlock(blockInfo, 32 * x, 32 * y, 1, canvases);
-
+    // var canvases = this._initDetachedBlock(blockInfo, x, y, block.event.animate !== false);
+    // this._moveDetachedBlock(blockInfo, 32 * x, 32 * y, 1, canvases);
     var moveInfo = {
         x: x, y: y, px: 32 * x, py: 32 * y, opacity: 1, keep: keep, lastDirection: null, offset: 1,
         moveSteps: moveSteps, step: 0, per_time: time / 16 / core.status.replay.speed
     }
-    this._moveBlock_doMove(blockInfo, canvases, moveInfo, callback);
+    this._moveBlock_doMove(blockInfo, block, moveInfo, callback);
 }
 
 maps.prototype._moveBlock_doMove = function (blockInfo, canvases, moveInfo, callback) {
+    var speed = 10; // TODO: 速度信息
+    var step = 0, moveSteps = (moveInfo.moveSteps||[]).filter(function (t) {
+        return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
+    });
+    var obj = blockInfo.sprite;
+    var nextStep = function(){
+        if(step<moveSteps.length){
+            core.events._eventMoveSprite_moving(obj, moveSteps[step++], speed, nextStep);
+        }else{
+            obj.stopAnimate();
+            obj.resetFrame();
+            delete core.animateFrame.asyncId[blockInfo.sprite];
+            core.maps._moveJumpBlock_finished(blockInfo, canvases, moveInfo, animate, callback);
+        }
+    }
+    core.animateFrame.asyncId[blockInfo.sprite] = true;
+    nextStep();
+    return ;
+    //////
     var animateTotal = core.icons._getAnimateFrames(blockInfo.cls, true), animateTime = 0;
     var animate = window.setInterval(function () {
         if (blockInfo.cls != 'tileset') {
@@ -2021,7 +2044,19 @@ maps.prototype._jumpBlock_jumping = function (blockInfo, canvases, jumpInfo) {
     core.maps._moveDetachedBlock(blockInfo, jumpInfo.px, jumpInfo.py, jumpInfo.opacity, canvases);
 }
 
-maps.prototype._moveJumpBlock_finished = function (blockInfo, canvases, info, animate, callback) {
+maps.prototype._moveJumpBlock_finished = function (blockInfo, block, info, animate, callback) {
+    if(info.keep){
+        this._recoverTempBlock(block);
+        if(callback)callback();
+    }else{///
+        this.hideBlockAnimate(blockInfo,500,function(){
+            if(blockInfo.sprite.destroy)
+                blockInfo.sprite.destroy();
+            if(callback)callback();
+        })
+    }
+    return;
+
     if (info.keep) info.opacity = 0;
     else info.opacity -= 0.06;
     if (info.opacity <= 0) {
@@ -2040,6 +2075,32 @@ maps.prototype._moveJumpBlock_finished = function (blockInfo, canvases, info, an
     }
 }
 
+
+maps.prototype.showBlockAnimate = function(blockInfo, time, callback){
+    this._showHideAnimate(blockInfo, time, 0.1, callback);
+}
+
+maps.prototype.hideBlockAnimate = function(blockInfo, time, callback){
+    this._showHideAnimate(blockInfo, time, -0.1, callback);
+
+}
+
+maps.prototype._showHideAnimate = function(blockInfo, time, fade, callback){
+    if(blockInfo.sprite.addAnimateInfo){
+        blockInfo.sprite.alpha = fade>0?0:1;
+        blockInfo.sprite.stopAnimate();
+        var originSpeed = blockInfo.sprite.animate ? blockInfo.sprite.animate.speed : 30; // 30帧
+        blockInfo.sprite.addAnimateInfo({
+                'fade': fade,
+                'fadeFreq': time/100,
+                'callafterplay': callback,
+                'speed': originSpeed,
+            }
+        );
+    }
+}
+
+
 ////// 显示/隐藏某个块时的动画效果 //////
 maps.prototype.animateBlock = function (loc, type, time, callback) {
     var isHide = type == 'hide';
@@ -2051,6 +2112,15 @@ maps.prototype.animateBlock = function (loc, type, time, callback) {
         if (callback) callback();
         return;
     }
+    var ct = list.length;
+    list.forEach(function(l){
+        core.maps._showHideAnimate(l.blockInfo, time, isHide?-0.1:0.1, function(){
+            ct -= 1;
+            if(ct==0 && callback)callback();
+        });
+    })
+    return;
+
     this._animateBlock_drawList(list, isHide ? 1 : 0);
     time /= Math.max(core.status.replay.speed, 1)
     this._animateBlock_doAnimate(loc, list, isHide, 10 / time, callback);

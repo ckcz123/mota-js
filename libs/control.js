@@ -601,7 +601,7 @@ control.prototype.setHeroMoveInterval = function (callback) {
     //core.status.heroSprite.obj.addAnimateInfo({
     //    'speed':30, 'line':line,
     //});
-    core.status.heroSprite.obj.updateStatus(null, line);
+    core.status.heroSprite.obj.changePattern(null, line);
     var nx = core.nextX(), ny = core.nextY();
     var bigmap =
         dx > 0 && nx > core.__HALF_SIZE__ && nx + 1 <= core.bigmap.width - core.__HALF_SIZE__
@@ -852,7 +852,7 @@ control.prototype.heroSpritePositionTransForm = function(obj, x, y, direction, s
     // obj.nFrame = (obj.nFrame||0)%2==1?obj.nFrame-1:obj.nFrame;
     obj.x = x * 32 + 16;
     obj.y = (y+1) * 32;
-    obj.updateStatus(null, dir[direction]);
+    obj.changePattern(null, dir[direction]);
     // obj.offsetX = core.utils.scan[direction].x * offset;
     // obj.offsetY = core.utils.scan[direction].y * offset;
     //obj.nFrame = obj.nFrame || mesh[status||'stop'];

@@ -2304,8 +2304,8 @@ events.prototype._eventMoveSprite_moving = function(obj, direction, speed, callb
     var line = core.utils.line[direction];
     var dx = core.utils.scan[direction].x * core.__BLOCK_SIZE__ * o,
         dy = core.utils.scan[direction].y * core.__BLOCK_SIZE__ * o;
-    if(o>0 && obj.info.line>line){
-        obj.updateStatus(null, line);
+    if(o>0 && obj.info.line>line && !obj.info.fixed){ // 如果固定朝向 也不会转向
+        obj.changePattern(null, line);
     }
     obj.addMoveInfo(dx, dy, speed, callback);
 }

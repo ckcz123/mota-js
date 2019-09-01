@@ -358,7 +358,7 @@ ui.prototype.calWidth = function (name, text, font) {
 ////// 字符串自动换行的分割 //////
 ui.prototype.splitLines = function (name, text, maxWidth, font) {
     var ctx = this.getContextByName(name);
-    if (!ctx) return;
+    if (!ctx) return [text];
     if (font) core.setFont(name, font);
 
     var contents = [];
@@ -2904,7 +2904,7 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
     newCanvas.style.zIndex = z;
     newCanvas.style.position = 'absolute';
     core.dymCanvas[name] = newCanvas.getContext('2d');
-    core.dom.gameDraw.appendChild(newCanvas);
+    // core.dom.gameDraw.appendChild(newCanvas);
     return core.dymCanvas[name];
 }
 
@@ -2926,15 +2926,15 @@ ui.prototype.relocateCanvas = function (name, x, y) {
 }
 
 ////// canvas重置 //////
-ui.prototype.resizeCanvas = function (name, width, height) {
+ui.prototype.resizeCanvas = function (name, width, height, styleOnly) {
     var ctx = core.dymCanvas[name];
     if (!core.isset(ctx)) return null;
     if (core.isset(width)) {
-        ctx.canvas.width = width;
+        if (!styleOnly) ctx.canvas.width = width;
         ctx.canvas.style.width = width * core.domStyle.scale + 'px';
     }
     if (core.isset(height)) {
-        ctx.canvas.height = height;
+        if (!styleOnly) ctx.canvas.height = height;
         ctx.canvas.style.height = height * core.domStyle.scale + 'px';
     }
     return ctx;
@@ -2942,14 +2942,14 @@ ui.prototype.resizeCanvas = function (name, width, height) {
 ////// canvas删除 //////
 ui.prototype.deleteCanvas = function (name) {
     if (!core.isset(core.dymCanvas[name])) return null;
-    core.dom.gameDraw.removeChild(core.dymCanvas[name].canvas);
+    // core.dom.gameDraw.removeChild(core.dymCanvas[name].canvas);
     delete core.dymCanvas[name];
 }
 
 ////// 删除所有动态canvas //////
 ui.prototype.deleteAllCanvas = function () {
     Object.keys(core.dymCanvas).forEach(function (name) {
-        core.dom.gameDraw.removeChild(core.dymCanvas[name].canvas);
+        // core.dom.gameDraw.removeChild(core.dymCanvas[name].canvas);
         delete core.dymCanvas[name];
     });
 }

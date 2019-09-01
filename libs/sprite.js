@@ -1,11 +1,12 @@
 "use strict";
 
+var SSPrite = PIXI.Sprite;
 var PSprite = PIXI.AnimatedSprite;
 var Container = PIXI.Container;
 var Texture = PIXI.Texture;
 var Rectangle = PIXI.Rectangle;
 /*
-    Sprite.js 包含：
+    sprite.js 包含：
     1. sprite： 对资源的注册管理
     2. spriteObj： 提供所有图块图标的渲染接口的对象，包括terr、items、enemys、icons、animates， 
     autotile和大地图贴图暂时不做（特殊的处理？）
@@ -32,6 +33,10 @@ function spriteObj(texture, image){
 function spriteRender(ctx){
     this._init(ctx);
 }
+function canvasRender(ctx){
+    this._init(ctx);
+}
+
 ///// ----- 资源管理 -----
 sprite.prototype._init = function(){
     // example:
@@ -100,16 +105,18 @@ sprite.prototype._generateTextures = function() {
 
 
 ////// 绘制Autotile //////
-sprite.prototype.getAutotileSprite = function(name,sx,sy,sw,sh,dx,dy,dw,dh,){
+sprite.prototype.getAutotileSprite = function(name,sx,sy,sw,sh){
     var base = this.textures[name] || null;
     if(!base)return null;
     var arr = [];
     for(var i in base[0]){
         arr.push(
-            new Texture(base[0][i],new Rectangle(dx,dy,dw,dh), new Rectangle(sx,sy,sw,sh))
+            new Texture(base[0][i], new Rectangle(sx+base[0][i].frame.x,sy+base[0][i].frame.y,sw,sh))
         );
     }
     var ret = new PSprite(arr);
+    ret.animationSpeed = 0.05;
+    ret.play();
     return ret;
 }
 
@@ -355,6 +362,13 @@ sprite.prototype.getSpriteObj = function(name){
 sprite.prototype.getEmptySprite = function(name){
     return new Container();
 }
+sprite.prototype.getSpriteFromImage = function(image){
+    return SSPrite.from(image);
+}
+
+sprite.prototype.createCanvasRender = function(canvas){
+    return new canvasRender(canvas);
+}
 
 ///// ------ sprite纯数据对象操作 -----
 sprite.prototype.playSpriteObj = function(obj){
@@ -369,20 +383,27 @@ sprite.prototype.changeSpriteStatus = function(obj, nFrame, nLine){
 // 此处的obj是数据对象 即不含方法的
 // 这是一个渲染方法 因此spriteObj不应该有此方法
 // obj : spirte data obj ctx : context bias : offset
-// ( X  —— 抛弃此方法
+// 循环中抛弃此方法 这个仅用于通过名字绘图
 sprite.prototype.drawSpriteToCanvas = function(obj, ctx, bias){
-    if(obj.disable)return;
+    if(typeof obj != 'string')return;
     bias = bias || {}
-    var x = (obj.x || 0) + (obj.offsetX || 0) + (bias.x || 0);
-    var y = (obj.y || 0) + (obj.offsetY || 0) + (bias.y || 0);
+    var x =(bias.x || 0);
+    var y =(bias.y || 0);
     /// var info = this.sprite[obj.info]; /// todo: 通用spriteInfo 减少内存开销
-
-    if(obj.special){
-        ctx.save();
-        for(var i in obj.special){
-            ctx[i] = obj.special [i];
+    if(this.sprite [obj]){
+        var info = this.sprite [obj];
+        var img = info.oldType || 'sprite';
+        if(core.material.images[img]){
+            ctx.drawImage(core.material.images[img],
+                info.x, info.y,
+                info.width, info.height,
+                x, y,
+                bias.width || info.width,
+                bias.height || info.height
+            );
         }
     }
+    return;
 
     if(obj.image && core.material.images[obj.image])
         ctx.drawImage(core.material.images[obj.image],
@@ -455,24 +476,28 @@ sprite.prototype.clearRenderSprite = function(){
 
 ///// ----- 渲染分组 -----
 
+///// 纯图片的渲染层 远景、前景图/伤害/
+canvasRender.prototype = Object.create(SSPrite.prototype);
+canvasRender.prototype.constructor = canvasRender;
+canvasRender.prototype._init = function(canvas){
+    SSPrite.call(this, Texture.from(canvas));
+}
+canvasRender.prototype.updateTexture = function(){
+    this.texture.update();
+}
+canvasRender.prototype.clear = function() {
+}
+
+///// 精灵渲染层
 spriteRender.prototype = Object.create(Container.prototype);
 spriteRender.prototype.constructor = spriteRender;
 
-spriteRender.prototype._init = function(ctx){
+spriteRender.prototype._init = function(name){
     Container.call(this)
+    this.name = name
     this.dirty = false;
     this.sortableChildren = true;
-    if(ctx){
-        this.ctx = ctx;
-        this.canvas = ctx.canvas;
-    }else{
-        this.canvas = document.createElement("canvas");
-        this.canvas.width = core.__PIXELS__;
-        this.canvas.height = core.__PIXELS__;
-        this.ctx = this.canvas.getContext('2d');
-    }
     this.objs = this.children;
-    this.destCtx = null;
     this.mspf = 1;//core.flags.mspf;
     this.lastTime = 0;
 }
@@ -482,27 +507,26 @@ spriteRender.prototype.requestUpdate = function(){
     this.changed = true;
 }
 
-///// 判断对象内部状态是否发生改变
+/////
 spriteRender.prototype.updateData = function(timeDelta) {
     var self = this;
     var callbackList = [];
     this.objs.forEach(function(obj){
-        obj.animateAction(timeDelta);
-        if(obj.move && !obj.move.stop){
-            if(obj.move.done){
-                obj.stopMoving();
-                if(obj.move.callback)
-                    callbackList.push(obj.move.callback);
-            }else{
-                obj.moveAction(timeDelta);
-                self.reloacate(obj);
-            }
+        if(!obj.updateAction)return;
+        obj.updateAction(timeDelta);
+        if(obj.endOneStep()){
+            obj.stopMoving();
+            if(obj.move.callback)
+                callbackList.push(obj.move.callback);
+        }
+        if(obj.isMoving()){
+            self.reloacate(obj);
         }
     })
     if(callbackList.length>0){
-        setTimeout(function(){
+        //setTimeout(function(){
             callbackList.forEach(function(f){f();});
-        });
+        //});
     }
 }
 ///// dirty是由外部驱动的 表示需要它【保持】更新 needUpdate是内部判断的——当前内容是否值得更新
@@ -635,6 +659,11 @@ spriteRender.prototype.drawTo = function(stage){
     //ctx.drawImage(this.canvas, 0, 0, this.canvas.width, this.canvas.height, 0, 0, ctx.canvas.width, ctx.canvas.height);
 }
 
+spriteRender.prototype.reloadCanvas = function(){
+    this.objs.forEach(function(obj) {
+        obj.updateTexture();
+    })
+}
 
 ///// ----- 对象 ------ 从数据初始化，数据为位置信息和原始信息
 
@@ -650,9 +679,8 @@ spriteObj.prototype._init = function(texture, extra){
     // this.info = info;
     this.nFrame = 0;
     this.nLine = 0;
-
-
     this._stopCount = 0;
+    this._waitCount = 0;
     // this.image = image;
 }
 
@@ -674,6 +702,7 @@ spriteObj.prototype.playFrameOneTime = function(){
 ///// 添加移动信息 速度的单位是像素/帧 —— 帧率由画布决定
 spriteObj.prototype.addMoveInfo = function(dx, dy, speed, callback, info){
     info = info || {};
+    var dist = Math.abs(dx+dy);
     this.move = {
         'sx':this.x, 'sy':this.y,
         'realX':this.x, 'realY': this.y,
@@ -681,7 +710,7 @@ spriteObj.prototype.addMoveInfo = function(dx, dy, speed, callback, info){
         'dx':dx, 'dy': dy,
         'xDir': dx>0?1:dx<0?-1:0,
         'yDir': dy>0?1:dy<0?-1:0,
-        'speed':speed, 'lag': 0,
+        'speed':dist/speed, 'lag': 0,
         'animate': true,
         'startStep': false,
         'callback': callback,
@@ -690,7 +719,9 @@ spriteObj.prototype.addMoveInfo = function(dx, dy, speed, callback, info){
         this.move[i] = info[i];
     }
     if(this.move.animate){
-        this.addAnimateInfo({'speed': speed });
+        this._maxWaitCount = 4;
+    }else{
+        this._maxWaitCount = -1;
     }
 }
 
@@ -754,6 +785,7 @@ spriteObj.prototype.stopMoving = function(){
 /////
 spriteObj.prototype.resetFrame = function(){
     this.nFrame = 0;
+    this.gotoAndStop(this.nFrame);
 }
 
 ///// 复位： updateStatus(0)
@@ -765,9 +797,21 @@ spriteObj.prototype.updateStatus = function(nFrame, nLine){
 }
 
 
+spriteObj.prototype.hasStepAnimate = function(){
+    return this.move.animate;
+}
 
 spriteObj.prototype.isMoving = function(){
     return this.move && !this.move.stop && !this.move.done;
+}
+
+spriteObj.prototype.isStoping = function(){
+    return !this.isMoving();
+}
+
+///// 刚刚结束一步的移动
+spriteObj.prototype.endOneStep = function(){
+    return this.move && !this.move.stop && this.move.done;
 }
 
 
@@ -791,20 +835,54 @@ spriteObj.prototype.moveAction = function(timeDelta){
         if(this.move.dy > 0){
             this.move.realY = Math.min(this.move.realY + step, this.move.destY);
         }
+        if(this.move.bigmap){ // 是否有大地图偏移
+            core.scrollBigMap(~~this.move.realX - this.x, ~~this.move.realY - this.y);
+            // core.setCentralViewPoint(this.x,this.y);
+        }
         this.x = ~~this.move.realX;
         this.y = ~~this.move.realY;
         if(this.x == this.move.destX && this.y == this.move.destY){
             this.move.done = true;
         }
         return true;
-    }else{
-        this._stopCount += 1;
+    }
+}
+
+///// 是否需要更新？ —— 有动作信息的才更新
+spriteObj.prototype.needUpdate = function(){
+    return this.animate || this.move;
+}
+
+///// 更新sprite动作
+spriteObj.prototype.updateAction = function(timeDelta){
+    if(!this.needUpdate())return;
+    this.updatePattern();
+    this.moveAction(timeDelta);
+    this.animateAction(timeDelta);
+}
+
+///// 更新模式，在走路过程中 只要等待到一定帧数就会加一步 如果停下来了就会复位
+spriteObj.prototype.updatePattern = function() {
+    if(this.isStoping())
+        this._stopCount++;
+    if(!this.isAnimating() && this._maxWaitCount > 0){
+        this._waitCount += 1;
+        if(this._waitCount>=this._maxWaitCount){
+            this._waitCount = 0;
+            if(this.isMoving()){
+                this.playFrame();
+            }
+            else if(this._stopCount>=this._maxWaitCount){
+                this.resetFrame();
+                this._stopCount = 0;
+            }
+        }
     }
 }
 
 
 spriteObj.prototype.isAnimating = function(){
-    return this.animate && !this.animate.stop && !this.animate.auto || this.isMoving() && this.move.animate;
+    return this.animate && !this.animate.stop && !this.animate.auto;
 }
 
 ////// timeDelta —— 其实就是帧差 如果无误应该是1 但是如果卡了或者机器比较垃圾就会大于1
@@ -830,12 +908,6 @@ spriteObj.prototype.animateAction = function(timeDelta){
             return false;
         }
     }
-    else if(this._stopCount > 50 && this.nFrame % 2==1){
-        this.stopAnimate();
-        this.updateStatus(this.nFrame+1);
-        this._stopCount = 0;
-    }
-
 }
 
 ///// 绘制到指定位置 (x
@@ -854,4 +926,3 @@ spriteObj.prototype.drawToMap = function(ctx,x,y,w,h){
 //spriteObj.prototype.bindPosition = function(pos){
 //    this.position = pos;
 //}
-

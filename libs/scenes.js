@@ -34,7 +34,7 @@ function baseScene(name){
 }
 baseScene.prototype = Object.create(Stage.prototype);
 baseScene.prototype.constructor = Stage;
-////// canvas创建 //////
+////// scene使用的canvas创建 属于离屏canvas //////
 var createCleanCanvas = function (name, x, y, width, height, z) {
     var newCanvas = document.createElement("canvas");
     newCanvas.id = name;
@@ -49,31 +49,39 @@ var createCleanCanvas = function (name, x, y, width, height, z) {
     newCanvas.style.top = y * core.domStyle.scale + 'px';
     newCanvas.style.zIndex = z;
     newCanvas.style.position = 'absolute';
-    core.dom.gameDraw.appendChild(newCanvas);
     return newCanvas;
 }
 
 baseScene.prototype._init = function(name){
     if(name){
-        Stage.call(this, {
-            'view': name?createCleanCanvas(name, 0,0, 416, 416, 50):null,
-        });
-        this.view.width = core.__PIXELS__;
-        this.view.height = core.__PIXELS__;
-        this.view.style.width = core.domStyle.scale * this.view.width + 'px';
-        this.view.style.height = core.domStyle.scale * this.view.height + 'px';
-        core.dom.gameDraw.appendChild(this.view);
-
+        if(typeof name == 'string'){
+            Stage.call(this, {
+                'view': createCleanCanvas(name, 0,0, 416, 416, 50),
+            });
+            this.view.width = core.__PIXELS__;
+            this.view.height = core.__PIXELS__;
+            this.view.style.width = core.domStyle.scale * this.view.width + 'px';
+            this.view.style.height = core.domStyle.scale * this.view.height + 'px';
+            if(main.mode=='editor'){
+                if(name=='map') {
+                    this.view.style.zIndex = 0;
+                    document.getElementById('mapEdit').appendChild(this.view);
+                }
+            }
+            else core.dom.gameDraw.appendChild(this.view);
+        }else{
+            Stage.call(this, name);
+        }
         var self = this;
         this.ticker.add(function(time){self.update(time)});
-        this.render = this.stage.children;
+        this.renders = this.stage.children;
     }
     else{
-        this.render = [];
+        this.renders = [];
     }
     this.parent = null;
     this.children = [];
-    this.renderTable = {};
+    this.rendersTable = {};
     this.configData = { // 当前场景的配置数据 是需要传给各个子场景
         'x':0, 'y':0,
         'width':0, 'height':0,
@@ -94,17 +102,22 @@ baseScene.prototype.config = function(cfg){
 
 baseScene.prototype.update = function(timeDelta){
     // this.children.forEach(function(c){c.update(timeDelta);});
-    this.render.forEach(function(r){r.update(timeDelta);})
+    this.renders.forEach(function(r){
+        if(r.update)
+            r.update(timeDelta);
+    })
 }
 
 baseScene.prototype.refresh = function(){
     this.children.forEach(function(c){c.refresh();});
-    this.render.forEach(function(r){r.refresh();});
+    this.renders.forEach(function(r){r.refresh();});
 }
 
 baseScene.prototype.clear = function(){
     this.children.forEach(function(c){c.clear();});
-    this.render.forEach(function(r){r.clear();});
+    this.renders.forEach(function(r){
+        if(r.clear)r.clear();
+    });
 }
 
 ///// 注意：子场景之间是不考虑碰撞和先后的问题的
@@ -120,25 +133,25 @@ baseScene.prototype.stop = function(c){
     this._active = false;
 }
 
-///// 添加渲染器是需要考虑【层优先级】的，如果不加此参数，按长度计算层级，即后添加的后绘制
+///// 添加渲染层是需要考虑【层优先级】的，如果不加此参数，按长度计算层级，即后添加的后绘制
 // ！支持动态添加图层的方法，就是新增render，将block的绘制放到该render上，类似多前景与多背景
 baseScene.prototype.addRender = function(name, r, floor){
     r.zIndex = floor ? floor : r.zIndex;
-    this.renderTable[name] = r;
+    this.rendersTable[name] = r;
     this.stage.addChild(r);
 }
 
 ///// 在某一层添加sprite（！重要）
 baseScene.prototype.addSpriteToRender = function(name, obj){
-    if(this.renderTable[name]){
-        this.renderTable[name].addNewObj(obj);
+    if(this.rendersTable[name]){
+        this.rendersTable[name].addNewObj(obj);
     }
 }
 
 ///// 查找一个渲染层（不建议使用 渲染层应该隐藏起来 通过数据驱动）
 baseScene.prototype.getRender = function(name){
-    if(this.renderTable[name]){
-        return this.renderTable[name];
+    if(this.rendersTable[name]){
+        return this.rendersTable[name];
     }else{
         var ret = null;
         for(var i in this.children){
@@ -149,21 +162,49 @@ baseScene.prototype.getRender = function(name){
     }
 }
 
-///// core.scenes.mainScene 就是主场景管理器，其子场景为实际游戏场景
 
-scenes.prototype._init = function(){
+///// 当资源发生变化时 重新加载材质
+baseScene.prototype.updateRenderTextures = function(name){
+    var f = this.rendersTable[name];
+    if(f){
+        f.children.forEach(function(child) {
+            child.texture.update();
+        })
+    }
 }
 
+
+
+///// core.scenes.mainScene 就是主场景管理器，其子场景为实际游戏场景
+scenes.prototype._init = function(){
+    this.tempScene = new baseScene({
+        'view':createCleanCanvas(name, 0,0, core.__PIXELS__, core.__PIXELS__, 50)
+    }); ///// 临时场景 用于toCanvas
+}
+
+
+///// 场景的加载 在所有资源加载和函数转发之后
 scenes.prototype._load = function(){
     this.mainScene = this.getNewScene();
 
     this.mapScene = this.getNewScene('map');
     // TODO : 更多系统场景（状态栏、工具栏窗口化）
     this.mainScene.addChildScene(this.mapScene);
-    this.mapScene.addRender('bg', core.sprite.getNewRenderSprite(),0);
-    this.mapScene.addRender('event', core.sprite.getNewRenderSprite(),1);
-    this.mapScene.addRender('fg', core.sprite.getNewRenderSprite(),2);
-    this.mapScene.addRender('animate', core.sprite.getNewRenderSprite(),3);
+
+    this.mapScene.addRender('back', core.getNewRenderSprite(),0);
+    this.mapScene.addRender('bg', core.getNewRenderSprite(),1);
+    this.mapScene.addRender('event', core.getNewRenderSprite(),2);
+    this.mapScene.addRender('fg', core.getNewRenderSprite(),3);
+
+
+    ///// ----- 伤害依然使用canvas 但是离屏绘制
+    core.canvas.damage = createCleanCanvas('damage',0,0,core.__PIXELS__,core.__PIXELS__).getContext('2d');
+    this.mapScene.addRender('damage', core.createCanvasRender(core.canvas.damage.canvas),4);
+    core.bigmap.canvas.push('damage'); // 需要在大地图尺寸变换
+
+    ///// ----- todo: 动画用animatesprite实现
+    this.mapScene.addRender('animate', core.getNewRenderSprite(),5);
+    this.mapScene.addRender('weather', core.getNewRenderSprite(),6);
 }
 
 scenes.prototype.updateAllScenes = function(){
@@ -173,8 +214,8 @@ scenes.prototype.addSceneToMainList = function(scene){
     this.mainScene.addChildScene(scene)
 }
 
-scenes.prototype.getNewScene = function(name){
-    return new baseScene(name);
+scenes.prototype.getNewScene = function(option){
+    return new baseScene(option);
 }
 
 

@@ -21,7 +21,7 @@ control.prototype._init = function () {
     this.registerAnimationFrame("globalAnimate", true, this._animationFrame_globalAnimate);
     this.registerAnimationFrame("animate", true, this._animationFrame_animate);
     //this.registerAnimationFrame("heroMoving", true, this._animationFrame_heroMoving);
-    this.registerAnimationFrame("sprite", true, this._animationFrame_sprite);
+    // this.registerAnimationFrame("sprite", true, this._animationFrame_sprite);
     this.registerAnimationFrame("weather", true, this._animationFrame_weather);
     this.registerAnimationFrame("parallelDo", false, this._animationFrame_parallelDo);
     this.registerAnimationFrame("checkConsoleOpened", true, this._animationFrame_checkConsoleOpened);
@@ -43,6 +43,7 @@ control.prototype._init = function () {
     this.registerResize("status", this._resize_status);
     this.registerResize("toolBar", this._resize_toolBar);
     this.registerResize("tools", this._resize_tools);
+    this.registerResize("map", this._resize_map);
 }
 
 // ------ requestAnimationFrame 相关 ------ //
@@ -559,6 +560,22 @@ control.prototype.setAutoHeroMove = function (steps) {
     core.moveHero(steps[0].direction);
 }
 
+
+control.prototype.scrollBigMap = function(dx, dy){
+    var maxWo = (core.bigmap.width - core.__SIZE__)* core.__BLOCK_SIZE__;
+    var maxHo = (core.bigmap.height - core.__SIZE__)* core.__BLOCK_SIZE__;
+    core.bigmap.offsetX = core.clamp(core.bigmap.offsetX + dx, 0, maxWo);
+    core.bigmap.offsetY = core.clamp(core.bigmap.offsetY + dy, 0, maxHo);
+    core.control.updateViewport();
+}
+
+///// 以某点为中心设置视野
+control.prototype.setCentralViewPoint = function(x, y){
+    core.bigmap.offsetX = core.clamp(x - core.__HALF_SIZE__*32, 0, 32*core.bigmap.width-core.__PIXELS__);
+    core.bigmap.offsetY = core.clamp(y - core.__HALF_SIZE__*32, 0, 32*core.bigmap.height-core.__PIXELS__);
+    core.control.updateViewport();
+}
+
 ////// 设置行走的效果动画 //////
 control.prototype.setHeroMoveInterval = function (callback) {
     if (core.status.heroMoving > 0) return;
@@ -585,16 +602,26 @@ control.prototype.setHeroMoveInterval = function (callback) {
     //    'speed':30, 'line':line,
     //});
     core.status.heroSprite.obj.updateStatus(null, line);
+    var nx = core.nextX(), ny = core.nextY();
+    var bigmap =
+        dx > 0 && nx > core.__HALF_SIZE__ && nx + 1 <= core.bigmap.width - core.__HALF_SIZE__
+        ||
+        dx < 0 && nx >= core.__HALF_SIZE__ && nx + 1 < core.bigmap.width - core.__HALF_SIZE__
+        ||
+        dy > 0 && ny > core.__HALF_SIZE__ && ny + 1 <= core.bigmap.height - core.__HALF_SIZE__
+        ||
+        dy < 0 && ny >= core.__HALF_SIZE__ && ny + 1 < core.bigmap.height - core.__HALF_SIZE__;
     core.status.heroSprite.obj.addMoveInfo(
-        dx,dy,4,//~~(800 / core.values.moveSpeed),
+        dx,dy,6,//~~(800 / core.values.moveSpeed),
         function(){
             core.status.heroMoving = 0;
-            core.moveOneStep(core.nextX(), core.nextY());
+            core.moveOneStep(nx, ny);
             core.status.heroSprite.obj.stopMoving();
             core.status.heroSprite.obj.stopAnimate();
             if (callback) callback();
         }, {
-            'freq':4
+            'freq':4,
+            'bigmap': bigmap
         });
     return;
     //// XXXXXXXXXXXXXXXX ///////////
@@ -705,8 +732,6 @@ control.prototype._moveHero_moving = function () {
     // ------ 我已经看不懂这个函数了，反正好用就行23333333
     core.status.heroStop = false;
     core.status.automaticRoute.moveDirectly = false;
-    //if (!core.status.heroStop) {core.moveAction();}
-    //return;
     var move = function () {
         if (!core.status.heroStop) {
             if (core.hasFlag('debug') && core.status.ctrlDown) {
@@ -721,8 +746,8 @@ control.prototype._moveHero_moving = function () {
                 });
             }
             else {
-                core.moveAction();
-                setTimeout(move, 50);
+                core.moveAction(move);
+                //setTimeout(move, 50);
             }
         }
     }
@@ -824,11 +849,12 @@ control.prototype.heroSpritePositionTransForm = function(obj, x, y, direction, s
     };
     offset = offset || 0;
     direction = direction || 'down';
-    obj.nFrame = (obj.nFrame||0)%2==1?obj.nFrame-1:obj.nFrame;
-    obj.x = x * 32 + 16 - core.bigmap.offsetX;
-    obj.y = (y+1) * 32 - core.bigmap.offsetY;
-    obj.offsetX = core.utils.scan[direction].x * offset;
-    obj.offsetY = core.utils.scan[direction].y * offset;
+    // obj.nFrame = (obj.nFrame||0)%2==1?obj.nFrame-1:obj.nFrame;
+    obj.x = x * 32 + 16;
+    obj.y = (y+1) * 32;
+    obj.updateStatus(null, dir[direction]);
+    // obj.offsetX = core.utils.scan[direction].x * offset;
+    // obj.offsetY = core.utils.scan[direction].y * offset;
     //obj.nFrame = obj.nFrame || mesh[status||'stop'];
    // obj.nLine =  obj.nLine || dir[direction];
 }
@@ -860,7 +886,6 @@ control.prototype.drawHero = function (status, offset) {
     core.bigmap.offsetY = core.clamp((y - core.__HALF_SIZE__) * 32 + offsetY, 0, 32*core.bigmap.height-core.__PIXELS__);
     core.clearAutomaticRouteNode(x+dx, y+dy);
     // core.clearMap('hero');
-    this.heroSpritePositionTransForm(core.status.heroSprite.obj, x, y, direction, status, offset);
     /*
     core.status.heroSprite.observer.notify(
         function(){
@@ -884,9 +909,10 @@ control.prototype.drawHero = function (status, offset) {
         }
     )
    */
-    core.scenes.mapScene.getRender('event').reloacate(core.status.heroSprite.obj);
+    // core.scenes.mapScene.getRender('event').reloacate(core.status.heroSprite.obj);
 
     core.control.updateViewport();
+    this.heroSpritePositionTransForm(core.status.heroSprite.obj, x, y, direction, status, offset);
     // core.setGameCanvasTranslate('hero', 0, 0);
     /*
     this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
@@ -894,7 +920,17 @@ control.prototype.drawHero = function (status, offset) {
             block.heroIcon.loc * block.height, block.width, block.height,
             block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
     });
-*/
+*/return;
+    if (!core.hasFlag('hideHero')) {
+        this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
+            core.drawImage('hero', block.img, block.heroIcon[block.status]*block.width,
+                block.heroIcon.loc * block.height, block.width, block.height,
+                block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
+        });
+    }
+
+    core.control.updateViewport();
+    core.setGameCanvasTranslate('hero', 0, 0);
 }
 
 control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, offset) {
@@ -961,9 +997,10 @@ control.prototype.addGameCanvasTranslate = function (x, y) {
 
 ////// 更新视野范围 //////
 control.prototype.updateViewport = function() {
-    core.bigmap.canvas.forEach(function(cn){
-        core.control.setGameCanvasTranslate(cn,-core.bigmap.offsetX,-core.bigmap.offsetY);
-    });
+    //core.bigmap.canvas.forEach(function(cn){
+    //    core.control.setGameCanvasTranslate(cn,-core.bigmap.offsetX,-core.bigmap.offsetY);
+    //});
+    core.scenes.mapScene.stage.setTransform(-core.bigmap.offsetX, -core.bigmap.offsetY);
     // ------ 路线
     core.relocateCanvas('route', core.status.automaticRoute.offsetX - core.bigmap.offsetX, core.status.automaticRoute.offsetY - core.bigmap.offsetY);
 }
@@ -974,9 +1011,9 @@ control.prototype.setViewport = function (x, y) {
     core.bigmap.offsetY = core.clamp(y, 0, 32 * core.bigmap.height - core.__PIXELS__);
     this.updateViewport();
     // ------ hero层也需要！
-    var hero_x = core.clamp((core.getHeroLoc('x') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.width-core.__PIXELS__);
-    var hero_y = core.clamp((core.getHeroLoc('y') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.height-core.__PIXELS__);
-    core.control.setGameCanvasTranslate('hero', hero_x - core.bigmap.offsetX, hero_y - core.bigmap.offsetY);
+    // var hero_x = core.clamp((core.getHeroLoc('x') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.width-core.__PIXELS__);
+    // var hero_y = core.clamp((core.getHeroLoc('y') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.height-core.__PIXELS__);
+    // core.control.setGameCanvasTranslate('hero', hero_x - core.bigmap.offsetX, hero_y - core.bigmap.offsetY);
 }
 
 ////// 移动视野范围 //////
@@ -1141,6 +1178,7 @@ control.prototype.updateDamage = function (floorId, ctx) {
     core.setFont(ctx, "bold 11px Arial");
     this._updateDamage_damage(floorId, ctx);
     this._updateDamage_extraDamage(floorId, ctx, refreshCheckBlock);
+    core.scenes.mapScene.getRender('damage').updateTexture();
 }
 
 control.prototype._updateDamage_damage = function (floorId, ctx) {
@@ -2900,5 +2938,12 @@ control.prototype._resize_tools = function (obj) {
     else {
         core.dom.hard.style.width = obj.BAR_WIDTH * core.domStyle.scale - 9 - 2 * toolsMarginLeft + "px";
         if (!obj.is15x15) core.dom.hard.style.marginTop = 0;
+    }
+}
+
+control.prototype._resize_map = function (obj) {
+    if(core.scenes && core.scenes.mapScene){
+        core.scenes.mapScene.view.style.width = core.domStyle.scale * core.scenes.mapScene.view.width + 'px';
+        core.scenes.mapScene.view.style.height = core.domStyle.scale * core.scenes.mapScene.view.height + 'px';
     }
 }

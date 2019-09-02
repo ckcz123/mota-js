@@ -37,9 +37,9 @@ function spriteRender(ctx){
 function canvasRender(ctx){
     this._init(ctx);
 }
-///// 精灵的被观察者和观察者
-function subject(obj, info){
-    this._init(obj, info);
+///// 精灵的观察对象s
+function subject(){
+    this._init();
 }
 
 function spriteObserver(sobj){
@@ -486,16 +486,29 @@ sprite.prototype.clearRenderSprite = function(){
     this.render.clear();
 }
 
+///// !! 一个怪异点： block的存读导致其对象信息的丢失
+// 解决思路
+// 1. 初始化block时改变其原型——问题：clone会丢失
+// 2.  全部改成全局函数——问题：管理混乱
 
+///// sobj成为一个被观察者
 
 ///// sobj成为一个被观察者 可以对dobj发出通知时进行行动 —— 注意： sobj必须是纯数据对象
-sprite.prototype.bindSubject = function(sobj, dobj, info){
+sprite.prototype.becomeSubject = function(sobj){
     Object.setPrototypeOf(sobj, subject.prototype);
-    sobj._init(dobj, info);
-    if(sobj.subject){
-        sobj.subject.addObserver(dobj, info);
-    }else{
-        sobj.subject = new subject(dobj, info);
+    sobj._init();
+}
+
+
+
+///// 检查是否是subject不是就
+sprite.prototype.notifyObservers = function(sobj, type, params){
+    if(sobj.observe_actions[type]){
+        var t = type;
+        arguments[1] = sobj;
+        for (var i = 0;i < this.observers.length; i++) {
+            this.observe_actions[t].apply(this.observers[i], Array.prototype.slice.call(arguments, 1));
+        }
     }
 }
 
@@ -558,6 +571,10 @@ spriteRender.prototype.updateData = function(timeDelta) {
 }
 ///// dirty是由外部驱动的 表示需要它【保持】更新 needUpdate是内部判断的——当前内容是否值得更新
 spriteRender.prototype.update = function(time){
+    this.updateData(time);
+    return;
+
+
     var timeDelta = 1;
     if(time){
         this.lastTime += time/this.mspf;
@@ -565,7 +582,6 @@ spriteRender.prototype.update = function(time){
     }
     if(timeDelta>=1){
         this.lastTime =  0;//1 - timeDelta;
-        this.updateData(timeDelta);
     }
     return;
 
@@ -877,8 +893,17 @@ spriteObj.prototype.setPositionWithBlock = function(block){
 }
 
 //////
+var fcount = 0;
+var timeCount = 0;
 spriteObj.prototype.moveAction = function(timeDelta){
     if(this.isMoving()){
+        fcount ++;
+        timeCount += timeDelta;
+        if(timeCount>=1000){
+            console.log(fcount);
+            fcount = 0;
+            timeCount = 0;
+        }
         var step = this.move.speed*timeDelta;
         if(this.move.dx < 0){
             this.move.realX = Math.max(this.move.realX - step, this.move.destX);
@@ -1007,12 +1032,9 @@ spriteObj.prototype.drawToMap = function(ctx,x,y,w,h){
 // 1. 当地图被删除时，对应的观察者应该也移除，否则会有sprite驻留内存，导致内存额外开销
 // 2. 由被观察者决定如何进行sprite的行动
 
-subject.prototype._init = function(obj,info){
-    this.observers = []; // 观察者
-    this.observe_actions = info||{};
-    if(obj){
-        this.observers.push(obj);
-    }
+subject.prototype._init = function(){ // sobj: 被观察者
+    this.observers = this.observers || {}; // 观察者
+    this.observe_actions = this.observe_actions || {}; // 提醒信息
 }
 
 // 使用headless的前提： 动画操作不改变任何实际数据
@@ -1026,27 +1048,30 @@ subject.prototype.headLessNotify = function(type, param){
 // 2. 如果有回调函数，需要将其写在第一个参数的字典中（最好全部参数放到params里）
 subject.prototype.notify = function(type, params){
     if(this.observe_actions[type]){
-        for (var i = 0;i < this.observers.length; i++) {
-            this.observe_actions[type].call(this.observers[i], params);
+        var t = type;
+        arguments[0] = this;
+        for (var i in this.observers) {
+            this.observe_actions[t].apply(this.observers[i], arguments);
         }
     }
 }
-subject.prototype.addObserver = function(obj, info) {
-    if(obj){
-        this.observers.push(obj);
-    }
+
+subject.prototype.hasObserver = function(name){
+    if(this.observers[name])return true;
+    return false;
+}
+
+subject.prototype.addObserver = function(name, obj, info) {
+    this.observers [name] = obj;
     info = info || {};
     for(var i in info){
         this.observe_actions[i] = info[i];
     }
 }
-subject.prototype.remove = function(obj){
-    if(!obj){
-        this.observers = [];
+subject.prototype.remove = function(name){
+    if(!name){
+        this.observers = {};
     }else{
-        var idx = this.observers.find(obj);
-        if(idx>=0){
-            this.observers.splice(idx,1);
-        }
+        delete this.observers[name];
     }
 }

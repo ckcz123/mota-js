@@ -7,6 +7,74 @@ function maps() {
 maps.prototype._init = function () {
     this.blocksInfo = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
     //delete(maps_90f36752_8815_4be8_b32b_d7fad1d0542e);
+    this.observerAction = {
+        // 绘制一个块，最好所有块都用通用的方式绘制，但是特殊的（比如自动元件）要在这里加判断
+        'draw': function(block, render, arr){
+            this.setPositionWithBlock(block);
+            if(!render){
+                render = core.scenes.mapScene.getRender(block.name || 'event');
+            }
+            if(block.event.cls=='autotile'){ //todo: 如果是添加到当前的容器 是否会正常？
+                core.maps._drawAutotile(render, arr, block, core.__BLOCK_SIZE__, 0, 0);
+            }
+            else{
+                if(block.event.animate && block.event.animate != 1){
+                    this.addAnimateInfo({'speed':30});
+                }
+                if(block.event.move){//如果是具有移动信息的事件，如何保证录像？
+                }
+                if(!render.hasObj(this))
+                    render.addNewObj(this);
+            }
+        },
+        'move': function(block, moveInfo){
+            this.setPositionWithBlock(block);
+            var speed = moveInfo.speed || 10; // TODO: 速度信息
+            var step = 0, moveSteps = (moveInfo.moveSteps||[]).filter(function (t) {
+                return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
+            });
+            var obj = this;
+            var nextStep = function(){
+                if(step<moveSteps.length){
+                    var dir = moveSteps[step++];
+                    block.x += core.utils.scan[dir].x;
+                    block.y += core.utils.scan[dir].y;
+                    core.events._eventMoveSprite_moving(obj, dir, speed, nextStep);
+                }else{
+                    obj.stopAnimate();
+                    obj.resetFrame();
+                    delete core.animateFrame.asyncId[obj];
+                    core.maps._moveJumpSprite_finished(obj, block, moveInfo, moveInfo.callback);
+                }
+            }
+            core.animateFrame.asyncId[obj] = true;
+            nextStep();
+        },
+        'jump': function(block){
+        },
+        'hide': function(block, params){
+            core.maps._showHideSpriteAnimate(this, params.time, -0.1, params.callback);
+        },
+        'show': function(block, params){
+            core.maps._showHideSpriteAnimate(this, params.time, 0.1, params.callback);
+        },
+        'blur': function(block, param){
+            this.alpha = param;
+        },
+        'play': function(block, info){
+            this.addAnimateInfo(info);
+        },
+        'stop': function(block){
+            this.stopAnimate();
+        },
+
+        // dying message
+        'remove': function(block, render){
+            render = render || core.scenes.mapScene.getRender('event');
+            render.removeChild(this);
+            block.remove();
+        }
+    }
 }
 
 maps.prototype._setFloorSize = function (floorId) {
@@ -103,8 +171,9 @@ maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     else if (core.icons.getTilesetOffset(id)) block.event = {"cls": "tileset", "id": "X" + id, "noPass": true};
     else block.event = {'cls': 'terrains', 'id': 'none', 'noPass': false};
 
-    block.event.sprite = block.event.id;//core.getSpriteObj();
-    // todo: 实现元件的贴图自由选择 此处就是认为，id就是对应的贴图
+    block.event.sprite = block.event.sprite || block.event.id;//core.getSpriteObj();
+    // todo: 实现元件的贴图自由选择 此处默认id就是对应的贴图
+
     if (typeof block.event.noPass === 'string')
         block.event.noPass = JSON.parse(block.event.noPass);
 
@@ -115,6 +184,7 @@ maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
         if (changeFloor) this._addEvent(block, x, y, {"trigger": "changeFloor", "data": changeFloor});
     }
     if (main.mode == 'editor') delete block.disable;
+    core.becomeSubject(block);// 凡是init的blcok 都要成为观察对象
     return block;
 }
 
@@ -694,89 +764,31 @@ maps.prototype._drawSpriteBlock = function(blockInfo, x, y, render){
 
 ///// todo:用注册的方式定义观察者（sprite）的行为，都是非闭包函数
 
-maps.prototype._bindSubjectToBlock = function(block, sprite) {
-    core.bindSubject(
-        block,
+maps.prototype._bindObserverToBlock = function(block, sprite) {
+    if(block.observers[block.event.sprite])return;
+    block.addObserver(
+        block.event.sprite,
         sprite || core.getSpriteObj(block.event.sprite),
-        // --- 观察者注册的行为：
-        {
-            // 绘制一个块，最好所有块都用通用的方式绘制，但是特殊的（比如自动元件）要在这里加判断
-            'draw': function(block, render, arr){
-                this.setPositionWithBlock(block);
-                if(!render){
-                    render = core.scenes.mapScenes.getRender(block.name || 'event');
-                }
-                if(block.event.cls=='autotile'){ //todo: 如果是添加到当前的容器 是否会正常？
-                    core.maps._drawAutotile(render, arr, block, core.__BLOCK_SIZE__, 0, 0);
-                }
-                else{
-                    if(block.event.animate){
-                        this.addAnimateInfo({'speed':30});
-                    }
-                    if(block.event.move){//如果是具有移动信息的事件，如何保证录像？
-                    }
-                    if(!render.hasObj(this))
-                        render.addNewObj(this);
-                }
-            },
-            'move': function(block, moveInfo, callback){
-                this.setPositionWithBlock(block);
-                var speed = moveInfo.speed || 10; // TODO: 速度信息
-                var step = 0, moveSteps = (moveInfo.moveSteps||[]).filter(function (t) {
-                    return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
-                });
-                var obj = this;
-                var nextStep = function(){
-                    if(step<moveSteps.length){
-                        core.events._eventMoveSprite_moving(obj, moveSteps[step++], speed, nextStep);
-                    }else{
-                        obj.stopAnimate();
-                        obj.resetFrame();
-                        delete core.animateFrame.asyncId[obj];
-                        core.maps._moveJumpSprite_finished(obj, block, moveInfo, callback);
-                    }
-                }
-                core.animateFrame.asyncId[obj] = true;
-                nextStep();
-            },
-            'jump': function(){
-            },
-            'hide': function(params){
-                core.maps._showHideSpriteAnimate(this, params.time, -0.1, params.callback);
-            },
-            'show': function(params){
-                core.maps._showHideSpriteAnimate(this, params.time, 0.1, params.callback);
-            },
-            'blur': function(block, param){
-                this.alpha = param;
-            },
-            'play': function(info){
-                this.addAnimateInfo(info);
-            },
-            'stop': function(){
-                this.stopAnimate();
-            },
-
-            // dying message
-            'remove': function(block, render){
-                render = render || core.scenes.mapScene.getRender('event');
-                render.removeChild(this);
-                block.remove();
-            }
-        });
+        this.observerAction,
+    );
 }
 
 maps.prototype._removeSubjectOfBlock = function(block){
     block.remove();
 }
 
+maps.prototype._hasBlockObserver = function(block){
+    return !!block.observers[block.event.sprite];
+}
+
 ////// 绘制一个图块 ////// render是需要绘制到的层、arr是所处的地图 //drawBlock会调用几次？
 maps.prototype.drawBlock = function (block, render, arr) {
     if (block.event.id == 'none') return;
-    if(!block.notify){ //!如何判断是否需要重新绑定？？
-        this._bindSubjectToBlock(block);
-    }
-    block.notify('draw', block, render, arr);//告诉sprite视图数据的变动
+    //if(!this._hasBlockObserver(block)){
+    //    this._bindObserverToBlock(block);
+    //}
+    block.notify('draw', render, arr);//告诉sprite视图数据的变动
+    // core.notifyObservers(block, 'draw', render, arr);
 }
 
 
@@ -791,6 +803,28 @@ maps.prototype.generateGroundPattern = function (floorId) {
     // core.material.groundPattern = '#000000';
 }
 
+
+///// 将地图放入幕后并将新地图拉到台前 : 是否使用？ 需要修改很多
+maps.prototype._exchangeMap = function(floorId){
+    var lastFloor = core.status.floorId;
+    if(lastFloor)
+        core.status.maps[lastFloor] = this.saveMap(lastFloor);
+    core.status.maps[floorId] = this.loadFloor(floorId, core.status.maps[floorId]);
+}
+
+maps.prototype._pushMap = function(floorId){
+    if(core.status.thisMap)
+        core.status.thisMap.blocks.forEach(function(block) {
+            block.remove();//防止驻留sprite（但实际不会
+        })
+    core.status.floorId = floorId;
+    core.status.thisMap = core.status.maps[floorId];
+    core.status.thisMap.blocks.forEach(function(block) {
+        core.becomeSubject(block);
+        core.maps._bindObserverToBlock(block);
+    })
+}
+
 ////// 绘制某张地图 //////
 maps.prototype.drawMap = function (floorId, callback) {
     floorId = floorId || core.status.floorId;
@@ -800,9 +834,7 @@ maps.prototype.drawMap = function (floorId, callback) {
     }
     core.clearMap('all');
     this.generateGroundPattern(floorId);
-    core.status.floorId = floorId;
-    core.status.thisMap = core.status.maps[floorId];
-
+    this._pushMap(floorId);
     this._drawMap_drawAll();
     if (core.status.curtainColor) {
         core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__,
@@ -1523,15 +1555,6 @@ maps.prototype.hideBlock = function (x, y, floorId) {
     var block = core.getBlock(x, y, floorId, true);
     if (block == null) return; // 不存在
 
-    // 删除动画，清除地图
-    if (floorId == core.status.floorId) {
-        core.removeGlobalAnimate(x, y);
-        //core.clearMap('event', x * 32, y * 32, 32, 32);
-        var height = block.block.event.height || 32;
-        if (height > 32)
-            core.clearMap('event2', x * 32, y * 32 + 32 - height, 32, height - 32);
-    }
-
     block.block.disable = true;
     core.updateStatusBar();
 }
@@ -1545,11 +1568,12 @@ maps.prototype.removeBlock = function (x, y, floorId) {
     if (block == null) return; // 不存在
 
     var index = block.index;
+    block = block.block;
 
     // 删除动画，清除地图
     if (floorId == core.status.floorId) {
-        core.removeGlobalAnimate(x, y);
-        block.notify('remove', block);
+        // core.removeGlobalAnimate(x, y);
+        block.notify('remove');
     }
 
     // 删除Index
@@ -1871,12 +1895,13 @@ maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
     // this._moveDetachedBlock(blockInfo, 32 * x, 32 * y, 1, canvases);
     var moveInfo = {
         x: x, y: y, px: 32 * x, py: 32 * y, opacity: 1, keep: keep, lastDirection: null, offset: 1,
-        moveSteps: moveSteps, step: 0, per_time: time / 16 / core.status.replay.speed
+        moveSteps: moveSteps, step: 0, per_time: time / 16 / core.status.replay.speed, callback: callback
     }
-    this._moveBlock_doMove(blockInfo, block, moveInfo, callback);
+    block.notify('move', moveInfo);
+    //this._moveBlock_doMove(blockInfo, block, moveInfo, callback);
 }
 
-maps.prototype._moveBlock_doMove = function (blockInfo, canvases, moveInfo, callback) {
+maps.prototype._moveBlock_doMove = function (blockInfo, block, moveInfo, callback) {
     var speed = 10; // TODO: 速度信息
     var step = 0, moveSteps = (moveInfo.moveSteps||[]).filter(function (t) {
         return ['up','down','left','right','forward','backward'].indexOf(t)>=0;

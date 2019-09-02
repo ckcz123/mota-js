@@ -419,15 +419,13 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
     var locked = core.status.lockControl;
     core.lockControl();
     core.status.replay.animate = true;
-    var sprite = core.getBlock(x,y).block.event.sprite;
-    sprite.addAnimateInfo({
+    core.getBlock(x,y).block.notify('play', {
         'speed': (speed - 10) / 10,
         'onetime':true,
-        'callafterplay': function(){
+        'callback': function(){
             core.removeBlock(x,y);
             delete core.animateFrame.asyncId[sprite];
             if (!locked) core.unLockControl();
-            sprite.disable = true;
             core.status.replay.animate = false;
             core.events.afterOpenDoor(id, x, y, callback);
         }
@@ -2076,19 +2074,18 @@ events.prototype.closeDoor = function (x, y, id, callback) {
     }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
 */
     core.setBlock(core.getNumberById(id), x, y);
-    var sprite = core.getBlock(x,y).block.event.sprite;
-    sprite.nFrame = 3;
-    sprite.addAnimateInfo({
+    var block = core.getBlock(x,y).block;
+    core.drawBlock(block);
+    block.notify('play', {
         'inverse': true,
         'onetime': true,
         'speed': 2,
-        'callafterplay': function(){
-            sprite.nFrame = 0;
-            delete core.animateFrame.asyncId[sprite];
+        'callback':function(){
+            delete core.animateFrame.asyncId[block];
             if(callback)callback();
         }
     })
-    core.animateFrame.asyncId[sprite] = true;
+    core.animateFrame.asyncId[block] = true;
 }
 
 ////// 显示图片 //////
@@ -2299,7 +2296,7 @@ events.prototype.eventMoveSprite= function(obj, steps, time, callback){
 events.prototype._eventMoveSprite_moving = function(obj, direction, speed, callback){
     var o = direction == 'backward' ? -1 : 1;
     if (direction == 'forward' || direction == 'backward'){
-        direction = core.utils.face[obj.nLine];
+        direction = core.utils.face[obj.nLine || 0];
     }
     var line = core.utils.line[direction];
     var dx = core.utils.scan[direction].x * core.__BLOCK_SIZE__ * o,

@@ -37,7 +37,14 @@ function spriteRender(ctx){
 function canvasRender(ctx){
     this._init(ctx);
 }
+///// 精灵的被观察者和观察者
+function subject(obj, info){
+    this._init(obj, info);
+}
 
+function spriteObserver(sobj){
+
+}
 ///// ----- 资源管理 -----
 sprite.prototype._init = function(){
     // example:
@@ -115,6 +122,7 @@ sprite.prototype.getAutotileSprite = function(name,sx,sy,sw,sh){
             new Texture(base[0][i], new Rectangle(sx+base[0][i].frame.x,sy+base[0][i].frame.y,sw,sh))
         );
     }
+    // ! 自动元件的动画是绑定的 无需自己添加动画 也不能添加动画
     var ret = new PSprite(arr);
     ret.animationSpeed = 0.05;
     ret.play();
@@ -356,7 +364,7 @@ sprite.prototype.getSpriteFrame = function(name, frame, line){
 ///// 获取一个常驻的精灵对象 支持一系列操作 /////
 sprite.prototype.getSpriteObj = function(name){
     var texture = this.textures[name];//this.sprite[name];
-    if(!texture)return null;
+    if(!texture) return this.getEmptySprite(name); //不存在的素材 返回空（作为容器存在）
     return new spriteObj(texture,{name:name});
 }
 
@@ -364,6 +372,11 @@ sprite.prototype.getEmptySprite = function(name){
     return new Container();
 }
 sprite.prototype.getSpriteFromImage = function(image){
+    return SSPrite.from(image);
+}
+
+sprite.prototype.getSpriteFromFrameImage = function(image, frame, width){
+    var t = Texture.from(image, new Rectangle(0,0,width,image.height));
     return SSPrite.from(image);
 }
 
@@ -471,6 +484,19 @@ sprite.prototype.drawRenderSprite = function(ctx){
 /////
 sprite.prototype.clearRenderSprite = function(){
     this.render.clear();
+}
+
+
+
+///// sobj成为一个被观察者 可以对dobj发出通知时进行行动 —— 注意： sobj必须是纯数据对象
+sprite.prototype.bindSubject = function(sobj, dobj, info){
+    Object.setPrototypeOf(sobj, subject.prototype);
+    sobj._init(dobj, info);
+    if(sobj.subject){
+        sobj.subject.addObserver(dobj, info);
+    }else{
+        sobj.subject = new subject(dobj, info);
+    }
 }
 
 
@@ -698,7 +724,14 @@ spriteObj.prototype.playFrame = function(){
 }
 spriteObj.prototype.playFrameOneTime = function(){
     this.playFrame();
-    if(this.nFrame==0){
+    if(this.animate.inverse && this.nFrame==this.totalFrames-1){
+        this.nFrame = 0;
+        this.changePattern(this.nFrame);
+        return true;
+    }
+    if(!this.animate.inverse && this.nFrame==0){
+        this.nFrame = this.totalFrames-1;
+        this.changePattern(this.nFrame);
         return true;
     }
     return false;
@@ -758,7 +791,7 @@ spriteObj.prototype.setBlendMode = function(mode){
 ///// 添加帧动画自动播放信息 speed是帧率
 spriteObj.prototype.addAnimateInfo = function(info){
     info = info || {};
-    if(this.animate && !this.animate.stop){ // 如果已有动画且在播放 将添加到其尾部
+    if(this.animate && !this.animate.stop){ // 如果已有动画且在播放 将添加到其尾部(所以添加一次性动画一定要先stop
         var lastCall = this.animate.callback;
         var self = this;
         this.animate.callback = function(){
@@ -767,11 +800,14 @@ spriteObj.prototype.addAnimateInfo = function(info){
         }
         return;
     }
+    if(info.onetime)info.frame =info.inverse?this.totalFrames-1:0;
     this.changePattern(info.frame, info.line);
+    // 几个会覆盖的信息：包括callback（即，一次性动画用掉callback后，原来的就没了
     this.animate = {
         'lastTime': 0,
         'stop': info.stop || false,
         'speed': info.speed || 20,
+        'callback': info.callback || null,
     }
     if(info.fade)this.animate.lastFadeTime = 0;
     for(var it in info){
@@ -792,7 +828,7 @@ spriteObj.prototype.stopAnimate = function(){
     this.gotoAndStop(this.nFrame);
 }
 
-///// 停止动画
+///// 停止移动
 spriteObj.prototype.stopMoving = function(){
     if(this.move)this.move.stop = true;
 }
@@ -832,6 +868,12 @@ spriteObj.prototype.endOneStep = function(){
 
 spriteObj.prototype.getSpeed = function(){
     return this.move.speed;
+}
+
+
+spriteObj.prototype.setPositionWithBlock = function(block){
+    this.x = block.x * core.__BLOCK_SIZE__ + core.__HALFBLOCK_SIZE__ ;
+    this.y = (block.y+1) * core.__BLOCK_SIZE__;
 }
 
 //////
@@ -905,16 +947,16 @@ spriteObj.prototype.animateAction = function(timeDelta){
     if(this.isAnimating()){
         timeDelta = timeDelta || 1;
         //// todo 单sprite的动画行为分开注册
-
         // 帧动画
         if(timeDelta + this.animate.lastTime > this.animate.speed){
             this.animate.lastTime = 0;
             if(this.animate.onetime){ //// 一次性动画有： 渐变 、 小动作、 开门
                 if(this.playFrameOneTime()){
                     this.stopAnimate();
-                    if(this.animate.callafterplay){
-                        this.animate.callafterplay();
+                    if(this.animate.callback){
+                        this.animate.callback();
                     }
+                    delete this.animate.onetime;
                 }
             }else{
                 this.playFrame();
@@ -958,3 +1000,53 @@ spriteObj.prototype.drawToMap = function(ctx,x,y,w,h){
 //spriteObj.prototype.bindPosition = function(pos){
 //    this.position = pos;
 //}
+
+//////  ----- 观察者：sprite  被观察者： block（以及所有可能会用到sprite的游戏数据对象）
+// subject对象应该位于block内部，当block发生变化时，通过notify通知sprite
+// 应用目的：
+// 1. 当地图被删除时，对应的观察者应该也移除，否则会有sprite驻留内存，导致内存额外开销
+// 2. 由被观察者决定如何进行sprite的行动
+
+subject.prototype._init = function(obj,info){
+    this.observers = []; // 观察者
+    this.observe_actions = info||{};
+    if(obj){
+        this.observers.push(obj);
+    }
+}
+
+// 使用headless的前提： 动画操作不改变任何实际数据
+subject.prototype.headLessNotify = function(type, param){
+    if(this.observe_actions[type] && param.callback){
+        param.callback();
+    }
+}
+// 使用notify的规范：
+// 1. 所有参数要保持和注册的函数参数一致
+// 2. 如果有回调函数，需要将其写在第一个参数的字典中（最好全部参数放到params里）
+subject.prototype.notify = function(type, params){
+    if(this.observe_actions[type]){
+        for (var i = 0;i < this.observers.length; i++) {
+            this.observe_actions[type].call(this.observers[i], params);
+        }
+    }
+}
+subject.prototype.addObserver = function(obj, info) {
+    if(obj){
+        this.observers.push(obj);
+    }
+    info = info || {};
+    for(var i in info){
+        this.observe_actions[i] = info[i];
+    }
+}
+subject.prototype.remove = function(obj){
+    if(!obj){
+        this.observers = [];
+    }else{
+        var idx = this.observers.find(obj);
+        if(idx>=0){
+            this.observers.splice(idx,1);
+        }
+    }
+}

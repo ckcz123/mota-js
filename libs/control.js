@@ -44,6 +44,8 @@ control.prototype._init = function () {
     this.registerResize("toolBar", this._resize_toolBar);
     this.registerResize("tools", this._resize_tools);
     this.registerResize("map", this._resize_map);
+    // --- 注册系统的blockAction
+
 }
 
 // ------ requestAnimationFrame 相关 ------ //
@@ -860,7 +862,7 @@ control.prototype.heroSpritePositionTransForm = function(obj, x, y, direction, s
 }
 
 ////// 绘制勇士 //////
-
+// TODO: 勇士的观察者sprite
 control.prototype.drawHero = function (status, offset) {
     if (!core.isPlaying() || !core.status.floorId || core.status.gameOver) return;
 

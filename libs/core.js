@@ -9,6 +9,7 @@ function core() {
     this.__PIXELS__ = this.__SIZE__ * 32;
     this.__HALF_SIZE__ = Math.floor(this.__SIZE__ / 2);
     this.__BLOCK_SIZE__ = 32;
+    this.__HALFBLOCK_SIZE__ = 16;
     this.material = {
         'animates': {},
         'images': {},

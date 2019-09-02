@@ -138,6 +138,7 @@ baseScene.prototype.stop = function(c){
 baseScene.prototype.addRender = function(name, r, floor){
     r.zIndex = floor ? floor : r.zIndex;
     this.rendersTable[name] = r;
+    r.name = name;
     this.stage.addChild(r);
 }
 

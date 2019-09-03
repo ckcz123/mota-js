@@ -14,6 +14,8 @@ maps.prototype._init = function () {
             if(!render){
                 render = core.scenes.mapScene.getRender(block.name || 'event');
             }
+            if(this.parent && this.parent != render)
+                return;
             if(block.event.cls=='autotile'){ //todo: 如果是添加到当前的容器 是否会正常？
                 core.maps._drawAutotile(render, arr, block, core.__BLOCK_SIZE__, 0, 0);
             }
@@ -67,12 +69,11 @@ maps.prototype._init = function () {
         'stop': function(block){
             this.stopAnimate();
         },
-
         // dying message
         'remove': function(block, render){
             render = render || core.scenes.mapScene.getRender('event');
             render.removeChild(this);
-            block.remove();
+            block.remove(this);
         }
     }
 }
@@ -763,12 +764,14 @@ maps.prototype._drawSpriteBlock = function(blockInfo, x, y, render){
 }
 
 ///// todo:用注册的方式定义观察者（sprite）的行为，都是非闭包函数
-
+//
 maps.prototype._bindObserverToBlock = function(block, sprite) {
-    if(block.observers[block.event.sprite])return;
+    // if(block.hasObserver(block.event.sprite))return;
+    sprite = sprite || core.getSpriteObj(block.event.sprite);
+    if(block.hasObserver(sprite))return;
     block.addObserver(
-        block.event.sprite,
-        sprite || core.getSpriteObj(block.event.sprite),
+        sprite, // kv一致？
+        sprite,
         this.observerAction,
     );
 }
@@ -778,7 +781,7 @@ maps.prototype._removeSubjectOfBlock = function(block){
 }
 
 maps.prototype._hasBlockObserver = function(block){
-    return !!block.observers[block.event.sprite];
+    return !!block.observers[block];
 }
 
 ////// 绘制一个图块 ////// render是需要绘制到的层、arr是所处的地图 //drawBlock会调用几次？
@@ -812,18 +815,23 @@ maps.prototype._exchangeMap = function(floorId){
     core.status.maps[floorId] = this.loadFloor(floorId, core.status.maps[floorId]);
 }
 
-maps.prototype._pushMap = function(floorId){
-    if(core.status.thisMap)
-        core.status.thisMap.blocks.forEach(function(block) {
-            block.remove();//防止驻留sprite（但实际不会
-        })
-    core.status.floorId = floorId;
-    core.status.thisMap = core.status.maps[floorId];
-    core.status.thisMap.blocks.forEach(function(block) {
+
+///// 给新图块赋精灵
+maps.prototype._empowerBlocks = function(blocks){
+    blocks.forEach(function(block) {
         core.becomeSubject(block);
         core.maps._bindObserverToBlock(block);
     })
 }
+
+///// 将地图推到舞台前 需要销毁之前的精灵 并且
+maps.prototype._pushMap = function(floorId){
+    core.status.floorId = floorId;
+    core.status.thisMap = core.status.maps[floorId];
+    this._empowerBlocks(core.status.thisMap.blocks);
+}
+
+
 
 ////// 绘制某张地图 //////
 maps.prototype.drawMap = function (floorId, callback) {
@@ -976,7 +984,7 @@ maps.prototype._drawFloorImages = function (floorId, render, name, images, currS
             }
             var _draw = function () {
                 var obj = core.getSpriteFromImage(image);
-                obj.zindex = -1;
+                obj.zIndex = -1;
                 obj.x = dx;
                 obj.y = dy;
                 obj.width = width;
@@ -1019,7 +1027,7 @@ maps.prototype._drawFloorImage = function (render, name, type, image, offsetX, w
     var height = image.height;
     var _draw = function () {
         var obj = core.getSpriteFromImage(image);
-        obj.zindex = 0;
+        obj.zIndex = 0;
         obj.x = dx;
         obj.y = dy;
         obj.width = dx;
@@ -1303,9 +1311,6 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
     tempCanvas.clearRect(0, 0, tempWidth, tempHeight);
 
     var tempScene = core.scenes.tempScene;
-    tempScene.clear();
-    var render = core.getNewRenderSprite();
-    tempScene.addRender('temp', render);
     // --- 暂存 flags
     var hasHero = core.status.hero != null, flags = null;
     if (options.flags) {
@@ -1313,40 +1318,46 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
         flags = core.status.hero.flags;
         core.status.hero.flags = options.flags;
     }
-    this._drawThumbnail_realDrawTempCanvas(floorId, blocks, options, render);
+    this._empowerBlocks(blocks); // 赋予精灵（如果已经有了 那就会有两个
+    this._drawThumbnail_realDrawTempCanvas(floorId, blocks, options, tempScene);
     tempScene.render();
     tempCanvas.clearRect(0, 0, tempWidth, tempHeight);
     tempCanvas.drawImage(tempScene.view, 0, 0);
+    tempScene.clear();//！重要！精灵需要回收
     // --- 恢复 flags
     if (!hasHero) delete core.status.hero;
     else if (flags != null) core.status.hero.flags = flags;
 }
 
-maps.prototype._drawThumbnail_realDrawTempCanvas = function (floorId, blocks, options, tempRender) {
-    var tempCanvas = core.bigmap.tempCanvas;
+maps.prototype._drawThumbnail_realDrawTempCanvas = function (floorId, blocks, options, scene) {
     // 缩略图：背景
-    this.drawBg(floorId, tempRender);
+    var bg = scene.createGetRender('tempBg', core.getNewRenderSprite());
+    var evt = scene.createGetRender('tempEvent', core.getNewRenderSprite());
+    var fg = scene.createGetRender('tempFg', core.getNewRenderSprite());
+    this.drawBg(floorId, bg);
     // 缩略图：事件
-    this.drawEvents(floorId, blocks, tempRender);
+    this.drawEvents(floorId, blocks, evt);
     // 缩略图：勇士
     if (options.heroLoc) {
         var obj = core.getSpriteObj('hero');
         core.heroSpritePositionTransForm(obj, options.heroLoc.x, options.heroLoc.y, options.heroLoc.direction);
-        tempRender.addNewObj(obj);
-        /*
-        options.heroIcon = options.heroIcon || core.getFlag("heroIcon", "hero.png");
-        options.heroIcon = core.getMappedName(options.heroIcon);
-        var icon = core.material.icons.hero[options.heroLoc.direction];
-        var height = core.material.images.images[options.heroIcon].height / 4;
-        tempCanvas.drawImage(core.material.images.images[options.heroIcon], icon.stop * 32, icon.loc * height, 32, height,
-            32 * options.heroLoc.x, 32 * options.heroLoc.y + 32 - height, 32, height); */
+        evt.addNewObj(obj);
     }
     // 缩略图：前景
-    this.drawFg(floorId, tempRender);
+    this.drawFg(floorId, fg);
     // 缩略图：显伤
-    if (options.damage)
-        core.control.updateDamage(floorId, tempCanvas);
-    tempRender.addNewObj(core.getSpriteFromImage(tempCanvas.canvas));
+    if (options.damage){
+        var tempCanvas = core.createCleanCanvas('tempDamage', 0, 0, core.bigmap.tempCanvas.canvas.width, core.bigmap.tempCanvas.canvas.height);
+        var ctx = tempCanvas.getContext('2d');
+        core.control.updateDamage(floorId, ctx);
+        var dmg = scene.getRender('tempDamage');
+        if(!dmg){
+            dmg = core.createCanvasRender(tempCanvas)
+            scene.addRender('tempDamage', dmg, 999999);
+        }else{
+            dmg.updateTexture(tempCanvas);
+        }
+    }
 }
 
 maps.prototype._drawThumbnail_drawToTarget = function (floorId, toDraw) {
@@ -1541,7 +1552,6 @@ maps.prototype.showBlock = function (x, y, floorId) {
         // 在本层，添加动画
         if (floorId == core.status.floorId) {
             core.drawBlock(block);
-            core.addGlobalAnimate(block);
         }
         core.updateStatusBar();
     }
@@ -2102,7 +2112,7 @@ maps.prototype._showHideSpriteAnimate = function(obj, time, fade, callback){
         obj.addAnimateInfo({
                 'fade': fade,
                 'fadeFreq': time/100,
-                'callafterplay': callback,
+                'callback': callback,
                 'speed': originSpeed,
             }
         );
@@ -2117,7 +2127,7 @@ maps.prototype._showHideAnimate = function(blockInfo, time, fade, callback){
         blockInfo.sprite.addAnimateInfo({
                 'fade': fade,
                 'fadeFreq': time/100,
-                'callafterplay': callback,
+                'callback': callback,
                 'speed': originSpeed,
             }
         );
@@ -2143,6 +2153,9 @@ maps.prototype.animateBlock = function (loc, type, time, callback) {
             'time': time,
             'callback': function(){
                 ct -= 1;
+                l.block.notify('stop');
+                if (isHide) core.removeBlock(l.x, l.y);
+                else core.showBlock(l.x, l.y);
                 if(ct==0 && callback)
                     callback();
             }

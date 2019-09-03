@@ -464,7 +464,7 @@ sprite.prototype.hasRenderSpriteObj = function(obj){
 }
 /////
 sprite.prototype.relocateRenderSpriteObj = function(obj, prior){
-    this.render.reloacate(obj, prior);
+    this.render.relocate(obj, prior);
 }
 /////
 sprite.prototype.blurRenderSprite = function(){
@@ -522,8 +522,9 @@ canvasRender.prototype.constructor = canvasRender;
 canvasRender.prototype._init = function(canvas){
     SSPrite.call(this, Texture.from(canvas));
 }
-canvasRender.prototype.updateTexture = function(){
-    this.texture.update();
+canvasRender.prototype.updateTexture = function(canvas){
+    if(canvas)this.textrure = Texture.from(canvas);
+    else this.texture.update();
 }
 canvasRender.prototype.clear = function() {
 }
@@ -560,7 +561,7 @@ spriteRender.prototype.updateData = function(timeDelta) {
                 callbackList.push(obj.move.callback);
         }
         if(obj.isMoving()){
-            self.reloacate(obj);
+            self.relocate(obj);
         }
     })
     if(callbackList.length>0){
@@ -611,6 +612,10 @@ spriteRender.prototype.refresh = function(){
 }
 
 spriteRender.prototype.clear = function(){
+    this.objs.forEach(function(c){
+        if(c.subject)
+            c.subject.remove(c); // 从观察者列表中移除自身
+    })
     this.removeChildren();
 }
 
@@ -641,8 +646,8 @@ spriteRender.prototype.createBackCanvas = function(){
 
 
 ///// 对obj重定位
-spriteRender.prototype.reloacate = function(obj, prior){
-    obj.zindex = prior || this.calcuPrior(obj);
+spriteRender.prototype.relocate = function(obj, prior){
+    obj.zIndex = prior || this.calcuPrior(obj);
     obj.sortDirty = true;
     // var idx = this.objs.indexOf(obj);
     // if(idx>=0)
@@ -670,15 +675,16 @@ spriteRender.prototype.addNewObj = function(obj, prior){
         Object.setPrototypeOf(obj, spriteObj.prototype);
     }
     if(typeof prior != 'number'){
-        obj.zindex = this.calcuPrior(obj);
+        obj.zIndex = this.calcuPrior(obj);
     }else{
-        obj.zindex = prior; // 可以指定优先级 并且此优先级会持久化 可以用来做飞翔的鸟
+        obj.zIndex = prior; // 可以指定优先级 并且此优先级会持久化 可以用来做飞翔的鸟
     }
     this.addChild(obj);
+    // this.addChildAt(obj, index);
     /*
     var index = this.objs.length;
     for(var i in this.objs){
-        if(this.calcuPrior(this.objs[i]) >= prior){
+        if(this.objs[i].zIndex >= obj.zindex){
             index = i;
             break;
         }
@@ -756,6 +762,7 @@ spriteObj.prototype.playFrameOneTime = function(){
 spriteObj.prototype.playFading = function() {
     if (this.animate.fade) { ///// 渐变 需要指定每次渐变的量
         this.alpha = core.clamp(this.alpha + this.animate.fade, 0, 1);
+        //this.sortDirty = true;
         if (this.alpha <= 0 || this.alpha >= 1) {
             return true;
         }
@@ -996,8 +1003,8 @@ spriteObj.prototype.animateAction = function(timeDelta){
             this.animate.lastFadeTime = 0;
             if(this.playFading()){ //// 渐变只进行一次就callback
                 this.stopAnimate();
-                if(this.animate.callafterplay){
-                    this.animate.callafterplay();
+                if(this.animate.callback){
+                    this.animate.callback();
                 }
             }
         }else{
@@ -1033,7 +1040,7 @@ spriteObj.prototype.drawToMap = function(ctx,x,y,w,h){
 // 2. 由被观察者决定如何进行sprite的行动
 
 subject.prototype._init = function(){ // sobj: 被观察者
-    this.observers = this.observers || {}; // 观察者
+    this.observers = this.observers || []; // 观察者
     this.observe_actions = this.observe_actions || {}; // 提醒信息
 }
 
@@ -1057,12 +1064,12 @@ subject.prototype.notify = function(type, params){
 }
 
 subject.prototype.hasObserver = function(name){
-    if(this.observers[name])return true;
-    return false;
+    return this.observers.indexOf(name)>=0;
 }
 
 subject.prototype.addObserver = function(name, obj, info) {
-    this.observers [name] = obj;
+    this.observers.push(obj);
+    obj.subject = this;
     info = info || {};
     for(var i in info){
         this.observe_actions[i] = info[i];
@@ -1070,8 +1077,10 @@ subject.prototype.addObserver = function(name, obj, info) {
 }
 subject.prototype.remove = function(name){
     if(!name){
-        this.observers = {};
-    }else{
-        delete this.observers[name];
+        this.observers = [];
+    }else {
+        var idx = this.observers.indexOf(name);
+        if(idx>=0)
+            this.observers.splice(idx, 1);
     }
 }

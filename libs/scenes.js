@@ -35,7 +35,7 @@ function baseScene(name){
 baseScene.prototype = Object.create(Stage.prototype);
 baseScene.prototype.constructor = Stage;
 ////// scene使用的canvas创建 属于离屏canvas //////
-var createCleanCanvas = function (name, x, y, width, height, z) {
+scenes.prototype.createCleanCanvas = function (name, x, y, width, height, z) {
     var newCanvas = document.createElement("canvas");
     newCanvas.id = name;
     newCanvas.style.display = 'block';
@@ -56,15 +56,16 @@ baseScene.prototype._init = function(name){
     if(name){
         if(typeof name == 'string'){
             Stage.call(this, {
-                'view': createCleanCanvas(name, 0,0, 416, 416, 50),
+                'view': core.createCleanCanvas(name, 0,0, 416, 416, 50),
             });
+            this.stage.sortableChildren = true;
             this.view.width = core.__PIXELS__;
             this.view.height = core.__PIXELS__;
             this.view.style.width = core.domStyle.scale * this.view.width + 'px';
             this.view.style.height = core.domStyle.scale * this.view.height + 'px';
             if(main.mode=='editor'){
                 if(name=='map') {
-                    this.view.style.zIndex = 0;
+                    this.view.style.zIndex = 10;
                     document.getElementById('mapEdit').appendChild(this.view);
                 }
             }
@@ -118,6 +119,8 @@ baseScene.prototype.clear = function(){
     this.renders.forEach(function(r){
         if(r.clear)r.clear();
     });
+//    if(this.stage)
+//        this.stage.removeChildren();
 }
 
 ///// 注意：子场景之间是不考虑碰撞和先后的问题的
@@ -146,6 +149,22 @@ baseScene.prototype.addRender = function(name, r, floor){
 baseScene.prototype.addSpriteToRender = function(name, obj){
     if(this.rendersTable[name]){
         this.rendersTable[name].addNewObj(obj);
+    }
+}
+
+///// 查找一个渲染层 不存在就创建
+baseScene.prototype.createGetRender = function(name){
+    if(this.rendersTable[name]){
+        return this.rendersTable[name];
+    }else{
+        var ret = null;
+        for(var i in this.children){
+            ret = this.children[i].getRender(name);
+            if(ret)break;
+        }
+        ret = core.getNewRenderSprite();
+        this.addRender(name, ret);
+        return ret;
     }
 }
 
@@ -179,7 +198,7 @@ baseScene.prototype.updateRenderTextures = function(name){
 ///// core.scenes.mainScene 就是主场景管理器，其子场景为实际游戏场景
 scenes.prototype._init = function(){
     this.tempScene = new baseScene({
-        'view':createCleanCanvas(name, 0,0, core.__PIXELS__, core.__PIXELS__, 50)
+        'view':this.createCleanCanvas(name, 0,0, core.__PIXELS__, core.__PIXELS__, 50)
     }); ///// 临时场景 用于toCanvas
 }
 
@@ -199,7 +218,7 @@ scenes.prototype._load = function(){
 
 
     ///// ----- 伤害依然使用canvas 但是离屏绘制
-    core.canvas.damage = createCleanCanvas('damage',0,0,core.__PIXELS__,core.__PIXELS__).getContext('2d');
+    core.canvas.damage = this.createCleanCanvas('damage',0,0,core.__PIXELS__,core.__PIXELS__).getContext('2d');
     this.mapScene.addRender('damage', core.createCanvasRender(core.canvas.damage.canvas),4);
     core.bigmap.canvas.push('damage'); // 需要在大地图尺寸变换
 

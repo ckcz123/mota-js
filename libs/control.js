@@ -687,7 +687,7 @@ control.prototype._moveAction_moving = function (callback) {
         // 执行该点事件
         if (!hasTrigger)
             core.events._trigger(nowx, nowy);
-        core.updateStatusBar();
+        // core.updateStatusBar();
 
         // 检查该点是否是滑冰
         if (core.getBgNumber() == 167) {
@@ -873,12 +873,6 @@ control.prototype.drawHero = function (status, offset) {
         // tmp.obj.bindPosition(tmp.observer.getPosition());
         core.status.heroSprite = tmp;
     }
-    if(main.mode=='play'){
-        if(!core.scenes.mapScene.getRender('event').hasObj(core.status.heroSprite.obj)){ // TODO：简化-查看是否位于当前场景
-            core.scenes.mapScene.addSpriteToRender('event', core.status.heroSprite.obj);
-        }
-    }
-
     var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
     status = status || 'stop';
     offset = offset || 0;
@@ -887,6 +881,17 @@ control.prototype.drawHero = function (status, offset) {
     core.bigmap.offsetX = core.clamp((x - core.__HALF_SIZE__) * 32 + offsetX, 0, 32*core.bigmap.width-core.__PIXELS__);
     core.bigmap.offsetY = core.clamp((y - core.__HALF_SIZE__) * 32 + offsetY, 0, 32*core.bigmap.height-core.__PIXELS__);
     core.clearAutomaticRouteNode(x+dx, y+dy);
+    this.heroSpritePositionTransForm(core.status.heroSprite.obj, x, y, direction, status, offset);
+
+
+    if(main.mode=='play'){
+        if(!core.scenes.mapScene.getRender('event').hasObj(core.status.heroSprite.obj)){ // TODO：简化-查看是否位于当前场景
+            core.scenes.mapScene.addSpriteToRender('event', core.status.heroSprite.obj);
+        }
+        core.scenes.mapScene.getRender('event').relocate(core.status.heroSprite.obj);
+    }
+
+
     // core.clearMap('hero');
     /*
     core.status.heroSprite.observer.notify(
@@ -914,7 +919,6 @@ control.prototype.drawHero = function (status, offset) {
     // core.scenes.mapScene.getRender('event').reloacate(core.status.heroSprite.obj);
 
     core.control.updateViewport();
-    this.heroSpritePositionTransForm(core.status.heroSprite.obj, x, y, direction, status, offset);
     // core.setGameCanvasTranslate('hero', 0, 0);
     /*
     this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {

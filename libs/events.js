@@ -2157,6 +2157,7 @@ events.prototype.moveImage = function (code, to, opacityVal, time, callback) {
 
 events.prototype._moveImage_moving = function (name, moveInfo, callback) {
     var per_time = 10, step = 0, steps = parseInt(moveInfo.time / 10);
+    if (steps <= 0) steps = 1;
     var fromX = moveInfo.fromX, fromY = moveInfo.fromY, toX = moveInfo.toX, toY = moveInfo.toY,
         opacity = moveInfo.opacity, toOpacity = moveInfo.toOpacity;
     var currX = fromX, currY = fromY, currOpacity = opacity;
@@ -2211,6 +2212,7 @@ events.prototype.setVolume = function (value, time, callback) {
     var currVolume = core.musicStatus.volume;
     time /= Math.max(core.status.replay.speed, 1);
     var per_time = 10, step = 0, steps = parseInt(time / per_time);
+    if (steps <= 0) steps = 1;
     var fade = setInterval(function () {
         step++;
         set(currVolume + (value - currVolume) * step / steps);

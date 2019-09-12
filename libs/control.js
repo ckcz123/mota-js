@@ -2134,6 +2134,7 @@ control.prototype.setCurtain = function(color, time, callback) {
 control.prototype._setCurtain_animate = function (nowColor, color, time, callback) {
     time /= Math.max(core.status.replay.speed, 1)
     var per_time = 10, step = parseInt(time / per_time);
+    if (step <= 0) step = 1;
     var animate = setInterval(function() {
         nowColor = [
             (nowColor[0]*(step-1)+color[0])/step,

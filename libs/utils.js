@@ -20,6 +20,12 @@ function utils() {
         'right': 2
     }
     this.face = ['down','left','right','up'];
+    this.invDir = {
+        'left':'right',
+        'right':'left',
+        'up':'down',
+        'down': 'up',
+    }
 }
 
 utils.prototype._init = function () {

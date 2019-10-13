@@ -1928,9 +1928,12 @@ events.prototype.hasAsync = function () {
 events.prototype.follow = function (name) {
     core.status.hero.followers = core.status.hero.followers || [];
     name = core.getMappedName(name);
-    if (core.material.images.images[name]) {
-        core.status.hero.followers.push({"name": name});
+
+    if (core.sprite.sprite[name] || core.material.images.images[name]) {
+        var data = {"name": name};
+        core.status.hero.followers.push(data);
         core.gatherFollowers();
+        core.control._addHeroSprite(data);
         core.clearMap('hero');
         core.drawHero();
     }
@@ -1946,13 +1949,14 @@ events.prototype.unfollow = function (name) {
         name = core.getMappedName(name);
         for (var i = 0; i < core.status.hero.followers.length; i++) {
             if (core.status.hero.followers[i].name == name) {
+                core.status.hero.followers[i].notify('remove');
                 core.status.hero.followers.splice(i, 1);
                 break;
             }
         }
     }
     core.gatherFollowers();
-    core.clearMap('hero');
+    // core.clearMap('hero');
     core.drawHero();
 }
 
@@ -2283,7 +2287,7 @@ events.prototype.eventMoveSprite= function(obj, steps, time, callback){
     });
     var nextStep = function(){
         if(step<moveSteps.length){
-            this._eventMoveSprite_moving(obj, moveSteps[step++], time, nextStep);
+            core.events._eventMoveSprite_moving(obj, moveSteps[step++], time, nextStep);
         }else{
             obj.stopMoving();
             if(callback)callback();
@@ -2293,7 +2297,7 @@ events.prototype.eventMoveSprite= function(obj, steps, time, callback){
 }
 
 ///// 实际移动，有朝向的角色会自动转向
-events.prototype._eventMoveSprite_moving = function(obj, direction, speed, callback){
+events.prototype._eventMoveSprite_moving = function(obj, direction, speed, callback, info){
     var o = direction == 'backward' ? -1 : 1;
     if (direction == 'forward' || direction == 'backward'){
         direction = core.utils.face[obj.nLine || 0];
@@ -2301,19 +2305,33 @@ events.prototype._eventMoveSprite_moving = function(obj, direction, speed, callb
     var line = core.utils.line[direction];
     var dx = core.utils.scan[direction].x * core.__BLOCK_SIZE__ * o,
         dy = core.utils.scan[direction].y * core.__BLOCK_SIZE__ * o;
-    if(o>0 && obj.image.length > line && !obj.animate.fixed){ // 如果固定朝向 也不会转向
+    if(o>0 && obj.image.length > line && (!obj.animate || !obj.animate.fixed)){ // 如果固定朝向 也不会转向
         obj.changePattern(null, line);
     }
-    obj.addMoveInfo(dx, dy, speed, callback);
+    obj.addMoveInfo(dx, dy, speed, callback, info);
 }
 
 
 /////// 使用事件让勇士移动。这个函数将不会触发任何事件 //////
 events.prototype.eventMoveHero = function(steps, time, callback) {
+    core.maps._moveBlock_spriteMove(null, steps, time,
+        callback, function(direction, next){
+            core.setHeroLoc('direction', direction, true);
+            core.control._herosSpriteMove(next);
+            core.setHeroLoc('x', core.nextX(), true);
+            core.setHeroLoc('y', core.nextY(), true);
+    });
+    return;
+
+
+    /////  xxxxxxxxxx
     time = 800/(time || core.values.moveSpeed || 100);
     var step = 0, moveSteps = (steps||[]).filter(function (t) {
         return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
     });
+
+
+
     var obj = core.status.heroSprite.obj;
     obj.addAnimateInfo();
     var nextStep = function(){
@@ -2379,6 +2397,23 @@ events.prototype.jumpHero = function (ex, ey, time, callback) {
     var sx=core.status.hero.loc.x, sy=core.status.hero.loc.y;
     if (!core.isset(ex)) ex=sx;
     if (!core.isset(ey)) ey=sy;
+    var ct = core.status.heroSprite.objs.length;
+    core.status.heroSprite.objs.forEach(function(o){
+        core.maps._jumpBlock_spriteJump(o, o.x, o.y, ex, ey, time || 500, true,
+            function(){
+                if(--ct==0){
+                    core.setHeroLoc('x', ex);
+                    core.setHeroLoc('y', ey);
+                    core.drawHero();
+                    if(callback)callback();
+                }});
+    });
+    return;
+///// xxxxxxx
+
+
+
+
     core.playSound('jump.mp3');
     var jumpInfo = core.maps.__generateJumpInfo(sx, sy, ex, ey, time || 500);
     jumpInfo.icon = core.material.icons.hero[core.getHeroLoc('direction')];

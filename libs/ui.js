@@ -53,10 +53,10 @@ ui.prototype.clearMap = function (name, x, y, width, height) {
         core.dom.gif.innerHTML = "";
         // core.removeGlobalAnimate();
         core.scenes.mainScene.clear();
-        //core.clearRenderSprite();
+        //core.clearLayerSprite();
     }
     else {
-        var ctx = core.scenes.mainScene.getRender(name);
+        var ctx = core.scenes.mainScene.getLayer(name);
         if(ctx)ctx.clear();
 
         var ctx = this.getContextByName(name);

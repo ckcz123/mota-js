@@ -2079,17 +2079,18 @@ events.prototype.closeDoor = function (x, y, id, callback) {
 */
     core.setBlock(core.getNumberById(id), x, y);
     var block = core.getBlock(x,y).block;
+    var id = setTimeOut(null);
     core.maps.drawBlock(block);
     block.notify('play', {
         'inverse': true,
         'onetime': true,
         'speed': 2,
         'callback':function(){
-            delete core.animateFrame.asyncId[block];
+            delete core.animateFrame.asyncId[id];
             if(callback)callback();
         }
     })
-    core.animateFrame.asyncId[block] = true;
+    core.animateFrame.asyncId[id] = true;
 }
 
 ////// 显示图片 //////
@@ -2281,7 +2282,7 @@ events.prototype._vibrate_update = function (shakeInfo) {
 
 ///// 让一个sprite对象按步骤移动
 events.prototype.eventMoveSprite= function(obj, steps, time, callback){
-    time = 800/(time || core.values.moveSpeed || 100);
+    time = (time || core.values.moveSpeed || 100);
     var step = 0, moveSteps = (steps||[]).filter(function (t) {
         return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
     });

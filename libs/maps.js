@@ -1834,11 +1834,16 @@ maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
         return;
     }
     // var block = blockArr[0], blockInfo = blockArr[1];
+    var id = setTimeout(null);
+    core.animateFrame.asyncId[id] = true;
     this._moveBlock_spriteMove(block, steps, time, function(){
         core.maps._moveJumpSprite_finished(null, block, {
             'keep': keep,
             'animate': time!=0,
-        }, callback);
+        }, function(){
+            delete core.animateFrame.asyncId[id];
+            if(callback)callback();
+        });
     });
 }
 
@@ -1850,7 +1855,7 @@ maps.prototype._moveBlock_spriteMove = function(block, steps, time, callback, re
     var i = 0;
     var moveInfo = {
         direction: moveSteps[i], step: 0, per_time: time / 16 / core.status.replay.speed,
-        speed: core.__BLOCK_SIZE__ / time,
+        speed: time / core.__BLOCK_SIZE__ / 16,
     }
     var nextStep = function(){
         moveInfo.direction = moveSteps[i];

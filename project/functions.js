@@ -1266,6 +1266,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		cache: {} // clear cache
 	};
 },
+	"beforeMoveStep":function(canmove){
+		
+	},
+
         "moveOneStep": function (x, y) {
 	// 勇士每走一步后执行的操作，x,y为要移动到的坐标。
 	// 这个函数执行在“刚走完”的时候，即还没有检查该点的事件和领域伤害等。

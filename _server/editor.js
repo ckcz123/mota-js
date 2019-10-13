@@ -141,9 +141,9 @@ editor.prototype.init = function (callback) {
         editor.core = core;
         editor.fs = fs;
 
-        core.scenes.mapScene.getRender('event').redirectCtx(core.getContextByName('event'));
-        core.scenes.mapScene.getRender('bg').redirectCtx(core.getContextByName('bg'));
-        core.scenes.mapScene.getRender('fg').redirectCtx(core.getContextByName('fg'));
+        //core.scenes.mapScene.getLayer('event').redirectCtx(core.getContextByName('event'));
+        //core.scenes.mapScene.getRender('bg').redirectCtx(core.getContextByName('bg'));
+        //core.scenes.mapScene.getRender('fg').redirectCtx(core.getContextByName('fg'));
 
         editor_file = editor_file(editor, function () {
             editor.file = editor_file;
@@ -298,12 +298,14 @@ editor.prototype.updateMap = function () {
     core.status.thisMap.blocks = blocks;
 
     var updateMap = function () {
+        core.drawMap();
+        /*
         core.removeGlobalAnimate();
         core.clearMap('bg');
         core.clearMap('event');
         core.clearMap('event2');
         core.clearMap('fg');
-        core.maps._drawMap_drawAll();
+        core.maps._drawMap_drawAll();*/
     }
     updateMap();
 
@@ -370,8 +372,8 @@ editor.prototype.drawInitData = function (icons) {
     // editor.uivalues.folded = true;
     editor.uivalues.foldPerCol = 50;
     // var imgNames = Object.keys(images);  //还是固定顺序吧；
-   //  var imgNames = ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"];
-    var imgNames = ["terrains", "animates", "npcs", "npc48", "autotile", "sprite"];
+    var imgNames = ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"];
+    //var imgNames = ["terrains", "animates", "npcs", "npc48", "autotile", "sprite"];
 
     for (var ii = 0; ii < imgNames.length; ii++) {
         var img = imgNames[ii], tempy = 0;

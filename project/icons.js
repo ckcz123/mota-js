@@ -263,7 +263,7 @@ var icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1 =
 		"wand": 10
 	},
 	"autotile": {
-		"autotile": 0,
+		"autotile0": 0,
 		"autotile1": 0,
 		"autotile2": 0,
 		"autotile3": 0

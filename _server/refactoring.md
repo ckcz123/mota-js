@@ -1,5 +1,7 @@
 # 重构
 
+> 目前状态: 按功能分类已基本完成, 未完成file/game的重写
+
 总体思路  
 + 按功能拆分文件
 + 左侧页面模块化, 方便添加
@@ -12,8 +14,6 @@
 
 editor_file之后是更改editor.map的储存方式, 现有的存对象的模式要在对象和数字间来回转换, 非常繁琐和奇怪
 
-再之后是把editor_unsorted_*.js整理清晰
-
 ## 文件结构
 
 (全部小写,必要时用下划线分割)
@@ -24,11 +24,11 @@ editor_file之后是更改editor.map的储存方式, 现有的存对象的模式
 + [ ] editor_file 调用fs.js编辑文件, 把原editor\_file模块化, 并且只负责文件写入
 + [ ] editor_game 处理游戏数据, 导入为editor的数据, 编辑数据, 从原editor和editor_file中抽离. **只有此文件允许`\s(main|core)`形式的调用**(以及其初始化`editor_game_wrapper(editor, main, core);`)
 + [x] editor_util 生成guid/处理颜色 等函数, 从editor分离
-+ [ ] editor_action 处理界面上的按钮/下拉框点击等用户的操作与功能函数的绑定, 维护editor.dom, unsorted_1/2中的绑定挪到此处, 其中的函数内容, 分类放在其他文件
-+ [ ] editor_mappanel 与地图面板相关的功能, <-unsorted_1/2/3
-+ [ ] editor_datapanel 与数据面板相关的功能, <-unsorted_1/2/3
-+ [ ] editor_materialpanel 与素材面板相关的功能, <-unsorted_1/2/3
-+ [ ] editor_ui 维护printe/printf/tip, 以及之后可能的窗口化, ui事件中没有具体到前三个面板中的函数 <-unsorted_1/2/3
++ [ ] editor_listen 处理界面上的按钮/下拉框点击等用户的操作与功能函数的绑定, 维护editor.dom, unsorted_1/2中的绑定挪到此处, 其中的函数内容, 分类放在其他文件
++ [ ] editor_mappanel 与地图区相关的功能, <-unsorted_1/2/3
++ [ ] editor_datapanel 与数据区相关的功能, <-unsorted_1/2/3
++ [ ] editor_materialpanel 与素材区相关的功能, <-unsorted_1/2/3
++ [ ] editor_ui 维护printe/printf/tip, 以及之后可能的窗口化, ui事件中没有具体到前三个区中的函数 <-unsorted_1/2/3
 + [ ] editor 执行初始化流程加组合各组件
 + [ ] 原editor_mode 移除
 + [x] 原vm 移除

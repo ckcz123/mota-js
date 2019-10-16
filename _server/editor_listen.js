@@ -48,7 +48,6 @@ editor_listen_wrapper = function (editor) {
         if (!editor.isMobile) return;
 
         var mobileview = document.getElementById('mobileview');
-        var editModeSelect = document.getElementById('editModeSelect');
         var mid = document.getElementById('mid');
         var right = document.getElementById('right');
         var mobileeditdata = document.getElementById('mobileeditdata');
@@ -58,7 +57,7 @@ editor_listen_wrapper = function (editor) {
             mid.style = 'z-index:-1;opacity: 0;';
             right.style = 'z-index:-1;opacity: 0;';
             mobileeditdata.style = '';
-            if (callShowMode) editor.mode.showMode(editModeSelect.value);
+            if (callShowMode) editor.mode.showMode(editor.dom.editModeSelect.value);
             editor.uifunctions.hideMidMenu();
         }
         mobileview.children[0].onclick = function () {
@@ -125,6 +124,35 @@ editor_listen_wrapper = function (editor) {
         editor.dom.moveLoc.onmousedown = null
         editor.dom.clearLoc.ontouchstart = editor.dom.clearLoc.onmousedown
         editor.dom.clearLoc.onmousedown = null
+    }
+
+    editor.constructor.prototype.mode_listen = function (callback) {
+
+        // 这里的函数还没有写jsdoc, 通过_func()的方式先完成分类
+
+        editor.uifunctions.newIdIdnum_func()
+        editor.uifunctions.changeId_func()
+
+        editor.uifunctions.selectFloor_func()
+        editor.uifunctions.saveFloor_func()
+
+        editor.uifunctions.newMap_func()
+
+        editor.uifunctions.createNewMaps_func()
+
+        editor.uifunctions.changeFloorId_func()
+
+        editor.uifunctions.fixCtx_func()
+
+        editor.uifunctions.selectAppend_func()
+        editor.uifunctions.selectFileBtn_func()
+        editor.uifunctions.changeColorInput_func()
+        editor.uifunctions.picClick_func()
+        editor.uifunctions.appendConfirm_func()
+
+        editor.dom.editModeSelect.onchange = editor.mode.editModeSelect_onchange
+
+        if (Boolean(callback)) callback();
     }
 
 }

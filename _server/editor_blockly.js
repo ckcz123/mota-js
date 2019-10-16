@@ -154,6 +154,8 @@ editor_blockly = function () {
       MotaActionBlocks['moveViewport_s'].xmlText(),
       MotaActionBlocks['showStatusBar_s'].xmlText(),
       MotaActionBlocks['hideStatusBar_s'].xmlText(),
+      MotaActionBlocks['showHero_s'].xmlText(),
+      MotaActionBlocks['hideHero_s'].xmlText(),
       MotaActionBlocks['setCurtain_0_s'].xmlText(),
       MotaActionBlocks['setCurtain_1_s'].xmlText(),
       MotaActionBlocks['screenFlash_s'].xmlText(),
@@ -627,8 +629,8 @@ function omitedcheckUpdateFunction(event) {
                 // console.log(obj);
                 if (obj.length > 0 && b.type.startsWith(obj[0].type)) {
                     if (b.type == 'previewUI_s')
-                        uievent.previewUI(obj[0].action);
-                    else uievent.previewUI([obj[0]]);
+                        editor.uievent.previewUI(obj[0].action);
+                    else editor.uievent.previewUI([obj[0]]);
                 }
             } catch (e) {main.log(e);}
             return true;
@@ -790,7 +792,7 @@ function omitedcheckUpdateFunction(event) {
             if (!isNaN(yv)) y = yv;
             if (arr[2] != null) floorId = block.getFieldValue(arr[2]) || floorId;
         }
-        uievent.selectPoint(floorId, x, y, arr && arr[2] == null, function (fv, xv, yv) {
+        editor.uievent.selectPoint(floorId, x, y, arr && arr[2] == null, function (fv, xv, yv) {
             if (!arr) return;
             if (arr[2] != null) {
                 if (fv != editor.currentFloorId) block.setFieldValue(fv, arr[2]);

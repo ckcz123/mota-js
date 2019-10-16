@@ -49,6 +49,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.showStatusBar();
 	// 隐藏右下角的音乐按钮
 	core.dom.musicBtn.style.display = 'none';
+	//core.sprite.render.destCtx = core.getContextByName('hero');
+
+	//core.scenes.mapScene.getRender('event').redirectCtx(core.getContextByName('event'));
+	//core.scenes.mapScene.getRender('bg').redirectCtx(core.getContextByName('bg'));
+	//core.scenes.mapScene.getRender('fg').redirectCtx(core.getContextByName('fg'));
 },
         "setInitData": function () {
 	// 不同难度分别设置初始属性
@@ -1000,7 +1005,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.updateEnemys();
 
 	// TODO：增加自己的一些读档处理
-
 	// 切换到对应的楼层
 	core.changeFloor(data.floorId, null, data.hero.loc, 0, function () {
 		// TODO：可以在这里设置读档后播放BGM
@@ -1262,6 +1266,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		cache: {} // clear cache
 	};
 },
+	"beforeMoveStep":function(canmove){
+		
+	},
+
         "moveOneStep": function (x, y) {
 	// 勇士每走一步后执行的操作，x,y为要移动到的坐标。
 	// 这个函数执行在“刚走完”的时候，即还没有检查该点的事件和领域伤害等。
@@ -1291,7 +1299,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 如需强行终止行走可以在这里条件判定：
 	// core.stopAutomaticRoute();
 
-	core.updateStatusBar();
+	// core.updateStatusBar();
 },
         "moveDirectly": function (x, y, ignoreSteps) {
 	// 瞬间移动；x,y为要瞬间移动的点；ignoreSteps为减少的步数，可能之前已经被计算过

@@ -65,11 +65,12 @@ loader.prototype._loadExtraImages = function (callback) {
 
 loader.prototype._loadAutotiles = function (callback) {
     core.material.images.autotile = {};
-    var keys = Object.keys(core.material.icons.autotile);
+    var keys = ['autotile'];//Object.keys(core.material.icons.autotile);
+    //var keys = Object.keys(core.material.icons.autotile);
     var autotiles = {};
     this.loadImages(keys, autotiles, function () {
         keys.forEach(function (v) {
-            core.material.images.autotile[v] = autotiles[v];
+            core.material.images.autotile = autotiles[v];
         });
 
         setTimeout(function () {

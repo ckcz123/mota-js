@@ -79,13 +79,13 @@ function main() {
     };
     this.mode = 'play';
     this.loadList = [
-        'loader', 'control', 'utils', 'items', 'icons', 'maps', 'enemys', 'events', 'actions', 'data', 'ui', 'core'
+        'loader', 'control', 'utils', 'items', 'icons','sprite', 'scenes', 'maps', 'enemys', 'events', 'actions', 'data', 'ui', 'core'
     ];
     this.pureData = [ 
-        'data', 'enemys', 'icons', 'maps', 'items', 'functions', 'events', 'plugins'
+        'data', 'enemys', 'icons', 'maps', 'items', 'functions', 'events', 'plugins', 'sprite',
     ];
     this.materials = [
-        'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains', 'enemy48', 'npc48'
+        'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains', 'enemy48', 'npc48', 'sprite'
     ];
 
     this.statusBar = {

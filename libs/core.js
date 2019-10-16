@@ -8,6 +8,8 @@ function core() {
     this.__SIZE__ = 13;
     this.__PIXELS__ = this.__SIZE__ * 32;
     this.__HALF_SIZE__ = Math.floor(this.__SIZE__ / 2);
+    this.__BLOCK_SIZE__ = 32;
+    this.__HALFBLOCK_SIZE__ = 16;
     this.material = {
         'animates': {},
         'images': {},
@@ -86,7 +88,7 @@ function core() {
         toolbarBtn: false,
     }
     this.bigmap = {
-        canvas: ["bg", "event", "event2", "fg", "damage"],
+        canvas: [],
         offsetX: 0, // in pixel
         offsetY: 0,
         width: this.__SIZE__, // map width and height
@@ -221,6 +223,8 @@ core.prototype.init = function (coreData, callback) {
     this._initPlugins();
 
     core.loader._load(function () {
+        core.sprite._load();
+        core.scenes._load();
         core._afterLoadResources(callback);
     });
 }
@@ -277,7 +281,7 @@ core.prototype._init_platform = function () {
         }
     });
     core.platform.string = core.platform.isPC ? "PC" : core.platform.isAndroid ? "Android" : core.platform.isIOS ? "iOS" : "";
-    core.platform.supportCopy = document.queryCommandSupported || document.queryCommandSupported("copy");
+    core.platform.supportCopy = document.queryCommandSupported && document.queryCommandSupported("copy");
     var chrome = /Chrome\/(\d+)\./i.exec(navigator.userAgent);
     if (chrome && parseInt(chrome[1]) >= 50) core.platform.isChrome = true;
     core.platform.isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent);

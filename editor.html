@@ -8,6 +8,7 @@
     <link href="_server/css/editor_mode.css" rel="stylesheet">
 </head>
 <body>
+<body>
 <script>
     if(innerWidth<innerHeight){ //pic:1242*2208 | chrome info:1340*2380
         confirm('高大于宽的设备请使用移动版本的editor, 点击确定跳转')?(window.location='./editor-mobile.html'):'';
@@ -293,7 +294,7 @@
             <canvas class='gameCanvas' id='event' width='416' height='416'></canvas>
             <canvas class='gameCanvas' id='event2' width='416' height='416'></canvas>
             <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
-            <canvas class='gameCanvas' id='efg' width='416' height='416'></canvas>
+            <canvas class='gameCanvas' id='efg' width='416' height='416' style='z-index:90'></canvas>
             <canvas class='gameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
         </div>
         <div class="tools">
@@ -488,12 +489,13 @@
     <div id="gameDraw">
         <div id="gif"></div>
         <div id="gif2"></div>
+        <div id="mapView"></div>
         <!-- <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas> -->
         <!-- <canvas class='gameCanvas' id='event' width='416' height='416'></canvas> -->
-        <canvas class='gameCanvas' id='hero' width='416' height='416'></canvas>
+        <!-- canvas class='gameCanvas' id='map' width='416' height='416'></canvas> -->
         <!-- <canvas class='gameCanvas' id='event2' width='416' height='416'></canvas> -->
         <!-- <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas> -->
-        <canvas class='gameCanvas' id='damage' width='416' height='416'></canvas>
+        <!-- canvas class='gameCanvas' id='damage' width='416' height='416'></canvas>-->
         <canvas class='gameCanvas' id='animate' width='416' height='416'></canvas>
         <canvas class='gameCanvas' id='curtain' width='416' height='416'></canvas>
         <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
@@ -559,8 +561,8 @@
 <script src='_server/editor_datapanel.js'></script>
 <script src='_server/editor_materialpanel.js'></script>
 <script src='_server/editor_listen.js'></script>
-<script src='_server/editor_unsorted_2.js'></script>
-<script src='_server/editor_unsorted_3.js'></script>
+<script src='_server/editor_legacy.js'></script>
+<script src='libs/thirdparty/pixi.min.js'></script>
 <script src='libs/thirdparty/lz-string.min.js'></script>
 <script src='libs/thirdparty/localforage.min.js'></script>
 <script id='mainScript' src='main.js'></script>
@@ -568,7 +570,7 @@
 <script>
     editor.init(function () {
         editor.listen();
-        editor.mode.listen();
+        editor.mode_listen();
         editor.mobile_listen();
     });
     //main.listen();

@@ -8,6 +8,143 @@ control.js：游戏主要逻辑控制
 
 function control() {
     this._init();
+    /*
+    观察者定义： 数据变化的反应器（观察者依赖于观察对象）
+
+    观察者行为定义：
+    block： 数据实体/观察对象/被观察者，通常为block、heroloc ! -> block的属性不可被观察者修改！
+    this：观察者，通常为sprite object
+    * */
+    this.observerAction = {
+        // 重绘自身
+        'draw': function(block, layer, arr){
+            this.setPositionWithBlock(block);
+            layer = layer || this.parent;
+            if(!layer){
+                layer = core.scenes.mapScene.getLayer(block.name || 'event')
+                    || core.scenes.mapScene.getLayer('event');
+            }
+            if(this.parent && this.parent != layer)
+                return;
+            if(block.event){
+                if(block.event.cls=='autotile'){ //todo: 如果是添加到当前的容器 是否会正常？
+                    core.maps._drawAutotile(layer, arr, block, core.__BLOCK_SIZE__, 0, 0);
+                    return;
+                }
+                else{
+                    if(block.event.animate && block.event.animate != 1){
+                        this.addAnimateInfo({'speed':30});
+                    }
+                    if(block.event.move){//todo:如果是具有移动信息的事件，如何保证录像？
+                    }
+                }
+            }
+            if(!layer.hasObj(this))
+                layer.addNewObj(this);
+
+        },
+        // 转向
+        'turn': function(block){
+            if(block.direction){
+                this.changePattern(null, core.utils.line[block.direction]);
+            }
+        },
+        // 移动 此处主要针对地图上的块 每次移动1格
+        'move': function(block, moveInfo){
+            this.setPositionWithBlock(block);
+            var speed = moveInfo.speed || 1; // TODO: 速度信息
+            var dir = moveInfo.direction;
+            var obj = this;
+            core.events._eventMoveSprite_moving(obj, dir, speed, moveInfo.callback, moveInfo.info)
+            return;
+
+            ////// xxxxxx 数据耦合 删除
+            var step = 0, moveSteps = (moveInfo.moveSteps||[]).filter(function (t) {
+                return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
+            });
+            var nextStep = function(){
+                if(step<moveSteps.length){
+                    var dir = moveSteps[step++];
+                    block.x += core.utils.scan[dir].x;
+                    block.y += core.utils.scan[dir].y;
+                    core.events._eventMoveSprite_moving(obj, dir, speed, nextStep, moveInfo.info);
+                }else{
+                    obj.stopAnimate();
+                    obj.resetFrame();
+                    delete core.animateFrame.asyncId[obj];
+                    if(moveInfo.callback)moveInfo.callback();
+                }
+            }
+            core.animateFrame.asyncId[obj] = true;
+            nextStep();
+        },
+
+        'relocate': function(block){
+            if(this.parent){
+                this.parent.relocate(this);
+            }
+        },
+
+
+        // 跳跃 todo: 有细微的像素偏差 不知道问题在什么地方
+        'jump': function(block, jumpInfo){
+            var obj = this;
+            if(obj.parent)
+                obj.parent.relocate(obj,1000001);
+            var px = jumpInfo.px,
+                py = jumpInfo.py;
+            var bias_x = px - this.x,
+                bias_y = py - this.y;
+            var next = function(){
+                obj.addMoveInfo(
+                    ~~(jumpInfo.px-px),
+                    ~~(jumpInfo.py-py),
+                    0.01,
+                    function(){
+                        if(jumpInfo.jump_count>0){
+                            core.maps.__updateJumpInfo(jumpInfo);
+                            setTimeout(next, jumpInfo.per_time);
+                        }
+                        else{
+                            obj.parent.relocate(obj);
+                            if(jumpInfo.callback){
+                                jumpInfo.callback();
+                            }
+                        }
+                    })
+                px = jumpInfo.px;
+                py = jumpInfo.py;
+            }
+            next();
+        },
+        // 淡出
+        'hide': function(block, params){
+            core.maps._showHideSpriteAnimate(this, params.time || 500, -0.1, params.callback);
+        },
+        // 淡入
+        'show': function(block, params){
+            core.maps._showHideSpriteAnimate(this, params.time, 0.1, params.callback);
+        },
+        // 模糊
+        'blur': function(block, param){
+            this.alpha = param;
+        },
+        // 动画
+        'play': function(block, info){
+            this.addAnimateInfo(info);
+        },
+        // 停止
+        'stop': function(block){
+            this.stopAnimate();
+        },
+        // 死亡的obj
+        'remove': function(block, layer, obj){
+            if(obj && this!==obj)return;
+            layer = layer || this.parent || obj;
+            layer.removeChild(this);//从场景中移除自身
+            block.remove(this);//观察者列表移除自身
+        }
+    }
 }
 
 control.prototype._init = function () {
@@ -20,7 +157,8 @@ control.prototype._init = function () {
     this.registerAnimationFrame("autoSave", true, this._animationFrame_autoSave);
     this.registerAnimationFrame("globalAnimate", true, this._animationFrame_globalAnimate);
     this.registerAnimationFrame("animate", true, this._animationFrame_animate);
-    this.registerAnimationFrame("heroMoving", true, this._animationFrame_heroMoving);
+    //this.registerAnimationFrame("heroMoving", true, this._animationFrame_heroMoving);
+    // this.registerAnimationFrame("sprite", true, this._animationFrame_sprite);
     this.registerAnimationFrame("weather", true, this._animationFrame_weather);
     this.registerAnimationFrame("parallelDo", false, this._animationFrame_parallelDo);
     this.registerAnimationFrame("checkConsoleOpened", true, this._animationFrame_checkConsoleOpened);
@@ -42,6 +180,9 @@ control.prototype._init = function () {
     this.registerResize("status", this._resize_status);
     this.registerResize("toolBar", this._resize_toolBar);
     this.registerResize("tools", this._resize_tools);
+    this.registerResize("map", this._resize_map);
+    // --- 注册系统的blockAction
+
 }
 
 // ------ requestAnimationFrame 相关 ------ //
@@ -127,23 +268,27 @@ control.prototype._animationFrame_autoSave = function (timestamp) {
     core.saves.autosave.time = timestamp;
 }
 
+control.prototype._animationFrame_sprite = function (timestamp) {
+    core.scenes.updateAllScenes();
+}
+
 control.prototype._animationFrame_globalAnimate = function (timestamp) {
     if (timestamp - core.animateFrame.globalTime <= core.values.animateSpeed) return;
     core.status.globalAnimateStatus++;
     if (core.status.floorId) {
         // Global Animate
         core.status.globalAnimateObjs.forEach(function (block) {
-            core.drawBlock(block, core.status.globalAnimateStatus % (block.event.animate||1));
+            core.maps.drawBlock(block, core.status.globalAnimateStatus % (block.event.animate||1));
         });
 
         // Global floor images
-        core.maps._drawFloorImages(core.status.floorId, core.canvas.bg, 'bg', core.status.floorAnimateObjs||[], core.status.globalAnimateStatus);
-        core.maps._drawFloorImages(core.status.floorId, core.canvas.fg, 'fg', core.status.floorAnimateObjs||[], core.status.globalAnimateStatus);
+        // core.maps._drawFloorImages(core.status.floorId, core.canvas.bg, 'bg', core.status.floorAnimateObjs||[], core.status.globalAnimateStatus);
+        // core.maps._drawFloorImages(core.status.floorId, core.canvas.fg, 'fg', core.status.floorAnimateObjs||[], core.status.globalAnimateStatus);
 
-        // Global Autotile Animate
-        core.status.autotileAnimateObjs.blocks.forEach(function (block) {
-            core.maps._drawAutotileAnimate(block, core.status.globalAnimateStatus);
-        });
+        // Global Autotile Animate 直接一开始就加动画
+        //core.status.autotileAnimateObjs.blocks.forEach(function (block) {
+        //    core.maps._drawAutotileAnimate(block, core.status.globalAnimateStatus);
+        //});
     }
     // Box animate
     core.drawBoxAnimate();
@@ -176,10 +321,12 @@ control.prototype._animationFrame_animate = function (timestamp) {
 control.prototype._animationFrame_heroMoving = function (timestamp) {
     if (core.status.heroMoving <= 0) return;
     // 换腿
-    if (timestamp - core.animateFrame.moveTime > (core.values.moveSpeed||100)) {
+    var lag = timestamp - core.animateFrame.moveTime;
+    if (lag > (core.values.moveSpeed||100)) {
         core.animateFrame.leftLeg = !core.animateFrame.leftLeg;
         core.animateFrame.moveTime = timestamp;
     }
+
     core.drawHero(core.animateFrame.leftLeg?'leftFoot':'rightFoot', 4*core.status.heroMoving);
 }
 
@@ -551,6 +698,70 @@ control.prototype.setAutoHeroMove = function (steps) {
     core.moveHero(steps[0].direction);
 }
 
+
+control.prototype.scrollBigMap = function(dx, dy){
+    var maxWo = (core.bigmap.width - core.__SIZE__)* core.__BLOCK_SIZE__;
+    var maxHo = (core.bigmap.height - core.__SIZE__)* core.__BLOCK_SIZE__;
+    core.bigmap.offsetX = core.clamp(core.bigmap.offsetX + dx, 0, maxWo);
+    core.bigmap.offsetY = core.clamp(core.bigmap.offsetY + dy, 0, maxHo);
+    core.control.updateViewport();
+}
+
+///// 以某点为中心设置视野
+control.prototype.setCentralViewPoint = function(x, y){
+    core.bigmap.offsetX = core.clamp(x - core.__HALF_SIZE__*32, 0, 32*core.bigmap.width-core.__PIXELS__);
+    core.bigmap.offsetY = core.clamp(y - core.__HALF_SIZE__*32, 0, 32*core.bigmap.height-core.__PIXELS__);
+    core.control.updateViewport();
+}
+
+////// 实际行走动画
+control.prototype._herosSpriteMove = function(callback){
+    var direction = core.getHeroLoc('direction');
+    var dx = core.utils.scan[direction].x * 32,
+        dy = core.utils.scan[direction].y * 32;
+    var line = core.utils.line[direction];
+    var render = core.scenes.mapScene.getLayer('event');
+    var nx = core.nextX(), ny = core.nextY();
+    var bigmap =
+        dx > 0 && nx > core.__HALF_SIZE__ && nx + 1 <= core.bigmap.width - core.__HALF_SIZE__
+        ||
+        dx < 0 && nx >= core.__HALF_SIZE__ && nx + 1 < core.bigmap.width - core.__HALF_SIZE__
+        ||
+        dy > 0 && ny > core.__HALF_SIZE__ && ny + 1 <= core.bigmap.height - core.__HALF_SIZE__
+        ||
+        dy < 0 && ny >= core.__HALF_SIZE__ && ny + 1 < core.bigmap.height - core.__HALF_SIZE__;
+    var ct = 0;
+    var i = 0;
+    core.status.heroSprite.objs.forEach(
+        function(o){
+            i += 1;
+            if(core.isset(o.stop)){
+                if(o.stop){
+                    return;
+                }
+            }
+            ct += 1;
+            o.notify("move",{
+                'moveSteps':[o.direction],
+                'direction': o.direction,
+                'speed': core.__BLOCK_SIZE__ / (core.values.moveSpeed/16.6), 
+                // hero移动速度: 每帧的移动距离，一帧约为16.6ms values的movespeed代表移动一格经过的毫秒数
+                'callback': function(){
+                    ct -= 1;
+                    if(ct==0 && i==core.status.heroSprite.objs.length){
+                        if(callback)callback();
+                    }
+                },
+                'info':{
+                    'freq':4,
+                    'bigmap': bigmap
+                }
+            })
+            bigmap = false; // bigmap只一次
+        }
+    )
+    return;
+}
 ////// 设置行走的效果动画 //////
 control.prototype.setHeroMoveInterval = function (callback) {
     if (core.status.heroMoving > 0) return;
@@ -559,14 +770,25 @@ control.prototype.setHeroMoveInterval = function (callback) {
         if (callback) callback();
         return;
     }
-
     core.status.heroMoving=1;
-
     var toAdd = 1;
     if (core.status.replay.speed>3) toAdd = 2;
     if (core.status.replay.speed>6) toAdd = 4;
     if (core.status.replay.speed>12) toAdd = 8;
 
+    this._herosSpriteMove(
+        function(){
+            core.status.heroMoving = 0;
+            core.moveOneStep(core.nextX(), core.nextY());
+            if(callback)callback();
+        }
+    )
+
+    return;
+
+
+    return;
+    //// XXXXXXXXXXXXXXXX ///////////
     core.interval.heroMoveInterval = window.setInterval(function () {
         core.status.heroMoving+=toAdd;
         if (core.status.heroMoving>=8) {
@@ -578,6 +800,11 @@ control.prototype.setHeroMoveInterval = function (callback) {
     }, (core.values.moveSpeed||100) / 8 * toAdd / core.status.replay.speed);
 }
 
+////// 每一步移动前的操作 如果返回false 表示无法移动 /////
+control.prototype.beforeMoveStep = function(canMove){
+    return this.controldata.beforeMoveStep(canMove);
+}
+
 ////// 每移动一格后执行的事件 //////
 control.prototype.moveOneStep = function(x, y) {
     return this.controldata.moveOneStep(x, y);
@@ -587,6 +814,7 @@ control.prototype.moveOneStep = function(x, y) {
 control.prototype.moveAction = function (callback) {
     if (core.status.heroMoving>0) return;
     var noPass = core.noPass(core.nextX(), core.nextY()), canMove = core.canMoveHero();
+    this.beforeMoveStep(!(noPass || !canMove));
     // 下一个点如果不能走
     if (noPass || !canMove) return this._moveAction_noPass(canMove, callback);
     this._moveAction_moving(callback);
@@ -627,7 +855,7 @@ control.prototype._moveAction_moving = function (callback) {
         // 执行该点事件
         if (!hasTrigger)
             core.events._trigger(nowx, nowy);
-        core.updateStatusBar();
+        // core.updateStatusBar();
 
         // 检查该点是否是滑冰
         if (core.getBgNumber() == 167) {
@@ -665,7 +893,6 @@ control.prototype.moveHero = function (direction, callback) {
     if (core.status.heroMoving!=0) return;
     if (core.isset(direction))
         core.setHeroLoc('direction', direction);
-
     if (callback) return this.moveAction(callback);
     this._moveHero_moving();
 }
@@ -688,8 +915,8 @@ control.prototype._moveHero_moving = function () {
                 });
             }
             else {
-                core.moveAction();
-                setTimeout(move, 50);
+                core.moveAction(move);
+                //setTimeout(move, 50);
             }
         }
     }
@@ -759,9 +986,72 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
     return false;
 }
 
+
+///// ----- 变换的观察者 -----
+function transformOberver(obj){
+    this.position = obj || {};
+}
+transformOberver.prototype.getPosition = function() {
+    return this.position;
+}
+transformOberver.prototype.notify = function(changeFunc){
+    changeFunc.call(this.position);
+}
+
+
+
+control.prototype.eventSpritePositionTransForm = function(obj, x, y, direction, status, offset){
+
+}
+
+control.prototype.heroSpritePositionTransForm = function(obj, x, y, direction, status, offset){
+    var mesh = {
+        "stop": 0,
+        "leftFoot": 1,
+        "rightFoot": 3
+    };
+    var dir = {
+        "down": 0,
+        "left": 1,
+        "right": 2,
+        "up": 3,
+    };
+    offset = offset || 0;
+    direction = direction || 'down';
+    // obj.nFrame = (obj.nFrame||0)%2==1?obj.nFrame-1:obj.nFrame;
+    obj.x = x * 32 + 16;
+    obj.y = (y+1) * 32;
+    obj.changePattern(null, dir[direction]);
+    // obj.offsetX = core.utils.scan[direction].x * offset;
+    // obj.offsetY = core.utils.scan[direction].y * offset;
+    //obj.nFrame = obj.nFrame || mesh[status||'stop'];
+   // obj.nLine =  obj.nLine || dir[direction];
+}
+
 ////// 绘制勇士 //////
+// TODO: 勇士的观察者sprite 包括勇士本体 以及勇士的追踪者
+control.prototype._addHeroSprite = function(data){
+    core.becomeSubject(data);
+    data.addObserver(
+        core.sprite.getSpriteObj(data.name || 'hero'));
+    core.status.heroSprite.objs.push(data);
+}
+
 control.prototype.drawHero = function (status, offset) {
     if (!core.isPlaying() || !core.status.floorId || core.status.gameOver) return;
+
+    if(core.status.heroSprite){
+        core.status.heroSprite.objs = core.status.heroSprite.objs.filter(function(o){
+            return !o.isEmpty();
+        })
+    }
+    if(!core.status.heroSprite || core.status.heroSprite.objs.length==0){
+        core.status.heroSprite = {
+            objs: [],
+        };
+        [core.status.hero.loc].concat(core.status.hero.followers || [])
+            .forEach(this._addHeroSprite);
+    }
     var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
     status = status || 'stop';
     offset = offset || 0;
@@ -770,13 +1060,66 @@ control.prototype.drawHero = function (status, offset) {
     core.bigmap.offsetX = core.clamp((x - core.__HALF_SIZE__) * 32 + offsetX, 0, 32*core.bigmap.width-core.__PIXELS__);
     core.bigmap.offsetY = core.clamp((y - core.__HALF_SIZE__) * 32 + offsetY, 0, 32*core.bigmap.height-core.__PIXELS__);
     core.clearAutomaticRouteNode(x+dx, y+dy);
-    core.clearMap('hero');
+    //this.heroSpritePositionTransForm(core.status.heroSprite.obj, x, y, direction, status, offset);
 
+
+    if(main.mode=='play'){
+        // 勇士放在事件层
+        core.status.heroSprite.objs[0].notify('turn');
+        core.status.heroSprite.objs.forEach(function(o){
+            o.notify('draw');
+        })
+        /*
+        if(!core.scenes.mapScene.getLayer('event').hasObj(core.status.heroSprite.obj)){ // TODO：简化-查看是否位于当前场景
+            core.scenes.mapScene.addSpriteToLayer('event', core.status.heroSprite.obj);
+        }
+        core.scenes.mapScene.getLayer('event').relocate(core.status.heroSprite.obj);
+        */
+    }
+
+
+    // core.clearMap('hero');
+    /*
+    core.status.heroSprite.observer.notify(
+        function(){
+            var mesh = {
+                "stop": 0,
+                "leftFoot": 1,
+                "rightFoot": 3
+            };
+            var dir = {
+                "down": 0,
+                "left": 1,
+                "right": 2,
+                "up": 3,
+            };
+            this.x = x * 32+16 - ~~(this.info.width/2+0.5) - core.bigmap.offsetX;
+            this.y = (y+1) * 32 - this.info.height - core.bigmap.offsetY;
+            this.offsetX = core.utils.scan[direction].x * offset;
+            this.offsetY = core.utils.scan[direction].y * offset;
+            this.nFrame = mesh[status];
+            this.nLine = dir[direction];
+        }
+    )
+   */
+    // core.scenes.mapScene.getLayer('event').reloacate(core.status.heroSprite.obj);
+
+    core.control.updateViewport();
+    // core.setGameCanvasTranslate('hero', 0, 0);
+    /*
     this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
         core.drawImage('hero', block.img, block.heroIcon[block.status]*block.width,
             block.heroIcon.loc * block.height, block.width, block.height,
             block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
     });
+*/return;
+    if (!core.hasFlag('hideHero')) {
+        this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
+            core.drawImage('hero', block.img, block.heroIcon[block.status]*block.width,
+                block.heroIcon.loc * block.height, block.width, block.height,
+                block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
+        });
+    }
 
     core.control.updateViewport();
     core.setGameCanvasTranslate('hero', 0, 0);
@@ -846,9 +1189,10 @@ control.prototype.addGameCanvasTranslate = function (x, y) {
 
 ////// 更新视野范围 //////
 control.prototype.updateViewport = function() {
-    core.bigmap.canvas.forEach(function(cn){
-        core.control.setGameCanvasTranslate(cn,-core.bigmap.offsetX,-core.bigmap.offsetY);
-    });
+    //core.bigmap.canvas.forEach(function(cn){
+    //    core.control.setGameCanvasTranslate(cn,-core.bigmap.offsetX,-core.bigmap.offsetY);
+    //});
+    core.scenes.mapScene.stage.setTransform(-core.bigmap.offsetX, -core.bigmap.offsetY);
     // ------ 路线
     core.relocateCanvas('route', core.status.automaticRoute.offsetX - core.bigmap.offsetX, core.status.automaticRoute.offsetY - core.bigmap.offsetY);
 }
@@ -859,9 +1203,9 @@ control.prototype.setViewport = function (x, y) {
     core.bigmap.offsetY = core.clamp(y, 0, 32 * core.bigmap.height - core.__PIXELS__);
     this.updateViewport();
     // ------ hero层也需要！
-    var hero_x = core.clamp((core.getHeroLoc('x') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.width-core.__PIXELS__);
-    var hero_y = core.clamp((core.getHeroLoc('y') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.height-core.__PIXELS__);
-    core.control.setGameCanvasTranslate('hero', hero_x - core.bigmap.offsetX, hero_y - core.bigmap.offsetY);
+    // var hero_x = core.clamp((core.getHeroLoc('x') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.width-core.__PIXELS__);
+    // var hero_y = core.clamp((core.getHeroLoc('y') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.height-core.__PIXELS__);
+    // core.control.setGameCanvasTranslate('hero', hero_x - core.bigmap.offsetX, hero_y - core.bigmap.offsetY);
 }
 
 ////// 移动视野范围 //////
@@ -1026,6 +1370,7 @@ control.prototype.updateDamage = function (floorId, ctx) {
     core.setFont(ctx, "bold 11px Arial");
     this._updateDamage_damage(floorId, ctx);
     this._updateDamage_extraDamage(floorId, ctx, refreshCheckBlock);
+    core.scenes.mapScene.getLayer('damage').updateTexture();
 }
 
 control.prototype._updateDamage_damage = function (floorId, ctx) {
@@ -2785,5 +3130,12 @@ control.prototype._resize_tools = function (obj) {
     else {
         core.dom.hard.style.width = obj.BAR_WIDTH * core.domStyle.scale - 9 - 2 * toolsMarginLeft + "px";
         if (!obj.is15x15) core.dom.hard.style.marginTop = 0;
+    }
+}
+
+control.prototype._resize_map = function (obj) {
+    if(core.scenes && core.scenes.mapScene){
+        core.scenes.mapScene.view.style.width = core.domStyle.scale * core.scenes.mapScene.view.width + 'px';
+        core.scenes.mapScene.view.style.height = core.domStyle.scale * core.scenes.mapScene.view.height + 'px';
     }
 }

@@ -63,5 +63,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"angel": {"name":"天使","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
 	"elemental": {"name":"元素生物","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
 	"steelGuard": {"name":"铁守卫","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":18,"value":20},
-	"evilBat": {"name":"邪恶蝙蝠","hp":1000,"atk":1,"def":0,"money":0,"experience":0,"point":0,"special":[2,3]}
+    "evilBat": {"name":"邪恶蝙蝠","hp":1000,"atk":1,"def":0,"money":0,"experience":0,"point":0,"special":[2,3]},
+    "darkMon1": {"name":"邪恶蝙蝠","hp":10,"atk":1,"def":0,"money":0,"experience":0,"point":0,"special":[2,3]},
+    "darkMon2": {"name":"邪恶蝙蝠","hp":1000,"atk":1,"def":0,"money":0,"experience":0,"point":0,"special":[2,3]},
 }

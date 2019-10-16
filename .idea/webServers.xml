@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="3fea1c5f-43ce-4b4a-b1f1-99e3f8addfd3" name="xfyy" url="http://xfyy.site">
+        <fileTransfer host="xfyy.site" port="22" rootFolder="/root/mota/mota-js" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

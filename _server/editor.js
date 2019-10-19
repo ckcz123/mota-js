@@ -344,6 +344,7 @@ editor.prototype.updateMap = function () {
 editor.prototype.setViewport=function (x, y) {
     core.bigmap.offsetX = core.clamp(x, 0, 32*core.bigmap.width-core.__PIXELS__);
     core.bigmap.offsetY = core.clamp(y, 0, 32*core.bigmap.height-core.__PIXELS__);
+    editor.viewportLoc = editor.viewportLoc || {};
     editor.viewportLoc[editor.currentFloorId] = [core.bigmap.offsetX, core.bigmap.offsetY];
     core.control.updateViewport();
     editor.buildMark();

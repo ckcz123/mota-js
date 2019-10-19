@@ -467,11 +467,13 @@ events.prototype.getItem = function (id, num, x, y, callback) {
         try {
             hint = core.replaceText(hint);
         } catch (e) {}
-        core.insertAction("\t["+core.material.items[id].name+","+id+"]" + hint + "\n"
-            + (itemCls == 'keys' || id == 'greenKey' || id == 'steelKey' ? "（钥匙类道具，遇到对应的门时自动打开）"
-                : itemCls == 'tools' ? "（消耗类道具，请按T在道具栏使用）"
-                : itemCls == 'constants' ? "（永久类道具，请按T在道具栏使用）"
-                : itemCls == 'equips' ? "（装备类道具，请按Q在装备栏进行装备）" : ""))
+        if (!core.status.event.id || core.status.event.id=='action') {
+            core.insertAction("\t["+core.material.items[id].name+","+id+"]" + hint + "\n"
+                + (itemCls == 'keys' || id == 'greenKey' || id == 'steelKey' ? "（钥匙类道具，遇到对应的门时自动打开）"
+                    : itemCls == 'tools' ? "（消耗类道具，请按T在道具栏使用）"
+                    : itemCls == 'constants' ? "（永久类道具，请按T在道具栏使用）"
+                    : itemCls == 'equips' ? "（装备类道具，请按Q在装备栏进行装备）" : ""));
+        }
         itemHint.push(id);
     }
 
@@ -2155,6 +2157,7 @@ events.prototype.moveImage = function (code, to, opacityVal, time, callback) {
 
 events.prototype._moveImage_moving = function (name, moveInfo, callback) {
     var per_time = 10, step = 0, steps = parseInt(moveInfo.time / 10);
+    if (steps <= 0) steps = 1;
     var fromX = moveInfo.fromX, fromY = moveInfo.fromY, toX = moveInfo.toX, toY = moveInfo.toY,
         opacity = moveInfo.opacity, toOpacity = moveInfo.toOpacity;
     var currX = fromX, currY = fromY, currOpacity = opacity;
@@ -2209,6 +2212,7 @@ events.prototype.setVolume = function (value, time, callback) {
     var currVolume = core.musicStatus.volume;
     time /= Math.max(core.status.replay.speed, 1);
     var per_time = 10, step = 0, steps = parseInt(time / per_time);
+    if (steps <= 0) steps = 1;
     var fade = setInterval(function () {
         step++;
         set(currVolume + (value - currVolume) * step / steps);

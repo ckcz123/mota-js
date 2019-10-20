@@ -87,6 +87,9 @@ function main() {
     this.materials = [
         'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains', 'enemy48', 'npc48'
     ];
+    this.pluginList = [
+        'plugins_data','plugins'
+    ];
 
     this.statusBar = {
         'image': {
@@ -234,8 +237,11 @@ main.prototype.init = function (mode, callback) {
                 "animates", "bgms", "sounds", "floorIds", "floors"].forEach(function (t) {
                     coreData[t] = main[t];
                 })
-                main.core.init(coreData, callback);
-                main.core.resize();
+                main.loadJs('plugins', main.pluginList, function() {
+                    PluginManager.setup($plugins);
+                    main.core.init(coreData, callback);
+                	main.core.resize();
+                });
             });
         });
     });

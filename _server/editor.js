@@ -253,8 +253,15 @@ editor.prototype.drawEventBlock = function () {
             var loc=(i+core.bigmap.offsetX/32)+","+(j+core.bigmap.offsetY/32);
             if (editor.currentFloorData.events[loc])
                 color.push('#FF0000');
-            if (editor.currentFloorData.autoEvent[loc])
-                color.push('#FFA500');
+            if (editor.currentFloorData.autoEvent[loc]) {
+                var x = editor.currentFloorData.autoEvent[loc];
+                for (var index in x) {
+                    if (x[index] && x[index].data) {
+                        color.push('#FFA500');
+                        break;
+                    }
+                }
+            }
             if (editor.currentFloorData.afterBattle[loc])
                 color.push('#FFFF00');
             if (editor.currentFloorData.changeFloor[loc])

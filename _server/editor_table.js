@@ -341,12 +341,12 @@ editor_table_wrapper = function (editor) {
         var mode = editor.dom.editModeSelect.value;
 
         // 1.输入id
-        var newid = '3'; 
+        var newid = '2';
         if (mode == 'loc') {
             var ae = editor.currentFloorData.autoEvent[editor_mode.pos.x + ',' + editor_mode.pos.y];
             if (ae != null) {
                 var testid;
-                for (testid = 3; Object.hasOwnProperty.call(ae, testid); testid++); // 从3开始是因为comment中设置了始终显示012
+                for (testid = 2; Object.hasOwnProperty.call(ae, testid); testid++); // 从3开始是因为comment中设置了始终显示012
                 newid = testid + '';
             }
         } else {

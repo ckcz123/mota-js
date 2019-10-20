@@ -123,6 +123,20 @@ editor_datapanel_wrapper = function (editor) {
     ///////////////////////////////////////////////////////////////////////
 
 
+    // 添加自动事件页，无需双击
+    editor.uifunctions.addAutoEvent = function () {
+        if (editor_mode.mode != 'loc') return false;
+        var newid = '2';
+        var ae = editor.currentFloorData.autoEvent[editor_mode.pos.x + ',' + editor_mode.pos.y];
+        if (ae != null) {
+            var testid;
+            for (testid = 2; Object.hasOwnProperty.call(ae, testid); testid++);
+            newid = testid + '';
+        }
+        editor_mode.addAction(['add', "['autoEvent']['" + newid + "']", null]);
+        editor_mode.onmode('save');
+    }
+
 
 
 

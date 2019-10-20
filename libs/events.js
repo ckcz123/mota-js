@@ -802,6 +802,8 @@ events.prototype.setEvents = function (list, x, y, callback) {
     if (x != null) data.x = x;
     if (y != null) data.y = y;
     if (callback) data.callback = callback;
+    if (!data.appendingEvents) data.appendingEvents = [];
+    if (!data.locStack) data.locStack = [];
     core.status.event.id = 'action';
     core.status.event.data = data;
 }
@@ -848,6 +850,11 @@ events.prototype.doAction = function (keepUI) {
 events.prototype._doAction_finishEvents = function () {
     // 事件处理完毕
     if (core.status.event.data.list.length == 0) {
+        // 检测并执行延迟自动事件
+        if (core.status.event.data.appendingEvents.length > 0) {
+            this.setEvents(core.status.event.data.appendingEvents.shift());
+            return false;
+        }
         var callback = core.status.event.data.callback;
         core.ui.closePanel();
         if (callback) callback();
@@ -915,6 +922,81 @@ events.prototype.recoverEvents = function (data) {
         return true;
     }
     return false;
+}
+
+////// 检测自动事件 //////
+events.prototype.checkAutoEvents = function () {
+    // 只有在无操作或事件流中才能执行自动事件！
+    if (!core.isPlaying() || core.status.lockControl && core.status.event.id != 'action') return;
+    var todo = [], delay = [];
+    core.status.autoEvents.forEach(function (autoEvent) {
+        var symbol = autoEvent.symbol, x = autoEvent.x, y = autoEvent.y, floorId = autoEvent.floorId;
+        // 不在当前楼层 or 已经执行过 or 正在执行中
+        if (autoEvent.currentFloor && floorId != core.status.floorId) return;
+        if (!autoEvent.multiExecute && autoEvent.executed) return;
+        if (core.autoEventExecuting(symbol)) return;
+        var prefix = floorId + "@" + x + "@" + y;
+        try {
+            if (!core.calValue(autoEvent.condition, prefix)) return;
+        } catch (e) {
+            return;
+        }
+
+        core.autoEventExecuting(symbol, true);
+        autoEvent.executed = true;
+
+        var event = [
+            {"type": "function", "function":
+                    "function() { core.pushEventLoc(" + x + ", " + y + ", '" + floorId + "' ); }"},
+            // 用do-while(0)包一层防止break影响事件流
+            {"type": "dowhile", "condition": "false", "data": autoEvent.data},
+            {"type": "function", "function":
+                    "function() { core.popEventLoc(); core.autoEventExecuting('" + symbol + "', false); }"}
+        ];
+
+        if (autoEvent.delayExecute)
+            delay.push(event);
+        else
+            core.push(todo, event);
+    });
+
+    if (todo.length == 0 && delay.length == 0) return;
+
+    if (core.status.event.id == 'action' || todo.length > 0) {
+        core.insertAction(todo);
+        core.push(core.status.event.data.appendingEvents, delay);
+    } else {
+        core.insertAction(delay);
+    }
+
+}
+
+events.prototype.autoEventExecuting = function (symbol, value) {
+    var name = '_executing_autoEvent_' + symbol;
+    if (value == null) return core.getFlag(name, false);
+    else core.setFlag(name, value || null);
+}
+
+events.prototype.pushEventLoc = function (x, y, floorId) {
+    if (core.status.event.id != 'action') return;
+    core.status.event.data.locStack.push({
+        x: core.status.event.data.x,
+        y: core.status.event.data.y,
+        floorId: core.status.event.data.floorId
+    });
+    core.status.event.data.x = x;
+    core.status.event.data.y = y;
+    core.status.event.data.floorId = floorId;
+}
+
+events.prototype.popEventLoc = function () {
+    if (core.status.event.id != 'action') return;
+    var loc = core.status.event.data.locStack.shift();
+    if (loc) {
+        core.status.event.data.x = loc.x;
+        core.status.event.data.y = loc.y;
+        core.status.event.data.floorId = loc.floorId;
+    }
 }
 
 // ------ 样板提供的的自定义事件 ------ //

@@ -2329,9 +2329,10 @@ control.prototype.clearStatusBar = function() {
 }
 
 ////// 更新状态栏 //////
-control.prototype.updateStatusBar = function () {
+control.prototype.updateStatusBar = function (doNotCheckAutoEvents) {
     if (!core.isPlaying()) return;
     this.controldata.updateStatusBar();
+    if (!doNotCheckAutoEvents) core.checkAutoEvents();
     this._updateStatusBar_setToolboxIcon();
 }
 

@@ -440,7 +440,7 @@ ui.prototype._uievent_drawIcon = function (data) {
 ui.prototype.closePanel = function () {
     this.clearUI();
     core.maps.generateGroundPattern();
-    core.updateStatusBar();
+    core.updateStatusBar(true);
     core.unLockControl();
     core.status.event.data = null;
     core.status.event.id = null;

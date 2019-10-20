@@ -145,6 +145,7 @@ editor_table_wrapper = function (editor) {
                     if (key === '_data') continue;
                     if (cobj[key] instanceof Function) cobj[key] = cobj[key](args);
                 }
+                pvobj[ii] = vobj = args.vobj;
                 // 标记为_hide的属性不展示
                 if (cobj._hide) continue;
                 if (!cobj._leaf) {
@@ -337,12 +338,22 @@ editor_table_wrapper = function (editor) {
     editor_table.prototype.addfunc = function (guid, obj, commentObj, thisTr, input, field, cobj, modeNode) {
         editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
 
-        var mode = document.getElementById('editModeSelect').value;
+        var mode = editor.dom.editModeSelect.value;
 
         // 1.输入id
-        var newid = prompt('请输入新项的ID（仅公共事件支持中文ID）');
-        if (newid == null || newid.length == 0) {
-            return;
+        var newid = '2';
+        if (mode == 'loc') {
+            var ae = editor.currentFloorData.autoEvent[editor_mode.pos.x + ',' + editor_mode.pos.y];
+            if (ae != null) {
+                var testid;
+                for (testid = 2; Object.hasOwnProperty.call(ae, testid); testid++); // 从3开始是因为comment中设置了始终显示012
+                newid = testid + '';
+            }
+        } else {
+            newid = prompt('请输入新项的ID（仅公共事件支持中文ID）');
+            if (newid == null || newid.length == 0) {
+                return;
+            }
         }
 
         // 检查commentEvents

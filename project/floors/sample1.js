@@ -730,20 +730,6 @@ main.floors.sample1=
             "type": "setValue",
             "name": "flag:door",
             "value": "flag:door+1"
-        },
-        {
-            "type": "if",
-            "condition": "flag:door==2",
-            "true": [
-                {
-                    "type": "openDoor",
-                    "loc": [
-                        11,
-                        6
-                    ]
-                }
-            ],
-            "false": []
         }
     ],
     "12,7": [
@@ -751,20 +737,6 @@ main.floors.sample1=
             "type": "setValue",
             "name": "flag:door",
             "value": "flag:door+1"
-        },
-        {
-            "type": "if",
-            "condition": "flag:door==2",
-            "true": [
-                {
-                    "type": "openDoor",
-                    "loc": [
-                        11,
-                        6
-                    ]
-                }
-            ],
-            "false": []
         }
     ]
 },
@@ -777,4 +749,21 @@ main.floors.sample1=
 "fgmap": [
 
 ],
+"autoEvent": {
+    "11,6": {
+        "0": {
+            "condition": "flag:door==2",
+            "currentFloor": true,
+            "priority": 0,
+            "delayExecute": false,
+            "multiExecute": false,
+            "data": [
+                {
+                    "type": "openDoor"
+                }
+
+            ]
+        }
+    }
+}
 }

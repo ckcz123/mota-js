@@ -26,6 +26,16 @@ editor_blockly = function () {
         "本事件触发一次后会消失",
         {"type": "hide", "time": 500},
       ],'event'),
+      MotaActionFunctions.actionParser.parse({
+        "condition": "flag:__door__==2",
+        "currentFloor": true,
+        "priority": 0,
+        "delayExecute": false,
+        "multiExecute": false,
+        "data": [
+          {"type": "openDoor", "loc": [10,5]}
+        ],
+      },'autoEvent'),
       MotaActionBlocks['changeFloor_m'].xmlText(),
       MotaActionFunctions.actionParser.parse([{
         "id": "moneyShop1",
@@ -629,8 +639,8 @@ function omitedcheckUpdateFunction(event) {
                 // console.log(obj);
                 if (obj.length > 0 && b.type.startsWith(obj[0].type)) {
                     if (b.type == 'previewUI_s')
-                        uievent.previewUI(obj[0].action);
-                    else uievent.previewUI([obj[0]]);
+                        editor.uievent.previewUI(obj[0].action);
+                    else editor.uievent.previewUI([obj[0]]);
                 }
             } catch (e) {main.log(e);}
             return true;
@@ -792,7 +802,7 @@ function omitedcheckUpdateFunction(event) {
             if (!isNaN(yv)) y = yv;
             if (arr[2] != null) floorId = block.getFieldValue(arr[2]) || floorId;
         }
-        uievent.selectPoint(floorId, x, y, arr && arr[2] == null, function (fv, xv, yv) {
+        editor.uievent.selectPoint(floorId, x, y, arr && arr[2] == null, function (fv, xv, yv) {
             if (!arr) return;
             if (arr[2] != null) {
                 if (fv != editor.currentFloorId) block.setFieldValue(fv, arr[2]);

@@ -353,7 +353,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.setFlag('skill', 0);
 		core.setFlag('skillName', '无');
 	}
-	core.updateStatusBar();
 
 	// 如果有加点
 	var point = core.material.enemys[enemyId].point;
@@ -375,6 +374,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 如果事件不为空，将其插入
 	if (todo.length > 0) core.insertAction(todo, x, y);
+	core.updateStatusBar();
 
 	// 如果已有事件正在处理中
 	if (core.status.event.id == null)

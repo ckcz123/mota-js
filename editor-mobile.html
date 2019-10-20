@@ -101,7 +101,7 @@
         </div>
     </div>
     <div id="left2" class='leftTab' style="z-index:-1;opacity: 0;"><!-- loc -->
-        <h3 class="leftTabHeader">地图选点&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('loc')">配置表格</button>
+        <h3 class="leftTabHeader">地图选点&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.uifunctions.addAutoEvent()">添加自动事件页</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('loc')">配置表格</button>
         </h3>
         <div class="leftTabContent">
             <p id='pos_a6771a78_a099_417c_828f_0a24851ebfce' style="margin-left: 15px">0,0</p>
@@ -195,6 +195,7 @@
                 -->
                 <select id="entryType" disabled="disabled" style="display: none">
                     <option value="event">event</option>
+                    <option value="autoEvent">autoEvent</option>
                     <option value="changeFloor">changeFloor</option>
                     <option value="level">level</option>
                     <option value="shop">shop</option>
@@ -569,9 +570,12 @@
 <script src='_server/editor_file_unsorted.js'></script>
 <script src='_server/editor_table.js'></script>
 <script src='_server/editor_mode.js'></script>
-<script src='_server/editor_unsorted_1.js'></script>
-<script src='_server/editor_unsorted_2.js'></script>
-<script src='_server/editor_unsorted_3.js'></script>
+<script src='_server/editor_ui.js'></script>
+<script src='_server/editor_mappanel.js'></script>
+<script src='_server/editor_datapanel.js'></script>
+<script src='_server/editor_materialpanel.js'></script>
+<script src='_server/editor_listen.js'></script>
+<script src='_server/editor_legacy.js'></script>
 <script src='libs/thirdparty/lz-string.min.js'></script>
 <script src='libs/thirdparty/localforage.min.js'></script>
 <script id='mainScript' src='main.js'></script>
@@ -580,7 +584,7 @@
     editor.isMobile=true;
     editor.init(function () {
         editor.listen();
-        editor.mode.listen();
+        editor.mode_listen();
         editor.mobile_listen();
     });
     //main.listen();

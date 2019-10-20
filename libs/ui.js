@@ -440,7 +440,7 @@ ui.prototype._uievent_drawIcon = function (data) {
 ui.prototype.closePanel = function () {
     this.clearUI();
     core.maps.generateGroundPattern();
-    core.updateStatusBar();
+    core.updateStatusBar(true);
     core.unLockControl();
     core.status.event.data = null;
     core.status.event.id = null;
@@ -2396,7 +2396,7 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
         else { // 绘制文字
             this._drawEquipbox_drawStatusChanged_draw(text + " ", '#CCCCCC', obj);
         }
-        var nowValue = core.getStatus(name) * core.getBuff(name), newValue = (nowValue + compare[name]) * core.getBuff(name);
+        var nowValue = core.getStatus(name) * core.getBuff(name), newValue = (core.getStatus(name) + compare[name]) * core.getBuff(name);
         if (equip.equip.percentage) {
             var nowBuff = core.getBuff(name), newBuff = nowBuff + compare[name] / 100;
             nowValue = Math.floor(nowBuff * core.getStatus(name));

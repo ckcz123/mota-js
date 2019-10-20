@@ -471,13 +471,14 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_action": function (args) {
 								args.vobj=args.vobj||{};
 								for(var ii=0;ii<3;ii++){
-									args.vobj[ii]=null;
+									args.vobj[ii]=args.vobj[ii]||null;
 								}
 							},
 							"_data": function (key) {
 								return {
 									"_leaf": true,
-									"_type": "textarea",
+									"_type": "event",
+									"_event": "autoEvent",
 									"_data": "自动事件"
 								}
 							}
@@ -513,6 +514,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 			"afterBattle": {},
 			"afterGetItem": {},
 			"afterOpenDoor": {},
+			"autoEvent": {},
 			"cannotMove": {}
 		}
 	}

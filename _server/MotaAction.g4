@@ -26,6 +26,27 @@ return code;
 */;
 
 
+//自动事件 事件编辑器入口之一
+autoEvent_m
+    :   '自动事件' BGNL? Newline '触发条件' EvalString '优先级' Int BGNL? Newline '仅在本层检测' Bool '延迟执行' Bool '多次执行' Bool BGNL? Newline action+ BEND
+    
+
+/* autoEvent_m
+tooltip : ?????
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+default : ["flag:__door__==2",0,null,null,null,null]
+var code = {
+    "condition": EvalString_0, // 条件不可为null
+    "currentFloor": Bool_0, // 是否仅在本层检测
+    "priority": Int_0, // 优先级
+    "delayExecute": Bool_1, // 延迟执行
+    "multiExecute": Bool_2, // 是否允许多次执行
+    "data": 'autoEvent_asdfefw', // 事件列表
+};
+code=JSON.stringify(code,null,2).split('"autoEvent_asdfefw"').join('[\n'+action_0+']\n');
+return code;
+*/;
+
 //升级 事件编辑器入口之一
 level_m
     :   '等级提升' BGNL? Newline levelCase+ BEND
@@ -2753,6 +2774,12 @@ ActionParser.prototype.parse = function (obj,type) {
       if(obj instanceof Array) obj={'data':obj};
       return MotaActionBlocks['event_m'].xmlText([
         obj.trigger==='action',obj.enable,obj.noPass,obj.displayDamage,this.parseList(obj.data)
+      ]);
+    
+    case 'autoEvent':
+      if(!obj)obj={};
+      return MotaActionBlocks['autoEvent_m'].xmlText([
+        obj.condition,obj.priority,obj.currentFloor,obj.delayExecute,obj.multiExecute,this.parseList(obj.data)
       ]);
     
     case 'changeFloor':

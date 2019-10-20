@@ -26,6 +26,16 @@ editor_blockly = function () {
         "本事件触发一次后会消失",
         {"type": "hide", "time": 500},
       ],'event'),
+      MotaActionFunctions.actionParser.parse({
+        "condition": "flag:__door__==2",
+        "currentFloor": true,
+        "priority": 0,
+        "delayExecute": false,
+        "multiExecute": false,
+        "data": [
+          {"type": "openDoor", "loc": [10,5]}
+        ],
+      },'autoEvent'),
       MotaActionBlocks['changeFloor_m'].xmlText(),
       MotaActionFunctions.actionParser.parse([{
         "id": "moneyShop1",

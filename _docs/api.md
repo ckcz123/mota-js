@@ -973,6 +973,10 @@ core.getCommonEvent(name)
 core.recoverEvents(data)
 恢复事件现场。一般用于呼出怪物手册、呼出存读档页面等时，恢复事件执行流。
 
+core.checkAutoEvents()
+检测自动事件并执行。
+
+
 // ------ 点击状态栏图标时执行的一些操作 ------ //
 
 core.openBook(fromUserAction)
@@ -1220,6 +1224,10 @@ core.quickSaveEquip(index)
 
 core.quickLoadEquip()
 读取当前套装。index为读取的套装编号。
+
+
+core.getEquippedStatus(name)
+获得装备直接增加的属性数据。
 ```
 
 ## loader.js

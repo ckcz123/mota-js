@@ -779,7 +779,7 @@ function omitedcheckUpdateFunction(event) {
         "jump_s": ["PosString_2", "PosString_3"], // 跳跃暂时只考虑终点
         "showBgFgMap_s": ["EvalString_0", "EvalString_1", "IdString_0"],
         "hideBgFgMap_s": ["EvalString_0", "EvalString_1", "IdString_0"],
-        "setBgFgBlock_s": ["PosString_0", "PosString_1", "IdString_0"],
+        "setBgFgBlock_s": ["EvalString_1", "EvalString_2", "IdString_0"],
         "showFloorImg_s": ["EvalString_0", "EvalString_1", "IdString_0"],
         "hideFloorImg_s": ["EvalString_0", "EvalString_1", "IdString_0"],
         "trigger_s": ["PosString_0", "PosString_1"],

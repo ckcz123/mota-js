@@ -644,12 +644,15 @@ ui.prototype.drawWindowSelector = function(background, x, y, w, h) {
     this._drawSelector(ctx, background, w, h);
 }
 
-ui.prototype._uievent_drawSelector = function (data) {
-    if (data.image == null) {
-        if (main.mode != 'editor')
-            core.deleteCanvas('_uievent_selector');
-        return;
+ui.prototype._deleteAllSelectors = function () {
+    for (var i = 0; core.dymCanvas['_uievent_selector_' + i]; i++) {
+        core.deleteCanvas('_uievent_selector_' + i);
     }
+}
+
+ui.prototype._uievent_drawSelector = function (data) {
+    if (data.image == null) return this._deleteAllSelectors();
+    if (data.clear) this,this._deleteAllSelectors();
 
     var background = data.image || core.status.textAttribute.background;
     if (typeof background != 'string') return;
@@ -661,7 +664,10 @@ ui.prototype._uievent_drawSelector = function (data) {
     }
     var z = 136;
     if (core.dymCanvas.uievent) z = (parseInt(core.dymCanvas.uievent.canvas.style.zIndex) || 135) + 1;
-    var ctx = core.createCanvas('_uievent_selector', x, y, w, h, z);
+    var i = 0;
+    while (core.dymCanvas['_uievent_selector_' + i]) i++;
+    var ctx = core.createCanvas('_uievent_selector_' + i, x, y, w, h, z);
+    ctx.canvas.classlist.add('_uievent_selector');
     this._drawSelector(ctx, background, w, h);
 }
 
@@ -1711,13 +1717,13 @@ ui.prototype._drawBook_drawName = function (index, enemy, top, left, width) {
     core.setTextAlign('ui', 'center');
     if (enemy.specialText=='') {
         core.fillText('ui', enemy.name, left + width / 2,
-            top + 35, '#DDDDDD', this._buildFont(17, true));
+            top + 35, '#DDDDDD', this._buildFont(17, true), width);
     }
     else {
         core.fillText('ui', enemy.name, left + width / 2,
             top + 28, '#DDDDDD', this._buildFont(17, true));
         core.fillText('ui', enemy.specialText, left + width / 2,
-            top + 50, '#FF6A6A', this._buildFont(15, true));
+            top + 50, '#FF6A6A', this._buildFont(15, true), width);
     }
 }
 
@@ -2118,7 +2124,7 @@ ui.prototype._drawMaps_drawHint = function () {
 ui.prototype._drawMaps_buildData = function (index, x, y) {
     var damage = (core.status.event.data||{}).damage;
     var paint =  (core.status.event.data||{}).paint;
-    var all = (core.status.event.data||{}).all;
+    var all = (core.status.event.data||{all: true}).all;
     if (index.damage != null) damage=index.damage;
     if (index.paint != null) paint=index.paint;
     if (index.all != null) all=index.all;

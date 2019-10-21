@@ -445,6 +445,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	*/
 
 },
+        "afterPassNet": function (x, y, id) {
+	// 经过特殊地形后的事件；x和y为当前坐标，id为当前的图块id
+
+	// 这是个一次性血网的例子
+	// if (id == 'lavaNet') core.removeBlock(x, y);
+
+},
         "canUseQuickShop": function(shopId) {
 	// 当前能否使用某个快捷商店
 	// shopId：快捷商店ID

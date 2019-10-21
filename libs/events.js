@@ -489,17 +489,31 @@ events.prototype.afterGetItem = function (id, x, y, callback) {
 
 ////// 获得面前的物品（轻按） //////
 events.prototype.getNextItem = function (noRoute) {
-    if (core.isMoving() || !core.canMoveHero() || !core.flags.enableGentleClick) return false;
+    if (core.isMoving() || !core.flags.enableGentleClick) return false;
+    if (this._canGetNextItem()) return this._getNextItem(null, noRoute);
 
-    var nextX = core.nextX(), nextY = core.nextY();
-    var block = core.getBlock(nextX, nextY);
-    if (block == null) return false;
-    if (block.block.event.trigger == 'getItem') {
-        if (!noRoute) core.status.route.push("getNext");
-        this.getItem(block.block.event.id, 1, nextX, nextY);
-        return true;
-    }
-    return false;
+    var directions = ["up", "down", "left", "right"].filter(function (dir) {
+        return core.events._canGetNextItem(dir);
+    });
+    return directions.length == 1 ? this._getNextItem(directions[0]) : false;
+}
+
+events.prototype._canGetNextItem = function (direction) {
+    direction = direction || core.getHeroLoc('direction');
+    if (!core.canMoveHero(null, null, direction)) return;
+    var nx = core.getHeroLoc('x') + core.utils.scan[direction].x;
+    var ny = core.getHeroLoc('y') + core.utils.scan[direction].y;
+    var block = core.getBlock(nx, ny);
+    return block != null && block.block.event.trigger == 'getItem';
+}
+
+events.prototype._getNextItem = function (direction, noRoute) {
+    direction = direction || core.getHeroLoc('direction');
+    var nx = core.getHeroLoc('x') + core.utils.scan[direction].x;
+    var ny = core.getHeroLoc('y') + core.utils.scan[direction].y;
+    if (!noRoute) core.status.route.push("getNext");
+    this.getItem(core.getBlockId(nx, ny), 1, nx, ny);
+    return true;
 }
 
 events.prototype._sys_changeFloor = function (data, callback) {
@@ -663,18 +677,24 @@ events.prototype._sys_passNet = function (data, callback) {
 
 ////// 经过一个路障 //////
 events.prototype.passNet = function (data) {
-    if (core.hasItem('shoes')) return;
-    // 血网 lavaNet 移动到 checkBlock 中处理
-    if (data.event.id == 'poisonNet') { // 毒网
-        core.insertAction({"type":"insert","name":"毒衰咒处理","args":[0]});
+    if (!core.hasItem('shoes')) {
+        // 血网 lavaNet 移动到 checkBlock 中处理
+        if (data.event.id == 'poisonNet') { // 毒网
+            core.insertAction({"type":"insert","name":"毒衰咒处理","args":[0]});
+        }
+        else if (data.event.id == 'weakNet') { // 衰网
+            core.insertAction({"type":"insert","name":"毒衰咒处理","args":[1]});
+        }
+        else if (data.event.id == 'curseNet') { // 咒网
+            core.insertAction({"type":"insert","name":"毒衰咒处理","args":[2]});
+        }
     }
-    else if (data.event.id == 'weakNet') { // 衰网
-        core.insertAction({"type":"insert","name":"毒衰咒处理","args":[1]});
-    }
-    else if (data.event.id == 'curseNet') { // 咒网
-        core.insertAction({"type":"insert","name":"毒衰咒处理","args":[2]});
-    }
+    this.afterPassNet(data.x, data.y, data.event.id);
     core.updateStatusBar();
+}
+
+events.prototype.afterPassNet = function (x, y, id) {
+    if (this.eventdata.afterPassNet) this.eventdata.afterPassNet(x, y, id);
 }
 
 events.prototype._sys_pushBox = function (data, callback) {

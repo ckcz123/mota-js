@@ -19,14 +19,12 @@ function dynamicMapEditor() {
 			undo: 220
 		}
 	};
-	this.infos = [];
+	this.items = [];
 	this.userChanged = [];
 	this.key2Function = {};
 	this.dom = null;
 	this.canvas = null;
-	this.database = [];
 	this.mapRecord = {};
-	this.enemy2id = {};
 	this.pageId = 0;
 	this.pageMaxItems = 21;
 	this.pageMax = 0;
@@ -34,6 +32,8 @@ function dynamicMapEditor() {
 	this.selectedItem = null;
 	this._init();
 }
+
+// ------ init
 
 dynamicMapEditor.prototype._init = function () {
 	var hotkeys = this.userParams.hotKeys;
@@ -49,104 +49,143 @@ dynamicMapEditor.prototype._init = function () {
 	this.dom.style.top = '3px';
 	this.dom.style.zIndex = 99999;
 	this.canvas = this.dom.getContext("2d");
+	this.canvas.font = "12px Verdana";
 	core.dom.gameGroup.appendChild(this.dom);
 
 	this.initInfos();
-	for(var k in core.material.enemys) {
-		var index = core.material.icons.enemys[k];
-		if(index !== undefined) {
-			this.database[index] = k;
-		}
-	}
-	this.database = this.database.filter(function(item){ return !!item; });
-	for(var k in core.maps.blocksInfo) {
-		var block = core.maps.blocksInfo[k];
-		if(block.cls == 'enemys') {
-			this.enemy2id[block.id] = k;
-		}
-	}
-	this.pageMax = Math.ceil(this.database.length / this.pageMaxItems);
-	core.actions.registerAction('onkeyUp', 'plugin_dme_keydown', this.onKeyDown.bind(this), 200);
-	core.actions.registerAction('onclick', 'plugin_dme_click', this.onMapClick.bind(this), 200);
+	this.pageMax = Math.ceil(this.items.length / this.pageMaxItems);
+	core.registerAction('onkeyUp', 'plugin_dme_keydown', this.onKeyDown.bind(this), 200);
+	core.registerAction('onclick', 'plugin_dme_click', this.onMapClick.bind(this), 200);
 	this.dom.addEventListener("click",this.onBoxClick.bind(this));
 }
 
 dynamicMapEditor.prototype.initInfos = function () {
-	this.infos = [];
+	this.items = [];
 	this.displayIds.forEach(function (v) {
 		if (v.startsWith("cls:")) {
 			var cls = v.substr(4);
 			for (var id in core.maps.blocksInfo) {
 				var u = core.maps.blocksInfo[id];
 				if (u && u.cls == cls) {
-					this.infos.push(core.getBlockInfo(u.id));
+					this.items.push(core.getBlockInfo(u.id));
 				}
 			}
 		} else {
-			this.infos.push(core.getBlockInfo(v));
+			this.items.push(core.getBlockInfo(v));
 		}
 	}, this);
 }
 
-dynamicMapEditor.prototype.openToolBox = function() {
-	this.isUsingTool = !this.isUsingTool;
-	this.selectedItem = null;
-	this.selectedIndex = -1;
-	this.refreshToolBox();
-}
-
-dynamicMapEditor.prototype.undo = function() {
-	var operation = this.userChanged.pop();
-	if(!operation) {
-		core.drawTip('没有动作可以撤销');
-		return;
-	}
-	var type = operation.type;
-	if(type == 'put') {
-		var blockId = operation.originId;
-		var x = operation.x;
-		var y = operation.y;
-		var floorId = operation.floorId;
-		var originData = core.floors[floorId];
-		core.floors[floorId].map[y][x] = blockId;
-		this.mapRecord[floorId] = true;
-		core.removeBlock(x,y,floorId);
-		core.drawTip('已撤销'+floorId+'在('+x+','+y+')的图块操作');
-	}else{
-		var enemyId = operation.enemyId;
-		var hp = operation.originHp;
-		var atk = operation.originAtk;
-		var def = operation.originDef;
-		var special = operation.originSpecial;
-		var enemy = core.material.enemys[enemyId];
-		enemy.hp = hp;
-		enemy.atk = atk;
-		enemy.def = def;
-		enemy.special = special;
-		core.drawTip('已撤销对'+enemy.name+'的属性修改');
-	}
-}
+// ------ bind actions
 
 dynamicMapEditor.prototype.onKeyDown = function(e) {
-	if(core.status.lockControl) return false;
+	if(!core.isPlaying() || core.isReplaying() || core.status.lockControl) return false;
 	var func = this.key2Function[e.keyCode];
 	func && func.call(this);
 	return false;
+}
+
+dynamicMapEditor.prototype.onMapClick = function(x, y) {
+	if (!core.isPlaying() || core.isReplaying() || core.status.lockControl) return false;
+	if (!this.isUsingTool || !this.selectedItem) return false;
+	var number = this.selectedItem.number;
+	this.addOperation('put', number, x, y, core.status.floorId);
+	return true;
+}
+
+dynamicMapEditor.prototype.getClickLoc = function (e) {
+	return {
+		x: (e.clientX - core.dom.gameGroup.offsetLeft - 3) / core.domStyle.scale,
+		y: (e.clientY - core.dom.gameGroup.offsetTop - 3) / core.domStyle.scale,
+	};
+}
+
+dynamicMapEditor.prototype.onBoxClick = function (e) {
+	if (!core.isPlaying() || core.isReplaying() || !this.isUsingTool) return;
+	var loc = this.getClickLoc(e), x = loc.x, y = loc.y;
+	for(var i = 0; i < this.pageMaxItems; i++) {
+		var rect = this.itemRect(i);
+		if(x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h) {
+			this.onItemClick(i);
+			return;
+		}
+	}
+	// TODO: page up, page down,help
+	if(y>=350) {
+		if(x>=this.offsetX && x<=this.offsetX+60){
+			this.changePage(-1);
+		}else{
+			this.changePage(1);
+		}
+	}
+}
+
+dynamicMapEditor.prototype.onItemClick = function(index) {
+	var startIndex = this.pageId * this.pageMaxItems;
+	var item = this.items[startIndex + index];
+	if(!item) return;
+	if(index == this.selectedIndex) {
+		var enemy = core.material.enemys[item.id];
+		if (!enemy) return;
+		var nowData = [enemy.hp, enemy.atk, enemy.def, enemy.special].join(';');
+		core.myprompt("请输入：血;攻;防;能力，以分号分隔", nowData, function (result) {
+			if (result) {
+				try {
+					var finalData = result.split(';');
+					if (finalData.length < 4) throw "";
+					var hp = parseInt(finalData[0]) || 0;
+					var atk = parseInt(finalData[1]) || 0;
+					var def = parseInt(finalData[2]) || 0;
+					var special = finalData[3].replace(/[\[\]]/g, "").split(',');
+					if (special.length == 0) special = 0;
+					else if (special.length == 1) special = special[0];
+					dynamicMapEditor.addOperation('modify', item.id, hp, atk, def, special);
+					core.drawTip('已更新' + enemy.name + '的数据');
+					return;
+				} catch (e) {}
+			}
+			core.drawTip('无效的输入数据');
+		});
+	} else {
+		this.selectedIndex = index;
+		this.selectedItem = item;
+		this.refreshToolBox();
+	}
+}
+
+// ------ methods
+
+dynamicMapEditor.prototype.openToolBox = function() {
+	if (!this.isUsingTool && core.domStyle.isVertical) {
+		core.drawTip("竖屏模式下暂不支持此功能。");
+		return;
+	}
+	this.isUsingTool = !this.isUsingTool;
+	this.selectedItem = null;
+	this.selectedIndex = -1;
+	this.dom.style.display = this.isUsingTool ? 'block' : 'none';
+	this.dom.style.width = core.dom.statusCanvas.style.width;
+	this.dom.width = core.dom.statusCanvas.width;
+	this.dom.style.height = core.dom.statusCanvas.style.height;
+	this.dom.height = core.dom.statusCanvas.height;
+	this.offsetX = this.dom.width / 2 - 60;
+	this.refreshToolBox();
 }
 
 dynamicMapEditor.prototype.addOperation = function() {
 	var operation = {};
 	var type = arguments[0];
 	operation.type = type;
-	if(type == 'put') {
-		operation.applyId = arguments[1];
+	if (type == 'put') {
+		operation.number = arguments[1];
 		operation.x = arguments[2];
 		operation.y = arguments[3];
 		operation.floorId = arguments[4];
-		operation.originId = core.floors[operation.floorId].map[operation.y][operation.x];
-		core.floors[operation.floorId].map[operation.y][operation.x] = operation.applyId;
+		operation.originNumber = core.floors[operation.floorId].map[operation.y][operation.x];
+		core.floors[operation.floorId].map[operation.y][operation.x] = operation.number;
+		core.setBlock(operation.number, operation.x, operation.y, operation.floorId);
 		this.mapRecord[operation.floorId] = true;
-	}else if(type == 'modify') {
+	} else if(type == 'modify') {
 		operation.enemyId = arguments[1];
 		operation.hp = arguments[2];
 		operation.atk = arguments[3];
@@ -165,153 +204,86 @@ dynamicMapEditor.prototype.addOperation = function() {
 	this.userChanged.push(operation);
 }
 
-dynamicMapEditor.prototype.onMapClick = function(x,y) {
-	if(core.status.lockControl) return false;
-	if(!this.isUsingTool) return false;
-	if(!this.selectedItem) return false;
-	var blockId = Number(this.enemy2id[this.selectedItem.id]);
-	this.addOperation('put',blockId,x,y,core.status.floorId);
-	core.setBlock(blockId, x, y, core.status.floorId);
-	return true;
-}
-
-dynamicMapEditor.prototype.onItemClick = function(index) {
-	var startIndex = this.pageId * this.pageMaxItems;
-	var item = this.database[startIndex + index];
-	if(!item) return;
-	if(index == this.selectedIndex) {
-		var enemy = core.material.enemys[item];
-		var nowData = [enemy.hp,enemy.atk,enemy.def,enemy.special].join(',');
-		var result = prompt("输入血,攻,防,能力",nowData);
-		if(result) {
-			var finalData = result.split(/,/);
-			var hp = Number(finalData[0]);
-			var atk = Number(finalData[1]);
-			var def = Number(finalData[2]);
-			var special = eval(finalData[3]);
-			this.addOperation('modify',item,hp,atk,def,special);
-			core.drawTip('已更新'+enemy.name+'的数据');
-			this.refreshToolBox();
-		}else{
-			core.drawTip('无效的输入数据');
-		}
-	}else{
-		this.selectedIndex = index;
-		this.selectedItem = core.material.enemys[item];
-		this.refreshToolBox();
+dynamicMapEditor.prototype.undo = function() {
+	var operation = this.userChanged.pop();
+	if(!operation) {
+		core.drawTip('没有动作可以撤销');
+		return;
+	}
+	var type = operation.type;
+	if(type == 'put') { // {originNumber, x, y, floorId}
+		var originNumber = operation.originNumber;
+		var x = operation.x;
+		var y = operation.y;
+		var floorId = operation.floorId;
+		core.floors[floorId].map[y][x] = originNumber;
+		core.setBlock(originNumber, x, y, floorId);
+		this.mapRecord[floorId] = true;
+		core.drawTip('已撤销' + floorId + '在(' + x + ',' + y + ')的图块操作');
+	} else { // {enemyId, originHp, originAtk, originDef, originSpecial}
+		var enemyId = operation.enemyId;
+		var hp = operation.originHp;
+		var atk = operation.originAtk;
+		var def = operation.originDef;
+		var special = operation.originSpecial;
+		var enemy = core.material.enemys[enemyId];
+		enemy.hp = hp;
+		enemy.atk = atk;
+		enemy.def = def;
+		enemy.special = special;
+		core.drawTip('已撤销对' + enemy.name + '的属性修改');
 	}
 }
 
-dynamicMapEditor.prototype.onPageUp = function() {
-	if(this.pageId>0) {
-		this.pageId--;
-		this.selectedItem = null;
-		this.refreshToolBox();
-	}
+dynamicMapEditor.prototype.changePage = function(delta) {
+	var newId = this.pageId + delta;
+	if (newId < 0 || newId >= this.pageMax) return;
+	this.pageId = newId;
+	this.selectedItem = null;
+	this.refreshToolBox();
 }
 
-dynamicMapEditor.prototype.onPageDown = function() {
-	if(this.pageId<this.pageMax-1) {
-		this.pageId++;
-		this.selectedItem = null;
-		this.refreshToolBox();
-	}
-}
-
-dynamicMapEditor.prototype.onBoxClick = function(e) {
-	if(!this.isUsingTool) return;
-	var x = e.layerX;
-	var y = e.layerY;
-	for(var i=0;i<this.pageMaxItems;i++) {
-		var rect = this.itemRect(i);
-		if(x>=rect.x && x<=rect.x+rect.w && y>=rect.y && y<=rect.y+rect.h) {
-			this.onItemClick(i);
-			return;
-		}
-	}
-	if(y>=350) {
-		if(x>=this.offsetX && x<=this.offsetX+60){
-			this.onPageUp();
-		}else{
-			this.onPageDown();
-		}
-	}
-}
-
-dynamicMapEditor.prototype.resetCanvas = function() {
-	this.canvas.font = "12px 宋体";
-	this.canvas.textBaseline = 'alphabetic';
-	this.canvas.mozImageSmoothingEnabled = false;
-	this.canvas.webkitImageSmoothingEnabled = false;
-	this.canvas.msImageSmoothingEnabled = false;
-	this.canvas.imageSmoothingEnabled = false;
-}
+// ------ draw
 
 dynamicMapEditor.prototype.itemRect = function(index) {
 	return {
-		'x' : this.offsetX+(index%3)*40,
-		'y' : Math.floor(index/3)*50,
+		'x' : this.offsetX + (index % 3) * 40,
+		'y' : Math.floor(index / 3) * 50,
 		'w'	: 40,
 		'h'	: 50
 	};
 }
 
-dynamicMapEditor.prototype.fillTextWithOutline = function(text,x,y,style) {
-	this.canvas.fillStyle = '#000000';
-	this.canvas.fillText(text, x-1, y-1);
-	this.canvas.fillText(text, x-1, y+1);
-	this.canvas.fillText(text, x+1, y-1);
-	this.canvas.fillText(text, x+1, y+1);
-	this.canvas.fillStyle = style;
-	this.canvas.fillText(text, x, y);
-}
-
 dynamicMapEditor.prototype.refreshToolBox = function() {
-	this.dom.style.width = core.dom.statusCanvas.style.width;
-	this.dom.width = core.dom.statusCanvas.width;
-	this.dom.style.height = core.dom.statusCanvas.style.height;
-	this.dom.height = core.dom.statusCanvas.height;
-	this.offsetX = this.dom.width / 2 - 60;;
-	if(this.isUsingTool) {
-		this.canvas.fillStyle = '#000000';
-		this.canvas.fillRect(0,0,this.dom.width,this.dom.height);
-		if(!core.domStyle.isVertical) {
-			this.resetCanvas();
-			var source = core.material.images.enemys;
-			var enemyCount = this.database.length;
-			var startIndex = this.pageId * this.pageMaxItems;
-			for(var i=0;i<this.pageMaxItems;i++) {
-				var item = this.database[startIndex + i];
-				if(!item) break;
-				var name = core.material.enemys[item].name;
-				var si = core.material.icons.enemys[item]*32;
-				var rect = this.itemRect(i);
-				this.canvas.drawImage(source,0,si,32,32,rect.x+4,rect.y,32,32);
+	if (!this.isUsingTool) return;
+	core.fillRect(this.canvas, 0, 0, this.dom.width, this.dom.height, '#000000');
+	var startIndex = this.pageId * this.pageMaxItems;
+	for (var i = 0; i < this.pageMaxItems; ++i) {
+		var item = this.items[startIndex + i];
+		if (item.number == 0) continue;
+		if (!item) break;
+		var rect = this.itemRect(i);
+		core.drawImage(this.canvas, item.image, 0, item.height * item.posY, 32, 32, rect.x + 4, rect.y, 32, 32);
+		this.canvas.textAlign = 'center';
+		if (item.name) core.fillText(this.canvas, item.name, rect.x + 20, rect.y + 44, null, '#FFFFFF', 40);
+		this.canvas.textAlign = 'left';
+		
+		var damageString = core.enemys.getDamageString(item.id);
+		core.fillBoldText(this.canvas, damageString.damage, rect.x + 5, rect.y + 31, damageString.color);
 
-				this.canvas.textAlign = 'center';
-				this.canvas.fillText(name,rect.x+20,rect.y+44);
-
-				var damageString = core.enemys.getDamageString(item, 0, 0, core.status.floorId);
-				var damage = damageString.damage
-				this.fillTextWithOutline(damage,rect.x+20,rect.y+32,damageString.color);
-				
-				this.canvas.textAlign = 'left';
-				var critical = core.enemys.nextCriticals(item, 1, 0, 0, core.status.floorId);
-				critical = core.formatBigNumber((critical[0]||[])[0], true);
-				if (critical == '???') critical = '?';
-				this.fillTextWithOutline(critical,rect.x+2,rect.y+12,'#FFFFFF');
-			}
-			this.canvas.textAlign = 'center';
-			if(this.pageId>0) this.canvas.fillText('上一页',this.offsetX + 30,380);
-			if(this.pageId<this.pageMax-1) this.canvas.fillText('下一页',this.offsetX + 90,380);
-			if(this.selectedItem) {
-				this.canvas.strokeStyle = '#FFFFFF';
-				var rect = this.itemRect(this.selectedIndex);
-				this.canvas.strokeRect(rect.x,rect.y,rect.w,rect.h);
-			}
-		}
+		var critical = core.enemys.nextCriticals(item.id, 1);
+		critical = core.formatBigNumber((critical[0]||[])[0], true);
+		if (critical == '???') critical = '?';
+		core.fillBoldText(this.canvas, critical, rect.x+1, rect.y+21, '#FFFFFF');
 	}
-	this.dom.style.display = this.isUsingTool ? 'block' : 'none';
+
+	if(this.pageId > 0) this.canvas.fillText('上一页', this.offsetX + 30, 380);
+	if(this.pageId < this.pageMax-1) this.canvas.fillText('下一页',this.offsetX + 90, 380);
+	if(this.selectedItem) {
+		this.canvas.strokeStyle = '#FFFFFF';
+		var rect = this.itemRect(this.selectedIndex);
+		this.canvas.strokeRect(rect.x, rect.y, rect.w, rect.h);
+	}
 }
 
 // ------ save

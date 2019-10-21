@@ -1,34 +1,40 @@
-var Imported = Imported || {};
-Imported.DynamicallyMapEditor = true;
+/**
+ * 运行时可编辑地图的扩展，By fux2（黄鸡）
+ */
 
-var Fux2 = Fux2 || {};
-Fux2.DynamicallyMapEditor = {};
+"use strict";
 
-Fux2.DynamicallyMapEditor.userParams = PluginManager.parameters('Fux2_DynamicallyMapEditor');
-Fux2.DynamicallyMapEditor.isUsingTool = false;
-Fux2.DynamicallyMapEditor.userChanged = [];
-Fux2.DynamicallyMapEditor.userChangedBak = [];
-Fux2.DynamicallyMapEditor.key2Function = {};
-Fux2.DynamicallyMapEditor.dom = null;
-Fux2.DynamicallyMapEditor.canvas = null;
-Fux2.DynamicallyMapEditor.database = [];
-Fux2.DynamicallyMapEditor.mapRecord = {};
-Fux2.DynamicallyMapEditor.enemy2id = {};
-Fux2.DynamicallyMapEditor.pageId = 0;
-Fux2.DynamicallyMapEditor.pageMaxItems = 21;
-Fux2.DynamicallyMapEditor.pageMax = 0;
-Fux2.DynamicallyMapEditor.selectedIndex = 0;
-Fux2.DynamicallyMapEditor.selectedItem = null;
-	
-Fux2.DynamicallyMapEditor.initialize = function() {
-	this.loadFS();
+function dynamicMapEditor() {
+	this.userParams = {
+		hotKeys: {
+			openToolBox: 219,
+			save: 221,
+			undo: 220
+		}
+	};
+	this.userChanged = [];
+	this.key2Function = {};
+	this.dom = null;
+	this.canvas = null;
+	this.database = [];
+	this.mapRecord = {};
+	this.enemy2id = {};
+	this.pageId = 0;
+	this.pageMaxItems = 21;
+	this.pageMax = 0;
+	this.selectedIndex = 0;
+	this.selectedItem = null;
+	this._init();
+}
+
+dynamicMapEditor.prototype._init = function () {
 	var hotkeys = this.userParams.hotKeys;
-	this.key2Function[hotkeys.OpenToolBox] = this.openToolBox;
-	this.key2Function[hotkeys.Save] = this.applyCurrentChange;
-	this.key2Function[hotkeys.Undo] = this.undo;
+	this.key2Function[hotkeys.openToolBox] = this.openToolBox;
+	this.key2Function[hotkeys.save] = this.applyCurrentChange;
+	this.key2Function[hotkeys.undo] = this.undo;
 
 	this.dom = document.createElement("canvas");
-	this.dom.id = 'fux2_dme';
+	this.dom.id = 'dynamicMapEditor';
 	this.dom.style.display = 'none';
 	this.dom.style.position = 'absolute';
 	this.dom.style.left = '3px';
@@ -56,27 +62,14 @@ Fux2.DynamicallyMapEditor.initialize = function() {
 	this.dom.addEventListener("click",this.onBoxClick.bind(this));
 }
 
-Fux2.DynamicallyMapEditor.loadFS = function() {
-	var url = '_server/fs.js';
-	var script = document.createElement('script');
-	script.type = 'text/javascript';
-	script.src = url;
-	script.async = false;
-	script.onerror = function() {
-		console.error('加载fs失败');
-	};
-	script._url = url;
-	document.body.appendChild(script);
-};
-
-Fux2.DynamicallyMapEditor.openToolBox = function() {
+dynamicMapEditor.prototype.openToolBox = function() {
 	this.isUsingTool = !this.isUsingTool;
 	this.selectedItem = null;
 	this.selectedIndex = -1;
 	this.refreshToolBox();
 }
 
-Fux2.DynamicallyMapEditor.applyCurrentChange = function() {
+dynamicMapEditor.prototype.applyCurrentChange = function() {
 	core.initStatus.maps = core.maps._initMaps();
 	core.enemys.enemys = core.clone(core.material.enemys);
 	var enemyString = 'var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = '+JSON.stringify(core.enemys.enemys);
@@ -88,10 +81,10 @@ Fux2.DynamicallyMapEditor.applyCurrentChange = function() {
 		}
 	}
 	this.mapRecord = {};
-	core.drawTip('已将所有改动应用到文件');
+	core.drawTip('已将所有改动应用到文件，刷新后生效');
 }
 
-Fux2.DynamicallyMapEditor.undo = function() {
+dynamicMapEditor.prototype.undo = function() {
 	var operation = this.userChanged.pop();
 	if(!operation) {
 		core.drawTip('没有动作可以撤销');
@@ -123,13 +116,14 @@ Fux2.DynamicallyMapEditor.undo = function() {
 	}
 }
 
-Fux2.DynamicallyMapEditor.onKeyDown = function(e) {
+dynamicMapEditor.prototype.onKeyDown = function(e) {
 	if(core.status.lockControl) return false;
-	this.key2Function[e.keyCode] && this.key2Function[e.keyCode].call(Fux2.DynamicallyMapEditor);
+	var func = this.key2Function[e.keyCode];
+	func && func.call(this);
 	return false;
 }
 
-Fux2.DynamicallyMapEditor.addOperation = function() {
+dynamicMapEditor.prototype.addOperation = function() {
 	var operation = {};
 	var type = arguments[0];
 	operation.type = type;
@@ -160,7 +154,7 @@ Fux2.DynamicallyMapEditor.addOperation = function() {
 	this.userChanged.push(operation);
 }
 
-Fux2.DynamicallyMapEditor.onMapClick = function(x,y) {
+dynamicMapEditor.prototype.onMapClick = function(x,y) {
 	if(core.status.lockControl) return false;
 	if(!this.isUsingTool) return false;
 	if(!this.selectedItem) return false;
@@ -170,7 +164,7 @@ Fux2.DynamicallyMapEditor.onMapClick = function(x,y) {
 	return true;
 }
 
-Fux2.DynamicallyMapEditor.onItemClick = function(index) {
+dynamicMapEditor.prototype.onItemClick = function(index) {
 	var startIndex = this.pageId * this.pageMaxItems;
 	var item = this.database[startIndex + index];
 	if(!item) return;
@@ -197,7 +191,7 @@ Fux2.DynamicallyMapEditor.onItemClick = function(index) {
 	}
 }
 
-Fux2.DynamicallyMapEditor.onPageUp = function() {
+dynamicMapEditor.prototype.onPageUp = function() {
 	if(this.pageId>0) {
 		this.pageId--;
 		this.selectedItem = null;
@@ -205,7 +199,7 @@ Fux2.DynamicallyMapEditor.onPageUp = function() {
 	}
 }
 
-Fux2.DynamicallyMapEditor.onPageDown = function() {
+dynamicMapEditor.prototype.onPageDown = function() {
 	if(this.pageId<this.pageMax-1) {
 		this.pageId++;
 		this.selectedItem = null;
@@ -213,7 +207,7 @@ Fux2.DynamicallyMapEditor.onPageDown = function() {
 	}
 }
 
-Fux2.DynamicallyMapEditor.onBoxClick = function(e) {
+dynamicMapEditor.prototype.onBoxClick = function(e) {
 	if(!this.isUsingTool) return;
 	var x = e.layerX;
 	var y = e.layerY;
@@ -233,7 +227,7 @@ Fux2.DynamicallyMapEditor.onBoxClick = function(e) {
 	}
 }
 
-Fux2.DynamicallyMapEditor.resetCanvas = function() {
+dynamicMapEditor.prototype.resetCanvas = function() {
 	this.canvas.font = "12px 宋体";
 	this.canvas.textBaseline = 'alphabetic';
 	this.canvas.mozImageSmoothingEnabled = false;
@@ -242,7 +236,7 @@ Fux2.DynamicallyMapEditor.resetCanvas = function() {
 	this.canvas.imageSmoothingEnabled = false;
 }
 
-Fux2.DynamicallyMapEditor.itemRect = function(index) {
+dynamicMapEditor.prototype.itemRect = function(index) {
 	return {
 		'x' : this.offsetX+(index%3)*40,
 		'y' : Math.floor(index/3)*50,
@@ -251,7 +245,7 @@ Fux2.DynamicallyMapEditor.itemRect = function(index) {
 	};
 }
 
-Fux2.DynamicallyMapEditor.fillTextWithOutline = function(text,x,y,style) {
+dynamicMapEditor.prototype.fillTextWithOutline = function(text,x,y,style) {
 	this.canvas.fillStyle = '#000000';
 	this.canvas.fillText(text, x-1, y-1);
 	this.canvas.fillText(text, x-1, y+1);
@@ -261,7 +255,7 @@ Fux2.DynamicallyMapEditor.fillTextWithOutline = function(text,x,y,style) {
 	this.canvas.fillText(text, x, y);
 }
 
-Fux2.DynamicallyMapEditor.refreshToolBox = function() {
+dynamicMapEditor.prototype.refreshToolBox = function() {
 	this.dom.style.width = core.dom.statusCanvas.style.width;
 	this.dom.width = core.dom.statusCanvas.width;
 	this.dom.style.height = core.dom.statusCanvas.style.height;
@@ -310,10 +304,10 @@ Fux2.DynamicallyMapEditor.refreshToolBox = function() {
 }
 
 // re
-Fux2.DynamicallyMapEditor._resize_statusBar = control.prototype._resize_statusBar;
-control.prototype._resize_statusBar = function (obj) {
-	Fux2.DynamicallyMapEditor._resize_statusBar.call(this,obj);
-	Fux2.DynamicallyMapEditor.refreshToolBox();
+dynamicMapEditor._resize_statusBar = core.control._resize_statusBar;
+core.control._resize_statusBar = function (obj) {
+	dynamicMapEditor._resize_statusBar.call(this,obj);
+	dynamicMapEditor.refreshToolBox();
 }
 
-Fux2.DynamicallyMapEditor.initialize();
+var dynamicMapEditor = new dynamicMapEditor();

@@ -5,6 +5,13 @@
 "use strict";
 
 function dynamicMapEditor() {
+	// 所有显示的ID
+	this.displayIds = [
+		'none', 'yellowWall', 'blueWall', 'whiteWall', 'yellowDoor', 'blueDoor', 'redDoor', 'star', 'lava', 'lavaNet',
+		'yellowKey', 'blueKey', 'redKey', 'redJewel', 'blueJewel', 'greenJewel', 'yellowJewel',
+		'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'pickaxe', 'bomb', 'centerFly',
+		'cls:autotile', 'cls:enemys', 'cls:enemy48'
+	];
 	this.userParams = {
 		hotKeys: {
 			openToolBox: 219,
@@ -12,6 +19,7 @@ function dynamicMapEditor() {
 			undo: 220
 		}
 	};
+	this.infos = [];
 	this.userChanged = [];
 	this.key2Function = {};
 	this.dom = null;
@@ -43,6 +51,7 @@ dynamicMapEditor.prototype._init = function () {
 	this.canvas = this.dom.getContext("2d");
 	core.dom.gameGroup.appendChild(this.dom);
 
+	this.initInfos();
 	for(var k in core.material.enemys) {
 		var index = core.material.icons.enemys[k];
 		if(index !== undefined) {
@@ -62,26 +71,28 @@ dynamicMapEditor.prototype._init = function () {
 	this.dom.addEventListener("click",this.onBoxClick.bind(this));
 }
 
+dynamicMapEditor.prototype.initInfos = function () {
+	this.infos = [];
+	this.displayIds.forEach(function (v) {
+		if (v.startsWith("cls:")) {
+			var cls = v.substr(4);
+			for (var id in core.maps.blocksInfo) {
+				var u = core.maps.blocksInfo[id];
+				if (u && u.cls == cls) {
+					this.infos.push(core.getBlockInfo(u.id));
+				}
+			}
+		} else {
+			this.infos.push(core.getBlockInfo(v));
+		}
+	}, this);
+}
+
 dynamicMapEditor.prototype.openToolBox = function() {
 	this.isUsingTool = !this.isUsingTool;
 	this.selectedItem = null;
 	this.selectedIndex = -1;
 	this.refreshToolBox();
-}
-
-dynamicMapEditor.prototype.applyCurrentChange = function() {
-	core.initStatus.maps = core.maps._initMaps();
-	core.enemys.enemys = core.clone(core.material.enemys);
-	var enemyString = 'var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = '+JSON.stringify(core.enemys.enemys);
-	fs.writeFile('project/enemys.js', enemyString, 'utf-8', function (e, d) {})
-	for(var k in this.mapRecord) {
-		if(this.mapRecord[k]) {
-			var mapString = 'main.floors.' + k + '=' + JSON.stringify(core.floors[k]);
-			fs.writeFile('project/floors/'+k+'.js', mapString, 'utf-8', function (e, d) { });
-		}
-	}
-	this.mapRecord = {};
-	core.drawTip('已将所有改动应用到文件，刷新后生效');
 }
 
 dynamicMapEditor.prototype.undo = function() {
@@ -303,7 +314,89 @@ dynamicMapEditor.prototype.refreshToolBox = function() {
 	this.dom.style.display = this.isUsingTool ? 'block' : 'none';
 }
 
-// re
+// ------ save
+
+dynamicMapEditor.prototype.applyCurrentChange = function() {
+	this.saveEnemys();
+	this.saveFloors();
+	this.mapRecord = {};
+	core.drawTip('已将所有改动应用到文件，刷新后生效');
+}
+
+dynamicMapEditor.prototype.saveEnemys = function () {
+	core.enemys.enemys = core.clone(core.material.enemys);
+	var datastr = 'var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = \n';
+	var emap = {};
+	var estr = JSON.stringify(core.enemys.enemys, function (k, v) {
+		if (v.hp != null) {
+			var id_ = ":" + k + ":";
+			emap[id_] = JSON.stringify(v);
+			return id_;
+		} else return v
+	}, '\t');
+	for (var id_ in emap) {
+		estr = estr.replace('"' + id_ + '"', emap[id_])
+	}
+	datastr += estr;
+	fs.writeFile('project/enemys.js', core.encodeBase64(datastr), 'base64', function (e, d) {});
+}
+
+dynamicMapEditor.prototype.saveFloors = function () {
+	core.initStatus.maps = core.maps._initMaps();
+	for (var floorId in this.mapRecord) {
+		if (this.mapRecord[floorId]) {
+			this.saveFloor(floorId);
+		}
+	}
+}
+
+dynamicMapEditor.prototype.saveFloor = function (floorId) {
+	var floorData = core.floors[floorId];
+	var filename = 'project/floors/' + floorId + '.js';
+	var datastr = ['main.floors.', floorId, '=\n'];
+
+	var tempJsonObj = core.clone(floorData);
+	var tempMap = [['map', ':map:'], ['bgmap', ':bgmap:'], ['fgmap', ':fgmap:']];
+	tempMap.forEach(function (v) {
+		v[2] = tempJsonObj[v[0]];
+		tempJsonObj[v[0]] = v[1];
+	});
+	var tempJson = JSON.stringify(tempJsonObj, null, 4);
+	tempMap.forEach(function (v) {
+		tempJson = tempJson.replace('"' + v[1] + '"', '[\n' + dynamicMapEditor.formatMap(v[2], v[0] != 'map') + '\n]')
+	});
+	datastr = datastr.concat([tempJson]);
+	datastr = datastr.join('');
+	fs.writeFile(filename, core.encodeBase64(datastr), 'base64', function (e, d) {});
+}
+
+dynamicMapEditor.prototype.formapMap = function (mapArr, trySimplify) {
+	if (!mapArr || JSON.stringify(mapArr) == JSON.stringify([])) return '';
+	if (trySimplify) {
+		//检查是否是全0二维数组
+		var jsoncheck = JSON.stringify(mapArr).replace(/\D/g, '');
+		if (jsoncheck == Array(jsoncheck.length + 1).join('0')) return '';
+	}
+	//把二维数组格式化
+	var formatArrStr = '';
+	var arr = JSON.stringify(mapArr).replace(/\s+/g, '').sdatastr
+	var si = mapArr.length - 1, sk = mapArr[0].length - 1;datastr
+	for (var i = 0; i <= si; i++) {
+		var a = [];
+		formatArrStr += '    [';
+		if (i == 0 || i == si) a = arr[i].split(/\D+/).join(' ').trim().split(' ');
+		else a = arr[i].split(/\D+/);
+		for (var k = 0; k <= sk; k++) {
+			var num = parseInt(a[k]);
+			formatArrStr += Array(Math.max(4 - String(num).length, 0)).join(' ') + num + (k == sk ? '' : ',');
+		}
+		formatArrStr += ']' + (i == si ? '' : ',\n');
+	}
+	return formatArrStr;
+}
+
+// ------ rewrite
+
 dynamicMapEditor._resize_statusBar = core.control._resize_statusBar;
 core.control._resize_statusBar = function (obj) {
 	dynamicMapEditor._resize_statusBar.call(this,obj);

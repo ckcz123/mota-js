@@ -622,7 +622,43 @@ function omitedcheckUpdateFunction(event) {
         var code = Blockly.JavaScript.workspaceToCode(editor_blockly.workspace);
         code = code.replace(/\\(i|c|d|e)/g, '\\\\$1');
         eval('var obj=' + code);
+        if (this.checkAsync(obj) && confirm("警告！存在不等待执行完毕的事件但却没有用【等待所有异步事件处理完毕】来等待" +
+            "它们执行完毕，这样可能会导致录像检测系统出问题。\n你要返回修改么？")) return;
         setvalue(JSON.stringify(obj));
+    }
+
+    // 检查"不等待处理完毕"
+    editor_blockly.checkAsync = function (obj) {
+        if (!(obj instanceof Array)) return false;
+        var hasAsync = false;
+        for (var i = 0; i < obj.length; ++i) {
+            var one = obj[i];
+            if (one.type == 'if' && (this.checkAsync(one['true']) || this.checkAsync(one['false'])))
+                return true;
+            if ((one.type == 'while' || one.type == 'dowhile') && this.checkAsync(one.data))
+                return true;
+            if (one.type == 'if' && (this.checkAsync(one.yes) || this.checkAsync(one.no)))
+                return true;
+            if (one.type == 'choices') {
+                var list = one.choices;
+                if (list instanceof Array) {
+                    for (var j = 0; j < list.length; j++) {
+                        if (this.checkAsync(list[j].action)) return true;
+                    }
+                }
+            }
+            if (one.type == 'switch') {
+                var list = one.caseList;
+                if (list instanceof Array) {
+                    for (var j = 0; j < list.length; j++) {
+                        if (this.checkAsync(list[j].action)) return true;
+                    }
+                }
+            }
+            if (one.async && one.type != 'animate') hasAsync = true;
+            if (one.type == 'waitAsync') hasAsync = false;
+        }
+        return hasAsync;
     }
 
     var previewBlock = function (b) {

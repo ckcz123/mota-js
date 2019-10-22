@@ -26,13 +26,19 @@ editor_table_wrapper = function (editor) {
     editor_table.prototype.textarea = function (value, indent) {
         return /* html */`<textarea spellcheck='false'>${JSON.stringify(value, null, indent || 0)}</textarea>\n`
     }
+    editor_table.prototype.editGrid = function (showComment) {
+        var html = "";
+        if (showComment) html += "<button onclick='editor.table.onCommentBtnClick(this)'>显示完整注释</button><br/>";
+        html += "<button onclick='editor.table.onEditBtnClick(this)'>编辑表格内容</button>";
+        return html;
+    }
 
     editor_table.prototype.title = function () {
-        return /* html */`\n<tr><td>条目</td><td>注释</td><td>值</td></tr>\n`
+        return /* html */`\n<tr><td>条目</td><td>注释</td><td>值</td><td>操作</td></tr>\n`
     }
 
     editor_table.prototype.gap = function (field) {
-        return /* html */`<tr><td>----</td><td>----</td><td>${field}</td></tr>\n`
+        return /* html */`<tr><td>----</td><td>----</td><td>${field}</td><td>----</td></tr>\n`
     }
 
     editor_table.prototype.tr = function (guid, field, shortField, commentHTMLescape, cobjstr, shortCommentHTMLescape, tdstr) {
@@ -40,6 +46,7 @@ editor_table_wrapper = function (editor) {
         <td title="${field}">${shortField}</td>
         <td title="${commentHTMLescape}" cobj="${cobjstr}">${shortCommentHTMLescape}</td>
         <td><div class="etableInputDiv">${tdstr}</div></td>
+        <td>${editor.table.editGrid(commentHTMLescape != shortCommentHTMLescape)}</td>
         </tr>\n`
     }
 
@@ -194,7 +201,7 @@ editor_table_wrapper = function (editor) {
         // "['a']['b']" => "b"
         var shortField = field.split("']").slice(-2)[0].split("['").slice(-1)[0];
         // 把长度超过 charlength 的字符改成 固定长度+...的形式
-        shortField = (shortField.length < charlength ? shortField : shortField.slice(0, charlength) + '...');
+        // shortField = (shortField.length < charlength ? shortField : shortField.slice(0, charlength) + '...');
 
         // 完整的内容转义后供悬停查看
         var commentHTMLescape = editor.util.HTMLescape(comment);
@@ -297,6 +304,25 @@ editor_table_wrapper = function (editor) {
         } else {
             printe(field + ' : 输入的值不合要求,请鼠标放置在注释上查看说明');
         }
+    }
+
+    /**
+     * 当"显示完整注释"被按下时
+     */
+    editor_table.prototype.onCommentBtnClick = function (button) {
+        var tr = button.parentNode.parentNode;
+        printf(tr.children[1].getAttribute('title'));
+    }
+
+    /**
+     * 当"编辑表格内容"被按下时
+     */
+    editor_table.prototype.onEditBtnClick = function (button) {
+        var tr = button.parentNode.parentNode;
+        var guid = tr.getAttribute('id');
+        var cobj = JSON.parse(tr.children[1].getAttribute('cobj'));
+        if (cobj._type === 'event') editor_blockly.import(guid, { type: cobj._event });
+        if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string });
     }
 
     /**

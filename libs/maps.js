@@ -1365,6 +1365,8 @@ maps.prototype.getBlockInfo = function (block) {
         faceIds = block.event.faceIds || {};
         if (core.material.enemys[id]) {
             name = core.material.enemys[id].name;
+        } else if (core.material.items[id]) {
+            name = core.material.items[id].name;
         }
     }
 

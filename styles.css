@@ -347,11 +347,10 @@ p#name {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -60%);
+    transform: translate(-50%, -55%);
     background: white;
     width: 250px;
     min-height: 50px;
-    max-height: 250px;
 }
 
 #inputMessage {

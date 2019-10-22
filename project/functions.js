@@ -330,6 +330,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 	// 自爆
 	if (core.enemys.hasSpecial(special, 19)) {
+		core.status.hero.statistics.battleDamage += core.status.hero.hp - 1;
 		core.status.hero.hp = 1;
 	}
 	// 退化

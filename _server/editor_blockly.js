@@ -54,7 +54,7 @@ editor_blockly = function () {
         "item": true,
         "textInList": "道具商店",
         "choices": [
-          {"id": "yellowKey", "count": 10, "money": 10}
+          {"id": "yellowKey", "number": 10, "money": 10}
         ]
       },{
         "id": "keyShop1",

@@ -2879,7 +2879,7 @@ ActionParser.prototype.parse = function (obj,type) {
         var text_choices = null;
         for(var ii=obj.choices.length-1,choice;choice=obj.choices[ii];ii--) {
           text_choices = MotaActionBlocks['shopItemChoices'].xmlText([
-            choice.id, choice.count, choice.money, choice.sell == null ? "" : (""+choice.sell),
+            choice.id, choice.number, choice.money, choice.sell == null ? "" : (""+choice.sell),
             text_choices
           ]);
         }

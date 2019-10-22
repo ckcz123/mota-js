@@ -2469,7 +2469,7 @@ events.prototype.openShop = function (shopId, needVisited) {
     shop.times = shop.times || 0;
     if (shop.commonTimes) shop.times = core.getFlag('commonTimes', 0);
     if (needVisited && !shop.visited) {
-        if (!core.flags.enableDisabledShop || shop.commonEvent) {
+        if (!core.flags.enableDisabledShop || shop.commonEvent || shop.item) {
             if (shop.times == 0) core.drawTip("该项尚未开启");
             else core.drawTip("该项已失效");
             core.ui.closePanel();
@@ -2481,8 +2481,11 @@ events.prototype.openShop = function (shopId, needVisited) {
     }
     else shop.visited = true;
 
-    // --- 商店
-    if (shop.commonEvent) {
+    if (shop.item) {
+        core.status.route.push("shop:" + shopId + ":0");
+        core.insertAction({"type": "insert", "name": "道具商店", "args": [shopId]});
+        return;
+    } else if (shop.commonEvent) {
         core.status.route.push("shop:"+shopId+":0");
         core.insertAction({"type": "insert", "name": shop.commonEvent, "args": shop.args});
         return;

@@ -86,6 +86,7 @@ return code;
 
 shoplist
     :   shopsub
+    |   shopitem
     |   shopcommonevent
     |   emptyshop
     ;
@@ -100,7 +101,7 @@ return code;
 */;
 
 shopcommonevent
-    :   '商店 id' IdString '快捷商店栏中名称' EvalString BGNL? '未开启状态则不显示在列表中' Bool BGNL? '执行的公共事件 id' EvalString '参数列表' EvalString?
+    :   '公共事件版商店 id' IdString '快捷商店栏中名称' EvalString BGNL? '未开启状态则不显示在列表中' Bool BGNL? '执行的公共事件 id' EvalString '参数列表' EvalString?
     
 /* shopcommonevent
 tooltip : 全局商店, 执行一个公共事件
@@ -174,6 +175,40 @@ shopEffect
 /* shopEffect
 colour : this.subColor
 var code = idString_e_0+'+='+expression_0+';'
+return code;
+*/;
+
+shopitem
+    :   '道具商店 id' IdString '快捷商店栏中名称' EvalString BGNL? '未开启状态则不显示在列表中' Bool BGNL? Newline shopItemChoices+ BEND
+
+
+/* shopitem
+tooltip : 道具商店
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e5%85%a8%e5%b1%80%e5%95%86%e5%ba%97
+default : ["itemShop","道具商店",false]
+var code = {
+    'id': IdString_0,
+    'item': true,
+    'textInList': EvalString_0,
+    'mustEnable': Bool_0,
+    'choices': 'choices_aqwedsa'
+}
+code=JSON.stringify(code,null,2).split('"choices_aqwedsa"').join('[\n'+shopItemChoices_0+']\n')+',\n';
+return code;
+*/;
+
+shopItemChoices
+    :   '道具商店选项' '道具名' IdString '存量' Int '买入价格' Int '卖出价格' EvalString? BEND
+
+
+
+/* shopItemChoices
+tooltip : 道具商店选项，每一项是道具名；卖出价格可不填代表不可卖出
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e5%85%a8%e5%b1%80%e5%95%86%e5%ba%97
+default : ["yellowKey","10","10",""]
+colour : this.subColor
+EvalString_0 = EvalString_0 ? (', "sell": '+(parseInt(EvalString_0) || 0)) : '';
+var code = '{"id": "' + IdString_0 + '", "number": ' + Int_0 + ', "money": ' + Int_1 + EvalString_0 + '},\n';
 return code;
 */;
 
@@ -2840,11 +2875,25 @@ ActionParser.prototype.parse = function (obj,type) {
           obj.id,parser.EvalString(obj.textInList),obj.mustEnable,parser.EvalString(obj.commonEvent),obj.args,next
         ]);
       }
+      var builditem = function (obj,parser,next){
+        var text_choices = null;
+        for(var ii=obj.choices.length-1,choice;choice=obj.choices[ii];ii--) {
+          text_choices = MotaActionBlocks['shopItemChoices'].xmlText([
+            choice.id, choice.count, choice.money, choice.sell == null ? "" : (""+choice.sell),
+            text_choices
+          ]);
+        }
+        return MotaActionBlocks['shopitem'].xmlText([
+          obj.id,obj.textInList,obj.mustEnable,text_choices,next
+        ]);
+      }
       var next=null;
       if(!obj)obj=[];
       while(obj.length){
         var shopobj=obj.pop()
-        if(shopobj.choices)
+        if(shopobj.item)
+          next=builditem(shopobj,this,next);
+        else if(shopobj.choices)
           next=buildsub(shopobj,this,next);
         else if(shopobj.commonEvent)
           next=buildcommentevent(shopobj,this,next);

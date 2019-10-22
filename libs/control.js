@@ -1473,8 +1473,8 @@ control.prototype._replayAction_shop = function (action) {
     if (selections.length == 0) return false;
     var shop=core.status.shops[shopId];
     if (!shop || !shop.visited) return false;
-    // --- 判定commonEvent
-    if (shop.commonEvent) {
+    // --- 判定commonEvent或item
+    if (shop.commonEvent || shop.item) {
         core.openShop(shopId, false);
         setTimeout(core.replay);
         return true;

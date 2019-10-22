@@ -48,8 +48,13 @@ editor_blockly = function () {
         "choices": [ 
           {"text": "生命+800", "effect": "status:hp+=800"},
           {"text": "攻击+4", "effect": "status:atk+=4"},
-          {"text": "防御+4", "effect": "status:def+=4"},
-          {"text": "魔防+10", "effect": "status:mdef+=10"}
+        ]
+      },{
+        "id": "itemShop",
+        "item": true,
+        "textInList": "道具商店",
+        "choices": [
+          {"id": "yellowKey", "count": 10, "money": 10}
         ]
       },{
         "id": "keyShop1",

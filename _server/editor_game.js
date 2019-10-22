@@ -178,6 +178,18 @@ editor_game_wrapper = function (editor, main, core) {
         callback([editor.core.floorIds, null]);
     }
 
+    editor_game.prototype.doCoreFunc = function (funcname) {
+        return core[funcname].apply(core, Array.prototype.slice.call(arguments, 1));
+    }
+
+    editor_game.prototype.getEnemy = function (id) {
+        return core.material.enemys[id];
+    }
+
+    editor_game.prototype.getFirstData = function () {
+        return core.firstData;
+    }
+
     editor.constructor.prototype.game = new editor_game();
 }
 //editor_game_wrapper(editor);

@@ -45,6 +45,7 @@ editor_mappanel_wrapper = function (editor) {
      * 双击地图可以选中素材
      */
     editor.uifunctions.map_doubleClick = function (e) {
+        if (editor.uivalues.bindSpecialDoor.loc != null) return;
         var loc = editor.uifunctions.eToLoc(e);
         var pos = editor.uifunctions.locToPos(loc, true);
         editor.setSelectBoxFromInfo(editor[editor.layerMod][pos.y][pos.x]);
@@ -68,6 +69,7 @@ editor_mappanel_wrapper = function (editor) {
 
     /**
      * editor.dom.eui.onmousedown
+     * + 绑定机关门事件的选择怪物
      * + 右键进入菜单
      * + 非绘图时选中
      * + 绘图时画个矩形在那个位置
@@ -75,6 +77,18 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.map_ondown = function (e) {
         var loc = editor.uifunctions.eToLoc(e);
         var pos = editor.uifunctions.locToPos(loc, true);
+        if (editor.uivalues.bindSpecialDoor.loc != null) {
+            var x = editor.pos.x, y = editor.pos.y, id = (editor.map[y][x] || {}).id;
+            // 检测是否是怪物
+            if (id && editor.game.getEnemy(id)) {
+                var locstr = x + "," + y, index = editor.uivalues.bindSpecialDoor.enemys.indexOf(locstr);
+                if (index >= 0) editor.uivalues.bindSpecialDoor.enemys.splice(index, 1);
+                else editor.uivalues.bindSpecialDoor.enemys.push(locstr);
+                editor.drawEventBlock();
+                editor.uifunctions._extraEvent_bindSpecialDoor_doAction();
+            }
+            return false;
+        }
         if (e.button == 2) {
             editor.uifunctions.showMidMenu(e.clientX, e.clientY);
             return false;
@@ -321,27 +335,34 @@ editor_mappanel_wrapper = function (editor) {
         e.stopPropagation();
 
         var thisevent = editor.map[editor.pos.y][editor.pos.x];
-        return this._extraEvent_bindStartPoint(thisevent) || this._extraEvent_bindStair(thisevent)
-            || this._extraEvent_bindSpecialDoor(thisevent);
+        return editor.uifunctions._extraEvent_bindStartPoint(thisevent)
+            || editor.uifunctions._extraEvent_bindStair(thisevent)
+            || editor.uifunctions._extraEvent_bindSpecialDoor(thisevent);
     }
 
+    /**
+     * 绑定该空地点为起始点
+     */
     editor.uifunctions._extraEvent_bindStartPoint = function (thisevent) {
         if (thisevent != 0) return false;
-        editor.file.editTower([
-            ["change", "['firstData']['floorId']", editor.currentFloorId],
-            ["change", "['firstData']['hero']['loc']['x']", editor.pos.x],
-            ["change", "['firstData']['hero']['loc']['y']", editor.pos.y]
-        ], function (objs_) {//console.log(objs_);
-            if (objs_.slice(-1)[0] != null) {
-                printe(objs_.slice(-1)[0]);
-                throw(objs_.slice(-1)[0])
-            }
+        editor.mode.onmode('tower');
+        editor.mode.addAction(["change", "['firstData']['floorId']", editor.currentFloorId]);
+        editor.mode.addAction(["change", "['firstData']['hero']['loc']['x']", editor.pos.x]);
+        editor.mode.addAction(["change", "['firstData']['hero']['loc']['y']", editor.pos.y]);
+        editor.mode.onmode('save', function () {
+            core.firstData.floorId = editor.currentFloorId;
+            core.firstData.hero.loc.x = editor.pos.x;
+            core.firstData.hero.loc.y = editor.pos.y;
             editor.drawPosSelection();
-            editor_mode.showMode('tower');
+            editor.drawEventBlock();
+            editor.mode.tower();
             printf('绑定初始点成功');
         });
     }
 
+    /**
+     * 绑定该楼梯的楼传事件
+     */
     editor.uifunctions._extraEvent_bindStair = function (thisevent) {
         if (['upFloor', 'downFloor', 'leftPortal', 'rightPortal', 'upPortal', 'downPortal'].indexOf(thisevent.id) < 0)
             return false;
@@ -364,14 +385,73 @@ editor_mappanel_wrapper = function (editor) {
                 throw (err)
             }
             editor.drawPosSelection();
+            editor.drawEventBlock();
             editor_mode.showMode('loc');
             printf('添加楼梯事件成功');
         });
         return true;
     }
 
+    /**
+     * 绑定该机关门的事件
+     */
     editor.uifunctions._extraEvent_bindSpecialDoor = function (thisevent) {
+        if (thisevent.id != 'specialDoor') return false;
+        var number = parseInt(prompt("请输入该机关门的怪物数量", "0"))|| 0;
+        if (number <= 0) return true;
+        editor.uivalues.bindSpecialDoor.n = number;
+        editor.uivalues.bindSpecialDoor.loc = editor.pos.x + ',' + editor.pos.y;
+        editor.uivalues.bindSpecialDoor.enemys = [];
+        printf("请点击选择" + number + "个怪物；切换楼层或刷新页面取消操作。");
+    }
 
+    /**
+     * 确定绑定该机关门的事件
+     * cancel：是否取消此模式
+     */
+    editor.uifunctions._extraEvent_bindSpecialDoor_doAction = function (cancel) {
+        var bindSpecialDoor = editor.uivalues.bindSpecialDoor;
+        if (cancel) {
+            bindSpecialDoor.loc = null;
+            bindSpecialDoor.enemys = [];
+            bindSpecialDoor.n = 0;
+            editor.drawEventBlock();
+            printf("");
+            return;
+        }
+        if (bindSpecialDoor.loc == null || bindSpecialDoor.enemys.length != bindSpecialDoor.n) return;
+        // 添加机关门自动事件
+        var doorFlag = "flag:door_" + editor.currentFloorId + "_" + bindSpecialDoor.loc.replace(',', '_');
+        editor.currentFloorData.autoEvent[bindSpecialDoor.loc] = {
+            '0': {
+                "condition": doorFlag + "==" + bindSpecialDoor.n,
+                "currentFloor": true,
+                "priority": 0,
+                "delayExecute": false,
+                "multiExecute": false,
+                "data": [
+                    {"type": "openDoor"}
+                ]
+            }
+        };
+        bindSpecialDoor.enemys.forEach(function (loc) {
+            editor.currentFloorData.afterBattle[loc] = [
+                {"type": "addValue", "name": doorFlag, "value": "1"}
+            ]
+        });
+        editor.file.saveFloorFile(function (err) {
+            if (err) {
+                printe(err);
+                throw (err)
+            }
+            editor.drawEventBlock();
+            editor.drawPosSelection();
+            editor_mode.showMode('loc');
+            printf('绑定机关门事件成功');
+        });
+        bindSpecialDoor.loc = null;
+        bindSpecialDoor.enemys = [];
+        bindSpecialDoor.n = 0;
     }
 
     /**

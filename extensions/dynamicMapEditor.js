@@ -368,7 +368,7 @@ dynamicMapEditor.prototype.showHelp = function (fromButton) {
 	text += "基本操作：\n - 点击图块再点地图可以放置；\n - 双击图块可以编辑数据；\n";
 	text += " - [ 键将开关此模式；\n - ] 键将会把改动保存到文件；\n - \\ 键将撤销上步操作。\n\n";
 	text += "最下面三行数据分别是：\n"
-	text += "血攻防魔防；金经黄蓝红；破炸飞和debuff";
+	text += "血攻防魔防；金经黄蓝红；破炸飞和debuff。";
 	if (!fromButton) text += "\n\n点取消将不再提示本页面。";
 	core.myconfirm(text, null, function () {
 		if (!fromButton) core.setLocalStorage("_dynamicMapEditor_help", true);
@@ -393,11 +393,13 @@ dynamicMapEditor.prototype.saveEnemys = function () {
 	var datastr = 'var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = \n';
 	var emap = {};
 	var estr = JSON.stringify(core.enemys.enemys, function (k, v) {
-		if (v.hp != null) {
+		var t = core.clone(v);
+		if (t.hp != null) {
+			delete t.id;
 			var id_ = ":" + k + ":";
-			emap[id_] = JSON.stringify(v);
+			emap[id_] = JSON.stringify(t);
 			return id_;
-		} else return v
+		} else return t;
 	}, '\t');
 	for (var id_ in emap) {
 		estr = estr.replace('"' + id_ + '"', emap[id_])
@@ -409,7 +411,9 @@ dynamicMapEditor.prototype.saveEnemys = function () {
 dynamicMapEditor.prototype.saveValues = function () {
 	if (!this.valueModified) return;
 	core.data.values = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.values = core.clone(core.values);
-	fs.writeFile('project/data.js', core.encodeBase64(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d), 'base64', function (e, d) {});
+	var datastr = 'var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d = \n' +
+		JSON.stringify(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d, null, '\t');
+	fs.writeFile('project/data.js', core.encodeBase64(datastr), 'base64', function (e, d) {});
 }
 
 dynamicMapEditor.prototype.saveFloors = function () {
@@ -451,15 +455,11 @@ dynamicMapEditor.prototype.formatMap = function (mapArr, trySimplify) {
 	}
 	//把二维数组格式化
 	var formatArrStr = '';
-	var arr = JSON.stringify(mapArr).replace(/\s+/g, '').sdatastr
-	var si = mapArr.length - 1, sk = mapArr[0].length - 1;datastr
+	var si = mapArr.length - 1, sk = mapArr[0].length - 1;
 	for (var i = 0; i <= si; i++) {
-		var a = [];
 		formatArrStr += '    [';
-		if (i == 0 || i == si) a = arr[i].split(/\D+/).join(' ').trim().split(' ');
-		else a = arr[i].split(/\D+/);
 		for (var k = 0; k <= sk; k++) {
-			var num = parseInt(a[k]);
+			var num = parseInt(mapArr[i][k]);
 			formatArrStr += Array(Math.max(4 - String(num).length, 0)).join(' ') + num + (k == sk ? '' : ',');
 		}
 		formatArrStr += ']' + (i == si ? '' : ',\n');

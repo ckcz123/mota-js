@@ -25,7 +25,7 @@ editor_listen_wrapper = function (editor) {
 
         editor.dom.iconLib.onmousedown = editor.uifunctions.material_ondown
 
-        editor.dom.addFloorEvent.onmousedown = editor.addFloorEvent_click
+        editor.dom.extraEvent.onmousedown = editor.uifunctions.extraEvent_click
         editor.dom.chooseThis.onmousedown = editor.uifunctions.chooseThis_click
         editor.dom.chooseInRight.onmousedown = editor.uifunctions.chooseInRight_click
         editor.dom.copyLoc.onmousedown = editor.uifunctions.copyLoc_click

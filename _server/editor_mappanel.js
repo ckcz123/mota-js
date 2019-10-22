@@ -271,19 +271,27 @@ editor_mappanel_wrapper = function (editor) {
 
         // 检测是否是上下楼
         var thisevent = editor.map[editor.pos.y][editor.pos.x];
-        if (thisevent.id == 'upFloor') {
-            editor.dom.addFloorEvent.style.display = 'block';
-            editor.dom.addFloorEvent.children[0].innerHTML = '绑定上楼事件';
+        if (thisevent == 0) {
+            editor.dom.extraEvent.style.display = 'block';
+            editor.dom.extraEvent.children[0].innerHTML = '绑定出生点为此点';
+        }
+        else if (thisevent.id == 'upFloor') {
+            editor.dom.extraEvent.style.display = 'block';
+            editor.dom.extraEvent.children[0].innerHTML = '绑定上楼事件';
         }
         else if (thisevent.id == 'downFloor') {
-            editor.dom.addFloorEvent.style.display = 'block';
-            editor.dom.addFloorEvent.children[0].innerHTML = '绑定下楼事件';
+            editor.dom.extraEvent.style.display = 'block';
+            editor.dom.extraEvent.children[0].innerHTML = '绑定下楼事件';
         }
         else if (['leftPortal', 'rightPortal', 'downPortal', 'upPortal'].indexOf(thisevent.id) >= 0) {
-            editor.dom.addFloorEvent.style.display = 'block';
-            editor.dom.addFloorEvent.children[0].innerHTML = '绑定楼传事件';
+            editor.dom.extraEvent.style.display = 'block';
+            editor.dom.extraEvent.children[0].innerHTML = '绑定楼传事件';
         }
-        else editor.dom.addFloorEvent.style.display = 'none';
+        else if (thisevent.id == 'specialDoor') {
+            editor.dom.extraEvent.style.display = 'block';
+            editor.dom.extraEvent.children[0].innerHTML = '绑定机关门事件';
+        } 
+        else editor.dom.extraEvent.style.display = 'none';
 
         editor.dom.chooseThis.children[0].innerHTML = '选中此点' + '(' + editor.pos.x + ',' + editor.pos.y + ')'
         editor.dom.copyLoc.children[0].innerHTML = '复制事件' + locStr + '到此处';
@@ -305,13 +313,38 @@ editor_mappanel_wrapper = function (editor) {
     }
 
     /**
-     * editor.dom.addFloorEvent.onmousedown
-     * 菜单 添加上下楼事件
+     * editor.dom.extraEvent.onmousedown
+     * 菜单 附加点操作
      */
-    editor.addFloorEvent_click = function (e) {
+    editor.uifunctions.extraEvent_click = function (e) {
         editor.uifunctions.hideMidMenu();
         e.stopPropagation();
+
         var thisevent = editor.map[editor.pos.y][editor.pos.x];
+        return this._extraEvent_bindStartPoint(thisevent) || this._extraEvent_bindStair(thisevent)
+            || this._extraEvent_bindSpecialDoor(thisevent);
+    }
+
+    editor.uifunctions._extraEvent_bindStartPoint = function (thisevent) {
+        if (thisevent != 0) return false;
+        editor.file.editTower([
+            ["change", "['firstData']['floorId']", editor.currentFloorId],
+            ["change", "['firstData']['hero']['loc']['x']", editor.pos.x],
+            ["change", "['firstData']['hero']['loc']['y']", editor.pos.y]
+        ], function (objs_) {//console.log(objs_);
+            if (objs_.slice(-1)[0] != null) {
+                printe(objs_.slice(-1)[0]);
+                throw(objs_.slice(-1)[0])
+            }
+            editor.drawPosSelection();
+            editor_mode.showMode('tower');
+            printf('绑定初始点成功');
+        });
+    }
+
+    editor.uifunctions._extraEvent_bindStair = function (thisevent) {
+        if (['upFloor', 'downFloor', 'leftPortal', 'rightPortal', 'upPortal', 'downPortal'].indexOf(thisevent.id) < 0)
+            return false;
         var loc = editor.pos.x + "," + editor.pos.y;
         if (thisevent.id == 'upFloor') {
             editor.currentFloorData.changeFloor[loc] = { "floorId": ":next", "stair": "downFloor" };
@@ -334,6 +367,11 @@ editor_mappanel_wrapper = function (editor) {
             editor_mode.showMode('loc');
             printf('添加楼梯事件成功');
         });
+        return true;
+    }
+
+    editor.uifunctions._extraEvent_bindSpecialDoor = function (thisevent) {
+
     }
 
     /**

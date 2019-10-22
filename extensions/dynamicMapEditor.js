@@ -136,8 +136,8 @@ dynamicMapEditor.prototype.onItemClick = function(index) {
 	var item = this.items[startIndex + index];
 	if(!item) return;
 	if(index == this.selectedIndex) {
-		var enemy = core.material.enemys[item.id];
-		if (!enemy) {
+		if (core.material.enemys[item.id]) {
+			var enemy = core.material.enemys[item.id];
 			var nowData = [enemy.hp, enemy.atk, enemy.def, enemy.special].join(';');
 			core.myprompt("请输入新怪物属性\n血;攻;防;能力，以分号分隔", nowData, function (result) {
 				if (result) {
@@ -169,7 +169,8 @@ dynamicMapEditor.prototype.onItemClick = function(index) {
 					return;
 				}
 				core.drawTip('无效的输入数据');
-			})
+			});
+			return;
 		}
 	} else {
 		this.selectedIndex = index;

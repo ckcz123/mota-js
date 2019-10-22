@@ -15,7 +15,7 @@ function editor() {
         dataSelection : document.getElementById('dataSelection'),
         iconLib:document.getElementById('iconLib'),
         midMenu:document.getElementById('midMenu'),
-        addFloorEvent :document.getElementById('addFloorEvent'),
+        extraEvent: document.getElementById('extraEvent'),
         chooseThis : document.getElementById('chooseThis'),
         chooseInRight : document.getElementById('chooseInRight'),
         copyLoc : document.getElementById('copyLoc'),

@@ -2388,28 +2388,28 @@ return code;
 */;
 
 drawSelector_s
-    :   '绘制闪烁光标' EvalString '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '清空已有光标' Bool Newline
+    :   '绘制闪烁光标' EvalString '编号' Int '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString Newline
 
 
 /* drawSelector_s
 tooltip : drawSelector：绘制闪烁光标
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawSelector%ef%bc%9a%e7%bb%98%e5%88%b6%e9%97%aa%e7%83%81%e5%85%89%e6%a0%87
-default : ["winskin.png","0","0","100","100", false]
+default : ["winskin.png","1","0","0","100","100"]
 colour : this.subColor
-Bool_0 = Bool_0 ? (',"clear": true') : '';
-var code = '{"type": "drawSelector", "image": "'+EvalString_0+'", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+Bool_0+'},\n';
+var code = '{"type": "drawSelector", "image": "'+EvalString_0+'", "code": '+Int_0+', "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+'},\n';
 return code;
 */;
 
 drawSelector_1_s
-    :   '清除闪烁光标' Newline
+    :   '清除闪烁光标' '编号' Int Newline
 
 
 /* drawSelector_1_s
 tooltip : drawSelector：清除闪烁光标
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showImage%ef%bc%9a%e6%98%be%e7%a4%ba%e5%9b%be%e7%89%87
+default : ["1"]
 colour : this.subColor
-var code = '{"type": "drawSelector"},\n';
+var code = '{"type": "drawSelector", "code": '+Int_0+'},\n';
 return code;
 */;
 
@@ -3541,11 +3541,11 @@ ActionParser.prototype.parseAction = function() {
     case "drawSelector": // 绘制光标
       if (data.image) {
         this.next = MotaActionBlocks['drawSelector_s'].xmlText([
-          data.image, data.x, data.y, data.width, data.height, data.clear || false, this.next
+          data.image, data.code, data.x, data.y, data.width, data.height, this.next
         ]);
       }
       else {
-        this.next = MotaActionBlocks['drawSelector_1_s'].xmlText([this.next]);
+        this.next = MotaActionBlocks['drawSelector_1_s'].xmlText([data.code, this.next]);
       }
     case "animateImage":  // 兼容 animateImage
       break;

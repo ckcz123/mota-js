@@ -644,15 +644,9 @@ ui.prototype.drawWindowSelector = function(background, x, y, w, h) {
     this._drawSelector(ctx, background, w, h);
 }
 
-ui.prototype._deleteAllSelectors = function () {
-    for (var i = 0; core.dymCanvas['_uievent_selector_' + i]; i++) {
-        core.deleteCanvas('_uievent_selector_' + i);
-    }
-}
-
 ui.prototype._uievent_drawSelector = function (data) {
-    if (data.image == null) return this._deleteAllSelectors();
-    if (data.clear) this,this._deleteAllSelectors();
+    var canvasName = '_uievent_selector_' + (data.code || 0);
+    if (data.image == null) return core.deleteCanvas(canvasName);
 
     var background = data.image || core.status.textAttribute.background;
     if (typeof background != 'string') return;
@@ -664,10 +658,8 @@ ui.prototype._uievent_drawSelector = function (data) {
     }
     var z = 136;
     if (core.dymCanvas.uievent) z = (parseInt(core.dymCanvas.uievent.canvas.style.zIndex) || 135) + 1;
-    var i = 0;
-    while (core.dymCanvas['_uievent_selector_' + i]) i++;
-    var ctx = core.createCanvas('_uievent_selector_' + i, x, y, w, h, z);
-    ctx.canvas.classlist.add('_uievent_selector');
+    var ctx = core.createCanvas(canvasName, x, y, w, h, z);
+    ctx.canvas.classList.add('_uievent_selector');
     this._drawSelector(ctx, background, w, h);
 }
 
@@ -1721,7 +1713,7 @@ ui.prototype._drawBook_drawName = function (index, enemy, top, left, width) {
     }
     else {
         core.fillText('ui', enemy.name, left + width / 2,
-            top + 28, '#DDDDDD', this._buildFont(17, true));
+            top + 28, '#DDDDDD', this._buildFont(17, true), width);
         core.fillText('ui', enemy.specialText, left + width / 2,
             top + 50, '#FF6A6A', this._buildFont(15, true), width);
     }

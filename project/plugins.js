@@ -87,12 +87,16 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 },
     "smoothCamera": function () {
 
+    // 是否启用本插件，默认不启用
+	this.__enableSmoothCamera = false;
+	if (!this.__enableSmoothCamera) return;
+
 	this.Camera = function () {
 
 		// 下面这个变量决定本插件的开关
 		// 你可以在游戏中使用core.setFlag('smoothCamera',false)来关闭本插件的功能
 		// 同时也可以core.setFlag('smoothCamera',true)重新开启
-		// 本插件默认开启
+		// 此项默认为true
 		// 
 		this.__switchName = 'smoothCamera';
 

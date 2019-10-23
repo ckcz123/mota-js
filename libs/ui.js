@@ -1296,7 +1296,7 @@ ui.prototype._drawScrollText_animate = function (ctx, time, callback) {
         if (currH < -height) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
-            if (core.isset(callback)) callback();
+            if (callback) callback();
             return;
         }
         core.drawImage('ui', ctx.canvas, 0, currH);
@@ -1416,7 +1416,7 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
         if (color instanceof Array) color = core.arrayToRGBA(color);
         core.setFillStyle('ui', color);
         var offset = this.HPIXEL;
-        if (core.isset(choices[i].icon)) {
+        if (choices[i].icon) {
             var iconInfo = this._getDrawableIconInfo(choices[i].icon), image = iconInfo[0], icon = iconInfo[1];
             if (image != null) {
                 core.drawImage('ui', image, 0, 32 * icon, 32, 32,
@@ -2035,7 +2035,7 @@ ui.prototype.drawShop = function (shopId) {
     for (var i=0;i<shop.choices.length;i++) {
         var choice = shop.choices[i];
         var text = core.replaceText(choice.text, need, times);
-        if (core.isset(choice.need))
+        if (choice.need != null)
             text += "（"+core.calValue(choice.need, null, null, times)+use+"）";
         choices.push({"text": text, "color":shop.visited?null:"#999999"});
     }
@@ -2816,7 +2816,7 @@ ui.prototype._drawPaint_draw = function () {
 
     // 将已有的内容绘制到route上
     var value = core.paint[core.status.floorId];
-    if (core.isset(value)) value = lzw_decode(value).split(",");
+    if (value) value = lzw_decode(value).split(",");
     core.utils._decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
     core.drawImage('paint', core.bigmap.tempCanvas.canvas, 0, 0);
 
@@ -2877,7 +2877,7 @@ ui.prototype.drawHelp = function () {
 ////// canvas创建 //////
 ui.prototype.createCanvas = function (name, x, y, width, height, z) {
     // 如果画布已存在则直接调用
-    if (core.isset(core.dymCanvas[name])) {
+    if (core.dymCanvas[name]) {
         this.relocateCanvas(name, x, y);
         this.resizeCanvas(name, width, height);
         core.dymCanvas[name].canvas.style.zIndex = z;
@@ -2903,13 +2903,13 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
 
 ////// canvas重定位 //////
 ui.prototype.relocateCanvas = function (name, x, y) {
-    var ctx = core.dymCanvas[name];
-    if (!core.isset(ctx)) return null;
-    if (core.isset(x)) {
+    var ctx = core.getContextByName(name);
+    if (!ctx) return null;
+    if (x != null) {
         ctx.canvas.style.left = x * core.domStyle.scale + 'px';
         ctx.canvas.setAttribute("_left", x);
     }
-    if (core.isset(y)) {
+    if (y != null) {
         ctx.canvas.style.top = y * core.domStyle.scale + 'px';
         ctx.canvas.setAttribute("_top", y);
     }
@@ -2918,13 +2918,13 @@ ui.prototype.relocateCanvas = function (name, x, y) {
 
 ////// canvas重置 //////
 ui.prototype.resizeCanvas = function (name, width, height, styleOnly) {
-    var ctx = core.dymCanvas[name];
-    if (!core.isset(ctx)) return null;
-    if (core.isset(width)) {
+    var ctx = core.getContextByName(name);
+    if (!ctx) return null;
+    if (width != null) {
         if (!styleOnly) ctx.canvas.width = width;
         ctx.canvas.style.width = width * core.domStyle.scale + 'px';
     }
-    if (core.isset(height)) {
+    if (height != null) {
         if (!styleOnly) ctx.canvas.height = height;
         ctx.canvas.style.height = height * core.domStyle.scale + 'px';
     }
@@ -2932,7 +2932,7 @@ ui.prototype.resizeCanvas = function (name, width, height, styleOnly) {
 }
 ////// canvas删除 //////
 ui.prototype.deleteCanvas = function (name) {
-    if (!core.isset(core.dymCanvas[name])) return null;
+    if (!core.dymCanvas[name]) return null;
     core.dom.gameDraw.removeChild(core.dymCanvas[name].canvas);
     delete core.dymCanvas[name];
 }

@@ -1642,8 +1642,9 @@ maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
     core.setFlag(vFlag, number);
     core.status[name + "maps"][floorId] = null;
 
-    if (floorId == core.status.floorId)
-        core.drawMap(floorId);
+    if (floorId == core.status.floorId){
+        core.clearMap(name);
+        core["draw"+(name=='bg' ? "Bg":"Fg")](floorId);
 }
 
 ////// 重置地图 //////

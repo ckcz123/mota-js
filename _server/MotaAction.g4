@@ -198,17 +198,19 @@ return code;
 */;
 
 shopItemChoices
-    :   '道具商店选项' '道具名' IdString '存量' Int '买入价格' Int '卖出价格' EvalString? BEND
+    :   '道具商店选项' '道具名' IdString '存量' Int '买入价格' EvalString? '卖出价格' EvalString? BEND
 
 
 
 /* shopItemChoices
-tooltip : 道具商店选项，每一项是道具名；卖出价格可不填代表不可卖出
+tooltip : 道具商店选项，每一项是道具名；买入或卖出可以不填表示只能卖出或买入
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e5%85%a8%e5%b1%80%e5%95%86%e5%ba%97
 default : ["yellowKey","10","10",""]
 colour : this.subColor
-EvalString_0 = EvalString_0 ? (', "sell": '+(parseInt(EvalString_0) || 0)) : '';
-var code = '{"id": "' + IdString_0 + '", "number": ' + Int_0 + ', "money": ' + Int_1 + EvalString_0 + '},\n';
+EvalString_0 = EvalString_0 ? (', "money": '+(parseInt(EvalString_0) || 0)) : '';
+EvalString_1 = EvalString_1 ? (', "sell": '+(parseInt(EvalString_1) || 0)) : '';
+if (!EvalString_0 && !EvalString_1) throw "买入金额和卖出金额至少需要填写一个";
+var code = '{"id": "' + IdString_0 + '", "number": ' + Int_0 + EvalString_0 + EvalString_1 + '},\n';
 return code;
 */;
 
@@ -2879,7 +2881,7 @@ ActionParser.prototype.parse = function (obj,type) {
         var text_choices = null;
         for(var ii=obj.choices.length-1,choice;choice=obj.choices[ii];ii--) {
           text_choices = MotaActionBlocks['shopItemChoices'].xmlText([
-            choice.id, choice.number, choice.money, choice.sell == null ? "" : (""+choice.sell),
+            choice.id, choice.number, choice.money == null ? "" : (""+choice.money), choice.sell == null ? "" : (""+choice.sell),
             text_choices
           ]);
         }

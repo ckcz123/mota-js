@@ -211,7 +211,7 @@ EvalString_0 = EvalString_0 ? (', "number": '+(parseInt(EvalString_0) || 0)) : '
 EvalString_1 = EvalString_1 ? (', "money": '+(parseInt(EvalString_1) || 0)) : '';
 EvalString_2 = EvalString_2 ? (', "sell": '+(parseInt(EvalString_2) || 0)) : '';
 if (!EvalString_1 && !EvalString_2) throw "买入金额和卖出金额至少需要填写一个";
-var code = '{"id": "' + IdString_0 + EvalString_0 + EvalString_1 + EvalString_2 + '},\n';
+var code = '{"id": "' + IdString_0 + '"' + EvalString_0 + EvalString_1 + EvalString_2 + '},\n';
 return code;
 */;
 

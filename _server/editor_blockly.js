@@ -48,8 +48,13 @@ editor_blockly = function () {
         "choices": [ 
           {"text": "生命+800", "effect": "status:hp+=800"},
           {"text": "攻击+4", "effect": "status:atk+=4"},
-          {"text": "防御+4", "effect": "status:def+=4"},
-          {"text": "魔防+10", "effect": "status:mdef+=10"}
+        ]
+      },{
+        "id": "itemShop",
+        "item": true,
+        "textInList": "道具商店",
+        "choices": [
+          {"id": "yellowKey", "number": 10, "money": 10}
         ]
       },{
         "id": "keyShop1",
@@ -622,7 +627,43 @@ function omitedcheckUpdateFunction(event) {
         var code = Blockly.JavaScript.workspaceToCode(editor_blockly.workspace);
         code = code.replace(/\\(i|c|d|e)/g, '\\\\$1');
         eval('var obj=' + code);
+        if (this.checkAsync(obj) && confirm("警告！存在不等待执行完毕的事件但却没有用【等待所有异步事件处理完毕】来等待" +
+            "它们执行完毕，这样可能会导致录像检测系统出问题。\n你要返回修改么？")) return;
         setvalue(JSON.stringify(obj));
+    }
+
+    // 检查"不等待处理完毕"
+    editor_blockly.checkAsync = function (obj) {
+        if (!(obj instanceof Array)) return false;
+        var hasAsync = false;
+        for (var i = 0; i < obj.length; ++i) {
+            var one = obj[i];
+            if (one.type == 'if' && (this.checkAsync(one['true']) || this.checkAsync(one['false'])))
+                return true;
+            if ((one.type == 'while' || one.type == 'dowhile') && this.checkAsync(one.data))
+                return true;
+            if (one.type == 'if' && (this.checkAsync(one.yes) || this.checkAsync(one.no)))
+                return true;
+            if (one.type == 'choices') {
+                var list = one.choices;
+                if (list instanceof Array) {
+                    for (var j = 0; j < list.length; j++) {
+                        if (this.checkAsync(list[j].action)) return true;
+                    }
+                }
+            }
+            if (one.type == 'switch') {
+                var list = one.caseList;
+                if (list instanceof Array) {
+                    for (var j = 0; j < list.length; j++) {
+                        if (this.checkAsync(list[j].action)) return true;
+                    }
+                }
+            }
+            if (one.async && one.type != 'animate') hasAsync = true;
+            if (one.type == 'waitAsync') hasAsync = false;
+        }
+        return hasAsync;
     }
 
     var previewBlock = function (b) {
@@ -779,7 +820,7 @@ function omitedcheckUpdateFunction(event) {
         "jump_s": ["PosString_2", "PosString_3"], // 跳跃暂时只考虑终点
         "showBgFgMap_s": ["EvalString_0", "EvalString_1", "IdString_0"],
         "hideBgFgMap_s": ["EvalString_0", "EvalString_1", "IdString_0"],
-        "setBgFgBlock_s": ["PosString_0", "PosString_1", "IdString_0"],
+        "setBgFgBlock_s": ["EvalString_1", "EvalString_2", "IdString_0"],
         "showFloorImg_s": ["EvalString_0", "EvalString_1", "IdString_0"],
         "hideFloorImg_s": ["EvalString_0", "EvalString_1", "IdString_0"],
         "trigger_s": ["PosString_0", "PosString_1"],

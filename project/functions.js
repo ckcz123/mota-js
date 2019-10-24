@@ -306,7 +306,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var hint = "打败 " + enemy.name;
 	if (core.flags.enableMoney) hint += "，金币+" + money;
 	if (core.flags.enableExperience) hint += "，经验+" + experience;
-	core.drawTip(hint);
+	core.drawTip(hint, enemy.id);
 
 	// 事件的处理
 	var todo = [];
@@ -330,6 +330,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 	// 自爆
 	if (core.enemys.hasSpecial(special, 19)) {
+		core.status.hero.statistics.battleDamage += core.status.hero.hp - 1;
 		core.status.hero.hp = 1;
 	}
 	// 退化
@@ -443,6 +444,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		])
 	}
 	*/
+
+},
+        "afterPassNet": function (x, y, id) {
+	// 经过特殊地形后的事件；x和y为当前坐标，id为当前的图块id
+
+	// 这是个一次性血网的例子
+	// if (id == 'lavaNet') core.removeBlock(x, y);
 
 },
         "canUseQuickShop": function(shopId) {

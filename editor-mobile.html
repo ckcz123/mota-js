@@ -237,6 +237,7 @@
         <input type="checkbox" onclick="editor_multi.toggerLint()" id="lintCheckbox"
                style="vertical-align: bottom;margin-left:6px"/>
         <span style="vertical-align: bottom; margin-left: -3px">语法检查</span>
+        <button onclick="editor_multi.showPlugins()" style="display: none; margin-top: 3px" id="showPlugins">显示云端插件列表</button>
         <textarea id="multiLineCode" name="multiLineCode"></textarea>
     </div>
     <div id="left8" class='leftTab' style="z-index:-1;opacity: 0;"><!-- functions -->
@@ -337,7 +338,7 @@
                 </span>
                 <div id="menuDiv">
                     <div id="midMenu" style="display:none">
-                        <div id='addFloorEvent' class="menuitem" style="display:none"><div class="menuitem-content">添加上下楼事件</div></div>
+                        <div id='extraEvent' class='menuitem' style="display:none"><div class="menuitem-content"></div></div>
                         <div id='chooseThis' class="menuitem"><div class="menuitem-content">选中此点</div></div>
                         <div id='chooseInRight' class="menuitem"><div class="menuitem-content">在素材区选中此图块</div></div>
                         <div id='copyLoc' class="menuitem"><div class="menuitem-content">复制此事件</div></div>

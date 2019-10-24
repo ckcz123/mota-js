@@ -86,6 +86,7 @@ return code;
 
 shoplist
     :   shopsub
+    |   shopitem
     |   shopcommonevent
     |   emptyshop
     ;
@@ -100,7 +101,7 @@ return code;
 */;
 
 shopcommonevent
-    :   '商店 id' IdString '快捷商店栏中名称' EvalString BGNL? '未开启状态则不显示在列表中' Bool BGNL? '执行的公共事件 id' EvalString '参数列表' EvalString?
+    :   '公共事件版商店 id' IdString '快捷商店栏中名称' EvalString BGNL? '未开启状态则不显示在列表中' Bool BGNL? '执行的公共事件 id' EvalString '参数列表' EvalString?
     
 /* shopcommonevent
 tooltip : 全局商店, 执行一个公共事件
@@ -174,6 +175,43 @@ shopEffect
 /* shopEffect
 colour : this.subColor
 var code = idString_e_0+'+='+expression_0+';'
+return code;
+*/;
+
+shopitem
+    :   '道具商店 id' IdString '快捷商店栏中名称' EvalString BGNL? '未开启状态则不显示在列表中' Bool BGNL? Newline shopItemChoices+ BEND
+
+
+/* shopitem
+tooltip : 道具商店
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e5%85%a8%e5%b1%80%e5%95%86%e5%ba%97
+default : ["itemShop","道具商店",false]
+var code = {
+    'id': IdString_0,
+    'item': true,
+    'textInList': EvalString_0,
+    'mustEnable': Bool_0,
+    'choices': 'choices_aqwedsa'
+}
+code=JSON.stringify(code,null,2).split('"choices_aqwedsa"').join('[\n'+shopItemChoices_0+']\n')+',\n';
+return code;
+*/;
+
+shopItemChoices
+    :   '道具商店选项' '道具名' IdString '存量' EvalString? '买入价格' EvalString? '卖出价格' EvalString? BEND
+
+
+
+/* shopItemChoices
+tooltip : 道具商店选项，每一项是道具名；买入或卖出可以不填表示只能卖出或买入
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e5%85%a8%e5%b1%80%e5%95%86%e5%ba%97
+default : ["yellowKey","","10",""]
+colour : this.subColor
+EvalString_0 = EvalString_0 ? (', "number": '+(parseInt(EvalString_0) || 0)) : '';
+EvalString_1 = EvalString_1 ? (', "money": '+(parseInt(EvalString_1) || 0)) : '';
+EvalString_2 = EvalString_2 ? (', "sell": '+(parseInt(EvalString_2) || 0)) : '';
+if (!EvalString_1 && !EvalString_2) throw "买入金额和卖出金额至少需要填写一个";
+var code = '{"id": "' + IdString_0 + '"' + EvalString_0 + EvalString_1 + EvalString_2 + '},\n';
 return code;
 */;
 
@@ -2388,27 +2426,28 @@ return code;
 */;
 
 drawSelector_s
-    :   '绘制闪烁光标' EvalString '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString Newline
+    :   '绘制闪烁光标' EvalString '编号' Int '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString Newline
 
 
 /* drawSelector_s
 tooltip : drawSelector：绘制闪烁光标
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawSelector%ef%bc%9a%e7%bb%98%e5%88%b6%e9%97%aa%e7%83%81%e5%85%89%e6%a0%87
-default : ["winskin.png","0","0","100","100"]
+default : ["winskin.png","1","0","0","100","100"]
 colour : this.subColor
-var code = '{"type": "drawSelector", "image": "'+EvalString_0+'", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+'},\n';
+var code = '{"type": "drawSelector", "image": "'+EvalString_0+'", "code": '+Int_0+', "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+'},\n';
 return code;
 */;
 
 drawSelector_1_s
-    :   '清除闪烁光标' Newline
+    :   '清除闪烁光标' '编号' Int Newline
 
 
 /* drawSelector_1_s
 tooltip : drawSelector：清除闪烁光标
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showImage%ef%bc%9a%e6%98%be%e7%a4%ba%e5%9b%be%e7%89%87
+default : ["1"]
 colour : this.subColor
-var code = '{"type": "drawSelector"},\n';
+var code = '{"type": "drawSelector", "code": '+Int_0+'},\n';
 return code;
 */;
 
@@ -2839,11 +2878,25 @@ ActionParser.prototype.parse = function (obj,type) {
           obj.id,parser.EvalString(obj.textInList),obj.mustEnable,parser.EvalString(obj.commonEvent),obj.args,next
         ]);
       }
+      var builditem = function (obj,parser,next){
+        var text_choices = null;
+        for(var ii=obj.choices.length-1,choice;choice=obj.choices[ii];ii--) {
+          text_choices = MotaActionBlocks['shopItemChoices'].xmlText([
+            choice.id, choice.number == null ? "" : (""+choice.number), choice.money == null ? "" : (""+choice.money), 
+            choice.sell == null ? "" : (""+choice.sell), text_choices
+          ]);
+        }
+        return MotaActionBlocks['shopitem'].xmlText([
+          obj.id,obj.textInList,obj.mustEnable,text_choices,next
+        ]);
+      }
       var next=null;
       if(!obj)obj=[];
       while(obj.length){
         var shopobj=obj.pop()
-        if(shopobj.choices)
+        if(shopobj.item)
+          next=builditem(shopobj,this,next);
+        else if(shopobj.choices)
           next=buildsub(shopobj,this,next);
         else if(shopobj.commonEvent)
           next=buildcommentevent(shopobj,this,next);
@@ -3540,11 +3593,11 @@ ActionParser.prototype.parseAction = function() {
     case "drawSelector": // 绘制光标
       if (data.image) {
         this.next = MotaActionBlocks['drawSelector_s'].xmlText([
-          data.image, data.x, data.y, data.width, data.height, this.next
+          data.image, data.code, data.x, data.y, data.width, data.height, this.next
         ]);
       }
       else {
-        this.next = MotaActionBlocks['drawSelector_1_s'].xmlText([this.next]);
+        this.next = MotaActionBlocks['drawSelector_1_s'].xmlText([data.code, this.next]);
       }
     case "animateImage":  // 兼容 animateImage
       break;

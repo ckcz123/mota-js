@@ -19,14 +19,12 @@ function core() {
         'icons': {},
     }
     this.timeout = {
-        'tipTimeout': null,
         'turnHeroTimeout': null,
         'onDownTimeout': null,
         'sleepTimeout': null,
     }
     this.interval = {
         'heroMoveInterval': null,
-        "tipAnimate": null,
         'onDownInterval': null,
     }
     this.animateFrame = {
@@ -46,6 +44,12 @@ function core() {
             'nodes': [],
             'data': null,
             'fog': null,
+        },
+        "tips": {
+            'time': 0,
+            'offset': 0,
+            'list': [],
+            'lastSize': 0,
         },
         "asyncId": {}
     }
@@ -222,7 +226,9 @@ core.prototype.init = function (coreData, callback) {
     this._initPlugins();
 
     core.loader._load(function () {
-        core._afterLoadResources(callback);
+        core.extensions._load(function () {
+            core._afterLoadResources(callback);
+        });
     });
 }
 

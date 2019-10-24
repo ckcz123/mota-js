@@ -2193,14 +2193,14 @@ UI绘制事件。此事件可以绘制闪烁光标。
 
 ```js
 [
-    {"type": "drawSelector", "image": "winskin.png", "x": 0, "y": 0, "width": 100, "height": 100},
+    {"type": "drawSelector", "image": "winskin.png", "x": 0, "y": 0, "width": 100, "height": 100, "clear": true},
     {"type": "drawSelector"} // 清除闪烁光标
 ]
 ```
 
 image为要绘制的WindowSkin图片名；如果不填则视为“清除闪烁光标”。
 
-x, y, width, height分别为要绘制的起点坐标和长宽。
+x, y, width, height分别为要绘制的起点坐标和长宽。clear可选，如果为true则在绘制前清空已有光标。
 
 请注意，同时只会有一个闪烁光标存在，如果创建多个则后者会替换前者。
 

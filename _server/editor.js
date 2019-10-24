@@ -15,7 +15,7 @@ function editor() {
         dataSelection : document.getElementById('dataSelection'),
         iconLib:document.getElementById('iconLib'),
         midMenu:document.getElementById('midMenu'),
-        addFloorEvent :document.getElementById('addFloorEvent'),
+        extraEvent: document.getElementById('extraEvent'),
         chooseThis : document.getElementById('chooseThis'),
         chooseInRight : document.getElementById('chooseInRight'),
         copyLoc : document.getElementById('copyLoc'),
@@ -74,6 +74,13 @@ function editor() {
         lastCopyedInfo : [null, null],
         //
         ratio : 1,
+
+        // 绑定机关门事件相关
+        bindSpecialDoor: {
+            loc: null,
+            n: -1,
+            enemys: []
+        }
 
     };
 
@@ -227,6 +234,7 @@ editor.prototype.changeFloor = function (floorId, callback) {
         editor.currentFloorData[name]=mapArray;
     }
     editor.uivalues.preMapData = null;
+    editor.uifunctions._extraEvent_bindSpecialDoor_doAction(true);
     core.changeFloor(floorId, null, {"x": 0, "y": 0, "direction": "up"}, null, function () {
         editor.game.fetchMapFromCore();
         editor.updateMap();
@@ -247,10 +255,17 @@ editor.prototype.drawEventBlock = function () {
     var fg=document.getElementById('efg').getContext('2d');
 
     fg.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+    var firstData = editor.game.getFirstData();
     for (var i=0;i<core.__SIZE__;i++) {
         for (var j=0;j<core.__SIZE__;j++) {
             var color=[];
             var loc=(i+core.bigmap.offsetX/32)+","+(j+core.bigmap.offsetY/32);
+            if (editor.currentFloorId == firstData.floorId
+                && loc == firstData.hero.loc.x + "," + firstData.hero.loc.y) {
+                fg.textAlign = 'center';
+                editor.game.doCoreFunc('fillBoldText', fg, 'S',
+                    32 * i + 16, 32 * j + 28, '#FFFFFF', 'bold 30px Verdana');
+            }
             if (editor.currentFloorData.events[loc])
                 color.push('#FF0000');
             if (editor.currentFloorData.autoEvent[loc]) {
@@ -275,6 +290,12 @@ editor.prototype.drawEventBlock = function () {
             for(var kk=0,cc;cc=color[kk];kk++){
                 fg.fillStyle = cc;
                 fg.fillRect(32*i+8*kk, 32*j+32-8, 8, 8);
+            }
+            var index = editor.uivalues.bindSpecialDoor.enemys.indexOf(loc);
+            if (index >= 0) {
+                fg.textAlign = 'right';
+                editor.game.doCoreFunc("fillBoldText", fg, index + 1,
+                    32 * i + 28, 32 * j + 15, '#FF7F00', '14px Verdana');
             }
         }
     }

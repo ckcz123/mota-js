@@ -48,7 +48,14 @@ utils.prototype._init = function () {
             return this.substring(this_len - search.length, this_len) === search;
         };
     }
-
+    if (typeof String.prototype.startsWith != "function") {
+        String.prototype.startsWith = function (search, this_len) {
+            if (this_len === undefined || this_len > this.length) {
+                this_len = this.length;
+            }
+            return this.substring(0, search.length) === search;
+        }
+    }
 
 }
 

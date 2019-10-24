@@ -458,66 +458,50 @@ ui.prototype.clearUI = function () {
 }
 
 ////// 左上角绘制一段提示 //////
-ui.prototype.drawTip = function (text, id) {
-    var textX, textY, width, height;
-    clearInterval(core.interval.tipAnimate);
-    core.setFont('data', "16px Arial");
-    core.setTextAlign('data', 'left');
+ui.prototype.drawTip = function (text, id, clear) {
+    if (clear) this.clearTip();
+    var one = {
+        text: text,
+        textX: 21,
+        width: 26 + core.calWidth('data', text, "16px Arial"),
+        opacity: 0.1,
+        stage: 1,
+        time: 0
+    };
     if (id != null) {
         var info = core.getBlockInfo(id);
-        if (info == null || !info.image || info.height != 32) {
+        if (info == null || !info.image) {
             // 检查状态栏图标
             if (core.statusBar.icons[id] instanceof Image) {
-                id = {image: core.statusBar.icons[id], posX: 0, posY: 0};
+                id = {image: core.statusBar.icons[id], posX: 0, posY: 0, height: 32};
             }
-            else id = null;
+            else info = null;
         }
-        else id = info;
+        if (info != null) {
+            one.image = info.image;
+            one.posX = info.posX;
+            one.posY = info.posY;
+            one.height = info.height;
+            one.textX += 24;
+            one.width += 24;
+        }
     }
-    if (!id) {
-        textX = 16;
-        textY = 18;
-        width = textX + core.calWidth('data', text) + 16;
-        height = 42;
-    }
-    else {
-        textX = 44;
-        textY = 18;
-        width = textX + core.calWidth('data', text) + 8;
-        height = 42;
-    }
-    this._drawTip_animate(text, id, textX, textY, width, height);
+    core.animateFrame.tips.list.push(one);
 }
 
-ui.prototype._drawTip_animate = function (text, info, textX, textY, width, height) {
-    var alpha = 0, hide = false;
-    core.interval.tipAnimate = window.setInterval(function () {
-        if (hide) alpha -= 0.1;
-        else alpha += 0.1;
-        core.clearMap('data', 5, 5, core.ui.PIXEL, height);
-        core.setAlpha('data', alpha);
-        core.fillRect('data', 5, 5, width, height, '#000');
-        if (info)
-            core.drawImage('data', info.image, info.posX * 32, info.posY * 32, 32, 32, 10, 8, 32, 32);
-        core.fillText('data', text, textX + 5, textY + 15, '#fff');
-        core.setAlpha('data', 1);
-        if (alpha > 0.6 || alpha < 0) {
-            if (hide) {
-                core.clearMap('data', 5, 5, core.ui.PIXEL, height);
-                clearInterval(core.interval.tipAnimate);
-                return;
-            }
-            else {
-                if (!core.timeout.tipTimeout) {
-                    core.timeout.tipTimeout = window.setTimeout(function () {
-                        hide = true;
-                        core.timeout.tipTimeout = null;
-                    }, 750);
-                }
-                alpha = 0.6;
-            }
-        }
-    }, 30);
+ui.prototype._drawTip_drawOne = function (one, offset) {
+    core.setAlpha('data', one.opacity);
+    core.fillRect('data', 5, offset+ 5, one.width, 42, '#000000');
+    if (one.image)
+        core.drawImage('data', one.image, one.posX * 32, one.posY * one.height, 32, 32, 10, offset + 10, 32, 32);
+    core.fillText('data', one.text, one.textX, offset + 33, '#FFFFFF');
+    core.setAlpha('data', 1);
+}
+
+ui.prototype.clearTip = function () {
+    core.animateFrame.tips.list = [];
+    core.animateFrame.tips.offset = 0;
+    core.animateFrame.tips.lastSize = 0;
 }
 
 ////// 地图中间绘制一段文字 //////
@@ -645,11 +629,8 @@ ui.prototype.drawWindowSelector = function(background, x, y, w, h) {
 }
 
 ui.prototype._uievent_drawSelector = function (data) {
-    if (data.image == null) {
-        if (main.mode != 'editor')
-            core.deleteCanvas('_uievent_selector');
-        return;
-    }
+    var canvasName = '_uievent_selector_' + (data.code || 0);
+    if (data.image == null) return core.deleteCanvas(canvasName);
 
     var background = data.image || core.status.textAttribute.background;
     if (typeof background != 'string') return;
@@ -661,7 +642,8 @@ ui.prototype._uievent_drawSelector = function (data) {
     }
     var z = 136;
     if (core.dymCanvas.uievent) z = (parseInt(core.dymCanvas.uievent.canvas.style.zIndex) || 135) + 1;
-    var ctx = core.createCanvas('_uievent_selector', x, y, w, h, z);
+    var ctx = core.createCanvas(canvasName, x, y, w, h, z);
+    ctx.canvas.classList.add('_uievent_selector');
     this._drawSelector(ctx, background, w, h);
 }
 
@@ -1298,7 +1280,7 @@ ui.prototype._drawScrollText_animate = function (ctx, time, callback) {
         if (currH < -height) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
-            if (core.isset(callback)) callback();
+            if (callback) callback();
             return;
         }
         core.drawImage('ui', ctx.canvas, 0, currH);
@@ -1418,7 +1400,7 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
         if (color instanceof Array) color = core.arrayToRGBA(color);
         core.setFillStyle('ui', color);
         var offset = this.HPIXEL;
-        if (core.isset(choices[i].icon)) {
+        if (choices[i].icon) {
             var iconInfo = this._getDrawableIconInfo(choices[i].icon), image = iconInfo[0], icon = iconInfo[1];
             if (image != null) {
                 core.drawImage('ui', image, 0, 32 * icon, 32, 32,
@@ -1711,13 +1693,13 @@ ui.prototype._drawBook_drawName = function (index, enemy, top, left, width) {
     core.setTextAlign('ui', 'center');
     if (enemy.specialText=='') {
         core.fillText('ui', enemy.name, left + width / 2,
-            top + 35, '#DDDDDD', this._buildFont(17, true));
+            top + 35, '#DDDDDD', this._buildFont(17, true), width);
     }
     else {
         core.fillText('ui', enemy.name, left + width / 2,
-            top + 28, '#DDDDDD', this._buildFont(17, true));
+            top + 28, '#DDDDDD', this._buildFont(17, true), width);
         core.fillText('ui', enemy.specialText, left + width / 2,
-            top + 50, '#FF6A6A', this._buildFont(15, true));
+            top + 50, '#FF6A6A', this._buildFont(15, true), width);
     }
 }
 
@@ -1809,7 +1791,7 @@ ui.prototype.drawBookDetail = function (index) {
     if (!enemy) return;
     var content = info[1].join("\n");
     core.status.event.id = 'book-detail';
-    clearInterval(core.interval.tipAnimate);
+    core.clearTip();
     core.clearMap('data');
 
     var left = 10, width = this.PIXEL - 2 * left, right = left + width;
@@ -2037,7 +2019,7 @@ ui.prototype.drawShop = function (shopId) {
     for (var i=0;i<shop.choices.length;i++) {
         var choice = shop.choices[i];
         var text = core.replaceText(choice.text, need, times);
-        if (core.isset(choice.need))
+        if (choice.need != null)
             text += "（"+core.calValue(choice.need, null, null, times)+use+"）";
         choices.push({"text": text, "color":shop.visited?null:"#999999"});
     }
@@ -2051,7 +2033,7 @@ ui.prototype.drawMaps = function (index, x, y) {
     core.status.event.id = 'viewMaps';
     this.clearUI();
     if (index == null) return this._drawMaps_drawHint();
-    clearTimeout(core.interval.tipAnimate);
+    core.clearTip();
     core.status.checkBlock.cache = {};
     var data = this._drawMaps_buildData(index, x, y);
     core.drawThumbnail(data.floorId, null, {damage: data.damage},
@@ -2118,7 +2100,7 @@ ui.prototype._drawMaps_drawHint = function () {
 ui.prototype._drawMaps_buildData = function (index, x, y) {
     var damage = (core.status.event.data||{}).damage;
     var paint =  (core.status.event.data||{}).paint;
-    var all = (core.status.event.data||{}).all;
+    var all = (core.status.event.data||{all: true}).all;
     if (index.damage != null) damage=index.damage;
     if (index.paint != null) paint=index.paint;
     if (index.all != null) all=index.all;
@@ -2818,7 +2800,7 @@ ui.prototype._drawPaint_draw = function () {
 
     // 将已有的内容绘制到route上
     var value = core.paint[core.status.floorId];
-    if (core.isset(value)) value = lzw_decode(value).split(",");
+    if (value) value = lzw_decode(value).split(",");
     core.utils._decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
     core.drawImage('paint', core.bigmap.tempCanvas.canvas, 0, 0);
 
@@ -2879,7 +2861,7 @@ ui.prototype.drawHelp = function () {
 ////// canvas创建 //////
 ui.prototype.createCanvas = function (name, x, y, width, height, z) {
     // 如果画布已存在则直接调用
-    if (core.isset(core.dymCanvas[name])) {
+    if (core.dymCanvas[name]) {
         this.relocateCanvas(name, x, y);
         this.resizeCanvas(name, width, height);
         core.dymCanvas[name].canvas.style.zIndex = z;
@@ -2905,13 +2887,13 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
 
 ////// canvas重定位 //////
 ui.prototype.relocateCanvas = function (name, x, y) {
-    var ctx = core.dymCanvas[name];
-    if (!core.isset(ctx)) return null;
-    if (core.isset(x)) {
+    var ctx = core.getContextByName(name);
+    if (!ctx) return null;
+    if (x != null) {
         ctx.canvas.style.left = x * core.domStyle.scale + 'px';
         ctx.canvas.setAttribute("_left", x);
     }
-    if (core.isset(y)) {
+    if (y != null) {
         ctx.canvas.style.top = y * core.domStyle.scale + 'px';
         ctx.canvas.setAttribute("_top", y);
     }
@@ -2920,13 +2902,13 @@ ui.prototype.relocateCanvas = function (name, x, y) {
 
 ////// canvas重置 //////
 ui.prototype.resizeCanvas = function (name, width, height, styleOnly) {
-    var ctx = core.dymCanvas[name];
-    if (!core.isset(ctx)) return null;
-    if (core.isset(width)) {
+    var ctx = core.getContextByName(name);
+    if (!ctx) return null;
+    if (width != null) {
         if (!styleOnly) ctx.canvas.width = width;
         ctx.canvas.style.width = width * core.domStyle.scale + 'px';
     }
-    if (core.isset(height)) {
+    if (height != null) {
         if (!styleOnly) ctx.canvas.height = height;
         ctx.canvas.style.height = height * core.domStyle.scale + 'px';
     }
@@ -2934,7 +2916,7 @@ ui.prototype.resizeCanvas = function (name, width, height, styleOnly) {
 }
 ////// canvas删除 //////
 ui.prototype.deleteCanvas = function (name) {
-    if (!core.isset(core.dymCanvas[name])) return null;
+    if (!core.dymCanvas[name]) return null;
     core.dom.gameDraw.removeChild(core.dymCanvas[name].canvas);
     delete core.dymCanvas[name];
 }

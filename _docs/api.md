@@ -1719,11 +1719,16 @@ core.clearUI()
 重置UI窗口。此函数将清掉所有的UI帧动画和光标，清空UI画布，并将alpha设为1。
 
 
-core.drawTip(text, id)
+core.drawTip(text, id, clear)
 在左上角以气泡的形式绘制一段提示。
 text为文字内容，仅支持${}的表达式计算，不支持换行和变色。
 id可选，为同时绘制的图标ID，如果不为null则会同时绘制该图标（仅对32x32的素材有效）。
 也可以使用状态栏的图标ID，例如lv, hp, up, save, settings等。
+如果clear为true，则会清空当前所有正在显示的提示。
+
+
+core.clearTip()
+清空当前所有正在显示的提示。
 
 
 core.drawText(content, callback)

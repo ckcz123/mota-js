@@ -22,6 +22,7 @@ control.prototype._init = function () {
     this.registerAnimationFrame("animate", true, this._animationFrame_animate);
     this.registerAnimationFrame("heroMoving", true, this._animationFrame_heroMoving);
     this.registerAnimationFrame("weather", true, this._animationFrame_weather);
+    this.registerAnimationFrame("tips", true, this._animateFrame_tips);
     this.registerAnimationFrame("parallelDo", false, this._animationFrame_parallelDo);
     this.registerAnimationFrame("checkConsoleOpened", true, this._animationFrame_checkConsoleOpened);
     // --- 注册系统的replay
@@ -276,6 +277,40 @@ control.prototype._animationFrame_weather_fog = function () {
         });
         core.setAlpha('weather',1);
     }
+}
+
+control.prototype._animateFrame_tips = function (timestamp) {
+    var tips = core.animateFrame.tips;
+    if (timestamp - tips.time <= 30) return;
+    var delta = timestamp - tips.time;
+    tips.time = timestamp;
+    if (tips.list.length == 0) return;
+
+    var currentOffset = Math.max(tips.offset - 5, 0), firstOffset = null;
+    var currList = [];
+    core.setFont('data', "16px Arial");
+    core.setTextAlign('data', 'left');
+    core.clearMap('data', 0, 0, this.PIXEL, tips.lastSize * 50);
+    tips.lastLength = tips.list.length;
+
+    while (tips.list.length > 0) {
+        var one = tips.list.shift();
+        core.ui._drawTip_drawOne(one, currentOffset);
+        if (one.stage == 1) {
+            one.opacity += 0.05;
+            if (one.opacity >= 0.7) one.stage = 2;
+        } else if (one.stage == 2) {
+            one.time += delta;
+            if (one.time >= 2000) one.stage = 3;
+        } else one.opacity -= 0.05;
+        if (one.opacity > 0) {
+            currList.push(one);
+            if (firstOffset == null) firstOffset = currentOffset;
+        }
+        currentOffset += 50;
+    }
+    tips.list = currList;
+    tips.offset = firstOffset || 0;
 }
 
 control.prototype._animationFrame_parallelDo = function (timestamp) {

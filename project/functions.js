@@ -306,7 +306,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var hint = "打败 " + enemy.name;
 	if (core.flags.enableMoney) hint += "，金币+" + money;
 	if (core.flags.enableExperience) hint += "，经验+" + experience;
-	core.drawTip(hint);
+	core.drawTip(hint, enemy.id);
 
 	// 事件的处理
 	var todo = [];

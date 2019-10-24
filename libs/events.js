@@ -341,7 +341,7 @@ events.prototype.battle = function (id, x, y, force, callback) {
     if (!id) return core.clearContinueAutomaticRoute(callback);
     // 非强制战斗
     if (!core.enemys.canBattle(id, x, y) && !force && !core.status.event.id) {
-        core.drawTip("你打不过此怪物！");
+        core.drawTip("你打不过此怪物！", null, true);
         return core.clearContinueAutomaticRoute(callback);
     }
     // 自动存档
@@ -401,8 +401,8 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
         var key = id.replace("Door", "Key");
         if (!core.hasItem(key)) {
             if (key != "specialKey")
-                core.drawTip("你没有" + ((core.material.items[key] || {}).name || "钥匙"));
-            else core.drawTip("无法开启此门");
+                core.drawTip("你没有" + ((core.material.items[key] || {}).name || "钥匙"), null, true);
+            else core.drawTip("无法开启此门", null, true);
             core.clearContinueAutomaticRoute();
             return false;
         }

@@ -283,6 +283,9 @@ editor_ui_wrapper = function (editor) {
     uievent.elements.selectPointBox = document.getElementById('selectPointBox');
     uievent.elements.body = document.getElementById('uieventBody');
     uievent.elements.selectPointButtons = document.getElementById('selectPointButtons');
+    uievent.elements.canvas = document.getElementById('uievent');
+    uievent.elements.usedFlags = document.getElementById('uieventUsedFlags');
+    uievent.elements.usedFlagList = document.getElementById('uieventUsedFlagList');
 
     uievent.confirm = function () {
         var callback = uievent.values.callback, floorId = uievent.values.floorId,
@@ -336,7 +339,12 @@ editor_ui_wrapper = function (editor) {
         uievent.elements.title.innerText = 'UI绘制预览';
         uievent.elements.selectBackground.style.display = 'inline';
         uievent.elements.selectBackground.value = 'thumbnail';
+        uievent.elements.selectFloor.style.display = 'none';
         uievent.elements.selectPointBox.style.display = 'none';
+        uievent.elements.canvas.style.display = 'block';
+        uievent.elements.usedFlags.style.display = 'none';
+        uievent.elements.usedFlagList.style.display = 'none';
+        uievent.elements.body.style.overflow = "hidden";
 
         uievent.values.list = list;
         uievent.drawPreviewUI();
@@ -357,6 +365,10 @@ editor_ui_wrapper = function (editor) {
         uievent.elements.selectBackground.style.display = 'none';
         uievent.elements.selectFloor.style.display = hideFloor ? 'none' : 'inline';
         uievent.elements.selectPointBox.style.display = 'block';
+        uievent.elements.canvas.style.display = 'block';
+        uievent.elements.usedFlags.style.display = 'none';
+        uievent.elements.usedFlagList.style.display = 'none';
+        uievent.elements.body.style.overflow = "hidden";
 
         // Append children
         var floors = "";
@@ -462,6 +474,45 @@ editor_ui_wrapper = function (editor) {
         } catch (ee) { main.log(ee); }
         index = core.clamp(index, 0, core.floorIds.length - 1);
         uievent.setPoint(core.floorIds[index]);
+    }
+
+    // ------ 搜索变量出现的位置，也放在uievent好了 ------ //
+
+    uievent.searchUsedFlags = function () {
+        uievent.isOpen = true;
+        uievent.elements.div.style.display = 'block';
+        uievent.mode = 'searchUsedFlags';
+        uievent.elements.selectPoint.style.display = 'none';
+        uievent.elements.yes.style.display = 'none';
+        uievent.elements.title.innerText = '搜索变量出现的位置';
+        uievent.elements.selectBackground.style.display = 'none';
+        uievent.elements.selectFloor.style.display = 'none';
+        uievent.elements.selectPointBox.style.display = 'none';
+        uievent.elements.canvas.style.display = 'none';
+        uievent.elements.usedFlags.style.display = 'inline';
+        uievent.elements.usedFlagList.style.display = 'block';
+        uievent.elements.body.style.overflow = "auto";
+
+        // build flags
+        var html = "";
+        Object.keys(editor.used_flags).forEach(function (v) {
+            v = "flag:" + v;
+            html += "<option value='" + v + "'>" + v + "</option>";
+        });
+        uievent.elements.usedFlags.innerHTML = html;
+
+        uievent.doSearchUsedFlags();
+    }
+
+    uievent.doSearchUsedFlags = function () {
+        var flag = uievent.elements.usedFlags.value;
+
+        var html = "<p style='margin-left: 10px'>该变量出现的所有位置如下：</p><ul>";
+        for (var i = 0; i <= 100; ++i) {
+            html += "<li>MT1层(0,0)的events</li>";
+        }
+        html += "</ul>";
+        uievent.elements.usedFlagList.innerHTML = html;
     }
 
     editor.constructor.prototype.uievent=uievent;

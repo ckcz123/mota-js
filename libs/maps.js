@@ -1644,7 +1644,9 @@ maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
 
     if (floorId == core.status.floorId){
         core.clearMap(name);
-        core["draw"+(name=='bg' ? "Bg":"Fg")](floorId);
+        if (name=='bg') core.drawBg(floorId);
+        else core.drawFg(floorId);
+    }
 }
 
 ////// 重置地图 //////

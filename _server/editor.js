@@ -74,6 +74,8 @@ function editor() {
         lastCopyedInfo : [null, null],
         //
         ratio : 1,
+        // blockly转义
+        disableBlocklyReplace: false,
 
         // 绑定机关门事件相关
         bindSpecialDoor: {

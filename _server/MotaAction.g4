@@ -52,7 +52,7 @@ level_m
     :   '等级提升' BGNL? Newline levelCase+ BEND
     
 
-/* level_m
+/* level_mexpression
 tooltip : 升级事件
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e7%bb%8f%e9%aa%8c%e5%8d%87%e7%ba%a7%ef%bc%88%e8%bf%9b%e9%98%b6%2f%e5%a2%83%e7%95%8c%e5%a1%94%ef%bc%89
 var code = '[\n'+levelCase_0+']\n';
@@ -207,9 +207,9 @@ tooltip : 道具商店选项，每一项是道具名；买入或卖出可以不�
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e5%85%a8%e5%b1%80%e5%95%86%e5%ba%97
 default : ["yellowKey","","10",""]
 colour : this.subColor
-EvalString_0 = EvalString_0 ? (', "number": '+(parseInt(EvalString_0) || 0)) : '';
-EvalString_1 = EvalString_1 ? (', "money": '+(parseInt(EvalString_1) || 0)) : '';
-EvalString_2 = EvalString_2 ? (', "sell": '+(parseInt(EvalString_2) || 0)) : '';
+EvalString_0 = EvalString_0 ? (', "number": "'+EvalString_0+'"') : '';
+EvalString_1 = EvalString_1 ? (', "money":  "'+EvalString_1+'"') : '';
+EvalString_2 = EvalString_2 ? (', "sell":  "'+EvalString_2+'"') : '';
 if (!EvalString_1 && !EvalString_2) throw "买入金额和卖出金额至少需要填写一个";
 var code = '{"id": "' + IdString_0 + '"' + EvalString_0 + EvalString_1 + EvalString_2 + '},\n';
 return code;
@@ -3692,6 +3692,7 @@ MotaActionFunctions.parse = function(obj,type) {
 
 MotaActionFunctions.EvalString_pre = function(EvalString){
   if (EvalString.indexOf('__door__')!==-1) throw new Error('请修改开门变量__door__，如door1，door2，door3等依次向后。请勿存在两个门使用相同的开门变量。');
+  console.log(EvalString);
   return EvalString.replace(/([^\\])"/g,'$1\\"').replace(/^"/g,'\\"').replace(/""/g,'"\\"');
 }
 
@@ -3753,5 +3754,114 @@ MotaActionFunctions.pattern.idWithoutFlag=/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
 MotaActionFunctions.pattern.colorRe=/^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
 MotaActionFunctions.pattern.fontRe=/^(italic )?(bold )?(\d+)px ([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
 
+
+MotaActionFunctions.pattern.replaceStatusList = [
+  // 保证顺序！
+  ["hpmax", "生命上限"],
+  ["hp", "生命"],
+  ["name", "名称"],
+  ["lv", "等级"],
+  ["atk", "攻击"],
+  ["def", "防御"],
+  ["mdef", "魔防"],
+  ["manamax", "魔力上限"],
+  ["mana", "魔力"],
+  ["money", "金币"],
+  ["experience", "经验"],
+  ["steps", "步数"]
+];
+
+MotaActionFunctions.pattern.replaceItemList = [
+  // 保证顺序！
+  ["yellowKey", "黄钥匙"],
+  ["blueKey", "蓝钥匙"],
+  ["redKey", "红钥匙"],
+  ["redJewel", "红宝石"],
+  ["blueJewel", "蓝宝石"],
+  ["greenJewel", "绿宝石"],
+  ["yellowJewel", "黄宝石"],
+  ["redPotion", "红血瓶"],
+  ["bluePotion", "蓝血瓶"],
+  ["yellowPotion", "黄血瓶"],
+  ["greenPotion", "绿血瓶"],
+  ["sword1", "铁剑"],
+  ["sword2", "银剑"],
+  ["sword3", "骑士剑"],
+  ["sword4", "圣剑"],
+  ["sword5", "神圣剑"],
+  ["shield1", "铁盾"],
+  ["shield2", "银盾"],
+  ["shield3", "骑士盾"],
+  ["shield4", "圣盾"],
+  ["shield5", "神圣盾"],
+  ["superPotion", "圣水"],
+  ["moneyPocket", "金钱袋"],
+  ["book", "怪物手册"],
+  ["fly", "楼层传送器"],
+  ["coin", "幸运金币"],
+  ["snow", "冰冻徽章"],
+  ["cross", "十字架"],
+  ["knife", "屠龙匕首"],
+  ["shoes", "绿鞋"],
+  ["bigKey", "大黄门钥匙"],
+  ["greenKey", "绿钥匙"],
+  ["steelKey", "铁门钥匙"],
+  ["pickaxe", "破墙镐"],
+  ["icePickaxe", "破冰镐"],
+  ["bomb", "炸弹"],
+  ["centerFly", "中心对称飞行器"],
+  ["upFly", "上楼器"],
+  ["downFly", "下楼器"],
+  ["earthquake", "地震卷轴"],
+  ["poisonWine", "解毒药水"],
+  ["weakWine", "解衰药水"],
+  ["curseWine", "解咒药水"],
+  ["superWine", "万能药水"],
+  ["hammer", "圣锤"],
+  ["lifeWand", "生命魔杖"],
+  ["jumpShoes", "跳跃靴"],
+];
+
+MotaActionFunctions.disableReplace = false;
+
+MotaActionFunctions.replaceToName = function (str) {
+  if (MotaActionFunctions.disableReplace) return str;
+  var map = {}, list = [];
+  MotaActionFunctions.pattern.replaceStatusList.forEach(function (v) {
+    map[v[0]] = v[1]; list.push(v[0]);
+  });
+  str = str.replace(new RegExp("status:(" + list.join("|") + ")", "g"), function (a, b) {
+    return map[b] ? ("状态：" + map[b]) : b;
+  }).replace(/status:/g, "状态：");
+  map = {}; list = [];
+  MotaActionFunctions.pattern.replaceItemList.forEach(function (v) {
+    map[v[0]] = v[1]; list.push(v[0]);
+  });
+  str = str.replace(new RegExp("item:(" + list.join("|") + ")", "g"), function (a, b) {
+    return map[b] ? ("道具：" + map[b]) : b;
+  }).replace(/item:/g, "道具：");
+  str = str.replace(/flag:/g, "变量：").replace(/switch:/g, "独立开关：").replace(/global:/g, "全局存储：");
+  return str;
+}
+
+MotaActionFunctions.replaceFromName = function (str) {
+  if (MotaActionFunctions.disableReplace) return str;
+  var map = {}, list = [];
+  MotaActionFunctions.pattern.replaceStatusList.forEach(function (v) {
+    map[v[1]] = v[0]; list.push(v[1]);
+  });
+  str = str.replace(new RegExp("状态[:：](" + list.join("|") + ")", "g"), function (a, b) {
+    return map[b] ? ("status:" + map[b]) : b;
+  }).replace(/状态[:：]/g, "status:");
+  map = {}; list = [];
+  MotaActionFunctions.pattern.replaceItemList.forEach(function (v) {
+    map[v[1]] = v[0]; list.push(v[1]);
+  });
+  str = str.replace(new RegExp("道具[:：](" + list.join("|") + ")", "g"), function (a, b) {
+    return map[b] ? ("item:" + map[b]) : b;
+  }).replace(/道具[:：]/g, "item:");
+  str = str.replace(/变量[:：]/g, "flag:").replace(/独立开关[:：]/g, "switch:").replace(/全局存储[:：]/g, "global:");
+  return str;
+}
 
 */

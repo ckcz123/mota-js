@@ -482,6 +482,17 @@ function omitedcheckUpdateFunction(event) {
 `;
 /////////////////initscript end  /////////////////////////////
 
+    editor.uivalues.disableBlocklyReplace = core.getLocalStorage("disableBlocklyReplace", false);
+    var replaceCheckbox = document.getElementById('blocklyReplace');
+    replaceCheckbox.checked = !editor.uivalues.disableBlocklyReplace;
+
+    editor_blockly.triggerReplace = function () {
+        editor.uivalues.disableBlocklyReplace = !replaceCheckbox.checked;
+        core.setLocalStorage("disableBlocklyReplace", !replaceCheckbox.checked);
+        if (MotaActionFunctions) MotaActionFunctions.disableReplace = !replaceCheckbox.checked;
+        alert("已" + (replaceCheckbox.checked ? "开启" : "关闭") + "中文变量名替换！\n关闭并重开事件编辑器以生效。");
+    }
+
     var input_ = '';
     editor_blockly.runOne = function () {
         //var printf = console.log;
@@ -511,6 +522,7 @@ function omitedcheckUpdateFunction(event) {
         }
         input_ = xhr.responseText;
         editor_blockly.runOne();
+        MotaActionFunctions.disableReplace = editor.uivalues.disableBlocklyReplace;
     }
     xhr.open('GET', '_server/MotaAction.g4', true);
     xhr.send(null);

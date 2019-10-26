@@ -100,10 +100,10 @@ editor_blockly = function () {
     ],
     '数据相关':[
       MotaActionBlocks['setValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
+        MotaActionBlocks['idString_1_e'].xmlText(['status','生命'])
       ]),
       MotaActionBlocks['addValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
+        MotaActionBlocks['idString_1_e'].xmlText(['status','生命'])
       ]),
       MotaActionBlocks['setFloor_s'].xmlText(),
       MotaActionBlocks['setGlobalAttribute_s'].xmlText(),
@@ -878,22 +878,35 @@ function omitedcheckUpdateFunction(event) {
     editor_blockly.getAutoCompletions = function (content) {
         // --- content为当前框中输入内容；将返回一个列表，为后续所有可补全内容
 
-        // 检查 flag:xxx，item:xxx和flag:xxx
-        var index = content.lastIndexOf(":");
+        // 检查 status:xxx，item:xxx和flag:xxx
+        var index = Math.max(content.lastIndexOf(":"), content.lastIndexOf("："));
         if (index >= 0) {
+            var ch = content.charAt(index);
             var before = content.substring(0, index), token = content.substring(index+1);
             if (/^[a-zA-Z0-9_\u4E00-\u9FCC]*$/.test(token)) {
-                if (before.endsWith("status")) {
-                    return Object.keys(core.status.hero).filter(function (one) {
+                if (before.endsWith("状态") || (ch == ':' && before.endsWith("status"))) {
+                    var list = Object.keys(core.status.hero);
+                    if (before.endsWith("状态") && MotaActionFunctions) {
+                        list = MotaActionFunctions.pattern.replaceStatusList.map(function (v) {
+                            return v[1];
+                        }).concat(list);
+                    }
+                    return list.filter(function (one) {
                         return one != token && one.startsWith(token);
                     }).sort();
                 }
-                else if (before.endsWith("item")) {
-                    return Object.keys(core.material.items).filter(function (one) {
+                else if (before.endsWith("道具") || (ch == ':' && before.endsWith("item"))) {
+                    var list = Object.keys(core.status.items);
+                    if (before.endsWith("道具") && MotaActionFunctions) {
+                        list = MotaActionFunctions.pattern.replaceItemList.map(function (v) {
+                            return v[1];
+                        }).concat(list);
+                    }
+                    return list.filter(function (one) {
                         return one != token && one.startsWith(token);
                     }).sort();
                 }
-                else if (before.endsWith("flag")) {
+                else if (before.endsWith("变量") || (ch == ':' && before.endsWith("flag"))) {
                     return Object.keys(editor.used_flags || {}).filter(function (one) {
                         return one != token && one.startsWith(token);
                     }).sort();
@@ -1026,7 +1039,7 @@ Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
 
         // --- awesomplete
         var awesomplete = new Awesomplete(htmlInput, {
-            minChars: 4,
+            minChars: 2,
             maxItems: 12,
             autoFirst: true,
             replace: function (text) {

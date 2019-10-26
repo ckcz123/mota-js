@@ -2569,7 +2569,7 @@ idString_1_e
 colour : this.idstring_eColor
 default : [null,"自定义flag"]
 //todo 将其output改成'idString_e'
-var code = Id_List_0+':'+IdText_0;
+var code = MotaActionFunctions.replaceFromName(MotaActionFunctions.replaceToName(Id_List_0+':'+IdText_0));
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
@@ -3842,8 +3842,8 @@ MotaActionFunctions.replaceToName = function (str) {
     map[v[0]] = v[1]; list.push(v[0]);
   });
   str = str.replace(new RegExp("item:(" + list.join("|") + ")", "g"), function (a, b) {
-    return map[b] ? ("道具：" + map[b]) : b;
-  }).replace(/item:/g, "道具：");
+    return map[b] ? ("物品：" + map[b]) : b;
+  }).replace(/item:/g, "物品：");
   str = str.replace(/flag:/g, "变量：").replace(/switch:/g, "独立开关：").replace(/global:/g, "全局存储：");
   return str;
 }
@@ -3861,9 +3861,9 @@ MotaActionFunctions.replaceFromName = function (str) {
   MotaActionFunctions.pattern.replaceItemList.forEach(function (v) {
     map[v[1]] = v[0]; list.push(v[1]);
   });
-  str = str.replace(new RegExp("道具[:：](" + list.join("|") + ")", "g"), function (a, b) {
+  str = str.replace(new RegExp("物品[:：](" + list.join("|") + ")", "g"), function (a, b) {
     return map[b] ? ("item:" + map[b]) : b;
-  }).replace(/道具[:：]/g, "item:");
+  }).replace(/物品[:：]/g, "item:");
   str = str.replace(/变量[:：]/g, "flag:").replace(/独立开关[:：]/g, "switch:").replace(/全局存储[:：]/g, "global:");
   return str;
 }

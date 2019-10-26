@@ -99,10 +99,10 @@ editor_blockly = function () {
       ]),
     ],
     '数据相关':[
-      MotaActionBlocks['setValue_s'].xmlText([
+      MotaActionBlocks['addValue_s'].xmlText([
         MotaActionBlocks['idString_1_e'].xmlText(['status','生命'])
       ]),
-      MotaActionBlocks['addValue_s'].xmlText([
+      MotaActionBlocks['setValue_s'].xmlText([
         MotaActionBlocks['idString_1_e'].xmlText(['status','生命'])
       ]),
       MotaActionBlocks['setFloor_s'].xmlText(),
@@ -895,9 +895,9 @@ function omitedcheckUpdateFunction(event) {
                         return one != token && one.startsWith(token);
                     }).sort();
                 }
-                else if (before.endsWith("道具") || (ch == ':' && before.endsWith("item"))) {
-                    var list = Object.keys(core.status.items);
-                    if (before.endsWith("道具") && MotaActionFunctions) {
+                else if (before.endsWith("物品") || (ch == ':' && before.endsWith("item"))) {
+                    var list = Object.keys(core.material.items);
+                    if (before.endsWith("物品") && MotaActionFunctions) {
                         list = MotaActionFunctions.pattern.replaceItemList.map(function (v) {
                             return v[1];
                         }).concat(list);

@@ -2555,7 +2555,7 @@ idString_e
 
 /* idString_e
 colour : this.idstring_eColor
-default : ["status:hp"]
+default : ["变量：生命"]
 var code = IdString_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;

@@ -216,11 +216,11 @@ editor_blockly = function () {
       MotaActionBlocks['unknown_s'].xmlText(),
     ],
     '值块':[
-      MotaActionBlocks['setValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
-      ]),
       MotaActionBlocks['addValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
+        MotaActionBlocks['idString_1_e'].xmlText(['status','生命'])
+      ]),
+      MotaActionBlocks['setValue_s'].xmlText([
+        MotaActionBlocks['idString_1_e'].xmlText(['status','生命'])
       ]),
       MotaActionBlocks['expression_arithmetic_0'].xmlText(),
       MotaActionBlocks['evFlag_e'].xmlText(),

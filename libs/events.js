@@ -297,6 +297,12 @@ events.prototype._trigger = function (x, y) {
     var block = core.getBlock(x, y);
     if (block == null) return;
     block = block.block;
+
+    // 执行该点的脚本
+    try {
+        eval(block.event.script);
+    } catch (e) { main.log(e); }
+
     if (block.event.trigger) {
         var noPass = block.event.noPass, trigger = block.event.trigger;
         if (noPass) core.clearAutomaticRouteNode(x, y);

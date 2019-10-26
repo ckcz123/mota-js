@@ -484,7 +484,7 @@ editor_ui_wrapper = function (editor) {
         uievent.mode = 'searchUsedFlags';
         uievent.elements.selectPoint.style.display = 'none';
         uievent.elements.yes.style.display = 'none';
-        uievent.elements.title.innerText = '搜索变量出现的位置';
+        uievent.elements.title.innerText = '搜索变量';
         uievent.elements.selectBackground.style.display = 'none';
         uievent.elements.selectFloor.style.display = 'none';
         uievent.elements.selectPointBox.style.display = 'none';
@@ -495,7 +495,7 @@ editor_ui_wrapper = function (editor) {
 
         // build flags
         var html = "";
-        Object.keys(editor.used_flags).forEach(function (v) {
+        Object.keys(editor.used_flags).sort().forEach(function (v) {
             v = "flag:" + v;
             html += "<option value='" + v + "'>" + v + "</option>";
         });
@@ -508,11 +508,57 @@ editor_ui_wrapper = function (editor) {
         var flag = uievent.elements.usedFlags.value;
 
         var html = "<p style='margin-left: 10px'>该变量出现的所有位置如下：</p><ul>";
-        for (var i = 0; i <= 100; ++i) {
-            html += "<li>MT1层(0,0)的events</li>";
-        }
+        var list = uievent._searchUsedFlags(flag);
+        list.forEach(function (v) {
+            var x = "<li>";
+            if (v[0] != null) x += v[0] + "层 ";
+            else x += "公共事件 ";
+            x += v[1];
+            if (v[2] != null) x += " 的 (" + v[2] + ") 点";
+            x += "</li>";
+            html += x;
+        });
         html += "</ul>";
         uievent.elements.usedFlagList.innerHTML = html;
+    }
+
+    var hasUsedFlags = function (obj, flag) {
+        if (obj == null) return false;
+        if (typeof obj != 'string') return hasUsedFlags(JSON.stringify(obj), flag);
+
+        var index = -1, length = flag.length;
+        while (true) {
+            index = obj.indexOf(flag, index + 1);
+            if (index < 0) return false;
+            if (!/^[a-zA-Z0-9_\u4E00-\u9FCC]$/.test(obj.charAt(index + length))) return true;
+        }
+    }
+
+    uievent._searchUsedFlags = function (flag) {
+        var list = [];
+        var events = ["events", "autoEvent", "changeFloor", "afterBattle", "afterGetItem", "afterOpenDoor"]
+        for (var floorId in core.floors) {
+            var floor = core.floors[floorId];
+            if (hasUsedFlags(floor.firstArrive, flag)) list.push([floorId, "firstArrive"]);
+            if (hasUsedFlags(floor.eachArrive, flag)) list.push([floorId, "eachArrive"]);
+            events.forEach(function (e) {
+                if (floor[e]) {
+                    for (var loc in floor[e]) {
+                        if (hasUsedFlags(floor[e][loc], flag)) {
+                            list.push([floorId, e, loc]);
+                        }
+                    }
+                }
+            });
+        }
+        // 公共事件
+        if (core.events.commonEvent) {
+            for (var name in core.events.commonEvent) {
+                if (hasUsedFlags(core.events.commonEvent[name], flag))
+                    list.push([null, name]);
+            }
+        }
+        return list;
     }
 
     editor.constructor.prototype.uievent=uievent;

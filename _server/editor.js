@@ -188,6 +188,11 @@ editor.prototype.init = function (callback) {
         for (var floorId in editor.main.floors) {
             editor.addUsedFlags(JSON.stringify(editor.main.floors[floorId]));
         }
+        if (events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
+            for (var name in events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
+                editor.addUsedFlags(JSON.stringify(events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent[name]));
+            }
+        }
 
         if (editor.useCompress == null) editor.useCompress = useCompress;
         if (Boolean(callback)) callback();

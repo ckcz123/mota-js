@@ -112,7 +112,7 @@ editor_mappanel_wrapper = function (editor) {
         editor.dom.euiCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
         editor.uivalues.stepPostfix = [];
         editor.uivalues.stepPostfix.push(pos);
-        editor.uifunctions.fillPos(pos);
+        if (editor.brushMod == 'line') editor.uifunctions.fillPos(pos);
         return false;
     }
 
@@ -168,8 +168,21 @@ editor_mappanel_wrapper = function (editor) {
         if (pos) {
             pos.x += pos0.x;
             pos.y += pos0.y;
+            if (editor.brushMod == 'line') editor.uifunctions.fillPos(pos);
+            else {
+                var x0 = editor.uivalues.stepPostfix[0].x;
+                var y0 = editor.uivalues.stepPostfix[0].y;
+                var x1 = pos.x;
+                var y1 = pos.y;
+                if (x0 > x1) { x0 ^= x1; x1 ^= x0; x0 ^= x1; }//swap
+                if (y0 > y1) { y0 ^= y1; y1 ^= y0; y0 ^= y1; }//swap
+                // draw rect
+                editor.dom.euiCtx.clearRect(0, 0, editor.dom.euiCtx.canvas.width, editor.dom.euiCtx.canvas.height);
+                editor.dom.euiCtx.fillStyle = 'rgba(0, 127, 255, 0.4)';
+                editor.dom.euiCtx.fillRect(32 * x0 - core.bigmap.offsetX, 32 * y0 - core.bigmap.offsetY,
+                    32 * (x1 - x0) + 32, 32 * (y1 - y0) + 32);
+            }
             editor.uivalues.stepPostfix.push(pos);
-            editor.uifunctions.fillPos(pos);
         }
         return false;
     }

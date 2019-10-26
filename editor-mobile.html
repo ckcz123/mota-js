@@ -76,6 +76,7 @@
                 <select id="selectAppend"></select>
                 <!-- ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48"] -->
                 <input id="appendConfirm" type="button" value="追加"/>
+                <input id="quickAppendConfirm" type="button" value="快速追加"/>
             </p>
             <p>
                 色相:<input id='changeColorInput' type="range" min="0" max="12" step="1" value="0" list="huelists" style="width: 60%;margin-left: 3%;vertical-align: middle">
@@ -218,7 +219,8 @@
                     <input class="color" id="colorPicker" value="255,215,0,1"/>
                     <button onclick="confirmColor()">确定</button>
                 </div>
-                <button class="cpPanel" onclick="editor_blockly.selectPoint()">选点</button>
+                <button class="cpPanel" onclick="editor_blockly.selectPoint()">地图选点</button>
+                <button class="cpPanel" onclick="editor.uievent.searchUsedFlags()" style="margin-left:5px">变量搜索</button>
                 <xml id="toolbox" style="display:none">
                 </xml>
             </h3>
@@ -538,6 +540,7 @@
                 <option value="#000000">黑色</option>
                 <option value="#FFFFFF">白色</option>
             </select>
+            <select id="uieventUsedFlags" style="margin-left: 10px; display: none" onchange="editor.uievent.doSearchUsedFlags()"></select>
             <button id="uieventNo">关闭</button>
             <button id="uieventYes">确定</button>
         </div>
@@ -545,6 +548,7 @@
         <div id='uieventBody'>
             <canvas class='gameCanvas' id='uievent' width='480' height='480'></canvas>
             <div id="selectPointBox"></div>
+            <div id="uieventUsedFlagList" style="display: none"></div>
         </div>
         <div id="selectPoint">
             <select id="selectPointFloor"></select>

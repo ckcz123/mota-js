@@ -852,9 +852,10 @@ events.prototype.doAction = function (keepUI) {
     }
     // 判定是否执行完毕
     if (this._doAction_finishEvents()) return;
+    var floorId = core.status.event.data.floorId || core.status.floorId;
     // 当前点坐标和前缀
     var x = core.status.event.data.x, y = core.status.event.data.y;
-    var prefix = [core.status.floorId || ":f", x != null ? x : "x", y != null ? y : "y"].join("@");
+    var prefix = [floorId || ":f", x != null ? x : "x", y != null ? y : "y"].join("@");
     var current = core.status.event.data.list[0];
     if (this._popEvents(current, prefix)) return;
     // 当前要执行的事件
@@ -862,6 +863,7 @@ events.prototype.doAction = function (keepUI) {
     core.status.event.data.current = data;
     if (typeof data == "string")
         data = {"type": "text", "text": data};
+    data.floorId = data.floorId || floorId;
     core.status.event.data.type = data.type;
     this.doEvent(data, x, y, prefix);
     return;
@@ -1106,7 +1108,7 @@ events.prototype._action_tip = function (data, x, y, prefix) {
 
 events.prototype._action_show = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
-    if (data.time > 0 && !(data.floorId && data.floorId != core.status.floorId)) {
+    if (data.time > 0 &&  data.floorId == core.status.floorId) {
         this.__action_doAsyncFunc(data.async, core.animateBlock, data.loc, 'show', data.time);
     }
     else {
@@ -1119,7 +1121,7 @@ events.prototype._action_show = function (data, x, y, prefix) {
 
 events.prototype._action_hide = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
-    if (data.time > 0 && !(data.floorId && data.floorId != core.status.floorId)) {
+    if (data.time > 0 && data.floorId == core.status.floorId) {
         data.loc.forEach(function (t) {
             core.hideBlock(t[0], t[1], data.floorId);
         });
@@ -1219,7 +1221,7 @@ events.prototype._action_jumpHero = function (data, x, y, prefix) {
 events.prototype._action_changeFloor = function (data, x, y, prefix) {
     var loc = this.__action_getHeroLoc(data.loc, prefix);
     var heroLoc = {x: loc[0], y: loc[1], direction: data.direction};
-    core.changeFloor(data.floorId || core.status.floorId, null, heroLoc, data.time, core.doAction);
+    core.changeFloor(data.floorId, null, heroLoc, data.time, core.doAction);
 }
 
 events.prototype._action_changePos = function (data, x, y, prefix) {
@@ -1293,7 +1295,7 @@ events.prototype._action_setWeather = function (data, x, y, prefix) {
 
 events.prototype._action_openDoor = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, x, y, prefix);
-    var floorId = data.floorId || core.status.floorId;
+    var floorId = data.floorId;
     if (floorId == core.status.floorId) {
         this.__action_doAsyncFunc(data.async, core.openDoor, loc[0], loc[1], data.needKey);
     }
@@ -1338,6 +1340,10 @@ events.prototype._action_battle = function (data, x, y, prefix) {
         this.battle(data.id, null, null, true, core.doAction);
     }
     else {
+        if (data.floorId != core.status.floorId) {
+            setTimeout(core.doAction);
+            return;
+        }
         var loc = this.__action_getLoc(data.loc, x, y, prefix);
         this.battle(null, loc[0], loc[1], true, core.doAction);
     }
@@ -1376,7 +1382,7 @@ events.prototype._action_insert = function (data, x, y, prefix) {
     else {
         var loc = this.__action_getLoc(data.loc, x, y, prefix);
         core.setFlag('arg0', loc);
-        var floorId = data.floorId || core.status.floorId;
+        var floorId = data.floorId;
         var which = data.which || "events";
         var event = (core.floors[floorId][which]||[])[loc[0] + "," + loc[1]];
         if (event) this.insertAction(event.data || event);

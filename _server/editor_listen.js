@@ -20,7 +20,7 @@ editor_listen_wrapper = function (editor) {
 
         editor.uivalues.scrollBarHeight = editor.uifunctions.getScrollBarHeight();
         editor.dom.iconExpandBtn.style.display = 'block';
-        editor.dom.iconExpandBtn.innerText = editor.uivalues.folded ? "展开" : "折叠";
+        editor.dom.iconExpandBtn.innerText = editor.uivalues.folded ? "展开素材区" : "折叠素材区";
         editor.dom.iconExpandBtn.onclick = editor.uifunctions.fold_material_click
 
         editor.dom.iconLib.onmousedown = editor.uifunctions.material_ondown

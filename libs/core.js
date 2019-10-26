@@ -37,7 +37,7 @@ function core() {
         'animateTime': 0,
         'moveTime': 0,
         'lastLegTime': 0,
-        'leftLeg': 0,
+        'leftLeg': true,
         'weather': {
             'time': 0,
             'type': null,

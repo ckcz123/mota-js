@@ -178,10 +178,10 @@ control.prototype._animationFrame_heroMoving = function (timestamp) {
     if (core.status.heroMoving <= 0) return;
     // 换腿
     if (timestamp - core.animateFrame.moveTime > (core.values.moveSpeed||100)) {
-        core.animateFrame.leftLeg ++;
+        core.animateFrame.leftLeg = !core.animateFrame.leftLeg;
         core.animateFrame.moveTime = timestamp;
     }
-    core.drawHero(core.animateFrame.leftLeg, 4*core.status.heroMoving);
+    core.drawHero(core.animateFrame.leftLeg?'leftFoot':'rightFoot', 4*core.status.heroMoving);
 }
 
 control.prototype._animationFrame_weather = function (timestamp) {
@@ -798,7 +798,7 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
 control.prototype.drawHero = function (status, offset) {
     if (!core.isPlaying() || !core.status.floorId || core.status.gameOver) return;
     var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
-    status = (status || 0)%4;
+    status = status || 'stop';
     offset = offset || 0;
     var way = core.utils.scan[direction];
     var dx = way.x, dy = way.y, offsetX = dx * offset, offsetY = dy * offset;
@@ -809,7 +809,7 @@ control.prototype.drawHero = function (status, offset) {
 
     if (!core.hasFlag('hideHero')) {
         this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
-            core.drawImage('hero', block.img, status * block.width,
+            core.drawImage('hero', block.img, block.heroIcon[block.status]*block.width,
                 block.heroIcon.loc * block.height, block.width, block.height,
                 block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
         });

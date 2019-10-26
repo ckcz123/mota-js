@@ -875,6 +875,7 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     config.fontSize = config.fontSize || textAttribute.textfont;
     config.lineHeight = config.lineHeight || (config.fontSize * 1.3);
     config.time = config.time || 0;
+    config.interval = textAttribute.interval || 0;
 
     config.index = 0;
     config.currcolor = config.color;
@@ -980,7 +981,7 @@ ui.prototype._drawTextContent_drawChar = function (tempCtx, content, config, ch)
         tempCtx.font = this._buildFont(config.fontSize, config.bold, config.italic);
     }
     // 检查是不是自动换行
-    var charwidth = core.calWidth(tempCtx, ch);
+    var charwidth = core.calWidth(tempCtx, ch) + config.interval;
     if (config.maxWidth != null && config.offsetX + charwidth > config.maxWidth) {
         this._drawTextContent_newLine(tempCtx, config);
         config.index--;

@@ -3684,6 +3684,9 @@ MotaActionFunctions.actionParser = new ActionParser();
 MotaActionFunctions.workspace = function(){return workspace}
 
 MotaActionFunctions.parse = function(obj,type) {
+  try {
+    obj = JSON.parse(MotaActionFunctions.replaceToName(JSON.stringify(obj)));
+  } catch (e) {}
   MotaActionFunctions.workspace().clear();
   xml_text = MotaActionFunctions.actionParser.parse(obj,type||'event');
   xml = Blockly.Xml.textToDom('<xml>'+xml_text+'</xml>');
@@ -3692,12 +3695,13 @@ MotaActionFunctions.parse = function(obj,type) {
 
 MotaActionFunctions.EvalString_pre = function(EvalString){
   if (EvalString.indexOf('__door__')!==-1) throw new Error('请修改开门变量__door__，如door1，door2，door3等依次向后。请勿存在两个门使用相同的开门变量。');
-  console.log(EvalString);
+  EvalString = MotaActionFunctions.replaceFromName(EvalString);
   return EvalString.replace(/([^\\])"/g,'$1\\"').replace(/^"/g,'\\"').replace(/""/g,'"\\"');
 }
 
 MotaActionFunctions.IdString_pre = function(IdString){
   if (IdString.indexOf('__door__')!==-1) throw new Error('请修改开门变量__door__，如door1，door2，door3等依次向后。请勿存在两个门使用相同的开门变量。');
+  IdString = MotaActionFunctions.replaceFromName(IdString);
   if (IdString && !(MotaActionFunctions.pattern.id.test(IdString)) && !(MotaActionFunctions.pattern.idWithoutFlag.test(IdString)))
       throw new Error('id: '+IdString+'中包含了0-9 a-z A-Z _ - :之外的字符');
   return IdString;
@@ -3706,7 +3710,7 @@ MotaActionFunctions.IdString_pre = function(IdString){
 MotaActionFunctions.PosString_pre = function(PosString){
   if (!PosString || /^-?\d+$/.test(PosString)) return PosString;
   //if (!(MotaActionFunctions.pattern.id.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ 和中文之外的字符,或者是没有以flag: 开头');
-  return '"'+PosString+'"';
+  return '"'+MotaActionFunctions.replaceFromName(PosString)+'"';
 }
 
 MotaActionFunctions.StepString_pre = function(StepString){
@@ -3825,7 +3829,7 @@ MotaActionFunctions.pattern.replaceItemList = [
 MotaActionFunctions.disableReplace = false;
 
 MotaActionFunctions.replaceToName = function (str) {
-  if (MotaActionFunctions.disableReplace) return str;
+  if (!str || MotaActionFunctions.disableReplace) return str;
   var map = {}, list = [];
   MotaActionFunctions.pattern.replaceStatusList.forEach(function (v) {
     map[v[0]] = v[1]; list.push(v[0]);
@@ -3845,7 +3849,7 @@ MotaActionFunctions.replaceToName = function (str) {
 }
 
 MotaActionFunctions.replaceFromName = function (str) {
-  if (MotaActionFunctions.disableReplace) return str;
+  if (!str || MotaActionFunctions.disableReplace) return str;
   var map = {}, list = [];
   MotaActionFunctions.pattern.replaceStatusList.forEach(function (v) {
     map[v[1]] = v[0]; list.push(v[1]);

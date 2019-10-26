@@ -258,11 +258,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					},
 					"_data": "该图块是否不可通行；true代表不可通行，false代表可通行，null代表使用系统缺省值"
 				},
-				"canBreak": {
+				"script": {
 					"_leaf": true,
-					"_type": "checkbox",
-					"_bool": "bool",
-					"_data": "该图块是否可被破墙或地震"
+					"_type": "textarea",
+					"_string": true,
+					"_lint": true,
+					"_data": "触碰到该图块时自动执行的脚本内容；此脚本会在该点的触发器执行前执行"
 				},
 				"cannotOut": {
 					"_leaf": true,
@@ -276,6 +277,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_range": "thiseval==null||(thiseval instanceof Array)",
 					"_data": "该图块的不可入方向\n可以在这里定义不能朝哪个方向进入该图块，可以达到悬崖之类的效果\n例如 [\"down\"] 代表不能从该图块的上方点朝向下进入此图块\n此值对背景层、事件层、前景层上的图块均有效"
 				},
+				"canBreak": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_bool": "bool",
+					"_data": "该图块是否可被破墙或地震"
+				},
 				"animate": {
 					"_leaf": true,
 					"_type": "textarea",
@@ -286,13 +293,6 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_data": "行走图朝向，仅对NPC有效。可以在这里定义同一个NPC的多个朝向行走图。\n比如 {\"up\":\"N333\",\"down\":\"N334\",\"left\":\"N335\",\"right\":\"N336\"} 就将该素材的上下左右朝向分别绑定到N333,N334,N335和N336四个图块。\n在勇士撞上NPC时，或NPC在移动时，会自动选择最合适的朝向图块（如果存在定义）来进行绘制。"
-				},
-				"script": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_string": true,
-					"_lint": true,
-					"_data": "触碰到该图块时自动执行的脚本内容；此脚本会在该点的触发器执行前执行"
 				}
 			}
 		},

@@ -1052,9 +1052,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 设置魔力值
 	if (core.flags.enableMana) {
 		// status:manamax 只有在非负时才生效。
-		if (core.status.hero.manamax != null && core.status.hero.manamax >= 0) {
-			core.status.hero.mana = Math.min(core.status.hero.mana, core.status.hero.manamax);
-			core.setStatusBarInnerHTML('mana', core.status.hero.mana + "/" + core.status.hero.manamax);
+		if (core.status.hero.manamax != null && core.getRealStatus('manamax') >= 0) {
+			core.status.hero.mana = Math.min(core.status.hero.mana, core.getRealStatus('manamax'));
+			core.setStatusBarInnerHTML('mana', core.status.hero.mana + "/" + core.getRealStatus('manamax'));
 		}
 		else {
 			core.setStatusBarInnerHTML("mana", core.status.hero.mana);
@@ -1099,7 +1099,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 
 	// 难度
-	core.statusBar.hard.innerHTML = core.status.hard;
+	core.statusBar.hard.innerText = core.status.hard;
 	// 自定义状态栏绘制
 	core.drawStatusBar();
 

@@ -539,7 +539,7 @@ events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback
     floorId = info.floorId;
     info.locked = core.status.lockControl;
 
-    core.dom.floorNameLabel.innerHTML = core.status.maps[floorId].title;
+    core.dom.floorNameLabel.innerText = core.status.maps[floorId].title;
     core.lockControl();
     core.stopAutomaticRoute();
     core.clearContinueAutomaticRoute();

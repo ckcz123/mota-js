@@ -292,7 +292,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	this._performItemShopClick = function (px, py) {
 		var item = list[selectItem] || null;
 		// 鼠标操作
-		console.log(px, py);
 		if (px >= 22 && px <= 82 && py >= 71 && py <= 102) {
 			// 买
 			if (type != 0) {

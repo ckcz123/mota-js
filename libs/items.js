@@ -59,7 +59,8 @@ items.prototype.getItemEffect = function (itemId, itemNum) {
         var curr_hp = core.status.hero.hp;
         if (itemId in this.itemEffect) {
             try {
-                eval(this.itemEffect[itemId]);
+                for (var i = 0; i < itemNum; ++i)
+                    eval(this.itemEffect[itemId]);
             }
             catch (e) {
                 main.log(e);

@@ -462,7 +462,7 @@ events.prototype.getItem = function (id, num, x, y, callback) {
     core.removeBlock(x, y);
     var text = '获得 ' + core.material.items[id].name;
     if (num > 1) text += "x" + num;
-    if (itemCls === 'items') text += core.items.getItemEffectTip(id);
+    if (itemCls === 'items' && num == 1) text += core.items.getItemEffectTip(id);
     core.drawTip(text, id);
 
     // --- 首次获得道具的提示
@@ -2495,7 +2495,11 @@ events.prototype.openShop = function (shopId, needVisited) {
 
     if (shop.item) {
         core.status.route.push("shop:" + shopId + ":0");
-        core.insertAction({"type": "insert", "name": "道具商店", "args": [shopId]});
+        if (core.openItemShop) {
+            core.openItemShop(shopId);
+        } else {
+            core.insertAction("道具商店插件不存在！请检查是否存在该插件！");
+        }
         return;
     } else if (shop.commonEvent) {
         core.status.route.push("shop:"+shopId+":0");

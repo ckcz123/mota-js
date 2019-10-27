@@ -19,17 +19,17 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"redJewel": {
 			"cls": "items",
 			"name": "红宝石",
-			"text": "'，攻击+'+core.values.redJewel"
+			"text": "'，攻击+${core.values.redJewel}'"
 		},
 		"blueJewel": {
 			"cls": "items",
 			"name": "蓝宝石",
-			"text": "'，防御+'+core.values.blueJewel"
+			"text": "'，防御+${core.values.blueJewel}'"
 		},
 		"greenJewel": {
 			"cls": "items",
 			"name": "绿宝石",
-			"text": "'，魔防+'+core.values.greenJewel"
+			"text": "'，魔防+${core.values.greenJewel}'"
 		},
 		"yellowJewel": {
 			"cls": "items",

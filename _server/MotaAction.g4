@@ -207,7 +207,8 @@ tooltip : 道具商店选项，每一项是道具名；买入或卖出可以不�
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e5%85%a8%e5%b1%80%e5%95%86%e5%ba%97
 default : ["yellowKey","","10",""]
 colour : this.subColor
-EvalString_0 = EvalString_0 ? (', "number": "'+EvalString_0+'"') : '';
+if (EvalString_0 && !/^\d+$/.test(EvalString_0)) throw "存量必须不填或非负整数";
+EvalString_0 = EvalString_0 ? (', "number": '+EvalString_0) : '';
 EvalString_1 = EvalString_1 ? (', "money":  "'+EvalString_1+'"') : '';
 EvalString_2 = EvalString_2 ? (', "sell":  "'+EvalString_2+'"') : '';
 if (!EvalString_1 && !EvalString_2) throw "买入金额和卖出金额至少需要填写一个";

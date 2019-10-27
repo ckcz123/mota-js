@@ -164,7 +164,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			core.setTextAlign('uievent', 'left');
 			core.fillText('uievent', core.material.items[item.id].name, 50, 132 + i * 40, null, bigFont);
 			core.setTextAlign('uievent', 'right');
-			core.fillText('uievent', (type == 0 ? item.money : item.sell) + "金币/个", 300, 133 + i * 40, null, middleFont);
+			core.fillText('uievent', (type == 0 ? core.calValue(item.money) : core.calValue(item.sell)) + "金币/个", 300, 133 + i * 40, null, middleFont);
 			core.setTextAlign("uievent", "left");
 			if (curr == selectItem) {
 				// 绘制描述，文字自动放缩
@@ -190,10 +190,15 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 					core.fillText("uievent", core.itemCount(item.id), 406, 132, null, null, 40);
 				}
 				core.setTextAlign("uievent", "left");
-				core.fillText("uievent", "合计金额", 324, 190);
+				core.fillText("uievent", "预计金额", 324, 250);
 				core.setTextAlign("uievent", "right");
-				totalMoney = selectCount * (type == 0 ? item.money : item.sell);
-				core.fillText("uievent", core.formatBigNumber(totalMoney), 405, 220);
+				totalMoney = selectCount * (type == 0 ? core.calValue(item.money) : core.calValue(item.sell));
+				core.fillText("uievent", core.formatBigNumber(totalMoney), 405, 280);
+
+				core.setTextAlign("uievent", "left");
+				core.fillText("uievent", type == 0 ? "已购次数" : "已卖次数", 324, 170);
+				core.setTextAlign("uievent", "right");
+				core.fillText("uievent", (type == 0 ? item.money_count : item.sell_count) || 0, 405, 200);
 			}
 		}
 
@@ -215,7 +220,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		if (item == null) return;
 		selectCount = core.clamp(
 			selectCount + delta, 0,
-			Math.min(type == 0 ? Math.floor(core.status.hero.money / item.money) : core.itemCount(item.id),
+			Math.min(type == 0 ? Math.floor(core.status.hero.money / core.calValue(item.money)) : core.itemCount(item.id),
 				type == 0 && item.number != null ? item.number : Number.MAX_SAFE_INTEGER)
 		);
 	}
@@ -226,11 +231,13 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			core.status.hero.money -= totalMoney;
 			core.getItem(item.id, selectCount);
 			if (item.number != null) item.number -= selectCount;
+			item.money_count = (item.money_count || 0) + selectCount;
 		} else {
 			core.status.hero.money += totalMoney;
 			core.removeItem(item.id, selectCount);
 			core.drawTip("成功卖出" + selectCount + "个" + core.material.items[item.id].name, item.id);
 			if (item.number != null) item.number += selectCount;
+			item.sell_count = (item.sell_count || 0) + selectCount;
 		}
 		selectCount = 0;
 	}
@@ -373,8 +380,12 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		var data = this.controldata.saveData();
 		for (var shopId in core.status.shops) {
 			if (core.status.shops[shopId].item) {
-				data.shops[shopId].number = core.status.shops[shopId].choices.map(function (t) {
-					return t.number == null ? null : t.number;
+				data.shops[shopId].choices = core.status.shops[shopId].choices.map(function (t) {
+					return {
+						number: t.number,
+						money_count: t.money_count || 0,
+						sell_count: t.sell_count || 0
+					}
 				});
 			}
 		}
@@ -384,9 +395,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	core.control.loadData = function (data, callback) {
 		this.controldata.loadData(data, callback);
 		for (var shopId in data.shops) {
-			if (data.shops[shopId].number) {
-				for (var i = 0; i < data.shops[shopId].number.length; ++i) {
-					core.status.shops[shopId].choices[i].number = data.shops[shopId].number[i];
+			if (data.shops[shopId].choices) {
+				for (var i = 0; i < data.shops[shopId].choices.length; ++i) {
+					core.status.shops[shopId].choices[i].number = data.shops[shopId].choices[i].number;
+					core.status.shops[shopId].choices[i].money_count = data.shops[shopId].choices[i].money_count;
+					core.status.shops[shopId].choices[i].sell_count = data.shops[shopId].choices[i].sell_count;
 				}
 			}
 		}

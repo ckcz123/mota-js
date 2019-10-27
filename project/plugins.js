@@ -106,33 +106,33 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		// Step 1: 背景和固定的几个文字
 		core.ui._createUIEvent();
 		this.clearItemShop();
-		core.fillRect('uievent', 0, 0, 416, 416, 'black');
-		core.ui._uievent_drawBackground({ x: 0, y: 0, width: 416, height: 56 });
-		core.ui._uievent_drawBackground({ x: 0, y: 56, width: 312, height: 56 });
-		core.ui._uievent_drawBackground({ x: 0, y: 112, width: 312, height: 304 });
-		core.ui._uievent_drawBackground({ x: 312, y: 56, width: 104, height: 56 });
-		core.ui._uievent_drawBackground({ x: 312, y: 112, width: 104, height: 304 });
-		core.fillText("uievent", "购买", 32, 74, 'white', bigFont);
-		core.fillText("uievent", "卖出", 132, 74);
-		core.fillText("uievent", "离开", 232, 74);
-		core.fillText("uievent", "当前金币", 324, 66, null, middleFont);
+		core.fillRect('uievent', 0, 0, 480, 480, 'black');
+		core.ui._uievent_drawBackground({ x: 0, y: 0, width: 480, height: 64 });
+		core.ui._uievent_drawBackground({ x: 0, y: 64, width: 360, height: 64 });
+		core.ui._uievent_drawBackground({ x: 0, y: 128, width: 360, height: 352 });
+		core.ui._uievent_drawBackground({ x: 360, y: 64, width: 120, height: 64 });
+		core.ui._uievent_drawBackground({ x: 360, y: 128, width: 120, height: 352 });
+		core.fillText("uievent", "购买", 32, 84, 'white', bigFont);
+		core.fillText("uievent", "卖出", 152, 84);
+		core.fillText("uievent", "离开", 272, 84);
+		core.fillText("uievent", "当前金币", 374, 75, null, middleFont);
 		core.setTextAlign("uievent", "right");
-		core.fillText("uievent", core.formatBigNumber(core.status.hero.money), 405, 89);
+		core.fillText("uievent", core.formatBigNumber(core.status.hero.money), 466, 100);
 		core.setTextAlign("uievent", "left");
 		core.ui._uievent_drawSelector({
 			"type": "drawSelector",
 			"image": "winskin.png",
 			"code": 2,
-			"x": 22 + 100 * type,
-			"y": 66,
+			"x": 22 + 120 * type,
+			"y": 76,
 			"width": 60,
 			"height": 33
 		});
 		if (selectItem != null) {
 			core.setTextAlign('uievent', 'center');
-			core.fillText("uievent", type == 0 ? "买入个数" : "卖出个数", 364, 320, null, bigFont);
-			core.fillText("uievent", "◀   " + selectCount + "   ▶", 364, 350);
-			core.fillText("uievent", "确定", 364, 380);
+			core.fillText("uievent", type == 0 ? "买入个数" : "卖出个数", 420, 360, null, bigFont);
+			core.fillText("uievent", "◀   " + selectCount + "   ▶", 420, 390);
+			core.fillText("uievent", "确定", 420, 420);
 		}
 
 		// Step 2：获得列表并展示
@@ -140,17 +140,17 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		list = choices.filter(function (one) {
 			return (type == 0 && one.money != null) || (type == 1 && one.sell != null);
 		});
-		var per_page = 6;
+		var per_page = 7;
 		totalPage = Math.ceil(list.length / per_page);
 		page = Math.floor((selectItem || 0) / per_page) + 1;
 
 		// 绘制分页
 		if (totalPage > 1) {
-			var half = 156;
+			var half = 180;
 			core.setTextAlign('uievent', 'center');
-			core.fillText('uievent', page + " / " + totalPage, half, 388, null, middleFont);
-			if (page > 1) core.fillText('uievent', '上一页', half - 80, 388);
-			if (page < totalPage) core.fillText('uievent', '下一页', half + 80, 388);
+			core.fillText('uievent', page + " / " + totalPage, half, 450, null, middleFont);
+			if (page > 1) core.fillText('uievent', '上一页', half - 80, 450);
+			if (page < totalPage) core.fillText('uievent', '下一页', half + 80, 450);
 		}
 		core.setTextAlign('uievent', 'left');
 
@@ -160,40 +160,40 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			var curr = start + i;
 			if (curr >= list.length) break;
 			var item = list[curr];
-			core.drawIcon('uievent', item.id, 10, 125 + i * 40);
+			core.drawIcon('uievent', item.id, 10, 141 + i * 40);
 			core.setTextAlign('uievent', 'left');
-			core.fillText('uievent', core.material.items[item.id].name, 50, 132 + i * 40, null, bigFont);
+			core.fillText('uievent', core.material.items[item.id].name, 50, 148 + i * 40, null, bigFont);
 			core.setTextAlign('uievent', 'right');
-			core.fillText('uievent', (type == 0 ? item.money : item.sell) + "金币/个", 300, 133 + i * 40, null, middleFont);
+			core.fillText('uievent', (type == 0 ? item.money : item.sell) + "金币/个", 340, 149 + i * 40, null, middleFont);
 			core.setTextAlign("uievent", "left");
 			if (curr == selectItem) {
 				// 绘制描述，文字自动放缩
 				var text = core.material.items[item.id].text || "该道具暂无描述";
 				try { text = core.replaceText(text); } catch (e) {}
 				for (var fontSize = 20; fontSize >= 8; fontSize -= 2) {
-					var config = { left: 10, fontSize: fontSize, maxWidth: 403, lineHeight: 1.4 };
+					var config = { left: 10, fontSize: fontSize, maxWidth: 467, lineHeight: 1.4 };
 					var height = core.getTextContentHeight(text, config);
-					if (height <= 50) {
-						config.top = (56 - height) / 2;
+					if (height <= 60) {
+						config.top = (64 - height) / 2;
 						core.drawTextContent("uievent", text, config);
 						break;
 					}
 				}
-				core.ui._uievent_drawSelector({ "type": "drawSelector", "image": "winskin.png", "code": 1, "x": 8, "y": 120 + i * 40, "width": 295, "height": 40 });
+				core.ui._uievent_drawSelector({ "type": "drawSelector", "image": "winskin.png", "code": 1, "x": 8, "y": 137 + i * 40, "width": 343, "height": 40 });
 				if (type == 0 && item.number != null) {
-					core.fillText("uievent", "存货", 324, 132, null, bigFont);
+					core.fillText("uievent", "存货", 370, 152, null, bigFont);
 					core.setTextAlign("uievent", "right");
-					core.fillText("uievent", item.number, 406, 132, null, null, 40);
+					core.fillText("uievent", item.number, 470, 152, null, null, 60);
 				} else if (type == 1) {
-					core.fillText("uievent", "数量", 324, 132, null, bigFont);
+					core.fillText("uievent", "数量", 370, 152, null, bigFont);
 					core.setTextAlign("uievent", "right");
-					core.fillText("uievent", core.itemCount(item.id), 406, 132, null, null, 40);
+					core.fillText("uievent", core.itemCount(item.id), 470, 152, null, null, 40);
 				}
 				core.setTextAlign("uievent", "left");
-				core.fillText("uievent", "合计金额", 324, 190);
+				core.fillText("uievent", "合计金额", 370, 210);
 				core.setTextAlign("uievent", "right");
 				totalMoney = selectCount * (type == 0 ? item.money : item.sell);
-				core.fillText("uievent", core.formatBigNumber(totalMoney), 405, 220);
+				core.fillText("uievent", core.formatBigNumber(totalMoney), 470, 240);
 			}
 		}
 
@@ -292,7 +292,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	this._performItemShopClick = function (px, py) {
 		var item = list[selectItem] || null;
 		// 鼠标操作
-		if (px >= 22 && px <= 82 && py >= 71 && py <= 102) {
+		if (px >= 22 && px <= 82 && py >= 81 && py <= 112) {
 			// 买
 			if (type != 0) {
 				type = 0;
@@ -301,7 +301,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			}
 			return;
 		}
-		if (px >= 122 && px <= 182 && py >= 71 && py <= 102) {
+		if (px >= 142 && px <= 202 && py >= 81 && py <= 112) {
 			// 卖
 			if (type != 1) {
 				type = 1;
@@ -310,31 +310,31 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			}
 			return;
 		}
-		if (px >= 222 && px <= 282 && py >= 71 && py <= 102) // 离开
+		if (px >= 262 && px <= 322 && py >= 81 && py <= 112) // 离开
 			return core.insertAction({ "type": "break" });
 		// ◀，▶
-		if (px >= 318 && px <= 341 && py >= 348 && py <= 376)
+		if (px >= 370 && px <= 395 && py >= 392 && py <= 415)
 			return _add(item, -1);
-		if (px >= 388 && px <= 416 && py >= 348 && py <= 376)
+		if (px >= 445 && px <= 470 && py >= 302 && py <= 415)
 			return _add(item, 1);
 		// 确定
-		if (px >= 341 && px <= 387 && py >= 380 && py <= 407)
+		if (px >= 392 && px <= 443 && py >= 421 && py <= 446)
 			return _confirm(item);
 
 		// 上一页/下一页
-		if (px >= 45 && px <= 105 && py >= 388) {
-			if (page > 1) selectItem -= 6;
+		if (px >= 70 && px <= 130 && py >= 450) {
+			if (page > 1) selectItem -= 7
 			return;
 		}
-		if (px >= 208 && px <= 268 && py >= 388) {
-			if (page < totalPage) selectItem = Math.min(selectItem + 6, list.length - 1);
+		if (px >= 230 && px <= 290 && py >= 450) {
+			if (page < totalPage) selectItem = Math.min(selectItem + 7, list.length - 1);
 			return;
 		}
 
 		// 实际区域
-		if (px >= 9 && px <= 300 && py >= 120 && py < 360) {
-			var index = parseInt((py - 120) / 40);
-			var newItem = 6 * (page - 1) + index;
+		if (px >= 9 && px <= 351 && py >= 142 && py < 422) {
+			var index = parseInt((py - 142) / 40);
+			var newItem = 7 * (page - 1) + index;
 			if (newItem >= list.length) newItem = list.length - 1;
 			if (newItem != selectItem) {
 				selectItem = newItem;
@@ -350,7 +350,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	}
 
 	this.openItemShop = function (itemShopId) {
-		shopId = itemShopId;
+		// shopId = itemShopId;
+		shopId = 'itemShop';
 		type = 0;
 		page = 0;
 		selectItem = null;

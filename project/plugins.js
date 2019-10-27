@@ -340,6 +340,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 		// 实际区域
 		if (px >= 9 && px <= 300 && py >= 120 && py < 360) {
+			if (list.length == 0) return;
 			var index = parseInt((py - 120) / 40);
 			var newItem = 6 * (page - 1) + index;
 			if (newItem >= list.length) newItem = list.length - 1;

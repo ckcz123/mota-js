@@ -105,13 +105,19 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 		// Step 1: 背景和固定的几个文字
 		core.ui._createUIEvent();
-		this.clearItemShop();
+		core.clearMap('uievent');
+		core.ui._uievent_drawSelector({ "code": 1 });
+		core.ui._uievent_drawSelector({ "code": 2 });
+		core.setTextAlign('uievent', 'left');
+		core.setTextBaseline('uievent', 'top');
 		core.fillRect('uievent', 0, 0, 416, 416, 'black');
 		core.ui._uievent_drawBackground({ x: 0, y: 0, width: 416, height: 56 });
 		core.ui._uievent_drawBackground({ x: 0, y: 56, width: 312, height: 56 });
 		core.ui._uievent_drawBackground({ x: 0, y: 112, width: 312, height: 304 });
 		core.ui._uievent_drawBackground({ x: 312, y: 56, width: 104, height: 56 });
 		core.ui._uievent_drawBackground({ x: 312, y: 112, width: 104, height: 304 });
+		core.setFillStyle('uievent', 'white');
+		core.setStrokeStyle('uievent', 'white');
 		core.fillText("uievent", "购买", 32, 74, 'white', bigFont);
 		core.fillText("uievent", "卖出", 132, 74);
 		core.fillText("uievent", "离开", 232, 74);
@@ -209,16 +215,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.setTextBaseline('uievent', 'alphabetic');
 	}
 
-	this.clearItemShop = function () {
-		core.clearMap('uievent');
-		core.ui._uievent_drawSelector({ "code": 1 });
-		core.ui._uievent_drawSelector({ "code": 2 });
-		core.setTextAlign('uievent', 'left');
-		core.setTextBaseline('uievent', 'top');
-		core.setFillStyle('uievent', 'white');
-		core.setStrokeStyle('uievent', 'white');
-	}
-
 	var _add = function (item, delta) {
 		if (item == null) return;
 		selectCount = core.clamp(
@@ -279,7 +275,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			selectCount = 0;
 			break;
 		case 13:
-		case 32: // SpaceBar/Space
+		case 32: // Enter/Space
 			if (selectItem == null) {
 				if (type == 2)
 					core.insertAction({ "type": "break" });
@@ -375,7 +371,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 					{ "type": "function", "function": "function() { core.performItemShopAction(); }" }
 				]
 			},
-			{ "type": "function", "function": "function () { core.clearItemShop(); core.deleteCanvas('uievent'); }" }
+			{ "type": "function", "function": "function () { " +
+					"core.deleteCanvas('uievent'); " +
+					"core.ui._uievent_drawSelector({ \"code\": 1 }); " +
+					"core.ui._uievent_drawSelector({ \"code\": 2 }); " +
+					"}" }
 		]);
 	}
 

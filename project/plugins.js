@@ -105,13 +105,19 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 		// Step 1: 背景和固定的几个文字
 		core.ui._createUIEvent();
-		this.clearItemShop();
+		core.clearMap('uievent');
+		core.ui._uievent_drawSelector({ "code": 1 });
+		core.ui._uievent_drawSelector({ "code": 2 });
+		core.setTextAlign('uievent', 'left');
+		core.setTextBaseline('uievent', 'top');
 		core.fillRect('uievent', 0, 0, 480, 480, 'black');
 		core.ui._uievent_drawBackground({ x: 0, y: 0, width: 480, height: 64 });
 		core.ui._uievent_drawBackground({ x: 0, y: 64, width: 360, height: 64 });
 		core.ui._uievent_drawBackground({ x: 0, y: 128, width: 360, height: 352 });
 		core.ui._uievent_drawBackground({ x: 360, y: 64, width: 120, height: 64 });
 		core.ui._uievent_drawBackground({ x: 360, y: 128, width: 120, height: 352 });
+		core.setFillStyle('uievent', 'white');
+		core.setStrokeStyle('uievent', 'white');
 		core.fillText("uievent", "购买", 32, 84, 'white', bigFont);
 		core.fillText("uievent", "卖出", 152, 84);
 		core.fillText("uievent", "离开", 272, 84);
@@ -138,6 +144,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		// Step 2：获得列表并展示
 		var choices = core.status.shops[shopId].choices;
 		list = choices.filter(function (one) {
+			if (one.condition != null) {
+				try { if (!core.calValue(one.condition)) return false; } catch (e) {}
+			}
 			return (type == 0 && one.money != null) || (type == 1 && one.sell != null);
 		});
 		var per_page = 7;
@@ -206,16 +215,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.setTextBaseline('uievent', 'alphabetic');
 	}
 
-	this.clearItemShop = function () {
-		core.clearMap('uievent');
-		core.ui._uievent_drawSelector({ "code": 1 });
-		core.ui._uievent_drawSelector({ "code": 2 });
-		core.setTextAlign('uievent', 'left');
-		core.setTextBaseline('uievent', 'top');
-		core.setFillStyle('uievent', 'white');
-		core.setStrokeStyle('uievent', 'white');
-	}
-
 	var _add = function (item, delta) {
 		if (item == null) return;
 		selectCount = core.clamp(
@@ -276,7 +275,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			selectCount = 0;
 			break;
 		case 13:
-		case 32: // SpaceBar/Space
+		case 32: // Enter/Space
 			if (selectItem == null) {
 				if (type == 2)
 					core.insertAction({ "type": "break" });
@@ -372,7 +371,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 					{ "type": "function", "function": "function() { core.performItemShopAction(); }" }
 				]
 			},
-			{ "type": "function", "function": "function () { core.clearItemShop(); core.deleteCanvas('uievent'); }" }
+			{ "type": "function", "function": "function () { " +
+					"core.deleteCanvas('uievent'); " +
+					"core.ui._uievent_drawSelector({ \"code\": 1 }); " +
+					"core.ui._uievent_drawSelector({ \"code\": 2 }); " +
+					"}" }
 		]);
 	}
 

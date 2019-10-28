@@ -138,6 +138,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		// Step 2：获得列表并展示
 		var choices = core.status.shops[shopId].choices;
 		list = choices.filter(function (one) {
+			if (one.condition != null) {
+				try { if (!core.calValue(one.condition)) return false; } catch (e) {}
+			}
 			return (type == 0 && one.money != null) || (type == 1 && one.sell != null);
 		});
 		var per_page = 6;

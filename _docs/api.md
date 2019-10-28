@@ -1757,6 +1757,7 @@ config为绘制的配置项，目前可以包括如下几项：
  - fontSize：字体大小，如果不设置则使用剧情文本设置中的正文字体大小。
  - lineHeight：绘制的行距值，如果不设置则使用fontSize*1.3（即1.3倍行距）。
  - time：打字机效果。若不为0，则会逐个字进行绘制，并设置core.status.event.interval定时器。
+ - interval：字符间的间距。值表示绘制每个字符之间间隔的距离，默认为0。
 
 
 core.drawTextBox(content, showAll)

@@ -875,7 +875,7 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     config.fontSize = config.fontSize || textAttribute.textfont;
     config.lineHeight = config.lineHeight || (config.fontSize * 1.3);
     config.time = config.time || 0;
-    config.interval = textAttribute.interval || 0;
+    config.interval = config.interval == null ? (textAttribute.interval || 0) : config.interval;
 
     config.index = 0;
     config.currcolor = config.color;
@@ -1263,7 +1263,7 @@ ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, al
 }
 
 ui.prototype._createTextCanvas = function (content, lineHeight) {
-    var width = this.PIXEL, height = 30 + this.getTextContentHeight(content, {lineHeight: lineHeight});
+    var width = this.PIXEL, height = 30 + this.getTextContentHeight(content, {lineHeight: lineHeight,maxWidth:core.__PIXELS__});
     var ctx = document.createElement('canvas').getContext('2d');
     ctx.canvas.width = width;
     ctx.canvas.height = height;
@@ -1280,7 +1280,7 @@ ui.prototype.drawScrollText = function (content, time, lineHeight, callback) {
     var offset = core.status.textAttribute.offset || 15;
     lineHeight *= core.status.textAttribute.textfont;
     var ctx = this._createTextCanvas(content, lineHeight);
-    var obj = { align: core.status.textAttribute.align, lineHeight: lineHeight };
+    var obj = { align: core.status.textAttribute.align, lineHeight: lineHeight ,maxWidth: core.__PIXELS__};
     if (obj.align == 'right') obj.left = this.PIXEL - offset;
     else if (obj.align != 'center') obj.left = offset;
     this.drawTextContent(ctx, content, obj);

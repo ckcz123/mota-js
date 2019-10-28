@@ -1263,7 +1263,7 @@ ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, al
 }
 
 ui.prototype._createTextCanvas = function (content, lineHeight) {
-    var width = this.PIXEL, height = 30 + this.getTextContentHeight(content, {lineHeight: lineHeight,maxWidth:core.__PIXELS__});
+    var width = this.PIXEL, height = 30 + this.getTextContentHeight(content, {lineHeight: lineHeight});
     var ctx = document.createElement('canvas').getContext('2d');
     ctx.canvas.width = width;
     ctx.canvas.height = height;
@@ -1280,7 +1280,7 @@ ui.prototype.drawScrollText = function (content, time, lineHeight, callback) {
     var offset = core.status.textAttribute.offset || 15;
     lineHeight *= core.status.textAttribute.textfont;
     var ctx = this._createTextCanvas(content, lineHeight);
-    var obj = { align: core.status.textAttribute.align, lineHeight: lineHeight ,maxWidth: core.__PIXELS__};
+    var obj = { align: core.status.textAttribute.align, lineHeight: lineHeight };
     if (obj.align == 'right') obj.left = this.PIXEL - offset;
     else if (obj.align != 'center') obj.left = offset;
     this.drawTextContent(ctx, content, obj);

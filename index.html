@@ -36,6 +36,8 @@
             startImageDiv.addEventListener("animationend", onAnimationEnd);
             startImageLogo.classList.add("startImageAnimation");
             startImageDiv.classList.add("startImageDivAnimation");
+            // 注释下面这句话以禁止单击立刻跳过开场动画
+            startImageBackgroundDiv.onclick = onAnimationEnd;
         }
         startImageLogo.onerror = function () {}
         startImageLogo.src = "logo.png";

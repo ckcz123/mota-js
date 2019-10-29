@@ -857,7 +857,7 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     config.fontSize = config.fontSize || textAttribute.textfont;
     config.lineHeight = config.lineHeight || (config.fontSize * 1.3);
     config.time = config.time || 0;
-    config.interval = textAttribute.interval || 0;
+    config.interval = config.interval == null ? (textAttribute.interval || 0) : config.interval;
 
     config.index = 0;
     config.currcolor = config.color;

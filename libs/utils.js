@@ -48,7 +48,14 @@ utils.prototype._init = function () {
             return this.substring(this_len - search.length, this_len) === search;
         };
     }
-
+    if (typeof String.prototype.startsWith != "function") {
+        String.prototype.startsWith = function (search, this_len) {
+            if (this_len === undefined || this_len > this.length) {
+                this_len = this.length;
+            }
+            return this.substring(0, search.length) === search;
+        }
+    }
 
 }
 
@@ -634,7 +641,8 @@ utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     var length = this.strlen(value) || 1;
     style += 'font-size: ' + Math.min(1, 7 / length) + 'em; ';
     if (css) style += css;
-    core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'>" + value + "</span>";
+    core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'></span>";
+    core.statusBar[name].children[0].innerText = value;
 }
 
 utils.prototype.strlen = function (str) {

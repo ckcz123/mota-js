@@ -306,7 +306,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var hint = "打败 " + enemy.name;
 	if (core.flags.enableMoney) hint += "，金币+" + money;
 	if (core.flags.enableExperience) hint += "，经验+" + experience;
-	core.drawTip(hint);
+	core.drawTip(hint, enemy.id);
 
 	// 事件的处理
 	var todo = [];
@@ -330,6 +330,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 	// 自爆
 	if (core.enemys.hasSpecial(special, 19)) {
+		core.status.hero.statistics.battleDamage += core.status.hero.hp - 1;
 		core.status.hero.hp = 1;
 	}
 	// 退化
@@ -353,7 +354,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.setFlag('skill', 0);
 		core.setFlag('skillName', '无');
 	}
-	core.updateStatusBar();
 
 	// 如果有加点
 	var point = core.material.enemys[enemyId].point;
@@ -375,6 +375,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 如果事件不为空，将其插入
 	if (todo.length > 0) core.insertAction(todo, x, y);
+	core.updateStatusBar();
 
 	// 如果已有事件正在处理中
 	if (core.status.event.id == null)
@@ -443,6 +444,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		])
 	}
 	*/
+
+},
+        "afterPassNet": function (x, y, id) {
+	// 经过特殊地形后的事件；x和y为当前坐标，id为当前的图块id
+
+	// 这是个一次性血网的例子
+	// if (id == 'lavaNet') core.removeBlock(x, y);
 
 },
         "canUseQuickShop": function(shopId) {
@@ -1044,9 +1052,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 设置魔力值
 	if (core.flags.enableMana) {
 		// status:manamax 只有在非负时才生效。
-		if (core.status.hero.manamax != null && core.status.hero.manamax >= 0) {
-			core.status.hero.mana = Math.min(core.status.hero.mana, core.status.hero.manamax);
-			core.setStatusBarInnerHTML('mana', core.status.hero.mana + "/" + core.status.hero.manamax);
+		if (core.status.hero.manamax != null && core.getRealStatus('manamax') >= 0) {
+			core.status.hero.mana = Math.min(core.status.hero.mana, core.getRealStatus('manamax'));
+			core.setStatusBarInnerHTML('mana', core.status.hero.mana + "/" + core.getRealStatus('manamax'));
 		}
 		else {
 			core.setStatusBarInnerHTML("mana", core.status.hero.mana);
@@ -1091,7 +1099,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 
 	// 难度
-	core.statusBar.hard.innerHTML = core.status.hard;
+	core.statusBar.hard.innerText = core.status.hard;
 	// 自定义状态栏绘制
 	core.drawStatusBar();
 

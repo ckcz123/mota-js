@@ -347,11 +347,10 @@ p#name {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -60%);
+    transform: translate(-50%, -55%);
     background: white;
     width: 250px;
     min-height: 50px;
-    max-height: 250px;
 }
 
 #inputMessage {
@@ -380,7 +379,7 @@ p#name {
     margin-right: 10%;
 }
 
-#_selector, #_uievent_selector {
+#_selector, ._uievent_selector {
     animation: selector 2s ease-in-out 0s infinite normal none running;
 }
 
@@ -423,4 +422,62 @@ p#name {
     100% {
         transform: rotate(45deg) translate(-3px, -3px);
     }
+}
+
+#startImageBackgroundDiv {
+    display: none;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    z-index: 10000;
+}
+
+#startImageDiv {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    background: black;
+    opacity: 1;
+}
+
+#startImageLogo {
+    opacity: 0;
+    max-width: 60%;
+    max-height: 60%;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.startImageAnimation {
+    -webkit-animation: startImage 4s ease-in-out 1s alternate 1;
+    animation: startImage 4s ease-in-out 1s alternate 1;
+}
+
+@-webkit-keyframes startImage {
+    0% { opacity: 0; }
+    60% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes startImage {
+    0% { opacity: 0; }
+    60% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.startImageDivAnimation {
+    -webkit-animation: startImageDivDisappear 2s ease-in-out 5s alternate 1;
+    animation: startImageDivDisappear 2s ease-in-out 5s alternate 1;
+}
+
+@-webkit-keyframes startImageDivDisappear {
+    0% { opacity: 1 }
+    100% { opacity: 0 }
+}
+
+@keyframes startImageDivDisappear {
+    0% { opacity: 1 }
+    100% { opacity: 0 }
 }

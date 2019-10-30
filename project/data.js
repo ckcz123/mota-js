@@ -78,7 +78,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 	"firstData": {
 		"title": "魔塔样板",
 		"name": "template",
-		"version": "Ver 2.6.3",
+		"version": "Ver 2.6.4",
 		"floorId": "sample0",
 		"hero": {
 			"name": "阳光",
@@ -266,18 +266,6 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 					{
 						"text": "生命+800",
 						"effect": "status:hp+=800"
-					},
-					{
-						"text": "攻击+4",
-						"effect": "status:atk+=4"
-					},
-					{
-						"text": "防御+4",
-						"effect": "status:def+=4"
-					},
-					{
-						"text": "魔防+10",
-						"effect": "status:mdef+=10"
 					}
 				]
 			},
@@ -295,17 +283,20 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 					{
 						"text": "等级+1",
 						"need": "100",
-						"effect": "status:lv+=1;status:hp+=1000;status:atk+=7;status:def+=7"
-					},
+						"effect": "status:hp+=1000"
+					}
+				]
+			},
+			{
+				"id": "itemShop",
+				"item": true,
+				"textInList": "道具商店",
+				"mustEnable": false,
+				"choices": [
 					{
-						"text": "攻击+5",
-						"need": "30",
-						"effect": "status:atk+=5"
-					},
-					{
-						"text": "防御+5",
-						"need": "30",
-						"effect": "status:def+=5"
+						"id": "yellowKey",
+						"number": 10,
+						"money": 10
 					}
 				]
 			},

@@ -654,9 +654,9 @@ core.clearStatusBar()
 清空状态栏的数据。
 
 
-core.updateStatusBar()
+core.updateStatusBar(doNotCheckAutoEvents)
 更新状态栏，被转发到了脚本编辑中。此函数还会根据是否在回放来设置工具栏的图标。
-
+如果doNotCheckAutoEvents为true则此时不检查自动事件。
 
 core.showStatusBar() / core.hideStatusBar(showToolbox)
 显示和隐藏状态栏。
@@ -973,6 +973,10 @@ core.getCommonEvent(name)
 core.recoverEvents(data)
 恢复事件现场。一般用于呼出怪物手册、呼出存读档页面等时，恢复事件执行流。
 
+core.checkAutoEvents()
+检测自动事件并执行。
+
+
 // ------ 点击状态栏图标时执行的一些操作 ------ //
 
 core.openBook(fromUserAction)
@@ -1220,6 +1224,10 @@ core.quickSaveEquip(index)
 
 core.quickLoadEquip()
 读取当前套装。index为读取的套装编号。
+
+
+core.getEquippedStatus(name)
+获得装备直接增加的属性数据。
 ```
 
 ## loader.js
@@ -1711,11 +1719,16 @@ core.clearUI()
 重置UI窗口。此函数将清掉所有的UI帧动画和光标，清空UI画布，并将alpha设为1。
 
 
-core.drawTip(text, id)
+core.drawTip(text, id, clear)
 在左上角以气泡的形式绘制一段提示。
 text为文字内容，仅支持${}的表达式计算，不支持换行和变色。
 id可选，为同时绘制的图标ID，如果不为null则会同时绘制该图标（仅对32x32的素材有效）。
 也可以使用状态栏的图标ID，例如lv, hp, up, save, settings等。
+如果clear为true，则会清空当前所有正在显示的提示。
+
+
+core.clearTip()
+清空当前所有正在显示的提示。
 
 
 core.drawText(content, callback)
@@ -1757,6 +1770,7 @@ config为绘制的配置项，目前可以包括如下几项：
  - fontSize：字体大小，如果不设置则使用剧情文本设置中的正文字体大小。
  - lineHeight：绘制的行距值，如果不设置则使用fontSize*1.3（即1.3倍行距）。
  - time：打字机效果。若不为0，则会逐个字进行绘制，并设置core.status.event.interval定时器。
+ - interval：字符间的间距。值表示绘制每个字符之间间隔的距离，默认为0。
 
 
 core.drawTextBox(content, showAll)

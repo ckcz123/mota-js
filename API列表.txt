@@ -661,8 +661,9 @@ core.clearStatusBar()
 清空状态栏的数据。
 
 
-core.updateStatusBar()
+core.updateStatusBar(doNotCheckAutoEvents)
 更新状态栏，被转发到了脚本编辑中。此函数还会根据是否在回放来设置工具栏的图标。
+如果doNotCheckAutoEvents为true则此时不检查自动事件。
 
 
 core.showStatusBar() / core.hideStatusBar(showToolbox)

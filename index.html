@@ -16,6 +16,33 @@
     <link type='text/css' href='styles.css' rel='stylesheet'>
 </head>
 <body>
+<div id='startImageBackgroundDiv'>
+    <div id='startImageDiv'></div>
+    <img id='startImageLogo' />
+</div>
+<script>
+    (function () {
+        var startImageBackgroundDiv = document.getElementById('startImageBackgroundDiv');
+        var startImageLogo = document.getElementById('startImageLogo');
+        var startImageDiv = document.getElementById('startImageDiv');
+        startImageLogo.onload = function () {
+            startImageBackgroundDiv.style.display = 'block';
+            var onAnimationEnd = function () {
+                startImageBackgroundDiv.style.display = 'none';
+                startImageLogo.classList.remove("startImageAnimation");
+                startImageDiv.classList.remove("startImageDivAnimation");
+            }
+            startImageDiv.addEventListener("webkitAnimationEnd", onAnimationEnd);
+            startImageDiv.addEventListener("animationend", onAnimationEnd);
+            startImageLogo.classList.add("startImageAnimation");
+            startImageDiv.classList.add("startImageDivAnimation");
+            // 注释下面这句话以禁止单击立刻跳过开场动画
+            startImageBackgroundDiv.onclick = onAnimationEnd;
+        }
+        startImageLogo.onerror = function () {}
+        startImageLogo.src = "logo.png";
+    })();
+</script>
 <div id='gameGroup'>
     <p id='mainTips'>请稍后...</p>
     <img id='musicBtn'>

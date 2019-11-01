@@ -1,11 +1,12 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
 <head>
     <meta charset="utf-8">
     <link href="_server/css/editor.css" rel="stylesheet">
-    <link href="_server/CodeMirror/codemirror.css" rel="stylesheet">
-    <link href="_server/thirdparty/awesomplete.css" rel="stylesheet">
-    <link href="_server/css/editor_mode.css" rel="stylesheet">
+    <link href="_server/css/editor_table.css" rel="stylesheet">
+    <link href="_server/css/mapPanel.css" rel="stylesheet">
+    <link href="_server/css/scriptEditor.css" rel="stylesheet">
+    <link href="_server/css/pluginPanel.css" rel="stylesheet">
+    <link href="_server/css/icon.css" rel="stylesheet">
 </head>
 <body>
 <body>
@@ -17,55 +18,175 @@
         alert("请在启动服务中打开本编辑器！不然包括编辑在内的绝大多数功能都无法使用。");
     }
 </script>
-<div class="main">
-    <div id="left" style="z-index:-1;opacity: 0;"><!-- map -->
-        <div id="arrEditor">
-            <table class="col" id='arrColMark'></table>
-            <table class="row" id='arrRowMark'></table>
-            <div id="mapEditArea">
-                <textarea cols="10" rows="10" id="pout"></textarea>
+<div id="header">
+    <ul id="navlist">
+        <li>地图</li>
+        <li>数据</li>
+        <li>资源</li>
+        <li>公共事件</li>
+        <li>脚本</li>
+        <li>插件</li>
+        <li><a href="https://h5mota.com/games/template/_docs/" target="_blank">帮助</a></li>
+    </ul>
+    <p id="projectName">title</p>
+</div>
+<div id="main">
+    <div class="mainPanel" id="mapEditor">
+        <div class="side" id="mapSide">
+            <ul id="mapSideList">
+                <li title="地图列表"><img src="_server/icon/mapList.svg"></li>
+                <li title="事件列表"><img src="_server/icon/eventList.svg"></li>
+                <li title="搜索事件"><img src="_server/icon/searchEvent.svg"></li>
+                <li title="新建地图"><img src="_server/icon/newMap.svg"></li>
+                <li title="地图属性"><img src="_server/icon/mapProperty.svg"></li>
+                <li title="预览地图"><img src="_server/icon/preview.svg"></li>
+            </ul>
+        </div>
+        <div class="left" id="mapLeft">
+            <div id="mapExplorer">
+                <h3 class="header">地图列表</h3>
+                <div class="inputSet" id="mapExplorerSearch">
+                    <input class="inputBar" type="name" placeholder="搜索地图">
+                    <div class="clearBtn staticIcon"><img src="_server/icon/close.svg"></div>
+                </div>
+                <ul id="mapExplorerUL">
+                </ul>
             </div>
-            <div id="editTip">
-                <input type="button" value="新建空白地图" id='newMap'/>
-                <input id='newFileName' placeholder="新楼层id" style="width: 70px"/>
-                <span style="vertical-align: bottom">宽</span>
-                <input id='newMapWidth' value="13" style="width: 20px"/>
-                <span style="vertical-align: bottom">高</span>
-                <input id='newMapHeight' value="13" style="width: 20px"/>
-                <input type="checkbox" id='newMapStatus' checked='checked' style='vertical-align: bottom'/>
-                <span style='vertical-align: bottom; margin-left: -4px'>保留楼层属性</span>
+            <div id="mapEvent">
+                <h3 class="header">地图选点&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('loc')">配置表格</button>
+                </h3>
+                <div class="container">
+                    <div class='etable'>
+                        <ul id='mapEventList'>
+                        </ul>
+                    </div>
+                </div>
             </div>
-            <div id="editBtns">
-                <input type="button" value="导出地图" id="exportMap"/>
-                <input type="button" value="复制地图" id="copyMap"/>
-                <input type="button" value="清除地图" id='clearMapButton'/>
-                <input type="button" value="删除地图" id="deleteMap"/>
+            <div id="mapSearch">
+                <h3 class="header">搜索事件</h3>
+
             </div>
-            <input type="button" value="批量创建空白地图 ↓" id='newMaps'/>
-            <div id='newFloors' style='display:none'>
-                <span style="vertical-align: bottom">楼层ID格式: </span>
-                <input id='newFloorIds' style="width: 70px" value='MT${i}'/>
-                <span style="vertical-align: bottom">地图中文名格式: </span>
-                <input id='newFloorTitles' style="width: 100px" value='主塔 ${i} 层'/>
-                <br/>
-                <span style="vertical-align: bottom">状态栏名称: </span>
-                <input id='newFloorNames' style="width: 70px" value='${i}'/>
-                <span style="vertical-align: bottom">宽</span>
-                <input id='newMapsWidth' value="13" style="width: 20px"/>
-                <span style="vertical-align: bottom">高</span>
-                <input id='newMapsHeight' value="13" style="width: 20px"/>
-                <input type="checkbox" id='newMapsStatus' checked='checked' style='vertical-align: bottom'/>
-                <span style='vertical-align: bottom; margin-left: -4px'>保留楼层属性</span>
-                <br/>
-                <span style="vertical-align: bottom">从 i=</span>
-                <input id='newMapsFrom' value="1" style="width: 20px"/>
-                <span style="vertical-align: bottom">到</span>
-                <input id='newMapsTo' value="5" style="width: 20px"/>
-                <input type="button" value="确认创建" id='createNewMaps'>
+            <div id="mapBuilding">
+                <h3 class="header">新建地图</h3>
+                <div id="buildingPara">
+                    <span>批量创建<i class="icon-i"></i></span>
+                    <input id='newFileName' placeholder="新楼层id" style="width: 70px"/>
+                    <div id='newFloors' style='display:none'>
+                        <span style="vertical-align: bottom">楼层ID格式: </span>
+                        <input id='newFloorIds' style="width: 70px" value='MT${i}'/>
+                        <span style="vertical-align: bottom">地图中文名格式: </span>
+                        <input id='newFloorTitles' style="width: 100px" value='主塔 ${i} 层'/>
+                        <br/>
+                        <span style="vertical-align: bottom">状态栏名称: </span>
+                        <input id='newFloorNames' style="width: 70px" value='${i}'/>
+                    </div>
+                    <br/>
+                    <span style="vertical-align: bottom">从 i=</span>
+                    <input id='newMapsFrom' value="1" style="width: 20px"/>
+                    <span style="vertical-align: bottom">到</span>
+                    <input id='newMapsTo' value="5" style="width: 20px"/>
+                    <span style="vertical-align: bottom">宽</span>
+                    <input id='newMapWidth' value="13" style="width: 20px"/>
+                    <span style="vertical-align: bottom">高</span>
+                    <input id='newMapHeight' value="13" style="width: 20px"/>
+                    <input type="checkbox" id='newMapStatus' checked='checked' style='vertical-align: bottom'/>
+                    <span style='vertical-align: bottom; margin-left: -4px'>保留楼层属性</span>
+                </div>
+                <input type="button" value="确认创建" id='createNewMap'/>
+            </div>
+            <div id="mapProperty">
+                <h3 class="header">地图属性
+                    <button onclick="editor.mode.onmode('save')">保存</button>
+                    <button onclick="editor.mode.changeDoubleClickModeByButton('add')">添加</button>
+                    <button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>
+                    <button onclick="editor_multi.editCommentJs('floor')">配置表格</button>
+                </h3>
+                <div class="container">
+                    <div class='etable'>
+                        <ul id='mapPropertyList'>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            <div id="mapPerview">
+                <h3 class="header">预览地图</h3>
+
+            </div>
+        </div>
+        <div class="mid" id="mapMid">
+            <div id="canvasManager">
+                <ul id="canvasTabList">
+                    <li><img src="_server/icon/tiled.ico">背景层</li>
+                    <li><img src="_server/icon/tiled.ico">事件层</li>
+                    <li><img src="_server/icon/tiled.ico">前景层</li>
+                </ul>
+            </div>
+            <div id="mapToolbar">
+                <ul id="paintToolbar">
+                    <li value="line">线</li>
+                    <li value="rectangle">矩形</li>
+                    <li value="tileset">tileset</li>
+                </ul>
+            </div>
+            <div id="mapViewPort">
+                <div class="markContainer col">
+                    <table class="col" id='mapColMark'></table>
+                </div>
+                <div class="markContainer row">
+                    <table class="row" id='mapRowMark'></table>
+                </div>
+                <div class="map" id="mapEdit">
+                    
+                    <canvas class='gameCanvas' id='efg' width='416' height='416'></canvas>
+                    <canvas class='gameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
+                </div>
+                <canvas id="tileMap">浏览器不支持，请使用chrome打开编辑器</canvas>
+            </div>
+        </div>
+        <div class="right" id="mapRight">
+            <div id="iconLib">
+                <div id="iconImages"></div>
+                <div id="selectBox">
+                    <div id='dataSelection' style="display:none"></div>
+                </div>
+            </div>
+            <button id="iconExpandBtn"></button>
+        </div>
+    </div>
+    <div class="mainPanel" id="dataEditor">
+        <div id="firstData" class="left">
+            <h3 class="header">初始数据
+            </h3>
+            <div class="container">
+                <div class='etable'>
+                    <ul id='firstDataList'>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="globalValue" class="mid">
+            <h3 class="header">全局变量
+            </h3>
+            <div class="container">
+                <div class='etable'>
+                    <ul id='globalValueList'>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="globalFlag" class="right">
+            <h3 class="header">全局开关
+            </h3>
+            <div class="container">
+                <div class='etable'>
+                    <ul id='globalFlagList'>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
-    <div id="left1" class='leftTab' style="z-index:-1;opacity: 0;"><!-- appendpic -->
+    <div class="mainPanel" id="resourceManager">
         <h3 class="leftTabHeader">追加素材</h3>
         <div class="leftTabContent">
             <p>
@@ -96,413 +217,125 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div id="left2" class='leftTab' style="z-index:-1;opacity: 0;"><!-- loc -->
-        <h3 class="leftTabHeader">地图选点&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('loc')">配置表格</button>
-        </h3>
-        <div class="leftTabContent">
-            <p id='pos_a6771a78_a099_417c_828f_0a24851ebfce' style="margin-left: 15px">0,0</p>
-            <div class='etable'>
-                <table>
-                    <tbody id='table_3d846fc4_7644_44d1_aa04_433d266a73df'>
-                    <tr>
-                        <td>条目</td>
-                        <td>注释</td>
-                        <td>值</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    <div id="left3" class='leftTab' style="z-index:-1;opacity: 0;"><!-- enemyitem -->
-        <h3 class="leftTabHeader">图块属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('add')">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('enemyitem')">配置表格</button>
-        </h3>
-        <div class="leftTabContent">
-            <div id="enemyItemTable"><!-- enemy and item -->
-                <div class='etable'>
-                    <table>
-                        <tbody id='table_a3f03d4c_55b8_4ef6_b362_b345783acd72'>
-                            <tr>
-                                <td>条目</td>
-                                <td>注释</td>
-                                <td>值</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div id='newIdIdnum'><!-- id and idnum -->
-                <input placeholder="新id（唯一标识符）"/>
-                <input placeholder="新idnum（10000以内数字）"/>
-                <button>save</button>
-                <br/>
-                <button style="margin-top: 10px">自动注册</button>
-            </div>
-            <div id='changeId'><!-- id and idnum -->
-                <input placeholder="修改图块id为"/>
-                <button>save</button>
-            </div>
-        </div>
-    </div>
-    <div id="left4" class='leftTab' style="z-index:-1;opacity: 0;"><!-- floor -->
-        <h3 class="leftTabHeader">楼层属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('add')">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('floor')">配置表格</button>
-        </h3>
-        <div class="leftTabContent">
-            <div class='etable'>
-                <table>
-                    <tbody id='table_4a3b1b09_b2fb_4bdf_b9ab_9f4cdac14c74'>
-                    <tr>
-                        <td>条目</td>
-                        <td>注释</td>
-                        <td>值</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div id='changeFloorId'><!-- id and idnum -->
-                <input placeholder="修改floorId为"/>
-                <button>save</button>
-            </div>
-        </div>
-    </div>
-    <div id="left5" class='leftTab' style="z-index:-1;opacity: 0;"><!-- tower -->
-        <h3 class="leftTabHeader">全塔属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('add')">添加</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('tower')">配置表格</button>
-        </h3>
-        <div class="leftTabContent">
-            <div class='etable'>
-                <table>
-                    <tbody id='table_b6a03e4c_5968_4633_ac40_0dfdd2c9cde5'>
-                    <tr>
-                        <td>条目</td>
-                        <td>注释</td>
-                        <td>值</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    <div id="left6" class='leftTab' style="z-index:-1;opacity: 0;">
-        <div style="position: relative; height: 95%"><!-- eventsEditor -->
-            <h3>事件编辑器 &nbsp;&nbsp;
-                <!--
-                <button onclick="editor_blockly.showXML()">Show XML</button>
-                <button onclick="editor_blockly.runCode()">console.log(obj=code)</button>
-                -->
-                <select id="entryType" disabled="disabled" style="display: none">
-                    <option value="event">event</option>
-                    <option value="changeFloor">changeFloor</option>
-                    <option value="level">level</option>
-                    <option value="shop">shop</option>
-                    <option value="afterBattle">afterBattle</option>
-                    <option value="afterGetItem">afterGetItem</option>
-                    <option value="afterOpenDoor">afterOpenDoor</option>
-                    <option value="firstArrive">firstArrive</option>
-                    <option value="eachArrive">eachArrive</option>
-                    <option value="commonEvent">commonEvent</option>
-                </select>
-                <button onclick="editor_blockly.confirm()">确认</button>
-                <button onclick="editor_blockly.parse()">解析</button>
-                <button onclick="editor_blockly.cancel()">取消</button>
-                <div style="position: relative; display: inline-block; margin-left: 10px">
-                    <div class="searchLogo"></div>
-                    <input type="text" id="searchBlock" placeholder="搜索图块"/>
-                    <button id = "colorSwitch" class="cpPanel" onclick="openColorFromButton()" style="margin-left:5px">颜色选择器</button>
-                    <div id="colorPanel" class="cpPanel" style="display: none">
-                        <input class="color" id="colorPicker" value="255,215,0,1"/>
-                        <button onclick="confirmColor()">确定</button>
-                    </div>
-                    <button class="cpPanel" onclick="editor_blockly.selectPoint()" style="margin-left:5px">地图选点</button>
-                </div>
-                <xml id="toolbox" style="display:none">
-                </xml>
-            </h3>
-            <div style="position: relative;height: 100%">
-                <div id="blocklyArea">
-                    <div id="blocklyDiv"></div>
-                </div>
-                <textarea id="codeArea" spellcheck="false"></textarea>
-            </div>
-        </div>
-    </div>
-    <div id="left7" style="z-index:-1;opacity: 0;"><!-- 多行文本编辑器 -->
-        <button onclick="editor_multi.confirm()">确认</button>
-        <button onclick="editor_multi.cancel()">取消</button>
-        <button onclick="editor_multi.format()">格式化</button>
-        <input type="checkbox" onclick="editor_multi.toggerLint()" id="lintCheckbox"
-               style="vertical-align: bottom;margin-left:6px"/>
-        <span style="vertical-align: bottom; margin-left: -3px">语法检查</span>
-        <textarea id="multiLineCode" name="multiLineCode"></textarea>
-    </div>
-    <div id="left8" class='leftTab' style="z-index:-1;opacity: 0;"><!-- functions -->
-        <h3 class="leftTabHeader">脚本编辑&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('functions')">配置表格</button>
-        </h3>
-        <div class="leftTabContent">
-            <div class='etable'>
-                <table>
-                    <tbody id='table_e260a2be_5690_476a_b04e_dacddede78b3'>
-                    <tr>
-                        <td>条目</td>
-                        <td>注释</td>
-                        <td>值</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    <div id="left9" class='leftTab' style="z-index:-1;opacity: 0;"><!-- commonevent -->
-        <h3 class="leftTabHeader">公共事件&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('add')">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('commonevent')">配置表格</button>
-        </h3>
-        <div class="leftTabContent">
-            <div class='etable'>
-                <table>
-                    <tbody id='table_b7bf0124_99fd_4af8_ae2f_0017f04a7c7d'>
-                    <tr>
-                        <td>条目</td>
-                        <td>注释</td>
-                        <td>值</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    <div id="left10" class='leftTab' style="z-index:-1;opacity: 0;"><!-- plugins -->
-        <h3 class="leftTabHeader">插件编写&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('add')">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('plugins')">配置表格</button>
-        </h3>
-        <div class="leftTabContent">
-            <div class='etable'>
-                <table>
-                    <tbody id='table_e2c034ec_47c6_48ae_8db8_4f8f32fea2d6'>
-                    <tr>
-                        <td>条目</td>
-                        <td>注释</td>
-                        <td>值</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    <div id="mid">
-        <table class="col" id='mapColMark'></table>
-        <table class="row" id='mapRowMark'></table>
-        <div class="map" id="mapEdit">
-            <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas>
-            <canvas class='gameCanvas' id='event' width='416' height='416'></canvas>
-            <canvas class='gameCanvas' id='event2' width='416' height='416'></canvas>
-            <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
-            <canvas class='gameCanvas' id='efg' width='416' height='416' style='z-index:90'></canvas>
-            <canvas class='gameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
-        </div>
-        <div class="tools">
-            <div id="tip">
-                <div id="isSelectedBlock-if" style="display:none">
-                    <p id="isClearBlock-if" style="display:none" class="infoText">当前选择为清除块，可擦除地图上块</p>
-                    <div id="isClearBlock-else"><p id="isAirwall-if" style="display:none" class="infoText">当前选择为空气墙, 在编辑器中可视, 在游戏中隐藏的墙, 用来配合前景/背景的贴图</p>
-                    <div id="isAirwall-else">
-                        
-                    </div></div>
-                </div>
-                <div id="isSelectedBlock-else">
-                    <p id="whichShow-if" style="display:none"></p>
-                </div>
-            </div>
 
+    </div>
+    <div class="mainPanel" id="commonEventEditor">
 
-            <select id="editModeSelect">
-                <option value="map">地图编辑</option>
-                <option value="loc">地图选点</option>
-                <option value="enemyitem">图块属性</option>
-                <option value="floor">楼层属性</option>
-                <option value="tower">全塔属性</option>
-                <option value="functions">脚本编辑</option>
-                <option value="appendpic">追加素材</option>
-                <option value="commonevent">公共事件</option>
-                <option value="plugins">插件编写</option>
+    </div>
+    <div class="mainPanel" id="scriptEditor">
+        <div class="left" id="scriptLeft">
+            <h3 class="header">脚本编写</h3>
+            <div class="container">
+                <div class="etable">
+                    <ul id="scriptList">
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="mid" id="scriptMid">
+
+        </div>
+    </div>
+    <div class="mainPanel" id="pluginManger">
+        <div class="left" id="pluginLeft">
+            <h3 class="header">插件管理</h3>
+            <div class="inputSet" id="pluginMangerSearch">
+                <input class="inputBar" type="name" placeholder="搜索插件">
+                <div class="clearBtn staticIcon"><img src="_server/icon/close.svg"></div>
+            </div>
+            <div class="container">
+                <ul id="pluginLib">
+    
+                </ul>
+                <ul id="pluginList">
+    
+                </ul>
+            </div>
+        </div>
+        <div class="mid" id="pluginMid">
+
+        </div>
+    </div>
+    <div id="infoBar">
+        <ul id="infoLeft">
+        </ul>
+        <ul class="infoRight">
+        </ul>
+        <ul class="infoRight">
+        </ul>
+        <ul class="infoRight">
+        </ul>
+    </div>
+    <div id="nameless"></div>
+    <div id="mutli" style="z-index:-1;opacity: 0;"><!-- 多行文本编辑器 -->
+        <!-- <button>确认</button>
+        <button>取消</button> -->
+        <div id="monacoContainer"></div>
+    </div>
+</div>
+<!-- compatibility -->
+<div id="menuDiv">
+    <div id="midMenu" style="display:none">
+        <div id='addFloorEvent' class="menuitem" style="display:none"><div class="menuitem-content">添加上下楼事件</div></div>
+        <div id='chooseThis' class="menuitem"><div class="menuitem-content">选中此点</div></div>
+        <div id='chooseInRight' class="menuitem"><div class="menuitem-content">在素材区选中此图块</div></div>
+        <div id='copyLoc' class="menuitem"><div class="menuitem-content">复制此事件</div></div>
+        <div id='moveLoc' class="menuitem"><div class="menuitem-content">移动此事件</div></div>
+        <div id='clearEvent' class="menuitem"><div class="menuitem-content">仅清空此点事件</div></div>
+        <div id='clearLoc' class="menuitem"><div class="menuitem-content">清空此点及事件</div></div>
+    </div>
+</div>
+<div style="display: none;">
+    <div style="position: relative; height: 95%"><!-- eventsEditor -->
+        <h3>事件编辑器 &nbsp;&nbsp;
+            <select id="entryType" disabled="disabled" style="display: none">
+                <option value="event">event</option>
+                <option value="changeFloor">changeFloor</option>
+                <option value="level">level</option>
+                <option value="shop">shop</option>
+                <option value="afterBattle">afterBattle</option>
+                <option value="afterGetItem">afterGetItem</option>
+                <option value="afterOpenDoor">afterOpenDoor</option>
+                <option value="firstArrive">firstArrive</option>
+                <option value="eachArrive">eachArrive</option>
+                <option value="commonEvent">commonEvent</option>
             </select>
-            <br/>
-            <span style="font-size: 12px;">
-            <input type="radio" id="brushMod" name="brushMod" value="line" checked="checked" />画线
-            <input type="radio" id="brushMod2" name="brushMod" value="rectangle" />画矩形
-            <input type="radio" id="brushMod3" name="brushMod" value="tileset" />tileset贴图
-            </span>
-            <br/>
-            <span style="font-size: 12px">
-            <input type="radio" id="layerMod2" name="layerMod" value="bgmap" />背景层
-            <input type="radio" id="layerMod" name="layerMod" value="map" checked="checked" style="margin-left: 5px" />事件层
-            <input type="radio" id="layerMod3" name="layerMod" value="fgmap" style="margin-left: 5px" />前景层
-            </span>
-            <br>
-            <div id="viewportButtons">
-                <input type="button" value="←"/>
-                <input type="button" value="↑"/>
-                <input type="button" value="↓"/>
-                <input type="button" value="→"/>
+            <button onclick="editor_blockly.confirm()">确认</button>
+            <button onclick="editor_blockly.parse()">解析</button>
+            <button onclick="editor_blockly.cancel()">取消</button>
+            <div style="position: relative; display: inline-block; margin-left: 10px">
+                <div class="searchLogo"></div>
+                <input type="text" id="searchBlock" placeholder="搜索图块"/>
+                <button id = "colorSwitch" class="cpPanel" onclick="openColorFromButton()" style="margin-left:5px">颜色选择器</button>
+                <div id="colorPanel" class="cpPanel" style="display: none">
+                    <input class="color" id="colorPicker" value="255,215,0,1"/>
+                    <button onclick="confirmColor()">确定</button>
+                </div>
+                <button class="cpPanel" onclick="editor_blockly.selectPoint()" style="margin-left:5px">地图选点</button>
             </div>
-            <br>
-            <select id="selectFloor"></select>
-            <input type="button" value="保存地图" id='saveFloor'/>
-        </div>
-    </div>
-    <div id="right">
-        <div id="iconLib">
-            <div id="iconImages"></div>
-            <div id="selectBox">
-                <div id='dataSelection' style="display:none"></div>
+            <xml id="toolbox" style="display:none">
+            </xml>
+        </h3>
+        <div style="position: relative;height: 100%">
+            <div id="blocklyArea">
+                <div id="blocklyDiv"></div>
             </div>
-        </div>
-        <button id="iconExpandBtn"></button>
-    </div>
-    <div id="menuDiv">
-        <div id="midMenu" style="display:none">
-            <div id='addFloorEvent' class="menuitem" style="display:none"><div class="menuitem-content">添加上下楼事件</div></div>
-            <div id='chooseThis' class="menuitem"><div class="menuitem-content">选中此点</div></div>
-            <div id='chooseInRight' class="menuitem"><div class="menuitem-content">在素材区选中此图块</div></div>
-            <div id='copyLoc' class="menuitem"><div class="menuitem-content">复制此事件</div></div>
-            <div id='moveLoc' class="menuitem"><div class="menuitem-content">移动此事件</div></div>
-            <div id='clearEvent' class="menuitem"><div class="menuitem-content">仅清空此点事件</div></div>
-            <div id='clearLoc' class="menuitem"><div class="menuitem-content">清空此点及事件</div></div>
+            <textarea id="codeArea" spellcheck="false"></textarea>
         </div>
     </div>
+    <div id='newIdIdnum'><!-- id and idnum -->
+        <input placeholder="新id（唯一标识符）"/>
+        <input placeholder="新idnum（10000以内数字）"/>
+        <button>save</button>
+        <br/>
+        <button style="margin-top: 10px">自动注册</button>
+    </div>
+    <div id='changeId'><!-- id and idnum -->
+        <input placeholder="修改图块id为"/>
+        <button>save</button>
+    </div>;
 </div>
 <!-- <script>/* -->
-<div id='gameGroup' style='display:none'>
-    <p id='mainTips'>请稍后...</p>
-    <img id='musicBtn'>
-    <div id='startPanel'>
-        <div id='startTop'>
-            <div id='startTopProgressBar'>
-                <div id='startTopProgress'></div>
-            </div>
-            <p id='startTopLoadTips'>资源即将开始加载</p>
-        </div>
-        <img id='startBackground'>
-        <p id='startLogo'></p>
-        <div id='startButtonGroup'>
-            <div id='startButtons'>
-                <span class='startButton' id='playGame'>开始游戏</span>
-                <span class='startButton' id='loadGame'>载入游戏</span>
-                <span class='startButton' id='replayGame'>录像回放</span>
-            </div>
-            <div id='levelChooseButtons'></div>
-        </div>
-    </div>
-    <div id='floorMsgGroup'>
-        <p id='logoLabel'></p>
-        <p id='versionLabel'></p>
-        <p id='floorNameLabel'></p>
-    </div>
-    <div id='statusBar' class="clearfix">
-        <div class="status" id="floorCol">
-            <img id="img-floor">
-            <p class='statusLabel statusText' id='floor'></p>
-        </div>
-        <div class="status" id="nameCol">
-            <img id="img-name">
-            <p class='statusLabel statusText' id='name'></p>
-        </div>
-        <div class="status" id="lvCol">
-            <img id="img-lv">
-            <p class='statusLabel statusText' id='lv'></p>
-        </div>
-        <div class="status" id='hpmaxCol'>
-            <img id="img-hpmax">
-            <p class='statusLabel statusText' id='hpmax'></p>
-        </div>
-        <div class="status" id='hpCol'>
-            <img id="img-hp">
-            <p class='statusLabel statusText' id='hp'></p>
-        </div>
-        <div class="status" id='manaCol'>
-            <img id="img-mana">
-            <p class='statusLabel statusText' id='mana'></p>
-        </div>
-        <div class="status" id='atkCol'>
-            <img id="img-atk">
-            <p class='statusLabel statusText' id='atk'></p>
-        </div>
-        <div class="status" id='defCol'>
-            <img id="img-def">
-            <p class='statusLabel statusText' id='def'></p>
-        </div>
-        <div class="status" id="mdefCol">
-            <img id="img-mdef">
-            <p class='statusLabel statusText' id='mdef'></p>
-        </div>
-        <div class="status" id="moneyCol">
-            <img id="img-money">
-            <p class='statusLabel statusText' id='money'></p>
-        </div>
-        <div class="status" id="experienceCol">
-            <img id="img-experience">
-            <p class='statusLabel statusText' id='experience'></p>
-        </div>
-        <div class="status" id="upCol">
-            <img id="img-up">
-            <p class='statusLabel statusText' id='up'></p>
-        </div>
-        <div class="status" id="skillCol">
-            <img id="img-skill">
-            <p class='statusLabel statusText' id='skill' style='font-style: normal'></p>
-        </div>
-        <div class="status" id='keyCol'>
-            <span class='statusLabel' id='yellowKey' style="color:#FFCCAA"></span>
-            <span class='statusLabel' id='blueKey' style="color:#AAAADD"></span>
-            <span class='statusLabel' id='redKey' style="color:#FF8888"></span>
-        </div>
-        <div class="status" id='pzfCol'>
-            <span class='statusLabel' id='pickaxe' style="color: #BC6E27"></span>
-            <span class='statusLabel' id='bomb' style="color: #FA14B9"></span>
-            <span class='statusLabel' id='fly' style="color: #8DB600"></span>
-        </div>
-        <div class="status" id="debuffCol">
-            <span class='statusLabel' id='poison' style="color: #AFFCA8;"></span>
-            <span class='statusLabel' id='weak' style="color: #FECCD0;"></span>
-            <span class='statusLabel' id='curse' style="color: #C2F4E7;"></span>
-        </div>
-
-        <!-- 状态栏canvas化 -->
-        <canvas id="statusCanvas"></canvas>
-    </div>
-    <div id="toolBar" class="clearfix">
-        <img class="tools" id='img-book'>
-        <img class="tools" id='img-fly'>
-        <img class="tools" id='img-toolbox'>
-        <img class="tools" id='img-keyboard'>
-        <img class="tools" id='img-shop'>
-        <img class="tools" id='img-save'>
-        <img class="tools" id='img-load'>
-        <img class="tools" id='img-settings'>
-        <img class="tools" id='img-btn1' style='display:none'>
-        <img class="tools" id='img-btn2' style='display:none'>
-        <img class="tools" id='img-btn3' style='display:none'>
-        <img class="tools" id='img-btn4' style='display:none'>
-        <img class="tools" id='img-btn5' style='display:none'>
-        <img class="tools" id='img-btn6' style='display:none'>
-        <img class="tools" id='img-btn7' style='display:none'>
-        <img class="tools" id='img-btn8' style='display:none'>
-        <p class="statusLabel tools" id="hard"></p>
-    </div>
-    <div id="gameDraw">
-        <div id="gif"></div>
-        <div id="gif2"></div>
-        <div id="mapView"></div>
-        <!-- <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas> -->
-        <!-- <canvas class='gameCanvas' id='event' width='416' height='416'></canvas> -->
-        <!-- canvas class='gameCanvas' id='map' width='416' height='416'></canvas> -->
-        <!-- <canvas class='gameCanvas' id='event2' width='416' height='416'></canvas> -->
-        <!-- <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas> -->
-        <!-- canvas class='gameCanvas' id='damage' width='416' height='416'></canvas>-->
-        <canvas class='gameCanvas' id='animate' width='416' height='416'></canvas>
-        <canvas class='gameCanvas' id='curtain' width='416' height='416'></canvas>
-        <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
-        <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
-        <div id="next"></div>
-    </div>
-</div>
 <div id='inputDiv' style='display: none'>
     <div id='inputDialog'>
         <p id="inputMessage">请输入文字...</p>
@@ -541,7 +374,6 @@
     </div>
 </div>
 
-
 <!-- */</script> -->
 
 <!-- =========================================================== -->
@@ -550,31 +382,31 @@
 <!-- <script src="https://cdn.bootcss.com/vue/2.5.13/vue.js"></script> -->
 <!-- <script src='_server/vendor/polyfill.min.js'></script> -->
 <script src='_server/fs.js'></script>
+<script src="_server/thirdparty/Sortable.min.js"></script>
 <script src='_server/editor_util.js'></script>
-<script src='_server/editor_game.js'></script>
+<!-- <script src='_server/editor_game.js'></script> -->
 <script src='_server/editor_file.js'></script>
 <script src='_server/editor_file_unsorted.js'></script>
-<script src='_server/editor_table.js'></script>
-<script src='_server/editor_mode.js'></script>
-<script src='_server/editor_ui.js'></script>
-<script src='_server/editor_mappanel.js'></script>
-<script src='_server/editor_datapanel.js'></script>
-<script src='_server/editor_materialpanel.js'></script>
-<script src='_server/editor_listen.js'></script>
-<script src='_server/editor_legacy.js'></script>
+<script src='_server/editor_list.js'></script>
+<!-- <script src='_server/editor_table.js'></script> -->
+<!-- <script src='_server/editor_mode.js'></script> -->
+<script src='_server/editor_map.js'></script>
+<!-- <script src='_server/editor_ui.js'></script> -->
+<script src='_server/editor_view.js'></script>
+<script src='_server/view_mapPanel.js'></script>
+<script src='_server/view_dataPanel.js'></script>
+<script src='_server/view_scriptPanel.js'></script>
+<script src='_server/view_pluginPanel.js'></script>
+<!-- <script src='_server/editor_mappanel.js'></script> -->
+<!-- <script src='_server/editor_datapanel.js'></script> -->
+<!-- <script src='_server/editor_materialpanel.js'></script> -->
+<!-- <script src='_server/editor_listen.js'></script> -->
+<!-- <script src='_server/editor_legacy.js'></script> -->
 <script src='libs/thirdparty/pixi.min.js'></script>
 <script src='libs/thirdparty/lz-string.min.js'></script>
 <script src='libs/thirdparty/localforage.min.js'></script>
-<script id='mainScript' src='main.js'></script>
 <script src='_server/editor.js'></script>
-<script>
-    editor.init(function () {
-        editor.listen();
-        editor.mode_listen();
-        editor.mobile_listen();
-    });
-    //main.listen();
-</script>
+<script>editor.init()</script>
 
 <!-- hightlight textarea -->
 <script src='_server/editor_multi.js'></script>
@@ -584,12 +416,13 @@
 <script src="_server/blockly/blocks_compressed.js"></script>
 <script src="_server/blockly/javascript_compressed.js"></script>
 <script src="_server/blockly/zh-hans.js"></script>
-<script src='_server/editor_blockly.js'></script>
+<!-- <script src='_server/editor_blockly.js'></script> -->
 <!-- codemirror -->
-<script src="_server/CodeMirror/codeMirror.bundle.min.js"></script>
-<script src="_server/CodeMirror/jshint.min.js"></script>
-<script src="_server/CodeMirror/beautify.min.js"></script>
-<script src="_server/CodeMirror/codeMirror.plugin.min.js"></script>
+<script src='_server/vs/loader.js'></script>
+<!-- <script src="_server/CodeMirror/codeMirror.bundle.min.js"></script> -->
+<!-- <script src="_server/CodeMirror/jshint.min.js"></script> -->
+<!-- <script src="_server/CodeMirror/beautify.min.js"></script> -->
+<!-- <script src="_server/CodeMirror/codeMirror.plugin.min.js"></script> -->
 <!-- thirdparty -->
 <script src="_server/thirdparty/color.all.min.js"></script>
 <script src="_server/thirdparty/awesomplete.min.js"></script>

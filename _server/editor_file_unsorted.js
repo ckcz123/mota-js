@@ -457,20 +457,6 @@ editor_file = function (editor, callback) {
             saveSetting('floorloc', actionList, function (err) {
                 callback([err]);
             });
-        } else {
-            callback([
-                (function () {
-                    var locObj = {};
-                    Object.keys(editor.file.comment._data.floors._data.loc._data).forEach(function (v) {
-                        if (isset(editor.currentFloorData[v][x + ',' + y]))
-                            locObj[v] = editor.currentFloorData[v][x + ',' + y];
-                        else
-                            locObj[v] = null;
-                    });
-                    return locObj;
-                })(),
-                editor.file.comment._data.floors._data.loc,
-                null]);
         }
 
     }
@@ -490,26 +476,6 @@ editor_file = function (editor, callback) {
             saveSetting('floors', actionList, function (err) {
                 callback([err]);
             });
-        } else {
-            callback([
-                (function () {
-                    var locObj = Object.assign({}, editor.currentFloorData);
-                    Object.keys(editor.file.comment._data.floors._data.floor._data).forEach(function (v) {
-                        if (!isset(editor.currentFloorData[v]))
-                        /* locObj[v]=editor.currentFloorData[v];
-                      else */
-                            locObj[v] = null;
-                    });
-                    Object.keys(editor.file.comment._data.floors._data.loc._data).forEach(function (v) {
-                        delete(locObj[v]);
-                    });
-                    delete(locObj.map);
-                    delete(locObj.bgmap);
-                    delete(locObj.fgmap);
-                    return locObj;
-                })(),
-                editor.file.comment._data.floors._data.floor,
-                null]);
         }
     }
     //callback([obj,commentObj,err:String])
@@ -523,50 +489,16 @@ editor_file = function (editor, callback) {
         ]
         为[]时只查询不修改
         */
-        var data_obj = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d;
         checkCallback(callback);
         if (isset(actionList) && actionList.length > 0) {
             saveSetting('data', actionList, function (err) {
                 callback([err]);
             });
-        } else {
-            callback([
-                (function () {
-                    //var locObj=Object.assign({'main':{}},editor.core.data);
-                    var locObj = Object.assign({}, data_obj, {'main': {}});
-                    Object.keys(editor.file.dataComment._data.main._data).forEach(function (v) {
-                        if (isset(editor.main[v]))
-                            locObj.main[v] = data_obj.main[v];
-                        else
-                            locObj.main[v] = null;
-                    });
-                    return locObj;
-                })(),
-                editor.file.dataComment,
-                null]);
         }
     }
     //callback([obj,commentObj,err:String])
 
     ////////////////////////////////////////////////////////////////////
-
-    var fmap = {};
-    var fjson = JSON.stringify(functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a, function (k, v) {
-        if (v instanceof Function) {
-            var id_ = editor.util.guid();
-            fmap[id_] = v.toString();
-            return id_;
-        } else return v
-    }, 4);
-    var fobj = JSON.parse(fjson);
-    editor.file.functionsMap = fmap;
-    editor.file.functionsJSON = fjson;
-    var buildlocobj = function (locObj) {
-        for (var key in locObj) {
-            if (typeof(locObj[key]) !== typeof('')) buildlocobj(locObj[key]);
-            else locObj[key] = fmap[locObj[key]];
-        }
-    };
 
     editor.file.editFunctions = function (actionList, callback) {
         /*actionList:[
@@ -580,15 +512,6 @@ editor_file = function (editor, callback) {
             saveSetting('functions', actionList, function (err) {
                 callback([err]);
             });
-        } else {
-            callback([
-                (function () {
-                    var locObj = JSON.parse(fjson);
-                    buildlocobj(locObj);
-                    return locObj;
-                })(),
-                editor.file.functionsComment,
-                null]);
         }
     }
     //callback([obj,commentObj,err:String])
@@ -822,16 +745,16 @@ editor_file = function (editor, callback) {
             actionList.forEach(function (value) {
                 // 检测null/undefined
                 if (value[2]==null)
-                    eval("delete editor.currentFloorData" + value[1]);
+                    eval("delete editor.map.currentFloorData" + value[1]);
                 else
-                    eval("editor.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
+                    eval("editor.map.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
             });
             editor.file.saveFloorFile(callback);
             return;
         }
         if (file == 'floors') {
             actionList.forEach(function (value) {
-                eval("editor.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
+                eval("editor.map.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));
             });
             editor.file.saveFloorFile(callback);
             return;

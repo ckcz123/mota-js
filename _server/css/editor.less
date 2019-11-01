@@ -1,0 +1,323 @@
+@c-info: #007ACC;
+@c-iChose: #1F8AD2;
+@c-chosen: white;
+@c-unchosen: darkgrey;
+@c-font: #C7C7C7;
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    overflow: hidden;
+}
+
+ul {
+    user-select:none;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+#header {
+    height: 31px;
+    width: 100%;
+    cursor: default;
+    background-color: #444;
+    box-shadow: 0px 3px 3px #222; 
+    overflow: hidden;
+    position: absolute;
+    z-index: 10;
+    #navlist {
+        display: inline-block;
+        padding-inline-start: 60px;
+        li {
+            padding: 5px 12px;
+            height: 21px;
+            margin-inline-start: -5px;
+            color: darkGray;
+            display: inline-block;
+            &:hover { 
+                background-color:#3E3E3E;
+            }
+            &.chosen {
+                color: white;
+                background-color: #333;
+            }
+            a {
+                color: darkGray;
+                text-decoration: none;
+            }
+        }
+    }
+    p {
+        margin: 5px;
+        margin-inline-start: 10%;
+        width:30%;
+        display: inline-block;
+        color: @c-font;
+        text-align: center;
+    }
+}
+
+.mainPanel {
+    width: 100%;
+    top: 31px;
+    bottom: 27px;
+    margin: 0 auto;
+    display: none;
+    position: absolute;
+    &.chosen {
+        display: block;
+    }
+}
+
+.side, .left, .mid, .right {
+    top: 0px;
+    bottom: 0px;
+    position: absolute;
+}
+
+.side {
+    z-index: 8;
+    width: 50px;
+}
+
+.left {
+    .header {
+        font-weight: inherit;
+        font-size: 14px;
+        color: #bbb;
+        margin: 8px 10px;
+        line-height: 36px;
+    }
+    z-index: 6;
+}
+
+.mid {
+    z-index: 4;
+}
+
+.right {
+    z-index: 6;
+    width: 360px;
+    right: 0px;
+}
+
+.container {
+    position: absolute;
+    overflow: auto;
+    &:hover {
+        overflow: auto;
+    }
+    &::-webkit-scrollbar {
+        width: 12px;
+    }
+    &::-webkit-scrollbar-button {
+        display: none;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: rgba(188, 188, 188, 0.5);
+    }
+}
+
+.staticIcon {
+    filter: drop-shadow(1400px 0 0 white);
+    img {
+        transform: translate(-1400px);
+    }
+}
+
+.disable {
+    filter: drop-shadow(1400px 0 0 darkGray);
+}
+
+.inputSet {
+    height: 30px;
+    box-sizing: border-box;
+    margin: 8px;
+    input {
+        height: 20px;
+        width: auto;
+        margin: 0px;
+        padding: 5px 5px;
+        background-color: #555;
+        border-width: 0px;
+        color: #ddd;
+    }
+    .staticIcon {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        margin: -2px -6px;
+        padding: 9px;
+        user-select: none;
+    }
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    height: 18px;
+    min-width: 32px;
+    padding: 0 5px;
+    border: 1px solid #d2d2d2;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #555;
+    -webkit-transition: .1s linear;
+    transition: .1s linear;
+    i {
+        position: absolute;
+        left: 2px;
+        top: 1px;
+        width: 16px;
+        height: 16px;
+        border-radius: 2px;
+        background-color: #d2d2d2;
+        -webkit-transition: .1s linear;
+        transition: .1s linear;
+    }
+    em {
+        position: relative;
+        top: -2px;
+        width: 25px;
+        margin-left: 21px;
+        padding: 0;
+        text-align: center;
+        color: #999;
+        font-style: normal;
+    }
+    &.on {
+        background-color: #0e5483;
+        i {
+            left: 100%;
+            margin-left: -17px;
+        }
+        em {
+            margin-left: 3px;
+            color: #ccc;
+        }
+    }
+}
+
+.badge {
+    height: 18px;
+    line-height: 18px;
+}
+
+.badge-dot {
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border-radius: 50%;
+}
+
+.badge, .badge-dot, .badge-rim {
+    position: relative;
+    display: inline-block;
+    padding: 0 6px;
+    font-size: 12px;
+    text-align: center;
+    background-color: #FF5722;
+    color: #fff;
+    border-radius: 2px;
+}
+
+.keyword {
+    background-color: SaddleBrown;
+}
+
+.menu {
+    display: none;
+    user-select: none;
+    z-index: 20;
+    position: absolute;
+    padding: 5px 0px;
+    background-color: #333;
+    box-shadow: 0px 3px 3px #111;
+    li {
+        padding: 5px 25px;
+        color: darkgrey;
+        &:hover {
+            background-color: @c-info;
+            color: white;
+        }
+    }
+    hr {
+        padding: 0px;
+        border-color: darkgrey;
+        margin: 4px 6px;
+    }
+}
+
+#infoBar {
+    display: block;
+    width: 100%;
+    height: 26px;
+    bottom: 0px;
+    background-color: @c-info;
+    position: absolute;
+    z-index: 10;
+    color: aliceblue;
+    .warning {
+        background-color: firebrick;
+    }
+    ul {
+        height: 100%;
+        display: flex;
+    }
+    #infoRight {
+        margin-left: auto;
+    }
+    span {
+        padding: 2px 5px 0;
+        height: 100%;
+        margin-inline-start: 3px;
+        margin-inline-end: 3px;
+        display: inline-block;
+        &:hover {
+            background-color: @c-iChose;
+        }
+    }
+}
+
+#dataEditor {
+    .left {
+        left: 0;
+        width: 33%;
+    }
+    .mid {
+        left: 33%;
+        width: 33%;
+        // border-left: solid 1px #999;
+        // border-right: solid 1px #999;
+    }
+    .right {
+        right: 0;
+        width: 34%;
+        // border-left: solid 1px #999;
+    }
+    .left, .mid, .right {
+        .header {
+            font-weight: inherit;
+            font-size: 14px;
+            color: #bbb;
+            margin: 8px 10px;
+            line-height: 36px;
+        }
+        .container {
+            background-color: #222;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            top: 45px;
+            li {
+                padding: 2px 18px;
+            }
+        }
+        background-color: #333;
+    }
+}

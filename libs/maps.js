@@ -1604,7 +1604,8 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     }
     if (floorId == core.status.floorId && !block.disable) {
         core.drawBlock(block);
-        core.addGlobalAnimate(block);
+        if (block.event.cls != 'autotile')
+            core.addGlobalAnimate(block);
         core.updateStatusBar();
     }
 }

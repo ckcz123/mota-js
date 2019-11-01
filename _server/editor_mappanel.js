@@ -298,23 +298,33 @@ editor_mappanel_wrapper = function (editor) {
 
         // 检测是否是上下楼
         var thisevent = editor.map[editor.pos.y][editor.pos.x];
+        var extraEvent = editor.dom.extraEvent, parent = extraEvent.parentElement;
         if (thisevent == 0) {
+            parent.removeChild(extraEvent);
+            parent.appendChild(extraEvent);
             editor.dom.extraEvent.style.display = 'block';
             editor.dom.extraEvent.children[0].innerHTML = '绑定出生点为此点';
-        }
-        else if (thisevent.id == 'upFloor') {
+        } else if (thisevent.id == 'upFloor') {
+            parent.removeChild(extraEvent);
+            parent.insertBefore(extraEvent, parent.firstChild);
             editor.dom.extraEvent.style.display = 'block';
             editor.dom.extraEvent.children[0].innerHTML = '绑定上楼事件';
         }
         else if (thisevent.id == 'downFloor') {
+            parent.removeChild(extraEvent);
+            parent.insertBefore(extraEvent, parent.firstChild);
             editor.dom.extraEvent.style.display = 'block';
             editor.dom.extraEvent.children[0].innerHTML = '绑定下楼事件';
         }
         else if (['leftPortal', 'rightPortal', 'downPortal', 'upPortal'].indexOf(thisevent.id) >= 0) {
+            parent.removeChild(extraEvent);
+            parent.insertBefore(extraEvent, parent.firstChild);
             editor.dom.extraEvent.style.display = 'block';
             editor.dom.extraEvent.children[0].innerHTML = '绑定楼传事件';
         }
         else if (thisevent.id == 'specialDoor') {
+            parent.removeChild(extraEvent);
+            parent.insertBefore(extraEvent, parent.firstChild);
             editor.dom.extraEvent.style.display = 'block';
             editor.dom.extraEvent.children[0].innerHTML = '绑定机关门事件';
         } 

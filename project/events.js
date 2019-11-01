@@ -4,7 +4,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 		"加点事件": [
 			{
 				"type": "comment",
-				"text": "通过传参，flag:arg1表示当前应该的加点数值"
+				"text": "通过传参，flag:arg1 表示当前应该的加点数值"
 			},
 			{
 				"type": "choices",
@@ -45,7 +45,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 		"毒衰咒处理": [
 			{
 				"type": "comment",
-				"text": "获得毒衰咒效果，flag:arg1为要获得的类型"
+				"text": "获得毒衰咒效果，flag:arg1 为要获得的类型"
 			},
 			{
 				"type": "switch",

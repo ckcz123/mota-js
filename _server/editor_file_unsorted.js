@@ -452,7 +452,8 @@ editor_file = function (editor, callback) {
         checkCallback(callback);
         if (isset(actionList) && actionList.length > 0) {
             actionList.forEach(function (value) {
-                value[1] = value[1] + "['" + x + "," + y + "']";
+                if(/\['autoEvent'\]\['\d+'\]$/.test(value[1]))value[1]=value[1].replace(/\['\d+'\]$/,function(v){return "['" + x + "," + y + "']"+v})
+                else value[1] = value[1] + "['" + x + "," + y + "']";
             });
             saveSetting('floorloc', actionList, function (err) {
                 callback([err]);
@@ -821,7 +822,13 @@ editor_file = function (editor, callback) {
         if (file == 'floorloc') {
             actionList.forEach(function (value) {
                 // 检测null/undefined
-                if (value[2]==null)
+                if(/\['autoEvent'\]\['\d+,\d+'\]\['\d+'\]$/.test(value[1])){
+                    var tempvalue=value[1].replace(/\['\d+'\]$/,'')
+                    tempvalue="editor.currentFloorData" +tempvalue
+                    tempvalue=tempvalue+'='+tempvalue+'||{}'
+                    eval(tempvalue)
+                }
+                if (value[2]==null && value[0]!=='add')
                     eval("delete editor.currentFloorData" + value[1]);
                 else
                     eval("editor.currentFloorData" + value[1] + '=' + JSON.stringify(value[2]));

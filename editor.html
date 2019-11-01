@@ -73,6 +73,7 @@
                 <select id="selectAppend"></select>
                 <!-- ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48"] -->
                 <input id="appendConfirm" type="button" value="追加"/>
+                <input id="quickAppendConfirm" type="button" value="快速追加"/>
             </p>
             <p>
                 色相:<input id='changeColorInput' type="range" min="0" max="12" step="1" value="0" list="huelists" style="width: 60%;margin-left: 3%;vertical-align: middle">
@@ -98,7 +99,7 @@
         </div>
     </div>
     <div id="left2" class='leftTab' style="z-index:-1;opacity: 0;"><!-- loc -->
-        <h3 class="leftTabHeader">地图选点&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('loc')">配置表格</button>
+        <h3 class="leftTabHeader">地图选点&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.uifunctions.addAutoEvent()">添加自动事件页</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('loc')">配置表格</button>
         </h3>
         <div class="leftTabContent">
             <p id='pos_a6771a78_a099_417c_828f_0a24851ebfce' style="margin-left: 15px">0,0</p>
@@ -192,6 +193,7 @@
                 -->
                 <select id="entryType" disabled="disabled" style="display: none">
                     <option value="event">event</option>
+                    <option value="autoEvent">autoEvent</option>
                     <option value="changeFloor">changeFloor</option>
                     <option value="level">level</option>
                     <option value="shop">shop</option>
@@ -208,13 +210,15 @@
                 <div style="position: relative; display: inline-block; margin-left: 10px">
                     <div class="searchLogo"></div>
                     <input type="text" id="searchBlock" placeholder="搜索图块"/>
-                    <button id = "colorSwitch" class="cpPanel" onclick="openColorFromButton()" style="margin-left:5px">颜色选择器</button>
-                    <div id="colorPanel" class="cpPanel" style="display: none">
-                        <input class="color" id="colorPicker" value="255,215,0,1"/>
-                        <button onclick="confirmColor()">确定</button>
-                    </div>
-                    <button class="cpPanel" onclick="editor_blockly.selectPoint()" style="margin-left:5px">地图选点</button>
                 </div>
+                <div id="colorPanel" class="cpPanel" style="display: none">
+                    <input class="color" id="colorPicker" value="255,215,0,1"/>
+                    <button onclick="confirmColor()">确定</button>
+                </div>
+                <button class="cpPanel" onclick="editor_blockly.selectPoint()" style="margin-left:5px">地图选点</button>
+                <button class="cpPanel" onclick="editor.uievent.searchUsedFlags()" style="margin-left:5px">变量出现位置搜索</button>
+                <input type="checkbox" class="cpPanel" id="blocklyReplace" onchange="editor_blockly.triggerReplace()" style="margin-left: 10px" />
+                <span class="cpPanel" style="margin-left: -4px; font-size: 13px">开启中文名替换</span>
                 <xml id="toolbox" style="display:none">
                 </xml>
             </h3>
@@ -233,6 +237,7 @@
         <input type="checkbox" onclick="editor_multi.toggerLint()" id="lintCheckbox"
                style="vertical-align: bottom;margin-left:6px"/>
         <span style="vertical-align: bottom; margin-left: -3px">语法检查</span>
+        <button onclick="editor_multi.showPlugins()" style="display: none; margin-top: 3px" id="showPlugins">显示云端插件列表</button>
         <textarea id="multiLineCode" name="multiLineCode"></textarea>
     </div>
     <div id="left8" class='leftTab' style="z-index:-1;opacity: 0;"><!-- functions -->
@@ -358,7 +363,7 @@
     </div>
     <div id="menuDiv">
         <div id="midMenu" style="display:none">
-            <div id='addFloorEvent' class="menuitem" style="display:none"><div class="menuitem-content">添加上下楼事件</div></div>
+            <div id='extraEvent' class='menuitem' style="display:none"><div class="menuitem-content"></div></div>
             <div id='chooseThis' class="menuitem"><div class="menuitem-content">选中此点</div></div>
             <div id='chooseInRight' class="menuitem"><div class="menuitem-content">在素材区选中此图块</div></div>
             <div id='copyLoc' class="menuitem"><div class="menuitem-content">复制此事件</div></div>
@@ -521,6 +526,7 @@
                 <option value="#000000">黑色</option>
                 <option value="#FFFFFF">白色</option>
             </select>
+            <select id="uieventUsedFlags" style="margin-left: 10px; display: none" onchange="editor.uievent.doSearchUsedFlags()"></select>
             <button id="uieventNo">关闭</button>
             <button id="uieventYes">确定</button>
         </div>
@@ -528,6 +534,7 @@
         <div id='uieventBody'>
             <canvas class='gameCanvas' id='uievent' width='416' height='416'></canvas>
             <div id="selectPointBox"></div>
+            <div id="uieventUsedFlagList" style="display: none"></div>
         </div>
         <div id="selectPoint">
             <select id="selectPointFloor"></select>

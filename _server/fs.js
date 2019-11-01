@@ -132,7 +132,13 @@
         var data = '';
         data += 'name=' + path;
         postsomething(data, '/listFile', function (err, data) {
-            callback(err, JSON.parse(data))
+            try {
+                data = JSON.parse(data);
+            } catch (e) {
+                err = "Invalid /listFile";
+                data = null;
+            }
+            callback(err, data);
         });
         return;
     }

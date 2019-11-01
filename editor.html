@@ -194,6 +194,7 @@
                 <select id="selectAppend"></select>
                 <!-- ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48"] -->
                 <input id="appendConfirm" type="button" value="追加"/>
+                <input id="quickAppendConfirm" type="button" value="快速追加"/>
             </p>
             <p>
                 色相:<input id='changeColorInput' type="range" min="0" max="12" step="1" value="0" list="huelists" style="width: 60%;margin-left: 3%;vertical-align: middle">
@@ -354,6 +355,7 @@
                 <option value="#000000">黑色</option>
                 <option value="#FFFFFF">白色</option>
             </select>
+            <select id="uieventUsedFlags" style="margin-left: 10px; display: none" onchange="editor.uievent.doSearchUsedFlags()"></select>
             <button id="uieventNo">关闭</button>
             <button id="uieventYes">确定</button>
         </div>
@@ -361,6 +363,7 @@
         <div id='uieventBody'>
             <canvas class='gameCanvas' id='uievent' width='416' height='416'></canvas>
             <div id="selectPointBox"></div>
+            <div id="uieventUsedFlagList" style="display: none"></div>
         </div>
         <div id="selectPoint">
             <select id="selectPointFloor"></select>

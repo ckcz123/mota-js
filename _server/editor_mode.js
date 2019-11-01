@@ -49,7 +49,7 @@ editor_mode = function (editor) {
         editor_mode.actionList.push(action);
     }
 
-    editor_mode.prototype.doActionList = function (mode, actionList) {
+    editor_mode.prototype.doActionList = function (mode, actionList, callback) {
         if (actionList.length == 0) return;
         printf('修改中...');
         var cb = function (objs_) {
@@ -58,6 +58,7 @@ editor_mode = function (editor) {
                 throw (objs_.slice(-1)[0])
             }
             ; printf('修改成功' + (data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.name == 'template' ? '\n\n请注意：全塔属性的name尚未修改，请及时予以设置' : ''));
+            if (callback) callback();
         }
         switch (mode) {
             case 'loc':
@@ -95,9 +96,9 @@ editor_mode = function (editor) {
         }
     }
 
-    editor_mode.prototype.onmode = function (mode) {
+    editor_mode.prototype.onmode = function (mode, callback) {
         if (editor_mode.mode != mode) {
-            if (mode === 'save') editor_mode.doActionList(editor_mode.mode, editor_mode.actionList);
+            if (mode === 'save') editor_mode.doActionList(editor_mode.mode, editor_mode.actionList, callback);
             if (editor_mode.mode === 'nextChange' && mode) editor_mode.showMode(mode);
             if (mode !== 'save') editor_mode.mode = mode;
             editor_mode.actionList = [];

@@ -452,7 +452,8 @@ editor_file = function (editor, callback) {
         checkCallback(callback);
         if (isset(actionList) && actionList.length > 0) {
             actionList.forEach(function (value) {
-                value[1] = value[1] + "['" + x + "," + y + "']";
+                if(/\['autoEvent'\]\['\d+'\]$/.test(value[1]))value[1]=value[1].replace(/\['\d+'\]$/,function(v){return "['" + x + "," + y + "']"+v})
+                else value[1] = value[1] + "['" + x + "," + y + "']";
             });
             saveSetting('floorloc', actionList, function (err) {
                 callback([err]);

@@ -87,6 +87,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 },
     "itemShop": function () {
 	// 道具商店相关的插件
+	// 可在全塔属性-全局商店中使用「道具商店」事件块进行编辑（如果找不到可以在入口方块中找）
 
 	var shopId = null; // 当前商店ID
 	var type = 0; // 当前正在选中的类型，0买入1卖出
@@ -111,11 +112,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.setTextAlign('uievent', 'left');
 		core.setTextBaseline('uievent', 'top');
 		core.fillRect('uievent', 0, 0, 416, 416, 'black');
-		core.ui._uievent_drawBackground({ x: 0, y: 0, width: 416, height: 56 });
-		core.ui._uievent_drawBackground({ x: 0, y: 56, width: 312, height: 56 });
-		core.ui._uievent_drawBackground({ x: 0, y: 112, width: 312, height: 304 });
-		core.ui._uievent_drawBackground({ x: 312, y: 56, width: 104, height: 56 });
-		core.ui._uievent_drawBackground({ x: 312, y: 112, width: 104, height: 304 });
+		core.ui._uievent_drawBackground({ background: 'winskin.png', x: 0, y: 0, width: 416, height: 56 });
+		core.ui._uievent_drawBackground({ background: 'winskin.png', x: 0, y: 56, width: 312, height: 56 });
+		core.ui._uievent_drawBackground({ background: 'winskin.png', x: 0, y: 112, width: 312, height: 304 });
+		core.ui._uievent_drawBackground({ background: 'winskin.png', x: 312, y: 56, width: 104, height: 56 });
+		core.ui._uievent_drawBackground({ background: 'winskin.png', x: 312, y: 112, width: 104, height: 304 });
 		core.setFillStyle('uievent', 'white');
 		core.setStrokeStyle('uievent', 'white');
 		core.fillText("uievent", "购买", 32, 74, 'white', bigFont);

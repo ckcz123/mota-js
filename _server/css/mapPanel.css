@@ -1,0 +1,198 @@
+#mapEditor .side {
+  padding-block-start: 10px;
+  box-shadow: 3px 0px 3px #222;
+  background-color: #444;
+}
+#mapEditor .side li {
+  cursor: pointer;
+  margin: -2px 0px;
+  width: 30px;
+  height: 30px;
+  padding: 10px;
+  filter: drop-shadow(50px 0 0 darkGray);
+}
+#mapEditor .side li:hover {
+  filter: drop-shadow(50px 0 0 white);
+}
+#mapEditor .side img {
+  transform: translate(-50px);
+}
+#mapEditor .side .chosen {
+  filter: drop-shadow(50px 0 0 white);
+}
+#mapLeft {
+  left: 50px;
+  width: 280px;
+  background-color: #333;
+  transition: left 1s;
+}
+#mapLeft.collapse {
+  left: -230px;
+}
+#mapLeft > div {
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+  position: absolute;
+  display: none;
+}
+#mapLeft > div.chosen {
+  display: block;
+}
+#mapLeft ul {
+  margin: 15px 0px;
+}
+#mapLeft li {
+  padding: 4px 2px 4px 15px;
+  color: #C7C7C7;
+}
+#mapLeft #mapExplorer li:hover {
+  background-color: #3E3E3E;
+}
+#mapLeft #mapExplorer li.chosen {
+  background-color: #444;
+}
+#mapLeft .container {
+  left: 5px;
+  right: 2px;
+  bottom: 0;
+  top: 45px;
+}
+#mapLeft #buildingPara {
+  color: #C7C7C7;
+}
+#mapMid {
+  left: 330px;
+  right: 360px;
+  transition: left 1s;
+}
+#mapMid.expand {
+  left: 50px;
+}
+#canvasManager {
+  white-space: nowrap;
+  height: 32px;
+  width: 100%;
+  background-color: #252525;
+}
+#mapToolbar {
+  white-space: nowrap;
+  height: 24px;
+  width: 100%;
+  background-color: #252525;
+  padding-inline-start: 20px;
+  box-shadow: 0px 4px 2px #000;
+}
+#canvasTabList,
+#paintToolbar {
+  display: inline;
+}
+#canvasTabList li,
+#paintToolbar li {
+  cursor: pointer;
+  color: darkGray;
+  display: inline-block;
+}
+#canvasTabList li:hover,
+#paintToolbar li:hover {
+  background-color: #555;
+}
+#canvasTabList li.chosen,
+#paintToolbar li.chosen {
+  color: #C7C7C7;
+  font-weight: bold;
+  background-color: #555;
+}
+#canvasTabList {
+  display: inline;
+}
+#canvasTabList li {
+  padding: 7px 28px 7px 10px;
+}
+#paintToolbar {
+  display: inline;
+}
+#paintToolbar li {
+  padding: 2px 28px 2px 10px;
+}
+#mapViewPort {
+  width: 100%;
+  top: 56px;
+  bottom: 0px;
+  background-color: #1E1E1E;
+  position: absolute;
+}
+#mapEdit {
+  top: 19px;
+  left: 19px;
+  right: 0px;
+  bottom: 0px;
+  overflow: overlay;
+  position: absolute;
+}
+#mapEdit .gameCanvas {
+  position: absolute;
+}
+.markContainer {
+  box-sizing: border-box;
+  overflow: hidden;
+  position: absolute;
+  border-collapse: collapse;
+}
+.markContainer.col {
+  top: 0px;
+  height: 19px;
+  left: 19px;
+  right: 0px;
+}
+.markContainer.col td {
+  min-width: 29px;
+  border: 1px solid white;
+  border-top: 0px;
+  width: 29px;
+}
+.markContainer.row {
+  top: 19px;
+  left: 0px;
+  width: 19px;
+  bottom: 0px;
+}
+.markContainer.row td {
+  min-height: 29px;
+  border: 1px solid white;
+  border-left: 0px;
+  height: 29px;
+}
+.markContainer table {
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.markContainer table td {
+  font-size: 14px;
+  text-align: center;
+  color: white;
+  cursor: crosshair;
+}
+.markContainer table td.chosen {
+  font-weight: bold;
+  background-color: #555;
+}
+#mapRight {
+  background-color: #444;
+  box-shadow: -3px 0px 3px #111;
+}
+#iconLib {
+  position: absolute;
+  width: 435px;
+  height: 620px;
+  left: 5px;
+  top: 5px;
+  overflow: auto;
+}
+#iconImages {
+  overflow: hidden;
+}
+#iconImages img {
+  position: absolute;
+}

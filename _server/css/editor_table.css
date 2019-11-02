@@ -1,0 +1,40 @@
+.etable ul li {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+}
+.etable ul .comment {
+  font-size: 14px;
+  width: 160px;
+  color: #D7D7D7;
+}
+.etable ul .elistInputDiv {
+  display: flex;
+  align-items: center;
+}
+.etable ul select {
+  width: 124px;
+  background-color: #444;
+  border: none;
+  padding: 2px;
+  color: #C7C7C7;
+}
+.etable ul input[type="text"] {
+  background-color: #444;
+  border: none;
+  padding: 2px;
+  color: #C7C7C7;
+  max-width: 120px;
+}
+.etable ul input[type="checkbox"] {
+  display: none;
+}
+.etable ul em {
+  font-size: 14px;
+  font-weight: bold;
+  font-style: normal;
+}
+.etable .editEntry {
+  width: 20px;
+  height: 20px;
+}

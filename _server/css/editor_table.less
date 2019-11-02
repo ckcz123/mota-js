@@ -1,0 +1,47 @@
+@c-font: #C7C7C7;
+
+.etable {
+    ul {
+        li {
+            // background-color: #111;
+            display: flex;
+            justify-content: start;
+            align-items: center;
+        }
+        .comment {
+            font-size: 14px;
+            width: 160px;
+            color: #D7D7D7;
+        }
+        .elistInputDiv {
+            display: flex;
+            align-items: center;
+        }
+        select {
+            width: 124px;
+            background-color: #444;
+            border: none;
+            padding: 2px;
+            color: @c-font;
+        }
+        input[type="text"] {
+            background-color: #444;
+            border: none;
+            padding: 2px;
+            color: @c-font;
+            max-width: 120px;
+        }
+        input[type="checkbox"] {
+            display: none;
+        }
+        em {
+            font-size: 14px;
+            font-weight: bold;
+            font-style: normal;
+        }
+    }
+    .editEntry {
+        width: 20px;
+        height: 20px;
+    }
+}

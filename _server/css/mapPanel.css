@@ -71,11 +71,13 @@
   left: 50px;
 }
 #canvasManager {
+  white-space: nowrap;
   height: 32px;
   width: 100%;
   background-color: #252525;
 }
 #mapToolbar {
+  white-space: nowrap;
   height: 24px;
   width: 100%;
   background-color: #252525;
@@ -88,8 +90,7 @@
 }
 #canvasTabList li,
 #paintToolbar li {
-  cursor: default;
-  padding: 7px 28px 7px 10px;
+  cursor: pointer;
   color: darkGray;
   display: inline-block;
 }
@@ -102,6 +103,18 @@
   color: #C7C7C7;
   font-weight: bold;
   background-color: #555;
+}
+#canvasTabList {
+  display: inline;
+}
+#canvasTabList li {
+  padding: 7px 28px 7px 10px;
+}
+#paintToolbar {
+  display: inline;
+}
+#paintToolbar li {
+  padding: 2px 28px 2px 10px;
 }
 #mapViewPort {
   width: 100%;

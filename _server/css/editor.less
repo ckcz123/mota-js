@@ -133,6 +133,11 @@ ul {
     filter: drop-shadow(1400px 0 0 darkGray);
 }
 
+.icon-f {
+    width: 24px;
+    height: 24px;
+}
+
 .inputSet {
     height: 30px;
     box-sizing: border-box;
@@ -254,7 +259,8 @@ ul {
 }
 
 #infoBar {
-    display: block;
+    display: flex;
+    justify-content: flex-end;
     width: 100%;
     height: 26px;
     bottom: 0px;
@@ -262,12 +268,16 @@ ul {
     position: absolute;
     z-index: 10;
     color: aliceblue;
+    font-size: 14px;
     .warning {
         background-color: firebrick;
     }
     ul {
         height: 100%;
         display: flex;
+    }
+    #infoLeft {
+        flex: 1;
     }
     #infoRight {
         margin-left: auto;

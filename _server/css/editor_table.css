@@ -1,6 +1,7 @@
 .etable ul li {
   display: flex;
   justify-content: start;
+  align-items: center;
 }
 .etable ul .comment {
   font-size: 14px;
@@ -9,6 +10,7 @@
 }
 .etable ul .elistInputDiv {
   display: flex;
+  align-items: center;
 }
 .etable ul select {
   width: 124px;

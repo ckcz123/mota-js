@@ -4,6 +4,8 @@ var editor_list_wrapper = function (editor) {
 
 editor.constructor.prototype.list = class editor_list {
 
+    data = null;
+
     constructor(elm, commentObj, getData) {
         this.body = elm;
         this.commentObj = commentObj;
@@ -44,19 +46,6 @@ editor.constructor.prototype.list = class editor_list {
         </div>\n`;
     }
 
-    toggleCheckbox(e) {
-        e.classList.toggle("on");
-        e.children[0].innerText = e.children[0].innerText == "T" ? "F" : "T";
-        var evt = document.createEvent("HTMLEvents");
-        evt.initEvent("change", false, false);
-        e.parentNode.children[0].dispatchEvent(evt);
-    }
-
-    openCodeEditor(e) {
-        console.log(e);
-        editor.multi.import(e.dataSet);
-    }
-
     scriptEntry(field) {
         let shortField = field.split("']").slice(-2)[0].split("['").slice(-1)[0];
         return /* html */`<img class="icon-f" src="_server/icon/javascript.svg"></img>
@@ -75,11 +64,19 @@ editor.constructor.prototype.list = class editor_list {
     }
 
     gap(shortfield, depth) {
-        return /* html */`<li depth=${depth}>${shortfield}</li>\n`
+        // 初始默认展开
+        return /* html */`<li 
+            depth=${depth}
+            data-type="gap">
+            <i class="codicon codicon-chevron-down"></i>
+            <span>${shortfield}</span>
+        </li>\n`
     }
 
-    li(field, shortField, commentHTMLescape, cobjstr, controlstr, name, depth) {
-        return /* html */`<li depth=${depth}>
+    li(field, shortField, commentHTMLescape, typestr, cobjstr, controlstr, name, depth) {
+        return /* html */`<li 
+            depth=${depth}
+            data-type="${typestr}">
             <span
                 class="comment"
                 title="${commentHTMLescape}\n[${shortField}]"
@@ -88,6 +85,20 @@ editor.constructor.prototype.list = class editor_list {
             ${name}</span>
             <div class="elistInputDiv">${controlstr}</div>
         </li>\n`
+    }
+
+    // 控件的响应函数
+
+    toggleCheckbox(e) {
+        e.classList.toggle("on");
+        e.children[0].innerText = e.children[0].innerText == "T" ? "F" : "T";
+        var evt = document.createEvent("HTMLEvents");
+        evt.initEvent("change", false, false);
+        e.parentNode.children[0].dispatchEvent(evt);
+    }
+
+    openCodeEditor(e) {
+        editor.multi.import(this.data, e.children[0].dataset.field);
     }
     
     /////////////////////////////////////////////////////////////////////////////
@@ -191,8 +202,8 @@ editor.constructor.prototype.list = class editor_list {
                 if (cobj._hide) continue;
                 let node = _this.objToLi(obj, _this.commentObj, field, cfield, vobj, cobj);
                 outstr.push(node);
+                // 不是叶节点时, 插入展开的标记并继续遍历
                 if (!cobj._leaf) {
-                    // 不是叶节点时, 插入展开的标记并继续遍历, 此处可以改成按钮用来添加新项或折叠等
                     recursionParse(field, cfield, vobj, cobj);
                 }
             }
@@ -223,16 +234,17 @@ editor.constructor.prototype.list = class editor_list {
         let shortField = fields.slice(-2)[0].split("['").slice(-1)[0];
         // 完整的内容转义后供悬停查看
         let commentHTMLescape = editor.util.HTMLescape(comment);
-
+        let typestr = cobj._type;
         let cobjstr = Object.assign({}, cobj);
         delete cobjstr._data;
+        delete cobjstr._type;
         // 把cobj塞到span的[cobj]中, 方便绑定事件时取
         cobjstr = editor.util.HTMLescape(JSON.stringify(cobjstr));
 
         let name = cobj["_name"];
         if (!cobj._leaf) return this.gap(shortField, depth);
         let controlstr = this.objToControl(obj, commentObj, field, cfield, vobj, cobj);
-        let outstr = this.li(field, shortField, commentHTMLescape, cobjstr, controlstr, name, depth);
+        let outstr = this.li(field, shortField, commentHTMLescape, typestr, cobjstr, controlstr, name, depth);
         return outstr;
     }
 
@@ -268,8 +280,8 @@ editor.constructor.prototype.list = class editor_list {
 
     update(callback) {
         console.log(this);
-        var objs = this.getData();
-        this.body.innerHTML = this.objToList(objs);
+        this.data = this.getData();
+        this.body.innerHTML = this.objToList(this.data);
         if (Boolean(callback)) callback();
     }
 
@@ -316,7 +328,7 @@ editor.constructor.prototype.list = class editor_list {
     /**
      * 表格的值变化时
      */
-    onchange(obj, commentObj, thisTr, input, field, cobj) {
+    onchange(input, thisLi, field, cobj) {
         var thiseval = null;
         if (input.checked != null) input.value = input.checked;
         try {
@@ -336,17 +348,17 @@ editor.constructor.prototype.list = class editor_list {
     doubleClickCheck = [[null, 0]];
     /**
      * 点击事件代理
-     * @param {Object} e 
+     * @param {Object} e 点击事件
      */
     proxyClickListener(e) {
         for (let i = 0; i < e.path.length; i++) {
             if (e.path[i].classList.contains("switch")) {
                 this.toggleCheckbox(e.path[i]);
             }
-            if (e.path[i].classList.contains("scriptEntry")) {
+            if (e.path[i].dataset.type == "script") {
                 this.openCodeEditor(e.path[i]);
             }
-            if (e.path[i] instanceof HTMLLIElement) {
+            if (e.path[i].tagName == "LI") {
                 let newClick = [e.path[i], new Date().getTime()];
                 let lastClick = this.doubleClickCheck.shift();
                 this.doubleClickCheck.push(newClick);

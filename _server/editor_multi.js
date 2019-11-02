@@ -16,7 +16,7 @@ class editor_multi {
         require(['vs/editor/editor.main'], function() {
             _this.editor = monaco.editor.create(_this.container, {
                 theme: 'vs-dark',
-                mouseWheelScrollSensitivity: 0.2,
+                mouseWheelScrollSensitivity: 0.4,
                 language: 'javascript'
             });
         });
@@ -32,9 +32,11 @@ class editor_multi {
         this.body.style.opacity = 0;
     }
 
-    import() {
-        
+    import(src, path, onchange) {
+        this.editor.setValue(eval("src"+path));
+        this.show();
     }
+
 }
 
 editor.multi = new editor_multi();

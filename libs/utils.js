@@ -13,6 +13,12 @@ function utils() {
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
+    this.obliScan = {
+        'lu': {'x': -1, 'y': -1},
+        'ld': {'x': -1, 'y': 1},
+        'ru': {'x': 1, 'y': 1},
+        'rd': {'x': 1, 'y': -1}
+    };
     this.line = {
         'down': 0,
         'up': 3,

@@ -1,9 +1,9 @@
 "use strict";
 /**
- * view_mapPanel.js 地图编辑界面表现层
+ * view_mappanel.js 地图编辑界面表现层
  */
 
-var view_mapPanel_wrapper = function(editor) {
+var view_mappanel_wrapper = function(editor) {
 
 class mapPanel {
 
@@ -208,7 +208,7 @@ class mapExplorer {
     insertFloor(name, target) {
         var li = document.createElement("li");
         li._value = name;
-        li.innerHTML = `<i class="icon-i icon-file"></i>
+        li.innerHTML = `<i class="codicon codicon-symbol-file"></i>
         <span>${name}</span>`;
         this.list[name] = li;
         if (target) {

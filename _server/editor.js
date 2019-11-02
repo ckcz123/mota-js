@@ -38,11 +38,11 @@ var editor = class Editor {
                     editor.file = editor_file;
                     editor_view_wrapper(editor);
                     editor_map_wrapper(editor, function() {
-                        view_mapPanel_wrapper(editor);
+                        view_mappanel_wrapper(editor);
                     });
-                    view_dataPanel_wrapper(editor);
-                    view_scriptPanel_wrapper(editor);
-                    view_pluginPanel_wrapper(editor);
+                    view_datapanel_wrapper(editor);
+                    view_scriptpanel_wrapper(editor);
+                    view_pluginpanel_wrapper(editor);
                 });
             });
         });
@@ -157,6 +157,7 @@ window.onerror = function (msg, url, lineNo, columnNo, error) {
     return false;
 };
 
+// 兼容
 var main = {
     floors: {},
     log: function (e) {

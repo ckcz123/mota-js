@@ -1,10 +1,10 @@
 "use strict";
 
 /**
- * view_plugin.js 插件管理界面
+ * view_pluginpanel.js 插件管理界面
  */
 
-var view_pluginPanel_wrapper = function(editor) {
+var view_pluginpanel_wrapper = function(editor) {
     
 class pluginPanel {
 

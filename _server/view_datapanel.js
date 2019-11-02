@@ -1,9 +1,9 @@
 "use strict";
 /**
- * view_dataPanel.js 地图编辑界面表现层
+ * view_datapanel.js 数据编辑界面
  */
 
-var view_dataPanel_wrapper = function(editor) {
+var view_datapanel_wrapper = function(editor) {
 
 class dataPanel {
 

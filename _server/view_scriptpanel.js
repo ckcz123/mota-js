@@ -1,10 +1,10 @@
 "use strict";
 
 /**
- * view_scriptPanel.js 脚本编辑界面
+ * view_scriptpanel.js 脚本编辑界面
  */
 
-var view_scriptPanel_wrapper = function(editor) {
+var view_scriptpanel_wrapper = function(editor) {
     
 class scriptPanel {
 
@@ -36,6 +36,21 @@ class scriptPanel {
             },
         );
         this.scriptList.update();
+        this.positionInfo = editor.infoBar.applyBlock("editor");
+        //editor.multi.editor.onMouseDown(this.updatePosition.bind(this));
+    }
+
+    active() {
+        this.positionInfo.show();
+    }
+
+    unactive() {
+        this.positionInfo.hide();
+    }
+
+    updatePosition(e) {
+        console.log(e);
+        this.positionInfo.setContent.call(this.positionInfo, `Ln ${e.target.range.startLineNumber}, Col ${e.target.range.startColumn}`);
     }
 }
 

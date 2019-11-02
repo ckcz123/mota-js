@@ -2405,7 +2405,7 @@ events.prototype._vibrate_update = function (shakeInfo) {
 events.prototype.eventMoveSprite= function(obj, steps, time, callback){
     time = (time || core.values.moveSpeed || 100);
     var step = 0, moveSteps = (steps||[]).filter(function (t) {
-        return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
+        return ['up','down','left','right','forward','backward','ld','lu','rd','ru'].indexOf(t)>=0;
     });
     var nextStep = function(){
         if(step<moveSteps.length){
@@ -2425,9 +2425,10 @@ events.prototype._eventMoveSprite_moving = function(obj, direction, speed, callb
         direction = core.utils.face[obj.nLine || 0];
     }
     var line = core.utils.line[direction];
-    var dx = core.utils.scan[direction].x * core.__BLOCK_SIZE__ * o,
-        dy = core.utils.scan[direction].y * core.__BLOCK_SIZE__ * o;
-    if(o>0 && obj.image.length > line && (!obj.animate || !obj.animate.fixed)){ // 如果固定朝向 也不会转向
+    var scan = core.utils.scan[direction]?core.utils.scan:core.utils.obliScan;
+    var dx = scan[direction].x * core.__BLOCK_SIZE__ * o,
+        dy = scan[direction].y * core.__BLOCK_SIZE__ * o;
+    if(obj.changePattern && o>0 && obj.image && obj.image.length > line && (!obj.animate || !obj.animate.fixed) && line){ // 如果固定朝向 也不会转向
         obj.changePattern(null, line);
     }
     obj.addMoveInfo(dx, dy, speed, callback, info);
@@ -2658,6 +2659,15 @@ events.prototype.canUseQuickShop = function (shopId) {
 
 ////// 设置角色行走图 //////
 events.prototype.setHeroIcon = function (name, noDraw) {
+    var idx = name.indexOf('.png');
+    if(idx>0)name = name.substr(0, idx);
+    core.status.hero.loc.name = name;
+    core.setFlag("heroIcon", name);
+    if(!noDraw){
+        core.status.hero.loc.notify("change", {name:name, line:core.utils.line[core.getHeroLoc('direction')]})
+    }
+    return;
+
     name = core.getMappedName(name);
     var img = core.material.images.images[name];
     if (!img) return;

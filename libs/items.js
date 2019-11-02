@@ -59,7 +59,8 @@ items.prototype.getItemEffect = function (itemId, itemNum) {
         var curr_hp = core.status.hero.hp;
         if (itemId in this.itemEffect) {
             try {
-                eval(this.itemEffect[itemId]);
+                for (var i = 0; i < itemNum; ++i)
+                    eval(this.itemEffect[itemId]);
             }
             catch (e) {
                 main.log(e);
@@ -423,4 +424,15 @@ items.prototype.quickLoadEquip = function (index) {
     this._realLoadEquip_playSound();
 
     core.drawTip("成功换上" + index + "号套装");
+}
+
+////// 获得装备直接增加的属性数据 //////
+items.prototype.getEquippedStatus = function (name) {
+    var value = 0;
+    core.status.hero.equipment.forEach(function (v) {
+        if (!v || !(core.material.items[v] || {}).equip) return;
+        if (core.material.items[v].equip.percentage) return;
+        value += core.material.items[v].equip[name] || 0;
+    });
+    return value;
 }

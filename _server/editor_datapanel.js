@@ -123,6 +123,20 @@ editor_datapanel_wrapper = function (editor) {
     ///////////////////////////////////////////////////////////////////////
 
 
+    // 添加自动事件页，无需双击
+    editor.uifunctions.addAutoEvent = function () {
+        if (editor_mode.mode != 'loc') return false;
+        var newid = '2';
+        var ae = editor.currentFloorData.autoEvent[editor_mode.pos.x + ',' + editor_mode.pos.y];
+        if (ae != null) {
+            var testid;
+            for (testid = 2; Object.hasOwnProperty.call(ae, testid); testid++);
+            newid = testid + '';
+        }
+        editor_mode.addAction(['add', "['autoEvent']['" + newid + "']", null]);
+        editor_mode.onmode('save');
+    }
+
 
 
 
@@ -640,10 +654,42 @@ editor_datapanel_wrapper = function (editor) {
                     printe(err);
                     throw (err)
                 }
-                printe('追加素材成功，请F5刷新编辑器，或继续追加当前素材');
+                printf('追加素材成功，你可以继续追加其他素材，最后再刷新以显示在素材区');
                 editor.dom.sprite.style.height = (editor.dom.sprite.height = (editor.dom.sprite.height + ysize)) + "px";
                 editor.dom.spriteCtx.putImageData(dt, 0, 0);
             });
+        }
+
+        var quickAppendConfirm = document.getElementById('quickAppendConfirm');
+        quickAppendConfirm.onclick = function () {
+            var value = editor.dom.selectAppend.value;
+            if (value != 'enemys' && value != 'enemy48' && value != 'npcs' && value != 'npc48')
+                return printe("只有怪物或NPC才能快速导入！");
+            var ysize = value.endsWith('48') ? 48 : 32;
+            if (editor.dom.sourceCtx.canvas.width != 128 || editor.dom.sourceCtx.canvas.height != 4 * ysize)
+                return printe("只有 4*4 的素材图片才可以快速导入！");
+
+            var dt = editor.dom.spriteCtx.getImageData(0, 0, editor.dom.sprite.width, editor.dom.sprite.height);
+            editor.dom.sprite.style.height = (editor.dom.sprite.height = (editor.dom.sprite.height + 3 * ysize)) + "px";
+            editor.dom.spriteCtx.putImageData(dt, 0, 0);
+            if (editor.dom.sprite.width == 64) { // 两帧
+                editor.dom.spriteCtx.drawImage(editor.dom.sourceCtx.canvas, 32, 0, 64, 4 * ysize, 0, editor.dom.sprite.height - 4 * ysize, 64, 4 * ysize);
+            } else { // 四帧
+                editor.dom.spriteCtx.drawImage(editor.dom.sourceCtx.canvas, 0, 0, 128, 4 * ysize, 0, editor.dom.sprite.height - 4 * ysize, 128, 4 * ysize);
+            }
+
+            dt = editor.dom.spriteCtx.getImageData(0, 0, editor.dom.sprite.width, editor.dom.sprite.height);
+            var imgbase64 = editor.dom.sprite.toDataURL().split(',')[1];
+            fs.writeFile('./project/images/' + editor_mode.appendPic.imageName + '.png', imgbase64, 'base64', function (err, data) {
+                if (err) {
+                    printe(err);
+                    throw (err)
+                }
+                printf('快速追加素材成功，你可以继续追加其他素材，最后再刷新以显示在素材区');
+                editor.dom.sprite.style.height = (editor.dom.sprite.height = (editor.dom.sprite.height + ysize)) + "px";
+                editor.dom.spriteCtx.putImageData(dt, 0, 0);
+            });
+
         }
     }
 

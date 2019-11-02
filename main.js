@@ -2,7 +2,7 @@ function main() {
 
     //------------------------ 用户修改内容 ------------------------//
 
-    this.version = "2.6.3"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+    this.version = "2.6.4"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
     this.useCompress = false; // 是否使用压缩文件
     // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
@@ -79,7 +79,7 @@ function main() {
     };
     this.mode = 'play';
     this.loadList = [
-        'loader', 'control', 'utils', 'items', 'icons','sprite', 'scenes', 'maps', 'enemys', 'events', 'actions', 'data', 'ui', 'core'
+        'loader', 'control', 'utils', 'items', 'icons','sprite', 'scenes', 'maps', 'enemys', 'events', 'actions', 'data', 'ui', 'extensions', 'core'
     ];
     this.pureData = [ 
         'data', 'enemys', 'icons', 'maps', 'items', 'functions', 'events', 'plugins', 'sprite',
@@ -189,8 +189,8 @@ function main() {
     this.floors = {}
     this.canvas = {};
 
-    this.__VERSION__ = "2.6.3";
-    this.__VERSION_CODE__ = 63;
+    this.__VERSION__ = "2.6.4";
+    this.__VERSION_CODE__ = 78;
 }
 
 main.prototype.init = function (mode, callback) {
@@ -231,7 +231,7 @@ main.prototype.init = function (mode, callback) {
             main.loadFloors(function() {
                 var coreData = {};
                 ["dom", "statusBar", "canvas", "images", "tilesets", "materials",
-                "animates", "bgms", "sounds", "floorIds", "floors"].forEach(function (t) {
+                    "animates", "bgms", "sounds", "floorIds", "floors"].forEach(function (t) {
                     coreData[t] = main[t];
                 })
                 main.core.init(coreData, callback);
@@ -267,14 +267,14 @@ main.prototype.loadJs = function (dir, loadList, callback) {
 }
 
 ////// 加载某一个JS文件 //////
-main.prototype.loadMod = function (dir, modName, callback) {
+main.prototype.loadMod = function (dir, modName, callback, onerror) {
     var script = document.createElement('script');
     var name = modName;
     script.src = dir + '/' + modName + (this.useCompress?".min":"") + '.js?v=' + this.version;
-    main.dom.body.appendChild(script);
     script.onload = function () {
         callback(name);
     }
+    main.dom.body.appendChild(script);
 }
 
 ////// 动态加载所有楼层（剧本） //////

@@ -146,6 +146,9 @@ editor_game_wrapper = function (editor, main, core) {
         });
         editor.currentFloorId = core.status.floorId;
         editor.currentFloorData = core.floors[core.status.floorId];
+        // 补出缺省的数据
+        editor.currentFloorData.autoEvent = editor.currentFloorData.autoEvent || {};
+        //
         for (var ii = 0, name; name = ['bgmap', 'fgmap'][ii]; ii++) {
             var mapArray = editor.currentFloorData[name];
             if (!mapArray || JSON.stringify(mapArray) == JSON.stringify([])) {//未设置或空数组
@@ -173,6 +176,18 @@ editor_game_wrapper = function (editor, main, core) {
           callback([data,err]);
         }); */
         callback([editor.core.floorIds, null]);
+    }
+
+    editor_game.prototype.doCoreFunc = function (funcname) {
+        return core[funcname].apply(core, Array.prototype.slice.call(arguments, 1));
+    }
+
+    editor_game.prototype.getEnemy = function (id) {
+        return core.material.enemys[id];
+    }
+
+    editor_game.prototype.getFirstData = function () {
+        return core.firstData;
     }
 
     editor.constructor.prototype.game = new editor_game();

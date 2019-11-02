@@ -258,11 +258,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					},
 					"_data": "该图块是否不可通行；true代表不可通行，false代表可通行，null代表使用系统缺省值"
 				},
-				"canBreak": {
+				"script": {
 					"_leaf": true,
-					"_type": "checkbox",
-					"_bool": "bool",
-					"_data": "该图块是否可被破墙或地震"
+					"_type": "textarea",
+					"_string": true,
+					"_lint": true,
+					"_data": "触碰到该图块时自动执行的脚本内容；此脚本会在该点的触发器执行前执行"
 				},
 				"cannotOut": {
 					"_leaf": true,
@@ -275,6 +276,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "textarea",
 					"_range": "thiseval==null||(thiseval instanceof Array)",
 					"_data": "该图块的不可入方向\n可以在这里定义不能朝哪个方向进入该图块，可以达到悬崖之类的效果\n例如 [\"down\"] 代表不能从该图块的上方点朝向下进入此图块\n此值对背景层、事件层、前景层上的图块均有效"
+				},
+				"canBreak": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_bool": "bool",
+					"_data": "该图块是否可被破墙或地震"
 				},
 				"animate": {
 					"_leaf": true,
@@ -435,6 +442,24 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_event": "event",
 							"_data": "该点的可能事件列表，可以双击进入事件编辑器。"
 						},
+						"autoEvent": {
+							"_type": "object",
+							"_leaf": false,
+							"_action": function (args) {
+								args.vobj=args.vobj||{};
+								for(var ii=0;ii<2;ii++){
+									args.vobj[ii]=args.vobj[ii]||null;
+								}
+							},
+							"_data": function (key) {
+								return {
+									"_leaf": true,
+									"_type": "event",
+									"_event": "autoEvent",
+									"_data": "自动事件页"
+								}
+							}
+						},
 						"changeFloor": {
 							"_leaf": true,
 							"_type": "event",
@@ -464,7 +489,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_type": "textarea",
 							"_range": "thiseval==null||(thiseval instanceof Array)",
 							"_data": "该点不可通行的方向 \n 可以在这里定义该点不能前往哪个方向，可以达到悬崖之类的效果\n例如 [\"up\", \"left\"] 代表该点不能往上和左走"
-						}
+						},
 					}
 				}
 			}
@@ -496,6 +521,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 			"afterBattle": {},
 			"afterGetItem": {},
 			"afterOpenDoor": {},
+			"autoEvent": {},
 			"cannotMove": {}
 		}
 	}

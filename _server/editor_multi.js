@@ -121,6 +121,7 @@ editor_multi = function () {
             }
             codeEditor.setValue(tstr || '');
         }
+        document.getElementById('showPlugins').style.display = editor_mode.mode == 'plugins' ? 'block': 'none';
         editor_multi.show();
         return true;
     }
@@ -184,6 +185,11 @@ editor_multi = function () {
         // ----- 自动格式化
         _format();
         setvalue(codeEditor.getValue() || '');
+    }
+
+    editor_multi.showPlugins = function () {
+        if (editor.isMobile && !confirm("你确定要跳转到云端插件列表吗？")) return;
+        window.open("https://h5mota.com/plugins/", "_blank");
     }
 
     var multiLineArgs = [null, null, null];

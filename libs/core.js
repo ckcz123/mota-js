@@ -18,17 +18,15 @@ function core() {
         'ground': null,
         'items': {},
         'enemys': {},
-        'icons': {}
+        'icons': {},
     }
     this.timeout = {
-        'tipTimeout': null,
         'turnHeroTimeout': null,
         'onDownTimeout': null,
         'sleepTimeout': null,
     }
     this.interval = {
         'heroMoveInterval': null,
-        "tipAnimate": null,
         'onDownInterval': null,
     }
     this.animateFrame = {
@@ -48,6 +46,12 @@ function core() {
             'nodes': [],
             'data': null,
             'fog': null,
+        },
+        "tips": {
+            'time': 0,
+            'offset': 0,
+            'list': [],
+            'lastSize': 0,
         },
         "asyncId": {}
     }
@@ -172,6 +176,7 @@ function core() {
             'ui': null,
             'interval': null,
         },
+        'autoEvents': [],
         'textAttribute': {
             'position': "center",
             "offset": 0,
@@ -225,7 +230,9 @@ core.prototype.init = function (coreData, callback) {
     core.loader._load(function () {
         core.sprite._load();
         core.scenes._load();
-        core._afterLoadResources(callback);
+        core.extensions._load(function () {
+            core._afterLoadResources(callback);
+        });
     });
 }
 
@@ -235,11 +242,37 @@ core.prototype._init_flags = function () {
     core.firstData = core.clone(core.data.firstData);
     this._init_sys_flags();
 
-    core.dom.versionLabel.innerHTML = core.firstData.version;
-    core.dom.logoLabel.innerHTML = core.firstData.title;
+    core.dom.versionLabel.innerText = core.firstData.version;
+    core.dom.logoLabel.innerText = core.firstData.title;
     document.title = core.firstData.title + " - HTML5魔塔";
-    document.getElementById("startLogo").innerHTML = core.firstData.title;
+    document.getElementById("startLogo").innerText = core.firstData.title;
     (core.firstData.shops||[]).forEach(function (t) { core.initStatus.shops[t.id] = t; });
+    // 初始化自动事件
+    for (var floorId in core.floors) {
+        var autoEvents = core.floors[floorId].autoEvent || {};
+        for (var loc in autoEvents) {
+            var locs = loc.split(","), x = parseInt(locs[0]), y = parseInt(locs[1]);
+            for (var index in autoEvents[loc]) {
+                var autoEvent = core.clone(autoEvents[loc][index]);
+                if (autoEvent && autoEvent.data) {
+                    autoEvent.floorId = floorId;
+                    autoEvent.x = x;
+                    autoEvent.y = y;
+                    autoEvent.index = index;
+                    autoEvent.symbol = floorId + "@" + x + "@" + y + "@" + index;
+                    core.initStatus.autoEvents.push(autoEvent);
+                }
+            }
+        }
+    }
+    core.initStatus.autoEvents.sort(function (e1, e2) {
+        if (e1.priority != e2.priority) return e2.priority - e1.priority;
+        if (e1.floorId != e2.floorId) return core.floorIds.indexOf(e1.floorId) - core.floorIds.indexOf(e2.floorId);
+        if (e1.x != e2.x) return e1.x - e2.x;
+        if (e1.y != e2.y) return e1.y - e2.y;
+        return e1.index - e2.index;
+    })
+
     core.maps._setFloorSize();
     // 初始化怪物、道具等
     core.material.enemys = core.enemys.getEnemys();

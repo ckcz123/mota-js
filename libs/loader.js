@@ -19,7 +19,7 @@ loader.prototype._setStartProgressVal = function (val) {
 
 ////// 设置加载进度条提示文字 //////
 loader.prototype._setStartLoadTipText = function (text) {
-    core.dom.startTopLoadTips.innerHTML = text;
+    core.dom.startTopLoadTips.innerText = text;
 }
 
 loader.prototype._load = function (callback) {

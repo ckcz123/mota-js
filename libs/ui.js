@@ -487,6 +487,9 @@ ui.prototype.drawTip = function (text, id, clear) {
         }
     }
     core.animateFrame.tips.list.push(one);
+    if (core.animateFrame.tips.list.length > 3) {
+        core.animateFrame.tips.list.shift();
+    }
 }
 
 ui.prototype._drawTip_drawOne = function (one, offset) {

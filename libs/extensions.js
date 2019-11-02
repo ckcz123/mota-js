@@ -9,6 +9,7 @@ function extensions() {
 }
 
 extensions.prototype._load = function (callback) {
+    if (main.replayChecking) return callback();
     if (!window.fs) {
         this._loadJs('_server/fs.js', function () {
             core.extensions._listExtensions(callback);

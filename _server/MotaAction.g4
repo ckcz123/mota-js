@@ -52,7 +52,7 @@ level_m
     :   '等级提升' BGNL? Newline levelCase+ BEND
     
 
-/* level_mexpression
+/* level_m
 tooltip : 升级事件
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e7%bb%8f%e9%aa%8c%e5%8d%87%e7%ba%a7%ef%bc%88%e8%bf%9b%e9%98%b6%2f%e5%a2%83%e7%95%8c%e5%a1%94%ef%bc%89
 var code = '[\n'+levelCase_0+']\n';

@@ -70,11 +70,18 @@ utils.prototype.replaceText = function (text, need, times) {
 utils.prototype.calValue = function (value, prefix, need, times) {
     if (!core.isset(value)) return null;
     if (typeof value === 'string') {
-        value = value.replace(/status:([a-zA-Z0-9_]+)/g, "core.getStatus('$1')");
-        value = value.replace(/item:([a-zA-Z0-9_]+)/g, "core.itemCount('$1')");
-        value = value.replace(/flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getFlag('$1', 0)");
-        value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
-        value = value.replace(/global:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getGlobal('$1', 0)");
+        if (value.indexOf(':') >= 0) {
+            if (value.indexOf('status:') >= 0)
+                value = value.replace(/status:([a-zA-Z0-9_]+)/g, "core.getStatus('$1')");
+            if (value.indexOf('item:') >= 0)
+                value = value.replace(/item:([a-zA-Z0-9_]+)/g, "core.itemCount('$1')");
+            if (value.indexOf('flag:') >= 0)
+                value = value.replace(/flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getFlag('$1', 0)");
+            if (value.indexOf('switch:' >= 0))
+                value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
+            if (value.indexOf('global:') >= 0)
+                value = value.replace(/global:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getGlobal('$1', 0)");
+        }
         return eval(value);
     }
     if (value instanceof Function) {
@@ -633,7 +640,11 @@ utils.prototype.getCookie = function (name) {
 ////// 设置statusBar的innerHTML，会自动斜体和放缩，也可以增加自定义css //////
 utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     if (!core.statusBar[name]) return;
-    if (typeof value == 'number') value = this.formatBigNumber(value);
+    var isNumber = false;
+    if (typeof value == 'number') {
+        value = this.formatBigNumber(value);
+        isNumber = true;
+    }
     // 判定是否斜体
     var italic = /^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(value);
     var style = 'font-style: ' + (italic ? 'italic' : 'normal') + '; ';
@@ -641,8 +652,12 @@ utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     var length = this.strlen(value) || 1;
     style += 'font-size: ' + Math.min(1, 7 / length) + 'em; ';
     if (css) style += css;
-    core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'></span>";
-    core.statusBar[name].children[0].innerText = value;
+    if (isNumber) {
+        core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'>" + value + "</span>";
+    } else {
+        core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'></span>";
+        core.statusBar[name].children[0].innerText = value;
+    }
 }
 
 utils.prototype.strlen = function (str) {

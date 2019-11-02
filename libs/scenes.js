@@ -112,6 +112,17 @@ baseScene.prototype.update = function(timeDelta){
     })
 }
 
+
+///// 突出某一层 其他层全部半透明 exclude为额外（不在透明列表范围内）
+scenes.prototype.emphasizeMapLayer = function(name, alpha, exclude){
+    exclude = exclude || [];
+    for(var n in this.mapScene.layersTable){
+        if(exclude.indexOf(n)<0 && n!=name)
+            this.mapScene.layersTable[n].alpha = alpha;
+    }
+}
+
+
 baseScene.prototype.refresh = function(){
     this.children.forEach(function(c){c.refresh();});
     this.layers.forEach(function(r){r.refresh();});
@@ -219,20 +230,21 @@ scenes.prototype._load = function(){
     this.mainScene = this.getNewScene();
 
     this.mapScene = this.getNewScene('map');
-    this.statusScene = this.getNewScene('status');
+    //this.statusScene = this.getNewScene('status');
 
     // TODO : 更多系统场景（状态栏、工具栏窗口化）
     this.mainScene.addChildScene(this.mapScene);
-    this.mainScene.addChildScene(this.statusScene);
+    // this.mainScene.addChildScene(this.statusScene);
 
     this.mapScene.addLayer('back', core.getNewLayerSprite(),0);
     this.mapScene.addLayer('bg', core.getNewLayerSprite(),1);
     this.mapScene.addLayer('event', core.getNewLayerSprite(),2);
     this.mapScene.addLayer('fg', core.getNewLayerSprite(),3);
+    this.mapScene.addLayer('number', core.getNewLayerSprite(),4);
 
-    this.statusScene.addLayer('back', core.getNewLayerSprite(), 1)
-    this.statusScene.addLayer('data', core.getNewLayerSprite(), 2)
-    this.statusScene.addLayer('animate', core.getNewLayerSprite(), 3)
+    //this.statusScene.addLayer('back', core.getNewLayerSprite(), 1)
+    //this.statusScene.addLayer('data', core.getNewLayerSprite(), 2)
+    //this.statusScene.addLayer('animate', core.getNewLayerSprite(), 3)
 
 
     ///// ----- 伤害依然使用canvas 但是离屏绘制

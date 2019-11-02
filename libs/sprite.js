@@ -1,7 +1,8 @@
 "use strict";
 
-var SSPrite = PIXI.Sprite;
+var SSprite = PIXI.Sprite;
 var PSprite = PIXI.AnimatedSprite;
+var TSprite = PIXI.TilingSprite;
 var SText = PIXI.Text;
 var Container = PIXI.Container;
 var Texture = PIXI.Texture;
@@ -42,20 +43,18 @@ function canvasLayer(ctx){
 function subject(){
 }
 
-
 ///// 文字精灵
 function textSprite(config){
     this._init(config);
 }
 
-function spriteObserver(sobj){
-}
 
 
 ///// ----- 资源管理 -----
 sprite.prototype._init = function(){
     // example:
     this.sprite = sprite_90f36752_8815_4be8_b32b_d7fad1d0542e;
+    this.tilesetStartOffset = 10000;
     
     // 兼容原来的部分图片并减少图片大小 如果是以下尺寸的精灵 将会附着到原有图片上 而非sprite上
     // todo: 如果允许可以让作者自定义类型
@@ -399,6 +398,30 @@ sprite.prototype._rearrangementOldtype = function(delSprite){
 }
 
 
+///// 通过ID 获取sprite信息 如果存在
+sprite.prototype.getSpriteInfo = function(name){
+    var texture = this.textures[name];
+    if(!texture && /^X\d+$/.test(name)){
+        var id = parseInt(name.substring(1));
+
+        core.tilesets = core.tilesets || [];
+        var startOffset = this.tilesetStartOffset;
+        for (var i in core.tilesets) {
+            var imgName = core.tilesets[i];
+            var img = core.material.images.tilesets[imgName];
+            var width = Math.floor(img.width / 32), height = Math.floor(img.height / 32);
+            if (id >= startOffset && id < startOffset + width * height) {
+                var x = (id - startOffset) % width, y = parseInt((id - startOffset) / width);
+                this.textures[name] = [[new Texture(Texture.from(img), new Rectangle(x*core.__BLOCK_SIZE__, y*core.__BLOCK_SIZE__, core.__BLOCK_SIZE__,core.__BLOCK_SIZE__))]]
+                return this.textures[name];
+            }
+            startOffset += this.tilesetStartOffset;
+        }
+    }
+    return texture;
+}
+
+
 ////// 依据行列状态 获取一个精灵图的frame 返回img x y w h //////
 sprite.prototype.getSpriteFrame = function(name, frame, line){
     var info = this.sprite[name];
@@ -416,24 +439,45 @@ sprite.prototype.getSpriteFrame = function(name, frame, line){
 
 ///// 获取一个常驻的精灵对象 支持一系列操作 /////
 sprite.prototype.getSpriteObj = function(name){
-    var texture = this.textures[name];//this.sprite[name];
-    if(!texture && name.indexOf('X')==0){
-        // TODO: 地图贴图的图块 特殊处理
-    }
+    var texture = this.getSpriteInfo(name);//this.sprite[name];
     if(!texture) return this.getEmptySprite(name); //不存在的素材 返回空（作为容器存在）
     return new spriteBase(texture,{name:name});
 }
+
+// 从材质集生成sprite对象
+sprite.prototype.getSpriteFromTextures = function(texture, name){
+    return new spriteBase(texture,{name:name});
+}
+
+
+// 从图片、canvas 获取材质
+sprite.prototype.getTextureFrom = function(src){
+    return Texture.from(src);
+}
+
 
 sprite.prototype.getEmptySprite = function(name){
     return new Container();
 }
 sprite.prototype.getSpriteFromImage = function(image){
-    return SSPrite.from(image);
+    return SSprite.from(image);
 }
+
+
+sprite.prototype.getTillingSprite = function(name, width, height){
+    var info = this.getSpriteInfo(name);
+    if(info)
+        return new TSprite(info[0][0], width, height);
+}
+
+sprite.prototype.getTextSprite = function(text, style){
+    return new SText(text, style);
+}
+
 
 sprite.prototype.getSpriteFromFrameImage = function(image, frame, width){
     var t = Texture.from(image, new Rectangle(0,0,width,image.height));
-    return SSPrite.from(image);
+    return SSprite.from(image);
 }
 
 sprite.prototype.createCanvasLayer = function(canvas){
@@ -561,10 +605,10 @@ sprite.prototype.becomeSubject = function(sobj){
 
 ///// 纯canvas的渲染层 远景、前景图/伤害/
 // 适用于静态canvas UI、图片
-canvasLayer.prototype = Object.create(SSPrite.prototype);
+canvasLayer.prototype = Object.create(SSprite.prototype);
 canvasLayer.prototype.constructor = canvasLayer;
 canvasLayer.prototype._init = function(canvas){
-    SSPrite.call(this, Texture.from(canvas));
+    SSprite.call(this, Texture.from(canvas));
 }
 canvasLayer.prototype.updateTexture = function(canvas){
     if(canvas)this.textrure = Texture.from(canvas);
@@ -755,18 +799,271 @@ spriteLayer.prototype.reloadCanvas = function(){
     })
 }
 
+
+Container.prototype.setPositionWithBlock = function(block){
+    this.x = ~~((block.x + this.anchor.x) * core.__BLOCK_SIZE__ );
+    this.y = ~~((block.y + this.anchor.y) * core.__BLOCK_SIZE__);
+    if(this.offset){
+        this.x += this.offset.x || 0;
+        this.y += this.offset.y || 0;
+    }
+}
+
+
+///// 添加移动信息 速度的单位是像素/帧 —— 帧率由画布决定
+SSprite.prototype.addMoveInfo = function(dx, dy, speed, callback, info){
+    info = info || {};
+    var dist = Math.abs(dx+dy);
+    this.move = {
+        'sx':this.x, 'sy':this.y,
+        'realX':this.x, 'realY': this.y,
+        'destX':this.x + dx, 'destY': this.y + dy,
+        'dx':dx, 'dy': dy,
+        'xDir': dx>0?1:dx<0?-1:0,
+        'yDir': dy>0?1:dy<0?-1:0,
+        'speed': speed, 'lag': 0,
+        'animate': true,
+        'startStep': false,
+        'callback': callback,
+    };
+    for(var i in info){
+        this.move[i] = info[i];
+    }
+    if(this.move.animate){
+        this._maxWaitCount = 6;
+    }else{
+        this._maxWaitCount = -1;
+    }
+}
+
+///// 添加特效信息
+SSprite.prototype.setAlpha = function(alpha){
+    this.alpha = alpha;
+    // this.special = this.special || {};
+    // this.special['globalAlpha'] = alpha;
+}
+///// 添加
+SSprite.prototype.setBlendMode = function(mode){
+    this.blendMode = mode;
+    //    this.special = this.special || {};
+//    this.special['globalCompositeOperation'] = mode;
+}
+
+
+///// 停止移动
+SSprite.prototype.stopMoving = function(){
+    if(this.move)this.move.stop = true;
+}
+
+///// 是否处于移动中
+SSprite.prototype.isMoving = function(){
+    return this.move && !this.move.stop && !this.move.done;
+}
+
+///// 是否处于高空状态
+
+SSprite.prototype.isFlying = function(){
+    return this.zIndex >= 1000000;
+}
+
+SSprite.prototype.isStoping = function(){
+    return !this.isMoving();
+}
+
+///// 刚刚结束一步的移动
+SSprite.prototype.endOneStep = function(){
+    return this.move && !this.move.stop && this.move.done;
+}
+
+
+SSprite.prototype.getSpeed = function(){
+    return this.move.speed;
+}
+
+//////
+SSprite.prototype.moveAction = function(timeDelta){
+    if(this.isMoving()){
+        var step = Math.max(this.move.speed*timeDelta, 0); // 至少移动1像素
+        if(this.move.dx < 0){
+            this.move.realX = Math.max(this.move.realX - step, this.move.destX);
+        }
+        if(this.move.dx > 0){
+            this.move.realX = Math.min(this.move.realX + step, this.move.destX);
+        }
+        if(this.move.dy < 0){
+            this.move.realY = Math.max(this.move.realY - step, this.move.destY);
+        }
+        if(this.move.dy > 0){
+            this.move.realY = Math.min(this.move.realY + step, this.move.destY);
+        }
+        if(this.move.bigmap){ // 是否有大地图偏移
+            core.scrollBigMap(~~this.move.realX - this.x, ~~this.move.realY - this.y);
+            // core.setCentralViewPoint(this.x,this.y);
+        }
+        this.x = ~~this.move.realX;
+        this.y = ~~this.move.realY;
+        if(this.x == this.move.destX && this.y == this.move.destY){
+            this.move.done = true;
+        }
+        return true;
+    }
+}
+
+///// 是否需要更新？ —— 有动作信息的才更新
+SSprite.prototype.needUpdate = function(){
+    return !!this.animate || !!this.move;
+}
+
+///// 更新sprite动作
+SSprite.prototype.updateAction = function(timeDelta){
+    if(!this.needUpdate())return;
+    if(this.updatePattern)this.updatePattern();
+    this.moveAction(timeDelta);
+    if(this.animateAction)this.animateAction(timeDelta);
+}
+
+
+SSprite.prototype.isAnimating = function(){
+    return this.animate && !this.animate.stop && !this.animate.auto;
+}
+
+////// timeDelta —— 其实就是帧差 如果无误应该是1 但是如果卡了或者机器比较垃圾就会大于1
+PSprite.prototype.animateAction = function(timeDelta){
+    if(this.isAnimating()){
+        timeDelta = timeDelta || 1;
+        //// todo 单sprite的动画行为分开注册
+        // 帧动画
+        if(timeDelta + this.animate.lastTime > this.animate.speed){
+            this.animate.lastTime = 0;
+            if(this.animate.onetime){ //// 一次性动画有： 渐变 、 小动作、 开门
+                if(this.playFrameOneTime()){
+                    this.stopAnimate();
+                    if(this.animate.callback){
+                        this.animate.callback();
+                    }
+                    delete this.animate.onetime;
+                }
+            }else{
+                this.playFrame();
+            }
+        }else{
+            this.animate.lastTime += timeDelta;
+        }
+
+
+        // 渐变动画
+        if(this.animate.fade && this.animate.lastFadeTime + timeDelta > this.animate.fadeFreq){
+            this.animate.lastFadeTime = 0;
+            if(this.playFading()){ //// 渐变只进行一次就callback
+                this.stopAnimate();
+                if(this.animate.callback){
+                    this.animate.callback();
+                }
+            }
+        }else{
+            this.animate.lastFadeTime += timeDelta;
+        }
+
+
+        // 绑定贴图动画
+    }
+}
+///// 更新模式，在走路过程中 只要等待到一定帧数就会加一步 如果停下来了就会复位
+PSprite.prototype.updatePattern = function() {
+    if(this.isStoping())
+        this._stopCount++;
+    if(!this.isAnimating() && this._maxWaitCount > 0){
+        this._waitCount += 1;
+        if(this._waitCount>=this._maxWaitCount){
+            this._waitCount = 0;
+            if(this.isMoving()){
+                this.playFrame();
+            }
+            else if(this._stopCount>=this._maxWaitCount){
+                this.resetFrame();
+                this._stopCount = 0;
+            }
+        }
+    }
+}
+
+/////
+PSprite.prototype.resetFrame = function(){
+    this.nFrame = 0;
+    this.gotoAndStop(this.nFrame);
+}
+
+///// 复位： changePattern(0)
+PSprite.prototype.changePattern = function(nFrame, nLine){
+    if(core.isset(nFrame))this.nFrame = nFrame % this.totalFrames;
+    if(core.isset(nLine))this.nLine = nLine % this.image.length;
+    this.textures = this.image[this.nLine]
+    this.gotoAndStop(this.nFrame);
+}
+
+
+PSprite.prototype.hasStepAnimate = function(){
+    return this.move.animate;
+}
+
+// TODO: https://www.w3school.com.cn/tags/canvas_globalcompositeoperation.asp
+
+
+///// 添加帧动画自动播放信息 speed是帧率
+PSprite.prototype.addAnimateInfo = function(info){
+    info = info || {};
+    if(this.animate && !this.animate.stop){ // 如果已有动画且在播放 将添加到其尾部(所以添加一次性动画一定要先stop
+        var lastCall = this.animate.callback;
+        var self = this;
+        this.animate.callback = function(){
+            if(lastCall)lastCall();
+            self.addAnimateInfo(info);
+        }
+        return;
+    }
+    if(info.onetime)info.frame =info.inverse?this.totalFrames-1:0;
+    this.changePattern(info.frame, info.line);
+    // 几个会覆盖的信息：包括callback（即，一次性动画用掉callback后，原来的就没了
+    this.animate = {
+        'lastTime': 0,
+        'stop': info.stop || false,
+        'speed': info.speed || 20,
+        'callback': info.callback || null,
+    }
+    if(info.fade)this.animate.lastFadeTime = 0;
+    for(var it in info){
+        this.animate[it] = info[it];
+    }
+    this.animationSpeed = this.animate.speed;
+    if(this.animate.auto){ // 自动播放 无需轮询??
+        this.play();
+    }else{
+        this.loop = false;
+    }
+}
+
+///// 停止动画
+PSprite.prototype.stopAnimate = function(){
+    if(this.animate)
+        this.animate.stop = true;
+    this.gotoAndStop(this.nFrame);
+}
+
+
 ///// ----- 对象 ------ 从数据初始化，数据为位置信息和原始信息
 
 spriteBase.prototype = Object.create(PSprite.prototype);
 spriteBase.prototype.constructor = spriteBase;
 
 spriteBase.prototype._init = function(texture, extra){
-    PSprite.call(this, texture[0], false);
-    this.name = extra.name;
-    this.image = texture;
-    this.info = {
-        'line': texture.length,
-        'frame': texture[0].length,
+    if(texture){
+        PSprite.call(this, texture[0], false);
+        this.name = extra.name;
+        this.image = texture;
+        this.info = {
+            'line': texture.length,
+            'frame': texture[0].length,
+        }
     }
     this.x = -100; this.y = -100; // 不立即显示
     this.anchor.set(0.5, 1);
@@ -810,250 +1107,6 @@ spriteBase.prototype.playFading = function() {
     }
 }
 
-///// 添加移动信息 速度的单位是像素/帧 —— 帧率由画布决定
-spriteBase.prototype.addMoveInfo = function(dx, dy, speed, callback, info){
-    info = info || {};
-    var dist = Math.abs(dx+dy);
-    this.move = {
-        'sx':this.x, 'sy':this.y,
-        'realX':this.x, 'realY': this.y,
-        'destX':this.x + dx, 'destY': this.y + dy,
-        'dx':dx, 'dy': dy,
-        'xDir': dx>0?1:dx<0?-1:0,
-        'yDir': dy>0?1:dy<0?-1:0,
-        'speed': speed, 'lag': 0,
-        'animate': true,
-        'startStep': false,
-        'callback': callback,
-    };
-    for(var i in info){
-        this.move[i] = info[i];
-    }
-    if(this.move.animate){
-        this._maxWaitCount = 6;
-    }else{
-        this._maxWaitCount = -1;
-    }
-}
-
-///// 添加特效信息
-spriteBase.prototype.setAlpha = function(alpha){
-    this.alpha = alpha;
-    // this.special = this.special || {};
-    // this.special['globalAlpha'] = alpha;
-}
-///// 添加
-spriteBase.prototype.setBlendMode = function(mode){
-    this.blendMode = mode;
-    //    this.special = this.special || {};
-//    this.special['globalCompositeOperation'] = mode;
-}
-
-// TODO: https://www.w3school.com.cn/tags/canvas_globalcompositeoperation.asp
-
-
-///// 添加帧动画自动播放信息 speed是帧率
-spriteBase.prototype.addAnimateInfo = function(info){
-    info = info || {};
-    if(this.animate && !this.animate.stop){ // 如果已有动画且在播放 将添加到其尾部(所以添加一次性动画一定要先stop
-        var lastCall = this.animate.callback;
-        var self = this;
-        this.animate.callback = function(){
-            if(lastCall)lastCall();
-            self.addAnimateInfo(info);
-        }
-        return;
-    }
-    if(info.onetime)info.frame =info.inverse?this.totalFrames-1:0;
-    this.changePattern(info.frame, info.line);
-    // 几个会覆盖的信息：包括callback（即，一次性动画用掉callback后，原来的就没了
-    this.animate = {
-        'lastTime': 0,
-        'stop': info.stop || false,
-        'speed': info.speed || 20,
-        'callback': info.callback || null,
-    }
-    if(info.fade)this.animate.lastFadeTime = 0;
-    for(var it in info){
-        this.animate[it] = info[it];
-    }
-    this.animationSpeed = this.animate.speed;
-    if(this.animate.auto){ // 自动播放 无需轮询??
-        this.play();
-    }else{
-        this.loop = false;
-    }
-}
-
-///// 停止动画
-spriteBase.prototype.stopAnimate = function(){
-    if(this.animate)
-        this.animate.stop = true;
-    this.gotoAndStop(this.nFrame);
-}
-
-///// 停止移动
-spriteBase.prototype.stopMoving = function(){
-    if(this.move)this.move.stop = true;
-}
-
-/////
-spriteBase.prototype.resetFrame = function(){
-    this.nFrame = 0;
-    this.gotoAndStop(this.nFrame);
-}
-
-///// 复位： changePattern(0)
-spriteBase.prototype.changePattern = function(nFrame, nLine){
-    if(core.isset(nFrame))this.nFrame = nFrame % this.totalFrames;
-    if(core.isset(nLine))this.nLine = nLine % this.image.length;
-    this.textures = this.image[this.nLine]
-    this.gotoAndStop(this.nFrame);
-}
-
-
-spriteBase.prototype.hasStepAnimate = function(){
-    return this.move.animate;
-}
-
-///// 是否处于移动中
-spriteBase.prototype.isMoving = function(){
-    return this.move && !this.move.stop && !this.move.done;
-}
-
-///// 是否处于高空状态
-
-spriteBase.prototype.isFlying = function(){
-    return this.zIndex >= 1000000;
-}
-
-spriteBase.prototype.isStoping = function(){
-    return !this.isMoving();
-}
-
-///// 刚刚结束一步的移动
-spriteBase.prototype.endOneStep = function(){
-    return this.move && !this.move.stop && this.move.done;
-}
-
-
-spriteBase.prototype.getSpeed = function(){
-    return this.move.speed;
-}
-
-
-Container.prototype.setPositionWithBlock = function(block){
-    this.x = block.x * core.__BLOCK_SIZE__ + core.__HALFBLOCK_SIZE__ ;
-    this.y = (block.y+1) * core.__BLOCK_SIZE__;
-}
-
-//////
-spriteBase.prototype.moveAction = function(timeDelta){
-    if(this.isMoving()){
-        var step = Math.max(this.move.speed*timeDelta, 0); // 至少移动1像素
-        if(this.move.dx < 0){
-            this.move.realX = Math.max(this.move.realX - step, this.move.destX);
-        }
-        if(this.move.dx > 0){
-            this.move.realX = Math.min(this.move.realX + step, this.move.destX);
-        }
-        if(this.move.dy < 0){
-            this.move.realY = Math.max(this.move.realY - step, this.move.destY);
-        }
-        if(this.move.dy > 0){
-            this.move.realY = Math.min(this.move.realY + step, this.move.destY);
-        }
-        if(this.move.bigmap){ // 是否有大地图偏移
-            core.scrollBigMap(~~this.move.realX - this.x, ~~this.move.realY - this.y);
-            // core.setCentralViewPoint(this.x,this.y);
-        }
-        this.x = ~~this.move.realX;
-        this.y = ~~this.move.realY;
-        if(this.x == this.move.destX && this.y == this.move.destY){
-            this.move.done = true;
-        }
-        return true;
-    }
-}
-
-///// 是否需要更新？ —— 有动作信息的才更新
-spriteBase.prototype.needUpdate = function(){
-    return this.animate || this.move;
-}
-
-///// 更新sprite动作
-spriteBase.prototype.updateAction = function(timeDelta){
-    if(!this.needUpdate())return;
-    this.updatePattern();
-    this.moveAction(timeDelta);
-    this.animateAction(timeDelta);
-}
-
-///// 更新模式，在走路过程中 只要等待到一定帧数就会加一步 如果停下来了就会复位
-spriteBase.prototype.updatePattern = function() {
-    if(this.isStoping())
-        this._stopCount++;
-    if(!this.isAnimating() && this._maxWaitCount > 0){
-        this._waitCount += 1;
-        if(this._waitCount>=this._maxWaitCount){
-            this._waitCount = 0;
-            if(this.isMoving()){
-                this.playFrame();
-            }
-            else if(this._stopCount>=this._maxWaitCount){
-                this.resetFrame();
-                this._stopCount = 0;
-            }
-        }
-    }
-}
-
-
-spriteBase.prototype.isAnimating = function(){
-    return this.animate && !this.animate.stop && !this.animate.auto;
-}
-
-////// timeDelta —— 其实就是帧差 如果无误应该是1 但是如果卡了或者机器比较垃圾就会大于1
-spriteBase.prototype.animateAction = function(timeDelta){
-    if(this.isAnimating()){
-        timeDelta = timeDelta || 1;
-        //// todo 单sprite的动画行为分开注册
-        // 帧动画
-        if(timeDelta + this.animate.lastTime > this.animate.speed){
-            this.animate.lastTime = 0;
-            if(this.animate.onetime){ //// 一次性动画有： 渐变 、 小动作、 开门
-                if(this.playFrameOneTime()){
-                    this.stopAnimate();
-                    if(this.animate.callback){
-                        this.animate.callback();
-                    }
-                    delete this.animate.onetime;
-                }
-            }else{
-                this.playFrame();
-            }
-        }else{
-            this.animate.lastTime += timeDelta;
-        }
-
-
-        // 渐变动画
-        if(this.animate.fade && this.animate.lastFadeTime + timeDelta > this.animate.fadeFreq){
-            this.animate.lastFadeTime = 0;
-            if(this.playFading()){ //// 渐变只进行一次就callback
-                this.stopAnimate();
-                if(this.animate.callback){
-                    this.animate.callback();
-                }
-            }
-        }else{
-            this.animate.lastFadeTime += timeDelta;
-        }
-
-
-        // 绑定贴图动画
-    }
-}
 
 ///// 绘制到指定位置 (x
 spriteBase.prototype.drawToCanvas = function(ctx,bias){
@@ -1068,6 +1121,17 @@ spriteBase.prototype.drawToMap = function(ctx,x,y,w,h){
     ctx.drawImage(this.image, this.info.x+this.nFrame*this.info.width, this.info.y+this.nLine*this.info.height, this.info.width, this.info.height, destX,destY,w||this.info.width,h || this.info.height);
 }
 
+
+textSprite.prototype = Object.create(SText.prototype);
+textSprite.prototype.constructor = textSprite;
+textSprite.prototype._init = function (config) {
+    SText.call('',config||{});
+    this.fText = config.text || null;
+}
+
+
+
+
 //////  ----- 观察者：sprite  被观察者： block（以及所有可能会用到sprite的游戏数据对象）
 // 使用方法，将block变成一个subject，当block发生变化时，通过notify通知sprite
 // 应用目的：
@@ -1075,15 +1139,15 @@ spriteBase.prototype.drawToMap = function(ctx,x,y,w,h){
 // 2. 由被观察者决定如何进行sprite的行动
 
 subject.prototype._init = function(sobj){ // sobj: 被观察者
-// private:
-    var observers = []; // 观察者
-    var observe_actions = core.control.observerAction; // 提醒信息
-// interface:
-    this.observers = function(){return observers}
-    this.observe_actions = function(){return observe_actions}
-    this.subject = function(){return sobj;}
-}
-
+    // private:
+        var observers = []; // 观察者
+        var observe_actions = core.control.observerAction; // 提醒信息
+    // interface:
+        this.observers = function(){return observers}
+        this.observe_actions = function(){return observe_actions}
+        this.subject = function(){return sobj;}
+    }
+    
 // 使用notify的规范：
 // 1. 所有参数要保持和注册的函数参数一致
 // 2. 如果有回调函数callback，需要将其写在第一个参数的字典中
@@ -1100,19 +1164,21 @@ subject.prototype.notify = function(type, params){
         }
         var t = type;
         arguments[0] = this;
-        for (var i in observers) {
-            observe_actions[t].apply(observers[i], arguments);
-        }
+        var arg = arguments;
+        observers.forEach(function(o){
+            observe_actions[t].apply(o, arg);
+        });
     }
 }
 
 subject.prototype.hasObserver = function(name){
-    return this.observers().indexOf(name)>=0;
+    return this.observers().find(function(o){return o===name || o.name && o.name==name});
 }
 
 subject.prototype.addObserver = function(obj, info) {
     var observe_actions = this.observe_actions();
     var observers = this.observers();
+    // if(observers.find(function(o){return o===obj || o.name&& o.name==obj.name}))return;// 不重复添加
     observers.push(obj);
     obj.subject = this;
     info = info || {};
@@ -1140,9 +1206,4 @@ subject.prototype.remove = function(name){
     }
 }
 
-textSprite.prototype = Object.create(SText.prototype);
-textSprite.prototype.constructor = textSprite;
-textSprite.prototype._init = function (config) {
-    SText.call('',config||{});
-    this.fText = config.text || null;
-}
+

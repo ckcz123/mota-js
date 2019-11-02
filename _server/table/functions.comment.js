@@ -96,7 +96,7 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				},
 				"afterPassNet": {
 					"_leaf": true,
-					"_type": "textarea",
+					"_type": "script",
 					"_lint": true,
 					"_data": "经过特殊地形后的事件"
 				},

@@ -2084,7 +2084,7 @@ num如果设置大于0，则生成一个[0, num-1]之间的数；否则生成一
 即先生成一个真随机数，根据该数来推进伪随机的种子，这样就可以放心调用core.rand()啦。
 
 
-core.readFile(success, error)
+core.readFile(success, error, accept)
 读取一个本地文件内容。success和error分别为读取成功或失败的回调函数。
 iOS平台暂不支持读取文件操作。
 

@@ -761,7 +761,7 @@ utils.prototype.__next_rand = function (_rand) {
 }
 
 ////// 读取一个本地文件内容 //////
-utils.prototype.readFile = function (success, error, readType) {
+utils.prototype.readFile = function (success, error, accept, readType) {
 
     core.platform.successCallback = success;
     core.platform.errorCallback = error;
@@ -800,6 +800,7 @@ utils.prototype.readFile = function (success, error, readType) {
             else core.platform.fileReader.readAsDataURL(core.platform.fileInput.files[0]);
             core.platform.fileInput.value = '';
         }
+        if (accept) core.platform.fileInput.accept = accept;
     }
 
     core.platform.fileInput.click();

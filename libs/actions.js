@@ -2103,7 +2103,7 @@ actions.prototype._clickSyncSave_readFile = function () {
         if (obj.version != core.firstData.version) return alert("游戏版本不一致！");
         if (!obj.data) return alert("无效的存档！");
         core.control._syncLoad_write(obj.data);
-    });
+    }, null, ".h5save");
 }
 
 actions.prototype._clickSyncSave_replay = function () {

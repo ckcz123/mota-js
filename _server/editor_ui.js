@@ -111,11 +111,6 @@ editor_ui_wrapper = function (editor) {
         if (editor_multi.id != "" || editor_blockly.id != "")
             return;
 
-        // 禁止快捷键的默认行为
-        if (e.ctrlKey && [89, 90, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
-            e.preventDefault();
-        if (e.altKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1)
-            e.preventDefault();
         //Ctrl+z 撤销上一步undo
         if (e.keyCode == 90 && e.ctrlKey && editor.uivalues.preMapData && editor.uivalues.currDrawData.pos.length && selectBox.isSelected()) {
             editor.map = JSON.parse(JSON.stringify(editor.uivalues.preMapData.map));
@@ -153,22 +148,10 @@ editor_ui_wrapper = function (editor) {
             }
             return;
         }
-        //ctrl + 0~9 切换到快捷图块
-        if (e.ctrlKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1) {
-            editor.setSelectBoxFromInfo(JSON.parse(JSON.stringify(editor.uivalues.shortcut[e.keyCode] || 0)));
-            return;
-        }
-        //alt + 0~9 改变快捷图块
-        if (e.altKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1) {
-            var infoToSave = JSON.stringify(editor.info || 0);
-            if (infoToSave == JSON.stringify({})) return;
-            editor.uivalues.shortcut[e.keyCode] = JSON.parse(infoToSave);
-            printf('已保存该快捷图块, ctrl + ' + (e.keyCode - 48) + ' 使用.')
-            core.setLocalStorage('shortcut', editor.uivalues.shortcut);
-            return;
-        }
+
         var focusElement = document.activeElement;
-        if (!focusElement || focusElement.tagName.toLowerCase() == 'body') {
+        if (!focusElement || focusElement.tagName.toLowerCase() == 'body'
+        || focusElement.id == 'selectFloor') {
             // Ctrl+C, Ctrl+X, Ctrl+V
             if (e.ctrlKey && e.keyCode == 67 && !selectBox.isSelected()) {
                 e.preventDefault();
@@ -223,6 +206,20 @@ editor_ui_wrapper = function (editor) {
                 editor.info = {};
                 return;
             }
+            //alt + 0~9 改变快捷图块
+            if (e.altKey && [48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1) {
+                var infoToSave = JSON.stringify(editor.info || 0);
+                if (infoToSave == JSON.stringify({})) return;
+                editor.uivalues.shortcut[e.keyCode] = JSON.parse(infoToSave);
+                printf('已保存该快捷图块, 数字键 ' + (e.keyCode - 48) + ' 使用.')
+                core.setLocalStorage('shortcut', editor.uivalues.shortcut);
+                return;
+            }
+            //ctrl + 0~9 切换到快捷图块
+            if ([48, 49, 50, 51, 52, 53, 54, 55, 56, 57].indexOf(e.keyCode) !== -1) {
+                editor.setSelectBoxFromInfo(JSON.parse(JSON.stringify(editor.uivalues.shortcut[e.keyCode] || 0)));
+                return;
+            }
             switch (e.keyCode) {
                 // WASD
                 case 87: editor.moveViewport(0, -1); break;
@@ -256,7 +253,7 @@ editor_ui_wrapper = function (editor) {
             "双击地图：选中对应点的素材\n" +
             "右键地图：弹出菜单栏\n" +
             "Alt+0~9：保存当前使用的图块\n" +
-            "Ctrl+0~9：选中保存的图块\n" +
+            "0~9：选中保存的图块\n" +
             "Ctrl+Z / Ctrl+Y：撤销/重做上次绘制\n" +
             "Ctrl+S：事件与脚本编辑器的保存并退出\n" +
             "双击事件编辑器：长文本编辑/脚本编辑/地图选点/UI绘制预览"

@@ -81,6 +81,12 @@ utils.prototype.calValue = function (value, prefix, need, times) {
                 value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
             if (value.indexOf('global:') >= 0)
                 value = value.replace(/global:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getGlobal('$1', 0)");
+            if (value.indexOf('enemy:')>=0)
+                value = value.replace(/enemy:([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)/g, "core.material.enemys['$1'].$2");
+            if (value.indexOf('blockId:')>=0)
+                value = value.replace(/blockId:(\d+),(\d+)/g, "core.getBlockId($1, $2)");
+            if (value.indexOf('blockCls:')>=0)
+                value = value.replace(/blockCls:(\d+),(\d+)/g, "core.getBlockCls($1, $2)");
         }
         return eval(value);
     }

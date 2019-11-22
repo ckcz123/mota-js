@@ -2593,6 +2593,46 @@ return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
+//这一条不会被antlr识别,总是会被归到idString_e
+idString_3_e
+    :   '怪物' IdString '的' EnemyId_List
+
+
+/* idString_3_e
+colour : this.idstring_eColor
+default : ['greenSlime',"攻击"]
+//todo 将其output改成'idString_e'
+var code = 'enemy:'+IdString_0+'.'+EnemyId_List_0;
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
+//这一条不会被antlr识别,总是会被归到idString_e
+idString_4_e
+    :   '图块ID:' Int ',' Int
+
+
+/* idString_4_e
+colour : this.idstring_eColor
+default : [0,0]
+var code = 'blockId:'+Int_0+','+Int_1;
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
+//这一条不会被antlr识别,总是会被归到idString_e
+idString_5_e
+    :   '图块类别:' Int ',' Int
+
+
+/* idString_5_e
+colour : this.idstring_eColor
+default : [0,0]
+var code = 'blockCls:'+Int_0+','+Int_1;
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
 evFlag_e
     :   '独立开关' Letter_List
 
@@ -2744,6 +2784,10 @@ Id_List
     :   '变量' | '状态' | '物品' | '独立开关' | '全局存储'
     /*Id_List ['flag','status','item', 'switch', 'global']*/;
 
+EnemyId_List
+    :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'属性'|'名称'
+    /*EnemyId_List ['hp','atk','def','money','experience','point','special','name']*/;
+
 //转blockly后不保留需要加"
 EvalString
     :   Equote_double (ESC_double | ~["\\])* Equote_double
@@ -2804,6 +2848,9 @@ this.evisitor.mapColor=175;
 delete(this.block('negate_e').inputsInline);
 this.block('idString_1_e').output='idString_e';
 this.block('idString_2_e').output='idString_e';
+this.block('idString_3_e').output='idString_e';
+this.block('idString_4_e').output='idString_e';
+this.block('idString_5_e').output='idString_e';
 this.block('evFlag_e').output='idString_e';
 */
 
@@ -3779,7 +3826,7 @@ MotaActionFunctions.pattern.replaceStatusList = [
   ["mana", "魔力"],
   ["money", "金币"],
   ["experience", "经验"],
-  ["steps", "步数"]
+  ["steps", "步数"],
 ];
 
 MotaActionFunctions.pattern.replaceItemList = [
@@ -3833,6 +3880,17 @@ MotaActionFunctions.pattern.replaceItemList = [
   ["jumpShoes", "跳跃靴"],
 ];
 
+MotaActionFunctions.pattern.replaceEnemyList = [
+  // 保证顺序！
+  ["name", "名称"],
+  ["atk", "攻击"],
+  ["def", "防御"],
+  ["money", "金币"],
+  ["experience", "经验"],
+  ["point", "加点"],
+  ["special", "属性"],
+];
+
 MotaActionFunctions.disableReplace = false;
 
 MotaActionFunctions.replaceToName = function (str) {
@@ -3852,6 +3910,16 @@ MotaActionFunctions.replaceToName = function (str) {
     return map[b] ? ("物品：" + map[b]) : b;
   }).replace(/item:/g, "物品：");
   str = str.replace(/flag:/g, "变量：").replace(/switch:/g, "独立开关：").replace(/global:/g, "全局存储：");
+
+  map = {}; list = [];
+  MotaActionFunctions.pattern.replaceEnemyList.forEach(function (v) {
+    map[v[0]] = v[1]; list.push(v[0]);
+  });
+  str = str.replace(new RegExp("enemy:([a-zA-Z0-9_]+).(" + list.join("|") + ")", "g"), function (a, b, c) {
+    return map[c] ? ("怪物：" + b + "：" + map[c]) : c;
+  }).replace(/enemy:/g, "怪物：");
+
+  str = str.replace(/blockId:/g, "图块ID：").replace(/blockCls:/g, "图块类别：");
   return str;
 }
 
@@ -3872,6 +3940,17 @@ MotaActionFunctions.replaceFromName = function (str) {
     return map[b] ? ("item:" + map[b]) : b;
   }).replace(/物品[:：]/g, "item:");
   str = str.replace(/变量[:：]/g, "flag:").replace(/独立开关[:：]/g, "switch:").replace(/全局存储[:：]/g, "global:");
+
+  map = {}; list = [];
+  MotaActionFunctions.pattern.replaceEnemyList.forEach(function (v) {
+    map[v[1]] = v[0]; list.push(v[1]);
+  });
+  str = str.replace(new RegExp("(enemy:|怪物[:：])([a-zA-Z0-9_]+)[:：](" + list.join("|") + ")", "g"), function (a, b, c, d) {
+    return map[d] ? ("enemy:" + c + ":" + map[d]) : d;
+  }).replace(/怪物[:：]/g, "enemy:");
+
+  str = str.replace(/图块I[dD][:：]/g, "blockId:").replace(/图块类别[:：]/g, "blockCls:");
+
   return str;
 }
 

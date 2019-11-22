@@ -74,23 +74,31 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	core.updateEnemys();
 },
-        "win": function(reason, norank) {
+        "win": function (reason, norank, noexit) {
+	// 游戏获胜事件
+	// 请注意，成绩统计时是按照hp进行上传并排名
+	// 可以先在这里对最终分数进行计算，比如将2倍攻击和5倍黄钥匙数量加到分数上
+	// core.status.hero.hp += 2 * core.getRealStatus('atk') + 5 * core.itemCount('yellowKey');
+
+	// 如果不退出，则临时存储数据
+	if (noexit) {
+		core.status.extraEvent = core.clone(core.status.event);
+	}
+
 	// 游戏获胜事件 
 	core.ui.closePanel();
 	var replaying = core.isReplaying();
 	if (replaying) core.stopReplay();
-	core.waitHeroToStop(function() {
-		core.clearMap('all'); // 清空全地图
-		core.deleteAllCanvas(); // 删除所有创建的画布
-		core.dom.gif2.innerHTML = "";
-		// 请注意：
-		// 成绩统计时是按照hp进行上传并排名，因此光在这里改${status:hp}是无效的
-		// 如需按照其他的的分数统计方式，请先将hp设置为你的得分
-		// core.setStatus('hp', ...);
+	core.waitHeroToStop(function () {
+		if (!noexit) {
+			core.clearMap('all'); // 清空全地图
+			core.deleteAllCanvas(); // 删除所有创建的画布
+			core.dom.gif2.innerHTML = "";
+		}
 		core.drawText([
-			"\t[" + (reason||"恭喜通关") + "]你的分数是${status:hp}。"
+			"\t[" + (reason || "恭喜通关") + "]你的分数是${status:hp}。"
 		], function () {
-			core.events.gameOver(reason||'', replaying, norank);
+			core.events.gameOver(reason || '', replaying, norank);
 		})
 	});
 },

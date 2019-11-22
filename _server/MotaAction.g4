@@ -1724,15 +1724,16 @@ return code;
 */;
 
 win_s
-    :   '游戏胜利,结局' ':' EvalString? '不计入榜单' Bool Newline
+    :   '游戏胜利,结局' ':' EvalString? '不计入榜单' Bool '不结束游戏' Bool Newline
     
 
 /* win_s
 tooltip : win: 获得胜利, 该事件会显示获胜页面, 并重新游戏
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=win%EF%BC%9A%E8%8E%B7%E5%BE%97%E8%83%9C%E5%88%A9
-default : ["",false]
+default : ["",false, false]
 Bool_0 = Bool_0?', "norank": 1':'';
-var code = '{"type": "win", "reason": "'+EvalString_0+'"'+Bool_0+'},\n';
+Bool_1 = Bool_1?', "noexit": 1':'';
+var code = '{"type": "win", "reason": "'+EvalString_0+'"'+Bool_0+Bool_1+'},\n';
 return code;
 */;
 
@@ -3397,7 +3398,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "win":
       this.next = MotaActionBlocks['win_s'].xmlText([
-        data.reason,data.norank?true:false,this.next]);
+        data.reason,data.norank?true:false,data.noexit?true:false,this.next]);
       break;
     case "lose":
       this.next = MotaActionBlocks['lose_s'].xmlText([

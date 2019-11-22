@@ -648,6 +648,7 @@ utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     // 判定是否斜体
     var italic = /^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(value);
     var style = 'font-style: ' + (italic ? 'italic' : 'normal') + '; ';
+    style += 'text-shadow: #000 1px 0 0, #000 0 1px 0, #000 -1px 0 0, #000 0 -1px 0; ';
     // 判定是否需要缩放
     var length = this.strlen(value) || 1;
     style += 'font-size: ' + Math.min(1, 7 / length) + 'em; ';

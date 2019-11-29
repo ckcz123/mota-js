@@ -315,6 +315,8 @@
 
 从V2.6开始，也可以使用`global:xxx`代表全局存储（和存档无关的存储）。
 
+从V2.6.5开始，也可以使用`enemy:id:atk`来获得某个怪物的属性，`blockId:x,y`来获得某个点的图块ID，`equip:x`来获得某个装备孔的装备ID。
+
 ``` js
 [
     "你当前的攻击力是${status:atk}, 防御是${status:def}，坐标是(${status:x},${status:y})",
@@ -322,15 +324,21 @@
     "你的红黄蓝钥匙总数为${item:yellowKey+item:blueKey+item:redKey}",
     "你访问某个老人的次数为${flag:man_times}",
     "当前的存档编号是${global:saveIndex}",
+    "绿色史莱姆的攻击力是${enemy:greenSlime:atk}",
+    "(2,3)点的图块ID是${blockId:2,3}，图块类型是${blockCls:2,3}",
+    "装备孔0的当前装备ID是${equip:0}",
 ]
 ```
 
-![](img/events/7.jpg)
+![](img/events/7.png)
 
 - `status:xxx` 获取勇士属性时只能使用如下几个：hp（生命值），atk（攻击力），def（防御力），mdef（魔防值），money（金币），experience（经验），x（勇士的横坐标），y（勇士的纵坐标），direction（勇士的方向）。
 - `item:xxx` 中的xxx为道具ID。所有道具的ID定义在items.js中，请自行查看。例如，`item:centerFly` 代表中心对称飞行器的个数。
 - `flag:xxx` 中的xxx为一个自定义的变量/Flag（支持中文）；如果没有对其进行赋值则默认值为0。
 - `global:xxx` 中的xxx为一个全局存储的名称（支持中文）；如果没有对其进行赋值则默认值为0。
+- `enemy:xxx:yyy` 中的xxx为怪物ID；yyy为要获得的项，比如hp, atk, def等等
+- `blockId:x,y` 和 `blockCls:x,y` 中的x,y为坐标值
+- `equip:x` 中的x为装备孔编号，从0开始。
 
 ### autoText：自动剧情文本
 
@@ -478,7 +486,9 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 
 ![](img/events/13.jpg)
 
-另外注意一点的是，如果hp被设置成了0或以下，将触发lose事件，直接死亡。
+从V2.6.5开始，默认`addValue`不会刷新状态栏、地图显伤和自动事件，除非设置了`"refresh": true`。
+
+在刷新的情况下，如果hp被设置成了0或以下，将触发lose事件，直接死亡。
 
 ### addValue：增减勇士的某个属性、道具个数，或某个变量/Flag的值
 
@@ -498,6 +508,28 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 ```
 
 ![](img/events/14.jpg)
+
+从V2.6.5开始，默认`addValue`不会刷新状态栏、地图显伤和自动事件，除非设置了`"refresh": true`。
+
+### setEnemy：设置怪物属性
+
+使用`{"type":"setEnemy"}`可以设置某个怪物的某个属性
+
+``` js
+[
+    {"type": "setEnemy", "id": "greenSlime", "name": "hp", "value": "1000"}, // 设置绿色史莱姆生命1000
+    {"type": "setEnemy", "id": "redSlime", "name": "special", "value": "[1,2]"}, // 设置红色史莱姆先攻魔攻
+    {"type": "setEnemy", "id": "redSlime", "name": "name", "value": "'小史莱姆'"}, // 设置怪物名称
+]
+```
+
+![](img/events/15.png)
+
+id为必填项，代表要修改的怪物ID。
+
+name为必填项，代表要修改的项，例如`hp`, `atk`, `def`, `money`, `experience`, `point`, `special`, `name`。
+
+value为必填项，代表要修改到的内容。对于修改名称的，必须加单引号。
 
 ### setFloor：设置楼层属性
 
@@ -898,12 +930,6 @@ name是可选的，代表目标行走图的文件名。
 
 使用`{"type": "showHero"}`会重新显示勇士。
 
-### updateEnemys：更新怪物数据
-
-使用 `{"type": "updateEnemys"}` 可以动态修改怪物数据。
-
-详见[怪物数据的动态修改](#怪物数据的动态修改)。
-
 ### sleep：等待多少毫秒
 
 等价于RMXP中的"等待x帧"，不过是以毫秒来计算。
@@ -1048,9 +1074,9 @@ time为可选的，指定的话将作为楼层切换动画的时间。
 
 ``` js
 [
-    {"type": "changePos", "id": "pickaxe"}, // 尝试使用破
-    {"type": "changePos", "id": "bomb"}, // 尝试使用炸
-    {"type": "changePos", "id": "centerFly"} // 尝试使用飞
+    {"type": "useItem", "id": "pickaxe"}, // 尝试使用破
+    {"type": "useItem", "id": "bomb"}, // 尝试使用炸
+    {"type": "useItem", "id": "centerFly"} // 尝试使用飞
 ]
 ```
 
@@ -1061,6 +1087,32 @@ time为可选的，指定的话将作为楼层切换动画的时间。
 如果当前不可使用该道具（如没有，或者达不到使用条件），则会进行提示并跳过本事件。
 
 不可使用“怪物手册”（请使用【呼出怪物手册】事件）或楼层传送器（如果[覆盖楼传事件](personalization#覆盖楼传事件)则可忽视本项）。
+
+### loadEquip：装上装备
+
+使用`{"type": "loadEquip"}`可以装上一个装备。
+
+``` js
+[
+    {"type": "loadEquip", "id": "sword1"}, // 尝试装上铁剑
+]
+```
+
+id必填，为需要装备的ID。
+
+使用装备时仍会检查条件（比如装备是否存在，能否装备等等）。
+
+### unloadEquip：卸下装备
+
+使用`{"type": "unloadEquip"}`卸下某个装备孔的装备。
+
+``` js
+[
+    {"type": "unloadEquip", "pos": 0}, // 卸下装备孔0的装备
+]
+```
+
+pos必填，为要卸下的装备孔编号，从0开始。
 
 ### openShop：打开一个全局商店
 
@@ -2645,43 +2697,6 @@ if (core.flags.enableAddPoint && point > 0) {
 	}
 }
 ```
-
-## 怪物数据的动态修改
-
-有时候我们可能还需要在游戏过程中动态修改怪物数据，例如50层魔塔的封印魔王，或者根据难度分歧来调整最终Boss的属性数据。
-
-而在我们的存档中，是不会对怪物数据进行存储的，只会存各个变量和Flag，因此我们需要在读档后根据变量或Flag来调整怪物数据。
-
-我们可以在脚本编辑中的`updateEnemys`进行处理。
-
-``` js
-"updateEnemys" : function () {
-	// 更新怪物数据，可以在这里对怪物属性和数据进行动态更新，详见文档——事件——怪物数据的动态修改
-	// 比如下面这个例子，如果flag:xxx为真，则将绿头怪的攻击设为100，红头怪的金币设为20
-	// 推荐写变化后的具体数值，以免多次变化导致冲突
-	/*
-	// 如果flag:xxx为真；你也可以写其他判断语句比如core.hasItem(...)等等
-	if (core.hasFlag('xxx')) { 
-		core.material.enemys.greenSlime.atk = 100;
-		core.material.enemys.redSlime.money = 20;
-	}
-	*/
-	// 别忘了在事件中调用“更新怪物数据”事件！
-}
-```
-
-当我们获得一个道具（或者触发某个事件等）后，需要在事件中调用“更新怪物数据”事件。
-
-``` js
-// 调用`updateEnemys`（更新怪物数据）事件就可以触发了
-[
-    "将flag:xxx置为真，就可以让怪物数据发生改变！",
-    {"type": "setValue", "name": "flag:xxx", "value": "true"}, // 将flag:xxx置为真
-    {"type": "updateEnemys"} // 更新怪物数据；此时绿头怪攻击就会变成100了
-]
-```
-
-事实上，除了动态修改怪物属性外，也可以在这里动态修改道具的类型、使用效果等等。都是一样的。
 
 ## 战前剧情
 

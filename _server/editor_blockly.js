@@ -100,11 +100,12 @@ editor_blockly = function () {
     ],
     '数据相关':[
       MotaActionBlocks['addValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','生命'])
+        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '', false
       ]),
       MotaActionBlocks['setValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','生命'])
+        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '', false
       ]),
+      MotaActionBlocks['setEnemy_s'].xmlText(),
       MotaActionBlocks['setFloor_s'].xmlText(),
       MotaActionBlocks['setGlobalAttribute_s'].xmlText(),
       MotaActionBlocks['setGlobalValue_s'].xmlText(),
@@ -112,7 +113,6 @@ editor_blockly = function () {
       MotaActionBlocks['input_s'].xmlText(),
       MotaActionBlocks['input2_s'].xmlText(),
       MotaActionBlocks['update_s'].xmlText(),
-      MotaActionBlocks['updateEnemys_s'].xmlText(),
       MotaActionBlocks['moveHero_s'].xmlText(),
       MotaActionBlocks['jumpHero_s'].xmlText(),
       MotaActionBlocks['changeFloor_s'].xmlText(),
@@ -120,6 +120,8 @@ editor_blockly = function () {
       MotaActionBlocks['changePos_1_s'].xmlText(),
       MotaActionBlocks['battle_s'].xmlText(),
       MotaActionBlocks['useItem_s'].xmlText(),
+      MotaActionBlocks['loadEquip_s'].xmlText(),
+      MotaActionBlocks['unloadEquip_s'].xmlText(),
       MotaActionBlocks['openShop_s'].xmlText(),
       MotaActionBlocks['disableShop_s'].xmlText(),
       MotaActionBlocks['setHeroIcon_s'].xmlText(),
@@ -229,6 +231,10 @@ editor_blockly = function () {
       MotaActionBlocks['idString_e'].xmlText(),
       MotaActionBlocks['idString_1_e'].xmlText(),
       MotaActionBlocks['idString_2_e'].xmlText(),
+      MotaActionBlocks['idString_3_e'].xmlText(),
+      MotaActionBlocks['idString_4_e'].xmlText(),
+      MotaActionBlocks['idString_5_e'].xmlText(),
+      MotaActionBlocks['idString_6_e'].xmlText(),
       MotaActionBlocks['evalString_e'].xmlText(),
     ],
     '常见事件模板':[
@@ -741,7 +747,7 @@ function omitedcheckUpdateFunction(event) {
         'comment_s',
         'show_s',
         'hide_s',
-        'setValue_s',
+        'addValue_s',
         'if_s',
         'battle_s',
         'openDoor_s',
@@ -910,6 +916,28 @@ function omitedcheckUpdateFunction(event) {
                     return Object.keys(editor.used_flags || {}).filter(function (one) {
                         return one != token && one.startsWith(token);
                     }).sort();
+                } else if (before.endsWith("怪物") || (ch == ':' && before.endsWith("enemy"))) {
+                    return Object.keys(core.material.enemys).filter(function (one) {
+                        return one != token && one.startsWith(token);
+                    })
+                } else {
+                    var index2 = Math.max(content.lastIndexOf(":", index-1), content.lastIndexOf("：", index-1));
+                    var ch2 = content.charAt(index2);
+                    if (index2 >= 0) {
+                        before = content.substring(0, index2);
+                        if (before.endsWith("怪物") || (ch == ':' && ch2 == ':' && before.endsWith("enemy"))) {
+                            var list = ["name", "hp", "atk", "def", "money", "experience", "point", "special"];
+                            if (before.endsWith("怪物") && MotaActionFunctions) {
+                                list = MotaActionFunctions.pattern.replaceEnemyList.map(function (v) {
+                                    return v[1];
+                                }).concat(list);
+                            }
+                            return list.filter(function (one) {
+                                return one != token && one.startsWith(token);
+                            })
+                        }
+                    }
+
                 }
             }
         }
@@ -1039,7 +1067,7 @@ Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
 
         // --- awesomplete
         var awesomplete = new Awesomplete(htmlInput, {
-            minChars: 2,
+            minChars: pb.type == "idString_3_e" ? 1 : 2,
             maxItems: 12,
             autoFirst: true,
             replace: function (text) {
@@ -1094,6 +1122,13 @@ Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
             }
 
             var list = editor_blockly.getAutoCompletions(value);
+            if (pb.type == "idString_3_e") {
+                list = list.concat(Object.keys(core.material.enemys).filter(function (one) {
+                    return one != value && one.startsWith(value);
+                }));
+                list.sort();
+            }
+
             awesomplete.list = list;
             awesomplete.ul.style.marginLeft = getCaretCoordinates(htmlInput, htmlInput.selectionStart).left -
                 htmlInput.scrollLeft - 20 + "px";

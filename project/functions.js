@@ -71,26 +71,32 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 设置已经到过的楼层
 	core.setFlag("__visited__", {});
-
-	core.updateEnemys();
 },
-        "win": function(reason, norank) {
+        "win": function (reason, norank, noexit) {
+	// 游戏获胜事件
+	// 请注意，成绩统计时是按照hp进行上传并排名
+	// 可以先在这里对最终分数进行计算，比如将2倍攻击和5倍黄钥匙数量加到分数上
+	// core.status.hero.hp += 2 * core.getRealStatus('atk') + 5 * core.itemCount('yellowKey');
+
+	// 如果不退出，则临时存储数据
+	if (noexit) {
+		core.status.extraEvent = core.clone(core.status.event);
+	}
+
 	// 游戏获胜事件 
 	core.ui.closePanel();
 	var replaying = core.isReplaying();
 	if (replaying) core.stopReplay();
-	core.waitHeroToStop(function() {
-		core.clearMap('all'); // 清空全地图
-		core.deleteAllCanvas(); // 删除所有创建的画布
-		core.dom.gif2.innerHTML = "";
-		// 请注意：
-		// 成绩统计时是按照hp进行上传并排名，因此光在这里改${status:hp}是无效的
-		// 如需按照其他的的分数统计方式，请先将hp设置为你的得分
-		// core.setStatus('hp', ...);
+	core.waitHeroToStop(function () {
+		if (!noexit) {
+			core.clearMap('all'); // 清空全地图
+			core.deleteAllCanvas(); // 删除所有创建的画布
+			core.dom.gif2.innerHTML = "";
+		}
 		core.drawText([
-			"\t[" + (reason||"恭喜通关") + "]你的分数是${status:hp}。"
+			"\t[" + (reason || "恭喜通关") + "]你的分数是${status:hp}。"
 		], function () {
-			core.events.gameOver(reason||'', replaying, norank);
+			core.events.gameOver(reason || '', replaying, norank);
 		})
 	});
 },
@@ -634,9 +640,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		hero_atk = core.getRealStatusOrDefault(hero, 'atk'),
 		hero_def = core.getRealStatusOrDefault(hero, 'def'),
 		hero_mdef = core.getRealStatusOrDefault(hero, 'mdef'),
-		origin_hero_hp = hero_hp,
-		origin_hero_atk = hero_atk,
-		origin_hero_def = hero_def;
+		origin_hero_hp = core.getStatusOrDefault(hero, 'hp'),
+		origin_hero_atk = core.getStatusOrDefault(hero, 'atk'),
+		origin_hero_def = core.getStatusOrDefault(hero, 'def');
 
 	// 勇士的负属性都按0计算
 	hero_hp = Math.max(0, hero_hp);
@@ -766,18 +772,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		"turn": Math.floor(turn),
 		"damage": Math.floor(damage)
 	};
-},
-        "updateEnemys": function () {
-	// 更新怪物数据，可以在这里对怪物属性和数据进行动态更新，详见文档——事件——怪物数据的动态修改
-	// 此函数执行时间：重新开始游戏、读档后、通过事件调用“更新怪物数据”时
-
-	// 比如下面这个例子，如果flag:xxx为真，则将绿头怪的攻击设为100，金币设为20
-	/*
-	if (core.hasFlag('xxx')) {
-		core.material.enemys.greenSlime.atk = 100;
-		core.material.enemys.greenSlime.money = 20;
-	}
-	*/
 }
     },
     "actions": {
@@ -1004,8 +998,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.material.icons.hero.width = core.material.images.images[icon].width / 4;
 		core.material.icons.hero.height = core.material.images.images[icon].height / 4;
 	}
-	// 刷新怪物数据
-	core.updateEnemys();
 
 	// TODO：增加自己的一些读档处理
 
@@ -1342,20 +1334,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			main.log(e);
 		}
 	}
-
-	// 下面是一个并行事件开门的样例
-	/*
-	// 如果某个flag为真
-	if (core.hasFlag("xxx")) {
-	    // 千万别忘了将该flag清空！否则下次仍然会执行这段代码。
-	    core.removeFlag("xxx");
-	    // 使用insertAction来插入若干自定义事件执行
-	    core.insertAction([
-	        {"type":"openDoor", "loc":[0,0], "floorId": "MT0"}
-	    ])
-	    // 也可以写任意其他的脚本代码
-	}
-	*/
 }
     },
     "ui": {

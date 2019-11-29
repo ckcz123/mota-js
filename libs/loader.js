@@ -107,11 +107,16 @@ loader.prototype.loadImages = function (names, toSave, callback) {
     for (var i = 0; i < names.length; i++) {
         this.loadImage(names[i], function (id, image) {
             core.loader._setStartLoadTipText('正在加载图片 ' + id + "...");
-            toSave[id] = image;
-            items++;
-            core.loader._setStartProgressVal(items * (100 / names.length));
-            if (items == names.length) {
-                if (callback) callback();
+                if (toSave[id] !== undefined) {
+                    if (image != null)
+                        toSave[id] = image;
+                    return;
+                }
+                toSave[id] = image;
+                items++;
+                core.loader._setStartProgressVal(items * (100 / names.length));
+                if (items == names.length) {
+                    if (callback) callback();
             }
         })
     }
@@ -126,7 +131,12 @@ loader.prototype.loadImage = function (imgName, callback) {
         image.onload = function () {
             callback(imgName, image);
         }
+        image.onerror = function () {
+            callback(imgName, null);
+        }
         image.src = 'project/images/' + name + "?v=" + main.version;
+        if (name.endsWith('.gif'))
+            callback(imgName, null);
     }
     catch (e) {
         main.log(e);

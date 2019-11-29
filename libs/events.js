@@ -1574,6 +1574,15 @@ events.prototype._action_setVolume = function (data, x, y, prefix) {
 
 events.prototype._action_setValue = function (data, x, y, prefix) {
     this.setValue(data.name, data.value, prefix);
+    if (data.refresh) {
+        if (core.status.hero.hp <= 0) {
+            core.status.hero.hp = 0;
+            core.updateStatusBar();
+            core.events.lose();
+        } else {
+            core.updateStatusBar();
+        }
+    }
     core.doAction();
 }
 
@@ -1583,6 +1592,15 @@ events.prototype._action_setValue2 = function (data, x, y, prefix) {
 
 events.prototype._action_addValue = function (data, x, y, prefix) {
     this.addValue(data.name, data.value, prefix);
+    if (data.refresh) {
+        if (core.status.hero.hp <= 0) {
+            core.status.hero.hp = 0;
+            core.updateStatusBar();
+            core.events.lose();
+        } else {
+            core.updateStatusBar();
+        }
+    }
     core.doAction();
 }
 
@@ -2279,17 +2297,11 @@ events.prototype.setValue = function (name, value, prefix, add) {
     this._setValue_setFlag(name, value);
     this._setValue_setSwitch(name, value, prefix);
     this._setValue_setGlobal(name, value);
-    core.updateStatusBar();
 }
 
 events.prototype._setValue_setStatus = function (name, value) {
     if (name.indexOf("status:") !== 0) return;
     core.setStatus(name.substring(7), value);
-    if (core.status.hero.hp <= 0) {
-        core.status.hero.hp = 0;
-        core.updateStatusBar();
-        core.events.lose();
-    }
 }
 
 events.prototype._setValue_setItem = function (name, value) {

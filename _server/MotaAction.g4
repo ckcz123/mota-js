@@ -322,6 +322,7 @@ action
     |   tip_s
     |   setValue_s
     |   addValue_s
+    |   setEnemy_s
     |   setFloor_s
     |   setGlobalAttribute_s
     |   setGlobalValue_s
@@ -345,7 +346,6 @@ action
     |   hideStatusBar_s
     |   showHero_s
     |   hideHero_s
-    |   updateEnemys_s
     |   sleep_s
     |   wait_s
     |   waitAsync_s
@@ -609,6 +609,21 @@ colour : this.dataColor
 var code = '{"type": "addValue", "name": "'+idString_e_0+'", "value": "'+expression_0+'"},\n';
 return code;
 */;
+
+
+setEnemy_s
+    :   '设置怪物属性' ':' '怪物ID' IdString '的' EnemyId_List '值' expression Newline
+
+
+/* setEnemy_s
+tooltip : setEnemy：设置某个怪物的属性
+default : ["greenSlime", "atk", "0"]
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=addValue%ef%bc%9a%e5%a2%9e%e5%87%8f%e5%8b%87%e5%a3%ab%e7%9a%84%e6%9f%90%e4%b8%aa%e5%b1%9e%e6%80%a7%e3%80%81%e9%81%93%e5%85%b7%e4%b8%aa%e6%95%b0%ef%bc%8c%e6%88%96%e6%9f%90%e4%b8%aa%e5%8f%98%e9%87%8f%2fFlag%e7%9a%84%e5%80%bc
+colour : this.dataColor
+var code = '{"type": "setEnemy", "id": "'+IdString_0+'", "name": "'+EnemyId_List_0+'", "value": "'+expression_0+'"},\n';
+return code;
+*/;
+
 
 setFloor_s
     :   '设置楼层属性' ':' Floor_Meta_List '楼层名' IdString? '值' EvalString Newline
@@ -1083,18 +1098,6 @@ tooltip : hideHero: 隐藏勇士
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=hideHero%ef%bc%9a%e9%9a%90%e8%97%8f%e5%8b%87%e5%a3%ab
 colour : this.soundColor
 var code = '{"type": "hideHero"},\n';
-return code;
-*/;
-
-updateEnemys_s
-    :   '更新怪物数据' Newline
-
-
-/* updateEnemys_s
-tooltip : updateEnemys: 立刻更新怪物数据
-helpUrl : https://h5mota.com/games/template/_docs/#/event?id=updateEnemys%ef%bc%9a%e6%9b%b4%e6%96%b0%e6%80%aa%e7%89%a9%e6%95%b0%e6%8d%ae
-colour : this.dataColor
-var code = '{"type": "updateEnemys"},\n';
 return code;
 */;
 
@@ -1724,15 +1727,16 @@ return code;
 */;
 
 win_s
-    :   '游戏胜利,结局' ':' EvalString? '不计入榜单' Bool Newline
+    :   '游戏胜利,结局' ':' EvalString? '不计入榜单' Bool '不结束游戏' Bool Newline
     
 
 /* win_s
 tooltip : win: 获得胜利, 该事件会显示获胜页面, 并重新游戏
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=win%EF%BC%9A%E8%8E%B7%E5%BE%97%E8%83%9C%E5%88%A9
-default : ["",false]
+default : ["",false, false]
 Bool_0 = Bool_0?', "norank": 1':'';
-var code = '{"type": "win", "reason": "'+EvalString_0+'"'+Bool_0+'},\n';
+Bool_1 = Bool_1?', "noexit": 1':'';
+var code = '{"type": "win", "reason": "'+EvalString_0+'"'+Bool_0+Bool_1+'},\n';
 return code;
 */;
 
@@ -2592,6 +2596,46 @@ return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
+//这一条不会被antlr识别,总是会被归到idString_e
+idString_3_e
+    :   '怪物' IdString '的' EnemyId_List
+
+
+/* idString_3_e
+colour : this.idstring_eColor
+default : ['greenSlime',"攻击"]
+//todo 将其output改成'idString_e'
+var code = 'enemy:'+IdString_0+'.'+EnemyId_List_0;
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
+//这一条不会被antlr识别,总是会被归到idString_e
+idString_4_e
+    :   '图块ID:' Int ',' Int
+
+
+/* idString_4_e
+colour : this.idstring_eColor
+default : [0,0]
+var code = 'blockId:'+Int_0+','+Int_1;
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
+//这一条不会被antlr识别,总是会被归到idString_e
+idString_5_e
+    :   '图块类别:' Int ',' Int
+
+
+/* idString_5_e
+colour : this.idstring_eColor
+default : [0,0]
+var code = 'blockCls:'+Int_0+','+Int_1;
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
 evFlag_e
     :   '独立开关' Letter_List
 
@@ -2743,6 +2787,10 @@ Id_List
     :   '变量' | '状态' | '物品' | '独立开关' | '全局存储'
     /*Id_List ['flag','status','item', 'switch', 'global']*/;
 
+EnemyId_List
+    :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'属性'|'名称'
+    /*EnemyId_List ['hp','atk','def','money','experience','point','special','name']*/;
+
 //转blockly后不保留需要加"
 EvalString
     :   Equote_double (ESC_double | ~["\\])* Equote_double
@@ -2803,6 +2851,9 @@ this.evisitor.mapColor=175;
 delete(this.block('negate_e').inputsInline);
 this.block('idString_1_e').output='idString_e';
 this.block('idString_2_e').output='idString_e';
+this.block('idString_3_e').output='idString_e';
+this.block('idString_4_e').output='idString_e';
+this.block('idString_5_e').output='idString_e';
 this.block('evFlag_e').output='idString_e';
 */
 
@@ -3304,6 +3355,10 @@ ActionParser.prototype.parseAction = function() {
         MotaActionBlocks['evalString_e'].xmlText([data.value]),
         this.next]);
       break;
+    case "setEnemy":
+      this.next = MotaActionBlocks['setEnemy_s'].xmlText([
+        data.id, data.name, MotaActionBlocks['evalString_e'].xmlText([data.value]), this.next]);
+      break;
     case "setFloor":
       this.next = MotaActionBlocks['setFloor_s'].xmlText([
         data.name, data.floorId||null, data.value, this.next]);
@@ -3397,7 +3452,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "win":
       this.next = MotaActionBlocks['win_s'].xmlText([
-        data.reason,data.norank?true:false,this.next]);
+        data.reason,data.norank?true:false,data.noexit?true:false,this.next]);
       break;
     case "lose":
       this.next = MotaActionBlocks['lose_s'].xmlText([
@@ -3431,10 +3486,6 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "hideHero":
       this.next = MotaActionBlocks['hideHero_s'].xmlText([
-        this.next]);
-      break;
-    case "updateEnemys":
-      this.next = MotaActionBlocks['updateEnemys_s'].xmlText([
         this.next]);
       break;
     case "sleep": // 等待多少毫秒
@@ -3778,7 +3829,7 @@ MotaActionFunctions.pattern.replaceStatusList = [
   ["mana", "魔力"],
   ["money", "金币"],
   ["experience", "经验"],
-  ["steps", "步数"]
+  ["steps", "步数"],
 ];
 
 MotaActionFunctions.pattern.replaceItemList = [
@@ -3832,6 +3883,17 @@ MotaActionFunctions.pattern.replaceItemList = [
   ["jumpShoes", "跳跃靴"],
 ];
 
+MotaActionFunctions.pattern.replaceEnemyList = [
+  // 保证顺序！
+  ["name", "名称"],
+  ["atk", "攻击"],
+  ["def", "防御"],
+  ["money", "金币"],
+  ["experience", "经验"],
+  ["point", "加点"],
+  ["special", "属性"],
+];
+
 MotaActionFunctions.disableReplace = false;
 
 MotaActionFunctions.replaceToName = function (str) {
@@ -3851,6 +3913,16 @@ MotaActionFunctions.replaceToName = function (str) {
     return map[b] ? ("物品：" + map[b]) : b;
   }).replace(/item:/g, "物品：");
   str = str.replace(/flag:/g, "变量：").replace(/switch:/g, "独立开关：").replace(/global:/g, "全局存储：");
+
+  map = {}; list = [];
+  MotaActionFunctions.pattern.replaceEnemyList.forEach(function (v) {
+    map[v[0]] = v[1]; list.push(v[0]);
+  });
+  str = str.replace(new RegExp("enemy:([a-zA-Z0-9_]+).(" + list.join("|") + ")", "g"), function (a, b, c) {
+    return map[c] ? ("怪物：" + b + "：" + map[c]) : c;
+  }).replace(/enemy:/g, "怪物：");
+
+  str = str.replace(/blockId:/g, "图块ID：").replace(/blockCls:/g, "图块类别：");
   return str;
 }
 
@@ -3871,6 +3943,17 @@ MotaActionFunctions.replaceFromName = function (str) {
     return map[b] ? ("item:" + map[b]) : b;
   }).replace(/物品[:：]/g, "item:");
   str = str.replace(/变量[:：]/g, "flag:").replace(/独立开关[:：]/g, "switch:").replace(/全局存储[:：]/g, "global:");
+
+  map = {}; list = [];
+  MotaActionFunctions.pattern.replaceEnemyList.forEach(function (v) {
+    map[v[1]] = v[0]; list.push(v[1]);
+  });
+  str = str.replace(new RegExp("(enemy:|怪物[:：])([a-zA-Z0-9_]+)[:：](" + list.join("|") + ")", "g"), function (a, b, c, d) {
+    return map[d] ? ("enemy:" + c + ":" + map[d]) : d;
+  }).replace(/怪物[:：]/g, "enemy:");
+
+  str = str.replace(/图块I[dD][:：]/g, "blockId:").replace(/图块类别[:：]/g, "blockCls:");
+
   return str;
 }
 

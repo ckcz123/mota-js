@@ -128,12 +128,6 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "textarea",
 					"_lint": true,
 					"_data": "获得战斗伤害信息"
-				},
-				"updateEnemys": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_lint": true,
-					"_data": "更新怪物数据"
 				}
 			}
 		},

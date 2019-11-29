@@ -81,6 +81,12 @@ utils.prototype.calValue = function (value, prefix, need, times) {
                 value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
             if (value.indexOf('global:') >= 0)
                 value = value.replace(/global:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getGlobal('$1', 0)");
+            if (value.indexOf('enemy:')>=0)
+                value = value.replace(/enemy:([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)/g, "core.material.enemys['$1'].$2");
+            if (value.indexOf('blockId:')>=0)
+                value = value.replace(/blockId:(\d+),(\d+)/g, "core.getBlockId($1, $2)");
+            if (value.indexOf('blockCls:')>=0)
+                value = value.replace(/blockCls:(\d+),(\d+)/g, "core.getBlockCls($1, $2)");
         }
         return eval(value);
     }
@@ -648,6 +654,7 @@ utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     // 判定是否斜体
     var italic = /^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(value);
     var style = 'font-style: ' + (italic ? 'italic' : 'normal') + '; ';
+    style += 'text-shadow: #000 1px 0 0, #000 0 1px 0, #000 -1px 0 0, #000 0 -1px 0; ';
     // 判定是否需要缩放
     var length = this.strlen(value) || 1;
     style += 'font-size: ' + Math.min(1, 7 / length) + 'em; ';
@@ -761,7 +768,7 @@ utils.prototype.__next_rand = function (_rand) {
 }
 
 ////// 读取一个本地文件内容 //////
-utils.prototype.readFile = function (success, error, readType) {
+utils.prototype.readFile = function (success, error, accept, readType) {
 
     core.platform.successCallback = success;
     core.platform.errorCallback = error;
@@ -800,6 +807,7 @@ utils.prototype.readFile = function (success, error, readType) {
             else core.platform.fileReader.readAsDataURL(core.platform.fileInput.files[0]);
             core.platform.fileInput.value = '';
         }
+        if (accept) core.platform.fileInput.accept = accept;
     }
 
     core.platform.fileInput.click();

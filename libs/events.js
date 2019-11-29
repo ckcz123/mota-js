@@ -108,9 +108,9 @@ events.prototype.setInitData = function () {
 }
 
 ////// 游戏获胜事件 //////
-events.prototype.win = function (reason, norank) {
-    core.status.gameOver = true;
-    return this.eventdata.win(reason, norank);
+events.prototype.win = function (reason, norank, noexit) {
+    if (!noexit) core.status.gameOver = true;
+    return this.eventdata.win(reason, norank, noexit);
 }
 
 ////// 游戏失败事件 //////
@@ -121,10 +121,12 @@ events.prototype.lose = function (reason) {
 
 ////// 游戏结束 //////
 events.prototype.gameOver = function (ending, fromReplay, norank) {
-    core.clearMap('all');
-    core.deleteAllCanvas();
-    core.dom.gif2.innerHTML = "";
-    core.setWeather();
+    if (!core.status.extraEvent) {
+        core.clearMap('all');
+        core.deleteAllCanvas();
+        core.dom.gif2.innerHTML = "";
+        core.setWeather();
+    }
     core.ui.closePanel();
 
     if (main.isCompetition && ending != null) {
@@ -220,12 +222,22 @@ events.prototype._gameOver_confirmDownload = function (ending) {
 }
 
 events.prototype._gameOver_askRate = function (ending) {
+    core.ui.closePanel();
+
+    // 继续接下来的事件
+    if (core.status.extraEvent) {
+        core.status.event = core.status.extraEvent;
+        delete core.status.extraEvent;
+        core.lockControl();
+        core.doAction();
+        return;
+    }
+
     if (ending == null) {
         core.restart();
         return;
     }
 
-    core.ui.closePanel();
     core.ui.drawConfirmBox("恭喜通关本塔，你想进行评分吗？", function () {
         if (core.platform.isPC) {
             window.open("/score.php?name=" + core.firstData.name + "&num=10", "_blank");
@@ -1453,6 +1465,11 @@ events.prototype._action_addValue = function (data, x, y, prefix) {
     core.doAction();
 }
 
+events.prototype._action_setEnemy = function (data, x, y, prefix) {
+    this.setEnemy(data.id, data.name, data.value, prefix);
+    core.doAction();
+}
+
 events.prototype._action_setFloor = function (data, x, y, prefix) {
     this.setFloorInfo(data.name, data.value, data.floorId, prefix);
     core.doAction();
@@ -1624,7 +1641,7 @@ events.prototype._action_continue = function (data, x, y, prefix) {
 }
 
 events.prototype._action_win = function (data, x, y, prefix) {
-    this.win(data.reason, data.norank);
+    this.win(data.reason, data.norank, data.noexit);
 }
 
 events.prototype._action_lose = function (data, x, y, prefix) {
@@ -1672,12 +1689,6 @@ events.prototype._action_showHero = function (data, x, y, prefix) {
 events.prototype._action_hideHero = function (data, x, y, prefix) {
     core.setFlag('hideHero', true);
     core.drawHero();
-    core.doAction();
-}
-
-events.prototype._action_updateEnemys = function (data, x, y, prefix) {
-    core.enemys.updateEnemys();
-    core.updateStatusBar();
     core.doAction();
 }
 
@@ -2136,6 +2147,19 @@ events.prototype.doEffect = function (effect, need, times) {
         var name=arr[0], value=core.calValue(arr[1], null, need, times);
         core.addValue(name, value);
     });
+}
+
+////// 设置一个怪物属性 //////
+events.prototype.setEnemy = function (id, name, value, prefix) {
+    if (!core.hasFlag('enemyInfo')) {
+        core.setFlag('enemyInfo', {});
+    }
+    var enemyInfo = core.getFlag('enemyInfo');
+    if (!enemyInfo[id]) enemyInfo[id] = {};
+    value = core.calValue(value, prefix);
+    enemyInfo[id][name] = value;
+    (core.material.enemys[id]||{})[name] = core.clone(value);
+    core.updateStatusBar();
 }
 
 ////// 设置楼层属性 //////

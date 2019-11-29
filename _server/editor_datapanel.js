@@ -511,7 +511,7 @@ editor_datapanel_wrapper = function (editor) {
                         editor.dom.selectAppend.onchange();
                     });
                 });
-            }, null, 'img');
+            }, null, 'image/*', 'img');
 
             return;
         }

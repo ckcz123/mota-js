@@ -459,7 +459,7 @@ ui.prototype.clearUI = function () {
 
 ////// 左上角绘制一段提示 //////
 ui.prototype.drawTip = function (text, id, clear) {
-    if (clear) this.clearTip();
+    this.clearTip();
     var one = {
         text: text,
         textX: 21,

@@ -19,7 +19,16 @@ enemys.prototype._init = function () {
 }
 
 enemys.prototype.getEnemys = function () {
-    return core.clone(this.enemys);
+    var enemys = core.clone(this.enemys);
+    var enemyInfo = core.getFlag('enemyInfo');
+    if (enemyInfo) {
+        for (var id in enemyInfo) {
+            for (var name in enemyInfo[id]) {
+                enemys[id][name] = core.clone(enemyInfo[id][name]);
+            }
+        }
+    }
+    return enemys;
 }
 
 ////// 判断是否含有某特殊属性 //////
@@ -298,10 +307,8 @@ enemys.prototype._calDamage = function (enemy, hero, x, y, floorId) {
     return info.damage;
 }
 
-////// 更新怪物数据 //////
-enemys.prototype.updateEnemys = function () {
-    return this.enemydata.updateEnemys();
-}
+////// 更新怪物数据。已经不再使用，这里留空进行兼容。 //////
+enemys.prototype.updateEnemys = function () {}
 
 ////// 获得当前楼层的怪物列表 //////
 enemys.prototype.getCurrentEnemys = function (floorId) {

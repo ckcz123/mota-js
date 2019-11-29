@@ -338,7 +338,7 @@ core.setHeroMoveInterval(callback)
 
 
 core.moveOneStep(x, y)
-每走完一步后执行的操作，被转发到了脚本编辑中。
+每走完一步后执行的操作，被转发到了脚本编辑中，执行脚本编辑moveOneStep中的内容。
 
 
 core.moveAction(callback)
@@ -349,6 +349,7 @@ core.moveAction(callback)
 core.moveHero(direction, callback)
 令勇士朝一个方向行走。如果设置了callback，则只会行走一步，并执行回调。
 否则，将一直朝该方向行走，直到core.status.heroStop为true为止。
+direction可为"up","down","right","left"，分别对应上，下，右，左。
 
 
 core.isMoving()
@@ -361,10 +362,11 @@ core.waitHeroToStop(callback)
 
 core.turnHero(direction)
 转向。如果设置了direction则会转到该方向，否则会右转。该函数会自动计入录像。
+direction可为"up","down","right","left"，分别对应上，下，右，左。
 
 
 core.moveDirectly(destX, destY)
-尝试瞬间移动到某点，被转发到了脚本编辑中。
+尝试瞬间移动到某点，被转发到了脚本编辑中，执行脚本编辑中的内容。
 此函数返回非负值代表成功进行瞬移，返回值是省略的步数；如果返回-1则代表没有成功瞬移。
 
 
@@ -499,12 +501,12 @@ core.syncSave(type) / core.syncLoad()
 
 
 core.saveData()
-获得要存档的内容，实际转发到了脚本编辑中。
+获得要存档的内容，实际转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.loadData(data, callback)
 实际执行一次读档行为，data为读取到的数据，callback为执行完毕的回调。
-实际转发到了脚本编辑中。
+实际转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.getSave(index, callback)
@@ -534,19 +536,23 @@ core.removeSave(index)
 // ------ 属性、状态、位置、变量等 ------ //
 
 core.setStatus(name, value)
-设置勇士当前的某个属性。
+设置勇士当前的某个属性，name可为"atk","def","hp"等。
+如core.setStatus("atk", 100)则为设置勇士攻击为100。
 
 
 core.addStatus(name, value)
-加减勇士当前的某个属性。等价于 core.setStatus(name, core.getStatus(name) + value)
+加减勇士当前的某个属性，name可为"atk","def","hp"等。
+如core.addStatus("atk", 100)则为增加勇士攻击100点。
+等价于 core.setStatus(name, core.getStatus(name) + value)。
 
 
 core.getStatus(name)
-获得勇士的某个原始属性值。
+获得勇士的某个原始属性值，该值不受百分比增幅影响。
+譬如你有一件道具加10%的攻击，你可以使用该函数获得你的攻击被增幅前的数值
 
 
 core.getStatusOrDefault(status, name)
-尝试从status中获得某个原始属性值；如果status为null或不存在对应属性值则从勇士属性中获取。
+尝试从status中获得某个原始属性值，该值不受百分比增幅影响；如果status为null或不存在对应属性值则从勇士属性中获取。
 此项在伤害计算函数中使用较多，例如传递新的攻击和防御来计算临界和1防减伤。
 
 
@@ -572,12 +578,14 @@ core.getBuff(name)
 
 
 core.setHeroLoc(name, value, noGather)
-设置勇士位置属性。name只能为'x', 'y'和'direction'之一。
+设置勇士位置属性。name只能为'x'（勇士x坐标）, 'y'（勇士y坐标）和'direction'（勇士朝向）之一。
 如果noGather为true，则不会聚集所有的跟随者。
+譬如core.setHeroLoc("x", 1, true)则为设置勇士x坐标为1，不聚集所有跟随者。
 
 
 core.getHeroLoc(name)
 获得勇士的某个位置属性。如果name为null则直接返回core.status.hero.loc。
+譬如core.getHeroLoc("x")则返回勇士当前x坐标
 
 
 core.getLvName(lv)
@@ -586,19 +594,26 @@ core.getLvName(lv)
 
 core.setFlag(name, value)
 设置某个自定义变量或flag。如果value为null则会调用core.removeFlag进行删除。
+这里的变量与事件中使用的变量等价
+譬如core.setFlag("xxx",1)则为设置变量xxx为1。
 
 
 core.addFlag(name, value)
 加减某个自定义的变量或flag。等价于 core.setFlag(name, core.getFlag(name, 0) + value)
+这里的变量与事件中使用的变量等价
+譬如core.addFlag("xxx",1)则为增加变量xxx1
 
 
 core.getFlag(name, defaultValue)
-获得某个自定义的变量或flag。如果该flag不存在（从未赋值过），则返回defaultValue值。
+获得某个自定义的变量或flag。如果该flag不存在（从未赋值过），则返回defaultValue的值。
+这里的变量与事件中使用的变量等价
+譬如core.getFlag("xxx",1)则为获得变量xxx的值，如变量xxx不存在则返回1
 
 
 core.hasFlag(name)
 判定是否拥有某个自定义变量或flag。等价于 !!core.getFlag(name, 0)
-
+这里的变量与事件中使用的变量等价
+譬如core.hasFlag("xxx",1)则为判断变量xxx是否存在
 
 core.removeFlag(name)
 删除一个自定义变量或flag。
@@ -619,6 +634,8 @@ core.setWeather(type, level)
 
 core.setCurtain(color, time, callback)
 更改画面色调。color为更改到的色调，是个三元或四元组；time为渐变时间，0代表立刻切换。
+譬如core.setCurtain([255,255,255,1], 0)即为无回调无等待更改画面色调为白色
+
 
 
 core.screenFlash(color, time, times, callback)
@@ -707,7 +724,7 @@ special为要测试的内容，允许接收如下类型参数：
 
 
 core.getSpecials()
-获得所有特殊属性的列表。实际上被转发到了脚本编辑中。
+获得所有特殊属性的列表。实际上被转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.getSpecialText(enemy)
@@ -747,7 +764,7 @@ number为要计算的临界值数量，不填默认为1。
 
 
 core.getDefDamage(enemy, k, x, y, floorId)
-获得某个怪物的k防减伤值。k可不填默认为1。
+获得某个怪物的k防减伤值。k可不填默认为1，x,y,floorId为当前xy坐标和楼层。
 
 
 core.getEnemyInfo(enemy, hero, x, y, floorId)
@@ -764,10 +781,6 @@ hero可为null或一个对象，具体将使用core.getRealStatusOrDefault(hero,
 从V2.5.5开始，该函数也允许直接返回一个数字，代表战斗伤害值，此时回合数将视为0。
 
 
-core.updateEnemys()
-更新怪物数据。该函数实际被转发到了脚本编辑中。详见文档-事件-更新怪物数据。
-
-
 core.getCurrentEnemys(floorId)
 获得某个楼层不重复的怪物信息，floorId不填默认为当前楼层。该函数会被怪物手册所调用。
 该函数将返回一个列表，每一项都是一个不同的怪物，按照伤害值从小到大排序。
@@ -776,7 +789,7 @@ core.getCurrentEnemys(floorId)
 
 core.hasEnemyLeft(enemyId, floorId)
 检查某个楼层是否还有剩余的（指定）怪物。
-floorId为楼层ID，可忽略表示当前楼层。也可以传数组如["MT0","MT1"]同时检测多个楼层。
+floorId为楼层ID，可忽略表示当前楼层。也可以填数组如["MT0","MT1"]同时检测多个楼层。
 enemyId如果不填或null则检查是否剩余任何怪物，否则只检查是否剩余指定的某类怪物。
 ```
 
@@ -806,16 +819,16 @@ seed为开始时要设置的的种子，route为要开始播放的录像，callb
 
 core.setInitData()
 根据难度分歧来初始化难度，包括设置flag:hard，设置初始属性等。
-该函数实际被转发到了脚本编辑中。
+该函数实际被转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.win(reason, norank)
 游戏胜利，reason为结局名，norank如果为真则该结局不计入榜单。
-该函数实际被转发到了脚本编辑中。
+该函数实际被转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.lose(reason)
-游戏失败，reason为结局名。该函数实际被转发到了脚本编辑中。
+游戏失败，reason为结局名。该函数实际被转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.gameOver(ending, fromReplay, norank)
@@ -855,7 +868,7 @@ id为怪物的ID，x和y为怪物坐标，force如果为真将强制战斗，cal
 
 
 core.beforeBattle(enemyId, x, y)
-战前事件。实际被转发到了脚本编辑中，可以在这里加上一些战前特效。
+战前事件。实际被转发到了脚本编辑中，执行脚本编辑中的内容，可以用于加上一些战前特效。
 此函数在“检测能否战斗和自动存档”【之后】执行。
 如果需要更早的战前事件，请在插件中覆重写 core.events.doSystemEvent 函数。
 此函数返回true则将继续本次战斗，返回false将不再战斗。
@@ -863,7 +876,7 @@ core.beforeBattle(enemyId, x, y)
 
 core.afterBattle(enemyId, x, y, callback)
 战后事件，将执行扣血、加金币经验、特殊属性处理、战后事件处理等操作。
-实际被转发到了脚本编辑中。
+实际被转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.openDoor(x, y, needKey, callback)
@@ -872,16 +885,17 @@ core.openDoor(x, y, needKey, callback)
 
 
 core.afterOpenDoor(doorId, x, y, callback)
-开完一个门后执行的事件，实际被转发到了脚本编辑中。
+开完一个门后执行的事件，实际被转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.getItem(id, num, x, y, callback)
 获得若干个道具。itemId为道具ID，itemNum为获得的道具个数，不填默认为1。
-x和y为道具点的坐标，如果设置则会擦除地图上的该点。
+x和y为道具点的坐标，如果设置则会擦除地图上的该点，也可不填。
+譬如core.getItem("yellowKey",2)会直接获得两把黄钥匙。
 
 
 core.afterGetItem(id, x, y, callback)
-获得一个道具后执行的事件，实际被转发到了脚本编辑中。
+获得一个道具后执行的事件，实际被转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.getNextItem(noRoute)
@@ -918,7 +932,7 @@ core.pushBox(data)
 
 
 core.afterPushBox()
-推箱子之后触发的事件，实际被转发到了脚本编辑中。
+推箱子之后触发的事件，实际被转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.changeLight(id, x, y)
@@ -1024,15 +1038,21 @@ core.follow(name) / core.unfollow(name)
 
 core.setValue(name, value, prefix) / core.addValue(name, value, prefix)
 设置/增减某个数值。name可以是status:xxx，item:xxx或flag:xxx。
-value可以是一个表达式，将调用core.calValue()计算。prefix为前缀，独立开关使用。
+value可以是一个表达式，将调用core.calValue()计算。prefix为前缀，独立开关使用，脚本中一般忽略。
 
 
 core.doEffect(effect, need, times)
 执行一个effect操作。该函数目前仅被全局商店的status:xxx+=yyy所调用。
 
 
+core.setEnemy(id, name, value, prefix)
+设置一个怪物属性。id为怪物的ID，name为要设置的项，比如hp,atk,def等等。
+value可以是一个表达式，将调用core.calValue()计算。prefix为前缀，独立开关使用，脚本中一般忽略。
+
+
 core.setFloorInfo(name, values, floorId, prefix)
-设置某层楼的楼层属性。
+设置某层楼的楼层属性，其中name为该楼层属性对应的条目，values为要设置的值，floorId为楼层id，prefix一般直接忽略。
+譬如core.setFloorInfo("name","4", "MT1")则为设置MT1显示在状态栏中的层数为4
 
 
 core.setGlobalAttribute(name, value)
@@ -1191,8 +1211,9 @@ core.addItem(itemId, itemNum)
 
 
 core.getEquipTypeByName(name)
-根据装备位名称来找到一个空的装备孔，适用于多重装备。
+根据装备位名称来找到一个空的装备孔，适用于多重装备，装备位名称可在全塔属性中设置。
 如果没有一个装备孔是该装备名称，则返回-1。
+譬如：core.getEquipTypeByName("武器")默认返回全塔属性中武器对应的装备孔号0。
 
 
 core.getEquipTypeById(equipId)
@@ -1205,11 +1226,12 @@ core.canEquip(equipId, hint)
 
 
 core.loadEquip(equipId, callback)
-穿上某个装备。
+穿上某个装备，equipId为装备id。
 
 
 core.unloadEquip(equipType, callback)
 脱下某个装备孔的装备。
+譬如core.unloadEquip(0)则为脱下0号装备孔中的装备，默认0号装备孔对应“武器”，1号装备孔对应“盾牌”
 
 
 core.compareEquipment(compareEquipId, beComparedEquipId)
@@ -1285,7 +1307,7 @@ map为存档信息，如果某项在map中不存在则会从core.floors中读取
 
 
 core.getNumberById(id)
-给定一个图块ID，找到对应的数字。
+给定一个图块ID，找到图块对应的图块编号。
 
 
 core.initBlock(x, y, id, addInfo, eventFloor)
@@ -1421,7 +1443,7 @@ toDraw为要绘制到的信息（可为null，或为一个画布名），包括�
 // ------ 获得某个点的图块信息 ------ //
 
 core.noPass(x, y, floorId)
-判定某个点是否有noPass的图块。
+判定某个点是否有noPass（不可通行）的图块。
 
 
 core.npcExists(x, y, floorId)
@@ -1429,7 +1451,7 @@ core.npcExists(x, y, floorId)
 
 
 core.terrainExists(x, y, id, floorId)
-判定某个点是否有（指定的）地形存在。
+判定某个点是否有（id对应的）地形存在。
 如果id为null，则只要存在terrains即为真，否则还会判定对应点的ID。
 
 
@@ -1442,7 +1464,7 @@ core.nearStair()
 
 
 core.enemyExists(x, y, id, floorId)
-判定某个点是否有（指定的）怪物存在。
+判定某个点是否有（id对应的）怪物存在。
 如果id为null，则只要存在怪物即为真，否则还会判定对应点的怪物ID。
 请注意，如果需要判定某个楼层是否存在怪物请使用core.hasEnemyLeft()函数。
 
@@ -1499,14 +1521,17 @@ core.removeBlock(x, y, floorId)
 
 
 core.removeBlockById(index, floorId)
+每个楼层的图块存成一个数组，index即为该数组中的索引，每个索引对应该地图中的一个图块
 根据索引从地图的block数组中尽可能删除一个图块。floorId可不填或null表示当前楼层。
 
 
 core.removeBlockByIds(floorId, ids)
+ids为由索引组成的数组，如[0,1]等
 根据索引数组从地图的block数组中尽可能删除一系列图块。floorId可不填或null表示当前楼层。
 
 
 core.canRemoveBlock(block, floorId)
+block为图块信息，可由core.getBlock获取
 判定当前能否完全删除某个图块。floorId可不填或null表示当前楼层。
 如果该点存在自定义事件，或者是重生怪，则不可进行删除。
 
@@ -1550,7 +1575,7 @@ number为要设置到的图块数字，x,y和floorId为目标点坐标和楼层�
 
 core.resetMap(floorId)
 重置某层或若干层的地图和楼层属性。
-floorId可为某个楼层ID，或者一个楼层数组（同时重置若干层）；如果不填则只重置当前楼层。
+floorId可为某个楼层ID，或者一个楼层数组如["MT1","MT2"]（同时重置若干层）；如果不填则只重置当前楼层。
 
 // ------ 移动/跳跃图块，淡入淡出图块 ------ //
 
@@ -1626,9 +1651,13 @@ core.clearMap(name)
 core.fillText(name, text, x, y, style, font, maxWidth)
 在某个画布上绘制一段文字。
 text为要绘制的文本，x,y为要绘制的坐标，style可选为绘制的样式，font可选为绘制的字体。（下同）
+style可直接使用"red","white"等或用"rgba(255,255,255,1)"或用"#FFFFFF"等方式来获得字体对应的颜色
+font的格式为"20px Verdana"前者为字体大小，后者为字体
 如果maxWidth不为null，则视为文字最大宽度，如果超过此宽度则会自动放缩文字直到自适应为止。
 请注意textAlign和textBaseline将决定绘制的左右对齐和上下对齐方式。
 具体可详见core.setTextAlign()和core.setTextBaseline()函数。
+譬如：core.fillText("ui", "这是要描绘的文字", 10, 10, "red", "20px Verdana", 100)
+即是在ui图层上，以10,10为起始点，描绘20像素大小，Verdana字体的红色字，长度不超过100像素
 
 
 core.fillBoldText(name, text, x, y, style, font)
@@ -1636,7 +1665,7 @@ core.fillBoldText(name, text, x, y, style, font)
 
 
 core.fillRect(name, x, y, width, height, style)
-绘制一个矩形。style可选为绘制样式。如果设置将调用core.setFillStyle()。（下同）
+绘制一个矩形。width, height为矩形宽高，style可选为绘制样式。如果设置将调用core.setFillStyle()。（下同）
 
 
 core.strokeRect(name, x, y, width, height, style, lineWidth)
@@ -1645,11 +1674,11 @@ lineWidth如果设置将调用core.setLineWidth()。（下同）
 
 
 core.drawLine(name, x1, y1, x2, y2, style, lineWidth)
-绘制一条线。
+绘制一条线，x1y1为起始点像素，x2y2为终止点像素。
 
 
 core.drawArrow(name, x1, y1, x2, y2, style, lineWidth)
-绘制一个箭头。
+绘制一个箭头，x1y1为起始点像素，x2y2为终止点像素。
 
 
 core.setFont(name, font) / core.setLineWidth(name, lineWidth)
@@ -1671,7 +1700,7 @@ core.setFillStyle(name, style) / core.setStrokeStyle(name, style)
 
 
 core.setTextAlign(name, align)
-设置一个画布的文字横向对齐模式，这里的align只能为'left', 'right'和'center'。
+设置一个画布的文字横向对齐模式，这里的align只能为'left', 'right'和'center'，分别对应左对齐，右对齐，居中。
 默认为'left'。
 
 
@@ -1862,7 +1891,7 @@ z值为创建的纵向高度（关系到画布之间的覆盖），z值高的将
 
 
 core.ui.relocateCanvas(name, x, y)
-重新定位一个自定义画布。x和y为画布的左上角坐标。
+重新定位一个自定义画布。x和y为画布的左上角坐标，name为画布名。
 
 
 core.ui.resizeCanvas(name, width, height, styleOnly)
@@ -2051,6 +2080,7 @@ core.matchWildcard(pattern, string)
 
 core.encodeBase64(str) / core.decodeBase64(str)
 将字符串进行base64加密或解密。
+可用于解压缩录像数据
 
 
 core.convertBase(str, fromBase, toBase)
@@ -2073,8 +2103,9 @@ num如果设置大于0，则生成一个[0, num-1]之间的数；否则生成一
 即先生成一个真随机数，根据该数来推进伪随机的种子，这样就可以放心调用core.rand()啦。
 
 
-core.readFile(success, error)
+core.readFile(success, error, accept)
 读取一个本地文件内容。success和error分别为读取成功或失败的回调函数。
+accept如果设置则控制能选择的文件类型。
 iOS平台暂不支持读取文件操作。
 
 

@@ -1122,7 +1122,7 @@ control.prototype.chooseReplayFile = function () {
             return;
         }
         _replay();
-    }, null, ".h5route");
+    });
 }
 
 ////// 开始播放 //////

@@ -108,9 +108,9 @@ events.prototype.setInitData = function () {
 }
 
 ////// 游戏获胜事件 //////
-events.prototype.win = function (reason, norank, noexit) {
-    if (!noexit) core.status.gameOver = true;
-    return this.eventdata.win(reason, norank, noexit);
+events.prototype.win = function (reason, norank) {
+    core.status.gameOver = true;
+    return this.eventdata.win(reason, norank);
 }
 
 ////// 游戏失败事件 //////
@@ -121,12 +121,10 @@ events.prototype.lose = function (reason) {
 
 ////// 游戏结束 //////
 events.prototype.gameOver = function (ending, fromReplay, norank) {
-    if (!core.status.extraEvent) {
-        core.clearMap('all');
-        core.deleteAllCanvas();
-        core.dom.gif2.innerHTML = "";
-        core.setWeather();
-    }
+    core.clearMap('all');
+    core.deleteAllCanvas();
+    core.dom.gif2.innerHTML = "";
+    core.setWeather();
     core.ui.closePanel();
 
     if (main.isCompetition && ending != null) {
@@ -222,22 +220,12 @@ events.prototype._gameOver_confirmDownload = function (ending) {
 }
 
 events.prototype._gameOver_askRate = function (ending) {
-    core.ui.closePanel();
-
-    // 继续接下来的事件
-    if (core.status.extraEvent) {
-        core.status.event = core.status.extraEvent;
-        delete core.status.extraEvent;
-        core.lockControl();
-        core.doAction();
-        return;
-    }
-
     if (ending == null) {
         core.restart();
         return;
     }
 
+    core.ui.closePanel();
     core.ui.drawConfirmBox("恭喜通关本塔，你想进行评分吗？", function () {
         if (core.platform.isPC) {
             window.open("/score.php?name=" + core.firstData.name + "&num=10", "_blank");
@@ -1636,7 +1624,7 @@ events.prototype._action_continue = function (data, x, y, prefix) {
 }
 
 events.prototype._action_win = function (data, x, y, prefix) {
-    this.win(data.reason, data.norank, data.noexit);
+    this.win(data.reason, data.norank);
 }
 
 events.prototype._action_lose = function (data, x, y, prefix) {

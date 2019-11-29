@@ -459,7 +459,7 @@ ui.prototype.clearUI = function () {
 
 ////// 左上角绘制一段提示 //////
 ui.prototype.drawTip = function (text, id, clear) {
-    this.clearTip();
+    if (clear) this.clearTip();
     var one = {
         text: text,
         textX: 21,
@@ -1496,6 +1496,8 @@ ui.prototype.drawSwitchs = function() {
     var choices = [
         "背景音乐： "+(core.musicStatus.bgmStatus ? "[ON]" : "[OFF]"),
         "背景音效： "+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
+        //显示为 1~10 十挡
+        " <   " + "音量："+parseInt(core.musicStatus.volume * 10) + "   > ",
         "行走速度： "+parseInt(core.values.moveSpeed),
         "怪物显伤： "+(core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
         "临界显伤： "+(core.flags.displayCritical ? "[ON]" : "[OFF]"),

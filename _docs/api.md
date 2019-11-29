@@ -987,8 +987,13 @@ core.getCommonEvent(name)
 core.recoverEvents(data)
 恢复事件现场。一般用于呼出怪物手册、呼出存读档页面等时，恢复事件执行流。
 
+
 core.checkAutoEvents()
 检测自动事件并执行。
+
+
+core.precompile(events)
+尝试预编译一段事件。
 
 
 // ------ 点击状态栏图标时执行的一些操作 ------ //
@@ -1916,6 +1921,11 @@ utils.js是一个工具函数库，里面有各个样板中使用到的工具函
 ```text
 core.replayText(text, need, times)
 将一段文字中的${}（表达式）进行替换。need和time一般可以直接忽略。
+
+
+core.replaceValue(value)
+对一个表达式中的特殊规则进行替换，如status:xxx等。
+请注意，此项不会对独立开关如switch:A进行替换。
 
 
 core.calValue(value, prefix, need, time)

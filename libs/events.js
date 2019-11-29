@@ -2329,16 +2329,16 @@ events.prototype.showGif = function (name, x, y) {
 ////// 淡入淡出音乐 //////
 events.prototype.setVolume = function (value, time, callback) {
     var set = function (value) {
-        core.musicStatus.volume = value;
+        core.musicStatus.designVolume = value;
         if (core.musicStatus.playingBgm)
-            core.material.bgms[core.musicStatus.playingBgm].volume = value;
+            core.material.bgms[core.musicStatus.playingBgm].volume = core.musicStatus.userVolume * core.musicStatus.designVolume;
     }
     if (!time || time < 100) {
         set(value);
         if (callback) callback();
         return;
     }
-    var currVolume = core.musicStatus.volume;
+    var currVolume = core.musicStatus.designVolume;
     time /= Math.max(core.status.replay.speed, 1);
     var per_time = 10, step = 0, steps = parseInt(time / per_time);
     if (steps <= 0) steps = 1;

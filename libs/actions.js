@@ -823,6 +823,10 @@ actions.prototype._selectChoices = function (length, keycode, callback) {
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         callback.apply(this, [this.HSIZE, topIndex + core.status.event.selection]);
     }
+    //左右方向键音量
+    if(core.status.event.id == "switchs" && core.status.event.selection == 2)
+    {
+        if (keycode == 37) callback.apply(this, [this.HSIZE - 2, topIndex + core.status.event.selection]);
         if (keycode == 39) callback.apply(this, [this.HSIZE + 2, topIndex + core.status.event.selection]);
     }
     if (keycode >= 49 && keycode <= 57) {

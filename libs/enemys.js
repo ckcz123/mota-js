@@ -19,7 +19,16 @@ enemys.prototype._init = function () {
 }
 
 enemys.prototype.getEnemys = function () {
-    return core.clone(this.enemys);
+    var enemys = core.clone(this.enemys);
+    var enemyInfo = core.getFlag('enemyInfo');
+    if (enemyInfo) {
+        for (var id in enemyInfo) {
+            for (var name in enemyInfo[id]) {
+                enemys[id][name] = core.clone(enemyInfo[id][name]);
+            }
+        }
+    }
+    return enemys;
 }
 
 ////// 判断是否含有某特殊属性 //////

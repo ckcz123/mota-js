@@ -1465,6 +1465,11 @@ events.prototype._action_addValue = function (data, x, y, prefix) {
     core.doAction();
 }
 
+events.prototype._action_setEnemy = function (data, x, y, prefix) {
+    this.setEnemy(data.id, data.name, data.value, prefix);
+    core.doAction();
+}
+
 events.prototype._action_setFloor = function (data, x, y, prefix) {
     this.setFloorInfo(data.name, data.value, data.floorId, prefix);
     core.doAction();
@@ -2148,6 +2153,19 @@ events.prototype.doEffect = function (effect, need, times) {
         var name=arr[0], value=core.calValue(arr[1], null, need, times);
         core.addValue(name, value);
     });
+}
+
+////// 设置一个怪物属性 //////
+events.prototype.setEnemy = function (id, name, value, prefix) {
+    if (!core.hasFlag('enemyInfo')) {
+        core.setFlag('enemyInfo', {});
+    }
+    var enemyInfo = core.getFlag('enemyInfo');
+    if (!enemyInfo[id]) enemyInfo[id] = {};
+    value = core.calValue(value, prefix);
+    enemyInfo[id][name] = value;
+    (core.material.enemys[id]||{})[name] = core.clone(value);
+    core.updateStatusBar();
 }
 
 ////// 设置楼层属性 //////

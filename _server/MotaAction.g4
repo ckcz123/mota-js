@@ -322,6 +322,7 @@ action
     |   tip_s
     |   setValue_s
     |   addValue_s
+    |   setEnemy_s
     |   setFloor_s
     |   setGlobalAttribute_s
     |   setGlobalValue_s
@@ -609,6 +610,21 @@ colour : this.dataColor
 var code = '{"type": "addValue", "name": "'+idString_e_0+'", "value": "'+expression_0+'"},\n';
 return code;
 */;
+
+
+setEnemy_s
+    :   '设置怪物属性' ':' '怪物ID' IdString '的' EnemyId_List '值' expression Newline
+
+
+/* setEnemy_s
+tooltip : setEnemy：设置某个怪物的属性
+default : ["greenSlime", "atk", "0"]
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=addValue%ef%bc%9a%e5%a2%9e%e5%87%8f%e5%8b%87%e5%a3%ab%e7%9a%84%e6%9f%90%e4%b8%aa%e5%b1%9e%e6%80%a7%e3%80%81%e9%81%93%e5%85%b7%e4%b8%aa%e6%95%b0%ef%bc%8c%e6%88%96%e6%9f%90%e4%b8%aa%e5%8f%98%e9%87%8f%2fFlag%e7%9a%84%e5%80%bc
+colour : this.dataColor
+var code = '{"type": "setEnemy", "id": "'+IdString_0+'", "name": "'+EnemyId_List_0+'", "value": "'+expression_0+'"},\n';
+return code;
+*/;
+
 
 setFloor_s
     :   '设置楼层属性' ':' Floor_Meta_List '楼层名' IdString? '值' EvalString Newline
@@ -3351,6 +3367,10 @@ ActionParser.prototype.parseAction = function() {
         this.tryToUseEvFlag_e('idString_e', [data.name]),
         MotaActionBlocks['evalString_e'].xmlText([data.value]),
         this.next]);
+      break;
+    case "setEnemy":
+      this.next = MotaActionBlocks['setEnemy_s'].xmlText([
+        data.id, data.name, MotaActionBlocks['evalString_e'].xmlText([data.value]), this.next]);
       break;
     case "setFloor":
       this.next = MotaActionBlocks['setFloor_s'].xmlText([

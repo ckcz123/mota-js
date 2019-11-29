@@ -642,9 +642,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		hero_atk = core.getRealStatusOrDefault(hero, 'atk'),
 		hero_def = core.getRealStatusOrDefault(hero, 'def'),
 		hero_mdef = core.getRealStatusOrDefault(hero, 'mdef'),
-		origin_hero_hp = hero_hp,
-		origin_hero_atk = hero_atk,
-		origin_hero_def = hero_def;
+		origin_hero_hp = core.getStatusOrDefault(hero, 'hp'),
+		origin_hero_atk = core.getStatusOrDefault(hero, 'atk'),
+		origin_hero_def = core.getStatusOrDefault(hero, 'def');
 
 	// 勇士的负属性都按0计算
 	hero_hp = Math.max(0, hero_hp);
@@ -1350,20 +1350,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			main.log(e);
 		}
 	}
-
-	// 下面是一个并行事件开门的样例
-	/*
-	// 如果某个flag为真
-	if (core.hasFlag("xxx")) {
-	    // 千万别忘了将该flag清空！否则下次仍然会执行这段代码。
-	    core.removeFlag("xxx");
-	    // 使用insertAction来插入若干自定义事件执行
-	    core.insertAction([
-	        {"type":"openDoor", "loc":[0,0], "floorId": "MT0"}
-	    ])
-	    // 也可以写任意其他的脚本代码
-	}
-	*/
 }
     },
     "ui": {

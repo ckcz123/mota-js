@@ -499,6 +499,27 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 
 ![](img/events/14.jpg)
 
+
+### setEnemy：设置怪物属性
+
+使用`{"type":"setEnemy"}`可以设置某个怪物的某个属性
+
+``` js
+[
+    {"type": "setEnemy", "id": "greenSlime", "name": "hp", "value": "1000"}, // 设置绿色史莱姆生命1000
+    {"type": "setEnemy", "id": "redSlime", "name": "special", "value": "[1,2]"}, // 设置红色史莱姆先攻魔攻
+    {"type": "setEnemy", "id": "redSlime", "name": "name", "value": "'小史莱姆'"}, // 设置怪物名称
+]
+```
+
+![](img/events/15.png)
+
+id为必填项，代表要修改的怪物ID。
+
+name为必填项，代表要修改的项，例如`hp`, `atk`, `def`, `money`, `experience`, `point`, `special`, `name`。
+
+value为必填项，代表要修改到的内容。对于修改名称的，必须加单引号。
+
 ### setFloor：设置楼层属性
 
 使用`{"type":"setFloor"}`可以设置某层楼的楼层属性。
@@ -897,12 +918,6 @@ name是可选的，代表目标行走图的文件名。
 ### showHero：显示勇士
 
 使用`{"type": "showHero"}`会重新显示勇士。
-
-### updateEnemys：更新怪物数据
-
-使用 `{"type": "updateEnemys"}` 可以动态修改怪物数据。
-
-详见[怪物数据的动态修改](#怪物数据的动态修改)。
 
 ### sleep：等待多少毫秒
 
@@ -2645,43 +2660,6 @@ if (core.flags.enableAddPoint && point > 0) {
 	}
 }
 ```
-
-## 怪物数据的动态修改
-
-有时候我们可能还需要在游戏过程中动态修改怪物数据，例如50层魔塔的封印魔王，或者根据难度分歧来调整最终Boss的属性数据。
-
-而在我们的存档中，是不会对怪物数据进行存储的，只会存各个变量和Flag，因此我们需要在读档后根据变量或Flag来调整怪物数据。
-
-我们可以在脚本编辑中的`updateEnemys`进行处理。
-
-``` js
-"updateEnemys" : function () {
-	// 更新怪物数据，可以在这里对怪物属性和数据进行动态更新，详见文档——事件——怪物数据的动态修改
-	// 比如下面这个例子，如果flag:xxx为真，则将绿头怪的攻击设为100，红头怪的金币设为20
-	// 推荐写变化后的具体数值，以免多次变化导致冲突
-	/*
-	// 如果flag:xxx为真；你也可以写其他判断语句比如core.hasItem(...)等等
-	if (core.hasFlag('xxx')) { 
-		core.material.enemys.greenSlime.atk = 100;
-		core.material.enemys.redSlime.money = 20;
-	}
-	*/
-	// 别忘了在事件中调用“更新怪物数据”事件！
-}
-```
-
-当我们获得一个道具（或者触发某个事件等）后，需要在事件中调用“更新怪物数据”事件。
-
-``` js
-// 调用`updateEnemys`（更新怪物数据）事件就可以触发了
-[
-    "将flag:xxx置为真，就可以让怪物数据发生改变！",
-    {"type": "setValue", "name": "flag:xxx", "value": "true"}, // 将flag:xxx置为真
-    {"type": "updateEnemys"} // 更新怪物数据；此时绿头怪攻击就会变成100了
-]
-```
-
-事实上，除了动态修改怪物属性外，也可以在这里动态修改道具的类型、使用效果等等。都是一样的。
 
 ## 战前剧情
 

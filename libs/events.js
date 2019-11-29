@@ -1692,12 +1692,6 @@ events.prototype._action_hideHero = function (data, x, y, prefix) {
     core.doAction();
 }
 
-events.prototype._action_updateEnemys = function (data, x, y, prefix) {
-    core.enemys.updateEnemys();
-    core.updateStatusBar();
-    core.doAction();
-}
-
 events.prototype._action_vibrate = function (data, x, y, prefix) {
     this.__action_doAsyncFunc(data.async, core.vibrate, data.time);
 }

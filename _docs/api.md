@@ -781,10 +781,6 @@ hero可为null或一个对象，具体将使用core.getRealStatusOrDefault(hero,
 从V2.5.5开始，该函数也允许直接返回一个数字，代表战斗伤害值，此时回合数将视为0。
 
 
-core.updateEnemys()
-更新怪物数据。该函数实际被转发到了脚本编辑中。详见文档-事件-更新怪物数据。
-
-
 core.getCurrentEnemys(floorId)
 获得某个楼层不重复的怪物信息，floorId不填默认为当前楼层。该函数会被怪物手册所调用。
 该函数将返回一个列表，每一项都是一个不同的怪物，按照伤害值从小到大排序。
@@ -1047,6 +1043,11 @@ value可以是一个表达式，将调用core.calValue()计算。prefix为前缀
 
 core.doEffect(effect, need, times)
 执行一个effect操作。该函数目前仅被全局商店的status:xxx+=yyy所调用。
+
+
+core.setEnemy(id, name, value, prefix)
+设置一个怪物属性。id为怪物的ID，name为要设置的项，比如hp,atk,def等等。
+value可以是一个表达式，将调用core.calValue()计算。prefix为前缀，独立开关使用，脚本中一般忽略。
 
 
 core.setFloorInfo(name, values, floorId, prefix)

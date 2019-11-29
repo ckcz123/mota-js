@@ -346,7 +346,6 @@ action
     |   hideStatusBar_s
     |   showHero_s
     |   hideHero_s
-    |   updateEnemys_s
     |   sleep_s
     |   wait_s
     |   waitAsync_s
@@ -1099,18 +1098,6 @@ tooltip : hideHero: 隐藏勇士
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=hideHero%ef%bc%9a%e9%9a%90%e8%97%8f%e5%8b%87%e5%a3%ab
 colour : this.soundColor
 var code = '{"type": "hideHero"},\n';
-return code;
-*/;
-
-updateEnemys_s
-    :   '更新怪物数据' Newline
-
-
-/* updateEnemys_s
-tooltip : updateEnemys: 立刻更新怪物数据
-helpUrl : https://h5mota.com/games/template/_docs/#/event?id=updateEnemys%ef%bc%9a%e6%9b%b4%e6%96%b0%e6%80%aa%e7%89%a9%e6%95%b0%e6%8d%ae
-colour : this.dataColor
-var code = '{"type": "updateEnemys"},\n';
 return code;
 */;
 
@@ -3499,10 +3486,6 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "hideHero":
       this.next = MotaActionBlocks['hideHero_s'].xmlText([
-        this.next]);
-      break;
-    case "updateEnemys":
-      this.next = MotaActionBlocks['updateEnemys_s'].xmlText([
         this.next]);
       break;
     case "sleep": // 等待多少毫秒

@@ -71,8 +71,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 设置已经到过的楼层
 	core.setFlag("__visited__", {});
-
-	core.updateEnemys();
 },
         "win": function (reason, norank, noexit) {
 	// 游戏获胜事件
@@ -774,18 +772,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		"turn": Math.floor(turn),
 		"damage": Math.floor(damage)
 	};
-},
-        "updateEnemys": function () {
-	// 更新怪物数据，可以在这里对怪物属性和数据进行动态更新，详见文档——事件——怪物数据的动态修改
-	// 此函数执行时间：重新开始游戏、读档后、通过事件调用“更新怪物数据”时
-
-	// 比如下面这个例子，如果flag:xxx为真，则将绿头怪的攻击设为100，金币设为20
-	/*
-	if (core.hasFlag('xxx')) {
-		core.material.enemys.greenSlime.atk = 100;
-		core.material.enemys.greenSlime.money = 20;
-	}
-	*/
 }
     },
     "actions": {
@@ -1012,8 +998,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.material.icons.hero.width = core.material.images.images[icon].width / 4;
 		core.material.icons.hero.height = core.material.images.images[icon].height / 4;
 	}
-	// 刷新怪物数据
-	core.updateEnemys();
 
 	// TODO：增加自己的一些读档处理
 

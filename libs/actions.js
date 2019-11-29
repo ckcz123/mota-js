@@ -1928,8 +1928,8 @@ actions.prototype._clickSwitchs = function (x, y) {
             case 1:
                 return this._clickSwitchs_sound();
             case 2:
-                    if (x == 4) return this._clickSwitchs_volume_down();
-                    else if (x == 8) return this._clickSwitchs_volume_up();
+                    if (x == 4) return this._clickSwitchs_userVolume_down();
+                    else if (x == 8) return this._clickSwitchs_userVolume_up();
                     return;
             case 3:
                 return this._clickSwitchs_moveSpeed();
@@ -1962,17 +1962,20 @@ actions.prototype._clickSwitchs_sound = function () {
     core.ui.drawSwitchs();
 }
 
-actions.prototype._clickSwitchs_volume_down = function () {
+actions.prototype._clickSwitchs_userVolume_down = function () {
     //浮点运算精度
-    core.musicStatus.volume = core.clamp(parseFloat(core.musicStatus.volume - 0.1).toFixed(1), 0, 1);
-    core.musicStatus.gainNode.gain.value = core.musicStatus.volume;
-    if (core.musicStatus.playingBgm) core.material.bgms[core.musicStatus.playingBgm].volume = core.musicStatus.volume;
+    core.musicStatus.userVolume = core.clamp(parseFloat(core.musicStatus.userVolume - 0.1).toFixed(1), 0, 1);
+    //audioContext 音效 不受designVolume 影响
+    if(core.musicStatus.gainNode != null) core.musicStatus.gainNode.gain.value = core.musicStatus.userVolume;
+    if (core.musicStatus.playingBgm) core.material.bgms[core.musicStatus.playingBgm].volume = core.musicStatus.userVolume * core.musicStatus.designVolume;
+    core.setLocalStorage('userVolume', core.musicStatus.userVolume);
     core.ui.drawSwitchs();
 }
-actions.prototype._clickSwitchs_volume_up = function () {
-    core.musicStatus.volume = core.clamp(parseFloat(core.musicStatus.volume + 0.1).toFixed(1), 0, 1);
-    core.musicStatus.gainNode.gain.value = core.musicStatus.volume;
-    if (core.musicStatus.playingBgm) core.material.bgms[core.musicStatus.playingBgm].volume = core.musicStatus.volume;
+actions.prototype._clickSwitchs_userVolume_up = function () {
+    core.musicStatus.userVolume = core.clamp(parseFloat(core.musicStatus.userVolume + 0.1).toFixed(1), 0, 1);
+    if(core.musicStatus.gainNode != null) core.musicStatus.gainNode.gain.value = core.musicStatus.userVolume;
+    if (core.musicStatus.playingBgm) core.material.bgms[core.musicStatus.playingBgm].volume = core.musicStatus.userVolume * core.musicStatus.designVolume;
+    core.setLocalStorage('userVolume', core.musicStatus.userVolume);
     core.ui.drawSwitchs();
 }
 

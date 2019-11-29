@@ -359,6 +359,8 @@ action
     |   setViewport_s
     |   moveViewport_s
     |   useItem_s
+    |   loadEquip_s
+    |   unloadEquip_s
     |   openShop_s
     |   disableShop_s
     |   follow_s
@@ -1241,6 +1243,32 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=useItem%ef%bc%9a%e4
 colour : this.dataColor
 default : ["pickaxe"]
 var code = '{"type": "useItem", "id": "'+IdString_0+'"},\n';
+return code;
+*/;
+
+loadEquip_s
+    :   '装上装备' IdString Newline
+
+
+/* loadEquip_s
+tooltip : loadEquip: 装上装备
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=useItem%ef%bc%9a%e4%bd%bf%e7%94%a8%e9%81%93%e5%85%b7
+colour : this.dataColor
+default : ["sword1"]
+var code = '{"type": "loadEquip", "id": "'+IdString_0+'"},\n';
+return code;
+*/;
+
+unloadEquip_s
+    :   '卸下装备孔' Int '的装备' Newline
+
+
+/* unloadEquip_s
+tooltip : unloadEquip: 卸下装备
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=useItem%ef%bc%9a%e4%bd%bf%e7%94%a8%e9%81%93%e5%85%b7
+colour : this.dataColor
+default : [0]
+var code = '{"type": "unloadEquip", "pos": '+Int_0+'},\n';
 return code;
 */;
 
@@ -2636,6 +2664,19 @@ return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
+//这一条不会被antlr识别,总是会被归到idString_e
+idString_6_e
+    :   '装备孔:' Int
+
+
+/* idString_6_e
+colour : this.idstring_eColor
+default : [0]
+var code = 'equip:'+Int_0;
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
 evFlag_e
     :   '独立开关' Letter_List
 
@@ -2854,6 +2895,7 @@ this.block('idString_2_e').output='idString_e';
 this.block('idString_3_e').output='idString_e';
 this.block('idString_4_e').output='idString_e';
 this.block('idString_5_e').output='idString_e';
+this.block('idString_6_e').output='idString_e';
 this.block('evFlag_e').output='idString_e';
 */
 
@@ -3271,6 +3313,14 @@ ActionParser.prototype.parseAction = function() {
     case "useItem": // 使用道具
       this.next = MotaActionBlocks['useItem_s'].xmlText([
         data.id,this.next]);
+      break;
+    case "loadEquip": // 装上装备
+      this.next = MotaActionBlocks['loadEquip_s'].xmlText([
+        data.id,this.next]);
+      break;
+    case "unloadEquip": // 卸下装备
+      this.next = MotaActionBlocks['unloadEquip_s'].xmlText([
+        data.pos,this.next]);
       break;
     case "openShop": // 打开一个全局商店
       this.next = MotaActionBlocks['openShop_s'].xmlText([
@@ -3922,7 +3972,7 @@ MotaActionFunctions.replaceToName = function (str) {
     return map[c] ? ("怪物：" + b + "：" + map[c]) : c;
   }).replace(/enemy:/g, "怪物：");
 
-  str = str.replace(/blockId:/g, "图块ID：").replace(/blockCls:/g, "图块类别：");
+  str = str.replace(/blockId:/g, "图块ID：").replace(/blockCls:/g, "图块类别：").replace(/equip:/g, "装备孔：");
   return str;
 }
 
@@ -3952,7 +4002,7 @@ MotaActionFunctions.replaceFromName = function (str) {
     return map[d] ? ("enemy:" + c + ":" + map[d]) : d;
   }).replace(/怪物[:：]/g, "enemy:");
 
-  str = str.replace(/图块I[dD][:：]/g, "blockId:").replace(/图块类别[:：]/g, "blockCls:");
+  str = str.replace(/图块I[dD][:：]/g, "blockId:").replace(/图块类别[:：]/g, "blockCls:").replace(/装备孔[:：]/g, "equip:");
 
   return str;
 }

@@ -87,6 +87,8 @@ utils.prototype.calValue = function (value, prefix, need, times) {
                 value = value.replace(/blockId:(\d+),(\d+)/g, "core.getBlockId($1, $2)");
             if (value.indexOf('blockCls:')>=0)
                 value = value.replace(/blockCls:(\d+),(\d+)/g, "core.getBlockCls($1, $2)");
+            if (value.indexOf('equip:')>=0)
+                value = value.replace(/equip:(\d)/g, "core.getEquip($1)");
         }
         return eval(value);
     }

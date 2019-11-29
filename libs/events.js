@@ -1339,6 +1339,16 @@ events.prototype._action_useItem = function (data, x, y, prefix) {
     }
 }
 
+events.prototype._action_loadEquip = function (data, x, y, prefix) {
+    core.loadEquip(data.id);
+    core.doAction();
+}
+
+events.prototype._action_unloadEquip = function (data, x, y, prefix) {
+    core.unloadEquip(data.pos);
+    core.doAction();
+}
+
 events.prototype._action_openShop = function (data, x, y, prefix) {
     core.status.shops[data.id].visited = true;
     this.setEvents([]);

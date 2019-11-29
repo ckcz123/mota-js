@@ -120,6 +120,8 @@ editor_blockly = function () {
       MotaActionBlocks['changePos_1_s'].xmlText(),
       MotaActionBlocks['battle_s'].xmlText(),
       MotaActionBlocks['useItem_s'].xmlText(),
+      MotaActionBlocks['loadEquip_s'].xmlText(),
+      MotaActionBlocks['unloadEquip_s'].xmlText(),
       MotaActionBlocks['openShop_s'].xmlText(),
       MotaActionBlocks['disableShop_s'].xmlText(),
       MotaActionBlocks['setHeroIcon_s'].xmlText(),
@@ -232,6 +234,7 @@ editor_blockly = function () {
       MotaActionBlocks['idString_3_e'].xmlText(),
       MotaActionBlocks['idString_4_e'].xmlText(),
       MotaActionBlocks['idString_5_e'].xmlText(),
+      MotaActionBlocks['idString_6_e'].xmlText(),
       MotaActionBlocks['evalString_e'].xmlText(),
     ],
     '常见事件模板':[

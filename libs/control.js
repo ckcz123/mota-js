@@ -1465,6 +1465,10 @@ control.prototype._replayAction_equip = function (action) {
     var index = ownEquipment.indexOf(equipId), per = core.__SIZE__-1;
     if (index<0) return false;
     core.status.route.push(action);
+    if (core.material.items[equipId].hideInReplay) {
+        core.loadEquip(equipId, core.replay);
+        return true;
+    }
     core.status.event.data = {"page":Math.floor(index/per)+1, "selectId":null};
     index = index%per+per;
     core.ui.drawEquipbox(index);

@@ -823,6 +823,8 @@ actions.prototype._selectChoices = function (length, keycode, callback) {
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         callback.apply(this, [this.HSIZE, topIndex + core.status.event.selection]);
     }
+        if (keycode == 39) callback.apply(this, [this.HSIZE + 2, topIndex + core.status.event.selection]);
+    }
     if (keycode >= 49 && keycode <= 57) {
         var index = keycode - 49;
         if (index < length) {
@@ -1910,7 +1912,7 @@ actions.prototype._keyUpSL = function (keycode) {
 
 ////// 系统设置界面时的点击操作 //////
 actions.prototype._clickSwitchs = function (x, y) {
-    if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
+    if ((x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) && (x != 4 && y != 4) && (x != 8 && y != 4)) return;
     var choices = core.status.event.ui.choices;
     var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
     if (y >= topIndex && y < topIndex + choices.length) {
@@ -1922,18 +1924,22 @@ actions.prototype._clickSwitchs = function (x, y) {
             case 1:
                 return this._clickSwitchs_sound();
             case 2:
-                return this._clickSwitchs_moveSpeed();
+                    if (x == 4) return this._clickSwitchs_volume_down();
+                    else if (x == 8) return this._clickSwitchs_volume_up();
+                    return;
             case 3:
-                return this._clickSwitchs_displayEnemyDamage();
+                return this._clickSwitchs_moveSpeed();
             case 4:
-                return this._clickSwitchs_displayCritical();
+                return this._clickSwitchs_displayEnemyDamage();
             case 5:
-                return this._clickSwitchs_displayExtraDamage();
+                return this._clickSwitchs_displayCritical();
             case 6:
-                return this._clickSwitchs_localForage();
+                return this._clickSwitchs_displayExtraDamage();
             case 7:
-                return this._clickSwitchs_clickMove();
+                return this._clickSwitchs_localForage();
             case 8:
+                return this._clickSwitchs_clickMove();
+            case 9:
                 core.status.event.selection = 0;
                 core.ui.drawSettings();
                 break;
@@ -1949,6 +1955,20 @@ actions.prototype._clickSwitchs_bgm = function () {
 actions.prototype._clickSwitchs_sound = function () {
     core.musicStatus.soundStatus = !core.musicStatus.soundStatus;
     core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
+    core.ui.drawSwitchs();
+}
+
+actions.prototype._clickSwitchs_volume_down = function () {
+    //浮点运算精度
+    core.musicStatus.volume = core.clamp(parseFloat(core.musicStatus.volume - 0.1).toFixed(1), 0, 1);
+    core.musicStatus.gainNode.gain.value = core.musicStatus.volume;
+    if (core.musicStatus.playingBgm) core.material.bgms[core.musicStatus.playingBgm].volume = core.musicStatus.volume;
+    core.ui.drawSwitchs();
+}
+actions.prototype._clickSwitchs_volume_up = function () {
+    core.musicStatus.volume = core.clamp(parseFloat(core.musicStatus.volume + 0.1).toFixed(1), 0, 1);
+    core.musicStatus.gainNode.gain.value = core.musicStatus.volume;
+    if (core.musicStatus.playingBgm) core.material.bgms[core.musicStatus.playingBgm].volume = core.musicStatus.volume;
     core.ui.drawSwitchs();
 }
 
@@ -2103,7 +2123,7 @@ actions.prototype._clickSyncSave_readFile = function () {
         if (obj.version != core.firstData.version) return alert("游戏版本不一致！");
         if (!obj.data) return alert("无效的存档！");
         core.control._syncLoad_write(obj.data);
-    }, null, ".h5save");
+    });
 }
 
 actions.prototype._clickSyncSave_replay = function () {

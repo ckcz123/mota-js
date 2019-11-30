@@ -608,6 +608,16 @@ editor.prototype.addUsedFlags = function (s) {
     s.replace(/flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, function (s0, s1) {
         editor.used_flags[s1] = true; return s0;
     });
+    s.replace(/flags\.([a-zA-Z_]\w*)/g, function (s0, s1) {
+        editor.used_flags[s1] = true; return s0;
+    });
+    if (window.flags) {
+        for (var s in editor.used_flags) {
+            if (!(s in window.flags)) {
+                window.flags[s] = null;
+            }
+        }
+    }
 }
 
 editor.prototype.listen = function () {

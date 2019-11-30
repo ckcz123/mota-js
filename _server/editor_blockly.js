@@ -687,7 +687,7 @@ function omitedcheckUpdateFunction(event) {
     var previewBlock = function (b) {
         var types = [
             "previewUI_s", "clearMap_s", "clearMap_1_s", "setAttribute_s", "fillText_s",
-            "fillBoldText_s", "drawTextContent_s", "fillRect_s", "strokeRect_s", "drawLine_s",
+            "fillBoldText_s", "fillRect_s", "strokeRect_s", "drawLine_s",
             "drawArrow_s", "fillPolygon_s", "strokePolygon_s", "fillCircle_s", "strokeCircle_s",
             "drawImage_s", "drawImage_1_s", "drawIcon_s", "drawBackground_s", "drawSelector_s", "drawSelector_1_s"
         ];
@@ -963,6 +963,16 @@ function omitedcheckUpdateFunction(event) {
                     }).sort();
                 }
             }
+        }
+
+        // 提供 flags.xxx 补全
+        index = content.lastIndexOf("flags.");
+        if (index >= 0) {
+            var token = content.substring(index+6);
+            return Object.keys(editor.used_flags || {}).filter(function (one) {
+                return one != token && one.startsWith(token)
+                    && /^[a-zA-Z_]\w*$/.test(one);
+            }).sort();
         }
 
         return [];

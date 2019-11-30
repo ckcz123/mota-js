@@ -234,7 +234,14 @@ events.prototype._gameOver_askRate = function (ending) {
     }
 
     if (ending == null) {
-        core.restart();
+        core.status.event.selection = 0;
+        core.ui.drawConfirmBox("你想读取自动存档么？", function () {
+            core.ui.closePanel();
+            core.doSL("autoSave", "load");
+        }, function () {
+            core.ui.closePanel();
+            core.restart();
+        });
         return;
     }
 

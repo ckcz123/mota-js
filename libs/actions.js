@@ -1933,8 +1933,8 @@ actions.prototype._clickSwitchs = function (x, y) {
                 else if (x == this.HSIZE+2) { return this._clickSwitchs_userVolume(0.1); }
                 return;
             case 3:
-                if (x == this.HSIZE-2) { return this._clickSwitchs_moveSpeed(10); }
-                else if (x == this.HSIZE+2) { return this._clickSwitchs_moveSpeed(-10); }
+                if (x == this.HSIZE-2) { return this._clickSwitchs_moveSpeed(-10); }
+                else if (x == this.HSIZE+2) { return this._clickSwitchs_moveSpeed(10); }
                 return;
             case 4:
                 return this._clickSwitchs_displayEnemyDamage();
@@ -1977,7 +1977,7 @@ actions.prototype._clickSwitchs_userVolume = function (delta) {
 }
 
 actions.prototype._clickSwitchs_moveSpeed = function (delta) {
-    var value = core.clamp(parseInt(core.values.moveSpeed + delta), 60, 200);
+    var value = core.clamp(parseInt(core.values.moveSpeed + delta), 50, 200);
     core.values.moveSpeed = parseInt(value);
     core.setLocalStorage("moveSpeed", core.values.moveSpeed);
     core.ui.drawSwitchs();

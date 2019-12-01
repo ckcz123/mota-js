@@ -251,12 +251,14 @@ core.prototype._init_flags = function () {
             var locs = loc.split(","), x = parseInt(locs[0]), y = parseInt(locs[1]);
             for (var index in autoEvents[loc]) {
                 var autoEvent = core.clone(autoEvents[loc][index]);
-                if (autoEvent && autoEvent.data) {
+                if (autoEvent && autoEvent.condition && autoEvent.data) {
                     autoEvent.floorId = floorId;
                     autoEvent.x = x;
                     autoEvent.y = y;
                     autoEvent.index = index;
                     autoEvent.symbol = floorId + "@" + x + "@" + y + "@" + index;
+                    autoEvent.condition = core.replaceValue(autoEvent.condition);
+                    autoEvent.data = core.precompile(autoEvent.data);
                     core.initStatus.autoEvents.push(autoEvent);
                 }
             }

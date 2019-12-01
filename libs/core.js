@@ -61,7 +61,8 @@ function core() {
         'lastBgm': null, // 上次播放的bgm
         'gainNode': null,
         'playingSounds': {}, // 正在播放的SE
-        'volume': 1.0, // 音量
+        'userVolume': 1.0, // 用户音量
+        'designVolume': 1.0, //设计音量
         'cachedBgms': [], // 缓存BGM内容
         'cachedBgmCount': 4, // 缓存的bgm数量
     }
@@ -302,6 +303,8 @@ core.prototype._init_platform = function () {
     }
     core.musicStatus.bgmStatus = core.getLocalStorage('bgmStatus', true);
     core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
+    //新增 userVolume 默认值1.0
+    core.musicStatus.userVolume = core.getLocalStorage('userVolume', 1.0);
     ["Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod"].forEach(function (t) {
         if (navigator.userAgent.indexOf(t) >= 0) {
             if (t == 'iPhone' || t == 'iPad' || t == 'iPod') core.platform.isIOS = true;

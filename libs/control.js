@@ -2251,7 +2251,7 @@ control.prototype._playBgm_play = function (bgm, startTime) {
     // 缓存BGM
     core.loader.loadBgm(bgm);
     // 播放当前BGM
-    core.material.bgms[bgm].volume = core.musicStatus.volume;
+    core.material.bgms[bgm].volume = core.musicStatus.userVolume * core.musicStatus.designVolume;
     core.material.bgms[bgm].currentTime = startTime || 0;
     core.material.bgms[bgm].play();
     core.musicStatus.playingBgm = bgm;
@@ -2324,7 +2324,7 @@ control.prototype.playSound = function (sound) {
             core.musicStatus.playingSounds[id] = source;
         }
         else {
-            core.material.sounds[sound].volume = core.musicStatus.volume;
+            core.material.sounds[sound].volume = core.musicStatus.userVolume;
             core.material.sounds[sound].play();
         }
     }

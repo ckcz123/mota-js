@@ -823,6 +823,13 @@ actions.prototype._selectChoices = function (length, keycode, callback) {
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         callback.apply(this, [this.HSIZE, topIndex + core.status.event.selection]);
     }
+    //左右方向键调整 音量 行走速度
+    if(core.status.event.id == "switchs" && (core.status.event.selection == 2 || core.status.event.selection == 3))
+    {
+        if (keycode == 37) callback.apply(this, [this.HSIZE - 2, topIndex + core.status.event.selection]);
+        if (keycode == 39) callback.apply(this, [this.HSIZE + 2, topIndex + core.status.event.selection]);
+    }
+
     if (keycode >= 49 && keycode <= 57) {
         var index = keycode - 49;
         if (index < length) {
@@ -1910,11 +1917,11 @@ actions.prototype._keyUpSL = function (keycode) {
 
 ////// 系统设置界面时的点击操作 //////
 actions.prototype._clickSwitchs = function (x, y) {
-    if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
     var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
-    if (y >= topIndex && y < topIndex + choices.length) {
-        var selection = y - topIndex;
+    var selection = y - topIndex;
+    if ((x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) && (x != this.HSIZE-2 && selection != 2) && (x != this.HSIZE+2 && selection != 2) && (x != this.HSIZE-2 && selection != 3) && (x != this.HSIZE+2 && selection != 3)) return;
+    if (selection >= 0 && selection < choices.length) {
         core.status.event.selection = selection;
         switch (selection) {
             case 0:
@@ -1922,18 +1929,24 @@ actions.prototype._clickSwitchs = function (x, y) {
             case 1:
                 return this._clickSwitchs_sound();
             case 2:
-                return this._clickSwitchs_moveSpeed();
+                if (x == this.HSIZE-2) { return this._clickSwitchs_userVolume(-0.1); }
+                else if (x == this.HSIZE+2) { return this._clickSwitchs_userVolume(0.1); }
+                return;
             case 3:
-                return this._clickSwitchs_displayEnemyDamage();
+                if (x == this.HSIZE-2) { return this._clickSwitchs_moveSpeed(-10); }
+                else if (x == this.HSIZE+2) { return this._clickSwitchs_moveSpeed(10); }
+                return;
             case 4:
-                return this._clickSwitchs_displayCritical();
+                return this._clickSwitchs_displayEnemyDamage();
             case 5:
-                return this._clickSwitchs_displayExtraDamage();
+                return this._clickSwitchs_displayCritical();
             case 6:
-                return this._clickSwitchs_localForage();
+                return this._clickSwitchs_displayExtraDamage();
             case 7:
-                return this._clickSwitchs_clickMove();
+                return this._clickSwitchs_localForage();
             case 8:
+                return this._clickSwitchs_clickMove();
+            case 9:
                 core.status.event.selection = 0;
                 core.ui.drawSettings();
                 break;
@@ -1952,15 +1965,24 @@ actions.prototype._clickSwitchs_sound = function () {
     core.ui.drawSwitchs();
 }
 
-actions.prototype._clickSwitchs_moveSpeed = function () {
-    core.myprompt("请输入行走速度（每走一步的时间，单位毫秒，默认100）", core.values.moveSpeed, function (value) {
-        value = parseInt(value) || core.values.moveSpeed;
-        value = core.clamp(value, 10, 500);
-        core.values.moveSpeed = value;
-        core.setLocalStorage("moveSpeed", value);
-        core.ui.drawSwitchs();
-    });
+actions.prototype._clickSwitchs_userVolume = function (delta) {
+    //浮点运算精度 JS弱类型
+    var value= parseFloat(Math.sqrt(core.musicStatus.userVolume).toFixed(1));
+    core.musicStatus.userVolume = parseFloat(Math.pow(core.clamp(parseFloat(value + delta), 0, 1), 2).toFixed(2));
+    //audioContext 音效 不受designVolume 影响
+    if(core.musicStatus.gainNode != null) core.musicStatus.gainNode.gain.value = core.musicStatus.userVolume;
+    if (core.musicStatus.playingBgm) core.material.bgms[core.musicStatus.playingBgm].volume = core.musicStatus.userVolume * core.musicStatus.designVolume;
+    core.setLocalStorage('userVolume', core.musicStatus.userVolume);
+    core.ui.drawSwitchs();
 }
+
+actions.prototype._clickSwitchs_moveSpeed = function (delta) {
+    var value = core.clamp(parseInt(core.values.moveSpeed + delta), 50, 200);
+    core.values.moveSpeed = parseInt(value);
+    core.setLocalStorage("moveSpeed", core.values.moveSpeed);
+    core.ui.drawSwitchs();
+}
+
 
 actions.prototype._clickSwitchs_displayEnemyDamage = function () {
     core.flags.displayEnemyDamage = !core.flags.displayEnemyDamage;

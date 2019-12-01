@@ -1498,7 +1498,7 @@ ui.prototype.drawSwitchs = function() {
         "背景音效： "+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
         //显示为 0~10 十挡
         " <     "+"音量："+parseInt(parseFloat(Math.sqrt(core.musicStatus.userVolume).toFixed(1)) * 10)+"     > ",
-        //显示为 1~15 十五挡
+        //数值越大耗时越长
         " <   "+"步时：" + parseInt(core.values.moveSpeed) +"   > ",
         "怪物显伤： "+(core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
         "临界显伤： "+(core.flags.displayCritical ? "[ON]" : "[OFF]"),

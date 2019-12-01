@@ -1499,7 +1499,7 @@ ui.prototype.drawSwitchs = function() {
         //显示为 0~10 十挡
         " <     "+"音量："+parseInt(parseFloat(Math.sqrt(core.musicStatus.userVolume).toFixed(1)) * 10)+"     > ",
         //显示为 1~15 十五挡
-        " < "+"行走速度：" + parseInt((210 - core.values.moveSpeed) / 10) +" > ",
+        " <   "+"步时：" + parseInt(core.values.moveSpeed) +"   > ",
         "怪物显伤： "+(core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
         "临界显伤： "+(core.flags.displayCritical ? "[ON]" : "[OFF]"),
         "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
